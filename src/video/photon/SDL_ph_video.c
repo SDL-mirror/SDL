@@ -64,19 +64,23 @@ static void* ph_GL_GetProcAddress(_THIS, const char* proc);
 static int   ph_GL_MakeCurrent(_THIS);
 #endif /* HAVE_OPENGL */
 
+static int phstatus=-1;
+
 static int ph_Available(void)
 {
-    int phstat=-1;
-
-    phstat=PtInit(0);
-    if (phstat==0)
+    if (phstatus==-1)
     {
-       return 1;
+        phstatus=PtInit(NULL);
+        if (phstatus==0)
+        {
+           return 1;
+        }
+        else
+        {
+           return 0;
+        }
     }
-    else
-    {
-       return 0;
-    }
+    return 1;
 }
 
 static SDL_VideoDevice *ph_CreateDevice(int devindex)
