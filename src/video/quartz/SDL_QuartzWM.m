@@ -227,8 +227,7 @@ static void QZ_SetIcon       (_THIS, SDL_Surface *icon, Uint8 *mask)
     NSBitmapImageRep *imgrep;
     NSImage *img;
     SDL_Surface *mergedSurface;
-    Uint8 *surfPtr;
-    int i,j,masksize;
+    int i,j;
     NSAutoreleasePool *pool;
     SDL_Rect rrect;
     NSSize imgSize = {icon->w, icon->h};
@@ -244,18 +243,34 @@ static void QZ_SetIcon       (_THIS, SDL_Surface *icon, Uint8 *mask)
         goto freePool;
     }
     
+    if (mergedSurface->pitch != 
+        mergedSurface->format->BytesPerPixel * mergedSurface->w) {
+        SDL_SetError ("merged surface has wrong format");
+        SDL_FreeSurface (mergedSurface);
+        goto freePool;
+    }
+    
     if (SDL_BlitSurface(icon,&rrect,mergedSurface,&rrect)) {
         NSLog(@"Error blitting to mergedSurface");
         goto freePool;
     }
     
     if (mask) {
-        masksize=icon->w*icon->h;
-        surfPtr = (Uint8 *)mergedSurface->pixels;
-        #define ALPHASHIFT 3
-        for (i=0;i<masksize;i+=8)
-            for (j=0;j<8;j++) 
-                surfPtr[ALPHASHIFT+((i+j)<<2)]=(mask[i>>3]&(1<<(7-j)))?0xFF:0x00;
+
+        Uint32 *pixels = mergedSurface->pixels;
+        for (i = 0; i < mergedSurface->h; i++) {
+            for (j = 0; j < mergedSurface->w; j++) {
+                
+                int index = i * mergedSurface->w + j;
+                int mindex = index >> 3;
+                int bindex = 7 - (index & 0x7);
+                
+                if (mask[mindex] & (1 << bindex))
+                    pixels[index] |= 0x000000FF;
+                else
+                    pixels[index] &= 0xFFFFFF00;
+            }
+        }
     }
     
     imgrep = [ [ NSBitmapImageRep alloc] 
