@@ -71,6 +71,10 @@ static SDL_Overlay *BE_CreateYUVOverlay(_THIS, int width, int height, Uint32 for
 
 /* OpenGL functions */
 #ifdef HAVE_OPENGL
+static int BE_GL_LoadLibrary(_THIS, const char *path);
+static void* BE_GL_GetProcAddress(_THIS, const char *proc);
+static int BE_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value);
+static int BE_GL_MakeCurrent(_THIS);
 static void BE_GL_SwapBuffers(_THIS);
 #endif
 
@@ -108,13 +112,17 @@ static SDL_VideoDevice *BE_CreateDevice(int devindex)
 	memset(device->hidden, 0, (sizeof *device->hidden));
 
 	/* Set the function pointers */
+	/* Initialization/Query functions */
 	device->VideoInit = BE_VideoInit;
 	device->ListModes = BE_ListModes;
 	device->SetVideoMode = BE_SetVideoMode;
+	device->ToggleFullScreen = BE_ToggleFullScreen;
 	device->UpdateMouse = BE_UpdateMouse;
+	device->CreateYUVOverlay = BE_CreateYUVOverlay;
 	device->SetColors = BE_SetColors;
 	device->UpdateRects = NULL;
 	device->VideoQuit = BE_VideoQuit;
+	/* Hardware acceleration functions */
 	device->AllocHWSurface = BE_AllocHWSurface;
 	device->CheckHWBlit = NULL;
 	device->FillHWRect = NULL;
@@ -124,22 +132,33 @@ static SDL_VideoDevice *BE_CreateDevice(int devindex)
 	device->UnlockHWSurface = BE_UnlockHWSurface;
 	device->FlipHWSurface = NULL;
 	device->FreeHWSurface = BE_FreeHWSurface;
+	/* Gamma support */
 #ifdef HAVE_OPENGL
+	/* OpenGL support */
+	device->GL_LoadLibrary = BE_GL_LoadLibrary;
+	device->GL_GetProcAddress = BE_GL_GetProcAddress;
+	device->GL_GetAttribute = BE_GL_GetAttribute;
+	device->GL_MakeCurrent = BE_GL_MakeCurrent;
 	device->GL_SwapBuffers = BE_GL_SwapBuffers;
 #endif
-	device->SetIcon = NULL;
+	/* Window manager functions */
 	device->SetCaption = BE_SetWMCaption;
-	device->GetWMInfo = NULL;
+	device->SetIcon = NULL;
+	device->IconifyWindow = BE_IconifyWindow;
+	device->GrabInput = NULL;
+	device->GetWMInfo = BE_GetWMInfo;
+	/* Cursor manager functions */
 	device->FreeWMCursor = BE_FreeWMCursor;
 	device->CreateWMCursor = BE_CreateWMCursor;
 	device->ShowWMCursor = BE_ShowWMCursor;
 	device->WarpWMCursor = BE_WarpWMCursor;
+	device->MoveWMCursor = NULL;
+	device->CheckMouseMode = NULL;
+	/* Event manager functions */
 	device->InitOSKeymap = BE_InitOSKeymap;
 	device->PumpEvents = BE_PumpEvents;
 
 	device->free = BE_DeleteDevice;
-	device->ToggleFullScreen = BE_ToggleFullScreen;
-	device->CreateYUVOverlay = BE_CreateYUVOverlay;
 
 	/* Set the driver flags */
 	device->handles_any_size = 1;
@@ -293,6 +312,12 @@ int BE_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	bounds.right = BEOS_HIDDEN_SIZE;
 	bounds.bottom = BEOS_HIDDEN_SIZE;
 	SDL_Win = new SDL_BWin(bounds);
+
+#ifdef HAVE_OPENGL
+	/* testgl application doesn't load library, just tries to load symbols */
+	/* is it correct? if so we have to load library here */
+	BE_GL_LoadLibrary(_this, NULL);
+#endif
 
 	/* Create the clear cursor */
 	SDL_BlankCursor = BE_CreateWMCursor(_this, blank_cdata, blank_cmask,
@@ -475,9 +500,28 @@ SDL_Surface *BE_SetVideoMode(_THIS, SDL_Surface *current,
 	BScreen bscreen;
 	BBitmap *bbitmap;
 	BRect bounds;
+	Uint32 gl_flags = 0;
 
-	/* Create the view for this window */
-	if ( SDL_Win->CreateView(flags) < 0 ) {
+	/* Only RGB works on r5 currently */
+	gl_flags = BGL_RGB;
+	if (_this->gl_config.double_buffer)
+		gl_flags |= BGL_DOUBLE;
+	else
+		gl_flags |= BGL_SINGLE;
+	if (_this->gl_config.alpha_size > 0 || bpp == 32)
+		gl_flags |= BGL_ALPHA;
+	if (_this->gl_config.depth_size > 0)
+		gl_flags |= BGL_DEPTH;
+	if (_this->gl_config.stencil_size > 0)
+		gl_flags |= BGL_STENCIL;
+	if (_this->gl_config.accum_red_size > 0
+		|| _this->gl_config.accum_green_size > 0
+		|| _this->gl_config.accum_blue_size > 0
+		|| _this->gl_config.accum_alpha_size > 0)
+		gl_flags |= BGL_ACCUM;
+
+	/* Create the view for this window, using found flags */
+	if ( SDL_Win->CreateView(flags, gl_flags) < 0 ) {
 		return(NULL);
 	}
 
@@ -502,7 +546,7 @@ SDL_Surface *BE_SetVideoMode(_THIS, SDL_Surface *current,
 		current->flags |= SDL_OPENGL;
 		current->pitch = 0;
 		current->pixels = NULL;
-		_this->UpdateRects = NULL;		
+		_this->UpdateRects = NULL;
 	} else {
 		/* Create the BBitmap framebuffer */
 		bounds.top = 0; bounds.left = 0;
@@ -591,6 +635,144 @@ static void BE_NormalUpdate(_THIS, int numrects, SDL_Rect *rects)
 }
 
 #ifdef HAVE_OPENGL
+/* Passing a NULL path means load pointers from the application */
+int BE_GL_LoadLibrary(_THIS, const char *path)
+{
+	if (path == NULL) {
+		if (_this->gl_config.dll_handle == NULL) {
+			image_info info;
+			int32 cookie = 0;
+			while (get_next_image_info(0,&cookie,&info) == B_OK) {
+				void *location = NULL;
+				if (get_image_symbol((image_id)cookie,"glBegin",B_SYMBOL_TYPE_ANY,&location) == B_OK) {
+					_this->gl_config.dll_handle = (void*)cookie;
+					_this->gl_config.driver_loaded = 1;
+					strncpy(_this->gl_config.driver_path, "libGL.so", sizeof(_this->gl_config.driver_path)-1);
+				}
+			}
+		}
+	} else {
+		/*
+			FIXME None of BeOS libGL.so implementations have exported functions 
+			to load BGLView, which should be reloaded from new lib.
+			So for now just "load" linked libGL.so :(
+		*/
+		if (_this->gl_config.dll_handle == NULL) {
+			return BE_GL_LoadLibrary(_this, NULL);
+		}
+
+		/* Unload old first */
+		/*if (_this->gl_config.dll_handle != NULL) {*/
+			/* Do not try to unload application itself (if LoadLibrary was called before with NULL ;) */
+		/*	image_info info;
+			if (get_image_info((image_id)_this->gl_config.dll_handle, &info) == B_OK) {
+				if (info.type != B_APP_IMAGE) {
+					unload_add_on((image_id)_this->gl_config.dll_handle);
+				}
+			}
+			
+		}
+
+		if ((_this->gl_config.dll_handle = (void*)load_add_on(path)) != (void*)B_ERROR) {
+			_this->gl_config.driver_loaded = 1;
+			strncpy(_this->gl_config.driver_path, path, sizeof(_this->gl_config.driver_path)-1);
+		}*/
+	}
+
+	if (_this->gl_config.dll_handle != NULL) {
+		return 0;
+	} else {
+		_this->gl_config.dll_handle = NULL;
+		_this->gl_config.driver_loaded = 0;
+		strcpy(_this->gl_config.driver_path, "");
+		return -1;
+	}
+}
+
+void* BE_GL_GetProcAddress(_THIS, const char *proc)
+{
+	if (_this->gl_config.dll_handle != NULL) {
+		void *location = NULL;
+		status_t err;
+		if ((err = get_image_symbol((image_id)_this->gl_config.dll_handle, proc, B_SYMBOL_TYPE_ANY, &location)) == B_OK) {
+			return location;
+		} else {
+			SDL_SetError("Couldn't find OpenGL symbol");
+			return NULL;
+		}
+	} else {
+		SDL_SetError("OpenGL library not loaded");
+		return NULL;
+	}
+}
+
+int BE_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
+{
+	/*
+		FIXME? Right now BE_GL_GetAttribute shouldn't be called between glBegin() and glEnd() - it doesn't use "cached" values
+	*/
+	switch (attrib)
+    {
+		case SDL_GL_RED_SIZE:
+			glGetIntegerv(GL_RED_BITS, (GLint*)value);
+			break;
+		case SDL_GL_GREEN_SIZE:
+			glGetIntegerv(GL_GREEN_BITS, (GLint*)value);
+			break;
+		case SDL_GL_BLUE_SIZE:
+			glGetIntegerv(GL_BLUE_BITS, (GLint*)value);
+			break;
+		case SDL_GL_ALPHA_SIZE:
+			glGetIntegerv(GL_ALPHA_BITS, (GLint*)value);
+			break;
+		case SDL_GL_DOUBLEBUFFER:
+			glGetBooleanv(GL_DOUBLEBUFFER, (GLboolean*)value);
+			break;
+		case SDL_GL_BUFFER_SIZE:
+			int v;
+			glGetIntegerv(GL_RED_BITS, (GLint*)&v);
+			*value = v;
+			glGetIntegerv(GL_GREEN_BITS, (GLint*)&v);
+			*value += v;
+			glGetIntegerv(GL_BLUE_BITS, (GLint*)&v);
+			*value += v;
+			glGetIntegerv(GL_ALPHA_BITS, (GLint*)&v);
+			*value += v;
+			break;
+		case SDL_GL_DEPTH_SIZE:
+			glGetIntegerv(GL_DEPTH_BITS, (GLint*)value); /* Mesa creates 16 only? r5 always 32 */
+			break;
+		case SDL_GL_STENCIL_SIZE:
+			glGetIntegerv(GL_STENCIL_BITS, (GLint*)value);
+			break;
+		case SDL_GL_ACCUM_RED_SIZE:
+			glGetIntegerv(GL_ACCUM_RED_BITS, (GLint*)value);
+			break;
+		case SDL_GL_ACCUM_GREEN_SIZE:
+			glGetIntegerv(GL_ACCUM_GREEN_BITS, (GLint*)value);
+			break;
+		case SDL_GL_ACCUM_BLUE_SIZE:
+			glGetIntegerv(GL_ACCUM_BLUE_BITS, (GLint*)value);
+			break;
+		case SDL_GL_ACCUM_ALPHA_SIZE:
+			glGetIntegerv(GL_ACCUM_ALPHA_BITS, (GLint*)value);
+			break;
+		case SDL_GL_STEREO:
+		case SDL_GL_MULTISAMPLEBUFFERS:
+		case SDL_GL_MULTISAMPLESAMPLES:
+		default:
+			*value=0;
+			return(-1);
+	}
+	return 0;
+}
+
+int BE_GL_MakeCurrent(_THIS)
+{
+	/* FIXME: should we glview->unlock and then glview->lock()? */
+	return 0;
+}
+
 void BE_GL_SwapBuffers(_THIS)
 {
 	SDL_Win->SwapBuffers();
@@ -618,6 +800,9 @@ void BE_VideoQuit(_THIS)
 {
 	int i, j;
 
+	SDL_Win->Quit();
+	SDL_Win = NULL;
+
 	if ( SDL_BlankCursor != NULL ) {
 		BE_FreeWMCursor(_this, SDL_BlankCursor);
 		SDL_BlankCursor = NULL;
@@ -639,6 +824,12 @@ void BE_VideoQuit(_THIS)
 		}
 		_this->screen->pixels = NULL;
 	}
+
+#ifdef HAVE_OPENGL
+	if (_this->gl_config.dll_handle != NULL)
+		unload_add_on((image_id)_this->gl_config.dll_handle);
+#endif
+
 	SDL_QuitBeApp();
 }
 

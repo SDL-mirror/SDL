@@ -99,7 +99,7 @@ public:
 		else 
 			SDL_PrivateResize((int)width, (int)height);
 	}
-	virtual int CreateView(Uint32 flags) {
+	virtual int CreateView(Uint32 flags, Uint32 gl_flags) {
 		int retval;
 
 		retval = 0;
@@ -107,11 +107,9 @@ public:
 		if ( flags & SDL_OPENGL ) {
 #ifdef HAVE_OPENGL
 			if ( SDL_GLView == NULL ) {
-				/* FIXME: choose BGL type via user flags */
 				SDL_GLView = new BGLView(Bounds(), "SDL GLView",
-					 	B_FOLLOW_ALL_SIDES,
-                                        	(B_WILL_DRAW|B_FRAME_EVENTS),
-						(BGL_RGB|BGL_DOUBLE|BGL_DEPTH));
+					 	B_FOLLOW_ALL_SIDES, (B_WILL_DRAW|B_FRAME_EVENTS),
+					 	gl_flags);
 			}
 			if ( the_view != SDL_GLView ) {
 				if ( the_view ) {
@@ -206,6 +204,11 @@ public:
 			return(false);
 		}
 		return(true);	/* Close the app window */
+	}
+	virtual void Quit() {
+		if (!IsLocked())
+			Lock();
+		BDirectWindow::Quit();
 	}
 
 private:
