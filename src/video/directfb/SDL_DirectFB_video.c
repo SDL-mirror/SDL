@@ -158,13 +158,13 @@ static DFBSurfacePixelFormat GetFormatForBpp (int bpp, IDirectFBDisplayLayer *la
 
   layer->GetConfiguration (layer, &dlc);
 
-  if (bytes == DFB_BYTES_PER_PIXEL(dlc.pixelformat))
+  if (bytes == DFB_BYTES_PER_PIXEL(dlc.pixelformat) && bytes > 1)
     return dlc.pixelformat;
 
   switch (bytes)
     {
     case 1:
-      return DSPF_RGB332;
+      return DSPF_LUT8;
     case 2:
       return DSPF_RGB16;
     case 3:
@@ -204,6 +204,7 @@ static DFBEnumerationResult EnumModesCallback (unsigned int  width,
 
 struct private_hwdata {
   IDirectFBSurface *surface;
+  IDirectFBPalette *palette;
 };
 
 void SetDirectFBerror (const char *function, DFBResult code)
@@ -222,6 +223,9 @@ static DFBSurfacePixelFormat SDLToDFBPixelFormat (SDL_PixelFormat *format)
     {
       switch (format->BitsPerPixel)
         {
+        case 8:
+          return DSPF_LUT8;
+          
         case 16:
           if (format->Rmask == 0xF800 &&
               format->Gmask == 0x07E0 &&
@@ -234,13 +238,6 @@ static DFBSurfacePixelFormat SDLToDFBPixelFormat (SDL_PixelFormat *format)
               format->Gmask == 0x03E0 &&
               format->Bmask == 0x001F)
             return DSPF_RGB15;
-          break;
-          
-        case 8:
-          if (format->Rmask == 0xE0 &&
-              format->Gmask == 0x1C &&
-              format->Bmask == 0x03)
-            return DSPF_RGB332;
           break;
           
         case 24:
@@ -268,7 +265,7 @@ static DFBSurfacePixelFormat SDLToDFBPixelFormat (SDL_PixelFormat *format)
       switch (format->BitsPerPixel)
 	{
         case 8:
-          return DSPF_RGB332;
+          return DSPF_LUT8;
 	case 15:
 	  return DSPF_RGB15;
 	case 16:
@@ -283,12 +280,8 @@ static DFBSurfacePixelFormat SDLToDFBPixelFormat (SDL_PixelFormat *format)
   return DSPF_UNKNOWN;
 }
 
-static const __u8 lookup3to8[] = { 0x00, 0x24, 0x49, 0x6d, 0x92, 0xb6, 0xdb, 0xff };
-static const __u8 lookup2to8[] = { 0x00, 0x55, 0xaa, 0xff };
-
-static SDL_Palette *GenerateRGB332Palette()
+static SDL_Palette *AllocatePalette(int size)
 {
-  int          i;
   SDL_Palette *palette;
   SDL_Color   *colors;
 
@@ -299,21 +292,14 @@ static SDL_Palette *GenerateRGB332Palette()
       return NULL;
     }
 
-  colors = calloc (256, sizeof(SDL_Color));
+  colors = calloc (size, sizeof(SDL_Color));
   if (!colors)
     {
       SDL_OutOfMemory();
       return NULL;
     }
 
-  for (i=0; i<256; i++)
-    {
-      colors[i].r = lookup3to8[ i >> 5 ];
-      colors[i].g = lookup3to8[ (i >> 2) & 7 ];
-      colors[i].g = lookup2to8[ i & 3 ];
-    }
-
-  palette->ncolors = 256;
+  palette->ncolors = size;
   palette->colors  = colors;
 
   return palette;
@@ -352,15 +338,17 @@ static int DFBToSDLPixelFormat (DFBSurfacePixelFormat pixelformat, SDL_PixelForm
       format->Bmask = 0x000000FF;
       break;
 
-    case DSPF_RGB332:
-      format->Rmask = 0x000000E0;
-      format->Gmask = 0x0000001C;
-      format->Bmask = 0x00000003;
+    case DSPF_LUT8:
+      format->Rmask = 0x000000FF;
+      format->Gmask = 0x000000FF;
+      format->Bmask = 0x000000FF;
 
-      format->palette = GenerateRGB332Palette();
+      if (!format->palette)
+        format->palette = AllocatePalette(256);
       break;
 
     default:
+      fprintf (stderr, "SDL_DirectFB: Unsupported pixelformat (0x%08x)!\n", pixelformat);
       return -1;
     }
 
@@ -377,7 +365,6 @@ int DirectFB_VideoInit(_THIS, SDL_PixelFormat *vformat)
   DFBResult                ret;
   DFBCardCapabilities      caps;
   DFBDisplayLayerConfig    dlc;
-  DFBSurfacePixelFormat    format;
   struct DirectFBEnumRect *rect;
   IDirectFB               *dfb    = NULL;
   IDirectFBDisplayLayer   *layer  = NULL;
@@ -417,15 +404,9 @@ int DirectFB_VideoInit(_THIS, SDL_PixelFormat *vformat)
   /* Query layer configuration to determine the current mode and pixelformat */
   layer->GetConfiguration (layer, &dlc);
 
-  /* FIXME: Returning RGB332 as the default mode doesn't work (everything is black) */
-  if ((format = dlc.pixelformat) == DSPF_RGB332)
-    format = DSPF_RGB16;
-
-  if (DFBToSDLPixelFormat (format, vformat))
-    {
-      SDL_SetError ("Unsupported pixelformat");
-      goto error;
-    }
+  /* If current format is not supported use LUT8 as the default */
+  if (DFBToSDLPixelFormat (dlc.pixelformat, vformat))
+    DFBToSDLPixelFormat (DSPF_LUT8, vformat);
 
   /* Enumerate the available fullscreen modes */
   ret = dfb->EnumVideoModes (dfb, EnumModesCallback, this);
@@ -494,9 +475,10 @@ static SDL_Rect **DirectFB_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flag
 
 static SDL_Surface *DirectFB_SetVideoMode(_THIS, SDL_Surface *current, int width, int height, int bpp, Uint32 flags)
 {
-  DFBResult             ret;
-  DFBSurfaceDescription dsc;
-  DFBSurfacePixelFormat pixelformat;
+  DFBResult              ret;
+  DFBSurfaceDescription  dsc;
+  DFBSurfacePixelFormat  pixelformat;
+  IDirectFBSurface      *surface;
 
   fprintf (stderr, "SDL DirectFB_SetVideoMode: %dx%d@%d, flags: 0x%08x\n",
            width, height, bpp, flags);
@@ -508,6 +490,13 @@ static SDL_Surface *DirectFB_SetVideoMode(_THIS, SDL_Surface *current, int width
     {
       current->hwdata->surface->Release (current->hwdata->surface);
       current->hwdata->surface = NULL;
+
+      /* And its palette if present */
+      if (current->hwdata->palette)
+        {
+          current->hwdata->palette->Release (current->hwdata->palette);
+          current->hwdata->palette = NULL;
+        }
     }
   else if (!current->hwdata)
     {
@@ -556,17 +545,16 @@ static SDL_Surface *DirectFB_SetVideoMode(_THIS, SDL_Surface *current, int width
   dsc.caps        = DSCAPS_PRIMARY | ((flags & SDL_DOUBLEBUF) ? DSCAPS_FLIPPING : 0);
   dsc.pixelformat = GetFormatForBpp (bpp, HIDDEN->layer);
 
-  ret = HIDDEN->dfb->CreateSurface (HIDDEN->dfb, &dsc, &current->hwdata->surface);
+  ret = HIDDEN->dfb->CreateSurface (HIDDEN->dfb, &dsc, &surface);
   if (ret && (flags & SDL_DOUBLEBUF))
     {
       /* Try without double buffering */
       dsc.caps &= ~DSCAPS_FLIPPING;
-      ret = HIDDEN->dfb->CreateSurface (HIDDEN->dfb, &dsc, &current->hwdata->surface);
+      ret = HIDDEN->dfb->CreateSurface (HIDDEN->dfb, &dsc, &surface);
     }
   if (ret)
     {
       SetDirectFBerror ("dfb->CreateSurface", ret);
-      current->hwdata->surface = NULL;
       return NULL;
     }
 
@@ -585,8 +573,19 @@ static SDL_Surface *DirectFB_SetVideoMode(_THIS, SDL_Surface *current, int width
   if (dsc.caps & DSCAPS_FLIPPING)
     current->flags |= SDL_DOUBLEBUF;
 
-  current->hwdata->surface->GetPixelFormat (current->hwdata->surface, &pixelformat);
+  surface->GetPixelFormat (surface, &pixelformat);
+
   DFBToSDLPixelFormat (pixelformat, current->format);
+
+  /* Get the surface palette (if supported) */
+  if (DFB_PIXELFORMAT_IS_INDEXED( pixelformat ))
+    {
+      surface->GetPalette (surface, &current->hwdata->palette);
+
+      current->flags |= SDL_HWPALETTE;
+    }
+
+  current->hwdata->surface = surface;
 
   return current;
 }
@@ -712,11 +711,14 @@ static int DirectFB_SetHWColorKey(_THIS, SDL_Surface *src, Uint32 key)
   SDL_PixelFormat  *fmt     = src->format;
   IDirectFBSurface *surface = src->hwdata->surface;
 
-  /* ugly */
-  surface->SetSrcColorKey (surface,
-                           (key & fmt->Rmask) >> (fmt->Rshift - fmt->Rloss),
-                           (key & fmt->Gmask) >> (fmt->Gshift - fmt->Gloss),
-                           (key & fmt->Bmask) << (fmt->Bloss - fmt->Bshift));
+  if (fmt->BitsPerPixel == 8)
+    surface->SetSrcColorKeyIndex (surface, key);
+  else
+    /* ugly */
+    surface->SetSrcColorKey (surface,
+                             (key & fmt->Rmask) >> (fmt->Rshift - fmt->Rloss),
+                             (key & fmt->Gmask) >> (fmt->Gshift - fmt->Gloss),
+                             (key & fmt->Bmask) << (fmt->Bloss - fmt->Bshift));
 
   return 0;
 }
@@ -809,13 +811,50 @@ static void DirectFB_WindowedUpdate(_THIS, int numrects, SDL_Rect *rects)
 
 int DirectFB_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 {
-  fprintf(stderr, "SDL: Unimplemented DirectFB_SetColors!\n");
-  return -1;
+  IDirectFBPalette *palette = this->screen->hwdata->palette;
+
+  if (!palette)
+    return 0;
+
+  if (firstcolor > 255)
+    return 0;
+
+  if (firstcolor + ncolors > 256)
+    ncolors = 256 - firstcolor;
+
+  if (ncolors > 0)
+    {
+      int      i;
+      DFBColor entries[ncolors];
+
+      for (i=0; i<ncolors; i++)
+        {
+          entries[i].a = 0xff;
+          entries[i].r = colors[i].r;
+          entries[i].g = colors[i].g;
+          entries[i].b = colors[i].b;
+        }
+
+      palette->SetEntries (palette, entries, ncolors, firstcolor);
+    }
+
+  return 1;
 }
 	
 void DirectFB_VideoQuit(_THIS)
 {
-  struct DirectFBEnumRect *rect = enumlist;
+  struct DirectFBEnumRect *rect    = enumlist;
+  IDirectFBSurface        *surface = this->screen->hwdata->surface;
+  IDirectFBPalette        *palette = this->screen->hwdata->palette;
+
+  if (palette)
+    palette->Release (palette);
+
+  if (surface)
+    surface->Release (surface);
+
+  this->screen->hwdata->surface = NULL;
+  this->screen->hwdata->palette = NULL;
 
   if (HIDDEN->eventbuffer)
     {
