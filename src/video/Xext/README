@@ -7,3 +7,4 @@ You can't link static library code into shared libraries on non-x86
 Linux platforms.  Since these libraries haven't become standard yet,
 we'll just include them directly.
 
+These sources are synchronized with XFree86 4.2.1
