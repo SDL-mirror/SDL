@@ -31,6 +31,7 @@ EXTRA_DIST =		\
 	README.MiNT	\
 	README.NanoX	\
 	README.QNX	\
+	README.Qtopia	\
 	README.WinCE	\
 	README-SDL.txt	\
 	BorlandC.html	\
