@@ -10,7 +10,6 @@ ARCH_SUBDIRS = $(srcdir)/beos \
                $(srcdir)/epoc \
                $(srcdir)/linux \
                $(srcdir)/macos \
-               $(srcdir)/macosx \
                $(srcdir)/win32
 
 # Build a separate library containing the main() entry point.
