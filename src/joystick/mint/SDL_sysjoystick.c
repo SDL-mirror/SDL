@@ -31,6 +31,7 @@ static char rcsid =
  *	Patrice Mandin
  */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -43,12 +44,15 @@ static char rcsid =
 #include "SDL_sysjoystick.h"
 #include "SDL_joystick_c.h"
 
-#include "../video/ataricommon/SDL_ikbdinterrupt_s.h"
+#include "SDL_ikbdinterrupt_s.h"
+#include "SDL_xbiosevents_c.h"
+#include "SDL_xbiosinterrupt_s.h"
 
 /*--- Const ---*/
 
 /* We can have:
-	1 joystick on IKBD port 1 (port 0 is used by mouse)
+	1 joystick on IKBD port 1, read via hardware I/O
+      or same joystick on IKBD port 1, read via xbios
 	2 joypads on ports A,B
 	  or 4 joysticks on joypads ports A,B
 	  or 1 lightpen on joypad port A
@@ -58,6 +62,7 @@ static char rcsid =
 
 enum {
 	IKBD_JOY1=0,
+	XBIOS_JOY1,
 	PORTA_PAD,
 	PORTB_PAD,
 	PORTA_JOY0,
@@ -116,6 +121,7 @@ typedef struct {
 
 static atarijoy_t atarijoysticks[MAX_JOYSTICKS]={
 	{SDL_FALSE,"IKBD joystick port 1",0},
+	{SDL_FALSE,"Xbios joystick port 1",0},
 	{SDL_FALSE,"Joypad port A",0},
 	{SDL_FALSE,"Joypad port B",0},
 	{SDL_FALSE,"Joystick 0 port A",0},
@@ -132,11 +138,11 @@ static atarijoy_t atarijoysticks[MAX_JOYSTICKS]={
 };
 
 static const int jp_buttons[JP_NUM_BUTTONS]={
-	JP_KPMULT,	JP_KP7,		JP_KP4,		JP_KP1,
-	JP_KP0,		JP_KP8,		JP_KP5,		JP_KP2,
-	JP_KPNUM,	JP_KP9,		JP_KP6,		JP_KP3,
-	JP_PAUSE,	JP_FIRE0,	JP_FIRE1,	JP_FIRE2,
-	JP_OPTION
+	JP_FIRE0,	JP_FIRE1,	JP_FIRE2,	JP_PAUSE,
+	JP_OPTION,	JP_KPMULT,	JP_KPNUM,	JP_KP0,
+	JP_KP1,		JP_KP2,		JP_KP3,		JP_KP4,
+	JP_KP5,		JP_KP6,		JP_KP7,		JP_KP8,
+	JP_KP9
 };
 
 static SDL_bool joypad_ports_enabled=SDL_FALSE;
@@ -160,8 +166,6 @@ int SDL_SYS_JoystickInit(void)
 	int i;
 	unsigned long cookie_mch;
 	const char *envr=getenv("SDL_JOYSTICK_ATARI");
-	const char *env_evt=getenv("SDL_ATARI_EVENTSDRIVER");
-	SDL_bool ikbd_enabled=SDL_FALSE;
 	
 #define TEST_JOY_ENABLED(env,idstring,num) \
 	if (strstr(env,idstring"-off")) { \
@@ -179,17 +183,14 @@ int SDL_SYS_JoystickInit(void)
 	/* Enable some default joysticks */
 	if ((cookie_mch == MCH_ST<<16) || ((cookie_mch>>16) == MCH_STE) ||
 		(cookie_mch == MCH_TT<<16) || (cookie_mch == MCH_F30<<16)) {
-		ikbd_enabled=SDL_TRUE;
-		if (env_evt) {
-			if (!strcmp(env_evt,"ikbd")) {
-				ikbd_enabled=SDL_FALSE;
-			}
-		}
-		atarijoysticks[IKBD_JOY1].enabled=ikbd_enabled;
+		atarijoysticks[IKBD_JOY1].enabled=(SDL_AtariIkbd_enabled!=0);
 	}
 	if ((cookie_mch == MCH_STE<<16) || (cookie_mch == MCH_F30<<16)) {
 		atarijoysticks[PORTA_PAD].enabled=SDL_TRUE;
 		atarijoysticks[PORTB_PAD].enabled=SDL_TRUE;
+	}
+	if (!atarijoysticks[IKBD_JOY1].enabled) {
+		atarijoysticks[XBIOS_JOY1].enabled=(SDL_AtariXbios_enabled!=0);
 	}
 
 	/* Read environment for joysticks to enable */
@@ -197,10 +198,8 @@ int SDL_SYS_JoystickInit(void)
 		/* IKBD on any Atari, maybe clones */
 		if ((cookie_mch == MCH_ST<<16) || ((cookie_mch>>16) == MCH_STE) ||
 			(cookie_mch == MCH_TT<<16) || (cookie_mch == MCH_F30<<16)) {
-			if (env_evt) {
-				if (strcmp(env_evt,"ikbd")) {
-					TEST_JOY_ENABLED(envr, "ikbd-joy1", IKBD_JOY1);
-				}
+			if (SDL_AtariIkbd_enabled!=0) {
+				TEST_JOY_ENABLED(envr, "ikbd-joy1", IKBD_JOY1);
 			}
 		}
 		/* Joypads ports only on STE and Falcon */
@@ -224,6 +223,12 @@ int SDL_SYS_JoystickInit(void)
 				if (!(atarijoysticks[PORTB_JOY0].enabled) && !(atarijoysticks[PORTB_JOY1].enabled)) {
 					TEST_JOY_ENABLED(envr, "portb-anpad", PORTB_ANPAD);
 				}
+			}
+		}
+
+		if (!atarijoysticks[IKBD_JOY1].enabled) {
+			if (SDL_AtariXbios_enabled!=0) {
+				TEST_JOY_ENABLED(envr, "xbios-joy1", XBIOS_JOY1);
 			}
 		}
 #if 0
@@ -262,13 +267,15 @@ static int GetEnabledAtariJoystick(int index)
 	/* Return the nth'index' enabled atari joystick */
 	j=0;
 	for (i=0;i<MAX_JOYSTICKS;i++) {
-		if (atarijoysticks[i].enabled) {
-			if (j==index) {
-				break;
-			} else {
-				j++;
-			}
+		if (!atarijoysticks[i].enabled) {
+			continue;
 		}
+
+		if (j==index) {
+			break;
+		}
+
+		++j;
 	}
 	if (i==MAX_JOYSTICKS)
 		return -1;
@@ -328,8 +335,17 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 
 	switch (numjoystick) {
 		case IKBD_JOY1:
+		case XBIOS_JOY1:
 			{
-				curstate = SDL_AtariIkbd_joystick & 0xff;
+				curstate = 0;
+
+				if (numjoystick==IKBD_JOY1) {
+					curstate = SDL_AtariIkbd_joystick & 0xff;
+				}
+				if (numjoystick==XBIOS_JOY1) {
+					curstate = SDL_AtariXbios_joystick & 0xff;
+				}
+
 				if (curstate != prevstate) {
 					/* X axis */
 					if ((curstate & (IKBD_JOY_LEFT|IKBD_JOY_RIGHT)) != (prevstate & (IKBD_JOY_LEFT|IKBD_JOY_RIGHT))) {
@@ -359,7 +375,7 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 						SDL_PrivateJoystickButton(joystick,0,SDL_RELEASED);
 					}
 				}
-				atarijoysticks[IKBD_JOY1].prevstate = curstate;
+				atarijoysticks[numjoystick].prevstate = curstate;
 			}
 			break;
 		case PORTA_PAD:

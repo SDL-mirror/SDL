@@ -41,7 +41,7 @@ static char rcsid =
 #include "SDL_events_c.h"
 
 #include "SDL_atarikeys.h"
-#include "SDL_xbiosmouseevents_c.h"
+#include "SDL_xbiosevents_c.h"
 
 /* To save state of keyboard */
 #define ATARIBIOS_MAXKEYS 128
@@ -109,7 +109,7 @@ void AtariGemdos_InitOSKeymap(_THIS)
 	keymap[SCANCODE_LEFTALT] = SDLK_LALT;
 	keymap[SCANCODE_CAPSLOCK] = SDLK_CAPSLOCK;
 
-	AtariXbios_InstallMouseVector();
+	SDL_AtariXbios_InstallVectors(ATARI_XBIOS_MOUSEEVENTS|ATARI_XBIOS_JOYSTICKEVENTS);
 }
 
 void AtariGemdos_PumpEvents(_THIS)
@@ -147,7 +147,7 @@ void AtariGemdos_PumpEvents(_THIS)
 			SDL_PrivateKeyboard(SDL_RELEASED, TranslateKey(i, gemdos_currentascii[i], &keysym));
 	}
 
-	AtariXbios_PostMouseEvents(this);
+	SDL_AtariXbios_PostMouseEvents(this);
 
 	/* Will be previous table */
 	memcpy(gemdos_previouskeyboard, gemdos_currentkeyboard, ATARIBIOS_MAXKEYS);
@@ -188,5 +188,5 @@ static SDL_keysym *TranslateKey(int scancode, int asciicode, SDL_keysym *keysym)
 
 void AtariGemdos_ShutdownEvents(void)
 {
-	AtariXbios_RestoreMouseVector();
+	SDL_AtariXbios_RestoreVectors();
 }

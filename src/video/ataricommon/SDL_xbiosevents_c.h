@@ -26,21 +26,26 @@ static char rcsid =
 #endif
 
 /*
- *	IKBD 6301 mouse vector
+ *	Xbios mouse & joystick vectors
  *
  *	Patrice Mandin
  */
 
-#ifndef _SDL_XBIOSMOUSEEVENTS_H_
-#define _SDL_XBIOSMOUSEEVENTS_H_
+#ifndef _SDL_ATARI_XBIOSEVENTS_H_
+#define _SDL_ATARI_XBIOSEVENTS_H_
 
 #include "SDL_sysvideo.h"
 
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_VideoDevice *this
 
-extern void AtariXbios_InstallMouseVector(void);
-extern void AtariXbios_RestoreMouseVector(void);
-extern void AtariXbios_PostMouseEvents(_THIS);
+#define ATARI_XBIOS_MOUSEEVENTS (1<<0)
+#define ATARI_XBIOS_JOYSTICKEVENTS (1<<1)
 
-#endif /* _SDL_XBIOSMOUSEEVENTS_H_ */
+extern int SDL_AtariXbios_enabled;
+
+extern void SDL_AtariXbios_InstallVectors(int vectors_mask);
+extern void SDL_AtariXbios_RestoreVectors(void);
+extern void SDL_AtariXbios_PostMouseEvents(_THIS);
+
+#endif /* _SDL_XBIOSEVENTS_H_ */

@@ -25,7 +25,7 @@ ATARICOMMON_SRCS = 	\
 	SDL_ikbdevents_c.h \
 	SDL_ikbdinterrupt.S	\
 	SDL_ikbdinterrupt_s.h \
-	SDL_xbiosmouseevents.c \
-	SDL_xbiosmouseevents_c.h \
-	SDL_xbiosmouseinterrupt.S \
-	SDL_xbiosmouseinterrupt_s.h
+	SDL_xbiosevents.c \
+	SDL_xbiosevents_c.h \
+	SDL_xbiosinterrupt.S \
+	SDL_xbiosinterrupt_s.h

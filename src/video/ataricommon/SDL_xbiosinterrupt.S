@@ -26,37 +26,46 @@ static char rcsid =
 #endif
 
 /*
- *	IKBD 6301 mouse vector
+ *	XBIOS mouse & joystick vectors
  *
  *	Patrice Mandin
  */
 
 	.text
 
-	.globl	_SDL_AtariXbiosMouseInstall
-	.globl	_SDL_AtariXbiosMouseVector
+	.globl	_SDL_AtariXbios_Install
+	.globl	_SDL_AtariXbios_MouseVector
+	.globl	_SDL_AtariXbios_JoystickVector
 
 	.globl	_SDL_AtariXbios_mouseb
 	.globl	_SDL_AtariXbios_mousex
 	.globl	_SDL_AtariXbios_mousey
+	.globl	_SDL_AtariXbios_joystick
 
 /*--- Vector installer ---*/
 
-_SDL_AtariXbiosMouseInstall:
+_SDL_AtariXbios_Install:
 	movel	sp@(4),a0
-	movel	sp@(8),a1
 
 	/* Stop interrupts */
 
 	movew	#0x2700,sr
 
-	/* Save old vector */
+	/* Save old mouse vector, set our routine */
 
-	movel	a0@(16),oldvector
+	movel	sp@(8),d0
+	beqs	no_new_mouse_vector
+	movel	a0@(16),oldmousevector
+	movel	d0,a0@(16)
+no_new_mouse_vector:
 
-	/* Set our routine */
+	/* Save old joystick vector, set our routine */
 
-	movel	a1,a0@(16)
+	movel	sp@(12),d0
+	beqs	no_new_joystick_vector
+	movel	a0@(24),oldjoystickvector
+	movel	d0,a0@(24)
+no_new_joystick_vector:
 
 	/* Restart interrupts */
 
@@ -70,8 +79,8 @@ _SDL_AtariXbiosMouseInstall:
 	.even
 	.ascii "XBRA"
 	.ascii "LSDL"
-	.comm	oldvector,4*1
-_SDL_AtariXbiosMouseVector:
+	.comm	oldmousevector,4*1
+_SDL_AtariXbios_MouseVector:
 	moveml	d0/a1,sp@-
 
 	/* Mouse buttons */
@@ -90,7 +99,7 @@ _SDL_AtariXbiosMouseVector:
 	addw	d0,_SDL_AtariXbios_mousey
 
 	/* Jump through old vector */
-	movel	oldvector,a1
+	movel	oldmousevector,a1
 	jsr	(a1)
 
 	moveml	sp@+,d0/a1
@@ -103,4 +112,30 @@ _SDL_AtariXbiosMouseVector:
 	.comm	_SDL_AtariXbios_mousey,2*1
 	.even
 	.comm	_SDL_AtariXbios_mouseb,2*1
+
+/*--- Our joystick vector ---*/
+
+	.text
+	.even
+	.ascii "XBRA"
+	.ascii "LSDL"
+	.comm	oldjoystickvector,4*1
+_SDL_AtariXbios_JoystickVector:
+	moveml	d0/a1,sp@-
+
+	/* New joystick state */
+	moveb	a0@(1),d0
+	andw	#0x8f,d0
+	movew	d0,_SDL_AtariXbios_joystick
+
+	/* Jump through old vector */
+	movel	oldjoystickvector,a1
+	jsr	(a1)
+
+	moveml	sp@+,d0/a1
+	rts
+
+	.data
+	.even
+	.comm	_SDL_AtariXbios_joystick,2*1
 

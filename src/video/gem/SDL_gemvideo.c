@@ -60,6 +60,7 @@ static char rcsid =
 #include "SDL_gemevents_c.h"
 #include "SDL_gemmouse_c.h"
 #include "SDL_gemwm_c.h"
+#include "SDL_xbiosevents_c.h"
 
 /* Defines */
 
@@ -175,6 +176,9 @@ static SDL_VideoDevice *GEM_CreateDevice(int devindex)
 	device->ShowWMCursor = GEM_ShowWMCursor;
 	device->WarpWMCursor = GEM_WarpWMCursor;
 	device->CheckMouseMode = GEM_CheckMouseMode;
+
+	/* Joystick */
+	SDL_AtariXbios_InstallVectors(ATARI_XBIOS_JOYSTICKEVENTS);
 
 	device->free = GEM_DeleteDevice;
 
@@ -937,6 +941,8 @@ static int GEM_ToggleFullScreen(_THIS, int on)
 */
 void GEM_VideoQuit(_THIS)
 {
+	SDL_AtariXbios_RestoreVectors();
+
 	GEM_FreeBuffers(this);
 
 	if (GEM_locked) {

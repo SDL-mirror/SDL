@@ -59,9 +59,9 @@ Threads support (TOS)
 - Driver combinations:
 Video	Kbd	Mouse	Timer	Jstick	Joypads
 xbios	ikbd	ikbd	vbl	ikbd	hardware
-xbios	gemdos	xbios	vbl	-	hardware
-xbios	bios	xbios	vbl	-	hardware
-gem	gem	gem	vbl	-	hardware
+xbios	gemdos	xbios	vbl	xbios	hardware
+xbios	bios	xbios	vbl	xbios	hardware
+gem	gem	gem	vbl	xbios	hardware
 
 ==============================================================================
 V.  Environment variables:
@@ -79,7 +79,8 @@ SDL_JOYSTICK_ATARI:
 	Use any of these strings in the environment variable to enable or
 	disable a joystick:
 
-	'ikbd-joy1-[on|off]' for IKBD joystick on port 1
+	'ikbd-joy1-[on|off]' for IKBD joystick on port 1 (hardware access)
+	'xbios-joy1-[on|off]' for IKBD joystick on port 1 (xbios access)
 	'porta-pad-[on|off]' for joypad on port A
 	'porta-joy0-[on|off]' for joystick 0 on port A
 	'porta-joy1-[on|off]' for joystick 1 on port A
@@ -92,6 +93,7 @@ SDL_JOYSTICK_ATARI:
 
 	Default configuration is:
 		'ikbd-joy1-on' (if IKBD events driver enabled)
+		'xbios-joy1-on' (if gemdos/bios/gem events driver enabled)
 		'porta-pad-on portb-pad-on' (if available on the machine)
 
 	port[a|b]-[pad|joy?|lp|anpad]-* strings are mutually exclusives.
@@ -99,7 +101,6 @@ SDL_JOYSTICK_ATARI:
 	a lightpen OR an analog paddle. You must disable joypad before
 	setting another controller.
 
-	IKBD joystick only available when the IKBD events driver is enabled.
 	The second joystick port on IKBD is used by the mouse, so not usable.
 
 	Joypads are multibuttons controller (Atari Jaguar console-like).

@@ -38,13 +38,25 @@ static char rcsid =
 
 #include "SDL_types.h"
 
+/* Const */
+
+#define IKBD_JOY_UP		(1<<0)
+#define IKBD_JOY_DOWN	(1<<1)
+#define IKBD_JOY_LEFT	(1<<2)
+#define IKBD_JOY_RIGHT	(1<<3)
+#define IKBD_JOY_FIRE	(1<<7)
+
 /* Variables */
 
 extern Uint8  SDL_AtariIkbd_keyboard[128];	/* Keyboard table */
-extern Uint16 SDL_AtariIkbd_mouseb;	/* buttons */
-extern Sint16 SDL_AtariIkbd_mousex;	/* X relative motion */
-extern Sint16 SDL_AtariIkbd_mousey;	/* Y relative motion */
+extern Uint16 SDL_AtariIkbd_mouseb;	/* Mouse on port 0, buttons */
+extern Sint16 SDL_AtariIkbd_mousex;	/* Mouse X relative motion */
+extern Sint16 SDL_AtariIkbd_mousey;	/* Mouse Y relative motion */
+extern Uint16 SDL_AtariIkbd_joystick;	/* Joystick on port 1 */
 
+extern Uint16 SDL_AtariIkbd_enabled;	/* For joystick driver to know
+											if this is usable */
+										
 /* Functions */ 
 
 extern void SDL_AtariIkbdInstall(void);

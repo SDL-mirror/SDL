@@ -42,6 +42,8 @@ static char rcsid =
 	.globl	_SDL_AtariIkbd_mousey
 	.globl	_SDL_AtariIkbd_joystick
 
+	.globl	_SDL_AtariIkbd_enabled
+
 /*--- Install our IKBD vector ---*/
 
 _SDL_AtariIkbdInstall:
@@ -71,6 +73,8 @@ _SDL_AtariIkbdInstall:
 	movew	#0x2300,sr
 
 	| Interrupts done
+
+	movew	#0xffff,_SDL_AtariIkbd_enabled
 
 	moveml	sp@+,d0-d1/a0-a1
 	rts
@@ -207,6 +211,9 @@ ikbd_joystick:
 
 	.data
 	
+	.even
+_SDL_AtariIkbd_enabled:
+	.word	0
 	.even
 	.comm	_SDL_AtariIkbd_keyboard,128
 	.even

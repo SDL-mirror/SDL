@@ -26,7 +26,7 @@ static char rcsid =
 #endif
 
 /*
- *	IKBD 6301 mouse vector
+ *	XBIOS mouse & joystick vectors
  *
  *	Patrice Mandin
  */
@@ -36,18 +36,27 @@ static char rcsid =
 #include <mint/osbind.h>
 
 #include "SDL_events_c.h"
-#include "SDL_xbiosmouseinterrupt_s.h"
-
-static _KBDVECS *kbdvecs;		/* Pointer to access vectors */
-static _KBDVECS sys_kbdvecs;	/* Backup of system vectors */
+#include "SDL_xbiosevents_c.h"
+#include "SDL_xbiosinterrupt_s.h"
 
 /* Variables */
 
+int SDL_AtariXbios_enabled=0;
+
+static _KBDVECS *kbdvecs;		/* Pointer to access vectors */
+static _KBDVECS sys_kbdvecs;	/* Backup of system vectors */
 static Uint16 atari_prevmouseb;	/* buttons */
 
-void AtariXbios_InstallMouseVector(void)
+void SDL_AtariXbios_InstallVectors(int vectors_mask)
 {
 	void *oldpile;
+
+	/* Clear variables */
+	SDL_AtariXbios_mouseb =
+		SDL_AtariXbios_mousex =
+		SDL_AtariXbios_mousey =
+		SDL_AtariXbios_joystick =
+		atari_prevmouseb = 0;
 
 	/* Read IKBD vectors base */
 	kbdvecs=Kbdvbase();
@@ -59,17 +68,19 @@ void AtariXbios_InstallMouseVector(void)
 	memcpy(&sys_kbdvecs, kbdvecs, sizeof(_KBDVECS));
 
 	/* Install our vector */
-	SDL_AtariXbiosMouseInstall(kbdvecs,SDL_AtariXbiosMouseVector);
+	SDL_AtariXbios_Install(
+		kbdvecs,
+		(vectors_mask & ATARI_XBIOS_MOUSEEVENTS) ? SDL_AtariXbios_MouseVector : NULL,
+		(vectors_mask & ATARI_XBIOS_JOYSTICKEVENTS) ? SDL_AtariXbios_JoystickVector : NULL
+	);
 
 	/* Back to user mode */
 	Super(oldpile);
 
-	/* Clear variables */
-	SDL_AtariXbios_mouseb = SDL_AtariXbios_mousex = SDL_AtariXbios_mousey = 0;
-	atari_prevmouseb = 0;
+	SDL_AtariXbios_enabled=1;
 }
 
-void AtariXbios_RestoreMouseVector(void)
+void SDL_AtariXbios_RestoreVectors(void)
 {
 	void *oldpile;
 
@@ -77,7 +88,7 @@ void AtariXbios_RestoreMouseVector(void)
 	oldpile=(void *)Super(NULL);
 
 	/* Reinstall system vector */
-	SDL_AtariXbiosMouseInstall(kbdvecs,sys_kbdvecs.mousevec);
+	SDL_AtariXbios_Install(kbdvecs,sys_kbdvecs.mousevec,sys_kbdvecs.joyvec);
 
 	/* Back to user mode */
 	Super(oldpile);
@@ -97,7 +108,7 @@ static int atari_GetButton(int button)
 	}
 }
 
-void AtariXbios_PostMouseEvents(_THIS)
+void SDL_AtariXbios_PostMouseEvents(_THIS)
 {
 	/* Mouse motion ? */
 	if (SDL_AtariXbios_mousex || SDL_AtariXbios_mousey) {
