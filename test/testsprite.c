@@ -267,6 +267,9 @@ int main(int argc, char *argv[])
 		++frames;
 		while ( SDL_PollEvent(&event) ) {
 			switch (event.type) {
+				case SDL_MOUSEBUTTONDOWN:
+					SDL_WarpMouse(screen->w/2, screen->h/2);
+					break;
 				case SDL_KEYDOWN:
 					/* Any keypress quits the app... */
 				case SDL_QUIT:
