@@ -154,8 +154,8 @@ void QZ_PrivateCocoaToSDL (_THIS, NSPoint *p) {
 
         *p = [ window_view convertPoint:*p fromView: nil ];
         
-        /* If OSX version is 10.3.0 or later, we need a workaround in OpenGL mode */
-        if ( system_version >= 0x1030 && (SDL_VideoSurface->flags & SDL_OPENGL) ) {
+        /* We need a workaround in OpenGL mode */
+        if ( SDL_VideoSurface->flags & SDL_OPENGL ) {
             p->y = [window_view frame].size.height - p->y - 1;
         }
     }
