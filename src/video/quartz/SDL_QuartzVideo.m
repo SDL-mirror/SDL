@@ -203,7 +203,7 @@ static int QZ_VideoInit (_THIS, SDL_PixelFormat *video_format) {
     current_grab_mode = SDL_GRAB_OFF;
     cursor_should_be_visible    = YES;
     cursor_visible              = YES;
-    current_mods = -1;
+    current_mods = 0;
     
     /* register for sleep notifications so wake from sleep generates SDL_VIDEOEXPOSE */
     QZ_RegisterForSleepNotifications (this);
