@@ -370,6 +370,10 @@ SDL_Surface *SVGA_SetVideoMode(_THIS, SDL_Surface *current,
 
 	/* Set up the new mode framebuffer */
 	current->flags = (SDL_FULLSCREEN|SDL_HWSURFACE);
+	if ( bpp == 8 ) {
+		/* FIXME: What about DirectColor? */
+		current->flags |= SDL_HWPALETTE;
+	}
 	current->w = width;
 	current->h = height;
 	current->pitch = modeinfo->linewidth;

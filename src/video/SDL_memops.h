@@ -53,6 +53,17 @@ do {									  \
 		: "memory" );						  \
 } while(0)
 
+#define SDL_memcpy4(dst, src, len)				\
+do {								\
+	int ecx, edi, esi;					\
+	__asm__ __volatile__ (					\
+		"cld\n\t"					\
+		"rep ; movsl"					\
+		: "=&c" (ecx), "=&D" (edi), "=&S" (esi)		\
+		: "0" ((unsigned)(len)), "1" (dst), "2" (src)	\
+		: "memory" );					\
+} while(0)
+
 #define SDL_revcpy(dst, src, len)			\
 do {							\
 	int u0, u1, u2;					\
@@ -104,9 +115,15 @@ do {								\
 #ifndef SDL_memcpy
 #define SDL_memcpy(dst, src, len)	memcpy(dst, src, len)
 #endif
+
+#ifndef SDL_memcpy4
+#define SDL_memcpy4(dst, src, len)	memcpy(dst, src, (len) << 2)
+#endif
+
 #ifndef SDL_revcpy
 #define SDL_revcpy(dst, src, len)	memmove(dst, src, len)
 #endif
+
 #ifndef SDL_memset4
 #define SDL_memset4(dst, val, len)		\
 do {						\

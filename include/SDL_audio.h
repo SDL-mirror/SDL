@@ -234,7 +234,7 @@ extern DECLSPEC int SDL_ConvertAudio(SDL_AudioCVT *cvt);
  * This is provided for convenience -- you can mix your own audio data.
  */
 #define SDL_MIX_MAXVOLUME 128
-extern DECLSPEC void SDL_MixAudio(Uint8 *dst, Uint8 *src, Uint32 len, int volume);
+extern DECLSPEC void SDL_MixAudio(Uint8 *dst, const Uint8 *src, Uint32 len, int volume);
 
 /*
  * The lock manipulated by these functions protects the callback function.

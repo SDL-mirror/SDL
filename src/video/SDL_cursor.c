@@ -723,7 +723,9 @@ void SDL_EraseCursor(SDL_Surface *screen)
 		SDL_Rect area;
 
 		SDL_MouseRect(&area);
-		video->UpdateRects(this, 1, &area);
+		if ( video->UpdateRects ) {
+			video->UpdateRects(this, 1, &area);
+		}
 	}
 }
 

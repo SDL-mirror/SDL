@@ -262,7 +262,12 @@ void BE_PumpEvents(_THIS)
 
 	/* Check for mouse motion */
 	if ( point != last_point ) {
-		SDL_PrivateMouseMotion(0, 0, (int)point.x, (int)point.y);
+		int x, y;
+
+		SDL_Win->GetXYOffset(x, y);
+		x = (int)point.x - x;
+		y = (int)point.y - y;
+		SDL_PrivateMouseMotion(0, 0, x, y);
 	}
 	last_point = point;
 

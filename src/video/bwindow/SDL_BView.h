@@ -50,6 +50,10 @@ public:
 		xoff = x;
 		yoff = y;
 	}
+	virtual void GetXYOffset(int &x, int &y) {
+		x = xoff;
+		y = yoff;
+	}
 	/* The view changed size. If it means we're in fullscreen, we
 	 * draw a nice black box in the entire view to get black borders.
 	 */

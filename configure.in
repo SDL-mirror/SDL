@@ -14,9 +14,9 @@ dnl Set various version strings - taken gratefully from the GTk sources
 #
 SDL_MAJOR_VERSION=1
 SDL_MINOR_VERSION=2
-SDL_MICRO_VERSION=0
-SDL_INTERFACE_AGE=0
-SDL_BINARY_AGE=0
+SDL_MICRO_VERSION=1
+SDL_INTERFACE_AGE=1
+SDL_BINARY_AGE=1
 SDL_VERSION=$SDL_MAJOR_VERSION.$SDL_MINOR_VERSION.$SDL_MICRO_VERSION
 
 AC_SUBST(SDL_MAJOR_VERSION)
@@ -250,6 +250,9 @@ CheckOSS()
           #endif
           #ifdef __bsdi__
           #include <sys/soundcard.h>
+          #endif
+          #ifdef __OpenBSD__
+          #include <soundcard.h>
           #endif
           #ifdef __USLC__
           #include <sys/soundcard.h>
@@ -680,6 +683,19 @@ CheckAAlib()
     fi
 }
 
+dnl rcg04172001 Set up the Null video driver.
+CheckDummyVideo()
+{
+    AC_ARG_ENABLE(video-dummy,
+[  --enable-video-dummy   use dummy video driver [default=no]],
+                  , enable_video_dummy=no)
+    if test x$enable_video_dummy = xyes; then
+      CFLAGS="$CFLAGS -DENABLE_DUMMYVIDEO"
+      VIDEO_SUBDIRS="$VIDEO_SUBDIRS dummy"
+      VIDEO_DRIVERS="$VIDEO_DRIVERS dummy/libvideo_null.la"
+    fi
+}
+
 dnl Check to see if OpenGL support is desired
 AC_ARG_ENABLE(video-opengl,
 [  --enable-video-opengl   include OpenGL context creation [default=yes]],
@@ -1012,6 +1028,7 @@ CheckKSTAT()
 case "$target" in
     *-*-linux*)
         ARCH=linux
+        CheckDummyVideo
         CheckNASM
         CheckOSS
         CheckALSA
@@ -1076,6 +1093,7 @@ case "$target" in
         ;;
     *-*-bsdi*)
         ARCH=bsdi
+        CheckDummyVideo
         CheckNASM
         CheckOSS
         CheckNAS
@@ -1116,6 +1134,7 @@ case "$target" in
         ;;
     *-*-freebsd*)
         ARCH=freebsd
+        CheckDummyVideo
         CheckNASM
         CheckOSS
         CheckARTSC
@@ -1167,6 +1186,7 @@ case "$target" in
         ;;
     *-*-netbsd*)
         ARCH=netbsd
+        CheckDummyVideo
         CheckNASM
         CheckOSS
         CheckARTSC
@@ -1199,7 +1219,11 @@ case "$target" in
             COPY_ARCH_SRC(src/thread, linux, SDL_systhread_c.h)
             COPY_ARCH_SRC(src/thread, linux, SDL_sysmutex.c)
             COPY_ARCH_SRC(src/thread, linux, SDL_sysmutex_c.h)
-            COPY_ARCH_SRC(src/thread, linux, SDL_syssem.c)
+	    if test x$use_pthreads = xyes -a x$enable_pthread_sem != xyes; then
+		COPY_ARCH_SRC(src/thread, generic, SDL_syssem.c)
+	    else
+		COPY_ARCH_SRC(src/thread, linux, SDL_syssem.c)
+	    fi
             COPY_ARCH_SRC(src/thread, generic, SDL_syssem_c.h)
             COPY_ARCH_SRC(src/thread, linux, SDL_syscond.c)
             COPY_ARCH_SRC(src/thread, generic, SDL_syscond_c.h)
@@ -1213,6 +1237,8 @@ case "$target" in
         ;;
     *-*-openbsd*)
         ARCH=openbsd
+        CFLAGS="$CFLAGS -Dunix"
+        CheckDummyVideo
         CheckNASM
         CheckOSS
         CheckARTSC
@@ -1261,6 +1287,7 @@ case "$target" in
         ;;
     *-*-sysv5*)
         ARCH=sysv5
+        CheckDummyVideo
         CheckNASM
         CheckOSS
         CheckARTSC
@@ -1306,6 +1333,8 @@ case "$target" in
         ;;
     *-*-solaris*)
         ARCH=solaris
+        CFLAGS="$CFLAGS -D__ELF__" # Fix for nasm on Solaris x86
+        CheckDummyVideo
         CheckNASM
         CheckARTSC
         CheckESD
@@ -1350,6 +1379,7 @@ case "$target" in
         ;;
     *-*-irix*)
         ARCH=irix
+        CheckDummyVideo
         CheckNAS
         CheckX11
         CheckAAlib
@@ -1407,6 +1437,7 @@ case "$target" in
         ;;
     *-*-hpux*)
         ARCH=hpux
+        CheckDummyVideo
         CheckNAS
         CheckX11
         CheckGGI
@@ -1449,6 +1480,7 @@ case "$target" in
         ;;
     *-*-aix*)
         ARCH=aix
+        CheckDummyVideo
         CheckNAS
         CheckX11
         CheckGGI
@@ -1490,6 +1522,7 @@ case "$target" in
         ;;
     *-*-osf*)
         ARCH=osf
+        CheckDummyVideo
         CheckNAS
         CheckX11
         CheckGGI
@@ -1532,6 +1565,7 @@ case "$target" in
         ;;
     *-*-qnx*)
         ARCH=qnx
+        CheckDummyVideo
         CheckNAS
         CheckPHOTON
         CheckX11
@@ -1581,8 +1615,11 @@ case "$target" in
             ac_default_prefix=/usr/local/cross-tools/i386-mingw32msvc
         else
             # Look for the location of the tools and install there
-            ac_default_prefix=$BUILD_PREFIX
+            if [ "$BUILD_PREFIX" != "" ]; then
+                ac_default_prefix=$BUILD_PREFIX
+            fi
         fi
+        CheckDummyVideo
         CheckWIN32
         CheckDIRECTX
         CheckNASM
@@ -1623,11 +1660,22 @@ case "$target" in
         fi
         # The Win32 platform requires special setup
         SDL_CFLAGS="$SDL_CFLAGS -Dmain=SDL_main"
-        SDL_LIBS="-lmingw32 -lSDLmain $SDL_LIBS -mwindows"
+        case "$target" in
+            *-*-cygwin*)
+                CFLAGS="$CFLAGS -I/usr/include/mingw -DWIN32 -Uunix"
+                SDL_CFLAGS="$SDL_CFLAGS -I/usr/include/mingw -DWIN32 -Uunix"
+                LIBS="$LIBS -mno-cygwin"
+                SDL_LIBS="-lmingw32 -lSDLmain $SDL_LIBS -mwindows -mno-cygwin"
+                ;;
+            *-*-mingw32*)
+                SDL_LIBS="-lmingw32 -lSDLmain $SDL_LIBS -mwindows"
+                ;;
+        esac
         ;;
     *-*-beos*)
         ARCH=beos
         ac_default_prefix=/boot/develop/tools/gnupro
+        CheckDummyVideo
         CheckNASM
         CheckBWINDOW
         CheckBeGL
@@ -1672,6 +1720,7 @@ case "$target" in
         # use it at present, but Apple is working on a X-to-9 compiler
         # for which this case would be handy.
         ARCH=macos
+        CheckDummyVideo
         CheckTOOLBOX
         CheckMacGL
         # Set up files for the main() stub
@@ -1714,6 +1763,7 @@ case "$target" in
         # just the OS X kernel sans upper layers like Carbon.  But
         # config.guess comes back with "darwin", so go with the flow.
         ARCH=macos
+        CheckDummyVideo
         CheckCARBON
         CheckMacGL
         CheckPTHREAD
@@ -1788,6 +1838,10 @@ fi
 
 if test $ARCH = solaris; then
   SDL_RLD_FLAGS="-R\${exec_prefix}/lib"
+fi
+
+if test $ARCH = openbsd; then
+  SDL_RLD_FLAGS="-Wl,-R\${exec_prefix}/lib -Wl,-R\${X11BASE}/lib"
 fi
 
 dnl Output the video drivers we use
@@ -1873,6 +1927,7 @@ src/video/windib/Makefile
 src/video/windx5/Makefile
 src/video/bwindow/Makefile
 src/video/photon/Makefile
+src/video/dummy/Makefile
 src/events/Makefile
 src/joystick/Makefile
 src/joystick/beos/Makefile

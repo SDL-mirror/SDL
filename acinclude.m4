@@ -434,7 +434,8 @@ ac_prog=ld
 if test "$ac_cv_prog_gcc" = yes; then
   # Check if gcc -print-prog-name=ld gives a path.
   AC_MSG_CHECKING([for ld used by GCC])
-  ac_prog=`($CC -print-prog-name=ld | tr -d '\r') 2>&5`
+  DELCR='tr -d \015'
+  ac_prog=`($CC -print-prog-name=ld | $DELCR) 2>&5`
   case "$ac_prog" in
     # Accept absolute paths.
 changequote(,)dnl

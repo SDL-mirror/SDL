@@ -156,6 +156,16 @@ public:
 #endif
 		SDL_View->SetXYOffset(x, y);		
 	}
+	virtual void GetXYOffset(int &x, int &y) {
+#ifdef HAVE_OPENGL
+		if ( the_view == SDL_GLView ) {
+			x = 0;
+			y = 0;
+			return;
+		}
+#endif
+		SDL_View->GetXYOffset(x, y);
+	}
 	virtual bool BeginDraw(void) {
 		return(Lock());
 	}

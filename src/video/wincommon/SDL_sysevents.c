@@ -134,10 +134,10 @@ static void WIN_GetKeyboardState(void)
 		if ( keyboard[VK_RMENU] & 0x80) {
 			state |= KMOD_RALT;
 		}
-		if ( keyboard[VK_NUMLOCK] & 0x80) {
+		if ( keyboard[VK_NUMLOCK] & 0x01) {
 			state |= KMOD_NUM;
 		}
-		if ( keyboard[VK_CAPITAL] & 0x80) {
+		if ( keyboard[VK_CAPITAL] & 0x01) {
 			state |= KMOD_CAPS;
 		}
 	}

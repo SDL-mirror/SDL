@@ -25,48 +25,24 @@ static char rcsid =
  "@(#) $Id$";
 #endif
 
-/* Functions to allocate audio buffer memory, shareable across threads
-	(necessary because SDL audio emulates threads with fork()
- */
+/* Being a null driver, there's no event stream. We just define stubs for
+   most of the API. */
 
-#include <stdlib.h>
-#ifdef FORK_HACK
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
-#include <stddef.h>
-#endif
+#include "SDL.h"
+#include "SDL_sysevents.h"
+#include "SDL_events_c.h"
+#include "SDL_nullvideo.h"
+#include "SDL_nullevents_c.h"
 
-#include "SDL_audiomem.h"
-
-/* Allocate memory that will be shared between threads (freed on exit) */
-void *SDL_AllocAudioMem(int size)
+void DUMMY_PumpEvents(_THIS)
 {
-	void *chunk;
-
-#ifdef FORK_HACK
-	int   semid;
-	
-	/* Create and get the address of a shared memory segment */
-	semid = shmget(IPC_PRIVATE, size, (IPC_CREAT|0600));
-	if ( semid < 0 ) {
-		return(NULL);
-	}
-	chunk = shmat(semid, NULL, 0);
-	
-	/* Set the segment for deletion when it is detatched */
-	shmctl(semid, IPC_RMID, NULL);	/* Delets semid if shmat() fails */
-#else
-	chunk = malloc(size);
-#endif
-	return((void *)chunk);
+	/* do nothing. */
 }
 
-void SDL_FreeAudioMem(void *chunk)
+void DUMMY_InitOSKeymap(_THIS)
 {
-#ifdef FORK_HACK
-	shmdt(chunk);
-#else
-	free(chunk);
-#endif
+	/* do nothing. */
 }
+
+/* end of SDL_nullevents.c ... */
+

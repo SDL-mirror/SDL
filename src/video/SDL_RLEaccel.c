@@ -109,12 +109,21 @@ static char rcsid =
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #endif
 
+#define PIXEL_COPY(to, from, len, bpp)			\
+do {							\
+    if(bpp == 4) {					\
+	SDL_memcpy4(to, from, (unsigned)(len));		\
+    } else {						\
+	SDL_memcpy(to, from, (unsigned)(len) * (bpp));	\
+    }							\
+} while(0)
+
 /*
  * Various colorkey blit methods, for opaque and per-surface alpha
  */
 
 #define OPAQUE_BLIT(to, from, length, bpp, alpha)	\
-    SDL_memcpy(to, from, (unsigned)(length * bpp))
+    PIXEL_COPY(to, from, length, bpp)
 
 /*
  * For 32bpp pixels on the form 0x00rrggbb:
@@ -657,9 +666,9 @@ static void RLEAlphaClipBlit(int w, Uint8 *srcbuf, SDL_Surface *dst,
 		    if(crun > right - cofs)				  \
 			crun = right - cofs;				  \
 		    if(crun > 0)					  \
-			SDL_memcpy(dstbuf + cofs * sizeof(Ptype),	  \
+			PIXEL_COPY(dstbuf + cofs * sizeof(Ptype),	  \
 				   srcbuf + (cofs - ofs) * sizeof(Ptype), \
-				   (unsigned)crun * sizeof(Ptype));	  \
+				   (unsigned)crun, sizeof(Ptype));	  \
 		    srcbuf += run * sizeof(Ptype);			  \
 		    ofs += run;						  \
 		} else if(!ofs)						  \
@@ -816,8 +825,8 @@ int SDL_RLEAlphaBlit(SDL_Surface *src, SDL_Rect *srcrect,
 		    run = ((Ctype *)srcbuf)[1];				 \
 		    srcbuf += 2 * sizeof(Ctype);			 \
 		    if(run) {						 \
-			SDL_memcpy(dstbuf + ofs * sizeof(Ptype), srcbuf, \
-				   run * sizeof(Ptype));		 \
+			PIXEL_COPY(dstbuf + ofs * sizeof(Ptype), srcbuf, \
+				   run, sizeof(Ptype));			 \
 			srcbuf += run * sizeof(Ptype);			 \
 			ofs += run;					 \
 		    } else if(!ofs)					 \

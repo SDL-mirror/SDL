@@ -46,6 +46,9 @@ static char rcsid =
 #ifdef __FreeBSD__
 #include <machine/soundcard.h>
 #endif
+#ifdef __OpenBSD__
+#include <soundcard.h>
+#endif
 #ifdef __USLC__
 #include <sys/soundcard.h>
 #endif

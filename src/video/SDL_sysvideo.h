@@ -355,6 +355,9 @@ extern VideoBootStrap DIRECTX_bootstrap;
 #ifdef ENABLE_BWINDOW
 extern VideoBootStrap BWINDOW_bootstrap;
 #endif
+#ifdef ENABLE_DUMMYVIDEO
+extern VideoBootStrap DUMMY_bootstrap;
+#endif
 /* MacOS X gets the proper defines from configure */
 #if defined(macintosh) && !defined(MACOSX)
 #define ENABLE_TOOLBOX

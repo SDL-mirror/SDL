@@ -36,6 +36,10 @@ static char rcsid =
 #include "SDL_timer.h"
 #include "SDL_timer_c.h"
 
+#if _POSIX_THREAD_SYSCALL_SOFT
+#include <pthread.h>
+#endif
+
 #if defined(DISABLE_THREADS) || defined(FORK_HACK)
 #define USE_ITIMER
 #endif
@@ -96,6 +100,9 @@ void SDL_Delay (Uint32 ms)
 	do {
 		errno = 0;
 
+#if _POSIX_THREAD_SYSCALL_SOFT
+		pthread_yield_np();
+#endif
 #ifdef USE_NANOSLEEP
 		tv.tv_sec = elapsed.tv_sec;
 		tv.tv_nsec = elapsed.tv_nsec;

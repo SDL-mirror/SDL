@@ -42,7 +42,8 @@ static char rcsid =
 #if  defined(__i386__) || defined(WIN32) || \
     (defined(__alpha__) || defined(__alpha)) || \
      defined(__arm__) || \
-    (defined(__mips__) && defined(__MIPSEL__))
+    (defined(__mips__) && defined(__MIPSEL__)) || \
+     defined(__LITTLE_ENDIAN__)
 #define SDL_BYTEORDER	SDL_LIL_ENDIAN
 #else
 #define SDL_BYTEORDER	SDL_BIG_ENDIAN

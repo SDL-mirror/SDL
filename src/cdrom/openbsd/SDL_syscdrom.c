@@ -36,6 +36,7 @@ static char rcsid =
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
 #include <sys/cdio.h>
 
 #include "SDL_error.h"
@@ -64,7 +65,8 @@ static void SDL_SYS_CDClose(SDL_CD *cdrom);
 
 /* Some ioctl() errno values which occur when the tray is empty */
 #define ERRNO_TRAYEMPTY(errno)	\
-	((errno == EIO) || (errno == ENOENT) || (errno == EINVAL))
+	((errno == EIO) || (errno == ENOENT) || (errno == EINVAL) || \
+	 (errno == ENODEV))
 
 /* Check a drive to see if it is a CD-ROM */
 static int CheckDrive(char *drive, struct stat *stbuf)
@@ -96,6 +98,8 @@ static int CheckDrive(char *drive, struct stat *stbuf)
 			}
 			close(cdfd);
 		}
+		else if (ERRNO_TRAYEMPTY(errno))
+			is_cd = 1;
 	}
 	return(is_cd);
 }
@@ -137,7 +141,11 @@ static void AddDrive(char *drive, struct stat *stbuf)
 int  SDL_SYS_CDInit(void)
 {
 	static char *checklist[] = {
+#ifdef __OpenBSD__
+		"?0 cd?a", "cdrom", NULL
+#else
 		"?0 cd?c", "?0 acd?c", "cdrom", NULL
+#endif
 	};
 	char *SDLcdrom;
 	int i, j, exists;

@@ -1684,6 +1684,7 @@ static int DX5_AllocHWSurface(_THIS, SDL_Surface *surface)
 	return(DX5_AllocDDSurface(this, surface, NULL, SDL_HWSURFACE));
 }
 
+#ifdef DDRAW_DEBUG
 void PrintSurface(char *title, LPDIRECTDRAWSURFACE3 surface, Uint32 flags)
 {
 	DDSURFACEDESC ddsd;
@@ -1717,6 +1718,7 @@ void PrintSurface(char *title, LPDIRECTDRAWSURFACE3 surface, Uint32 flags)
 	     		ddsd.ddpfPixelFormat.dwBBitMask);
 #endif
 }
+#endif /* DDRAW_DEBUG */
 
 static int DX5_HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,
 					SDL_Surface *dst, SDL_Rect *dstrect)

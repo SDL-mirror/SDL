@@ -51,46 +51,59 @@ void SDL_UninstallParachute(void)
 #include "SDL.h"
 #include "SDL_fatal.h"
 
+#ifdef __CYGWIN__
+#define DISABLE_STDIO
+#endif
+
 /* This installs some signal handlers for the more common fatal signals,
    so that if the programmer is lazy, the app doesn't die so horribly if
    the program crashes.
 */
 
+static void print_msg(const char *text)
+{
+#ifndef DISABLE_STDIO
+	fprintf(stderr, "%s", text);
+#endif
+}
+
 static void SDL_Parachute(int sig)
 {
 	signal(sig, SIG_DFL);
-	fprintf(stderr, "Fatal signal: ");
+	print_msg("Fatal signal: ");
 	switch (sig) {
 		case SIGSEGV:
-			fprintf(stderr, "Segmentation Fault");
+			print_msg("Segmentation Fault");
 			break;
 #ifdef SIGBUS
 #if SIGBUS != SIGSEGV
 		case SIGBUS:
-			fprintf(stderr, "Bus Error");
+			print_msg("Bus Error");
 			break;
 #endif
 #endif /* SIGBUS */
 #ifdef SIGFPE
 		case SIGFPE:
-			fprintf(stderr, "Floating Point Exception");
+			print_msg("Floating Point Exception");
 			break;
 #endif /* SIGFPE */
 #ifdef SIGQUIT
 		case SIGQUIT:
-			fprintf(stderr, "Keyboard Quit");
+			print_msg("Keyboard Quit");
 			break;
 #endif /* SIGQUIT */
 #ifdef SIGPIPE
 		case SIGPIPE:
-			fprintf(stderr, "Broken Pipe");
+			print_msg("Broken Pipe");
 			break;
 #endif /* SIGPIPE */
 		default:
+#ifndef DISABLE_STDIO
 			fprintf(stderr, "# %d", sig);
+#endif
 			break;
 	}
-	fprintf(stderr, " (SDL Parachute Deployed)\n");
+	print_msg(" (SDL Parachute Deployed)\n");
 	SDL_Quit();
 	exit(-sig);
 }

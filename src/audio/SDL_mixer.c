@@ -96,7 +96,7 @@ static const Uint8 mix8[] =
 #define ADJUST_VOLUME(s, v)	(s = (s*v)/SDL_MIX_MAXVOLUME)
 #define ADJUST_VOLUME_U8(s, v)	(s = (((s-128)*v)/SDL_MIX_MAXVOLUME)+128)
 
-void SDL_MixAudio (Uint8 *dst, Uint8 *src, Uint32 len, int volume)
+void SDL_MixAudio (Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 {
 	Uint16 format;
 
