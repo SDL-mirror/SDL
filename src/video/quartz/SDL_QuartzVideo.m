@@ -397,13 +397,6 @@ static void QZ_UnsetVideoMode (_THIS) {
             QZ_TearDownOpenGL (this);
     }
 
-    /* Restore gamma settings */
-    CGDisplayRestoreColorSyncSettings ();
-
-    /* Ensure the cursor will be visible and working when we quit */
-    CGDisplayShowCursor (display_id);
-    CGAssociateMouseAndMouseCursorPosition (1);
-
     /* Signal successful teardown */
     video_set = SDL_FALSE;
 }
@@ -576,7 +569,7 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
             return NULL;
         }
     
-        [ qz_window setReleasedWhenClosed:YES ];
+        //[ qz_window setReleasedWhenClosed:YES ];
         QZ_SetCaption(this, this->wm_title, this->wm_icon);
         [ qz_window setAcceptsMouseMovedEvents:YES ];
         [ qz_window setViewsNeedDisplay:NO ];
@@ -1061,6 +1054,13 @@ static void QZ_UpdateRects (_THIS, int numRects, SDL_Rect *rects) {
 
 static void QZ_VideoQuit (_THIS) {
 
+    /* Restore gamma settings */
+    CGDisplayRestoreColorSyncSettings ();
+
+    /* Ensure the cursor will be visible and working when we quit */
+    CGDisplayShowCursor (display_id);
+    CGAssociateMouseAndMouseCursorPosition (1);
+    
     QZ_UnsetVideoMode (this);
     CGPaletteRelease (palette);
 }
