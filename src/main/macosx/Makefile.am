@@ -4,6 +4,9 @@
 # experience knows how to do this properly?
 
 if TARGET_MACOSX
+hackhacknibdatadir = $(nibdatadir)/SDLMain.nib
+hackhacknibdata_DATA = info.nib
+
 nibdatadir = $(datadir)/sdl
 nibdata_DATA =			\
 	SDLMain.nib/classes.nib	\
@@ -12,12 +15,11 @@ nibdata_DATA =			\
 	Info.plist
 endif
 
-EXTRA_DIST = SDLMain.h SDLMain.m
+EXTRA_DIST = SDLMain.h SDLMain.m info.nib
 
 # The nib and exports directories need to be copied into place
 # when building a distribution.
 dist-hook:
-	(cd $(distdir) && rm -f $(BUILT_SOURCES))
 	cp -rp SDLMain.nib $(distdir)
 	cp -rp exports $(distdir)
 	(cd $(distdir) && rm -rf `find . -name CVS`)
