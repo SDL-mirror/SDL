@@ -669,7 +669,9 @@ static HRESULT WINAPI EnumModes2(DDSURFACEDESC *desc, VOID *udata)
 				if ( refreshRate > enumlists[bpp]->refreshRate &&
 				     refreshRate <= 85 /* safe value? */ ) {
 					enumlists[bpp]->refreshRate = refreshRate;
-printf("New refresh rate for %d bpp: %dx%d at %d Hz\n", (bpp+1)*8, (int)desc->dwWidth, (int)desc->dwHeight, refreshRate);
+#ifdef DDRAW_DEBUG
+ fprintf(stderr, "New refresh rate for %d bpp: %dx%d at %d Hz\n", (bpp+1)*8, (int)desc->dwWidth, (int)desc->dwHeight, refreshRate);
+#endif
 				}
 				break;
 			}
@@ -686,7 +688,9 @@ printf("New refresh rate for %d bpp: %dx%d at %d Hz\n", (bpp+1)*8, (int)desc->dw
 			enumrect->r.h = (Uint16)desc->dwHeight;
 			enumrect->next = enumlists[bpp];
 			enumlists[bpp] = enumrect;
-printf("New mode for %d bpp: %dx%d at %d Hz\n", (bpp+1)*8, (int)desc->dwWidth, (int)desc->dwHeight, refreshRate);
+#ifdef DDRAW_DEBUG
+ fprintf(stderr, "New mode for %d bpp: %dx%d at %d Hz\n", (bpp+1)*8, (int)desc->dwWidth, (int)desc->dwHeight, refreshRate);
+#endif
 			break;
 	}
 
