@@ -401,6 +401,7 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	GEM_locked = SDL_FALSE;
 	GEM_win_fulled = SDL_FALSE;
 	GEM_fullscreen = SDL_FALSE;
+	GEM_lock_redraw = SDL_TRUE;	/* Prevent redraw till buffers are setup */
 
 	VDI_screen = NULL;
 	VDI_pitch = VDI_w * VDI_pixelsize;
@@ -720,6 +721,7 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 #endif
 
 	this->UpdateRects = GEM_UpdateRects;
+	GEM_lock_redraw = SDL_FALSE;	/* Enable redraw */
 
 	/* We're done */
 	return(current);
@@ -858,6 +860,10 @@ static void GEM_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 {
 	SDL_Surface *surface;
 
+	if (GEM_lock_redraw) {
+		return;
+	}
+
 	surface = this->screen;
 
 	if (surface->flags & SDL_FULLSCREEN) {
@@ -951,6 +957,10 @@ static int GEM_FlipHWSurfaceWindowed(_THIS, SDL_Surface *surface)
 
 static int GEM_FlipHWSurface(_THIS, SDL_Surface *surface)
 {
+	if (GEM_lock_redraw) {
+		return(0);
+	}
+
 	if (surface->flags & SDL_FULLSCREEN) {
 		return GEM_FlipHWSurfaceFullscreen(this, surface);
 	} else {

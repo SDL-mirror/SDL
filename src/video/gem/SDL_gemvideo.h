@@ -79,6 +79,7 @@ struct SDL_PrivateVideoData {
 	SDL_bool window_fulled;		/* Window maximized ? */
 	SDL_bool mouse_relative;	/* Report relative mouse movement */
 	SDL_bool locked;			/* AES locked for fullscreen ? */
+	SDL_bool lock_redraw;		/* Prevent redraw till buffers are setup */
 	short message[8];			/* To self-send an AES message */
 
 	SDL_bool fullscreen;		/* Fullscreen or windowed mode ? */
@@ -120,6 +121,7 @@ struct SDL_PrivateVideoData {
 #define GEM_win_fulled		(this->hidden->window_fulled)
 #define GEM_mouse_relative	(this->hidden->mouse_relative)
 #define GEM_locked			(this->hidden->locked)
+#define GEM_lock_redraw		(this->hidden->lock_redraw)
 #define GEM_message			(this->hidden->message)
 #define SDL_modelist		(this->hidden->SDL_modelist)
 #define GEM_icon			(this->hidden->icon)

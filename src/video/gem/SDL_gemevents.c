@@ -210,7 +210,9 @@ static int do_messages(_THIS, short *message)
 			SDL_PrivateAppActive(1, SDL_APPINPUTFOCUS);
 			break;
 		case WM_REDRAW:
-			GEM_wind_redraw(this, message[3],&message[4]);
+			if (!GEM_lock_redraw) {
+				GEM_wind_redraw(this, message[3],&message[4]);
+			}
 			break;
 		case WM_ICONIFY:
 		case WM_ALLICONIFY:
@@ -240,8 +242,9 @@ static int do_messages(_THIS, short *message)
 			break;
 		case WM_SIZED:
 			wind_set (message[3], WF_CURRXYWH, message[4], message[5], message[6], message[7]);
-			GEM_win_fulled = SDL_FALSE;		/* Cancel maximized flag */
 			wind_get (message[3], WF_WORKXYWH, &x2, &y2, &w2, &h2);
+			GEM_win_fulled = SDL_FALSE;		/* Cancel maximized flag */
+			GEM_lock_redraw = SDL_TRUE;		/* Prevent redraw till buffers resized */
 			SDL_PrivateResize(w2, h2);
 			break;
 		case WM_FULLED:
@@ -260,6 +263,7 @@ static int do_messages(_THIS, short *message)
 				}
 				wind_set (message[3], WF_CURRXYWH, x, y, w, h);
 				wind_get (message[3], WF_WORKXYWH, &x2, &y2, &w2, &h2);
+				GEM_lock_redraw = SDL_TRUE;		/* Prevent redraw till buffers resized */
 				SDL_PrivateResize(w2, h2);
 			}
 			break;
