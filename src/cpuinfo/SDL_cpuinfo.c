@@ -136,6 +136,9 @@ static __inline__ int CPU_haveMMX()
 static __inline__ int CPU_have3DNow()
 {
 	int has_3DNow = 0;
+	if ( !CPU_haveCPUID() ) {
+		return 0;
+	}
 #if defined(__GNUC__) && defined(i386)
 	__asm__ (
 "push %%ebx\n"
