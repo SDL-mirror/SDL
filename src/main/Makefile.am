@@ -41,6 +41,9 @@ endif
 
 libarch_la_SOURCES = $(ARCH_SRCS)
 
+exports:
+	for i in $(ARCH_SUBDIRS); do if [ -d $$i/exports ]; then (cd $$i/exports; make); fi; done
+
 # The architecture specific directories need to be copied into place
 # when building a distribution.
 dist-hook:
