@@ -378,6 +378,25 @@ static void QZ_RegisterForSleepNotifications (_THIS)
      CFRelease (rls);
 }
 
+
+// Try to map Quartz mouse buttons to SDL's lingo...
+static int QZ_OtherMouseButtonToSDL(int button)
+{
+    switch (button)
+    {
+        case 0:
+            return(SDL_BUTTON_LEFT);   // 1
+        case 1:
+            return(SDL_BUTTON_RIGHT);  // 3
+        case 2:
+            return(SDL_BUTTON_MIDDLE); // 2
+    }
+
+    // >= 3: skip 4 & 5, since those are the SDL mousewheel buttons.
+    return(button + 3);
+}
+
+
 static void QZ_PumpEvents (_THIS)
 {
     int firstMouseEvent;
@@ -420,6 +439,7 @@ static void QZ_PumpEvents (_THIS)
                                     inMode: NSDefaultRunLoopMode dequeue:YES ];
         if (event != nil) {
 
+            int button;
             unsigned int type;
             BOOL isForGameWin;
             BOOL isInGameWin;
@@ -466,8 +486,7 @@ static void QZ_PumpEvents (_THIS)
                         }
                     }
                     break;
-                case NSOtherMouseDown: DO_MOUSE_DOWN (SDL_BUTTON_MIDDLE); break;
-                case NSRightMouseDown: DO_MOUSE_DOWN (SDL_BUTTON_RIGHT);  break;
+
                 case NSLeftMouseUp:
                     if ( last_virtual_button != 0 ) {
                         DO_MOUSE_UP (last_virtual_button);
@@ -477,8 +496,19 @@ static void QZ_PumpEvents (_THIS)
                         DO_MOUSE_UP (SDL_BUTTON_LEFT);
                     }
                     break;
-                case NSOtherMouseUp:   DO_MOUSE_UP (SDL_BUTTON_MIDDLE); break;
-                case NSRightMouseUp:   DO_MOUSE_UP (SDL_BUTTON_RIGHT);  break;
+
+                case NSOtherMouseDown:
+                case NSRightMouseDown:
+                    button = QZ_OtherMouseButtonToSDL([ event buttonNumber ]);
+                    DO_MOUSE_DOWN (button);
+                    break;
+
+                case NSOtherMouseUp:
+                case NSRightMouseUp:
+                    button = QZ_OtherMouseButtonToSDL([ event buttonNumber ]);
+                    DO_MOUSE_UP (button);
+                    break;
+
                 case NSSystemDefined:
                     /*
                         Future: up to 32 "mouse" buttons can be handled.
