@@ -36,7 +36,6 @@
         - Fix white OpenGL window on minimize (fixed) (update: broken again on 10.2)
         - Find out what events should be sent/ignored if window is minimized
         - Find a way to deal with external resolution/depth switch while app is running
-        - Resizeable windows (done)
         - Check accuracy of QZ_SetGamma()
     Problems:
         - OGL not working in full screen with software renderer
