@@ -69,45 +69,98 @@ static struct {
 
 #ifndef NO_LOGICAL_JOYSTICKS
 
-static struct joystick_logical_values {
+/*
+   Some USB HIDs show up as a single joystick even though they actually
+   control 2 or more joysticks.
+*/
+/*
+   This code handles the MP-8800 (Quad) and MP-8866 (Dual), which can
+   be identified by their transparent blue design. It's quite trivial
+   to add other joysticks with similar quirky behavior.
+   -id
+*/
+
+struct joystick_logical_mapping {
         int njoy;
         int nthing;
-} joystick_logical_values[] = {
+};
 
-/* +0 */
-   /* MP-8800 axes map - map to {logical joystick #, logical axis #} */
-   {0,0},{0,1},{0,2},{1,0},{1,1},{0,3},{1,2},{1,3},{2,0},{2,1},{2,2},{2,3},
-   {3,0},{3,1},{3,2},{3,3},{0,4},{1,4},{2,4},
+/*
+   {logical joy, logical axis},
+   {logical joy, logical hat},
+   {logical joy, logical ball},
+   {logical joy, logical button}
+*/
 
-/* +19 */
-   /* MP-8800 hat map - map to {logical joystick #, logical hat #} */
-   {0,0},{1,0},{2,0},{3,0},
+static struct joystick_logical_mapping mp88xx_1_logical_axismap[] = {
+   {0,0},{0,1},{0,2},{0,3},{0,4},{0,5}
+};
+static struct joystick_logical_mapping mp88xx_1_logical_buttonmap[] = {
+   {0,0},{0,1},{0,2},{0,3},{0,4},{0,5},{0,6},{0,7},{0,8},{0,9},{0,10},{0,11}
+};
 
-/* +23 */
-   /* MP-8800 button map - map to {logical joystick #, logical button #} */
+static struct joystick_logical_mapping mp88xx_2_logical_axismap[] = {
+   {0,0},{0,1},{0,2},{1,0},{1,1},{0,3},
+   {1,2},{1,3},{0,4},{0,5},{1,4},{1,5}
+};
+static struct joystick_logical_mapping mp88xx_2_logical_buttonmap[] = {
+   {0,0},{0,1},{0,2},{0,3},{0,4},{0,5},{0,6},{0,7},{0,8},{0,9},{0,10},{0,11},
+   {1,0},{1,1},{1,2},{1,3},{1,4},{1,5},{1,6},{1,7},{1,8},{1,9},{1,10},{1,11}
+};
+
+static struct joystick_logical_mapping mp88xx_3_logical_axismap[] = {
+   {0,0},{0,1},{0,2},{1,0},{1,1},{0,3},
+   {1,2},{1,3},{2,0},{2,1},{2,2},{2,3},
+   {0,4},{0,5},{1,4},{1,5},{2,4},{2,5}
+};
+static struct joystick_logical_mapping mp88xx_3_logical_buttonmap[] = {
+   {0,0},{0,1},{0,2},{0,3},{0,4},{0,5},{0,6},{0,7},{0,8},{0,9},{0,10},{0,11},
+   {1,0},{1,1},{1,2},{1,3},{1,4},{1,5},{1,6},{1,7},{1,8},{1,9},{1,10},{1,11},
+   {2,0},{2,1},{2,2},{2,3},{2,4},{2,5},{2,6},{2,7},{2,8},{2,9},{2,10},{2,11}
+};
+
+static struct joystick_logical_mapping mp88xx_4_logical_axismap[] = {
+   {0,0},{0,1},{0,2},{1,0},{1,1},{0,3},
+   {1,2},{1,3},{2,0},{2,1},{2,2},{2,3},
+   {3,0},{3,1},{3,2},{3,3},{0,4},{0,5},
+   {1,4},{1,5},{2,4},{2,5},{3,4},{3,5}
+};
+static struct joystick_logical_mapping mp88xx_4_logical_buttonmap[] = {
    {0,0},{0,1},{0,2},{0,3},{0,4},{0,5},{0,6},{0,7},{0,8},{0,9},{0,10},{0,11},
    {1,0},{1,1},{1,2},{1,3},{1,4},{1,5},{1,6},{1,7},{1,8},{1,9},{1,10},{1,11},
    {2,0},{2,1},{2,2},{2,3},{2,4},{2,5},{2,6},{2,7},{2,8},{2,9},{2,10},{2,11},
    {3,0},{3,1},{3,2},{3,3},{3,4},{3,5},{3,6},{3,7},{3,8},{3,9},{3,10},{3,11}
 };
 
-static struct joystick_logical_layout {
+struct joystick_logical_layout {
         int naxes;
         int nhats;
         int nballs;
         int nbuttons;
-} joystick_logical_layout[] = {
-        /* MP-8800 logical layout */
-        {5, 1, 0, 12},
-        {5, 1, 0, 12},
-        {5, 1, 0, 12},
-        {4, 1, 0, 12}
+};
+
+static struct joystick_logical_layout mp88xx_1_logical_layout[] = {
+        {6, 0, 0, 12}
+};
+static struct joystick_logical_layout mp88xx_2_logical_layout[] = {
+        {6, 0, 0, 12},
+        {6, 0, 0, 12}
+};
+static struct joystick_logical_layout mp88xx_3_logical_layout[] = {
+        {6, 0, 0, 12},
+        {6, 0, 0, 12},
+        {6, 0, 0, 12}
+};
+static struct joystick_logical_layout mp88xx_4_logical_layout[] = {
+        {6, 0, 0, 12},
+        {6, 0, 0, 12},
+        {6, 0, 0, 12},
+        {6, 0, 0, 12}
 };
 
 /*
-   Some USB HIDs show up as a single joystick even though they actually
-   control 2 or more joysticks.  This array sets up a means of mapping
-   a single physical joystick to multiple logical joysticks. (djm)
+   This array sets up a means of mapping a single physical joystick to
+   multiple logical joysticks. (djm)
                                                                                 
    njoys
         the number of logical joysticks
@@ -118,19 +171,78 @@ static struct joystick_logical_layout {
    axes, hats, balls, buttons
         arrays that map a physical thingy to a logical thingy
  */
-static struct joystick_logicalmap {
+struct joystick_logicalmap {
         const char *name;
+	int nbuttons;
         int njoys;
-        struct joystick_logical_layout *layouts;
-        struct joystick_logical_values *axes;
-        struct joystick_logical_values *hats;
-        struct joystick_logical_values *balls;
-        struct joystick_logical_values *buttons;
+        struct joystick_logical_layout *layout;
+        struct joystick_logical_mapping *axismap;
+        struct joystick_logical_mapping *hatmap;
+        struct joystick_logical_mapping *ballmap;
+        struct joystick_logical_mapping *buttonmap;
+};
 
-} joystick_logicalmap[] = {
-        {"WiseGroup.,Ltd MP-8800 Quad USB Joypad", 4, joystick_logical_layout,
-         joystick_logical_values, joystick_logical_values+19, NULL,
-         joystick_logical_values+23}
+static struct joystick_logicalmap joystick_logicalmap[] = {
+        {
+		"WiseGroup.,Ltd MP-8866 Dual USB Joypad",
+		12,
+		1,
+		mp88xx_1_logical_layout,
+        	mp88xx_1_logical_axismap,
+		NULL,
+		NULL,
+        	mp88xx_1_logical_buttonmap
+	},
+        {
+		"WiseGroup.,Ltd MP-8866 Dual USB Joypad",
+		24,
+		2,
+		mp88xx_2_logical_layout,
+        	mp88xx_2_logical_axismap,
+		NULL,
+		NULL,
+        	mp88xx_2_logical_buttonmap
+	},
+        {
+		"WiseGroup.,Ltd MP-8800 Quad USB Joypad",
+		12,
+		1,
+		mp88xx_1_logical_layout,
+        	mp88xx_1_logical_axismap,
+		NULL,
+		NULL,
+        	mp88xx_1_logical_buttonmap
+	},
+        {
+		"WiseGroup.,Ltd MP-8800 Quad USB Joypad",
+		24,
+		2,
+		mp88xx_2_logical_layout,
+        	mp88xx_2_logical_axismap,
+		NULL,
+		NULL,
+        	mp88xx_2_logical_buttonmap
+	},
+        {
+		"WiseGroup.,Ltd MP-8800 Quad USB Joypad",
+		36,
+		3,
+		mp88xx_3_logical_layout,
+        	mp88xx_3_logical_axismap,
+		NULL,
+		NULL,
+        	mp88xx_3_logical_buttonmap
+	},
+        {
+		"WiseGroup.,Ltd MP-8800 Quad USB Joypad",
+		48,
+		4,
+		mp88xx_4_logical_layout,
+        	mp88xx_4_logical_axismap,
+		NULL,
+		NULL,
+        	mp88xx_4_logical_buttonmap
+	}
 };
 
 /* find the head of a linked list, given a point in it
@@ -206,28 +318,40 @@ static int CountLogicalJoysticks(int max)
 {
    register int i, j, k, ret, prev;
    const char* name;
+   int nbuttons, fd;
+   unsigned char n;
 
    ret = 0;
 
    for(i = 0; i < max; i++) {
       name = SDL_SYS_JoystickName(i);
+	
+      fd = open(SDL_joylist[i].fname, O_RDONLY, 0);
+      if ( fd >= 0 ) {
+	 if ( ioctl(fd, JSIOCGBUTTONS, &n) < 0 ) {
+	    nbuttons = -1;
+	 } else {
+            nbuttons = n;
+	 }
+	 close(fd);
+      }
+      else {
+	 nbuttons=-1;
+      }
 
       if (name) {
          for(j = 0; j < SDL_TABLESIZE(joystick_logicalmap); j++) {
-            if (!strcmp(name, joystick_logicalmap[j].name)) {
-
+            if (!strcmp(name, joystick_logicalmap[j].name) && (nbuttons==-1 || nbuttons==joystick_logicalmap[j].nbuttons)) {
                prev = i;
-               SDL_joylist[prev].map = joystick_logicalmap+j;
+               SDL_joylist[prev].map = &(joystick_logicalmap[j]);
 
                for(k = 1; k < joystick_logicalmap[j].njoys; k++) {
                   SDL_joylist[prev].next = max + ret;
-
-                  if (prev != i)
-                     SDL_joylist[max+ret].prev = prev;
-
+                  SDL_joylist[max+ret].prev = prev;
+		  
                   prev = max + ret;
                   SDL_joylist[prev].logicalno = k;
-                  SDL_joylist[prev].map = joystick_logicalmap+j;
+                  SDL_joylist[prev].map = &(joystick_logicalmap[j]);
                   ret++;
                }
 
@@ -247,9 +371,7 @@ static void LogicalSuffix(int logicalno, char* namebuf, int len)
       "01020304050607080910111213141516171819"
       "20212223242526272829303132";
    const char* suffix;
-
    slen = strlen(namebuf);
-
    suffix = NULL;
 
    if (logicalno*2<sizeof(suffixs))
@@ -419,9 +541,12 @@ const char *SDL_SYS_JoystickName(int index)
 		}
 		close(fd);
 
+
 #ifndef NO_LOGICAL_JOYSTICKS
-		if (SDL_joylist[oindex].prev || SDL_joylist[oindex].next)
+		if (SDL_joylist[oindex].prev || SDL_joylist[oindex].next || index!=oindex)
+		{
        		   LogicalSuffix(SDL_joylist[oindex].logicalno, namebuf, 128);
+		}
 #endif
 	}
 	return name;
@@ -655,7 +780,7 @@ static void ConfigLogicalJoystick(SDL_Joystick *joystick)
 {
         struct joystick_logical_layout* layout;
                                                                                 
-        layout = SDL_joylist[joystick->index].map->layouts +
+        layout = SDL_joylist[joystick->index].map->layout +
                 SDL_joylist[joystick->index].logicalno;
                                                                                 
         joystick->nbuttons = layout->nbuttons;
@@ -731,7 +856,7 @@ int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
 #ifndef NO_LOGICAL_JOYSTICKS
 
 static SDL_Joystick* FindLogicalJoystick(
-   SDL_Joystick *joystick, struct joystick_logical_values* v)
+   SDL_Joystick *joystick, struct joystick_logical_mapping* v)
 {
         SDL_Joystick *logicaljoy;
         register int i;
@@ -760,7 +885,7 @@ static SDL_Joystick* FindLogicalJoystick(
 
 static int LogicalJoystickButton(
    SDL_Joystick *joystick, Uint8 button, Uint8 state){
-        struct joystick_logical_values* buttons;
+        struct joystick_logical_mapping* buttons;
         SDL_Joystick *logicaljoy = NULL;
 
         /* if there's no map then this is just a regular joystick
@@ -770,7 +895,7 @@ static int LogicalJoystickButton(
 
         /* get the logical joystick that will receive the event
          */
-        buttons = SDL_joylist[joystick->index].map->buttons+button;
+        buttons = SDL_joylist[joystick->index].map->buttonmap+button;
         logicaljoy = FindLogicalJoystick(joystick, buttons);
 
         if (logicaljoy == NULL)
@@ -784,7 +909,7 @@ static int LogicalJoystickButton(
 static int LogicalJoystickAxis(
 	SDL_Joystick *joystick, Uint8 axis, Sint16 value)
 {
-        struct joystick_logical_values* axes;
+        struct joystick_logical_mapping* axes;
         SDL_Joystick *logicaljoy = NULL;
 
         /* if there's no map then this is just a regular joystick
@@ -794,7 +919,7 @@ static int LogicalJoystickAxis(
 
         /* get the logical joystick that will receive the event
          */
-        axes = SDL_joylist[joystick->index].map->axes+axis;
+        axes = SDL_joylist[joystick->index].map->axismap+axis;
         logicaljoy = FindLogicalJoystick(joystick, axes);
 
         if (logicaljoy == NULL)
@@ -816,7 +941,7 @@ void HandleHat(SDL_Joystick *stick, Uint8 hat, int axis, int value)
 		{ SDL_HAT_LEFTDOWN, SDL_HAT_DOWN, SDL_HAT_RIGHTDOWN }
 	};
 	SDL_logical_joydecl(SDL_Joystick *logicaljoy = NULL);
-	SDL_logical_joydecl(struct joystick_logical_values* hats = NULL);
+	SDL_logical_joydecl(struct joystick_logical_mapping* hats = NULL);
 
 	the_hat = &stick->hwdata->hats[hat];
 	if ( value < 0 ) {
@@ -838,7 +963,7 @@ void HandleHat(SDL_Joystick *stick, Uint8 hat, int axis, int value)
 
 			/* get the fake joystick that will receive the event
 			*/
-			hats = SDL_joylist[stick->index].map->hats+hat;
+			hats = SDL_joylist[stick->index].map->hatmap+hat;
 			logicaljoy = FindLogicalJoystick(stick, hats);
 		}
 
