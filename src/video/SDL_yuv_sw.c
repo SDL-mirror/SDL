@@ -1299,6 +1299,9 @@ void SDL_FreeYUV_SW(_THIS, SDL_Overlay *overlay)
 
 	swdata = overlay->hwdata;
 	if ( swdata ) {
+		if ( swdata->stretch ) {
+			SDL_FreeSurface(swdata->stretch);
+		}
 		if ( swdata->pixels ) {
 			free(swdata->pixels);
 		}
