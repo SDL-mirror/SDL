@@ -277,6 +277,11 @@ static void handle_mouse(const int numevents, DIDEVICEOBJECTDATA *ptrbuf)
 	Uint8 button;
 	DWORD timestamp = 0;
 
+	/* Sanity check. Mailing list reports this being NULL unexpectedly. */
+	if (SDL_PublicSurface == NULL) {
+		return;
+	}
+
 	/* If we are in windowed mode, Windows is taking care of the mouse */
 	if (  (SDL_PublicSurface->flags & SDL_OPENGL) ||
 	     !(SDL_PublicSurface->flags & SDL_FULLSCREEN) ) {
