@@ -170,11 +170,5 @@ int main(int argc, char *argv[])
   fi
   AC_SUBST(SDL_CFLAGS)
   AC_SUBST(SDL_LIBS)
-      case "$target" in
-          *-*-darwin*)
-              SDL_APPLE_CREATOR="????"
-              AC_SUBST(SDL_APPLE_CREATOR)
-              ;;
-      esac
   rm -f conf.sdltest
 ])
