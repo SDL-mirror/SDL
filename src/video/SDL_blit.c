@@ -116,7 +116,7 @@ static int SDL_SoftBlit(SDL_Surface *src, SDL_Rect *srcrect,
 		SDL_VideoDevice *video = current_video;
 		SDL_VideoDevice *this  = current_video;
 		video->UnlockHWSurface(this, dst);
-	} else
+	}
 	if ( src_locked ) {
 		SDL_VideoDevice *video = current_video;
 		SDL_VideoDevice *this  = current_video;
