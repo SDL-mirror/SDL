@@ -113,10 +113,16 @@ static void set_best_resolution(_THIS, int width, int height)
             }
 #endif
             for ( i = nmodes-1; i > 0 ; --i ) {
+                if ( (modes[i]->hdisplay == width) &&
+                     (modes[i]->vdisplay == height) )
+                    goto match;
+            }
+            for ( i = nmodes-1; i > 0 ; --i ) {
                 if ( (modes[i]->hdisplay >= width) &&
                      (modes[i]->vdisplay >= height) )
                     break;
             }
+       match:
             if ( (modes[i]->hdisplay != mode.hdisplay) ||
                  (modes[i]->vdisplay != mode.vdisplay) ) {
                 SDL_NAME(XF86VidModeSwitchToMode)(SDL_Display, SDL_Screen, modes[i]);
