@@ -52,18 +52,7 @@ AC_PROG_MAKE_SET
 AC_PROG_CC
 AC_C_INLINE
 AC_C_CONST
-case "$target" in
-    *-*-beos*)
-        AC_PROG_CXX
-        ;;
-    *-*-aix*)
-        AC_PROG_CXX
-        ;;
-    # This is stupid, but necessary on some versions of Linux (joysticks)
-    *-*-linux*)
-        AC_PROG_CXX
-        ;;
-esac
+AC_PROG_CXX
 AC_PROG_INSTALL
 AC_FUNC_ALLOCA
 
@@ -2201,8 +2190,10 @@ case "$target" in
     *-*-darwin*)
         OBJC="cc"
         OBJCFLAGS="$CFLAGS"
+        OBJCDEPMODE="$CCDEPMODE"
         AC_SUBST(OBJC)
         AC_SUBST(OBJCFLAGS)
+        AC_SUBST(OBJCDEPMODE)
         ;;
 esac
 
