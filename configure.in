@@ -402,6 +402,7 @@ CheckDiskAudio()
 }
 
 dnl See if we can use x86 assembly blitters
+# NASM is available from: http://nasm.octium.net/
 CheckNASM()
 {
     dnl Make sure we are running on an x86 platform
