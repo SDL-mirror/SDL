@@ -12,3 +12,4 @@ SDL_sysmutex.c
 SDL_sysmutex_c.h
 SDL_syscond.c
 SDL_syscond_c.h
+clone.S
