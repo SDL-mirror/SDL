@@ -19,5 +19,7 @@ int main(int argc, char *argv[])
   QWidget dummy;
   app.showMainWidget(&dummy);
 #endif
-  return(SDL_main(argc, argv));
+  // Exit here because if return is used, the application
+  // doesn't seem to quit correctly.
+  exit(SDL_main(argc, argv));
 }
