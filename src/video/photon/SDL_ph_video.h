@@ -46,9 +46,9 @@
 
 typedef struct
 {
-	unsigned char* Y;
-	unsigned char* V;
-	unsigned char* U;
+    unsigned char* Y;
+    unsigned char* V;
+    unsigned char* U;
 } FRAMEDATA;
 
 /* Mask values for SDL_ReallocFormat() */
@@ -68,6 +68,8 @@ struct SDL_PrivateVideoData {
     PhImage_t *image;	                 /* used to display image       */
 #ifdef HAVE_OPENGL
     PdOpenGLContext_t* OGLContext;       /* OpenGL context              */
+    Uint32 OGLFlags;                     /* OpenGL flags                */
+    Uint32 OGLBPP;                       /* OpenGL bpp                  */
 #endif /* HAVE_OPENGL */
     PgColor_t savedpal[_Pg_MAX_PALETTE];
     PgColor_t syspalph[_Pg_MAX_PALETTE];
@@ -82,8 +84,8 @@ struct SDL_PrivateVideoData {
         unsigned char*        CurrentFrameData;
         unsigned char*        FrameData0;
         unsigned char*        FrameData1;
-        int                   current;
-        long                  flags;
+        Uint32                current;
+        Uint32                flags;
     } ocimage;
 
     PgHWCaps_t graphics_card_caps;  /* Graphics card caps at the moment of start   */
@@ -94,9 +96,9 @@ struct SDL_PrivateVideoData {
     int mouse_relative;
     WMcursor* BlankCursor;
 
-    int depth;			/* current visual depth (not bpp)           */
-    int desktopbpp;             /* bpp of desktop at the moment of start    */
-    int desktoppal;             /* palette mode emulation or system         */
+    Uint32 depth;	            /* current visual depth (not bpp)           */
+    Uint32 desktopbpp;              /* bpp of desktop at the moment of start    */
+    Uint32 desktoppal;              /* palette mode emulation or system         */
 
     int currently_fullscreen;
     int currently_hided;        /* 1 - window hided (minimazed), 0 - normal */
@@ -107,7 +109,6 @@ struct SDL_PrivateVideoData {
 
 #define mode_settings        (this->hidden->mode_settings)
 #define window	             (this->hidden->Window)
-#define oglctx               (this->hidden->OGLContext)
 #define SDL_Image            (this->hidden->image)
 #define OCImage              (this->hidden->ocimage)
 #define old_video_mode       (this->hidden->old_video_mode)
@@ -122,9 +123,13 @@ struct SDL_PrivateVideoData {
 #define event                (this->hidden->event)
 #define current_overlay      (this->hidden->overlay)
 #define desktop_mode         (this->hidden->desktop_mode)
-
-/* Old variable names */
 #define mouse_relative       (this->hidden->mouse_relative)
 #define SDL_BlankCursor      (this->hidden->BlankCursor)
+
+#ifdef HAVE_OPENGL
+     #define oglctx               (this->hidden->OGLContext)
+     #define oglflags             (this->hidden->OGLFlags)
+     #define oglbpp               (this->hidden->OGLBPP)
+#endif /* HAVE_OPENGL */
 
 #endif /* __SDL_PH_VIDEO_H__ */

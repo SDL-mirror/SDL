@@ -20,10 +20,14 @@
     slouken@libsdl.org
 */
 
+
+#ifndef __SDL_PH_YUV_H__
+#define __SDL_PH_YUV_H__
+
 #ifdef SAVE_RCSID
 static char rcsid =
  "@(#) $Id$";
-#endif
+#endif /* SAVE_RCSID */
 
 /* This is the photon implementation of YUV video overlays */
 
@@ -59,3 +63,5 @@ extern int ph_LockYUVOverlay(_THIS, SDL_Overlay* overlay);
 extern void ph_UnlockYUVOverlay(_THIS, SDL_Overlay* overlay);
 extern int ph_DisplayYUVOverlay(_THIS, SDL_Overlay* overlay, SDL_Rect* dstrect);
 extern void ph_FreeYUVOverlay(_THIS, SDL_Overlay* overlay);
+
+#endif /* __SDL_PH_YUV_H__ */

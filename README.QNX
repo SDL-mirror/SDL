@@ -77,7 +77,8 @@ Shared library building:
 script you must manually delete the libtool.m4 stuff from the acinclu-
 de.m4 file (it comes after the ESD detection code up to the end of the
 file), because the libtool stuff in the acinclude.m4 file is very  old
-and doesn't know anything about QNX. Just remove it and run autogen.sh.
+and  doesn't  know  anything  about  QNX. Just   remove  it, then  run
+"libtoolize --force --copy" and after that run autogen.sh.
 
 ======================================================================
 Some building issues:

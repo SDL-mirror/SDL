@@ -20,10 +20,13 @@
     slouken@libsdl.org
 */
 
+#ifndef __SDL_PH_EVENTS_H__
+#define __SDL_PH_EVENTS_H__
+
 #ifdef SAVE_RCSID
 static char rcsid =
  "@(#) $Id$";
-#endif
+#endif /* SAVE_RCSID */
 
 #include "SDL_ph_video.h"
 
@@ -32,3 +35,5 @@ static char rcsid =
 /* Functions to be exported */
 extern void ph_InitOSKeymap(_THIS);
 extern void ph_PumpEvents(_THIS);
+
+#endif /* __SDL_PH_EVENTS_H__ */

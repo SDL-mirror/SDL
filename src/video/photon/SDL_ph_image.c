@@ -186,13 +186,6 @@ int ph_SetupOCImage(_THIS, SDL_Surface *screen)
     return 0;
 }
 
-int ph_SetupOpenGLImage(_THIS, SDL_Surface* screen)
-{
-   this->UpdateRects = ph_OpenGLUpdate;
-   
-   return 0;
-}
-
 int ph_SetupFullScreenImage(_THIS, SDL_Surface* screen)
 {
     OCImage.flags = screen->flags;
@@ -210,7 +203,7 @@ int ph_SetupFullScreenImage(_THIS, SDL_Surface* screen)
         PgGetPalette(syspalph);
     }
 
-    OCImage.offscreen_context = PdCreateOffscreenContext(0, 0, 0, Pg_OSC_MAIN_DISPLAY);
+    OCImage.offscreen_context = PdCreateOffscreenContext(0, 0, 0, Pg_OSC_MAIN_DISPLAY | Pg_OSC_MEM_PAGE_ALIGN | Pg_OSC_CRTC_SAFE);
     if (OCImage.offscreen_context == NULL)
     {
         SDL_SetError("ph_SetupFullScreenImage(): PdCreateOffscreenContext() function failed !\n");
@@ -219,7 +212,7 @@ int ph_SetupFullScreenImage(_THIS, SDL_Surface* screen)
     
     if ((screen->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF)
     {
-        OCImage.offscreen_backcontext = PdDupOffscreenContext(OCImage.offscreen_context, Pg_OSC_CRTC_SAFE);
+        OCImage.offscreen_backcontext = PdDupOffscreenContext(OCImage.offscreen_context, Pg_OSC_CRTC_SAFE | Pg_OSC_MEM_PAGE_ALIGN);
         if (OCImage.offscreen_backcontext == NULL)
         {
             SDL_SetError("ph_SetupFullScreenImage(): PdCreateOffscreenContext(back) function failed !\n");
@@ -272,8 +265,122 @@ int ph_SetupFullScreenImage(_THIS, SDL_Surface* screen)
     return 0;
 }
 
-void ph_DestroyImage(_THIS, SDL_Surface *screen)
+#ifdef HAVE_OPENGL
+
+static int ph_SetupOpenGLContext(_THIS, int width, int height, int bpp, Uint32 flags)
 {
+    PhDim_t dim;
+    uint64_t OGLAttrib[PH_OGL_MAX_ATTRIBS];
+    int exposepost=0;
+    int OGLargc;
+
+    dim.w=width;
+    dim.h=height;
+    
+    if ((oglctx!=NULL) && (oglflags==flags) && (oglbpp==bpp))
+    {
+       PdOpenGLContextResize(oglctx, &dim);
+       PhDCSetCurrent(oglctx);
+       return 0;
+    }
+    else
+    {
+       if (oglctx!=NULL)
+       {
+          PhDCSetCurrent(NULL);
+          PhDCRelease(oglctx);
+          oglctx=NULL;
+          exposepost=1;
+       }
+    }
+
+    OGLargc=0;
+    if (this->gl_config.depth_size)
+    {
+        OGLAttrib[OGLargc++]=PHOGL_ATTRIB_DEPTH_BITS;
+        OGLAttrib[OGLargc++]=this->gl_config.depth_size;
+    }
+    if (this->gl_config.stencil_size)
+    {
+        OGLAttrib[OGLargc++]=PHOGL_ATTRIB_STENCIL_BITS;
+        OGLAttrib[OGLargc++]=this->gl_config.stencil_size;
+    }
+    OGLAttrib[OGLargc++]=PHOGL_ATTRIB_FORCE_SW;
+    if (flags & SDL_FULLSCREEN)
+    {
+        OGLAttrib[OGLargc++]=PHOGL_ATTRIB_FULLSCREEN;
+        OGLAttrib[OGLargc++]=PHOGL_ATTRIB_DIRECT;
+        OGLAttrib[OGLargc++]=PHOGL_ATTRIB_FULLSCREEN_BEST;
+        OGLAttrib[OGLargc++]=PHOGL_ATTRIB_FULLSCREEN_CENTER;
+    }
+    OGLAttrib[OGLargc++]=PHOGL_ATTRIB_NONE;
+
+    if (this->gl_config.double_buffer)
+    {
+        oglctx=PdCreateOpenGLContext(2, &dim, 0, OGLAttrib);
+    }
+    else
+    {
+        oglctx=PdCreateOpenGLContext(1, &dim, 0, OGLAttrib);
+    }
+
+    if (oglctx==NULL)
+    {
+        SDL_SetError("ph_SetupOpenGLContext(): cannot create OpenGL context !\n");
+        return (-1);
+    }
+
+    PhDCSetCurrent(oglctx);
+
+    PtFlush();
+
+    oglflags=flags;
+    oglbpp=bpp;
+
+    if (exposepost!=0)
+    {
+        /* OpenGL context has been recreated, so report about this fact */
+        SDL_PrivateExpose();
+    }
+
+    return 0;
+}
+
+int ph_SetupOpenGLImage(_THIS, SDL_Surface* screen)
+{
+   this->UpdateRects = ph_OpenGLUpdate;
+   screen->pixels=NULL;
+   screen->pitch=NULL;
+
+   if (ph_SetupOpenGLContext(this, screen->w, screen->h, screen->format->BitsPerPixel, screen->flags)!=0)
+   {
+      screen->flags &= ~SDL_OPENGL;
+      return -1;
+   }
+   
+   return 0;
+}
+
+#endif /* HAVE_OPENGL */
+
+void ph_DestroyImage(_THIS, SDL_Surface* screen)
+{
+
+#ifdef HAVE_OPENGL
+    if ((screen->flags & SDL_OPENGL)==SDL_OPENGL)
+    {
+        if (oglctx)
+        {
+            PhDCSetCurrent(NULL);
+            PhDCRelease(oglctx);
+            oglctx=NULL;
+            oglflags=0;
+            oglbpp=0;
+        }
+        return;
+    }
+#endif /* HAVE_OPENGL */
+
     if (currently_fullscreen)
     {
         /* if we right now in 8bpp fullscreen we must release palette */
@@ -320,10 +427,16 @@ void ph_DestroyImage(_THIS, SDL_Surface *screen)
     }
 }
 
-int ph_SetupUpdateFunction(_THIS, SDL_Surface *screen, Uint32 flags)
+int ph_SetupUpdateFunction(_THIS, SDL_Surface* screen, Uint32 flags)
 {
     ph_DestroyImage(this, screen);
     
+#ifdef HAVE_OPENGL
+    if ((flags & SDL_OPENGL)==SDL_OPENGL)
+    {
+        return ph_SetupOpenGLImage(this, screen);
+    }
+#endif /* HAVE_OPENGL */
     if ((flags & SDL_FULLSCREEN)==SDL_FULLSCREEN)
     {
         return ph_SetupFullScreenImage(this, screen);
@@ -332,43 +445,31 @@ int ph_SetupUpdateFunction(_THIS, SDL_Surface *screen, Uint32 flags)
     {
         return ph_SetupOCImage(this, screen);
     }
-    if ((flags & SDL_OPENGL)==SDL_OPENGL)
-    {
-        return ph_SetupOpenGLImage(this, screen);
-    } 
 
     return ph_SetupImage(this, screen);
 }
 
-int ph_AllocHWSurface(_THIS, SDL_Surface *surface)
+int ph_AllocHWSurface(_THIS, SDL_Surface* surface)
 {
     return(-1);
 }
 
-void ph_FreeHWSurface(_THIS, SDL_Surface *surface)
+void ph_FreeHWSurface(_THIS, SDL_Surface* surface)
 {
     return;
 }
 
-int ph_FlipHWSurface(_THIS, SDL_Surface *screen)
+int ph_FlipHWSurface(_THIS, SDL_Surface* screen)
 {
-    PhArea_t area;
-
-    area.pos.x=0;
-    area.pos.y=0;
-    area.size.w=screen->w;
-    area.size.h=screen->h;
-
     if ((screen->flags & SDL_FULLSCREEN) == SDL_FULLSCREEN)
     {
+        PgWaitHWIdle();
         if (OCImage.current==0)
         {
             PgSwapDisplay(OCImage.offscreen_context, 0);
             OCImage.current=1;
             screen->pitch = OCImage.offscreen_backcontext->pitch;
             screen->pixels = OCImage.FrameData1;
-//            memcpy(OCImage.FrameData1, OCImage.FrameData0, OCImage.offscreen_context->shared_size);
-            PgContextBlitArea(OCImage.offscreen_context, &area, OCImage.offscreen_backcontext, &area);
             PhDCSetCurrent(OCImage.offscreen_backcontext);
             PgFlush();
         }
@@ -378,8 +479,6 @@ int ph_FlipHWSurface(_THIS, SDL_Surface *screen)
             OCImage.current=0;
             screen->pitch = OCImage.offscreen_context->pitch;
             screen->pixels = OCImage.FrameData0;
-//            memcpy(OCImage.FrameData0, OCImage.FrameData1, OCImage.offscreen_context->shared_size);
-            PgContextBlitArea(OCImage.offscreen_backcontext, &area, OCImage.offscreen_context, &area);
             PhDCSetCurrent(OCImage.offscreen_context);
             PgFlush();
         }
@@ -397,12 +496,14 @@ void ph_UnlockHWSurface(_THIS, SDL_Surface *surface)
     return;
 }
 
+#ifdef HAVE_OPENGL
 void ph_OpenGLUpdate(_THIS, int numrects, SDL_Rect* rects)
 {
    this->GL_SwapBuffers(this);
    
    return;
 }
+#endif /* HAVE_OPENGL */
 
 void ph_NormalUpdate(_THIS, int numrects, SDL_Rect *rects)
 {

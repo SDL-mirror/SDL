@@ -120,10 +120,10 @@ WMcursor *ph_CreateWMCursor(_THIS, Uint8 *data, Uint8 *mask, int w, int h, int h
 
 PhCursorDef_t ph_GetWMPhCursor(WMcursor *cursor)
 {
-    return(*cursor->ph_cursor);
+    return (*cursor->ph_cursor);
 }
 
-int ph_ShowWMCursor(_THIS, WMcursor *cursor)
+int ph_ShowWMCursor(_THIS, WMcursor* cursor)
 {
     PtArg_t args[3];
     int nargs = 0;
@@ -137,7 +137,15 @@ int ph_ShowWMCursor(_THIS, WMcursor *cursor)
     /* looks like photon can't draw mouse cursor in direct mode */
     if ((this->screen->flags & SDL_FULLSCREEN) == SDL_FULLSCREEN)
     {
-        return (0);
+         /* disable the fake mouse in the fullscreen OpenGL mode */
+         if ((this->screen->flags & SDL_OPENGL) == SDL_OPENGL)
+         {
+             cursor=NULL;
+         }
+         else
+         {
+             return (0);
+         }
     }
 
     /* Set the photon cursor, or blank if cursor is NULL */
@@ -167,6 +175,7 @@ int ph_ShowWMCursor(_THIS, WMcursor *cursor)
     return (1);
 }
 
+
 void ph_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
 {
     short abs_x, abs_y;
@@ -189,4 +198,32 @@ void ph_CheckMouseMode(_THIS)
     {
         mouse_relative = 0;
     }
+}
+
+
+void ph_UpdateMouse(_THIS)
+{
+    PhCursorInfo_t phcursor;
+    short abs_x;
+    short abs_y;
+
+    /* Lock the event thread, in multi-threading environments */
+    SDL_Lock_EventThread();
+
+    /* synchronizing photon mouse cursor position and SDL mouse position, if cursor appears over window. */
+    PtGetAbsPosition(window, &abs_x, &abs_y);
+    PhQueryCursor(PhInputGroup(NULL), &phcursor);
+    if (((phcursor.pos.x >= abs_x) && (phcursor.pos.x <= abs_x + this->screen->w)) &&
+        ((phcursor.pos.y >= abs_y) && (phcursor.pos.y <= abs_y + this->screen->h)))
+    {
+        SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS);
+        SDL_PrivateMouseMotion(0, 0, phcursor.pos.x-abs_x, phcursor.pos.y-abs_y);
+    }
+    else
+    {
+        SDL_PrivateAppActive(0, SDL_APPMOUSEFOCUS);
+    }
+
+    /* Unlock the event thread, in multi-threading environments */
+    SDL_Unlock_EventThread();
 }

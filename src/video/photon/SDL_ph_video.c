@@ -50,21 +50,18 @@ static char rcsid =
 #include "SDL_phyuv_c.h"
 #include "blank_cursor.h"
 
-static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat);
-static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
-                int width, int height, int bpp, Uint32 flags);
-static int ph_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors);
+static int  ph_VideoInit(_THIS, SDL_PixelFormat *vformat);
+static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current, int width, int height, int bpp, Uint32 flags);
+static int  ph_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors);
 static void ph_VideoQuit(_THIS);
 static void ph_DeleteDevice(SDL_VideoDevice *device);
-static void ph_UpdateMouse(_THIS);
 
 #ifdef HAVE_OPENGL
-static int ph_SetupOpenGLContext(_THIS, int width, int height, int bpp, Uint32 flags);
-static void ph_GL_SwapBuffers(_THIS);
-static int ph_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value);
-static int ph_GL_LoadLibrary(_THIS, const char* path);
+static void  ph_GL_SwapBuffers(_THIS);
+static int   ph_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value);
+static int   ph_GL_LoadLibrary(_THIS, const char* path);
 static void* ph_GL_GetProcAddress(_THIS, const char* proc);
-
+static int   ph_GL_MakeCurrent(_THIS);
 #endif /* HAVE_OPENGL */
 
 static int ph_Available(void)
@@ -132,18 +129,20 @@ static SDL_VideoDevice *ph_CreateDevice(int devindex)
     device->CreateWMCursor = ph_CreateWMCursor;
     device->ShowWMCursor = ph_ShowWMCursor;
     device->WarpWMCursor = ph_WarpWMCursor;
+    device->MoveWMCursor = NULL;
     device->CheckMouseMode = ph_CheckMouseMode;
     device->InitOSKeymap = ph_InitOSKeymap;
     device->PumpEvents = ph_PumpEvents;
 
     /* OpenGL support. */
-    device->GL_MakeCurrent = NULL;
 #ifdef HAVE_OPENGL
+    device->GL_MakeCurrent = ph_GL_MakeCurrent;
     device->GL_SwapBuffers = ph_GL_SwapBuffers;
     device->GL_GetAttribute = ph_GL_GetAttribute;
     device->GL_LoadLibrary = ph_GL_LoadLibrary;
     device->GL_GetProcAddress = ph_GL_GetProcAddress;
 #else
+    device->GL_MakeCurrent = NULL;
     device->GL_SwapBuffers = NULL;
     device->GL_GetAttribute = NULL;
     device->GL_LoadLibrary = NULL;
@@ -313,8 +312,11 @@ static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
     window=NULL;
     desktoppal=SDLPH_PAL_NONE;
+
 #ifdef HAVE_OPENGL
     oglctx=NULL;
+    oglflags=0;
+    oglbpp=0;
 #endif /* HAVE_OPENGL */
     
     old_video_mode=-1;
@@ -428,21 +430,10 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
     }
 
 #ifdef HAVE_OPENGL
-    if (current->flags & SDL_OPENGL)
+    if ((current->flags & SDL_OPENGL)==SDL_OPENGL)
     {
-        /* ph_SetupOpenGLContext creates also window as need */
-        if (ph_SetupOpenGLContext(this, width, height, bpp, flags)==0)
-        {
-            ph_SetupUpdateFunction(this, current, flags); 
-        }
-        else
-        {
-            /* if context creation fail, report no OpenGL to high level */
-            current->flags &= ~SDL_OPENGL;
-            return NULL;
-        }
 #else
-    if (current->flags & SDL_OPENGL) /* if no built-in OpenGL support */
+    if ((current->flags & SDL_OPENGL)==SDL_OPENGL) /* if no built-in OpenGL support */
     {
         SDL_SetError("ph_SetVideoMode(): no OpenGL support, try to recompile library.\n");
         current->flags &= ~SDL_OPENGL;
@@ -528,10 +519,6 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
 
 static void ph_VideoQuit(_THIS)
 {
-#ifdef HAVE_OPENGL
-    PhRegion_t region_info;
-#endif /* HAVE_OPENGL */
-
     /* restore palette */
     if (desktopbpp==8)
     {
@@ -542,37 +529,12 @@ static void ph_VideoQuit(_THIS)
 
     ph_DestroyImage(this, SDL_VideoSurface); 
 
-#ifdef HAVE_OPENGL
-    /* prevent double SEGFAULT during parachute mode */
-    if (this->screen)
-    {
-        if (((this->screen->flags & SDL_FULLSCREEN)==SDL_FULLSCREEN) &&
-            ((this->screen->flags & SDL_OPENGL)==SDL_OPENGL))
-        {
-            region_info.cursor_type=Ph_CURSOR_POINTER;
-            region_info.rid=PtWidgetRid(window);
-            PhRegionChange(Ph_REGION_CURSOR, 0, &region_info, NULL, NULL);
-        }
-    }
-
-    PtFlush();
-#endif /* HAVE_OPENGL */
-    
     if (window)
     {
         PtUnrealizeWidget(window);
         PtDestroyWidget(window);
         window=NULL;
     }
-
-#ifdef HAVE_OPENGL
-    if (oglctx)
-    {
-        PhDCSetCurrent(NULL);
-        PhDCRelease(oglctx);
-        oglctx=NULL;
-    }
-#endif /* HAVE_OPENGL */
 
     if (event!=NULL)
     {
@@ -638,82 +600,13 @@ static int ph_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 
 #ifdef HAVE_OPENGL
 
-int ph_SetupOpenGLContext(_THIS, int width, int height, int bpp, Uint32 flags)
-{
-    PhDim_t dim;
-    uint64_t OGLAttrib[PH_OGL_MAX_ATTRIBS];
-    int OGLargc;
-
-    dim.w=width;
-    dim.h=height;
-    
-    if (oglctx!=NULL)
-    {
-       PhDCSetCurrent(NULL);
-       PhDCRelease(oglctx);
-       oglctx=NULL;
-    }
-
-    OGLargc=0;
-    if (this->gl_config.depth_size)
-    {
-        OGLAttrib[OGLargc++]=PHOGL_ATTRIB_DEPTH_BITS;
-        OGLAttrib[OGLargc++]=this->gl_config.depth_size;
-    }
-    if (this->gl_config.stencil_size)
-    {
-        OGLAttrib[OGLargc++]=PHOGL_ATTRIB_STENCIL_BITS;
-        OGLAttrib[OGLargc++]=this->gl_config.stencil_size;
-    }
-    OGLAttrib[OGLargc++]=PHOGL_ATTRIB_FORCE_SW;
-    if (flags & SDL_FULLSCREEN)
-    {
-        OGLAttrib[OGLargc++]=PHOGL_ATTRIB_FULLSCREEN;
-        OGLAttrib[OGLargc++]=PHOGL_ATTRIB_DIRECT;
-        OGLAttrib[OGLargc++]=PHOGL_ATTRIB_FULLSCREEN_BEST;
-        OGLAttrib[OGLargc++]=PHOGL_ATTRIB_FULLSCREEN_CENTER;
-    }
-    OGLAttrib[OGLargc++]=PHOGL_ATTRIB_NONE;
-
-    if (this->gl_config.double_buffer)
-    {
-        oglctx=PdCreateOpenGLContext(2, &dim, 0, OGLAttrib);
-    }
-    else
-    {
-        oglctx=PdCreateOpenGLContext(1, &dim, 0, OGLAttrib);
-    }
-
-    if (oglctx==NULL)
-    {
-        SDL_SetError("ph_SetupOpenGLContext(): cannot create OpenGL context !\n");
-        return (-1);
-    }
-
-    PhDCSetCurrent(oglctx);
-
-    /* disable mouse for fullscreen */
-    if (flags & SDL_FULLSCREEN)
-    {
-        PhRegion_t region_info;
-
-        region_info.cursor_type=Ph_CURSOR_NONE;
-        region_info.rid=PtWidgetRid(window);
-        PhRegionChange(Ph_REGION_CURSOR, 0, &region_info, NULL, NULL);
-    }
-
-    PtFlush();
-
-    return 0;
-}
-
-void ph_GL_SwapBuffers(_THIS)
+static void ph_GL_SwapBuffers(_THIS)
 {
     PgSetRegion(PtWidgetRid(window));
     PdOpenGLContextSwapBuffers(oglctx);
 }
 
-int ph_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
+static int ph_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
 {
     switch (attrib)
     {
@@ -733,44 +626,29 @@ int ph_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
     return 0;
 }
 
-int ph_GL_LoadLibrary(_THIS, const char* path)
+static int ph_GL_LoadLibrary(_THIS, const char* path)
 {
-   /* if code compiled with HAVE_OPENGL, the library already linked */
+   /* if code compiled with HAVE_OPENGL, that mean that library already linked */
    this->gl_config.driver_loaded = 1;
 
    return 0;
 }
 
-void* ph_GL_GetProcAddress(_THIS, const char* proc)
+static void* ph_GL_GetProcAddress(_THIS, const char* proc)
 {
    return NULL;
 }
 
-#endif /* HAVE_OPENGL */
-
-static void ph_UpdateMouse(_THIS)
+static int ph_GL_MakeCurrent(_THIS)
 {
-    PhCursorInfo_t phcursor;
-    short abs_x;
-    short abs_y;
+    PgSetRegion(PtWidgetRid(window));
 
-    /* Lock the event thread, in multi-threading environments */
-    SDL_Lock_EventThread();
-
-    /* synchronizing photon mouse cursor position and SDL mouse position, if cursor appears over window. */
-    PtGetAbsPosition(window, &abs_x, &abs_y);
-    PhQueryCursor(PhInputGroup(NULL), &phcursor);
-    if (((phcursor.pos.x >= abs_x) && (phcursor.pos.x <= abs_x + this->screen->w)) &&
-        ((phcursor.pos.y >= abs_y) && (phcursor.pos.y <= abs_y + this->screen->h)))
+    if (oglctx!=NULL)
     {
-        SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS);
-        SDL_PrivateMouseMotion(0, 0, phcursor.pos.x-abs_x, phcursor.pos.y-abs_y);
-    }
-    else
-    {
-        SDL_PrivateAppActive(0, SDL_APPMOUSEFOCUS);
+        PhDCSetCurrent(oglctx);
     }
 
-    /* Unlock the event thread, in multi-threading environments */
-    SDL_Unlock_EventThread();
+    return 0;
 }
+
+#endif /* HAVE_OPENGL */

@@ -20,14 +20,13 @@
     slouken@libsdl.org
 */
 
+#ifndef __SDL_PH_MODES_H__
+#define __SDL_PH_MODES_H__
+
 #ifdef SAVE_RCSID
 static char rcsid =
  "@(#) $Id$";
-#endif
-
-
-#ifndef _PH_MODES_INCLUDED_
-#define _PH_MODES_INCLUDED_
+#endif /* SAVE_RCSID */
 
 #include "SDL_ph_video.h"
 
@@ -42,4 +41,4 @@ extern int ph_GetVideoMode(int width, int height, int bpp);
 extern int get_mode_any_format(int width, int height, int bpp);
 extern int ph_ToggleFullScreen(_THIS, int on);
 
-#endif /* _PH_MODES_INCLUDED_ */
+#endif /* __SDL_PH_MODES_H__ */
