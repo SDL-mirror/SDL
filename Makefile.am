@@ -22,12 +22,17 @@ EXTRA_DIST =		\
         COPYING		\
         CREDITS		\
         INSTALL		\
-        README		\
-        README-SDL.txt	\
-        README.Win32	\
-        README.WinCE	\
-        README.MacOS	\
-        README.MacOSX	\
+	README		\
+	README.AmigaOS	\
+	README.CVS	\
+	README.Epoc	\
+	README.MacOS	\
+	README.MacOSX	\
+	README.NanoX	\
+	README.OpenBSD	\
+	README.Win32	\
+	README.WinCE	\
+	README-SDL.txt	\
         VisualC.html	\
         VisualC.zip	\
         MPWmake.sea.bin	\
