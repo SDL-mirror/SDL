@@ -194,9 +194,11 @@ static int ph_SetupWindow(_THIS, int w, int h, int flags)
     PhPoint_t   pos = {0, 0};
     PhDim_t     dim = {w, h};
     int         nargs = 0;
+    const char* windowpos;
+    const char* iscentered;
+    int         x, y;
 
     PtSetArg(&args[nargs++], Pt_ARG_DIM, &dim, 0);
-    PtSetArg(&args[nargs++], Pt_ARG_FILL_COLOR, Pg_BLACK, 0);
 
     if ((flags & SDL_RESIZABLE) == SDL_RESIZABLE)
     {
@@ -234,12 +236,36 @@ static int ph_SetupWindow(_THIS, int w, int h, int flags)
     if ((flags & SDL_FULLSCREEN) == SDL_FULLSCREEN)
     {
         PtSetArg(&args[nargs++], Pt_ARG_POS, &pos, 0);
+        PtSetArg(&args[nargs++], Pt_ARG_BASIC_FLAGS, Pt_TRUE, Pt_BASIC_PREVENT_FILL);
         PtSetArg(&args[nargs++], Pt_ARG_WINDOW_MANAGED_FLAGS, Pt_TRUE, Ph_WM_FFRONT | Ph_WM_MAX);
-        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_STATE, Pt_TRUE, Ph_WM_STATE_ISFRONT | Ph_WM_STATE_ISMAX |
-                                                               Ph_WM_STATE_ISFOCUS | Ph_WM_STATE_ISALTKEY);
+        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_STATE, Pt_TRUE, Ph_WM_STATE_ISFRONT | Ph_WM_STATE_ISFOCUS | Ph_WM_STATE_ISALTKEY);
     }
     else
     {
+        windowpos = getenv("SDL_VIDEO_WINDOW_POS");
+	iscentered = getenv("SDL_VIDEO_CENTERED");
+
+        if ((iscentered) || ((windowpos) && (strcmp(windowpos, "center")==0)))
+        {
+            pos.x = (desktop_mode.width - w)/2;
+            pos.y = (desktop_mode.height - h)/2;
+            PtSetArg(&args[nargs++], Pt_ARG_POS, &pos, 0);
+	}
+        else
+        {
+            if (windowpos)
+            {
+                if (sscanf(windowpos, "%d,%d", &x, &y) == 2 )
+                {
+                    pos.x=x;
+                    pos.y=y;
+                    PtSetArg(&args[nargs++], Pt_ARG_POS, &pos, 0);
+                }
+	    }
+        }
+
+
+        PtSetArg(&args[nargs++], Pt_ARG_FILL_COLOR, Pg_BLACK, 0);
         PtSetArg(&args[nargs++], Pt_ARG_WINDOW_STATE, Pt_FALSE, Ph_WM_STATE_ISFRONT | Ph_WM_STATE_ISMAX | Ph_WM_STATE_ISALTKEY);
         PtSetArg(&args[nargs++], Pt_ARG_WINDOW_MANAGED_FLAGS, Pt_TRUE, Ph_WM_HIDE);
         PtSetArg(&args[nargs++], Pt_ARG_WINDOW_NOTIFY_FLAGS, Pt_TRUE, Ph_WM_HIDE);
@@ -248,6 +274,7 @@ static int ph_SetupWindow(_THIS, int w, int h, int flags)
 
     PtSetResources(window, nargs, args);
     PtRealizeWidget(window);
+    PtWindowToFront(window);
 
     return 0;
 }
@@ -281,7 +308,6 @@ static const struct ColourMasks* ph_GetColourMasks(int bpp)
 
 static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat)
 {
-    PgVideoModeInfo_t my_mode_info;
     PgHWCaps_t my_hwcaps;
     int i;
 
@@ -325,7 +351,7 @@ static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat)
         return -1;
     }
 
-    if (PgGetVideoModeInfo(my_hwcaps.current_video_mode, &my_mode_info) < 0)
+    if (PgGetVideoModeInfo(my_hwcaps.current_video_mode, &desktop_mode) < 0)
     {
         SDL_SetError("ph_VideoInit(): PgGetVideoModeInfo function failed !\n");
         this->FreeWMCursor(this, SDL_BlankCursor);
@@ -333,9 +359,9 @@ static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat)
     }
 
     /* We need to return BytesPerPixel as it in used by CreateRGBsurface */
-    vformat->BitsPerPixel = my_mode_info.bits_per_pixel;
-    vformat->BytesPerPixel = my_mode_info.bytes_per_scanline/my_mode_info.width;
-    desktopbpp = my_mode_info.bits_per_pixel;
+    vformat->BitsPerPixel = desktop_mode.bits_per_pixel;
+    vformat->BytesPerPixel = desktop_mode.bytes_per_scanline/desktop_mode.width;
+    desktopbpp = desktop_mode.bits_per_pixel;
     
     /* save current palette */
     if (desktopbpp==8)
@@ -434,6 +460,7 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
             }
 
             current->flags &= ~SDL_RESIZABLE; /* no resize for Direct Context */
+            current->flags |= SDL_HWSURFACE;
         }
         else
         {
@@ -487,6 +514,10 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
     if ((current->flags & SDL_FULLSCREEN) != SDL_FULLSCREEN)
     {
        PtFlush();
+    }
+    else
+    {
+       PgFlush();
     }
 
     SDL_Unlock_EventThread();

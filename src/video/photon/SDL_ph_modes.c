@@ -297,13 +297,14 @@ int ph_EnterFullScreen(_THIS, SDL_Surface* screen)
 
         currently_fullscreen = 1;
     }
+    PgFlush();
 
     return 1;
 }
 
 int ph_LeaveFullScreen(_THIS)
 {
-    PgDisplaySettings_t mymode_settings;
+    PgDisplaySettings_t oldmode_settings;
        
     if (currently_fullscreen)
     {
@@ -332,11 +333,11 @@ int ph_LeaveFullScreen(_THIS)
             /* Restore old video mode */
             if (old_video_mode != -1)
             {
-                mymode_settings.mode = (unsigned short) old_video_mode;
-                mymode_settings.refresh = (unsigned short) old_refresh_rate;
-                mymode_settings.flags = 0;
+                oldmode_settings.mode = (unsigned short) old_video_mode;
+                oldmode_settings.refresh = (unsigned short) old_refresh_rate;
+                oldmode_settings.flags = 0;
                 
-                if (PgSetVideoMode(&mymode_settings) < 0)
+                if (PgSetVideoMode(&oldmode_settings) < 0)
                 {
                     SDL_SetError("Ph_LeaveFullScreen(): PgSetVideoMode() function failed !\n");
                     return 0;

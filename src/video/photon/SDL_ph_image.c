@@ -267,6 +267,8 @@ int ph_SetupFullScreenImage(_THIS, SDL_Surface* screen)
 
     this->UpdateRects = ph_OCDCUpdate;
 
+    PgFlush();
+
     return 0;
 }
 

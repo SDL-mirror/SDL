@@ -72,20 +72,22 @@ struct SDL_PrivateVideoData {
     PgColor_t savedpal[_Pg_MAX_PALETTE];
     PgColor_t syspalph[_Pg_MAX_PALETTE];
 
-    struct {
+    struct
+    {
         PdDirectContext_t*    direct_context;
         PdOffscreenContext_t* offscreen_context;
         PdOffscreenContext_t* offscreen_backcontext;
         PhDrawContext_t*      oldDC;
         uint8_t*              dc_ptr;
-        unsigned char* CurrentFrameData;
-        unsigned char* FrameData0;
-        unsigned char* FrameData1;
-        int current;
-        long flags;
+        unsigned char*        CurrentFrameData;
+        unsigned char*        FrameData0;
+        unsigned char*        FrameData1;
+        int                   current;
+        long                  flags;
     } ocimage;
 
     PgHWCaps_t graphics_card_caps;  /* Graphics card caps at the moment of start   */
+    PgVideoModeInfo_t desktop_mode; /* Current desktop video mode information      */
     int old_video_mode;             /* Stored mode before fullscreen switch        */
     int old_refresh_rate;           /* Stored refresh rate befor fullscreen switch */
 
@@ -119,6 +121,7 @@ struct SDL_PrivateVideoData {
 #define currently_hided      (this->hidden->currently_hided)
 #define event                (this->hidden->event)
 #define current_overlay      (this->hidden->overlay)
+#define desktop_mode         (this->hidden->desktop_mode)
 
 /* Old variable names */
 #define mouse_relative       (this->hidden->mouse_relative)

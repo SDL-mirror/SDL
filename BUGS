@@ -142,7 +142,7 @@ EPOC:
     No console output screen. Printing to stdout do not have any effect.
 
 QNX:
-	Fullscreen switch doesn't work correctly.
+	Fullscreen switch doesn't work (disabled for now).
  
 
 OpenBSD:  -= NOT YET SUPPORTED =-
