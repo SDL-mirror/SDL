@@ -759,6 +759,7 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
         if (!isCustom) {
             [ qz_window setContentSize:contentRect.size ];
             current->flags |= (SDL_NOFRAME|SDL_RESIZABLE) & mode_flags;
+            [ window_view setFrameSize:contentRect.size ];
         }
     }
 
@@ -770,7 +771,7 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
         }
 
         window_view = [ [ NSView alloc ] initWithFrame:contentRect ];
-        [ window_view setAutoresizingMask: NSViewMinYMargin ];
+        [ window_view setAutoresizingMask: NSViewWidthSizable | NSViewHeightSizable ];
         [ [ qz_window contentView ] addSubview:window_view ];
         [ gl_context setView: window_view ];
         [ window_view release ];
@@ -785,7 +786,7 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
         if (window_view == nil) {
         
             window_view = [ [ NSQuickDrawView alloc ] initWithFrame:contentRect ];
-            [ window_view setAutoresizingMask: NSViewMinYMargin ];
+            [ window_view setAutoresizingMask: NSViewWidthSizable | NSViewHeightSizable ];
             [ [ qz_window contentView ] addSubview:window_view ];
             [ window_view release ];
             [ qz_window makeKeyAndOrderFront:nil ];
