@@ -18,19 +18,6 @@ process:
 
 (You may need to create the subdirs of /usr/local manually.)
 
-/*
-To use the library once it's built, you need to use the "Carbon
-framework", which is the port of the old Mac Toolbox to OS X.
-To do this, use the -F and -framework arguments for compiling
-and linking, respectively:
-
-	cc -c myprog.c -I/usr/local/include/SDL -F/System/Library/Frameworks/Carbon.framework
-	cc myprog.o -L/usr/local/lib -lSDL -framework Carbon
-
-sdl-config knows about the linking path and -framework, so it's
-recommended to use it to fill in your Makefile variables.
-*/
-
 To use the library once it's built, you essential have two possibilities:
 use the traditional autoconf/automake/make method, or use Apple's Project Builder.
 
@@ -65,19 +52,21 @@ will want to do the other steps, too.
 
 3) Add something like the following rule to your Makefile.am:
 
-APP_NAME.app: EXE_NAME
-	mkdir -p $@/Contents/MacOS
-	mkdir -p $@/Contents/Resources
-	mkdir -p $@/Contents/Resources/SDL_main.nib
-	echo "APPL????" > $@/Contents/PkgInfo
-	$(INSTALL_DATA) Info.plist $@/Contents/
-	$(INSTALL_DATA) SDL_main.nib/*.nib $@/Contents/Resources/
-	$(INSTALL_PROGRAM) $< $@/Contents/MacOS/
+bundle_contents = APP_NAME.app/Contents
+APP_NAME_bundle: EXE_NAME
+	mkdir -p $(bundle_contents)/MacOS
+	mkdir -p $(bundle_contents)/Resources
+	mkdir -p $(bundle_contents)/Resources/SDL_main.nib
+	echo "APPL????" > $(bundle_contents)/PkgInfo
+	$(INSTALL_DATA) Info.plist $(bundle_contents)/
+	$(INSTALL_DATA) SDL_main.nib/*.nib $(bundle_contents)/Resources/SDLMain.nib
+	$(INSTALL_PROGRAM) $< $(bundle_contents)/MacOS/
 
    You should replace EXE_NAME with the name of the executable. APP_NAME is what
    will be visible to the user in the Finder. Usually it will be the same
    as EXE_NAME but capitalized. E.g. if EXE_NAME is "testgame" then APP_NAME 
-   usually is "TestGame"
+   usually is "TestGame". You might also want to use @PACKAGE@ to use the package
+   name as specified in your configure.in file.
 
    If your project builds more than one application, you will have to do a bit more.
    For each of your target applications, you need a seperate rule. Furthermore, each
@@ -92,12 +81,13 @@ APP_NAME.app: EXE_NAME
 4) If you want the create bundles to be installed, you may want to add this
    rule to your Makefile.am:
 
-install-exec-local: Exult.app
-	mkdir -p /Applications/
-	cp -r $< /Applications/
+install-exec-hook: APP_NAME_bundle
+	rm -rf $(DESTDIR)$(prefix)/Applications/APP_NAME.app
+	mkdir -p $(DESTDIR)$(prefix)/Applications/
+	cp -r $< /$(DESTDIR)$(prefix)Applications/
 
    This rule takes the Bundle created by the rule from step 3 and installs them
-   into /Applications/. An alternate installation place would be $HOME/Applications/
+   into $(DESTDIR)$(prefix)/Applications/.
 
    Again, if you want to install multiple applications, you will have to augment
    the make rule accordingly.
