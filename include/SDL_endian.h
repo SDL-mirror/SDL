@@ -59,53 +59,101 @@ extern "C" {
    static for compilers that do not support inline functions, this
    header should only be included in files that actually use them.
 */
-#if defined(__GNUC__) && defined(i386)
-static __inline__ Uint16 SDL_Swap16(Uint16 D)
+#if defined(__GNUC__) && defined(__i386__)
+static __inline__ Uint16 SDL_Swap16(Uint16 x)
 {
-	__asm__("xchgb %b0,%h0" : "=q" (D) :  "0" (D));
-	return D;
+	__asm__("xchgb %b0,%h0" : "=q" (x) :  "0" (x));
+	return x;
+}
+#elif defined(__GNUC__) && defined(__x86_64__)
+static __inline__ Uint16 SDL_Swap16(Uint16 x)
+{
+	__asm__("xchgb %b0,%h0" : "=q" (x) :  "0" (x));
+	return x;
+}
+#elif defined(__GNUC__) && defined(__powerpc__)
+static __inline__ Uint16 SDL_Swap16(Uint16 x)
+{
+	Uint16 result;
+
+	__asm__("rlwimi %0,%2,8,16,23" : "=&r" (result) : "0" (x >> 8), "r" (x));
+	return result;
 }
 #else
-static __inline__ Uint16 SDL_Swap16(Uint16 D) {
-	return((D<<8)|(D>>8));
+static __inline__ Uint16 SDL_Swap16(Uint16 x) {
+	return((x<<8)|(x>>8));
 }
 #endif
 
-#if defined(__GNUC__) && defined(i386)
-static __inline__ Uint32 SDL_Swap32(Uint32 D)
+#if defined(__GNUC__) && defined(__i386__)
+static __inline__ Uint32 SDL_Swap32(Uint32 x)
 {
-	__asm__("bswap %0" : "=r" (D) : "0" (D));
-	return D;
+	__asm__("bswap %0" : "=r" (x) : "0" (x));
+	return x;
+}
+#elif defined(__GNUC__) && defined(__x86_64__)
+static __inline__ Uint32 SDL_Swap32(Uint32 x)
+{
+	__asm__("bswapl %0" : "=r" (x) : "0" (x));
+	return x;
+}
+#elif defined(__GNUC__) && defined(__powerpc__)
+static __inline__ Uint32 SDL_Swap32(Uint32 x)
+{
+	Uint32 result;
+
+	__asm__("rlwimi %0,%2,24,16,23" : "=&r" (result) : "0" (x>>24), "r" (x));
+	__asm__("rlwimi %0,%2,8,8,15"   : "=&r" (result) : "0" (result),    "r" (x));
+	__asm__("rlwimi %0,%2,24,0,7"   : "=&r" (result) : "0" (result),    "r" (x));
+	return result;
 }
 #else
-static __inline__ Uint32 SDL_Swap32(Uint32 D) {
-	return((D<<24)|((D<<8)&0x00FF0000)|((D>>8)&0x0000FF00)|(D>>24));
+static __inline__ Uint32 SDL_Swap32(Uint32 x) {
+	return((x<<24)|((x<<8)&0x00FF0000)|((x>>8)&0x0000FF00)|(x>>24));
 }
 #endif
 
 #ifdef SDL_HAS_64BIT_TYPE
-#ifndef SDL_Swap64
-static __inline__ Uint64 SDL_Swap64(Uint64 val) {
+#if defined(__GNUC__) && defined(__i386__)
+static __inline__ Uint64 SDL_Swap64(Uint64 x)
+{
+	union { 
+		struct { Uint32 a,b; } s;
+		Uint64 u;
+	} v;
+	v.u = x;
+	__asm__("bswapl %0 ; bswapl %1 ; xchgl %0,%1" 
+	        : "=r" (v.s.a), "=r" (v.s.b) 
+	        : "0" (v.s.a), "1" (v.s.b)); 
+	return v.u;
+}
+#elif defined(__GNUC__) && defined(__x86_64__)
+static __inline__ Uint64 SDL_Swap64(Uint64 x)
+{
+	__asm__("bswapq %0" : "=r" (x) : "0" (x));
+	return x;
+}
+#else
+static __inline__ Uint64 SDL_Swap64(Uint64 x)
+{
 	Uint32 hi, lo;
 
 	/* Separate into high and low 32-bit values and swap them */
-	lo = (Uint32)(val&0xFFFFFFFF);
-	val >>= 32;
-	hi = (Uint32)(val&0xFFFFFFFF);
-	val = SDL_Swap32(lo);
-	val <<= 32;
-	val |= SDL_Swap32(hi);
-	return(val);
+	lo = (Uint32)(x&0xFFFFFFFF);
+	x >>= 32;
+	hi = (Uint32)(x&0xFFFFFFFF);
+	x = SDL_Swap32(lo);
+	x <<= 32;
+	x |= SDL_Swap32(hi);
+	return(x);
 }
 #endif
 #else
-#ifndef SDL_Swap64
 /* This is mainly to keep compilers from complaining in SDL code.
    If there is no real 64-bit datatype, then compilers will complain about
    the fake 64-bit datatype that SDL provides when it compiles user code.
 */
 #define SDL_Swap64(X)	(X)
-#endif
 #endif /* SDL_HAS_64BIT_TYPE */
 
 
