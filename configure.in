@@ -2741,4 +2741,5 @@ src/file/Makefile
 src/hermes/Makefile
 sdl-config
 SDL.spec
+SDL.qpg
 ], [chmod +x sdl-config])
