@@ -4656,8 +4656,13 @@ check_executable(const char * path)
     return 0;
 
   if ((stat (path, &st) >= 0) &&
-      (((st.st_mode & S_IXOTH) == S_IXOTH) ||
+      (
+#ifdef S_IXOTH
+       ((st.st_mode & S_IXOTH) == S_IXOTH) ||
+#endif
+#ifdef S_IXGRP
        ((st.st_mode & S_IXGRP) == S_IXGRP) ||
+#endif
        ((st.st_mode & S_IXUSR) == S_IXUSR)))
     return 1;
   else
