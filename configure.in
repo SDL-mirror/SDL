@@ -1130,14 +1130,22 @@ CheckMacGL()
 }
 
 dnl Check for Mesa offscreen rendering
-CheckOSMesa()
+CheckAtariOSMesa()
 {
-    if test x$enable_video = xyes -a x$enable_video_opengl = xyes; then
-        AC_CHECK_HEADER(GL/osmesa.h, have_osmesa_hdr=yes)
-        AC_CHECK_LIB(OSMesa, OSMesaCreateContext, have_osmesa_lib=yes, have_osmesa_lib=no, -lm)
-        if test x$have_osmesa_hdr = xyes -a x$have_osmesa_lib = xyes; then
-    	    CFLAGS="$CFLAGS -DHAVE_OPENGL"
-			SYSTEM_LIBS="$SYSTEM_LIBS -lOSMesa"
+    if test "x$enable_video" = "xyes" -a "x$enable_video_opengl" = "xyes"; then
+        AC_PATH_PROG(OSMESA_CONFIG, osmesa-config, no)
+        if test "x$OSMESA_CONFIG" = "xno" -o "x$enable_atari_ldg" = "xno"; then
+            AC_CHECK_HEADER(GL/osmesa.h, have_osmesa_hdr=yes)
+            AC_CHECK_LIB(OSMesa, OSMesaCreateContext, have_osmesa_lib=yes, have_osmesa_lib=no, -lm)
+            if test "x$have_osmesa_hdr" = "xyes" -a "x$have_osmesa_lib" = "xyes"; then
+    	        CFLAGS="$CFLAGS -DHAVE_OPENGL"
+		    	SYSTEM_LIBS="$SYSTEM_LIBS -lOSMesa"
+            fi
+        else
+            OSMESA_CFLAGS=`$OSMESA_CONFIG --cflags`
+            OSMESA_LIBS=`$OSMESA_CONFIG --libs`
+        	CFLAGS="$CFLAGS -DHAVE_OPENGL $OSMESA_CFLAGS"
+            SYSTEM_LIBS="$SYSTEM_LIBS $OSMESA_LIBS"
         fi
     fi
 }
@@ -2584,8 +2592,8 @@ case "$target" in
         CheckAtariGemVideo
         CheckAtariAudio
         CheckAtariLdg
+		CheckAtariOSMesa
         CheckPTH
-		CheckOSMesa
         # Set up files for the audio library
         if test x$enable_threads = xyes -a x$enable_pth = xyes; then
             if test x$enable_audio = xyes; then

@@ -37,10 +37,6 @@ static char rcsid =
 #include <sys/stat.h>
 #include <unistd.h>
 
-#ifdef HAVE_OPENGL
-#include <GL/osmesa.h>
-#endif
-
 /* Mint includes */
 #include <mint/cookie.h>
 #include <mint/osbind.h>
@@ -57,6 +53,7 @@ static char rcsid =
 #include "SDL_ataric2p_s.h"
 #include "SDL_atarievents_c.h"
 #include "SDL_atarimxalloc_c.h"
+#include "SDL_atarigl_c.h"
 #include "SDL_xbios.h"
 
 #define XBIOS_VID_DRIVER_NAME "xbios"
@@ -80,10 +77,6 @@ static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects);
 
 #ifdef HAVE_OPENGL
 /* OpenGL functions */
-static int XBIOS_GL_LoadLibrary(_THIS, const char *path);
-static void *XBIOS_GL_GetProcAddress(_THIS, const char *proc);
-static int XBIOS_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value);
-static int XBIOS_GL_MakeCurrent(_THIS);
 static void XBIOS_GL_SwapBuffers(_THIS);
 #endif
 
@@ -196,6 +189,8 @@ static SDL_VideoDevice *XBIOS_CreateDevice(int devindex)
 		memset(device, 0, (sizeof *device));
 		device->hidden = (struct SDL_PrivateVideoData *)
 				malloc((sizeof *device->hidden));
+		device->gl_data = (struct SDL_PrivateGLData *)
+				malloc((sizeof *device->gl_data));
 	}
 	if ( (device == NULL) || (device->hidden == NULL) ) {
 		SDL_OutOfMemory();
@@ -205,6 +200,7 @@ static SDL_VideoDevice *XBIOS_CreateDevice(int devindex)
 		return(0);
 	}
 	memset(device->hidden, 0, (sizeof *device->hidden));
+	memset(device->gl_data, 0, sizeof(*device->gl_data));
 
 	/* Video functions */
 	device->VideoInit = XBIOS_VideoInit;
@@ -221,10 +217,10 @@ static SDL_VideoDevice *XBIOS_CreateDevice(int devindex)
 
 #ifdef HAVE_OPENGL
 	/* OpenGL functions */
-	device->GL_LoadLibrary = XBIOS_GL_LoadLibrary;
-	device->GL_GetProcAddress = XBIOS_GL_GetProcAddress;
-	device->GL_GetAttribute = XBIOS_GL_GetAttribute;
-	device->GL_MakeCurrent = XBIOS_GL_MakeCurrent;
+	device->GL_LoadLibrary = SDL_AtariGL_LoadLibrary;
+	device->GL_GetProcAddress = SDL_AtariGL_GetProcAddress;
+	device->GL_GetAttribute = SDL_AtariGL_GetAttribute;
+	device->GL_MakeCurrent = SDL_AtariGL_MakeCurrent;
 	device->GL_SwapBuffers = XBIOS_GL_SwapBuffers;
 #endif
 
@@ -415,10 +411,6 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	/* Init chunky to planar routine */
 	SDL_Atari_C2pConvert = SDL_Atari_C2pConvert8;
 
-#ifdef HAVE_OPENGL
-	this->gl_config.driver_loaded = 1;
-#endif
-
 	/* We're done! */
 	return(0);
 }
@@ -439,11 +431,7 @@ static void XBIOS_FreeBuffers(_THIS)
 	int i;
 
 #ifdef HAVE_OPENGL
-	/* Shutdown OpenGL context */
-	if (XBIOS_ctx) {
-		OSMesaDestroyContext(XBIOS_ctx);
-		XBIOS_ctx = NULL;
-	}
+	SDL_AtariGL_Quit(this);
 #endif
 
 	for (i=0;i<2;i++) {
@@ -583,23 +571,10 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 
 #ifdef HAVE_OPENGL
 	if (flags & SDL_OPENGL) {
-		GLenum format;
-
-		/* Init OpenGL context using OSMesa */
-		if (new_depth == 8) {
-			format = OSMESA_COLOR_INDEX;
-		} else {
-			format = OSMESA_RGB_565;
-		}
-
-		XBIOS_ctx = OSMesaCreateContextExt( format, this->gl_config.depth_size,
-			this->gl_config.stencil_size, this->gl_config.accum_red_size +
-			this->gl_config.accum_green_size + this->gl_config.accum_blue_size +
-			this->gl_config.accum_alpha_size, NULL );
-		if (!XBIOS_ctx) {
+		if (!SDL_AtariGL_Init(this, current)) {
 			XBIOS_FreeBuffers(this);
-			SDL_SetError("OSMesaCreateContext failed");
-			return(NULL);
+			SDL_SetError("Can not create OpenGL context");
+			return NULL;
 		}
 
 		modeflags |= SDL_OPENGL;
@@ -899,113 +874,14 @@ static void XBIOS_VideoQuit(_THIS)
 
 #ifdef HAVE_OPENGL
 
-/* OpenGL functions */
-static int XBIOS_GL_LoadLibrary(_THIS, const char *path)
-{
-	/* Library is always opened */
-	this->gl_config.driver_loaded = 1;
-
-	return 0;
-}
-
-static void *XBIOS_GL_GetProcAddress(_THIS, const char *proc)
-{
-	void *func = NULL;
-
-	if (XBIOS_ctx != NULL) {
-		func = OSMesaGetProcAddress(proc);
-	}
-
-	return func;
-}
-
-static int XBIOS_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
-{
-	GLenum mesa_attrib;
-	SDL_Surface *surface;
-
-	if (XBIOS_ctx == NULL) {
-		return -1;
-	}
-
-	switch(attrib) {
-		case SDL_GL_RED_SIZE:
-			mesa_attrib = GL_RED_BITS;
-			break;
-		case SDL_GL_GREEN_SIZE:
-			mesa_attrib = GL_GREEN_BITS;
-			break;
-		case SDL_GL_BLUE_SIZE:
-			mesa_attrib = GL_BLUE_BITS;
-			break;
-		case SDL_GL_ALPHA_SIZE:
-			mesa_attrib = GL_ALPHA_BITS;
-			break;
-		case SDL_GL_DOUBLEBUFFER:
-			surface = this->screen;
-			*value = ((surface->flags & SDL_DOUBLEBUF)==SDL_DOUBLEBUF);
-			return 0;
-		case SDL_GL_DEPTH_SIZE:
-			mesa_attrib = GL_DEPTH_BITS;
-			break;
-		case SDL_GL_STENCIL_SIZE:
-			mesa_attrib = GL_STENCIL_BITS;
-			break;
-		case SDL_GL_ACCUM_RED_SIZE:
-			mesa_attrib = GL_ACCUM_RED_BITS;
-			break;
-		case SDL_GL_ACCUM_GREEN_SIZE:
-			mesa_attrib = GL_ACCUM_GREEN_BITS;
-			break;
-		case SDL_GL_ACCUM_BLUE_SIZE:
-			mesa_attrib = GL_ACCUM_BLUE_BITS;
-			break;
-		case SDL_GL_ACCUM_ALPHA_SIZE:
-			mesa_attrib = GL_ACCUM_ALPHA_BITS;
-			break;
-		default :
-			return -1;
-	}
-
-	glGetIntegerv(mesa_attrib, value);
-	return 0;
-}
-
-static int XBIOS_GL_MakeCurrent(_THIS)
-{
-	SDL_Surface *surface;
-	GLenum type;
-
-	if (XBIOS_ctx == NULL) {
-		return -1;
-	}
-
-	surface = this->screen;
-	if ((surface->format->BitsPerPixel) == 8) {
-		type = GL_UNSIGNED_BYTE;
-	} else {
-		type = GL_UNSIGNED_SHORT_5_6_5;
-	}
-
-	if (!OSMesaMakeCurrent(XBIOS_ctx, surface->pixels, type, surface->w, surface->h)) {
-		SDL_SetError("Can not make OpenGL context current");
-		return -1;
-	}
-
-	/* OSMesa draws upside down */
-	OSMesaPixelStore(OSMESA_Y_UP, 0);
-
-	return 0;
-}
-
 static void XBIOS_GL_SwapBuffers(_THIS)
 {
-	if (XBIOS_ctx == NULL) {
+	if (gl_ctx == NULL) {
 		return;
 	}
 
 	XBIOS_FlipHWSurface(this, this->screen);
-	XBIOS_GL_MakeCurrent(this);
+	SDL_AtariGL_MakeCurrent(this);
 }
 
 #endif

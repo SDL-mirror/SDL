@@ -28,10 +28,6 @@ static char rcsid =
 #ifndef _SDL_gemvideo_h
 #define _SDL_gemvideo_h
 
-#ifdef HAVE_OPENGL
-#include <GL/osmesa.h>
-#endif
-
 #include "SDL_sysvideo.h"
 #include "SDL_mutex.h"
 
@@ -89,10 +85,6 @@ struct SDL_PrivateVideoData {
 	SDL_bool fullscreen;		/* Fullscreen or windowed mode ? */
 	SDL_Rect *SDL_modelist[SDL_NUMMODES+1];	/* Mode list */
 	SDL_Surface *icon;			/* The icon */
-
-#ifdef HAVE_OPENGL
-	OSMesaContext	ctx;		/* OSMesa OpenGL context */
-#endif
 };
 
 /* Hidden structure -> variables names */
@@ -138,8 +130,6 @@ struct SDL_PrivateVideoData {
 #define GEM_buffer1			(this->hidden->buffer1)
 #define GEM_buffer2			(this->hidden->buffer2)
 #define GEM_bufops			(this->hidden->buf2scr_ops)
-
-#define GEM_ctx				(this->hidden->ctx)
 
 #define VDI_FBMASK(amask, rmask, gmask, bmask) \
 	VDI_alphamask = (amask); \

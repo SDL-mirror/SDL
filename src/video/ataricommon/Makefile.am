@@ -12,6 +12,8 @@ ATARICOMMON_SRCS = 	\
 	SDL_atarieddi_s.h	\
 	SDL_atarievents.c	\
 	SDL_atarievents_c.h	\
+	SDL_atarigl.c	\
+	SDL_atarigl_c.h	\
 	SDL_atarikeys.h	\
 	SDL_atarimxalloc.c	\
 	SDL_atarimxalloc_c.h	\

@@ -37,10 +37,6 @@ static char rcsid =
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef HAVE_OPENGL
-#include <GL/osmesa.h>
-#endif
-
 /* Mint includes */
 #include <gem.h>
 #include <gemx.h>
@@ -60,6 +56,8 @@ static char rcsid =
 #include "SDL_ataric2p_s.h"
 #include "SDL_atarieddi_s.h"
 #include "SDL_atarimxalloc_c.h"
+#include "SDL_atarigl_c.h"
+
 #include "SDL_gemvideo.h"
 #include "SDL_gemevents_c.h"
 #include "SDL_gemmouse_c.h"
@@ -114,19 +112,7 @@ static void refresh_window(_THIS, int winhandle, short *rect);
 
 #ifdef HAVE_OPENGL
 /* OpenGL functions */
-static int GEM_GL_LoadLibrary(_THIS, const char *path);
-static void *GEM_GL_GetProcAddress(_THIS, const char *proc);
-static int GEM_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value);
-static int GEM_GL_MakeCurrent(_THIS);
 static void GEM_GL_SwapBuffers(_THIS);
-
-static void GEM_GL_ConvertNull(SDL_Surface *surface);
-static void GEM_GL_Convert565To555be(SDL_Surface *surface);
-static void GEM_GL_Convert565To555le(SDL_Surface *surface);
-static void GEM_GL_Convert565le(SDL_Surface *surface);
-static void GEM_GL_ConvertBGRAToABGR(SDL_Surface *surface);
-
-static void (*GEM_GL_Convert)(SDL_Surface *surface);
 #endif
 
 /* GEM driver bootstrap functions */
@@ -157,6 +143,8 @@ static SDL_VideoDevice *GEM_CreateDevice(int devindex)
 		memset(device, 0, (sizeof *device));
 		device->hidden = (struct SDL_PrivateVideoData *)
 				malloc((sizeof *device->hidden));
+		device->gl_data = (struct SDL_PrivateGLData *)
+				malloc((sizeof *device->gl_data));
 	}
 	if ( (device == NULL) || (device->hidden == NULL) ) {
 		SDL_OutOfMemory();
@@ -166,6 +154,7 @@ static SDL_VideoDevice *GEM_CreateDevice(int devindex)
 		return(0);
 	}
 	memset(device->hidden, 0, (sizeof *device->hidden));
+	memset(device->gl_data, 0, sizeof(*device->gl_data));
 
 	/* Set the function pointers */
 	device->VideoInit = GEM_VideoInit;
@@ -200,10 +189,10 @@ static SDL_VideoDevice *GEM_CreateDevice(int devindex)
 
 #ifdef HAVE_OPENGL
 	/* OpenGL functions */
-	device->GL_LoadLibrary = GEM_GL_LoadLibrary;
-	device->GL_GetProcAddress = GEM_GL_GetProcAddress;
-	device->GL_GetAttribute = GEM_GL_GetAttribute;
-	device->GL_MakeCurrent = GEM_GL_MakeCurrent;
+	device->GL_LoadLibrary = SDL_AtariGL_LoadLibrary;
+	device->GL_GetProcAddress = SDL_AtariGL_GetProcAddress;
+	device->GL_GetAttribute = SDL_AtariGL_GetAttribute;
+	device->GL_MakeCurrent = SDL_AtariGL_MakeCurrent;
 	device->GL_SwapBuffers = GEM_GL_SwapBuffers;
 #endif
 
@@ -483,10 +472,6 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	printf("sdl:video:gem: VideoInit(): done\n");
 #endif
 
-#ifdef HAVE_OPENGL
-	this->gl_config.driver_loaded = 1;
-#endif
-
 	/* We're done! */
 	return(0);
 }
@@ -507,11 +492,7 @@ SDL_Rect **GEM_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
 static void GEM_FreeBuffers(_THIS)
 {
 #ifdef HAVE_OPENGL
-	/* Shutdown OpenGL context */
-	if (GEM_ctx) {
-		OSMesaDestroyContext(GEM_ctx);
-		GEM_ctx = NULL;
-	}
+	SDL_AtariGL_Quit(this);
 #endif
 
 	/* Release buffer */
@@ -760,59 +741,10 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 
 #ifdef HAVE_OPENGL
 	if (flags & SDL_OPENGL) {
-		GLenum format = OSMESA_COLOR_INDEX;	/* 8 bits */
-
-		/* Init OpenGL context using OSMesa */
-		GEM_GL_Convert = GEM_GL_ConvertNull;
-		switch (VDI_bpp) {
-			case 15:
-				/* 1555, big and little endian, unsupported */
-				format = OSMESA_RGB_565;
-				if (VDI_redmask == 31<<10) {
-					GEM_GL_Convert = GEM_GL_Convert565To555be;
-				} else {
-					GEM_GL_Convert = GEM_GL_Convert565To555le;
-				}
-				break;
-			case 16:
-				if (VDI_redmask == 31<<11) {
-					format = OSMESA_RGB_565;
-				} else {
-					/* 565, little endian, unsupported */
-					format = OSMESA_RGB_565;
-					GEM_GL_Convert = GEM_GL_Convert565le;
-				}
-				break;
-			case 24:
-				if (VDI_redmask == 255<<16) {
-					format = OSMESA_RGB;
-				} else {
-					format = OSMESA_BGR;
-				}
-				break;
-			case 32:
-				if (VDI_redmask == 255<<16) {
-					format = OSMESA_ARGB;
-				} else if (VDI_redmask == 255<<8) {
-					format = OSMESA_BGRA;
-				} else if (VDI_redmask == 255<<24) {
-					format = OSMESA_RGBA;
-				} else {
-					/* ABGR format unsupported */
-					format = OSMESA_BGRA;
-					GEM_GL_Convert = GEM_GL_ConvertBGRAToABGR;
-				}
-				break;
-		}
-
-		GEM_ctx = OSMesaCreateContextExt( format, this->gl_config.depth_size,
-			this->gl_config.stencil_size, this->gl_config.accum_red_size +
-			this->gl_config.accum_green_size + this->gl_config.accum_blue_size +
-			this->gl_config.accum_alpha_size, NULL );
-		if (!GEM_ctx) {
+		if (!SDL_AtariGL_Init(this, current)) {
 			GEM_FreeBuffers(this);
-			SDL_SetError("OSMesaCreateContext failed");
-			return(NULL);
+			SDL_SetError("Can not create OpenGL context");
+			return NULL;
 		}
 
 		modeflags |= SDL_OPENGL;
@@ -1356,188 +1288,14 @@ static void refresh_window(_THIS, int winhandle, short *rect)
 
 #ifdef HAVE_OPENGL
 
-static int GEM_GL_LoadLibrary(_THIS, const char *path)
-{
-	/* Library is always opened */
-	this->gl_config.driver_loaded = 1;
-
-	return 0;
-}
-
-static void *GEM_GL_GetProcAddress(_THIS, const char *proc)
-{
-	void *func = NULL;
-
-	if (GEM_ctx != NULL) {
-		func = OSMesaGetProcAddress(proc);
-	}
-
-	return func;
-}
-
-static int GEM_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
-{
-	GLenum mesa_attrib;
-
-	if (GEM_ctx == NULL) {
-		return -1;
-	}
-
-	switch(attrib) {
-		case SDL_GL_RED_SIZE:
-			mesa_attrib = GL_RED_BITS;
-			break;
-		case SDL_GL_GREEN_SIZE:
-			mesa_attrib = GL_GREEN_BITS;
-			break;
-		case SDL_GL_BLUE_SIZE:
-			mesa_attrib = GL_BLUE_BITS;
-			break;
-		case SDL_GL_ALPHA_SIZE:
-			mesa_attrib = GL_ALPHA_BITS;
-			break;
-		case SDL_GL_DOUBLEBUFFER:
-			mesa_attrib = GL_DOUBLEBUFFER;
-			break;
-		case SDL_GL_DEPTH_SIZE:
-			mesa_attrib = GL_DEPTH_BITS;
-			break;
-		case SDL_GL_STENCIL_SIZE:
-			mesa_attrib = GL_STENCIL_BITS;
-			break;
-		case SDL_GL_ACCUM_RED_SIZE:
-			mesa_attrib = GL_ACCUM_RED_BITS;
-			break;
-		case SDL_GL_ACCUM_GREEN_SIZE:
-			mesa_attrib = GL_ACCUM_GREEN_BITS;
-			break;
-		case SDL_GL_ACCUM_BLUE_SIZE:
-			mesa_attrib = GL_ACCUM_BLUE_BITS;
-			break;
-		case SDL_GL_ACCUM_ALPHA_SIZE:
-			mesa_attrib = GL_ACCUM_ALPHA_BITS;
-			break;
-		default :
-			return -1;
-	}
-
-	glGetIntegerv(mesa_attrib, value);
-	return 0;
-}
-
-static int GEM_GL_MakeCurrent(_THIS)
-{
-	SDL_Surface *surface;
-	GLenum type;
-
-	if (GEM_ctx == NULL) {
-		return -1;
-	}
-
-	surface = this->screen;
-	
-	if ((surface->format->BitsPerPixel == 15) || (surface->format->BitsPerPixel == 16)) {
-		type = GL_UNSIGNED_SHORT_5_6_5;
-	} else {
-		type = GL_UNSIGNED_BYTE;
-	}
-
-	if (!OSMesaMakeCurrent(GEM_ctx, surface->pixels, type, surface->w, surface->h)) {
-		SDL_SetError("Can not make OpenGL context current");
-		return -1;
-	}
-
-	/* OSMesa draws upside down */
-	OSMesaPixelStore(OSMESA_Y_UP, 0);
-
-	return 0;
-}
-
 static void GEM_GL_SwapBuffers(_THIS)
 {
-	GEM_GL_Convert(this->screen);
+	if (gl_ctx == NULL) {
+		return;
+	}
+
+	gl_convert(this->screen);
 	GEM_FlipHWSurface(this, this->screen);
-}
-
-static void GEM_GL_ConvertNull(SDL_Surface *surface)
-{
-}
-
-static void GEM_GL_Convert565To555be(SDL_Surface *surface)
-{
-	int x,y, pitch;
-	unsigned short *line, *pixel;
-
-	line = surface->pixels;
-	pitch = surface->pitch >> 1;
-	for (y=0; y<surface->h; y++) {
-		pixel = line;
-		for (x=0; x<surface->w; x++) {
-			unsigned short color = *pixel;
-
-			*pixel++ = (color & 0x1f)|((color>>1) & 0xffe0);
-		}
-
-		line += pitch;
-	}
-}
-
-static void GEM_GL_Convert565To555le(SDL_Surface *surface)
-{
-	int x,y, pitch;
-	unsigned short *line, *pixel;
-
-	line = surface->pixels;
-	pitch = surface->pitch >>1;
-	for (y=0; y<surface->h; y++) {
-		pixel = line;
-		for (x=0; x<surface->w; x++) {
-			unsigned short color = *pixel;
-
-			color = (color & 0x1f)|((color>>1) & 0xffe0);
-			*pixel++ = SDL_Swap16(color);
-		}
-
-		line += pitch;
-	}
-}
-
-static void GEM_GL_Convert565le(SDL_Surface *surface)
-{
-	int x,y, pitch;
-	unsigned short *line, *pixel;
-
-	line = surface->pixels;
-	pitch = surface->pitch >>1;
-	for (y=0; y<surface->h; y++) {
-		pixel = line;
-		for (x=0; x<surface->w; x++) {
-			unsigned short color = *pixel;
-
-			*pixel++ = SDL_Swap16(color);
-		}
-
-		line += pitch;
-	}
-}
-
-static void GEM_GL_ConvertBGRAToABGR(SDL_Surface *surface)
-{
-	int x,y, pitch;
-	unsigned long *line, *pixel;
-
-	line = surface->pixels;
-	pitch = surface->pitch >>2;
-	for (y=0; y<surface->h; y++) {
-		pixel = line;
-		for (x=0; x<surface->w; x++) {
-			unsigned long color = *pixel;
-
-			*pixel++ = (color<<24)|(color>>8);
-		}
-
-		line += pitch;
-	}
 }
 
 #endif
