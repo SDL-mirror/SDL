@@ -29,6 +29,9 @@ static char rcsid =
 #include <stdlib.h>
 #include <malloc.h>
 #include <windows.h>
+#ifdef HAVE_AYGSHELL
+#include <aygshell.h>
+#endif
 
 /* Not yet in the mingw32 cross-compile headers */
 #ifndef CDS_FULLSCREEN
@@ -514,6 +517,23 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 	video->h = height;
 	video->pitch = SDL_CalculatePitch(video);
 
+#ifdef HAVE_AYGSHELL
+	 /* Stuff to hide that $#!^%#$ WinCE taskbar in fullscreen... */
+	if ( flags & SDL_FULLSCREEN ) {
+		if ( !(prev_flags & SDL_FULLSCREEN) ) {
+			SHFullScreen(SDL_Window, SHFS_HIDETASKBAR);
+			SHFullScreen(SDL_Window, SHFS_HIDESIPBUTTON);
+			ShowWindow(FindWindow(TEXT("HHTaskBar"),NULL),SW_HIDE);
+		}
+		video->flags |= SDL_FULLSCREEN;
+	} else {
+		if ( prev_flags & SDL_FULLSCREEN ) {
+			SHFullScreen(SDL_Window, SHFS_SHOWTASKBAR);
+			SHFullScreen(SDL_Window, SHFS_SHOWSIPBUTTON);
+			ShowWindow(FindWindow(TEXT("HHTaskBar"),NULL),SW_SHOWNORMAL);
+		}
+	}
+#endif
 #ifndef NO_CHANGEDISPLAYSETTINGS
 	/* Set fullscreen mode if appropriate */
 	if ( (flags & SDL_FULLSCREEN) == SDL_FULLSCREEN ) {

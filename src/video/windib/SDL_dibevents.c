@@ -28,6 +28,9 @@ static char rcsid =
 #include <stdlib.h>
 #include <stdio.h>
 #include <windows.h>
+#ifdef HAVE_AYGSHELL
+#include <aygshell.h>
+#endif
 
 #include "SDL_events.h"
 #include "SDL_error.h"
@@ -363,6 +366,12 @@ int DIB_CreateWindow(_THIS)
 void DIB_DestroyWindow(_THIS)
 {
 	if ( SDL_windowid == NULL ) {
+#ifdef HAVE_AYGSHELL
+		/* Unhide taskbar, etc. */
+		SHFullScreen(SDL_Window, SHFS_SHOWTASKBAR);
+		SHFullScreen(SDL_Window, SHFS_SHOWSIPBUTTON);
+		ShowWindow(FindWindow(TEXT("HHTaskBar"),NULL),SW_SHOWNORMAL);
+#endif
 		DestroyWindow(SDL_Window);
 	}
 }
