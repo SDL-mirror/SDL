@@ -37,6 +37,19 @@ static char rcsid =
 #include "SDL_pixels_c.h"
 #include "SDL_memops.h"
 
+#if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
+#include "mmx.h"
+/* Function to check the CPU flags */
+#define MMX_CPU		0x800000
+#define SSE_CPU		0x2000000
+#define CPU_Flags()	Hermes_X86_CPU()
+#define X86_ASSEMBLER
+#define HermesConverterInterface	void
+#define HermesClearInterface		void
+#define STACKCALL
+#include "HeadX86.h"
+#endif
+
 /* The general purpose software blit routine */
 static int SDL_SoftBlit(SDL_Surface *src, SDL_Rect *srcrect,
 			SDL_Surface *dst, SDL_Rect *dstrect)
@@ -106,11 +119,54 @@ static int SDL_SoftBlit(SDL_Surface *src, SDL_Rect *srcrect,
 	return(okay ? 0 : -1);
 }
 
+#if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
+void SDL_memcpyMMX(char* to,char* from,int len)
+{
+	int i;
+
+	for(i=0; i<len/8; i++) {
+		__asm__ __volatile__ (
+		"	movq (%0), %%mm0\n"
+		"	movq %%mm0, (%1)\n"
+		: : "r" (from), "r" (to) : "memory");
+		from+=8;
+		to+=8;
+	}
+	if (len&7)
+		SDL_memcpy(to, from, len&7);
+}
+
+void SDL_memcpySSE(char* to,char* from,int len)
+{
+	int i;
+
+	__asm__ __volatile__ (
+	"	prefetchnta (%0)\n"
+	"	prefetchnta 64(%0)\n"
+	"	prefetchnta 128(%0)\n"
+	"	prefetchnta 192(%0)\n"
+	: : "r" (from) );
+
+	for(i=0; i<len/8; i++) {
+		__asm__ __volatile__ (
+		"	prefetchnta 256(%0)\n"
+		"	movq (%0), %%mm0\n"
+		"	movntq %%mm0, (%1)\n"
+		: : "r" (from), "r" (to) : "memory");
+		from+=8;
+		to+=8;
+	}
+	if (len&7)
+		SDL_memcpy(to, from, len&7);
+}
+#endif
+
 static void SDL_BlitCopy(SDL_BlitInfo *info)
 {
 	Uint8 *src, *dst;
 	int w, h;
 	int srcskip, dstskip;
+	Uint32 f;
 
 	w = info->d_width*info->dst->BytesPerPixel;
 	h = info->d_height;
@@ -118,6 +174,33 @@ static void SDL_BlitCopy(SDL_BlitInfo *info)
 	dst = info->d_pixels;
 	srcskip = w+info->s_skip;
 	dstskip = w+info->d_skip;
+#if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
+	f=CPU_Flags();
+	if((f&(MMX_CPU|SSE_CPU))==(MMX_CPU|SSE_CPU))
+	{
+		while ( h-- ) {
+			SDL_memcpySSE(dst, src, w);
+			src += srcskip;
+			dst += dstskip;
+		}
+		__asm__ __volatile__ (
+		"	emms\n"
+		::);
+	}
+	else
+	if((f&(MMX_CPU))!=0)
+	{
+		while ( h-- ) {
+			SDL_memcpyMMX(dst, src, w);
+			src += srcskip;
+			dst += dstskip;
+		}
+		__asm__ __volatile__ (
+		"	emms\n"
+		::);
+	}
+	else
+#endif
 	while ( h-- ) {
 		SDL_memcpy(dst, src, w);
 		src += srcskip;

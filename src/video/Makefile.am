@@ -42,6 +42,7 @@ COMMON_SRCS =			\
 	SDL_yuv_sw.c		\
 	SDL_yuv_sw_c.h		\
 	SDL_yuv_mmx.c		\
+	mmx.h			\
 	blank_cursor.h		\
 	default_cursor.h
 

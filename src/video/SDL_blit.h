@@ -410,11 +410,85 @@ do {						\
 	}								\
 }
 
+/* 2 - times unrolled loop */
+#define DUFFS_LOOP_DOUBLE2(pixel_copy_increment,			\
+				double_pixel_copy_increment, width)	\
+{ int n, w = width;							\
+	if( w & 1 ) {							\
+	    pixel_copy_increment;					\
+	    w--;							\
+	}								\
+	if ( w > 0 )	{						\
+	    n = ( w + 2) / 4;						\
+	    switch( w & 2 ) {						\
+	    case 0: do {	double_pixel_copy_increment;		\
+	    case 2:		double_pixel_copy_increment;		\
+		    } while ( --n > 0 );					\
+	    }								\
+	}								\
+}
+
+/* 2 - times unrolled loop 4 pixels */
+#define DUFFS_LOOP_QUATRO2(pixel_copy_increment,			\
+				double_pixel_copy_increment,		\
+				quatro_pixel_copy_increment, width)	\
+{ int n, w = width;								\
+        if(w & 1) {							\
+	  pixel_copy_increment;						\
+	  w--;								\
+	}								\
+	if(w & 2) {							\
+	  double_pixel_copy_increment;					\
+	  w -= 2;							\
+	}								\
+	if ( w > 0 ) {							\
+	    n = ( w + 7 ) / 8;						\
+	    switch( w & 4 ) {						\
+	    case 0: do {	quatro_pixel_copy_increment;		\
+	    case 4:		quatro_pixel_copy_increment;		\
+		    } while ( --n > 0 );					\
+	    }								\
+	}								\
+}
+
 /* Use the 8-times version of the loop by default */
 #define DUFFS_LOOP(pixel_copy_increment, width)				\
 	DUFFS_LOOP8(pixel_copy_increment, width)
 
 #else
+
+/* Don't use Duff's device to unroll loops */
+#define DUFFS_LOOP_DOUBLE2(pixel_copy_increment,			\
+			 double_pixel_copy_increment, width)		\
+{ int n = width;								\
+    if( n & 1 ) {							\
+	pixel_copy_increment;						\
+	n--;								\
+    }									\
+    n=n>>1;								\
+    for(; n > 0; --n) {   						\
+	double_pixel_copy_increment;					\
+    }									\
+}
+
+/* Don't use Duff's device to unroll loops */
+#define DUFFS_LOOP_QUATRO2(pixel_copy_increment,			\
+				double_pixel_copy_increment,		\
+				quatro_pixel_copy_increment, width)	\
+{ int n = width;								\
+        if(n & 1) {							\
+	  pixel_copy_increment;						\
+	  n--;								\
+	}								\
+	if(n & 2) {							\
+	  double_pixel_copy_increment;					\
+	  n -= 2;							\
+	}								\
+	n=n>>2;								\
+	for(; n > 0; --n) {   						\
+	  quatro_pixel_copy_increment;					\
+        }								\
+}
 
 /* Don't use Duff's device to unroll loops */
 #define DUFFS_LOOP(pixel_copy_increment, width)				\
