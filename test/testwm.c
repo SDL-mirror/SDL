@@ -254,6 +254,7 @@ int main(int argc, char *argv[])
 	SDL_Surface *icon;
 	Uint8 *icon_mask;
 	int parsed;
+	int w, h;
 
 	if ( SDL_Init(SDL_INIT_VIDEO) < 0 ) {
 		fprintf(stderr,
@@ -263,6 +264,8 @@ int main(int argc, char *argv[])
 	atexit(SDL_Quit);
 
 	/* Check command line arguments */
+	w = 640;
+	h = 480;
 	video_bpp = 8;
 	video_flags = SDL_SWSURFACE;
 	parsed = 1;
@@ -281,6 +284,16 @@ int main(int argc, char *argv[])
 			video_flags |= SDL_NOFRAME;
 			argc -= 1;
 			argv += 1;
+		} else
+		if ( (argc >= 3) && (strcmp(argv[1], "-width") == 0) ) {
+			w = atoi(argv[2]);
+			argc -= 2;
+			argv += 2;
+		} else
+		if ( (argc >= 3) && (strcmp(argv[1], "-height") == 0) ) {
+			h = atoi(argv[2]);
+			argc -= 2;
+			argv += 2;
 		} else
 		if ( (argc >= 3) && (strcmp(argv[1], "-bpp") == 0) ) {
 			video_bpp = atoi(argv[2]);
@@ -314,7 +327,7 @@ int main(int argc, char *argv[])
 		printf("No window title was set!\n");
 
 	/* Initialize the display */
-	if ( SetVideoMode(640, 480) < 0 ) {
+	if ( SetVideoMode(w, h) < 0 ) {
 		return(1);
 	}
 
