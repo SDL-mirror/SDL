@@ -68,7 +68,7 @@ extern DECLSPEC const char * SDLCALL SDL_JoystickName(int device_index);
  *
  * This function returns a joystick identifier, or NULL if an error occurred.
  */
-extern DECLSPEC SDL_Joystick * SDLCALL SDLCALL SDL_JoystickOpen(int device_index);
+extern DECLSPEC SDL_Joystick * SDLCALL SDL_JoystickOpen(int device_index);
 
 /*
  * Returns 1 if the joystick has been opened, or 0 if it has not.
