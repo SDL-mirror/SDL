@@ -616,6 +616,10 @@ SDL_Surface * SDL_SetVideoMode (int width, int height, int bpp, Uint32 flags)
 	if ( mode ) { /* Prevent resize events from mode change */
 	    SDL_PrivateResize(mode->w, mode->h);
         }
+	/* Sam - If we asked for an OpenGL mode, but didn't get it, fail */
+	if ( is_opengl && !(mode->flags & SDL_OPENGL) ) {
+		mode = NULL;
+	}
 	/*
 	 * rcg11292000
 	 * If you try to set an SDL_OPENGL surface, and fail to find a
