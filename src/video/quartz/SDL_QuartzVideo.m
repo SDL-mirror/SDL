@@ -253,6 +253,17 @@ static SDL_Rect** QZ_ListModes (_THIS, SDL_PixelFormat *format, Uint32 flags) {
     return client_mode_list;
 }
 
+static SDL_bool QZ_WindowPosition(_THIS, int *x, int *y)
+{
+    const char *window = getenv("SDL_VIDEO_WINDOW_POS");
+    if ( window ) {
+        if ( sscanf(window, "%d,%d", x, y) == 2 ) {
+            return SDL_TRUE;
+        }
+    }
+    return SDL_FALSE;
+}
+
 /* 
     Gamma functions to try to hide the flash from a rez switch
     Fade the display from normal to black
@@ -569,6 +580,8 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
                                          int height, int bpp, Uint32 flags) {
     unsigned int style;
     NSRect contentRect;
+    int center_window = 1;
+    int origin_x, origin_y;
 
     current->flags = 0;
     current->w = width;
@@ -606,6 +619,12 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
             }
         }
                 
+        if ( QZ_WindowPosition(this, &origin_x, &origin_y) ) {
+            center_window = 0;
+            contentRect.origin.x = (float)origin_x;
+            contentRect.origin.y = (float)origin_y;            
+        }
+        
         /* Manually create a window, avoids having a nib file resource */
         qz_window = [ [ SDL_QuartzWindow alloc ] 
             initWithContentRect:contentRect
@@ -622,7 +641,9 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
         QZ_SetCaption(this, this->wm_title, this->wm_icon);
         [ qz_window setAcceptsMouseMovedEvents:YES ];
         [ qz_window setViewsNeedDisplay:NO ];
-        [ qz_window center ];
+        if ( center_window ) {
+            [ qz_window center ];
+        }
         [ qz_window setDelegate:
             [ [ [ SDL_QuartzWindowDelegate alloc ] init ] autorelease ] ];
     }
