@@ -414,17 +414,9 @@ void *X11_GL_GetProcAddress(_THIS, const char* proc)
 	void* retval;
 	
 	handle = this->gl_config.dll_handle;
-#if 0 /* This doesn't work correctly yet */
 	if ( this->gl_data->glXGetProcAddress ) {
-        void *func, *func2;
-		func = this->gl_data->glXGetProcAddress(proc);
-        func2 = dlsym(handle, proc);
-        if ( func != func2 ) {
-fprintf(stderr, "glXGetProcAddress returned %p and dlsym returned %p for %s\n", func, func2, proc);
-        }
-        return this->gl_data->glXGetProcAddress(proc);
+		return this->gl_data->glXGetProcAddress(proc);
 	}
-#endif
 #if defined(__OpenBSD__) && !defined(__ELF__)
 #undef dlsym(x,y);
 #endif
