@@ -271,7 +271,7 @@ static int FB_AddMode(_THIS, int index, unsigned int w, unsigned int h)
 	}
 
 	/* Only allow a mode if we have a valid timing for it */
-	next_mode = 0;
+	next_mode = -1;
 	for ( i=0; i<(sizeof(vesa_timings)/sizeof(vesa_timings[0])); ++i ) {
 		if ( (w == vesa_timings[i].xres) &&
 		     (h == vesa_timings[i].yres) && vesa_timings[i].pixclock ) {
@@ -279,7 +279,7 @@ static int FB_AddMode(_THIS, int index, unsigned int w, unsigned int h)
 			break;
 		}
 	}
-	if ( ! next_mode ) {
+	if ( next_mode == -1 ) {
 #ifdef FBCON_DEBUG
 		fprintf(stderr, "No valid timing line for mode %dx%d\n", w, h);
 #endif
