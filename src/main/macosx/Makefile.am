@@ -4,10 +4,6 @@
 # experience knows how to do this properly?
 
 if TARGET_MACOSX
-masternibdatadir = $(datadir)/sdl/SDLMain.nib
-masternibdata_DATA =		\
-	SDLMain.nib
-
 nibdatadir = $(datadir)/sdl
 nibdata_DATA =			\
 	SDLMain.nib/classes.nib	\
