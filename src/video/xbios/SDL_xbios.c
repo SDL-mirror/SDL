@@ -51,12 +51,13 @@ static char rcsid =
 #include "SDL_events_c.h"
 
 #include "SDL_ataric2p_s.h"
-#include "SDL_ataric2p060_c.h"
 #include "SDL_atarievents_c.h"
 #include "SDL_atarimxalloc_c.h"
 #include "SDL_xbios.h"
 
 #define XBIOS_VID_DRIVER_NAME "xbios"
+
+/*#define DEBUG_VIDEO_XBIOS 1*/
 
 /* Initialization/Query functions */
 static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat);
@@ -185,8 +186,6 @@ static SDL_VideoDevice *XBIOS_CreateDevice(int devindex)
 		return(0);
 	}
 	memset(device->hidden, 0, (sizeof *device->hidden));
-
-	atari_test_cpu060_present();
 
 	/* Video functions */
 	device->VideoInit = XBIOS_VideoInit;
@@ -386,13 +385,7 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	this->info.video_mem = (Uint32) Atari_SysMalloc(-1L, MX_STRAM);
 
 	/* Init chunky to planar routine */
-	Atari_C2pInit = Atari_C2pInit8;
-	if (atari_cpu060_avail) {
-		Atari_C2pConvert = Atari_C2pConvert8_060;
-	} else {
-		Atari_C2pConvert = Atari_C2pConvert8;
-	}
-	Atari_C2pInit();
+	SDL_Atari_C2pConvert = SDL_Atari_C2pConvert8;
 
 	/* We're done! */
 	return(0);
@@ -458,21 +451,11 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 	new_video_mode = XBIOS_videomodes[bpp][mode];
 	new_depth = new_video_mode->depth;
 	if (new_depth == 4) {
-		Atari_C2pInit = Atari_C2pInit4;
-		if (atari_cpu060_avail) {
-			Atari_C2pConvert = Atari_C2pConvert4_060;
-		} else {
-			Atari_C2pConvert = Atari_C2pConvert4;
-		}
+		SDL_Atari_C2pConvert = SDL_Atari_C2pConvert4;
 		new_depth=8;
 		modeflags |= SDL_SWSURFACE;
 	} else if (new_depth == 8) {
-		Atari_C2pInit = Atari_C2pInit8;
-		if (atari_cpu060_avail) {
-			Atari_C2pConvert = Atari_C2pConvert8_060;
-		} else {
-			Atari_C2pConvert = Atari_C2pConvert8;
-		}
+		SDL_Atari_C2pConvert = SDL_Atari_C2pConvert8;
 		modeflags |= SDL_SWSURFACE|SDL_HWPALETTE;
 	} else {
 		modeflags |= SDL_HWSURFACE;
@@ -547,11 +530,15 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 	XBIOS_fbnum = 0;
 
 	/* Now set the video mode */
+#ifndef DEBUG_VIDEO_XBIOS
 	Setscreen(-1,XBIOS_screens[0],-1);
+#endif
 
 	switch(XBIOS_cvdo >> 16) {
 		case VDO_ST:
+#ifndef DEBUG_VIDEO_XBIOS
 			Setscreen(-1,-1,new_video_mode->number);
+#endif
 			/* Reset palette */
 			for (i=0;i<16;i++) {
 				int c;
@@ -564,10 +551,14 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 
 				TT_palette[i]= c;
 			}
+#ifndef DEBUG_VIDEO_XBIOS
 			Setpalette(TT_palette);
+#endif
 			break;
 		case VDO_STE:
+#ifndef DEBUG_VIDEO_XBIOS
 			Setscreen(-1,-1,new_video_mode->number);
+#endif
 			/* Reset palette */
 			for (i=0;i<16;i++)
 			{
@@ -576,13 +567,19 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 				c=((i&1)<<3)|((i>>1)&7);
 				TT_palette[i]=(c<<8)|(c<<4)|c;
 			}
+#ifndef DEBUG_VIDEO_XBIOS
 			Setpalette(TT_palette);
+#endif
 			break;
 		case VDO_TT:
+#ifndef DEBUG_VIDEO_XBIOS
 			EsetShift(new_video_mode->number);
+#endif
 			break;
 		case VDO_F30:
+#ifndef DEBUG_VIDEO_XBIOS
 			Vsetmode(new_video_mode->number);
+#endif
 			break;
 	}
 
@@ -651,7 +648,7 @@ static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 			destination += x1;
 
 			/* Convert chunky to planar screen */
-			Atari_C2pConvert(
+			SDL_Atari_C2pConvert(
 				source,
 				destination,
 				x2-x1,
@@ -663,7 +660,9 @@ static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 		}
 	}
 
+#ifndef DEBUG_VIDEO_XBIOS
 	Setscreen(-1,XBIOS_screens[XBIOS_fbnum],-1);
+#endif
 	Vsync();
 
 	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
@@ -688,7 +687,14 @@ static int XBIOS_FlipHWSurface(_THIS, SDL_Surface *surface)
 		destscr += destx;
 
 		/* Convert chunky to planar screen */
-		Atari_C2pConvert(
+#ifdef DEBUG_VIDEO_XBIOS
+		printf("C2p:\n");
+		printf(" Source: Adr=0x%08x, Pitch=%d\n", surface->pixels, surface->pitch);
+		printf(" Dest: Adr=0x%08x, Pitch=%d\n", destscr, XBIOS_pitch);
+		printf(" Size: %dx%d, dblline=%d\n", surface->w, surface->h, XBIOS_doubleline);
+		fflush(stdout);
+#endif
+		SDL_Atari_C2pConvert(
 			surface->pixels,
 			destscr,
 			surface->w,
@@ -699,7 +705,9 @@ static int XBIOS_FlipHWSurface(_THIS, SDL_Surface *surface)
 		);
 	}
 
+#ifndef DEBUG_VIDEO_XBIOS
 	Setscreen(-1,XBIOS_screens[XBIOS_fbnum],-1);
+#endif
 	Vsync();
 
 	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
@@ -728,7 +736,7 @@ static int XBIOS_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors
 
 				TT_palette[firstcolor+i]=((r*30)+(v*59)+(b*11))/100;
 			}
-			Atari_C2pConvert4_pal(TT_palette); /* convert the lighting */
+			SDL_Atari_C2pConvert4_pal(TT_palette); /* convert the lighting */
 			break;
 		case VDO_TT:
 			for(i = 0; i < ncolors; i++)
@@ -739,7 +747,9 @@ static int XBIOS_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors
 					
 				TT_palette[i]=((r>>4)<<8)|((v>>4)<<4)|(b>>4);
 			}
+#ifndef DEBUG_VIDEO_XBIOS
 			EsetPalette(firstcolor,ncolors,TT_palette);
+#endif
 			break;
 		case VDO_F30:
 			for(i = 0; i < ncolors; i++)
@@ -750,7 +760,9 @@ static int XBIOS_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors
 
 				F30_palette[i]=(r<<16)|(v<<8)|b;
 			}
+#ifndef DEBUG_VIDEO_XBIOS
 			VsetRGB(firstcolor,ncolors,F30_palette);
+#endif
 			break;
 	}
 
