@@ -30,35 +30,29 @@ static char rcsid =
 
 #include "SDL_types.h"
 
-#ifdef __ELF__
-#define ASM_VAR(X) _##X
-#else
-#define ASM_VAR(X) X
-#endif
+static unsigned int  MMX_0080w[]    = {0x00800080, 0x00800080};
+static unsigned int  MMX_00FFw[]    = {0x00ff00ff, 0x00ff00ff}; 
+static unsigned int  MMX_FF00w[]    = {0xff00ff00, 0xff00ff00}; 
 
-static unsigned int  ASM_VAR(MMX_0080w)[]    = {0x00800080, 0x00800080};
-static unsigned int  ASM_VAR(MMX_00FFw)[]    = {0x00ff00ff, 0x00ff00ff}; 
-static unsigned int  ASM_VAR(MMX_FF00w)[]    = {0xff00ff00, 0xff00ff00}; 
+static unsigned short MMX_Ycoeff[]  = {0x004a, 0x004a, 0x004a, 0x004a}; 
 
-static unsigned short ASM_VAR(MMX_Ycoeff)[]  = {0x004a, 0x004a, 0x004a, 0x004a}; 
+static unsigned short MMX_UbluRGB[] = {0x0072, 0x0072, 0x0072, 0x0072};    
+static unsigned short MMX_VredRGB[] = {0x0059, 0x0059, 0x0059, 0x0059};  
+static unsigned short MMX_UgrnRGB[] = {0xffea, 0xffea, 0xffea, 0xffea}; 
+static unsigned short MMX_VgrnRGB[] = {0xffd2, 0xffd2, 0xffd2, 0xffd2};  
 
-static unsigned short ASM_VAR(MMX_UbluRGB)[] = {0x0072, 0x0072, 0x0072, 0x0072};    
-static unsigned short ASM_VAR(MMX_VredRGB)[] = {0x0059, 0x0059, 0x0059, 0x0059};  
-static unsigned short ASM_VAR(MMX_UgrnRGB)[] = {0xffea, 0xffea, 0xffea, 0xffea}; 
-static unsigned short ASM_VAR(MMX_VgrnRGB)[] = {0xffd2, 0xffd2, 0xffd2, 0xffd2};  
+static unsigned short MMX_Ublu5x5[] = {0x0081, 0x0081, 0x0081, 0x0081};
+static unsigned short MMX_Vred5x5[] = {0x0066, 0x0066, 0x0066, 0x0066};
+static unsigned short MMX_Ugrn555[] = {0xffe7, 0xffe7, 0xffe7, 0xffe7};
+static unsigned short MMX_Vgrn555[] = {0xffcc, 0xffcc, 0xffcc, 0xffcc};
+static unsigned short MMX_Ugrn565[] = {0xffe8, 0xffe8, 0xffe8, 0xffe8};
+static unsigned short MMX_Vgrn565[] = {0xffcd, 0xffcd, 0xffcd, 0xffcd};
 
-static unsigned short ASM_VAR(MMX_Ublu5x5)[] = {0x0081, 0x0081, 0x0081, 0x0081};
-static unsigned short ASM_VAR(MMX_Vred5x5)[] = {0x0066, 0x0066, 0x0066, 0x0066};
-static unsigned short ASM_VAR(MMX_Ugrn555)[] = {0xffe7, 0xffe7, 0xffe7, 0xffe7};
-static unsigned short ASM_VAR(MMX_Vgrn555)[] = {0xffcc, 0xffcc, 0xffcc, 0xffcc};
-static unsigned short ASM_VAR(MMX_Ugrn565)[] = {0xffe8, 0xffe8, 0xffe8, 0xffe8};
-static unsigned short ASM_VAR(MMX_Vgrn565)[] = {0xffcd, 0xffcd, 0xffcd, 0xffcd};
-
-static unsigned short ASM_VAR(MMX_red555)[]  = {0x7c00, 0x7c00, 0x7c00, 0x7c00};
-static unsigned short ASM_VAR(MMX_red565)[]  = {0xf800, 0xf800, 0xf800, 0xf800};
-static unsigned short ASM_VAR(MMX_grn555)[]  = {0x03e0, 0x03e0, 0x03e0, 0x03e0};
-static unsigned short ASM_VAR(MMX_grn565)[]  = {0x07e0, 0x07e0, 0x07e0, 0x07e0};
-static unsigned short ASM_VAR(MMX_blu5x5)[]  = {0x001f, 0x001f, 0x001f, 0x001f};
+static unsigned short MMX_red555[]  = {0x7c00, 0x7c00, 0x7c00, 0x7c00};
+static unsigned short MMX_red565[]  = {0xf800, 0xf800, 0xf800, 0xf800};
+static unsigned short MMX_grn555[]  = {0x03e0, 0x03e0, 0x03e0, 0x03e0};
+static unsigned short MMX_grn565[]  = {0x07e0, 0x07e0, 0x07e0, 0x07e0};
+static unsigned short MMX_blu5x5[]  = {0x001f, 0x001f, 0x001f, 0x001f};
 
 /**
    This MMX assembler is my first assembler/MMX program ever.
@@ -239,13 +233,13 @@ void ColorRGBDitherYV12MMX1X( int *colortab, Uint32 *rgb_2_pix,
 		 :
 		 : "m" (cr), "r"(cb),"r"(lum),
 		 "r"(row1),"r"(cols),"r"(row2),"m"(x),"m"(y),"m"(mod),
-         [_MMX_0080w] "m" (*_MMX_0080w),
-         [_MMX_00FFw] "m" (*_MMX_00FFw),
-         [_MMX_FF00w] "m" (*_MMX_FF00w),
-         [_MMX_VgrnRGB] "m" (*_MMX_VgrnRGB),
-         [_MMX_VredRGB] "m" (*_MMX_VredRGB),
-         [_MMX_UgrnRGB] "m" (*_MMX_UgrnRGB),
-         [_MMX_UbluRGB] "m" (*_MMX_UbluRGB)
+         [_MMX_0080w] "m" (*MMX_0080w),
+         [_MMX_00FFw] "m" (*MMX_00FFw),
+         [_MMX_FF00w] "m" (*MMX_FF00w),
+         [_MMX_VgrnRGB] "m" (*MMX_VgrnRGB),
+         [_MMX_VredRGB] "m" (*MMX_VredRGB),
+         [_MMX_UgrnRGB] "m" (*MMX_UgrnRGB),
+         [_MMX_UbluRGB] "m" (*MMX_UbluRGB)
 		 );
 }
 
@@ -417,18 +411,18 @@ void Color565DitherYV12MMX1X( int *colortab, Uint32 *rgb_2_pix,
 	 "jl             1b\n"
          "emms\n"
 	 "popl %%ebx\n"
-         :
-         :"m" (cr), "r"(cb),"r"(lum),
+	:
+	:"m" (cr), "r"(cb),"r"(lum),
 	 "r"(row1),"r"(cols),"r"(row2),"m"(x),"m"(y),"m"(mod),
-     [_MMX_0080w] "m" (*_MMX_0080w),
- [_MMX_Ugrn565] "m" (*_MMX_Ugrn565),
- [_MMX_Ublu5x5] "m" (*_MMX_Ublu5x5),
- [_MMX_00FFw] "m" (*_MMX_00FFw),
- [_MMX_Vgrn565] "m" (*_MMX_Vgrn565),
- [_MMX_Vred5x5] "m" (*_MMX_Vred5x5),
- [_MMX_Ycoeff] "m" (*_MMX_Ycoeff),
- [_MMX_red565] "m" (*_MMX_red565),
- [_MMX_grn565] "m" (*_MMX_grn565)
+	[_MMX_0080w] "m" (*MMX_0080w),
+	[_MMX_Ugrn565] "m" (*MMX_Ugrn565),
+	[_MMX_Ublu5x5] "m" (*MMX_Ublu5x5),
+	[_MMX_00FFw] "m" (*MMX_00FFw),
+	[_MMX_Vgrn565] "m" (*MMX_Vgrn565),
+	[_MMX_Vred5x5] "m" (*MMX_Vred5x5),
+	[_MMX_Ycoeff] "m" (*MMX_Ycoeff),
+	[_MMX_red565] "m" (*MMX_red565),
+	[_MMX_grn565] "m" (*MMX_grn565)
          );
 }
 
