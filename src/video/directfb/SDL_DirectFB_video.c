@@ -189,10 +189,10 @@ static DFBSurfacePixelFormat GetFormatForBpp (int bpp, IDirectFBDisplayLayer *la
   return DSPF_UNKNOWN;
 }
 
-static DFBEnumerationResult EnumModesCallback (unsigned int  width,
-                                               unsigned int  height,
-                                               unsigned int  bpp,
-                                               void         *data)
+static DFBEnumerationResult EnumModesCallback (int  width,
+                                               int  height,
+                                               int  bpp,
+                                               void *data)
 {
   SDL_VideoDevice *this = (SDL_VideoDevice *)data;
   struct DirectFBEnumRect *enumrect;
@@ -206,8 +206,8 @@ static DFBEnumerationResult EnumModesCallback (unsigned int  width,
       return DFENUM_CANCEL;
     }
 
-  enumrect->r.w  = width;
-  enumrect->r.h  = height;
+  enumrect->r.w  = (Uint16)width;
+  enumrect->r.h  = (Uint16)height;
   enumrect->next = enumlist;
 
   enumlist = enumrect;
@@ -1156,11 +1156,11 @@ int DirectFB_ShowWMCursor(_THIS, WMcursor *cursor)
   /* We can only hide or show the default cursor */
   if ( cursor == NULL )
     {
-      SetCursorOpacity(HIDDEN->layer, 0);
+      HIDDEN->layer->SetCursorOpacity(HIDDEN->layer, 0x00);
     }
     else
     {
-      SetCursorOpacity(HIDDEN->layer, 256);
+      HIDDEN->layer->SetCursorOpacity(HIDDEN->layer, 0xFF);
     }
   return 1;
 }
