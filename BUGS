@@ -46,8 +46,6 @@ BeOS:
 
 	Continuous relative mouse motion is not implemented.
 
-	The CD driver doesn't detect SCSI CD-ROMs yet.
-
 	Wide UNICODE character input (Kanji, etc.) has not been tested.
 	Latin-1 keyboard input works fine.
 
