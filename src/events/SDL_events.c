@@ -91,7 +91,6 @@ void SDL_Unlock_EventThread(void)
 
 static int SDL_GobbleEvents(void *unused)
 {
-	SDL_SetTimerThreaded(2);
 	event_thread = SDL_ThreadID();
 	while ( SDL_EventQ.active ) {
 		SDL_VideoDevice *video = current_video;
@@ -114,7 +113,7 @@ static int SDL_GobbleEvents(void *unused)
 
 		/* Give up the CPU for the rest of our timeslice */
 		SDL_EventLock.safe = 1;
-		if( SDL_timer_running ) {
+		if ( SDL_timer_running ) {
 			SDL_ThreadedTimerCheck();
 		}
 		SDL_Delay(1);
@@ -162,6 +161,8 @@ static int SDL_StartEventThread(Uint32 flags)
 		}
 		SDL_EventLock.safe = 0;
 
+		/* The event thread will handle timers too */
+		SDL_SetTimerThreaded(2);
 		SDL_EventThread = SDL_CreateThread(SDL_GobbleEvents, NULL);
 		if ( SDL_EventThread == NULL ) {
 			return(-1);

@@ -81,6 +81,8 @@ typedef Uint32 (SDLCALL *SDL_TimerCallback)(Uint32 interval);
  * in the same program, as it is implemented using setitimer().  You also
  * should not use this function in multi-threaded applications as signals
  * to multi-threaded apps have undefined behavior in some implementations.
+ *
+ * This function returns 0 if successful, or -1 if there was an error.
  */
 extern DECLSPEC int SDLCALL SDL_SetTimer(Uint32 interval, SDL_TimerCallback callback);
 
