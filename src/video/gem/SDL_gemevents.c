@@ -302,7 +302,7 @@ static void do_mouse(_THIS, short mx, short my, short mb, short ks)
 			SDL_PrivateMouseMotion(0, 1, SDL_AtariXbios_mousex, SDL_AtariXbios_mousey);
 			SDL_AtariXbios_mousex = SDL_AtariXbios_mousey = 0;
 		} else {
-			SDL_PrivateMouseMotion(0, 1, mx, my);
+			SDL_PrivateMouseMotion(0, 0, mx, my);
 		}
 		prevmousex = mx;
 		prevmousey = my;
