@@ -238,24 +238,24 @@ static Uint32 SDL_GetCPUFeatures()
 		if ( CPU_haveMMX() ) {
 			SDL_CPUFeatures |= CPU_HAS_MMX;
 		}
+		if ( CPU_haveMMXExt() ) {
+			SDL_CPUFeatures |= CPU_HAS_MMXEXT;
+		}
 		if ( CPU_have3DNow() ) {
 			SDL_CPUFeatures |= CPU_HAS_3DNOW;
+		}
+		if ( CPU_have3DNowExt() ) {
+			SDL_CPUFeatures |= CPU_HAS_3DNOWEXT;
 		}
 		if ( CPU_haveSSE() ) {
 			SDL_CPUFeatures |= CPU_HAS_SSE;
 		}
+		if ( CPU_haveSSE2() ) {
+			SDL_CPUFeatures |= CPU_HAS_SSE2;
+		}
 		if ( CPU_haveAltiVec() ) {
 			SDL_CPUFeatures |= CPU_HAS_ALTIVEC;
 		}
-      if ( CPU_haveMMXExt() ) {
-         SDL_CPUFeatures |= CPU_HAS_MMXEXT;
-      }
-      if ( CPU_have3DNowExt() ) {
-         SDL_CPUFeatures |= CPU_HAS_3DNOWEXT;
-      }
-      if ( CPU_haveSSE2() ) {
-         SDL_CPUFeatures |= CPU_HAS_SSE2;
-      }
 	}
 	return SDL_CPUFeatures;
 }
