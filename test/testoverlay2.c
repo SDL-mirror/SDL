@@ -251,10 +251,6 @@ ConvertRGBtoYUY2(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 	SDL_UnlockSurface(s);
 }
 
-void Draw()
-{
-}
-
 static void PrintUsage(char *argv0)
 {
     fprintf(stderr, "Usage: %s [arg] [arg] [arg] ...\n", argv0);
@@ -384,7 +380,7 @@ int main(int argc, char **argv)
     }
 
     /* load the trojan moose images */
-    handle=SDL_RWFromFile("moose.dat", "r");
+    handle=SDL_RWFromFile("moose.dat", "rb");
     if (handle==NULL)
     {
         fprintf(stderr, "Can't find the file moose.dat !\n");
@@ -404,7 +400,7 @@ int main(int argc, char **argv)
     }
     atexit(SDL_Quit);
 
-    /* Set 640x480 video mode */
+    /* Set video mode */
     if ( (screen=SDL_SetVideoMode(MOOSEPIC_W*scale, MOOSEPIC_H*scale, 0, SDL_RESIZABLE | SDL_SWSURFACE)) == NULL )
     {
         fprintf(stderr, "Couldn't set video mode: %s\n", 0, SDL_GetError());
