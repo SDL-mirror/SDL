@@ -67,6 +67,8 @@ struct SDL_PrivateVideoData {
 	int screen_image_size;
 	unsigned long long *head_tags_mem;
 	unsigned long long *image_tags_mem;
+	unsigned long long *tex_tags_mem;
+	unsigned long long *scale_tags_mem;
 	int dma_pending;
 };
 /* Old variable names */
@@ -87,6 +89,11 @@ struct SDL_PrivateVideoData {
 #define screen_image_size	(this->hidden->screen_image_size)
 #define head_tags_mem		(this->hidden->head_tags_mem)
 #define image_tags_mem		(this->hidden->image_tags_mem)
+#define tex_tags_mem		(this->hidden->tex_tags_mem)
+#define scale_tags_mem		(this->hidden->scale_tags_mem)
 #define dma_pending		(this->hidden->dma_pending)
 
+/* Shared between the mouse and video code for screen update scaling */
+extern int scaleimage_nonblock(int fd,
+                               unsigned long long *tm, unsigned long long *sm);
 #endif /* _SDL_gsvideo_h */

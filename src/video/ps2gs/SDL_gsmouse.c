@@ -79,7 +79,7 @@ static void GS_MoveCursor(_THIS, SDL_Cursor *cursor, int x, int y)
 	screen->pixels = mapped_mem + screen->offset;
 	screen_updated = 0;
 	if ( cursor_drawn ) {
-		SDL_EraseCursorNoLock(this->screen);
+		SDL_EraseCursorNoLock(screen);
 		cursor_drawn = 0;
 		screen_updated = 1;
 	}
@@ -114,10 +114,17 @@ static void GS_MoveCursor(_THIS, SDL_Cursor *cursor, int x, int y)
 			mouse_y2 = area.y+area.h;
 		}
 		image = screen_image;
-		image.y = screen->offset / screen->pitch + mouse_y1;
+		image.y += screen->offset / screen->pitch + mouse_y1;
 		image.h = mouse_y2 - mouse_y1;
-		image.ptr = mapped_mem + image.y * screen->pitch;
+		image.ptr = mapped_mem +
+		            (image.y - screen_image.y) * screen->pitch;
 		ioctl(console_fd, PS2IOC_LOADIMAGE, &image);
+
+		/* Need to scale offscreen image to TV output */
+		if ( image.y > 0 ) {
+			scaleimage_nonblock(console_fd,
+			                    tex_tags_mem, scale_tags_mem);
+		}
 	}
 
 	/* We're finished */

@@ -235,6 +235,59 @@ static inline int loadimage_nonblock(int fd, struct ps2_image *image, int size,
 	return ioctl(fd, PS2IOC_SENDL, &plist);
 }
 
+static unsigned long long tex_tags[] __attribute__((aligned(16))) = {
+	3 | (1LL << 60),	/* GIFtag */
+	0x0e,			/* A+D */
+	0,			/* 2 */
+	PS2_GS_TEX0_1,
+	(1 << 5) + (1 << 6),
+	PS2_GS_TEX1_1,
+	0,
+	PS2_GS_TEXFLUSH
+};
+static unsigned long long scale_tags[] __attribute__((aligned(16))) = {
+	5 | (1LL << 60),	/* GIFtag */
+	0x0e,			/* A+D */
+	6 + (1 << 4) + (1 << 8),
+	PS2_GS_PRIM,
+	((unsigned long long)0 * 16) + (((unsigned long long)0 * 16) << 16),
+	PS2_GS_UV,
+	((unsigned long long)0 * 16) + (((unsigned long long)0 * 16) << 16),
+	PS2_GS_XYZ2,
+	0,			/* 8 */
+	PS2_GS_UV,
+	0,			/* 10 */
+	PS2_GS_XYZ2
+};
+
+
+int scaleimage_nonblock(int fd, unsigned long long *tm, unsigned long long *sm)
+{
+	struct ps2_plist plist;
+	struct ps2_packet packet[2];
+
+	/* initialize the variables */
+	plist.num = 2;
+	plist.packet = packet;
+
+	packet[0].ptr = tm;
+	packet[0].len = sizeof(tex_tags);
+	packet[1].ptr = sm;
+	packet[1].len = sizeof(scale_tags);
+
+	return ioctl(fd, PS2IOC_SENDL, &plist);
+}
+
+static int power_of_2(int value)
+{
+	int shift;
+
+	for ( shift = 0; (1<<shift) < value; ++shift ) {
+		/* Keep looking */ ;
+	}
+	return(shift);
+}
+
 static int GS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 {
 	struct ps2_screeninfo vinfo;
@@ -261,13 +314,6 @@ static int GS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		SDL_SetError("Couldn't get console pixel format");
 		return(-1);
 	}
-#if 0
-	if ( vinfo.mode != PS2_GS_VESA ) {
-		GS_VideoQuit(this);
-		SDL_SetError("Console must be in VESA video mode");
-		return(-1);
-	}
-#endif
 	switch (vinfo.psm) {
 	    /* Supported pixel formats */
 	    case PS2_GS_PSMCT32:
@@ -308,11 +354,6 @@ static int GS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 static SDL_Rect **GS_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
 {
-	static SDL_Rect GS_tvout_mode;
-	static SDL_Rect *GS_tvout_modes[] = {
-		&GS_tvout_mode,
-		NULL
-	};
 	static SDL_Rect GS_vesa_mode_list[] = {
 		{ 0, 0, 1280, 1024 },
 		{ 0, 0, 1024, 768 },
@@ -326,24 +367,44 @@ static SDL_Rect **GS_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
 		&GS_vesa_mode_list[3],
 		NULL
 	};
+	static SDL_Rect GS_tvout_stretch;
+	static SDL_Rect GS_tvout_mode;
+	static SDL_Rect *GS_tvout_modes[3];
 	SDL_Rect **modes = NULL;
 
-	if ( saved_vinfo.mode == PS2_GS_VESA ) {
-		switch (format->BitsPerPixel) {
-		    case 16:
-		    case 24:
-		    case 32:
+	switch (format->BitsPerPixel) {
+	    case 16:
+	    case 24:
+	    case 32:
+		if ( saved_vinfo.mode == PS2_GS_VESA ) {
 			modes = GS_vesa_modes;
-			break;
-		    default:
-			break;
-		}
-	} else {
-		if ( GS_formatmap[format->BitsPerPixel/8] == saved_vinfo.psm ) {
+		} else {
+			int i, j = 0;
+
+// FIXME - what's wrong with the stretch code at 16 bpp?
+if ( format->BitsPerPixel != 32 ) break;
+			/* Add a mode that we could possibly stretch to */
+			for ( i=0; GS_vesa_modes[i]; ++i ) {
+				if ( (GS_vesa_modes[i]->w == saved_vinfo.w) &&
+				     (GS_vesa_modes[i]->h != saved_vinfo.h) ) {
+					GS_tvout_stretch.w=GS_vesa_modes[i]->w;
+					GS_tvout_stretch.h=GS_vesa_modes[i]->h;
+					GS_tvout_modes[j++] = &GS_tvout_stretch;
+					break;
+				}
+			}
+			/* Add the current TV video mode */
 			GS_tvout_mode.w = saved_vinfo.w;
 			GS_tvout_mode.h = saved_vinfo.h;
+			GS_tvout_modes[j++] = &GS_tvout_mode;
+			GS_tvout_modes[j++] = NULL;
+
+			/* Return the created list of modes */
 			modes = GS_tvout_modes;
 		}
+		break;
+	    default:
+		break;
 	}
 	return(modes);
 }
@@ -368,27 +429,30 @@ static SDL_Surface *GS_SetVideoMode(_THIS, SDL_Surface *current,
 	}
 	if ( (vinfo.w != width) || (vinfo.h != height) ||
 	     (GS_pixelmasks[vinfo.psm].bpp != bpp) ) {
-		switch (width) {
-		    case 640:
-			vinfo.res = PS2_GS_640x480;
-			break;
-		    case 800:
-			vinfo.res = PS2_GS_800x600;
-			break;
-		    case 1024:
-			vinfo.res = PS2_GS_1024x768;
-			break;
-		    case 1280:
-			vinfo.res = PS2_GS_1280x1024;
-			break;
-		    default:
-			SDL_SetError("Unsupported resolution: %dx%d\n",
-			             width, height);
-			return(NULL);
+		/* If we're not in VESA mode, we have to scale resolution */
+		if ( saved_vinfo.mode == PS2_GS_VESA ) {
+			switch (width) {
+			    case 640:
+				vinfo.res = PS2_GS_640x480;
+				break;
+			    case 800:
+				vinfo.res = PS2_GS_800x600;
+				break;
+			    case 1024:
+				vinfo.res = PS2_GS_1024x768;
+				break;
+			    case 1280:
+				vinfo.res = PS2_GS_1280x1024;
+				break;
+			    default:
+				SDL_SetError("Unsupported resolution: %dx%d\n",
+					     width, height);
+				return(NULL);
+			}
+			vinfo.res |= (PS2_GS_75Hz << 8);
+			vinfo.w = width;
+			vinfo.h = height;
 		}
-		vinfo.res |= (PS2_GS_75Hz << 8);
-		vinfo.w = width;
-		vinfo.h = height;
 		vinfo.fbp = 0;
 		vinfo.psm = GS_formatmap[bpp/8];
 		if ( vinfo.psm < 0 ) {
@@ -415,8 +479,8 @@ static SDL_Surface *GS_SetVideoMode(_THIS, SDL_Surface *current,
 
 	/* Set up the new mode framebuffer */
 	current->flags = SDL_FULLSCREEN;
-	current->w = vinfo.w;
-	current->h = vinfo.h;
+	current->w = width;
+	current->h = height;
 	current->pitch = SDL_CalculatePitch(current);
 
 	/* Memory map the DMA area for block memory transfer */
@@ -425,6 +489,9 @@ static SDL_Surface *GS_SetVideoMode(_THIS, SDL_Surface *current,
 		mapped_len = pixels_len +
 		             /* Screen update DMA command area */
 		             sizeof(head_tags) + ((2 * MAXTAGS) * 16);
+		if ( saved_vinfo.mode != PS2_GS_VESA ) {
+			mapped_len += sizeof(tex_tags) + sizeof(scale_tags);
+		}
 		mapped_mem = mmap(0, mapped_len, PROT_READ|PROT_WRITE,
 		                  MAP_SHARED, memory_fd, 0);
 		if ( mapped_mem == MAP_FAILED ) {
@@ -440,12 +507,17 @@ static SDL_Surface *GS_SetVideoMode(_THIS, SDL_Surface *current,
 		screen_image.fbw = (vinfo.w + 63) / 64;
 		screen_image.psm = vinfo.psm;
 		screen_image.x = 0;
-		screen_image.y = 0;
-		screen_image.w = vinfo.w;
-		screen_image.h = vinfo.h;
+		if ( vinfo.h == height ) {
+			screen_image.y = 0;
+		} else {
+			/* Put image offscreen and scale to screen height */
+			screen_image.y = vinfo.h;
+		}
+		screen_image.w = current->w;
+		screen_image.h = current->h;
 
 		/* get screen image data size (qword aligned) */
-		screen_image_size = (vinfo.w * vinfo.h);
+		screen_image_size = (screen_image.w * screen_image.h);
 		switch (screen_image.psm) {
 		    case PS2_GS_PSMCT32:
 			screen_image_size *= 4;
@@ -465,6 +537,28 @@ static SDL_Surface *GS_SetVideoMode(_THIS, SDL_Surface *current,
 		image_tags_mem = (unsigned long long *)
 		                 ((caddr_t)head_tags_mem + sizeof(head_tags));
 		memcpy(head_tags_mem, head_tags, sizeof(head_tags));
+		if ( saved_vinfo.mode != PS2_GS_VESA ) {
+			tex_tags_mem = (unsigned long long *)
+		                 ((caddr_t)image_tags_mem + ((2*MAXTAGS)*16));
+			scale_tags_mem = (unsigned long long *)
+		                 ((caddr_t)tex_tags_mem + sizeof(tex_tags));
+			memcpy(tex_tags_mem, tex_tags, sizeof(tex_tags));
+			tex_tags_mem[2] = 
+				(vinfo.h * vinfo.w) / 64 +
+	          		((unsigned long long)screen_image.fbw << 14) +
+	          		((unsigned long long)screen_image.psm << 20) +
+	          		((unsigned long long)power_of_2(screen_image.w) << 26) +
+	          		((unsigned long long)power_of_2(screen_image.h) << 30) +
+	          		((unsigned long long)1 << 34) +
+	          		((unsigned long long)1 << 35);
+			memcpy(scale_tags_mem, scale_tags, sizeof(scale_tags));
+			scale_tags_mem[8] =
+				((unsigned long long)screen_image.w * 16) +
+			         (((unsigned long long)screen_image.h * 16) << 16);
+			scale_tags_mem[10] =
+				((unsigned long long)vinfo.w * 16) +
+			         (((unsigned long long)vinfo.h * 16) << 16);
+		}
 	}
 	current->pixels = NULL;
 	if ( getenv("SDL_FULLSCREEN_UPDATE") ) {
@@ -554,7 +648,14 @@ static void GS_DMAFullUpdate(_THIS, int numrects, SDL_Rect *rects)
 	loadimage_nonblock(console_fd,
 	                   &screen_image, screen_image_size,
 	                   head_tags_mem, image_tags_mem);
-	dma_pending = 1;
+	if ( screen_image.y > 0 ) {
+		/* Need to scale offscreen image to TV output */
+		ioctl(console_fd, PS2IOC_SENDQCT, 1);
+		dma_pending = 0;
+		scaleimage_nonblock(console_fd, tex_tags_mem, scale_tags_mem);
+	} else {
+		dma_pending = 1;
+	}
 
 	/* We're finished! */
 	SDL_UnlockCursor();

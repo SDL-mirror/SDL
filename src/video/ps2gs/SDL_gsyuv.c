@@ -223,7 +223,7 @@ SDL_Overlay *GS_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SD
 	fbp = screen_image.fbp;
 	fbw = screen_image.fbw;
 	psm = screen_image.psm;
-	y = screen_image.h;	/* Offscreen video memory */
+	y = screen_image.y + screen_image.h;	/* Offscreen video memory */
 	for ( h=height/16; h; --h ) {
 		x = 0;			/* Visible video memory */
 		for ( w=width/16; w; --w ) {
@@ -273,7 +273,7 @@ SDL_Overlay *GS_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SD
 	tex_packet.len = 8 * sizeof(*tags);
 	tags[0] = 3 | (1LL << 60);	/* GIFtag */
 	tags[1] = 0x0e;			/* A+D */
-	tags[2] = (screen_image.h * screen_image.w) / 64 +
+	tags[2] = ((screen_image.y + screen_image.h) * screen_image.w) / 64 +
 	          ((unsigned long long)fbw << 14) +
 	          ((unsigned long long)psm << 20) +
 	          ((unsigned long long)power_of_2(width) << 26) +
@@ -437,6 +437,7 @@ int GS_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *dstrect)
 		     screen->format->BytesPerPixel;
 		y += (screen->offset / screen->pitch);
 	}
+	y += screen_image.y;
 	*hwdata->stretch_x1y1 = (x * 16) + ((y * 16) << 16);
 	x += (unsigned int)dstrect->w;
 	y += (unsigned int)dstrect->h;
