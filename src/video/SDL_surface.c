@@ -692,10 +692,6 @@ int SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, Uint32 color)
 
 /*
  * Lock a surface to directly access the pixels
- * -- Do not call this from any blit function, as SDL_DrawCursor() may recurse
- *    Instead, use:
- *    if ( (surface->flags & SDL_HWSURFACE) == SDL_HWSURFACE )
- *               video->LockHWSurface(video, surface);
  */
 int SDL_LockSurface (SDL_Surface *surface)
 {
@@ -724,10 +720,6 @@ int SDL_LockSurface (SDL_Surface *surface)
 }
 /*
  * Unlock a previously locked surface
- * -- Do not call this from any blit function, as SDL_DrawCursor() may recurse
- *    Instead, use:
- *    if ( (surface->flags & SDL_HWSURFACE) == SDL_HWSURFACE )
- *               video->UnlockHWSurface(video, surface);
  */
 void SDL_UnlockSurface (SDL_Surface *surface)
 {

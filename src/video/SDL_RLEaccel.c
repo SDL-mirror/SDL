@@ -463,10 +463,8 @@ int SDL_RLEBlit(SDL_Surface *src, SDL_Rect *srcrect,
 	unsigned alpha;
 
 	/* Lock the destination if necessary */
-	if ( dst->flags & (SDL_HWSURFACE|SDL_ASYNCBLIT) ) {
-		SDL_VideoDevice *video = current_video;
-		SDL_VideoDevice *this  = current_video;
-		if ( video->LockHWSurface(this, dst) < 0 ) {
+	if ( SDL_MUSTLOCK(dst) ) {
+		if ( SDL_LockSurface(dst) < 0 ) {
 			return(-1);
 		}
 	}
@@ -474,7 +472,7 @@ int SDL_RLEBlit(SDL_Surface *src, SDL_Rect *srcrect,
 	/* Set up the source and destination pointers */
 	x = dstrect->x;
 	y = dstrect->y;
-	dstbuf = (Uint8 *)dst->pixels + dst->offset
+	dstbuf = (Uint8 *)dst->pixels
 	         + y * dst->pitch + x * src->format->BytesPerPixel;
 	srcbuf = (Uint8 *)src->map->sw_data->aux_data;
 
@@ -553,10 +551,8 @@ int SDL_RLEBlit(SDL_Surface *src, SDL_Rect *srcrect,
 
 done:
 	/* Unlock the destination if necessary */
-	if ( dst->flags & (SDL_HWSURFACE|SDL_ASYNCBLIT) ) {
-		SDL_VideoDevice *video = current_video;
-		SDL_VideoDevice *this  = current_video;
-		video->UnlockHWSurface(this, dst);
+	if ( SDL_MUSTLOCK(dst) ) {
+		SDL_UnlockSurface(dst);
 	}
 	return(0);
 }
@@ -733,17 +729,15 @@ int SDL_RLEAlphaBlit(SDL_Surface *src, SDL_Rect *srcrect,
     SDL_PixelFormat *df = dst->format;
 
     /* Lock the destination if necessary */
-    if(dst->flags & (SDL_HWSURFACE|SDL_ASYNCBLIT)) {
-	SDL_VideoDevice *video = current_video;
-	SDL_VideoDevice *this  = current_video;
-	if(video->LockHWSurface(this, dst) < 0) {
+    if ( SDL_MUSTLOCK(dst) ) {
+	if ( SDL_LockSurface(dst) < 0 ) {
 	    return -1;
 	}
     }
 
     x = dstrect->x;
     y = dstrect->y;
-    dstbuf = (Uint8 *)dst->pixels + dst->offset
+    dstbuf = (Uint8 *)dst->pixels
 	     + y * dst->pitch + x * df->BytesPerPixel;
     srcbuf = (Uint8 *)src->map->sw_data->aux_data + sizeof(RLEDestFormat);
 
@@ -874,10 +868,8 @@ int SDL_RLEAlphaBlit(SDL_Surface *src, SDL_Rect *srcrect,
 
  done:
     /* Unlock the destination if necessary */
-    if(dst->flags & (SDL_HWSURFACE|SDL_ASYNCBLIT)) {
-	SDL_VideoDevice *video = current_video;
-	SDL_VideoDevice *this  = current_video;
-	video->UnlockHWSurface(this, dst);
+    if ( SDL_MUSTLOCK(dst) ) {
+	SDL_UnlockSurface(dst);
     }
     return 0;
 }
@@ -1117,7 +1109,7 @@ static int RLEAlphaSurface(SDL_Surface *surface)
 	int x, y;
 	int h = surface->h, w = surface->w;
 	SDL_PixelFormat *sf = surface->format;
-	Uint32 *src = (Uint32 *)((Uint8 *)surface->pixels + surface->offset);
+	Uint32 *src = (Uint32 *)surface->pixels;
 	Uint8 *lastline = dst;	/* end of last non-blank line */
 
 	/* opaque counts are 8 or 16 bits, depending on target depth */
@@ -1303,7 +1295,7 @@ static int RLEColorkeySurface(SDL_Surface *surface)
 	}
 
 	/* Set up the conversion */
-	srcbuf = (Uint8 *)surface->pixels+surface->offset;
+	srcbuf = (Uint8 *)surface->pixels;
 	curbuf = srcbuf;
 	maxn = bpp == 4 ? 65535 : 255;
 	skip = run = 0;
@@ -1409,10 +1401,8 @@ int SDL_RLESurface(SDL_Surface *surface)
 	}
 
 	/* Lock the surface if it's in hardware */
-	if ( surface->flags & (SDL_HWSURFACE|SDL_ASYNCBLIT) ) {
-		SDL_VideoDevice *video = current_video;
-		SDL_VideoDevice *this  = current_video;
-		if ( video->LockHWSurface(this, surface) < 0 ) {
+	if ( SDL_MUSTLOCK(surface) ) {
+		if ( SDL_LockSurface(surface) < 0 ) {
 			return(-1);
 		}
 	}
@@ -1429,10 +1419,8 @@ int SDL_RLESurface(SDL_Surface *surface)
 	}
 
 	/* Unlock the surface if it's in hardware */
-	if ( surface->flags & (SDL_HWSURFACE|SDL_ASYNCBLIT) ) {
-		SDL_VideoDevice *video = current_video;
-		SDL_VideoDevice *this  = current_video;
-		video->UnlockHWSurface(this, surface);
+	if ( SDL_MUSTLOCK(surface) ) {
+		SDL_UnlockSurface(surface);
 	}
 
 	if(retcode < 0)

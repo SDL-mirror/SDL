@@ -50,10 +50,8 @@ static int SDL_SoftBlit(SDL_Surface *src, SDL_Rect *srcrect,
 
 	/* Lock the destination if it's in hardware */
 	dst_locked = 0;
-	if ( dst->flags & (SDL_HWSURFACE|SDL_ASYNCBLIT) ) {
-		SDL_VideoDevice *video = current_video;
-		SDL_VideoDevice *this  = current_video;
-		if ( video->LockHWSurface(this, dst) < 0 ) {
+	if ( SDL_MUSTLOCK(dst) ) {
+		if ( SDL_LockSurface(dst) < 0 ) {
 			okay = 0;
 		} else {
 			dst_locked = 1;
@@ -61,20 +59,12 @@ static int SDL_SoftBlit(SDL_Surface *src, SDL_Rect *srcrect,
 	}
 	/* Lock the source if it's in hardware */
 	src_locked = 0;
-	if ( src->flags & (SDL_HWSURFACE|SDL_ASYNCBLIT) ) {
-		SDL_VideoDevice *video = current_video;
-		SDL_VideoDevice *this  = current_video;
-		if ( video->LockHWSurface(this, src) < 0 ) {
+	if ( SDL_MUSTLOCK(src) ) {
+		if ( SDL_LockSurface(src) < 0 ) {
 			okay = 0;
 		} else {
 			src_locked = 1;
 		}
-	}
-
-	/* Unencode the destination if it's RLE encoded */
-	if ( dst->flags & SDL_RLEACCEL ) {
-		SDL_UnRLESurface(dst, 1);
-		dst->flags |= SDL_RLEACCEL;	/* save accel'd state */
 	}
 
 	/* Set up source and destination buffer pointers, and BLIT! */
@@ -83,13 +73,13 @@ static int SDL_SoftBlit(SDL_Surface *src, SDL_Rect *srcrect,
 		SDL_loblit RunBlit;
 
 		/* Set up the blit information */
-		info.s_pixels = (Uint8 *)src->pixels + src->offset +
+		info.s_pixels = (Uint8 *)src->pixels +
 				(Uint16)srcrect->y*src->pitch +
 				(Uint16)srcrect->x*src->format->BytesPerPixel;
 		info.s_width = srcrect->w;
 		info.s_height = srcrect->h;
 		info.s_skip=src->pitch-info.s_width*src->format->BytesPerPixel;
-		info.d_pixels = (Uint8 *)dst->pixels + dst->offset +
+		info.d_pixels = (Uint8 *)dst->pixels +
 				(Uint16)dstrect->y*dst->pitch +
 				(Uint16)dstrect->x*dst->format->BytesPerPixel;
 		info.d_width = dstrect->w;
@@ -105,22 +95,12 @@ static int SDL_SoftBlit(SDL_Surface *src, SDL_Rect *srcrect,
 		RunBlit(&info);
 	}
 
-	/* Re-encode the destination if it's RLE encoded */
-	if ( dst->flags & SDL_RLEACCEL ) {
-	        dst->flags &= ~SDL_RLEACCEL; /* stop lying */
-		SDL_RLESurface(dst);
-	}
-
 	/* We need to unlock the surfaces if they're locked */
 	if ( dst_locked ) {
-		SDL_VideoDevice *video = current_video;
-		SDL_VideoDevice *this  = current_video;
-		video->UnlockHWSurface(this, dst);
+		SDL_UnlockSurface(dst);
 	}
 	if ( src_locked ) {
-		SDL_VideoDevice *video = current_video;
-		SDL_VideoDevice *this  = current_video;
-		video->UnlockHWSurface(this, src);
+		SDL_UnlockSurface(src);
 	}
 	/* Blit is done! */
 	return(okay ? 0 : -1);
