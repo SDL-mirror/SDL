@@ -79,7 +79,7 @@ static int WIN_GL_ResetWindow(_THIS)
 	return(status);
 }
 
-static int Init_WGL_ARB_extensions(_THIS)
+static void Init_WGL_ARB_extensions(_THIS)
 {
 	HWND hwnd;
 	HDC hdc;
