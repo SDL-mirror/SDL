@@ -146,10 +146,15 @@ static void SDL_DelThread(SDL_Thread *thread)
 			}
 		}
 		if ( i < SDL_numthreads ) {
-			--SDL_numthreads;
-			while ( i < SDL_numthreads ) {
-				SDL_Threads[i] = SDL_Threads[i+1];
-				++i;
+			if ( --SDL_numthreads > 0 ) {
+				while ( i < SDL_numthreads ) {
+					SDL_Threads[i] = SDL_Threads[i+1];
+					++i;
+				}
+			} else {
+				SDL_maxthreads = 0;
+				free(SDL_Threads);
+				SDL_Threads = NULL;
 			}
 #ifdef DEBUG_THREADS
 			printf("Deleting thread (%d left - %d max)\n",
