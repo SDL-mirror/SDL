@@ -15,6 +15,12 @@ SUFFIXES = .asm
 noinst_LTLIBRARIES = libhermes.la
 
 libhermes_la_SOURCES = $(PORTABLE_SRCS)
+am_libhermes_la_OBJECTS =	\
+	mmx_main.lo		\
+	mmxp2_32.lo		\
+	x86_main.lo		\
+	x86p_16.lo		\
+	x86p_32.lo
 
 # The hermes library sources
 PORTABLE_SRCS = 		\
