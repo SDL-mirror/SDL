@@ -631,17 +631,17 @@ static void DGA_FreeHWSurfaces(_THIS)
 	surfaces.next = NULL;
 }
 
-static __inline__ void DGA_AddDirtySurface(SDL_Surface *surface)
+static __inline__ void DGA_AddBusySurface(SDL_Surface *surface)
 {
 	((vidmem_bucket *)surface->hwdata)->dirty = 1;
 }
 
-static __inline__ int DGA_IsSurfaceDirty(SDL_Surface *surface)
+static __inline__ int DGA_IsSurfaceBusy(SDL_Surface *surface)
 {
 	return ((vidmem_bucket *)surface->hwdata)->dirty;
 }
 
-static __inline__ void DGA_WaitDirtySurfaces(_THIS)
+static __inline__ void DGA_WaitBusySurfaces(_THIS)
 {
 	vidmem_bucket *bucket;
 
@@ -783,7 +783,7 @@ static void DGA_FreeHWSurface(_THIS, SDL_Surface *surface)
 	surface->hwdata = NULL;
 }
 
-static __inline__ void dst_to_xy(_THIS, SDL_Surface *dst, int *x, int *y)
+static __inline__ void DGA_dst_to_xy(_THIS, SDL_Surface *dst, int *x, int *y)
 {
 	*x = (long)((Uint8 *)dst->pixels - memory_base)%memory_pitch;
 	*y = (long)((Uint8 *)dst->pixels - memory_base)/memory_pitch;
@@ -805,7 +805,7 @@ static int DGA_FillHWRect(_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color)
 			/* Keep waiting for the hardware ... */ ;
 		was_flipped = 0;
 	}
-	dst_to_xy(this, dst, &x, &y);
+	DGA_dst_to_xy(this, dst, &x, &y);
 	x += rect->x;
 	y += rect->y;
 	w = rect->w;
@@ -815,7 +815,7 @@ static int DGA_FillHWRect(_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color)
 #endif
 	XDGAFillRectangle(DGA_Display, DGA_Screen, x, y, w, h, color);
 	XFlush(DGA_Display);
-	DGA_AddDirtySurface(dst);
+	DGA_AddBusySurface(dst);
 	UNLOCK_DISPLAY();
 	return(0);
 }
@@ -836,10 +836,10 @@ static int HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,
 			/* Keep waiting for the hardware ... */ ;
 		was_flipped = 0;
 	}
-	dst_to_xy(this, src, &srcx, &srcy);
+	DGA_dst_to_xy(this, src, &srcx, &srcy);
 	srcx += srcrect->x;
 	srcy += srcrect->y;
-	dst_to_xy(this, dst, &dstx, &dsty);
+	DGA_dst_to_xy(this, dst, &dstx, &dsty);
 	dstx += dstrect->x;
 	dsty += dstrect->y;
 	w = srcrect->w;
@@ -855,8 +855,8 @@ static int HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,
 			srcx, srcy, w, h, dstx, dsty);
 	}
 	XFlush(DGA_Display);
-	DGA_AddDirtySurface(src);
-	DGA_AddDirtySurface(dst);
+	DGA_AddBusySurface(src);
+	DGA_AddBusySurface(dst);
 	UNLOCK_DISPLAY();
 	return(0);
 }
@@ -902,15 +902,15 @@ static int DGA_LockHWSurface(_THIS, SDL_Surface *surface)
 	if ( surface == this->screen ) {
 		SDL_mutexP(hw_lock);
 		LOCK_DISPLAY();
-		if ( DGA_IsSurfaceDirty(surface) ) {
-			DGA_WaitDirtySurfaces(this);
+		if ( DGA_IsSurfaceBusy(surface) ) {
+			DGA_WaitBusySurfaces(this);
 		}
 		DGA_WaitFlip(this);
 		UNLOCK_DISPLAY();
 	} else {
-		if ( DGA_IsSurfaceDirty(surface) ) {
+		if ( DGA_IsSurfaceBusy(surface) ) {
 			LOCK_DISPLAY();
-			DGA_WaitDirtySurfaces(this);
+			DGA_WaitBusySurfaces(this);
 			UNLOCK_DISPLAY();
 		}
 	}
@@ -927,8 +927,8 @@ static int DGA_FlipHWSurface(_THIS, SDL_Surface *surface)
 {
 	/* Wait for vertical retrace and then flip display */
 	LOCK_DISPLAY();
-	if ( DGA_IsSurfaceDirty(this->screen) ) {
-		DGA_WaitDirtySurfaces(this);
+	if ( DGA_IsSurfaceBusy(this->screen) ) {
+		DGA_WaitBusySurfaces(this);
 	}
 	DGA_WaitFlip(this);
 	XDGASetViewport(DGA_Display, DGA_Screen,

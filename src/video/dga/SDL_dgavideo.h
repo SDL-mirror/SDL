@@ -58,12 +58,6 @@ typedef struct vidmem_bucket {
 	struct vidmem_bucket *next;
 } vidmem_bucket;
 
-/* Information about the location of the surface in hardware memory */
-struct private_hwdata {
-	int x;
-	int y;
-};
-
 /* Private display data */
 struct SDL_PrivateVideoData {
 	Display *DGA_Display;
