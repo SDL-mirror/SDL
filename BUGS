@@ -16,6 +16,8 @@ Linux:
 	input translation extension.  I will implement it as requested.
 	Latin-1 keyboard input works fine.
 
+	The keyboard modifiers are not set to the correct state on startup.
+
 	The AAlib, GGI, and SVGAlib video drivers are not heavily tested.
 
 Win32:
@@ -100,6 +102,8 @@ FreeBSD:
 	input translation extension.  I will implement it as requested.
 	Latin-1 keyboard input works fine.
 
+	The keyboard modifiers are not set to the correct state on startup.
+
 Solaris:
 	The joystick functions are not implemented yet.
 
@@ -107,6 +111,8 @@ Solaris:
 	It requires handling of keyboard mapping events and using the XIM
 	input translation extension.  I will implement it as requested.
 	Latin-1 keyboard input works fine.
+
+	The keyboard modifiers are not set to the correct state on startup.
 
 IRIX:
 	The CD-ROM handling doesn't work completely.
@@ -118,6 +124,8 @@ IRIX:
 	input translation extension.  I will implement it as requested.
 	Latin-1 keyboard input works fine.
 
+	The keyboard modifiers are not set to the correct state on startup.
+
 OpenBSD:  -= NOT YET SUPPORTED =-
 	This is reported to work, but I haven't verified this.
 
@@ -125,6 +133,8 @@ OpenBSD:  -= NOT YET SUPPORTED =-
 	It requires handling of keyboard mapping events and using the XIM
 	input translation extension.  I will implement it as requested.
 	Latin-1 keyboard input works fine.
+
+	The keyboard modifiers are not set to the correct state on startup.
 
 OSF/Tru64:  -= NOT YET SUPPORTED =-
 	The audio functions are not implemented yet.
@@ -135,6 +145,8 @@ OSF/Tru64:  -= NOT YET SUPPORTED =-
 	It requires handling of keyboard mapping events and using the XIM
 	input translation extension.  I will implement it as requested.
 	Latin-1 keyboard input works fine.
+
+	The keyboard modifiers are not set to the correct state on startup.
 
 AIX:  -= NOT YET SUPPORTED =-
 	This port has only been tested with AIX 4.3.3
@@ -149,6 +161,8 @@ AIX:  -= NOT YET SUPPORTED =-
 	It requires handling of keyboard mapping events and using the XIM
 	input translation extension.  I will implement it as requested.
 	Latin-1 keyboard input works fine.
+
+	The keyboard modifiers are not set to the correct state on startup.
 
 	The AIX port was done by Carsten.Griwodz@KOM.tu-darmstadt.de
 	More information on this port is available at:
