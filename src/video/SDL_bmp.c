@@ -413,6 +413,8 @@ int SDL_SaveBMP_RW (SDL_Surface *saveme, SDL_RWops *dst, int freedst)
 	}
 
 	if ( surface && (SDL_LockSurface(surface) == 0) ) {
+		const int bw = surface->w*surface->format->BytesPerPixel;
+
 		/* Set the BMP file header values */
 		bfSize = 0;		 /* We'll write this when we're done */
 		bfReserved1 = 0;
@@ -485,11 +487,10 @@ int SDL_SaveBMP_RW (SDL_Surface *saveme, SDL_RWops *dst, int freedst)
 
 		/* Write the bitmap image upside down */
 		bits = (Uint8 *)surface->pixels+(surface->h*surface->pitch);
-		pad  = ((surface->pitch%4) ? (4-(surface->pitch%4)) : 0);
+		pad  = ((bw%4) ? (4-(bw%4)) : 0);
 		while ( bits > (Uint8 *)surface->pixels ) {
 			bits -= surface->pitch;
-			if ( SDL_RWwrite(dst, bits, 1, surface->pitch)
-							!= surface->pitch) {
+			if ( SDL_RWwrite(dst, bits, 1, bw) != bw) {
 				SDL_Error(SDL_EFWRITE);
 				break;
 			}
