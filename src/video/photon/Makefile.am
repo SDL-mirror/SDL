@@ -16,6 +16,8 @@ PH_SRCS = 			\
 	SDL_ph_mouse_c.h	\
 	SDL_ph_video.c		\
 	SDL_ph_video.h		\
+	SDL_ph_gl.c		\
+	SDL_ph_gl.h		\
 	SDL_ph_wm.c		\
 	SDL_ph_wm_c.h		\
 	SDL_phyuv.c		\

@@ -564,6 +564,10 @@ static void SDL_CreateShadowSurface(int depth)
 	return;
 }
 
+#ifdef __QNXNTO__
+    #include <sys/neutrino.h>
+#endif /* __QNXNTO__ */
+
 /*
  * Set the requested video mode, allocating a shadow buffer if necessary.
  */
@@ -738,22 +742,31 @@ SDL_Surface * SDL_SetVideoMode (int width, int height, int bpp, Uint32 flags)
 #ifdef HAVE_OPENGL
 	/* Load GL symbols (before MakeCurrent, where we need glGetString). */
 	if ( flags & (SDL_OPENGL | SDL_OPENGLBLIT) ) {
-#ifndef __QNXNTO__
-#define SDL_PROC(ret,func,params) \
-do { \
-	video->func = SDL_GL_GetProcAddress(#func); \
-	if ( ! video->func ) { \
-		SDL_SetError("Couldn't load GL function: %s\n", #func); \
-		return(NULL); \
-	} \
-} while ( 0 );
-#else
-#define SDL_PROC(ret,func,params) video->func=func;
+
+#ifdef __QNXNTO__
+    #if (_NTO_VERSION < 630)
+       #define __SDL_NOGETPROCADDR__
+    #endif /* 6.3.0 */
 #endif /* __QNXNTO__ */
+
+#ifdef __SDL_NOGETPROCADDR__
+    #define SDL_PROC(ret,func,params) video->func=func;
+#else
+    #define SDL_PROC(ret,func,params) \
+    do { \
+        video->func = SDL_GL_GetProcAddress(#func); \
+        if ( ! video->func ) { \
+            SDL_SetError("Couldn't load GL function: %s\n", #func); \
+        return(NULL); \
+        } \
+    } while ( 0 );
+
+#endif /* __SDL_NOGETPROCADDR__ */
+
 #include "SDL_glfuncs.h"
 #undef SDL_PROC	
 	}
-#endif
+#endif /* HAVE_OPENGL */
 
 	/* If we're running OpenGL, make the context current */
 	if ( (video->screen->flags & SDL_OPENGL) &&

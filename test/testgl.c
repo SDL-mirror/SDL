@@ -744,7 +744,7 @@ int main(int argc, char *argv[])
 		}
 		if ( strncmp(argv[i], "-h", 2) == 0 ) {
  		       printf(
-"Usage: %s [-twice] [-logo] [-slow] [-bpp n] [-gamma n] [-noframe] [-fsaa]\n",
+"Usage: %s [-twice] [-logo] [-slow] [-bpp n] [-gamma n] [-noframe] [-fsaa] [-fullscreen]\n",
  			      argv[0]);
 			exit(0);
 		}

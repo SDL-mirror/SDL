@@ -32,7 +32,6 @@ static char rcsid =
 #include <stdio.h>
 #include <setjmp.h>
 #include <sys/time.h>
-#include <sys/neutrino.h>
 
 #include <Ph.h>
 #include <photon/PkKeyDef.h>

@@ -26,13 +26,20 @@
 #include "SDL_mouse.h"
 #include "SDL_sysvideo.h"
 
+#include <sys/neutrino.h>
+
 #include <Ph.h>
 #include <Pt.h>
 #include <photon/Pg.h>
 #include <photon/PdDirect.h>
 
 #ifdef HAVE_OPENGL
-    #include <photon/PdGL.h>
+    #if (_NTO_VERSION < 630)
+        #include <photon/PdGL.h>
+    #else
+        #include <GL/qnxgl.h>
+        #include <GL/GLPh.h>
+    #endif /* 6.3.0 */
 #endif /* HAVE_OPENGL */
 
 /* Hidden "this" pointer for the video functions */
@@ -68,7 +75,14 @@ struct SDL_PrivateVideoData
     PtWidget_t *Window;                  /* used to handle input events */
     PhImage_t *image;	                 /* used to display image       */
 #ifdef HAVE_OPENGL
-    PdOpenGLContext_t* OGLContext;       /* OpenGL context              */
+    #if (_NTO_VERSION < 630)
+        PdOpenGLContext_t* OGLContext;   /* OpenGL context              */
+        void* OGLBuffers;                /* OpenGL buffers (unused)     */
+    #else
+        qnxglc_t* OGLContext;            /* OpenGL context for the 6.3  */
+        qnxgl_bufs_t* OGLBuffers;        /* OpenGL buffers for the 6.3  */
+    #endif /* 630 */
+
     Uint32 OGLFlags;                     /* OpenGL flags                */
     Uint32 OGLBPP;                       /* OpenGL bpp                  */
 #endif /* HAVE_OPENGL */
@@ -134,6 +148,7 @@ struct SDL_PrivateVideoData
 
 #ifdef HAVE_OPENGL
      #define oglctx               (this->hidden->OGLContext)
+     #define oglbuffers           (this->hidden->OGLBuffers)
      #define oglflags             (this->hidden->OGLFlags)
      #define oglbpp               (this->hidden->OGLBPP)
 #endif /* HAVE_OPENGL */

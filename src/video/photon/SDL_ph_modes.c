@@ -253,7 +253,7 @@ int ph_ToggleFullScreen(_THIS, int on)
     return -1;
 }
 
-int ph_EnterFullScreen(_THIS, SDL_Surface* screen)
+int ph_EnterFullScreen(_THIS, SDL_Surface* screen, int fmode)
 {
     PgDisplaySettings_t settings;
     int mode;
@@ -326,23 +326,29 @@ int ph_EnterFullScreen(_THIS, SDL_Surface* screen)
             if ((this->screen->flags & SDL_OPENGL)==SDL_OPENGL)
             {
 #ifdef HAVE_OPENGL
+    #if (_NTO_VERSION < 630)
+                return 0;
+    #endif /* 6.3.0 */
+#else
+                return 0;
 #endif /* HAVE_OPENGL */
-                return 0;
             }
         }
 
-        if (OCImage.direct_context==NULL)
+        if (fmode==0)
         {
-            OCImage.direct_context=(PdDirectContext_t*)PdCreateDirectContext();
-            if (!OCImage.direct_context)
+            if (OCImage.direct_context==NULL)
             {
-                SDL_SetError("ph_EnterFullScreen(): Can't create direct context !\n");
-                ph_LeaveFullScreen(this);
-                return 0;
+                OCImage.direct_context=(PdDirectContext_t*)PdCreateDirectContext();
+                if (!OCImage.direct_context)
+                {
+                    SDL_SetError("ph_EnterFullScreen(): Can't create direct context !\n");
+                    ph_LeaveFullScreen(this);
+                    return 0;
+                }
             }
+            OCImage.oldDC=PdDirectStart(OCImage.direct_context);
         }
-
-        OCImage.oldDC=PdDirectStart(OCImage.direct_context);
 
         currently_fullscreen = 1;
     }
@@ -360,10 +366,15 @@ int ph_LeaveFullScreen(_THIS)
         if ((this->screen) && ((this->screen->flags & SDL_OPENGL)==SDL_OPENGL))
         {
 #ifdef HAVE_OPENGL
+    #if (_NTO_VERSION < 630)
+            return 0;
+    #endif /* 6.3.0 */
+#else
+            return 0;
 #endif /* HAVE_OPENGL */
-           return 0;
         }
-        else
+
+        /* release routines starts here */
         {
             if (OCImage.direct_context)
             {

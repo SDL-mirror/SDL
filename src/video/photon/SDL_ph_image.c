@@ -26,6 +26,7 @@ static char rcsid =
 #endif
 
 #include <stdlib.h>
+
 #include <Ph.h>
 #include <photon/Pg.h>
 
@@ -34,8 +35,10 @@ static char rcsid =
 #include "SDL_endian.h"
 #include "SDL_video.h"
 #include "SDL_pixels_c.h"
+#include "SDL_ph_video.h"
 #include "SDL_ph_image_c.h"
 #include "SDL_ph_modes_c.h"
+#include "SDL_ph_gl.h"
 
 int ph_SetupImage(_THIS, SDL_Surface *screen)
 {
@@ -189,8 +192,8 @@ int ph_SetupFullScreenImage(_THIS, SDL_Surface* screen)
 {
     OCImage.flags = screen->flags;
 
-    /* Begin direct mode */
-    if (!ph_EnterFullScreen(this, screen))
+    /* Begin direct and fullscreen mode */
+    if (!ph_EnterFullScreen(this, screen, PH_ENTER_DIRECTMODE))
     {
         return -1;
     }
@@ -301,98 +304,30 @@ int ph_SetupFullScreenImage(_THIS, SDL_Surface* screen)
 
 #ifdef HAVE_OPENGL
 
-static int ph_SetupOpenGLContext(_THIS, int width, int height, int bpp, Uint32 flags)
-{
-    PhDim_t dim;
-    uint64_t OGLAttrib[PH_OGL_MAX_ATTRIBS];
-    int exposepost=0;
-    int OGLargc;
-
-    dim.w=width;
-    dim.h=height;
-    
-    if ((oglctx!=NULL) && (oglflags==flags) && (oglbpp==bpp))
-    {
-       PdOpenGLContextResize(oglctx, &dim);
-       PhDCSetCurrent(oglctx);
-       return 0;
-    }
-    else
-    {
-       if (oglctx!=NULL)
-       {
-          PhDCSetCurrent(NULL);
-          PhDCRelease(oglctx);
-          oglctx=NULL;
-          exposepost=1;
-       }
-    }
-
-    OGLargc=0;
-    if (this->gl_config.depth_size)
-    {
-        OGLAttrib[OGLargc++]=PHOGL_ATTRIB_DEPTH_BITS;
-        OGLAttrib[OGLargc++]=this->gl_config.depth_size;
-    }
-    if (this->gl_config.stencil_size)
-    {
-        OGLAttrib[OGLargc++]=PHOGL_ATTRIB_STENCIL_BITS;
-        OGLAttrib[OGLargc++]=this->gl_config.stencil_size;
-    }
-    OGLAttrib[OGLargc++]=PHOGL_ATTRIB_FORCE_SW;
-    if (flags & SDL_FULLSCREEN)
-    {
-        OGLAttrib[OGLargc++]=PHOGL_ATTRIB_FULLSCREEN;
-        OGLAttrib[OGLargc++]=PHOGL_ATTRIB_DIRECT;
-        OGLAttrib[OGLargc++]=PHOGL_ATTRIB_FULLSCREEN_BEST;
-        OGLAttrib[OGLargc++]=PHOGL_ATTRIB_FULLSCREEN_CENTER;
-    }
-    OGLAttrib[OGLargc++]=PHOGL_ATTRIB_NONE;
-
-    if (this->gl_config.double_buffer)
-    {
-        oglctx=PdCreateOpenGLContext(2, &dim, 0, OGLAttrib);
-    }
-    else
-    {
-        oglctx=PdCreateOpenGLContext(1, &dim, 0, OGLAttrib);
-    }
-
-    if (oglctx==NULL)
-    {
-        SDL_SetError("ph_SetupOpenGLContext(): cannot create OpenGL context !\n");
-        return (-1);
-    }
-
-    PhDCSetCurrent(oglctx);
-
-    PtFlush();
-
-    oglflags=flags;
-    oglbpp=bpp;
-
-    if (exposepost!=0)
-    {
-        /* OpenGL context has been recreated, so report about this fact */
-        SDL_PrivateExpose();
-    }
-
-    return 0;
-}
-
 int ph_SetupOpenGLImage(_THIS, SDL_Surface* screen)
 {
-   this->UpdateRects = ph_OpenGLUpdate;
-   screen->pixels=NULL;
-   screen->pitch=NULL;
+    this->UpdateRects = ph_OpenGLUpdate;
+    screen->pixels=NULL;
+    screen->pitch=NULL;
 
-   if (ph_SetupOpenGLContext(this, screen->w, screen->h, screen->format->BitsPerPixel, screen->flags)!=0)
-   {
-      screen->flags &= ~SDL_OPENGL;
-      return -1;
-   }
+    #if (_NTO_VERSION >= 630)
+        if ((screen->flags & SDL_FULLSCREEN) == SDL_FULLSCREEN)
+        {
+            if (!ph_EnterFullScreen(this, screen, PH_IGNORE_DIRECTMODE))
+            {
+                screen->flags &= ~SDL_FULLSCREEN;
+                return -1;
+            }
+        }
+    #endif /* 6.3.0 */
+
+    if (ph_SetupOpenGLContext(this, screen->w, screen->h, screen->format->BitsPerPixel, screen->flags)!=0)
+    {
+        screen->flags &= ~SDL_OPENGL;
+        return -1;
+    }
    
-   return 0;
+    return 0;
 }
 
 #endif /* HAVE_OPENGL */
@@ -405,12 +340,27 @@ void ph_DestroyImage(_THIS, SDL_Surface* screen)
     {
         if (oglctx)
         {
-            PhDCSetCurrent(NULL);
-            PhDCRelease(oglctx);
+            #if (_NTO_VERSION < 630)
+                PhDCSetCurrent(NULL);
+                PhDCRelease(oglctx);
+            #else
+                qnxgl_context_destroy(oglctx);
+                qnxgl_buffers_destroy(oglbuffers);
+                qnxgl_finish();
+            #endif /* 6.3.0 */
             oglctx=NULL;
+            oglbuffers=NULL;
             oglflags=0;
             oglbpp=0;
         }
+
+        #if (_NTO_VERSION >= 630)
+            if (currently_fullscreen)
+            {
+                ph_LeaveFullScreen(this);
+            }
+        #endif /* 6.3.0 */
+
         return;
     }
 #endif /* HAVE_OPENGL */

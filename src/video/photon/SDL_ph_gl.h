@@ -20,28 +20,25 @@
     slouken@libsdl.org
 */
 
-#ifndef __SDL_PH_MODES_H__
-#define __SDL_PH_MODES_H__
-
 #ifdef SAVE_RCSID
-static char rcsid =
- "@(#) $Id$";
-#endif /* SAVE_RCSID */
+    static char rcsid = "@(#) $Id$";
+#endif
+
+#ifndef __SDL_PH_GL_H__
+#define __SDL_PH_GL_H__
 
 #include "SDL_ph_video.h"
 
-#define PH_MAX_VIDEOMODES 127
+#define DEFAULT_OPENGL "/usr/lib/libGL.so"
 
-#define PH_ENTER_DIRECTMODE  0
-#define PH_IGNORE_DIRECTMODE 1
+#ifdef HAVE_OPENGL
+    void  ph_GL_SwapBuffers(_THIS);
+    int   ph_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value);
+    int   ph_GL_LoadLibrary(_THIS, const char* path);
+    void* ph_GL_GetProcAddress(_THIS, const char* proc);
+    int   ph_GL_MakeCurrent(_THIS);
 
-extern SDL_Rect **ph_ListModes(_THIS,SDL_PixelFormat *format, Uint32 flags);
-extern void ph_FreeVideoModes(_THIS);
-extern int ph_ResizeFullScreen(_THIS);
-extern int ph_EnterFullScreen(_THIS, SDL_Surface* screen, int fmode);
-extern int ph_LeaveFullScreen(_THIS);
-extern int ph_GetVideoMode(int width, int height, int bpp);
-extern int get_mode_any_format(int width, int height, int bpp);
-extern int ph_ToggleFullScreen(_THIS, int on);
+    int   ph_SetupOpenGLContext(_THIS, int width, int height, int bpp, Uint32 flags);
+#endif /* HAVE_OPENGL */
 
-#endif /* __SDL_PH_MODES_H__ */
+#endif /* __SDL_PH_GL_H__ */

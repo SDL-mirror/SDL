@@ -89,8 +89,10 @@ int main(int argc,char *argv[])
 	SDL_Event event;
 	int done=0;
 	GLfloat pixels[NB_PIXELS*3];
-#ifdef _WIN32
+#if defined(_WIN32)
 	char *gl_library = "OpenGL32.DLL";
+#elif defined(__QNXNTO__)
+	char *gl_library = "libGL.so.3";
 #else
 	char *gl_library = "libGL.so.1";
 #endif
@@ -122,6 +124,9 @@ int main(int argc,char *argv[])
 		printf("Unable to open video mode : %s\n",SDL_GetError());
 		exit(1);
 	}
+
+	/* Set the window manager title bar */
+	SDL_WM_SetCaption( "SDL Dynamic OpenGL Loading Test", "testdyngl" );
 
 	init_glfuncs(&f);
 

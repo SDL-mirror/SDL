@@ -47,6 +47,7 @@ static char rcsid =
 #include "SDL_ph_events_c.h"
 #include "SDL_ph_mouse_c.h"
 #include "SDL_ph_wm_c.h"
+#include "SDL_ph_gl.h"
 #include "SDL_phyuv_c.h"
 #include "blank_cursor.h"
 
@@ -55,14 +56,6 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current, int width, int 
 static int  ph_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors);
 static void ph_VideoQuit(_THIS);
 static void ph_DeleteDevice(SDL_VideoDevice *device);
-
-#ifdef HAVE_OPENGL
-static void  ph_GL_SwapBuffers(_THIS);
-static int   ph_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value);
-static int   ph_GL_LoadLibrary(_THIS, const char* path);
-static void* ph_GL_GetProcAddress(_THIS, const char* proc);
-static int   ph_GL_MakeCurrent(_THIS);
-#endif /* HAVE_OPENGL */
 
 static int phstatus=-1;
 
@@ -376,6 +369,7 @@ static int ph_VideoInit(_THIS, SDL_PixelFormat* vformat)
 
 #ifdef HAVE_OPENGL
     oglctx=NULL;
+    oglbuffers=NULL;
     oglflags=0;
     oglbpp=0;
 #endif /* HAVE_OPENGL */
@@ -663,57 +657,3 @@ static int ph_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
     return 1;
 }
 
-#ifdef HAVE_OPENGL
-
-static void ph_GL_SwapBuffers(_THIS)
-{
-    PgSetRegion(PtWidgetRid(window));
-    PdOpenGLContextSwapBuffers(oglctx);
-}
-
-static int ph_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
-{
-    switch (attrib)
-    {
-        case SDL_GL_DOUBLEBUFFER:
-             *value=this->gl_config.double_buffer;
-             break;
-        case SDL_GL_STENCIL_SIZE:
-             *value=this->gl_config.stencil_size;
-             break;
-        case SDL_GL_DEPTH_SIZE:
-             *value=this->gl_config.depth_size;
-             break;
-        default:
-             *value=0;
-             return(-1);
-    }
-    return 0;
-}
-
-static int ph_GL_LoadLibrary(_THIS, const char* path)
-{
-   /* if code compiled with HAVE_OPENGL, that mean that library already linked */
-   this->gl_config.driver_loaded = 1;
-
-   return 0;
-}
-
-static void* ph_GL_GetProcAddress(_THIS, const char* proc)
-{
-   return NULL;
-}
-
-static int ph_GL_MakeCurrent(_THIS)
-{
-    PgSetRegion(PtWidgetRid(window));
-
-    if (oglctx!=NULL)
-    {
-        PhDCSetCurrent(oglctx);
-    }
-
-    return 0;
-}
-
-#endif /* HAVE_OPENGL */
