@@ -44,6 +44,7 @@ make
 %install
 rm -rf $RPM_BUILD_ROOT
 make install prefix=$RPM_BUILD_ROOT/%{prefix}
+ln -s libSDL-1.2.so.0 $RPM_BUILD_ROOT/%{prefix}/lib/libSDL-1.1.so.0
 
 %clean
 rm -rf $RPM_BUILD_ROOT
