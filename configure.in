@@ -1307,7 +1307,7 @@ CopyUnixThreadSource()
     if test x$use_pthreads = xyes -o x$use_clone = xyes; then
         # Basic thread creation functions
         COPY_ARCH_SRC(src/thread, linux, SDL_systhread.c)
-        if test x$use_pthreads != xyes; then
+        if test x$use_clone = xyes; then
             COPY_ARCH_SRC(src/thread, linux, clone.S)
         fi
         COPY_ARCH_SRC(src/thread, linux, SDL_systhread_c.h)
