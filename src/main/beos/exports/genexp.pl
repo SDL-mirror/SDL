@@ -9,7 +9,7 @@ while ( ($file = shift(@ARGV)) ) {
 	}
 	$file =~ s,.*/,,;
 	while (<FILE>) {
-		if ( /DECLSPEC.*SDLCALL ([^\s\(]+)/ ) {
+		if ( / DECLSPEC.*SDLCALL ([^\s\(]+)/ ) {
 			print "_$1\n";
 		}
 	}
