@@ -20,4 +20,6 @@ CGX_SRCS = 			\
 	SDL_cgxvideo.c		\
 	SDL_cgxvideo.h		\
 	SDL_cgxwm.c		\
-	SDL_cgxwm_c.h
+	SDL_cgxwm_c.h		\
+	SDL_cgxyuv.c		\
+	SDL_cgxyuv_c.h
