@@ -87,7 +87,7 @@ static int Init_WGL_ARB_extensions(_THIS)
 	int pformat;
 	const char * (WINAPI *wglGetExtensionsStringARB)(HDC) = 0;
 	
-	hwnd = CreateWindow(NULL, "PFormat", WS_POPUP | WS_DISABLED,
+	hwnd = CreateWindow(SDL_Appname, SDL_Appname, WS_POPUP | WS_DISABLED,
 	                    0, 0, 10, 10,
 	                    NULL, NULL, SDL_Instance,NULL);
 	hdc = GetDC(hwnd);
@@ -96,7 +96,9 @@ static int Init_WGL_ARB_extensions(_THIS)
 	SetPixelFormat(hdc, pformat, &GL_pfd);
 
 	hglrc = this->gl_data->wglCreateContext(hdc);
-	this->gl_data->wglMakeCurrent(hdc, hglrc);
+	if ( hglrc ) {
+		this->gl_data->wglMakeCurrent(hdc, hglrc);
+	}
 
 	wglGetExtensionsStringARB = (const char * (WINAPI *)(HDC))
 		this->gl_data->wglGetProcAddress("wglGetExtensionsStringARB");
@@ -118,8 +120,10 @@ static int Init_WGL_ARB_extensions(_THIS)
 		this->gl_data->wgl_arb_pixel_format = 0;
 	}
 	
-	this->gl_data->wglMakeCurrent(NULL, NULL);
-	this->gl_data->wglDeleteContext(hglrc);
+	if ( hglrc ) {
+		this->gl_data->wglMakeCurrent(NULL, NULL);
+		this->gl_data->wglDeleteContext(hglrc);
+	}
 	ReleaseDC(hwnd, hdc);
 	DestroyWindow(hwnd);
 }
