@@ -43,6 +43,8 @@ static char rcsid =
 #include <X11/extensions/Xinerama.h>
 #endif 
 
+#define MAX(a, b)	(a > b ? a : b)
+
 #ifdef XFREE86_VM
 Bool XVidMode(GetModeInfo, (Display *dpy, int scr, XF86VidModeModeInfo *info))
 {
@@ -206,10 +208,15 @@ int X11_GetVideoModes(_THIS)
     int nmodes;
     XF86VidModeModeInfo **modes;
 #endif
-    int i;
+    int i, n;
+    int screen_w;
+    int screen_h;
 
     vm_error = -1;
     use_vidmode = 0;
+    screen_w = DisplayWidth(SDL_Display, SDL_Screen);
+    screen_h = DisplayHeight(SDL_Display, SDL_Screen);
+
 #ifdef XFREE86_VM
     /* Metro-X 4.3.0 and earlier has a broken implementation of
        XF86VidModeGetAllModeLines() - it hangs the client.
@@ -259,19 +266,42 @@ int X11_GetVideoModes(_THIS)
          XVidMode(GetAllModeLines, (SDL_Display, SDL_Screen,&nmodes,&modes)) ) {
 
         qsort(modes, nmodes, sizeof *modes, cmpmodes);
-        SDL_modelist = (SDL_Rect **)malloc((nmodes+1)*sizeof(SDL_Rect *));
+        SDL_modelist = (SDL_Rect **)malloc((nmodes+2)*sizeof(SDL_Rect *));
         if ( SDL_modelist ) {
+            n = 0;
             for ( i=0; i<nmodes; ++i ) {
-                SDL_modelist[i] = (SDL_Rect *)malloc(sizeof(SDL_Rect));
-                if ( SDL_modelist[i] == NULL ) {
+                int w, h;
+
+                /* Check to see if we should add the screen size (Xinerama) */
+                w = modes[i]->hdisplay;
+                h = modes[i]->vdisplay;
+                if ( (screen_w * screen_h) >= (w * h) ) {
+                    if ( (screen_w != w) || (screen_h != h) ) {
+                        SDL_modelist[n] = (SDL_Rect *)malloc(sizeof(SDL_Rect));
+                        if ( SDL_modelist[n] ) {
+                            SDL_modelist[n]->x = 0;
+                            SDL_modelist[n]->y = 0;
+                            SDL_modelist[n]->w = screen_w;
+                            SDL_modelist[n]->h = screen_h;
+                            ++n;
+                        }
+                    }
+                    screen_w = 0;
+                    screen_h = 0;
+                }
+
+                /* Add the size from the video mode list */
+                SDL_modelist[n] = (SDL_Rect *)malloc(sizeof(SDL_Rect));
+                if ( SDL_modelist[n] == NULL ) {
                     break;
                 }
-                SDL_modelist[i]->x = 0;
-                SDL_modelist[i]->y = 0;
-                SDL_modelist[i]->w = modes[i]->hdisplay;
-                SDL_modelist[i]->h = modes[i]->vdisplay;
+                SDL_modelist[n]->x = 0;
+                SDL_modelist[n]->y = 0;
+                SDL_modelist[n]->w = w;
+                SDL_modelist[n]->h = h;
+                ++n;
             }
-            SDL_modelist[i] = NULL;
+            SDL_modelist[n] = NULL;
         }
         XFree(modes);
 
@@ -325,17 +355,17 @@ int X11_GetVideoModes(_THIS)
 
     if ( SDL_modelist == NULL ) {
         SDL_modelist = (SDL_Rect **)malloc((1+1)*sizeof(SDL_Rect *));
-        i = 0;
         if ( SDL_modelist ) {
-            SDL_modelist[i] = (SDL_Rect *)malloc(sizeof(SDL_Rect));
-            if ( SDL_modelist[i] ) {
-                SDL_modelist[i]->x = 0;
-                SDL_modelist[i]->y = 0;
-                SDL_modelist[i]->w = DisplayWidth(SDL_Display, SDL_Screen);
-                SDL_modelist[i]->h = DisplayHeight(SDL_Display, SDL_Screen);
-                ++i;
+            n = 0;
+            SDL_modelist[n] = (SDL_Rect *)malloc(sizeof(SDL_Rect));
+            if ( SDL_modelist[n] ) {
+                SDL_modelist[n]->x = 0;
+                SDL_modelist[n]->y = 0;
+                SDL_modelist[n]->w = screen_w;
+                SDL_modelist[n]->h = screen_h;
+                ++n;
             }
-            SDL_modelist[i] = NULL;
+            SDL_modelist[n] = NULL;
         }
     }
 
@@ -425,6 +455,11 @@ int X11_ResizeFullScreen(_THIS)
 {
     int x, y;
     int real_w, real_h;
+    int screen_w;
+    int screen_h;
+
+    screen_w = DisplayWidth(SDL_Display, SDL_Screen);
+    screen_h = DisplayHeight(SDL_Display, SDL_Screen);
 
     x = xinerama_x;
     y = xinerama_y;
@@ -434,6 +469,12 @@ int X11_ResizeFullScreen(_THIS)
         set_best_resolution(this, current_w, current_h);
         move_cursor_to(this, x, y);
         get_real_resolution(this, &real_w, &real_h);
+        if ( current_w > real_w ) {
+            real_w = MAX(real_w, screen_w);
+        }
+        if ( current_h > real_h ) {
+            real_h = MAX(real_h, screen_h);
+        }
         XMoveResizeWindow(SDL_Display, FSwindow, x, y, real_w, real_h);
         move_cursor_to(this, real_w/2, real_h/2);
 
@@ -464,6 +505,8 @@ int X11_EnterFullScreen(_THIS)
     int i, nwindows;
 #endif
     int real_w, real_h;
+    int screen_w;
+    int screen_h;
 
     okay = 1;
     if ( currently_fullscreen ) {
@@ -474,7 +517,15 @@ int X11_EnterFullScreen(_THIS)
     X11_GrabInputNoLock(this, SDL_GRAB_OFF);
 
     /* Map the fullscreen window to blank the screen */
+    screen_w = DisplayWidth(SDL_Display, SDL_Screen);
+    screen_h = DisplayHeight(SDL_Display, SDL_Screen);
     get_real_resolution(this, &real_w, &real_h);
+    if ( current_w > real_w ) {
+        real_w = MAX(real_w, screen_w);
+    }
+    if ( current_h > real_h ) {
+        real_h = MAX(real_h, screen_h);
+    }
     XMoveResizeWindow(SDL_Display, FSwindow, 0, 0, real_w, real_h);
     XMapRaised(SDL_Display, FSwindow);
     X11_WaitMapped(this, FSwindow);
