@@ -51,6 +51,7 @@ static char rcsid =
 #include "SDL_error.h"
 #include "SDL_video.h"
 #include "SDL_mouse.h"
+#include "SDL_endian.h"
 #include "SDL_sysvideo.h"
 #include "SDL_pixels_c.h"
 #include "SDL_events_c.h"
@@ -118,6 +119,14 @@ static void *GEM_GL_GetProcAddress(_THIS, const char *proc);
 static int GEM_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value);
 static int GEM_GL_MakeCurrent(_THIS);
 static void GEM_GL_SwapBuffers(_THIS);
+
+static void GEM_GL_ConvertNull(SDL_Surface *surface);
+static void GEM_GL_Convert565To555be(SDL_Surface *surface);
+static void GEM_GL_Convert565To555le(SDL_Surface *surface);
+static void GEM_GL_Convert565le(SDL_Surface *surface);
+static void GEM_GL_ConvertBGRAToABGR(SDL_Surface *surface);
+
+static void (*GEM_GL_Convert)(SDL_Surface *surface);
 #endif
 
 /* GEM driver bootstrap functions */
@@ -751,17 +760,29 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 
 #ifdef HAVE_OPENGL
 	if (flags & SDL_OPENGL) {
-		GLenum format = OSMESA_COLOR_INDEX;
+		int conversion_needed = 0;
+		GLenum format = OSMESA_COLOR_INDEX;	/* 8 bits */
 
 		/* Init OpenGL context using OSMesa */
+		GEM_GL_Convert = GEM_GL_ConvertNull;
 		switch (VDI_bpp) {
 			case 15:
-				/* 1555, big and little endian unsupported */
+				/* 1555, big and little endian, unsupported */
 				format = OSMESA_RGB_565;
+				if (VDI_redmask == 31<<10) {
+					GEM_GL_Convert = GEM_GL_Convert565To555be;
+				} else {
+					GEM_GL_Convert = GEM_GL_Convert565To555le;
+				}
 				break;
 			case 16:
-				format = OSMESA_RGB_565;
-				/* 565, little endian unsupported */
+				if (VDI_redmask == 31<<11) {
+					format = OSMESA_RGB_565;
+				} else {
+					/* 565, little endian, unsupported */
+					format = OSMESA_RGB_565;
+					GEM_GL_Convert = GEM_GL_Convert565le;
+				}
 				break;
 			case 24:
 				if (VDI_redmask == 255<<16) {
@@ -780,6 +801,7 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 				} else {
 					/* ABGR format unsupported */
 					format = OSMESA_BGRA;
+					GEM_GL_Convert = GEM_GL_ConvertBGRAToABGR;
 				}
 				break;
 		}
@@ -1434,7 +1456,87 @@ static int GEM_GL_MakeCurrent(_THIS)
 
 static void GEM_GL_SwapBuffers(_THIS)
 {
+	GEM_GL_Convert(this->screen);
 	GEM_FlipHWSurface(this, this->screen);
+}
+
+static void GEM_GL_ConvertNull(SDL_Surface *surface)
+{
+}
+
+static void GEM_GL_Convert565To555be(SDL_Surface *surface)
+{
+	int x,y, pitch;
+	unsigned short *line, *pixel;
+
+	line = surface->pixels;
+	pitch = surface->pitch >> 1;
+	for (y=0; y<surface->h; y++) {
+		pixel = line;
+		for (x=0; x<surface->w; x++) {
+			unsigned short color = *pixel;
+
+			*pixel++ = (color & 0x1f)|((color>>1) & 0xffe0);
+		}
+
+		line += pitch;
+	}
+}
+
+static void GEM_GL_Convert565To555le(SDL_Surface *surface)
+{
+	int x,y, pitch;
+	unsigned short *line, *pixel;
+
+	line = surface->pixels;
+	pitch = surface->pitch >>1;
+	for (y=0; y<surface->h; y++) {
+		pixel = line;
+		for (x=0; x<surface->w; x++) {
+			unsigned short color = *pixel;
+
+			color = (color & 0x1f)|((color>>1) & 0xffe0);
+			*pixel++ = SDL_Swap16(color);
+		}
+
+		line += pitch;
+	}
+}
+
+static void GEM_GL_Convert565le(SDL_Surface *surface)
+{
+	int x,y, pitch;
+	unsigned short *line, *pixel;
+
+	line = surface->pixels;
+	pitch = surface->pitch >>1;
+	for (y=0; y<surface->h; y++) {
+		pixel = line;
+		for (x=0; x<surface->w; x++) {
+			*pixel++ = SDL_Swap16(*pixel);
+		}
+
+		line += pitch;
+	}
+}
+
+static void GEM_GL_ConvertBGRAToABGR(SDL_Surface *surface)
+{
+	int x,y, pitch;
+	unsigned long *line, *pixel;
+
+	line = surface->pixels;
+	pitch = surface->pitch >>2;
+	for (y=0; y<surface->h; y++) {
+		pixel = line;
+		for (x=0; x<surface->w; x++) {
+			unsigned long color = *pixel;
+
+			*pixel++ = (color<<24)|(color>>8);
+		}
+
+		line += pitch;
+	}
 }
 
 #endif
