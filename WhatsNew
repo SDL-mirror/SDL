@@ -4,7 +4,8 @@ This is a list of API changes in SDL's version history.
 Version 1.0:
 
 1.2.7:
-	Added SDL_HasMMX(), SDL_Has3DNow(), SDL_HasSSE()
+	Added CPU feature detection functions to SDL_cpuinfo.h:
+		SDL_HasRDTSC(), SDL_HasMMX(), SDL_Has3DNow(), SDL_HasSSE()
 
 1.2.6:
 	Added SDL_LoadObject(), SDL_LoadFunction(), and SDL_UnloadObject()
