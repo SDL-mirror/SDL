@@ -1,0 +1,51 @@
+
+Simple DirectMedia Layer CREDITS
+Thanks to everyone who made this possible, including:
+
+* Cliff Matthews, for giving me a reason to start this project. :)
+ -- Executor rocks!  *grin*
+
+* Scott Call, for making a home for SDL on the 'Net, Thanks! :)
+
+* Michael Samuel and Loki Entertainment Software, for the SDL mailing list
+
+* Patrick Trainor and Jim Boucher, for the QNX Neutrino port
+
+* Gabriele Greco, for the Amiga port
+
+* Stan Shebs, for the initial MacOS X port
+
+* Carsten Griwodz for the AIX port
+
+* Mattias Engdegerd, for help with the Solaris port and lots of other code
+
+* Kent B Mein, for a place to do the IRIX port
+
+* Ash, for a place to do the OSF/1 Alpha port
+
+* David Sowsy, for help with the BeOS port
+
+* Max Watson, Matt Slot, and Kyle for help with the MacOS port
+
+* Jon Taylor for the GGI front-end
+
+* Paulus Esterhazy, for the Visual C++ testing and libraries
+
+* Brenda Tantzen, for Metrowerks CodeWarrior on MacOS
+
+* Chris Nentwich, for the Hermes assembly blitters
+
+* Michael Vance and Jim Kutter for the X11 OpenGL support
+
+* Peter Wiklund, for the 1998 winning SDL logo,
+  and Arto Hamara, Steven Wong, and Kent Mein for other logo entries.
+
+* Stephane Peter, for the AAlib front-end and multi-threaded timer idea.
+
+ And a big hand to everyone else who gave me appreciation, advice,
+ and suggestions, especially the good folks on the SDL mailing list.
+
+THANKS! :)
+
+  -- Sam Lantinga			<slouken@libsdl.org>
+

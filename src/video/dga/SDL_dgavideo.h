@@ -1,0 +1,106 @@
+/*
+    SDL - Simple DirectMedia Layer
+    Copyright (C) 1997, 1998, 1999, 2000, 2001  Sam Lantinga
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Library General Public
+    License as published by the Free Software Foundation; either
+    version 2 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Library General Public License for more details.
+
+    You should have received a copy of the GNU Library General Public
+    License along with this library; if not, write to the Free
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+    Sam Lantinga
+    slouken@devolution.com
+*/
+
+#ifdef SAVE_RCSID
+static char rcsid =
+ "@(#) $Id$";
+#endif
+
+#ifndef _SDL_dgavideo_h
+#define _SDL_dgavideo_h
+
+#include <X11/Xlib.h>
+
+#include "SDL_mouse.h"
+#include "SDL_mutex.h"
+#include "SDL_sysvideo.h"
+
+/* Hidden "this" pointer for the video functions */
+#define _THIS	SDL_VideoDevice *this
+
+
+/* This is the structure we use to keep track of video memory */
+typedef struct vidmem_bucket {
+	struct vidmem_bucket *prev;
+	unsigned int used;
+	Uint8 *base;
+	unsigned int size;
+	struct vidmem_bucket *next;
+} vidmem_bucket;
+
+/* Information about the location of the surface in hardware memory */
+struct private_hwdata {
+	int x;
+	int y;
+};
+
+/* Private display data */
+struct SDL_PrivateVideoData {
+	Display *DGA_Display;
+	Colormap DGA_colormap;
+	int visualClass;
+
+#define NUM_MODELISTS	4		/* 8, 16, 24, and 32 bits-per-pixel */
+	int SDL_nummodes[NUM_MODELISTS];
+	SDL_Rect **SDL_modelist[NUM_MODELISTS];
+
+	/* Information for the video surface */
+	Uint8 *memory_base;
+	int memory_pitch;
+	SDL_mutex *hw_lock;
+	int sync_needed;
+	int was_flipped;
+
+	/* Information for hardware surfaces */
+	vidmem_bucket surfaces;
+	int surfaces_memtotal;
+	int surfaces_memleft;
+
+	/* Information for double-buffering */
+	int flip_page;
+	int flip_yoffset[2];
+	Uint8 *flip_address[2];
+
+	/* Used to handle DGA events */
+	int event_base;
+};
+/* Old variable names */
+#define DGA_Display		(this->hidden->DGA_Display)
+#define DGA_Screen		DefaultScreen(DGA_Display)
+#define DGA_colormap		(this->hidden->DGA_colormap)
+#define DGA_visualClass		(this->hidden->visualClass)
+#define memory_base		(this->hidden->memory_base)
+#define memory_pitch		(this->hidden->memory_pitch)
+#define flip_page		(this->hidden->flip_page)
+#define flip_yoffset		(this->hidden->flip_yoffset)
+#define flip_address		(this->hidden->flip_address)
+#define sync_needed		(this->hidden->sync_needed)
+#define was_flipped		(this->hidden->was_flipped)
+#define SDL_nummodes		(this->hidden->SDL_nummodes)
+#define SDL_modelist		(this->hidden->SDL_modelist)
+#define surfaces		(this->hidden->surfaces)
+#define surfaces_memtotal	(this->hidden->surfaces_memtotal)
+#define surfaces_memleft	(this->hidden->surfaces_memleft)
+#define hw_lock			(this->hidden->hw_lock)
+#define DGA_event_base		(this->hidden->event_base)
+
+#endif /* _SDL_dgavideo_h */

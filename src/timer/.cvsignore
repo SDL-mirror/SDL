@@ -1,0 +1,7 @@
+Makefile.in
+SDL_timer.c
+Makefile
+.libs
+*.o
+*.lo
+*.la

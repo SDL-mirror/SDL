@@ -1,0 +1,13 @@
+
+The latest development version of SDL is available via CVS:
+
+cvs -d :pserver:guest@cvs.lokigames.com:/cvs login
+# use the password "guest"
+cvs -d :pserver:guest@cvs.lokigames.com:/cvs checkout SDL
+
+When you check a fresh copy of SDL out of CVS, you need to generate
+the files used by make by running the "autogen.sh" script, which will
+run aclocal, automake, autoconf and then run configure.
+
+There is a web interface to cvs at http://cvs.lokigames.com/
+

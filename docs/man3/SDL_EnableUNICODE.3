@@ -1,0 +1,20 @@
+.TH "SDL_EnableUNICODE" "3" "Mon 12 Mar 2001, 01:03" "SDL" "SDL API Reference" 
+.SH "NAME"
+SDL_EnableUNICODE\- Enable UNICODE translation
+.SH "SYNOPSIS"
+.PP
+\fB#include "SDL\&.h"
+.sp
+\fBint \fBSDL_EnableUNICODE\fP\fR(\fBint enable\fR);
+.SH "DESCRIPTION"
+.PP
+Enables/Disables UNICODE keyboard translation\&.
+.PP
+If you wish to translate a keysym to it\&'s printable representation, you need to enable UNICODE translation using this function (\fBenable\fR=0) and then look in the \fBunicode\fR member of the \fI\fBSDL_keysym\fR\fR structure\&. This value will be zero for keysyms that do not have a printable representation\&. UNICODE translation is disabled by default as the conversion can cause a slight overhead\&.
+.SH "RETURN VALUE"
+.PP
+Returns the previous translation mode\&.
+.SH "SEE ALSO"
+.PP
+\fI\fBSDL_keysym\fR\fR
+...\" created by instant / docbook-to-man, Mon 12 Mar 2001, 01:03

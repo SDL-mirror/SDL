@@ -1,0 +1,44 @@
+==============================================================================
+Using the Simple DirectMedia Layer with Mac OS X
+==============================================================================
+
+These instructions are for people using Apple's Mac OS X (pronounced
+"ten").
+
+From the developer's point of view, OS X is a sort of hybrid Mac and
+Unix system, and you have the option of using either traditional
+command line tools or Apple's IDE ProjectBuilder (PB).
+
+To build using the command line, use the standard configure and make
+process:
+
+	./configure
+	make
+	make install
+
+(You may need to create the subdirs of /usr/local manually.)
+
+For some reason, libtool doesn't run ranlib properly, so do this
+manually:
+
+	ranlib /usr/local/lib/libSDL.a
+
+To use the library once it's built, you need to use the "Carbon
+framework", which is the port of the old Mac Toolbox to OS X.
+To do this, use the -F and -framework arguments for compiling
+and linking, respectively:
+
+	cc -c myprog.c -I/usr/local/include/SDL -F/System/Library/Frameworks/Carbon.framework
+	cc myprog.o -L/usr/local/lib -lSDL -framework Carbon
+
+sdl-config knows about the linking path and -framework, so it's
+recommended to use it to fill in your Makefile variables.
+
+[Add instructions for how to build using PB]
+
+As of this writing (Sep 2000), OS X is in public beta.  This means
+that while most of the APIs are frozen, things are still subject to
+change, and many of the known problems will be resolved before the
+final release comes out.
+
+Known bugs are listed in the file "BUGS"

@@ -1,0 +1,9 @@
+Makefile.in
+SDL_mutex.c
+SDL_systhread.c
+SDL_systhread_c.h
+Makefile
+.libs
+*.o
+*.lo
+*.la

@@ -1,0 +1,24 @@
+.TH "SDL_GetAudioStatus" "3" "Mon 12 Mar 2001, 01:02" "SDL" "SDL API Reference" 
+.SH "NAME"
+SDL_GetAudioStatus\- Get the current audio state
+.SH "SYNOPSIS"
+.PP
+\fB#include "SDL\&.h"
+.sp
+\fBSDL_audiostatus\fBSDL_GetAudioStatus\fP\fR(\fBvoid\fR);
+.SH "DESCRIPTION"
+.PP
+.nf
+\f(CWtypedef enum{
+  SDL_AUDIO_STOPPED,
+  SDL_AUDIO_PAUSED,
+  SDL_AUDIO_PLAYING
+} SDL_audiostatus;\fR
+.fi
+.PP
+.PP
+Returns either \fBSDL_AUDIO_STOPPED\fP, \fBSDL_AUDIO_PAUSED\fP or \fBSDL_AUDIO_PLAYING\fP depending on the current audio state\&.
+.SH "SEE ALSO"
+.PP
+\fI\fBSDL_PauseAudio\fP\fR
+...\" created by instant / docbook-to-man, Mon 12 Mar 2001, 01:02

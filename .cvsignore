@@ -1,0 +1,10 @@
+Makefile.in
+configure
+aclocal.m4
+config.log
+config.cache
+libtool
+config.status
+Makefile
+sdl-config
+SDL.spec

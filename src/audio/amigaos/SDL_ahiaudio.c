@@ -1,0 +1,299 @@
+/*
+    SDL - Simple DirectMedia Layer
+    Copyright (C) 1997, 1998  Sam Lantinga
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Library General Public
+    License as published by the Free Software Foundation; either
+    version 2 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Library General Public License for more details.
+
+    You should have received a copy of the GNU Library General Public
+    License along with this library; if not, write to the Free
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+    Sam Lantinga
+    5635-34 Springhouse Dr.
+    Pleasanton, CA 94588 (USA)
+    slouken@devolution.com
+*/
+
+#ifdef SAVE_RCSID
+static char rcsid =
+ "@(#) $Id$";
+#endif
+
+/* Allow access to a raw mixing buffer (For IRIX 6.5 and higher) */
+
+#include "SDL_endian.h"
+#include "SDL_audio.h"
+#include "SDL_audiomem.h"
+#include "SDL_audio_c.h"
+#include "SDL_lowaudio.h"
+
+/* Audio driver functions */
+static int AHI_OpenAudio(_THIS, SDL_AudioSpec *spec);
+static void AHI_WaitAudio(_THIS);
+static void AHI_PlayAudio(_THIS);
+static Uint8 *AHI_GetAudioBuf(_THIS);
+static void AHI_CloseAudio(_THIS);
+
+#ifndef __SASC
+	#define mymalloc(x) AllocVec(x,MEMF_PUBLIC) 
+	#define myfree FreeVec
+#else
+	#define mymalloc malloc
+	#define myfree free
+#endif
+
+/* Audio driver bootstrap functions */
+
+static int Audio_Available(void)
+{
+#ifndef NO_AMIGADEBUG
+	D(bug("AHI available.\n"));
+#endif
+
+	return 1;
+}
+
+static void Audio_DeleteDevice(SDL_AudioDevice *device)
+{
+	free(device->hidden);
+	free(device);
+}
+
+static SDL_AudioDevice *Audio_CreateDevice(int devindex)
+{
+	SDL_AudioDevice *this;
+
+#ifndef NO_AMIGADEBUG
+	D(bug("AHI created...\n"));
+#endif
+
+	/* Initialize all variables that we clean on shutdown */
+	this = (SDL_AudioDevice *)malloc(sizeof(SDL_AudioDevice));
+	if ( this ) {
+		memset(this, 0, (sizeof *this));
+		this->hidden = (struct SDL_PrivateAudioData *)
+				malloc((sizeof *this->hidden));
+	}
+	if ( (this == NULL) || (this->hidden == NULL) ) {
+		SDL_OutOfMemory();
+		if ( this ) {
+			free(this);
+		}
+		return(0);
+	}
+	memset(this->hidden, 0, (sizeof *this->hidden));
+
+	/* Set the function pointers */
+	this->OpenAudio = AHI_OpenAudio;
+	this->WaitAudio = AHI_WaitAudio;
+	this->PlayAudio = AHI_PlayAudio;
+	this->GetAudioBuf = AHI_GetAudioBuf;
+	this->CloseAudio = AHI_CloseAudio;
+
+	this->free = Audio_DeleteDevice;
+
+	return this;
+}
+
+AudioBootStrap AHI_bootstrap = {
+	"AHI", Audio_Available, Audio_CreateDevice
+};
+
+
+void static AHI_WaitAudio(_THIS)
+{
+	if(!CheckIO((struct IORequest *)audio_req[current_buffer]))
+	{
+		WaitIO((struct IORequest *)audio_req[current_buffer]);
+//		AbortIO((struct IORequest *)audio_req[current_buffer]);
+	}
+}
+
+static void AHI_PlayAudio(_THIS)
+{
+	if(playing>1)
+		WaitIO((struct IORequest *)audio_req[current_buffer]);
+
+	/* Write the audio data out */
+	audio_req[current_buffer] -> ahir_Std. io_Message.mn_Node.ln_Pri = 60;
+	audio_req[current_buffer] -> ahir_Std. io_Data                = mixbuf[current_buffer];
+	audio_req[current_buffer] -> ahir_Std. io_Length              = this->spec.samples*this->hidden->bytespersample;
+	audio_req[current_buffer] -> ahir_Std. io_Offset              = 0;
+	audio_req[current_buffer] -> ahir_Std . io_Command            = CMD_WRITE;
+	audio_req[current_buffer] -> ahir_Frequency                   = this->hidden->freq;
+	audio_req[current_buffer] -> ahir_Volume                      = 0x10000;
+	audio_req[current_buffer] -> ahir_Type                        = this->hidden->type;
+	audio_req[current_buffer] -> ahir_Position                    = 0x8000;
+	audio_req[current_buffer] -> ahir_Link                        = (playing>0 ? audio_req[current_buffer^1] : NULL);
+
+	SendIO((struct IORequest *)audio_req[current_buffer]);
+	current_buffer^=1;
+
+	playing++;
+}
+
+static Uint8 *AHI_GetAudioBuf(_THIS)
+{
+	return(mixbuf[current_buffer]);
+}
+
+static void AHI_CloseAudio(_THIS)
+{
+	D(bug("Closing audio...\n"));
+
+	if ( mixbuf[0] != NULL ) {
+		myfree(mixbuf[0]);
+//		SDL_FreeAudioMem(mixbuf[0]);
+		mixbuf[0] = NULL;
+	}
+
+	if ( mixbuf[1] != NULL ) {
+		myfree(mixbuf[1]);
+//		SDL_FreeAudioMem(mixbuf[1]);
+		mixbuf[1] = NULL;
+	}
+
+	playing=0;
+
+	if(audio_req[0])
+	{
+		if(audio_req[1])
+		{
+			if(!CheckIO((struct IORequest *)audio_req[1]))
+			{
+				AbortIO((struct IORequest *)audio_req[1]);
+				WaitIO((struct IORequest *)audio_req[1]);
+			}
+			myfree(audio_req[1]);
+		}
+
+		if(!CheckIO((struct IORequest *)audio_req[0]))
+		{
+			AbortIO((struct IORequest *)audio_req[0]);
+			WaitIO((struct IORequest *)audio_req[0]);
+		}
+
+		CloseDevice((struct IORequest *)audio_req[0]);
+		DeleteIORequest((struct IORequest *)audio_req[0]);
+		audio_req[0]=audio_req[1]=NULL;
+	}
+
+	if ( audio_port != NULL ) {
+		DeleteMsgPort(audio_port);
+		audio_port = NULL;
+	}
+	D(bug("...done!\n"));
+}
+
+static int AHI_OpenAudio(_THIS, SDL_AudioSpec *spec)
+{	
+//	int width;
+
+	D(bug("AHI opening...\n"));
+
+	/* Determine the audio parameters from the AudioSpec */
+	switch ( spec->format & 0xFF ) {
+
+		case 8: { /* Signed 8 bit audio data */
+			D(bug("Samples a 8 bit...\n"));
+			spec->format = AUDIO_S8;
+			this->hidden->bytespersample=1;
+			this->hidden->type = AHIST_M8S;
+
+		}
+		break;
+
+		case 16: { /* Signed 16 bit audio data */
+			D(bug("Samples a 16 bit...\n"));
+			spec->format = AUDIO_S16MSB;
+			this->hidden->bytespersample=2;
+			this->hidden->type = AHIST_M16S;
+		}
+		break;
+
+		default: {
+			SDL_SetError("Unsupported audio format");
+			return(-1);
+		}
+	}
+
+	D(bug("Before CalculateAudioSpec\n"));
+	/* Update the fragment size as size in bytes */
+	SDL_CalculateAudioSpec(spec);
+
+	D(bug("Before CreateMsgPort\n"));
+
+	if(!(audio_port=CreateMsgPort()))
+	{
+		SDL_SetError("Unable to create a MsgPort");
+		return -1;
+	}
+
+	D(bug("Before CreateIORequest\n"));
+
+	if(!(audio_req[0]=(struct AHIRequest *)CreateIORequest(audio_port,sizeof(struct AHIRequest))))
+	{
+		SDL_SetError("Unable to create an AHIRequest");
+		DeleteMsgPort(audio_port);
+		return -1;
+	}
+
+	audio_req[0]->ahir_Version = 4;
+
+	if(OpenDevice(AHINAME,0,(struct IORequest *)audio_req[0],NULL))
+	{
+		SDL_SetError("Unable to open AHI device!\n");
+		DeleteIORequest((struct IORequest *)audio_req[0]);
+		DeleteMsgPort(audio_port);
+		return -1;
+	}
+	
+	D(bug("AFTER opendevice\n"));
+
+	/* Set output frequency */
+	this->hidden->freq = spec->freq;
+
+	D(bug("Before buffer allocation\n"));
+
+	/* Allocate mixing buffer */
+	mixbuf[0] = (Uint8 *)mymalloc(spec->size);
+	mixbuf[1] = (Uint8 *)mymalloc(spec->size);
+
+	D(bug("Before audio_req allocation\n"));
+
+	if(!(audio_req[1]=mymalloc(sizeof(struct AHIRequest))))
+	{
+		SDL_OutOfMemory();
+		return(-1);
+	}
+	
+	D(bug("Before audio_req memcpy\n"));
+
+	memcpy(audio_req[1],audio_req[0],sizeof(struct AHIRequest));
+
+	if ( mixbuf[0] == NULL || mixbuf[1] == NULL ) {
+		SDL_OutOfMemory();
+		return(-1);
+	}
+
+	D(bug("Before mixbuf memset\n"));
+
+	memset(mixbuf[0], spec->silence, spec->size);
+	memset(mixbuf[1], spec->silence, spec->size);
+
+	current_buffer=0;
+	playing=0;
+
+	D(bug("AHI opened: freq:%ld mixbuf:%lx/%lx buflen:%ld bits:%ld\n",spec->freq,mixbuf[0],mixbuf[1],spec->size,this->hidden->bytespersample*8));
+
+	/* We're ready to rock and roll. :-) */
+	return(0);
+}

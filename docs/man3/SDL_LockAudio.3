@@ -1,0 +1,15 @@
+.TH "SDL_LockAudio" "3" "Mon 12 Mar 2001, 01:02" "SDL" "SDL API Reference" 
+.SH "NAME"
+SDL_LockAudio\- Lock out the callback function
+.SH "SYNOPSIS"
+.PP
+\fB#include "SDL\&.h"
+.sp
+\fBvoid \fBSDL_LockAudio\fP\fR(\fBvoid\fR)
+.SH "DESCRIPTION"
+.PP
+The lock manipulated by these functions protects the callback function\&. During a LockAudio period, you can be guaranteed that the callback function is not running\&. Do not call these from the callback function or you will cause deadlock\&.
+.SH "SEE ALSO"
+.PP
+\fI\fBSDL_OpenAudio\fP\fR
+...\" created by instant / docbook-to-man, Mon 12 Mar 2001, 01:02

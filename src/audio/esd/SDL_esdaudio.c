@@ -1,0 +1,260 @@
+/*
+    SDL - Simple DirectMedia Layer
+    Copyright (C) 1997, 1998, 1999, 2000, 2001  Sam Lantinga
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Library General Public
+    License as published by the Free Software Foundation; either
+    version 2 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Library General Public License for more details.
+
+    You should have received a copy of the GNU Library General Public
+    License along with this library; if not, write to the Free
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+    Sam Lantinga
+    slouken@devolution.com
+*/
+
+#ifdef SAVE_RCSID
+static char rcsid =
+ "@(#) $Id$";
+#endif
+
+/* Allow access to an ESD network stream mixing buffer */
+
+#ifdef ESD_SUPPORT
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <signal.h>
+#include <unistd.h>
+
+#include <esd.h>
+
+#include "SDL_audio.h"
+#include "SDL_error.h"
+#include "SDL_audiomem.h"
+#include "SDL_audio_c.h"
+#include "SDL_timer.h"
+#include "SDL_audiodev_c.h"
+#include "SDL_esdaudio.h"
+
+/* The tag name used by ESD audio */
+#define ESD_DRIVER_NAME		"esd"
+
+/* Audio driver functions */
+static int ESD_OpenAudio(_THIS, SDL_AudioSpec *spec);
+static void ESD_WaitAudio(_THIS);
+static void ESD_PlayAudio(_THIS);
+static Uint8 *ESD_GetAudioBuf(_THIS);
+static void ESD_CloseAudio(_THIS);
+
+/* Audio driver bootstrap functions */
+
+static int Audio_Available(void)
+{
+	int connection;
+	int available;
+
+	available = 0;
+	connection = esd_open_sound(NULL);
+	if ( connection >= 0 ) {
+		available = 1;
+		esd_close(connection);
+	}
+	return(available);
+}
+
+static void Audio_DeleteDevice(SDL_AudioDevice *device)
+{
+	free(device->hidden);
+	free(device);
+}
+
+static SDL_AudioDevice *Audio_CreateDevice(int devindex)
+{
+	SDL_AudioDevice *this;
+
+	/* Initialize all variables that we clean on shutdown */
+	this = (SDL_AudioDevice *)malloc(sizeof(SDL_AudioDevice));
+	if ( this ) {
+		memset(this, 0, (sizeof *this));
+		this->hidden = (struct SDL_PrivateAudioData *)
+				malloc((sizeof *this->hidden));
+	}
+	if ( (this == NULL) || (this->hidden == NULL) ) {
+		SDL_OutOfMemory();
+		if ( this ) {
+			free(this);
+		}
+		return(0);
+	}
+	memset(this->hidden, 0, (sizeof *this->hidden));
+	audio_fd = -1;
+
+	/* Set the function pointers */
+	this->OpenAudio = ESD_OpenAudio;
+	this->WaitAudio = ESD_WaitAudio;
+	this->PlayAudio = ESD_PlayAudio;
+	this->GetAudioBuf = ESD_GetAudioBuf;
+	this->CloseAudio = ESD_CloseAudio;
+
+	this->free = Audio_DeleteDevice;
+
+	return this;
+}
+
+AudioBootStrap ESD_bootstrap = {
+	ESD_DRIVER_NAME, "Enlightened Sound Daemon",
+	Audio_Available, Audio_CreateDevice
+};
+
+/* This function waits until it is possible to write a full sound buffer */
+static void ESD_WaitAudio(_THIS)
+{
+	Sint32 ticks;
+
+	/* Check to see if the thread-parent process is still alive */
+	{ static int cnt = 0;
+		/* Note that this only works with thread implementations 
+		   that use a different process id for each thread.
+		*/
+		if (parent && (((++cnt)%10) == 0)) { /* Check every 10 loops */
+			if ( kill(parent, 0) < 0 ) {
+				this->enabled = 0;
+			}
+		}
+	}
+
+	/* Use timer for general audio synchronization */
+	ticks = ((Sint32)(next_frame - SDL_GetTicks()))-FUDGE_TICKS;
+	if ( ticks > 0 ) {
+		SDL_Delay(ticks);
+	}
+}
+
+static void ESD_PlayAudio(_THIS)
+{
+	int written;
+
+	/* Write the audio data, checking for EAGAIN on broken audio drivers */
+	do {
+		written = write(audio_fd, mixbuf, mixlen);
+		if ( (written < 0) && ((errno == 0) || (errno == EAGAIN)) ) {
+			SDL_Delay(1);	/* Let a little CPU time go by */
+		}
+	} while ( (written < 0) && 
+	          ((errno == 0) || (errno == EAGAIN) || (errno == EINTR)) );
+
+	/* Set the next write frame */
+	next_frame += frame_ticks;
+
+	/* If we couldn't write, assume fatal error for now */
+	if ( written < 0 ) {
+		this->enabled = 0;
+	}
+}
+
+static Uint8 *ESD_GetAudioBuf(_THIS)
+{
+	return(mixbuf);
+}
+
+static void ESD_CloseAudio(_THIS)
+{
+	if ( mixbuf != NULL ) {
+		SDL_FreeAudioMem(mixbuf);
+		mixbuf = NULL;
+	}
+	if ( audio_fd >= 0 ) {
+		close(audio_fd);
+		audio_fd = -1;
+	}
+}
+
+/* Try to get the name of the program */
+static char *get_progname(void)
+{
+	char *progname = NULL;
+#ifdef linux
+	FILE *fp;
+	static char temp[BUFSIZ];
+
+	sprintf(temp, "/proc/%d/cmdline", getpid());
+	fp = fopen(temp, "r");
+	if ( fp != NULL ) {
+		if ( fgets(temp, sizeof(temp)-1, fp) ) {
+			progname = strrchr(temp, '/');
+			if ( progname == NULL ) {
+				progname = temp;
+			} else {
+				progname = progname+1;
+			}
+		}
+		fclose(fp);
+	}
+#endif
+	return(progname);
+}
+
+static int ESD_OpenAudio(_THIS, SDL_AudioSpec *spec)
+{
+	esd_format_t format;
+
+	/* Convert audio spec to the ESD audio format */
+	format = (ESD_STREAM | ESD_PLAY);
+	switch ( spec->format & 0xFF ) {
+		case 8:
+			format |= ESD_BITS8;
+			break;
+		case 16:
+			format |= ESD_BITS16;
+			break;
+		default:
+			SDL_SetError("Unsupported ESD audio format");
+			return(-1);
+	}
+	if ( spec->channels == 1 ) {
+		format |= ESD_MONO;
+	} else {
+		format |= ESD_STEREO;
+	}
+#if 0
+	spec->samples = ESD_BUF_SIZE;	/* Darn, no way to change this yet */
+#endif
+
+	/* Open a connection to the ESD audio server */
+	audio_fd = esd_play_stream(format, spec->freq, NULL, get_progname());
+	if ( audio_fd < 0 ) {
+		SDL_SetError("Couldn't open ESD connection");
+		return(-1);
+	}
+
+	/* Calculate the final parameters for this audio specification */
+	SDL_CalculateAudioSpec(spec);
+	frame_ticks = (float)(spec->samples*1000)/spec->freq;
+	next_frame = SDL_GetTicks()+frame_ticks;
+
+	/* Allocate mixing buffer */
+	mixlen = spec->size;
+	mixbuf = (Uint8 *)SDL_AllocAudioMem(mixlen);
+	if ( mixbuf == NULL ) {
+		return(-1);
+	}
+	memset(mixbuf, spec->silence, spec->size);
+
+	/* Get the parent process id (we're the parent of the audio thread) */
+	parent = getpid();
+
+	/* We're ready to rock and roll. :-) */
+	return(0);
+}
+
+#endif /* ESD_SUPPORT */

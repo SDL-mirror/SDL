@@ -1,0 +1,29 @@
+.TH "SDL_CreateRGBSurface" "3" "Mon 12 Mar 2001, 01:04" "SDL" "SDL API Reference" 
+.SH "NAME"
+SDL_CreateRGBSurface\- Create an empty SDL_Surface
+.SH "SYNOPSIS"
+.PP
+\fB#include "SDL\&.h"
+.sp
+\fBSDL_Surface *\fBSDL_CreateRGBSurface\fP\fR(\fBUint32 flags, int width, int height, int depth, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask, Uint32 Amask\fR);
+.SH "DESCRIPTION"
+.PP
+Allocate an empty surface (must be called after \fISDL_SetVideoMode\fR)
+.PP
+If \fBdepth\fR is 8 bits an empty palette is allocated for the surface, otherwise a \&'packed-pixel\&' \fI\fBSDL_PixelFormat\fR\fR is created using the \fB[RGBA]mask\fR\&'s provided (see \fI\fBSDL_PixelFormat\fR\fR)\&. The \fBflags\fR specifies the type of surface that should be created, it is an OR\&'d combination of the following possible values\&.
+.TP 20
+\fBSDL_SWSURFACE\fP
+SDL will create the surface in system memory\&. This improves the performance of pixel level access, however you may not be able to take advantage of some types of hardware blitting\&.
+.TP 20
+\fBSDL_HWSURFACE\fP
+SDL will attempt to create the surface in video memory\&. This will allow SDL to take advantage of Video->Video blits (which are often accelerated)\&.
+.TP 20
+\fBSDL_SRCCOLORKEY\fP
+With this flag SDL will attempt to find the best location for this surface, either in system memory or video memory, to obtain hardware colorkey blitting support\&.
+.TP 20
+\fBSDL_SRCALPHA\fP
+With this flag SDL will attempt to find the best location for this surface, either in system memory or video memory, to obtain hardware alpha support
+.SH "SEE ALSO"
+.PP
+\fI\fBSDL_CreateRGBSurfaceFrom\fP\fR, \fI\fBSDL_FreeSurface\fP\fR, \fI\fBSDL_SetVideoMode\fP\fR, \fI\fBSDL_LockSurface\fP\fR, \fI\fBSDL_PixelFormat\fR\fR, \fI\fBSDL_Surface\fR\fR
+...\" created by instant / docbook-to-man, Mon 12 Mar 2001, 01:04

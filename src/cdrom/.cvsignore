@@ -1,0 +1,7 @@
+Makefile.in
+SDL_syscdrom.c
+Makefile
+.libs
+*.o
+*.lo
+*.la

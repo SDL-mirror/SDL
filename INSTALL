@@ -1,0 +1,22 @@
+
+To compile and install SDL:
+
+    1.  Run './configure; make; make install'
+
+        If you are cross-compiling from Linux to Win32, you should read
+        the file README.Win32
+
+        If you are compiling using Visual C++ on Win32, you should read
+        the file VisualC.html
+
+    2.  Look at the example programs in ./test, and check out the HTML
+        documentation in ./docs to see how to use the SDL library.
+
+    3.  Join the SDL developer mailing list by sending E-mail to
+    	majordomo@lokigames.com
+        and including the line "subscribe sdl" in the body.
+
+
+	
+That's it!
+Sam Lantinga <slouken@libsdl.org>
