@@ -492,6 +492,7 @@ fprintf(stderr, "Last mouse mode: 0x%x\n", ch);
 
 int FB_OpenMouse(_THIS)
 {
+	int i;
 	const char *mousedev;
 	const char *mousedrv;
 
@@ -522,6 +523,10 @@ fprintf(stderr, "Using ELO touchscreen\n");
 	/* STD MICE */
 
 	if ( mousedev == NULL ) {
+		/* FIXME someday... allow multiple mice in this driver */
+		char *ps2mice[] = {
+		    "/dev/input/mice", "/dev/usbmouse", "/dev/psaux", NULL
+		};
 		/* First try to use GPM in repeater mode */
 		if ( mouse_fd < 0 ) {
 			if ( gpm_available() ) {
@@ -534,38 +539,25 @@ fprintf(stderr, "Using GPM mouse\n");
 				}
 			}
 		}
-		/* Now try to use the new HID unified mouse device */
-		if ( mouse_fd < 0 ) {
-			mouse_fd = open("/dev/input/mice", O_RDWR, 0);
+		/* Now try to use a modern PS/2 mouse */
+		for ( i=0; (mouse_fd < 0) && ps2mice[i]; ++i ) {
+			mouse_fd = open(ps2mice[i], O_RDWR, 0);
 			if (mouse_fd < 0) {
-				mouse_fd = open("/dev/input/mice", O_RDONLY, 0);
+				mouse_fd = open(ps2mice[i], O_RDONLY, 0);
 			}
 			if (mouse_fd >= 0) {
-				/* rcg06112001 Attempt to set IMPS/2 mode first, even with envr var... */
-				set_imps2_mode(mouse_fd);
-
-				if (detect_imps2(mouse_fd)) {
-					mouse_drv = MOUSE_IMPS2;
-				} else {
-					mouse_drv = MOUSE_PS2;
+				/* rcg06112001 Attempt to set IMPS/2 mode */
+				if ( i == 0 ) {
+					set_imps2_mode(mouse_fd);
 				}
-			}
-		}
-		/* Now try to use a modern PS/2 port mouse */
-		if ( mouse_fd < 0 ) {
-			mouse_fd = open("/dev/psaux", O_RDWR, 0);
-			if ( mouse_fd < 0 ) {
-				mouse_fd = open("/dev/psaux", O_RDONLY, 0);
-			}
-			if ( mouse_fd >= 0 ) {
-				if ( detect_imps2(mouse_fd) ) {
+				if (detect_imps2(mouse_fd)) {
 #ifdef DEBUG_MOUSE
-fprintf(stderr, "Using IMPS/2 mouse\n");
+fprintf(stderr, "Using IMPS2 mouse\n");
 #endif
 					mouse_drv = MOUSE_IMPS2;
 				} else {
 #ifdef DEBUG_MOUSE
-fprintf(stderr, "Using PS/2 mouse\n");
+fprintf(stderr, "Using PS2 mouse\n");
 #endif
 					mouse_drv = MOUSE_PS2;
 				}
