@@ -190,6 +190,10 @@ LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			BOOL minimized;
 			Uint8 appstate;
 
+			if ( ! this->screen ) {
+				/* What do we do when we get the screen? */
+				return(0);
+			}
 			minimized = HIWORD(wParam);
 			if ( !minimized && (LOWORD(wParam) != WA_INACTIVE) ) {
 				/* Gain the following states */
