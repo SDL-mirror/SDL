@@ -752,34 +752,42 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 		Uint8 pos = 0;
 
 		value = HIDGetElementValue(device, element);
+		if (element->max == 3) /* 4 position hatswitch - scale up value */
+			value *= 2;
+		else if (element->max != 7) /* Neither a 4 nor 8 positions - fall back to default position (centered) */
+			value = -1;
 		switch(value)
 		{
 			case 0:
-				pos = SDL_HAT_CENTERED;
-				break;
-			case 1:
 				pos = SDL_HAT_UP;
 				break;
-			case 2:
+			case 1:
 				pos = SDL_HAT_RIGHTUP;
 				break;
-			case 3:
+			case 2:
 				pos = SDL_HAT_RIGHT;
 				break;
-			case 4:
+			case 3:
 				pos = SDL_HAT_RIGHTDOWN;
 				break;
-			case 5:
+			case 4:
 				pos = SDL_HAT_DOWN;
 				break;
-			case 6:
+			case 5:
 				pos = SDL_HAT_LEFTDOWN;
 				break;
-			case 7:
+			case 6:
 				pos = SDL_HAT_LEFT;
 				break;
-			case 8:
+			case 7:
 				pos = SDL_HAT_LEFTUP;
+				break;
+			default:
+				/* Every other value is mapped to center. We do that because some
+				 * joysticks use 8 and some 15 for this value, and apparently
+				 * there are even more variants out there - so we try to be generous.
+				 */
+				pos = SDL_HAT_CENTERED;
 				break;
 		}
 		if ( pos != joystick->hats[i] )
