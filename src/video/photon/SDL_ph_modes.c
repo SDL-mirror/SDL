@@ -155,54 +155,52 @@ int ph_GetVideoModes(_THIS)
 
 SDL_Rect **ph_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
 {
-	int i = 0;
-	int j = 0;
-	SDL_Rect Amodelist[PH_MAX_VIDEOMODES];
+    int i = 0;
+    int j = 0;
+    SDL_Rect Amodelist[PH_MAX_VIDEOMODES];
 
-        for (i=0; i<PH_MAX_VIDEOMODES; i++)
+    for (i=0; i<PH_MAX_VIDEOMODES; i++)
+    {
+        SDL_modearray[i]=&SDL_modelist[i];
+    }
+
+    if (PgGetVideoModeList( &mode_list ) < 0)
+    {
+       fprintf(stderr,"error: PgGetVideoModeList failed\n");
+       return NULL;
+    }
+
+    mode_info.bits_per_pixel = 0;
+
+    for (i=0; i < mode_list.num_modes; i++) 
+    {
+        if (PgGetVideoModeInfo(mode_list.modes[i], &mode_info) < 0)
         {
-           SDL_modearray[i]=&SDL_modelist[i];
+            fprintf(stderr,"error: PgGetVideoModeInfo failed on mode: 0x%x\n", mode_list.modes[i]);
+            return NULL;
         }
-
-	if (PgGetVideoModeList( &mode_list ) < 0)
-	{
-	   fprintf(stderr,"error: PgGetVideoModeList failed\n");
-	   return NULL;
-	}
-
-	mode_info.bits_per_pixel = 0;
-
-	for (i=0; i < mode_list.num_modes; i++) 
-	{
-            if (PgGetVideoModeInfo(mode_list.modes[i], &mode_info) < 0)
-            {
-                fprintf(stderr,"error: PgGetVideoModeInfo failed on mode: 0x%x\n",
-                        mode_list.modes[i]);
-                return NULL;
-            }
-
-            if(mode_info.bits_per_pixel == format->BitsPerPixel)
-            {
-		Amodelist[j].w = mode_info.width;
-		Amodelist[j].h = mode_info.height;
-		Amodelist[j].x = 0;
-		Amodelist[j].y = 0;
-		j++;	
-            }
-	}
+        if(mode_info.bits_per_pixel == format->BitsPerPixel)
+        {
+            Amodelist[j].w = mode_info.width;
+            Amodelist[j].h = mode_info.height;
+            Amodelist[j].x = 0;
+            Amodelist[j].y = 0;
+            j++;	
+        }
+    }
 	
-	//reorder biggest for smallest, assume width dominates
+    /* reorder biggest for smallest, assume width dominates */
 
-	for(i=0; i< j ; i++)
-	{
-	    SDL_modelist[i].w = Amodelist[j - i -1].w;
-	    SDL_modelist[i].h = Amodelist[j - i -1].h;
-	    SDL_modelist[i].x = Amodelist[j - i -1].x;
-	    SDL_modelist[i].y = Amodelist[j - i -1].y;
-	}
-        SDL_modearray[j]=NULL;
+    for(i=0; i<j; i++)
+    {
+        SDL_modelist[i].w = Amodelist[j - i -1].w;
+        SDL_modelist[i].h = Amodelist[j - i -1].h;
+        SDL_modelist[i].x = Amodelist[j - i -1].x;
+        SDL_modelist[i].y = Amodelist[j - i -1].y;
+    }
+    SDL_modearray[j]=NULL;
 	
-	return SDL_modearray;
+    return SDL_modearray;
 }
 
 void ph_FreeVideoModes(_THIS)
@@ -281,82 +279,53 @@ static void set_best_resolution(_THIS, int width, int height)
     }
 }
 
-/*
-static void get_real_resolution(_THIS, int* w, int* h)
-{
-
-    if ( use_vidmode ) {
-        //PgDisplaySettings_t settings;
-	    PgVideoModeInfo_t		current_mode_info;
-	    	PgHWCaps_t my_hwcaps;
-//        int unused;
-		
-//        if (PgGetVideoMode( &settings ) >= 0) {
-//			*w = settings.xres;
-//			*h = settings.yres;
-//            return;
-//        }
-            if (PgGetGraphicsHWCaps(&my_hwcaps) >= 0)
-         	{
-                 if (PgGetVideoModeInfo(my_hwcaps.current_video_mode, &current_mode_info) < 0)
-           		 {
-                fprintf(stderr,"get_real_resolution:  PgGetVideoModeInfo failed\n");
-            		 }
-				*w = current_mode_info.width;
-				*h = current_mode_info.height;            
-            }
-    }
-//    *w = DisplayWidth(SDL_Display, SDL_Screen);
-//    *h = DisplayHeight(SDL_Display, SDL_Screen);
-}
-*/
-
 int ph_ResizeFullScreen(_THIS)
 {
-
-    if ( currently_fullscreen ) {
+    if (currently_fullscreen) {
         set_best_resolution(this, current_w, current_h);
     }
-    return(1);
+    return (1);
 }
 
-int get_mode(int width, int height, int bpp)
 /* return the mode associated with width, height and bpp */
-/* if there is no mode then zero is returned */
+/* if there is no mode then zero is returned             */
+int get_mode(int width, int height, int bpp)
 {
-	int i;
+    int i;
 
+    if(width<640)
+    {
+        width=640;
+    }
+    if(height<480)
+    {
+        height=480;
+    }
 
-if(width <640)
-   width = 640;
-if(height < 480)
-  height = 480;
+    if (PgGetVideoModeList(&mode_list) < 0)
+    {
+        fprintf(stderr,"error: PgGetVideoModeList failed\n");
+        return -1;
+    }
 
+    /* search list for exact match */
+    for (i=0;i<mode_list.num_modes;i++)
+    {
+        if (PgGetVideoModeInfo(mode_list.modes[i], &mode_info) < 0)
+        {
+            fprintf(stderr,"error: PgGetVideoModeInfo failed\n");
+            return 0;
+        }
 
-	if (PgGetVideoModeList( &mode_list ) < 0)
-	{
-	    fprintf(stderr,"error: PgGetVideoModeList failed\n");
-    	return -1;
-	}
+        if ((mode_info.width == width) && 
+            (mode_info.height == height) && 
+            (mode_info.bits_per_pixel == bpp))
+        {
+            return mode_list.modes[i];
+        }
+    }
 
-	// search list for exact match
-	for (i=0;i<mode_list.num_modes;i++)
-	{
-		if (PgGetVideoModeInfo(mode_list.modes[i], &mode_info) < 0)
-		{
-			fprintf(stderr,"error: PgGetVideoModeInfo failed\n");
-			return 0;
-		}
-		
-		
-		if ((mode_info.width == width) && 
-			(mode_info.height == height) && 
-			(mode_info.bits_per_pixel == bpp))
-			{
-			return mode_list.modes[i];
-			}
-	}
-	return (i == mode_list.num_modes) ? 0 : mode_list.modes[i];
+    return (i == mode_list.num_modes) ? 0 : mode_list.modes[i];
 }
 
 int get_mode_any_format(int width, int height, int bpp)
@@ -421,7 +390,7 @@ int get_mode_any_format(int width, int height, int bpp)
 		return mode_list.modes[ closest ];
 	}
 	else
-		return 0;
+    return 0;
 }
 
 void ph_WaitMapped(_THIS);
@@ -430,78 +399,88 @@ void ph_QueueEnterFullScreen(_THIS);
 
 int ph_ToggleFullScreen(_THIS, int on)
 {
-
-   if(currently_fullscreen)
-        ph_LeaveFullScreen(this);
-   else
-        ph_EnterFullScreen(this);
+    if (currently_fullscreen)
+    {
+        return ph_LeaveFullScreen(this);
+    }
+    else
+    {
+        return ph_EnterFullScreen(this);
+    }
       
-   return 0;     
-
+    return 0;     
 }
 
 int ph_EnterFullScreen(_THIS)
 {
-	if ( ! currently_fullscreen ) 
-	{
+    if (!currently_fullscreen)
+    {
+        if ((this->screen->flags & SDL_OPENGL)==SDL_OPENGL)
+        {
+#ifdef HAVE_OPENGL
+#endif /* HAVE_OPENGL */
+           return 0;
+        }
+        else
+        {
+            if (old_video_mode==-1)
+            {
+                PgGetGraphicsHWCaps(&graphics_card_caps);
+                old_video_mode=graphics_card_caps.current_video_mode;
+                old_refresh_rate=graphics_card_caps.current_rrate;
+            }
 
-		if (old_video_mode==-1)
-		{
-			PgGetGraphicsHWCaps(&graphics_card_caps);
-			old_video_mode=graphics_card_caps.current_video_mode;
-			old_refresh_rate=graphics_card_caps.current_rrate;
-		}
+            if(OCImage.direct_context == NULL)
+            {
+                OCImage.direct_context=(PdDirectContext_t*)PdCreateDirectContext();
+            }
+            if(!OCImage.direct_context)
+            {
+                fprintf(stderr, "error: Can't create direct context\n" );
+            }
 
+            PdDirectStart(OCImage.direct_context);
 
-		if(OCImage.direct_context == NULL)
-       	 OCImage.direct_context=(PdDirectContext_t*)PdCreateDirectContext();
-        if( !OCImage.direct_context )
-             fprintf(stderr, "error: Can't create direct context\n" );
-             
-       
-		/* Remove the cursor if in full screen mode */		
-/*
-		region_info.cursor_type = Ph_CURSOR_NONE;
-		region_info.rid=PtWidgetRid(window);
-		PhRegionChange(Ph_REGION_CURSOR,0,&region_info,NULL,NULL);
-*/
+            currently_fullscreen = 1;
+        }
+    }
 
-	 	PdDirectStart( OCImage.direct_context );
-
-		currently_fullscreen = 1;
-		}
-
-
-		
-	return 1;
+    return 1;
 }
 
 int ph_LeaveFullScreen(_THIS )
 {
-   PgDisplaySettings_t mymode_settings;
+    PgDisplaySettings_t mymode_settings;
        
-	if ( currently_fullscreen )
-	{
-		PdDirectStop(OCImage.direct_context);
-		PdReleaseDirectContext(OCImage.direct_context);
+    if (currently_fullscreen)
+    {
+        if ((this->screen->flags & SDL_OPENGL)==SDL_OPENGL)
+        {
+#ifdef HAVE_OPENGL
+#endif /* HAVE_OPENGL */
+           return 0;
+        }
+        else
+        {
+            PdDirectStop(OCImage.direct_context);
+            PdReleaseDirectContext(OCImage.direct_context);
 
-		//Restore old video mode	
-		if (old_video_mode != -1)
-		{
-			mymode_settings.mode= (unsigned short) old_video_mode;
-			mymode_settings.refresh= (unsigned short) old_refresh_rate;
-			mymode_settings.flags = 0;
-			if(PgSetVideoMode(&mymode_settings) < 0)
-                        {
-                           fprintf(stderr,"error: PgSetVideoMode failed\n");
-        	        }
-		}
-	
-		old_video_mode=-1;
-		old_refresh_rate=-1;	
-	
-		// Restore cursor	
-	
-	}
-	return 1;
+            /* Restore old video mode */
+            if (old_video_mode != -1)
+            {
+                mymode_settings.mode= (unsigned short) old_video_mode;
+                mymode_settings.refresh= (unsigned short) old_refresh_rate;
+                mymode_settings.flags = 0;
+                if (PgSetVideoMode(&mymode_settings) < 0)
+                {
+                    fprintf(stderr,"error: PgSetVideoMode failed\n");
+                }
+            }
+
+            old_video_mode=-1;
+            old_refresh_rate=-1;	
+        }
+
+    }
+    return 1;
 }
