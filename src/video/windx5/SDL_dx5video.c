@@ -1920,11 +1920,11 @@ static int DX5_FlipHWSurface(_THIS, SDL_Surface *surface)
 	LPDIRECTDRAWSURFACE3 dd_surface;
 
 	dd_surface = surface->hwdata->dd_surface;
-	result = IDirectDrawSurface3_Flip(dd_surface, NULL, DDFLIP_WAIT);
+	result = IDirectDrawSurface3_Flip(dd_surface, NULL, 0);
 	if ( result == DDERR_SURFACELOST ) {
 		result = IDirectDrawSurface3_Restore(
 						surface->hwdata->dd_surface);
-		result = IDirectDrawSurface3_Flip(dd_surface,NULL,DDFLIP_WAIT);
+		result = IDirectDrawSurface3_Flip(dd_surface, NULL, 0);
 	}
 	if ( result != DD_OK ) {
 		SetDDerror("DirectDrawSurface3::Flip", result);
