@@ -250,7 +250,7 @@ static DFBSurfacePixelFormat SDLToDFBPixelFormat (SDL_PixelFormat *format)
           if (format->Rmask == 0x7C00 &&
               format->Gmask == 0x03E0 &&
               format->Bmask == 0x001F)
-            return DSPF_RGB15;
+            return DSPF_ARGB1555;
           break;
           
         case 24:
@@ -280,7 +280,7 @@ static DFBSurfacePixelFormat SDLToDFBPixelFormat (SDL_PixelFormat *format)
         case 8:
           return DSPF_LUT8;
 	case 15:
-	  return DSPF_RGB15;
+	  return DSPF_ARGB1555;
 	case 16:
 	  return DSPF_RGB16;
 	case 24:
@@ -329,7 +329,7 @@ static int DFBToSDLPixelFormat (DFBSurfacePixelFormat pixelformat, SDL_PixelForm
       format->Amask = 0x000000FF;
       break;
 
-    case DSPF_RGB15:
+    case DSPF_ARGB1555:
       format->Rmask = 0x00007C00;
       format->Gmask = 0x000003E0;
       format->Bmask = 0x0000001F;
