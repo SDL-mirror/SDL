@@ -69,10 +69,15 @@
 #define SDL_INLINE_OKAY
 #else
 /* Add any special compiler-specific cases here */
-#if !defined(_MSC_VER) && !defined(__MRC__) && !defined(_SGI_SOURCE)
+#if defined(_MSC_VER)
+#define __inline__	__inline
+#define SDL_INLINE_OKAY
+#else
+#if !defined(__MRC__) && !defined(_SGI_SOURCE)
 #define __inline__ inline
 #define SDL_INLINE_OKAY
 #endif /* Not a funky compiler */
+#endif /* Visual C++ */
 #endif /* GNU C */
 #endif /* SDL_INLINE_OKAY */
 
