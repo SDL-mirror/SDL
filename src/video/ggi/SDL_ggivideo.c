@@ -75,11 +75,13 @@ static void GGI_FreeHWSurface(_THIS, SDL_Surface *surface);
 static int GGI_Available(void)
 {
 	ggi_visual_t *vis;
-	
-	vis = ggiOpen(NULL);
-	if (vis != NULL) 
-	{
-		ggiClose(vis);
+
+	vis = NULL;
+	if (ggiInit() == 0) {
+		vis = ggiOpen(NULL);
+		if (vis != NULL) {
+			ggiClose(vis);
+		}
 	}
 	return (vis != NULL);
 }
