@@ -35,6 +35,12 @@ static char rcsid =
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_VideoDevice *this
 
+#define WINDIB_FULLSCREEN()						\
+(									\
+	((SDL_VideoSurface->flags & SDL_FULLSCREEN) == SDL_FULLSCREEN) && \
+	(((SDL_VideoSurface->flags & SDL_OPENGL   ) == SDL_OPENGL    ) || \
+	 (strcmp(this->name, "windib") == 0))				\
+)
 #define DDRAW_FULLSCREEN() 						\
 (									\
 	((SDL_VideoSurface->flags & SDL_FULLSCREEN) == SDL_FULLSCREEN) && \
@@ -83,6 +89,11 @@ extern int SDL_resizing;
 
 /* Flag -- the mouse is in relative motion mode */
 extern int mouse_relative;
+
+/* The GDI fullscreen mode currently active */
+#ifndef NO_CHANGEDISPLAYSETTINGS
+extern DEVMODE SDL_fullscreen_mode;
+#endif
 
 /* This is really from SDL_dx5audio.c */
 extern void DX5_SoundFocus(HWND window);

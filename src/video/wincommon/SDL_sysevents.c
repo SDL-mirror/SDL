@@ -57,6 +57,9 @@ RECT SDL_bounds = {0, 0, 0, 0};
 int SDL_resizing = 0;
 int mouse_relative = 0;
 int posted = 0;
+#ifndef NO_CHANGEDISPLAYSETTINGS
+DEVMODE SDL_fullscreen_mode;
+#endif
 
 
 /* Functions called by the message processing function */
@@ -66,6 +69,21 @@ void (*WIN_RealizePalette)(_THIS);
 void (*WIN_PaletteChanged)(_THIS, HWND window);
 void (*WIN_SwapGamma)(_THIS);
 void (*WIN_WinPAINT)(_THIS, HDC hdc);
+
+static void SDL_RestoreGameMode(void)
+{
+#ifndef NO_CHANGEDISPLAYSETTINGS
+	ShowWindow(SDL_Window, SW_RESTORE);
+	ChangeDisplaySettings(&SDL_fullscreen_mode, CDS_FULLSCREEN);
+#endif
+}
+static void SDL_RestoreDesktopMode(void)
+{
+#ifndef NO_CHANGEDISPLAYSETTINGS
+	ShowWindow(SDL_Window, SW_MINIMIZE);
+	ChangeDisplaySettings(NULL, 0);
+#endif
+}
 
 #ifdef WM_MOUSELEAVE
 /* 
@@ -178,6 +196,9 @@ LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				}
 				if ( !(SDL_GetAppState()&SDL_APPINPUTFOCUS) ) {
 					WIN_SwapGamma(this);
+					if ( WINDIB_FULLSCREEN() ) {
+						SDL_RestoreGameMode();
+					}
 				}
 				posted = SDL_PrivateAppActive(1, appstate);
 				WIN_GetKeyboardState();
@@ -192,6 +213,9 @@ LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				}
 				if ( SDL_GetAppState() & SDL_APPINPUTFOCUS ) {
 					WIN_SwapGamma(this);
+					if ( WINDIB_FULLSCREEN() ) {
+						SDL_RestoreDesktopMode();
+					}
 				}
 				posted = SDL_PrivateAppActive(0, appstate);
 			}

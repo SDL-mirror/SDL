@@ -51,9 +51,6 @@ static char rcsid =
 #include "SDL_dx5yuv_c.h"
 #include "SDL_wingl_c.h"
 
-/* Function called to create a GL video mode - use the GDI driver, not DirectX */
-extern SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
-				int width, int height, int bpp, Uint32 flags);
 
 /* DirectX function pointers for video and events */
 HRESULT (WINAPI *DDrawCreate)( GUID FAR *lpGUID, LPDIRECTDRAW FAR *lplpDD, IUnknown FAR *pUnkOuter );
@@ -1078,6 +1075,7 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 			settings.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL;
 			if ( ChangeDisplaySettings(&settings, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL ) {
 				video->flags |= SDL_FULLSCREEN;
+				SDL_fullscreen_mode = settings;
 			}
 		}
 

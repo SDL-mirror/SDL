@@ -527,6 +527,7 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		settings.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL;
 		if ( ChangeDisplaySettings(&settings, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL ) {
 			video->flags |= SDL_FULLSCREEN;
+			SDL_fullscreen_mode = settings;
 		}
 	}
 #endif /* !NO_CHANGEDISPLAYSETTINGS */
