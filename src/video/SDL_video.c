@@ -117,6 +117,9 @@ static VideoBootStrap *bootstrap[] = {
 #ifdef ENABLE_PICOGUI
 	&PG_bootstrap,
 #endif
+#ifdef ENABLE_DC
+	&DC_bootstrap,
+#endif
 	NULL
 };
 

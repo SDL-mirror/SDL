@@ -7,6 +7,7 @@ ARCH_SUBDIRS = $(srcdir)/generic	\
                $(srcdir)/amigaos	\
                $(srcdir)/beos		\
                $(srcdir)/bsdi		\
+               $(srcdir)/dc		\
                $(srcdir)/epoc		\
                $(srcdir)/irix		\
                $(srcdir)/linux		\

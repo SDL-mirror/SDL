@@ -153,6 +153,9 @@ extern AudioBootStrap MINTAUDIO_bootstrap;
 #ifdef DISKAUD_SUPPORT
 extern AudioBootStrap DISKAUD_bootstrap;
 #endif
+#ifdef ENABLE_DC
+extern AudioBootStrap DCAUD_bootstrap;
+#endif
 
 /* This is the current audio device */
 extern SDL_AudioDevice *current_audio;

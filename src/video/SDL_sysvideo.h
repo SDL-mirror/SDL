@@ -406,6 +406,9 @@ extern VideoBootStrap Qtopia_bootstrap;
 #ifdef ENABLE_PICOGUI
 extern VideoBootStrap PG_bootstrap;
 #endif
+#ifdef ENABLE_DC
+extern VideoBootStrap DC_bootstrap;
+#endif
 /* This is the current video device */
 extern SDL_VideoDevice *current_video;
 

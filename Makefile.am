@@ -25,6 +25,7 @@ EXTRA_DIST =		\
 	README		\
 	README.AmigaOS	\
 	README.CVS	\
+	README.DC	\
 	README.Epoc	\
 	README.MacOS	\
 	README.MacOSX	\
@@ -40,6 +41,7 @@ EXTRA_DIST =		\
 	VisualC.html	\
 	VisualC.zip	\
 	VisualCE.zip	\
+	Makefile.dc	\
 	MPWmake.sea.bin	\
 	CWprojects.sea.bin \
 	PBProjects.tar.gz \

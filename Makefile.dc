@@ -1,0 +1,105 @@
+#GL=1
+
+CC = sh-elf-gcc -ml -m4-single-only
+AR = sh-elf-ar
+KOS_BASE=/prog/kos-1.1.7
+INCS = -I$(KOS_BASE)/libc/include -I$(KOS_BASE)/include -I$(KOS_BASE)/kernel/arch/dreamcast/include
+DEFS =-DNO_SIGNAL_H -DENABLE_DC
+
+ifdef GL
+DEFS += -DHAVE_OPENGL
+TARGET = libSDL_gl.a
+else
+TARGET = libSDL.a
+endif
+
+OPTFLAGS=-O2 -fomit-frame-pointer
+CFLAGS=-D_arch_dreamcast $(DEFS) $(INCS) -Iinclude -Isrc -Isrc/audio -Isrc/cdrom -Isrc/endian -Isrc/events -Isrc/joystick -Isrc/thread/dc -Isrc/thread -Isrc/timer -Isrc/video $(OPTFLAGS)
+
+SRCS = \
+	src/audio/dc/SDL_dcaudio.c \
+	src/audio/dc/aica.c \
+	src/audio/SDL_audio.c \
+	src/audio/SDL_audiocvt.c \
+	src/audio/SDL_audiodev.c \
+	src/audio/SDL_audiomem.c \
+	src/audio/SDL_mixer.c \
+	src/audio/SDL_wave.c \
+	src/cdrom/dc/SDL_syscdrom.c \
+	src/cdrom/SDL_cdrom.c \
+	src/endian/SDL_endian.c \
+	src/events/SDL_active.c \
+	src/events/SDL_events.c \
+	src/events/SDL_expose.c \
+	src/events/SDL_keyboard.c \
+	src/events/SDL_mouse.c \
+	src/events/SDL_quit.c \
+	src/events/SDL_resize.c \
+	src/file/SDL_rwops.c \
+	src/joystick/dc/SDL_sysjoystick.c \
+	src/joystick/SDL_joystick.c \
+	src/SDL.c \
+	src/SDL_error.c \
+	src/SDL_fatal.c \
+	src/SDL_getenv.c \
+	src/SDL_loadso.c \
+	src/thread/dc/SDL_syscond.c \
+	src/thread/dc/SDL_sysmutex.c \
+	src/thread/dc/SDL_syssem.c \
+	src/thread/dc/SDL_systhread.c \
+	src/thread/SDL_thread.c \
+	src/timer/dc/SDL_systimer.c \
+	src/timer/SDL_timer.c \
+	src/video/dc/SDL_dcevents.c \
+	src/video/dc/SDL_dcvideo.c \
+	src/video/SDL_blit.c \
+	src/video/SDL_blit_0.c \
+	src/video/SDL_blit_1.c \
+	src/video/SDL_blit_A.c \
+	src/video/SDL_blit_N.c \
+	src/video/SDL_bmp.c \
+	src/video/SDL_cursor.c \
+	src/video/SDL_gamma.c \
+	src/video/SDL_pixels.c \
+	src/video/SDL_RLEaccel.c \
+	src/video/SDL_stretch.c \
+	src/video/SDL_surface.c \
+	src/video/SDL_video.c \
+	src/video/SDL_yuv.c \
+	src/video/SDL_yuv_sw.c \
+
+OBJS = $(SRCS:.c=.o)
+
+TEST = \
+	test/checkkeys.c \
+	test/graywin.c \
+	test/loopwave.c \
+	test/testalpha.c \
+	test/testbitmap.c \
+	test/testcdrom.c \
+	test/testerror.c \
+	test/testgamma.c \
+	test/testgl.c \
+	test/testhread.c \
+	test/testjoystick.c \
+	test/testkeys.c \
+	test/testlock.c \
+	test/testoverlay.c \
+	test/testpalette.c \
+	test/testsem.c \
+	test/testsprite.c \
+	test/testtimer.c \
+	test/testtypes.c \
+	test/testver.c \
+	test/testvidinfo.c \
+	test/testwin.c \
+	test/testwm.c \
+	test/threadwin.c \
+	test/torturethread.c \
+
+clean:
+	rm $(OBJS)
+
+$(TARGET) : $(OBJS)
+	$(AR) rcs $(TARGET) $(OBJS)
+

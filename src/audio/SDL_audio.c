@@ -89,6 +89,9 @@ static AudioBootStrap *bootstrap[] = {
 #ifdef DISKAUD_SUPPORT
 	&DISKAUD_bootstrap,
 #endif
+#ifdef ENABLE_DC
+	&DCAUD_bootstrap,
+#endif
 	NULL
 };
 SDL_AudioDevice *current_audio = NULL;

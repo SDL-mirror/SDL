@@ -5,6 +5,7 @@ noinst_LTLIBRARIES = libtimer.la
 
 ARCH_SUBDIRS = $(srcdir)/amigaos \
                $(srcdir)/beos \
+               $(srcdir)/dc \
                $(srcdir)/epoc \
                $(srcdir)/linux \
                $(srcdir)/macos \
