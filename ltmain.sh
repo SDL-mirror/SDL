@@ -952,7 +952,7 @@ compiler."
 	  continue
 	  ;;
 	framework)
-	  deplibs="$deplibs -framework $arg"
+	  linkopts="$linkopts -framework $arg"
 	  prev=
 	  continue
 	  ;;
