@@ -1208,7 +1208,7 @@ static void*  QZ_GL_GetProcAddress (_THIS, const char *proc) {
 
 static int    QZ_GL_GetAttribute   (_THIS, SDL_GLattr attrib, int* value) {
 
-    GLenum attr;
+    GLenum attr = 0;
 
     QZ_GL_MakeCurrent (this);
 
