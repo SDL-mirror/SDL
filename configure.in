@@ -1994,8 +1994,8 @@ case "$target" in
         SDL_CFLAGS="$SDL_CFLAGS -Dmain=SDL_main"
         case "$target" in
             *-*-cygwin*)
-                CFLAGS="$CFLAGS -I/usr/include/mingw -DWIN32 -Uunix"
-                SDL_CFLAGS="$SDL_CFLAGS -I/usr/include/mingw -DWIN32 -Uunix"
+                CFLAGS="$CFLAGS -I/usr/include/mingw -DWIN32 -Uunix -mno-cygwin"
+                SDL_CFLAGS="$SDL_CFLAGS -I/usr/include/mingw -DWIN32 -Uunix -mno-cygwin"
                 LIBS="$LIBS -mno-cygwin"
                 SDL_LIBS="-lmingw32 -lSDLmain $SDL_LIBS -mwindows -mno-cygwin"
                 ;;
