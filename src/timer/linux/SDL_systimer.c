@@ -73,9 +73,9 @@ static float cpu_mhz1000 = 0.0f;
 /* This is for old binutils version that don't recognize rdtsc mnemonics.
    But all binutils version supports this.
 */
-#define rdtsc(t) asm(".byte 0x0f, 0x31; " : "=A" (t));   
+#define rdtsc(t) asm __volatile__ (".byte 0x0f, 0x31; " : "=A" (t))
 #else
-#define rdtsc(t) asm("rdtsc" : "=A" (t));
+#define rdtsc(t) asm __volatile__ ("rdtsc" : "=A" (t))
 #endif
 
 static float calc_cpu_mhz(void)
