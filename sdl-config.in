@@ -39,13 +39,16 @@ while test $# -gt 0; do
       echo @SDL_VERSION@
       ;;
     --cflags)
-      if test @includedir@ != /usr/include ; then
-          # Handle oddities in Win32 path handling (assumes prefix)
-          prefix=`echo ${prefix} | sed 's,^//\([A-Z]\),\1:,'`
+      echo -I@includedir@/SDL @SDL_CFLAGS@
 
-          includes=-I@includedir@
-      fi
-      echo $includes -I@includedir@/SDL @SDL_CFLAGS@
+      # The portable way of including SDL is #include "SDL.h"
+      #if test @includedir@ != /usr/include ; then
+      #    # Handle oddities in Win32 path handling (assumes prefix)
+      #    prefix=`echo ${prefix} | sed 's,^//\([A-Z]\),\1:,'`
+      #
+      #    includes=-I@includedir@
+      #fi
+      #echo $includes -I@includedir@/SDL @SDL_CFLAGS@
       ;;
 @ENABLE_SHARED_TRUE@    --libs)
 @ENABLE_SHARED_TRUE@      libdirs="-L@libdir@ @SDL_RLD_FLAGS@"
