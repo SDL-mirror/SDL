@@ -43,7 +43,8 @@ static char rcsid =
 #define MAX_BUTTONS	32	/* and 32 buttons                      */
 #define AXIS_MIN	-32768  /* minimum value for axis coordinate */
 #define AXIS_MAX	32767   /* maximum value for axis coordinate */
-#define JOY_AXIS_THRESHOLD	(((AXIS_MAX)-(AXIS_MIN))/100) /* 1% motion */
+/* limit axis to 256 possible positions to filter out noise */
+#define JOY_AXIS_THRESHOLD      (((AXIS_MAX)-(AXIS_MIN))/256)
 #define JOY_BUTTON_FLAG(n)	(1<<n)
 
 
