@@ -32,6 +32,7 @@ EXTRA_DIST =		\
         VisualC.zip	\
         MPWmake.sea.bin	\
 	CWprojects.sea.bin \
+	PBProjects.tar.gz \
         WhatsNew	\
         docs.html	\
         sdl.m4		\
