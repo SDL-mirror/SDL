@@ -3,7 +3,6 @@ noinst_HEADERS =	\
 	extutil.h	\
 	panoramiXext.h	\
 	panoramiXproto.h \
-	SDLname.h	\
 	xf86dga1.h	\
 	xf86dga1str.h	\
 	xf86dga.h	\
