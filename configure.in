@@ -647,6 +647,7 @@ CheckX11()
         fi
     fi
 }
+
 CheckPHOTON()
 {
     AC_ARG_ENABLE(video-photon,
@@ -671,6 +672,7 @@ CheckPHOTON()
             SYSTEM_LIBS="$SYSTEM_LIBS -lph"
             VIDEO_SUBDIRS="$VIDEO_SUBDIRS photon"
             VIDEO_DRIVERS="$VIDEO_DRIVERS photon/libvideo_photon.la"
+            CheckOpenGLQNX
         fi
     fi
 }
@@ -943,6 +945,26 @@ CheckOpenGL()
         if test x$video_opengl = xyes; then
             CFLAGS="$CFLAGS -DHAVE_OPENGL"
             AC_CHECK_LIB(dl, dlopen, SYSTEM_LIBS="$SYSTEM_LIBS -ldl")
+        fi
+    fi
+}
+
+dnl Find QNX RtP OpenGL
+CheckOpenGLQNX()
+{
+    if test x$enable_video = xyes -a x$enable_video_opengl = xyes; then
+        AC_MSG_CHECKING(for OpenGL (Photon) support)
+        video_opengl=no
+        AC_TRY_COMPILE([
+         #include <GL/gl.h>
+        ],[
+        ],[
+        video_opengl=yes
+        ])
+        AC_MSG_RESULT($video_opengl)
+        if test x$video_opengl = xyes; then
+            CFLAGS="$CFLAGS -DHAVE_OPENGL"
+            SYSTEM_LIBS="$SYSTEM_LIBS -lGL"
         fi
     fi
 }
@@ -2162,6 +2184,7 @@ AM_CONDITIONAL(TARGET_WIN32, test $ARCH = win32)
 AM_CONDITIONAL(TARGET_BEOS, test $ARCH = beos)
 AM_CONDITIONAL(TARGET_MACOS, test $ARCH = macos)
 AM_CONDITIONAL(TARGET_MACOSX, test $ARCH = macosx)
+AM_CONDITIONAL(TARGET_QNX, test $ARCH = qnx)
 
 # Set conditional variables for shared and static library selection.
 # These are not used in any Makefile.am but in sdl-config.in.

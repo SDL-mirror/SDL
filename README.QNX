@@ -3,17 +3,34 @@ README by Mike Gorchak <mike@malva.com.ua>
     Experimentally added OpenGL support in window mode (in fullscreen
 mode not yet). If you have QNX RtP v6.1.0 w/ or w/o Patch A you  need
 to download new Photon3D runtime from http://developers.qnx.com.  The
-versions of OS before 6.1.0 is not supported. OpenGL support is  very
-raw. It is often fail.
+versions of OS before 6.1.0 is not supported.
+
+Problems:
+1. OpenGL support is very raw. It is often fail. Update function has
+   not been written yet. Fullscreen mode has not been written yet.
+2. Photon has some errors in detecting how much bits per pixel has
+   videomode, creating images with different color depth.
+3. No shared libraries yet. We need manually set flags as
+   --disable-shared.
 
 Some building issues:
 
     Run configure script without x11 support, e.g.:
 
-    ./configure --prefix=/usr/local --disable-video-x11
+    a) for OpenGL support:
+    ./configure --prefix=/usr/local \
+                --disable-video-x11 \
+                --disable-shared
+
+    a) without OpenGL support:
+    ./configure --prefix=/usr/local \
+                --disable-video-x11 \
+                --disable-shared    \
+                --disable-video-opengl
 
     In test directory also run ./configure script without x11 support, e.g.:
 
     ./configure  --with-sdl-prefix=/usr/local      \
                  --with-sdl-exec-prefix=/usr/local \
                  --prefix=/usr/local --without-x
+

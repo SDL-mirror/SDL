@@ -190,10 +190,6 @@ AIX:  -= NOT YET SUPPORTED =-
 	http://www.kom.e-technik.tu-darmstadt.de/~griff/SDL/
 
 QNX:  -= NOT YET SUPPORTED =-
-	Configuration doesn't work right, Makefiles still need to be
-	tweaked (need to add libraries to any apps that use sdl_config
-	to figure out what libs they need).
- 
 	Only static libraries are being made, no shared ones.
  
 	The only hardware surface is the primary view surface.
@@ -203,9 +199,6 @@ QNX:  -= NOT YET SUPPORTED =-
 	Fullscreen doesn't display correctly.
  
 	The software surfaces could use some speed up.
- 
-	It doesn't look like the OpenGL stuff is there. (did a grep for
-	PdCreateOpenGLContext, nothing found).
  
 	The mouse cursor doesn't look right.
 
