@@ -763,7 +763,6 @@ CheckFBCON()
 [  --enable-video-fbcon    use framebuffer console video driver [default=yes]],
                   , enable_video_fbcon=yes)
     if test x$enable_video = xyes -a x$enable_video_fbcon = xyes; then
-        CFLAGS="$CFLAGS -D__KERNEL_STRICT_NAMES"
         AC_MSG_CHECKING(for framebuffer console support)
         video_fbcon=no
         AC_TRY_COMPILE([
