@@ -93,21 +93,21 @@ static xbiosmode_t xbiosmodelist_tt[]={
 static int xbiosnummodes_f30rvb=16;
 static xbiosmode_t xbiosmodelist_f30rvb[]={
 	{BPS16|COL80|OVERSCAN|VERTFLAG,768,480,16,SDL_FALSE},
-	{BPS16|COL80|OVERSCAN,768,240,16,SDL_FALSE},
-	{BPS16|COL80|VERTFLAG,640,400,16,SDL_FALSE},
-	{BPS16|COL80,640,200,16,SDL_FALSE},
 	{BPS16|OVERSCAN|VERTFLAG,384,480,16,SDL_FALSE},
-	{BPS16|OVERSCAN,384,240,16,SDL_FALSE},
+	{BPS16|COL80|VERTFLAG,640,400,16,SDL_FALSE},
 	{BPS16|VERTFLAG,320,400,16,SDL_FALSE},
+	{BPS16|COL80|OVERSCAN,768,240,16,SDL_FALSE},
+	{BPS16|OVERSCAN,384,240,16,SDL_FALSE},
+	{BPS16|COL80,640,200,16,SDL_FALSE},
 	{BPS16,320,200,16,SDL_FALSE},
 
 	{BPS8|COL80|OVERSCAN|VERTFLAG,768,480,8,SDL_FALSE},
-	{BPS8|COL80|OVERSCAN,768,240,8,SDL_FALSE},
-	{BPS8|COL80|VERTFLAG,640,400,8,SDL_FALSE},
-	{BPS8|COL80,640,200,8,SDL_FALSE},
 	{BPS8|OVERSCAN|VERTFLAG,384,480,8,SDL_FALSE},
-	{BPS8|OVERSCAN,384,240,8,SDL_FALSE},
+	{BPS8|COL80|VERTFLAG,640,400,8,SDL_FALSE},
 	{BPS8|VERTFLAG,320,400,8,SDL_FALSE},
+	{BPS8|COL80|OVERSCAN,768,240,8,SDL_FALSE},
+	{BPS8|OVERSCAN,384,240,8,SDL_FALSE},
+	{BPS8|COL80,640,200,8,SDL_FALSE},
 	{BPS8,320,200,8,SDL_FALSE}
 };
 
@@ -118,8 +118,8 @@ static xbiosmode_t xbiosmodelist_f30vga[]={
 	{BPS16|VERTFLAG,320,240,16,SDL_FALSE},
 
 	{BPS8|COL80,640,480,8,SDL_FALSE},	
-	{BPS8|COL80|VERTFLAG,640,240,8,SDL_FALSE},
 	{BPS8,320,480,8,SDL_FALSE},
+	{BPS8|COL80|VERTFLAG,640,240,8,SDL_FALSE},
 	{BPS8|VERTFLAG,320,240,8,SDL_FALSE}
 };
 
@@ -437,8 +437,13 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 	/* Free current buffers */
 	XBIOS_FreeBuffers(this);
 
-	/* Search if the mode exists (width, height, bpp) */
+	/* Limit bpp */
+	if (bpp>16) {
+		bpp = 16;
+	}
 	bpp >>= 4;
+
+	/* Search if the mode exists (width, height, bpp) */
 	for ( mode=0; SDL_modelist[bpp][mode]; ++mode ) {
 		if ( (SDL_modelist[bpp][mode]->w == width) &&
 		     (SDL_modelist[bpp][mode]->h == height) ) {
@@ -785,6 +790,7 @@ static void XBIOS_VideoQuit(_THIS)
 	Atari_ShutdownEvents();
 
 	/* Restore video mode and palette */
+#ifndef DEBUG_VIDEO_XBIOS
 	switch(XBIOS_cvdo >> 16) {
 		case VDO_ST:
 		case VDO_STE:
@@ -809,6 +815,7 @@ static void XBIOS_VideoQuit(_THIS)
 			break;
 	}
 	Vsync();
+#endif
 
 	if (XBIOS_oldpalette) {
 		free(XBIOS_oldpalette);
