@@ -2489,6 +2489,26 @@ case "$target" in
         # MiNT does not define "unix"
         CFLAGS="$CFLAGS -Dunix"
         ;;
+    *-*-riscos)
+        ARCH=riscos
+        JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS riscos"
+        JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS riscos/libjoystick_riscos.la"
+        COPY_ARCH_SRC(src/timer, riscos, SDL_systimer.c)
+        COPY_ARCH_SRC(src/main, linux, SDL_main.c)
+        VIDEO_SUBDIRS="$VIDEO_SUBDIRS riscos"
+        VIDEO_DRIVERS="$VIDEO_DRIVERS riscos/libvideo_riscos.la"
+        AUDIO_SUBDIRS="$AUDIO_SUBDIRS riscos"
+        AUDIO_DRIVERS="$AUDIO_DRIVERS riscos/libaudio_riscos.la"
+
+        if test x$enable_cdrom = xyes; then
+            CDROM_SUBDIRS="$CDROM_SUBDIRS dummy"
+            CDROM_DRIVERS="$CDROM_DRIVERS dummy/libcdrom_dummy.la"
+        fi
+
+        CFLAGS="$CFLAGS -DDISABLE_THREADS -DENABLE_RISCOS -DDRENDERER_SUPPORT"
+
+        SYSTEM_LIBS="$SYSTEM_LIBS -ljpeg -ltiff -lpng -lz"
+        ;;
     *)
         AC_MSG_ERROR(Unsupported target:  Please add to configure.in)
         ;;

@@ -177,8 +177,8 @@ int RISCOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	regs.r[0] = -1; /* Current mode */
 	regs.r[1] = 9;  /* Log base 2 bpp */
 
-	_kernel_swi(OS_ReadVduVariables, &regs, &regs);
-	vformat->BitsPerPixel = (1 << regs.r[0]);
+	_kernel_swi(OS_ReadModeVariable, &regs, &regs);
+	vformat->BitsPerPixel = (1 << regs.r[2]);
 
 	/* Minimum bpp for SDL is 8 */
 	if (vformat->BitsPerPixel < 8) vformat->BitsPerPixel = 8;
@@ -191,7 +191,7 @@ int RISCOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 			vformat->Bmask = 0x00007c00;
 			vformat->Gmask = 0x000003e0;
 			vformat->Rmask = 0x0000001f;
-			vformat->BitsPerPixel = 15; /* SDL wants actual number of bits used */
+			vformat->BitsPerPixel = 16; /* SDL wants actual number of bits used */
 			vformat->BytesPerPixel = 2;
 			break;
 
