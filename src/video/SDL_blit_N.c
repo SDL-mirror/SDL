@@ -31,14 +31,7 @@ static char rcsid =
 #include "SDL_video.h"
 #include "SDL_blit.h"
 #include "SDL_byteorder.h"
-
-/* Function to check the CPU flags */
-#define MMX_CPU		0x800000
-#ifdef USE_ASMBLIT
-#define CPU_Flags()	Hermes_X86_CPU()
-#else
-#define CPU_Flags()	0L
-#endif
+#include "SDL_cpuinfo.h"
 
 /* Functions to blit from N-bit surfaces to other surfaces */
 
@@ -1429,7 +1422,7 @@ struct blit_table {
 	Uint32 srcR, srcG, srcB;
 	int dstbpp;
 	Uint32 dstR, dstG, dstB;
-	Uint32 cpu_flags;
+	SDL_bool cpu_mmx;
 	void *aux_data;
 	SDL_loblit blitfunc;
         enum { NO_ALPHA, SET_ALPHA, COPY_ALPHA } alpha;
@@ -1466,19 +1459,19 @@ static const struct blit_table normal_blit_3[] = {
 static const struct blit_table normal_blit_4[] = {
 #ifdef USE_ASMBLIT
     { 0x00FF0000,0x0000FF00,0x000000FF, 2, 0x0000F800,0x000007E0,0x0000001F,
-      MMX_CPU, ConvertMMXpII32_16RGB565, ConvertMMX, NO_ALPHA },
+      1, ConvertMMXpII32_16RGB565, ConvertMMX, NO_ALPHA },
     { 0x00FF0000,0x0000FF00,0x000000FF, 2, 0x0000F800,0x000007E0,0x0000001F,
       0, ConvertX86p32_16RGB565, ConvertX86, NO_ALPHA },
     { 0x00FF0000,0x0000FF00,0x000000FF, 2, 0x0000001F,0x000007E0,0x0000F800,
-      MMX_CPU, ConvertMMXpII32_16BGR565, ConvertMMX, NO_ALPHA },
+      1, ConvertMMXpII32_16BGR565, ConvertMMX, NO_ALPHA },
     { 0x00FF0000,0x0000FF00,0x000000FF, 2, 0x0000001F,0x000007E0,0x0000F800,
       0, ConvertX86p32_16BGR565, ConvertX86, NO_ALPHA },
     { 0x00FF0000,0x0000FF00,0x000000FF, 2, 0x00007C00,0x000003E0,0x0000001F,
-      MMX_CPU, ConvertMMXpII32_16RGB555, ConvertMMX, NO_ALPHA },
+      1, ConvertMMXpII32_16RGB555, ConvertMMX, NO_ALPHA },
     { 0x00FF0000,0x0000FF00,0x000000FF, 2, 0x00007C00,0x000003E0,0x0000001F,
       0, ConvertX86p32_16RGB555, ConvertX86, NO_ALPHA },
     { 0x00FF0000,0x0000FF00,0x000000FF, 2, 0x0000001F,0x000003E0,0x00007C00,
-      MMX_CPU, ConvertMMXpII32_16BGR555, ConvertMMX, NO_ALPHA },
+      1, ConvertMMXpII32_16BGR555, ConvertMMX, NO_ALPHA },
     { 0x00FF0000,0x0000FF00,0x000000FF, 2, 0x0000001F,0x000003E0,0x00007C00,
       0, ConvertX86p32_16BGR555, ConvertX86, NO_ALPHA },
     { 0x00FF0000,0x0000FF00,0x000000FF, 3, 0x00FF0000,0x0000FF00,0x000000FF,
@@ -1581,8 +1574,7 @@ SDL_loblit SDL_CalculateBlitN(SDL_Surface *surface, int blit_index)
 			     dstfmt->Gmask == table[which].dstG &&
 			     dstfmt->Bmask == table[which].dstB &&
 			     (a_need & table[which].alpha) == a_need &&
-			     (CPU_Flags()&table[which].cpu_flags) ==
-			     table[which].cpu_flags )
+			     (table[which].cpu_mmx == SDL_HasMMX())) 
 				break;
 		}
 		sdata->aux_data = table[which].aux_data;

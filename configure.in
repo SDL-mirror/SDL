@@ -503,6 +503,7 @@ CheckNASM()
             CFLAGS="$CFLAGS -I\$(top_srcdir)/src/hermes"
             SDL_EXTRADIRS="$SDL_EXTRADIRS hermes"
             SDL_EXTRALIBS="$SDL_EXTRALIBS hermes/libhermes.la"
+            use_nasm=yes
         fi
     fi
 }
@@ -2569,6 +2570,7 @@ AM_CONDITIONAL(TARGET_MINT, test $ARCH = mint)
 # More automake conditionals
 AM_CONDITIONAL(USE_DIRECTX, test x$use_directx = xyes)
 AM_CONDITIONAL(USE_CLONE, test x$use_clone = xyes)
+AM_CONDITIONAL(HAVE_NASM, test x$use_nasm = xyes)
 
 # Set conditional variables for shared and static library selection.
 # These are not used in any Makefile.am but in sdl-config.in.
@@ -2774,6 +2776,7 @@ src/thread/Makefile
 src/timer/Makefile
 src/endian/Makefile
 src/file/Makefile
+src/cpuinfo/Makefile
 src/hermes/Makefile
 sdl-config
 SDL.spec

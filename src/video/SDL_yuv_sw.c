@@ -92,26 +92,10 @@ static char rcsid =
 
 #include "SDL_error.h"
 #include "SDL_video.h"
+#include "SDL_cpuinfo.h"
 #include "SDL_stretch_c.h"
 #include "SDL_yuvfuncs.h"
 #include "SDL_yuv_sw_c.h"
-
-/* Function to check the CPU flags */
-#define MMX_CPU		0x800000
-#ifdef USE_ASMBLIT
-#define CPU_Flags()	Hermes_X86_CPU()
-#else
-#define CPU_Flags()	0L
-#endif
-
-#ifdef USE_ASMBLIT
-#define X86_ASSEMBLER
-#define HermesConverterInterface	void
-#define HermesClearInterface		void
-#define STACKCALL
-
-#include "HeadX86.h"
-#endif
 
 /* The functions used to manipulate software video overlays */
 static struct private_yuvhwfuncs sw_yuvfuncs = {
@@ -956,7 +940,7 @@ SDL_Overlay *SDL_CreateYUV_SW(_THIS, int width, int height, Uint32 format, SDL_S
 	Uint32 *r_2_pix_alloc;
 	Uint32 *g_2_pix_alloc;
 	Uint32 *b_2_pix_alloc;
-	int i, cpu_mmx;
+	int i;
 	int CR, CB;
 	Uint32 Rmask, Gmask, Bmask;
 
@@ -1082,14 +1066,13 @@ SDL_Overlay *SDL_CreateYUV_SW(_THIS, int width, int height, Uint32 format, SDL_S
 	switch (format) {
 	    case SDL_YV12_OVERLAY:
 	    case SDL_IYUV_OVERLAY:
-		cpu_mmx = CPU_Flags() & MMX_CPU;
 		if ( display->format->BytesPerPixel == 2 ) {
 #if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
 			/* inline assembly functions */
-			if ( cpu_mmx && (Rmask == 0xF800) &&
-			                (Gmask == 0x07E0) &&
-				        (Bmask == 0x001F) &&
-			                (width & 15) == 0) {
+			if ( SDL_HasMMX() && (Rmask == 0xF800) &&
+			                     (Gmask == 0x07E0) &&
+				             (Bmask == 0x001F) &&
+			                     (width & 15) == 0) {
 /*printf("Using MMX 16-bit 565 dither\n");*/
 				swdata->Display1X = Color565DitherYV12MMX1X;
 			} else {
@@ -1108,10 +1091,10 @@ SDL_Overlay *SDL_CreateYUV_SW(_THIS, int width, int height, Uint32 format, SDL_S
 		if ( display->format->BytesPerPixel == 4 ) {
 #if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
 			/* inline assembly functions */
-			if ( cpu_mmx && (Rmask == 0x00FF0000) &&
-			                (Gmask == 0x0000FF00) &&
-				        (Bmask == 0x000000FF) && 
-			                (width & 15) == 0) {
+			if ( SDL_HasMMX() && (Rmask == 0x00FF0000) &&
+			                     (Gmask == 0x0000FF00) &&
+				             (Bmask == 0x000000FF) && 
+			                     (width & 15) == 0) {
 /*printf("Using MMX 32-bit dither\n");*/
 				swdata->Display1X = ColorRGBDitherYV12MMX1X;
 			} else {

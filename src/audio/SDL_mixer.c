@@ -34,27 +34,12 @@ static char rcsid =
 #include "SDL_audio.h"
 #include "SDL_mutex.h"
 #include "SDL_timer.h"
+#include "SDL_cpuinfo.h"
 #include "SDL_sysaudio.h"
+#include "SDL_cpuinfo.h"
 #include "SDL_mixer_MMX.h"
 #include "SDL_mixer_MMX_VC.h"
 #include "SDL_mixer_m68k.h"
-
-/* Function to check the CPU flags */
-#define MMX_CPU		0x800000
-#ifdef USE_ASMBLIT
-#define CPU_Flags()	Hermes_X86_CPU()
-#else
-#define CPU_Flags()	0L
-#endif
-
-#ifdef USE_ASMBLIT
-#define X86_ASSEMBLER
-#define HermesConverterInterface	void
-#define HermesClearInterface		void
-#define STACKCALL
-
-#include "HeadX86.h"
-#endif
 
 /* This table is used to add two sound values together and pin
  * the value to avoid overflow.  (used with permission from ARDI)
@@ -154,7 +139,7 @@ void SDL_MixAudio (Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 
 		case AUDIO_S8: {
 #if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
-			if (CPU_Flags() & MMX_CPU)
+			if (SDL_HasMMX())
 			{
 				SDL_MixAudio_MMX_S8((char*)dst,(char*)src,(unsigned int)len,(int)volume);
 			}
@@ -201,7 +186,7 @@ void SDL_MixAudio (Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 
 		case AUDIO_S16LSB: {
 #if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
-			if (CPU_Flags() & MMX_CPU)
+			if (SDL_HasMMX())
 			{
 				SDL_MixAudio_MMX_S16((char*)dst,(char*)src,(unsigned int)len,(int)volume);
 			}

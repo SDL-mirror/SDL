@@ -104,14 +104,7 @@ static char rcsid =
 
 #if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
 #include "mmx.h"
-/* Function to check the CPU flags */
-#define MMX_CPU		0x800000
-#define CPU_Flags()	Hermes_X86_CPU()
-#define X86_ASSEMBLER
-#define HermesConverterInterface	void
-#define HermesClearInterface		void
-#define STACKCALL
-#include "HeadX86.h"
+#include "SDL_cpuinfo.h"
 #endif
 
 #ifndef MAX
@@ -657,7 +650,7 @@ do {							\
 			if(alpha == 128)				\
 			    blitter(2, Uint8, ALPHA_BLIT16_565_50);	\
 			else {						\
-			    if((CPU_Flags()&MMX_CPU)!=0)		\
+			    if(SDL_HasMMX())				\
 				blitter(2, Uint8, ALPHA_BLIT16_565MMX);	\
 			    else					\
 				blitter(2, Uint8, ALPHA_BLIT16_565);	\
@@ -673,7 +666,7 @@ do {							\
 			if(alpha == 128)				\
 			    blitter(2, Uint8, ALPHA_BLIT16_555_50);	\
 			else {						\
-			    if((CPU_Flags()&MMX_CPU)!=0)		\
+			    if(SDL_HasMMX())				\
 				blitter(2, Uint8, ALPHA_BLIT16_555MMX);	\
 			    else					\
 				blitter(2, Uint8, ALPHA_BLIT16_555);	\
@@ -698,14 +691,14 @@ do {							\
 		       || fmt->Bmask == 0xff00)) {			\
 		    if(alpha == 128)					\
 		    {							\
-			if((CPU_Flags()&MMX_CPU)!=0)			\
+			if(SDL_HasMMX())				\
 				blitter(4, Uint16, ALPHA_BLIT32_888_50MMX);\
 			else						\
 				blitter(4, Uint16, ALPHA_BLIT32_888_50);\
 		    }							\
 		    else						\
 		    {							\
-			if((CPU_Flags()&MMX_CPU)!=0)			\
+			if(SDL_HasMMX())				\
 				blitter(4, Uint16, ALPHA_BLIT32_888MMX);\
 			else						\
 				blitter(4, Uint16, ALPHA_BLIT32_888);	\

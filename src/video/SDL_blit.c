@@ -38,16 +38,8 @@ static char rcsid =
 #include "SDL_memops.h"
 
 #if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
+#include "SDL_cpuinfo.h"
 #include "mmx.h"
-/* Function to check the CPU flags */
-#define MMX_CPU		0x800000
-#define SSE_CPU		0x2000000
-#define CPU_Flags()	Hermes_X86_CPU()
-#define X86_ASSEMBLER
-#define HermesConverterInterface	void
-#define HermesClearInterface		void
-#define STACKCALL
-#include "HeadX86.h"
 #endif
 
 /* The general purpose software blit routine */
@@ -166,9 +158,6 @@ static void SDL_BlitCopy(SDL_BlitInfo *info)
 	Uint8 *src, *dst;
 	int w, h;
 	int srcskip, dstskip;
-#if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
-	Uint32 f;
-#endif
 
 	w = info->d_width*info->dst->BytesPerPixel;
 	h = info->d_height;
@@ -177,8 +166,7 @@ static void SDL_BlitCopy(SDL_BlitInfo *info)
 	srcskip = w+info->s_skip;
 	dstskip = w+info->d_skip;
 #if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
-	f=CPU_Flags();
-	if((f&(MMX_CPU|SSE_CPU))==(MMX_CPU|SSE_CPU))
+	if(SDL_HasSSE())
 	{
 		while ( h-- ) {
 			SDL_memcpySSE(dst, src, w);
@@ -190,7 +178,7 @@ static void SDL_BlitCopy(SDL_BlitInfo *info)
 		::);
 	}
 	else
-	if((f&(MMX_CPU))!=0)
+	if(SDL_HasMMX())
 	{
 		while ( h-- ) {
 			SDL_memcpyMMX(dst, src, w);

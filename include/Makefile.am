@@ -11,6 +11,7 @@ libSDLinclude_HEADERS =		\
 	SDL_byteorder.h		\
 	SDL_cdrom.h		\
 	SDL_copying.h		\
+	SDL_cpuinfo.h		\
 	SDL_endian.h		\
 	SDL_error.h		\
 	SDL_events.h		\

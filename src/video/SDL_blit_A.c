@@ -32,16 +32,9 @@ static char rcsid =
 #include "SDL_blit.h"
 
 #if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
-#include "mmx.h"
 /* Function to check the CPU flags */
-#define MMX_CPU		0x800000
-#define TDNOW_CPU	0x80000000
-#define CPU_Flags()	Hermes_X86_CPU()
-#define X86_ASSEMBLER
-#define HermesConverterInterface	void
-#define HermesClearInterface		void
-#define STACKCALL
-#include "HeadX86.h"
+#include "SDL_cpuinfo.h"
+#include "mmx.h"
 #endif
 
 /* Functions to perform alpha blended blitting */
@@ -1387,7 +1380,7 @@ SDL_loblit SDL_CalculateAlphaBlit(SDL_Surface *surface, int blit_index)
 		    if(df->Gmask == 0x7e0)
 		    {
 #if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
-		if((CPU_Flags()&MMX_CPU)!=0)
+		if(SDL_HasMMX())
 			return Blit565to565SurfaceAlphaMMX;
 		else
 #endif
@@ -1396,7 +1389,7 @@ SDL_loblit SDL_CalculateAlphaBlit(SDL_Surface *surface, int blit_index)
 		    else if(df->Gmask == 0x3e0)
 		    {
 #if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
-		if((CPU_Flags()&MMX_CPU)!=0)
+		if(SDL_HasMMX())
 			return Blit555to555SurfaceAlphaMMX;
 		else
 #endif
@@ -1413,7 +1406,7 @@ SDL_loblit SDL_CalculateAlphaBlit(SDL_Surface *surface, int blit_index)
 		   && sf->BytesPerPixel == 4)
 		{
 #if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
-		if((CPU_Flags()&MMX_CPU)!=0)
+		if(SDL_HasMMX())
 		    return BlitRGBtoRGBSurfaceAlphaMMX;
 		else
 #endif
@@ -1453,12 +1446,10 @@ SDL_loblit SDL_CalculateAlphaBlit(SDL_Surface *surface, int blit_index)
 	       && sf->BytesPerPixel == 4)
 	    {
 #if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
-		Uint32 f;
-		f=CPU_Flags();
-		if((f&(TDNOW_CPU|MMX_CPU))==(TDNOW_CPU|MMX_CPU))
+		if(SDL_Has3DNow())
 		    return BlitRGBtoRGBPixelAlphaMMX3DNOW;
 		else
-		if((f&MMX_CPU)!=0)
+		if(SDL_HasMMX())
 		    return BlitRGBtoRGBPixelAlphaMMX;
 		else
 #endif
