@@ -33,15 +33,26 @@ static int    gArgc;
 static char  **gArgv;
 static BOOL   gFinderLaunch;
 
+static NSString *getApplicationName(void)
+{
+    NSDictionary *dict;
+    NSString *appName = 0;
+
+    /* Determine the application name */
+    dict = (NSDictionary *)CFBundleGetInfoDictionary(CFBundleGetMainBundle());
+    if (dict)
+        appName = [dict objectForKey: @"CFBundleName"];
+    
+    if (![appName length])
+        appName = [[NSProcessInfo processInfo] processName];
+
+    return appName;
+}
+
 #if SDL_USE_NIB_FILE
 /* A helper category for NSString */
 @interface NSString (ReplaceSubString)
 - (NSString *)stringByReplacingRange:(NSRange)aRange with:(NSString *)aString;
-@end
-#else
-/* An internal Apple class used to setup Apple menus */
-@interface NSAppleMenuController:NSObject {}
-- (void)controlMenu:(NSMenu *)aMenu;
 @end
 #endif
 
@@ -59,33 +70,24 @@ static BOOL   gFinderLaunch;
 }
 @end
 
-
 /* The main class of the application, the application's delegate */
 @implementation SDLMain
 
 /* Set the working directory to the .app's parent directory */
 - (void) setupWorkingDirectory:(BOOL)shouldChdir
 {
-
     if (shouldChdir)
     {
         char parentdir[MAXPATHLEN];
-        char *c;
+		CFURLRef url = CFBundleCopyBundleURL(CFBundleGetMainBundle());
+		CFURLRef url2 = CFURLCreateCopyDeletingLastPathComponent(0, url);
+		if (CFURLGetFileSystemRepresentation(url2, true, parentdir, MAXPATHLEN)) {
+	        assert ( chdir (parentdir) == 0 );   /* chdir to the binary app's parent */
+		}
+		CFRelease(url);
+		CFRelease(url2);
+	}
 
-        strncpy ( parentdir, gArgv[0], sizeof(parentdir) );
-        c = (char*) parentdir;
-
-        while (*c != '\0')     /* go to end */
-               c++;
-
-        while (*c != '/')      /* back up to parent */
-               c--;
-
-        *c++ = '\0';           /* cut off last part (binary name) */
-
-        assert ( chdir (parentdir) == 0 );   /* chdir to the binary app's parent */
-        assert ( chdir ("../../../") == 0 ); /* chdir to the .app's parent */
-    }
 }
 
 #if SDL_USE_NIB_FILE
@@ -115,38 +117,56 @@ static BOOL   gFinderLaunch;
 
 #else
 
-void setupAppleMenu(void)
+static void setApplicationMenu(void)
 {
     /* warning: this code is very odd */
-    NSAppleMenuController *appleMenuController;
     NSMenu *appleMenu;
-    NSMenuItem *appleMenuItem;
-
-    appleMenuController = [[NSAppleMenuController alloc] init];
-    appleMenu = [[NSMenu alloc] initWithTitle:@""];
-    appleMenuItem = [[NSMenuItem alloc] initWithTitle:@"" action:nil keyEquivalent:@""];
+    NSMenuItem *menuItem;
+    NSString *title;
+    NSString *appName;
     
-    [appleMenuItem setSubmenu:appleMenu];
+    appName = getApplicationName();
+    appleMenu = [[NSMenu alloc] initWithTitle:@""];
+    
+    /* Add menu items */
+    title = [@"About " stringByAppendingString:appName];
+    [appleMenu addItemWithTitle:title action:@selector(orderFrontStandardAboutPanel:) keyEquivalent:@""];
 
-    /* yes, we do need to add it and then remove it --
-       if you don't add it, it doesn't get displayed
-       if you don't remove it, you have an extra, titleless item in the menubar
-       when you remove it, it appears to stick around
-       very, very odd */
-    [[NSApp mainMenu] addItem:appleMenuItem];
-    [appleMenuController controlMenu:appleMenu];
-    [[NSApp mainMenu] removeItem:appleMenuItem];
+    [appleMenu addItem:[NSMenuItem separatorItem]];
+
+    title = [@"Hide " stringByAppendingString:appName];
+    [appleMenu addItemWithTitle:title action:@selector(hide:) keyEquivalent:@"h"];
+
+    menuItem = (NSMenuItem *)[appleMenu addItemWithTitle:@"Hide Others" action:@selector(hideOtherApplications:) keyEquivalent:@"h"];
+    [menuItem setKeyEquivalentModifierMask:(NSAlternateKeyMask|NSCommandKeyMask)];
+
+    [appleMenu addItemWithTitle:@"Show All" action:@selector(unhideAllApplications:) keyEquivalent:@""];
+
+    [appleMenu addItem:[NSMenuItem separatorItem]];
+
+    title = [@"Quit " stringByAppendingString:appName];
+    [appleMenu addItemWithTitle:title action:@selector(terminate:) keyEquivalent:@"q"];
+
+    
+    /* Put menu into the menubar */
+    menuItem = [[NSMenuItem alloc] initWithTitle:@"" action:nil keyEquivalent:@""];
+    [menuItem setSubmenu:appleMenu];
+    [[NSApp mainMenu] addItem:menuItem];
+
+    /* Tell the application object that this is now the application menu */
+    [NSApp setAppleMenu:appleMenu];
+
+    /* Finally give up our references to the objects */
     [appleMenu release];
-    [appleMenuItem release];
+    [menuItem release];
 }
 
 /* Create a window menu */
-void setupWindowMenu(void)
+static void setupWindowMenu(void)
 {
-    NSMenu		*windowMenu;
-    NSMenuItem	*windowMenuItem;
-    NSMenuItem	*menuItem;
-
+    NSMenu      *windowMenu;
+    NSMenuItem  *windowMenuItem;
+    NSMenuItem  *menuItem;
 
     windowMenu = [[NSMenu alloc] initWithTitle:@"Window"];
     
@@ -169,7 +189,7 @@ void setupWindowMenu(void)
 }
 
 /* Replacement for NSApplicationMain */
-void CustomApplicationMain (argc, argv)
+static void CustomApplicationMain (argc, argv)
 {
     NSAutoreleasePool	*pool = [[NSAutoreleasePool alloc] init];
     SDLMain				*sdlMain;
@@ -190,9 +210,9 @@ void CustomApplicationMain (argc, argv)
 
     /* Set up the menubar */
     [NSApp setMainMenu:[[NSMenu alloc] init]];
-    setupAppleMenu();
+    setApplicationMenu();
     setupWindowMenu();
-    
+
     /* Create SDLMain and make it the app delegate */
     sdlMain = [[SDLMain alloc] init];
     [NSApp setDelegate:sdlMain];
@@ -216,7 +236,7 @@ void CustomApplicationMain (argc, argv)
 
 #if SDL_USE_NIB_FILE
     /* Set the main menu to contain the real app name instead of "SDL App" */
-    [self fixMenu:[NSApp mainMenu] withAppName:[[NSProcessInfo processInfo] processName]];
+    [self fixMenu:[NSApp mainMenu] withAppName:getApplicationName()];
 #endif
 
     /* Hand off to main application code */
@@ -284,16 +304,12 @@ int main (int argc, char **argv)
     /* This is passed if we are launched by double-clicking */
     if ( argc >= 2 && strncmp (argv[1], "-psn", 4) == 0 ) {
         gArgc = 1;
-	gFinderLaunch = YES;
+        gFinderLaunch = YES;
     } else {
         gArgc = argc;
-	gFinderLaunch = NO;
+        gFinderLaunch = NO;
     }
-    gArgv = (char**) malloc (sizeof(*gArgv) * (gArgc+1));
-    assert (gArgv != NULL);
-    for (i = 0; i < gArgc; i++)
-        gArgv[i] = argv[i];
-    gArgv[i] = NULL;
+    gArgv = argv;
 
 #if SDL_USE_NIB_FILE
     [SDLApplication poseAsClass:[NSApplication class]];
