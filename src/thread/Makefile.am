@@ -6,6 +6,7 @@ noinst_LTLIBRARIES = libthread.la
 ARCH_SUBDIRS = $(srcdir)/generic	\
                $(srcdir)/amigaos	\
                $(srcdir)/beos		\
+               $(srcdir)/bsdi		\
                $(srcdir)/epoc		\
                $(srcdir)/irix		\
                $(srcdir)/linux		\
