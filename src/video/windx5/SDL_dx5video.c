@@ -2214,6 +2214,7 @@ void DX5_VideoQuit(_THIS)
 		if ( (this->screen->flags & (SDL_OPENGL|SDL_FULLSCREEN)) ==
 		                            (SDL_OPENGL|SDL_FULLSCREEN) ) {
 			ChangeDisplaySettings(NULL, 0);
+			SDL_ShowWindow(SDL_Window, SW_HIDE);
 		}
 		if ( this->screen->flags & SDL_OPENGL ) {
 			WIN_GL_ShutDown(this);
