@@ -120,7 +120,7 @@ static void set_best_resolution(_THIS, int width, int height)
                     goto match;
             }
             qsort(modes, nmodes, sizeof *modes, cmpmodes);
-            for ( i = nmodes-1; i >= 0 ; i-- ) {
+            for ( i = nmodes-1; i > 0 ; i-- ) {
 		if ( ! best_width ) {
                     if ( (modes[i]->hdisplay >= width) &&
                          (modes[i]->vdisplay >= height) ) {
