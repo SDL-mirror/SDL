@@ -17,7 +17,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
     Sam Lantinga
-    slouken@devolution.com
+    slouken@libsdl.org
 
     This file hacked^H^H^H^H^H^Hwritten by Ryan C. Gordon
         (icculus@linuxgames.com)

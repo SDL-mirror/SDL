@@ -19,7 +19,7 @@
     Sam Lantinga
     5635-34 Springhouse Dr.
     Pleasanton, CA 94588 (USA)
-    slouken@devolution.com
+    slouken@libsdl.org
 */
 
 #ifdef SAVE_RCSID

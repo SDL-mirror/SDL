@@ -17,7 +17,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 	Sam Lantinga
-	slouken@devolution.com
+	slouken@libsdl.org
 */
 
 /* SDL joystick driver for Darwin / MacOS X, based on the IOKit HID API */
