@@ -87,8 +87,14 @@ int main(int argc, char *argv[])
 	atexit(SDL_Quit);
 
 	videoflags = SDL_SWSURFACE;
-	if ( strcmp(argv[1], "-fullscreen") == 0 ) {
-		videoflags |= SDL_FULLSCREEN;
+	while( argc > 1 ) {
+		--argc;
+		if ( argv[argc] && !strcmp(argv[argc], "-fullscreen") ) {
+			videoflags |= SDL_FULLSCREEN;
+		} else {
+			fprintf(stderr, "Usage: %s [-fullscreen]\n", argv[0]);
+			exit(1);
+		}
 	}
 
 	/* Set 640x480 video mode */
