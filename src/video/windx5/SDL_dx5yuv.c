@@ -35,7 +35,7 @@ static char rcsid =
 #include "SDL_dx5yuv_c.h"
 #include "SDL_yuvfuncs.h"
 
-#define USE_DIRECTX_OVERLAY
+//#define USE_DIRECTX_OVERLAY
 
 /* The functions used to manipulate software video overlays */
 static struct private_yuvhwfuncs dx5_yuvfuncs = {
