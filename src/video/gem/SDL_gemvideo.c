@@ -475,12 +475,6 @@ SDL_Rect **GEM_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
 
 static void GEM_FreeBuffers(_THIS)
 {
-#ifdef HAVE_OPENGL
-	if (gl_active) {
-		SDL_AtariGL_Quit(this);
-	}
-#endif
-
 	/* Release buffer */
 	if ( GEM_buffer2 ) {
 		free( GEM_buffer2 );
@@ -1046,6 +1040,12 @@ void GEM_VideoQuit(_THIS)
 	SDL_AtariXbios_RestoreVectors();
 
 	GEM_FreeBuffers(this);
+
+#ifdef HAVE_OPENGL
+	if (gl_active) {
+		SDL_AtariGL_Quit(this, SDL_TRUE);
+	}
+#endif
 
 	/* Destroy window */
 	if (GEM_handle>=0) {

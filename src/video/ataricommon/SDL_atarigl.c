@@ -80,13 +80,9 @@ int SDL_AtariGL_Init(_THIS, SDL_Surface *current)
 	return (gl_active);
 }
 
-void SDL_AtariGL_Quit(_THIS)
+void SDL_AtariGL_Quit(_THIS, SDL_bool unload)
 {
 #ifdef HAVE_OPENGL
-	if (!gl_active) {
-		return;
-	}
-
 	if (gl_oldmesa) {
 		/* Old mesa implementations */
 		if (this->gl_data->OSMesaDestroyLDG) {
@@ -106,7 +102,9 @@ void SDL_AtariGL_Quit(_THIS)
 		}
 	}
 
-	SDL_AtariGL_UnloadLibrary(this);
+	if (unload) {
+		SDL_AtariGL_UnloadLibrary(this);
+	}
 
 #endif /* HAVE_OPENGL */
 	gl_active = 0;
@@ -378,6 +376,8 @@ static int InitNew(_THIS, SDL_Surface *current)
 	GLenum osmesa_format;
 	SDL_PixelFormat *pixel_format;
 	Uint32	redmask;
+	int recreatecontext;
+	GLint newaccumsize;
 
 	if (this->gl_config.dll_handle) {
 		if (this->gl_data->OSMesaCreateContextExt == NULL) {
@@ -440,11 +440,39 @@ static int InitNew(_THIS, SDL_Surface *current)
 			break;
 	}
 
-	gl_ctx = this->gl_data->OSMesaCreateContextExt(
-		osmesa_format, this->gl_config.depth_size,
-		this->gl_config.stencil_size, this->gl_config.accum_red_size +
-		this->gl_config.accum_green_size + this->gl_config.accum_blue_size +
-		this->gl_config.accum_alpha_size, NULL );
+	/* Try to keep current context if possible */
+	newaccumsize =
+		this->gl_config.accum_red_size +
+		this->gl_config.accum_green_size +
+		this->gl_config.accum_blue_size +
+		this->gl_config.accum_alpha_size;
+	recreatecontext=1;
+	if (gl_ctx &&
+		(gl_curformat == osmesa_format) &&
+		(gl_curdepth == this->gl_config.depth_size) &&
+		(gl_curstencil == this->gl_config.stencil_size) &&
+		(gl_curaccum == newaccumsize)) {
+		recreatecontext = 0;
+	}
+	if (recreatecontext) {
+		SDL_AtariGL_Quit(this, SDL_FALSE);
+
+		gl_ctx = this->gl_data->OSMesaCreateContextExt(
+			osmesa_format, this->gl_config.depth_size,
+			this->gl_config.stencil_size, newaccumsize, NULL );
+
+		if (gl_ctx) {
+			gl_curformat = osmesa_format;
+			gl_curdepth = this->gl_config.depth_size;
+			gl_curstencil = this->gl_config.stencil_size;
+			gl_curaccum = newaccumsize;
+		} else {
+			gl_curformat = 0;
+			gl_curdepth = 0;
+			gl_curstencil = 0;
+			gl_curaccum = 0;
+		}
+	}
 
 	return (gl_ctx != NULL);
 }
@@ -454,6 +482,7 @@ static int InitOld(_THIS, SDL_Surface *current)
 	GLenum osmesa_format;
 	SDL_PixelFormat *pixel_format;
 	Uint32	redmask;
+	int recreatecontext;
 
 	if (this->gl_config.dll_handle) {
 		if (this->gl_data->OSMesaCreateLDG == NULL) {
@@ -520,9 +549,31 @@ static int InitOld(_THIS, SDL_Surface *current)
 			break;
 	}
 
-	gl_shadow = this->gl_data->OSMesaCreateLDG(
-		osmesa_format, GL_UNSIGNED_BYTE, current->w, current->h
-	);
+	/* Try to keep current context if possible */
+	recreatecontext=1;
+	if (gl_shadow &&
+		(gl_curformat == osmesa_format) &&
+		(gl_curwidth == current->w) &&
+		(gl_curheight == current->h)) {
+		recreatecontext = 0;
+	}
+	if (recreatecontext) {
+		SDL_AtariGL_Quit(this, SDL_FALSE);
+
+		gl_shadow = this->gl_data->OSMesaCreateLDG(
+			osmesa_format, GL_UNSIGNED_BYTE, current->w, current->h
+		);
+
+		if (gl_shadow) {
+			gl_curformat = osmesa_format;
+			gl_curwidth = current->w;
+			gl_curheight = current->h;
+		} else {
+			gl_curformat = 0;
+			gl_curwidth = 0;
+			gl_curheight = 0;
+		}
+	}
 
 	return (gl_shadow != NULL);
 }

@@ -434,12 +434,6 @@ static void XBIOS_FreeBuffers(_THIS)
 {
 	int i;
 
-#ifdef HAVE_OPENGL
-	if (gl_active) {
-		SDL_AtariGL_Quit(this);
-	}
-#endif
-
 	for (i=0;i<2;i++) {
 		if (XBIOS_screensmem[i]!=NULL) {
 			Mfree(XBIOS_screensmem[i]);
@@ -857,6 +851,13 @@ static void XBIOS_VideoQuit(_THIS)
 			break;
 	}
 	Vsync();
+#endif
+
+
+#ifdef HAVE_OPENGL
+	if (gl_active) {
+		SDL_AtariGL_Quit(this, SDL_TRUE);
+	}
 #endif
 
 	if (XBIOS_oldpalette) {

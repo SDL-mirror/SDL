@@ -61,6 +61,11 @@ struct SDL_PrivateGLData {
 	/* mesa_gl.ldg, tiny_gl.ldg */
 	void *(*OSMesaCreateLDG)( long format, long type, long width, long height );
 	void (*OSMesaDestroyLDG)(void);
+
+	/* Info needed to compare existing context with new asked one */
+	int width, height;
+	GLenum format;
+	GLint depth,stencil,accum;
 };
 
 /* Variable names */
@@ -71,10 +76,16 @@ struct SDL_PrivateGLData {
 #define gl_shadow	(this->gl_data->gl_shadow)
 #define gl_convert	(this->gl_data->ConvertSurface)
 #define gl_copyshadow	(this->gl_data->CopyShadow)
+#define gl_curformat	(this->gl_data->format)
+#define gl_curdepth		(this->gl_data->depth)
+#define gl_curstencil	(this->gl_data->stencil)
+#define gl_curaccum		(this->gl_data->accum)
+#define gl_curwidth	(this->gl_data->width)
+#define gl_curheight		(this->gl_data->height)
 
 /* OpenGL functions */
 extern int SDL_AtariGL_Init(_THIS, SDL_Surface *current);
-extern void SDL_AtariGL_Quit(_THIS);
+extern void SDL_AtariGL_Quit(_THIS, SDL_bool unload);
 extern void SDL_AtariGL_InitPointers(_THIS);
 
 extern int SDL_AtariGL_LoadLibrary(_THIS, const char *path);
