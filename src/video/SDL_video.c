@@ -233,6 +233,8 @@ int SDL_VideoInit (const char *driver_name, Uint32 flags)
 	video->gl_config.accum_blue_size = 0;
 	video->gl_config.accum_alpha_size = 0;
 	video->gl_config.stereo = 0;
+	video->gl_config.sample_buffers = 0;
+	video->gl_config.samples = 0;
 	
 	/* Initialize the video subsystem */
 	memset(&vformat, 0, sizeof(vformat));
@@ -1419,6 +1421,12 @@ int SDL_GL_SetAttribute( SDL_GLattr attr, int value )
 			break;
 		case SDL_GL_STEREO:
 			video->gl_config.stereo = value;
+			break;
+		case SDL_GL_SAMPLE_BUFFERS:
+			video->gl_config.sample_buffers = value;
+			break;
+		case SDL_GL_SAMPLES:
+			video->gl_config.samples = value;
 			break;
 		default:
 			SDL_SetError("Unknown OpenGL attribute");

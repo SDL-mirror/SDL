@@ -304,6 +304,8 @@ struct SDL_VideoDevice {
 		int accum_blue_size;
 		int accum_alpha_size;
 		int stereo;
+		int sample_buffers;
+		int samples;
 		int driver_loaded;
 		char driver_path[256];
 		void* dll_handle;

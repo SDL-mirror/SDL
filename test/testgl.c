@@ -393,7 +393,7 @@ void DrawLogoBlit(void)
 }
 
 int RunGLTest( int argc, char* argv[],
-               int logo, int slowly, int bpp, float gamma, int noframe )
+               int logo, int slowly, int bpp, float gamma, int noframe, int fsaa )
 {
 	int i;
 	int rgb_size[3];
@@ -475,6 +475,10 @@ int RunGLTest( int argc, char* argv[],
 	SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, rgb_size[2] );
 	SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );
 	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+	if ( fsaa ) {
+		SDL_GL_SetAttribute( SDL_GL_SAMPLE_BUFFERS, 1 );
+		SDL_GL_SetAttribute( SDL_GL_SAMPLES, fsaa );
+	}
 	if ( SDL_SetVideoMode( w, h, bpp, video_flags ) == NULL ) {
 		fprintf(stderr, "Couldn't set GL mode: %s\n", SDL_GetError());
 		SDL_Quit();
@@ -499,6 +503,12 @@ int RunGLTest( int argc, char* argv[],
 	printf( "SDL_GL_DEPTH_SIZE: requested %d, got %d\n", bpp, value );
 	SDL_GL_GetAttribute( SDL_GL_DOUBLEBUFFER, &value );
 	printf( "SDL_GL_DOUBLEBUFFER: requested 1, got %d\n", value );
+	if ( fsaa ) {
+		SDL_GL_GetAttribute( SDL_GL_SAMPLE_BUFFERS, &value );
+		printf( "SDL_GL_SAMPLE_BUFFERS: requested 1, got %d\n", value );
+		SDL_GL_GetAttribute( SDL_GL_SAMPLES, &value );
+		printf( "SDL_GL_SAMPLES: requested %d, got %d\n", fsaa, value );
+	}
 
 	/* Set the window manager title bar */
 	SDL_WM_SetCaption( "SDL GL test", "testgl" );
@@ -700,6 +710,7 @@ int main(int argc, char *argv[])
 	int slowly;
 	float gamma = 0.0;
 	int noframe = 0;
+	int fsaa = 0;
 
 	logo = 0;
 	slowly = 0;
@@ -728,15 +739,18 @@ int main(int argc, char *argv[])
 		if ( strcmp(argv[i], "-noframe") == 0 ) {
  		       noframe = 1;
 		}
+		if ( strcmp(argv[i], "-fsaa") == 0 ) {
+ 		       ++fsaa;
+		}
 		if ( strncmp(argv[i], "-h", 2) == 0 ) {
  		       printf(
-"Usage: %s [-twice] [-logo] [-slow] [-bpp n] [-gamma n] [-noframe]\n",
+"Usage: %s [-twice] [-logo] [-slow] [-bpp n] [-gamma n] [-noframe] [-fsaa]\n",
  			      argv[0]);
 			exit(0);
 		}
 	}
 	for ( i=0; i<numtests; ++i ) {
- 		RunGLTest(argc, argv, logo, slowly, bpp, gamma, noframe);
+ 		RunGLTest(argc, argv, logo, slowly, bpp, gamma, noframe, fsaa);
 	}
 	return 0;
 }

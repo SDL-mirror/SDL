@@ -25,6 +25,8 @@ static char rcsid =
  "@(#) $Id$";
 #endif
 
+#include <string.h>
+
 /* WGL implementation of SDL OpenGL support */
 
 #ifdef HAVE_OPENGL
@@ -77,12 +79,60 @@ static int WIN_GL_ResetWindow(_THIS)
 	return(status);
 }
 
+static int Init_WGL_ARB_extensions(_THIS)
+{
+	HWND hwnd;
+	HDC hdc;
+	HGLRC hglrc;
+	int pformat;
+	const char * (WINAPI *wglGetExtensionsStringARB)(HDC) = 0;
+	
+	hwnd = CreateWindow(NULL, "PFormat", WS_POPUP | WS_DISABLED,
+	                    0, 0, 10, 10,
+	                    NULL, NULL, SDL_Instance,NULL);
+	hdc = GetDC(hwnd);
+
+	pformat = ChoosePixelFormat(hdc, &GL_pfd);
+	SetPixelFormat(hdc, pformat, &GL_pfd);
+
+	hglrc = this->gl_data->wglCreateContext(hdc);
+	this->gl_data->wglMakeCurrent(hdc, hglrc);
+
+	wglGetExtensionsStringARB = (const char * (WINAPI *)(HDC))
+		this->gl_data->wglGetProcAddress("wglGetExtensionsStringARB");
+
+	if(wglGetExtensionsStringARB && strstr(wglGetExtensionsStringARB(hdc),"WGL_ARB_pixel_format")) {
+		this->gl_data->wglChoosePixelFormatARB =
+			(BOOL (WINAPI *)(HDC, const int *, const FLOAT *, UINT, int *, UINT *))
+			this->gl_data->wglGetProcAddress("wglChoosePixelFormatARB");
+		this->gl_data->wglGetPixelFormatAttribivARB =
+			(BOOL (WINAPI *)(HDC, int, int, UINT, const int *, int *))
+			this->gl_data->wglGetProcAddress("wglGetPixelFormatAttribivARB");
+
+		if( (this->gl_data->wglChoosePixelFormatARB != NULL) &&
+		    (this->gl_data->wglGetPixelFormatAttribivARB != NULL) )
+			this->gl_data->wgl_arb_pixel_format = 1;
+		else 
+			this->gl_data->wgl_arb_pixel_format = 0;
+	} else {
+		this->gl_data->wgl_arb_pixel_format = 0;
+	}
+	
+	this->gl_data->wglMakeCurrent(NULL, NULL);
+	this->gl_data->wglDeleteContext(hglrc);
+	ReleaseDC(hwnd, hdc);
+	DestroyWindow(hwnd);
+}
+
 int WIN_GL_SetupWindow(_THIS)
 {
 	int retval;
 #ifdef HAVE_OPENGL
 	int i;
-	int pixel_format;
+	unsigned int matching;
+	int iAttribs[64];
+	int *iAttr;
+	float fAttribs[1] = { 0 };
 
 	/* load the gl driver from a default path */
 	if ( ! this->gl_config.driver_loaded ) {
@@ -127,13 +177,90 @@ int WIN_GL_SetupWindow(_THIS)
 		GL_pfd.cDepthBits = this->gl_config.depth_size;
 		GL_pfd.cStencilBits = this->gl_config.stencil_size;
 
+		/* initialize WGL_ARB_pixel_format */
+		Init_WGL_ARB_extensions(this);
+
+		/* setup WGL_ARB_pixel_format attribs */
+		iAttr = &iAttribs[0];
+
+		*iAttr++ = WGL_DRAW_TO_WINDOW_ARB;
+		*iAttr++ = GL_TRUE;
+		*iAttr++ = WGL_ACCELERATION_ARB;
+		*iAttr++ = WGL_FULL_ACCELERATION_ARB;
+		*iAttr++ = WGL_RED_BITS_ARB;
+		*iAttr++ = this->gl_config.red_size;
+		*iAttr++ = WGL_GREEN_BITS_ARB;
+		*iAttr++ = this->gl_config.green_size;
+		*iAttr++ = WGL_BLUE_BITS_ARB;
+		*iAttr++ = this->gl_config.blue_size;
+		
+		if ( this->gl_config.alpha_size ) {
+			*iAttr++ = WGL_ALPHA_BITS_ARB;
+			*iAttr++ = this->gl_config.alpha_size;
+		}
+
+		if ( this->gl_config.double_buffer ) {
+			*iAttr ++ = WGL_DOUBLE_BUFFER_ARB;
+			*iAttr ++ = GL_TRUE;
+		}
+
+		*iAttr++ = WGL_DEPTH_BITS_ARB;
+		*iAttr++ = this->gl_config.depth_size;
+
+		if ( this->gl_config.stencil_size ) {
+			*iAttr++ = WGL_STENCIL_BITS_ARB;
+			*iAttr++ = this->gl_config.stencil_size;
+		}
+
+		if ( this->gl_config.accum_red_size ) {
+			*iAttr++ = WGL_ACCUM_RED_BITS_ARB;
+			*iAttr++ = this->gl_config.accum_red_size;
+		}
+
+		if ( this->gl_config.accum_green_size ) {
+			*iAttr++ = WGL_ACCUM_GREEN_BITS_ARB;
+			*iAttr++ = this->gl_config.accum_green_size;
+		}
+
+		if ( this->gl_config.accum_blue_size ) {
+			*iAttr++ = WGL_ACCUM_BLUE_BITS_ARB;
+			*iAttr++ = this->gl_config.accum_blue_size;
+		}
+
+		if ( this->gl_config.accum_alpha_size ) {
+			*iAttr++ = WGL_ACCUM_ALPHA_BITS_ARB;
+			*iAttr++ = this->gl_config.accum_alpha_size;
+		}
+
+		if ( this->gl_config.stereo ) {
+			*iAttr++ = WGL_STEREO_ARB;
+			*iAttr++ = this->gl_config.stereo;
+		}
+
+		if ( this->gl_config.sample_buffers ) {
+			*iAttr++ = WGL_SAMPLE_BUFFERS_ARB;
+			*iAttr++ = this->gl_config.sample_buffers;
+		}
+
+		if ( this->gl_config.samples ) {
+			*iAttr++ = WGL_SAMPLES_ARB;
+			*iAttr++ = this->gl_config.samples;
+		}
+
+		*iAttr = 0;
+
 		/* Choose and set the closest available pixel format */
-		pixel_format = ChoosePixelFormat(GL_hdc, &GL_pfd);
+		if ( !this->gl_data->wgl_arb_pixel_format ||
+		     !this->gl_data->wglChoosePixelFormatARB(GL_hdc, iAttribs, fAttribs, 1, &pixel_format, &matching) ||
+		     !matching ) {
+			pixel_format = ChoosePixelFormat(GL_hdc, &GL_pfd);
+			this->gl_data->wgl_arb_pixel_format = 0;
+		}
 		if ( !pixel_format ) {
 			SDL_SetError("No matching GL pixel format available");
 			return(-1);
 		}
-		if( !SetPixelFormat(GL_hdc, pixel_format, &GL_pfd) ) {
+		if ( !SetPixelFormat(GL_hdc, pixel_format, &GL_pfd) ) {
 			if ( i == 0 ) {
 				/* First time through, try resetting the window */
 				if ( WIN_GL_ResetWindow(this) < 0 ) {
@@ -150,7 +277,7 @@ int WIN_GL_SetupWindow(_THIS)
 	DescribePixelFormat(GL_hdc, pixel_format, sizeof(GL_pfd), &GL_pfd);
 
 	GL_hrc = this->gl_data->wglCreateContext(GL_hdc);
-	if( GL_hrc == NULL ) {
+	if ( GL_hrc == NULL ) {
 		SDL_SetError("Unable to create GL context");
 		return(-1);
 	}
@@ -204,9 +331,66 @@ int WIN_GL_MakeCurrent(_THIS)
 int WIN_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
 {
 	int retval;
+	
+	if ( this->gl_data->wgl_arb_pixel_format ) {
+		int wgl_attrib;
+
+		switch(attrib) {
+		    case SDL_GL_RED_SIZE:
+			wgl_attrib = WGL_RED_BITS_ARB;
+			break;
+		    case SDL_GL_GREEN_SIZE:
+			wgl_attrib = WGL_GREEN_BITS_ARB;
+			break;
+		    case SDL_GL_BLUE_SIZE:
+			wgl_attrib = WGL_BLUE_BITS_ARB;
+			break;
+		    case SDL_GL_ALPHA_SIZE:
+			wgl_attrib = WGL_ALPHA_BITS_ARB;
+			break;
+		    case SDL_GL_DOUBLEBUFFER:
+			wgl_attrib = WGL_DOUBLE_BUFFER_ARB;
+			break;
+		    case SDL_GL_BUFFER_SIZE:
+			wgl_attrib = WGL_COLOR_BITS_ARB;
+			break;
+		    case SDL_GL_DEPTH_SIZE:
+			wgl_attrib = WGL_DEPTH_BITS_ARB;
+			break;
+		    case SDL_GL_STENCIL_SIZE:
+			wgl_attrib = WGL_STENCIL_BITS_ARB;
+			break;
+		    case SDL_GL_ACCUM_RED_SIZE:
+			wgl_attrib = WGL_ACCUM_RED_BITS_ARB;
+			break;
+		    case SDL_GL_ACCUM_GREEN_SIZE:
+			wgl_attrib = WGL_ACCUM_GREEN_BITS_ARB;
+			break;
+		    case SDL_GL_ACCUM_BLUE_SIZE:
+			wgl_attrib = WGL_ACCUM_BLUE_BITS_ARB;
+			break;
+		    case SDL_GL_ACCUM_ALPHA_SIZE:
+			wgl_attrib = WGL_ACCUM_ALPHA_BITS_ARB;
+			break;
+		    case SDL_GL_STEREO:
+			wgl_attrib = WGL_STEREO_ARB;
+			break;
+		    case SDL_GL_SAMPLE_BUFFERS:
+			wgl_attrib = WGL_SAMPLE_BUFFERS_ARB;
+			break;
+		    case SDL_GL_SAMPLES:
+			wgl_attrib = WGL_SAMPLES_ARB;
+			break;
+		    default:
+			return(-1);
+		}
+		this->gl_data->wglGetPixelFormatAttribivARB(GL_hdc, pixel_format, 0, 1, &wgl_attrib, value);
+
+		return 0;
+	}
 
 	retval = 0;
-	switch( attrib ) {
+	switch ( attrib ) {
 	    case SDL_GL_RED_SIZE:
 		*value = GL_pfd.cRedBits;
 		break;
@@ -275,6 +459,8 @@ void WIN_GL_UnloadLibrary(_THIS)
 		this->gl_data->wglCreateContext = NULL;
 		this->gl_data->wglDeleteContext = NULL;
 		this->gl_data->wglMakeCurrent = NULL;
+		this->gl_data->wglChoosePixelFormatARB = NULL;
+		this->gl_data->wglGetPixelFormatAttribivARB = NULL;
 
 		this->gl_config.dll_handle = NULL;
 		this->gl_config.driver_loaded = 0;
@@ -304,6 +490,7 @@ int WIN_GL_LoadLibrary(_THIS, const char* path)
 	WIN_GL_UnloadLibrary(this);
 
 	/* Load new function pointers */
+	memset(this->gl_data, 0, sizeof(*this->gl_data));
 	this->gl_data->wglGetProcAddress = (void * (WINAPI *)(const char *))
 		GetProcAddress(handle, "wglGetProcAddress");
 	this->gl_data->wglCreateContext = (HGLRC (WINAPI *)(HDC))

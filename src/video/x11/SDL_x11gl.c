@@ -122,6 +122,16 @@ XVisualInfo *X11_GL_GetVisual(_THIS)
 		attribs[i++] = GLX_STEREO;
 		attribs[i++] = this->gl_config.stereo;
 	}
+	
+	if( this->gl_config.sample_buffers ) {
+		attribs[i++] = GLX_SAMPLE_BUFFERS_ARB;
+		attribs[i++] = this->gl_config.sample_buffers;
+	}
+	
+	if( this->gl_config.samples ) {
+		attribs[i++] = GLX_SAMPLES_ARB;
+		attribs[i++] = this->gl_config.samples;
+	}
 
 #ifdef GLX_DIRECT_COLOR /* Try for a DirectColor visual for gamma support */
 	attribs[i++] = GLX_X_VISUAL_TYPE;
@@ -229,7 +239,7 @@ void X11_GL_Shutdown(_THIS)
 
 #ifdef HAVE_OPENGL
 
-static int ExtensionSupported(const char *extension, const char *all_extensions)
+static int ExtensionSupported(const char *extension)
 {
 	const GLubyte *extensions = NULL;
 	const GLubyte *start;
@@ -266,7 +276,6 @@ static int ExtensionSupported(const char *extension, const char *all_extensions)
 int X11_GL_MakeCurrent(_THIS)
 {
 	int retval;
-	const char *glx_extensions;
 	
 	retval = 0;
 	if ( ! this->gl_data->glXMakeCurrent(GFX_Display,
@@ -276,7 +285,6 @@ int X11_GL_MakeCurrent(_THIS)
 	}
 	XSync( GFX_Display, False );
 
-	
 	/* 
 	 * The context is now current, check for glXReleaseBuffersMESA() 
 	 * extension. If extension is _not_ supported, destroy the pointer 
@@ -296,10 +304,10 @@ int X11_GL_MakeCurrent(_THIS)
 	 * 
 	 */
 	
-	glx_extensions = this->gl_data->glXQueryExtensionsString(GFX_Display, SDL_Screen);
-	if (!ExtensionSupported("glXReleaseBuffersMESA", glx_extensions)) this->gl_data->glXReleaseBuffersMESA = NULL;
-	
-	
+	if ( ! ExtensionSupported("glXReleaseBuffersMESA") ) {
+		this->gl_data->glXReleaseBuffersMESA = NULL;
+	}
+
 	/* More Voodoo X server workarounds... Grr... */
 	SDL_Lock_EventThread();
 	X11_CheckDGAMouse(this);
@@ -354,6 +362,12 @@ int X11_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
 	    case SDL_GL_STEREO:
 		glx_attrib = GLX_STEREO;
 		break;
+ 	    case SDL_GL_SAMPLE_BUFFERS:
+ 		glx_attrib = GLX_SAMPLE_BUFFERS_ARB;
+ 		break;
+ 	    case SDL_GL_SAMPLES:
+ 		glx_attrib = GLX_SAMPLES_ARB;
+ 		break;
 	    default:
 		return(-1);
 	}

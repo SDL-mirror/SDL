@@ -217,7 +217,9 @@ typedef enum {
     SDL_GL_ACCUM_GREEN_SIZE,
     SDL_GL_ACCUM_BLUE_SIZE,
     SDL_GL_ACCUM_ALPHA_SIZE,
-	SDL_GL_STEREO
+    SDL_GL_STEREO,
+    SDL_GL_SAMPLE_BUFFERS,
+    SDL_GL_SAMPLES
 } SDL_GLattr;
 
 /* flags for SDL_SetPalette() */
