@@ -1323,11 +1323,7 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 		SetDDerror("DirectDrawSurface::QueryInterface", result);
 		return(NULL);
 	}
-	result = IDirectDrawSurface_Release(dd_surface1);
-	if ( result != DD_OK ) {
-		SetDDerror("DirectDrawSurface::Release", result);
-		return(NULL);
-	}
+	IDirectDrawSurface_Release(dd_surface1);
 
 	/* Get the format of the primary DirectDraw surface */
 	memset(&ddsd, 0, sizeof(ddsd));
@@ -1335,7 +1331,7 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 	ddsd.dwFlags = DDSD_PIXELFORMAT|DDSD_CAPS;
 	result = IDirectDrawSurface3_GetSurfaceDesc(SDL_primary, &ddsd);
 	if ( result != DD_OK ) {
-		SetDDerror("DirectDrawSurface::Release", result);
+		SetDDerror("DirectDrawSurface::GetSurfaceDesc", result);
 		return(NULL);
 	}
 	if ( ! (ddsd.ddpfPixelFormat.dwFlags&DDPF_RGB) ) {
