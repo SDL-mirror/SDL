@@ -92,6 +92,7 @@ extern DECLSPEC SDL_RWops * SDLCALL SDL_RWFromFile(const char *file, const char 
 extern DECLSPEC SDL_RWops * SDLCALL SDL_RWFromFP(FILE *fp, int autoclose);
 
 extern DECLSPEC SDL_RWops * SDLCALL SDL_RWFromMem(void *mem, int size);
+extern DECLSPEC SDL_RWops * SDLCALL SDL_RWFromConstMem(const void *mem, int size);
 
 extern DECLSPEC SDL_RWops * SDLCALL SDL_AllocRW(void);
 extern DECLSPEC void SDLCALL SDL_FreeRW(SDL_RWops *area);

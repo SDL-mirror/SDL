@@ -111,6 +111,7 @@
 	SDL_RWFromFile
 	SDL_RWFromFP
 	SDL_RWFromMem
+	SDL_RWFromConstMem
 	SDL_AllocRW
 	SDL_FreeRW
 	SDL_GetWMInfo

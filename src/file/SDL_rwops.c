@@ -129,6 +129,11 @@ static int mem_write(SDL_RWops *context, const void *ptr, int size, int num)
 	context->hidden.mem.here += num*size;
 	return(num);
 }
+static int mem_writeconst(SDL_RWops *context, const void *ptr, int size, int num)
+{
+	SDL_SetError("Can't write to read-only memory");
+	return(-1);
+}
 static int mem_close(SDL_RWops *context)
 {
 	if ( context ) {
@@ -250,6 +255,23 @@ SDL_RWops *SDL_RWFromMem(void *mem, int size)
 		rwops->seek = mem_seek;
 		rwops->read = mem_read;
 		rwops->write = mem_write;
+		rwops->close = mem_close;
+		rwops->hidden.mem.base = (Uint8 *)mem;
+		rwops->hidden.mem.here = rwops->hidden.mem.base;
+		rwops->hidden.mem.stop = rwops->hidden.mem.base+size;
+	}
+	return(rwops);
+}
+
+SDL_RWops *SDL_RWFromConstMem(const void *mem, int size)
+{
+	SDL_RWops *rwops;
+
+	rwops = SDL_AllocRW();
+	if ( rwops != NULL ) {
+		rwops->seek = mem_seek;
+		rwops->read = mem_read;
+		rwops->write = mem_writeconst;
 		rwops->close = mem_close;
 		rwops->hidden.mem.base = (Uint8 *)mem;
 		rwops->hidden.mem.here = rwops->hidden.mem.base;

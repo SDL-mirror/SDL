@@ -112,6 +112,7 @@ _SDL_CondWaitTimeout
 _SDL_RWFromFile
 _SDL_RWFromFP
 _SDL_RWFromMem
+_SDL_RWFromConstMem
 _SDL_AllocRW
 _SDL_FreeRW
 _SDL_GetWMInfo

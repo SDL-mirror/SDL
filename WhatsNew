@@ -6,6 +6,7 @@ Version 1.0:
 1.2.7:
 	Added CPU feature detection functions to SDL_cpuinfo.h:
 		SDL_HasRDTSC(), SDL_HasMMX(), SDL_Has3DNow(), SDL_HasSSE()
+	Added function to create RWops from const memory: SDL_RWFromConstMem()
 
 1.2.6:
 	Added SDL_LoadObject(), SDL_LoadFunction(), and SDL_UnloadObject()
