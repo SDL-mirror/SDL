@@ -47,17 +47,13 @@ static char rcsid =
 #include "SDL_ph_events_c.h"
 #include "SDL_phyuv_c.h"
 
-
-
 /* The translation tables from a photon keysym to a SDL keysym */
 static SDLKey ODD_keymap[256];
 static SDLKey MISC_keymap[0xFF + 1];
 SDL_keysym *ph_TranslateKey(PhKeyEvent_t *key, SDL_keysym *keysym);
 
 /* Check to see if this is a repeated key.
-   (idea shamelessly lifted from GII -- thanks guys! :)
- */
-
+   (idea shamelessly lifted from GII -- thanks guys! :) */
 static int ph_WarpedMotion(_THIS, PhEvent_t *winEvent)
 {
     PhRect_t *rect = PhGetRects( winEvent );
@@ -117,8 +113,6 @@ static Uint8 ph2sdl_mousebutton(unsigned short button_state)
     return (mouse_button);
 }
 
-//                   void* PtAppCreateContext();
-
 static int ph_DispatchEvent(_THIS)
 {
     int posted;
@@ -127,7 +121,7 @@ static int ph_DispatchEvent(_THIS)
     PhKeyEvent_t* keyEvent;
     PhWindowEvent_t* winEvent;
     int i, buttons;
-    SDL_Rect sdlrects[50]; 
+    SDL_Rect sdlrects[PH_SDL_MAX_RECTS];
 	
     posted = 0;
 	
@@ -217,12 +211,12 @@ static int ph_DispatchEvent(_THIS)
                 set_motion_sensitivity(this, -1);
                 posted = SDL_PrivateAppActive(1, SDL_APPINPUTFOCUS);
             }
-            /* quit request */
+            /* request quit */
             else if (winEvent->event_f==Ph_WM_CLOSE)
             {
                 posted = SDL_PrivateQuit();
             }
-            /* hide/unhide request */
+            /* request hide/unhide */
             else if (winEvent->event_f==Ph_WM_HIDE)
             {
                 if (currently_hided)
@@ -287,9 +281,16 @@ static int ph_DispatchEvent(_THIS)
         {
             if (event->num_rects!=0)
             {
+                int numrects;
+
                 if (SDL_VideoSurface)
                 {
                     rect = PhGetRects(event);
+                    if (event->num_rects>PH_SDL_MAX_RECTS)
+                    {
+                       /* sorry, buffers underrun, we'll update only first PH_SDL_MAX_RECTS rects */
+                       numrects=PH_SDL_MAX_RECTS;
+                    }
 
                     for(i=0; i<event->num_rects; i++)
                     {
@@ -368,6 +369,32 @@ static int ph_DispatchEvent(_THIS)
         
         case Ph_EV_INFO:
         {
+           if (event->subtype==Ph_OFFSCREEN_INVALID)
+           {
+              unsigned long* EvInfoData;
+
+              EvInfoData=(unsigned long*)PhGetData(event);
+
+              switch (*EvInfoData)
+              {
+                 case Pg_VIDEO_MODE_SWITCHED:
+                      {
+                      }
+                      break;
+                 case Pg_ENTERED_DIRECT:
+                      {
+                      }
+                      break;
+                 case Pg_EXITED_DIRECT:
+                      {
+                      }
+                      break;
+                 case Pg_DRIVER_STARTED:
+                      {
+                      }
+                      break;
+              }
+           }
         }
         break;
     }
@@ -387,10 +414,9 @@ int ph_Pending(_THIS)
         {
             case Ph_EVENT_MSG:
                  return 1;
-                 break;
             case -1:
-                 perror("ph_Pending(): PhEventNext failed");
-                 break;
+                 SDL_SetError("ph_Pending(): PhEventNext failed.\n");
+                 return 0;
             default:
                  return 0;
         }

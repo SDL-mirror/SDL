@@ -80,7 +80,7 @@ SDL_Rect **ph_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
         SDL_modearray[i]=&SDL_modelist[i];
     }
 
-    if (PgGetVideoModeList( &mode_list ) < 0)
+    if (PgGetVideoModeList(&mode_list) < 0)
     {
        SDL_SetError("ph_ListModes(): PgGetVideoModeList() function failed !\n");
        return NULL;
@@ -109,10 +109,10 @@ SDL_Rect **ph_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
 
     for(i=0; i<j; i++)
     {
-        SDL_modelist[i].w = Amodelist[j - i -1].w;
-        SDL_modelist[i].h = Amodelist[j - i -1].h;
-        SDL_modelist[i].x = Amodelist[j - i -1].x;
-        SDL_modelist[i].y = Amodelist[j - i -1].y;
+        SDL_modelist[i].w = Amodelist[j - i - 1].w;
+        SDL_modelist[i].h = Amodelist[j - i - 1].h;
+        SDL_modelist[i].x = Amodelist[j - i - 1].x;
+        SDL_modelist[i].y = Amodelist[j - i - 1].y;
     }
     SDL_modearray[j]=NULL;
 	
@@ -129,32 +129,54 @@ void ph_FreeVideoModes(_THIS)
 int ph_GetVideoMode(int width, int height, int bpp)
 {
     int i;
+    int modestage=0;
+    int closestmode=0;
 
     if (PgGetVideoModeList(&mode_list) < 0)
     {
         return -1;
     }
 
+    /* special case for the double-sized 320x200 mode */
+    if ((width==640) && (height==400))
+    {
+       modestage=1;
+    }
+
     /* search list for exact match */
-    for (i=0;i<mode_list.num_modes;i++)
+    for (i=0; i<mode_list.num_modes; i++)
     {
         if (PgGetVideoModeInfo(mode_list.modes[i], &mode_info) < 0)
         {
             return 0;
         }
 
-        if ((mode_info.width == width) && 
-            (mode_info.height == height) && 
+        if ((mode_info.width == width) && (mode_info.height == height) && 
             (mode_info.bits_per_pixel == bpp))
         {
             return mode_list.modes[i];
         }
+        else
+        {
+           if ((modestage) && (mode_info.width == width) && (mode_info.height == height+80) && 
+               (mode_info.bits_per_pixel == bpp))
+           {
+              modestage=2;
+              closestmode=mode_list.modes[i];
+           }
+        }
+    }
+
+    /* if we are here, then no 640x400xbpp mode found and we'll emulate it via 640x480xbpp mode */
+    if (modestage==2)
+    {
+       return closestmode;
     }
 
     return (i == mode_list.num_modes) ? 0 : mode_list.modes[i];
 }
 
-/* return the mode associated with width, height and bpp */
+/* return the mode associated with width, height and bpp               */
 /* if requested bpp is not found the mode with closest bpp is returned */
 int get_mode_any_format(int width, int height, int bpp)
 {
@@ -235,6 +257,8 @@ int ph_EnterFullScreen(_THIS, SDL_Surface* screen)
 {
     PgDisplaySettings_t settings;
     int mode;
+    char* refreshrate;
+    int refreshratenum;
 
     if (!currently_fullscreen)
     {
@@ -254,6 +278,22 @@ int ph_EnterFullScreen(_THIS, SDL_Surface* screen)
                 SDL_SetError("ph_EnterFullScreen(): can't find appropriate video mode !\n");
                 return 0;
             }
+            if (PgGetVideoModeInfo(mode, &mode_info) < 0)
+            {
+                SDL_SetError("ph_EnterFullScreen(): can't get video mode capabilities !\n");
+                return 0;
+            }
+            if (mode_info.height != screen->h)
+            {
+               if ((mode_info.height==480) && (screen->h==400))
+               {
+                  videomode_emulatemode=1;
+               }
+            }
+            else
+            {
+               videomode_emulatemode=0;
+            }
         }
 
         /* save old video mode caps */
@@ -265,6 +305,15 @@ int ph_EnterFullScreen(_THIS, SDL_Surface* screen)
         settings.mode = mode;
         settings.refresh = 0;
         settings.flags = 0;
+
+        refreshrate=getenv("SDL_PHOTON_FULLSCREEN_REFRESH");
+        if (refreshrate!=NULL)
+        {
+           if (sscanf(refreshrate, "%d", &refreshratenum)==1)
+           {
+               settings.refresh = refreshratenum;
+           }
+        }
 
         if (PgSetVideoMode(&settings) < 0)
         {

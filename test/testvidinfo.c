@@ -27,6 +27,12 @@ void PrintFlags(Uint32 flags)
 	if ( flags & SDL_DOUBLEBUF ) {
 		printf(" | SDL_DOUBLEBUF");
 	}
+	if ( flags & SDL_SRCCOLORKEY ) {
+		printf(" | SDL_SRCCOLORKEY");
+	}
+	if ( flags & SDL_RLEACCEL ) {
+		printf(" | SDL_RLEACCEL");
+	}
 }
 
 int RunBlitTests(SDL_Surface *screen, SDL_Surface *bmp, int blitcount)
@@ -67,7 +73,7 @@ int RunModeTests(SDL_Surface *screen)
 	float seconds;
 	int i;
 	Uint8 r, g, b;
-	SDL_Surface *bmp, *tmp;
+	SDL_Surface *bmp, *bmpcc, *tmp;
 	SDL_Event event;
 
 	while ( SDL_PollEvent(&event) ) {
@@ -116,6 +122,7 @@ int RunModeTests(SDL_Surface *screen)
 			return 0;
 	}
 
+        /* run the generic blit test */
 	bmp = SDL_LoadBMP("sample.bmp");
 	if ( ! bmp ) {
 		printf("Couldn't load sample.bmp: %s\n", SDL_GetError());
@@ -135,6 +142,29 @@ int RunModeTests(SDL_Surface *screen)
 		printf("%d blits / %d updates in zero seconds!\n", NUM_BLITS*frames, frames);
 	}
 
+        /* run the colorkeyed blit test */
+	bmpcc = SDL_LoadBMP("sample.bmp");
+	if ( ! bmpcc ) {
+		printf("Couldn't load sample.bmp: %s\n", SDL_GetError());
+		return 0;
+	}
+	printf("Running freshly loaded cc blit test: %dx%d at %d bpp, flags: ",
+		bmpcc->w, bmpcc->h, bmpcc->format->BitsPerPixel);
+        SDL_SetColorKey(bmpcc, SDL_SRCCOLORKEY | SDL_RLEACCEL, *(Uint8 *)bmpcc->pixels);
+
+	PrintFlags(bmpcc->flags);
+	printf("\n");
+	then = SDL_GetTicks();
+	frames = RunBlitTests(screen, bmpcc, NUM_BLITS);
+	now = SDL_GetTicks();
+	seconds = (float)(now - then) / 1000.0f;
+	if ( seconds > 0.0f ) {
+		printf("%d cc blits / %d updates in %2.2f seconds, %2.2f FPS\n", NUM_BLITS*frames, frames, seconds, (float)frames / seconds);
+	} else {
+		printf("%d cc blits / %d updates in zero seconds!\n", NUM_BLITS*frames, frames);
+	}
+
+        /* run the generic blit test */
 	tmp = bmp;
 	bmp = SDL_DisplayFormat(bmp);
 	SDL_FreeSurface(tmp);
@@ -155,6 +185,30 @@ int RunModeTests(SDL_Surface *screen)
 	} else {
 		printf("%d blits / %d updates in zero seconds!\n", NUM_BLITS*frames, frames);
 	}
+
+        /* run the colorkeyed blit test */
+	tmp = bmpcc;
+	bmpcc = SDL_DisplayFormat(bmpcc);
+	SDL_FreeSurface(tmp);
+	if ( ! bmpcc ) {
+		printf("Couldn't convert sample.bmp: %s\n", SDL_GetError());
+		return 0;
+	}
+	printf("Running display format cc blit test: %dx%d at %d bpp, flags: ",
+		bmpcc->w, bmpcc->h, bmpcc->format->BitsPerPixel);
+	PrintFlags(bmpcc->flags);
+	printf("\n");
+	then = SDL_GetTicks();
+	frames = RunBlitTests(screen, bmpcc, NUM_BLITS);
+	now = SDL_GetTicks();
+	seconds = (float)(now - then) / 1000.0f;
+	if ( seconds > 0.0f ) {
+		printf("%d cc blits / %d updates in %2.2f seconds, %2.2f FPS\n", NUM_BLITS*frames, frames, seconds, (float)frames / seconds);
+	} else {
+		printf("%d cc blits / %d updates in zero seconds!\n", NUM_BLITS*frames, frames);
+	}
+
+	SDL_FreeSurface(bmpcc);
 	SDL_FreeSurface(bmp);
 
 	while ( SDL_PollEvent(&event) ) {

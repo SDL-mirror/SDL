@@ -96,8 +96,9 @@ struct SDL_PrivateVideoData
 
     int mouse_relative;
     WMcursor* BlankCursor;
+    uint32_t videomode_emulatemode;
 
-    Uint32 depth;	            /* current visual depth (not bpp)              */
+    Uint32 visualbpp;	            /* current visual bpp                          */
     Uint32 desktopbpp;              /* bpp of desktop at the moment of start       */
     Uint32 desktoppal;              /* palette mode emulation or system            */
 
@@ -109,25 +110,27 @@ struct SDL_PrivateVideoData
     SDL_Overlay* overlay;
 };
 
-#define mode_settings        (this->hidden->mode_settings)
-#define window	             (this->hidden->Window)
-#define SDL_Image            (this->hidden->image)
-#define OCImage              (this->hidden->ocimage)
-#define old_video_mode       (this->hidden->old_video_mode)
-#define old_refresh_rate     (this->hidden->old_refresh_rate)
-#define graphics_card_caps   (this->hidden->graphics_card_caps)
-#define desktopbpp           (this->hidden->desktopbpp)
-#define desktoppal           (this->hidden->desktoppal)
-#define savedpal             (this->hidden->savedpal)
-#define syspalph             (this->hidden->syspalph)
-#define currently_fullscreen (this->hidden->currently_fullscreen)
-#define currently_hided      (this->hidden->currently_hided)
-#define currently_maximized  (this->hidden->currently_maximized)
-#define event                (this->hidden->event)
-#define current_overlay      (this->hidden->overlay)
-#define desktop_mode         (this->hidden->desktop_mode)
-#define mouse_relative       (this->hidden->mouse_relative)
-#define SDL_BlankCursor      (this->hidden->BlankCursor)
+#define mode_settings         (this->hidden->mode_settings)
+#define window	              (this->hidden->Window)
+#define SDL_Image             (this->hidden->image)
+#define OCImage               (this->hidden->ocimage)
+#define old_video_mode        (this->hidden->old_video_mode)
+#define old_refresh_rate      (this->hidden->old_refresh_rate)
+#define graphics_card_caps    (this->hidden->graphics_card_caps)
+#define desktopbpp            (this->hidden->desktopbpp)
+#define visualbpp             (this->hidden->visualbpp)
+#define desktoppal            (this->hidden->desktoppal)
+#define savedpal              (this->hidden->savedpal)
+#define syspalph              (this->hidden->syspalph)
+#define currently_fullscreen  (this->hidden->currently_fullscreen)
+#define currently_hided       (this->hidden->currently_hided)
+#define currently_maximized   (this->hidden->currently_maximized)
+#define event                 (this->hidden->event)
+#define current_overlay       (this->hidden->overlay)
+#define desktop_mode          (this->hidden->desktop_mode)
+#define mouse_relative        (this->hidden->mouse_relative)
+#define SDL_BlankCursor       (this->hidden->BlankCursor)
+#define videomode_emulatemode (this->hidden->videomode_emulatemode)
 
 #ifdef HAVE_OPENGL
      #define oglctx               (this->hidden->OGLContext)

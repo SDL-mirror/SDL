@@ -1,5 +1,5 @@
 README by Mike Gorchak <mike@malva.ua>, <lestat@i.com.ua>
-Last changed at 30 Sep 2003.
+Last changed at 14 Feb 2004.
 
 ======================================================================
 Table of Contents:
@@ -13,7 +13,7 @@ Table of Contents:
 7. Environment variables.
 
 ======================================================================
-OpenGL:
+1. OpenGL:
 
     OpenGL works well and is stable, but fullscreen mode has not  been
 heavily tested yet.
@@ -34,7 +34,7 @@ line in the ph_SetupOpenGLContext() function or change the argument to
 PHOGL_ATTRIB_FORCE_HW or PHOGL_ATTRIB_FAVOR_HW.
 
 ======================================================================
-Wheel and multi-button mouses:
+2. Wheel and multi-button mouses:
 
     Photon emits  keyboard  events (key up and down)  when  the  mouse
 wheel is moved. The key_scan field appears valid, and it contains zero.
@@ -54,14 +54,14 @@ I've tested it on:
    front, but works not with any window, looks like bug-o-feature :).
 
 ======================================================================
-CDROM handling issues:
+3. CDROM handling issues:
 
     Access to CDROM can only be  provided  with  'root'  privileges. I
 can't do anything about that, /dev/cd0 has brw------- permissions  and
 root:root rights.
 
 ======================================================================
-Hardware video overlays:
+4. Hardware video overlays:
 
     Overlays can flicker  during  window  movement,  resizing, etc. It
 happens because the photon driver updates the real window contents be-
@@ -82,20 +82,20 @@ smaller). It's really strange, looks  like  the  overlay  doesn't like
 negative coordinates.
 
 =======================================================================
-Shared library building:
+5. Shared library building:
 
     A shared library can be built, but before running  the  autogen.sh
 script you must manually delete the libtool.m4 stuff from the acinclu-
 de.m4 file (it comes after the ESD detection code up to the end of the
-file), because the libtool stuff in the acinclude.m4 file is very  old
-in SDL distribution before the version 1.2.7 and doesn't know anything
+file), because the libtool stuff in the acinclude.m4 file was very old
+in SDL distribution before the version 1.2.7 and doesn't knew anything
 about QNX. SDL 1.2.7 distribution contain  the  new libtool.m4 script,
 but anyway  it  is  broken :), Just  remove  it, then  run "libtoolize
 --force --copy",  delete the file aclocal.m4 and after  that  run  the
 autogen.sh script.
 
 ======================================================================
-Some building issues:
+6. Some building issues:
 
     Feel free to not use the --disable-shared configure option if you'
 ve read the above comment about 'Shared  library  building'. Otherwise
@@ -123,10 +123,15 @@ x11 support, e.g.:
                  --prefix=/usr --without-x
 
 ======================================================================
-Environment variables:
+7. Environment variables:
 
     Please note that the photon driver  is  sensible to the  following
 environmental variables:
+
+ * SDL_PHOTON_FULLSCREEN_REFRESH - this environment variable controls
+the refresh rate in all fullscreen modes. Be carefull !!! Photon drivers
+usually do not checking the maximum refresh rate, which video adapter or
+monitor supports.
 
  * SDL_VIDEO_WINDOW_POS - can be  set in the "X,Y" format.  If X and Y
 coordinates are bigger than the current desktop resolution, then  win-

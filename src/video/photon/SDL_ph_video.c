@@ -68,7 +68,7 @@ static int phstatus=-1;
 
 static int ph_Available(void)
 {
-    if (phstatus==-1)
+    if (phstatus!=0)
     {
         phstatus=PtInit(NULL);
         if (phstatus==0)
@@ -116,10 +116,10 @@ static SDL_VideoDevice *ph_CreateDevice(int devindex)
     device->UpdateRects = NULL;         /* set up in ph_SetupUpdateFunction */
     device->VideoQuit = ph_VideoQuit;
     device->AllocHWSurface = ph_AllocHWSurface;
-    device->CheckHWBlit = NULL;
-    device->FillHWRect = NULL;
-    device->SetHWColorKey = NULL;
-    device->SetHWAlpha = NULL;
+    device->CheckHWBlit = ph_CheckHWBlit;
+    device->FillHWRect = ph_FillHWRect;
+    device->SetHWColorKey = ph_SetHWColorKey;
+    device->SetHWAlpha = ph_SetHWAlpha;
     device->LockHWSurface = ph_LockHWSurface;
     device->UnlockHWSurface = ph_UnlockHWSurface;
     device->FlipHWSurface = ph_FlipHWSurface;
@@ -254,6 +254,14 @@ static int ph_SetupWindow(_THIS, int w, int h, int flags)
     }
     else
     {
+        if ((flags & SDL_HWSURFACE) == SDL_HWSURFACE)
+        {
+            PtSetArg(&args[nargs++], Pt_ARG_BASIC_FLAGS, Pt_TRUE, Pt_BASIC_PREVENT_FILL);
+        }
+        else
+        {
+            PtSetArg(&args[nargs++], Pt_ARG_FILL_COLOR, Pg_BLACK, 0);
+        }
         if (!currently_maximized)
         {
             windowpos = getenv("SDL_VIDEO_WINDOW_POS");
@@ -293,8 +301,6 @@ static int ph_SetupWindow(_THIS, int w, int h, int flags)
             }
         }
 
-        PtSetArg(&args[nargs++], Pt_ARG_FILL_COLOR, Pg_BLACK, 0);
-        
         /* if window is maximized render it as maximized */
         if (currently_maximized)
         {
@@ -311,7 +317,7 @@ static int ph_SetupWindow(_THIS, int w, int h, int flags)
         /* bring the focus to the window */
         PtSetArg(&args[nargs++], Pt_ARG_WINDOW_STATE, Pt_TRUE, Ph_WM_STATE_ISFOCUS);
 
-        /* allow to catch hide events */
+        /* allow to catch hide event */
         PtSetArg(&args[nargs++], Pt_ARG_WINDOW_MANAGED_FLAGS, Pt_TRUE, Ph_WM_HIDE);
         PtSetArg(&args[nargs++], Pt_ARG_WINDOW_NOTIFY_FLAGS, Pt_TRUE, Ph_WM_HIDE);
     }
@@ -319,6 +325,11 @@ static int ph_SetupWindow(_THIS, int w, int h, int flags)
     PtSetResources(window, nargs, args);
     PtRealizeWidget(window);
     PtWindowToFront(window);
+
+#if 0 /* FIXME */
+    PtGetResource(window, Pt_ARG_POS, &olddim, 0);
+    fprintf(stderr, "POSITION: %d, %d\n", olddim->w, olddim->h);
+#endif
 
     return 0;
 }
@@ -350,9 +361,9 @@ static const struct ColourMasks* ph_GetColourMasks(int bpp)
     return NULL;
 }
 
-static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat)
+static int ph_VideoInit(_THIS, SDL_PixelFormat* vformat)
 {
-    PgHWCaps_t my_hwcaps;
+    PgHWCaps_t hwcaps;
     int i;
 
     window=NULL;
@@ -391,14 +402,14 @@ static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat)
         return -1;
     }
 
-    if (PgGetGraphicsHWCaps(&my_hwcaps) < 0)
+    if (PgGetGraphicsHWCaps(&hwcaps) < 0)
     {
         SDL_SetError("ph_VideoInit(): GetGraphicsHWCaps function failed !\n");
         this->FreeWMCursor(this, SDL_BlankCursor);
         return -1;
     }
 
-    if (PgGetVideoModeInfo(my_hwcaps.current_video_mode, &desktop_mode) < 0)
+    if (PgGetVideoModeInfo(hwcaps.current_video_mode, &desktop_mode) < 0)
     {
         SDL_SetError("ph_VideoInit(): PgGetVideoModeInfo function failed !\n");
         this->FreeWMCursor(this, SDL_BlankCursor);
@@ -437,15 +448,22 @@ static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat)
     OCImage.CurrentFrameData = NULL;
     OCImage.FrameData0 = NULL;
     OCImage.FrameData1 = NULL;
+    videomode_emulatemode = 0;
     
+    this->info.video_mem=hwcaps.currently_available_video_ram/1024;
     this->info.wm_available = 1;
+    this->info.hw_available = 1;
+    this->info.blit_fill = 1;
+    this->info.blit_hw = 1;
+    this->info.blit_hw_A = 0;
+    this->info.blit_hw_CC = 1;
     
     return 0;
 }
 
-static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
-                int width, int height, int bpp, Uint32 flags)
+static SDL_Surface* ph_SetVideoMode(_THIS, SDL_Surface *current, int width, int height, int bpp, Uint32 flags)
 {
+    PgHWCaps_t hwcaps;
     const struct ColourMasks* mask;
 
     /* Lock the event thread, in multi-threading environments */
@@ -474,13 +492,13 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
         return NULL;
     }
 
-#ifdef HAVE_OPENGL
     if ((current->flags & SDL_OPENGL)==SDL_OPENGL)
     {
-#else
-    if ((current->flags & SDL_OPENGL)==SDL_OPENGL) /* if no built-in OpenGL support */
+#if !defined(HAVE_OPENGL)
+    if ((current->flags & SDL_OPENGL)==SDL_OPENGL)
     {
-        SDL_SetError("ph_SetVideoMode(): no OpenGL support, try to recompile library.\n");
+        /* if no built-in OpenGL support */
+        SDL_SetError("ph_SetVideoMode(): no OpenGL support, you need to recompile SDL.\n");
         current->flags &= ~SDL_OPENGL;
         return NULL;
 #endif /* HAVE_OPENGL */
@@ -500,13 +518,12 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
         }
         else
         {
-            /* remove this if we'll support non-fullscreen sw/hw+doublebuf */
+            /* remove this if we'll have support for the non-fullscreen sw/hw+doublebuf one day */
             current->flags &= ~SDL_DOUBLEBUF;
 
             /* Use offscreen memory if SDL_HWSURFACE flag is set */
             if ((current->flags & SDL_HWSURFACE) == SDL_HWSURFACE)
             {
-
                 if (desktopbpp!=bpp)
                 {
                    current->flags &= ~SDL_HWSURFACE;
@@ -556,9 +573,18 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
        PgFlush();
     }
 
+    visualbpp=bpp;
+
+    if (PgGetGraphicsHWCaps(&hwcaps) < 0)
+    {
+        SDL_SetError("ph_SetVideoMode(): GetGraphicsHWCaps function failed !\n");
+        return NULL;
+    }
+    this->info.video_mem=hwcaps.currently_available_video_ram/1024;
+
     SDL_Unlock_EventThread();
 
-    /* We're done! */
+    /* We've done! */
     return (current);
 }
 

@@ -30,7 +30,9 @@ static char rcsid =
 
 #include "SDL_ph_video.h"
 
-#define EVENT_SIZE sizeof(PhEvent_t) + 1000
+#define PH_SDL_MAX_RECTS 256
+#define PH_EVENT_SAFETY_POOL 512
+#define EVENT_SIZE (sizeof(PhEvent_t) + 1000 + PH_EVENT_SAFETY_POOL)
 
 /* Functions to be exported */
 extern void ph_InitOSKeymap(_THIS);
