@@ -4,11 +4,14 @@
 # This isn't always true (for example, nasm can't handle it)
 command=""
 while [ $# -gt 0 ]; do
-    if [ "$1" != "-fPIC" ]; then
-        if [ "$1" != "-DPIC" ]; then
+    case "$1" in
+        -?PIC)
+            # Ignore -fPIC and -DPIC options
+            ;;
+        *)
             command="$command $1"
-        fi
-    fi
+            ;;
+    esac
     shift
 done
 echo $command
