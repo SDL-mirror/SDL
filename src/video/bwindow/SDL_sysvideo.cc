@@ -416,7 +416,6 @@ static int BE_SetFullScreen(_THIS, SDL_Surface *screen, int fullscreen)
 		 */
 		xoff = (bounds.IntegerWidth() - width)/2;
 		yoff = (bounds.IntegerHeight() - height)/2;
-printf("Setting X/Y offset: %d/%d\n", xoff, yoff);
 		if ( fullscreen ) {
 			/* Set offset for drawing */
 			SDL_Win->SetXYOffset(xoff, yoff);
