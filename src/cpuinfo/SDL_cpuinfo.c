@@ -228,7 +228,7 @@ static __inline__ int CPU_haveSSE2()
 
 static __inline__ int CPU_haveAltiVec()
 {
-	int altivec = 0;
+	volatile int altivec = 0;
 #ifdef MACOSX
 	int selectors[2] = { CTL_HW, HW_VECTORUNIT }; 
 	int hasVectorUnit = 0; 
