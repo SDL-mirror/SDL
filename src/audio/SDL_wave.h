@@ -60,6 +60,6 @@ typedef struct WaveFMT {
 typedef struct Chunk {
 	Uint32 magic;
 	Uint32 length;
-	Uint8 *data;			/* Data includes magic and length */
+	Uint8 *data;
 } Chunk;
 
