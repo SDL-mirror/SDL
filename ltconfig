@@ -1930,7 +1930,7 @@ cygwin* | mingw*)
     # See where the system libraries really are - /usr/lib won't cut it
     libuser32=`$CC --print-file-name=libuser32.a`
     win32libs=`expr $libuser32 : '\(.*\)/.*'`
-    sys_lib_search_path_spec="$sys_lib_search_path_spec $win32libs"
+    sys_lib_search_path_spec="$sys_lib_search_path_spec /usr/lib/w32api $win32libs"
   fi
   lt_cv_dlopen="LoadLibrary"
   lt_cv_dlopen_libs=
