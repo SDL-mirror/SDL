@@ -24,10 +24,11 @@
    <QPG:Values>
       <QPG:Files>
          <QPG:Add file="./COPYING" install="LicenseUrl/" handling="repdata"/>
-         <QPG:Add permissions="0755" file="./src/.libs/libSDL-1.2.so.0" install="/opt/lib/"/>
-         <QPG:Add filetype="symlink" file="libSDL.so" install="/opt/lib/" linkto="libSDL-1.2.so.0"/>
-         <QPG:Add filetype="symlink" file="libSDL-1.1.so.0" install="/opt/lib/" linkto="libSDL-1.2.so.0"/>
-         <QPG:Add filetype="symlink" file="libSDL-1.0.so.0" install="/opt/lib/" linkto="libSDL-1.2.so.0"/>
+         <QPG:Add permissions="0755" file="./src/.libs/libSDL-@SDL_MAJOR_VERSION@.@SDL_MINOR_VERSION@.so.@SDL_BINARY_AGE@" install="/opt/lib/"/>
+         <QPG:Add filetype="symlink" file="libSDL.so" install="/opt/lib/" linkto="libSDL-@SDL_MAJOR_VERSION@.@SDL_MINOR_VERSION@.so.@SDL_BINARY_AGE@"/>
+         <QPG:Add filetype="symlink" file="libSDL-@SDL_MAJOR_VERSION@.@SDL_MINOR_VERSION@.so.0" install="/opt/lib/" linkto="libSDL-@SDL_MAJOR_VERSION@.@SDL_MINOR_VERSION@.so.@SDL_BINARY_AGE@"/>
+         <QPG:Add filetype="symlink" file="libSDL-@SDL_MAJOR_VERSION@.1.so.0" install="/opt/lib/" linkto="libSDL-@SDL_MAJOR_VERSION@.@SDL_MINOR_VERSION@.so.@SDL_BINARY_AGE@"/>
+         <QPG:Add filetype="symlink" file="libSDL-@SDL_MAJOR_VERSION@.0.so.0" install="/opt/lib/" linkto="libSDL-@SDL_MAJOR_VERSION@.@SDL_MINOR_VERSION@.so.@SDL_BINARY_AGE@"/>
          <QPG:Add permissions="0644" file="./src/.libs/libSDL.a" install="/opt/lib/"/>
          <QPG:Add permissions="0644" file="./src/.libs/libSDL.lai" install="/opt/lib/libSDL.la"/>
          <QPG:Add permissions="0644" file="./src/main/libSDLmain.a" install="/opt/lib/"/>
