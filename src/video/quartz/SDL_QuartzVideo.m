@@ -373,6 +373,7 @@ static void QZ_UnsetVideoMode (_THIS) {
         [ qz_window setDelegate:nil ];
         [ qz_window close ];
         [ qz_window release ];
+	qz_window = nil;
 
         /* Release the OpenGL context */
         if ( mode_flags & SDL_OPENGL )
