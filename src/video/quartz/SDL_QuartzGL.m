@@ -102,6 +102,8 @@ int QZ_SetupOpenGL (_THIS, int bpp, Uint32 flags) {
     if ( this->gl_config.multisamplesamples != 0 ) {
         attr[i++] = NSOpenGLPFASamples;
         attr[i++] = this->gl_config.multisamplesamples;
+        attr[i++] = NSOpenGLPFANoRecovery;
+        attr[i++] = (NSOpenGLPixelFormatAttribute)nil;
     }
 
     attr[i++] = NSOpenGLPFAScreenMask;
