@@ -142,7 +142,7 @@ int  SDL_SYS_CDInit(void)
 {
 	static char *checklist[] = {
 #ifdef __OpenBSD__
-		"?0 cd?a", "cdrom", NULL
+		"?0 cd?c", "cdrom", NULL
 #else
 		"?0 cd?c", "?0 acd?c", "cdrom", NULL
 #endif
