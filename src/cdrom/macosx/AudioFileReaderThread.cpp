@@ -241,7 +241,7 @@ void    FileReaderThread::ReadNextChunk ()
             dataChunkSize = theItem->mChunkSize;
         
             // this is the exit condition for the thread
-        if (dataChunkSize == 0) {
+        if (dataChunkSize <= 0) {
             theItem->mFinishedReadingData = true;
             continue;
         }
@@ -249,14 +249,9 @@ void    FileReaderThread::ReadNextChunk ()
         char* writePtr = const_cast<char*>(theItem->GetFileBuffer() + 
                                 (theItem->mWriteToFirstBuffer ? 0 : theItem->mChunkSize));
     
-/*
-        printf ("AudioFileReadBytes: theItem=%.8X fileID=%.8X pos=%.8X sz=%.8X flen=%.8X ptr=%.8X\n", 
-            (unsigned int)theItem, (unsigned int)theItem->GetFileID(),
-            (unsigned int)theItem->mReadFilePosition, (unsigned int)dataChunkSize, 
-            (unsigned int)theItem->mFileLength, (unsigned int)writePtr);
-*/            
+            // read data
         result = theItem->Read(writePtr, &dataChunkSize);
-        if (result) {
+        if (result != noErr && result != eofErr) {
             theItem->GetParent().DoNotification(result);
             continue;
         }
@@ -271,7 +266,10 @@ void    FileReaderThread::ReadNextChunk ()
         
         theItem->mWriteToFirstBuffer = !theItem->mWriteToFirstBuffer;   // switch buffers
         
-        theItem->mReadFilePosition += dataChunkSize;        // increment count
+        if (result == eofErr)
+            theItem->mReadFilePosition = theItem->mFileLength;
+        else
+            theItem->mReadFilePosition += dataChunkSize;        // increment count
     }
 }
 

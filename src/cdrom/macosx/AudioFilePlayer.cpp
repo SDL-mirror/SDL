@@ -352,7 +352,7 @@ void    AudioFilePlayer::OpenFile (const FSRef *inRef, SInt64& outFileDataSize)
        THROW_RESULT("AudioFilePlayer::OpenFile(): FSSetForkPosition")
 
     // Data size
-    outFileDataSize = chunk.ckSize - ssndData.offset;
+    outFileDataSize = chunk.ckSize - ssndData.offset - 8;
 
     // File format
     mFileDescription.mSampleRate = 44100;
