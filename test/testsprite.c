@@ -1,4 +1,3 @@
-
 /* Simple program:  Move N sprites around on the screen as fast as possible */
 
 #include <stdio.h>
@@ -18,6 +17,7 @@ SDL_Rect *sprite_rects;
 SDL_Rect *positions;
 SDL_Rect *velocities;
 int sprites_visible;
+Uint16 sprite_w, sprite_h;
 
 int LoadSprite(SDL_Surface *screen, char *file)
 {
@@ -66,12 +66,12 @@ void MoveSprites(SDL_Surface *screen, Uint32 background)
 		position = &positions[i];
 		velocity = &velocities[i];
 		position->x += velocity->x;
-		if ( (position->x < 0) || (position->x >= screen->w) ) {
+		if ( (position->x < 0) || (position->x >= (screen->w - sprite_w)) ) {
 			velocity->x = -velocity->x;
 			position->x += velocity->x;
 		}
 		position->y += velocity->y;
-		if ( (position->y < 0) || (position->y >= screen->h) ) {
+		if ( (position->y < 0) || (position->y >= (screen->h - sprite_w)) ) {
 			velocity->y = -velocity->y;
 			position->y += velocity->y;
 		}
@@ -209,10 +209,12 @@ int main(int argc, char *argv[])
 	sprite_rects += numsprites;
 	velocities = sprite_rects;
 	sprite_rects += numsprites;
+	sprite_w = sprite->w;
+	sprite_h = sprite->h;
 	srand(time(NULL));
 	for ( i=0; i<numsprites; ++i ) {
-		positions[i].x = rand()%screen->w;
-		positions[i].y = rand()%screen->h;
+		positions[i].x = rand()%(screen->w - sprite_w);
+		positions[i].y = rand()%(screen->h - sprite_h);
 		positions[i].w = sprite->w;
 		positions[i].h = sprite->h;
 		velocities[i].x = 0;
@@ -285,5 +287,6 @@ int main(int argc, char *argv[])
 		printf("%2.2f frames per second\n",
 					((double)frames*1000)/(now-then));
 	}
+	SDL_Quit();
 	return(0);
 }

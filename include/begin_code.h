@@ -67,7 +67,7 @@
    packing set to an alternate value, say for loading structures from disk.
    The packing is reset to the previous value in close_code.h
  */
-#if defined(_MSC_VER) || defined(__MWERKS__) || defined(__WATCOMC__) || defined(__BORLANDC__)
+#if defined(_MSC_VER) || defined(__MWERKS__) || defined(__BORLANDC__)
 #ifdef _MSC_VER
 #pragma warning(disable: 4103)
 #endif
@@ -86,8 +86,12 @@
 #define SDL_INLINE_OKAY
 #else
 /* Add any special compiler-specific cases here */
-#if defined(_MSC_VER) || defined(__BORLANDC__)
+#if defined(_MSC_VER) || defined(__BORLANDC__) || \
+    defined(__DMC__) || defined(__SC__) || \
+    defined(__WATCOMC__) || defined(__LCC__)
+#ifndef __inline__
 #define __inline__	__inline
+#endif
 #define SDL_INLINE_OKAY
 #else
 #if !defined(__MRC__) && !defined(_SGI_SOURCE)
@@ -106,3 +110,11 @@
 #define __inline__
 #endif
 
+/* Apparently this is needed by several Windows compilers */
+#ifndef NULL
+#ifdef __cplusplus
+#define NULL 0
+#else
+#define NULL ((void *)0)
+#endif
+#endif /* NULL */
