@@ -250,32 +250,21 @@ SDL_GrabMode X11_GrabInputNoLock(_THIS, SDL_GrabMode mode)
 		return(mode);	/* Will be set later on mode switch */
 	}
 	if ( mode == SDL_GRAB_OFF ) {
+printf("SDL grab OFF\n");
 		XUngrabPointer(SDL_Display, CurrentTime);
-		if ( this->screen->flags & SDL_FULLSCREEN ) {
-			/* Rebind the mouse to the fullscreen window */
-			for ( numtries = 0; numtries < 10; ++numtries ) {
-				result = XGrabPointer(SDL_Display, FSwindow,
-						True, 0,
-						GrabModeAsync, GrabModeAsync,
-						FSwindow, None, CurrentTime);
-				if ( result == GrabSuccess ) {
-					break;
-				}
-				SDL_Delay(100);
-			}
-			if ( result != GrabSuccess ) {
-				/* Uh, oh, what do we do here? */ ;
-			}
-		}
-		if ( !(this->screen->flags & SDL_FULLSCREEN) )
-			XUngrabKeyboard(SDL_Display, CurrentTime);
+		XUngrabKeyboard(SDL_Display, CurrentTime);
 	} else {
+printf("SDL grab ON\n");
 		if ( this->screen->flags & SDL_FULLSCREEN ) {
 			/* Unbind the mouse from the fullscreen window */
 			XUngrabPointer(SDL_Display, CurrentTime);
 		}
 		/* Try to grab the mouse */
+#if 0 /* We'll wait here until we actually grab, otherwise behavior undefined */
 		for ( numtries = 0; numtries < 10; ++numtries ) {
+#else
+		while ( 1 ) {
+#endif
 			result = XGrabPointer(SDL_Display, SDL_Window, True, 0,
 						GrabModeAsync, GrabModeAsync,
 						SDL_Window, None, CurrentTime);
@@ -287,16 +276,16 @@ SDL_GrabMode X11_GrabInputNoLock(_THIS, SDL_GrabMode mode)
 		if ( result != GrabSuccess ) {
 			/* Uh, oh, what do we do here? */ ;
 		}
-		/* Grab the keyboard if we're in fullscreen mode */
-		if ( !(this->screen->flags & SDL_FULLSCREEN) ) {
-			XGrabKeyboard(SDL_Display, WMwindow, True,
+		/* Now grab the keyboard */
+		XGrabKeyboard(SDL_Display, WMwindow, True,
 				GrabModeAsync, GrabModeAsync, CurrentTime);
-			SDL_PrivateAppActive(1, SDL_APPINPUTFOCUS);
-		}
 
 		/* Raise the window if we grab the mouse */
 		if ( !(this->screen->flags & SDL_FULLSCREEN) )
 			XRaiseWindow(SDL_Display, WMwindow);
+
+		/* Make sure we register input focus */
+		SDL_PrivateAppActive(1, SDL_APPINPUTFOCUS);
 	}
 	XSync(SDL_Display, False);
 
