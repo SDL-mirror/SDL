@@ -181,10 +181,21 @@ static void CheckMounts(const char *mtab)
 
 	mntfp = setmntent(mtab, "r");
 	if ( mntfp != NULL ) {
-		char *tmp, mnt_type[32], mnt_dev[1024];
+		char *tmp;
+		char *mnt_type;
+		char *mnt_dev;
 
 		while ( (mntent=getmntent(mntfp)) != NULL ) {
-			/* Warning, possible buffer overflow.. */
+			mnt_type = malloc(strlen(mntent->mnt_type) + 1);
+			if (mnt_type == NULL)
+				continue;  /* maybe you'll get lucky next time. */
+
+			mnt_dev = malloc(strlen(mntent->mnt_fsname) + 1);
+			if (mnt_dev == NULL) {
+				free(mnt_type);
+				continue;
+			}
+
 			strcpy(mnt_type, mntent->mnt_type);
 			strcpy(mnt_dev, mntent->mnt_fsname);
 
@@ -216,6 +227,8 @@ static void CheckMounts(const char *mtab)
 					AddDrive(mnt_dev, &stbuf);
 				}
 			}
+			free(mnt_dev);
+			free(mnt_type);
 		}
 		endmntent(mntfp);
 	}
