@@ -321,10 +321,10 @@ static void do_mouse(_THIS, short mx, short my, short mb, short ks)
 
 			/* Give mouse position relative to window position */
 			posx = mx - x2;
-			if (posx<0) posx = x2;
+			if (posx<0) posx = 0;
 			if (posx>w2) posx = w2-1;
 			posy = my - y2;
-			if (posy<0) posy = y2;
+			if (posy<0) posy = 0;
 			if (posy>h2) posy = h2-1;
 
 			SDL_PrivateMouseMotion(0, 0, posx, posy);
