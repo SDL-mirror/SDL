@@ -39,6 +39,9 @@ static char rcsid =
 #include <string.h>
 #include <errno.h>
 
+#if defined(HAVE_USB_H)
+#include <usb.h>
+#endif
 #include <dev/usb/usb.h>
 #include <dev/usb/usbhid.h>
 

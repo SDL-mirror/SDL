@@ -1545,9 +1545,13 @@ CheckUSBHID()
             SYSTEM_LIBS="$SYSTEM_LIBS -lusb"
         fi
 
+        AC_CHECK_HEADER(usb.h, have_usb_h=yes)
         AC_CHECK_HEADER(usbhid.h, have_usbhid_h=yes)
         AC_CHECK_HEADER(libusb.h, have_libusb_h=yes)
         AC_CHECK_HEADER(libusbhid.h, have_libusbhid_h=yes)
+        if test x$have_usb_h = xyes; then
+            CFLAGS="$CFLAGS -DHAVE_USB_H"
+        fi
         if test x$have_usbhid_h = xyes; then
             CFLAGS="$CFLAGS -DHAVE_USBHID_H"
         fi
@@ -1561,6 +1565,9 @@ CheckUSBHID()
         AC_MSG_CHECKING(for usbhid)
         have_usbhid=no
         AC_TRY_COMPILE([
+          #if defined(HAVE_USB_H)
+          #include <usb.h>
+          #endif
           #include <dev/usb/usb.h>
           #include <dev/usb/usbhid.h>
           #if defined(HAVE_USBHID_H)
@@ -1569,7 +1576,6 @@ CheckUSBHID()
           #include <libusb.h>
           #elif defined(HAVE_LIBUSBHID_H)
           #include <libusbhid.h>
-          #endif
         ],[
           struct report_desc *repdesc;
           struct usb_ctl_report *repbuf;
