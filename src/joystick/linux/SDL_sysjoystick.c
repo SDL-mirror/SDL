@@ -383,7 +383,7 @@ static SDL_bool JS_ConfigJoystick(SDL_Joystick *joystick, int fd)
 
 static SDL_bool EV_ConfigJoystick(SDL_Joystick *joystick, int fd)
 {
-	int i;
+	int i, t;
 	unsigned long keybit[40];
 	unsigned long absbit[40];
 	unsigned long relbit[40];
@@ -436,12 +436,18 @@ static SDL_bool EV_ConfigJoystick(SDL_Joystick *joystick, int fd)
 				    joystick->hwdata->abs_correct[i].used = 0;
 				} else {
 				    joystick->hwdata->abs_correct[i].used = 1;
-				    joystick->hwdata->abs_correct[i].coef[0] =
-					(values[2] + values[1]) / 2 - values[4];
-				    joystick->hwdata->abs_correct[i].coef[1] =
-					(values[2] + values[1]) / 2 + values[4];
-				    joystick->hwdata->abs_correct[i].coef[2] =
-					(1 << 29) / ((values[2] - values[1]) / 2 - 2 * values[4]);
+				    t = (2 - values[4]);
+				    if ( t != 0 ) {
+				        joystick->hwdata->abs_correct[i].coef[0] = (values[2] + values[1]) / t;
+				    }
+				    t = (2 + values[4]);
+				    if ( t != 0 ) {
+				        joystick->hwdata->abs_correct[i].coef[1] = (values[2] + values[1]) / t;
+				    }
+				    t = ((values[2] - values[1]) / 2 - 2 * values[4]);
+				    if ( t != 0 ) {
+					joystick->hwdata->abs_correct[i].coef[2] = (1 << 29) / t;
+				    }
 				}
 				++joystick->naxes;
 			}
