@@ -435,6 +435,24 @@ CheckDiskAudio()
     fi
 }
 
+dnl Set up the Atari Audio driver
+CheckAtariAudio()
+{
+    AC_ARG_ENABLE(mintaudio,
+[  --enable-mintaudio      support Atari audio driver [default=yes]],
+                  , enable_mintaudio=yes)
+    if test x$enable_audio = xyes -a x$enable_mintaudio = xyes; then
+        mintaudio=no
+        AC_CHECK_HEADER(mint/falcon.h, have_mint_falcon_hdr=yes)
+        if test x$have_mint_falcon_hdr = xyes; then
+            mintaudio=yes
+            CFLAGS="$CFLAGS -DMINTAUDIO_SUPPORT"
+            AUDIO_SUBDIRS="$AUDIO_SUBDIRS mint"
+            AUDIO_DRIVERS="$AUDIO_DRIVERS mint/libaudio_mintaudio.la"
+        fi
+    fi
+}
+
 dnl See if we can use x86 assembly blitters
 # NASM is available from: http://nasm.octium.net/
 CheckNASM()
@@ -2380,13 +2398,17 @@ case "$target" in
         CheckAtariBiosEvent
         CheckAtariXbiosVideo
         CheckAtariGemVideo
+        CheckAtariAudio
         CheckPTH
         # Set up files for the main() stub
         COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         # Set up files for the audio library
-        if test x$enable_audio = xyes; then
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS sun"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
+        if test x$enable_threads = xyes -a x$enable_pth = xyes; then
+            if test x$enable_audio = xyes; then
+                CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
+                AUDIO_SUBDIRS="$AUDIO_SUBDIRS sun"
+                AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
+            fi
         fi
         # Set up files for the joystick library
         if test x$enable_joystick = xyes; then
@@ -2575,6 +2597,7 @@ src/audio/ums/Makefile
 src/audio/windib/Makefile
 src/audio/windx5/Makefile
 src/audio/disk/Makefile
+src/audio/mint/Makefile
 src/video/Makefile
 src/video/XFree86/Makefile
 src/video/XFree86/extensions/Makefile

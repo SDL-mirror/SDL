@@ -147,6 +147,9 @@ extern AudioBootStrap SNDMGR_bootstrap;
 #ifdef ENABLE_AHI
 extern AudioBootStrap AHI_bootstrap;
 #endif
+#ifdef MINTAUDIO_SUPPORT
+extern AudioBootStrap MINTAUDIO_bootstrap;
+#endif
 #ifdef DISKAUD_SUPPORT
 extern AudioBootStrap DISKAUD_bootstrap;
 #endif

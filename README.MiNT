@@ -10,9 +10,8 @@ I.  Building the Simple DirectMedia Layer libraries:
   Do the classic configure, with --disable-shared --enable-static and:
 
     Tos version (should run everywhere):
-      --disable-audio --disable-threads
-    Tos does not support threads, so can not support audio, maybe in a future
-    version audio support will be added via interrupts.
+      --disable-threads
+    Tos does not support threads.
 
     MiNT version (maybe Magic, only for multitasking OS):
       --disable-pthreads --enable-pth
@@ -50,11 +49,11 @@ Mouse (XBIOS, GEM, Ikbd)
 Video (XBIOS (Fullscreen), GEM (Windowed and Fullscreen))
 Timer (VBL vector)
 Joystick and joypad support (Ikbd, Hardware)
+Audio support (Hardware, XBIOS, GSXB, /dev/audio if threads enabled)
+Threads support (Multitasking OS only via GNU pth library)
 
 - What is missing:
-Audio support (TOS)
 CDROM support (Metados, /dev/cdrom)
-Threads support (TOS)
 
 - Driver combinations:
 Video	Kbd	Mouse	Timer	Jstick	Joypads
@@ -69,14 +68,19 @@ to report this type event.
 ==============================================================================
 V.  Environment variables:
 
+SDL_VIDEODRIVER:
+	Set to 'xbios' to force xbios video driver
+	Set to 'gem' to force gem video driver
+
+SDL_AUDIODRIVER:
+	Set to 'mint' to force Atari audio driver
+	Set to 'audio' to force Sun /dev/audio audio driver
+	Set to 'disk' to force disk-writing audio driver
+
 SDL_ATARI_EVENTSDRIVER
 	Set to 'ikbd' to force IKBD 6301 keyboard driver
 	Set to 'gemdos' to force gemdos keyboard driver
 	Set to 'bios' to force bios keyboard driver
-
-SDL_VIDEODRIVER:
-	Set to 'xbios' to force xbios video driver
-	Set to 'gem' to force gem video driver
 
 SDL_JOYSTICK_ATARI:
 	Use any of these strings in the environment variable to enable or
@@ -151,7 +155,19 @@ Joypad driver:
 	Available if _MCH cookie is STE or Falcon.
 
 VBL timer driver:
-	Available all machines (I think).
+	Available on all machines (I think).
+
+Audio driver:
+	Cookie _SND is used to detect supported audio capabilities
+
+	STE, Mega STE, TT:
+		8 bits DMA (hardware access)
+
+	Falcon, machines with GSXB driver:
+		Xbios functions
+
+	Other machines:
+		Not supported
 
 -- 
 Patrice Mandin <pmandin@caramail.com>

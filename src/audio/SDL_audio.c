@@ -83,6 +83,9 @@ static AudioBootStrap *bootstrap[] = {
 #ifdef ENABLE_AHI
 	&AHI_bootstrap,
 #endif
+#ifdef MINTAUDIO_SUPPORT
+	&MINTAUDIO_bootstrap,
+#endif
 #ifdef DISKAUD_SUPPORT
 	&DISKAUD_bootstrap,
 #endif
@@ -378,6 +381,9 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 #ifdef macintosh
 	/* FIXME: Need to implement PPC interrupt asm for SDL_LockAudio() */
 #else
+#if defined(__MINT__) && !defined(ENABLE_THREADS)
+	/* Uses interrupt driven audio, without thread */
+#else
 	/* Create a semaphore for locking the sound buffers */
 	audio->mixer_lock = SDL_CreateMutex();
 	if ( audio->mixer_lock == NULL ) {
@@ -385,7 +391,8 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 		SDL_CloseAudio();
 		return(-1);
 	}
-#endif
+#endif /* __MINT__ */
+#endif /* macintosh */
 
 	/* Calculate the silence and size of the audio specification */
 	SDL_CalculateAudioSpec(desired);
