@@ -83,27 +83,28 @@ static int ph_Available(void)
     return 1;
 }
 
-static SDL_VideoDevice *ph_CreateDevice(int devindex)
+static SDL_VideoDevice* ph_CreateDevice(int devindex)
 {
-    SDL_VideoDevice *device;
+    SDL_VideoDevice* device;
 
     /* Initialize all variables that we clean on shutdown */
     device = (SDL_VideoDevice *)malloc(sizeof(SDL_VideoDevice));
-    if (device) {
+    if (device)
+    {
         memset(device, 0, (sizeof *device));
-        device->hidden = (struct SDL_PrivateVideoData *)
-                malloc((sizeof *device->hidden));
+        device->hidden = (struct SDL_PrivateVideoData*)malloc((sizeof *device->hidden));
         device->gl_data = NULL;
     }
-    if ((device == NULL) || (device->hidden == NULL)) {
+    if ((device == NULL) || (device->hidden == NULL))
+    {
         SDL_OutOfMemory();
         ph_DeleteDevice(device);
-        return(0);
+        return NULL;
     }
     memset(device->hidden, 0, (sizeof *device->hidden));
 
     /* Set the driver flags */
-    device->handles_any_size = 1; /* JB not true for fullscreen */
+    device->handles_any_size = 1;
 
     /* Set the function pointers */
     device->CreateYUVOverlay = ph_CreateYUVOverlay;
@@ -113,7 +114,7 @@ static SDL_VideoDevice *ph_CreateDevice(int devindex)
     device->ToggleFullScreen = ph_ToggleFullScreen;
     device->UpdateMouse = ph_UpdateMouse;
     device->SetColors = ph_SetColors;
-    device->UpdateRects = NULL;         /* set up in ph_SetupUpdateFunction */
+    device->UpdateRects = NULL;                        /* set up in ph_SetupUpdateFunction */
     device->VideoQuit = ph_VideoQuit;
     device->AllocHWSurface = ph_AllocHWSurface;
     device->CheckHWBlit = ph_CheckHWBlit;
@@ -254,6 +255,10 @@ static int ph_SetupWindow(_THIS, int w, int h, int flags)
     }
     else
     {
+        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_MANAGED_FLAGS, Pt_FALSE, Ph_WM_FFRONT | Ph_WM_CONSWITCH);
+        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_STATE, Pt_FALSE, Ph_WM_STATE_ISFRONT);
+        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_STATE, Pt_TRUE, Ph_WM_STATE_ISALTKEY);
+
         if ((flags & SDL_HWSURFACE) == SDL_HWSURFACE)
         {
             PtSetArg(&args[nargs++], Pt_ARG_BASIC_FLAGS, Pt_TRUE, Pt_BASIC_PREVENT_FILL);
@@ -450,20 +455,15 @@ static int ph_VideoInit(_THIS, SDL_PixelFormat* vformat)
     OCImage.FrameData1 = NULL;
     videomode_emulatemode = 0;
     
-    this->info.video_mem=hwcaps.currently_available_video_ram/1024;
     this->info.wm_available = 1;
-    this->info.hw_available = 1;
-    this->info.blit_fill = 1;
-    this->info.blit_hw = 1;
-    this->info.blit_hw_A = 0;
-    this->info.blit_hw_CC = 1;
+
+    ph_UpdateHWInfo(this);
     
     return 0;
 }
 
 static SDL_Surface* ph_SetVideoMode(_THIS, SDL_Surface *current, int width, int height, int bpp, Uint32 flags)
 {
-    PgHWCaps_t hwcaps;
     const struct ColourMasks* mask;
 
     /* Lock the event thread, in multi-threading environments */
@@ -558,6 +558,7 @@ static SDL_Surface* ph_SetVideoMode(_THIS, SDL_Surface *current, int width, int 
     /* Must call at least once for setup image planes */
     if (ph_SetupUpdateFunction(this, current, current->flags)==-1)
     {
+        /* Error string was filled in the ph_SetupUpdateFunction() */
         return NULL;
     }
 
@@ -573,12 +574,7 @@ static SDL_Surface* ph_SetVideoMode(_THIS, SDL_Surface *current, int width, int 
 
     visualbpp=bpp;
 
-    if (PgGetGraphicsHWCaps(&hwcaps) < 0)
-    {
-        SDL_SetError("ph_SetVideoMode(): GetGraphicsHWCaps function failed !\n");
-        return NULL;
-    }
-    this->info.video_mem=hwcaps.currently_available_video_ram/1024;
+    ph_UpdateHWInfo(this);
 
     SDL_Unlock_EventThread();
 

@@ -528,6 +528,14 @@ CheckNASM()
             SDL_EXTRADIRS="$SDL_EXTRADIRS hermes"
             SDL_EXTRALIBS="$SDL_EXTRALIBS hermes/libhermes.la"
             use_nasm=yes
+            
+            case "$target" in
+                # this line is needed for QNX, because it's not defined the __ELF__
+                *-*-qnx*) CFLAGS="$CFLAGS -D__ELF__"
+                          ;;
+
+            esac
+
         fi
     fi
 }
@@ -2309,6 +2317,7 @@ case "$target" in
         ARCH=qnx
         CheckDummyVideo
         CheckDiskAudio
+        # CheckNASM
         CheckDLOPEN
         CheckNAS
         CheckPHOTON

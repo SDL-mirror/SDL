@@ -152,8 +152,7 @@ int ph_SetupOCImage(_THIS, SDL_Surface *screen)
                 break;
     }
 
-    /* Currently only offscreen contexts with the same bit depth as the
-     * display can be created. */
+    /* Currently offscreen contexts with the same bit depth as display bpp only can be created */
     OCImage.offscreen_context = PdCreateOffscreenContext(0, screen->w, screen->h, Pg_OSC_MEM_PAGE_ALIGN);
 
     if (OCImage.offscreen_context == NULL)
@@ -482,24 +481,57 @@ int ph_UpdateHWInfo(_THIS)
         return -1;
     }
 
-    this->info.blit_hw = 1;
-
-    if ((vmode.mode_capabilities2 & PgVM_MODE_CAP2_ALPHA_BLEND) == PgVM_MODE_CAP2_ALPHA_BLEND)
+    if ((vmode.mode_capabilities1 & PgVM_MODE_CAP1_OFFSCREEN) == PgVM_MODE_CAP1_OFFSCREEN)
     {
-       this->info.blit_hw_A = 1;
+        /* this is a special test for drivers which tries to lie about offscreen capability */
+        if (hwcaps.currently_available_video_ram!=0)
+        {
+           this->info.hw_available = 1;
+        }
+        else
+        {
+           this->info.hw_available = 0;
+        }
     }
     else
     {
-       this->info.blit_hw_A = 0;
+        this->info.hw_available = 0;
+    }
+
+    if ((vmode.mode_capabilities2 & PgVM_MODE_CAP2_RECTANGLE) == PgVM_MODE_CAP2_RECTANGLE)
+    {
+        this->info.blit_fill = 1;
+    }
+    else
+    {
+        this->info.blit_fill = 0;
+    }
+
+    if ((vmode.mode_capabilities2 & PgVM_MODE_CAP2_BITBLT) == PgVM_MODE_CAP2_BITBLT)
+    {
+        this->info.blit_hw = 1;
+    }
+    else
+    {
+        this->info.blit_hw = 0;
+    }
+
+    if ((vmode.mode_capabilities2 & PgVM_MODE_CAP2_ALPHA_BLEND) == PgVM_MODE_CAP2_ALPHA_BLEND)
+    {
+        this->info.blit_hw_A = 1;
+    }
+    else
+    {
+        this->info.blit_hw_A = 0;
     }
     
     if ((vmode.mode_capabilities2 & PgVM_MODE_CAP2_CHROMA) == PgVM_MODE_CAP2_CHROMA)
     {
-       this->info.blit_hw_CC = 1;
+        this->info.blit_hw_CC = 1;
     }
     else
     {
-       this->info.blit_hw_CC = 0;
+        this->info.blit_hw_CC = 0;
     }
     
     return 0;
@@ -748,6 +780,11 @@ int ph_FillHWRect(_THIS, SDL_Surface* surface, SDL_Rect* rect, Uint32 color)
     Uint32 truecolor;
     int ydisp=0;
 
+    if (this->info.blit_fill!=1)
+    {
+       return -1;
+    }
+
     truecolor=ph_ExpandColor(this, surface, color);
     if (truecolor==0xFFFFFFFFUL)
     {
@@ -885,6 +922,12 @@ int ph_HWAccelBlit(SDL_Surface* src, SDL_Rect* srcrect, SDL_Surface* dst, SDL_Re
             PgChromaOn();
         }
 
+        if ((src->flags & SDL_SRCALPHA) == SDL_SRCALPHA)
+        {
+            ph_SetHWAlpha(this, src, src->format->alpha);
+            PgAlphaOn();
+        }
+
         if (dst == this->screen)
         {
             if (src == this->screen)
@@ -916,6 +959,11 @@ int ph_HWAccelBlit(SDL_Surface* src, SDL_Rect* srcrect, SDL_Surface* dst, SDL_Re
             }
         }
 
+        if ((src->flags & SDL_SRCALPHA) == SDL_SRCALPHA)
+        {
+            PgAlphaOff();
+        }
+
         if ((src->flags & SDL_SRCCOLORKEY) == SDL_SRCCOLORKEY)
         {
             PgChromaOff();
@@ -935,6 +983,11 @@ int ph_HWAccelBlit(SDL_Surface* src, SDL_Rect* srcrect, SDL_Surface* dst, SDL_Re
 
 int ph_SetHWColorKey(_THIS, SDL_Surface *surface, Uint32 key)
 {
+    if (this->info.blit_hw_CC!=1)
+    {
+       return -1;
+    }
+
     if (surface->hwdata!=NULL)
     {
         surface->hwdata->colorkey=ph_ExpandColor(this, surface, key);
@@ -950,7 +1003,14 @@ int ph_SetHWColorKey(_THIS, SDL_Surface *surface, Uint32 key)
 
 int ph_SetHWAlpha(_THIS, SDL_Surface* surface, Uint8 alpha)
 {
-    return -1;
+    if (this->info.blit_hw_A!=1)
+    {
+       return -1;
+    }
+
+    PgSetAlphaBlend(NULL, alpha);
+
+    return 0;
 }
 
 #ifdef HAVE_OPENGL

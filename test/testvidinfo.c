@@ -11,7 +11,9 @@
 #define NUM_BLITS	10
 #define NUM_UPDATES	500
 
-#define FLAG_MASK	(SDL_HWSURFACE | SDL_FULLSCREEN | SDL_DOUBLEBUF)
+#define FLAG_MASK	(SDL_HWSURFACE | SDL_FULLSCREEN | SDL_DOUBLEBUF | \
+                         SDL_SRCCOLORKEY | SDL_SRCALPHA | SDL_RLEACCEL  | \
+                         SDL_RLEACCELOK)
 
 void PrintFlags(Uint32 flags)
 {
@@ -30,8 +32,14 @@ void PrintFlags(Uint32 flags)
 	if ( flags & SDL_SRCCOLORKEY ) {
 		printf(" | SDL_SRCCOLORKEY");
 	}
+	if ( flags & SDL_SRCALPHA ) {
+		printf(" | SDL_SRCALPHA");
+	}
 	if ( flags & SDL_RLEACCEL ) {
 		printf(" | SDL_RLEACCEL");
+	}
+	if ( flags & SDL_RLEACCELOK ) {
+		printf(" | SDL_RLEACCELOK");
 	}
 }
 
@@ -117,6 +125,10 @@ int RunModeTests(SDL_Surface *screen)
 		printf("%d fills and flips in zero seconds!n", frames);
 	}
 
+        /* clear the screen after fill test */
+        SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
+	SDL_Flip(screen);
+
 	while ( SDL_PollEvent(&event) ) {
 		if ( event.type == SDL_KEYDOWN )
 			return 0;
@@ -142,6 +154,15 @@ int RunModeTests(SDL_Surface *screen)
 		printf("%d blits / %d updates in zero seconds!\n", NUM_BLITS*frames, frames);
 	}
 
+        /* clear the screen after blit test */
+        SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
+	SDL_Flip(screen);
+
+	while ( SDL_PollEvent(&event) ) {
+		if ( event.type == SDL_KEYDOWN )
+			return 0;
+	}
+
         /* run the colorkeyed blit test */
 	bmpcc = SDL_LoadBMP("sample.bmp");
 	if ( ! bmpcc ) {
@@ -162,6 +183,15 @@ int RunModeTests(SDL_Surface *screen)
 		printf("%d cc blits / %d updates in %2.2f seconds, %2.2f FPS\n", NUM_BLITS*frames, frames, seconds, (float)frames / seconds);
 	} else {
 		printf("%d cc blits / %d updates in zero seconds!\n", NUM_BLITS*frames, frames);
+	}
+
+        /* clear the screen after cc blit test */
+        SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
+	SDL_Flip(screen);
+
+	while ( SDL_PollEvent(&event) ) {
+		if ( event.type == SDL_KEYDOWN )
+			return 0;
 	}
 
         /* run the generic blit test */
@@ -186,6 +216,15 @@ int RunModeTests(SDL_Surface *screen)
 		printf("%d blits / %d updates in zero seconds!\n", NUM_BLITS*frames, frames);
 	}
 
+        /* clear the screen after blit test */
+        SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
+	SDL_Flip(screen);
+
+	while ( SDL_PollEvent(&event) ) {
+		if ( event.type == SDL_KEYDOWN )
+			return 0;
+	}
+
         /* run the colorkeyed blit test */
 	tmp = bmpcc;
 	bmpcc = SDL_DisplayFormat(bmpcc);
@@ -206,6 +245,81 @@ int RunModeTests(SDL_Surface *screen)
 		printf("%d cc blits / %d updates in %2.2f seconds, %2.2f FPS\n", NUM_BLITS*frames, frames, seconds, (float)frames / seconds);
 	} else {
 		printf("%d cc blits / %d updates in zero seconds!\n", NUM_BLITS*frames, frames);
+	}
+
+        /* clear the screen after cc blit test */
+        SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
+	SDL_Flip(screen);
+
+	while ( SDL_PollEvent(&event) ) {
+		if ( event.type == SDL_KEYDOWN )
+			return 0;
+	}
+
+        /* run the alpha blit test only if screen bpp>8 */
+        if (bmp->format->BitsPerPixel>8)
+        {
+		SDL_FreeSurface(bmp);
+                bmp = SDL_LoadBMP("sample.bmp");
+		SDL_SetAlpha(bmp, SDL_SRCALPHA, 85); /* 85 - 33% alpha */
+		tmp = bmp;
+		bmp = SDL_DisplayFormat(bmp);
+		SDL_FreeSurface(tmp);
+		if ( ! bmp ) {
+			printf("Couldn't convert sample.bmp: %s\n", SDL_GetError());
+			return 0;
+		}
+		printf("Running display format alpha blit test: %dx%d at %d bpp, flags: ",
+			bmp->w, bmp->h, bmp->format->BitsPerPixel);
+		PrintFlags(bmp->flags);
+		printf("\n");
+		then = SDL_GetTicks();
+		frames = RunBlitTests(screen, bmp, NUM_BLITS);
+		now = SDL_GetTicks();
+		seconds = (float)(now - then) / 1000.0f;
+		if ( seconds > 0.0f ) {
+			printf("%d alpha blits / %d updates in %2.2f seconds, %2.2f FPS\n", NUM_BLITS*frames, frames, seconds, (float)frames / seconds);
+		} else {
+			printf("%d alpha blits / %d updates in zero seconds!\n", NUM_BLITS*frames, frames);
+		}
+	}
+
+        /* clear the screen after alpha blit test */
+        SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 0, 0, 0));
+	SDL_Flip(screen);
+
+	while ( SDL_PollEvent(&event) ) {
+		if ( event.type == SDL_KEYDOWN )
+			return 0;
+	}
+
+        /* run the cc+alpha blit test only if screen bpp>8 */
+        if (bmp->format->BitsPerPixel>8)
+        {
+		SDL_FreeSurface(bmpcc);
+                bmpcc = SDL_LoadBMP("sample.bmp");
+		SDL_SetAlpha(bmpcc, SDL_SRCALPHA, 85); /* 85 - 33% alpha */
+                SDL_SetColorKey(bmpcc, SDL_SRCCOLORKEY | SDL_RLEACCEL, *(Uint8 *)bmpcc->pixels);
+		tmp = bmpcc;
+		bmpcc = SDL_DisplayFormat(bmpcc);
+		SDL_FreeSurface(tmp);
+		if ( ! bmpcc ) {
+			printf("Couldn't convert sample.bmp: %s\n", SDL_GetError());
+			return 0;
+		}
+		printf("Running display format cc+alpha blit test: %dx%d at %d bpp, flags: ",
+			bmpcc->w, bmpcc->h, bmpcc->format->BitsPerPixel);
+		PrintFlags(bmpcc->flags);
+		printf("\n");
+		then = SDL_GetTicks();
+		frames = RunBlitTests(screen, bmpcc, NUM_BLITS);
+		now = SDL_GetTicks();
+		seconds = (float)(now - then) / 1000.0f;
+		if ( seconds > 0.0f ) {
+			printf("%d cc+alpha blits / %d updates in %2.2f seconds, %2.2f FPS\n", NUM_BLITS*frames, frames, seconds, (float)frames / seconds);
+		} else {
+			printf("%d cc+alpha blits / %d updates in zero seconds!\n", NUM_BLITS*frames, frames);
+		}
 	}
 
 	SDL_FreeSurface(bmpcc);

@@ -1,5 +1,5 @@
-README by Mike Gorchak <mike@malva.ua>, <lestat@i.com.ua>
-Last changed at 14 Feb 2004.
+README.QNX by Mike Gorchak <mike@malva.ua>, <lestat@i.com.ua>
+Last changed at 24 Apr 2004.
 
 ======================================================================
 Table of Contents:
@@ -19,8 +19,8 @@ Table of Contents:
 heavily tested yet.
     If you have QNX RtP version 6.1.0 or above you must  download  the
 Photon3D runtime from http://developers.qnx.com or install it from the
-public repository or the  public CD, available  with  QNX. OS versions
-below 6.1.0 are not supported.
+public repository or from the public CD, available with QNX. OS versi-
+ons below 6.1.0 are not supported.
     When creating an OpenGL context, software renderer mode is artifi-
 cially selected (QSSL made acceleration  only  for  Voodoo  boards  in
 fullscreen mode, sorry but I don't have this board  to  test  OpenGL -
@@ -36,22 +36,23 @@ PHOGL_ATTRIB_FORCE_HW or PHOGL_ATTRIB_FAVOR_HW.
 ======================================================================
 2. Wheel and multi-button mouses:
 
-    Photon emits  keyboard  events (key up and down)  when  the  mouse
+    Photon emits  keyboard  events (key up and  down)  when the  mouse
 wheel is moved. The key_scan field appears valid, and it contains zero.
 That is a basic method of detecting  mouse  wheel events under Photon.
-It looks like a hack, but it works for me :) on various PC  configura-
+It looks like a hack, but it  works for me :) on various PC configura-
 tions.
 
 I've tested it on:
 
-1. Genius Optical NetScroll/+ (1 wheel)
-2. A4Tech Optical  GreatEye  WheelMouse,  model: WOP-35. (2 wheels + 2
-   additional buttons). The wheel for vertical scrolling works as usu-
-   al, but the second wheel for horizontal scrolling emits two sequen-
-   tial events up or down, so it can provide faster scrolling than the
-   first wheel. Additional buttons don't emit any events, but it looks
-   like they're handled by photon in an unusual  way - like  click  to
-   front, but works not with any window, looks like bug-o-feature :).
+1. Genius Optical NetScroll/+ PS/2 (1 wheel)
+2. A4Tech Optical GreatEye WheelMouse PS/2,  model: WOP-35.  (2 wheels
+   + 2 additional buttons). The wheel for vertical scrolling  works as
+   usual, but the second wheel for horizontal scrolling emits  two se-
+   quential events up or down, so it can provide faster scrolling than
+   the first wheel. Additional buttons don't emit  any  events, but it
+   looks like they're handled by photon in an unusual way - like click
+   to front, but works not with any window, looks like a fun bug-o-fe-
+   ature :).
 
 ======================================================================
 3. CDROM handling issues:
@@ -89,10 +90,12 @@ script you must manually delete the libtool.m4 stuff from the acinclu-
 de.m4 file (it comes after the ESD detection code up to the end of the
 file), because the libtool stuff in the acinclude.m4 file was very old
 in SDL distribution before the version 1.2.7 and doesn't knew anything
-about QNX. SDL 1.2.7 distribution contain  the  new libtool.m4 script,
+about QNX. SDL 1.2.7 distribution contains the  new libtool.m4 script,
 but anyway  it  is  broken :), Just  remove  it, then  run "libtoolize
---force --copy",  delete the file aclocal.m4 and after  that  run  the
-autogen.sh script.
+--force --copy",  delete the file aclocal.m4 if it is exists and after
+that run the  autogen.sh script. SDL 1.2.8 contains  fixed libtool.m4,
+ltmain.sh and config.sub files, so you  can  just  run  the autogen.sh
+script.
 
 ======================================================================
 6. Some building issues:
@@ -105,15 +108,18 @@ script will be broken.
     Run the configure script without x11 support, e.g.:
 
     a) for OpenGL support:
-    ./configure --prefix=/usr       \
-                --disable-video-x11 \
+    ./configure --prefix=/usr           \
+                --disable-video-x11     \
                 --disable-shared
 
     b) without OpenGL support:
-    ./configure --prefix=/usr       \
-                --disable-video-x11 \
-                --disable-shared    \
+    ./configure --prefix=/usr           \
+                --disable-video-x11     \
+                --disable-shared        \
                 --disable-video-opengl
+
+    And of course dont forget to specify --disable-debug, which  is on
+by default, to disable debug and enable the expensive optimizations.
 
     In the test directory also run the ./configure script without
 x11 support, e.g.:
@@ -128,10 +134,10 @@ x11 support, e.g.:
     Please note that the photon driver  is  sensible to the  following
 environmental variables:
 
- * SDL_PHOTON_FULLSCREEN_REFRESH - this environment variable controls
-the refresh rate in all fullscreen modes. Be carefull !!! Photon drivers
-usually do not checking the maximum refresh rate, which video adapter or
-monitor supports.
+ * SDL_PHOTON_FULLSCREEN_REFRESH - this environment variable  controls
+the refresh  rate  in  all  fullscreen  modes. Be  carefull !!! Photon
+drivers usually do not checking the maximum  refresh rate, which video
+adapter or monitor supports.
 
  * SDL_VIDEO_WINDOW_POS - can be  set in the "X,Y" format.  If X and Y
 coordinates are bigger than the current desktop resolution, then  win-
@@ -144,6 +150,6 @@ environmental variable.
  * SDL_VIDEO_CENTERED - if this environmental variable exists then the
 window centering is perfomed in the current virtual console.
 
-    The SDL_VIDEO_CENTERED enviromental variable has greater  priority
-than the SDL_VIDEO_WINDOW_POS in case if both variables  are  supplied
-to the application.
+Notes: The SDL_VIDEO_CENTERED enviromental  variable  has greater pri-
+ority than the SDL_VIDEO_WINDOW_POS in case if both variables are sup-
+plied to the application.

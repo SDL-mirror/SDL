@@ -1652,14 +1652,16 @@ newsos6)
   shlibpath_overrides_runpath=yes
   ;;
 
-nto-qnx)
-  version_type=linux
+*qnx* | *nto*)
+  version_type=qnx
   need_lib_prefix=no
   need_version=no
-  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}$major $libname${shared_ext}'
-  soname_spec='${libname}${release}${shared_ext}$major'
+  library_names_spec='${libname}${release}.so$versuffix ${libname}${release}.so$major $libname.so'
+  soname_spec='${libname}${release}.so$major'
   shlibpath_var=LD_LIBRARY_PATH
-  shlibpath_overrides_runpath=yes
+  shlibpath_overrides_runpath=no
+  hardcode_into_libs=yes
+  dynamic_linker='ldqnx.so'
   ;;
 
 openbsd*)
@@ -2356,6 +2358,10 @@ irix5* | irix6* | nonstopux*)
   lt_cv_deplibs_check_method=pass_all
   ;;
 
+*qnx* | *nto*)
+  lt_cv_deplibs_check_method=pass_all
+  ;;
+
 # This must be Linux ELF.
 linux*)
   case $host_cpu in
@@ -2380,10 +2386,6 @@ newos6*)
   lt_cv_deplibs_check_method='file_magic ELF [[0-9]][[0-9]]*-bit [[ML]]SB (executable|dynamic lib)'
   lt_cv_file_magic_cmd=/usr/bin/file
   lt_cv_file_magic_test_file=/usr/lib/libnls.so
-  ;;
-
-nto-qnx)
-  lt_cv_deplibs_check_method=unknown
   ;;
 
 openbsd*)
@@ -3614,6 +3616,8 @@ case $host_os in
     # FIXME: insert proper C++ library support
     _LT_AC_TAGVAR(ld_shlibs, $1)=no
     ;;
+  *qnx* | *nto*)
+    ;;
   *)
     # FIXME: insert proper C++ library support
     _LT_AC_TAGVAR(ld_shlibs, $1)=no
@@ -4729,6 +4733,10 @@ AC_MSG_CHECKING([for $compiler option to produce PIC])
 	;;
       esac
       ;;
+    *qnx* | *nto*)
+      # QNX uses GNU C++, but need to define -shared option too, otherwise it will coredumped.
+      _LT_AC_TAGVAR(lt_prog_compiler_pic, $1)='-fPIC -shared'
+      ;;
     *)
       _LT_AC_TAGVAR(lt_prog_compiler_pic, $1)='-fPIC'
       ;;
@@ -4768,6 +4776,10 @@ AC_MSG_CHECKING([for $compiler option to produce PIC])
       freebsd*)
 	# FreeBSD uses GNU C++
 	;;
+      *qnx* | *nto*)
+	# QNX uses GNU C++, but need to define -shared option too, otherwise it will coredumped.
+        _LT_AC_TAGVAR(lt_prog_compiler_pic, $1)='-fPIC -shared'
+        ;;
       hpux9* | hpux10* | hpux11*)
 	case $cc_basename in
 	  CC)
@@ -4988,6 +5000,10 @@ AC_MSG_CHECKING([for $compiler option to produce PIC])
 	;;
       esac
       ;;
+    *qnx* | *nto*)
+      # QNX uses GNU C++, but need to define -shared option too, otherwise it will coredumped.
+      _LT_AC_TAGVAR(lt_prog_compiler_pic, $1)='-fPIC -shared'
+      ;;
 
     *)
       _LT_AC_TAGVAR(lt_prog_compiler_pic, $1)='-fPIC'
@@ -5026,6 +5042,11 @@ AC_MSG_CHECKING([for $compiler option to produce PIC])
       esac
       # Is there a better lt_prog_compiler_static that works with the bundled CC?
       _LT_AC_TAGVAR(lt_prog_compiler_static, $1)='${wl}-a ${wl}archive'
+      ;;
+
+    *qnx* | *nto*)
+      # QNX uses GNU C++, but need to define -shared option too, otherwise it will coredumped.
+      _LT_AC_TAGVAR(lt_prog_compiler_pic, $1)='-fPIC -shared'
       ;;
 
     irix5* | irix6* | nonstopux*)

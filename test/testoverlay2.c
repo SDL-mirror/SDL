@@ -254,13 +254,15 @@ ConvertRGBtoYUY2(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 static void PrintUsage(char *argv0)
 {
     fprintf(stderr, "Usage: %s [arg] [arg] [arg] ...\n", argv0);
-    fprintf(stderr, "Where 'arg' is one of:\n");
+    fprintf(stderr, "\n");
+    fprintf(stderr, "Where 'arg' is any of the following options:\n");
+    fprintf(stderr, "\n");
     fprintf(stderr, "	-fps <frames per second>\n");
     fprintf(stderr, "	-format <fmt> (one of the: YV12, IYUV, YUY2, UYVY, YVYU)\n");
     fprintf(stderr, "	-scale <scale factor> (initial scale of the overlay)\n");
     fprintf(stderr, "	-help (shows this help)\n");
     fprintf(stderr, "\n");
-    fprintf(stderr, "	Press ESC to exit, or SPACE to freeze the movie while application running.\n");
+    fprintf(stderr, "Press ESC to exit, or SPACE to freeze the movie while application running.\n");
     fprintf(stderr, "\n");
 }
 
@@ -466,6 +468,11 @@ int main(int argc, char **argv)
     free(RawMooseData);
 
     overlay=SDL_CreateYUVOverlay(MOOSEPIC_W, MOOSEPIC_H, overlay_format, screen);
+    if (!overlay)
+    {
+        fprintf(stderr, "Couldn't create overlay: %s\n", SDL_GetError());
+        return 7;
+    }
 
     printf("Created %dx%dx%d %s %s overlay\n",overlay->w,overlay->h,overlay->planes,
            overlay->hw_overlay?"hardware":"software",

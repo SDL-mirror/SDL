@@ -380,6 +380,37 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
+	/* Print out information about our surfaces */
+	printf("Screen is at %d bits per pixel\n",screen->format->BitsPerPixel);
+	if ( (screen->flags & SDL_HWSURFACE) == SDL_HWSURFACE ) {
+		printf("Screen is in video memory\n");
+	} else {
+		printf("Screen is in system memory\n");
+	}
+	if ( (screen->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF ) {
+		printf("Screen has double-buffering enabled\n");
+	}
+	if ( (sprite->flags & SDL_HWSURFACE) == SDL_HWSURFACE ) {
+		printf("Sprite is in video memory\n");
+	} else {
+		printf("Sprite is in system memory\n");
+	}
+
+	/* Run a sample blit to trigger blit acceleration */
+	{ SDL_Rect dst;
+		dst.x = 0;
+		dst.y = 0;
+		dst.w = sprite->w;
+		dst.h = sprite->h;
+		SDL_BlitSurface(sprite, NULL, screen, &dst);
+		SDL_FillRect(screen, &dst, 0);
+	}
+	if ( (sprite->flags & SDL_HWACCEL) == SDL_HWACCEL ) {
+		printf("Sprite blit uses hardware alpha acceleration\n");
+	} else {
+		printf("Sprite blit dosn't uses hardware alpha acceleration\n");
+	}
+
 	/* Set a clipping rectangle to clip the outside edge of the screen */
 	{ SDL_Rect clip;
 		clip.x = 32;

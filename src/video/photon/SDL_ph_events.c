@@ -32,6 +32,7 @@ static char rcsid =
 #include <stdio.h>
 #include <setjmp.h>
 #include <sys/time.h>
+#include <sys/neutrino.h>
 
 #include <Ph.h>
 #include <photon/PkKeyDef.h>
@@ -235,7 +236,13 @@ static int ph_DispatchEvent(_THIS)
             /* request to resize */
             else if (winEvent->event_f==Ph_WM_RESIZE)
             {
-                SDL_PrivateResize(winEvent->size.w+1, winEvent->size.h+1);
+                currently_maximized=0;
+                #if (_NTO_VERSION < 630)
+                   SDL_PrivateResize(winEvent->size.w+1, winEvent->size.h+1);
+                #else
+                   /* QNX 6.3.0 have this bug fixed */
+                   SDL_PrivateResize(winEvent->size.w, winEvent->size.h);
+                #endif /* _NTO_VERSION */
             }
             /* request to move */
             else if (winEvent->event_f==Ph_WM_MOVE)

@@ -2975,6 +2975,12 @@ EOF
 	  versuffix=".$current";
 	  ;;
 
+        qnx)
+          major=".$current"
+          versuffix=".$current"
+          deplibs_check_method="pass_all"
+          ;;
+
 	irix | nonstopux)
 	  major=`expr $current - $age + 1`
 

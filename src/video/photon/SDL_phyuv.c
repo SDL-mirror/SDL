@@ -42,7 +42,7 @@ static char rcsid =
 #define OVERLAY_STATE_UNINIT 0
 #define OVERLAY_STATE_ACTIVE 1
 
-/* The functions used to manipulate software video overlays */
+/* The functions are used to manipulate software video overlays */
 static struct private_yuvhwfuncs ph_yuvfuncs =
 {
     ph_LockYUVOverlay,
