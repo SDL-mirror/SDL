@@ -486,8 +486,8 @@ void SDL_ConvertSurround(SDL_AudioCVT *cvt, Uint16 format)
 		case AUDIO_S8: {
 			Sint8 *src, *dst, lf, rf, ce;
 
-			src = cvt->buf+cvt->len_cvt;
-			dst = cvt->buf+cvt->len_cvt*3;
+			src = (Sint8 *)cvt->buf+cvt->len_cvt;
+			dst = (Sint8 *)cvt->buf+cvt->len_cvt*3;
 			for ( i=cvt->len_cvt; i; --i ) {
 				dst -= 6;
 				src -= 2;
@@ -661,8 +661,8 @@ void SDL_ConvertSurround_4(SDL_AudioCVT *cvt, Uint16 format)
 		case AUDIO_S8: {
 			Sint8 *src, *dst, lf, rf, ce;
 
-			src = cvt->buf+cvt->len_cvt;
-			dst = cvt->buf+cvt->len_cvt*2;
+			src = (Sint8 *)cvt->buf+cvt->len_cvt;
+			dst = (Sint8 *)cvt->buf+cvt->len_cvt*2;
 			for ( i=cvt->len_cvt; i; --i ) {
 				dst -= 4;
 				src -= 2;
