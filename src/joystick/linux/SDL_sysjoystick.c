@@ -48,33 +48,24 @@ static char rcsid =
 #include "SDL_sysjoystick.h"
 #include "SDL_joystick_c.h"
 
-/* Define this if you want to map axes to hats and trackballs */
-#define FANCY_HATS_AND_BALLS
-
-#ifdef FANCY_HATS_AND_BALLS
-/* Special joystick configurations:
-	'JoystickName' Naxes Nhats Nballs
- */
-static const char *special_joysticks[] = {
-	"'MadCatz Panther XL' 3 2 1", /* We don't handle a rudder (axis 8) */
-	"'SideWinder Precision Pro' 4 1 0",
-	"'SideWinder 3D Pro' 4 1 0",
-	"'Microsoft SideWinder 3D Pro' 4 1 0",
-	"'Microsoft SideWinder Dual Strike USB version 1.0' 2 1 0",
-	"'WingMan Interceptor' 3 3 0",
-	/* WingMan Extreme Analog - not recognized by default
-	"'Analog 3-axis 4-button joystick' 2 1 0",
-	*/
-	"'WingMan Extreme Digital 3D' 4 1 0",
-	"'Analog 2-axis 4-button 1-hat FCS joystick' 2 1 0",
-	"'Microsoft SideWinder Precision 2 Joystick' 4 1 0",
-	"'Logitech Inc. WingMan Extreme Digital 3D' 4 1 0",
-	"'Saitek Saitek X45' 6 1 0",
-	NULL
+/* Special joystick configurations */
+static struct {
+	const char *name;
+	int naxes;
+	int nhats;
+	int nballs;
+} special_joysticks[] = {
+	{ "MadCatz Panther XL", 3, 2, 1 }, /* We don't handle rudder (axis 8) */
+	{ "SideWinder Precision Pro", 4, 1, 0 },
+	{ "SideWinder 3D Pro", 4, 1, 0 },
+	{ "Microsoft SideWinder 3D Pro", 4, 1, 0 },
+	{ "Microsoft SideWinder Dual Strike USB version 1.0", 2, 1, 0 },
+	{ "WingMan Interceptor", 3, 3, 0 },
+	{ "WingMan Extreme Digital 3D", 4, 1, 0 },
+	{ "Microsoft SideWinder Precision 2 Joystick", 4, 1, 0 },
+	{ "Logitech Inc. WingMan Extreme Digital 3D", 4, 1, 0 },
+	{ "Saitek Saitek X45", 6, 1, 0 }
 };
-#else
-#undef USE_INPUT_EVENTS
-#endif
 
 /* The maximum number of joysticks we'll detect */
 #define MAX_JOYSTICKS	32
@@ -96,8 +87,8 @@ struct joystick_hwdata {
 	} *balls;
 
 	/* Support for the Linux 2.4 unified input interface */
-	SDL_bool is_hid;
 #ifdef USE_INPUT_EVENTS
+	SDL_bool is_hid;
 	Uint8 key_map[KEY_MAX-BTN_MISC];
 	Uint8 abs_map[ABS_MAX];
 	struct axis_correct {
@@ -146,14 +137,14 @@ int SDL_SYS_JoystickInit(void)
 {
 	/* The base path of the joystick devices */
 	const char *joydev_pattern[] = {
-		"/dev/js%d",
 #ifdef USE_INPUT_EVENTS
 		"/dev/input/event%d",
 #endif
-		"/dev/input/js%d"
+		"/dev/input/js%d",
+		"/dev/js%d"
 	};
 	int numjoysticks;
-	int i, j, done;
+	int i, j;
 	int fd;
 	char path[PATH_MAX];
 	dev_t dev_nums[MAX_JOYSTICKS];  /* major/minor device numbers */
@@ -179,9 +170,9 @@ int SDL_SYS_JoystickInit(void)
 			}
 		}
 	}
+
 	for ( i=0; i<SDL_TABLESIZE(joydev_pattern); ++i ) {
-		done = 0;
-		for ( j=0; (j < MAX_JOYSTICKS) && !done; ++j ) {
+		for ( j=0; j < MAX_JOYSTICKS; ++j ) {
 			sprintf(path, joydev_pattern[i], j);
 
 			/* rcg06302000 replaced access(F_OK) call with stat().
@@ -210,7 +201,7 @@ int SDL_SYS_JoystickInit(void)
 #ifdef DEBUG_INPUT_EVENTS
 				printf("Checking %s\n", path);
 #endif
-				if ( (i > 0) && ! EV_IsJoystick(fd) ) {
+				if ( (i == 0) && ! EV_IsJoystick(fd) ) {
 					close(fd);
 					continue;
 				}
@@ -223,20 +214,23 @@ int SDL_SYS_JoystickInit(void)
 					dev_nums[numjoysticks] = sb.st_rdev;
 					++numjoysticks;
 				}
-			} else {
-				done = 1;
-			}
+			} else
+				break;
 		}
-        /* This is a special case...
-           If we're looking at the /dev/input event devices, and we found
-           at least one, then we don't want to look at the input joystick
-           devices, since they're built on top of devices that we've already
-           seen, so we're done.
-         */
-        if ( i > 0 && j > 0 ) {
-            done = 1;
-        }
+
+#ifdef USE_INPUT_EVENTS
+		/* This is a special case...
+		   If the event devices are valid then the joystick devices
+		   will be duplicates but without extra information about their
+		   hats or balls. Unfortunately, the event devices can't
+		   currently be calibrated, so it's a win-lose situation.
+		   So : /dev/input/eventX = /dev/input/jsY = /dev/jsY
+		*/
+		if ( (i == 0) && (numjoysticks > 0) )
+			break;
+#endif
 	}
+
 	return(numjoysticks);
 }
 
@@ -263,8 +257,6 @@ const char *SDL_SYS_JoystickName(int index)
 	}
 	return name;
 }
-
-#ifdef FANCY_HATS_AND_BALLS
 
 static int allocate_hatdata(SDL_Joystick *joystick)
 {
@@ -298,34 +290,84 @@ static int allocate_balldata(SDL_Joystick *joystick)
 	return(0);
 }
 
-static SDL_bool ConfigJoystick(SDL_Joystick *joystick,
-			const char *name, const char *config)
+static SDL_bool JS_ConfigJoystick(SDL_Joystick *joystick, int fd)
 {
-	char cfg_name[128];
 	SDL_bool handled;
+	unsigned char n;
+	int old_axes, tmp_naxes, tmp_nhats, tmp_nballs;
+	const char *name;
+	char *env, env_name[128];
+	int i;
 
-	if ( config == NULL ) {
-		return(SDL_FALSE);
-	}
-	strcpy(cfg_name, "");
-	if ( *config == '\'' ) {
-		sscanf(config, "'%[^']s'", cfg_name);
-		config += strlen(cfg_name)+2;
-	} else {
-		sscanf(config, "%s", cfg_name);
-		config += strlen(cfg_name);
-	}
 	handled = SDL_FALSE;
-	if ( strcmp(cfg_name, name) == 0 ) {
-		/* Get the number of axes, hats and balls for this joystick */
-		int joystick_axes = joystick->naxes;
-		sscanf(config, "%d %d %d", 
-			&joystick->naxes, &joystick->nhats, &joystick->nballs);
 
-		/* Allocate the extra data for mapping them */
+	/* Default joystick device settings */
+	if ( ioctl(fd, JSIOCGAXES, &n) < 0 ) {
+		joystick->naxes = 2;
+	} else {
+		joystick->naxes = n;
+	}
+	if ( ioctl(fd, JSIOCGBUTTONS, &n) < 0 ) {
+		joystick->nbuttons = 2;
+	} else {
+		joystick->nbuttons = n;
+	}
+
+	name = SDL_SYS_JoystickName(joystick->index);
+	old_axes = joystick->naxes;
+
+	/* Generic analog joystick support */
+	if ( strstr(name, "Analog") == name && strstr(name, "-hat") ) {
+		if ( sscanf(name,"Analog %d-axis %*d-button %d-hat",
+			&tmp_naxes, &tmp_nhats) == 2 ) {
+
+			joystick->naxes = tmp_naxes;
+			joystick->nhats = tmp_nhats;
+
+			handled = SDL_TRUE;
+		}
+	}
+
+	/* Special joystick support */
+	for ( i=0; i < SDL_TABLESIZE(special_joysticks); ++i ) {
+		if ( strcmp(name, special_joysticks[i].name) == 0 ) {
+
+			joystick->naxes = special_joysticks[i].naxes;
+			joystick->nhats = special_joysticks[i].nhats;
+			joystick->nballs = special_joysticks[i].nballs;
+
+			handled = SDL_TRUE;
+			break;
+		}
+	}
+
+	/* User environment joystick support */
+	if ( (env = getenv("SDL_LINUX_JOYSTICK")) ) {
+		strcpy(env_name, "");
+		if ( *env == '\'' && sscanf(env, "'%[^']s'", env_name) == 1 )
+			env += strlen(env_name)+2;
+		else if ( sscanf(env, "%s", env_name) == 1 )
+			env += strlen(env_name);
+
+		if ( strcmp(name, env_name) == 0 ) {
+
+			if ( sscanf(env, "%d %d %d", &tmp_naxes, &tmp_nhats,
+				&tmp_nballs) == 3 ) {
+
+				joystick->naxes = tmp_naxes;
+				joystick->nhats = tmp_nhats;
+				joystick->nballs = tmp_nballs;
+
+				handled = SDL_TRUE;
+			}
+		}
+	}
+
+	/* Remap hats and balls */
+	if (handled) {
 		if ( joystick->nhats > 0 ) {
 			/* HACK: Analog hats map to only one axis */
-			if (joystick_axes == (joystick->naxes+joystick->nhats)){
+			if (old_axes == (joystick->naxes+joystick->nhats)){
 				joystick->hwdata->analog_hat = 1;
 			} else {
 				if ( allocate_hatdata(joystick) < 0 ) {
@@ -339,8 +381,8 @@ static SDL_bool ConfigJoystick(SDL_Joystick *joystick,
 				joystick->nballs = 0;
 			}
 		}
-		handled = SDL_TRUE;
 	}
+
 	return(handled);
 }
 
@@ -440,8 +482,6 @@ static SDL_bool EV_ConfigJoystick(SDL_Joystick *joystick, int fd)
 
 #endif /* USE_INPUT_EVENTS */
 
-#endif /* FANCY_HATS_AND_BALLS */
-
 /* Function to open a joystick for use.
    The joystick to open is specified by the index field of the joystick.
    This should fill the nbuttons and naxes fields of the joystick structure.
@@ -449,12 +489,7 @@ static SDL_bool EV_ConfigJoystick(SDL_Joystick *joystick, int fd)
  */
 int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
 {
-#ifdef FANCY_HATS_AND_BALLS
-	const char *name;
-	int i;
-#endif
 	int fd;
-	unsigned char n;
 
 	/* Open the joystick and set the joystick file descriptor */
 	fd = open(SDL_joylist[joystick->index], O_RDONLY, 0);
@@ -480,31 +515,8 @@ int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
 #ifdef USE_INPUT_EVENTS
 	if ( ! EV_ConfigJoystick(joystick, fd) )
 #endif
-	{
-		if ( ioctl(fd, JSIOCGAXES, &n) < 0 ) {
-			joystick->naxes = 2;
-		} else {
-			joystick->naxes = n;
-		}
-		if ( ioctl(fd, JSIOCGBUTTONS, &n) < 0 ) {
-			joystick->nbuttons = 2;
-		} else {
-			joystick->nbuttons = n;
-		}
-#ifdef FANCY_HATS_AND_BALLS
-		/* Check for special joystick support */
-		name = SDL_SYS_JoystickName(joystick->index);
-		for ( i=0; special_joysticks[i]; ++i ) {
-			if (ConfigJoystick(joystick,name,special_joysticks[i])){
-				break;
-			}
-		}
-		if ( special_joysticks[i] == NULL ) {
-			ConfigJoystick(joystick, name,
-					getenv("SDL_LINUX_JOYSTICK"));
-		}
-#endif /* FANCY_HATS_AND_BALLS */
-	}
+		JS_ConfigJoystick(joystick, fd);
+
 	return(0);
 }
 
@@ -631,13 +643,11 @@ static __inline__ int EV_AxisCorrect(SDL_Joystick *joystick, int which, int valu
 		value *= correct->coef[2];
 		value >>= 14;
 	}
+
 	/* Clamp and return */
-	if ( value < -32767 ) {
-		value = -32767;
-	} else
-	if ( value > 32767 ) {
-		value = 32767;
-	}
+	if ( value < -32767 ) return -32767;
+	if ( value >  32767 ) return  32767;
+
 	return value;
 }
 
