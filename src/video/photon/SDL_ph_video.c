@@ -154,6 +154,7 @@ static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	int rtnval;
 	PgDisplaySettings_t mysettings;
 	PgVideoModeInfo_t my_mode_info;
+	PgHWCaps_t my_hwcaps;
 	
      if( NULL == ( event = malloc( EVENT_SIZE ) ) )
           exit( EXIT_FAILURE );
@@ -207,13 +208,19 @@ static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	if(SDL_BlankCursor == NULL)
 	  printf("could not create blank cursor\n");
      /* Get the video mode */
+     /*    
          if (PgGetVideoMode( &mysettings ) < 0)
             {
-                fprintf(stderr,"ph_VideoInit:  PgGetVideoMode failed\n");
+                fprintf(stderr,"ph_VideoInit:  PgGetVideoMode failed patch A?? \n");
       			//QNX6/Patch A always fails return code even though call succeeds. fixed Patch B
             }
-        
-         if (PgGetVideoModeInfo(mysettings.mode, &my_mode_info) < 0)
+       */
+         if (PgGetGraphicsHWCaps(&my_hwcaps) < 0)
+         	{
+                fprintf(stderr,"ph_VideoInit:  GetGraphicsHWCaps failed!! \n");
+      			//that HAVE to work
+            }
+         if (PgGetVideoModeInfo(my_hwcaps.current_video_mode, &my_mode_info) < 0)
             {
                 fprintf(stderr,"ph_VideoInit:  PgGetVideoModeInfo failed\n");
             }
@@ -258,6 +265,7 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
 {
     PhRegion_t region_info;
     PgDisplaySettings_t settings;
+    PgHWCaps_t my_hwcaps;
 	PgVideoModeInfo_t mode_info;
     int mode, actual_width, actual_height;
 	PtArg_t arg[5];
@@ -295,15 +303,22 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
         /* Get the video mode and set it */
         if (bpp == 0)
         {
+            /*again same issue, same solution
             if (PgGetVideoMode( &settings ) < 0)
             {
                 fprintf(stderr,"error: PgGetVideoMode failed\n");
             }
-            if (PgGetVideoModeInfo(settings.mode, &mode_info) < 0)
-            {
-                fprintf(stderr,"error: PgGetVideoModeInfo failed\n");
+            */
+         if (PgGetGraphicsHWCaps(&my_hwcaps) < 0)
+         	{
+                fprintf(stderr,"ph_SetVideoMode:  GetGraphicsHWCaps failed!! \n");
+      			//that HAVE to work
             }
-            bpp = mode_info.bits_per_pixel;
+         if (PgGetVideoModeInfo(my_hwcaps.current_video_mode, &mode_info) < 0)
+            {
+                fprintf(stderr,"ph_SetVideoMode:  PgGetVideoModeInfo failed\n");
+            }
+           bpp = mode_info.bits_per_pixel;
         }
         if (flags & SDL_ANYFORMAT)
         {

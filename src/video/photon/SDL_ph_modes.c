@@ -205,7 +205,7 @@ SDL_Rect **ph_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
 
 void ph_FreeVideoModes(_THIS)
 {
-    int i;
+//    int i;
 
  //   if ( SDL_modelist ) {
  //       for ( i=0; SDL_modelist[i]; ++i ) {
@@ -222,9 +222,10 @@ static void set_best_resolution(_THIS, int width, int height)
     if ( use_vidmode ) {
 		PgDisplaySettings_t 	settings;
 		PgVideoModeInfo_t		current_mode_info;
+		PgHWCaps_t my_hwcaps;
 		unsigned short			current_bpp;
         int i;
-
+	/*
 		if (PgGetVideoMode( &settings ) < 0)
 		{
 			fprintf(stderr,"error: PgGetVideoMode failed\n");
@@ -235,6 +236,17 @@ static void set_best_resolution(_THIS, int width, int height)
 			fprintf(stderr,"error: PgGetVideoModeInfo failed\n");
 			return;
 		}
+		*/
+		//lu_zero 
+         if (PgGetGraphicsHWCaps(&my_hwcaps) < 0)
+         	{
+                fprintf(stderr,"set_best_resolution:  GetGraphicsHWCaps failed!! \n");
+      			//that HAVE to work
+            }
+         if (PgGetVideoModeInfo(my_hwcaps.current_video_mode, &current_mode_info) < 0)
+            {
+                fprintf(stderr,"set_best_resolution:  PgGetVideoModeInfo failed\n");
+            }
 		current_bpp = current_mode_info.bits_per_pixel;
 
         if (PgGetVideoModeList(&mode_list) >= 0)
@@ -279,14 +291,25 @@ static void get_real_resolution(_THIS, int* w, int* h)
 {
 
     if ( use_vidmode ) {
-        PgDisplaySettings_t settings;
+        //PgDisplaySettings_t settings;
+	    PgVideoModeInfo_t		current_mode_info;
+	    	PgHWCaps_t my_hwcaps;
         int unused;
-
+		/*
         if (PgGetVideoMode( &settings ) >= 0) {
 			*w = settings.xres;
 			*h = settings.yres;
             return;
-        }
+        }*/
+            if (PgGetGraphicsHWCaps(&my_hwcaps) >= 0)
+         	{
+                 if (PgGetVideoModeInfo(my_hwcaps.current_video_mode, &current_mode_info) < 0)
+           		 {
+                fprintf(stderr,"get_real_resolution:  PgGetVideoModeInfo failed\n");
+            		 }
+				*w = current_mode_info.width;
+				*h = current_mode_info.height;            
+            }
     }
 //    *w = DisplayWidth(SDL_Display, SDL_Screen);
 //    *h = DisplayHeight(SDL_Display, SDL_Screen);
