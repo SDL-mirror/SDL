@@ -119,9 +119,6 @@ static int SDL_fatal_signals[] = {
 #ifdef SIGQUIT
 	SIGQUIT,
 #endif
-#ifdef SIGPIPE
-	SIGPIPE,
-#endif
 	0
 };
 
