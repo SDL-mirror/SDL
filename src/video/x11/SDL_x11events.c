@@ -196,7 +196,8 @@ if ( xevent.xcrossing.mode == NotifyUngrab )
 printf("Mode: NotifyUngrab\n");
 #endif
 		if ( (xevent.xcrossing.mode != NotifyGrab) &&
-		     (xevent.xcrossing.mode != NotifyUngrab) ) {
+		     (xevent.xcrossing.mode != NotifyUngrab) &&
+		     (xevent.xcrossing.detail != NotifyInferior) ) {
 			if ( this->input_grab == SDL_GRAB_OFF ) {
 				posted = SDL_PrivateAppActive(0, SDL_APPMOUSEFOCUS);
 			} else {
