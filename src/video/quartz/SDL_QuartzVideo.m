@@ -1208,20 +1208,40 @@ static void*  QZ_GL_GetProcAddress (_THIS, const char *proc) {
 
 static int    QZ_GL_GetAttribute   (_THIS, SDL_GLattr attrib, int* value) {
 
-/*
-    CGLContextRef ctx = [ gl_context cglContext ];
-    CGLContextParameter param;
-    
-    switch (attrib) {
-    case SDL_GL_RED_SIZE: param = CGLContextParameter break;
-    
-    }
-    
-    CGLGetParameter (ctx, param, (long*)value);
-*/
+    GLenum attr;
 
-    *value = -1;
-    return -1;
+    QZ_GL_MakeCurrent (this);
+
+    switch (attrib) {
+    case SDL_GL_RED_SIZE: attr = GL_RED_BITS;   break;
+    case SDL_GL_BLUE_SIZE: attr = GL_BLUE_BITS;  break;
+    case SDL_GL_GREEN_SIZE: attr = GL_GREEN_BITS; break;
+    case SDL_GL_ALPHA_SIZE: attr = GL_ALPHA_BITS; break;
+    case SDL_GL_DOUBLEBUFFER: attr = GL_DOUBLEBUFFER; break;
+    case SDL_GL_DEPTH_SIZE: attr = GL_DEPTH_BITS;  break;
+    case SDL_GL_STENCIL_SIZE: attr = GL_STENCIL_BITS; break;
+    case SDL_GL_ACCUM_RED_SIZE: attr = GL_ACCUM_RED_BITS; break;
+    case SDL_GL_ACCUM_GREEN_SIZE: attr = GL_ACCUM_GREEN_BITS; break;
+    case SDL_GL_ACCUM_BLUE_SIZE: attr = GL_ACCUM_BLUE_BITS; break;
+    case SDL_GL_ACCUM_ALPHA_SIZE: attr = GL_ACCUM_ALPHA_BITS; break;
+    case SDL_GL_BUFFER_SIZE:
+        {
+            GLint bits = 0;
+            GLint component;
+
+            /* there doesn't seem to be a single flag in OpenGL for this! */
+            glGetIntegerv (GL_RED_BITS, &component);   bits += component;
+            glGetIntegerv (GL_GREEN_BITS,&component);  bits += component;
+            glGetIntegerv (GL_BLUE_BITS, &component);  bits += component;
+            glGetIntegerv (GL_ALPHA_BITS, &component); bits += component;
+
+            *value = bits;
+        }
+        return 0;
+    }
+
+    glGetIntegerv (attr, value);
+    return 0;
 }
 
 static int    QZ_GL_MakeCurrent    (_THIS) {
