@@ -47,7 +47,7 @@ static char rcsid =
 #include "SDL_timer_c.h"
 #include "SDL_thread.h"
 
-#include "SDL_vbltimer_s.h"
+#include "mint/SDL_vbltimer_s.h"
 
 /* The first ticks value of the application */
 static Uint32 start;

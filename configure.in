@@ -505,7 +505,7 @@ CheckNASM()
                   NASMFLAGS="-f aoutb"
                   ;;
               *)
-                  NASMFLAGS="-f elf -D __NOU__"
+                  NASMFLAGS="-f elf"
                   ;;
             esac
             AC_SUBST(NASMFLAGS)
@@ -1331,9 +1331,6 @@ CopyUnixThreadSource()
     if test x$use_pthreads = xyes -o x$use_clone = xyes; then
         # Basic thread creation functions
         COPY_ARCH_SRC(src/thread, linux, SDL_systhread.c)
-        if test x$use_clone = xyes; then
-            COPY_ARCH_SRC(src/thread, linux, clone.S)
-        fi
         COPY_ARCH_SRC(src/thread, linux, SDL_systhread_c.h)
 
         # Semaphores
@@ -1757,11 +1754,8 @@ case "$target" in
         CheckPTHREAD
         # Set up files for the main() stub
         if test "x$video_qtopia" = "xyes"; then
-          COPY_ARCH_SRC(src/main, linux, SDL_Qtopia_main.cc)
           SDL_CFLAGS="$SDL_CFLAGS -Dmain=SDL_main"
           SDL_LIBS="-lSDLmain $SDL_LIBS"
-        else
-          COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         fi
         # Set up files for the audio library
         # We use the OSS and ALSA API's, not the Sun audio API
@@ -1833,8 +1827,6 @@ case "$target" in
         CheckAAlib
         CheckOpenGL
         CheckPTHREAD
-        # Set up files for the main() stub
-        COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         # Set up files for the audio library
         # We use the OSS and ALSA API's, not the Sun audio API
         #if test x$enable_audio = xyes; then
@@ -1880,8 +1872,6 @@ case "$target" in
         CheckOpenGL
         CheckPTHREAD
         CheckUSBHID
-        # Set up files for the main() stub
-        COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         # Set up files for the audio library
         # We use the OSS and ALSA API's, not the Sun audio API
         #if test x$enable_audio = xyes; then
@@ -1918,8 +1908,6 @@ case "$target" in
         CheckOpenGL
         CheckPTHREAD
         CheckUSBHID
-        # Set up files for the main() stub
-        COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
             CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
@@ -1960,8 +1948,6 @@ case "$target" in
         CheckOpenGL
         CheckPTHREAD
         CheckUSBHID
-        # Set up files for the main() stub
-        COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
             CFLAGS="$CFLAGS -DOPENBSD_AUDIO_SUPPORT"
@@ -2002,8 +1988,6 @@ case "$target" in
         CheckAAlib
         CheckOpenGL
         CheckPTHREAD
-        # Set up files for the main() stub
-        COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
             CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
@@ -2045,8 +2029,6 @@ case "$target" in
         CheckAAlib
         CheckOpenGL
         CheckPTHREAD
-        # Set up files for the main() stub
-        COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
             CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
@@ -2085,8 +2067,6 @@ case "$target" in
         CheckAAlib
         CheckOpenGL
         CheckPTHREAD
-        # Set up files for the main() stub
-        COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         # We use the dmedia audio API, not the Sun audio API
         #if test x$enable_audio = xyes; then
         #    CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
@@ -2137,8 +2117,6 @@ case "$target" in
         CheckAAlib
         CheckOpenGL
         CheckPTHREAD
-        # Set up files for the main() stub
-        COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
             CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
@@ -2178,8 +2156,6 @@ case "$target" in
         CheckAAlib
         CheckOpenGL
         CheckPTHREAD
-        # Set up files for the main() stub
-        COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
             AUDIO_SUBDIRS="$AUDIO_SUBDIRS paudio"
@@ -2217,8 +2193,6 @@ case "$target" in
         CheckOpenGL
         CheckPTHREAD
         SDL_LIBS="$SDL_LIBS -lrt"
-        # Set up files for the main() stub
-        COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
             CFLAGS="$CFLAGS -I/usr/include/mme -DMMEAUDIO_SUPPORT"
@@ -2257,8 +2231,6 @@ case "$target" in
         CheckX11
         CheckOpenGL
         CheckPTHREAD
-        # Set up files for the main() stub
-        COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
             CFLAGS="$CFLAGS -DQNXNTOAUDIO_SUPPORT"
@@ -2302,8 +2274,6 @@ case "$target" in
         CheckWIN32
         CheckDIRECTX
         CheckNASM
-        # Set up files for the main() stub
-        COPY_ARCH_SRC(src/main, win32, SDL_main.c)
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
             AUDIO_SUBDIRS="$AUDIO_SUBDIRS windib"
@@ -2360,10 +2330,6 @@ case "$target" in
         CheckNASM
         CheckBWINDOW
         CheckBeGL
-        # Set up files for the main() stub
-        COPY_ARCH_SRC(src/main, linux, SDL_main.c)
-        COPY_ARCH_SRC(src/main, beos, SDL_BeApp.cc)
-        COPY_ARCH_SRC(src/main, beos, SDL_BeApp.h)
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
             AUDIO_SUBDIRS="$AUDIO_SUBDIRS baudio"
@@ -2406,8 +2372,6 @@ case "$target" in
         CheckDiskAudio
         CheckTOOLBOX
         CheckMacGL
-        # Set up files for the main() stub
-        COPY_ARCH_SRC(src/main, macos, SDL_main.c)
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
             AUDIO_SUBDIRS="$AUDIO_SUBDIRS macrom"
@@ -2452,9 +2416,6 @@ case "$target" in
         CheckQUARTZ
         CheckMacGL
         CheckPTHREAD
-        # Set up files for the main() stub
-        COPY_ARCH_SRC(src/main, macosx, SDLMain.m)
-        COPY_ARCH_SRC(src/main, macosx, SDLMain.h)
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
             AUDIO_SUBDIRS="$AUDIO_SUBDIRS macrom"
@@ -2498,8 +2459,6 @@ case "$target" in
         CheckAtariAudio
         CheckAtariLdg
         CheckPTH
-        # Set up files for the main() stub
-        COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         # Set up files for the audio library
         if test x$enable_threads = xyes -a x$enable_pth = xyes; then
             if test x$enable_audio = xyes; then
@@ -2528,8 +2487,6 @@ case "$target" in
                 COPY_ARCH_SRC(src/timer, linux, SDL_systimer.c)
             else
                 COPY_ARCH_SRC(src/timer, mint, SDL_systimer.c)
-                COPY_ARCH_SRC(src/timer, mint, SDL_vbltimer.S)
-                COPY_ARCH_SRC(src/timer, mint, SDL_vbltimer_s.h)
             fi
         fi
         # MiNT does not define "unix"
@@ -2540,7 +2497,6 @@ case "$target" in
         JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS riscos"
         JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS riscos/libjoystick_riscos.la"
         COPY_ARCH_SRC(src/timer, riscos, SDL_systimer.c)
-        COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         VIDEO_SUBDIRS="$VIDEO_SUBDIRS riscos"
         VIDEO_DRIVERS="$VIDEO_DRIVERS riscos/libvideo_riscos.la"
         AUDIO_SUBDIRS="$AUDIO_SUBDIRS riscos"
@@ -2648,7 +2604,6 @@ dnl Expand the include directories for building SDL
 CFLAGS="$CFLAGS -I\$(top_srcdir)/include"
 CFLAGS="$CFLAGS -I\$(top_srcdir)/include/SDL"
 CFLAGS="$CFLAGS -I\$(top_srcdir)/src -I\$(top_srcdir)/src/$ARCH"
-CFLAGS="$CFLAGS -I\$(top_srcdir)/src/main"
 CFLAGS="$CFLAGS -I\$(top_srcdir)/src/audio"
 CFLAGS="$CFLAGS -I\$(top_srcdir)/src/video"
 CFLAGS="$CFLAGS -I\$(top_srcdir)/src/video/XFree86/extensions"

@@ -69,6 +69,7 @@ rpm: $(PACKAGE)-$(VERSION).tar.gz
 exports:
 	(cd src/main/beos/exports; $(MAKE))
 	(cd src/main/macos/exports; $(MAKE))
+	(cd src/main/macosx/exports; $(MAKE))
 	(cd src/main/win32/exports; $(MAKE))
 
 # Rule to build the Project Builder archive in MacOS X
@@ -77,10 +78,6 @@ PBProjects.tar.gz:
 	if [ -d PBProjects ]; then \
 	    tar zcvf $@ PBProjects; \
 	fi
-
-# Rule to force automake to rebuild the library
-changed:
-	@echo "This build target is no longer necessary"
 
 # Rule to install the libraries only - prevent rebuilding apps
 install-lib:
@@ -93,6 +90,7 @@ install-hook:
 # Grab the test programs for the distribution:
 dist-hook:
 	if test -f test/Makefile; then (cd test; make distclean); fi
+	rm -rf $(srcdir)/test/autom4te*
 	cp -rp $(srcdir)/test $(distdir)
 	rm -rf `find $(distdir) -type d -name CVS -print`
 

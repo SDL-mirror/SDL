@@ -3,7 +3,7 @@ configure
 aclocal.m4
 config.log
 config.cache
-autom4te.cache
+autom4te*
 depcomp
 libtool
 config.status

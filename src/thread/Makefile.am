@@ -16,7 +16,7 @@ ARCH_SUBDIRS = $(srcdir)/generic	\
 
 # Older versions of Linux require an asm clone() implementation
 if USE_CLONE
-THREAD_ASM_SRC = clone.S
+THREAD_ASM_SRC = linux/clone.S
 else
 THREAD_ASM_SRC =
 endif

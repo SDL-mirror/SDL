@@ -18,7 +18,7 @@ COMMON_SRCS = SDL_timer.c SDL_timer_c.h SDL_systimer.h
 
 # Include the architecture-specific sources
 if TARGET_MINT
-ARCH_SRCS = SDL_systimer.c SDL_vbltimer.S SDL_vbltimer_s.h
+ARCH_SRCS = SDL_systimer.c mint/SDL_vbltimer.S mint/SDL_vbltimer_s.h
 else
 ARCH_SRCS = SDL_systimer.c
 endif

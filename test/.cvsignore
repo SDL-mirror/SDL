@@ -4,6 +4,7 @@ configure
 config.cache
 config.log
 config.status
+autom4te*
 aclocal.m4
 checkkeys
 graywin
