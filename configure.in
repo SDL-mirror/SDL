@@ -1265,6 +1265,7 @@ CheckPTH()
             PTH_LIBS=`$PTH_CONFIG --libs --all`
             SDL_CFLAGS="$SDL_CFLAGS $PTH_CFLAGS"
             SDL_LIBS="$SDL_LIBS $PTH_LIBS"
+            CFLAGS="$CFLAGS -DENABLE_PTH"
             use_pth=yes
         fi
         AC_MSG_CHECKING(pth)
@@ -2295,16 +2296,20 @@ case "$target" in
             if test x$enable_pth = xyes; then
                 COPY_ARCH_SRC(src/thread, pth, SDL_systhread.c)
                 COPY_ARCH_SRC(src/thread, pth, SDL_systhread_c.h)
+                COPY_ARCH_SRC(src/thread, pth, SDL_sysmutex.c)
+                COPY_ARCH_SRC(src/thread, pth, SDL_sysmutex_c.h)
+                COPY_ARCH_SRC(src/thread, pth, SDL_syscond.c)
+                COPY_ARCH_SRC(src/thread, pth, SDL_syscond_c.h)
             else
                 COPY_ARCH_SRC(src/thread, generic, SDL_systhread.c)
                 COPY_ARCH_SRC(src/thread, generic, SDL_systhread_c.h)
+                COPY_ARCH_SRC(src/thread, generic, SDL_sysmutex.c)
+                COPY_ARCH_SRC(src/thread, generic, SDL_sysmutex_c.h)
+                COPY_ARCH_SRC(src/thread, generic, SDL_syscond.c)
+                COPY_ARCH_SRC(src/thread, generic, SDL_syscond_c.h)
             fi
-            COPY_ARCH_SRC(src/thread, generic, SDL_sysmutex.c)
-            COPY_ARCH_SRC(src/thread, generic, SDL_sysmutex_c.h)
-            COPY_ARCH_SRC(src/thread, linux, SDL_syssem.c)
+            COPY_ARCH_SRC(src/thread, generic, SDL_syssem.c)
             COPY_ARCH_SRC(src/thread, generic, SDL_syssem_c.h)
-            COPY_ARCH_SRC(src/thread, generic, SDL_syscond.c)
-            COPY_ARCH_SRC(src/thread, generic, SDL_syscond_c.h)
         fi
         # Set up files for the timer library
         if test x$enable_timers = xyes; then
