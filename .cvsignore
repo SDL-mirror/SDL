@@ -5,6 +5,9 @@ config.log
 config.cache
 autom4te*
 depcomp
+mkinstalldirs
+missing
+install-sh
 libtool
 config.status
 Makefile
