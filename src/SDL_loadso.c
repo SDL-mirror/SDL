@@ -203,7 +203,7 @@ void SDL_UnloadObject(void *handle)
 #elif defined(macintosh)
 /* * */
 	library_id = (CFragConnectionID)handle;
-	CloseConnection(library_id);
+	CloseConnection(&library_id);
 #elif defined(__MINT__) && defined(ENABLE_LDG)
 /* * */
 	ldg_close((LDG *)handle, ldg_global);
