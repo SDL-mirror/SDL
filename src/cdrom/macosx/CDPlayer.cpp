@@ -370,15 +370,19 @@ int ListTrackFiles (FSVolumeRefNum theVolume, FSRef *trackFiles, int numTracks)
                 name = CFStringCreateWithCharacters (NULL, nameStr.unicode, nameStr.length);
                 
                 // Look for .aiff extension
-                if (CFStringHasSuffix (name, CFSTR(".aiff"))) {
+                if (CFStringHasSuffix (name, CFSTR(".aiff")) ||
+                    CFStringHasSuffix (name, CFSTR(".cdda"))) {
                     
                     // Extract the track id from the filename
                     int trackID = 0, i = 0;
-                    while (nameStr.unicode[i] >= '0' && nameStr.unicode[i] <= '9') {
-                        trackID = 10 * trackID +(nameStr.unicode[i] - '0');
-                        i++;
+                    while (i < nameStr.length && !isdigit(nameStr.unicode[i])) {
+                        ++i;
                     }
-                    
+                    while (i < nameStr.length && isdigit(nameStr.unicode[i])) {
+                        trackID = 10 * trackID +(nameStr.unicode[i] - '0');
+                        ++i;
+                    }
+
                     #if DEBUG_CDROM
                     printf("Found AIFF for track %d: '%s'\n", trackID, 
                     CFStringGetCStringPtr (name, CFStringGetSystemEncoding()));
