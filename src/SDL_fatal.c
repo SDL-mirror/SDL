@@ -141,7 +141,7 @@ void SDL_InstallParachute(void)
 	sigaction(SIGALRM, NULL, &action);
 	if ( action.sa_handler == SIG_DFL ) {
 		action.sa_handler = SIG_IGN;
-		sigaction(SDL_fatal_signals[i], &action, NULL);
+		sigaction(SIGALRM, &action, NULL);
 	}
 #endif
 #else
