@@ -180,7 +180,7 @@ void GEM_PumpEvents(_THIS)
 			
 		/* Key unpressed ? */
 		if (gem_previouskeyboard[i] && !gem_currentkeyboard[i])
-			SDL_PrivateKeyboard(SDL_RELEASED, TranslateKey(i, 0, &keysym));
+			SDL_PrivateKeyboard(SDL_RELEASED, TranslateKey(i, gem_currentascii[i], &keysym));
 	}
 
 	memcpy(gem_previouskeyboard,gem_currentkeyboard,sizeof(gem_previouskeyboard));
