@@ -522,21 +522,23 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		settings.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL;
 		if ( ChangeDisplaySettings(&settings, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL ) {
 			video->flags |= SDL_FULLSCREEN;
-			if ( screen_pal != NULL ) {
-			/*	RJR: March 28, 2000
-				delete identity palette if switching from a palettized mode */
-				DeleteObject(screen_pal);
-				screen_pal = NULL;
-			}
-			if ( bpp <= 8 )
-			{
-			/*	RJR: March 28, 2000
-				create identity palette switching to a palettized mode */
-				screen_pal = DIB_CreatePalette(bpp);
-			}
 		}
 	}
 #endif /* !NO_CHANGEDISPLAYSETTINGS */
+
+	/* Reset the palette and create a new one if necessary */
+	if ( screen_pal != NULL ) {
+	/*	RJR: March 28, 2000
+		delete identity palette if switching from a palettized mode */
+		DeleteObject(screen_pal);
+		screen_pal = NULL;
+	}
+	if ( bpp <= 8 )
+	{
+	/*	RJR: March 28, 2000
+		create identity palette switching to a palettized mode */
+		screen_pal = DIB_CreatePalette(bpp);
+	}
 
 	style = GetWindowLong(SDL_Window, GWL_STYLE);
 #ifndef _WIN32_WCE
