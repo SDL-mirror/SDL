@@ -87,4 +87,8 @@ extern int mouse_relative;
 /* This is really from SDL_dx5audio.c */
 extern void DX5_SoundFocus(HWND window);
 
+/* DJM: This is really from SDL_sysevents.c, we need it in
+   GDL_CreateWindow as well */
+LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 #endif /* SDL_lowvideo_h */

@@ -199,12 +199,16 @@ int console_main(int argc, char *argv[])
 	atexit(SDL_Quit);
 
 #ifndef DISABLE_VIDEO
-	/* Create and register our class */
+	/* Create and register our class *
+      DJM: If we do this here, the user nevers gets a chance to
+      putenv(SDL_WINDOWID).  This is already called later by
+      the (DIB|DX5)_CreateWindow function, so it should be
+      safe to comment it out here.
 	if ( SDL_RegisterApp(appname, CS_BYTEALIGNCLIENT, 
 	                     GetModuleHandle(NULL)) < 0 ) {
 		ShowError("WinMain() error", SDL_GetError());
 		exit(1);
-	}
+	}*/
 #endif /* !DISABLE_VIDEO */
 
 	/* Run the application main() code */

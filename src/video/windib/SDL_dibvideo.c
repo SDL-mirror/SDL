@@ -574,7 +574,10 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		if (IsZoomed(SDL_Window)) style |= WS_MAXIMIZE;
 #endif
 	}
-	SetWindowLong(SDL_Window, GWL_STYLE, style);
+
+   /* DJM: Don't piss of anyone who has setup his own window */
+   if (!SDL_windowid)
+	   SetWindowLong(SDL_Window, GWL_STYLE, style);
 
 	/* Delete the old bitmap if necessary */
 	if ( screen_bmp != NULL ) {

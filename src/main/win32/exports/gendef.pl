@@ -20,3 +20,4 @@ while ( ($file = shift(@ARGV)) ) {
 }
 # Special exports not in the header files
 print "\tSDL_RegisterApp\n";
+print "\tSDL_SetModuleHandle\n";

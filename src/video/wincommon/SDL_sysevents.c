@@ -145,8 +145,10 @@ static void WIN_GetKeyboardState(void)
 #endif /* !NO_GETKEYBOARDSTATE */
 }
 
-/* The main Win32 event handler */
-static LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+/* The main Win32 event handler
+DJM: This is no longer static as (DX5/DIB)_CreateWindow needs it
+*/
+LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	SDL_VideoDevice *this = current_video;
 	static int mouse_pressed = 0;
@@ -264,6 +266,13 @@ static LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 			if ( SDL_VideoSurface && ! DINPUT_FULLSCREEN() ) {
 				Sint16 x, y;
 				Uint8 button, state;
+
+				/* DJM:
+				   We want the SDL window to take focus so that
+				   it acts like a normal windows "component"
+				   (e.g. gains keyboard focus on a mouse click).
+				 */
+				SetFocus(SDL_Window);
 
 				/* Figure out which button to use */
 				switch (msg) {
@@ -465,10 +474,11 @@ static LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 		}
 		return(0);
 
+		/* DJM: Send an expose event in this case */
 		case WM_ERASEBKGND: {
-			/* Just do nothing */ ;
+			posted = SDL_PrivateExpose();
 		}
-		return(1);
+		return(0);
 
 		case WM_CLOSE: {
 			if ( (posted = SDL_PrivateQuit()) )
@@ -493,11 +503,35 @@ static LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 	return(DefWindowProc(hwnd, msg, wParam, lParam));
 }
 
+/* Allow the application handle to be stored and retrieved later */
+static HMODULE SDL_handle = NULL;
+
+void SDL_SetModuleHandle(HMODULE handle)
+{
+	SDL_handle = handle;
+}
+HMODULE SDL_GetModuleHandle(void)
+{
+	void *handle;
+
+	if ( SDL_handle ) {
+		handle = SDL_handle;
+	} else {
+		/* Warning:
+		   If SDL is built as a DLL, this will return a handle to
+		   the DLL, not the application, and DirectInput may fail
+		   to initialize.
+		 */
+		handle = GetModuleHandle(NULL);
+	}
+	return(handle);
+}
+
 /* This allows the SDL_WINDOWID hack */
 const char *SDL_windowid = NULL;
 
 /* Register the class for this application -- exported for winmain.c */
-int SDL_RegisterApp(char *name, Uint32 style, void *hInst)
+int SDL_RegisterApp(char *name, Uint32 style, HMODULE hInst)
 {
 	static int initialized = 0;
 	WNDCLASS class;
@@ -511,12 +545,10 @@ int SDL_RegisterApp(char *name, Uint32 style, void *hInst)
 	}
 
 	/* This function needs to be passed the correct process handle
-	   by the application.  The following call just returns a handle
-	   to the SDL DLL, which is useless for our purposes and causes
-	   DirectInput to fail to initialize.
+	   by the application.
 	 */
 	if ( ! hInst ) {
-		hInst = GetModuleHandle(NULL);
+		hInst = SDL_GetModuleHandle();
 	}
 
 	/* Register the application class */

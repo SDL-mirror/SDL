@@ -54,6 +54,10 @@ static SDL_keysym *TranslateKey(UINT vkey, UINT scancode, SDL_keysym *keysym, in
 #define REPEATED_KEYMASK	(1<<30)
 #define EXTENDED_KEYMASK	(1<<24)
 
+/* DJM: If the user setup the window for us, we want to save his window proc,
+   and give him a chance to handle some messages. */
+static WNDPROC userWindowProc = NULL;
+
 /* The main Win32 event handler */
 LONG
  DIB_HandleMessage(_THIS, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -150,6 +154,13 @@ LONG
 				wmmsg.wParam = wParam;
 				wmmsg.lParam = lParam;
 				posted = SDL_PrivateSysWMEvent(&wmmsg);
+
+			/* DJM: If the user isn't watching for private
+				messages in her SDL event loop, then pass it
+				along to any win32 specific window proc.
+			 */
+			} else if (userWindowProc) {
+				return userWindowProc(hwnd, msg, wParam, lParam);
 			}
 		}
 		break;
@@ -339,6 +350,14 @@ int DIB_CreateWindow(_THIS)
 	SDL_RegisterApp("SDL_app", CS_BYTEALIGNCLIENT, 0);
 	if ( SDL_windowid ) {
 		SDL_Window = (HWND)strtol(SDL_windowid, NULL, 0);
+
+      /* DJM: we want all event's for the user specified
+         window to be handled by SDL.
+       */
+      if (SDL_Window) {
+         userWindowProc = (WNDPROC)GetWindowLong(SDL_Window, GWL_WNDPROC);
+         SetWindowLong(SDL_Window, GWL_WNDPROC, (LONG)WinMessage);
+      }
 	} else {
 		SDL_Window = CreateWindow(SDL_Appname, SDL_Appname,
                         (WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX),

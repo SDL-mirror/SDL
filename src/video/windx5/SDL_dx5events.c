@@ -59,6 +59,10 @@ static int mouse_pressed;
 static SDLKey DIK_keymap[256];
 static SDL_keysym *TranslateKey(UINT scancode, SDL_keysym *keysym, int pressed);
 
+/* DJM: If the user setup the window for us, we want to save his window proc,
+   and give him a chance to handle some messages. */
+static WNDPROC userWindowProc = NULL;
+
 /* Convert a DirectInput return code to a text message */
 static void SetDIerror(char *function, int code)
 {
@@ -509,7 +513,14 @@ LONG
 				wmmsg.wParam = wParam;
 				wmmsg.lParam = lParam;
 				posted = SDL_PrivateSysWMEvent(&wmmsg);
-			}
+
+         /* DJM: If the user isn't watching for private messages in her
+            SDL event loop, then pass it along to any win32 specific
+            window proc.
+          */
+         } else if (userWindowProc) {
+            return userWindowProc(hwnd, msg, wParam, lParam);
+         }
 		}
 		break;
 	}
@@ -764,6 +775,14 @@ int DX5_CreateWindow(_THIS)
 	SDL_RegisterApp("SDL_app", CS_BYTEALIGNCLIENT, 0);
 	if ( SDL_windowid ) {
 		SDL_Window = (HWND)strtol(SDL_windowid, NULL, 0);
+
+      /* DJM: we want all event's for the user specified
+         window to be handled by SDL.
+       */
+      if (SDL_Window) {
+         userWindowProc = (WNDPROC)GetWindowLong(SDL_Window, GWL_WNDPROC);
+         SetWindowLong(SDL_Window, GWL_WNDPROC, (LONG)WinMessage);
+      }
 	} else {
 		SDL_Window = CreateWindow(SDL_Appname, SDL_Appname,
                         (WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX),
