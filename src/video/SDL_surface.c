@@ -399,6 +399,8 @@ int SDL_LowerBlit (SDL_Surface *src, SDL_Rect *srcrect,
 				SDL_Surface *dst, SDL_Rect *dstrect)
 {
 	SDL_blit do_blit;
+	SDL_Rect hw_srcrect;
+	SDL_Rect hw_dstrect;
 
 	/* Check to make sure the blit mapping is valid */
 	if ( (src->map->dst != dst) ||
@@ -410,6 +412,18 @@ int SDL_LowerBlit (SDL_Surface *src, SDL_Rect *srcrect,
 
 	/* Figure out which blitter to use */
 	if ( (src->flags & SDL_HWACCEL) == SDL_HWACCEL ) {
+		if ( src == SDL_VideoSurface ) {
+			hw_srcrect = *dstrect;
+			hw_srcrect.x += current_video->offset_x;
+			hw_srcrect.y += current_video->offset_y;
+			srcrect = &hw_srcrect;
+		}
+		if ( dst == SDL_VideoSurface ) {
+			hw_dstrect = *dstrect;
+			hw_dstrect.x += current_video->offset_x;
+			hw_dstrect.y += current_video->offset_y;
+			dstrect = &hw_dstrect;
+		}
 		do_blit = src->map->hw_blit;
 	} else {
 		do_blit = src->map->sw_blit;
@@ -533,6 +547,13 @@ int SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, Uint32 color)
 	/* Check for hardware acceleration */
 	if ( ((dst->flags & SDL_HWSURFACE) == SDL_HWSURFACE) &&
 					video->info.blit_fill ) {
+		SDL_Rect hw_rect;
+		if ( dst == SDL_VideoSurface ) {
+			hw_rect = *dstrect;
+			hw_rect.x += current_video->offset_x;
+			hw_rect.y += current_video->offset_y;
+			dstrect = &hw_rect;
+		}
 		return(video->FillHWRect(this, dst, dstrect, color));
 	}
 

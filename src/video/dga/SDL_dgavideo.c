@@ -793,10 +793,6 @@ static __inline__ void DGA_dst_to_xy(_THIS, SDL_Surface *dst, int *x, int *y)
 {
 	*x = (long)((Uint8 *)dst->pixels - memory_base)%memory_pitch;
 	*y = (long)((Uint8 *)dst->pixels - memory_base)/memory_pitch;
-	if ( dst == this->screen ) {
-		*x += this->offset_x;
-		*y += this->offset_y;
-	}
 }
 
 static int DGA_FillHWRect(_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color)
