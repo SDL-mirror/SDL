@@ -816,7 +816,9 @@ static int DGA_FillHWRect(_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color)
   printf("Hardware accelerated rectangle fill: %dx%d at %d,%d\n", w, h, x, y);
 #endif
 	SDL_NAME(XDGAFillRectangle)(DGA_Display, DGA_Screen, x, y, w, h, color);
-	XFlush(DGA_Display);
+	if ( !(this->screen->flags & SDL_DOUBLEBUF) ) {
+		XFlush(DGA_Display);
+	}
 	DGA_AddBusySurface(dst);
 	UNLOCK_DISPLAY();
 	return(0);
@@ -856,7 +858,9 @@ static int HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,
 		SDL_NAME(XDGACopyArea)(DGA_Display, DGA_Screen,
 			srcx, srcy, w, h, dstx, dsty);
 	}
-	XFlush(DGA_Display);
+	if ( !(this->screen->flags & SDL_DOUBLEBUF) ) {
+		XFlush(DGA_Display);
+	}
 	DGA_AddBusySurface(src);
 	DGA_AddBusySurface(dst);
 	UNLOCK_DISPLAY();
