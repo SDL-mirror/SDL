@@ -2073,6 +2073,7 @@ netbsd*)
     dynamic_linker='NetBSD ld.elf_so'
   fi
   shlibpath_var=LD_LIBRARY_PATH
+  deplibs_check_method='pass_all'
   ;;
 
 openbsd*)
