@@ -78,8 +78,8 @@ dist-hook:
 CVSROOT = :pserver:guest@cvs.lokigames.com:/cvs
 snapshot:
 	cvs -d $(CVSROOT) login
-	cvs -d $(CVSROOT) checkout -r devel_1_1_0 SDL
-	(cd SDL && ./autogen.sh)
-	mv SDL SDL-1.2
+	cvs -d $(CVSROOT) checkout SDL12
+	(cd SDL12 && ./autogen.sh)
+	mv SDL12 SDL-1.2
 	tar zcvf $(HOME)/SDL-1.2.tar.gz SDL-1.2
 	rm -rf SDL-1.2
