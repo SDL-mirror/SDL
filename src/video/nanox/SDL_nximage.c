@@ -84,7 +84,7 @@ void NX_NormalUpdate (_THIS, int numrects, SDL_Rect * rects)
                 }
             }
         }
-#if 0 /* This is needed for microwindows 0.90 or older */
+#if 1 /* This is needed for microwindows 0.90 or older */
         else if (pixel_type == MWPF_TRUECOLOR0888 || pixel_type == MWPF_TRUECOLOR888) {
             Uint8 * ptrsrc ;
             Uint8 * ptrdst ;
