@@ -379,16 +379,16 @@ void SDL_GetRGBA(Uint32 pixel, SDL_PixelFormat *fmt,
 		 * This only works for RGB bit fields at least 4 bit
 		 * wide, which is almost always the case.
 		 */
-	        unsigned rv, gv, bv, av;
-		rv = (pixel & fmt->Rmask) >> fmt->Rshift;
-		*r = (rv << fmt->Rloss) + (rv >> (8 - fmt->Rloss));
-		gv = (pixel & fmt->Gmask) >> fmt->Gshift;
-		*g = (gv << fmt->Gloss) + (gv >> (8 - fmt->Gloss));
-		bv = (pixel & fmt->Bmask) >> fmt->Bshift;
-		*b = (bv << fmt->Bloss) + (bv >> (8 - fmt->Bloss));
+	        unsigned v;
+		v = (pixel & fmt->Rmask) >> fmt->Rshift;
+		*r = (v << fmt->Rloss) + (v >> (8 - fmt->Rloss));
+		v = (pixel & fmt->Gmask) >> fmt->Gshift;
+		*g = (v << fmt->Gloss) + (v >> (8 - fmt->Gloss));
+		v = (pixel & fmt->Bmask) >> fmt->Bshift;
+		*b = (v << fmt->Bloss) + (v >> (8 - fmt->Bloss));
 		if(fmt->Amask) {
-		        av = (pixel & fmt->Amask) >> fmt->Ashift;
-			*a = (av << fmt->Aloss) + (av >> (8 - fmt->Aloss));
+		        v = (pixel & fmt->Amask) >> fmt->Ashift;
+			*a = (v << fmt->Aloss) + (v >> (8 - fmt->Aloss));
 		} else
 		        *a = SDL_ALPHA_OPAQUE;
 	} else {
@@ -403,13 +403,13 @@ void SDL_GetRGB(Uint32 pixel, SDL_PixelFormat *fmt, Uint8 *r,Uint8 *g,Uint8 *b)
 {
 	if ( fmt->palette == NULL ) {
 	        /* the note for SDL_GetRGBA above applies here too */
-	        unsigned rv, gv, bv;
-		rv = (pixel & fmt->Rmask) >> fmt->Rshift;
-		*r = (rv << fmt->Rloss) + (rv >> (8 - fmt->Rloss));
-		gv = (pixel & fmt->Gmask) >> fmt->Gshift;
-		*g = (gv << fmt->Gloss) + (gv >> (8 - fmt->Gloss));
-		bv = (pixel & fmt->Bmask) >> fmt->Bshift;
-		*b = (bv << fmt->Bloss) + (bv >> (8 - fmt->Bloss));
+	        unsigned v;
+		v = (pixel & fmt->Rmask) >> fmt->Rshift;
+		*r = (v << fmt->Rloss) + (v >> (8 - fmt->Rloss));
+		v = (pixel & fmt->Gmask) >> fmt->Gshift;
+		*g = (v << fmt->Gloss) + (v >> (8 - fmt->Gloss));
+		v = (pixel & fmt->Bmask) >> fmt->Bshift;
+		*b = (v << fmt->Bloss) + (v >> (8 - fmt->Bloss));
 	} else {
 		*r = fmt->palette->colors[pixel].r;
 		*g = fmt->palette->colors[pixel].g;
