@@ -47,6 +47,16 @@ struct SDL_PrivateVideoData
 
   int nummodes;
   SDL_Rect **modelist;
+
+  /* MGA CRTC2 support */
+  int enable_mga_crtc2;
+  int mga_crtc2_stretch;
+  float mga_crtc2_stretch_overscan;
+  IDirectFBDisplayLayer *c2layer;
+  IDirectFBSurface *c2frame;
+  DFBRectangle c2ssize;	/* Real screen size */
+  DFBRectangle c2dsize;	/* Stretched screen size */
+  DFBRectangle c2framesize;    /* CRTC2 screen size */
 };
 
 #define HIDDEN (this->hidden)

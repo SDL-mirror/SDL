@@ -18,6 +18,10 @@
 
 	Sam Lantinga
 	slouken@libsdl.org
+
+	MGA CRTC2 support by Thomas Jarosch - tomj@simonv.com
+	CRTC2 support is inspired by mplayer's dfbmga driver
+	written by Ville Syrj��<syrjala@sci.fi>
 */
 
 #ifdef SAVE_RCSID
@@ -372,6 +376,9 @@ int DirectFB_VideoInit(_THIS, SDL_PixelFormat *vformat)
   IDirectFBDisplayLayer   *layer  = NULL;
   IDirectFBEventBuffer    *events = NULL;
 
+  HIDDEN->c2layer = NULL, HIDDEN->c2frame = NULL;
+  HIDDEN->enable_mga_crtc2 = 0;
+  HIDDEN->mga_crtc2_stretch_overscan = 1;
 
   ret = DirectFBInit (NULL, NULL);
   if (ret)
@@ -449,12 +456,93 @@ int DirectFB_VideoInit(_THIS, SDL_PixelFormat *vformat)
   HIDDEN->layer       = layer;
   HIDDEN->eventbuffer = events;
 
+  if (getenv("SDL_DIRECTFB_MGA_CRTC2") != NULL)
+    HIDDEN->enable_mga_crtc2 = 1;
+  
+  if (HIDDEN->enable_mga_crtc2)
+    {
+      ret = dfb->GetDisplayLayer (dfb, 2, &HIDDEN->c2layer);
+      if (ret)
+        {
+          SetDirectFBerror ("dfb->GetDisplayLayer(CRTC2)", ret);
+          goto error;
+        }
+
+      ret = HIDDEN->layer->SetCooperativeLevel(HIDDEN->layer, DLSCL_EXCLUSIVE);
+      if (ret)
+        {
+          SetDirectFBerror ("layer->SetCooperativeLevel(CRTC2, EXCLUSIVE)", ret);
+          goto error;
+        }
+ 
+      ret = HIDDEN->c2layer->SetCooperativeLevel(HIDDEN->c2layer, DLSCL_EXCLUSIVE);
+      if (ret)
+        {
+          SetDirectFBerror ("c2layer->SetCooperativeLevel(CRTC2, EXCLUSIVE)", ret);
+          goto error;
+        }
+
+      HIDDEN->c2layer->SetOpacity(HIDDEN->c2layer, 0x0);
+
+      /* Init the surface here as it got a fixed size */
+      DFBDisplayLayerConfig      dlc;
+      DFBDisplayLayerConfigFlags failed;
+    
+      dlc.flags      = DLCONF_PIXELFORMAT | DLCONF_BUFFERMODE | DLCONF_OPTIONS;
+      dlc.buffermode = DLBM_BACKVIDEO;
+      dlc.options    = DLOP_FLICKER_FILTERING;
+      dlc.pixelformat = DSPF_RGB32;
+      
+      ret = HIDDEN->c2layer->TestConfiguration( HIDDEN->c2layer, &dlc, &failed );
+      if (ret)
+        {
+          SetDirectFBerror ("c2layer->TestConfiguration", ret);
+          goto error;
+        }
+    
+      ret = HIDDEN->c2layer->SetConfiguration( HIDDEN->c2layer, &dlc );
+      if (ret)
+        {
+          SetDirectFBerror ("c2layer->SetConfiguration", ret);
+          goto error;
+        }
+    
+      ret = HIDDEN->c2layer->GetSurface( HIDDEN->c2layer, &HIDDEN->c2frame );
+      if (ret)
+        {
+          SetDirectFBerror ("c2layer->GetSurface", ret);
+          goto error;
+        }
+
+      HIDDEN->c2framesize.x = 0;
+      HIDDEN->c2framesize.y = 0;
+      HIDDEN->c2frame->GetSize( HIDDEN->c2frame, &HIDDEN->c2framesize.w, &HIDDEN->c2framesize.h);
+
+      HIDDEN->c2frame->SetBlittingFlags( HIDDEN->c2frame, DSBLIT_NOFX );
+      HIDDEN->c2frame->SetColor( HIDDEN->c2frame, 0, 0, 0, 0xff );
+    
+      /* Clear CRTC2 */
+      HIDDEN->c2frame->Clear(HIDDEN->c2frame, 0, 0, 0, 0xff );
+      HIDDEN->c2frame->Flip(HIDDEN->c2frame, NULL, 0 );
+      HIDDEN->c2frame->Clear(HIDDEN->c2frame, 0, 0, 0, 0xff );
+      HIDDEN->c2frame->Flip(HIDDEN->c2frame, NULL, 0 );
+      HIDDEN->c2frame->Clear(HIDDEN->c2frame, 0, 0, 0, 0xff );
+
+      HIDDEN->c2layer->SetOpacity(HIDDEN->c2layer, 0xFF );
+    }
+
   return 0;
 
  error:
   if (events)
     events->Release (events);
   
+  if (HIDDEN->c2frame)
+    HIDDEN->c2frame->Release (HIDDEN->c2frame);
+
+  if (HIDDEN->c2layer)
+    HIDDEN->c2layer->Release (HIDDEN->c2layer);
+
   if (layer)
     layer->Release (layer);
 
@@ -515,7 +603,7 @@ static SDL_Surface *DirectFB_SetVideoMode(_THIS, SDL_Surface *current, int width
   if (flags & SDL_FULLSCREEN)
     {
       ret = HIDDEN->dfb->SetCooperativeLevel (HIDDEN->dfb, DFSCL_FULLSCREEN);
-      if (ret)
+      if (ret && !HIDDEN->enable_mga_crtc2)
         {
           DirectFBError ("dfb->SetCooperativeLevel", ret);
           flags &= ~SDL_FULLSCREEN;
@@ -588,6 +676,73 @@ static SDL_Surface *DirectFB_SetVideoMode(_THIS, SDL_Surface *current, int width
     }
 
   current->hwdata->surface = surface;
+
+  /* MGA CRTC2 stuff */
+  if (HIDDEN->enable_mga_crtc2)
+    {
+      /* no stretching if c2ssize == c2framesize */
+      HIDDEN->c2ssize.x = 0, HIDDEN->c2ssize.y = 0;
+      HIDDEN->c2ssize.w = width;
+      HIDDEN->c2ssize.h = height;
+
+      HIDDEN->c2dsize.x = 0, HIDDEN->c2dsize.y = 0;
+      HIDDEN->c2dsize.w = width;
+      HIDDEN->c2dsize.h = height;
+
+      HIDDEN->mga_crtc2_stretch = 0;
+
+      if (getenv("SDL_DIRECTFB_MGA_STRETCH") != NULL)
+        {
+          /* don't stretch slightly smaller/larger images */
+          if (width < HIDDEN->c2framesize.w*0.95 && height < HIDDEN->c2framesize.w*0.95)
+            {
+              while (HIDDEN->c2dsize.w < HIDDEN->c2framesize.w*HIDDEN->mga_crtc2_stretch_overscan && HIDDEN->c2dsize.h < HIDDEN->c2framesize.h*HIDDEN->mga_crtc2_stretch_overscan)
+                {
+                   HIDDEN->c2dsize.w+=4;
+                   HIDDEN->c2dsize.h+=3;
+                }
+
+              /* one step down */
+              HIDDEN->c2dsize.w-=4;
+              HIDDEN->c2dsize.h-=3;
+
+              #ifdef DIRECTFB_CRTC2_DEBUG
+              printf("Stretched resolution: X: %d, Y: %d\n", HIDDEN->c2dsize.w, HIDDEN->c2dsize.h);
+              #endif
+
+              HIDDEN->mga_crtc2_stretch = 1;
+            } 
+          else if (width > HIDDEN->c2framesize.w*0.95 && height > HIDDEN->c2framesize.w*0.95)
+            {
+              while (HIDDEN->c2dsize.w > HIDDEN->c2framesize.w*HIDDEN->mga_crtc2_stretch_overscan || HIDDEN->c2dsize.h > HIDDEN->c2framesize.h*HIDDEN->mga_crtc2_stretch_overscan)
+                {
+                  HIDDEN->c2dsize.w-=4;
+                  HIDDEN->c2dsize.h-=3;
+                }
+              
+              #ifdef DIRECTFB_CRTC2_DEBUG
+              printf("Down-Stretched resolution: X: %d, Y: %d\n", HIDDEN->c2dsize.w, HIDDEN->c2dsize.h);
+              #endif
+
+              HIDDEN->mga_crtc2_stretch = 1;
+            }
+        }
+
+      /* Panning */
+      if (HIDDEN->c2framesize.w > HIDDEN->c2dsize.w)
+        HIDDEN->c2dsize.x = (HIDDEN->c2framesize.w - HIDDEN->c2dsize.w)  / 2;
+      else
+        HIDDEN->c2dsize.x = (HIDDEN->c2dsize.w - HIDDEN->c2framesize.w)  / 2;
+
+      if (HIDDEN->c2framesize.h > HIDDEN->c2dsize.h)
+        HIDDEN->c2dsize.y = (HIDDEN->c2framesize.h - HIDDEN->c2dsize.h)  / 2;
+      else
+        HIDDEN->c2dsize.y = (HIDDEN->c2dsize.h - HIDDEN->c2framesize.h)  / 2;
+
+      #ifdef DIRECTFB_CRTC2_DEBUG
+      printf("CTRC2 position X: %d, Y: %d\n", HIDDEN->c2dsize.x, HIDDEN->c2dsize.y);
+      #endif
+   }
 
   return current;
 }
@@ -732,7 +887,19 @@ static int DirectFB_SetHWAlpha(_THIS, SDL_Surface *surface, Uint8 alpha)
 
 static int DirectFB_FlipHWSurface(_THIS, SDL_Surface *surface)
 {
-  return surface->hwdata->surface->Flip (surface->hwdata->surface, NULL, DSFLIP_WAITFORSYNC);
+  if (HIDDEN->enable_mga_crtc2)
+    {
+       int rtn = surface->hwdata->surface->Flip (surface->hwdata->surface, NULL, 0);
+       if (HIDDEN->mga_crtc2_stretch)
+         HIDDEN->c2frame->StretchBlit(HIDDEN->c2frame, surface->hwdata->surface, &HIDDEN->c2ssize, &HIDDEN->c2dsize);
+       else
+         HIDDEN->c2frame->Blit(HIDDEN->c2frame, surface->hwdata->surface, NULL, HIDDEN->c2dsize.x, HIDDEN->c2dsize.y);
+     
+       HIDDEN->c2frame->Flip(HIDDEN->c2frame, NULL, DSFLIP_WAITFORSYNC);
+       return rtn;
+    } 
+  else 
+     return surface->hwdata->surface->Flip (surface->hwdata->surface, NULL, DSFLIP_WAITFORSYNC);
 }
 
 static int DirectFB_LockHWSurface(_THIS, SDL_Surface *surface)
@@ -763,6 +930,15 @@ static void DirectFB_UnlockHWSurface(_THIS, SDL_Surface *surface)
 
 static void DirectFB_DirectUpdate(_THIS, int numrects, SDL_Rect *rects)
 {
+  if (HIDDEN->enable_mga_crtc2)
+    {
+       if (HIDDEN->mga_crtc2_stretch)
+         HIDDEN->c2frame->StretchBlit(HIDDEN->c2frame, this->screen->hwdata->surface, &HIDDEN->c2ssize, &HIDDEN->c2dsize); 
+       else
+         HIDDEN->c2frame->Blit(HIDDEN->c2frame, this->screen->hwdata->surface, NULL, HIDDEN->c2dsize.x, HIDDEN->c2dsize.y); 
+
+       HIDDEN->c2frame->Flip(HIDDEN->c2frame, NULL, DSFLIP_WAITFORSYNC);
+    }
 }
 
 static void DirectFB_WindowedUpdate(_THIS, int numrects, SDL_Rect *rects)
@@ -808,7 +984,19 @@ static void DirectFB_WindowedUpdate(_THIS, int numrects, SDL_Rect *rects)
     }
 
   if (region_valid)
-    surface->Flip (surface, &region, DSFLIP_WAITFORSYNC);
+    {
+      if (HIDDEN->enable_mga_crtc2)
+        {
+          if (HIDDEN->mga_crtc2_stretch)
+            HIDDEN->c2frame->StretchBlit(HIDDEN->c2frame, surface, &HIDDEN->c2ssize, &HIDDEN->c2dsize);
+          else
+            HIDDEN->c2frame->Blit(HIDDEN->c2frame, surface, NULL, HIDDEN->c2dsize.x, HIDDEN->c2dsize.y); 
+      
+          HIDDEN->c2frame->Flip(HIDDEN->c2frame, NULL, DSFLIP_WAITFORSYNC);
+        }
+      else 
+        surface->Flip (surface, &region, DSFLIP_WAITFORSYNC);
+    }
 }
 
 int DirectFB_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
@@ -855,6 +1043,12 @@ void DirectFB_VideoQuit(_THIS)
   if (surface)
     surface->Release (surface);
 
+  if (HIDDEN->c2frame)
+    {
+      HIDDEN->c2frame->Release (HIDDEN->c2frame);
+      HIDDEN->c2frame = NULL;
+    }
+
   this->screen->hwdata->surface = NULL;
   this->screen->hwdata->palette = NULL;
 
@@ -862,6 +1056,12 @@ void DirectFB_VideoQuit(_THIS)
     {
       HIDDEN->eventbuffer->Release (HIDDEN->eventbuffer);
       HIDDEN->eventbuffer = NULL;
+    }
+
+  if (HIDDEN->c2layer)
+    {
+      HIDDEN->c2layer->Release (HIDDEN->c2layer);
+      HIDDEN->c2layer = NULL;
     }
 
   if (HIDDEN->layer)
