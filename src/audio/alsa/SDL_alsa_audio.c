@@ -168,6 +168,7 @@ static void ALSA_PlayAudio(_THIS)
 				this->enabled = 0;
 				return;
 			}
+			continue;
 		}
 		sample_buf += status * this->spec.channels;
 		sample_len -= status;
