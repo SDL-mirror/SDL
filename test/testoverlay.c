@@ -315,6 +315,7 @@ static void PrintUsage(char *argv0)
 
 int main(int argc, char **argv)
 {
+	char *argv0 = argv[0];
 	int flip;
 	int delay;
 	int desired_bpp;
@@ -437,7 +438,7 @@ int main(int argc, char **argv)
 			argc -= 1;
 		} else
 		if (( strcmp(argv[1], "-help") == 0 ) || (strcmp(argv[1], "-h") == 0)) {
-                        PrintUsage(argv[0]);
+                        PrintUsage(argv0);
                         exit(1);
 		} else
 		if ( strcmp(argv[1], "-fullscreen") == 0 ) {
