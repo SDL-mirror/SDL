@@ -2578,6 +2578,7 @@ src/audio/Makefile
 src/audio/alsa/Makefile
 src/audio/arts/Makefile
 src/audio/baudio/Makefile
+src/audio/dc/Makefile
 src/audio/dma/Makefile
 src/audio/dmedia/Makefile
 src/audio/dsp/Makefile
@@ -2625,6 +2626,7 @@ src/video/dummy/Makefile
 src/video/ataricommon/Makefile
 src/video/xbios/Makefile
 src/video/gem/Makefile
+src/video/dc/Makefile
 src/video/qtopia/Makefile
 src/video/picogui/Makefile
 src/events/Makefile
@@ -2633,6 +2635,7 @@ src/joystick/amigaos/Makefile
 src/joystick/beos/Makefile
 src/joystick/bsd/Makefile
 src/joystick/darwin/Makefile
+src/joystick/dc/Makefile
 src/joystick/dummy/Makefile
 src/joystick/linux/Makefile
 src/joystick/macos/Makefile
@@ -2641,6 +2644,7 @@ src/joystick/win32/Makefile
 src/cdrom/Makefile
 src/cdrom/aix/Makefile
 src/cdrom/beos/Makefile
+src/cdrom/dc/Makefile
 src/cdrom/dummy/Makefile
 src/cdrom/bsdi/Makefile
 src/cdrom/freebsd/Makefile
