@@ -1,8 +1,3 @@
-Date: Sun, 16 Jun 2002 00:59:13 -0300
-From: Travis <smallfri@bigfoot.com>
-To: slouken@libsdl.org
-Subject: NTO Audio Fixes
-
 /*
     SDL - Simple DirectMedia Layer
     Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002  Sam Lantinga
