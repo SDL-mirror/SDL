@@ -760,7 +760,6 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 
 #ifdef HAVE_OPENGL
 	if (flags & SDL_OPENGL) {
-		int conversion_needed = 0;
 		GLenum format = OSMESA_COLOR_INDEX;	/* 8 bits */
 
 		/* Init OpenGL context using OSMesa */
@@ -1513,7 +1512,9 @@ static void GEM_GL_Convert565le(SDL_Surface *surface)
 	for (y=0; y<surface->h; y++) {
 		pixel = line;
 		for (x=0; x<surface->w; x++) {
-			*pixel++ = SDL_Swap16(*pixel);
+			unsigned short color = *pixel;
+
+			*pixel++ = SDL_Swap16(color);
 		}
 
 		line += pitch;
