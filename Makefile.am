@@ -47,6 +47,7 @@ EXTRA_DIST =		\
 	CWprojects.sea.bin \
 	PBProjects.tar.gz \
 	EpocBuildFiles.zip \
+	Xcode.tar.gz	\
 	WhatsNew	\
 	docs.html	\
 	sdl.m4		\
