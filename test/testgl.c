@@ -18,7 +18,11 @@
 /* The SDL_OPENGLBLIT interface is deprecated.
    The code is still available for benchmark purposes though.
 */
+
 static SDL_bool USE_DEPRECATED_OPENGLBLIT = SDL_FALSE;
+
+static SDL_Surface *global_image = NULL;
+static GLuint global_texture = 0;
 
 /**********************************************************************/
 
@@ -233,9 +237,9 @@ GLuint SDL_GL_LoadTexture(SDL_Surface *surface, GLfloat *texcoord)
 	return texture;
 }
 
+
 void DrawLogoTexture(void)
 {
-	static GLuint texture;
 	static GLfloat texMinX, texMinY;
 	static GLfloat texMaxX, texMaxY;
 	static int x = 0;
@@ -247,7 +251,7 @@ void DrawLogoTexture(void)
 
 	SDL_Surface *screen = SDL_GetVideoSurface();
 
-	if ( ! texture ) {
+	if ( ! global_texture ) {
 		SDL_Surface *image;
 		GLfloat texcoord[4];
 
@@ -260,7 +264,7 @@ void DrawLogoTexture(void)
 		h = image->h;
 
 		/* Convert the image into an OpenGL texture */
-		texture = SDL_GL_LoadTexture(image, texcoord);
+		global_texture = SDL_GL_LoadTexture(image, texcoord);
 
 		/* Make texture coordinates easy to understand */
 		texMinX = texcoord[0];
@@ -272,7 +276,7 @@ void DrawLogoTexture(void)
 		SDL_FreeSurface(image);
 
 		/* Make sure that the texture conversion is okay */
-		if ( ! texture ) {
+		if ( ! global_texture ) {
 			return;
 		}
 	}
@@ -299,7 +303,7 @@ void DrawLogoTexture(void)
 
 	/* Show the image on the screen */
 	SDL_GL_Enter2DMode();
-	glBindTexture(GL_TEXTURE_2D, texture);
+	glBindTexture(GL_TEXTURE_2D, global_texture);
 	glBegin(GL_TRIANGLE_STRIP);
 	glTexCoord2f(texMinX, texMinY); glVertex2i(x,   y  );
 	glTexCoord2f(texMaxX, texMinY); glVertex2i(x+w, y  );
@@ -312,10 +316,6 @@ void DrawLogoTexture(void)
 /* This code is deprecated, but available for speed comparisons */
 void DrawLogoBlit(void)
 {
-	static SDL_Surface *image = NULL;
-	static GLuint texture;
-	static GLfloat texMinX, texMinY;
-	static GLfloat texMaxX, texMaxY;
 	static int x = 0;
 	static int y = 0;
 	static int w, h;
@@ -326,7 +326,7 @@ void DrawLogoBlit(void)
 	SDL_Rect dst;
 	SDL_Surface *screen = SDL_GetVideoSurface();
 
-	if ( image == NULL ) {
+	if ( global_image == NULL ) {
 		SDL_Surface *temp;
 
 		/* Load the image (could use SDL_image library here) */
@@ -338,7 +338,7 @@ void DrawLogoBlit(void)
 		h = temp->h;
 
 		/* Convert the image into the screen format */
-		image = SDL_CreateRGBSurface(
+		global_image = SDL_CreateRGBSurface(
 				SDL_SWSURFACE,
 				w, h,
 				screen->format->BitsPerPixel,
@@ -346,13 +346,13 @@ void DrawLogoBlit(void)
 				screen->format->Gmask,
 				screen->format->Bmask,
 				screen->format->Amask);
-		if ( image ) {
-			SDL_BlitSurface(temp, NULL, image, NULL);
+		if ( global_image ) {
+			SDL_BlitSurface(temp, NULL, global_image, NULL);
 		}
 		SDL_FreeSurface(temp);
 
 		/* Make sure that the texture conversion is okay */
-		if ( ! image ) {
+		if ( ! global_image ) {
 			return;
 		}
 	}
@@ -386,7 +386,7 @@ void DrawLogoBlit(void)
 	dst.y = y;
 	dst.w = w;
 	dst.h = h;
-	SDL_BlitSurface(image, NULL, screen, &dst);
+	SDL_BlitSurface(global_image, NULL, screen, &dst);
 
 	/* Show the image on the screen */
 	SDL_UpdateRects(screen, 1, &dst);
@@ -678,6 +678,15 @@ int RunGLTest( int argc, char* argv[],
 			((float)frames/(this_time-start_time))*1000.0);
 	}
 
+	if ( global_image ) {
+	   	SDL_FreeSurface(global_image);
+		global_image = NULL;
+	}
+	if ( global_texture ) {
+		glDeleteTextures( 1, &global_texture );
+		global_texture = 0;
+	}
+
 	/* Destroy our GL context, etc. */
 	SDL_Quit( );
 	return(0);
@@ -690,7 +699,7 @@ int main(int argc, char *argv[])
 	int bpp = 0;
 	int slowly;
 	float gamma = 0.0;
-        int noframe = 0;
+	int noframe = 0;
 
 	logo = 0;
 	slowly = 0;
@@ -727,7 +736,7 @@ int main(int argc, char *argv[])
 		}
 	}
 	for ( i=0; i<numtests; ++i ) {
- 	       RunGLTest(argc, argv, logo, slowly, bpp, gamma, noframe);
+ 		RunGLTest(argc, argv, logo, slowly, bpp, gamma, noframe);
 	}
 	return 0;
 }
