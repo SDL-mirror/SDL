@@ -1134,6 +1134,9 @@ int SDL_SetPalette(SDL_Surface *screen, int which,
 	int gotall;
 	int palsize;
 
+	if ( ! current_video ) {
+		return 0;
+	}
 	if ( screen != SDL_PublicSurface ) {
 	        /* only screens have physical palettes */
 	        which &= ~SDL_PHYSPAL;
