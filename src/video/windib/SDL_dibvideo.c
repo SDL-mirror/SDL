@@ -898,7 +898,7 @@ void DIB_VideoQuit(_THIS)
 #ifndef NO_CHANGEDISPLAYSETTINGS
 			if ( this->screen->flags & SDL_FULLSCREEN ) {
 				ChangeDisplaySettings(NULL, 0);
-				SDL_ShowWindow(SDL_Window, SW_HIDE);
+				ShowWindow(SDL_Window, SW_HIDE);
 			}
 #endif
 #ifdef HAVE_OPENGL
