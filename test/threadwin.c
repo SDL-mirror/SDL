@@ -172,14 +172,37 @@ int HandleKeyboard(void *unused)
 			    /* We want to toggle visibility on buttonpress */
 			    case SDL_KEYDOWN:
 			    case SDL_KEYUP:
-			    	/* Allow hitting <ESC> to quit the app */
-			    	if ( events[i].key.keysym.sym == SDLK_ESCAPE ) {
-			    		done = 1;
-			    	}
 			    	printf("Key '%c' has been %s\n",
 						events[i].key.keysym.unicode,
 					(events[i].key.state == SDL_PRESSED) ?
 						"pressed" : "released");
+
+			    	/* Allow hitting <ESC> to quit the app */
+			    	if ( events[i].key.keysym.sym == SDLK_ESCAPE ) {
+			    		done = 1;
+			    	}
+
+					/* skip events now that aren't KEYUPs... */
+					if (events[i].key.state == SDL_PRESSED)
+						break;
+
+			    	if ( events[i].key.keysym.sym == SDLK_f ) {
+						int rc = 0;
+						printf("attempting to toggle fullscreen...\n");
+						rc = SDL_WM_ToggleFullScreen(SDL_GetVideoSurface());
+                        printf("SDL_WM_ToggleFullScreen returned %d.\n", rc);
+			    	}
+
+			    	if ( events[i].key.keysym.sym == SDLK_g ) {
+						SDL_GrabMode m;
+						m = SDL_WM_GrabInput(SDL_GRAB_QUERY) == SDL_GRAB_ON ?
+								SDL_GRAB_OFF : SDL_GRAB_ON;
+						printf("attempting to toggle input grab to %s...\n",
+                                m == SDL_GRAB_ON ? "ON" : "OFF");
+                        SDL_WM_GrabInput(m);
+						printf("attempt finished.\n");
+			    	}
+
 			    	break;
 			}
 		}
