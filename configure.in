@@ -1470,6 +1470,32 @@ CheckQtopia()
     fi
 }
 
+dnl Set up the PicoGUI video driver if enabled
+CheckPicoGUI()
+{
+    AC_ARG_ENABLE(video-picogui,
+[  --enable-video-picogui  use PicoGUI video driver [default=no]],
+                  , enable_video_picogui=no)
+    if test x$enable_video = xyes -a x$enable_video_picogui = xyes; then
+        AC_MSG_CHECKING(for PicoGUI support)
+        video_picogui=no
+        AC_TRY_COMPILE([
+         #include <picogui.h>
+        ],[
+        ],[
+        video_picogui=yes
+        ])
+        AC_MSG_RESULT($video_picogui)
+        if test x$video_picogui = xyes; then
+	    SDL_LIBS="$SDL_LIBS -lpgui"
+            CFLAGS="$CFLAGS -DENABLE_PICOGUI"
+            VIDEO_SUBDIRS="$VIDEO_SUBDIRS picogui"
+            VIDEO_DRIVERS="$VIDEO_DRIVERS picogui/libvideo_picogui.la"
+        fi
+        AC_LANG_C
+    fi
+}
+
 dnl Set up the Mac toolbox video driver for Mac OS 7-9
 CheckTOOLBOX()
 {
@@ -1676,6 +1702,7 @@ case "$target" in
         CheckSVGA
         CheckAAlib
         CheckQtopia
+        CheckPicoGUI
         CheckOpenGL
         CheckInputEvents
         CheckPTHREAD
@@ -2602,6 +2629,7 @@ src/video/ataricommon/Makefile
 src/video/xbios/Makefile
 src/video/gem/Makefile
 src/video/qtopia/Makefile
+src/video/picogui/Makefile
 src/events/Makefile
 src/joystick/Makefile
 src/joystick/amigaos/Makefile

@@ -114,6 +114,9 @@ static VideoBootStrap *bootstrap[] = {
 #ifdef ENABLE_QTOPIA
 	&Qtopia_bootstrap,
 #endif
+#ifdef ENABLE_PICOGUI
+	&PG_bootstrap,
+#endif
 	NULL
 };
 

@@ -8,7 +8,7 @@ SUBDIRS = @VIDEO_SUBDIRS@
 DIST_SUBDIRS = dummy x11 dga nanox fbcon directfb vgl svga ggi aalib \
                wincommon windib windx5 \
                maccommon macdsp macrom quartz \
-               bwindow ps2gs photon cybergfx epoc \
+               bwindow ps2gs photon cybergfx epoc picogui \
                ataricommon xbios gem XFree86
 
 DRIVERS = @VIDEO_DRIVERS@

@@ -30,6 +30,7 @@ EXTRA_DIST =		\
 	README.MacOSX	\
 	README.MiNT	\
 	README.NanoX	\
+	README.PicoGUI	\
 	README.QNX	\
 	README.Qtopia	\
 	README.WinCE	\
