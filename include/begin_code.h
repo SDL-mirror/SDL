@@ -125,6 +125,7 @@
 #endif
 
 /* Apparently this is needed by several Windows compilers */
+#if !defined(__MACH__)
 #ifndef NULL
 #ifdef __cplusplus
 #define NULL 0
@@ -132,3 +133,4 @@
 #define NULL ((void *)0)
 #endif
 #endif /* NULL */
+#endif /* ! MacOS X - breaks precompiled headers */
