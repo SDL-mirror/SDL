@@ -9,17 +9,17 @@ From the developer's point of view, OS X is a sort of hybrid Mac and
 Unix system, and you have the option of using either traditional
 command line tools or Apple's IDE ProjectBuilder (PB).
 
-To build using the command line, use the standard configure and make
+To build SDL using the command line, use the standard configure and make
 process:
 
 	./configure
 	make
-	make install
+	sudo make install
 
 (You may need to create the subdirs of /usr/local manually.)
 
 To use the library once it's built, you essential have two possibilities:
-use the traditional autoconf/automake/make method, or use Apple's Project Builder.
+use the traditional autoconf/automake/make method, or use Project Builder.
 
 ==============================================================================
 Using the Simple DirectMedia Layer with a traditional Makefile
@@ -63,6 +63,33 @@ into $(DESTDIR)$(prefix)/Applications/.
 
 Again, if you want to install multiple applications, you will have to augment
 the make rule accordingly.
+
+
+But beware! That is only part of the story! With the above, you end up with
+a bare bone .app bundle, which is double clickable from the Finder. But
+there are some  more things you should do before shipping yor product...
+
+1) The bundle right now probably is dynamically linked against SDL. That 
+   means that when you copy it to another computer, *it will not run*,
+   unless you also install SDL on that other computer. A good solution
+   for this dilemma is to static link against SDL. On OS X, you can
+   achieve that by linkinag against the libraries listed by
+     sdl-config --static-libs
+   instead of those listed by
+     sdl-config --libs
+   Depending on how exactly SDL is integrated into your build systems, the
+   way to achieve that varies, so I won't describe it here in detail
+2) Add an 'Info.plist' to your application. That is a special XML file which
+   contains some meta-information about your application (like some copyright
+   information, the version of your app, the name of an optional icon file,
+   and other things). Part of that information is displayed by the Finder
+   when you click on the .app, or if you look at the "Get Info" window.
+   More information about Info.plist files can be found on Apple's homepage.
+
+
+As a final remark, let me add that I use some of the techniques (and some
+variations of them) in Exult and ScummVM; both are available in source on
+the net, so feel free to take a peek at them for inspiration!
 
 
 ==============================================================================
