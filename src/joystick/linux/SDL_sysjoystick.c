@@ -436,17 +436,15 @@ static SDL_bool EV_ConfigJoystick(SDL_Joystick *joystick, int fd)
 				    joystick->hwdata->abs_correct[i].used = 0;
 				} else {
 				    joystick->hwdata->abs_correct[i].used = 1;
-				    t = (2 - values[4]);
-				    if ( t != 0 ) {
-				        joystick->hwdata->abs_correct[i].coef[0] = (values[2] + values[1]) / t;
-				    }
-				    t = (2 + values[4]);
-				    if ( t != 0 ) {
-				        joystick->hwdata->abs_correct[i].coef[1] = (values[2] + values[1]) / t;
-				    }
+				    joystick->hwdata->abs_correct[i].coef[0] =
+					(values[2] + values[1]) / 2 - values[4];
+				    joystick->hwdata->abs_correct[i].coef[1] =
+					(values[2] + values[1]) / 2 + values[4];
 				    t = ((values[2] - values[1]) / 2 - 2 * values[4]);
 				    if ( t != 0 ) {
 					joystick->hwdata->abs_correct[i].coef[2] = (1 << 29) / t;
+				    } else {
+					joystick->hwdata->abs_correct[i].coef[2] = 0;
 				    }
 				}
 				++joystick->naxes;
