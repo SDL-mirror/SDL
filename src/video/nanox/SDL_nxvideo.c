@@ -2,6 +2,7 @@
     SDL - Simple DirectMedia Layer
     Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002  Sam Lantinga
     Copyright (C) 2001  Hsieh-Fu Tsai
+    Copyright (C) 2002  Greg Haerr <greg@censoft.com>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -222,42 +223,10 @@ int NX_VideoInit (_THIS, SDL_PixelFormat * vformat)
         SDL_modelist [1] = NULL ;
     }
 
-#ifdef NANOX_PIXEL_RGB
-    pixel_type = MWPF_RGB ;
-    SDL_Visual.red_mask   = 0x000000FF ;
-    SDL_Visual.green_mask = 0x0000FF00 ;
-    SDL_Visual.blue_mask  = 0x00FF0000 ;
-#endif
-#ifdef NANOX_PIXEL_0888
-    pixel_type = MWPF_TRUECOLOR0888 ;
-    SDL_Visual.red_mask   = 0x00FF0000 ;
-    SDL_Visual.green_mask = 0x0000FF00 ;
-    SDL_Visual.blue_mask  = 0x000000FF ;
-#endif
-#ifdef NANOX_PIXEL_888
-    pixel_type = MWPF_TRUECOLOR888 ;
-    SDL_Visual.red_mask   = 0xFF0000 ;
-    SDL_Visual.green_mask = 0x00FF00 ;
-    SDL_Visual.blue_mask  = 0x0000FF ;
-#endif
-#ifdef NANOX_PIXEL_565
-    pixel_type = MWPF_TRUECOLOR565 ;
-    SDL_Visual.red_mask   = 0xF800 ;
-    SDL_Visual.green_mask = 0x07E0 ;
-    SDL_Visual.blue_mask  = 0x001F ;
-#endif
-#ifdef NANOX_PIXEL_555
-    pixel_type = MWPF_TRUECOLOR555 ;
-    SDL_Visual.red_mask   = 0x7C00 ;
-    SDL_Visual.green_mask = 0x03E0 ;
-    SDL_Visual.blue_mask  = 0x001F ;
-#endif
-#ifdef NANOX_PIXEL_332
-    pixel_type = MWPF_TRUECOLOR332 ;
-#endif
-#ifdef NANOX_PIXEL_PAL
-    pixel_type = MWPF_PALETTE ;
-#endif
+    pixel_type = si.pixtype;
+    SDL_Visual.red_mask = si.rmask;
+    SDL_Visual.green_mask = si.gmask;
+    SDL_Visual.blue_mask = si.bmask;
 
     vformat -> BitsPerPixel = SDL_Visual.bpp ;
     if (vformat -> BitsPerPixel > 8) {
@@ -290,6 +259,11 @@ void NX_VideoQuit (_THIS)
     free (GammaRamp_R) ;
     free (GammaRamp_G) ;
     free (GammaRamp_B) ;
+
+#ifdef ENABLE_NANOX_DIRECT_FB
+    if (Clientfb)
+        GrCloseClientFramebuffer();
+#endif
     GrClose () ;
 
     Dprintf ("leave NX_VideoQuit\n") ;
@@ -372,6 +346,12 @@ static int NX_CreateWindow (_THIS, SDL_Surface * screen,
             screen -> flags &= ~ SDL_FULLSCREEN ;
         }
     }
+
+#ifdef ENABLE_NANOX_DIRECT_FB
+    /* attempt allocating the client side framebuffer */
+    Clientfb = GrOpenClientFramebuffer();
+    /* NULL return will default to using GrArea()*/
+#endif
 
     Dprintf ("leave NX_CreateWindow\n") ;
     return 0 ;

@@ -2,6 +2,7 @@
     SDL - Simple DirectMedia Layer
     Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002  Sam Lantinga
     Copyright (C) 2001  Hsieh-Fu Tsai
+    Copyright (C) 2002  Greg Haerr <greg@censoft.com>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -32,12 +33,13 @@
 
 void NX_NormalUpdate (_THIS, int numrects, SDL_Rect * rects)
 {
-    int           i, j, xinc, yinc, destinc ;
+    int           i, j, xinc, yinc, destinc, rowinc ;
     int           x, y, w, h ;
     unsigned char * src = NULL, * dest = NULL ;
-            
-    Dprintf ("enter NX_NormalUpdate\n") ;
 
+    Dprintf ("enter NX_NormalUpdate\n") ;
+    
+    /* These are the values for the incoming image */
     xinc = this -> screen -> format -> BytesPerPixel ;
     yinc = this -> screen -> pitch ;
         
@@ -45,28 +47,36 @@ void NX_NormalUpdate (_THIS, int numrects, SDL_Rect * rects)
         x = rects [i].x, y = rects [i].y ;
         w = rects [i].w, h = rects [i].h ;
         src = SDL_Image + y * yinc + x * xinc ;
-        dest = Image_buff ;
-        destinc = w * xinc ;
+#ifdef ENABLE_NANOX_DIRECT_FB
+	if (Clientfb) {
+	    if (currently_fullscreen)
+	        dest = fbinfo.winpixels + (((y+OffsetY) * fbinfo.pitch) +
+		    ((x+OffsetX) * fbinfo.bytespp));
+	    else
+	        dest = fbinfo.winpixels + ((y * fbinfo.pitch) + (x * fbinfo.bytespp));
+	    destinc = fbinfo.pitch;
+	} else {
+#endif
+            dest = Image_buff ;
+            destinc = w * xinc ;
+#ifdef ENABLE_NANOX_DIRECT_FB
+	}
+#endif
+	rowinc = w * xinc;
 
         // apply GammaRamp table
-#if (defined (NANOX_PIXEL_RGB) || defined (NANOX_PIXEL_0888) || \
-     defined (NANOX_PIXEL_888))
-        if (GammaRamp_R && GammaRamp_G && GammaRamp_B) {
+        if ((pixel_type == MWPF_TRUECOLOR0888 || pixel_type == MWPF_TRUECOLOR888)
+	  && GammaRamp_R && GammaRamp_G && GammaRamp_B) {
             Uint8 * ptr ;
             int   k ;
 
             for (j = h; j > 0; -- j, src += yinc) {
                 ptr = src - 1 ;
                 for (k = w; k > 0; -- k) {
-#ifdef NANOX_PIXEL_RGB
-                    ptr += 2 ;
-#endif
-#ifdef NANOX_PIXEL_0888
-                    ptr += 2 ;
-#endif
-#ifdef NANOX_PIXEL_888
-                    ++ ptr ;
-#endif
+		    if (pixel_type == MWPF_TRUECOLOR0888)
+                        ptr += 2 ;
+                    else
+                        ++ ptr ;
                     (* ptr) = GammaRamp_B [(* ptr)] ;
                     ++ ptr ;
                     (* ptr) = GammaRamp_G [(* ptr)] ;
@@ -76,19 +86,19 @@ void NX_NormalUpdate (_THIS, int numrects, SDL_Rect * rects)
             }
             src = SDL_Image + y * yinc + x * xinc ;
         }
-#endif // apply Gamma table
 
-        for (j = h; j > 0; -- j, src += yinc, dest += destinc) {
-            memcpy (dest, src, destinc) ;
-        }
-
-        if (currently_fullscreen) {
-            GrArea (FSwindow, SDL_GC, x + OffsetX, y + OffsetY, w, h, Image_buff, 
-                pixel_type) ;
-        } else {
-            GrArea (SDL_Window, SDL_GC, x, y, w, h, Image_buff, pixel_type) ;
-        }
+        for (j = h; j > 0; -- j, src += yinc, dest += destinc)
+            memcpy (dest, src, rowinc) ;
+	if (!Clientfb) {
+            if (currently_fullscreen) {
+                GrArea (FSwindow, SDL_GC, x + OffsetX, y + OffsetY, w, h, Image_buff, 
+                    pixel_type) ;
+            } else {
+                GrArea (SDL_Window, SDL_GC, x, y, w, h, Image_buff, pixel_type) ;
+            }
+	}
     }
+    GrFlush();
 
     Dprintf ("leave NX_NormalUpdate\n") ;
 }
@@ -100,12 +110,15 @@ int NX_SetupImage (_THIS, SDL_Surface * screen)
     Dprintf ("enter NX_SetupImage\n") ;
 
     screen -> pixels = (void *) malloc (size) ;
-    Image_buff = (unsigned char *) malloc (size) ;
-    if (screen -> pixels == NULL || Image_buff == NULL) {
-        free (screen -> pixels) ;
-        free (Image_buff) ;
-        SDL_OutOfMemory () ;
-        return -1 ;
+
+    if (!Clientfb) {
+        Image_buff = (unsigned char *) malloc (size) ;
+        if (screen -> pixels == NULL || Image_buff == NULL) {
+            free (screen -> pixels) ;
+            free (Image_buff) ;
+            SDL_OutOfMemory () ;
+            return -1 ;
+        }
     }
 
     SDL_Image = (unsigned char *) screen -> pixels ;
@@ -140,7 +153,16 @@ int NX_ResizeImage (_THIS, SDL_Surface * screen, Uint32 flags)
     GrGetScreenInfo (& si) ;
     OffsetX = (si.cols - screen -> w) / 2 ;
     OffsetY = (si.rows - screen -> h) / 2 ;
-    
+
+#ifdef ENABLE_NANOX_DIRECT_FB
+    if (Clientfb) {
+        /* Get current window position and fb pointer*/
+        if (currently_fullscreen) 
+            GrGetWindowFBInfo(FSwindow, &fbinfo);
+        else
+            GrGetWindowFBInfo(SDL_Window, &fbinfo);
+    }
+#endif
     Dprintf ("leave NX_ResizeImage\n") ;
     return retval ;
 }
@@ -154,13 +176,40 @@ void NX_RefreshDisplay (_THIS)
         return;
     }
 
-    if (currently_fullscreen) {
-        GrArea (FSwindow, SDL_GC, OffsetX, OffsetY, this -> screen -> w, 
-            this -> screen -> h, SDL_Image, pixel_type) ;
+#ifdef ENABLE_NANOX_DIRECT_FB
+    if (Clientfb) {
+        int j;
+        char *src, *dest = NULL;
+        int xinc, yinc, rowinc;
+
+	GrGetWindowFBInfo(SDL_Window, &fbinfo);
+
+	xinc = this -> screen -> format -> BytesPerPixel ; 
+	yinc = this -> screen -> pitch ;           
+
+	src = SDL_Image;
+	if (currently_fullscreen)
+	    dest = fbinfo.winpixels + ((OffsetY * fbinfo.pitch) +
+	        (OffsetX * fbinfo.bytespp));
+	else
+	    dest = fbinfo.winpixels;
+	rowinc = xinc * this -> screen -> w;
+
+	for (j = this -> screen -> h; j > 0; -- j, src += yinc, dest += fbinfo.pitch)
+	    memcpy (dest, src, rowinc) ;
     } else {
-        GrArea (SDL_Window, SDL_GC, 0, 0, this -> screen -> w, 
-            this -> screen -> h, SDL_Image, pixel_type) ;
+#endif
+        if (currently_fullscreen) {
+            GrArea (FSwindow, SDL_GC, OffsetX, OffsetY, this -> screen -> w, 
+                this -> screen -> h, SDL_Image, pixel_type) ;
+	} else {
+            GrArea (SDL_Window, SDL_GC, 0, 0, this -> screen -> w, 
+                this -> screen -> h, SDL_Image, pixel_type) ;
+	}
+#ifdef ENABLE_NANOX_DIRECT_FB
     }
+#endif
+    GrFlush();
 
     Dprintf ("leave NX_RefreshDisplay\n") ;
 }

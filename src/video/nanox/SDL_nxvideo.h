@@ -55,7 +55,8 @@ struct SDL_PrivateVideoData {
     char            * SDL_windowid ;
     GR_GC_ID        GC ;
     unsigned char   * Image ;
-    unsigned char   * Image_buff ;
+    unsigned char   * Image_buff ;	/* for GrArea*/
+    unsigned char   * Clientfb;		/* for DirectFB*/
     nx_sdl_visual_t SDL_Visual ;
     // The current list of available video modes
     SDL_Rect        ** modelist ;
@@ -66,6 +67,9 @@ struct SDL_PrivateVideoData {
     Uint16          * GammaRamp_R, * GammaRamp_G, * GammaRamp_B ;
     // for GrArea, r_mask, g_mask, b_mask
     int             pixel_type ;
+#ifdef ENABLE_NANOX_DIRECT_FB
+    GR_WINDOW_FB_INFO fbinfo;
+#endif
 } ;
 
 #define SDL_Window           (this -> hidden -> SDL_Window)
@@ -74,6 +78,7 @@ struct SDL_PrivateVideoData {
 #define SDL_GC               (this -> hidden -> GC)
 #define SDL_Image            (this -> hidden -> Image)
 #define Image_buff           (this -> hidden -> Image_buff)
+#define Clientfb             (this -> hidden -> Clientfb)
 #define SDL_Visual           (this -> hidden -> SDL_Visual)
 #define SDL_modelist         (this -> hidden -> modelist)
 #define currently_fullscreen (this -> hidden -> currently_fullscreen)
@@ -83,6 +88,7 @@ struct SDL_PrivateVideoData {
 #define GammaRamp_G          (this -> hidden -> GammaRamp_G)
 #define GammaRamp_B          (this -> hidden -> GammaRamp_B)
 #define pixel_type           (this -> hidden -> pixel_type)
+#define fbinfo               (this -> hidden -> fbinfo)
 
 #define CI_SIZE 256   // color index size
 

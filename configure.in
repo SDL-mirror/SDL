@@ -511,9 +511,9 @@ CheckNANOX()
     AC_ARG_ENABLE(nanox-share-memory,  
         [  --enable-nanox-share-memory use share memory [default=no]],
         , enable_nanox_share_memory=no)
-
-    AC_ARG_WITH(nanox_pixel_type, 
-        [  --with-nanox-pixel-type=[rgb/0888/888/565/555/332/pal]])
+    AC_ARG_ENABLE(nanox_direct_fb, 
+        [  --enable-nanox-direct-fb use direct framebuffer access [default=no]],
+        , enable_nanox_direct_fb=no)
 
     if test x$enable_video = xyes -a x$enable_video_nanox = xyes; then
         if test x$enable_nanox_debug = xyes; then
@@ -524,16 +524,9 @@ CheckNANOX()
             CFLAGS="$CFLAGS -DNANOX_SHARE_MEMORY"
         fi
 
-        case "$with_nanox_pixel_type" in
-             rgb) CFLAGS="$CFLAGS -DNANOX_PIXEL_RGB" ;;
-            0888) CFLAGS="$CFLAGS -DNANOX_PIXEL_0888" ;;
-             888) CFLAGS="$CFLAGS -DNANOX_PIXEL_888"  ;;
-             565) CFLAGS="$CFLAGS -DNANOX_PIXEL_565"  ;;
-             555) CFLAGS="$CFLAGS -DNANOX_PIXEL_555"  ;;
-             332) CFLAGS="$CFLAGS -DNANOX_PIXEL_332"  ;;
-             pal) CFLAGS="$CFLAGS -DNANOX_PIXEL_PAL"  ;;
-               *) AC_MSG_ERROR([Invalid nanox_pixel_type]);;
-        esac
+        if test x$enable_nanox_direct_fb = xyes; then
+            CFLAGS="$CFLAGS -DENABLE_NANOX_DIRECT_FB"
+        fi
 
         CFLAGS="$CFLAGS $X_CFLAGS -DENABLE_NANOX"
         SYSTEM_LIBS="$SYSTEM_LIBS -lnano-X"

@@ -2,6 +2,7 @@
     SDL - Simple DirectMedia Layer
     Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002  Sam Lantinga
     Copyright (C) 2001  Hsieh-Fu Tsai
+    Copyright (C) 2002  Greg Haerr <greg@censoft.com>
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -343,6 +344,22 @@ void NX_PumpEvents (_THIS)
                     {
                         Dprintf ("GR_UPDATE_SIZE\n") ;
                         SDL_PrivateResize (event.update.width, event.update.height) ;
+                        break ; 
+                    }
+
+                    case GR_UPDATE_MOVE :
+		    case GR_UPDATE_REPARENT :
+                    {
+                        Dprintf ("GR_UPDATE_MOVE or GR_UPDATE_REPARENT\n") ;
+#ifdef ENABLE_NANOX_DIRECT_FB
+			if (Clientfb) {
+			    /* Get current window position and fb pointer*/
+			    if (currently_fullscreen) 
+				GrGetWindowFBInfo(FSwindow, &fbinfo);
+			    else
+				GrGetWindowFBInfo(SDL_Window, &fbinfo);
+			}
+#endif
                         break ; 
                     }
                     
