@@ -57,7 +57,7 @@ static char rcsid =
 #define DSP_DRIVER_NAME         "dsp"
 
 /* Open the audio device for playback, and don't block if busy */
-#define USE_BLOCKING_WRITES
+/*#define USE_BLOCKING_WRITES*/
 #define OPEN_FLAGS	(O_WRONLY|O_NONBLOCK)
 
 /* Audio driver functions */
