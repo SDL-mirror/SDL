@@ -728,11 +728,9 @@ do { \
 		   support the GL_UNSIGNED_SHORT_5_6_5 texture format.
 		 */
 		if ( (bpp == 16) &&
-		     (strstr((const char *)video->glGetString(GL_EXTENSIONS),
-		                           "GL_EXT_packed_pixels") ||
-		     (strncmp((const char *)video->glGetString(GL_VERSION),
-		              "1.2", 3) == 0)) )
-		{
+		     (strstr((const char *)video->glGetString(GL_EXTENSIONS), "GL_EXT_packed_pixels") ||
+		     (atof((const char *)video->glGetString(GL_VERSION)) >= 1.2f))
+		   ) {
 			video->is_32bit = 0;
 			SDL_VideoSurface = SDL_CreateRGBSurface(
 				flags, 
