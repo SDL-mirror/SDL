@@ -225,6 +225,9 @@ int console_main(int argc, char *argv[])
 
 	/* Exit cleanly, calling atexit() functions */
 	exit(0);
+
+	/* Hush little compiler, don't you cry... */
+	return(0);
 }
 
 /* This is where execution begins [windowed apps] */

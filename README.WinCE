@@ -1,8 +1,7 @@
 
-NOTE:
-SDL is NOT SUPPORTED on the WinCE platform!  This is for experimental
-purposes only.
+Project files for embedded Visual C++ 4.0 can be found in VisualCE.zip
 
+NOTE:
 There are several SDL features not available in the WinCE port of SDL.
 
 - DirectX is not yet available

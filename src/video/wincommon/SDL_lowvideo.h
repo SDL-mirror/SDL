@@ -53,7 +53,11 @@ static char rcsid =
 #define DINPUT_FULLSCREEN()	DDRAW_FULLSCREEN()
 
 /* The main window -- and a function to set it for the audio */
-extern const char *SDL_Appname;
+#ifdef _WIN32_WCE
+extern LPWSTR SDL_Appname;
+#else
+extern LPSTR SDL_Appname;
+#endif
 extern HINSTANCE SDL_Instance;
 extern HWND SDL_Window;
 extern const char *SDL_windowid;

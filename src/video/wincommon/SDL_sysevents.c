@@ -47,10 +47,15 @@ static char rcsid =
 
 #ifdef _WIN32_WCE
 #define NO_GETKEYBOARDSTATE
+#define NO_CHANGEDISPLAYSETTINGS
 #endif
 
 /* The window we use for everything... */
-const char *SDL_Appname = NULL;
+#ifdef _WIN32_WCE
+LPWSTR SDL_Appname = NULL;
+#else
+LPSTR SDL_Appname = NULL;
+#endif
 HINSTANCE SDL_Instance = NULL;
 HWND SDL_Window = NULL;
 RECT SDL_bounds = {0, 0, 0, 0};
@@ -578,21 +583,22 @@ int SDL_RegisterApp(char *name, Uint32 style, void *hInst)
 	class.hCursor		= NULL;
 #ifdef _WIN32_WCE
     {
-	/* WinCE uses the UNICODE version */
-	int nLen = strlen(name)+1;
-	LPWSTR lpszW = alloca(nLen*2);
-	MultiByteToWideChar(CP_ACP, 0, name, -1, lpszW, nLen);
-	class.hIcon		= LoadImage(hInst, lpszW, IMAGE_ICON,
-	                                    0, 0, LR_DEFAULTCOLOR);
-	class.lpszMenuName	= NULL;
-	class.lpszClassName	= lpszW;
+		/* WinCE uses the UNICODE version */
+		int nLen = strlen(name)+1;
+		SDL_Appname = malloc(nLen*2);
+		MultiByteToWideChar(CP_ACP, 0, name, -1, SDL_Appname, nLen);
     }
 #else
-	class.hIcon		= LoadImage(hInst, name, IMAGE_ICON,
-	                                    0, 0, LR_DEFAULTCOLOR);
-	class.lpszMenuName	= "(none)";
-	class.lpszClassName	= name;
+	{
+		int nLen = strlen(name)+1;
+		SDL_Appname = malloc(nLen);
+		strcpy(SDL_Appname, name);
+	}
 #endif /* _WIN32_WCE */
+	class.hIcon		= LoadImage(hInst, SDL_Appname, IMAGE_ICON,
+	                                    0, 0, LR_DEFAULTCOLOR);
+	class.lpszMenuName	= NULL;
+	class.lpszClassName	= SDL_Appname;
 	class.hbrBackground	= NULL;
 	class.hInstance		= hInst;
 	class.style		= style;
@@ -606,7 +612,6 @@ int SDL_RegisterApp(char *name, Uint32 style, void *hInst)
 		SDL_SetError("Couldn't register application class");
 		return(-1);
 	}
-	SDL_Appname = name;
 	SDL_Instance = hInst;
 
 #ifdef WM_MOUSELEAVE

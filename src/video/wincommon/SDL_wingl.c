@@ -27,7 +27,9 @@ static char rcsid =
 
 /* WGL implementation of SDL OpenGL support */
 
+#ifdef HAVE_OPENGL
 #include "SDL_opengl.h"
+#endif
 #include "SDL_error.h"
 #include "SDL_lowvideo.h"
 #include "SDL_wingl_c.h"
@@ -263,10 +265,6 @@ void WIN_GL_SwapBuffers(_THIS)
 {
 	SwapBuffers(GL_hdc);
 }
-
-#endif /* HAVE_OPENGL */
-
-#ifdef HAVE_OPENGL
 
 void WIN_GL_UnloadLibrary(_THIS)
 {

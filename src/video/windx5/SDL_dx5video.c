@@ -51,10 +51,23 @@ static char rcsid =
 #include "SDL_dx5yuv_c.h"
 #include "SDL_wingl_c.h"
 
+#ifdef _WIN32_WCE
+#define NO_CHANGEDISPLAYSETTINGS
+#endif
+#ifndef WS_MAXIMIZE
+#define WS_MAXIMIZE		0
+#endif
+#ifndef SWP_NOCOPYBITS
+#define SWP_NOCOPYBITS	0
+#endif
+#ifndef PC_NOCOLLAPSE
+#define PC_NOCOLLAPSE	0
+#endif
+
 
 /* DirectX function pointers for video and events */
 HRESULT (WINAPI *DDrawCreate)( GUID FAR *lpGUID, LPDIRECTDRAW FAR *lplpDD, IUnknown FAR *pUnkOuter );
-HRESULT (WINAPI *DInputCreate)(HINSTANCE hinst, DWORD dwVersion, LPDIRECTINPUTA *ppDI, LPUNKNOWN punkOuter);
+HRESULT (WINAPI *DInputCreate)(HINSTANCE hinst, DWORD dwVersion, LPDIRECTINPUT *ppDI, LPUNKNOWN punkOuter);
 
 /* This is the rect EnumModes2 uses */
 struct DX5EnumRect {
@@ -443,19 +456,19 @@ static int DX5_Available(void)
 
 	/* Version check DINPUT.DLL and DDRAW.DLL (Is DirectX okay?) */
 	dinput_ok = 0;
-	DInputDLL = LoadLibrary("DINPUT.DLL");
+	DInputDLL = LoadLibrary(TEXT("DINPUT.DLL"));
 	if ( DInputDLL != NULL ) {
 		dinput_ok = 1;
 	  	FreeLibrary(DInputDLL);
 	}
 	ddraw_ok = 0;
-	DDrawDLL = LoadLibrary("DDRAW.DLL");
+	DDrawDLL = LoadLibrary(TEXT("DDRAW.DLL"));
 	if ( DDrawDLL != NULL ) {
 	  HRESULT (WINAPI *DDrawCreate)(GUID *,LPDIRECTDRAW *,IUnknown *);
 	  LPDIRECTDRAW DDraw;
 
 	  /* Try to create a valid DirectDraw object */
-	  DDrawCreate = (void *)GetProcAddress(DDrawDLL, "DirectDrawCreate");
+	  DDrawCreate = (void *)GetProcAddress(DDrawDLL, TEXT("DirectDrawCreate"));
 	  if ( (DDrawCreate != NULL)
 			&& !FAILED(DDrawCreate(NULL, &DDraw, NULL)) ) {
 	    if ( !FAILED(IDirectDraw_SetCooperativeLevel(DDraw,
@@ -511,15 +524,15 @@ static int DX5_Load(void)
 	int status;
 
 	DX5_Unload();
-	DDrawDLL = LoadLibrary("DDRAW.DLL");
+	DDrawDLL = LoadLibrary(TEXT("DDRAW.DLL"));
 	if ( DDrawDLL != NULL ) {
 		DDrawCreate = (void *)GetProcAddress(DDrawDLL,
-					"DirectDrawCreate");
+					TEXT("DirectDrawCreate"));
 	}
-	DInputDLL = LoadLibrary("DINPUT.DLL");
+	DInputDLL = LoadLibrary(TEXT("DINPUT.DLL"));
 	if ( DInputDLL != NULL ) {
 		DInputCreate = (void *)GetProcAddress(DInputDLL,
-					"DirectInputCreateA");
+					TEXT("DirectInputCreateA"));
 	}
 	if ( DDrawDLL && DDrawCreate && DInputDLL && DInputCreate ) {
 		status = 0;
@@ -596,11 +609,11 @@ static SDL_VideoDevice *DX5_CreateDevice(int devindex)
 	device->SetGammaRamp = DX5_SetGammaRamp;
 	device->GetGammaRamp = DX5_GetGammaRamp;
 #ifdef HAVE_OPENGL
-        device->GL_LoadLibrary = WIN_GL_LoadLibrary;
-        device->GL_GetProcAddress = WIN_GL_GetProcAddress;
-        device->GL_GetAttribute = WIN_GL_GetAttribute;
-        device->GL_MakeCurrent = WIN_GL_MakeCurrent;
-        device->GL_SwapBuffers = WIN_GL_SwapBuffers;
+	device->GL_LoadLibrary = WIN_GL_LoadLibrary;
+	device->GL_GetProcAddress = WIN_GL_GetProcAddress;
+	device->GL_GetAttribute = WIN_GL_GetAttribute;
+	device->GL_MakeCurrent = WIN_GL_MakeCurrent;
+	device->GL_SwapBuffers = WIN_GL_SwapBuffers;
 #endif
 	device->SetCaption = WIN_SetWMCaption;
 	device->SetIcon = WIN_SetWMIcon;
@@ -670,7 +683,7 @@ static HRESULT WINAPI EnumModes2(DDSURFACEDESC *desc, VOID *udata)
 void SetDDerror(const char *function, int code)
 {
 	static char *error;
-	static char  errbuf[BUFSIZ];
+	static char  errbuf[1024];
 
 	errbuf[0] = 0;
 	switch (code) {
@@ -994,11 +1007,13 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 		SDL_primary = NULL;
 	}
 
+#ifndef NO_CHANGEDISPLAYSETTINGS
 	/* Unset any previous OpenGL fullscreen mode */
 	if ( (current->flags & (SDL_OPENGL|SDL_FULLSCREEN)) ==
 	                       (SDL_OPENGL|SDL_FULLSCREEN) ) {
 		ChangeDisplaySettings(NULL, 0);
 	}
+#endif
 
 	/* Clean up any GL context that may be hanging around */
 	if ( current->flags & SDL_OPENGL ) {
@@ -1057,6 +1072,7 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 		video->h = height;
 		video->pitch = SDL_CalculatePitch(video);
 
+#ifndef NO_CHANGEDISPLAYSETTINGS
 		/* Set fullscreen mode if appropriate.
 		   Ugh, since our list of valid video modes comes from
 		   the DirectX driver, we may not actually be able to
@@ -1077,6 +1093,7 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 				SDL_fullscreen_mode = settings;
 			}
 		}
+#endif /* !NO_CHANGEDISPLAYSETTINGS */
 
 		style = GetWindowLong(SDL_Window, GWL_STYLE);
 		style &= ~(resizestyle|WS_MAXIMIZE);
@@ -1096,7 +1113,9 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 					video->flags |= SDL_RESIZABLE;
 				}
 			}
+#if WS_MAXIMIZE
 			if (IsZoomed(SDL_Window)) style |= WS_MAXIMIZE;
+#endif
 		}
 		SetWindowLong(SDL_Window, GWL_STYLE, style);
 
@@ -1110,7 +1129,7 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 			bounds.top = 0;
 			bounds.right = video->w;
 			bounds.bottom = video->h;
-			AdjustWindowRect(&bounds, GetWindowLong(SDL_Window, GWL_STYLE), FALSE);
+			AdjustWindowRectEx(&bounds, GetWindowLong(SDL_Window, GWL_STYLE), FALSE, 0);
 			width = bounds.right-bounds.left;
 			height = bounds.bottom-bounds.top;
 			x = (GetSystemMetrics(SM_CXSCREEN)-width)/2;
@@ -1157,7 +1176,9 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 				style |= resizestyle;
 			}
 		}
+#if WS_MAXIMIZE
 		if (IsZoomed(SDL_Window)) style |= WS_MAXIMIZE;
+#endif
 	}
 	SetWindowLong(SDL_Window, GWL_STYLE, style);
 
@@ -1466,8 +1487,7 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 		bounds.top = 0;
 		bounds.right = video->w;
 		bounds.bottom = video->h;
-		AdjustWindowRect(&bounds, GetWindowLong(SDL_Window, GWL_STYLE),
-									FALSE);
+		AdjustWindowRectEx(&bounds, GetWindowLong(SDL_Window, GWL_STYLE), FALSE, 0);
 		width = bounds.right-bounds.left;
 		height = bounds.bottom-bounds.top;
 		x = (GetSystemMetrics(SM_CXSCREEN)-width)/2;
@@ -2235,11 +2255,13 @@ void DX5_VideoQuit(_THIS)
 
 	/* If we're fullscreen GL, we need to reset the display */
 	if ( this->screen != NULL ) {
+#ifndef NO_CHANGEDISPLAYSETTINGS
 		if ( (this->screen->flags & (SDL_OPENGL|SDL_FULLSCREEN)) ==
 		                            (SDL_OPENGL|SDL_FULLSCREEN) ) {
 			ChangeDisplaySettings(NULL, 0);
 			ShowWindow(SDL_Window, SW_HIDE);
 		}
+#endif
 		if ( this->screen->flags & SDL_OPENGL ) {
 			WIN_GL_ShutDown(this);
 		}

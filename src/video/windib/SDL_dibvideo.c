@@ -53,6 +53,15 @@ static char rcsid =
 #define NO_CHANGEDISPLAYSETTINGS
 #define NO_GAMMA_SUPPORT
 #endif
+#ifndef WS_MAXIMIZE
+#define WS_MAXIMIZE		0
+#endif
+#ifndef SWP_NOCOPYBITS
+#define SWP_NOCOPYBITS	0
+#endif
+#ifndef PC_NOCOLLAPSE
+#define PC_NOCOLLAPSE	0
+#endif
 
 /* Initialization/Query functions */
 static int DIB_VideoInit(_THIS, SDL_PixelFormat *vformat);
@@ -143,11 +152,11 @@ static SDL_VideoDevice *DIB_CreateDevice(int devindex)
 	device->SetGammaRamp = DIB_SetGammaRamp;
 	device->GetGammaRamp = DIB_GetGammaRamp;
 #ifdef HAVE_OPENGL
-        device->GL_LoadLibrary = WIN_GL_LoadLibrary;
-        device->GL_GetProcAddress = WIN_GL_GetProcAddress;
-        device->GL_GetAttribute = WIN_GL_GetAttribute;
-        device->GL_MakeCurrent = WIN_GL_MakeCurrent;
-        device->GL_SwapBuffers = WIN_GL_SwapBuffers;
+	device->GL_LoadLibrary = WIN_GL_LoadLibrary;
+	device->GL_GetProcAddress = WIN_GL_GetProcAddress;
+	device->GL_GetAttribute = WIN_GL_GetAttribute;
+	device->GL_MakeCurrent = WIN_GL_MakeCurrent;
+	device->GL_SwapBuffers = WIN_GL_SwapBuffers;
 #endif
 	device->SetCaption = WIN_SetWMCaption;
 	device->SetIcon = WIN_SetWMIcon;
@@ -440,10 +449,8 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 			(WS_POPUP);
 	const DWORD windowstyle = 
 			(WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX);
-#ifndef _WIN32_WCE
 	const DWORD resizestyle =
 			(WS_THICKFRAME|WS_MAXIMIZEBOX);
-#endif
 	int binfo_size;
 	BITMAPINFO *binfo;
 	HDC hdc;
@@ -455,12 +462,10 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 	/* See whether or not we should center the window */
 	was_visible = IsWindowVisible(SDL_Window);
 
-#ifdef HAVE_OPENGL
 	/* Clean up any GL context that may be hanging around */
 	if ( current->flags & SDL_OPENGL ) {
 		WIN_GL_ShutDown(this);
 	}
-#endif /* HAVE_OPENGL */
 
 	/* Recalculate the bitmasks if necessary */
 	if ( bpp == current->format->BitsPerPixel ) {
@@ -542,9 +547,7 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 	}
 
 	style = GetWindowLong(SDL_Window, GWL_STYLE);
-#ifndef _WIN32_WCE
 	style &= ~(resizestyle|WS_MAXIMIZE);
-#endif
 	if ( (video->flags & SDL_FULLSCREEN) == SDL_FULLSCREEN ) {
 		style &= ~windowstyle;
 		style |= directstyle;
@@ -562,13 +565,11 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 			style &= ~directstyle;
 			style |= windowstyle;
 			if ( flags & SDL_RESIZABLE ) {
-#ifndef _WIN32_WCE
 				style |= resizestyle;
-#endif
 				video->flags |= SDL_RESIZABLE;
 			}
 		}
-#ifndef _WIN32_WCE
+#if WS_MAXIMIZE
 		if (IsZoomed(SDL_Window)) style |= WS_MAXIMIZE;
 #endif
 	}
@@ -659,11 +660,7 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		bounds.top = 0;
 		bounds.right = video->w;
 		bounds.bottom = video->h;
-#ifndef _WIN32_WCE
-		AdjustWindowRect(&bounds, GetWindowLong(SDL_Window, GWL_STYLE), FALSE);
-#else
-		AdjustWindowRectEx(&bounds, GetWindowLong(SDL_Window, GWL_STYLE), FALSE,0);
-#endif
+		AdjustWindowRectEx(&bounds, GetWindowLong(SDL_Window, GWL_STYLE), FALSE, 0);
 		width = bounds.right-bounds.left;
 		height = bounds.bottom-bounds.top;
 		x = (GetSystemMetrics(SM_CXSCREEN)-width)/2;
@@ -671,11 +668,7 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		if ( y < 0 ) { /* Cover up title bar for more client area */
 			y -= GetSystemMetrics(SM_CYCAPTION)/2;
 		}
-#ifndef _WIN32_WCE
 		swp_flags = (SWP_NOCOPYBITS | SWP_FRAMECHANGED | SWP_SHOWWINDOW);
-#else
-		swp_flags = (SWP_FRAMECHANGED | SWP_SHOWWINDOW);
-#endif
 		if ( was_visible && !(flags & SDL_FULLSCREEN) ) {
 			swp_flags |= SWP_NOMOVE;
 		}
@@ -689,7 +682,6 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		SetForegroundWindow(SDL_Window);
 	}
 
-#ifdef HAVE_OPENGL
 	/* Set up for OpenGL */
 	if ( flags & SDL_OPENGL ) {
 		if ( WIN_GL_SetupWindow(this) < 0 ) {
@@ -697,7 +689,6 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		}
 		video->flags |= SDL_OPENGL;
 	}
-#endif /* HAVE_OPENGL */
 
 	/* We're live! */
 	return(video);
@@ -760,11 +751,7 @@ int DIB_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 			entries[i].peRed   = colors[i].r;
 			entries[i].peGreen = colors[i].g;
 			entries[i].peBlue  = colors[i].b;
-#ifndef _WIN32_WCE
 			entries[i].peFlags = PC_NOCOLLAPSE;
-#else
-			entries[i].peFlags = 0;
-#endif
 		}
 		SetPaletteEntries(screen_pal, firstcolor, ncolors, entries);
 		SelectPalette(hdc, screen_pal, FALSE);
@@ -917,11 +904,9 @@ void DIB_VideoQuit(_THIS)
 				ShowWindow(SDL_Window, SW_HIDE);
 			}
 #endif
-#ifdef HAVE_OPENGL
 			if ( this->screen->flags & SDL_OPENGL ) {
 				WIN_GL_ShutDown(this);
 			}
-#endif /* HAVE_OPENGL */
 			this->screen->pixels = NULL;
 		}
 		if ( screen_bmp ) {

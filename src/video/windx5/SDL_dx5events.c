@@ -43,6 +43,10 @@ static char rcsid =
 #define WM_APP	0x8000
 #endif
 
+#ifdef _WIN32_WCE
+#define NO_GETKEYBOARDSTATE
+#endif
+
 /* The keyboard and mouse device input */
 #define MAX_INPUTS	16		/* Maximum of 16-1 input devices */
 #define INPUT_QSIZE	32		/* Buffer up to 32 input messages */
@@ -67,7 +71,7 @@ static WNDPROC userWindowProc = NULL;
 static void SetDIerror(char *function, int code)
 {
 	static char *error;
-	static char  errbuf[BUFSIZ];
+	static char  errbuf[1024];
 
 	errbuf[0] = 0;
 	switch (code) {
@@ -449,6 +453,7 @@ LONG
  DX5_HandleMessage(_THIS, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg) {
+#ifdef WM_ACTIVATEAPP
 		case WM_ACTIVATEAPP: {
 			int i, active;
 
@@ -467,7 +472,9 @@ LONG
 			}
 		}
 		break;
+#endif /* WM_ACTIVATEAPP */
 
+#ifdef WM_DISPLAYCHANGE
 		case WM_DISPLAYCHANGE: {
 			WORD BitsPerPixel;
 			WORD SizeX, SizeY;
@@ -479,6 +486,7 @@ LONG
 			/* We cause this message when we go fullscreen */
 		}
 		break;
+#endif /* WM_DISPLAYCHANGE */
 
 		/* The keyboard is handled via DirectInput */
 		case WM_SYSKEYUP:
@@ -489,6 +497,7 @@ LONG
 		}
 		return(0);
 
+#if defined(SC_SCREENSAVE) || defined(SC_MONITORPOWER)
 		/* Don't allow screen savers or monitor power downs.
 		   This is because they quietly clear DirectX surfaces.
 		   It would be better to allow the application to
@@ -501,11 +510,11 @@ LONG
 			    (wParam&0xFFF0)==SC_MONITORPOWER)
 				return(0);
 		}
-		goto custom_processing;
-		break;
+		/* Fall through to default processing */
+
+#endif /* SC_SCREENSAVE || SC_MONITORPOWER */
 
 		default: {
-		custom_processing:
 			/* Only post the event if we're watching for it */
 			if ( SDL_ProcessEvents[SDL_SYSWMEVENT] == SDL_ENABLE ) {
 			        SDL_SysWMmsg wmmsg;
@@ -759,14 +768,21 @@ static SDL_keysym *TranslateKey(UINT scancode, SDL_keysym *keysym, int pressed)
 	keysym->unicode = 0;
 	if ( pressed && SDL_TranslateUNICODE ) { /* Someday use ToUnicode() */
 		UINT vkey;
+#ifndef NO_GETKEYBOARDSTATE
 		BYTE keystate[256];
 		BYTE chars[2];
+#endif
 
 		vkey = MapVirtualKey(scancode, 1);
+#ifdef NO_GETKEYBOARDSTATE
+		/* Uh oh, better hope the vkey is close enough.. */
+		keysym->unicode = vkey;
+#else
 		GetKeyboardState(keystate);
 		if ( ToAscii(vkey,scancode,keystate,(WORD *)chars,0) == 1 ) {
 			keysym->unicode = chars[0];
 		}
+#endif
 	}
 	return(keysym);
 }
@@ -782,7 +798,9 @@ int DX5_CreateWindow(_THIS)
 		SDL_DIfun[i] = NULL;
 	}
 
-	/* Create the SDL window */
+#ifndef CS_BYTEALIGNCLIENT
+#define CS_BYTEALIGNCLIENT	0
+#endif
 	SDL_RegisterApp("SDL_app", CS_BYTEALIGNCLIENT, 0);
 	if ( SDL_windowid ) {
 		SDL_Window = (HWND)strtol(SDL_windowid, NULL, 0);

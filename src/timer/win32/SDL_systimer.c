@@ -33,8 +33,8 @@ static char rcsid =
 #include "SDL_error.h"
 
 #ifdef _WIN32_WCE
-#define USE_GETTICKCOUNT
-#define USE_SETTIMER
+//#define USE_GETTICKCOUNT
+//#define USE_SETTIMER
 #endif
 
 #define TIME_WRAP_VALUE	(~(DWORD)0)

@@ -333,28 +333,9 @@ static SDL_keysym *TranslateKey(UINT vkey, UINT scancode, SDL_keysym *keysym, in
 
 int DIB_CreateWindow(_THIS)
 {
-#ifdef _WIN32_WCE
-	/* WinCE uses the UNICODE version */
-	int nLen;
-	LPWSTR lpszW;
-
-	if ( SDL_RegisterApp("SDL_app", 0, 0) != 0 ) {
-		return -1;
-	}
-
-	nLen = strlen(SDL_Appname) + 1;
-	lpszW = alloca(nLen * 2);
-
-	MultiByteToWideChar(CP_ACP, 0, "SDL_App", -1, lpszW, nLen);
-
-	SDL_Window = CreateWindow(lpszW, lpszW, WS_VISIBLE,
-                                  0, 0, 0, 0, NULL, NULL, SDL_Instance, NULL);
-	if ( SDL_Window == NULL ) {
-		SDL_SetError("Couldn't create window");
-		return(-1);
-	}
-	ShowWindow(SDL_Window, SW_HIDE);
-#else
+#ifndef CS_BYTEALIGNCLIENT
+#define CS_BYTEALIGNCLIENT	0
+#endif
 	SDL_RegisterApp("SDL_app", CS_BYTEALIGNCLIENT, 0);
 	if ( SDL_windowid ) {
 		SDL_Window = (HWND)strtol(SDL_windowid, NULL, 0);
@@ -376,8 +357,6 @@ int DIB_CreateWindow(_THIS)
 		}
 		ShowWindow(SDL_Window, SW_HIDE);
 	}
-#endif /* _WIN32_WCE */
-
 	return(0);
 }
 

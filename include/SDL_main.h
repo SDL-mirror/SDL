@@ -30,9 +30,10 @@ static char rcsid =
 
 /* Redefine main() on Win32 and MacOS so that it is called by winmain.c */
 
-#if defined(WIN32) || (defined(__MWERKS__) && !defined(__BEOS__)) || \
-    defined(macintosh) || defined(__APPLE__) || defined(__SYMBIAN32__) || \
-    defined(QWS)
+#if defined(WIN32) || defined(_WIN32) || \
+    (defined(__MWERKS__) && !defined(__BEOS__)) || \
+    defined(macintosh) || defined(__APPLE__) || \
+    defined(__SYMBIAN32__) || defined(QWS)
 
 #ifdef __cplusplus
 #define C_LINKAGE	"C"

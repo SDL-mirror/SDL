@@ -39,6 +39,7 @@ EXTRA_DIST =		\
 	Borland.zip	\
         VisualC.html	\
         VisualC.zip	\
+	VisualCE.zip	\
         MPWmake.sea.bin	\
 	CWprojects.sea.bin \
 	PBProjects.tar.gz \

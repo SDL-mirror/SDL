@@ -63,7 +63,7 @@ static int Audio_Available(void)
 
 	/* Version check DSOUND.DLL (Is DirectX okay?) */
 	dsound_ok = 0;
-	DSoundDLL = LoadLibrary("DSOUND.DLL");
+	DSoundDLL = LoadLibrary(TEXT("DSOUND.DLL"));
 	if ( DSoundDLL != NULL ) {
 		/* We just use basic DirectSound, we're okay */
 		/* Yay! */
@@ -95,7 +95,7 @@ static int Audio_Available(void)
 		 * to fall back to the DIB driver. */
 		if (dsound_ok) {
 			/* DirectSoundCaptureCreate was added in DX5 */
-			if (!GetProcAddress(DSoundDLL, "DirectSoundCaptureCreate"))
+			if (!GetProcAddress(DSoundDLL, TEXT("DirectSoundCaptureCreate")))
 				dsound_ok = 0;
 
 		}
@@ -121,10 +121,10 @@ static int DX5_Load(void)
 	int status;
 
 	DX5_Unload();
-	DSoundDLL = LoadLibrary("DSOUND.DLL");
+	DSoundDLL = LoadLibrary(TEXT("DSOUND.DLL"));
 	if ( DSoundDLL != NULL ) {
 		DSoundCreate = (void *)GetProcAddress(DSoundDLL,
-					"DirectSoundCreate");
+					TEXT("DirectSoundCreate"));
 	}
 	if ( DSoundDLL && DSoundCreate ) {
 		status = 0;
@@ -189,7 +189,7 @@ AudioBootStrap DSOUND_bootstrap = {
 static void SetDSerror(const char *function, int code)
 {
 	static const char *error;
-	static char  errbuf[BUFSIZ];
+	static char  errbuf[1024];
 
 	errbuf[0] = 0;
 	switch (code) {
