@@ -55,6 +55,10 @@ static char rcsid =
 #include <libusbhid.h>
 #endif
 
+#ifdef __FreeBSD__
+#include <osreldate.h>
+#endif
+
 #include "SDL_error.h"
 #include "SDL_joystick.h"
 #include "SDL_sysjoystick.h"
@@ -210,6 +214,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick *joy)
 	}
 
 	rep = &hw->inreport;
+	rep->rid = 0;
 	if (report_alloc(rep, hw->repdesc, REPORT_INPUT) < 0) {
 		goto usberr;
 	}
@@ -219,7 +224,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick *joy)
 		goto usberr;
 	}
 
-#ifdef USBHID_NEW
+#if defined(USBHID_NEW) || (defined(__FreeBSD__) && __FreeBSD_version >= 500111)
 	hdata = hid_start_parse(hw->repdesc, 1 << hid_input, rep->rid);
 #else
 	hdata = hid_start_parse(hw->repdesc, 1 << hid_input);
@@ -309,7 +314,7 @@ SDL_SYS_JoystickUpdate(SDL_Joystick *joy)
 	if (read(joy->hwdata->fd, REP_BUF_DATA(rep), rep->size) != rep->size) {
 		return;
 	}
-#ifdef USBHID_NEW
+#if defined(USBHID_NEW) || (defined(__FreeBSD__) && __FreeBSD_version >= 500111)
 	hdata = hid_start_parse(joy->hwdata->repdesc, 1 << hid_input, rep->rid);
 #else
 	hdata = hid_start_parse(joy->hwdata->repdesc, 1 << hid_input);
@@ -410,7 +415,11 @@ report_alloc(struct report *r, struct report_desc *rd, int repind)
 
 #ifdef __FreeBSD__
 # if (__FreeBSD_version >= 470000)
+#  if (__FreeBSD_version <= 500111)
 	len = hid_report_size(rd, r->rid, repinfo[repind].kind);
+#  else
+	len = hid_report_size(rd, repinfo[repind].kind, r->rid);
+#  endif
 # else
 	len = hid_report_size(rd, repinfo[repind].kind, &r->rid);
 #endif
