@@ -82,7 +82,13 @@ LONG
 					break;
 				case VK_SHIFT:
 					/* EXTENDED trick doesn't work here */
-					wParam = VK_LSHIFT;
+					if ( GetKeyState(VK_LSHIFT) & 0x8000 ) {
+						wParam = VK_LSHIFT;
+					} else if ( GetKeyState(VK_RSHIFT) & 0x8000 ) {
+						wParam = VK_RSHIFT;
+					} else {
+						/* Huh? */
+					}
 					break;
 				case VK_MENU:
 					if ( lParam&EXTENDED_KEYMASK )
