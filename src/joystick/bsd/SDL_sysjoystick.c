@@ -41,7 +41,12 @@ static char rcsid =
 
 #include <dev/usb/usb.h>
 #include <dev/usb/usbhid.h>
-#include <usbhid.h>
+
+#if defined(__FreeBSD__)
+# include <libusb.h>
+#else
+# include <usbhid.h>
+#endif
 
 #include "SDL_error.h"
 #include "SDL_joystick.h"
@@ -205,7 +210,8 @@ SDL_SYS_JoystickOpen(SDL_Joystick *joy)
 	joy->nballs = 0;
 
 	while (hid_get_item(hdata, &hitem) > 0) {
-		char *s, *sp;
+		char *sp;
+		const char *s;
 
 		switch (hitem.kind) {
 		case hid_collection:
@@ -271,7 +277,7 @@ SDL_SYS_JoystickUpdate(SDL_Joystick *joy)
 	static struct hid_item hitem;
 	static struct hid_data *hdata;
 	static struct report *rep;
-	int nbutton, naxe;
+	int nbutton, naxe = -1;
 	Sint32 v;
 	
 	rep = &joy->hwdata->inreport;
