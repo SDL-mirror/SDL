@@ -99,14 +99,14 @@ CVSROOT = :pserver:guest@libsdl.org:/home/sdlweb/libsdl.org/cvs
 snapshot:
 	cvs -d $(CVSROOT) login
 	cvs -d $(CVSROOT) checkout SDL12
-	(cd SDL12 && ./autogen.sh)
+	(cd SDL12 && ./autogen.sh && rm -rf autom4te.cache)
 	mv SDL12 SDL-1.2
 	tar zcvf $(HOME)/SDL-1.2.tar.gz SDL-1.2
 	rm -rf SDL-1.2
 snapshot13:
 	cvs -d $(CVSROOT) login
 	cvs -d $(CVSROOT) checkout -r branch_1_3_x SDL12
-	(cd SDL12 && ./autogen.sh)
+	(cd SDL12 && ./autogen.sh && rm -rf autom4te.cache)
 	mv SDL12 SDL-1.3
 	tar zcvf $(HOME)/SDL-1.3.tar.gz SDL-1.3
 	rm -rf SDL-1.3
