@@ -71,6 +71,7 @@ HRESULT (WINAPI *DInputCreate)(HINSTANCE hinst, DWORD dwVersion, LPDIRECTINPUT *
 /* This is the rect EnumModes2 uses */
 struct DX5EnumRect {
 	SDL_Rect r;
+	int refreshRate;
 	struct DX5EnumRect* next;
 };
 static struct DX5EnumRect *enumlists[NUM_MODELISTS];
@@ -650,8 +651,10 @@ static HRESULT WINAPI EnumModes2(DDSURFACEDESC *desc, VOID *udata)
 	struct DX5EnumRect *enumrect;
 #if defined(NONAMELESSUNION)
 	int bpp = desc->ddpfPixelFormat.u1.dwRGBBitCount;
+	int refreshRate = desc->u2.dwRefreshRate;
 #else
 	int bpp = desc->ddpfPixelFormat.dwRGBBitCount;
+	int refreshRate = desc->dwRefreshRate;
 #endif
 
 	switch (bpp)  {
@@ -660,21 +663,32 @@ static HRESULT WINAPI EnumModes2(DDSURFACEDESC *desc, VOID *udata)
 		case 24:
 		case 32:
 			bpp /= 8; --bpp;
+			if ( enumlists[bpp] &&
+			     enumlists[bpp]->r.w == (Uint16)desc->dwWidth &&
+			     enumlists[bpp]->r.h == (Uint16)desc->dwHeight ) {
+				if ( refreshRate > enumlists[bpp]->refreshRate &&
+				     refreshRate <= 85 /* safe value? */ ) {
+					enumlists[bpp]->refreshRate = refreshRate;
+printf("New refresh rate for %d bpp: %dx%d at %d Hz\n", (bpp+1)*8, (int)desc->dwWidth, (int)desc->dwHeight, refreshRate);
+				}
+				break;
+			}
 			++SDL_nummodes[bpp];
 			enumrect = (struct DX5EnumRect*)malloc(sizeof(struct DX5EnumRect));
 			if ( !enumrect ) {
 				SDL_OutOfMemory();
 				return(DDENUMRET_CANCEL);
 			}
+			enumrect->refreshRate = refreshRate;
 			enumrect->r.x = 0;
 			enumrect->r.y = 0;
 			enumrect->r.w = (Uint16)desc->dwWidth;
 			enumrect->r.h = (Uint16)desc->dwHeight;
 			enumrect->next = enumlists[bpp];
 			enumlists[bpp] = enumrect;
+printf("New mode for %d bpp: %dx%d at %d Hz\n", (bpp+1)*8, (int)desc->dwWidth, (int)desc->dwHeight, refreshRate);
 			break;
 	}
-
 
 	return(DDENUMRET_OK);
 }
@@ -912,7 +926,7 @@ int DX5_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	for ( i=0; i<NUM_MODELISTS; ++i )
 		enumlists[i] = NULL;
 
-	result = IDirectDraw2_EnumDisplayModes(ddraw2,0,NULL,this,EnumModes2);
+	result = IDirectDraw2_EnumDisplayModes(ddraw2,DDEDM_REFRESHRATES,NULL,this,EnumModes2);
 	if ( result != DD_OK ) {
 		SetDDerror("DirectDraw2::EnumDisplayModes", result);
 		return(-1);
@@ -926,7 +940,7 @@ int DX5_VideoInit(_THIS, SDL_PixelFormat *vformat)
 			return(-1);
 		}
 		for ( j = 0, rect = enumlists[i]; rect; ++j, rect = rect->next ) {
-			SDL_modelist[i][j]=(SDL_Rect *)rect;
+			SDL_modelist[i][j] = &rect->r;
 		}
 		SDL_modelist[i][j] = NULL;
 	}
@@ -1195,6 +1209,9 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 
 	/* Set the display mode, if we are in fullscreen mode */
 	if ( (flags & SDL_FULLSCREEN) == SDL_FULLSCREEN ) {
+		struct DX5EnumRect *rect;
+		int maxRefreshRate;
+
 		/* Cover up desktop during mode change */
 		SDL_resizing = 1;
 		SetWindowPos(SDL_Window, NULL, 0, 0, 
@@ -1207,12 +1224,25 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 			SetForegroundWindow(SDL_Window);
 			SDL_Delay(100);
 		}
-		result = IDirectDraw2_SetDisplayMode(ddraw2, width, height,
-								bpp, 0, 0);
+
+		/* find maximum monitor refresh rate for this resolution */
+		/* Dmitry Yakimov ftech@tula.net */
+		maxRefreshRate = 0; /* system default */
+		for ( rect = enumlists[bpp / 8 - 1]; rect; rect = rect->next ) {
+			if ( (width == rect->r.w) && (height == rect->r.h) ) {
+				maxRefreshRate = rect->refreshRate;
+				break;
+			}
+		}
+		printf("refresh rate = %d Hz\n", maxRefreshRate);
+
+		result = IDirectDraw2_SetDisplayMode(ddraw2, width, height, bpp, maxRefreshRate, 0);
 		if ( result != DD_OK ) {
-			/* We couldn't set fullscreen mode, try window */
-			return(DX5_SetVideoMode(this, current,
-				width, height, bpp, flags & ~SDL_FULLSCREEN)); 
+			result = IDirectDraw2_SetDisplayMode(ddraw2, width, height, bpp, 0, 0);
+			if ( result != DD_OK ) {
+				/* We couldn't set fullscreen mode, try window */
+				return(DX5_SetVideoMode(this, current, width, height, bpp, flags & ~SDL_FULLSCREEN)); 
+			}
 		}
 		DX5_DInputReset(this, 1);
 	} else {
@@ -1953,11 +1983,17 @@ static int DX5_FlipHWSurface(_THIS, SDL_Surface *surface)
 	LPDIRECTDRAWSURFACE3 dd_surface;
 
 	dd_surface = surface->hwdata->dd_surface;
-	result = IDirectDrawSurface3_Flip(dd_surface, NULL, 0);
+
+	/* to prevent big slowdown on fast computers, wait here instead of driver ring 0 code */
+	/* Dmitry Yakimov (ftech@tula.net) */
+	while(IDirectDrawSurface3_GetFlipStatus(dd_surface, DDGBS_ISBLTDONE) == DDERR_WASSTILLDRAWING);
+
+	result = IDirectDrawSurface3_Flip(dd_surface, NULL, DDFLIP_WAIT);
 	if ( result == DDERR_SURFACELOST ) {
 		result = IDirectDrawSurface3_Restore(
 						surface->hwdata->dd_surface);
-		result = IDirectDrawSurface3_Flip(dd_surface, NULL, 0);
+		while(IDirectDrawSurface3_GetFlipStatus(dd_surface, DDGBS_ISBLTDONE) == DDERR_WASSTILLDRAWING);
+		result = IDirectDrawSurface3_Flip(dd_surface, NULL, DDFLIP_WAIT);
 	}
 	if ( result != DD_OK ) {
 		SetDDerror("DirectDrawSurface3::Flip", result);
