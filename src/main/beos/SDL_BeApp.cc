@@ -65,27 +65,20 @@ int SDL_InitBeApp(void)
 			return(-1);
 		}
 		
-		/* Check if we started from Terminal or Tracker... */
-		/* Based on code posted to BeDevTalk by Marco Nelissen */
-		char *cmd = getenv("_"); 
-		if(!(cmd == NULL || strlen(cmd) < 7) && 
-			(!strcmp(cmd + strlen(cmd) - 7 , "Tracker"))) { 
-	
-			/* Change working to directory to that of executable */
-			app_info info;
-			if (B_OK == be_app->GetAppInfo(&info)) {
-				entry_ref ref = info.ref;
-				BEntry entry;
-				if (B_OK == entry.SetTo(&ref)) {
-					BPath path;
-					if (B_OK == path.SetTo(&entry)) {
-						if (B_OK == path.GetParent(&path)) {
-							chdir(path.Path());
-						}
+		/* Change working to directory to that of executable */
+		app_info info;
+		if (B_OK == be_app->GetAppInfo(&info)) {
+			entry_ref ref = info.ref;
+			BEntry entry;
+			if (B_OK == entry.SetTo(&ref)) {
+				BPath path;
+				if (B_OK == path.SetTo(&entry)) {
+					if (B_OK == path.GetParent(&path)) {
+						chdir(path.Path());
 					}
 				}
-			}	
-		} /* else started from Terminal */
+			}
+		}	
 		
 		do {
 			SDL_Delay(10);
