@@ -336,6 +336,11 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 	}
 	audio = current_audio;
 
+	if (audio->opened) {
+		SDL_SetError("Audio device is already opened");
+		return(-1);
+	}
+
 	/* Verify some parameters */
 	if ( desired->callback == NULL ) {
 		SDL_SetError("SDL_OpenAudio() passed a NULL callback");
