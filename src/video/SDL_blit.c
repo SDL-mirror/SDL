@@ -166,7 +166,9 @@ static void SDL_BlitCopy(SDL_BlitInfo *info)
 	Uint8 *src, *dst;
 	int w, h;
 	int srcskip, dstskip;
+#if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
 	Uint32 f;
+#endif
 
 	w = info->d_width*info->dst->BytesPerPixel;
 	h = info->d_height;
