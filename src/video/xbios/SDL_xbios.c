@@ -55,6 +55,8 @@ static char rcsid =
 #include "SDL_atarimxalloc_c.h"
 #include "SDL_atarigl_c.h"
 #include "SDL_xbios.h"
+#include "SDL_xbios_blowup.h"
+#include "SDL_xbios_sb3.h"
 
 #define XBIOS_VID_DRIVER_NAME "xbios"
 
@@ -138,7 +140,7 @@ static unsigned long	F30_palette[256];
 
 static int XBIOS_Available(void)
 {
-	unsigned long cookie_vdo, cookie_mil, cookie_hade;
+	unsigned long cookie_vdo, cookie_mil, cookie_hade, cookie_scpn;
 
 	/* Milan/Hades Atari clones do not have an Atari video chip */
 	if ( (Getcookie(C__MIL, &cookie_mil) == C_FOUND) ||
@@ -165,6 +167,11 @@ static int XBIOS_Available(void)
 		case VDO_F30:
 			if ( Montype() == MONITOR_MONO)
 				return 0;
+			if (Getcookie(C_SCPN, &cookie_scpn) == C_FOUND) {
+				if (!SDL_XBIOS_SB3Usable((scpn_cookie_t *)cookie_scpn)) {
+					return 0;
+				}
+			}
 			break;
 		default:
 			return 0;
@@ -242,6 +249,7 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 {
 	int i,j8,j16;
 	xbiosmode_t *current_mode;
+	unsigned long cookie_blow, cookie_scpn;
 
 	/* Initialize all variables that we clean on shutdown */
 	memset (SDL_modelist, 0, sizeof(SDL_modelist));
@@ -367,6 +375,13 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 				current_mode->number = newvmode;
 				
 				current_mode++;
+			}
+
+			/* Initialize BlowUp or SB3 stuff if present */
+			if (Getcookie(C_BLOW, &cookie_blow) == C_FOUND) {
+				SDL_XBIOS_BlowupInit(this, (blow_cookie_t *)cookie_blow);
+			} else if (Getcookie(C_SCPN, &cookie_scpn) == C_FOUND) {
+				SDL_XBIOS_SB3Init(this, (scpn_cookie_t *)cookie_scpn);
 			}
 
 			break;
