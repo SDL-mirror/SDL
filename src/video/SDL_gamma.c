@@ -151,7 +151,7 @@ int SDL_GetGamma(float *red, float *green, float *blue)
 	return succeeded;
 }
 
-int SDL_SetGammaRamp(Uint16 *red, Uint16 *green, Uint16 *blue)
+int SDL_SetGammaRamp(const Uint16 *red, const Uint16 *green, const Uint16 *blue)
 {
 	int succeeded;
 	SDL_VideoDevice *video = current_video;
