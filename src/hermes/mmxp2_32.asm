@@ -271,7 +271,7 @@ _convert_bgr555_cheat:
 
         and ecx,BYTE 0fffffff8h            ; clear lower three bits
 	jnz .L_OK
-        jmp .L2 
+        jmp near .L2 
 
 .L_OK:
 	
