@@ -43,9 +43,6 @@ static char rcsid =
 #include "SDL_ph_modes_c.h"
 #include "SDL_ph_wm_c.h"
 
-/* This is necessary for working properly with Enlightenment, etc. */
-#define USE_ICON_WINDOW
-
 void ph_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 {
     return;

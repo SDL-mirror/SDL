@@ -182,7 +182,9 @@ SDL_Overlay* ph_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SD
     overlay->hwdata->props.src_dim.w = width;
     overlay->hwdata->props.src_dim.h = height;
 
-    overlay->hwdata->chromakey = PgGetOverlayChromaColor();
+    /* overlay->hwdata->chromakey = PgGetOverlayChromaColor(); */
+    overlay->hwdata->chromakey = PgRGB(12, 6, 12); /* very dark pink color */
+    overlay->hwdata->props.color_key = overlay->hwdata->chromakey;
 
     PhAreaToRect(&overlay->hwdata->CurrentViewPort, &overlay->hwdata->props.viewport);
 
@@ -191,6 +193,7 @@ SDL_Overlay* ph_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SD
     if ((overlay->hwdata->ischromakey)&&(overlay->hwdata->chromakey))
     {
         overlay->hwdata->props.flags |= Pg_SCALER_PROP_CHROMA_ENABLE;
+        overlay->hwdata->props.flags |= Pg_SCALER_PROP_CHROMA_SPECIFY_KEY_MASK;
     } 
     else
     {
@@ -286,7 +289,7 @@ int ph_LockYUVOverlay(_THIS, SDL_Overlay* overlay)
 {
     if (overlay == NULL)
     {
-        return 0;
+        return -1;
     }
 
     overlay->hwdata->locked = 1;
@@ -332,7 +335,7 @@ void ph_UnlockYUVOverlay(_THIS, SDL_Overlay* overlay)
 {
     if (overlay == NULL)
     {
-         return;
+        return;
     }
 
     overlay->hwdata->locked = 0;
@@ -406,9 +409,9 @@ int ph_DisplayYUVOverlay(_THIS, SDL_Overlay* overlay, SDL_Rect* dstrect)
         switch(rtncode)
         {
             case -1:
-                     SDL_SetError("PgConfigScalerChannel failed\n");
+                     SDL_SetError("PgConfigScalerChannel() function failed\n");
                      SDL_FreeYUVOverlay(overlay);
-                     return (0);
+                     return -1;
             case 1:
                      grab_ptrs2(overlay->hwdata->channel, overlay->hwdata->FrameData0, overlay->hwdata->FrameData1);
                      break;

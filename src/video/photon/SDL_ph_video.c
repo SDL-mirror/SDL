@@ -186,7 +186,7 @@ static PtWidget_t *ph_CreateWindow(_THIS)
 {
     PtWidget_t *widget;
     
-    widget = PtCreateWidget(PtWindow, NULL, 0, 0);
+    widget = PtCreateWidget(PtWindow, NULL, 0, NULL);
 
     return widget;
 }
@@ -195,20 +195,28 @@ static int ph_SetupWindow(_THIS, int w, int h, int flags)
 {
     PtArg_t     args[32];
     PhPoint_t   pos = {0, 0};
+    PhDim_t*    olddim;
     PhDim_t     dim = {w, h};
+    PhRect_t    desktopextent;
     int         nargs = 0;
     const char* windowpos;
     const char* iscentered;
     int         x, y;
 
-    PtSetArg(&args[nargs++], Pt_ARG_DIM, &dim, 0);
+    /* check if window size has been changed by Window Manager */
+    PtGetResource(window, Pt_ARG_DIM, &olddim, 0);
+    if ((olddim->w!=w) || (olddim->h!=h))
+    {
+       PtSetArg(&args[nargs++], Pt_ARG_DIM, &dim, 0);
+    }
 
     if ((flags & SDL_RESIZABLE) == SDL_RESIZABLE)
     {
-        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_MANAGED_FLAGS, Pt_FALSE, Ph_WM_RESIZE | Ph_WM_CLOSE);
-        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_MANAGED_FLAGS, Pt_TRUE, Ph_WM_MAX | Ph_WM_RESTORE);
-        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_NOTIFY_FLAGS, Pt_TRUE, Ph_WM_RESIZE | Ph_WM_MOVE | Ph_WM_MAX | Ph_WM_RESTORE | Ph_WM_CLOSE);
+        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_MANAGED_FLAGS, Pt_FALSE, Ph_WM_CLOSE);
+        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_MANAGED_FLAGS, Pt_TRUE, Ph_WM_MAX | Ph_WM_RESTORE | Ph_WM_RESIZE);
+        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_NOTIFY_FLAGS, Pt_TRUE, Ph_WM_RESIZE | Ph_WM_MOVE | Ph_WM_CLOSE | Ph_WM_MAX | Ph_WM_RESTORE);
         PtSetArg(&args[nargs++], Pt_ARG_WINDOW_RENDER_FLAGS, Pt_TRUE, Ph_WM_RENDER_RESIZE | Ph_WM_RENDER_MAX | Ph_WM_RENDER_COLLAPSE | Ph_WM_RENDER_RETURN);
+        PtSetArg(&args[nargs++], Pt_ARG_RESIZE_FLAGS, Pt_TRUE, Pt_RESIZE_XY_AS_REQUIRED);
     }
     else
     {
@@ -216,6 +224,7 @@ static int ph_SetupWindow(_THIS, int w, int h, int flags)
         PtSetArg(&args[nargs++], Pt_ARG_WINDOW_NOTIFY_FLAGS, Pt_FALSE, Ph_WM_RESIZE | Ph_WM_MAX | Ph_WM_RESTORE);
         PtSetArg(&args[nargs++], Pt_ARG_WINDOW_NOTIFY_FLAGS, Pt_TRUE, Ph_WM_MOVE | Ph_WM_CLOSE);
         PtSetArg(&args[nargs++], Pt_ARG_WINDOW_RENDER_FLAGS, Pt_FALSE, Ph_WM_RENDER_RESIZE | Ph_WM_RENDER_MAX | Ph_WM_RENDER_COLLAPSE | Ph_WM_RENDER_RETURN);
+        PtSetArg(&args[nargs++], Pt_ARG_RESIZE_FLAGS, Pt_FALSE, Pt_RESIZE_XY_AS_REQUIRED);
     }
 
     if (((flags & SDL_NOFRAME)==SDL_NOFRAME) || ((flags & SDL_FULLSCREEN)==SDL_FULLSCREEN))
@@ -240,39 +249,71 @@ static int ph_SetupWindow(_THIS, int w, int h, int flags)
     {
         PtSetArg(&args[nargs++], Pt_ARG_POS, &pos, 0);
         PtSetArg(&args[nargs++], Pt_ARG_BASIC_FLAGS, Pt_TRUE, Pt_BASIC_PREVENT_FILL);
-        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_MANAGED_FLAGS, Pt_TRUE, Ph_WM_FFRONT | Ph_WM_MAX);
+        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_MANAGED_FLAGS, Pt_TRUE, Ph_WM_FFRONT | Ph_WM_MAX | Ph_WM_TOFRONT | Ph_WM_CONSWITCH);
         PtSetArg(&args[nargs++], Pt_ARG_WINDOW_STATE, Pt_TRUE, Ph_WM_STATE_ISFRONT | Ph_WM_STATE_ISFOCUS | Ph_WM_STATE_ISALTKEY);
     }
     else
     {
-        windowpos = getenv("SDL_VIDEO_WINDOW_POS");
-	iscentered = getenv("SDL_VIDEO_CENTERED");
+        if (!currently_maximized)
+        {
+            windowpos = getenv("SDL_VIDEO_WINDOW_POS");
+            iscentered = getenv("SDL_VIDEO_CENTERED");
 
-        if ((iscentered) || ((windowpos) && (strcmp(windowpos, "center")==0)))
-        {
-            pos.x = (desktop_mode.width - w)/2;
-            pos.y = (desktop_mode.height - h)/2;
-            PtSetArg(&args[nargs++], Pt_ARG_POS, &pos, 0);
-	}
-        else
-        {
-            if (windowpos)
+            if ((iscentered) || ((windowpos) && (strcmp(windowpos, "center")==0)))
             {
-                if (sscanf(windowpos, "%d,%d", &x, &y) == 2 )
+                PhWindowQueryVisible(Ph_QUERY_CONSOLE, 0, 0, &desktopextent);
+                if (desktop_mode.width>w)
                 {
-                    pos.x=x;
-                    pos.y=y;
-                    PtSetArg(&args[nargs++], Pt_ARG_POS, &pos, 0);
+                    pos.x = (desktop_mode.width - w)/2;
                 }
-	    }
+                if (desktop_mode.height>h)
+                {
+                    pos.y = (desktop_mode.height - h)/2;
+                }
+
+                pos.x+=desktopextent.ul.x;
+                pos.y+=desktopextent.ul.y;
+                PtSetArg(&args[nargs++], Pt_ARG_POS, &pos, 0);
+            }
+            else
+            {
+                if (windowpos)
+                {
+                    if (sscanf(windowpos, "%d,%d", &x, &y) == 2)
+                    {
+                        if ((x<desktop_mode.width) && (y<desktop_mode.height))
+                        {
+                            PhWindowQueryVisible(Ph_QUERY_CONSOLE, 0, 0, &desktopextent);
+                            pos.x=x+desktopextent.ul.x;
+                            pos.y=y+desktopextent.ul.y;
+                        }
+                        PtSetArg(&args[nargs++], Pt_ARG_POS, &pos, 0);
+                    }
+                }
+            }
         }
 
-
         PtSetArg(&args[nargs++], Pt_ARG_FILL_COLOR, Pg_BLACK, 0);
-        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_STATE, Pt_FALSE, Ph_WM_STATE_ISFRONT | Ph_WM_STATE_ISMAX | Ph_WM_STATE_ISALTKEY);
+        
+        /* if window is maximized render it as maximized */
+        if (currently_maximized)
+        {
+           PtSetArg(&args[nargs++], Pt_ARG_WINDOW_STATE, Pt_TRUE, Ph_WM_STATE_ISMAX);
+        }
+        else
+        {
+           PtSetArg(&args[nargs++], Pt_ARG_WINDOW_STATE, Pt_FALSE, Ph_WM_STATE_ISMAX);
+        }
+
+        /* do not grab the keyboard by default */
+        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_STATE, Pt_FALSE, Ph_WM_STATE_ISALTKEY);
+
+        /* bring the focus to the window */
+        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_STATE, Pt_TRUE, Ph_WM_STATE_ISFOCUS);
+
+        /* allow to catch hide events */
         PtSetArg(&args[nargs++], Pt_ARG_WINDOW_MANAGED_FLAGS, Pt_TRUE, Ph_WM_HIDE);
         PtSetArg(&args[nargs++], Pt_ARG_WINDOW_NOTIFY_FLAGS, Pt_TRUE, Ph_WM_HIDE);
-        PtSetArg(&args[nargs++], Pt_ARG_RESIZE_FLAGS, Pt_FALSE, Pt_RESIZE_XY_AS_REQUIRED);
     }
 
     PtSetResources(window, nargs, args);
@@ -386,6 +427,7 @@ static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat)
          
     currently_fullscreen = 0;
     currently_hided = 0;
+    currently_maximized = 0;
     current_overlay = NULL;
 
     OCImage.direct_context = NULL;
@@ -395,7 +437,6 @@ static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat)
     OCImage.CurrentFrameData = NULL;
     OCImage.FrameData0 = NULL;
     OCImage.FrameData1 = NULL;
-
     
     this->info.wm_available = 1;
     

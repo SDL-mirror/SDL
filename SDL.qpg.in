@@ -62,7 +62,7 @@
             </QPM:PackageDescription>
 
             <QPM:ProductDescription>
-               <QPM:ProductName>SDL</QPM:ProductName>
+               <QPM:ProductName>Simple DirectMedia Layer (SDL)</QPM:ProductName>
                <QPM:ProductIdentifier>SDL</QPM:ProductIdentifier>
                <QPM:ProductEmail>slouken@libsdl.org</QPM:ProductEmail>
                <QPM:VendorName>public</QPM:VendorName>
@@ -95,10 +95,11 @@
 
             <QPM:ContentDescription>
                <QPM:ContentTopic xmlmultiple="true">Software Development/Libraries and Extensions/C Libraries</QPM:ContentTopic>
-               <QPM:ContentKeyword>SDL, audio, graphics, demos, games, emulators, media, layer</QPM:ContentKeyword>
+               <QPM:ContentKeyword>SDL, audio, graphics, demos, games, emulators, direct, media, layer</QPM:ContentKeyword>
                <QPM:TargetOS>qnx6</QPM:TargetOS>
                <QPM:HostOS>none</QPM:HostOS>
                <QPM:DisplayEnvironment xmlmultiple="true">Photon</QPM:DisplayEnvironment>
+               <QPM:DisplayEnvironment xmlmultiple="true">Console</QPM:DisplayEnvironment>
                <QPM:TargetAudience xmlmultiple="true">Developer</QPM:TargetAudience>
                <QPM:TargetAudience xmlmultiple="true">User</QPM:TargetAudience>
             </QPM:ContentDescription>

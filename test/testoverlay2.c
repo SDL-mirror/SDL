@@ -275,6 +275,7 @@ int main(int argc, char **argv)
     SDL_Event event;
     Uint32 lastftick;
     int paused=0;
+    int resized=0;
     int i;
     int fps=12;
     int fpsdelay;
@@ -505,6 +506,10 @@ int main(int argc, char **argv)
                      screen=SDL_SetVideoMode(event.resize.w, event.resize.h, 0, SDL_RESIZABLE | SDL_SWSURFACE);
                      overlayrect.w=event.resize.w;
                      overlayrect.h=event.resize.h;
+                     if (paused)
+                     {
+                         resized=1;
+                     }
                      break;
                 case SDL_KEYDOWN:
                      if (event.key.keysym.sym == SDLK_SPACE)
@@ -526,9 +531,9 @@ int main(int argc, char **argv)
             }
         }
 
-        if (!paused)
+        if ((!paused)||(resized))
         {
-            if ((SDL_GetTicks()-lastftick)>fpsdelay)
+            if (((SDL_GetTicks()-lastftick)>fpsdelay)||(resized))
             {
                 lastftick=SDL_GetTicks();
 
@@ -552,10 +557,17 @@ int main(int argc, char **argv)
                 }
 
                 SDL_DisplayYUVOverlay(overlay, &overlayrect);
-                i++;
-                if (i==10)
+                if (!resized)
                 {
-                    i=0;
+                    i++;
+                    if (i==10)
+                    {
+                        i=0;
+                    }
+                }
+                else
+                {
+                    resized=0;
                 }
             }
         }

@@ -62,7 +62,8 @@ struct ColourMasks
 };
 
 /* Private display data */
-struct SDL_PrivateVideoData {
+struct SDL_PrivateVideoData
+{
     PgDisplaySettings_t mode_settings;	
     PtWidget_t *Window;                  /* used to handle input events */
     PhImage_t *image;	                 /* used to display image       */
@@ -96,12 +97,13 @@ struct SDL_PrivateVideoData {
     int mouse_relative;
     WMcursor* BlankCursor;
 
-    Uint32 depth;	            /* current visual depth (not bpp)           */
-    Uint32 desktopbpp;              /* bpp of desktop at the moment of start    */
-    Uint32 desktoppal;              /* palette mode emulation or system         */
+    Uint32 depth;	            /* current visual depth (not bpp)              */
+    Uint32 desktopbpp;              /* bpp of desktop at the moment of start       */
+    Uint32 desktoppal;              /* palette mode emulation or system            */
 
     int currently_fullscreen;
-    int currently_hided;        /* 1 - window hided (minimazed), 0 - normal */
+    int currently_hided;            /* 1 - window hided (minimazed), 0 - normal    */
+    int currently_maximized;        /* 1 - window hided (minimazed), 0 - normal    */
 
     PhEvent_t* event;
     SDL_Overlay* overlay;
@@ -120,6 +122,7 @@ struct SDL_PrivateVideoData {
 #define syspalph             (this->hidden->syspalph)
 #define currently_fullscreen (this->hidden->currently_fullscreen)
 #define currently_hided      (this->hidden->currently_hided)
+#define currently_maximized  (this->hidden->currently_maximized)
 #define event                (this->hidden->event)
 #define current_overlay      (this->hidden->overlay)
 #define desktop_mode         (this->hidden->desktop_mode)

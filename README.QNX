@@ -1,5 +1,16 @@
 README by Mike Gorchak <mike@malva.ua>, <lestat@i.com.ua>
-Last changed at 12 Aug 2003.
+Last changed at 30 Sep 2003.
+
+======================================================================
+Table of Contents:
+
+1. OpenGL.
+2. Wheel and multi-button mouses.
+3. CDROM handling issues.
+4. Hardware video overlays.
+5. Shared library building.
+6. Some building issues.
+7. Environment variables.
 
 ======================================================================
 OpenGL:
@@ -14,7 +25,7 @@ below 6.1.0 are not supported.
 cially selected (QSSL made acceleration  only  for  Voodoo  boards  in
 fullscreen mode, sorry but I don't have this board  to  test  OpenGL -
 maybe it works or maybe not :)). If you  want  acceleration - you  can
-remove one line in the source code: find the  file SDL_ph_video.c  and
+remove one line in the source code: find the  file SDL_ph_image.c  and
 remove the following
 
     OGLAttrib[OGLargc++]=PHOGL_ATTRIB_FORCE_SW;
@@ -50,7 +61,7 @@ can't do anything about that, /dev/cd0 has brw------- permissions  and
 root:root rights.
 
 ======================================================================
-Video Overlays:
+Hardware video overlays:
 
     Overlays can flicker  during  window  movement,  resizing, etc. It
 happens because the photon driver updates the real window contents be-
@@ -77,8 +88,11 @@ Shared library building:
 script you must manually delete the libtool.m4 stuff from the acinclu-
 de.m4 file (it comes after the ESD detection code up to the end of the
 file), because the libtool stuff in the acinclude.m4 file is very  old
-and  doesn't  know  anything  about  QNX. Just   remove  it, then  run
-"libtoolize --force --copy" and after that run the autogen.sh script.
+in SDL distribution before the version 1.2.7 and doesn't know anything
+about QNX. SDL 1.2.7 distribution contain  the  new libtool.m4 script,
+but anyway  it  is  broken :), Just  remove  it, then  run "libtoolize
+--force --copy",  delete the file aclocal.m4 and after  that  run  the
+autogen.sh script.
 
 ======================================================================
 Some building issues:
@@ -107,3 +121,24 @@ x11 support, e.g.:
     ./configure  --with-sdl-prefix=/usr            \
                  --with-sdl-exec-prefix=/usr       \
                  --prefix=/usr --without-x
+
+======================================================================
+Environment variables:
+
+    Please note that the photon driver  is  sensible to the  following
+environmental variables:
+
+ * SDL_VIDEO_WINDOW_POS - can be  set in the "X,Y" format.  If X and Y
+coordinates are bigger than the current desktop resolution, then  win-
+dow positioning across  virtual  consoles is activated. If X and Y are
+smaller than the desktop resolution  then  window  positioning  in the
+current console is activated. The word "center" can be used instead of
+coordinates, it  produces  the  same  behavior  as  SDL_VIDEO_CENTERED
+environmental variable.
+
+ * SDL_VIDEO_CENTERED - if this environmental variable exists then the
+window centering is perfomed in the current virtual console.
+
+    The SDL_VIDEO_CENTERED enviromental variable has greater  priority
+than the SDL_VIDEO_WINDOW_POS in case if both variables  are  supplied
+to the application.

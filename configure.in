@@ -1582,7 +1582,9 @@ CheckDLOPEN()
 
         if test x$use_dlopen = xyes; then
             CFLAGS="$CFLAGS -DUSE_DLOPEN"
-            AC_CHECK_LIB(dl, dlopen, SYSTEM_LIBS="$SYSTEM_LIBS -ldl", AC_CHECK_LIB(ltdl, dlopen, SYSTEM_LIBS="$SYSTEM_LIBS -lltdl"))
+            AC_CHECK_LIB(c, dlopen, SYSTEM_LIBS="$SYSTEM_LIBS",
+               AC_CHECK_LIB(dl, dlopen, SYSTEM_LIBS="$SYSTEM_LIBS -ldl",
+                  AC_CHECK_LIB(ltdl, dlopen, SYSTEM_LIBS="$SYSTEM_LIBS -lltdl")))
         fi
     fi
 }

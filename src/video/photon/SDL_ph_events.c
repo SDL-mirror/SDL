@@ -217,12 +217,12 @@ static int ph_DispatchEvent(_THIS)
                 set_motion_sensitivity(this, -1);
                 posted = SDL_PrivateAppActive(1, SDL_APPINPUTFOCUS);
             }
-            /* request to quit */
+            /* quit request */
             else if (winEvent->event_f==Ph_WM_CLOSE)
             {
                 posted = SDL_PrivateQuit();
             }
-            /* request to hide/unhide */
+            /* hide/unhide request */
             else if (winEvent->event_f==Ph_WM_HIDE)
             {
                 if (currently_hided)
@@ -241,7 +241,7 @@ static int ph_DispatchEvent(_THIS)
             /* request to resize */
             else if (winEvent->event_f==Ph_WM_RESIZE)
             {
-                SDL_PrivateResize(winEvent->size.w, winEvent->size.h);
+                SDL_PrivateResize(winEvent->size.w+1, winEvent->size.h+1);
             }
             /* request to move */
             else if (winEvent->event_f==Ph_WM_MOVE)
@@ -250,6 +250,7 @@ static int ph_DispatchEvent(_THIS)
                 {
                    int lockedstate=current_overlay->hwdata->locked;
                    int chromastate=current_overlay->hwdata->ischromakey;
+                   int error;
                    SDL_Rect target;
 
                    current_overlay->hwdata->locked=1;
@@ -258,20 +259,25 @@ static int ph_DispatchEvent(_THIS)
                    target.w=current_overlay->hwdata->CurrentViewPort.size.w;
                    target.h=current_overlay->hwdata->CurrentViewPort.size.h;
                    current_overlay->hwdata->ischromakey=0;
-                   ph_DisplayYUVOverlay(this, current_overlay, &target);
-                   current_overlay->hwdata->ischromakey=chromastate;
-                   current_overlay->hwdata->locked=lockedstate;
+                   error=ph_DisplayYUVOverlay(this, current_overlay, &target);
+                   if (!error)
+                   {
+                       current_overlay->hwdata->ischromakey=chromastate;
+                       current_overlay->hwdata->locked=lockedstate;
+                   }
                 }
             }
-            /* request to maximize */
+            /* maximize request */
             else if (winEvent->event_f==Ph_WM_MAX)
             {
                 /* window already moved and resized here */
-                SDL_PrivateResize(winEvent->size.w-winEvent->pos.x, winEvent->size.h-winEvent->pos.y);
+                currently_maximized=1;
             }
-            /* request to restore */
+            /* restore request */
             else if (winEvent->event_f==Ph_WM_RESTORE)
             {
+                /* window already moved and resized here */
+                currently_maximized=0;
             }
         }
         break;
@@ -285,7 +291,7 @@ static int ph_DispatchEvent(_THIS)
                 {
                     rect = PhGetRects(event);
 
-                    for(i=0;i<event->num_rects;i++)
+                    for(i=0; i<event->num_rects; i++)
                     {
                         sdlrects[i].x = rect[i].ul.x;
                         sdlrects[i].y = rect[i].ul.y;
@@ -298,6 +304,7 @@ static int ph_DispatchEvent(_THIS)
                     if (current_overlay!=NULL)
                     {
                         int lockedstate=current_overlay->hwdata->locked;
+                        int error;
                         SDL_Rect target;
 
                         current_overlay->hwdata->locked=1;
@@ -306,9 +313,12 @@ static int ph_DispatchEvent(_THIS)
                         target.w=current_overlay->hwdata->CurrentViewPort.size.w;
                         target.h=current_overlay->hwdata->CurrentViewPort.size.h;
                         current_overlay->hwdata->forcedredraw=1;
-                        ph_DisplayYUVOverlay(this, current_overlay, &target);
-                        current_overlay->hwdata->forcedredraw=0;
-                        current_overlay->hwdata->locked=lockedstate;
+                        error=ph_DisplayYUVOverlay(this, current_overlay, &target);
+                        if (!error)
+                        {
+                            current_overlay->hwdata->forcedredraw=0;
+                            current_overlay->hwdata->locked=lockedstate;
+                        }
                     }
                 }
             }
@@ -353,6 +363,11 @@ static int ph_DispatchEvent(_THIS)
                 }
                 posted = SDL_PrivateKeyboard(SDL_RELEASED, ph_TranslateKey( keyEvent, &keysym));
             }
+        }
+        break;
+        
+        case Ph_EV_INFO:
+        {
         }
         break;
     }
@@ -542,13 +557,20 @@ SDL_keysym *ph_TranslateKey(PhKeyEvent_t *key, SDL_keysym *keysym)
 
         switch (keysym->scancode)
         {
+           /* Esc key */
            case 0x01: keysym->unicode = 27;
+                      break;
+           /* BackSpace key */
+           case 0x0E: keysym->unicode = 127;
+                      break;
+           /* Enter key */
+           case 0x1C: keysym->unicode = 10;
                       break;
            default:
                       utf8len = PhKeyToMb(utf8, key);
                       if (utf8len > 0)
                       {
-                          utf8len = mbtowc(&unicode, utf8, utf8len);
+                         utf8len = mbtowc(&unicode, utf8, utf8len);
                          if (utf8len > 0)
                          {
                              keysym->unicode = unicode;
