@@ -4,12 +4,11 @@
 # This is necessary because some platforms have special program
 # entry points, which require special application initialization.
 
-SUBDIRS = macosx
-
 ARCH_SUBDIRS = $(srcdir)/beos \
                $(srcdir)/epoc \
                $(srcdir)/linux \
                $(srcdir)/macos \
+               $(srcdir)/macosx \
                $(srcdir)/win32
 
 # Build a separate library containing the main() entry point.

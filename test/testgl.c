@@ -7,7 +7,6 @@
 
 #ifdef HAVE_OPENGL
 #include "SDL_opengl.h"
-#endif
 
 #define SHADED_CUBE
 

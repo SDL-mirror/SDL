@@ -61,9 +61,10 @@ static const char *special_joysticks[] = {
 	"'Microsoft SideWinder Dual Strike USB version 1.0' 2 1 0",
 	"'WingMan Interceptor' 3 3 0",
 	/* WingMan Extreme Analog - not recognized by default
-	"'Analog 3-axis 4-button joystick' 2 1",
+	"'Analog 3-axis 4-button joystick' 2 1 0",
 	*/
 	"'WingMan Extreme Digital 3D' 4 1 0",
+	"'Analog 2-axis 4-button 1-hat FCS joystick' 2 1 0",
 	NULL
 };
 #else
