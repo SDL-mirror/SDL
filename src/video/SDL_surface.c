@@ -524,6 +524,20 @@ int SDL_UpperBlit (SDL_Surface *src, SDL_Rect *srcrect,
 	return 0;
 }
 
+static int SDL_FillRect1(SDL_Surface *dst, SDL_Rect *dstrect, Uint32 color)
+{
+	/* FIXME: We have to worry about packing order.. *sigh* */
+	SDL_SetError("1-bpp rect fill not yet implemented");
+	return -1;
+}
+
+static int SDL_FillRect4(SDL_Surface *dst, SDL_Rect *dstrect, Uint32 color)
+{
+	/* FIXME: We have to worry about packing order.. *sigh* */
+	SDL_SetError("4-bpp rect fill not yet implemented");
+	return -1;
+}
+
 /* 
  * This function performs a fast fill of the given rectangle with 'color'
  */
@@ -533,6 +547,22 @@ int SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, Uint32 color)
 	SDL_VideoDevice *this  = current_video;
 	int x, y;
 	Uint8 *row;
+
+	/* This function doesn't work on surfaces < 8 bpp */
+	if ( dst->format->BitsPerPixel < 8 ) {
+		switch(dst->format->BitsPerPixel) {
+		    case 1:
+			return SDL_FillRect1(dst, dstrect, color);
+			break;
+		    case 4:
+			return SDL_FillRect4(dst, dstrect, color);
+			break;
+		    default:
+			SDL_SetError("Fill rect on unsupported surface format");
+			return(-1);
+			break;
+		}
+	}
 
 	/* If 'dstrect' == NULL, then fill the whole surface */
 	if ( dstrect ) {
