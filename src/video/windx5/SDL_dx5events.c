@@ -298,7 +298,8 @@ static void handle_mouse(const int numevents, DIDEVICEOBJECTDATA *ptrbuf)
 	Uint8 button;
 
 	/* If we are in windowed mode, Windows is taking care of the mouse */
-	if ( ! (SDL_PublicSurface->flags & SDL_FULLSCREEN) ) {
+	if (  (SDL_PublicSurface->flags & SDL_OPENGL) ||
+	     !(SDL_PublicSurface->flags & SDL_FULLSCREEN) ) {
 		return;
 	}
 

@@ -48,11 +48,7 @@ static char rcsid =
 	(strcmp(this->name, "directx") == 0)				\
 )
 
-#define DINPUT_FULLSCREEN() 						\
-(									\
-	((SDL_VideoSurface->flags & SDL_FULLSCREEN) == SDL_FULLSCREEN) && \
-	(strcmp(this->name, "directx") == 0)				\
-)
+#define DINPUT_FULLSCREEN()	DDRAW_FULLSCREEN()
 
 /* The main window -- and a function to set it for the audio */
 extern const char *SDL_Appname;
