@@ -89,6 +89,11 @@ SDL_COMPILE_TIME_ASSERT(sint64, sizeof(Sint64) == 8);
    enums having the size of an int must be enabled.
    This is "-b" for Borland C/C++ and "-ei" for Watcom C/C++ (v11).
 */
+/* Enable enums always int in CodeWarrior (for MPW use "-enum int") */
+#ifdef __MWERKS__
+#pragma enumsalwaysint on
+#endif
+
 typedef enum {
 	DUMMY_ENUM_VALUE
 } SDL_DUMMY_ENUM;
