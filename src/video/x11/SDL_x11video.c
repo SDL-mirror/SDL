@@ -282,7 +282,8 @@ static void create_aux_windows(_THIS)
     xattr.border_pixel = 0;
     xattr.colormap = SDL_XColorMap;
 
-    FSwindow = XCreateWindow(SDL_Display, SDL_Root, 0, 0, 32, 32, 0,
+    FSwindow = XCreateWindow(SDL_Display, SDL_Root,
+                             xinerama_x, xinerama_y, 32, 32, 0,
 			     this->hidden->depth, InputOutput, SDL_Visual,
 			     CWOverrideRedirect | CWBackPixel | CWBorderPixel
 			     | CWColormap,
