@@ -51,7 +51,7 @@ static char rcsid =
 #define DSP_DRIVER_NAME         "dsp"
 
 /* Open the audio device for playback, and don't block if busy */
-/*#define USE_BLOCKING_WRITES*/
+#define USE_BLOCKING_WRITES
 #ifdef USE_BLOCKING_WRITES
 #define OPEN_FLAGS	O_WRONLY
 #else
@@ -128,9 +128,6 @@ AudioBootStrap DSP_bootstrap = {
 /* This function waits until it is possible to write a full sound buffer */
 static void DSP_WaitAudio(_THIS)
 {
-#ifndef USE_BLOCKING_WRITES /* Not necessary because of blocking writes */
-	fd_set fdset;
-
 	/* Check to see if the thread-parent process is still alive */
 	{ static int cnt = 0;
 		/* Note that this only works with thread implementations 
@@ -143,6 +140,7 @@ static void DSP_WaitAudio(_THIS)
 		}
 	}
 
+#ifndef USE_BLOCKING_WRITES /* Not necessary when using blocking writes */
 	/* See if we need to use timed audio synchronization */
 	if ( frame_ticks ) {
 		/* Use timer for general audio synchronization */
@@ -154,7 +152,9 @@ static void DSP_WaitAudio(_THIS)
 		}
 	} else {
 		/* Use select() for audio synchronization */
+		fd_set fdset;
 		struct timeval timeout;
+
 		FD_ZERO(&fdset);
 		FD_SET(audio_fd, &fdset);
 		timeout.tv_sec = 10;
@@ -186,16 +186,24 @@ static void DSP_WaitAudio(_THIS)
 
 static void DSP_PlayAudio(_THIS)
 {
-	int written;
+	int written, p=0;
 
 	/* Write the audio data, checking for EAGAIN on broken audio drivers */
 	do {
-		written = write(audio_fd, mixbuf, mixlen);
-		if ( (written < 0) && ((errno == 0) || (errno == EAGAIN)) ) {
+		written = write(audio_fd, &mixbuf[p], mixlen-p);
+		if (written>0)
+		   p += written;
+		if (written == -1 && errno != 0 && errno != EAGAIN && errno != EINTR)
+		{
+		   /* Non recoverable error has occurred. It should be reported!!! */
+		   perror("audio");
+		   break;
+		}
+
+		if ( p < written || ((written < 0) && ((errno == 0) || (errno == EAGAIN))) ) {
 			SDL_Delay(1);	/* Let a little CPU time go by */
 		}
-	} while ( (written < 0) && 
-	          ((errno == 0) || (errno == EAGAIN) || (errno == EINTR)) );
+	} while ( p < written );
 
 	/* If timer synchronization is enabled, set the next write frame */
 	if ( frame_ticks ) {
