@@ -47,7 +47,7 @@ typedef signed int	Sint32;
 
 /* Figure out how to support 64-bit datatypes */
 #if !defined(__STRICT_ANSI__)
-#if defined(__GNUC__) || defined(__MWERKS__) || defined(__SUNPRO_C)
+#if defined(__GNUC__) || defined(__MWERKS__) || defined(__DECC)
 #define SDL_HAS_64BIT_TYPE	long long
 #elif defined(_MSC_VER) /* VC++ */
 #define SDL_HAS_64BIT_TYPE	__int64
@@ -61,7 +61,9 @@ typedef signed int	Sint32;
 
 /* The 64-bit datatype isn't supported on all platforms */
 #ifdef SDL_HAS_64BIT_TYPE
+#ifndef H_MMBASIC
 typedef unsigned SDL_HAS_64BIT_TYPE Uint64;
+#endif
 typedef SDL_HAS_64BIT_TYPE Sint64;
 #else
 /* This is really just a hack to prevent the compiler from complaining */

@@ -163,6 +163,9 @@ extern AudioBootStrap DCAUD_bootstrap;
 #ifdef DRENDERER_SUPPORT
 extern AudioBootStrap DRENDERER_bootstrap;
 #endif
+#ifdef MMEAUDIO_SUPPORT
+extern AudioBootStrap MMEAUDIO_bootstrap;
+#endif
 
 /* This is the current audio device */
 extern SDL_AudioDevice *current_audio;

@@ -5,8 +5,28 @@ noinst_LTLIBRARIES = libaudio.la
 
 # Define which subdirectories need to be built
 SUBDIRS = @AUDIO_SUBDIRS@
-DIST_SUBDIRS = alsa arts baudio dma dmedia dsp esd macrom nas nto openbsd \
-	paudio riscos sun ums windib windx5 disk mint dc
+DIST_SUBDIRS =	\
+	alsa	\
+	arts	\
+	baudio	\
+	dc	\
+	disk	\
+	dma	\
+	dmedia	\
+	dsp	\
+	esd	\
+	macrom	\
+	mint	\
+	mme	\
+	nas	\
+	nto	\
+	openbsd	\
+	paudio	\
+	riscos	\
+	sun	\
+	ums	\
+	windib	\
+	windx5
 
 DRIVERS = @AUDIO_DRIVERS@
 

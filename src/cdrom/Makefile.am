@@ -5,18 +5,19 @@ noinst_LTLIBRARIES = libcdrom.la
 
 # Define which subdirectories need to be built
 SUBDIRS = @CDROM_SUBDIRS@
-DIST_SUBDIRS = \
-	aix \
-	beos \
-	bsdi \
-	dc \
-	dummy \
-	freebsd \
-	linux \
-	macos \
-	macosx \
-	openbsd \
-	qnx \
+DIST_SUBDIRS =	\
+	aix	\
+	beos	\
+	bsdi	\
+	dc	\
+	dummy	\
+	freebsd	\
+	linux	\
+	macos	\
+	macosx	\
+	openbsd	\
+	osf	\
+	qnx	\
 	win32
 
 DRIVERS = @CDROM_DRIVERS@

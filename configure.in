@@ -2170,13 +2170,15 @@ case "$target" in
         CheckAAlib
         CheckOpenGL
         CheckPTHREAD
+        SDL_LIBS="$SDL_LIBS -lrt"
         # Set up files for the main() stub
         COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
-            CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS sun"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
+            CFLAGS="$CFLAGS -I/usr/include/mme -DMMEAUDIO_SUPPORT"
+            SYSTEM_LIBS="$SYSTEM_LIBS -lmme"
+            AUDIO_SUBDIRS="$AUDIO_SUBDIRS mme"
+            AUDIO_DRIVERS="$AUDIO_DRIVERS mme/libaudio_mme.la"
         fi
         # Set up files for the joystick library
         # (No joystick support yet)
@@ -2187,8 +2189,8 @@ case "$target" in
         # Set up files for the cdrom library
         # (No cdrom support yet)
         if test x$enable_cdrom = xyes; then
-            CDROM_SUBDIRS="$CDROM_SUBDIRS dummy"
-            CDROM_DRIVERS="$CDROM_DRIVERS dummy/libcdrom_dummy.la"
+            CDROM_SUBDIRS="$CDROM_SUBDIRS osf"
+            CDROM_DRIVERS="$CDROM_DRIVERS osf/libcdrom_osf.la"
         fi
         # Set up files for the thread library
         if test x$enable_threads = xyes; then
@@ -2626,6 +2628,7 @@ src/audio/dsp/Makefile
 src/audio/esd/Makefile
 src/audio/macrom/Makefile
 src/audio/mint/Makefile
+src/audio/mme/Makefile
 src/audio/nas/Makefile
 src/audio/nto/Makefile
 src/audio/openbsd/Makefile
@@ -2695,6 +2698,7 @@ src/cdrom/linux/Makefile
 src/cdrom/macos/Makefile
 src/cdrom/macosx/Makefile
 src/cdrom/openbsd/Makefile
+src/cdrom/osf/Makefile
 src/cdrom/qnx/Makefile
 src/cdrom/win32/Makefile
 src/thread/Makefile
