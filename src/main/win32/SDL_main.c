@@ -11,6 +11,7 @@
 
 #include <windows.h>
 #include <malloc.h>		/* For _alloca() */
+#include <io.h>			/* For _getcwd() */
 
 /* Include the SDL main definition header */
 #include "SDL.h"
@@ -29,6 +30,11 @@
 /* The standard output files */
 #define STDOUT_FILE	TEXT("stdout.txt")
 #define STDERR_FILE	TEXT("stderr.txt")
+
+#ifndef NO_STDIO_REDIRECT
+static char stdoutPath[MAX_PATH];
+static char stderrPath[MAX_PATH];
+#endif
 
 #if defined(_WIN32_WCE) && _WIN32_WCE < 300
 /* seems to be undefined in Win CE although in online help */
@@ -138,20 +144,20 @@ static void __cdecl cleanup_output(void)
 
 #ifndef NO_STDIO_REDIRECT
 	/* See if the files have any output in them */
-	file = fopen(STDOUT_FILE, "rb");
+	file = fopen(stdoutPath, "rb");
 	if ( file ) {
 		empty = (fgetc(file) == EOF) ? 1 : 0;
 		fclose(file);
 		if ( empty ) {
-			remove(STDOUT_FILE);
+			remove(stdoutPath);
 		}
 	}
-	file = fopen(STDERR_FILE, "rb");
+	file = fopen(stderrPath, "rb");
 	if ( file ) {
 		empty = (fgetc(file) == EOF) ? 1 : 0;
 		fclose(file);
 		if ( empty ) {
-			remove(STDERR_FILE);
+			remove(stderrPath);
 		}
 	}
 #endif
@@ -261,24 +267,31 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 	}
 
 #ifndef NO_STDIO_REDIRECT
+	_getcwd( stdoutPath, sizeof( stdoutPath ) );
+	strcat( stdoutPath, "/" STDOUT_FILE );
+    
 	/* Redirect standard input and standard output */
-	newfp = freopen(STDOUT_FILE, "w", stdout);
+	newfp = freopen(stdoutPath, "w", stdout);
 	if ( newfp == NULL ) {	/* This happens on NT */
 #if !defined(stdout)
-		stdout = fopen(STDOUT_FILE, "w");
+		stdout = fopen(stdoutPath, "w");
 #else
-		newfp = fopen(STDOUT_FILE, "w");
+		newfp = fopen(stdoutPath, "w");
 		if ( newfp ) {
 			*stdout = *newfp;
 		}
 #endif
 	}
-	newfp = freopen(STDERR_FILE, "w", stderr);
+
+	_getcwd( stderrPath, sizeof( stderrPath ) );
+	strcat( stderrPath, "/" STDERR_FILE );
+
+	newfp = freopen(stderrPath, "w", stderr);
 	if ( newfp == NULL ) {	/* This happens on NT */
 #if !defined(stderr)
-		stderr = fopen(STDERR_FILE, "w");
+		stderr = fopen(stderrPath, "w");
 #else
-		newfp = fopen(STDERR_FILE, "w");
+		newfp = fopen(stderrPath, "w");
 		if ( newfp ) {
 			*stderr = *newfp;
 		}
