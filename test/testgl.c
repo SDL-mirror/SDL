@@ -23,6 +23,7 @@ static SDL_bool USE_DEPRECATED_OPENGLBLIT = SDL_FALSE;
 
 static SDL_Surface *global_image = NULL;
 static GLuint global_texture = 0;
+static GLuint cursor_texture = 0;
 
 /**********************************************************************/
 
@@ -237,6 +238,61 @@ GLuint SDL_GL_LoadTexture(SDL_Surface *surface, GLfloat *texcoord)
 	return texture;
 }
 
+void DrawLogoCursor(void)
+{
+	static GLfloat texMinX, texMinY;
+	static GLfloat texMaxX, texMaxY;
+	static int w, h;
+	int x, y;
+
+	SDL_Surface *screen = SDL_GetVideoSurface();
+
+	if ( ! cursor_texture ) {
+		SDL_Surface *image;
+		GLfloat texcoord[4];
+
+		/* Load the image (could use SDL_image library here) */
+		image = SDL_LoadBMP(LOGO_FILE);
+		if ( image == NULL ) {
+			return;
+		}
+		w = image->w;
+		h = image->h;
+
+		/* Convert the image into an OpenGL texture */
+		cursor_texture = SDL_GL_LoadTexture(image, texcoord);
+
+		/* Make texture coordinates easy to understand */
+		texMinX = texcoord[0];
+		texMinY = texcoord[1];
+		texMaxX = texcoord[2];
+		texMaxY = texcoord[3];
+
+		/* We don't need the original image anymore */
+		SDL_FreeSurface(image);
+
+		/* Make sure that the texture conversion is okay */
+		if ( ! cursor_texture ) {
+			return;
+		}
+	}
+
+	/* Move the image around */
+	SDL_GetMouseState(&x, &y);
+	x -= w/2;
+	y -= h/2;
+
+	/* Show the image on the screen */
+	SDL_GL_Enter2DMode();
+	glBindTexture(GL_TEXTURE_2D, cursor_texture);
+	glBegin(GL_TRIANGLE_STRIP);
+	glTexCoord2f(texMinX, texMinY); glVertex2i(x,   y  );
+	glTexCoord2f(texMaxX, texMinY); glVertex2i(x+w, y  );
+	glTexCoord2f(texMinX, texMaxY); glVertex2i(x,   y+h);
+	glTexCoord2f(texMaxX, texMaxY); glVertex2i(x+w, y+h);
+	glEnd();
+	SDL_GL_Leave2DMode();
+}
 
 void DrawLogoTexture(void)
 {
@@ -393,7 +449,7 @@ void DrawLogoBlit(void)
 }
 
 int RunGLTest( int argc, char* argv[],
-               int logo, int slowly, int bpp, float gamma, int noframe, int fsaa )
+               int logo, int logocursor, int slowly, int bpp, float gamma, int noframe, int fsaa )
 {
 	int i;
 	int rgb_size[3];
@@ -652,6 +708,9 @@ int RunGLTest( int argc, char* argv[],
 				DrawLogoTexture();
 			}
 		}
+		if ( logocursor ) {
+			DrawLogoCursor();
+		}
 
 		SDL_GL_SwapBuffers( );
 
@@ -696,6 +755,10 @@ int RunGLTest( int argc, char* argv[],
 		glDeleteTextures( 1, &global_texture );
 		global_texture = 0;
 	}
+	if ( cursor_texture ) {
+		glDeleteTextures( 1, &cursor_texture );
+		cursor_texture = 0;
+	}
 
 	/* Destroy our GL context, etc. */
 	SDL_Quit( );
@@ -704,7 +767,7 @@ int RunGLTest( int argc, char* argv[],
 
 int main(int argc, char *argv[])
 {
-	int i, logo;
+	int i, logo, logocursor;
 	int numtests;
 	int bpp = 0;
 	int slowly;
@@ -727,6 +790,9 @@ int main(int argc, char *argv[])
 			logo = 1;
 			USE_DEPRECATED_OPENGLBLIT = SDL_TRUE;
 		}
+		if ( strcmp(argv[i], "-logocursor") == 0 ) {
+			logocursor = 1;
+		}
 		if ( strcmp(argv[i], "-slow") == 0 ) {
 			slowly = 1;
 		}
@@ -744,13 +810,13 @@ int main(int argc, char *argv[])
 		}
 		if ( strncmp(argv[i], "-h", 2) == 0 ) {
  		       printf(
-"Usage: %s [-twice] [-logo] [-slow] [-bpp n] [-gamma n] [-noframe] [-fsaa] [-fullscreen]\n",
+"Usage: %s [-twice] [-logo] [-logocursor] [-slow] [-bpp n] [-gamma n] [-noframe] [-fsaa] [-fullscreen]\n",
  			      argv[0]);
 			exit(0);
 		}
 	}
 	for ( i=0; i<numtests; ++i ) {
- 		RunGLTest(argc, argv, logo, slowly, bpp, gamma, noframe, fsaa);
+ 		RunGLTest(argc, argv, logo, logocursor, slowly, bpp, gamma, noframe, fsaa);
 	}
 	return 0;
 }
