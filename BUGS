@@ -72,25 +72,19 @@ MacOS X:
 
 	Joystick code is not extensively tested yet.
 
-	Window may not close when unsetting video mode and resetting.
-
 	Resizeable windows aren't implemented yet.
 
 	Depth switching for windowed mode isn't implemented yet.
 	
 	Palette handling isn't implemented in windowed mode yet.
 	
-	Command-line arguments Dialog is not implemented yet.
+	Command-line arguments dialog is not implemented yet.
 
 	Fullscreen drawing has some artifacts.
-	
-	Fullscreen window covers *all* other windows - even force quit.
 	
 	Fullscreen OpenGL for the software renderer is broken.
 
 	Some OpenGL parameters are not accounted for, for example color bits customization.
-	
-	Getting OpenGL context parameters is not implemented.
 	
 	Continuous mouse motion perhaps is not as smooth as it should be.
 

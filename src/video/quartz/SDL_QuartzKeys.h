@@ -1,24 +1,24 @@
 /*
     SDL - Simple DirectMedia Layer
     Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002  Sam Lantinga
-
+    
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
     License as published by the Free Software Foundation; either
     version 2 of the License, or (at your option) any later version.
-
+    
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
     Library General Public License for more details.
-
+    
     You should have received a copy of the GNU Library General Public
     License along with this library; if not, write to the Free
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
+    
     Sam Lantinga
     slouken@libsdl.org
-*/
+ */
 
 /* These are the Macintosh key scancode constants -- from Inside Macintosh */
 
@@ -36,10 +36,10 @@
 #define QZ_F11			0x67
 #define QZ_F12			0x6F
 #define QZ_PRINT		0x69
-#define QZ_SCROLLOCK		0x6B
+#define QZ_SCROLLOCK    0x6B
 #define QZ_PAUSE		0x71
 #define QZ_POWER		0x7F
-#define QZ_BACKQUOTE		0x32
+#define QZ_BACKQUOTE	0x32
 #define QZ_1			0x12
 #define QZ_2			0x13
 #define QZ_3			0x14
@@ -52,14 +52,14 @@
 #define QZ_0			0x1D
 #define QZ_MINUS		0x1B
 #define QZ_EQUALS		0x18
-#define QZ_BACKSPACE		0x33
+#define QZ_BACKSPACE	0x33
 #define QZ_INSERT		0x72
 #define QZ_HOME			0x73
 #define QZ_PAGEUP		0x74
 #define QZ_NUMLOCK		0x47
-#define QZ_KP_EQUALS		0x51
-#define QZ_KP_DIVIDE		0x4B
-#define QZ_KP_MULTIPLY		0x43
+#define QZ_KP_EQUALS	0x51
+#define QZ_KP_DIVIDE	0x4B
+#define QZ_KP_MULTIPLY	0x43
 #define QZ_TAB			0x30
 #define QZ_q			0x0C
 #define QZ_w			0x0D
@@ -71,9 +71,9 @@
 #define QZ_i			0x22
 #define QZ_o			0x1F
 #define QZ_p			0x23
-#define QZ_LEFTBRACKET		0x21
-#define QZ_RIGHTBRACKET		0x1E
-#define QZ_BACKSLASH		0x2A
+#define QZ_LEFTBRACKET	0x21
+#define QZ_RIGHTBRACKET	0x1E
+#define QZ_BACKSLASH	0x2A
 #define QZ_DELETE		0x75
 #define QZ_END			0x77
 #define QZ_PAGEDOWN		0x79
@@ -91,7 +91,7 @@
 #define QZ_j			0x26
 #define QZ_k			0x28
 #define QZ_l			0x25
-#define QZ_SEMICOLON		0x29
+#define QZ_SEMICOLON	0x29
 #define QZ_QUOTE		0x27
 #define QZ_RETURN		0x24
 #define QZ_KP4			0x56
@@ -130,11 +130,11 @@
 #define QZ_DOWN			0x7D
 #define QZ_RIGHT		0x7C
 #define QZ_KP0			0x52
-#define QZ_KP_PERIOD		0x41
+#define QZ_KP_PERIOD	0x41
 
 /* Wierd, these keys are on my iBook under MacOS X */
 #define QZ_IBOOK_ENTER		0x34
 #define QZ_IBOOK_LEFT		0x3B
 #define QZ_IBOOK_RIGHT		0x3C
 #define QZ_IBOOK_DOWN		0x3D
-#define QZ_IBOOK_UP		0x3E
+#define QZ_IBOOK_UP			0x3E

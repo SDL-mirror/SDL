@@ -32,17 +32,17 @@ static void QZ_FreeWMCursor     (_THIS, WMcursor *cursor) {
 
 /* Use the Carbon cursor routines for now */
 static WMcursor*    QZ_CreateWMCursor   (_THIS, Uint8 *data, Uint8 *mask, 
-                                          int w, int h, int hot_x, int hot_y) { 
-	WMcursor *cursor;
-	int row, bytes;
-		
-	/* Allocate the cursor memory */
-	cursor = (WMcursor *)malloc(sizeof(WMcursor));
-	if ( cursor == NULL ) {
-		SDL_OutOfMemory();
-		return(NULL);
-	}
-	memset(cursor, 0, sizeof(*cursor));
+                                         int w, int h, int hot_x, int hot_y) { 
+    WMcursor *cursor;
+    int row, bytes;
+        
+    /* Allocate the cursor memory */
+    cursor = (WMcursor *)malloc(sizeof(WMcursor));
+    if ( cursor == NULL ) {
+        SDL_OutOfMemory();
+        return(NULL);
+    }
+    memset(cursor, 0, sizeof(*cursor));
     
     if (w > 16)
         w = 16;
@@ -50,19 +50,19 @@ static WMcursor*    QZ_CreateWMCursor   (_THIS, Uint8 *data, Uint8 *mask,
     if (h > 16)
         h = 16;
     
-	bytes = (w+7)/8;
+    bytes = (w+7)/8;
 
-	for ( row=0; row<h; ++row ) {
-		memcpy(&cursor->curs.data[row], data, bytes);
-		data += bytes;
-	}
-	for ( row=0; row<h; ++row ) {
-		memcpy(&cursor->curs.mask[row], mask, bytes);
-		mask += bytes;
-	}
-	cursor->curs.hotSpot.h = hot_x;
-	cursor->curs.hotSpot.v = hot_y;
-	
+    for ( row=0; row<h; ++row ) {
+        memcpy(&cursor->curs.data[row], data, bytes);
+        data += bytes;
+    }
+    for ( row=0; row<h; ++row ) {
+        memcpy(&cursor->curs.mask[row], mask, bytes);
+        mask += bytes;
+    }
+    cursor->curs.hotSpot.h = hot_x;
+    cursor->curs.hotSpot.v = hot_y;
+    
     return(cursor);
 }
 
@@ -246,18 +246,18 @@ static void QZ_SetIcon       (_THIS, SDL_Surface *icon, Uint8 *mask)
      #define ALPHASHIFT 3
      for (i=0;i<masksize;i+=8)
          for (j=0;j<8;j++) 
-surfPtr[ALPHASHIFT+((i+j)<<2)]=(mask[i>>3]&(1<<(7-j)))?0xFF:0x00;
+             surfPtr[ALPHASHIFT+((i+j)<<2)]=(mask[i>>3]&(1<<(7-j)))?0xFF:0x00;
      }
-     imgrep = [[NSBitmapImageRep alloc] 
-initWithBitmapDataPlanes:(unsigned char **)&mergedSurface->pixels 
-pixelsWide:icon->w pixelsHigh:icon->h bitsPerSample:8 samplesPerPixel:4 
-hasAlpha:YES isPlanar:NO colorSpaceName:NSDeviceRGBColorSpace 
-bytesPerRow:icon->w<<2 bitsPerPixel:32];
-     img = [[NSImage alloc] initWithSize:imgSize];
-     [img addRepresentation: imgrep];
-     [NSApp setApplicationIconImage:img];
-     [img release];
-     [imgrep release];
+     imgrep = [ [ NSBitmapImageRep alloc] 
+                     initWithBitmapDataPlanes:(unsigned char **)&mergedSurface->pixels 
+                         pixelsWide:icon->w pixelsHigh:icon->h bitsPerSample:8 samplesPerPixel:4 
+                         hasAlpha:YES isPlanar:NO colorSpaceName:NSDeviceRGBColorSpace 
+                         bytesPerRow:icon->w<<2 bitsPerPixel:32 ];
+     img = [ [ NSImage alloc ] initWithSize:imgSize ];
+     [ img addRepresentation: imgrep ];
+     [ NSApp setApplicationIconImage:img ];
+     [ img release ];
+     [ imgrep release ];
      SDL_FreeSurface(mergedSurface);
 freePool:
      [pool release];
@@ -285,19 +285,18 @@ static int  QZ_GetWMInfo  (_THIS, SDL_SysWMinfo *info) {
 static SDL_GrabMode QZ_GrabInput (_THIS, SDL_GrabMode grab_mode) {
 
     switch (grab_mode) {
-	case SDL_GRAB_QUERY:
+    case SDL_GRAB_QUERY:
             break;
-	case SDL_GRAB_OFF:
+    case SDL_GRAB_OFF:
             CGAssociateMouseAndMouseCursorPosition (1);
             currentGrabMode = SDL_GRAB_OFF;
             break;
-	case SDL_GRAB_ON:
+    case SDL_GRAB_ON:
             QZ_WarpWMCursor (this, SDL_VideoSurface->w / 2, SDL_VideoSurface->h / 2);
             CGAssociateMouseAndMouseCursorPosition (0);
             currentGrabMode = SDL_GRAB_ON;
             break;
-        case SDL_GRAB_FULLSCREEN:
-            
+    case SDL_GRAB_FULLSCREEN:        
             break;
     }
         

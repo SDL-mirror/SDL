@@ -32,7 +32,6 @@ static char QZ_Error[255]; /* Global error buffer to temporarily store more info
 #include "SDL_QuartzEvents.m"
 #include "SDL_QuartzWindow.m"
 
-
 /* Bootstrap binding, enables entry point into the driver */
 VideoBootStrap QZ_bootstrap = {
     "Quartz", "Mac OS X CoreGraphics", QZ_Available, QZ_CreateDevice
@@ -100,7 +99,9 @@ static SDL_VideoDevice* QZ_CreateDevice (int device_index) {
     /*device->GetWMInfo     = QZ_GetWMInfo;*/
     device->GrabInput     = QZ_GrabInput;
 
-    device->free = QZ_DeleteDevice;
+    device->CreateYUVOverlay =  QZ_CreateYUVOverlay;
+
+    device->free             = QZ_DeleteDevice;
 
     return device;
 }
@@ -135,106 +136,106 @@ static int QZ_VideoInit (_THIS, SDL_PixelFormat *video_format) {
 }
 
 static SDL_Rect** QZ_ListModes (_THIS, SDL_PixelFormat *format, Uint32 flags) {
-    
+
     CFIndex num_modes;
     CFIndex i;
 
     static SDL_Rect **list = NULL;
     int list_size = 0;
-    
+
     /* Any windowed mode is acceptable */
     if ( (flags & SDL_FULLSCREEN) == 0 )
         return (SDL_Rect**)-1;
-        
+
     /* Free memory from previous call, if any */
     if ( list != NULL ) {
 
-      int i;
+        int i;
 
-      for (i = 0; list[i] != NULL; i++)
-	free (list[i]);
+        for (i = 0; list[i] != NULL; i++)
+            free (list[i]);
 
-      free (list);
-      list = NULL;
+        free (list);
+        list = NULL;
     }
-    
+
     num_modes = CFArrayGetCount (mode_list);
 
     /* Build list of modes with the requested bpp */
     for (i = 0; i < num_modes; i++) {
-   
+
         CFDictionaryRef onemode;
         CFNumberRef     number;
-	int bpp;
-	
-        onemode = CFArrayGetValueAtIndex (mode_list, i); 
-	number = CFDictionaryGetValue (onemode, kCGDisplayBitsPerPixel);
-	CFNumberGetValue (number, kCFNumberSInt32Type, &bpp);
+        int bpp;
 
-	if (bpp == format->BitsPerPixel) {
-	  
-	  int intvalue;
-          int hasMode;
-          int width, height;
-          
-	  number = CFDictionaryGetValue (onemode, kCGDisplayWidth);
-	  CFNumberGetValue (number, kCFNumberSInt32Type, &intvalue);
-	  width = (Uint16) intvalue;
-	  
-	  number = CFDictionaryGetValue (onemode, kCGDisplayHeight);
-	  CFNumberGetValue (number, kCFNumberSInt32Type, &intvalue);
-	  height = (Uint16) intvalue;
-          
-          /* Check if mode is already in the list */
-          {
-            int i;
-            hasMode = SDL_FALSE;
-            for (i = 0; i < list_size; i++) {
-                if (list[i]->w == width && list[i]->h == height) {
-                    hasMode = SDL_TRUE;
-                    break;
+        onemode = CFArrayGetValueAtIndex (mode_list, i);
+        number = CFDictionaryGetValue (onemode, kCGDisplayBitsPerPixel);
+        CFNumberGetValue (number, kCFNumberSInt32Type, &bpp);
+
+        if (bpp == format->BitsPerPixel) {
+
+            int intvalue;
+            int hasMode;
+            int width, height;
+
+            number = CFDictionaryGetValue (onemode, kCGDisplayWidth);
+            CFNumberGetValue (number, kCFNumberSInt32Type, &intvalue);
+            width = (Uint16) intvalue;
+
+            number = CFDictionaryGetValue (onemode, kCGDisplayHeight);
+            CFNumberGetValue (number, kCFNumberSInt32Type, &intvalue);
+            height = (Uint16) intvalue;
+
+            /* Check if mode is already in the list */
+            {
+                int i;
+                hasMode = SDL_FALSE;
+                for (i = 0; i < list_size; i++) {
+                    if (list[i]->w == width && list[i]->h == height) {
+                        hasMode = SDL_TRUE;
+                        break;
+                    }
                 }
             }
-          }
-          
-          /* Grow the list and add mode to the list */
-          if ( ! hasMode ) {
-	  
-            SDL_Rect *rect;
-            
-            list_size++;
 
-            if (list == NULL)
-                list = (SDL_Rect**) malloc (sizeof(*list) * (list_size+1) );
-            else
-                list = (SDL_Rect**) realloc (list, sizeof(*list) * (list_size+1));
-            
-            rect = (SDL_Rect*) malloc (sizeof(**list));
-            
-            if (list == NULL || rect == NULL) {
-                SDL_OutOfMemory ();
-                return NULL;
+            /* Grow the list and add mode to the list */
+            if ( ! hasMode ) {
+
+                SDL_Rect *rect;
+
+                list_size++;
+
+                if (list == NULL)
+                    list = (SDL_Rect**) malloc (sizeof(*list) * (list_size+1) );
+                else
+                    list = (SDL_Rect**) realloc (list, sizeof(*list) * (list_size+1));
+
+                rect = (SDL_Rect*) malloc (sizeof(**list));
+
+                if (list == NULL || rect == NULL) {
+                    SDL_OutOfMemory ();
+                    return NULL;
+                }
+
+                rect->w = width;
+                rect->h = height;
+
+                list[list_size-1] = rect;
+                list[list_size]   = NULL;
             }
-            
-            rect->w = width;
-            rect->h = height;
-    
-            list[list_size-1] = rect;
-            list[list_size]   = NULL;
         }
-      }
     }
-    
+
     /* Sort list largest to smallest (by area) */
     {
         int i, j;
         for (i = 0; i < list_size; i++) {
             for (j = 0; j < list_size-1; j++) {
-            
+
                 int area1, area2;
                 area1 = list[j]->w * list[j]->h;
                 area2 = list[j+1]->w * list[j+1]->h;
-                
+
                 if (area1 < area2) {
                     SDL_Rect *tmp = list[j];
                     list[j] = list[j+1];
@@ -299,8 +300,8 @@ static UInt32 QZ_FadeGammaOut (_THIS, SDL_QuartzGammaTable *table) {
 static UInt32 QZ_FadeGammaIn (_THIS, SDL_QuartzGammaTable *table) {
 
     CGGammaValue redTable[QZ_GAMMA_TABLE_SIZE],
-        greenTable[QZ_GAMMA_TABLE_SIZE],
-        blueTable[QZ_GAMMA_TABLE_SIZE];
+    greenTable[QZ_GAMMA_TABLE_SIZE],
+    blueTable[QZ_GAMMA_TABLE_SIZE];
 
     float percent;
     int j;
@@ -308,7 +309,7 @@ static UInt32 QZ_FadeGammaIn (_THIS, SDL_QuartzGammaTable *table) {
     memset (redTable, 0, sizeof(redTable));
     memset (greenTable, 0, sizeof(greenTable));
     memset (blueTable, 0, sizeof(greenTable));
-    
+
     for (percent = 0.0; percent <= 1.0; percent += 0.01) {
 
         for (j = 0; j < QZ_GAMMA_TABLE_SIZE; j++) {
@@ -338,7 +339,7 @@ static void QZ_UnsetVideoMode (_THIS) {
     this->info.blit_fill = 0;
     this->FillHWRect     = NULL;
     this->UpdateRects    = NULL;
-   
+
     /* Release fullscreen resources */
     if ( mode_flags & SDL_FULLSCREEN ) {
 
@@ -351,7 +352,7 @@ static void QZ_UnsetVideoMode (_THIS) {
         /* Do this first to avoid trash on the display before fade */
         if ( mode_flags & SDL_OPENGL )
             QZ_TearDownOpenGL (this);
-        
+
         if (mode_flags & SDL_OPENGL)
             CGLSetFullScreen(NULL);
 
@@ -359,12 +360,12 @@ static void QZ_UnsetVideoMode (_THIS) {
         CGDisplaySwitchToMode (display_id, save_mode);
         CGDisplayRelease (display_id);
         ShowMenuBar ();
-        
+
         if (! gamma_error)
             QZ_FadeGammaIn (this, &gamma_table);
     }
     /* Release window mode resources */
-    else { 
+    else {
         if ( (mode_flags & SDL_OPENGL) == 0 ) {
             UnlockPortBits ( [ window_view qdPort ] );
             [ window_view release  ];
@@ -373,7 +374,7 @@ static void QZ_UnsetVideoMode (_THIS) {
         [ qz_window setDelegate:nil ];
         [ qz_window close ];
         [ qz_window release ];
-	qz_window = nil;
+        qz_window = nil;
 
         /* Release the OpenGL context */
         if ( mode_flags & SDL_OPENGL )
@@ -382,15 +383,15 @@ static void QZ_UnsetVideoMode (_THIS) {
 
     /* Restore gamma settings */
     CGDisplayRestoreColorSyncSettings ();
-    
+
     /* Set pixels to null (so other code doesn't try to free it) */
     if (this->screen != NULL)
         this->screen->pixels = NULL;
-        
+
     /* Ensure the cursor will be visible and working when we quit */
     CGDisplayShowCursor (display_id);
     CGAssociateMouseAndMouseCursorPosition (1);
-    
+
     /* Signal successful teardown */
     video_set = SDL_FALSE;
 }
@@ -400,11 +401,11 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
     int exact_match;
     int gamma_error;
     SDL_QuartzGammaTable gamma_table;
-    
+
     /* See if requested mode exists */
-    mode = CGDisplayBestModeForParameters (display_id, bpp, width, 
-					   height, &exact_match);
-    
+    mode = CGDisplayBestModeForParameters (display_id, bpp, width,
+                                           height, &exact_match);
+
     /* Require an exact match to the requested mode */
     if ( ! exact_match ) {
         sprintf (QZ_Error, "Failed to find display resolution: %dx%dx%d", width, height, bpp);
@@ -421,7 +422,7 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
         goto ERR_NO_CAPTURE;
     }
 
-    
+
     /* Do the physical switch */
     if ( CGDisplayNoErr != CGDisplaySwitchToMode (display_id, mode) ) {
         SDL_SetError ("Failed switching display resolution");
@@ -434,45 +435,45 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
     current->flags = 0;
     current->w = width;
     current->h = height;
-    current->flags |= SDL_FULLSCREEN;  
+    current->flags |= SDL_FULLSCREEN;
     current->flags |= SDL_HWSURFACE;
-   
+
     this->UpdateRects = QZ_DirectUpdate;
-    
+
     /* Setup some mode-dependant info */
     if ( CGSDisplayCanHWFill (display_id) ) {
-         this->info.blit_fill = 1;
-         this->FillHWRect = QZ_FillHWRect;
+        this->info.blit_fill = 1;
+        this->FillHWRect = QZ_FillHWRect;
     }
-        
+
     if ( CGDisplayCanSetPalette (display_id) )
         current->flags |= SDL_HWPALETTE;
-    
+
     /* Setup OpenGL for a fullscreen context */
     if (flags & SDL_OPENGL) {
 
         CGLError err;
         CGLContextObj ctx;
-        
+
         if ( ! QZ_SetupOpenGL (this, bpp, flags) ) {
             goto ERR_NO_GL;
         }
-       
+
         ctx = [ gl_context cglContext ];
         err = CGLSetFullScreen (ctx);
-        
+
         if (err) {
             sprintf (QZ_Error, "Error setting OpenGL fullscreen: %s", CGLErrorString(err));
             SDL_SetError (QZ_Error);
             goto ERR_NO_GL;
         }
-         
+
         [ gl_context makeCurrentContext];
 
         glClear (GL_COLOR_BUFFER_BIT);
 
         [ gl_context flushBuffer ];
-        
+
         current->flags |= SDL_OPENGL;
     }
 
@@ -482,23 +483,23 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
     /* Fade the display to original gamma */
     if (! gamma_error )
         QZ_FadeGammaIn (this, &gamma_table);
-    
+
     /* Save the flags to ensure correct tear-down */
     mode_flags = current->flags;
-    
+
     return current;
 
- /* Since the blanking window covers *all* windows (even force quit) correct recovery is crucial */
- ERR_NO_GL:      CGDisplaySwitchToMode (display_id, save_mode);
- ERR_NO_SWITCH:  CGDisplayRelease (display_id);
- ERR_NO_CAPTURE: if (!gamma_error) { QZ_FadeGammaIn (this, &gamma_table); }
- ERR_NO_MATCH:	return NULL;
+    /* Since the blanking window covers *all* windows (even force quit) correct recovery is crucial */
+ERR_NO_GL:      CGDisplaySwitchToMode (display_id, save_mode);
+ERR_NO_SWITCH:  CGDisplayRelease (display_id);
+ERR_NO_CAPTURE: if (!gamma_error) { QZ_FadeGammaIn (this, &gamma_table); }
+ERR_NO_MATCH:    return NULL;
 }
 
 static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
-                                           int height, int bpp, Uint32 flags) {    
+                                         int height, int bpp, Uint32 flags) {
     unsigned int style;
-    NSRect rect;    
+    NSRect rect;
     rect = NSMakeRect (0, 0, width, height);
 
 #if 1 // FIXME - the resize button doesn't show?  Also need resize events...
@@ -515,17 +516,17 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
     }
 
     /* Manually create a window, avoids having a nib file resource */
-    qz_window = [ [ SDL_QuartzWindow alloc ] initWithContentRect:rect 
-        styleMask:style backing:NSBackingStoreBuffered defer:NO ];
+    qz_window = [ [ SDL_QuartzWindow alloc ] initWithContentRect:rect
+                                                       styleMask:style backing:NSBackingStoreBuffered defer:NO ];
     if (qz_window == nil) {
         SDL_SetError ("Could not create the Cocoa window");
         return NULL;
     }
-    
+
     current->flags = 0;
     current->w = width;
     current->h = height;
-    
+
     [ qz_window setReleasedWhenClosed:YES ];
     QZ_SetCaption(this, this->wm_title, this->wm_icon);
     [ qz_window setAcceptsMouseMovedEvents:YES ];
@@ -533,14 +534,14 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
     [ qz_window center ];
     [ qz_window setDelegate:
         [ [ [ SDL_QuartzWindowDelegate alloc ] init ] autorelease ] ];
-    
+
     /* For OpenGL, we set the content view to a NSOpenGLView */
     if ( flags & SDL_OPENGL ) {
-    
+
         if ( ! QZ_SetupOpenGL (this, bpp, flags) ) {
             return NULL;
         }
-        
+
         [ gl_context setView: [ qz_window contentView ] ];
         [ gl_context makeCurrentContext];
         [ qz_window makeKeyAndOrderFront:nil ];
@@ -548,45 +549,45 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
     }
     /* For 2D, we set the content view to a NSQuickDrawView */
     else {
-    
+
         window_view = [ [ SDL_QuartzWindowView alloc ] init ];
         [ qz_window setContentView:window_view ];
-        [ qz_window makeKeyAndOrderFront:nil ];    
-        
+        [ qz_window makeKeyAndOrderFront:nil ];
+
         LockPortBits ( [ window_view qdPort ] );
         current->pixels = GetPixBaseAddr ( GetPortPixMap ( [ window_view qdPort ] ) );
         current->pitch  = GetPixRowBytes ( GetPortPixMap ( [ window_view qdPort ] ) );
-        
+
         current->flags |= SDL_SWSURFACE;
         current->flags |= SDL_PREALLOC;
-        
-	if ( flags & SDL_NOFRAME )
-        	current->flags |= SDL_NOFRAME;
-	if ( flags & SDL_RESIZABLE )
-        	current->flags |= SDL_RESIZABLE;
+
+        if ( flags & SDL_NOFRAME )
+            current->flags |= SDL_NOFRAME;
+        if ( flags & SDL_RESIZABLE )
+            current->flags |= SDL_RESIZABLE;
 
         /* Offset 22 pixels down to fill the full content region */
-	if ( ! (current->flags & SDL_NOFRAME) ) {
-        	current->pixels += 22 * current->pitch;
-	}
+        if ( ! (current->flags & SDL_NOFRAME) ) {
+            current->pixels += 22 * current->pitch;
+        }
 
         this->UpdateRects = QZ_UpdateRects;
     }
-    
+
     /* Save flags to ensure correct teardown */
     mode_flags = current->flags;
-      
+
     return current;
 }
 
-static SDL_Surface* QZ_SetVideoMode (_THIS, SDL_Surface *current, int width, 
-				     int height, int bpp, Uint32 flags) {
+static SDL_Surface* QZ_SetVideoMode (_THIS, SDL_Surface *current, int width,
+                                     int height, int bpp, Uint32 flags) {
 
     if (video_set == SDL_TRUE)
         QZ_UnsetVideoMode (this);
-       
+
     current->flags = 0;
-    
+
     /* Setup full screen video */
     if ( flags & SDL_FULLSCREEN ) {
         current = QZ_SetVideoFullScreen (this, current, width, height, bpp, flags );
@@ -601,17 +602,17 @@ static SDL_Surface* QZ_SetVideoMode (_THIS, SDL_Surface *current, int width,
         if (current == NULL)
             return NULL;
     }
-    
+
     /* Setup the new pixel format */
     {
-        int amask = 0, 
-            rmask = 0, 
-            gmask = 0,
-            bmask = 0;
-            
+        int amask = 0,
+        rmask = 0,
+        gmask = 0,
+        bmask = 0;
+
         switch (bpp) {
             case 16:   /* (1)-5-5-5 RGB */
-                amask = 0; 
+                amask = 0;
                 rmask = 0x7C00;
                 gmask = 0x03E0;
                 bmask = 0x001F;
@@ -626,212 +627,212 @@ static SDL_Surface* QZ_SetVideoMode (_THIS, SDL_Surface *current, int width,
                 bmask = 0x000000FF;
                 break;
         }
-        
+
         if ( ! SDL_ReallocFormat (current, bpp,
                                   rmask, gmask, bmask, amask ) ) {
-       	   SDL_SetError ("Couldn't reallocate pixel format");
-           return NULL;
-       	}
+            SDL_SetError ("Couldn't reallocate pixel format");
+            return NULL;
+           }
     }
-    
+
     /* Signal successful completion (used internally) */
     video_set = SDL_TRUE;
-    
+
     return current;
 }
 
-static int QZ_ToggleFullScreen (_THIS, int on) { 
+static int QZ_ToggleFullScreen (_THIS, int on) {
     return -1;
 }
 
-static int QZ_SetColors (_THIS, int first_color, int num_colors, 
-			 SDL_Color *colors) {
+static int QZ_SetColors (_THIS, int first_color, int num_colors,
+                         SDL_Color *colors) {
 
     CGTableCount  index;
     CGDeviceColor color;
-    
+
     for (index = first_color; index < first_color+num_colors; index++) {
-    
+
         /* Clamp colors between 0.0 and 1.0 */
         color.red   = colors->r / 255.0;
         color.blue  = colors->b / 255.0;
         color.green = colors->g / 255.0;
-        
+
         colors++;
-        
+
         CGPaletteSetColorAtIndex (palette, color, index);
     }
-     
+
     if ( CGDisplayNoErr != CGDisplaySetPalette (display_id, palette) )
         return 0;
-        
+
     return 1;
 }
 
 static void QZ_DirectUpdate (_THIS, int num_rects, SDL_Rect *rects) {
-    #pragma unused(this,num_rects,rects)
+#pragma unused(this,num_rects,rects)
 }
 
-/** 
+/**
  *  The obscured code is based on work by Matt Slot fprefect@ambrosiasw.com,
  *  who supplied sample code for Carbon.
  **/
 static int QZ_IsWindowObscured (NSWindow *window) {
 
-//#define TEST_OBSCURED 1
+    //#define TEST_OBSCURED 1
 
 #if TEST_OBSCURED
-    
+
     /*  In order to determine if a direct copy to the screen is possible,
-       we must figure out if there are any windows covering ours (including shadows).
-       This can be done by querying the window server about the on screen            
-       windows for their screen rectangle and window level.                          
-       The procedure used below is puts accuracy before speed; however, it aims to call 
-       the window server the fewest number of times possible to keep things reasonable.
-       In my testing on a 300mhz G3, this routine typically takes < 2 ms. -DW
+        we must figure out if there are any windows covering ours (including shadows).
+        This can be done by querying the window server about the on screen
+        windows for their screen rectangle and window level.
+        The procedure used below is puts accuracy before speed; however, it aims to call
+        the window server the fewest number of times possible to keep things reasonable.
+        In my testing on a 300mhz G3, this routine typically takes < 2 ms. -DW
     
-        Notes:
-            -Calls into the Window Server involve IPC which is slow.
-            -Getting a rectangle seems slower than getting the window level
-            -The window list we get back is in sorted order, top to bottom
-            -On average, I suspect, most windows above ours are dock icon windows (hence optimization)
-            -Some windows above ours are always there, and cannot move or obscure us (menu bar)
-            
-        Bugs:
-            -no way (yet) to deactivate direct drawing when a window is dragged, 
-               or suddenly obscured, so drawing continues and can produce garbage
-               We need some kind of locking mechanism on window movement to prevent this
-               
-            -deactivated normal windows use activated normal 
-               window shadows (slight inaccuraccy)
+    Notes:
+        -Calls into the Window Server involve IPC which is slow.
+        -Getting a rectangle seems slower than getting the window level
+        -The window list we get back is in sorted order, top to bottom
+        -On average, I suspect, most windows above ours are dock icon windows (hence optimization)
+        -Some windows above ours are always there, and cannot move or obscure us (menu bar)
+    
+    Bugs:
+        -no way (yet) to deactivate direct drawing when a window is dragged,
+        or suddenly obscured, so drawing continues and can produce garbage
+        We need some kind of locking mechanism on window movement to prevent this
+    
+        -deactivated normal windows use activated normal
+        window shadows (slight inaccuraccy)
     */
-    
+
     /* Cache the connection to the window server */
-    static CGSConnectionID	cgsConnection = (CGSConnectionID) -1;
-    
+    static CGSConnectionID    cgsConnection = (CGSConnectionID) -1;
+
     /* Cache the dock icon windows */
     static CGSWindowID          dockIcons[kMaxWindows];
     static int                  numCachedDockIcons = 0;
-    
-    CGSWindowID		        windows[kMaxWindows];
-    CGSWindowCount	        i, count;
-    CGSWindowLevel	        winLevel;
-    CGSRect			winRect;
+
+    CGSWindowID                windows[kMaxWindows];
+    CGSWindowCount             i, count;
+    CGSWindowLevel             winLevel;
+    CGSRect                    winRect;
 
     CGSRect contentRect;
     int     windowNumber;
     //int     isMainWindow;
-    int     firstDockIcon;    
+    int     firstDockIcon;
     int     dockIconCacheMiss;
     int     windowContentOffset;
-    
+
     int     obscured = SDL_TRUE;
-        
+
     if ( [ window isVisible ] ) {
-        
-        /*  walk the window list looking for windows over top of 
-                (or casting a shadow on) ours */
-       
+
+        /*  walk the window list looking for windows over top of
+        (or casting a shadow on) ours */
+
         /* Get a connection to the window server */
         /* Should probably be moved out into SetVideoMode() or InitVideo() */
         if (cgsConnection == (CGSConnectionID) -1) {
             cgsConnection = (CGSConnectionID) 0;
             cgsConnection = _CGSDefaultConnection ();
         }
-        
-        if (cgsConnection) { 
-        
+
+        if (cgsConnection) {
+
             if ( ! [ window styleMask ] & NSBorderlessWindowMask )
                 windowContentOffset = 22;
             else
                 windowContentOffset = 0;
-                
+
             windowNumber = [ window windowNumber ];
             //isMainWindow = [ window isMainWindow ];
-            
+
             /* The window list is sorted according to order on the screen */
             count = 0;
             CGSGetOnScreenWindowList (cgsConnection, 0, kMaxWindows, windows, &count);
             CGSGetScreenRectForWindow (cgsConnection, windowNumber, &contentRect);
-    
+
             /* adjust rect for window title bar (if present) */
             contentRect.origin.y    += windowContentOffset;
             contentRect.size.height -= windowContentOffset;
-            
+
             firstDockIcon = -1;
             dockIconCacheMiss = SDL_FALSE;
-            
-            /* The first window is always an empty window with level kCGSWindowLevelTop 
-               so start at index 1 */
+
+            /* The first window is always an empty window with level kCGSWindowLevelTop
+                so start at index 1 */
             for (i = 1; i < count; i++) {
-                
+
                 /* If we reach our window in the list, it cannot be obscured */
                 if (windows[i] == windowNumber) {
-                    
+
                     obscured = SDL_FALSE;
                     break;
                 }
                 else {
-                    
+
                     float shadowSide;
                     float shadowTop;
                     float shadowBottom;
 
                     CGSGetWindowLevel (cgsConnection, windows[i], &winLevel);
-                    
+
                     if (winLevel == kCGSWindowLevelDockIcon) {
-                    
+
                         int j;
-                        
+
                         if (firstDockIcon < 0) {
-                            
+
                             firstDockIcon = i;
-                        
+
                             if (numCachedDockIcons > 0) {
-                            
+
                                 for (j = 0; j < numCachedDockIcons; j++) {
-                            
+
                                     if (windows[i] == dockIcons[j])
                                         i++;
                                     else
                                         break;
                                 }
-                            
+
                                 if (j != 0) {
-                                 
+
                                     i--;
-                                                                    
+
                                     if (j < numCachedDockIcons) {
-                                        
+
                                         dockIconCacheMiss = SDL_TRUE;
                                     }
                                 }
 
                             }
                         }
-                                               
+
                         continue;
                     }
                     else if (winLevel == kCGSWindowLevelMenuIgnore
                              /* winLevel == kCGSWindowLevelTop */) {
-                     
+
                         continue; /* cannot obscure window */
                     }
                     else if (winLevel == kCGSWindowLevelDockMenu ||
                              winLevel == kCGSWindowLevelMenu) {
-                     
+
                         shadowSide = 18;
                         shadowTop = 4;
-                        shadowBottom = 22;   
+                        shadowBottom = 22;
                     }
                     else if (winLevel == kCGSWindowLevelUtility) {
-                    
+
                         shadowSide = 8;
                         shadowTop = 4;
                         shadowBottom = 12;
                     }
                     else if (winLevel == kCGSWindowLevelNormal) {
-                    
+
                         /* These numbers are for foreground windows,
                            they are too big (but will work) for background windows */
                         shadowSide = 20;
@@ -839,52 +840,52 @@ static int QZ_IsWindowObscured (NSWindow *window) {
                         shadowBottom = 24;
                     }
                     else if (winLevel == kCGSWindowLevelDock) {
-                    
+
                         /* Create dock icon cache */
                         if (numCachedDockIcons != (i-firstDockIcon) ||
                             dockIconCacheMiss) {
-                        
+
                             numCachedDockIcons = i - firstDockIcon;
-                            memcpy (dockIcons, &(windows[firstDockIcon]), 
+                            memcpy (dockIcons, &(windows[firstDockIcon]),
                                     numCachedDockIcons * sizeof(*windows));
                         }
-                        
+
                         /* no shadow */
                         shadowSide = 0;
                         shadowTop = 0;
                         shadowBottom = 0;
                     }
                     else {
-                    
+
                         /*   kCGSWindowLevelDockLabel,
-                             kCGSWindowLevelDock,
-                             kOther??? */
-                        
+                        kCGSWindowLevelDock,
+                        kOther??? */
+
                         /* no shadow */
                         shadowSide = 0;
                         shadowTop = 0;
                         shadowBottom = 0;
                     }
-                    
+
                     CGSGetScreenRectForWindow (cgsConnection, windows[i], &winRect);
-                    
+
                     winRect.origin.x -= shadowSide;
                     winRect.origin.y -= shadowTop;
                     winRect.size.width += shadowSide;
                     winRect.size.height += shadowBottom;
-                    
+
                     if (NSIntersectsRect (contentRect, winRect)) {
-                    
+
                         obscured = SDL_TRUE;
                         break;
                     }
-               
-               } /* window was not our window */
-            
+
+                } /* window was not our window */
+
             } /* iterate over windows */
-            
+
         } /* get cgsConnection */
-    
+
     } /* window is visible */
     
     return obscured;
@@ -893,86 +894,86 @@ static int QZ_IsWindowObscured (NSWindow *window) {
 #endif
 }
 
-static void QZ_UpdateRects (_THIS, int numRects, SDL_Rect *rects) { 
+static void QZ_UpdateRects (_THIS, int numRects, SDL_Rect *rects) {
 
     if (SDL_VideoSurface->flags & SDL_OPENGLBLIT) {
         QZ_GL_SwapBuffers (this);
     }
-    else if ( [ qz_window isMiniaturized ] && 
+    else if ( [ qz_window isMiniaturized ] &&
               ! (SDL_VideoSurface->flags & SDL_OPENGL)) {
-    
-        /** 
+
+        /**
          * Set port alpha opaque so deminiaturize looks right
-         * This isn't so nice, but there is no 
+         * This isn't so nice, but there is no
          * initial deminatureize notification (before demini starts)
          **/
         QZ_SetPortAlphaOpaque ([ [ qz_window contentView ] qdPort],
-                                [ qz_window styleMask ] & NSBorderlessWindowMask);
+                               [ qz_window styleMask ] & NSBorderlessWindowMask);
     }
     else if ( ! QZ_IsWindowObscured (qz_window) ) {
-        
+
         /* Use direct copy to flush contents to the display */
         CGrafPtr savePort;
         CGrafPtr dstPort, srcPort;
         const BitMap  *dstBits, *srcBits;
-        Rect     dstRect, srcRect;      
+        Rect     dstRect, srcRect;
         Point    offset;
         int i;
-        
+
         GetPort (&savePort);
-        
+
         dstPort = CreateNewPortForCGDisplayID ((UInt32)display_id);
         srcPort = [ window_view qdPort ];
-        
+
         offset.h = 0;
         offset.v = 0;
         SetPort (srcPort);
         LocalToGlobal (&offset);
-        
+
         SetPort (dstPort);
-        
+
         LockPortBits (dstPort);
         LockPortBits (srcPort);
-        
+
         dstBits = GetPortBitMapForCopyBits (dstPort);
         srcBits = GetPortBitMapForCopyBits (srcPort);
-        
+
         for (i = 0; i < numRects; i++) {
-            
+
             SetRect (&srcRect, rects[i].x, rects[i].y,
                      rects[i].x + rects[i].w,
                      rects[i].y + rects[i].h);
-            
+
             SetRect (&dstRect,
-                     rects[i].x + offset.h, 
+                     rects[i].x + offset.h,
                      rects[i].y + offset.v,
                      rects[i].x + rects[i].w + offset.h,
                      rects[i].y + rects[i].h + offset.v);
-                        
+
             CopyBits (srcBits, dstBits,
                       &srcRect, &dstRect, srcCopy, NULL);
-                        
+
         }
-        
+
         SetPort (savePort);
     }
     else {
-    
+
         /* Use QDFlushPortBuffer() to flush content to display */
         int i;
         RgnHandle dirty = NewRgn ();
         RgnHandle temp  = NewRgn ();
-        
+
         SetEmptyRgn (dirty);
-        
+
         /* Build the region of dirty rectangles */
         for (i = 0; i < numRects; i++) {
-        
-            MacSetRectRgn (temp, rects[i].x, rects[i].y, 
-                rects[i].x + rects[i].w, rects[i].y + rects[i].h);
+
+            MacSetRectRgn (temp, rects[i].x, rects[i].y,
+                           rects[i].x + rects[i].w, rects[i].y + rects[i].h);
             MacUnionRgn (dirty, temp, dirty);
         }
-        
+
         /* Flush the dirty region */
         QDFlushPortBuffer ( [ window_view qdPort ], dirty );
         DisposeRgn (dirty);
@@ -993,7 +994,7 @@ static int  QZ_FillHWRect (_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color
     return 0;
 }
 
-static int  QZ_LockHWSurface(_THIS, SDL_Surface *surface) { 
+static int  QZ_LockHWSurface(_THIS, SDL_Surface *surface) {
 
     return 1;
 }
@@ -1006,10 +1007,10 @@ static void QZ_FreeHWSurface (_THIS, SDL_Surface *surface) {
 }
 
 /*
-int QZ_FlipHWSurface (_THIS, SDL_Surface *surface) {
-    return 0;
-}
-*/
+ int QZ_FlipHWSurface (_THIS, SDL_Surface *surface) {
+     return 0;
+ }
+ */
 
 /* Gamma functions */
 static int QZ_SetGamma (_THIS, float red, float green, float blue) {
@@ -1030,14 +1031,14 @@ static int QZ_SetGamma (_THIS, float red, float green, float blue) {
         blue = FLT_MAX;
     else
         blue  = 1.0 / blue;
-    
-    if ( CGDisplayNoErr == CGSetDisplayTransferByFormula 
-        (display_id, min, max, red, min, max, green, min, max, blue) ) {
-            
+
+    if ( CGDisplayNoErr == CGSetDisplayTransferByFormula
+         (display_id, min, max, red, min, max, green, min, max, blue) ) {
+
         return 0;
     }
     else {
-    
+
         return -1;
     }
 }
@@ -1046,66 +1047,66 @@ static int QZ_GetGamma (_THIS, float *red, float *green, float *blue) {
 
     CGGammaValue dummy;
     if ( CGDisplayNoErr == CGGetDisplayTransferByFormula
-        (display_id, &dummy, &dummy, red, 
-	 &dummy, &dummy, green, &dummy, &dummy, blue) )
-        
+         (display_id, &dummy, &dummy, red,
+          &dummy, &dummy, green, &dummy, &dummy, blue) )
+
         return 0;
     else
         return -1;
 }
 
 static int QZ_SetGammaRamp (_THIS, Uint16 *ramp) {
- 
-   const CGTableCount tableSize = 255;
-   CGGammaValue redTable[tableSize];
-   CGGammaValue greenTable[tableSize];
-   CGGammaValue blueTable[tableSize];
-   
-   int i;
-   
-   /* Extract gamma values into separate tables, convert to floats between 0.0 and 1.0 */
-   for (i = 0; i < 256; i++)
-    redTable[i % 256] = ramp[i] / 65535.0;
-   
-   for (i=256; i < 512; i++)
-    greenTable[i % 256] = ramp[i] / 65535.0;
-   
-   for (i=512; i < 768; i++)
-     blueTable[i % 256] = ramp[i] / 65535.0;
-     
-    if ( CGDisplayNoErr == CGSetDisplayTransferByTable 
-            (display_id, tableSize, redTable, greenTable, blueTable) )        
+
+    const CGTableCount tableSize = 255;
+    CGGammaValue redTable[tableSize];
+    CGGammaValue greenTable[tableSize];
+    CGGammaValue blueTable[tableSize];
+
+    int i;
+
+    /* Extract gamma values into separate tables, convert to floats between 0.0 and 1.0 */
+    for (i = 0; i < 256; i++)
+        redTable[i % 256] = ramp[i] / 65535.0;
+
+    for (i=256; i < 512; i++)
+        greenTable[i % 256] = ramp[i] / 65535.0;
+
+    for (i=512; i < 768; i++)
+        blueTable[i % 256] = ramp[i] / 65535.0;
+
+    if ( CGDisplayNoErr == CGSetDisplayTransferByTable
+         (display_id, tableSize, redTable, greenTable, blueTable) )
         return 0;
     else
         return -1;
 }
 
 static int QZ_GetGammaRamp (_THIS, Uint16 *ramp) {
-    
+
     const CGTableCount tableSize = 255;
     CGGammaValue redTable[tableSize];
     CGGammaValue greenTable[tableSize];
     CGGammaValue blueTable[tableSize];
     CGTableCount actual;
     int i;
-    
-    if ( CGDisplayNoErr != CGGetDisplayTransferByTable 
-            (display_id, tableSize, redTable, greenTable, blueTable, &actual) ||
-          actual != tableSize)
-        
+
+    if ( CGDisplayNoErr != CGGetDisplayTransferByTable
+         (display_id, tableSize, redTable, greenTable, blueTable, &actual) ||
+         actual != tableSize)
+
         return -1;
-    
+
     /* Pack tables into one array, with values from 0 to 65535 */
     for (i = 0; i < 256; i++)
         ramp[i] = redTable[i % 256] * 65535.0;
-   
+
     for (i=256; i < 512; i++)
         ramp[i] = greenTable[i % 256] * 65535.0;
-   
+
     for (i=512; i < 768; i++)
         ramp[i] = blueTable[i % 256] * 65535.0;
-      
-    return 0;    
+
+    return 0;
 }
 
 /* OpenGL helper functions (used internally) */
@@ -1118,53 +1119,53 @@ static int QZ_SetupOpenGL (_THIS, int bpp, Uint32 flags) {
     int colorBits = bpp;
 
     if ( flags & SDL_FULLSCREEN ) {
-    
+
         attr[i++] = NSOpenGLPFAFullScreen;
     }
     /* In windowed mode, the OpenGL pixel depth must match device pixel depth */
-    else if ( colorBits != device_bpp ) { 
+    else if ( colorBits != device_bpp ) {
 
         colorBits = device_bpp;
     }
-    
+
     attr[i++] = NSOpenGLPFAColorSize;
     attr[i++] = colorBits;
-    
+
     attr[i++] = NSOpenGLPFADepthSize;
     attr[i++] = this->gl_config.depth_size;
 
     if ( this->gl_config.double_buffer ) {
         attr[i++] = NSOpenGLPFADoubleBuffer;
     }
-    
+
     if ( this->gl_config.stencil_size != 0 ) {
         attr[i++] = NSOpenGLPFAStencilSize;
         attr[i++] = this->gl_config.stencil_size;
     }
-    
+
     attr[i++] = NSOpenGLPFAScreenMask;
     attr[i++] = CGDisplayIDToOpenGLDisplayMask (display_id);
     attr[i] = 0;
-    
+
     fmt = [ [ NSOpenGLPixelFormat alloc ] initWithAttributes:attr ];
     if (fmt == nil) {
         SDL_SetError ("Failed creating OpenGL pixel format");
         return 0;
     }
-    
-    gl_context = [ [ NSOpenGLContext alloc ] initWithFormat:fmt 
-        shareContext:nil];
-    
+
+    gl_context = [ [ NSOpenGLContext alloc ] initWithFormat:fmt
+                                               shareContext:nil];
+
     if (gl_context == nil) {
         SDL_SetError ("Failed creating OpenGL context");
         return 0;
-    }	
-    
+    }
+
     /* Convince SDL that the GL "driver" is loaded */
     this->gl_config.driver_loaded = 1;
-    
+
     [ fmt release ];
-    
+
     return 1;
 }
 
@@ -1187,23 +1188,23 @@ static void*  QZ_GL_GetProcAddress (_THIS, const char *proc) {
 
     /* We may want to cache the bundleRef at some point */
     CFBundleRef bundle;
-    CFURLRef bundleURL = CFURLCreateWithFileSystemPath (kCFAllocatorDefault, 
-        CFSTR("/System/Library/Frameworks/OpenGL.framework"), kCFURLPOSIXPathStyle, true);
-    
-    CFStringRef functionName = CFStringCreateWithCString 
+    CFURLRef bundleURL = CFURLCreateWithFileSystemPath (kCFAllocatorDefault,
+                                                        CFSTR("/System/Library/Frameworks/OpenGL.framework"), kCFURLPOSIXPathStyle, true);
+
+    CFStringRef functionName = CFStringCreateWithCString
         (kCFAllocatorDefault, proc, kCFStringEncodingASCII);
-    
+
     void *function;
-    
+
     bundle = CFBundleCreate (kCFAllocatorDefault, bundleURL);
     assert (bundle != NULL);
-    
+
     function = CFBundleGetFunctionPointerForName (bundle, functionName);
 
     CFRelease ( bundleURL );
     CFRelease ( functionName );
     CFRelease ( bundle );
-    
+
     return function;
 }
 
@@ -1214,18 +1215,18 @@ static int    QZ_GL_GetAttribute   (_THIS, SDL_GLattr attrib, int* value) {
     QZ_GL_MakeCurrent (this);
 
     switch (attrib) {
-    case SDL_GL_RED_SIZE: attr = GL_RED_BITS;   break;
-    case SDL_GL_BLUE_SIZE: attr = GL_BLUE_BITS;  break;
-    case SDL_GL_GREEN_SIZE: attr = GL_GREEN_BITS; break;
-    case SDL_GL_ALPHA_SIZE: attr = GL_ALPHA_BITS; break;
-    case SDL_GL_DOUBLEBUFFER: attr = GL_DOUBLEBUFFER; break;
-    case SDL_GL_DEPTH_SIZE: attr = GL_DEPTH_BITS;  break;
-    case SDL_GL_STENCIL_SIZE: attr = GL_STENCIL_BITS; break;
-    case SDL_GL_ACCUM_RED_SIZE: attr = GL_ACCUM_RED_BITS; break;
-    case SDL_GL_ACCUM_GREEN_SIZE: attr = GL_ACCUM_GREEN_BITS; break;
-    case SDL_GL_ACCUM_BLUE_SIZE: attr = GL_ACCUM_BLUE_BITS; break;
-    case SDL_GL_ACCUM_ALPHA_SIZE: attr = GL_ACCUM_ALPHA_BITS; break;
-    case SDL_GL_BUFFER_SIZE:
+        case SDL_GL_RED_SIZE: attr = GL_RED_BITS;   break;
+        case SDL_GL_BLUE_SIZE: attr = GL_BLUE_BITS;  break;
+        case SDL_GL_GREEN_SIZE: attr = GL_GREEN_BITS; break;
+        case SDL_GL_ALPHA_SIZE: attr = GL_ALPHA_BITS; break;
+        case SDL_GL_DOUBLEBUFFER: attr = GL_DOUBLEBUFFER; break;
+        case SDL_GL_DEPTH_SIZE: attr = GL_DEPTH_BITS;  break;
+        case SDL_GL_STENCIL_SIZE: attr = GL_STENCIL_BITS; break;
+        case SDL_GL_ACCUM_RED_SIZE: attr = GL_ACCUM_RED_BITS; break;
+        case SDL_GL_ACCUM_GREEN_SIZE: attr = GL_ACCUM_GREEN_BITS; break;
+        case SDL_GL_ACCUM_BLUE_SIZE: attr = GL_ACCUM_BLUE_BITS; break;
+        case SDL_GL_ACCUM_ALPHA_SIZE: attr = GL_ACCUM_ALPHA_BITS; break;
+        case SDL_GL_BUFFER_SIZE:
         {
             GLint bits = 0;
             GLint component;
@@ -1254,4 +1255,298 @@ static void   QZ_GL_SwapBuffers    (_THIS) {
     [ gl_context flushBuffer ];
 }
 
+static int QZ_LockYUV (_THIS, SDL_Overlay *overlay) {
+
+    return 0;
+}
+
+static void QZ_UnlockYUV (_THIS, SDL_Overlay *overlay) {
+
+    ;
+}
+
+static int QZ_DisplayYUV (_THIS, SDL_Overlay *overlay, SDL_Rect *dstrect) {
+
+    OSErr err;
+    CodecFlags flags;
+
+    if (dstrect->x != 0 || dstrect->y != 0) {
+
+        SDL_SetError ("Need a dstrect at (0,0)");
+        return -1;
+    }
+
+    if (dstrect->w != yuv_width || dstrect->h != yuv_height) {
+
+        Fixed scale_x, scale_y;
+
+        scale_x = FixDiv ( Long2Fix (dstrect->w), Long2Fix (overlay->w) );
+        scale_y = FixDiv ( Long2Fix (dstrect->h), Long2Fix (overlay->h) );
+
+        SetIdentityMatrix (yuv_matrix);
+        ScaleMatrix (yuv_matrix, scale_x, scale_y, Long2Fix (0), Long2Fix (0));
+
+        SetDSequenceMatrix (yuv_seq, yuv_matrix);
+
+        yuv_width = dstrect->w;
+        yuv_height = dstrect->h;
+    }
+
+    if( ( err = DecompressSequenceFrameS(
+                                         yuv_seq,
+                                         (void*)yuv_pixmap,
+                                         sizeof (PlanarPixmapInfoYUV420),
+                                         codecFlagUseImageBuffer, &flags, nil ) != noErr ) )
+    {
+        SDL_SetError ("DecompressSequenceFrameS failed");
+    }
+
+    return err == noErr;
+}
+
+static void QZ_FreeHWYUV (_THIS, SDL_Overlay *overlay) {
+
+    CDSequenceEnd (yuv_seq);
+    ExitMovies();
+
+    free (overlay->hwfuncs);
+    free (overlay->pitches);
+    free (overlay->pixels);
+
+    if (SDL_VideoSurface->flags & SDL_FULLSCREEN) {
+        [ qz_window close ];
+        qz_window = nil;
+    }
+
+    free (yuv_matrix);
+    DisposeHandle ((Handle)yuv_idh);
+}
+
+#include "SDL_yuvfuncs.h"
+
+/**
+ * check for 16 byte alignment, bail otherwise
+ **/
+#define CHECK_ALIGN(x) do { if ((Uint32)x & 15) { SDL_SetError("Alignment error"); return NULL; } } while(0)
+
+/**
+ * align a byte offset, return how much to add to make it
+ * a multiple of 16
+ **/
+#define ALIGN(x) ((16 - (x & 15)) & 15)
+
+static SDL_Overlay* QZ_CreateYUVOverlay (_THIS, int width, int height,
+                                         Uint32 format, SDL_Surface *display) {
+
+    Uint32 codec;
+    OSStatus err;
+    CGrafPtr port;
+    SDL_Overlay *overlay;
+
+    if (format == SDL_YV12_OVERLAY ||
+        format == SDL_IYUV_OVERLAY) {
+
+        codec = kYUV420CodecType;
+    }
+    else {
+        SDL_SetError ("Hardware: unsupported video format");
+        return NULL;
+    }
+
+    yuv_idh = (ImageDescriptionHandle) NewHandleClear (sizeof(ImageDescription));
+    if (yuv_idh == NULL) {
+        SDL_OutOfMemory();
+        return NULL;
+    }
+
+    yuv_matrix = (MatrixRecordPtr) malloc (sizeof(MatrixRecord));
+    if (yuv_matrix == NULL) {
+        SDL_OutOfMemory();
+        return NULL;
+    }
+
+    if ( EnterMovies() != noErr ) {
+        SDL_SetError ("Could not init QuickTime for YUV playback");
+        return NULL;
+    }
+
+    err = FindCodec (codec, bestSpeedCodec, nil, &yuv_codec);
+    if (err != noErr) {
+        SDL_SetError ("Could not find QuickTime codec for format");
+        return NULL;
+    }
+
+    if (SDL_VideoSurface->flags & SDL_FULLSCREEN) {
+
+        /**
+         * Good acceleration requires a window to be present.
+         * A CGrafPtr that points to the screen isn't good enough
+         **/
+        NSRect content = NSMakeRect (0, 0, SDL_VideoSurface->w, SDL_VideoSurface->h);
+
+        qz_window = [ [ SDL_QuartzWindow alloc ]
+                            initWithContentRect:content
+                            styleMask:NSBorderlessWindowMask
+                            backing:NSBackingStoreBuffered defer:NO ];
+
+        if (qz_window == nil) {
+            SDL_SetError ("Could not create the Cocoa window");
+            return NULL;
+        }
+
+        [ qz_window setContentView:[ [ SDL_QuartzWindowView alloc ] init ] ];
+        [ qz_window setReleasedWhenClosed:YES ];
+        [ qz_window center ];
+        [ qz_window setAcceptsMouseMovedEvents:YES ];
+        [ qz_window setLevel:CGShieldingWindowLevel() ];
+        [ qz_window makeKeyAndOrderFront:nil ];
+
+        port = [ [ qz_window contentView ] qdPort ];
+        SetPort (port);
+        // BUG: would like to remove white flash when window kicks in
+        //{
+        //    Rect r;
+        //    SetRect (&r, 0, 0, SDL_VideoSurface->w, SDL_VideoSurface->h);
+        //    PaintRect (&r);
+        //    QDFlushPortBuffer (port, nil);
+        //}
+
+    }
+    else {
+        port = [ [ qz_window contentView ] qdPort ];
+        SetPort (port);
+    }
+    
+    SetIdentityMatrix (yuv_matrix);
+    
+    HLock ((Handle)yuv_idh);
+    
+    (**yuv_idh).idSize = sizeof(ImageDescription);
+    (**yuv_idh).cType  = codec;
+    (**yuv_idh).version = 1;
+    (**yuv_idh).revisionLevel = 0;
+    (**yuv_idh).width = width;
+    (**yuv_idh).height = height;
+    (**yuv_idh).hRes = Long2Fix(72);
+    (**yuv_idh).vRes = Long2Fix(72);
+    (**yuv_idh).spatialQuality = codecLosslessQuality;
+    (**yuv_idh).frameCount = 1;
+    (**yuv_idh).clutID = -1;
+    (**yuv_idh).dataSize = 0;
+    (**yuv_idh).depth = 12;
+    
+    HUnlock ((Handle)yuv_idh);
+    
+    err = DecompressSequenceBeginS (
+                                    &yuv_seq,
+                                    yuv_idh,
+                                    NULL,
+                                    0,
+                                    port,
+                                    NULL,
+                                    NULL,
+                                    yuv_matrix,
+                                    0,
+                                    NULL,
+                                    codecFlagUseImageBuffer,
+                                    codecLosslessQuality,
+                                    yuv_codec);
+    
+    if (err != noErr) {
+        SDL_SetError ("Error trying to start YUV codec.");
+        return NULL;
+    }
+    
+    overlay = (SDL_Overlay*) malloc (sizeof(*overlay));
+    if (overlay == NULL) {
+        SDL_OutOfMemory();
+        return NULL;
+    }
+    
+    overlay->format      = format;
+    overlay->w           = width;
+    overlay->h           = height;
+    overlay->planes      = 3;
+    overlay->hw_overlay  = 1;
+    {
+        int      offset;
+        Uint8  **pixels;
+        Uint16  *pitches;
+        int      plane2, plane3;
+
+        if (format == SDL_IYUV_OVERLAY) {
+
+            plane2 = 1; /* Native codec format */
+            plane3 = 2;
+        }
+        else if (format == SDL_YV12_OVERLAY) {
+
+            /* switch the U and V planes */
+            plane2 = 2; /* U plane maps to plane 3 */
+            plane3 = 1; /* V plane maps to plane 2 */
+        }
+        else {
+            SDL_SetError("Unsupported YUV format");
+            return NULL;
+        }
+
+        pixels = (Uint8**) malloc (sizeof(*pixels) * 3);
+        pitches = (Uint16*) malloc (sizeof(*pitches) * 3);
+        if (pixels == NULL || pitches == NULL) {
+            SDL_OutOfMemory();
+            return NULL;
+        }
+
+        yuv_pixmap = (PlanarPixmapInfoYUV420*)
+            malloc (sizeof(PlanarPixmapInfoYUV420) +
+                    (width * height * 2));
+        if (yuv_pixmap == NULL) {
+            SDL_OutOfMemory ();
+            return NULL;
+        }
+
+        //CHECK_ALIGN(yuv_pixmap);
+        offset  = sizeof(PlanarPixmapInfoYUV420);
+        //offset += ALIGN(offset);
+        //CHECK_ALIGN(offset);
+
+        pixels[0] = (Uint8*)yuv_pixmap + offset;
+        //CHECK_ALIGN(pixels[0]);
+
+        pitches[0] = width;
+        yuv_pixmap->componentInfoY.offset = offset;
+        yuv_pixmap->componentInfoY.rowBytes = width;
+
+        offset += width * height;
+        pixels[plane2] = (Uint8*)yuv_pixmap + offset;
+        pitches[plane2] = width / 2;
+        yuv_pixmap->componentInfoCb.offset = offset;
+        yuv_pixmap->componentInfoCb.rowBytes = width / 2;
+
+        offset += (width * height / 4);
+        pixels[plane3] = (Uint8*)yuv_pixmap + offset;
+        pitches[plane3] = width / 2;
+        yuv_pixmap->componentInfoCr.offset = offset;
+        yuv_pixmap->componentInfoCr.rowBytes = width / 2;
+
+        overlay->pixels = pixels;
+        overlay->pitches = pitches;
+    }
+
+    overlay->hwfuncs = malloc (sizeof(*overlay->hwfuncs));
+    if (overlay->hwfuncs == NULL) {
+        SDL_OutOfMemory();
+        return NULL;
+    }
+    
+    overlay->hwfuncs->Lock    = QZ_LockYUV;
+    overlay->hwfuncs->Unlock  = QZ_UnlockYUV;
+    overlay->hwfuncs->Display = QZ_DisplayYUV;
+    overlay->hwfuncs->FreeHW  = QZ_FreeHWYUV;
+
+    yuv_width = overlay->w;
+    yuv_height = overlay->h;
+    
+    return overlay;
+}
 

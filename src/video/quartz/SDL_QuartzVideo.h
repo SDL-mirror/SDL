@@ -20,7 +20,7 @@
     slouken@libsdl.org
 */
 
-/*	
+/*    
     @file   SDL_QuartzVideo.h
     @author Darrell Walisser
     
@@ -33,16 +33,15 @@
         - Keyboard repeat/mouse speed adjust (if needed)
         - Multiple monitor support (currently only main display)
         - Accelerated blitting support
-        - Set the window icon (dock icon when API is available)
-        - Fix white OpenGL window on minimize
+        - Fix white OpenGL window on minimize (fixed)
         - Find out what events should be sent/ignored if window is mimimized
-        - Find a better way to deal with resolution/depth switch while app is running
+        - Find a way to deal with external resolution/depth switch while app is running
         - Resizeable windows
         - Check accuracy of QZ_SetGamma()
     Problems:
         - OGL not working in full screen with software renderer
         - SetColors sets palette correctly but clears framebuffer
-        - Crash in CG after several mode switches
+        - Crash in CG after several mode switches (I think this has been fixed)
         - Retained windows don't draw their title bar quite right (OS Bug) (not using retained windows)
         - Cursor in 8 bit modes is screwy (might just be Radeon PCI bug)
         - Warping cursor delays mouse events for a fraction of a second,
@@ -52,6 +51,7 @@
 #include <Cocoa/Cocoa.h>
 #include <OpenGL/OpenGL.h>
 #include <Carbon/Carbon.h>
+#include <QuickTime/QuickTime.h>
 
 #include "SDL_video.h"
 #include "SDL_error.h"
@@ -102,10 +102,17 @@ typedef struct SDL_PrivateVideoData {
     Uint32             warp_ticks;         /* timestamp when the warp occured */
     NSWindow           *window;            /* Cocoa window to implement the SDL window */
     NSQuickDrawView    *view;              /* the window's view; draw 2D into this view */
-    
+    ImageDescriptionHandle yuv_idh;
+    MatrixRecordPtr        yuv_matrix;
+    DecompressorComponent  yuv_codec;
+    ImageSequence          yuv_seq;
+    PlanarPixmapInfoYUV420 *yuv_pixmap;
+    Sint16                  yuv_width, yuv_height;
+    CGrafPtr                yuv_port;
+
 } SDL_PrivateVideoData ;
 
-#define _THIS	SDL_VideoDevice *this
+#define _THIS    SDL_VideoDevice *this
 #define display_id (this->hidden->display)
 #define mode (this->hidden->mode)
 #define save_mode (this->hidden->save_mode)
@@ -121,6 +128,15 @@ typedef struct SDL_PrivateVideoData {
 #define video_set (this->hidden->video_set)
 #define warp_ticks (this->hidden->warp_ticks)
 #define warp_flag (this->hidden->warp_flag)
+#define yuv_idh (this->hidden->yuv_idh)
+#define yuv_matrix (this->hidden->yuv_matrix)
+#define yuv_codec (this->hidden->yuv_codec)
+#define yuv_seq (this->hidden->yuv_seq)
+#define yuv_pixmap (this->hidden->yuv_pixmap)
+#define yuv_data (this->hidden->yuv_data)
+#define yuv_width (this->hidden->yuv_width)
+#define yuv_height (this->hidden->yuv_height)
+#define yuv_port (this->hidden->yuv_port)
 
 /* Obscuring code: maximum number of windows above ours (inclusive) */
 #define kMaxWindows 256
@@ -144,16 +160,16 @@ typedef struct SDL_PrivateVideoData {
 */
 
 typedef CGError       CGSError;
-typedef long	      CGSWindowCount;
-typedef void *	      CGSConnectionID;
-typedef int	      CGSWindowID;
+typedef long          CGSWindowCount;
+typedef void *        CGSConnectionID;
+typedef int           CGSWindowID;
 typedef CGSWindowID*  CGSWindowIDList;
 typedef CGWindowLevel CGSWindowLevel;
 typedef NSRect        CGSRect;
 
 extern CGSConnectionID _CGSDefaultConnection ();
 
-extern CGSError CGSGetOnScreenWindowList (CGSConnectionID cid, 
+extern CGSError CGSGetOnScreenWindowList (CGSConnectionID cid,
                                           CGSConnectionID owner,
                                           CGSWindowCount listCapacity,
                                           CGSWindowIDList list,
@@ -166,9 +182,9 @@ extern CGSError CGSGetScreenRectForWindow (CGSConnectionID cid,
 extern CGWindowLevel CGSGetWindowLevel (CGSConnectionID cid,
                                         CGSWindowID wid,
                                         CGSWindowLevel *level);
-                                        
-extern CGSError CGSDisplayHWFill (CGDirectDisplayID id, unsigned int x, unsigned int y, 
-                      unsigned int w, unsigned int h, unsigned int color);
+
+extern CGSError CGSDisplayHWFill (CGDirectDisplayID id, unsigned int x, unsigned int y,
+                                  unsigned int w, unsigned int h, unsigned int color);
 
 extern CGSError CGSDisplayCanHWFill (CGDirectDisplayID id);
 
@@ -182,16 +198,16 @@ static void             QZ_DeleteDevice (SDL_VideoDevice *device);
 /* Initialization, Query, Setup, and Redrawing functions */
 static int          QZ_VideoInit        (_THIS, SDL_PixelFormat *video_format);
 
-static SDL_Rect**   QZ_ListModes        (_THIS, SDL_PixelFormat *format, 
-					 Uint32 flags);
+static SDL_Rect**   QZ_ListModes        (_THIS, SDL_PixelFormat *format,
+                                         Uint32 flags);
 static void         QZ_UnsetVideoMode   (_THIS);
 
-static SDL_Surface* QZ_SetVideoMode     (_THIS, SDL_Surface *current, 
-					 int width, int height, int bpp, 
-					 Uint32 flags);
+static SDL_Surface* QZ_SetVideoMode     (_THIS, SDL_Surface *current,
+                                         int width, int height, int bpp,
+                                         Uint32 flags);
 static int          QZ_ToggleFullScreen (_THIS, int on);
-static int          QZ_SetColors        (_THIS, int first_color, 
-					 int num_colors, SDL_Color *colors);
+static int          QZ_SetColors        (_THIS, int first_color,
+                                         int num_colors, SDL_Color *colors);
 static void         QZ_DirectUpdate     (_THIS, int num_rects, SDL_Rect *rects);
 static void         QZ_UpdateRects      (_THIS, int num_rects, SDL_Rect *rects);
 static void         QZ_VideoQuit        (_THIS);
@@ -223,8 +239,8 @@ static void  QZ_PrivateWarpCursor (_THIS, int x, int y);
 
 /* Cursor and Mouse functions */
 static void         QZ_FreeWMCursor     (_THIS, WMcursor *cursor);
-static WMcursor*    QZ_CreateWMCursor   (_THIS, Uint8 *data, Uint8 *mask, 
-                                          int w, int h, int hot_x, int hot_y);
+static WMcursor*    QZ_CreateWMCursor   (_THIS, Uint8 *data, Uint8 *mask,
+                                         int w, int h, int hot_x, int hot_y);
 static int          QZ_ShowWMCursor     (_THIS, WMcursor *cursor);
 static void         QZ_WarpWMCursor     (_THIS, Uint16 x, Uint16 y);
 static void         QZ_MoveWMCursor     (_THIS, int x, int y);
@@ -240,4 +256,8 @@ static void QZ_SetIcon       (_THIS, SDL_Surface *icon, Uint8 *mask);
 static int  QZ_IconifyWindow (_THIS);
 static SDL_GrabMode QZ_GrabInput (_THIS, SDL_GrabMode grab_mode);
 /*static int  QZ_GetWMInfo     (_THIS, SDL_SysWMinfo *info);*/
+
+/* YUV functions */
+static SDL_Overlay* QZ_CreateYUVOverlay (_THIS, int width, int height,
+                                         Uint32 format, SDL_Surface *display);
 
