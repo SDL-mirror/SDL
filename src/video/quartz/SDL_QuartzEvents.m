@@ -19,15 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
-#include <sys/time.h>
-
 #include "SDL_QuartzKeys.h"
-
-
-
-static SDLKey keymap[256];
-static unsigned int currentMods = 0; /* Current keyboard modifiers, to track modifier state */
-static int last_virtual_button = 0; /* Last virtual mouse button pressed */
 
 static void     QZ_InitOSKeymap (_THIS) {
     const void *KCHRPtr;
@@ -147,11 +139,12 @@ static void     QZ_InitOSKeymap (_THIS) {
     keymap[QZ_IBOOK_UP]      = SDLK_UP;
     keymap[QZ_IBOOK_LEFT] = SDLK_LEFT;
 
-    /* Up there we setup a static scancode->keysym map. However, it will not
-     * work very well on international keyboard. Hence we now query MacOS
-     * for its own keymap to adjust our own mapping table. However, this is
-     * bascially only useful for ascii char keys. This is also the reason
-     * why we keep the static table, too.
+    /* 
+        Up there we setup a static scancode->keysym map. However, it will not
+        work very well on international keyboard. Hence we now query MacOS
+        for its own keymap to adjust our own mapping table. However, this is
+        basically only useful for ascii char keys. This is also the reason
+        why we keep the static table, too.
      */
 
     /* Get a pointer to the systems cached KCHR */
@@ -180,13 +173,14 @@ static void     QZ_InitOSKeymap (_THIS) {
         }
     }
 
-    /* The keypad codes are re-setup here, because the loop above cannot
-     * distinguish between a key on the keypad and a regular key. We maybe
-     * could get around this problem in another fashion: NSEvent's flags
-     * include a "NSNumericPadKeyMask" bit; we could check that and modify
-     * the symbol we return on the fly. However, this flag seems to exhibit
-     * some weird behaviour related to the num lock key
-     */
+    /* 
+        The keypad codes are re-setup here, because the loop above cannot
+        distinguish between a key on the keypad and a regular key. We maybe
+        could get around this problem in another fashion: NSEvent's flags
+        include a "NSNumericPadKeyMask" bit; we could check that and modify
+        the symbol we return on the fly. However, this flag seems to exhibit
+        some weird behaviour related to the num lock key
+    */
     keymap[QZ_KP0] = SDLK_KP0;
     keymap[QZ_KP1] = SDLK_KP1;
     keymap[QZ_KP2] = SDLK_KP2;
@@ -206,14 +200,18 @@ static void     QZ_InitOSKeymap (_THIS) {
     keymap[QZ_KP_ENTER] = SDLK_KP_ENTER;
 }
 
-static void QZ_DoKey (int state, NSEvent *event) {
+static void QZ_DoKey (_THIS, int state, NSEvent *event) {
 
     NSString *chars;
     int i;
     SDL_keysym key;
 
-    /* An event can contain multiple characters */
-    /* I'll ignore this fact for now, since there is only one virtual key code per event */
+    /* 
+        An event can contain multiple characters
+        I'll ignore this fact for now, since there 
+        is only one virtual key code per event, so
+        no good way to handle this.
+    */
     chars = [ event characters ];
     for (i =0; i < 1 /*[ chars length ] */; i++) {
 
@@ -226,7 +224,7 @@ static void QZ_DoKey (int state, NSEvent *event) {
     }
 }
 
-static void QZ_DoModifiers (unsigned int newMods) {
+static void QZ_DoModifiers (_THIS, unsigned int newMods) {
 
     const int mapping[] = { SDLK_CAPSLOCK, SDLK_LSHIFT, SDLK_LCTRL, SDLK_LALT, SDLK_LMETA } ;
 
@@ -244,8 +242,8 @@ static void QZ_DoModifiers (unsigned int newMods) {
 
         unsigned int currentMask, newMask;
 
-        currentMask = currentMods & bit;
-        newMask        = newMods & bit;
+        currentMask = current_mods & bit;
+        newMask     = newMods & bit;
 
         if ( currentMask &&
              currentMask != newMask ) {     /* modifier up event */
@@ -267,15 +265,15 @@ static void QZ_DoModifiers (unsigned int newMods) {
         }
     }
 
-    currentMods = newMods;
+    current_mods = newMods;
 }
 
 static void QZ_DoActivate (_THIS)
 {
-    inForeground = YES;
+    in_foreground = YES;
 
-    /* Regrab the mouse */
-    if (currentGrabMode == SDL_GRAB_ON) {
+    /* Regrab the mouse, only if it was previously grabbed */
+    if ( current_grab_mode == SDL_GRAB_ON ) {
         QZ_WarpWMCursor (this, SDL_VideoSurface->w / 2, SDL_VideoSurface->h / 2);
         CGAssociateMouseAndMouseCursorPosition (0);
     }
@@ -290,10 +288,10 @@ static void QZ_DoActivate (_THIS)
 
 static void QZ_DoDeactivate (_THIS) {
 
-    inForeground = NO;
+    in_foreground = NO;
 
     /* Ungrab mouse if it is grabbed */
-    if (currentGrabMode == SDL_GRAB_ON) {
+    if ( current_grab_mode == SDL_GRAB_ON ) {
         CGAssociateMouseAndMouseCursorPosition (1);
     }
 
@@ -343,7 +341,7 @@ static void QZ_PumpEvents (_THIS)
             BOOL isForGameWin;
     
             #define DO_MOUSE_DOWN(button, sendToWindow) do {                                 \
-                            if ( inForeground ) {                                            \
+                            if ( in_foreground ) {                                           \
                                 if ( (SDL_VideoSurface->flags & SDL_FULLSCREEN) ||           \
                                     NSPointInRect([event locationInWindow], winRect) )       \
                                         SDL_PrivateMouseButton (SDL_PRESSED, button, 0, 0);  \
@@ -366,11 +364,11 @@ static void QZ_PumpEvents (_THIS)
             switch (type) {
             
                 case NSLeftMouseDown:
-                    if ( NSCommandKeyMask & currentMods ) {
+                    if ( NSCommandKeyMask & current_mods ) {
                         last_virtual_button = 3;
                         DO_MOUSE_DOWN (3, 0);
                     }
-                    else if ( NSAlternateKeyMask & currentMods ) {
+                    else if ( NSAlternateKeyMask & current_mods ) {
                         last_virtual_button = 2;
                         DO_MOUSE_DOWN (2, 0);
                     }
@@ -392,22 +390,24 @@ static void QZ_PumpEvents (_THIS)
                 case NSOtherMouseUp:   DO_MOUSE_UP (2, 0);     break;
                 case NSRightMouseUp:   DO_MOUSE_UP (3, 0);     break;
                 case NSSystemDefined:
-                    //if ([event subtype] == 7) {
-                    //      unsigned int buttons;      // up to 32 mouse button states!
-                    //      buttons = [ event data2 ];
-                    //}
+                    /*
+                        Future: up to 32 "mouse" buttons can be handled.
+                        if ([event subtype] == 7) {
+                            unsigned int buttons;
+                            buttons = [ event data2 ];
+                    */
                     break;
                 case NSLeftMouseDragged:
                 case NSRightMouseDragged:
                 case NSOtherMouseDragged: /* usually middle mouse dragged */
                 case NSMouseMoved:
-                    if (currentGrabMode == SDL_GRAB_ON) {
+                    if (current_grab_mode == SDL_GRAB_ON) {
                 
-                        /**
-                         *  If input is grabbed, the cursor doesn't move,
-                         *  so we have to call the lowlevel window server
-                         *  function. This is less accurate but works OK.                         
-                         **/
+                        /*
+                            If input is grabbed, the cursor doesn't move,
+                            so we have to call the lowlevel window server
+                            function. This is less accurate but works OK.                         
+                        */
                         CGMouseDelta dx1, dy1;
                         CGGetLastMouseDelta (&dx1, &dy1);
                         dx += dx1;
@@ -415,12 +415,14 @@ static void QZ_PumpEvents (_THIS)
                     }
                     else if (warp_flag) {
                 
-                        /**
-                         * If we just warped the mouse, the cursor is frozen for a while.
-                         * So we have to use the lowlevel function until it
-                         * unfreezes. This really helps apps that continuously
-                         * warp the mouse to keep it in the game window.
-                         **/
+                        /*
+                            If we just warped the mouse, the cursor is frozen for a while.
+                            So we have to use the lowlevel function until it
+                            unfreezes. This really helps apps that continuously
+                            warp the mouse to keep it in the game window. Developers should
+                            really use GrabInput, but our GrabInput freezes the HW cursor,
+                            which doesn't cut it for some apps.
+                        */
                         Uint32 ticks;
                 
                         ticks = SDL_GetTicks();
@@ -438,14 +440,14 @@ static void QZ_PumpEvents (_THIS)
                     }
                     else if (firstMouseEvent) {
                         
-                        /**
-                         * Get the first mouse event in a possible
-                         * sequence of mouse moved events. Since we
-                         * use absolute coordinates, this serves to
-                         * compensate any inaccuracy in deltas, and
-                         * provides the first known mouse position,
-                         * since everything after this uses deltas
-                         **/
+                        /*
+                            Get the first mouse event in a possible
+                            sequence of mouse moved events. Since we
+                            use absolute coordinates, this serves to
+                            compensate any inaccuracy in deltas, and
+                            provides the first known mouse position,
+                            since everything after this uses deltas
+                        */
                         NSPoint p = [ event locationInWindow ];
                         QZ_PrivateCocoaToSDL(this, &p);
                         
@@ -455,12 +457,12 @@ static void QZ_PumpEvents (_THIS)
                     }
                     else {
                     
-                       /**
-                        * Get the amount moved since the last drag or move event,
-                        * add it on for one big move event at the end.
-                        **/
-                       dx += [ event deltaX ];
-                       dy += [ event deltaY ];
+                        /*
+                            Get the amount moved since the last drag or move event,
+                            add it on for one big move event at the end.
+                        */
+                        dx += [ event deltaX ];
+                        dy += [ event deltaY ];
                     }
                     break;
                 case NSScrollWheel:
@@ -474,13 +476,13 @@ static void QZ_PumpEvents (_THIS)
                     }
                     break;
                 case NSKeyUp:
-                    QZ_DoKey (SDL_RELEASED, event);
+                    QZ_DoKey (this, SDL_RELEASED, event);
                     break;
                 case NSKeyDown:
-                    QZ_DoKey (SDL_PRESSED, event);
+                    QZ_DoKey (this, SDL_PRESSED, event);
                     break;
                 case NSFlagsChanged:
-                    QZ_DoModifiers( [ event modifierFlags ] );
+                    QZ_DoModifiers(this, [ event modifierFlags ] );
                     break;
                 case NSAppKitDefined:
                     switch ( [ event subtype ] ) {
@@ -508,4 +510,3 @@ static void QZ_PumpEvents (_THIS)
     
     [ pool release ];
 }
-

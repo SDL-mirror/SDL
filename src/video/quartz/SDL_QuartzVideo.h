@@ -22,9 +22,9 @@
 
 /*    
     @file   SDL_QuartzVideo.h
-    @author Darrell Walisser
+    @author Darrell Walisser, Max Horn, et al.
     
-    @abstract SDL video driver for MacOS X.
+    @abstract SDL video driver for Mac OS X.
     
     @discussion
     
@@ -33,17 +33,17 @@
         - Keyboard repeat/mouse speed adjust (if needed)
         - Multiple monitor support (currently only main display)
         - Accelerated blitting support
-        - Fix white OpenGL window on minimize (fixed)
-        - Find out what events should be sent/ignored if window is mimimized
+        - Fix white OpenGL window on minimize (fixed) (update: broken again on 10.2)
+        - Find out what events should be sent/ignored if window is minimized
         - Find a way to deal with external resolution/depth switch while app is running
-        - Resizeable windows
+        - Resizeable windows (done)
         - Check accuracy of QZ_SetGamma()
     Problems:
         - OGL not working in full screen with software renderer
         - SetColors sets palette correctly but clears framebuffer
         - Crash in CG after several mode switches (I think this has been fixed)
         - Retained windows don't draw their title bar quite right (OS Bug) (not using retained windows)
-        - Cursor in 8 bit modes is screwy (might just be Radeon PCI bug)
+        - Cursor in 8 bit modes is screwy (might just be Radeon PCI bug) (update: not just Radeon)
         - Warping cursor delays mouse events for a fraction of a second,
           there is a hack around this that helps a bit
 */
@@ -62,11 +62,11 @@
 #include "SDL_events_c.h"
 
 /* 
-   Add methods to get at private members of NSScreen. 
-   Since there is a bug in Apple's screen switching code
-   that does not update this variable when switching
-   to fullscreen, we'll set it manually (but only for the
-   main screen).
+    Add methods to get at private members of NSScreen. 
+    Since there is a bug in Apple's screen switching code
+    that does not update this variable when switching
+    to fullscreen, we'll set it manually (but only for the
+    main screen).
 */
 @interface NSScreen (NSScreenAccess)
 - (void) setFrame:(NSRect)frame;
@@ -79,8 +79,10 @@
 }
 @end
 
-/* This is a workaround to directly access NSOpenGLContext's CGL context */
-/* We need to do this in order to check for errors */
+/* 
+    This is a workaround to directly access NSOpenGLContext's CGL context
+    We need this to check for errors NSOpenGLContext doesn't support
+*/
 @interface NSOpenGLContext (CGLContextAccess)
 - (CGLContextObj) cglContext;
 @end
@@ -92,8 +94,10 @@
 }
 @end
 
-/* Structure for rez switch gamma fades */
-/* We can hide the monitor flicker by setting the gamma tables to 0 */
+/* 
+    Structure for rez switch gamma fades
+    We can hide the monitor flicker by setting the gamma tables to 0
+*/
 #define QZ_GAMMA_TABLE_SIZE 256
 
 typedef struct {
@@ -112,14 +116,22 @@ typedef struct SDL_PrivateVideoData {
     CFDictionaryRef    save_mode;          /* original mode of the display */
     CFArrayRef         mode_list;          /* list of available fullscreen modes */
     CGDirectPaletteRef palette;            /* palette of an 8-bit display */
-    NSOpenGLContext    *gl_context;        /* object that represents an OpenGL rendering context */
+    NSOpenGLContext    *gl_context;        /* OpenGL rendering context */
     Uint32             width, height, bpp; /* frequently used data about the display */
-    Uint32             flags;              /* flags for mode, for teardown purposes */
+    Uint32             flags;              /* flags for current mode, for teardown purposes */
     Uint32             video_set;          /* boolean; indicates if video was set correctly */
     Uint32             warp_flag;          /* boolean; notify to event loop that a warp just occured */
     Uint32             warp_ticks;         /* timestamp when the warp occured */
     NSWindow           *window;            /* Cocoa window to implement the SDL window */
-    NSQuickDrawView    *view;              /* the window's view; draw 2D into this view */
+    NSQuickDrawView    *view;              /* the window's view; draw 2D and OpenGL into this view */
+    SDL_Surface        *resize_icon;       /* icon for the resize badge, we have to draw it by hand */
+    SDL_GrabMode       current_grab_mode;  /* default value is SDL_GRAB_OFF */
+    BOOL               in_foreground;      /* boolean; indicate if app is in foreground or not */
+    SDL_Rect           **client_mode_list; /* resolution list to pass back to client */
+    SDLKey             keymap[256];        /* Mac OS X to SDL key mapping */
+    Uint32             current_mods;       /* current keyboard modifiers, to track modifier state */
+    Uint32             last_virtual_button;/* last virtual mouse button pressed */
+    
     ImageDescriptionHandle yuv_idh;
     MatrixRecordPtr        yuv_matrix;
     DecompressorComponent  yuv_codec;
@@ -146,6 +158,14 @@ typedef struct SDL_PrivateVideoData {
 #define video_set (this->hidden->video_set)
 #define warp_ticks (this->hidden->warp_ticks)
 #define warp_flag (this->hidden->warp_flag)
+#define resize_icon (this->hidden->resize_icon)
+#define current_grab_mode (this->hidden->current_grab_mode)
+#define in_foreground (this->hidden->in_foreground)
+#define client_mode_list (this->hidden->client_mode_list)
+#define keymap (this->hidden->keymap)
+#define current_mods (this->hidden->current_mods)
+#define last_virtual_button (this->hidden->last_virtual_button)
+
 #define yuv_idh (this->hidden->yuv_idh)
 #define yuv_matrix (this->hidden->yuv_matrix)
 #define yuv_codec (this->hidden->yuv_codec)
@@ -156,7 +176,13 @@ typedef struct SDL_PrivateVideoData {
 #define yuv_height (this->hidden->yuv_height)
 #define yuv_port (this->hidden->yuv_port)
 
-/* Obscuring code: maximum number of windows above ours (inclusive) */
+/* 
+    Obscuring code: maximum number of windows above ours (inclusive) 
+    
+    Note: this doesn't work too well in practice and should be
+    phased out when we add OpenGL 2D acceleration. It was never
+    enabled in the first place, so this shouldn't be a problem ;-)
+*/
 #define kMaxWindows 256
 
 /* Some of the Core Graphics Server API for obscuring code */
@@ -171,10 +197,11 @@ typedef struct SDL_PrivateVideoData {
 #define kCGSWindowLevelUtility        3
 #define kCGSWindowLevelNormal         0
 
-/* For completeness; We never use these window levels, they are always below us
-#define kCGSWindowLevelMBarShadow -20
-#define kCGSWindowLevelDesktopPicture -2147483647
-#define kCGSWindowLevelDesktop        -2147483648
+/* 
+    For completeness; We never use these window levels, they are always below us
+    #define kCGSWindowLevelMBarShadow -20
+    #define kCGSWindowLevelDesktopPicture -2147483647
+    #define kCGSWindowLevelDesktop        -2147483648
 */
 
 typedef CGError       CGSError;
@@ -227,7 +254,7 @@ static int          QZ_ToggleFullScreen (_THIS, int on);
 static int          QZ_SetColors        (_THIS, int first_color,
                                          int num_colors, SDL_Color *colors);
 static void         QZ_DirectUpdate     (_THIS, int num_rects, SDL_Rect *rects);
-static int 	     QZ_LockWindow       (_THIS, SDL_Surface *surface);
+static int          QZ_LockWindow       (_THIS, SDL_Surface *surface);
 static void         QZ_UnlockWindow     (_THIS, SDL_Surface *surface);
 static void         QZ_UpdateRects      (_THIS, int num_rects, SDL_Rect *rects);
 static void         QZ_VideoQuit        (_THIS);
@@ -246,8 +273,8 @@ static int QZ_SetGammaRamp (_THIS, Uint16 *ramp);
 static int QZ_GetGammaRamp (_THIS, Uint16 *ramp);
 
 /* OpenGL functions */
-static int    QZ_SetupOpenGL (_THIS, int bpp, Uint32 flags);
-static void   QZ_TearDownOpenGL (_THIS);
+static int    QZ_SetupOpenGL       (_THIS, int bpp, Uint32 flags);
+static void   QZ_TearDownOpenGL    (_THIS);
 static void*  QZ_GL_GetProcAddress (_THIS, const char *proc);
 static int    QZ_GL_GetAttribute   (_THIS, SDL_GLattr attrib, int* value);
 static int    QZ_GL_MakeCurrent    (_THIS);
@@ -271,13 +298,12 @@ static void         QZ_InitOSKeymap     (_THIS);
 static void         QZ_PumpEvents       (_THIS);
 
 /* Window Manager functions */
-static void QZ_SetCaption    (_THIS, const char *title, const char *icon);
-static void QZ_SetIcon       (_THIS, SDL_Surface *icon, Uint8 *mask);
-static int  QZ_IconifyWindow (_THIS);
+static void QZ_SetCaption        (_THIS, const char *title, const char *icon);
+static void QZ_SetIcon           (_THIS, SDL_Surface *icon, Uint8 *mask);
+static int  QZ_IconifyWindow     (_THIS);
 static SDL_GrabMode QZ_GrabInput (_THIS, SDL_GrabMode grab_mode);
 /*static int  QZ_GetWMInfo     (_THIS, SDL_SysWMinfo *info);*/
 
 /* YUV functions */
 static SDL_Overlay* QZ_CreateYUVOverlay (_THIS, int width, int height,
                                          Uint32 format, SDL_Surface *display);
-
