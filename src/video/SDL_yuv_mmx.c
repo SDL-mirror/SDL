@@ -232,14 +232,14 @@ void ColorRGBDitherYV12MMX1X( int *colortab, Uint32 *rgb_2_pix,
 		 "popl %%ebx\n"
 		 :
 		 : "m" (cr), "r"(cb),"r"(lum),
-		 "r"(row1),"r"(cols),"r"(row2),"m"(x),"m"(y),"m"(mod),
-         [_MMX_0080w] "m" (*MMX_0080w),
-         [_MMX_00FFw] "m" (*MMX_00FFw),
-         [_MMX_FF00w] "m" (*MMX_FF00w),
-         [_MMX_VgrnRGB] "m" (*MMX_VgrnRGB),
-         [_MMX_VredRGB] "m" (*MMX_VredRGB),
-         [_MMX_UgrnRGB] "m" (*MMX_UgrnRGB),
-         [_MMX_UbluRGB] "m" (*MMX_UbluRGB)
+		   "r"(row1),"r"(cols),"r"(row2),"m"(x),"m"(y),"m"(mod),
+                   [_MMX_0080w] "m" (*MMX_0080w),
+                   [_MMX_00FFw] "m" (*MMX_00FFw),
+                   [_MMX_FF00w] "m" (*MMX_FF00w),
+                   [_MMX_VgrnRGB] "m" (*MMX_VgrnRGB),
+                   [_MMX_VredRGB] "m" (*MMX_VredRGB),
+                   [_MMX_UgrnRGB] "m" (*MMX_UgrnRGB),
+                   [_MMX_UbluRGB] "m" (*MMX_UbluRGB)
 		 );
 }
 
@@ -269,21 +269,21 @@ void Color565DitherYV12MMX1X( int *colortab, Uint32 *rgb_2_pix,
          "movd           (%%ebx),                %%mm1\n" // 4 Cr                0  0  0  0 v3 v2 v1 v0
          "punpcklbw      %%mm7,                  %%mm0\n" // 4 W cb   0 u3  0 u2  0 u1  0 u0
          "punpcklbw      %%mm7,                  %%mm1\n" // 4 W cr   0 v3  0 v2  0 v1  0 v0
-         "psubw          _MMX_0080w,             %%mm0\n"
-         "psubw          _MMX_0080w,             %%mm1\n"
+         "psubw          %[_MMX_0080w],             %%mm0\n"
+         "psubw          %[_MMX_0080w],             %%mm1\n"
          "movq           %%mm0,                  %%mm2\n" // Cb                   0 u3  0 u2  0 u1  0 u0
          "movq           %%mm1,                  %%mm3\n" // Cr
-         "pmullw         _MMX_Ugrn565,           %%mm2\n" // Cb2green 0 R3  0 R2  0 R1  0 R0
+         "pmullw         %[_MMX_Ugrn565],           %%mm2\n" // Cb2green 0 R3  0 R2  0 R1  0 R0
          "movq           (%2),                   %%mm6\n" // L1      l7 L6 L5 L4 L3 L2 L1 L0
-         "pmullw         _MMX_Ublu5x5,           %%mm0\n" // Cb2blue
-         "pand           _MMX_00FFw,             %%mm6\n" // L1      00 L6 00 L4 00 L2 00 L0
-         "pmullw         _MMX_Vgrn565,           %%mm3\n" // Cr2green
+         "pmullw         %[_MMX_Ublu5x5],           %%mm0\n" // Cb2blue
+         "pand           %[_MMX_00FFw],             %%mm6\n" // L1      00 L6 00 L4 00 L2 00 L0
+         "pmullw         %[_MMX_Vgrn565],           %%mm3\n" // Cr2green
          "movq           (%2),                   %%mm7\n" // L2
-         "pmullw         _MMX_Vred5x5,           %%mm1\n" // Cr2red
+         "pmullw         %[_MMX_Vred5x5],           %%mm1\n" // Cr2red
          "psrlw          $8,                     %%mm7\n"        // L2           00 L7 00 L5 00 L3 00 L1
-         "pmullw         _MMX_Ycoeff,            %%mm6\n" // lum1
+         "pmullw         %[_MMX_Ycoeff],            %%mm6\n" // lum1
          "paddw          %%mm3,                  %%mm2\n" // Cb2green + Cr2green == green
-         "pmullw         _MMX_Ycoeff,            %%mm7\n" // lum2
+         "pmullw         %[_MMX_Ycoeff],            %%mm7\n" // lum2
 
          "movq           %%mm6,                  %%mm4\n" // lum1
          "paddw          %%mm0,                  %%mm6\n" // lum1 +blue 00 B6 00 B4 00 B2 00 B0
@@ -301,11 +301,11 @@ void Color565DitherYV12MMX1X( int *colortab, Uint32 *rgb_2_pix,
          "punpcklbw      %%mm4,                  %%mm4\n"
          "punpcklbw      %%mm5,                  %%mm5\n"
 
-         "pand           _MMX_red565,            %%mm4\n"
+         "pand           %[_MMX_red565],            %%mm4\n"
          "psllw          $3,                     %%mm5\n" // GREEN       1
          "punpcklbw      %%mm6,                  %%mm6\n"
-         "pand           _MMX_grn565,            %%mm5\n"
-         "pand           _MMX_red565,            %%mm6\n"
+         "pand           %[_MMX_grn565],            %%mm5\n"
+         "pand           %[_MMX_red565],            %%mm6\n"
          "por            %%mm5,                  %%mm4\n" //
          "psrlw          $11,                    %%mm6\n" // BLUE        1
          "movq           %%mm3,                  %%mm5\n" // lum2
@@ -319,23 +319,23 @@ void Color565DitherYV12MMX1X( int *colortab, Uint32 *rgb_2_pix,
          "packuswb       %%mm3,                  %%mm3\n"
          "packuswb       %%mm5,                  %%mm5\n"
          "packuswb       %%mm7,                  %%mm7\n"
-         "pand           _MMX_00FFw,             %%mm6\n" // L3
+         "pand           %[_MMX_00FFw],             %%mm6\n" // L3
          "punpcklbw      %%mm3,                  %%mm3\n"
          "punpcklbw      %%mm5,                  %%mm5\n"
-         "pmullw         _MMX_Ycoeff,            %%mm6\n" // lum3
+         "pmullw         %[_MMX_Ycoeff],            %%mm6\n" // lum3
          "punpcklbw      %%mm7,                  %%mm7\n"
          "psllw          $3,                     %%mm5\n" // GREEN 2
-         "pand           _MMX_red565,            %%mm7\n"
-         "pand           _MMX_red565,            %%mm3\n"
+         "pand           %[_MMX_red565],            %%mm7\n"
+         "pand           %[_MMX_red565],            %%mm3\n"
          "psrlw          $11,                    %%mm7\n" // BLUE  2
-         "pand           _MMX_grn565,            %%mm5\n"
+         "pand           %[_MMX_grn565],            %%mm5\n"
          "por            %%mm7,                  %%mm3\n"
          "movq           (%2,%4),                %%mm7\n" // L4 load lum2
          "por            %%mm5,                  %%mm3\n" //
          "psrlw          $8,                     %%mm7\n" // L4
          "movq           %%mm4,                  %%mm5\n"
          "punpcklwd      %%mm3,                  %%mm4\n"
-         "pmullw         _MMX_Ycoeff,            %%mm7\n" // lum4
+         "pmullw         %[_MMX_Ycoeff],            %%mm7\n" // lum4
          "punpckhwd      %%mm3,                  %%mm5\n"
 
          "movq           %%mm4,                  (%3)\n"  // write row1
@@ -362,11 +362,11 @@ void Color565DitherYV12MMX1X( int *colortab, Uint32 *rgb_2_pix,
          "punpcklbw      %%mm5,                  %%mm5\n"
          "punpcklbw      %%mm6,                  %%mm6\n"
          "psllw          $3,                     %%mm5\n" // GREEN 3
-         "pand           _MMX_red565,            %%mm4\n"
+         "pand           %[_MMX_red565],            %%mm4\n"
          "psraw          $6,                     %%mm3\n" // psr 6
          "psraw          $6,                     %%mm0\n"
-         "pand           _MMX_red565,            %%mm6\n" // BLUE
-         "pand           _MMX_grn565,            %%mm5\n"
+         "pand           %[_MMX_red565],            %%mm6\n" // BLUE
+         "pand           %[_MMX_grn565],            %%mm5\n"
          "psrlw          $11,                    %%mm6\n" // BLUE  3
          "por            %%mm5,                  %%mm4\n"
          "psraw          $6,                     %%mm7\n"
@@ -377,11 +377,11 @@ void Color565DitherYV12MMX1X( int *colortab, Uint32 *rgb_2_pix,
          "punpcklbw      %%mm3,                  %%mm3\n"
          "punpcklbw      %%mm0,                  %%mm0\n"
          "punpcklbw      %%mm7,                  %%mm7\n"
-         "pand           _MMX_red565,            %%mm3\n"
-         "pand           _MMX_red565,            %%mm7\n" // BLUE
+         "pand           %[_MMX_red565],            %%mm3\n"
+         "pand           %[_MMX_red565],            %%mm7\n" // BLUE
          "psllw          $3,                     %%mm0\n" // GREEN 4
          "psrlw          $11,                    %%mm7\n"
-         "pand           _MMX_grn565,            %%mm0\n"
+         "pand           %[_MMX_grn565],            %%mm0\n"
          "por            %%mm7,                  %%mm3\n"
          "por            %%mm0,                  %%mm3\n"
 
@@ -414,15 +414,15 @@ void Color565DitherYV12MMX1X( int *colortab, Uint32 *rgb_2_pix,
 	:
 	:"m" (cr), "r"(cb),"r"(lum),
 	 "r"(row1),"r"(cols),"r"(row2),"m"(x),"m"(y),"m"(mod),
-	[_MMX_0080w] "m" (*MMX_0080w),
-	[_MMX_Ugrn565] "m" (*MMX_Ugrn565),
-	[_MMX_Ublu5x5] "m" (*MMX_Ublu5x5),
-	[_MMX_00FFw] "m" (*MMX_00FFw),
-	[_MMX_Vgrn565] "m" (*MMX_Vgrn565),
-	[_MMX_Vred5x5] "m" (*MMX_Vred5x5),
-	[_MMX_Ycoeff] "m" (*MMX_Ycoeff),
-	[_MMX_red565] "m" (*MMX_red565),
-	[_MMX_grn565] "m" (*MMX_grn565)
+	 [_MMX_0080w] "m" (*MMX_0080w),
+	 [_MMX_Ugrn565] "m" (*MMX_Ugrn565),
+	 [_MMX_Ublu5x5] "m" (*MMX_Ublu5x5),
+	 [_MMX_00FFw] "m" (*MMX_00FFw),
+	 [_MMX_Vgrn565] "m" (*MMX_Vgrn565),
+	 [_MMX_Vred5x5] "m" (*MMX_Vred5x5),
+	 [_MMX_Ycoeff] "m" (*MMX_Ycoeff),
+	 [_MMX_red565] "m" (*MMX_red565),
+	 [_MMX_grn565] "m" (*MMX_grn565)
          );
 }
 
