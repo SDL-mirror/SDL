@@ -15,5 +15,7 @@ BWINDOW_SRCS = 			\
 	SDL_sysmouse_c.h	\
 	SDL_sysvideo.cc		\
 	SDL_syswm.cc		\
-	SDL_syswm_c.h
+	SDL_syswm_c.h		\
+	SDL_sysyuv.cc		\
+	SDL_sysyuv.h
 

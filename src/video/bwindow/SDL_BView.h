@@ -20,6 +20,9 @@
     slouken@libsdl.org
 */
 
+#ifndef _SDL_BView_h
+#define _SDL_BView_h
+
 #ifdef SAVE_RCSID
 static char rcsid =
  "@(#) $Id$";
@@ -109,3 +112,5 @@ private:
 	BBitmap *image;
 	int xoff, yoff;
 };
+
+#endif /* _SDL_BView_h */

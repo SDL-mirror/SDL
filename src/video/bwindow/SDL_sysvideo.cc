@@ -47,6 +47,8 @@ extern "C" {
 #include "SDL_events_c.h"
 #include "SDL_syswm_c.h"
 #include "SDL_lowvideo.h"
+#include "SDL_yuvfuncs.h"
+#include "SDL_sysyuv.h"
 
 #define BEOS_HIDDEN_SIZE	32	/* starting hidden window size */
 
@@ -65,6 +67,7 @@ static void BE_UnlockHWSurface(_THIS, SDL_Surface *surface);
 static void BE_FreeHWSurface(_THIS, SDL_Surface *surface);
 
 static int BE_ToggleFullScreen(_THIS, int fullscreen);
+static SDL_Overlay *BE_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SDL_Surface *display);
 
 /* OpenGL functions */
 #ifdef HAVE_OPENGL
@@ -136,6 +139,7 @@ static SDL_VideoDevice *BE_CreateDevice(int devindex)
 
 	device->free = BE_DeleteDevice;
 	device->ToggleFullScreen = BE_ToggleFullScreen;
+	device->CreateYUVOverlay = BE_CreateYUVOverlay;
 
 	/* Set the driver flags */
 	device->handles_any_size = 1;
@@ -330,6 +334,11 @@ static bool BE_FindClosestFSMode(_THIS, int width, int height, int bpp,
 	uint32 i, nmodes;
 	SDL_Rect **modes;
 	display_mode *dmodes;
+	display_mode current;
+	float current_refresh;
+	bscreen.GetMode(&current);
+	current_refresh = (1000 * current.timing.pixel_clock) / 
+	                  (current.timing.h_total * current.timing.v_total);
 
 	modes = SDL_modelist[((bpp+7)/8)-1];
 	for ( i=0; modes[i] && (modes[i]->w > width) &&
@@ -351,6 +360,15 @@ static bool BE_FindClosestFSMode(_THIS, int width, int height, int bpp,
 	}
 	if ( i != nmodes ) {
 		*mode = dmodes[i];
+		if ((mode->virtual_width <= current.virtual_width) &&
+		    (mode->virtual_height <= current.virtual_height)) {
+			float new_refresh = (1000 * mode->timing.pixel_clock) /
+			                    (mode->timing.h_total * mode->timing.v_total);
+			if (new_refresh < current_refresh) {
+				mode->timing.pixel_clock = (uint32)((mode->timing.h_total * mode->timing.v_total)
+				                                    * current_refresh / 1000);
+			}
+		}
 		return true;
 	} else {
 		return false;

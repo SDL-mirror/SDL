@@ -28,6 +28,7 @@ static char rcsid =
 #ifndef _SDL_lowvideo_h
 #define _SDL_lowvideo_h
 
+#include "SDL_BWin.h"
 #include "SDL_mouse.h"
 #include "SDL_sysvideo.h"
 
@@ -55,6 +56,8 @@ struct SDL_PrivateVideoData {
 	/* Keyboard state variables */
 	int key_flip;
 	struct key_info keyinfo[2];
+	
+	SDL_Overlay *overlay;
 };
 /* Old variable names */
 #define SDL_Win		(_this->hidden->SDL_Win)
@@ -66,5 +69,6 @@ struct SDL_PrivateVideoData {
 #define last_point	(_this->hidden->last_point)
 #define key_flip	(_this->hidden->key_flip)
 #define keyinfo		(_this->hidden->keyinfo)
+#define current_overlay (_this->hidden->overlay)
 
 #endif /* _SDL_lowvideo_h */
