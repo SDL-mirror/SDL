@@ -1125,10 +1125,10 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 			UINT swp_flags;
 
 			SDL_resizing = 1;
-			bounds.left = 0;
-			bounds.top = 0;
-			bounds.right = video->w;
+			bounds.top    = 0;
 			bounds.bottom = video->h;
+			bounds.left   = 0;
+			bounds.right  = video->w;
 			AdjustWindowRectEx(&bounds, GetWindowLong(SDL_Window, GWL_STYLE), FALSE, 0);
 			width = bounds.right-bounds.left;
 			height = bounds.bottom-bounds.top;
@@ -1483,10 +1483,10 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 
 		/* Set the size of the window, centering and adjusting */
 		SDL_resizing = 1;
-		bounds.left = 0;
-		bounds.top = 0;
-		bounds.right = video->w;
+		bounds.top    = 0;
 		bounds.bottom = video->h;
+		bounds.left   = 0;
+		bounds.right  = video->w;
 		AdjustWindowRectEx(&bounds, GetWindowLong(SDL_Window, GWL_STYLE), FALSE, 0);
 		width = bounds.right-bounds.left;
 		height = bounds.bottom-bounds.top;
@@ -1765,10 +1765,10 @@ static int DX5_HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,
 	/* Set it up.. the desination must have a DDRAW surface */
 	src_surface = src->hwdata->dd_writebuf;
 	dst_surface = dst->hwdata->dd_writebuf;
-	rect.top    = srcrect->y;
-	rect.bottom = srcrect->y+srcrect->h;
-	rect.left   = srcrect->x;
-	rect.right  = srcrect->x+srcrect->w;
+	rect.top    = (LONG)srcrect->y;
+	rect.bottom = (LONG)srcrect->y+srcrect->h;
+	rect.left   = (LONG)srcrect->x;
+	rect.right  = (LONG)srcrect->x+srcrect->w;
 	if ( (src->flags & SDL_SRCCOLORKEY) == SDL_SRCCOLORKEY )
 		flags = DDBLTFAST_SRCCOLORKEY;
 	else
@@ -1858,10 +1858,10 @@ static int DX5_FillHWRect(_THIS, SDL_Surface *dst, SDL_Rect *dstrect, Uint32 col
  fprintf(stderr, "HW accelerated fill at (%d,%d)\n", dstrect->x, dstrect->y);
 #endif
 	dst_surface = dst->hwdata->dd_writebuf;
-	area.top = dstrect->y;
-	area.bottom = dstrect->y+dstrect->h;
-	area.left = dstrect->x;
-	area.right = dstrect->x+dstrect->w;
+	area.top    = (LONG)dstrect->y;
+	area.bottom = (LONG)dstrect->y+dstrect->h;
+	area.left   = (LONG)dstrect->x;
+	area.right  = (LONG)dstrect->x+dstrect->w;
 	bltfx.dwSize = sizeof(bltfx);
 #if defined(NONAMELESSUNION)
 	bltfx.u5.dwFillColor = color;
@@ -1985,14 +1985,14 @@ void DX5_WindowUpdate(_THIS, int numrects, SDL_Rect *rects)
 	RECT src, dst;
 
 	for ( i=0; i<numrects; ++i ) {
-		src.top = rects[i].y;
-		src.bottom = rects[i].y+rects[i].h;
-		src.left = rects[i].x;
-		src.right = rects[i].x+rects[i].w;
-		dst.top = SDL_bounds.top+src.top;
-		dst.left = SDL_bounds.left+src.left;
+		src.top    = (LONG)rects[i].y;
+		src.bottom = (LONG)rects[i].y+rects[i].h;
+		src.left   = (LONG)rects[i].x;
+		src.right  = (LONG)rects[i].x+rects[i].w;
+		dst.top    = SDL_bounds.top+src.top;
+		dst.left   = SDL_bounds.left+src.left;
 		dst.bottom = SDL_bounds.top+src.bottom;
-		dst.right = SDL_bounds.left+src.right;
+		dst.right  = SDL_bounds.left+src.right;
 		result = IDirectDrawSurface3_Blt(SDL_primary, &dst, 
 					this->screen->hwdata->dd_surface, &src,
 							DDBLT_WAIT, NULL);
