@@ -160,6 +160,15 @@ LONG
 		}
 		return(0);
 
+#if defined(SC_SCREENSAVE) && defined(SC_MONITORPOWER)
+		case WM_SYSCOMMAND: {
+			if ((wParam&0xFFF0)==SC_SCREENSAVE ||
+				(wParam&0xFFF0)==SC_MONITORPOWER)
+					return(0);
+		}
+		/* Fall through to default processing */
+#endif /* SC_SCREENSAVE && SC_MONITORPOWER */
+
 		default: {
 			/* Only post the event if we're watching for it */
 			if ( SDL_ProcessEvents[SDL_SYSWMEVENT] == SDL_ENABLE ) {
