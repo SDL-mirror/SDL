@@ -850,9 +850,9 @@ static int X11_CreateWindow(_THIS, SDL_Surface *screen,
 	if ( ! SDL_windowid ) {
 		XMapWindow(SDL_Display, SDL_Window);
 		XMapWindow(SDL_Display, WMwindow);
+		X11_WaitMapped(this, WMwindow);
 		if ( flags & SDL_FULLSCREEN ) {
 			screen->flags |= SDL_FULLSCREEN;
-			X11_WaitMapped(this, WMwindow);
 			X11_EnterFullScreen(this);
 		} else {
 			screen->flags &= ~SDL_FULLSCREEN;
