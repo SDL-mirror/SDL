@@ -77,7 +77,6 @@ static char *SDL_joylist[MAX_JOYSTICKS];
 struct joystick_hwdata {
 	int fd;
 	/* The current linux joystick driver maps hats to two axes */
-	int analog_hat;		/* Well, except for analog hats */
 	struct hwdata_hat {
 		int axis[2];
 	} *hats;
@@ -366,14 +365,8 @@ static SDL_bool JS_ConfigJoystick(SDL_Joystick *joystick, int fd)
 	/* Remap hats and balls */
 	if (handled) {
 		if ( joystick->nhats > 0 ) {
-			/* HACK: Analog hats map to only one axis */
-			if (old_axes == (joystick->naxes+joystick->nhats)){
-				joystick->hwdata->analog_hat = 1;
-			} else {
-				if ( allocate_hatdata(joystick) < 0 ) {
-					joystick->nhats = 0;
-				}
-				joystick->hwdata->analog_hat = 0;
+			if ( allocate_hatdata(joystick) < 0 ) {
+				joystick->nhats = 0;
 			}
 		}
 		if ( joystick->nballs > 0 ) {
@@ -547,20 +540,6 @@ void HandleHat(SDL_Joystick *stick, Uint8 hat, int axis, int value)
 	}
 }
 
-/* This was necessary for the Wingman Extreme Analog joystick */
-static __inline__
-void HandleAnalogHat(SDL_Joystick *stick, Uint8 hat, int value)
-{
-	const Uint8 position_map[] = {
-		SDL_HAT_UP,
-		SDL_HAT_RIGHT,
-		SDL_HAT_DOWN,
-		SDL_HAT_LEFT,
-		SDL_HAT_CENTERED
-	};
-	SDL_PrivateJoystickHat(stick, hat, position_map[(value/16000)+2]);
-}
-
 static __inline__
 void HandleBall(SDL_Joystick *stick, Uint8 ball, int axis, int value)
 {
@@ -589,21 +568,12 @@ static __inline__ void JS_HandleEvents(SDL_Joystick *joystick)
 					break;
 				}
 				events[i].number -= joystick->naxes;
-				if ( joystick->hwdata->analog_hat ) {
-					other_axis = events[i].number;
-					if ( other_axis < joystick->nhats ) {
-						HandleAnalogHat(joystick, other_axis,
-							events[i].value);
-						break;
-					}
-				} else {
-					other_axis = (events[i].number / 2);
-					if ( other_axis < joystick->nhats ) {
-						HandleHat(joystick, other_axis,
-							events[i].number%2,
-							events[i].value);
-						break;
-					}
+				other_axis = (events[i].number / 2);
+				if ( other_axis < joystick->nhats ) {
+					HandleHat(joystick, other_axis,
+						events[i].number%2,
+						events[i].value);
+					break;
 				}
 				events[i].number -= joystick->nhats*2;
 				other_axis = (events[i].number / 2);
