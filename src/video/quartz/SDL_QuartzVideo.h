@@ -227,6 +227,8 @@ static int          QZ_ToggleFullScreen (_THIS, int on);
 static int          QZ_SetColors        (_THIS, int first_color,
                                          int num_colors, SDL_Color *colors);
 static void         QZ_DirectUpdate     (_THIS, int num_rects, SDL_Rect *rects);
+static int 	     QZ_LockWindow       (_THIS, SDL_Surface *surface);
+static void         QZ_UnlockWindow     (_THIS, SDL_Surface *surface);
 static void         QZ_UpdateRects      (_THIS, int num_rects, SDL_Rect *rects);
 static void         QZ_VideoQuit        (_THIS);
 

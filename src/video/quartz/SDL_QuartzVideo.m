@@ -576,10 +576,12 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
         LockPortBits ( [ window_view qdPort ] );
         current->pixels = GetPixBaseAddr ( GetPortPixMap ( [ window_view qdPort ] ) );
         current->pitch  = GetPixRowBytes ( GetPortPixMap ( [ window_view qdPort ] ) );
-
+        UnlockPortBits ( [ window_view qdPort ] );
+        
         current->flags |= SDL_SWSURFACE;
         current->flags |= SDL_PREALLOC;
-
+        current->flags |= SDL_ASYNCBLIT;
+        
         if ( flags & SDL_NOFRAME )
             current->flags |= SDL_NOFRAME;
         if ( flags & SDL_RESIZABLE )
@@ -590,7 +592,9 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
             current->pixels += 22 * current->pitch;
         }
 
-        this->UpdateRects = QZ_UpdateRects;
+        this->UpdateRects     = QZ_UpdateRects;
+        this->LockHWSurface   = QZ_LockWindow;
+        this->UnlockHWSurface = QZ_UnlockWindow;
     }
 
     /* Save flags to ensure correct teardown */
@@ -911,6 +915,17 @@ static int QZ_IsWindowObscured (NSWindow *window) {
 #else
     return SDL_TRUE;
 #endif
+}
+
+/* Locking functions for the software window buffer */
+static int QZ_LockWindow (_THIS, SDL_Surface *surface) {
+    
+    return LockPortBits ( [ window_view qdPort ] );
+}
+
+static void QZ_UnlockWindow (_THIS, SDL_Surface *surface) {
+
+    UnlockPortBits ( [ window_view qdPort ] );
 }
 
 static void QZ_UpdateRects (_THIS, int numRects, SDL_Rect *rects) {
