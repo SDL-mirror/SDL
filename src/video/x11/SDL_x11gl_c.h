@@ -77,6 +77,11 @@ struct SDL_PrivateGLData {
 	 ( Display* dpy,
 	   GLXDrawable drawable );
 
+    const char (*glXQueryExtensionsString)
+	    ( Display* dpy,
+	      int screen);
+
+    
 #endif /* HAVE_OPENGL */
 };
 

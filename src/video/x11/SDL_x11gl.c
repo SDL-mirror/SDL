@@ -229,11 +229,45 @@ void X11_GL_Shutdown(_THIS)
 
 #ifdef HAVE_OPENGL
 
+static int ExtensionSupported(const char *extension, const char *all_extensions)
+{
+	const GLubyte *extensions = NULL;
+	const GLubyte *start;
+	GLubyte *where, *terminator;
+
+	/* Extension names should not have spaces. */
+	where = (GLubyte *) strchr(extension, ' ');
+	if (where || *extension == '\0')
+	      return 0;
+	
+	extensions = glGetString(GL_EXTENSIONS);
+	/* It takes a bit of care to be fool-proof about parsing the
+	 *      OpenGL extensions string. Don't be fooled by sub-strings,
+	 *           etc. */
+	
+	start = extensions;
+	
+	for (;;)
+	{
+		where = (GLubyte *) strstr((const char *) start, extension);
+		if (!where) break;
+		
+		terminator = where + strlen(extension);
+		if (where == start || *(where - 1) == ' ')
+	        if (*terminator == ' ' || *terminator == '\0') return 1;
+						  
+		start = terminator;
+	}
+	
+	return 0;
+}
+
 /* Make the current context active */
 int X11_GL_MakeCurrent(_THIS)
 {
 	int retval;
-
+	const char *glx_extensions;
+	
 	retval = 0;
 	if ( ! this->gl_data->glXMakeCurrent(GFX_Display,
 	                                     SDL_Window, glx_context) ) {
@@ -242,6 +276,30 @@ int X11_GL_MakeCurrent(_THIS)
 	}
 	XSync( GFX_Display, False );
 
+	
+	/* 
+	 * The context is now current, check for glXReleaseBuffersMESA() 
+	 * extension. If extension is _not_ supported, destroy the pointer 
+	 * (to make sure it will not be called in X11_GL_Shutdown() ).
+	 * 
+	 * DRI/Mesa drivers include glXReleaseBuffersMESA() in the libGL.so, 
+	 * but there's no need to call it (is is only needed for some old 
+	 * non-DRI drivers).
+	 * 
+	 * When using for example glew (http://glew.sf.net), dlsym() for
+	 * glXReleaseBuffersMESA() returns the pointer from the glew library
+	 * (namespace conflict).
+	 *
+	 * The glXReleaseBuffersMESA() pointer in the glew is NULL, if the 
+	 * driver doesn't support this extension. So blindly calling it will
+	 * cause segfault with DRI/Mesa drivers!
+	 * 
+	 */
+	
+	glx_extensions = this->gl_data->glXQueryExtensionsString(GFX_Display, SDL_Screen);
+	if (!ExtensionSupported("glXReleaseBuffersMESA", glx_extensions)) this->gl_data->glXReleaseBuffersMESA = NULL;
+	
+	
 	/* More Voodoo X server workarounds... Grr... */
 	SDL_Lock_EventThread();
 	X11_CheckDGAMouse(this);
@@ -382,16 +440,21 @@ int X11_GL_LoadLibrary(_THIS, const char* path)
 		(void (*)(Display *, GLXDrawable)) dlsym(handle, "glXSwapBuffers");
 	this->gl_data->glXGetConfig =
 		(int (*)(Display *, XVisualInfo *, int, int *)) dlsym(handle, "glXGetConfig");
+	this->gl_data->glXQueryExtensionsString =
+		(const char (*)(Display *, int)) dlsym(handle, "glXQueryExtensionsString");
+	
 	/* We don't compare below for this in case we're not using Mesa. */
 	this->gl_data->glXReleaseBuffersMESA =
 		(void (*)(Display *, GLXDrawable)) dlsym( handle, "glXReleaseBuffersMESA" );
-
+	
+	
 	if ( (this->gl_data->glXChooseVisual == NULL) || 
 	     (this->gl_data->glXCreateContext == NULL) ||
 	     (this->gl_data->glXDestroyContext == NULL) ||
 	     (this->gl_data->glXMakeCurrent == NULL) ||
 	     (this->gl_data->glXSwapBuffers == NULL) ||
-	     (this->gl_data->glXGetConfig == NULL) ) {
+	     (this->gl_data->glXGetConfig == NULL) ||
+	     (this->gl_data->glXQueryExtensionsString == NULL)) {
 		SDL_SetError("Could not retrieve OpenGL functions");
 		return -1;
 	}
