@@ -46,6 +46,13 @@ static char rcsid =
 #include "SDL_audiodev_c.h"
 #include "SDL_esdaudio.h"
 
+#ifdef ESD_DYNAMIC
+#include "SDL_name.h"
+#include "SDL_loadso.h"
+#else
+#define SDL_NAME(X)	X
+#endif
+
 /* The tag name used by ESD audio */
 #define ESD_DRIVER_NAME		"esd"
 
@@ -56,6 +63,68 @@ static void ESD_PlayAudio(_THIS);
 static Uint8 *ESD_GetAudioBuf(_THIS);
 static void ESD_CloseAudio(_THIS);
 
+#ifdef ESD_DYNAMIC
+
+static const char *esd_library = ESD_DYNAMIC;
+static void *esd_handle = NULL;
+static int esd_loaded = 0;
+
+static int (*SDL_NAME(esd_open_sound))( const char *host );
+static int (*SDL_NAME(esd_close))( int esd );
+static int (*SDL_NAME(esd_play_stream))( esd_format_t format, int rate,
+                                         const char *host, const char *name );
+static struct {
+	const char *name;
+	void **func;
+} esd_functions[] = {
+	{ "esd_open_sound",	(void **)&SDL_NAME(esd_open_sound)	},
+	{ "esd_close",		(void **)&SDL_NAME(esd_close)		},
+	{ "esd_play_stream",	(void **)&SDL_NAME(esd_play_stream)	},
+};
+
+static void UnloadESDLibrary()
+{
+	if ( esd_loaded ) {
+		SDL_UnloadObject(esd_handle);
+		esd_handle = NULL;
+		esd_loaded = 0;
+	}
+}
+
+static int LoadESDLibrary(void)
+{
+	int i, retval = -1;
+
+	esd_handle = SDL_LoadObject(esd_library);
+	if ( esd_handle ) {
+		esd_loaded = 1;
+		retval = 0;
+		for ( i=0; i<SDL_TABLESIZE(esd_functions); ++i ) {
+			*esd_functions[i].func = SDL_LoadFunction(esd_handle, esd_functions[i].name);
+			if ( ! esd_functions[i].func ) {
+				retval = -1;
+				UnloadESDLibrary();
+				break;
+			}
+		}
+	}
+	return retval;
+}
+
+#else
+
+static void UnloadESDLibrary()
+{
+	return;
+}
+
+static int LoadESDLibrary(void)
+{
+	return 0;
+}
+
+#endif /* ESD_DYNAMIC */
+
 /* Audio driver bootstrap functions */
 
 static int Audio_Available(void)
@@ -64,11 +133,15 @@ static int Audio_Available(void)
 	int available;
 
 	available = 0;
-	connection = esd_open_sound(NULL);
+	if ( LoadESDLibrary() < 0 ) {
+		return available;
+	}
+	connection = SDL_NAME(esd_open_sound)(NULL);
 	if ( connection >= 0 ) {
 		available = 1;
-		esd_close(connection);
+		SDL_NAME(esd_close)(connection);
 	}
+	UnloadESDLibrary();
 	return(available);
 }
 
@@ -76,6 +149,7 @@ static void Audio_DeleteDevice(SDL_AudioDevice *device)
 {
 	free(device->hidden);
 	free(device);
+	UnloadESDLibrary();
 }
 
 static SDL_AudioDevice *Audio_CreateDevice(int devindex)
@@ -83,6 +157,7 @@ static SDL_AudioDevice *Audio_CreateDevice(int devindex)
 	SDL_AudioDevice *this;
 
 	/* Initialize all variables that we clean on shutdown */
+	LoadESDLibrary();
 	this = (SDL_AudioDevice *)malloc(sizeof(SDL_AudioDevice));
 	if ( this ) {
 		memset(this, 0, (sizeof *this));
@@ -174,7 +249,7 @@ static void ESD_CloseAudio(_THIS)
 		mixbuf = NULL;
 	}
 	if ( audio_fd >= 0 ) {
-		close(audio_fd);
+		SDL_NAME(esd_close)(audio_fd);
 		audio_fd = -1;
 	}
 }
@@ -231,7 +306,7 @@ static int ESD_OpenAudio(_THIS, SDL_AudioSpec *spec)
 #endif
 
 	/* Open a connection to the ESD audio server */
-	audio_fd = esd_play_stream(format, spec->freq, NULL, get_progname());
+	audio_fd = SDL_NAME(esd_play_stream)(format, spec->freq, NULL, get_progname());
 	if ( audio_fd < 0 ) {
 		SDL_SetError("Couldn't open ESD connection");
 		return(-1);

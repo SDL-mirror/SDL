@@ -18,6 +18,7 @@ libSDLinclude_HEADERS =		\
 	SDL_joystick.h		\
 	SDL_keyboard.h		\
 	SDL_keysym.h		\
+	SDL_loadso.h		\
 	SDL_main.h		\
 	SDL_mouse.h		\
 	SDL_mutex.h		\
