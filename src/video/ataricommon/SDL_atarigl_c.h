@@ -48,6 +48,7 @@ struct SDL_PrivateGLData {
 	/* to convert the shadow buffer to the screen format */
 	void (*CopyShadow)(_THIS, SDL_Surface *surface);	
 
+#ifdef HAVE_OPENGL
 	OSMesaContext	ctx;
 
 	/* OpenGL functions */
@@ -70,6 +71,7 @@ struct SDL_PrivateGLData {
 	int width, height;
 	GLenum format;
 	GLint depth,stencil,accum;
+#endif
 };
 
 /* Variable names */
