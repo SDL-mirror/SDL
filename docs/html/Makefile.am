@@ -199,4 +199,4 @@ EXTRA_DIST = \
 	thread.html	\
 	time.html	\
 	video.html	\
-	wm.html	\
+	wm.html
