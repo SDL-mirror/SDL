@@ -36,11 +36,50 @@ static char rcsid =
 #define DEFAULT_GL_DRIVER_PATH "OPENGL32.DLL"
 #endif
 
+/* If setting the HDC fails, we may need to recreate the window (MSDN) */
+static int WIN_GL_ResetWindow(_THIS)
+{
+	int status = 0;
+	int can_reset = 1;
+
+	/* If we were passed a window, then we can't create a new one */
+	if ( SDL_windowid ) {
+		can_reset = 0;
+	}
+#ifndef _WIN32_WCE /* FIXME WinCE needs the UNICODE version of CreateWindow() */
+	if ( can_reset ) {
+		/* Save the existing window attributes */
+		LONG style;
+		RECT rect = { 0, 0, 0, 0 };
+		style = GetWindowLong(SDL_Window, GWL_STYLE);
+		GetWindowRect(SDL_Window, &rect);
+		DestroyWindow(SDL_Window);
+		SDL_Window = CreateWindow(SDL_Appname, SDL_Appname,
+		                          style,
+					  rect.left, rect.top,
+                                          (rect.right-rect.left)+1,
+                                          (rect.top-rect.bottom)+1,
+		                          NULL, NULL, SDL_Instance, NULL);
+		if ( SDL_Window ) {
+			this->SetCaption(this, this->wm_title, this->wm_icon);
+		} else {
+			SDL_SetError("Couldn't create window");
+			status = -1;
+		}
+	} else
+#endif /* !_WIN32_WCE */
+	{
+		SDL_SetError("Unable to reset window for OpenGL context");
+		status = -1;
+	}
+	return(status);
+}
 
 int WIN_GL_SetupWindow(_THIS)
 {
 	int retval;
 #ifdef HAVE_OPENGL
+	int i;
 	int pixel_format;
 
 	/* load the gl driver from a default path */
@@ -51,46 +90,57 @@ int WIN_GL_SetupWindow(_THIS)
 		}
 	}
 
-	/* Get the window device context for our OpenGL drawing */
-	GL_hdc = GetDC(SDL_Window);
-	if ( GL_hdc == NULL ) {
-		SDL_SetError("Unable to get DC for SDL_Window");
-		return(-1);
-	}
+	for ( i=0; ; ++i ) {
+		/* Get the window device context for our OpenGL drawing */
+		GL_hdc = GetDC(SDL_Window);
+		if ( GL_hdc == NULL ) {
+			SDL_SetError("Unable to get DC for SDL_Window");
+			return(-1);
+		}
 
-	/* Set up the pixel format descriptor with our needed format */
-	memset(&GL_pfd, 0, sizeof(GL_pfd));
-	GL_pfd.nSize = sizeof(GL_pfd);
-	GL_pfd.nVersion = 1;
-	GL_pfd.dwFlags = (PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL);
-	if ( this->gl_config.double_buffer ) {
-		GL_pfd.dwFlags |= PFD_DOUBLEBUFFER;
-	}
-	GL_pfd.iPixelType = PFD_TYPE_RGBA;
-	GL_pfd.cColorBits = this->gl_config.buffer_size;
-	GL_pfd.cRedBits = this->gl_config.red_size;
-	GL_pfd.cGreenBits = this->gl_config.green_size;
-	GL_pfd.cBlueBits = this->gl_config.blue_size;
-	GL_pfd.cAlphaBits = this->gl_config.alpha_size;
-	GL_pfd.cAccumRedBits = this->gl_config.accum_red_size;
-	GL_pfd.cAccumGreenBits = this->gl_config.accum_green_size;
-	GL_pfd.cAccumBlueBits = this->gl_config.accum_blue_size;
-	GL_pfd.cAccumAlphaBits = this->gl_config.accum_alpha_size;
-	GL_pfd.cAccumBits =
-		(GL_pfd.cAccumRedBits + GL_pfd.cAccumGreenBits +
-		 GL_pfd.cAccumBlueBits + GL_pfd.cAccumAlphaBits);
-	GL_pfd.cDepthBits = this->gl_config.depth_size;
-	GL_pfd.cStencilBits = this->gl_config.stencil_size;
+		/* Set up the pixel format descriptor with our needed format */
+		memset(&GL_pfd, 0, sizeof(GL_pfd));
+		GL_pfd.nSize = sizeof(GL_pfd);
+		GL_pfd.nVersion = 1;
+		GL_pfd.dwFlags = (PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL);
+		if ( this->gl_config.double_buffer ) {
+			GL_pfd.dwFlags |= PFD_DOUBLEBUFFER;
+		}
+		GL_pfd.iPixelType = PFD_TYPE_RGBA;
+		GL_pfd.cColorBits = this->gl_config.buffer_size;
+		GL_pfd.cRedBits = this->gl_config.red_size;
+		GL_pfd.cGreenBits = this->gl_config.green_size;
+		GL_pfd.cBlueBits = this->gl_config.blue_size;
+		GL_pfd.cAlphaBits = this->gl_config.alpha_size;
+		GL_pfd.cAccumRedBits = this->gl_config.accum_red_size;
+		GL_pfd.cAccumGreenBits = this->gl_config.accum_green_size;
+		GL_pfd.cAccumBlueBits = this->gl_config.accum_blue_size;
+		GL_pfd.cAccumAlphaBits = this->gl_config.accum_alpha_size;
+		GL_pfd.cAccumBits =
+			(GL_pfd.cAccumRedBits + GL_pfd.cAccumGreenBits +
+			 GL_pfd.cAccumBlueBits + GL_pfd.cAccumAlphaBits);
+		GL_pfd.cDepthBits = this->gl_config.depth_size;
+		GL_pfd.cStencilBits = this->gl_config.stencil_size;
 
-	/* Choose and set the closest available pixel format */
-	pixel_format = ChoosePixelFormat(GL_hdc, &GL_pfd);
-	if ( !pixel_format ) {
-		SDL_SetError("No matching GL pixel format available");
-		return(-1);
-	}
-	if( !SetPixelFormat(GL_hdc, pixel_format, &GL_pfd) ) {
-		SDL_SetError("Unable to set HDC pixel format");
-		return(-1);
+		/* Choose and set the closest available pixel format */
+		pixel_format = ChoosePixelFormat(GL_hdc, &GL_pfd);
+		if ( !pixel_format ) {
+			SDL_SetError("No matching GL pixel format available");
+			return(-1);
+		}
+		if( !SetPixelFormat(GL_hdc, pixel_format, &GL_pfd) ) {
+			if ( i == 0 ) {
+				/* First time through, try resetting the window */
+				if ( WIN_GL_ResetWindow(this) < 0 ) {
+					return(-1);
+				}
+				continue;
+			}
+			SDL_SetError("Unable to set HDC pixel format");
+			return(-1);
+		}
+		/* We either succeeded or failed by this point */
+		break;
 	}
 	DescribePixelFormat(GL_hdc, pixel_format, sizeof(GL_pfd), &GL_pfd);
 
