@@ -86,6 +86,7 @@ static int SVGA_Available(void)
 
 	/* See if we are connected to a virtual terminal */
 	console = STDIN_FILENO;
+#if 0 /* This is no longer needed, SVGAlib can switch consoles for us */
 	if ( console >= 0 ) {
 		struct stat sb;
 		struct vt_mode dummy;
@@ -95,6 +96,7 @@ static int SVGA_Available(void)
 			console = -1;
 		}
 	}
+#endif /* 0 */
 
 	/* See if SVGAlib 2.0 is available */
 	svgalib2 = open("/dev/svga", O_RDONLY);
@@ -225,8 +227,8 @@ static void SVGA_UpdateVideoInfo(_THIS)
 	modeinfo = vga_getmodeinfo(vga_getcurrentmode());
 	this->info.video_mem = modeinfo->memory;
 	/* FIXME: Add hardware accelerated blit information */
-#if 0
-printf("Hardware accelerated blit: %savailable\n", modeinfo->haveblit ? "" : "not ");
+#ifdef SVGALIB_DEBUG
+	printf("Hardware accelerated blit: %savailable\n", modeinfo->haveblit ? "" : "not ");
 #endif
 }
 
