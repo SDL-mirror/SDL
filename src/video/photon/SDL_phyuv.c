@@ -29,7 +29,6 @@ static char rcsid =
 
 #include <stdlib.h>
 #include <string.h>
-//#include <ncurses.h> //only for bool
 #ifndef bool
 #define bool char
 #define TRUE 1
@@ -104,7 +103,7 @@ struct private_yuvhwdata {
 	FRAMEDATA *FrameData0;
 	FRAMEDATA *FrameData1;
 	PgScalerProps_t	props;
-	PgScalerCaps_t		caps;
+	PgScalerCaps_t	caps;
 	PgVideoChannel_t *channel;
 	SDL_Rect CurrentWindow;
 	long format;
@@ -142,7 +141,7 @@ grab_ptrs2(PgVideoChannel_t *channel, FRAMEDATA *Frame0, FRAMEDATA *Frame1 )
 
 }
 
-SDL_Overlay *ph_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SDL_Surface *display)
+SDL_Overlay* ph_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SDL_Surface *display)
 {
 	SDL_Overlay *overlay;
 	struct private_yuvhwdata *hwdata;
@@ -162,7 +161,8 @@ SDL_Overlay *ph_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SD
 	PhDCSetCurrent(0);  //Need to set draw context to window esp. if we we in Offscreeen mode
 
 	/* Create the overlay structure */
-	overlay = (SDL_Overlay *)malloc(sizeof *overlay);
+	overlay = (SDL_Overlay *)malloc(sizeof(SDL_Overlay));
+        memset(overlay, 0x00, sizeof(SDL_Overlay));
 	if ( overlay == NULL ) {
 		SDL_OutOfMemory();
 		return(NULL);
@@ -178,7 +178,8 @@ SDL_Overlay *ph_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SD
 	overlay->hwfuncs = &ph_yuvfuncs;
 
 	/* Create the pixel data and lookup tables */
-	hwdata = (struct private_yuvhwdata *)malloc(sizeof *hwdata);
+	hwdata = (struct private_yuvhwdata *)malloc(sizeof(struct private_yuvhwdata));
+        memset(hwdata, 0x00, sizeof(struct private_yuvhwdata));
 	overlay->hwdata = hwdata;
 	if ( hwdata == NULL ) {
 		SDL_OutOfMemory();
@@ -186,54 +187,41 @@ SDL_Overlay *ph_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SD
 		return(NULL);
 	}
 	
-		if (overlay->hwdata->channel == NULL)
-	{
-	
-  
-		if ((overlay->hwdata->channel = PgCreateVideoChannel(Pg_VIDEO_CHANNEL_SCALER,0)) == NULL) 
-		{
-			SDL_SetError("Create channel failed:%s\n", strerror( errno ));
-			free(overlay->hwdata);
-			free(overlay);
-			return(NULL);
-		}
-#if 0
-		overlay->hwdata->caps.size = sizeof (overlay->hwdata->caps);
-		PgGetScalerCapabilities(overlay->hwdata->channel, 0, &(overlay->hwdata->caps));
-		if (overlay->hwdata->caps.flags & Pg_SCALER_CAP_DOUBLE_BUFFER)
-			overlay->hwdata->props.flags |= Pg_SCALER_PROP_DOUBLE_BUFFER;
-#endif	
-	}
+    if (overlay->hwdata->channel == NULL)
+    {
+        if ((overlay->hwdata->channel = PgCreateVideoChannel(Pg_VIDEO_CHANNEL_SCALER,0)) == NULL) 
+        {
+            SDL_SetError("ph_CreateYUVOverlay(): Create channel failed: %s\n", strerror( errno ));
+            free(overlay->hwdata);
+            free(overlay);
+            return (NULL);
+        }
+    }
 
-overlay->hwdata->CurrentWindow.x = 0;
-overlay->hwdata->CurrentWindow.y = 0;
-overlay->hwdata->CurrentWindow.w = 320;
-overlay->hwdata->CurrentWindow.h = 240;
+    overlay->hwdata->CurrentWindow.x = 0;
+    overlay->hwdata->CurrentWindow.y = 0;
+    overlay->hwdata->CurrentWindow.w = 320;
+    overlay->hwdata->CurrentWindow.h = 240;
 
+    overlay->hwdata->State = OVERLAY_STATE_UNINIT;
 
+    overlay->hwdata->screen_bpp = 2;
+    overlay->hwdata->scaler_on = FALSE;
+    overlay->hwdata->screen_width = 1024;
+    overlay->hwdata->screen_height  = 768;
 
-overlay->hwdata->State = OVERLAY_STATE_UNINIT;
+    overlay->hwdata->FrameData0 = (FRAMEDATA *) malloc((size_t)(sizeof( FRAMEDATA)));
+    overlay->hwdata->FrameData1 = (FRAMEDATA *) malloc((size_t)(sizeof( FRAMEDATA)));
 
-overlay->hwdata->screen_bpp = 2;
-overlay->hwdata->scaler_on = FALSE;
-
-overlay->hwdata->screen_width = 1024;
-overlay->hwdata->screen_height  = 768;
-
-overlay->hwdata->FrameData0 = (FRAMEDATA *) malloc((size_t)(sizeof( FRAMEDATA)));
-overlay->hwdata->FrameData1 = (FRAMEDATA *) malloc((size_t)(sizeof( FRAMEDATA)));
-
-overlay->hwdata->caps.size = sizeof(overlay->hwdata->caps);
-
+    overlay->hwdata->caps.size = sizeof(overlay->hwdata->caps);
 
 //Note you really don't need to do this for SDL as you are given a format, but this is a good example
 
-xv_port = -1;
-i=0;
-	
+    xv_port = -1;
+    i=0;
+
 while(PgGetScalerCapabilities(overlay->hwdata->channel, i++, &(overlay->hwdata->caps)) == 0) 
 {
-
 		if(overlay->hwdata->caps.format  == Pg_VIDEO_FORMAT_YV12) //in SDL
 		{
 			
