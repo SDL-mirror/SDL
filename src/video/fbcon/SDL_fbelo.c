@@ -29,6 +29,7 @@ static char rcsid =
 #include <unistd.h>
 #include <sys/time.h>
 #include <ctype.h>
+#include <string.h>
 
 #include "SDL_fbvideo.h"
 #include "SDL_fbelo.h"
