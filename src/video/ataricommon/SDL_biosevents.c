@@ -139,7 +139,7 @@ void AtariBios_PumpEvents(_THIS)
 			
 		/* Key unpressed ? */
 		if (bios_previouskeyboard[i] && !bios_currentkeyboard[i])
-			SDL_PrivateKeyboard(SDL_RELEASED, TranslateKey(i, 0, &keysym));
+			SDL_PrivateKeyboard(SDL_RELEASED, TranslateKey(i, bios_currentascii[i], &keysym));
 	}
 
 	AtariXbios_PostMouseEvents(this);

@@ -144,7 +144,7 @@ void AtariGemdos_PumpEvents(_THIS)
 			
 		/* Key unpressed ? */
 		if (gemdos_previouskeyboard[i] && !gemdos_currentkeyboard[i])
-			SDL_PrivateKeyboard(SDL_RELEASED, TranslateKey(i, 0, &keysym));
+			SDL_PrivateKeyboard(SDL_RELEASED, TranslateKey(i, gemdos_currentascii[i], &keysym));
 	}
 
 	AtariXbios_PostMouseEvents(this);
