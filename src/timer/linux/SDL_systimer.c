@@ -18,6 +18,8 @@
 
     Sam Lantinga
     slouken@libsdl.org
+
+    RDTSC stuff by lompik (lompik@voila.fr) 20/03/2002 
 */
 
 #ifdef SAVE_RCSID
@@ -54,24 +56,87 @@ static char rcsid =
 #define USE_NANOSLEEP
 #endif
 
+#if defined(i386) || defined(__i386__)
+/* Actually, this isn't reliable on multi-cpu systems, so is disabled */
+/*#define USE_RDTSC*/
+#endif
+
+
+#ifdef USE_RDTSC 
+
+/* The first ticks value of the application */
+static unsigned long long start;
+static float cpu_mhz1000 = 0.0f;
+
+#if 1
+/* This is for old binutils version that don't recognize rdtsc mnemonics.
+   But all binutils version supports this.
+*/
+#define rdtsc(t) asm(".byte 0x0f, 0x31; " : "=A" (t));   
+#else
+#define rdtsc(t) asm("rdtsc" : "=A" (t));
+#endif
+
+static float calc_cpu_mhz(void)
+{
+	float cpu_mhz;
+	unsigned long long tsc_start;
+	unsigned long long tsc_end;
+	struct timeval tv_start, tv_end;
+	long usec_delay;
+
+	rdtsc(tsc_start);
+	gettimeofday(&tv_start, NULL);
+	sleep(1);
+	rdtsc(tsc_end);
+	gettimeofday(&tv_end, NULL);
+	usec_delay = 1000000L * (tv_end.tv_sec - tv_start.tv_sec) +
+	                        (tv_end.tv_usec - tv_start.tv_usec);
+	cpu_mhz = (float)(tsc_end-tsc_start) / usec_delay;
+#if 0
+	printf("cpu MHz\t\t: %.3f\n", cpu_mhz);
+#endif
+	return cpu_mhz;
+}
+
+#else
 
 /* The first ticks value of the application */
 static struct timeval start;
 
+#endif  /* USE_RDTSC */
+
+
 void SDL_StartTicks(void)
 {
 	/* Set first ticks value */
+#ifdef USE_RDTSC
+	if ( ! cpu_mhz1000 ) {
+		cpu_mhz1000 = calc_cpu_mhz() * 1000.0f;
+	}
+	rdtsc(start);
+#else
 	gettimeofday(&start, NULL);
+#endif /* USE_RDTSC */
 }
 
 Uint32 SDL_GetTicks (void)
 {
+#ifdef USE_RDTSC 
+	unsigned long long now;
+	if ( ! cpu_mhz1000 ) {
+		return 0; /* Shouldn't happen. BUG!! */
+	}
+	rdtsc(now);
+	return (Uint32)((now-start)/cpu_mhz1000);
+#else
 	struct timeval now;
 	Uint32 ticks;
 
 	gettimeofday(&now, NULL);
 	ticks=(now.tv_sec-start.tv_sec)*1000+(now.tv_usec-start.tv_usec)/1000;
 	return(ticks);
+#endif /* USE_RDTSC */
 }
 
 void SDL_Delay (Uint32 ms)
