@@ -5,9 +5,9 @@
 #undef main
 #endif
 
-extern int SDL_run(int argc, char **argv);
+extern int SDL_main(int argc, char *argv[]);
 
 int main(int argc, char *argv[])
 {
-	return(SDL_run(argc, argv));
+	return(SDL_main(argc, argv));
 }

@@ -40,6 +40,17 @@ Using the Simple DirectMedia Layer with Project Builder
 
 These instructions are for using Apple's Project Builder IDE to build SDL applications.
 
+- First steps
+
+The first thing to do is to unpack the PBProjects.tar.gz archive in the
+top level SDL directory (where the PBProjects.tar.gz archive resides).
+Because Stuffit Expander will unpack the archive into a subdirectory,
+you should unpack the archive manually from the command line:
+	cd [path_to_SDL_source]
+	tar zxf PBProjects.tar.gz
+This will create a new folder called PBProjects, which you can browse
+normally from the Finder.
+
 - Building the Framework
 
 The SDL Library is packaged as a framework bundle, an organized

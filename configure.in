@@ -1865,7 +1865,7 @@ case "$target" in
         fi
         # The MacOS X platform requires special setup
         SDL_CFLAGS="$SDL_CFLAGS -F/System/Library/Frameworks/Carbon.framework"
-        SDL_LIBS="$SDL_LIBS -framework Carbon"
+        SDL_LIBS="-lSDLmain $SDL_LIBS -framework Carbon"
         ;;
     *)
         AC_MSG_ERROR(Unsupported target:  Please add to configure.in)
