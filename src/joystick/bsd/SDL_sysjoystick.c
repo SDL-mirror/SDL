@@ -32,6 +32,8 @@ static char rcsid =
  "@(#) $Id$";
 #endif
 
+#include <sys/param.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -406,11 +408,20 @@ report_alloc(struct report *r, struct report_desc *rd, int repind)
 {
 	int len;
 
-#ifdef USBHID_NEW
-	len = hid_report_size(rd, repinfo[repind].kind, r->rid);
-#else
+#ifdef __FreeBSD__
+# if (__FreeBSD_version >= 470000)
+	len = hid_report_size(rd, r->rid, repinfo[repind].kind);
+# else
 	len = hid_report_size(rd, repinfo[repind].kind, &r->rid);
 #endif
+#else
+# ifdef USBHID_NEW
+	len = hid_report_size(rd, repinfo[repind].kind, &r->rid);
+# else
+	len = hid_report_size(rd, repinfo[repind].kind, r->rid);
+# endif
+#endif
+
 	if (len < 0) {
 		SDL_SetError("Negative HID report size");
 		return (-1);
