@@ -290,7 +290,7 @@ static int DFBToSDLPixelFormat (DFBSurfacePixelFormat pixelformat, SDL_PixelForm
       return -1;
     }
 
-  format->BitsPerPixel = BITS_PER_PIXEL(pixelformat);
+  format->BitsPerPixel = DFB_BITS_PER_PIXEL(pixelformat);
 
   return 0;
 }
