@@ -1280,12 +1280,11 @@ CheckPTHREAD()
             pthread_lib=""
             ;;
         *-*-osf*)
+            pthread_cflags="-D_REENTRANT"
             if test x$ac_cv_prog_gcc = xyes; then
-                pthread_cflags="-D_REENTRANT"
                 pthread_lib="-lpthread -lrt"
             else
-                pthread_cflags="-pthread"
-                pthread_lib="-lpthread -lrt"
+                pthread_lib="-lpthread -lexc -lrt"
             fi
             ;;
         *)

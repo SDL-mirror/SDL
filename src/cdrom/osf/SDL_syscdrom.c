@@ -22,9 +22,10 @@
 
 /* Functions for system-level CD-ROM audio control */
 
-//#define DEBUG_CDROM 1
+/* #define DEBUG_CDROM 1 */
 
 #include <sys/types.h>
+#include <dirent.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <io/cam/cdrom.h>
@@ -141,11 +142,22 @@ static void AddDrive(char *drive, struct stat *stbuf)
 
 int  SDL_SYS_CDInit(void)
 {
-    /* checklist: /dev/rdisk/cdrom?c
+    /* checklist:
+     *
+     * Tru64 5.X (/dev/rdisk/cdrom?c)
+     * dir: /dev/rdisk, name: cdrom
+     *
+     * Digital UNIX 4.0X (/dev/rrz?c)
+     * dir: /dev, name: rrz
      *
      */
-    static char *checklist[] = {
-	"?0 rdisk/cdrom?",NULL};
+    struct {
+	char *dir;
+	char *name;
+    } checklist[] = {
+	{"/dev/rdisk", "cdrom"},
+	{"/dev", "rrz"},
+	{NULL, NULL}};
     char drive[32];
     char *SDLcdrom;
     int i, j, exists;
@@ -195,37 +207,32 @@ int  SDL_SYS_CDInit(void)
 	}
     }
     /* Scan the system for CD-ROM drives */
-    for ( i=0; checklist[i]; ++i ) {
-	if ( checklist[i][0] == '?' ) {
-	    char *insert;
-	    exists = 1;
-	    for ( j=checklist[i][1]; exists; ++j ) {
-		sprintf(drive, "/dev/%sc", &checklist[i][3]);
-		insert = strchr(drive, '?');
-		if ( insert != NULL ) {
-		    *insert = j;
-		}
-		switch (CheckDrive(drive, &stbuf)) {
-		    /* Drive exists and is a CD-ROM */
-		    case 1:
-			AddDrive(drive, &stbuf);
-			break;
-			/* Drive exists, but isn't a CD-ROM */
-		    case 0:
-			break;
-			/* Drive doesn't exist */
-		    case -1:
-			exists = 0;
-			break;
-		}
-	    }
+    for ( i = 0; checklist[i].dir; ++i) {
+	DIR *devdir;
+	struct dirent *devent;
+	int name_len;
+
+	devdir = opendir(checklist[i].dir);
+	if (devdir) {
+	    name_len = strlen(checklist[i].name);
+	    while (devent = readdir(devdir))
+		if (memcmp(checklist[i].name, devent->d_name, name_len) == 0)
+		    if (devent->d_name[devent->d_namlen-1] == 'c') {
+			sprintf(drive, "%s/%s", checklist[i].dir, devent->d_name);
+#ifdef DEBUG_CDROM
+			fprintf(stderr, "Try to add drive: %s\n", drive);
+#endif
+			if ( CheckDrive(drive, &stbuf) > 0 )
+			    AddDrive(drive, &stbuf);
+		    }
+	    closedir(devdir);
 	} else {
-	    sprintf(drive, "/dev/%s", checklist[i]);
-	    if ( CheckDrive(drive, &stbuf) > 0 ) {
-		AddDrive(drive, &stbuf);
-	    }
+#ifdef DEBUG_CDROM
+	    fprintf(stderr, "cannot open dir: %s\n", checklist[i].dir);
+#endif
 	}
     }
+
 /*
     SDLcdrom=malloc(sizeof(char) * 32);
     strcpy(SDLcdrom,"/dev/rdisk/cdrom0c");

@@ -1,14 +1,16 @@
-// MMX assembler version of SDL_MixAudio for signed little endian 16 bit samples and signed 8 bit samples
-// Copyright 2002 Stephane Marchesin (stephane.marchesin@wanadoo.fr)
-// This code is licensed under the LGPL (see COPYING for details)
-// 
-// Assumes buffer size in bytes is a multiple of 16
-// Assumes SDL_MIX_MAXVOLUME = 128
+/*
+    MMX assembler version of SDL_MixAudio for signed little endian 16 bit samples and signed 8 bit samples
+    Copyright 2002 Stephane Marchesin (stephane.marchesin@wanadoo.fr)
+    This code is licensed under the LGPL (see COPYING for details)
+ 
+    Assumes buffer size in bytes is a multiple of 16
+    Assumes SDL_MIX_MAXVOLUME = 128
+*/
 
 
-////////////////////////////////////////////////
-// Mixing for 16 bit signed buffers
-////////////////////////////////////////////////
+/***********************************************
+*   Mixing for 16 bit signed buffers
+***********************************************/
 
 #if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
 void SDL_MixAudio_MMX_S16(char* dst,char* src,unsigned int size,int volume)
