@@ -274,8 +274,8 @@ extern DECLSPEC int SDLCALL SDL_PollEvent(SDL_Event *event);
 extern DECLSPEC int SDLCALL SDL_WaitEvent(SDL_Event *event);
 
 /* Add an event to the event queue.
-   This function returns 0 if the event queue was full, or -1
-   if there was some other error.  Returns 1 on success.
+   This function returns 0 on success, or -1 if the event queue was full
+   or there was some other error.
  */
 extern DECLSPEC int SDLCALL SDL_PushEvent(SDL_Event *event);
 
