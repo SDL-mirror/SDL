@@ -1240,7 +1240,7 @@ static int    QZ_GL_GetAttribute   (_THIS, SDL_GLattr attrib, int* value) {
         return 0;
     }
 
-    glGetIntegerv (attr, value);
+    glGetIntegerv (attr, (GLint *)value);
     return 0;
 }
 

@@ -147,7 +147,7 @@ static void Mac_UnlockAudio(_THIS)
         return;
 
     /* Did we miss the chance to mix in an interrupt? Do it now. */
-    if ( BitAndAtomic (0xFFFFFFFF, &need_to_mix) ) {
+    if ( BitAndAtomic (0xFFFFFFFF, (UInt32 *) &need_to_mix) ) {
         /*
          * Note that this could be a problem if you missed an interrupt
          *  while the audio was locked, and get preempted by a second
@@ -184,7 +184,7 @@ static void callBackProc (SndChannel *chan, SndCommand *cmd_passed ) {
     * if audio device isn't locked, mix the next buffer to be queued in
     *  the memory block that just finished playing.
     */
-   if ( ! BitAndAtomic(0xFFFFFFFF, &audio_is_locked) ) {
+   if ( ! BitAndAtomic(0xFFFFFFFF, (UInt32 *) &audio_is_locked) ) {
       mix_buffer (audio, buffer[fill_me]);
    } 
 

@@ -231,9 +231,11 @@ static void QZ_SetIcon       (_THIS, SDL_Surface *icon, Uint8 *mask)
      SDL_GetClipRect(icon, &rrect);
      /* create a big endian RGBA surface */
      mergedSurface = SDL_CreateRGBSurface(SDL_SWSURFACE|SDL_SRCALPHA, 
-icon->w, icon->h, 32, 0xff<<24, 0xff<<16, 0xff<<8, 0xff<<0);
-     if (mergedSurface==NULL) { NSLog(@"Error creating surface for 
-merge"); goto freePool; }
+                        icon->w, icon->h, 32, 0xff<<24, 0xff<<16, 0xff<<8, 0xff<<0);
+     if (mergedSurface==NULL) {
+        NSLog(@"Error creating surface for merge");
+        goto freePool;
+    }
      if (SDL_BlitSurface(icon,&rrect,mergedSurface,&rrect)) {
          NSLog(@"Error blitting to mergedSurface");
          goto freePool;
