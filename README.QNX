@@ -7,10 +7,11 @@ new Photon3D runtime from http://developers.qnx.com. The versions
 of OS before 6.1.0 are not supported.
 
 Problems:
-1. While creating OpenGL context artificially  selected  software
-   renderer mode (QSSL made acceleration only for  Voodoo  boards
-   in fullscreen mode, sorry but I don't have this board, if  you
-   want acceleration - you may remove some line in source).
+1. While  creating  OpenGL  context  software  renderer  mode  is
+   artificially selected (QSSL made acceleration only for  Voodoo
+   boards in fullscreen mode, sorry but I don't have  this board,
+   if you want acceleration - you may remove some line  in source
+   code).
 2. Photon has some errors in detecting  how  much bits  per pixel
    videomode has.
 3. No  shared  libraries  yet.  We  need  manually  set  flag  to
@@ -31,7 +32,8 @@ Some building issues:
                 --disable-shared    \
                 --disable-video-opengl
 
-    In test directory also run ./configure script without x11 support, e.g.:
+    In test directory  also run  ./configure  script  without x11
+support, e.g.:
 
     ./configure  --with-sdl-prefix=/usr/local      \
                  --with-sdl-exec-prefix=/usr/local \

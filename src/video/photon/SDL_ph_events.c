@@ -74,7 +74,7 @@ static int ph_KeyRepeat(_THIS, PhKeyEvent_t* keyevent)
 					(peekevent->timestamp == event->timestamp)	
 				) {
 					repeated = 1;
-					 //PhEventNext( peekevent, EVENT_SIZE );  
+					 /* PhEventNext( peekevent, EVENT_SIZE ); */
 				}				
 			}
 		}
@@ -85,7 +85,7 @@ static int ph_KeyRepeat(_THIS, PhKeyEvent_t* keyevent)
 		}
 		break;
 
-		default: // no events pending
+		default: /* no events pending */
 	}
 	return(repeated);
 }
@@ -93,11 +93,12 @@ static int ph_KeyRepeat(_THIS, PhKeyEvent_t* keyevent)
 
 static int ph_WarpedMotion(_THIS, PhEvent_t *winEvent)
 {
-	PhPointerEvent_t *pointer = PhGetData( winEvent );
+/*	PhPointerEvent_t *pointer = PhGetData( winEvent ); */
 	PhRect_t *rect = PhGetRects( winEvent );
 
 	int centre_x, centre_y;
-	int dx, dy, abs_x, abs_y;
+	int dx, dy;
+        short abs_x, abs_y;
 	int posted;
 
 	centre_x = SDL_VideoSurface->w / 2;
@@ -155,177 +156,168 @@ static Uint8 ph2sdl_mousebutton( unsigned short button_state )
 
 static int ph_DispatchEvent(_THIS)
 {
-	int posted;
-	PhRect_t* rect;
-	PhPointerEvent_t* pointerEvent;
-	PhKeyEvent_t* keyEvent;
-	PhWindowEvent_t* winEvent;
-	int i, buttons;
-	SDL_Rect sdlrects[50]; 
+    int posted;
+    PhRect_t* rect;
+    PhPointerEvent_t* pointerEvent;
+    PhKeyEvent_t* keyEvent;
+    PhWindowEvent_t* winEvent;
+    int i, buttons;
+    SDL_Rect sdlrects[50]; 
 	
-	posted = 0;
+    posted = 0;
 	
-	switch (event->type) {
-		case Ph_EV_BOUNDARY:
+    switch (event->type)
+    {
+        case Ph_EV_BOUNDARY:
+        {
+            if (event->subtype == Ph_EV_PTR_ENTER)
+            {
+                posted = SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS);
+            }
+            else if (event->subtype ==Ph_EV_PTR_LEAVE)
+            {
+                posted = SDL_PrivateAppActive(0, SDL_APPMOUSEFOCUS);	
+            }
+        }
+        break;
+
+        case Ph_EV_PTR_MOTION_BUTTON:
+        case Ph_EV_PTR_MOTION_NOBUTTON:
+        {
+            if (SDL_VideoSurface)
+            {
+                pointerEvent = PhGetData(event);
+                rect = PhGetRects(event);
+
+                if (mouse_relative)
+                {
+                    posted = ph_WarpedMotion(this, event);
+                }
+                else
+                {
+                    posted = SDL_PrivateMouseMotion(0, 0, rect->ul.x, rect->ul.y);
+                }
+            }
+        }
+        break;
+
+        case Ph_EV_BUT_PRESS:
+        {
+            pointerEvent = PhGetData( event );
+            buttons = ph2sdl_mousebutton( pointerEvent->buttons );
+            if (buttons != 0)
+            {
+                posted = SDL_PrivateMouseButton(SDL_PRESSED, buttons, 0, 0);
+            }
+        }
+        break;
+
+        case Ph_EV_BUT_RELEASE:
+        {
+            pointerEvent = PhGetData(event);
+            buttons = ph2sdl_mousebutton(pointerEvent->buttons);
+            if (event->subtype == Ph_EV_RELEASE_REAL && buttons != 0)
+            {
+                posted = SDL_PrivateMouseButton(SDL_RELEASED, buttons, 0, 0);
+            }
+            else if(event->subtype == Ph_EV_RELEASE_PHANTOM)
+            {
+                /* If the mouse is outside the window,
+                 * only a phantom release event is sent, so
+                 * check if the window doesn't have mouse focus.
+                 * Not perfect, maybe checking the mouse button
+                 * state for Ph_EV_BOUNDARY events would be
+                 * better. */
+                if ((SDL_GetAppState() & SDL_APPMOUSEFOCUS) == 0)
 		{
-			if (event->subtype == Ph_EV_PTR_ENTER)
-				posted = SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS);
-			else if (event->subtype ==Ph_EV_PTR_LEAVE)
-				posted = SDL_PrivateAppActive(0, SDL_APPMOUSEFOCUS);	
-		}
-		break;
+                    posted = SDL_PrivateMouseButton(SDL_RELEASED, buttons, 0, 0);
+                }
+            }
+        }
+        break;
 
-		case Ph_EV_PTR_MOTION_BUTTON:
-		case Ph_EV_PTR_MOTION_NOBUTTON:
-		{
-			if ( SDL_VideoSurface ) {
-				pointerEvent = PhGetData( event );
-				rect = PhGetRects( event );
-				if( mouse_relative )
-				{
-					posted = ph_WarpedMotion(this, event);
-				}
-				else
-					posted = SDL_PrivateMouseMotion(0, 0,
-							rect->ul.x, rect->ul.y);
-			}
-		}
-		break;
+        case Ph_EV_WM:
+        {
+            winEvent = PhGetData(event);
 
-		case Ph_EV_BUT_PRESS:
-		{
-			pointerEvent = PhGetData( event );
-			buttons = ph2sdl_mousebutton( pointerEvent->buttons );
-			if( buttons != 0 )
-			posted = SDL_PrivateMouseButton( SDL_PRESSED, buttons,
-					0, 0 );
-		}
-		break;
+            /* losing focus */
+            if ((winEvent->event_f==Ph_WM_FOCUS) && (winEvent->event_state==Ph_WM_EVSTATE_FOCUSLOST))
+            {
+                set_motion_sensitivity(this, Ph_EV_PTR_MOTION_BUTTON);
+                posted = SDL_PrivateAppActive(0, SDL_APPINPUTFOCUS);	
 
-		case Ph_EV_BUT_RELEASE:
-		{
-			pointerEvent = PhGetData(event);
-			buttons = ph2sdl_mousebutton(pointerEvent->buttons);
-			if( event->subtype == Ph_EV_RELEASE_REAL && 
-					buttons != 0 )
-			{
-				posted = SDL_PrivateMouseButton( SDL_RELEASED,
-						buttons, 0, 0 );
-			}
-			else if( event->subtype == Ph_EV_RELEASE_PHANTOM )
-			{
-				/* If the mouse is outside the window,
-				 * only a phantom release event is sent, so
-				 * check if the window doesn't have mouse focus.
-				 * Not perfect, maybe checking the mouse button
-				 * state for Ph_EV_BOUNDARY events would be
-				 * better. */
-				if( ( SDL_GetAppState() & SDL_APPMOUSEFOCUS ) == 0 )
-				{
-					posted = SDL_PrivateMouseButton( SDL_RELEASED,
-						buttons, 0, 0 );
-				}
-			}
-		}
-		break;
+                /* Queue leaving fullscreen mode */
+                switch_waiting = 0x01;
+                switch_time = SDL_GetTicks() + 200;
+            }
+            /* gaining focus */
+            else if ((winEvent->event_f==Ph_WM_FOCUS) && (winEvent->event_state==Ph_WM_EVSTATE_FOCUS))
+            {
+                set_motion_sensitivity(this, -1);
+                posted = SDL_PrivateAppActive(1, SDL_APPINPUTFOCUS);
+            }
+            /* request to quit */
+            else if (winEvent->event_f==Ph_WM_CLOSE)
+            {
+                posted = SDL_PrivateQuit();
+            }
+            /* request to resize */
+            else if (winEvent->event_f==Ph_WM_RESIZE)
+            {
+                SDL_PrivateResize(winEvent->size.w, winEvent->size.h);
+            }
+            /* request to maximize */
+            else if (winEvent->event_f==Ph_WM_MAX)
+            {
+                /* TODO: get screen resolution, set window pos to 0, 0 and resize it ! */
+            }
+        }
+        break;
 
-		case Ph_EV_WM:
-		{
-			winEvent = PhGetData( event );
-			
-			/* losing focus */
-			if ((winEvent->event_f==Ph_WM_FOCUS)&&
-				(winEvent->event_state==Ph_WM_EVSTATE_FOCUSLOST))
-			{
-				set_motion_sensitivity(this, Ph_EV_PTR_MOTION_BUTTON);
-				posted = SDL_PrivateAppActive(0, SDL_APPINPUTFOCUS);	
+        /* window has been resized, moved or removed */
+        case Ph_EV_EXPOSE:
+        {
+            if (SDL_VideoSurface)
+            {
+                rect = PhGetRects(event);
 
-				/* Queue leaving fullscreen mode */
-				switch_waiting = 0x01;
-				switch_time = SDL_GetTicks() + 200;
-			}
+                for(i=0;i<event->num_rects;i++)
+                {
+                    sdlrects[i].x = rect[i].ul.x;
+                    sdlrects[i].y = rect[i].ul.y;
+                    sdlrects[i].w = rect[i].lr.x - rect[i].ul.x + 1;
+                    sdlrects[i].h = rect[i].lr.y - rect[i].ul.y + 1;
+                }
 
-			/* gaining focus */
-			else if ((winEvent->event_f==Ph_WM_FOCUS)&&
-					(winEvent->event_state==Ph_WM_EVSTATE_FOCUS))
-			{
-				set_motion_sensitivity(this, -1);
-				posted = SDL_PrivateAppActive(1, SDL_APPINPUTFOCUS);
-#if 0
-				/* Queue entry into fullscreen mode */
-				switch_waiting = 0x01 | SDL_FULLSCREEN;
-				switch_time = SDL_GetTicks() + 1500;
-#endif
-			}
+                this->UpdateRects(this, event->num_rects, sdlrects);
+            }
+        }
+	break;
 
-			/* request to quit */
-			else if (winEvent->event_f==Ph_WM_CLOSE)
-			{
-				posted = SDL_PrivateQuit();
-			}
-			else if (winEvent->event_f==Ph_WM_RESIZE)
-			{
-				PhDim_t *size;
+        case Ph_EV_KEY:
+        {
+            SDL_keysym keysym;
 
-				PtGetResource( window, Pt_ARG_DIM, &size, 0 );
-				SDL_PrivateResize(size->w,size->h);
-			}
-		}
-		break;
-		
-		/* window has been resized, moved or removed */
-		case Ph_EV_EXPOSE:
-		{
-			if (SDL_VideoSurface)
-			{
-				rect = PhGetRects( event );
+            posted = 0;
 
-				//PgSetClipping(1, rect );
-				for(i=0;i<event->num_rects;i++)
-				{
-					sdlrects[i].x = rect[i].ul.x;
-					sdlrects[i].y = rect[i].ul.y;
-					sdlrects[i].w = rect[i].lr.x - rect[i].ul.x + 1;
-					sdlrects[i].h = rect[i].lr.y - rect[i].ul.y + 1;
-				}
+            keyEvent = PhGetData( event );
 
-				this->UpdateRects(this, event->num_rects, sdlrects);
+            if (Pk_KF_Key_Down & keyEvent->key_flags)
+            {
+                posted = SDL_PrivateKeyboard(SDL_PRESSED, ph_TranslateKey(keyEvent, &keysym));
+            }
+            else /* must be key release */
+            {
+                 /* Ignore repeated key release events */
+                 /* if (! Pk_KF_Key_Repeat & keyEvent->key_flags ) */
 
-			}
-		}
-		break;
+                posted = SDL_PrivateKeyboard(SDL_RELEASED, ph_TranslateKey( keyEvent, &keysym));
+            }
+        }
+        break;
+    }
 
-		case Ph_EV_KEY:
-		{
-	
-			SDL_keysym keysym;
-			
-			posted = 0;
-			
-			keyEvent = PhGetData( event );
-
-			if (Pk_KF_Key_Down & keyEvent->key_flags)
-			{
-				
-				posted = SDL_PrivateKeyboard(SDL_PRESSED,
-                			ph_TranslateKey( keyEvent, &keysym));
-			}
-			else /* must be key release */
- 			{
- 				/* Ignore repeated key release events */
-				/*if (! Pk_KF_Key_Repeat & keyEvent->key_flags )*/
-				
-					posted = SDL_PrivateKeyboard(SDL_RELEASED,
-        					ph_TranslateKey( keyEvent, &keysym));
-				/*}*/
-			}
-		}
-		break;
-	}
-	
-		
-	
-	return(posted);
+    return(posted);
 }
 
 /* perform a blocking read if no events available */

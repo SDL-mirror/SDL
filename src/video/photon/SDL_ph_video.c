@@ -175,15 +175,14 @@ static void ph_DeleteDevice(SDL_VideoDevice *device)
 
 static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat)
 {
-    int i;
-    unsigned long *tempptr;
-    int rtnval;
     PgVideoModeInfo_t my_mode_info;
     PgHWCaps_t my_hwcaps;
 
     window=NULL;
-    oglctx=NULL;
     desktoppal=SDLPH_PAL_NONE;
+#ifdef HAVE_OPENGL
+    oglctx=NULL;
+#endif /* HAVE_OPENGL */
     
     captionflag=0;
     old_video_mode=-1;
@@ -218,31 +217,13 @@ static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat)
     vformat->BitsPerPixel = my_mode_info.bits_per_pixel;
     vformat->BytesPerPixel = my_mode_info.bytes_per_scanline/my_mode_info.width;
     desktopbpp = my_mode_info.bits_per_pixel;
-         
-    /* return a palette if we are in 256 color mode */
-    if (vformat->BitsPerPixel == 8)
+    
+    /* save current palette */
+    if (desktopbpp==8)
     {
-        vformat->palette = malloc(sizeof(SDL_Palette));
-        memset(vformat->palette, 0, sizeof(SDL_Palette));
-        vformat->palette->ncolors = 256;
-        vformat->palette->colors = (SDL_Color *)malloc(256 *sizeof(SDL_Color));
-
-        /* fill the palette */
-        rtnval = PgGetPalette(ph_palette);
-        if (rtnval < 0)
-        {
-	    fprintf(stderr, "ph_VideoInit: PgGetPalette failed\n");
-        }
-
-        tempptr = (unsigned long *)vformat->palette->colors;
-
-        for(i=0;i<256; i++)
-        {
-            *tempptr = (((unsigned long)ph_palette[i]) << 8);
-            tempptr++;
-        }		
+        PgGetPalette(ph_palette);
     }
-
+         
     currently_fullscreen = 0;
     
     this->info.wm_available = 1;
@@ -268,6 +249,8 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
     /* Lock the event thread, in multi-threading environments */
     SDL_Lock_EventThread();
 
+    current->flags = flags;
+
     /* create window if no OpenGL support selected */
     if ((flags & SDL_OPENGL)!=SDL_OPENGL)
     {
@@ -276,6 +259,34 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
         PtSetArg(&arg[pargc++], Pt_ARG_DIM, &dim, 0);
         PtSetArg(&arg[pargc++], Pt_ARG_RESIZE_FLAGS, Pt_FALSE, Pt_RESIZE_XY_AS_REQUIRED);
 
+        /* enable window minimizing */
+        PtSetArg(&arg[pargc++], Pt_ARG_WINDOW_MANAGED_FLAGS, Pt_TRUE, Ph_WM_HIDE);
+
+        /* remove border and caption if no frame flag selected */
+        if ((flags & SDL_NOFRAME) == SDL_NOFRAME)
+        {
+            PtSetArg(&arg[pargc++], Pt_ARG_WINDOW_RENDER_FLAGS, Pt_FALSE, Ph_WM_RENDER_TITLE | Ph_WM_RENDER_BORDER);
+        }
+        else
+        {
+            PtSetArg(&arg[pargc++], Pt_ARG_WINDOW_RENDER_FLAGS, Pt_TRUE, Ph_WM_RENDER_TITLE | Ph_WM_RENDER_BORDER);
+        }
+
+        /* if window is not resizable then remove resize handles and maximize button */
+        if ((flags & SDL_RESIZABLE) != SDL_RESIZABLE)
+        {
+            PtSetArg(&arg[pargc++], Pt_ARG_WINDOW_RENDER_FLAGS, Pt_FALSE, Ph_WM_RENDER_RESIZE | Ph_WM_RENDER_MAX);
+            PtSetArg(&arg[pargc++], Pt_ARG_WINDOW_MANAGED_FLAGS, Pt_FALSE, Ph_WM_RESIZE | Ph_WM_MAX);
+            PtSetArg(&arg[pargc++], Pt_ARG_WINDOW_NOTIFY_FLAGS, Pt_FALSE, Ph_WM_RESIZE | Ph_WM_MAX);
+        }
+        else
+        {
+            PtSetArg(&arg[pargc++], Pt_ARG_WINDOW_RENDER_FLAGS, Pt_TRUE, Ph_WM_RENDER_RESIZE | Ph_WM_RENDER_MAX);
+            /* it is need to be Pt_FALSE to allow the application to process the resize callback */
+            PtSetArg(&arg[pargc++], Pt_ARG_WINDOW_MANAGED_FLAGS, Pt_FALSE, Ph_WM_RESIZE | Ph_WM_MAX);
+            PtSetArg(&arg[pargc++], Pt_ARG_WINDOW_NOTIFY_FLAGS, Pt_TRUE, Ph_WM_RESIZE | Ph_WM_MAX);
+        }
+
         if (window!=NULL)
         {
             PtUnrealizeWidget(window);
@@ -283,7 +294,7 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
             window=NULL;
         }
 
-        window=PtCreateWidget(PtWindow, NULL, pargc-1, arg);
+        window=PtCreateWidget(PtWindow, NULL, pargc, arg);
         PtRealizeWidget(window);
         
         PtFlush();
@@ -295,7 +306,6 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
         /* ph_SetupOpenGLContext creates also window as need */
         if (ph_SetupOpenGLContext(this, width, height, bpp, flags)==0)
         {
-            current->flags=flags;
             /* setup OGL update function ... ugly method */
             ph_ResizeImage(this, current, flags); 
         }
@@ -363,15 +373,13 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
         } /* end fullscreen flag */
         else
         {
-            if (flags & SDL_HWSURFACE)  /* Use offscreen memory iff SDL_HWSURFACE flag is set */
+            /* Use offscreen memory iff SDL_HWSURFACE flag is set */
+            if (flags & SDL_HWSURFACE)
             {
-                /* Hardware surface is Offsceen Context.  ph_ResizeImage handles the switch */
-                current->flags = (flags & (~SDL_RESIZABLE)); /* no stretch blit in offscreen context */
+                /* no stretch blit in offscreen context */
+                current->flags = (flags & (~SDL_RESIZABLE));
             }
-            else /* must be SDL_SWSURFACE */
-            {
-                current->flags = (flags | SDL_RESIZABLE); /* yes we can resize as this is a software surface */
-            }
+
             /* using palette emulation code in window mode */
             if (bpp==8)
             {
@@ -425,6 +433,9 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
         ph_SetCaption(this, this->wm_title, NULL);
     }
 
+    /* finish window drawing */
+    PtFlush();
+
     SDL_Unlock_EventThread();
 
     /* We're done! */
@@ -433,7 +444,9 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
 
 static void ph_VideoQuit(_THIS)
 {
+#ifdef HAVE_OPENGL
     PhRegion_t region_info;
+#endif /* HAVE_OPENGL */
 
     ph_DestroyImage(this, SDL_VideoSurface); 
 
@@ -443,7 +456,7 @@ static void ph_VideoQuit(_THIS)
     }
 
 #ifdef HAVE_OPENGL
-    /* prevent double SEGFAULT with parachute mode */
+    /* prevent double SEGFAULT during parachute mode */
     if (this->screen)
     {
         if (((this->screen->flags & SDL_FULLSCREEN)==SDL_FULLSCREEN) &&
@@ -518,14 +531,14 @@ static int ph_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
             if ((this->screen->flags & SDL_FULLSCREEN) != SDL_FULLSCREEN)
             {
                 /* window mode must use soft palette */
-                PgSetPalette((PgColor_t*)&syspalph, 0, firstcolor, ncolors, Pg_PALSET_SOFT, 0);
+                PgSetPalette((PgColor_t*)&syspalph[firstcolor], 0, firstcolor, ncolors, Pg_PALSET_SOFT, 0);
                 /* image needs to be redrawed, very slow method */
                 PgDrawPhImage(&point, SDL_Image, 0);
             }
             else
             {
                 /* fullscreen mode must use hardware palette */
-                PgSetPalette((PgColor_t*)&syspalph, 0, firstcolor, ncolors, Pg_PALSET_GLOBAL, 0);
+                PgSetPalette((PgColor_t*)&syspalph[firstcolor], 0, firstcolor, ncolors, Pg_PALSET_GLOBAL, 0);
             }
         }
         else
@@ -586,9 +599,10 @@ int ph_SetupOpenGLContext(_THIS, int width, int height, int bpp, Uint32 flags)
     {
         oglctx=PdCreateOpenGLContext(1, &dim, 0, OGLAttrib);
     }
+
     if (oglctx==NULL)
     {
-        fprintf(stderr,"error: cannot create OpenGL context.\n");
+        fprintf(stderr,"ph_SetupOpenGLContext: cannot create OpenGL context.\n");
         return (-1);
     }
 
@@ -608,9 +622,25 @@ int ph_SetupOpenGLContext(_THIS, int width, int height, int bpp, Uint32 flags)
         pos.y=0;
 
         PtSetArg(&args[pargc++], Pt_ARG_WINDOW_RENDER_FLAGS, Pt_FALSE, ~0);
-        PtSetArg(&args[pargc++], Pt_ARG_WINDOW_MANAGED_FLAGS,Pt_TRUE, Ph_WM_FFRONT | Ph_WM_CLOSE | Ph_WM_TOFRONT | Ph_WM_CONSWITCH);
+        PtSetArg(&args[pargc++], Pt_ARG_WINDOW_MANAGED_FLAGS, Pt_TRUE, Ph_WM_FFRONT | Ph_WM_CLOSE | Ph_WM_TOFRONT | Ph_WM_CONSWITCH);
         PtSetArg(&args[pargc++], Pt_ARG_WINDOW_STATE, Pt_TRUE, Ph_WM_STATE_ISFRONT | Ph_WM_STATE_ISFOCUS);
         PtSetArg(&args[pargc++], Pt_ARG_POS, &pos, 0);
+    }
+    else
+    {
+        /* remove border and caption if no frame flag selected */
+        if ((flags & SDL_NOFRAME) == SDL_NOFRAME)
+        {
+            PtSetArg(&args[pargc++], Pt_ARG_WINDOW_RENDER_FLAGS, 0, Ph_WM_RENDER_TITLE | Ph_WM_RENDER_BORDER);
+        }
+        else
+        {
+           /* if window is not resizable then remove resize handles */
+           if ((flags & SDL_RESIZABLE) != SDL_RESIZABLE)
+           {
+               PtSetArg(&args[pargc++], Pt_ARG_WINDOW_RENDER_FLAGS, 0, Ph_WM_RENDER_RESIZE);
+           }
+        }
     }
 
     if (window!=NULL)
@@ -620,7 +650,7 @@ int ph_SetupOpenGLContext(_THIS, int width, int height, int bpp, Uint32 flags)
         window=NULL;
     }
 
-    window=PtCreateWidget(PtWindow, NULL, pargc-1, args);
+    window=PtCreateWidget(PtWindow, NULL, pargc, args);
     PtRealizeWidget(window);
 
     /* disable mouse for fullscreen */

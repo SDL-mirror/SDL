@@ -393,7 +393,7 @@ void DrawLogoBlit(void)
 }
 
 int RunGLTest( int argc, char* argv[],
-               int logo, int slowly, int bpp, float gamma )
+               int logo, int slowly, int bpp, float gamma, int noframe )
 {
 	int i;
 	int rgb_size[3];
@@ -446,6 +446,10 @@ int RunGLTest( int argc, char* argv[],
 			video_flags |= SDL_FULLSCREEN;
 		}
 	}
+
+        if (noframe) {
+           video_flags |= SDL_NOFRAME;
+        }
 
 	/* Initialize the display */
 	switch (bpp) {
@@ -686,6 +690,7 @@ int main(int argc, char *argv[])
 	int bpp = 0;
 	int slowly;
 	float gamma = 0.0;
+        int noframe = 0;
 
 	logo = 0;
 	slowly = 0;
@@ -711,15 +716,18 @@ int main(int argc, char *argv[])
 		if ( strcmp(argv[i], "-gamma") == 0 ) {
  		       gamma = (float)atof(argv[++i]);
 		}
+		if ( strcmp(argv[i], "-noframe") == 0 ) {
+ 		       noframe = 1;
+		}
 		if ( strncmp(argv[i], "-h", 2) == 0 ) {
  		       printf(
-"Usage: %s [-twice] [-logo] [-slow] [-bpp n] [-gamma n]\n",
+"Usage: %s [-twice] [-logo] [-slow] [-bpp n] [-gamma n] [-noframe]\n",
  			      argv[0]);
 			exit(0);
 		}
 	}
 	for ( i=0; i<numtests; ++i ) {
- 	       RunGLTest(argc, argv, logo, slowly, bpp, gamma);
+ 	       RunGLTest(argc, argv, logo, slowly, bpp, gamma, noframe);
 	}
 	return 0;
 }
