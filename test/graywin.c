@@ -176,10 +176,13 @@ int main(int argc, char *argv[])
 		if ( argv[argc] && (strcmp(argv[argc], "-noframe") == 0) ) {
 			videoflags |= SDL_NOFRAME;
 		} else
+		if ( argv[argc] && (strcmp(argv[argc], "-resize") == 0) ) {
+			videoflags |= SDL_RESIZABLE;
+		} else
 		if ( argv[argc] && (strcmp(argv[argc], "-fullscreen") == 0) ) {
 			videoflags |= SDL_FULLSCREEN;
 		} else {
-			fprintf(stderr, "Usage: %s [-width] [-height] [-bpp] [-hw] [-hwpalette] [-flip] [-noframe] [-fullscreen]\n",
+			fprintf(stderr, "Usage: %s [-width] [-height] [-bpp] [-hw] [-hwpalette] [-flip] [-noframe] [-fullscreen] [-resize]\n",
 								argv[0]);
 			exit(1);
 		}
@@ -232,6 +235,18 @@ int main(int argc, char *argv[])
 				break;
 			case SDL_VIDEOEXPOSE:
 				DrawBackground(screen);
+				break;
+			case SDL_VIDEORESIZE:
+					screen = CreateScreen(
+						event.resize.w, event.resize.h,
+						screen->format->BitsPerPixel,
+								videoflags);
+					if ( screen == NULL ) {
+						fprintf(stderr,
+					"Couldn't resize video mode\n");
+						done = 1;
+					}
+					DrawBackground(screen);
 				break;
 			default:
 				break;
