@@ -203,18 +203,24 @@ static void CheckMounts(const char *mtab)
 			if ( strcmp(mnt_type, MNTTYPE_SUPER) == 0 ) {
 				tmp = strstr(mntent->mnt_opts, "fs=");
 				if ( tmp ) {
-					strcpy(mnt_type, tmp+strlen("fs="));
-					tmp = strchr(mnt_type, ',');
-					if ( tmp ) {
-						*tmp = '\0';
+					free(mnt_type);
+					mnt_type = strdup(tmp + strlen("fs="));
+					if ( mnt_type ) {
+						tmp = strchr(mnt_type, ',');
+						if ( tmp ) {
+							*tmp = '\0';
+						}
 					}
 				}
 				tmp = strstr(mntent->mnt_opts, "dev=");
 				if ( tmp ) {
-					strcpy(mnt_dev, tmp+strlen("dev="));
-					tmp = strchr(mnt_dev, ',');
-					if ( tmp ) {
-						*tmp = '\0';
+					free(mnt_dev);
+					mnt_dev = strdup(tmp + strlen("dev="));
+					if ( mnt_dev ) {
+						tmp = strchr(mnt_dev, ',');
+						if ( tmp ) {
+							*tmp = '\0';
+						}
 					}
 				}
 			}
