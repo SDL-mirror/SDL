@@ -743,12 +743,11 @@ SDL_Surface * SDL_SetVideoMode (int width, int height, int bpp, Uint32 flags)
 	/* Load GL symbols (before MakeCurrent, where we need glGetString). */
 	if ( flags & (SDL_OPENGL | SDL_OPENGLBLIT) ) {
 
-#ifdef __QNXNTO__
-    #if (_NTO_VERSION < 630)
-       #define __SDL_NOGETPROCADDR__
-    #endif /* 6.3.0 */
-#endif /* __QNXNTO__ */
-
+#if (defined(macintosh) && !defined(__MWERKS__))
+#define __SDL_NOGETPROCADDR__
+#elif defined(__QNXNTO__) && (_NTO_VERSION < 630)
+#define __SDL_NOGETPROCADDR__
+#endif
 #ifdef __SDL_NOGETPROCADDR__
     #define SDL_PROC(ret,func,params) video->func=func;
 #else
