@@ -58,7 +58,10 @@ static char rcsid =
 #define NO_GAMMA_SUPPORT
 #endif
 #ifndef WS_MAXIMIZE
-#define WS_MAXIMIZE		0
+#define WS_MAXIMIZE	0
+#endif
+#ifndef WS_THICKFRAME
+#define WS_THICKFRAME	0
 #endif
 #ifndef SWP_NOCOPYBITS
 #define SWP_NOCOPYBITS	0

@@ -63,13 +63,13 @@ int main(int argc, char *argv[])
 	printf("Testing multiple timers...\n");
 	t1 = SDL_AddTimer(100, callback, (void*)1);
 	if(!t1)
-	  fprintf(stderr,"Could not create timer 1\n");
+	  fprintf(stderr,"Could not create timer 1: %s\n", SDL_GetError());
 	t2 = SDL_AddTimer(50, callback, (void*)2);
 	if(!t2)
-	  fprintf(stderr,"Could not create timer 2\n");
+	  fprintf(stderr,"Could not create timer 2: %s\n", SDL_GetError());
 	t3 = SDL_AddTimer(233, callback, (void*)3);
 	if(!t3)
-	  fprintf(stderr,"Could not create timer 3\n");
+	  fprintf(stderr,"Could not create timer 3: %s\n", SDL_GetError());
 	
 	/* Wait 10 seconds */
 	printf("Waiting 10 seconds\n");

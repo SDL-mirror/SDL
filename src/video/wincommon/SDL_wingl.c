@@ -79,6 +79,7 @@ static int WIN_GL_ResetWindow(_THIS)
 	return(status);
 }
 
+#ifdef HAVE_OPENGL
 static void Init_WGL_ARB_extensions(_THIS)
 {
 	HWND hwnd;
@@ -127,6 +128,7 @@ static void Init_WGL_ARB_extensions(_THIS)
 	ReleaseDC(hwnd, hdc);
 	DestroyWindow(hwnd);
 }
+#endif /* !HAVE_OPENGL */
 
 int WIN_GL_SetupWindow(_THIS)
 {

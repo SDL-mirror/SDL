@@ -14,9 +14,10 @@
 
 #ifdef _WIN32_WCE
 # define DIR_SEPERATOR TEXT("\\")
-# define _getcwd(str,len)	wcscpy(str,DIR_SEPERATOR);
-# define setbuf(x)
-# define setvbuf(x)
+# undef _getcwd
+# define _getcwd(str,len)	wcscpy(str,TEXT(""))
+# define setbuf(f,b)
+# define setvbuf(w,x,y,z)
 # define fopen		_wfopen
 # define freopen	_wfreopen
 # define remove(x)	DeleteFile(x)
