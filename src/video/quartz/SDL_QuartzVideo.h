@@ -313,7 +313,9 @@ static void         QZ_UpdateRects      (_THIS, int num_rects, SDL_Rect *rects);
 static void         QZ_VideoQuit        (_THIS);
 
 /* Hardware surface functions (for fullscreen mode only) */
+#if 0 /* Not used (apparently, it's really slow) */
 static int  QZ_FillHWRect (_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color);
+#endif
 static int  QZ_LockHWSurface(_THIS, SDL_Surface *surface);
 static void QZ_UnlockHWSurface(_THIS, SDL_Surface *surface);
 static void QZ_FreeHWSurface (_THIS, SDL_Surface *surface);
