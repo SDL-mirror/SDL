@@ -400,19 +400,13 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 static SDL_Rect **XBIOS_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
 {
-	unsigned int numlist;
-
 	/* 8 bits -> list 0 */
 	/* 16 bits -> list 1 */
-	if (format->BitsPerPixel == 15) {
+	if ((format->BitsPerPixel != 8) && (format->BitsPerPixel !=16)) {
 		return NULL;
 	}
 
-	numlist = (format->BitsPerPixel)>>4;
-	if (numlist>1)
-		return NULL;
-
-	return(SDL_modelist[numlist]);
+	return(SDL_modelist[(format->BitsPerPixel)>>4]);
 }
 
 static void XBIOS_FreeBuffers(_THIS)
