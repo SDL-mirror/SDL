@@ -20,7 +20,7 @@
 	slouken@devolution.com
 */
 
-/* SDL joystick driver for Darwn / MacOS X, based on the IOKit HID API */
+/* SDL joystick driver for Darwin / MacOS X, based on the IOKit HID API */
 /* Written 2001 by Max Horn */
 
 #include <stdio.h>
@@ -33,7 +33,7 @@
 #include <mach/mach_error.h>
 #include <IOKit/IOKitLib.h>
 #include <IOKit/IOCFPlugIn.h>
-#include <IOKit/IOUSBHIDParser.h>
+#include <IOKit/hidsystem/IOHIDUsageTables.h>
 #include <IOKit/hid/IOHIDLib.h>
 #include <IOKit/hid/IOHIDKeys.h>
 #include <CoreFoundation/CoreFoundation.h>

@@ -2084,6 +2084,7 @@ case "$target" in
         if test x$enable_joystick = xyes; then
             JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS darwin"
             JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS darwin/libjoystick_darwin.la"
+            SDL_LIBS="$SDL_LIBS -framework IOKit"
         fi
         # Set up files for the cdrom library
         if test x$enable_cdrom = xyes; then
