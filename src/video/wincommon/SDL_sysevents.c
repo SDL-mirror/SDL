@@ -286,9 +286,9 @@ LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				/* mouse has left the window */
 				/* or */
 				/* Elvis has left the building! */
-				in_window = FALSE;
 				posted = SDL_PrivateAppActive(0, SDL_APPMOUSEFOCUS);
 			}
+			in_window = FALSE;
 		}
 		return(0);
 #endif /* WM_MOUSELEAVE */
