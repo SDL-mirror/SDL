@@ -1,0 +1,81 @@
+=============================================================
+Using the Simple DirectMedia Layer with OpenBSD 2.9 and later
+=============================================================
+
+Author: 
+Peter Valchev <pvalchev@openbsd.org>
+  
+=======
+Install 
+=======
+There is an OpenBSD port for SDL and various other tools.  Using
+this port is recommended, since it contains all the needed patches
+and configure arguments nicely organized in several FLAVORS you
+can pick from.  If you're unfamiliar with the OpenBSD ports system
+please visit:
+http://www.openbsd.org/ports.html
+http://www.openbsd.org/anoncvs.html
+
+You should have a precompiled binary package on your OpenBSD 2.9
+or later CD-ROM, which you can easily add with pkg_add(1).
+
+If for whatever reason you're unable to take the advantage of the
+created port, or you want to stick with the newest fresh SDL from
+the current CVS repository, here are some hints of what has left
+unresolved and needs to be disabled/changed.
+
+To build SDL with OSS + esound:
+
+1. ./configure --disable-joystick \
+	--disable-pthread-sem \
+	--disable-nasm \
+	--enable-esd \
+	--enable-oss \
+	--disable-arts \
+	--disable-video-opengl
+
+OR
+
+To build SDL with native audio + esound (remove --disable-esd otherwise):
+1. ./configure --disable-joystick \
+	--disable-pthread-sem \
+	--disable-nasm \
+	--enable-openbsdaudio \
+	--enable-esd \
+	--disable-arts \
+	--disable-video-opengl
+
+If you need arts or GL, omit the responding --disable lines.  In the
+port, they're disabled by default, you need to specify flavors to
+make use of them.
+
+2. gmake    # Yeah, GNU make is required, install the package 
+3. sudo gmake install
+
+=========
+Todo List 
+=========
+
+Feedback is always welcome with anything you may find useful and
+you can suggest.
+For now, the following things have to be worked on:
+
+1. The native audio should be widely tested and will eventually
+become the default.  At that moment I have not received any 
+feedback which should explain its current condition.
+
+2. There are occurences of dynamic loading of drivers in the OpenGL
+code section, and our a.out architectures need an underscore prefixed
+to symbol names.  Some solution to that may be a good thing.  I can
+fix it theoretically, but unfortunately I do not have the needed 
+hardware/configuration to test it.  If you bump into that, email me.
+
+===================
+Contact Information
+===================
+Everybody is welcome to give me any suggestions and to report bugs
+(as well as fixing them ;-)  You can contact me by email:
+Peter Valchev <pvalchev@openbsd.org>
+
+$Id$
+

@@ -278,6 +278,19 @@ CheckALSA()
     fi
 }
 
+dnl Check whether we want to use OpenBSD native audio or not
+CheckOPENBSDAUDIO()
+{
+    AC_ARG_ENABLE(openbsdaudio,
+[  --enable-openbsdaudio   OpenBSD native audio support [default=no]],
+                  , enable_openbsdaudio=no)
+    if test x$enable_audio = xyes -a x$enable_openbsdaudio = xyes; then
+        SYSTEM_LIBS="$SYSTEM_LIBS $ESD_LIBS"
+        AUDIO_SUBDIRS="$AUDIO_SUBDIRS openbsd"
+        AUDIO_DRIVERS="$AUDIO_DRIVERS openbsd/libaudio_openbsd.la"
+    fi
+}
+
 dnl Find the ESD includes and libraries
 CheckESD()
 {
@@ -1275,7 +1288,6 @@ case "$target" in
         ;;
     *-*-openbsd*)
         ARCH=openbsd
-        CFLAGS="$CFLAGS -Dunix"
         CheckDummyVideo
         CheckNASM
         CheckOSS
@@ -1289,10 +1301,7 @@ case "$target" in
         # Set up files for the main() stub
         COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         # Set up files for the audio library
-        if test x$enable_audio = xyes; then
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS sun"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
-        fi
+        CheckOPENBSDAUDIO
         # Set up files for the joystick library
         # (No joystick support yet)
         if test x$enable_joystick = xyes; then
@@ -1322,6 +1331,8 @@ case "$target" in
         if test x$enable_timers = xyes; then
             COPY_ARCH_SRC(src/timer, linux, SDL_systimer.c)
         fi
+        # OpenBSD does not define "unix"
+        CFLAGS="$CFLAGS -Dunix"
         ;;
     *-*-sysv5*)
         ARCH=sysv5
@@ -1882,7 +1893,7 @@ if test $ARCH = solaris; then
 fi
 
 if test $ARCH = openbsd; then
-  SDL_RLD_FLAGS="-Wl,-R\${exec_prefix}/lib -Wl,-R\${X11BASE}/lib"
+  SDL_RLD_FLAGS="-L${X11BASE}/lib -Wl,-rpath,\${exec_prefix}/lib -Wl,-rpath,${X11BASE}/lib"
 fi
 
 dnl Output the video drivers we use
@@ -1947,6 +1958,7 @@ src/audio/esd/Makefile
 src/audio/macrom/Makefile
 src/audio/nas/Makefile
 src/audio/nto/Makefile
+src/audio/openbsd/Makefile
 src/audio/paudio/Makefile
 src/audio/sun/Makefile
 src/audio/ums/Makefile

@@ -47,6 +47,9 @@ static AudioBootStrap *bootstrap[] = {
 #ifdef ALSA_SUPPORT
 	&ALSA_bootstrap,
 #endif
+#ifdef __OpenBSD__
+	&OBSD_bootstrap;
+#endif
 #if (defined(unix) && !defined(__CYGWIN32__)) && \
     !defined(OSS_SUPPORT) && !defined(ALSA_SUPPORT)
 	&AUDIO_bootstrap,
