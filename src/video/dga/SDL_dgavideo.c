@@ -31,7 +31,7 @@ static char rcsid =
 #include <stdlib.h>
 #include <string.h>
 #include <X11/Xlib.h>
-#include <X11/extensions/xf86dga.h>
+#include <XFree86/extensions/xf86dga.h>
 
 #ifdef HAVE_ALLOCA_H
 #include <alloca.h>
@@ -87,15 +87,15 @@ static int DGA_Available(void)
 		if ( dpy ) {
 			int events, errors, major, minor;
 
-			if ( XDGAQueryExtension(dpy, &events, &errors) &&
-			     XDGAQueryVersion(dpy, &major, &minor) ) {
+			if ( SDL_NAME(XDGAQueryExtension)(dpy, &events, &errors) &&
+			     SDL_NAME(XDGAQueryVersion)(dpy, &major, &minor) ) {
 				int screen;
 
 				screen = DefaultScreen(dpy);
 				if ( (major >= 2) && 
-				     XDGAOpenFramebuffer(dpy, screen) ) {
+				     SDL_NAME(XDGAOpenFramebuffer)(dpy, screen) ) {
 					available = 1;
-					XDGACloseFramebuffer(dpy, screen);
+					SDL_NAME(XDGACloseFramebuffer)(dpy, screen);
 				}
 			}
 			XCloseDisplay(dpy);
@@ -216,14 +216,14 @@ static int DGA_AddMode(_THIS, int bpp, int w, int h)
 static Uint32 get_video_size(_THIS)
 {
 	/* This is a non-exported function from libXxf86dga.a */
-	extern unsigned char *XDGAGetMappedMemory(int screen);
+	extern unsigned char *SDL_NAME(XDGAGetMappedMemory)(int screen);
 	FILE *proc;
 	unsigned long mem;
 	unsigned start, stop;
 	char line[BUFSIZ];
 	Uint32 size;
 
-	mem = (unsigned long)XDGAGetMappedMemory(DGA_Screen);
+	mem = (unsigned long)SDL_NAME(XDGAGetMappedMemory)(DGA_Screen);
 	size = 0;
 	proc = fopen("/proc/self/maps", "r");
 	if ( proc ) {
@@ -240,7 +240,7 @@ static Uint32 get_video_size(_THIS)
 }
 
 #ifdef DGA_DEBUG
-static void PrintMode(XDGAMode *mode)
+static void PrintMode(SDL_NAME(XDGAMode) *mode)
 {
 	printf("Mode: %s (%dx%d) at %d bpp (%f refresh, %d pitch) num: %d\n",
 		mode->name,
@@ -278,8 +278,8 @@ static void PrintMode(XDGAMode *mode)
 
 static int cmpmodes(const void *va, const void *vb)
 {
-    const XDGAMode *a = (const XDGAMode *)va;
-    const XDGAMode *b = (const XDGAMode *)vb;
+    const SDL_NAME(XDGAMode) *a = (const SDL_NAME(XDGAMode) *)va;
+    const SDL_NAME(XDGAMode) *b = (const SDL_NAME(XDGAMode) *)vb;
 
     /* Prefer DirectColor visuals for otherwise equal modes */
     if ( (a->viewportWidth == b->viewportWidth) &&
@@ -295,7 +295,7 @@ static int cmpmodes(const void *va, const void *vb)
         return b->viewportHeight - a->viewportHeight;
     }
 }
-static void UpdateHWInfo(_THIS, XDGAMode *mode)
+static void UpdateHWInfo(_THIS, SDL_NAME(XDGAMode) *mode)
 {
 	this->info.wm_available = 0;
 	this->info.hw_available = 1;
@@ -323,7 +323,7 @@ static int DGA_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	int event_base, error_base;
 	int major_version, minor_version;
 	Visual *visual;
-	XDGAMode *modes;
+	SDL_NAME(XDGAMode) *modes;
 	int i, num_modes;
 
 	/* Open the X11 display */
@@ -336,8 +336,8 @@ static int DGA_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	}
 
 	/* Check for the DGA extension */
-	if ( ! XDGAQueryExtension(DGA_Display, &event_base, &error_base) ||
-	     ! XDGAQueryVersion(DGA_Display, &major_version, &minor_version) ) {
+	if ( ! SDL_NAME(XDGAQueryExtension)(DGA_Display, &event_base, &error_base) ||
+	     ! SDL_NAME(XDGAQueryVersion)(DGA_Display, &major_version, &minor_version) ) {
 		SDL_SetError("DGA extension not available");
 		XCloseDisplay(DGA_Display);
 		return(-1);
@@ -377,14 +377,14 @@ static int DGA_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	}
 
 	/* Open access to the framebuffer */
-	if ( ! XDGAOpenFramebuffer(DGA_Display, DGA_Screen) ) {
+	if ( ! SDL_NAME(XDGAOpenFramebuffer)(DGA_Display, DGA_Screen) ) {
 		SDL_SetError("Unable to map the video memory");
 		XCloseDisplay(DGA_Display);
 		return(-1);
 	}
 
 	/* Query for the list of available video modes */
-	modes = XDGAQueryModes(DGA_Display, DGA_Screen, &num_modes);
+	modes = SDL_NAME(XDGAQueryModes)(DGA_Display, DGA_Screen, &num_modes);
 	qsort(modes, num_modes, sizeof *modes, cmpmodes);
 	for ( i=0; i<num_modes; ++i ) {
 #ifdef DGA_DEBUG
@@ -429,9 +429,9 @@ static void DGA_DirectUpdate(_THIS, int numrects, SDL_Rect *rects);
 SDL_Surface *DGA_SetVideoMode(_THIS, SDL_Surface *current,
 				int width, int height, int bpp, Uint32 flags)
 {
-	XDGAMode *modes;
+	SDL_NAME(XDGAMode) *modes;
 	int i, num_modes;
-	XDGADevice *mode;
+	SDL_NAME(XDGADevice) *mode;
 	int screen_len;
 	Uint8 *surfaces_mem;
 	int surfaces_len;
@@ -443,7 +443,7 @@ SDL_Surface *DGA_SetVideoMode(_THIS, SDL_Surface *current,
 	}
 
 	/* Search for a matching video mode */
-	modes = XDGAQueryModes(DGA_Display, DGA_Screen, &num_modes);
+	modes = SDL_NAME(XDGAQueryModes)(DGA_Display, DGA_Screen, &num_modes);
 	qsort(modes, num_modes, sizeof *modes, cmpmodes);
 	for ( i=0; i<num_modes; ++i ) {
 		int depth;
@@ -468,7 +468,7 @@ SDL_Surface *DGA_SetVideoMode(_THIS, SDL_Surface *current,
 	}
 
 	/* Set the video mode */
-	mode = XDGASetMode(DGA_Display, DGA_Screen, modes[i].num);
+	mode = SDL_NAME(XDGASetMode)(DGA_Display, DGA_Screen, modes[i].num);
 	XFree(modes);
 	if ( mode == NULL ) {
 		SDL_SetError("Unable to switch to requested mode");
@@ -495,7 +495,7 @@ SDL_Surface *DGA_SetVideoMode(_THIS, SDL_Surface *current,
 	/* Create a colormap if necessary */
 	if ( (DGA_visualClass == PseudoColor) ||
              (DGA_visualClass == DirectColor) ) {
-		DGA_colormap = XDGACreateColormap(DGA_Display, DGA_Screen,
+		DGA_colormap = SDL_NAME(XDGACreateColormap)(DGA_Display, DGA_Screen,
 							mode, AllocAll);
 		if ( DGA_visualClass == PseudoColor ) {
 			current->flags |= SDL_HWPALETTE;
@@ -507,10 +507,10 @@ SDL_Surface *DGA_SetVideoMode(_THIS, SDL_Surface *current,
 			this->screen = NULL;
 		}
 	} else {
-		DGA_colormap = XDGACreateColormap(DGA_Display, DGA_Screen,
+		DGA_colormap = SDL_NAME(XDGACreateColormap)(DGA_Display, DGA_Screen,
 							mode, AllocNone);
 	}
-	XDGAInstallColormap(DGA_Display, DGA_Screen, DGA_colormap);
+	SDL_NAME(XDGAInstallColormap)(DGA_Display, DGA_Screen, DGA_colormap);
 
 	/* Update the hardware capabilities */
 	UpdateHWInfo(this, &mode->mode);
@@ -520,7 +520,7 @@ SDL_Surface *DGA_SetVideoMode(_THIS, SDL_Surface *current,
 	surfaces_len = (mode->mode.imageHeight*current->pitch - screen_len);
 
 	/* Update for double-buffering, if we can */
-	XDGASetViewport(DGA_Display, DGA_Screen, 0, 0, XDGAFlipRetrace);
+	SDL_NAME(XDGASetViewport)(DGA_Display, DGA_Screen, 0, 0, XDGAFlipRetrace);
 	if ( flags & SDL_DOUBLEBUF ) {
 		if ( mode->mode.imageHeight >= (current->h*2) ) {
 			current->flags |= SDL_DOUBLEBUF;
@@ -556,7 +556,7 @@ SDL_Surface *DGA_SetVideoMode(_THIS, SDL_Surface *current,
 	  input_mask = (KeyPressMask | KeyReleaseMask);
 	  input_mask |= (ButtonPressMask | ButtonReleaseMask);
 	  input_mask |= PointerMotionMask;
-	  XDGASelectInput(DGA_Display, DGA_Screen, input_mask);
+	  SDL_NAME(XDGASelectInput)(DGA_Display, DGA_Screen, input_mask);
 	}
 
 	/* We're done */
@@ -652,7 +652,7 @@ static __inline__ void DGA_WaitBusySurfaces(_THIS)
 	vidmem_bucket *bucket;
 
 	/* Wait for graphic operations to complete */
-	XDGASync(DGA_Display, DGA_Screen);
+	SDL_NAME(XDGASync)(DGA_Display, DGA_Screen);
 
 	/* Clear all surface dirty bits */
 	for ( bucket=&surfaces; bucket; bucket=bucket->next ) {
@@ -807,7 +807,7 @@ static int DGA_FillHWRect(_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color)
 	/* Don't fill the visible part of the screen, wait until flipped */
 	LOCK_DISPLAY();
 	if ( was_flipped && (dst == this->screen) ) {
-		while ( XDGAGetViewportStatus(DGA_Display, DGA_Screen) )
+		while ( SDL_NAME(XDGAGetViewportStatus)(DGA_Display, DGA_Screen) )
 			/* Keep waiting for the hardware ... */ ;
 		was_flipped = 0;
 	}
@@ -819,7 +819,7 @@ static int DGA_FillHWRect(_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color)
 #if 0
   printf("Hardware accelerated rectangle fill: %dx%d at %d,%d\n", w, h, x, y);
 #endif
-	XDGAFillRectangle(DGA_Display, DGA_Screen, x, y, w, h, color);
+	SDL_NAME(XDGAFillRectangle)(DGA_Display, DGA_Screen, x, y, w, h, color);
 	XFlush(DGA_Display);
 	DGA_AddBusySurface(dst);
 	UNLOCK_DISPLAY();
@@ -838,7 +838,7 @@ static int HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,
 	/* Don't blit to the visible part of the screen, wait until flipped */
 	LOCK_DISPLAY();
 	if ( was_flipped && (dst == this->screen) ) {
-		while ( XDGAGetViewportStatus(DGA_Display, DGA_Screen) )
+		while ( SDL_NAME(XDGAGetViewportStatus)(DGA_Display, DGA_Screen) )
 			/* Keep waiting for the hardware ... */ ;
 		was_flipped = 0;
 	}
@@ -854,10 +854,10 @@ static int HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,
   printf("Blitting %dx%d from %d,%d to %d,%d\n", w, h, srcx, srcy, dstx, dsty);
 #endif
 	if ( (src->flags & SDL_SRCCOLORKEY) == SDL_SRCCOLORKEY ) {
-		XDGACopyTransparentArea(DGA_Display, DGA_Screen,
+		SDL_NAME(XDGACopyTransparentArea)(DGA_Display, DGA_Screen,
 			srcx, srcy, w, h, dstx, dsty, src->format->colorkey);
 	} else {
-		XDGACopyArea(DGA_Display, DGA_Screen,
+		SDL_NAME(XDGACopyArea)(DGA_Display, DGA_Screen,
 			srcx, srcy, w, h, dstx, dsty);
 	}
 	XFlush(DGA_Display);
@@ -897,7 +897,7 @@ static int DGA_CheckHWBlit(_THIS, SDL_Surface *src, SDL_Surface *dst)
 static __inline__ void DGA_WaitFlip(_THIS)
 {
 	if ( was_flipped ) {
-		while ( XDGAGetViewportStatus(DGA_Display, DGA_Screen) )
+		while ( SDL_NAME(XDGAGetViewportStatus)(DGA_Display, DGA_Screen) )
 			/* Keep waiting for the hardware ... */ ;
 		was_flipped = 0;
 	}
@@ -937,7 +937,7 @@ static int DGA_FlipHWSurface(_THIS, SDL_Surface *surface)
 		DGA_WaitBusySurfaces(this);
 	}
 	DGA_WaitFlip(this);
-	XDGASetViewport(DGA_Display, DGA_Screen,
+	SDL_NAME(XDGASetViewport)(DGA_Display, DGA_Screen,
 	                0, flip_yoffset[flip_page], XDGAFlipRetrace);
 	XFlush(DGA_Display);
 	UNLOCK_DISPLAY();
@@ -1024,12 +1024,12 @@ void DGA_VideoQuit(_THIS)
 		}
 
 		/* Unmap memory and reset video mode */
-		XDGACloseFramebuffer(DGA_Display, DGA_Screen);
+		SDL_NAME(XDGACloseFramebuffer)(DGA_Display, DGA_Screen);
 		if ( this->screen ) {
 			/* Tell SDL not to free the pixels */
 			this->screen->pixels = NULL;
 		}
-		XDGASetMode(DGA_Display, DGA_Screen, 0);
+		SDL_NAME(XDGASetMode)(DGA_Display, DGA_Screen, 0);
 
 		/* Clear the lock mutex */
 		if ( hw_lock != NULL ) {

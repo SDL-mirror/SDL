@@ -421,6 +421,7 @@ static int DX5_FillHWRect(_THIS, SDL_Surface *dst, SDL_Rect *dstrect, Uint32 col
 static int DX5_SetHWColorKey(_THIS, SDL_Surface *surface, Uint32 key);
 static int DX5_SetHWAlpha(_THIS, SDL_Surface *surface, Uint8 alpha);
 static int DX5_LockHWSurface(_THIS, SDL_Surface *surface);
+static int DX5_LockHWSurfaceRect(_THIS, SDL_Surface *surface, SDL_Rect *rect, void **pixels, int *pitch);
 static void DX5_UnlockHWSurface(_THIS, SDL_Surface *surface);
 static int DX5_FlipHWSurface(_THIS, SDL_Surface *surface);
 static void DX5_FreeHWSurface(_THIS, SDL_Surface *surface);
@@ -591,7 +592,9 @@ static SDL_VideoDevice *DX5_CreateDevice(int devindex)
 	device->SetHWColorKey = DX5_SetHWColorKey;
 	device->SetHWAlpha = DX5_SetHWAlpha;
 	device->LockHWSurface = DX5_LockHWSurface;
+	device->LockHWSurfaceRect = DX5_LockHWSurfaceRect;
 	device->UnlockHWSurface = DX5_UnlockHWSurface;
+	device->UnlockHWSurfaceRect = DX5_UnlockHWSurface;
 	device->FlipHWSurface = DX5_FlipHWSurface;
 	device->FreeHWSurface = DX5_FreeHWSurface;
 #ifdef IID_IDirectDrawGammaControl
@@ -1908,6 +1911,43 @@ static int DX5_LockHWSurface(_THIS, SDL_Surface *surface)
 					surface->format->BytesPerPixel;
 	}
 	surface->pixels = ddsd.lpSurface;
+	return(0);
+}
+static int DX5_LockHWSurfaceRect(_THIS, SDL_Surface *surface, SDL_Rect *rect, void **pixels, int *pitch)
+{
+	HRESULT result;
+	LPDIRECTDRAWSURFACE3 dd_surface;
+	DDSURFACEDESC ddsd;
+	RECT ddrect;
+
+	/* Calculate the lock rectangle */
+	ddrect.top    = rect->y;
+	ddrect.bottom = rect->y+rect->h;
+	ddrect.left   = rect->x;
+	ddrect.right  = rect->x+rect->w;
+
+	/* Lock and load! */
+	dd_surface = surface->hwdata->dd_writebuf;
+	memset(&ddsd, 0, sizeof(ddsd));
+	ddsd.dwSize = sizeof(ddsd);
+	result = IDirectDrawSurface3_Lock(dd_surface, &ddrect, &ddsd,
+					(DDLOCK_NOSYSLOCK|DDLOCK_WAIT), NULL);
+	if ( result == DDERR_SURFACELOST ) {
+		result = IDirectDrawSurface3_Restore(
+						surface->hwdata->dd_surface);
+		result = IDirectDrawSurface3_Lock(dd_surface, &ddrect, &ddsd, 
+					(DDLOCK_NOSYSLOCK|DDLOCK_WAIT), NULL);
+	}
+	if ( result != DD_OK ) {
+		SetDDerror("DirectDrawSurface3::Lock", result);
+		return(-1);
+	}
+	*pixels = ddsd.lpSurface;
+#if defined(NONAMELESSUNION)
+	*pitch = ddsd.u1.lPitch;
+#else
+	*pitch = (Uint16)ddsd.lPitch;
+#endif
 	return(0);
 }
 

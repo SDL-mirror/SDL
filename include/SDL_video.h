@@ -532,6 +532,26 @@ extern DECLSPEC int SDL_LockSurface(SDL_Surface *surface);
 extern DECLSPEC void SDL_UnlockSurface(SDL_Surface *surface);
 
 /*
+ * SDL_LockRect() locks a portion of the surface designated by the 'rect'
+ * parameter, and saves the resulting pixels and pitch in the arguments.
+ * The rect will be clipped if it extends beyond the bounds of the surface
+ *
+ * This may be more efficient than a full lock if you are using a hardware
+ * surface and plan to make a few changes to small areas in the surface.
+ *
+ * While a rectangle is locked, no other lock or blit call may be called
+ * on the surface.  No operating system or library calls should be made
+ * between lock/unlock pairs, as critical system locks may be held during
+ * this time.
+ *
+ * After the surface is unlocked, the pixels pointer is no longer valid.
+ *
+ * SDL_LockRect() returns 0, or -1 if the surface couldn't be locked.
+ */
+extern DECLSPEC int SDL_LockRect(SDL_Surface *surface, SDL_Rect *rect, void **pixels, int *pitch);
+extern DECLSPEC void SDL_UnlockRect(SDL_Surface *surface);
+
+/*
  * Load a surface from a seekable SDL data source (memory or file.)
  * If 'freesrc' is non-zero, the source will be closed after being read.
  * Returns the new surface, or NULL if there was an error.

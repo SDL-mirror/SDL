@@ -37,16 +37,11 @@ static char rcsid =
 #include <X11/extensions/XShm.h>
 #endif
 #ifdef XFREE86_DGAMOUSE
-#include <X11/extensions/xf86dga.h>
+#include <XFree86/extensions/xf86dga.h>
 #endif
 #ifdef XFREE86_VM
-#include <X11/extensions/xf86vmode.h>
-#ifdef XFREE86_VM_DYNAMIC_HACK
-#define XVidMode(func, args)	XF40VidMode##func args
-#else
-#define XVidMode(func, args)	XF86VidMode##func args
+#include <XFree86/extensions/xf86vmode.h>
 #endif
-#endif /* XFREE86_VM */
 #ifdef HAVE_XIGXME
 #include <X11/extensions/xme.h>
 #endif
@@ -118,7 +113,7 @@ struct SDL_PrivateVideoData {
 
     /* Variables used by the X11 video mode code */
 #ifdef XFREE86_VM
-    XF86VidModeModeInfo saved_mode;
+    SDL_NAME(XF86VidModeModeInfo) saved_mode;
     struct {
         int x, y;
     } saved_view;

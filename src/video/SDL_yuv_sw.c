@@ -1255,7 +1255,7 @@ int SDL_DisplayYUV_SW(_THIS, SDL_Overlay *overlay, SDL_Rect *dstrect)
 		Cb = lum + 3;
 		break;
 	    default:
-		SDL_SetError("Unsupported YUV format in blit (??)");
+		SDL_SetError("Unsupported YUV format in blit");
 		return(-1);
 	}
 	if ( SDL_MUSTLOCK(display) ) {

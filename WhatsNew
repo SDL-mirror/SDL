@@ -3,6 +3,12 @@ This is a list of API changes in SDL's version history.
 
 Version 1.0:
 
+1.2.4:
+	Added SDL_LockRect() and SDL_UnlockRect() to lock a portion of a
+	surface.  This may be more efficient than a full lock if you are
+	using a hardware surface and plan to make a few changes to small
+	areas in the surface.
+
 1.2.0:
 	Added SDL_VIDEOEXPOSE event to signal that the screen needs to
 	be redrawn.  This is currently only delivered to OpenGL windows

@@ -143,6 +143,8 @@
 	SDL_FreeSurface
 	SDL_LockSurface
 	SDL_UnlockSurface
+	SDL_LockRect
+	SDL_UnlockRect
 	SDL_LoadBMP_RW
 	SDL_SaveBMP_RW
 	SDL_SetColorKey
@@ -174,4 +176,5 @@
 	SDL_WM_IconifyWindow
 	SDL_WM_ToggleFullScreen
 	SDL_WM_GrabInput
+	SDL_SoftStretch
 	SDL_InitQuickDraw

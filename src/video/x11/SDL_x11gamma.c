@@ -38,7 +38,7 @@ static int X11_SetGammaNoLock(_THIS, float red, float green, float blue)
 {
 #ifdef XFREE86_VMGAMMA
     if (use_vidmode >= 200) {
-        XF86VidModeGamma gamma;
+        SDL_NAME(XF86VidModeGamma) gamma;
         Bool succeeded;
 
 	/* Clamp the gamma values */
@@ -67,7 +67,7 @@ static int X11_SetGammaNoLock(_THIS, float red, float green, float blue)
         	gamma.blue = blue;
 	}
         if ( SDL_GetAppState() & SDL_APPACTIVE ) {
-            succeeded = XVidMode(SetGamma, (SDL_Display, SDL_Screen, &gamma));
+            succeeded = SDL_NAME(XF86VidModeSetGamma)(SDL_Display, SDL_Screen, &gamma);
             XSync(SDL_Display, False);
         } else {
             gamma_saved[0] = gamma.red;
@@ -99,8 +99,8 @@ static int X11_GetGammaNoLock(_THIS, float *red, float *green, float *blue)
 {
 #ifdef XFREE86_VMGAMMA
     if (use_vidmode >= 2) {
-        XF86VidModeGamma gamma;
-        if (XVidMode(GetGamma, (SDL_Display, SDL_Screen, &gamma))) {
+        SDL_NAME(XF86VidModeGamma) gamma;
+        if (SDL_NAME(XF86VidModeGetGamma)(SDL_Display, SDL_Screen, &gamma)) {
             *red   = gamma.red;
             *green = gamma.green;
             *blue  = gamma.blue;

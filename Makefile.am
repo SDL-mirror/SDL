@@ -45,7 +45,7 @@ EXTRA_DIST =		\
 	EpocBuildFiles.zip \
         WhatsNew	\
         docs.html	\
-        sdl.m4		\
+	sdl.m4		\
         SDL.spec	\
         autogen.sh	\
         strip_fPIC.sh

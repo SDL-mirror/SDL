@@ -141,6 +141,8 @@
 	_SDL_FreeSurface
 	_SDL_LockSurface
 	_SDL_UnlockSurface
+	_SDL_LockRect
+	_SDL_UnlockRect
 	_SDL_LoadBMP_RW
 	_SDL_SaveBMP_RW
 	_SDL_SetColorKey

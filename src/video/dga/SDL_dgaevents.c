@@ -29,7 +29,7 @@ static char rcsid =
 
 #include <stdio.h>
 #include <X11/Xlib.h>
-#include <X11/extensions/xf86dga.h>
+#include <XFree86/extensions/xf86dga.h>
 
 #include "SDL_sysvideo.h"
 #include "SDL_events_c.h"
@@ -45,7 +45,7 @@ extern SDL_keysym *X11_TranslateKey(Display *display, XKeyEvent *xkey,
 static int DGA_DispatchEvent(_THIS)
 {
 	int posted;
-	XDGAEvent xevent;
+	SDL_NAME(XDGAEvent) xevent;
 
 	XNextEvent(DGA_Display, (XEvent *)&xevent);
 
@@ -82,7 +82,7 @@ static int DGA_DispatchEvent(_THIS)
 		SDL_keysym keysym;
 		XKeyEvent xkey;
 
-		XDGAKeyEventToXKeyEvent(&xevent.xkey, &xkey);
+		SDL_NAME(XDGAKeyEventToXKeyEvent)(&xevent.xkey, &xkey);
 		posted = SDL_PrivateKeyboard((xevent.type == KeyPress), 
 					X11_TranslateKey(DGA_Display,
 							 &xkey, xkey.keycode,
