@@ -7,7 +7,7 @@ These instructions are for people using Apple's Mac OS X (pronounced
 
 From the developer's point of view, OS X is a sort of hybrid Mac and
 Unix system, and you have the option of using either traditional
-command line tools or Apple's IDE ProjectBuilder (PB).
+command line tools or Apple's IDE Xcode.
 
 To build SDL using the command line, use the standard configure and make
 process:
@@ -93,21 +93,20 @@ the net, so feel free to take a peek at them for inspiration!
 
 
 ==============================================================================
-Using the Simple DirectMedia Layer with Project Builder
+Using the Simple DirectMedia Layer with Xcode
 ==============================================================================
 
-These instructions are for using Apple's Project Builder IDE to build SDL
-applications.
+These instructions are for using Apple's Xcode IDE to build SDL applications.
 
 - First steps
 
-The first thing to do is to unpack the PBProjects.tar.gz archive in the
-top level SDL directory (where the PBProjects.tar.gz archive resides).
+The first thing to do is to unpack the Xcode.tar.gz archive in the
+top level SDL directory (where the Xcode.tar.gz archive resides).
 Because Stuffit Expander will unpack the archive into a subdirectory,
 you should unpack the archive manually from the command line:
 	cd [path_to_SDL_source]
-	tar zxf PBProjects.tar.gz
-This will create a new folder called PBProjects, which you can browse
+	tar zxf Xcode.tar.gz
+This will create a new folder called Xcode, which you can browse
 normally from the Finder.
 
 - Building the Framework
@@ -120,7 +119,7 @@ file behaves more or less like a standard UNIX shared library.
 
 To build the framework, simply open the framework project and build it. 
 By default, the framework bundle "SDL.framework" is installed in 
-~/Library/Frameworks. Therefore, the testers and project stationary expect
+/Library/Frameworks. Therefore, the testers and project stationary expect
 it to be located there. However, it will function the same in any of the
 following locations:
 
