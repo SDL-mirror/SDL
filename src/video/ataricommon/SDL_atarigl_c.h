@@ -40,6 +40,8 @@ struct SDL_PrivateGLData {
 
 	int	gl_pixelsize;	/* for CopyShadow functions */
 
+	SDL_bool gl_upsidedown; /* Some implementations draw upside down */
+
 	Uint8 *gl_shadow;	/* Shadow buffer for old implementations */
 
 	/* for unsupported OSMesa buffer formats */
@@ -75,19 +77,20 @@ struct SDL_PrivateGLData {
 };
 
 /* Variable names */
-#define gl_active	(this->gl_data->gl_active)
-#define gl_ctx		(this->gl_data->ctx)
-#define gl_oldmesa	(this->gl_data->gl_oldmesa)
+#define gl_active		(this->gl_data->gl_active)
+#define gl_ctx			(this->gl_data->ctx)
+#define gl_oldmesa		(this->gl_data->gl_oldmesa)
 #define gl_pixelsize	(this->gl_data->gl_pixelsize)
-#define gl_shadow	(this->gl_data->gl_shadow)
-#define gl_convert	(this->gl_data->ConvertSurface)
+#define gl_upsidedown	(this->gl_data->gl_upsidedown)
+#define gl_shadow		(this->gl_data->gl_shadow)
+#define gl_convert		(this->gl_data->ConvertSurface)
 #define gl_copyshadow	(this->gl_data->CopyShadow)
 #define gl_curformat	(this->gl_data->format)
 #define gl_curdepth		(this->gl_data->depth)
 #define gl_curstencil	(this->gl_data->stencil)
 #define gl_curaccum		(this->gl_data->accum)
-#define gl_curwidth	(this->gl_data->width)
-#define gl_curheight		(this->gl_data->height)
+#define gl_curwidth		(this->gl_data->width)
+#define gl_curheight	(this->gl_data->height)
 
 /* OpenGL functions */
 extern int SDL_AtariGL_Init(_THIS, SDL_Surface *current);

@@ -425,6 +425,7 @@ static int InitNew(_THIS, SDL_Surface *current)
 	/* Init OpenGL context using OSMesa */
 	gl_convert = ConvertNull;
 	gl_copyshadow = CopyShadowNull;
+	gl_upsidedown = SDL_FALSE;
 
 	pixel_format = current->format;
 	redmask = pixel_format->Rmask;
@@ -539,6 +540,7 @@ static int InitOld(_THIS, SDL_Surface *current)
 	/* Init OpenGL context using OSMesa */
 	gl_convert = ConvertNull;
 	gl_copyshadow = CopyShadowNull;
+	gl_upsidedown = SDL_FALSE;
 
 	pixel_format = current->format;
 	redmask = pixel_format->Rmask;
@@ -556,6 +558,7 @@ static int InitOld(_THIS, SDL_Surface *current)
 				}
 			} else {
 				gl_pixelsize = 4;
+				gl_upsidedown = SDL_TRUE;
 				osmesa_format = OSMESA_ARGB;
 				if (redmask == 31<<10) {
 					gl_copyshadow = CopyShadow8888To555;
@@ -577,6 +580,7 @@ static int InitOld(_THIS, SDL_Surface *current)
 				}
 			} else {
 				gl_pixelsize = 4;
+				gl_upsidedown = SDL_TRUE;
 				osmesa_format = OSMESA_ARGB;
 				gl_copyshadow = CopyShadow8888To565;
 				if (redmask != 31<<11) {
@@ -595,6 +599,7 @@ static int InitOld(_THIS, SDL_Surface *current)
 				}
 			} else {
 				gl_copyshadow = CopyShadowDirect;
+				gl_upsidedown = SDL_TRUE;
 				if (redmask == 255<<16) {
 					osmesa_format = OSMESA_RGB;
 				} else {
@@ -616,6 +621,7 @@ static int InitOld(_THIS, SDL_Surface *current)
 				}
 			} else {
 				gl_pixelsize = 4;
+				gl_upsidedown = SDL_TRUE;
 				gl_copyshadow = CopyShadowDirect;
 				if (redmask == 255<<16) {
 					osmesa_format = OSMESA_ARGB;
@@ -685,6 +691,10 @@ static void CopyShadowDirect(_THIS, SDL_Surface *surface)
 	srcpitch = surface->w * gl_pixelsize;
 	dstline = surface->pixels;
 	dstpitch = surface->pitch;
+	if (gl_upsidedown) {
+		srcline += (surface->h-1)*srcpitch;
+		srcpitch = -srcpitch;
+	}
 
 	for (y=0; y<surface->h; y++) {
 		memcpy(dstline, srcline, srcpitch);
@@ -704,6 +714,10 @@ static void CopyShadowRGBTo555(_THIS, SDL_Surface *surface)
 	srcpitch = surface->w * gl_pixelsize;
 	dstline = surface->pixels;
 	dstpitch = surface->pitch >>1;
+	if (gl_upsidedown) {
+		srcline += (surface->h-1)*srcpitch;
+		srcpitch = -srcpitch;
+	}
 
 	for (y=0; y<surface->h; y++) {
 		srccol = srcline;
@@ -732,6 +746,10 @@ static void CopyShadowRGBTo565(_THIS, SDL_Surface *surface)
 	srcpitch = surface->w * gl_pixelsize;
 	dstline = surface->pixels;
 	dstpitch = surface->pitch >>1;
+	if (gl_upsidedown) {
+		srcline += (surface->h-1)*srcpitch;
+		srcpitch = -srcpitch;
+	}
 
 	for (y=0; y<surface->h; y++) {
 		srccol = srcline;
@@ -761,6 +779,10 @@ static void CopyShadowRGBSwap(_THIS, SDL_Surface *surface)
 	srcpitch = surface->w * gl_pixelsize;
 	dstline = surface->pixels;
 	dstpitch = surface->pitch;
+	if (gl_upsidedown) {
+		srcline += (surface->h-1)*srcpitch;
+		srcpitch = -srcpitch;
+	}
 
 	for (y=0; y<surface->h; y++) {
 		srccol = srcline;
@@ -788,6 +810,10 @@ static void CopyShadowRGBToARGB(_THIS, SDL_Surface *surface)
 	srcpitch = surface->w * gl_pixelsize;
 	dstline = surface->pixels;
 	dstpitch = surface->pitch >>2;
+	if (gl_upsidedown) {
+		srcline += (surface->h-1)*srcpitch;
+		srcpitch = -srcpitch;
+	}
 
 	for (y=0; y<surface->h; y++) {
 		srccol = srcline;
@@ -818,6 +844,10 @@ static void CopyShadowRGBToABGR(_THIS, SDL_Surface *surface)
 	srcpitch = surface->w * gl_pixelsize;
 	dstline = surface->pixels;
 	dstpitch = surface->pitch >>2;
+	if (gl_upsidedown) {
+		srcline += (surface->h-1)*srcpitch;
+		srcpitch = -srcpitch;
+	}
 
 	for (y=0; y<surface->h; y++) {
 		srccol = srcline;
@@ -848,6 +878,10 @@ static void CopyShadowRGBToBGRA(_THIS, SDL_Surface *surface)
 	srcpitch = surface->w * gl_pixelsize;
 	dstline = surface->pixels;
 	dstpitch = surface->pitch >>2;
+	if (gl_upsidedown) {
+		srcline += (surface->h-1)*srcpitch;
+		srcpitch = -srcpitch;
+	}
 
 	for (y=0; y<surface->h; y++) {
 		srccol = srcline;
@@ -878,6 +912,10 @@ static void CopyShadowRGBToRGBA(_THIS, SDL_Surface *surface)
 	srcpitch = surface->w * gl_pixelsize;
 	dstline = surface->pixels;
 	dstpitch = surface->pitch >>2;
+	if (gl_upsidedown) {
+		srcline += (surface->h-1)*srcpitch;
+		srcpitch = -srcpitch;
+	}
 
 	for (y=0; y<surface->h; y++) {
 		srccol = srcline;
@@ -908,6 +946,10 @@ static void CopyShadow8888To555(_THIS, SDL_Surface *surface)
 	srcpitch = (surface->w * gl_pixelsize) >>2;
 	dstline = surface->pixels;
 	dstpitch = surface->pitch >>1;
+	if (gl_upsidedown) {
+		srcline += (surface->h-1)*srcpitch;
+		srcpitch = -srcpitch;
+	}
 
 	for (y=0; y<surface->h; y++) {
 		srccol = srcline;
@@ -938,6 +980,10 @@ static void CopyShadow8888To565(_THIS, SDL_Surface *surface)
 	srcpitch = (surface->w * gl_pixelsize) >> 2;
 	dstline = surface->pixels;
 	dstpitch = surface->pitch >>1;
+	if (gl_upsidedown) {
+		srcline += (surface->h-1)*srcpitch;
+		srcpitch = -srcpitch;
+	}
 
 	for (y=0; y<surface->h; y++) {
 		srccol = srcline;
