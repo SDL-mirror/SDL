@@ -53,7 +53,7 @@
 
 /* Debug print info */
 #define DEBUG_NAME "audio:gsxb: "
-#if 0
+#if 1
 #define DEBUG_PRINT(what) \
 	{ \
 		printf what; \
@@ -179,28 +179,20 @@ static void Mint_CloseAudio(_THIS)
 	/* Stop replay */
 	Buffoper(0);
 
-	DEBUG_PRINT((DEBUG_NAME "closeaudio: replay stopped\n"));
-
 	/* Uninstall interrupt */
 	if (NSetinterrupt(2, SI_NONE, SDL_MintAudio_EmptyGsxbInterrupt)<0) {
 		DEBUG_PRINT((DEBUG_NAME "NSetinterrupt() failed in close\n"));
 	}
 
-	DEBUG_PRINT((DEBUG_NAME "closeaudio: interrupt disabled\n"));
-
 	/* Wait if currently playing sound */
 	while (SDL_MintAudio_mutex != 0) {
 	}
-
-	DEBUG_PRINT((DEBUG_NAME "closeaudio: no more interrupt running\n"));
 
 	/* Clear buffers */
 	if (SDL_MintAudio_audiobuf[0]) {
 		Mfree(SDL_MintAudio_audiobuf[0]);
 		SDL_MintAudio_audiobuf[0] = SDL_MintAudio_audiobuf[1] = NULL;
 	}
-
-	DEBUG_PRINT((DEBUG_NAME "closeaudio: buffers freed\n"));
 
 	/* Unlock sound system */
 	Unlocksnd();
@@ -278,15 +270,22 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 	}
 	
 	/* Calculate and select the closest frequency */
-	MINTAUDIO_sfreq=1;
-	MINTAUDIO_nfreq=12;
-	for (i=MINTAUDIO_sfreq;i<MINTAUDIO_nfreq;i++) {
-		MINTAUDIO_hardfreq[i]=MASTERCLOCK_44K/(MASTERPREDIV_MILAN*(i+1));
-		DEBUG_PRINT((DEBUG_NAME "calc:freq(%d)=%lu\n", i, MINTAUDIO_hardfreq[i]));
+	MINTAUDIO_freqcount=0;
+	for (i=1;i<4;i++) {
+		SDL_MintAudio_AddFrequency(this, MASTERCLOCK_44K/(MASTERPREDIV_MILAN*(1<<i)), MASTERCLOCK_44K, (1<<i)-1);
 	}
 
-	MINTAUDIO_numfreq=SDL_MintAudio_SearchFrequency(this, 1, spec->freq);
-	spec->freq=MINTAUDIO_hardfreq[MINTAUDIO_numfreq];
+#if 1
+	for (i=0; i<MINTAUDIO_freqcount; i++) {
+		DEBUG_PRINT((DEBUG_NAME "freq %d: %lu Hz, clock %lu, prediv %d\n",
+			i, MINTAUDIO_frequencies[i].frequency, MINTAUDIO_frequencies[i].masterclock,
+			MINTAUDIO_frequencies[i].predivisor
+		));
+	}
+#endif
+
+	MINTAUDIO_numfreq=SDL_MintAudio_SearchFrequency(this, spec->freq);
+	spec->freq=MINTAUDIO_frequencies[MINTAUDIO_numfreq].frequency;
 
 	DEBUG_PRINT((DEBUG_NAME "obtained: %d bits, ",spec->format & 0x00ff));
 	DEBUG_PRINT(("signed=%d, ", ((spec->format & 0x8000)!=0)));
@@ -299,7 +298,7 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 
 static void Mint_InitAudio(_THIS, SDL_AudioSpec *spec)
 {
-	int channels_mode;
+	int channels_mode, prediv;
 	void *buffer;
 
 	/* Stop currently playing sound */
@@ -333,7 +332,8 @@ static void Mint_InitAudio(_THIS, SDL_AudioSpec *spec)
 		DEBUG_PRINT((DEBUG_NAME "Setmode() failed\n"));
 	}
 
-	Devconnect(DMAPLAY, DAC, CLKEXT, MINTAUDIO_numfreq, 1);
+	prediv = MINTAUDIO_frequencies[MINTAUDIO_numfreq].predivisor;
+	Devconnect(DMAPLAY, DAC, CLKEXT, prediv, 1);
 
 	/* Set buffer */
 	buffer = SDL_MintAudio_audiobuf[SDL_MintAudio_numbuf];

@@ -41,6 +41,7 @@ Uint8 *SDL_MintAudio_audiobuf[2];	/* Pointers to buffers */
 unsigned long SDL_MintAudio_audiosize;		/* Length of audio buffer=spec->size */
 unsigned short SDL_MintAudio_numbuf;		/* Buffer to play */
 unsigned short SDL_MintAudio_mutex;
+unsigned long SDL_MintAudio_clocktics;
 cookie_stfa_t	*SDL_MintAudio_stfa;
 
 /* The callback function, called by each driver whenever needed */
@@ -64,30 +65,57 @@ void SDL_MintAudio_Callback(void)
 	}
 }
 
-/* Simple function to search for the nearest frequency */
-int SDL_MintAudio_SearchFrequency(_THIS, int falcon_codec, int desired_freq)
+/* Add a new frequency/clock/predivisor to the current list */
+void SDL_MintAudio_AddFrequency(_THIS, Uint32 frequency, Uint32 clock, Uint32 prediv)
+{
+	int i, p;
+
+	if (MINTAUDIO_freqcount==MINTAUDIO_maxfreqs) {
+		return;
+	}
+
+	/* Search where to insert the frequency (highest first) */
+	for (p=0; p<MINTAUDIO_freqcount; p++) {
+		if (frequency > MINTAUDIO_frequencies[p].frequency) {
+			break;
+		}
+	}
+
+	/* Put all following ones farer */
+	if (MINTAUDIO_freqcount>0) {
+		for (i=MINTAUDIO_freqcount; i>p; i--) {
+			MINTAUDIO_frequencies[i].frequency = MINTAUDIO_frequencies[i-1].frequency;
+			MINTAUDIO_frequencies[i].masterclock = MINTAUDIO_frequencies[i-1].masterclock;
+			MINTAUDIO_frequencies[i].predivisor = MINTAUDIO_frequencies[i-1].predivisor;
+		}
+	}
+
+	/* And insert new one */
+	MINTAUDIO_frequencies[p].frequency = frequency;
+	MINTAUDIO_frequencies[p].masterclock = clock;
+	MINTAUDIO_frequencies[p].predivisor = prediv;
+
+	MINTAUDIO_freqcount++;
+}
+
+/* Search for the nearest frequency */
+int SDL_MintAudio_SearchFrequency(_THIS, int desired_freq)
 {
 	int i;
 
 	/* Only 1 freq ? */
-	if (MINTAUDIO_nfreq==1) {
-		return(MINTAUDIO_sfreq);
+	if (MINTAUDIO_freqcount==1) {
+		return 0;
 	}
 
 	/* Check the array */
-	for (i=MINTAUDIO_sfreq; i<MINTAUDIO_nfreq-1; i++) {
-		/* Remove unusable falcon codec frequencies */
-		if (falcon_codec) {
-			if ((i==6) || (i==8) || (i==10)) {
-				continue;
-			}
-		}
-
-		if (desired_freq >= ((MINTAUDIO_hardfreq[i]+MINTAUDIO_hardfreq[i+1])>>1)) {
+	for (i=0; i<MINTAUDIO_freqcount; i++) {
+		if (desired_freq >= ((MINTAUDIO_frequencies[i].frequency+
+			MINTAUDIO_frequencies[i+1].frequency)>>1)) {
 			return i;
 		}
 	}
 
 	/* Not in the array, give the latest */
-	return MINTAUDIO_nfreq-1;
+	return MINTAUDIO_freqcount-1;
 }

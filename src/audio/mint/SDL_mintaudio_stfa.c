@@ -53,7 +53,7 @@
 
 /* Debug print info */
 #define DEBUG_NAME "audio:stfa: "
-#if 0
+#if 1
 #define DEBUG_PRINT(what) \
 	{ \
 		printf what; \
@@ -211,15 +211,22 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 	DEBUG_PRINT(("freq=%d\n", spec->freq));
 
 	/* Check formats available */
-	MINTAUDIO_nfreq=16;
-	MINTAUDIO_sfreq=0;
-	for (i=MINTAUDIO_sfreq;i<MINTAUDIO_nfreq;i++) {
-		MINTAUDIO_hardfreq[i]=freqs[15-i];
-		DEBUG_PRINT((DEBUG_NAME "calc:freq(%d)=%lu\n", i, MINTAUDIO_hardfreq[i]));
+	MINTAUDIO_freqcount=0;
+	for (i=0;i<16;i++) {
+		SDL_MintAudio_AddFrequency(this, freqs[i], 0, i);
 	}
 
-	MINTAUDIO_numfreq=SDL_MintAudio_SearchFrequency(this, 0, spec->freq);
-	spec->freq=MINTAUDIO_hardfreq[MINTAUDIO_numfreq];
+#if 1
+	for (i=0; i<MINTAUDIO_freqcount; i++) {
+		DEBUG_PRINT((DEBUG_NAME "freq %d: %lu Hz, clock %lu, prediv %d\n",
+			i, MINTAUDIO_frequencies[i].frequency, MINTAUDIO_frequencies[i].masterclock,
+			MINTAUDIO_frequencies[i].predivisor
+		));
+	}
+#endif
+
+	MINTAUDIO_numfreq=SDL_MintAudio_SearchFrequency(this, spec->freq);
+	spec->freq=MINTAUDIO_frequencies[MINTAUDIO_numfreq].frequency;
 
 	DEBUG_PRINT((DEBUG_NAME "obtained: %d bits, ",spec->format & 0x00ff));
 	DEBUG_PRINT(("signed=%d, ", ((spec->format & 0x8000)!=0)));
@@ -243,7 +250,7 @@ static void Mint_InitAudio(_THIS, SDL_AudioSpec *spec)
 	cookie_stfa->sound_enable=STFA_PLAY_DISABLE;
 
 	/* Select replay format */
-	cookie_stfa->sound_control = 15-MINTAUDIO_numfreq;
+	cookie_stfa->sound_control = MINTAUDIO_frequencies[MINTAUDIO_numfreq].predivisor;
 	if ((spec->format & 0xff)==8) {
 		cookie_stfa->sound_control |= STFA_FORMAT_8BIT;
 	} else {

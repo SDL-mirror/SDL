@@ -23,7 +23,7 @@
 /*
 	Audio interrupts
 
-	Patrice Mandin
+	Patrice Mandin, Didier Méquignon
  */
 
 	.text
@@ -33,6 +33,7 @@
 	.globl	_SDL_MintAudio_GsxbInterrupt
 	.globl	_SDL_MintAudio_EmptyGsxbInterrupt
 	.globl	_SDL_MintAudio_XbiosInterrupt
+	.globl	_SDL_MintAudio_XbiosInterruptMeasureClock
 	.globl	_SDL_MintAudio_Dma8Interrupt
 	.globl	_SDL_MintAudio_StfaInterrupt
 
@@ -40,6 +41,7 @@
 	.globl	_SDL_MintAudio_audiobuf
 	.globl	_SDL_MintAudio_numbuf
 	.globl	_SDL_MintAudio_audiosize
+	.globl	_SDL_MintAudio_clocktics
 
 	.globl	_SDL_MintAudio_stfa
 
@@ -93,6 +95,17 @@ _SDL_MintAudio_GsxbInterrupt:
 	clrw	_SDL_MintAudio_mutex
 _SDL_MintAudio_EmptyGsxbInterrupt:
 	rts
+
+/*--- Xbios interrupt vector to measure Falcon external clock ---*/
+
+_SDL_MintAudio_XbiosInterruptMeasureClock:          /* 1 mS */
+
+	btst	#0,0xFFFF8901:w	/* state DMA sound */
+	beqs	SDL_MintAudio_EndIntMeasure
+	addql	#1,_SDL_MintAudio_clocktics
+SDL_MintAudio_EndIntMeasure:
+	bclr	#5,0xFFFFFA0F:w	/* Clear service bit */
+	rte
 
 /*--- Xbios interrupt vector ---*/
 

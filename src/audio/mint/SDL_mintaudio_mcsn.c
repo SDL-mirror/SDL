@@ -53,7 +53,7 @@
 
 /* Debug print info */
 #define DEBUG_NAME "audio:mcsn: "
-#if 0
+#if 1
 #define DEBUG_PRINT(what) \
 	{ \
 		printf what; \
@@ -217,14 +217,12 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 	DEBUG_PRINT(("freq=%d\n", spec->freq));
 
 	/* Check formats available */
-	MINTAUDIO_nfreq=4;
-	MINTAUDIO_sfreq=0;
+	MINTAUDIO_freqcount=0;
 	switch(cookie_mcsn->play) {
 		case MCSN_ST:
 			spec->channels=1;
 			spec->format=8; /* FIXME: is it signed or unsigned ? */
-			MINTAUDIO_nfreq=1;
-			MINTAUDIO_hardfreq[0]=12500;
+			SDL_MintAudio_AddFrequency(this, 12500, 0, 0);
 			break;
 		case MCSN_TT:	/* Also STE, Mega STE */
 			spec->format=AUDIO_S8;
@@ -234,21 +232,22 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 				masterclock=MASTERCLOCK_TT;
 				masterprediv=MASTERPREDIV_TT;
 			}
-			for (i=MINTAUDIO_sfreq;i<MINTAUDIO_nfreq;i++) {
-				MINTAUDIO_hardfreq[i]=masterclock/(masterprediv*(1<<i));
-				DEBUG_PRINT((DEBUG_NAME "calc:freq(%d)=%lu\n", i, MINTAUDIO_hardfreq[i]));
+			for (i=0; i<4; i++) {
+				SDL_MintAudio_AddFrequency(this, masterclock/(masterprediv*(1<<i)), masterclock, 3-i);
 			}
 			break;
 		case MCSN_FALCON:	/* Also Mac */
-			MINTAUDIO_nfreq=12;
-			MINTAUDIO_sfreq=1;
-			masterclock=MASTERCLOCK_FALCON1;
-			if (cookie_mcsn->res1 != 0) {
-				masterclock=cookie_mcsn->res1;
+			for (i=1; i<12; i++) {
+				/* Remove unusable Falcon codec predivisors */
+				if ((i==6) || (i==8) || (i==10)) {
+					continue;
+				}
+				SDL_MintAudio_AddFrequency(this, MASTERCLOCK_FALCON1/(MASTERPREDIV_FALCON*(i+1)), CLK25M, i+1);
 			}
-			for (i=MINTAUDIO_sfreq;i<MINTAUDIO_nfreq;i++) {
-				MINTAUDIO_hardfreq[i]=masterclock/(MASTERPREDIV_FALCON*(i+1));
-				DEBUG_PRINT((DEBUG_NAME "calc:freq(%d)=%lu\n", i, MINTAUDIO_hardfreq[i]));
+			if (cookie_mcsn->res1 != 0) {
+				for (i=1; i<4; i++) {
+					SDL_MintAudio_AddFrequency(this, (cookie_mcsn->res1)/(MASTERPREDIV_FALCON*(1<<i)), CLKEXT, (1<<i)-1);
+				}
 			}
 			spec->format |= 0x8000;	/* Audio is always signed */
 			if ((spec->format & 0x00ff)==16) {
@@ -258,8 +257,17 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 			break;
 	}
 
-	MINTAUDIO_numfreq=SDL_MintAudio_SearchFrequency(this, (cookie_mch>>16)==MCH_F30, spec->freq);
-	spec->freq=MINTAUDIO_hardfreq[MINTAUDIO_numfreq];
+#if 1
+	for (i=0; i<MINTAUDIO_freqcount; i++) {
+		DEBUG_PRINT((DEBUG_NAME "freq %d: %lu Hz, clock %lu, prediv %d\n",
+			i, MINTAUDIO_frequencies[i].frequency, MINTAUDIO_frequencies[i].masterclock,
+			MINTAUDIO_frequencies[i].predivisor
+		));
+	}
+#endif
+
+	MINTAUDIO_numfreq=SDL_MintAudio_SearchFrequency(this, spec->freq);
+	spec->freq=MINTAUDIO_frequencies[MINTAUDIO_numfreq].frequency;
 
 	DEBUG_PRINT((DEBUG_NAME "obtained: %d bits, ",spec->format & 0x00ff));
 	DEBUG_PRINT(("signed=%d, ", ((spec->format & 0x8000)!=0)));
@@ -272,7 +280,7 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 
 static void Mint_InitAudio(_THIS, SDL_AudioSpec *spec)
 {
-	int channels_mode;
+	int channels_mode, prediv, dmaclock;
 	void *buffer;
 
 	/* Stop currently playing sound */
@@ -297,20 +305,17 @@ static void Mint_InitAudio(_THIS, SDL_AudioSpec *spec)
 		DEBUG_PRINT((DEBUG_NAME "Setmode() failed\n"));
 	}
 
+	dmaclock = MINTAUDIO_frequencies[MINTAUDIO_numfreq].masterclock;
+	prediv = MINTAUDIO_frequencies[MINTAUDIO_numfreq].predivisor;
 	switch(cookie_mcsn->play) {
 		case MCSN_TT:
 			Devconnect(DMAPLAY, DAC, CLK25M, CLKOLD, 1);
-			Soundcmd(SETPRESCALE, 3-MINTAUDIO_numfreq);
+			Soundcmd(SETPRESCALE, prediv);
 			DEBUG_PRINT((DEBUG_NAME "STE/TT prescaler selected\n"));
 			break;
 		case MCSN_FALCON:
-			if (cookie_mcsn->res1 != 0) {
-				Devconnect(DMAPLAY, DAC, CLKEXT, MINTAUDIO_numfreq, 1);
-				DEBUG_PRINT((DEBUG_NAME "External clock selected, prescaler %d\n", MINTAUDIO_numfreq));
-			} else {
-				Devconnect(DMAPLAY, DAC, CLK25M, MINTAUDIO_numfreq, 1);
-				DEBUG_PRINT((DEBUG_NAME "25.175 MHz clock selected, prescaler %d\n", MINTAUDIO_numfreq));
-			}
+			Devconnect(DMAPLAY, DAC, dmaclock, prediv, 1);
+			DEBUG_PRINT((DEBUG_NAME "Falcon prescaler selected\n"));
 			break;
 	}
 

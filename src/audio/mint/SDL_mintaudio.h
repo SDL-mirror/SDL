@@ -35,17 +35,25 @@
 /* Hidden "this" pointer for the audio functions */
 #define _THIS	SDL_AudioDevice *this
 
+/* 16 predivisors with 3 clocks max. */
+#define MINTAUDIO_maxfreqs		(16*3)		
+
+typedef struct {
+	Uint32	frequency;
+	Uint32	masterclock;
+	Uint32	predivisor;
+} mint_frequency_t;
+
 struct SDL_PrivateAudioData {
-	Uint32	hardfreq[16];	/* Array of replay freqs of the hardware */
-	int		sfreq;			/* First number of freq to use in the array */
-	int 	nfreq;			/* Number of freqs to use in the array */
+	mint_frequency_t	frequencies[MINTAUDIO_maxfreqs];
+	int 	freq_count;		/* Number of frequencies in the array */
 	int		numfreq;		/* Number of selected frequency */
 };
 
 /* Old variable names */
-#define MINTAUDIO_hardfreq		(this->hidden->hardfreq)
-#define MINTAUDIO_sfreq			(this->hidden->sfreq)
-#define MINTAUDIO_nfreq			(this->hidden->nfreq)
+
+#define MINTAUDIO_frequencies	(this->hidden->frequencies)
+#define MINTAUDIO_freqcount		(this->hidden->freq_count)
 #define MINTAUDIO_numfreq		(this->hidden->numfreq)
 
 /* _MCH cookie (values>>16) */
@@ -110,14 +118,17 @@ extern unsigned long SDL_MintAudio_audiosize;		/* Length of audio buffer=spec->s
 extern unsigned short SDL_MintAudio_numbuf;		/* Buffer to play */
 extern unsigned short SDL_MintAudio_mutex;
 extern cookie_stfa_t *SDL_MintAudio_stfa;
+extern unsigned long SDL_MintAudio_clocktics;
 
 /* Functions */
 void SDL_MintAudio_Callback(void);
-int SDL_MintAudio_SearchFrequency(_THIS, int falcon_codec, int desired_freq);
+void SDL_MintAudio_AddFrequency(_THIS, Uint32 frequency, Uint32 clock, Uint32 prediv);
+int SDL_MintAudio_SearchFrequency(_THIS, int desired_freq);
 
 /* ASM interrupt functions */
 void SDL_MintAudio_GsxbInterrupt(void);
 void SDL_MintAudio_EmptyGsxbInterrupt(void);
+void SDL_MintAudio_XbiosInterruptMeasureClock(void);
 void SDL_MintAudio_XbiosInterrupt(void);
 void SDL_MintAudio_Dma8Interrupt(void);
 void SDL_MintAudio_StfaInterrupt(void);

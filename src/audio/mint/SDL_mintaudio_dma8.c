@@ -53,7 +53,7 @@
 
 /* Debug print info */
 #define DEBUG_NAME "audio:dma8: "
-#if 0
+#if 1
 #define DEBUG_PRINT(what) \
 	{ \
 		printf what; \
@@ -100,11 +100,12 @@ static int Audio_Available(void)
 	}
 
 	/* Check if we have 8 bits audio */
+/*
 	if ((cookie_snd & SND_8BIT)==0) {
 		DEBUG_PRINT((DEBUG_NAME "no 8 bits sound\n"));
 	    return(0);
 	}
-
+*/
 	if ((cookie_mch>>16)>MCH_F30) {
 		DEBUG_PRINT((DEBUG_NAME "unknown 8 bits audio chip\n"));
 		return 0;
@@ -218,7 +219,7 @@ static void Mint_CloseAudio(_THIS)
 
 static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 {
-	int i, masterprediv;
+	int i, masterprediv, sfreq;
 	unsigned long masterclock;
 
 	DEBUG_PRINT((DEBUG_NAME "asked: %d bits, ",spec->format & 0x00ff));
@@ -231,8 +232,7 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 	spec->format = AUDIO_S8;
 	
 	/* Calculate and select the closest frequency */
-	MINTAUDIO_nfreq=4;
-	MINTAUDIO_sfreq=0;
+	sfreq=0;
 	masterclock=MASTERCLOCK_STE;
 	masterprediv=MASTERPREDIV_STE;
 	switch(cookie_mch>>16) {
@@ -248,18 +248,27 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 			break;
 		case MCH_F30:
 			masterclock=MASTERCLOCK_FALCON1;
-			masterprediv=MASTERPREDIV_FALCON<<1;
-			MINTAUDIO_nfreq=3;
-			MINTAUDIO_sfreq=1;
+			masterprediv=MASTERPREDIV_FALCON;
+			sfreq=1;
 			break;
 	}
-	for (i=MINTAUDIO_sfreq;i<MINTAUDIO_nfreq;i++) {
-		MINTAUDIO_hardfreq[i]=masterclock/(masterprediv*(1<<i));
-		DEBUG_PRINT((DEBUG_NAME "calc:freq(%d)=%lu\n", i, MINTAUDIO_hardfreq[i]));
+	
+	MINTAUDIO_freqcount=0;
+	for (i=sfreq;i<4;i++) {
+		SDL_MintAudio_AddFrequency(this, masterclock/(masterprediv*(1<<i)), masterclock, i-sfreq);
 	}
 
-	MINTAUDIO_numfreq=SDL_MintAudio_SearchFrequency(this, 0, spec->freq);
-	spec->freq=MINTAUDIO_hardfreq[MINTAUDIO_numfreq];
+#if 1
+	for (i=0; i<MINTAUDIO_freqcount; i++) {
+		DEBUG_PRINT((DEBUG_NAME "freq %d: %lu Hz, clock %lu, prediv %d\n",
+			i, MINTAUDIO_frequencies[i].frequency, MINTAUDIO_frequencies[i].masterclock,
+			MINTAUDIO_frequencies[i].predivisor
+		));
+	}
+#endif
+
+	MINTAUDIO_numfreq=SDL_MintAudio_SearchFrequency(this, spec->freq);
+	spec->freq=MINTAUDIO_frequencies[MINTAUDIO_numfreq].frequency;
 
 	DEBUG_PRINT((DEBUG_NAME "obtained: %d bits, ",spec->format & 0x00ff));
 	DEBUG_PRINT(("signed=%d, ", ((spec->format & 0x8000)!=0)));
@@ -298,11 +307,11 @@ static void Mint_InitAudio(_THIS, SDL_AudioSpec *spec)
 	DMAAUDIO_IO.end_mid = (buffer>>8) & 255;
 	DMAAUDIO_IO.end_low = buffer & 255;
 
-	mode = 3-MINTAUDIO_numfreq;
+	mode = 3-MINTAUDIO_frequencies[MINTAUDIO_numfreq].predivisor;
 	if (spec->channels==1) {
 		mode |= 1<<7;
 	}
-	DMAAUDIO_IO.mode = mode;	
+	DMAAUDIO_IO.sound_ctrl = mode;	
 
 	/* Set interrupt */
 	Jdisint(MFP_DMASOUND);
