@@ -901,6 +901,9 @@ void SDL_FreeSurface (SDL_Surface *surface)
 	if ( --surface->refcount > 0 ) {
 		return;
 	}
+	while ( surface->locked > 0 ) {
+		SDL_UnlockSurface(surface);
+	}
 	if ( (surface->flags & SDL_RLEACCEL) == SDL_RLEACCEL ) {
 	        SDL_UnRLESurface(surface, 0);
 	}
