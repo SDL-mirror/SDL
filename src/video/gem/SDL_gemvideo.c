@@ -437,6 +437,15 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	vsf_interior(VDI_handle,1);
 	vsf_perimeter(VDI_handle,0);
 
+	/* Fill video modes list */
+	SDL_modelist[0] = malloc(sizeof(SDL_Rect));
+	SDL_modelist[0]->x = 0;
+	SDL_modelist[0]->y = 0;
+	SDL_modelist[0]->w = VDI_w;
+	SDL_modelist[0]->h = VDI_h;
+
+	SDL_modelist[1] = NULL;
+
 #ifdef DEBUG_VIDEO_GEM
 	printf("sdl:video:gem: VideoInit(): done\n");
 #endif
@@ -447,11 +456,15 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 SDL_Rect **GEM_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
 {
-	if (format->BitsPerPixel == VDI_bpp) {
-		return((SDL_Rect **)-1);
-	} else {
+	if (format->BitsPerPixel != VDI_bpp) {
 		return ((SDL_Rect **)NULL);
 	}
+
+	if (flags & SDL_FULLSCREEN) {
+		return (SDL_modelist);
+	}
+
+	return((SDL_Rect **)-1);
 }
 
 static void GEM_FreeBuffers(_THIS)
