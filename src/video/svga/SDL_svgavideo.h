@@ -40,10 +40,19 @@ struct SDL_PrivateVideoData {
 	int SDL_nummodes[NUM_MODELISTS];
 	SDL_Rect **SDL_modelist[NUM_MODELISTS];
 	int *SDL_vgamode[NUM_MODELISTS];
+
+	/* information for double-buffering */
+	int flip_page;
+	int flip_offset[2];
+	Uint8 *flip_address[2];
 };
 /* Old variable names */
 #define SDL_nummodes		(this->hidden->SDL_nummodes)
 #define SDL_modelist		(this->hidden->SDL_modelist)
 #define SDL_vgamode		(this->hidden->SDL_vgamode)
+#define flip_page		(this->hidden->flip_page)
+#define flip_offset		(this->hidden->flip_offset)
+#define flip_address		(this->hidden->flip_address)
 
 #endif /* _SDL_svgavideo_h */
+
