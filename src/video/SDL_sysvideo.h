@@ -331,6 +331,9 @@ extern VideoBootStrap X11_bootstrap;
 #ifdef ENABLE_DGA
 extern VideoBootStrap DGA_bootstrap;
 #endif
+#ifdef ENABLE_NANOX
+extern VideoBootStrap NX_bootstrap;
+#endif
 #ifdef ENABLE_FBCON
 extern VideoBootStrap FBCON_bootstrap;
 #endif

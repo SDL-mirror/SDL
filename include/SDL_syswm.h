@@ -50,7 +50,7 @@ typedef struct SDL_SysWMinfo SDL_SysWMinfo;
 
 /* This is the structure for custom window manager events */
 #if (defined(unix) || defined(__unix__) || defined(_AIX)) && \
-    (!defined(DISABLE_X11) && !defined(__CYGWIN32__))
+    (defined(ENABLE_X11) && !defined(__CYGWIN32__))
  /* AIX is unix, of course, but the native compiler CSet doesn't define unix */
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
@@ -93,6 +93,21 @@ typedef struct {
 	    	Window wmwindow;	/* The X11 managed input window */
 	    } x11;
 	} info;
+} SDL_SysWMinfo;
+
+#elif defined(ENABLE_NANOX)
+#include <microwin/nano-X.h>
+
+/* The generic custom event structure */
+struct SDL_SysWMmsg {
+	SDL_version version;
+	int data;
+};
+
+/* The windows custom window manager information structure */
+typedef struct {
+	SDL_version version ;
+	GR_WINDOW_ID window ;	/* The display window */
 } SDL_SysWMinfo;
 
 #elif defined(WIN32)

@@ -1,0 +1,81 @@
+  =================================================================
+  Patch version 0.8 of SDL(Simple DirectMedia Layer) for Nano-X API
+  =================================================================
+  
+  Author: Hsieh-Fu Tsai, clare@setabox.com
+
+  There are two patch files in this package. 
+
+  1. The first patch file, nanox.patch, is to fix a bug in Nano-X. 
+     This patch is proposed by Gary James (gjames@twcny.rr.com).
+
+  It fixes the client side GrClose(). In the original version, 
+  GrOpen() can only be called once. When the GrOpen() is called at 
+  the second time, the program will terminate. In order to prevent
+  this situation, we need to insert "nxSocket = -1" after 
+  "close(nxSocket)" in GrClose(). If you do not have this problem,
+  you may skip this step. 
+
+  =============
+  Quick Install 
+  =============
+
+  1. ./configure --disable-video-x11 --disable-video-fbcon \ 
+       --enable-video-nanox \ 
+       --with-nanox-pixel-type=[rgb/0888/888/565/555/332/pal] 
+  2. make clean 
+  3. make 
+  4. make install (as root) 
+
+  ============
+  Nitty-gritty 
+  ============
+
+  --with-nanox-pixel-type=[rgb/0888/888/565/555/332/pal] 
+
+  If the wrong pixel type is used, the program will crash when the 
+  sub-routine updates the screen. This option depends on SCREEN_PIXTYPE 
+  which is defined in Microwin0.89pre7/src/config. SCREEN_PIXTYPE 
+  is used to define the pixel type in Microwindows/Nano-X. 
+  I only test the program when the pixel type is in "rgb" 
+  (Microwin under X11) or "888" (framebuffer in 24-bit).
+
+  --enable-nanox-debug           Show debug messages 
+  --enable-nanox-share-memory    Use shared-memory to speed up 
+
+  =============================================
+  Some programs can be used to test this patch. 
+  =============================================
+
+  1. http://www.cs.berkeley.edu/~weimer/atris (a tetris-like game) 
+  2. http://www.libsdl.org/projects/newvox/
+  3. http://www.libsdl.org/projects/xflame/
+  4. http://www.libsdl.org/projects/optimum/ 
+  5. http://www.gnugeneration.com/software/loop/ 
+    
+  =========
+  Todo List 
+  =========
+
+  1. Create hardware surface
+  2. Create YUVOverlay on hardware
+  3. Use OpenGL
+  4. Gamma correction
+  5. Hide/Change mouse pointer
+
+  =====================
+  Supporting Institutes
+  =====================
+  
+  Many thanks to go to Setabox Co., Ltd. and CML (Communication and
+  Multimedia Laboratory, http://www.cmlab.csie.ntu.edu.tw/) in the 
+  Department of Computer Science and Information Engineering of 
+  National Taiwan University for supporting this porting project.
+  
+  ===================
+  Contact Information
+  ===================
+
+  Welcome to give me any suggestion and to report bugs.
+  My e-mail address : clare@setabox.com or niky@cmlab.csie.ntu.edu.tw
+  

@@ -51,6 +51,9 @@ static VideoBootStrap *bootstrap[] = {
 #ifdef ENABLE_DGA
 	&DGA_bootstrap,
 #endif
+#ifdef ENABLE_NANOX
+	&NX_bootstrap,
+#endif
 #ifdef ENABLE_FBCON
 	&FBCON_bootstrap,
 #endif
