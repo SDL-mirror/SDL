@@ -3500,7 +3500,7 @@ EOF
 	case $host in
 	  *-*-darwin*)
 	    newdeplibs=`$echo "X $newdeplibs" | $Xsed -e 's% \([^ $]*\).framework% -framework \1%g'`
-	    dependency_libs=`$echo "X $dependency_libs" | $Xsed -e 's% \([^ $]*\).framework% -framework \1%g'`
+	    dependency_libs=`$echo "X $dependency_libs" | $Xsed -e 's% \([^ $]*\).framework%%g'`
 	    ;;
 	esac
 	# Done checking deplibs!
