@@ -8,8 +8,6 @@ libvideo_qtopia_la_SOURCES = $(QTOPIA_SRCS)
 QTOPIA_SRCS = 			\
 	SDL_QWin.h		\
 	SDL_QWin.cc		\
-	SDL_QPEApp.h		\
-	SDL_QPEApp.cc		\
 	SDL_lowvideo.h		\
 	SDL_sysmouse.cc		\
 	SDL_sysmouse_c.h	\

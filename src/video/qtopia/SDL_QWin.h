@@ -36,7 +36,6 @@ static char rcsid =
 #include <qdirectpainter_qws.h>
 
 #include "SDL_events.h"
-//#include "SDL_BView.h"
 
 extern "C" {
 #include "SDL_events_c.h"
@@ -77,7 +76,7 @@ class SDL_QWin : public QWidget
     my_flags = flags;
   }
   const QPoint& mousePos() const { return my_mouse_pos; }
-  void setMousePos(const QPoint& newpos) { my_mouse_pos = newpos; }
+  void setMousePos(const QPoint& newpos);
   void setFullscreen(bool);
 
   void lockScreen() {

@@ -80,6 +80,14 @@ void SDL_QWin::closeEvent(QCloseEvent *e) {
   e->ignore();
 }
 
+void SDL_QWin::setMousePos(const QPoint &pos) {
+  if(my_image->width() == height()) {
+    my_mouse_pos = QPoint(height()-pos.y(), pos.x());
+  } else {
+    my_mouse_pos = pos;
+  }
+}
+
 void SDL_QWin::mouseMoveEvent(QMouseEvent *e) {
   Qt::ButtonState button = e->button();
   int sdlstate = 0;
@@ -92,25 +100,27 @@ void SDL_QWin::mouseMoveEvent(QMouseEvent *e) {
   if( (button & Qt::MidButton)) {
     sdlstate |= SDL_BUTTON_MMASK;
   }
-  SDL_PrivateMouseMotion(sdlstate, 0, e->pos().x(), e->pos().y());
+  setMousePos(e->pos());
+  SDL_PrivateMouseMotion(sdlstate, 0, my_mouse_pos.x(), my_mouse_pos.y());
 }
 
 void SDL_QWin::mousePressEvent(QMouseEvent *e) {
-  my_mouse_pos = e->pos();
+  setMousePos(e->pos());
   Qt::ButtonState button = e->button();
   SDL_PrivateMouseButton(SDL_PRESSED,
 			 (button & Qt::LeftButton) ? 1 :
 			 ((button & Qt::RightButton) ? 2 : 3),
-			 e->x(), e->y());
+			 my_mouse_pos.x(), my_mouse_pos.y());
 }
 
 void SDL_QWin::mouseReleaseEvent(QMouseEvent *e) {
-  my_mouse_pos = QPoint(-1, -1);
+  setMousePos(e->pos());
   Qt::ButtonState button = e->button();
   SDL_PrivateMouseButton(SDL_RELEASED,
 			 (button & Qt::LeftButton) ? 1 :
 			 ((button & Qt::RightButton) ? 2 : 3),
-			 e->x(), e->y());
+			 my_mouse_pos.x(), my_mouse_pos.y());
+  my_mouse_pos = QPoint(-1, -1);
 }
 
 #define USE_DIRECTPAINTER
@@ -190,16 +200,20 @@ void SDL_QWin::repaintRect(const QRect& rect) {
       // landscape mode
       uchar *fb = (uchar*)my_painter->frameBuffer();
       uchar *buf = (uchar*)my_image->bits();
-      int h = rect.height();
-      int wd = rect.width()<<1;
-      int fblineadd = my_painter->lineStep();
-      int buflineadd = my_image->bytesPerLine();
-      fb  += (rect.left()<<1) + rect.top() * my_painter->lineStep();
-      buf += (rect.left()<<1) + rect.top() * my_image->bytesPerLine();
-      while(h--) {
-	memcpy(fb, buf, wd);
-	fb += fblineadd;
-	buf += buflineadd;
+      if(rect == my_image->rect()) {
+	memcpy(fb, buf, width()*height()*2);
+      } else {
+	int h = rect.height();
+	int wd = rect.width()<<1;
+	int fblineadd = my_painter->lineStep();
+	int buflineadd = my_image->bytesPerLine();
+	fb  += (rect.left()<<1) + rect.top() * my_painter->lineStep();
+	buf += (rect.left()<<1) + rect.top() * my_image->bytesPerLine();
+	while(h--) {
+	  memcpy(fb, buf, wd);
+	  fb += fblineadd;
+	  buf += buflineadd;
+	}
       }
     }
   } else {

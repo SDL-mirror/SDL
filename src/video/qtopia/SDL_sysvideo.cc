@@ -34,12 +34,12 @@ static char rcsid =
 #include <unistd.h>
 
 #include <qapplication.h>
+#include <qpe/qpeapplication.h>
 
 #include "SDL.h"
 #include "SDL_timer.h"
 
 #include "SDL_QWin.h"
-#include "SDL_QPEApp.h"
 
 extern "C" {
 
@@ -213,10 +213,6 @@ extern "C" {
   int QT_VideoInit(_THIS, SDL_PixelFormat *vformat)
   {
     /* Initialize the QPE Application  */
-    if(SDL_InitQPEApp() == -1) {
-      return -1;
-    }
-
      /* Determine the screen depth */
     vformat->BitsPerPixel = QPixmap::defaultDepth();
 
@@ -231,7 +227,7 @@ extern "C" {
 
     /* Create the window / widget */
     SDL_Win = new SDL_QWin(QSize(QT_HIDDEN_SIZE, QT_HIDDEN_SIZE));
-    qApp->setMainWidget(SDL_Win);
+    ((QPEApplication*)qApp)->showMainWidget(SDL_Win);
     /* Fill in some window manager capabilities */
     _this->info.wm_available = 0;
 
@@ -274,7 +270,7 @@ extern "C" {
   SDL_Surface *QT_SetVideoMode(_THIS, SDL_Surface *current,
 			       int width, int height, int bpp, Uint32 flags)
   {
-    Qt::WFlags wflags = Qt::WType_TopLevel|Qt::WStyle_Customize;
+
     QImage *qimage;
     QSize desktop_size = qApp->desktop()->size();
 
@@ -367,9 +363,13 @@ extern "C" {
 
   void QT_VideoQuit(_THIS)
   {
-    qApp->setMainWidget(0);
-    delete SDL_Win;
-    SDL_QuitQPEApp();
+    // This is dumb, but if I free this, the app doesn't exit correctly.
+    // Of course, this will leak memory if init video is done more than once.
+    // Sucks but such is life.
+    
+    //    -- David Hedbor
+    //    delete SDL_Win; 
+    //    SDL_Win = 0;
     _this->screen->pixels = NULL;
   }
 
