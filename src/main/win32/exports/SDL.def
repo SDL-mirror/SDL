@@ -29,6 +29,10 @@
 	SDL_CDStop
 	SDL_CDEject
 	SDL_CDClose
+	SDL_HasRDTSC
+	SDL_HasMMX
+	SDL_Has3DNow
+	SDL_HasSSE
 	SDL_ReadLE16
 	SDL_ReadBE16
 	SDL_ReadLE32
