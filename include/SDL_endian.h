@@ -71,7 +71,7 @@ static __inline__ Uint16 SDL_Swap16(Uint16 x)
 	__asm__("xchgb %b0,%h0" : "=q" (x) :  "0" (x));
 	return x;
 }
-#elif defined(__GNUC__) && defined(__powerpc__)
+#elif defined(__GNUC__) && (defined(__powerpc__) || defined(__ppc__))
 static __inline__ Uint16 SDL_Swap16(Uint16 x)
 {
 	Uint16 result;
@@ -97,7 +97,7 @@ static __inline__ Uint32 SDL_Swap32(Uint32 x)
 	__asm__("bswapl %0" : "=r" (x) : "0" (x));
 	return x;
 }
-#elif defined(__GNUC__) && defined(__powerpc__)
+#elif defined(__GNUC__) && (defined(__powerpc__) || defined(__ppc__))
 static __inline__ Uint32 SDL_Swap32(Uint32 x)
 {
 	Uint32 result;
