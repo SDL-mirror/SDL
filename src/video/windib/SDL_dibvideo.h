@@ -38,14 +38,11 @@ struct SDL_PrivateVideoData {
 #define NUM_MODELISTS	4		/* 8, 16, 24, and 32 bits-per-pixel */
     int SDL_nummodes[NUM_MODELISTS];
     SDL_Rect **SDL_modelist[NUM_MODELISTS];
-
-    WORD *gamma_saved;
 };
 /* Old variable names */
 #define screen_bmp		(this->hidden->screen_bmp)
 #define screen_pal		(this->hidden->screen_pal)
 #define SDL_nummodes		(this->hidden->SDL_nummodes)
 #define SDL_modelist		(this->hidden->SDL_modelist)
-#define gamma_saved		(this->hidden->gamma_saved)
 
 #endif /* _SDL_dibvideo_h */

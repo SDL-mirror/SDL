@@ -67,9 +67,6 @@ extern void (*WIN_RealizePalette)(_THIS);
 /* Called by windows message loop when the system palette changes */
 extern void (*WIN_PaletteChanged)(_THIS, HWND window);
 
-/* Called by windows message loop when losing or gaining gamma focus */
-extern void (*WIN_SwapGamma)(_THIS);
-
 /* Called by windows message loop when a portion of the screen needs update */
 extern void (*WIN_WinPAINT)(_THIS, HDC hdc);
 
@@ -92,6 +89,9 @@ extern int mouse_relative;
 #ifndef NO_CHANGEDISPLAYSETTINGS
 extern DEVMODE SDL_fullscreen_mode;
 #endif
+
+/* The system gamma ramp for GDI modes */
+extern WORD *gamma_saved;
 
 /* This is really from SDL_dx5audio.c */
 extern void DX5_SoundFocus(HWND window);

@@ -404,11 +404,8 @@ static SDL_Rect **DX5_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags);
 static SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current, int width, int height, int bpp, Uint32 flags);
 static int DX5_SetColors(_THIS, int firstcolor, int ncolors,
 			 SDL_Color *colors);
-static void DX5_SwapGamma(_THIS);
-#ifdef IDirectDrawGammaControl_SetGammaRamp
 static int DX5_SetGammaRamp(_THIS, Uint16 *ramp);
 static int DX5_GetGammaRamp(_THIS, Uint16 *ramp);
-#endif
 static void DX5_VideoQuit(_THIS);
 
 /* Hardware surface functions */
@@ -429,6 +426,11 @@ static int DX5_AllocDDSurface(_THIS, SDL_Surface *surface,
 static void DX5_RealizePalette(_THIS);
 static void DX5_PaletteChanged(_THIS, HWND window);
 static void DX5_WinPAINT(_THIS, HDC hdc);
+
+/* WinDIB driver functions for manipulating gamma ramps */
+extern int DIB_SetGammaRamp(_THIS, Uint16 *ramp);
+extern int DIB_GetGammaRamp(_THIS, Uint16 *ramp);
+extern void DIB_QuitGamma(_THIS);
 
 /* DX5 driver bootstrap functions */
 
@@ -591,10 +593,8 @@ static SDL_VideoDevice *DX5_CreateDevice(int devindex)
 	device->UnlockHWSurface = DX5_UnlockHWSurface;
 	device->FlipHWSurface = DX5_FlipHWSurface;
 	device->FreeHWSurface = DX5_FreeHWSurface;
-#ifdef IDirectDrawGammaControl_SetGammaRamp
 	device->SetGammaRamp = DX5_SetGammaRamp;
 	device->GetGammaRamp = DX5_GetGammaRamp;
-#endif
 #ifdef HAVE_OPENGL
         device->GL_LoadLibrary = WIN_GL_LoadLibrary;
         device->GL_GetProcAddress = WIN_GL_GetProcAddress;
@@ -618,7 +618,6 @@ static SDL_VideoDevice *DX5_CreateDevice(int devindex)
 	/* Set up the windows message handling functions */
 	WIN_RealizePalette = DX5_RealizePalette;
 	WIN_PaletteChanged = DX5_PaletteChanged;
-	WIN_SwapGamma = DX5_SwapGamma;
 	WIN_WinPAINT = DX5_WinPAINT;
 	HandleMessage = DX5_HandleMessage;
 
@@ -2112,20 +2111,24 @@ int DX5_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 	return(alloct_all);
 }
 
-static void DX5_SwapGamma(_THIS)
-{
-	return;
-}
-
 /* Gamma code is only available on DirectX 7 and newer */
-#ifdef IDirectDrawGammaControl_SetGammaRamp
-
 static int DX5_SetGammaRamp(_THIS, Uint16 *ramp)
 {
+#ifdef IDirectDrawGammaControl_SetGammaRamp
 	LPDIRECTDRAWGAMMACONTROL gamma;
 	DDGAMMARAMP gamma_ramp;
 	HRESULT result;
+#endif
 
+	/* In windowed or OpenGL mode, use windib gamma code */
+	if ( ! DDRAW_FULLSCREEN() ) {
+		return DIB_SetGammaRamp(this, ramp);
+	}
+
+#ifndef IDirectDrawGammaControl_SetGammaRamp
+	SDL_SetError("SDL compiled without DirectX gamma ramp support");
+	return -1;
+#else
 	/* Check for a video mode! */
 	if ( ! SDL_primary ) {
 		SDL_SetError("A video mode must be set for gamma correction");
@@ -2152,14 +2155,26 @@ static int DX5_SetGammaRamp(_THIS, Uint16 *ramp)
 	/* Release the interface and return */
 	IDirectDrawGammaControl_Release(gamma);
 	return (result == DD_OK) ? 0 : -1;
+#endif /* !IDirectDrawGammaControl_SetGammaRamp */
 }
 
 static int DX5_GetGammaRamp(_THIS, Uint16 *ramp)
 {
+#ifdef IDirectDrawGammaControl_SetGammaRamp
 	LPDIRECTDRAWGAMMACONTROL gamma;
 	DDGAMMARAMP gamma_ramp;
 	HRESULT result;
+#endif
 
+	/* In windowed or OpenGL mode, use windib gamma code */
+	if ( ! DDRAW_FULLSCREEN() ) {
+		return DIB_GetGammaRamp(this, ramp);
+	}
+
+#ifndef IDirectDrawGammaControl_SetGammaRamp
+	SDL_SetError("SDL compiled without DirectX gamma ramp support");
+	return -1;
+#else
 	/* Check for a video mode! */
 	if ( ! SDL_primary ) {
 		SDL_SetError("A video mode must be set for gamma correction");
@@ -2187,9 +2202,8 @@ static int DX5_GetGammaRamp(_THIS, Uint16 *ramp)
 	/* Release the interface and return */
 	IDirectDrawGammaControl_Release(gamma);
 	return (result == DD_OK) ? 0 : -1;
+#endif /* !IDirectDrawGammaControl_SetGammaRamp */
 }
-
-#endif /* IDirectDrawGammaControl_SetGammaRamp */
 
 void DX5_VideoQuit(_THIS)
 {
@@ -2228,6 +2242,7 @@ void DX5_VideoQuit(_THIS)
 	}
 
 	/* Free the window */
+	DIB_QuitGamma(this);
 	if ( SDL_Window ) {
 		DX5_DestroyWindow(this);
 	}

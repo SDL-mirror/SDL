@@ -60,6 +60,7 @@ int posted = 0;
 #ifndef NO_CHANGEDISPLAYSETTINGS
 DEVMODE SDL_fullscreen_mode;
 #endif
+WORD *gamma_saved = NULL;
 
 
 /* Functions called by the message processing function */
@@ -67,8 +68,8 @@ LONG
 (*HandleMessage)(_THIS, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)=NULL;
 void (*WIN_RealizePalette)(_THIS);
 void (*WIN_PaletteChanged)(_THIS, HWND window);
-void (*WIN_SwapGamma)(_THIS);
 void (*WIN_WinPAINT)(_THIS, HDC hdc);
+extern void DIB_SwapGamma(_THIS);
 
 static void SDL_RestoreGameMode(void)
 {
@@ -198,7 +199,9 @@ LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					WIN_GrabInput(this, SDL_GRAB_ON);
 				}
 				if ( !(SDL_GetAppState()&SDL_APPINPUTFOCUS) ) {
-					WIN_SwapGamma(this);
+					if ( ! DDRAW_FULLSCREEN() ) {
+						DIB_SwapGamma(this);
+					}
 					if ( WINDIB_FULLSCREEN() ) {
 						SDL_RestoreGameMode();
 					}
@@ -215,7 +218,9 @@ LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					WIN_GrabInput(this, SDL_GRAB_OFF);
 				}
 				if ( SDL_GetAppState() & SDL_APPINPUTFOCUS ) {
-					WIN_SwapGamma(this);
+					if ( ! DDRAW_FULLSCREEN() ) {
+						DIB_SwapGamma(this);
+					}
 					if ( WINDIB_FULLSCREEN() ) {
 						SDL_RestoreDesktopMode();
 					}

@@ -61,12 +61,10 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current, int width, int height
 static int DIB_SetColors(_THIS, int firstcolor, int ncolors,
 			 SDL_Color *colors);
 static void DIB_CheckGamma(_THIS);
-static void DIB_SwapGamma(_THIS);
-static void DIB_QuitGamma(_THIS);
-#ifndef NO_GAMMA_SUPPORT
-static int DIB_SetGammaRamp(_THIS, Uint16 *ramp);
-static int DIB_GetGammaRamp(_THIS, Uint16 *ramp);
-#endif
+void DIB_SwapGamma(_THIS);
+void DIB_QuitGamma(_THIS);
+int DIB_SetGammaRamp(_THIS, Uint16 *ramp);
+int DIB_GetGammaRamp(_THIS, Uint16 *ramp);
 static void DIB_VideoQuit(_THIS);
 
 /* Hardware surface functions */
@@ -142,10 +140,8 @@ static SDL_VideoDevice *DIB_CreateDevice(int devindex)
 	device->UnlockHWSurface = DIB_UnlockHWSurface;
 	device->FlipHWSurface = NULL;
 	device->FreeHWSurface = DIB_FreeHWSurface;
-#ifndef NO_GAMMA_SUPPORT
 	device->SetGammaRamp = DIB_SetGammaRamp;
 	device->GetGammaRamp = DIB_GetGammaRamp;
-#endif
 #ifdef HAVE_OPENGL
         device->GL_LoadLibrary = WIN_GL_LoadLibrary;
         device->GL_GetProcAddress = WIN_GL_GetProcAddress;
@@ -169,7 +165,6 @@ static SDL_VideoDevice *DIB_CreateDevice(int devindex)
 	/* Set up the windows message handling functions */
 	WIN_RealizePalette = DIB_RealizePalette;
 	WIN_PaletteChanged = DIB_PaletteChanged;
-	WIN_SwapGamma = DIB_SwapGamma;
 	WIN_WinPAINT = DIB_WinPAINT;
 	HandleMessage = DIB_HandleMessage;
 
@@ -807,7 +802,7 @@ static void DIB_CheckGamma(_THIS)
 	ReleaseDC(SDL_Window, hdc);
 #endif /* !NO_GAMMA_SUPPORT */
 }
-static void DIB_SwapGamma(_THIS)
+void DIB_SwapGamma(_THIS)
 {
 #ifndef NO_GAMMA_SUPPORT
 	HDC hdc;
@@ -826,7 +821,7 @@ static void DIB_SwapGamma(_THIS)
 	}
 #endif /* !NO_GAMMA_SUPPORT */
 }
-static void DIB_QuitGamma(_THIS)
+void DIB_QuitGamma(_THIS)
 {
 #ifndef NO_GAMMA_SUPPORT
 	if ( gamma_saved ) {
@@ -846,10 +841,12 @@ static void DIB_QuitGamma(_THIS)
 #endif /* !NO_GAMMA_SUPPORT */
 }
 
-#ifndef NO_GAMMA_SUPPORT
-
-static int DIB_SetGammaRamp(_THIS, Uint16 *ramp)
+int DIB_SetGammaRamp(_THIS, Uint16 *ramp)
 {
+#ifdef NO_GAMMA_SUPPORT
+	SDL_SetError("SDL compiled without gamma ramp support");
+	return -1;
+#else
 	HDC hdc;
 	BOOL succeeded;
 
@@ -872,10 +869,15 @@ static int DIB_SetGammaRamp(_THIS, Uint16 *ramp)
 		succeeded = TRUE;
 	}
 	return succeeded ? 0 : -1;
+#endif /* !NO_GAMMA_SUPPORT */
 }
 
-static int DIB_GetGammaRamp(_THIS, Uint16 *ramp)
+int DIB_GetGammaRamp(_THIS, Uint16 *ramp)
 {
+#ifdef NO_GAMMA_SUPPORT
+	SDL_SetError("SDL compiled without gamma ramp support");
+	return -1;
+#else
 	HDC hdc;
 	BOOL succeeded;
 
@@ -884,9 +886,8 @@ static int DIB_GetGammaRamp(_THIS, Uint16 *ramp)
 	succeeded = GetDeviceGammaRamp(hdc, ramp);
 	ReleaseDC(SDL_Window, hdc);
 	return succeeded ? 0 : -1;
-}
-
 #endif /* !NO_GAMMA_SUPPORT */
+}
 
 void DIB_VideoQuit(_THIS)
 {
