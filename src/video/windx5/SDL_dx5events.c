@@ -621,6 +621,9 @@ void DX5_PumpEvents(_THIS)
 
 void DX5_InitOSKeymap(_THIS)
 {
+#ifndef DIK_PAUSE
+#define DIK_PAUSE	0xC5
+#endif
 	int i;
 
 	/* Map the DIK scancodes to SDL keysyms */
@@ -724,6 +727,7 @@ void DX5_InitOSKeymap(_THIS)
 	DIK_keymap[DIK_DIVIDE] = SDLK_KP_DIVIDE;
 	DIK_keymap[DIK_SYSRQ] = SDLK_SYSREQ;
 	DIK_keymap[DIK_RMENU] = SDLK_RALT;
+	DIK_keymap[DIK_PAUSE] = SDLK_BREAK;
 	DIK_keymap[DIK_HOME] = SDLK_HOME;
 	DIK_keymap[DIK_UP] = SDLK_UP;
 	DIK_keymap[DIK_PRIOR] = SDLK_PAGEUP;
