@@ -3,11 +3,13 @@ AC_INIT(README)
 
 dnl Setup for automake
 SDL_VERSION=1.2.0
-AM_INIT_AUTOMAKE(SDL_tests, $SDL_VERSION)
 
 dnl Detect the canonical host and target build environment
 AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
+
+dnl Setup for automake
+AM_INIT_AUTOMAKE(SDL_tests, $SDL_VERSION)
 
 dnl Check for tools
 
