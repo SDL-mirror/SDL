@@ -52,7 +52,7 @@ static char rcsid =
 /* array to hold joystick ID values */
 static UINT	SYS_JoystickID[MAX_JOYSTICKS];
 static JOYCAPS	SYS_Joystick[MAX_JOYSTICKS];
-static char	*SYS_JoystickNames[MAX_JOYSTICKS];
+static char	*SYS_JoystickName[MAX_JOYSTICKS];
 
 /* The private structure used to keep track of a joystick */
 struct joystick_hwdata
@@ -72,7 +72,7 @@ struct joystick_hwdata
 static void SetMMerror(char *function, int code);
 
 
-static char *GetJoystickName(const char *szRegKey)
+static char *GetJoystickName(int index, const char *szRegKey)
 {
 	/* added 7/24/2004 by Eckhard Stolberg */
 	/*
@@ -101,7 +101,7 @@ static char *GetJoystickName(const char *szRegKey)
 		*/
 		regsize = sizeof(regname);
 		sprintf(regvalue,
-			"Joystick%d%s", i+1,
+			"Joystick%d%s", index+1,
 			REGSTR_VAL_JOYOEMNAME);
 		regresult = RegQueryValueExA(hKey,
 			regvalue, 0, 0, (LPBYTE) &regname,
@@ -168,7 +168,7 @@ int SDL_SYS_JoystickInit(void)
 
 	for ( i = 0; i < MAX_JOYSTICKS; i++ ) {
 		SYS_JoystickID[i] = JOYSTICKID1 + i;
-		SYS_JoystickNames[i] = NULL;
+		SYS_JoystickName[i] = NULL;
 	}
 
 
@@ -185,7 +185,7 @@ int SDL_SYS_JoystickInit(void)
 			if ( result == JOYERR_NOERROR ) {
 				SYS_JoystickID[numdevs] = SYS_JoystickID[i];
 				SYS_Joystick[numdevs] = joycaps;
-				SYS_JoystickName[numdevs] = GetJoystickName(joycaps.szRegKey);
+				SYS_JoystickName[numdevs] = GetJoystickName(numdevs, joycaps.szRegKey);
 				numdevs++;
 			}
 		}
@@ -196,8 +196,8 @@ int SDL_SYS_JoystickInit(void)
 /* Function to get the device-dependent name of a joystick */
 const char *SDL_SYS_JoystickName(int index)
 {
-	if ( SYS_JoystickNames[index] != NULL ) {
-		return(SYS_JoystickNames[index]);
+	if ( SYS_JoystickName[index] != NULL ) {
+		return(SYS_JoystickName[index]);
 	} else {
 		return(SYS_Joystick[index].szPname);
 	}
@@ -373,8 +373,8 @@ void SDL_SYS_JoystickQuit(void)
 {
 	int i;
 	for (i = 0; i < MAX_JOYSTICKS; i++) {
-		if ( SYS_JoystickNames[i] != NULL ) {
-			free(SYS_JoystickNames[i]);
+		if ( SYS_JoystickName[i] != NULL ) {
+			free(SYS_JoystickName[i]);
 		}
 	}
 }
