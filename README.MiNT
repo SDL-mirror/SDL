@@ -48,13 +48,11 @@ Keyboard (GEMDOS, BIOS, GEM, Ikbd)
 Mouse (XBIOS, GEM, Ikbd)
 Video (XBIOS (Fullscreen), GEM (Windowed and Fullscreen))
 Timer (VBL vector, GNU pth library)
-Joystick and joypad support (Ikbd, Hardware)
-Audio support (Hardware, XBIOS, GSXB, MCSN, STFA, /dev/audio if threads enabled)
-Threads support (Multitasking OS only via GNU pth library)
-Shared object support (using LDG library from http://ldg.atari.org/)
-
-- What is missing:
-CDROM support (Metados, /dev/cdrom)
+Joystick and joypad (Ikbd, Hardware)
+Audio (Hardware, XBIOS, GSXB, MCSN, STFA, /dev/audio if threads enabled)
+Threads (Multitasking OS only via GNU pth library)
+Shared object loader (using LDG library from http://ldg.atari.org/)
+Audio CD (MetaDOS)
 
 - Driver combinations:
 Video	Kbd	Mouse	Timer	Joystick

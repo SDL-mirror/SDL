@@ -2503,8 +2503,8 @@ case "$target" in
         fi
         # Set up files for the cdrom library
         if test x$enable_cdrom = xyes; then
-            CDROM_SUBDIRS="$CDROM_SUBDIRS dummy"
-            CDROM_DRIVERS="$CDROM_DRIVERS dummy/libcdrom_dummy.la"
+            CDROM_SUBDIRS="$CDROM_SUBDIRS mint"
+            CDROM_DRIVERS="$CDROM_DRIVERS mint/libcdrom_mint.la"
         fi
         # Set up files for the thread library
         if test x$enable_threads = xyes; then
@@ -2765,6 +2765,7 @@ src/cdrom/freebsd/Makefile
 src/cdrom/linux/Makefile
 src/cdrom/macos/Makefile
 src/cdrom/macosx/Makefile
+src/cdrom/mint/Makefile
 src/cdrom/openbsd/Makefile
 src/cdrom/osf/Makefile
 src/cdrom/qnx/Makefile
