@@ -193,6 +193,7 @@ void GEM_PumpEvents(_THIS)
 static int do_messages(_THIS, short *message)
 {
 	int quit, posted;
+	short x2,y2,w2,h2;
 
 	quit=0;
 	switch (message[0]) {
@@ -240,7 +241,8 @@ static int do_messages(_THIS, short *message)
 		case WM_SIZED:
 			wind_set (message[3], WF_CURRXYWH, message[4], message[5], message[6], message[7]);
 			GEM_win_fulled = SDL_FALSE;		/* Cancel maximized flag */
-			SDL_PrivateResize(message[6], message[7]);
+			wind_get (message[3], WF_WORKXYWH, &x2, &y2, &w2, &h2);
+			SDL_PrivateResize(w2, h2);
 			break;
 		case WM_FULLED:
 			{
@@ -257,7 +259,8 @@ static int do_messages(_THIS, short *message)
 					GEM_win_fulled = SDL_TRUE;
 				}
 				wind_set (message[3], WF_CURRXYWH, x, y, w, h);
-				SDL_PrivateResize(w, h);
+				wind_get (message[3], WF_WORKXYWH, &x2, &y2, &w2, &h2);
+				SDL_PrivateResize(w2, h2);
 			}
 			break;
 		case WM_BOTTOMED:
