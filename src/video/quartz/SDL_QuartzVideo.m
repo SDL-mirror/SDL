@@ -485,7 +485,6 @@ static void QZ_UnsetVideoMode (_THIS) {
     else {
         
         [ qz_window close ];
-        [ qz_window release ];
         qz_window = nil;
         window_view = nil;
         
