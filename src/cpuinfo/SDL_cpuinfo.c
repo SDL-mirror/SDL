@@ -36,16 +36,18 @@ static char rcsid =
 
 #define CPU_HAS_RDTSC	0x00000001
 #define CPU_HAS_MMX	0x00000002
-#define CPU_HAS_3DNOW	0x00000004
-#define CPU_HAS_SSE	0x00000008
-#define CPU_HAS_ALTIVEC	0x00000010
+#define CPU_HAS_MMXEXT	0x00000004
+#define CPU_HAS_3DNOW	0x00000010
+#define CPU_HAS_3DNOWEXT 0x00000020
+#define CPU_HAS_SSE	0x00000040
+#define CPU_HAS_SSE2	0x00000080
+#define CPU_HAS_ALTIVEC	0x00000100
 
 static __inline__ int CPU_haveCPUID()
 {
 	int has_CPUID = 0;
 #if defined(__GNUC__) && defined(i386)
 	__asm__ (
-"push %%ecx\n"
 "        pushfl                      # Get original EFLAGS             \n"
 "        popl    %%eax                                                 \n"
 "        movl    %%eax,%%ecx                                           \n"
@@ -58,7 +60,6 @@ static __inline__ int CPU_haveCPUID()
 "        jz      1f                  # Processor=80486                 \n"
 "        movl    $1,%0               # We have CPUID support           \n"
 "1:                                                                    \n"
-"pop %%ecx\n"
 	: "=m" (has_CPUID)
 	:
 	: "%eax", "%ecx"
@@ -87,9 +88,7 @@ static __inline__ int CPU_getCPUIDFeatures()
 	int features = 0;
 #if defined(__GNUC__) && defined(i386)
 	__asm__ (
-"push %%ebx\n"
-"push %%ecx\n"
-"push %%edx\n"
+"        movl    %%ebx,%%edi\n"
 "        xorl    %%eax,%%eax         # Set up for CPUID instruction    \n"
 "        cpuid                       # Get and save vendor ID          \n"
 "        cmpl    $1,%%eax            # Make sure 1 is valid input for CPUID\n"
@@ -99,12 +98,10 @@ static __inline__ int CPU_getCPUIDFeatures()
 "        cpuid                       # Get family/model/stepping/features\n"
 "        movl    %%edx,%0                                              \n"
 "1:                                                                    \n"
-"pop %%edx\n"
-"pop %%ecx\n"
-"pop %%ebx\n"
+"        movl    %%edi,%%ebx\n"
 	: "=m" (features)
 	:
-	: "%eax", "%ebx", "%ecx", "%edx"
+	: "%eax", "%ebx", "%ecx", "%edx", "%edi"
 	);
 #elif defined(_MSC_VER)
 	__asm {
@@ -116,6 +113,40 @@ static __inline__ int CPU_getCPUIDFeatures()
         inc     eax
         cpuid                       ; Get family/model/stepping/features
         mov     features, edx
+done:
+	}
+#endif
+	return features;
+}
+
+static __inline__ int CPU_getCPUIDFeaturesExt()
+{
+	int features = 0;
+#if defined(__GNUC__) && defined(i386)
+	__asm__ (
+"        movl    %%ebx,%%edi\n"
+"        movl    $0x80000000,%%eax   # Query for extended functions    \n"
+"        cpuid                       # Get extended function limit     \n"
+"        cmpl    $0x80000001,%%eax                                     \n"
+"        jbe     1f                  # Nope, we dont have function 800000001h\n"
+"        movl    $0x80000001,%%eax   # Setup extended function 800000001h\n"
+"        cpuid                       # and get the information         \n"
+"        movl    %%edx,%0                                              \n"
+"1:                                                                    \n"
+"        movl    %%edi,%%ebx\n"
+	: "=m" (features)
+	:
+	: "%eax", "%ebx", "%ecx", "%edx", "%edi"
+	);
+#elif defined(_MSC_VER)
+	__asm {
+        mov     eax,80000000h       ; Query for extended functions
+        cpuid                       ; Get extended function limit
+        cmp     eax,80000001h
+        jbe     done                ; Nope, we dont have function 800000001h
+        mov     eax,80000001h       ; Setup extended function 800000001h
+        cpuid                       ; and get the information
+        mov     features,edx
 done:
 	}
 #endif
@@ -138,55 +169,42 @@ static __inline__ int CPU_haveMMX()
 	return 0;
 }
 
+static __inline__ int CPU_haveMMXExt()
+{
+	if ( CPU_haveCPUID() ) {
+		return (CPU_getCPUIDFeaturesExt() & 0x00400000);
+	}
+	return 0;
+}
+
 static __inline__ int CPU_have3DNow()
 {
-	int has_3DNow = 0;
-	if ( !CPU_haveCPUID() ) {
-		return 0;
+	if ( CPU_haveCPUID() ) {
+		return (CPU_getCPUIDFeaturesExt() & 0x80000000);
 	}
-#if defined(__GNUC__) && defined(i386)
-	__asm__ (
-"push %%ebx\n"
-"push %%ecx\n"
-"push %%edx\n"
-"        movl    $0x80000000,%%eax   # Query for extended functions    \n"
-"        cpuid                       # Get extended function limit     \n"
-"        cmpl    $0x80000001,%%eax                                     \n"
-"        jbe     1f                  # Nope, we dont have function 800000001h\n"
-"        movl    $0x80000001,%%eax   # Setup extended function 800000001h\n"
-"        cpuid                       # and get the information         \n"
-"        testl   $0x80000000,%%edx   # Bit 31 is set if 3DNow! present \n"
-"        jz      1f                  # Nope, we dont have 3DNow support\n"
-"        movl    $1,%0               # Yep, we have 3DNow! support!    \n"
-"1:                                                                    \n"
-"pop %%edx\n"
-"pop %%ecx\n"
-"pop %%ebx\n"
-	: "=m" (has_3DNow)
-	:
-	: "%eax", "%ebx", "%ecx", "%edx"
-	);
-#elif defined(_MSC_VER)
-	__asm {
-        mov     eax,80000000h       ; Query for extended functions
-        cpuid                       ; Get extended function limit
-        cmp     eax,80000001h
-        jbe     done                ; Nope, we dont have function 800000001h
-        mov     eax,80000001h       ; Setup extended function 800000001h
-        cpuid                       ; and get the information
-        test    edx,80000000h       ; Bit 31 is set if 3DNow! present
-        jz      done                ; Nope, we dont have 3DNow support
-        mov     has_3DNow,1         ; Yep, we have 3DNow! support!
-done:
+	return 0;
+}
+
+static __inline__ int CPU_have3DNowExt()
+{
+	if ( CPU_haveCPUID() ) {
+		return (CPU_getCPUIDFeaturesExt() & 0x40000000);
 	}
-#endif
-	return has_3DNow;
+	return 0;
 }
 
 static __inline__ int CPU_haveSSE()
 {
 	if ( CPU_haveCPUID() ) {
 		return (CPU_getCPUIDFeatures() & 0x02000000);
+	}
+	return 0;
+}
+
+static __inline__ int CPU_haveSSE2()
+{
+	if ( CPU_haveCPUID() ) {
+		return (CPU_getCPUIDFeatures() & 0x04000000);
 	}
 	return 0;
 }
@@ -229,6 +247,15 @@ static Uint32 SDL_GetCPUFeatures()
 		if ( CPU_haveAltiVec() ) {
 			SDL_CPUFeatures |= CPU_HAS_ALTIVEC;
 		}
+      if ( CPU_haveMMXExt() ) {
+         SDL_CPUFeatures |= CPU_HAS_MMXEXT;
+      }
+      if ( CPU_have3DNowExt() ) {
+         SDL_CPUFeatures |= CPU_HAS_3DNOWEXT;
+      }
+      if ( CPU_haveSSE2() ) {
+         SDL_CPUFeatures |= CPU_HAS_SSE2;
+      }
 	}
 	return SDL_CPUFeatures;
 }
@@ -273,6 +300,30 @@ SDL_bool SDL_HasAltiVec()
 	return SDL_FALSE;
 }
 
+SDL_bool SDL_HasMMXExt()
+{
+   if ( SDL_GetCPUFeatures() & CPU_HAS_MMXEXT ) {
+      return SDL_TRUE;
+   }
+   return SDL_FALSE;
+}
+
+SDL_bool SDL_Has3DNowExt()
+{
+   if ( SDL_GetCPUFeatures() & CPU_HAS_3DNOWEXT ) {
+      return SDL_TRUE;
+   }
+   return SDL_FALSE;
+}
+
+SDL_bool SDL_HasSSE2()
+{
+   if ( SDL_GetCPUFeatures() & CPU_HAS_SSE2 ) {
+      return SDL_TRUE;
+   }
+   return SDL_FALSE;
+}
+
 #ifdef TEST_MAIN
 
 #include <stdio.h>
@@ -281,8 +332,11 @@ int main()
 {
 	printf("RDTSC: %d\n", SDL_HasRDTSC());
 	printf("MMX: %d\n", SDL_HasMMX());
+	printf("MMXExt: %d\n", SDL_HasMMXExt());
 	printf("3DNow: %d\n", SDL_Has3DNow());
+	printf("3DNowExt: %d\n", SDL_Has3DNowExt());
 	printf("SSE: %d\n", SDL_HasSSE());
+	printf("SSE2: %d\n", SDL_HasSSE2());
 	printf("AltiVec: %d\n", SDL_HasAltiVec());
 	return 0;
 }

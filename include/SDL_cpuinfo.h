@@ -45,13 +45,25 @@ extern DECLSPEC SDL_bool SDLCALL SDL_HasRDTSC();
  */
 extern DECLSPEC SDL_bool SDLCALL SDL_HasMMX();
 
+/* This function returns true if the CPU has MMX Ext. features
+ */
+extern DECLSPEC SDL_bool SDLCALL SDL_HasMMXExt();
+
 /* This function returns true if the CPU has 3DNow features
  */
 extern DECLSPEC SDL_bool SDLCALL SDL_Has3DNow();
 
+/* This function returns true if the CPU has 3DNow! Ext. features
+ */
+extern DECLSPEC SDL_bool SDLCALL SDL_Has3DNowExt();
+
 /* This function returns true if the CPU has SSE features
  */
 extern DECLSPEC SDL_bool SDLCALL SDL_HasSSE();
+
+/* This function returns true if the CPU has SSE2 features
+ */
+extern DECLSPEC SDL_bool SDLCALL SDL_HasSSE2();
 
 /* This function returns true if the CPU has AltiVec features
  */
