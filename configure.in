@@ -2232,6 +2232,7 @@ src/video/windib/Makefile
 src/video/windx5/Makefile
 src/video/bwindow/Makefile
 src/video/photon/Makefile
+src/video/epoc/Makefile
 src/video/dummy/Makefile
 src/events/Makefile
 src/joystick/Makefile
