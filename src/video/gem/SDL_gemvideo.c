@@ -400,6 +400,7 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	GEM_handle = -1;
 	GEM_locked = SDL_FALSE;
 	GEM_win_fulled = SDL_FALSE;
+	GEM_fullscreen = SDL_FALSE;
 
 	VDI_screen = NULL;
 	VDI_pitch = VDI_w * VDI_pixelsize;
@@ -641,6 +642,8 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 		} else {
 			modeflags |= SDL_SWSURFACE;
 		}
+
+		GEM_fullscreen = SDL_TRUE;
 	} else {
 		int old_win_type;
 		short x2,y2,w2,h2;
@@ -701,6 +704,8 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 	
 		/* Open the window */
 		wind_open(GEM_handle,x2,y2,w2,h2);
+
+		GEM_fullscreen = SDL_FALSE;
 	}
 
 	/* Set up the new mode framebuffer */

@@ -298,6 +298,18 @@ static void do_keyboard(short kc, short ks)
 static void do_mouse(_THIS, short mx, short my, short mb, short ks)
 {
 	static short prevmousex=0, prevmousey=0, prevmouseb=0;
+	short x2, y2, w2, h2;
+
+	/* Retrieve window coords, and generate mouse events accordingly */
+	x2 = y2 = 0;
+	if ((!GEM_fullscreen) && (GEM_handle>=0)) {
+		wind_get (GEM_handle, WF_WORKXYWH, &x2, &y2, &w2, &h2);
+
+		/* Do not generate mouse button event if out of window working area */
+		if ((mx<x2) || (mx>=x2+w2) || (my<y2) || (my>=y2+h2)) {
+			mb=prevmouseb;
+		}
+	}
 
 	/* Mouse motion ? */
 	if ((prevmousex!=mx) || (prevmousey!=my)) {
@@ -305,7 +317,17 @@ static void do_mouse(_THIS, short mx, short my, short mb, short ks)
 			SDL_PrivateMouseMotion(0, 1, SDL_AtariXbios_mousex, SDL_AtariXbios_mousey);
 			SDL_AtariXbios_mousex = SDL_AtariXbios_mousey = 0;
 		} else {
-			SDL_PrivateMouseMotion(0, 0, mx, my);
+			int posx, posy;
+
+			/* Give mouse position relative to window position */
+			posx = mx - x2;
+			if (posx<0) posx = x2;
+			if (posx>w2) posx = w2-1;
+			posy = my - y2;
+			if (posy<0) posy = y2;
+			if (posy>h2) posy = h2-1;
+
+			SDL_PrivateMouseMotion(0, 0, posx, posy);
 		}
 		prevmousex = mx;
 		prevmousey = my;

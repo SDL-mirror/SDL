@@ -80,6 +80,8 @@ struct SDL_PrivateVideoData {
 	SDL_bool mouse_relative;	/* Report relative mouse movement */
 	SDL_bool locked;			/* AES locked for fullscreen ? */
 	short message[8];			/* To self-send an AES message */
+
+	SDL_bool fullscreen;		/* Fullscreen or windowed mode ? */
 	SDL_Rect *SDL_modelist[SDL_NUMMODES+1];	/* Mode list */
 	SDL_Surface *icon;			/* The icon */
 };
@@ -121,6 +123,7 @@ struct SDL_PrivateVideoData {
 #define GEM_message			(this->hidden->message)
 #define SDL_modelist		(this->hidden->SDL_modelist)
 #define GEM_icon			(this->hidden->icon)
+#define GEM_fullscreen		(this->hidden->fullscreen)
 
 #define GEM_buffer1			(this->hidden->buffer1)
 #define GEM_buffer2			(this->hidden->buffer2)
