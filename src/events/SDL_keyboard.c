@@ -316,6 +316,7 @@ int SDL_KeyboardInit(void)
 	keynames[SDLK_MENU] = "menu";
 	keynames[SDLK_POWER] = "power";
 	keynames[SDLK_EURO] = "euro";
+	keynames[SDLK_UNDO] = "undo";
 
 	/* Done.  Whew. */
 	return(0);
