@@ -409,9 +409,9 @@ static int X11_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	/* use default screen (from $DISPLAY) */
 	SDL_Screen = DefaultScreen(SDL_Display);
 
-	use_mitshm = 0;
 #ifndef NO_SHARED_MEMORY
 	/* Check for MIT shared memory extension */
+	use_mitshm = 0;
 	if ( local_X11 ) {
 		use_mitshm = XShmQueryExtension(SDL_Display);
 	}
