@@ -55,7 +55,7 @@ static int device_no = 0;
 #define DEFAULT_CPARAMS_VOICES 1
 #define DEFAULT_CPARAMS_FRAG_SIZE 4096  //was 512
 #define DEFAULT_CPARAMS_FRAGS_MIN 1
-#define DEFAULT_CPARAMS_FRAGS_MAX -1
+#define DEFAULT_CPARAMS_FRAGS_MAX 1
 
 /* Open the audio device for playback, and don't block if busy */
 #define OPEN_FLAGS	SND_PCM_OPEN_PLAYBACK
@@ -384,9 +384,9 @@ static int NTO_OpenAudio(_THIS, SDL_AudioSpec *spec)
     }
 
     /* enable count status parameter */
-    if ((rval = snd_plugin_set_disable(audio_handle, PLUGIN_DISABLE_MMAP))<0)
+    if ((rval = snd_pcm_plugin_set_disable(audio_handle, PLUGIN_DISABLE_MMAP))<0)
     {
-        SDL_SetError("snd_plugin_set_disable failed: %s\n", snd_strerror(rval));
+        SDL_SetError("snd_pcm_plugin_set_disable failed: %s\n", snd_strerror(rval));
         return(-1);
     }
 

@@ -175,8 +175,10 @@ int ph_SetupOCImage(_THIS, SDL_Surface *screen) //Offscreen context
 
 void ph_DestroyImage(_THIS, SDL_Surface *screen)
 {
+#if 0
    if(SDL_Image == NULL)
      return;
+#endif
 
    if (OCImage.offscreen_context != NULL)
    {
@@ -188,21 +190,21 @@ void ph_DestroyImage(_THIS, SDL_Surface *screen)
       OCImage.FrameData1 = NULL;
    }
 
-	if (SDL_Image->image)
+	if (SDL_Image)
 	{
                 // SDL_Image->flags=Ph_RELEASE_IMAGE;
                 // PhReleaseImage(SDL_Image);
-                PgShmemDestroy(SDL_Image->image); // Use this if you using shared memory, or uncomment
+		if (SDL_Image->image)
+			PgShmemDestroy(SDL_Image->image); // Use this if you using shared memory, or uncomment
                                                   // lines above if not (and comment this line ;-)
                 free(SDL_Image);
+		SDL_Image = NULL;
 	}
 
 	if ( screen )
         {
     	        screen->pixels = NULL;
 	}
-	
-	SDL_Image = NULL;
 }
 
 int ph_ResizeImage(_THIS, SDL_Surface *screen, Uint32 flags)

@@ -233,19 +233,15 @@ void ph_SetCaption(_THIS, const char *title, const char *icon)
 /* Iconify current window */
 int ph_IconifyWindow(_THIS)
 {
-   WmApiContext_t context=WmCreateContext();
-   WmWindowDefinition_t **wininfo=malloc(sizeof(WmWindowDefinition_t)*2);
-   int num;
+	PhWindowEvent_t windowevent;
 
-   SDL_Lock_EventThread();
-   WmGetFocusList(context,2,&num,wininfo);
-   WmPerformFrameAction(context, wininfo[0]->rid,Pt_ACTION_MIN);
-
-   WmDestroyContext (context);   
-   SDL_Unlock_EventThread();	 
-   free(wininfo);		   
-
-   return (0);   
+	SDL_Lock_EventThread();
+	memset( &windowevent, 0, sizeof (event) );
+	windowevent.event_f = Ph_WM_HIDE;
+	windowevent.event_state = Ph_WM_EVSTATE_HIDE;
+	windowevent.rid = PtWidgetRid( window );
+	PtForwardWindowEvent( &windowevent );
+	SDL_Unlock_EventThread();
 }
 
 SDL_GrabMode ph_GrabInputNoLock(_THIS, SDL_GrabMode mode)
@@ -255,7 +251,29 @@ SDL_GrabMode ph_GrabInputNoLock(_THIS, SDL_GrabMode mode)
 
 SDL_GrabMode ph_GrabInput(_THIS, SDL_GrabMode mode)
 {
-   return(mode);
+	short abs_x, abs_y;
+
+	SDL_Lock_EventThread();
+/*	mode = ph_GrabInputNoLock(this, mode);*/
+
+	if( mode == SDL_GRAB_OFF )
+	{
+		PtSetResource(window, Pt_ARG_WINDOW_STATE, Pt_FALSE,
+				Ph_WM_STATE_ISALTKEY );
+	}
+	else
+	{
+		PtSetResource(window, Pt_ARG_WINDOW_STATE, Pt_TRUE,
+				Ph_WM_STATE_ISALTKEY );
+
+		PtGetAbsPosition( window, &abs_x, &abs_y );
+		PhMoveCursorAbs( PhInputGroup( NULL ),
+				abs_x + SDL_VideoSurface->w/2,
+				abs_y + SDL_VideoSurface->h/2 );
+	}
+
+	SDL_Unlock_EventThread();
+	return(mode);
 }
 
 int ph_GetWMInfo(_THIS, SDL_SysWMinfo *info)

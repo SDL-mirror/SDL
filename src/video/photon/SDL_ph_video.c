@@ -111,7 +111,7 @@ static SDL_VideoDevice *ph_CreateDevice(int devindex)
     device->SetCaption = ph_SetCaption;
     device->SetIcon = NULL;
     device->IconifyWindow = ph_IconifyWindow;
-    device->GrabInput = NULL;
+    device->GrabInput = ph_GrabInput;
     device->GetWMInfo = NULL;
     device->FreeWMCursor = ph_FreeWMCursor;
     device->CreateWMCursor = ph_CreateWMCursor;
@@ -329,7 +329,7 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
 
 		/* Get the true height and width */
 		
-      current->flags = (flags|(~SDL_RESIZABLE)); /* no resize for Direct Context */
+      current->flags = (flags & (~SDL_RESIZABLE)); /* no resize for Direct Context */
 
 		 /* Begin direct mode */
 		 ph_EnterFullScreen(this);
@@ -342,11 +342,11 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
        if (flags & SDL_HWSURFACE)  /* Use offscreen memory iff SDL_HWSURFACE flag is set */
        {
          /* Hardware surface is Offsceen Context.  ph_ResizeImage handles the switch */
-         current->flags = (flags|(~SDL_RESIZABLE)); /* no stretch blit in offscreen context */
+         current->flags = (flags & (~SDL_RESIZABLE)); /* no stretch blit in offscreen context */
        }
        else /* must be SDL_SWSURFACE */
        {
-          current->flags = (flags|SDL_RESIZABLE); /* yes we can resize as this is a software surface */
+          current->flags = (flags | SDL_RESIZABLE); /* yes we can resize as this is a software surface */
        }
 
 #ifdef HAVE_OPENGL       
@@ -415,10 +415,7 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
 
 static void ph_VideoQuit(_THIS)
 {
-    if (SDL_Image != NULL)
-    {
-        ph_DestroyImage(this, SDL_VideoSurface); 
-    }
+    ph_DestroyImage(this, SDL_VideoSurface); 
 
     if (currently_fullscreen)
     {
