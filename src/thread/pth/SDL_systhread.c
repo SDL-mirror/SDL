@@ -51,15 +51,17 @@ int SDL_SYS_CreateThread(SDL_Thread *thread, void *args)
 {
 	pth_attr_t type;
 
+	type = pth_attr_new();
+
 	/* Set the thread attributes */
-	if ( pth_attr_init(&type) != 0 ) {
+	if ( pth_attr_init(type) != 0 ) {
 		SDL_SetError("Couldn't initialize pth attributes");
 		return(-1);
 	}
-	pth_attr_set(&type, PTH_ATTR_JOINABLE, TRUE);
+	pth_attr_set(type, PTH_ATTR_JOINABLE, TRUE);
 
 	/* Create the thread and go! */
-	if ( pth_spawn( &type, RunThread, args) != 0 ) {
+	if ( pth_spawn(type, RunThread, args) != 0 ) {
 		SDL_SetError("Not enough resources to create thread");
 		return(-1);
 	}

@@ -1262,7 +1262,7 @@ CheckPTH()
             use_pth=no
         else
             PTH_CFLAGS=`$PTH_CONFIG --cflags`
-            PTH_LIBS=`$PTH_CONFIG --libs`
+            PTH_LIBS=`$PTH_CONFIG --libs --all`
             SDL_CFLAGS="$SDL_CFLAGS $PTH_CFLAGS"
             SDL_LIBS="$SDL_LIBS $PTH_LIBS"
             use_pth=yes
