@@ -72,7 +72,7 @@ struct report {
 
 static struct {
 	int	uhid_report;
-	enum	hid_kind kind;
+	hid_kind_t kind;
 	const	char *name;
 } const repinfo[] = {
 	{ UHID_INPUT_REPORT,	hid_input,	"input" },

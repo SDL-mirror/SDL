@@ -1573,7 +1573,7 @@ CheckUSBHID()
         ],[
           struct report_desc *repdesc;
           struct usb_ctl_report *repbuf;
-          enum hid_kind hidkind;
+          hid_kind_t hidkind;
         ],[
         have_usbhid=yes
         ])
