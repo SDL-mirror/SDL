@@ -334,7 +334,6 @@ LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 #if (_WIN32_WINNT >= 0x0400) || (_WIN32_WINDOWS > 0x0400)
 		case WM_MOUSEWHEEL: 
 			if ( SDL_VideoSurface && ! DINPUT_FULLSCREEN() ) {
-				Sint16 x, y;
 				int move = (short)HIWORD(wParam);
 				if ( move ) {
 					Uint8 button;
