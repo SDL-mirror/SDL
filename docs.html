@@ -20,11 +20,52 @@ The latest stable release may be found on the
 Major changes since SDL 1.0.0:
 </H2>
 <UL>
+	<LI> 1.2.6: Fixed bugs in the Nano-X video driver
+	<LI> 1.2.6: Fixed use of SDL with XInitThreads()
+	<LI> 1.2.6: Added MMX and 3DNow! optimized alpha blitters (thanks Stephane!)
+	<LI> 1.2.6: Turned dynamic loading of ESD and aRts on by default
+	<LI> 1.2.6: Fixed fullscreen mouse click bug in Quartz events (thanks Max!)
+	<LI> 1.2.6: Added an environment variable SDL_VIDEO_WINDOW_POS for MacOS X
+	<LI> 1.2.6: Added SDL_GL_MULTISAMPLEBUFFERS and SDL_GL_MULTISAMPLESAMPLES for FSAA support (thanks Shawn and Ryan!)
+	<LI> 1.2.6: Added audio and CD-ROM support for OSF/Tru64 (thanks Hayashi!)
+	<LI> 1.2.6: Added SDL_LoadObject(), SDL_LoadFunction(), and SDL_UnloadObject()
+	<LI> 1.2.6: Added new Atari audio drivers (thanks Patrice!)
+	<LI> 1.2.6: Added more-than-three mouse button support for the Quartz target
+	<LI> 1.2.6: Fixed compile problem in SDL_stretch.c with gcc 3.3
+	<LI> 1.2.6: Added initial support for RISC OS (thanks Peter and Alan!)
+	<LI> 1.2.6: Improved video mode selection under XFree86 (thanks Despair!)
+	<LI> 1.2.6: Added support for HID sliders wheels and dials on MacOS X
+	<LI> 1.2.6: Added m68k assembly routines for audio mixing (thanks Patrice!)
+	<LI> 1.2.6: Updated FreeBSD joystick USBHID support (thanks Matthew!)
+	<LI> 1.2.6: Fixed video intitialization problem on Qtopia (thanks David!)
+	<LI> 1.2.6: Fixed refresh rate issue with XFree86 4.3.0 (thanks Stephen!)
+	<LI> 1.2.6: Fixed lost cursor bug under MacOS X (thanks Darrell!)
+	<LI> 1.2.6: Fixed crash in SDL_SetIcon() under Quartz (thanks Darrell!)
+	<LI> 1.2.6: Darrell added support for emulated SDL_DOUBLEBUF on MacOSX
+	<LI> 1.2.6: Cth converted the MMX audio mixing routines to VC++ syntax
+	<LI> 1.2.6: David MacCormack fixed a bug in window sizing with Windows menus
+	<LI> 1.2.6: Enable the glXGetProcAddressARB code on X11 (fixes NVidia issues)
+	<LI> 1.2.6: Added support for SDL_WM_GrabInput and SDL_WM_IconifyWindow on Qtopia (thanks David!)
+	<LI> 1.2.6: Almost completely rewritten and improved QNX code (thanks Mike and Julian!)
+	<LI> 1.2.6: Fixed left/right shift detection on Windows (thanks Mike!)
+	<LI> 1.2.6: Fixed invalid memory access in DGA video driver (thanks ldb!)
+	<LI> 1.2.6: Generate an expose event on MacOS X after power save (thanks Darrell!)
+	<LI> 1.2.6: Updated Atari port for new system headers (thanks Patrice!)
+	<LI> 1.2.6: Linux joystick cleanups from Alan Swanson
+	<LI> 1.2.6: *BSD joystick cleanups from Wilbern Cobb
+	<LI> 1.2.6: Worked around Visual C++ 7 optimizer bug in blit code
 	<LI> 1.2.6: Open ALSA devices in non-blocking mode (thanks Aleksey!)
-	<LI> 1.2.6: Support 1-bit alpha on surfaces passed to SDL_WM_SetIcon()
+	<LI> 1.2.6: Updated for DirectDB 0.9.15 (thanks Denis!)
+	<LI> 1.2.6: Fixed building SDL DLL with Watcom C++ (thanks Jean-Pierre)
+	<LI> 1.2.6: Support 1-bit alpha on surfaces passed to SDL_WM_SetIcon() (thanks Glenn!)
 	<LI> 1.2.6: Greatly improved X11 DGA video speed (thanks Cezary!)
 	<LI> 1.2.6: Added MMX audio mixing code for gcc (thanks Stephane!)
 	<LI> 1.2.6: Fixed potential dropped events under DirectInput
+	<LI> 1.2.6: Fixed alpha blending bug (thanks Glenn!)
+	<LI> 1.2.6: Fixed joystick detection on Windows XP (thanks Maciej!)
+	<LI> 1.2.6: Fixed a crash blitting RLE surfaces to RLE surfaces
+	<LI> 1.2.6: Fixed mouse warp position bug with offset video modes
+	<LI> 1.2.6: Fixed windows event handling for ActiveX controls
 	<LI> 1.2.6: Added Visual C++ 7 (.NET) projects (thanks James!)
 	<LI> 1.2.5: Added an environment variable SDL_HAS3BUTTONMOUSE for Quartz
 	<LI> 1.2.5: Added initial support for Dreamcast (thanks HERO!) 
