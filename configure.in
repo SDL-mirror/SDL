@@ -1347,18 +1347,18 @@ case "$target" in
             JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS dummy/libjoystick_dummy.la"
         fi
         # Set up files for the cdrom library
-        # (No cdrom support yet)
         if test x$enable_cdrom = xyes; then
-            CDROM_SUBDIRS="$CDROM_SUBDIRS dummy"
-            CDROM_DRIVERS="$CDROM_DRIVERS dummy/libcdrom_dummy.la"
+            CDROM_SUBDIRS="$CDROM_SUBDIRS bsdi"
+            CDROM_DRIVERS="$CDROM_DRIVERS bsdi/libcdrom_bsdi.la"
         fi
         # Set up files for the thread library
+        SDL_LIBS="$SDL_LIBS -lsem"
         if test x$enable_threads = xyes; then
             COPY_ARCH_SRC(src/thread, linux, SDL_systhread.c)
             COPY_ARCH_SRC(src/thread, linux, SDL_systhread_c.h)
             COPY_ARCH_SRC(src/thread, linux, SDL_sysmutex.c)
             COPY_ARCH_SRC(src/thread, linux, SDL_sysmutex_c.h)
-            COPY_ARCH_SRC(src/thread, generic, SDL_syssem.c)
+            COPY_ARCH_SRC(src/thread, linux, SDL_syssem.c)
             COPY_ARCH_SRC(src/thread, generic, SDL_syssem_c.h)
             COPY_ARCH_SRC(src/thread, linux, SDL_syscond.c)
             COPY_ARCH_SRC(src/thread, generic, SDL_syscond_c.h)
@@ -2247,6 +2247,7 @@ src/cdrom/Makefile
 src/cdrom/aix/Makefile
 src/cdrom/beos/Makefile
 src/cdrom/dummy/Makefile
+src/cdrom/bsdi/Makefile
 src/cdrom/freebsd/Makefile
 src/cdrom/linux/Makefile
 src/cdrom/macos/Makefile
