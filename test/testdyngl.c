@@ -106,6 +106,8 @@ int main(int argc,char *argv[])
 		printf("Unable to init SDL : %s\n",SDL_GetError());
 		exit(1);
 	}
+
+	atexit(SDL_Quit);
 	
 	if (SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER,1)<0)
 	{
