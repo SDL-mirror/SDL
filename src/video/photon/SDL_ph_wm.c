@@ -233,6 +233,20 @@ void ph_SetCaption(_THIS, const char *title, const char *icon)
 /* Iconify the window (stolen from PhHotKey sources by phearbear ;-) */
 int ph_IconifyWindow(_THIS)
 {
+#if 1 /* Code submitted by Luca <barbato_luca@yahoo.com> */
+	WmApiContext_t context=WmCreateContext();
+	WmWindowDefinition_t
+**wininfo=malloc(sizeof(WmWindowDefinition_t)*2);
+	int num;									
+	SDL_Lock_EventThread();
+	WmGetFocusList(context,2,&num,wininfo);
+	WmPerformFrameAction(context, wininfo[0]->rid,Pt_ACTION_MIN);
+
+	WmDestroyContext (context);   
+	SDL_Unlock_EventThread();	 
+	free(wininfo);		   
+	return (0);   
+#else
 	int result=0;
         int myerr;
         int num;
@@ -268,6 +282,7 @@ int ph_IconifyWindow(_THIS)
 	SDL_Unlock_EventThread();
 
 	return(result);
+#endif /* 1 */
 }
 
 SDL_GrabMode ph_GrabInputNoLock(_THIS, SDL_GrabMode mode)
