@@ -966,9 +966,9 @@ void SDL_UpdateRects (SDL_Surface *screen, int numrects, SDL_Rect *rects)
 
 	if ( screen == SDL_ShadowSurface ) {
 		/* Blit the shadow surface using saved mapping */
-	        SDL_Palette *pal = screen->format->palette;
+		SDL_Palette *pal = screen->format->palette;
 		SDL_Color *saved_colors = NULL;
-	        if ( pal && !(SDL_VideoSurface->flags & SDL_HWPALETTE) ) {
+		if ( pal && !(SDL_VideoSurface->flags & SDL_HWPALETTE) ) {
 			/* simulated 8bpp, use correct physical palette */
 			saved_colors = pal->colors;
 			if ( video->gammacols ) {
@@ -994,8 +994,9 @@ void SDL_UpdateRects (SDL_Surface *screen, int numrects, SDL_Rect *rects)
 						SDL_VideoSurface, &rects[i]);
 			}
 		}
-		if ( saved_colors )
+		if ( saved_colors ) {
 			pal->colors = saved_colors;
+		}
 
 		/* Fall through to video surface update */
 		screen = SDL_VideoSurface;
@@ -1027,9 +1028,9 @@ int SDL_Flip(SDL_Surface *screen)
 	/* Copy the shadow surface to the video surface */
 	if ( screen == SDL_ShadowSurface ) {
 		SDL_Rect rect;
-	        SDL_Palette *pal = screen->format->palette;
+		SDL_Palette *pal = screen->format->palette;
 		SDL_Color *saved_colors = NULL;
-	        if ( pal && !(SDL_VideoSurface->flags & SDL_HWPALETTE) ) {
+		if ( pal && !(SDL_VideoSurface->flags & SDL_HWPALETTE) ) {
 			/* simulated 8bpp, use correct physical palette */
 			saved_colors = pal->colors;
 			if ( video->gammacols ) {
@@ -1045,10 +1046,22 @@ int SDL_Flip(SDL_Surface *screen)
 		rect.y = 0;
 		rect.w = screen->w;
 		rect.h = screen->h;
-		SDL_LowerBlit(SDL_ShadowSurface,&rect, SDL_VideoSurface,&rect);
-
-		if ( saved_colors )
+		if ( SHOULD_DRAWCURSOR(SDL_cursorstate) ) {
+			SDL_LockCursor();
+			SDL_DrawCursor(SDL_ShadowSurface);
+			SDL_LowerBlit(SDL_ShadowSurface, &rect,
+					SDL_VideoSurface, &rect);
+			SDL_EraseCursor(SDL_ShadowSurface);
+			SDL_UnlockCursor();
+		} else {
+			SDL_LowerBlit(SDL_ShadowSurface, &rect,
+					SDL_VideoSurface, &rect);
+		}
+		if ( saved_colors ) {
 			pal->colors = saved_colors;
+		}
+
+		/* Fall through to video surface update */
 		screen = SDL_VideoSurface;
 	}
 	if ( (screen->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF ) {
