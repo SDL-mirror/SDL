@@ -143,9 +143,8 @@ int SDL_SYS_JoystickInit(void)
 		"/dev/js%d",
 #ifdef USE_INPUT_EVENTS
 		"/dev/input/event%d"
-#else
-		"/dev/input/js%d"
 #endif
+		"/dev/input/js%d"
 	};
 	int numjoysticks;
 	int i, j, done;
@@ -222,6 +221,15 @@ int SDL_SYS_JoystickInit(void)
 				done = 1;
 			}
 		}
+        /* This is a special case...
+           If we're looking at the /dev/input event devices, and we found
+           at least one, then we don't want to look at the input joystick
+           devices, since they're built on top of devices that we've already
+           seen, so we're done.
+         */
+        if ( i > 0 && j > 0 ) {
+            done = 1;
+        }
 	}
 	return(numjoysticks);
 }
