@@ -295,8 +295,22 @@ CheckALSA()
         AC_CHECK_LIB(asound, snd_pcm_open, have_alsa=yes)
         ])
         if test x$have_alsa = xyes; then
-            CFLAGS="$CFLAGS -DALSA_SUPPORT"
-            SYSTEM_LIBS="$SYSTEM_LIBS -lasound"
+            AC_ARG_ENABLE(alsa-shared,
+[  --enable-alsa-shared     dynamically load ALSA audio support [default=yes]],
+                          , enable_alsa_shared=yes)
+            alsa_lib=`ls /usr/lib/libasound.so.* | head -1 | sed 's/.*\/\(.*\)/\1/'`
+            if test x$use_dlopen != xyes && \
+               test x$enable_alsa_shared = xyes; then
+                AC_MSG_ERROR([You must have dlopen() support and use the --enable-dlopen option])
+            fi
+            if test x$use_dlopen = xyes && \
+               test x$enable_alsa_shared = xyes && test x$alsa_lib != x; then
+                CFLAGS="$CFLAGS -DALSA_SUPPORT -DALSA_DYNAMIC=\$(alsa_lib)"
+                AC_SUBST(alsa_lib)
+            else
+                CFLAGS="$CFLAGS -DALSA_SUPPORT"
+                SYSTEM_LIBS="$SYSTEM_LIBS -lasound"
+            fi
             AUDIO_SUBDIRS="$AUDIO_SUBDIRS alsa"
             AUDIO_DRIVERS="$AUDIO_DRIVERS alsa/libaudio_alsa.la"
         else
