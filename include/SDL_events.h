@@ -106,14 +106,14 @@ enum {
 #define SDL_ALLEVENTS		0xFFFFFFFF
 
 /* Application visibility event structure */
-typedef struct {
+typedef struct SDL_ActiveEvent {
 	Uint8 type;	/* SDL_ACTIVEEVENT */
 	Uint8 gain;	/* Whether given states were gained or lost (1/0) */
 	Uint8 state;	/* A mask of the focus states */
 } SDL_ActiveEvent;
 
 /* Keyboard event structure */
-typedef struct {
+typedef struct SDL_KeyboardEvent {
 	Uint8 type;	/* SDL_KEYDOWN or SDL_KEYUP */
 	Uint8 which;	/* The keyboard device index */
 	Uint8 state;	/* SDL_PRESSED or SDL_RELEASED */
@@ -121,7 +121,7 @@ typedef struct {
 } SDL_KeyboardEvent;
 
 /* Mouse motion event structure */
-typedef struct {
+typedef struct SDL_MouseMotionEvent {
 	Uint8 type;	/* SDL_MOUSEMOTION */
 	Uint8 which;	/* The mouse device index */
 	Uint8 state;	/* The current button state */
@@ -131,7 +131,7 @@ typedef struct {
 } SDL_MouseMotionEvent;
 
 /* Mouse button event structure */
-typedef struct {
+typedef struct SDL_MouseButtonEvent {
 	Uint8 type;	/* SDL_MOUSEBUTTONDOWN or SDL_MOUSEBUTTONUP */
 	Uint8 which;	/* The mouse device index */
 	Uint8 button;	/* The mouse button index */
@@ -140,7 +140,7 @@ typedef struct {
 } SDL_MouseButtonEvent;
 
 /* Joystick axis motion event structure */
-typedef struct {
+typedef struct SDL_JoyAxisEvent {
 	Uint8 type;	/* SDL_JOYAXISMOTION */
 	Uint8 which;	/* The joystick device index */
 	Uint8 axis;	/* The joystick axis index */
@@ -148,7 +148,7 @@ typedef struct {
 } SDL_JoyAxisEvent;
 
 /* Joystick trackball motion event structure */
-typedef struct {
+typedef struct SDL_JoyBallEvent {
 	Uint8 type;	/* SDL_JOYBALLMOTION */
 	Uint8 which;	/* The joystick device index */
 	Uint8 ball;	/* The joystick trackball index */
@@ -157,7 +157,7 @@ typedef struct {
 } SDL_JoyBallEvent;
 
 /* Joystick hat position change event structure */
-typedef struct {
+typedef struct SDL_JoyHatEvent {
 	Uint8 type;	/* SDL_JOYHATMOTION */
 	Uint8 which;	/* The joystick device index */
 	Uint8 hat;	/* The joystick hat index */
@@ -170,7 +170,7 @@ typedef struct {
 } SDL_JoyHatEvent;
 
 /* Joystick button event structure */
-typedef struct {
+typedef struct SDL_JoyButtonEvent {
 	Uint8 type;	/* SDL_JOYBUTTONDOWN or SDL_JOYBUTTONUP */
 	Uint8 which;	/* The joystick device index */
 	Uint8 button;	/* The joystick button index */
@@ -181,24 +181,24 @@ typedef struct {
    When you get this event, you are responsible for setting a new video
    mode with the new width and height.
  */
-typedef struct {
+typedef struct SDL_ResizeEvent {
 	Uint8 type;	/* SDL_VIDEORESIZE */
 	int w;		/* New width */
 	int h;		/* New height */
 } SDL_ResizeEvent;
 
 /* The "screen redraw" event */
-typedef struct {
+typedef struct SDL_ExposeEvent {
 	Uint8 type;	/* SDL_VIDEOEXPOSE */
 } SDL_ExposeEvent;
 
 /* The "quit requested" event */
-typedef struct {
+typedef struct SDL_QuitEvent {
 	Uint8 type;	/* SDL_QUIT */
 } SDL_QuitEvent;
 
 /* A user-defined event type */
-typedef struct {
+typedef struct SDL_UserEvent {
 	Uint8 type;	/* SDL_USEREVENT through SDL_NUMEVENTS-1 */
 	int code;	/* User defined event code */
 	void *data1;	/* User defined data pointer */
@@ -208,7 +208,7 @@ typedef struct {
 /* If you want to use this event, you should include SDL_syswm.h */
 struct SDL_SysWMmsg;
 typedef struct SDL_SysWMmsg SDL_SysWMmsg;
-typedef struct {
+typedef struct SDL_SysWMEvent {
 	Uint8 type;
 	SDL_SysWMmsg *msg;
 } SDL_SysWMEvent;

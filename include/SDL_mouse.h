@@ -40,7 +40,7 @@ extern "C" {
 #endif
 
 typedef struct WMcursor WMcursor;	/* Implementation dependent */
-typedef struct {
+typedef struct SDL_Cursor {
 	SDL_Rect area;			/* The area of the mouse cursor */
 	Sint16 hot_x, hot_y;		/* The "tip" of the cursor */
 	Uint8 *data;			/* B/W cursor data */

@@ -55,7 +55,7 @@ extern "C" {
 		An international character..
 	}
  */
-typedef struct {
+typedef struct SDL_keysym {
 	Uint8 scancode;			/* hardware specific scancode */
 	SDLKey sym;			/* SDL virtual keysym */
 	SDLMod mod;			/* current key modifiers */

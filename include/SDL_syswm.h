@@ -74,7 +74,7 @@ struct SDL_SysWMmsg {
    When this structure is returned, it holds information about which
    low level system it is using, and will be one of SDL_SYSWM_TYPE.
  */
-typedef struct {
+typedef struct SDL_SysWMinfo {
 	SDL_version version;
 	SDL_SYSWM_TYPE subsystem;
 	union {
@@ -106,7 +106,7 @@ struct SDL_SysWMmsg {
 };
 
 /* The windows custom window manager information structure */
-typedef struct {
+typedef struct SDL_SysWMinfo {
 	SDL_version version ;
 	GR_WINDOW_ID window ;	/* The display window */
 } SDL_SysWMinfo;
@@ -125,7 +125,7 @@ struct SDL_SysWMmsg {
 };
 
 /* The windows custom window manager information structure */
-typedef struct {
+typedef struct SDL_SysWMinfo {
 	SDL_version version;
 	HWND window;			/* The Win32 display window */
 	HGLRC hglrc;			/* The OpenGL context, if any */
@@ -141,7 +141,7 @@ struct SDL_SysWMmsg {
 };
 
 /* The RISCOS custom window manager information structure */
-typedef struct {
+typedef struct SDL_SysWMinfo {
 	SDL_version version;
 	int wimpVersion;    /* Wimp version running under */
 	int taskHandle;     /* The RISCOS task handle */
@@ -159,7 +159,7 @@ struct SDL_SysWMmsg {
 };
 
 /* The QNX custom window manager information structure */
-typedef struct {
+typedef struct SDL_SysWMinfo {
 	SDL_version version;
 	int data;
 } SDL_SysWMinfo;
@@ -173,7 +173,7 @@ struct SDL_SysWMmsg {
 };
 
 /* The generic custom window manager information structure */
-typedef struct {
+typedef struct SDL_SysWMinfo {
 	SDL_version version;
 	int data;
 } SDL_SysWMinfo;

@@ -62,7 +62,7 @@ typedef enum {
 /* Given a status, returns true if there's a disk in the drive */
 #define CD_INDRIVE(status)	((int)status > 0)
 
-typedef struct {
+typedef struct SDL_CDtrack {
 	Uint8 id;		/* Track number */
 	Uint8 type;		/* Data or audio track */
 	Uint16 unused;

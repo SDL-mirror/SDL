@@ -35,7 +35,7 @@ static char rcsid =
 #define ERR_MAX_STRLEN	128
 #define ERR_MAX_ARGS	5
 
-typedef struct {
+typedef struct SDL_error {
 	/* This is a numeric value corresponding to the current error */
 	int error;
 

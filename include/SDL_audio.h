@@ -45,7 +45,7 @@ extern "C" {
 #endif
 
 /* The calculated values in this structure are calculated by SDL_OpenAudio() */
-typedef struct {
+typedef struct SDL_AudioSpec {
 	int freq;		/* DSP frequency -- samples per second */
 	Uint16 format;		/* Audio data format */
 	Uint8  channels;	/* Number of channels: 1 mono, 2 stereo */

@@ -47,12 +47,12 @@ extern "C" {
 #define SDL_ALPHA_TRANSPARENT 0
 
 /* Useful data types */
-typedef struct {
+typedef struct SDL_Rect {
 	Sint16 x, y;
 	Uint16 w, h;
 } SDL_Rect;
 
-typedef struct {
+typedef struct SDL_Color {
 	Uint8 r;
 	Uint8 g;
 	Uint8 b;
@@ -60,7 +60,7 @@ typedef struct {
 } SDL_Color;
 #define SDL_Colour SDL_Color
 
-typedef struct {
+typedef struct SDL_Palette {
 	int       ncolors;
 	SDL_Color *colors;
 } SDL_Palette;
@@ -154,7 +154,7 @@ typedef struct SDL_Surface {
 
 
 /* Useful for determining the video hardware capabilities */
-typedef struct {
+typedef struct SDL_VideoInfo {
 	Uint32 hw_available :1;	/* Flag: Can you create hardware surfaces? */
 	Uint32 wm_available :1;	/* Flag: Can you talk to a window manager? */
 	Uint32 UnusedBits1  :6;
