@@ -828,7 +828,7 @@ static void GEM_UpdateRectsFullscreen(_THIS, int numrects, SDL_Rect *rects)
 		mfdb_src.fd_addr=surface->pixels;
 		mfdb_src.fd_w=surf_width;
 		mfdb_src.fd_h=surface->h;
-		mfdb_src.fd_wdwidth=mfdb_src.fd_w >> 4;
+		mfdb_src.fd_wdwidth= (surface->pitch/VDI_pixelsize) >> 4;
 		mfdb_src.fd_nplanes=surface->format->BitsPerPixel;
 		mfdb_src.fd_stand=
 			mfdb_src.fd_r1=
