@@ -66,7 +66,6 @@ int RunModeTests(SDL_Surface *screen)
 	float seconds;
 	int i;
 	Uint8 r, g, b;
-	Uint32 pixel;
 	SDL_Surface *bmp, *tmp;
 	SDL_Event event;
 
