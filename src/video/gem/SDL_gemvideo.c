@@ -105,13 +105,6 @@ static void refresh_window(_THIS, int winhandle, short *rect);
 
 static int GEM_Available(void)
 {
-	const char *envr = getenv("SDL_VIDEODRIVER");
-
-	/* Check if user asked a different video driver */
-	if ((envr) && (strcmp(envr, GEM_VID_DRIVER_NAME)!=0)) {
-		return 0;
-	}
-
 	/* Test if AES available */
 	if (appl_init() == -1)
 		return 0;
