@@ -301,7 +301,7 @@ static int DMA_ReopenAudio(_THIS, const char *audiodev, int format, int stereo,
 
 	/* Set the DSP frequency */
 	value = spec->freq;
-	if ( ioctl(audio_fd, SOUND_PCM_WRITE_RATE, &value) < 0 ) {
+	if ( ioctl(audio_fd, SNDCTL_DSP_SPEED, &value) < 0 ) {
 		SDL_SetError("Couldn't set audio frequency");
 		return(-1);
 	}
