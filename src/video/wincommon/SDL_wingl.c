@@ -106,6 +106,9 @@ int WIN_GL_SetupWindow(_THIS)
 		if ( this->gl_config.double_buffer ) {
 			GL_pfd.dwFlags |= PFD_DOUBLEBUFFER;
 		}
+		if ( this->gl_config.stereo ) {
+			GL_pfd.dwFlags |= PFD_STEREO;
+		}
 		GL_pfd.iPixelType = PFD_TYPE_RGBA;
 		GL_pfd.cColorBits = this->gl_config.buffer_size;
 		GL_pfd.cRedBits = this->gl_config.red_size;
@@ -241,6 +244,13 @@ int WIN_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
 		break;
 	    case SDL_GL_ACCUM_ALPHA_SIZE:
 		*value = GL_pfd.cAccumAlphaBits;
+		break;
+	    case SDL_GL_STEREO:
+		if ( GL_pfd.dwFlags & PFD_STEREO ) {
+			*value = 1;
+		} else {
+			*value = 0;
+		}
 		break;
 	    default:
 		retval = -1;

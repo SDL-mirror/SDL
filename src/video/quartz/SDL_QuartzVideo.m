@@ -1157,6 +1157,10 @@ static int QZ_SetupOpenGL (_THIS, int bpp, Uint32 flags) {
         attr[i++] = NSOpenGLPFADoubleBuffer;
     }
 
+    if ( this->gl_config.stereo ) {
+        attr[i++] = NSOpenGLPFAStereo;
+    }
+
     if ( this->gl_config.stencil_size != 0 ) {
         attr[i++] = NSOpenGLPFAStencilSize;
         attr[i++] = this->gl_config.stencil_size;
@@ -1245,6 +1249,7 @@ static int    QZ_GL_GetAttribute   (_THIS, SDL_GLattr attrib, int* value) {
         case SDL_GL_ACCUM_GREEN_SIZE: attr = GL_ACCUM_GREEN_BITS; break;
         case SDL_GL_ACCUM_BLUE_SIZE: attr = GL_ACCUM_BLUE_BITS; break;
         case SDL_GL_ACCUM_ALPHA_SIZE: attr = GL_ACCUM_ALPHA_BITS; break;
+        case SDL_GL_STEREO: attr = GL_STEREO; break;
         case SDL_GL_BUFFER_SIZE:
         {
             GLint bits = 0;

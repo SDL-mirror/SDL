@@ -67,8 +67,8 @@ XVisualInfo *X11_GL_GetVisual(_THIS)
 	}
 
         /* Setup our GLX attributes according to the gl_config. */
-        i = 0;
-        attribs[i++] = GLX_RGBA;
+	i = 0;
+	attribs[i++] = GLX_RGBA;
 	attribs[i++] = GLX_RED_SIZE;
 	attribs[i++] = this->gl_config.red_size;
 	attribs[i++] = GLX_GREEN_SIZE;
@@ -82,8 +82,8 @@ XVisualInfo *X11_GL_GetVisual(_THIS)
 	}
 
 	if( this->gl_config.buffer_size ) {
-                attribs[i++] = GLX_BUFFER_SIZE;
-	        attribs[i++] = this->gl_config.buffer_size;
+		attribs[i++] = GLX_BUFFER_SIZE;
+		attribs[i++] = this->gl_config.buffer_size;
 	}
 
 	if( this->gl_config.double_buffer ) {
@@ -99,23 +99,28 @@ XVisualInfo *X11_GL_GetVisual(_THIS)
 	}
 
 	if( this->gl_config.accum_red_size ) {
-	        attribs[i++] = GLX_ACCUM_RED_SIZE;
+		attribs[i++] = GLX_ACCUM_RED_SIZE;
 		attribs[i++] = this->gl_config.accum_red_size;
 	}
 
 	if( this->gl_config.accum_green_size ) {
-	        attribs[i++] = GLX_ACCUM_GREEN_SIZE;
+		attribs[i++] = GLX_ACCUM_GREEN_SIZE;
 		attribs[i++] = this->gl_config.accum_green_size;
 	}
 
 	if( this->gl_config.accum_blue_size ) {
-	        attribs[i++] = GLX_ACCUM_BLUE_SIZE;
+		attribs[i++] = GLX_ACCUM_BLUE_SIZE;
 		attribs[i++] = this->gl_config.accum_blue_size;
 	}
 
 	if( this->gl_config.accum_alpha_size ) {
-	        attribs[i++] = GLX_ACCUM_ALPHA_SIZE;
+		attribs[i++] = GLX_ACCUM_ALPHA_SIZE;
 		attribs[i++] = this->gl_config.accum_alpha_size;
+	}
+
+	if( this->gl_config.stereo ) {
+		attribs[i++] = GLX_STEREO;
+		attribs[i++] = this->gl_config.stereo;
 	}
 
 #ifdef GLX_DIRECT_COLOR /* Try for a DirectColor visual for gamma support */
@@ -287,6 +292,9 @@ int X11_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
 		break;
 	    case SDL_GL_ACCUM_ALPHA_SIZE:
 		glx_attrib = GLX_ACCUM_ALPHA_SIZE;
+		break;
+	    case SDL_GL_STEREO:
+		glx_attrib = GLX_STEREO;
 		break;
 	    default:
 		return(-1);
