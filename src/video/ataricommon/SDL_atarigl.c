@@ -116,6 +116,7 @@ int SDL_AtariGL_LoadLibrary(_THIS, const char *path)
 
 #ifdef ENABLE_OSMESA_SHARED
 	void *handle;
+	SDL_bool cancel_load;
 
 	if (gl_active) {
 		SDL_SetError("OpenGL context already created");
@@ -158,9 +159,19 @@ int SDL_AtariGL_LoadLibrary(_THIS, const char *path)
 
 	this->gl_data->glGetIntegerv = SDL_LoadFunction(handle, "glGetIntegerv");
 	this->gl_data->glFinish = SDL_LoadFunction(handle, "glFinish");
+	this->gl_data->glFlush = SDL_LoadFunction(handle, "glFlush");
 
-	if ( (this->gl_data->glGetIntegerv == NULL) || 
-	     (this->gl_data->glFinish == NULL)) {
+	cancel_load = SDL_FALSE;
+	if (this->gl_data->glGetIntegerv == NULL) {
+		cancel_load = SDL_TRUE;
+	} else {
+		/* We need either glFinish (OSMesa) or glFlush (TinyGL) */
+		if ((this->gl_data->glFinish == NULL) &&
+			(this->gl_data->glFlush == NULL)) {
+				cancel_load = SDL_TRUE;
+		}
+	}
+	if (cancel_load) {
 		SDL_SetError("Could not retrieve OpenGL functions");
 		SDL_UnloadObject(handle);
 		/* Restore pointers to static library */
@@ -236,12 +247,6 @@ int SDL_AtariGL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
 #ifdef HAVE_OPENGL
 	GLenum mesa_attrib;
 	SDL_Surface *surface;
-
-	if (this->gl_config.dll_handle) {
-		if (this->gl_data->glGetIntegerv == NULL) {
-			return -1;
-		}
-	}
 
 	if (!gl_active) {
 		return -1;
@@ -344,6 +349,8 @@ void SDL_AtariGL_SwapBuffers(_THIS)
 		if (this->gl_config.dll_handle) {
 			if (this->gl_data->glFinish) {
 				this->gl_data->glFinish();
+			} else if (this->gl_data->glFlush) {
+				this->gl_data->glFlush();
 			}
 		} else {
 			this->gl_data->glFinish();
@@ -365,6 +372,7 @@ void SDL_AtariGL_InitPointers(_THIS)
 
 	this->gl_data->glGetIntegerv = glGetIntegerv;
 	this->gl_data->glFinish = glFinish;
+	this->gl_data->glFlush = glFlush;
 
 	this->gl_data->OSMesaCreateLDG = NULL;
 	this->gl_data->OSMesaDestroyLDG = NULL;

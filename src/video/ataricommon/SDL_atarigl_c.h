@@ -53,6 +53,7 @@ struct SDL_PrivateGLData {
 	/* OpenGL functions */
 	void (*glGetIntegerv)( GLenum pname, GLint *value );
 	void (*glFinish)(void);
+	void (*glFlush)(void);
 
 	/* osmesa.ldg */
 	OSMesaContext (*OSMesaCreateContextExt)( GLenum format, GLint depthBits, GLint stencilBits, GLint accumBits, OSMesaContext sharelist);
