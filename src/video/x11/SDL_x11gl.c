@@ -34,7 +34,12 @@ static char rcsid =
 #include "SDL_x11dga_c.h"
 #include "SDL_x11gl_c.h"
 
+#if defined(sgi)
+/* IRIX doesn't have a GL library versioning system */
+#define DEFAULT_OPENGL	"libGL.so"
+#else
 #define DEFAULT_OPENGL	"libGL.so.1"
+#endif
 
 #ifndef GLX_ARB_multisample
 #define GLX_ARB_multisample
