@@ -58,9 +58,6 @@ int VGL_ShowWMCursor(_THIS, WMcursor *cursor)
 
 void VGL_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
 {
-	x += (this->screen->offset % this->screen->pitch) /
-	      this->screen->format->BytesPerPixel;
-	y += (this->screen->offset / this->screen->pitch);
 	SDL_PrivateMouseMotion(0, 0, x, y);
 }
 

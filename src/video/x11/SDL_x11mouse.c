@@ -177,9 +177,11 @@ int X11_ShowWMCursor(_THIS, WMcursor *cursor)
 void X11_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
 {
 	if ( using_dga & DGA_MOUSE ) {
-		x += (this->screen->offset % this->screen->pitch) /
-		      this->screen->format->BytesPerPixel;
-		y += (this->screen->offset / this->screen->pitch);
+		SDL_PrivateMouseMotion(0, 0, x, y);
+	} else if ( mouse_relative) {
+		/*	RJR: March 28, 2000
+			leave physical cursor at center of screen if
+			mouse hidden and grabbed */
 		SDL_PrivateMouseMotion(0, 0, x, y);
 	} else {
 		SDL_Lock_EventThread();
