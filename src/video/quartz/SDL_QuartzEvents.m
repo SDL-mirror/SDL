@@ -472,7 +472,7 @@ void QZ_PumpEvents (_THIS)
                     if ( getenv("SDL_HAS3BUTTONMOUSE") ) {
                         DO_MOUSE_DOWN (SDL_BUTTON_LEFT);
                     } else {
-                        if ( NSControlKeyMask & current_mods ) {
+                        if ( NSCommandKeyMask & current_mods ) {
                             last_virtual_button = SDL_BUTTON_RIGHT;
                             DO_MOUSE_DOWN (SDL_BUTTON_RIGHT);
                         }
@@ -519,18 +519,7 @@ void QZ_PumpEvents (_THIS)
                 case NSLeftMouseDragged:
                 case NSRightMouseDragged:
                 case NSOtherMouseDragged: /* usually middle mouse dragged */
-                case NSMouseMoved:    
-                    /* Show the cursor if it was hidden by SDL_ShowCursor() */
-                    /* this is how games I've seen work */
-                    if (!cursor_visible) {
-                        if (!isInGameWin && cursor_hidden) {
-                            ShowCursor();
-                            cursor_hidden = NO;
-                        } else if (isInGameWin && !cursor_hidden) {
-                            HideCursor();
-                            cursor_hidden = YES;
-                        }
-                    }
+                case NSMouseMoved:
                     if ( grab_state == QZ_INVISIBLE_GRAB ) {
                 
                         /*
@@ -653,6 +642,6 @@ void QZ_PumpEvents (_THIS)
     /* handle accumulated mouse moved events */
     if (dx != 0 || dy != 0)
         SDL_PrivateMouseMotion (0, 1, dx, dy);
-
+    
     [ pool release ];
 }
