@@ -57,6 +57,9 @@ static VideoBootStrap *bootstrap[] = {
 #ifdef ENABLE_FBCON
 	&FBCON_bootstrap,
 #endif
+#ifdef ENABLE_DIRECTFB
+	&DirectFB_bootstrap,
+#endif
 #ifdef ENABLE_PS2GS
 	&PS2GS_bootstrap,
 #endif

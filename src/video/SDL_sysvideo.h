@@ -337,6 +337,9 @@ extern VideoBootStrap NX_bootstrap;
 #ifdef ENABLE_FBCON
 extern VideoBootStrap FBCON_bootstrap;
 #endif
+#ifdef ENABLE_DIRECTFB
+extern VideoBootStrap DirectFB_bootstrap;
+#endif
 #ifdef ENABLE_PS2GS
 extern VideoBootStrap PS2GS_bootstrap;
 #endif
