@@ -49,14 +49,6 @@ struct SDL_PrivateVideoData {
 	/* A completely clear cursor */
 	WMcursor *BlankCursor;
 
-	/* Mouse state variables */
-	uint32 last_buttons;
-	BPoint last_point;
-
-	/* Keyboard state variables */
-	int key_flip;
-	struct key_info keyinfo[2];
-	
 	SDL_Overlay *overlay;
 };
 /* Old variable names */
@@ -65,10 +57,6 @@ struct SDL_PrivateVideoData {
 #define SDL_nummodes	(_this->hidden->SDL_nummodes)
 #define SDL_modelist	(_this->hidden->SDL_modelist)
 #define SDL_BlankCursor	(_this->hidden->BlankCursor)
-#define last_buttons	(_this->hidden->last_buttons)
-#define last_point	(_this->hidden->last_point)
-#define key_flip	(_this->hidden->key_flip)
-#define keyinfo		(_this->hidden->keyinfo)
 #define current_overlay (_this->hidden->overlay)
 
 #endif /* _SDL_lowvideo_h */
