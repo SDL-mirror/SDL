@@ -67,6 +67,11 @@ static char rcsid =
 
 #define GEM_VID_DRIVER_NAME "gem"
 
+#undef MIN
+#define MIN(a,b) (((a)<(b)) ? (a) : (b))
+#undef MAX
+#define MAX(a,b) (((a)>(b)) ? (a) : (b))
+
 /* Variables */
 
 static unsigned char vdi_index[256] = {
@@ -1105,14 +1110,18 @@ static void refresh_window(_THIS, int winhandle, short *rect)
 
 	if (iconified && GEM_icon) {
 		short icon_rect[4], dst_rect[4];
+		short iconx,icony;
 		
 		surface = GEM_icon;
 
 		GEM_ClearRect(this, rect);
 
 		/* Calculate centered icon(x,y,w,h) relative to window */
-		icon_rect[0] = (wind_pxy[2]-surface->w)>>1;
-		icon_rect[1] = (wind_pxy[3]-surface->h)>>1;
+		iconx = (wind_pxy[2]-surface->w)>>1;
+		icony = (wind_pxy[3]-surface->h)>>1;
+
+		icon_rect[0] = iconx;
+		icon_rect[1] = icony;
 		icon_rect[2] = surface->w;
 		icon_rect[3] = surface->h;
 
@@ -1142,42 +1151,16 @@ static void refresh_window(_THIS, int winhandle, short *rect)
 		icon_rect[3] += icon_rect[1]-1;
 
 		/* Calculate intersection rectangle to redraw */
-		pxy[0]=0;
-		pxy[1]=0;
- 		pxy[2]=surface->w - 1;
-	 	pxy[3]=surface->h - 1;
-		pxy[4]=rect[0];
-		pxy[5]=rect[1];
-		pxy[6]=rect[2];
-		pxy[7]=rect[3];
+		pxy[4]=pxy[0]=MAX(icon_rect[0],rect[0]);
+		pxy[5]=pxy[1]=MAX(icon_rect[1],rect[1]);
+ 		pxy[6]=pxy[2]=MIN(icon_rect[2],rect[2]);
+	 	pxy[7]=pxy[3]=MIN(icon_rect[3],rect[3]);
 
-		if (icon_rect[0]>rect[0]) {
-			pxy[4]=icon_rect[0];
-		} else if (icon_rect[0]<rect[0]) {
-			pxy[0]=rect[0]-icon_rect[0];
-		}
-
-		if (icon_rect[1]>rect[1]) {
-			pxy[5]=icon_rect[1];
-		} else if (icon_rect[1]<rect[1]) {
-			pxy[1]=rect[1]-icon_rect[1];
-		}
-
-		if (icon_rect[2]>rect[2]) {
-			pxy[2]=rect[2]-icon_rect[0];
-			pxy[6]=rect[2];
-		} else if (icon_rect[2]<rect[2]) {
-			pxy[2]=icon_rect[2]-rect[0];
-			pxy[6]=icon_rect[2];
-		}
-
-		if (icon_rect[3]>rect[3]) {
-			pxy[3]=rect[3]-icon_rect[1];
-			pxy[7]=rect[3];
-		} else if (icon_rect[3]<rect[3]) {
-			pxy[3]=icon_rect[3]-rect[1];
-			pxy[7]=icon_rect[3];
-		}
+		/* Calculate icon source image pos relative to window */
+		pxy[0] -= wind_pxy[0]+iconx;
+		pxy[1] -= wind_pxy[1]+icony;
+		pxy[2] -= wind_pxy[0]+iconx;
+		pxy[3] -= wind_pxy[1]+icony;
 
 	} else {
 		surface = this->screen;
