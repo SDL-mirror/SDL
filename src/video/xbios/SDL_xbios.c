@@ -132,7 +132,13 @@ static unsigned long	F30_palette[256];
 
 static int XBIOS_Available(void)
 {
-	unsigned long cookie_vdo;
+	unsigned long cookie_vdo, cookie_mil, cookie_hade;
+
+	/* Milan/Hades Atari clones do not have an Atari video chip */
+	if ( (Getcookie(C__MIL, &cookie_mil) == C_FOUND) ||
+		(Getcookie(C_hade, &cookie_hade) == C_FOUND) ) {
+		return 0;
+	}
 
 	/* Cookie _VDO present ? if not, assume ST machine */
 	if (Getcookie(C__VDO, &cookie_vdo) != C_FOUND) {
