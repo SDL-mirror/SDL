@@ -267,6 +267,7 @@ SDL_NAME(XvQueryAdaptors)(
   *p_nAdaptors = rep.num_adaptors;
   *p_pAdaptors = pas;
 
+  Xfree(buffer);
   UnlockDisplay(dpy);
   SyncHandle();
 
