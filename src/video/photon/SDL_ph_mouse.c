@@ -67,8 +67,8 @@ WMcursor *ph_CreateWMCursor(_THIS,
 	/* Allocate and initialize the cursor memory */
 	if ((cursor = (WMcursor*)malloc(sizeof(WMcursor))) == NULL)
 	{
-        SDL_OutOfMemory();
-        return(NULL);
+            SDL_OutOfMemory();
+            return(NULL);
 	}
 	memset(cursor,0,sizeof(WMcursor));
 

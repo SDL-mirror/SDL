@@ -15,7 +15,7 @@
 #endif
 
 /* Draw a randomly sized and colored box centered about (X,Y) */
-void DrawBox(SDL_Surface *screen, int X, int Y)
+void DrawBox(SDL_Surface *screen, int X, int Y, int width, int height)
 {
 	static unsigned int seeded = 0;
 	SDL_Rect area;
@@ -28,8 +28,8 @@ void DrawBox(SDL_Surface *screen, int X, int Y)
 	}
 
 	/* Get the bounds of the rectangle */
-	area.w = (rand()%640);
-	area.h = (rand()%480);
+	area.w = (rand()%width);
+	area.h = (rand()%height);
 	area.x = X-(area.w/2);
 	area.y = Y-(area.h/2);
 	color = (rand()%NUM_COLORS);
@@ -72,7 +72,7 @@ SDL_Surface *CreateScreen(Uint16 w, Uint16 h, Uint8 bpp, Uint32 flags)
 	}
 	buffer = (Uint8 *)screen->pixels;
 	for ( i=0; i<screen->h; ++i ) {
-		memset(buffer,(i*(NUM_COLORS-1))/screen->h, screen->w);
+		memset(buffer,(i*(NUM_COLORS-1))/screen->h, screen->w * screen->format->BytesPerPixel);
 		buffer += screen->pitch;
 	}
 	SDL_UnlockSurface(screen);
@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
 		if ( argv[argc] && (strcmp(argv[argc], "-fullscreen") == 0) ) {
 			videoflags |= SDL_FULLSCREEN;
 		} else {
-			fprintf(stderr, "Usage: %s [-warp] [-fullscreen]\n",
+			fprintf(stderr, "Usage: %s [-width] [-height] [-bpp] [-hw] [-hwpalette] [-noframe] [-fullscreen]\n",
 								argv[0]);
 			exit(1);
 		}
@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
 	while ( !done && SDL_WaitEvent(&event) ) {
 		switch (event.type) {
 			case SDL_MOUSEBUTTONDOWN:
-				DrawBox(screen, event.button.x, event.button.y);
+				DrawBox(screen, event.button.x, event.button.y, width, height);
 				break;
 			case SDL_KEYDOWN:
 				/* Ignore ALT-TAB for windows */
@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
 				}
 				/* Center the mouse on <SPACE> */
 				if ( event.key.keysym.sym == SDLK_SPACE ) {
-					SDL_WarpMouse(640/2, 480/2);
+					SDL_WarpMouse(width/2, height/2);
 					break;
 				}
 				/* Toggle fullscreen mode on <RETURN> */

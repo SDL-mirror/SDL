@@ -192,6 +192,7 @@ static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat)
     {
         exit(EXIT_FAILURE);
     }
+    memset(event, 0x00, EVENT_SIZE);
 
     /* Create the blank cursor */
     SDL_BlankCursor = this->CreateWMCursor(this, blank_cdata, blank_cmask,
@@ -200,17 +201,17 @@ static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
     if (SDL_BlankCursor == NULL)
     {
-        printf("ph_VideoInit: could not create blank cursor\n");
+        printf("ph_VideoInit(): could not create blank cursor !\n");
     }
 
     if (PgGetGraphicsHWCaps(&my_hwcaps) < 0)
     {
-        fprintf(stderr,"ph_VideoInit: GetGraphicsHWCaps failed!! \n");
+        fprintf(stderr,"ph_VideoInit(): GetGraphicsHWCaps failed !\n");
     }
 
     if (PgGetVideoModeInfo(my_hwcaps.current_video_mode, &my_mode_info) < 0)
     {
-        fprintf(stderr,"ph_VideoInit:  PgGetVideoModeInfo failed\n");
+        fprintf(stderr,"ph_VideoInit(): PgGetVideoModeInfo failed !\n");
     }
 
     /* We need to return BytesPerPixel as it in used by CreateRGBsurface */

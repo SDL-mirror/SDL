@@ -75,7 +75,6 @@ struct SDL_PrivateVideoData {
         FRAMEDATA *FrameData0;
         FRAMEDATA *FrameData1;
         int current;
-        long Stride;
         long flags;
     } ocimage;
 

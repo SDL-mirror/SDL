@@ -38,11 +38,14 @@ int PgWaitHWIdle(void);
 
 int ph_SetupImage(_THIS, SDL_Surface *screen)
 {
-    int type=0;
     PgColor_t* palette=NULL;
+    int type=0;
+    int bpp;
+    
+    bpp=screen->format->BitsPerPixel;
 
     /* Determine image type */
-    switch(screen->format->BitsPerPixel)
+    switch(bpp)
     {
         case 8:{
             type = Pg_IMAGE_PALETTE_BYTE;
@@ -65,14 +68,14 @@ int ph_SetupImage(_THIS, SDL_Surface *screen)
         }
         break;
         default:{
-            fprintf(stderr,"ph_SetupImage(): unsupported bbp = %d\n", screen->format->BitsPerPixel);
+            fprintf(stderr,"ph_SetupImage(): unsupported bbp = %d\n", bpp);
             return -1;
         }
         break;
     }
 
     /* palette emulation code */
-    if ((screen->format->BitsPerPixel==8) && (desktoppal==SDLPH_PAL_EMULATE))
+    if ((bpp==8) && (desktoppal==SDLPH_PAL_EMULATE))
     {
         /* creating image palette */
         palette=malloc(_Pg_MAX_PALETTE*sizeof(PgColor_t));
@@ -81,7 +84,7 @@ int ph_SetupImage(_THIS, SDL_Surface *screen)
         /* using shared memory for speed (set last param to 1) */
         if ((SDL_Image = PhCreateImage(NULL, screen->w, screen->h, type, palette, _Pg_MAX_PALETTE, 1)) == NULL)
         {
-            fprintf(stderr,"ph_SetupImage: PhCreateImage failed for bpp=8.\n");
+            fprintf(stderr,"ph_SetupImage(): PhCreateImage failed for bpp=8.\n");
             return -1;
         }
     }
@@ -94,8 +97,9 @@ int ph_SetupImage(_THIS, SDL_Surface *screen)
             return -1;
         }
     }
-
+    
     screen->pixels = SDL_Image->image;
+    screen->pitch = SDL_Image->bpl; /* Recalculated pitch, created by PhCreateImage */
 
     this->UpdateRects = ph_NormalUpdate;
 
@@ -105,9 +109,12 @@ int ph_SetupImage(_THIS, SDL_Surface *screen)
 int ph_SetupOCImage(_THIS, SDL_Surface *screen)
 {
     int type = 0;
+    int bpp;
+    
+    bpp=screen->format->BitsPerPixel;
 
     /* Determine image type */
-    switch(screen->format->BitsPerPixel)
+    switch(bpp)
     {
         case 8: {
                     type = Pg_IMAGE_PALETTE_BYTE;
@@ -130,7 +137,7 @@ int ph_SetupOCImage(_THIS, SDL_Surface *screen)
                 }
                 break;
         default:{
-                    fprintf(stderr,"ph_SetupOCImage(): unsupported bpp = %d\n", screen->format->BitsPerPixel);
+                    fprintf(stderr,"ph_SetupOCImage(): unsupported bpp = %d\n", bpp);
                     return -1;
                 }
                 break;
@@ -138,6 +145,8 @@ int ph_SetupOCImage(_THIS, SDL_Surface *screen)
 
     OCImage.FrameData0 = (FRAMEDATA *) malloc((size_t)(sizeof(FRAMEDATA)));
     OCImage.FrameData1 = (FRAMEDATA *) malloc((size_t)(sizeof(FRAMEDATA)));
+    memset(OCImage.FrameData0, 0x00, (size_t)(sizeof(FRAMEDATA)));
+    memset(OCImage.FrameData1, 0x00, (size_t)(sizeof(FRAMEDATA)));
 
     if(OCImage.direct_context == NULL)
     {
@@ -152,7 +161,7 @@ int ph_SetupOCImage(_THIS, SDL_Surface *screen)
         return -1;
     }
 
-    OCImage.Stride = OCImage.offscreen_context->pitch;	
+    screen->pitch = OCImage.offscreen_context->pitch; /* Recalculated pitch */
 
     if (OCImage.flags & SDL_DOUBLEBUF)
     {
@@ -269,10 +278,6 @@ void ph_UnlockHWSurface(_THIS, SDL_Surface *surface)
     return;
 }
 
-static PhPoint_t ph_pos;
-static PhRect_t ph_rect;
-static int i;
-
 void ph_OpenGLUpdate(_THIS, int numrects, SDL_Rect* rects)
 {
    this->GL_SwapBuffers(this);
@@ -282,7 +287,11 @@ void ph_OpenGLUpdate(_THIS, int numrects, SDL_Rect* rects)
 
 void ph_NormalUpdate(_THIS, int numrects, SDL_Rect *rects)
 {
-    for ( i=0; i<numrects; ++i ) 
+    PhPoint_t ph_pos;
+    PhRect_t ph_rect;
+    int i;
+
+    for (i=0; i<numrects; ++i) 
     {
     	if (rects[i].w==0) /* Clipped? */
         { 
@@ -310,6 +319,8 @@ void ph_NormalUpdate(_THIS, int numrects, SDL_Rect *rects)
 
 void ph_OCUpdate(_THIS, int numrects, SDL_Rect *rects)
 {
+    int i;
+
     PhPoint_t zero = {0};
     PhArea_t src_rect;
     PhArea_t dest_rect;

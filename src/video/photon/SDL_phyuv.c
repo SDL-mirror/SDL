@@ -210,8 +210,10 @@ SDL_Overlay* ph_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SD
     overlay->hwdata->screen_width = 1024;
     overlay->hwdata->screen_height  = 768;
 
-    overlay->hwdata->FrameData0 = (FRAMEDATA *) malloc((size_t)(sizeof( FRAMEDATA)));
-    overlay->hwdata->FrameData1 = (FRAMEDATA *) malloc((size_t)(sizeof( FRAMEDATA)));
+    overlay->hwdata->FrameData0 = (FRAMEDATA *) malloc((size_t)(sizeof(FRAMEDATA)));
+    overlay->hwdata->FrameData1 = (FRAMEDATA *) malloc((size_t)(sizeof(FRAMEDATA)));
+    memset(overlay->hwdata->FrameData0, 0x00, (size_t)(sizeof(FRAMEDATA)));
+    memset(overlay->hwdata->FrameData1, 0x00, (size_t)(sizeof(FRAMEDATA)));
 
     overlay->hwdata->caps.size = sizeof(overlay->hwdata->caps);
 
@@ -493,7 +495,7 @@ if(overlay == NULL)
 	//Lock gets the pointer and passes it to the app. The app writes all yuv data into overlay->pixels
 //Note this is defined as Uint8 **pixels;				/* Read-write */	
 	overlay->pixels = &overlay->hwdata->CurrentFrameData->Y; 
-	overlay->pitches  = &overlay->hwdata->YStride;
+	overlay->pitches = (Uint16*) &(overlay->hwdata->YStride);
 		
 	return(0);
 }

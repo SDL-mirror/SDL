@@ -1,4 +1,4 @@
-README by Mike Gorchak <mike@malva.ua>
+README by Mike Gorchak <mike@malva.ua>, <lestat@i.com.ua>
 
     OpenGL in window mode  works well  and  stable, in fullscreen
 mode too, but fullscreen mode has not been heavily tested.
@@ -16,6 +16,9 @@ Problems:
    videomode has.
 3. No  shared  libraries  yet.  We  need  manually  set  flag  to
    'configure' --disable-shared.
+4. Due to Photon API limitation, flag SDL_HWSURFACE supported on-
+   ly in case of desktop bpp is equal requested bpp in window mo-
+   de.
 
 Some building issues:
 
