@@ -3,8 +3,11 @@ configure
 aclocal.m4
 config.log
 config.cache
+autom4te.cache
+depcomp
 libtool
 config.status
 Makefile
 sdl-config
 SDL.spec
+.DS_Store
