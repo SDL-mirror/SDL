@@ -665,6 +665,7 @@ static int X11_CreateWindow(_THIS, SDL_Surface *screen,
 	/* If a window is already present, destroy it and start fresh */
 	if ( SDL_Window ) {
 		X11_DestroyWindow(this, screen);
+		switch_waiting = 0; /* Prevent jump back to now-meaningless state. */
 	}
 
 	/* See if we have been given a window id */
