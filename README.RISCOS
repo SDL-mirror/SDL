@@ -1,37 +1,39 @@
 Readme for RISC OS port of SDL
 ==============================
 
-This document last updated on 25th June 2004
+This document last updated on 26th January 2005
 
-This is a RISC OS port of the Simple Direct Media Layer (SDL) by Alan Buckley.
+This is a RISC OS port of the Simple Direct Media Layer (SDL) by Alan Buckley with contributions from Peter Naulls.
 
 Details of the SDL can be found at http://www.libsdl.org.
 
-The source code including the RISC OS version can be obtained from http://www.libsdl.org.
+The source code including the RISC OS version can be obtained from
+http://www.libsdl.org.
 
 RISC OS makefiles, pre built libraries and many games and applications compiled for RISC OS using this library can be downloaded from The Unix Porting Project at http://www.chocky.org/unix/index.html.
 
 This is released under the LGPL see the file COPYING for details.
 
 
-RISCOS port of SDL runtime information
+RISC OS port of SDL runtime information
 ======================================
 
 Runtime requirements
 --------------------
 
-This library currently needs a minimum of RISCOS 3.6. The source code for the library (and a lot of the programs built with it) also need long file names.
+This library currently needs a minimum of RISC OS 3.6. The source code for the library (and a lot of the programs built with it) also need long file names.
 
-To use the audio you also need 16 bit sound and to have installed the Digital Render module by Andreas Dehmel version 0.51 available from his web site:
-  http://home.t-online.de/~zarquon
+To use the audio you also need 16 bit sound and to have installed the DigitalRender module by Andreas Dehmel version 0.51 available from his
+web site: http://home.t-online.de/~zarquon
+This is loaded when needed by UnixLib.
 
-Note: As most programs ported from other OS's use high resolution graphics and a memory back buffer a machine with a StrongARM processor and 1 or 2MB of VRAM (or a better machine) is recomended.
+Note: As most programs ported from other OSes use high resolution graphics and a memory back buffer a machine with a StrongARM processor and 1 or 2MB of VRAM (or a better machine) is recomended.
 
 
-RISCOS runtime parameters
+RISC OS runtime parameters
 -------------------------
 
-Several environmental variables have been defined to make porting programs easier (i.e. By setting these variable you do not need to have source code differences between OS's).
+Several environmental variables have been defined to make porting programs easier (i.e. By setting these variable you do not need to have source code differences between OSes).
 
 They are all defined on an application basis.
 
@@ -41,9 +43,9 @@ The <appname> used below is found as follows:
 
 The variables are:
 
-SDL$<appname>$TaskName - The name of the task for RISCOS. If omitted then <appname> is used for the task name,
+SDL$<appname>$TaskName - The name of the task for RISC OS. If omitted then <appname> is used for the task name,
 
-SDL$<appname>$BackBuffer - set to 1 to use a system memory back buffer for the screen in full screen mode. Some programs on other systems assume their is always a back buffer even though the SDL specification specifies this is not the case. The current RISCOS implementation uses direct writes to the screen if a hardware fullscreen is requested.
+SDL$<appname>$BackBuffer - set to 1 to use a system memory back buffer for the screen in full screen mode. Some programs on other systems assume their is always a back buffer even though the SDL specification specifies this is not the case. The current RISC OS implementation uses direct writes to the screen if a hardware fullscreen is requested.
 
 SDL$<appname>$CloseAction - set the action for the close icon. Again as programs don't match the specification you can set this to 0 to remove the close icon from the main window for applications where this does not affect the program.
 
@@ -51,7 +53,7 @@ SDL$<appname>$AudioBuffer - set the minimum size of the audio buffer in samples 
 
 
 
-RISCOS SDL port API notes
+RISC OS SDL port API notes
 =========================
 
 Current level of implementation
@@ -59,11 +61,11 @@ Current level of implementation
 
 The following list is an overview of how much of the SDL is implemented. The areas match the main areas of the SDL.
 
-video - Mostly done. Doesn't cover gamma, YUV-overlay or open gl.
+video - Mostly done. Doesn't cover gamma, YUV-overlay or OpenGL.
 Window Manager - Mostly done. SetIcon/IconifyWindow not implemented.
 Events - Mostly done. Resize and some joystick events missing.
 Joystick - Currently assumes a single joystick with 4 buttons.
-Audio - Requires Digital Renderer module.
+Audio - Done
 CDROM - Not implemented.
 Threads - Done
 Timers - Done
@@ -76,12 +78,12 @@ SDL API notes
 This section contains additional notes on some specific commands.
 
 SDL_SetVideoMode
-  On RISCOS a fullscreen mode directly accesses the screen. This can be modified by the environmental variable (SDL$<appname>$BackBuffer) or by using the SDL_SWSURFACE flag to write to an offscreen buffer that is updated using SDL_UpdateRects.
+  On RISC OS a fullscreen mode directly accesses the screen. This can be modified by the environmental variable (SDL$<appname>$BackBuffer) or by using the SDL_SWSURFACE flag to write to an offscreen buffer that is updated using SDL_UpdateRects.
   Open GL is not supported so SDL_OPENGL and SDL_OPENGLBLIT flags fail.
   SDL_RESIZEABLE and SDL_NOFRAME flags are not supported.
 
 SDL_SetColors
-  In a wimp mode the screen colours are not changed for a hardware palette instead the RISCOS sprite colour mapping is used to get the best matching colours.
+  In a wimp mode the screen colours are not changed for a hardware palette instead the RISC OS sprite colour mapping is used to get the best matching colours.
 
 SDL_CreateCursor
    Inverted colour is not supported.
@@ -107,6 +109,3 @@ Notes on current implementation
 -------------------------------
 
 Keyboard and mouse are polled so if too long a time is spent between a call to SDL_PumpEvents, functions that use it, or SDL_Delay events can be missed.
-
-The sound is sent to the digital renderer player in a seperate thread. If there is too long a delay between this thread being processed (possibly if a lot else is running in the Wimp) the sound may sound incorrect or dissappear.
-

@@ -21,10 +21,10 @@
 */
 
 /*
-     File added by Alan Buckley (alan_baa@hotmail.com) for RISCOS compatability
+     File added by Alan Buckley (alan_baa@hotmail.com) for RISC OS compatability
 	 27 March 2003
 
-     Implements RISCOS full screen display.
+     Implements RISC OS full screen display.
 */
 
 #include <stdio.h>
@@ -69,9 +69,16 @@ void FULLSCREEN_SetupBanks(_THIS);
 /* SDL video device functions for fullscreen mode */
 static int FULLSCREEN_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors);
 static int FULLSCREEN_FlipHWSurface(_THIS, SDL_Surface *surface);
-static void FULLSCREEN_UpdateRects(_THIS, int numrects, SDL_Rect *rects);
 void FULLSCREEN_SetWMCaption(_THIS, const char *title, const char *icon);
 extern int RISCOS_GetWmInfo(_THIS, SDL_SysWMinfo *info);
+
+/* UpdateRects variants */
+static void FULLSCREEN_UpdateRects(_THIS, int numrects, SDL_Rect *rects);
+static void FULLSCREEN_UpdateRectsMemCpy(_THIS, int numrects, SDL_Rect *rects);
+static void FULLSCREEN_UpdateRects8bpp(_THIS, int numrects, SDL_Rect *rects);
+static void FULLSCREEN_UpdateRects16bpp(_THIS, int numrects, SDL_Rect *rects);
+static void FULLSCREEN_UpdateRects32bpp(_THIS, int numrects, SDL_Rect *rects);
+static void FULLSCREEN_UpdateRectsOS(_THIS, int numrects, SDL_Rect *rects);
 
 /* Local helper functions */
 static int cmpmodes(const void *va, const void *vb);
@@ -85,7 +92,11 @@ void FULLSCREEN_BuildModeList(_THIS);
 /* Following variable is set up in riskosTask.c */
 extern int riscos_backbuffer; /* Create a back buffer in system memory for full screen mode */
 
+/* Following is used to create a sprite back buffer */
+extern unsigned char *WIMP_CreateBuffer(int width, int height, int bpp);
 
+/* Fast assembler copy */
+extern void RISCOS_Put32(void *to, int pixels, int pitch, int rows, void *from, int src_skip_bytes);
 
 SDL_Surface *FULLSCREEN_SetVideoMode(_THIS, SDL_Surface *current,
 				int width, int height, int bpp, Uint32 flags)
@@ -180,11 +191,14 @@ SDL_Surface *FULLSCREEN_SetVideoMode(_THIS, SDL_Surface *current,
     if (create_back_buffer)
     {
        /* If not double buffered we may need to create a memory
-       ** back buffer to simulate processing on other OS's. 
+         ** back buffer to simulate processing on other OSes.
          ** This is turned on by setting the enviromental variable
-         ** SDL$<name>$BackBuffer to 1
-         */    
-       this->hidden->bank[0] = malloc(height * current->pitch);
+         ** SDL$<name>$BackBuffer >= 1
+         */
+       if (riscos_backbuffer == 3)
+          this->hidden->bank[0] = WIMP_CreateBuffer(width, height, bpp);
+       else
+          this->hidden->bank[0] = malloc(height * current->pitch);
        if (this->hidden->bank[0] == 0)
        {
  	       RISCOS_RestoreWimpMode();
@@ -195,20 +209,28 @@ SDL_Surface *FULLSCREEN_SetVideoMode(_THIS, SDL_Surface *current,
        current->flags &= ~SDL_HWSURFACE;
     }
 
-	   /* Store address of allocated screen bank to be freed later */
-	   if (this->hidden->alloc_bank) free(this->hidden->alloc_bank);
-	   if (create_back_buffer)
-	   {
-		   this->hidden->alloc_bank = this->hidden->bank[0];
-	   } else
-		   this->hidden->alloc_bank = 0;
+    /* Store address of allocated screen bank to be freed later */
+    if (this->hidden->alloc_bank) free(this->hidden->alloc_bank);
+    if (create_back_buffer)
+    {
+        this->hidden->alloc_bank = this->hidden->bank[0];
+        if (riscos_backbuffer == 3)
+        {
+           this->hidden->bank[0] += 60; /* Start of sprite data */
+           if (bpp == 8) this->hidden->bank[0] += 2048; /* 8bpp sprite have palette first */
+        }
+    } else
+	  this->hidden->alloc_bank = 0;
 
-       // Clear both banks to black
-       memset(this->hidden->bank[0], 0, height * current->pitch);
-	   memset(this->hidden->bank[1], 0, height * current->pitch);
+    // Clear both banks to black
+    memset(this->hidden->bank[0], 0, height * current->pitch);
+    memset(this->hidden->bank[1], 0, height * current->pitch);
 
  	   this->hidden->current_bank = 0;
 	   current->pixels = this->hidden->bank[0];
+
+    /* Have to set the screen here, so SetDeviceMode will pick it up */
+    this->screen = current;
 
 	/* Reset device functions for the wimp */
 	FULLSCREEN_SetDeviceMode(this);
@@ -222,10 +244,45 @@ SDL_Surface *FULLSCREEN_SetVideoMode(_THIS, SDL_Surface *current,
 /* Reset any device functions that have been changed because we have run in WIMP mode */
 void FULLSCREEN_SetDeviceMode(_THIS)
 {
+	/* Update rects is different if we have a backbuffer */
+
+	if (riscos_backbuffer && (this->screen->flags & SDL_DOUBLEBUF) == 0)
+      {
+	   switch(riscos_backbuffer)
+         {
+            case 2: /* ARM code full word copy */
+               switch(this->screen->format->BytesPerPixel)
+               {
+                  case 1: /* 8bpp modes */
+               	   this->UpdateRects = FULLSCREEN_UpdateRects8bpp;
+                     break;
+                  case 2: /* 15/16bpp modes */
+               	   this->UpdateRects = FULLSCREEN_UpdateRects16bpp;
+                     break;
+                  case 4: /* 32 bpp modes */
+               	   this->UpdateRects = FULLSCREEN_UpdateRects32bpp;
+                     break;
+
+                  default: /* Just default to the memcpy routine */
+               	   this->UpdateRects = FULLSCREEN_UpdateRectsMemCpy;
+                     break;
+                }
+               break;
+
+            case 3: /* Use OS sprite plot routine */
+               this->UpdateRects = FULLSCREEN_UpdateRectsOS;
+               break;
+
+            default: /* Old but safe memcpy */
+               this->UpdateRects = FULLSCREEN_UpdateRectsMemCpy;
+               break;
+         }
+      } else
+	   this->UpdateRects = FULLSCREEN_UpdateRects; /* Default do nothing implementation */
+
 	if (this->SetColors == FULLSCREEN_SetColors) return; /* Already set up */
 
 	this->SetColors   = FULLSCREEN_SetColors;
-	this->UpdateRects = FULLSCREEN_UpdateRects;
 
 	this->FlipHWSurface = FULLSCREEN_FlipHWSurface;
 
@@ -322,11 +379,14 @@ static int FULLSCREEN_FlipHWSurface(_THIS, SDL_Surface *surface)
 	return(0);
 }
 
+/* Nothing to do if we are writing direct to hardware */
 static void FULLSCREEN_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 {
-   if (riscos_backbuffer && (this->screen->flags & SDL_DOUBLEBUF) == 0)
-   {
-      /* If not double buffered copy rectangles to main screen now */
+}
+
+/* Safe but slower Memory copy from our allocated back buffer */
+static void FULLSCREEN_UpdateRectsMemCpy(_THIS, int numrects, SDL_Rect *rects)
+{
       int j;
       char *to, *from;
       int pitch = this->screen->pitch;
@@ -344,8 +404,137 @@ static void FULLSCREEN_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
          }
          rects++;
       }
+}
+
+/* Use optimized assembler memory copy. Deliberately copies extra columns if
+   necessary to ensure the rectangle is word aligned. */
+static void FULLSCREEN_UpdateRects8bpp(_THIS, int numrects, SDL_Rect *rects)
+{
+   int j;
+   char *to, *from;
+   int pitch = this->screen->pitch;
+   int width_bytes;
+   int src_skip_bytes;
+
+   for (j = 0; j < numrects; j++)
+   {
+      from = this->hidden->bank[0] + rects->x + rects->y * pitch;
+      to  = this->hidden->bank[1] + rects->x + rects->y * pitch;
+      width_bytes = rects->w;
+      if ((int)from & 3)
+      {
+         int extra = ((int)from & 3);
+         from -= extra;
+         to -= extra;
+         width_bytes += extra;
+      }
+      if (width_bytes & 3) width_bytes += 4 - (width_bytes & 3);
+      src_skip_bytes = pitch - width_bytes;
+               
+      RISCOS_Put32(to, (width_bytes >> 2), pitch, (int)rects->h, from, src_skip_bytes);
+      rects++;
    }
 }
+
+/* Use optimized assembler memory copy. Deliberately copies extra columns if
+   necessary to ensure the rectangle is word aligned. */
+static void FULLSCREEN_UpdateRects16bpp(_THIS, int numrects, SDL_Rect *rects)
+{
+   int j;
+   char *to, *from;
+   int pitch = this->screen->pitch;
+   int width_bytes;
+   int src_skip_bytes;
+
+   for (j = 0; j < numrects; j++)
+   {
+      from = this->hidden->bank[0] + (rects->x << 1) + rects->y * pitch;
+      to  = this->hidden->bank[1] + (rects->x << 1) + rects->y * pitch;
+      width_bytes = (((int)rects->w) << 1);
+      if ((int)from & 3)
+      {
+         from -= 2;
+         to -= 2;
+         width_bytes += 2;
+      }
+      if (width_bytes & 3) width_bytes += 2;
+      src_skip_bytes = pitch - width_bytes;
+               
+      RISCOS_Put32(to, (width_bytes >> 2), pitch, (int)rects->h, from, src_skip_bytes);
+      rects++;
+   }
+}
+
+/* Use optimized assembler memory copy. 32 bpp modes are always word aligned */
+static void FULLSCREEN_UpdateRects32bpp(_THIS, int numrects, SDL_Rect *rects)
+{
+   int j;
+   char *to, *from;
+   int pitch = this->screen->pitch;
+   int width;
+
+   for (j = 0; j < numrects; j++)
+   {
+      from = this->hidden->bank[0] + (rects->x << 2) + rects->y * pitch;
+      to  = this->hidden->bank[1] + (rects->x << 2) + rects->y * pitch;
+      width = (int)rects->w ;
+               
+      RISCOS_Put32(to, width, pitch, (int)rects->h, from, pitch - (width << 2));
+      rects++;
+   }
+}
+
+/* Use operating system sprite plots. Currently this is much slower than the
+   other variants however accelerated sprite plotting can be seen on the horizon
+   so this prepares for it. */
+static void FULLSCREEN_UpdateRectsOS(_THIS, int numrects, SDL_Rect *rects)
+{
+   _kernel_swi_regs regs;
+   _kernel_oserror *err;
+   int j;
+   int y;
+
+   regs.r[0] = 28 + 512;
+   regs.r[1] = (unsigned int)this->hidden->alloc_bank;
+   regs.r[2] = (unsigned int)this->hidden->alloc_bank+16;
+   regs.r[5] = 0;
+
+   for (j = 0; j < numrects; j++)
+   {
+      y = this->screen->h - rects->y; /* top of clipping region */
+      _kernel_oswrch(24); /* Set graphics clip region */
+      _kernel_oswrch((rects->x << this->hidden->xeig) & 0xFF); /* left */
+      _kernel_oswrch(((rects->x << this->hidden->xeig) >> 8) & 0xFF);
+      _kernel_oswrch(((y - rects->h) << this->hidden->yeig) & 0xFF); /* bottom */
+      _kernel_oswrch((((y - rects->h) << this->hidden->yeig)>> 8) & 0xFF);
+      _kernel_oswrch(((rects->x + rects->w - 1) << this->hidden->xeig) & 0xFF); /* right */
+      _kernel_oswrch((((rects->x + rects->w - 1)<< this->hidden->xeig) >> 8) & 0xFF);
+      _kernel_oswrch(((y-1) << this->hidden->yeig) & 0xFF); /* top */
+      _kernel_oswrch((((y-1) << this->hidden->yeig) >> 8) & 0xFF);
+
+      regs.r[3] = 0;
+      regs.r[4] = 0;
+
+      if ((err = _kernel_swi(OS_SpriteOp, &regs, &regs)) != 0)
+      {
+         printf("OS_SpriteOp failed \n%s\n",err->errmess);
+      }
+
+      rects++;
+
+      /* Reset to full screen clipping */
+      _kernel_oswrch(24); /* Set graphics clip region */
+      _kernel_oswrch(0); /* left */
+      _kernel_oswrch(0);
+      _kernel_oswrch(0); /* bottom */
+      _kernel_oswrch(0);
+      _kernel_oswrch(((this->screen->w-1) << this->hidden->xeig) & 0xFF); /* right */
+      _kernel_oswrch((((this->screen->w-1) << this->hidden->xeig) >> 8) & 0xFF);
+      _kernel_oswrch(((this->screen->h-1) << this->hidden->yeig) & 0xFF); /* top */
+      _kernel_oswrch((((this->screen->h-1) << this->hidden->yeig) >> 8) & 0xFF);
+   }
+}
+
 
 int FULLSCREEN_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 {
@@ -573,7 +762,7 @@ int FULLSCREEN_ToggleFromWimp(_THIS)
    {
        char *buffer = this->hidden->alloc_bank; /* This is start of sprite data */
        /* Support back buffer mode only */
-       riscos_backbuffer = 1;
+       if (riscos_backbuffer == 0) riscos_backbuffer = 1;
 
        FULLSCREEN_SetupBanks(this);
 

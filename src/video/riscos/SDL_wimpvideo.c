@@ -21,10 +21,10 @@
 */
 
 /*
-     File added by Alan Buckley (alan_baa@hotmail.com) for RISCOS compatability
+     File added by Alan Buckley (alan_baa@hotmail.com) for RISC OS compatability
 	 27 March 2003
 
-     Implements RISCOS wimp display.
+     Implements RISC OS Wimp display.
 */
 
 #include <stdio.h>
@@ -486,7 +486,7 @@ int WIMP_ToggleFromFullScreen(_THIS)
       WIMP_SetDeviceMode(this);
       WIMP_SetupPlotInfo(this);
 
-      riscos_backbuffer = 1;
+      if (riscos_backbuffer == 0) riscos_backbuffer = 1;
 
       if (buffer && old_alloc_bank) free(old_alloc_bank);
 

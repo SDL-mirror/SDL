@@ -6,6 +6,7 @@ libvideo_riscos_la_SOURCES = $(CGX_SRCS)
 
 # The SDL RISC OS video driver sources
 CGX_SRCS = 				\
+	SDL_riscosASM.s			\
 	SDL_riscosevents.c		\
 	SDL_riscosevents_c.h		\
 	SDL_riscosFullScreenVideo.c	\

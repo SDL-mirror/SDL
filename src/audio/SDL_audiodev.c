@@ -27,7 +27,7 @@ static char rcsid =
 
 /* Get the name of the audio device we use for output */
 
-#if defined(unix) || defined(__unix__)
+#if defined(unix) || defined(__unix__) || defined(__riscos__)
 
 #include <stdlib.h>
 #include <stdio.h>

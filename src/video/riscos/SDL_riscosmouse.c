@@ -21,7 +21,7 @@
 */
 
 /*
-     File added by Alan Buckley (alan_baa@hotmail.com) for RISCOS compatability
+     File added by Alan Buckley (alan_baa@hotmail.com) for RISC OS compatability
 	 27 March 2003
 
      Implements mouse cursor shape definitions and positioning

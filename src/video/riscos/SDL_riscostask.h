@@ -21,7 +21,7 @@
 */
 
 /*
-    This file added by Alan Buckley (alan_baa@hotmail.com) to support RISCOS 
+    This file added by Alan Buckley (alan_baa@hotmail.com) to support RISC OS 
 	26 March 2003
 */
 

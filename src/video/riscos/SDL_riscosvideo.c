@@ -21,10 +21,10 @@
 */
 
 /*
-     File added by Alan Buckley (alan_baa@hotmail.com) for RISCOS compatability
+     File added by Alan Buckley (alan_baa@hotmail.com) for RISC OS compatability
 	 23 March 2003
 
-     Implements RISCOS display device management.
+     Implements RISC OS display device management.
 	 Routines for full screen and wimp modes are split
 	 into other source files.
 */
@@ -83,7 +83,7 @@ static int RISCOS_LockHWSurface(_THIS, SDL_Surface *surface);
 static void RISCOS_UnlockHWSurface(_THIS, SDL_Surface *surface);
 static void RISCOS_FreeHWSurface(_THIS, SDL_Surface *surface);
 
-/* RISCOS driver bootstrap functions */
+/* RISC OS driver bootstrap functions */
 
 static int RISCOS_Available(void)
 {
@@ -150,16 +150,11 @@ static SDL_VideoDevice *RISCOS_CreateDevice(int devindex)
 	/* Set other entries for fullscreen mode */
 	FULLSCREEN_SetDeviceMode(device);
 
-/* Turn off unixlib file name translation - we hope people have initialised
-   the video system before they try to read any files */
-/*        __riscosify_control = __RISCOSIFY_NO_PROCESS;
-*//* We may be able to eventually replace our processing of filenames with the correct flags above*/
-
 	return device;
 }
 
 VideoBootStrap RISCOS_bootstrap = {
-	RISCOSVID_DRIVER_NAME, "RISCOS video driver",
+	RISCOSVID_DRIVER_NAME, "RISC OS video driver",
 	RISCOS_Available, RISCOS_CreateDevice
 };
 

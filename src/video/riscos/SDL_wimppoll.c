@@ -21,7 +21,7 @@
 */
 
 /*
-     File added by Alan Buckley (alan_baa@hotmail.com) for RISCOS compatability
+     File added by Alan Buckley (alan_baa@hotmail.com) for RISC OS compatability
 	 27 March 2003
 
      Implements Pumping of events and WIMP polling
@@ -33,6 +33,7 @@
 #include "SDL_events_c.h"
 #include "SDL_riscosvideo.h"
 #include "SDL_riscosevents_c.h"
+#include "SDL_riscosmouse_c.h"
 #include "SDL_timer_c.h"
 
 #include "memory.h"
@@ -61,8 +62,6 @@ extern void WIMP_PollMouse(_THIS);
 extern void RISCOS_PollKeyboard();
 
 #ifdef DISABLE_THREADS
-extern void DRenderer_FillBuffers();
-
 /* Timer running function */
 extern void RISCOS_CheckTimer();
 
@@ -85,7 +84,6 @@ void WIMP_PumpEvents(_THIS)
 	if (hasFocus) RISCOS_PollKeyboard();
 	if (mouseInWindow) WIMP_PollMouse(this);
 #ifdef DISABLE_THREADS
-	DRenderer_FillBuffers();
 	if (SDL_timer_running) RISCOS_CheckTimer();
 #endif
 }
@@ -329,8 +327,6 @@ void RISCOS_BackgroundTasks(void)
 		WIMP_Poll(current_video, 0);
 	}
 #ifdef DISABLE_THREADS
-	/* Keep sound buffers running */
-	DRenderer_FillBuffers();
 	if (SDL_timer_running) RISCOS_CheckTimer();
 #endif
 }

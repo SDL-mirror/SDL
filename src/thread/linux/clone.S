@@ -1,7 +1,7 @@
 
 /* Taken with thanks from LinuxThreads 0.6 */
 
-/* This is no longer necessary with glibc-2.1, which has it's own clone() */
+/* This is no longer necessary with glibc-2.1, which has its own clone() */
 #ifdef linux
 /* Look to see if glibc is available, and if so, what version */
 #include <features.h>

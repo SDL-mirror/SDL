@@ -21,7 +21,7 @@
 */
 
 /*
-     File added by Alan Buckley (alan_baa@hotmail.com) for RISCOS compatability
+     File added by Alan Buckley (alan_baa@hotmail.com) for RISC OS compatability
 	 27 March 2003
 
      Implements keyboard setup, event pump and keyboard and mouse polling
@@ -43,10 +43,10 @@
 #include "kernel.h"
 #include "swis.h"
 
-/* The translation table from a RISCOS internal key numbers to a SDL keysym */
+/* The translation table from a RISC OS internal key numbers to a SDL keysym */
 static SDLKey RO_keymap[SDLK_LAST];
 
-/* RISCOS Key codes */
+/* RISC OS Key codes */
 #define ROKEY_SHIFT 0
 #define ROKEY_CTRL  1
 #define ROKEY_ALT   2
@@ -90,7 +90,7 @@ void FULLSCREEN_PumpEvents(_THIS)
 	RISCOS_PollKeyboard();
 	RISCOS_PollMouse(this);
 #ifdef DISABLE_THREADS
-	DRenderer_FillBuffers();
+//	DRenderer_FillBuffers();
 	if (SDL_timer_running) RISCOS_CheckTimer();
 #endif
 }
@@ -262,9 +262,11 @@ void RISCOS_PollMouseHelper(_THIS, int fullscreen)
        Sint16 new_x = regs.r[0]; /* Initialy get as OS units */
        Sint16 new_y = regs.r[1];
 
-/* Discard mouse events until the let go of the mouse after starting */
-       if (starting && regs.r[2] != 0) return;
-       else starting = 0;
+       /* Discard mouse events until they let go of the mouse after starting */
+       if (starting && regs.r[2] != 0)
+         return;
+       else
+         starting = 0;
 
        if (new_x != last_x || new_y != last_y || last_buttons != regs.r[2])
        {

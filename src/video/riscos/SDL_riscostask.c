@@ -21,7 +21,7 @@
 */
 
 /*
-    This file added by Alan Buckley (alan_baa@hotmail.com) to support RISCOS 
+    This file added by Alan Buckley (alan_baa@hotmail.com) to support RISC OS 
 	26 March 2003
 
 	File includes routines for:
@@ -44,7 +44,7 @@
 pthread_t main_thread;
 #endif
 
-/* RISCOS variables */
+/* RISC OS variables */
 
 static int task_handle = 0;
 static int wimp_version = 0;
@@ -84,7 +84,7 @@ static void dump_mode()
 
 /******************************************************************
 
- Initialise as RISCOS Wimp task
+ Initialise as RISC OS Wimp task
 
 *******************************************************************/
 
@@ -169,7 +169,7 @@ void RISCOS_ExitTask()
 		   there is a variable set up in the form SDL$<name>$TaskName
 		   in which case the value of this variable will be used.
 
-		   Now also gets other riscos configuration varibles
+		   Now also gets other RISC OS configuration varibles
                 SDL$<name>$BackBuffer - set to 1 to use a system memory backbuffer in fullscreen mode
 						    so updates wait until a call to SDL_UpdateRects. (default 0)
 						    This is required for programmes where they have assumed this is
@@ -226,7 +226,7 @@ int RISCOS_GetTaskName(char *task_name)
 
 	   if (*p)
 	   {
-		   /* Read variables that effect the RISCOS SDL engine for this task */
+		   /* Read variables that effect the RISC OS SDL engine for this task */
 		   env_var = malloc(strlen(p) + 18); /* 18 is larger than the biggest variable name */
 		   if (env_var)
 		   {
@@ -246,7 +246,7 @@ int RISCOS_GetTaskName(char *task_name)
 			   strcat(env_var, "$BackBuffer");
 
 			   env_val = getenv(env_var);
-			   if (env_val && strcmp(env_val,"1") == 0) riscos_backbuffer = 1;
+			   if (env_val) riscos_backbuffer = atoi(env_val);
 
 			   strcpy(env_var, "SDL$");
 			   strcat(env_var, p);

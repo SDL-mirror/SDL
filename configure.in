@@ -2644,7 +2644,7 @@ case "$target" in
         # MiNT does not define "unix"
         CFLAGS="$CFLAGS -Dunix"
         ;;
-    *-*-riscos)
+    *-riscos)
         ARCH=riscos
         # Set up files for the video library
         if test x$enable_video = xyes; then
@@ -2653,8 +2653,11 @@ case "$target" in
         fi
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS riscos"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS riscos/libaudio_riscos.la"
+            CFLAGS="$CFLAGS -DOSS_SUPPORT"
+            AUDIO_SUBDIRS="$AUDIO_SUBDIRS dsp"
+            AUDIO_DRIVERS="$AUDIO_DRIVERS dsp/libaudio_dsp.la"
+            AUDIO_SUBDIRS="$AUDIO_SUBDIRS dma"
+            AUDIO_DRIVERS="$AUDIO_DRIVERS dma/libaudio_dma.la"
         fi
         # Set up files for the joystick library
         if test x$enable_joystick = xyes; then
@@ -2684,7 +2687,7 @@ case "$target" in
             COPY_ARCH_SRC(src/timer, riscos, SDL_systimer.c)
         fi
 
-        CFLAGS="$CFLAGS -DENABLE_RISCOS -DDRENDERER_SUPPORT"
+        CFLAGS="$CFLAGS -DENABLE_RISCOS"
 
         SYSTEM_LIBS="$SYSTEM_LIBS -ljpeg -ltiff -lpng -lz"
         ;;
@@ -2859,7 +2862,6 @@ src/audio/nas/Makefile
 src/audio/nto/Makefile
 src/audio/openbsd/Makefile
 src/audio/paudio/Makefile
-src/audio/riscos/Makefile
 src/audio/sun/Makefile
 src/audio/ums/Makefile
 src/audio/windib/Makefile

@@ -140,12 +140,12 @@ struct SDL_SysWMmsg {
 	int pollBlock[64];
 };
 
-/* The RISCOS custom window manager information structure */
+/* The RISC OS custom window manager information structure */
 typedef struct SDL_SysWMinfo {
 	SDL_version version;
 	int wimpVersion;    /* Wimp version running under */
-	int taskHandle;     /* The RISCOS task handle */
-	int window;			/* The RISCOS display window */
+	int taskHandle;     /* The RISC OS task handle */
+	int window;		/* The RISC OS display window */
 } SDL_SysWMinfo;
 
 #elif defined(__QNXNTO__)
