@@ -77,7 +77,7 @@ struct SDL_PrivateGLData {
 	 ( Display* dpy,
 	   GLXDrawable drawable );
 
-    const char (*glXQueryExtensionsString)
+    const char *(*glXQueryExtensionsString)
 	    ( Display* dpy,
 	      int screen);
 

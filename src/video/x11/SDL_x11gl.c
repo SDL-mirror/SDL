@@ -441,7 +441,7 @@ int X11_GL_LoadLibrary(_THIS, const char* path)
 	this->gl_data->glXGetConfig =
 		(int (*)(Display *, XVisualInfo *, int, int *)) dlsym(handle, "glXGetConfig");
 	this->gl_data->glXQueryExtensionsString =
-		(const char (*)(Display *, int)) dlsym(handle, "glXQueryExtensionsString");
+		(const char *(*)(Display *, int)) dlsym(handle, "glXQueryExtensionsString");
 	
 	/* We don't compare below for this in case we're not using Mesa. */
 	this->gl_data->glXReleaseBuffersMESA =
