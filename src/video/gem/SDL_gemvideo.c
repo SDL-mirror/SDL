@@ -520,11 +520,11 @@ static void GEM_ClearScreen(_THIS)
 static void GEM_LockScreen(_THIS)
 {
 	if (!GEM_locked) {
-		/* Reserve memory space, used to be sure of compatibility */
-		form_dial( FMD_START, 0,0,0,0, 0,0,VDI_w,VDI_h);
 		/* Lock AES */
 		wind_update(BEG_UPDATE);
 		wind_update(BEG_MCTRL);
+		/* Reserve memory space, used to be sure of compatibility */
+		form_dial( FMD_START, 0,0,0,0, 0,0,VDI_w,VDI_h);
 
 		GEM_locked=SDL_TRUE;
 	}
