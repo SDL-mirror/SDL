@@ -712,10 +712,12 @@ static void handle_mouse(_THIS)
 				    case 0x02: /* DX = -1 */
 					break;
 				    case 0x0F: /* DY = +1 (map button 4) */
-					button |= (1<<3);
+                                       FB_vgamousecallback(button | (1<<3),
+                                                           1, 0, 0);
 					break;
 				    case 0x01: /* DY = -1 (map button 5) */
-					button |= (1<<4);
+                                       FB_vgamousecallback(button | (1<<4),
+                                                           1, 0, 0);
 					break;
 				}
 				break;
