@@ -992,6 +992,9 @@ static int XBIOS_GL_MakeCurrent(_THIS)
 		return -1;
 	}
 
+	/* OSMesa draws upside down */
+	OSMesaPixelStore(OSMESA_Y_UP, 0);
+
 	return 0;
 }
 
