@@ -59,6 +59,17 @@ int SDL_MouseInit(void)
 	return(0);
 }
 
+/* We lost the mouse, so post button up messages for all pressed buttons */
+void SDL_ResetMouse(void)
+{
+	int i;
+	for ( i = 0; i < sizeof(SDL_ButtonState)*8; ++i ) {
+		if ( SDL_ButtonState & SDL_BUTTON(i) ) {
+			SDL_PrivateMouseButton(SDL_RELEASED, i, 0, 0);
+		}
+	}
+}
+
 Uint8 SDL_GetMouseState (int *x, int *y)
 {
 	if ( x )

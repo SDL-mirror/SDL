@@ -221,33 +221,6 @@ static int DX5_DInputInit(_THIS)
 	return(0);
 }
 
-/* Change cooperative level based on whether or not we are fullscreen */
-void DX5_DInputReset(_THIS, int fullscreen)
-{
-	DWORD level;
-	int i;
-	HRESULT result;
-
-	for ( i=0; i<MAX_INPUTS; ++i ) {
-		if ( SDL_DIdev[i] != NULL ) {
-			if ( fullscreen ) {
-				level = inputs[i].raw_level;
-			} else {
-				level = inputs[i].win_level;
-			}
-			IDirectInputDevice2_Unacquire(SDL_DIdev[i]);
-			result = IDirectInputDevice2_SetCooperativeLevel(
-					SDL_DIdev[i], SDL_Window, level);
-			IDirectInputDevice2_Acquire(SDL_DIdev[i]);
-			if ( result != DI_OK ) {
-				SetDIerror(
-			"DirectInputDevice::SetCooperativeLevel", result);
-			}
-		}
-	}
-	mouse_lost = 1;
-}
-
 /* Clean up DirectInput */
 static void DX5_DInputQuit(_THIS)
 {
@@ -396,10 +369,10 @@ static void handle_mouse(const int numevents, DIDEVICEOBJECTDATA *ptrbuf)
 					yrel = 0;
 				}
 				if((int)ptrbuf[i].dwData > 0)
-					button = 4;
+					button = SDL_BUTTON_WHEELUP;
 				else
-					button = 5;
-					posted = SDL_PrivateMouseButton(
+					button = SDL_BUTTON_WHEELDOWN;
+				posted = SDL_PrivateMouseButton(
 						SDL_PRESSED, button, 0, 0);
 				posted |= SDL_PrivateMouseButton(
 						SDL_RELEASED, button, 0, 0);
@@ -543,7 +516,7 @@ LONG
    1 if there was input, 0 if there was no input, or -1 if the application has
    posted a quit message.
 */
-static int DX5_CheckInput(_THIS, int timeout)
+static int DX5_CheckInput(_THIS, int timeout, BOOL processInput)
 {
 	MSG msg;
 	int      i;
@@ -602,7 +575,7 @@ static int DX5_CheckInput(_THIS, int timeout)
 							evtbuf, &numevents, 0);
 		}
 		/* Handle the events */
-		if ( result == DI_OK ) {
+		if ( result == DI_OK && processInput ) {
 			/* Note: This can post multiple events to event queue
 			 */
 			(*SDL_DIfun[event])((int)numevents, evtbuf);
@@ -623,10 +596,40 @@ static int DX5_CheckInput(_THIS, int timeout)
 	return(0);
 }
 
+/* Change cooperative level based on whether or not we are fullscreen */
+void DX5_DInputReset(_THIS, int fullscreen)
+{
+	DWORD level;
+	int i;
+	HRESULT result;
+
+	for ( i=0; i<MAX_INPUTS; ++i ) {
+		if ( SDL_DIdev[i] != NULL ) {
+			if ( fullscreen ) {
+				level = inputs[i].raw_level;
+			} else {
+				level = inputs[i].win_level;
+			}
+			IDirectInputDevice2_Unacquire(SDL_DIdev[i]);
+			result = IDirectInputDevice2_SetCooperativeLevel(
+					SDL_DIdev[i], SDL_Window, level);
+			IDirectInputDevice2_Acquire(SDL_DIdev[i]);
+			if ( result != DI_OK ) {
+				SetDIerror(
+			"DirectInputDevice::SetCooperativeLevel", result);
+			}
+		}
+	}
+	mouse_lost = 1;
+
+	/* Flush pending input */
+	DX5_CheckInput(this, 0, FALSE);
+}
+
 void DX5_PumpEvents(_THIS)
 {
 	/* Wait for messages and DirectInput */
-	while ( DX5_CheckInput(this, 0) > 0 ) {
+	while ( DX5_CheckInput(this, 0, TRUE) > 0 ) {
 		/* Loop and check again */;
 	}
 }

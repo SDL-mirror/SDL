@@ -63,7 +63,7 @@ extern int SDL_PrivateQuit(void);
 extern int SDL_PrivateSysWMEvent(SDL_SysWMmsg *message);
 
 /* Used by the activity event handler to remove mouse focus */
-extern void SDL_MouseFocus(int focus);
+extern void SDL_ResetMouse(void);
 
 /* Used by the activity event handler to remove keyboard focus */
 extern void SDL_ResetKeyboard(void);
