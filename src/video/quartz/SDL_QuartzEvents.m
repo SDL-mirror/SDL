@@ -583,6 +583,16 @@ static void QZ_PumpEvents (_THIS)
                         
                         QZ_PrivateWarpCursor (this, p.x, p.y);
                     }
+                    else
+                    if ( !isInGameWin && (SDL_GetAppState() & SDL_APPMOUSEFOCUS) ) {
+                    
+                        SDL_PrivateAppActive (0, SDL_APPMOUSEFOCUS);
+                    }
+                    else
+                    if ( isInGameWin && !(SDL_GetAppState() & SDL_APPMOUSEFOCUS) ) {
+                    
+                        SDL_PrivateAppActive (1, SDL_APPMOUSEFOCUS);
+                    }
                     break;
                 case NSScrollWheel:
                     if ( isInGameWin ) {

@@ -31,6 +31,9 @@ static void QZ_SetPortAlphaOpaque () {
 - (void)miniaturize:(id)sender;
 - (void)display;
 - (void)setFrame:(NSRect)frameRect display:(BOOL)flag;
+- (void)appDidHide:(NSNotification*)note;
+- (void)appDidUnhide:(NSNotification*)note;
+- (id)initWithContentRect:(NSRect)contentRect styleMask:(unsigned int)styleMask backing:(NSBackingStoreType)backingType defer:(BOOL)flag;
 @end
 
 @implementation SDL_QuartzWindow
@@ -51,6 +54,9 @@ static void QZ_SetPortAlphaOpaque () {
         QZ_SetPortAlphaOpaque ();
     }
     
+    /* window is hidden now */
+    SDL_PrivateAppActive (0, SDL_APPACTIVE);
+    
     [ super miniaturize:sender ];
 }
 
@@ -63,6 +69,9 @@ static void QZ_SetPortAlphaOpaque () {
     */
     if ( (SDL_VideoSurface->flags & SDL_OPENGL) == 0)
         QZ_SetPortAlphaOpaque ();
+
+    /* window is visible again */
+    SDL_PrivateAppActive (1, SDL_APPACTIVE);
 }
 
 - (void)setFrame:(NSRect)frameRect display:(BOOL)flag
@@ -98,6 +107,28 @@ static void QZ_SetPortAlphaOpaque () {
             UnlockPortBits ( [ window_view qdPort ] );
         }
     }
+}
+
+- (void)appDidHide:(NSNotification*)note
+{
+    SDL_PrivateAppActive (0, SDL_APPACTIVE);
+}
+
+- (void)appDidUnhide:(NSNotification*)note
+{
+    SDL_PrivateAppActive (1, SDL_APPACTIVE);
+}
+
+- (id)initWithContentRect:(NSRect)contentRect styleMask:(unsigned int)styleMask backing:(NSBackingStoreType)backingType defer:(BOOL)flag
+{
+    /* Make our window subclass receive these application notifications */
+    [ [ NSNotificationCenter defaultCenter ] addObserver:self
+        selector:@selector(appDidHide:) name:NSApplicationDidHideNotification object:NSApp ];
+    
+    [ [ NSNotificationCenter defaultCenter ] addObserver:self
+        selector:@selector(appDidUnhide:) name:NSApplicationDidUnhideNotification object:NSApp ];
+        
+    return [ super initWithContentRect:contentRect styleMask:styleMask backing:backingType defer:flag ];
 }
 
 @end
