@@ -271,17 +271,6 @@ static int  QZ_IconifyWindow (_THIS) {
         return 0;
     }
 }
-static int  QZ_IconifyWindow (_THIS) { 
-
-    if ( ! [ qz_window isMiniaturized ] ) {
-        [ qz_window miniaturize:nil ];
-        return 1;
-    }
-    else {
-        SDL_SetError ("Quartz window already iconified");
-        return 0;
-    }
-}
 
 /*
 static int  QZ_GetWMInfo  (_THIS, SDL_SysWMinfo *info) { 
