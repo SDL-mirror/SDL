@@ -1,3 +1,8 @@
+Date: Sun, 16 Jun 2002 00:59:13 -0300
+From: Travis <smallfri@bigfoot.com>
+To: slouken@libsdl.org
+Subject: NTO Audio Fixes
+
 /*
     SDL - Simple DirectMedia Layer
     Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002  Sam Lantinga
@@ -20,10 +25,6 @@
     slouken@libsdl.org
 */
 
-
-
-/* Allow access to a raw mixing buffer */
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -35,6 +36,7 @@
 #include <sys/time.h>
 #include <sched.h>
 #include <sys/asoundlib.h>
+#include <sys/select.h>
 
 #include "SDL_audio.h"
 #include "SDL_error.h"
@@ -46,19 +48,15 @@
 /* The tag name used by NTO audio */
 #define DRIVER_NAME         "nto"
 
-/* default card and device numbers as listed in dev/snd */
-static int card_no = 0;
-static int device_no = 0;
-
 /* default channel communication parameters */
 #define DEFAULT_CPARAMS_RATE 22050
 #define DEFAULT_CPARAMS_VOICES 1
-#define DEFAULT_CPARAMS_FRAG_SIZE 4096  //was 512
+#define DEFAULT_CPARAMS_FRAG_SIZE 4096
 #define DEFAULT_CPARAMS_FRAGS_MIN 1
 #define DEFAULT_CPARAMS_FRAGS_MAX 1
 
 /* Open the audio device for playback, and don't block if busy */
-#define OPEN_FLAGS	SND_PCM_OPEN_PLAYBACK
+#define OPEN_FLAGS SND_PCM_OPEN_PLAYBACK
 
 /* Audio driver functions */
 static int NTO_OpenAudio(_THIS, SDL_AudioSpec *spec);
@@ -68,8 +66,8 @@ static Uint8 *NTO_GetAudioBuf(_THIS);
 static void NTO_CloseAudio(_THIS);
 
 static snd_pcm_channel_status_t cstatus;
-static	snd_pcm_channel_params_t cparams;
-static	snd_pcm_channel_setup_t  csetup;
+static snd_pcm_channel_params_t cparams;
+static snd_pcm_channel_setup_t  csetup;
 
 /* PCM transfer channel parameters initialize function */
 static void init_pcm_cparams(snd_pcm_channel_params_t* cparams)
@@ -78,7 +76,7 @@ static void init_pcm_cparams(snd_pcm_channel_params_t* cparams)
 
 	cparams->channel = SND_PCM_CHANNEL_PLAYBACK;
 	cparams->mode = SND_PCM_MODE_BLOCK;
-	cparams->start_mode = SND_PCM_START_DATA; //_FULL
+	cparams->start_mode = SND_PCM_START_DATA;
 	cparams->stop_mode  = SND_PCM_STOP_STOP;
 	cparams->format.format = SND_PCM_SFMT_S16_LE;
 	cparams->format.interleave = 1;
@@ -89,54 +87,48 @@ static void init_pcm_cparams(snd_pcm_channel_params_t* cparams)
 	cparams->buf.block.frags_max = DEFAULT_CPARAMS_FRAGS_MAX;
 }
 
-/* Audio driver bootstrap functions */
-
 static int Audio_Available(void)
-/*
-	See if we can open a nonblocking channel.
-	Return value '1' means we can.
-	Return value '0' means we cannot.
-*/
 {
+	/*
+		See if we can open a nonblocking channel.
+		Return value '1' means we can.
+		Return value '0' means we cannot.
+	*/
+
 	int available;
 	int rval;
 	snd_pcm_t *handle;
 
 	available = 0;
 	handle = NULL;
-	
-	//JB modified to take advantage of software mixer
-	rval = snd_pcm_open_preferred(&handle, &card_no, &device_no, OPEN_FLAGS);
 
-	if (rval >= 0)
-	{
-			available = 1;
+	rval = snd_pcm_open_preferred(&handle, NULL, NULL, OPEN_FLAGS);
 
-        if ((rval = snd_pcm_close(handle)) < 0)
-        {
-            SDL_SetError("snd_pcm_close failed: %s\n",snd_strerror(rval));
+	if (rval >= 0){
+		available = 1;
+		
+		if ((rval = snd_pcm_close(handle)) < 0){
+			SDL_SetError("snd_pcm_close failed: %s\n",snd_strerror(rval));
 			available = 0;
-        }
+		}
 	}
-	else
-	{
-	
-       SDL_SetError("snd_pcm_open failed: %s\n", snd_strerror(rval));
+	else{
+		SDL_SetError("snd_pcm_open failed: %s\n", snd_strerror(rval));
 	}
 	
-#ifdef DEBUG_AUDIO
+	#ifdef DEBUG_AUDIO
 	fprintf(stderr,"AudioAvailable rtns %d\n", available);
-#endif
+	#endif
+	
 	return(available);
 }
 
 static void Audio_DeleteDevice(SDL_AudioDevice *device)
 {
-#ifdef DEBUG_AUDIO
+	#ifdef DEBUG_AUDIO
 	fprintf(stderr,"Audio_DeleteDevice\n");
-#endif
+	#endif
 
-	
 	free(device->hidden);
 	free(device);
 }
@@ -144,15 +136,15 @@ static void Audio_DeleteDevice(SDL_AudioDevice *device)
 static SDL_AudioDevice *Audio_CreateDevice(int devindex)
 {
 	SDL_AudioDevice *this;
-#ifdef DEBUG_AUDIO
+	#ifdef DEBUG_AUDIO
 	fprintf(stderr,"Audio_CreateDevice\n");
-#endif
+	#endif
 	/* Initialize all variables that we clean on shutdown */
 	this = (SDL_AudioDevice *)malloc(sizeof(SDL_AudioDevice));
 	if ( this ) {
 		memset(this, 0, (sizeof *this));
 		this->hidden = (struct SDL_PrivateAudioData *)
-				malloc((sizeof *this->hidden));
+		malloc((sizeof *this->hidden));
 	}
 	if ( (this == NULL) || (this->hidden == NULL) ) {
 		SDL_OutOfMemory();
@@ -185,117 +177,92 @@ AudioBootStrap ALSA_bootstrap = {
 /* This function waits until it is possible to write a full sound buffer */
 static void NTO_WaitAudio(_THIS)
 {
-	int rval;
-	int totalbytes,roomavail;
-	/*we consider a full sound buffer to be of size pcm_len bytes */
-	
-#ifdef DEBUG_AUDIO
-	fprintf(stderr,"NTO_WaitAudio\n");
-#endif
+	fd_set wfds;
 
-	while(1)
+	FD_SET( audio_fd, &wfds );
+	switch( select( audio_fd + 1, NULL, &wfds, NULL, NULL ) )
 	{
-	memset(&cstatus, 0, sizeof(cstatus));
-	 if( (rval = snd_pcm_plugin_status(audio_handle, &cstatus)) < 0 )
-    {
-		 SDL_SetError("snd_pcm_plugin_status failed: %s\n", snd_strerror(rval));
-   	    return;
-	}	
-	
-	totalbytes = csetup.buf.block.frag_size *csetup.buf.block.frags;
-	roomavail = totalbytes - cstatus.count;
-
-#ifdef DEBUG_AUDIO
-	fprintf(stderr,"NTO_WaitAudio roomavail %d pcm_len %d\n",roomavail,pcm_len);
-#endif
-	
-	if ((roomavail >= pcm_len) || (roomavail < 0))
-		return;
-		
-		SDL_Delay(10);	
-	}	
-      
+		case -1:
+		case 0:
+			/* Error */
+			SDL_SetError("select() in NTO_WaitAudio failed: %s\n", strerror(errno));
+			break;
+		default:
+			if(FD_ISSET(audio_fd, &wfds))
+				return;
+	}
 }
-
-
 
 static void NTO_PlayAudio(_THIS)
 {
-    int written, rval;
-    int towrite;
+	int written, rval;
+	int towrite;
 
-#ifdef DEBUG_AUDIO
-		fprintf(stderr, "NTO_PlayAudio\n");
-#endif
+	#ifdef DEBUG_AUDIO
+	fprintf(stderr, "NTO_PlayAudio\n");
+	#endif
 
-	if( !this->enabled)
-	   return;
+	if( !this->enabled){
+		return;
+	}
 
 	towrite = pcm_len;
 	
-
-    /* Write the audio data, checking for EAGAIN (buffer full) and underrun */
-    do {
+	/* Write the audio data, checking for EAGAIN (buffer full) and underrun */
+	do {
 		written = snd_pcm_plugin_write(audio_handle, pcm_buf, towrite);
-#ifdef DEBUG_AUDIO
+		#ifdef DEBUG_AUDIO
 		fprintf(stderr, "NTO_PlayAudio: written = %d towrite = %d\n",written,towrite);
-#endif
-		if (written != towrite)
-		{
-	        if ((errno == EAGAIN) || (errno == EWOULDBLOCK))
-			{
-            	SDL_Delay(1);   /* Let a little CPU time go by and try to write again */
-#ifdef DEBUG_AUDIO
+		#endif
+		if (written != towrite){
+			if ((errno == EAGAIN) || (errno == EWOULDBLOCK)){
+				SDL_Delay(1);   /* Let a little CPU time go by and try to write again */
+				#ifdef DEBUG_AUDIO
 				fprintf(stderr, "errno == EAGAIN written %d\n", written);
+				#endif
 				towrite -= written; //we wrote some data
-#endif
 				continue;
-        	}		
-			else if((errno == EINVAL) || (errno == EIO))
-			{
-#ifdef DEBUG_AUDIO
-					if(errno == EIO)
-						fprintf(stderr,"snd_pcm_plugin_write failed EIO: %s\n", snd_strerror(written));	
-					if(errno == EINVAL)
-						fprintf(stderr,"snd_pcm_plugin_write failed EINVAL: %s\n", snd_strerror(written));	
-								
-#endif			
-			
-				  memset(&cstatus, 0, sizeof(cstatus));			
-		         if( (rval = snd_pcm_plugin_status(audio_handle, &cstatus)) < 0 )
-        		 {
-#ifdef DEBUG_AUDIO
+			}		
+			else if((errno == EINVAL) || (errno == EIO)){
+				if(errno == EIO){
+					#ifdef DEBUG_AUDIO
+					fprintf(stderr,"snd_pcm_plugin_write failed EIO: %s\n", snd_strerror(written));
+					#endif
+				}
+				if(errno == EINVAL){
+					#ifdef DEBUG_AUDIO
+					fprintf(stderr,"snd_pcm_plugin_write failed EINVAL: %s\n", snd_strerror(written));	
+					#endif
+				}
+				
+				memset(&cstatus, 0, sizeof(cstatus));
+				if( (rval = snd_pcm_plugin_status(audio_handle, &cstatus)) < 0 ){
+					#ifdef DEBUG_AUDIO
 					fprintf(stderr, "snd_pcm_plugin_status failed %s\n",snd_strerror(rval));
-#endif
-		            SDL_SetError("snd_pcm_plugin_status failed: %s\n", snd_strerror(rval));
-        		   return;
-		        }	
+					#endif
+					SDL_SetError("snd_pcm_plugin_status failed: %s\n", snd_strerror(rval));
+					return;
+				}	
 		        
-				if ( (cstatus.status == SND_PCM_STATUS_UNDERRUN) ||
-					(cstatus.status == SND_PCM_STATUS_READY) )
-				{
-#ifdef DEBUG_AUDIO
+				if ( (cstatus.status == SND_PCM_STATUS_UNDERRUN) || (cstatus.status == SND_PCM_STATUS_READY) ){
+					#ifdef DEBUG_AUDIO
 					fprintf(stderr, "buffer underrun\n");
-#endif
-					if ( (rval = snd_pcm_plugin_prepare (audio_handle,SND_PCM_CHANNEL_PLAYBACK)) < 0 )
-					{
-#ifdef DEBUG_AUDIO
+					#endif
+					if ( (rval = snd_pcm_plugin_prepare (audio_handle,SND_PCM_CHANNEL_PLAYBACK)) < 0 ){
+						#ifdef DEBUG_AUDIO
 						fprintf(stderr, "NTO_PlayAudio: prepare failed %s\n",snd_strerror(rval));
-#endif
+						#endif
 						SDL_SetError("snd_pcm_plugin_prepare failed: %s\n",snd_strerror(rval) );
 						return;
 					}
-					
 				}		        		
  				continue;
 			}
-			else
-			{
-#ifdef DEBUG_AUDIO
-						fprintf(stderr, "NTO_PlayAudio: snd_pcm_plugin_write failed unknown errno %d %s\n",errno, snd_strerror(rval));
-#endif
+			else{
+				#ifdef DEBUG_AUDIO
+				fprintf(stderr, "NTO_PlayAudio: snd_pcm_plugin_write failed unknown errno %d %s\n",errno, snd_strerror(rval));
+				#endif
 				return;
-			
 			}
 			
 		}
@@ -303,41 +270,39 @@ static void NTO_PlayAudio(_THIS)
 		{
 			towrite -= written; //we wrote all remaining data
 		}
-    } while ( (towrite > 0)  && (this->enabled) );
+	} while ( (towrite > 0)  && (this->enabled) );
 
-    /* If we couldn't write, assume fatal error for now */
-    if ( towrite != 0 ) {
-        this->enabled = 0;
-    }
+	/* If we couldn't write, assume fatal error for now */
+	if ( towrite != 0 ) {
+		this->enabled = 0;
+	}
 	return;
 }
 
 static Uint8 *NTO_GetAudioBuf(_THIS)
 {
- #ifdef DEBUG_AUDIO
-		fprintf(stderr, "NTO_GetAudioBuf: pcm_buf %X\n",(Uint8 *)pcm_buf);
-#endif
+	#ifdef DEBUG_AUDIO
+	fprintf(stderr, "NTO_GetAudioBuf: pcm_buf %X\n",(Uint8 *)pcm_buf);
+	#endif
 	return(pcm_buf);
 }
 
 static void NTO_CloseAudio(_THIS)
 {
 	int rval;
-	
-#ifdef DEBUG_AUDIO
-		fprintf(stderr, "NTO_CloseAudio\n");
-#endif
 
-	 this->enabled = 0;
+	#ifdef DEBUG_AUDIO
+	fprintf(stderr, "NTO_CloseAudio\n");
+	#endif
+
+	this->enabled = 0;
 
 	if ( audio_handle != NULL ) {
-		if ((rval = snd_pcm_plugin_flush(audio_handle,SND_PCM_CHANNEL_PLAYBACK)) < 0)
-		{
-        	SDL_SetError("snd_pcm_plugin_flush failed: %s\n",snd_strerror(rval));
+		if ((rval = snd_pcm_plugin_flush(audio_handle,SND_PCM_CHANNEL_PLAYBACK)) < 0){
+			SDL_SetError("snd_pcm_plugin_flush failed: %s\n",snd_strerror(rval));
 			return;
 		}
-		if ((rval = snd_pcm_close(audio_handle)) < 0)
-		{
+		if ((rval = snd_pcm_close(audio_handle)) < 0){
 			SDL_SetError("snd_pcm_close failed: %s\n",snd_strerror(rval));
 			return;
 		}
@@ -353,12 +318,12 @@ static int NTO_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	int twidth;
 	int found;
 
-#ifdef DEBUG_AUDIO
-		fprintf(stderr, "NTO_OpenAudio\n");
-#endif
+	#ifdef DEBUG_AUDIO
+	fprintf(stderr, "NTO_OpenAudio\n");
+	#endif
 	
 	audio_handle = NULL;
-	 this->enabled = 0;
+	this->enabled = 0;
 
 	if ( pcm_buf != NULL ) {
 		free((Uint8 *)pcm_buf); 
@@ -369,67 +334,51 @@ static int NTO_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	init_pcm_cparams(&cparams);
 
 	/* Open the audio device */
-	
-	rval = snd_pcm_open_preferred(&audio_handle, &card_no, &device_no, OPEN_FLAGS);
+	rval = snd_pcm_open_preferred(&audio_handle, NULL, NULL, OPEN_FLAGS);
 	if ( rval < 0 ) {
 		SDL_SetError("snd_pcm_open failed: %s\n", snd_strerror(rval));
 		return(-1);
 	}
 
-    /* set to nonblocking mode */
-    if ((rval = snd_pcm_nonblock_mode(audio_handle, 1))<0) //I assume 1 means on
-    {
-        SDL_SetError("snd_pcm_nonblock_mode failed: %s\n", snd_strerror(rval));
-        return(-1);
-    }
-
-    /* enable count status parameter */
-    if ((rval = snd_pcm_plugin_set_disable(audio_handle, PLUGIN_DISABLE_MMAP))<0)
-    {
-        SDL_SetError("snd_pcm_plugin_set_disable failed: %s\n", snd_strerror(rval));
-        return(-1);
-    }
-
+	/* enable count status parameter */
+	if ((rval = snd_pcm_plugin_set_disable(audio_handle, PLUGIN_DISABLE_MMAP))<0){
+		SDL_SetError("snd_pcm_plugin_set_disable failed: %s\n", snd_strerror(rval));
+		return(-1);
+	}
 
 	/* Try for a closest match on audio format */
 	format = 0;
- 	found = 0; // can't use format as SND_PCM_SFMT_U8 = 0 in nto
+ 	found = 0; /* can't use format as SND_PCM_SFMT_U8 = 0 in nto */
 	for ( test_format = SDL_FirstAudioFormat(spec->format);	!found ; ) 
-
 	{
-#ifdef DEBUG_AUDIO
+		#ifdef DEBUG_AUDIO
 		fprintf(stderr, "Trying format 0x%4.4x spec->samples %d\n", test_format,spec->samples);
-#endif
-			/* if match found set format to equivalent ALSA format */
-        switch ( test_format ) {
+		#endif
+		
+		/* if match found set format to equivalent ALSA format */
+		switch ( test_format ) {
 			case AUDIO_U8:
 				format = SND_PCM_SFMT_U8;
-				cparams.buf.block.frag_size = spec->samples * spec->channels;
 				found = 1;
 				break;
 			case AUDIO_S8:
 				format = SND_PCM_SFMT_S8;
-				cparams.buf.block.frag_size = spec->samples * spec->channels;
 				found = 1;
 				break;
 			case AUDIO_S16LSB:
 				format = SND_PCM_SFMT_S16_LE;
-				cparams.buf.block.frag_size = spec->samples*2 * spec->channels;
 				found = 1;
 				break;
 			case AUDIO_S16MSB:
 				format = SND_PCM_SFMT_S16_BE;
-				cparams.buf.block.frag_size = spec->samples*2 * spec->channels;
 				found = 1;
 				break;
 			case AUDIO_U16LSB:
 				format = SND_PCM_SFMT_U16_LE;
-				cparams.buf.block.frag_size = spec->samples*2 * spec->channels;
 				found = 1;
 				break;
 			case AUDIO_U16MSB:
 				format = SND_PCM_SFMT_U16_BE;
-				cparams.buf.block.frag_size = spec->samples*2 * spec->channels;
 				found = 1;
 				break;
 			default:
@@ -439,13 +388,13 @@ static int NTO_OpenAudio(_THIS, SDL_AudioSpec *spec)
 			test_format = SDL_NextAudioFormat();
 		}
 	}
-	
+
 	/* assumes test_format not 0 on success */
 	if ( test_format == 0 ) {
 		SDL_SetError("Couldn't find any hardware audio formats");
 		return(-1);
 	}
-	
+
 	spec->format = test_format;
 
 	/* Set the audio format */
@@ -454,11 +403,10 @@ static int NTO_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	/* Set mono or stereo audio (currently only two channels supported) */
 	cparams.format.voices = spec->channels;
 	
-#ifdef DEBUG_AUDIO
+	#ifdef DEBUG_AUDIO
 	fprintf(stderr,"intializing channels %d\n", cparams.format.voices);
-#endif
+	#endif
 
-	
 	/* Set rate */
 	cparams.format.rate = spec->freq ;
 
@@ -469,86 +417,81 @@ static int NTO_OpenAudio(_THIS, SDL_AudioSpec *spec)
 		return(-1);
 	}
 
-    /*  Make sure channel is setup right one last time */
-    memset( &csetup, 0, sizeof( csetup ) );
-    csetup.channel = SND_PCM_CHANNEL_PLAYBACK;
-    if ( snd_pcm_plugin_setup( audio_handle, &csetup ) < 0 )
-    {
-        SDL_SetError("Unable to setup playback channel\n" );
-        return(-1);
-    }
-    else
-    {
-#ifdef DEBUG_AUDIO
-        fprintf(stderr,"requested format: %d\n",cparams.format.format);
-        fprintf(stderr,"requested frag size: %d\n",cparams.buf.block.frag_size);
-        fprintf(stderr,"requested max frags: %d\n\n",cparams.buf.block.frags_max);
+	/*  Make sure channel is setup right one last time */
+	memset( &csetup, 0, sizeof( csetup ) );
+	csetup.channel = SND_PCM_CHANNEL_PLAYBACK;
+	if ( snd_pcm_plugin_setup( audio_handle, &csetup ) < 0 )
+	{
+		SDL_SetError("Unable to setup playback channel\n" );
+		return(-1);
+	}
+	else
+	{
+		#ifdef DEBUG_AUDIO
+		fprintf(stderr,"requested format: %d\n",cparams.format.format);
+		fprintf(stderr,"requested frag size: %d\n",cparams.buf.block.frag_size);
+		fprintf(stderr,"requested max frags: %d\n\n",cparams.buf.block.frags_max);
 
-        fprintf(stderr,"real format: %d\n", csetup.format.format );
-        fprintf(stderr,"real frag size : %d\n", csetup.buf.block.frag_size );
+		fprintf(stderr,"real format: %d\n", csetup.format.format );
+		fprintf(stderr,"real frag size : %d\n", csetup.buf.block.frag_size );
 		fprintf(stderr,"real max frags : %d\n", csetup.buf.block.frags_max );
-#endif // DEBUG_AUDIO
-    }
+		#endif
+	}
 
+	/*
+		Allocate memory to the audio buffer and initialize with silence (Note that
+		buffer size must be a multiple of fragment size, so find closest multiple)
+	*/
+	
+	twidth = snd_pcm_format_width(format);
+	if (twidth < 0) {
+		printf("snd_pcm_format_width failed\n");
+		twidth = 0;
+	}
 
-    /*  Allocate memory to the audio buffer and initialize with silence
-        (Note that buffer size must be a multiple of fragment size, so find closest multiple)
-    */
-    
-    twidth = snd_pcm_format_width(format);
-    if (twidth < 0) {
-        printf("snd_pcm_format_width failed\n");
-        twidth = 0;
-    }
-    
-#ifdef DEBUG_AUDIO
-    fprintf(stderr,"format is %d bits wide\n",twidth);
-#endif      
-    
-    pcm_len = spec->size ;
-    
-  
-#ifdef DEBUG_AUDIO    
-    fprintf(stderr,"pcm_len set to %d\n", pcm_len);
-#endif
-    
-    if (pcm_len == 0)
-    {
-        pcm_len = csetup.buf.block.frag_size;
-    }
-    
-    pcm_buf = (Uint8*)malloc(pcm_len);
-    if (pcm_buf == NULL) {
-        SDL_SetError("pcm_buf malloc failed\n");
-        return(-1);
-    }
-    memset(pcm_buf,spec->silence,pcm_len);
+	#ifdef DEBUG_AUDIO
+	fprintf(stderr,"format is %d bits wide\n",twidth);
+	#endif
 
-#ifdef DEBUG_AUDIO
+	pcm_len = spec->size ;
+	
+	#ifdef DEBUG_AUDIO
+	fprintf(stderr,"pcm_len set to %d\n", pcm_len);
+	#endif
+
+	if (pcm_len == 0){
+		pcm_len = csetup.buf.block.frag_size;
+	}
+
+	pcm_buf = (Uint8*)malloc(pcm_len);
+	if (pcm_buf == NULL) {
+		SDL_SetError("pcm_buf malloc failed\n");
+		return(-1);
+	}
+	memset(pcm_buf,spec->silence,pcm_len);
+
+	#ifdef DEBUG_AUDIO
 	fprintf(stderr,"pcm_buf malloced and silenced.\n");
-#endif
+	#endif
 
-    /* get the file descriptor */
-    if( (audio_fd = snd_pcm_file_descriptor(audio_handle, SND_PCM_CHANNEL_PLAYBACK)) < 0)
-    {
-       fprintf(stderr, "snd_pcm_file_descriptor failed with error code: %d\n", audio_fd);
-    }
+	/* get the file descriptor */
+	if( (audio_fd = snd_pcm_file_descriptor(audio_handle, SND_PCM_CHANNEL_PLAYBACK)) < 0){
+		fprintf(stderr, "snd_pcm_file_descriptor failed with error code: %d\n", audio_fd);
+	}
 
 	/* Trigger audio playback */
 	rval = snd_pcm_plugin_prepare( audio_handle, SND_PCM_CHANNEL_PLAYBACK);
 	if (rval < 0) {
-       SDL_SetError("snd_pcm_plugin_prepare failed: %s\n", snd_strerror (rval));
-       return(-1);
+		SDL_SetError("snd_pcm_plugin_prepare failed: %s\n", snd_strerror (rval));
+		return(-1);
 	}
-	
-	 this->enabled = 1;
-	 
+
+	this->enabled = 1;
+
 	/* Get the parent process id (we're the parent of the audio thread) */
 	parent = getpid();
 
 	/* We're ready to rock and roll. :-) */
 	return(0);
 }
-
-
 
