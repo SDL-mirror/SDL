@@ -740,42 +740,44 @@ static void DGA_FreeHWSurface(_THIS, SDL_Surface *surface)
 	vidmem_bucket *bucket, *freeable;
 
 	/* Look for the bucket in the current list */
-	bucket = (vidmem_bucket *)surface->hwdata;
-	if ( (bucket == NULL) || ! bucket->used ) {
-		return;
+	for ( bucket=&surfaces; bucket; bucket=bucket->next ) {
+		if ( bucket == (vidmem_bucket *)surface->hwdata ) {
+			break;
+		}
 	}
-
-	/* Add the memory back to the total */
+	if ( bucket && bucket->used ) {
+		/* Add the memory back to the total */
 #ifdef DGA_DEBUG
 	printf("Freeing bucket of %d bytes\n", bucket->size);
 #endif
-	surfaces_memleft += bucket->size;
+		surfaces_memleft += bucket->size;
 
-	/* Can we merge the space with surrounding buckets? */
-	bucket->used = 0;
-	if ( bucket->next && ! bucket->next->used ) {
+		/* Can we merge the space with surrounding buckets? */
+		bucket->used = 0;
+		if ( bucket->next && ! bucket->next->used ) {
 #ifdef DGA_DEBUG
 	printf("Merging with next bucket, for %d total bytes\n", bucket->size+bucket->next->size);
 #endif
-		freeable = bucket->next;
-		bucket->size += bucket->next->size;
-		bucket->next = bucket->next->next;
-		if ( bucket->next ) {
-			bucket->next->prev = bucket;
+			freeable = bucket->next;
+			bucket->size += bucket->next->size;
+			bucket->next = bucket->next->next;
+			if ( bucket->next ) {
+				bucket->next->prev = bucket;
+			}
+			free(freeable);
 		}
-		free(freeable);
-	}
-	if ( bucket->prev && ! bucket->prev->used ) {
+		if ( bucket->prev && ! bucket->prev->used ) {
 #ifdef DGA_DEBUG
 	printf("Merging with previous bucket, for %d total bytes\n", bucket->prev->size+bucket->size);
 #endif
-		freeable = bucket;
-		bucket->prev->size += bucket->size;
-		bucket->prev->next = bucket->next;
-		if ( bucket->next ) {
-			bucket->next->prev = bucket->prev;
+			freeable = bucket;
+			bucket->prev->size += bucket->size;
+			bucket->prev->next = bucket->next;
+			if ( bucket->next ) {
+				bucket->next->prev = bucket->prev;
+			}
+			free(freeable);
 		}
-		free(freeable);
 	}
 	surface->pixels = NULL;
 	surface->hwdata = NULL;
