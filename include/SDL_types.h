@@ -38,16 +38,26 @@ typedef enum {
 	SDL_FALSE = 0,
 	SDL_TRUE  = 1
 } SDL_bool;
+
+#ifdef H_MMBASIC /* mmbasic.h (Tru64 MME) */
+/* Some of the basic types are already defined in mmbasic.h */
+typedef signed char	Sint8;
+typedef signed short	Sint16;
+typedef signed int	Sint32;
+#else
 typedef unsigned char	Uint8;
 typedef signed char	Sint8;
 typedef unsigned short	Uint16;
 typedef signed short	Sint16;
 typedef unsigned int	Uint32;
 typedef signed int	Sint32;
+#endif
 
 /* Figure out how to support 64-bit datatypes */
 #if !defined(__STRICT_ANSI__)
-#if defined(__GNUC__) || defined(__MWERKS__) || defined(__SUNPRO_C) || defined(__DECC)
+#ifdef H_MMBASIC /* mmbasic.h (Tru64 MME) */
+#define SDL_HAS_64BIT_TYPE	long
+#elif defined(__GNUC__) || defined(__MWERKS__) || defined(__SUNPRO_C) || defined(__DECC)
 #define SDL_HAS_64BIT_TYPE	long long
 #elif defined(_MSC_VER) /* VC++ */
 #define SDL_HAS_64BIT_TYPE	__int64
