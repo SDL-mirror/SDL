@@ -454,7 +454,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 		return(NULL);
 	}
 
-	modeflags = (SDL_FULLSCREEN|SDL_HWPALETTE);
+	modeflags = SDL_FULLSCREEN;
 
 	/* Allocate needed buffers: simple/double buffer and shadow surface */
 	new_video_mode = XBIOS_videomodes[bpp][mode];
@@ -475,7 +475,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 		} else {
 			Atari_C2pConvert = Atari_C2pConvert8;
 		}
-		modeflags |= SDL_SWSURFACE;
+		modeflags |= SDL_SWSURFACE|SDL_HWPALETTE;
 	} else {
 		modeflags |= SDL_HWSURFACE;
 	}
