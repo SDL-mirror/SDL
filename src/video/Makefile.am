@@ -7,7 +7,7 @@ noinst_LTLIBRARIES = libvideo.la
 SUBDIRS = @VIDEO_SUBDIRS@
 DIST_SUBDIRS = dummy x11 dga nanox fbcon directfb vgl svga ggi aalib \
                wincommon windib windx5 \
-               maccommon macdsp macrom quartz \
+               maccommon macdsp macrom riscos quartz \
                bwindow ps2gs photon cybergfx epoc picogui \
                ataricommon xbios gem dc qtopia XFree86
 

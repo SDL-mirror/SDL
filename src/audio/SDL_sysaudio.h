@@ -156,6 +156,9 @@ extern AudioBootStrap DISKAUD_bootstrap;
 #ifdef ENABLE_DC
 extern AudioBootStrap DCAUD_bootstrap;
 #endif
+#ifdef DRENDERER_SUPPORT
+extern AudioBootStrap DRENDERER_bootstrap;
+#endif
 
 /* This is the current audio device */
 extern SDL_AudioDevice *current_audio;

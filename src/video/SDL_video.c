@@ -117,6 +117,9 @@ static VideoBootStrap *bootstrap[] = {
 #ifdef ENABLE_DC
 	&DC_bootstrap,
 #endif
+#ifdef ENABLE_RISCOS
+    &RISCOS_bootstrap,
+#endif
 #ifdef ENABLE_DUMMYVIDEO
 	&DUMMY_bootstrap,
 #endif

@@ -10,6 +10,7 @@ ARCH_SUBDIRS = $(srcdir)/amigaos \
                $(srcdir)/linux \
                $(srcdir)/macos \
                $(srcdir)/mint \
+               $(srcdir)/riscos \
                $(srcdir)/win32
 
 # Include the architecture-independent sources

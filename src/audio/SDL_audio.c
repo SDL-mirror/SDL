@@ -92,6 +92,9 @@ static AudioBootStrap *bootstrap[] = {
 #ifdef ENABLE_DC
 	&DCAUD_bootstrap,
 #endif
+#ifdef DRENDERER_SUPPORT
+	&DRENDERER_bootstrap,
+#endif
 	NULL
 };
 SDL_AudioDevice *current_audio = NULL;
@@ -381,7 +384,7 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 		return(-1);
 	}
 
-#ifdef macintosh
+#if defined(macintosh) || defined(__riscos__)
 	/* FIXME: Need to implement PPC interrupt asm for SDL_LockAudio() */
 #else
 #if defined(__MINT__) && !defined(ENABLE_THREADS)

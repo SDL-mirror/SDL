@@ -130,6 +130,23 @@ typedef struct {
 	HGLRC hglrc;			/* The OpenGL context, if any */
 } SDL_SysWMinfo;
 
+#elif defined(__riscos__)
+
+/* RISC OS custom event structure */
+struct SDL_SysWMmsg {
+	SDL_version version;
+	int eventCode;		/* The window for the message */
+	int pollBlock[64];
+};
+
+/* The RISCOS custom window manager information structure */
+typedef struct {
+	SDL_version version;
+	int wimpVersion;    /* Wimp version running under */
+	int taskHandle;     /* The RISCOS task handle */
+	int window;			/* The RISCOS display window */
+} SDL_SysWMinfo;
+
 #else
 
 /* The generic custom event structure */

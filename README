@@ -19,7 +19,7 @@ Objective C, Perl, PHP, Pike, Python, and Ruby.
 The current version supports Linux, Windows, BeOS, MacOS, MacOS X,
 FreeBSD, OpenBSD, BSD/OS, Solaris, and IRIX.  The code contains support
 for Windows CE, AmigaOS, Dreamcast, Atari, QNX, NetBSD, AIX, OSF/Tru64,
-and SymbianOS, but these are not officially supported.
+RISC OS, and SymbianOS, but these are not officially supported.
 
 This library is distributed under GNU LGPL version 2, which can be
 found in the file  "COPYING".  This license allows you to use SDL
