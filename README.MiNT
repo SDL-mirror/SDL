@@ -48,18 +48,18 @@ Keyboard (GEMDOS, BIOS, GEM, Ikbd)
 Mouse (XBIOS, GEM, Ikbd)
 Video (XBIOS (Fullscreen), GEM (Windowed and Fullscreen))
 Timer (VBL vector, GNU pth library)
-Joystick and joypad (Ikbd, Hardware)
+Joysticks and joypads (Ikbd, Hardware)
 Audio (Hardware, XBIOS, GSXB, MCSN, STFA, /dev/audio if threads enabled)
 Threads (Multitasking OS only via GNU pth library)
 Shared object loader (using LDG library from http://ldg.atari.org/)
 Audio CD (MetaDOS)
 
 - Driver combinations:
-Video	Kbd	Mouse	Timer	Joystick
-xbios	ikbd	ikbd	vbl(2)	ikbd
-xbios	gemdos	xbios	vbl(2)	xbios
-xbios	bios	xbios	vbl(2)	xbios
-gem	gem	gem(1)	vbl(2)	xbios
+Video   Kbd     Mouse   Timer   Joysticks Joypads
+xbios   ikbd    ikbd    vbl(2)  ikbd      hardware
+xbios   gemdos  xbios   vbl(2)  xbios     hardware
+xbios   bios    xbios   vbl(2)  xbios     hardware
+gem     gem     gem(1)  vbl(2)  xbios     hardware
 
 (1) GEM does not report relative mouse motion, so xbios mouse driver is used
 to report this type event.
@@ -116,10 +116,11 @@ SDL_JOYSTICK_ATARI:
 
 	The second joystick port on IKBD is used by the mouse, so not usable.
 
-	Joypads are multibuttons controller (Atari Jaguar console-like).
-	Joysticks are 1 button, 2 axis controllers.
-	Lightpen and analog paddle are 2 buttons, 2 axis controllers. The 2
-	buttons are those affected to 1 button joysticks on the same port.
+	Descriptions of joysticks/joypads:
+	- Joypads: 1 hat, 17 buttons (Atari Jaguar console-like).
+	- Joysticks: 1 hat, 1 button.
+	- Lightpen, analog paddles: 2 axis, 2 buttons. The 2 buttons are those
+	  affected to 1 button joysticks on the same port.
 
 ==============================================================================
 VI.  More informations about drivers:

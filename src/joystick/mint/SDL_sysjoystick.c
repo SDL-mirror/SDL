@@ -302,17 +302,27 @@ int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
 	if (numjoystick==-1)
 		return -1;
 	
-	if ((numjoystick==PORTA_PAD) || (numjoystick==PORTB_PAD)) {
-		joystick->nbuttons=JP_NUM_BUTTONS;
-	} else if ((numjoystick==PORTA_LP) || (numjoystick==PORTA_ANPAD) ||
-				(numjoystick==PORTB_ANPAD)) {
-		joystick->nbuttons=2;
-	} else {
-		joystick->nbuttons=1;
-	}
-	joystick->naxes=2;
-	joystick->nballs=0;
+	joystick->naxes=0;
 	joystick->nhats=0;
+	joystick->nballs=0;
+
+	switch(numjoystick) {
+		case PORTA_PAD:
+		case PORTB_PAD:
+			joystick->nhats=1;
+			joystick->nbuttons=JP_NUM_BUTTONS;
+			break;
+		case PORTA_LP:
+		case PORTA_ANPAD:
+		case PORTB_ANPAD:
+			joystick->naxes=2;
+			joystick->nbuttons=2;
+			break;
+		default:
+			joystick->nhats=1;
+			joystick->nbuttons=1;
+			break;
+	}
 
 	return(0);
 }
@@ -320,8 +330,8 @@ int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
 void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 {
 	int numjoystick;
+	Uint8 hatstate;
 	Uint32 curstate,prevstate;
-	Sint16 curaxis;
 	
 	numjoystick=GetEnabledAtariJoystick(joystick->index);
 	if (numjoystick==-1)
@@ -347,26 +357,21 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 				}
 
 				if (curstate != prevstate) {
-					/* X axis */
-					if ((curstate & (IKBD_JOY_LEFT|IKBD_JOY_RIGHT)) != (prevstate & (IKBD_JOY_LEFT|IKBD_JOY_RIGHT))) {
-						curaxis=0;
-						if (curstate & IKBD_JOY_LEFT) {
-							curaxis=0x8000;
-						} else if (curstate & IKBD_JOY_RIGHT) {
-							curaxis=0x7fff;
-						}					
-						SDL_PrivateJoystickAxis(joystick,0,curaxis);
+					hatstate = SDL_HAT_CENTERED;
+					if (curstate & IKBD_JOY_LEFT) {
+						hatstate |= SDL_HAT_LEFT;
 					}
-					/* Y axis */
-					if ((curstate & (IKBD_JOY_UP|IKBD_JOY_DOWN)) != (prevstate & (IKBD_JOY_UP|IKBD_JOY_DOWN))) {
-						curaxis=0;
-						if (curstate & IKBD_JOY_UP) {
-							curaxis=0x8000;
-						} else if (curstate & IKBD_JOY_DOWN) {
-							curaxis=0x7fff;
-						}					
-						SDL_PrivateJoystickAxis(joystick,1,curaxis);
+					if (curstate & IKBD_JOY_RIGHT) {
+						hatstate |= SDL_HAT_RIGHT;
 					}
+					if (curstate & IKBD_JOY_UP) {
+						hatstate |= SDL_HAT_UP;
+					}
+					if (curstate & IKBD_JOY_DOWN) {
+						hatstate |= SDL_HAT_DOWN;
+					}
+					SDL_PrivateJoystickHat(joystick, 0, hatstate);
+
 					/* Button */
 					if ((curstate & IKBD_JOY_FIRE) && !(prevstate & IKBD_JOY_FIRE)) {
 						SDL_PrivateJoystickButton(joystick,0,SDL_PRESSED);
@@ -384,31 +389,25 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 				int numjoypad,i;
 				
 				numjoypad=0;
-/*				if (numjoystick==PORTA_PAD) numjoypad=0;*/
 				if (numjoystick==PORTB_PAD) numjoypad=1;
 				
 				curstate=jp_joypads[numjoypad];
 				if (curstate!=prevstate) {
-					/* X axis */
-					if ((curstate & ((1<<JP_LEFT)|(1<<JP_RIGHT))) != (prevstate & ((1<<JP_LEFT)|(1<<JP_RIGHT)))) {
-						curaxis=0;
-						if (curstate & (1<<JP_LEFT)) {
-							curaxis=0x8000;
-						} else if (curstate & (1<<JP_RIGHT)) {
-							curaxis=0x7fff;
-						}					
-						SDL_PrivateJoystickAxis(joystick,0,curaxis);
+					hatstate = SDL_HAT_CENTERED;
+					if (curstate & (1<<JP_LEFT)) {
+						hatstate |= SDL_HAT_LEFT;
 					}
-					/* Y axis */
-					if ((curstate & ((1<<JP_UP)|(1<<JP_DOWN))) != (prevstate & ((1<<JP_UP)|(1<<JP_DOWN)))) {
-						curaxis=0;
-						if (curstate & (1<<JP_UP)) {
-							curaxis=0x8000;
-						} else if (curstate & (1<<JP_DOWN)) {
-							curaxis=0x7fff;
-						}					
-						SDL_PrivateJoystickAxis(joystick,1,curaxis);
+					if (curstate & (1<<JP_RIGHT)) {
+						hatstate |= SDL_HAT_RIGHT;
 					}
+					if (curstate & (1<<JP_UP)) {
+						hatstate |= SDL_HAT_UP;
+					}
+					if (curstate & (1<<JP_DOWN)) {
+						hatstate |= SDL_HAT_DOWN;
+					}
+					SDL_PrivateJoystickHat(joystick, 0, hatstate);
+
 					/* Buttons */
 					for (i=0;i<JP_NUM_BUTTONS;i++) {
 						int button;
@@ -442,26 +441,21 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 				curstate |= ((jp_fires>>fire_shift) & 1)<<4;
 
 				if (curstate != prevstate) {
-					/* X axis */
-					if ((curstate & (PORT_JS_LEFT|PORT_JS_RIGHT)) != (prevstate & (PORT_JS_LEFT|PORT_JS_RIGHT))) {
-						curaxis=0;
-						if (curstate & PORT_JS_LEFT) {
-							curaxis=0x8000;
-						} else if (curstate & PORT_JS_RIGHT) {
-							curaxis=0x7fff;
-						}					
-						SDL_PrivateJoystickAxis(joystick,0,curaxis);
+					hatstate = SDL_HAT_CENTERED;
+					if (curstate & PORT_JS_LEFT) {
+						hatstate |= SDL_HAT_LEFT;
 					}
-					/* Y axis */
-					if ((curstate & (PORT_JS_UP|PORT_JS_DOWN)) != (prevstate & (PORT_JS_UP|PORT_JS_DOWN))) {
-						curaxis=0;
-						if (curstate & PORT_JS_UP) {
-							curaxis=0x8000;
-						} else if (curstate & PORT_JS_DOWN) {
-							curaxis=0x7fff;
-						}					
-						SDL_PrivateJoystickAxis(joystick,1,curaxis);
+					if (curstate & PORT_JS_RIGHT) {
+						hatstate |= SDL_HAT_RIGHT;
 					}
+					if (curstate & PORT_JS_UP) {
+						hatstate |= SDL_HAT_UP;
+					}
+					if (curstate & PORT_JS_DOWN) {
+						hatstate |= SDL_HAT_DOWN;
+					}
+					SDL_PrivateJoystickHat(joystick, 0, hatstate);
+
 					/* Button */
 					if ((curstate & PORT_JS_FIRE) && !(prevstate & PORT_JS_FIRE)) {
 						SDL_PrivateJoystickButton(joystick,0,SDL_PRESSED);
