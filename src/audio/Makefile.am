@@ -24,7 +24,9 @@ COMMON_SRCS =			\
 	SDL_wave.c		\
 	SDL_wave.h              \
 	SDL_mixer_MMX.c         \
-	SDL_mixer_MMX.h
+	SDL_mixer_MMX.h		\
+	SDL_mixer_MMX_VC.c	\
+	SDL_mixer_MMX_VC.h
 
 libaudio_la_SOURCES = $(COMMON_SRCS)
 libaudio_la_LIBADD = $(DRIVERS)

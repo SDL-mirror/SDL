@@ -36,6 +36,7 @@ static char rcsid =
 #include "SDL_timer.h"
 #include "SDL_sysaudio.h"
 #include "SDL_mixer_MMX.h"
+#include "SDL_mixer_MMX_VC.h"
 
 /* Function to check the CPU flags */
 #define MMX_CPU		0x800000
@@ -147,11 +148,17 @@ void SDL_MixAudio (Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 		break;
 
 		case AUDIO_S8: {
-
 #if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
 			if (CPU_Flags() & MMX_CPU)
 			{
 				SDL_MixAudio_MMX_S8((char*)dst,(char*)src,(unsigned int)len,(int)volume);
+			}
+			else
+#endif
+#if defined(USE_ASM_MIXER_VC)
+			if (SDL_IsMMX_VC())
+			{
+				SDL_MixAudio_MMX_S8_VC((char*)dst,(char*)src,(unsigned int)len,(int)volume);
 			}
 			else
 #endif
@@ -188,6 +195,12 @@ void SDL_MixAudio (Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 			if (CPU_Flags() & MMX_CPU)
 			{
 				SDL_MixAudio_MMX_S16((char*)dst,(char*)src,(unsigned int)len,(int)volume);
+			}
+			else
+#elif defined(USE_ASM_MIXER_VC)
+			if (SDL_IsMMX_VC())
+			{
+				SDL_MixAudio_MMX_S16_VC((char*)dst,(char*)src,(unsigned int)len,(int)volume);
 			}
 			else
 #endif
@@ -251,3 +264,4 @@ void SDL_MixAudio (Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 			return;
 	}
 }
+
