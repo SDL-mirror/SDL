@@ -411,6 +411,11 @@ static int SDL_GetVideoMode (int *w, int *h, int *BitsPerPixel, Uint32 flags)
 	SDL_PixelFormat format;
 	SDL_Rect **sizes;
 
+	if ((*w <= 0) || (*h <= 0)) {
+		SDL_SetError("Invalid parameter");
+		return(0);
+	}
+
 	/* Try the original video mode, get the closest depth */
 	native_bpp = SDL_VideoModeOK(*w, *h, *BitsPerPixel, flags);
 	if ( native_bpp == *BitsPerPixel ) {
