@@ -130,6 +130,7 @@ static int QZ_VideoInit (_THIS, SDL_PixelFormat *video_format) {
     /* Set misc globals */
     current_grab_mode = SDL_GRAB_OFF;
     in_foreground     = YES;
+    cursor_visible    = YES;
     
     /* register for sleep notifications so wake from sleep generates SDL_VIDEOEXPOSE */
     QZ_RegisterForSleepNotifications (this);
@@ -1491,7 +1492,6 @@ static SDL_Overlay* QZ_CreateYUVOverlay (_THIS, int width, int height,
                 QDFlushPortBuffer (port, nil);
             }
         */
-
     }
     else {
         port = [ window_view qdPort ];

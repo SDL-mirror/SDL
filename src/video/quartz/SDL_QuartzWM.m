@@ -20,6 +20,8 @@
     slouken@libsdl.org
 */
 
+static void QZ_ChangeGrabState (_THIS, int action);
+
 struct WMcursor {
     Cursor curs;
 };
@@ -66,21 +68,21 @@ static WMcursor*    QZ_CreateWMCursor   (_THIS, Uint8 *data, Uint8 *mask,
     return(cursor);
 }
 
-static int QZ_cursor_visible = 1;
-    
 static int QZ_ShowWMCursor (_THIS, WMcursor *cursor) { 
 
     if ( cursor == NULL) {
-        if ( QZ_cursor_visible ) {
+        if ( cursor_visible ) {
             HideCursor ();
-            QZ_cursor_visible = 0;
+            cursor_visible = NO;
+            QZ_ChangeGrabState (this, QZ_HIDECURSOR);
         }
     }
     else {
         SetCursor(&cursor->curs);
-        if ( ! QZ_cursor_visible ) {
+        if ( ! cursor_visible ) {
             ShowCursor ();
-            QZ_cursor_visible = 1;
+            cursor_visible = YES;
+            QZ_ChangeGrabState (this, QZ_SHOWCURSOR);
         }
     }
 
@@ -126,7 +128,7 @@ static void QZ_PrivateSDLToCocoa (_THIS, NSPoint *p) {
         }
     }
     
-    p->y = height - p->y;
+    p->y = height - p->y - 1;
 }
 
 /* Convert Cocoa coordinate to SDL coordinate */
@@ -179,12 +181,12 @@ static void  QZ_PrivateWarpCursor (_THIS, int x, int y) {
     CGPoint cgp;
     
     p = NSMakePoint (x, y);
-    cgp = QZ_PrivateSDLToCG (this, &p);   
-    CGDisplayMoveCursorToPoint (display_id, cgp);
-    warp_ticks = SDL_GetTicks();
-    warp_flag = 1;
-
-    SDL_PrivateMouseMotion(0, 0, x, y);
+    cgp = QZ_PrivateSDLToCG (this, &p);
+    QZ_PrivateCGToSDL (this, &p);
+    
+    /* this is the magic call that fixes cursor "freezing" after warp */
+    CGSetLocalEventsSuppressionInterval (0.0);
+    CGWarpMouseCursorPosition (cgp);
 }
 
 static void QZ_WarpWMCursor (_THIS, Uint16 x, Uint16 y) {
@@ -195,6 +197,9 @@ static void QZ_WarpWMCursor (_THIS, Uint16 x, Uint16 y) {
             
     /* Do the actual warp */
     QZ_PrivateWarpCursor (this, x, y);
+
+    /* Generate the mouse moved event */
+    SDL_PrivateMouseMotion (0, 0, x, y);
 }
 
 static void QZ_MoveWMCursor     (_THIS, int x, int y) { }
@@ -289,24 +294,77 @@ static int  QZ_GetWMInfo  (_THIS, SDL_SysWMinfo *info) {
     return 0; 
 }*/
 
+static void QZ_ChangeGrabState (_THIS, int action) {
+
+    /* 
+        Figure out what the next state should be based on the action.
+        Ignore actions that can't change the current state.
+    */
+    if ( grab_state == QZ_UNGRABBED ) {
+        if ( action == QZ_ENABLE_GRAB ) {
+            if ( cursor_visible )
+                grab_state = QZ_VISIBLE_GRAB;
+            else
+                grab_state = QZ_INVISIBLE_GRAB;
+        }
+    }
+    else if ( grab_state == QZ_VISIBLE_GRAB ) {
+        if ( action == QZ_DISABLE_GRAB )
+            grab_state = QZ_UNGRABBED;
+        else if ( action == QZ_HIDECURSOR )
+            grab_state = QZ_INVISIBLE_GRAB;
+    }
+    else {
+        assert( grab_state == QZ_INVISIBLE_GRAB );
+        
+        if ( action == QZ_DISABLE_GRAB )
+            grab_state = QZ_UNGRABBED;
+        else if ( action == QZ_SHOWCURSOR )
+            grab_state = QZ_VISIBLE_GRAB;
+    }
+    
+    /* now apply the new state */
+    if (grab_state == QZ_UNGRABBED) {
+    
+        CGAssociateMouseAndMouseCursorPosition (1);
+    }
+    else if (grab_state == QZ_VISIBLE_GRAB) {
+    
+        CGAssociateMouseAndMouseCursorPosition (1);
+    }
+    else {
+        assert( grab_state == QZ_INVISIBLE_GRAB );
+
+        QZ_PrivateWarpCursor (this, SDL_VideoSurface->w / 2, SDL_VideoSurface->h / 2);
+        CGAssociateMouseAndMouseCursorPosition (0);
+    }
+}
+
 static SDL_GrabMode QZ_GrabInput (_THIS, SDL_GrabMode grab_mode) {
 
-    switch (grab_mode) {
-    case SDL_GRAB_QUERY:
-            break;
-    case SDL_GRAB_OFF:
-            CGAssociateMouseAndMouseCursorPosition (1);
-            current_grab_mode = SDL_GRAB_OFF;
-            break;
-    case SDL_GRAB_ON:
-            QZ_WarpWMCursor (this, SDL_VideoSurface->w / 2, SDL_VideoSurface->h / 2);
-            CGAssociateMouseAndMouseCursorPosition (0);
-            current_grab_mode = SDL_GRAB_ON;
-            break;
-    case SDL_GRAB_FULLSCREEN:        
-            break;
+    int doGrab = grab_mode & SDL_GRAB_ON;
+    /*int fullscreen = grab_mode & SDL_GRAB_FULLSCREEN;*/
+
+    if ( this->screen == NULL ) {
+        SDL_SetError ("QZ_GrabInput: screen is NULL");
+        return SDL_GRAB_OFF;
     }
         
+    if ( ! video_set ) {
+        /*SDL_SetError ("QZ_GrabInput: video is not set, grab will take effect on mode switch"); */
+        current_grab_mode = grab_mode;
+        return grab_mode;       /* Will be set later on mode switch */
+    }
+
+    if ( grab_mode != SDL_GRAB_QUERY ) {
+        if ( doGrab )
+            QZ_ChangeGrabState (this, QZ_ENABLE_GRAB);
+        else
+            QZ_ChangeGrabState (this, QZ_DISABLE_GRAB);
+        
+        current_grab_mode = doGrab ? SDL_GRAB_ON : SDL_GRAB_OFF;
+    }
+
     return current_grab_mode;
 }
 

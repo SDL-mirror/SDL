@@ -132,8 +132,12 @@ typedef struct SDL_PrivateVideoData {
     SDLKey             keymap[256];        /* Mac OS X to SDL key mapping */
     Uint32             current_mods;       /* current keyboard modifiers, to track modifier state */
     Uint32             last_virtual_button;/* last virtual mouse button pressed */
-    io_connect_t       powerConnection;    /* used with IOKit to detect wake from sleep */
-
+    io_connect_t       power_connection;   /* used with IOKit to detect wake from sleep */
+    Uint8              expect_mouse_up;    /* used to determine when to send mouse up events */
+    Uint8              grab_state;         /* used to manage grab behavior */
+    NSPoint            cursor_loc;         /* saved cursor coords, for activate/deactivate when grabbed */
+    BOOL          	   cursor_visible;     /* tells if cursor was hidden or not */
+    
     ImageDescriptionHandle yuv_idh;
     MatrixRecordPtr        yuv_matrix;
     DecompressorComponent  yuv_codec;
@@ -167,7 +171,11 @@ typedef struct SDL_PrivateVideoData {
 #define keymap (this->hidden->keymap)
 #define current_mods (this->hidden->current_mods)
 #define last_virtual_button (this->hidden->last_virtual_button)
-#define powerConnection (this->hidden->powerConnection)
+#define power_connection (this->hidden->power_connection)
+#define expect_mouse_up (this->hidden->expect_mouse_up)
+#define grab_state (this->hidden->grab_state)
+#define cursor_loc (this->hidden->cursor_loc)
+#define cursor_visible (this->hidden->cursor_visible)
 
 #define yuv_idh (this->hidden->yuv_idh)
 #define yuv_matrix (this->hidden->yuv_matrix)
@@ -178,6 +186,22 @@ typedef struct SDL_PrivateVideoData {
 #define yuv_width (this->hidden->yuv_width)
 #define yuv_height (this->hidden->yuv_height)
 #define yuv_port (this->hidden->yuv_port)
+
+
+/* grab states - the input is in one of these states */
+enum {
+    QZ_UNGRABBED = 0,
+    QZ_VISIBLE_GRAB,
+    QZ_INVISIBLE_GRAB
+};
+
+/* grab actions - these can change the grabbed state */
+enum {
+    QZ_ENABLE_GRAB = 0,
+    QZ_DISABLE_GRAB,
+    QZ_HIDECURSOR,
+    QZ_SHOWCURSOR
+};
 
 /* 
     Obscuring code: maximum number of windows above ours (inclusive) 

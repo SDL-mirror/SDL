@@ -300,16 +300,18 @@ static void QZ_DoModifiers (_THIS, unsigned int newMods) {
 static void QZ_DoActivate (_THIS)
 {
     in_foreground = YES;
-
-    /* Regrab the mouse, only if it was previously grabbed */
-    if ( current_grab_mode == SDL_GRAB_ON ) {
-        QZ_WarpWMCursor (this, SDL_VideoSurface->w / 2, SDL_VideoSurface->h / 2);
-        CGAssociateMouseAndMouseCursorPosition (0);
+    
+    /* Hide the mouse cursor if was hidden */
+    if (!cursor_visible) {
+        HideCursor ();
     }
 
-    /* Hide the mouse cursor if inside the app window */
-    if (!QZ_cursor_visible) {
-        HideCursor ();
+    /* Regrab input, only if it was previously grabbed */
+    if ( current_grab_mode == SDL_GRAB_ON ) {
+        
+        /* Restore cursor location if input was grabbed */
+        QZ_PrivateWarpCursor (this, cursor_loc.x, cursor_loc.y);
+        QZ_ChangeGrabState (this, QZ_ENABLE_GRAB);
     }
 
     SDL_PrivateAppActive (1, SDL_APPINPUTFOCUS);
@@ -319,15 +321,17 @@ static void QZ_DoDeactivate (_THIS) {
 
     in_foreground = NO;
 
-    /* Ungrab mouse if it is grabbed */
-    if ( current_grab_mode == SDL_GRAB_ON ) {
-        CGAssociateMouseAndMouseCursorPosition (1);
-    }
+    /* Get the current cursor location, for restore on activate */
+    cursor_loc = [ NSEvent mouseLocation ]; /* global coordinates */
+    if (qz_window)
+        QZ_PrivateGlobalToLocal (this, &cursor_loc);
+    QZ_PrivateCocoaToSDL (this, &cursor_loc);
+    
+    /* Reassociate mouse and cursor */
+    CGAssociateMouseAndMouseCursorPosition (1);
 
-    /* Show the mouse cursor */
-    if (!QZ_cursor_visible) {
-        ShowCursor ();
-    }
+    /* Show the cursor */
+    ShowCursor ();
 
     SDL_PrivateAppActive (0, SDL_APPINPUTFOCUS);
 }
@@ -342,10 +346,10 @@ void QZ_SleepNotificationHandler (void * refcon,
      switch(messageType)
      {
          case kIOMessageSystemWillSleep:
-             IOAllowPowerChange(powerConnection, (long) messageArgument);
+             IOAllowPowerChange(power_connection, (long) messageArgument);
              break;
          case kIOMessageCanSystemSleep:
-             IOAllowPowerChange(powerConnection, (long) messageArgument);
+             IOAllowPowerChange(power_connection, (long) messageArgument);
              break;
          case kIOMessageSystemHasPoweredOn:
 			/* awake */
@@ -360,9 +364,9 @@ static void QZ_RegisterForSleepNotifications (_THIS)
      IONotificationPortRef thePortRef;
      io_object_t notifier;
 
-     powerConnection = IORegisterForSystemPower (this, &thePortRef, QZ_SleepNotificationHandler, &notifier);
+     power_connection = IORegisterForSystemPower (this, &thePortRef, QZ_SleepNotificationHandler, &notifier);
 
-     if (powerConnection == 0)
+     if (power_connection == 0)
          NSLog(@"SDL: QZ_SleepNotificationHandler() IORegisterForSystemPower failed.");
 
      rls = IONotificationPortGetRunLoopSource (thePortRef);
@@ -401,17 +405,18 @@ static void QZ_PumpEvents (_THIS)
         event = [ NSApp nextEventMatchingMask:NSAnyEventMask
                                     untilDate:distantPast
                                     inMode: NSDefaultRunLoopMode dequeue:YES ];
-    
         if (event != nil) {
 
             unsigned int type;
             BOOL isForGameWin;
-    
-            #define DO_MOUSE_DOWN(button, sendToWindow) do {                                 \
+            BOOL isInGameWin;
+            
+            #define DO_MOUSE_DOWN(button) do {                                               \
                             if ( in_foreground ) {                                           \
-                                if ( (SDL_VideoSurface->flags & SDL_FULLSCREEN) ||           \
-                                    NSPointInRect([event locationInWindow], winRect) )       \
-                                        SDL_PrivateMouseButton (SDL_PRESSED, button, 0, 0);  \
+                                if ( isInGameWin ) {                                         \
+                                    SDL_PrivateMouseButton (SDL_PRESSED, button, 0, 0);      \
+                                    expect_mouse_up |= 1<<button;                            \
+                                }                                                            \
                             }                                                                \
                             else {                                                           \
                                 QZ_DoActivate (this);                                        \
@@ -419,47 +424,48 @@ static void QZ_PumpEvents (_THIS)
                             [ NSApp sendEvent:event ];                                       \
             } while(0)
             
-            #define DO_MOUSE_UP(button, sendToWindow) do {                      \
-                            if ( (SDL_VideoSurface->flags & SDL_FULLSCREEN) ||  \
-                    !NSPointInRect([event locationInWindow], titleBarRect) )    \
-                        SDL_PrivateMouseButton (SDL_RELEASED, button, 0, 0);    \
-                            [ NSApp sendEvent:event ];                          \
+            #define DO_MOUSE_UP(button) do {                                            \
+                            if ( expect_mouse_up & (1<<button) ) {                      \
+                                SDL_PrivateMouseButton (SDL_RELEASED, button, 0, 0);    \
+                                expect_mouse_up &= ~(1<<button);                        \
+                            }                                                           \
+                            [ NSApp sendEvent:event ];                                  \
             } while(0)
             
             type = [ event type ];
             isForGameWin = (qz_window == [ event window ]);
+            isInGameWin = NSPointInRect([event locationInWindow], winRect);
             switch (type) {
-            
                 case NSLeftMouseDown:
                     if ( getenv("SDL_HAS3BUTTONMOUSE") ) {
-                        DO_MOUSE_DOWN (1, 1);
+                        DO_MOUSE_DOWN (SDL_BUTTON_LEFT);
                     } else {
                         if ( NSCommandKeyMask & current_mods ) {
-                            last_virtual_button = 3;
-                            DO_MOUSE_DOWN (3, 0);
+                            last_virtual_button = SDL_BUTTON_RIGHT;
+                            DO_MOUSE_DOWN (SDL_BUTTON_RIGHT);
                         }
                         else if ( NSAlternateKeyMask & current_mods ) {
-                            last_virtual_button = 2;
-                            DO_MOUSE_DOWN (2, 0);
+                            last_virtual_button = SDL_BUTTON_MIDDLE;
+                            DO_MOUSE_DOWN (SDL_BUTTON_MIDDLE);
                         }
                         else {
-                            DO_MOUSE_DOWN (1, 1);
+                            DO_MOUSE_DOWN (SDL_BUTTON_LEFT);
                         }
                     }
                     break;
-                case NSOtherMouseDown: DO_MOUSE_DOWN (2, 0); break;
-                case NSRightMouseDown: DO_MOUSE_DOWN (3, 0); break;
+                case NSOtherMouseDown: DO_MOUSE_DOWN (SDL_BUTTON_MIDDLE); break;
+                case NSRightMouseDown: DO_MOUSE_DOWN (SDL_BUTTON_RIGHT);  break;
                 case NSLeftMouseUp:
                     if ( last_virtual_button != 0 ) {
-                        DO_MOUSE_UP (last_virtual_button, 0);
+                        DO_MOUSE_UP (last_virtual_button);
                         last_virtual_button = 0;
                     }
                     else {
-                        DO_MOUSE_UP (1, 1);
+                        DO_MOUSE_UP (SDL_BUTTON_LEFT);
                     }
                     break;
-                case NSOtherMouseUp:   DO_MOUSE_UP (2, 0);     break;
-                case NSRightMouseUp:   DO_MOUSE_UP (3, 0);     break;
+                case NSOtherMouseUp:   DO_MOUSE_UP (SDL_BUTTON_MIDDLE); break;
+                case NSRightMouseUp:   DO_MOUSE_UP (SDL_BUTTON_RIGHT);  break;
                 case NSSystemDefined:
                     /*
                         Future: up to 32 "mouse" buttons can be handled.
@@ -472,10 +478,10 @@ static void QZ_PumpEvents (_THIS)
                 case NSRightMouseDragged:
                 case NSOtherMouseDragged: /* usually middle mouse dragged */
                 case NSMouseMoved:
-                    if (current_grab_mode == SDL_GRAB_ON) {
+                    if ( grab_state == QZ_INVISIBLE_GRAB ) {
                 
                         /*
-                            If input is grabbed, the cursor doesn't move,
+                            If input is grabbed+hidden, the cursor doesn't move,
                             so we have to call the lowlevel window server
                             function. This is less accurate but works OK.                         
                         */
@@ -483,31 +489,6 @@ static void QZ_PumpEvents (_THIS)
                         CGGetLastMouseDelta (&dx1, &dy1);
                         dx += dx1;
                         dy += dy1;
-                    }
-                    else if (warp_flag) {
-                
-                        /*
-                            If we just warped the mouse, the cursor is frozen for a while.
-                            So we have to use the lowlevel function until it
-                            unfreezes. This really helps apps that continuously
-                            warp the mouse to keep it in the game window. Developers should
-                            really use GrabInput, but our GrabInput freezes the HW cursor,
-                            which doesn't cut it for some apps.
-                        */
-                        Uint32 ticks;
-                
-                        ticks = SDL_GetTicks();
-                        if (ticks - warp_ticks < 150) {
-                
-                            CGMouseDelta dx1, dy1;
-                            CGGetLastMouseDelta (&dx1, &dy1);
-                            dx += dx1;
-                            dy += dy1;
-                        }
-                        else {
-                
-                            warp_flag = 0;
-                        }
                     }
                     else if (firstMouseEvent) {
                         
@@ -520,10 +501,8 @@ static void QZ_PumpEvents (_THIS)
                             since everything after this uses deltas
                         */
                         NSPoint p = [ event locationInWindow ];
-                        QZ_PrivateCocoaToSDL(this, &p);
-                        
+                        QZ_PrivateCocoaToSDL (this, &p);
                         SDL_PrivateMouseMotion (0, 0, p.x, p.y);
-
                         firstMouseEvent = 0;
                     }
                     else {
@@ -535,9 +514,35 @@ static void QZ_PumpEvents (_THIS)
                         dx += [ event deltaX ];
                         dy += [ event deltaY ];
                     }
+                    
+                    /* 
+                        Handle grab input+cursor visible by warping the cursor back
+                        into the game window. This still generates a mouse moved event,
+                        but not as a result of the warp (so it's in the right direction).
+                    */
+                    if ( grab_state == QZ_VISIBLE_GRAB &&
+                         !isInGameWin ) {
+                       
+                        NSPoint p = [ event locationInWindow ]; 
+                        QZ_PrivateCocoaToSDL (this, &p);
+
+                        if ( p.x < 0.0 ) 
+                            p.x = 0.0;
+                        
+                        if ( p.y < 0.0 ) 
+                            p.y = 0.0;
+                        
+                        if ( p.x >= winRect.size.width ) 
+                            p.x = winRect.size.width-1;
+                        
+                        if ( p.y >= winRect.size.height ) 
+                            p.y = winRect.size.height-1;
+                        
+                        QZ_PrivateWarpCursor (this, p.x, p.y);
+                    }
                     break;
                 case NSScrollWheel:
-                    if (NSPointInRect([ event locationInWindow ], winRect)) {
+                    if ( isInGameWin ) {
                         float dy;
                         Uint8 button;
                         dy = [ event deltaY ];
@@ -545,7 +550,7 @@ static void QZ_PumpEvents (_THIS)
                             button = SDL_BUTTON_WHEELUP;
                         else /* Scroll down */
                             button = SDL_BUTTON_WHEELDOWN;
-			/* For now, wheel is sent as a quick down+up */
+                        /* For now, wheel is sent as a quick down+up */
                         SDL_PrivateMouseButton (SDL_PRESSED, button, 0, 0);
                         SDL_PrivateMouseButton (SDL_RELEASED, button, 0, 0);
                     }
