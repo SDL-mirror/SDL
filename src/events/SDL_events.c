@@ -301,7 +301,7 @@ int SDL_PeepEvents(SDL_Event *events, int numevents, SDL_eventaction action,
 
 	/* Don't look after we've quit */
 	if ( ! SDL_EventQ.active ) {
-		return(0);
+		return(-1);
 	}
 	/* Lock the event queue */
 	used = 0;
