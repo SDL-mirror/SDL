@@ -1217,6 +1217,15 @@ CheckPTHREAD()
             pthread_cflags=""
             pthread_lib=""
             ;;
+        *-*-osf*)
+            if test x$ac_cv_prog_gcc = xyes; then
+                pthread_cflags="-D_REENTRANT"
+                pthread_lib="-lpthread -lrt"
+            else
+                pthread_cflags="-pthread"
+                pthread_lib="-lpthread -lrt"
+            fi
+            ;;
         *)
             pthread_cflags="-D_REENTRANT"
             pthread_lib="-lpthread"
@@ -2268,7 +2277,6 @@ case "$target" in
         CheckOpenGL
         CheckPTHREAD
         CheckSIGACTION
-        SDL_LIBS="$SDL_LIBS -lrt"
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
             CFLAGS="$CFLAGS -I/usr/include/mme -DMMEAUDIO_SUPPORT"

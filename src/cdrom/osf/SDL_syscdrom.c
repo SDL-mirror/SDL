@@ -59,46 +59,45 @@ static int         SDL_SYS_CDStop(SDL_CD *cdrom);
 static int         SDL_SYS_CDEject(SDL_CD *cdrom);
 static void        SDL_SYS_CDClose(SDL_CD *cdrom);
 
-/* Some ioctl() errno values which occur when the tray is empty */
-#define ERRNO_TRAYEMPTY(errno)	\
-    ((errno == EIO) || (errno == ENOENT) || (errno == EINVAL))
-
 /* Check a drive to see if it is a CD-ROM */
 /* Caution!! Not tested. */ 
 static int CheckDrive(char *drive, struct stat *stbuf)
 {
-    int is_cd, cdfd;
-    struct cd_sub_channel info;
+    int cdfd, is_cd = 0;
+    struct mode_sel_sns_params msp;
+    struct inquiry_info inq;
+
+#ifdef DEBUG_CDROM
+    char *devtype[] = {"Disk", "Tape", "Printer", "Processor", "WORM",
+	"CD-ROM", "Scanner", "Optical", "Changer", "Comm", "Unknown"};
+#endif
+
+    bzero(&msp, sizeof(msp));
+    bzero(&inq, sizeof(inq));
 
     /* If it doesn't exist, return -1 */
     if ( stat(drive, stbuf) < 0 ) {
 	return(-1);
     }
 
-    /* If it does exist, verify that it's an available CD-ROM */
-    is_cd = 0;
-    if ( S_ISCHR(stbuf->st_mode) || S_ISBLK(stbuf->st_mode) ) {
-	cdfd = open(drive, (O_RDWR|O_NDELAY), 0);
-	if ( cdfd >= 0 ) {
-	    info.sch_address_format = CDROM_MSF_FORMAT;
-	    info.sch_data_format = CDROM_CURRENT_POSITION;
-	    info.sch_alloc_length = 0;
-	    info.sch_track_number = 0;
-	    info.sch_buffer = NULL;
-	    /*
-	     *
-	     * Under Linux, EIO occurs when a disk is not present.
-	     * This isn't 100% reliable, so we use the USE_MNTENT
-	     * code above instead.
-	     *
-	     */
-	    if ( (ioctl(cdfd, CDROM_READ_SUBCHANNEL, &info) == 0) ||
-		    ERRNO_TRAYEMPTY(errno) ) {
-		is_cd = 1;
-	    }
+    if ( (cdfd = open(drive, (O_RDWR|O_NDELAY), 0)) >= 0 ) {
+	msp.msp_addr   =   (caddr_t) &inq;
+	msp.msp_pgcode =                0;
+	msp.msp_pgctrl =                0;
+	msp.msp_length =      sizeof(inq);
+	msp.msp_setps  =                0;
 
-	    close(cdfd);
-	}
+	if ( ioctl(cdfd, SCSI_GET_INQUIRY_DATA, &msp) )
+	    return (0);
+
+#ifdef DEBUG_CDROM
+	fprintf(stderr, "Device Type: %s\n", devtype[inq.perfdt]);
+	fprintf(stderr, "Vendor: %.8s\n", inq.vndrid);
+	fprintf(stderr, "Product: %.8s\n", inq.prodid);
+	fprintf(stderr, "Revision: %.8s\n", inq.revlvl);
+#endif
+	if ( inq.perfdt == DTYPE_RODIRECT )
+	    is_cd = 1;
     }
 
     return(is_cd);
@@ -113,7 +112,7 @@ static void AddDrive(char *drive, struct stat *stbuf)
 	/* Check to make sure it's not already in our list.
 	 * This can happen when we see a drive via symbolic link.
 	 *
-	 * /
+	 */
 	for ( i=0; i<SDL_numcds; ++i ) {
 	    if ( stbuf->st_rdev == SDL_cdmode[i] ) {
 #ifdef DEBUG_CDROM
@@ -142,8 +141,7 @@ static void AddDrive(char *drive, struct stat *stbuf)
 
 int  SDL_SYS_CDInit(void)
 {
-    /* checklist: /dev/cdrom,/dev/cd?c /dev/acd?c
-     * /dev/matcd?c /dev/mcd?c /dev/scd?c
+    /* checklist: /dev/rdisk/cdrom?c
      *
      */
     static char *checklist[] = {
@@ -287,28 +285,28 @@ static int SDL_SYS_CDGetTOC(SDL_CD *cdrom)
 	return -1;
     }
 
-    (char *)cdte = toc.toc_buffer + sizeof(hdr);
-	for (i=0; i <= cdrom->numtracks; ++i) {
-	    if (i == cdrom->numtracks ) {
-		cdrom->track[i].id = 0xAA;;
-	    } else {
-		cdrom->track[i].id = hdr.th_starting_track + i;
-	    }
-
-	    cdrom->track[i].type =
-		cdte[i].te_control & CDROM_DATA_TRACK;
-	    cdrom->track[i].offset =
-		cdte[i].te_absaddr.lba.addr3 << 24 |
-		cdte[i].te_absaddr.lba.addr2 << 16 |
-		cdte[i].te_absaddr.lba.addr1 << 8  |
-		cdte[i].te_absaddr.lba.addr0;
-	    cdrom->track[i].length = 0;
-	    if ( i > 0 ) {
-		cdrom->track[i - 1].length =
-		    cdrom->track[i].offset -
-		    cdrom->track[i - 1].offset;
-	    }
+    cdte =(struct cd_toc_entry *) ((char *) toc.toc_buffer + sizeof(hdr));
+    for (i=0; i <= cdrom->numtracks; ++i) {
+	if (i == cdrom->numtracks ) {
+	    cdrom->track[i].id = 0xAA;;
+	} else {
+	    cdrom->track[i].id = hdr.th_starting_track + i;
 	}
+
+	cdrom->track[i].type =
+	    cdte[i].te_control & CDROM_DATA_TRACK;
+	cdrom->track[i].offset =
+	    cdte[i].te_absaddr.lba.addr3 << 24 |
+	    cdte[i].te_absaddr.lba.addr2 << 16 |
+	    cdte[i].te_absaddr.lba.addr1 << 8  |
+	    cdte[i].te_absaddr.lba.addr0;
+	cdrom->track[i].length = 0;
+	if ( i > 0 ) {
+	    cdrom->track[i - 1].length =
+		cdrom->track[i].offset -
+		cdrom->track[i - 1].offset;
+	}
+    }
 #ifdef DEBUG_CDROM
   for (i = 0; i <= cdrom->numtracks; i++) {
     fprintf(stderr,"toc_entry[%d].te_track_number = %d\n",
@@ -388,13 +386,14 @@ static CDstatus SDL_SYS_CDStatus(SDL_CD *cdrom, int *position)
 /* Start play */
 static int SDL_SYS_CDPlay(SDL_CD *cdrom, int start, int length)
 {
-/* Play MSF
- *
+/*
+ * Play MSF
  */
     struct cd_play_audio_msf msf;
     int end;
 
     bzero(&msf, sizeof(msf));
+    start += 150; /* Some CD-ROM drives cannot play the first 150 frames. */
     end = start +length;
     FRAMES_TO_MSF(start,
 		  &msf.msf_starting_M_unit,
@@ -449,5 +448,4 @@ void SDL_SYS_CDQuit(void)
 	SDL_numcds = 0;
     }
 }
-
 
