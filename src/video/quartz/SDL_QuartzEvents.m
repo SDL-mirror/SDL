@@ -195,8 +195,8 @@ static void QZ_DoModifiers (unsigned int newMods) {
     currentMods = newMods;
 }
 
-static void QZ_DoActivate (_THIS, NSPoint p) {
-    
+static void QZ_DoActivate (_THIS)
+{
     inForeground = YES;
 
     /* Regrab the mouse */
@@ -220,12 +220,9 @@ static void QZ_DoDeactivate (_THIS) {
     SDL_PrivateAppActive (0, SDL_APPINPUTFOCUS);
 }
 
-static void QZ_PumpEvents (_THIS) { 
-
+static void QZ_PumpEvents (_THIS)
+{ 
     NSDate *distantPast = [ NSDate distantPast ];
-    
-    //NSAutoreleasePool *pool;
-    //pool = [ [ NSAutoreleasePool alloc ] init ];
     
     NSEvent *event;
     NSRect winRect;
@@ -244,29 +241,28 @@ static void QZ_PumpEvents (_THIS) {
     
         if (event != nil) {
             unsigned int type;
-            NSPoint p;
-            
-            type = [ event type ];
-            p = [ event locationInWindow ];
-            
-            #define DO_MOUSE_DOWN(button, sendToWindow)                                                \
-                if ( inForeground ) {                                                                  \
-                    if ( NSPointInRect(p,winRect))                                                     \
-                        SDL_PrivateMouseButton (SDL_PRESSED, button, p.x, SDL_VideoSurface->h - p.y);  \
-                    else if (sendToWindow)                                                             \
-                            [ window sendEvent:event ];                                                   \
-                }                                                                                      \
-                else {                                                                                 \
-                    QZ_DoActivate (this, p);                                                           \
+
+            #define DO_MOUSE_DOWN(button, sendToWindow)                      \
+                if ( inForeground ) {                                        \
+                    if ( (SDL_VideoSurface->flags & SDL_FULLSCREEN) ||       \
+                         NSPointInRect([event locationInWindow], winRect) )  \
+                        SDL_PrivateMouseButton (SDL_PRESSED, button, 0, 0);  \
+                    else if (sendToWindow)                                   \
+                            [ window sendEvent:event ];                      \
+                }                                                            \
+                else {                                                       \
+                    QZ_DoActivate (this);                                    \
                 }       
             
-            #define DO_MOUSE_UP(button, sendToWindow)                                          \
-                if ( ! NSPointInRect (p, titleBarRect) ) \
-                    SDL_PrivateMouseButton (SDL_RELEASED, button, p.x, SDL_VideoSurface->h - p.y); \
-                if (sendToWindow)                                                              \
+            #define DO_MOUSE_UP(button, sendToWindow)                        \
+                if ( (SDL_VideoSurface->flags & SDL_FULLSCREEN) ||           \
+                     !NSPointInRect([event locationInWindow], titleBarRect) )\
+                    SDL_PrivateMouseButton (SDL_RELEASED, button, 0, 0);     \
+                if (sendToWindow)                                            \
                     [ window sendEvent:event ]
                     
-            switch ( type) {
+            type = [ event type ];
+            switch (type) {
             
             case NSLeftMouseDown:  
                 if ( NSCommandKeyMask & currentMods ) {
@@ -302,33 +298,39 @@ static void QZ_PumpEvents (_THIS) {
             case NSLeftMouseDragged:
             case NSRightMouseDragged:
             case 27:
-                SDL_PrivateMouseMotion (SDL_PRESSED, 0, p.x, SDL_VideoSurface->h - p.y);
-                break;
             case NSMouseMoved:
                 {
                    static int moves = 0;
-                    
+                   NSPoint p;
+            
+                   if ( SDL_VideoSurface->flags & SDL_FULLSCREEN ) {
+                       p = [ NSEvent mouseLocation ];
+                       p.y = [[NSScreen mainScreen] frame].size.height - p.y;
+                   } else {
+            	       p = [ event locationInWindow ];
+                       p.y = SDL_VideoSurface->h - p.y;
+                   }
+
                    if ( (moves % 10) == 0 ) {
-                        SDL_PrivateMouseMotion (SDL_RELEASED, 0, p.x, SDL_VideoSurface->h - p.y);
-                        moves = 0;
+                        SDL_PrivateMouseMotion (0, 0, p.x, p.y);
                    }
                    else {
                         CGMouseDelta dx, dy;
                         CGGetLastMouseDelta (&dx, &dy);
-                        SDL_PrivateMouseMotion (SDL_RELEASED, 1, dx, dy);
-                        moves++;
+                        SDL_PrivateMouseMotion (0, 1, dx, dy);
                    }
+                   moves++;
                 }
                 break;
             case NSScrollWheel:
                 {
-                    if (NSPointInRect(p, winRect)) {
+                    if (NSPointInRect([ event locationInWindow ], winRect)) {
                         float dy;
                         dy = [ event deltaY ];
                         if ( dy > 0.0 ) /* Scroll up */
-                            SDL_PrivateMouseButton (SDL_PRESSED, 4, p.x, SDL_VideoSurface->h - p.y);
+                            SDL_PrivateMouseButton (SDL_PRESSED, 4, 0, 0);
                         else /* Scroll down */
-                            SDL_PrivateMouseButton (SDL_PRESSED, 5, p.x, SDL_VideoSurface->h - p.y);
+                            SDL_PrivateMouseButton (SDL_PRESSED, 5, 0, 0);
                     }
                 }
                 break;
@@ -346,7 +348,7 @@ static void QZ_PumpEvents (_THIS) {
             case NSAppKitDefined:
                 switch ( [ event subtype ] ) {
                 case NSApplicationActivatedEventType:
-                    QZ_DoActivate (this, p);
+                    QZ_DoActivate (this);
                     break;
                 case NSApplicationDeactivatedEventType:
                     QZ_DoDeactivate (this);
@@ -361,8 +363,6 @@ static void QZ_PumpEvents (_THIS) {
             case NSCursorUpdate: break;
             }
         }
-       // [ pool release ];
-
       } while (event != nil);
 }
 

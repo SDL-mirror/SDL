@@ -231,6 +231,7 @@ static void QZ_UnsetVideoMode (_THIS) {
     if ( mode_flags & SDL_FULLSCREEN ) {
         CGDisplaySwitchToMode (display_id, save_mode);
         CGDisplayRelease (display_id);
+        this->screen->pixels = NULL;
     }
     /* Release window mode data structures */
     else { 
