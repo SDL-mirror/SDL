@@ -74,6 +74,9 @@
 	SDL_GetModState
 	SDL_SetModState
 	SDL_GetKeyName
+	SDL_LoadObject
+	SDL_LoadFunction
+	SDL_UnloadObject
 	SDL_SetModuleHandle
 	SDL_RegisterApp
 	SDL_InitQuickDraw
