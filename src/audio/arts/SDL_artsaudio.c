@@ -140,6 +140,13 @@ static int Audio_Available(void)
 		return available;
 	}
 	if ( SDL_NAME(arts_init)() == 0 ) {
+#define ARTS_CRASH_HACK	/* Play a stream so aRts doesn't crash */
+#ifdef ARTS_CRASH_HACK
+		arts_stream_t stream2;
+		stream2=SDL_NAME(arts_play_stream)(44100, 16, 2, "SDL");
+		SDL_NAME(arts_write)(stream2, "", 0);
+		SDL_NAME(arts_close_stream)(stream2);
+#endif
 		available = 1;
 		SDL_NAME(arts_free)();
 	}
