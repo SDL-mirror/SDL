@@ -578,6 +578,8 @@ extern DECLSPEC int SDLCALL SDL_SetColorKey
  * If 'flag' is SDL_SRCALPHA, alpha blending is enabled for the surface.
  * OR:ing the flag with SDL_RLEACCEL requests RLE acceleration for the
  * surface; if SDL_RLEACCEL is not specified, the RLE accel will be removed.
+ *
+ * The 'alpha' parameter is ignored for surfaces that have an alpha channel.
  */
 extern DECLSPEC int SDLCALL SDL_SetAlpha(SDL_Surface *surface, Uint32 flag, Uint8 alpha);
 
