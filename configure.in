@@ -2613,6 +2613,7 @@ src/audio/nas/Makefile
 src/audio/nto/Makefile
 src/audio/openbsd/Makefile
 src/audio/paudio/Makefile
+src/audio/riscos/Makefile
 src/audio/sun/Makefile
 src/audio/ums/Makefile
 src/audio/windib/Makefile
@@ -2639,6 +2640,7 @@ src/video/picogui/Makefile
 src/video/ps2gs/Makefile
 src/video/qtopia/Makefile
 src/video/quartz/Makefile
+src/video/riscos/Makefile
 src/video/svga/Makefile
 src/video/vgl/Makefile
 src/video/wincommon/Makefile
@@ -2663,6 +2665,7 @@ src/joystick/dummy/Makefile
 src/joystick/linux/Makefile
 src/joystick/macos/Makefile
 src/joystick/mint/Makefile
+src/joystick/riscos/Makefile
 src/joystick/win32/Makefile
 src/cdrom/Makefile
 src/cdrom/aix/Makefile
