@@ -350,8 +350,12 @@ static void create_aux_windows(_THIS)
 	XClassHint *classhints;
 	classhints = XAllocClassHint();
 	if(classhints != NULL) {
-	    classhints->res_name = "SDL_App";
-	    classhints->res_class = "SDL_App";
+            char *classname = getenv("SDL_VIDEO_X11_WMCLASS");
+            if ( ! classname ) {
+                classname = "SDL_App";
+            }
+	    classhints->res_name = classname;
+	    classhints->res_class = classname;
 	    XSetClassHint(SDL_Display, WMwindow, classhints);
 	    XFree(classhints);
 	}
