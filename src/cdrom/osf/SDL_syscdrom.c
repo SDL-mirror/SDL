@@ -393,13 +393,12 @@ static int SDL_SYS_CDPlay(SDL_CD *cdrom, int start, int length)
     int end;
 
     bzero(&msf, sizeof(msf));
-    start += 150; /* Some CD-ROM drives cannot play the first 150 frames. */
     end = start +length;
-    FRAMES_TO_MSF(start,
+    FRAMES_TO_MSF(start + 150, /* LBA = 4500*M + 75*S + F - 150 */
 		  &msf.msf_starting_M_unit,
 		  &msf.msf_starting_S_unit,
 		  &msf.msf_starting_F_unit);
-    FRAMES_TO_MSF(end,
+    FRAMES_TO_MSF(end + 150, /* LBA = 4500*M + 75*S + F - 150 */
 		  &msf.msf_ending_M_unit,
 		  &msf.msf_ending_S_unit,
 		  &msf.msf_ending_F_unit);
@@ -448,4 +447,5 @@ void SDL_SYS_CDQuit(void)
 	SDL_numcds = 0;
     }
 }
+
 
