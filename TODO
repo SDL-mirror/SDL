@@ -1,10 +1,7 @@
 
-TODO list for the 1.2 release:
-
- * Use /etc/fb.modes, if available, like GGI does
-
 Wish list for the 1.3 development branch:
 
+ * Use /etc/fb.modes, if available, like GGI does
  * Add mousewheel events (new unified event architecture?)
  * DirectInput joystick support needs to be implemented
  * Be able to enumerate and select available audio and video drivers
@@ -16,6 +13,9 @@ Wish list for the 1.3 development branch:
  * Add a timestamp to events
  * Use RDTSC for timer resolution on x86 hardware
  * Add audio input API
+ * Add hardware accelerated scaled blit
+ * Add hardware accelerated alpha blits
+ * Redesign blitting architecture to allow blit plugins
 
 In the jump from 1.2 to 1.3, we should change the SDL_Rect members to
 int and evaluate all the rest of the datatypes.  This is the only place
