@@ -61,160 +61,45 @@ SDL_PixelFormat *SDL_AllocFormat(int bpp,
 	/* Set up the format */
 	format->BitsPerPixel = bpp;
 	format->BytesPerPixel = (bpp+7)/8;
-	switch (bpp) {
-		case 1:
-			/* Create the 2 color black-white palette */
-			format->palette = (SDL_Palette *)malloc(
-							sizeof(SDL_Palette));
-			if ( format->palette == NULL ) {
-				SDL_FreeFormat(format);
-				SDL_OutOfMemory();
-				return(NULL);
-			}
-			(format->palette)->ncolors = 2;
-			(format->palette)->colors = (SDL_Color *)malloc(
-				(format->palette)->ncolors*sizeof(SDL_Color));
-			if ( (format->palette)->colors == NULL ) {
-				SDL_FreeFormat(format);
-				SDL_OutOfMemory();
-				return(NULL);
-			}
-			format->palette->colors[0].r = 0xFF;
-			format->palette->colors[0].g = 0xFF;
-			format->palette->colors[0].b = 0xFF;
-			format->palette->colors[1].r = 0x00;
-			format->palette->colors[1].g = 0x00;
-			format->palette->colors[1].b = 0x00;
-			format->Rloss = 8;
-			format->Gloss = 8;
-			format->Bloss = 8;
-			format->Aloss = 8;
-			format->Rshift = 0;
-			format->Gshift = 0;
-			format->Bshift = 0;
-			format->Ashift = 0;
-			format->Rmask = 0;
-			format->Gmask = 0;
-			format->Bmask = 0;
-			format->Amask = 0;
-			break;
-
-		case 4:
-			/* Create the 16 color VGA palette */
-			format->palette = (SDL_Palette *)malloc(
-							sizeof(SDL_Palette));
-			if ( format->palette == NULL ) {
-				SDL_FreeFormat(format);
-				SDL_OutOfMemory();
-				return(NULL);
-			}
-			(format->palette)->ncolors = 16;
-			(format->palette)->colors = (SDL_Color *)malloc(
-				(format->palette)->ncolors*sizeof(SDL_Color));
-			if ( (format->palette)->colors == NULL ) {
-				SDL_FreeFormat(format);
-				SDL_OutOfMemory();
-				return(NULL);
-			}
-			/* Punt for now, will this ever be used? */
-			memset((format->palette)->colors, 0,
-				(format->palette)->ncolors*sizeof(SDL_Color));
-
-			/* Palettized formats have no mask info */
-			format->Rloss = 8;
-			format->Gloss = 8;
-			format->Bloss = 8;
-			format->Aloss = 8;
-			format->Rshift = 0;
-			format->Gshift = 0;
-			format->Bshift = 0;
-			format->Ashift = 0;
-			format->Rmask = 0;
-			format->Gmask = 0;
-			format->Bmask = 0;
-			format->Amask = 0;
-			break;
-
-		case 8:
-			/* Create an empty 256 color palette */
-			format->palette = (SDL_Palette *)malloc(
-							sizeof(SDL_Palette));
-			if ( format->palette == NULL ) {
-				SDL_FreeFormat(format);
-				SDL_OutOfMemory();
-				return(NULL);
-			}
-			(format->palette)->ncolors = 256;
-			(format->palette)->colors = (SDL_Color *)malloc(
-				(format->palette)->ncolors*sizeof(SDL_Color));
-			if ( (format->palette)->colors == NULL ) {
-				SDL_FreeFormat(format);
-				SDL_OutOfMemory();
-				return(NULL);
-			}
-			memset((format->palette)->colors, 0,
-				(format->palette)->ncolors*sizeof(SDL_Color));
-
-			/* Palettized formats have no mask info */
-			format->Rloss = 8;
-			format->Gloss = 8;
-			format->Bloss = 8;
-			format->Aloss = 8;
-			format->Rshift = 0;
-			format->Gshift = 0;
-			format->Bshift = 0;
-			format->Ashift = 0;
-			format->Rmask = 0;
-			format->Gmask = 0;
-			format->Bmask = 0;
-			format->Amask = 0;
-			break;
-
-		default:
-			/* No palette, just packed pixel info */
-			format->palette = NULL;
-			format->Rshift = 0;
-			format->Rloss = 8;
-			if ( Rmask ) {
-				for ( mask = Rmask; !(mask&0x01); mask >>= 1 )
-					++format->Rshift;
-				for ( ; (mask&0x01); mask >>= 1 )
-					--format->Rloss;
-			}
-			format->Gshift = 0;
-			format->Gloss = 8;
-			if ( Gmask ) {
-				for ( mask = Gmask; !(mask&0x01); mask >>= 1 )
-					++format->Gshift;
-				for ( ; (mask&0x01); mask >>= 1 )
-					--format->Gloss;
-			}
-			format->Bshift = 0;
-			format->Bloss = 8;
-			if ( Bmask ) {
-				for ( mask = Bmask; !(mask&0x01); mask >>= 1 )
-					++format->Bshift;
-				for ( ; (mask&0x01); mask >>= 1 )
-					--format->Bloss;
-			}
-			format->Ashift = 0;
-			format->Aloss = 8;
-			if ( Amask ) {
-				for ( mask = Amask; !(mask&0x01); mask >>= 1 )
-					++format->Ashift;
-				for ( ; (mask&0x01); mask >>= 1 )
-					--format->Aloss;
-			}
-			format->Rmask = Rmask;
-			format->Gmask = Gmask;
-			format->Bmask = Bmask;
-			format->Amask = Amask;
-			break;
-	}
-	/* Calculate some standard bitmasks, if necessary 
-	 * Note:  This could conflict with an alpha mask, if given.
-	 */
-	if ( (bpp > 8) && !format->Rmask && !format->Gmask && !format->Bmask ) {
+	if ( Rmask || Bmask || Gmask ) { /* Packed pixels with custom mask */
+		format->palette = NULL;
+		format->Rshift = 0;
+		format->Rloss = 8;
+		if ( Rmask ) {
+			for ( mask = Rmask; !(mask&0x01); mask >>= 1 )
+				++format->Rshift;
+			for ( ; (mask&0x01); mask >>= 1 )
+				--format->Rloss;
+		}
+		format->Gshift = 0;
+		format->Gloss = 8;
+		if ( Gmask ) {
+			for ( mask = Gmask; !(mask&0x01); mask >>= 1 )
+				++format->Gshift;
+			for ( ; (mask&0x01); mask >>= 1 )
+				--format->Gloss;
+		}
+		format->Bshift = 0;
+		format->Bloss = 8;
+		if ( Bmask ) {
+			for ( mask = Bmask; !(mask&0x01); mask >>= 1 )
+				++format->Bshift;
+			for ( ; (mask&0x01); mask >>= 1 )
+				--format->Bloss;
+		}
+		format->Ashift = 0;
+		format->Aloss = 8;
+		if ( Amask ) {
+			for ( mask = Amask; !(mask&0x01); mask >>= 1 )
+				++format->Ashift;
+			for ( ; (mask&0x01); mask >>= 1 )
+				--format->Aloss;
+		}
+		format->Rmask = Rmask;
+		format->Gmask = Gmask;
+		format->Bmask = Bmask;
+		format->Amask = Amask;
+	} else if ( bpp > 8 ) {		/* Packed pixels with standard mask */
 		/* R-G-B */
 		if ( bpp > 24 )
 			bpp = 24;
@@ -227,6 +112,52 @@ SDL_PixelFormat *SDL_AllocFormat(int bpp,
 		format->Rmask = ((0xFF>>format->Rloss)<<format->Rshift);
 		format->Gmask = ((0xFF>>format->Gloss)<<format->Gshift);
 		format->Bmask = ((0xFF>>format->Bloss)<<format->Bshift);
+	} else {			/* Palettized mode */
+		int i, ncolors = 1;
+		for ( i = 0; i < bpp; ++i ) {
+			ncolors *= 2;
+		}
+		format->palette = (SDL_Palette *)malloc(sizeof(SDL_Palette));
+		if ( format->palette == NULL ) {
+			SDL_FreeFormat(format);
+			SDL_OutOfMemory();
+			return(NULL);
+		}
+		(format->palette)->ncolors = ncolors;
+		(format->palette)->colors = (SDL_Color *)malloc(
+				(format->palette)->ncolors*sizeof(SDL_Color));
+		if ( (format->palette)->colors == NULL ) {
+			SDL_FreeFormat(format);
+			SDL_OutOfMemory();
+			return(NULL);
+		}
+		if ( ncolors == 2 ) {
+			/* Create a black and white bitmap palette */
+			format->palette->colors[0].r = 0xFF;
+			format->palette->colors[0].g = 0xFF;
+			format->palette->colors[0].b = 0xFF;
+			format->palette->colors[1].r = 0x00;
+			format->palette->colors[1].g = 0x00;
+			format->palette->colors[1].b = 0x00;
+		} else {
+			/* Create an empty palette */
+			memset((format->palette)->colors, 0,
+				(format->palette)->ncolors*sizeof(SDL_Color));
+		}
+
+		/* Palettized formats have no mask info */
+		format->Rloss = 8;
+		format->Gloss = 8;
+		format->Bloss = 8;
+		format->Aloss = 8;
+		format->Rshift = 0;
+		format->Gshift = 0;
+		format->Bshift = 0;
+		format->Ashift = 0;
+		format->Rmask = 0;
+		format->Gmask = 0;
+		format->Bmask = 0;
+		format->Amask = 0;
 	}
 	return(format);
 }
