@@ -836,7 +836,10 @@ do { \
 		   as soon as they are performed, so we need to buffer them
 		 */
 	     (   ((flags&SDL_HWSURFACE) == SDL_SWSURFACE) &&
-				(SDL_VideoSurface->flags&SDL_HWSURFACE))
+				(SDL_VideoSurface->flags&SDL_HWSURFACE)) ||
+	     (   (flags&SDL_DOUBLEBUF) &&
+				(SDL_VideoSurface->flags&SDL_HWSURFACE) &&
+				!(SDL_VideoSurface->flags&SDL_DOUBLEBUF))
 	     ) ) {
 		SDL_CreateShadowSurface(bpp);
 		if ( SDL_ShadowSurface == NULL ) {
