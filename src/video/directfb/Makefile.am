@@ -1,7 +1,7 @@
 
 ## Makefile.am for SDL using the DirectFB video driver
 
-CFLAGS = @CFLAGS@ $(DIRECTFB_CFLAGS)
+INCLUDES += $(DIRECTFB_CFLAGS)
 
 noinst_LTLIBRARIES = libvideo_directfb.la
 libvideo_directfb_la_SOURCES = $(DIRECTFB_SRCS)
