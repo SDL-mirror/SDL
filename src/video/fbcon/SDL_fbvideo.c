@@ -463,31 +463,31 @@ static int FB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	current_w = vinfo.xres;
 	current_h = vinfo.yres;
 	current_index = ((vinfo.bits_per_pixel+7)/8)-1;
-#ifdef BROKEN_MODES
-	FB_AddMode(this, current_index, current_w, current_h);
-#else
-	for ( i=0; i<NUM_MODELISTS; ++i ) {
-		SDL_nummodes[i] = 0;
-		SDL_modelist[i] = NULL;
-		for ( j=0; j<(sizeof(checkres)/sizeof(checkres[0])); ++j ) {
-			unsigned int w, h;
+	if ( getenv("SDL_FB_BROKEN_MODES") != NULL ) {
+		FB_AddMode(this, current_index, current_w, current_h);
+	} else {
+		for ( i=0; i<NUM_MODELISTS; ++i ) {
+			SDL_nummodes[i] = 0;
+			SDL_modelist[i] = NULL;
+			for ( j=0; j<(sizeof(checkres)/sizeof(checkres[0])); ++j ) {
+				unsigned int w, h;
 
-			/* See if we are querying for the current mode */
-			w = checkres[j].w;
-			h = checkres[j].h;
-			if ( i == current_index ) {
-				if ( (current_w > w) || (current_h > h) ) {
-					/* Only check once */
-					FB_AddMode(this, i, current_w, current_h);
-					current_index = -1;
+				/* See if we are querying for the current mode */
+				w = checkres[j].w;
+				h = checkres[j].h;
+				if ( i == current_index ) {
+					if ( (current_w > w) || (current_h > h) ) {
+						/* Only check once */
+						FB_AddMode(this, i, current_w, current_h);
+						current_index = -1;
+					}
 				}
-			}
-			if ( FB_CheckMode(this, &vinfo, i, &w, &h) ) {
-				FB_AddMode(this, i, w, h);
+				if ( FB_CheckMode(this, &vinfo, i, &w, &h) ) {
+					FB_AddMode(this, i, w, h);
+				}
 			}
 		}
 	}
-#endif /* BROKEN_MODES */
 
 	/* Fill in our hardware acceleration capabilities */
 	this->info.wm_available = 0;
