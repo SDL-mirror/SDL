@@ -13,4 +13,4 @@ GGI_SRCS = 			\
 	SDL_ggimouse.c		\
 	SDL_ggivideo.c		\
 	SDL_ggievents_c.h	\
-       	SDL_ggimouse_c.h	\
+       	SDL_ggimouse_c.h
