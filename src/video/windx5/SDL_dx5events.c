@@ -537,13 +537,13 @@ LONG
 				wmmsg.lParam = lParam;
 				posted = SDL_PrivateSysWMEvent(&wmmsg);
 
-         /* DJM: If the user isn't watching for private messages in her
-            SDL event loop, then pass it along to any win32 specific
-            window proc.
-          */
-         } else if (userWindowProc) {
-            return userWindowProc(hwnd, msg, wParam, lParam);
-         }
+			/* DJM: If the user isn't watching for private
+				messages in her SDL event loop, then pass it
+				along to any win32 specific window proc.
+			 */
+			} else if (userWindowProc) {
+				return CallWindowProc(userWindowProc, hwnd, msg, wParam, lParam);
+			}
 		}
 		break;
 	}

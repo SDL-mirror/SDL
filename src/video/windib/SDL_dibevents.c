@@ -177,7 +177,7 @@ LONG
 				along to any win32 specific window proc.
 			 */
 			} else if (userWindowProc) {
-				return userWindowProc(hwnd, msg, wParam, lParam);
+				return CallWindowProc(userWindowProc, hwnd, msg, wParam, lParam);
 			}
 		}
 		break;
