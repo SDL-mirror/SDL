@@ -201,8 +201,12 @@ int BE_OpenAudio(_THIS, SDL_AudioSpec *spec)
 		                                                 NULL, _this);
 		SDL_UnmaskSignals(&omask);
 	}
-	audio_obj->Start();
-	audio_obj->SetHasData(true);
+	if ( audio_obj->Start() == B_NO_ERROR ) {
+		audio_obj->SetHasData(true);
+	} else {
+		SDL_SetError("Unable to start Be audio");
+		return(-1);
+	}
 
 	/* We're running! */
 	return(1);

@@ -357,32 +357,26 @@ static bool BE_FindClosestFSMode(_THIS, int width, int height, int bpp,
 	}	
 }
 
-static int BE_ToggleFullScreen(_THIS, int fullscreen)
+static int BE_SetFullScreen(_THIS, SDL_Surface *screen, int fullscreen)
 {
-	bool needs_unlock, is_fullscreen;	
+	int was_fullscreen;
+	bool needs_unlock;
 	BScreen bscreen;
 	BRect bounds;
 	display_mode mode;
 	int width, height, bpp;
 
+	/* Set the fullscreen mode */
+	was_fullscreen = SDL_Win->IsFullScreen();
 	SDL_Win->SetFullScreen(fullscreen);
-	is_fullscreen = SDL_Win->IsFullScreen();
-					     
-	if(!((is_fullscreen && fullscreen) ||
-	     (!is_fullscreen && !fullscreen))) {
-		/* Modeswitch failed */
-		return 0;
-	}
-	
-	if(is_fullscreen)	_this->screen->flags |= SDL_FULLSCREEN;
-	else			_this->screen->flags &= ~SDL_FULLSCREEN;
+	fullscreen = SDL_Win->IsFullScreen();
 
-	width = _this->screen->w;
-	height = _this->screen->h;
+	width = screen->w;
+	height = screen->h;
 
 	/* Set the appropriate video mode */
 	if ( fullscreen ) {
-		bpp = _this->screen->format->BitsPerPixel;
+		bpp = screen->format->BitsPerPixel;
 		bscreen.GetMode(&mode);
 		if ( (bpp != ColorSpaceToBitsPerPixel(mode.space)) ||
 		     (width != mode.virtual_width) ||
@@ -394,14 +388,15 @@ static int BE_ToggleFullScreen(_THIS, int fullscreen)
 				 */
 				SDL_Win->InhibitResize();
 			} else {
-				_this->screen->flags &= ~SDL_FULLSCREEN;
+				fullscreen = 0;
+				SDL_Win->SetFullScreen(fullscreen);
 			}
 		}
-		
-	} else {
+	}
+	if ( ! fullscreen ) {
 		bscreen.SetMode(&saved_mode);
 	}
-	
+
 	if ( SDL_Win->Lock() ) {
 		int xoff, yoff;
 		if ( SDL_Win->Shown() ) {
@@ -410,32 +405,50 @@ static int BE_ToggleFullScreen(_THIS, int fullscreen)
 		} else {
 			needs_unlock = 0;
 		}
-		/* This resizes the window and view area, but inhibits resizing of
-		 * the BBitmap due to the InhibitResize call above. Thus the bitmap
-		 * (pixel data) never changes.
+		/* This resizes the window and view area, but inhibits resizing
+		 * of the BBitmap due to the InhibitResize call above. Thus the
+		 * bitmap (pixel data) never changes.
 		 */
 		SDL_Win->ResizeTo(width, height);
 		bounds = bscreen.Frame();
-		/* Calculate offsets - used either to center window (windowed mode)
-		 * or to set drawing offsets (fullscreen mode)
+		/* Calculate offsets - used either to center window
+		 * (windowed mode) or to set drawing offsets (fullscreen mode)
 		 */
-		xoff = (bounds.IntegerWidth() - _this->screen->w)/2;
-		yoff = (bounds.IntegerHeight() - _this->screen->h)/2;
-		if(fullscreen) {
+		xoff = (bounds.IntegerWidth() - width)/2;
+		yoff = (bounds.IntegerHeight() - height)/2;
+printf("Setting X/Y offset: %d/%d\n", xoff, yoff);
+		if ( fullscreen ) {
 			/* Set offset for drawing */
 			SDL_Win->SetXYOffset(xoff, yoff);
 		} else {
 			/* Center window and reset the drawing offset */
-			SDL_Win->MoveTo(xoff > 0 ? (float)xoff : 0.0,
-					yoff > 0 ? (float)yoff : 0.0);
 			SDL_Win->SetXYOffset(0, 0);
+		}
+		if ( ! needs_unlock || was_fullscreen ) {
+			/* Center the window the first time */
+			SDL_Win->MoveTo(xoff > 0 ? (float)xoff : 0.0f,
+					yoff > 0 ? (float)yoff : 0.0f);
 		}
 		SDL_Win->Show();
 		
 		/* Unlock the window manually after the first Show() */
-		if ( needs_unlock ) { SDL_Win->Unlock(); }
+		if ( needs_unlock ) {
+			SDL_Win->Unlock();
+		}
+	}
+
+	/* Set the fullscreen flag in the screen surface */
+	if ( fullscreen ) {
+		screen->flags |= SDL_FULLSCREEN;
+	} else {
+		screen->flags &= ~SDL_FULLSCREEN; 
 	}
 	return(1);
+}
+
+static int BE_ToggleFullScreen(_THIS, int fullscreen)
+{
+	return BE_SetFullScreen(_this, _this->screen, fullscreen);
 }
 
 /* FIXME: check return values and cleanup here */
@@ -443,49 +456,17 @@ SDL_Surface *BE_SetVideoMode(_THIS, SDL_Surface *current,
 				int width, int height, int bpp, Uint32 flags)
 {
 	BScreen bscreen;
-	display_mode mode;
 	BBitmap *bbitmap;
 	BRect bounds;
-	int needs_unlock;
-	int xoff = 0, yoff = 0;
-
-	/* Set the appropriate video mode */
-	if ( flags & SDL_FULLSCREEN ) { 
-		bscreen.GetMode(&mode);
-		if ( (bpp != ColorSpaceToBitsPerPixel(mode.space)) ||
-		     (width != mode.virtual_width) ||
-		     (height != mode.virtual_height) ) {
-			if(BE_FindClosestFSMode(_this, width, height, bpp, &mode)) {
-				bscreen.SetMode(&mode);
-				xoff = (mode.virtual_width - width)/2;
-				yoff = (mode.virtual_height - height)/2;
-			} else {
-				flags &= ~SDL_FULLSCREEN;
-			}
-		}
-	} else {
-		if ( current->flags & SDL_FULLSCREEN ) {
-			bscreen.SetMode(&saved_mode);
-		}
-	}
 
 	/* Create the view for this window */
 	if ( SDL_Win->CreateView(flags) < 0 ) {
 		return(NULL);
 	}
 
-	/* Set offsets */
-	SDL_Win->SetXYOffset(xoff, yoff);
-
 	current->flags = 0;		/* Clear flags */
 	current->w = width;
 	current->h = height;
-	if ( flags & SDL_FULLSCREEN ) {
-		SDL_Win->SetFullScreen(1);
-		current->flags |= SDL_FULLSCREEN;
-	} else {
-		SDL_Win->SetFullScreen(0);
-	}
 	SDL_Win->SetType(B_TITLED_WINDOW);
 	if ( flags & SDL_NOFRAME ) {
 		current->flags |= SDL_NOFRAME;
@@ -523,33 +504,8 @@ SDL_Surface *BE_SetVideoMode(_THIS, SDL_Surface *current,
 		_this->UpdateRects = BE_NormalUpdate;
 	}
 
-	/* Hide the window for resizing */
-	if ( SDL_Win->Lock() ) {
-		if ( SDL_Win->Shown() ) {
-			needs_unlock = 1;
-			SDL_Win->Hide();
-		} else {
-			needs_unlock = 0;
-		}
-
-		/* Resize, but only if the window is different size than
-		 * before. Otherwise it jumps funnily when the user resizes.
-		 */
-		bounds = SDL_Win->Bounds();
-		if((int)bounds.Width() != width ||
-		   (int)bounds.Height() != height) {
-			SDL_Win->ResizeTo(width, height);
-			bounds = bscreen.Frame();
-			SDL_Win->MoveTo((bounds.Width()-width)/2,
-					(bounds.Height()-height)/2);
-		}
-		SDL_Win->Show();
-
-		/* Unlock the window manually after the first Show() */
-		if ( needs_unlock ) {
-			SDL_Win->Unlock();
-		}
-	}
+	/* Set the correct fullscreen mode */
+	BE_SetFullScreen(_this, current, flags & SDL_FULLSCREEN ? 1 : 0);
 
 	/* We're done */
 	return(current);

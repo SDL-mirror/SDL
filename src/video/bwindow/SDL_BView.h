@@ -85,7 +85,7 @@ public:
 				dest.top    = updateRect.top + yoff;
 				dest.left   = updateRect.left + xoff;
 				dest.bottom = updateRect.bottom + yoff;
-				dest.right  = updateRect.right + xoff;;
+				dest.right  = updateRect.right + xoff;
 				DrawBitmap(image, updateRect, dest);
 			} else {
 				DrawBitmap(image, updateRect, updateRect);
