@@ -44,6 +44,8 @@ static char rcsid =
 #endif 
 
 #define MAX(a, b)        (a > b ? a : b)
+#define V_INTERLACE      0x010
+#define V_DBLSCAN        0x020
 
 #ifdef XFREE86_VM
 Bool SDL_NAME(XF86VidModeGetModeInfo)(Display *dpy, int scr, SDL_NAME(XF86VidModeModeInfo) *info)
@@ -91,6 +93,82 @@ static int cmpmodes(const void *va, const void *vb)
 }
 #endif
 
+#ifdef XFREE86_VM
+static int get_vidmode_filter(SDL_NAME(XF86VidModeModeInfo) **modes, int nmodes, char **bitmap)
+{
+    int i, result = 0;
+    int use_all_modes, use_specific_mode;
+    const char *variable;
+    char *temp;
+
+    if (!nmodes)
+        return 0;
+
+    temp = (char *)malloc((nmodes)*sizeof(char));
+    if (!temp)
+        return 0;
+
+    for ( i = 0; i < nmodes; ++i )
+        temp[i] = 0;
+
+    variable = getenv("SDL_VIDEO_X11_USE_ALL_MODES");
+    use_all_modes = variable ? atoi(variable) : 0;
+    variable = getenv("SDL_VIDEO_X11_USE_SPECIFIC_MODE");
+    use_specific_mode = variable ? atoi(variable) : 0;
+
+    qsort(modes, nmodes, sizeof *modes, cmpmodes);
+
+    if ( use_all_modes ) {
+        for ( i = 0; i < nmodes; ++i )
+            temp[i] = 1;
+        result  = 1;
+/*    } else if ( use_specific_mode ) { ... */
+    } else {
+        int previous_refresh, current_refresh;
+        SDL_NAME(XF86VidModeModeInfo) *previous, *current;
+
+        previous = modes[0];
+        previous_refresh = (int)(previous->dotclock * 1000.0 /
+          (previous->htotal * previous->vtotal));
+        if ( previous->flags & V_INTERLACE ) previous_refresh *= 2;
+        else if ( previous->flags & V_DBLSCAN ) previous_refresh /= 2;
+
+        temp[0] = 1;
+        for ( i = 1; i < nmodes; ++i ) {
+            current = modes[i];
+            current_refresh = (int)(current->dotclock * 1000.0 /
+              (current->htotal * current->vtotal));
+            if ( current->flags & V_INTERLACE ) current_refresh *= 2;
+            else if ( current->flags & V_DBLSCAN ) current_refresh /= 2;
+
+            /* Compare this mode to the previous one */
+            if ( current->hdisplay == previous->hdisplay &&
+                 current->vdisplay == previous->vdisplay ) {
+#ifdef XFREE86_DEBUG
+		printf("Comparing %dx%d at %d Hz and %d Hz\n",
+			current->hdisplay, current->vdisplay,
+			current_refresh, previous_refresh);
+#endif
+                if ( current_refresh > previous_refresh ) {
+                    temp[i-1] = 0;
+                    temp[i]   = 1;
+                }
+                else
+                    temp[i] = 0;
+            }
+            else
+                temp[i] = 1;
+
+            previous = current;
+            previous_refresh = current_refresh;
+        }
+        result = 1;
+    }
+    *bitmap = temp;
+    return result;
+}
+#endif
+
 static void get_real_resolution(_THIS, int* w, int* h);
 
 static void set_best_resolution(_THIS, int width, int height)
@@ -101,10 +179,11 @@ static void set_best_resolution(_THIS, int width, int height)
         SDL_NAME(XF86VidModeModeInfo) **modes;
         int i;
         int nmodes;
+        char *bitmap;
 
         if ( SDL_NAME(XF86VidModeGetModeLine)(SDL_Display, SDL_Screen, &i, &mode) &&
-             SDL_NAME(XF86VidModeGetAllModeLines)(SDL_Display,SDL_Screen,&nmodes,&modes)){
-            qsort(modes, nmodes, sizeof *modes, cmpmodes);
+             SDL_NAME(XF86VidModeGetAllModeLines)(SDL_Display,SDL_Screen,&nmodes,&modes) &&
+             get_vidmode_filter(modes, nmodes, &bitmap) ) {
 #ifdef XFREE86_DEBUG
             printf("Available modes:\n");
             for ( i = 0; i < nmodes; ++i ) {
@@ -114,12 +193,14 @@ static void set_best_resolution(_THIS, int width, int height)
 #endif
             for ( i = nmodes-1; i > 0 ; --i ) {
                 if ( (modes[i]->hdisplay == width) &&
-                     (modes[i]->vdisplay == height) )
+                     (modes[i]->vdisplay == height) &&
+                     (bitmap[i] == 1) )
                     goto match;
             }
             for ( i = nmodes-1; i > 0 ; --i ) {
                 if ( (modes[i]->hdisplay >= width) &&
-                     (modes[i]->vdisplay >= height) )
+                     (modes[i]->vdisplay >= height) &&
+                     (bitmap[i] == 1) )
                     break;
             }
        match:
@@ -128,6 +209,7 @@ static void set_best_resolution(_THIS, int width, int height)
                 SDL_NAME(XF86VidModeSwitchToMode)(SDL_Display, SDL_Screen, modes[i]);
             }
             XFree(modes);
+            if (bitmap) free(bitmap);
         }
     }
 #endif /* XFREE86_VM */
@@ -275,6 +357,7 @@ int X11_GetVideoModes(_THIS)
     int vm_major, vm_minor;
     int nmodes;
     SDL_NAME(XF86VidModeModeInfo) **modes;
+    char *bitmap = (char*)0;
 #endif
 #ifdef HAVE_XIGXME
     int xme_major, xme_minor;
@@ -336,14 +419,17 @@ int X11_GetVideoModes(_THIS)
         }
     }
     if ( ! buggy_X11 &&
-         SDL_NAME(XF86VidModeGetAllModeLines)(SDL_Display, SDL_Screen,&nmodes,&modes) ) {
+         SDL_NAME(XF86VidModeGetAllModeLines)(SDL_Display, SDL_Screen,&nmodes,&modes) &&
+         get_vidmode_filter(modes, nmodes, &bitmap) ) {
 
-        qsort(modes, nmodes, sizeof *modes, cmpmodes);
         SDL_modelist = (SDL_Rect **)malloc((nmodes+2)*sizeof(SDL_Rect *));
         if ( SDL_modelist ) {
             n = 0;
             for ( i=0; i<nmodes; ++i ) {
                 int w, h;
+
+                /* Exclude those vidmodes that have been filtered out */
+                if (!bitmap[i]) continue;
 
                 /* Check to see if we should add the screen size (Xinerama) */
                 w = modes[i]->hdisplay;
@@ -377,6 +463,7 @@ int X11_GetVideoModes(_THIS)
             SDL_modelist[n] = NULL;
         }
         XFree(modes);
+        if (bitmap) free(bitmap);
 
         use_vidmode = vm_major * 100 + vm_minor;
         save_mode(this);
