@@ -48,6 +48,7 @@ static MCIDEVICEID SDL_mciID[MAX_DRIVES];
 #ifdef BROKEN_MCI_PAUSE
 static int SDL_paused[MAX_DRIVES];
 #endif
+static int SDL_CD_end_position;
 
 /* The system-dependent CD control functions */
 static const char *SDL_SYS_CDName(int drive);
@@ -314,6 +315,7 @@ static int SDL_SYS_CDPlay(SDL_CD *cdrom, int start, int length)
 	mci_play.dwFrom = MCI_MAKE_MSF(m, s, f);
 	FRAMES_TO_MSF(start+length, &m, &s, &f);
 	mci_play.dwTo = MCI_MAKE_MSF(m, s, f);
+	SDL_CD_end_position = mci_play.dwTo;
 	return(SDL_SYS_CDioctl(cdrom->id, MCI_PLAY, flags, &mci_play));
 }
 
@@ -335,15 +337,16 @@ static int SDL_SYS_CDResume(SDL_CD *cdrom)
 	int flags;
 
 	okay = 0;
-	/* Play from the current play position to end of CD */
+	/* Play from the current play position to the end position set earlier */
 	flags = MCI_STATUS_ITEM | MCI_WAIT;
 	mci_status.dwItem = MCI_STATUS_POSITION;
 	if ( SDL_SYS_CDioctl(cdrom->id, MCI_STATUS, flags, &mci_status) == 0 ) {
 		MCI_PLAY_PARMS mci_play;
 
-		flags = MCI_FROM | MCI_NOTIFY;
+		flags = MCI_FROM | MCI_TO | MCI_NOTIFY;
 		mci_play.dwCallback = 0;
 		mci_play.dwFrom = mci_status.dwReturn;
+		mci_play.dwTo = SDL_CD_end_position;
 		if (SDL_SYS_CDioctl(cdrom->id,MCI_PLAY,flags,&mci_play) == 0) {
 			okay = 1;
 			SDL_paused[cdrom->id] = 0;
