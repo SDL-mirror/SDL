@@ -327,6 +327,8 @@ printf("MapNotify!\n");
 		} else {
 			X11_GrabInputNoLock(this, this->input_grab);
 		}
+		X11_CheckMouseModeNoLock(this);
+
 		if ( SDL_VideoSurface ) {
 			X11_RefreshDisplay(this);
 		}
