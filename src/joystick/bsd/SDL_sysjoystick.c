@@ -57,6 +57,11 @@ static char rcsid =
 
 #ifdef __FreeBSD__
 #include <osreldate.h>
+#include <sys/joystick.h>
+#endif
+
+#if defined(__NetBSD__) || defined(__OpenBSD__)
+#include <machine/joystick.h>
 #endif
 
 #include "SDL_error.h"
@@ -139,8 +144,8 @@ SDL_SYS_JoystickInit(void)
 
 	SDL_numjoysticks = 0;
 
-	memset(joynames, NULL, sizeof(joynames));
-	memset(joydevnames, NULL, sizeof(joydevnames));
+	memset(joynames, 0, sizeof(joynames));
+	memset(joydevnames, 0, sizeof(joydevnames));
 
 	for (i = 0; i < MAX_UHID_JOYS; i++) {
 		SDL_Joystick nj;
@@ -249,7 +254,18 @@ SDL_SYS_JoystickOpen(SDL_Joystick *joy)
 	joy->hwdata = hw;
 	hw->fd = fd;
 	hw->path = strdup(path);
-	hw->type = BSDJOY_UHID;
+	if (! strncmp(path, "/dev/joy", 8)) {
+		hw->type = BSDJOY_JOY;
+		joy->naxes = 2;
+		joy->nbuttons = 2;
+		joy->nhats = 0;
+		joy->nballs = 0;
+		joydevnames[joy->index] = strdup("Gameport joystick");
+		goto usbend;
+	} else {
+		hw->type = BSDJOY_UHID;
+	}
+
 	{
 	    int ax;
 	    for (ax = 0; ax < JOYAXE_count; ax++)
@@ -332,6 +348,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick *joy)
 	}
 	hid_end_parse(hdata);
 
+usbend:
 	/* The poll blocks the event thread. */
 	fcntl(fd, F_SETFL, O_NONBLOCK);
 
@@ -351,6 +368,57 @@ SDL_SYS_JoystickUpdate(SDL_Joystick *joy)
 	struct report *rep;
 	int nbutton, naxe = -1;
 	Sint32 v;
+
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+	struct joystick gameport;
+	static int x, y, xmin = 0xffff, ymin = 0xffff, xmax = 0, ymax = 0;
+ 
+	if (joy->hwdata->type == BSDJOY_JOY) {
+		if (read(joy->hwdata->fd, &gameport, sizeof gameport) != sizeof gameport)
+			return;
+		if (abs(x - gameport.x) > 8) {
+			x = gameport.x;
+			if (x < xmin) {
+				xmin = x;
+			}
+			if (x > xmax) {
+				xmax = x;
+			}
+			if (xmin == xmax) {
+				xmin--;
+				xmax++;
+			}
+			v = (Sint32)x;
+			v -= (xmax + xmin + 1)/2;
+			v *= 32768/((xmax - xmin + 1)/2);
+			SDL_PrivateJoystickAxis(joy, 0, v);
+		}
+		if (abs(y - gameport.y) > 8) {
+			y = gameport.y;
+			if (y < ymin) {
+				ymin = y;
+			}
+			if (y > ymax) {
+				ymax = y;
+			}
+			if (ymin == ymax) {
+				ymin--;
+				ymax++;
+			}
+			v = (Sint32)y;
+			v -= (ymax + ymin + 1)/2;
+			v *= 32768/((ymax - ymin + 1)/2);
+			SDL_PrivateJoystickAxis(joy, 1, v);
+		}
+		if (gameport.b1 != joy->buttons[0]) {
+			SDL_PrivateJoystickButton(joy, 0, gameport.b1);
+		}
+		if (gameport.b2 != joy->buttons[1]) {
+			SDL_PrivateJoystickButton(joy, 1, gameport.b2);
+		}
+		return;
+	}
+#endif /* defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) */
 	
 	rep = &joy->hwdata->inreport;
 
@@ -418,8 +486,10 @@ SDL_SYS_JoystickUpdate(SDL_Joystick *joy)
 void
 SDL_SYS_JoystickClose(SDL_Joystick *joy)
 {
-	report_free(&joy->hwdata->inreport);
-	hid_dispose_report_desc(joy->hwdata->repdesc);
+	if (strncmp(joy->hwdata->path, "/dev/joy", 8))	{
+		report_free(&joy->hwdata->inreport);
+		hid_dispose_report_desc(joy->hwdata->repdesc);
+	}
 	close(joy->hwdata->fd);
 	free(joy->hwdata->path);
 	free(joy->hwdata);
