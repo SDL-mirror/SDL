@@ -69,6 +69,8 @@ struct SDL_PrivateVideoData {
     struct Window *SDL_Window;	/* Shared by both displays (no X security?) */
     unsigned char *BlankCursor;	/* The invisible cursor */
 
+    char *SDL_windowid;		/* Flag: true if we have been passed a window */
+
     /* The variables used for displaying graphics */
     Uint8 *Ximage;		/* The X image for our window */
     int swap_pixels;		/* Flag: true if display is swapped endian */
@@ -134,6 +136,7 @@ struct SDL_PrivateVideoData {
 #define SDL_Window		(this->hidden->SDL_Window)
 #define WM_DELETE_WINDOW	(this->hidden->WM_DELETE_WINDOW)
 #define SDL_BlankCursor		(this->hidden->BlankCursor)
+#define SDL_windowid		(this->hidden->SDL_windowid)
 #define SDL_Ximage		(this->hidden->Ximage)
 #define SDL_GC			(this->hidden->gc)
 #define swap_pixels		(this->hidden->swap_pixels)
@@ -151,6 +154,9 @@ struct SDL_PrivateVideoData {
 #define SDL_DisplayColormap	(this->hidden->GFX_Display->ViewPort.ColorMap)
 #define SDL_XPixels		(this->hidden->XPixels)
 #define SDL_iconcolors		(this->hidden->iconcolors)
+
+/* Used to get the X cursor from a window-manager specific cursor */
+// extern Cursor SDL_GetWMXCursor(WMcursor *cursor);
 
 extern int CGX_CreateWindow(_THIS, SDL_Surface *screen,
 			    int w, int h, int bpp, Uint32 flags);

@@ -1936,6 +1936,7 @@ src/video/photon/Makefile
 src/video/dummy/Makefile
 src/events/Makefile
 src/joystick/Makefile
+src/joystick/amigaos/Makefile
 src/joystick/beos/Makefile
 src/joystick/dummy/Makefile
 src/joystick/linux/Makefile

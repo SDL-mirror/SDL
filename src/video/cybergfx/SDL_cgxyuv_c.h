@@ -25,25 +25,21 @@ static char rcsid =
  "@(#) $Id$";
 #endif
 
-/* Utilities for getting and setting the X display mode */
+/* This is the XFree86 Xv extension implementation of YUV video overlays */
 
+#include "SDL_video.h"
 #include "SDL_cgxvideo.h"
 
-/* Define this if you want to grab the keyboard in fullscreen mode.
-   If you do not define this, SDL will return from SDL_SetVideoMode()
-   immediately, but will not actually go fullscreen until the window
-   manager is idle.
-*/
-#define GRAB_FULLSCREEN
+#ifdef XFREE86_XV
 
-extern int CGX_GetVideoModes(_THIS);
-extern SDL_Rect **CGX_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags);
-extern void CGX_FreeVideoModes(_THIS);
-extern int CGX_ResizeFullScreen(_THIS);
-/*
-extern void CGX_WaitMapped(_THIS, Window win);
-extern void CGX_WaitUnmapped(_THIS, Window win);
-extern void CGX_QueueEnterFullScreen(_THIS);
-*/
-extern int CGX_EnterFullScreen(_THIS);
-extern int CGX_LeaveFullScreen(_THIS);
+extern SDL_Overlay *X11_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SDL_Surface *display);
+
+extern int X11_LockYUVOverlay(_THIS, SDL_Overlay *overlay);
+
+extern void X11_UnlockYUVOverlay(_THIS, SDL_Overlay *overlay);
+
+extern int X11_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *dstrect);
+
+extern void X11_FreeYUVOverlay(_THIS, SDL_Overlay *overlay);
+
+#endif /* XFREE86_XV */

@@ -3,6 +3,6 @@
 
 noinst_LTLIBRARIES = libaudio_arch.la
 
-ARCH_SRCS = SDL_ahiaudio.c SDL_audio.c SDL_lowaudio.h SDL_sysaudio.h
+ARCH_SRCS = SDL_ahiaudio.c SDL_ahiaudio.h
 
 libaudio_arch_la_SOURCES = $(ARCH_SRCS)

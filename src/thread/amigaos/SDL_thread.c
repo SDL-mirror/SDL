@@ -265,6 +265,18 @@ void SDL_WaitThread(SDL_Thread *thread, int *status)
 	}
 }
 
+Uint32 SDL_GetThreadID(SDL_Thread *thread)
+{
+	Uint32 id;
+
+	if ( thread ) {
+		id = thread->threadid;
+	} else {
+		id = SDL_ThreadID();
+	}
+	return(id);
+}
+
 void SDL_KillThread(SDL_Thread *thread)
 {
 	if ( thread ) {

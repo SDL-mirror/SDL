@@ -25,7 +25,7 @@ static char rcsid =
  "@(#) $Id$";
 #endif
 
-/* AmigaOS thread management routines for SDL */
+/* BeOS thread management routines for SDL */
 
 #include "SDL_error.h"
 #include "SDL_mutex.h"
@@ -39,6 +39,8 @@ typedef struct {
 	SDL_Thread *info;
 	struct Task *wait;
 } thread_args;
+
+#ifndef MORPHOS
 
 #if defined(__SASC) && !defined(__PPC__) 
 __saveds __asm Uint32 RunThread(register __a0 char *args )
@@ -59,6 +61,34 @@ Uint32 RunThread(char *args __asm("a0") )
 	Signal(Father,SIGBREAKF_CTRL_F);
 	return(0);
 }
+
+#else
+
+#include <emul/emulinterface.h>
+
+Uint32 RunTheThread(void)
+{
+	thread_args *data=(thread_args *)atol(REG_A0);
+	struct Task *Father;
+
+	D(bug("Received data: %lx\n",data));
+	Father=data->wait;
+
+	SDL_RunThread(data);
+
+	Signal(Father,SIGBREAKF_CTRL_F);
+	return(0);
+}
+
+struct EmulLibEntry RunThread=
+{
+	TRAP_LIB,
+	0,
+	RunTheThread
+};
+
+#endif
+
 
 int SDL_SYS_CreateThread(SDL_Thread *thread, void *args)
 {
@@ -98,6 +128,7 @@ Uint32 SDL_ThreadID(void)
 
 void SDL_SYS_WaitThread(SDL_Thread *thread)
 {
+	SetSignal(0L,SIGBREAKF_CTRL_F|SIGBREAKF_CTRL_C);
 	Wait(SIGBREAKF_CTRL_F|SIGBREAKF_CTRL_C);
 }
 

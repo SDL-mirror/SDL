@@ -25,15 +25,20 @@ static char rcsid =
  "@(#) $Id$";
 #endif
 
-#ifndef _SDL_lowaudio_h
-#define _SDL_lowaudio_h
+#ifndef _SDL_ahiaudio_h
+#define _SDL_ahiaudio_h
 
-// #include <libraries/ahi_sub.h>
+#include <exec/exec.h>
+#include <dos/dos.h>
+#ifdef __SASC
+#include <proto/exec.h>
+#else
+#include <inline/exec.h>
+#endif
 
+#include <devices/ahi.h>
+#include "mydebug.h"
 #include "SDL_sysaudio.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 /* Hidden "this" pointer for the audio functions */
 #define _THIS	SDL_AudioDevice *this
@@ -55,4 +60,4 @@ struct SDL_PrivateAudioData {
 #define current_buffer		(this->hidden->current_buffer)
 #define playing			(this->hidden->playing)
 
-#endif /* _SDL_lowaudio_h */
+#endif /* _SDL_ahiaudio_h */

@@ -126,14 +126,17 @@ extern AudioBootStrap DSOUND_bootstrap;
 #ifdef ENABLE_WINDIB
 extern AudioBootStrap WAVEOUT_bootstrap;
 #endif
+#ifdef _AIX
+extern AudioBootStrap Paud_bootstrap;
+#endif
 #ifdef __BEOS__
 extern AudioBootStrap BAUDIO_bootstrap;
 #endif
 #if defined(macintosh) || TARGET_API_MAC_CARBON
 extern AudioBootStrap SNDMGR_bootstrap;
 #endif
-#ifdef _AIX
-extern AudioBootStrap Paud_bootstrap;
+#ifdef ENABLE_AHI
+extern AudioBootStrap AHI_bootstrap;
 #endif
 
 /* This is the current audio device */

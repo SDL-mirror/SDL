@@ -214,6 +214,8 @@ static int CGX_HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,
 	}
 	else if(dst->hwdata)
 		BBB(src->hwdata->bmap,srcrect->x,srcrect->y,dst->hwdata->bmap,dstrect->x,dstrect->y,srcrect->w,srcrect->h,0xc0,0xff,NULL);
+
+	return 0;
 }
 
 int CGX_FillHWRect(_THIS,SDL_Surface *dst,SDL_Rect *dstrect,Uint32 color)
@@ -234,4 +236,5 @@ int CGX_FillHWRect(_THIS,SDL_Surface *dst,SDL_Rect *dstrect,Uint32 color)
 
 		FillPixelArray(&temprp,dstrect->x,dstrect->y,dstrect->w,dstrect->h,color);
 	}
+	return 0;
 }

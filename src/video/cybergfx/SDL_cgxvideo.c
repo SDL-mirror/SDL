@@ -64,8 +64,7 @@ static int CGX_VideoInit(_THIS, SDL_PixelFormat *vformat);
 static SDL_Surface *CGX_SetVideoMode(_THIS, SDL_Surface *current, int width, int height, int bpp, Uint32 flags);
 static int CGX_ToggleFullScreen(_THIS, int on);
 static void CGX_UpdateMouse(_THIS);
-static int CGX_SetColors(_THIS, int firstcolor, int ncolors,
-			 SDL_Color *colors);
+static int CGX_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors);
 static void CGX_VideoQuit(_THIS);
 
 /* CGX driver bootstrap functions */
@@ -110,6 +109,7 @@ static void DestroyScreen(_THIS)
 			this->hidden->dbuffer=0;
 		}
 		CloseScreen(GFX_Display);
+		currently_fullscreen=0;
 	}
 	else
 		UnlockPubScreen(NULL,GFX_Display);
@@ -173,6 +173,9 @@ static SDL_VideoDevice *CGX_CreateDevice(int devindex)
 	device->SetVideoMode = CGX_SetVideoMode;
 	device->ToggleFullScreen = CGX_ToggleFullScreen;
 	device->UpdateMouse = CGX_UpdateMouse;
+#ifdef XFREE86_XV
+	device->CreateYUVOverlay = X11_CreateYUVOverlay;
+#endif
 	device->SetColors = CGX_SetColors;
 	device->UpdateRects = NULL;
 	device->VideoQuit = CGX_VideoQuit;
@@ -192,8 +195,8 @@ static SDL_VideoDevice *CGX_CreateDevice(int devindex)
 	device->GL_MakeCurrent = X11_GL_MakeCurrent;
 	device->GL_SwapBuffers = X11_GL_SwapBuffers;
 #endif
-	device->SetCaption = CGX_SetCaption;
 	device->SetIcon = CGX_SetIcon;
+	device->SetCaption = CGX_SetCaption;
 	device->IconifyWindow = NULL; /* CGX_IconifyWindow; */
 	device->GrabInput = NULL /* CGX_GrabInput*/; 
 	device->GetWMInfo = CGX_GetWMInfo;
@@ -211,10 +214,114 @@ static SDL_VideoDevice *CGX_CreateDevice(int devindex)
 }
 
 VideoBootStrap CGX_bootstrap = {
-	"CGX", "Amiga CyberGFX video",
-	CGX_Available, CGX_CreateDevice
+	"CGX", "AmigaOS CyberGraphics", CGX_Available, CGX_CreateDevice
 };
 
+#if 0
+
+/* Create auxiliary (toplevel) windows with the current visual */
+static void create_aux_windows(_THIS)
+{
+    XSetWindowAttributes xattr;
+    XWMHints *hints;
+    XTextProperty titleprop, iconprop;
+    int def_vis = (SDL_Visual == DefaultVisual(SDL_Display, SDL_Screen));
+
+    /* Don't create any extra windows if we are being managed */
+    if ( SDL_windowid ) {
+	FSwindow = 0;
+	WMwindow = strtol(SDL_windowid, NULL, 0);
+        return;
+    }
+
+    if(FSwindow)
+	XDestroyWindow(SDL_Display, FSwindow);
+
+    xattr.override_redirect = True;
+    xattr.background_pixel = def_vis ? BlackPixel(SDL_Display, SDL_Screen) : 0;
+    xattr.border_pixel = 0;
+    xattr.colormap = SDL_XColorMap;
+
+    FSwindow = XCreateWindow(SDL_Display, SDL_Root, 0, 0, 32, 32, 0,
+			     this->hidden->depth, InputOutput, SDL_Visual,
+			     CWOverrideRedirect | CWBackPixel | CWBorderPixel
+			     | CWColormap,
+			     &xattr);
+
+    XSelectInput(SDL_Display, FSwindow, StructureNotifyMask);
+
+    /* Tell KDE to keep the fullscreen window on top */
+    {
+	XEvent ev;
+	long mask;
+
+	memset(&ev, 0, sizeof(ev));
+	ev.xclient.type = ClientMessage;
+	ev.xclient.window = SDL_Root;
+	ev.xclient.message_type = XInternAtom(SDL_Display,
+					      "KWM_KEEP_ON_TOP", False);
+	ev.xclient.format = 32;
+	ev.xclient.data.l[0] = FSwindow;
+	ev.xclient.data.l[1] = CurrentTime;
+	mask = SubstructureRedirectMask;
+	XSendEvent(SDL_Display, SDL_Root, False, mask, &ev);
+    }
+
+    hints = NULL;
+    titleprop.value = iconprop.value = NULL;
+    if(WMwindow) {
+	/* All window attributes must survive the recreation */
+	hints = XGetWMHints(SDL_Display, WMwindow);
+	XGetWMName(SDL_Display, WMwindow, &titleprop);
+	XGetWMIconName(SDL_Display, WMwindow, &iconprop);
+	XDestroyWindow(SDL_Display, WMwindow);
+    }
+
+    /* Create the window for windowed management */
+    /* (reusing the xattr structure above) */
+    WMwindow = XCreateWindow(SDL_Display, SDL_Root, 0, 0, 32, 32, 0,
+			     this->hidden->depth, InputOutput, SDL_Visual,
+			     CWBackPixel | CWBorderPixel | CWColormap,
+			     &xattr);
+
+    /* Set the input hints so we get keyboard input */
+    if(!hints) {
+	hints = XAllocWMHints();
+	hints->input = True;
+	hints->flags = InputHint;
+    }
+    XSetWMHints(SDL_Display, WMwindow, hints);
+    XFree(hints);
+    if(titleprop.value) {
+	XSetWMName(SDL_Display, WMwindow, &titleprop);
+	XFree(titleprop.value);
+    }
+    if(iconprop.value) {
+	XSetWMIconName(SDL_Display, WMwindow, &iconprop);
+	XFree(iconprop.value);
+    }
+
+    XSelectInput(SDL_Display, WMwindow,
+		 FocusChangeMask | KeyPressMask | KeyReleaseMask
+		 | PropertyChangeMask | StructureNotifyMask);
+
+    /* Set the class hints so we can get an icon (AfterStep) */
+    {
+	XClassHint *classhints;
+	classhints = XAllocClassHint();
+	if(classhints != NULL) {
+	    classhints->res_name = "SDL_App";
+	    classhints->res_class = "SDL_App";
+	    XSetClassHint(SDL_Display, WMwindow, classhints);
+	    XFree(classhints);
+	}
+    }
+
+    /* Allow the window to be deleted by the window manager */
+    WM_DELETE_WINDOW = XInternAtom(SDL_Display, "WM_DELETE_WINDOW", False);
+    XSetWMProtocols(SDL_Display, WMwindow, &WM_DELETE_WINDOW, 1);
+}
+#endif
 
 Uint32 MakeBitMask(_THIS,int type,int format,int *bpp)
 {
@@ -468,6 +575,8 @@ static int CGX_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	}
 	SDL_Visual = this->hidden->visuals[i].visual;
 
+//	SDL_XColorMap = SDL_DisplayColormap;
+
 	this->hidden->depth = this->hidden->visuals[i].depth;
 	D(bug("Setto la profiondita' dello schermo a: %ld\n",this->hidden->depth));
 	vformat->BitsPerPixel = this->hidden->visuals[i].depth; /* this->hidden->visuals[i].bpp; */
@@ -495,6 +604,10 @@ static int CGX_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		}
 	}
 
+	/* See if we have been passed a window to use */
+/*	SDL_windowid = getenv("SDL_WINDOWID"); */
+	SDL_windowid=NULL;
+
 	/* Create the fullscreen and managed windows */
 //	create_aux_windows(this);
 
@@ -517,45 +630,47 @@ static int CGX_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 void CGX_DestroyWindow(_THIS, SDL_Surface *screen)
 {
-	/* Hide the managed window */
-	int was_fullscreen=0;
+	if ( ! SDL_windowid ) {
+		/* Hide the managed window */
+		int was_fullscreen=0;
 
-	if ( screen && (screen->flags & SDL_FULLSCREEN) ) {	
-		was_fullscreen=1;
-		screen->flags &= ~SDL_FULLSCREEN;
-		CGX_LeaveFullScreen(this);
-	}
+		if ( screen && (screen->flags & SDL_FULLSCREEN) ) {	
+			was_fullscreen=1;
+			screen->flags &= ~SDL_FULLSCREEN;
+//			CGX_LeaveFullScreen(this); tolto x crash
+		}
 
-	/* Destroy the output window */
-	if ( SDL_Window ) {
-		CloseWindow(SDL_Window);
-		SDL_Window=NULL;
-	}
+		/* Destroy the output window */
+		if ( SDL_Window ) {
+			CloseWindow(SDL_Window);
+			SDL_Window=NULL;
+		}
 
-	/* Free the colormap entries */
-	if ( SDL_XPixels ) {
-		int numcolors;
-		unsigned long pixel;
+		/* Free the colormap entries */
+		if ( SDL_XPixels ) {
+			int numcolors;
+			unsigned long pixel;
 
-		if(this->screen->format&&this->hidden->depth==8&&!was_fullscreen)
-		{
-			numcolors = 1<<this->screen->format->BitsPerPixel;
-
-			if(numcolors>256)
-				numcolors=256;
-
-			if(!was_fullscreen&&this->hidden->depth==8)
+			if(this->screen->format&&this->hidden->depth==8&&!was_fullscreen)
 			{
-				for ( pixel=0; pixel<numcolors; pixel++ ) 
+				numcolors = 1<<this->screen->format->BitsPerPixel;
+
+				if(numcolors>256)
+					numcolors=256;
+
+				if(!was_fullscreen&&this->hidden->depth==8)
 				{
-					if(SDL_XPixels[pixel]>=0)
-						ReleasePen(GFX_Display->ViewPort.ColorMap,SDL_XPixels[pixel]);
+					for ( pixel=0; pixel<numcolors; pixel++ ) 
+					{
+						if(SDL_XPixels[pixel]>=0)
+							ReleasePen(GFX_Display->ViewPort.ColorMap,SDL_XPixels[pixel]);
+					}
 				}
 			}
-		}
-		free(SDL_XPixels);
-		SDL_XPixels = NULL;
-	} 
+			free(SDL_XPixels);
+			SDL_XPixels = NULL;
+		} 
+	}
 }
 
 static void CGX_SetSizeHints(_THIS, int w, int h, Uint32 flags)
@@ -590,7 +705,13 @@ int CGX_CreateWindow(_THIS, SDL_Surface *screen,
 	if ( SDL_Window ) {
 		CGX_DestroyWindow(this, screen);
 	}
-	SDL_Window = 0;
+
+	/* See if we have been given a window id */
+	if ( SDL_windowid ) {
+		SDL_Window = (struct Window *)atol(SDL_windowid);
+	} else {
+		SDL_Window = 0;
+	}
 
 	/* find out which visual we are going to use */
 #if 0
@@ -656,6 +777,11 @@ int CGX_CreateWindow(_THIS, SDL_Surface *screen,
 	}
 
 	/* Create the appropriate colormap */
+/*
+	if ( SDL_XColorMap != SDL_DisplayColormap ) {
+		XFreeColormap(SDL_Display, SDL_XColorMap);
+	}
+*/
 	if ( GetCyberMapAttr(SDL_Display->RastPort.BitMap,CYBRMATTR_PIXFMT)==PIXFMT_LUT8 || bpp==8 ) {
 	    int ncolors;
 	    D(bug("Alloco XPixels x la palette...\n"));
@@ -681,32 +807,70 @@ int CGX_CreateWindow(_THIS, SDL_Surface *screen,
 		flags |= SDL_HWPALETTE;
 
 	    if ( flags & SDL_HWPALETTE ) {
-		screen->flags |= SDL_HWPALETTE;
+			screen->flags |= SDL_HWPALETTE;
+/*
+			SDL_XColorMap = XCreateColormap(SDL_Display, SDL_Root,
+		                                SDL_Visual, AllocAll);
+*/
+	    } else {
+/*
+			SDL_XColorMap = SDL_DisplayColormap;
+*/
 	    }
+	} else {
+/*
+	    SDL_XColorMap = XCreateColormap(SDL_Display, SDL_Root,
+	                                    SDL_Visual, AllocNone);
+*/
 	}
+
+	/* Recreate the auxiliary windows, if needed (required for GL) */
+/*
+	if ( vis_change )
+	    create_aux_windows(this);
+*/
 
 	/* resize the (possibly new) window manager window */
 
 	/* Create (or use) the X11 display window */
-	if ( flags & SDL_OPENGL ) {
-		return(-1);
-	} else {
-		if(flags & SDL_FULLSCREEN)
-			SDL_Window = OpenWindowTags(NULL,WA_Width,w,WA_Height,h,
+	if ( !SDL_windowid ) {
+		if ( flags & SDL_OPENGL ) {
+			return(-1);
+		} 
+		else 
+		{
+			if(flags & SDL_FULLSCREEN)
+			{
+				SDL_Window = OpenWindowTags(NULL,WA_Width,w,WA_Height,h,
 											WA_Flags,WFLG_ACTIVATE|WFLG_RMBTRAP|WFLG_BORDERLESS|WFLG_BACKDROP|WFLG_REPORTMOUSE,
 											WA_IDCMP,IDCMP_RAWKEY|IDCMP_MOUSEBUTTONS|IDCMP_MOUSEMOVE,
 											WA_CustomScreen,(ULONG)SDL_Display,
 											TAG_DONE);
-		else
-			SDL_Window = OpenWindowTags(NULL,WA_InnerWidth,w,WA_InnerHeight,h,
-											WA_Flags,WFLG_REPORTMOUSE|WFLG_ACTIVATE|WFLG_RMBTRAP|WFLG_DEPTHGADGET|WFLG_CLOSEGADGET|WFLG_DRAGBAR| ((screen->flags&SDL_RESIZABLE) ? WFLG_SIZEGADGET|WFLG_SIZEBBOTTOM : 0),
+
+				D(bug("Apro finestra backdrop %ldx%ld su %lx!\n",w,h,SDL_Display));
+			}
+			else
+			{
+				SDL_Window = OpenWindowTags(NULL,WA_InnerWidth,w,WA_InnerHeight,h,
+											WA_Flags,WFLG_REPORTMOUSE|WFLG_ACTIVATE|WFLG_RMBTRAP | ((flags&SDL_NOFRAME) ? 0 : (WFLG_DEPTHGADGET|WFLG_CLOSEGADGET|WFLG_DRAGBAR | ((flags&SDL_RESIZABLE) ? WFLG_SIZEGADGET|WFLG_SIZEBBOTTOM : 0))),
 											WA_IDCMP,IDCMP_RAWKEY|IDCMP_CLOSEWINDOW|IDCMP_MOUSEBUTTONS|IDCMP_NEWSIZE|IDCMP_MOUSEMOVE,
 											WA_PubScreen,(ULONG)SDL_Display,
-											TAG_DONE);
+														TAG_DONE);
+				D(bug("Apro finestra %ldx%ld sul wb!\n",w,h));
+			}
+
+		}
+		/* Only manage our input if we own the window */
+/*
+		XSelectInput(SDL_Display, SDL_Window,
+					( EnterWindowMask | LeaveWindowMask
+					| ButtonPressMask | ButtonReleaseMask
+					| PointerMotionMask | ExposureMask ));
+*/
+
+		if(!SDL_Window)
+			return -1;
 	}
-	/* Only manage our input if we own the window */
-	if(!SDL_Window)
-		return -1;
 
 	this->hidden->BytesPerPixel=GetCyberMapAttr(SDL_Window->RPort->BitMap,CYBRMATTR_BPPIX);
 
@@ -736,45 +900,69 @@ int CGX_CreateWindow(_THIS, SDL_Surface *screen,
 	if(flags&SDL_HWSURFACE)
 		screen->flags|=SDL_HWSURFACE;
 
-	CGX_SetSizeHints(this, w, h, flags);
-	current_w = w;
-	current_h = h;
+	if( !SDL_windowid ) {
+	    CGX_SetSizeHints(this, w, h, flags);
+		current_w = w;
+		current_h = h;
+	}
+
+	/* Set our colormaps when not setting a GL mode */
+/*
+	if ( ! (flags & SDL_OPENGL) ) {
+		XSetWindowColormap(SDL_Display, SDL_Window, SDL_XColorMap);
+	}
+*/
 
 	/* Map them both and go fullscreen, if requested */
-	if ( flags & SDL_FULLSCREEN ) {
-		screen->flags |= SDL_FULLSCREEN;
-		currently_fullscreen=1;
-//		CGX_EnterFullScreen(this); Ci siamo gia'!
-	} else {
-		screen->flags &= ~SDL_FULLSCREEN;
+	if ( ! SDL_windowid ) {
+		if ( flags & SDL_FULLSCREEN ) {
+			screen->flags |= SDL_FULLSCREEN;
+			currently_fullscreen=1;
+//			CGX_EnterFullScreen(this); Ci siamo gia'!
+		} else {
+			screen->flags &= ~SDL_FULLSCREEN;
+		}
 	}
+	screen->w = w;
+	screen->h = h;
+	screen->pitch = SDL_CalculatePitch(screen);
+	CGX_ResizeImage(this, screen, flags);
+
 	return(0);
 }
 
 int CGX_ResizeWindow(_THIS,
 			SDL_Surface *screen, int w, int h, Uint32 flags)
 {
-	/* Resize the window manager window */
-	CGX_SetSizeHints(this, w, h, flags);
-	current_w = w;
-	current_h = h;
+	if ( ! SDL_windowid ) {
+		/* Resize the window manager window */
+		CGX_SetSizeHints(this, w, h, flags);
+		current_w = w;
+		current_h = h;
 
-	ChangeWindowBox(SDL_Window,SDL_Window->LeftEdge,SDL_Window->TopEdge, w+SDL_Window->BorderLeft+SDL_Window->BorderRight,
-				h+SDL_Window->BorderTop+SDL_Window->BorderBottom);
+		ChangeWindowBox(SDL_Window,SDL_Window->LeftEdge,SDL_Window->TopEdge, w+SDL_Window->BorderLeft+SDL_Window->BorderRight,
+					h+SDL_Window->BorderTop+SDL_Window->BorderBottom);
 
-	/* Resize the fullscreen and display windows */
-	if ( flags & SDL_FULLSCREEN ) {
-		if ( screen->flags & SDL_FULLSCREEN ) {
-			CGX_ResizeFullScreen(this);
+		/* Resize the fullscreen and display windows */
+/*
+		if ( flags & SDL_FULLSCREEN ) {
+			if ( screen->flags & SDL_FULLSCREEN ) {
+				CGX_ResizeFullScreen(this);
+			} else {
+				screen->flags |= SDL_FULLSCREEN;
+				CGX_EnterFullScreen(this);
+			}
 		} else {
-			screen->flags |= SDL_FULLSCREEN;
-			CGX_EnterFullScreen(this);
+			if ( screen->flags & SDL_FULLSCREEN ) {
+				screen->flags &= ~SDL_FULLSCREEN;
+				CGX_LeaveFullScreen(this);
+			}
 		}
-	} else {
-		if ( screen->flags & SDL_FULLSCREEN ) {
-			screen->flags &= ~SDL_FULLSCREEN;
-			CGX_LeaveFullScreen(this);
-		}
+*/
+		screen->w = w;
+		screen->h = h;
+		screen->pitch = SDL_CalculatePitch(screen);
+		CGX_ResizeImage(this, screen, flags);
 	}
 	return(0);
 }
@@ -783,24 +971,51 @@ static SDL_Surface *CGX_SetVideoMode(_THIS, SDL_Surface *current,
 				int width, int height, int bpp, Uint32 flags)
 {
 	Uint32 saved_flags;
+	int needcreate=0;
 
 	/* Lock the event thread, in multi-threading environments */
 	SDL_Lock_EventThread();
+
+// Check if the window needs to be closed or can be resized
+
+	if( (flags&SDL_FULLSCREEN) || (current->flags&SDL_FULLSCREEN && !(flags&SDL_FULLSCREEN)))
+		needcreate=1;
 
 // Check if we need to close an already existing videomode... 
 
 	if(current->flags&SDL_FULLSCREEN && !(flags&SDL_FULLSCREEN))
 	{
+		unsigned long i;
 		CGX_DestroyImage(this,current);
 		CGX_DestroyWindow(this,current);
 		DestroyScreen(this);
+		D(bug("Distrutte immagine, finestra e schermo!\n"));
+		GFX_Display=SDL_Display=LockPubScreen(NULL);
+
+		bpp=this->hidden->depth=GetCyberMapAttr(SDL_Display->RastPort.BitMap,CYBRMATTR_DEPTH);
+
+		for ( i = 0; i < this->hidden->nvisuals; i++ ) {
+			if ( this->hidden->visuals[i].depth == bpp ) /* era .depth */
+				break;
+		}
+		if ( i == this->hidden->nvisuals ) {
+			SDL_SetError("No matching visual for requested depth");
+			return NULL;	/* should never happen */
+		}
+		SDL_Visual = this->hidden->visuals[i].visual;
+
+		D(bug("Setto la profiondita' dello schermo a: %ld\n",this->hidden->depth));
+		
 	}
 	/* Check the combination of flags we were passed */
 	if ( flags & SDL_FULLSCREEN ) {
 		int i;
 	
 		/* Clear fullscreen flag if not supported */
-		if(current->flags&SDL_FULLSCREEN )
+		if ( SDL_windowid ) {
+			flags &= ~SDL_FULLSCREEN;
+		}
+		else if(current->flags&SDL_FULLSCREEN )
 		{
 			if(current->w!=width ||
 				current->h!=height ||
@@ -930,7 +1145,7 @@ buildnewscreen:
 	saved_flags = current->flags;
 
 	if (SDL_Window && (saved_flags&SDL_OPENGL) == (flags&SDL_OPENGL)
-	    && bpp == current->format->BitsPerPixel) {
+	    && bpp == current->format->BitsPerPixel && !needcreate) {
 		if (CGX_ResizeWindow(this, current, width, height, flags) < 0) {
 			current = NULL;
 			goto done;
@@ -942,6 +1157,7 @@ buildnewscreen:
 		}
 	}
 
+#if 0
 	/* Set up the new mode framebuffer */
 	if ( ((current->w != width) || (current->h != height)) ||
              ((saved_flags&SDL_OPENGL) != (flags&SDL_OPENGL)) ) {
@@ -950,6 +1166,8 @@ buildnewscreen:
 		current->pitch = SDL_CalculatePitch(current);
 		CGX_ResizeImage(this, current, flags);
 	}
+#endif
+
 	current->flags |= (flags&SDL_RESIZABLE); // Resizable only if the user asked it
 
   done:
@@ -963,6 +1181,11 @@ buildnewscreen:
 static int CGX_ToggleFullScreen(_THIS, int on)
 {
 	Uint32 event_thread;
+
+	/* Don't switch if we don't own the window */
+	if ( SDL_windowid ) {
+		return(0);
+	}
 
 	/* Don't lock if we are the event thread */
 	event_thread = SDL_EventThreadID();
@@ -1090,9 +1313,6 @@ static int CGX_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 
 	/* Check to make sure we have a colormap allocated */
 
-// It's not needed to reload the whole palette each time on Amiga!
-//	ncolors = this->screen->format->palette->ncolors;
-
 	/* It's easy if we have a hidden colormap */
 	if ( (this->screen->flags & SDL_HWPALETTE) && currently_fullscreen ) 
 	{
@@ -1104,9 +1324,9 @@ static int CGX_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 //		D(bug("Setting %ld colors on an HWPALETTE screen\n",ncolors));
 
 		for ( i=0; i<ncolors; i++ ) {
-			xcmap[i*3+1] = colors[i].r<<24;
-			xcmap[i*3+2] = colors[i].g<<24;
-			xcmap[i*3+3] = colors[i].b<<24;
+			xcmap[i*3+1] = colors[i+firstcolor].r<<24;
+			xcmap[i*3+2] = colors[i+firstcolor].g<<24;
+			xcmap[i*3+3] = colors[i+firstcolor].b<<24;
 		}
 		xcmap[ncolors*3+1]=0;
 		LoadRGB32(&GFX_Display->ViewPort,xcmap);
@@ -1119,7 +1339,6 @@ static int CGX_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 			return(0);
 		}
 
-		colors = this->screen->format->palette->colors;
 		if(this->hidden->depth==8)
 		{
 // In this case I have to unalloc and realloc the full palette
@@ -1178,6 +1397,22 @@ static void CGX_VideoQuit(_THIS)
 		SDL_VideoSurface=NULL;
 		CGX_FreeVideoModes(this);
 
+/*
+		if ( SDL_iconcolors ) {
+			unsigned long pixel;
+			int numcolors =
+				((this->screen->format)->palette)->ncolors;
+			for ( pixel=0; pixel<numcolors; ++pixel ) {
+				while ( SDL_iconcolors[pixel] > 0 ) {
+					XFreeColors(SDL_Display,
+						SDL_DisplayColormap,&pixel,1,0);
+					--SDL_iconcolors[pixel];
+				}
+			}
+			free(SDL_iconcolors);
+			SDL_iconcolors = NULL;
+		} 
+*/
 		/* Free that blank cursor */
 		if ( SDL_BlankCursor != NULL ) {
 			FreeMem(SDL_BlankCursor,16);

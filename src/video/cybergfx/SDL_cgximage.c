@@ -57,6 +57,7 @@ int CGX_SetupImage(_THIS, SDL_Surface *screen)
 {
 	if(screen->flags&SDL_HWSURFACE)
 	{
+		Uint32 pitch;
 		SDL_Ximage=NULL;
 
 		if(!screen->hwdata)
@@ -66,14 +67,30 @@ int CGX_SetupImage(_THIS, SDL_Surface *screen)
 				return -1;
 			}
 			D(bug("Creating system accel struct\n"));
-			screen->hwdata->lock=0;
-			screen->hwdata->bmap=SDL_RastPort->BitMap;
-			screen->hwdata->videodata=this;
 		}
+		screen->hwdata->lock=0;
+		screen->hwdata->bmap=SDL_RastPort->BitMap;
+		screen->hwdata->videodata=this;
+
+		if(!(screen->hwdata->lock=LockBitMapTags(screen->hwdata->bmap,
+				LBMI_BASEADDRESS,(ULONG)&screen->pixels,
+				LBMI_BYTESPERROW,(ULONG)&pitch,TAG_DONE)))
+		{
+			free(screen->hwdata);
+			screen->hwdata=NULL;
+			return -1;
+		}
+		else
+		{
+			UnLockBitMap(screen->hwdata->lock);
+			screen->hwdata->lock=NULL;
+		}
+
+		screen->pitch=pitch;
 
 		this->UpdateRects = CGX_FakeUpdate;
 
-		D(bug("Accel video image configured.\n"));
+		D(bug("Accel video image configured (%lx, pitch %ld).\n",screen->pixels,screen->pitch));
 		return 0;
 	}
 
@@ -83,6 +100,18 @@ int CGX_SetupImage(_THIS, SDL_Surface *screen)
 		SDL_OutOfMemory();
 		return(-1);
 	}
+
+/*
+	{
+ 	        int bpp = screen->format->BytesPerPixel;
+			SDL_Ximage = XCreateImage(SDL_Display, SDL_Visual,
+					  this->hidden->depth, ZPixmap, 0,
+					  (char *)screen->pixels, 
+					  screen->w, screen->h,
+					  (bpp == 3) ? 32 : bpp * 8,
+					  0);
+	}
+*/
 	SDL_Ximage=screen->pixels;
 
 	if ( SDL_Ximage == NULL ) {
@@ -106,16 +135,35 @@ void CGX_DestroyImage(_THIS, SDL_Surface *screen)
 	}
 }
 
+/* This is a hack to see whether this system has more than 1 CPU */
+static int num_CPU(void)
+{
+	return 1;
+}
+
 int CGX_ResizeImage(_THIS, SDL_Surface *screen, Uint32 flags)
 {
 	int retval;
 
+	D(bug("Chiamata ResizeImage!\n"));
+
 	CGX_DestroyImage(this, screen);
 
-	if ( flags & SDL_OPENGL ) {  /* No image when using GL */
+    if ( flags & SDL_OPENGL ) {  /* No image when using GL */
         	retval = 0;
-	} else {
+    } else {
 		retval = CGX_SetupImage(this, screen);
+		/* We support asynchronous blitting on the display */
+		if ( flags & SDL_ASYNCBLIT ) {
+			/* This is actually slower on single-CPU systems,
+			   probably because of CPU contention between the
+			   X server and the application.
+			   Note: Is this still true with XFree86 4.0?
+			*/
+			if ( num_CPU() > 1 ) {
+				screen->flags |= SDL_ASYNCBLIT;
+			}
+		}
 	}
 	return(retval);
 }
@@ -135,10 +183,10 @@ int CGX_AllocHWSurface(_THIS, SDL_Surface *surface)
 	{
 		if(!(surface->hwdata=malloc(sizeof(struct private_hwdata))))
 			return -1;
-		
-		surface->hwdata->lock=NULL;
-		surface->hwdata->videodata=this;
 	}
+
+	surface->hwdata->lock=NULL;
+	surface->hwdata->videodata=this;
 
 	if(surface->hwdata->bmap=AllocBitMap(surface->w,surface->h,this->hidden->depth,BMF_MINPLANES,SDL_Display->RastPort.BitMap))
 	{
@@ -205,7 +253,7 @@ void CGX_UnlockHWSurface(_THIS, SDL_Surface *surface)
 	{
 		UnLockBitMap(surface->hwdata->lock);
 		surface->hwdata->lock=NULL;
-		surface->pixels=NULL;
+//		surface->pixels=NULL;
 	}
 }
 

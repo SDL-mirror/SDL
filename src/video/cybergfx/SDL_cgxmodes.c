@@ -76,6 +76,13 @@ static void get_real_resolution(_THIS, int* w, int* h)
     *h = SDL_Display->Height;
 }
 
+static void move_cursor_to(_THIS, int x, int y)
+{
+/*    XWarpPointer(SDL_Display, None, SDL_Root, 0, 0, 0, 0, x, y); */
+
+/* DA FARE! */
+}
+
 static void add_visual(_THIS, int depth, int class)
 {
 	Uint32 tID;

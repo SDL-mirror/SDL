@@ -255,8 +255,8 @@ printf("MapNotify!\n");
 
 	    /* Have we been resized? */
 	    case IDCMP_NEWSIZE: 
-			SDL_PrivateResize(SDL_Window->Width,
-		                  SDL_Window->Height);
+			SDL_PrivateResize(SDL_Window->Width-SDL_Window->BorderLeft-SDL_Window->BorderRight,
+		                  SDL_Window->Height-SDL_Window->BorderTop-SDL_Window->BorderBottom);
 			break;
 
 	    /* Have we been requested to quit? */

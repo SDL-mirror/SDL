@@ -169,9 +169,6 @@ QNX:  -= NOT YET SUPPORTED =-
  
 	The software surfaces could use some speed up.
  
-	Many of the test apps segment violate on exit, and I'm not sure
-	they're all working either
- 
 	It doesn't look like the OpenGL stuff is there. (did a grep for
 	PdCreateOpenGLContext, nothing found).
  
@@ -186,14 +183,5 @@ AmigaOS:  -= NOT YET SUPPORTED =-
 	the SDL application.
 
 	Continuous relative mouse motion is not implemented.
-
-	Audio can work, but isn't completely integrated in the CVS
-	version of SDL.
-
-	The joystick subsystem isn't implemented yet.
-
-	There's some confusion about the multi-threaded synchronization
-	primitives on AmigaOS, so mutexes and semaphores aren't correctly
-	implemented yet.
 
 	The AmigaOS port was done by Gabriele.Greco@galactica.it
