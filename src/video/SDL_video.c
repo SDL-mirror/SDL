@@ -100,10 +100,6 @@ static VideoBootStrap *bootstrap[] = {
 };
 SDL_VideoDevice *current_video = NULL;
 
-/* Places to store title and icon text for the app */
-static char *wm_title = NULL;
-static char *wm_icon  = NULL;
-
 /* Various local functions */
 int SDL_VideoInit(const char *driver_name, Uint32 flags);
 void SDL_VideoQuit(void);
@@ -1254,13 +1250,13 @@ void SDL_VideoQuit (void)
 			free(video->gamma);
 			video->gamma = NULL;
 		}
-		if ( wm_title != NULL ) {
-			free(wm_title);
-			wm_title = NULL;
+		if ( video->wm_title != NULL ) {
+			free(video->wm_title);
+			video->wm_title = NULL;
 		}
-		if ( wm_icon != NULL ) {
-			free(wm_icon);
-			wm_icon = NULL;
+		if ( video->wm_icon != NULL ) {
+			free(video->wm_icon);
+			video->wm_icon = NULL;
 		}
 
 		/* Finish cleaning up video subsystem */
@@ -1539,35 +1535,41 @@ void SDL_WM_SetCaption (const char *title, const char *icon)
 	SDL_VideoDevice *video = current_video;
 	SDL_VideoDevice *this  = current_video;
 
-	if ( title ) {
-		if ( wm_title ) {
-			free(wm_title);
+	if ( video ) {
+		if ( title ) {
+			if ( video->wm_title ) {
+				free(video->wm_title);
+			}
+			video->wm_title = (char *)malloc(strlen(title)+1);
+			if ( video->wm_title != NULL ) {
+				strcpy(video->wm_title, title);
+			}
 		}
-		wm_title = (char *)malloc(strlen(title)+1);
-		if ( wm_title != NULL ) {
-			strcpy(wm_title, title);
+		if ( icon ) {
+			if ( video->wm_icon ) {
+				free(video->wm_icon);
+			}
+			video->wm_icon = (char *)malloc(strlen(icon)+1);
+			if ( video->wm_icon != NULL ) {
+				strcpy(video->wm_icon, icon);
+			}
 		}
-	}
-	if ( icon ) {
-		if ( wm_icon ) {
-			free(wm_icon);
+		if ( (title || icon) && (video->SetCaption != NULL) ) {
+			video->SetCaption(this, video->wm_title,video->wm_icon);
 		}
-		wm_icon = (char *)malloc(strlen(icon)+1);
-		if ( wm_icon != NULL ) {
-			strcpy(wm_icon, icon);
-		}
-	}
-	if ( (title || icon) && video && (video->SetCaption != NULL) ) {
-		video->SetCaption(this, wm_title, wm_icon);
 	}
 }
 void SDL_WM_GetCaption (char **title, char **icon)
 {
-	if ( title ) {
-		*title = wm_title;
-	}
-	if ( icon ) {
-		*icon = wm_icon;
+	SDL_VideoDevice *video = current_video;
+
+	if ( video ) {
+		if ( title ) {
+			*title = video->wm_title;
+		}
+		if ( icon ) {
+			*icon = video->wm_icon;
+		}
 	}
 }
 

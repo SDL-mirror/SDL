@@ -40,7 +40,7 @@
         - SetColors sets palette correctly but clears framebuffer
         - Crash in CG after several mode switches
         - Retained windows don't draw their title bar quite right (OS Bug)
-        - Should I do depth switching for windowed modes?
+        - Should I do depth switching for windowed modes? - No, not usually.
         - Launch times are slow, maybe prebinding will help
         - Direct framebuffer access has some artifacts, maybe a driver issue
         - Cursor in 8 bit modes is screwy
@@ -89,7 +89,6 @@ typedef struct SDL_PrivateVideoData {
     /* Window-only fields */
     NSWindow        *window;
     NSQuickDrawView *view;
-    NSString        *title;
     
 } SDL_PrivateVideoData ;
 
@@ -108,7 +107,6 @@ typedef struct SDL_PrivateVideoData {
 #define mode_flags (this->hidden->flags)
 #define window (this->hidden->window)
 #define windowView (this->hidden->view)
-#define windowTitle (this->hidden->title)
 
 /* Interface for hardware fill not (yet) in the public API */
 int CGSDisplayHWFill (CGDirectDisplayID id, unsigned int x, unsigned int y, 

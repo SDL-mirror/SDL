@@ -122,12 +122,19 @@ static void QZ_CheckMouseMode   (_THIS) { }
 
 static void QZ_SetCaption    (_THIS, const char *title, const char *icon) {
 
-    NSString *str = [ [ NSString alloc ] initWithCString:title ];
-    if (window != nil)
-        [ window setTitle:str ];
-
-    [ windowTitle release ];
-    windowTitle = str;
+    if ( window != nil ) {
+        NSString *string;
+        if ( title != NULL ) {
+            string = [ [ NSString alloc ] initWithCString:title ];
+            [ window setTitle:string ];
+            [ string release ];
+        }
+        if ( icon != NULL ) {
+            string = [ [ NSString alloc ] initWithCString:icon ];
+            [ window setMiniwindowTitle:string ];
+            [ string release ];
+        }
+    }
 }
 
 static void QZ_SetIcon       (_THIS, SDL_Surface *icon, Uint8 *mask) {

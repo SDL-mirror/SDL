@@ -132,7 +132,6 @@ static int QZ_VideoInit (_THIS, SDL_PixelFormat *video_format) {
                     kCFNumberSInt32Type, &device_height);
 
   video_format->BitsPerPixel = device_bpp;
-  windowTitle = @"";
   
   return 0;
 }
@@ -293,6 +292,7 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
     current->pitch  = CGDisplayBytesPerRow (display_id);
 #endif
 
+    current->flags = 0;
     current->w = width;
     current->h = height;
     current->flags |= SDL_FULLSCREEN;  
@@ -350,27 +350,37 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
 
 static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
                                            int height, int bpp, Uint32 flags) {    
+    unsigned int style;
     NSRect rect;    
     rect = NSMakeRect (0, 0, width, height);
-    
+
+#if 1 // FIXME - the resize button doesn't show?  Also need resize events...
+    flags &= ~SDL_RESIZABLE;
+#endif
+    /* Set the window style based on input flags */
+    if ( flags & SDL_NOFRAME ) {
+        style = NSBorderlessWindowMask;
+    } else {
+        style = NSTitledWindowMask;
+        style |= (NSMiniaturizableWindowMask | NSClosableWindowMask);
+        if ( flags & SDL_RESIZABLE )
+            style |= NSResizableWindowMask;
+    }
+
     /* Manually create a window, avoids having a nib file resource */
     window = [ [ SDL_QuartzWindow alloc ] initWithContentRect:rect 
-        styleMask:(NSTitledWindowMask | NSMiniaturizableWindowMask |
-                    NSClosableWindowMask)
-        backing: //NSBackingStoreBuffered
-            NSBackingStoreRetained
-          defer:NO ];
-    
+        styleMask:style backing:NSBackingStoreRetained defer:NO ];
     if (window == nil) {
         SDL_SetError ("Could not create the Cocoa window");
         return NULL;
     }
     
-    current->w  = width;
+    current->flags = 0;
+    current->w = width;
     current->h = height;
     
     [ window setReleasedWhenClosed:YES ];
-    [ window setTitle:windowTitle ];
+    QZ_SetCaption(this, this->wm_title, this->wm_icon);
     [ window setAcceptsMouseMovedEvents:YES ];
     [ window setViewsNeedDisplay:NO ];
     [ window center ];
@@ -400,11 +410,17 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
         current->pixels = GetPixBaseAddr ( GetPortPixMap ( [ windowView qdPort ] ) );
         current->pitch  = GetPixRowBytes ( GetPortPixMap ( [ windowView qdPort ] ) );
             
-        /* Offset 22 pixels down to fill the full content region */
-        current->pixels += 22 * current->pitch;
-        
         current->flags |= SDL_SWSURFACE;
         current->flags |= SDL_PREALLOC;
+	if ( flags & SDL_NOFRAME )
+        	current->flags |= SDL_NOFRAME;
+	if ( flags & SDL_RESIZABLE )
+        	current->flags |= SDL_RESIZABLE;
+
+        /* Offset 22 pixels down to fill the full content region */
+	if ( ! (current->flags & SDL_NOFRAME) ) {
+        	current->pixels += 22 * current->pitch;
+	}
 
         this->UpdateRects = QZ_UpdateRects;
     }
@@ -444,15 +460,15 @@ static SDL_Surface* QZ_SetVideoMode (_THIS, SDL_Surface *current, int width,
         switch (bpp) {
             case 16:   /* (1)-5-5-5 RGB */
                 amask = 0; 
-                rmask = 0x7c00;
-                gmask = 0x3e0;
-                bmask = 0x1f;
+                rmask = 0x7C00;
+                gmask = 0x03E0;
+                bmask = 0x001F;
                 break;
             case 24:
                 SDL_SetError ("24bpp is not available");
                 return NULL;
             case 32:   /* (8)-8-8-8 ARGB */
-                amask = 0x00000000; /* per-pixel alpha needs to be fixed */
+                amask = 0x00000000; /* These are the correct semantics */
                 rmask = 0x00FF0000;
                 gmask = 0x0000FF00;
                 bmask = 0x000000FF;

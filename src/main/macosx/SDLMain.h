@@ -4,5 +4,4 @@
 {
 }
 - (IBAction)quit:(id)sender;
-- (IBAction)makeFullscreen:(id)sender;
 @end

@@ -35,9 +35,7 @@
 @implementation SDL_QuartzWindowDelegate
 - (BOOL)windowShouldClose:(id)sender {
 
-    SDL_Event event;
-    event.type = SDL_QUIT;
-    SDL_PushEvent(&event);
+    SDL_PrivateQuit();
     return NO;
 }
 @end

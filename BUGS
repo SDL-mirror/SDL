@@ -72,12 +72,12 @@ MacOS:
 MacOS X:
 	Joystick and CD-ROM functions are not implemented yet.
 
-	Closing window from window's close widget not implemented yet.
-	
-	Minimizing the window erases the framebuffer to the pinstripe pattern.
-	
+	Window management buttons don't draw correctly.
+
 	Window may not close when unsetting video mode and resetting.
-	
+
+	Resizeable windows aren't implemented yet.
+
 	Depth switching for windowed mode isn't implemented yet.
 	
 	Palette handling isn't implemented in windowed mode yet.
