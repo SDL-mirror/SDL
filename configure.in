@@ -60,7 +60,6 @@ CCAS="$CC"
 AC_SUBST(CCAS)
 CCASFLAGS=""
 AC_SUBST(CCASFLAGS)
-AM_CONDITIONAL([am__fastdepOBJC], false)
 
 dnl The alpha architecture needs special flags for binary portability
 case "$target" in
@@ -2596,12 +2595,17 @@ CXXFLAGS="$CFLAGS"
 # We do this here so that we get the full CFLAGS into OBJCFLAGS
 case "$target" in
     *-*-darwin*)
-        OBJC="cc"
-        OBJCFLAGS="$CFLAGS"
-        OBJCDEPMODE="$CCDEPMODE"
+        dnl AC_PROG_OBJC doesn't seem to exist, this is the SDL workaround
+        AC_MSG_CHECKING(for an Objective-C compiler)
+        OBJC="$CC"
         AC_SUBST(OBJC)
+        OBJCFLAGS="$CFLAGS"
         AC_SUBST(OBJCFLAGS)
+        dnl _AM_DEPENDENCIES(OBJC) doesn't work, so hard code OBJCDEPMODE here
+        dnl _AM_DEPENDENCIES(OBJC)
+        OBJCDEPMODE="depmode=gcc3"
         AC_SUBST(OBJCDEPMODE)
+        AC_MSG_RESULT(not implemented yet)
         ;;
 esac
 
