@@ -163,13 +163,15 @@ static int LoadALSALibrary(void) {
 
 #endif /* ALSA_DYNAMIC */
 
-static const char *get_audio_device()
+static const char *get_audio_device(int channels)
 {
 	const char *device;
 	
 	device = getenv("AUDIODEV");	/* Is there a standard variable name? */
 	if ( device == NULL ) {
-		device = DEFAULT_DEVICE;
+		if (channels == 6) device = "surround51";
+		else if (channels == 4) device = "surround40";
+		else device = DEFAULT_DEVICE;
 	}
 	return device;
 }
@@ -186,7 +188,7 @@ static int Audio_Available(void)
 	if (LoadALSALibrary() < 0) {
 		return available;
 	}
-	status = SDL_NAME(snd_pcm_open)(&handle, get_audio_device(), SND_PCM_STREAM_PLAYBACK, SND_PCM_NONBLOCK);
+	status = SDL_NAME(snd_pcm_open)(&handle, get_audio_device(2), SND_PCM_STREAM_PLAYBACK, SND_PCM_NONBLOCK);
 	if ( status >= 0 ) {
 		available = 1;
         	SDL_NAME(snd_pcm_close)(handle);
@@ -319,7 +321,9 @@ static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	Uint16               test_format;
 
 	/* Open the audio device */
-	status = SDL_NAME(snd_pcm_open)(&pcm_handle, get_audio_device(), SND_PCM_STREAM_PLAYBACK, SND_PCM_NONBLOCK);
+	/* Name of device should depend on # channels in spec */
+	status = SDL_NAME(snd_pcm_open)(&pcm_handle, get_audio_device(spec->channels), SND_PCM_STREAM_PLAYBACK, SND_PCM_NONBLOCK);
+
 	if ( status < 0 ) {
 		SDL_SetError("Couldn't open audio device: %s", SDL_NAME(snd_strerror)(status));
 		return(-1);

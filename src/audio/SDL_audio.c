@@ -391,6 +391,8 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 	switch ( desired->channels ) {
 	    case 1:	/* Mono */
 	    case 2:	/* Stereo */
+	    case 4:	/* surround */
+	    case 6:	/* surround with center and lfe */
 		break;
 	    default:
 		SDL_SetError("1 (mono) and 2 (stereo) channels supported");
