@@ -13,6 +13,7 @@ HEADERS = \
 	../../../../include/SDL_joystick.h \
 	../../../../include/SDL_keyboard.h \
 	../../../../include/SDL_keysym.h \
+	../../../../include/SDL_loadso.h \
 	../../../../include/SDL_mouse.h \
 	../../../../include/SDL_mutex.h \
 	../../../../include/SDL_quit.h \

@@ -1558,7 +1558,7 @@ CheckDLOPEN()
 {
     AC_ARG_ENABLE(dlopen,
 [  --enable-dlopen         use dlopen for shared object loading [default=no]],
-                  , enable_dlopen=no)
+                  , enable_dlopen=yes)
     if test x$enable_dlopen = xyes; then
         AC_MSG_CHECKING(for dlopen)
         use_dlopen=no

@@ -3,6 +3,9 @@ This is a list of API changes in SDL's version history.
 
 Version 1.0:
 
+1.2.6:
+	Added SDL_LoadObject(), SDL_LoadFunction(), and SDL_UnloadObject()
+
 1.2.5:
 	Added SDL_BUTTON_WHEELUP (4) and SDL_BUTTON_WHEELDOWN (5)
 

@@ -76,6 +76,9 @@
 	SDL_GetModState
 	SDL_SetModState
 	SDL_GetKeyName
+	SDL_LoadObject
+	SDL_LoadFunction
+	SDL_UnloadObject
 	SDL_GetMouseState
 	SDL_GetRelativeMouseState
 	SDL_WarpMouse
