@@ -50,6 +50,7 @@ static int WIN_GL_ResetWindow(_THIS)
 	if ( SDL_windowid ) {
 		can_reset = 0;
 	}
+#if 0 /* This doesn't work with DirectX code (see CVS comments) */
 #ifndef _WIN32_WCE /* FIXME WinCE needs the UNICODE version of CreateWindow() */
 	if ( can_reset ) {
 		/* Save the existing window attributes */
@@ -72,6 +73,7 @@ static int WIN_GL_ResetWindow(_THIS)
 		}
 	} else
 #endif /* !_WIN32_WCE */
+#endif
 	{
 		SDL_SetError("Unable to reset window for OpenGL context");
 		status = -1;
