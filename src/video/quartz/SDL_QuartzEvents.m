@@ -255,13 +255,13 @@ static void QZ_DoKey (_THIS, int state, NSEvent *event) {
 
 static void QZ_DoModifiers (_THIS, unsigned int newMods) {
 
-    const int mapping[] = { SDLK_CAPSLOCK, SDLK_LSHIFT, SDLK_LCTRL, SDLK_LALT, SDLK_LMETA } ;
+    const int mapping[] = { SDLK_CAPSLOCK, SDLK_LSHIFT, SDLK_LCTRL, SDLK_LALT, SDLK_LMETA };
 
     int i;
     int bit;
     SDL_keysym key;
 
-    key.scancode = 0;
+    key.scancode    = 0;
     key.sym         = SDLK_UNKNOWN;
     key.unicode     = 0;
     key.mod         = KMOD_NONE;
@@ -405,7 +405,6 @@ static void QZ_PumpEvents (_THIS)
     NSDate *distantPast;
     NSEvent *event;
     NSRect winRect;
-    NSRect titleBarRect;
     NSAutoreleasePool *pool;
 
     /* Update activity every five seconds to prevent screensaver. --ryan. */
@@ -421,8 +420,6 @@ static void QZ_PumpEvents (_THIS)
     distantPast = [ NSDate distantPast ];
 
     winRect = NSMakeRect (0, 0, SDL_VideoSurface->w, SDL_VideoSurface->h);
-    titleBarRect = NSMakeRect (0, SDL_VideoSurface->h, SDL_VideoSurface->w,
-                                SDL_VideoSurface->h + 22);
     
     /* send the first mouse event in absolute coordinates */
     firstMouseEvent = 1;
@@ -467,7 +464,7 @@ static void QZ_PumpEvents (_THIS)
             
             type = [ event type ];
             isForGameWin = (qz_window == [ event window ]);
-            isInGameWin = NSPointInRect([event locationInWindow], winRect);
+            isInGameWin = (mode_flags & SDL_FULLSCREEN) ? true : NSPointInRect([event locationInWindow], winRect);
             switch (type) {
                 case NSLeftMouseDown:
                     if ( getenv("SDL_HAS3BUTTONMOUSE") ) {
