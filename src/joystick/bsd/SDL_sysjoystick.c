@@ -42,10 +42,12 @@ static char rcsid =
 #include <dev/usb/usb.h>
 #include <dev/usb/usbhid.h>
 
-#if defined(__FreeBSD__)
-# include <libusb.h>
-#else
-# include <usbhid.h>
+#if defined(HAVE_USBHID_H)
+#include <usbhid.h>
+#elif defined(HAVE_LIBUSB_H)
+#include <libusb.h>
+#elif defined(HAVE_LIBUSBHID_H)
+#include <libusbhid.h>
 #endif
 
 #include "SDL_error.h"
@@ -112,6 +114,12 @@ static char *joydevnames[MAX_JOYS];
 
 static int	report_alloc(struct report *, struct report_desc *, int);
 static void	report_free(struct report *);
+
+#ifdef USBHID_UCR_DATA
+#define REP_BUF_DATA(rep) ((rep)->buf->ucr_data)
+#else
+#define REP_BUF_DATA(rep) ((rep)->buf->data)
+#endif
 
 int
 SDL_SYS_JoystickInit(void)
@@ -274,14 +282,15 @@ usberr:
 void
 SDL_SYS_JoystickUpdate(SDL_Joystick *joy)
 {
-	static struct hid_item hitem;
-	static struct hid_data *hdata;
-	static struct report *rep;
+	struct hid_item hitem;
+	struct hid_data *hdata;
+	struct report *rep;
 	int nbutton, naxe = -1;
 	Sint32 v;
 	
 	rep = &joy->hwdata->inreport;
-	if (read(joy->hwdata->fd, rep->buf->data, rep->size) != rep->size) {
+
+	if (read(joy->hwdata->fd, REP_BUF_DATA(rep), rep->size) != rep->size) {
 		return;
 	}
 	hdata = hid_start_parse(joy->hwdata->repdesc, 1 << hid_input);
@@ -316,7 +325,8 @@ SDL_SYS_JoystickUpdate(SDL_Joystick *joy)
 					goto scaleaxe;
 				}
 scaleaxe:
-				v = (Sint32)hid_get_data(rep->buf->data, &hitem);
+				v = (Sint32)hid_get_data(REP_BUF_DATA(rep),
+				    &hitem);
 				if (v != 127) {
 					if (v < 127) {
 						v = -(256 - v);
@@ -335,7 +345,7 @@ scaleaxe:
 				}
 				break;
 			case HUP_BUTTON:
-				v = (Sint32)hid_get_data(rep->buf->data,
+				v = (Sint32)hid_get_data(REP_BUF_DATA(rep),
 				    &hitem);
 				if (joy->buttons[nbutton] != v) {
 					SDL_PrivateJoystickButton(joy,
@@ -395,7 +405,7 @@ report_alloc(struct report *r, struct report_desc *rd, int repind)
 	r->size = len;
 
 	if (r->size > 0) {
-		r->buf = malloc(sizeof(*r->buf) - sizeof(r->buf->data) +
+		r->buf = malloc(sizeof(*r->buf) - sizeof(REP_BUF_DATA(r)) +
 		    r->size);
 		if (r->buf == NULL) {
 			SDL_OutOfMemory();

@@ -1445,6 +1445,86 @@ CheckDLOPEN()
     fi
 }
 
+dnl Check for the usbhid(3) library on *BSD
+CheckUSBHID()
+{
+    if test x$enable_joystick = xyes; then
+        have_libusbhid=no
+        have_libusb=no
+        AC_CHECK_LIB(usbhid, hid_init, have_libusbhid=yes)
+        AC_CHECK_LIB(usb, hid_init, have_libusb=yes)
+        if test x$have_libusbhid = xyes; then
+            SYSTEM_LIBS="$SYSTEM_LIBS -lusbhid"
+        fi
+        if test x$have_libusb = xyes; then
+            SYSTEM_LIBS="$SYSTEM_LIBS -lusb"
+        fi
+
+        AC_CHECK_HEADER(usbhid.h, have_usbhid_h=yes)
+        AC_CHECK_HEADER(libusb.h, have_libusb_h=yes)
+        AC_CHECK_HEADER(libusbhid.h, have_libusbhid_h=yes)
+        if test x$have_usbhid_h = xyes; then
+            CFLAGS="$CFLAGS -DHAVE_USBHID_H"
+        fi
+        if test x$have_libusb_h = xyes; then
+            CFLAGS="$CFLAGS -DHAVE_LIBUSB_H"
+        fi
+        if test x$have_libusbhid_h = xyes; then
+            CFLAGS="$CFLAGS -DHAVE_LIBUSBHID_H"
+        fi
+
+        AC_MSG_CHECKING(for usbhid)
+        have_usbhid=no
+        AC_TRY_COMPILE([
+          #include <dev/usb/usb.h>
+          #include <dev/usb/usbhid.h>
+          #if defined(HAVE_USBHID_H)
+          #include <usbhid.h>
+          #elif defined(HAVE_LIBUSB_H)
+          #include <libusb.h>
+          #elif defined(HAVE_LIBUSBHID_H)
+          #include <libusbhid.h>
+          #endif
+        ],[
+          struct report_desc *repdesc;
+          struct usb_ctl_report *repbuf;
+          enum hid_kind hidkind;
+        ],[
+        have_usbhid=yes
+        ])
+        AC_MSG_RESULT($have_usbhid)
+
+        if test x$have_usbhid = xyes; then
+            AC_MSG_CHECKING(for ucr_data member of usb_ctl_report)
+            have_usbhid_ucr_data=no
+            AC_TRY_COMPILE([
+              #include <dev/usb/usb.h>
+              #include <dev/usb/usbhid.h>
+              #include <stdio.h>
+              #if defined(HAVE_USBHID_H)
+              #include <usbhid.h>
+              #elif defined(HAVE_LIBUSB_H)
+              #include <libusb.h>
+              #elif defined(HAVE_LIBUSBHID_H)
+              #include <libusbhid.h>
+              #endif
+            ],[
+              struct usb_ctl_report buf;
+              if (buf.ucr_data) { }
+            ],[
+            have_usbhid_ucr_data=yes
+            ])
+            if test x$have_usbhid_ucr_data = xyes; then
+                CFLAGS="$CFLAGS -DUSBHID_UCR_DATA"
+            fi
+            AC_MSG_RESULT($have_usbhid_ucr_data)
+
+            JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS bsd"
+            JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS bsd/libjoystick_bsd.la"
+        fi
+    fi
+}
+
 case "$target" in
     *-*-linux*)
         ARCH=linux
@@ -1598,6 +1678,7 @@ case "$target" in
         CheckAAlib
         CheckOpenGL
         CheckPTHREAD
+        CheckUSBHID
         # Set up files for the main() stub
         COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         # Set up files for the audio library
@@ -1607,12 +1688,6 @@ case "$target" in
         #    AUDIO_SUBDIRS="$AUDIO_SUBDIRS sun"
         #    AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
         #fi
-        # Set up files for the joystick library
-        if test x$enable_joystick = xyes; then
-            JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS bsd"
-            JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS bsd/libjoystick_bsd.la"
-            SYSTEM_LIBS="$SYSTEM_LIBS -lusb"
-        fi
         # Set up files for the cdrom library
         if test x$enable_cdrom = xyes; then
             CDROM_SUBDIRS="$CDROM_SUBDIRS freebsd"
@@ -1652,6 +1727,7 @@ case "$target" in
         CheckAAlib
         CheckOpenGL
         CheckPTHREAD
+        CheckUSBHID
         # Set up files for the main() stub
         COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         # Set up files for the audio library
@@ -1659,12 +1735,6 @@ case "$target" in
             CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
             AUDIO_SUBDIRS="$AUDIO_SUBDIRS sun"
             AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
-        fi
-        # Set up files for the joystick library
-        if test x$enable_joystick = xyes; then
-            JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS bsd"
-            JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS bsd/libjoystick_bsd.la"
-            SYSTEM_LIBS="$SYSTEM_LIBS -lusb"
         fi
         # Set up files for the cdrom library
         if test x$enable_cdrom = xyes; then
@@ -1707,6 +1777,7 @@ case "$target" in
         CheckAAlib
         CheckOpenGL
         CheckPTHREAD
+        CheckUSBHID
         # Set up files for the main() stub
         COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         # Set up files for the audio library
@@ -1718,12 +1789,6 @@ case "$target" in
         # OpenBSD needs linking with ossaudio emulation library
         if test x$have_oss = xyes; then
             SYSTEM_LIBS="$SYSTEM_LIBS -lossaudio"
-        fi
-        # Set up files for the joystick library
-        if test x$enable_joystick = xyes; then
-            JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS bsd"
-            JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS bsd/libjoystick_bsd.la"
-            SYSTEM_LIBS="$SYSTEM_LIBS -lusbhid"
         fi
         # Set up files for the cdrom library
         if test x$enable_cdrom = xyes; then
