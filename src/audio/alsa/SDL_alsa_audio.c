@@ -42,7 +42,9 @@
 #include "SDL_alsa_audio.h"
 
 #ifdef ALSA_DYNAMIC
+#ifdef USE_DLVSYM
 #define __USE_GNU
+#endif
 #include <dlfcn.h>
 #include "SDL_name.h"
 #include "SDL_loadso.h"
@@ -134,7 +136,11 @@ static int LoadALSALibrary(void) {
 		retval = 0;
 		for (i = 0; i < SDL_TABLESIZE(alsa_functions); i++) {
 /*			*alsa_functions[i].func = SDL_LoadFunction(alsa_handle,alsa_functions[i].name);*/
+#ifdef USE_DLVSYM
 			*alsa_functions[i].func = dlvsym(alsa_handle,alsa_functions[i].name,"ALSA_0.9");
+			if (!*alsa_functions[i].func)
+#endif
+				*alsa_functions[i].func = dlsym(alsa_handle,alsa_functions[i].name);
 			if (!*alsa_functions[i].func) {
 				retval = -1;
 				UnloadALSALibrary();
