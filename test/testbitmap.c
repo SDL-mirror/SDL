@@ -50,8 +50,13 @@ int main(int argc, char *argv[])
 	Uint8  video_bpp;
 	Uint32 videoflags;
 	Uint8 *buffer;
-	int i, done;
+	int i, k, done;
 	SDL_Event event;
+	Uint16 *buffer16;
+        Uint16 color;
+        Uint8  gradient;
+	SDL_Color palette[256];
+
 
 	/* Initialize SDL */
 	if ( SDL_Init(SDL_INIT_VIDEO) < 0 ) {
@@ -91,6 +96,16 @@ int main(int argc, char *argv[])
 		exit(2);
 	}
 
+	if (video_bpp==8) {
+		/* Set a gray colormap, reverse order from white to black */
+		for ( i=0; i<256; ++i ) {
+			palette[i].r = 255-i;
+			palette[i].g = 255-i;
+			palette[i].b = 255-i;
+		}
+		SDL_SetColors(screen, palette, 0, 256);
+	}
+
 	/* Set the surface pixels and refresh! */
 	if ( SDL_LockSurface(screen) < 0 ) {
 		fprintf(stderr, "Couldn't lock the display surface: %s\n",
@@ -98,10 +113,25 @@ int main(int argc, char *argv[])
 		exit(2);
 	}
 	buffer=(Uint8 *)screen->pixels;
-	for ( i=0; i<screen->h; ++i ) {
-		memset(buffer,(i*255)/screen->h, screen->pitch);
-		buffer += screen->pitch;
-	}
+	if (screen->format->BytesPerPixel!=2) {
+        	for ( i=0; i<screen->h; ++i ) {
+        		memset(buffer,(i*255)/screen->h, screen->pitch);
+        		buffer += screen->pitch;
+        	}
+        }
+        else
+        {
+		for ( i=0; i<screen->h; ++i ) {
+			gradient=((i*255)/screen->h);
+                        color = SDL_MapRGB(screen->format, gradient, gradient, gradient);
+                        buffer16=(Uint16*)buffer;
+                        for (k=0; k<screen->w; k++)
+                        {
+                            *(buffer16+k)=color;
+                        }
+			buffer += screen->pitch;
+		}
+        }
 	SDL_UnlockSurface(screen);
 	SDL_UpdateRect(screen, 0, 0, 0, 0);
 

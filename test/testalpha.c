@@ -279,11 +279,15 @@ int main(int argc, char *argv[])
 	Uint8  video_bpp;
 	Uint32 videoflags;
 	Uint8 *buffer;
-	int    i, done;
+	int    i, k, done;
 	SDL_Event event;
 	SDL_Surface *light;
 	int mouse_pressed;
 	Uint32 ticks, lastticks;
+	Uint16 *buffer16;
+        Uint16 color;
+        Uint8  gradient;
+
 
 	/* Initialize SDL */
 	if ( SDL_Init(SDL_INIT_VIDEO) < 0 ) {
@@ -298,12 +302,17 @@ int main(int argc, char *argv[])
 		video_bpp = info->vfmt->BitsPerPixel;
 	} else {
 		video_bpp = 16;
+                fprintf(stderr, "forced 16 bpp mode\n");
 	}
 	videoflags = SDL_SWSURFACE;
 	while ( argc > 1 ) {
 		--argc;
 		if ( strcmp(argv[argc-1], "-bpp") == 0 ) {
 			video_bpp = atoi(argv[argc]);
+                        if (video_bpp<=8) {
+                            video_bpp=16;
+                            fprintf(stderr, "forced 16 bpp mode\n");
+                        }
 			--argc;
 		} else
 		if ( strcmp(argv[argc], "-hw") == 0 ) {
@@ -336,10 +345,26 @@ int main(int argc, char *argv[])
 		exit(2);
 	}
 	buffer=(Uint8 *)screen->pixels;
-	for ( i=0; i<screen->h; ++i ) {
-		memset(buffer,(i*255)/screen->h, screen->pitch);
-		buffer += screen->pitch;
+	if (screen->format->BytesPerPixel!=2) {
+		for ( i=0; i<screen->h; ++i ) {
+			memset(buffer,(i*255)/screen->h, screen->pitch);
+			buffer += screen->pitch;
+		}
 	}
+        else
+        {
+		for ( i=0; i<screen->h; ++i ) {
+			gradient=((i*255)/screen->h);
+                        color = SDL_MapRGB(screen->format, gradient, gradient, gradient);
+                        buffer16=(Uint16*)buffer;
+                        for (k=0; k<screen->w; k++)
+                        {
+                            *(buffer16+k)=color;
+                        }
+			buffer += screen->pitch;
+		}
+        }
+
 	SDL_UnlockSurface(screen);
 	SDL_UpdateRect(screen, 0, 0, 0, 0);
 
