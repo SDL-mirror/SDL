@@ -696,7 +696,7 @@ static SDL_Surface* QZ_SetVideoMode (_THIS, SDL_Surface *current, int width,
 }
 
 static int QZ_ToggleFullScreen (_THIS, int on) {
-    return -1;
+    return 0;
 }
 
 static int QZ_SetColors (_THIS, int first_color, int num_colors,
