@@ -38,6 +38,7 @@ EXTRA_DIST =		\
         MPWmake.sea.bin	\
 	CWprojects.sea.bin \
 	PBProjects.tar.gz \
+	EpocBuildFiles.zip \
         WhatsNew	\
         docs.html	\
         sdl.m4		\
