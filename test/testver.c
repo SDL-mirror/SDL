@@ -6,7 +6,6 @@
 #include <stdio.h>
 
 #include "SDL.h"
-#include "SDL_byteorder.h"
 
 int main(int argc, char *argv[])
 {
@@ -32,8 +31,6 @@ int main(int argc, char *argv[])
 			SDL_Linked_Version()->major,
 			SDL_Linked_Version()->minor,
 			SDL_Linked_Version()->patch);
-	printf("This is a %s endian machine.\n",
-		(SDL_BYTEORDER == SDL_LIL_ENDIAN) ? "little" : "big");
 	SDL_Quit();
 	return(0);
 }

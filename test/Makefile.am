@@ -1,7 +1,8 @@
 AUTOMAKE_OPTIONS = no-dependencies
 
 noinst_PROGRAMS = \
-	testver testtypes testcpuinfo testhread testlock testerror testsem testtimer \
+	testver testtypes testendian testcpuinfo \
+	testhread testlock testerror testsem testtimer \
 	loopwave testcdrom testkeys testvidinfo checkkeys testwin graywin \
 	testsprite testbitmap testalpha testgamma testpalette testwm \
 	threadwin testoverlay testoverlay2 testgl testdyngl testjoystick
