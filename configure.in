@@ -1333,6 +1333,8 @@ CopyUnixThreadSource()
             *-*-bsdi*)
                 COPY_ARCH_SRC(src/thread, bsdi, SDL_syssem.c)
                 COPY_ARCH_SRC(src/thread, generic, SDL_syssem_c.h)
+                COPY_ARCH_SRC(src/thread, linux, SDL_sysmutex.c)
+                COPY_ARCH_SRC(src/thread, linux, SDL_sysmutex_c.h)
                 ;;
             *)
                 if test x$glibc20_pthreads = xyes; then
