@@ -8,6 +8,8 @@
 
 #include "SDL.h"
 
+#define DEBUG_FLIP 1
+
 #define NUM_SPRITES	100
 #define MAX_SPEED 	1
 
@@ -52,6 +54,10 @@ int LoadSprite(SDL_Surface *screen, char *file)
 
 void MoveSprites(SDL_Surface *screen, Uint32 background)
 {
+#if DEBUG_FLIP
+    static int t = 0;
+#endif
+
 	int i, nupdates;
 	SDL_Rect area, *position, *velocity;
 
@@ -82,6 +88,20 @@ void MoveSprites(SDL_Surface *screen, Uint32 background)
 		sprite_rects[nupdates++] = area;
 	}
 
+#if DEBUG_FLIP
+    {
+        Uint32 color = SDL_MapRGB (screen->format, 255, 0, 0);
+        SDL_Rect r;
+        r.x = (sin((float)t * 2 * 3.1459) + 1.0) / 2.0 * (screen->w-20);
+        r.y = 0;
+        r.w = 20;
+        r.h = screen->h;
+        
+        SDL_FillRect (screen, &r, color);
+        t+=2;
+    }
+#endif
+    
 	/* Update the screen! */
 	if ( (screen->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF ) {
 		SDL_Flip(screen);
