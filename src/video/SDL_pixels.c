@@ -494,6 +494,10 @@ static Uint8 *MapNto1(SDL_PixelFormat *src, SDL_Palette *dst, int *identical)
 	/* Generate a 256 color dither palette */
 	SDL_Palette dithered;
 	SDL_Color colors[256];
+	
+	/* SDL_DitherColors does not initialize the 'unused' component of colors,
+	   but Map1to1 compares it against dst, so we should initialize it. */  
+	memset(colors, 0, sizeof(colors));
 
 	dithered.ncolors = 256;
 	SDL_DitherColors(colors, 8);
