@@ -85,9 +85,9 @@ static int cmpmodes(const void *va, const void *vb)
 {
     const SDL_NAME(XF86VidModeModeInfo) *a = *(const SDL_NAME(XF86VidModeModeInfo)**)va;
     const SDL_NAME(XF86VidModeModeInfo) *b = *(const SDL_NAME(XF86VidModeModeInfo)**)vb;
-    if(a->hdisplay > b->hdisplay)
+    if( (a->vdisplay > b->vdisplay) && (a->hdisplay >= b->hdisplay) )
         return -1;
-    return b->vdisplay - a->vdisplay;
+    return b->hdisplay - a->hdisplay;
 }
 #endif
 
@@ -105,9 +105,8 @@ static void set_best_resolution(_THIS, int width, int height)
 
         if ( SDL_NAME(XF86VidModeGetModeLine)(SDL_Display, SDL_Screen, &i, &mode) &&
              SDL_NAME(XF86VidModeGetAllModeLines)(SDL_Display,SDL_Screen,&nmodes,&modes)){
-            qsort(modes, nmodes, sizeof *modes, cmpmodes);
 #ifdef XFREE86_DEBUG
-            printf("Available modes (sdl):\n");
+            printf("Available modes (unsorted):\n");
             for ( i = 0; i < nmodes; ++i ) {
                 printf("Mode %d: %d x %d @ %d\n", i,
                         modes[i]->hdisplay, modes[i]->vdisplay,
@@ -120,6 +119,7 @@ static void set_best_resolution(_THIS, int width, int height)
                      (modes[i]->vdisplay == height) )
                     goto match;
             }
+            qsort(modes, nmodes, sizeof *modes, cmpmodes);
             for ( i = nmodes-1; i >= 0 ; i-- ) {
 		if ( ! best_width ) {
                     if ( (modes[i]->hdisplay >= width) &&
@@ -352,7 +352,7 @@ int X11_GetVideoModes(_THIS)
          SDL_NAME(XF86VidModeGetAllModeLines)(SDL_Display, SDL_Screen,&nmodes,&modes) ) {
 
 #ifdef XFREE86_DEBUG
-        printf("Available modes (x11):\n");
+        printf("Available modes: (sorted)\n");
         for ( i = 0; i < nmodes; ++i ) {
             printf("Mode %d: %d x %d @ %d\n", i,
                     modes[i]->hdisplay, modes[i]->vdisplay,
