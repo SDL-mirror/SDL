@@ -48,7 +48,7 @@
 # ifdef WIN32
 #  ifdef __BORLANDC__
 #   ifdef BUILD_SDL
-#    define DECLSPEC __declspec(dllexport)
+#    define DECLSPEC 
 #   else
 #    define DECLSPEC __declspec(dllimport)
 #   endif
