@@ -292,19 +292,6 @@ CheckALSA()
     fi
 }
 
-dnl Check whether we want to use OpenBSD native audio or not
-CheckOPENBSDAUDIO()
-{
-    AC_ARG_ENABLE(openbsdaudio,
-[  --enable-openbsdaudio   OpenBSD native audio support [default=yes]],
-                  , enable_openbsdaudio=yes)
-    if test x$enable_audio = xyes -a x$enable_openbsdaudio = xyes; then
-        CFLAGS="$CFLAGS -DOPENBSD_AUDIO_SUPPORT"
-        AUDIO_SUBDIRS="$AUDIO_SUBDIRS openbsd"
-        AUDIO_DRIVERS="$AUDIO_DRIVERS openbsd/libaudio_openbsd.la"
-    fi
-}
-
 dnl Check whether we want to use IRIX 6.5+ native audio or not
 CheckDMEDIA()
 {
@@ -474,6 +461,9 @@ CheckNASM()
             case $ARCH in
               win32)
                   NASMFLAGS="-f win32"
+                  ;;
+              openbsd)
+                  NASMFLAGS="-f aoutb"
                   ;;
               *)
                   NASMFLAGS="-f elf"
@@ -1580,6 +1570,7 @@ case "$target" in
         if test x$enable_joystick = xyes; then
             JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS bsd"
             JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS bsd/libjoystick_bsd.la"
+            SYSTEM_LIBS="$SYSTEM_LIBS -lusb"
         fi
         # Set up files for the cdrom library
         if test x$enable_cdrom = xyes; then
@@ -1632,6 +1623,7 @@ case "$target" in
         if test x$enable_joystick = xyes; then
             JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS bsd"
             JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS bsd/libjoystick_bsd.la"
+            SYSTEM_LIBS="$SYSTEM_LIBS -lusb"
         fi
         # Set up files for the cdrom library
         if test x$enable_cdrom = xyes; then
@@ -1665,7 +1657,6 @@ case "$target" in
         CheckDummyVideo
         CheckDiskAudio
 	CheckDLOPEN
-        CheckOPENBSDAUDIO
         CheckNASM
         CheckOSS
         CheckARTSC
@@ -1678,12 +1669,11 @@ case "$target" in
         # Set up files for the main() stub
         COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         # Set up files for the audio library
-        # We use the OSS and native API's, not the Sun audio API
-        #if test x$enable_audio = xyes; then
-        #    CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
-        #    AUDIO_SUBDIRS="$AUDIO_SUBDIRS sun"
-        #    AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
-        #fi
+        if test x$enable_audio = xyes; then
+            CFLAGS="$CFLAGS -DOPENBSD_AUDIO_SUPPORT"
+            AUDIO_SUBDIRS="$AUDIO_SUBDIRS openbsd"
+            AUDIO_DRIVERS="$AUDIO_DRIVERS openbsd/libaudio_openbsd.la"
+        fi
         # OpenBSD needs linking with ossaudio emulation library
         if test x$have_oss = xyes; then
             SYSTEM_LIBS="$SYSTEM_LIBS -lossaudio"
@@ -1692,6 +1682,7 @@ case "$target" in
         if test x$enable_joystick = xyes; then
             JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS bsd"
             JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS bsd/libjoystick_bsd.la"
+            SYSTEM_LIBS="$SYSTEM_LIBS -lusbhid"
         fi
         # Set up files for the cdrom library
         if test x$enable_cdrom = xyes; then
