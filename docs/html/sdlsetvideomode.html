@@ -73,7 +73,7 @@ NAME="SDLSETVIDEOMODE"
 ><DIV
 CLASS="REFNAMEDIV"
 ><A
-NAME="AEN834"
+NAME="AEN856"
 ></A
 ><H2
 >Name</H2
@@ -81,14 +81,14 @@ NAME="AEN834"
 ><DIV
 CLASS="REFSYNOPSISDIV"
 ><A
-NAME="AEN837"
+NAME="AEN859"
 ></A
 ><H2
 >Synopsis</H2
 ><DIV
 CLASS="FUNCSYNOPSIS"
 ><A
-NAME="AEN838"
+NAME="AEN860"
 ></A
 ><P
 ></P
@@ -112,7 +112,7 @@ CLASS="FSFUNC"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN844"
+NAME="AEN866"
 ></A
 ><H2
 >Description</H2
@@ -147,7 +147,7 @@ CLASS="STRUCTNAME"
 ><DIV
 CLASS="INFORMALTABLE"
 ><A
-NAME="AEN854"
+NAME="AEN876"
 ></A
 ><P
 ></P
@@ -192,7 +192,9 @@ CLASS="LITERAL"
 ><TD
 ALIGN="LEFT"
 VALIGN="TOP"
->Enables the use of asynchronous to the display surface. This will usually slow down blitting on single CPU machines, but may provide a speed increase on SMP systems.</TD
+>Enables the use of asynchronous updates of the display surface. This will
+usually slow down blitting on single CPU machines, but may provide a speed
+increase on SMP systems.</TD
 ></TR
 ><TR
 ><TD
@@ -205,7 +207,7 @@ CLASS="LITERAL"
 ><TD
 ALIGN="LEFT"
 VALIGN="TOP"
->Normally, if a video surface of the requested depth (<TT
+>Normally, if a video surface of the requested bits-per-pixel (<TT
 CLASS="PARAMETER"
 ><I
 >bpp</I
@@ -213,7 +215,7 @@ CLASS="PARAMETER"
 >) is not available, SDL will emulate one with a shadow surface. Passing <TT
 CLASS="LITERAL"
 >SDL_ANYFORMAT</TT
-> prevents this and causes SDL to use the video surface, regardless of its depth.</TD
+> prevents this and causes SDL to use the video surface, regardless of its pixel depth.</TD
 ></TR
 ><TR
 ><TD
@@ -232,6 +234,12 @@ HREF="sdlsetcolors.html"
 CLASS="FUNCTION"
 >SDL_SetColors</TT
 ></A
+> or <A
+HREF="sdlsetpalette.html"
+><TT
+CLASS="FUNCTION"
+>SDL_SetPalette</TT
+></A
 >.</TD
 ></TR
 ><TR
@@ -245,22 +253,28 @@ CLASS="LITERAL"
 ><TD
 ALIGN="LEFT"
 VALIGN="TOP"
->Enable double buffering; only valid with SDL_HWSURFACE. Calling <A
+>Enable hardware double buffering; only valid with SDL_HWSURFACE. Calling
+<A
 HREF="sdlflip.html"
 ><TT
 CLASS="FUNCTION"
 >SDL_Flip</TT
 ></A
-> will flip the buffers and update the screen. If double buffering could not be enabled then <TT
+> will flip the
+buffers and update the screen. All drawing will take place on the surface
+that is not displayed at the moment. If double buffering could not be enabled
+then <TT
 CLASS="FUNCTION"
 >SDL_Flip</TT
-> will just perform a <A
+> will just perform a
+<A
 HREF="sdlupdaterect.html"
 ><TT
 CLASS="FUNCTION"
 >SDL_UpdateRect</TT
 ></A
-> on the entire screen.</TD
+>
+on the entire screen.</TD
 ></TR
 ><TR
 ><TD
@@ -273,7 +287,9 @@ CLASS="LITERAL"
 ><TD
 ALIGN="LEFT"
 VALIGN="TOP"
->SDL will attempt to use a fullscreen mode</TD
+>SDL will attempt to use a fullscreen mode. If a hardware resolution change is
+not possible (for whatever reason), the next higher resolution will be used and
+the display window centered on a black background.</TD
 ></TR
 ><TR
 ><TD
@@ -305,7 +321,16 @@ CLASS="LITERAL"
 ><TD
 ALIGN="LEFT"
 VALIGN="TOP"
->Create an OpenGL rendering context, like above, but allow normal blitting operations.</TD
+>Create an OpenGL rendering context, like above, but allow normal blitting
+operations. The screen (2D) surface may have an alpha channel, and
+<A
+HREF="sdlupdaterects.html"
+><TT
+CLASS="FUNCTION"
+>SDL_UpdateRects</TT
+></A
+>
+must be used for updating changes to the screen surface.</TD
 ></TR
 ><TR
 ><TD
@@ -373,11 +398,40 @@ CLASS="STRUCTFIELD"
 > member of the returned surface.</P
 ></BLOCKQUOTE
 ></DIV
+><DIV
+CLASS="NOTE"
+><BLOCKQUOTE
+CLASS="NOTE"
+><P
+><B
+>Note: </B
+>The <TT
+CLASS="PARAMETER"
+><I
+>bpp</I
+></TT
+> parameter is the number of bits per pixel,
+so a <TT
+CLASS="PARAMETER"
+><I
+>bpp</I
+></TT
+> of 24 uses the packed representation of
+3 bytes/pixel. For the more common 4 bytes/pixel mode, use a
+<TT
+CLASS="PARAMETER"
+><I
+>bpp</I
+></TT
+> of 32. Somewhat oddly, both 15 and 16 will
+request a 2 bytes/pixel mode, but different pixel formats.</P
+></BLOCKQUOTE
+></DIV
 ></DIV
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN921"
+NAME="AEN952"
 ></A
 ><H2
 >Return Value</H2
@@ -385,12 +439,14 @@ NAME="AEN921"
 >The framebuffer surface, or <SPAN
 CLASS="RETURNVALUE"
 >NULL</SPAN
-> if it fails.</P
+> if it fails.
+The surface returned is freed by SDL_Quit() and should nt be freed by
+the caller.</P
 ></DIV
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN925"
+NAME="AEN956"
 ></A
 ><H2
 >See Also</H2

@@ -73,7 +73,7 @@ NAME="SDLOPENAUDIO"
 ><DIV
 CLASS="REFNAMEDIV"
 ><A
-NAME="AEN6103"
+NAME="AEN6262"
 ></A
 ><H2
 >Name</H2
@@ -81,14 +81,14 @@ NAME="AEN6103"
 ><DIV
 CLASS="REFSYNOPSISDIV"
 ><A
-NAME="AEN6106"
+NAME="AEN6265"
 ></A
 ><H2
 >Synopsis</H2
 ><DIV
 CLASS="FUNCSYNOPSIS"
 ><A
-NAME="AEN6107"
+NAME="AEN6266"
 ></A
 ><P
 ></P
@@ -112,7 +112,7 @@ CLASS="FSFUNC"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN6113"
+NAME="AEN6272"
 ></A
 ><H2
 >Description</H2
@@ -418,7 +418,7 @@ CLASS="STRUCTFIELD"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN6200"
+NAME="AEN6359"
 ></A
 ><H2
 >Examples</H2
@@ -442,6 +442,9 @@ desired-&#62;freq=22050;
 
 /* 16-bit signed audio */
 desired-&#62;format=AUDIO_S16LSB;
+
+/* Mono */
+desired-&#62;channels=0;
 
 /* Large audio buffer reduces risk of dropouts but increases response time */
 desired-&#62;samples=8192;
@@ -471,7 +474,7 @@ SDL_PauseAudio(0);</PRE
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN6203"
+NAME="AEN6362"
 ></A
 ><H2
 >See Also</H2

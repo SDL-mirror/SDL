@@ -73,7 +73,7 @@ NAME="SDLJOYSTICKOPEN"
 ><DIV
 CLASS="REFNAMEDIV"
 ><A
-NAME="AEN5549"
+NAME="AEN5708"
 ></A
 ><H2
 >Name</H2
@@ -81,14 +81,14 @@ NAME="AEN5549"
 ><DIV
 CLASS="REFSYNOPSISDIV"
 ><A
-NAME="AEN5552"
+NAME="AEN5711"
 ></A
 ><H2
 >Synopsis</H2
 ><DIV
 CLASS="FUNCSYNOPSIS"
 ><A
-NAME="AEN5553"
+NAME="AEN5712"
 ></A
 ><P
 ></P
@@ -112,7 +112,7 @@ CLASS="FSFUNC"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN5559"
+NAME="AEN5718"
 ></A
 ><H2
 >Description</H2
@@ -127,7 +127,7 @@ CLASS="PARAMETER"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN5563"
+NAME="AEN5722"
 ></A
 ><H2
 >Return Value</H2
@@ -143,7 +143,7 @@ CLASS="RETURNVALUE"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN5568"
+NAME="AEN5727"
 ></A
 ><H2
 >Examples</H2
@@ -160,9 +160,9 @@ if(SDL_NumJoysticks()&#62;0){
   {
     printf("Opened Joystick 0\n");
     printf("Name: %s\n", SDL_JoystickName(0));
-    printf("Number of Axes: %s\n", SDL_JoystickNumAxes(joy));
-    printf("Number of Buttons: %s\n", SDL_JoystickNumButtons(joy));
-    printf("Number of Balls: %s\n", SDL_JoystickNumBalls(joy));
+    printf("Number of Axes: %d\n", SDL_JoystickNumAxes(joy));
+    printf("Number of Buttons: %d\n", SDL_JoystickNumButtons(joy));
+    printf("Number of Balls: %d\n", SDL_JoystickNumBalls(joy));
   }
   else
     printf("Couldn't open Joystick 0\n");
@@ -176,7 +176,7 @@ if(SDL_NumJoysticks()&#62;0){
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN5572"
+NAME="AEN5731"
 ></A
 ><H2
 >See Also</H2

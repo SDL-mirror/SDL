@@ -1,4 +1,4 @@
-.TH "SDL_Event" "3" "Sun 10 Jun 2001, 19:40" "SDL" "SDL API Reference" 
+.TH "SDL_Event" "3" "Tue 11 Sep 2001, 22:59" "SDL" "SDL API Reference" 
 .SH "NAME"
 SDL_Event\- General event structure
 .SH "STRUCTURE DEFINITION"
@@ -15,6 +15,7 @@ SDL_Event\- General event structure
   SDL_JoyHatEvent jhat;
   SDL_JoyButtonEvent jbutton;
   SDL_ResizeEvent resize;
+  SDL_ExposeEvent expose;
   SDL_QuitEvent quit;
   SDL_UserEvent user;
   SDL_SywWMEvent syswm;
@@ -52,6 +53,9 @@ The type of event
 .TP 20
 \fBresize\fR
 \fIApplication window resize event\fR
+.TP 20
+\fBexpose\fR
+\fIApplication window expose event\fR
 .TP 20
 \fBquit\fR
 \fIApplication quit request event\fR
@@ -101,6 +105,9 @@ The \fBSDL_Event\fR union is the core to all event handling is SDL, its probably
 .TP 20
 \fBSDL_VIDEORESIZE\fP
 \fI\fBSDL_ResizeEvent\fR\fR
+.TP 20
+\fBSDL_VIDEOEXPOSE\fP
+\fI\fBSDL_ExposeEvent\fR\fR
 .TP 20
 \fBSDL_USEREVENT\fP
 \fI\fBSDL_UserEvent\fR\fR
@@ -172,4 +179,4 @@ SDL_PushEvent(&user_event);\fR
 .SH "SEE ALSO"
 .PP
 \fI\fBSDL_PollEvent\fP\fR, \fI\fBSDL_PushEvent\fP\fR, \fI\fBSDL_PeepEvents\fP\fR
-...\" created by instant / docbook-to-man, Sun 10 Jun 2001, 19:40
+...\" created by instant / docbook-to-man, Tue 11 Sep 2001, 22:59

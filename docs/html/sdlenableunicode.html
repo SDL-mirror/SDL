@@ -73,7 +73,7 @@ NAME="SDLENABLEUNICODE"
 ><DIV
 CLASS="REFNAMEDIV"
 ><A
-NAME="AEN5262"
+NAME="AEN5417"
 ></A
 ><H2
 >Name</H2
@@ -81,14 +81,14 @@ NAME="AEN5262"
 ><DIV
 CLASS="REFSYNOPSISDIV"
 ><A
-NAME="AEN5265"
+NAME="AEN5420"
 ></A
 ><H2
 >Synopsis</H2
 ><DIV
 CLASS="FUNCSYNOPSIS"
 ><A
-NAME="AEN5266"
+NAME="AEN5421"
 ></A
 ><P
 ></P
@@ -112,48 +112,64 @@ CLASS="FSFUNC"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN5272"
+NAME="AEN5427"
 ></A
 ><H2
 >Description</H2
 ><P
->Enables/Disables UNICODE keyboard translation.</P
+>Enables/Disables Unicode keyboard translation.</P
 ><P
->If you wish to translate a keysym to it's printable representation, you need to enable UNICODE translation
-using this function (<TT
-CLASS="PARAMETER"
-><I
->enable</I
-></TT
->=0) and then look in the <TT
+>To obtain the character codes corresponding to received keyboard events,
+Unicode translation must first be turned on using this function. The
+translation incurs a slight overhead for each keyboard event and is therefore
+disabled by default. For each subsequently received key down event, the
+<TT
 CLASS="STRUCTFIELD"
 ><I
 >unicode</I
 ></TT
-> member
-of the <A
+> member of the
+<A
 HREF="sdlkeysym.html"
 ><SPAN
 CLASS="STRUCTNAME"
 >SDL_keysym</SPAN
 ></A
-> structure. This value will be zero for keysyms
-that do not have a printable representation. UNICODE translation is disabled by default as the conversion can cause a slight overhead.</P
+> structure
+will then contain the corresponding character code, or zero for keysyms that do
+not correspond to any character code.</P
+><P
+>A value of 1 for <TT
+CLASS="PARAMETER"
+><I
+>enable</I
+></TT
+> enables Unicode translation;
+0 disables it, and -1 leaves it unchanged (useful for querying the current
+translation mode).</P
+><P
+>Note that only key press events will be translated, not release events.</P
 ></DIV
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN5280"
+NAME="AEN5437"
 ></A
 ><H2
 >Return Value</H2
 ><P
->Returns the previous translation mode.</P
+>Returns the previous translation mode (<SPAN
+CLASS="RETURNVALUE"
+>0</SPAN
+> or <SPAN
+CLASS="RETURNVALUE"
+>1</SPAN
+>).</P
 ></DIV
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN5283"
+NAME="AEN5442"
 ></A
 ><H2
 >See Also</H2

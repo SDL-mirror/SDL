@@ -88,25 +88,27 @@ NAME="AEN412"
 CLASS="PROGRAMLISTING"
 >#define TICK_INTERVAL    30
 
-Uint32 TimeLeft(void)
+static Uint32 next_time;
+
+Uint32 time_left(void)
 {
-    static Uint32 next_time = 0;
     Uint32 now;
 
     now = SDL_GetTicks();
-    if ( next_time &#60;= now ) {
-        next_time = now+TICK_INTERVAL;
-        return(0);
-    }
-    return(next_time-now);
+    if(next_time &#60;= now)
+        return 0;
+    else
+        return next_time - now;
 }
 
 
-/* main game loop
+/* main game loop */
 
+    next_time = SDL_GetTicks() + TICK_INTERVAL;
     while ( game_running ) {
-        UpdateGameState();
-        SDL_Delay(TimeLeft());
+        update_game_state();
+        SDL_Delay(time_left());
+        next_time += TICK_INTERVAL;
     }&#13;</PRE
 ></P
 ></DIV

@@ -70,6 +70,7 @@ EXTRA_DIST = \
     sdlenableunicode.html \
     sdlevent.html \
     sdleventstate.html \
+    sdlexposeevent.html \
     sdlfillrect.html \
     sdlflip.html \
     sdlfreecursor.html \
@@ -80,6 +81,7 @@ EXTRA_DIST = \
     sdlgetaudiostatus.html \
     sdlgetcliprect.html \
     sdlgetcursor.html \
+    sdlgeterror.html \
     sdlgeteventfilter.html \
     sdlgetgammaramp.html \
     sdlgetkeyname.html \

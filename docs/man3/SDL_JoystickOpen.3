@@ -1,4 +1,4 @@
-.TH "SDL_JoystickOpen" "3" "Sun 10 Jun 2001, 19:41" "SDL" "SDL API Reference" 
+.TH "SDL_JoystickOpen" "3" "Tue 11 Sep 2001, 23:00" "SDL" "SDL API Reference" 
 .SH "NAME"
 SDL_JoystickOpen\- Opens a joystick for use\&.
 .SH "SYNOPSIS"
@@ -28,11 +28,11 @@ if(SDL_NumJoysticks()>0){
 ");
     printf("Name: %s
 ", SDL_JoystickName(0));
-    printf("Number of Axes: %s
+    printf("Number of Axes: %d
 ", SDL_JoystickNumAxes(joy));
-    printf("Number of Buttons: %s
+    printf("Number of Buttons: %d
 ", SDL_JoystickNumButtons(joy));
-    printf("Number of Balls: %s
+    printf("Number of Balls: %d
 ", SDL_JoystickNumBalls(joy));
   }
   else
@@ -48,4 +48,4 @@ if(SDL_NumJoysticks()>0){
 .SH "SEE ALSO"
 .PP
 \fI\fBSDL_JoystickClose\fP\fR
-...\" created by instant / docbook-to-man, Sun 10 Jun 2001, 19:41
+...\" created by instant / docbook-to-man, Tue 11 Sep 2001, 23:00

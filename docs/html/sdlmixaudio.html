@@ -73,7 +73,7 @@ NAME="SDLMIXAUDIO"
 ><DIV
 CLASS="REFNAMEDIV"
 ><A
-NAME="AEN6560"
+NAME="AEN6719"
 ></A
 ><H2
 >Name</H2
@@ -81,14 +81,14 @@ NAME="AEN6560"
 ><DIV
 CLASS="REFSYNOPSISDIV"
 ><A
-NAME="AEN6563"
+NAME="AEN6722"
 ></A
 ><H2
 >Synopsis</H2
 ><DIV
 CLASS="FUNCSYNOPSIS"
 ><A
-NAME="AEN6564"
+NAME="AEN6723"
 ></A
 ><P
 ></P
@@ -112,7 +112,7 @@ CLASS="FSFUNC"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN6570"
+NAME="AEN6729"
 ></A
 ><H2
 >Description</H2
@@ -136,11 +136,25 @@ CLASS="LITERAL"
 > and should be set to the maximum
 value for full audio volume. Note this does not change hardware volume. This is
 provided for convenience -- you can mix your own audio data.</P
+><DIV
+CLASS="NOTE"
+><BLOCKQUOTE
+CLASS="NOTE"
+><P
+><B
+>Note: </B
+>Do not use this function for mixing together more than two streams of sample
+data. The output from repeated application of this function may be distorted
+by clipping, because there is no accumulator with greater range than the
+input (not to mention this being an inefficient way of doing it).
+Use mixing functions from SDL_mixer, OpenAL, or write your own mixer instead.</P
+></BLOCKQUOTE
+></DIV
 ></DIV
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN6576"
+NAME="AEN6737"
 ></A
 ><H2
 >See Also</H2

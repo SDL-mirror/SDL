@@ -132,7 +132,7 @@ CLASS="PROGRAMLISTING"
 
         /* Mix as much data as possible */
         len = ( len &#62; audio_len ? audio_len : len );
-        SDL_MixAudio(stream, audio_pos, len, SDL_MIX_MAXVOLUME)
+        SDL_MixAudio(stream, audio_pos, len, SDL_MIX_MAXVOLUME);
         audio_pos += len;
         audio_len -= len;
     }

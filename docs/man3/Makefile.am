@@ -46,6 +46,7 @@ man_MANS =  \
     SDL_EnableUNICODE.3 \
     SDL_Event.3 \
     SDL_EventState.3 \
+    SDL_ExposeEvent.3 \
     SDL_FillRect.3 \
     SDL_Flip.3 \
     SDL_FreeCursor.3 \
@@ -62,6 +63,7 @@ man_MANS =  \
     SDL_GetAudioStatus.3 \
     SDL_GetClipRect.3 \
     SDL_GetCursor.3 \
+    SDL_GetError.3 \
     SDL_GetEventFilter.3 \
     SDL_GetGamma.3 \
     SDL_GetGammaRamp.3 \

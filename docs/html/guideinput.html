@@ -436,7 +436,7 @@ NAME="AEN214"
 >Advanced Joystick Functions</A
 ></H2
 ><P
->That takes care of the controls that you can count on being on every joystick under the sun, but there are a few extra things that SDL can support.  Joyballs are next on our list, they are alot like axis we a few minor differences.  Joyballs store relative changes unlike the the absolute postion stored in a axis event. Also one trackball event contains both the change in x and they change in y.  Our case for it is as follows:</P
+>That takes care of the controls that you can count on being on every joystick under the sun, but there are a few extra things that SDL can support.  Joyballs are next on our list, they are alot like axis with a few minor differences.  Joyballs store relative changes unlike the the absolute postion stored in a axis event. Also one trackball event contains both the change in x and they change in y.  Our case for it is as follows:</P
 ><DIV
 CLASS="EXAMPLE"
 ><A
@@ -569,17 +569,17 @@ NAME="AEN244"
 ><PRE
 CLASS="PROGRAMLISTING"
 >    case SDL_JOYHATMOTION:  /* Handle Hat Motion */
-    if ( event.jhat.hat | SDL_HAT_UP )
+    if ( event.jhat.hat &#38; SDL_HAT_UP )
     {
         /* Do up stuff here */
     }
 
-    if ( event.jhat.hat | SDL_HAT_LEFT )
+    if ( event.jhat.hat &#38; SDL_HAT_LEFT )
     {
         /* Do left stuff here */
     }
 
-    if ( event.jhat.hat | SDL_HAT_RIGHTDOWN )
+    if ( event.jhat.hat &#38; SDL_HAT_RIGHTDOWN )
     {
         /* Do right and down together stuff here */
     }

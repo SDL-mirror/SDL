@@ -73,7 +73,7 @@ NAME="SDLEVENT"
 ><DIV
 CLASS="REFNAMEDIV"
 ><A
-NAME="AEN3289"
+NAME="AEN3327"
 ></A
 ><H2
 >Name</H2
@@ -81,7 +81,7 @@ NAME="AEN3289"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN3292"
+NAME="AEN3330"
 ></A
 ><H2
 >Structure Definition</H2
@@ -98,6 +98,7 @@ CLASS="PROGRAMLISTING"
   SDL_JoyHatEvent jhat;
   SDL_JoyButtonEvent jbutton;
   SDL_ResizeEvent resize;
+  SDL_ExposeEvent expose;
   SDL_QuitEvent quit;
   SDL_UserEvent user;
   SDL_SywWMEvent syswm;
@@ -106,14 +107,14 @@ CLASS="PROGRAMLISTING"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN3295"
+NAME="AEN3333"
 ></A
 ><H2
 >Structure Data</H2
 ><DIV
 CLASS="INFORMALTABLE"
 ><A
-NAME="AEN3297"
+NAME="AEN3335"
 ></A
 ><P
 ></P
@@ -305,6 +306,24 @@ VALIGN="TOP"
 ><TT
 CLASS="STRUCTFIELD"
 ><I
+>expose</I
+></TT
+></TD
+><TD
+ALIGN="LEFT"
+VALIGN="TOP"
+><A
+HREF="sdlexposeevent.html"
+>Application window expose event</A
+></TD
+></TR
+><TR
+><TD
+ALIGN="LEFT"
+VALIGN="TOP"
+><TT
+CLASS="STRUCTFIELD"
+><I
 >quit</I
 ></TT
 ></TD
@@ -361,7 +380,7 @@ HREF="sdlsyswmevent.html"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN3364"
+NAME="AEN3407"
 ></A
 ><H2
 >Description</H2
@@ -385,7 +404,7 @@ CLASS="STRUCTFIELD"
 ><DIV
 CLASS="INFORMALTABLE"
 ><A
-NAME="AEN3372"
+NAME="AEN3415"
 ></A
 ><P
 ></P
@@ -625,6 +644,25 @@ ALIGN="LEFT"
 VALIGN="TOP"
 ><TT
 CLASS="LITERAL"
+>SDL_VIDEOEXPOSE</TT
+></TD
+><TD
+ALIGN="LEFT"
+VALIGN="TOP"
+><A
+HREF="sdlexposeevent.html"
+><SPAN
+CLASS="STRUCTNAME"
+>SDL_ExposeEvent</SPAN
+></A
+></TD
+></TR
+><TR
+><TD
+ALIGN="LEFT"
+VALIGN="TOP"
+><TT
+CLASS="LITERAL"
 >SDL_USEREVENT</TT
 ></TD
 ><TD
@@ -648,7 +686,7 @@ CLASS="STRUCTNAME"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN3452"
+NAME="AEN3501"
 ></A
 ><H2
 >Use</H2
@@ -853,7 +891,7 @@ SDL_PushEvent(&#38;user_event);</PRE
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN3509"
+NAME="AEN3558"
 ></A
 ><H2
 >See Also</H2
