@@ -58,6 +58,7 @@ static char rcsid =
 
 /* Define this if you want to debug X11 events */
 /*#define DEBUG_XEVENTS*/
+#define DEBUG_XEVENTS
 
 /* The translation tables from an X11 keysym to a SDL keysym */
 static SDLKey ODD_keymap[256];
@@ -167,7 +168,7 @@ static int X11_DispatchEvent(_THIS)
 	    /* Gaining mouse coverage? */
 	    case EnterNotify: {
 #ifdef DEBUG_XEVENTS
-printf("EnterNotify!\n");
+printf("EnterNotify! (%d,%d)\n", xevent.xcrossing.x, xevent.xcrossing.y);
 if ( xevent.xcrossing.mode == NotifyGrab )
 printf("Mode: NotifyGrab\n");
 if ( xevent.xcrossing.mode == NotifyUngrab )
@@ -175,7 +176,13 @@ printf("Mode: NotifyUngrab\n");
 #endif
 		if ( (xevent.xcrossing.mode != NotifyGrab) &&
 		     (xevent.xcrossing.mode != NotifyUngrab) ) {
-			posted = SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS);
+			if ( this->input_grab == SDL_GRAB_OFF ) {
+				posted = SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS);
+			} else {
+				posted = SDL_PrivateMouseMotion(0, 0,
+						xevent.xcrossing.x,
+						xevent.xcrossing.y);
+			}
 		}
 	    }
 	    break;
@@ -183,7 +190,7 @@ printf("Mode: NotifyUngrab\n");
 	    /* Losing mouse coverage? */
 	    case LeaveNotify: {
 #ifdef DEBUG_XEVENTS
-printf("LeaveNotify!\n");
+printf("LeaveNotify! (%d,%d)\n", xevent.xcrossing.x, xevent.xcrossing.y);
 if ( xevent.xcrossing.mode == NotifyGrab )
 printf("Mode: NotifyGrab\n");
 if ( xevent.xcrossing.mode == NotifyUngrab )
@@ -191,7 +198,13 @@ printf("Mode: NotifyUngrab\n");
 #endif
 		if ( (xevent.xcrossing.mode != NotifyGrab) &&
 		     (xevent.xcrossing.mode != NotifyUngrab) ) {
-			posted = SDL_PrivateAppActive(0, SDL_APPMOUSEFOCUS);
+			if ( this->input_grab == SDL_GRAB_OFF ) {
+				posted = SDL_PrivateAppActive(0, SDL_APPMOUSEFOCUS);
+			} else {
+				posted = SDL_PrivateMouseMotion(0, 0,
+						xevent.xcrossing.x,
+						xevent.xcrossing.y);
+			}
 		}
 	    }
 	    break;
@@ -246,6 +259,9 @@ printf("KeymapNotify!\n");
 					posted = X11_WarpedMotion(this,&xevent);
 				}
 			} else {
+#ifdef DEBUG_MOTION
+  printf("X11 motion: %d,%d\n", xevent.xmotion.x, xevent.xmotion.y);
+#endif
 				posted = SDL_PrivateMouseMotion(0, 0,
 						xevent.xmotion.x,
 						xevent.xmotion.y);
