@@ -10,6 +10,49 @@
 /* Is the cursor visible? */
 static int visible = 1;
 
+static Uint8  video_bpp;
+static Uint32 video_flags;
+
+int SetVideoMode(int w, int h)
+{
+	SDL_Surface *screen;
+	int i;
+	Uint8 *buffer;
+	SDL_Color palette[256];
+
+	screen = SDL_SetVideoMode(w, h, video_bpp, video_flags);
+	if (  screen == NULL ) {
+		fprintf(stderr, "Couldn't set %dx%dx%d video mode: %s\n",
+					w, h, video_bpp, SDL_GetError());
+		return(-1);
+	}
+	printf("Running in %s mode\n", screen->flags & SDL_FULLSCREEN ?
+						"fullscreen" : "windowed");
+
+	/* Set the surface pixels and refresh! */
+	for ( i=0; i<256; ++i ) {
+		palette[i].r = 255-i;
+		palette[i].g = 255-i;
+		palette[i].b = 255-i;
+	}
+	SDL_SetColors(screen, palette, 0, 256);
+	if ( SDL_LockSurface(screen) < 0 ) {
+		fprintf(stderr, "Couldn't lock display surface: %s\n",
+							SDL_GetError());
+		return(-1);
+	}
+	buffer = (Uint8 *)screen->pixels;
+	for ( i=0; i<screen->h; ++i ) {
+		memset(buffer,(i*255)/screen->h,
+				screen->w*screen->format->BytesPerPixel);
+		buffer += screen->pitch;
+	}
+	SDL_UnlockSurface(screen);
+	SDL_UpdateRect(screen, 0, 0, 0, 0);
+
+	return(0);
+}
+
 SDL_Surface *LoadIconSurface(char *file, Uint8 **maskp)
 {
 	SDL_Surface *icon;
@@ -79,6 +122,8 @@ void HotKey_ToggleFullScreen(void)
 		    (screen->flags&SDL_FULLSCREEN) ? "fullscreen" : "windowed");
 	} else {
 		printf("Unable to toggle fullscreen mode\n");
+		video_flags ^= SDL_FULLSCREEN;
+		SetVideoMode(screen->w, screen->h);
 	}
 }
 
@@ -205,49 +250,6 @@ int FilterEvents(const SDL_Event *event)
 		default:
 			return(0);
 	}
-}
-
-static Uint8  video_bpp;
-static Uint32 video_flags;
-
-int SetVideoMode(int w, int h)
-{
-	SDL_Surface *screen;
-	int i;
-	Uint8 *buffer;
-	SDL_Color palette[256];
-
-	screen = SDL_SetVideoMode(w, h, video_bpp, video_flags);
-	if (  screen == NULL ) {
-		fprintf(stderr, "Couldn't set %dx%dx%d video mode: %s\n",
-					w, h, video_bpp, SDL_GetError());
-		return(-1);
-	}
-	printf("Running in %s mode\n", screen->flags & SDL_FULLSCREEN ?
-						"fullscreen" : "windowed");
-
-	/* Set the surface pixels and refresh! */
-	for ( i=0; i<256; ++i ) {
-		palette[i].r = 255-i;
-		palette[i].g = 255-i;
-		palette[i].b = 255-i;
-	}
-	SDL_SetColors(screen, palette, 0, 256);
-	if ( SDL_LockSurface(screen) < 0 ) {
-		fprintf(stderr, "Couldn't lock display surface: %s\n",
-							SDL_GetError());
-		return(-1);
-	}
-	buffer = (Uint8 *)screen->pixels;
-	for ( i=0; i<screen->h; ++i ) {
-		memset(buffer,(i*255)/screen->h,
-				screen->w*screen->format->BytesPerPixel);
-		buffer += screen->pitch;
-	}
-	SDL_UnlockSurface(screen);
-	SDL_UpdateRect(screen, 0, 0, 0, 0);
-
-	return(0);
 }
 
 int main(int argc, char *argv[])
