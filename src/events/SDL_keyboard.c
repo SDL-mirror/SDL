@@ -49,7 +49,6 @@ static char *keynames[SDLK_LAST];	/* Array of keycode names */
 /*
  * jk 991215 - added
  */
-#define MINIMUM_REPEAT_INTERVAL	30	/* Minimum repeat interval (30 ms) */
 struct {
 	int firsttime;    /* if we check against the delay or repeat value */
 	int delay;        /* the delay before we start repeating */
@@ -556,17 +555,13 @@ void SDL_CheckKeyRepeat(void)
 
 int SDL_EnableKeyRepeat(int delay, int interval)
 {
-	if ( delay < 0 ) {
-		SDL_SetError("keyboard repeat delay less than zero");
+	if ( (delay < 0) || (interval < 0) ) {
+		SDL_SetError("keyboard repeat value less than zero");
 		return(-1);
 	}
 	SDL_KeyRepeat.firsttime = 0;
 	SDL_KeyRepeat.delay = delay;
-	if ( interval < MINIMUM_REPEAT_INTERVAL ) {
-		SDL_KeyRepeat.interval = MINIMUM_REPEAT_INTERVAL;
-	} else {
-		SDL_KeyRepeat.interval = interval;
-	}
+	SDL_KeyRepeat.interval = interval;
 	SDL_KeyRepeat.timestamp = 0;
 	return(0);
 }
