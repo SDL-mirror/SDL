@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002  Sam Lantinga
+    Copyright (C) 1997-2003  Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -21,11 +21,82 @@
 */
 
 #include "SDL_QuartzVideo.h"
+#include "SDL_QuartzWindow.h"
 
-/* Include files into one compile unit...break apart eventually */
-#include "SDL_QuartzWM.m"
-#include "SDL_QuartzEvents.m"
-#include "SDL_QuartzWindow.m"
+
+/* 
+    Add methods to get at private members of NSScreen. 
+    Since there is a bug in Apple's screen switching code
+    that does not update this variable when switching
+    to fullscreen, we'll set it manually (but only for the
+    main screen).
+*/
+@interface NSScreen (NSScreenAccess)
+- (void) setFrame:(NSRect)frame;
+@end
+
+@implementation NSScreen (NSScreenAccess)
+- (void) setFrame:(NSRect)frame;
+{
+    _frame = frame;
+}
+@end
+
+
+/* 
+    Structure for rez switch gamma fades
+    We can hide the monitor flicker by setting the gamma tables to 0
+*/
+#define QZ_GAMMA_TABLE_SIZE 256
+
+typedef struct {
+
+    CGGammaValue red[QZ_GAMMA_TABLE_SIZE];
+    CGGammaValue green[QZ_GAMMA_TABLE_SIZE];
+    CGGammaValue blue[QZ_GAMMA_TABLE_SIZE];
+
+} SDL_QuartzGammaTable;
+
+
+/* Bootstrap functions */
+static int              QZ_Available ();
+static SDL_VideoDevice* QZ_CreateDevice (int device_index);
+static void             QZ_DeleteDevice (SDL_VideoDevice *device);
+
+/* Initialization, Query, Setup, and Redrawing functions */
+static int          QZ_VideoInit        (_THIS, SDL_PixelFormat *video_format);
+
+static SDL_Rect**   QZ_ListModes        (_THIS, SDL_PixelFormat *format,
+                                         Uint32 flags);
+static void         QZ_UnsetVideoMode   (_THIS);
+
+static SDL_Surface* QZ_SetVideoMode     (_THIS, SDL_Surface *current,
+                                         int width, int height, int bpp,
+                                         Uint32 flags);
+static int          QZ_ToggleFullScreen (_THIS, int on);
+static int          QZ_SetColors        (_THIS, int first_color,
+                                         int num_colors, SDL_Color *colors);
+
+static int          QZ_LockDoubleBuffer   (_THIS, SDL_Surface *surface);
+static void         QZ_UnlockDoubleBuffer (_THIS, SDL_Surface *surface);
+static int          QZ_ThreadFlip         (_THIS);
+static int          QZ_FlipDoubleBuffer   (_THIS, SDL_Surface *surface);
+static void         QZ_DoubleBufferUpdate (_THIS, int num_rects, SDL_Rect *rects);
+
+static void         QZ_DirectUpdate     (_THIS, int num_rects, SDL_Rect *rects);
+static int          QZ_LockWindow       (_THIS, SDL_Surface *surface);
+static void         QZ_UnlockWindow     (_THIS, SDL_Surface *surface);
+static void         QZ_UpdateRects      (_THIS, int num_rects, SDL_Rect *rects);
+static void         QZ_VideoQuit        (_THIS);
+
+/* Hardware surface functions (for fullscreen mode only) */
+#if 0 /* Not used (apparently, it's really slow) */
+static int  QZ_FillHWRect (_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color);
+#endif
+static int  QZ_LockHWSurface(_THIS, SDL_Surface *surface);
+static void QZ_UnlockHWSurface(_THIS, SDL_Surface *surface);
+static void QZ_FreeHWSurface (_THIS, SDL_Surface *surface);
+/* static int  QZ_FlipHWSurface (_THIS, SDL_Surface *surface); */
 
 /* Bootstrap binding, enables entry point into the driver */
 VideoBootStrap QZ_bootstrap = {
@@ -130,8 +201,7 @@ static int QZ_VideoInit (_THIS, SDL_PixelFormat *video_format) {
 
     /* Set misc globals */
     current_grab_mode = SDL_GRAB_OFF;
-    in_foreground     = YES;
-    cursor_visible    = YES;
+    cursor_should_be_visible    = YES;
     
     /* register for sleep notifications so wake from sleep generates SDL_VIDEOEXPOSE */
     QZ_RegisterForSleepNotifications (this);
@@ -712,7 +782,7 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
         /* Only recreate the view if it doesn't already exist */
         if (window_view == nil) {
         
-            window_view = [ [ SDL_QuartzWindowView alloc ] initWithFrame:contentRect ];
+            window_view = [ [ NSQuickDrawView alloc ] initWithFrame:contentRect ];
             [ window_view setAutoresizingMask: NSViewMinYMargin ];
             [ [ qz_window contentView ] addSubview:window_view ];
             [ window_view release ];
@@ -851,7 +921,7 @@ static void QZ_UnlockDoubleBuffer (_THIS, SDL_Surface *surface) {
     
     union
     {
-        UInt64	i;
+        UInt64 i;
         Nanoseconds ns;
     } temp;
         
@@ -990,9 +1060,15 @@ static void QZ_DirectUpdate (_THIS, int num_rects, SDL_Rect *rects) {
     The obscured code is based on work by Matt Slot fprefect@ambrosiasw.com,
     who supplied sample code for Carbon.
 */
+
+//#define TEST_OBSCURED 1
+
+#if TEST_OBSCURED
+#include "CGS.h"
+#endif
+
 static int QZ_IsWindowObscured (NSWindow *window) {
 
-    //#define TEST_OBSCURED 1
 
 #if TEST_OBSCURED
 
@@ -1230,6 +1306,84 @@ static void QZ_UnlockWindow (_THIS, SDL_Surface *surface) {
     UnlockPortBits ( [ window_view qdPort ] );
 }
 
+/* Resize icon, BMP format */
+static const unsigned char QZ_ResizeIcon[] = {
+    0x42,0x4d,0x31,0x02,0x00,0x00,0x00,0x00,0x00,0x00,0x36,0x00,0x00,0x00,0x28,0x00,
+    0x00,0x00,0x0d,0x00,0x00,0x00,0x0d,0x00,0x00,0x00,0x01,0x00,0x18,0x00,0x00,0x00,
+    0x00,0x00,0xfb,0x01,0x00,0x00,0x13,0x0b,0x00,0x00,0x13,0x0b,0x00,0x00,0x00,0x00,
+    0x00,0x00,0x00,0x00,0x00,0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x0b,0xff,0xff,
+    0xff,0xda,0xda,0xda,0x87,0x87,0x87,0xe8,0xe8,0xe8,0xff,0xff,0xff,0xda,0xda,0xda,
+    0x87,0x87,0x87,0xe8,0xe8,0xe8,0xff,0xff,0xff,0xda,0xda,0xda,0x87,0x87,0x87,0xe8,
+    0xe8,0xe8,0xff,0xff,0xff,0x0b,0xff,0xff,0xff,0xff,0xff,0xff,0xda,0xda,0xda,0x87,
+    0x87,0x87,0xe8,0xe8,0xe8,0xff,0xff,0xff,0xda,0xda,0xda,0x87,0x87,0x87,0xe8,0xe8,
+    0xe8,0xff,0xff,0xff,0xda,0xda,0xda,0x87,0x87,0x87,0xff,0xff,0xff,0x0b,0xff,0xff,
+    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xd5,0xd5,0xd5,0x87,0x87,0x87,0xe8,0xe8,0xe8,
+    0xff,0xff,0xff,0xda,0xda,0xda,0x87,0x87,0x87,0xe8,0xe8,0xe8,0xff,0xff,0xff,0xda,
+    0xda,0xda,0xff,0xff,0xff,0x0b,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+    0xff,0xff,0xd7,0xd7,0xd7,0x87,0x87,0x87,0xe8,0xe8,0xe8,0xff,0xff,0xff,0xda,0xda,
+    0xda,0x87,0x87,0x87,0xe8,0xe8,0xe8,0xff,0xff,0xff,0xff,0xff,0xff,0x0b,0xff,0xff,
+    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xd7,0xd7,0xd7,
+    0x87,0x87,0x87,0xe8,0xe8,0xe8,0xff,0xff,0xff,0xda,0xda,0xda,0x87,0x87,0x87,0xe8,
+    0xe8,0xe8,0xff,0xff,0xff,0x0b,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xd7,0xd7,0xd7,0x87,0x87,0x87,0xe8,0xe8,
+    0xe8,0xff,0xff,0xff,0xdc,0xdc,0xdc,0x87,0x87,0x87,0xff,0xff,0xff,0x0b,0xff,0xff,
+    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+    0xff,0xff,0xff,0xd9,0xd9,0xd9,0x87,0x87,0x87,0xe8,0xe8,0xe8,0xff,0xff,0xff,0xdc,
+    0xdc,0xdc,0xff,0xff,0xff,0x0b,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xdb,0xdb,
+    0xdb,0x87,0x87,0x87,0xe8,0xe8,0xe8,0xff,0xff,0xff,0xff,0xff,0xff,0x0b,0xff,0xff,
+    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xdb,0xdb,0xdb,0x87,0x87,0x87,0xe8,
+    0xe8,0xe8,0xff,0xff,0xff,0x0b,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+    0xff,0xff,0xff,0xff,0xdc,0xdc,0xdc,0x87,0x87,0x87,0xff,0xff,0xff,0x0b,0xff,0xff,
+    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xdc,
+    0xdc,0xdc,0xff,0xff,0xff,0x0b,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
+    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x0b
+};
+
+static void QZ_DrawResizeIcon (_THIS, RgnHandle dirtyRegion) {
+
+    /* Check if we should draw the resize icon */
+    if (SDL_VideoSurface->flags & SDL_RESIZABLE) {
+    
+        Rect    icon;
+        SetRect (&icon, SDL_VideoSurface->w - 13, SDL_VideoSurface->h - 13, 
+                    SDL_VideoSurface->w, SDL_VideoSurface->h);
+                    
+        if (RectInRgn (&icon, dirtyRegion)) {
+        
+            SDL_Rect icon_rect;
+            
+            /* Create the icon image */
+            if (resize_icon == NULL) {
+            
+                SDL_RWops *rw;
+                SDL_Surface *tmp;
+                
+                rw = SDL_RWFromMem (QZ_ResizeIcon, sizeof(QZ_ResizeIcon));
+                tmp = SDL_LoadBMP_RW (rw, SDL_TRUE);
+                                                                
+                resize_icon = SDL_ConvertSurface (tmp, SDL_VideoSurface->format, SDL_SRCCOLORKEY);
+                SDL_SetColorKey (resize_icon, SDL_SRCCOLORKEY, 0xFFFFFF);
+                
+                SDL_FreeSurface (tmp);
+            }
+            
+            icon_rect.x = SDL_VideoSurface->w - 13;
+            icon_rect.y = SDL_VideoSurface->h - 13;
+            icon_rect.w = 13;
+            icon_rect.h = 13;
+            
+            SDL_BlitSurface (resize_icon, NULL, SDL_VideoSurface, &icon_rect);
+        }
+    }
+}
+
 static void QZ_UpdateRects (_THIS, int numRects, SDL_Rect *rects) {
 
     if (SDL_VideoSurface->flags & SDL_OPENGLBLIT) {
@@ -1353,7 +1507,7 @@ static void QZ_FreeHWSurface (_THIS, SDL_Surface *surface) {
  */
 
 /* Gamma functions */
-static int QZ_SetGamma (_THIS, float red, float green, float blue) {
+int QZ_SetGamma (_THIS, float red, float green, float blue) {
 
     const CGGammaValue min = 0.0, max = 1.0;
 
@@ -1383,7 +1537,7 @@ static int QZ_SetGamma (_THIS, float red, float green, float blue) {
     }
 }
 
-static int QZ_GetGamma (_THIS, float *red, float *green, float *blue) {
+int QZ_GetGamma (_THIS, float *red, float *green, float *blue) {
 
     CGGammaValue dummy;
     if ( CGDisplayNoErr == CGGetDisplayTransferByFormula
@@ -1395,7 +1549,7 @@ static int QZ_GetGamma (_THIS, float *red, float *green, float *blue) {
         return -1;
 }
 
-static int QZ_SetGammaRamp (_THIS, Uint16 *ramp) {
+int QZ_SetGammaRamp (_THIS, Uint16 *ramp) {
 
     const CGTableCount tableSize = 255;
     CGGammaValue redTable[tableSize];
@@ -1421,7 +1575,7 @@ static int QZ_SetGammaRamp (_THIS, Uint16 *ramp) {
         return -1;
 }
 
-static int QZ_GetGammaRamp (_THIS, Uint16 *ramp) {
+int QZ_GetGammaRamp (_THIS, Uint16 *ramp) {
 
     const CGTableCount tableSize = 255;
     CGGammaValue redTable[tableSize];
@@ -1449,484 +1603,3 @@ static int QZ_GetGammaRamp (_THIS, Uint16 *ramp) {
     return 0;
 }
 
-/* OpenGL helper functions (used internally) */
-
-static int QZ_SetupOpenGL (_THIS, int bpp, Uint32 flags) {
-
-    NSOpenGLPixelFormatAttribute attr[32];
-    NSOpenGLPixelFormat *fmt;
-    int i = 0;
-    int colorBits = bpp;
-
-    if ( flags & SDL_FULLSCREEN ) {
-
-        attr[i++] = NSOpenGLPFAFullScreen;
-    }
-    /* In windowed mode, the OpenGL pixel depth must match device pixel depth */
-    else if ( colorBits != device_bpp ) {
-
-        colorBits = device_bpp;
-    }
-
-    attr[i++] = NSOpenGLPFAColorSize;
-    attr[i++] = colorBits;
-
-    attr[i++] = NSOpenGLPFADepthSize;
-    attr[i++] = this->gl_config.depth_size;
-
-    if ( this->gl_config.double_buffer ) {
-        attr[i++] = NSOpenGLPFADoubleBuffer;
-    }
-
-    if ( this->gl_config.stereo ) {
-        attr[i++] = NSOpenGLPFAStereo;
-    }
-
-    if ( this->gl_config.stencil_size != 0 ) {
-        attr[i++] = NSOpenGLPFAStencilSize;
-        attr[i++] = this->gl_config.stencil_size;
-    }
-
-#if NSOPENGL_CURRENT_VERSION > 1  /* What version should this be? */
-    if ( this->gl_config.multisamplebuffers != 0 ) {
-        attr[i++] = NSOpenGLPFASampleBuffers;
-        attr[i++] = this->gl_config.multisamplebuffers;
-    }
-
-    if ( this->gl_config.multisamplesamples != 0 ) {
-        attr[i++] = NSOpenGLPFASamples;
-        attr[i++] = this->gl_config.multisamplesamples;
-    }
-#endif
-
-    attr[i++] = NSOpenGLPFAScreenMask;
-    attr[i++] = CGDisplayIDToOpenGLDisplayMask (display_id);
-    attr[i] = 0;
-
-    fmt = [ [ NSOpenGLPixelFormat alloc ] initWithAttributes:attr ];
-    if (fmt == nil) {
-        SDL_SetError ("Failed creating OpenGL pixel format");
-        return 0;
-    }
-
-    gl_context = [ [ NSOpenGLContext alloc ] initWithFormat:fmt
-                                               shareContext:nil];
-
-    if (gl_context == nil) {
-        SDL_SetError ("Failed creating OpenGL context");
-        return 0;
-    }
-
-    /*
-     * Wisdom from Apple engineer in reference to UT2003's OpenGL performance:
-     *  "You are blowing a couple of the internal OpenGL function caches. This
-     *  appears to be happening in the VAO case.  You can tell OpenGL to up
-     *  the cache size by issuing the following calls right after you create
-     *  the OpenGL context.  The default cache size is 16."    --ryan.
-     */
-
-    #ifndef GLI_ARRAY_FUNC_CACHE_MAX
-    #define GLI_ARRAY_FUNC_CACHE_MAX 284
-    #endif
-
-    #ifndef GLI_SUBMIT_FUNC_CACHE_MAX
-    #define GLI_SUBMIT_FUNC_CACHE_MAX 280
-    #endif
-
-    {
-        long cache_max = 64;
-        CGLContextObj ctx = [ gl_context cglContext ];
-        CGLSetParameter (ctx, GLI_SUBMIT_FUNC_CACHE_MAX, &cache_max);
-        CGLSetParameter (ctx, GLI_ARRAY_FUNC_CACHE_MAX, &cache_max);
-    }
-
-    /* End Wisdom from Apple Engineer section. --ryan. */
-
-    /* Convince SDL that the GL "driver" is loaded */
-    this->gl_config.driver_loaded = 1;
-
-    [ fmt release ];
-
-    return 1;
-}
-
-static void QZ_TearDownOpenGL (_THIS) {
-
-    [ NSOpenGLContext clearCurrentContext ];
-    [ gl_context clearDrawable ];
-    [ gl_context release ];
-}
-
-
-/* SDL OpenGL functions */
-
-static int    QZ_GL_LoadLibrary    (_THIS, const char *location) {
-    this->gl_config.driver_loaded = 1;
-    return 1;
-}
-
-static void*  QZ_GL_GetProcAddress (_THIS, const char *proc) {
-
-    /* We may want to cache the bundleRef at some point */
-    CFBundleRef bundle;
-    CFURLRef bundleURL = CFURLCreateWithFileSystemPath (kCFAllocatorDefault,
-                                                        CFSTR("/System/Library/Frameworks/OpenGL.framework"), kCFURLPOSIXPathStyle, true);
-
-    CFStringRef functionName = CFStringCreateWithCString
-        (kCFAllocatorDefault, proc, kCFStringEncodingASCII);
-
-    void *function;
-
-    bundle = CFBundleCreate (kCFAllocatorDefault, bundleURL);
-    assert (bundle != NULL);
-
-    function = CFBundleGetFunctionPointerForName (bundle, functionName);
-
-    CFRelease ( bundleURL );
-    CFRelease ( functionName );
-    CFRelease ( bundle );
-
-    return function;
-}
-
-static int    QZ_GL_GetAttribute   (_THIS, SDL_GLattr attrib, int* value) {
-
-    GLenum attr = 0;
-
-    QZ_GL_MakeCurrent (this);
-
-    switch (attrib) {
-        case SDL_GL_RED_SIZE: attr = GL_RED_BITS;   break;
-        case SDL_GL_BLUE_SIZE: attr = GL_BLUE_BITS;  break;
-        case SDL_GL_GREEN_SIZE: attr = GL_GREEN_BITS; break;
-        case SDL_GL_ALPHA_SIZE: attr = GL_ALPHA_BITS; break;
-        case SDL_GL_DOUBLEBUFFER: attr = GL_DOUBLEBUFFER; break;
-        case SDL_GL_DEPTH_SIZE: attr = GL_DEPTH_BITS;  break;
-        case SDL_GL_STENCIL_SIZE: attr = GL_STENCIL_BITS; break;
-        case SDL_GL_ACCUM_RED_SIZE: attr = GL_ACCUM_RED_BITS; break;
-        case SDL_GL_ACCUM_GREEN_SIZE: attr = GL_ACCUM_GREEN_BITS; break;
-        case SDL_GL_ACCUM_BLUE_SIZE: attr = GL_ACCUM_BLUE_BITS; break;
-        case SDL_GL_ACCUM_ALPHA_SIZE: attr = GL_ACCUM_ALPHA_BITS; break;
-        case SDL_GL_STEREO: attr = GL_STEREO; break;
-        case SDL_GL_MULTISAMPLEBUFFERS: attr = GL_SAMPLE_BUFFERS_ARB; break;
-        case SDL_GL_MULTISAMPLESAMPLES: attr = GL_SAMPLES_ARB; break;
-        case SDL_GL_BUFFER_SIZE:
-        {
-            GLint bits = 0;
-            GLint component;
-
-            /* there doesn't seem to be a single flag in OpenGL for this! */
-            glGetIntegerv (GL_RED_BITS, &component);   bits += component;
-            glGetIntegerv (GL_GREEN_BITS,&component);  bits += component;
-            glGetIntegerv (GL_BLUE_BITS, &component);  bits += component;
-            glGetIntegerv (GL_ALPHA_BITS, &component); bits += component;
-
-            *value = bits;
-        }
-        return 0;
-    }
-
-    glGetIntegerv (attr, (GLint *)value);
-    return 0;
-}
-
-static int    QZ_GL_MakeCurrent    (_THIS) {
-    [ gl_context makeCurrentContext ];
-    return 0;
-}
-
-static void   QZ_GL_SwapBuffers    (_THIS) {
-    [ gl_context flushBuffer ];
-}
-
-static int QZ_LockYUV (_THIS, SDL_Overlay *overlay) {
-
-    return 0;
-}
-
-static void QZ_UnlockYUV (_THIS, SDL_Overlay *overlay) {
-
-    ;
-}
-
-static int QZ_DisplayYUV (_THIS, SDL_Overlay *overlay, SDL_Rect *dstrect) {
-
-    OSErr err;
-    CodecFlags flags;
-
-    if (dstrect->x != 0 || dstrect->y != 0) {
-
-        SDL_SetError ("Need a dstrect at (0,0)");
-        return -1;
-    }
-
-    if (dstrect->w != yuv_width || dstrect->h != yuv_height) {
-
-        Fixed scale_x, scale_y;
-
-        scale_x = FixDiv ( Long2Fix (dstrect->w), Long2Fix (overlay->w) );
-        scale_y = FixDiv ( Long2Fix (dstrect->h), Long2Fix (overlay->h) );
-
-        SetIdentityMatrix (yuv_matrix);
-        ScaleMatrix (yuv_matrix, scale_x, scale_y, Long2Fix (0), Long2Fix (0));
-
-        SetDSequenceMatrix (yuv_seq, yuv_matrix);
-
-        yuv_width = dstrect->w;
-        yuv_height = dstrect->h;
-    }
-
-    if( ( err = DecompressSequenceFrameS(
-                                         yuv_seq,
-                                         (void*)yuv_pixmap,
-                                         sizeof (PlanarPixmapInfoYUV420),
-                                         codecFlagUseImageBuffer, &flags, nil ) != noErr ) )
-    {
-        SDL_SetError ("DecompressSequenceFrameS failed");
-    }
-
-    return err == noErr;
-}
-
-static void QZ_FreeHWYUV (_THIS, SDL_Overlay *overlay) {
-
-    CDSequenceEnd (yuv_seq);
-    ExitMovies();
-
-    free (overlay->hwfuncs);
-    free (overlay->pitches);
-    free (overlay->pixels);
-
-    if (SDL_VideoSurface->flags & SDL_FULLSCREEN) {
-        [ qz_window close ];
-        qz_window = nil;
-    }
-
-    free (yuv_matrix);
-    DisposeHandle ((Handle)yuv_idh);
-}
-
-#include "SDL_yuvfuncs.h"
-
-/* check for 16 byte alignment, bail otherwise */
-#define CHECK_ALIGN(x) do { if ((Uint32)x & 15) { SDL_SetError("Alignment error"); return NULL; } } while(0)
-
-/* align a byte offset, return how much to add to make it a multiple of 16 */
-#define ALIGN(x) ((16 - (x & 15)) & 15)
-
-static SDL_Overlay* QZ_CreateYUVOverlay (_THIS, int width, int height,
-                                         Uint32 format, SDL_Surface *display) {
-
-    Uint32 codec;
-    OSStatus err;
-    CGrafPtr port;
-    SDL_Overlay *overlay;
-
-    if (format == SDL_YV12_OVERLAY ||
-        format == SDL_IYUV_OVERLAY) {
-
-        codec = kYUV420CodecType;
-    }
-    else {
-        SDL_SetError ("Hardware: unsupported video format");
-        return NULL;
-    }
-
-    yuv_idh = (ImageDescriptionHandle) NewHandleClear (sizeof(ImageDescription));
-    if (yuv_idh == NULL) {
-        SDL_OutOfMemory();
-        return NULL;
-    }
-
-    yuv_matrix = (MatrixRecordPtr) malloc (sizeof(MatrixRecord));
-    if (yuv_matrix == NULL) {
-        SDL_OutOfMemory();
-        return NULL;
-    }
-
-    if ( EnterMovies() != noErr ) {
-        SDL_SetError ("Could not init QuickTime for YUV playback");
-        return NULL;
-    }
-
-    err = FindCodec (codec, bestSpeedCodec, nil, &yuv_codec);
-    if (err != noErr) {
-        SDL_SetError ("Could not find QuickTime codec for format");
-        return NULL;
-    }
-
-    if (SDL_VideoSurface->flags & SDL_FULLSCREEN) {
-
-        /*
-          Acceleration requires a window to be present.
-          A CGrafPtr that points to the screen isn't good enough
-        */
-        NSRect content = NSMakeRect (0, 0, SDL_VideoSurface->w, SDL_VideoSurface->h);
-
-        qz_window = [ [ SDL_QuartzWindow alloc ]
-                            initWithContentRect:content
-                            styleMask:NSBorderlessWindowMask
-                            backing:NSBackingStoreBuffered defer:NO ];
-
-        if (qz_window == nil) {
-            SDL_SetError ("Could not create the Cocoa window");
-            return NULL;
-        }
-
-        [ qz_window setContentView:[ [ SDL_QuartzWindowView alloc ] init ] ];
-        [ qz_window setReleasedWhenClosed:YES ];
-        [ qz_window center ];
-        [ qz_window setAcceptsMouseMovedEvents:YES ];
-        [ qz_window setLevel:CGShieldingWindowLevel() ];
-        [ qz_window makeKeyAndOrderFront:nil ];
-
-        port = [ [ qz_window contentView ] qdPort ];
-        SetPort (port);
-        
-        /*
-            BUG: would like to remove white flash when window kicks in
-            {
-                Rect r;
-                SetRect (&r, 0, 0, SDL_VideoSurface->w, SDL_VideoSurface->h);
-                PaintRect (&r);
-                QDFlushPortBuffer (port, nil);
-            }
-        */
-    }
-    else {
-        port = [ window_view qdPort ];
-        SetPort (port);
-    }
-    
-    SetIdentityMatrix (yuv_matrix);
-    
-    HLock ((Handle)yuv_idh);
-    
-    (**yuv_idh).idSize = sizeof(ImageDescription);
-    (**yuv_idh).cType  = codec;
-    (**yuv_idh).version = 1;
-    (**yuv_idh).revisionLevel = 0;
-    (**yuv_idh).width = width;
-    (**yuv_idh).height = height;
-    (**yuv_idh).hRes = Long2Fix(72);
-    (**yuv_idh).vRes = Long2Fix(72);
-    (**yuv_idh).spatialQuality = codecLosslessQuality;
-    (**yuv_idh).frameCount = 1;
-    (**yuv_idh).clutID = -1;
-    (**yuv_idh).dataSize = 0;
-    (**yuv_idh).depth = 24;
-    
-    HUnlock ((Handle)yuv_idh);
-    
-    err = DecompressSequenceBeginS (
-                                    &yuv_seq,
-                                    yuv_idh,
-                                    NULL,
-                                    0,
-                                    port,
-                                    NULL,
-                                    NULL,
-                                    yuv_matrix,
-                                    0,
-                                    NULL,
-                                    codecFlagUseImageBuffer,
-                                    codecLosslessQuality,
-                                    yuv_codec);
-    
-    if (err != noErr) {
-        SDL_SetError ("Error trying to start YUV codec.");
-        return NULL;
-    }
-    
-    overlay = (SDL_Overlay*) malloc (sizeof(*overlay));
-    if (overlay == NULL) {
-        SDL_OutOfMemory();
-        return NULL;
-    }
-    
-    overlay->format      = format;
-    overlay->w           = width;
-    overlay->h           = height;
-    overlay->planes      = 3;
-    overlay->hw_overlay  = 1;
-    {
-        int      offset;
-        Uint8  **pixels;
-        Uint16  *pitches;
-        int      plane2, plane3;
-
-        if (format == SDL_IYUV_OVERLAY) {
-
-            plane2 = 1; /* Native codec format */
-            plane3 = 2;
-        }
-        else if (format == SDL_YV12_OVERLAY) {
-
-            /* switch the U and V planes */
-            plane2 = 2; /* U plane maps to plane 3 */
-            plane3 = 1; /* V plane maps to plane 2 */
-        }
-        else {
-            SDL_SetError("Unsupported YUV format");
-            return NULL;
-        }
-
-        pixels = (Uint8**) malloc (sizeof(*pixels) * 3);
-        pitches = (Uint16*) malloc (sizeof(*pitches) * 3);
-        if (pixels == NULL || pitches == NULL) {
-            SDL_OutOfMemory();
-            return NULL;
-        }
-
-        yuv_pixmap = (PlanarPixmapInfoYUV420*)
-            malloc (sizeof(PlanarPixmapInfoYUV420) +
-                    (width * height * 2));
-        if (yuv_pixmap == NULL) {
-            SDL_OutOfMemory ();
-            return NULL;
-        }
-
-        /* CHECK_ALIGN(yuv_pixmap); */
-        offset  = sizeof(PlanarPixmapInfoYUV420);
-        /* offset += ALIGN(offset); */
-        /* CHECK_ALIGN(offset); */
-
-        pixels[0] = (Uint8*)yuv_pixmap + offset;
-        /* CHECK_ALIGN(pixels[0]); */
-
-        pitches[0] = width;
-        yuv_pixmap->componentInfoY.offset = offset;
-        yuv_pixmap->componentInfoY.rowBytes = width;
-
-        offset += width * height;
-        pixels[plane2] = (Uint8*)yuv_pixmap + offset;
-        pitches[plane2] = width / 2;
-        yuv_pixmap->componentInfoCb.offset = offset;
-        yuv_pixmap->componentInfoCb.rowBytes = width / 2;
-
-        offset += (width * height / 4);
-        pixels[plane3] = (Uint8*)yuv_pixmap + offset;
-        pitches[plane3] = width / 2;
-        yuv_pixmap->componentInfoCr.offset = offset;
-        yuv_pixmap->componentInfoCr.rowBytes = width / 2;
-
-        overlay->pixels = pixels;
-        overlay->pitches = pitches;
-    }
-
-    overlay->hwfuncs = malloc (sizeof(*overlay->hwfuncs));
-    if (overlay->hwfuncs == NULL) {
-        SDL_OutOfMemory();
-        return NULL;
-    }
-    
-    overlay->hwfuncs->Lock    = QZ_LockYUV;
-    overlay->hwfuncs->Unlock  = QZ_UnlockYUV;
-    overlay->hwfuncs->Display = QZ_DisplayYUV;
-    overlay->hwfuncs->FreeHW  = QZ_FreeHWYUV;
-
-    yuv_width = overlay->w;
-    yuv_height = overlay->h;
-    
-    return overlay;
-}

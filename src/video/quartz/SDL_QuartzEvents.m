@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002    Sam Lantinga
+    Copyright (C) 1997-2003  Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -19,12 +19,15 @@
     Sam Lantinga
     slouken@libsdl.org
 */
-#include <stdlib.h>	// For getenv()
+
+#include "SDL_QuartzVideo.h"
+
+#include <stdlib.h> // For getenv()
 #include <IOKit/IOMessage.h> // For wake from sleep detection
 #include <IOKit/pwr_mgt/IOPMLib.h> // For wake from sleep detection
 #include "SDL_QuartzKeys.h"
 
-static void     QZ_InitOSKeymap (_THIS) {
+void     QZ_InitOSKeymap (_THIS) {
     const void *KCHRPtr;
     UInt32 state;
     UInt32 value;
@@ -283,7 +286,7 @@ static void QZ_DoModifiers (_THIS, unsigned int newMods) {
              key.sym = mapping[i];
              /* If this was Caps Lock, we need some additional voodoo to make SDL happy */
              if (bit == NSAlphaShiftKeyMask)
-             SDL_PrivateKeyboard (SDL_PRESSED, &key);
+                  SDL_PrivateKeyboard (SDL_PRESSED, &key);
              SDL_PrivateKeyboard (SDL_RELEASED, &key);
         }
         else if ( newMask &&
@@ -302,13 +305,9 @@ static void QZ_DoModifiers (_THIS, unsigned int newMods) {
 
 static void QZ_DoActivate (_THIS)
 {
-    in_foreground = YES;
-    
     /* Hide the cursor if it was hidden by SDL_ShowCursor() */
-    if (!cursor_visible && !cursor_hidden) {
-        HideCursor ();
-        cursor_hidden = YES;
-    }
+    if (!cursor_should_be_visible)
+        QZ_HideMouse (this);
 
     /* Regrab input, only if it was previously grabbed */
     if ( current_grab_mode == SDL_GRAB_ON ) {
@@ -323,8 +322,6 @@ static void QZ_DoActivate (_THIS)
 
 static void QZ_DoDeactivate (_THIS) {
 
-    in_foreground = NO;
-
     /* Get the current cursor location, for restore on activate */
     cursor_loc = [ NSEvent mouseLocation ]; /* global coordinates */
     if (qz_window)
@@ -335,10 +332,8 @@ static void QZ_DoDeactivate (_THIS) {
     CGAssociateMouseAndMouseCursorPosition (1);
 
     /* Show the cursor if it was hidden by SDL_ShowCursor() */
-    if (!cursor_visible && cursor_hidden) {
-        ShowCursor ();
-        cursor_hidden = NO;
-    }
+    if (!cursor_should_be_visible)
+        QZ_ShowMouse (this);
 
     SDL_PrivateAppActive (0, SDL_APPINPUTFOCUS);
 }
@@ -359,13 +354,13 @@ void QZ_SleepNotificationHandler (void * refcon,
              IOAllowPowerChange(power_connection, (long) messageArgument);
              break;
          case kIOMessageSystemHasPoweredOn:
-			/* awake */
+            /* awake */
             SDL_PrivateExpose();
             break;
      }
 }
 
-static void QZ_RegisterForSleepNotifications (_THIS)
+void QZ_RegisterForSleepNotifications (_THIS)
 {
      CFRunLoopSourceRef rls;
      IONotificationPortRef thePortRef;
@@ -400,7 +395,7 @@ static int QZ_OtherMouseButtonToSDL(int button)
 }
 
 
-static void QZ_PumpEvents (_THIS)
+void QZ_PumpEvents (_THIS)
 {
     int firstMouseEvent;
     CGMouseDelta dx, dy;
@@ -445,7 +440,7 @@ static void QZ_PumpEvents (_THIS)
             BOOL isInGameWin;
             
             #define DO_MOUSE_DOWN(button) do {                                               \
-                            if ( in_foreground ) {                                           \
+                            if ( [ NSApp isActive ] ) {                                      \
                                 if ( isInGameWin ) {                                         \
                                     SDL_PrivateMouseButton (SDL_PRESSED, button, 0, 0);      \
                                     expect_mouse_up |= 1<<button;                            \

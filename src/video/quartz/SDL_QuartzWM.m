@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002  Sam Lantinga
+    Copyright (C) 1997-2003  Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -20,20 +20,21 @@
     slouken@libsdl.org
 */
 
-static void QZ_ChangeGrabState (_THIS, int action);
+#include "SDL_QuartzVideo.h"
+
 
 struct WMcursor {
     Cursor curs;
 };
 
-static void QZ_FreeWMCursor     (_THIS, WMcursor *cursor) { 
+void QZ_FreeWMCursor     (_THIS, WMcursor *cursor) { 
 
     if ( cursor != NULL )
         free (cursor);
 }
 
 /* Use the Carbon cursor routines for now */
-static WMcursor*    QZ_CreateWMCursor   (_THIS, Uint8 *data, Uint8 *mask, 
+WMcursor*    QZ_CreateWMCursor   (_THIS, Uint8 *data, Uint8 *mask, 
                                          int w, int h, int hot_x, int hot_y) { 
     WMcursor *cursor;
     int row, bytes;
@@ -68,26 +69,34 @@ static WMcursor*    QZ_CreateWMCursor   (_THIS, Uint8 *data, Uint8 *mask,
     return(cursor);
 }
 
-static int QZ_ShowWMCursor (_THIS, WMcursor *cursor) { 
+void QZ_ShowMouse (_THIS) {
+    if (!cursor_visible) {
+        [ NSCursor unhide ];
+        cursor_visible = YES;
+    }
+}
+
+void QZ_HideMouse (_THIS) {
+    if (cursor_visible) {
+        [ NSCursor hide ];
+        cursor_visible = NO;
+    }
+}
+
+int QZ_ShowWMCursor (_THIS, WMcursor *cursor) { 
 
     if ( cursor == NULL) {
-        if ( cursor_visible ) {
-            if (!cursor_hidden) {
-                HideCursor ();
-                cursor_hidden = YES;
-            }
-            cursor_visible = NO;
+        if ( cursor_should_be_visible ) {
+            QZ_HideMouse (this);
+            cursor_should_be_visible = NO;
             QZ_ChangeGrabState (this, QZ_HIDECURSOR);
         }
     }
     else {
         SetCursor(&cursor->curs);
-        if ( ! cursor_visible ) {
-            if (cursor_hidden) {
-                ShowCursor ();
-                cursor_hidden = NO;
-            }
-            cursor_visible = YES;
+        if ( ! cursor_should_be_visible ) {
+            QZ_ShowMouse (this);
+            cursor_should_be_visible = YES;
             QZ_ChangeGrabState (this, QZ_SHOWCURSOR);
         }
     }
@@ -104,20 +113,20 @@ static int QZ_ShowWMCursor (_THIS, WMcursor *cursor) {
 */
 
 /* Convert Cocoa screen coordinate to Cocoa window coordinate */
-static void QZ_PrivateGlobalToLocal (_THIS, NSPoint *p) {
+void QZ_PrivateGlobalToLocal (_THIS, NSPoint *p) {
 
     *p = [ qz_window convertScreenToBase:*p ];
 }
 
 
 /* Convert Cocoa window coordinate to Cocoa screen coordinate */
-static void QZ_PrivateLocalToGlobal (_THIS, NSPoint *p) {
+void QZ_PrivateLocalToGlobal (_THIS, NSPoint *p) {
 
     *p = [ qz_window convertBaseToScreen:*p ];
 }
 
 /* Convert SDL coordinate to Cocoa coordinate */
-static void QZ_PrivateSDLToCocoa (_THIS, NSPoint *p) {
+void QZ_PrivateSDLToCocoa (_THIS, NSPoint *p) {
 
     if ( CGDisplayIsCaptured (display_id) ) { /* capture signals fullscreen */
     
@@ -134,7 +143,7 @@ static void QZ_PrivateSDLToCocoa (_THIS, NSPoint *p) {
 }
 
 /* Convert Cocoa coordinate to SDL coordinate */
-static void QZ_PrivateCocoaToSDL (_THIS, NSPoint *p) {
+void QZ_PrivateCocoaToSDL (_THIS, NSPoint *p) {
 
     if ( CGDisplayIsCaptured (display_id) ) { /* capture signals fullscreen */
     
@@ -151,7 +160,7 @@ static void QZ_PrivateCocoaToSDL (_THIS, NSPoint *p) {
 }
 
 /* Convert SDL coordinate to window server (CoreGraphics) coordinate */
-static CGPoint QZ_PrivateSDLToCG (_THIS, NSPoint *p) {
+CGPoint QZ_PrivateSDLToCG (_THIS, NSPoint *p) {
     
     CGPoint cgp;
     
@@ -174,7 +183,7 @@ static CGPoint QZ_PrivateSDLToCG (_THIS, NSPoint *p) {
 
 #if 0 /* Dead code */
 /* Convert window server (CoreGraphics) coordinate to SDL coordinate */
-static void QZ_PrivateCGToSDL (_THIS, NSPoint *p) {
+void QZ_PrivateCGToSDL (_THIS, NSPoint *p) {
             
     if ( ! CGDisplayIsCaptured (display_id) ) { /* not captured => not fullscreen => local coord */
     
@@ -190,7 +199,7 @@ static void QZ_PrivateCGToSDL (_THIS, NSPoint *p) {
 }
 #endif /* Dead code */
 
-static void  QZ_PrivateWarpCursor (_THIS, int x, int y) {
+void  QZ_PrivateWarpCursor (_THIS, int x, int y) {
     
     NSPoint p;
     CGPoint cgp;
@@ -203,10 +212,10 @@ static void  QZ_PrivateWarpCursor (_THIS, int x, int y) {
     CGWarpMouseCursorPosition (cgp);
 }
 
-static void QZ_WarpWMCursor (_THIS, Uint16 x, Uint16 y) {
+void QZ_WarpWMCursor (_THIS, Uint16 x, Uint16 y) {
 
     /* Only allow warping when in foreground */
-    if ( ! in_foreground )
+    if ( ! [ NSApp isActive ] )
         return;
             
     /* Do the actual warp */
@@ -216,10 +225,10 @@ static void QZ_WarpWMCursor (_THIS, Uint16 x, Uint16 y) {
     SDL_PrivateMouseMotion (0, 0, x, y);
 }
 
-static void QZ_MoveWMCursor     (_THIS, int x, int y) { }
-static void QZ_CheckMouseMode   (_THIS) { }
+void QZ_MoveWMCursor     (_THIS, int x, int y) { }
+void QZ_CheckMouseMode   (_THIS) { }
 
-static void QZ_SetCaption    (_THIS, const char *title, const char *icon) {
+void QZ_SetCaption    (_THIS, const char *title, const char *icon) {
 
     if ( qz_window != nil ) {
         NSString *string;
@@ -236,7 +245,7 @@ static void QZ_SetCaption    (_THIS, const char *title, const char *icon) {
     }
 }
 
-static void QZ_SetIcon       (_THIS, SDL_Surface *icon, Uint8 *mask)
+void QZ_SetIcon       (_THIS, SDL_Surface *icon, Uint8 *mask)
 {
     NSBitmapImageRep *imgrep;
     NSImage *img;
@@ -305,7 +314,7 @@ freePool:
     [pool release];
 }
 
-static int  QZ_IconifyWindow (_THIS) { 
+int  QZ_IconifyWindow (_THIS) { 
 
     if ( ! [ qz_window isMiniaturized ] ) {
         [ qz_window miniaturize:nil ];
@@ -318,12 +327,12 @@ static int  QZ_IconifyWindow (_THIS) {
 }
 
 /*
-static int  QZ_GetWMInfo  (_THIS, SDL_SysWMinfo *info) { 
+int  QZ_GetWMInfo  (_THIS, SDL_SysWMinfo *info) { 
     info->nsWindowPtr = qz_window;
     return 0; 
 }*/
 
-static void QZ_ChangeGrabState (_THIS, int action) {
+void QZ_ChangeGrabState (_THIS, int action) {
 
     /* 
         Figure out what the next state should be based on the action.
@@ -331,7 +340,7 @@ static void QZ_ChangeGrabState (_THIS, int action) {
     */
     if ( grab_state == QZ_UNGRABBED ) {
         if ( action == QZ_ENABLE_GRAB ) {
-            if ( cursor_visible )
+            if ( cursor_should_be_visible )
                 grab_state = QZ_VISIBLE_GRAB;
             else
                 grab_state = QZ_INVISIBLE_GRAB;
@@ -369,7 +378,7 @@ static void QZ_ChangeGrabState (_THIS, int action) {
     }
 }
 
-static SDL_GrabMode QZ_GrabInput (_THIS, SDL_GrabMode grab_mode) {
+SDL_GrabMode QZ_GrabInput (_THIS, SDL_GrabMode grab_mode) {
 
     int doGrab = grab_mode & SDL_GRAB_ON;
     /*int fullscreen = grab_mode & SDL_GRAB_FULLSCREEN;*/
@@ -395,82 +404,4 @@ static SDL_GrabMode QZ_GrabInput (_THIS, SDL_GrabMode grab_mode) {
     }
 
     return current_grab_mode;
-}
-
-/* Resize icon, BMP format */
-static unsigned char QZ_ResizeIcon[] = {
-    0x42,0x4d,0x31,0x02,0x00,0x00,0x00,0x00,0x00,0x00,0x36,0x00,0x00,0x00,0x28,0x00,
-    0x00,0x00,0x0d,0x00,0x00,0x00,0x0d,0x00,0x00,0x00,0x01,0x00,0x18,0x00,0x00,0x00,
-    0x00,0x00,0xfb,0x01,0x00,0x00,0x13,0x0b,0x00,0x00,0x13,0x0b,0x00,0x00,0x00,0x00,
-    0x00,0x00,0x00,0x00,0x00,0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x0b,0xff,0xff,
-    0xff,0xda,0xda,0xda,0x87,0x87,0x87,0xe8,0xe8,0xe8,0xff,0xff,0xff,0xda,0xda,0xda,
-    0x87,0x87,0x87,0xe8,0xe8,0xe8,0xff,0xff,0xff,0xda,0xda,0xda,0x87,0x87,0x87,0xe8,
-    0xe8,0xe8,0xff,0xff,0xff,0x0b,0xff,0xff,0xff,0xff,0xff,0xff,0xda,0xda,0xda,0x87,
-    0x87,0x87,0xe8,0xe8,0xe8,0xff,0xff,0xff,0xda,0xda,0xda,0x87,0x87,0x87,0xe8,0xe8,
-    0xe8,0xff,0xff,0xff,0xda,0xda,0xda,0x87,0x87,0x87,0xff,0xff,0xff,0x0b,0xff,0xff,
-    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xd5,0xd5,0xd5,0x87,0x87,0x87,0xe8,0xe8,0xe8,
-    0xff,0xff,0xff,0xda,0xda,0xda,0x87,0x87,0x87,0xe8,0xe8,0xe8,0xff,0xff,0xff,0xda,
-    0xda,0xda,0xff,0xff,0xff,0x0b,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-    0xff,0xff,0xd7,0xd7,0xd7,0x87,0x87,0x87,0xe8,0xe8,0xe8,0xff,0xff,0xff,0xda,0xda,
-    0xda,0x87,0x87,0x87,0xe8,0xe8,0xe8,0xff,0xff,0xff,0xff,0xff,0xff,0x0b,0xff,0xff,
-    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xd7,0xd7,0xd7,
-    0x87,0x87,0x87,0xe8,0xe8,0xe8,0xff,0xff,0xff,0xda,0xda,0xda,0x87,0x87,0x87,0xe8,
-    0xe8,0xe8,0xff,0xff,0xff,0x0b,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xd7,0xd7,0xd7,0x87,0x87,0x87,0xe8,0xe8,
-    0xe8,0xff,0xff,0xff,0xdc,0xdc,0xdc,0x87,0x87,0x87,0xff,0xff,0xff,0x0b,0xff,0xff,
-    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-    0xff,0xff,0xff,0xd9,0xd9,0xd9,0x87,0x87,0x87,0xe8,0xe8,0xe8,0xff,0xff,0xff,0xdc,
-    0xdc,0xdc,0xff,0xff,0xff,0x0b,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xdb,0xdb,
-    0xdb,0x87,0x87,0x87,0xe8,0xe8,0xe8,0xff,0xff,0xff,0xff,0xff,0xff,0x0b,0xff,0xff,
-    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xdb,0xdb,0xdb,0x87,0x87,0x87,0xe8,
-    0xe8,0xe8,0xff,0xff,0xff,0x0b,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-    0xff,0xff,0xff,0xff,0xdc,0xdc,0xdc,0x87,0x87,0x87,0xff,0xff,0xff,0x0b,0xff,0xff,
-    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xdc,
-    0xdc,0xdc,0xff,0xff,0xff,0x0b,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-    0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x0b
-};
-
-static void QZ_DrawResizeIcon (_THIS, RgnHandle dirtyRegion) {
-
-    /* Check if we should draw the resize icon */
-    if (SDL_VideoSurface->flags & SDL_RESIZABLE) {
-    
-        Rect	icon;
-        SetRect (&icon, SDL_VideoSurface->w - 13, SDL_VideoSurface->h - 13, 
-                    SDL_VideoSurface->w, SDL_VideoSurface->h);
-                    
-        if (RectInRgn (&icon, dirtyRegion)) {
-        
-            SDL_Rect icon_rect;
-            
-            /* Create the icon image */
-            if (resize_icon == NULL) {
-            
-                SDL_RWops *rw;
-                SDL_Surface *tmp;
-                
-                rw = SDL_RWFromMem (QZ_ResizeIcon, sizeof(QZ_ResizeIcon));
-                tmp = SDL_LoadBMP_RW (rw, SDL_TRUE);
-                                                                
-                resize_icon = SDL_ConvertSurface (tmp, SDL_VideoSurface->format, SDL_SRCCOLORKEY);								
-                SDL_SetColorKey (resize_icon, SDL_SRCCOLORKEY, 0xFFFFFF);
-                
-                SDL_FreeSurface (tmp);
-            }
-            
-            icon_rect.x = SDL_VideoSurface->w - 13;
-            icon_rect.y = SDL_VideoSurface->h - 13;
-            icon_rect.w = 13;
-            icon_rect.h = 13;
-            
-            SDL_BlitSurface (resize_icon, NULL, SDL_VideoSurface, &icon_rect);
-        }
-    }
 }
