@@ -13,10 +13,11 @@ To compile and install SDL:
         documentation in ./docs to see how to use the SDL library.
 
     3.  Join the SDL developer mailing list by sending E-mail to
-    	majordomo@lokigames.com
-        and including the line "subscribe sdl" in the body.
+    	sdl-request@libsdl.org
+        and put "subscribe" in the subject of the message.
 
+        Or alternatively you can use the web interface:
+            http://www.libsdl.org/mailing-list.html
 
-	
 That's it!
 Sam Lantinga <slouken@libsdl.org>
