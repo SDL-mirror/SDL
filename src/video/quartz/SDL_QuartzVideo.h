@@ -61,6 +61,24 @@
 #include "SDL_pixels_c.h"
 #include "SDL_events_c.h"
 
+/* 
+   Add methods to get at private members of NSScreen. 
+   Since there is a bug in Apple's screen switching code
+   that does not update this variable when switching
+   to fullscreen, we'll set it manually (but only for the
+   main screen).
+*/
+@interface NSScreen (NSScreenAccess)
+- (void) setFrame:(NSRect)frame;
+@end
+
+@implementation NSScreen (NSScreenAccess)
+- (void) setFrame:(NSRect)frame;
+{
+    _frame = frame;
+}
+@end
+
 /* This is a workaround to directly access NSOpenGLContext's CGL context */
 /* We need to do this in order to check for errors */
 @interface NSOpenGLContext (CGLContextAccess)

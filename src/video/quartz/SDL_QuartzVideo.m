@@ -345,7 +345,8 @@ static void QZ_UnsetVideoMode (_THIS) {
 
         SDL_QuartzGammaTable gamma_table;
         int gamma_error;
-
+        NSRect screen_rect;
+        
         gamma_error = QZ_FadeGammaOut (this, &gamma_table);
 
         /* Release the OpenGL context */
@@ -361,6 +362,13 @@ static void QZ_UnsetVideoMode (_THIS) {
         CGDisplayRelease (display_id);
         ShowMenuBar ();
 
+        /* 
+           reset the main screen's rectangle, see comment
+           in QZ_SetVideoFullscreen
+        */
+        screen_rect = NSMakeRect(0,0,device_width,device_height);
+        [ [ NSScreen mainScreen ] setFrame:screen_rect ];
+        
         if (! gamma_error)
             QZ_FadeGammaIn (this, &gamma_table);
     }
@@ -401,7 +409,8 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
     int exact_match;
     int gamma_error;
     SDL_QuartzGammaTable gamma_table;
-
+    NSRect screen_rect;
+    
     /* See if requested mode exists */
     mode = CGDisplayBestModeForParameters (display_id, bpp, width,
                                            height, &exact_match);
@@ -483,6 +492,16 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
     /* Fade the display to original gamma */
     if (! gamma_error )
         QZ_FadeGammaIn (this, &gamma_table);
+
+    /* 
+       There is a bug in Cocoa where NSScreen doesn't synchronize
+       with CGDirectDisplay, so the main screen's frame is wrong.
+       As a result, coordinate translation produces wrong results.
+       We can hack around this bug by setting the screen rect
+       ourselves. This hack should be removed if/when the bug is fixed.
+    */
+    screen_rect = NSMakeRect(0,0,width,height);
+    [ [ NSScreen mainScreen ] setFrame:screen_rect ]; 
 
     /* Save the flags to ensure correct tear-down */
     mode_flags = current->flags;

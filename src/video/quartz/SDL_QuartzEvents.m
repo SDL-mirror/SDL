@@ -23,6 +23,8 @@
 
 #include "SDL_QuartzKeys.h"
 
+
+
 static SDLKey keymap[256];
 static unsigned int currentMods = 0; /* Current keyboard modifiers, to track modifier state */
 static int last_virtual_button = 0; /* Last virtual mouse button pressed */
@@ -305,9 +307,7 @@ static void QZ_DoDeactivate (_THIS) {
 
 static void QZ_PumpEvents (_THIS)
 {
-    static NSPoint lastMouse;
-    NSPoint mouse, saveMouse;
-    Point qdMouse;
+    int firstMouseEvent;
     CGMouseDelta dx, dy;
 
     NSDate *distantPast;
@@ -320,33 +320,13 @@ static void QZ_PumpEvents (_THIS)
     distantPast = [ NSDate distantPast ];
 
     winRect = NSMakeRect (0, 0, SDL_VideoSurface->w, SDL_VideoSurface->h);
-    titleBarRect = NSMakeRect ( 0, SDL_VideoSurface->h, SDL_VideoSurface->w,
-                                SDL_VideoSurface->h + 22 );
-
-    if (currentGrabMode != SDL_GRAB_ON) { /* if grabbed, the cursor can't move! (see fallback below) */
-
-        /* 1/2 second after a warp, the mouse cannot move (don't ask me why) */
-        /* So, approximate motion with CGGetLastMouseDelta, which still works, somehow */
-        if (! warp_flag) {
-
-            GetGlobalMouse (&qdMouse);  /* use Carbon since [ NSEvent mouseLocation ] is broken */
-            mouse = NSMakePoint (qdMouse.h, qdMouse.v);
-            saveMouse = mouse;
-
-            if (mouse.x != lastMouse.x || mouse.y != lastMouse.y) {
-
-                QZ_PrivateCGToSDL (this, &mouse);
-                /* -note- we now generate mouse motion events if the mouse isn't over the window */
-                if (inForeground /* && NSPointInRect (mouse, winRect)*/) {
-                    //printf ("Mouse Loc: (%f, %f)\n", mouse.x, mouse.y);
-                    SDL_PrivateMouseMotion (0, 0, mouse.x, mouse.y);
-                }
-            }
-            lastMouse = saveMouse;
-        }
-    }
-
-    /* accumulate any mouse events into one SDL mouse event */
+    titleBarRect = NSMakeRect (0, SDL_VideoSurface->h, SDL_VideoSurface->w,
+                                SDL_VideoSurface->h + 22);
+    
+    /* send the first mouse event in absolute coordinates */
+    firstMouseEvent = 1;
+    
+    /* accumulate any additional mouse moved events into one SDL mouse event */
     dx = 0;
     dy = 0;
     
@@ -419,14 +399,14 @@ static void QZ_PumpEvents (_THIS)
                     break;
                 case NSLeftMouseDragged:
                 case NSRightMouseDragged:
-                case 27:
+                case NSOtherMouseDragged: /* usually middle mouse dragged */
                 case NSMouseMoved:
                     if (currentGrabMode == SDL_GRAB_ON) {
                 
                         /**
-                         *  If input is grabbed, we'll wing it and try to send some mouse
-                         *  moved events with CGGetLastMouseDelta(). Not optimal, but better
-                         *  than nothing.
+                         *  If input is grabbed, the cursor doesn't move,
+                         *  so we have to call the lowlevel window server
+                         *  function. This is less accurate but works OK.                         
                          **/
                         CGMouseDelta dx1, dy1;
                         CGGetLastMouseDelta (&dx1, &dy1);
@@ -435,6 +415,12 @@ static void QZ_PumpEvents (_THIS)
                     }
                     else if (warp_flag) {
                 
+                        /**
+                         * If we just warped the mouse, the cursor is frozen for a while.
+                         * So we have to use the lowlevel function until it
+                         * unfreezes. This really helps apps that continuously
+                         * warp the mouse to keep it in the game window.
+                         **/
                         Uint32 ticks;
                 
                         ticks = SDL_GetTicks();
@@ -449,6 +435,30 @@ static void QZ_PumpEvents (_THIS)
                 
                             warp_flag = 0;
                         }
+                    }
+                    else if (firstMouseEvent) {
+                        
+                        /**
+                         * Get the first mouse event in a possible
+                         * sequence of mouse moved events. Since we
+                         * use absolute coordinates, this serves to
+                         * compensate any inaccuracy in deltas, and
+                         * provides the first known mouse position,
+                         * since everything after this uses deltas
+                         **/
+                        NSPoint p = [ event locationInWindow ];
+                        QZ_PrivateCocoaToSDL(this, &p);
+                        
+                        firstMouseEvent = 0;
+                    }
+                    else {
+                    
+                       /**
+                        * Get the amount moved since the last drag or move event,
+                        * add it on for one big move event at the end.
+                        **/
+                       dx += [ event deltaX ];
+                       dy += [ event deltaY ];
                     }
                     break;
                 case NSScrollWheel:
@@ -490,9 +500,9 @@ static void QZ_PumpEvents (_THIS)
         }
     } while (event != nil);
     
-    /* check for accumulated mouse events */
+    /* handle accumulated mouse moved events */
     if (dx != 0 || dy != 0)
-    SDL_PrivateMouseMotion (0, 1, dx, dy);
+        SDL_PrivateMouseMotion (0, 1, dx, dy);
     
     [ pool release ];
 }
