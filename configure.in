@@ -1229,6 +1229,7 @@ CheckPTHREAD()
         # Do futher testing if we have pthread support...
         if test x$use_pthreads = xyes; then
             CFLAGS="$CFLAGS $pthread_cflags -DSDL_USE_PTHREADS"
+            LIBS="$LIBS $pthread_lib"
             SDL_CFLAGS="$SDL_CFLAGS $pthread_cflags"
             SDL_LIBS="$SDL_LIBS $pthread_lib"
 
