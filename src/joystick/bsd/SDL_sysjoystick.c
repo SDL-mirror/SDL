@@ -32,7 +32,6 @@ static char rcsid =
  "@(#) $Id $";
 #endif
 
-#include <sys/types.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -242,8 +241,6 @@ SDL_SYS_JoystickOpen(SDL_Joystick *joy)
 			break;
 		case hid_input:
 			switch (HID_PAGE(hitem.usage)) {
-			case HUP_UNDEFINED:
-				break;
 			case HUP_GENERIC_DESKTOP:
 				switch (HID_USAGE(hitem.usage)) {
 				case HUG_X:
@@ -263,6 +260,8 @@ SDL_SYS_JoystickOpen(SDL_Joystick *joy)
 				break;
 			case HUP_BUTTON:
 				joy->nbuttons++;
+				break;
+			default:
 				break;
 			}
 			break;
@@ -308,8 +307,6 @@ SDL_SYS_JoystickUpdate(SDL_Joystick *joy)
 		switch (hitem.kind) {
 		case hid_input:
 			switch (HID_PAGE(hitem.usage)) {
-			case HUP_UNDEFINED:
-				continue;
 			case HUP_GENERIC_DESKTOP:
 				switch (HID_USAGE(hitem.usage)) {
 				case HUG_X:
@@ -357,6 +354,8 @@ scaleaxe:
 				}
 				nbutton++;
 				break;
+			default:
+				continue;
 			}
 			break;
 		default:
