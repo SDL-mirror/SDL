@@ -739,12 +739,14 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 	while (element)
 	{
 		value = HIDGetElementValue(device, element);
+        if (value > 1)  /* handle pressure-sensitive buttons */
+            value = 1;
 		if ( value != joystick->buttons[i] )
 			SDL_PrivateJoystickButton(joystick, i, value);
 		element = element->pNext;
 		++i;
 	}
-	
+	    
 	element = device->firstHat;
 	i = 0;
 	while (element)
