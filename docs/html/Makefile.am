@@ -20,6 +20,7 @@ EXTRA_DIST = \
     guidetimeexamples.html \
     guidevideo.html \
     guidevideoexamples.html \
+    guidevideoopengl.html \
     index.html \
     joystick.html \
     reference.html \

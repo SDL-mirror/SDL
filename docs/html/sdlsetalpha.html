@@ -4,7 +4,7 @@
 >SDL_SetAlpha</TITLE
 ><META
 NAME="GENERATOR"
-CONTENT="Modular DocBook HTML Stylesheet Version 1.61
+CONTENT="Modular DocBook HTML Stylesheet Version 1.64
 "><LINK
 REL="HOME"
 TITLE="SDL Library Documentation"
@@ -73,7 +73,7 @@ NAME="SDLSETALPHA"
 ><DIV
 CLASS="REFNAMEDIV"
 ><A
-NAME="AEN1612"
+NAME="AEN1681"
 ></A
 ><H2
 >Name</H2
@@ -81,14 +81,14 @@ NAME="AEN1612"
 ><DIV
 CLASS="REFSYNOPSISDIV"
 ><A
-NAME="AEN1615"
+NAME="AEN1684"
 ></A
 ><H2
 >Synopsis</H2
 ><DIV
 CLASS="FUNCSYNOPSIS"
 ><A
-NAME="AEN1616"
+NAME="AEN1685"
 ></A
 ><P
 ></P
@@ -112,7 +112,7 @@ CLASS="FSFUNC"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN1622"
+NAME="AEN1691"
 ></A
 ><H2
 >Description</H2
@@ -136,22 +136,27 @@ CLASS="LITERAL"
 ><TT
 CLASS="FUNCTION"
 >SDL_SetAlpha</TT
-> is used for setting the per-surface alpha and/or enabling and disabling per-pixel alpha blending.</P
+> is used for setting the per-surface alpha
+value and/or enabling and disabling alpha blending.</P
 ><P
->The <TT
+>The<TT
 CLASS="PARAMETER"
 ><I
 >surface</I
 ></TT
-> parameter specifies which surface whose alpha attributes you wish to adjust. <TT
+> parameter specifies which surface whose alpha
+attributes you wish to adjust. <TT
 CLASS="PARAMETER"
 ><I
 >flags</I
 ></TT
-> is used to specify whether alpha blending should be used (<TT
+> is used to specify
+whether alpha blending should be used (<TT
 CLASS="LITERAL"
 >SDL_SRCALPHA</TT
->) and whether the surface should use RLE acceleration for blitting (<TT
+>) and
+whether the surface should use RLE acceleration for blitting
+(<TT
 CLASS="LITERAL"
 >SDL_RLEACCEL</TT
 >). <TT
@@ -159,18 +164,24 @@ CLASS="PARAMETER"
 ><I
 >flags</I
 ></TT
-> can be an OR'd combination of these two options, one of these options or 0. If <TT
+> can be an OR'd
+combination of these two options, one of these options or 0. If
+<TT
 CLASS="LITERAL"
 >SDL_SRCALPHA</TT
-> is not passed as a flag then all alpha information is ignored when blitting the surface. The <TT
+> is not passed as a flag then all alpha
+information is ignored when blitting the surface. The
+<TT
 CLASS="PARAMETER"
 ><I
 >alpha</I
 ></TT
-> parameter is the per-surface alpha value, a surface need not have an alpha channel to use per-surface alpha and blitting can still be accelerated with <TT
+> parameter is the per-surface alpha value; a
+surface need not have an alpha channel to use per-surface alpha and blitting
+can still be accelerated with <TT
 CLASS="LITERAL"
 >SDL_RLEACCEL</TT
->. Setting the per-surface alpha value to 0 disables per-surface alpha blending.</P
+>.</P
 ><DIV
 CLASS="NOTE"
 ><BLOCKQUOTE
@@ -178,7 +189,8 @@ CLASS="NOTE"
 ><P
 ><B
 >Note: </B
->The per-surface alpha value of 128 is considered a special case and is optimised, so it's much faster than other per-surface values.</P
+>The per-surface alpha value of 128 is considered a special case and
+is optimised, so it's much faster than other per-surface values.</P
 ></BLOCKQUOTE
 ></DIV
 ><P
@@ -186,7 +198,7 @@ CLASS="NOTE"
 ><DIV
 CLASS="INFORMALTABLE"
 ><A
-NAME="AEN1642"
+NAME="AEN1711"
 ></A
 ><P
 ></P
@@ -239,10 +251,13 @@ CLASS="LITERAL"
 ALIGN="LEFT"
 VALIGN="TOP"
 ><P
->The source is alpha-blended with the destination using the per-surface alpha value. If <TT
+>The source is alpha-blended with the destination using the per-surface alpha
+value. If <TT
 CLASS="LITERAL"
 >SDL_SRCCOLORKEY</TT
->literal&#62; is set, only the pixels not matching the colorkey value are copied.</P
+> is set, only the pixels not
+matching the colorkey value are copied. The alpha channel of the copied pixels
+is set to opaque.</P
 ></TD
 ></TR
 ><TR
@@ -257,10 +272,12 @@ CLASS="LITERAL"
 ALIGN="LEFT"
 VALIGN="TOP"
 ><P
->The RGB data is copied from the source and the destination alpha is zero to opaque. If <TT
+>The RGB data is copied from the source and the alpha value of the copied pixels
+is set to opaque. If <TT
 CLASS="LITERAL"
 >SDL_SRCCOLORKEY</TT
-> is set, only the pixels not matching the colorkey value are copied.</P
+> is set, only the pixels
+not matching the colorkey value are copied. </P
 ></TD
 ></TR
 ><TR
@@ -275,7 +292,9 @@ CLASS="LITERAL"
 ALIGN="LEFT"
 VALIGN="TOP"
 ><P
->The source is alpha-blended with the destination using the source alpha channel. The alpha channel in the destination surface is left untouched. <TT
+>The source is alpha-blended with the destination using the source alpha
+channel. The alpha channel in the destination surface is left untouched.
+<TT
 CLASS="LITERAL"
 >SDL_SRCCOLORKEY</TT
 > is ignored.</P
@@ -340,11 +359,44 @@ CLASS="LITERAL"
 ><P
 ></P
 ></DIV
+><DIV
+CLASS="NOTE"
+><BLOCKQUOTE
+CLASS="NOTE"
+><P
+><B
+>Note: </B
+> Note that RGBA-&#62;RGBA blits (with SDL_SRCALPHA set) keep the alpha
+of the destination surface. This means that you cannot compose two arbitrary
+RGBA surfaces this way and get the result you would expect from "overlaying"
+them; the destination alpha will work as a mask.</P
+><P
+>Also note that per-pixel and per-surface alpha cannot be combined;
+the per-pixel alpha is always used if available</P
+></BLOCKQUOTE
+></DIV
 ></DIV
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN1692"
+NAME="AEN1764"
+></A
+><H2
+>Return Value</H2
+><P
+>This function returns <SPAN
+CLASS="RETURNVALUE"
+>0</SPAN
+>, or
+<SPAN
+CLASS="RETURNVALUE"
+>-1</SPAN
+> if there was an error.</P
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN1769"
 ></A
 ><H2
 >See Also</H2

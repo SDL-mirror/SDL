@@ -4,7 +4,7 @@
 >SDL_UpdateRects</TITLE
 ><META
 NAME="GENERATOR"
-CONTENT="Modular DocBook HTML Stylesheet Version 1.61
+CONTENT="Modular DocBook HTML Stylesheet Version 1.64
 "><LINK
 REL="HOME"
 TITLE="SDL Library Documentation"
@@ -73,7 +73,7 @@ NAME="SDLUPDATERECTS"
 ><DIV
 CLASS="REFNAMEDIV"
 ><A
-NAME="AEN938"
+NAME="AEN977"
 ></A
 ><H2
 >Name</H2
@@ -81,14 +81,14 @@ NAME="AEN938"
 ><DIV
 CLASS="REFSYNOPSISDIV"
 ><A
-NAME="AEN941"
+NAME="AEN980"
 ></A
 ><H2
 >Synopsis</H2
 ><DIV
 CLASS="FUNCSYNOPSIS"
 ><A
-NAME="AEN942"
+NAME="AEN981"
 ></A
 ><P
 ></P
@@ -112,12 +112,14 @@ CLASS="FSFUNC"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN948"
+NAME="AEN987"
 ></A
 ><H2
 >Description</H2
 ><P
->Makes sure the given list of rectangles is updated on the given screen.</P
+>Makes sure the given list of rectangles is updated on the given screen.
+The rectangles must all be confined within the screen boundaries (no
+clipping is done).</P
 ><P
 >This function should not be called while <TT
 CLASS="PARAMETER"
@@ -128,12 +130,28 @@ CLASS="PARAMETER"
 <A
 HREF="sdllocksurface.html"
 >locked</A
->.&#13;</P
+>.</P
+><DIV
+CLASS="NOTE"
+><BLOCKQUOTE
+CLASS="NOTE"
+><P
+><B
+>Note: </B
+>It is adviced to call this function only once per frame, since each
+call has some processing overhead. This is no restriction since you
+can pass any number of rectangles each time.</P
+><P
+>The rectangles are not automatically merged or checked for overlap. In
+general, the programmer can use his knowledge about his particular
+rectangles to merge them in an efficient way, to avoid overdraw.</P
+></BLOCKQUOTE
+></DIV
 ></DIV
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN954"
+NAME="AEN996"
 ></A
 ><H2
 >See Also</H2

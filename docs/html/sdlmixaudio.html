@@ -4,7 +4,7 @@
 >SDL_MixAudio</TITLE
 ><META
 NAME="GENERATOR"
-CONTENT="Modular DocBook HTML Stylesheet Version 1.61
+CONTENT="Modular DocBook HTML Stylesheet Version 1.64
 "><LINK
 REL="HOME"
 TITLE="SDL Library Documentation"
@@ -73,7 +73,7 @@ NAME="SDLMIXAUDIO"
 ><DIV
 CLASS="REFNAMEDIV"
 ><A
-NAME="AEN6485"
+NAME="AEN6560"
 ></A
 ><H2
 >Name</H2
@@ -81,14 +81,14 @@ NAME="AEN6485"
 ><DIV
 CLASS="REFSYNOPSISDIV"
 ><A
-NAME="AEN6488"
+NAME="AEN6563"
 ></A
 ><H2
 >Synopsis</H2
 ><DIV
 CLASS="FUNCSYNOPSIS"
 ><A
-NAME="AEN6489"
+NAME="AEN6564"
 ></A
 ><P
 ></P
@@ -112,30 +112,35 @@ CLASS="FSFUNC"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN6495"
+NAME="AEN6570"
 ></A
 ><H2
 >Description</H2
 ><P
->This takes two audio buffers of the playing audio format and mixes
-them, performing addition, volume adjustment, and overflow clipping.
-The <TT
+>This function takes two audio buffers of <TT
+CLASS="PARAMETER"
+><I
+>len</I
+></TT
+> bytes each
+of the playing audio format and mixes them, performing addition, volume
+adjustment, and overflow clipping. The <TT
 CLASS="PARAMETER"
 ><I
 >volume</I
 ></TT
-> ranges from 0 - 128, 
-and should be set to <TT
+> ranges
+from 0 to <TT
 CLASS="LITERAL"
 >SDL_MIX_MAXVOLUME</TT
->
-for full audio volume.  Note this does not change hardware volume.
-This is provided for convenience -- you can mix your own audio data.</P
+> and should be set to the maximum
+value for full audio volume. Note this does not change hardware volume. This is
+provided for convenience -- you can mix your own audio data.</P
 ></DIV
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN6500"
+NAME="AEN6576"
 ></A
 ><H2
 >See Also</H2

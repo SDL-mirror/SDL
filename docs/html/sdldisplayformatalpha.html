@@ -4,7 +4,7 @@
 >SDL_DisplayFormatAlpha</TITLE
 ><META
 NAME="GENERATOR"
-CONTENT="Modular DocBook HTML Stylesheet Version 1.61
+CONTENT="Modular DocBook HTML Stylesheet Version 1.64
 "><LINK
 REL="HOME"
 TITLE="SDL Library Documentation"
@@ -73,7 +73,7 @@ NAME="SDLDISPLAYFORMATALPHA"
 ><DIV
 CLASS="REFNAMEDIV"
 ><A
-NAME="AEN1936"
+NAME="AEN2013"
 ></A
 ><H2
 >Name</H2
@@ -81,14 +81,14 @@ NAME="AEN1936"
 ><DIV
 CLASS="REFSYNOPSISDIV"
 ><A
-NAME="AEN1939"
+NAME="AEN2016"
 ></A
 ><H2
 >Synopsis</H2
 ><DIV
 CLASS="FUNCSYNOPSIS"
 ><A
-NAME="AEN1940"
+NAME="AEN2017"
 ></A
 ><P
 ></P
@@ -112,7 +112,7 @@ CLASS="FSFUNC"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN1946"
+NAME="AEN2023"
 ></A
 ><H2
 >Description</H2
@@ -128,11 +128,19 @@ HREF="sdlconvertsurface.html"
 >If you want to take advantage of hardware colorkey or alpha blit
 acceleration, you should set the colorkey and alpha value before
 calling this function.</P
+><P
+>This function can be used to convert a colourkey to an alpha channel,
+if the <TT
+CLASS="LITERAL"
+>SDL_SRCCOLORKEY</TT
+> flag is set on the surface.
+The generated surface will then be transparent (alpha=0) where the
+pixels match the colourkey, and opaque (alpha=255) elsewhere.</P
 ></DIV
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN1951"
+NAME="AEN2030"
 ></A
 ><H2
 >Return Value</H2
@@ -146,7 +154,7 @@ CLASS="RETURNVALUE"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN1955"
+NAME="AEN2034"
 ></A
 ><H2
 >See Also</H2

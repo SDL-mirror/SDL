@@ -4,7 +4,7 @@
 >SDL_BlitSurface</TITLE
 ><META
 NAME="GENERATOR"
-CONTENT="Modular DocBook HTML Stylesheet Version 1.61
+CONTENT="Modular DocBook HTML Stylesheet Version 1.64
 "><LINK
 REL="HOME"
 TITLE="SDL Library Documentation"
@@ -73,7 +73,7 @@ NAME="SDLBLITSURFACE"
 ><DIV
 CLASS="REFNAMEDIV"
 ><A
-NAME="AEN1806"
+NAME="AEN1883"
 ></A
 ><H2
 >Name</H2
@@ -81,14 +81,14 @@ NAME="AEN1806"
 ><DIV
 CLASS="REFSYNOPSISDIV"
 ><A
-NAME="AEN1809"
+NAME="AEN1886"
 ></A
 ><H2
 >Synopsis</H2
 ><DIV
 CLASS="FUNCSYNOPSIS"
 ><A
-NAME="AEN1810"
+NAME="AEN1887"
 ></A
 ><P
 ></P
@@ -112,7 +112,7 @@ CLASS="FSFUNC"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN1816"
+NAME="AEN1893"
 ></A
 ><H2
 >Description</H2
@@ -170,27 +170,37 @@ CLASS="PARAMETER"
 > is not modified).</P
 ><P
 >The blit function should not be called on a locked surface.</P
-><DIV
-CLASS="NOTE"
-><BLOCKQUOTE
-CLASS="NOTE"
 ><P
-><B
->Note: </B
 >The results of blitting operations vary greatly depending on whether <TT
 CLASS="LITERAL"
 >SDL_SRCAPLHA</TT
 > is set or not. See <A
 HREF="sdlsetalpha.html"
 >SDL_SetAlpha</A
->.</P
-></BLOCKQUOTE
-></DIV
+> for an explaination of how this affects your results. Colorkeying and alpha attributes also interact with surface blitting, as the following pseudo-code should hopefully explain.
+<PRE
+CLASS="PROGRAMLISTING"
+>if (source surface has SDL_SRCALPHA set) {
+    if (source surface has alpha channel (that is, format-&#62;Amask != 0))
+        blit using per-pixel alpha, ignoring any colour key
+    else {
+        if (source surface has SDL_SRCCOLORKEY set)
+            blit using the colour key AND the per-surface alpha value
+        else
+            blit using the per-surface alpha value
+    }
+} else {
+    if (source surface has SDL_SRCCOLORKEY set)
+        blit using the colour key
+    else
+        ordinary opaque rectangular blit
+}</PRE
+></P
 ></DIV
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN1835"
+NAME="AEN1912"
 ></A
 ><H2
 >Return Value</H2
@@ -226,7 +236,7 @@ have access to the video memory again.</P
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN1843"
+NAME="AEN1920"
 ></A
 ><H2
 >See Also</H2

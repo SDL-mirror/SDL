@@ -4,7 +4,7 @@
 >SDL_AddTimer</TITLE
 ><META
 NAME="GENERATOR"
-CONTENT="Modular DocBook HTML Stylesheet Version 1.61
+CONTENT="Modular DocBook HTML Stylesheet Version 1.64
 "><LINK
 REL="HOME"
 TITLE="SDL Library Documentation"
@@ -73,7 +73,7 @@ NAME="SDLADDTIMER"
 ><DIV
 CLASS="REFNAMEDIV"
 ><A
-NAME="AEN7854"
+NAME="AEN7933"
 ></A
 ><H2
 >Name</H2
@@ -82,14 +82,14 @@ elapsed.</DIV
 ><DIV
 CLASS="REFSYNOPSISDIV"
 ><A
-NAME="AEN7857"
+NAME="AEN7936"
 ></A
 ><H2
 >Synopsis</H2
 ><DIV
 CLASS="FUNCSYNOPSIS"
 ><A
-NAME="AEN7858"
+NAME="AEN7937"
 ></A
 ><P
 ></P
@@ -125,7 +125,7 @@ typedef Uint32 (*SDL_NewTimerCallback)(Uint32 interval, void *param);</PRE
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN7867"
+NAME="AEN7946"
 ></A
 ><H2
 >Description</H2
@@ -153,9 +153,15 @@ CLASS="FUNCTION"
 >.</P
 ><P
 >The timer callback function may run in a different thread than your
-main program, and so shouldn't call any functions from within itself.</P
+main program, and so shouldn't call any functions from within itself.
+You may always call <A
+HREF="sdlpushevent.html"
+>SDL_PushEvent</A
+>, however.</P
 ><P
->The maximum resolution of this timer is 10 ms, which means that if
+>The granularity of the timer is platform-dependent, but you should count
+on it being at least 10 ms as this is the most common number.
+This means that if
 you request a 16 ms timer, your callback will run approximately 20 ms
 later on an unloaded system.  If you wanted to set a flag signaling
 a frame update at 30 frames per second (every 33 ms), you might set a
@@ -173,7 +179,7 @@ HREF="sdlinit.html"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN7878"
+NAME="AEN7958"
 ></A
 ><H2
 >Return Value</H2
@@ -187,7 +193,7 @@ CLASS="RETURNVALUE"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN7882"
+NAME="AEN7962"
 ></A
 ><H2
 >Examples</H2
@@ -200,7 +206,7 @@ CLASS="PROGRAMLISTING"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN7886"
+NAME="AEN7966"
 ></A
 ><H2
 >See Also</H2
@@ -210,6 +216,13 @@ HREF="sdlremovetimer.html"
 ><TT
 CLASS="FUNCTION"
 >SDL_RemoveTimer</TT
+></A
+>,
+<A
+HREF="sdlpushevent.html"
+><TT
+CLASS="FUNCTION"
+>SDL_PushEvent</TT
 ></A
 ></P
 ></DIV

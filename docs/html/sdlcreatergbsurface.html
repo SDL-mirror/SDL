@@ -4,7 +4,7 @@
 >SDL_CreateRGBSurface</TITLE
 ><META
 NAME="GENERATOR"
-CONTENT="Modular DocBook HTML Stylesheet Version 1.61
+CONTENT="Modular DocBook HTML Stylesheet Version 1.64
 "><LINK
 REL="HOME"
 TITLE="SDL Library Documentation"
@@ -73,7 +73,7 @@ NAME="SDLCREATERGBSURFACE"
 ><DIV
 CLASS="REFNAMEDIV"
 ><A
-NAME="AEN1316"
+NAME="AEN1358"
 ></A
 ><H2
 >Name</H2
@@ -81,14 +81,14 @@ NAME="AEN1316"
 ><DIV
 CLASS="REFSYNOPSISDIV"
 ><A
-NAME="AEN1319"
+NAME="AEN1361"
 ></A
 ><H2
 >Synopsis</H2
 ><DIV
 CLASS="FUNCSYNOPSIS"
 ><A
-NAME="AEN1320"
+NAME="AEN1362"
 ></A
 ><P
 ></P
@@ -112,7 +112,7 @@ CLASS="FSFUNC"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN1326"
+NAME="AEN1368"
 ></A
 ><H2
 >Description</H2
@@ -153,7 +153,7 @@ CLASS="PARAMETER"
 ><DIV
 CLASS="INFORMALTABLE"
 ><A
-NAME="AEN1338"
+NAME="AEN1380"
 ></A
 ><P
 ></P
@@ -198,7 +198,21 @@ CLASS="LITERAL"
 ><TD
 ALIGN="LEFT"
 VALIGN="TOP"
->With this flag SDL will attempt to find the best location for this surface, either in system memory or video memory, to obtain hardware colorkey blitting support.</TD
+>This flag turns on colourkeying for blits from this surface. If
+<TT
+CLASS="LITERAL"
+>SDL_HWSURFACE</TT
+> is also specified and colourkeyed blits
+are hardware-accelerated, then SDL will attempt to place the surface in
+video memory.
+Use <A
+HREF="sdlsetcolorkey.html"
+><TT
+CLASS="FUNCTION"
+>SDL_SetColorKey</TT
+></A
+>
+to set or clear this flag after surface creation.</TD
 ></TR
 ><TR
 ><TD
@@ -211,18 +225,108 @@ CLASS="LITERAL"
 ><TD
 ALIGN="LEFT"
 VALIGN="TOP"
->With this flag SDL will attempt to find the best location for this surface, either in system memory or video memory, to obtain hardware alpha support</TD
+>This flag turns on alpha-blending for blits from this surface. If
+<TT
+CLASS="LITERAL"
+>SDL_HWSURFACE</TT
+> is also specified and alpha-blending blits
+are hardware-accelerated, then the surface will be placed in video memory if
+possible.
+Use <A
+HREF="sdlsetalpha.html"
+><TT
+CLASS="FUNCTION"
+>SDL_SetAlpha</TT
+></A
+> to
+set or clear this flag after surface creation.</TD
 ></TR
 ></TBODY
 ></TABLE
 ><P
 ></P
 ></DIV
+><DIV
+CLASS="NOTE"
+><BLOCKQUOTE
+CLASS="NOTE"
+><P
+><B
+>Note: </B
+>If an alpha-channel is specified (that is, if <TT
+CLASS="PARAMETER"
+><I
+>Amask</I
+></TT
+> is
+nonzero), then the <TT
+CLASS="LITERAL"
+>SDL_SRCALPHA</TT
+> flag is automatically
+set. You may remove this flag by calling 
+<A
+HREF="sdlsetalpha.html"
+><TT
+CLASS="FUNCTION"
+>SDL_SetAlpha</TT
+></A
+>
+after surface creation.</P
+></BLOCKQUOTE
+></DIV
 ></DIV
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN1357"
+NAME="AEN1411"
+></A
+><H2
+>Return Value</H2
+><P
+>Returns the created surface, or <SPAN
+CLASS="RETURNVALUE"
+>NULL</SPAN
+> upon error.</P
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN1415"
+></A
+><H2
+>Example</H2
+><PRE
+CLASS="PROGRAMLISTING"
+>    /* Create a 32-bit surface with the bytes of each pixel in R,G,B,A order,
+       as expected by OpenGL for textures */
+    SDL_Surface *surface;
+    Uint32 rmask, gmask, bmask, amask;
+
+    /* SDL interprets each pixel as a 32-bit number, so our masks must depend
+       on the endianness (byte order) of the machine */
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+    rmask = 0xff000000;
+    gmask = 0x00ff0000;
+    bmask = 0x0000ff00;
+    amask = 0x000000ff;
+#else
+    rmask = 0x000000ff;
+    gmask = 0x0000ff00;
+    bmask = 0x00ff0000;
+    amask = 0xff000000;
+#endif
+
+    surface = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, 32,
+                                   rmask, gmask, bmask, amask);
+    if(surface == NULL) {
+        fprintf(stderr, "CreateRGBSurface failed: %s\n", SDL_GetError());
+        exit(1);
+    }</PRE
+></DIV
+><DIV
+CLASS="REFSECT1"
+><A
+NAME="AEN1418"
 ></A
 ><H2
 >See Also</H2
@@ -267,6 +371,20 @@ HREF="sdlsurface.html"
 ><SPAN
 CLASS="STRUCTNAME"
 >SDL_Surface</SPAN
+></A
+>
+<A
+HREF="sdlsetalpha.html"
+><TT
+CLASS="FUNCTION"
+>SDL_SetAlpha</TT
+></A
+>
+<A
+HREF="sdlsetcolorkey.html"
+><TT
+CLASS="FUNCTION"
+>SDL_SetColorKey</TT
 ></A
 ></P
 ></DIV

@@ -1,4 +1,4 @@
-.TH "SDL_SetVideoMode" "3" "Mon 12 Mar 2001, 01:04" "SDL" "SDL API Reference" 
+.TH "SDL_SetVideoMode" "3" "Sun 10 Jun 2001, 19:42" "SDL" "SDL API Reference" 
 .SH "NAME"
 SDL_SetVideoMode\- Set up a video mode with the specified width, height and bits-per-pixel\&.
 .SH "SYNOPSIS"
@@ -30,7 +30,7 @@ Normally, if a video surface of the requested depth (\fBbpp\fR) is not available
 Give SDL exclusive palette access\&. Without this flag you may not always get the the colors you request with \fI\fBSDL_SetColors\fP\fR\&.
 .TP 20
 \fBSDL_DOUBLEBUF\fP
-Enable double buffering\&. Calling \fI\fBSDL_Flip\fP\fR will flip the buffers and update the screen\&. If double buffering could not be enabled then \fBSDL_Flip\fP will just perform a \fI\fBSDL_UpdateRect\fP\fR on the entire screen\&.
+Enable double buffering; only valid with SDL_HWSURFACE\&. Calling \fI\fBSDL_Flip\fP\fR will flip the buffers and update the screen\&. If double buffering could not be enabled then \fBSDL_Flip\fP will just perform a \fI\fBSDL_UpdateRect\fP\fR on the entire screen\&.
 .TP 20
 \fBSDL_FULLSCREEN\fP
 SDL will attempt to use a fullscreen mode
@@ -58,4 +58,4 @@ The framebuffer surface, or \fBNULL\fR if it fails\&.
 .SH "SEE ALSO"
 .PP
 \fI\fBSDL_LockSurface\fP\fR, \fI\fBSDL_SetColors\fP\fR, \fI\fBSDL_Flip\fP\fR, \fI\fBSDL_Surface\fR\fR
-...\" created by instant / docbook-to-man, Mon 12 Mar 2001, 01:04
+...\" created by instant / docbook-to-man, Sun 10 Jun 2001, 19:42

@@ -1,4 +1,4 @@
-.TH "SDL_BlitSurface" "3" "Mon 12 Mar 2001, 01:04" "SDL" "SDL API Reference" 
+.TH "SDL_BlitSurface" "3" "Sun 10 Jun 2001, 19:41" "SDL" "SDL API Reference" 
 .SH "NAME"
 SDL_BlitSurface\- This performs a fast blit from the source surface to the destination surface\&.
 .SH "SYNOPSIS"
@@ -18,11 +18,26 @@ The final blit rectangle is saved in \fBdstrect\fR after all clipping is perform
 .PP
 The blit function should not be called on a locked surface\&.
 .PP
-.RS
-\fBNote:  
+The results of blitting operations vary greatly depending on whether \fBSDL_SRCAPLHA\fP is set or not\&. See \fISDL_SetAlpha\fR for an explaination of how this affects your results\&. Colorkeying and alpha attributes also interact with surface blitting, as the following pseudo-code should hopefully explain\&. 
 .PP
-The results of blitting operations vary greatly depending on whether \fBSDL_SRCAPLHA\fP is set or not\&. See \fISDL_SetAlpha\fR\&.
-.RE
+.nf
+\f(CWif (source surface has SDL_SRCALPHA set) {
+    if (source surface has alpha channel (that is, format->Amask != 0))
+        blit using per-pixel alpha, ignoring any colour key
+    else {
+        if (source surface has SDL_SRCCOLORKEY set)
+            blit using the colour key AND the per-surface alpha value
+        else
+            blit using the per-surface alpha value
+    }
+} else {
+    if (source surface has SDL_SRCCOLORKEY set)
+        blit using the colour key
+    else
+        ordinary opaque rectangular blit
+}\fR
+.fi
+.PP
 .SH "RETURN VALUE"
 .PP
 If the blit is successful, it returns \fB0\fR, otherwise it returns \fB-1\fR\&.
@@ -42,4 +57,4 @@ If either of the surfaces were in video memory, and the blit returns \fB-2\fR, t
 .SH "SEE ALSO"
 .PP
 \fI\fBSDL_LockSurface\fP\fR, \fI\fBSDL_FillRect\fP\fR, \fI\fBSDL_Surface\fR\fR, \fI\fBSDL_Rect\fR\fR
-...\" created by instant / docbook-to-man, Mon 12 Mar 2001, 01:04
+...\" created by instant / docbook-to-man, Sun 10 Jun 2001, 19:41

@@ -4,7 +4,7 @@
 >Handling the Keyboard</TITLE
 ><META
 NAME="GENERATOR"
-CONTENT="Modular DocBook HTML Stylesheet Version 1.61
+CONTENT="Modular DocBook HTML Stylesheet Version 1.64
 "><LINK
 REL="HOME"
 TITLE="SDL Library Documentation"
@@ -78,7 +78,7 @@ CLASS="SECT2"
 ><H2
 CLASS="SECT2"
 ><A
-NAME="AEN205"
+NAME="AEN271"
 >Keyboard Related Structures</A
 ></H2
 ><P
@@ -88,7 +88,7 @@ CLASS="SECT3"
 ><H3
 CLASS="SECT3"
 ><A
-NAME="AEN208"
+NAME="AEN274"
 >SDLKey</A
 ></H3
 ><P
@@ -114,7 +114,7 @@ CLASS="SECT3"
 ><H3
 CLASS="SECT3"
 ><A
-NAME="AEN216"
+NAME="AEN282"
 >SDLMod</A
 ></H3
 ><P
@@ -134,7 +134,7 @@ CLASS="SECT3"
 ><H3
 CLASS="SECT3"
 ><A
-NAME="AEN222"
+NAME="AEN288"
 >SDL_keysym</A
 ></H3
 ><PRE
@@ -215,7 +215,7 @@ CLASS="SECT3"
 ><H3
 CLASS="SECT3"
 ><A
-NAME="AEN241"
+NAME="AEN307"
 >SDL_KeyboardEvent</A
 ></H3
 ><PRE
@@ -283,7 +283,7 @@ CLASS="SECT2"
 ><H2
 CLASS="SECT2"
 ><A
-NAME="AEN258"
+NAME="AEN324"
 >Reading Keyboard Events</A
 ></H2
 ><P
@@ -308,8 +308,17 @@ CLASS="LITERAL"
 > events using a <TT
 CLASS="LITERAL"
 >switch</TT
-> statement, like so:
-<PRE
+> statement, like so:</P
+><DIV
+CLASS="EXAMPLE"
+><A
+NAME="AEN334"
+></A
+><P
+><B
+>Example 3-10. Reading Keyboard Events</B
+></P
+><PRE
 CLASS="PROGRAMLISTING"
 >  SDL_Event event;
   .
@@ -334,15 +343,16 @@ CLASS="PROGRAMLISTING"
   }
   .
   .</PRE
->
-This is a very basic example. No information about the key press or release is interpreted. We will explore the other extreme out our first full example below - reporting all available information about a keyboard event.</P
+></DIV
+><P
+>This is a very basic example. No information about the key press or release is interpreted. We will explore the other extreme out our first full example below - reporting all available information about a keyboard event.</P
 ></DIV
 ><DIV
 CLASS="SECT2"
 ><H2
 CLASS="SECT2"
 ><A
-NAME="AEN269"
+NAME="AEN338"
 >A More Detailed Look</A
 ></H2
 ><P
@@ -384,11 +394,11 @@ CLASS="NOTE"
 ><DIV
 CLASS="EXAMPLE"
 ><A
-NAME="AEN282"
+NAME="AEN351"
 ></A
 ><P
 ><B
->Example 3-1. keys.c - Key event information</B
+>Example 3-11. Interpreting Key Event Information</B
 ></P
 ><PRE
 CLASS="PROGRAMLISTING"
@@ -405,7 +415,7 @@ CLASS="PROGRAMLISTING"
         int quit = 0;
         
         /* Initialise SDL */
-        if( SDL_Init( SDL_INIT_VIDEO ) ){
+        if( SDL_Init( SDL_INIT_VIDEO ) &#60; 0){
             fprintf( stderr, "Could not initialise SDL: %s\n", SDL_GetError() );
             exit( -1 );
         }
@@ -518,13 +528,13 @@ CLASS="SECT2"
 ><H2
 CLASS="SECT2"
 ><A
-NAME="AEN285"
+NAME="AEN354"
 >Game-type Input</A
 ></H2
 ><P
 >I have found that people using keyboard events for games and other interactive applications don't always understand one fundemental point.</P
 ><A
-NAME="AEN288"
+NAME="AEN357"
 ></A
 ><BLOCKQUOTE
 CLASS="BLOCKQUOTE"
@@ -575,8 +585,17 @@ CLASS="PROGRAMLISTING"
 >
 At first glance you may think this is a perfectly reasonable piece of code for the task, but it isn't. Like I said keyboard events only occur when a key changes state, so the user would have to press and release the left cursor key 100 times to move the alien 100 pixels to the left.</P
 ><P
->To get around this problem we must not use the events to change the position of the alien, we use the events to set flags which are then used in a seperate section of code to move the alien. Something like this:
-<PRE
+>To get around this problem we must not use the events to change the position of the alien, we use the events to set flags which are then used in a seperate section of code to move the alien. Something like this:</P
+><DIV
+CLASS="EXAMPLE"
+><A
+NAME="AEN363"
+></A
+><P
+><B
+>Example 3-12. Proper Game Movement</B
+></P
+><PRE
 CLASS="PROGRAMLISTING"
 >    /* Alien screen coordinates */
     int alien_x=0, alien_y=0;
@@ -649,8 +668,9 @@ CLASS="PROGRAMLISTING"
     /* Update the alien position */
     alien_x += alien_xvel;
     alien_y += alien_yvel;</PRE
->
-As can be seen, we use two extra variables, alien_xvel and alien_yvel, which represent the motion of the ship, it is these variables that we update when we detect keypresses and releases.</P
+></DIV
+><P
+>As can be seen, we use two extra variables, alien_xvel and alien_yvel, which represent the motion of the ship, it is these variables that we update when we detect keypresses and releases.</P
 ></DIV
 ></DIV
 ><DIV

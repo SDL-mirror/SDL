@@ -4,7 +4,7 @@
 >SDL_Surface</TITLE
 ><META
 NAME="GENERATOR"
-CONTENT="Modular DocBook HTML Stylesheet Version 1.61
+CONTENT="Modular DocBook HTML Stylesheet Version 1.64
 "><LINK
 REL="HOME"
 TITLE="SDL Library Documentation"
@@ -73,7 +73,7 @@ NAME="SDLSURFACE"
 ><DIV
 CLASS="REFNAMEDIV"
 ><A
-NAME="AEN2762"
+NAME="AEN2841"
 ></A
 ><H2
 >Name</H2
@@ -81,7 +81,7 @@ NAME="AEN2762"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN2765"
+NAME="AEN2844"
 ></A
 ><H2
 >Structure Definition</H2
@@ -93,37 +93,27 @@ CLASS="PROGRAMLISTING"
         int w, h;                               /* Read-only */
         Uint16 pitch;                           /* Read-only */
         void *pixels;                           /* Read-write */
-        int offset;                             /* Private */
-
-        /* Hardware-specific surface info */
-        struct private_hwdata *hwdata;
 
         /* clipping information */
         SDL_Rect clip_rect;                     /* Read-only */
-        Uint32 unused1;                         /* for binary compatibility */
-        Uint32 unused2;                         /* for binary compatibility */
-
-        /* info for fast blit mapping to other surfaces */
-        struct SDL_BlitMap *map;                /* Private */
-
-        /* format version, bumped at every change to invalidate blit maps */
-        unsigned int format_version;            /* Private */
 
         /* Reference count -- used when freeing surface */
         int refcount;                           /* Read-mostly */
+
+	/* This structure also contains private fields not shown here */
 } SDL_Surface;</PRE
 ></DIV
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN2768"
+NAME="AEN2847"
 ></A
 ><H2
 >Structure Data</H2
 ><DIV
 CLASS="INFORMALTABLE"
 ><A
-NAME="AEN2770"
+NAME="AEN2849"
 ></A
 ><P
 ></P
@@ -216,21 +206,6 @@ VALIGN="TOP"
 ><TT
 CLASS="STRUCTFIELD"
 ><I
->clip_minx, clip_maxx</I
-></TT
-></TD
-><TD
-ALIGN="LEFT"
-VALIGN="TOP"
->X clip coords</TD
-></TR
-><TR
-><TD
-ALIGN="LEFT"
-VALIGN="TOP"
-><TT
-CLASS="STRUCTFIELD"
-><I
 >clip_rect</I
 ></TT
 ></TD
@@ -251,7 +226,7 @@ HREF="sdlrect.html"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN2803"
+NAME="AEN2878"
 ></A
 ><H2
 >Description</H2
@@ -327,7 +302,7 @@ CLASS="STRUCTFIELD"
 ><DIV
 CLASS="INFORMALTABLE"
 ><A
-NAME="AEN2821"
+NAME="AEN2896"
 ></A
 ><P
 ></P
@@ -484,7 +459,7 @@ ALIGN="LEFT"
 VALIGN="TOP"
 ><TT
 CLASS="LITERAL"
->SDL_SRCOLORKEY</TT
+>SDL_SRCCOLORKEY</TT
 ></TD
 ><TD
 ALIGN="LEFT"
@@ -539,7 +514,7 @@ VALIGN="TOP"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN2884"
+NAME="AEN2959"
 ></A
 ><H2
 >See Also</H2

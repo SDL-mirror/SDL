@@ -4,7 +4,7 @@
 >Graphics and Video</TITLE
 ><META
 NAME="GENERATOR"
-CONTENT="Modular DocBook HTML Stylesheet Version 1.61
+CONTENT="Modular DocBook HTML Stylesheet Version 1.64
 "><LINK
 REL="HOME"
 TITLE="SDL Library Documentation"
@@ -16,8 +16,8 @@ REL="PREVIOUS"
 TITLE="Initializing SDL"
 HREF="guidebasicsinit.html"><LINK
 REL="NEXT"
-TITLE="Input handling"
-HREF="guideinput.html"></HEAD
+TITLE="Using OpenGL With SDL"
+HREF="guidevideoopengl.html"></HEAD
 ><BODY
 CLASS="CHAPTER"
 BGCOLOR="#FFF8DC"
@@ -57,7 +57,7 @@ WIDTH="10%"
 ALIGN="right"
 VALIGN="bottom"
 ><A
-HREF="guideinput.html"
+HREF="guidevideoopengl.html"
 >Next</A
 ></TD
 ></TR
@@ -73,572 +73,322 @@ NAME="GUIDEVIDEO"
 >Chapter 2. Graphics and Video</A
 ></H1
 ><DIV
+CLASS="TOC"
+><DL
+><DT
+><B
+>Table of Contents</B
+></DT
+><DT
+><A
+HREF="guidevideo.html#GUIDEVIDEOINTRO"
+>Introduction to SDL Video</A
+></DT
+><DT
+><A
+HREF="guidevideoopengl.html"
+>Using OpenGL With SDL</A
+></DT
+></DL
+></DIV
+><DIV
 CLASS="SECT1"
 ><H1
 CLASS="SECT1"
 ><A
-NAME="GUIDEVIDEOOPENGL"
->Using OpenGL With SDL</A
+NAME="GUIDEVIDEOINTRO"
+>Introduction to SDL Video</A
 ></H1
 ><P
->SDL has the ability to create and use OpenGL contexts on several platforms(Linux/X11, Win32, BeOS, MacOS Classic/Toolbox, MacOS X, FreeBSD/X11 and Solaris/X11). This allows you to use SDL's audio, event handling, threads and times in your OpenGL applications (a function often performed by GLUT).</P
+>Video is probably the most common thing that SDL is used for, and
+so it has the most complete subsystem. Here are a few
+examples to demonstrate the basics.</P
 ><DIV
 CLASS="SECT2"
 ><H2
 CLASS="SECT2"
 ><A
-NAME="AEN65"
->Initialisation</A
+NAME="AEN68"
+>Initializing the Video Display</A
 ></H2
 ><P
->Initialising SDL to use OpenGL is not very different to initialising SDL normally. There are three differences; you must pass <TT
-CLASS="LITERAL"
->SDL_OPENGL</TT
-> to <A
-HREF="sdlsetvideomode.html"
-><TT
-CLASS="FUNCTION"
->SDL_SetVideoMode</TT
+>This is what almost all SDL programs have to do in one way or
+another.</P
+><DIV
+CLASS="EXAMPLE"
+><A
+NAME="AEN71"
 ></A
->, you must specify several GL attributes (depth buffer size, framebuffer sizes) using <A
-HREF="sdlglsetattribute.html"
-><TT
-CLASS="FUNCTION"
->SDL_GL_SetAttribute</TT
-></A
-> and finally, if you wish to use double buffering you must specify it as a GL attribute, <I
-CLASS="EMPHASIS"
->not</I
-> by passing the <TT
-CLASS="LITERAL"
->SDL_DOUBLEBUF</TT
-> flag to <TT
-CLASS="FUNCTION"
->SDL_SetVideoMode</TT
->.
-<PRE
-CLASS="PROGRAMLISTING"
->    /* Information about the current video settings. */
-    const SDL_VideoInfo* info = NULL;
-    /* Dimensions of our window. */
-    int width = 0;
-    int height = 0;
-    /* Color depth in bits of our window. */
-    int bpp = 0;
-    /* Flags we will pass into SDL_SetVideoMode. */
-    int flags = 0;
-
-    /* First, initialize SDL's video subsystem. */
-    if( SDL_Init( SDL_INIT_VIDEO ) &#60; 0 ) {
-        /* Failed, exit. */
-        fprintf( stderr, "Video initialization failed: %s\n",
-             SDL_GetError( ) );
-        quit_tutorial( 1 );
-    }
-
-    /* Let's get some video information. */
-    info = SDL_GetVideoInfo( );
-
-    if( !info ) {
-        /* This should probably never happen. */
-        fprintf( stderr, "Video query failed: %s\n",
-             SDL_GetError( ) );
-        quit_tutorial( 1 );
-    }
-
-    /*
-     * Set our width/height to 640/480 (you would
-     * of course let the user decide this in a normal
-     * app). We get the bpp we will request from
-     * the display. On X11, VidMode can't change
-     * resolution, so this is probably being overly
-     * safe. Under Win32, ChangeDisplaySettings
-     * can change the bpp.
-     */
-    width = 640;
-    height = 480;
-    bpp = info-&#62;vfmt-&#62;BitsPerPixel;
-
-    /*
-     * Now, we want to setup our requested
-     * window attributes for our OpenGL window.
-     * We want *at least* 5 bits of red, green
-     * and blue. We also want at least a 16-bit
-     * depth buffer.
-     *
-     * The last thing we do is request a double
-     * buffered window. '1' turns on double
-     * buffering, '0' turns it off.
-     *
-     * Note that we do not use SDL_DOUBLEBUF in
-     * the flags to SDL_SetVideoMode. That does
-     * not affect the GL attribute state, only
-     * the standard 2D blitting setup.
-     */
-    SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 5 );
-    SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 5 );
-    SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 5 );
-    SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );
-    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-
-    /*
-     * We want to request that SDL provide us
-     * with an OpenGL window, in a fullscreen
-     * video mode.
-     *
-     * EXERCISE:
-     * Make starting windowed an option, and
-     * handle the resize events properly with
-     * glViewport.
-     */
-    flags = SDL_OPENGL | SDL_FULLSCREEN;
-
-    /*
-     * Set the video mode
-     */
-    if( SDL_SetVideoMode( width, height, bpp, flags ) == 0 ) {
-        /* 
-         * This could happen for a variety of reasons,
-         * including DISPLAY not being set, the specified
-         * resolution not being available, etc.
-         */
-        fprintf( stderr, "Video mode set failed: %s\n",
-             SDL_GetError( ) );
-        quit_tutorial( 1 );
-    }</PRE
+><P
+><B
+>Example 2-1. Initializing the Video Display</B
 ></P
+><PRE
+CLASS="PROGRAMLISTING"
+>    SDL_Surface *screen;
+
+    /* Initialize the SDL library */
+    if( SDL_Init(SDL_INIT_VIDEO) &#60; 0 ) {
+        fprintf(stderr,
+                "Couldn't initialize SDL: %s\n", SDL_GetError());
+        exit(1);
+    }
+
+    /* Clean up on exit */
+    atexit(SDL_Quit);
+    
+    /*
+     * Initialize the display in a 640x480 8-bit palettized mode,
+     * requesting a software surface
+     */
+    screen = SDL_SetVideoMode(640, 480, 8, SDL_SWSURFACE);
+    if ( screen == NULL ) {
+        fprintf(stderr, "Couldn't set 640x480x8 video mode: %s\n",
+                        SDL_GetError());
+        exit(1);
+    }</PRE
+></DIV
 ></DIV
 ><DIV
 CLASS="SECT2"
 ><H2
 CLASS="SECT2"
 ><A
-NAME="AEN77"
->Drawing</A
+NAME="AEN74"
+>Initializing the Best Video Mode</A
 ></H2
 ><P
->Apart from initialisation, using OpenGL within SDL is the same as using. However if you have request a double buffered display (using <A
-HREF="sdlglsetattribute.html"
-><TT
-CLASS="FUNCTION"
->SDL_GL_SetAttribute</TT
-></A
->) and one (which can be checked by using <A
-HREF="sdlglgetattribute.html"
-><TT
-CLASS="FUNCTION"
->SDL_GL_GetAttribute</TT
-></A
->), then you must use <A
-HREF="sdlglswapbuffers.html"
-><TT
-CLASS="FUNCTION"
->SDL_GL_SwapBuffers()</TT
-></A
-> to swap the buffers and update the display.</P
-><P
->A full example code listing is now presented below.</P
+>If you have a preference for a certain pixel depth but will accept any
+other, use SDL_SetVideoMode with SDL_ANYFORMAT as below. You can also
+use SDL_VideoModeOK() to find the native video mode that is closest to
+the mode you request.</P
 ><DIV
 CLASS="EXAMPLE"
 ><A
-NAME="AEN87"
+NAME="AEN77"
 ></A
 ><P
 ><B
->Example 2-1. gl.c - SDL OpenGL Example</B
+>Example 2-2. Initializing the Best Video Mode</B
+></P
+><PRE
+CLASS="PROGRAMLISTING"
+>    /* Have a preference for 8-bit, but accept any depth */
+    screen = SDL_SetVideoMode(640, 480, 8, SDL_SWSURFACE|SDL_ANYFORMAT);
+    if ( screen == NULL ) {
+        fprintf(stderr, "Couldn't set 640x480x8 video mode: %s\n",
+                        SDL_GetError());
+        exit(1);
+    }
+    printf("Set 640x480 at %d bits-per-pixel mode\n",
+           screen-&#62;format-&#62;BitsPerPixel);</PRE
+></DIV
+></DIV
+><DIV
+CLASS="SECT2"
+><H2
+CLASS="SECT2"
+><A
+NAME="AEN80"
+>Loading and Displaying a BMP File</A
+></H2
+><P
+>The following function loads and displays a BMP file given as
+argument, once SDL is initialised and a video mode has been set.</P
+><DIV
+CLASS="EXAMPLE"
+><A
+NAME="AEN83"
+></A
+><P
+><B
+>Example 2-3. Loading and Displaying a BMP File</B
+></P
+><PRE
+CLASS="PROGRAMLISTING"
+>void display_bmp(char *file_name)
+{
+    SDL_Surface *image;
+
+    /* Load the BMP file into a surface */
+    image = SDL_LoadBMP(file_name);
+    if (image == NULL) {
+        fprintf(stderr, "Couldn't load %s: %s\n", file_name, SDL_GetError());
+        return;
+    }
+
+    /*
+     * Palettized screen modes will have a default palette (a standard
+     * 8*8*4 colour cube), but if the image is palettized as well we can
+     * use that palette for a nicer colour matching
+     */
+    if (image-&#62;format-&#62;palette &#38;&#38; screen-&#62;format-&#62;palette) {
+    SDL_SetColors(screen, image-&#62;format-&#62;palette-&#62;colors, 0,
+                  image-&#62;format-&#62;palette-&#62;ncolors);
+    }
+
+    /* Blit onto the screen surface */
+    if(SDL_BlitSurface(image, NULL, screen, NULL) &#60; 0)
+        fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
+
+    SDL_UpdateRect(screen, 0, 0, image-&#62;w, image-&#62;h);
+
+    /* Free the allocated BMP surface */
+    SDL_FreeSurface(image);
+}</PRE
+></DIV
+></DIV
+><DIV
+CLASS="SECT2"
+><H2
+CLASS="SECT2"
+><A
+NAME="AEN86"
+>Drawing Directly to the Display</A
+></H2
+><P
+>The following two functions can be used to get and set single
+pixels of a surface. They are carefully written to work with any depth
+currently supported by SDL. Remember to lock the surface before
+calling them, and to unlock it before calling any other SDL
+functions.</P
+><P
+>To convert between pixel values and their red, green, blue
+components, use SDL_GetRGB() and SDL_MapRGB().</P
+><DIV
+CLASS="EXAMPLE"
+><A
+NAME="AEN90"
+></A
+><P
+><B
+>Example 2-4. getpixel()</B
 ></P
 ><PRE
 CLASS="PROGRAMLISTING"
 >/*
- * SDL OpenGL Tutorial.
- * (c) Michael Vance, 2000
- * briareos@lokigames.com
- *
- * Distributed under terms of the LGPL. 
+ * Return the pixel value at (x, y)
+ * NOTE: The surface must be locked before calling this!
  */
-
-#include &#60;SDL/SDL.h&#62;
-#include &#60;GL/gl.h&#62;
-#include &#60;GL/glu.h&#62;
-
-#include &#60;stdio.h&#62;
-#include &#60;stdlib.h&#62;
-
-static GLboolean should_rotate = GL_TRUE;
-
-static void quit_tutorial( int code )
+Uint32 getpixel(SDL_Surface *surface, int x, int y)
 {
-    /*
-     * Quit SDL so we can release the fullscreen
-     * mode and restore the previous video settings,
-     * etc.
-     */
-    SDL_Quit( );
+    int bpp = surface-&#62;format-&#62;BytesPerPixel;
+    /* Here p is the address to the pixel we want to retrieve */
+    Uint8 *p = (Uint8 *)surface-&#62;pixels + y * surface-&#62;pitch + x * bpp;
 
-    /* Exit program. */
-    exit( code );
-}
+    switch(bpp) {
+    case 1:
+        return *p;
 
-static void handle_key_down( SDL_keysym* keysym )
-{
+    case 2:
+        return *(Uint16 *)p;
 
-    /* 
-     * We're only interested if 'Esc' has
-     * been presssed.
-     *
-     * EXERCISE: 
-     * Handle the arrow keys and have that change the
-     * viewing position/angle.
-     */
-    switch( keysym-&#62;sym ) {
-    case SDLK_ESCAPE:
-        quit_tutorial( 0 );
-        break;
-    case SDLK_SPACE:
-        should_rotate = !should_rotate;
-        break;
+    case 3:
+        if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
+            return p[0] &#60;&#60; 16 | p[1] &#60;&#60; 8 | p[2];
+        else
+            return p[0] | p[1] &#60;&#60; 8 | p[2] &#60;&#60; 16;
+
+    case 4:
+        return *(Uint32 *)p;
+
     default:
+        return 0;       /* shouldn't happen, but avoids warnings */
+    }
+}</PRE
+></DIV
+><DIV
+CLASS="EXAMPLE"
+><A
+NAME="AEN93"
+></A
+><P
+><B
+>Example 2-5. putpixel()</B
+></P
+><PRE
+CLASS="PROGRAMLISTING"
+>/*
+ * Set the pixel at (x, y) to the given value
+ * NOTE: The surface must be locked before calling this!
+ */
+void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
+{
+    int bpp = surface-&#62;format-&#62;BytesPerPixel;
+    /* Here p is the address to the pixel we want to set */
+    Uint8 *p = (Uint8 *)surface-&#62;pixels + y * surface-&#62;pitch + x * bpp;
+
+    switch(bpp) {
+    case 1:
+        *p = pixel;
+        break;
+
+    case 2:
+        *(Uint16 *)p = pixel;
+        break;
+
+    case 3:
+        if(SDL_BYTEORDER == SDL_BIG_ENDIAN) {
+            p[0] = (pixel &#62;&#62; 16) &#38; 0xff;
+            p[1] = (pixel &#62;&#62; 8) &#38; 0xff;
+            p[2] = pixel &#38; 0xff;
+        } else {
+            p[0] = pixel &#38; 0xff;
+            p[1] = (pixel &#62;&#62; 8) &#38; 0xff;
+            p[2] = (pixel &#62;&#62; 16) &#38; 0xff;
+        }
+        break;
+
+    case 4:
+        *(Uint32 *)p = pixel;
         break;
     }
-
-}
-
-static void process_events( void )
-{
-    /* Our SDL event placeholder. */
-    SDL_Event event;
-
-    /* Grab all the events off the queue. */
-    while( SDL_PollEvent( &#38;event ) ) {
-
-        switch( event.type ) {
-        case SDL_KEYDOWN:
-            /* Handle key presses. */
-            handle_key_down( &#38;event.key.keysym );
-            break;
-        case SDL_QUIT:
-            /* Handle quit requests (like Ctrl-c). */
-            quit_tutorial( 0 );
-            break;
-        }
-
-    }
-
-}
-
-static void draw_screen( void )
-{
-    /* Our angle of rotation. */
-    static float angle = 0.0f;
-
-    /*
-     * EXERCISE:
-     * Replace this awful mess with vertex
-     * arrays and a call to glDrawElements.
-     *
-     * EXERCISE:
-     * After completing the above, change
-     * it to use compiled vertex arrays.
-     *
-     * EXERCISE:
-     * Verify my windings are correct here ;).
-     */
-    static GLfloat v0[] = { -1.0f, -1.0f,  1.0f };
-    static GLfloat v1[] = {  1.0f, -1.0f,  1.0f };
-    static GLfloat v2[] = {  1.0f,  1.0f,  1.0f };
-    static GLfloat v3[] = { -1.0f,  1.0f,  1.0f };
-    static GLfloat v4[] = { -1.0f, -1.0f, -1.0f };
-    static GLfloat v5[] = {  1.0f, -1.0f, -1.0f };
-    static GLfloat v6[] = {  1.0f,  1.0f, -1.0f };
-    static GLfloat v7[] = { -1.0f,  1.0f, -1.0f };
-    static GLubyte red[]    = { 255,   0,   0, 255 };
-    static GLubyte green[]  = {   0, 255,   0, 255 };
-    static GLubyte blue[]   = {   0,   0, 255, 255 };
-    static GLubyte white[]  = { 255, 255, 255, 255 };
-    static GLubyte yellow[] = {   0, 255, 255, 255 };
-    static GLubyte black[]  = {   0,   0,   0, 255 };
-    static GLubyte orange[] = { 255, 255,   0, 255 };
-    static GLubyte purple[] = { 255,   0, 255,   0 };
-
-    /* Clear the color and depth buffers. */
-    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
-    /* We don't want to modify the projection matrix. */
-    glMatrixMode( GL_MODELVIEW );
-    glLoadIdentity( );
-
-    /* Move down the z-axis. */
-    glTranslatef( 0.0, 0.0, -5.0 );
-
-    /* Rotate. */
-    glRotatef( angle, 0.0, 1.0, 0.0 );
-
-    if( should_rotate ) {
-
-        if( ++angle &#62; 360.0f ) {
-            angle = 0.0f;
-        }
-
-    }
-
-    /* Send our triangle data to the pipeline. */
-    glBegin( GL_TRIANGLES );
-
-    glColor4ubv( red );
-    glVertex3fv( v0 );
-    glColor4ubv( green );
-    glVertex3fv( v1 );
-    glColor4ubv( blue );
-    glVertex3fv( v2 );
-
-    glColor4ubv( red );
-    glVertex3fv( v0 );
-    glColor4ubv( blue );
-    glVertex3fv( v2 );
-    glColor4ubv( white );
-    glVertex3fv( v3 );
-
-    glColor4ubv( green );
-    glVertex3fv( v1 );
-    glColor4ubv( black );
-    glVertex3fv( v5 );
-    glColor4ubv( orange );
-    glVertex3fv( v6 );
-
-    glColor4ubv( green );
-    glVertex3fv( v1 );
-    glColor4ubv( orange );
-    glVertex3fv( v6 );
-    glColor4ubv( blue );
-    glVertex3fv( v2 );
-
-    glColor4ubv( black );
-    glVertex3fv( v5 );
-    glColor4ubv( yellow );
-    glVertex3fv( v4 );
-    glColor4ubv( purple );
-    glVertex3fv( v7 );
-
-    glColor4ubv( black );
-    glVertex3fv( v5 );
-    glColor4ubv( purple );
-    glVertex3fv( v7 );
-    glColor4ubv( orange );
-    glVertex3fv( v6 );
-
-    glColor4ubv( yellow );
-    glVertex3fv( v4 );
-    glColor4ubv( red );
-    glVertex3fv( v0 );
-    glColor4ubv( white );
-    glVertex3fv( v3 );
-
-    glColor4ubv( yellow );
-    glVertex3fv( v4 );
-    glColor4ubv( white );
-    glVertex3fv( v3 );
-    glColor4ubv( purple );
-    glVertex3fv( v7 );
-
-    glColor4ubv( white );
-    glVertex3fv( v3 );
-    glColor4ubv( blue );
-    glVertex3fv( v2 );
-    glColor4ubv( orange );
-    glVertex3fv( v6 );
-
-    glColor4ubv( white );
-    glVertex3fv( v3 );
-    glColor4ubv( orange );
-    glVertex3fv( v6 );
-    glColor4ubv( purple );
-    glVertex3fv( v7 );
-
-    glColor4ubv( green );
-    glVertex3fv( v1 );
-    glColor4ubv( red );
-    glVertex3fv( v0 );
-    glColor4ubv( yellow );
-    glVertex3fv( v4 );
-
-    glColor4ubv( green );
-    glVertex3fv( v1 );
-    glColor4ubv( yellow );
-    glVertex3fv( v4 );
-    glColor4ubv( black );
-    glVertex3fv( v5 );
-
-    glEnd( );
-
-    /*
-     * EXERCISE:
-     * Draw text telling the user that 'Spc'
-     * pauses the rotation and 'Esc' quits.
-     * Do it using vetors and textured quads.
-     */
-
-    /*
-     * Swap the buffers. This this tells the driver to
-     * render the next frame from the contents of the
-     * back-buffer, and to set all rendering operations
-     * to occur on what was the front-buffer.
-     *
-     * Double buffering prevents nasty visual tearing
-     * from the application drawing on areas of the
-     * screen that are being updated at the same time.
-     */
-    SDL_GL_SwapBuffers( );
-}
-
-static void setup_opengl( int width, int height )
-{
-    float ratio = (float) width / (float) height;
-
-    /* Our shading model--Gouraud (smooth). */
-    glShadeModel( GL_SMOOTH );
-
-    /* Culling. */
-    glCullFace( GL_BACK );
-    glFrontFace( GL_CCW );
-    glEnable( GL_CULL_FACE );
-
-    /* Set the clear color. */
-    glClearColor( 0, 0, 0, 0 );
-
-    /* Setup our viewport. */
-    glViewport( 0, 0, width, height );
-
-    /*
-     * Change to the projection matrix and set
-     * our viewing volume.
-     */
-    glMatrixMode( GL_PROJECTION );
-    glLoadIdentity( );
-    /*
-     * EXERCISE:
-     * Replace this with a call to glFrustum.
-     */
-    gluPerspective( 60.0, ratio, 1.0, 1024.0 );
-}
-
-int main( int argc, char* argv[] )
-{
-    /* Information about the current video settings. */
-    const SDL_VideoInfo* info = NULL;
-    /* Dimensions of our window. */
-    int width = 0;
-    int height = 0;
-    /* Color depth in bits of our window. */
-    int bpp = 0;
-    /* Flags we will pass into SDL_SetVideoMode. */
-    int flags = 0;
-
-    /* First, initialize SDL's video subsystem. */
-    if( SDL_Init( SDL_INIT_VIDEO ) &#60; 0 ) {
-        /* Failed, exit. */
-        fprintf( stderr, "Video initialization failed: %s\n",
-             SDL_GetError( ) );
-        quit_tutorial( 1 );
-    }
-
-    /* Let's get some video information. */
-    info = SDL_GetVideoInfo( );
-
-    if( !info ) {
-        /* This should probably never happen. */
-        fprintf( stderr, "Video query failed: %s\n",
-             SDL_GetError( ) );
-        quit_tutorial( 1 );
-    }
-
-    /*
-     * Set our width/height to 640/480 (you would
-     * of course let the user decide this in a normal
-     * app). We get the bpp we will request from
-     * the display. On X11, VidMode can't change
-     * resolution, so this is probably being overly
-     * safe. Under Win32, ChangeDisplaySettings
-     * can change the bpp.
-     */
-    width = 640;
-    height = 480;
-    bpp = info-&#62;vfmt-&#62;BitsPerPixel;
-
-    /*
-     * Now, we want to setup our requested
-     * window attributes for our OpenGL window.
-     * We want *at least* 5 bits of red, green
-     * and blue. We also want at least a 16-bit
-     * depth buffer.
-     *
-     * The last thing we do is request a double
-     * buffered window. '1' turns on double
-     * buffering, '0' turns it off.
-     *
-     * Note that we do not use SDL_DOUBLEBUF in
-     * the flags to SDL_SetVideoMode. That does
-     * not affect the GL attribute state, only
-     * the standard 2D blitting setup.
-     */
-    SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 5 );
-    SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 5 );
-    SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 5 );
-    SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );
-    SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-
-    /*
-     * We want to request that SDL provide us
-     * with an OpenGL window, in a fullscreen
-     * video mode.
-     *
-     * EXERCISE:
-     * Make starting windowed an option, and
-     * handle the resize events properly with
-     * glViewport.
-     */
-    flags = SDL_OPENGL | SDL_FULLSCREEN;
-
-    /*
-     * Set the video mode
-     */
-    if( SDL_SetVideoMode( width, height, bpp, flags ) == 0 ) {
-        /* 
-         * This could happen for a variety of reasons,
-         * including DISPLAY not being set, the specified
-         * resolution not being available, etc.
-         */
-        fprintf( stderr, "Video mode set failed: %s\n",
-             SDL_GetError( ) );
-        quit_tutorial( 1 );
-    }
-
-    /*
-     * At this point, we should have a properly setup
-     * double-buffered window for use with OpenGL.
-     */
-    setup_opengl( width, height );
-
-    /*
-     * Now we want to begin our normal app process--
-     * an event loop with a lot of redrawing.
-     */
-    while( 1 ) {
-        /* Process incoming events. */
-        process_events( );
-        /* Draw the screen. */
-        draw_screen( );
-    }
-
-    /*
-     * EXERCISE:
-     * Record timings using SDL_GetTicks() and
-     * and print out frames per second at program
-     * end.
-     */
-
-    /* Never reached. */
-    return 0;
 }</PRE
+></DIV
+><P
+>The following code uses the putpixel() function above to set a
+yellow pixel in the middle of the screen.</P
+><DIV
+CLASS="EXAMPLE"
+><A
+NAME="AEN97"
+></A
+><P
+><B
+>Example 2-6. Using putpixel()</B
+></P
+><PRE
+CLASS="PROGRAMLISTING"
+>&#13;    /* Code to set a yellow pixel at the center of the screen */
+
+    int x, y;
+    Uint32 yellow;
+
+    /* Map the color yellow to this display (R=0xff, G=0xFF, B=0x00)
+       Note:  If the display is palettized, you must set the palette first.
+    */
+    yellow = SDL_MapRGB(screen-&#62;format, 0xff, 0xff, 0x00);
+
+    x = screen-&#62;w / 2;
+    y = screen-&#62;h / 2;
+
+    /* Lock the screen for direct access to the pixels */
+    if ( SDL_MUSTLOCK(screen) ) {
+        if ( SDL_LockSurface(screen) &#60; 0 ) {
+            fprintf(stderr, "Can't lock screen: %s\n", SDL_GetError());
+            return;
+        }
+    }
+
+    putpixel(screen, x, y, yellow);
+
+    if ( SDL_MUSTLOCK(screen) ) {
+        SDL_UnlockSurface(screen);
+    }
+    /* Update just the part of the display that we've changed */
+    SDL_UpdateRect(screen, x, y, 1, 1);
+
+    return;&#13;</PRE
 ></DIV
 ></DIV
 ></DIV
@@ -674,7 +424,7 @@ WIDTH="33%"
 ALIGN="right"
 VALIGN="top"
 ><A
-HREF="guideinput.html"
+HREF="guidevideoopengl.html"
 >Next</A
 ></TD
 ></TR
@@ -696,7 +446,7 @@ HREF="guide.html"
 WIDTH="33%"
 ALIGN="right"
 VALIGN="top"
->Input handling</TD
+>Using OpenGL With SDL</TD
 ></TR
 ></TABLE
 ></DIV

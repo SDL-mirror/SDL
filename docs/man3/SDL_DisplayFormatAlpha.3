@@ -1,4 +1,4 @@
-.TH "SDL_DisplayFormatAlpha" "3" "Mon 12 Mar 2001, 01:04" "SDL" "SDL API Reference" 
+.TH "SDL_DisplayFormatAlpha" "3" "Sun 10 Jun 2001, 19:41" "SDL" "SDL API Reference" 
 .SH "NAME"
 SDL_DisplayFormatAlpha\- Convert a surface to the display format
 .SH "SYNOPSIS"
@@ -11,10 +11,12 @@ SDL_DisplayFormatAlpha\- Convert a surface to the display format
 This function takes a surface and copies it to a new surface of the pixel format and colors of the video framebuffer plus an alpha channel, suitable for fast blitting onto the display surface\&. It calls \fISDL_ConvertSurface\fR
 .PP
 If you want to take advantage of hardware colorkey or alpha blit acceleration, you should set the colorkey and alpha value before calling this function\&.
+.PP
+This function can be used to convert a colourkey to an alpha channel, if the \fBSDL_SRCCOLORKEY\fP flag is set on the surface\&. The generated surface will then be transparent (alpha=0) where the pixels match the colourkey, and opaque (alpha=255) elsewhere\&.
 .SH "RETURN VALUE"
 .PP
 If the conversion fails or runs out of memory, it returns \fBNULL\fR
 .SH "SEE ALSO"
 .PP
 \fISDL_ConvertSurface\fR, \fISDL_SetAlpha\fR, \fISDL_SetColorKey\fR, \fISDL_DisplayFormat\fR, \fISDL_Surface\fR
-...\" created by instant / docbook-to-man, Mon 12 Mar 2001, 01:04
+...\" created by instant / docbook-to-man, Sun 10 Jun 2001, 19:41

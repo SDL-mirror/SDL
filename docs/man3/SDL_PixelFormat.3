@@ -1,4 +1,4 @@
-.TH "SDL_PixelFormat" "3" "Mon 12 Mar 2001, 01:04" "SDL" "SDL API Reference" 
+.TH "SDL_PixelFormat" "3" "Sun 10 Jun 2001, 19:42" "SDL" "SDL API Reference" 
 .SH "NAME"
 SDL_PixelFormat\- Stores surface format information
 .SH "STRUCTURE DEFINITION"
@@ -87,7 +87,7 @@ printf("Pixel Color-> Red: %d, Green: %d, Blue: %d\&. Index: %d
 .fi
 .PP
 .PP
-Pixel formats above 8-bit are an entirely different experience\&. They are considered to be "TrueColor" formats and the color information is stored in the pixels themselves, not in a palette (packed-pixel)\&. The mask, shift and loss fields tell us how the color information is encoded\&. The mask fields allow us to isolate each color component, the shift fields tell us how far left we have to shift the masked value and the loss fields tell us for far right we have to shift the final value to convert it to a full 8-bit color component\&. 
+Pixel formats above 8-bit are an entirely different experience\&. They are considered to be "TrueColor" formats and the color information is stored in the pixels themselves, not in a palette\&. The mask, shift and loss fields tell us how the color information is encoded\&. The mask fields allow us to isolate each color component, the shift fields tell us the number of bits to the right of each component in the pixel value and the loss fields tell us the number of bits lost from each component when packing 8-bit color component in a pixel\&. 
 .PP
 .nf
 \f(CW/* Extracting color components from a 32-bit color value */
@@ -100,7 +100,7 @@ Uint8 red, green, blue, alpha;
 \&.
 fmt=surface->format;
 SDL_LockSurface(surface);
-pixel=(Uint32*)surface->pixels;
+pixel=*((Uint32*)surface->pixels);
 SDL_UnlockSurface(surface);
 
 /* Get Red component */
@@ -137,4 +137,4 @@ printf("Pixel Color -> R: %d,  G: %d,  B: %d,  A: %d
 .SH "SEE ALSO"
 .PP
 \fI\fBSDL_Surface\fR\fR, \fI\fBSDL_MapRGB\fP\fR
-...\" created by instant / docbook-to-man, Mon 12 Mar 2001, 01:04
+...\" created by instant / docbook-to-man, Sun 10 Jun 2001, 19:42

@@ -1,4 +1,4 @@
-.TH "SDL_Surface" "3" "Mon 12 Mar 2001, 01:04" "SDL" "SDL API Reference" 
+.TH "SDL_Surface" "3" "Sun 10 Jun 2001, 19:42" "SDL" "SDL API Reference" 
 .SH "NAME"
 SDL_Surface\- Graphical Surface Structure
 .SH "STRUCTURE DEFINITION"
@@ -10,24 +10,14 @@ SDL_Surface\- Graphical Surface Structure
         int w, h;                               /* Read-only */
         Uint16 pitch;                           /* Read-only */
         void *pixels;                           /* Read-write */
-        int offset;                             /* Private */
-
-        /* Hardware-specific surface info */
-        struct private_hwdata *hwdata;
 
         /* clipping information */
         SDL_Rect clip_rect;                     /* Read-only */
-        Uint32 unused1;                         /* for binary compatibility */
-        Uint32 unused2;                         /* for binary compatibility */
-
-        /* info for fast blit mapping to other surfaces */
-        struct SDL_BlitMap *map;                /* Private */
-
-        /* format version, bumped at every change to invalidate blit maps */
-        unsigned int format_version;            /* Private */
 
         /* Reference count -- used when freeing surface */
         int refcount;                           /* Read-mostly */
+
+	/* This structure also contains private fields not shown here */
 } SDL_Surface;\fR
 .fi
 .PP
@@ -47,9 +37,6 @@ Length of a surface scanline in bytes
 .TP 20
 \fBpixels\fR
 Pointer to the actual pixel data
-.TP 20
-\fBclip_minx, clip_maxx\fR
-X clip coords
 .TP 20
 \fBclip_rect\fR
 surface clip \fIrectangle\fR
@@ -92,7 +79,7 @@ Surface is resizable (Display Surface)
 \fBSDL_HWACCEL\fP
 Surface blit uses hardware acceleration
 .TP 20
-\fBSDL_SRCOLORKEY\fP
+\fBSDL_SRCCOLORKEY\fP
 Surface use colorkey blitting
 .TP 20
 \fBSDL_RLEACCEL\fP
@@ -106,4 +93,4 @@ Surface uses preallocated memory
 .SH "SEE ALSO"
 .PP
 \fI\fBSDL_PixelFormat\fR\fR
-...\" created by instant / docbook-to-man, Mon 12 Mar 2001, 01:04
+...\" created by instant / docbook-to-man, Sun 10 Jun 2001, 19:42

@@ -1,4 +1,4 @@
-.TH "SDL_Delay" "3" "Mon 12 Mar 2001, 01:04" "SDL" "SDL API Reference" 
+.TH "SDL_Delay" "3" "Sun 10 Jun 2001, 19:41" "SDL" "SDL API Reference" 
 .SH "NAME"
 SDL_Delay\- Wait a specified number of milliseconds before returning\&.
 .SH "SYNOPSIS"
@@ -9,7 +9,13 @@ SDL_Delay\- Wait a specified number of milliseconds before returning\&.
 .SH "DESCRIPTION"
 .PP
 Wait a specified number of milliseconds before returning\&. \fBSDL_Delay\fP will wait at \fIleast\fP the specified time, but possible longer due to OS scheduling\&.
+.PP
+.RS
+\fBNote:  
+.PP
+Count on a delay granularity of \fIat least\fP 10 ms\&. Some platforms have shorter clock ticks but this is the most common\&.
+.RE
 .SH "SEE ALSO"
 .PP
 \fI\fBSDL_AddTimer\fP\fR
-...\" created by instant / docbook-to-man, Mon 12 Mar 2001, 01:04
+...\" created by instant / docbook-to-man, Sun 10 Jun 2001, 19:41

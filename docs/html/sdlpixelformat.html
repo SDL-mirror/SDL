@@ -4,7 +4,7 @@
 >SDL_PixelFormat</TITLE
 ><META
 NAME="GENERATOR"
-CONTENT="Modular DocBook HTML Stylesheet Version 1.61
+CONTENT="Modular DocBook HTML Stylesheet Version 1.64
 "><LINK
 REL="HOME"
 TITLE="SDL Library Documentation"
@@ -73,7 +73,7 @@ NAME="SDLPIXELFORMAT"
 ><DIV
 CLASS="REFNAMEDIV"
 ><A
-NAME="AEN2677"
+NAME="AEN2756"
 ></A
 ><H2
 >Name</H2
@@ -81,7 +81,7 @@ NAME="AEN2677"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN2680"
+NAME="AEN2759"
 ></A
 ><H2
 >Structure Definition</H2
@@ -101,14 +101,14 @@ CLASS="PROGRAMLISTING"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN2683"
+NAME="AEN2762"
 ></A
 ><H2
 >Structure Data</H2
 ><DIV
 CLASS="INFORMALTABLE"
 ><A
-NAME="AEN2685"
+NAME="AEN2764"
 ></A
 ><P
 ></P
@@ -258,7 +258,7 @@ VALIGN="TOP"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN2724"
+NAME="AEN2803"
 ></A
 ><H2
 >Description</H2
@@ -383,7 +383,13 @@ printf("Pixel Color-&#62; Red: %d, Green: %d, Blue: %d. Index: %d\n",
 .</PRE
 ></P
 ><P
->Pixel formats above 8-bit are an entirely different experience. They are considered to be "TrueColor" formats and the color information is stored in the pixels themselves, not in a palette (packed-pixel). The mask, shift and loss fields tell us how the color information is encoded. The mask fields allow us to isolate each color component, the shift fields tell us how far left we have to shift the masked value and the loss fields tell us for far right we have to shift the final value to convert it to a full 8-bit color component.
+>Pixel formats above 8-bit are an entirely different experience. They are
+considered to be "TrueColor" formats and the color information is stored in the
+pixels themselves, not in a palette. The mask, shift and loss fields tell us
+how the color information is encoded. The mask fields allow us to isolate each
+color component, the shift fields tell us the number of bits to the right of
+each component in the pixel value and the loss fields tell us the number of
+bits lost from each component when packing 8-bit color component in a pixel.
 <PRE
 CLASS="PROGRAMLISTING"
 >/* Extracting color components from a 32-bit color value */
@@ -396,7 +402,7 @@ Uint8 red, green, blue, alpha;
 .
 fmt=surface-&#62;format;
 SDL_LockSurface(surface);
-pixel=(Uint32*)surface-&#62;pixels;
+pixel=*((Uint32*)surface-&#62;pixels);
 SDL_UnlockSurface(surface);
 
 /* Get Red component */
@@ -432,7 +438,7 @@ printf("Pixel Color -&#62; R: %d,  G: %d,  B: %d,  A: %d\n", red, green, blue, a
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN2751"
+NAME="AEN2830"
 ></A
 ><H2
 >See Also</H2
