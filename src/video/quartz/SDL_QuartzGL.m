@@ -22,13 +22,6 @@
 
 #include "SDL_QuartzVideo.h"
 
-/* 
-    This is a workaround to directly access NSOpenGLContext's CGL context
-    We need this to check for errors NSOpenGLContext doesn't support
-*/
-@interface NSOpenGLContext (CGLContextAccess)
-- (CGLContextObj) cglContext;
-@end
 
 @implementation NSOpenGLContext (CGLContextAccess)
 - (CGLContextObj) cglContext;

@@ -66,6 +66,15 @@
 #include "SDL_pixels_c.h"
 #include "SDL_events_c.h"
 
+/* 
+    This is a workaround to directly access NSOpenGLContext's CGL context
+    We need this to check for errors NSOpenGLContext doesn't support
+*/
+@interface NSOpenGLContext (CGLContextAccess)
+- (CGLContextObj) cglContext;
+@end
+
+
 /* Main driver structure to store required state information */
 typedef struct SDL_PrivateVideoData {
 
