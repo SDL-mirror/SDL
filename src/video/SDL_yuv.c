@@ -48,13 +48,13 @@ SDL_Overlay *SDL_CreateYUVOverlay(int w, int h, Uint32 format,
 	overlay = NULL;
 
 	/* Display directly on video surface, if possible */
-#if 0
-	if ( (display == SDL_PublicSurface) &&
-	     ((SDL_VideoSurface->format->BytesPerPixel == 2) ||
-	      (SDL_VideoSurface->format->BytesPerPixel == 4)) ) {
-		display = SDL_VideoSurface;
+	if ( getenv("SDL_VIDEO_YUV_DIRECT") ) {
+		if ( (display == SDL_PublicSurface) &&
+		     ((SDL_VideoSurface->format->BytesPerPixel == 2) ||
+		      (SDL_VideoSurface->format->BytesPerPixel == 4)) ) {
+			display = SDL_VideoSurface;
+		}
 	}
-#endif
         yuv_hwaccel = getenv("SDL_VIDEO_YUV_HWACCEL");
 	if ( ((display == SDL_VideoSurface) && video->CreateYUVOverlay) &&
 	     (!yuv_hwaccel || (atoi(yuv_hwaccel) > 0)) ) {
