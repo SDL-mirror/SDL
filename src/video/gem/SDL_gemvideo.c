@@ -669,7 +669,7 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 			modeflags |= SDL_NOFRAME;
 		}
 
-		if (!wind_calc(0, GEM_win_type, posx, posy, width, height, &x2, &y2, &w2, &h2)) {
+		if (!wind_calc(WC_BORDER, GEM_win_type, posx, posy, width, height, &x2, &y2, &w2, &h2)) {
 			GEM_FreeBuffers(this);
 			SDL_SetError("Can not calculate window attributes\n");
 			return NULL;
