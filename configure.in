@@ -269,14 +269,25 @@ CheckALSA()
 [  --enable-alsa           support the ALSA audio API [default=yes]],
                   , enable_alsa=yes)
     if test x$enable_audio = xyes -a x$enable_alsa = xyes; then
+        AC_MSG_CHECKING(for ALSA audio support)
         have_alsa=no
-        AC_CHECK_HEADER(sys/asoundlib.h, have_alsa_hdr=yes)
-        AC_CHECK_LIB(asound, snd_pcm_open, have_alsa_lib=yes)
-        if test x$have_alsa_hdr = xyes -a x$have_alsa_lib = xyes; then
+        AC_TRY_COMPILE([
+          #include <alsa/asoundlib.h>
+        ],[
+          #if SND_LIB_VERSION < ((0<<16)|(9<<8)|0)
+          #error Your version of ALSA is too old
+          #endif
+          snd_pcm_t *pcm_handle;
+        ],[
+        AC_CHECK_LIB(asound, snd_pcm_open, have_alsa=yes)
+        ])
+        if test x$have_alsa = xyes; then
             CFLAGS="$CFLAGS -DALSA_SUPPORT"
             SYSTEM_LIBS="$SYSTEM_LIBS -lasound"
             AUDIO_SUBDIRS="$AUDIO_SUBDIRS alsa"
             AUDIO_DRIVERS="$AUDIO_DRIVERS alsa/libaudio_alsa.la"
+        else
+            AC_MSG_RESULT($have_alsa)
         fi
     fi
 }

@@ -24,38 +24,27 @@
 #define _ALSA_PCM_audio_h
 
 #include "SDL_sysaudio.h"
-#include <sys/asoundlib.h>
+#include <alsa/asoundlib.h>
 
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_AudioDevice *this
 
 struct SDL_PrivateAudioData {
 	/* The audio device handle */
-	 snd_pcm_t *audio_handle;
-
-	/* The audio file descriptor */
-	int audio_fd;
+	snd_pcm_t *pcm_handle;
 
 	/* The parent process id, to detect when application quits */
 	pid_t parent;
 
 	/* Raw mixing buffer */
-	Uint8 *pcm_buf;
-	int    pcm_len;
-
-	/* Support for audio timing using a timer, in addition to select() */
-	float frame_ticks;
-	float next_frame;
+	Uint8 *mixbuf;
+	int    mixlen;
 };
-#define FUDGE_TICKS	10	/* The scheduler overhead ticks per frame */
 
 /* Old variable names */
-#define audio_handle	(this->hidden->audio_handle)
-#define audio_fd		(this->hidden->audio_fd)
+#define pcm_handle		(this->hidden->pcm_handle)
 #define parent			(this->hidden->parent)
-#define pcm_buf			(this->hidden->pcm_buf)
-#define pcm_len			(this->hidden->pcm_len)
-#define frame_ticks		(this->hidden->frame_ticks)
-#define next_frame		(this->hidden->next_frame)
+#define mixbuf			(this->hidden->mixbuf)
+#define mixlen			(this->hidden->mixlen)
 
 #endif /* _ALSA_PCM_audio_h */

@@ -394,6 +394,7 @@ static int DSP_OpenAudio(_THIS, SDL_AudioSpec *spec)
 				}
 				break;
 			default:
+				format = 0;
 				break;
 		}
 		if ( ! format ) {
