@@ -1423,12 +1423,15 @@ CheckDIRECTX()
     if test x$enable_directx = xyes; then
         AC_MSG_CHECKING(for DirectX headers and libraries)
         use_directx=no
+        tmp_cflags=$CFLAGS
+        CFLAGS="$CFLAGS -I$srcdir"
         AC_TRY_COMPILE([
          #include "src/video/windx5/directx.h"
         ],[
         ],[
         use_directx=yes
         ])
+        CFLAGS=$tmp_cflags
         AC_MSG_RESULT($use_directx)
     fi
 
