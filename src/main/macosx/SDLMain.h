@@ -10,5 +10,6 @@
 {
 }
 - (IBAction)quit:(id)sender;
+- (IBAction)makeFullscreen:(id)sender;
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification;
 @end

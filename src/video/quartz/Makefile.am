@@ -11,7 +11,7 @@ QUARTZ_SRCS = 			\
 	SDL_QuartzVideo.m
 
 # These files are included by SDL_QuartzVideo.m (is that right??)
-EXTRA_DIST = 			\
+noinst_HEADERS =		\
 	SDL_QuartzEvents.m	\
 	SDL_QuartzWM.m		\
 	SDL_QuartzWindow.m

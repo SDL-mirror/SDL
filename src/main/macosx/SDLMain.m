@@ -12,6 +12,7 @@
 static int    gArgc;
 static char  **gArgv;
 static NSString *gAppName = 0;
+static BOOL   gFinderLaunch;
 
 @interface NSString (ReplaceSubString)
 - (NSString *)stringByReplacingRange:(NSRange)aRange with:(NSString *)aString;
@@ -29,15 +30,21 @@ static NSString *gAppName = 0;
     SDL_PushEvent(&event);
 }
 
+/* Invoked from the Make Full-Screen menu item */
+- (void) makeFullscreen:(id)sender
+{
+    /* TODO */
+}
+
 /* Set the working directory to the .app's parent directory */
-- (void) setupWorkingDirectory
+- (void) setupWorkingDirectory:(BOOL)shouldChdir
 {
     char parentdir[MAXPATHLEN];
     char *c;
     
     strncpy ( parentdir, gArgv[0], sizeof(parentdir) );
     c = (char*) parentdir;
-    
+
     while (*c != '\0')     /* go to end */
         c++;
     
@@ -45,11 +52,13 @@ static NSString *gAppName = 0;
         c--;
     
     *c++ = '\0';             /* cut off last part (binary name) */
-    
-    assert ( chdir (parentdir) == 0 );   /* chdir to the binary app's parent */
-    assert ( chdir ("../../../") == 0 ); /* chdir to the .app's parent */
-    
-    gAppName = [ NSString stringWithCString: c ];
+  
+    if (shouldChdir)
+    {
+      assert ( chdir (parentdir) == 0 );   /* chdir to the binary app's parent */
+      assert ( chdir ("../../../") == 0 ); /* chdir to the .app's parent */
+    }
+    /* gAppName = [ NSString stringWithCString: c ]; */
 }
 
 /* Fix menu to contain the real app name instead of "SDL App" */
@@ -81,9 +90,10 @@ static NSString *gAppName = 0;
     int status;
 
     /* Set the working directory to the .app's parent directory */
-    [ self setupWorkingDirectory ];
+    [ self setupWorkingDirectory: gFinderLaunch ];
 
     /* Set the main menu to contain the real app name instead of "SDL App" */
+    gAppName = [ [ NSBundle mainBundle ] bundleIdentifier ];
     [ self fixMenu: [ NSApp mainMenu ] ];
 
     /* Hand off to main application code */
@@ -148,8 +158,10 @@ int main (int argc, char **argv) {
     /* This is passed if we are launched by double-clicking */
     if ( argc >= 2 && strncmp (argv[1], "-psn", 4) == 0 ) {
         gArgc = 1;
+	gFinderLaunch = YES;
     } else {
         gArgc = argc;
+	gFinderLaunch = NO;
     }
     gArgv = (char**) malloc (sizeof(*gArgv) * (gArgc+1));
     assert (gArgv != NULL);

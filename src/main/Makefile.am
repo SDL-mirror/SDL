@@ -4,6 +4,8 @@
 # This is necessary because some platforms have special program
 # entry points, which require special application initialization.
 
+SUBDIRS = macosx
+
 ARCH_SUBDIRS = $(srcdir)/beos $(srcdir)/linux \
                $(srcdir)/macos $(srcdir)/macosx $(srcdir)/win32
 

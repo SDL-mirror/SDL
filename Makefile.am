@@ -61,7 +61,7 @@ exports:
 PBProjects.tar.gz:
 	rm -f `find . -name .DS_Store`
 	if [ -d PBProjects ]; then \
-	    tar zcvf $@ PBProjects src/main/macosx/SDLMain.nib; \
+	    tar zcvf $@ PBProjects; \
 	fi
 
 # Rule to force automake to rebuild the library

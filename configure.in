@@ -2191,6 +2191,7 @@ docs/man3/Makefile
 include/Makefile
 src/Makefile
 src/main/Makefile
+src/main/macosx/Makefile
 src/audio/Makefile
 src/audio/alsa/Makefile
 src/audio/arts/Makefile

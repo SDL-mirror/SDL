@@ -72,7 +72,7 @@ static int Mac_HandleActivate(int activate)
 		SDL_SetCursor(NULL);
 
 		/* put our mask back case it changed during context switch */
-		SetEventMask(everyEvent - autoKeyMask);
+		SetEventMask(everyEvent & ~autoKeyMask);
 	} else {
 #if TARGET_API_MAC_CARBON
 		{ Cursor cursor;
@@ -617,7 +617,7 @@ void Mac_InitEvents(_THIS)
 	FlushEvents(everyEvent, 0);
 	
 	/* Allow every event but keyrepeat */
-	SetEventMask(everyEvent - autoKeyMask);
+	SetEventMask(everyEvent & ~autoKeyMask);
 }
 
 void Mac_QuitEvents(_THIS)

@@ -67,18 +67,22 @@ WMcursor *Mac_CreateWMCursor(_THIS,
 		return(NULL);
 	}
 	memset(cursor, 0, sizeof(*cursor));
-		
-	bytes = (w/8);
-	if ( bytes > 2 ) {
-		bytes = 2;
-	}
-	for ( row=0; row<h && (row < 16); ++row ) {
+    
+    if (w > 16)
+        w = 16;
+    
+    if (h > 16)
+        h = 16;
+    
+	bytes = (w+7)/8;
+
+	for ( row=0; row<h; ++row ) {
 		memcpy(&cursor->curs.data[row], data, bytes);
-		data += w/8;
+		data += bytes;
 	}
-	for ( row=0; row<h && (row < 16); ++row ) {
+	for ( row=0; row<h; ++row ) {
 		memcpy(&cursor->curs.mask[row], mask, bytes);
-		mask += w/8;
+		mask += bytes;
 	}
 	cursor->curs.hotSpot.h = hot_x;
 	cursor->curs.hotSpot.v = hot_y;

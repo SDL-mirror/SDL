@@ -35,46 +35,52 @@ static WMcursor*    QZ_CreateWMCursor   (_THIS, Uint8 *data, Uint8 *mask,
                                           int w, int h, int hot_x, int hot_y) { 
 	WMcursor *cursor;
 	int row, bytes;
+		
+	/* Allocate the cursor memory */
 	cursor = (WMcursor *)malloc(sizeof(WMcursor));
 	if ( cursor == NULL ) {
 		SDL_OutOfMemory();
 		return(NULL);
 	}
 	memset(cursor, 0, sizeof(*cursor));
-		
-	bytes = (w/8);
-	if ( bytes > 2 ) {
-		bytes = 2;
-	}
-	for ( row=0; row<h && (row < 16); ++row ) {
+    
+    if (w > 16)
+        w = 16;
+    
+    if (h > 16)
+        h = 16;
+    
+	bytes = (w+7)/8;
+
+	for ( row=0; row<h; ++row ) {
 		memcpy(&cursor->curs.data[row], data, bytes);
-		data += w/8;
+		data += bytes;
 	}
-	for ( row=0; row<h && (row < 16); ++row ) {
+	for ( row=0; row<h; ++row ) {
 		memcpy(&cursor->curs.mask[row], mask, bytes);
-		mask += w/8;
+		mask += bytes;
 	}
 	cursor->curs.hotSpot.h = hot_x;
 	cursor->curs.hotSpot.v = hot_y;
 	
-        return(cursor);
+    return(cursor);
 }
 
+static int QZ_cursor_visible = 1;
+    
 static int QZ_ShowWMCursor (_THIS, WMcursor *cursor) { 
 
-    static int visible = 1;
-    
     if ( cursor == NULL) {
-        if ( visible ) {
+        if ( QZ_cursor_visible ) {
             HideCursor ();
-            visible = 0;
+            QZ_cursor_visible = 0;
         }
     }
     else {
         SetCursor(&cursor->curs);
-        if ( ! visible ) {
+        if ( ! QZ_cursor_visible ) {
             ShowCursor ();
-            visible = 1;
+            QZ_cursor_visible = 1;
         }
     }
 

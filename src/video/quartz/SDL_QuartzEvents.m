@@ -206,6 +206,12 @@ static void QZ_DoActivate (_THIS)
         QZ_WarpWMCursor (this, SDL_VideoSurface->w / 2, SDL_VideoSurface->h / 2);
         CGAssociateMouseAndMouseCursorPosition (0);
     }
+
+    /* Hide the mouse cursor if inside the app window */
+    // FIXME
+    if (!QZ_cursor_visible) {
+            HideCursor ();
+    }
     
     SDL_PrivateAppActive (1, SDL_APPINPUTFOCUS);
 }
@@ -217,6 +223,12 @@ static void QZ_DoDeactivate (_THIS) {
     /* Ungrab mouse if it is grabbed */
     if (currentGrabMode == SDL_GRAB_ON) {
         CGAssociateMouseAndMouseCursorPosition (1);
+    }
+
+    /* Show the mouse cursor */
+    // FIXME
+    if (!QZ_cursor_visible) {
+            ShowCursor ();
     }
     
     SDL_PrivateAppActive (0, SDL_APPINPUTFOCUS);
@@ -309,6 +321,8 @@ static void QZ_PumpEvents (_THIS)
             case NSRightMouseDragged:
             case 27:
             case NSMouseMoved:
+                if ( (SDL_VideoSurface->flags & SDL_FULLSCREEN)
+                	|| NSPointInRect([event locationInWindow], winRect) )
                 {
                    static int moves = 0;
                    NSPoint p;
