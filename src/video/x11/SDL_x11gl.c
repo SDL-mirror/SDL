@@ -414,7 +414,7 @@ fprintf(stderr, "glXGetProcAddress returned %p and dlsym returned %p for %s\n", 
 #endif
 	retval = dlsym(handle, proc);
 	if (!retval && strlen(proc) <= 1022) {
-		procname[0] = "_";
+		procname[0] = '_';
 		strcpy(procname + 1, proc);
 		retval = dlsym(handle, procname);
 	}
