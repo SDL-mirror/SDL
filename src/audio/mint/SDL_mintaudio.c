@@ -49,19 +49,29 @@ cookie_stfa_t	*SDL_MintAudio_stfa;
 void SDL_MintAudio_Callback(void)
 {
 	Uint8 *buffer;
+	SDL_AudioDevice *audio = SDL_MintAudio_device;
 
  	buffer = SDL_MintAudio_audiobuf[SDL_MintAudio_numbuf];
-	memset(buffer, SDL_MintAudio_device->spec.silence, SDL_MintAudio_device->spec.size);
+	memset(buffer, audio->spec.silence, audio->spec.size);
 
-	if ( ! SDL_MintAudio_device->paused ) {
-		if ( SDL_MintAudio_device->convert.needed ) {
-			SDL_MintAudio_device->spec.callback(SDL_MintAudio_device->spec.userdata,
-				(Uint8 *)SDL_MintAudio_device->convert.buf,SDL_MintAudio_device->convert.len);
-			SDL_ConvertAudio(&SDL_MintAudio_device->convert);
-			memcpy(buffer, SDL_MintAudio_device->convert.buf, SDL_MintAudio_device->convert.len_cvt);
+	if (audio->paused)
+		return;
+
+	if (audio->convert.needed) {
+		int silence;
+
+		if ( audio->convert.src_format == AUDIO_U8 ) {
+			silence = 0x80;
 		} else {
-			SDL_MintAudio_device->spec.callback(SDL_MintAudio_device->spec.userdata, buffer, SDL_MintAudio_device->spec.size);
+			silence = 0;
 		}
+		memset(audio->convert.buf, silence, audio->convert.len);
+		audio->spec.callback(audio->spec.userdata,
+			(Uint8 *)audio->convert.buf,audio->convert.len);
+		SDL_ConvertAudio(&audio->convert);
+		memcpy(buffer, audio->convert.buf, audio->convert.len_cvt);
+	} else {
+		audio->spec.callback(audio->spec.userdata, buffer, audio->spec.size);
 	}
 }
 
