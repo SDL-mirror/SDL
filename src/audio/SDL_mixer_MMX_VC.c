@@ -1,3 +1,4 @@
+#if defined(USE_ASM_MIXER_VC)
 // MMX assembler version of SDL_MixAudio for signed little endian 16 bit samples and signed 8 bit samples
 // Copyright 2002 Stephane Marchesin (stephane.marchesin@wanadoo.fr)
 // Converted to Intel ASM notation by Cth
@@ -11,7 +12,6 @@
 // Mixing for 16 bit signed buffers
 ////////////////////////////////////////////////
 
-#if defined(USE_ASM_MIXER_VC)
 #include <windows.h>
 #include <stdio.h>
 
@@ -152,54 +152,4 @@ endS8:
 	}
 }
 
-int _SDL_IsMMX_VC()
-{
-	// This	bit	flag can get set on	calling	cpuid
-	// with	register eax set to	1
-	const int _MMX_FEATURE_BIT = 0x00800000;
-	DWORD dwFeature	= 0;
-	__try {
-			_asm {
-				mov	eax,1
-				cpuid
-				mov	dwFeature,edx
-			}
-	} __except ( EXCEPTION_EXECUTE_HANDLER)	{
-			return 0;
-	}
-	if (dwFeature &	_MMX_FEATURE_BIT) {
-		__try {
-			__asm {
-				pxor mm0, mm0
-				emms
-			}
-		} __except (EXCEPTION_EXECUTE_HANDLER) {
-			return(0);
-		}
-		return 1;
-	}
-
-	return 0;
-}
-
-static int _notTwice = 2;
-
-int SDL_IsMMX_VC()
-{
-	if (_notTwice > 1)
-	{
-		_notTwice = _SDL_IsMMX_VC();
-/*
-#ifdef _DEBUG
-		if (_notTwice)
-			MessageBox( NULL, "Using MMX!!!", "Error", MB_OK | MB_ICONINFORMATION );
-		else
-			MessageBox( NULL, "Not sing MMX!!!", "Error", MB_OK | MB_ICONINFORMATION );
-#endif
-*/
-	}
-	return _notTwice;
-}
-
-#endif
-
+#endif /* USE_ASM_MIXER_VC */

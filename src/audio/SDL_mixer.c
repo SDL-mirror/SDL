@@ -146,7 +146,7 @@ void SDL_MixAudio (Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 			else
 #endif
 #if defined(USE_ASM_MIXER_VC)
-			if (SDL_IsMMX_VC())
+			if (SDL_HasMMX())
 			{
 				SDL_MixAudio_MMX_S8_VC((char*)dst,(char*)src,(unsigned int)len,(int)volume);
 			}
@@ -192,7 +192,7 @@ void SDL_MixAudio (Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 			}
 			else
 #elif defined(USE_ASM_MIXER_VC)
-			if (SDL_IsMMX_VC())
+			if (SDL_HasMMX())
 			{
 				SDL_MixAudio_MMX_S16_VC((char*)dst,(char*)src,(unsigned int)len,(int)volume);
 			}
