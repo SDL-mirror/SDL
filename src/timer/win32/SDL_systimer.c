@@ -39,8 +39,17 @@ static char rcsid =
 
 #define TIME_WRAP_VALUE	(~(DWORD)0)
 
-/* The first ticks value of the application */
+/* The first (low-resolution) ticks value of the application */
 static DWORD start;
+
+#ifndef USE_GETTICKCOUNT
+/* Store if a high-resolution performance counter exists on the system */
+static BOOL hires_timer_available;
+/* The first high-resolution ticks value of the application */
+static LARGE_INTEGER hires_start_ticks;
+/* The number of ticks per second of the high-resolution performance counter */
+static LARGE_INTEGER hires_ticks_per_second;
+#endif
 
 void SDL_StartTicks(void)
 {
@@ -48,19 +57,46 @@ void SDL_StartTicks(void)
 #ifdef USE_GETTICKCOUNT
 	start = GetTickCount();
 #else
-	start = timeGetTime();
+	if (QueryPerformanceFrequency(&hires_ticks_per_second) == TRUE)
+	{
+		hires_timer_available = TRUE;
+		QueryPerformanceCounter(&hires_start_ticks);
+	}
+	else
+	{
+		hires_timer_available = FALSE;
+		timeBeginPeriod(1);		/* use 1 ms timer precision */
+		start = timeGetTime();
+	}
 #endif
 }
 
 Uint32 SDL_GetTicks(void)
 {
 	DWORD now, ticks;
+#ifndef USE_GETTICKCOUNT
+	LARGE_INTEGER hires_now;
+#endif
 
 #ifdef USE_GETTICKCOUNT
 	now = GetTickCount();
 #else
-	now = timeGetTime();
+	if (hires_timer_available)
+	{
+		QueryPerformanceCounter(&hires_now);
+
+		hires_now.QuadPart -= hires_start_ticks.QuadPart;
+		hires_now.QuadPart *= 1000;
+		hires_now.QuadPart /= hires_ticks_per_second.QuadPart;
+
+		return (DWORD)hires_now.QuadPart;
+	}
+	else
+	{
+		now = timeGetTime();
+	}
 #endif
+
 	if ( now < start ) {
 		ticks = (TIME_WRAP_VALUE-start) + now;
 	} else {
