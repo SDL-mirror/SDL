@@ -454,9 +454,9 @@ int RunGLTest( int argc, char* argv[],
 	/* Initialize the display */
 	switch (bpp) {
 	    case 8:
-		rgb_size[0] = 2;
+		rgb_size[0] = 3;
 		rgb_size[1] = 3;
-		rgb_size[2] = 3;
+		rgb_size[2] = 2;
 		break;
 	    case 15:
 	    case 16:
