@@ -110,4 +110,4 @@ SDL_JOYSTICK_ATARI:
 
 -- 
 Patrice Mandin <pmandin@caramail.com>
-http://www.multimania.com/pmandin
+http://membres.lycos.fr/pmandin/

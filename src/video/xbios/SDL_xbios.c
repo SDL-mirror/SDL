@@ -619,10 +619,58 @@ static void XBIOS_UnlockHWSurface(_THIS, SDL_Surface *surface)
 static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 {
 	SDL_Surface *surface;
-	
+
 	surface = this->screen;
 
-	XBIOS_FlipHWSurface(this, surface);
+	if ((surface->format->BitsPerPixel) == 8) {
+		void *destscr;
+		int destx;
+		int i;
+
+		/* Center on destination screen */
+		destscr = XBIOS_screens[XBIOS_fbnum];
+		destscr += XBIOS_pitch * ((XBIOS_height - surface->h) >> 1);
+		destx = (XBIOS_width - surface->w) >> 1;
+		destx &= ~15;
+		destscr += destx;
+
+		for (i=0;i<numrects;i++) {
+			void *source,*destination;
+			int x1,x2;
+
+			x1 = rects[i].x & ~15;
+			x2 = ((rects[i].x+rects[i].w) | 15) +1;
+
+			source = surface->pixels;
+			source += surface->pitch * rects[i].y;
+			source += x1;
+
+			destination = destscr;
+			destination += XBIOS_pitch * rects[i].y;
+			destination += x1;
+
+			/* Convert chunky to planar screen */
+			Atari_C2pConvert(
+				source,
+				destination,
+				x2-x1,
+				rects[i].h,
+				XBIOS_doubleline,
+				surface->pitch,
+				XBIOS_pitch
+			);
+		}
+	}
+
+	Setscreen(-1,XBIOS_screens[XBIOS_fbnum],-1);
+	Vsync();
+
+	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
+		XBIOS_fbnum ^= 1;
+		if ((surface->format->BitsPerPixel) > 8) {
+			surface->pixels=XBIOS_screens[XBIOS_fbnum];
+		}
+	}
 }
 
 static int XBIOS_FlipHWSurface(_THIS, SDL_Surface *surface)
