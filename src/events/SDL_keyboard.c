@@ -514,16 +514,16 @@ printf("The '%s' key has been %s\n", SDL_GetKeyName(keysym->sym),
 	if ( SDL_ProcessEvents[event.type] == SDL_ENABLE ) {
 		event.key.state = state;
 		event.key.keysym = *keysym;
+		/*
+		 * jk 991215 - Added
+		 */
+		if (repeatable && (SDL_KeyRepeat.delay != 0)) {
+			SDL_KeyRepeat.evt = event;
+			SDL_KeyRepeat.firsttime = 1;
+			SDL_KeyRepeat.timestamp=SDL_GetTicks();
+		}
 		if ( (SDL_EventOK == NULL) || SDL_EventOK(&event) ) {
 			posted = 1;
-			/*
-			 * jk 991215 - Added
-			 */
-			if (repeatable && (SDL_KeyRepeat.delay != 0)) {
-				SDL_KeyRepeat.evt = event;
-				SDL_KeyRepeat.firsttime = 1;
-				SDL_KeyRepeat.timestamp=SDL_GetTicks();
-			}
 			SDL_PushEvent(&event);
 		}
 	}
@@ -548,7 +548,9 @@ void SDL_CheckKeyRepeat(void)
 		} else {
 			if ( interval > (Uint32)SDL_KeyRepeat.interval ) {
 				SDL_KeyRepeat.timestamp = now;
-				SDL_PushEvent(&SDL_KeyRepeat.evt);
+				if ( (SDL_EventOK == NULL) || SDL_EventOK(&SDL_KeyRepeat.evt) ) {
+					SDL_PushEvent(&SDL_KeyRepeat.evt);
+				}
 			}
 		}
 	}
