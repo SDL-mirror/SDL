@@ -183,6 +183,8 @@ static void  QZ_PrivateWarpCursor (_THIS, int x, int y) {
     CGDisplayMoveCursorToPoint (display_id, cgp);
     warp_ticks = SDL_GetTicks();
     warp_flag = 1;
+
+    SDL_PrivateMouseMotion(0, 0, x, y);
 }
 
 static void QZ_WarpWMCursor (_THIS, Uint16 x, Uint16 y) {
