@@ -50,7 +50,8 @@ typedef struct SDL_SysWMinfo SDL_SysWMinfo;
 
 /* This is the structure for custom window manager events */
 #if (defined(unix) || defined(__unix__) || defined(_AIX) || defined(__OpenBSD__)) && \
-    (!defined(DISABLE_X11) && !defined(__CYGWIN32__) && !defined(ENABLE_NANOX))
+    (!defined(DISABLE_X11) && !defined(__CYGWIN32__) && !defined(ENABLE_NANOX) && \
+     !defined(__QNXNTO__))
  /* AIX is unix, of course, but the native compiler CSet doesn't define unix */
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
@@ -145,6 +146,22 @@ typedef struct {
 	int wimpVersion;    /* Wimp version running under */
 	int taskHandle;     /* The RISCOS task handle */
 	int window;			/* The RISCOS display window */
+} SDL_SysWMinfo;
+
+#elif defined(__QNXNTO__)
+#include <sys/neutrino.h>
+#include <Ph.h>
+
+/* The QNX custom event structure */
+struct SDL_SysWMmsg {
+	SDL_version version;
+	int data;
+};
+
+/* The QNX custom window manager information structure */
+typedef struct {
+	SDL_version version;
+	int data;
 } SDL_SysWMinfo;
 
 #else
