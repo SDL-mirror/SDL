@@ -372,7 +372,10 @@ int SDL_PollEvent (SDL_Event *event)
 {
 	SDL_PumpEvents();
 
-	return(SDL_PeepEvents(event, 1, SDL_GETEVENT, SDL_ALLEVENTS));
+	/* We can't return -1, just return 0 (no event) on error */
+	if ( SDL_PeepEvents(event, 1, SDL_GETEVENT, SDL_ALLEVENTS) <= 0 )
+		return 0;
+	return 1;
 }
 
 int SDL_WaitEvent (SDL_Event *event)
