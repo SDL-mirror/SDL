@@ -50,7 +50,7 @@ typedef struct SDL_SysWMinfo SDL_SysWMinfo;
 
 /* This is the structure for custom window manager events */
 #if (defined(unix) || defined(__unix__) || defined(_AIX)) && \
-    (defined(ENABLE_X11) && !defined(__CYGWIN32__))
+    (!defined(DISABLE_X11) && !defined(__CYGWIN32__))
  /* AIX is unix, of course, but the native compiler CSet doesn't define unix */
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
