@@ -39,8 +39,10 @@ static char rcsid =
 #include <string.h>
 #include <errno.h>
 
-#include <mint/osbind.h>
+#include <mint/cookie.h>
 #include <mint/sysvars.h>
+#include <mint/osbind.h>
+#include <mint/mintbind.h>
 
 #include "SDL_error.h"
 #include "SDL_timer.h"
@@ -52,10 +54,12 @@ static char rcsid =
 /* The first ticks value of the application */
 static Uint32 start;
 static SDL_bool supervisor;
+static int mint_present; /* can we use Syield() ? */
 
 void SDL_StartTicks(void)
 {
 	void *oldpile;
+	unsigned long dummy;
 
 	/* Set first ticks value */
 	oldpile=(void *)Super(0);
@@ -63,12 +67,14 @@ void SDL_StartTicks(void)
 	Super(oldpile);
 
 	start *= 5;	/* One _hz_200 tic is 5ms */
+
+	mint_present = (Getcookie(C_MiNT, &dummy) == C_FOUND);
 }
 
 Uint32 SDL_GetTicks (void)
 {
 	Uint32 now;
-	void *oldpile;
+	void *oldpile=NULL;
 
 	/* Check if we are in supervisor mode 
 	   (this is the case when called from SDL_ThreadedTimerCheck,
@@ -93,6 +99,9 @@ void SDL_Delay (Uint32 ms)
 
 	now = SDL_GetTicks();
 	while ((SDL_GetTicks()-now)<ms){
+		if (mint_present) {
+			Syield();
+		}
 	}
 }
 
