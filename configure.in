@@ -415,7 +415,7 @@ CheckNAS()
         have_nas=no
         if test -r /usr/X11R6/include/audio/audiolib.h; then
             have_nas=yes
-            CFLAGS="$CFLAGS -DNAS_SUPPORT"
+            CFLAGS="$CFLAGS -DNAS_SUPPORT -I/usr/X11R6/include/"
             SYSTEM_LIBS="$SYSTEM_LIBS -laudio -lXt"
             AUDIO_SUBDIRS="$AUDIO_SUBDIRS nas"
             AUDIO_DRIVERS="$AUDIO_DRIVERS nas/libaudio_nas.la"

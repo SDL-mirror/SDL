@@ -220,11 +220,11 @@ static void BlitRGBtoRGBSurfaceAlpha128MMX(SDL_BlitInfo *info)
 	int dstskip = info->d_skip >> 2;
         Uint8 load[8];
   
-        *(Uint64 *)load = 0x00fefefe00fefefe;/* alpha128 mask */
+        *(Uint64 *)load = 0x00fefefe00fefefeULL;/* alpha128 mask */
         movq_m2r(*load, mm4); /* alpha128 mask -> mm4 */
-        *(Uint64 *)load = 0x0001010100010101;/* !alpha128 mask */
+        *(Uint64 *)load = 0x0001010100010101ULL;/* !alpha128 mask */
         movq_m2r(*load, mm3); /* !alpha128 mask -> mm3 */
-        *(Uint64 *)load = 0xFF000000FF000000;/* dst alpha mask */
+        *(Uint64 *)load = 0xFF000000FF000000ULL;/* dst alpha mask */
         movq_m2r(*load, mm7); /* dst alpha mask -> mm7 */
 	while(height--) {
             DUFFS_LOOP_DOUBLE2(
@@ -276,10 +276,10 @@ static void BlitRGBtoRGBSurfaceAlphaMMX(SDL_BlitInfo *info)
     					alpha, alpha, alpha, alpha};
 					
                 movq_m2r(*load, mm4); /* alpha -> mm4 */
-		*(Uint64 *)load = 0x00FF00FF00FF00FF;
+		*(Uint64 *)load = 0x00FF00FF00FF00FFULL;
                 movq_m2r(*load, mm3); /* mask -> mm3 */
 		pand_r2r(mm3, mm4); /* mm4 & mask -> 0A0A0A0A -> mm4 */
-		*(Uint64 *)load = 0xFF000000FF000000;/* dst alpha mask */
+		*(Uint64 *)load = 0xFF000000FF000000ULL;/* dst alpha mask */
 		movq_m2r(*load, mm7); /* dst alpha mask -> mm7 */
 		
 		while(height--) {
@@ -360,13 +360,13 @@ static void BlitRGBtoRGBPixelAlphaMMX(SDL_BlitInfo *info)
         Uint32 alpha = 0;
         Uint8 load[8];
 	                
-	*(Uint64 *)load = 0x00FF00FF00FF00FF;
+	*(Uint64 *)load = 0x00FF00FF00FF00FFULL;
         movq_m2r(*load, mm3); /* mask -> mm2 */
-	*(Uint64 *)load = 0x00FF000000000000;
+	*(Uint64 *)load = 0x00FF000000000000ULL;
         movq_m2r(*load, mm7); /* dst alpha mask -> mm2 */
-        *(Uint64 *)load = 0x00FFFFFF00FFFFFF;
+        *(Uint64 *)load = 0x00FFFFFF00FFFFFFULL;
         movq_m2r(*load, mm0); /* alpha 255 mask -> mm0 */
-        *(Uint64 *)load = 0xFF000000FF000000;
+        *(Uint64 *)load = 0xFF000000FF000000ULL;
         movq_m2r(*load, mm6); /* alpha 255 !mask -> mm6 */
 	while(height--) {
 	    DUFFS_LOOP4({
@@ -792,11 +792,11 @@ static void Blit565to565SurfaceAlphaMMX(SDL_BlitInfo *info)
                 punpcklwd_r2r(mm0, mm0); /* 0A0A0A0A -> mm0 */
 	  
  	        /* Setup the 565 color channel masks */
-	        *(Uint64 *)load = 0xF800F800F800F800;
+	        *(Uint64 *)load = 0xF800F800F800F800ULL;
 		movq_m2r(*load, mm1); /* MASKRED -> mm1 */
-		*(Uint64 *)load = 0x07E007E007E007E0;
+		*(Uint64 *)load = 0x07E007E007E007E0ULL;
 		movq_m2r(*load, mm4); /* MASKGREEN -> mm4 */
-		*(Uint64 *)load = 0x001F001F001F001F;
+		*(Uint64 *)load = 0x001F001F001F001FULL;
 		movq_m2r(*load, mm7); /* MASKBLUE -> mm7 */
 		while(height--) {
                         DUFFS_LOOP_QUATRO2(
@@ -942,11 +942,11 @@ static void Blit555to555SurfaceAlphaMMX(SDL_BlitInfo *info)
                 punpcklwd_r2r(mm0, mm0); /* 0A0A0A0A -> mm0 */
 	  
  	        /* Setup the 555 color channel masks */
-	        *(Uint64 *)load = 0x7C007C007C007C00;
+	        *(Uint64 *)load = 0x7C007C007C007C00ULL;
 		movq_m2r(*load, mm1); /* MASKRED -> mm1 */
-		*(Uint64 *)load = 0x03E003E003E003E0;
+		*(Uint64 *)load = 0x03E003E003E003E0ULL;
 		movq_m2r(*load, mm4); /* MASKGREEN -> mm4 */
-		*(Uint64 *)load = 0x001F001F001F001F;
+		*(Uint64 *)load = 0x001F001F001F001FULL;
 		movq_m2r(*load, mm7); /* MASKBLUE -> mm7 */
 		while(height--) {
                         DUFFS_LOOP_QUATRO2(
