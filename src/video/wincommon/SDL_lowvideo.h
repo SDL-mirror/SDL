@@ -35,10 +35,16 @@ static char rcsid =
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_VideoDevice *this
 
-#define DIRECTX_FULLSCREEN() 						\
+#define DDRAW_FULLSCREEN() 						\
 (									\
 	((SDL_VideoSurface->flags & SDL_FULLSCREEN) == SDL_FULLSCREEN) && \
 	((SDL_VideoSurface->flags & SDL_OPENGL    ) != SDL_OPENGL    ) && \
+	(strcmp(this->name, "directx") == 0)				\
+)
+
+#define DINPUT_FULLSCREEN() 						\
+(									\
+	((SDL_VideoSurface->flags & SDL_FULLSCREEN) == SDL_FULLSCREEN) && \
 	(strcmp(this->name, "directx") == 0)				\
 )
 

@@ -192,7 +192,7 @@ int WIN_ShowWMCursor(_THIS, WMcursor *cursor)
 	POINT mouse_pos;
 
 	/* The fullscreen cursor must be done in software with DirectInput */
-	if ( !this->screen || DIRECTX_FULLSCREEN() ) {
+	if ( !this->screen || DDRAW_FULLSCREEN() ) {
 		return(0);
 	}
 
@@ -213,7 +213,7 @@ void WIN_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
 {
 	POINT pt;
 
-	if ( DIRECTX_FULLSCREEN() ) {
+	if ( DDRAW_FULLSCREEN() ) {
 		x += (this->screen->offset % this->screen->pitch) /
 		      this->screen->format->BytesPerPixel;
 		y += (this->screen->offset / this->screen->pitch);
@@ -237,7 +237,7 @@ void WIN_UpdateMouse(_THIS)
 	RECT rect;
 	POINT pt;
 
-	if ( ! DIRECTX_FULLSCREEN() ) {
+	if ( ! DDRAW_FULLSCREEN() ) {
 		GetClientRect(SDL_Window, &rect);
 		GetCursorPos(&pt);
 		MapWindowPoints(NULL, SDL_Window, &pt, 1);

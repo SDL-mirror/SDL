@@ -200,7 +200,7 @@ static LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 		case WM_MOUSEMOVE: {
 			
 			/* Mouse is handled by DirectInput when fullscreen */
-			if ( SDL_VideoSurface && ! DIRECTX_FULLSCREEN() ) {
+			if ( SDL_VideoSurface && ! DINPUT_FULLSCREEN() ) {
 				Sint16 x, y;
 
 				/* mouse has entered the window */
@@ -243,7 +243,7 @@ static LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 		case WM_MOUSELEAVE: {
 
 			/* Mouse is handled by DirectInput when fullscreen */
-			if ( SDL_VideoSurface && ! DIRECTX_FULLSCREEN() ) {
+			if ( SDL_VideoSurface && ! DINPUT_FULLSCREEN() ) {
 				/* mouse has left the window */
 				/* or */
 				/* Elvis has left the building! */
@@ -261,7 +261,7 @@ static LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 		case WM_RBUTTONDOWN:
 		case WM_RBUTTONUP: {
 			/* Mouse is handled by DirectInput when fullscreen */
-			if ( SDL_VideoSurface && ! DIRECTX_FULLSCREEN() ) {
+			if ( SDL_VideoSurface && ! DINPUT_FULLSCREEN() ) {
 				Sint16 x, y;
 				Uint8 button, state;
 
