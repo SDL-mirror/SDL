@@ -383,7 +383,7 @@ int SDL_WaitEvent (SDL_Event *event)
 	while ( 1 ) {
 		SDL_PumpEvents();
 		switch(SDL_PeepEvents(event, 1, SDL_GETEVENT, SDL_ALLEVENTS)) {
-		    case -1: return -1; 
+		    case -1: return 0;
 		    case 1: return 1;
 		    case 0: SDL_Delay(10);
 		}
