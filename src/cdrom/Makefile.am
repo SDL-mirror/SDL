@@ -15,7 +15,7 @@ DIST_SUBDIRS =	\
 	linux	\
 	macos	\
 	macosx	\
-	mint \
+	mint	\
 	openbsd	\
 	osf	\
 	qnx	\
