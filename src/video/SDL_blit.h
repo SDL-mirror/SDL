@@ -330,7 +330,7 @@ do {									   \
 	pixel = ((r>>fmt->Rloss)<<fmt->Rshift)|				\
 		((g>>fmt->Gloss)<<fmt->Gshift)|				\
 		((b>>fmt->Bloss)<<fmt->Bshift)|				\
-		((a<<fmt->Aloss)<<fmt->Ashift);				\
+		((a>>fmt->Aloss)<<fmt->Ashift);				\
 }
 #define ASSEMBLE_RGBA(buf, bpp, fmt, r, g, b, a)			\
 {									\
