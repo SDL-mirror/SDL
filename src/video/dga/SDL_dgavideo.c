@@ -531,7 +531,6 @@ SDL_Surface *DGA_SetVideoMode(_THIS, SDL_Surface *current,
 			flip_address[1] = memory_base+screen_len;
 			surfaces_mem += screen_len;
 			surfaces_len -= screen_len;
-			DGA_FlipHWSurface(this, current);
 		}
 	}
 
@@ -541,6 +540,13 @@ SDL_Surface *DGA_SetVideoMode(_THIS, SDL_Surface *current,
 		surfaces_len = 0;
 	}
 	DGA_InitHWSurfaces(this, current, surfaces_mem, surfaces_len);
+
+	/* Expose the back buffer as surface memory */
+	if ( current->flags & SDL_DOUBLEBUF ) {
+		this->screen = current;
+		DGA_FlipHWSurface(this, current);
+		this->screen = NULL;
+	}
 
 	/* Set the update rectangle function */
 	this->UpdateRects = DGA_DirectUpdate;
