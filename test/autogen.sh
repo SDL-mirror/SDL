@@ -1,7 +1,7 @@
 #!/bin/sh
 #
 aclocal
-automake --foreign
+automake --foreign --add-missing
 autoconf
 
 # Run configure for this platform
