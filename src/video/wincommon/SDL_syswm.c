@@ -34,6 +34,7 @@ static char rcsid =
 #include "SDL_video.h"
 #include "SDL_syswm.h"
 #include "SDL_syswm_c.h"
+#include "SDL_wingl_c.h"
 #include "SDL_pixels_c.h"
 
 #ifdef _WIN32_WCE
@@ -270,7 +271,7 @@ int WIN_GetWMInfo(_THIS, SDL_SysWMinfo *info)
 		if ( SDL_VERSIONNUM(info->version.major,
 		                    info->version.minor,
 		                    info->version.patch) >=
-		     SDL_VERSION(1, 2, 5) ) {
+		     SDL_VERSIONNUM(1, 2, 5) ) {
 #ifdef HAVE_OPENGL
 			info->hglrc = GL_hrc;
 #else
