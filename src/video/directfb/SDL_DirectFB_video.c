@@ -394,7 +394,7 @@ int DirectFB_VideoInit(_THIS, SDL_PixelFormat *vformat)
       goto error;
     }
 
-  ret = dfb->CreateEventBuffer (dfb, DICAPS_ALL, &events);
+  ret = dfb->CreateInputEventBuffer (dfb, DICAPS_ALL, DFB_FALSE, &events);
   if (ret)
     {
       SetDirectFBerror ("dfb->CreateEventBuffer", ret);
