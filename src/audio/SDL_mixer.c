@@ -35,7 +35,24 @@ static char rcsid =
 #include "SDL_mutex.h"
 #include "SDL_timer.h"
 #include "SDL_sysaudio.h"
+#include "SDL_mixer_MMX.h"
 
+/* Function to check the CPU flags */
+#define MMX_CPU		0x800000
+#ifdef USE_ASMBLIT
+#define CPU_Flags()	Hermes_X86_CPU()
+#else
+#define CPU_Flags()	0L
+#endif
+
+#ifdef USE_ASMBLIT
+#define X86_ASSEMBLER
+#define HermesConverterInterface	void
+#define HermesClearInterface		void
+#define STACKCALL
+
+#include "HeadX86.h"
+#endif
 
 /* This table is used to add two sound values together and pin
  * the value to avoid overflow.  (used with permission from ARDI)
@@ -130,6 +147,15 @@ void SDL_MixAudio (Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 		break;
 
 		case AUDIO_S8: {
+
+#if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
+			if (CPU_Flags() & MMX_CPU)
+			{
+				SDL_MixAudio_MMX_S8((char*)dst,(char*)src,(unsigned int)len,(int)volume);
+			}
+			else
+#endif
+			{
 			Sint8 *dst8, *src8;
 			Sint8 src_sample;
 			int dst_sample;
@@ -153,10 +179,19 @@ void SDL_MixAudio (Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 				++dst8;
 				++src8;
 			}
+			}
 		}
 		break;
 
 		case AUDIO_S16LSB: {
+#if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
+			if (CPU_Flags() & MMX_CPU)
+			{
+				SDL_MixAudio_MMX_S16((char*)dst,(char*)src,(unsigned int)len,(int)volume);
+			}
+			else
+#endif
+			{
 			Sint16 src1, src2;
 			int dst_sample;
 			const int max_audioval = ((1<<(16-1))-1);
@@ -179,6 +214,7 @@ void SDL_MixAudio (Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 				dst_sample >>= 8;
 				dst[1] = dst_sample&0xFF;
 				dst += 2;
+			}
 			}
 		}
 		break;
