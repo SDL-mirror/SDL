@@ -111,6 +111,7 @@ typedef struct {
 } SDL_SysWMinfo;
 
 #elif defined(WIN32)
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
 /* The windows custom event structure */
@@ -126,6 +127,7 @@ struct SDL_SysWMmsg {
 typedef struct {
 	SDL_version version;
 	HWND window;			/* The Win32 display window */
+	HGLRC hglrc;			/* The OpenGL context, if any */
 } SDL_SysWMinfo;
 
 #else

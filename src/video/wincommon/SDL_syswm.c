@@ -267,6 +267,16 @@ int WIN_GetWMInfo(_THIS, SDL_SysWMinfo *info)
 {
 	if ( info->version.major <= SDL_MAJOR_VERSION ) {
 		info->window = SDL_Window;
+		if ( SDL_VERSIONNUM(info->version.major,
+		                    info->version.minor,
+		                    info->version.patch) >=
+		     SDL_VERSION(1, 2, 5) ) {
+#ifdef HAVE_OPENGL
+			info->hglrc = GL_hrc;
+#else
+			info->hglrc = NULL;
+#endif
+		}
 		return(1);
 	} else {
 		SDL_SetError("Application not compiled with SDL %d.%d\n",
