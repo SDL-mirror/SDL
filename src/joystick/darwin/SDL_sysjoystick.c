@@ -648,7 +648,7 @@ int SDL_SYS_JoystickInit(void)
 		/* Filter device list to non-keyboard/mouse stuff */ 
 		if ( device->usagePage == kHIDPage_GenericDesktop &&
 		     (device->usage != kHIDUsage_GD_Joystick ||
-		      device->usage != kHIDUsage_GD_Gamepad)) {
+		      device->usage != kHIDUsage_GD_GamePad)) {
 
 			/* release memory for the device */
 			HIDDisposeDevice (&device);
