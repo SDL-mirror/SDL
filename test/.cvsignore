@@ -19,6 +19,7 @@ testjoystick
 testkeys
 testlock
 testoverlay
+testoverlay2
 testpalette
 testsem
 testsprite
