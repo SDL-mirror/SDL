@@ -63,8 +63,8 @@ int SDL_JoystickInit(void)
 			SDL_numjoysticks = 0;
 		} else {
 			memset(SDL_joysticks, 0, arraylen);
+			SDL_numjoysticks = status;
 		}
-		SDL_numjoysticks = status;
 		status = 0;
 	}
 	default_joystick = NULL;
