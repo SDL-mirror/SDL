@@ -389,6 +389,15 @@ static void QZ_PumpEvents (_THIS)
     NSRect titleBarRect;
     NSAutoreleasePool *pool;
 
+    /* Update activity every five seconds to prevent screensaver. --ryan. */
+    static Uint32 screensaverTicks = 0;
+    Uint32 nowTicks = SDL_GetTicks();
+    if ((nowTicks - screensaverTicks) > 5000)
+    {
+        UpdateSystemActivity(UsrActivity);
+        screensaverTicks = nowTicks;
+    }
+
     pool = [ [ NSAutoreleasePool alloc ] init ];
     distantPast = [ NSDate distantPast ];
 
