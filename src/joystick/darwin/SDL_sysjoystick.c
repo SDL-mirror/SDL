@@ -42,6 +42,7 @@
 #include <IOKit/hid/IOHIDLib.h>
 #include <IOKit/hid/IOHIDKeys.h>
 #include <CoreFoundation/CoreFoundation.h>
+#include <Carbon/Carbon.h> /* for NewPtrClear, DisposePtr */
 
 #include "SDL_error.h"
 #include "SDL_joystick.h"
@@ -595,9 +596,9 @@ int SDL_SYS_JoystickInit(void)
 		/* Add key for device type (joystick, in this case) to refine the matching dictionary. */
 		CFNumberRef refUsage = NULL, refUsagePage = NULL;
 
-		refUsage = CFNumberCreate (kCFAllocatorDefault, kCFNumberIntType, &usagePage);
+		refUsage = CFNumberCreate (kCFAllocatorDefault, kCFNumberIntType, &usage);
 		CFDictionarySetValue (hidMatchDictionary, CFSTR (kIOHIDPrimaryUsageKey), refUsage);
-		refUsagePage = CFNumberCreate (kCFAllocatorDefault, kCFNumberIntType, &usage);
+		refUsagePage = CFNumberCreate (kCFAllocatorDefault, kCFNumberIntType, &usagePage);
 		CFDictionarySetValue (hidMatchDictionary, CFSTR (kIOHIDPrimaryUsagePageKey), refUsagePage);
 	}
 	else
