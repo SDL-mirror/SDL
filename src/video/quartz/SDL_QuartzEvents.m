@@ -468,11 +468,15 @@ static void QZ_PumpEvents (_THIS)
                 case NSScrollWheel:
                     if (NSPointInRect([ event locationInWindow ], winRect)) {
                         float dy;
+                        Uint8 button;
                         dy = [ event deltaY ];
                         if ( dy > 0.0 ) /* Scroll up */
-                            SDL_PrivateMouseButton (SDL_PRESSED, 4, 0, 0);
+                            button = SDL_BUTTON_WHEELUP;
                         else /* Scroll down */
-                            SDL_PrivateMouseButton (SDL_PRESSED, 5, 0, 0);
+                            button = SDL_BUTTON_WHEELDOWN;
+			/* For now, wheel is sent as a quick down+up */
+                        SDL_PrivateMouseButton (SDL_PRESSED, button, 0, 0);
+                        SDL_PrivateMouseButton (SDL_RELEASED, button, 0, 0);
                     }
                     break;
                 case NSKeyUp:
