@@ -58,6 +58,7 @@ typedef struct {
 	Uint8 b;
 	Uint8 unused;
 } SDL_Color;
+#define SDL_Colour SDL_Color
 
 typedef struct {
 	int       ncolors;
