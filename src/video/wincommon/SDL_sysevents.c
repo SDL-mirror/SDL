@@ -335,24 +335,15 @@ LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case WM_MOUSEWHEEL: 
 			if ( SDL_VideoSurface && ! DINPUT_FULLSCREEN() ) {
 				Sint16 x, y;
-				Uint8 button = 0;
 				int move = (short)HIWORD(wParam);
-				if(move > 0)
-					button = 4;
-				else if(move < 0)
-					button = 5;
-				if(button)
-				{
-					if ( mouse_relative ) {
-					/*	RJR: March 28, 2000
-						report internal mouse position if in relative mode */
-						x = 0; y = 0;
-					} else {
-						x = (Sint16)LOWORD(lParam);
-						y = (Sint16)HIWORD(lParam);
-					}
+				if ( move ) {
+					Uint8 button;
+					if ( move > 0 )
+						button = 4;
+					else
+						button = 5;
 					posted = SDL_PrivateMouseButton(
-								SDL_PRESSED, button, x, y);
+						SDL_PRESSED, button, 0, 0);
 				}
 			}
 			return(0);
