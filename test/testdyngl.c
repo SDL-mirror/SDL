@@ -39,23 +39,23 @@ void* get_funcaddr(const char* p)
 
 typedef struct
 {
-	void(*glBegin)(GLenum);
-	void(*glEnd)();
-	void(*glVertex3f)(GLfloat, GLfloat, GLfloat);
-	void(*glClearColor)(GLfloat, GLfloat, GLfloat, GLfloat);
-	void(*glClear)(GLbitfield);
-	void(*glDisable)(GLenum);
-	void(*glEnable)(GLenum);
-	void(*glColor4ub)(GLubyte,GLubyte,GLubyte,GLubyte);
-	void(*glPointSize)(GLfloat);
-	void(*glHint)(GLenum,GLenum);
-	void(*glBlendFunc)(GLenum,GLenum);
-	void(*glMatrixMode)(GLenum);
-	void(*glLoadIdentity)();
-	void(*glOrtho)(GLdouble,GLdouble,GLdouble,GLdouble,GLdouble,GLdouble);
-	void(*glRotatef)(GLfloat,GLfloat,GLfloat,GLfloat);
-	void(*glViewport)(GLint,GLint,GLsizei,GLsizei);
-	void(*glFogf)(GLenum,GLfloat);
+	void(APIENTRY*glBegin)(GLenum);
+	void(APIENTRY*glEnd)();
+	void(APIENTRY*glVertex3f)(GLfloat, GLfloat, GLfloat);
+	void(APIENTRY*glClearColor)(GLfloat, GLfloat, GLfloat, GLfloat);
+	void(APIENTRY*glClear)(GLbitfield);
+	void(APIENTRY*glDisable)(GLenum);
+	void(APIENTRY*glEnable)(GLenum);
+	void(APIENTRY*glColor4ub)(GLubyte,GLubyte,GLubyte,GLubyte);
+	void(APIENTRY*glPointSize)(GLfloat);
+	void(APIENTRY*glHint)(GLenum,GLenum);
+	void(APIENTRY*glBlendFunc)(GLenum,GLenum);
+	void(APIENTRY*glMatrixMode)(GLenum);
+	void(APIENTRY*glLoadIdentity)();
+	void(APIENTRY*glOrtho)(GLdouble,GLdouble,GLdouble,GLdouble,GLdouble,GLdouble);
+	void(APIENTRY*glRotatef)(GLfloat,GLfloat,GLfloat,GLfloat);
+	void(APIENTRY*glViewport)(GLint,GLint,GLsizei,GLsizei);
+	void(APIENTRY*glFogf)(GLenum,GLfloat);
 }
 glfuncs;
 
