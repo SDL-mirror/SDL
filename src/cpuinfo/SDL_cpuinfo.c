@@ -81,6 +81,26 @@ static __inline__ int CPU_haveCPUID()
 	:
 	: "%eax", "%ecx"
 	);
+#elif defined(__GNUC__) && defined(__x86_64__)
+/* Technically, if this is being compiled under __x86_64__ then it has 
+CPUid by definition.  But it's nice to be able to prove it.  :)      */
+	__asm__ (
+"        pushfq                      # Get original EFLAGS             \n"
+"        popq    %%rax                                                 \n"
+"        movq    %%rax,%%rcx                                           \n"
+"        xorl    $0x200000,%%eax     # Flip ID bit in EFLAGS           \n"
+"        pushq   %%rax               # Save new EFLAGS value on stack  \n"
+"        popfq                       # Replace current EFLAGS value    \n"
+"        pushfq                      # Get new EFLAGS                  \n"
+"        popq    %%rax               # Store new EFLAGS in EAX         \n"
+"        xorl    %%ecx,%%eax         # Can not toggle ID bit,          \n"
+"        jz      1f                  # Processor=80486                 \n"
+"        movl    $1,%0               # We have CPUID support           \n"
+"1:                                                                    \n"
+	: "=m" (has_CPUID)
+	:
+	: "%rax", "%rcx"
+	);
 #elif defined(_MSC_VER)
 	__asm {
         pushfd                      ; Get original EFLAGS
@@ -103,7 +123,7 @@ done:
 static __inline__ int CPU_getCPUIDFeatures()
 {
 	int features = 0;
-#if defined(__GNUC__) && defined(i386)
+#if defined(__GNUC__) && ( defined(i386) || defined(__x86_64__) )
 	__asm__ (
 "        movl    %%ebx,%%edi\n"
 "        xorl    %%eax,%%eax         # Set up for CPUID instruction    \n"
@@ -139,7 +159,7 @@ done:
 static __inline__ int CPU_getCPUIDFeaturesExt()
 {
 	int features = 0;
-#if defined(__GNUC__) && defined(i386)
+#if defined(__GNUC__) && (defined(i386) || defined (__x86_64__) )
 	__asm__ (
 "        movl    %%ebx,%%edi\n"
 "        movl    $0x80000000,%%eax   # Query for extended functions    \n"
