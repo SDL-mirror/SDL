@@ -64,9 +64,9 @@ extern "C" {
 #endif
 
 /* This should be called from your WinMain() function, if any */
-extern DECLSPEC void SDL_SetModuleHandle(void *hInst);
+extern DECLSPEC void SDLCALL SDL_SetModuleHandle(void *hInst);
 /* This can also be called, but is no longer necessary */
-extern DECLSPEC int SDL_RegisterApp(char *name, Uint32 style, void *hInst);
+extern DECLSPEC int SDLCALL SDL_RegisterApp(char *name, Uint32 style, void *hInst);
 
 #ifdef __cplusplus
 }
@@ -86,7 +86,7 @@ extern "C" {
 struct QDGlobals;
 
 /* This should be called from your main() function, if any */
-extern DECLSPEC void SDL_InitQuickDraw(struct QDGlobals *the_qd);
+extern DECLSPEC void SDLCALL SDL_InitQuickDraw(struct QDGlobals *the_qd);
 
 #ifdef __cplusplus
 }

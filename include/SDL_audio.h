@@ -105,14 +105,14 @@ typedef struct SDL_AudioCVT {
  * have a specific need to specify the audio driver you want to use.
  * You should normally use SDL_Init() or SDL_InitSubSystem().
  */
-extern DECLSPEC int SDL_AudioInit(const char *driver_name);
-extern DECLSPEC void SDL_AudioQuit(void);
+extern DECLSPEC int SDLCALL SDL_AudioInit(const char *driver_name);
+extern DECLSPEC void SDLCALL SDL_AudioQuit(void);
 
 /* This function fills the given character buffer with the name of the
  * current audio driver, and returns a pointer to it if the audio driver has
  * been initialized.  It returns NULL if no driver has been initialized.
  */
-extern DECLSPEC char *SDL_AudioDriverName(char *namebuf, int maxlen);
+extern DECLSPEC char * SDLCALL SDL_AudioDriverName(char *namebuf, int maxlen);
 
 /*
  * This function opens the audio device with the desired parameters, and
@@ -155,7 +155,7 @@ extern DECLSPEC char *SDL_AudioDriverName(char *namebuf, int maxlen);
  * may modify the requested size of the audio buffer, you should allocate
  * any local mixing buffers after you open the audio device.
  */
-extern DECLSPEC int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained);
+extern DECLSPEC int SDLCALL SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained);
 
 /*
  * Get the current audio state:
@@ -165,7 +165,7 @@ typedef enum {
 	SDL_AUDIO_PLAYING,
 	SDL_AUDIO_PAUSED
 } SDL_audiostatus;
-extern DECLSPEC SDL_audiostatus SDL_GetAudioStatus(void);
+extern DECLSPEC SDL_audiostatus SDLCALL SDL_GetAudioStatus(void);
 
 /*
  * This function pauses and unpauses the audio callback processing.
@@ -174,7 +174,7 @@ extern DECLSPEC SDL_audiostatus SDL_GetAudioStatus(void);
  * data for your callback function after opening the audio device.
  * Silence will be written to the audio device during the pause.
  */
-extern DECLSPEC void SDL_PauseAudio(int pause_on);
+extern DECLSPEC void SDLCALL SDL_PauseAudio(int pause_on);
 
 /*
  * This function loads a WAVE from the data source, automatically freeing
@@ -193,8 +193,7 @@ extern DECLSPEC void SDL_PauseAudio(int pause_on);
  * wave file cannot be opened, uses an unknown data format, or is 
  * corrupt.  Currently raw and MS-ADPCM WAVE files are supported.
  */
-extern DECLSPEC SDL_AudioSpec *SDL_LoadWAV_RW(SDL_RWops *src, int freesrc,
-		 SDL_AudioSpec *spec, Uint8 **audio_buf, Uint32 *audio_len);
+extern DECLSPEC SDL_AudioSpec * SDLCALL SDL_LoadWAV_RW(SDL_RWops *src, int freesrc, SDL_AudioSpec *spec, Uint8 **audio_buf, Uint32 *audio_len);
 
 /* Compatibility convenience function -- loads a WAV from a file */
 #define SDL_LoadWAV(file, spec, audio_buf, audio_len) \
@@ -203,7 +202,7 @@ extern DECLSPEC SDL_AudioSpec *SDL_LoadWAV_RW(SDL_RWops *src, int freesrc,
 /*
  * This function frees data previously allocated with SDL_LoadWAV_RW()
  */
-extern DECLSPEC void SDL_FreeWAV(Uint8 *audio_buf);
+extern DECLSPEC void SDLCALL SDL_FreeWAV(Uint8 *audio_buf);
 
 /*
  * This function takes a source format and rate and a destination format
@@ -212,7 +211,7 @@ extern DECLSPEC void SDL_FreeWAV(Uint8 *audio_buf);
  * to the other.
  * This function returns 0, or -1 if there was an error.
  */
-extern DECLSPEC int SDL_BuildAudioCVT(SDL_AudioCVT *cvt,
+extern DECLSPEC int SDLCALL SDL_BuildAudioCVT(SDL_AudioCVT *cvt,
 		Uint16 src_format, Uint8 src_channels, int src_rate,
 		Uint16 dst_format, Uint8 dst_channels, int dst_rate);
 
@@ -224,7 +223,7 @@ extern DECLSPEC int SDL_BuildAudioCVT(SDL_AudioCVT *cvt,
  * cvt->buf should be allocated after the cvt structure is initialized by
  * SDL_BuildAudioCVT(), and should be cvt->len*cvt->len_mult bytes long.
  */
-extern DECLSPEC int SDL_ConvertAudio(SDL_AudioCVT *cvt);
+extern DECLSPEC int SDLCALL SDL_ConvertAudio(SDL_AudioCVT *cvt);
 
 /*
  * This takes two audio buffers of the playing audio format and mixes
@@ -234,7 +233,7 @@ extern DECLSPEC int SDL_ConvertAudio(SDL_AudioCVT *cvt);
  * This is provided for convenience -- you can mix your own audio data.
  */
 #define SDL_MIX_MAXVOLUME 128
-extern DECLSPEC void SDL_MixAudio(Uint8 *dst, const Uint8 *src, Uint32 len, int volume);
+extern DECLSPEC void SDLCALL SDL_MixAudio(Uint8 *dst, const Uint8 *src, Uint32 len, int volume);
 
 /*
  * The lock manipulated by these functions protects the callback function.
@@ -242,13 +241,13 @@ extern DECLSPEC void SDL_MixAudio(Uint8 *dst, const Uint8 *src, Uint32 len, int 
  * callback function is not running.  Do not call these from the callback
  * function or you will cause deadlock.
  */
-extern DECLSPEC void SDL_LockAudio(void);
-extern DECLSPEC void SDL_UnlockAudio(void);
+extern DECLSPEC void SDLCALL SDL_LockAudio(void);
+extern DECLSPEC void SDLCALL SDL_UnlockAudio(void);
 
 /*
  * This function shuts down audio processing and closes the audio device.
  */
-extern DECLSPEC void SDL_CloseAudio(void);
+extern DECLSPEC void SDLCALL SDL_CloseAudio(void);
 
 
 /* Ends C function definitions when using C++ */

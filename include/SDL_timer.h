@@ -48,13 +48,13 @@ extern "C" {
 /* Get the number of milliseconds since the SDL library initialization.
  * Note that this value wraps if the program runs for more than ~49 days.
  */ 
-extern DECLSPEC Uint32 SDL_GetTicks(void);
+extern DECLSPEC Uint32 SDLCALL SDL_GetTicks(void);
 
 /* Wait a specified number of milliseconds before returning */
-extern DECLSPEC void SDL_Delay(Uint32 ms);
+extern DECLSPEC void SDLCALL SDL_Delay(Uint32 ms);
 
 /* Function prototype for the timer callback function */
-typedef Uint32 (*SDL_TimerCallback)(Uint32 interval);
+typedef Uint32 (SDLCALL *SDL_TimerCallback)(Uint32 interval);
 
 /* Set a callback to run after the specified number of milliseconds has
  * elapsed. The callback function is passed the current timer interval
@@ -82,7 +82,7 @@ typedef Uint32 (*SDL_TimerCallback)(Uint32 interval);
  * should not use this function in multi-threaded applications as signals
  * to multi-threaded apps have undefined behavior in some implementations.
  */
-extern DECLSPEC int SDL_SetTimer(Uint32 interval, SDL_TimerCallback callback);
+extern DECLSPEC int SDLCALL SDL_SetTimer(Uint32 interval, SDL_TimerCallback callback);
 
 /* New timer API, supports multiple timers
  * Written by Stephane Peter <megastep@lokigames.com>
@@ -94,7 +94,7 @@ extern DECLSPEC int SDL_SetTimer(Uint32 interval, SDL_TimerCallback callback);
  * passed in, the periodic alarm continues, otherwise a new alarm is
  * scheduled.  If the callback returns 0, the periodic alarm is cancelled.
  */
-typedef Uint32 (*SDL_NewTimerCallback)(Uint32 interval, void *param);
+typedef Uint32 (SDLCALL *SDL_NewTimerCallback)(Uint32 interval, void *param);
 
 /* Definition of the timer ID type */
 typedef struct _SDL_TimerID *SDL_TimerID;
@@ -102,12 +102,12 @@ typedef struct _SDL_TimerID *SDL_TimerID;
 /* Add a new timer to the pool of timers already running.
    Returns a timer ID, or NULL when an error occurs.
  */
-extern DECLSPEC SDL_TimerID SDL_AddTimer(Uint32 interval, SDL_NewTimerCallback callback, void *param);
+extern DECLSPEC SDL_TimerID SDLCALL SDL_AddTimer(Uint32 interval, SDL_NewTimerCallback callback, void *param);
 
 /* Remove one of the multiple timers knowing its ID.
  * Returns a boolean value indicating success.
  */
-extern DECLSPEC SDL_bool SDL_RemoveTimer(SDL_TimerID t);
+extern DECLSPEC SDL_bool SDLCALL SDL_RemoveTimer(SDL_TimerID t);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

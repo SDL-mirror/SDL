@@ -10,9 +10,7 @@ while ( ($file = shift(@ARGV)) ) {
 	$printed_header = 0;
 	$file =~ s,.*/,,;
 	while (<FILE>) {
-		if ( /DECLSPEC.*\s\**([^\s\(]+)\(/ ) {
-			print "\t$1\n";
-		} elsif ( /DECLSPEC.*\s\**([^\s\(]+)$/ ) {
+		if ( /DECLSPEC.*SDLCALL ([^\s\(]+)/ ) {
 			print "\t$1\n";
 		}
 	}

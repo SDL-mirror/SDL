@@ -9,9 +9,7 @@ while ( ($file = shift(@ARGV)) ) {
 	}
 	$file =~ s,.*/,,;
 	while (<FILE>) {
-		if ( /DECLSPEC.*\s\**([^\s\(]+)\(/ ) {
-			print "_$1\n";
-		} elsif ( /DECLSPEC.*\s\**([^\s\(]+)$/ ) {
+		if ( /DECLSPEC.*SDLCALL ([^\s\(]+)/ ) {
 			print "_$1\n";
 		}
 	}

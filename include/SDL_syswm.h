@@ -153,7 +153,7 @@ typedef struct {
  * returns 1 if the function is implemented.  If it's not implemented, or
  * the version member of the 'info' structure is invalid, it returns 0. 
  */
-extern DECLSPEC int SDL_GetWMInfo(SDL_SysWMinfo *info);
+extern DECLSPEC int SDLCALL SDL_GetWMInfo(SDL_SysWMinfo *info);
 
 
 /* Ends C function definitions when using C++ */

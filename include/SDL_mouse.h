@@ -56,7 +56,7 @@ typedef struct {
  * be tested using the SDL_BUTTON(X) macros, and x and y are set to the
  * current mouse cursor position.  You can pass NULL for either x or y.
  */
-extern DECLSPEC Uint8 SDL_GetMouseState(int *x, int *y);
+extern DECLSPEC Uint8 SDLCALL SDL_GetMouseState(int *x, int *y);
 
 /*
  * Retrieve the current state of the mouse.
@@ -64,12 +64,12 @@ extern DECLSPEC Uint8 SDL_GetMouseState(int *x, int *y);
  * be tested using the SDL_BUTTON(X) macros, and x and y are set to the
  * mouse deltas since the last call to SDL_GetRelativeMouseState().
  */
-extern DECLSPEC Uint8 SDL_GetRelativeMouseState(int *x, int *y);
+extern DECLSPEC Uint8 SDLCALL SDL_GetRelativeMouseState(int *x, int *y);
 
 /*
  * Set the position of the mouse cursor (generates a mouse motion event)
  */
-extern DECLSPEC void SDL_WarpMouse(Uint16 x, Uint16 y);
+extern DECLSPEC void SDLCALL SDL_WarpMouse(Uint16 x, Uint16 y);
 
 /*
  * Create a cursor using the specified data and mask (in MSB format).
@@ -84,7 +84,7 @@ extern DECLSPEC void SDL_WarpMouse(Uint16 x, Uint16 y);
  *
  * Cursors created with this function must be freed with SDL_FreeCursor().
  */
-extern DECLSPEC SDL_Cursor *SDL_CreateCursor
+extern DECLSPEC SDL_Cursor * SDLCALL SDL_CreateCursor
 		(Uint8 *data, Uint8 *mask, int w, int h, int hot_x, int hot_y);
 
 /*
@@ -92,17 +92,17 @@ extern DECLSPEC SDL_Cursor *SDL_CreateCursor
  * If the cursor is currently visible, the change will be immediately 
  * represented on the display.
  */
-extern DECLSPEC void SDL_SetCursor(SDL_Cursor *cursor);
+extern DECLSPEC void SDLCALL SDL_SetCursor(SDL_Cursor *cursor);
 
 /*
  * Returns the currently active cursor.
  */
-extern DECLSPEC SDL_Cursor * SDL_GetCursor(void);
+extern DECLSPEC SDL_Cursor * SDLCALL SDL_GetCursor(void);
 
 /*
  * Deallocates a cursor created with SDL_CreateCursor().
  */
-extern DECLSPEC void SDL_FreeCursor(SDL_Cursor *cursor);
+extern DECLSPEC void SDLCALL SDL_FreeCursor(SDL_Cursor *cursor);
 
 /*
  * Toggle whether or not the cursor is shown on the screen.
@@ -111,7 +111,7 @@ extern DECLSPEC void SDL_FreeCursor(SDL_Cursor *cursor);
  * before the call, or 0 if it was not.  You can query the current
  * state by passing a 'toggle' value of -1.
  */
-extern DECLSPEC int SDL_ShowCursor(int toggle);
+extern DECLSPEC int SDLCALL SDL_ShowCursor(int toggle);
 
 /* Used as a mask when testing buttons in buttonstate
    Button 1:	Left mouse button

@@ -79,7 +79,7 @@ typedef struct {
    it should NOT be used to fill a version structure, instead you should
    use the SDL_Version() macro.
  */
-extern DECLSPEC const SDL_version * SDL_Linked_Version(void);
+extern DECLSPEC const SDL_version * SDLCALL SDL_Linked_Version(void);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

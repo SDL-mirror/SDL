@@ -124,20 +124,20 @@ static __inline__ Uint64 SDL_Swap64(Uint64 val) {
 #endif
 
 /* Read an item of the specified endianness and return in native format */
-extern DECLSPEC Uint16 SDL_ReadLE16(SDL_RWops *src);
-extern DECLSPEC Uint16 SDL_ReadBE16(SDL_RWops *src);
-extern DECLSPEC Uint32 SDL_ReadLE32(SDL_RWops *src);
-extern DECLSPEC Uint32 SDL_ReadBE32(SDL_RWops *src);
-extern DECLSPEC Uint64 SDL_ReadLE64(SDL_RWops *src);
-extern DECLSPEC Uint64 SDL_ReadBE64(SDL_RWops *src);
+extern DECLSPEC Uint16 SDLCALL SDL_ReadLE16(SDL_RWops *src);
+extern DECLSPEC Uint16 SDLCALL SDL_ReadBE16(SDL_RWops *src);
+extern DECLSPEC Uint32 SDLCALL SDL_ReadLE32(SDL_RWops *src);
+extern DECLSPEC Uint32 SDLCALL SDL_ReadBE32(SDL_RWops *src);
+extern DECLSPEC Uint64 SDLCALL SDL_ReadLE64(SDL_RWops *src);
+extern DECLSPEC Uint64 SDLCALL SDL_ReadBE64(SDL_RWops *src);
 
 /* Write an item of native format to the specified endianness */
-extern DECLSPEC int SDL_WriteLE16(SDL_RWops *dst, Uint16 value);
-extern DECLSPEC int SDL_WriteBE16(SDL_RWops *dst, Uint16 value);
-extern DECLSPEC int SDL_WriteLE32(SDL_RWops *dst, Uint32 value);
-extern DECLSPEC int SDL_WriteBE32(SDL_RWops *dst, Uint32 value);
-extern DECLSPEC int SDL_WriteLE64(SDL_RWops *dst, Uint64 value);
-extern DECLSPEC int SDL_WriteBE64(SDL_RWops *dst, Uint64 value);
+extern DECLSPEC int SDLCALL SDL_WriteLE16(SDL_RWops *dst, Uint16 value);
+extern DECLSPEC int SDLCALL SDL_WriteBE16(SDL_RWops *dst, Uint16 value);
+extern DECLSPEC int SDLCALL SDL_WriteLE32(SDL_RWops *dst, Uint32 value);
+extern DECLSPEC int SDLCALL SDL_WriteBE32(SDL_RWops *dst, Uint32 value);
+extern DECLSPEC int SDLCALL SDL_WriteLE64(SDL_RWops *dst, Uint64 value);
+extern DECLSPEC int SDLCALL SDL_WriteBE64(SDL_RWops *dst, Uint64 value);
 
 
 /* Ends C function definitions when using C++ */

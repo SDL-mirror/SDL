@@ -48,7 +48,7 @@ extern "C" {
  * SDL_APPACTIVE.  If SDL_APPACTIVE is set, then the user is able to
  * see your application, otherwise it has been iconified or disabled.
  */
-extern DECLSPEC Uint8 SDL_GetAppState(void);
+extern DECLSPEC Uint8 SDLCALL SDL_GetAppState(void);
 
 
 /* Ends C function definitions when using C++ */

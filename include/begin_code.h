@@ -31,6 +31,11 @@
 #endif
 #define _begin_code_h
 
+/* Make sure the correct platform symbols are defined */
+#if !defined(WIN32) && defined(_WIN32)
+#define WIN32
+#endif /* Windows */
+
 /* Some compilers use a special export keyword */
 #ifndef DECLSPEC
 # ifdef __BEOS__
@@ -55,6 +60,15 @@
 # endif
 # endif
 #endif
+
+/* By default SDL uses the C calling convention */
+#ifndef SDLCALL
+#ifdef WIN32
+#define SDLCALL __cdecl
+#else
+#define SDLCALL
+#endif
+#endif /* SDLCALL */
 
 /* Removed DECLSPEC on Symbian OS because SDL cannot be a DLL in EPOC */
 #ifdef __SYMBIAN32__ 

@@ -87,14 +87,14 @@ typedef struct SDL_RWops {
 
 /* Functions to create SDL_RWops structures from various data sources */
 
-extern DECLSPEC SDL_RWops * SDL_RWFromFile(const char *file, const char *mode);
+extern DECLSPEC SDL_RWops * SDLCALL SDL_RWFromFile(const char *file, const char *mode);
 
-extern DECLSPEC SDL_RWops * SDL_RWFromFP(FILE *fp, int autoclose);
+extern DECLSPEC SDL_RWops * SDLCALL SDL_RWFromFP(FILE *fp, int autoclose);
 
-extern DECLSPEC SDL_RWops * SDL_RWFromMem(void *mem, int size);
+extern DECLSPEC SDL_RWops * SDLCALL SDL_RWFromMem(void *mem, int size);
 
-extern DECLSPEC SDL_RWops * SDL_AllocRW(void);
-extern DECLSPEC void SDL_FreeRW(SDL_RWops *area);
+extern DECLSPEC SDL_RWops * SDLCALL SDL_AllocRW(void);
+extern DECLSPEC void SDLCALL SDL_FreeRW(SDL_RWops *area);
 
 /* Macros to easily read and write from an SDL_RWops structure */
 #define SDL_RWseek(ctx, offset, whence)	(ctx)->seek(ctx, offset, whence)
