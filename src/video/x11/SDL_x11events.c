@@ -515,6 +515,9 @@ void X11_InitKeymap(void)
 	/* These X keysyms have 0xFE as the high byte */
 	ODD_keymap[XK_dead_circumflex&0xFF] = SDLK_CARET;
 #endif
+#ifdef XK_ISO_Level3_Shift
+	ODD_keymap[XK_ISO_Level3_Shift&0xFF] = SDLK_MODE; /* "Alt Gr" key */
+#endif
 
 	/* Map the miscellaneous keys */
 	for ( i=0; i<SDL_TABLESIZE(MISC_keymap); ++i )
