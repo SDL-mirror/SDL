@@ -7,9 +7,15 @@ Thanks to everyone who made this possible, including:
 
 * Scott Call, for making a home for SDL on the 'Net... Thanks! :)
 
-* Everybody at Loki Software, Inc. for their great contributions!
+* The Linux Fund, C Magazine, and Gareth Noyce for financial contributions
 
-* Mattias Engdegerd, for help with the Solaris port and lots of other help
+* Gaëtan de Menten for writing the PHP and SQL behind the SDL website
+
+* Martin Donlon for his work on the SDL Documentation Project
+
+* Ryan Gordon for helping everybody out and keeping the dream alive. :)
+
+* Mattias Engdegård, for help with the Solaris port and lots of other help
 
 * Max Watson, Matt Slot, and Kyle for help with the MacOS Classic port
 
@@ -17,7 +23,7 @@ Thanks to everyone who made this possible, including:
 
 * Max Horn and Darrell Walisser for unflagging work on the MacOS X port
 
-* Patrick Trainor and Jim Boucher, for the QNX Neutrino port
+* Patrick Trainor, Jim Boucher, and Mike Gorchak for the QNX Neutrino port
 
 * Carsten Griwodz for the AIX port
 
@@ -47,10 +53,14 @@ Thanks to everyone who made this possible, including:
 
 * Michael Vance and Jim Kutter for the X11 OpenGL support
 
+* Stephane Peter, for the AAlib front-end and multi-threaded timer idea.
+
+* Jon Atkins for great SDL_net and SDL_mixer documentation
+
 * Peter Wiklund, for the 1998 winning SDL logo,
   and Arto Hamara, Steven Wong, and Kent Mein for other logo entries.
 
-* Stephane Peter, for the AAlib front-end and multi-threaded timer idea.
+* Everybody at Loki Software, Inc. for their great contributions!
 
  And a big hand to everyone else who gave me appreciation, advice,
  and suggestions, especially the good folks on the SDL mailing list.
