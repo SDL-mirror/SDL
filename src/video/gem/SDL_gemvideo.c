@@ -313,27 +313,11 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	if (GEM_version >= 0x0410) {
 		short ap_gout[4], errorcode;
 		
-#ifdef DEBUG_VIDEO_GEM
-		printf("sdl:video:gem: AES %02x.%02x\n", (GEM_version>>8) & 0xff, GEM_version & 0xff);
-#endif
-
 		GEM_wfeatures=0;
 		errorcode=appl_getinfo(AES_WINDOW, &ap_gout[0], &ap_gout[1], &ap_gout[2], &ap_gout[3]);
-#ifdef DEBUG_VIDEO_GEM
-		printf("sdl:video:gem: appl_getinfo() returned 0x%04x\n", errorcode);
-#endif
 
 		if (errorcode==0) {
 			GEM_wfeatures=ap_gout[0];			
-
-#ifdef DEBUG_VIDEO_GEM
-			printf("sdl:video:gem: AES wind_*() modes: 0x%04x\n", GEM_wfeatures);
-			printf("sdl:video:gem: AES window behaviours: 0x%04x\n", ap_gout[3]);
-		} else {
-			printf("sdl:video:gem: apgout[]={0x%04x,0x%04x,0x%04x,0x%04x}\n",
-				ap_gout[0], ap_gout[1], ap_gout[1], ap_gout[3]
-			);
-#endif
 		}
 	}	
 
@@ -468,8 +452,8 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 	SDL_modelist[1] = NULL;
 
-#ifdef DEBUG_VIDEO_GEM
-	printf("sdl:video:gem: VideoInit(): done\n");
+#ifdef HAVE_OPENGL
+	SDL_AtariGL_InitPointers(this);
 #endif
 
 	/* We're done! */
@@ -492,7 +476,9 @@ SDL_Rect **GEM_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
 static void GEM_FreeBuffers(_THIS)
 {
 #ifdef HAVE_OPENGL
-	SDL_AtariGL_Quit(this);
+	if (gl_active) {
+		SDL_AtariGL_Quit(this);
+	}
 #endif
 
 	/* Release buffer */
@@ -1290,12 +1276,11 @@ static void refresh_window(_THIS, int winhandle, short *rect)
 
 static void GEM_GL_SwapBuffers(_THIS)
 {
-	if (gl_ctx == NULL) {
-		return;
+	if (gl_active) {
+		gl_copyshadow(this, this->screen);
+		gl_convert(this, this->screen);
+		GEM_FlipHWSurface(this, this->screen);
 	}
-
-	gl_convert(this->screen);
-	GEM_FlipHWSurface(this, this->screen);
 }
 
 #endif

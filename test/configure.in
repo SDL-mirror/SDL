@@ -28,7 +28,7 @@ case "$target" in
         MATHLIB=""
         SYS_GL_LIBS="-lGL"
         ;;
-    *-*-darwin* | *-*-mint* )
+    *-*-darwin* )
         MATHLIB=""
         SYS_GL_LIBS=""
         ;;
@@ -38,6 +38,18 @@ case "$target" in
         fi
         SYS_GL_LIBS=""
         ;;
+    *-*-mint*)
+        MATHLIB=""
+        AC_PATH_PROG(OSMESA_CONFIG, osmesa-config, no)
+        if test "x$OSMESA_CONFIG" = "xyes"; then
+            OSMESA_CFLAGS=`$OSMESA_CONFIG --cflags`
+            OSMESA_LIBS=`$OSMESA_CONFIG --libs`
+            CFLAGS="$CFLAGS $OSMESA_CFLAGS"
+            SYS_GL_LIBS="$OSMESA_LIBS"
+        else
+            SYS_GL_LIBS="-lOSMesa"
+        fi
+		;;
     *)
         MATHLIB="-lm"
         AC_PATH_X

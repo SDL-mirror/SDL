@@ -411,6 +411,10 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	/* Init chunky to planar routine */
 	SDL_Atari_C2pConvert = SDL_Atari_C2pConvert8;
 
+#ifdef HAVE_OPENGL
+	SDL_AtariGL_InitPointers(this);
+#endif
+
 	/* We're done! */
 	return(0);
 }
@@ -431,7 +435,9 @@ static void XBIOS_FreeBuffers(_THIS)
 	int i;
 
 #ifdef HAVE_OPENGL
-	SDL_AtariGL_Quit(this);
+	if (gl_active) {
+		SDL_AtariGL_Quit(this);
+	}
 #endif
 
 	for (i=0;i<2;i++) {
@@ -876,12 +882,12 @@ static void XBIOS_VideoQuit(_THIS)
 
 static void XBIOS_GL_SwapBuffers(_THIS)
 {
-	if (gl_ctx == NULL) {
-		return;
+	if (gl_active) {
+		gl_copyshadow(this, this->screen);
+		gl_convert(this, this->screen);
+		XBIOS_FlipHWSurface(this, this->screen);
+		SDL_AtariGL_MakeCurrent(this);
 	}
-
-	XBIOS_FlipHWSurface(this, this->screen);
-	SDL_AtariGL_MakeCurrent(this);
 }
 
 #endif
