@@ -191,16 +191,15 @@ static int MME_OpenAudio(_THIS, SDL_AudioSpec *spec)
 
 static void MME_WaitAudio(_THIS)
 {
-    mmeWaitForCallbacks ();
-    mmeProcessCallbacks ();
+    while ( inUse[next_buffer] ) {
+	mmeWaitForCallbacks();
+	mmeProcessCallbacks();
+    }
 }
 
 static Uint8 *MME_GetAudioBuf(_THIS)
 {
     Uint8 *retval;
-
-    while ( inUse[next_buffer] )
-	;
 
     inUse[next_buffer] = TRUE;
     retval = (Uint8 *)(shm->wHdr[next_buffer].lpData);
@@ -220,13 +219,15 @@ static void MME_WaitDone(_THIS)
     int i;
 
     if ( shm->sound ) {
+	for (i = 0; i < NUM_BUFFERS; i++)
+	    while ( inUse[i] ) {
+		mmeWaitForCallbacks();
+		mmeProcessCallbacks();
+	    }
 	result = waveOutReset(shm->sound);
 	if ( result != MMSYSERR_NOERROR )
 	    SetMMerror("waveOutReset()", result);
-	else {
-	    mmeWaitForCallbacks ();
-	    mmeProcessCallbacks ();
-	}
+	mmeProcessCallbacks();
     }
 }
 
@@ -246,6 +247,7 @@ static void MME_CloseAudio(_THIS)
 	    result = waveOutClose(shm->sound);
 	    if (result != MMSYSERR_NOERROR )
 		SetMMerror("waveOutClose()", result);
+	    mmeProcessCallbacks();
 	}
 	result = mmeFreeMem(shm);
 	if (result != MMSYSERR_NOERROR )
