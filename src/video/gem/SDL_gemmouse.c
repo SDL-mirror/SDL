@@ -43,6 +43,8 @@ static char rcsid =
 
 /* Defines */
 
+/*#define DEBUG_VIDEO_GEM 1*/
+
 #define MAXCURWIDTH 16
 #define MAXCURHEIGHT 16
 
@@ -102,36 +104,46 @@ WMcursor *GEM_CreateWMCursor(_THIS,
 	new_mform->mf_fg = 0;
 	new_mform->mf_bg = 1;
 
-	for (i=0;i<MAXCURHEIGHT;i++)
-	{
+	for (i=0;i<MAXCURHEIGHT;i++) {
 		new_mform->mf_mask[i]=0;
 		new_mform->mf_data[i]=0;
 	}
 
 	if (w<=8) {
-		for (i=0;i<h;i++)
-		{
+		for (i=0;i<h;i++) {
 			new_mform->mf_mask[i]= mask[i]<<8;
 			new_mform->mf_data[i]= data[i]<<8;
 		}
 	} else {
-		for (i=0;i<h;i++)
-		{
+		for (i=0;i<h;i++) {
 			new_mform->mf_mask[i]= mask[i<<1]<<8 | mask[(i<<1)+1];
 			new_mform->mf_data[i]= data[i<<1]<<8 | data[(i<<1)+1];
 		}
 	}
+
+#ifdef DEBUG_VIDEO_GEM
+	for (i=0; i<h ;i++) {
+		printf("sdl:video:gem: cursor, line %d = 0x%04x\n", i, new_mform->mf_mask[i]);
+	}
+
+	printf("sdl:video:gem: CreateWMCursor(): done\n");
+#endif
 
 	return cursor;
 }
 
 int GEM_ShowWMCursor(_THIS, WMcursor *cursor)
 {
+/*
 	if (cursor == NULL) {
 		graf_mouse(M_OFF, NULL);
 	} else if (cursor->mform_p) {
 		graf_mouse(USER_DEF, cursor->mform_p);
 	}
+*/
+#ifdef DEBUG_VIDEO_GEM
+	printf("sdl:video:gem: ShowWMCursor(0x%08x)\n", (long) cursor);
+#endif
 
 	return 1;
 }

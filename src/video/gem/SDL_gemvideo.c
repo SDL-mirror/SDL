@@ -26,13 +26,12 @@ static char rcsid =
 #endif
 
 /*
- * GEM SDL video driver implementation
- * inspired from the Dummy SDL driver
- * 
- * Patrice Mandin
- * and work from
- * Olivier Landemarre, Johan Klockars, Xavier Joubert, Claude Attard
- */
+	GEM video driver
+
+	Patrice Mandin
+	and work from
+	Olivier Landemarre, Johan Klockars, Xavier Joubert, Claude Attard
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -54,7 +53,6 @@ static char rcsid =
 #include "SDL_cursor_c.h"
 
 #include "SDL_ataric2p_s.h"
-#include "SDL_ataric2p060_c.h"
 #include "SDL_atarieddi_s.h"
 #include "SDL_atarimxalloc_c.h"
 #include "SDL_gemvideo.h"
@@ -64,6 +62,8 @@ static char rcsid =
 #include "SDL_xbiosevents_c.h"
 
 /* Defines */
+
+/*#define DEBUG_VIDEO_GEM	1*/
 
 #define GEM_VID_DRIVER_NAME "gem"
 
@@ -97,6 +97,7 @@ static int GEM_ToggleFullScreen(_THIS, int on);
 /* Internal functions */
 static void GEM_FreeBuffers(_THIS);
 static void GEM_ClearScreen(_THIS);
+static void GEM_ClearRect(_THIS, short *rect);
 static void GEM_LockScreen(_THIS);
 static void GEM_UnlockScreen(_THIS);
 static void refresh_window(_THIS, int winhandle, short *rect);
@@ -139,8 +140,6 @@ static SDL_VideoDevice *GEM_CreateDevice(int devindex)
 	}
 	memset(device->hidden, 0, (sizeof *device->hidden));
 
-	atari_test_cpu060_present();
-
 	/* Set the function pointers */
 	device->VideoInit = GEM_VideoInit;
 	device->ListModes = GEM_ListModes;
@@ -157,7 +156,7 @@ static SDL_VideoDevice *GEM_CreateDevice(int devindex)
 
 	/* Window manager */
 	device->SetCaption = GEM_SetCaption;
-	device->SetIcon = NULL /*GEM_SetIcon*/;
+	device->SetIcon = GEM_SetIcon;
 	device->IconifyWindow = GEM_IconifyWindow;
 	device->GrabInput = GEM_GrabInput;
 
@@ -218,48 +217,26 @@ static void VDI_ReadExtInfo(_THIS, short *work_out)
 				if (work_out[14] & (1<<7)) {
 					/* Little endian */
 					if (work_out[14] & (1<<1)) {
-						/* Falcon */
-						VDI_alphamask = 1 << 13;
-						VDI_redmask = 31 << 3;
-						VDI_greenmask = (3 << 14) | 7;
-						VDI_bluemask = 31 << 8;
+						VDI_FBMASK(1<<13, 31<<3, (3<<14)|7, 31<<8);
 					} else {
-						/* Others */
-						VDI_alphamask = 1 << 7;
-						VDI_redmask = 31 << 2;
-						VDI_greenmask = (7 << 13) | 3;
-						VDI_bluemask = 31 << 8;
+						VDI_FBMASK(1<<7, 31<<2, (7<<13)|3, 31<<8);
 					}
 				} else {
 					/* Big endian */
 					if (work_out[14] & (1<<1)) {
-						/* Falcon */
-						VDI_alphamask = 1 << 5;
-						VDI_redmask = 31 << 11;
-						VDI_greenmask = 31 << 6;
-						VDI_bluemask = 31;
+						VDI_FBMASK(1<<5, 31<<11, 31<<6, 31);
 					} else {
-						/* Others */
-						VDI_alphamask = 1 << 15;
-						VDI_redmask = 31 << 10;
-						VDI_greenmask = 31 << 5;
-						VDI_bluemask = 31;
+						VDI_FBMASK(1<<15, 31<<10, 31<<5, 31);
 					}
 				}
 				break;
 			case 65536UL:
 				if (work_out[14] & (1<<7)) {
 					/* Little endian */
-					VDI_alphamask = 0;
-					VDI_redmask = 31 << 3;
-					VDI_greenmask = (7 << 13) | 7;
-					VDI_bluemask = 31 << 8;
+					VDI_FBMASK(0, 31<<3, (7<<13)|7, 31<<8);
 				} else {
 					/* Big endian */
-					VDI_alphamask = 0;
-					VDI_redmask = 31 << 11;
-					VDI_greenmask = 63 << 5;
-					VDI_bluemask = 31;
+					VDI_FBMASK(0, 31<<11, 63<<5, 31);
 				}
 				break;
 			case 16777216UL:
@@ -267,32 +244,20 @@ static void VDI_ReadExtInfo(_THIS, short *work_out)
 					/* Little endian */
 					switch(num_bits) {
 						case 24:
-							VDI_alphamask = 0;
-							VDI_redmask = 255;
-							VDI_greenmask = 255 << 8;
-							VDI_bluemask = 255 << 16;
+							VDI_FBMASK(0, 255, 255<<8, 255<<16);
 							break;
 						case 32:
-							VDI_alphamask = 255;
-							VDI_redmask = 255 << 8;
-							VDI_greenmask = 255 << 16;
-							VDI_bluemask = 255 << 24;
+							VDI_FBMASK(255, 255<<8, 255<<16, 255<<24);
 							break;
 					}
 				} else {
 					/* Big endian */
 					switch(num_bits) {
 						case 24:
-							VDI_alphamask = 0;
-							VDI_redmask = 255 << 16;
-							VDI_greenmask = 255 << 8;
-							VDI_bluemask = 255;
+							VDI_FBMASK(0, 255<<16, 255<<8, 255);
 							break;
 						case 32:
-							VDI_alphamask = 255 << 24;
-							VDI_redmask = 255 << 16;
-							VDI_greenmask = 255 << 8;
-							VDI_bluemask = 255;
+							VDI_FBMASK(255<<24, 255<<16, 255<<8, 255);
 							break;
 					}
 				}
@@ -371,13 +336,31 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	}
 
 	/* Read version and features */
-	GEM_version = aes_params.global[0];
-	if (GEM_version >= 0x0400) {
-		short ap_gout[4];
+	GEM_version = aes_global[0];
+	if (GEM_version >= 0x0410) {
+		short ap_gout[4], errorcode;
 		
+#ifdef DEBUG_VIDEO_GEM
+		printf("sdl:video:gem: AES %02x.%02x\n", (GEM_version>>8) & 0xff, GEM_version & 0xff);
+#endif
+
 		GEM_wfeatures=0;
-		if (appl_getinfo(AES_WINDOW, &ap_gout[0], &ap_gout[1], &ap_gout[2], &ap_gout[3])==0) {
+		errorcode=appl_getinfo(AES_WINDOW, &ap_gout[0], &ap_gout[1], &ap_gout[2], &ap_gout[3]);
+#ifdef DEBUG_VIDEO_GEM
+		printf("sdl:video:gem: appl_getinfo() returned 0x%04x\n", errorcode);
+#endif
+
+		if (errorcode==0) {
 			GEM_wfeatures=ap_gout[0];			
+
+#ifdef DEBUG_VIDEO_GEM
+			printf("sdl:video:gem: AES wind_*() modes: 0x%04x\n", GEM_wfeatures);
+			printf("sdl:video:gem: AES window behaviours: 0x%04x\n", ap_gout[3]);
+		} else {
+			printf("sdl:video:gem: apgout[]={0x%04x,0x%04x,0x%04x,0x%04x}\n",
+				ap_gout[0], ap_gout[1], ap_gout[1], ap_gout[3]
+			);
+#endif
 		}
 	}	
 
@@ -469,7 +452,10 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	VDI_ReadExtInfo(this, work_out);
 	if (VDI_screen == NULL) {
 		VDI_pitch = VDI_w * VDI_pixelsize;
-		VDI_format = VDI_FORMAT_UNKNOWN;
+		VDI_format = VDI_FORMAT_PACK;
+		if (VDI_bpp <= 8) {
+			VDI_format = VDI_FORMAT_INTER;
+		}
 		VDI_redmask = VDI_greenmask = VDI_bluemask = VDI_alphamask = 0;
 	}
 
@@ -480,14 +466,6 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	this->info.hw_available = 0;
 	this->info.video_mem = 0;
 
-	/*	TC, screen : no shadow (direct)
-     *  8P, screen: no shadow (direct)
-     *  8I, screen: shadow, c2p (shadow -> c2p)
-	 *  TC, no screen: shadow (vro_cpyfm)
-	 *  8P, no screen: shadow (vro_cpyfm)
-	 *  8I/U, no screen: shadow, shadow_c2p, c2p (shadow -> c2p -> vro_cpyfm)
-	 */
-
 	/* Determine the screen depth */
 	/* we change this during the SDL_SetVideoMode implementation... */
 	vformat->BitsPerPixel = VDI_bpp;
@@ -496,13 +474,16 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	graf_mouse(ARROW, NULL);
 
 	/* Init chunky to planar routine */
-	Atari_C2pInit = Atari_C2pInit8;
-	if (atari_cpu060_avail) {
-		Atari_C2pConvert = Atari_C2pConvert8_060;
-	} else {
-		Atari_C2pConvert = Atari_C2pConvert8;
-	}
-	Atari_C2pInit();
+	SDL_Atari_C2pConvert = SDL_Atari_C2pConvert8;
+
+	/* Setup VDI fill functions */
+	vsf_color(VDI_handle,0);
+	vsf_interior(VDI_handle,1);
+	vsf_perimeter(VDI_handle,0);
+
+#ifdef DEBUG_VIDEO_GEM
+	printf("sdl:video:gem: VideoInit(): done\n");
+#endif
 
 	/* We're done! */
 	return(0);
@@ -520,9 +501,14 @@ SDL_Rect **GEM_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
 static void GEM_FreeBuffers(_THIS)
 {
 	/* Release buffer */
-	if ( GEM_buffer ) {
-		free( GEM_buffer );
-		GEM_buffer=NULL;
+	if ( GEM_buffer2 ) {
+		free( GEM_buffer2 );
+		GEM_buffer2=NULL;
+	}
+
+	if ( GEM_buffer1 ) {
+		free( GEM_buffer1 );
+		GEM_buffer1=NULL;
 	}
 
 	/* Destroy window */
@@ -533,26 +519,31 @@ static void GEM_FreeBuffers(_THIS)
 	}
 }
 
-static void GEM_ClearScreen(_THIS)
+static void GEM_ClearRect(_THIS, short *rect)
 {
-	short rgb[3]={0,0,0};
-	short oldrgb[3];
-	short pxy[4];
-
-	v_hide_c(VDI_handle);
+	short oldrgb[3], rgb[3]={0,0,0};
 
 	vq_color(VDI_handle, vdi_index[0], 0, oldrgb);
 	vs_color(VDI_handle, vdi_index[0], rgb);
 
-	pxy[0] = pxy[1] = 0;
-	pxy[2] = VDI_w - 1;
-	pxy[3] = VDI_h - 1;
 	vsf_color(VDI_handle,0);
 	vsf_interior(VDI_handle,1);
 	vsf_perimeter(VDI_handle,0);
-	v_bar(VDI_handle,pxy);
+	v_bar(VDI_handle, rect);
 
 	vs_color(VDI_handle, vdi_index[0], oldrgb);
+}
+
+static void GEM_ClearScreen(_THIS)
+{
+	short pxy[4];
+
+	v_hide_c(VDI_handle);
+
+	pxy[0] = pxy[1] = 0;
+	pxy[2] = VDI_w - 1;
+	pxy[3] = VDI_h - 1;
+	GEM_ClearRect(this, pxy);
 
 	v_show_c(VDI_handle, 1);
 }
@@ -588,7 +579,7 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 {
 	int maxwidth, maxheight;
 	Uint32 modeflags, screensize;
-	SDL_bool use_shadow;
+	SDL_bool use_shadow1, use_shadow2;
 
 	GEM_FreeBuffers(this);
 
@@ -613,38 +604,48 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 		return(NULL);
 	}
 
-	/*--- Allocate shadow buffer if needed ---*/
-	use_shadow=SDL_FALSE;
-	if (flags & SDL_FULLSCREEN) {
-		if (!VDI_screen) {
-			/* No access to real framebuffer, use shadow surface */
-			use_shadow=SDL_TRUE;
-		} else {
-			if (VDI_format==VDI_FORMAT_INTER) {
-				/* Real framebuffer, interleaved bitplanes,
-				  use shadow surface */
-				use_shadow=SDL_TRUE;
-			} else if (flags & SDL_DOUBLEBUF) {
-				/* Real framebuffer, double-buffered,
-				  use shadow surface */
-				use_shadow=SDL_TRUE;
-				modeflags |= SDL_DOUBLEBUF;
-			}
+	screensize = width * height * VDI_pixelsize;
+
+	/*--- Allocate shadow buffers if needed, and conversion operations ---*/
+	GEM_bufops=0;
+	use_shadow1=use_shadow2=SDL_FALSE;
+	if (VDI_screen && (flags & SDL_FULLSCREEN)) {
+		if (VDI_format==VDI_FORMAT_INTER) {
+			use_shadow1=SDL_TRUE;
+			GEM_bufops = B2S_C2P_1TOS;
 		}
 	} else {
-		/* Windowed mode, always with shadow surface */
-		use_shadow=SDL_TRUE;
+		use_shadow1=SDL_TRUE;
+		if (VDI_format==VDI_FORMAT_PACK) {
+			GEM_bufops = B2S_VROCPYFM_1TOS;
+		} else {
+			use_shadow2=SDL_TRUE;
+			GEM_bufops = B2S_C2P_1TO2|B2S_VROCPYFM_2TOS;
+		}
 	}
 
-	if (use_shadow) {
-		screensize = width * height * VDI_pixelsize;
-
-		GEM_buffer = Atari_SysMalloc(screensize, MX_PREFTTRAM);
-		if (GEM_buffer==NULL) {
+	if (use_shadow1) {
+		GEM_buffer1 = Atari_SysMalloc(screensize, MX_PREFTTRAM);
+		if (GEM_buffer1==NULL) {
 			fprintf(stderr,"Unable to allocate shadow buffer\n");
 			return NULL;
 		}
-		memset(GEM_buffer, 0, screensize);
+		memset(GEM_buffer1, 0, screensize);
+#ifdef DEBUG_VIDEO_GEM
+		printf("sdl:video:gem: setvideomode(): allocated buffer 1\n");
+#endif
+	}
+
+	if (use_shadow2) {
+		GEM_buffer2 = Atari_SysMalloc(screensize, MX_PREFTTRAM);
+		if (GEM_buffer2==NULL) {
+			fprintf(stderr,"Unable to allocate shadow buffer\n");
+			return NULL;
+		}
+		memset(GEM_buffer2, 0, screensize);
+#ifdef DEBUG_VIDEO_GEM
+		printf("sdl:video:gem: setvideomode(): allocated buffer 2\n");
+#endif
 	}
 
 	/*--- Initialize screen ---*/
@@ -659,7 +660,7 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 		GEM_ClearScreen(this);
 
 		modeflags |= SDL_FULLSCREEN;
-		if (VDI_screen && (VDI_format==VDI_FORMAT_PACK) && !use_shadow) {
+		if (VDI_screen && (VDI_format==VDI_FORMAT_PACK) && !use_shadow1) {
 			modeflags |= SDL_HWSURFACE;
 		} else {
 			modeflags |= SDL_SWSURFACE;
@@ -704,8 +705,13 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 			return NULL;
 		}
 
+#ifdef DEBUG_VIDEO_GEM
+		printf("sdl:video:gem: handle=%d\n", GEM_handle);
+#endif
+
 		/* Setup window name */
 		wind_set(GEM_handle,WF_NAME,(short)(((unsigned long)GEM_title_name)>>16),(short)(((unsigned long)GEM_title_name) & 0xffff),0,0);
+		GEM_refresh_name = SDL_FALSE;
 	
 		/* Open the window */
 		wind_open(GEM_handle,x2,y2,w2,h2);
@@ -717,8 +723,8 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 	current->flags = modeflags;
 	current->w = width;
 	current->h = height;
-	if (use_shadow) {
-		current->pixels = GEM_buffer;
+	if (use_shadow1) {
+		current->pixels = GEM_buffer1;
 		current->pitch = width * (VDI_bpp >> 3);
 	} else {
 		current->pixels = VDI_screen;
@@ -733,7 +739,6 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 	return(current);
 }
 
-/* We don't actually allow hardware surfaces other than the main one */
 static int GEM_AllocHWSurface(_THIS, SDL_Surface *surface)
 {
 	return -1;
@@ -743,7 +748,6 @@ static void GEM_FreeHWSurface(_THIS, SDL_Surface *surface)
 	return;
 }
 
-/* We need to wait for vertical retrace on page flipped displays */
 static int GEM_LockHWSurface(_THIS, SDL_Surface *surface)
 {
 	return(0);
@@ -757,93 +761,96 @@ static void GEM_UnlockHWSurface(_THIS, SDL_Surface *surface)
 static void GEM_UpdateRectsFullscreen(_THIS, int numrects, SDL_Rect *rects)
 {
 	SDL_Surface *surface;
-	MFDB mfdb_src;
-	short blitcoords[8];
 	int i;
 
 	surface = this->screen;
 
-	if (VDI_screen) {
-		if (VDI_format==VDI_FORMAT_INTER) {
-			void *destscr;
+	if (GEM_bufops & (B2S_C2P_1TO2|B2S_C2P_1TOS)) {
+		void *destscr;
+		int destpitch;
+
+		if (GEM_bufops & B2S_C2P_1TOS) {
 			int destx;
-			
+
 			destscr = VDI_screen;
 			destscr += VDI_pitch * ((VDI_h - surface->h) >> 1);
 			destx = (VDI_w - surface->w) >> 1;
 			destx &= ~15;
 			destscr += destx;
-
-			for (i=0;i<numrects;i++) {
-				void *source,*destination;
-				int x1,x2;
-
-				x1 = rects[i].x & ~15;
-				x2 = rects[i].x+rects[i].w;
-				if (x2 & 15) {
-					x2 = (x2 | 15) +1;
-				}
-
-				source = surface->pixels;
-				source += surface->pitch * rects[i].y;
-				source += x1;
-
-				destination = destscr;
-				destination += VDI_pitch * rects[i].y;
-				destination += x1;
-
-				/* Convert chunky to planar screen */
-				Atari_C2pConvert(
-					source,
-					destination,
-					x2-x1,
-					rects[i].h,
-					SDL_FALSE,
-					surface->pitch,
-					VDI_pitch
-				);
-
-			}
-
-			return;
+			destpitch = VDI_pitch;
+		} else {
+			destscr = GEM_buffer2;
+			destpitch = surface->pitch;
 		}
 
-		if (!(surface->flags & SDL_DOUBLEBUF)) {
-			return;
+		for (i=0;i<numrects;i++) {
+			void *source,*destination;
+			int x1,x2;
+
+			x1 = rects[i].x & ~15;
+			x2 = rects[i].x+rects[i].w;
+			if (x2 & 15) {
+				x2 = (x2 | 15) +1;
+			}
+
+			source = surface->pixels;
+			source += surface->pitch * rects[i].y;
+			source += x1;
+
+			destination = destscr;
+			destination += destpitch * rects[i].y;
+			destination += x1;
+
+			SDL_Atari_C2pConvert(
+				source, destination,
+				x2-x1, rects[i].h,
+				SDL_FALSE,
+				surface->pitch, destpitch
+			);
 		}
 	}
 
-	mfdb_src.fd_addr=surface->pixels;
-	mfdb_src.fd_w=surface->w;
-	mfdb_src.fd_h=surface->h;
-	mfdb_src.fd_wdwidth=(surface->w) >> 4;
-	mfdb_src.fd_stand=0;
-	mfdb_src.fd_nplanes=surface->format->BitsPerPixel;
-	mfdb_src.fd_r1=0;
-	mfdb_src.fd_r2=0;
-	mfdb_src.fd_r3=0;
+	if (GEM_bufops & (B2S_VROCPYFM_1TOS|B2S_VROCPYFM_2TOS)) {
+		MFDB mfdb_src;
+		short blitcoords[8];
 
-	for ( i=0; i<numrects; ++i ) {
-		blitcoords[0] = rects[i].x;
-		blitcoords[1] = rects[i].y;
-		blitcoords[2] = blitcoords[0] + rects[i].w - 1;
-		blitcoords[3] = blitcoords[1] + rects[i].h - 1;
+		mfdb_src.fd_addr=surface->pixels;
+		mfdb_src.fd_w=surface->w;
+		mfdb_src.fd_h=surface->h;
+		mfdb_src.fd_wdwidth=(surface->w) >> 4;
+		mfdb_src.fd_nplanes=surface->format->BitsPerPixel;
+		mfdb_src.fd_stand=
+			mfdb_src.fd_r1=
+			mfdb_src.fd_r2=
+			mfdb_src.fd_r3= 0;
+		if (GEM_bufops & B2S_VROCPYFM_2TOS) {
+			mfdb_src.fd_addr=GEM_buffer2;
+		}
 
-		blitcoords[4] = rects[i].x + ((VDI_w - surface->w) >> 1);
-		blitcoords[5] = rects[i].y + ((VDI_h - surface->h) >> 1);
-		blitcoords[6] = blitcoords[4] + rects[i].w - 1;
-		blitcoords[7] = blitcoords[5] + rects[i].h - 1;
+		for ( i=0; i<numrects; ++i ) {
+			blitcoords[0] = rects[i].x;
+			blitcoords[1] = rects[i].y;
+			blitcoords[2] = blitcoords[0] + rects[i].w - 1;
+			blitcoords[3] = blitcoords[1] + rects[i].h - 1;
 
-		vro_cpyfm(VDI_handle, S_ONLY, blitcoords, &mfdb_src, &VDI_dst_mfdb);
+			blitcoords[4] = rects[i].x + ((VDI_w - surface->w) >> 1);
+			blitcoords[5] = rects[i].y + ((VDI_h - surface->h) >> 1);
+			blitcoords[6] = blitcoords[4] + rects[i].w - 1;
+			blitcoords[7] = blitcoords[5] + rects[i].h - 1;
+
+			vro_cpyfm(VDI_handle, S_ONLY, blitcoords, &mfdb_src, &VDI_dst_mfdb);
+		}
 	}
 }
 
 static void GEM_UpdateRectsWindowed(_THIS, int numrects, SDL_Rect *rects)
 {
-	short pxy[8], wind_pxy[8];
+	short pxy[4], wind_pxy[4];
 	int i;
 
-	wind_get(GEM_handle, WF_WORKXYWH, &wind_pxy[0], &wind_pxy[1], &wind_pxy[2], &wind_pxy[3]);
+	if (wind_get(GEM_handle, WF_WORKXYWH, &wind_pxy[0], &wind_pxy[1], &wind_pxy[2], &wind_pxy[3])==0) {
+		return;
+	}
 
 	for ( i=0; i<numrects; ++i ) {
 		pxy[0] = wind_pxy[0] + rects[i].x;
@@ -870,60 +877,62 @@ static void GEM_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 
 static int GEM_FlipHWSurfaceFullscreen(_THIS, SDL_Surface *surface)
 {
-	MFDB mfdb_src;
-	short blitcoords[8];
+	if (GEM_bufops & (B2S_C2P_1TO2|B2S_C2P_1TOS)) {
+		void *destscr;
+		int destpitch;
 
-	if (VDI_screen) {
-		if (VDI_format==VDI_FORMAT_INTER) {
-			void *destscr;
+		if (GEM_bufops & B2S_C2P_1TOS) {
 			int destx;
-			
-			/* Center on destination screen */
+
 			destscr = VDI_screen;
 			destscr += VDI_pitch * ((VDI_h - surface->h) >> 1);
 			destx = (VDI_w - surface->w) >> 1;
 			destx &= ~15;
 			destscr += destx;
-
-			/* Convert chunky to planar screen */
-			Atari_C2pConvert(
-				surface->pixels,
-				destscr,
-				surface->w,
-				surface->h,
-				SDL_FALSE,
-				surface->pitch,
-				VDI_pitch
-			);
-
-			return(0);
+			destpitch = VDI_pitch;
+		} else {
+			destscr = GEM_buffer2;
+			destpitch = surface->pitch;
 		}
 
-		if (!(surface->flags & SDL_DOUBLEBUF)) {
-			return(0);
-		}
+		SDL_Atari_C2pConvert(
+			surface->pixels, destscr,
+			surface->w, surface->h,
+			SDL_FALSE,
+			surface->pitch, destpitch
+		);
 	}
-	
-	mfdb_src.fd_addr=surface->pixels;
-	mfdb_src.fd_w=surface->w;
-	mfdb_src.fd_h=surface->h;
-	mfdb_src.fd_wdwidth=(surface->w) >> 4;
-	mfdb_src.fd_stand=0;
-	mfdb_src.fd_nplanes=surface->format->BitsPerPixel;
-	mfdb_src.fd_r1=0;
-	mfdb_src.fd_r2=0;
-	mfdb_src.fd_r3=0;
 
-	blitcoords[0] = 0;
-	blitcoords[1] = 0;
-	blitcoords[2] = surface->w - 1;
-	blitcoords[3] = surface->h - 1;
-	blitcoords[4] = (VDI_w - surface->w) >> 1;
-	blitcoords[5] = (VDI_h - surface->h) >> 1;
-	blitcoords[6] = blitcoords[4] + surface->w - 1;
-	blitcoords[7] = blitcoords[5] + surface->h - 1;
+	if (GEM_bufops & (B2S_VROCPYFM_1TOS|B2S_VROCPYFM_2TOS)) {
+		MFDB mfdb_src;
+		short blitcoords[8];
 
-	vro_cpyfm(VDI_handle, S_ONLY, blitcoords, &mfdb_src, &VDI_dst_mfdb);
+		mfdb_src.fd_w=surface->w;
+		mfdb_src.fd_h=surface->h;
+		mfdb_src.fd_wdwidth=(surface->w) >> 4;
+		mfdb_src.fd_nplanes=surface->format->BitsPerPixel;
+		mfdb_src.fd_stand=
+			mfdb_src.fd_r1=
+			mfdb_src.fd_r2=
+			mfdb_src.fd_r3= 0;
+		if (GEM_bufops & B2S_VROCPYFM_1TOS) {
+			mfdb_src.fd_addr=surface->pixels;
+		} else {
+			mfdb_src.fd_addr=GEM_buffer2;
+		}
+
+		blitcoords[0] = 0;
+		blitcoords[1] = 0;
+		blitcoords[2] = surface->w - 1;
+		blitcoords[3] = surface->h - 1;
+
+		blitcoords[4] = (VDI_w - surface->w) >> 1;
+		blitcoords[5] = (VDI_h - surface->h) >> 1;
+		blitcoords[6] = blitcoords[4] + surface->w - 1;
+		blitcoords[7] = blitcoords[5] + surface->h - 1;
+
+		vro_cpyfm(VDI_handle, S_ONLY, blitcoords, &mfdb_src, &VDI_dst_mfdb);
+	}
 
 	return(0);
 }
@@ -953,6 +962,10 @@ static int GEM_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 {
 	int i;
 	SDL_Surface *surface;
+
+#ifdef DEBUG_VIDEO_GEM
+	printf("sdl:video:gem: setcolors()\n");
+#endif
 
 	/* Do not change palette in True Colour */
 	surface = this->screen;
@@ -1044,76 +1057,193 @@ void GEM_wind_redraw(_THIS, int winhandle, short *inside)
 	v_hide_c(VDI_handle);
 
 	/* Browse the rectangle list to redraw */
-	wind_get(winhandle, WF_FIRSTXYWH, &todo[0], &todo[1], &todo[2], &todo[3]);
+	if (wind_get(winhandle, WF_FIRSTXYWH, &todo[0], &todo[1], &todo[2], &todo[3])!=0) {
 
-	while (todo[2] && todo[3]) {
+		while (todo[2] && todo[3]) {
 
-		if (rc_intersect((GRECT *)inside,(GRECT *)todo)) {
-			todo[2] += todo[0]-1;
-			todo[3] += todo[1]-1;
-			refresh_window(this, winhandle, todo);
+			if (rc_intersect((GRECT *)inside,(GRECT *)todo)) {
+				todo[2] += todo[0]-1;
+				todo[3] += todo[1]-1;
+				refresh_window(this, winhandle, todo);
+			}
+
+			if (wind_get(winhandle, WF_NEXTXYWH, &todo[0], &todo[1], &todo[2], &todo[3])==0) {
+				break;
+			}
 		}
 
-		wind_get(winhandle, WF_NEXTXYWH, &todo[0], &todo[1], &todo[2], &todo[3]);
 	}
 
 	/* Update finished */
 	wind_update(END_UPDATE);
 
 	v_show_c(VDI_handle,1);
+
+#if DEBUG_VIDEO_GEM
+	fflush(stdout);
+#endif
 }
 
 static void refresh_window(_THIS, int winhandle, short *rect)
 {
-	MFDB	mfdb_src;
-	short	pxy[8], wind_pxy[8];
-	int iconified;
+	MFDB mfdb_src;
+	short pxy[8],wind_pxy[8];
 	SDL_Surface *surface;
-
-	surface=this->screen;
+	int iconified;
 
 	/* Is window iconified ? */
 	iconified = 0;
-	if (GEM_wfeatures & (1<<WF_ICONIFY)) {
-		wind_get(winhandle, WF_ICONIFY, &wind_pxy[0], &wind_pxy[1], &wind_pxy[2], &wind_pxy[3]);
-		iconified = pxy[0];
+/*	if (GEM_wfeatures & (1<<WF_ICONIFY))*/ {
+		if (wind_get(winhandle, WF_ICONIFY, &wind_pxy[0], &wind_pxy[1], &wind_pxy[2], &wind_pxy[3])!=0) {
+			iconified = wind_pxy[0];
+		}
 	}
 
-	wind_get(winhandle, WF_WORKXYWH, &wind_pxy[0], &wind_pxy[1], &wind_pxy[2], &wind_pxy[3]);
+	if (wind_get(winhandle, WF_WORKXYWH, &wind_pxy[0], &wind_pxy[1], &wind_pxy[2], &wind_pxy[3])==0) {
+		return;
+	}
 
-	if (iconified) {
-		/* Refresh icon */
-		mfdb_src.fd_addr=surface->pixels;	/* Should be icon image */
-		mfdb_src.fd_w=surface->w;
-		mfdb_src.fd_h=surface->h;
-		mfdb_src.fd_wdwidth=mfdb_src.fd_w>>4;
-	  	mfdb_src.fd_stand=0;
-  		mfdb_src.fd_nplanes=surface->format->BitsPerPixel;
-		mfdb_src.fd_r1=0;
-  		mfdb_src.fd_r2=0;
-	  	mfdb_src.fd_r3=0;
+	if (iconified && GEM_icon) {
+		short icon_rect[4], dst_rect[4];
+		
+		surface = GEM_icon;
+
+		GEM_ClearRect(this, rect);
+
+		/* Calculate centered icon(x,y,w,h) relative to window */
+		icon_rect[0] = (wind_pxy[2]-surface->w)>>1;
+		icon_rect[1] = (wind_pxy[3]-surface->h)>>1;
+		icon_rect[2] = surface->w;
+		icon_rect[3] = surface->h;
+
+		/* Calculate redraw rectangle(x,y,w,h) relative to window */
+		dst_rect[0] = rect[0]-wind_pxy[0];
+		dst_rect[1] = rect[1]-wind_pxy[1];
+		dst_rect[2] = rect[2]-rect[0]+1;
+		dst_rect[3] = rect[3]-rect[1]+1;
+
+		/* Does the icon rectangle must be redrawn ? */
+		if (!rc_intersect((GRECT *)icon_rect, (GRECT *)dst_rect)) {
+			return;
+		}
+
+#ifdef DEBUG_VIDEO_GEM
+		printf("sdl:video:gem:  clip(0,0,%d,%d) to (%d,%d,%d,%d)\n",
+			surface->w-1,surface->h-1, dst_rect[0],dst_rect[1],dst_rect[2],dst_rect[3]);
+		printf("sdl:video:gem:  icon(%d,%d,%d,%d)\n",
+			icon_rect[0], icon_rect[1], icon_rect[2], icon_rect[3]);
+		printf("sdl:video:gem: refresh_window(): draw icon\n");
+#endif
+
+		/* Calculate icon(x1,y1,x2,y2) relative to screen */
+		icon_rect[0] += wind_pxy[0];
+		icon_rect[1] += wind_pxy[1];
+		icon_rect[2] += icon_rect[0]-1;
+		icon_rect[3] += icon_rect[1]-1;
+
+		/* Calculate intersection rectangle to redraw */
+		pxy[0]=0;
+		pxy[1]=0;
+ 		pxy[2]=surface->w - 1;
+	 	pxy[3]=surface->h - 1;
+		pxy[4]=rect[0];
+		pxy[5]=rect[1];
+		pxy[6]=rect[2];
+		pxy[7]=rect[3];
+
+		if (icon_rect[0]>rect[0]) {
+			pxy[4]=icon_rect[0];
+		} else if (icon_rect[0]<rect[0]) {
+			pxy[0]=rect[0]-icon_rect[0];
+		}
+
+		if (icon_rect[1]>rect[1]) {
+			pxy[5]=icon_rect[1];
+		} else if (icon_rect[1]<rect[1]) {
+			pxy[1]=rect[1]-icon_rect[1];
+		}
+
+		if (icon_rect[2]>rect[2]) {
+			pxy[2]=rect[2]-icon_rect[0];
+			pxy[6]=rect[2];
+		} else if (icon_rect[2]<rect[2]) {
+			pxy[2]=icon_rect[2]-rect[0];
+			pxy[6]=icon_rect[2];
+		}
+
+		if (icon_rect[3]>rect[3]) {
+			pxy[3]=rect[3]-icon_rect[1];
+			pxy[7]=rect[3];
+		} else if (icon_rect[3]<rect[3]) {
+			pxy[3]=icon_rect[3]-rect[1];
+			pxy[7]=icon_rect[3];
+		}
+
 	} else {
-		/* Refresh window */
-		mfdb_src.fd_addr=surface->pixels;
-		mfdb_src.fd_w=surface->w;
-		mfdb_src.fd_h=surface->h;
-		mfdb_src.fd_wdwidth=mfdb_src.fd_w>>4;
-	  	mfdb_src.fd_stand=0;
-  		mfdb_src.fd_nplanes=surface->format->BitsPerPixel;
-		mfdb_src.fd_r1=0;
-  		mfdb_src.fd_r2=0;
-	  	mfdb_src.fd_r3=0;
+		surface = this->screen;
+
+#ifdef DEBUG_VIDEO_GEM
+		printf("sdl:video:gem: refresh_window(): draw frame buffer\n");
+#endif
+
+		/* Redraw all window content */
+		pxy[0] = rect[0]-wind_pxy[0];
+		pxy[1] = rect[1]-wind_pxy[1];
+	 	pxy[2] = rect[2]-wind_pxy[0];   
+	 	pxy[3] = rect[3]-wind_pxy[1];  
+
+		pxy[4] = rect[0];
+		pxy[5] = rect[1];
+		pxy[6] = rect[2];  
+		pxy[7] = rect[3];
 	}
 
-	pxy[0] = rect[0] - wind_pxy[0];
-	pxy[1] = rect[1] - wind_pxy[1];
- 	pxy[2] = pxy[0] + rect[2] - rect[0];   
- 	pxy[3] = pxy[1] + rect[3] - rect[1];  
+	if (GEM_bufops & B2S_C2P_1TO2) {
+		void *src, *dest;
+		int x1,x2;
 
-	pxy[4] = rect[0];
-	pxy[5] = rect[1];
-	pxy[6] = rect[2];  
-	pxy[7] = rect[3];
+		x1 = (rect[0]-wind_pxy[0]) & ~15;
+		x2 = rect[2]-wind_pxy[0];
+		if (x2 & 15) {
+			x2 = (x2 | 15) +1;
+		}
+
+		src = surface->pixels;
+		src += surface->pitch * (rect[1]-wind_pxy[1]);
+		src += x1;
+
+		dest = GEM_buffer2;
+		dest += surface->pitch * (rect[1]-wind_pxy[1]);
+		dest += x1;
+
+		SDL_Atari_C2pConvert(
+			src, dest,
+			x2-x1, rect[3]-rect[1]+1,
+			SDL_FALSE,
+			surface->pitch, surface->pitch
+		);
+	}
+
+	mfdb_src.fd_addr=surface->pixels;
+	mfdb_src.fd_w=surface->w;
+	mfdb_src.fd_h=surface->h;
+  	mfdb_src.fd_nplanes=surface->format->BitsPerPixel;
+	mfdb_src.fd_wdwidth=mfdb_src.fd_w>>4;
+	mfdb_src.fd_stand=
+		mfdb_src.fd_r1=
+  		mfdb_src.fd_r2=
+	  	mfdb_src.fd_r3= 0;
+
+	if (GEM_bufops & B2S_VROCPYFM_2TOS) {
+		mfdb_src.fd_addr=GEM_buffer2;
+	}
+
+#ifdef DEBUG_VIDEO_GEM
+	printf("sdl:video:gem: redraw (%d,%d,%d,%d) to (%d,%d,%d,%d)\n",
+		pxy[0],pxy[1],pxy[2],pxy[3],
+		pxy[4],pxy[5],pxy[6],pxy[7]
+	);
+#endif
 
 	vro_cpyfm( VDI_handle, S_ONLY, pxy, &mfdb_src, &VDI_dst_mfdb);
 }

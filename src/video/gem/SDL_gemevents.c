@@ -219,6 +219,11 @@ static int do_messages(_THIS, short *message)
 				/* Send an internal deactivate event */
 				SDL_PrivateAppActive(0, SDL_APPACTIVE|SDL_APPINPUTFOCUS);
 			}
+			/* Update window title */
+			if (GEM_refresh_name && GEM_icon_name) {
+				wind_set(GEM_handle,WF_NAME,(short)(((unsigned long)GEM_icon_name)>>16),(short)(((unsigned long)GEM_icon_name) & 0xffff),0,0);
+				GEM_refresh_name = SDL_FALSE;
+			}
 			break;
 		case WM_UNICONIFY:
 			wind_set(message[3],WF_UNICONIFY,message[4],message[5],message[6],message[7]);
@@ -226,6 +231,10 @@ static int do_messages(_THIS, short *message)
 			if ( !(SDL_GetAppState() & SDL_APPACTIVE) ) {
 				/* Send an internal activate event */
 				SDL_PrivateAppActive(1, SDL_APPACTIVE);
+			}
+			if (GEM_refresh_name && GEM_title_name) {
+				wind_set(GEM_handle,WF_NAME,(short)(((unsigned long)GEM_title_name)>>16),(short)(((unsigned long)GEM_title_name) & 0xffff),0,0);
+				GEM_refresh_name = SDL_FALSE;
 			}
 			break;
 		case WM_SIZED:

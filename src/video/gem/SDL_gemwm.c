@@ -26,11 +26,11 @@ static char rcsid =
 #endif
 
 /*
- *	GEM SDL video driver implementation
- *	Window manager functions
- * 
- *	Patrice Mandin
- */
+	GEM SDL video driver
+	Window manager functions
+
+	Patrice Mandin
+*/
 
 /* Mint includes */
 #include <gem.h>
@@ -39,6 +39,8 @@ static char rcsid =
 
 /* Defines */
 
+#define DEBUG_VIDEO_GEM 0
+
 #define ICONWIDTH 64
 #define ICONHEIGHT 64
 
@@ -46,65 +48,77 @@ static char rcsid =
 
 void GEM_SetCaption(_THIS, const char *title, const char *icon)
 {
-	short parm[4];
-	const char *new_name;
-
-	new_name = NULL;
-
-	if (title)
+	if (title) {
 		GEM_title_name = title;
-
-	if (icon)
-		GEM_icon_name = icon;
-
-	/* Is window iconified ? */
-	parm[0]=0;
-	if (GEM_wfeatures & (1<<WF_ICONIFY))
-		wind_get(GEM_handle, WF_ICONIFY, &parm[0], &parm[1], &parm[2], &parm[3]);
-
-	if (parm[0]==0) {
-		/* Change window name */
-		if (title)
-			new_name = title;
-	} else {
-		/* Change icon name */
-		if (icon)
-			new_name = icon;
+		GEM_refresh_name = SDL_TRUE;
 	}
 
-	parm[0]= ((unsigned long) new_name)>>16;
-	parm[1]= ((unsigned long) new_name) & 65535;
-
-	if (new_name) {
-		wind_set(GEM_handle, WF_NAME, parm[0], parm[1], 0, 0);
+	if (icon) {
+		GEM_icon_name = icon;
+		GEM_refresh_name = SDL_TRUE;
 	}
 }
 
 void GEM_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 {
-	if ((GEM_wfeatures & (1<<WF_ICONIFY))==0)
-		return;
+	SDL_Surface *sicon;
+	SDL_Rect bounds;
 
-	/* Todo */
+#ifdef DEBUG_VIDEO_GEM
+	printf("sdl:video:gem: SetIcon(0x%08x)\n", (long) icon);
+#endif
+
+#if 0
+	if ((GEM_wfeatures & (1<<WF_ICONIFY))==0) {
+#ifdef DEBUG_VIDEO_GEM
+		printf("sdl:video:gem: AES can not iconify windows\n");
+#endif
+		return;
+	}
+#endif
+
+	if (icon == NULL) {
+		return;
+	}
+	
+	/* Convert icon to the screen format */
+	sicon = SDL_CreateRGBSurface(SDL_SWSURFACE, icon->w, icon->h,
+		VDI_bpp, VDI_redmask, VDI_greenmask, VDI_bluemask, 0);
+	if ( sicon == NULL ) {
+		return;
+	}
+
+	bounds.x = 0;
+	bounds.y = 0;
+	bounds.w = icon->w;
+	bounds.h = icon->h;
+	if ( SDL_LowerBlit(icon, &bounds, sicon, &bounds) < 0 ) {
+		SDL_FreeSurface(sicon);
+		return;
+	}
+
+	GEM_icon = sicon;
+
+#ifdef DEBUG_VIDEO_GEM
+	printf("sdl:video:gem: SetIcon(): done\n");
+#endif
 }
 
 int GEM_IconifyWindow(_THIS)
 {
-	short message[8];
-	
 	if ((GEM_wfeatures & (1<<WF_ICONIFY))==0)
 		return 0;
 
-	message[0] = WM_ICONIFY;
-	message[1] = gl_apid;
-	message[2] = 0;
-	message[3] = GEM_handle;
-	message[4] = 0;
-	message[5] = GEM_desk_h-ICONHEIGHT;
-	message[6] = ICONWIDTH;
-	message[7] = ICONHEIGHT;
+	GEM_message[0] = WM_ICONIFY;
+	GEM_message[1] = gl_apid;
+	GEM_message[2] = 0;
+	GEM_message[3] = GEM_handle;
+	GEM_message[4] = 0;
+	GEM_message[5] = GEM_desk_h-ICONHEIGHT;
+	GEM_message[6] = ICONWIDTH;
+	GEM_message[7] = ICONHEIGHT;
 
-	appl_write(gl_apid, sizeof(message), message);
+	appl_write(gl_apid, sizeof(GEM_message), GEM_message);
 
 	return 1;
 }
