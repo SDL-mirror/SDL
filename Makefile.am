@@ -40,6 +40,7 @@ EXTRA_DIST =		\
 	Borland.zip	\
 	VisualC.html	\
 	VisualC.zip	\
+	VisualC7.zip	\
 	VisualCE.zip	\
 	Makefile.dc	\
 	MPWmake.sea.bin	\
