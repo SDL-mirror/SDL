@@ -573,9 +573,9 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 #endif
 	}
 
-   /* DJM: Don't piss of anyone who has setup his own window */
-   if (!SDL_windowid)
-	   SetWindowLong(SDL_Window, GWL_STYLE, style);
+	/* DJM: Don't piss of anyone who has setup his own window */
+	if (!SDL_windowid)
+		SetWindowLong(SDL_Window, GWL_STYLE, style);
 
 	/* Delete the old bitmap if necessary */
 	if ( screen_bmp != NULL ) {
@@ -651,6 +651,7 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 
 	/* Resize the window */
 	if ( SDL_windowid == NULL ) {
+		HWND top;
 		UINT swp_flags;
 
 		SDL_resizing = 1;
@@ -671,14 +672,19 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 			y -= GetSystemMetrics(SM_CYCAPTION)/2;
 		}
 #ifndef _WIN32_WCE
-		swp_flags = (SWP_NOCOPYBITS | SWP_NOZORDER | SWP_SHOWWINDOW);
+		swp_flags = (SWP_NOCOPYBITS | SWP_FRAMECHANGED | SWP_SHOWWINDOW);
 #else
-		swp_flags = (SWP_NOZORDER | SWP_SHOWWINDOW);
+		swp_flags = (SWP_FRAMECHANGED | SWP_SHOWWINDOW);
 #endif
 		if ( was_visible && !(flags & SDL_FULLSCREEN) ) {
 			swp_flags |= SWP_NOMOVE;
 		}
-		SetWindowPos(SDL_Window, NULL, x, y, width, height, swp_flags);
+		if ( flags & SDL_FULLSCREEN ) {
+			top = HWND_TOPMOST;
+		} else {
+			top = HWND_NOTOPMOST;
+		}
+		SetWindowPos(SDL_Window, top, x, y, width, height, swp_flags);
 		SDL_resizing = 0;
 		SetForegroundWindow(SDL_Window);
 	}

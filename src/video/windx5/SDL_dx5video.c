@@ -1080,7 +1080,7 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 
 		style = GetWindowLong(SDL_Window, GWL_STYLE);
 		style &= ~(resizestyle|WS_MAXIMIZE);
-		if ( (video->flags & SDL_FULLSCREEN) == SDL_FULLSCREEN ) {
+		if ( video->flags & SDL_FULLSCREEN ) {
 			style &= ~windowstyle;
 			style |= directstyle;
 		} else {
@@ -1102,6 +1102,7 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 
 		/* Resize the window (copied from SDL WinDIB driver) */
 		if ( SDL_windowid == NULL ) {
+			HWND top;
 			UINT swp_flags;
 
 			SDL_resizing = 1;
@@ -1117,11 +1118,16 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 			if ( y < 0 ) { /* Cover up title bar for more client area */
 				y -= GetSystemMetrics(SM_CYCAPTION)/2;
 			}
-			swp_flags = (SWP_NOCOPYBITS | SWP_NOZORDER | SWP_SHOWWINDOW);
-			if ( was_visible && !(flags & SDL_FULLSCREEN) ) {
+			swp_flags = (SWP_NOCOPYBITS | SWP_FRAMECHANGED | SWP_SHOWWINDOW);
+			if ( was_visible && (video->flags & SDL_FULLSCREEN) ) {
 				swp_flags |= SWP_NOMOVE;
 			}
-			SetWindowPos(SDL_Window, NULL, x, y, width, height, swp_flags);
+			if ( video->flags & SDL_FULLSCREEN ) {
+				top = HWND_TOPMOST;
+			} else {
+				top = HWND_NOTOPMOST;
+			}
+			SetWindowPos(SDL_Window, top, x, y, width, height, swp_flags);
 			SDL_resizing = 0;
 			SetForegroundWindow(SDL_Window);
 		}
