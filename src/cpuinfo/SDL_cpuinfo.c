@@ -138,7 +138,7 @@ static __inline__ int CPU_getCPUIDFeatures()
 "        movl    %%edi,%%ebx\n"
 	: "=m" (features)
 	:
-	: "%eax", "%ebx", "%ecx", "%edx", "%edi"
+	: "%eax", "%ecx", "%edx", "%edi"
 	);
 #elif defined(_MSC_VER)
 	__asm {
@@ -173,7 +173,7 @@ static __inline__ int CPU_getCPUIDFeaturesExt()
 "        movl    %%edi,%%ebx\n"
 	: "=m" (features)
 	:
-	: "%eax", "%ebx", "%ecx", "%edx", "%edi"
+	: "%eax", "%ecx", "%edx", "%edi"
 	);
 #elif defined(_MSC_VER)
 	__asm {
