@@ -188,6 +188,22 @@ void GEM_PumpEvents(_THIS)
 	}
 
 	memcpy(gem_previouskeyboard,gem_currentkeyboard,sizeof(gem_previouskeyboard));
+
+	/* Refresh window name ? */
+	if (GEM_refresh_name) {
+		if ( SDL_GetAppState() & SDL_APPACTIVE ) {
+			/* Fullscreen/windowed */
+			if (GEM_title_name) {
+				wind_set(GEM_handle,WF_NAME,(short)(((unsigned long)GEM_title_name)>>16),(short)(((unsigned long)GEM_title_name) & 0xffff),0,0);
+			}
+		} else {
+			/* Iconified */
+			if (GEM_icon_name) {
+				wind_set(GEM_handle,WF_NAME,(short)(((unsigned long)GEM_icon_name)>>16),(short)(((unsigned long)GEM_icon_name) & 0xffff),0,0);
+			}
+		}
+		GEM_refresh_name = SDL_FALSE;
+	}
 }
 
 static int do_messages(_THIS, short *message)
