@@ -29,7 +29,9 @@ static char rcsid =
 
 #ifdef WIN32
 #define WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
 #define NOMINMAX	/* Don't defined min() and max() */
+#endif
 #include <windows.h>
 #endif
 #if defined(__APPLE__) && defined(__MACH__)
