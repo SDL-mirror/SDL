@@ -743,9 +743,7 @@ SDL_Surface * SDL_SetVideoMode (int width, int height, int bpp, Uint32 flags)
 	/* Load GL symbols (before MakeCurrent, where we need glGetString). */
 	if ( flags & (SDL_OPENGL | SDL_OPENGLBLIT) ) {
 
-#if (defined(macintosh) && !defined(__MWERKS__))
-#define __SDL_NOGETPROCADDR__
-#elif defined(__QNXNTO__) && (_NTO_VERSION < 630)
+#if defined(__QNXNTO__) && (_NTO_VERSION < 630)
 #define __SDL_NOGETPROCADDR__
 #elif defined(__MINT__)
 #define __SDL_NOGETPROCADDR__

@@ -298,6 +298,8 @@ static SDL_VideoDevice *DSp_CreateDevice(int devindex)
 #ifdef HAVE_OPENGL
 	device->GL_MakeCurrent  = Mac_GL_MakeCurrent;
 	device->GL_SwapBuffers  = DSp_GL_SwapBuffers;
+	device->GL_LoadLibrary = Mac_GL_LoadLibrary;
+	device->GL_GetProcAddress = Mac_GL_GetProcAddress;
 #endif
 	device->SetCaption = NULL;
 	device->SetIcon = NULL;
@@ -790,7 +792,7 @@ rebuild:
 		SDL_SetError ("Display Manager couldn't associate GDevice with display_id");
 		return NULL;
 	}	
-	if ( DSpFindBestContextOnDisplayID (&attrib, &dsp_context, display_id) != noErr ) {
+	if ( DSpFindBestContextOnDisplayID(&attrib, &dsp_context, display_id) != noErr ) {
 		SDL_SetError ("DrawSprocket couldn't find a suitable context on given display");
 		return NULL;
 	}
