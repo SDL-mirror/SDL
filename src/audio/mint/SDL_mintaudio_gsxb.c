@@ -214,9 +214,10 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 	resolution = spec->format & 0x00ff;
 	format_signed = ((spec->format & 0x8000)!=0);
 	format_bigendian = ((spec->format & 0x1000)!=0);
-	DEBUG_PRINT((DEBUG_NAME "asked: %d bits, ",resolution));
-	DEBUG_PRINT(("signed=%d, ", format_signed));
-	DEBUG_PRINT(("big endian=%d, ", format_bigendian));
+
+	DEBUG_PRINT((DEBUG_NAME "asked: %d bits, ",spec->format & 0x00ff));
+	DEBUG_PRINT(("signed=%d, ", ((spec->format & 0x8000)!=0)));
+	DEBUG_PRINT(("big endian=%d, ", ((spec->format & 0x1000)!=0)));
 	DEBUG_PRINT(("channels=%d, ", spec->channels));
 	DEBUG_PRINT(("freq=%d\n", spec->freq));
 
@@ -268,9 +269,9 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 			spec->format = spec->format & (~0x1000);
 		}
 	} else {
-		if (snd_format & SND_FORMATBIGENDIAN) {
+		if (snd_format & SND_FORMATLITTLEENDIAN) {
 			/* Ok */
-		} else if (snd_format & SND_FORMATLITTLEENDIAN) {
+		} else if (snd_format & SND_FORMATBIGENDIAN) {
 			/* Give big endian format */
 			spec->format |= 0x1000;
 		}
@@ -289,7 +290,7 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 
 	DEBUG_PRINT((DEBUG_NAME "obtained: %d bits, ",spec->format & 0x00ff));
 	DEBUG_PRINT(("signed=%d, ", ((spec->format & 0x8000)!=0)));
-	DEBUG_PRINT(("big endian=%d, ", ((spec->format & 0x8000)!=0)));
+	DEBUG_PRINT(("big endian=%d, ", ((spec->format & 0x1000)!=0)));
 	DEBUG_PRINT(("channels=%d, ", spec->channels));
 	DEBUG_PRINT(("freq=%d\n", spec->freq));
 
@@ -368,10 +369,6 @@ static int Mint_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	SDL_CalculateAudioSpec(spec);
 
 	/* Allocate memory for audio buffers in DMA-able RAM */
-	spec->size = spec->samples;
-	spec->size *= spec->channels;
-	spec->size *= (spec->format & 0xFF)/8;
-
 	DEBUG_PRINT((DEBUG_NAME "buffer size=%d\n", spec->size));
 
 	SDL_MintAudio_audiobuf[0] = Atari_SysMalloc(spec->size *2, MX_STRAM);

@@ -38,9 +38,9 @@
 
 SDL_AudioDevice *SDL_MintAudio_device;
 Uint8 *SDL_MintAudio_audiobuf[2];	/* Pointers to buffers */
-long SDL_MintAudio_audiosize;		/* Length of audio buffer=spec->size */
-long SDL_MintAudio_numbuf;		/* Buffer to play */
-long SDL_MintAudio_mutex;
+unsigned long SDL_MintAudio_audiosize;		/* Length of audio buffer=spec->size */
+unsigned short SDL_MintAudio_numbuf;		/* Buffer to play */
+unsigned short SDL_MintAudio_mutex;
 cookie_stfa_t	*SDL_MintAudio_stfa;
 
 /* The callback function, called by each driver whenever needed */

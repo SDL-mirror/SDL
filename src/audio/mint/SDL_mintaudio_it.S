@@ -62,27 +62,27 @@ _SDL_MintAudio_GsxbInterrupt:
 	notw	_SDL_MintAudio_mutex
 	
 	/* Swap buffers */
+	eorw	#1,_SDL_MintAudio_numbuf
+
 	moveml	d0-d2/a0-a2,sp@-
 
-	movel	_SDL_MintAudio_numbuf,d0
-	movel	_SDL_MintAudio_audiobuf,a0
-	eorl	#1,d0
-	beqs	SDL_MintAudio_GsxbBuffer0
-	movel	_SDL_MintAudio_audiobuf+4,a0
-SDL_MintAudio_GsxbBuffer0:
-	movel	d0,_SDL_MintAudio_numbuf
-
 	/* Callback */
-	movel	a0,sp@-
 	jsr	_SDL_MintAudio_Callback
-	movel	sp@+,a0
 
-	/* Setbuffer xbios function */
+	/* Set new buffer */
+
+	moveq	#0,d0
 	movel	_SDL_MintAudio_audiosize,d1
-	lea	a0@(0,d1:l),a1
 
+	movew	_SDL_MintAudio_numbuf,d0
+	lsll	#2,d0
+	lea	_SDL_MintAudio_audiobuf,a0
+	movel	a0@(d0:l),a1
+
+	lea	a1@(d1:l),a2
+
+	movel	a2,sp@-
 	movel	a1,sp@-
-	movel	a0,sp@-
 	clrw	sp@-
 	movew	#131,sp@-
 	trap	#14
@@ -110,27 +110,27 @@ _SDL_MintAudio_XbiosInterrupt:
 	notw	_SDL_MintAudio_mutex
 	
 	/* Swap buffers */
+	eorw	#1,_SDL_MintAudio_numbuf
+
 	moveml	d0-d2/a0-a2,sp@-
 
-	movel	_SDL_MintAudio_numbuf,d0
-	movel	_SDL_MintAudio_audiobuf,a0
-	eorl	#1,d0
-	beqs	SDL_MintAudio_XbiosBuffer0
-	movel	_SDL_MintAudio_audiobuf+4,a0
-SDL_MintAudio_XbiosBuffer0:
-	movel	d0,_SDL_MintAudio_numbuf
-
 	/* Callback */
-	movel	a0,sp@-
 	jsr	_SDL_MintAudio_Callback
-	movel	sp@+,a0
 
-	/* Setbuffer xbios function */
+	/* Set new buffer */
+
+	moveq	#0,d0
 	movel	_SDL_MintAudio_audiosize,d1
-	lea	a0@(0,d1:l),a1
 
+	movew	_SDL_MintAudio_numbuf,d0
+	lsll	#2,d0
+	lea	_SDL_MintAudio_audiobuf,a0
+	movel	a0@(d0:l),a1
+
+	lea	a1@(d1:l),a2
+
+	movel	a2,sp@-
 	movel	a1,sp@-
-	movel	a0,sp@-
 	clrw	sp@-
 	movew	#131,sp@-
 	trap	#14
@@ -158,20 +158,21 @@ _SDL_MintAudio_Dma8Interrupt:
 	notw	_SDL_MintAudio_mutex
 	
 	/* Swap buffers */
+	eorw	#1,_SDL_MintAudio_numbuf
+
 	moveml	d0-d1/a0-a1,sp@-
 
-	movel	_SDL_MintAudio_numbuf,d0
-	movel	_SDL_MintAudio_audiobuf,d1
-	eorl	#1,d0
-	beqs	SDL_MintAudio_Dma8Buffer0
-	movel	_SDL_MintAudio_audiobuf+4,d1
-SDL_MintAudio_Dma8Buffer0:
-	movel	d0,_SDL_MintAudio_numbuf
-
 	/* Callback */
-	movel	d1,sp@-
 	jsr	_SDL_MintAudio_Callback
-	movel	sp@+,d1
+
+	/* Set new buffer */
+
+	moveq	#0,d0
+
+	movew	_SDL_MintAudio_numbuf,d0
+	lslw	#2,d0
+	lea	_SDL_MintAudio_audiobuf,a0
+	movel	a0@(d0:w),d1
 
 	/* Modify DMA addresses */
 	lea	0xffff8900:w,a0
@@ -213,30 +214,30 @@ _SDL_MintAudio_StfaInterrupt:
 	notw	_SDL_MintAudio_mutex
 	
 	/* Swap buffers */
+	eorw	#1,_SDL_MintAudio_numbuf
+
 	moveml	d0-d1/a0-a1,sp@-
 
-	movel	_SDL_MintAudio_numbuf,d0
-	movel	_SDL_MintAudio_audiobuf,d1
-	eorl	#1,d0
-	beqs	SDL_MintAudio_StfaBuffer0
-	movel	_SDL_MintAudio_audiobuf+4,d1
-SDL_MintAudio_StfaBuffer0:
-	movel	d0,_SDL_MintAudio_numbuf
-
 	/* Callback */
-	movel	d1,sp@-
 	jsr	_SDL_MintAudio_Callback
-	movel	sp@+,d1
+
+	/* Set new buffer */
+
+	moveq	#0,d0
+	movel	_SDL_MintAudio_stfa,a1
+
+	movew	_SDL_MintAudio_numbuf,d0
+	lslw	#2,d0
+	lea	_SDL_MintAudio_audiobuf,a0
+	movel	a0@(d0:w),d1
 
 	/* Modify STFA replay buffers */
-	movel	_SDL_MintAudio_stfa,a0
-	movel	d1,a0@(STFA_SOUND_START)
+	movel	d1,a1@(STFA_SOUND_START)
 	addl	_SDL_MintAudio_audiosize,d1
-	movel	d1,a0@(STFA_SOUND_END)
+	movel	d1,a1@(STFA_SOUND_END)
 
 	moveml	sp@+,d0-d1/a0-a1
 
 	clrw	_SDL_MintAudio_mutex
 SDL_MintAudio_StfaEnd:
 	rte
-

@@ -106,9 +106,9 @@ enum {
 /* Variables */
 extern SDL_AudioDevice *SDL_MintAudio_device;
 extern Uint8 *SDL_MintAudio_audiobuf[2];	/* Pointers to buffers */
-extern long SDL_MintAudio_audiosize;		/* Length of audio buffer=spec->size */
-extern long SDL_MintAudio_numbuf;		/* Buffer to play */
-extern long SDL_MintAudio_mutex;
+extern unsigned long SDL_MintAudio_audiosize;		/* Length of audio buffer=spec->size */
+extern unsigned short SDL_MintAudio_numbuf;		/* Buffer to play */
+extern unsigned short SDL_MintAudio_mutex;
 extern cookie_stfa_t *SDL_MintAudio_stfa;
 
 /* Functions */
