@@ -645,7 +645,7 @@ extern DECLSPEC SDL_Surface * SDLCALL SDL_ConvertSurface
  * 	alpha-blend (using the source per-surface alpha value);
  * 	set destination alpha to opaque.
  *     SDL_SRCALPHA not set:
- * 	copy RGB, set destination alpha to opaque.
+ * 	copy RGB, set destination alpha to source per-surface alpha value.
  *     both:
  * 	if SDL_SRCCOLORKEY set, only copy the pixels matching the
  * 	source colour key.

@@ -1202,7 +1202,7 @@ static void BlitNtoN(SDL_BlitInfo *info)
 	int srcbpp = srcfmt->BytesPerPixel;
 	SDL_PixelFormat *dstfmt = info->dst;
 	int dstbpp = dstfmt->BytesPerPixel;
-	unsigned alpha = dstfmt->Amask ? SDL_ALPHA_OPAQUE : 0;
+	unsigned alpha = dstfmt->Amask ? srcfmt->alpha : 0;
 
 	while ( height-- ) {
 		DUFFS_LOOP(
@@ -1358,7 +1358,7 @@ static void BlitNtoNKey(SDL_BlitInfo *info)
 	SDL_PixelFormat *dstfmt = info->dst;
 	int srcbpp = srcfmt->BytesPerPixel;
 	int dstbpp = dstfmt->BytesPerPixel;
-	unsigned alpha = dstfmt->Amask ? SDL_ALPHA_OPAQUE : 0;
+	unsigned alpha = dstfmt->Amask ? srcfmt->alpha : 0;
 
 	while ( height-- ) {
 		DUFFS_LOOP(

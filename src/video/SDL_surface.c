@@ -211,6 +211,7 @@ int SDL_SetColorKey (SDL_Surface *surface, Uint32 flag, Uint32 key)
 	SDL_InvalidateMap(surface->map);
 	return(0);
 }
+/* This function sets the alpha channel of a surface */
 int SDL_SetAlpha (SDL_Surface *surface, Uint32 flag, Uint8 value)
 {
 	Uint32 oldflags = surface->flags;
@@ -268,6 +269,52 @@ int SDL_SetAlpha (SDL_Surface *surface, Uint32 flag, Uint8 value)
 	   || (((oldalpha + 1) ^ (value + 1)) & 0x100))
 		SDL_InvalidateMap(surface->map);
 	return(0);
+}
+int SDL_SetAlphaChannel(SDL_Surface *surface, Uint8 value)
+{
+	int row, col;
+	int offset;
+	Uint8 *buf;
+
+	if ( (surface->format->Amask != 0xFF000000) &&
+	     (surface->format->Amask != 0x000000FF) ) {
+		SDL_SetError("Unsupported surface alpha mask format");
+		return -1;
+	}
+
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
+	if ( surface->format->Amask == 0xFF000000 ) {
+			offset = 3;
+	} else {
+			offset = 0;
+	}
+#else
+	if ( surface->format->Amask == 0xFF000000 ) {
+			offset = 0;
+	} else {
+			offset = 3;
+	}
+#endif /* Byte ordering */
+
+	/* Quickly set the alpha channel of an RGBA or ARGB surface */
+	if ( SDL_MUSTLOCK(surface) ) {
+		if ( SDL_LockSurface(surface) < 0 ) {
+			return -1;
+		}
+	}
+	row = surface->h;
+	while (row--) {
+		col = surface->w;
+		buf = (Uint8 *)surface->pixels + row * surface->pitch + offset;
+		while(col--) {
+			*buf = value;
+			buf += 4;
+		}
+	}
+	if ( SDL_MUSTLOCK(surface) ) {
+		SDL_UnlockSurface(surface);
+	}
+	return 0;
 }
 
 /*
@@ -748,8 +795,13 @@ SDL_Surface * SDL_ConvertSurface (SDL_Surface *surface,
 		}
 	}
 	if ( (surface_flags & SDL_SRCALPHA) == SDL_SRCALPHA ) {
-		alpha = surface->format->alpha;
-		SDL_SetAlpha(surface, 0, 0);
+		/* Copy over the alpha channel to RGBA if requested */
+		if ( format->Amask ) {
+			surface->flags &= ~SDL_SRCALPHA;
+		} else {
+			alpha = surface->format->alpha;
+			SDL_SetAlpha(surface, 0, 0);
+		}
 	}
 
 	/* Copy over the image data */
@@ -780,7 +832,11 @@ SDL_Surface * SDL_ConvertSurface (SDL_Surface *surface,
 		        SDL_SetAlpha(convert, aflags|(flags&SDL_RLEACCELOK),
 				alpha);
 		}
-		SDL_SetAlpha(surface, aflags, alpha);
+		if ( format->Amask ) {
+			surface->flags |= SDL_SRCALPHA;
+		} else {
+			SDL_SetAlpha(surface, aflags, alpha);
+		}
 	}
 
 	/* We're ready to go! */
