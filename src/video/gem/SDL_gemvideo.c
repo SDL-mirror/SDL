@@ -605,7 +605,7 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 	if (use_shadow1) {
 		GEM_buffer1 = Atari_SysMalloc(screensize, MX_PREFTTRAM);
 		if (GEM_buffer1==NULL) {
-			fprintf(stderr,"Unable to allocate shadow buffer\n");
+			SDL_SetError("Unable to allocate shadow buffer");
 			return NULL;
 		}
 		memset(GEM_buffer1, 0, screensize);
@@ -617,7 +617,7 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 	if (use_shadow2) {
 		GEM_buffer2 = Atari_SysMalloc(screensize, MX_PREFTTRAM);
 		if (GEM_buffer2==NULL) {
-			fprintf(stderr,"Unable to allocate shadow buffer\n");
+			SDL_SetError("Unable to allocate shadow buffer");
 			return NULL;
 		}
 		memset(GEM_buffer2, 0, screensize);
@@ -671,7 +671,7 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 
 		if (!wind_calc(0, GEM_win_type, posx, posy, width, height, &x2, &y2, &w2, &h2)) {
 			GEM_FreeBuffers(this);
-			fprintf(stderr,"Can not calculate window attributes\n");
+			SDL_SetError("Can not calculate window attributes\n");
 			return NULL;
 		}
 
@@ -679,7 +679,7 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 		GEM_handle=wind_create(GEM_win_type, x2, y2, w2, h2);
 		if (GEM_handle<0) {
 			GEM_FreeBuffers(this);
-			fprintf(stderr,"Can not create window\n");
+			SDL_SetError("Can not create window\n");
 			return NULL;
 		}
 
