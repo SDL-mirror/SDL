@@ -63,7 +63,7 @@
 
 /* By default SDL uses the C calling convention */
 #ifndef SDLCALL
-#ifdef WIN32
+#if defined(WIN32) && !defined(__GNUC__)
 #define SDLCALL __cdecl
 #else
 #define SDLCALL
