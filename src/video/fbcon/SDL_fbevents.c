@@ -835,7 +835,7 @@ static void handle_mouse(_THIS)
 static void switch_vt(_THIS, unsigned short which)
 {
 	struct vt_stat vtstate;
-	unsigned short current;
+	unsigned short v_active;
 	SDL_Surface *screen;
 	__u16 saved_pal[3*256];
 	Uint32 screen_arealen;
@@ -846,7 +846,7 @@ static void switch_vt(_THIS, unsigned short which)
 	     (which == vtstate.v_active) ) {
 		return;
 	}
-	current = vtstate.v_active;
+	v_active = vtstate.v_active;
 
 	/* Save the contents of the screen, and go to text mode */
 	SDL_mutexP(hw_lock);
@@ -864,7 +864,7 @@ static void switch_vt(_THIS, unsigned short which)
 	if ( ioctl(keyboard_fd, VT_ACTIVATE, which) == 0 ) {
 		/* Wait for our console to be activated again */
 		ioctl(keyboard_fd, VT_WAITACTIVE, which);
-		while ( ioctl(keyboard_fd, VT_WAITACTIVE, current) < 0 ) {
+		while ( ioctl(keyboard_fd, VT_WAITACTIVE, v_active) < 0 ) {
 			if ( (errno != EINTR) && (errno != EAGAIN) ) {
 				/* Unknown VT error - cancel this */
 				break;
