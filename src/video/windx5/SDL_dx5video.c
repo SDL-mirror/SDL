@@ -876,7 +876,9 @@ int DX5_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	if ( DX5_CreateWindow(this) < 0 ) {
 		return(-1);
 	}
+#ifndef DISABLE_AUDIO
 	DX5_SoundFocus(SDL_Window);
+#endif
 
 	/* Create the DirectDraw object */
 	result = DDrawCreate(NULL, &ddraw, NULL);

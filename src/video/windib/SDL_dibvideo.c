@@ -286,7 +286,9 @@ int DIB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	if ( DIB_CreateWindow(this) < 0 ) {
 		return(-1);
 	}
+#ifndef DISABLE_AUDIO
 	DX5_SoundFocus(SDL_Window);
+#endif
 
 	/* Determine the screen depth */
 	vformat->BitsPerPixel = DIB_SussScreenDepth();
