@@ -1138,7 +1138,7 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 				y -= GetSystemMetrics(SM_CYCAPTION)/2;
 			}
 			swp_flags = (SWP_NOCOPYBITS | SWP_FRAMECHANGED | SWP_SHOWWINDOW);
-			if ( was_visible && (video->flags & SDL_FULLSCREEN) ) {
+			if ( was_visible && !(video->flags & SDL_FULLSCREEN) ) {
 				swp_flags |= SWP_NOMOVE;
 			}
 			if ( video->flags & SDL_FULLSCREEN ) {
