@@ -100,7 +100,11 @@ enum {
 	JOYAXE_Y,
 	JOYAXE_Z,
 	JOYAXE_SLIDER,
-	JOYAXE_WHEEL
+	JOYAXE_WHEEL,
+	JOYAXE_RX,
+	JOYAXE_RY,
+	JOYAXE_RZ,
+	JOYAXE_count
 };
 
 struct joystick_hwdata {
@@ -112,10 +116,7 @@ struct joystick_hwdata {
 	} type;
 	struct	report_desc *repdesc;
 	struct	report inreport;
-#if 0
-	int	axismin[];
-	int	axismax[];
-#endif
+	int	axis_map[JOYAXE_count];	/* map present JOYAXE_* to 0,1,..*/
 };
 
 static char *joynames[MAX_JOYS];
@@ -180,6 +181,49 @@ SDL_SYS_JoystickName(int index)
 	return (joynames[index]);
 }
 
+static int
+usage_to_joyaxe(unsigned usage)
+{
+    int joyaxe;
+    switch (usage) {
+    case HUG_X:
+	joyaxe = JOYAXE_X; break;
+    case HUG_Y:
+	joyaxe = JOYAXE_Y; break;
+    case HUG_Z:
+	joyaxe = JOYAXE_Z; break;
+    case HUG_SLIDER:
+	joyaxe = JOYAXE_SLIDER; break;
+    case HUG_WHEEL:
+	joyaxe = JOYAXE_WHEEL; break;
+    case HUG_RX:
+	joyaxe = JOYAXE_RX; break;
+    case HUG_RY:
+	joyaxe = JOYAXE_RY; break;
+    case HUG_RZ:
+	joyaxe = JOYAXE_RZ; break;
+    default:
+	joyaxe = -1;
+    }
+    return joyaxe;    
+}
+
+static unsigned
+hatval_to_sdl(Sint32 hatval)
+{
+    static const unsigned hat_dir_map[8] = {
+	SDL_HAT_UP, SDL_HAT_RIGHTUP, SDL_HAT_RIGHT, SDL_HAT_RIGHTDOWN, 
+	SDL_HAT_DOWN, SDL_HAT_LEFTDOWN, SDL_HAT_LEFT, SDL_HAT_LEFTUP
+    };
+    unsigned result;
+    if ((hatval & 7) == hatval) 
+	result = hat_dir_map[hatval];
+    else 
+	result = SDL_HAT_CENTERED;
+    return result;
+}
+
+
 int
 SDL_SYS_JoystickOpen(SDL_Joystick *joy)
 {
@@ -206,6 +250,11 @@ SDL_SYS_JoystickOpen(SDL_Joystick *joy)
 	hw->fd = fd;
 	hw->path = strdup(path);
 	hw->type = BSDJOY_UHID;
+	{
+	    int ax;
+	    for (ax = 0; ax < JOYAXE_count; ax++)
+		hw->axis_map[ax] = -1;
+	}
 	hw->repdesc = hid_get_report_desc(fd);
 	if (hw->repdesc == NULL) {
 		SDL_SetError("%s: USB_GET_REPORT_DESC: %s", hw->path,
@@ -259,23 +308,17 @@ SDL_SYS_JoystickOpen(SDL_Joystick *joy)
 			break;
 		case hid_input:
 			switch (HID_PAGE(hitem.usage)) {
-			case HUP_GENERIC_DESKTOP:
-				switch (HID_USAGE(hitem.usage)) {
-				case HUG_X:
-				case HUG_Y:
-				case HUG_Z:
-				case HUG_SLIDER:
-				case HUG_WHEEL:
-#if 0
-					hw->axismin[joy->naxes] =
-					    hitem.logical_minimum;
-					hw->axismax[joy->naxes] =
-					    hitem.logical_maximum;
-#endif
-					joy->naxes++;
-					break;
-				}
-				break;
+			case HUP_GENERIC_DESKTOP: {
+			    unsigned usage = HID_USAGE(hitem.usage);
+			    int joyaxe = usage_to_joyaxe(usage);
+			    if (joyaxe >= 0) {
+				hw->axis_map[joyaxe] = joy->naxes;
+				joy->naxes++;
+			    } else if (usage == HUG_HAT_SWITCH) {
+				joy->nhats++;
+			    }
+			    break;
+			}
 			case HUP_BUTTON:
 				joy->nbuttons++;
 				break;
@@ -329,35 +372,26 @@ SDL_SYS_JoystickUpdate(SDL_Joystick *joy)
 		switch (hitem.kind) {
 		case hid_input:
 			switch (HID_PAGE(hitem.usage)) {
-			case HUP_GENERIC_DESKTOP:
-				switch (HID_USAGE(hitem.usage)) {
-				case HUG_X:
-					naxe = JOYAXE_X;
-					goto scaleaxe;
-				case HUG_Y:
-					naxe = JOYAXE_Y;
-					goto scaleaxe;
-				case HUG_Z:
-					naxe = JOYAXE_Z;
-					goto scaleaxe;
-				case HUG_SLIDER:
-					naxe = JOYAXE_SLIDER;
-					goto scaleaxe;
-				case HUG_WHEEL:
-					naxe = JOYAXE_WHEEL;
-					goto scaleaxe;
-				default:
-					continue;
-				}
-scaleaxe:
+			case HUP_GENERIC_DESKTOP: {
+			    unsigned usage = HID_USAGE(hitem.usage);
+			    int joyaxe = usage_to_joyaxe(usage);
+			    if (joyaxe >= 0) {
+				naxe = joy->hwdata->axis_map[joyaxe];
+				/* scaleaxe */
 				v = (Sint32)hid_get_data(REP_BUF_DATA(rep),
-				    &hitem);
+							 &hitem);
 				v -= (hitem.logical_maximum + hitem.logical_minimum + 1)/2;
 				v *= 32768/((hitem.logical_maximum - hitem.logical_minimum + 1)/2);
 				if (v != joy->axes[naxe]) {
-					SDL_PrivateJoystickAxis(joy, naxe, v);
+				    SDL_PrivateJoystickAxis(joy, naxe, v);
 				}
-				break;
+			    } else if (usage == HUG_HAT_SWITCH) {
+				v = (Sint32)hid_get_data(REP_BUF_DATA(rep),
+							 &hitem);
+				SDL_PrivateJoystickHat(joy, 0, hatval_to_sdl(v));
+			    }
+			    break;
+			}
 			case HUP_BUTTON:
 				v = (Sint32)hid_get_data(REP_BUF_DATA(rep),
 				    &hitem);
@@ -420,6 +454,8 @@ report_alloc(struct report *r, struct report_desc *rd, int repind)
 #  else
 	len = hid_report_size(rd, repinfo[repind].kind, r->rid);
 #  endif
+# elif (__FreeBSD_version == 460002)
+	len = hid_report_size(rd, r->rid, repinfo[repind].kind);
 # else
 	len = hid_report_size(rd, repinfo[repind].kind, &r->rid);
 #endif
