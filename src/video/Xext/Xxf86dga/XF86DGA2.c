@@ -23,7 +23,7 @@ Copyright (c) 1995,1996  The XFree86 Project, Inc
 #include "extutil.h"
 #include <stdio.h>
 
-#if defined(linux)  /* Needed for framebuffer console support */
+#if defined(ENABLE_FBCON)  /* Needed for framebuffer console support */
 #include <sys/ioctl.h>
 #include <linux/fb.h>
 #endif
@@ -929,7 +929,7 @@ DGAMapPhysical(
     if (!name)
 	    name = DEV_MEM;
     if ((pMap->fd = open(name, O_RDWR)) < 0)
-#if defined(linux)
+#if defined(ENABLE_FBCON)
     { /* /dev/fb0 fallback added by Sam Lantinga <hercules@lokigames.com> */
         /* Try to fall back to /dev/fb on Linux - FIXME: verify the device */
         struct fb_fix_screeninfo finfo;
