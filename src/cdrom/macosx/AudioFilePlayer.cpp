@@ -110,8 +110,8 @@ AudioFilePlayer::AudioFilePlayer (const FSRef           *inFileRef)
 
     OpenFile (inFileRef, fileDataSize);
         
-    // we want about a seconds worth of data for the buffer
-    int bytesPerSecond = UInt32 (mFileDescription.mSampleRate * mFileDescription.mBytesPerFrame);
+    // we want about 4 seconds worth of data for the buffer
+    int bytesPerSecond = UInt32 (4 * mFileDescription.mSampleRate * mFileDescription.mBytesPerFrame);
     
 #if DEBUG
     printf("File format:\n");
