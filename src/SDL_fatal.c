@@ -127,47 +127,63 @@ static int SDL_fatal_signals[] = {
 
 void SDL_InstallParachute(void)
 {
+	/* Set a handler for any fatal signal not already handled */
 	int i;
+#ifdef HAVE_SIGACTION
+	struct sigaction action;
+
+	for ( i=0; SDL_fatal_signals[i]; ++i ) {
+		sigaction(SDL_fatal_signals[i], NULL, &action);
+		if ( action.sa_handler == SIG_DFL ) {
+			action.sa_handler = SDL_Parachute;
+			sigaction(SDL_fatal_signals[i], &action, NULL);
+		}
+	}
+#ifdef SIGALRM
+	/* Set SIGALRM to be ignored -- necessary on Solaris */
+	sigaction(SIGALRM, NULL, &action);
+	if ( action.sa_handler == SIG_DFL ) {
+		action.sa_handler = SIG_IGN;
+		sigaction(SDL_fatal_signals[i], &action, NULL);
+	}
+#endif
+#else
 	void (*ohandler)(int);
 
-	/* Set a handler for any fatal signal not already handled */
 	for ( i=0; SDL_fatal_signals[i]; ++i ) {
 		ohandler = signal(SDL_fatal_signals[i], SDL_Parachute);
 		if ( ohandler != SIG_DFL ) {
 			signal(SDL_fatal_signals[i], ohandler);
 		}
 	}
-#ifdef SIGALRM
-	/* Set SIGALRM to be ignored -- necessary on Solaris */
-	{
-		struct sigaction action, oaction;
-
-		/* Set SIG_IGN action */
-		memset(&action, 0, (sizeof action));
-		action.sa_handler = SIG_IGN;
-		sigaction(SIGALRM, &action, &oaction);
-
-		/* Reset original action if it was already being handled */
-		if ( oaction.sa_handler != SIG_DFL ) {
-			sigaction(SIGALRM, &oaction, NULL);
-		}
-	}
-#endif
+#endif /* HAVE_SIGACTION */
 	return;
 }
 
 void SDL_UninstallParachute(void)
 {
+	/* Remove a handler for any fatal signal handled */
 	int i;
+#ifdef HAVE_SIGACTION
+	struct sigaction action;
+
+	for ( i=0; SDL_fatal_signals[i]; ++i ) {
+		sigaction(SDL_fatal_signals[i], NULL, &action);
+		if ( action.sa_handler == SDL_Parachute ) {
+			action.sa_handler = SIG_DFL;
+			sigaction(SDL_fatal_signals[i], &action, NULL);
+		}
+	}
+#else
 	void (*ohandler)(int);
 
-	/* Remove a handler for any fatal signal handled */
 	for ( i=0; SDL_fatal_signals[i]; ++i ) {
 		ohandler = signal(SDL_fatal_signals[i], SIG_DFL);
 		if ( ohandler != SDL_Parachute ) {
 			signal(SDL_fatal_signals[i], ohandler);
 		}
 	}
+#endif /* HAVE_SIGACTION */
 }
 
 #endif /* NO_SIGNAL_H */

@@ -763,6 +763,7 @@ CheckFBCON()
 [  --enable-video-fbcon    use framebuffer console video driver [default=yes]],
                   , enable_video_fbcon=yes)
     if test x$enable_video = xyes -a x$enable_video_fbcon = xyes; then
+        CFLAGS="$CFLAGS -D__KERNEL_STRICT_NAMES"
         AC_MSG_CHECKING(for framebuffer console support)
         video_fbcon=no
         AC_TRY_COMPILE([
@@ -1387,6 +1388,31 @@ CopyUnixThreadSource()
     fi
 }
 
+dnl See if we can use sigaction() instead of signal()
+CheckSIGACTION()
+{
+    dnl Check for sigaction support
+    AC_ARG_ENABLE(sigaction,
+[  --enable-sigaction      use sigaction instead of signal [default=yes]],
+                  , enable_sigaction=yes)
+    if test x$enable_sigaction = xyes; then
+        AC_MSG_CHECKING(sigaction)
+        have_sigaction=no
+        AC_TRY_COMPILE([
+         #include <signal.h>
+        ],[
+         struct sigaction junk;
+         sigaction(0, &junk, &junk);
+        ],[
+        have_sigaction=yes
+        ])
+        AC_MSG_RESULT($have_sigaction)
+        if test x$have_sigaction = xyes; then
+            CFLAGS="$CFLAGS -DHAVE_SIGACTION"
+        fi
+    fi
+}
+
 dnl Determine whether the compiler can produce Win32 executables
 CheckWIN32()
 {
@@ -1775,6 +1801,7 @@ case "$target" in
         CheckOpenGL
         CheckInputEvents
         CheckPTHREAD
+        CheckSIGACTION
         CheckAltivec
         # Set up files for the main() stub
         if test "x$video_qtopia" = "xyes"; then
@@ -1851,6 +1878,7 @@ case "$target" in
         CheckAAlib
         CheckOpenGL
         CheckPTHREAD
+        CheckSIGACTION
         # Set up files for the audio library
         # We use the OSS and ALSA API's, not the Sun audio API
         #if test x$enable_audio = xyes; then
@@ -1895,6 +1923,7 @@ case "$target" in
         CheckAAlib
         CheckOpenGL
         CheckPTHREAD
+        CheckSIGACTION
         CheckUSBHID
         # Set up files for the audio library
         # We use the OSS and ALSA API's, not the Sun audio API
@@ -1931,6 +1960,7 @@ case "$target" in
         CheckAAlib
         CheckOpenGL
         CheckPTHREAD
+        CheckSIGACTION
         CheckUSBHID
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
@@ -1971,6 +2001,7 @@ case "$target" in
         CheckAAlib
         CheckOpenGL
         CheckPTHREAD
+        CheckSIGACTION
         CheckUSBHID
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
@@ -2012,6 +2043,7 @@ case "$target" in
         CheckAAlib
         CheckOpenGL
         CheckPTHREAD
+        CheckSIGACTION
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
             CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
@@ -2053,6 +2085,7 @@ case "$target" in
         CheckAAlib
         CheckOpenGL
         CheckPTHREAD
+        CheckSIGACTION
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
             CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
@@ -2091,6 +2124,7 @@ case "$target" in
         CheckAAlib
         CheckOpenGL
         CheckPTHREAD
+        CheckSIGACTION
         # We use the dmedia audio API, not the Sun audio API
         #if test x$enable_audio = xyes; then
         #    CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
@@ -2141,6 +2175,7 @@ case "$target" in
         CheckAAlib
         CheckOpenGL
         CheckPTHREAD
+        CheckSIGACTION
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
             CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
@@ -2180,6 +2215,7 @@ case "$target" in
         CheckAAlib
         CheckOpenGL
         CheckPTHREAD
+        CheckSIGACTION
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
             AUDIO_SUBDIRS="$AUDIO_SUBDIRS paudio"
@@ -2216,6 +2252,7 @@ case "$target" in
         CheckAAlib
         CheckOpenGL
         CheckPTHREAD
+        CheckSIGACTION
         SDL_LIBS="$SDL_LIBS -lrt"
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
@@ -2255,6 +2292,7 @@ case "$target" in
         CheckX11
         CheckOpenGL
         CheckPTHREAD
+        CheckSIGACTION
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
             CFLAGS="$CFLAGS -DQNXNTOAUDIO_SUPPORT"
@@ -2440,6 +2478,7 @@ case "$target" in
         CheckQUARTZ
         CheckMacGL
         CheckPTHREAD
+        CheckSIGACTION
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
             AUDIO_SUBDIRS="$AUDIO_SUBDIRS macrom"
