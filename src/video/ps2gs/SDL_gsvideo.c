@@ -261,11 +261,13 @@ static int GS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		SDL_SetError("Couldn't get console pixel format");
 		return(-1);
 	}
+#if 0
 	if ( vinfo.mode != PS2_GS_VESA ) {
 		GS_VideoQuit(this);
 		SDL_SetError("Console must be in VESA video mode");
 		return(-1);
 	}
+#endif
 	switch (vinfo.psm) {
 	    /* Supported pixel formats */
 	    case PS2_GS_PSMCT32:
@@ -306,30 +308,42 @@ static int GS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 static SDL_Rect **GS_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
 {
-	static SDL_Rect GS_mode_list[] = {
+	static SDL_Rect GS_tvout_mode;
+	static SDL_Rect *GS_tvout_modes[] = {
+		&GS_tvout_mode,
+		NULL
+	};
+	static SDL_Rect GS_vesa_mode_list[] = {
 		{ 0, 0, 1280, 1024 },
 		{ 0, 0, 1024, 768 },
 		{ 0, 0, 800, 600 },
 		{ 0, 0, 640, 480 }
 	};
-	static SDL_Rect *GS_modes[] = {
-		&GS_mode_list[0],
-		&GS_mode_list[1],
-		&GS_mode_list[2],
-		&GS_mode_list[3],
+	static SDL_Rect *GS_vesa_modes[] = {
+		&GS_vesa_mode_list[0],
+		&GS_vesa_mode_list[1],
+		&GS_vesa_mode_list[2],
+		&GS_vesa_mode_list[3],
 		NULL
 	};
-	SDL_Rect **modes;
+	SDL_Rect **modes = NULL;
 
-	switch (format->BitsPerPixel) {
-	    case 16:
-	    case 24:
-	    case 32:
-		modes = GS_modes;
-		break;
-	    default:
-		modes = NULL;
-		break;
+	if ( saved_vinfo.mode == PS2_GS_VESA ) {
+		switch (format->BitsPerPixel) {
+		    case 16:
+		    case 24:
+		    case 32:
+			modes = GS_vesa_modes;
+			break;
+		    default:
+			break;
+		}
+	} else {
+		if ( GS_formatmap[format->BitsPerPixel/8] == saved_vinfo.psm ) {
+			GS_tvout_mode.w = saved_vinfo.w;
+			GS_tvout_mode.h = saved_vinfo.h;
+			modes = GS_tvout_modes;
+		}
 	}
 	return(modes);
 }
