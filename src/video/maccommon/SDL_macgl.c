@@ -42,29 +42,9 @@ int Mac_GL_Init(_THIS)
 	GLboolean noerr;
    
 	attributes[i++] = AGL_RGBA;
-
-	if ( this->gl_config.double_buffer ) {
-		attributes[i++] = AGL_DOUBLEBUFFER;
-	}
-	if ( this->gl_config.stereo ) {
-		attributes[i++] = AGL_STEREO;
-	}
-	if ( this->gl_config.multisamplebuffers != 0 ) {
-		attributes[i++] = AGL_SAMPLE_BUFFERS_ARB;
-		attributes[i++] = this->gl_config.multisamplebuffers;
-	}	
-	if ( this->gl_config.multisamplesamples != 0 ) {
-		attributes[i++] = AGL_SAMPLES_ARB;
-		attributes[i++] = this->gl_config.multisamplesamples;
-	}	
-	if ( this->gl_config.depth_size != 0 ) {
-		attributes[i++] = AGL_DEPTH_SIZE;
-		attributes[i++] = this->gl_config.depth_size;
-	}	
 	if ( this->gl_config.red_size   != 0 &&
 	     this->gl_config.blue_size  != 0 &&
 	     this->gl_config.green_size != 0 ) {
-
 		attributes[i++] = AGL_RED_SIZE;
 		attributes[i++] = this->gl_config.red_size;
 		attributes[i++] = AGL_GREEN_SIZE;
@@ -74,6 +54,13 @@ int Mac_GL_Init(_THIS)
 		attributes[i++] = AGL_ALPHA_SIZE;
 		attributes[i++] = this->gl_config.alpha_size;
 	}
+	if ( this->gl_config.double_buffer ) {
+		attributes[i++] = AGL_DOUBLEBUFFER;
+	}
+	if ( this->gl_config.depth_size != 0 ) {
+		attributes[i++] = AGL_DEPTH_SIZE;
+		attributes[i++] = this->gl_config.depth_size;
+	}	
 	if ( this->gl_config.stencil_size != 0 ) {
 		attributes[i++] = AGL_STENCIL_SIZE;
 		attributes[i++] = this->gl_config.stencil_size;
@@ -91,6 +78,19 @@ int Mac_GL_Init(_THIS)
 		attributes[i++] = AGL_ACCUM_ALPHA_SIZE;
 		attributes[i++] = this->gl_config.accum_alpha_size;
 	}
+	if ( this->gl_config.stereo ) {
+		attributes[i++] = AGL_STEREO;
+	}
+#if defined(AGL_SAMPLE_BUFFERS_ARB) && defined(AGL_SAMPLES_ARB)
+	if ( this->gl_config.multisamplebuffers != 0 ) {
+		attributes[i++] = AGL_SAMPLE_BUFFERS_ARB;
+		attributes[i++] = this->gl_config.multisamplebuffers;
+	}	
+	if ( this->gl_config.multisamplesamples != 0 ) {
+		attributes[i++] = AGL_SAMPLES_ARB;
+		attributes[i++] = this->gl_config.multisamplesamples;
+	}	
+#endif
 	attributes[i++] = AGL_ALL_RENDERERS;
 	attributes[i]	= AGL_NONE;
 
