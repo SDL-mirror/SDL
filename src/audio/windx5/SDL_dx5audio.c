@@ -662,10 +662,12 @@ static int DX5_OpenAudio(_THIS, SDL_AudioSpec *spec)
 
 	/* Create the audio buffer to which we write */
 	NUM_BUFFERS = -1;
+#ifdef USE_PRIMARY_BUFFER
 	if ( mainwin ) {
 		NUM_BUFFERS = CreatePrimary(sound, mainwin, &mixbuf,
 						&waveformat, spec->size);
 	}
+#endif /* USE_PRIMARY_BUFFER */
 	if ( NUM_BUFFERS < 0 ) {
 		NUM_BUFFERS = CreateSecondary(sound, mainwin, &mixbuf,
 						&waveformat, spec->size);
