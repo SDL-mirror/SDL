@@ -1345,7 +1345,7 @@ CopyUnixThreadSource()
         fi
         COPY_ARCH_SRC(src/thread, generic, SDL_syscond_c.h)
 
-    elif text x$use_pth = xyes; then
+    elif test x$use_pth = xyes; then
         COPY_ARCH_SRC(src/thread, pth, SDL_systhread.c)
         COPY_ARCH_SRC(src/thread, pth, SDL_systhread_c.h)
         COPY_ARCH_SRC(src/thread, pth, SDL_sysmutex.c)
