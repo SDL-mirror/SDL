@@ -1351,8 +1351,10 @@ int SDL_GL_GetAttribute(SDL_GLattr attr, int* value)
 
 	if ( video->GL_GetAttribute ) {
 		retval = this->GL_GetAttribute(this, attr, value);
+	} else {
+		*value = 0;
+		SDL_SetError("GL_GetAttribute not supported");
 	}
-
 	return retval;
 }
 
@@ -1680,10 +1682,10 @@ SDL_GrabMode SDL_WM_GrabInput(SDL_GrabMode mode)
 {
 	SDL_VideoDevice *video = current_video;
 
-    /* If the video isn't initialized yet, we can't do anything */
-    if ( ! video ) {
-        return SDL_GRAB_OFF;
-    }
+	/* If the video isn't initialized yet, we can't do anything */
+	if ( ! video ) {
+		return SDL_GRAB_OFF;
+	}
 
 	/* Return the current mode on query */
 	if ( mode == SDL_GRAB_QUERY ) {
