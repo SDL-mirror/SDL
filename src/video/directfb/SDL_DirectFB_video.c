@@ -601,7 +601,7 @@ static int DirectFB_HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,
   if (src->flags & SDL_SRCCOLORKEY)
     {
       flags |= DSBLIT_SRC_COLORKEY;
-      surface->SetSrcColorKey (surface, src->format->colorkey);
+      DirectFB_SetHWColorKey (NULL, src, src->format->colorkey);
     }
 
   if (src->flags & SDL_SRCALPHA)
@@ -635,8 +635,17 @@ static int DirectFB_FillHWRect(_THIS, SDL_Surface *dst, SDL_Rect *dstrect, Uint3
   return 0;
 }
 
-static int DirectFB_SetHWColorKey(_THIS, SDL_Surface *surface, Uint32 key)
+static int DirectFB_SetHWColorKey(_THIS, SDL_Surface *src, Uint32 key)
 {
+  SDL_PixelFormat  *fmt     = src->format;
+  IDirectFBSurface *surface = src->hwdata->surface;
+
+  /* ugly */
+  surface->SetSrcColorKey (surface,
+                           (key & fmt->Rmask) >> (fmt->Rshift - fmt->Rloss),
+                           (key & fmt->Gmask) >> (fmt->Gshift - fmt->Gloss),
+                           (key & fmt->Bmask) << (fmt->Bloss - fmt->Bshift));
+
   return 0;
 }
 
