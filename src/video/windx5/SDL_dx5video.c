@@ -1368,7 +1368,15 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 			}
 		}
 		dd_surface3 = NULL;
+#if 0 /* FIXME: enable this when SDL consistently reports lost surfaces */
+		if ( (flags & SDL_HWSURFACE) == SDL_HWSURFACE ) {
+			video->flags |= SDL_HWSURFACE;
+		} else {
+			video->flags |= SDL_SWSURFACE;
+		}
+#else
 		video->flags |= SDL_SWSURFACE;
+#endif
 		if ( (flags & SDL_RESIZABLE) && !(flags & SDL_NOFRAME) ) {
 			video->flags |= SDL_RESIZABLE;
 		}
@@ -1587,7 +1595,7 @@ static int DX5_AllocDDSurface(_THIS, SDL_Surface *surface,
 	memset(&ddsd, 0, sizeof(ddsd));
 	ddsd.dwSize = sizeof(ddsd);
 	result = IDirectDrawSurface3_Lock(dd_surface3, NULL,
-					&ddsd, DDLOCK_NOSYSLOCK, NULL);
+		&ddsd, (DDLOCK_NOSYSLOCK|DDLOCK_WAIT), NULL);
 	if ( result != DD_OK ) {
 		SetDDerror("DirectDrawSurface3::Lock", result);
 		goto error_end;
