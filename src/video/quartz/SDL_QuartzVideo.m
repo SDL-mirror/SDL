@@ -1280,12 +1280,14 @@ static void QZ_VideoQuit (_THIS) {
     CGPaletteRelease (palette);
 }
 
+#if 0 /* Not used (apparently, it's really slow) */
 static int  QZ_FillHWRect (_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color) {
 
     CGSDisplayHWFill (display_id, rect->x, rect->y, rect->w, rect->h, color);
 
     return 0;
 }
+#endif
 
 static int  QZ_LockHWSurface(_THIS, SDL_Surface *surface) {
 
@@ -1440,6 +1442,7 @@ static int QZ_SetupOpenGL (_THIS, int bpp, Uint32 flags) {
         attr[i++] = this->gl_config.stencil_size;
     }
 
+#if NSOPENGL_CURRENT_VERSION > 1  /* What version should this be? */
     if ( this->gl_config.multisamplebuffers != 0 ) {
         attr[i++] = NSOpenGLPFASampleBuffers;
         attr[i++] = this->gl_config.multisamplebuffers;
@@ -1449,6 +1452,7 @@ static int QZ_SetupOpenGL (_THIS, int bpp, Uint32 flags) {
         attr[i++] = NSOpenGLPFASamples;
         attr[i++] = this->gl_config.multisamplesamples;
     }
+#endif
 
     attr[i++] = NSOpenGLPFAScreenMask;
     attr[i++] = CGDisplayIDToOpenGLDisplayMask (display_id);
