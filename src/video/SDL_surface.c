@@ -413,7 +413,7 @@ int SDL_LowerBlit (SDL_Surface *src, SDL_Rect *srcrect,
 	/* Figure out which blitter to use */
 	if ( (src->flags & SDL_HWACCEL) == SDL_HWACCEL ) {
 		if ( src == SDL_VideoSurface ) {
-			hw_srcrect = *dstrect;
+			hw_srcrect = *srcrect;
 			hw_srcrect.x += current_video->offset_x;
 			hw_srcrect.y += current_video->offset_y;
 			srcrect = &hw_srcrect;
