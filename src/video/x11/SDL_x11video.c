@@ -853,11 +853,7 @@ static int X11_CreateWindow(_THIS, SDL_Surface *screen,
 		if ( flags & SDL_FULLSCREEN ) {
 			screen->flags |= SDL_FULLSCREEN;
 			X11_WaitMapped(this, WMwindow);
-#ifdef GRAB_FULLSCREEN
 			X11_EnterFullScreen(this);
-#else
-			X11_QueueEnterFullScreen(this);
-#endif
 		} else {
 			screen->flags &= ~SDL_FULLSCREEN;
 		}
@@ -881,11 +877,7 @@ static int X11_ResizeWindow(_THIS,
 				X11_ResizeFullScreen(this);
 			} else {
 				screen->flags |= SDL_FULLSCREEN;
-#ifdef GRAB_FULLSCREEN
 				X11_EnterFullScreen(this);
-#else
-				X11_QueueEnterFullScreen(this);
-#endif
 			}
 		} else {
 			if ( screen->flags & SDL_FULLSCREEN ) {
@@ -969,12 +961,8 @@ static int X11_ToggleFullScreen(_THIS, int on)
 		SDL_Lock_EventThread();
 	}
 	if ( on ) {
-#ifdef GRAB_FULLSCREEN
 		this->screen->flags |= SDL_FULLSCREEN;
 		X11_EnterFullScreen(this);
-#else
-		X11_QueueEnterFullScreen(this);
-#endif
 	} else {
 		this->screen->flags &= ~SDL_FULLSCREEN;
 		X11_LeaveFullScreen(this);

@@ -258,16 +258,17 @@ SDL_GrabMode X11_GrabInputNoLock(_THIS, SDL_GrabMode mode)
 						True, 0,
 						GrabModeAsync, GrabModeAsync,
 						FSwindow, None, CurrentTime);
-				if ( result == AlreadyGrabbed ) {
+				if ( result == GrabSuccess ) {
 					break;
 				}
 				SDL_Delay(100);
 			}
+			if ( result != GrabSuccess ) {
+				/* Uh, oh, what do we do here? */ ;
+			}
 		}
-#ifdef GRAB_FULLSCREEN
 		if ( !(this->screen->flags & SDL_FULLSCREEN) )
-#endif
-		XUngrabKeyboard(SDL_Display, CurrentTime);
+			XUngrabKeyboard(SDL_Display, CurrentTime);
 	} else {
 		if ( this->screen->flags & SDL_FULLSCREEN ) {
 			/* Unbind the mouse from the fullscreen window */
@@ -278,16 +279,20 @@ SDL_GrabMode X11_GrabInputNoLock(_THIS, SDL_GrabMode mode)
 			result = XGrabPointer(SDL_Display, SDL_Window, True, 0,
 						GrabModeAsync, GrabModeAsync,
 						SDL_Window, None, CurrentTime);
-			if ( result != AlreadyGrabbed ) {
+			if ( result == GrabSuccess ) {
 				break;
 			}
 			SDL_Delay(100);
 		}
-#ifdef GRAB_FULLSCREEN
-		if ( !(this->screen->flags & SDL_FULLSCREEN) )
-#endif
-		XGrabKeyboard(SDL_Display, WMwindow, True,
-			GrabModeAsync, GrabModeAsync, CurrentTime);
+		if ( result != GrabSuccess ) {
+			/* Uh, oh, what do we do here? */ ;
+		}
+		/* Grab the keyboard if we're in fullscreen mode */
+		if ( !(this->screen->flags & SDL_FULLSCREEN) ) {
+			XGrabKeyboard(SDL_Display, WMwindow, True,
+				GrabModeAsync, GrabModeAsync, CurrentTime);
+			SDL_PrivateAppActive(1, SDL_APPINPUTFOCUS);
+		}
 
 		/* Raise the window if we grab the mouse */
 		if ( !(this->screen->flags & SDL_FULLSCREEN) )

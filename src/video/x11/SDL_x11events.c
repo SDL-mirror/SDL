@@ -347,13 +347,7 @@ printf("MapNotify!\n");
 
 		if ( SDL_VideoSurface &&
 		     (SDL_VideoSurface->flags & SDL_FULLSCREEN) ) {
-#ifdef GRAB_FULLSCREEN
 			X11_EnterFullScreen(this);
-#else
-			/* Queue entry into fullscreen mode */
-			switch_waiting = 0x01 | SDL_FULLSCREEN;
-			switch_time = SDL_GetTicks() + 1500;
-#endif
 		} else {
 			X11_GrabInputNoLock(this, this->input_grab);
 		}

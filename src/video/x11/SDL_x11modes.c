@@ -37,6 +37,7 @@ static char rcsid =
 #include "SDL_x11video.h"
 #include "SDL_x11wm_c.h"
 #include "SDL_x11modes_c.h"
+#include "SDL_x11image_c.h"
 
 
 #ifdef XFREE86_VM
@@ -459,31 +460,6 @@ int X11_EnterFullScreen(_THIS)
 	XRaiseWindow(SDL_Display, FSwindow);
 #endif
 
-        /* Grab the mouse on the fullscreen window
-           The event handling will know when we become active, and then
-           enter fullscreen mode if we can't grab the mouse this time.
-         */
-#ifdef GRAB_FULLSCREEN
-        if ( (XGrabPointer(SDL_Display, FSwindow, True, 0,
-                          GrabModeAsync, GrabModeAsync,
-                          FSwindow, None, CurrentTime) != GrabSuccess) ||
-             (XGrabKeyboard(SDL_Display, WMwindow, True,
-                          GrabModeAsync, GrabModeAsync, CurrentTime) != 0) ) {
-#else
-        if ( XGrabPointer(SDL_Display, FSwindow, True, 0,
-                          GrabModeAsync, GrabModeAsync,
-                          FSwindow, None, CurrentTime) != GrabSuccess ) {
-#endif
-            /* We lost the grab, so try again later */
-            XUnmapWindow(SDL_Display, FSwindow);
-            X11_WaitUnmapped(this, FSwindow);
-            X11_QueueEnterFullScreen(this);
-            return(0);
-        }
-#ifdef GRAB_FULLSCREEN
-	SDL_PrivateAppActive(1, SDL_APPINPUTFOCUS);
-#endif
-
 #ifdef XFREE86_VM
         /* Save the current video mode */
         if ( use_vidmode ) {
@@ -502,7 +478,19 @@ int X11_EnterFullScreen(_THIS)
 		XInstallColormap(SDL_Display, SDL_XColorMap);
 	}
     }
-    X11_GrabInputNoLock(this, this->input_grab | SDL_GRAB_FULLSCREEN);
+    if ( okay )
+        X11_GrabInputNoLock(this, this->input_grab | SDL_GRAB_FULLSCREEN);
+
+    /* We may need to refresh the screen at this point (no backing store)
+       We also don't get an event, which is why we explicitly refresh. */
+    if ( this->screen ) {
+        if ( this->screen->flags & SDL_OPENGL ) {
+            SDL_PrivateExpose();
+        } else {
+            X11_RefreshDisplay(this);
+        }
+    }
+
     return(okay);
 }
 
@@ -518,9 +506,6 @@ int X11_LeaveFullScreen(_THIS)
 #endif
         XUnmapWindow(SDL_Display, FSwindow);
         X11_WaitUnmapped(this, FSwindow);
-#ifdef GRAB_FULLSCREEN
-        XUngrabKeyboard(SDL_Display, CurrentTime);
-#endif
         XSync(SDL_Display, True);   /* Flush spurious mode change events */
         currently_fullscreen = 0;
     }
@@ -530,5 +515,16 @@ int X11_LeaveFullScreen(_THIS)
        explicitly grabbed.
      */
     X11_GrabInputNoLock(this, this->input_grab & ~SDL_GRAB_FULLSCREEN);
+
+    /* We may need to refresh the screen at this point (no backing store)
+       We also don't get an event, which is why we explicitly refresh. */
+    if ( this->screen ) {
+        if ( this->screen->flags & SDL_OPENGL ) {
+            SDL_PrivateExpose();
+        } else {
+            X11_RefreshDisplay(this);
+        }
+    }
+
     return(0);
 }
