@@ -303,6 +303,13 @@ static void QZ_DoModifiers (_THIS, unsigned int newMods) {
     current_mods = newMods;
 }
 
+static void QZ_GetMouseLocation (_THIS, NSPoint *p) {
+    *p = [ NSEvent mouseLocation ]; /* global coordinates */
+    if (qz_window)
+        QZ_PrivateGlobalToLocal (this, p);
+    QZ_PrivateCocoaToSDL (this, p);
+}
+
 static void QZ_DoActivate (_THIS)
 {
     /* Hide the cursor if it was hidden by SDL_ShowCursor() */
@@ -321,10 +328,7 @@ static void QZ_DoActivate (_THIS)
 static void QZ_DoDeactivate (_THIS) {
 
     /* Get the current cursor location, for restore on activate */
-    cursor_loc = [ NSEvent mouseLocation ]; /* global coordinates */
-    if (qz_window)
-        QZ_PrivateGlobalToLocal (this, &cursor_loc);
-    QZ_PrivateCocoaToSDL (this, &cursor_loc);
+    QZ_GetMouseLocation (this, &cursor_loc);
     
     /* Reassociate mouse and cursor */
     CGAssociateMouseAndMouseCursorPosition (1);
@@ -432,7 +436,6 @@ void QZ_PumpEvents (_THIS)
 
             int button;
             unsigned int type;
-            BOOL isForGameWin;
             BOOL isInGameWin;
             
             #define DO_MOUSE_DOWN(button) do {                                               \
@@ -457,8 +460,8 @@ void QZ_PumpEvents (_THIS)
             } while(0)
             
             type = [ event type ];
-            isForGameWin = (qz_window == [ event window ]);
             isInGameWin = QZ_IsMouseInWindow (this);
+
             switch (type) {
                 case NSLeftMouseDown:
                     if ( getenv("SDL_HAS3BUTTONMOUSE") ) {
@@ -534,11 +537,11 @@ void QZ_PumpEvents (_THIS)
                             provides the first known mouse position,
                             since everything after this uses deltas
                         */
-                        NSPoint p = [ qz_window mouseLocationOutsideOfEventStream ];
-                        QZ_PrivateCocoaToSDL (this, &p);
+                        NSPoint p;
+                        QZ_GetMouseLocation (this, &p);
                         SDL_PrivateMouseMotion (0, 0, p.x, p.y);
                         firstMouseEvent = 0;
-                    }
+                   }
                     else {
                     
                         /*
@@ -557,8 +560,8 @@ void QZ_PumpEvents (_THIS)
                     if ( grab_state == QZ_VISIBLE_GRAB &&
                          !isInGameWin ) {
                        
-                        NSPoint p = [ qz_window mouseLocationOutsideOfEventStream ]; 
-                        QZ_PrivateCocoaToSDL (this, &p);
+                        NSPoint p;
+                        QZ_GetMouseLocation (this, &p);
 
                         if ( p.x < 0.0 ) 
                             p.x = 0.0;
