@@ -20,6 +20,8 @@
     slouken@libsdl.org
 */
 #include <stdlib.h>	// For getenv()
+#include <IOKit/IOMessage.h> // For wake from sleep detection
+#include <IOKit/pwr_mgt/IOPMLib.h> // For wake from sleep detection
 #include "SDL_QuartzKeys.h"
 
 static void     QZ_InitOSKeymap (_THIS) {
@@ -302,6 +304,44 @@ static void QZ_DoDeactivate (_THIS) {
     }
 
     SDL_PrivateAppActive (0, SDL_APPINPUTFOCUS);
+}
+
+void QZ_SleepNotificationHandler (void * refcon,
+                                  io_service_t service,
+                                  natural_t messageType,
+                                  void * messageArgument )
+{
+     SDL_VideoDevice *this = (SDL_VideoDevice*)refcon;
+     
+     switch(messageType)
+     {
+         case kIOMessageSystemWillSleep:
+             IOAllowPowerChange(powerConnection, (long) messageArgument);
+             break;
+         case kIOMessageCanSystemSleep:
+             IOAllowPowerChange(powerConnection, (long) messageArgument);
+             break;
+         case kIOMessageSystemHasPoweredOn:
+			/* awake */
+            SDL_PrivateExpose();
+            break;
+     }
+}
+
+static void QZ_RegisterForSleepNotifications (_THIS)
+{
+     CFRunLoopSourceRef rls;
+     IONotificationPortRef thePortRef;
+     io_object_t notifier;
+
+     powerConnection = IORegisterForSystemPower (this, &thePortRef, QZ_SleepNotificationHandler, &notifier);
+
+     if (powerConnection == 0)
+         NSLog(@"SDL: QZ_SleepNotificationHandler() IORegisterForSystemPower failed.");
+
+     rls = IONotificationPortGetRunLoopSource (thePortRef);
+     CFRunLoopAddSource (CFRunLoopGetCurrent(), rls, kCFRunLoopDefaultMode);
+     CFRelease (rls);
 }
 
 static void QZ_PumpEvents (_THIS)

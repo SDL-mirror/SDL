@@ -131,6 +131,9 @@ static int QZ_VideoInit (_THIS, SDL_PixelFormat *video_format) {
     current_grab_mode = SDL_GRAB_OFF;
     in_foreground     = YES;
     
+    /* register for sleep notifications so wake from sleep generates SDL_VIDEOEXPOSE */
+    QZ_RegisterForSleepNotifications (this);
+    
     return 0;
 }
 

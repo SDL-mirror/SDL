@@ -131,7 +131,8 @@ typedef struct SDL_PrivateVideoData {
     SDLKey             keymap[256];        /* Mac OS X to SDL key mapping */
     Uint32             current_mods;       /* current keyboard modifiers, to track modifier state */
     Uint32             last_virtual_button;/* last virtual mouse button pressed */
-    
+    io_connect_t       powerConnection;    /* used with IOKit to detect wake from sleep */
+
     ImageDescriptionHandle yuv_idh;
     MatrixRecordPtr        yuv_matrix;
     DecompressorComponent  yuv_codec;
@@ -165,6 +166,7 @@ typedef struct SDL_PrivateVideoData {
 #define keymap (this->hidden->keymap)
 #define current_mods (this->hidden->current_mods)
 #define last_virtual_button (this->hidden->last_virtual_button)
+#define powerConnection (this->hidden->powerConnection)
 
 #define yuv_idh (this->hidden->yuv_idh)
 #define yuv_matrix (this->hidden->yuv_matrix)
