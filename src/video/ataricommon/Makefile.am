@@ -8,8 +8,6 @@ libvideo_ataricommon_la_SOURCES = $(ATARICOMMON_SRCS)
 ATARICOMMON_SRCS = 	\
 	SDL_ataric2p.S	\
 	SDL_ataric2p_s.h	\
-	SDL_ataric2p060.c	\
-	SDL_ataric2p060_c.h	\
 	SDL_atarieddi.S	\
 	SDL_atarieddi_s.h	\
 	SDL_atarievents.c	\

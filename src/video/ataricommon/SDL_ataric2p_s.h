@@ -32,17 +32,13 @@ static char rcsid =
 
 /*--- Variables ---*/
 
-extern Uint8 Atari_table_c2p[2048];	/* Used by conversions routines */
+extern Uint8 SDL_Atari_table_c2p[2048];	/* Used by conversions routines */
 
 /*--- Functions pointers ---*/
 
-/* Initialize conversion table */
-
-extern void (*Atari_C2pInit)(void);
-
 /* Convert a chunky screen to bitplane screen */
 
-extern void (*Atari_C2pConvert)(
+extern void (*SDL_Atari_C2pConvert)(
 	Uint8 *src,			/* Source screen (one byte=one pixel) */
 	Uint8 *dest,		/* Destination (4/8 bits planes) */
 	Uint32 width,		/* Dimensions of screen to convert */
@@ -54,13 +50,9 @@ extern void (*Atari_C2pConvert)(
 
 /*--- 8 bits functions ---*/
 
-/* Initialize conversion table */
-
-void Atari_C2pInit8(void);
-
 /* Convert a chunky screen to bitplane screen */
 
-void Atari_C2pConvert8(
+void SDL_Atari_C2pConvert8(
 	Uint8 *src,			/* Source screen (one byte=one pixel) */
 	Uint8 *dest,		/* Destination (8 bits planes) */
 	Uint32 width,		/* Dimensions of screen to convert */
@@ -72,13 +64,9 @@ void Atari_C2pConvert8(
 
 /*--- 4 bits functions ---*/
 
-/* Initialize conversion table */
-
-void Atari_C2pInit4(void);
-
 /* Convert a chunky screen to bitplane screen */
 
-void Atari_C2pConvert4(
+void SDL_Atari_C2pConvert4(
 	Uint8 *src,			/* Source screen (one byte=one pixel) */
 	Uint8 *dest,		/* Destination (4 bits planes) */
 	Uint32 width,		/* Dimensions of screen to convert */
@@ -90,6 +78,6 @@ void Atari_C2pConvert4(
 
 /* Conversion palette */
 
-void Atari_C2pConvert4_pal(Uint16 *lightpalette);
+void SDL_Atari_C2pConvert4_pal(Uint16 *lightpalette);
 
 #endif /* _ATARI_C2P_h */
