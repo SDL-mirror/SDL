@@ -449,7 +449,11 @@ void Mac_PumpEvents(_THIS)
 
 void Mac_InitOSKeymap(_THIS)
 {
+	const void *KCHRPtr;
+	UInt32 state;
+	UInt32 value;
 	int i;
+	int world = SDLK_WORLD_0;
 
 	/* Map the MAC keysyms */
 	for ( i=0; i<SDL_TABLESIZE(MAC_keymap); ++i )
@@ -576,6 +580,64 @@ void Mac_InitOSKeymap(_THIS)
 	MAC_keymap[MK_IBOOK_UP] = SDLK_UP;
 	MAC_keymap[MK_IBOOK_LEFT] = SDLK_LEFT;
 #endif /* MacOS X */
+
+	/* Up there we setup a static scancode->keysym map. However, it will not
+	 * work very well on international keyboard. Hence we now query MacOS
+	 * for its own keymap to adjust our own mapping table. However, this is
+	 * bascially only useful for ascii char keys. This is also the reason
+	 * why we keep the static table, too.
+	 */
+	
+	/* Get a pointer to the systems cached KCHR */
+	KCHRPtr = (void *)GetScriptManagerVariable(smKCHRCache);
+	if (KCHRPtr)
+	{
+		/* Loop over all 127 possible scan codes */
+		for (i = 0; i < 0x7F; i++)
+		{
+			/* We pretend a clean start to begin with (i.e. no dead keys active */
+			state = 0;
+			
+			/* Now translate the key code to a key value */
+			value = KeyTranslate(KCHRPtr, i, &state) & 0xff;
+			
+			/* If the state become 0, it was a dead key. We need to translate again,
+			passing in the new state, to get the actual key value */
+			if (state != 0)
+				value = KeyTranslate(KCHRPtr, i, &state) & 0xff;
+			
+			/* Now we should have an ascii value, or 0. Try to figure out to which SDL symbol it maps */
+			if (value >= 128)	 /* Some non-ASCII char, map it to SDLK_WORLD_* */
+				MAC_keymap[i] = world++;
+			else if (value >= 32)	 /* non-control ASCII char */
+				MAC_keymap[i] = value;
+		}
+	}
+	
+	/* The keypad codes are re-setup here, because the loop above cannot
+	 * distinguish between a key on the keypad and a regular key. We maybe
+	 * could get around this problem in another fashion: NSEvent's flags
+	 * include a "NSNumericPadKeyMask" bit; we could check that and modify
+	 * the symbol we return on the fly. However, this flag seems to exhibit
+	 * some weird behaviour related to the num lock key
+	 */
+	MAC_keymap[MK_KP0] = SDLK_KP0;
+	MAC_keymap[MK_KP1] = SDLK_KP1;
+	MAC_keymap[MK_KP2] = SDLK_KP2;
+	MAC_keymap[MK_KP3] = SDLK_KP3;
+	MAC_keymap[MK_KP4] = SDLK_KP4;
+	MAC_keymap[MK_KP5] = SDLK_KP5;
+	MAC_keymap[MK_KP6] = SDLK_KP6;
+	MAC_keymap[MK_KP7] = SDLK_KP7;
+	MAC_keymap[MK_KP8] = SDLK_KP8;
+	MAC_keymap[MK_KP9] = SDLK_KP9;
+	MAC_keymap[MK_KP_MINUS] = SDLK_KP_MINUS;
+	MAC_keymap[MK_KP_PLUS] = SDLK_KP_PLUS;
+	MAC_keymap[MK_KP_PERIOD] = SDLK_KP_PERIOD;
+	MAC_keymap[MK_KP_EQUALS] = SDLK_KP_EQUALS;
+	MAC_keymap[MK_KP_DIVIDE] = SDLK_KP_DIVIDE;
+	MAC_keymap[MK_KP_MULTIPLY] = SDLK_KP_MULTIPLY;
+	MAC_keymap[MK_KP_ENTER] = SDLK_KP_ENTER;
 }
 
 static SDL_keysym *TranslateKey(int scancode, int modifiers,
