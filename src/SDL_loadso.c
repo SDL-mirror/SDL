@@ -173,6 +173,9 @@ void *SDL_LoadFunction(void *handle, const char *name)
 
 void SDL_UnloadObject(void *handle)
 {
+#if defined(__BEOS__)
+	image_id library_id;
+#endif
 	if ( handle == NULL ) {
 		return;
 	}
@@ -184,7 +187,7 @@ void SDL_UnloadObject(void *handle)
 	FreeLibrary((HMODULE)handle);
 #elif defined(__BEOS__)
 /* * */
-	image_id library_id = (image_id)handle;
+	library_id = (image_id)handle;
 	unload_add_on(library_id);
 #elif defined(macintosh)
 /* * */
