@@ -27,6 +27,12 @@ static char rcsid =
 
 /* CPU feature detection for SDL */
 
+#ifdef unix /* FIXME: Better setjmp detection? */
+#define USE_SETJMP
+#include <signal.h>
+#include <setjmp.h>
+#endif
+
 #include "SDL.h"
 #include "SDL_cpuinfo.h"
 
@@ -42,6 +48,17 @@ static char rcsid =
 #define CPU_HAS_SSE	0x00000040
 #define CPU_HAS_SSE2	0x00000080
 #define CPU_HAS_ALTIVEC	0x00000100
+
+#ifdef USE_SETJMP
+/* This is the brute force way of detecting instruction sets...
+   the idea is borrowed from the libmpeg2 library - thanks!
+ */
+static jmp_buf jmpbuf;
+static void illegal_instruction(int sig)
+{
+	longjmp(jmpbuf, 1);
+}
+#endif // USE_SETJMP
 
 static __inline__ int CPU_haveCPUID()
 {
@@ -211,19 +228,27 @@ static __inline__ int CPU_haveSSE2()
 
 static __inline__ int CPU_haveAltiVec()
 {
+	int altivec = 0;
 #ifdef MACOSX
-	/* TODO: This check works on OS X. It would be nice to detect AltiVec
-	   properly on for example Linux/PPC, too. But I don't know how that
-	   is done in Linux (or FreeBSD, or whatever other OS you run PPC :-)
-	 */
 	int selectors[2] = { CTL_HW, HW_VECTORUNIT }; 
 	int hasVectorUnit = 0; 
 	size_t length = sizeof(hasVectorUnit); 
 	int error = sysctl(selectors, 2, &hasVectorUnit, &length, NULL, 0); 
 	if( 0 == error )
-		return hasVectorUnit != 0; 
+		altivec = (hasVectorUnit != 0); 
+#elseif defined(USE_SETJMP) && defined(__GNUC__) && defined(__powerpc__)
+	void (*handler)(int sig);
+	handler = signal(SIGILL, illegal_instruction);
+	if ( setjmp(jmpbuf) == 0 ) {
+		asm volatile ("mtspr 256, %0\n\t"
+			      "vand %%v0, %%v0, %%v0"
+			      :
+			      : "r" (-1));
+		altivec = 1;
+	}
+	signal(SIGILL, handler);
 #endif
-	return 0; 
+	return altivec; 
 }
 
 static Uint32 SDL_CPUFeatures = 0xFFFFFFFF;
