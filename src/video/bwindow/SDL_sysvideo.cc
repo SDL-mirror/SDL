@@ -393,7 +393,7 @@ static int BE_SetFullScreen(_THIS, SDL_Surface *screen, int fullscreen)
 			}
 		}
 	}
-	if ( ! fullscreen ) {
+	if ( was_fullscreen && ! fullscreen ) {
 		bscreen.SetMode(&saved_mode);
 	}
 
@@ -485,7 +485,6 @@ SDL_Surface *BE_SetVideoMode(_THIS, SDL_Surface *current,
 		current->pitch = 0;
 		current->pixels = NULL;
 		_this->UpdateRects = NULL;		
-		//		_this->ToggleFullScreen = NULL;
 	} else {
 		/* Create the BBitmap framebuffer */
 		bounds.top = 0; bounds.left = 0;
