@@ -245,15 +245,16 @@ void SDL_FreeCursor (SDL_Cursor *cursor)
 			SDL_SetCursor(SDL_defcursor);
 		}
 		if ( cursor != SDL_defcursor ) {
+			SDL_VideoDevice *video = current_video;
+			SDL_VideoDevice *this  = current_video;
+
 			if ( cursor->data ) {
 				free(cursor->data);
 			}
 			if ( cursor->save[0] ) {
 				free(cursor->save[0]);
 			}
-			if ( cursor->wm_cursor ) {
-				SDL_VideoDevice *video = current_video;
-				SDL_VideoDevice *this  = current_video;
+			if ( video && cursor->wm_cursor ) {
 				video->FreeWMCursor(this, cursor->wm_cursor);
 			}
 			free(cursor);
