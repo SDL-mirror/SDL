@@ -36,6 +36,12 @@ static char rcsid =
 
 #define DEFAULT_OPENGL	"libGL.so.1"
 
+#ifndef GLX_ARB_multisample
+#define GLX_ARB_multisample
+#define GLX_SAMPLE_BUFFERS_ARB             100000
+#define GLX_SAMPLES_ARB                    100001
+#endif
+
 /* return the preferred visual to use for openGL graphics */
 XVisualInfo *X11_GL_GetVisual(_THIS)
 {
