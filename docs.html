@@ -16,12 +16,31 @@ be found at the <A HREF="http://www.libsdl.org/"> main SDL page</A>.
 Major changes since SDL 1.0.0:
 </H2>
 <UL>
-	<LI> 1.2.4: Incorporated XFree86 extension libraries into the source
 	<LI> 1.2.4: Added initial support for Atari (thanks Patrice!)
-	<LI> 1.2.4: Added support for joysticks on *BSD (thanks Wilbern!)
-	<LI> 1.2.4: Added a YUV overlay test program (thanks Jon!)
 	<LI> 1.2.4: Added support for building SDL for EPOC/SymbianOS 6.0
+	<LI> 1.2.4: SDL now compiles and works cleanly on stock BSDI
+	<LI> 1.2.4: Added support for joysticks on *BSD (thanks Wilbern!)
 	<LI> 1.2.4: Added support for Xi Graphics XME fullscreen extension
+	<LI> 1.2.4: Incorporated XFree86 extension libraries into the source
+	<LI> 1.2.4: Dynamically load sound daemon audio drivers on UNIX
+	<LI> 1.2.4: David Snopek added Borland compiler support
+	<LI> 1.2.4: Updated for Watcom and LCC compilers (thanks Jean-Pierre)
+	<LI> 1.2.4: Added a YUV overlay test program (thanks Jon!)
+	<LI> 1.2.4: Fixed gamma ramps in DirectX windowed and OpenGL modes
+	<LI> 1.2.4: John Popplewell fixed mousewheel support on Windows
+	<LI> 1.2.4: Disabled QueryPerformanceCounter() due to problems on Win2K
+	<LI> 1.2.4: Fixed Windows OpenGL mouse cursor/position mismatch bug
+	<LI> 1.2.4: Fixed display settings with ALT-tab and OpenGL on Windows
+	<LI> 1.2.4: Fixed timeout in Linux condition variable implementation
+	<LI> 1.2.4: Fixed bug in joystick detection code under Linux
+	<LI> 1.2.4: Fix crash with Linux supermount fstab entries (thanks Erno!)
+	<LI> 1.2.4: Fixed X11 crash updating rectangles of zero height (thanks Mattias!)
+	<LI> 1.2.4: Fixed spurious keypress at startup on BeOS
+	<LI> 1.2.4: MacOS audio locking has been implemented by Ryan Gordon
+	<LI> 1.2.4: Fixed "short jump out of range" error in MMX code (thanks Steven)
+	<LI> 1.2.4: Specify the SDL API calling convention (C by default)
+	<LI> 1.2.4: Updated autogen.sh for new versions of automake
+	<LI> 1.2.4: Fixed SDL 1.1 RPM dependency problem (thanks Edward!)
 	<LI> 1.2.3: Added X11 Xinerama support - fullscreen starts on screen 0
 	<LI> 1.2.3: Added platform independent OpenGL header - SDL_opengl.h
 	<LI> 1.2.3: Fixed flashing the screen when creating a window on BeOS
