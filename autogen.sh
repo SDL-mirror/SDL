@@ -11,7 +11,7 @@ touch $directory/configure.in
 aclocal
 automake --foreign --include-deps --add-missing --copy
 autoconf
-(cd test; aclocal; automake --foreign --include-deps; autoconf)
+(cd test; aclocal; automake --foreign --include-deps --add-missing --copy; autoconf)
 
 # Run configure for this platform
 #./configure $*
