@@ -215,6 +215,7 @@ void DIB_InitOSKeymap(_THIS)
 	VK_keymap[VK_BACKSLASH] = SDLK_BACKSLASH;
 	VK_keymap[VK_RBRACKET] = SDLK_RIGHTBRACKET;
 	VK_keymap[VK_GRAVE] = SDLK_BACKQUOTE;
+	VK_keymap[VK_BACKTICK] = SDLK_BACKQUOTE;
 	VK_keymap[VK_A] = SDLK_a;
 	VK_keymap[VK_B] = SDLK_b;
 	VK_keymap[VK_C] = SDLK_c;

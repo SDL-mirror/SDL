@@ -27,8 +27,7 @@ static char rcsid =
 
 /* WGL implementation of SDL OpenGL support */
 
-#include <windows.h>
-
+#include "SDL_opengl.h"
 #include "SDL_error.h"
 #include "SDL_lowvideo.h"
 #include "SDL_wingl_c.h"

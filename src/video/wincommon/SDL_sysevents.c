@@ -131,6 +131,7 @@ static void WIN_GetKeyboardState(void)
 #ifndef NO_GETKEYBOARDSTATE
 	SDLMod state;
 	BYTE keyboard[256];
+	Uint8 *kstate = SDL_GetKeyState(NULL);
 
 	state = KMOD_NONE;
 	if ( GetKeyboardState(keyboard) ) {
@@ -154,9 +155,11 @@ static void WIN_GetKeyboardState(void)
 		}
 		if ( keyboard[VK_NUMLOCK] & 0x01) {
 			state |= KMOD_NUM;
+			kstate[SDLK_NUMLOCK] = SDL_PRESSED;
 		}
 		if ( keyboard[VK_CAPITAL] & 0x01) {
 			state |= KMOD_CAPS;
+			kstate[SDLK_CAPSLOCK] = SDL_PRESSED;
 		}
 	}
 	SDL_SetModState(state);

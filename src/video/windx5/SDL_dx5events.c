@@ -625,6 +625,9 @@ void DX5_InitOSKeymap(_THIS)
 #ifndef DIK_PAUSE
 #define DIK_PAUSE	0xC5
 #endif
+#ifndef DIK_OEM_102
+#define DIK_OEM_102	0x56	/* < > | on UK/Germany keyboards */
+#endif
 	int i;
 
 	/* Map the DIK scancodes to SDL keysyms */
@@ -675,6 +678,7 @@ void DX5_InitOSKeymap(_THIS)
 	DIK_keymap[DIK_GRAVE] = SDLK_BACKQUOTE;
 	DIK_keymap[DIK_LSHIFT] = SDLK_LSHIFT;
 	DIK_keymap[DIK_BACKSLASH] = SDLK_BACKSLASH;
+	DIK_keymap[DIK_OEM_102] = SDLK_BACKSLASH;
 	DIK_keymap[DIK_Z] = SDLK_z;
 	DIK_keymap[DIK_X] = SDLK_x;
 	DIK_keymap[DIK_C] = SDLK_c;
