@@ -77,6 +77,7 @@ int main(int argc, char *argv[])
 {
 	SDL_Event event;
 	int done;
+	Uint32 videoflags;
 
 	/* Initialize SDL */
 	if ( SDL_Init(SDL_INIT_VIDEO) < 0 ) {
@@ -85,8 +86,13 @@ int main(int argc, char *argv[])
 	}
 	atexit(SDL_Quit);
 
+	videoflags = SDL_SWSURFACE;
+	if ( strcmp(argv[1], "-fullscreen") == 0 ) {
+		videoflags |= SDL_FULLSCREEN;
+	}
+
 	/* Set 640x480 video mode */
-	if ( SDL_SetVideoMode(640, 480, 0, SDL_SWSURFACE) == NULL ) {
+	if ( SDL_SetVideoMode(640, 480, 0, videoflags) == NULL ) {
 		fprintf(stderr, "Couldn't set 640x480 video mode: %s\n",
 							SDL_GetError());
 		exit(2);
