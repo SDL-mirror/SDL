@@ -42,7 +42,7 @@ static char rcsid =
 #include <gem.h>
 #include <gemx.h>
 #include <mint/osbind.h>
-#include <sys/cookie.h>
+#include <mint/cookie.h>
 
 #include "SDL.h"
 #include "SDL_error.h"
@@ -105,7 +105,6 @@ static void refresh_window(_THIS, int winhandle, short *rect);
 
 static int GEM_Available(void)
 {
-	short ap_id;
 	const char *envr = getenv("SDL_VIDEODRIVER");
 
 	/* Check if user asked a different video driver */
@@ -114,8 +113,7 @@ static int GEM_Available(void)
 	}
 
 	/* Test if AES available */
-	ap_id = appl_init();
-	if (ap_id == -1)
+	if (appl_init() == -1)
 		return 0;
 
 	appl_exit();
@@ -374,14 +372,13 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	short work_in[12], work_out[272], dummy;
 
 	/* Open AES (Application Environment Services) */
-	GEM_ap_id = appl_init();
-	if (GEM_ap_id == -1) {
+	if (appl_init() == -1) {
 		fprintf(stderr,"Can not open AES\n");
 		return 1;
 	}
 
 	/* Read version and features */
-	GEM_version = aes_global[0];
+	GEM_version = aes_params.global[0];
 	if (GEM_version >= 0x0400) {
 		short ap_gout[4];
 		

@@ -47,7 +47,7 @@ IV.  What is supported:
 Keyboard (GEMDOS, BIOS, GEM, Ikbd)
 Mouse (XBIOS, GEM, Ikbd)
 Video (XBIOS (Fullscreen), GEM (Windowed and Fullscreen))
-Timer (VBL vector)
+Timer (VBL vector, GNU pth library)
 Joystick and joypad support (Ikbd, Hardware)
 Audio support (Hardware, XBIOS, GSXB, /dev/audio if threads enabled)
 Threads support (Multitasking OS only via GNU pth library)
@@ -57,13 +57,16 @@ CDROM support (Metados, /dev/cdrom)
 
 - Driver combinations:
 Video	Kbd	Mouse	Timer	Jstick	Joypads
-xbios	ikbd	ikbd	vbl	ikbd	hardware
-xbios	gemdos	xbios	vbl	xbios	hardware
-xbios	bios	xbios	vbl	xbios	hardware
-gem	gem	gem(*)	vbl	xbios	hardware
+xbios	ikbd	ikbd	vbl(2)	ikbd	hardware
+xbios	gemdos	xbios	vbl(2)	xbios	hardware
+xbios	bios	xbios	vbl(2)	xbios	hardware
+gem	gem	gem(1)	vbl(2)	xbios	hardware
 
-(*) GEM does not report relative mouse motion, so xbios mouse driver is used
+(1) GEM does not report relative mouse motion, so xbios mouse driver is used
 to report this type event.
+
+(2) If you build SDL with threads using the GNU pth library, timers are
+supported via the pth library.
 
 ==============================================================================
 V.  Environment variables:
@@ -153,6 +156,9 @@ Mouse and joystick xbios driver:
 
 Joypad driver:
 	Available if _MCH cookie is STE or Falcon.
+
+PTH timer driver:
+	Available with multitasking OS.
 
 VBL timer driver:
 	Available on all machines (I think).

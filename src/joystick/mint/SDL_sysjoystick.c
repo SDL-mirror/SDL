@@ -35,7 +35,7 @@ static char rcsid =
 #include <stdlib.h>
 #include <string.h>
 
-#include <sys/cookie.h>
+#include <mint/cookie.h>
 #include <mint/osbind.h>
 
 #include "SDL_types.h"

@@ -38,7 +38,7 @@ static char rcsid =
 #include <unistd.h>
 
 /* Mint includes */
-#include <sys/cookie.h>
+#include <mint/cookie.h>
 #include <mint/osbind.h>
 #include <mint/falcon.h>
 

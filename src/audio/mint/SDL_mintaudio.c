@@ -11,7 +11,7 @@
 /* Mint includes */
 #include <mint/osbind.h>
 #include <mint/falcon.h>
-#include <sys/cookie.h>
+#include <mint/cookie.h>
 
 #include "SDL_endian.h"
 #include "SDL_audio.h"

@@ -35,7 +35,7 @@ static char rcsid =
 
 #include <string.h>
 
-#include <sys/cookie.h>
+#include <mint/cookie.h>
 
 #include "SDL_ataric2p_s.h"
 

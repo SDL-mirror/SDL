@@ -40,7 +40,7 @@ static char rcsid =
 #include <errno.h>
 
 #include <mint/osbind.h>
-#include <sysvars.h>
+#include <mint/sysvars.h>
 
 #include "SDL_error.h"
 #include "SDL_timer.h"

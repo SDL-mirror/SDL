@@ -96,7 +96,7 @@ int GEM_IconifyWindow(_THIS)
 		return 0;
 
 	message[0] = WM_ICONIFY;
-	message[1] = GEM_ap_id;
+	message[1] = gl_apid;
 	message[2] = 0;
 	message[3] = GEM_handle;
 	message[4] = 0;
@@ -104,7 +104,7 @@ int GEM_IconifyWindow(_THIS)
 	message[6] = ICONWIDTH;
 	message[7] = ICONHEIGHT;
 
-	appl_write(GEM_ap_id, sizeof(message), message);
+	appl_write(gl_apid, sizeof(message), message);
 
 	return 1;
 }

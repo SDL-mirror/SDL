@@ -56,8 +56,7 @@ struct SDL_PrivateVideoData {
 	Uint32 screensize;
 	MFDB	src_mfdb, dst_mfdb;	/* VDI MFDB for bitblt */
 	short	blit_coords[8];		/* Coordinates for bitblt */
-	/* Gem infos */
-	short ap_id;				/* AES handle */
+	/* GEM infos */
 	short desk_x, desk_y;		/* Desktop properties */
 	short desk_w, desk_h;
 	short win_handle;			/* Our window handle */
@@ -92,7 +91,7 @@ struct SDL_PrivateVideoData {
 #define VDI_src_mfdb		(this->hidden->src_mfdb)
 #define VDI_dst_mfdb		(this->hidden->dst_mfdb)
 #define VDI_blit_coords		(this->hidden->blit_coords)
-#define GEM_ap_id			(this->hidden->ap_id)
+
 #define GEM_desk_x			(this->hidden->desk_x)
 #define GEM_desk_y			(this->hidden->desk_y)
 #define GEM_desk_w			(this->hidden->desk_w)

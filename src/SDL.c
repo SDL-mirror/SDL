@@ -28,6 +28,9 @@ static char rcsid =
 /* Initialization code for SDL */
 
 #include <stdlib.h>		/* For getenv() */
+#ifdef ENABLE_PTH
+#include <pth.h>
+#endif
 
 #include "SDL.h"
 #include "SDL_endian.h"
