@@ -491,7 +491,8 @@ printf("The '%s' key has been %s\n", SDL_GetKeyName(keysym->sym),
 			/*
 			 * jk 991215 - Added
 			 */
-			if ( SDL_KeyRepeat.timestamp ) {
+			if ( SDL_KeyRepeat.timestamp &&
+			     SDL_KeyRepeat.evt.key.keysym.sym == keysym->sym ) {
 				SDL_KeyRepeat.timestamp = 0;
 			}
 			break;
