@@ -343,9 +343,6 @@ int X11_GL_LoadLibrary(_THIS, const char* path)
 #endif
 	handle = dlopen(path, dlopen_flags);
 	/* Catch the case where the application isn't linked with GL */
-#if defined __OpenBSD__ && !defined __ELF__
-#define dlsym(x,y) dlsym(x, "_" y)
-#endif
 	if ( (dlsym(handle, "glXChooseVisual") == NULL) && (path == NULL) ) {
 		dlclose(handle);
 		path = getenv("SDL_VIDEO_GL_DRIVER");
