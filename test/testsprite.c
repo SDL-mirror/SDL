@@ -92,7 +92,7 @@ void MoveSprites(SDL_Surface *screen, Uint32 background)
 }
 
 /* This is a way of telling whether or not to use hardware surfaces */
-Uint32 FastestFlags(Uint32 flags)
+Uint32 FastestFlags(Uint32 flags, int width, int height, int bpp)
 {
 	const SDL_VideoInfo *info;
 
@@ -112,8 +112,7 @@ Uint32 FastestFlags(Uint32 flags)
 		/* Direct hardware blitting without double-buffering
 		   causes really bad flickering.
 		 */
-		SDL_Surface *screen = SDL_GetVideoSurface();
-		if ( info->video_mem > (screen->h*screen->pitch) ) {
+		if ( info->video_mem*1024 > (height*width*bpp/8) ) {
 			flags |= SDL_DOUBLEBUF;
 		} else {
 			flags &= ~SDL_HWSURFACE;
@@ -164,7 +163,7 @@ int main(int argc, char *argv[])
 			--argc;
 		} else
 		if ( strcmp(argv[argc], "-fast") == 0 ) {
-			videoflags = FastestFlags(videoflags);
+			videoflags = FastestFlags(videoflags, width, height, video_bpp);
 		} else
 		if ( strcmp(argv[argc], "-hw") == 0 ) {
 			videoflags ^= SDL_HWSURFACE;
