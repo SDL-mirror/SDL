@@ -12,6 +12,7 @@ loopwave
 testalpha
 testbitmap
 testcdrom
+testcpuinfo
 testerror
 testgamma
 testgl
