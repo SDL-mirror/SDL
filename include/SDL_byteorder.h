@@ -39,7 +39,8 @@ static char rcsid =
    script so that application code can use this too.  The "right" way would
    be to dynamically generate this file on install, but that's a lot of work.
  */
-#if  defined(__i386__) || defined(__ia64__) || defined(WIN32) || \
+#if (defined(__i386__) || defined(__i386)) || \
+     defined(__ia64__) || defined(WIN32) || \
     (defined(__alpha__) || defined(__alpha)) || \
      defined(__arm__) || \
     (defined(__mips__) && defined(__MIPSEL__)) || \
