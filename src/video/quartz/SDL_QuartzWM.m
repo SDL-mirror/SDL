@@ -135,7 +135,7 @@ void QZ_PrivateSDLToCocoa (_THIS, NSPoint *p) {
 
     if ( CGDisplayIsCaptured (display_id) ) { /* capture signals fullscreen */
     
-        p->y = CGDisplayPixelsHigh (display_id) - p->y - 1;
+        p->y = CGDisplayPixelsHigh (display_id) - p->y;
     }
     else {
         
@@ -152,7 +152,7 @@ void QZ_PrivateCocoaToSDL (_THIS, NSPoint *p) {
 
     if ( CGDisplayIsCaptured (display_id) ) { /* capture signals fullscreen */
     
-        p->y = CGDisplayPixelsHigh (display_id) - p->y - 1;
+        p->y = CGDisplayPixelsHigh (display_id) - p->y;
     }
     else {
         
@@ -161,6 +161,11 @@ void QZ_PrivateCocoaToSDL (_THIS, NSPoint *p) {
         newPoint = [ window_view convertPoint:*p fromView:[ qz_window contentView ] ];
         
         *p = newPoint;
+
+        /* If OSX version is 10.3.0 or later, we need a workaround in OpenGL mode */
+        if( system_version >= 0x1030 && (SDL_VideoSurface->flags & (SDL_OPENGL | SDL_OPENGLBLIT)) ) {
+            p->y = [window_view frame].size.height - p->y - 1;
+        }
     }
 }
 

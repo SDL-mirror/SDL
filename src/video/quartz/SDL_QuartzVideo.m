@@ -205,6 +205,9 @@ static int QZ_VideoInit (_THIS, SDL_PixelFormat *video_format) {
     cursor_visible              = YES;
     current_mods = 0;
     
+    if ( Gestalt(gestaltSystemVersion, &system_version) != noErr )
+        system_version = 0;
+
     /* register for sleep notifications so wake from sleep generates SDL_VIDEOEXPOSE */
     QZ_RegisterForSleepNotifications (this);
     

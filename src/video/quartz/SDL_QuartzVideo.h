@@ -107,6 +107,7 @@ typedef struct SDL_PrivateVideoData {
     SDL_sem            *sem1, *sem2;       /* synchronization for async screen updates */
     Uint8              *current_buffer;    /* the buffer being copied to the screen */
     BOOL               quit_thread;        /* used to quit the async blitting thread */
+    SInt32             system_version;     /* used to dis-/enable workarounds depending on the system version */
     
     ImageDescriptionHandle yuv_idh;
     MatrixRecordPtr        yuv_matrix;
@@ -152,6 +153,7 @@ typedef struct SDL_PrivateVideoData {
 #define sem2 (this->hidden->sem2)
 #define current_buffer (this->hidden->current_buffer)
 #define quit_thread (this->hidden->quit_thread)
+#define system_version (this->hidden->system_version)
 
 /* grab states - the input is in one of these states */
 enum {
