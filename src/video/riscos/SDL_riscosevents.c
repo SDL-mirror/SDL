@@ -336,9 +336,9 @@ void RISCOS_PollMouseHelper(_THIS, int fullscreen)
           {
              int changed = last_buttons ^ regs.r[2];
              last_buttons = regs.r[2];
-             if (changed & 4) SDL_PrivateMouseButton((last_buttons & 4) ? SDL_PRESSED : SDL_RELEASED, SDL_BUTTON_LEFT, x, y);
-             if (changed & 2) SDL_PrivateMouseButton((last_buttons & 2) ? SDL_PRESSED : SDL_RELEASED, SDL_BUTTON_MIDDLE, x, y);
-             if (changed & 1) SDL_PrivateMouseButton((last_buttons & 1) ? SDL_PRESSED : SDL_RELEASED, SDL_BUTTON_RIGHT, x, y);
+             if (changed & 4) SDL_PrivateMouseButton((last_buttons & 4) ? SDL_PRESSED : SDL_RELEASED, SDL_BUTTON_LEFT, 0, 0);
+             if (changed & 2) SDL_PrivateMouseButton((last_buttons & 2) ? SDL_PRESSED : SDL_RELEASED, SDL_BUTTON_MIDDLE, 0, 0);
+             if (changed & 1) SDL_PrivateMouseButton((last_buttons & 1) ? SDL_PRESSED : SDL_RELEASED, SDL_BUTTON_RIGHT, 0, 0);
           }
        }
     }
