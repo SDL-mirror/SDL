@@ -34,7 +34,7 @@ static char rcsid =
    is still at the back on MacOS X, which is where this code is needed.
  */
 #if USE_QUICKTIME
-#include <Movies.h>
+#include <QuickTime/Movies.h>
 #endif
 #else
 #include <LowMem.h>

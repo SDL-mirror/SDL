@@ -1,6 +1,6 @@
 
 #include <stdio.h>
-
+#include "SDL_main.h"
 #include "SDL_types.h"
 
 int main(int argc, char *argv[])

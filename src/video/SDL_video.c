@@ -84,6 +84,9 @@ static VideoBootStrap *bootstrap[] = {
 #ifdef ENABLE_DRAWSPROCKET
 	&DSp_bootstrap,
 #endif
+#ifdef ENABLE_QUARTZ
+	&QZ_bootstrap,
+#endif
 #ifdef ENABLE_CYBERGRAPHICS
 	&CGX_bootstrap,
 #endif

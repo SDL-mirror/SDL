@@ -34,11 +34,80 @@ and linking, respectively:
 sdl-config knows about the linking path and -framework, so it's
 recommended to use it to fill in your Makefile variables.
 
-[Add instructions for how to build using PB]
+==============================================================================
+Using the Simple DirectMedia Layer with Project Builder
+==============================================================================
 
-As of this writing (Sep 2000), OS X is in public beta.  This means
-that while most of the APIs are frozen, things are still subject to
-change, and many of the known problems will be resolved before the
-final release comes out.
+These instructions are for using Apple's Project Builder IDE to build SDL applications.
 
+- Building the Framework
+
+The SDL Library is packaged as a framework bundle, an organized
+relocatable folder heirarchy of executible code, interface headers, 
+and additional resources. For practical purposes, you can think of a 
+framework as a more user and system-friendly shared library, whose library
+file behaves more or less like a standard UNIX shared library.
+
+To build the framework, simply open the framework project and build it. 
+By default, the framework bundle "SDL.framework" is installed in 
+~/Library/Frameworks. Therefore, the testers and project stationary expect
+it to be located there. However, it will function the same in any of the
+following locations:
+
+    ~/Library/Frameworks
+    /Local/Library/Frameworks
+    /System/Library/Frameworks
+
+- Build Options
+    There are two "Build Styles" (See the "Targets" tab) for SDL.
+    "Deployment" should be used if you aren't tweaking the SDL library.
+    "Development" should be used to debug SDL apps or the library itself.
+
+- Building the Testers
+    Open the SDLTest project and build away!
+
+- Using the Project Stationary
+    Copy the stationary to the indicated folders to access it from
+    the "New Project" and "Add target" menus. What could be easier?
+
+- Setting up a new project by hand
+    Some of you won't want to use the Stationary so I'll give some tips:
+    * Create a new "Cocoa Application"
+    * Add src/main/macosx/SDLMain.m , .h and .nib to your project
+    * Remove "main.c" from your project
+    * Remove "MainMenu.nib" from your project
+    * Add "$(HOME)/Library/Frameworks/SDL.framework/Headers" to include path
+    * Add "$(HOME)/Library/Frameworks" to the frameworks search path
+    * Add "-framework SDL" to the "OTHER_LDFLAGS" variable
+    * Set the "Main Nib File" under "Application Settings" to "SDLMain.nib"
+    * Add your files
+    * Clean and build
+
+- Building from command line
+    Use pbxbuild in the same directory as your .pbproj file
+         
+- Running your app
+    You can send command line args to your app by either invoking it from
+    the command line (in *.app/Contents/MacOS) or by entering them in the
+    "Executibles" panel of the target settings.
+    
+- Implementation Notes
+    Some things that may be of interest about how it all works...
+    * Working directory
+        As defined in the SDLMain.m file, the working directory of your SDL app
+        is by default set to its parent. You may wish to change this to better
+        suit your needs.
+    * You have a Cocoa App!
+        Your SDL app is essentially a Cocoa application. When your app
+        starts up and the libraries finish loading, a Cocoa procedure is called,
+        which sets up the working directory and calls your main() method.
+        You are free to modify your Cocoa app with generally no consequence 
+        to SDL. You cannot, however, easily change the SDL window itself.
+        Functionality may be added in the future to help this.
+    * My development setup:
+        I am using version 1.0.1 (v63.0) of Project Builder on MacOS X 10.0.3,
+        from the Developer Tools CD for May 2001.
+        As of May 31 2001, Apple hasn't released this version of the tools to the public, 
+        but I expect that things will still work on older versions.
+        
 Known bugs are listed in the file "BUGS"

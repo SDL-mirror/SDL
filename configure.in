@@ -63,6 +63,10 @@ case "$target" in
     *-*-linux*)
         AC_PROG_CXX
         ;;
+    *-*-darwin*)
+        OBJC="???"
+        AC_SUBST(OBJC)
+        ;;
 esac
 AC_PROG_INSTALL
 AC_FUNC_ALLOCA
@@ -1979,6 +1983,7 @@ src/video/ggi/Makefile
 src/video/maccommon/Makefile
 src/video/macdsp/Makefile
 src/video/macrom/Makefile
+src/video/quartz/Makefile
 src/video/svga/Makefile
 src/video/aalib/Makefile
 src/video/wincommon/Makefile

@@ -70,22 +70,35 @@ MacOS:
 	Not all of the keys are properly recognized on the keyboard.
 
 MacOS X:
-	Fullscreen mode doesn't work - it requires the QuickTime framework
-	and that the new SDL window gets raised to the top of the Z order.
+	Joystick and CD-ROM functions are not implemented yet.
 
+	Closing window from window's close widget not implemented yet.
+	
+	Minimizing the window erases the framebuffer to the pinstripe pattern.
+	
+	Window may not close when unsetting video mode and resetting.
+	
+	Depth switching for windowed mode isn't implemented yet.
+	
 	Palette handling isn't implemented in windowed mode yet.
+	
+	Command-line arguments Dialog is not implemented yet.
 
-	Native sound and video routines are not finished, though Carbon
-	seems to work fairly well.
+	Fullscreen drawing has some artifacts.
+	
+	Fullscreen window covers *all* other windows - even force quit.
+	
+	Fullscreen OpenGL for the software renderer is broken.
 
-	Joysticks and CD-ROM functions are not implemented yet.
+	Some OpenGL parameters are not accounted for, for example color bits customization.
+	
+	Getting OpenGL context parameters is not implemented.
+	
+	Continuous mouse motion perhaps is not as smooth as it should be.
 
-	SDL_WM_GrabInput() is not implemented.
-	Does anyone know how to do this?  SDL_WM_GrabInput() is designed
-	to prevent the user from switching input and mouse focus away from
-	the SDL application.
-
-	Continuous relative mouse motion is not implemented.
+	SDL_WM_GrabInput() is implemented, but it "freezes" the hardware
+	cursor in the center of the window/screen.  Also, mouse moved events
+	are not generated, and the keyboard cannot be grabbed.
 
 	Not all of the keys are properly recognized on the keyboard.
 

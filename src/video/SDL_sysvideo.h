@@ -63,7 +63,7 @@ typedef struct SDL_VideoDevice SDL_VideoDevice;
 #endif
 struct SDL_VideoDevice {
 	/* * * */
-	/* The name of this audio driver */
+	/* The name of this video driver */
 	const char *name;
 
 	/* * * */
@@ -377,10 +377,12 @@ extern VideoBootStrap TOOLBOX_bootstrap;
 #ifdef ENABLE_DRAWSPROCKET
 extern VideoBootStrap DSp_bootstrap;
 #endif
+#ifdef ENABLE_QUARTZ
+extern VideoBootStrap QZ_bootstrap;
+#endif
 #ifdef ENABLE_CYBERGRAPHICS
 extern VideoBootStrap CGX_bootstrap;
 #endif
-
 /* This is the current video device */
 extern SDL_VideoDevice *current_video;
 

@@ -878,6 +878,10 @@ typedef enum {
  */
 extern DECLSPEC SDL_GrabMode SDL_WM_GrabInput(SDL_GrabMode mode);
 
+/* Not in public API at the moment - do not use! */
+extern DECLSPEC int SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect,
+                                    SDL_Surface *dst, SDL_Rect *dstrect);
+                    
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
 }

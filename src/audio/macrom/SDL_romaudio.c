@@ -105,9 +105,8 @@ static void callBackProc (SndChannel *chan, SndCommand *cmd_passed ) {
    UInt32 fill_me, play_me;
    SndCommand cmd; 
    SDL_AudioDevice *audio = (SDL_AudioDevice *)chan->userInfo;
- 
-   fill_me = cmd_passed->param2;  /* buffer that has just finished playing,
-so fill it */      
+   
+   fill_me = cmd_passed->param2;  /* buffer that has just finished playing, so fill it */      
    play_me = ! fill_me;           /* filled buffer to play _now_ */
 
    if ( ! audio->enabled ) {
@@ -119,15 +118,21 @@ so fill it */
    cmd.cmd = bufferCmd;
    cmd.param1 = 0; 
    cmd.param2 = (long)&header;
-   
-    SndDoCommand (chan, &cmd, 0);
+
+   SndDoCommand (chan, &cmd, 0);
    
    memset (buffer[fill_me], 0, audio->spec.size);
    
    if ( ! audio->paused ) {
         if ( audio->convert.needed ) {
-            audio->spec.callback(audio->spec.userdata,
-                (Uint8 *)audio->convert.buf,audio->convert.len);
+            #if MACOSX
+                SDL_mutexP(audio->mixer_lock);
+            #endif
+                audio->spec.callback(audio->spec.userdata,
+                    (Uint8 *)audio->convert.buf,audio->convert.len);
+            #if MACOSX
+                SDL_mutexV(audio->mixer_lock);
+            #endif 
                SDL_ConvertAudio(&audio->convert);
 #if 0
             if ( audio->convert.len_cvt != audio->spec.size ) {
@@ -137,11 +142,17 @@ so fill it */
             memcpy(buffer[fill_me], audio->convert.buf,
                             audio->convert.len_cvt);
         } else {
+            #if MACOSX
+                SDL_mutexP(audio->mixer_lock);
+            #endif
             audio->spec.callback(audio->spec.userdata,
                 (Uint8 *)buffer[fill_me], audio->spec.size);
+            #if MACOSX
+                SDL_mutexV(audio->mixer_lock);
+            #endif
         }
     }
-    
+
     if ( running ) {
          
       cmd.cmd = callBackCmd;
@@ -150,6 +161,7 @@ so fill it */
    
       SndDoCommand (chan, &cmd, 0);
    }
+
 }
 
 static int Mac_OpenAudio(_THIS, SDL_AudioSpec *spec) {
