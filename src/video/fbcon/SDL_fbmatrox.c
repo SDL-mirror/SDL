@@ -68,10 +68,12 @@ static int SetHWColorKey(_THIS, SDL_Surface *surface, Uint32 key)
 }
 
 /* Sets per surface hardware alpha value */
+#if 0
 static int SetHWAlpha(_THIS, SDL_Surface *surface, Uint8 value)
 {
 	return(0);
 }
+#endif
 
 static int FillHWRect(_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color)
 {
