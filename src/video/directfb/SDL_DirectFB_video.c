@@ -468,6 +468,9 @@ int DirectFB_VideoInit(_THIS, SDL_PixelFormat *vformat)
   
   if (HIDDEN->enable_mga_crtc2)
     {
+      DFBDisplayLayerConfig      dlc;
+      DFBDisplayLayerConfigFlags failed;
+
       ret = dfb->GetDisplayLayer (dfb, 2, &HIDDEN->c2layer);
       if (ret)
         {
@@ -492,9 +495,6 @@ int DirectFB_VideoInit(_THIS, SDL_PixelFormat *vformat)
       HIDDEN->c2layer->SetOpacity(HIDDEN->c2layer, 0x0);
 
       /* Init the surface here as it got a fixed size */
-      DFBDisplayLayerConfig      dlc;
-      DFBDisplayLayerConfigFlags failed;
-    
       dlc.flags      = DLCONF_PIXELFORMAT | DLCONF_BUFFERMODE | DLCONF_OPTIONS;
       dlc.buffermode = DLBM_BACKVIDEO;
       dlc.options    = DLOP_FLICKER_FILTERING;
