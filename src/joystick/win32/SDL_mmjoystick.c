@@ -85,14 +85,22 @@ int SDL_SYS_JoystickInit(void)
 
 	numdevs = 0;
 	maxdevs = joyGetNumDevs();
+
 	if ( maxdevs > MAX_JOYSTICKS ) {
 		maxdevs = MAX_JOYSTICKS;
 	}
+
 
 	SYS_JoystickID[0] = JOYSTICKID1;
 	SYS_JoystickID[1] = JOYSTICKID2;
 
 	for ( i = 0; (i < maxdevs); ++i ) {
+		
+		/* added 8/31/2001 By Vitaliy Mikitchenko */
+		joyinfo.dwSize = sizeof(joyinfo);
+		joyinfo.dwFlags = JOY_RETURNALL;
+		/* end addition */
+
 		result = joyGetPosEx(SYS_JoystickID[i], &joyinfo);
 		if ( result == JOYERR_NOERROR ) {
 			result = joyGetDevCaps(SYS_JoystickID[i], &joycaps, sizeof(joycaps));
