@@ -44,6 +44,7 @@ static char rcsid =
 /*#error Unsupported dynamic link environment*/
 #endif /* system type */
 
+#include "SDL_types.h"
 #include "SDL_error.h"
 #include "SDL_loadso.h"
 

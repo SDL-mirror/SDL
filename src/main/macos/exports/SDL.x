@@ -76,9 +76,6 @@
 	SDL_GetModState
 	SDL_SetModState
 	SDL_GetKeyName
-	SDL_LoadObject
-	SDL_LoadFunction
-	SDL_UnloadObject
 	SDL_GetMouseState
 	SDL_GetRelativeMouseState
 	SDL_WarpMouse
@@ -146,8 +143,6 @@
 	SDL_FreeSurface
 	SDL_LockSurface
 	SDL_UnlockSurface
-	SDL_LockRect
-	SDL_UnlockRect
 	SDL_LoadBMP_RW
 	SDL_SaveBMP_RW
 	SDL_SetColorKey

@@ -630,10 +630,6 @@ int SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, Uint32 color)
  */
 int SDL_LockSurface (SDL_Surface *surface)
 {
-	if ( surface->locked < 0 ) {
-		SDL_SetError("Surface has a rectangle lock");
-		return(-1);
-	}
 	if ( ! surface->locked ) {
 		/* Perform the lock */
 		if ( surface->flags & (SDL_HWSURFACE|SDL_ASYNCBLIT) ) {
@@ -657,78 +653,6 @@ int SDL_LockSurface (SDL_Surface *surface)
 	/* Ready to go.. */
 	return(0);
 }
-int SDL_LockRect (SDL_Surface *surface, SDL_Rect *rect, void **pixels, int *pitch)
-{
-	int retval = 0;
-
-	/* Check to see if the surface is already locked */
-	*pixels = NULL;
-	if ( surface->locked != 0 ) {
-		SDL_SetError("Surface is already locked");
-		return(-1);
-	}
-
-	/* Clip the lock to the clipping rectangle of the surface */
-	{
-	        SDL_Rect *clip = &surface->clip_rect;
-		int dx, dy;
-		int h = rect->h;
-		int w = rect->w;
-
-		dx = clip->x - rect->x;
-		if(dx > 0) {
-			w -= dx;
-			rect->x += dx;
-		}
-		dx = rect->x + w - clip->x - clip->w;
-		if(dx > 0)
-			w -= dx;
-
-		dy = clip->y - rect->y;
-		if(dy > 0) {
-			h -= dy;
-			rect->y += dy;
-		}
-		dy = rect->y + h - clip->y - clip->h;
-		if(dy > 0)
-			h -= dy;
-
-		if(w > 0 && h > 0) {
-			rect->w = w;
-			rect->h = h;
-		} else {
-			rect->w = 0;
-			rect->h = 0;
-			SDL_SetError("Rectangle was clipped");
-			return(-1);
-		}
-	}
-
-	/* Perform the lock */
-	if ( surface->flags & (SDL_HWSURFACE|SDL_ASYNCBLIT) ) {
-		SDL_VideoDevice *video = current_video;
-		SDL_VideoDevice *this  = current_video;
-		if ( video->LockHWSurfaceRect ) {
-			retval = video->LockHWSurfaceRect(this, surface, rect, pixels, pitch);
-			if ( retval == 0 ) {
-				surface->locked = -1;
-				return 0;
-			}
-		}
-	}
-	if ( SDL_MUSTLOCK(surface) ) {
-		retval = SDL_LockSurface(surface);
-		if ( retval < 0 ) {
-			return retval;
-		}
-	}
-	surface->locked = -1;
-	*pixels = (Uint8 *)surface->pixels + rect->y * surface->pitch + rect->x * surface->format->BytesPerPixel;
-	*pitch = surface->pitch;
-
-	/* Ready to go.. */
-	return(0);
-}
 /*
  * Unlock a previously locked surface
  * -- Do not call this from any blit function, as SDL_DrawCursor() may recurse
@@ -739,9 +663,6 @@ int SDL_LockRect (SDL_Surface *surface, SDL_Rect *rect, void **pixels, int *pitc
 void SDL_UnlockSurface (SDL_Surface *surface)
 {
 	/* Only perform an unlock if we are locked */
-	if ( surface->locked < 0 ) {
-		return;
-	}
 	if ( ! surface->locked || (--surface->locked > 0) ) {
 		return;
 	}
@@ -760,29 +681,6 @@ void SDL_UnlockSurface (SDL_Surface *surface)
 		        surface->flags &= ~SDL_RLEACCEL; /* stop lying */
 			SDL_RLESurface(surface);
 		}
-	}
-}
-void SDL_UnlockRect (SDL_Surface *surface)
-{
-	/* Only perform an unlock if we are locked */
-	if ( surface->locked != -1 ) {
-		return;
-	}
-
-	/* Perform the unlock */
-	if ( surface->flags & (SDL_HWSURFACE|SDL_ASYNCBLIT) ) {
-		SDL_VideoDevice *video = current_video;
-		SDL_VideoDevice *this  = current_video;
-		if ( video->LockHWSurfaceRect ) {
-			video->UnlockHWSurfaceRect(this, surface);
-			return;
-		}
-	}
-	if ( SDL_MUSTLOCK(surface) ) {
-		surface->locked = 1;
-		SDL_UnlockSurface(surface);
-	} else {
-		surface->locked = 0;
 	}
 }
 

@@ -74,9 +74,6 @@ _SDL_GetKeyState
 _SDL_GetModState
 _SDL_SetModState
 _SDL_GetKeyName
-_SDL_LoadObject
-_SDL_LoadFunction
-_SDL_UnloadObject
 _SDL_SetModuleHandle
 _SDL_RegisterApp
 _SDL_InitQuickDraw
@@ -147,8 +144,6 @@ _SDL_CreateRGBSurfaceFrom
 _SDL_FreeSurface
 _SDL_LockSurface
 _SDL_UnlockSurface
-_SDL_LockRect
-_SDL_UnlockRect
 _SDL_LoadBMP_RW
 _SDL_SaveBMP_RW
 _SDL_SetColorKey

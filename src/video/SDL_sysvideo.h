@@ -153,8 +153,6 @@ struct SDL_VideoDevice {
 	/* Returns a readable/writable surface */
 	int (*LockHWSurface)(_THIS, SDL_Surface *surface);
 	void (*UnlockHWSurface)(_THIS, SDL_Surface *surface);
-	int (*LockHWSurfaceRect)(_THIS, SDL_Surface *surface, SDL_Rect *rect, void **pixels, int *pitch);
-	void (*UnlockHWSurfaceRect)(_THIS, SDL_Surface *surface);
 
 	/* Performs hardware flipping */
 	int (*FlipHWSurface)(_THIS, SDL_Surface *surface);

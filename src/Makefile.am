@@ -38,5 +38,6 @@ GENERAL_SRCS = 		\
 	SDL_fatal.c		\
 	SDL_fatal.h		\
 	SDL_getenv.c		\
-	SDL_loadso.c
+	SDL_loadso.c		\
+	SDL_loadso.h
 

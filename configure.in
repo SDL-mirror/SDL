@@ -15,7 +15,7 @@ dnl Set various version strings - taken gratefully from the GTk sources
 SDL_MAJOR_VERSION=1
 SDL_MINOR_VERSION=2
 SDL_MICRO_VERSION=4
-SDL_INTERFACE_AGE=0
+SDL_INTERFACE_AGE=4
 SDL_BINARY_AGE=4
 SDL_VERSION=$SDL_MAJOR_VERSION.$SDL_MINOR_VERSION.$SDL_MICRO_VERSION
 
@@ -328,11 +328,15 @@ CheckESD()
         AM_PATH_ESD(0.2.8, use_esd=yes)
 	if test x$use_esd = xyes; then
             AC_ARG_ENABLE(esd-shared,
-[  --enable-esd-shared     dynamically load ESD support [default=yes]],
-                          , enable_esd_shared=yes)
+[  --enable-esd-shared     dynamically load ESD audio support [default=no]],
+                          , enable_esd_shared=no)
             esd_lib_spec=`echo $ESD_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libesd.so.*/'`
 	    esd_lib=`ls $esd_lib_spec | head -1 | sed 's/.*\/\(.*\)/\1/'`
 	    echo "-- $esd_lib_spec -> $esd_lib"
+            if test x$enable_dlopen != xyes && \
+               test x$enable_esd_shared = xyes; then
+                AC_MSG_ERROR([You must have dlopen() support and use the --enable-dlopen option])
+            fi
             if test x$enable_dlopen = xyes && \
                test x$enable_esd_shared = xyes && test x$esd_lib != x; then
                 CFLAGS="$CFLAGS -DESD_SUPPORT -DESD_DYNAMIC=\$(esd_lib) $ESD_CFLAGS"
@@ -374,11 +378,15 @@ CheckARTSC()
             AC_MSG_RESULT($audio_arts)
             if test x$audio_arts = xyes; then
                 AC_ARG_ENABLE(arts-shared,
-[  --enable-arts-shared     dynamically load ESD support [default=yes]],
-                              , enable_arts_shared=yes)
+[  --enable-arts-shared     dynamically load aRts audio support [default=no]],
+                              , enable_arts_shared=no)
                 arts_lib_spec=`echo $ARTSC_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libarts.so.*/'`
 	        arts_lib=`ls $arts_lib_spec | head -1 | sed 's/.*\/\(.*\)/\1/'`
 	        echo "-- $arts_lib_spec -> $arts_lib"
+                if test x$enable_dlopen != xyes && \
+                   test x$enable_arts_shared = xyes; then
+                    AC_MSG_ERROR([You must have dlopen() support and use the --enable-dlopen option])
+                fi
                 if test x$enable_dlopen = xyes && \
                    test x$enable_arts_shared = xyes && test x$arts_lib != x; then
                     CFLAGS="$CFLAGS -DARTSC_SUPPORT -DARTSC_DYNAMIC=\$(arts_lib) $ARTSC_CFLAGS"
@@ -998,7 +1006,9 @@ CheckOpenGL()
         AC_MSG_RESULT($video_opengl)
         if test x$video_opengl = xyes; then
             CFLAGS="$CFLAGS -DHAVE_OPENGL"
-            AC_CHECK_LIB(dl, dlopen, SYSTEM_LIBS="$SYSTEM_LIBS -ldl")
+            if test x$use_dlopen != xyes; then
+                AC_CHECK_LIB(dl, dlopen, SYSTEM_LIBS="$SYSTEM_LIBS -ldl")
+            fi
         fi
     fi
 }
@@ -1383,8 +1393,8 @@ dnl Check for the dlfcn.h interface for dynamically loading objects
 CheckDLOPEN()
 {
     AC_ARG_ENABLE(dlopen,
-[  --enable-dlopen         use dlopen for shared object loading [default=yes]],
-                  , enable_dlopen=yes)
+[  --enable-dlopen         use dlopen for shared object loading [default=no]],
+                  , enable_dlopen=no)
     if test x$enable_dlopen = xyes; then
         AC_MSG_CHECKING(for dlopen)
         use_dlopen=no
@@ -1398,7 +1408,7 @@ CheckDLOPEN()
 
         if test x$use_dlopen = xyes; then
             CFLAGS="$CFLAGS -DUSE_DLOPEN"
-            SYSTEM_LIBS="$SYSTEM_LIBS -ldl"
+            AC_CHECK_LIB(dl, dlopen, SYSTEM_LIBS="$SYSTEM_LIBS -ldl")
         fi
     fi
 }

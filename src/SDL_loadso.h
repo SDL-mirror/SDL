@@ -27,6 +27,7 @@ static char rcsid =
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* System dependent library loading routines                           */
+/* Note: This API isn't meant for public release until SDL 1.3         */
 
 #ifndef _SDL_loadso_h
 #define _SDL_loadso_h
