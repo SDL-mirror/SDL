@@ -722,6 +722,22 @@ SDL_Surface * SDL_SetVideoMode (int width, int height, int bpp, Uint32 flags)
 	SDL_WM_GrabInput(saved_grab);
 	SDL_GetRelativeMouseState(NULL, NULL); /* Clear first large delta */
 
+#ifdef HAVE_OPENGL
+	/* Load GL symbols (before MakeCurrent, where we need glGetString). */
+	if ( flags & (SDL_OPENGL | SDL_OPENGLBLIT) ) {
+#define SDL_PROC(ret,func,params) \
+do { \
+	video->func = SDL_GL_GetProcAddress(#func); \
+	if ( ! video->func ) { \
+		SDL_SetError("Couldn't load GL function: %s\n", #func); \
+		return(NULL); \
+	} \
+} while ( 0 );
+#include "SDL_glfuncs.h"
+#undef SDL_PROC	
+	}
+#endif
+
 	/* If we're running OpenGL, make the context current */
 	if ( (video->screen->flags & SDL_OPENGL) &&
 	      video->GL_MakeCurrent ) {
@@ -734,16 +750,6 @@ SDL_Surface * SDL_SetVideoMode (int width, int height, int bpp, Uint32 flags)
 	if ( (flags & SDL_OPENGLBLIT) == SDL_OPENGLBLIT ) {
 		/* Load GL functions for performing the texture updates */
 #ifdef HAVE_OPENGL
-#define SDL_PROC(ret,func,params) \
-do { \
-	video->func = SDL_GL_GetProcAddress(#func); \
-	if ( ! video->func ) { \
-		SDL_SetError("Couldn't load GL function: %s\n", #func); \
-		return(NULL); \
-	} \
-} while ( 0 );
-#include "SDL_glfuncs.h"
-#undef SDL_PROC	
 
 		/* Create a software surface for blitting */
 #ifdef GL_VERSION_1_2
