@@ -20,11 +20,6 @@
     slouken@libsdl.org
 */
 
-#ifdef SAVE_RCSID
-static char rcsid =
- "@(#) $Id$";
-#endif
-
 /*
 	Atari MetaDOS CD-ROM functions
 
@@ -43,17 +38,18 @@ static char rcsid =
 #include "SDL_cdrom.h"
 #include "SDL_syscdrom.h"
 
+/* Some ioctl() errno values which occur when the tray is empty */
+#ifndef ENOMEDIUM
+#define ENOMEDIUM ENOENT
+#endif
+#define ERRNO_TRAYEMPTY(errno)	\
+	((errno == EIO)    || (errno == ENOENT) || \
+	 (errno == EINVAL) || (errno == ENOMEDIUM))
 
 /* The maximum number of CD-ROM drives we'll detect */
 #define MAX_DRIVES	32	
 
-/* Type of CD-ROM drive */
-#define DRIVE_TYPE_NOCD	-1
-#define DRIVE_TYPE_STANDARD	0
-#define DRIVE_TYPE_CDAR	1
-
 typedef struct {
-	int	type;					/* Standard, or old CDAR-type CD drive ? */
 	unsigned char device[3];	/* Physical device letter + ':' + '\0' */
 	metaopen_t	metaopen;		/* Infos on opened drive */
 } metados_drive_t;
@@ -65,8 +61,6 @@ static const char *SDL_SYS_CDName(int drive);
 static int SDL_SYS_CDOpen(int drive);
 static void SDL_SYS_CDClose(SDL_CD *cdrom);
 static int SDL_SYS_CDioctl(int id, int command, void *arg);
-
-/* Commands using ioctl() */
 static int SDL_SYS_CDGetTOC(SDL_CD *cdrom);
 static CDstatus SDL_SYS_CDStatus(SDL_CD *cdrom, int *position);
 static int SDL_SYS_CDPlay(SDL_CD *cdrom, int start, int length);
@@ -75,16 +69,12 @@ static int SDL_SYS_CDResume(SDL_CD *cdrom);
 static int SDL_SYS_CDStop(SDL_CD *cdrom);
 static int SDL_SYS_CDEject(SDL_CD *cdrom);
 
-/* Commands using Meta*() CDAR functions */
-static int SDL_SYS_CD_BcdToBinary(int value);
-static int SDL_SYS_CDGetTOC_CDAR(SDL_CD *cdrom);
-static CDstatus SDL_SYS_CDStatus_CDAR(SDL_CD *cdrom, int *position);
-
 int SDL_SYS_CDInit(void)
 {
 	metainit_t	metainit={0,0,0,0};
 	metaopen_t	metaopen;
 	int i, handle;
+	struct cdrom_subchnl info;
 
 	Metainit(&metainit);
 	if (metainit.version == NULL) {
@@ -104,7 +94,6 @@ int SDL_SYS_CDInit(void)
 	SDL_numcds = 0;
 	
 	for (i='A'; i<='Z'; i++) {
-		metados_drives[SDL_numcds].type = DRIVE_TYPE_NOCD;
 		metados_drives[SDL_numcds].device[0] = 0;
 		metados_drives[SDL_numcds].device[1] = ':';
 		metados_drives[SDL_numcds].device[2] = 0;
@@ -113,20 +102,10 @@ int SDL_SYS_CDInit(void)
 			handle = Metaopen(i, &metaopen);
 			if (handle == 0) {
 
-				if ( (metaopen.name[0]=='C') && (metaopen.name[1]=='D') &&
-					(metaopen.name[2]=='A') && (metaopen.name[3]=='R')) {
-					/* Drive compatible with CDAR */
-					metados_drives[SDL_numcds].type = DRIVE_TYPE_CDAR;
+				info.cdsc_format = CDROM_MSF;
+				if ( (Metaioctl(i, METADOS_IOCTL_MAGIC, CDROMSUBCHNL, &info) == 0) || ERRNO_TRAYEMPTY(errno) ) {
 					metados_drives[SDL_numcds].device[0] = i;
 					++SDL_numcds;
-				} else {
-					/* Check for a CD-ROM device */
-					if ((Metastatus(i, NULL) & 0x7fff) >= 0) {
-						/* Drive compatible with new ioctl functions */
-						metados_drives[SDL_numcds].type = DRIVE_TYPE_STANDARD;
-						metados_drives[SDL_numcds].device[0] = i;
-						++SDL_numcds;
-					}
 				}
 
 				Metaclose(i);
@@ -188,93 +167,11 @@ static int SDL_SYS_CDioctl(int id, int command, void *arg)
 	return(retval);
 }
 
-static int SDL_SYS_CD_BcdToBinary(int value)
-{
-	int tmp;
-	
-	tmp = (value>>4) & 0xf;	
-	return (tmp*10)+(value & 0xf);
-}
-
-static int SDL_SYS_CDGetTOC_CDAR(SDL_CD *cdrom)
-{
-	int errorcode, i, minute, second, frame;
-	metatocentry_t *toc_entries;
-	metadiscinfo_t	disc_info;
-
-	/* First, read disc info */
-	errorcode = Metadiscinfo(metados_drives[cdrom->id].device[0], &disc_info);
-	if (errorcode<0) {
-#ifdef DEBUG_CDROM
-		fprintf(stderr, "Can not read disc info\n");
-#endif
-		return -1;
-	}
-	
-	cdrom->numtracks = disc_info.last - disc_info.first + 1;
-
-	/* Then read toc entries for tracks */
-	toc_entries = (metatocentry_t *)malloc(100*sizeof(metatocentry_t));
-	if (toc_entries == NULL) {
-#ifdef DEBUG_CDROM
-		fprintf(stderr, "Can not allocate memory for TOC entries\n");
-#endif
-		return -1;
-	}
-
-	errorcode = Metagettoc(metados_drives[cdrom->id].device[0], 0, toc_entries);
-	if (errorcode<0) {
-#ifdef DEBUG_CDROM
-		fprintf(stderr, "Can not read TOC\n");
-#endif
-		free(toc_entries);
-		return -1;
-	}
-
-	i=0;
-	for (;;) {
-		if ((toc_entries[i].track==0) && (toc_entries[i].minute==0) && 
-			(toc_entries[i].second==0) && (toc_entries[i].frame==0)
-			) {
-			break;
-		}
-
-		if (toc_entries[i].track == CDROM_LEADOUT_CDAR) {
-			cdrom->track[i].id = CDROM_LEADOUT;
-		} else {
-			cdrom->track[i].id = toc_entries[i].track;
-		}
-		if (disc_info.disctype == 0) {
-			cdrom->track[i].type = SDL_AUDIO_TRACK;
-		} else {
-			cdrom->track[i].type = SDL_DATA_TRACK;
-		}
-		minute = SDL_SYS_CD_BcdToBinary(toc_entries[i].minute);
-		second = SDL_SYS_CD_BcdToBinary(toc_entries[i].second);
-		frame = SDL_SYS_CD_BcdToBinary(toc_entries[i].frame);
-		cdrom->track[i].offset = MSF_TO_FRAMES(minute, second, frame);
-
-		if ( i > 0 ) {
-			cdrom->track[i-1].length = cdrom->track[i].offset - cdrom->track[i-1].offset;
-		}
-
-		++i;
-	}
-
-	free(toc_entries);
-	return 0;
-}
-
 static int SDL_SYS_CDGetTOC(SDL_CD *cdrom)
 {
 	int i,okay;
 	struct cdrom_tochdr toc;
 	struct cdrom_tocentry entry;
-
-	/* CDAR compatible drive ? */
-	if (metados_drives[cdrom->id].type == DRIVE_TYPE_CDAR) {
-		return SDL_SYS_CDGetTOC_CDAR(cdrom);
-	}
 
 	/* Use standard ioctl() */	
 	if (SDL_SYS_CDioctl(cdrom->id, CDROMREADTOCHDR, &toc)<0) {
@@ -320,26 +217,19 @@ static int SDL_SYS_CDGetTOC(SDL_CD *cdrom)
 }
 
 /* Get CD-ROM status */
-static CDstatus SDL_SYS_CDStatus_CDAR(SDL_CD *cdrom, int *position)
-{
-	return CD_ERROR;
-}
-
 static CDstatus SDL_SYS_CDStatus(SDL_CD *cdrom, int *position)
 {
 	CDstatus status;
 	struct cdrom_tochdr toc;
 	struct cdrom_subchnl info;
 
-	/* CDAR compatible drive ? */
-	if (metados_drives[cdrom->id].type == DRIVE_TYPE_CDAR) {
-		return SDL_SYS_CDStatus_CDAR(cdrom, position);
-	}
-
-	/* Standard ioctl */
 	info.cdsc_format = CDROM_MSF;
 	if ( SDL_SYS_CDioctl(cdrom->id, CDROMSUBCHNL, &info) < 0 ) {
-		status = CD_TRAYEMPTY;
+		if ( ERRNO_TRAYEMPTY(errno) ) {
+			status = CD_TRAYEMPTY;
+		} else {
+			status = CD_ERROR;
+		}
 	} else {
 		switch (info.cdsc_audiostatus) {
 			case CDROM_AUDIO_INVALID:
@@ -384,29 +274,9 @@ static CDstatus SDL_SYS_CDStatus(SDL_CD *cdrom, int *position)
 }
 
 /* Start play */
-static int SDL_SYS_CDPlay_CDAR(SDL_CD *cdrom, int start, int length)
-{
-	struct cdrom_msf playtime;
-
-	FRAMES_TO_MSF(start,
-	   &playtime.cdmsf_min0, &playtime.cdmsf_sec0, &playtime.cdmsf_frame0);
-	FRAMES_TO_MSF(start+length,
-	   &playtime.cdmsf_min1, &playtime.cdmsf_sec1, &playtime.cdmsf_frame1);
-
-	return Metasetsongtime(metados_drives[cdrom->id].device[0], 0,
-		(playtime.cdmsf_min0<<16)|(playtime.cdmsf_sec0<<8)|(playtime.cdmsf_frame0),
-		(playtime.cdmsf_min1<<16)|(playtime.cdmsf_sec1<<8)|(playtime.cdmsf_frame1)
-	);
-}
-
 static int SDL_SYS_CDPlay(SDL_CD *cdrom, int start, int length)
 {
 	struct cdrom_msf playtime;
-
-	/* CDAR compatible drive ? */
-	if (metados_drives[cdrom->id].type == DRIVE_TYPE_CDAR) {
-		return SDL_SYS_CDPlay_CDAR(cdrom, start, length);
-	}
 
 	FRAMES_TO_MSF(start,
 	   &playtime.cdmsf_min0, &playtime.cdmsf_sec0, &playtime.cdmsf_frame0);
@@ -417,49 +287,30 @@ static int SDL_SYS_CDPlay(SDL_CD *cdrom, int start, int length)
 	playtime.cdmsf_min0, playtime.cdmsf_sec0, playtime.cdmsf_frame0,
 	playtime.cdmsf_min1, playtime.cdmsf_sec1, playtime.cdmsf_frame1);
 #endif
-	return(SDL_SYS_CDioctl(cdrom->id, CDROMPLAYMSF, &playtime));
+
+	return SDL_SYS_CDioctl(cdrom->id, CDROMPLAYMSF, &playtime);
 }
 
 /* Pause play */
 static int SDL_SYS_CDPause(SDL_CD *cdrom)
 {
-	/* CDAR compatible drive ? */
-	if (metados_drives[cdrom->id].type == DRIVE_TYPE_CDAR) {
-		return -1;
-	}
-
-	return(SDL_SYS_CDioctl(cdrom->id, CDROMPAUSE, 0));
+	return SDL_SYS_CDioctl(cdrom->id, CDROMPAUSE, 0);
 }
 
 /* Resume play */
 static int SDL_SYS_CDResume(SDL_CD *cdrom)
 {
-	/* CDAR compatible drive ? */
-	if (metados_drives[cdrom->id].type == DRIVE_TYPE_CDAR) {
-		return -1;
-	}
-
-	return(SDL_SYS_CDioctl(cdrom->id, CDROMRESUME, 0));
+	return SDL_SYS_CDioctl(cdrom->id, CDROMRESUME, 0);
 }
 
 /* Stop play */
 static int SDL_SYS_CDStop(SDL_CD *cdrom)
 {
-	/* CDAR compatible drive ? */
-	if (metados_drives[cdrom->id].type == DRIVE_TYPE_CDAR) {
-		return Metastopaudio(metados_drives[cdrom->id].device[0]);
-	}
-
-	return(SDL_SYS_CDioctl(cdrom->id, CDROMSTOP, 0));
+	return SDL_SYS_CDioctl(cdrom->id, CDROMSTOP, 0);
 }
 
 /* Eject the CD-ROM */
 static int SDL_SYS_CDEject(SDL_CD *cdrom)
 {
-	/* CDAR compatible drive ? */
-	if (metados_drives[cdrom->id].type == DRIVE_TYPE_CDAR) {
-		return -1;
-	}
-
-	return(SDL_SYS_CDioctl(cdrom->id, CDROMEJECT, 0));
+	return SDL_SYS_CDioctl(cdrom->id, CDROMEJECT, 0);
 }
