@@ -142,6 +142,8 @@ WMcursor *X11_CreateWMCursor(_THIS,
 	/* Create the cursor */
 	cursor->x_cursor = XCreatePixmapCursor(SDL_Display, data_pixmap,
 				mask_pixmap, &black, &white, hot_x, hot_y);
+	XFreePixmap(SDL_Display, data_pixmap);
+	XFreePixmap(SDL_Display, mask_pixmap);
 
 	/* Release the event thread */
 	XSync(SDL_Display, False);
