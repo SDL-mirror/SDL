@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997, 1998, 1999, 2000, 2001  Sam Lantinga
+    Copyright (C) 1997, 1998, 1999, 2000  Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -28,115 +28,36 @@ static char rcsid =
 /* Handle the event stream, converting X11 events into SDL events */
 
 #include <stdio.h>
-#include <stdlib.h>
 
-#include <vga.h>
-#include <vgamouse.h>
-#include <vgakeyboard.h>
-#if defined(linux)
-#include <linux/kd.h>
-#include <linux/keyboard.h>
-#elif defined(__FreeBSD__)
+#include <sys/fbio.h>
+#include <sys/consio.h>
 #include <sys/kbio.h>
-#else
-#error You must choose your operating system here
-#endif
+#include <vgl.h>
 
 #include "SDL.h"
+#include "SDL_thread.h"
 #include "SDL_sysevents.h"
 #include "SDL_events_c.h"
-#include "SDL_svgavideo.h"
-#include "SDL_svgaevents_c.h"
+#include "SDL_vglvideo.h"
+#include "SDL_vglevents_c.h"
 
 /* The translation tables from a console scancode to a SDL keysym */
-#if defined(linux)
-#define NUM_VGAKEYMAPS	(1<<KG_CAPSSHIFT)
-static Uint16 vga_keymap[NUM_VGAKEYMAPS][NR_KEYS];
-#elif defined(__FreeBSD__)
 /* FIXME: Free the keymap when we shut down the video mode */
 static keymap_t *vga_keymap = NULL;
-#else
-#error You must choose your operating system here
-#endif
 static SDLKey keymap[128];
 static SDL_keysym *TranslateKey(int scancode, SDL_keysym *keysym);
+
+static int posted = 0;
+static int oldx = -1;
+static int oldy = -1;
+static struct mouse_info mouseinfo;
 
 /* Ugh, we have to duplicate the kernel's keysym mapping code...
    Oh, it's not so bad. :-)
 
    FIXME: Add keyboard LED handling code
  */
-#if defined(linux)
-int SVGA_initkeymaps(int fd)
-{
-	struct kbentry entry;
-	int map, i;
-
-	/* Load all the keysym mappings */
-	for ( map=0; map<NUM_VGAKEYMAPS; ++map ) {
-		memset(vga_keymap[map], 0, NR_KEYS*sizeof(Uint16));
-		for ( i=0; i<NR_KEYS; ++i ) {
-			entry.kb_table = map;
-			entry.kb_index = i;
-			if ( ioctl(fd, KDGKBENT, &entry) == 0 ) {
-				/* The "Enter" key is a special case */
-				if ( entry.kb_value == K_ENTER ) {
-					entry.kb_value = K(KT_ASCII,13);
-				}
-				/* Handle numpad specially as well */
-				if ( KTYP(entry.kb_value) == KT_PAD ) {
-				    switch ( entry.kb_value ) {
-					case K_P0:
-					case K_P1:
-					case K_P2:
-					case K_P3:
-					case K_P4:
-					case K_P5:
-					case K_P6:
-					case K_P7:
-					case K_P8:
-					case K_P9:
-					    vga_keymap[map][i]=entry.kb_value;
-					    vga_keymap[map][i]+= '0';
-					    break;
-                                        case K_PPLUS:
-					    vga_keymap[map][i]=K(KT_ASCII,'+');
-					    break;
-                                        case K_PMINUS:
-					    vga_keymap[map][i]=K(KT_ASCII,'-');
-					    break;
-                                        case K_PSTAR:
-					    vga_keymap[map][i]=K(KT_ASCII,'*');
-					    break;
-                                        case K_PSLASH:
-					    vga_keymap[map][i]=K(KT_ASCII,'/');
-					    break;
-                                        case K_PENTER:
-					    vga_keymap[map][i]=K(KT_ASCII,'\r');
-					    break;
-                                        case K_PCOMMA:
-					    vga_keymap[map][i]=K(KT_ASCII,',');
-					    break;
-                                        case K_PDOT:
-					    vga_keymap[map][i]=K(KT_ASCII,'.');
-					    break;
-					default:
-					    break;
-				    }
-				}
-				/* Do the normal key translation */
-				if ( (KTYP(entry.kb_value) == KT_LATIN) ||
-				     (KTYP(entry.kb_value) == KT_ASCII) ||
-				     (KTYP(entry.kb_value) == KT_LETTER) ) {
-					vga_keymap[map][i] = entry.kb_value;
-				}
-			}
-		}
-	}
-	return(0);
-}
-#elif defined(__FreeBSD__)
-int SVGA_initkeymaps(int fd)
+int VGL_initkeymaps(int fd)
 {
 	vga_keymap = malloc(sizeof(keymap_t));
 	if ( ! vga_keymap ) {
@@ -151,70 +72,78 @@ int SVGA_initkeymaps(int fd)
 	}
 	return(0);
 }
-#else
-#error You must choose your operating system here
-#endif
 
-int posted = 0;
-
-void SVGA_mousecallback(int button, int dx, int dy,
-                          int u1,int u2,int u3, int u4)
-{
-	if ( dx || dy ) {
-		posted += SDL_PrivateMouseMotion(0, 1, dx, dy);
-	}
-	if ( button & MOUSE_LEFTBUTTON ) {
-		if ( !(SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(1)) ) {
-			posted += SDL_PrivateMouseButton(SDL_PRESSED, 1, 0, 0);
-		}
-	} else {
-		if ( (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(1)) ) {
-			posted += SDL_PrivateMouseButton(SDL_RELEASED, 1, 0, 0);
-		}
-	}
-	if ( button & MOUSE_MIDDLEBUTTON ) {
-		if ( !(SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(2)) ) {
-			posted += SDL_PrivateMouseButton(SDL_PRESSED, 2, 0, 0);
-		}
-	} else {
-		if ( (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(2)) ) {
-			posted += SDL_PrivateMouseButton(SDL_RELEASED, 2, 0, 0);
-		}
-	}
-	if ( button & MOUSE_RIGHTBUTTON ) {
-		if ( !(SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(3)) ) {
-			posted += SDL_PrivateMouseButton(SDL_PRESSED, 3, 0, 0);
-		}
-	} else {
-		if ( (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(3)) ) {
-			posted += SDL_PrivateMouseButton(SDL_RELEASED, 3, 0, 0);
-		}
-	}
-}
-
-void SVGA_keyboardcallback(int scancode, int pressed)
+static void handle_keyboard(_THIS)
 {
 	SDL_keysym keysym;
+	int c, pressed, scancode;
 
-	if ( pressed ) {
-		posted += SDL_PrivateKeyboard(SDL_PRESSED,
-			    TranslateKey(scancode, &keysym));
-	} else {
-		posted += SDL_PrivateKeyboard(SDL_RELEASED,
-			    TranslateKey(scancode, &keysym));
+	while ((c = VGLKeyboardGetCh()) != 0) {
+		scancode = c & 0x7F;
+                if (c & 0x80) {
+                        pressed = SDL_RELEASED;
+                } else {
+                        pressed = SDL_PRESSED;
+                }
+
+		posted += SDL_PrivateKeyboard(pressed,
+				 TranslateKey(scancode, &keysym));
 	}
 }
 
-void SVGA_PumpEvents(_THIS)
+int VGL_initmouse(int fd)
+{
+	mouseinfo.operation = MOUSE_GETINFO;
+	if (ioctl(fd, CONS_MOUSECTL, &mouseinfo) != 0)
+		return -1;
+
+	return 0;
+}
+
+static void handle_mouse(_THIS)
+{
+	char buttons;
+	int x, y;
+	int button_state, state_changed, state;
+	int i;
+
+	ioctl(0, CONS_MOUSECTL, &mouseinfo);
+	x = mouseinfo.u.data.x;
+	y = mouseinfo.u.data.y;
+	buttons = mouseinfo.u.data.buttons;
+
+	if ((x != oldx) || (y != oldy)) {
+		posted += SDL_PrivateMouseMotion(0, 0, x, y);
+		oldx = x;
+		oldy = y;
+	}
+
+	/* See what's changed */
+	button_state = SDL_GetMouseState(NULL, NULL);
+	state_changed = button_state ^ buttons;
+	for (i = 0; i < 8; i++) {
+		if (state_changed & (1<<i)) {
+			if (buttons & (1<<i)) {
+				state = SDL_PRESSED;
+			} else {
+				state = SDL_RELEASED;
+			}
+			posted += SDL_PrivateMouseButton(state, i + 1, 0, 0);
+		}
+	}
+}
+	
+
+void VGL_PumpEvents(_THIS)
 {
 	do {
 		posted = 0;
-		mouse_update();
-		keyboard_update();
-	} while ( posted );
+		handle_keyboard(this);
+		handle_mouse(this);
+	} while (posted != 0);
 }
 
-void SVGA_InitOSKeymap(_THIS)
+void VGL_InitOSKeymap(_THIS)
 {
 	int i;
 
@@ -340,50 +269,6 @@ void SVGA_InitOSKeymap(_THIS)
 	keymap[127] = SDLK_MENU;
 }
 
-#if defined(linux)
-static SDL_keysym *TranslateKey(int scancode, SDL_keysym *keysym)
-{
-	/* Set the keysym information */
-	keysym->scancode = scancode;
-	keysym->sym = keymap[scancode];
-	keysym->mod = KMOD_NONE;
-
-	/* If UNICODE is on, get the UNICODE value for the key */
-	keysym->unicode = 0;
-	if ( SDL_TranslateUNICODE ) {
-		int map;
-		SDLMod modstate;
-
-		modstate = SDL_GetModState();
-		map = 0;
-		if ( modstate & KMOD_SHIFT ) {
-			map |= (1<<KG_SHIFT);
-		}
-		if ( modstate & KMOD_CTRL ) {
-			map |= (1<<KG_CTRL);
-		}
-		if ( modstate & KMOD_ALT ) {
-			map |= (1<<KG_ALT);
-		}
-		if ( modstate & KMOD_MODE ) {
-			map |= (1<<KG_ALTGR);
-		}
-		if ( KTYP(vga_keymap[map][scancode]) == KT_LETTER ) {
-			if ( modstate & KMOD_CAPS ) {
-				map ^= (1<<KG_SHIFT);
-			}
-		}
-		if ( KTYP(vga_keymap[map][scancode]) == KT_PAD ) {
-			if ( modstate & KMOD_NUM ) {
-				keysym->unicode=KVAL(vga_keymap[map][scancode]);
-			}
-		} else {
-			keysym->unicode = KVAL(vga_keymap[map][scancode]);
-		}
-	}
-	return(keysym);
-}
-#elif defined(__FreeBSD__)
 static SDL_keysym *TranslateKey(int scancode, SDL_keysym *keysym)
 {
 	/* Set the keysym information */
@@ -415,6 +300,4 @@ static SDL_keysym *TranslateKey(int scancode, SDL_keysym *keysym)
 	}
 	return(keysym);
 }
-#else
-#error You must choose your operating system here
-#endif
+

@@ -749,6 +749,37 @@ CheckSVGA()
     fi
 }
 
+dnl Find the VGL includes and libraries
+CheckVGL()
+{
+    AC_ARG_ENABLE(video-vgl,
+[  --enable-video-vgl     use VGL video driver [default=no]],
+                  , enable_video_vgl=no)
+    if test x$enable_video = xyes -a x$enable_video_vgl = xyes; then
+        AC_MSG_CHECKING(for libVGL support)
+        video_vgl=no
+        AC_TRY_COMPILE([
+         #include <sys/fbio.h>
+         #include <sys/consio.h>
+         #include <sys/kbio.h>
+         #include <vgl.h>
+        ],[
+         VGLBitmap bitmap;
+         exit(bitmap.PyxelBytes);
+        ],[
+        video_vgl=yes
+        ])
+        AC_MSG_RESULT($video_vgl)
+        if test x$video_vgl = xyes; then
+            CFLAGS="$CFLAGS -DENABLE_VGL"
+            SYSTEM_LIBS="$SYSTEM_LIBS -lvgl"
+
+            VIDEO_SUBDIRS="$VIDEO_SUBDIRS vgl"
+            VIDEO_DRIVERS="$VIDEO_DRIVERS vgl/libvideo_vgl.la"
+        fi
+    fi
+}
+
 dnl Find the AAlib includes
 CheckAAlib()
 {
@@ -1202,6 +1233,7 @@ case "$target" in
         CheckX11
         CheckDGA
         CheckSVGA
+        CheckVGL
         CheckAAlib
         CheckOpenGL
         CheckPTHREAD
@@ -2044,6 +2076,7 @@ src/video/macdsp/Makefile
 src/video/macrom/Makefile
 src/video/quartz/Makefile
 src/video/svga/Makefile
+src/video/vgl/Makefile
 src/video/aalib/Makefile
 src/video/wincommon/Makefile
 src/video/windib/Makefile

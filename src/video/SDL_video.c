@@ -63,6 +63,9 @@ static VideoBootStrap *bootstrap[] = {
 #ifdef ENABLE_GGI
 	&GGI_bootstrap,
 #endif
+#ifdef ENABLE_VGL
+	&VGL_bootstrap,
+#endif
 #ifdef ENABLE_SVGALIB
 	&SVGALIB_bootstrap,
 #endif

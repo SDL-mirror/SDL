@@ -37,7 +37,9 @@ static char rcsid =
 #ifdef __SVR4
 #include <X11/Sunkeysym.h>
 #endif
+#include <sys/types.h>
 #include <sys/time.h>
+#include <unistd.h>
 
 #include "SDL.h"
 #include "SDL_syswm.h"

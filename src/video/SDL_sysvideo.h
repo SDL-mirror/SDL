@@ -343,6 +343,9 @@ extern VideoBootStrap PS2GS_bootstrap;
 #ifdef ENABLE_GGI
 extern VideoBootStrap GGI_bootstrap;
 #endif
+#ifdef ENABLE_VGL
+extern VideoBootStrap VGL_bootstrap;
+#endif
 #ifdef ENABLE_SVGALIB
 extern VideoBootStrap SVGALIB_bootstrap;
 #endif

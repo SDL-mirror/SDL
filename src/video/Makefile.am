@@ -5,7 +5,7 @@ noinst_LTLIBRARIES = libvideo.la
 
 # Define which subdirectories need to be built
 SUBDIRS = @VIDEO_SUBDIRS@
-DIST_SUBDIRS = dummy x11 dga nanox fbcon svga ggi aalib \
+DIST_SUBDIRS = dummy x11 dga nanox fbcon vgl svga ggi aalib \
                wincommon windib windx5 \
                maccommon macdsp macrom quartz \
                bwindow ps2gs photon cybergfx
