@@ -36,7 +36,6 @@ static char rcsid =
 #include <sys/shm.h>
 #include <X11/extensions/XShm.h>
 #include <XFree86/extensions/Xvlib.h>
-#include <X11/Xlibint.h>
 
 #include "SDL_error.h"
 #include "SDL_video.h"
