@@ -1104,9 +1104,6 @@ void DirectFB_VideoQuit(_THIS)
       HIDDEN->c2frame = NULL;
     }
 
-  this->screen->hwdata->surface = NULL;
-  this->screen->hwdata->palette = NULL;
-
   if (HIDDEN->eventbuffer)
     {
       HIDDEN->eventbuffer->Release (HIDDEN->eventbuffer);
