@@ -380,7 +380,7 @@ CheckARTSC()
                 AC_ARG_ENABLE(arts-shared,
 [  --enable-arts-shared     dynamically load aRts audio support [default=no]],
                               , enable_arts_shared=no)
-                arts_lib_spec=`echo $ARTSC_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libarts.so.*/'`
+                arts_lib_spec=`echo $ARTSC_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libartsc.so.*/'`
 	        arts_lib=`ls $arts_lib_spec | head -1 | sed 's/.*\/\(.*\)/\1/'`
 	        echo "-- $arts_lib_spec -> $arts_lib"
                 if test x$enable_dlopen != xyes && \

@@ -38,7 +38,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %setup -q 
 
 %build
-CFLAGS="$RPM_OPT_FLAGS" ./configure --prefix=%{prefix} --disable-video-svga --disable-video-ggi --disable-video-aalib --disable-debug --enable-xfree86-glidehack
+CFLAGS="$RPM_OPT_FLAGS" ./configure --prefix=%{prefix} --disable-video-svga --disable-video-ggi --disable-video-aalib --disable-debug --enable-dlopen --enable-esd-shared --enable-arts-shared
 make
 
 %install
