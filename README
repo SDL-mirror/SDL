@@ -13,8 +13,8 @@ level access to audio, keyboard, mouse, joystick, 3D hardware via OpenGL,
 and 2D framebuffer across multiple platforms.
 
 SDL is written in C, but works with C++ natively, and has bindings to
-several other languages, including Ada, Eiffel, Java, ML, Perl, PHP,
-Pike, Python, and Ruby.
+several other languages, including Ada, Eiffel, Java, Lua, ML, Perl,
+PHP, Pike, Python, and Ruby.
 
 The current version supports Linux, Windows, BeOS, MacOS, MacOS X,
 FreeBSD, OpenBSD, BSD/OS, Solaris, and IRIX.  The code contains support
