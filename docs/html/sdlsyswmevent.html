@@ -4,7 +4,7 @@
 >SDL_SysWMEvent</TITLE
 ><META
 NAME="GENERATOR"
-CONTENT="Modular DocBook HTML Stylesheet Version 1.64
+CONTENT="Modular DocBook HTML Stylesheet Version 1.76b+
 "><LINK
 REL="HOME"
 TITLE="SDL Library Documentation"
@@ -28,6 +28,7 @@ ALINK="#ff0000"
 ><DIV
 CLASS="NAVHEADER"
 ><TABLE
+SUMMARY="Header navigation table"
 WIDTH="100%"
 BORDER="0"
 CELLPADDING="0"
@@ -45,6 +46,7 @@ ALIGN="left"
 VALIGN="bottom"
 ><A
 HREF="sdlexposeevent.html"
+ACCESSKEY="P"
 >Prev</A
 ></TD
 ><TD
@@ -58,6 +60,7 @@ ALIGN="right"
 VALIGN="bottom"
 ><A
 HREF="sdluserevent.html"
+ACCESSKEY="N"
 >Next</A
 ></TD
 ></TR
@@ -68,12 +71,12 @@ WIDTH="100%"></DIV
 ><H1
 ><A
 NAME="SDLSYSWMEVENT"
->SDL_SysWMEvent</A
-></H1
+></A
+>SDL_SysWMEvent</H1
 ><DIV
 CLASS="REFNAMEDIV"
 ><A
-NAME="AEN4154"
+NAME="AEN4538"
 ></A
 ><H2
 >Name</H2
@@ -81,7 +84,7 @@ NAME="AEN4154"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN4157"
+NAME="AEN4541"
 ></A
 ><H2
 >Description</H2
@@ -103,7 +106,8 @@ application.
 <PRE
 CLASS="PROGRAMLISTING"
 >typedef struct {
-         Uint8 type;   /* Always SDL_SysWM */
+         Uint8 type;   /* Always SDL_SYSWMEVENT */
+         SDL_SysWMmsg *msg;
  } SDL_SysWMEvent;</PRE
 >
 
@@ -127,7 +131,7 @@ function:
 <DIV
 CLASS="FUNCSYNOPSIS"
 ><A
-NAME="AEN4167"
+NAME="AEN4551"
 ></A
 ><P
 ></P
@@ -149,7 +153,7 @@ CLASS="FSFUNC"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN4172"
+NAME="AEN4556"
 ></A
 ><H2
 >See Also</H2
@@ -167,6 +171,7 @@ CLASS="NAVFOOTER"
 ><HR
 ALIGN="LEFT"
 WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
 WIDTH="100%"
 BORDER="0"
 CELLPADDING="0"
@@ -178,6 +183,7 @@ ALIGN="left"
 VALIGN="top"
 ><A
 HREF="sdlexposeevent.html"
+ACCESSKEY="P"
 >Prev</A
 ></TD
 ><TD
@@ -186,6 +192,7 @@ ALIGN="center"
 VALIGN="top"
 ><A
 HREF="index.html"
+ACCESSKEY="H"
 >Home</A
 ></TD
 ><TD
@@ -194,6 +201,7 @@ ALIGN="right"
 VALIGN="top"
 ><A
 HREF="sdluserevent.html"
+ACCESSKEY="N"
 >Next</A
 ></TD
 ></TR
@@ -209,6 +217,7 @@ ALIGN="center"
 VALIGN="top"
 ><A
 HREF="eventstructures.html"
+ACCESSKEY="U"
 >Up</A
 ></TD
 ><TD

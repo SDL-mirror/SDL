@@ -4,7 +4,7 @@
 >Handling the Keyboard</TITLE
 ><META
 NAME="GENERATOR"
-CONTENT="Modular DocBook HTML Stylesheet Version 1.64
+CONTENT="Modular DocBook HTML Stylesheet Version 1.76b+
 "><LINK
 REL="HOME"
 TITLE="SDL Library Documentation"
@@ -28,6 +28,7 @@ ALINK="#ff0000"
 ><DIV
 CLASS="NAVHEADER"
 ><TABLE
+SUMMARY="Header navigation table"
 WIDTH="100%"
 BORDER="0"
 CELLPADDING="0"
@@ -45,6 +46,7 @@ ALIGN="left"
 VALIGN="bottom"
 ><A
 HREF="guideinput.html"
+ACCESSKEY="P"
 >Prev</A
 ></TD
 ><TD
@@ -58,6 +60,7 @@ ALIGN="right"
 VALIGN="bottom"
 ><A
 HREF="guideexamples.html"
+ACCESSKEY="N"
 >Next</A
 ></TD
 ></TR
@@ -71,16 +74,16 @@ CLASS="SECT1"
 CLASS="SECT1"
 ><A
 NAME="GUIDEINPUTKEYBOARD"
->Handling the Keyboard</A
-></H1
+></A
+>Handling the Keyboard</H1
 ><DIV
 CLASS="SECT2"
 ><H2
 CLASS="SECT2"
 ><A
 NAME="AEN271"
->Keyboard Related Structures</A
-></H2
+></A
+>Keyboard Related Structures</H2
 ><P
 >It should make it a lot easier to understand this tutorial is you are familiar with the data types involved in keyboard access, so I'll explain them first.</P
 ><DIV
@@ -89,8 +92,8 @@ CLASS="SECT3"
 CLASS="SECT3"
 ><A
 NAME="AEN274"
->SDLKey</A
-></H3
+></A
+>SDLKey</H3
 ><P
 ><SPAN
 CLASS="STRUCTNAME"
@@ -115,8 +118,8 @@ CLASS="SECT3"
 CLASS="SECT3"
 ><A
 NAME="AEN282"
->SDLMod</A
-></H3
+></A
+>SDLMod</H3
 ><P
 >SDLMod is an enumerated type, similar to <SPAN
 CLASS="STRUCTNAME"
@@ -135,8 +138,8 @@ CLASS="SECT3"
 CLASS="SECT3"
 ><A
 NAME="AEN288"
->SDL_keysym</A
-></H3
+></A
+>SDL_keysym</H3
 ><PRE
 CLASS="PROGRAMLISTING"
 >typedef struct{
@@ -216,8 +219,8 @@ CLASS="SECT3"
 CLASS="SECT3"
 ><A
 NAME="AEN307"
->SDL_KeyboardEvent</A
-></H3
+></A
+>SDL_KeyboardEvent</H3
 ><PRE
 CLASS="PROGRAMLISTING"
 >typedef struct{
@@ -284,8 +287,8 @@ CLASS="SECT2"
 CLASS="SECT2"
 ><A
 NAME="AEN324"
->Reading Keyboard Events</A
-></H2
+></A
+>Reading Keyboard Events</H2
 ><P
 >Reading keybaord events from the event queue is quite simple (the event queue and using it is described <A
 HREF="sdlevent.html"
@@ -353,8 +356,8 @@ CLASS="SECT2"
 CLASS="SECT2"
 ><A
 NAME="AEN338"
->A More Detailed Look</A
-></H2
+></A
+>A More Detailed Look</H2
 ><P
 >Before we can read events SDL must be initialised with <A
 HREF="sdlinit.html"
@@ -529,8 +532,8 @@ CLASS="SECT2"
 CLASS="SECT2"
 ><A
 NAME="AEN354"
->Game-type Input</A
-></H2
+></A
+>Game-type Input</H2
 ><P
 >I have found that people using keyboard events for games and other interactive applications don't always understand one fundemental point.</P
 ><A
@@ -539,13 +542,16 @@ NAME="AEN357"
 ><BLOCKQUOTE
 CLASS="BLOCKQUOTE"
 ><P
->Keyboard events <I
+>Keyboard events <SPAN
+CLASS="emphasis"
+><I
 CLASS="EMPHASIS"
 >only</I
+></SPAN
 > take place when a keys state changes from being unpressed to pressed, and vice versa.</P
 ></BLOCKQUOTE
 ><P
->Imagine you have an image of an alien that you wish to move around using the cursor keys - when you pressed the left arrow key you want him to slide over to the left, when you press the down key you want him to slide down the screen. Examine the following code, it highlights and error that many people have made.
+>Imagine you have an image of an alien that you wish to move around using the cursor keys: when you pressed the left arrow key you want him to slide over to the left, and when you press the down key you want him to slide down the screen. Examine the following code; it highlights an error that many people have made.
 <PRE
 CLASS="PROGRAMLISTING"
 >    /* Alien screen coordinates */
@@ -678,6 +684,7 @@ CLASS="NAVFOOTER"
 ><HR
 ALIGN="LEFT"
 WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
 WIDTH="100%"
 BORDER="0"
 CELLPADDING="0"
@@ -689,6 +696,7 @@ ALIGN="left"
 VALIGN="top"
 ><A
 HREF="guideinput.html"
+ACCESSKEY="P"
 >Prev</A
 ></TD
 ><TD
@@ -697,6 +705,7 @@ ALIGN="center"
 VALIGN="top"
 ><A
 HREF="index.html"
+ACCESSKEY="H"
 >Home</A
 ></TD
 ><TD
@@ -705,6 +714,7 @@ ALIGN="right"
 VALIGN="top"
 ><A
 HREF="guideexamples.html"
+ACCESSKEY="N"
 >Next</A
 ></TD
 ></TR
@@ -720,6 +730,7 @@ ALIGN="center"
 VALIGN="top"
 ><A
 HREF="guideinput.html"
+ACCESSKEY="U"
 >Up</A
 ></TD
 ><TD

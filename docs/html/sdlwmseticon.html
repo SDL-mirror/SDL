@@ -4,7 +4,7 @@
 >SDL_WM_SetIcon</TITLE
 ><META
 NAME="GENERATOR"
-CONTENT="Modular DocBook HTML Stylesheet Version 1.64
+CONTENT="Modular DocBook HTML Stylesheet Version 1.76b+
 "><LINK
 REL="HOME"
 TITLE="SDL Library Documentation"
@@ -28,6 +28,7 @@ ALINK="#ff0000"
 ><DIV
 CLASS="NAVHEADER"
 ><TABLE
+SUMMARY="Header navigation table"
 WIDTH="100%"
 BORDER="0"
 CELLPADDING="0"
@@ -45,6 +46,7 @@ ALIGN="left"
 VALIGN="bottom"
 ><A
 HREF="sdlwmgetcaption.html"
+ACCESSKEY="P"
 >Prev</A
 ></TD
 ><TD
@@ -58,6 +60,7 @@ ALIGN="right"
 VALIGN="bottom"
 ><A
 HREF="sdlwmiconifywindow.html"
+ACCESSKEY="N"
 >Next</A
 ></TD
 ></TR
@@ -68,12 +71,12 @@ WIDTH="100%"></DIV
 ><H1
 ><A
 NAME="SDLWMSETICON"
->SDL_WM_SetIcon</A
-></H1
+></A
+>SDL_WM_SetIcon</H1
 ><DIV
 CLASS="REFNAMEDIV"
 ><A
-NAME="AEN3198"
+NAME="AEN3582"
 ></A
 ><H2
 >Name</H2
@@ -81,14 +84,14 @@ NAME="AEN3198"
 ><DIV
 CLASS="REFSYNOPSISDIV"
 ><A
-NAME="AEN3201"
+NAME="AEN3585"
 ></A
 ><H2
 >Synopsis</H2
 ><DIV
 CLASS="FUNCSYNOPSIS"
 ><A
-NAME="AEN3202"
+NAME="AEN3586"
 ></A
 ><P
 ></P
@@ -112,7 +115,7 @@ CLASS="FSFUNC"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN3208"
+NAME="AEN3592"
 ></A
 ><H2
 >Description</H2
@@ -125,33 +128,41 @@ HREF="sdlsetvideomode.html"
 >SDL_SetVideoMode</A
 >.</P
 ><P
->It takes an <TT
-CLASS="PARAMETER"
-><I
->icon</I
-></TT
-> surface, and a <TT
+>The <TT
 CLASS="PARAMETER"
 ><I
 >mask</I
 ></TT
-> in MSB format.</P
+> is a bitmask that describes the shape of the
+icon. If <TT
+CLASS="PARAMETER"
+><I
+>mask</I
+></TT
+> is NULL, then the shape is determined by
+the colorkey of <TT
+CLASS="PARAMETER"
+><I
+>icon</I
+></TT
+>, if any, or makes the icon
+rectangular (no transparency) otherwise.</P
 ><P
 >If <TT
 CLASS="PARAMETER"
 ><I
 >mask</I
 ></TT
-> is <TT
-CLASS="LITERAL"
->NULL</TT
->, the entire 
-icon surface will be used as the icon.</P
+> is non-NULL, it points to a bitmap with bits set
+where the corresponding pixel should be visible. The format of the bitmap is as
+follows: Scanlines come in the usual top-down order. Each scanline consists of
+(width / 8) bytes, rounded up. The most significant bit of each byte represents
+the leftmost pixel.</P
 ></DIV
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN3219"
+NAME="AEN3603"
 ></A
 ><H2
 >Example</H2
@@ -162,7 +173,7 @@ CLASS="PROGRAMLISTING"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN3222"
+NAME="AEN3606"
 ></A
 ><H2
 >See Also</H2
@@ -187,6 +198,7 @@ CLASS="NAVFOOTER"
 ><HR
 ALIGN="LEFT"
 WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
 WIDTH="100%"
 BORDER="0"
 CELLPADDING="0"
@@ -198,6 +210,7 @@ ALIGN="left"
 VALIGN="top"
 ><A
 HREF="sdlwmgetcaption.html"
+ACCESSKEY="P"
 >Prev</A
 ></TD
 ><TD
@@ -206,6 +219,7 @@ ALIGN="center"
 VALIGN="top"
 ><A
 HREF="index.html"
+ACCESSKEY="H"
 >Home</A
 ></TD
 ><TD
@@ -214,6 +228,7 @@ ALIGN="right"
 VALIGN="top"
 ><A
 HREF="sdlwmiconifywindow.html"
+ACCESSKEY="N"
 >Next</A
 ></TD
 ></TR
@@ -229,6 +244,7 @@ ALIGN="center"
 VALIGN="top"
 ><A
 HREF="wm.html"
+ACCESSKEY="U"
 >Up</A
 ></TD
 ><TD

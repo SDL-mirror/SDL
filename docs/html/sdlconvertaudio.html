@@ -4,7 +4,7 @@
 >SDL_ConvertAudio</TITLE
 ><META
 NAME="GENERATOR"
-CONTENT="Modular DocBook HTML Stylesheet Version 1.64
+CONTENT="Modular DocBook HTML Stylesheet Version 1.76b+
 "><LINK
 REL="HOME"
 TITLE="SDL Library Documentation"
@@ -28,6 +28,7 @@ ALINK="#ff0000"
 ><DIV
 CLASS="NAVHEADER"
 ><TABLE
+SUMMARY="Header navigation table"
 WIDTH="100%"
 BORDER="0"
 CELLPADDING="0"
@@ -45,6 +46,7 @@ ALIGN="left"
 VALIGN="bottom"
 ><A
 HREF="sdlbuildaudiocvt.html"
+ACCESSKEY="P"
 >Prev</A
 ></TD
 ><TD
@@ -58,6 +60,7 @@ ALIGN="right"
 VALIGN="bottom"
 ><A
 HREF="sdlmixaudio.html"
+ACCESSKEY="N"
 >Next</A
 ></TD
 ></TR
@@ -68,12 +71,12 @@ WIDTH="100%"></DIV
 ><H1
 ><A
 NAME="SDLCONVERTAUDIO"
->SDL_ConvertAudio</A
-></H1
+></A
+>SDL_ConvertAudio</H1
 ><DIV
 CLASS="REFNAMEDIV"
 ><A
-NAME="AEN6660"
+NAME="AEN7048"
 ></A
 ><H2
 >Name</H2
@@ -81,14 +84,14 @@ NAME="AEN6660"
 ><DIV
 CLASS="REFSYNOPSISDIV"
 ><A
-NAME="AEN6663"
+NAME="AEN7051"
 ></A
 ><H2
 >Synopsis</H2
 ><DIV
 CLASS="FUNCSYNOPSIS"
 ><A
-NAME="AEN6664"
+NAME="AEN7052"
 ></A
 ><P
 ></P
@@ -112,7 +115,7 @@ CLASS="FSFUNC"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN6670"
+NAME="AEN7058"
 ></A
 ><H2
 >Description</H2
@@ -240,7 +243,7 @@ CLASS="STRUCTNAME"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN6705"
+NAME="AEN7093"
 ></A
 ><H2
 >Examples</H2
@@ -257,8 +260,8 @@ Uint8 *wav_buf;
 int ret;
 
 /* Allocated audio specs */
-desired=(SDL_AudioSpec *)malloc(sizeof(SDL_AudioSpec));
-obtained=(SDL_AudioSpec *)malloc(sizeof(SDL_AudioSpec));
+desired = malloc(sizeof(SDL_AudioSpec));
+obtained = malloc(sizeof(SDL_AudioSpec));
 
 /* Set desired format */
 desired-&#62;freq=22050;
@@ -297,8 +300,8 @@ if(ret==-1){
 }
 
 /* Setup for conversion */
-wav_cvt.buf=(Uint8 *)malloc(wav_len*wav_cvt.len_mult);
-wav_cvt.len=wav_len;
+wav_cvt.buf = malloc(wav_len * wav_cvt.len_mult);
+wav_cvt.len = wav_len;
 memcpy(wav_cvt.buf, wav_buf, wav_len);
 
 /* We can delete to original WAV data now */
@@ -317,7 +320,7 @@ SDL_ConvertAudio(&#38;wav_cvt);
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN6708"
+NAME="AEN7096"
 ></A
 ><H2
 >See Also</H2
@@ -342,6 +345,7 @@ CLASS="NAVFOOTER"
 ><HR
 ALIGN="LEFT"
 WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
 WIDTH="100%"
 BORDER="0"
 CELLPADDING="0"
@@ -353,6 +357,7 @@ ALIGN="left"
 VALIGN="top"
 ><A
 HREF="sdlbuildaudiocvt.html"
+ACCESSKEY="P"
 >Prev</A
 ></TD
 ><TD
@@ -361,6 +366,7 @@ ALIGN="center"
 VALIGN="top"
 ><A
 HREF="index.html"
+ACCESSKEY="H"
 >Home</A
 ></TD
 ><TD
@@ -369,6 +375,7 @@ ALIGN="right"
 VALIGN="top"
 ><A
 HREF="sdlmixaudio.html"
+ACCESSKEY="N"
 >Next</A
 ></TD
 ></TR
@@ -384,6 +391,7 @@ ALIGN="center"
 VALIGN="top"
 ><A
 HREF="audio.html"
+ACCESSKEY="U"
 >Up</A
 ></TD
 ><TD

@@ -4,7 +4,7 @@
 >SDL_OpenAudio</TITLE
 ><META
 NAME="GENERATOR"
-CONTENT="Modular DocBook HTML Stylesheet Version 1.64
+CONTENT="Modular DocBook HTML Stylesheet Version 1.76b+
 "><LINK
 REL="HOME"
 TITLE="SDL Library Documentation"
@@ -28,6 +28,7 @@ ALINK="#ff0000"
 ><DIV
 CLASS="NAVHEADER"
 ><TABLE
+SUMMARY="Header navigation table"
 WIDTH="100%"
 BORDER="0"
 CELLPADDING="0"
@@ -45,6 +46,7 @@ ALIGN="left"
 VALIGN="bottom"
 ><A
 HREF="sdlaudiospec.html"
+ACCESSKEY="P"
 >Prev</A
 ></TD
 ><TD
@@ -58,6 +60,7 @@ ALIGN="right"
 VALIGN="bottom"
 ><A
 HREF="sdlpauseaudio.html"
+ACCESSKEY="N"
 >Next</A
 ></TD
 ></TR
@@ -68,12 +71,12 @@ WIDTH="100%"></DIV
 ><H1
 ><A
 NAME="SDLOPENAUDIO"
->SDL_OpenAudio</A
-></H1
+></A
+>SDL_OpenAudio</H1
 ><DIV
 CLASS="REFNAMEDIV"
 ><A
-NAME="AEN6262"
+NAME="AEN6650"
 ></A
 ><H2
 >Name</H2
@@ -81,14 +84,14 @@ NAME="AEN6262"
 ><DIV
 CLASS="REFSYNOPSISDIV"
 ><A
-NAME="AEN6265"
+NAME="AEN6653"
 ></A
 ><H2
 >Synopsis</H2
 ><DIV
 CLASS="FUNCSYNOPSIS"
 ><A
-NAME="AEN6266"
+NAME="AEN6654"
 ></A
 ><P
 ></P
@@ -112,7 +115,7 @@ CLASS="FSFUNC"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN6272"
+NAME="AEN6660"
 ></A
 ><H2
 >Description</H2
@@ -157,7 +160,7 @@ CLASS="PROGRAMLISTING"
 >SDL_AudioSpec *desired;
 .
 .
-desired=(SDL_AudioSpec *)malloc(sizeof(SDL_AudioSpec));</PRE
+desired = malloc(sizeof(SDL_AudioSpec));</PRE
 >
 You must then fill this structure with your desired audio specifications.</P
 ><P
@@ -418,7 +421,7 @@ CLASS="STRUCTFIELD"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN6359"
+NAME="AEN6747"
 ></A
 ><H2
 >Examples</H2
@@ -432,10 +435,10 @@ SDL_AudioSpec *desired, *obtained;
 SDL_AudioSpec *hardware_spec;
 
 /* Allocate a desired SDL_AudioSpec */
-desired=(SDL_AudioSpec *)malloc(sizeof(SDL_AudioSpec));
+desired = malloc(sizeof(SDL_AudioSpec));
 
 /* Allocate space for the obtained SDL_AudioSpec */
-obtained=(SDL_AudioSpec *)malloc(sizeof(SDL_AudioSpec));
+obtained = malloc(sizeof(SDL_AudioSpec));
 
 /* 22050Hz - FM Radio quality */
 desired-&#62;freq=22050;
@@ -474,7 +477,7 @@ SDL_PauseAudio(0);</PRE
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN6362"
+NAME="AEN6750"
 ></A
 ><H2
 >See Also</H2
@@ -513,6 +516,7 @@ CLASS="NAVFOOTER"
 ><HR
 ALIGN="LEFT"
 WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
 WIDTH="100%"
 BORDER="0"
 CELLPADDING="0"
@@ -524,6 +528,7 @@ ALIGN="left"
 VALIGN="top"
 ><A
 HREF="sdlaudiospec.html"
+ACCESSKEY="P"
 >Prev</A
 ></TD
 ><TD
@@ -532,6 +537,7 @@ ALIGN="center"
 VALIGN="top"
 ><A
 HREF="index.html"
+ACCESSKEY="H"
 >Home</A
 ></TD
 ><TD
@@ -540,6 +546,7 @@ ALIGN="right"
 VALIGN="top"
 ><A
 HREF="sdlpauseaudio.html"
+ACCESSKEY="N"
 >Next</A
 ></TD
 ></TR
@@ -555,6 +562,7 @@ ALIGN="center"
 VALIGN="top"
 ><A
 HREF="audio.html"
+ACCESSKEY="U"
 >Up</A
 ></TD
 ><TD

@@ -4,7 +4,7 @@
 >SDL_CreateCursor</TITLE
 ><META
 NAME="GENERATOR"
-CONTENT="Modular DocBook HTML Stylesheet Version 1.64
+CONTENT="Modular DocBook HTML Stylesheet Version 1.76b+
 "><LINK
 REL="HOME"
 TITLE="SDL Library Documentation"
@@ -28,6 +28,7 @@ ALINK="#ff0000"
 ><DIV
 CLASS="NAVHEADER"
 ><TABLE
+SUMMARY="Header navigation table"
 WIDTH="100%"
 BORDER="0"
 CELLPADDING="0"
@@ -45,6 +46,7 @@ ALIGN="left"
 VALIGN="bottom"
 ><A
 HREF="sdlwarpmouse.html"
+ACCESSKEY="P"
 >Prev</A
 ></TD
 ><TD
@@ -58,6 +60,7 @@ ALIGN="right"
 VALIGN="bottom"
 ><A
 HREF="sdlfreecursor.html"
+ACCESSKEY="N"
 >Next</A
 ></TD
 ></TR
@@ -68,12 +71,12 @@ WIDTH="100%"></DIV
 ><H1
 ><A
 NAME="SDLCREATECURSOR"
->SDL_CreateCursor</A
-></H1
+></A
+>SDL_CreateCursor</H1
 ><DIV
 CLASS="REFNAMEDIV"
 ><A
-NAME="AEN2103"
+NAME="AEN2487"
 ></A
 ><H2
 >Name</H2
@@ -81,14 +84,14 @@ NAME="AEN2103"
 ><DIV
 CLASS="REFSYNOPSISDIV"
 ><A
-NAME="AEN2106"
+NAME="AEN2490"
 ></A
 ><H2
 >Synopsis</H2
 ><DIV
 CLASS="FUNCSYNOPSIS"
 ><A
-NAME="AEN2107"
+NAME="AEN2491"
 ></A
 ><P
 ></P
@@ -112,7 +115,7 @@ CLASS="FSFUNC"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN2113"
+NAME="AEN2497"
 ></A
 ><H2
 >Description</H2
@@ -134,7 +137,7 @@ The cursor width must be a multiple of 8 bits.</P
 <DIV
 CLASS="INFORMALTABLE"
 ><A
-NAME="AEN2119"
+NAME="AEN2503"
 ></A
 ><P
 ></P
@@ -210,7 +213,7 @@ HREF="sdlfreecursor.html"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN2140"
+NAME="AEN2524"
 ></A
 ><H2
 >Example</H2
@@ -284,7 +287,7 @@ static SDL_Cursor *init_system_cursor(const char *image[])
       switch (image[4+row][col]) {
         case 'X':
           data[i] |= 0x01;
-          k[i] |= 0x01;
+          mask[i] |= 0x01;
           break;
         case '.':
           mask[i] |= 0x01;
@@ -301,7 +304,7 @@ static SDL_Cursor *init_system_cursor(const char *image[])
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN2143"
+NAME="AEN2527"
 ></A
 ><H2
 >See Also</H2
@@ -333,6 +336,7 @@ CLASS="NAVFOOTER"
 ><HR
 ALIGN="LEFT"
 WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
 WIDTH="100%"
 BORDER="0"
 CELLPADDING="0"
@@ -344,6 +348,7 @@ ALIGN="left"
 VALIGN="top"
 ><A
 HREF="sdlwarpmouse.html"
+ACCESSKEY="P"
 >Prev</A
 ></TD
 ><TD
@@ -352,6 +357,7 @@ ALIGN="center"
 VALIGN="top"
 ><A
 HREF="index.html"
+ACCESSKEY="H"
 >Home</A
 ></TD
 ><TD
@@ -360,6 +366,7 @@ ALIGN="right"
 VALIGN="top"
 ><A
 HREF="sdlfreecursor.html"
+ACCESSKEY="N"
 >Next</A
 ></TD
 ></TR
@@ -375,6 +382,7 @@ ALIGN="center"
 VALIGN="top"
 ><A
 HREF="video.html"
+ACCESSKEY="U"
 >Up</A
 ></TD
 ><TD

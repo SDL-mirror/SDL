@@ -4,7 +4,7 @@
 >SDL_BlitSurface</TITLE
 ><META
 NAME="GENERATOR"
-CONTENT="Modular DocBook HTML Stylesheet Version 1.64
+CONTENT="Modular DocBook HTML Stylesheet Version 1.76b+
 "><LINK
 REL="HOME"
 TITLE="SDL Library Documentation"
@@ -28,6 +28,7 @@ ALINK="#ff0000"
 ><DIV
 CLASS="NAVHEADER"
 ><TABLE
+SUMMARY="Header navigation table"
 WIDTH="100%"
 BORDER="0"
 CELLPADDING="0"
@@ -45,6 +46,7 @@ ALIGN="left"
 VALIGN="bottom"
 ><A
 HREF="sdlconvertsurface.html"
+ACCESSKEY="P"
 >Prev</A
 ></TD
 ><TD
@@ -58,6 +60,7 @@ ALIGN="right"
 VALIGN="bottom"
 ><A
 HREF="sdlfillrect.html"
+ACCESSKEY="N"
 >Next</A
 ></TD
 ></TR
@@ -68,12 +71,12 @@ WIDTH="100%"></DIV
 ><H1
 ><A
 NAME="SDLBLITSURFACE"
->SDL_BlitSurface</A
-></H1
+></A
+>SDL_BlitSurface</H1
 ><DIV
 CLASS="REFNAMEDIV"
 ><A
-NAME="AEN1915"
+NAME="AEN2299"
 ></A
 ><H2
 >Name</H2
@@ -81,14 +84,14 @@ NAME="AEN1915"
 ><DIV
 CLASS="REFSYNOPSISDIV"
 ><A
-NAME="AEN1918"
+NAME="AEN2302"
 ></A
 ><H2
 >Synopsis</H2
 ><DIV
 CLASS="FUNCSYNOPSIS"
 ><A
-NAME="AEN1919"
+NAME="AEN2303"
 ></A
 ><P
 ></P
@@ -112,48 +115,47 @@ CLASS="FSFUNC"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN1925"
+NAME="AEN2309"
 ></A
 ><H2
 >Description</H2
 ><P
 >This performs a fast blit from the source surface to the destination surface.</P
 ><P
->Only the position is used in the <TT
-CLASS="PARAMETER"
-><I
->dstrect</I
-></TT
-> (the
-width and height are ignored).</P
-><P
->If either <TT
+>The width and height in <TT
 CLASS="PARAMETER"
 ><I
 >srcrect</I
 ></TT
-> or
+> determine the
+size of the copied rectangle. Only the position is used in the
 <TT
 CLASS="PARAMETER"
 ><I
 >dstrect</I
 ></TT
-> are <TT
+> (the width and height are ignored).</P
+><P
+>If <TT
+CLASS="PARAMETER"
+><I
+>srcrect</I
+></TT
+> is <TT
 CLASS="LITERAL"
 >NULL</TT
->, the entire
-surface (<TT
+>, the
+entire surface is copied. If <TT
 CLASS="PARAMETER"
 ><I
->src</I
+>dstrect</I
 ></TT
-> or <TT
-CLASS="PARAMETER"
-><I
->dst</I
-></TT
->) is
-copied.</P
+> is
+<TT
+CLASS="LITERAL"
+>NULL</TT
+>, then the destination position (upper left
+corner) is (0, 0).</P
 ><P
 >The final blit rectangle is saved in
 <TT
@@ -200,7 +202,7 @@ CLASS="PROGRAMLISTING"
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN1944"
+NAME="AEN2328"
 ></A
 ><H2
 >Return Value</H2
@@ -224,7 +226,7 @@ reloaded with artwork and re-blitted:
 CLASS="PROGRAMLISTING"
 >        while ( SDL_BlitSurface(image, imgrect, screen, dstrect) == -2 ) {
                 while ( SDL_LockSurface(image)) &#60; 0 )
-                        Sleep(10);
+                        SDL_Delay(10);
                 -- Write image pixels to image-&#62;pixels --
                 SDL_UnlockSurface(image);
         }</PRE
@@ -236,7 +238,7 @@ have access to the video memory again.</P
 ><DIV
 CLASS="REFSECT1"
 ><A
-NAME="AEN1952"
+NAME="AEN2336"
 ></A
 ><H2
 >See Also</H2
@@ -275,6 +277,7 @@ CLASS="NAVFOOTER"
 ><HR
 ALIGN="LEFT"
 WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
 WIDTH="100%"
 BORDER="0"
 CELLPADDING="0"
@@ -286,6 +289,7 @@ ALIGN="left"
 VALIGN="top"
 ><A
 HREF="sdlconvertsurface.html"
+ACCESSKEY="P"
 >Prev</A
 ></TD
 ><TD
@@ -294,6 +298,7 @@ ALIGN="center"
 VALIGN="top"
 ><A
 HREF="index.html"
+ACCESSKEY="H"
 >Home</A
 ></TD
 ><TD
@@ -302,6 +307,7 @@ ALIGN="right"
 VALIGN="top"
 ><A
 HREF="sdlfillrect.html"
+ACCESSKEY="N"
 >Next</A
 ></TD
 ></TR
@@ -317,6 +323,7 @@ ALIGN="center"
 VALIGN="top"
 ><A
 HREF="video.html"
+ACCESSKEY="U"
 >Up</A
 ></TD
 ><TD

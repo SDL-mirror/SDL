@@ -4,7 +4,7 @@
 >Multi-threaded Programming</TITLE
 ><META
 NAME="GENERATOR"
-CONTENT="Modular DocBook HTML Stylesheet Version 1.64
+CONTENT="Modular DocBook HTML Stylesheet Version 1.76b+
 "><LINK
 REL="HOME"
 TITLE="SDL Library Documentation"
@@ -32,6 +32,7 @@ ALINK="#ff0000"
 ><DIV
 CLASS="NAVHEADER"
 ><TABLE
+SUMMARY="Header navigation table"
 WIDTH="100%"
 BORDER="0"
 CELLPADDING="0"
@@ -49,6 +50,7 @@ ALIGN="left"
 VALIGN="bottom"
 ><A
 HREF="sdlcdtrack.html"
+ACCESSKEY="P"
 >Prev</A
 ></TD
 ><TD
@@ -62,6 +64,7 @@ ALIGN="right"
 VALIGN="bottom"
 ><A
 HREF="sdlcreatethread.html"
+ACCESSKEY="N"
 >Next</A
 ></TD
 ></TR
@@ -74,8 +77,8 @@ CLASS="CHAPTER"
 ><H1
 ><A
 NAME="THREAD"
->Chapter 12. Multi-threaded Programming</A
-></H1
+></A
+>Chapter 12. Multi-threaded Programming</H1
 ><DIV
 CLASS="TOC"
 ><DL
@@ -87,57 +90,57 @@ CLASS="TOC"
 ><A
 HREF="sdlcreatethread.html"
 >SDL_CreateThread</A
-> &#8212; Creates a new thread of execution that shares its parent's properties.</DT
+>&nbsp;--&nbsp;Creates a new thread of execution that shares its parent's properties.</DT
 ><DT
 ><A
 HREF="sdlthreadid.html"
 >SDL_ThreadID</A
-> &#8212; Get the 32-bit thread identifier for the current thread.</DT
+>&nbsp;--&nbsp;Get the 32-bit thread identifier for the current thread.</DT
 ><DT
 ><A
 HREF="sdlgetthreadid.html"
 >SDL_GetThreadID</A
-> &#8212; Get the SDL thread ID of a SDL_Thread</DT
+>&nbsp;--&nbsp;Get the SDL thread ID of a SDL_Thread</DT
 ><DT
 ><A
 HREF="sdlwaitthread.html"
 >SDL_WaitThread</A
-> &#8212; Wait for a thread to finish.</DT
+>&nbsp;--&nbsp;Wait for a thread to finish.</DT
 ><DT
 ><A
 HREF="sdlkillthread.html"
 >SDL_KillThread</A
-> &#8212; Gracelessly terminates the thread.</DT
+>&nbsp;--&nbsp;Gracelessly terminates the thread.</DT
 ><DT
 ><A
 HREF="sdlcreatemutex.html"
 >SDL_CreateMutex</A
-> &#8212; Create a mutex</DT
+>&nbsp;--&nbsp;Create a mutex</DT
 ><DT
 ><A
 HREF="sdldestroymutex.html"
 >SDL_DestroyMutex</A
-> &#8212; Destroy a mutex</DT
+>&nbsp;--&nbsp;Destroy a mutex</DT
 ><DT
 ><A
 HREF="sdlmutexp.html"
 >SDL_mutexP</A
-> &#8212; Lock a mutex</DT
+>&nbsp;--&nbsp;Lock a mutex</DT
 ><DT
 ><A
 HREF="sdlmutexv.html"
 >SDL_mutexV</A
-> &#8212; Unlock a mutex</DT
+>&nbsp;--&nbsp;Unlock a mutex</DT
 ><DT
 ><A
 HREF="sdlcreatesemaphore.html"
 >SDL_CreateSemaphore</A
-> &#8212; Creates a new semaphore and assigns an initial value to it.</DT
+>&nbsp;--&nbsp;Creates a new semaphore and assigns an initial value to it.</DT
 ><DT
 ><A
 HREF="sdldestroysemaphore.html"
 >SDL_DestroySemaphore</A
-> &#8212; Destroys a semaphore that was created by <A
+>&nbsp;--&nbsp;Destroys a semaphore that was created by <A
 HREF="sdlcreatesemaphore.html"
 >SDL_CreateSemaphore</A
 >.</DT
@@ -145,57 +148,57 @@ HREF="sdlcreatesemaphore.html"
 ><A
 HREF="sdlsemwait.html"
 >SDL_SemWait</A
-> &#8212; Lock a semaphore and suspend the thread if the semaphore value is zero.</DT
+>&nbsp;--&nbsp;Lock a semaphore and suspend the thread if the semaphore value is zero.</DT
 ><DT
 ><A
 HREF="sdlsemtrywait.html"
 >SDL_SemTryWait</A
-> &#8212; Attempt to lock a semaphore but don't suspend the thread.</DT
+>&nbsp;--&nbsp;Attempt to lock a semaphore but don't suspend the thread.</DT
 ><DT
 ><A
 HREF="sdlsemwaittimeout.html"
 >SDL_SemWaitTimeout</A
-> &#8212; Lock a semaphore, but only wait up to a specified maximum time.</DT
+>&nbsp;--&nbsp;Lock a semaphore, but only wait up to a specified maximum time.</DT
 ><DT
 ><A
 HREF="sdlsempost.html"
 >SDL_SemPost</A
-> &#8212; Unlock a semaphore.</DT
+>&nbsp;--&nbsp;Unlock a semaphore.</DT
 ><DT
 ><A
 HREF="sdlsemvalue.html"
 >SDL_SemValue</A
-> &#8212; Return the current value of a semaphore.</DT
+>&nbsp;--&nbsp;Return the current value of a semaphore.</DT
 ><DT
 ><A
 HREF="sdlcreatecond.html"
 >SDL_CreateCond</A
-> &#8212; Create a condition variable</DT
+>&nbsp;--&nbsp;Create a condition variable</DT
 ><DT
 ><A
 HREF="sdldestroycond.html"
 >SDL_DestroyCond</A
-> &#8212; Destroy a condition variable</DT
+>&nbsp;--&nbsp;Destroy a condition variable</DT
 ><DT
 ><A
 HREF="sdlcondsignal.html"
 >SDL_CondSignal</A
-> &#8212; Restart a thread wait on a condition variable</DT
+>&nbsp;--&nbsp;Restart a thread wait on a condition variable</DT
 ><DT
 ><A
 HREF="sdlcondbroadcast.html"
 >SDL_CondBroadcast</A
-> &#8212; Restart all threads waiting on a condition variable</DT
+>&nbsp;--&nbsp;Restart all threads waiting on a condition variable</DT
 ><DT
 ><A
 HREF="sdlcondwait.html"
 >SDL_CondWait</A
-> &#8212; Wait on a condition variable</DT
+>&nbsp;--&nbsp;Wait on a condition variable</DT
 ><DT
 ><A
 HREF="sdlcondwaittimeout.html"
 >SDL_CondWaitTimeout</A
-> &#8212; Wait on a condition variable, with timeout</DT
+>&nbsp;--&nbsp;Wait on a condition variable, with timeout</DT
 ></DL
 ></DIV
 ><P
@@ -248,6 +251,7 @@ CLASS="NAVFOOTER"
 ><HR
 ALIGN="LEFT"
 WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
 WIDTH="100%"
 BORDER="0"
 CELLPADDING="0"
@@ -259,6 +263,7 @@ ALIGN="left"
 VALIGN="top"
 ><A
 HREF="sdlcdtrack.html"
+ACCESSKEY="P"
 >Prev</A
 ></TD
 ><TD
@@ -267,6 +272,7 @@ ALIGN="center"
 VALIGN="top"
 ><A
 HREF="index.html"
+ACCESSKEY="H"
 >Home</A
 ></TD
 ><TD
@@ -275,6 +281,7 @@ ALIGN="right"
 VALIGN="top"
 ><A
 HREF="sdlcreatethread.html"
+ACCESSKEY="N"
 >Next</A
 ></TD
 ></TR
@@ -290,6 +297,7 @@ ALIGN="center"
 VALIGN="top"
 ><A
 HREF="reference.html"
+ACCESSKEY="U"
 >Up</A
 ></TD
 ><TD

@@ -4,7 +4,7 @@
 >Input handling</TITLE
 ><META
 NAME="GENERATOR"
-CONTENT="Modular DocBook HTML Stylesheet Version 1.64
+CONTENT="Modular DocBook HTML Stylesheet Version 1.76b+
 "><LINK
 REL="HOME"
 TITLE="SDL Library Documentation"
@@ -28,6 +28,7 @@ ALINK="#ff0000"
 ><DIV
 CLASS="NAVHEADER"
 ><TABLE
+SUMMARY="Header navigation table"
 WIDTH="100%"
 BORDER="0"
 CELLPADDING="0"
@@ -45,6 +46,7 @@ ALIGN="left"
 VALIGN="bottom"
 ><A
 HREF="guidevideoopengl.html"
+ACCESSKEY="P"
 >Prev</A
 ></TD
 ><TD
@@ -58,6 +60,7 @@ ALIGN="right"
 VALIGN="bottom"
 ><A
 HREF="guideinputkeyboard.html"
+ACCESSKEY="N"
 >Next</A
 ></TD
 ></TR
@@ -70,8 +73,8 @@ CLASS="CHAPTER"
 ><H1
 ><A
 NAME="GUIDEINPUT"
->Chapter 3. Input handling</A
-></H1
+></A
+>Chapter 3. Input handling</H1
 ><DIV
 CLASS="TOC"
 ><DL
@@ -97,16 +100,16 @@ CLASS="SECT1"
 CLASS="SECT1"
 ><A
 NAME="GUIDEINPUTJOYSTICK"
->Handling Joysticks</A
-></H1
+></A
+>Handling Joysticks</H1
 ><DIV
 CLASS="SECT2"
 ><H2
 CLASS="SECT2"
 ><A
 NAME="AEN135"
->Initialization</A
-></H2
+></A
+>Initialization</H2
 ><P
 >The first step in using a joystick in a SDL program is to initialize the Joystick subsystems of SDL. This done by passing the <TT
 CLASS="LITERAL"
@@ -144,8 +147,8 @@ CLASS="SECT2"
 CLASS="SECT2"
 ><A
 NAME="AEN145"
->Querying</A
-></H2
+></A
+>Querying</H2
 ><P
 >If we have reached this point then we can safely assume that the SDL library has been initialized and that the Joystick subsystem is active. We can now call some video and/or sound functions to get things going before we need the joystick. Eventually we have to make sure that there is actually a joystick to work with. It's wise to always check even if you know a joystick will be present on the system because it can also help detect when the joystick is unplugged. The function used to check for joysticks is <A
 HREF="sdlnumjoysticks.html"
@@ -191,8 +194,8 @@ CLASS="SECT2"
 CLASS="SECT2"
 ><A
 NAME="AEN157"
->Opening a Joystick and Receiving Joystick Events</A
-></H2
+></A
+>Opening a Joystick and Receiving Joystick Events</H2
 ><P
 >SDL's event driven architecture makes working with joysticks a snap.  Joysticks can trigger 4 different types of events:
 <P
@@ -433,8 +436,8 @@ CLASS="SECT2"
 CLASS="SECT2"
 ><A
 NAME="AEN214"
->Advanced Joystick Functions</A
-></H2
+></A
+>Advanced Joystick Functions</H2
 ><P
 >That takes care of the controls that you can count on being on every joystick under the sun, but there are a few extra things that SDL can support.  Joyballs are next on our list, they are alot like axis with a few minor differences.  Joyballs store relative changes unlike the the absolute postion stored in a axis event. Also one trackball event contains both the change in x and they change in y.  Our case for it is as follows:</P
 ><DIV
@@ -569,17 +572,17 @@ NAME="AEN244"
 ><PRE
 CLASS="PROGRAMLISTING"
 >    case SDL_JOYHATMOTION:  /* Handle Hat Motion */
-    if ( event.jhat.hat &#38; SDL_HAT_UP )
+    if ( event.jhat.value &#38; SDL_HAT_UP )
     {
         /* Do up stuff here */
     }
 
-    if ( event.jhat.hat &#38; SDL_HAT_LEFT )
+    if ( event.jhat.value &#38; SDL_HAT_LEFT )
     {
         /* Do left stuff here */
     }
 
-    if ( event.jhat.hat &#38; SDL_HAT_RIGHTDOWN )
+    if ( event.jhat.value &#38; SDL_HAT_RIGHTDOWN )
     {
         /* Do right and down together stuff here */
     }
@@ -674,6 +677,7 @@ CLASS="NAVFOOTER"
 ><HR
 ALIGN="LEFT"
 WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
 WIDTH="100%"
 BORDER="0"
 CELLPADDING="0"
@@ -685,6 +689,7 @@ ALIGN="left"
 VALIGN="top"
 ><A
 HREF="guidevideoopengl.html"
+ACCESSKEY="P"
 >Prev</A
 ></TD
 ><TD
@@ -693,6 +698,7 @@ ALIGN="center"
 VALIGN="top"
 ><A
 HREF="index.html"
+ACCESSKEY="H"
 >Home</A
 ></TD
 ><TD
@@ -701,6 +707,7 @@ ALIGN="right"
 VALIGN="top"
 ><A
 HREF="guideinputkeyboard.html"
+ACCESSKEY="N"
 >Next</A
 ></TD
 ></TR
@@ -716,6 +723,7 @@ ALIGN="center"
 VALIGN="top"
 ><A
 HREF="guide.html"
+ACCESSKEY="U"
 >Up</A
 ></TD
 ><TD

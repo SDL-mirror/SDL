@@ -4,7 +4,7 @@
 >Using OpenGL With SDL</TITLE
 ><META
 NAME="GENERATOR"
-CONTENT="Modular DocBook HTML Stylesheet Version 1.64
+CONTENT="Modular DocBook HTML Stylesheet Version 1.76b+
 "><LINK
 REL="HOME"
 TITLE="SDL Library Documentation"
@@ -28,6 +28,7 @@ ALINK="#ff0000"
 ><DIV
 CLASS="NAVHEADER"
 ><TABLE
+SUMMARY="Header navigation table"
 WIDTH="100%"
 BORDER="0"
 CELLPADDING="0"
@@ -45,6 +46,7 @@ ALIGN="left"
 VALIGN="bottom"
 ><A
 HREF="guidevideo.html"
+ACCESSKEY="P"
 >Prev</A
 ></TD
 ><TD
@@ -58,6 +60,7 @@ ALIGN="right"
 VALIGN="bottom"
 ><A
 HREF="guideinput.html"
+ACCESSKEY="N"
 >Next</A
 ></TD
 ></TR
@@ -71,8 +74,8 @@ CLASS="SECT1"
 CLASS="SECT1"
 ><A
 NAME="GUIDEVIDEOOPENGL"
->Using OpenGL With SDL</A
-></H1
+></A
+>Using OpenGL With SDL</H1
 ><P
 >SDL has the ability to create and use OpenGL contexts on several platforms(Linux/X11, Win32, BeOS, MacOS Classic/Toolbox, MacOS X, FreeBSD/X11 and Solaris/X11). This allows you to use SDL's audio, event handling, threads and times in your OpenGL applications (a function often performed by GLUT).</P
 ><DIV
@@ -81,8 +84,8 @@ CLASS="SECT2"
 CLASS="SECT2"
 ><A
 NAME="AEN103"
->Initialisation</A
-></H2
+></A
+>Initialisation</H2
 ><P
 >Initialising SDL to use OpenGL is not very different to initialising SDL normally. There are three differences; you must pass <TT
 CLASS="LITERAL"
@@ -99,9 +102,12 @@ HREF="sdlglsetattribute.html"
 CLASS="FUNCTION"
 >SDL_GL_SetAttribute</TT
 ></A
-> and finally, if you wish to use double buffering you must specify it as a GL attribute, <I
+> and finally, if you wish to use double buffering you must specify it as a GL attribute, <SPAN
+CLASS="emphasis"
+><I
 CLASS="EMPHASIS"
 >not</I
+></SPAN
 > by passing the <TT
 CLASS="LITERAL"
 >SDL_DOUBLEBUF</TT
@@ -216,8 +222,8 @@ CLASS="SECT2"
 CLASS="SECT2"
 ><A
 NAME="AEN117"
->Drawing</A
-></H2
+></A
+>Drawing</H2
 ><P
 >Apart from initialisation, using OpenGL within SDL is the same as using OpenGL
 with any other API, e.g. GLUT. You still use all the same function calls and
@@ -662,6 +668,7 @@ CLASS="NAVFOOTER"
 ><HR
 ALIGN="LEFT"
 WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
 WIDTH="100%"
 BORDER="0"
 CELLPADDING="0"
@@ -673,6 +680,7 @@ ALIGN="left"
 VALIGN="top"
 ><A
 HREF="guidevideo.html"
+ACCESSKEY="P"
 >Prev</A
 ></TD
 ><TD
@@ -681,6 +689,7 @@ ALIGN="center"
 VALIGN="top"
 ><A
 HREF="index.html"
+ACCESSKEY="H"
 >Home</A
 ></TD
 ><TD
@@ -689,6 +698,7 @@ ALIGN="right"
 VALIGN="top"
 ><A
 HREF="guideinput.html"
+ACCESSKEY="N"
 >Next</A
 ></TD
 ></TR
@@ -704,6 +714,7 @@ ALIGN="center"
 VALIGN="top"
 ><A
 HREF="guidevideo.html"
+ACCESSKEY="U"
 >Up</A
 ></TD
 ><TD

@@ -4,7 +4,7 @@
 >Initializing SDL</TITLE
 ><META
 NAME="GENERATOR"
-CONTENT="Modular DocBook HTML Stylesheet Version 1.64
+CONTENT="Modular DocBook HTML Stylesheet Version 1.76b+
 "><LINK
 REL="HOME"
 TITLE="SDL Library Documentation"
@@ -28,6 +28,7 @@ ALINK="#ff0000"
 ><DIV
 CLASS="NAVHEADER"
 ><TABLE
+SUMMARY="Header navigation table"
 WIDTH="100%"
 BORDER="0"
 CELLPADDING="0"
@@ -45,6 +46,7 @@ ALIGN="left"
 VALIGN="bottom"
 ><A
 HREF="guidethebasics.html"
+ACCESSKEY="P"
 >Prev</A
 ></TD
 ><TD
@@ -58,6 +60,7 @@ ALIGN="right"
 VALIGN="bottom"
 ><A
 HREF="guidevideo.html"
+ACCESSKEY="N"
 >Next</A
 ></TD
 ></TR
@@ -71,8 +74,8 @@ CLASS="SECT1"
 CLASS="SECT1"
 ><A
 NAME="GUIDEBASICSINIT"
->Initializing SDL</A
-></H1
+></A
+>Initializing SDL</H1
 ><P
 >SDL is composed of eight subsystems - Audio, CDROM, Event Handling, File I/O, Joystick Handling, Threading, Timers and Video. Before you can use any of these subsystems they must be initialized by calling <A
 HREF="sdlinit.html"
@@ -147,7 +150,7 @@ CLASS="PROGRAMLISTING"
 >#include "SDL.h"   /* All SDL App's need this */
 #include &#60;stdio.h&#62;
 
-int main() {
+int main(int argc, char *argv[]) {
     
     printf("Initializing SDL.\n");
     
@@ -175,6 +178,7 @@ CLASS="NAVFOOTER"
 ><HR
 ALIGN="LEFT"
 WIDTH="100%"><TABLE
+SUMMARY="Footer navigation table"
 WIDTH="100%"
 BORDER="0"
 CELLPADDING="0"
@@ -186,6 +190,7 @@ ALIGN="left"
 VALIGN="top"
 ><A
 HREF="guidethebasics.html"
+ACCESSKEY="P"
 >Prev</A
 ></TD
 ><TD
@@ -194,6 +199,7 @@ ALIGN="center"
 VALIGN="top"
 ><A
 HREF="index.html"
+ACCESSKEY="H"
 >Home</A
 ></TD
 ><TD
@@ -202,6 +208,7 @@ ALIGN="right"
 VALIGN="top"
 ><A
 HREF="guidevideo.html"
+ACCESSKEY="N"
 >Next</A
 ></TD
 ></TR
@@ -217,6 +224,7 @@ ALIGN="center"
 VALIGN="top"
 ><A
 HREF="guidethebasics.html"
+ACCESSKEY="U"
 >Up</A
 ></TD
 ><TD
