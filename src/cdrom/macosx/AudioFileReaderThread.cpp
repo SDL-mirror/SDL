@@ -306,7 +306,7 @@ void    AudioFileManager::DoConnect ()
         //mReadFilePosition = 0;
         mFinishedReadingData = false;
 
-        mNumTimesAskedSinceFinished = -1;
+        mNumTimesAskedSinceFinished = 0;
         mLockUnsuccessful = false;
         
         OSStatus result;

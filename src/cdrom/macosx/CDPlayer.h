@@ -30,6 +30,8 @@
 #include <AudioUnit/AudioUnit.h>
 
 #include "SDL.h"
+#include "SDL_thread.h"
+#include "SDL_mutex.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -56,11 +56,8 @@ static bool             playBackWasInit = false;
 static AudioUnit        theUnit;
 static AudioFilePlayer* thePlayer = NULL;
 static CDPlayerCompletionProc   completionProc = NULL;
-static pthread_mutex_t  apiMutex;
-static pthread_t        callbackThread;
-static pthread_mutex_t  callbackMutex;
-static volatile  int    runCallBackThread;
-static int              initMutex = SDL_TRUE;
+static SDL_mutex       *apiMutex = NULL;
+static SDL_sem         *callbackSem;
 static SDL_CD*          theCDROM;
 
 //ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
@@ -69,36 +66,28 @@ static SDL_CD*          theCDROM;
 
 #pragma mark -- Prototypes --
 
-OSStatus CheckInit ();
+static OSStatus CheckInit ();
 
-OSStatus MatchAUFormats (AudioUnit theUnit, UInt32 theInputBus);
+static OSStatus MatchAUFormats (AudioUnit theUnit, UInt32 theInputBus);
 
-void     FilePlayNotificationHandler (void* inRefCon, OSStatus inStatus);
+static void     FilePlayNotificationHandler (void* inRefCon, OSStatus inStatus);
 
-void*    RunCallBackThread (void* inRefCon);
+static int      RunCallBackThread (void* inRefCon);
 
 
 #pragma mark -- Public Functions --
 
 void     Lock ()
 {
-    if (initMutex) {
-    
-        pthread_mutexattr_t attr;
-        
-        pthread_mutexattr_init (&attr);
-        pthread_mutex_init (&apiMutex, &attr);
-        pthread_mutexattr_destroy (&attr);
-        
-        initMutex = SDL_FALSE;
+    if (!apiMutex) {
+        apiMutex = SDL_CreateMutex();
     }
-    
-    pthread_mutex_lock (&apiMutex);
+    SDL_mutexP(apiMutex);
 }
 
 void     Unlock ()
 {
-    pthread_mutex_unlock (&apiMutex);
+    SDL_mutexV(apiMutex);
 }
 
 //ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
@@ -355,7 +344,7 @@ int ListTrackFiles (FSVolumeRefNum theVolume, FSRef *trackFiles, int numTracks)
                                  
     if (result != noErr) {
         SDL_SetError ("ListTrackFiles: FSGetVolumeInfo returned %d", result);
-        goto bail;
+        return result;
     }
 
     result = FSOpenIterator (&rootDirectory, kFSIterateFlat, &iterator);
@@ -402,9 +391,7 @@ int ListTrackFiles (FSVolumeRefNum theVolume, FSRef *trackFiles, int numTracks)
         FSCloseIterator (iterator);
     }
     
-    result = 0;
-  bail:   
-    return result;
+    return 0;
 }
 
 //ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
@@ -563,6 +550,9 @@ void SetCompletionProc (CDPlayerCompletionProc proc, SDL_CD *cdrom)
     thePlayer->SetNotifier (FilePlayNotificationHandler, cdrom);
 }
 
+//ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
+//  GetCurrentFrame
+//ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
 
 int GetCurrentFrame ()
 {    
@@ -579,26 +569,18 @@ int GetCurrentFrame ()
 
 #pragma mark -- Private Functions --
 
-OSStatus CheckInit ()
+static OSStatus CheckInit ()
 {    
     if (playBackWasInit)
         return 0;
     
     OSStatus result = noErr;
     
-        
-    // Create the callback mutex
-    pthread_mutexattr_t attr;
-    pthread_mutexattr_init (&attr);
-    pthread_mutex_init (&callbackMutex, &attr);
-    pthread_mutexattr_destroy (&attr);
-    pthread_mutex_lock (&callbackMutex);
-        
+    // Create the callback semaphore
+    callbackSem = SDL_CreateSemaphore(0);
+
     // Start callback thread
-    pthread_attr_t attr1;
-    pthread_attr_init (&attr1);        
-    pthread_create (&callbackThread, &attr1, RunCallBackThread, NULL);
-    pthread_attr_destroy (&attr1);
+    SDL_CreateThread(RunCallBackThread, NULL);
 
     try {
         ComponentDescription desc;
@@ -644,7 +626,7 @@ OSStatus CheckInit ()
 }
 
 
-OSStatus MatchAUFormats (AudioUnit theUnit, UInt32 theInputBus)
+static OSStatus MatchAUFormats (AudioUnit theUnit, UInt32 theInputBus)
 {
     AudioStreamBasicDescription theDesc;
     UInt32 size = sizeof (theDesc);
@@ -666,12 +648,12 @@ OSStatus MatchAUFormats (AudioUnit theUnit, UInt32 theInputBus)
     return result;
 }
 
-void FilePlayNotificationHandler(void * inRefCon, OSStatus inStatus)
+static void FilePlayNotificationHandler(void * inRefCon, OSStatus inStatus)
 {
     if (inStatus == kAudioFilePlay_FileIsFinished) {
     
         // notify non-CA thread to perform the callback
-        pthread_mutex_unlock (&callbackMutex);
+        SDL_SemPost(callbackSem);
         
     } else if (inStatus == kAudioFilePlayErr_FilePlayUnderrun) {
     
@@ -685,13 +667,11 @@ void FilePlayNotificationHandler(void * inRefCon, OSStatus inStatus)
     }
 }
 
-void* RunCallBackThread (void *param)
+static int RunCallBackThread (void *param)
 {
-    runCallBackThread = 1;
+    for (;;) {
     
-    while (runCallBackThread) {
-    
-        pthread_mutex_lock (&callbackMutex);
+	SDL_SemWait(callbackSem);
 
         if (completionProc && theCDROM) {
             #if DEBUG_CDROM
@@ -705,13 +685,11 @@ void* RunCallBackThread (void *param)
         }
     }
     
-    runCallBackThread = -1;
-    
     #if DEBUG_CDROM
     printf ("thread dying now...\n");
     #endif
     
-    return NULL;
+    return 0;
 }
 
 }; // extern "C"
