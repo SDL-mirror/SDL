@@ -2073,8 +2073,8 @@ case "$target" in
         CheckMacGL
         CheckPTHREAD
         # Set up files for the main() stub
-        COPY_ARCH_SRC(src/main, macosx, SDL_main.m)
-        COPY_ARCH_SRC(src/main, macosx, SDL_main.h)
+        COPY_ARCH_SRC(src/main, macosx, SDLMain.m)
+        COPY_ARCH_SRC(src/main, macosx, SDLMain.h)
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
             AUDIO_SUBDIRS="$AUDIO_SUBDIRS macrom"

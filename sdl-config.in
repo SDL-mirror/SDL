@@ -57,7 +57,7 @@ while test $# -gt 0; do
 @ENABLE_STATIC_TRUE@      echo $libdirs @SDL_LIBS@ @SYSTEM_LIBS@
 @ENABLE_STATIC_TRUE@      ;;
 @TARGET_MACOSX_TRUE@    --nib)
-@TARGET_MACOSX_TRUE@      echo @datadir@/sdl/SDL_main.nib
+@TARGET_MACOSX_TRUE@      echo @datadir@/sdl/SDLMain.nib
 @TARGET_MACOSX_TRUE@      ;;
 @TARGET_MACOSX_TRUE@    --plist)
 @TARGET_MACOSX_TRUE@      echo @datadir@/sdl/Info.plist

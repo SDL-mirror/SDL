@@ -16,7 +16,7 @@ ARCH_SUBDIRS = $(srcdir)/beos \
 lib_LIBRARIES = libSDLmain.a
 
 if TARGET_MACOSX
-MAINLIB_ARCH_SRCS = SDL_main.m SDL_main.h
+MAINLIB_ARCH_SRCS = SDLMain.m SDLMain.h
 else
 MAINLIB_ARCH_SRCS = SDL_main.c
 endif

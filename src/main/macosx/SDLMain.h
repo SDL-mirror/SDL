@@ -1,4 +1,4 @@
-/*   SDL_main.h - main entry point for our Cocoa-ized SDL app
+/*   SDLMain.h - main entry point for our Cocoa-ized SDL app
        Darrell Walisser - dwaliss1@purdue.edu
 
     Feel free to customize this file to suit your needs
@@ -6,7 +6,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface SDL_main : NSObject
+@interface SDLMain : NSObject
 {
 }
 - (IBAction)quit:(id)sender;

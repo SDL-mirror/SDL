@@ -17,7 +17,7 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>NSMainNibFile</key>
-	<string>SDL_main.nib</string>
+	<string>SDLMain.nib</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 </dict>
