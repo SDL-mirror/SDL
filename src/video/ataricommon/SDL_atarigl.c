@@ -47,12 +47,22 @@
 #define PATH_MESAGL_LDG	"mesa_gl.ldg"
 #define PATH_TINYGL_LDG	"tiny_gl.ldg"
 
+#define VDI_RGB	0xf
+
 /*--- Functions prototypes ---*/
 
 static void SDL_AtariGL_UnloadLibrary(_THIS);
 
+#ifdef HAVE_OPENGL
 static void CopyShadowNull(_THIS, SDL_Surface *surface);
 static void CopyShadowDirect(_THIS, SDL_Surface *surface);
+static void CopyShadowRGBTo555(_THIS, SDL_Surface *surface);
+static void CopyShadowRGBTo565(_THIS, SDL_Surface *surface);
+static void CopyShadowRGBSwap(_THIS, SDL_Surface *surface);
+static void CopyShadowRGBToARGB(_THIS, SDL_Surface *surface);
+static void CopyShadowRGBToABGR(_THIS, SDL_Surface *surface);
+static void CopyShadowRGBToBGRA(_THIS, SDL_Surface *surface);
+static void CopyShadowRGBToRGBA(_THIS, SDL_Surface *surface);
 static void CopyShadow8888To555(_THIS, SDL_Surface *surface);
 static void CopyShadow8888To565(_THIS, SDL_Surface *surface);
 
@@ -64,6 +74,7 @@ static void ConvertBGRAToABGR(_THIS, SDL_Surface *surface);
 
 static int InitNew(_THIS, SDL_Surface *current);
 static int InitOld(_THIS, SDL_Surface *current);
+#endif
 
 /*--- Public functions ---*/
 
@@ -396,6 +407,7 @@ static void SDL_AtariGL_UnloadLibrary(_THIS)
 
 /*--- Creation of an OpenGL context using new/old functions ---*/
 
+#ifdef HAVE_OPENGL
 static int InitNew(_THIS, SDL_Surface *current)
 {
 	GLenum osmesa_format;
@@ -502,16 +514,25 @@ static int InitNew(_THIS, SDL_Surface *current)
 	return (gl_ctx != NULL);
 }
 
+
 static int InitOld(_THIS, SDL_Surface *current)
 {
 	GLenum osmesa_format;
 	SDL_PixelFormat *pixel_format;
 	Uint32	redmask;
-	int recreatecontext;
+	int recreatecontext, tinygl_present;
 
 	if (this->gl_config.dll_handle) {
 		if (this->gl_data->OSMesaCreateLDG == NULL) {
 			return 0;
+		}
+	}
+
+	/* TinyGL only supports VDI_RGB (OSMESA_RGB) */
+	tinygl_present=0;
+	if (this->gl_config.dll_handle) {
+		if (this->gl_data->glFinish == NULL) {
+			tinygl_present=1;
 		}
 	}
 
@@ -525,49 +546,92 @@ static int InitOld(_THIS, SDL_Surface *current)
 		case 15:
 			/* 15 bits unsupported */
 			gl_pixelsize = 2;
-			osmesa_format = OSMESA_ARGB;
-			if (redmask == 31<<10) {
-				gl_copyshadow = CopyShadow8888To555;
+			if (tinygl_present) {
+				osmesa_format = VDI_RGB;
+				if (redmask == 31<<10) {
+					gl_copyshadow = CopyShadowRGBTo555;
+				} else {
+					gl_copyshadow = CopyShadowRGBTo565;
+					gl_convert = Convert565To555le;
+				}
 			} else {
-				gl_copyshadow = CopyShadow8888To565;
-				gl_convert = Convert565To555le;
+				osmesa_format = OSMESA_ARGB;
+				if (redmask == 31<<10) {
+					gl_copyshadow = CopyShadow8888To555;
+				} else {
+					gl_copyshadow = CopyShadow8888To565;
+					gl_convert = Convert565To555le;
+				}
 			}
 			break;
 		case 16:
 			/* 16 bits unsupported */
 			gl_pixelsize = 2;
-			osmesa_format = OSMESA_ARGB;
-			gl_copyshadow = CopyShadow8888To565;
-			if (redmask != 31<<11) {
-				/* 565, little endian, unsupported */
-				gl_convert = Convert565le;
+			if (tinygl_present) {
+				osmesa_format = VDI_RGB;
+				gl_copyshadow = CopyShadowRGBTo565;
+				if (redmask != 31<<11) {
+					/* 565, little endian, unsupported */
+					gl_convert = Convert565le;
+				}
+			} else {
+				osmesa_format = OSMESA_ARGB;
+				gl_copyshadow = CopyShadow8888To565;
+				if (redmask != 31<<11) {
+					/* 565, little endian, unsupported */
+					gl_convert = Convert565le;
+				}
 			}
 			break;
 		case 24:
 			gl_pixelsize = 3;
-			gl_copyshadow = CopyShadowDirect;
-			if (redmask == 255<<16) {
-				osmesa_format = OSMESA_RGB;
+			if (tinygl_present) {
+				osmesa_format = VDI_RGB;
+				gl_copyshadow = CopyShadowDirect;
+				if (redmask != 255<<16) {
+					gl_copyshadow = CopyShadowRGBSwap;
+				}
 			} else {
-				osmesa_format = OSMESA_BGR;
+				gl_copyshadow = CopyShadowDirect;
+				if (redmask == 255<<16) {
+					osmesa_format = OSMESA_RGB;
+				} else {
+					osmesa_format = OSMESA_BGR;
+				}
 			}
 			break;
 		case 32:
 			gl_pixelsize = 4;
-			gl_copyshadow = CopyShadowDirect;
-			if (redmask == 255<<16) {
-				osmesa_format = OSMESA_ARGB;
-			} else if (redmask == 255<<8) {
-				osmesa_format = OSMESA_BGRA;
-			} else if (redmask == 255<<24) {
-				osmesa_format = OSMESA_RGBA;
+			if (tinygl_present) {
+				osmesa_format = VDI_RGB;
+				gl_copyshadow = CopyShadowRGBToARGB;
+				if (redmask == 255) {
+					gl_convert = CopyShadowRGBToABGR;
+				} else if (redmask == 255<<8) {
+					gl_convert = CopyShadowRGBToBGRA;
+				} else if (redmask == 255<<24) {
+					gl_convert = CopyShadowRGBToRGBA;
+				}
 			} else {
-				/* ABGR format unsupported */
-				osmesa_format = OSMESA_BGRA;
-				gl_convert = ConvertBGRAToABGR;
+				gl_copyshadow = CopyShadowDirect;
+				if (redmask == 255<<16) {
+					osmesa_format = OSMESA_ARGB;
+				} else if (redmask == 255<<8) {
+					osmesa_format = OSMESA_BGRA;
+				} else if (redmask == 255<<24) {
+					osmesa_format = OSMESA_RGBA;
+				} else {
+					/* ABGR format unsupported */
+					osmesa_format = OSMESA_BGRA;
+					gl_convert = ConvertBGRAToABGR;
+				}
 			}
 			break;
 		default:
+			if (tinygl_present) {
+				SDL_AtariGL_Quit(this, SDL_FALSE);
+				return 0;
+			}
 			gl_pixelsize = 1;
 			gl_copyshadow = CopyShadowDirect;
 			osmesa_format = OSMESA_COLOR_INDEX;
@@ -621,6 +685,210 @@ static void CopyShadowDirect(_THIS, SDL_Surface *surface)
 
 	for (y=0; y<surface->h; y++) {
 		memcpy(dstline, srcline, srcpitch);
+
+		srcline += srcpitch;
+		dstline += dstpitch;
+	}
+}
+
+static void CopyShadowRGBTo555(_THIS, SDL_Surface *surface)
+{
+	int x,y, srcpitch, dstpitch;
+	Uint16 *dstline, *dstcol;
+	Uint8 *srcline, *srccol;
+
+	srcline = (Uint8 *)gl_shadow;
+	srcpitch = surface->w *3;
+	dstline = surface->pixels;
+	dstpitch = surface->pitch >>1;
+
+	for (y=0; y<surface->h; y++) {
+		srccol = srcline;
+		dstcol = dstline;
+		for (x=0; x<surface->w; x++) {
+			Uint16 dstcolor;
+			
+			dstcolor = ((*srccol++)>>9) & (31<<10);
+			dstcolor |= ((*srccol++)>>6) & (31<<5);
+			dstcolor |= ((*srccol++)>>3) & 31;
+			*dstcol++ = dstcolor;
+		}
+
+		srcline += srcpitch;
+		dstline += dstpitch;
+	}
+}
+
+static void CopyShadowRGBTo565(_THIS, SDL_Surface *surface)
+{
+	int x,y, srcpitch, dstpitch;
+	Uint16 *dstline, *dstcol;
+	Uint8 *srcline, *srccol;
+
+	srcline = (Uint8 *)gl_shadow;
+	srcpitch = surface->w *3;
+	dstline = surface->pixels;
+	dstpitch = surface->pitch >>1;
+
+	for (y=0; y<surface->h; y++) {
+		srccol = srcline;
+		dstcol = dstline;
+
+		for (x=0; x<surface->w; x++) {
+			Uint16 dstcolor;
+			
+			dstcolor = ((*srccol++)>>8) & (31<<11);
+			dstcolor |= ((*srccol++)>>5) & (63<<5);
+			dstcolor |= ((*srccol++)>>3) & 31;
+			*dstcol++ = dstcolor;
+		}
+
+		srcline += srcpitch;
+		dstline += dstpitch;
+	}
+}
+
+static void CopyShadowRGBSwap(_THIS, SDL_Surface *surface)
+{
+	int x,y, srcpitch, dstpitch;
+	Uint8 *dstline, *dstcol;
+	Uint8 *srcline, *srccol;
+
+	srcline = (Uint8 *)gl_shadow;
+	srcpitch = surface->w *3;
+	dstline = surface->pixels;
+	dstpitch = surface->pitch;
+
+	for (y=0; y<surface->h; y++) {
+		srccol = srcline;
+		dstcol = dstline;
+
+		for (x=0; x<surface->w; x++) {
+			*dstcol++ = srccol[2];
+			*dstcol++ = srccol[1];
+			*dstcol++ = srccol[0];
+			srccol += 3;
+		}
+
+		srcline += srcpitch;
+		dstline += dstpitch;
+	}
+}
+
+static void CopyShadowRGBToARGB(_THIS, SDL_Surface *surface)
+{
+	int x,y, srcpitch, dstpitch;
+	Uint32 *dstline, *dstcol;
+	Uint8 *srcline, *srccol;
+
+	srcline = (Uint8 *)gl_shadow;
+	srcpitch = surface->w *3;
+	dstline = surface->pixels;
+	dstpitch = surface->pitch >>2;
+
+	for (y=0; y<surface->h; y++) {
+		srccol = srcline;
+		dstcol = dstline;
+
+		for (x=0; x<surface->w; x++) {
+			Uint32	dstcolor;
+
+			dstcolor = (*srccol++)<<16;
+			dstcolor |= (*srccol++)<<8;
+			dstcolor |= *srccol++;
+
+			*dstcol++ = dstcolor;
+		}
+
+		srcline += srcpitch;
+		dstline += dstpitch;
+	}
+}
+
+static void CopyShadowRGBToABGR(_THIS, SDL_Surface *surface)
+{
+	int x,y, srcpitch, dstpitch;
+	Uint32 *dstline, *dstcol;
+	Uint8 *srcline, *srccol;
+
+	srcline = (Uint8 *)gl_shadow;
+	srcpitch = surface->w *3;
+	dstline = surface->pixels;
+	dstpitch = surface->pitch >>2;
+
+	for (y=0; y<surface->h; y++) {
+		srccol = srcline;
+		dstcol = dstline;
+
+		for (x=0; x<surface->w; x++) {
+			Uint32	dstcolor;
+
+			dstcolor = *srccol++;
+			dstcolor |= (*srccol++)<<8;
+			dstcolor |= (*srccol++)<<16;
+
+			*dstcol++ = dstcolor;
+		}
+
+		srcline += srcpitch;
+		dstline += dstpitch;
+	}
+}
+
+static void CopyShadowRGBToBGRA(_THIS, SDL_Surface *surface)
+{
+	int x,y, srcpitch, dstpitch;
+	Uint32 *dstline, *dstcol;
+	Uint8 *srcline, *srccol;
+
+	srcline = (Uint8 *)gl_shadow;
+	srcpitch = surface->w *3;
+	dstline = surface->pixels;
+	dstpitch = surface->pitch >>2;
+
+	for (y=0; y<surface->h; y++) {
+		srccol = srcline;
+		dstcol = dstline;
+
+		for (x=0; x<surface->w; x++) {
+			Uint32	dstcolor;
+
+			dstcolor = (*srccol++)<<8;
+			dstcolor |= (*srccol++)<<16;
+			dstcolor |= (*srccol++)<<24;
+
+			*dstcol++ = dstcolor;
+		}
+
+		srcline += srcpitch;
+		dstline += dstpitch;
+	}
+}
+
+static void CopyShadowRGBToRGBA(_THIS, SDL_Surface *surface)
+{
+	int x,y, srcpitch, dstpitch;
+	Uint32 *dstline, *dstcol;
+	Uint8 *srcline, *srccol;
+
+	srcline = (Uint8 *)gl_shadow;
+	srcpitch = surface->w *3;
+	dstline = surface->pixels;
+	dstpitch = surface->pitch >>2;
+
+	for (y=0; y<surface->h; y++) {
+		srccol = srcline;
+		dstcol = dstline;
+
+		for (x=0; x<surface->w; x++) {
+			Uint32	dstcolor;
+
+			dstcolor = (*srccol++)<<24;
+			dstcolor |= (*srccol++)<<16;
+			dstcolor |= (*srccol++)<<8;
+
+			*dstcol++ = dstcolor;
+		}
 
 		srcline += srcpitch;
 		dstline += dstpitch;
@@ -770,3 +1038,5 @@ static void ConvertBGRAToABGR(_THIS, SDL_Surface *surface)
 		line += pitch;
 	}
 }
+
+#endif /* HAVE_OPENGL */
