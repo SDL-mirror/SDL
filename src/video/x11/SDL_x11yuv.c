@@ -132,17 +132,23 @@ SDL_Overlay *X11_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, S
 		SDL_NAME(XvFreeAdaptorInfo)(ainfo);
 	}
 
+#if 0
     /*
      * !!! FIXME:
      * "Here are some diffs for X11 and yuv.  Note that the last part 2nd
      *  diff should probably be a new call to XvQueryAdaptorFree with ainfo
      *  and the number of adaptors, instead of the loop through like I did."
+     *
+     *  ACHTUNG: This is broken! It looks like XvFreeAdaptorInfo does this
+     *  for you, so we end up with a double-free. I need to look at this
+     *  more closely...  --ryan.
      */
  	for ( i=0; i < adaptors; ++i ) {
  	  if (ainfo[i].name != NULL) Xfree(ainfo[i].name);
  	  if (ainfo[i].formats != NULL) Xfree(ainfo[i].formats);
    	}
  	Xfree(ainfo);
+#endif
 
 	if ( xv_port == -1 ) {
 		SDL_SetError("No available video ports for requested format");
