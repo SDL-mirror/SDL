@@ -3,12 +3,13 @@
 
 noinst_LTLIBRARIES = libthread.la
 
-ARCH_SUBDIRS = $(srcdir)/generic \
-               $(srcdir)/amigaos \
-               $(srcdir)/beos \
-               $(srcdir)/epoc \
-               $(srcdir)/irix \
-               $(srcdir)/linux \
+ARCH_SUBDIRS = $(srcdir)/generic	\
+               $(srcdir)/amigaos	\
+               $(srcdir)/beos		\
+               $(srcdir)/epoc		\
+               $(srcdir)/irix		\
+               $(srcdir)/linux		\
+               $(srcdir)/pth		\
                $(srcdir)/win32
 
 # Older versions of Linux require an asm clone() implementation
