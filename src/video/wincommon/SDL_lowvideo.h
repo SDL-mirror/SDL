@@ -83,6 +83,10 @@ extern HCURSOR SDL_hcursor;
 /* The bounds of the window in screen coordinates */
 extern RECT SDL_bounds;
 
+/* The position of the window in windowed mode */
+extern int SDL_windowX;
+extern int SDL_windowY;
+
 /* Flag -- SDL is performing a resize, rather than the user */
 extern int SDL_resizing;
 

@@ -379,7 +379,7 @@ int DIB_CreateWindow(_THIS)
 	} else {
 		SDL_Window = CreateWindow(SDL_Appname, SDL_Appname,
                         (WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX),
-                                 0, 0, 0, 0, NULL, NULL, SDL_Instance, NULL);
+                        CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, NULL, NULL, SDL_Instance, NULL);
 		if ( SDL_Window == NULL ) {
 			SDL_SetError("Couldn't create window");
 			return(-1);

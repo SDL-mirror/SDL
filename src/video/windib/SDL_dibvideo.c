@@ -463,11 +463,7 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 	HDC hdc;
 	RECT bounds;
 	int x, y;
-	BOOL was_visible;
 	Uint32 Rmask, Gmask, Bmask;
-
-	/* See whether or not we should center the window */
-	was_visible = IsWindowVisible(SDL_Window);
 
 	/* Clean up any GL context that may be hanging around */
 	if ( current->flags & SDL_OPENGL ) {
@@ -599,7 +595,7 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 	}
 
 	/* DJM: Don't piss of anyone who has setup his own window */
-	if (!SDL_windowid)
+	if ( SDL_windowid == NULL )
 		SetWindowLong(SDL_Window, GWL_STYLE, style);
 
 	/* Delete the old bitmap if necessary */
@@ -678,23 +674,46 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 	if ( SDL_windowid == NULL ) {
 		HWND top;
 		UINT swp_flags;
+		const char *window = getenv("SDL_VIDEO_WINDOW_POS");
+		const char *center = getenv("SDL_VIDEO_CENTERED");
+
+		if ( !SDL_windowX && !SDL_windowY ) {
+			if ( window ) {
+				if ( sscanf(window, "%d,%d", &x, &y) == 2 ) {
+					SDL_windowX = x;
+					SDL_windowY = y;
+				}
+				if ( strcmp(window, "center") == 0 ) {
+					center = window;
+					window = NULL;
+				}
+			}
+		}
+		swp_flags = (SWP_NOCOPYBITS | SWP_SHOWWINDOW);
 
 		SDL_resizing = 1;
-		bounds.left = 0;
-		bounds.top = 0;
-		bounds.right = video->w;
-		bounds.bottom = video->h;
+		bounds.left = SDL_windowX;
+		bounds.top = SDL_windowY;
+		bounds.right = SDL_windowX+video->w;
+		bounds.bottom = SDL_windowY+video->h;
 		AdjustWindowRectEx(&bounds, GetWindowLong(SDL_Window, GWL_STYLE), FALSE, 0);
 		width = bounds.right-bounds.left;
 		height = bounds.bottom-bounds.top;
-		x = (GetSystemMetrics(SM_CXSCREEN)-width)/2;
-		y = (GetSystemMetrics(SM_CYSCREEN)-height)/2;
+		if ( (flags & SDL_FULLSCREEN) ) {
+			x = (GetSystemMetrics(SM_CXSCREEN)-width)/2;
+			y = (GetSystemMetrics(SM_CYSCREEN)-height)/2;
+		} else if ( SDL_windowX || SDL_windowY || window ) {
+			x = bounds.left;
+			y = bounds.top;
+		} else if ( center ) {
+			x = (GetSystemMetrics(SM_CXSCREEN)-width)/2;
+			y = (GetSystemMetrics(SM_CYSCREEN)-height)/2;
+		} else {
+			x = y = -1;
+			swp_flags |= SWP_NOMOVE;
+		}
 		if ( y < 0 ) { /* Cover up title bar for more client area */
 			y -= GetSystemMetrics(SM_CYCAPTION)/2;
-		}
-		swp_flags = (SWP_NOCOPYBITS | SWP_FRAMECHANGED | SWP_SHOWWINDOW);
-		if ( was_visible && !(flags & SDL_FULLSCREEN) ) {
-			swp_flags |= SWP_NOMOVE;
 		}
 		if ( flags & SDL_FULLSCREEN ) {
 			top = HWND_TOPMOST;
