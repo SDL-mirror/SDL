@@ -1472,7 +1472,7 @@ static SDL_Overlay* QZ_CreateYUVOverlay (_THIS, int width, int height,
     (**yuv_idh).frameCount = 1;
     (**yuv_idh).clutID = -1;
     (**yuv_idh).dataSize = 0;
-    (**yuv_idh).depth = 12;
+    (**yuv_idh).depth = 24;
     
     HUnlock ((Handle)yuv_idh);
     
