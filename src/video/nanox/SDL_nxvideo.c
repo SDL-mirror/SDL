@@ -506,6 +506,7 @@ static int NX_SetGammaRamp (_THIS, Uint16 * ramp)
         GammaRamp_G [i] = green [i] ;
         GammaRamp_B [i] = blue  [i] ;
     }
+    SDL_UpdateRect(this->screen, 0, 0, 0, 0);
 
     Dprintf ("leave NX_SetGammaRamp\n") ;   
     return 0 ;
