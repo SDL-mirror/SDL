@@ -36,8 +36,8 @@ int main(int argc, char *argv[])
 #ifdef QWS
   // This initializes the Qtopia application. It needs to be done here
   // because it parses command line options.
-  QWidget dummy;
   app = new QPEApplication(argc, argv);
+  QWidget dummy;
   app->showMainWidget(&dummy);
   atexit(cleanupQCop);
 #endif
