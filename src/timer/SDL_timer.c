@@ -45,7 +45,7 @@ int SDL_timer_running = 0;
 Uint32 SDL_alarm_interval = 0;
 SDL_TimerCallback SDL_alarm_callback;
 
-static SDL_bool list_changed = SDL_FALSE;
+static volatile SDL_bool list_changed = SDL_FALSE;
 
 /* Data used for a thread-based timer */
 static int SDL_timer_threaded = 0;
@@ -114,6 +114,9 @@ void SDL_ThreadedTimerCheck(void)
 	Uint32 now, ms;
 	SDL_TimerID t, prev, next;
 	int removed;
+	SDL_NewTimerCallback callback;
+	Uint32 interval;
+	void *param;
 
 	now = SDL_GetTicks();
 
@@ -133,8 +136,11 @@ void SDL_ThreadedTimerCheck(void)
 			printf("Executing timer %p (thread = %d)\n",
 						t, SDL_ThreadID());
 #endif
+			callback = t->cb;
+			interval = t->interval;
+			param = t->param;
 			SDL_mutexV(SDL_timer_mutex);
-			ms = t->cb(t->interval, t->param);
+			ms = callback(interval, param);
 			SDL_mutexP(SDL_timer_mutex);
 			if ( list_changed ) {
 				/* Abort, list of timers has been modified */
