@@ -1238,7 +1238,9 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 				break;
 			}
 		}
-		printf("refresh rate = %d Hz\n", maxRefreshRate);
+#ifdef DDRAW_DEBUG
+ fprintf(stderr, "refresh rate = %d Hz\n", maxRefreshRate);
+#endif
 
 		result = IDirectDraw2_SetDisplayMode(ddraw2, width, height, bpp, maxRefreshRate, 0);
 		if ( result != DD_OK ) {
