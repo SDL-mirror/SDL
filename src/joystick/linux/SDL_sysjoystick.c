@@ -140,10 +140,10 @@ static int EV_IsJoystick(int fd)
 int SDL_SYS_JoystickInit(void)
 {
 	/* The base path of the joystick devices */
-	const char *joydev_pattern[2] = {
+	const char *joydev_pattern[] = {
 		"/dev/js%d",
 #ifdef USE_INPUT_EVENTS
-		"/dev/input/event%d"
+		"/dev/input/event%d",
 #endif
 		"/dev/input/js%d"
 	};
