@@ -444,9 +444,6 @@ static int detect_imps2(int fd)
 
 	imps2 = 0;
 
-	/* rcg06112001 Attempt to set IMPS/2 mode first, even with envr var... */
-	set_imps2_mode(fd);
-
 	if ( getenv("SDL_MOUSEDEV_IMPS2") ) {
 		imps2 = 1;
 	}
@@ -544,6 +541,9 @@ fprintf(stderr, "Using GPM mouse\n");
 				mouse_fd = open("/dev/input/mice", O_RDONLY, 0);
 			}
 			if (mouse_fd >= 0) {
+				/* rcg06112001 Attempt to set IMPS/2 mode first, even with envr var... */
+				set_imps2_mode(mouse_fd);
+
 				if (detect_imps2(mouse_fd)) {
 					mouse_drv = MOUSE_IMPS2;
 				} else {
