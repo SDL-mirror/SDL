@@ -474,7 +474,7 @@ SDL_Surface *DGA_SetVideoMode(_THIS, SDL_Surface *current,
 		SDL_SetError("Unable to switch to requested mode");
 		return(NULL);
 	}
-	DGA_visualClass = modes[i].visualClass;
+	DGA_visualClass = mode->mode.visualClass;
 	memory_base = (Uint8 *)mode->data;
 	memory_pitch = mode->mode.bytesPerScanline;
 
