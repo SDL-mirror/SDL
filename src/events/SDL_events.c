@@ -392,7 +392,7 @@ int SDL_WaitEvent (SDL_Event *event)
 
 int SDL_PushEvent(SDL_Event *event)
 {
-	return(SDL_PeepEvents(event, 1, SDL_ADDEVENT, 0));
+	return((SDL_PeepEvents(event, 1, SDL_ADDEVENT, 0) == 0) ? -1 : 0);
 }
 
 void SDL_SetEventFilter (SDL_EventFilter filter)
