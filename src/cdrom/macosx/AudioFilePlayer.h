@@ -31,7 +31,6 @@
 
 #include <CoreServices/CoreServices.h>
 
-#include <AudioToolbox/AudioConverter.h>
 #include <AudioUnit/AudioUnit.h>
 
 #include "SDL_error.h"
@@ -65,8 +64,7 @@ public:
     
     ~AudioFilePlayer();
 
-    void            SetDestination (AudioUnit                   &inDestUnit, 
-                                int                             inBusNumber);
+    void            SetDestination (AudioUnit &inDestUnit);
     
     void            SetNotifier (AudioFilePlayNotifier inNotifier, void *inRefCon)
     {
@@ -88,26 +86,18 @@ public:
     
     bool            IsConnected () const { return mConnected; }
 
-    UInt32          GetBusNumber () const { return mBusNumber; }
-    
     AudioUnit       GetDestUnit () const { return mPlayUnit; }
     
-    AudioConverterRef   GetAudioConverter() const { return mConverter; }
-
 #if DEBUG    
     void            Print() const 
     {
-        printf ("Destination Bus:%ld\n", GetBusNumber());
         printf ("Is Connected:%s\n", (IsConnected() ? "true" : "false"));
         printf ("- - - - - - - - - - - - - - \n");
     }
 #endif
-
-    const AudioStreamBasicDescription&      GetFileFormat() const { return mFileDescription; }
     
 private:
     AudioUnit                       mPlayUnit;
-    UInt32                          mBusNumber;
     SInt16                          mForkRefNum;
     
     AudioUnitInputCallback          mInputCallback;
@@ -117,7 +107,6 @@ private:
     bool                            mConnected;
     
     AudioFileManager*               mAudioFileManager;
-    AudioConverterRef               mConverter;
     
     AudioFilePlayNotifier           mNotifier;
     void*                           mRefCon;
@@ -141,15 +130,11 @@ public:
     ~AudioFileManager();
     
     
-    void                Connect (AudioConverterRef inConverter) 
-    {
-        mParentConverter = inConverter;
-        DoConnect();
-    }
-
         // this method should NOT be called by an object of this class
         // as it is called by the parent's Disconnect() method
     void                Disconnect ();
+    
+    void                DoConnect ();
 
     OSStatus            Read(char *buffer, UInt32 *len);
 
@@ -165,7 +150,6 @@ public:
    
 protected:
     AudioFilePlayer&    mParent;
-    AudioConverterRef   mParentConverter;
     SInt16              mForkRefNum;
     SInt64              mAudioDataOffset;
     
@@ -179,6 +163,10 @@ protected:
     
     int                 mNumTimesAskedSinceFinished;
 
+
+	void*               mTmpBuffer;
+	UInt32              mBufferSize;
+	UInt32              mBufferOffset;
 public:
     const UInt32        mChunkSize;
     SInt64              mFileLength;
@@ -190,8 +178,6 @@ protected:
     OSStatus            Render (AudioBuffer &ioData);
     
     OSStatus            GetFileData (void** inOutData, UInt32 *inOutDataSize);
-    
-    void                DoConnect ();
         
     void                AfterRender ();
 
@@ -201,10 +187,6 @@ public:
                                         const AudioTimeStamp            *inTimeStamp, 
                                         UInt32                          inBusNumber, 
                                         AudioBuffer                     *ioData);
-    static OSStatus     ACInputProc (AudioConverterRef          inAudioConverter,
-                                            UInt32*                     outDataSize,
-                                            void**                      outData,
-                                            void*                       inUserData);
 };
 
 

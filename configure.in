@@ -332,6 +332,7 @@ CheckDMEDIA()
         ],[
         have_dmedia=yes
         ])
+        AC_MSG_RESULT($have_dmedia)
         # Set up files for the audio library
         if test x$have_dmedia = xyes; then
             CFLAGS="$CFLAGS -DDMEDIA_SUPPORT"
@@ -485,6 +486,29 @@ CheckAtariAudio()
             CFLAGS="$CFLAGS -DMINTAUDIO_SUPPORT"
             AUDIO_SUBDIRS="$AUDIO_SUBDIRS mint"
             AUDIO_DRIVERS="$AUDIO_DRIVERS mint/libaudio_mintaudio.la"
+        fi
+    fi
+}
+
+dnl Check whether we want to use CoreAudio
+CheckCoreAudio()
+{
+    if test x$enable_audio = xyes; then
+        AC_MSG_CHECKING(for CoreAudio audio support)
+        have_coreaudio=no
+        AC_TRY_COMPILE([
+          #include <AudioUnit/AudioUnit.h>
+        ],[
+          AudioUnitInputCallback callback;
+        ],[
+        have_coreaudio=yes
+        ])
+        AC_MSG_RESULT($have_coreaudio)
+        # Set up files for the audio library
+        if test x$have_coreaudio = xyes; then
+            CFLAGS="$CFLAGS -DCOREAUDIO_SUPPORT"
+            AUDIO_SUBDIRS="$AUDIO_SUBDIRS macosx"
+            AUDIO_DRIVERS="$AUDIO_DRIVERS macosx/libaudio_macosx.la"
         fi
     fi
 }
@@ -2507,10 +2531,15 @@ case "$target" in
         ARCH=macosx
         CheckDummyVideo
         CheckDiskAudio
+        CheckCoreAudio
         CheckQUARTZ
         CheckMacGL
         CheckPTHREAD
         CheckSIGACTION
+        # If either the audio or CD driver is used, add the AudioUnit framework
+        if test x$enable_audio = xyes -o x$enable_cdrom = xyes; then
+            SYSTEM_LIBS="$SYSTEM_LIBS -framework AudioToolbox -framework AudioUnit"
+        fi
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
             AUDIO_SUBDIRS="$AUDIO_SUBDIRS macrom"
@@ -2526,7 +2555,7 @@ case "$target" in
         if test x$enable_cdrom = xyes; then
             CDROM_SUBDIRS="$CDROM_SUBDIRS macosx"
             CDROM_DRIVERS="$CDROM_DRIVERS macosx/libcdrom_macosx.la"
-            SYSTEM_LIBS="$SYSTEM_LIBS -framework AudioToolbox -framework AudioUnit -lstdc++"
+            SYSTEM_LIBS="$SYSTEM_LIBS -lstdc++"
         fi
         # Set up files for the thread library
         if test x$enable_threads = xyes; then
@@ -2766,6 +2795,7 @@ src/audio/dma/Makefile
 src/audio/dmedia/Makefile
 src/audio/dsp/Makefile
 src/audio/esd/Makefile
+src/audio/macosx/Makefile
 src/audio/macrom/Makefile
 src/audio/mint/Makefile
 src/audio/mme/Makefile

@@ -68,8 +68,6 @@ static SDL_CD*          theCDROM;
 
 static OSStatus CheckInit ();
 
-static OSStatus MatchAUFormats (AudioUnit theUnit, UInt32 theInputBus);
-
 static void     FilePlayNotificationHandler (void* inRefCon, OSStatus inStatus);
 
 static int      RunCallBackThread (void* inRefCon);
@@ -423,7 +421,7 @@ int LoadFile (const FSRef *ref, int startFrame, int stopFrame)
             throw (-3);
         }
             
-        thePlayer->SetDestination(theUnit, 0);
+        thePlayer->SetDestination(theUnit);
         
         if (startFrame >= 0)
             thePlayer->SetStartFrame (startFrame);
@@ -605,16 +603,6 @@ static OSStatus CheckInit ()
             THROW_RESULT("CheckInit: AudioUnitInitialize")
         
                     
-        // In this case we first want to get the output format of the OutputUnit
-        // Then we set that as the input format. Why?
-        // So that only a single conversion process is done
-        // when SetDestination is called it will get the input format of the
-        // unit its supplying data to. This defaults to 44.1K, stereo, so if
-        // the device is not that, then we lose a possibly rendering of data
-        
-        result = MatchAUFormats (theUnit, 0);
-            THROW_RESULT("CheckInit: MatchAUFormats")
-    
         playBackWasInit = true;
     }
     catch (...)
@@ -623,29 +611,6 @@ static OSStatus CheckInit ()
     }
     
     return 0;
-}
-
-
-static OSStatus MatchAUFormats (AudioUnit theUnit, UInt32 theInputBus)
-{
-    AudioStreamBasicDescription theDesc;
-    UInt32 size = sizeof (theDesc);
-    OSStatus result = AudioUnitGetProperty (theUnit,
-                                            kAudioUnitProperty_StreamFormat,
-                                            kAudioUnitScope_Output,
-                                            0,
-                                            &theDesc,
-                                            &size);
-        THROW_RESULT("MatchAUFormats: AudioUnitGetProperty")
-
-    result = AudioUnitSetProperty (theUnit,
-                                   kAudioUnitProperty_StreamFormat,
-                                   kAudioUnitScope_Input,
-                                   theInputBus,
-                                   &theDesc,
-                                   size);
-    
-    return result;
 }
 
 static void FilePlayNotificationHandler(void * inRefCon, OSStatus inStatus)

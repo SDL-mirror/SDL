@@ -67,28 +67,27 @@ OSStatus    AudioFileManager::FileInputProc (void                       *inRefCo
 
 OSStatus    AudioFileManager::Render (AudioBuffer &ioData)
 {
-    OSStatus result = AudioConverterFillBuffer(mParentConverter, 
-                                    AudioFileManager::ACInputProc, 
-                                    this, 
-                                    &ioData.mDataByteSize, 
-                                    ioData.mData);
-    if (result) {
-        SDL_SetError ("AudioConverterFillBuffer:%ld\n", result);
-        mParent.DoNotification (result);
-    } else {
-        mByteCounter += ioData.mDataByteSize / 2;
-        AfterRender();
-    }
-    return result;
-}
+    OSStatus result = noErr;
+    
+	if (mBufferOffset >= mBufferSize) {
+		result = GetFileData(&mTmpBuffer, &mBufferSize);
+		if (result) {
+			SDL_SetError ("AudioConverterFillBuffer:%ld\n", result);
+			mParent.DoNotification (result);
+			return result;
+		}
 
-OSStatus    AudioFileManager::ACInputProc (AudioConverterRef            inAudioConverter,
-                                            UInt32*                     outDataSize,
-                                            void**                      outData,
-                                            void*                       inUserData)
-{
-    AudioFileManager* THIS = (AudioFileManager*)inUserData;
-    return THIS->GetFileData(outData, outDataSize);
+		mBufferOffset = 0;
+	}
+    	
+    if (ioData.mDataByteSize > mBufferSize - mBufferOffset)
+    	ioData.mDataByteSize = mBufferSize - mBufferOffset;
+    ioData.mData = (char *)mTmpBuffer + mBufferOffset;
+    mBufferOffset += ioData.mDataByteSize;
+    
+	mByteCounter += ioData.mDataByteSize;
+	AfterRender();
+    return result;
 }
 
 AudioFileManager::~AudioFileManager ()
@@ -102,7 +101,6 @@ AudioFileManager::~AudioFileManager ()
 AudioFilePlayer::AudioFilePlayer (const FSRef           *inFileRef)
     : mConnected (false),
       mAudioFileManager (0),
-      mConverter (0),
       mNotifier (0),
       mStartFrame (0)
 {
@@ -124,39 +122,14 @@ AudioFilePlayer::AudioFilePlayer (const FSRef           *inFileRef)
                                                 bytesPerSecond);
 }
 
-// you can put a rate scalar here to play the file faster or slower
-// by multiplying the same rate by the desired factor 
-// eg fileSampleRate * 2 -> twice as fast
-// before you create the AudioConverter
-void    AudioFilePlayer::SetDestination (AudioUnit  &inDestUnit, 
-                                         int         inBusNumber)
+void    AudioFilePlayer::SetDestination (AudioUnit  &inDestUnit)
 {
     if (mConnected) throw static_cast<OSStatus>(-1); //can't set dest if already engaged
  
     mPlayUnit = inDestUnit;
-    mBusNumber = inBusNumber;
 
     OSStatus result = noErr;
     
-    if (mConverter) {
-        result = AudioConverterDispose (mConverter);
-            THROW_RESULT("AudioConverterDispose")
-    }
-    
-    AudioStreamBasicDescription     destDesc;
-    UInt32  size = sizeof (destDesc);
-    result = AudioUnitGetProperty (inDestUnit,
-                                   kAudioUnitProperty_StreamFormat,
-                                   kAudioUnitScope_Input,
-                                   inBusNumber,
-                                   &destDesc,
-                                   &size);
-        THROW_RESULT("AudioUnitGetProperty")
-
-#if DEBUG
-    printf("Destination format:\n");
-    PrintStreamDesc (&destDesc);
-#endif
 
         //we can "down" cast a component instance to a component
     ComponentDescription desc;
@@ -171,19 +144,14 @@ void    AudioFilePlayer::SetDestination (AudioUnit  &inDestUnit,
         THROW_RESULT("BAD COMPONENT")
     }
 
-    
-    result = AudioConverterNew (&mFileDescription, &destDesc, &mConverter);
-        THROW_RESULT("AudioConverterNew")
-
-#if 0
-    // this uses the better quality SRC
-    UInt32 srcID = kAudioUnitSRCAlgorithm_Polyphase;
-    result = AudioConverterSetProperty(mConverter,
-                    kAudioConverterSampleRateConverterAlgorithm, 
-                    sizeof(srcID), 
-                    &srcID);
-        THROW_RESULT("AudioConverterSetProperty")
-#endif
+    /* Set the input format of the audio unit. */
+    result = AudioUnitSetProperty (inDestUnit,
+                               kAudioUnitProperty_StreamFormat,
+                               kAudioUnitScope_Input,
+                               0,
+                               &mFileDescription,
+                               sizeof (mFileDescription));
+        THROW_RESULT("AudioUnitSetProperty")
 }
 
 void    AudioFilePlayer::SetStartFrame (int frame)
@@ -220,22 +188,18 @@ AudioFilePlayer::~AudioFilePlayer()
         FSClose (mForkRefNum);
         mForkRefNum = 0;
     }
-
-    if (mConverter) {
-        AudioConverterDispose (mConverter);
-        mConverter = 0;
-    }
 }
 
 void    AudioFilePlayer::Connect()
 {
 #if DEBUG
-    printf ("Connect:%x,%ld, engaged=%d\n", (int)mPlayUnit, mBusNumber, (mConnected ? 1 : 0));
+    printf ("Connect:%x, engaged=%d\n", (int)mPlayUnit, (mConnected ? 1 : 0));
 #endif
     if (!mConnected)
     {           
-        mAudioFileManager->Connect(mConverter);
-                
+        mAudioFileManager->DoConnect();
+
+
         // set the render callback for the file data to be supplied to the sound converter AU
         mInputCallback.inputProc = AudioFileManager::FileInputProc;
         mInputCallback.inputProcRefCon = mAudioFileManager;
@@ -243,7 +207,7 @@ void    AudioFilePlayer::Connect()
         OSStatus result = AudioUnitSetProperty (mPlayUnit, 
                             kAudioUnitProperty_SetInputCallback, 
                             kAudioUnitScope_Input, 
-                            mBusNumber,
+                            0,
                             &mInputCallback, 
                             sizeof(mInputCallback));
         THROW_RESULT("AudioUnitSetProperty")
@@ -272,7 +236,7 @@ void    AudioFilePlayer::DoNotification (OSStatus inStatus) const
 void    AudioFilePlayer::Disconnect ()
 {
 #if DEBUG
-    printf ("Disconnect:%x,%ld, engaged=%d\n", (int)mPlayUnit, mBusNumber, (mConnected ? 1 : 0));
+    printf ("Disconnect:%x,%ld, engaged=%d\n", (int)mPlayUnit, 0, (mConnected ? 1 : 0));
 #endif
     if (mConnected)
     {
@@ -283,7 +247,7 @@ void    AudioFilePlayer::Disconnect ()
         OSStatus result = AudioUnitSetProperty (mPlayUnit, 
                                         kAudioUnitProperty_SetInputCallback, 
                                         kAudioUnitScope_Input, 
-                                        mBusNumber,
+                                        0,
                                         &mInputCallback, 
                                         sizeof(mInputCallback));
         if (result) 

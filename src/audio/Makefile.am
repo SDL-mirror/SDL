@@ -15,6 +15,7 @@ DIST_SUBDIRS =	\
 	dmedia	\
 	dsp	\
 	esd	\
+	macosx	\
 	macrom	\
 	mint	\
 	mme	\

@@ -287,6 +287,8 @@ AudioFileManager::AudioFileManager (AudioFilePlayer &inParent,
       mLockUnsuccessful (false),
       mIsEngaged (false),
 
+      mBufferSize (inChunkSize),
+      mBufferOffset (inChunkSize),
       mChunkSize (inChunkSize),
       mFileLength (inFileLength),
       mReadFilePosition (0),
@@ -364,7 +366,7 @@ OSStatus AudioFileManager::GetFileData (void** inOutData, UInt32 *inOutDataSize)
     
     if (mReadFromFirstBuffer == mWriteToFirstBuffer) {
         #if DEBUG
-        printf ("* * * * * * * Can't keep up with reading file:%ld\n", mParent.GetBusNumber());
+        printf ("* * * * * * * Can't keep up with reading file\n");
         #endif
         
         mParent.DoNotification (kAudioFilePlayErr_FilePlayUnderrun);

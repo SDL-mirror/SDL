@@ -77,6 +77,9 @@ static AudioBootStrap *bootstrap[] = {
 #ifdef __BEOS__
 	&BAUDIO_bootstrap,
 #endif
+#ifdef COREAUDIO_SUPPORT
+	&COREAUDIO_bootstrap,
+#endif
 #if defined(macintosh) || TARGET_API_MAC_CARBON
 	&SNDMGR_bootstrap,
 #endif
