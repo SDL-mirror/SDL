@@ -266,6 +266,9 @@ static void QZ_DoModifiers (_THIS, unsigned int newMods) {
     int i;
     int bit;
     SDL_keysym key;
+    
+    if (current_mods == newMods)
+    	return;
 
     key.scancode    = 0;
     key.sym         = SDLK_UNKNOWN;
@@ -462,6 +465,8 @@ void QZ_PumpEvents (_THIS)
             type = [ event type ];
             isInGameWin = QZ_IsMouseInWindow (this);
 
+            QZ_DoModifiers(this, [ event modifierFlags ] );
+
             switch (type) {
                 case NSLeftMouseDown:
                     if ( getenv("SDL_HAS3BUTTONMOUSE") ) {
@@ -613,7 +618,6 @@ void QZ_PumpEvents (_THIS)
                     QZ_DoKey (this, SDL_PRESSED, event);
                     break;
                 case NSFlagsChanged:
-                    QZ_DoModifiers(this, [ event modifierFlags ] );
                     break;
                 case NSAppKitDefined:
                     switch ( [ event subtype ] ) {
