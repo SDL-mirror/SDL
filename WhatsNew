@@ -3,6 +3,11 @@ This is a list of API changes in SDL's version history.
 
 Version 1.0:
 
+1.2.5:
+	Added SDL_BUTTON_WHEELUP (4) and SDL_BUTTON_WHEELDOWN (5)
+
+	Added SDL_GL_STEREO for stereoscopic OpenGL contexts
+
 1.2.0:
 	Added SDL_VIDEOEXPOSE event to signal that the screen needs to
 	be redrawn.  This is currently only delivered to OpenGL windows

@@ -370,9 +370,9 @@ LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				if ( move ) {
 					Uint8 button;
 					if ( move > 0 )
-						button = 4;
+						button = SDL_BUTTON_WHEELUP;
 					else
-						button = 5;
+						button = SDL_BUTTON_WHEELDOWN;
 					posted = SDL_PrivateMouseButton(
 						SDL_PRESSED, button, 0, 0);
 					posted |= SDL_PrivateMouseButton(
