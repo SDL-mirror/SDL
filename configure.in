@@ -1050,7 +1050,7 @@ CheckMacGL()
         CFLAGS="$CFLAGS -DHAVE_OPENGL"
         case "$target" in
             *-*-darwin*)
-                SDL_LIBS="$SDL_LIBS -framework OpenGL -framework AGL"
+                SYSTEM_LIBS="$SYSTEM_LIBS -framework OpenGL -framework AGL"
         esac
     fi
 }
@@ -1247,7 +1247,6 @@ CheckPTHREAD()
                 ;;
         esac
     fi
-    AM_CONDITIONAL(USE_CLONE, test x$use_clone = xyes)
 }
 
 dnl See if we can use GNU pth library for threads
@@ -1322,7 +1321,6 @@ CheckDIRECTX()
         ])
         AC_MSG_RESULT($use_directx)
     fi
-    AM_CONDITIONAL(USE_DIRECTX, test x$use_directx = xyes)
 
     CFLAGS="$CFLAGS -I\$(top_srcdir)/src/video/wincommon"
     SYSTEM_LIBS="$SYSTEM_LIBS -luser32 -lgdi32 -lwinmm"
@@ -2344,7 +2342,7 @@ case "$target" in
         if test x$enable_joystick = xyes; then
             JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS darwin"
             JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS darwin/libjoystick_darwin.la"
-            SDL_LIBS="$SDL_LIBS -framework IOKit"
+            SYSTEM_LIBS="$SYSTEM_LIBS -framework IOKit"
         fi
         # Set up files for the cdrom library
         if test x$enable_cdrom = xyes; then
@@ -2370,9 +2368,10 @@ case "$target" in
         if test x$enable_timers = xyes; then
             COPY_ARCH_SRC(src/timer, linux, SDL_systimer.c)
         fi
-        # The MacOS X platform requires special setup
-        SDL_CFLAGS="$SDL_CFLAGS -F/System/Library/Frameworks/Carbon.framework -F/System/Library/Frameworks/Cocoa.framework"
-        SDL_LIBS="-lSDLmain $SDL_LIBS -framework Carbon -framework Cocoa"
+        # The MacOS X platform requires special setup.
+        SDL_LIBS="-lSDLmain $SDL_LIBS"
+        # The Cocoa backend still needs Carbon, and the YUV code QuickTime
+        SYSTEM_LIBS="$SYSTEM_LIBS -framework Cocoa -framework Carbon -framework QuickTime"
         ;;
     *-*-mint*)
         ARCH=mint
@@ -2451,6 +2450,10 @@ AM_CONDITIONAL(TARGET_MACOSX, test $ARCH = macosx)
 AM_CONDITIONAL(TARGET_QNX, test $ARCH = qnx)
 AM_CONDITIONAL(TARGET_MINT, test $ARCH = mint)
 
+# More automake conditionals
+AM_CONDITIONAL(USE_DIRECTX, test x$use_directx = xyes)
+AM_CONDITIONAL(USE_CLONE, test x$use_clone = xyes)
+
 # Set conditional variables for shared and static library selection.
 # These are not used in any Makefile.am but in sdl-config.in.
 AM_CONDITIONAL([ENABLE_SHARED], [test "$enable_shared" = yes])
@@ -2464,11 +2467,22 @@ fi
 if test $ARCH = solaris; then
   SDL_RLD_FLAGS="-R\${exec_prefix}/lib"
 fi
-if test $ARCH = openbsd -o $ARCH = bsdi; then
+
+case "$ARCH" in
+  openbsd | bsdi)
     SHARED_SYSTEM_LIBS="$SYSTEM_LIBS"
-else
+    ;;
+  macosx)
+    SHARED_SYSTEM_LIBS="-framework Cocoa"
+    if test x$enable_video = xyes -a x$enable_video_opengl = xyes; then
+      SHARED_SYSTEM_LIBS="$SHARED_SYSTEM_LIBS -framework OpenGL"
+    fi
+    ;;
+  *)
     SHARED_SYSTEM_LIBS=""
-fi
+    ;;
+esac
+
 STATIC_SYSTEM_LIBS="$SYSTEM_LIBS"
 
 dnl Output the video drivers we use
