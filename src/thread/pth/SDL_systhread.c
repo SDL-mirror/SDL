@@ -64,7 +64,8 @@ int SDL_SYS_CreateThread(SDL_Thread *thread, void *args)
 	pth_attr_set(type, PTH_ATTR_JOINABLE, TRUE);
 
 	/* Create the thread and go! */
-	if ( pth_spawn(type, RunThread, args) == NULL ) {
+	thread->handle = pth_spawn(type, RunThread, args);
+	if ( thread->handle == NULL ) {
 		SDL_SetError("Not enough resources to create thread");
 		return(-1);
 	}

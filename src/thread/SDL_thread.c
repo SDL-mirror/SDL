@@ -52,12 +52,6 @@ int SDL_ThreadsInit(void)
 {
 	int retval;
 
-#ifdef ENABLE_PTH
-	if (!pth_init()) {
-		return -1;
-	}
-#endif
-
 	retval = 0;
 	/* Set the thread lock creation flag so that we can reuse an
 	   existing lock on the system - since this mutex never gets
@@ -86,10 +80,6 @@ void SDL_ThreadsQuit()
 	if ( mutex != NULL ) {
 		SDL_DestroyMutex(mutex);
 	}
-
-#ifdef ENABLE_PTH
-	pth_kill();
-#endif
 }
 
 /* Routines for manipulating the thread list */
