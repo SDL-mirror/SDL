@@ -91,6 +91,8 @@ static int cmpmodes(const void *va, const void *vb)
 }
 #endif
 
+static void get_real_resolution(_THIS, int* w, int* h);
+
 static void set_best_resolution(_THIS, int width, int height)
 {
 #ifdef XFREE86_VM
@@ -123,6 +125,47 @@ static void set_best_resolution(_THIS, int width, int height)
         }
     }
 #endif /* XFREE86_VM */
+
+				/* XiG */
+#ifdef HAVE_XIGXME
+#ifdef XIG_DEBUG
+    fprintf(stderr, "XME: set_best_resolution(): w = %d, h = %d\n",
+	    width, height);
+#endif
+    if ( SDL_modelist ) {
+	int i;
+
+        for ( i=0; SDL_modelist[i]; ++i ) {
+	    if ( (SDL_modelist[i]->w >= width) &&
+                 (SDL_modelist[i]->h >= height) ) {
+		break;
+	    }
+        }
+	
+	if ( SDL_modelist[i] ) { /* found one, lets try it */
+	    int w, h;	
+
+            /* check current mode so we can avoid uneccessary mode changes */
+	    get_real_resolution(this, &w, &h);
+
+	    if ( (SDL_modelist[i]->w != w) || (SDL_modelist[i]->h != h) ) {
+# ifdef XIG_DEBUG
+		fprintf(stderr, "XME: set_best_resolution: "
+			"XiGMiscChangeResolution: %d %d\n",
+			SDL_modelist[s]->w, SDL_modelist[s]->h);
+# endif
+		XiGMiscChangeResolution(SDL_Display, 
+					SDL_Screen,
+					0, /* view */
+					SDL_modelist[i]->w, 
+					SDL_modelist[i]->h, 
+					0);
+		XSync(SDL_Display, False);
+            }
+        }
+    }
+#endif /* HAVE_XIGXME */
+
 }
 
 static void get_real_resolution(_THIS, int* w, int* h)
@@ -139,6 +182,25 @@ static void get_real_resolution(_THIS, int* w, int* h)
         }
     }
 #endif
+
+#ifdef HAVE_XIGXME
+    if ( use_xme ) {
+        int ractive;
+        XiGMiscResolutionInfo *modelist;
+
+        XiGMiscQueryResolutions(SDL_Display, SDL_Screen,
+			        0, /* view */
+			        &ractive, &modelist);
+        *w = modelist[ractive].width;
+        *h = modelist[ractive].height;
+#ifdef XIG_DEBUG
+        fprintf(stderr, "XME: get_real_resolution: w = %d h = %d\n", *w, *h);
+#endif
+        XFree(modelist);
+        return;
+    }
+#endif /* XIG_XME */
+
     *w = DisplayWidth(SDL_Display, SDL_Screen);
     *h = DisplayHeight(SDL_Display, SDL_Screen);
 }
@@ -207,6 +269,11 @@ int X11_GetVideoModes(_THIS)
     int vm_major, vm_minor;
     int nmodes;
     XF86VidModeModeInfo **modes;
+#endif
+#ifdef HAVE_XIGXME
+    int xme_major, xme_minor;
+    int ractive, nummodes;
+    XiGMiscResolutionInfo *modelist;
 #endif
     int i, n;
     int screen_w;
@@ -310,6 +377,77 @@ int X11_GetVideoModes(_THIS)
     }
 #endif /* XFREE86_VM */
 
+				/* XiG */
+#ifdef HAVE_XIGXME
+    /* first lets make sure we have the extension, and it's at least v2.0 */
+    if (XiGMiscQueryVersion(SDL_Display, &xme_major, &xme_minor)) {
+#ifdef XIG_DEBUG
+	fprintf(stderr, "XME: XiGMiscQueryVersion: V%d.%d\n",
+		xme_major, xme_minor);
+#endif
+	/* work around a XiGMisc bogosity in our version of libXext */
+	if (xme_major == 0 && xme_major == 0) {
+	    /* Ideally libxme would spit this out, but the problem is that
+	       the right Query func will never be called if using the bogus
+	       libXext version.
+	     */
+	    fprintf(stderr, 
+"XME: If you are using Xi Graphics CDE and a Summit server, you need to\n"
+"XME: get the libXext update from our ftp site before fullscreen switching\n"
+"XME: will work.  Fullscreen switching is only supported on Summit Servers\n");
+	  }
+    } else {
+        /* not there. Bummer. */
+	xme_major = xme_minor = 0;
+    }
+
+    modelist = NULL;
+    if (xme_major >= 2 && (nummodes = XiGMiscQueryResolutions(SDL_Display, 
+					    SDL_Screen,
+					    0, /* view */
+					    &ractive, 
+					    &modelist)) > 1)
+    {				/* then we actually have some */
+	int j;
+
+#ifdef XIG_DEBUG
+	fprintf(stderr, "XME: nummodes = %d, active mode = %d\n",
+		nummodes, ractive);
+#endif
+
+	SDL_modelist = (SDL_Rect **)malloc((nummodes+1)*sizeof(SDL_Rect *));
+
+				/* we get the list already sorted in */
+				/* descending order.  We'll copy it in */
+				/* reverse order so SDL is happy */
+	if (SDL_modelist) {
+	    for ( i=0, j=nummodes-1; j>=0; i++, j-- ) {
+		if ((SDL_modelist[i] = 
+		     (SDL_Rect *)malloc(sizeof(SDL_Rect))) == NULL)
+		  break;
+#ifdef XIG_DEBUG
+		fprintf(stderr, "XME: mode = %4d, w = %4d, h = %4d\n",
+		       i, modelist[i].width, modelist[i].height);
+#endif
+		
+		SDL_modelist[i]->x = 0;
+		SDL_modelist[i]->y = 0;
+		SDL_modelist[i]->w = modelist[j].width;
+		SDL_modelist[i]->h = modelist[j].height;
+		
+	    }
+            SDL_modelist[i] = NULL; /* terminator */
+	}
+	use_xme = 1;
+	saved_res = modelist[ractive]; /* save the current resolution */
+    } else {
+        use_xme = 0;
+    }
+    if ( modelist ) {
+        XFree(modelist);
+    }
+#endif /* HAVE_XIGXME */
+
     {
 	static int depth_list[] = { 32, 24, 16, 15, 8 };
 	int j, np;
@@ -369,17 +507,25 @@ int X11_GetVideoModes(_THIS)
         }
     }
 
-#ifdef XFREE86_DEBUG
+#if defined(XFREE86_DEBUG) || defined(XIG_DEBUG)
     if ( use_vidmode ) {
         printf("XFree86 VidMode is enabled\n");
     }
+
+#ifdef HAVE_XIGXME
+    if ( use_xme )
+      printf("Xi Graphics XME fullscreen is enabled\n");
+    else
+      printf("Xi Graphics XME fullscreen is not available\n");
+#endif 
+
     if ( SDL_modelist ) {
         printf("X11 video mode list:\n");
         for ( i=0; SDL_modelist[i]; ++i ) {
             printf("\t%dx%d\n", SDL_modelist[i]->w, SDL_modelist[i]->h);
         }
     }
-#endif /* XFREE86_DEBUG */
+#endif /* XFREE86_DEBUG || XIG_DEBUG */
 
     /* The default X/Y fullscreen offset is 0/0 */
     xinerama_x = 0;
@@ -597,6 +743,26 @@ int X11_LeaveFullScreen(_THIS)
             XVidMode(LockModeSwitch, (SDL_Display, SDL_Screen, False));
         }
 #endif
+
+#ifdef HAVE_XIGXME
+	if ( use_xme ) {
+	    int rw, rh;	
+	    
+            /* check current mode so we can avoid uneccessary mode changes */
+	    get_real_resolution(this, &rw, &rh);
+
+	    if (rw != saved_res.width || rh != saved_res.height) {
+		XiGMiscChangeResolution(SDL_Display, 
+					SDL_Screen,
+					0, /* view */
+					saved_res.width, 
+					saved_res.height,
+					0);
+		XSync(SDL_Display, False);
+	    }
+	}
+#endif
+
         XUnmapWindow(SDL_Display, FSwindow);
         X11_WaitUnmapped(this, FSwindow);
         XSync(SDL_Display, True);   /* Flush spurious mode change events */

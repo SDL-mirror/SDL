@@ -50,7 +50,7 @@ static char rcsid =
    If you don't want this version included, simply define "NO_SDL_GLEXT"
  */
 #ifndef NO_SDL_GLEXT
-#ifndef __glext_h_
+#if !defined(__glext_h_) && !defined(GL_GLEXT_LEGACY)
 #define __glext_h_
 
 #ifdef __cplusplus

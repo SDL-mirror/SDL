@@ -47,6 +47,9 @@ static char rcsid =
 #define XVidMode(func, args)	XF86VidMode##func args
 #endif
 #endif /* XFREE86_VM */
+#ifdef HAVE_XIGXME
+#include <X11/extensions/xme.h>
+#endif
 
 #include <string.h>
 
@@ -121,6 +124,11 @@ struct SDL_PrivateVideoData {
         int x, y;
     } saved_view;
 #endif
+#ifdef HAVE_XIGXME /* XiG XME fullscreen */
+    int use_xme;
+    XiGMiscResolutionInfo saved_res;
+#endif
+
     int xinerama_x;
     int xinerama_y;
     int use_vidmode;
@@ -172,6 +180,8 @@ struct SDL_PrivateVideoData {
 #define SDL_modelist		(this->hidden->modelist)
 #define saved_mode		(this->hidden->saved_mode)
 #define saved_view		(this->hidden->saved_view)
+#define use_xme			(this->hidden->use_xme)
+#define saved_res		(this->hidden->saved_res)
 #define xinerama_x		(this->hidden->xinerama_x)
 #define xinerama_y		(this->hidden->xinerama_y)
 #define use_vidmode		(this->hidden->use_vidmode)
