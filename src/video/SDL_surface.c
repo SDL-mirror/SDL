@@ -711,6 +711,14 @@ SDL_Surface * SDL_ConvertSurface (SDL_Surface *surface,
 		}
 	}
 
+	/* Only create hw surfaces with alpha channel if hw alpha blits
+	   are supported */
+	if(format->Amask != 0 && (flags & SDL_HWSURFACE)) {
+		const SDL_VideoInfo *vi = SDL_GetVideoInfo();
+		if(!vi || !vi->blit_hw_A)
+			flags &= ~SDL_HWSURFACE;
+	}
+
 	/* Create a new surface with the desired format */
 	convert = SDL_CreateRGBSurface(flags,
 				surface->w, surface->h, format->BitsPerPixel,
