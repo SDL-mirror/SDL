@@ -464,6 +464,7 @@ static Uint8 *Map1toN(SDL_Palette *src, SDL_PixelFormat *dst)
 	Uint8 *map;
 	int i;
 	int  bpp;
+	unsigned alpha;
 
 	bpp = ((dst->BytesPerPixel == 3) ? 4 : dst->BytesPerPixel);
 	map = (Uint8 *)malloc(src->ncolors*bpp);
@@ -472,11 +473,12 @@ static Uint8 *Map1toN(SDL_Palette *src, SDL_PixelFormat *dst)
 		return(NULL);
 	}
 
+	alpha = dst->Amask ? SDL_ALPHA_OPAQUE : 0;
 	/* We memory copy to the pixel map so the endianness is preserved */
 	for ( i=0; i<src->ncolors; ++i ) {
 		ASSEMBLE_RGBA(&map[i*bpp], dst->BytesPerPixel, dst,
 			      src->colors[i].r, src->colors[i].g,
-			      src->colors[i].b, SDL_ALPHA_OPAQUE);
+			      src->colors[i].b, alpha);
 	}
 	return(map);
 }
