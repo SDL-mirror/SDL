@@ -28,6 +28,10 @@ static char rcsid =
 #ifndef _SDL_xbios_h
 #define _SDL_xbios_h
 
+#ifdef HAVE_OPENGL
+#include <GL/osmesa.h>
+#endif
+
 #include "SDL_types.h"
 #include "SDL_sysvideo.h"
 
@@ -69,6 +73,9 @@ struct SDL_PrivateVideoData {
 	int frame_number;		/* Number of frame for double buffer */
 	int pitch;				/* Destination line width for C2P */
 	int width, height;		/* Screen size for centered C2P */
+#ifdef HAVE_OPENGL
+	OSMesaContext ctx;		/* OpenGL OSMesa context */
+#endif
 
 	SDL_Rect *SDL_modelist[NUM_MODELISTS][SDL_NUMMODES+1];
 	xbiosmode_t *videomodes[NUM_MODELISTS][SDL_NUMMODES+1];
@@ -123,5 +130,8 @@ enum {
 #define XBIOS_pitch			(this->hidden->pitch)
 #define XBIOS_width			(this->hidden->width)
 #define XBIOS_height		(this->hidden->height)
+#ifdef HAVE_OPENGL
+#define XBIOS_ctx			(this->hidden->ctx)
+#endif
 
 #endif /* _SDL_xbios_h */

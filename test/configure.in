@@ -5,8 +5,7 @@ dnl Setup for automake
 SDL_VERSION=1.2.7
 
 dnl Detect the canonical host and target build environment
-AC_CANONICAL_HOST
-AC_CANONICAL_TARGET
+AC_CANONICAL_SYSTEM
 
 dnl Setup for automake
 AM_INIT_AUTOMAKE(SDL_tests, $SDL_VERSION)
@@ -36,8 +35,12 @@ case "$target" in
     *-*-aix*)
         if test x$ac_cv_prog_gcc = xyes; then
             CFLAGS="-mthreads"
-	fi
+        fi
         SYS_GL_LIBS=""
+        ;;
+    *-*-mint*)
+        MATHLIB="-lm"
+        SYS_GL_LIBS="-lOSMesa"
         ;;
     *)
         MATHLIB="-lm"

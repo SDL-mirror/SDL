@@ -53,13 +53,14 @@ Audio (Hardware, XBIOS, GSXB, MCSN, STFA, /dev/audio if threads enabled)
 Threads (Multitasking OS only via GNU pth library)
 Shared object loader (using LDG library from http://ldg.atari.org/)
 Audio CD (MetaDOS)
+OpenGL (using Mesa offscreen rendering driver)
 
 - Driver combinations:
-Video   Kbd     Mouse   Timer   Joysticks Joypads
-xbios   ikbd    ikbd    vbl(2)  ikbd      hardware
-xbios   gemdos  xbios   vbl(2)  xbios     hardware
-xbios   bios    xbios   vbl(2)  xbios     hardware
-gem     gem     gem(1)  vbl(2)  xbios     hardware
+Video   Kbd     Mouse   Timer   Joysticks Joypads	OpenGL
+xbios   ikbd    ikbd    vbl(2)  ikbd      hardware	OSMesa
+xbios   gemdos  xbios   vbl(2)  xbios     hardware	OSMesa
+xbios   bios    xbios   vbl(2)  xbios     hardware	OSMesa
+gem     gem     gem(1)  vbl(2)  xbios     hardware	no
 
 (1) GEM does not report relative mouse motion, so xbios mouse driver is used
 to report this type event.

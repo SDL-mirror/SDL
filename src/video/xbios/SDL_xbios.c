@@ -37,6 +37,10 @@ static char rcsid =
 #include <sys/stat.h>
 #include <unistd.h>
 
+#ifdef HAVE_OPENGL
+#include <GL/osmesa.h>
+#endif
+
 /* Mint includes */
 #include <mint/cookie.h>
 #include <mint/osbind.h>
@@ -74,6 +78,15 @@ static void XBIOS_UnlockHWSurface(_THIS, SDL_Surface *surface);
 static void XBIOS_FreeHWSurface(_THIS, SDL_Surface *surface);
 static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects);
 
+#ifdef HAVE_OPENGL
+/* OpenGL functions */
+static int XBIOS_GL_LoadLibrary(_THIS, const char *path);
+static void *XBIOS_GL_GetProcAddress(_THIS, const char *proc);
+static int XBIOS_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value);
+static int XBIOS_GL_MakeCurrent(_THIS);
+static void XBIOS_GL_SwapBuffers(_THIS);
+#endif
+
 /* List of video modes */
 
 /* ST modes */
@@ -93,21 +106,21 @@ static xbiosmode_t xbiosmodelist_tt[]={
 static int xbiosnummodes_f30rvb=16;
 static xbiosmode_t xbiosmodelist_f30rvb[]={
 	{BPS16|COL80|OVERSCAN|VERTFLAG,768,480,16,SDL_FALSE},
-	{BPS16|COL80|OVERSCAN,768,240,16,SDL_FALSE},
-	{BPS16|COL80|VERTFLAG,640,400,16,SDL_FALSE},
-	{BPS16|COL80,640,200,16,SDL_FALSE},
 	{BPS16|OVERSCAN|VERTFLAG,384,480,16,SDL_FALSE},
-	{BPS16|OVERSCAN,384,240,16,SDL_FALSE},
+	{BPS16|COL80|VERTFLAG,640,400,16,SDL_FALSE},
 	{BPS16|VERTFLAG,320,400,16,SDL_FALSE},
+	{BPS16|COL80|OVERSCAN,768,240,16,SDL_FALSE},
+	{BPS16|OVERSCAN,384,240,16,SDL_FALSE},
+	{BPS16|COL80,640,200,16,SDL_FALSE},
 	{BPS16,320,200,16,SDL_FALSE},
 
 	{BPS8|COL80|OVERSCAN|VERTFLAG,768,480,8,SDL_FALSE},
-	{BPS8|COL80|OVERSCAN,768,240,8,SDL_FALSE},
-	{BPS8|COL80|VERTFLAG,640,400,8,SDL_FALSE},
-	{BPS8|COL80,640,200,8,SDL_FALSE},
 	{BPS8|OVERSCAN|VERTFLAG,384,480,8,SDL_FALSE},
-	{BPS8|OVERSCAN,384,240,8,SDL_FALSE},
+	{BPS8|COL80|VERTFLAG,640,400,8,SDL_FALSE},
 	{BPS8|VERTFLAG,320,400,8,SDL_FALSE},
+	{BPS8|COL80|OVERSCAN,768,240,8,SDL_FALSE},
+	{BPS8|OVERSCAN,384,240,8,SDL_FALSE},
+	{BPS8|COL80,640,200,8,SDL_FALSE},
 	{BPS8,320,200,8,SDL_FALSE}
 };
 
@@ -118,8 +131,8 @@ static xbiosmode_t xbiosmodelist_f30vga[]={
 	{BPS16|VERTFLAG,320,240,16,SDL_FALSE},
 
 	{BPS8|COL80,640,480,8,SDL_FALSE},	
-	{BPS8|COL80|VERTFLAG,640,240,8,SDL_FALSE},
 	{BPS8,320,480,8,SDL_FALSE},
+	{BPS8|COL80|VERTFLAG,640,240,8,SDL_FALSE},
 	{BPS8|VERTFLAG,320,240,8,SDL_FALSE}
 };
 
@@ -205,6 +218,15 @@ static SDL_VideoDevice *XBIOS_CreateDevice(int devindex)
 	device->UnlockHWSurface = XBIOS_UnlockHWSurface;
 	device->FlipHWSurface = XBIOS_FlipHWSurface;
 	device->FreeHWSurface = XBIOS_FreeHWSurface;
+
+#ifdef HAVE_OPENGL
+	/* OpenGL functions */
+	device->GL_LoadLibrary = XBIOS_GL_LoadLibrary;
+	device->GL_GetProcAddress = XBIOS_GL_GetProcAddress;
+	device->GL_GetAttribute = XBIOS_GL_GetAttribute;
+	device->GL_MakeCurrent = XBIOS_GL_MakeCurrent;
+	device->GL_SwapBuffers = XBIOS_GL_SwapBuffers;
+#endif
 
 	/* Events */
 	device->InitOSKeymap = Atari_InitOSKeymap;
@@ -393,6 +415,10 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	/* Init chunky to planar routine */
 	SDL_Atari_C2pConvert = SDL_Atari_C2pConvert8;
 
+#ifdef HAVE_OPENGL
+	this->gl_config.driver_loaded = 1;
+#endif
+
 	/* We're done! */
 	return(0);
 }
@@ -411,6 +437,14 @@ static SDL_Rect **XBIOS_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
 static void XBIOS_FreeBuffers(_THIS)
 {
 	int i;
+
+#ifdef HAVE_OPENGL
+	/* Shutdown OpenGL context */
+	if (XBIOS_ctx) {
+		OSMesaDestroyContext(XBIOS_ctx);
+		XBIOS_ctx = NULL;
+	}
+#endif
 
 	for (i=0;i<2;i++) {
 		if (XBIOS_screensmem[i]!=NULL) {
@@ -503,6 +537,14 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 
 	XBIOS_screens[0]=(void *) (( (long) XBIOS_screensmem[0]+256) & 0xFFFFFF00UL);
 
+#ifdef HAVE_OPENGL
+	if (flags & SDL_OPENGL) {
+		if (this->gl_config.double_buffer) {
+			flags |= SDL_DOUBLEBUF;
+		}
+	}
+#endif
+
 	/* Double buffer ? */
 	if (flags & SDL_DOUBLEBUF) {
 		XBIOS_screensmem[1] = Atari_SysMalloc(new_screen_size, MX_STRAM);
@@ -525,7 +567,6 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 		return(NULL);
 	}
 
-	current->flags = modeflags;
 	current->w = XBIOS_width = width;
 	current->h = XBIOS_height = height;
 	current->pitch = (width * new_depth)>>3;
@@ -539,6 +580,33 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 		current->pixels = XBIOS_screens[0];
 
 	XBIOS_fbnum = 0;
+
+#ifdef HAVE_OPENGL
+	if (flags & SDL_OPENGL) {
+		GLenum format;
+
+		/* Init OpenGL context using OSMesa */
+		if (new_depth == 8) {
+			format = OSMESA_COLOR_INDEX;
+		} else {
+			format = OSMESA_RGB_565;
+		}
+
+		XBIOS_ctx = OSMesaCreateContextExt( format, this->gl_config.depth_size,
+			this->gl_config.stencil_size, this->gl_config.accum_red_size +
+			this->gl_config.accum_green_size + this->gl_config.accum_blue_size +
+			this->gl_config.accum_alpha_size, NULL );
+		if (!XBIOS_ctx) {
+			XBIOS_FreeBuffers(this);
+			SDL_SetError("OSMesaCreateContext failed");
+			return(NULL);
+		}
+
+		modeflags |= SDL_OPENGL;
+	}
+#endif
+
+	current->flags = modeflags;
 
 	/* Now set the video mode */
 #ifndef DEBUG_VIDEO_XBIOS
@@ -698,13 +766,6 @@ static int XBIOS_FlipHWSurface(_THIS, SDL_Surface *surface)
 		destscr += destx;
 
 		/* Convert chunky to planar screen */
-#ifdef DEBUG_VIDEO_XBIOS
-		printf("C2p:\n");
-		printf(" Source: Adr=0x%08x, Pitch=%d\n", surface->pixels, surface->pitch);
-		printf(" Dest: Adr=0x%08x, Pitch=%d\n", destscr, XBIOS_pitch);
-		printf(" Size: %dx%d, dblline=%d\n", surface->w, surface->h, XBIOS_doubleline);
-		fflush(stdout);
-#endif
 		SDL_Atari_C2pConvert(
 			surface->pixels,
 			destscr,
@@ -835,3 +896,113 @@ static void XBIOS_VideoQuit(_THIS)
 
 	this->screen->pixels = NULL;	
 }
+
+#ifdef HAVE_OPENGL
+
+/* OpenGL functions */
+static int XBIOS_GL_LoadLibrary(_THIS, const char *path)
+{
+	/* Library is always opened */
+	this->gl_config.driver_loaded = 1;
+
+	return 0;
+}
+
+static void *XBIOS_GL_GetProcAddress(_THIS, const char *proc)
+{
+	void *func = NULL;
+
+	if (XBIOS_ctx != NULL) {
+		func = OSMesaGetProcAddress(proc);
+	}
+
+	return func;
+}
+
+static int XBIOS_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
+{
+	GLenum mesa_attrib;
+	SDL_Surface *surface;
+
+	if (XBIOS_ctx == NULL) {
+		return -1;
+	}
+
+	switch(attrib) {
+		case SDL_GL_RED_SIZE:
+			mesa_attrib = GL_RED_BITS;
+			break;
+		case SDL_GL_GREEN_SIZE:
+			mesa_attrib = GL_GREEN_BITS;
+			break;
+		case SDL_GL_BLUE_SIZE:
+			mesa_attrib = GL_BLUE_BITS;
+			break;
+		case SDL_GL_ALPHA_SIZE:
+			mesa_attrib = GL_ALPHA_BITS;
+			break;
+		case SDL_GL_DOUBLEBUFFER:
+			surface = this->screen;
+			*value = ((surface->flags & SDL_DOUBLEBUF)==SDL_DOUBLEBUF);
+			return 0;
+		case SDL_GL_DEPTH_SIZE:
+			mesa_attrib = GL_DEPTH_BITS;
+			break;
+		case SDL_GL_STENCIL_SIZE:
+			mesa_attrib = GL_STENCIL_BITS;
+			break;
+		case SDL_GL_ACCUM_RED_SIZE:
+			mesa_attrib = GL_ACCUM_RED_BITS;
+			break;
+		case SDL_GL_ACCUM_GREEN_SIZE:
+			mesa_attrib = GL_ACCUM_GREEN_BITS;
+			break;
+		case SDL_GL_ACCUM_BLUE_SIZE:
+			mesa_attrib = GL_ACCUM_BLUE_BITS;
+			break;
+		case SDL_GL_ACCUM_ALPHA_SIZE:
+			mesa_attrib = GL_ACCUM_ALPHA_BITS;
+			break;
+		default :
+			return -1;
+	}
+
+	glGetIntegerv(mesa_attrib, value);
+	return 0;
+}
+
+static int XBIOS_GL_MakeCurrent(_THIS)
+{
+	SDL_Surface *surface;
+	GLenum type;
+
+	if (XBIOS_ctx == NULL) {
+		return -1;
+	}
+
+	surface = this->screen;
+	if ((surface->format->BitsPerPixel) == 8) {
+		type = GL_UNSIGNED_BYTE;
+	} else {
+		type = GL_UNSIGNED_SHORT_5_6_5;
+	}
+
+	if (!OSMesaMakeCurrent(XBIOS_ctx, surface->pixels, type, surface->w, surface->h)) {
+		SDL_SetError("Can not make OpenGL context current");
+		return -1;
+	}
+
+	return 0;
+}
+
+static void XBIOS_GL_SwapBuffers(_THIS)
+{
+	if (XBIOS_ctx == NULL) {
+		return;
+	}
+
+	XBIOS_FlipHWSurface(this, this->screen);
+	XBIOS_GL_MakeCurrent(this);
+}
+
+#endif

@@ -1129,6 +1129,19 @@ CheckMacGL()
     fi
 }
 
+dnl Check for Mesa offscreen rendering
+CheckOSMesa()
+{
+    if test x$enable_video = xyes -a x$enable_video_opengl = xyes; then
+        AC_CHECK_HEADER(GL/osmesa.h, have_osmesa_hdr=yes)
+        AC_CHECK_LIB(OSMesa, OSMesaCreateContext, have_osmesa_lib=yes, have_osmesa_lib=no, -lm)
+        if test x$have_osmesa_hdr = xyes -a x$have_osmesa_lib = xyes; then
+    	    CFLAGS="$CFLAGS -DHAVE_OPENGL"
+			SYSTEM_LIBS="$SYSTEM_LIBS -lOSMesa"
+        fi
+    fi
+}
+
 dnl See if we can use the new unified event interface in Linux 2.4
 CheckInputEvents()
 {
@@ -2572,6 +2585,7 @@ case "$target" in
         CheckAtariAudio
         CheckAtariLdg
         CheckPTH
+		CheckOSMesa
         # Set up files for the audio library
         if test x$enable_threads = xyes -a x$enable_pth = xyes; then
             if test x$enable_audio = xyes; then
