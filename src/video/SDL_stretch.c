@@ -181,6 +181,8 @@ void copy_row3(Uint8 *src, int src_w, Uint8 *dst, int dst_w)
 int SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect,
                     SDL_Surface *dst, SDL_Rect *dstrect)
 {
+	int src_locked;
+	int dst_locked;
 	int pos, inc;
 	int dst_width;
 	int dst_maxrow;
@@ -227,6 +229,28 @@ int SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect,
 		full_dst.w = dst->w;
 		full_dst.h = dst->h;
 		dstrect = &full_dst;
+	}
+
+	/* Lock the destination if it's in hardware */
+	dst_locked = 0;
+	if ( SDL_MUSTLOCK(dst) ) {
+		if ( SDL_LockSurface(dst) < 0 ) {
+			SDL_SetError("Unable to lock destination surface");
+			return(-1);
+		}
+		dst_locked = 1;
+	}
+	/* Lock the source if it's in hardware */
+	src_locked = 0;
+	if ( SDL_MUSTLOCK(src) ) {
+		if ( SDL_LockSurface(src) < 0 ) {
+			if ( dst_locked ) {
+				SDL_UnlockSurface(dst);
+			}
+			SDL_SetError("Unable to lock source surface");
+			return(-1);
+		}
+		src_locked = 1;
 	}
 
 	/* Set up the data... */
@@ -306,6 +330,14 @@ int SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect,
 		}
 #endif
 		pos += inc;
+	}
+
+	/* We need to unlock the surfaces if they're locked */
+	if ( dst_locked ) {
+		SDL_UnlockSurface(dst);
+	}
+	if ( src_locked ) {
+		SDL_UnlockSurface(src);
 	}
 	return(0);
 }
