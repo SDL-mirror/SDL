@@ -28,6 +28,7 @@ static char rcsid =
 #endif
 
 /* Allow access to a raw mixing buffer (For IRIX 6.5 and higher) */
+/* patch for IRIX 5 by Georg Schwarz 18/07/2004 */
 
 #include <stdlib.h>
 
@@ -38,6 +39,19 @@ static char rcsid =
 #include "SDL_audio_c.h"
 #include "SDL_irixaudio.h"
 
+
+#ifndef AL_RESOURCE /* as a test whether we use the old IRIX audio libraries */
+#define OLD_IRIX_AUDIO
+#define alClosePort(x) ALcloseport(x)
+#define alFreeConfig(x) ALfreeconfig(x)
+#define alGetFillable(x) ALgetfillable(x)
+#define alNewConfig() ALnewconfig()
+#define alOpenPort(x,y,z) ALopenport(x,y,z)
+#define alSetChannels(x,y) ALsetchannels(x,y)
+#define alSetQueueSize(x,y) ALsetqueuesize(x,y)
+#define alSetSampFmt(x,y) ALsetsampfmt(x,y)
+#define alSetWidth(x,y) ALsetwidth(x,y)
+#endif
 
 /* Audio driver functions */
 static int AL_OpenAudio(_THIS, SDL_AudioSpec *spec);
@@ -137,7 +151,11 @@ static void AL_CloseAudio(_THIS)
 static int AL_OpenAudio(_THIS, SDL_AudioSpec *spec)
 {
 	ALconfig audio_config;
+#ifdef OLD_IRIX_AUDIO
+	long audio_param[2];
+#else
 	ALpv audio_param;
+#endif
 	int width;
 
 	/* Determine the audio parameters from the AudioSpec */
@@ -165,9 +183,15 @@ static int AL_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	SDL_CalculateAudioSpec(spec);
 
 	/* Set output frequency */
+#ifdef OLD_IRIX_AUDIO
+	audio_param[0] = AL_OUTPUT_RATE;
+	audio_param[1] = spec->freq;
+	if( ALsetparams(AL_DEFAULT_DEVICE, audio_param, 2) < 0 ) {
+#else
 	audio_param.param = AL_RATE;
 	audio_param.value.i = spec->freq;
 	if( alSetParams(AL_DEFAULT_OUTPUT, &audio_param, 1) < 0 ) {
+#endif
 		SDL_SetError("alSetParams failed");
 		return(-1);
 	}
