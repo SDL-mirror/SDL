@@ -295,6 +295,11 @@ void SDL_WarpMouse (Uint16 x, Uint16 y)
 	SDL_VideoDevice *video = current_video;
 	SDL_VideoDevice *this  = current_video;
 
+	if ( !video || !SDL_PublicSurface ) {
+		SDL_SetError("A video mode must be set before warping mouse");
+		return;
+	}
+
 	/* If we have an offset video mode, offset the mouse coordinates */
 	x += (this->screen->offset % this->screen->pitch) /
 	      this->screen->format->BytesPerPixel;
