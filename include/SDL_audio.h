@@ -50,7 +50,7 @@ typedef struct {
 	Uint16 format;		/* Audio data format */
 	Uint8  channels;	/* Number of channels: 1 mono, 2 stereo */
 	Uint8  silence;		/* Audio buffer silence value (calculated) */
-	Uint16 samples;		/* Audio buffer size in samples */
+	Uint16 samples;		/* Audio buffer size in samples (power of 2) */
 	Uint16 padding;		/* Necessary for some compile environments */
 	Uint32 size;		/* Audio buffer size in bytes (calculated) */
 	/* This function is called when the audio device needs more data.
