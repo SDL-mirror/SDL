@@ -28,6 +28,9 @@ static char rcsid =
 #ifdef HAVE_OPENGL
 #include <GL/glx.h>
 #include <dlfcn.h>
+#if defined(__OpenBSD__) && !defined(__ELF__)
+#define dlsym(x,y) dlsym(x, "_" y)
+#endif
 #endif
 #include "SDL_sysvideo.h"
 

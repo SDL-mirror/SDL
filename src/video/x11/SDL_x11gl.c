@@ -393,7 +393,9 @@ int X11_GL_LoadLibrary(_THIS, const char* path)
 
 void *X11_GL_GetProcAddress(_THIS, const char* proc)
 {
+	static char procname[1024];
 	void* handle;
+	void* retval;
 	
 	handle = this->gl_config.dll_handle;
 #if 0 /* This doesn't work correctly yet */
@@ -407,7 +409,16 @@ fprintf(stderr, "glXGetProcAddress returned %p and dlsym returned %p for %s\n", 
         return this->gl_data->glXGetProcAddress(proc);
 	}
 #endif
-	return dlsym(handle, proc);
+#if defined(__OpenBSD__) && !defined(__ELF__)
+#undef dlsym(x,y);
+#endif
+	retval = dlsym(handle, proc);
+	if (!retval && strlen(proc) <= 1022) {
+		procname[0] = "_";
+		strcpy(procname + 1, proc);
+		retval = dlsym(handle, procname);
+	}
+	return retval;
 }
 
 #endif /* HAVE_OPENGL */
