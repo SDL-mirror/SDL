@@ -5,7 +5,7 @@
  * (FYI it was supposed to look like snow in the wind or something...)
  *
  * Compile with :
- * gcc testdyngl.c `sdl-config --libs --cflags` -o testdyngl
+ * gcc testdyngl.c `sdl-config --libs --cflags` -o testdyngl -DHAVE_OPENGL
  *
  * You can specify a different OpenGL lib on the command line, i.e. :
  * ./testdyngl  /usr/X11R6/lib/libGL.so.1.2
