@@ -141,6 +141,7 @@ static int DX5_DInputInit(_THIS)
 	LPDIRECTINPUTDEVICE device;
 	HRESULT     result;
 	DIPROPDWORD dipdw;
+	HWND        topwnd;
 
 	/* Create the DirectInput object */
 	result = DInputCreate(SDL_Instance, DIRECTINPUT_VERSION,
@@ -167,8 +168,9 @@ static int DX5_DInputInit(_THIS)
 			SetDIerror("DirectInputDevice::QueryInterface", result);
 			return(-1);
 		}
+		topwnd =  GetAncestor(SDL_Window, GA_ROOT);
 		result = IDirectInputDevice2_SetCooperativeLevel(SDL_DIdev[i],
-					SDL_Window, inputs[i].win_level);
+					topwnd, inputs[i].win_level);
 		if ( result != DI_OK ) {
 			SetDIerror("DirectInputDevice::SetCooperativeLevel",
 									result);
@@ -640,6 +642,7 @@ void DX5_DInputReset(_THIS, int fullscreen)
 	DWORD level;
 	int i;
 	HRESULT result;
+	HWND topwnd;
 
 	for ( i=0; i<MAX_INPUTS; ++i ) {
 		if ( SDL_DIdev[i] != NULL ) {
@@ -649,8 +652,9 @@ void DX5_DInputReset(_THIS, int fullscreen)
 				level = inputs[i].win_level;
 			}
 			IDirectInputDevice2_Unacquire(SDL_DIdev[i]);
+			topwnd = GetAncestor(SDL_Window, GA_ROOT);
 			result = IDirectInputDevice2_SetCooperativeLevel(
-					SDL_DIdev[i], SDL_Window, level);
+					SDL_DIdev[i], topwnd, level);
 			IDirectInputDevice2_Acquire(SDL_DIdev[i]);
 			if ( result != DI_OK ) {
 				SetDIerror(
