@@ -40,8 +40,13 @@ static char rcsid =
 #include "SDL_x11modes_c.h"
 #include "SDL_x11wm_c.h"
 
-/* This is necessary for working properly with Enlightenment, etc. */
-#define USE_ICON_WINDOW
+static Uint8 reverse_byte(Uint8 x)
+{
+	x = (x & 0xaa) >> 1 | (x & 0x55) << 1;
+	x = (x & 0xcc) >> 2 | (x & 0x33) << 2;
+	x = (x & 0xf0) >> 4 | (x & 0x0f) << 4;
+	return x;
+}
 
 void X11_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 {
@@ -50,46 +55,123 @@ void X11_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 	XImage *icon_image;
 	Pixmap icon_pixmap;
 	Pixmap mask_pixmap;
-#ifdef USE_ICON_WINDOW
-	Window icon_window;
-#endif
-	GC GC;
+	Window icon_window = None;
+	GC gc;
 	XGCValues GCvalues;
-	int i, b, dbpp;
+	int i, dbpp;
 	SDL_Rect bounds;
-	Uint8 *LSBmask, *color_tried;
+	Uint8 *LSBmask;
 	Visual *dvis;
+	char *p;
+	int masksize;
 
-	/* Lock the event thread, in multi-threading environments */
 	SDL_Lock_EventThread();
 
 	/* The icon must use the default visual, depth and colormap of the
 	   screen, so it might need a conversion */
-	dbpp = DefaultDepth(SDL_Display, SDL_Screen);
-	switch(dbpp) {
-	case 15:
-	    dbpp = 16; break;
-	case 24:
-	    dbpp = 32; break;
-	}
 	dvis = DefaultVisual(SDL_Display, SDL_Screen);
+	dbpp = DefaultDepth(SDL_Display, SDL_Screen);
+	for(i = 0; i < this->hidden->nvisuals; i++) {
+		if(this->hidden->visuals[i].visual == dvis) {
+			dbpp = this->hidden->visuals[i].bpp;
+			break;
+		}
+	}
 
 	/* The Visual struct is supposed to be opaque but we cheat a little */
 	sicon = SDL_CreateRGBSurface(SDL_SWSURFACE, icon->w, icon->h,
 				     dbpp,
 				     dvis->red_mask, dvis->green_mask,
 				     dvis->blue_mask, 0);
-
-	if ( sicon == NULL ) {
+	if ( sicon == NULL )
 		goto done;
-	}
-	/* If we already have allocated colours from the default colormap,
-	   copy them */
-	if(SDL_Visual == dvis && SDL_XColorMap == SDL_DisplayColormap
-	   && this->screen->format->palette && sicon->format->palette) {
-	    memcpy(sicon->format->palette->colors,
-		   this->screen->format->palette->colors,
-		   this->screen->format->palette->ncolors * sizeof(SDL_Color));
+
+	if(dbpp == 8) {
+		/* Default visual is 8bit; we need to allocate colours from
+		   the default colormap */
+		SDL_Color want[256], got[256];
+		int nwant;
+		Colormap dcmap;
+		int missing;
+		dcmap = DefaultColormap(SDL_Display, SDL_Screen);
+		if(icon->format->palette) {
+			/* The icon has a palette as well - we just have to
+			   find those colours */
+			nwant = icon->format->palette->ncolors;
+			memcpy(want, icon->format->palette->colors,
+			       nwant * sizeof want[0]);
+		} else {
+			/* try the standard 6x6x6 cube for lack of better
+			   ideas */
+			int r, g, b, i;
+			for(r = i = 0; r < 256; r += 0x33)
+				for(g = 0; g < 256; g += 0x33)
+					for(b = 0; b < 256; b += 0x33, i++) {
+						want[i].r = r;
+						want[i].g = g;
+						want[i].b = b;
+					}
+			nwant = 216;
+		}
+		if(SDL_iconcolors) {
+			/* free already allocated colours first */
+			unsigned long freelist[512];
+			int nfree = 0;
+			for(i = 0; i < 256; i++) {
+				while(SDL_iconcolors[i]) {
+					freelist[nfree++] = i;
+					SDL_iconcolors[i]--;
+				}
+			}
+			XFreeColors(GFX_Display, dcmap, freelist, nfree, 0);
+		}
+		if(!SDL_iconcolors)
+			SDL_iconcolors = malloc(256 * sizeof *SDL_iconcolors);
+		memset(SDL_iconcolors, 0, 256 * sizeof *SDL_iconcolors);
+
+		/* try to allocate the colours */
+		memset(got, 0, sizeof got);
+		missing = 0;
+		for(i = 0; i < nwant; i++) {
+			XColor c;
+			c.red = want[i].r << 8;
+			c.green = want[i].g << 8;
+			c.blue = want[i].b << 8;
+			c.flags = DoRed | DoGreen | DoBlue;
+			if(XAllocColor(GFX_Display, dcmap, &c)) {
+				/* got the colour */
+				SDL_iconcolors[c.pixel]++;
+				got[c.pixel] = want[i];
+			} else {
+				missing = 1;
+			}
+		}
+		if(missing) {
+			/* Some colours were apparently missing, so we just
+			   allocate all the rest as well */
+			XColor cols[256];
+			for(i = 0; i < 256; i++)
+				cols[i].pixel = i;
+			XQueryColors(GFX_Display, dcmap, cols, 256);
+			for(i = 0; i < 256; i++) {
+				got[i].r = cols[i].red >> 8;
+				got[i].g = cols[i].green >> 8;
+				got[i].b = cols[i].blue >> 8;
+				if(!SDL_iconcolors[i]) {
+					if(XAllocColor(GFX_Display, dcmap,
+							cols + i)) {
+						SDL_iconcolors[i] = 1;
+					} else {
+						/* index not available */
+						got[i].r = 0;
+						got[i].g = 0;
+						got[i].b = 0;
+					}
+				}
+			}
+		}
+
+		SDL_SetColors(sicon, got, 0, 256);
 	}
 
 	bounds.x = 0;
@@ -99,110 +181,68 @@ void X11_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 	if ( SDL_LowerBlit(icon, &bounds, sicon, &bounds) < 0 )
 		goto done;
 
-	/* Lock down the colors used in the colormap */
-	color_tried = NULL;
-	if ( sicon->format->BitsPerPixel == 8 ) {
-		SDL_Palette *palette;
-		Uint8 *p;
-		XColor wanted;
-
-		palette = sicon->format->palette;
-		color_tried = malloc(palette->ncolors);
-		if ( color_tried == NULL ) {
-			goto done;
-		}
-		if ( SDL_iconcolors != NULL ) {
-			free(SDL_iconcolors);
-		}
-		SDL_iconcolors = malloc(palette->ncolors
-					* sizeof(*SDL_iconcolors));
-		if ( SDL_iconcolors == NULL ) {
-			free(color_tried);
-			goto done;
-		}
-		memset(color_tried, 0, palette->ncolors);
-		memset(SDL_iconcolors, 0,
-		       palette->ncolors * sizeof(*SDL_iconcolors));
-
-		p = (Uint8 *)sicon->pixels; 
-		for ( i = sicon->w*sicon->h; i > 0; --i, ++p ) {
-			if ( ! color_tried[*p] ) {
-				wanted.pixel = *p;
-				wanted.red   = (palette->colors[*p].r<<8);
-				wanted.green = (palette->colors[*p].g<<8);
-				wanted.blue  = (palette->colors[*p].b<<8);
-				wanted.flags = (DoRed|DoGreen|DoBlue);
-				if (XAllocColor(SDL_Display,
-						SDL_DisplayColormap, &wanted)) {
-					++SDL_iconcolors[wanted.pixel];
-				}
-				color_tried[*p] = 1;
-			}
-		}
-	}
-	if ( color_tried != NULL ) {
-		free(color_tried);
-	}
-
-	/* Translate mask data to LSB order and set the icon mask */
-	i = (sicon->w/8)*sicon->h;
-	LSBmask = (Uint8 *)malloc(i);
+	/* We need the mask as given, except in LSBfirst format instead of
+	   MSBfirst. Reverse the bits in each byte. */
+	masksize = ((sicon->w + 7) >> 3) * sicon->h;
+	LSBmask = malloc(masksize);
 	if ( LSBmask == NULL ) {
 		goto done;
 	}
-	memset(LSBmask, 0, i);
-	while ( --i >= 0 ) {
-		for ( b=0; b<8; ++b )
-			LSBmask[i] |= (((mask[i]>>b)&0x01)<<(7-b));
-	}
+	memset(LSBmask, 0, masksize);
+	for(i = 0; i < masksize; i++)
+		LSBmask[i] = reverse_byte(mask[i]);
 	mask_pixmap = XCreatePixmapFromBitmapData(SDL_Display, WMwindow,
-		          (char *)LSBmask, sicon->w, sicon->h, 1L, 0L, 1);
+						  (char *)LSBmask,
+						  sicon->w, sicon->h,
+						  1L, 0L, 1);
 
 	/* Transfer the image to an X11 pixmap */
 	icon_image = XCreateImage(SDL_Display,
-			DefaultVisual(SDL_Display, SDL_Screen),
-			DefaultDepth(SDL_Display, SDL_Screen),
-			ZPixmap, 0, (char *)sicon->pixels, sicon->w, sicon->h,
-			((sicon->format)->BytesPerPixel == 3) ? 32 :
-				(sicon->format)->BytesPerPixel*8, 0);
+				  DefaultVisual(SDL_Display, SDL_Screen),
+				  DefaultDepth(SDL_Display, SDL_Screen),
+				  ZPixmap, 0, sicon->pixels,
+				  sicon->w, sicon->h,
+				  32, 0);
 	icon_pixmap = XCreatePixmap(SDL_Display, SDL_Root, sicon->w, sicon->h,
-			DefaultDepth(SDL_Display, SDL_Screen));
-	GC = XCreateGC(SDL_Display, icon_pixmap, 0, &GCvalues);
-	XPutImage(SDL_Display, icon_pixmap, GC, icon_image,
-					0, 0, 0, 0, sicon->w, sicon->h);
-	XFreeGC(SDL_Display, GC);
+				    DefaultDepth(SDL_Display, SDL_Screen));
+	gc = XCreateGC(SDL_Display, icon_pixmap, 0, &GCvalues);
+	XPutImage(SDL_Display, icon_pixmap, gc, icon_image,
+		  0, 0, 0, 0, sicon->w, sicon->h);
+	XFreeGC(SDL_Display, gc);
 	XDestroyImage(icon_image);
 	free(LSBmask);
 	sicon->pixels = NULL;
 
-#ifdef USE_ICON_WINDOW
-	/* Create an icon window and set the pixmap as its background */
-	icon_window = XCreateSimpleWindow(SDL_Display, SDL_Root,
-					0, 0, sicon->w, sicon->h, 0,
-					CopyFromParent, CopyFromParent);
-	XSetWindowBackgroundPixmap(SDL_Display, icon_window, icon_pixmap);
-	XClearWindow(SDL_Display, icon_window);
-#endif
+	/* Some buggy window managers (some versions of Enlightenment, it
+	   seems) need an icon window *and* icon pixmap to work properly, while
+	   it screws up others. The default is only to use a pixmap. */
+	p = getenv("SDL_VIDEO_X11_ICONWIN");
+	if(p && *p) {
+		icon_window = XCreateSimpleWindow(SDL_Display, SDL_Root,
+						  0, 0, sicon->w, sicon->h, 0,
+						  CopyFromParent,
+						  CopyFromParent);
+		XSetWindowBackgroundPixmap(SDL_Display, icon_window,
+					   icon_pixmap);
+		XClearWindow(SDL_Display, icon_window);
+	}
 
 	/* Set the window icon to the icon pixmap (and icon window) */
 	wmhints = XAllocWMHints();
 	wmhints->flags = (IconPixmapHint | IconMaskHint);
 	wmhints->icon_pixmap = icon_pixmap;
 	wmhints->icon_mask = mask_pixmap;
-#ifdef USE_ICON_WINDOW
-	wmhints->flags |= IconWindowHint;
-	wmhints->icon_window = icon_window;
-#endif
+	if(icon_window != None) {
+		wmhints->flags |= IconWindowHint;
+		wmhints->icon_window = icon_window;
+	}
 	XSetWMHints(SDL_Display, WMwindow, wmhints);
 	XFree(wmhints);
 	XSync(SDL_Display, False);
 
   done:
 	SDL_Unlock_EventThread();
-	if ( sicon != NULL ) {
-		SDL_FreeSurface(sicon);
-	}
-	return;
+	SDL_FreeSurface(sicon);
 }
 
 void X11_SetCaption(_THIS, const char *title, const char *icon)
@@ -241,7 +281,7 @@ int X11_IconifyWindow(_THIS)
 
 SDL_GrabMode X11_GrabInputNoLock(_THIS, SDL_GrabMode mode)
 {
-	int numtries, result;
+	int result;
 
 	if ( this->screen == NULL ) {
 		return(SDL_GRAB_OFF);
