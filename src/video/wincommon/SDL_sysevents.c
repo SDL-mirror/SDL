@@ -504,13 +504,13 @@ LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 }
 
 /* Allow the application handle to be stored and retrieved later */
-static HMODULE SDL_handle = NULL;
+static void *SDL_handle = NULL;
 
-void SDL_SetModuleHandle(HMODULE handle)
+void SDL_SetModuleHandle(void *handle)
 {
 	SDL_handle = handle;
 }
-HMODULE SDL_GetModuleHandle(void)
+void *SDL_GetModuleHandle(void)
 {
 	void *handle;
 
@@ -531,7 +531,7 @@ HMODULE SDL_GetModuleHandle(void)
 const char *SDL_windowid = NULL;
 
 /* Register the class for this application -- exported for winmain.c */
-int SDL_RegisterApp(char *name, Uint32 style, HMODULE hInst)
+int SDL_RegisterApp(char *name, Uint32 style, void *hInst)
 {
 	static int initialized = 0;
 	WNDCLASS class;
@@ -571,7 +571,7 @@ int SDL_RegisterApp(char *name, Uint32 style, HMODULE hInst)
 	class.lpszClassName	= name;
 #endif /* _WIN32_WCE */
 	class.hbrBackground	= NULL;
-	class.hInstance		= hInst ? hInst : GetModuleHandle(0);
+	class.hInstance		= hInst;
 	class.style		= style;
 #ifdef HAVE_OPENGL
 	class.style		|= CS_OWNDC;

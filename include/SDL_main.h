@@ -64,9 +64,9 @@ extern "C" {
 #endif
 
 /* This should be called from your WinMain() function, if any */
-extern DECLSPEC void SDL_SetModuleHandle(HMODULE hInst);
+extern DECLSPEC void SDL_SetModuleHandle(void *hInst);
 /* This can also be called, but is no longer necessary */
-extern DECLSPEC int SDL_RegisterApp(char *name, Uint32 style, HMODULE hInst);
+extern DECLSPEC int SDL_RegisterApp(char *name, Uint32 style, void *hInst);
 
 #ifdef __cplusplus
 }

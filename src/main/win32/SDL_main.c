@@ -199,16 +199,25 @@ int console_main(int argc, char *argv[])
 	atexit(SDL_Quit);
 
 #ifndef DISABLE_VIDEO
+#if 0
 	/* Create and register our class *
-      DJM: If we do this here, the user nevers gets a chance to
-      putenv(SDL_WINDOWID).  This is already called later by
-      the (DIB|DX5)_CreateWindow function, so it should be
-      safe to comment it out here.
+	   DJM: If we do this here, the user nevers gets a chance to
+	   putenv(SDL_WINDOWID).  This is already called later by
+	   the (DIB|DX5)_CreateWindow function, so it should be
+	   safe to comment it out here.
 	if ( SDL_RegisterApp(appname, CS_BYTEALIGNCLIENT, 
 	                     GetModuleHandle(NULL)) < 0 ) {
 		ShowError("WinMain() error", SDL_GetError());
 		exit(1);
 	}*/
+#else
+	/* Sam:
+	   We still need to pass in the application handle so that
+	   DirectInput will initialize properly when SDL_RegisterApp()
+	   is called later in the video initialization.
+	 */
+	SDL_SetModuleHandle(GetModuleHandle(NULL));
+#endif /* 0 */
 #endif /* !DISABLE_VIDEO */
 
 	/* Run the application main() code */
