@@ -43,7 +43,7 @@ struct SDL_PrivateVideoData
 
   IDirectFB             *dfb;
   IDirectFBDisplayLayer *layer;
-  IDirectFBInputBuffer  *inputbuffer;
+  IDirectFBEventBuffer  *eventbuffer;
 
 #define NUM_MODELISTS	4		/* 8, 16, 24, and 32 bits-per-pixel */
   int SDL_nummodes[NUM_MODELISTS];

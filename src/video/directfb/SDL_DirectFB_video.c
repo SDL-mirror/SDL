@@ -304,7 +304,7 @@ int DirectFB_VideoInit(_THIS, SDL_PixelFormat *vformat)
   DFBCardCapabilities    caps;
   IDirectFBDisplayLayer *layer;
   DFBDisplayLayerConfig  dlc;
-  IDirectFBInputBuffer  *inputbuffer;
+  IDirectFBEventBuffer  *eventbuffer;
 
 
   ret = DirectFBInit (NULL, NULL);
@@ -329,11 +329,10 @@ int DirectFB_VideoInit(_THIS, SDL_PixelFormat *vformat)
       return -1;
     }
 
-  ret = dfb->CreateInputBuffer (dfb, DICAPS_BUTTONS | DICAPS_AXIS | DICAPS_KEYS,
-                                &inputbuffer);
+  ret = dfb->CreateEventBuffer (dfb, DICAPS_ALL, &eventbuffer);
   if (ret)
     {
-      SetDirectFBerror ("dfb->CreateInputBuffer", ret);
+      SetDirectFBerror ("dfb->CreateEventBuffer", ret);
       layer->Release (layer);
       dfb->Release (dfb);
       return -1;
@@ -395,7 +394,7 @@ int DirectFB_VideoInit(_THIS, SDL_PixelFormat *vformat)
   HIDDEN->initialized = 1;
   HIDDEN->dfb         = dfb;
   HIDDEN->layer       = layer;
-  HIDDEN->inputbuffer = inputbuffer;
+  HIDDEN->eventbuffer = eventbuffer;
 
   return 0;
 }
@@ -691,34 +690,48 @@ static void DirectFB_DirectUpdate(_THIS, int numrects, SDL_Rect *rects)
 
 static void DirectFB_WindowedUpdate(_THIS, int numrects, SDL_Rect *rects)
 {
+  DFBRegion         region;
+  int               i;
+  int               region_valid = 0;
   IDirectFBSurface *surface = this->screen->hwdata->surface;
-  DFBRegion region = { rects->x, rects->y,
-                       rects->x + rects->w - 1,
-                       rects->y + rects->h - 1 };
 
-  while (--numrects)
+  for (i=0; i<numrects; ++i)
     {
       int x2, y2;
 
-      rects++;
+      if ( ! rects[i].w ) /* Clipped? */
+        continue;
 
-      if (rects->x < region.x1)
-        region.x1 = rects->x;
+      x2 = rects[i].x + rects[i].w - 1;
+      y2 = rects[i].y + rects[i].h - 1;
 
-      if (rects->y < region.y1)
-        region.y1 = rects->y;
+      if (region_valid)
+        {
+          if (rects[i].x < region.x1)
+            region.x1 = rects[i].x;
 
-      x2 = rects->x + rects->w - 1;
-      y2 = rects->y + rects->h - 1;
+          if (rects[i].y < region.y1)
+            region.y1 = rects[i].y;
 
-      if (x2 > region.x2)
-        region.x2 = x2;
+          if (x2 > region.x2)
+            region.x2 = x2;
 
-      if (y2 > region.y2)
-        region.y2 = y2;
+          if (y2 > region.y2)
+            region.y2 = y2;
+        }
+      else
+        {
+            region.x1 = rects[i].x;
+            region.y1 = rects[i].y;
+            region.x2 = x2;
+            region.y2 = y2;
+
+            region_valid = 1;
+        }
     }
 
-  surface->Flip (surface, &region, DSFLIP_WAITFORSYNC);
+  if (region_valid)
+    surface->Flip (surface, &region, DSFLIP_WAITFORSYNC);
 }
 
 int DirectFB_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
@@ -731,7 +744,7 @@ void DirectFB_VideoQuit(_THIS)
 {
   int i, j;
 
-  HIDDEN->inputbuffer->Release (HIDDEN->inputbuffer);
+  HIDDEN->eventbuffer->Release (HIDDEN->eventbuffer);
   HIDDEN->layer->Release (HIDDEN->layer);
   HIDDEN->dfb->Release (HIDDEN->dfb);
 

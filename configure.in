@@ -748,7 +748,7 @@ CheckDirectFB()
                 AC_MSG_ERROR([*** pkg-config too old; version 0.5 or better required.])
             fi
 
-            DIRECTFB_REQUIRED_VERSION=0.9.8
+            DIRECTFB_REQUIRED_VERSION=0.9.9
 
             if $PKG_CONFIG --atleast-version $DIRECTFB_REQUIRED_VERSION directfb ; then
                 DIRECTFB_CFLAGS=`$PKG_CONFIG --cflags directfb`

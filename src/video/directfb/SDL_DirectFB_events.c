@@ -56,7 +56,8 @@ void DirectFB_PumpEvents (_THIS)
 {
   DFBInputEvent evt;
 
-  while (HIDDEN->inputbuffer->GetEvent (HIDDEN->inputbuffer, &evt) == DFB_OK)
+  while (HIDDEN->eventbuffer->GetEvent (HIDDEN->eventbuffer,
+                                        DFB_EVENT (&evt)) == DFB_OK)
     {
       SDL_keysym keysym;
 
