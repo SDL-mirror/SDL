@@ -60,10 +60,10 @@ void ConvertX86pI8_32();
 void ConvertX86pI8_24();
 void ConvertX86pI8_16();
 
-extern int32 ConvertX86p16_32RGB888_LUT_X86[512];
-extern int32 ConvertX86p16_32BGR888_LUT_X86[512];
-extern int32 ConvertX86p16_32RGBA888_LUT_X86[512];
-extern int32 ConvertX86p16_32BGRA888_LUT_X86[512];
+extern int ConvertX86p16_32RGB888_LUT_X86[512];
+extern int ConvertX86p16_32BGR888_LUT_X86[512];
+extern int ConvertX86p16_32RGBA888_LUT_X86[512];
+extern int ConvertX86p16_32BGRA888_LUT_X86[512];
   
 #ifdef __cplusplus
 }
@@ -124,10 +124,10 @@ extern int32 ConvertX86p16_32BGRA888_LUT_X86[512];
   void ConvertX86pI8_24() __attribute__ ((alias ("_ConvertX86pI8_24")));
   void ConvertX86pI8_16() __attribute__ ((alias ("_ConvertX86pI8_16")));
 
-  extern int32 ConvertX86p16_32RGB888_LUT_X86[512] __attribute__ ((alias ("_ConvertX86p16_32RGB888_LUT_X86")));
-  extern int32 ConvertX86p16_32BGR888_LUT_X86[512] __attribute__ ((alias ("_ConvertX86p16_32BGR888_LUT_X86")));
-  extern int32 ConvertX86p16_32RGBA888_LUT_X86[512] __attribute__ ((alias ("_ConvertX86p16_32RGBA888_LUT_X86")));
-  extern int32 ConvertX86p16_32BGRA888_LUT_X86[512] __attribute__ ((alias ("_ConvertX86p16_32BGRA888_LUT_X86")));
+  extern int ConvertX86p16_32RGB888_LUT_X86[512] __attribute__ ((alias ("_ConvertX86p16_32RGB888_LUT_X86")));
+  extern int ConvertX86p16_32BGR888_LUT_X86[512] __attribute__ ((alias ("_ConvertX86p16_32BGR888_LUT_X86")));
+  extern int ConvertX86p16_32RGBA888_LUT_X86[512] __attribute__ ((alias ("_ConvertX86p16_32RGBA888_LUT_X86")));
+  extern int ConvertX86p16_32BGRA888_LUT_X86[512] __attribute__ ((alias ("_ConvertX86p16_32BGRA888_LUT_X86")));
 #endif
 
   #ifdef __cplusplus

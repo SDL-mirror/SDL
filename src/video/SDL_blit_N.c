@@ -49,7 +49,6 @@ static char rcsid =
 #define HermesConverterInterface	SDL_BlitInfo
 #define HermesClearInterface		void
 #define STACKCALL
-typedef Uint32 int32;
 
 #include "HeadMMX.h"
 #include "HeadX86.h"

@@ -109,7 +109,6 @@ static char rcsid =
 #define HermesConverterInterface	void
 #define HermesClearInterface		void
 #define STACKCALL
-typedef Uint32 int32;
 
 #include "HeadX86.h"
 #endif
