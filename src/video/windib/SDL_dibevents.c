@@ -87,6 +87,26 @@ LONG
 						wParam = VK_LMENU;
 					break;
 			}
+#ifdef NO_GETKEYBOARDSTATE
+			/* this is the workaround for the missing ToAscii() and ToUnicode() in CE (not necessary at KEYUP!) */
+			if ( SDL_TranslateUNICODE ) {
+				MSG msg;
+
+				msg.hwnd = hwnd;
+				msg.message = msg;
+				msg.wParam = wParam;
+				msg.lParam = lParam;
+				msg.time = 0;
+				if ( TranslateMessage(&m) && PeekMessage(&msg, hwnd, 0, WM_USER, PM_NOREMOVE) && (m.message == WM_CHAR) ) {
+					GetMessage(&m, hwnd, 0, WM_USER);
+			    		wParam = m.wParam;
+				} else {
+					wParam = 0;
+				}
+			} else {
+				wParam = 0;
+			}
+#endif /* NO_GETKEYBOARDSTATE */
 			posted = SDL_PrivateKeyboard(SDL_PRESSED,
 				TranslateKey(wParam,HIWORD(lParam),&keysym,1));
 		}

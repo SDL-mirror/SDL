@@ -16,7 +16,9 @@
 #include "SDL.h"
 #include "SDL_main.h"
 #ifdef main
+#ifndef _WIN32_WCE_EMULATION
 #undef main
+#endif
 #endif
 
 /* Do we really not want stdio redirection with Windows CE? */
@@ -28,7 +30,7 @@
 #define STDOUT_FILE	TEXT("stdout.txt")
 #define STDERR_FILE	TEXT("stderr.txt")
 
-#ifdef _WIN32_WCE
+#if defined(_WIN32_WCE) && _WIN32_WCE < 300
 /* seems to be undefined in Win CE although in online help */
 #define isspace(a) (((CHAR)a == ' ') || ((CHAR)a == '\t'))
 
@@ -52,7 +54,7 @@ char *strrchr(char *str, int c)
 	}
 	return p;
 }
-#endif /* _WIN32_WCE */
+#endif /* _WIN32_WCE < 300 */
 
 /* Parse a command line buffer into arguments */
 static int ParseCommandLine(char *cmdline, char **argv)
@@ -274,7 +276,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 	nLen = wcslen(szCmdLine)+128+1;
 	bufp = (wchar_t *)alloca(nLen*2);
 	GetModuleFileName(NULL, bufp, 128);
-	wcsncpy(bufp+wcslen(bufp), szCmdLine,nLen);
+	wcsncpy(bufp+wcslen(bufp), szCmdLine,nLen-wcslen(bufp));
 	nLen = wcslen(bufp)+1;
 	cmdline = (char *)alloca(nLen);
 	if ( cmdline == NULL ) {

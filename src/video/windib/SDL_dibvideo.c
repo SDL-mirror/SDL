@@ -375,9 +375,12 @@ static int DIB_SussScreenDepth()
 	hdc = GetDC(SDL_Window);
 	depth = GetDeviceCaps(hdc, PLANES) * GetDeviceCaps(hdc, BITSPIXEL);
 	ReleaseDC(SDL_Window, hdc);
+#ifndef _WIN32_WCE
+	// AFAIK 16 bit CE devices have indeed RGB 565
 	if ( depth == 16 ) {
 		depth = 15;	/* GDI defined as RGB 555 */
 	}
+#endif
 	return(depth);
 #else
     int dib_size;
