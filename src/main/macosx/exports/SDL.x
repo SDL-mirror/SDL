@@ -52,8 +52,6 @@
 	_SDL_SetEventFilter
 	_SDL_GetEventFilter
 	_SDL_EventState
-	_SDL_putenv
-	_SDL_getenv
 	_SDL_NumJoysticks
 	_SDL_JoystickName
 	_SDL_JoystickOpen
