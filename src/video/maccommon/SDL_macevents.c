@@ -460,13 +460,6 @@ void Mac_InitOSKeymap(_THIS)
 	for ( i=0; i<SDL_TABLESIZE(MAC_keymap); ++i )
 		MAC_keymap[i] = SDLK_UNKNOWN;
 
-	/* Wierd, these keys are on my iBook under MacOS X */
-	MAC_keymap[MK_IBOOK_ENTER] = SDLK_KP_ENTER;
-	MAC_keymap[MK_IBOOK_RIGHT] = SDLK_RIGHT;
-	MAC_keymap[MK_IBOOK_DOWN] = SDLK_DOWN;
-	MAC_keymap[MK_IBOOK_UP] = SDLK_UP;
-	MAC_keymap[MK_IBOOK_LEFT] = SDLK_LEFT;
-
 	/* Defined MAC_* constants */
 	MAC_keymap[MK_ESCAPE] = SDLK_ESCAPE;
 	MAC_keymap[MK_F1] = SDLK_F1;
@@ -577,6 +570,17 @@ void Mac_InitOSKeymap(_THIS)
 	MAC_keymap[MK_RIGHT] = SDLK_RIGHT;
 	MAC_keymap[MK_KP0] = SDLK_KP0;
 	MAC_keymap[MK_KP_PERIOD] = SDLK_KP_PERIOD;
+
+#if defined(__APPLE__) && defined(__MACH__)
+	/* Wierd, these keys are on my iBook under MacOS X
+	   Note that the left arrow keysym is the same as left ctrl!?
+	 */
+	MAC_keymap[MK_IBOOK_ENTER] = SDLK_KP_ENTER;
+	MAC_keymap[MK_IBOOK_RIGHT] = SDLK_RIGHT;
+	MAC_keymap[MK_IBOOK_DOWN] = SDLK_DOWN;
+	MAC_keymap[MK_IBOOK_UP] = SDLK_UP;
+	MAC_keymap[MK_IBOOK_LEFT] = SDLK_LEFT;
+#endif /* MacOS X */
 }
 
 static SDL_keysym *TranslateKey(int scancode, int modifiers,
