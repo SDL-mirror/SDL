@@ -98,7 +98,7 @@ int X11_SetVidModeGamma(_THIS, float red, float green, float blue)
 static int X11_GetGammaNoLock(_THIS, float *red, float *green, float *blue)
 {
 #ifdef XFREE86_VMGAMMA
-    if (use_vidmode >= 2) {
+    if (use_vidmode >= 200) {
         SDL_NAME(XF86VidModeGamma) gamma;
         if (SDL_NAME(XF86VidModeGetGamma)(SDL_Display, SDL_Screen, &gamma)) {
             *red   = gamma.red;
