@@ -47,6 +47,7 @@ static char rcsid =
 #define XVidMode(func, args)	XF86VidMode##func args
 #endif
 #endif /* XFREE86_VM */
+
 #include <string.h>
 
 #include "SDL_mouse.h"
@@ -120,6 +121,8 @@ struct SDL_PrivateVideoData {
         int x, y;
     } saved_view;
 #endif
+    int xinerama_x;
+    int xinerama_y;
     int use_vidmode;
     int currently_fullscreen;
 
@@ -169,6 +172,8 @@ struct SDL_PrivateVideoData {
 #define SDL_modelist		(this->hidden->modelist)
 #define saved_mode		(this->hidden->saved_mode)
 #define saved_view		(this->hidden->saved_view)
+#define xinerama_x		(this->hidden->xinerama_x)
+#define xinerama_y		(this->hidden->xinerama_y)
 #define use_vidmode		(this->hidden->use_vidmode)
 #define currently_fullscreen	(this->hidden->currently_fullscreen)
 #define switch_waiting		(this->hidden->switch_waiting)

@@ -39,6 +39,9 @@ static char rcsid =
 #include "SDL_x11modes_c.h"
 #include "SDL_x11image_c.h"
 
+#ifdef HAVE_XINERAMA
+#include <X11/extensions/Xinerama.h>
+#endif 
 
 #ifdef XFREE86_VM
 Bool XVidMode(GetModeInfo, (Display *dpy, int scr, XF86VidModeModeInfo *info))
@@ -99,10 +102,11 @@ static void set_best_resolution(_THIS, int width, int height)
              XVidMode(GetAllModeLines, (SDL_Display,SDL_Screen,&nmodes,&modes))){
             qsort(modes, nmodes, sizeof *modes, cmpmodes);
 #ifdef XFREE86_DEBUG
-  printf("Available modes:\n");
-  for ( i = 0; i < nmodes; ++i ) {
-    printf("Mode %d: %dx%d\n", i, modes[i]->hdisplay, modes[i]->vdisplay);
-  }
+            printf("Available modes:\n");
+            for ( i = 0; i < nmodes; ++i ) {
+                printf("Mode %d: %dx%d\n", i,
+                        modes[i]->hdisplay, modes[i]->vdisplay);
+            }
 #endif
             for ( i = nmodes-1; i > 0 ; --i ) {
                 if ( (modes[i]->hdisplay >= width) &&
@@ -238,8 +242,8 @@ int X11_GetVideoModes(_THIS)
 #ifdef X_XF86VidModeGetDotClocks  /* Compiled under XFree86 4.0 */
                 /* Earlier X servers hang when doing vidmode */
 		if ( vm_major < 2 ) {
-#ifdef DEBUG_XF86
-  printf("Compiled under XFree86 4.0, server is XFree86 3.X\n");
+#ifdef XFREE86_DEBUG
+                    printf("Compiled under XFree86 4.0, server is XFree86 3.X\n");
 #endif
                     buggy_X11 = 1;
                 }
@@ -335,18 +339,50 @@ int X11_GetVideoModes(_THIS)
         }
     }
 
-#ifdef DEBUG_XF86
+#ifdef XFREE86_DEBUG
     if ( use_vidmode ) {
-        fprintf(stderr, "XFree86 VidMode is enabled\n");
+        printf("XFree86 VidMode is enabled\n");
     }
     if ( SDL_modelist ) {
-        fprintf(stderr, "X11 video mode list:\n");
+        printf("X11 video mode list:\n");
         for ( i=0; SDL_modelist[i]; ++i ) {
-            fprintf(stderr, "\t%dx%d\n",
-                SDL_modelist[i]->w, SDL_modelist[i]->h);
+            printf("\t%dx%d\n", SDL_modelist[i]->w, SDL_modelist[i]->h);
         }
     }
-#endif /* DEBUG_XF86 */
+#endif /* XFREE86_DEBUG */
+
+    /* The default X/Y fullscreen offset is 0/0 */
+    xinerama_x = 0;
+    xinerama_y = 0;
+
+#ifdef HAVE_XINERAMA
+    /* Query Xinerama extention */
+    if ( XineramaQueryExtension(SDL_Display, &i, &i) &&
+         XineramaIsActive(SDL_Display) ) {
+        /* Find out which screen is the zero'th one */
+        int screens;
+        XineramaScreenInfo *xinerama;
+
+#ifdef XINERAMA_DEBUG
+        printf("X11 detected Xinerama:\n");
+#endif
+        xinerama = XineramaQueryScreens(SDL_Display, &screens);
+        for ( i = 0; i < screens; i++ ) {
+#ifdef XINERAMA_DEBUG
+            printf("xinerama %d: %dx%d+%d+%d\n",
+                xinerama[i].screen_number,
+                xinerama[i].width, xinerama[i].height,
+                xinerama[i].x_org, xinerama[i].y_org);
+#endif
+            if ( xinerama[i].screen_number == 0 ) {
+                xinerama_x = xinerama[i].x_org;
+                xinerama_y = xinerama[i].y_org;
+            }
+        }
+        XFree(xinerama);
+    }
+#endif /* HAVE_XINERAMA */
+
     return 0;
 }
 
@@ -390,13 +426,15 @@ int X11_ResizeFullScreen(_THIS)
     int x, y;
     int real_w, real_h;
 
+    x = xinerama_x;
+    y = xinerama_y;
     if ( currently_fullscreen ) {
         /* Switch resolution and cover it with the FSwindow */
-        move_cursor_to(this, 0, 0);
+        move_cursor_to(this, x, y);
         set_best_resolution(this, current_w, current_h);
-        move_cursor_to(this, 0, 0);
+        move_cursor_to(this, x, y);
         get_real_resolution(this, &real_w, &real_h);
-        XMoveResizeWindow(SDL_Display, FSwindow, 0, 0, real_w, real_h);
+        XMoveResizeWindow(SDL_Display, FSwindow, x, y, real_w, real_h);
         move_cursor_to(this, real_w/2, real_h/2);
 
         /* Center and reparent the drawing window */
