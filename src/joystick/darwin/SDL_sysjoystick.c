@@ -609,10 +609,16 @@ int SDL_SYS_JoystickInit(void)
 	/*/ Now search I/O Registry for matching devices. */
 	result = IOServiceGetMatchingServices (masterPort, hidMatchDictionary, &hidObjectIterator);
 	/* Check for errors */
-	if ((kIOReturnSuccess != result) || (NULL == hidObjectIterator))
+	if (kIOReturnSuccess != result)
 	{
 		SDL_SetError("Joystick: Couldn't create a HID object iterator.");
 		return -1;
+	}
+	if (NULL == hidObjectIterator) /* there are no joysticks */
+	{
+		gpDeviceList = NULL;
+		SDL_numjoysticks = 0;
+		return 0;
 	}
 	/* IOServiceGetMatchingServices consumes a reference to the dictionary, so we don't need to release the dictionary ref. */
 
