@@ -52,6 +52,11 @@ static char rcsid =
 #include "SDL_DirectFB_events.h"
 #include "SDL_DirectFB_yuv.h"
 
+/* The implementation dependent data for the window manager cursor */
+struct WMcursor {
+	int unused;
+};
+
 
 /* Initialization/Query functions */
 static int DirectFB_VideoInit(_THIS, SDL_PixelFormat *vformat);
@@ -73,6 +78,7 @@ static int DirectFB_HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,
 static int DirectFB_SetHWColorKey(_THIS, SDL_Surface *surface, Uint32 key);
 static int DirectFB_SetHWAlpha(_THIS, SDL_Surface *surface, Uint8 alpha);
 static int DirectFB_FlipHWSurface(_THIS, SDL_Surface *surface);
+static int DirectFB_ShowWMCursor(_THIS, WMcursor *cursor);
 
 /* Various screen update functions available */
 static void DirectFB_DirectUpdate(_THIS, int numrects, SDL_Rect *rects);
@@ -139,6 +145,7 @@ static SDL_VideoDevice *DirectFB_CreateDevice(int devindex)
   device->UnlockHWSurface = DirectFB_UnlockHWSurface;
   device->FlipHWSurface = DirectFB_FlipHWSurface;
   device->FreeHWSurface = DirectFB_FreeHWSurface;
+  device->ShowWMCursor = DirectFB_ShowWMCursor;
   device->SetCaption = NULL;
   device->SetIcon = NULL;
   device->IconifyWindow = NULL;
@@ -1141,6 +1148,21 @@ void DirectFB_VideoQuit(_THIS)
   enumlist = NULL;
 
   HIDDEN->initialized = 0;
+}
+
+
+int DirectFB_ShowWMCursor(_THIS, WMcursor *cursor)
+{
+  /* We can only hide or show the default cursor */
+  if ( cursor == NULL )
+    {
+      SetCursorOpacity(HIDDEN->layer, 0);
+    }
+    else
+    {
+      SetCursorOpacity(HIDDEN->layer, 256);
+    }
+  return 1;
 }
 
 void DirectFB_FinalQuit(void) 
