@@ -1,11 +1,11 @@
-/*   SDLMain.m - main entry point for our Cocoa-ized SDL app
+/*   SDL_main.m - main entry point for our Cocoa-ized SDL app
        Darrell Walisser - dwaliss1@purdue.edu
 
     Feel free to customize this file to suit your needs
 */
 
 #import "SDL.h"
-#import "SDLMain.h"
+#import "SDL_main.h"
 #import <sys/param.h> /* for MAXPATHLEN */
 #import <unistd.h>
 
@@ -20,7 +20,7 @@ static BOOL   gFinderLaunch;
 
 
 /* The main class of the application, the application's delegate */
-@implementation SDLMain
+@implementation SDL_main
 
 /* Invoked from the Quit menu item */
 - (void) quit:(id)sender

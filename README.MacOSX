@@ -51,7 +51,7 @@ will want to do the other steps, too.
    tasks when used on MacOS X
 
    Rationale: AM_PATH_SDL copies /usr/local/share/sdl/Info.plist and the folder
-   /usr/local/share/sdl/SDLMain.nib/ into the directory where configure is invoked.
+   /usr/local/share/sdl/SDL_main.nib/ into the directory where configure is invoked.
    This is essential for the configure script to be able to run the test code
    that detects SDL.
 
@@ -68,10 +68,10 @@ will want to do the other steps, too.
 APP_NAME.app: EXE_NAME
 	mkdir -p $@/Contents/MacOS
 	mkdir -p $@/Contents/Resources
-	mkdir -p $@/Contents/Resources/SDLMain.nib
+	mkdir -p $@/Contents/Resources/SDL_main.nib
 	echo "APPL????" > $@/Contents/PkgInfo
 	$(INSTALL_DATA) Info.plist $@/Contents/
-	$(INSTALL_DATA) SDLMain.nib/*.nib $@/Contents/Resources/
+	$(INSTALL_DATA) SDL_main.nib/*.nib $@/Contents/Resources/
 	$(INSTALL_PROGRAM) $< $@/Contents/MacOS/
 
    You should replace EXE_NAME with the name of the executable. APP_NAME is what
@@ -153,13 +153,13 @@ following locations:
 - Setting up a new project by hand
     Some of you won't want to use the Stationary so I'll give some tips:
     * Create a new "Cocoa Application"
-    * Add src/main/macosx/SDLMain.m , .h and .nib to your project
+    * Add src/main/macosx/SDL_main.m , .h and .nib to your project
     * Remove "main.c" from your project
     * Remove "MainMenu.nib" from your project
     * Add "$(HOME)/Library/Frameworks/SDL.framework/Headers" to include path
     * Add "$(HOME)/Library/Frameworks" to the frameworks search path
     * Add "-framework SDL" to the "OTHER_LDFLAGS" variable
-    * Set the "Main Nib File" under "Application Settings" to "SDLMain.nib"
+    * Set the "Main Nib File" under "Application Settings" to "SDL_main.nib"
     * Add your files
     * Clean and build
 
@@ -174,7 +174,7 @@ following locations:
 - Implementation Notes
     Some things that may be of interest about how it all works...
     * Working directory
-        As defined in the SDLMain.m file, the working directory of your SDL app
+        As defined in the SDL_main.m file, the working directory of your SDL app
         is by default set to its parent. You may wish to change this to better
         suit your needs.
     * You have a Cocoa App!

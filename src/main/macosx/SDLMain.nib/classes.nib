@@ -3,7 +3,7 @@
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
         {
             ACTIONS = {makeFullscreen = id; quit = id; }; 
-            CLASS = SDLMain; 
+            CLASS = SDL_main; 
             LANGUAGE = ObjC; 
             SUPERCLASS = NSObject; 
         }

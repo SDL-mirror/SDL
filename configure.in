@@ -1379,13 +1379,12 @@ case "$target" in
             CDROM_DRIVERS="$CDROM_DRIVERS bsdi/libcdrom_bsdi.la"
         fi
         # Set up files for the thread library
-        SDL_LIBS="$SDL_LIBS -lsem"
         if test x$enable_threads = xyes; then
             COPY_ARCH_SRC(src/thread, linux, SDL_systhread.c)
             COPY_ARCH_SRC(src/thread, linux, SDL_systhread_c.h)
             COPY_ARCH_SRC(src/thread, linux, SDL_sysmutex.c)
             COPY_ARCH_SRC(src/thread, linux, SDL_sysmutex_c.h)
-            COPY_ARCH_SRC(src/thread, linux, SDL_syssem.c)
+            COPY_ARCH_SRC(src/thread, bsdi, SDL_syssem.c)
             COPY_ARCH_SRC(src/thread, generic, SDL_syssem_c.h)
             COPY_ARCH_SRC(src/thread, linux, SDL_syscond.c)
             COPY_ARCH_SRC(src/thread, generic, SDL_syscond_c.h)
@@ -2074,8 +2073,8 @@ case "$target" in
         CheckMacGL
         CheckPTHREAD
         # Set up files for the main() stub
-        COPY_ARCH_SRC(src/main, macosx, SDLmain.m)
-        COPY_ARCH_SRC(src/main, macosx, SDLmain.h)
+        COPY_ARCH_SRC(src/main, macosx, SDL_main.m)
+        COPY_ARCH_SRC(src/main, macosx, SDL_main.h)
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
             AUDIO_SUBDIRS="$AUDIO_SUBDIRS macrom"
