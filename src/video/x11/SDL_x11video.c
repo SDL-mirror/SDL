@@ -513,6 +513,26 @@ static void X11_DestroyWindow(_THIS, SDL_Surface *screen)
 	}
 }
 
+static SDL_bool X11_WindowPosition(_THIS, int *x, int *y, int w, int h)
+{
+	const char *window = getenv("SDL_VIDEO_WINDOW_POS");
+	const char *center = getenv("SDL_VIDEO_CENTERED");
+	if ( window ) {
+		if ( sscanf(window, "%d,%d", x, y) == 2 ) {
+			return SDL_TRUE;
+		}
+		if ( strcmp(window, "center") == 0 ) {
+			center = window;
+		}
+	}
+	if ( center ) {
+		*x = (DisplayWidth(SDL_Display, SDL_Screen) - w)/2;
+		*y = (DisplayHeight(SDL_Display, SDL_Screen) - h)/2;
+		return SDL_TRUE;
+	}
+	return SDL_FALSE;
+}
+
 static void X11_SetSizeHints(_THIS, int w, int h, Uint32 flags)
 {
 	XSizeHints *hints;
@@ -535,13 +555,7 @@ static void X11_SetSizeHints(_THIS, int w, int h, Uint32 flags)
 			hints->flags |= USPosition;
 		} else
 		/* Center it, if desired */
-		if ( getenv("SDL_VIDEO_CENTERED") ) {
-			int display_w, display_h;
-
-			display_w = DisplayWidth(SDL_Display, SDL_Screen);
-			display_h = DisplayHeight(SDL_Display, SDL_Screen);
-			hints->x = (display_w - w)/2;
-			hints->y = (display_h - h)/2;
+		if ( X11_WindowPosition(this, &hints->x, &hints->y, w, h) ) {
 			hints->flags |= USPosition;
 			XMoveWindow(SDL_Display, WMwindow, hints->x, hints->y);
 
@@ -870,18 +884,6 @@ static int X11_CreateWindow(_THIS, SDL_Surface *screen,
 			screen->flags |= SDL_FULLSCREEN;
 			X11_EnterFullScreen(this);
 		} else {
-			/* Position standalone window based on user request. --ryan. */
-			const char *envr = getenv("SDL_WINDOW_POS");
-			if (envr != NULL) {
-				int xscreen = DefaultScreen(SDL_Display);
-				if (strcmp(envr, "center") == 0) {
-					int disw = DisplayWidth(SDL_Display, xscreen);
-					int dish = DisplayHeight(SDL_Display, xscreen);
-					int centerx = (disw - current_w) / 2;
-					int centery = (dish - current_h) / 2;
-					XMoveWindow(SDL_Display, WMwindow, centerx, centery);
-				}
-			}
 			screen->flags &= ~SDL_FULLSCREEN;
 		}
 	}
