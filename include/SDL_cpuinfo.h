@@ -37,6 +37,10 @@ static char rcsid =
 extern "C" {
 #endif
 
+/* This function returns true if the CPU has the RDTSC instruction
+ */
+extern DECLSPEC SDL_bool SDLCALL SDL_HasRDTSC();
+
 /* This function returns true if the CPU has MMX features
  */
 extern DECLSPEC SDL_bool SDLCALL SDL_HasMMX();
