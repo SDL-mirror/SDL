@@ -52,6 +52,13 @@ SDL_Surface * SDL_CreateRGBSurface (Uint32 flags,
 	SDL_Surface *screen;
 	SDL_Surface *surface;
 
+	/* Make sure the size requested doesn't overflow our datatypes */
+	/* Next time I write a library like SDL, I'll use int for size. :) */
+	if ( width > 16384 || height > 16384 ) {
+		SDL_SetError("Width or height is too large");
+		return(NULL);
+	}
+
 	/* Check to see if we desire the surface in video memory */
 	if ( video ) {
 		screen = SDL_PublicSurface;
