@@ -45,7 +45,7 @@
 #define DRIVER_NAME         "alsa"
 
 /* The default ALSA audio driver */
-#define DEFAULT_DEVICE	"plughw:0,0"
+#define DEFAULT_DEVICE	"default"
 
 /* Audio driver functions */
 static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec);
@@ -146,17 +146,19 @@ static void ALSA_PlayAudio(_THIS)
 	int           status;
 	int           sample_len;
 	signed short *sample_buf;
-       
+
 	sample_len = this->spec.samples;
 	sample_buf = (signed short *)mixbuf;
 	while ( sample_len > 0 ) {
 		status = snd_pcm_writei(pcm_handle, sample_buf, sample_len);
 		if ( status < 0 ) {
 			if ( status == -EAGAIN ) {
+				SDL_Delay(1);
 				continue;
 			}
 			if ( status == -ESTRPIPE ) {
 				do {
+					SDL_Delay(1);
 					status = snd_pcm_resume(pcm_handle);
 				} while ( status == -EAGAIN );
 			}
@@ -315,6 +317,9 @@ static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec)
 
 	/* Get the parent process id (we're the parent of the audio thread) */
 	parent = getpid();
+
+	/* Switch to blocking mode for playback */
+	snd_pcm_nonblock(pcm_handle, 0);
 
 	/* We're ready to rock and roll. :-) */
 	return(0);
