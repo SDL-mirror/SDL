@@ -63,7 +63,7 @@ static char rcsid =
 
 /* Defines */
 
-#define DEBUG_VIDEO_GEM	0
+/* #define DEBUG_VIDEO_GEM	1 */
 
 #define GEM_VID_DRIVER_NAME "gem"
 
@@ -216,60 +216,6 @@ static void VDI_ReadExtInfo(_THIS, short *work_out)
 	if (EdDI_version >= EDDI_11) {
 		VDI_pitch = work_out[5];
 		VDI_screen = (void *) *((unsigned long *) &work_out[6]);
-
-#if 0 /* lecoat */
-		switch(num_colours) {
-			case 32768UL:
-				if (work_out[14] & (1<<7)) {
-					/* Little endian */
-					if (work_out[14] & (1<<1)) {
-						VDI_FBMASK(1<<13, 31<<3, (3<<14)|7, 31<<8);
-					} else {
-						VDI_FBMASK(1<<7, 31<<2, (7<<13)|3, 31<<8);
-					}
-				} else {
-					/* Big endian */
-					if (work_out[14] & (1<<1)) {
-						VDI_FBMASK(1<<5, 31<<11, 31<<6, 31);
-					} else {
-						VDI_FBMASK(1<<15, 31<<10, 31<<5, 31);
-					}
-				}
-				break;
-			case 65536UL:
-				if (work_out[14] & (1<<7)) {
-					/* Little endian */
-					VDI_FBMASK(0, 31<<3, (7<<13)|7, 31<<8);
-				} else {
-					/* Big endian */
-					VDI_FBMASK(0, 31<<11, 63<<5, 31);
-				}
-				break;
-			case 16777216UL:
-				if (work_out[14] & (1<<7)) {
-					/* Little endian */
-					switch(num_bits) {
-						case 24:
-							VDI_FBMASK(0, 255, 255<<8, 255<<16);
-							break;
-						case 32:
-							VDI_FBMASK(255, 255<<8, 255<<16, 255<<24);
-							break;
-					}
-				} else {
-					/* Big endian */
-					switch(num_bits) {
-						case 24:
-							VDI_FBMASK(0, 255<<16, 255<<8, 255);
-							break;
-						case 32:
-							VDI_FBMASK(255<<24, 255<<16, 255<<8, 255);
-							break;
-					}
-				}
-				break;
-		}
-#endif
 	}
 
 	switch(clut_type) {
@@ -286,7 +232,7 @@ static void VDI_ReadExtInfo(_THIS, short *work_out)
 			}
 			break;
 		case VDI_CLUT_SOFTWARE:
-/* lecoat 			if (EdDI_version < EDDI_11) */ {
+			{
 				int component; /* red, green, blue, alpha, overlay */
 				int num_bit;
 				unsigned short *tmp_p;
@@ -456,19 +402,10 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	GEM_win_fulled = SDL_FALSE;
 
 	VDI_screen = NULL;
-#if 1 /* lecoat */
 	VDI_pitch = VDI_w * VDI_pixelsize;
 	VDI_format = ( (VDI_bpp <= 8) ? VDI_FORMAT_INTER : VDI_FORMAT_PACK);
 	VDI_redmask = VDI_greenmask = VDI_bluemask = VDI_alphamask = 0;
 	VDI_ReadExtInfo(this, work_out);
-#else
-	VDI_ReadExtInfo(this, work_out);
-	if (VDI_screen == NULL) {
-		VDI_pitch = VDI_w * VDI_pixelsize;
-		VDI_format = ( (VDI_bpp <= 8) ? VDI_FORMAT_INTER : VDI_FORMAT_PACK);
-		VDI_redmask = VDI_greenmask = VDI_bluemask = VDI_alphamask = 0;
-	}
-#endif
 
 #ifdef DEBUG_VIDEO_GEM
 	printf("sdl:video:gem: screen: address=0x%08x, pitch=%d\n", VDI_screen, VDI_pitch);
@@ -775,6 +712,7 @@ static int GEM_AllocHWSurface(_THIS, SDL_Surface *surface)
 {
 	return -1;
 }
+
 static void GEM_FreeHWSurface(_THIS, SDL_Surface *surface)
 {
 	return;
@@ -1123,10 +1061,6 @@ void GEM_wind_redraw(_THIS, int winhandle, short *inside)
 	wind_update(END_UPDATE);
 
 	v_show_c(VDI_handle,1);
-
-#if 0 /*DEBUG_VIDEO_GEM*/
-	fflush(stdout);
-#endif
 }
 
 static void refresh_window(_THIS, int winhandle, short *rect)
