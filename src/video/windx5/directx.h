@@ -1,5 +1,5 @@
 
-#ifndef _directx_h_
+#ifndef _directx_h
 #define _directx_h
 
 /* Include all of the DirectX 5.0 headers and adds any necessary tweaks */
