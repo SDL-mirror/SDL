@@ -1832,7 +1832,7 @@ int SDL_RLESurface(SDL_Surface *surface)
  * completely transparent pixels will be lost, and colour and alpha depth
  * may have been reduced (when encoding for 16bpp targets).
  */
-static void UnRLEAlpha(SDL_Surface *surface)
+static SDL_bool UnRLEAlpha(SDL_Surface *surface)
 {
     Uint8 *srcbuf;
     Uint32 *dst;
@@ -1853,6 +1853,9 @@ static void UnRLEAlpha(SDL_Surface *surface)
     }
 
     surface->pixels = malloc(surface->h * surface->pitch);
+    if ( !surface->pixels ) {
+        return(SDL_FALSE);
+    }
     /* fill background with transparent pixels */
     memset(surface->pixels, 0, surface->h * surface->pitch);
 
@@ -1876,7 +1879,7 @@ static void UnRLEAlpha(SDL_Surface *surface)
 		srcbuf += uncopy_opaque(dst + ofs, srcbuf, run, df, sf);
 		ofs += run;
 	    } else if(!ofs)
-		return;
+		return(SDL_TRUE);
 	} while(ofs < w);
 
 	/* skip padding if needed */
@@ -1897,6 +1900,8 @@ static void UnRLEAlpha(SDL_Surface *surface)
 	} while(ofs < w);
 	dst += surface->pitch >> 2;
     }
+    /* Make the compiler happy */
+    return(SDL_TRUE);
 }
 
 void SDL_UnRLESurface(SDL_Surface *surface, int recode)
@@ -1912,6 +1917,11 @@ void SDL_UnRLESurface(SDL_Surface *surface, int recode)
 
 		/* re-create the original surface */
 		surface->pixels = malloc(surface->h * surface->pitch);
+		if ( !surface->pixels ) {
+			/* Oh crap... */
+			surface->flags |= SDL_RLEACCEL;
+			return;
+		}
 
 		/* fill it with the background colour */
 		SDL_FillRect(surface, NULL, surface->format->colorkey);
@@ -1924,8 +1934,13 @@ void SDL_UnRLESurface(SDL_Surface *surface, int recode)
 		surface->flags &= ~SDL_SRCALPHA; /* opaque blit */
 		SDL_RLEBlit(surface, &full, surface, &full);
 		surface->flags |= alpha_flag;
-	    } else
-		UnRLEAlpha(surface);
+	    } else {
+		if ( !UnRLEAlpha(surface) ) {
+		    /* Oh crap... */
+		    surface->flags |= SDL_RLEACCEL;
+		    return;
+		}
+	    }
 	}
 
 	if ( surface->map && surface->map->sw_data->aux_data ) {

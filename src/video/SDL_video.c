@@ -1275,10 +1275,16 @@ int SDL_SetPalette(SDL_Surface *screen, int which,
 			/* Lazy physical palette allocation */
 			int size;
 			SDL_Palette *pp = malloc(sizeof(*pp));
+			if ( !pp ) {
+				return 0;
+			}
 			current_video->physpal = pp;
 			pp->ncolors = pal->ncolors;
 			size = pp->ncolors * sizeof(SDL_Color);
 			pp->colors = malloc(size);
+			if ( !pp->colors ) {
+				return 0;
+			}
 			memcpy(pp->colors, pal->colors, size);
 		}
 		if ( ! SetPalette_physical(screen,
