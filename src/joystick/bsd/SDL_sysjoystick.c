@@ -160,6 +160,7 @@ SDL_SYS_JoystickInit(void)
 			SDL_numjoysticks++;
 		} else {
 			free(joynames[nj.index]);
+			joynames[nj.index] = NULL;
 		}
 	}
 	for (i = 0; i < MAX_JOY_JOYS; i++) {
