@@ -61,12 +61,12 @@ static char rcsid =
 #define XBIOS_VID_DRIVER_NAME "xbios"
 
 /* Debug print info */
-#if 1
+#if 0
 #define DEBUG_PRINT(what) \
 	{ \
 		printf what; \
 	}
-/*#define DEBUG_VIDEO_XBIOS 1*/
+#define DEBUG_VIDEO_XBIOS 1
 #else
 #define DEBUG_PRINT(what)
 #undef DEBUG_VIDEO_XBIOS
