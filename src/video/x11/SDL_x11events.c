@@ -843,6 +843,10 @@ void X11_SetKeyboardState(Display *display, const char *key_vec)
 	KeyCode xcode[SDLK_LAST];
 	Uint8 new_kstate[SDLK_LAST];
 	Uint8 *kstate = SDL_GetKeyState(NULL);
+	SDLMod modstate;
+	Window junk_window;
+	int x, y;
+	unsigned int mask;
 
 	/* The first time the window is mapped, we initialize key state */
 	if ( ! key_vec ) {
@@ -850,11 +854,31 @@ void X11_SetKeyboardState(Display *display, const char *key_vec)
 		XQueryKeymap(display, keys_return);
 		gen_event = 0;
 	} else {
+#if 1 /* We no longer generate key down events, just update state */
+		gen_event = 0;
+#else
 		gen_event = 1;
+#endif
 	}
 
-	/* Zero the new state and generate it */
-	memset(new_kstate, 0, sizeof(new_kstate));
+	/* Get the keyboard modifier state */
+	modstate = 0;
+	get_modifier_masks(display);
+	if ( XQueryPointer(display, DefaultRootWindow(display),
+		&junk_window, &junk_window, &x, &y, &x, &y, &mask) ) {
+		if ( mask & LockMask ) {
+			modstate |= KMOD_CAPS;
+		}
+		if ( mask & mode_switch_mask ) {
+			modstate |= KMOD_MODE;
+		}
+		if ( mask & num_mask ) {
+			modstate |= KMOD_NUM;
+		}
+	}
+
+	/* Zero the new keyboard state and generate it */
+	memset(new_kstate, SDL_RELEASED, sizeof(new_kstate));
 	/*
 	 * An obvious optimisation is to check entire longwords at a time in
 	 * both loops, but we can't be sure the arrays are aligned so it's not
@@ -869,17 +893,47 @@ void X11_SetKeyboardState(Display *display, const char *key_vec)
 				SDL_keysym sk;
 				KeyCode kc = i << 3 | j;
 				X11_TranslateKey(display, NULL, kc, &sk);
-				new_kstate[sk.sym] = 1;
+				new_kstate[sk.sym] = SDL_PRESSED;
 				xcode[sk.sym] = kc;
 			}
 		}
 	}
 	for(i = SDLK_FIRST+1; i < SDLK_LAST; i++) {
-		int st;
-		SDL_keysym sk;
+		int state = new_kstate[i];
 
-		if(kstate[i] == new_kstate[i])
+		if ( state == SDL_PRESSED ) {
+			switch (i) {
+				case SDLK_LSHIFT:
+					modstate |= KMOD_LSHIFT;
+					break;
+				case SDLK_RSHIFT:
+					modstate |= KMOD_RSHIFT;
+					break;
+				case SDLK_LCTRL:
+					modstate |= KMOD_LCTRL;
+					break;
+				case SDLK_RCTRL:
+					modstate |= KMOD_RCTRL;
+					break;
+				case SDLK_LALT:
+					modstate |= KMOD_LALT;
+					break;
+				case SDLK_RALT:
+					modstate |= KMOD_RALT;
+					break;
+				case SDLK_LMETA:
+					modstate |= KMOD_LMETA;
+					break;
+				case SDLK_RMETA:
+					modstate |= KMOD_RMETA;
+					break;
+				default:
+					break;
+			}
+		}
+		if ( kstate[i] == state )
 			continue;
+
 		/*
 		 * Send a fake keyboard event correcting the difference between
 		 * SDL's keyboard state and the actual. Note that there is no
@@ -887,16 +941,31 @@ void X11_SetKeyboardState(Display *display, const char *key_vec)
 		 * keys are released when focus is lost only keypresses should
 		 * be sent here
 		 */
-		st = new_kstate[i] ? SDL_PRESSED : SDL_RELEASED;
-		memset(&sk, 0, sizeof(sk));
-		sk.sym = i;
-		sk.scancode = xcode[i];		/* only valid for key press */
 		if ( gen_event ) {
-			SDL_PrivateKeyboard(st, &sk);
+			SDL_keysym sk;
+			memset(&sk, 0, sizeof(sk));
+			sk.sym = i;
+			sk.scancode = xcode[i];	/* only valid for key press */
+			SDL_PrivateKeyboard(state, &sk);
 		} else {
-			kstate[i] = new_kstate[i];
+			kstate[i] = state;
 		}
 	}
+
+	/* Hack - set toggle key state */
+	if ( modstate & KMOD_CAPS ) {
+		kstate[SDLK_CAPSLOCK] = SDL_PRESSED;
+	} else {
+		kstate[SDLK_CAPSLOCK] = SDL_RELEASED;
+	}
+	if ( modstate & KMOD_NUM ) {
+		kstate[SDLK_NUMLOCK] = SDL_PRESSED;
+	} else {
+		kstate[SDLK_NUMLOCK] = SDL_RELEASED;
+	}
+
+	/* Set the final modifier state */
+	SDL_SetModState(modstate);
 }
 
 void X11_InitOSKeymap(_THIS)
