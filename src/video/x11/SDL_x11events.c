@@ -407,11 +407,7 @@ printf("ConfigureNotify! (resize: %dx%d)\n", xevent.xconfigure.width, xevent.xco
 printf("Expose (count = %d)\n", xevent.xexpose.count);
 #endif
 		if ( SDL_VideoSurface && (xevent.xexpose.count == 0) ) {
-			if ( SDL_VideoSurface->flags & SDL_OPENGL ) {
-				SDL_PrivateExpose();
-			} else {
-				X11_RefreshDisplay(this);
-			}
+			X11_RefreshDisplay(this);
 		}
 	    }
 	    break;

@@ -29,6 +29,7 @@ static char rcsid =
 
 #include "SDL_error.h"
 #include "SDL_endian.h"
+#include "SDL_events_c.h"
 #include "SDL_x11image_c.h"
 
 #if defined(__USLC__)
@@ -427,8 +428,11 @@ void X11_EnableAutoRefresh(_THIS)
 
 void X11_RefreshDisplay(_THIS)
 {
-	/* Don't refresh a display that doesn't have an image (like GL) */
+	/* Don't refresh a display that doesn't have an image (like GL)
+	   Instead, post an expose event so the application can refresh.
+	 */
 	if ( ! SDL_Ximage || (enable_autorefresh <= 0) ) {
+		SDL_PrivateExpose();
 		return;
 	}
 #ifndef NO_SHARED_MEMORY
