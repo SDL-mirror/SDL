@@ -159,6 +159,41 @@ static inline int X11_WarpedMotion(_THIS, XEvent *xevent)
 }
 */
 
+/* Control which motion flags the window has set, a flags value of -1 sets
+ * MOTION_BUTTON and MOTION_NOBUTTON */
+static void set_motion_sensitivity(_THIS, unsigned int flags)
+{
+	int rid, fields = Ph_EV_PTR_MOTION_BUTTON | Ph_EV_PTR_MOTION_NOBUTTON;
+	PhRegion_t region;
+
+	if( window )
+	{
+		rid = PtWidgetRid( window );
+		if( rid != 0 && PhRegionQuery( rid, &region, NULL, NULL, 0 ) == 0 )
+		{
+			region.events_sense = ( region.events_sense & ~fields ) |
+				( flags & fields );
+			PhRegionChange( Ph_REGION_EV_SENSE, 0, &region,
+					NULL, NULL );
+		}
+	}
+}
+
+/* Convert the photon button state value to an SDL value */
+static Uint8 ph2sdl_mousebutton( unsigned short button_state )
+{
+	Uint8 mouse_button = 0;
+
+	if( button_state & Ph_BUTTON_SELECT )
+			mouse_button |= SDL_BUTTON_LEFT;
+	if( button_state & Ph_BUTTON_MENU )
+			mouse_button |= SDL_BUTTON_RIGHT;
+	if( button_state & Ph_BUTTON_ADJUST )
+			mouse_button |= SDL_BUTTON_MIDDLE;
+
+	return( mouse_button );
+}
+
 static int ph_DispatchEvent(_THIS)
 {
 	int posted;
@@ -166,7 +201,7 @@ static int ph_DispatchEvent(_THIS)
 	PhPointerEvent_t* pointerEvent;
 	PhKeyEvent_t* keyEvent;
 	PhWindowEvent_t* winEvent;
-	int i;
+	int i, buttons;
 	SDL_Rect sdlrects[50]; 
 	
 	posted = 0;
@@ -174,7 +209,6 @@ static int ph_DispatchEvent(_THIS)
 	switch (event->type) {
 		case Ph_EV_BOUNDARY:
 		{
-		
 			if (event->subtype == Ph_EV_PTR_ENTER)
 				posted = SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS);
 			else if (event->subtype ==Ph_EV_PTR_LEAVE)
@@ -185,46 +219,61 @@ static int ph_DispatchEvent(_THIS)
 		case Ph_EV_PTR_MOTION_BUTTON:
 		case Ph_EV_PTR_MOTION_NOBUTTON:
 		{
-		
 			if ( SDL_VideoSurface ) {
 				pointerEvent = PhGetData( event );
 				rect = PhGetRects( event );
-				posted = SDL_PrivateMouseMotion(0, 1,
-                		pointerEvent->pos.x - rect[0].ul.x,
-                		pointerEvent->pos.y - rect[0].ul.y);		
+				posted = SDL_PrivateMouseMotion(0, 0,
+						rect->ul.x, rect->ul.y);		
 			}
 		}
 		break;
 
 		case Ph_EV_BUT_PRESS:
 		{
-
 			pointerEvent = PhGetData( event );
-			/* TODO: is 'buttons' the right mapping? */
-			posted = SDL_PrivateMouseButton(SDL_PRESSED,
-                        	pointerEvent->buttons, 0, 0);
+			buttons = ph2sdl_mousebutton( pointerEvent->buttons );
+			if( buttons != 0 )
+			posted = SDL_PrivateMouseButton( SDL_PRESSED, buttons,
+					0, 0 );
 		}
 		break;
 
 		case Ph_EV_BUT_RELEASE:
 		{
-			
-			pointerEvent = PhGetData( event );
-			 posted = SDL_PrivateMouseButton(SDL_RELEASED,
-         			pointerEvent->buttons, 0, 0);
+			pointerEvent = PhGetData(event);
+			buttons = ph2sdl_mousebutton(pointerEvent->buttons);
+			if( event->subtype == Ph_EV_RELEASE_REAL && 
+					buttons != 0 )
+			{
+				posted = SDL_PrivateMouseButton( SDL_RELEASED,
+						buttons, 0, 0 );
+			}
+			else if( event->subtype == Ph_EV_RELEASE_PHANTOM )
+			{
+				/* If the mouse is outside the window,
+				 * only a phantom release event is sent, so
+				 * check if the window doesn't have mouse focus.
+				 * Not perfect, maybe checking the mouse button
+				 * state for Ph_EV_BOUNDARY events would be
+				 * better. */
+				if( ( SDL_GetAppState() & SDL_APPMOUSEFOCUS ) == 0 )
+				{
+					posted = SDL_PrivateMouseButton( SDL_RELEASED,
+						buttons, 0, 0 );
+				}
+			}
 		}
 		break;
 
 		case Ph_EV_WM:
 		{
-
-		
 			winEvent = PhGetData( event );
 			
 			/* losing focus */
 			if ((winEvent->event_f==Ph_WM_FOCUS)&&
 				(winEvent->event_state==Ph_WM_EVSTATE_FOCUSLOST))
 			{
+				set_motion_sensitivity(this, Ph_EV_PTR_MOTION_BUTTON);
 				posted = SDL_PrivateAppActive(0, SDL_APPINPUTFOCUS);	
 
 				/* Queue leaving fullscreen mode */
@@ -236,6 +285,7 @@ static int ph_DispatchEvent(_THIS)
 			else if ((winEvent->event_f==Ph_WM_FOCUS)&&
 					(winEvent->event_state==Ph_WM_EVSTATE_FOCUS))
 			{
+				set_motion_sensitivity(this, -1);
 				posted = SDL_PrivateAppActive(1, SDL_APPINPUTFOCUS);
 
 				/* Queue entry into fullscreen mode */
@@ -254,24 +304,20 @@ static int ph_DispatchEvent(_THIS)
 		/* window has been resized, moved or removed */
 		case Ph_EV_EXPOSE:
 		{
-
 			if (SDL_VideoSurface)
 			{
-			  
-			  
-					rect = PhGetRects( event );
+				rect = PhGetRects( event );
 
 				//PgSetClipping(1, rect );
-				 for(i=0;i<event->num_rects;i++)
-			   {
-			      sdlrects[i].x = rect[i].ul.x;
-			      sdlrects[i].y = rect[i].ul.y;
-			      sdlrects[i].w = rect[i].lr.x - rect[i].ul.x;
-			      sdlrects[i].h = rect[i].lr.y - rect[i].ul.y;
-			      	
+				for(i=0;i<event->num_rects;i++)
+				{
+					sdlrects[i].x = rect[i].ul.x;
+					sdlrects[i].y = rect[i].ul.y;
+					sdlrects[i].w = rect[i].lr.x - rect[i].ul.x + 1;
+					sdlrects[i].h = rect[i].lr.y - rect[i].ul.y + 1;
 				}
-			
-					this->UpdateRects(this, event->num_rects, sdlrects);
+
+				this->UpdateRects(this, event->num_rects, sdlrects);
 
 			}
 		}
@@ -313,9 +359,7 @@ static int ph_DispatchEvent(_THIS)
 /* perform a blocking read if no events available */
 int ph_Pending(_THIS)
 {
-	
 	/* Flush the display connection and look to see if events are queued */
-
 	PgFlush();
 
      while( 1 )
@@ -526,7 +570,7 @@ SDL_keysym *ph_TranslateKey(PhKeyEvent_t *key, SDL_keysym *keysym)
 	We will assume it is valid.
 */
 	cap = key->key_cap;
-    switch (cap>>8) {
+	switch (cap>>8) {
             case 0x00:  /* Latin 1 */
             case 0x01:  /* Latin 2 */
             case 0x02:  /* Latin 3 */
@@ -553,13 +597,13 @@ SDL_keysym *ph_TranslateKey(PhKeyEvent_t *key, SDL_keysym *keysym)
             default:
                 fprintf(stderr,"Photon: Unknown key_cap, cap = 0x%.4x\n", (unsigned int)cap);
                 break;
-    }	
+	}
+	keysym->scancode = key->key_scan;
 	return (keysym);
 }
 
 void ph_InitOSKeymap(_THIS)
 {
-
 	ph_InitKeymap();
 }
 
