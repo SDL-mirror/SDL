@@ -7,7 +7,8 @@ noinst_LTLIBRARIES = libvideo.la
 SUBDIRS = @VIDEO_SUBDIRS@
 DIST_SUBDIRS = dummy x11 dga nanox fbcon svga ggi aalib \
                wincommon windib windx5 \
-               maccommon macdsp macrom bwindow photon cybergfx
+               maccommon macdsp macrom \
+               bwindow ps2gs photon cybergfx
 
 DRIVERS = @VIDEO_DRIVERS@
 
