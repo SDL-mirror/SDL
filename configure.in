@@ -505,7 +505,7 @@ CheckNASM()
                   NASMFLAGS="-f aoutb"
                   ;;
               *)
-                  NASMFLAGS="-f elf"
+                  NASMFLAGS="-f elf -D __NOU__"
                   ;;
             esac
             AC_SUBST(NASMFLAGS)

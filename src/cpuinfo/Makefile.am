@@ -7,7 +7,7 @@ STRIP_FPIC = sh $(top_srcdir)/strip_fPIC.sh
 SUFFIXES = .asm
 
 .asm.lo:
-	$(LIBTOOL) --tag=CC --mode=compile $(STRIP_FPIC) $(NASM) -t -D __FLAT__ -D __NOU__ @NASMFLAGS@ $< -o $*.o
+	$(LIBTOOL) --tag=CC --mode=compile $(STRIP_FPIC) $(NASM) -t -D __FLAT__ @NASMFLAGS@ $< -o $*.o
 
 ###########################################################################
 
