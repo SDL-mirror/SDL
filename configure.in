@@ -2174,14 +2174,15 @@ AM_CONDITIONAL([ENABLE_STATIC], [test "$enable_static" = yes])
 if test $ARCH = linux -o $ARCH = freebsd -o $ARCH = bsdi; then
   SDL_RLD_FLAGS="-Wl,-rpath,\${exec_prefix}/lib"
 fi
-
 if test $ARCH = solaris; then
   SDL_RLD_FLAGS="-R\${exec_prefix}/lib"
 fi
-
-if test $ARCH = openbsd; then
-  SDL_RLD_FLAGS="-Wl,-rpath,\${exec_prefix}/lib $SYSTEM_LIBS"
+if test $ARCH = openbsd -o $ARCH = bsdi; then
+    SHARED_SYSTEM_LIBS="$SYSTEM_LIBS"
+else
+    SHARED_SYSTEM_LIBS=""
 fi
+STATIC_SYSTEM_LIBS="$SYSTEM_LIBS"
 
 dnl Output the video drivers we use
 if test x$enable_video = xtrue; then
@@ -2199,15 +2200,16 @@ AC_SUBST(CDROM_SUBDIRS)
 AC_SUBST(CDROM_DRIVERS)
 AC_SUBST(SDL_EXTRADIRS)
 AC_SUBST(SDL_EXTRALIBS)
-AC_SUBST(SYSTEM_LIBS)
 
 dnl Expand the cflags and libraries needed by apps using SDL
 AC_SUBST(SDL_CFLAGS)
 AC_SUBST(SDL_LIBS)
 AC_SUBST(SDL_RLD_FLAGS)
 
-dnl Expand the libraries needed for static linking
-AC_SUBST(SYSTEM_LIBS)
+dnl Expand the libraries needed for static and dynamic linking
+AC_SUBST(STATIC_SYSTEM_LIBS)
+AC_SUBST(SHARED_SYSTEM_LIBS)
+
 dnl Expand the include directories for building SDL
 CFLAGS="$CFLAGS -I\$(top_srcdir)/include"
 CFLAGS="$CFLAGS -I\$(top_srcdir)/include/SDL"
