@@ -55,6 +55,8 @@ static char rcsid =
 #include "SDL_nullevents_c.h"
 #include "SDL_nullmouse_c.h"
 
+#define DUMMYVID_DRIVER_NAME "dummy"
+
 /* Initialization/Query functions */
 static int DUMMY_VideoInit(_THIS, SDL_PixelFormat *vformat);
 static SDL_Rect **DUMMY_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags);
@@ -76,7 +78,12 @@ static void DUMMY_UpdateRects(_THIS, int numrects, SDL_Rect *rects);
 
 static int DUMMY_Available(void)
 {
-	return 1; /* Always available ! */
+	const char *envr = getenv("SDL_VIDEODRIVER");
+	if ((envr) && (strcmp(envr, DUMMYVID_DRIVER_NAME) == 0)) {
+		return(1);
+	}
+
+	return(0);
 }
 
 static void DUMMY_DeleteDevice(SDL_VideoDevice *device)
@@ -136,7 +143,7 @@ static SDL_VideoDevice *DUMMY_CreateDevice(int devindex)
 }
 
 VideoBootStrap DUMMY_bootstrap = {
-	"dummy", "SDL dummy video driver",
+	DUMMYVID_DRIVER_NAME, "SDL dummy video driver",
 	DUMMY_Available, DUMMY_CreateDevice
 };
 

@@ -80,23 +80,30 @@ static int DISKAUD_Available(void)
     int exists = 0;
     struct stat statbuf;
     const char *fname = DISKAUD_GetOutputFilename();
-
+	const char *envr = getenv("SDL_AUDIODRIVER");
 	available = 0;
 
-    if (stat(fname, &statbuf) == 0)
-        exists = 1;
+	if ((envr) && (strcmp(envr, DISKAUD_DRIVER_NAME) == 0)) {
+		if (stat(fname, &statbuf) == 0)
+			exists = 1;
 
-    fd = open(fname, O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
-	if ( fd != -1 ) {
-		available = 1;
-		close(fd);
-        if (!exists) {
-            unlink(fname);
-        }
+		fd = open(fname, O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
+		if ( fd != -1 ) {
+			available = 1;
+			close(fd);
+			if (!exists) {
+				unlink(fname);
+			}
+		}
 	}
 	return(available);
 #else
-    return(1);
+	const char *envr = getenv("SDL_AUDIODRIVER");
+	if ((envr) && (strcmp(envr, DISKAUD_DRIVER_NAME) == 0)) {
+		return(1);
+	}
+
+	return(0);
 #endif
 }
 
