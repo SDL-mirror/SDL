@@ -144,20 +144,24 @@ static void __cdecl cleanup_output(void)
 
 #ifndef NO_STDIO_REDIRECT
 	/* See if the files have any output in them */
-	file = fopen(stdoutPath, "rb");
-	if ( file ) {
-		empty = (fgetc(file) == EOF) ? 1 : 0;
-		fclose(file);
-		if ( empty ) {
-			remove(stdoutPath);
+	if ( stdoutPath[0] ) {
+		file = fopen(stdoutPath, "rb");
+		if ( file ) {
+			empty = (fgetc(file) == EOF) ? 1 : 0;
+			fclose(file);
+			if ( empty ) {
+				remove(stdoutPath);
+			}
 		}
 	}
-	file = fopen(stderrPath, "rb");
-	if ( file ) {
-		empty = (fgetc(file) == EOF) ? 1 : 0;
-		fclose(file);
-		if ( empty ) {
-			remove(stderrPath);
+	if ( stderrPath[0] ) {
+		file = fopen(stderrPath, "rb");
+		if ( file ) {
+			empty = (fgetc(file) == EOF) ? 1 : 0;
+			fclose(file);
+			if ( empty ) {
+				remove(stderrPath);
+			}
 		}
 	}
 #endif
