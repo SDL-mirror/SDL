@@ -234,7 +234,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick *joy)
 	struct report *rep;
 	int fd;
 
-	fd = open(path, O_RDWR);
+	fd = open(path, O_RDONLY);
 	if (fd == -1) {
 		SDL_SetError("%s: %s", path, strerror(errno));
 		return (-1);
@@ -448,14 +448,12 @@ report_alloc(struct report *r, struct report_desc *rd, int repind)
 	int len;
 
 #ifdef __FreeBSD__
-# if (__FreeBSD_version >= 470000)
+# if (__FreeBSD_version >= 460000)
 #  if (__FreeBSD_version <= 500111)
 	len = hid_report_size(rd, r->rid, repinfo[repind].kind);
 #  else
 	len = hid_report_size(rd, repinfo[repind].kind, r->rid);
 #  endif
-# elif (__FreeBSD_version == 460002)
-	len = hid_report_size(rd, r->rid, repinfo[repind].kind);
 # else
 	len = hid_report_size(rd, repinfo[repind].kind, &r->rid);
 #endif
