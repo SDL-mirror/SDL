@@ -15,7 +15,7 @@ SDL_Surface *LoadIconSurface(char *file, Uint8 **maskp)
 	SDL_Surface *icon;
 	Uint8       *pixels;
 	Uint8       *mask;
-	int          mlen, i;
+	int          mlen, i, j;
 
 	*maskp = NULL;
 
@@ -26,12 +26,15 @@ SDL_Surface *LoadIconSurface(char *file, Uint8 **maskp)
 		return(NULL);
 	}
 
-	/* Check width and height */
+	/* Check width and height 
 	if ( (icon->w%8) != 0 ) {
 		fprintf(stderr, "Icon width must be a multiple of 8!\n");
 		SDL_FreeSurface(icon);
 		return(NULL);
 	}
+*/
+    
+    
 	if ( icon->format->palette == NULL ) {
 		fprintf(stderr, "Icon must have a palette!\n");
 		SDL_FreeSurface(icon);
@@ -47,21 +50,21 @@ SDL_Surface *LoadIconSurface(char *file, Uint8 **maskp)
 				icon->format->palette->colors[*pixels].r,
 				icon->format->palette->colors[*pixels].g,
 				icon->format->palette->colors[*pixels].b);
-	mlen = icon->w*icon->h;
-	mask = (Uint8 *)malloc(mlen/8);
+	mlen = (icon->w*icon->h + 7) / 8;
+	mask = (Uint8 *)malloc(mlen);
 	if ( mask == NULL ) {
 		fprintf(stderr, "Out of memory!\n");
 		SDL_FreeSurface(icon);
 		return(NULL);
 	}
-	memset(mask, 0, mlen/8);
-	for ( i=0; i<mlen; ) {
-		if ( pixels[i] != *pixels )
-			mask[i/8] |= 0x01;
-		++i;
-		if ( (i%8) != 0 )
-			mask[i/8] <<= 1;
-	}
+	memset(mask, 0, mlen);
+	for ( i=0; i < icon->h; i++)
+        for (j=0; j < icon->w; j++) {
+            int pindex = i * icon->pitch + j;
+            int mindex = i * icon->w + j;
+            if ( pixels[pindex] != *pixels )
+                mask[mindex>>3] |= 1 << (7 - (mindex & 7));
+        }
 	*maskp = mask;
 	return(icon);
 }
