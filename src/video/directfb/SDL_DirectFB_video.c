@@ -529,6 +529,19 @@ int DirectFB_VideoInit(_THIS, SDL_PixelFormat *vformat)
       HIDDEN->c2frame->Clear(HIDDEN->c2frame, 0, 0, 0, 0xff );
 
       HIDDEN->c2layer->SetOpacity(HIDDEN->c2layer, 0xFF );
+    
+      /* Check if overscan is possibly set */
+      if (getenv("SDL_DIRECTFB_MGA_OVERSCAN") != NULL)
+        {
+	    float overscan = 0;
+	    if (sscanf(getenv("SDL_DIRECTFB_MGA_OVERSCAN"), "%f", &overscan) == 1)
+               if (overscan > 0 && overscan < 2)
+		  HIDDEN->mga_crtc2_stretch_overscan = overscan;
+	}
+
+      #ifdef DIRECTFB_CRTC2_DEBUG
+      printf("CRTC2 overscan: %f\n", HIDDEN->mga_crtc2_stretch_overscan);
+      #endif
     }
 
   return 0;
@@ -693,18 +706,42 @@ static SDL_Surface *DirectFB_SetVideoMode(_THIS, SDL_Surface *current, int width
 
       if (getenv("SDL_DIRECTFB_MGA_STRETCH") != NULL)
         {
-          /* don't stretch slightly smaller/larger images */
-          if (width < HIDDEN->c2framesize.w*0.95 && height < HIDDEN->c2framesize.w*0.95)
+	    /* Normally assume a picture aspect ratio of 4:3 */
+	    int zoom_aspect_x = 4, zoom_aspect_y = 3, i, j;
+
+	    for (i = 1; i < 20; i++)
+	      {
+		for (j = 1; j < 10; j++)
+		  {
+		    if ((float)width/(float)i*(float)j == height) 
+		      {
+			zoom_aspect_x = i;
+			zoom_aspect_y = j;
+			
+			/* break the loop */
+			i = 21;
+			break;
+		      }
+		  }
+	      }
+	
+            #ifdef DIRECTFB_CRTC2_DEBUG
+            printf("Source resolution: X: %d, Y: %d, Aspect ratio: %d:%d\n", width, height, zoom_aspect_x, zoom_aspect_y);
+            printf("CRTC2 resolution: X: %d, Y: %d\n", HIDDEN->c2framesize.w, HIDDEN->c2framesize.h);
+            #endif
+	
+          /* don't stretch only slightly smaller/larger images */
+          if ((float)width < (float)HIDDEN->c2framesize.w*0.95 || (float)height < (float)HIDDEN->c2framesize.h*0.95)
             {
-              while (HIDDEN->c2dsize.w < HIDDEN->c2framesize.w*HIDDEN->mga_crtc2_stretch_overscan && HIDDEN->c2dsize.h < HIDDEN->c2framesize.h*HIDDEN->mga_crtc2_stretch_overscan)
+              while ((float)HIDDEN->c2dsize.w < (float)HIDDEN->c2framesize.w*HIDDEN->mga_crtc2_stretch_overscan && (float)HIDDEN->c2dsize.h < (float)HIDDEN->c2framesize.h*HIDDEN->mga_crtc2_stretch_overscan)
                 {
-                   HIDDEN->c2dsize.w+=4;
-                   HIDDEN->c2dsize.h+=3;
+                   HIDDEN->c2dsize.w+=zoom_aspect_x;
+                   HIDDEN->c2dsize.h+=zoom_aspect_y;
                 }
 
               /* one step down */
-              HIDDEN->c2dsize.w-=4;
-              HIDDEN->c2dsize.h-=3;
+                HIDDEN->c2dsize.w-=zoom_aspect_x;
+                HIDDEN->c2dsize.h-=zoom_aspect_y;
 
               #ifdef DIRECTFB_CRTC2_DEBUG
               printf("Stretched resolution: X: %d, Y: %d\n", HIDDEN->c2dsize.w, HIDDEN->c2dsize.h);
@@ -712,12 +749,12 @@ static SDL_Surface *DirectFB_SetVideoMode(_THIS, SDL_Surface *current, int width
 
               HIDDEN->mga_crtc2_stretch = 1;
             } 
-          else if (width > HIDDEN->c2framesize.w*0.95 && height > HIDDEN->c2framesize.w*0.95)
+          else if ((float)width > (float)HIDDEN->c2framesize.w*0.95 || (float)height > (float)HIDDEN->c2framesize.h*0.95)
             {
-              while (HIDDEN->c2dsize.w > HIDDEN->c2framesize.w*HIDDEN->mga_crtc2_stretch_overscan || HIDDEN->c2dsize.h > HIDDEN->c2framesize.h*HIDDEN->mga_crtc2_stretch_overscan)
+               while ((float)HIDDEN->c2dsize.w > (float)HIDDEN->c2framesize.w*HIDDEN->mga_crtc2_stretch_overscan || (float)HIDDEN->c2dsize.h > (float)HIDDEN->c2framesize.h*HIDDEN->mga_crtc2_stretch_overscan)
                 {
-                  HIDDEN->c2dsize.w-=4;
-                  HIDDEN->c2dsize.h-=3;
+              HIDDEN->c2dsize.w-=zoom_aspect_x;
+              HIDDEN->c2dsize.h-=zoom_aspect_y;
                 }
               
               #ifdef DIRECTFB_CRTC2_DEBUG
@@ -725,7 +762,10 @@ static SDL_Surface *DirectFB_SetVideoMode(_THIS, SDL_Surface *current, int width
               #endif
 
               HIDDEN->mga_crtc2_stretch = 1;
-            }
+             } else {
+          #ifdef DIRECTFB_CRTC2_DEBUG
+          printf("Not stretching image\n");
+          #endif
         }
 
       /* Panning */
@@ -740,9 +780,10 @@ static SDL_Surface *DirectFB_SetVideoMode(_THIS, SDL_Surface *current, int width
         HIDDEN->c2dsize.y = (HIDDEN->c2dsize.h - HIDDEN->c2framesize.h)  / 2;
 
       #ifdef DIRECTFB_CRTC2_DEBUG
-      printf("CTRC2 position X: %d, Y: %d\n", HIDDEN->c2dsize.x, HIDDEN->c2dsize.y);
+    printf("CRTC2 position X: %d, Y: %d\n", HIDDEN->c2dsize.x, HIDDEN->c2dsize.y);
       #endif
    }
+  }
 
   return current;
 }
