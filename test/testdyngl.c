@@ -89,15 +89,17 @@ int main(int argc,char *argv[])
 	SDL_Event event;
 	int done=0;
 	GLfloat pixels[NB_PIXELS*3];
-	char default_gl_lib[]="/usr/lib/libGL.so";
-	char* current_gl_lib=default_gl_lib;
+#ifdef _WIN32
+	char *gl_library = "OpenGL32.DLL";
+#else
+	char *gl_library = "libGL.so.1";
+#endif
 	
-	if (argc==2)
-	{
-		current_gl_lib=argv[1];
+	if (argv[1]) {
+		gl_library = argv[1];
 	}
 	
-	if (SDL_Init(SDL_INIT_EVERYTHING)<0)
+	if (SDL_Init(SDL_INIT_VIDEO)<0)
 	{
 		printf("Unable to init SDL : %s\n",SDL_GetError());
 		exit(1);
@@ -109,7 +111,7 @@ int main(int argc,char *argv[])
 		exit(1);
 	}
 	
-	if (SDL_GL_LoadLibrary(current_gl_lib)<0)
+	if (SDL_GL_LoadLibrary(gl_library)<0)
 	{
 		printf("Unable to dynamically open GL lib : %s\n",SDL_GetError());
 		exit(1);
