@@ -123,7 +123,9 @@ SDL_Overlay *X11_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, S
 						}
 					}
 				}
-				XFree(formats);
+				if ( formats ) {
+					XFree(formats);
+				}
 			}
 		}
 		SDL_NAME(XvFreeAdaptorInfo)(ainfo);
