@@ -1299,10 +1299,14 @@ int SDL_GL_LoadLibrary(const char *path)
 	int retval;
 
 	retval = -1;
-	if ( video && video->GL_LoadLibrary ) {
-		retval = video->GL_LoadLibrary(this, path);
+	if ( video == NULL ) {
+		SDL_SetError("Video subsystem has not been initialized");
 	} else {
-		SDL_SetError("No dynamic GL support in video driver");
+		if ( video->GL_LoadLibrary ) {
+			retval = video->GL_LoadLibrary(this, path);
+		} else {
+			SDL_SetError("No dynamic GL support in video driver");
+		}
 	}
 	return(retval);
 }
