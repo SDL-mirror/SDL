@@ -79,6 +79,12 @@ static __inline__ Uint16 SDL_Swap16(Uint16 x)
 	__asm__("rlwimi %0,%2,8,16,23" : "=&r" (result) : "0" (x >> 8), "r" (x));
 	return result;
 }
+#elif defined(__GNUC__) && defined(__M68000__)
+static __inline__ Uint16 SDL_Swap16(Uint16 x)
+{
+	__asm__("rorw #8,%0" : "=d" (x) :  "0" (x) : "cc");
+	return x;
+}
 #else
 static __inline__ Uint16 SDL_Swap16(Uint16 x) {
 	return((x<<8)|(x>>8));
@@ -106,6 +112,12 @@ static __inline__ Uint32 SDL_Swap32(Uint32 x)
 	__asm__("rlwimi %0,%2,8,8,15"   : "=&r" (result) : "0" (result),    "r" (x));
 	__asm__("rlwimi %0,%2,24,0,7"   : "=&r" (result) : "0" (result),    "r" (x));
 	return result;
+}
+#elif defined(__GNUC__) && defined(__M68000__)
+static __inline__ Uint16 SDL_Swap32(Uint16 x)
+{
+	__asm__("rorw	#8,%0;\t\nswap	%0;\t\nror	#8,%0" : "=d" (x) :  "0" (x) : "cc");
+	return x;
 }
 #else
 static __inline__ Uint32 SDL_Swap32(Uint32 x) {
