@@ -184,6 +184,8 @@ void SDL_UnloadObject(void *handle)
 {
 #if defined(__BEOS__)
 	image_id library_id;
+#elif defined(macintosh)
+	CFragConnectionID library_id;
 #endif
 	if ( handle == NULL ) {
 		return;
@@ -200,7 +202,7 @@ void SDL_UnloadObject(void *handle)
 	unload_add_on(library_id);
 #elif defined(macintosh)
 /* * */
-	CFragConnectionID library_id = (CFragConnectionID)handle;
+	library_id = (CFragConnectionID)handle;
 	CloseConnection(library_id);
 #elif defined(__MINT__) && defined(ENABLE_LDG)
 /* * */
