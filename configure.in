@@ -2592,6 +2592,17 @@ case "$ARCH" in
     ;;
 esac
 
+case "$ARCH" in
+  macosx)
+    # Evil hack to allow static linking on Mac OS X
+    SDL_STATIC_LIBS="\${exec_prefix}/lib/libSDLmain.a \${exec_prefix}/lib/libSDL.a"
+    ;;
+  *)
+    SDL_STATIC_LIBS="$SDL_LIBS"
+    ;;
+esac
+
+
 STATIC_SYSTEM_LIBS="$SYSTEM_LIBS"
 
 dnl Output the video drivers we use
@@ -2614,6 +2625,7 @@ AC_SUBST(SDL_EXTRALIBS)
 dnl Expand the cflags and libraries needed by apps using SDL
 AC_SUBST(SDL_CFLAGS)
 AC_SUBST(SDL_LIBS)
+AC_SUBST(SDL_STATIC_LIBS)
 AC_SUBST(SDL_RLD_FLAGS)
 
 dnl Expand the libraries needed for static and dynamic linking
