@@ -7,6 +7,9 @@
 
 #include "SDL.h"
 
+#define NUM_BLITS	10
+#define NUM_UPDATES	500
+
 #define FLAG_MASK	(SDL_HWSURFACE | SDL_FULLSCREEN | SDL_DOUBLEBUF)
 
 void PrintFlags(Uint32 flags)
@@ -30,49 +33,47 @@ int RunBlitTests(SDL_Surface *screen, SDL_Surface *bmp, int blitcount)
 	int i, j;
 	int maxx;
 	int maxy;
-	SDL_Rect *rects;
+	SDL_Rect dst;
 
-	rects = (SDL_Rect *)malloc(blitcount * sizeof(*rects));
-	if ( ! rects ) {
-		return 0;
-	}
-	maxx = (int)screen->w - bmp->w;
-	maxy = (int)screen->h - bmp->h;
-	for ( i = 0; i < 100; ++i ) {
+	maxx = (int)screen->w - bmp->w + 1;
+	maxy = (int)screen->h - bmp->h + 1;
+	for ( i = 0; i < NUM_UPDATES; ++i ) {
 		for ( j = 0; j < blitcount; ++j ) {
 			if ( maxx ) {
-				rects[j].x = rand() % maxx;
+				dst.x = rand() % maxx;
 			} else {
-				rects[j].x = 0;
+				dst.x = 0;
 			}
 			if ( maxy ) {
-				rects[j].y = rand() % maxy;
+				dst.y = rand() % maxy;
 			} else {
-				rects[j].y = 0;
+				dst.y = 0;
 			}
-			rects[j].w = bmp->w;
-			rects[j].h = bmp->h;
-			SDL_BlitSurface(bmp, NULL, screen, &rects[j]);
+			dst.w = bmp->w;
+			dst.h = bmp->h;
+			SDL_BlitSurface(bmp, NULL, screen, &dst);
 		}
-		if ( screen->flags & SDL_DOUBLEBUF ) {
-			SDL_Flip(screen);
-		} else {
-			SDL_UpdateRects(screen, blitcount, rects);
-		}
+		SDL_Flip(screen);
 	}
-	free(rects);
 
 	return i;
 }
 
-void RunModeTests(SDL_Surface *screen)
+int RunModeTests(SDL_Surface *screen)
 {
 	Uint32 then, now;
 	Uint32 frames;
+	float seconds;
 	int i;
 	Uint8 r, g, b;
 	Uint32 pixel;
 	SDL_Surface *bmp, *tmp;
+	SDL_Event event;
+
+	while ( SDL_PollEvent(&event) ) {
+		if ( event.type == SDL_KEYDOWN )
+			return 0;
+	}
 
 	/* First test fills and screen update speed */
 	printf("Running color fill and fullscreen update test\n");
@@ -103,7 +104,17 @@ void RunModeTests(SDL_Surface *screen)
 		++frames;
 	}
 	now = SDL_GetTicks();
-	printf("%d fills and flips, %f FPS\n", frames, (float)(now - then) / frames);
+	seconds = (float)(now - then) / 1000.0f;
+	if ( seconds > 0.0f ) {
+		printf("%d fills and flips in %2.2f seconds, %2.2f FPS\n", frames, seconds, (float)frames / seconds);
+	} else {
+		printf("%d fills and flips in zero seconds!n", frames);
+	}
+
+	while ( SDL_PollEvent(&event) ) {
+		if ( event.type == SDL_KEYDOWN )
+			return 0;
+	}
 
 	bmp = SDL_LoadBMP("sample.bmp");
 	if ( ! bmp ) {
@@ -115,10 +126,13 @@ void RunModeTests(SDL_Surface *screen)
 	PrintFlags(bmp->flags);
 	printf("\n");
 	then = SDL_GetTicks();
-	frames = RunBlitTests(screen, bmp, 10);
+	frames = RunBlitTests(screen, bmp, NUM_BLITS);
 	now = SDL_GetTicks();
-	if ( frames ) {
-		printf("%d blits, %d updates, %f FPS\n", 10*frames, frames, (float)(now - then) / frames);
+	seconds = (float)(now - then) / 1000.0f;
+	if ( seconds > 0.0f ) {
+		printf("%d blits / %d updates in %2.2f seconds, %2.2f FPS\n", NUM_BLITS*frames, frames, seconds, (float)frames / seconds);
+	} else {
+		printf("%d blits / %d updates in zero seconds!\n", NUM_BLITS*frames, frames);
 	}
 
 	tmp = bmp;
@@ -133,12 +147,21 @@ void RunModeTests(SDL_Surface *screen)
 	PrintFlags(bmp->flags);
 	printf("\n");
 	then = SDL_GetTicks();
-	frames = RunBlitTests(screen, bmp, 10);
+	frames = RunBlitTests(screen, bmp, NUM_BLITS);
 	now = SDL_GetTicks();
-	if ( frames ) {
-		printf("%d blits, %d updates, %f FPS\n", 10*frames, frames, (float)(now - then) / frames);
+	seconds = (float)(now - then) / 1000.0f;
+	if ( seconds > 0.0f ) {
+		printf("%d blits / %d updates in %2.2f seconds, %2.2f FPS\n", NUM_BLITS*frames, frames, seconds, (float)frames / seconds);
+	} else {
+		printf("%d blits / %d updates in zero seconds!\n", NUM_BLITS*frames, frames);
 	}
 	SDL_FreeSurface(bmp);
+
+	while ( SDL_PollEvent(&event) ) {
+		if ( event.type == SDL_KEYDOWN )
+			return 0;
+	}
+	return 1;
 }
 
 void RunVideoTests()
@@ -160,6 +183,8 @@ void RunVideoTests()
 	SDL_Surface *screen;
 
 	/* Test out several different video mode combinations */
+	SDL_WM_SetCaption("SDL Video Benchmark", "vidtest");
+	SDL_ShowCursor(0);
 	for ( i = 0; i < SDL_TABLESIZE(mode_list); ++i ) {
 		for ( j = 0; j < SDL_TABLESIZE(flags); ++j ) {
 			printf("===================================\n");
@@ -183,7 +208,9 @@ void RunVideoTests()
 				printf("\n");
 				continue;
 			}
-			RunModeTests(screen);
+			if ( ! RunModeTests(screen) ) {
+				return;
+			}
 		}
 	}
 }
@@ -193,11 +220,15 @@ int main(int argc, char *argv[])
 	const SDL_VideoInfo *info;
 	int i;
 	SDL_Rect **modes;
+	char driver[128];
 
 	if ( SDL_Init(SDL_INIT_VIDEO) < 0 ) {
 		fprintf(stderr,
 			"Couldn't initialize SDL: %s\n", SDL_GetError());
 		exit(1);
+	}
+	if ( SDL_VideoDriverName(driver, sizeof(driver)) ) {
+		printf("Video driver: %s\n", driver);
 	}
 	info = SDL_GetVideoInfo();
 	printf(
