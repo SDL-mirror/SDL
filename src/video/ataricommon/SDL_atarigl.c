@@ -711,8 +711,8 @@ static void CopyShadowRGBTo555(_THIS, SDL_Surface *surface)
 		for (x=0; x<surface->w; x++) {
 			Uint16 dstcolor;
 			
-			dstcolor = ((*srccol++)>>9) & (31<<10);
-			dstcolor |= ((*srccol++)>>6) & (31<<5);
+			dstcolor = ((*srccol++)<<7) & (31<<10);
+			dstcolor |= ((*srccol++)<<2) & (31<<5);
 			dstcolor |= ((*srccol++)>>3) & 31;
 			*dstcol++ = dstcolor;
 		}
@@ -740,8 +740,8 @@ static void CopyShadowRGBTo565(_THIS, SDL_Surface *surface)
 		for (x=0; x<surface->w; x++) {
 			Uint16 dstcolor;
 			
-			dstcolor = ((*srccol++)>>8) & (31<<11);
-			dstcolor |= ((*srccol++)>>5) & (63<<5);
+			dstcolor = ((*srccol++)<<8) & (31<<11);
+			dstcolor |= ((*srccol++)<<3) & (63<<5);
 			dstcolor |= ((*srccol++)>>3) & 31;
 			*dstcol++ = dstcolor;
 		}
