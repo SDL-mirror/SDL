@@ -321,6 +321,34 @@ static LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 		}
 		return(0);
 
+
+#if (_WIN32_WINNT >= 0x0400) || (_WIN32_WINDOWS > 0x0400)
+		case WM_MOUSEWHEEL: 
+			if ( SDL_VideoSurface && ! DINPUT_FULLSCREEN() ) {
+				Sint16 x, y;
+				Uint8 button = 0;
+				int move = (short)HIWORD(wParam);
+				if(move > 0)
+					button = 4;
+				else if(move < 0)
+					button = 5;
+				if(button)
+				{
+					if ( mouse_relative ) {
+					/*	RJR: March 28, 2000
+						report internal mouse position if in relative mode */
+						x = 0; y = 0;
+					} else {
+						x = (Sint16)LOWORD(lParam);
+						y = (Sint16)HIWORD(lParam);
+					}
+					posted = SDL_PrivateMouseButton(
+								SDL_PRESSED, button, x, y);
+				}
+			}
+			return(0);
+#endif
+
 #ifdef WM_GETMINMAXINFO
 		/* This message is sent as a way for us to "check" the values
 		 * of a position change.  If we don't like it, we can adjust
