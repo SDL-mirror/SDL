@@ -58,6 +58,7 @@ static void (*SDL_DIfun[MAX_INPUTS])(const int, DIDEVICEOBJECTDATA *);
 static int SDL_DIndev = 0;
 static int mouse_lost;
 static int mouse_pressed;
+static int mouse_buttons_swapped = 0;
 
 /* The translation table from a DirectInput scancode to an SDL keysym */
 static SDLKey DIK_keymap[256];
@@ -216,6 +217,7 @@ static int DX5_DInputInit(_THIS)
 		++SDL_DIndev;
 	}
 	mouse_pressed = 0;
+	mouse_buttons_swapped = GetSystemMetrics(SM_SWAPBUTTON);
 
 	/* DirectInput is ready! */
 	return(0);
@@ -340,6 +342,11 @@ static void handle_mouse(const int numevents, DIDEVICEOBJECTDATA *ptrbuf)
 					}
 					state = SDL_RELEASED;
 				}
+				if ( mouse_buttons_swapped ) {
+					if ( button == 1 ) button = 3;
+					else
+					if ( button == 3 ) button = 1;
+				}
 				posted = SDL_PrivateMouseButton(state, button,
 									0, 0);
 			}
@@ -410,6 +417,11 @@ static void handle_mouse(const int numevents, DIDEVICEOBJECTDATA *ptrbuf)
 						mouse_pressed = 0;
 					}
 					state = SDL_RELEASED;
+				}
+				if ( mouse_buttons_swapped ) {
+					if ( button == 1 ) button = 3;
+					else
+					if ( button == 3 ) button = 1;
 				}
 				posted = SDL_PrivateMouseButton(state, button,
 									0, 0);
