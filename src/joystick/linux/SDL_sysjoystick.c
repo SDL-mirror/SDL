@@ -69,7 +69,7 @@ static const char *special_joysticks[] = {
 	"'Analog 2-axis 4-button 1-hat FCS joystick' 2 1 0",
 	"'Microsoft SideWinder Precision 2 Joystick' 4 1 0",
 	"'Logitech Inc. WingMan Extreme Digital 3D' 4 1 0",
-	"'Saitek Saitek X45' 6 1 0"
+	"'Saitek Saitek X45' 6 1 0",
 	NULL
 };
 #else
