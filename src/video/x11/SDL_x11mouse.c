@@ -236,7 +236,7 @@ void X11_CheckMouseModeNoLock(_THIS)
 	   They almost never want to do this, as it seriously affects
 	   applications that rely on continuous relative mouse motion.
 	*/
-	env_override = getenv("SDL_MOUSE_NORELATIVE");
+	env_override = getenv("SDL_MOUSE_RELATIVE");
 	if ( env_override ) {
 		enable_relative = atoi(env_override);
 	}
