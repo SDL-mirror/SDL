@@ -71,7 +71,6 @@ static char RO_pressed[ROKEYBD_ARRAYSIZE];
 
 static SDL_keysym *TranslateKey(int intkey, SDL_keysym *keysym, int pressed);
 
-
 void RISCOS_PollMouse(_THIS);
 void RISCOS_PollKeyboard();
 
@@ -144,7 +143,7 @@ void RISCOS_InitOSKeymap(_THIS)
   RO_keymap[53] = SDLK_u;
   RO_keymap[54] = SDLK_o;
   RO_keymap[55] = SDLK_p;
-  RO_keymap[56] = SDLK_LEFTPAREN;
+  RO_keymap[56] = SDLK_LEFTBRACKET;
   RO_keymap[57] = SDLK_UP;
   RO_keymap[58] = SDLK_KP_PLUS;
   RO_keymap[59] = SDLK_KP_MINUS;
@@ -173,7 +172,7 @@ void RISCOS_InitOSKeymap(_THIS)
   RO_keymap[85] = SDLK_n;
   RO_keymap[86] = SDLK_l;
   RO_keymap[87] = SDLK_SEMICOLON;
-  RO_keymap[88] = SDLK_RIGHTPAREN;
+  RO_keymap[88] = SDLK_RIGHTBRACKET;
   RO_keymap[89] = SDLK_DELETE;
   RO_keymap[90] = SDLK_KP_MINUS;
   RO_keymap[91] = SDLK_KP_MULTIPLY;
@@ -356,7 +355,7 @@ void RISCOS_PollKeyboard()
 	{
 		which_key = (_kernel_osbyte(121, which_key, 0) & 0xFF);
 	    if (which_key != ROKEY_NONE)
-		{
+	    {
 		    switch(which_key)
 		    {
 		    /* Skip over mouse keys */
@@ -369,6 +368,10 @@ void RISCOS_PollKeyboard()
             /* Ignore keys that cause 2 internal number to be generated */
 			case 71: case 24: case 87: case 40:
 			    break;
+
+            /* Ignore break as it can be latched on */
+            case 44:
+                break;
 
 			default:
 				RO_pressed[which_key] += 2;
@@ -426,11 +429,11 @@ static SDL_keysym *TranslateKey(int intkey, SDL_keysym *keysym, int pressed)
 
 		state = (_kernel_osbyte(202, 0, 255) & 0xFF);
 
-		/*TODO: better key to char mapping */
+		/*TODO: Take into account other keyboard layouts */
 
-		ch = keysym->sym; /* This should handle most keys */
+		ch = keysym->sym; /* This should handle most unshifted keys */
 
-        if (intkey < 9)
+        if (intkey < 9 || ch == SDLK_UNKNOWN)
         {
            ch = 0;
 
@@ -438,15 +441,95 @@ static SDL_keysym *TranslateKey(int intkey, SDL_keysym *keysym, int pressed)
 		{
 			ch = ch & 31;
 
-		} else if ((state & 16) == 0) /* Caps lock is on */
+		} else 
 		{
-			if ((state & 128) == 0) /* Shift Enable off */
+			int topOfKey = 0;
+            if (state & 8) /* Shift on */
 			{
-				ch = toupper(ch);
+				topOfKey = 1;
 			}
-		} else if (state & 8) /* Shift on */
-		{
-			ch = toupper(ch);
+
+			if ((state & 16) == 0) /* Caps lock is on */
+			{
+			   if (ch >= SDLK_a && ch <= SDLK_z)
+			   {
+ 				  if ((state & 128) == 0) /* Shift Enable off */
+				  {
+				     /* All letter become upper case */
+				 	 topOfKey = 1;
+				  } else
+				  {
+				     /* Shift+Letters gives lower case */
+				     topOfKey = 1 - topOfKey;
+				  }
+		       }
+			}
+
+			if (topOfKey)
+			{
+				/* Key produced with shift held down */
+
+				/* Letters just give upper case version */
+				if (ch >= SDLK_a && ch <= SDLK_z) ch = toupper(ch);
+				else
+				{
+					switch(ch)
+					{
+					case SDLK_HASH:   ch = '~'; break;
+					case SDLK_QUOTE:  ch = '@'; break;
+					case SDLK_COMMA:  ch = '<'; break;
+					case SDLK_MINUS:  ch = '_'; break;
+					case SDLK_PERIOD: ch = '>'; break;
+					case SDLK_SLASH:  ch = '?'; break;
+
+					case SDLK_0: ch = ')'; break;
+					case SDLK_1: ch = '!'; break;
+					case SDLK_2: ch = '"'; break;
+					case SDLK_3: ch = '£'; break;
+					case SDLK_4: ch = '$'; break;
+					case SDLK_5: ch = '%'; break;
+					case SDLK_6: ch = '^'; break;
+					case SDLK_7: ch = '&'; break;
+					case SDLK_8: ch = '*'; break;
+					case SDLK_9: ch = '('; break;
+
+					case SDLK_SEMICOLON:    ch = ':'; break;
+					case SDLK_EQUALS:       ch = '+'; break;
+					case SDLK_LEFTBRACKET:  ch = '{'; break;
+					case SDLK_BACKSLASH:    ch = '|'; break;
+					case SDLK_RIGHTBRACKET: ch = '}'; break;
+					case SDLK_BACKQUOTE:    ch = '¬'; break;
+
+					default:
+						ch = 0; /* Map to zero character if we don't understand it */
+						break;
+					}
+				}
+
+			} else if (ch > 126)
+			{
+				/* SDL key code < 126 map directly onto their Unicode equivalents */
+				/* Keypad 0 to 9 maps to numeric equivalent */
+				if (ch >= SDLK_KP0 && ch <= SDLK_KP9) ch = ch - SDLK_KP0 + '0';
+				else
+				{
+					/* Following switch maps other keys that produce an Ascii value */
+					switch(ch)
+					{
+					case SDLK_KP_PERIOD:   ch = '.'; break;
+					case SDLK_KP_DIVIDE:   ch = '/'; break;
+					case SDLK_KP_MULTIPLY: ch = '*'; break;
+					case SDLK_KP_MINUS:    ch = '-'; break;
+					case SDLK_KP_PLUS:     ch = '+'; break;
+					case SDLK_KP_EQUALS:   ch = '='; break;
+
+					default:
+						/* If we don't know what it is set the Unicode to 0 */
+						ch = 0;
+						break;
+					}
+				}
+			}			
 		}
 				
 		keysym->unicode = ch;
@@ -455,4 +538,3 @@ static SDL_keysym *TranslateKey(int intkey, SDL_keysym *keysym, int pressed)
 }
 
 /* end of SDL_riscosevents.c ... */
-
