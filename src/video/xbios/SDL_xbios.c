@@ -639,7 +639,10 @@ static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 			int x1,x2;
 
 			x1 = rects[i].x & ~15;
-			x2 = ((rects[i].x+rects[i].w) | 15) +1;
+			x2 = rects[i].x+rects[i].w;
+			if (x2 & 15) {
+				x2 = (x2 | 15) +1;
+			}
 
 			source = surface->pixels;
 			source += surface->pitch * rects[i].y;

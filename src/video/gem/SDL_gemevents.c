@@ -43,7 +43,8 @@ static char rcsid =
 #include "SDL_events_c.h"
 #include "SDL_gemvideo.h"
 #include "SDL_gemevents_c.h"
-#include "../ataricommon/SDL_atarikeys.h"	/* for keyboard scancodes */
+#include "SDL_atarikeys.h"	/* for keyboard scancodes */
+#include "SDL_xbiosinterrupt_s.h"
 
 /* Defines */
 
@@ -55,8 +56,6 @@ static unsigned char gem_currentkeyboard[ATARIBIOS_MAXKEYS];
 static unsigned char gem_previouskeyboard[ATARIBIOS_MAXKEYS];
 static unsigned char gem_currentascii[ATARIBIOS_MAXKEYS];
 
-static short prevmousex, prevmousey, prevmouseb;
-
 /* The translation tables from a console scancode to a SDL keysym */
 static SDLKey keymap[ATARIBIOS_MAXKEYS];
 
@@ -65,7 +64,7 @@ static SDLKey keymap[ATARIBIOS_MAXKEYS];
 static SDL_keysym *TranslateKey(int scancode, int asciicode, SDL_keysym *keysym);
 static int do_messages(_THIS, short *message);
 static void do_keyboard(short kc, short ks);
-static void do_mouse(_THIS, short mx, short my, short mb);
+static void do_mouse(_THIS, short mx, short my, short mb, short ks);
 
 /* Functions */
 
@@ -124,22 +123,23 @@ void GEM_InitOSKeymap(_THIS)
 	keymap[SCANCODE_CAPSLOCK] = SDLK_CAPSLOCK;
 
 	/* Mouse init */
-	prevmousex = prevmousey = prevmouseb = 0;
 	GEM_mouse_relative = SDL_FALSE;
 }
 
 void GEM_PumpEvents(_THIS)
 {
-	short mx, my, mb, dummy;
+	short mousex, mousey, mouseb, dummy;
+	short kstate, prevkc, prevks;
 	int i;
 	SDL_keysym	keysym;
 
 	memset(gem_currentkeyboard,0,sizeof(gem_currentkeyboard));
+	prevkc = prevks = 0;
 	
 	for (;;)
 	{
 		int quit, resultat;
-		short buffer[8], kc, ks;
+		short buffer[8], kc;
 
 		quit = 0;
 
@@ -150,7 +150,7 @@ void GEM_PumpEvents(_THIS)
 			0,0,0,0,0,
 			buffer,
 			10,
-			&dummy,&dummy,&dummy,&ks,&kc,&dummy
+			&dummy,&dummy,&dummy,&kstate,&kc,&dummy
 		);
 
 		/* Message event ? */
@@ -158,10 +158,14 @@ void GEM_PumpEvents(_THIS)
 			quit = do_messages(this, buffer);
 
 		/* Keyboard event ? */
-		if (resultat & MU_KEYBD)
-			do_keyboard(kc,ks);
-		else
-			do_keyboard(0,0);
+		if (resultat & MU_KEYBD) {
+			if ((prevkc != kc) || (prevks != kstate)) {
+				do_keyboard(kc,kstate);
+			} else {
+				/* Avoid looping, if repeating same key */
+				break;
+			}
+		}
 
 		/* Timer event ? */
 		if ((resultat & MU_TIMER) || quit)
@@ -169,10 +173,10 @@ void GEM_PumpEvents(_THIS)
 	}
 
 	/* Update mouse */
-	graf_mkstate(&mx, &my, &mb, &dummy);
-	do_mouse(this, mx, my, mb);
+	graf_mkstate(&mousex, &mousey, &mouseb, &kstate);
+	do_mouse(this, mousex, mousey, mouseb, kstate);
 
-	/* Now generates keyboard events */
+	/* Now generate keyboard events */
 	for (i=0; i<ATARIBIOS_MAXKEYS; i++) {
 		/* Key pressed ? */
 		if (gem_currentkeyboard[i] && !gem_previouskeyboard[i])
@@ -259,7 +263,6 @@ static int do_messages(_THIS, short *message)
 static void do_keyboard(short kc, short ks)
 {
 	int			scancode, asciicode;
-	short		dummy;
 
 	if (kc) {
 		scancode=(kc>>8) & 127;
@@ -268,9 +271,6 @@ static void do_keyboard(short kc, short ks)
 		gem_currentkeyboard[scancode]=0xFF;
 		gem_currentascii[scancode]=asciicode;
 	}
-
-	if (!ks)
-		graf_mkstate(&dummy, &dummy, &dummy, &ks);
 
 	/* Read special keys */
 	if (ks & K_RSHIFT)
@@ -283,16 +283,15 @@ static void do_keyboard(short kc, short ks)
 		gem_currentkeyboard[SCANCODE_LEFTALT]=0xFF;
 }
 
-static void do_mouse(_THIS, short mx, short my, short mb)
+static void do_mouse(_THIS, short mx, short my, short mb, short ks)
 {
+	static short prevmousex=0, prevmousey=0, prevmouseb=0;
+
 	/* Mouse motion ? */
 	if ((prevmousex!=mx) || (prevmousey!=my)) {
 		if (GEM_mouse_relative) {
-			short wind_pxy[8];
-
-			wind_get(GEM_handle, WF_WORKXYWH, &wind_pxy[0], &wind_pxy[1], &wind_pxy[2], &wind_pxy[3]);
-
-			SDL_PrivateMouseMotion(0, 1, mx-wind_pxy[0], my-wind_pxy[1]);
+			SDL_PrivateMouseMotion(0, 1, SDL_AtariXbios_mousex, SDL_AtariXbios_mousey);
+			SDL_AtariXbios_mousex = SDL_AtariXbios_mousey = 0;
 		} else {
 			SDL_PrivateMouseMotion(0, 1, mx, my);
 		}
@@ -304,19 +303,29 @@ static void do_mouse(_THIS, short mx, short my, short mb)
 	if (prevmouseb!=mb) {
 		int i;
 
-		for (i=0;i<3;i++) {
+		for (i=0;i<2;i++) {
 			int curbutton, prevbutton;
 		
 			curbutton = mb & (1<<i);
 			prevbutton = prevmouseb & (1<<i);
 		
-			if (curbutton & !prevbutton) {
-				SDL_PrivateMouseButton(SDL_PRESSED, i, 0, 0);
+			if (curbutton && !prevbutton) {
+				SDL_PrivateMouseButton(SDL_PRESSED, i+1, 0, 0);
 			}
-			if (!curbutton & prevbutton) {
-				SDL_PrivateMouseButton(SDL_RELEASED, i, 0, 0);
+			if (!curbutton && prevbutton) {
+				SDL_PrivateMouseButton(SDL_RELEASED, i+1, 0, 0);
 			}
 		}
 		prevmouseb = mb;
 	}
+
+	/* Read special keys */
+	if (ks & K_RSHIFT)
+		gem_currentkeyboard[SCANCODE_RIGHTSHIFT]=0xFF;
+	if (ks & K_LSHIFT)
+		gem_currentkeyboard[SCANCODE_LEFTSHIFT]=0xFF;
+	if (ks & K_CTRL)
+		gem_currentkeyboard[SCANCODE_LEFTCONTROL]=0xFF;
+	if (ks & K_ALT)
+		gem_currentkeyboard[SCANCODE_LEFTALT]=0xFF;
 }

@@ -136,21 +136,26 @@ int GEM_ShowWMCursor(_THIS, WMcursor *cursor)
 	return 1;
 }
 
+#if 0
 void GEM_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
 {
+	/* This seems to work only on AES 3.4 (Falcon) */
+
 	EVNTREC	warpevent;
 	
 	warpevent.ap_event = APPEVNT_MOUSE; 
-	warpevent.ap_value = (y << 16) | x;
+	warpevent.ap_value = (x << 16) | y;
 
 	appl_tplay(&warpevent, 1, 1000);
 }
+#endif
 
 void GEM_CheckMouseMode(_THIS)
 {
 	/* If the mouse is hidden and input is grabbed, we use relative mode */
 	if ( !(SDL_cursorstate & CURSOR_VISIBLE) &&
-		(this->input_grab != SDL_GRAB_OFF) ) {
+		(this->input_grab != SDL_GRAB_OFF) &&
+             (SDL_GetAppState() & SDL_APPACTIVE) ) {
 		GEM_mouse_relative = SDL_TRUE;
 	} else {
 		GEM_mouse_relative = SDL_FALSE;

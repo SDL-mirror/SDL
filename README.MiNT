@@ -45,7 +45,7 @@ III.  Enjoy! :)
 ==============================================================================
 IV.  What is supported:
 
-Keyboard (GEMDOS, BIOS, Ikbd)
+Keyboard (GEMDOS, BIOS, GEM, Ikbd)
 Mouse (XBIOS, GEM, Ikbd)
 Video (XBIOS (Fullscreen), GEM (Windowed and Fullscreen))
 Timer (VBL vector)
@@ -61,7 +61,10 @@ Video	Kbd	Mouse	Timer	Jstick	Joypads
 xbios	ikbd	ikbd	vbl	ikbd	hardware
 xbios	gemdos	xbios	vbl	xbios	hardware
 xbios	bios	xbios	vbl	xbios	hardware
-gem	gem	gem	vbl	xbios	hardware
+gem	gem	gem(*)	vbl	xbios	hardware
+
+(*) GEM does not report relative mouse motion, so xbios mouse driver is used
+to report this type event.
 
 ==============================================================================
 V.  Environment variables:
@@ -107,6 +110,48 @@ SDL_JOYSTICK_ATARI:
 	Joysticks are 1 button, 2 axis controllers.
 	Lightpen and analog paddle are 2 buttons, 2 axis controllers. The 2
 	buttons are those affected to 1 button joysticks on the same port.
+
+==============================================================================
+VI.  More informations about drivers:
+
+Xbios video:
+	Video chip is detected using the _VDO cookie.
+	Screen enhancers are not supported, but could be if you know how to
+	use them.
+
+	ST, STE, Mega ST, Mega STE:
+		320x200x4 bits, shades of grey, available only for the purpose
+		of testing SDL.
+	TT:
+		320x480x8 and 320x240x8 (software double-lined mode).
+	Falcon:
+		All modes supported by the current monitor (RVB or VGA).
+	Clones and any machine with monochrome monitor:
+		Not supported.
+
+Gem video:
+	Automatically used if xbios not available.
+
+	All machines:
+		Only the current resolution, if 8 bits or higher depth.
+
+IKBD keyboard, mouse and joystick driver:
+	Available if _MCH cookie is ST, Mega ST, STE, Mega STE, TT or Falcon.
+
+	Hades has an IKBD, but xbios is not available for video, so IKBD
+	driver is disabled.
+
+Gemdos and bios keyboard driver:
+	Available on all machines.
+
+Mouse and joystick xbios driver:
+	Available on all machines (I think).
+
+Joypad driver:
+	Available if _MCH cookie is STE or Falcon.
+
+VBL timer driver:
+	Available all machines (I think).
 
 -- 
 Patrice Mandin <pmandin@caramail.com>

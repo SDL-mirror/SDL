@@ -51,6 +51,7 @@ static char rcsid =
 #include "SDL_sysvideo.h"
 #include "SDL_pixels_c.h"
 #include "SDL_events_c.h"
+#include "SDL_cursor_c.h"
 
 #include "SDL_ataric2p_s.h"
 #include "SDL_ataric2p060_c.h"
@@ -95,6 +96,9 @@ static int GEM_ToggleFullScreen(_THIS, int on);
 
 /* Internal functions */
 static void GEM_FreeBuffers(_THIS);
+static void GEM_ClearScreen(_THIS);
+static void GEM_LockScreen(_THIS);
+static void GEM_UnlockScreen(_THIS);
 static void refresh_window(_THIS, int winhandle, short *rect);
 
 /* GEM driver bootstrap functions */
@@ -174,11 +178,11 @@ static SDL_VideoDevice *GEM_CreateDevice(int devindex)
 	device->FreeWMCursor = GEM_FreeWMCursor;
 	device->CreateWMCursor = GEM_CreateWMCursor;
 	device->ShowWMCursor = GEM_ShowWMCursor;
-	device->WarpWMCursor = GEM_WarpWMCursor;
+	device->WarpWMCursor = NULL /*GEM_WarpWMCursor*/;
 	device->CheckMouseMode = GEM_CheckMouseMode;
 
-	/* Joystick */
-	SDL_AtariXbios_InstallVectors(ATARI_XBIOS_JOYSTICKEVENTS);
+	/* Joystick + Mouse relative motion */
+	SDL_AtariXbios_InstallVectors(ATARI_XBIOS_MOUSEEVENTS|ATARI_XBIOS_JOYSTICKEVENTS);
 
 	device->free = GEM_DeleteDevice;
 
@@ -314,7 +318,7 @@ static void VDI_ReadExtInfo(_THIS, short *work_out)
 				tmp_p = (Uint16 *)&work_out[16];
 
 				for (i=0;i<256;i++) {
-					vdi_index[i] = *tmp_p++;
+					vdi_index[*tmp_p++] = i;
 				}
 			}
 			break;
@@ -352,11 +356,11 @@ static void VDI_ReadExtInfo(_THIS, short *work_out)
 						}
 					}
 				}
+			}
 
-				/* Remove lower green bits for Intel endian screen */
-				if ((VDI_greenmask == ((7<<13)|3)) || (VDI_greenmask == ((7<<13)|7))) {
-					VDI_greenmask &= ~(7<<13);
-				}
+			/* Remove lower green bits for Intel endian screen */
+			if ((VDI_greenmask == ((7<<13)|3)) || (VDI_greenmask == ((7<<13)|7))) {
+				VDI_greenmask &= ~(7<<13);
 			}
 			break;
 		case VDI_CLUT_NONE:
@@ -474,7 +478,7 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	VDI_screen = NULL;
 	VDI_ReadExtInfo(this, work_out);
 	if (VDI_screen == NULL) {
-		VDI_pitch = VDI_w * ((VDI_bpp)>>3);
+		VDI_pitch = VDI_w * VDI_pixelsize;
 		VDI_format = VDI_FORMAT_UNKNOWN;
 		VDI_redmask = VDI_greenmask = VDI_bluemask = VDI_alphamask = 0;
 	}
@@ -539,6 +543,56 @@ static void GEM_FreeBuffers(_THIS)
 	}
 }
 
+static void GEM_ClearScreen(_THIS)
+{
+	short rgb[3]={0,0,0};
+	short oldrgb[3];
+	short pxy[4];
+
+	v_hide_c(VDI_handle);
+
+	vq_color(VDI_handle, vdi_index[0], 0, oldrgb);
+	vs_color(VDI_handle, vdi_index[0], rgb);
+
+	pxy[0] = pxy[1] = 0;
+	pxy[2] = VDI_w - 1;
+	pxy[3] = VDI_h - 1;
+	vsf_color(VDI_handle,0);
+	vsf_interior(VDI_handle,1);
+	vsf_perimeter(VDI_handle,0);
+	v_bar(VDI_handle,pxy);
+
+	vs_color(VDI_handle, vdi_index[0], oldrgb);
+
+	v_show_c(VDI_handle, 1);
+}
+
+static void GEM_LockScreen(_THIS)
+{
+	if (!GEM_locked) {
+		/* Reserve memory space, used to be sure of compatibility */
+		form_dial( FMD_START, 0,0,0,0, 0,0,VDI_w,VDI_h);
+		/* Lock AES */
+		wind_update(BEG_UPDATE);
+		wind_update(BEG_MCTRL);
+
+		GEM_locked=SDL_TRUE;
+	}
+}
+
+static void GEM_UnlockScreen(_THIS)
+{
+	if (GEM_locked) {
+		/* Restore screen memory, and send REDRAW to all apps */
+		form_dial( FMD_FINISH, 0,0,0,0, 0,0,VDI_w,VDI_h);
+		/* Unlock AES */
+		wind_update(END_MCTRL);
+		wind_update(END_UPDATE);
+
+		GEM_locked=SDL_FALSE;
+	}
+}
+
 SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 				int width, int height, int bpp, Uint32 flags)
 {
@@ -574,11 +628,22 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 	use_shadow=SDL_FALSE;
 	if (flags & SDL_FULLSCREEN) {
 		if (!VDI_screen) {
+			/* No access to real framebuffer, use shadow surface */
 			use_shadow=SDL_TRUE;
-		} else if (VDI_format==VDI_FORMAT_INTER) {
-			use_shadow=SDL_TRUE;
+		} else {
+			if (VDI_format==VDI_FORMAT_INTER) {
+				/* Real framebuffer, interleaved bitplanes,
+				  use shadow surface */
+				use_shadow=SDL_TRUE;
+			} else if (flags & SDL_DOUBLEBUF) {
+				/* Real framebuffer, double-buffered,
+				  use shadow surface */
+				use_shadow=SDL_TRUE;
+				modeflags |= SDL_DOUBLEBUF;
+			}
 		}
 	} else {
+		/* Windowed mode, always with shadow surface */
 		use_shadow=SDL_TRUE;
 	}
 
@@ -595,30 +660,12 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 
 	/*--- Initialize screen ---*/
 	if (flags & SDL_FULLSCREEN) {
-		short rgb[3]={0,0,0};
-		short pxy[4];
+		GEM_LockScreen(this);
 
-		if (!GEM_locked) {
-			/* Reserve memory space, used to be sure of compatibility */
-			form_dial( FMD_START, 0,0,0,0, 0,0,VDI_w,VDI_h);
-			/* Lock AES */
-			while (!wind_update(BEG_UPDATE|BEG_MCTRL));
-
-			GEM_locked=SDL_TRUE;
-		}
-
-		/* Clear screen */
-		pxy[0] = pxy[1] = 0;
-		pxy[2] = VDI_w - 1;
-		pxy[3] = VDI_h - 1;
-		vs_color(VDI_handle, vdi_index[0], rgb);
-		vsf_color(VDI_handle,0);
-		vsf_interior(VDI_handle,1);
-		vsf_perimeter(VDI_handle,0);
-		v_bar(VDI_handle,pxy);
+		GEM_ClearScreen(this);
 
 		modeflags |= SDL_FULLSCREEN;
-		if (VDI_screen && (VDI_format==VDI_FORMAT_PACK)) {
+		if (VDI_screen && (VDI_format==VDI_FORMAT_PACK) && !use_shadow) {
 			modeflags |= SDL_HWSURFACE;
 		} else {
 			modeflags |= SDL_SWSURFACE;
@@ -627,13 +674,7 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 		int posx,posy;
 		short x2,y2,w2,h2;
 
-		if (GEM_locked) {
-			/* Restore screen memory, and send REDRAW to all apps */
-			form_dial( FMD_FINISH, 0,0,0,0, 0,0,VDI_w,VDI_h);
-			/* Unlock AES */
-			wind_update(END_UPDATE|END_MCTRL);
-			GEM_locked=SDL_FALSE;
-		}
+		GEM_UnlockScreen(this);
 
 		/* Center our window */
 		posx = GEM_desk_x;
@@ -722,6 +763,9 @@ static void GEM_UnlockHWSurface(_THIS, SDL_Surface *surface)
 static void GEM_UpdateRectsFullscreen(_THIS, int numrects, SDL_Rect *rects)
 {
 	SDL_Surface *surface;
+	MFDB mfdb_src;
+	short blitcoords[8];
+	int i;
 
 	surface = this->screen;
 
@@ -734,47 +778,69 @@ static void GEM_UpdateRectsFullscreen(_THIS, int numrects, SDL_Rect *rects)
 			destscr += VDI_pitch * ((VDI_h - surface->h) >> 1);
 			destx = (VDI_w - surface->w) >> 1;
 			destx &= ~15;
-			destscr += VDI_pixelsize * destx;
+			destscr += destx;
 
-			/* Convert chunky to planar screen */
-			Atari_C2pConvert(
-				surface->pixels,
-				destscr,
-				surface->w,
-				surface->h,
-				SDL_FALSE,
-				surface->pitch,
-				VDI_pitch
-			);
+			for (i=0;i<numrects;i++) {
+				void *source,*destination;
+				int x1,x2;
+
+				x1 = rects[i].x & ~15;
+				x2 = rects[i].x+rects[i].w;
+				if (x2 & 15) {
+					x2 = (x2 | 15) +1;
+				}
+
+				source = surface->pixels;
+				source += surface->pitch * rects[i].y;
+				source += x1;
+
+				destination = destscr;
+				destination += VDI_pitch * rects[i].y;
+				destination += x1;
+
+				/* Convert chunky to planar screen */
+				Atari_C2pConvert(
+					source,
+					destination,
+					x2-x1,
+					rects[i].h,
+					SDL_FALSE,
+					surface->pitch,
+					VDI_pitch
+				);
+
+			}
+
+			return;
 		}
-	} else {
-		MFDB mfdb_src;
-		short blitcoords[8];
-		int i;
 
-		mfdb_src.fd_addr=surface->pixels;
-		mfdb_src.fd_w=surface->w;
-		mfdb_src.fd_h=surface->h;
-		mfdb_src.fd_wdwidth=(surface->w) >> 4;
-		mfdb_src.fd_stand=0;
-	  	mfdb_src.fd_nplanes=surface->format->BitsPerPixel;
-		mfdb_src.fd_r1=0;
-		mfdb_src.fd_r2=0;
-		mfdb_src.fd_r3=0;
-
-		for ( i=0; i<numrects; ++i ) {
-			blitcoords[0] = rects[i].x;
-			blitcoords[1] = rects[i].y;
-			blitcoords[2] = blitcoords[0] + rects[i].w - 1;
-			blitcoords[3] = blitcoords[1] + rects[i].h - 1;
-
-			blitcoords[4] = rects[i].x + ((VDI_w - surface->w) >> 1);
-			blitcoords[5] = rects[i].y + ((VDI_h - surface->h) >> 1);
-			blitcoords[6] = blitcoords[4] + rects[i].w - 1;
-			blitcoords[7] = blitcoords[5] + rects[i].h - 1;
-
-			vro_cpyfm(VDI_handle, S_ONLY, blitcoords, &mfdb_src, &VDI_dst_mfdb);
+		if (!(surface->flags & SDL_DOUBLEBUF)) {
+			return;
 		}
+	}
+
+	mfdb_src.fd_addr=surface->pixels;
+	mfdb_src.fd_w=surface->w;
+	mfdb_src.fd_h=surface->h;
+	mfdb_src.fd_wdwidth=(surface->w) >> 4;
+	mfdb_src.fd_stand=0;
+	mfdb_src.fd_nplanes=surface->format->BitsPerPixel;
+	mfdb_src.fd_r1=0;
+	mfdb_src.fd_r2=0;
+	mfdb_src.fd_r3=0;
+
+	for ( i=0; i<numrects; ++i ) {
+		blitcoords[0] = rects[i].x;
+		blitcoords[1] = rects[i].y;
+		blitcoords[2] = blitcoords[0] + rects[i].w - 1;
+		blitcoords[3] = blitcoords[1] + rects[i].h - 1;
+
+		blitcoords[4] = rects[i].x + ((VDI_w - surface->w) >> 1);
+		blitcoords[5] = rects[i].y + ((VDI_h - surface->h) >> 1);
+		blitcoords[6] = blitcoords[4] + rects[i].w - 1;
+		blitcoords[7] = blitcoords[5] + rects[i].h - 1;
+
+		vro_cpyfm(VDI_handle, S_ONLY, blitcoords, &mfdb_src, &VDI_dst_mfdb);
 	}
 }
 
@@ -810,6 +876,9 @@ static void GEM_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 
 static int GEM_FlipHWSurfaceFullscreen(_THIS, SDL_Surface *surface)
 {
+	MFDB mfdb_src;
+	short blitcoords[8];
+
 	if (VDI_screen) {
 		if (VDI_format==VDI_FORMAT_INTER) {
 			void *destscr;
@@ -820,7 +889,7 @@ static int GEM_FlipHWSurfaceFullscreen(_THIS, SDL_Surface *surface)
 			destscr += VDI_pitch * ((VDI_h - surface->h) >> 1);
 			destx = (VDI_w - surface->w) >> 1;
 			destx &= ~15;
-			destscr += VDI_pixelsize * destx;
+			destscr += destx;
 
 			/* Convert chunky to planar screen */
 			Atari_C2pConvert(
@@ -832,32 +901,35 @@ static int GEM_FlipHWSurfaceFullscreen(_THIS, SDL_Surface *surface)
 				surface->pitch,
 				VDI_pitch
 			);
+
+			return(0);
 		}
-	} else {
-		MFDB mfdb_src;
-		short blitcoords[8];
 
-		mfdb_src.fd_addr=surface->pixels;
-		mfdb_src.fd_w=surface->w;
-		mfdb_src.fd_h=surface->h;
-		mfdb_src.fd_wdwidth=(surface->w) >> 4;
-		mfdb_src.fd_stand=0;
-	  	mfdb_src.fd_nplanes=surface->format->BitsPerPixel;
-		mfdb_src.fd_r1=0;
-		mfdb_src.fd_r2=0;
-		mfdb_src.fd_r3=0;
-
-		blitcoords[0] = 0;
-		blitcoords[1] = 0;
-		blitcoords[2] = surface->w - 1;
-		blitcoords[3] = surface->h - 1;
-		blitcoords[4] = (VDI_w - surface->w) >> 1;
-		blitcoords[5] = (VDI_h - surface->h) >> 1;
-		blitcoords[6] = blitcoords[4] + surface->w - 1;
-		blitcoords[7] = blitcoords[5] + surface->h - 1;
-
-		vro_cpyfm(VDI_handle, S_ONLY, blitcoords, &mfdb_src, &VDI_dst_mfdb);
+		if (!(surface->flags & SDL_DOUBLEBUF)) {
+			return(0);
+		}
 	}
+	
+	mfdb_src.fd_addr=surface->pixels;
+	mfdb_src.fd_w=surface->w;
+	mfdb_src.fd_h=surface->h;
+	mfdb_src.fd_wdwidth=(surface->w) >> 4;
+	mfdb_src.fd_stand=0;
+	mfdb_src.fd_nplanes=surface->format->BitsPerPixel;
+	mfdb_src.fd_r1=0;
+	mfdb_src.fd_r2=0;
+	mfdb_src.fd_r3=0;
+
+	blitcoords[0] = 0;
+	blitcoords[1] = 0;
+	blitcoords[2] = surface->w - 1;
+	blitcoords[3] = surface->h - 1;
+	blitcoords[4] = (VDI_w - surface->w) >> 1;
+	blitcoords[5] = (VDI_h - surface->h) >> 1;
+	blitcoords[6] = blitcoords[4] + surface->w - 1;
+	blitcoords[7] = blitcoords[5] + surface->h - 1;
+
+	vro_cpyfm(VDI_handle, S_ONLY, blitcoords, &mfdb_src, &VDI_dst_mfdb);
 
 	return(0);
 }
@@ -894,7 +966,6 @@ static int GEM_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 		return 1;
 	}
 
-
 	for(i = 0; i < ncolors; i++)
 	{
 		int		r, g, b;
@@ -918,18 +989,9 @@ static int GEM_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 static int GEM_ToggleFullScreen(_THIS, int on)
 {
 	if (on) {
-		if (!GEM_locked) {
-			/* Lock AES */
-			while (!wind_update(BEG_UPDATE|BEG_MCTRL));
-			GEM_locked=SDL_TRUE;
-		}
+		GEM_LockScreen(this);
 	} else {
-		if (GEM_locked) {
-			/* Unlock AES */
-			wind_update(END_UPDATE|END_MCTRL);
-			GEM_locked=SDL_FALSE;
-		}
-		/* Redraw all screen */
+		GEM_UnlockScreen(this);
 	}
 
 	return(1);
@@ -945,15 +1007,8 @@ void GEM_VideoQuit(_THIS)
 
 	GEM_FreeBuffers(this);
 
-	if (GEM_locked) {
-		/* Restore screen memory, and send REDRAW to all apps */
-		form_dial( FMD_FINISH, 0,0,0,0, 0,0,VDI_w,VDI_h);
-		/* Unlock AES */
-		wind_update(END_UPDATE|END_MCTRL);
-		GEM_locked=SDL_FALSE;
-	}
+	GEM_UnlockScreen(this);
 
-	/* Close AES application */
 	appl_exit();
 
 	/* Restore palette */
@@ -990,7 +1045,7 @@ void GEM_wind_redraw(_THIS, int winhandle, short *inside)
 	short todo[4];
 
 	/* Tell AES we are going to update */
-	while (!wind_update(BEG_UPDATE));
+	wind_update(BEG_UPDATE);
 
 	v_hide_c(VDI_handle);
 
