@@ -20,6 +20,43 @@ The latest stable release may be found on the
 Major changes since SDL 1.0.0:
 </H2>
 <UL>
+	<LI> 1.2.7: Increased sensitivity of the Windows joystick driver 
+	<LI> 1.2.7: Added support for SDL_VIDEO_WINDOW_POS and SDL_VIDEO_CENTERED on Windows 
+	<LI> 1.2.7: Added fullscreen toggle support in testwm for Windows, etc. 
+	<LI> 1.2.7: Fixed mouse focus events after resetting video mode on Windows 
+	<LI> 1.2.7: Added colorkey blit tests to testvidinfo (thanks Mike!) 
+	<LI> 1.2.7: Added video hardware acceleration support on QNX (thanks Mike!) 
+	<LI> 1.2.7: SDL no longer sets a fatal signal handler for SIGPIPE 
+	<LI> 1.2.7: Fixed modifier key state on MacOS X (thanks Max!) 
+	<LI> 1.2.7: Added support for remote XVideo (thanks Frederic!) 
+	<LI> 1.2.7: Try to use higher refresh rate by default in DirectX driver (thanks Dmitry!) 
+	<LI> 1.2.7: Fixed static linking on MacOS X (thanks Max!) 
+	<LI> 1.2.7: Various Atari video driver improvements (thanks Patrice!) 
+	<LI> 1.2.7: Fixed compiling with broken Linux 2.6 headers 
+	<LI> 1.2.7: Fixed mouse cursor visibility and focus events on MacOS X (thanks Max!) 
+	<LI> 1.2.7: Added support for /dev/joy* on Free/Net/OpenBSD (thanks Christian!) 
+	<LI> 1.2.7: Fixed problems with CD-ROM audio playback on MacOS X 10.1 
+	<LI> 1.2.7: Added dynamic GL library loading to MacOS Carbon support (thanks Anders!) 
+	<LI> 1.2.7: Added the ability to hide the cursor in the DirectFB driver (thanks Pete!) 
+	<LI> 1.2.7: Added minor cleanup for Embedded Visual C++ 3.0 (thanks Andy!) 
+	<LI> 1.2.7: Fixed high CPU usage with ALSA audio driver (thanks Michel!) 
+	<LI> 1.2.7: Added function to create RWops from const memory: SDL_RWFromConstMem() 
+	<LI> 1.2.7: Fixed compiling with ALSA 1.0 (thanks Stephane!) 
+	<LI> 1.2.7: Added YUV overlay support on BeOS (thanks Andrew!) 
+	<LI> 1.2.7: Fixed build problems with newer versions of automake
+	<LI> 1.2.7: Fixed MacOS X libtool framework support (thanks Max!) 
+	<LI> 1.2.7: Added CPU feature detection functions to SDL_cpuinfo.h
+	<LI> 1.2.7: Fixed illegal instruction crash using 3DNow on Intel processors 
+	<LI> 1.2.7: Fixed asm issues with mmx.h and gcc 3.3 (thanks Stephane!) 
+	<LI> 1.2.7: Updated libtool support so Mingw32 builds work. 
+	<LI> 1.2.7: Disable screen saver in Windows DIB video driver 
+	<LI> 1.2.7: Added Atari CD-ROM support (thanks Patrice!) 
+	<LI> 1.2.7: Fixed crash calling app defined window proc (thanks Scott!) 
+	<LI> 1.2.7: Fixed long long constant warnings in GCC 3.3.1 (thanks Stephane!) 
+	<LI> 1.2.7: Added configure.in support for K*BSD (thanks Robert!) 
+	<LI> 1.2.7: Added QNX package and audio fixes (thanks Mike!) 
+	<LI> 1.2.7: Fixed joystick open problems on BSD (thanks SUGIMOTO!) 
+	<LI> 1.2.7: Fixed X11 mode line crash with only one video mode (thanks Alan!) 
 	<LI> 1.2.6: Fixed bugs in the Nano-X video driver
 	<LI> 1.2.6: Fixed use of SDL with XInitThreads()
 	<LI> 1.2.6: Added MMX and 3DNow! optimized alpha blitters (thanks Stephane!)
