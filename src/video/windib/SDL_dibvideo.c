@@ -752,7 +752,7 @@ int DIB_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 			entries[i].peBlue  = colors[i].b;
 #ifndef _WIN32_WCE
 			entries[i].peFlags = PC_NOCOLLAPSE;
-else
+#else
 			entries[i].peFlags = 0;
 #endif
 		}
