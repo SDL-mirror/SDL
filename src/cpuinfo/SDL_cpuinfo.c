@@ -301,9 +301,25 @@ SDL_bool SDL_HasMMX()
 	return SDL_FALSE;
 }
 
+SDL_bool SDL_HasMMXExt()
+{
+	if ( SDL_GetCPUFeatures() & CPU_HAS_MMXEXT ) {
+		return SDL_TRUE;
+	}
+	return SDL_FALSE;
+}
+
 SDL_bool SDL_Has3DNow()
 {
 	if ( SDL_GetCPUFeatures() & CPU_HAS_3DNOW ) {
+		return SDL_TRUE;
+	}
+	return SDL_FALSE;
+}
+
+SDL_bool SDL_Has3DNowExt()
+{
+	if ( SDL_GetCPUFeatures() & CPU_HAS_3DNOWEXT ) {
 		return SDL_TRUE;
 	}
 	return SDL_FALSE;
@@ -317,36 +333,20 @@ SDL_bool SDL_HasSSE()
 	return SDL_FALSE;
 }
 
+SDL_bool SDL_HasSSE2()
+{
+	if ( SDL_GetCPUFeatures() & CPU_HAS_SSE2 ) {
+		return SDL_TRUE;
+	}
+	return SDL_FALSE;
+}
+
 SDL_bool SDL_HasAltiVec()
 {
 	if ( SDL_GetCPUFeatures() & CPU_HAS_ALTIVEC ) {
 		return SDL_TRUE;
 	}
 	return SDL_FALSE;
-}
-
-SDL_bool SDL_HasMMXExt()
-{
-   if ( SDL_GetCPUFeatures() & CPU_HAS_MMXEXT ) {
-      return SDL_TRUE;
-   }
-   return SDL_FALSE;
-}
-
-SDL_bool SDL_Has3DNowExt()
-{
-   if ( SDL_GetCPUFeatures() & CPU_HAS_3DNOWEXT ) {
-      return SDL_TRUE;
-   }
-   return SDL_FALSE;
-}
-
-SDL_bool SDL_HasSSE2()
-{
-   if ( SDL_GetCPUFeatures() & CPU_HAS_SSE2 ) {
-      return SDL_TRUE;
-   }
-   return SDL_FALSE;
 }
 
 #ifdef TEST_MAIN
