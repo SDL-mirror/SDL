@@ -68,7 +68,6 @@ static void DUMMY_VideoQuit(_THIS);
 /* Hardware surface functions */
 static int DUMMY_AllocHWSurface(_THIS, SDL_Surface *surface);
 static int DUMMY_LockHWSurface(_THIS, SDL_Surface *surface);
-static int DUMMY_FlipHWSurface(_THIS, SDL_Surface *surface);
 static void DUMMY_UnlockHWSurface(_THIS, SDL_Surface *surface);
 static void DUMMY_FreeHWSurface(_THIS, SDL_Surface *surface);
 
@@ -222,11 +221,6 @@ static int DUMMY_LockHWSurface(_THIS, SDL_Surface *surface)
 static void DUMMY_UnlockHWSurface(_THIS, SDL_Surface *surface)
 {
 	return;
-}
-
-static int DUMMY_FlipHWSurface(_THIS, SDL_Surface *surface)
-{
-	return(0);
 }
 
 static void DUMMY_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
