@@ -27,6 +27,42 @@
 #include <IOKit/pwr_mgt/IOPMLib.h> // For wake from sleep detection
 #include "SDL_QuartzKeys.h"
 
+/* 
+ * In Panther, this header defines device dependent masks for 
+ * right side keys. These definitions only exist in Panther, but
+ * the header seems to exist at least in Jaguar and probably earlier
+ * versions of the OS, so this should't break anything.
+ */
+#include <IOKit/hidsystem/IOLLEvent.h>
+/* 
+ * These are not defined before Panther. To keep the code compiling
+ * on systems without these, I will define if they don't exist.
+ */
+#ifndef NX_DEVICERCTLKEYMASK
+    #define NX_DEVICELCTLKEYMASK    0x00000001
+#endif
+#ifndef NX_DEVICELSHIFTKEYMASK
+    #define NX_DEVICELSHIFTKEYMASK  0x00000002
+#endif
+#ifndef NX_DEVICERSHIFTKEYMASK
+    #define NX_DEVICERSHIFTKEYMASK  0x00000004
+#endif
+#ifndef NX_DEVICELCMDKEYMASK
+    #define NX_DEVICELCMDKEYMASK    0x00000008
+#endif
+#ifndef NX_DEVICERCMDKEYMASK
+    #define NX_DEVICERCMDKEYMASK    0x00000010
+#endif
+#ifndef NX_DEVICELALTKEYMASK
+    #define NX_DEVICELALTKEYMASK    0x00000020
+#endif
+#ifndef NX_DEVICERALTKEYMASK
+    #define NX_DEVICERALTKEYMASK    0x00000040
+#endif
+#ifndef NX_DEVICERCTLKEYMASK
+    #define NX_DEVICERCTLKEYMASK    0x00002000
+#endif
+
 void     QZ_InitOSKeymap (_THIS) {
     const void *KCHRPtr;
     UInt32 state;
@@ -115,6 +151,7 @@ void     QZ_InitOSKeymap (_THIS) {
     keymap[QZ_KP6] = SDLK_KP6;
     keymap[QZ_KP_PLUS] = SDLK_KP_PLUS;
     keymap[QZ_LSHIFT] = SDLK_LSHIFT;
+    keymap[QZ_RSHIFT] = SDLK_RSHIFT;
     keymap[QZ_z] = SDLK_z;
     keymap[QZ_x] = SDLK_x;
     keymap[QZ_c] = SDLK_c;
@@ -133,6 +170,9 @@ void     QZ_InitOSKeymap (_THIS) {
     keymap[QZ_LCTRL] = SDLK_LCTRL;
     keymap[QZ_LALT] = SDLK_LALT;
     keymap[QZ_LMETA] = SDLK_LMETA;
+    keymap[QZ_RCTRL] = SDLK_RCTRL;
+    keymap[QZ_RALT] = SDLK_RALT;
+    keymap[QZ_RMETA] = SDLK_RMETA;
     keymap[QZ_SPACE] = SDLK_SPACE;
     keymap[QZ_LEFT] = SDLK_LEFT;
     keymap[QZ_DOWN] = SDLK_DOWN;
@@ -259,7 +299,10 @@ static void QZ_DoKey (_THIS, int state, NSEvent *event) {
         [ NSApp sendEvent:event ];
 }
 
-static void QZ_DoModifiers (_THIS, unsigned int newMods) {
+/* This is the original behavior, before support was added for 
+ * differentiating between left and right versions of the keys.
+ */
+static void QZ_DoUnsidedModifiers (_THIS, unsigned int newMods) {
 
     const int mapping[] = { SDLK_CAPSLOCK, SDLK_LSHIFT, SDLK_LCTRL, SDLK_LALT, SDLK_LMETA };
 
@@ -267,9 +310,6 @@ static void QZ_DoModifiers (_THIS, unsigned int newMods) {
     int bit;
     SDL_keysym key;
     
-    if (current_mods == newMods)
-    	return;
-
     key.scancode    = 0;
     key.sym         = SDLK_UNKNOWN;
     key.unicode     = 0;
@@ -302,7 +342,268 @@ static void QZ_DoModifiers (_THIS, unsigned int newMods) {
                   SDL_PrivateKeyboard (SDL_RELEASED, &key);
         }
     }
+}
 
+/* This is a helper function for QZ_HandleModifierSide. This 
+ * function reverts back to behavior before the distinction between
+ * sides was made.
+ */
+static void QZ_HandleNonDeviceModifier ( _THIS, unsigned int device_independent_mask, unsigned int newMods, unsigned int key_sym) {
+    unsigned int currentMask, newMask;
+    SDL_keysym key;
+    
+    key.scancode    = 0;
+    key.sym         = key_sym;
+    key.unicode     = 0;
+    key.mod         = KMOD_NONE;
+    
+    /* Isolate just the bits we care about in the depedent bits so we can 
+     * figure out what changed
+     */ 
+    currentMask = current_mods & device_independent_mask;
+    newMask     = newMods & device_independent_mask;
+    
+    if ( currentMask &&
+         currentMask != newMask ) {     /* modifier up event */
+         SDL_PrivateKeyboard (SDL_RELEASED, &key);
+    }
+    else if ( newMask &&
+          currentMask != newMask ) {     /* modifier down event */
+          SDL_PrivateKeyboard (SDL_PRESSED, &key);
+    }
+}
+
+/* This is a helper function for QZ_HandleModifierSide. 
+ * This function sets the actual SDL_PrivateKeyboard event.
+ */
+static void QZ_HandleModifierOneSide ( _THIS, unsigned int newMods,
+                                       unsigned int key_sym, 
+                                       unsigned int sided_device_dependent_mask ) {
+    
+    SDL_keysym key;
+    unsigned int current_dep_mask, new_dep_mask;
+    
+    key.scancode    = 0;
+    key.sym         = key_sym;
+    key.unicode     = 0;
+    key.mod         = KMOD_NONE;
+    
+    /* Isolate just the bits we care about in the depedent bits so we can 
+     * figure out what changed
+     */ 
+    current_dep_mask = current_mods & sided_device_dependent_mask;
+    new_dep_mask     = newMods & sided_device_dependent_mask;
+    
+    /* We now know that this side bit flipped. But we don't know if
+     * it went pressed to released or released to pressed, so we must 
+     * find out which it is.
+     */
+    if( new_dep_mask &&
+        current_dep_mask != new_dep_mask ) { 
+        /* Modifier down event */
+        SDL_PrivateKeyboard (SDL_PRESSED, &key);
+    }
+    else /* Modifier up event */ {
+        SDL_PrivateKeyboard (SDL_RELEASED, &key);
+    }
+}
+
+/* This is a helper function for QZ_DoSidedModifiers.
+ * This function will figure out if the modifier key is the left or right side, 
+ * e.g. left-shift vs right-shift. 
+ */
+static void QZ_HandleModifierSide ( _THIS, int device_independent_mask, 
+                                    unsigned int newMods, 
+                                    unsigned int left_key_sym, 
+                                    unsigned int right_key_sym,
+                                    unsigned int left_device_dependent_mask, 
+                                    unsigned int right_device_dependent_mask ) {
+    unsigned int device_dependent_mask = 0;
+    unsigned int diff_mod = 0;
+    
+    device_dependent_mask = left_device_dependent_mask | right_device_dependent_mask;
+    /* On the basis that the device independent mask is set, but there are 
+     * no device dependent flags set, we'll assume that we can't detect this 
+     * keyboard and revert to the unsided behavior.
+     */
+    if ( (device_dependent_mask & newMods) == 0 ) {
+        /* Revert to the old behavior */
+        QZ_HandleNonDeviceModifier ( this, device_independent_mask, newMods, left_key_sym );
+        return;
+    }
+        
+    /* XOR the previous state against the new state to see if there's a change */
+    diff_mod = (device_dependent_mask & current_mods)
+        ^ (device_dependent_mask & newMods);
+
+    if ( diff_mod ) {
+        /* A change in state was found. Isolate the left and right bits 
+         * to handle them separately just in case the values can simulataneously
+         * change or if the bits don't both exist.
+         */
+        if ( left_device_dependent_mask & diff_mod ) {
+            QZ_HandleModifierOneSide ( this, newMods, left_key_sym, left_device_dependent_mask );
+        }
+        if ( right_device_dependent_mask & diff_mod ) {
+            QZ_HandleModifierOneSide ( this, newMods, right_key_sym, right_device_dependent_mask );
+        }
+    }
+}
+   
+/* This is a helper function for QZ_DoSidedModifiers.
+ * This function will release a key press in the case that 
+ * it is clear that the modifier has been released (i.e. one side 
+ * can't still be down).
+ */
+static void QZ_ReleaseModifierSide ( _THIS, 
+                                     unsigned int device_independent_mask, 
+                                     unsigned int newMods,
+                                     unsigned int left_key_sym, 
+                                     unsigned int right_key_sym,
+                                     unsigned int left_device_dependent_mask, 
+                                     unsigned int right_device_dependent_mask ) {
+    unsigned int device_dependent_mask = 0;
+    SDL_keysym key;
+    
+    key.scancode    = 0;
+    key.sym         = SDLK_UNKNOWN;
+    key.unicode     = 0;
+    key.mod         = KMOD_NONE;
+    
+    device_dependent_mask = left_device_dependent_mask | right_device_dependent_mask;
+    /* On the basis that the device independent mask is set, but there are 
+     * no device dependent flags set, we'll assume that we can't detect this 
+     * keyboard and revert to the unsided behavior.
+     */
+    if ( (device_dependent_mask & current_mods) == 0 ) {
+        /* In this case, we can't detect the keyboard, so use the left side 
+         * to represent both, and release it. 
+         */
+        key.sym = left_key_sym;
+        SDL_PrivateKeyboard (SDL_RELEASED, &key);
+
+        return;
+    }
+        
+        
+    /* 
+     * This could have been done in an if-else case because at this point,
+     * we know that all keys have been released when calling this function. 
+     * But I'm being paranoid so I want to handle each separately,
+     * so I hope this doesn't cause other problems.
+     */
+    if ( left_device_dependent_mask & current_mods ) {
+        key.sym = left_key_sym;
+        SDL_PrivateKeyboard (SDL_RELEASED, &key);
+    }
+    if ( right_device_dependent_mask & current_mods ) {
+        key.sym = right_key_sym;
+        SDL_PrivateKeyboard (SDL_RELEASED, &key);
+    }
+}
+
+/* This is a helper function for QZ_DoSidedModifiers.
+ * This function handles the CapsLock case.
+ */
+static void QZ_HandleCapsLock (_THIS, unsigned int newMods) {
+    unsigned int currentMask, newMask;
+    SDL_keysym key;
+    
+    key.scancode    = 0;
+    key.sym         = SDLK_CAPSLOCK;
+    key.unicode     = 0;
+    key.mod         = KMOD_NONE;
+    
+    currentMask = current_mods & NSAlphaShiftKeyMask;
+    newMask     = newMods & NSAlphaShiftKeyMask;
+
+    if ( currentMask &&
+         currentMask != newMask ) {     /* modifier up event */
+         /* If this was Caps Lock, we need some additional voodoo to make SDL happy */
+         SDL_PrivateKeyboard (SDL_PRESSED, &key);
+         SDL_PrivateKeyboard (SDL_RELEASED, &key);
+    }
+    else if ( newMask &&
+              currentMask != newMask ) {     /* modifier down event */
+        /* If this was Caps Lock, we need some additional voodoo to make SDL happy */
+        SDL_PrivateKeyboard (SDL_PRESSED, &key);
+        SDL_PrivateKeyboard (SDL_RELEASED, &key);
+    }
+}
+
+/* This function will handle the modifier keys and also determine the 
+ * correct side of the key.
+ */
+static void QZ_DoSidedModifiers (_THIS, unsigned int newMods) {
+	/* Set up arrays for the key syms for the left and right side. */
+    const unsigned int left_mapping[]  = { SDLK_LSHIFT, SDLK_LCTRL, SDLK_LALT, SDLK_LMETA };
+    const unsigned int right_mapping[] = { SDLK_RSHIFT, SDLK_RCTRL, SDLK_RALT, SDLK_RMETA };
+	/* Set up arrays for the device dependent masks with indices that 
+     * correspond to the _mapping arrays 
+     */
+    const unsigned int left_device_mapping[]  = { NX_DEVICELSHIFTKEYMASK, NX_DEVICELCTLKEYMASK, NX_DEVICELALTKEYMASK, NX_DEVICELCMDKEYMASK };
+    const unsigned int right_device_mapping[] = { NX_DEVICERSHIFTKEYMASK, NX_DEVICERCTLKEYMASK, NX_DEVICERALTKEYMASK, NX_DEVICERCMDKEYMASK };
+
+    unsigned int i;
+    unsigned int bit;
+    
+    /* Handle CAPSLOCK separately because it doesn't have a left/right side */
+    QZ_HandleCapsLock ( this, newMods );
+        
+    /* Iterate through the bits, testing each against the current modifiers */
+    for (i = 0, bit = NSShiftKeyMask; bit <= NSCommandKeyMask; bit <<= 1, ++i) {
+		
+        unsigned int currentMask, newMask;
+		
+        currentMask = current_mods & bit;
+        newMask     = newMods & bit;
+		
+        /* If the bit is set, we must always examine it because the left
+         * and right side keys may alternate or both may be pressed.
+         */
+        if ( newMask ) {
+            QZ_HandleModifierSide ( this, bit, newMods, 
+                                       left_mapping[i],
+                                       right_mapping[i],
+                                       left_device_mapping[i],
+                                       right_device_mapping[i] );
+        }
+        /* If the state changed from pressed to unpressed, we must examine
+            * the device dependent bits to release the correct keys.
+            */
+        else if ( currentMask &&
+                  currentMask != newMask ) { /* modifier up event */
+                  QZ_ReleaseModifierSide ( this, bit, newMods,
+                                           left_mapping[i],
+                                           right_mapping[i],
+                                           left_device_mapping[i],
+                                           right_device_mapping[i] );
+        }
+    }
+}
+
+/* This function is called to handle the modifiers.
+ * It will try to distinguish between the left side and right side 
+ * of the keyboard for those modifiers that qualify if the 
+ * operating system version supports it. Otherwise, the code 
+ * will not try to make the distinction.
+ */
+static void QZ_DoModifiers (_THIS, unsigned int newMods) {
+	
+    if (current_mods == newMods)
+    	return;
+    
+    /* 
+     * Starting with Panther (10.3.0), the ability to distinguish between 
+     * left side and right side modifiers is available.
+     */
+    if( system_version >= 0x1030 ) {
+        QZ_DoSidedModifiers (this, newMods);
+    }
+    else {
+        QZ_DoUnsidedModifiers (this, newMods);
+    }
+    
     current_mods = newMods;
 }
 

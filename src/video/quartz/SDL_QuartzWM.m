@@ -138,12 +138,8 @@ void QZ_PrivateSDLToCocoa (_THIS, NSPoint *p) {
         p->y = CGDisplayPixelsHigh (display_id) - p->y;
     }
     else {
-        
-        NSPoint newPoint;
-        
-        newPoint = [ window_view convertPoint:*p toView:[ qz_window contentView ] ];
-        
-        *p = newPoint;
+       
+        *p = [ window_view convertPoint:*p toView: nil ];
     }
 }
 
@@ -155,17 +151,11 @@ void QZ_PrivateCocoaToSDL (_THIS, NSPoint *p) {
         p->y = CGDisplayPixelsHigh (display_id) - p->y;
     }
     else {
-        
-        NSPoint newPoint;
-        
-        newPoint = [ window_view convertPoint:*p fromView:[ qz_window contentView ] ];
-        
-        *p = newPoint;
 
-        /* If OSX version is 10.3.0 or later, we need a workaround in OpenGL mode */
-        if( system_version >= 0x1030 && (SDL_VideoSurface->flags & (SDL_OPENGL | SDL_OPENGLBLIT)) ) {
-            p->y = [window_view frame].size.height - p->y - 1;
-        }
+        *p = [ window_view convertPoint:*p fromView: nil ];
+        
+        /* The coordinates need to be inverted */
+        p->y = [window_view frame].size.height - p->y - 1;
     }
 }
 

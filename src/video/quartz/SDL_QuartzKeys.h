@@ -109,8 +109,8 @@
 #define QZ_COMMA		0x2B
 #define QZ_PERIOD		0x2F
 #define QZ_SLASH		0x2C
-#if 0	/* These are the same as the left versions - use left by default */
-#define QZ_RSHIFT		0x38
+#if 1	/* Panther now defines right side keys */
+#define QZ_RSHIFT		0x3C
 #endif
 #define QZ_UP			0x7E
 #define QZ_KP1			0x53
@@ -121,10 +121,10 @@
 #define QZ_LALT			0x3A
 #define QZ_LMETA		0x37
 #define QZ_SPACE		0x31
-#if 0	/* These are the same as the left versions - use left by default */
-#define QZ_RMETA		0x37
-#define QZ_RALT			0x3A
-#define QZ_RCTRL		0x3B
+#if 1	/* Panther now defines right side keys */
+#define QZ_RMETA		0x36
+#define QZ_RALT			0x3D
+#define QZ_RCTRL		0x3E
 #endif
 #define QZ_LEFT			0x7B
 #define QZ_DOWN			0x7D
