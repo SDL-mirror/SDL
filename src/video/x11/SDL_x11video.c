@@ -870,6 +870,18 @@ static int X11_CreateWindow(_THIS, SDL_Surface *screen,
 			screen->flags |= SDL_FULLSCREEN;
 			X11_EnterFullScreen(this);
 		} else {
+			/* Position standalone window based on user request. --ryan. */
+			const char *envr = getenv("SDL_WINDOW_POS");
+			if (envr != NULL) {
+				int xscreen = DefaultScreen(SDL_Display);
+				if (strcmp(envr, "center") == 0) {
+					int disw = DisplayWidth(SDL_Display, xscreen);
+					int dish = DisplayHeight(SDL_Display, xscreen);
+					int centerx = (disw - current_w) / 2;
+					int centery = (dish - current_h) / 2;
+					XMoveWindow(SDL_Display, WMwindow, centerx, centery);
+				}
+			}
 			screen->flags &= ~SDL_FULLSCREEN;
 		}
 	}
