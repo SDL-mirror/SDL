@@ -156,6 +156,7 @@ Xbios video:
 		320x480x8 and 320x240x8 (software double-lined mode).
 	Falcon:
 		All modes supported by the current monitor (RVB or VGA).
+		BlowUp extended modes, ScreenBlaster 3 current mode.
 	Clones and any machine with monochrome monitor:
 		Not supported.
 

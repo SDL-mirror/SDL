@@ -67,14 +67,19 @@ void SDL_XBIOS_SB3Init(_THIS, scpn_cookie_t *cookie_scpn)
 	scpn_screeninfo_t *scrinfo;
 
 	/* SB3 prevent changing video modes, we can only use current one */
-
-	XBIOS_nummodes = 1;
-	current_mode = XBIOS_modelist;	
-	current_mode->number = -1;
+	if (XBIOS_modelist) {
+		free(XBIOS_modelist);
+		XBIOS_nummodes = 0;
+		XBIOS_modelist = NULL;
+	}
 
 	scrinfo = cookie_scpn->screen_info;
-	current_mode->width = scrinfo->virtual_width;
-	current_mode->height = scrinfo->virtual_height;
-	current_mode->depth = 1<<(SDL_XBIOS_scpn_planes_device[scrinfo->device]);
 	scrinfo->h_pos = scrinfo->v_pos = 0;
+
+	SDL_XBIOS_AddMode(this,
+		-1,
+		scrinfo->virtual_width, scrinfo->virtual_height,
+		1<<(SDL_XBIOS_scpn_planes_device[scrinfo->device]),
+		SDL_FALSE
+	);
 }

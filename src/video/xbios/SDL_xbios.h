@@ -124,4 +124,9 @@ enum {
 #define XBIOS_width			(this->hidden->width)
 #define XBIOS_height		(this->hidden->height)
 
+/*--- Functions prototypes ---*/
+
+void SDL_XBIOS_AddMode(_THIS, Uint16 modecode, Uint16 width, Uint16 height,
+	Uint16 depth, SDL_bool flags);
+
 #endif /* _SDL_xbios_h */
