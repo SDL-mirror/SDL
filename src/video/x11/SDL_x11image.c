@@ -103,8 +103,9 @@ int X11_SetupImage(_THIS, SDL_Surface *screen)
 		}
 		this->UpdateRects = X11_MITSHMUpdate;
 	}
+	if(!use_mitshm)
 #endif /* not NO_SHARED_MEMORY */
-	if(!use_mitshm) {
+	{
 		int bpp;
 		screen->pixels = malloc(screen->h*screen->pitch);
 		if ( screen->pixels == NULL ) {
