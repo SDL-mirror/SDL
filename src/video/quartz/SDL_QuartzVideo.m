@@ -828,6 +828,7 @@ static SDL_Surface* QZ_SetVideoMode (_THIS, SDL_Surface *current, int width,
                                      int height, int bpp, Uint32 flags) {
 
     current->flags = 0;
+    current->pixels = NULL;
 
     /* Setup full screen video */
     if ( flags & SDL_FULLSCREEN ) {
