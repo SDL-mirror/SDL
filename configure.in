@@ -288,11 +288,13 @@ CheckALSA()
 [  --enable-alsa-shared     dynamically load ALSA audio support [default=yes]],
                           , enable_alsa_shared=yes)
             if test "x`echo $ALSA_LIBS | grep -- -L`" = "x"; then
-                if test "x`ls /usr/lib/libasound.so.* 2> /dev/null`" != "x"; then
+                if test "x`ls /lib/libasound.so.* 2> /dev/null`" != "x"; then
+                    ALSA_LIBS="-L/lib $ALSA_LIBS"
+                elif test "x`ls /usr/lib/libasound.so.* 2> /dev/null`" != "x"; then
                     ALSA_LIBS="-L/usr/lib $ALSA_LIBS"
-                else if test "x`ls /usr/local/lib/libasound.so.* 2> /dev/null`" != "x"; then
+                elif test "x`ls /usr/local/lib/libasound.so.* 2> /dev/null`" != "x"; then
                     ALSA_LIBS="-L/usr/local/lib $ALSA_LIBS"
-                fi; fi
+                fi
             fi
             alsa_lib_spec=`echo $ALSA_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libasound.so.*/'`
             alsa_lib=`ls $alsa_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
