@@ -143,8 +143,48 @@ static void QZ_SetCaption    (_THIS, const char *title, const char *icon) {
     }
 }
 
-static void QZ_SetIcon       (_THIS, SDL_Surface *icon, Uint8 *mask) {
-/* Convert icon/mask to NSImage, assign with NSWindow's setMiniwindowImage method */
+static void QZ_SetIcon       (_THIS, SDL_Surface *icon, Uint8 *mask)
+{
+     NSBitmapImageRep *imgrep;
+     NSImage *img;
+     SDL_Surface *mergedSurface;
+     Uint8 *surfPtr;
+     int i,j,masksize;
+     NSAutoreleasePool *pool;
+     SDL_Rect rrect;
+     NSSize imgSize = {icon->w, icon->h};
+     pool = [ [ NSAutoreleasePool alloc ] init ];
+     SDL_GetClipRect(icon, &rrect);
+     /* create a big endian RGBA surface */
+     mergedSurface = SDL_CreateRGBSurface(SDL_SWSURFACE|SDL_SRCALPHA, 
+icon->w, icon->h, 32, 0xff<<24, 0xff<<16, 0xff<<8, 0xff<<0);
+     if (mergedSurface==NULL) { NSLog(@"Error creating surface for 
+merge"); goto freePool; }
+     if (SDL_BlitSurface(icon,&rrect,mergedSurface,&rrect)) {
+         NSLog(@"Error blitting to mergedSurface");
+         goto freePool;
+     }
+     if (mask) {
+     masksize=icon->w*icon->h;
+     surfPtr = (Uint8 *)mergedSurface->pixels;
+     #define ALPHASHIFT 3
+     for (i=0;i<masksize;i+=8)
+         for (j=0;j<8;j++) 
+surfPtr[ALPHASHIFT+((i+j)<<2)]=(mask[i>>3]&(1<<(7-j)))?0xFF:0x00;
+     }
+     imgrep = [[NSBitmapImageRep alloc] 
+initWithBitmapDataPlanes:(unsigned char **)&mergedSurface->pixels 
+pixelsWide:icon->w pixelsHigh:icon->h bitsPerSample:8 samplesPerPixel:4 
+hasAlpha:YES isPlanar:NO colorSpaceName:NSDeviceRGBColorSpace 
+bytesPerRow:icon->w<<2 bitsPerPixel:32];
+     img = [[NSImage alloc] initWithSize:imgSize];
+     [img addRepresentation: imgrep];
+     [NSApp setApplicationIconImage:img];
+     [img release];
+     [imgrep release];
+     SDL_FreeSurface(mergedSurface);
+freePool:
+     [pool release];
 }
 
 static int  QZ_IconifyWindow (_THIS) { 
