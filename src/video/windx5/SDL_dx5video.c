@@ -41,7 +41,6 @@ static char rcsid =
 #include "SDL_events.h"
 #include "SDL_syswm.h"
 #include "SDL_sysvideo.h"
-#include "SDL_RLEaccel_c.h"
 #include "SDL_blit.h"
 #include "SDL_pixels_c.h"
 #include "SDL_dx5video.h"
