@@ -114,9 +114,7 @@ int DetectAudioCDVolumes(FSVolumeRefNum *volumes, int numVolumes)
     for (volumeIndex = 1; result == noErr || result != nsvErr; volumeIndex++)
     {
         FSVolumeRefNum  actualVolume;
-        HFSUniStr255    volumeName;
         FSVolumeInfo    volumeInfo;
-        FSRef           rootDirectory;
         
         memset (&volumeInfo, 0, sizeof(volumeInfo));
         
@@ -125,13 +123,13 @@ int DetectAudioCDVolumes(FSVolumeRefNum *volumes, int numVolumes)
                                   &actualVolume,
                                   kFSVolInfoFSInfo,
                                   &volumeInfo,
-                                  &volumeName,
-                                  &rootDirectory); 
+                                  NULL,
+                                  NULL); 
          
         if (result == noErr)
         {
             if (volumeInfo.filesystemID == kAudioCDFilesystemID) // It's an audio CD
-            {                
+            {
                 if (volumes != NULL && cdVolumeCount < numVolumes)
                     volumes[cdVolumeCount] = actualVolume;
             

@@ -24,7 +24,7 @@
 */
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// AudioFileReaderThread.cpp
+// AudioFileManager.cpp
 //
 #include "AudioFilePlayer.h"
 #include <mach/mach.h> //used for setting policy of thread
@@ -35,115 +35,110 @@
 
 class FileReaderThread {
 public:
-	FileReaderThread ();
+    FileReaderThread ();
 
-	CAGuard&					GetGuard() { return mGuard; }
+    CAGuard&                    GetGuard() { return mGuard; }
     
-	void						AddReader();
-	
-	void						RemoveReader (const AudioFileReaderThread* inItem);
-		
-		// returns true if succeeded
-	bool						TryNextRead (AudioFileReaderThread* inItem)
-	{
-		bool didLock = false;
-		bool succeeded = false;
-		if (mGuard.Try (didLock))
-		{
-			mFileData.push_back (inItem);
-			mGuard.Notify();
-			succeeded = true;
+    void                        AddReader();
+    
+    void                        RemoveReader (AudioFileManager* inItem);
+        
+        // returns true if succeeded
+    bool                        TryNextRead (AudioFileManager* inItem)
+    {
+        bool didLock = false;
+        bool succeeded = false;
+        if (mGuard.Try (didLock))
+        {
+            mFileData.push_back (inItem);
+            mGuard.Notify();
+            succeeded = true;
 
-			if (didLock)
-				mGuard.Unlock();
-		}
-				
-		return succeeded;
-	}	
-	
-    int		mThreadShouldDie;
+            if (didLock)
+                mGuard.Unlock();
+        }
+                
+        return succeeded;
+    }   
+    
+    int     mThreadShouldDie;
     
 private:
-	typedef	std::list<AudioFileReaderThread*> FileData;
+    typedef std::list<AudioFileManager*> FileData;
 
-	CAGuard				mGuard;
-	UInt32				mThreadPriority;
-	
-	int					mNumReaders;	
-	FileData			mFileData;
-
-
-	void 						ReadNextChunk ();
-	
-	void 						StartFixedPriorityThread ();
-    static UInt32				GetThreadBasePriority (pthread_t inThread);
+    CAGuard             mGuard;
+    UInt32              mThreadPriority;
     
-	static void*				DiskReaderEntry (void *inRefCon);
+    int                 mNumReaders;    
+    FileData            mFileData;
+
+
+    void                        ReadNextChunk ();
+    
+    void                        StartFixedPriorityThread ();
+    static UInt32               GetThreadBasePriority (pthread_t inThread);
+    
+    static void*                DiskReaderEntry (void *inRefCon);
 };
 
 FileReaderThread::FileReaderThread ()
-	  : mThreadPriority (62),
-		mNumReaders (0)
+      : mThreadPriority (62),
+        mNumReaders (0)
 {
 }
 
-void	FileReaderThread::AddReader()
+void    FileReaderThread::AddReader()
 {
-	if (mNumReaders == 0)
-	{
-		mThreadShouldDie = false;
-	
-		StartFixedPriorityThread ();
-	}
-	mNumReaders++;
-}
-
-void	FileReaderThread::RemoveReader (const AudioFileReaderThread* inItem)
-{
-	if (mNumReaders > 0)
-	{
-		CAGuard::Locker fileReadLock (mGuard);
-
-		for (FileData::iterator iter = mFileData.begin(); iter != mFileData.end(); ++iter)
-		{
-			if ((*iter) == inItem) {	
-				mFileData.erase (iter);
-			}
-		}
-		
-		if (--mNumReaders == 0) {
-			mThreadShouldDie = true;
-			mGuard.Notify(); // wake up thread so it will quit
-            mGuard.Wait();   // wait for thread to die
-		}
-	}	
-}
-
-void 	FileReaderThread::StartFixedPriorityThread ()
-{
-	pthread_attr_t		theThreadAttrs;
-	pthread_t			pThread;
-	
-	OSStatus result = pthread_attr_init(&theThreadAttrs);
-		THROW_RESULT("pthread_attr_init - Thread attributes could not be created.")
-	
-	result = pthread_attr_setdetachstate(&theThreadAttrs, PTHREAD_CREATE_DETACHED);
-		THROW_RESULT("pthread_attr_setdetachstate - Thread attributes could not be detached.")
-	
-	result = pthread_create (&pThread, &theThreadAttrs, DiskReaderEntry, this);
-		THROW_RESULT("pthread_create - Create and start the thread.")
-	
-	pthread_attr_destroy(&theThreadAttrs);
+    if (mNumReaders == 0)
+    {
+        mThreadShouldDie = false;
     
-	// we've now created the thread and started it
-	// we'll now set the priority of the thread to the nominated priority
-	// and we'll also make the thread fixed
-    thread_extended_policy_data_t		theFixedPolicy;
-    thread_precedence_policy_data_t		thePrecedencePolicy;
-    SInt32								relativePriority;
+        StartFixedPriorityThread ();
+    }
+    mNumReaders++;
+}
+
+void    FileReaderThread::RemoveReader (AudioFileManager* inItem)
+{
+    if (mNumReaders > 0)
+    {
+        CAGuard::Locker fileReadLock (mGuard);
+        
+        mFileData.remove (inItem);
+        
+        if (--mNumReaders == 0) {
+            mThreadShouldDie = true;
+            mGuard.Notify(); // wake up thread so it will quit
+            mGuard.Wait();   // wait for thread to die
+        }
+    }   
+}
+
+void    FileReaderThread::StartFixedPriorityThread ()
+{
+    pthread_attr_t      theThreadAttrs;
+    pthread_t           pThread;
+    
+    OSStatus result = pthread_attr_init(&theThreadAttrs);
+        THROW_RESULT("pthread_attr_init - Thread attributes could not be created.")
+    
+    result = pthread_attr_setdetachstate(&theThreadAttrs, PTHREAD_CREATE_DETACHED);
+        THROW_RESULT("pthread_attr_setdetachstate - Thread attributes could not be detached.")
+    
+    result = pthread_create (&pThread, &theThreadAttrs, DiskReaderEntry, this);
+        THROW_RESULT("pthread_create - Create and start the thread.")
+    
+    pthread_attr_destroy(&theThreadAttrs);
+    
+    // we've now created the thread and started it
+    // we'll now set the priority of the thread to the nominated priority
+    // and we'll also make the thread fixed
+    thread_extended_policy_data_t       theFixedPolicy;
+    thread_precedence_policy_data_t     thePrecedencePolicy;
+    SInt32                              relativePriority;
     
     // make thread fixed
-    theFixedPolicy.timeshare = false;	// set to true for a non-fixed thread
+    theFixedPolicy.timeshare = false;   // set to true for a non-fixed thread
     result = thread_policy_set (pthread_mach_thread_np(pThread), THREAD_EXTENDED_POLICY, (thread_policy_t)&theFixedPolicy, THREAD_EXTENDED_POLICY_COUNT);
         THROW_RESULT("thread_policy - Couldn't set thread as fixed priority.")
     // set priority
@@ -155,26 +150,26 @@ void 	FileReaderThread::StartFixedPriorityThread ()
         THROW_RESULT("thread_policy - Couldn't set thread priority.")
 }
 
-UInt32	FileReaderThread::GetThreadBasePriority (pthread_t inThread)
+UInt32  FileReaderThread::GetThreadBasePriority (pthread_t inThread)
 {
-    thread_basic_info_data_t			threadInfo;
-	policy_info_data_t					thePolicyInfo;
-	unsigned int						count;
+    thread_basic_info_data_t            threadInfo;
+    policy_info_data_t                  thePolicyInfo;
+    unsigned int                        count;
     
     // get basic info
     count = THREAD_BASIC_INFO_COUNT;
     thread_info (pthread_mach_thread_np (inThread), THREAD_BASIC_INFO, (integer_t*)&threadInfo, &count);
     
-	switch (threadInfo.policy) {
-		case POLICY_TIMESHARE:
-			count = POLICY_TIMESHARE_INFO_COUNT;
-			thread_info(pthread_mach_thread_np (inThread), THREAD_SCHED_TIMESHARE_INFO, (integer_t*)&(thePolicyInfo.ts), &count);
-			return thePolicyInfo.ts.base_priority;
+    switch (threadInfo.policy) {
+        case POLICY_TIMESHARE:
+            count = POLICY_TIMESHARE_INFO_COUNT;
+            thread_info(pthread_mach_thread_np (inThread), THREAD_SCHED_TIMESHARE_INFO, (integer_t*)&(thePolicyInfo.ts), &count);
+            return thePolicyInfo.ts.base_priority;
             break;
             
         case POLICY_FIFO:
-			count = POLICY_FIFO_INFO_COUNT;
-			thread_info(pthread_mach_thread_np (inThread), THREAD_SCHED_FIFO_INFO, (integer_t*)&(thePolicyInfo.fifo), &count);
+            count = POLICY_FIFO_INFO_COUNT;
+            thread_info(pthread_mach_thread_np (inThread), THREAD_SCHED_FIFO_INFO, (integer_t*)&(thePolicyInfo.fifo), &count);
             if (thePolicyInfo.fifo.depressed) {
                 return thePolicyInfo.fifo.depress_priority;
             } else {
@@ -182,225 +177,233 @@ UInt32	FileReaderThread::GetThreadBasePriority (pthread_t inThread)
             }
             break;
             
-		case POLICY_RR:
-			count = POLICY_RR_INFO_COUNT;
-			thread_info(pthread_mach_thread_np (inThread), THREAD_SCHED_RR_INFO, (integer_t*)&(thePolicyInfo.rr), &count);
-			if (thePolicyInfo.rr.depressed) {
+        case POLICY_RR:
+            count = POLICY_RR_INFO_COUNT;
+            thread_info(pthread_mach_thread_np (inThread), THREAD_SCHED_RR_INFO, (integer_t*)&(thePolicyInfo.rr), &count);
+            if (thePolicyInfo.rr.depressed) {
                 return thePolicyInfo.rr.depress_priority;
             } else {
                 return thePolicyInfo.rr.base_priority;
             }
             break;
-	}
+    }
     
     return 0;
 }
 
-void	*FileReaderThread::DiskReaderEntry (void *inRefCon)
+void    *FileReaderThread::DiskReaderEntry (void *inRefCon)
 {
-	FileReaderThread *This = (FileReaderThread *)inRefCon;
-	This->ReadNextChunk();
-	#if DEBUG
-	printf ("finished with reading file\n");
-	#endif
-	
-	return 0;
+    FileReaderThread *This = (FileReaderThread *)inRefCon;
+    This->ReadNextChunk();
+    #if DEBUG
+    printf ("finished with reading file\n");
+    #endif
+    
+    return 0;
 }
 
-void 	FileReaderThread::ReadNextChunk ()
+void    FileReaderThread::ReadNextChunk ()
 {
-	OSStatus result;
-	UInt32	dataChunkSize;
-	AudioFileReaderThread* theItem = 0;
+    OSStatus result;
+    UInt32  dataChunkSize;
+    AudioFileManager* theItem = 0;
 
-	for (;;) 
-	{
-		{ // this is a scoped based lock
-			CAGuard::Locker fileReadLock (mGuard);
-			
-			if (this->mThreadShouldDie) {
+    for (;;) 
+    {
+        { // this is a scoped based lock
+            CAGuard::Locker fileReadLock (mGuard);
+            
+            if (this->mThreadShouldDie) {
             
                 mGuard.Notify();
                 return;
             }
-			
-			if (mFileData.empty())
-			{
-				mGuard.Wait();
-			}
-			            
-			// kill thread
-			if (this->mThreadShouldDie) {
+            
+            if (mFileData.empty())
+            {
+                mGuard.Wait();
+            }
+                        
+            // kill thread
+            if (this->mThreadShouldDie) {
             
                 mGuard.Notify();
                 return;
             }
 
-			theItem = mFileData.front();
-			mFileData.pop_front();
-		}
-	
-		if ((theItem->mFileLength - theItem->mReadFilePosition) < theItem->mChunkSize)
-			dataChunkSize = theItem->mFileLength - theItem->mReadFilePosition;
-		else
-			dataChunkSize = theItem->mChunkSize;
-		
-			// this is the exit condition for the thread
-		if (dataChunkSize == 0) {
-			theItem->mFinishedReadingData = true;
-			continue;
-		}
-			// construct pointer
-		char* writePtr = const_cast<char*>(theItem->GetFileBuffer() + 
-								(theItem->mWriteToFirstBuffer ? 0 : theItem->mChunkSize));
-	
+            theItem = mFileData.front();
+            mFileData.pop_front();
+        }
+    
+        if ((theItem->mFileLength - theItem->mReadFilePosition) < theItem->mChunkSize)
+            dataChunkSize = theItem->mFileLength - theItem->mReadFilePosition;
+        else
+            dataChunkSize = theItem->mChunkSize;
+        
+            // this is the exit condition for the thread
+        if (dataChunkSize == 0) {
+            theItem->mFinishedReadingData = true;
+            continue;
+        }
+            // construct pointer
+        char* writePtr = const_cast<char*>(theItem->GetFileBuffer() + 
+                                (theItem->mWriteToFirstBuffer ? 0 : theItem->mChunkSize));
+    
 /*
         printf ("AudioFileReadBytes: theItem=%.8X fileID=%.8X pos=%.8X sz=%.8X flen=%.8X ptr=%.8X\n", 
             (unsigned int)theItem, (unsigned int)theItem->GetFileID(),
             (unsigned int)theItem->mReadFilePosition, (unsigned int)dataChunkSize, 
             (unsigned int)theItem->mFileLength, (unsigned int)writePtr);
 */            
-		result = AudioFileReadBytes (theItem->GetFileID(), 
-									false,
-									theItem->mReadFilePosition, 
-									&dataChunkSize, 
-									writePtr);
-		if (result) {
-			theItem->GetParent().DoNotification(result);
-			continue;
-		}
-		
-		if (dataChunkSize != theItem->mChunkSize)
-		{
-			writePtr += dataChunkSize;
+        result = theItem->Read(writePtr, &dataChunkSize);
+        if (result) {
+            theItem->GetParent().DoNotification(result);
+            continue;
+        }
+        
+        if (dataChunkSize != theItem->mChunkSize)
+        {
+            writePtr += dataChunkSize;
 
             // can't exit yet.. we still have to pass the partial buffer back
             memset (writePtr, 0, (theItem->mChunkSize - dataChunkSize));
         }
-		
-		theItem->mWriteToFirstBuffer = !theItem->mWriteToFirstBuffer;	// switch buffers
-		
-		theItem->mReadFilePosition += dataChunkSize;		// increment count
-	}
+        
+        theItem->mWriteToFirstBuffer = !theItem->mWriteToFirstBuffer;   // switch buffers
+        
+        theItem->mReadFilePosition += dataChunkSize;        // increment count
+    }
 }
 
 
 static FileReaderThread sReaderThread;
 
-AudioFileReaderThread::AudioFileReaderThread (AudioFilePlayer	&inParent, 
-										AudioFileID 			&inFile, 
-										SInt64 					inFileLength,
-										UInt32					inChunkSize)
-	: AudioFileManager (inParent, inFile),
-	  mChunkSize (inChunkSize),
-	  mFileLength (inFileLength),
-	  mReadFilePosition (0),
-	  mWriteToFirstBuffer (false),
-	  mFinishedReadingData (false),
+AudioFileManager::AudioFileManager (AudioFilePlayer &inParent, 
+                                    SInt16          inForkRefNum, 
+                                    SInt64          inFileLength,
+                                    UInt32          inChunkSize)
+    : mParent (inParent),
+      mForkRefNum (inForkRefNum),
+      mFileBuffer (0),
+      mByteCounter (0),
+      mLockUnsuccessful (false),
+      mIsEngaged (false),
 
-	  mLockUnsuccessful (false),
-	  mIsEngaged (false)
+      mChunkSize (inChunkSize),
+      mFileLength (inFileLength),
+      mReadFilePosition (0),
+      mWriteToFirstBuffer (false),
+      mFinishedReadingData (false)
+
 {
-	mFileBuffer = (char*) malloc (mChunkSize * 2);
+    mFileBuffer = (char*) malloc (mChunkSize * 2);
+    FSGetForkPosition(mForkRefNum, &mAudioDataOffset);
     assert (mFileBuffer != NULL);
 }
 
-void	AudioFileReaderThread::DoConnect ()
+void    AudioFileManager::DoConnect ()
 {
-	if (!mIsEngaged)
-	{
-		//mReadFilePosition = 0;
-		mFinishedReadingData = false;
+    if (!mIsEngaged)
+    {
+        //mReadFilePosition = 0;
+        mFinishedReadingData = false;
 
-		mNumTimesAskedSinceFinished = -1;
-		mLockUnsuccessful = false;
-		
-		UInt32 dataChunkSize;
+        mNumTimesAskedSinceFinished = -1;
+        mLockUnsuccessful = false;
+        
+        OSStatus result;
+        UInt32 dataChunkSize;
         
         if ((mFileLength - mReadFilePosition) < mChunkSize)
-			dataChunkSize = mFileLength - mReadFilePosition;
-		else
-			dataChunkSize = mChunkSize;
+            dataChunkSize = mFileLength - mReadFilePosition;
+        else
+            dataChunkSize = mChunkSize;
         
-		OSStatus result = AudioFileReadBytes ( mAudioFileID, 
-												false, 
-												mReadFilePosition, 
-												&dataChunkSize, 
-												mFileBuffer);
-            THROW_RESULT("AudioFileReadBytes")
-            
-		mReadFilePosition += dataChunkSize;
-				
-		mWriteToFirstBuffer = false;
-		mReadFromFirstBuffer = true;
+        result = Read(mFileBuffer, &dataChunkSize);
+           THROW_RESULT("AudioFileManager::DoConnect(): Read")
 
-		sReaderThread.AddReader();
-		
-		mIsEngaged = true;
-	}
-	else
-		throw static_cast<OSStatus>(-1); //thread has already been started
+        mReadFilePosition += dataChunkSize;
+                
+        mWriteToFirstBuffer = false;
+        mReadFromFirstBuffer = true;
+
+        sReaderThread.AddReader();
+        
+        mIsEngaged = true;
+    }
+    else
+        throw static_cast<OSStatus>(-1); //thread has already been started
 }
 
-void	AudioFileReaderThread::Disconnect ()
+void    AudioFileManager::Disconnect ()
 {
-	if (mIsEngaged) 
-	{
-		sReaderThread.RemoveReader (this);
-		mIsEngaged = false;
-	}
+    if (mIsEngaged) 
+    {
+        sReaderThread.RemoveReader (this);
+        mIsEngaged = false;
+    }
 }
 
-OSStatus AudioFileReaderThread::GetFileData (void** inOutData, UInt32 *inOutDataSize)
+OSStatus AudioFileManager::Read(char *buffer, UInt32 *len)
 {
-	if (mFinishedReadingData) 
-	{
-		++mNumTimesAskedSinceFinished;
-		*inOutDataSize = 0;
-		*inOutData = 0;
-		return noErr;
-	}
-	
-	if (mReadFromFirstBuffer == mWriteToFirstBuffer) {
-		#if DEBUG
-		printf ("* * * * * * * Can't keep up with reading file:%ld\n", mParent.GetBusNumber());
-		#endif
-		
-		mParent.DoNotification (kAudioFilePlayErr_FilePlayUnderrun);
-		*inOutDataSize = 0;
-		*inOutData = 0;
-	} else {
-		*inOutDataSize = mChunkSize;
-		*inOutData = mReadFromFirstBuffer ? mFileBuffer : (mFileBuffer + mChunkSize);
-	}
-
-	mLockUnsuccessful = !sReaderThread.TryNextRead (this);
-	
-	mReadFromFirstBuffer = !mReadFromFirstBuffer;
-
-	return noErr;
+    return FSReadFork (mForkRefNum,
+                       fsFromStart,
+                       mReadFilePosition + mAudioDataOffset,
+                       *len,
+                       buffer,
+                       len);
 }
 
-void 	AudioFileReaderThread::AfterRender ()
+OSStatus AudioFileManager::GetFileData (void** inOutData, UInt32 *inOutDataSize)
 {
-	if (mNumTimesAskedSinceFinished > 0)
-	{
-		bool didLock = false;
-		if (sReaderThread.GetGuard().Try (didLock)) {
-			mParent.DoNotification (kAudioFilePlay_FileIsFinished);
-			if (didLock)
-				sReaderThread.GetGuard().Unlock();
-		}
-	}
+    if (mFinishedReadingData) 
+    {
+        ++mNumTimesAskedSinceFinished;
+        *inOutDataSize = 0;
+        *inOutData = 0;
+        return noErr;
+    }
+    
+    if (mReadFromFirstBuffer == mWriteToFirstBuffer) {
+        #if DEBUG
+        printf ("* * * * * * * Can't keep up with reading file:%ld\n", mParent.GetBusNumber());
+        #endif
+        
+        mParent.DoNotification (kAudioFilePlayErr_FilePlayUnderrun);
+        *inOutDataSize = 0;
+        *inOutData = 0;
+    } else {
+        *inOutDataSize = mChunkSize;
+        *inOutData = mReadFromFirstBuffer ? mFileBuffer : (mFileBuffer + mChunkSize);
+    }
 
-	if (mLockUnsuccessful)
-		mLockUnsuccessful = !sReaderThread.TryNextRead (this);
+    mLockUnsuccessful = !sReaderThread.TryNextRead (this);
+    
+    mReadFromFirstBuffer = !mReadFromFirstBuffer;
+
+    return noErr;
 }
 
-void 	AudioFileReaderThread::SetPosition (SInt64 pos)
+void    AudioFileManager::AfterRender ()
+{
+    if (mNumTimesAskedSinceFinished > 0)
+    {
+        bool didLock = false;
+        if (sReaderThread.GetGuard().Try (didLock)) {
+            mParent.DoNotification (kAudioFilePlay_FileIsFinished);
+            if (didLock)
+                sReaderThread.GetGuard().Unlock();
+        }
+    }
+
+    if (mLockUnsuccessful)
+        mLockUnsuccessful = !sReaderThread.TryNextRead (this);
+}
+
+void    AudioFileManager::SetPosition (SInt64 pos)
 {
     if (pos < 0 || pos >= mFileLength) {
-        SDL_SetError ("AudioFileReaderThread::SetPosition - position invalid: %d filelen=%d\n", 
+        SDL_SetError ("AudioFileManager::SetPosition - position invalid: %d filelen=%d\n", 
             (unsigned int)pos, (unsigned int)mFileLength);
         pos = 0;
     }
@@ -408,10 +411,10 @@ void 	AudioFileReaderThread::SetPosition (SInt64 pos)
     mReadFilePosition = pos;
 }
     
-void 	AudioFileReaderThread::SetEndOfFile (SInt64 pos)
+void    AudioFileManager::SetEndOfFile (SInt64 pos)
 {
     if (pos <= 0 || pos > mFileLength) {
-        SDL_SetError ("AudioFileReaderThread::SetEndOfFile - position beyond actual eof\n");
+        SDL_SetError ("AudioFileManager::SetEndOfFile - position beyond actual eof\n");
         pos = mFileLength;
     }
     

@@ -1365,7 +1365,7 @@ static void QZ_DrawResizeIcon (_THIS, RgnHandle dirtyRegion) {
                 SDL_RWops *rw;
                 SDL_Surface *tmp;
                 
-                rw = SDL_RWFromMem (QZ_ResizeIcon, sizeof(QZ_ResizeIcon));
+                rw = SDL_RWFromConstMem (QZ_ResizeIcon, sizeof(QZ_ResizeIcon));
                 tmp = SDL_LoadBMP_RW (rw, SDL_TRUE);
                                                                 
                 resize_icon = SDL_ConvertSurface (tmp, SDL_VideoSurface->format, SDL_SRCCOLORKEY);

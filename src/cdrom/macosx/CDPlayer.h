@@ -25,9 +25,8 @@
 
 #include <string.h>
 
-#include <CoreFoundation/CoreFoundation.h>
 #include <Carbon/Carbon.h>
-
+#include <CoreFoundation/CoreFoundation.h>
 #include <AudioUnit/AudioUnit.h>
 
 #include "SDL.h"

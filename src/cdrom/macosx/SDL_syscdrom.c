@@ -265,19 +265,25 @@ void SDL_SYS_CDQuit(void)
 /* Get the Unix disk name of the volume */
 static const char *SDL_SYS_CDName (int drive)
 {
-    CFStringRef  diskID;
     OSStatus     err = noErr;
-    
+    HParamBlockRec  pb;
+    GetVolParmsInfoBuffer   volParmsInfo;
+   
     if (fakeCD)
         return "Fake CD-ROM Device";
-        
-    err = FSCopyDiskIDForVolume (volumes[drive], &diskID);
+
+    pb.ioParam.ioNamePtr = NULL;
+    pb.ioParam.ioVRefNum = volumes[drive];
+    pb.ioParam.ioBuffer = (Ptr)&volParmsInfo;
+    pb.ioParam.ioReqCount = (SInt32)sizeof(volParmsInfo);
+    err = PBHGetVolParmsSync(&pb);
+
     if (err != noErr) {
-        SDL_SetError ("FSCopyDiskIDForVolume returned %d", err);
+        SDL_SetError ("PBHGetVolParmsSync returned %d", err);
         return NULL;
     }
-    
-    return CFStringGetCStringPtr (diskID, 0);
+
+    return volParmsInfo.vMDeviceID;
 }
 
 /* Open the "device" */
@@ -318,14 +324,15 @@ static int SDL_SYS_CDGetTOC (SDL_CD *cdrom)
 /* Get CD-ROM status */
 static CDstatus SDL_SYS_CDStatus (SDL_CD *cdrom, int *position)
 {
-    int trackFrame;
+    if (position) {
+        int trackFrame;
+        
+        Lock ();
+        trackFrame = GetCurrentFrame ();
+        Unlock ();
     
-    Lock ();
-    trackFrame = GetCurrentFrame ();
-    Unlock ();
-    
-    if (position)
-	    *position = cdrom->track[currentTrack].offset + trackFrame;
+        *position = cdrom->track[currentTrack].offset + trackFrame;
+    }
     
     return status;
 }
@@ -383,8 +390,10 @@ static int SDL_SYS_CDPause(SDL_CD *cdrom)
     
     Lock ();
     
-    if (PauseFile () < 0)
+    if (PauseFile () < 0) {
+        Unlock ();
         return -2;
+    }
     
     status = CD_PAUSED;
     
@@ -403,8 +412,10 @@ static int SDL_SYS_CDResume(SDL_CD *cdrom)
     
     Lock ();
     
-    if (PlayFile () < 0)
+    if (PauseFile () < 0) {
+        Unlock ();
         return -2;
+    }
         
     status = CD_PLAYING;
     
@@ -423,11 +434,15 @@ static int SDL_SYS_CDStop(SDL_CD *cdrom)
     
     Lock ();
     
-    if (PauseFile () < 0)
+    if (PauseFile () < 0) {
+        Unlock ();
         return -2;
+    }
         
-    if (ReleaseFile () < 0)
+    if (ReleaseFile () < 0) {
+        Unlock ();
         return -3;
+    }
         
     status = CD_STOPPED;
     
@@ -440,6 +455,7 @@ static int SDL_SYS_CDStop(SDL_CD *cdrom)
 static int SDL_SYS_CDEject(SDL_CD *cdrom)
 {
     OSStatus err;
+	HParamBlockRec  pb;
     
     if (fakeCD) {
         SDL_SetError (kErrorFakeDevice);
@@ -448,20 +464,28 @@ static int SDL_SYS_CDEject(SDL_CD *cdrom)
     
     Lock ();
     
-    if (PauseFile () < 0)
+    if (PauseFile () < 0) {
+        Unlock ();
         return -2;
+    }
         
-    if (ReleaseFile () < 0)
+    if (ReleaseFile () < 0) {
+        Unlock ();
         return -3;
+    }
     
     status = CD_STOPPED;
     
-    err = FSEjectVolumeSync (volumes[cdrom->id], 0, NULL);
-    
-    if (err != noErr) {
-        SDL_SetError ("FSEjectVolumeSync returned %d", err);
-        return -4;
-    }
+	// Eject the volume
+	pb.ioParam.ioNamePtr = NULL;
+	pb.ioParam.ioVRefNum = volumes[cdrom->id];
+	err = PBUnmountVol((ParamBlockRec *) &pb);
+
+	if (err != noErr) {
+        Unlock ();
+		SDL_SetError ("PBUnmountVol returned %d", err);
+		return -4;
+	}
     
     status = CD_TRAYEMPTY;
 

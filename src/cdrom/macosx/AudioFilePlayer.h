@@ -31,7 +31,7 @@
 
 #include <CoreServices/CoreServices.h>
 
-#include <AudioToolbox/AudioToolbox.h>
+#include <AudioToolbox/AudioConverter.h>
 #include <AudioUnit/AudioUnit.h>
 
 #include "SDL_error.h"
@@ -97,12 +97,9 @@ public:
 #if DEBUG    
     void            Print() const 
     {
-        CAShow (mAudioFileID);
         printf ("Destination Bus:%ld\n", GetBusNumber());
-        printf ("Is 'aunt' unit:%s\n", (mIsAUNTUnit ? "true" : "false"));
         printf ("Is Connected:%s\n", (IsConnected() ? "true" : "false"));
-        if (mConverter) CAShow (mConverter);
-          printf ("- - - - - - - - - - - - - - \n");
+        printf ("- - - - - - - - - - - - - - \n");
     }
 #endif
 
@@ -111,14 +108,13 @@ public:
 private:
     AudioUnit                       mPlayUnit;
     UInt32                          mBusNumber;
-    AudioFileID                     mAudioFileID;
+    SInt16                          mForkRefNum;
     
     AudioUnitInputCallback          mInputCallback;
 
     AudioStreamBasicDescription     mFileDescription;
     
     bool                            mConnected;
-    bool                            mIsAUNTUnit;
     
     AudioFileManager*               mAudioFileManager;
     AudioConverterRef               mConverter;
@@ -137,14 +133,12 @@ private:
 class AudioFileManager
 {
 public:
-    AudioFileManager (AudioFilePlayer& inParent, AudioFileID inFile)
-        : mParent (inParent),
-          mAudioFileID (inFile),
-          mFileBuffer (0),
-          mByteCounter (0)
-        {}
+    AudioFileManager (AudioFilePlayer &inParent, 
+                      SInt16          inForkRefNum, 
+                      SInt64          inFileLength,
+                      UInt32          inChunkSize);
     
-    virtual ~AudioFileManager();
+    ~AudioFileManager();
     
     
     void                Connect (AudioConverterRef inConverter) 
@@ -155,36 +149,51 @@ public:
 
         // this method should NOT be called by an object of this class
         // as it is called by the parent's Disconnect() method
-    virtual void        Disconnect () {}
+    void                Disconnect ();
 
-    const AudioFileID&  GetFileID() const { return mAudioFileID; }
+    OSStatus            Read(char *buffer, UInt32 *len);
 
     const char*         GetFileBuffer () { return mFileBuffer; }
 
     const AudioFilePlayer&  GetParent () const { return mParent; }
     
-    virtual void        SetPosition (SInt64 pos) = 0;  // seek/rewind in the file
+    void                SetPosition (SInt64 pos);  // seek/rewind in the file
     
-    virtual int         GetByteCounter () { return mByteCounter; } // return actual bytes streamed to audio hardware
+    int                 GetByteCounter () { return mByteCounter; } // return actual bytes streamed to audio hardware
     
-    virtual void        SetEndOfFile (SInt64 pos) = 0;  // set the "EOF" (will behave just like it reached eof)
+    void                SetEndOfFile (SInt64 pos);  // set the "EOF" (will behave just like it reached eof)
    
 protected:
-    AudioFilePlayer&            mParent;
-    AudioConverterRef           mParentConverter;
-    const AudioFileID           mAudioFileID;
+    AudioFilePlayer&    mParent;
+    AudioConverterRef   mParentConverter;
+    SInt16              mForkRefNum;
+    SInt64              mAudioDataOffset;
     
-    char*                       mFileBuffer;
+    char*               mFileBuffer;
 
+    int                 mByteCounter;
+
+    bool                mReadFromFirstBuffer;
+    bool                mLockUnsuccessful;
+    bool                mIsEngaged;
+    
+    int                 mNumTimesAskedSinceFinished;
+
+public:
+    const UInt32        mChunkSize;
+    SInt64              mFileLength;
+    SInt64              mReadFilePosition;
+    bool                mWriteToFirstBuffer;
+    bool                mFinishedReadingData;
+
+protected:
     OSStatus            Render (AudioBuffer &ioData);
-
-    int                         mByteCounter;
     
-    virtual OSStatus    GetFileData (void** inOutData, UInt32 *inOutDataSize) = 0;
+    OSStatus            GetFileData (void** inOutData, UInt32 *inOutDataSize);
     
-    virtual void        DoConnect () = 0;
+    void                DoConnect ();
         
-    virtual void        AfterRender () = 0;
+    void                AfterRender ();
 
 public:
     static OSStatus     FileInputProc (void                             *inRefCon, 
@@ -196,44 +205,6 @@ public:
                                             UInt32*                     outDataSize,
                                             void**                      outData,
                                             void*                       inUserData);
-};
-
-
-#pragma mark __________ AudioFileReaderThread
-class AudioFileReaderThread 
-    : public AudioFileManager
-{
-public:
-    const UInt32    mChunkSize;
-    SInt64          mFileLength;
-    SInt64          mReadFilePosition;
-    bool            mWriteToFirstBuffer;
-    bool            mFinishedReadingData;
-    
-    AudioFileReaderThread (AudioFilePlayer  &inParent, 
-                            AudioFileID     &inFile, 
-                            SInt64          inFileLength,
-                            UInt32          inChunkSize);
-    
-    virtual void        Disconnect ();
-
-    virtual void        SetPosition (SInt64 pos);  // seek/rewind in the file
-    
-    virtual void        SetEndOfFile (SInt64 pos);  // set the "EOF" (will behave just like it reached eof)
-    
-protected:
-    virtual void        DoConnect ();
-
-    virtual OSStatus    GetFileData (void** inOutData, UInt32 *inOutDataSize);
-
-    virtual void        AfterRender ();
-
-private:
-    bool                        mReadFromFirstBuffer;
-    bool                        mLockUnsuccessful;
-    bool                        mIsEngaged;
-    
-    int                         mNumTimesAskedSinceFinished;
 };
 
 
