@@ -567,6 +567,9 @@ SDL_Surface * SDL_SetVideoMode (int width, int height, int bpp, Uint32 flags)
 		flags &= ~(SDL_HWSURFACE|SDL_DOUBLEBUF);
 	}
 
+	/* Reset the keyboard here so event callbacks can run */
+	SDL_ResetKeyboard();
+
 	/* Clean up any previous video mode */
 	if ( SDL_PublicSurface != NULL ) {
 		SDL_PublicSurface = NULL;

@@ -335,6 +335,7 @@ void SDL_ResetKeyboard(void)
 			SDL_PrivateKeyboard(SDL_RELEASED, &keysym);
 		}
 	}
+	SDL_KeyRepeat.timestamp = 0;
 }
 
 int SDL_EnableUNICODE(int enable)

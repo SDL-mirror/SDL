@@ -54,6 +54,9 @@ static char rcsid =
 #include "SDL_x11events_c.h"
 
 
+/* Define this if you want to debug X11 events */
+/*#define DEBUG_XEVENTS*/
+
 /* The translation tables from an X11 keysym to a SDL keysym */
 static SDLKey ODD_keymap[256];
 static SDLKey MISC_keymap[256];
@@ -219,6 +222,9 @@ printf("FocusOut!\n");
 
 	    /* Generated upon EnterWindow and FocusIn */
 	    case KeymapNotify: {
+#ifdef DEBUG_XEVENTS
+printf("KeymapNotify!\n");
+#endif
 		X11_SetKeyboardState(SDL_Display, xevent.xkeymap.key_vector);
 	    }
 	    break;
@@ -263,6 +269,10 @@ printf("FocusOut!\n");
 	    /* Key press? */
 	    case KeyPress: {
 		SDL_keysym keysym;
+
+#ifdef DEBUG_XEVENTS
+printf("KeyPress (X11 keycode = 0x%X)\n", xevent.xkey.keycode);
+#endif
 		posted = SDL_PrivateKeyboard(SDL_PRESSED,
 				X11_TranslateKey(SDL_Display, &xevent.xkey,
 						 xevent.xkey.keycode,
@@ -274,6 +284,9 @@ printf("FocusOut!\n");
 	    case KeyRelease: {
 		SDL_keysym keysym;
 
+#ifdef DEBUG_XEVENTS
+printf("KeyRelease (X11 keycode = 0x%X)\n", xevent.xkey.keycode);
+#endif
 		/* Check to see if this is a repeated key */
 		if ( ! X11_KeyRepeat(SDL_Display, &xevent) ) {
 			posted = SDL_PrivateKeyboard(SDL_RELEASED, 
