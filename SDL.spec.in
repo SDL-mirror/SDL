@@ -12,6 +12,7 @@ Copyright: LGPL
 Group: System Environment/Libraries
 BuildRoot: /var/tmp/%{name}-buildroot
 Prefix: %{_prefix}
+Provides: libSDL-1.1.so.0
 
 %description
 This is the Simple DirectMedia Layer, a generic API that provides low
