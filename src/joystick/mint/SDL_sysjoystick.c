@@ -351,9 +351,9 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 					if ((curstate & (IKBD_JOY_LEFT|IKBD_JOY_RIGHT)) != (prevstate & (IKBD_JOY_LEFT|IKBD_JOY_RIGHT))) {
 						curaxis=0;
 						if (curstate & IKBD_JOY_LEFT) {
-							curaxis=-128;
+							curaxis=0x8000;
 						} else if (curstate & IKBD_JOY_RIGHT) {
-							curaxis=127;
+							curaxis=0x7fff;
 						}					
 						SDL_PrivateJoystickAxis(joystick,0,curaxis);
 					}
@@ -361,9 +361,9 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 					if ((curstate & (IKBD_JOY_UP|IKBD_JOY_DOWN)) != (prevstate & (IKBD_JOY_UP|IKBD_JOY_DOWN))) {
 						curaxis=0;
 						if (curstate & IKBD_JOY_UP) {
-							curaxis=-128;
+							curaxis=0x8000;
 						} else if (curstate & IKBD_JOY_DOWN) {
-							curaxis=127;
+							curaxis=0x7fff;
 						}					
 						SDL_PrivateJoystickAxis(joystick,1,curaxis);
 					}
@@ -393,9 +393,9 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 					if ((curstate & ((1<<JP_LEFT)|(1<<JP_RIGHT))) != (prevstate & ((1<<JP_LEFT)|(1<<JP_RIGHT)))) {
 						curaxis=0;
 						if (curstate & (1<<JP_LEFT)) {
-							curaxis=-128;
+							curaxis=0x8000;
 						} else if (curstate & (1<<JP_RIGHT)) {
-							curaxis=127;
+							curaxis=0x7fff;
 						}					
 						SDL_PrivateJoystickAxis(joystick,0,curaxis);
 					}
@@ -403,9 +403,9 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 					if ((curstate & ((1<<JP_UP)|(1<<JP_DOWN))) != (prevstate & ((1<<JP_UP)|(1<<JP_DOWN)))) {
 						curaxis=0;
 						if (curstate & (1<<JP_UP)) {
-							curaxis=-128;
+							curaxis=0x8000;
 						} else if (curstate & (1<<JP_DOWN)) {
-							curaxis=127;
+							curaxis=0x7fff;
 						}					
 						SDL_PrivateJoystickAxis(joystick,1,curaxis);
 					}
@@ -446,9 +446,9 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 					if ((curstate & (PORT_JS_LEFT|PORT_JS_RIGHT)) != (prevstate & (PORT_JS_LEFT|PORT_JS_RIGHT))) {
 						curaxis=0;
 						if (curstate & PORT_JS_LEFT) {
-							curaxis=-128;
+							curaxis=0x8000;
 						} else if (curstate & PORT_JS_RIGHT) {
-							curaxis=127;
+							curaxis=0x7fff;
 						}					
 						SDL_PrivateJoystickAxis(joystick,0,curaxis);
 					}
@@ -456,9 +456,9 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 					if ((curstate & (PORT_JS_UP|PORT_JS_DOWN)) != (prevstate & (PORT_JS_UP|PORT_JS_DOWN))) {
 						curaxis=0;
 						if (curstate & PORT_JS_UP) {
-							curaxis=-128;
+							curaxis=0x8000;
 						} else if (curstate & PORT_JS_DOWN) {
-							curaxis=127;
+							curaxis=0x7fff;
 						}					
 						SDL_PrivateJoystickAxis(joystick,1,curaxis);
 					}
@@ -483,9 +483,9 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 
 				if (curstate != prevstate) {
 					/* X axis */
-					SDL_PrivateJoystickAxis(joystick,0,(jp_lightpens[0]>>8)-128);
+					SDL_PrivateJoystickAxis(joystick,0,jp_lightpens[0] ^ 0x8000);
 					/* Y axis */
-					SDL_PrivateJoystickAxis(joystick,1,(jp_lightpens[1]>>8)-128);
+					SDL_PrivateJoystickAxis(joystick,1,jp_lightpens[1] ^ 0x8000);
 					/* Buttons */
 					for (i=0;i<2;i++) {
 						int button;
@@ -517,9 +517,9 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 
 				if (curstate != prevstate) {
 					/* X axis */
-					SDL_PrivateJoystickAxis(joystick,0,(jp_paddles[numpaddle]>>8)-128);
+					SDL_PrivateJoystickAxis(joystick,0,jp_paddles[numpaddle] ^ 0x8000);
 					/* Y axis */
-					SDL_PrivateJoystickAxis(joystick,1,(jp_paddles[numpaddle+1]>>8)-128);
+					SDL_PrivateJoystickAxis(joystick,1,jp_paddles[numpaddle+1] ^ 0x8000);
 					/* Buttons */
 					for (i=0;i<2;i++) {
 						int button;
