@@ -335,11 +335,18 @@ int DIB_CreateWindow(_THIS)
 {
 #ifdef _WIN32_WCE
 	/* WinCE uses the UNICODE version */
-	int nLen = strlen(SDL_Appname)+1;
-	LPWSTR lpszW = alloca(nLen*2);
-	MultiByteToWideChar(CP_ACP, 0, SDL_Appname, -1, lpszW, nLen);
+	int nLen;
+	LPWSTR lpszW;
 
-	SDL_RegisterApp("SDL_app", 0, 0);
+	if ( SDL_RegisterApp("SDL_app", 0, 0) != 0 ) {
+		return -1;
+	}
+
+	nLen = strlen(SDL_Appname) + 1;
+	lpszW = alloca(nLen * 2);
+
+	MultiByteToWideChar(CP_ACP, 0, "SDL_App", -1, lpszW, nLen);
+
 	SDL_Window = CreateWindow(lpszW, lpszW, WS_VISIBLE,
                                   0, 0, 0, 0, NULL, NULL, SDL_Instance, NULL);
 	if ( SDL_Window == NULL ) {
