@@ -52,6 +52,7 @@
 	SDL_SetError
 	SDL_GetError
 	SDL_ClearError
+	SDL_Error
 	SDL_PumpEvents
 	SDL_PeepEvents
 	SDL_PollEvent
