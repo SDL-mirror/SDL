@@ -107,6 +107,7 @@ SDL_Surface * SDL_CreateRGBSurface (Uint32 flags,
 	surface->locked = 0;
 	surface->map = NULL;
 	surface->format_version = 0;
+	surface->unused1 = 0;
 	SDL_SetClipRect(surface, NULL);
 
 	/* Get the pixels */
