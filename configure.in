@@ -844,6 +844,10 @@ CheckPTHREAD()
             pthread_cflags="-D_REENTRANT -D_THREAD_SAFE"
             pthread_lib="-pthread"
             ;;
+        *-*-netbsd*)
+            pthread_cflags="-I/usr/pkg/include -D_REENTRANT"
+            pthread_lib="-L/usr/pkg/lib -lpthread -lsem"
+            ;;
         *-*-openbsd*)
             pthread_cflags="-D_REENTRANT"
             pthread_lib="-pthread"
@@ -1284,7 +1288,7 @@ case "$target" in
             COPY_ARCH_SRC(src/timer, linux, SDL_systimer.c)
         fi
         # NetBSD does not define "unix"
-        CFLAGS="$CFLAGS -Dunix"
+        CFLAGS="$CFLAGS -Dunix -D_POSIX_THREAD_SYSCALL_SOFT=1"
         ;;
     *-*-openbsd*)
         ARCH=openbsd
