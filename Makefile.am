@@ -57,6 +57,13 @@ exports:
 	(cd src/main/macos/exports; $(MAKE))
 	(cd src/main/win32/exports; $(MAKE))
 
+# Rule to build the Project Builder archive in MacOS X
+PBProjects.tar.gz:
+	rm -f `find . -name .DS_Store`
+	if [ -d PBProjects ]; then \
+	    tar zcvf $@ PBProjects src/main/macosx/SDLMain.nib; \
+	fi
+
 # Rule to force automake to rebuild the library
 changed:
 	@echo "This build target is no longer necessary"
