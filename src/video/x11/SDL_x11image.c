@@ -26,22 +26,12 @@ static char rcsid =
 #endif
 
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "SDL_error.h"
 #include "SDL_endian.h"
 #include "SDL_events_c.h"
 #include "SDL_x11image_c.h"
-
-#if defined(__USLC__)
-#ifdef HAVE_KSTAT
-#undef HAVE_KSTAT
-#endif
-#include <unistd.h>
-#endif
-
-#ifdef HAVE_KSTAT
-#include <kstat.h>
-#endif
 
 #ifndef NO_SHARED_MEMORY
 
@@ -177,13 +167,13 @@ void X11_DestroyImage(_THIS, SDL_Surface *screen)
 	}
 }
 
-/* This is a hack to see whether this system has more than 1 CPU */
+/* Determine the number of CPUs in the system */
 static int num_CPU(void)
 {
        static int num_cpus = 0;
 
        if(!num_cpus) {
-#ifdef linux
+#if defined(__linux)
            char line[BUFSIZ];
            FILE *pstat = fopen("/proc/stat", "r");
            if ( pstat ) {
@@ -194,23 +184,12 @@ static int num_CPU(void)
                }
                fclose(pstat);
            }
-#elif defined(HAVE_KSTAT)
-           kstat_ctl_t *kc = kstat_open();
-           kstat_t *ks;
-           kstat_named_t *kn;
-           if(kc) {
-               if((ks = kstat_lookup(kc, "unix", -1, "system_misc"))
-                  && kstat_read(kc, ks, NULL) != -1
-                  && (kn = kstat_data_lookup(ks, "ncpus")))
-#ifdef KSTAT_DATA_UINT32
-                   num_cpus = kn->value.ui32;
-#else
-                   num_cpus = kn->value.ul; /* needed in solaris <2.6 */
-#endif
-               kstat_close(kc);
-           }
-#elif defined(__USLC__)
-           num_cpus = (int)sysconf(_SC_NPROCESSORS_CONF);
+#elif defined(_SC_NPROCESSORS_ONLN)
+	   /* number of processors online (SVR4.0MP compliant machines) */
+           num_cpus = sysconf(_SC_NPROCESSORS_ONLN);
+#elif defined(_SC_NPROCESSORS_CONF)
+	   /* number of processors configured (SVR4.0MP compliant machines) */
+           num_cpus = sysconf(_SC_NPROCESSORS_CONF);
 #endif
            if ( num_cpus <= 0 ) {
                num_cpus = 1;

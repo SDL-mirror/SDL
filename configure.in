@@ -1196,18 +1196,12 @@ CheckQUARTZ()
     # and what runs on older Macs - while in theory "Carbon" defns
     # are consistent between the two, in practice Carbon is still
     # changing. -sts Aug 2000
+    mac_autoconf_target_workaround="MAC"
     CFLAGS="$CFLAGS -I/System/Library/Frameworks/Carbon.framework/Headers \
       -I/System/Library/Frameworks/Cocoa.framework/Headers -fpascal-strings \
-      -DENABLE_QUARTZ -DMACOSX -DTARGET_API_MAC_CARBON=1 -I\$(top_srcdir)/src/video/quartz"
+      -DENABLE_QUARTZ -DMACOSX -DTARGET_API_${mac_autoconf_target_workaround}_CARBON=1 -I\$(top_srcdir)/src/video/quartz"
     VIDEO_SUBDIRS="$VIDEO_SUBDIRS quartz"
     VIDEO_DRIVERS="$VIDEO_DRIVERS quartz/libvideo_quartz.la"
-}
-
-dnl Set up the kernel statistics library for Solaris
-CheckKSTAT()
-{
-    CFLAGS="$CFLAGS -DHAVE_KSTAT"
-    SYSTEM_LIBS="$SYSTEM_LIBS -lkstat"
 }
 
 case "$target" in
@@ -1516,7 +1510,6 @@ case "$target" in
         CheckAAlib
         CheckOpenGL
         CheckPTHREAD
-        CheckKSTAT
         # Set up files for the main() stub
         COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         # Set up files for the audio library
@@ -1566,7 +1559,6 @@ case "$target" in
         CheckAAlib
         CheckOpenGL
         CheckPTHREAD
-        CheckKSTAT
         # Set up files for the main() stub
         COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         # Set up files for the audio library
