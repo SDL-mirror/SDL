@@ -425,11 +425,13 @@ public:
 			{
 				/*	mouse up doesn't give which button was released,
 					only state of buttons (after release, so it's always = 0),
-					which is is not what we need ;]
+					which is not what we need ;]
 					So we need to store button in mouse down, and restore
 					in mouse up :(
-					mouse up is (similarly to mouse down) send only when
-					no more buttons are down */
+					mouse up is (similarly to mouse down) send only for
+					first button down (ie. it's no send if we click another button
+					without releasing previous one first) - but that's probably
+					because of how drivers are written?, not BeOS itself. */
 				int32 buttons;
 				int sdl_buttons = 0;
 				if (msg->FindInt32("buttons", &buttons) == B_OK) {
@@ -471,6 +473,11 @@ public:
 			{
 				int32 key;
 				int32 modifiers;
+				int32 key_repeat;
+				/* Workaround for SDL message queue being filled too fast because of BeOS own key-repeat mechanism */
+				if (msg->FindInt32("be:key_repeat", &key_repeat) == B_OK && key_repeat > 0)
+					break;
+
 				if (msg->FindInt32("key", &key) == B_OK && msg->FindInt32("modifiers", &modifiers) == B_OK) {
 					SDL_keysym keysym;
 					keysym.scancode = key;
