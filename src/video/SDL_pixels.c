@@ -389,8 +389,9 @@ void SDL_GetRGBA(Uint32 pixel, SDL_PixelFormat *fmt,
 		if(fmt->Amask) {
 		        v = (pixel & fmt->Amask) >> fmt->Ashift;
 			*a = (v << fmt->Aloss) + (v >> (8 - (fmt->Aloss << 1)));
-		} else
+		} else {
 		        *a = SDL_ALPHA_OPAQUE;
+                }
 	} else {
 		*r = fmt->palette->colors[pixel].r;
 		*g = fmt->palette->colors[pixel].g;
