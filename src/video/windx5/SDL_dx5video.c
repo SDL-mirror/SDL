@@ -2205,6 +2205,16 @@ static int DX5_GetGammaRamp(_THIS, Uint16 *ramp)
 #endif /* !IDirectDrawGammaControl_SetGammaRamp */
 }
 
+static void FlushMessageQueue()
+{
+	MSG  msg;
+	while ( PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) ) {
+		if ( msg.message == WM_QUIT ) break;
+		TranslateMessage( &msg );
+		DispatchMessage( &msg );
+	}
+}
+
 void DX5_VideoQuit(_THIS)
 {
 	int i, j;
@@ -2246,6 +2256,7 @@ void DX5_VideoQuit(_THIS)
 	DIB_QuitGamma(this);
 	if ( SDL_Window ) {
 		DX5_DestroyWindow(this);
+		FlushMessageQueue();
 	}
 
 	/* Free our window icon */
