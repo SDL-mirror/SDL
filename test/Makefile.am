@@ -5,7 +5,8 @@ noinst_PROGRAMS = \
 	testhread testlock testerror testsem testtimer \
 	loopwave testcdrom testkeys testvidinfo checkkeys testwin graywin \
 	testsprite testbitmap testalpha testgamma testpalette testwm \
-	threadwin testoverlay testoverlay2 testgl testdyngl testjoystick
+	threadwin testoverlay testoverlay2 testgl testdyngl testjoystick \
+	testblitspeed
 
 testalpha_SOURCES = testalpha.c
 testalpha_LDADD = @MATHLIB@

@@ -24,3 +24,5 @@ These are test programs for the SDL library:
 	testjoystick	List joysticks and watch joystick events
 	testoverlay	Tests the software/hardware overlay functionality.
 	testoverlay2	Tests the overlay flickering/scaling during playback.
+	testblitspeed	Tests performance of SDL's blitters and converters.
+
