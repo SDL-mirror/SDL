@@ -123,14 +123,14 @@ XVisualInfo *X11_GL_GetVisual(_THIS)
 		attribs[i++] = this->gl_config.stereo;
 	}
 	
-	if( this->gl_config.sample_buffers ) {
+	if( this->gl_config.multisamplebuffers ) {
 		attribs[i++] = GLX_SAMPLE_BUFFERS_ARB;
-		attribs[i++] = this->gl_config.sample_buffers;
+		attribs[i++] = this->gl_config.multisamplebuffers;
 	}
 	
-	if( this->gl_config.samples ) {
+	if( this->gl_config.multisamplesamples ) {
 		attribs[i++] = GLX_SAMPLES_ARB;
-		attribs[i++] = this->gl_config.samples;
+		attribs[i++] = this->gl_config.multisamplesamples;
 	}
 
 #ifdef GLX_DIRECT_COLOR /* Try for a DirectColor visual for gamma support */
@@ -362,10 +362,10 @@ int X11_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
 	    case SDL_GL_STEREO:
 		glx_attrib = GLX_STEREO;
 		break;
- 	    case SDL_GL_SAMPLE_BUFFERS:
+ 	    case SDL_GL_MULTISAMPLEBUFFERS:
  		glx_attrib = GLX_SAMPLE_BUFFERS_ARB;
  		break;
- 	    case SDL_GL_SAMPLES:
+ 	    case SDL_GL_MULTISAMPLESAMPLES:
  		glx_attrib = GLX_SAMPLES_ARB;
  		break;
 	    default:

@@ -49,6 +49,14 @@ int Mac_GL_Init(_THIS)
 	if ( this->gl_config.stereo ) {
 		attributes[i++] = AGL_STEREO;
 	}
+	if ( this->gl_config.multisamplebuffers != 0 ) {
+		attributes[i++] = AGL_SAMPLE_BUFFERS_ARB;
+		attributes[i++] = this->gl_config.multisamplebuffers;
+	}	
+	if ( this->gl_config.multisamplesamples != 0 ) {
+		attributes[i++] = AGL_SAMPLES_ARB;
+		attributes[i++] = this->gl_config.multisamplesamples;
+	}	
 	if ( this->gl_config.depth_size != 0 ) {
 		attributes[i++] = AGL_DEPTH_SIZE;
 		attributes[i++] = this->gl_config.depth_size;

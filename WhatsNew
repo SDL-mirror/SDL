@@ -6,7 +6,7 @@ Version 1.0:
 1.2.6:
 	Added SDL_LoadObject(), SDL_LoadFunction(), and SDL_UnloadObject()
 
-	Added SDL_GL_SAMPLE_BUFFERS and SDL_GL_SAMPLES for FSAA support
+	Added SDL_GL_MULTISAMPLEBUFFERS and SDL_GL_MULTISAMPLESAMPLES for FSAA
 
 1.2.5:
 	Added SDL_BUTTON_WHEELUP (4) and SDL_BUTTON_WHEELDOWN (5)

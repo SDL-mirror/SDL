@@ -50,6 +50,8 @@
 
 #include <Cocoa/Cocoa.h>
 #include <OpenGL/OpenGL.h>
+#include <OpenGL/gl.h>
+#include <OpenGL/glext.h>
 #include <Carbon/Carbon.h>
 #include <QuickTime/QuickTime.h>
 #include <IOKit/IOKitLib.h>	/* For powersave handling */

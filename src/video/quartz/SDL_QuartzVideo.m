@@ -1419,6 +1419,16 @@ static int QZ_SetupOpenGL (_THIS, int bpp, Uint32 flags) {
         attr[i++] = this->gl_config.stencil_size;
     }
 
+    if ( this->gl_config.multisamplebuffers != 0 ) {
+        attr[i++] = NSOpenGLPFASampleBuffers;
+        attr[i++] = this->gl_config.multisamplebuffers;
+    }
+
+    if ( this->gl_config.multisamplesamples != 0 ) {
+        attr[i++] = NSOpenGLPFASamples;
+        attr[i++] = this->gl_config.multisamplesamples;
+    }
+
     attr[i++] = NSOpenGLPFAScreenMask;
     attr[i++] = CGDisplayIDToOpenGLDisplayMask (display_id);
     attr[i] = 0;
@@ -1503,6 +1513,8 @@ static int    QZ_GL_GetAttribute   (_THIS, SDL_GLattr attrib, int* value) {
         case SDL_GL_ACCUM_BLUE_SIZE: attr = GL_ACCUM_BLUE_BITS; break;
         case SDL_GL_ACCUM_ALPHA_SIZE: attr = GL_ACCUM_ALPHA_BITS; break;
         case SDL_GL_STEREO: attr = GL_STEREO; break;
+        case SDL_GL_MULTISAMPLEBUFFERS: attr = GL_SAMPLE_BUFFERS_ARB; break;
+        case SDL_GL_MULTISAMPLESAMPLES: attr = GL_SAMPLES_ARB; break;
         case SDL_GL_BUFFER_SIZE:
         {
             GLint bits = 0;

@@ -476,8 +476,8 @@ int RunGLTest( int argc, char* argv[],
 	SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );
 	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 	if ( fsaa ) {
-		SDL_GL_SetAttribute( SDL_GL_SAMPLE_BUFFERS, 1 );
-		SDL_GL_SetAttribute( SDL_GL_SAMPLES, fsaa );
+		SDL_GL_SetAttribute( SDL_GL_MULTISAMPLEBUFFERS, 1 );
+		SDL_GL_SetAttribute( SDL_GL_MULTISAMPLESAMPLES, fsaa );
 	}
 	if ( SDL_SetVideoMode( w, h, bpp, video_flags ) == NULL ) {
 		fprintf(stderr, "Couldn't set GL mode: %s\n", SDL_GetError());
@@ -504,10 +504,10 @@ int RunGLTest( int argc, char* argv[],
 	SDL_GL_GetAttribute( SDL_GL_DOUBLEBUFFER, &value );
 	printf( "SDL_GL_DOUBLEBUFFER: requested 1, got %d\n", value );
 	if ( fsaa ) {
-		SDL_GL_GetAttribute( SDL_GL_SAMPLE_BUFFERS, &value );
-		printf( "SDL_GL_SAMPLE_BUFFERS: requested 1, got %d\n", value );
-		SDL_GL_GetAttribute( SDL_GL_SAMPLES, &value );
-		printf( "SDL_GL_SAMPLES: requested %d, got %d\n", fsaa, value );
+		SDL_GL_GetAttribute( SDL_GL_MULTISAMPLEBUFFERS, &value );
+		printf( "SDL_GL_MULTISAMPLEBUFFERS: requested 1, got %d\n", value );
+		SDL_GL_GetAttribute( SDL_GL_MULTISAMPLESAMPLES, &value );
+		printf( "SDL_GL_MULTISAMPLESAMPLES: requested %d, got %d\n", fsaa, value );
 	}
 
 	/* Set the window manager title bar */

@@ -237,14 +237,14 @@ int WIN_GL_SetupWindow(_THIS)
 			*iAttr++ = this->gl_config.stereo;
 		}
 
-		if ( this->gl_config.sample_buffers ) {
+		if ( this->gl_config.multisamplebuffers ) {
 			*iAttr++ = WGL_SAMPLE_BUFFERS_ARB;
-			*iAttr++ = this->gl_config.sample_buffers;
+			*iAttr++ = this->gl_config.multisamplebuffers;
 		}
 
-		if ( this->gl_config.samples ) {
+		if ( this->gl_config.multisamplesamples ) {
 			*iAttr++ = WGL_SAMPLES_ARB;
-			*iAttr++ = this->gl_config.samples;
+			*iAttr++ = this->gl_config.multisamplesamples;
 		}
 
 		*iAttr = 0;
@@ -375,10 +375,10 @@ int WIN_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
 		    case SDL_GL_STEREO:
 			wgl_attrib = WGL_STEREO_ARB;
 			break;
-		    case SDL_GL_SAMPLE_BUFFERS:
+		    case SDL_GL_MULTISAMPLEBUFFERS:
 			wgl_attrib = WGL_SAMPLE_BUFFERS_ARB;
 			break;
-		    case SDL_GL_SAMPLES:
+		    case SDL_GL_MULTISAMPLESAMPLES:
 			wgl_attrib = WGL_SAMPLES_ARB;
 			break;
 		    default:
