@@ -101,7 +101,7 @@ static int LoadESDLibrary(void)
 		retval = 0;
 		for ( i=0; i<SDL_TABLESIZE(esd_functions); ++i ) {
 			*esd_functions[i].func = SDL_LoadFunction(esd_handle, esd_functions[i].name);
-			if ( ! esd_functions[i].func ) {
+			if ( !*esd_functions[i].func ) {
 				retval = -1;
 				UnloadESDLibrary();
 				break;

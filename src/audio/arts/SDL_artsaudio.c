@@ -106,7 +106,7 @@ static int LoadARTSLibrary(void)
 		retval = 0;
 		for ( i=0; i<SDL_TABLESIZE(arts_functions); ++i ) {
 			*arts_functions[i].func = SDL_LoadFunction(arts_handle, arts_functions[i].name);
-			if ( ! arts_functions[i].func ) {
+			if ( !*arts_functions[i].func ) {
 				retval = -1;
 				UnloadARTSLibrary();
 				break;
