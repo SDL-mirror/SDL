@@ -263,7 +263,15 @@ static CDstatus SDL_SYS_CDStatus(SDL_CD *cdrom, int *position)
 #endif /* BROKEN_MCI_PAUSE */
 				break;
 			case MCI_MODE_PLAY:
+#ifdef BROKEN_MCI_PAUSE
+				if ( SDL_paused[cdrom->id] ) {
+					status = CD_PAUSED;
+				} else {
+					status = CD_PLAYING;
+				}
+#else
 				status = CD_PLAYING;
+#endif /* BROKEN_MCI_PAUSE */
 				break;
 			case MCI_MODE_PAUSE:
 				status = CD_PAUSED;
