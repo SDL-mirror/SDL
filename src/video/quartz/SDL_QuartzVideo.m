@@ -27,13 +27,12 @@ static SDL_GrabMode currentGrabMode = SDL_GRAB_OFF;
 static BOOL   inForeground = YES;
 static SDLKey keymap[256];
 static unsigned int currentMods = 0; /* Current keyboard modifiers, to track modifier state */
+static char QZ_Error[255]; /* Global error buffer to temporarily store more informative error messages */
 
 /* Include files into one compile unit...break apart eventually */
 #include "SDL_QuartzWM.m"
 #include "SDL_QuartzEvents.m"
 #include "SDL_QuartzWindow.m"
-
-char QZ_Error[255]; /* Global error buffer to temporarily store more informative error messages */
 
 /* Bootstrap binding, enables entry point into the driver */
 VideoBootStrap QZ_bootstrap = {
@@ -143,7 +142,7 @@ static SDL_Rect** QZ_ListModes (_THIS, SDL_PixelFormat *format, Uint32 flags) {
 
     static SDL_Rect **list = NULL;
     int list_size = 0;
-
+    
     /* Any windowed mode is acceptable */
     if ( (flags & SDL_FULLSCREEN) == 0 )
         return (SDL_Rect**)-1;
@@ -151,7 +150,7 @@ static SDL_Rect** QZ_ListModes (_THIS, SDL_PixelFormat *format, Uint32 flags) {
     /* Free memory from previous call, if any */
     if ( list != NULL ) {
 
-      int i = 0;
+      int i;
 
       for (i = 0; list[i] != NULL; i++)
 	free (list[i]);
@@ -159,23 +158,24 @@ static SDL_Rect** QZ_ListModes (_THIS, SDL_PixelFormat *format, Uint32 flags) {
       free (list);
       list = NULL;
     }
-
+    
     /* Build list of modes with the requested bpp */
-    for (i = num_modes-1; i >= 0; i--) {
+    for (i = 0; i < num_modes; i++) {
    
-        CFDictionaryRef onemode = CFArrayGetValueAtIndex (mode_list, i);
-	CFNumberRef     number;
+        CFDictionaryRef onemode;
+        CFNumberRef     number;
 	int bpp;
 	
+        onemode = CFArrayGetValueAtIndex (mode_list, i); 
 	number = CFDictionaryGetValue (onemode, kCGDisplayBitsPerPixel);
 	CFNumberGetValue (number, kCFNumberSInt32Type, &bpp);
 
 	if (bpp == format->BitsPerPixel) {
 	  
-	  int       intvalue;
-	  SDL_Rect *rect;
-          int       lastwidth = 0, lastheight = 0, width, height;
-
+	  int intvalue;
+          int hasMode;
+          int width, height;
+          
 	  number = CFDictionaryGetValue (onemode, kCGDisplayWidth);
 	  CFNumberGetValue (number, kCFNumberSInt32Type, &intvalue);
 	  width = (Uint16) intvalue;
@@ -184,12 +184,23 @@ static SDL_Rect** QZ_ListModes (_THIS, SDL_PixelFormat *format, Uint32 flags) {
 	  CFNumberGetValue (number, kCFNumberSInt32Type, &intvalue);
 	  height = (Uint16) intvalue;
           
-          /* We'll get a lot of modes with the same size, so ignore them */
-          if ( width != lastwidth && height != lastheight ) {
-
-            lastwidth  = width;
-            lastheight = height;
+          /* Check if mode is already in the list */
+          {
+            int i;
+            hasMode = SDL_FALSE;
+            for (i = 0; i < list_size; i++) {
+                if (list[i]->w == width && list[i]->h == height) {
+                    hasMode = SDL_TRUE;
+                    break;
+                }
+            }
+          }
+          
+          /* Grow the list and add mode to the list */
+          if ( ! hasMode ) {
 	  
+            SDL_Rect *rect;
+            
             list_size++;
 
             if ( list == NULL)
@@ -211,13 +222,28 @@ static SDL_Rect** QZ_ListModes (_THIS, SDL_PixelFormat *format, Uint32 flags) {
       }
     }
     
+    /* Sort list largest to smallest (by area) */
+    {
+        int i, j;
+        for (i = 0; i < list_size; i++) {
+            for (j = 0; j < list_size-1; j++) {
+            
+                int area1, area2;
+                area1 = list[j]->w * list[j]->h;
+                area2 = list[j+1]->w * list[j+1]->h;
+                
+                if (area1 < area2) {
+                    SDL_Rect *tmp = list[j];
+                    list[j] = list[j+1];
+                    list[j+1] = tmp;
+                }
+            }
+        }
+    }
     return list;
 }
 
 static void QZ_UnsetVideoMode (_THIS) {
-
-    if ( mode_flags & SDL_OPENGL )
-        QZ_TearDownOpenGL (this);
 
     /* Reset values that may change between switches */
     this->info.blit_fill = 0;
@@ -229,9 +255,11 @@ static void QZ_UnsetVideoMode (_THIS) {
    
     /* Restore original screen resolution */
     if ( mode_flags & SDL_FULLSCREEN ) {
+        if (mode_flags & SDL_OPENGL)
+            CGLSetFullScreen(NULL);
+            
         CGDisplaySwitchToMode (display_id, save_mode);
         CGDisplayRelease (display_id);
-        this->screen->pixels = NULL;
     }
     /* Release window mode data structures */
     else { 
@@ -240,13 +268,24 @@ static void QZ_UnsetVideoMode (_THIS) {
             [ windowView release  ];
         }
         [ window setContentView:nil ];
+        [ window setDelegate:nil ];
         [ window close ];
-        [ window release ];
     }
     
+    /* Set pixels to null (so other code doesn't try to free it) */
+    if (this->screen != NULL)
+        this->screen->pixels = NULL;
+        
+    /* Release the OpenGL context */
+    if ( mode_flags & SDL_OPENGL )
+        QZ_TearDownOpenGL (this);
+        
     /* Ensure the cursor will be visible and working when we quit */
     CGDisplayShowCursor (display_id);
     CGAssociateMouseAndMouseCursorPosition (1);
+    
+    /* Signal successful teardown */
+    video_set = SDL_FALSE;
 }
 
 static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int width,
@@ -263,7 +302,7 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
         SDL_SetError (QZ_Error);
         goto ERR_NO_MATCH;
     }
-    
+
     /* Put up the blanking window (a window above all other windows) */
     if ( CGDisplayNoErr != CGDisplayCapture (display_id) ) {
         SDL_SetError ("Failed capturing display");
@@ -370,7 +409,7 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
 
     /* Manually create a window, avoids having a nib file resource */
     window = [ [ SDL_QuartzWindow alloc ] initWithContentRect:rect 
-        styleMask:style backing:NSBackingStoreRetained defer:NO ];
+        styleMask:style backing:NSBackingStoreBuffered defer:NO ];
     if (window == nil) {
         SDL_SetError ("Could not create the Cocoa window");
         return NULL;
@@ -431,7 +470,7 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
 static SDL_Surface* QZ_SetVideoMode (_THIS, SDL_Surface *current, int width, 
 				     int height, int bpp, Uint32 flags) {
 
-    if (SDL_VideoSurface != NULL)
+    if (video_set == SDL_TRUE)
         QZ_UnsetVideoMode (this);
        
     current->flags = 0;
@@ -469,7 +508,7 @@ static SDL_Surface* QZ_SetVideoMode (_THIS, SDL_Surface *current, int width,
                 SDL_SetError ("24bpp is not available");
                 return NULL;
             case 32:   /* (8)-8-8-8 ARGB */
-                amask = 0x00000000; /* These are the correct semantics */
+                amask = 0x00000000;
                 rmask = 0x00FF0000;
                 gmask = 0x0000FF00;
                 bmask = 0x000000FF;
@@ -485,6 +524,9 @@ static SDL_Surface* QZ_SetVideoMode (_THIS, SDL_Surface *current, int width,
     
     /* Warp mouse to origin in order to get passive mouse motion events started correctly */
     QZ_PrivateWarpCursor (this, current->flags & SDL_FULLSCREEN, height, 0, 0);
+    
+    /* Signal successful completion */
+    video_set = SDL_TRUE;
     
     return current;
 }

@@ -83,8 +83,9 @@ typedef struct SDL_PrivateVideoData {
     CFArrayRef         mode_list;
     CGDirectPaletteRef palette;
     NSOpenGLContext    *gl_context;
-    int                width, height, bpp;
+    Uint32             width, height, bpp;
     Uint32             flags;
+    SDL_bool           video_is_set; /* tell if the video mode was set */
     
     /* Window-only fields */
     NSWindow        *window;
@@ -105,6 +106,7 @@ typedef struct SDL_PrivateVideoData {
 #define device_height (this->hidden->height)
 #define device_bpp (this->hidden->bpp)
 #define mode_flags (this->hidden->flags)
+#define video_set (this->hidden->video_is_set)
 #define window (this->hidden->window)
 #define windowView (this->hidden->view)
 

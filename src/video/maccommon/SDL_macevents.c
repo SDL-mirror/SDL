@@ -107,6 +107,7 @@ static void myGlobalToLocal(_THIS, Point *pt)
 /* The main MacOS event handler */
 static int Mac_HandleEvents(_THIS, int wait4it)
 {
+	static int mouse_button = 1;
 	int i;
 	EventRecord event;
 
@@ -148,7 +149,7 @@ static int Mac_HandleEvents(_THIS, int wait4it)
 	/* for some reason, event.where isn't set ? */
 	GetGlobalMouse ( &event.where );
 #endif
-    
+
 	/* Check for mouse motion */
 	if ( (event.where.h != last_where.h) ||
 	     (event.where.v != last_where.v) ) {
@@ -282,16 +283,14 @@ static int Mac_HandleEvents(_THIS, int wait4it)
 			myGlobalToLocal(this, &event.where);
 			/* Treat command-click as right mouse button */
 			if ( event.modifiers & optionKey ) {
-			    SDL_PrivateMouseButton(SDL_PRESSED,
-					2,event.where.h,event.where.v);
-			}
-			else if ( event.modifiers & cmdKey ) {
-			    SDL_PrivateMouseButton(SDL_PRESSED,
-					3,event.where.h,event.where.v);
+				mouse_button = 2;
+			} else if ( event.modifiers & cmdKey ) {
+				mouse_button = 3;
 			} else {
-			    SDL_PrivateMouseButton(SDL_PRESSED,
-					1,event.where.h,event.where.v);
+				mouse_button = 1;
 			}
+			SDL_PrivateMouseButton(SDL_PRESSED,
+				mouse_button, event.where.h, event.where.v);
 			break;
 		  case inGrow: {
 			int newSize;
@@ -336,7 +335,7 @@ static int Mac_HandleEvents(_THIS, int wait4it)
 			if ( TrackBox (win, event.where, area )) {
 				if ( IsWindowCollapsable(win) ) {
 					CollapseWindow (win, !IsWindowCollapsed(win));
-					// There should be something done like in inGrow case, but...
+					/* There should be something done like in inGrow case, but... */
 				}
 			}
 			break;
@@ -355,18 +354,14 @@ static int Mac_HandleEvents(_THIS, int wait4it)
 	  break;
 	  case mouseUp: {
 		myGlobalToLocal(this, &event.where);
-		/* Treat command-click as right mouse button */
-		if ( event.modifiers & cmdKey ) {
-		    SDL_PrivateMouseButton(SDL_RELEASED,
-				3, event.where.h, event.where.v);
-		}
-		else if ( event.modifiers & optionKey ) {
-		    SDL_PrivateMouseButton(SDL_RELEASED,
-				2,event.where.h,event.where.v);
-		} else {
-		    SDL_PrivateMouseButton(SDL_RELEASED,
-				1, event.where.h, event.where.v);
-		}
+		/* Release the mouse button we simulated in the last press.
+		   The drawback of this methos is we cannot press more than
+		   one button. However, this doesn't matter, since there is
+		   only a single logical mouse button, even if you have a
+		   multi-button mouse, this doesn't matter at all.
+		 */
+		SDL_PrivateMouseButton(SDL_RELEASED,
+			mouse_button, event.where.h, event.where.v);
 	  }
 	  break;
 #if 0 /* Handled above the switch statement */

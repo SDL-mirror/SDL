@@ -22,6 +22,8 @@
 
 #include "SDL_QuartzKeys.h"
 
+static int last_virtual_button = 0; // Last virtual mouse button pressed
+
 static void  QZ_InitOSKeymap (_THIS) {
 	int i;
 
@@ -222,12 +224,16 @@ static void QZ_DoDeactivate (_THIS) {
 
 static void QZ_PumpEvents (_THIS)
 { 
-    NSDate *distantPast = [ NSDate distantPast ];
-    
+    NSDate *distantPast;
     NSEvent *event;
     NSRect winRect;
     NSRect titleBarRect;
-            
+    NSAutoreleasePool *pool;
+    
+    distantPast = [ [ NSDate distantPast ] retain ];
+    
+    pool = [ [ NSAutoreleasePool alloc ] init ];
+    
     winRect = NSMakeRect (0, 0, SDL_VideoSurface->w + 1, SDL_VideoSurface->h + 1);
     titleBarRect = NSMakeRect ( 0, SDL_VideoSurface->h, SDL_VideoSurface->w,
         SDL_VideoSurface->h + 22 );
@@ -266,9 +272,11 @@ static void QZ_PumpEvents (_THIS)
             
             case NSLeftMouseDown:  
                 if ( NSCommandKeyMask & currentMods ) {
-                        DO_MOUSE_DOWN (3, 0);
+                    last_virtual_button = 3;
+                    DO_MOUSE_DOWN (3, 0);
                 } 
                 else if ( NSAlternateKeyMask & currentMods ) {
+                    last_virtual_button = 2;
                     DO_MOUSE_DOWN (2, 0);
                 } 
                 else {
@@ -278,14 +286,14 @@ static void QZ_PumpEvents (_THIS)
             case 25:               DO_MOUSE_DOWN (2, 0); break;
             case NSRightMouseDown: DO_MOUSE_DOWN (3, 0); break;   
             case NSLeftMouseUp:    
-            if ( NSCommandKeyMask & currentMods ) {
-                        DO_MOUSE_UP (3, 0);
-                } 
-                else if ( NSAlternateKeyMask & currentMods ) {
-                    DO_MOUSE_UP (2, 0);
-                } 
-                else
+            
+                if ( last_virtual_button != 0 ) {
+                    DO_MOUSE_UP (last_virtual_button, 0);
+                    last_virtual_button = 0;
+                }
+                else {
                     DO_MOUSE_UP (1, 1);
+                }
                 break;
             case 26:               DO_MOUSE_UP (2, 0);   break;
             case NSRightMouseUp:   DO_MOUSE_UP (3, 0);   break;
@@ -364,5 +372,8 @@ static void QZ_PumpEvents (_THIS)
             }
         }
       } while (event != nil);
+      
+      [ pool release ];
+      [ distantPast release ];
 }
 
