@@ -1138,6 +1138,7 @@ CheckPTHREAD()
     AC_ARG_ENABLE(pthread-sem,
 [  --enable-pthread-sem    use pthread semaphores [default=yes]],
                   , enable_pthread_sem=yes)
+    ac_save_cflags="$CFLAGS"
     ac_save_libs="$LIBS"
     case "$target" in
         *-*-bsdi*)
@@ -1186,6 +1187,7 @@ CheckPTHREAD()
             pthread_lib="-lpthread"
             ;;
     esac
+    CFLAGS="$CFLAGS $pthread_cflags"
     LIBS="$LIBS $pthread_lib"
     if test x$enable_threads = xyes -a x$enable_pthreads = xyes; then
         AC_MSG_CHECKING(for pthreads)
@@ -1267,6 +1269,7 @@ CheckPTHREAD()
             esac
         fi
     fi
+    CFLAGS="$ac_save_cflags"
     LIBS="$ac_save_libs"
 
     AC_MSG_CHECKING(whether semun is defined in /usr/include/sys/sem.h)
@@ -1782,6 +1785,9 @@ case "$target" in
         fi
         # Set up files for the thread library
         if test x$enable_threads = xyes; then
+            if test x$use_pthreads = xyes; then
+                CFLAGS="$CFLAGS -D_POSIX_THREAD_SYSCALL_SOFT=1"
+            fi
             CopyUnixThreadSource
         fi
         # Set up files for the timer library
@@ -1789,7 +1795,7 @@ case "$target" in
             COPY_ARCH_SRC(src/timer, linux, SDL_systimer.c)
         fi
         # NetBSD does not define "unix"
-        CFLAGS="$CFLAGS -Dunix -D_POSIX_THREAD_SYSCALL_SOFT=1"
+        CFLAGS="$CFLAGS -Dunix"
         ;;
     *-*-openbsd*)
         ARCH=openbsd
@@ -2412,7 +2418,7 @@ if test $ARCH = solaris; then
 fi
 
 case "$ARCH" in
-  openbsd | bsdi)
+  openbsd | netbsd | bsdi)
     SHARED_SYSTEM_LIBS="$SYSTEM_LIBS"
     ;;
   macosx)
