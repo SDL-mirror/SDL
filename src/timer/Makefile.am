@@ -8,13 +8,18 @@ ARCH_SUBDIRS = $(srcdir)/amigaos \
                $(srcdir)/epoc \
                $(srcdir)/linux \
                $(srcdir)/macos \
+               $(srcdir)/mint \
                $(srcdir)/win32
 
 # Include the architecture-independent sources
 COMMON_SRCS = SDL_timer.c SDL_timer_c.h SDL_systimer.h
 
 # Include the architecture-specific sources
+if TARGET_MINT
+ARCH_SRCS = SDL_systimer.c SDL_vbltimer.S SDL_vbltimer_s.h
+else
 ARCH_SRCS = SDL_systimer.c
+endif
 
 libtimer_la_SOURCES = $(COMMON_SRCS) $(ARCH_SRCS)
 

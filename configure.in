@@ -909,6 +909,49 @@ CheckAAlib()
     fi
 }
 
+dnl Set up the Atari Xbios driver
+CheckAtariXbiosVideo()
+{
+    AC_ARG_ENABLE(xbios,
+[  --enable-video-xbios    use Atari Xbios video driver [default=yes]],
+                  , enable_video_xbios=yes)
+    video_xbios=no
+    if test x$enable_video = xyes -a x$enable_video_xbios = xyes; then
+        video_xbios=yes
+        CFLAGS="$CFLAGS -DENABLE_XBIOS"
+        VIDEO_SUBDIRS="$VIDEO_SUBDIRS xbios"
+        VIDEO_DRIVERS="$VIDEO_DRIVERS xbios/libvideo_xbios.la"
+    fi
+}
+
+dnl Set up the Atari Gem driver
+CheckAtariGemVideo()
+{
+    AC_ARG_ENABLE(gem,
+[  --enable-video-gem      use Atari Gem video driver [default=yes]],
+                  , enable_video_gem=yes)
+    if test x$enable_video = xyes -a x$enable_video_gem = xyes; then
+        video_gem=no
+        AC_CHECK_HEADER(gem.h, have_gem_hdr=yes)
+        AC_CHECK_LIB(gem, appl_init, have_gem_lib=yes)
+        if test x$have_gem_hdr = xyes -a x$have_gem_lib = xyes; then
+            video_gem=yes
+            CFLAGS="$CFLAGS -DENABLE_GEM"
+            SYSTEM_LIBS="$SYSTEM_LIBS -lgem"
+            VIDEO_SUBDIRS="$VIDEO_SUBDIRS gem"
+            VIDEO_DRIVERS="$VIDEO_DRIVERS gem/libvideo_gem.la"
+        fi
+    fi
+}
+
+dnl Set up the Atari Bios keyboard driver
+CheckAtariBiosEvent()
+{
+    CFLAGS="$CFLAGS -I\$(top_srcdir)/src/video/ataricommon"
+    VIDEO_SUBDIRS="$VIDEO_SUBDIRS ataricommon"
+    VIDEO_DRIVERS="$VIDEO_DRIVERS ataricommon/libvideo_ataricommon.la"
+}
+
 dnl rcg04172001 Set up the Null video driver.
 CheckDummyVideo()
 {
@@ -2165,6 +2208,57 @@ case "$target" in
         SDL_CFLAGS="$SDL_CFLAGS -F/System/Library/Frameworks/Carbon.framework -F/System/Library/Frameworks/Cocoa.framework"
         SDL_LIBS="-lSDLmain $SDL_LIBS -framework Carbon -framework Cocoa"
         ;;
+    *-*-mint*)
+        ARCH=mint
+        CheckDummyVideo
+        CheckDiskAudio
+        CheckAtariBiosEvent
+        CheckAtariXbiosVideo
+        CheckAtariGemVideo
+        CheckPTH
+        # Set up files for the main() stub
+        COPY_ARCH_SRC(src/main, linux, SDL_main.c)
+        # Set up files for the audio library
+        if test x$enable_audio = xyes; then
+            AUDIO_SUBDIRS="$AUDIO_SUBDIRS sun"
+            AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
+        fi
+        # Set up files for the joystick library
+        # (No joystick support yet)
+        if test x$enable_joystick = xyes; then
+            JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS dummy"
+            JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS dummy/libjoystick_dummy.la"
+        fi
+        # Set up files for the cdrom library
+        if test x$enable_cdrom = xyes; then
+            CDROM_SUBDIRS="$CDROM_SUBDIRS dummy"
+            CDROM_DRIVERS="$CDROM_DRIVERS dummy/libcdrom_dummy.la"
+        fi
+        # Set up files for the thread library
+        if test x$enable_threads = xyes; then
+            if test x$enable_pth = xyes; then
+                COPY_ARCH_SRC(src/thread, pth, SDL_systhread.c)
+                COPY_ARCH_SRC(src/thread, pth, SDL_systhread_c.h)
+            else
+                COPY_ARCH_SRC(src/thread, generic, SDL_systhread.c)
+                COPY_ARCH_SRC(src/thread, generic, SDL_systhread_c.h)
+            fi
+            COPY_ARCH_SRC(src/thread, generic, SDL_sysmutex.c)
+            COPY_ARCH_SRC(src/thread, generic, SDL_sysmutex_c.h)
+            COPY_ARCH_SRC(src/thread, linux, SDL_syssem.c)
+            COPY_ARCH_SRC(src/thread, generic, SDL_syssem_c.h)
+            COPY_ARCH_SRC(src/thread, generic, SDL_syscond.c)
+            COPY_ARCH_SRC(src/thread, generic, SDL_syscond_c.h)
+        fi
+        # Set up files for the timer library
+        if test x$enable_timers = xyes; then
+            COPY_ARCH_SRC(src/timer, mint, SDL_systimer.c)
+            COPY_ARCH_SRC(src/timer, mint, SDL_vbltimer.S)
+            COPY_ARCH_SRC(src/timer, mint, SDL_vbltimer_s.h)
+        fi
+        # MiNT does not define "unix"
+        CFLAGS="$CFLAGS -Dunix"
+        ;;
     *)
         AC_MSG_ERROR(Unsupported target:  Please add to configure.in)
         ;;
@@ -2185,6 +2279,7 @@ AM_CONDITIONAL(TARGET_BEOS, test $ARCH = beos)
 AM_CONDITIONAL(TARGET_MACOS, test $ARCH = macos)
 AM_CONDITIONAL(TARGET_MACOSX, test $ARCH = macosx)
 AM_CONDITIONAL(TARGET_QNX, test $ARCH = qnx)
+AM_CONDITIONAL(TARGET_MINT, test $ARCH = mint)
 
 # Set conditional variables for shared and static library selection.
 # These are not used in any Makefile.am but in sdl-config.in.
@@ -2318,10 +2413,14 @@ src/video/bwindow/Makefile
 src/video/photon/Makefile
 src/video/epoc/Makefile
 src/video/dummy/Makefile
+src/video/ataricommon/Makefile
+src/video/xbios/Makefile
+src/video/gem/Makefile
 src/events/Makefile
 src/joystick/Makefile
 src/joystick/amigaos/Makefile
 src/joystick/beos/Makefile
+src/joystick/bsd/Makefile
 src/joystick/darwin/Makefile
 src/joystick/dummy/Makefile
 src/joystick/linux/Makefile

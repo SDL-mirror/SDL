@@ -392,6 +392,12 @@ extern VideoBootStrap EPOC_bootstrap;
 #ifdef ENABLE_DUMMYVIDEO
 extern VideoBootStrap DUMMY_bootstrap;
 #endif
+#ifdef ENABLE_XBIOS
+extern VideoBootStrap XBIOS_bootstrap;
+#endif
+#ifdef ENABLE_GEM
+extern VideoBootStrap GEM_bootstrap;
+#endif
 /* This is the current video device */
 extern SDL_VideoDevice *current_video;
 

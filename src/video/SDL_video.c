@@ -105,6 +105,12 @@ static VideoBootStrap *bootstrap[] = {
 #ifdef ENABLE_DUMMYVIDEO
 	&DUMMY_bootstrap,
 #endif
+#ifdef ENABLE_XBIOS
+	&XBIOS_bootstrap,
+#endif
+#ifdef ENABLE_GEM
+	&GEM_bootstrap,
+#endif
 	NULL
 };
 

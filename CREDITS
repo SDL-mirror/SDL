@@ -19,11 +19,13 @@ Thanks to everyone who made this possible, including:
 
 * Patrick Trainor and Jim Boucher, for the QNX Neutrino port
 
-* Hannu Viitala for the EPOC port
+* Carsten Griwodz for the AIX port
 
 * Gabriele Greco, for the Amiga port
 
-* Carsten Griwodz for the AIX port
+* Patrice Mandin, for the Atari port
+
+* Hannu Viitala for the EPOC port
 
 * Peter Valchev for nagging me about the OpenBSD port until I got it right. :)
 
