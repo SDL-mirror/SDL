@@ -1640,8 +1640,9 @@ void SDL_WM_GetCaption (char **title, char **icon)
 	}
 }
 
-/* Utility function used by SDL_WM_SetIcon() */
-static void CreateMaskFromColorKey(SDL_Surface *icon, Uint8 *mask)
+/* Utility function used by SDL_WM_SetIcon();
+ * flags & 1 for color key, flags & 2 for alpha channel. */
+static void CreateMaskFromColorKeyOrAlpha(SDL_Surface *icon, Uint8 *mask, int flags)
 {
 	int x, y;
 	Uint32 colorkey;
@@ -1667,9 +1668,12 @@ static void CreateMaskFromColorKey(SDL_Surface *icon, Uint8 *mask)
 				pixels = (Uint16 *)icon->pixels +
 				                   y*icon->pitch/2;
 				for ( x=0; x<icon->w; ++x ) {
-					if ( *pixels++ == colorkey ) {
+					if ( (flags & 1) && *pixels == colorkey ) {
+						SET_MASKBIT(icon, x, y, mask);
+					} else if((flags & 2) && (*pixels & icon->format->Amask) == 0) {
 						SET_MASKBIT(icon, x, y, mask);
 					}
+					pixels++;
 				}
 			}
 		}
@@ -1680,9 +1684,12 @@ static void CreateMaskFromColorKey(SDL_Surface *icon, Uint8 *mask)
 				pixels = (Uint32 *)icon->pixels +
 				                   y*icon->pitch/4;
 				for ( x=0; x<icon->w; ++x ) {
-					if ( *pixels++ == colorkey ) {
+					if ( (flags & 1) && *pixels == colorkey ) {
+						SET_MASKBIT(icon, x, y, mask);
+					} else if((flags & 2) && (*pixels & icon->format->Amask) == 0) {
 						SET_MASKBIT(icon, x, y, mask);
 					}
+					pixels++;
 				}
 			}
 		}
@@ -1702,13 +1709,16 @@ void SDL_WM_SetIcon (SDL_Surface *icon, Uint8 *mask)
 		/* Generate a mask if necessary, and create the icon! */
 		if ( mask == NULL ) {
 			int mask_len = icon->h*(icon->w+7)/8;
+			int flags = 0;
 			mask = (Uint8 *)malloc(mask_len);
 			if ( mask == NULL ) {
 				return;
 			}
 			memset(mask, ~0, mask_len);
-			if ( icon->flags & SDL_SRCCOLORKEY ) {
-				CreateMaskFromColorKey(icon, mask);
+			if ( icon->flags & SDL_SRCCOLORKEY ) flags |= 1;
+			if ( icon->flags & SDL_SRCALPHA ) flags |= 2;
+			if( flags ) {
+				CreateMaskFromColorKeyOrAlpha(icon, mask, flags);
 			}
 			video->SetIcon(video, icon, mask);
 			free(mask);
