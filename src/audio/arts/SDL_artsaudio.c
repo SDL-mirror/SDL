@@ -144,6 +144,8 @@ static int Audio_Available(void)
 		SDL_NAME(arts_free)();
 	}
 	UnloadARTSLibrary();
+
+	return available;
 }
 
 static void Audio_DeleteDevice(SDL_AudioDevice *device)
