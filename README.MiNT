@@ -60,7 +60,7 @@ Video   Kbd     Mouse   Timer   Joysticks Joypads	OpenGL
 xbios   ikbd    ikbd    vbl(2)  ikbd      hardware	OSMesa
 xbios   gemdos  xbios   vbl(2)  xbios     hardware	OSMesa
 xbios   bios    xbios   vbl(2)  xbios     hardware	OSMesa
-gem     gem     gem(1)  vbl(2)  xbios     hardware	no
+gem     gem     gem(1)  vbl(2)  xbios     hardware	OSMesa
 
 (1) GEM does not report relative mouse motion, so xbios mouse driver is used
 to report this type event.

@@ -37,6 +37,10 @@ static char rcsid =
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef HAVE_OPENGL
+#include <GL/osmesa.h>
+#endif
+
 /* Mint includes */
 #include <gem.h>
 #include <gemx.h>
@@ -63,7 +67,7 @@ static char rcsid =
 
 /* Defines */
 
-/* #define DEBUG_VIDEO_GEM	1 */
+/*#define DEBUG_VIDEO_GEM	1*/
 
 #define GEM_VID_DRIVER_NAME "gem"
 
@@ -106,6 +110,15 @@ static void GEM_ClearRect(_THIS, short *rect);
 static void GEM_LockScreen(_THIS);
 static void GEM_UnlockScreen(_THIS);
 static void refresh_window(_THIS, int winhandle, short *rect);
+
+#ifdef HAVE_OPENGL
+/* OpenGL functions */
+static int GEM_GL_LoadLibrary(_THIS, const char *path);
+static void *GEM_GL_GetProcAddress(_THIS, const char *proc);
+static int GEM_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value);
+static int GEM_GL_MakeCurrent(_THIS);
+static void GEM_GL_SwapBuffers(_THIS);
+#endif
 
 /* GEM driver bootstrap functions */
 
@@ -175,6 +188,15 @@ static SDL_VideoDevice *GEM_CreateDevice(int devindex)
 	device->ShowWMCursor = GEM_ShowWMCursor;
 	device->WarpWMCursor = NULL /*GEM_WarpWMCursor*/;
 	device->CheckMouseMode = GEM_CheckMouseMode;
+
+#ifdef HAVE_OPENGL
+	/* OpenGL functions */
+	device->GL_LoadLibrary = GEM_GL_LoadLibrary;
+	device->GL_GetProcAddress = GEM_GL_GetProcAddress;
+	device->GL_GetAttribute = GEM_GL_GetAttribute;
+	device->GL_MakeCurrent = GEM_GL_MakeCurrent;
+	device->GL_SwapBuffers = GEM_GL_SwapBuffers;
+#endif
 
 	/* Joystick + Mouse relative motion */
 	SDL_AtariXbios_InstallVectors(ATARI_XBIOS_MOUSEEVENTS|ATARI_XBIOS_JOYSTICKEVENTS);
@@ -452,6 +474,10 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	printf("sdl:video:gem: VideoInit(): done\n");
 #endif
 
+#ifdef HAVE_OPENGL
+	this->gl_config.driver_loaded = 1;
+#endif
+
 	/* We're done! */
 	return(0);
 }
@@ -471,6 +497,14 @@ SDL_Rect **GEM_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
 
 static void GEM_FreeBuffers(_THIS)
 {
+#ifdef HAVE_OPENGL
+	/* Shutdown OpenGL context */
+	if (GEM_ctx) {
+		OSMesaDestroyContext(GEM_ctx);
+		GEM_ctx = NULL;
+	}
+#endif
+
 	/* Release buffer */
 	if ( GEM_buffer2 ) {
 		free( GEM_buffer2 );
@@ -703,7 +737,6 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 	}
 
 	/* Set up the new mode framebuffer */
-	current->flags = modeflags;
 	current->w = width;
 	current->h = height;
 	if (use_shadow1) {
@@ -715,6 +748,57 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 		current->pixels += VDI_pixelsize * ((VDI_w - width) >> 1);
 		current->pitch = VDI_pitch;
 	}
+
+#ifdef HAVE_OPENGL
+	if (flags & SDL_OPENGL) {
+		GLenum format = OSMESA_COLOR_INDEX;
+
+		/* Init OpenGL context using OSMesa */
+		switch (VDI_bpp) {
+			case 15:
+				/* 1555, big and little endian unsupported */
+				format = OSMESA_RGB_565;
+				break;
+			case 16:
+				format = OSMESA_RGB_565;
+				/* 565, little endian unsupported */
+				break;
+			case 24:
+				if (VDI_redmask == 255<<16) {
+					format = OSMESA_RGB;
+				} else {
+					format = OSMESA_BGR;
+				}
+				break;
+			case 32:
+				if (VDI_redmask == 255<<16) {
+					format = OSMESA_ARGB;
+				} else if (VDI_redmask == 255<<8) {
+					format = OSMESA_BGRA;
+				} else if (VDI_redmask == 255<<24) {
+					format = OSMESA_RGBA;
+				} else {
+					/* ABGR format unsupported */
+					format = OSMESA_BGRA;
+				}
+				break;
+		}
+
+		GEM_ctx = OSMesaCreateContextExt( format, this->gl_config.depth_size,
+			this->gl_config.stencil_size, this->gl_config.accum_red_size +
+			this->gl_config.accum_green_size + this->gl_config.accum_blue_size +
+			this->gl_config.accum_alpha_size, NULL );
+		if (!GEM_ctx) {
+			GEM_FreeBuffers(this);
+			SDL_SetError("OSMesaCreateContext failed");
+			return(NULL);
+		}
+
+		modeflags |= SDL_OPENGL;
+	}
+#endif
+
+	current->flags = modeflags;
 
 #ifdef DEBUG_VIDEO_GEM
 	printf("sdl:video:gem: surface: %dx%d\n", current->w, current->h);
@@ -1248,3 +1332,109 @@ static void refresh_window(_THIS, int winhandle, short *rect)
 
 	vro_cpyfm( VDI_handle, S_ONLY, pxy, &mfdb_src, &VDI_dst_mfdb);
 }
+
+#ifdef HAVE_OPENGL
+
+static int GEM_GL_LoadLibrary(_THIS, const char *path)
+{
+	/* Library is always opened */
+	this->gl_config.driver_loaded = 1;
+
+	return 0;
+}
+
+static void *GEM_GL_GetProcAddress(_THIS, const char *proc)
+{
+	void *func = NULL;
+
+	if (GEM_ctx != NULL) {
+		func = OSMesaGetProcAddress(proc);
+	}
+
+	return func;
+}
+
+static int GEM_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
+{
+	GLenum mesa_attrib;
+
+	if (GEM_ctx == NULL) {
+		return -1;
+	}
+
+	switch(attrib) {
+		case SDL_GL_RED_SIZE:
+			mesa_attrib = GL_RED_BITS;
+			break;
+		case SDL_GL_GREEN_SIZE:
+			mesa_attrib = GL_GREEN_BITS;
+			break;
+		case SDL_GL_BLUE_SIZE:
+			mesa_attrib = GL_BLUE_BITS;
+			break;
+		case SDL_GL_ALPHA_SIZE:
+			mesa_attrib = GL_ALPHA_BITS;
+			break;
+		case SDL_GL_DOUBLEBUFFER:
+			mesa_attrib = GL_DOUBLEBUFFER;
+			break;
+		case SDL_GL_DEPTH_SIZE:
+			mesa_attrib = GL_DEPTH_BITS;
+			break;
+		case SDL_GL_STENCIL_SIZE:
+			mesa_attrib = GL_STENCIL_BITS;
+			break;
+		case SDL_GL_ACCUM_RED_SIZE:
+			mesa_attrib = GL_ACCUM_RED_BITS;
+			break;
+		case SDL_GL_ACCUM_GREEN_SIZE:
+			mesa_attrib = GL_ACCUM_GREEN_BITS;
+			break;
+		case SDL_GL_ACCUM_BLUE_SIZE:
+			mesa_attrib = GL_ACCUM_BLUE_BITS;
+			break;
+		case SDL_GL_ACCUM_ALPHA_SIZE:
+			mesa_attrib = GL_ACCUM_ALPHA_BITS;
+			break;
+		default :
+			return -1;
+	}
+
+	glGetIntegerv(mesa_attrib, value);
+	return 0;
+}
+
+static int GEM_GL_MakeCurrent(_THIS)
+{
+	SDL_Surface *surface;
+	GLenum type;
+
+	if (GEM_ctx == NULL) {
+		return -1;
+	}
+
+	surface = this->screen;
+	
+	if ((surface->format->BitsPerPixel == 15) || (surface->format->BitsPerPixel == 16)) {
+		type = GL_UNSIGNED_SHORT_5_6_5;
+	} else {
+		type = GL_UNSIGNED_BYTE;
+	}
+
+	if (!OSMesaMakeCurrent(GEM_ctx, surface->pixels, type, surface->w, surface->h)) {
+		SDL_SetError("Can not make OpenGL context current");
+		return -1;
+	}
+
+	/* OSMesa draws upside down */
+	OSMesaPixelStore(OSMESA_Y_UP, 0);
+
+	return 0;
+}
+
+static void GEM_GL_SwapBuffers(_THIS)
+{
+	GEM_FlipHWSurface(this, this->screen);
+}
+
+#endif
