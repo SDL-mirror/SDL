@@ -232,7 +232,8 @@ void X11_CheckMouseModeNoLock(_THIS)
 	/* If the mouse is hidden and input is grabbed, we use relative mode */
 	if ( !(SDL_cursorstate & CURSOR_VISIBLE) &&
 	     (this->input_grab != SDL_GRAB_OFF) &&
-             (SDL_GetAppState() & SDL_APPACTIVE) ) {
+             (SDL_GetAppState() & SDL_APPACTIVE) &&
+	     !getenv("SDL_MOUSE_NORELATIVE") ) {
 		if ( ! mouse_relative ) {
 			X11_EnableDGAMouse(this);
 			if ( ! (using_dga & DGA_MOUSE) ) {
