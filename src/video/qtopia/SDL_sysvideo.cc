@@ -53,6 +53,12 @@ extern "C" {
   //#define QTOPIA_DEBUG
 #define QT_HIDDEN_SIZE	32	/* starting hidden window size */
 
+/* Name of the environment variable used to invert the screen rotation or not:
+   Possible values:
+   !=0 : Screen is 270° rotated
+   0: Screen is 90° rotated*/
+#define SDL_QT_ROTATION_ENV_NAME "SDL_QT_INVERT_ROTATION"
+
   /* Initialization/Query functions */
   static int QT_VideoInit(_THIS, SDL_PixelFormat *vformat);
   static SDL_Rect **QT_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags);
@@ -277,12 +283,15 @@ extern "C" {
     
     current->flags = SDL_FULLSCREEN; // We always run fullscreen.
 
-    if(width <= desktop_size.width() && height <= desktop_size.height()) {
+    if(width <= desktop_size.width()
+	      && height <= desktop_size.height()) {
       current->w = desktop_size.width();
       current->h = desktop_size.height();
-    } else if(width <= desktop_size.height()
-	      && height <= desktop_size.width()) {
+    } else if(width <= desktop_size.height() && height <= desktop_size.width()) {
       // Landscape mode
+      char * envString = getenv(SDL_QT_ROTATION_ENV_NAME);
+      int envValue = envString ? atoi(envString) : 0;
+      screenRotation = envValue ? SDL_QT_ROTATION_270 : SDL_QT_ROTATION_90;
       current->h = desktop_size.width();
       current->w = desktop_size.height();
     } else {

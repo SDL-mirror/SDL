@@ -41,6 +41,14 @@ extern "C" {
 #include "SDL_events_c.h"
 };
 
+typedef enum { 
+    SDL_QT_NO_ROTATION = 0, 
+    SDL_QT_ROTATION_90, 
+    SDL_QT_ROTATION_270 
+} screenRotationT;
+
+extern screenRotationT screenRotation;
+
 class SDL_QWin : public QWidget
 {
   void QueueKey(QKeyEvent *e, int pressed);

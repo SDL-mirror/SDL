@@ -28,6 +28,9 @@ static char rcsid =
 #include "SDL_QWin.h"
 #include <qapplication.h>
 #include <qdirectpainter_qws.h>
+
+screenRotationT screenRotation = SDL_QT_NO_ROTATION;
+
 SDL_QWin::SDL_QWin(const QSize& size)
   : QWidget(0, "SDL_main"), my_painter(0), my_image(0),
     my_inhibit_resize(false), my_mouse_pos(-1,-1), my_flags(0),
@@ -82,7 +85,10 @@ void SDL_QWin::closeEvent(QCloseEvent *e) {
 
 void SDL_QWin::setMousePos(const QPoint &pos) {
   if(my_image->width() == height()) {
-    my_mouse_pos = QPoint(height()-pos.y(), pos.x());
+    if (screenRotation == SDL_QT_ROTATION_90)
+      my_mouse_pos = QPoint(height()-pos.y(), pos.x());
+    else if (screenRotation == SDL_QT_ROTATION_270)
+      my_mouse_pos = QPoint(pos.y(), width()-pos.x());
   } else {
     my_mouse_pos = pos;
   }
@@ -105,7 +111,7 @@ void SDL_QWin::mouseMoveEvent(QMouseEvent *e) {
 }
 
 void SDL_QWin::mousePressEvent(QMouseEvent *e) {
-  setMousePos(e->pos());
+  mouseMoveEvent(e);
   Qt::ButtonState button = e->button();
   SDL_PrivateMouseButton(SDL_PRESSED,
 			 (button & Qt::LeftButton) ? 1 :
@@ -198,23 +204,49 @@ void SDL_QWin::repaintRect(const QRect& rect) {
       gs_fastRotateBlit_3(fb, buf, rect);
     } else {
       // landscape mode
-      uchar *fb = (uchar*)my_painter->frameBuffer();
-      uchar *buf = (uchar*)my_image->bits();
-      if(rect == my_image->rect()) {
-	memcpy(fb, buf, width()*height()*2);
-      } else {
-	int h = rect.height();
-	int wd = rect.width()<<1;
-	int fblineadd = my_painter->lineStep();
-	int buflineadd = my_image->bytesPerLine();
-	fb  += (rect.left()<<1) + rect.top() * my_painter->lineStep();
-	buf += (rect.left()<<1) + rect.top() * my_image->bytesPerLine();
-	while(h--) {
-	  memcpy(fb, buf, wd);
-	  fb += fblineadd;
-	  buf += buflineadd;
-	}
+      if (screenRotation == SDL_QT_ROTATION_90) {
+        uchar *fb = (uchar*)my_painter->frameBuffer();
+        uchar *buf = (uchar*)my_image->bits();
+        if(rect == my_image->rect()) {
+          memcpy(fb, buf, width()*height()*2);
+        } else {
+          int h = rect.height();
+          int wd = rect.width()<<1;
+          int fblineadd = my_painter->lineStep();
+          int buflineadd = my_image->bytesPerLine();
+          fb  += (rect.left()<<1) + rect.top() * my_painter->lineStep();
+          buf += (rect.left()<<1) + rect.top() * my_image->bytesPerLine();
+          while(h--) {
+            memcpy(fb, buf, wd);
+            fb += fblineadd;
+            buf += buflineadd;
+          }
+        }
       }
+      else if (screenRotation == SDL_QT_ROTATION_270) {
+        int h = rect.height();
+        int wd = rect.width();
+        int fblineadd = my_painter->lineStep() - (rect.width() << 1);
+        int buflineadd = my_image->bytesPerLine() - (rect.width() << 1);
+        int w;
+
+        uchar *fb = (uchar*)my_painter->frameBuffer();
+        uchar *buf = (uchar*)my_image->bits();
+        
+        fb += ((my_painter->width() - (rect.top() + rect.height())) * 
+            my_painter->lineStep()) + ((my_painter->height() - ((rect.left() + 
+                                                                 rect.width()))) << 1);
+
+        buf += my_image->bytesPerLine() * (rect.top() + rect.height()) -
+            (((my_image->width() - (rect.left() + rect.width())) << 1) + 2);
+
+        while(h--) {
+          w = wd;
+          while(w--) *((unsigned short*)fb)++ = *((unsigned short*)buf)--;
+          fb += fblineadd;
+          buf -= buflineadd;
+          }
+        }
     }
   } else {
 #endif
@@ -259,10 +291,27 @@ void SDL_QWin::QueueKey(QKeyEvent *e, int pressed)
     case Qt::Key_SysReq: scancode = SDLK_SYSREQ; break;
     case Qt::Key_Home: scancode = SDLK_HOME; break;
     case Qt::Key_End: scancode = SDLK_END; break;
-    case Qt::Key_Left: scancode = SDLK_LEFT; break;
-    case Qt::Key_Up: scancode = SDLK_UP; break;
-    case Qt::Key_Right: scancode = SDLK_RIGHT; break;
-    case Qt::Key_Down: scancode = SDLK_DOWN; break;
+    // We want the control keys to rotate with the screen
+    case Qt::Key_Left: 
+        if (screenRotation == SDL_QT_ROTATION_90) scancode = SDLK_UP;
+        else if (screenRotation == SDL_QT_ROTATION_270) scancode = SDLK_DOWN;
+        else scancode = SDLK_LEFT;
+        break;
+    case Qt::Key_Up: 
+        if (screenRotation == SDL_QT_ROTATION_90) scancode = SDLK_RIGHT;
+        else if (screenRotation == SDL_QT_ROTATION_270) scancode = SDLK_LEFT;
+        else scancode = SDLK_UP;
+        break;
+    case Qt::Key_Right: 
+        if (screenRotation == SDL_QT_ROTATION_90) scancode = SDLK_DOWN;
+        else if (screenRotation == SDL_QT_ROTATION_270) scancode = SDLK_UP;
+        else scancode = SDLK_RIGHT;
+        break;
+    case Qt::Key_Down:
+        if (screenRotation == SDL_QT_ROTATION_90) scancode = SDLK_LEFT;
+        else if (screenRotation == SDL_QT_ROTATION_270) scancode = SDLK_RIGHT;
+        else scancode = SDLK_DOWN;
+        break;
     case Qt::Key_Prior: scancode = SDLK_PAGEUP; break;
     case Qt::Key_Next: scancode = SDLK_PAGEDOWN; break;
     case Qt::Key_Shift: scancode = SDLK_LSHIFT; break;
