@@ -226,6 +226,15 @@ if test x$enable_file = xyes; then
 else
     CFLAGS="$CFLAGS -DDISABLE_FILE"
 fi
+AC_ARG_ENABLE(cpuinfo,
+[  --enable-cpuinfo        Enable the cpuinfo subsystem [default=yes]],
+              , enable_cpuinfo=yes)
+if test x$enable_cpuinfo = xyes; then
+    SDL_EXTRADIRS="$SDL_EXTRADIRS cpuinfo"
+    SDL_EXTRALIBS="$SDL_EXTRALIBS cpuinfo/libcpuinfo.la"
+else
+    CFLAGS="$CFLAGS -DDISABLE_CPUINFO"
+fi
 
 dnl See if the OSS audio interface is supported
 CheckOSS()

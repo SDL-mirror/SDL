@@ -16,7 +16,6 @@ noinst_LTLIBRARIES = libcpuinfo.la
 
 if HAVE_NASM
 ARCH_SRCS =			\
-	gcpuinfo.c		\
 	_cpuinfo.asm		\
 	_pcihelp.asm
 else
@@ -24,6 +23,8 @@ ARCH_SRCS =
 endif
 
 COMMON_SRCS = 			\
+	cpuinfo.h		\
+	gcpuinfo.c		\
 	SDL_cpuinfo.c
 
 libcpuinfo_la_SOURCES = $(ARCH_SRCS) $(COMMON_SRCS)

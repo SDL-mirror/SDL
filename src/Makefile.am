@@ -7,7 +7,7 @@ CORE_SUBDIRS =			\
 
 # These are the subdirectories which may be built
 EXTRA_SUBDIRS =			\
-	 audio video events joystick cdrom thread timer endian file hermes
+	 audio video events joystick cdrom thread timer endian file cpuinfo hermes
 
 # These are the subdirectories which will be built now
 SUBDIRS = $(CORE_SUBDIRS) @SDL_EXTRADIRS@
