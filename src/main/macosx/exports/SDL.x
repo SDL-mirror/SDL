@@ -1,3 +1,5 @@
+	.objc_class_name_SDL_QuartzWindow
+	.objc_class_name_SDL_QuartzWindowDelegate
 	_SDL_Init
 	_SDL_InitSubSystem
 	_SDL_QuitSubSystem
