@@ -396,7 +396,7 @@ extern DECLSPEC int SDLCALL SDL_SetGamma(float red, float green, float blue);
  * hardware does not support gamma translation, or otherwise fails,
  * this function will return -1.
  */
-extern DECLSPEC int SDLCALL SDL_SetGammaRamp(Uint16 *red, Uint16 *green, Uint16 *blue);
+extern DECLSPEC int SDLCALL SDL_SetGammaRamp(const Uint16 *red, const Uint16 *green, const Uint16 *blue);
 
 /*
  * Retrieve the current values of the gamma translation tables.
