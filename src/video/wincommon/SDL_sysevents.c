@@ -438,22 +438,21 @@ LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		return(0);
 #endif /* WM_GETMINMAXINFO */
 
-		case WM_MOVE: {
+		case WM_WINDOWPOSCHANGED: {
 			SDL_VideoDevice *this = current_video;
+			int w, h;
 
 			GetClientRect(SDL_Window, &SDL_bounds);
 			ClientToScreen(SDL_Window, (LPPOINT)&SDL_bounds);
 			ClientToScreen(SDL_Window, (LPPOINT)&SDL_bounds+1);
+			w = SDL_bounds.right-SDL_bounds.left;
+			h = SDL_bounds.bottom-SDL_bounds.top;
 			if ( this->input_grab != SDL_GRAB_OFF ) {
 				ClipCursor(&SDL_bounds);
 			}
-		}
-		break;
-	
-		case WM_SIZE: {
-			if ( SDL_PublicSurface &&
+			if ( SDL_PublicSurface && 
 				(SDL_PublicSurface->flags & SDL_RESIZABLE) ) {
-				SDL_PrivateResize(LOWORD(lParam), HIWORD(lParam));
+				SDL_PrivateResize(w, h);
 			}
 			return(0);
 		}
