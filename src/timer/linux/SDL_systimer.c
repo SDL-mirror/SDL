@@ -41,6 +41,9 @@ static char rcsid =
 #if _POSIX_THREAD_SYSCALL_SOFT
 #include <pthread.h>
 #endif
+#ifdef ENABLE_PTH
+#include <pth.h>
+#endif
 
 #if defined(DISABLE_THREADS) || defined(FORK_HACK)
 #define USE_ITIMER
@@ -142,6 +145,12 @@ Uint32 SDL_GetTicks (void)
 
 void SDL_Delay (Uint32 ms)
 {
+#ifdef ENABLE_PTH
+	pth_time_t tv;
+	tv.tv_sec  =  ms/1000;
+	tv.tv_usec = (ms%1000)*1000;
+	pth_nap(tv);
+#else
 	int was_error;
 
 #ifdef USE_NANOSLEEP
@@ -189,6 +198,7 @@ void SDL_Delay (Uint32 ms)
 		was_error = select(0, NULL, NULL, NULL, &tv);
 #endif /* USE_NANOSLEEP */
 	} while ( was_error && (errno == EINTR) );
+#endif /* ENABLE_PTH */
 }
 
 #ifdef USE_ITIMER
