@@ -563,7 +563,7 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 	}
 
 	/* width must be multiple of 16, for vro_cpyfm() and c2p_convert() */
-	if ((width & -16) != 0) {
+	if ((width & 15) != 0) {
 		width = (width | 15) +1;
 	}
 
@@ -749,7 +749,7 @@ static void GEM_UpdateRectsFullscreen(_THIS, int numrects, SDL_Rect *rects)
 	surface = this->screen;
 	/* Need to be a multiple of 16 pixels */
 	surf_width=surface->w;
-	if ((surf_width & -16) != 0) {
+	if ((surf_width & 15) != 0) {
 		surf_width = (surf_width | 15) + 1;
 	}
 
@@ -869,7 +869,7 @@ static int GEM_FlipHWSurfaceFullscreen(_THIS, SDL_Surface *surface)
 
 	/* Need to be a multiple of 16 pixels */
 	surf_width=surface->w;
-	if ((surf_width & -16) != 0) {
+	if ((surf_width & 15) != 0) {
 		surf_width = (surf_width | 15) + 1;
 	}
 
@@ -1200,7 +1200,7 @@ static void refresh_window(_THIS, int winhandle, short *rect)
 
 		/* Need to be a multiple of 16 pixels */
 		width=surface->w;
-		if ((width & -16) != 0) {
+		if ((width & 15) != 0) {
 			width = (width | 15) + 1;
 		}
 		mfdb_src.fd_w=width;
