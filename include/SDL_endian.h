@@ -54,32 +54,35 @@ static char rcsid =
 extern "C" {
 #endif
 
-/* The macros used to swap values */
-/* Try to use superfast macros on systems that support them */
-#ifdef linux
-#include <asm/byteorder.h>
-#ifdef __arch__swab16
-#define SDL_Swap16  __arch__swab16
-#endif
-#ifdef __arch__swab32
-#define SDL_Swap32  __arch__swab32
-#endif
-#endif /* linux */
 /* Use inline functions for compilers that support them, and static
    functions for those that do not.  Because these functions become
    static for compilers that do not support inline functions, this
    header should only be included in files that actually use them.
 */
-#ifndef SDL_Swap16
+#if defined(__GNUC__) && defined(i386)
+static __inline__ Uint16 SDL_Swap16(Uint16 D)
+{
+	__asm__("xchgb %b0,%h0" : "=q" (D) :  "0" (D));
+	return D;
+}
+#else
 static __inline__ Uint16 SDL_Swap16(Uint16 D) {
 	return((D<<8)|(D>>8));
 }
 #endif
-#ifndef SDL_Swap32
+
+#if defined(__GNUC__) && defined(i386)
+static __inline__ Uint32 SDL_Swap32(Uint32 D)
+{
+	__asm__("bswap %0" : "=r" (D) : "0" (D));
+	return D;
+}
+#else
 static __inline__ Uint32 SDL_Swap32(Uint32 D) {
 	return((D<<24)|((D<<8)&0x00FF0000)|((D>>8)&0x0000FF00)|(D>>24));
 }
 #endif
+
 #ifdef SDL_HAS_64BIT_TYPE
 #ifndef SDL_Swap64
 static __inline__ Uint64 SDL_Swap64(Uint64 val) {
