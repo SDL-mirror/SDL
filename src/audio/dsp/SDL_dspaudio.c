@@ -233,6 +233,8 @@ static void DSP_CloseAudio(_THIS)
 		mixbuf = NULL;
 	}
 	if ( audio_fd >= 0 ) {
+		int value;
+		ioctl(audio_fd, SNDCTL_DSP_RESET, &value);
 		close(audio_fd);
 		audio_fd = -1;
 	}
