@@ -396,6 +396,7 @@ LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			MINMAXINFO *info;
 			RECT        size;
 			int x, y;
+			int style;
 			int width;
 			int height;
 
@@ -424,8 +425,19 @@ LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				size.bottom = 0;
 				size.right = 0;
 			}
-			AdjustWindowRect(&size, GetWindowLong(hwnd, GWL_STYLE),
-									FALSE);
+
+			/* DJM - according to the docs for GetMenu(), the
+			   return value is undefined if hwnd is a child window.
+			   Aparently it's too difficult for MS to check
+			   inside their function, so I have to do it here.
+          		 */
+         		style = GetWindowLong(hwnd, GWL_STYLE);
+         		AdjustWindowRect(
+				&size,
+				style,
+            			style & WS_CHILDWINDOW ? FALSE
+						       : GetMenu(hwnd) != NULL);
+
 			width = size.right - size.left;
 			height = size.bottom - size.top;
 
