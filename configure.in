@@ -775,7 +775,7 @@ CheckVGL()
          #include <vgl.h>
         ],[
          VGLBitmap bitmap;
-         exit(bitmap.PyxelBytes);
+         exit(bitmap.PixelBytes);
         ],[
         video_vgl=yes
         ])
@@ -1257,7 +1257,6 @@ case "$target" in
         CheckX11
         CheckDGA
         CheckSVGA
-        CheckVGL
         CheckAAlib
         CheckOpenGL
         CheckPTHREAD
@@ -1294,6 +1293,7 @@ case "$target" in
         ARCH=freebsd
         CheckDummyVideo
         CheckDiskAudio
+        CheckVGL
         CheckNASM
         CheckOSS
         CheckARTSC
