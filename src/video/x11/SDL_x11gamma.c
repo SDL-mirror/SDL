@@ -37,7 +37,7 @@ static char rcsid =
 static int X11_SetGammaNoLock(_THIS, float red, float green, float blue)
 {
 #ifdef XFREE86_VMGAMMA
-    if (use_vidmode >= 2) {
+    if (use_vidmode >= 200) {
         XF86VidModeGamma gamma;
         Bool succeeded;
 

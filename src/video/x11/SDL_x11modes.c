@@ -271,7 +271,7 @@ int X11_GetVideoModes(_THIS)
         }
         XFree(modes);
 
-        use_vidmode = vm_major;
+        use_vidmode = vm_major * 100 + vm_minor;
         save_mode(this);
     }
 #endif /* XFREE86_VM */
