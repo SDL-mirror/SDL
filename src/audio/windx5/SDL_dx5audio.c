@@ -495,9 +495,11 @@ static int CreatePrimary(LPDIRECTSOUND sndObj, HWND focus,
 static int CreateSecondary(LPDIRECTSOUND sndObj, HWND focus,
 	LPDIRECTSOUNDBUFFER *sndbuf, WAVEFORMATEX *wavefmt, Uint32 chunksize)
 {
+	const int numchunks = 2;
 	HRESULT result;
 	DSBUFFERDESC format;
-	const int numchunks = 2;
+	LPVOID pvAudioPtr1, pvAudioPtr2;
+	DWORD  dwAudioBytes1, dwAudioBytes2;
 
 	/* Try to set primary mixing privileges */
 	if ( focus ) {
@@ -539,6 +541,22 @@ static int CreateSecondary(LPDIRECTSOUND sndObj, HWND focus,
 		return(-1);
 	}
 	IDirectSoundBuffer_SetFormat(*sndbuf, wavefmt);
+
+	/* Silence the initial audio buffer */
+	result = IDirectSoundBuffer_Lock(*sndbuf, 0, format.dwBufferBytes,
+	                                 (LPVOID *)&pvAudioPtr1, &dwAudioBytes1,
+	                                 (LPVOID *)&pvAudioPtr2, &dwAudioBytes2,
+	                                 DSBLOCK_ENTIREBUFFER);
+	if ( result == DS_OK ) {
+		if ( wavefmt->wBitsPerSample == 8 ) {
+			memset(pvAudioPtr1, 0x80, dwAudioBytes1);
+		} else {
+			memset(pvAudioPtr1, 0x00, dwAudioBytes1);
+		}
+		IDirectSoundBuffer_Unlock(*sndbuf,
+		                          (LPVOID)pvAudioPtr1, dwAudioBytes1,
+		                          (LPVOID)pvAudioPtr2, dwAudioBytes2);
+	}
 
 	/* We're ready to go */
 	return(numchunks);
