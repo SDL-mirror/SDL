@@ -43,6 +43,10 @@
 #include "swis.h"
 #include "unixlib/os.h"
 
+#ifndef DISABLE_THREADS
+#include <pthread.h>
+#endif
+
 /* Local functions */
 void WIMP_Poll(_THIS, int waitTime);
 void WIMP_SetFocus(int win);
@@ -56,10 +60,15 @@ void WIMP_PaletteChanged(_THIS);
 extern void WIMP_PollMouse(_THIS);
 extern void RISCOS_PollKeyboard();
 
+#ifdef DISABLE_THREADS
 extern void DRenderer_FillBuffers();
 
 /* Timer running function */
 extern void RISCOS_CheckTimer();
+
+#else
+extern int riscos_using_threads;
+#endif
 
 /* Mouse cursor handling */
 extern void WIMP_ReshowCursor(_THIS);
@@ -75,8 +84,10 @@ void WIMP_PumpEvents(_THIS)
 	WIMP_Poll(this, 0);
 	if (hasFocus) RISCOS_PollKeyboard();
 	if (mouseInWindow) WIMP_PollMouse(this);
+#ifdef DISABLE_THREADS
 	DRenderer_FillBuffers();
 	if (SDL_timer_running) RISCOS_CheckTimer();
+#endif
 }
 
 
@@ -100,10 +111,15 @@ void WIMP_Poll(_THIS, int waitTime)
 
     while (doPoll)
     {
+#ifndef DISABLE_THREADS
+       /* Stop thread callbacks while program is paged out */
+       if (riscos_using_threads) __pthread_stop_ticker();
+#endif
+
         if (waitTime <= 0)
         {
         	regs.r[0] = pollMask; /* Poll Mask */
-        	 /* For no wait time mask out null event so we wait until something happens */
+        	/* For no wait time mask out null event so we wait until something happens */
         	if (waitTime < 0) regs.r[0] |= 1;
         	regs.r[1] = (int)message;
         	_kernel_swi(Wimp_Poll, &regs, &regs);
@@ -116,34 +132,34 @@ void WIMP_Poll(_THIS, int waitTime)
         }
 
 		/* Flag to specify if we post a SDL_SysWMEvent */
-		sysEvent = 0;
+	sysEvent = 0;
         
         code = (unsigned int)regs.r[0];
 
-		switch(code)
-		{
-		case 0:  /* Null Event - drop out for standard processing*/
-		   doPoll = 0;
-		   break;
+	switch(code)
+	{
+        case 0:  /* Null Event - drop out for standard processing*/
+	   doPoll = 0;
+	   break;
 
-		case 1:     /* Redraw window */
-        	_kernel_swi(Wimp_RedrawWindow, &regs,&regs);
-			if (message[0] == sdlWindow)
-			{
-        		while (regs.r[0])
-        		{
-        			WIMP_PlotSprite(this, message[1], message[2]);
-        			_kernel_swi(Wimp_GetRectangle, &regs, &regs);
-        		}
-			} else
-			{
-				/* TODO: Currently we just eat them - we may need to pass them on */
-        		while (regs.r[0])
-        		{
-        			_kernel_swi(Wimp_GetRectangle, &regs, &regs);
-        		}
-			}
-        	break;
+	case 1:     /* Redraw window */
+           _kernel_swi(Wimp_RedrawWindow, &regs,&regs);
+	   if (message[0] == sdlWindow)
+	   {
+                 while (regs.r[0])
+                 {
+           	    WIMP_PlotSprite(this, message[1], message[2]);
+           	    _kernel_swi(Wimp_GetRectangle, &regs, &regs);
+                 }
+	   } else
+	  {
+	/* TODO: Currently we just eat them - we may need to pass them on */
+        	while (regs.r[0])
+        	{
+                        _kernel_swi(Wimp_GetRectangle, &regs, &regs);
+        	}
+	  }
+          break;
         	
 		case 2:		/* Open window */
 		   if ( resizeOnOpen && message[0] == sdlWindow)
@@ -277,7 +293,16 @@ void WIMP_Poll(_THIS, int waitTime)
 			/* Fall out of polling loop if message is successfully posted */
 			if (SDL_PrivateSysWMEvent(&wmmsg)) doPoll = 0;
 		}
-
+#ifndef DISABLE_THREADS
+		if (riscos_using_threads)
+		{
+                   /* Restart ticker here so other thread can not interfere
+                      with the Redraw processing */
+		   if (riscos_using_threads) __pthread_start_ticker();
+                   /* Give other threads a better chance of running */
+		   pthread_yield();
+		}
+#endif
     }
 }
 
@@ -303,7 +328,9 @@ void RISCOS_BackgroundTasks(void)
 	{
 		WIMP_Poll(current_video, 0);
 	}
+#ifdef DISABLE_THREADS
 	/* Keep sound buffers running */
 	DRenderer_FillBuffers();
 	if (SDL_timer_running) RISCOS_CheckTimer();
+#endif
 }

@@ -399,7 +399,7 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 		return(-1);
 	}
 
-#if defined(macintosh) || defined(__riscos__)
+#if defined(macintosh) || (defined(__riscos__) && !defined(DISABLE_THREADS))
 	/* FIXME: Need to implement PPC interrupt asm for SDL_LockAudio() */
 #else
 #if defined(__MINT__) && !defined(ENABLE_THREADS)

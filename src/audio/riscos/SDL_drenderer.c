@@ -35,6 +35,10 @@
 #include "SDL_sysaudio.h"
 #include "SDL_drenderer.h"
 
+#ifndef DISABLE_THREADS
+#include <pthread.h>
+#endif
+
 #define DigitalRenderer_Activate    0x4F700
 #define DigitalRenderer_Deactivate	0x4F701
 #define DigitalRenderer_ReadState	0x4F705
@@ -56,6 +60,12 @@ extern int riscos_audiobuffer; /* Override for audio buffer size */
 
 static void DRenderer_CloseAudio(_THIS);
 static int DRenderer_OpenAudio(_THIS, SDL_AudioSpec *spec);
+
+#ifndef DISABLE_THREADS
+static void DRenderer_WaitAudio(_THIS);
+static Uint8 *DRenderer_GetAudioBuf(_THIS);
+static void DRenderer_PlayAudio(_THIS);
+#endif
 
 /* Audio driver bootstrap functions */
 
@@ -104,6 +114,11 @@ static SDL_AudioDevice *Audio_CreateDevice(int devindex)
     /* Set the function pointers */
     this->OpenAudio   = DRenderer_OpenAudio;
     this->CloseAudio  = DRenderer_CloseAudio;
+#ifndef DISABLE_THREADS
+    this->GetAudioBuf = DRenderer_GetAudioBuf;
+    this->PlayAudio   = DRenderer_PlayAudio;
+    this->WaitAudio   = DRenderer_WaitAudio;
+#endif
     this->free        = Audio_DeleteDevice;
 
     return this;
@@ -117,6 +132,9 @@ AudioBootStrap DRENDERER_bootstrap = {
 /* Routine called to check and fill audio buffers if necessary */
 static Uint8 *buffer = NULL;
 
+#ifdef DISABLE_THREADS
+
+/* Buffer fill routine called during polling */
 void DRenderer_FillBuffers()
 {
 	SDL_AudioDevice *audio = current_audio;
@@ -182,14 +200,32 @@ void DRenderer_FillBuffers()
    }
 }
 
+#endif
+
 /* Size of DMA buffer to use */
 #define DRENDERER_BUFFER_SIZE 512
 
 /* Number of centiseconds of sound to buffer.
    Hopefully more than the maximum time between calls to the
-   FillBuffers routine above
+   FillBuffers routine above (non-threaded) or the PlayAudio
+   routine below (threaded).
 */
+
 #define DRENDERER_CSEC_TO_BUFFER 10
+
+static void DeactivateAudio()
+{
+	_kernel_swi_regs regs;
+
+	/* Close down the digital renderer */
+	_kernel_swi(DigitalRenderer_Deactivate, &regs, &regs);
+
+	if (buffer != NULL)
+	{
+	   free(buffer);
+	   buffer = NULL;
+	}
+}
 
 static int DRenderer_OpenAudio(_THIS, SDL_AudioSpec *spec)
 {
@@ -200,15 +236,13 @@ static int DRenderer_OpenAudio(_THIS, SDL_AudioSpec *spec)
     printf("Request format %d\n", spec->format);
     printf("Request freq   %d\n", spec->freq);
     printf("Samples        %d\n", spec->samples);
+    printf("Channels       %d\n", spec->channels);
 #endif
 
 	/* Only support signed 16bit format */
 	spec->format = AUDIO_S16LSB;
 
     if (spec->samples < DRENDERER_BUFFER_SIZE) spec->samples = DRENDERER_BUFFER_SIZE;
-
-    SDL_CalculateAudioSpec(spec);
-
 
 	buffers_per_sample = spec->samples / DRENDERER_BUFFER_SIZE;
 
@@ -217,6 +251,7 @@ static int DRenderer_OpenAudio(_THIS, SDL_AudioSpec *spec)
 		buffers_per_sample++;
 		spec->samples = buffers_per_sample * DRENDERER_BUFFER_SIZE;
 	}
+	
 
 	/* Set number of buffers to use - the following should give enough
 	   data between calls to the sound polling.
@@ -227,7 +262,19 @@ static int DRenderer_OpenAudio(_THIS, SDL_AudioSpec *spec)
     	FillBuffer = (int)((double)DRENDERER_CSEC_TO_BUFFER / ((double)DRENDERER_BUFFER_SIZE * 100.0 / (double)spec->freq)) + 1;
     } else FillBuffer = riscos_audiobuffer/DRENDERER_BUFFER_SIZE - buffers_per_sample;
 
-	if (FillBuffer < buffers_per_sample) FillBuffer = buffers_per_sample;
+    if (FillBuffer < buffers_per_sample) FillBuffer = buffers_per_sample;
+#ifndef DISABLE_THREADS
+    if (buffers_per_sample < FillBuffer)
+    {
+       /* For the threaded version we are only called once per cycle
+          so the callback needs to give us the full data we need in
+          one go, rather than multiple calls as it the case for the
+          non threaded version */
+       buffers_per_sample = FillBuffer;
+       spec->samples = buffers_per_sample * DRENDERER_BUFFER_SIZE;
+    }
+#endif
+        SDL_CalculateAudioSpec(spec);
 	regs.r[0] = FillBuffer + buffers_per_sample;
 
 #ifdef DUMP_AUDIO
@@ -259,6 +306,9 @@ static int DRenderer_OpenAudio(_THIS, SDL_AudioSpec *spec)
 		spec->freq = regs.r[0];
 	}
 
+        /* Ensure sound is deactivated if we exit without calling SDL_Quit */
+        atexit(DeactivateAudio);
+
 #ifdef DUMP_AUDIO
     printf("Got format %d\n", spec->format);
     printf("Frequency  %d\n", spec->freq);
@@ -277,17 +327,56 @@ static int DRenderer_OpenAudio(_THIS, SDL_AudioSpec *spec)
 		return -1;
 	}
 
+#ifdef DISABLE_THREADS
    /* Hopefully returning 2 will show success, but not start up an audio thread */
    return 2;
+#else
+   /* Success and start audio thread */
+   return 0;
+#endif
 }
 
 static void DRenderer_CloseAudio(_THIS)
 {
-	_kernel_swi_regs regs;
-
-	/* Close down the digital renderer */
-	_kernel_swi(DigitalRenderer_Deactivate, &regs, &regs);
-
-	if (buffer != NULL) free(buffer);
+        DeactivateAudio();
 }
 
+#ifndef DISABLE_THREADS
+
+/* Routines for threaded version of audio */
+
+void DRenderer_WaitAudio(_THIS)
+{
+   _kernel_swi_regs regs;
+   int waiting = 1;
+
+   while (waiting)
+   {
+      /* Check filled buffers count */
+      _kernel_swi(DigitalRenderer_StreamStatistics, &regs, &regs);
+#if 0
+    if (regs.r[0] <= FillBuffer)
+    {
+       printf("Buffers in use %d\n", regs.r[0]);
+    }
+#endif
+      if (regs.r[0] <= FillBuffer) waiting = 0;
+      else pthread_yield();
+   }
+}
+
+Uint8 *DRenderer_GetAudioBuf(_THIS)
+{
+    return buffer;
+}
+
+void DRenderer_PlayAudio(_THIS)
+{
+	_kernel_swi_regs regs;
+
+	regs.r[0] = (int)buffer;
+	regs.r[1] = current_audio->spec.samples * current_audio->spec.channels;
+	_kernel_swi(DigitalRenderer_Stream16BitSamples, &regs, &regs);
+}
+
+#endif

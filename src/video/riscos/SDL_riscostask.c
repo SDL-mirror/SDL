@@ -39,6 +39,11 @@
 
 #include "SDL_riscostask.h"
 
+#ifndef DISABLE_THREADS
+#include <pthread.h>
+pthread_t main_thread;
+#endif
+
 /* RISCOS variables */
 
 static int task_handle = 0;
@@ -107,6 +112,10 @@ int RISCOS_InitTask()
 	   task_handle = regs.r[1];
 	   return 1;
    }
+
+#ifndef DISABLE_THREADS
+   main_thread = pthread_self();
+#endif
 
    return 0;
 }

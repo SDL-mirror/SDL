@@ -76,18 +76,23 @@ void RISCOS_PollKeyboard();
 
 void RISCOS_PollMouseHelper(_THIS, int fullscreen);
 
+#ifdef DISABLE_THREADS
 extern void DRenderer_FillBuffers();
 
 /* Timer running function */
 extern void RISCOS_CheckTimer();
+
+#endif
 
 void FULLSCREEN_PumpEvents(_THIS)
 {
     /* Current implementation requires keyboard and mouse polling */
 	RISCOS_PollKeyboard();
 	RISCOS_PollMouse(this);
+#ifdef DISABLE_THREADS
 	DRenderer_FillBuffers();
 	if (SDL_timer_running) RISCOS_CheckTimer();
+#endif
 }
 
 
@@ -538,3 +543,4 @@ static SDL_keysym *TranslateKey(int intkey, SDL_keysym *keysym, int pressed)
 }
 
 /* end of SDL_riscosevents.c ... */
+

@@ -1,0 +1,112 @@
+Readme for RISC OS port of SDL
+==============================
+
+This document last updated on 25th June 2004
+
+This is a RISC OS port of the Simple Direct Media Layer (SDL) by Alan Buckley.
+
+Details of the SDL can be found at http://www.libsdl.org.
+
+The source code including the RISC OS version can be obtained from http://www.libsdl.org.
+
+RISC OS makefiles, pre built libraries and many games and applications compiled for RISC OS using this library can be downloaded from The Unix Porting Project at http://www.chocky.org/unix/index.html.
+
+This is released under the LGPL see the file COPYING for details.
+
+
+RISCOS port of SDL runtime information
+======================================
+
+Runtime requirements
+--------------------
+
+This library currently needs a minimum of RISCOS 3.6. The source code for the library (and a lot of the programs built with it) also need long file names.
+
+To use the audio you also need 16 bit sound and to have installed the Digital Render module by Andreas Dehmel version 0.51 available from his web site:
+  http://home.t-online.de/~zarquon
+
+Note: As most programs ported from other OS's use high resolution graphics and a memory back buffer a machine with a StrongARM processor and 1 or 2MB of VRAM (or a better machine) is recomended.
+
+
+RISCOS runtime parameters
+-------------------------
+
+Several environmental variables have been defined to make porting programs easier (i.e. By setting these variable you do not need to have source code differences between OS's).
+
+They are all defined on an application basis.
+
+The <appname> used below is found as follows:
+1. Use the name of the program unless it is !RunImage
+2. Check the folder specification for the folder !RunImage is run from. If it is a folder name use that name, otherwise if it is an environmental variable of the form <XXX$Dir> use the value of XXX.
+
+The variables are:
+
+SDL$<appname>$TaskName - The name of the task for RISCOS. If omitted then <appname> is used for the task name,
+
+SDL$<appname>$BackBuffer - set to 1 to use a system memory back buffer for the screen in full screen mode. Some programs on other systems assume their is always a back buffer even though the SDL specification specifies this is not the case. The current RISCOS implementation uses direct writes to the screen if a hardware fullscreen is requested.
+
+SDL$<appname>$CloseAction - set the action for the close icon. Again as programs don't match the specification you can set this to 0 to remove the close icon from the main window for applications where this does not affect the program.
+
+SDL$<appname>$AudioBuffer - set the minimum size of the audio buffer in samples in steps of 512. If this is less than the minimum calculated from the parameters requested in the program by SDL_OpenAudio these will be used instead. If this parameter is not used or set to 0 the buffer size will be calculated to buffer 10 centisecond of sound. The time buffered can be calculated as specified size/frequency in seconds. The larger the buffer the more audio data that will be buffered, but this can lead to a lag between a sound being requested and it being heard, so the size should be kept to a minimum. You should only set this parameter if the sound is being missed out. 
+
+
+
+RISCOS SDL port API notes
+=========================
+
+Current level of implementation
+-------------------------------
+
+The following list is an overview of how much of the SDL is implemented. The areas match the main areas of the SDL.
+
+video - Mostly done. Doesn't cover gamma, YUV-overlay or open gl.
+Window Manager - Mostly done. SetIcon/IconifyWindow not implemented.
+Events - Mostly done. Resize and some joystick events missing.
+Joystick - Currently assumes a single joystick with 4 buttons.
+Audio - Requires Digital Renderer module.
+CDROM - Not implemented.
+Threads - Done
+Timers - Done
+
+Thread support can be removed by defining DISABLE_THREADS and recompiling the library.
+
+SDL API notes
+-------------
+
+This section contains additional notes on some specific commands.
+
+SDL_SetVideoMode
+  On RISCOS a fullscreen mode directly accesses the screen. This can be modified by the environmental variable (SDL$<appname>$BackBuffer) or by using the SDL_SWSURFACE flag to write to an offscreen buffer that is updated using SDL_UpdateRects.
+  Open GL is not supported so SDL_OPENGL and SDL_OPENGLBLIT flags fail.
+  SDL_RESIZEABLE and SDL_NOFRAME flags are not supported.
+
+SDL_SetColors
+  In a wimp mode the screen colours are not changed for a hardware palette instead the RISCOS sprite colour mapping is used to get the best matching colours.
+
+SDL_CreateCursor
+   Inverted colour is not supported.
+
+SDL_WM_ToggleFullScreen
+   Currently this won't work if the application starts up in Fullscreen mode.
+   Toggling to fullscreen will only work if the monitor is set up to support the exact screen size requested.
+
+SDL_EnableUNICODE
+   Unicode translation used here is only really accurate for 7 bit characters.
+
+SDL_NumJoysticks/JoystickName etc.
+   Hardcoded to expect only 1 joystick with 4 buttons if the Joystick module is loaded.
+
+SDL_GetTicks
+   Timer used has only a centisecond accuracy. This applies to other time related functions.
+   
+SDL_Delay
+   Modified to poll keyboard/mouse during the delay on the event thread.
+
+
+Notes on current implementation
+-------------------------------
+
+Keyboard and mouse are polled so if too long a time is spent between a call to SDL_PumpEvents, functions that use it, or SDL_Delay events can be missed.
+
+The sound is sent to the digital renderer player in a seperate thread. If there is too long a delay between this thread being processed (possibly if a lot else is running in the Wimp) the sound may sound incorrect or dissappear.
+

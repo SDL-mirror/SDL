@@ -36,10 +36,19 @@ static char rcsid =
 #include "SDL_timer.h"
 #include "SDL_timer_c.h"
 
+#ifdef DISABLE_THREADS
 /* Timer start/reset time */
 static Uint32 timerStart;
 /* Timer running function */
 void RISCOS_CheckTimer();
+#else
+#include <pthread.h>
+extern Uint32 riscos_main_thread;
+extern int riscos_using_threads;
+extern Uint32 SDL_ThreadID();
+extern Uint32 SDL_EventThreadID(void);
+#endif
+
 
 extern void RISCOS_BackgroundTasks(void);
 
@@ -75,18 +84,36 @@ Uint32 SDL_GetTicks (void)
 
 }
 
-extern void DRenderer_FillBuffers();
-
 void SDL_Delay (Uint32 ms)
 {
     Uint32 now,then,elapsed;
+#ifndef DISABLE_THREADS
+    int is_event_thread;
+    if (riscos_using_threads)
+    {
+       is_event_thread = 0;
+       if (SDL_EventThreadID())
+       {
+          if (SDL_EventThreadID() == SDL_ThreadID()) is_event_thread = 1;
+       } else if (SDL_ThreadID() == riscos_main_thread) is_event_thread = 1;
+    } else is_event_thread = 1;
+#endif
+
+/*TODO: Next version of unixlib may allow us to use usleep here */
+/*      for non event threads */
 
 	/* Set the timeout interval - Linux only needs to do this once */
 	then = SDL_GetTicks();
 
 	do {
 		/* Do background tasks required while sleeping as we are not multithreaded */
+#ifdef DISABLE_THREADS
 		RISCOS_BackgroundTasks();
+#else
+		/* For threaded build only run background tasks in event thread */
+		if (is_event_thread) RISCOS_BackgroundTasks();
+#endif
+
 		/* Calculate the time interval left (in case of interrupt) */
 		now = SDL_GetTicks();
 		elapsed = (now-then);
@@ -95,9 +122,17 @@ void SDL_Delay (Uint32 ms)
 			break;
 		}
 		ms -= elapsed;
+#ifndef DISABLE_THREADS
+            /* Need to yield to let other threads have a go */
+            if (riscos_using_threads) pthread_yield();
+#endif
 
 	} while ( 1 );
 }
+
+#ifdef DISABLE_THREADS
+
+/* Non-threaded version of timer */
 
 int SDL_SYS_TimerInit(void)
 {
@@ -144,3 +179,56 @@ void RISCOS_CheckTimer()
 		if (SDL_alarm_interval) timerStart = SDL_GetTicks();
 	}
 }
+
+#else
+
+/* Threaded version of timer - based on code for linux */
+
+#include "SDL_thread.h"
+
+/* Data to handle a single periodic alarm */
+static int timer_alive = 0;
+static SDL_Thread *timer = NULL;
+
+static int RunTimer(void *unused)
+{
+	while ( timer_alive ) {
+		if ( SDL_timer_running ) {
+			SDL_ThreadedTimerCheck();
+		}
+		SDL_Delay(1);
+	}
+	return(0);
+}
+
+/* This is only called if the event thread is not running */
+int SDL_SYS_TimerInit(void)
+{
+	timer_alive = 1;
+	timer = SDL_CreateThread(RunTimer, NULL);
+	if ( timer == NULL )
+		return(-1);
+	return(SDL_SetTimerThreaded(1));
+}
+
+void SDL_SYS_TimerQuit(void)
+{
+	timer_alive = 0;
+	if ( timer ) {
+		SDL_WaitThread(timer, NULL);
+		timer = NULL;
+	}
+}
+
+int SDL_SYS_StartTimer(void)
+{
+	SDL_SetError("Internal logic error: RISCOS uses threaded timer");
+	return(-1);
+}
+
+void SDL_SYS_StopTimer(void)
+{
+	return;
+}
+
+#endif /* DISABLE_THREADS */
