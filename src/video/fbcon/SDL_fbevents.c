@@ -482,7 +482,7 @@ static int detect_imps2(int fd)
 #ifdef DEBUG_MOUSE
 fprintf(stderr, "Last mouse mode: 0x%x\n", ch);
 #endif
-			if ( ch == 3 ) {
+			if ( (ch == 3) || (ch == 4) ) {
 				imps2 = 1;
 			}
 		}
