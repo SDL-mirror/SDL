@@ -461,34 +461,28 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 	}
 
 	/* See if we need to do any conversion */
-	if ( memcmp(desired, &audio->spec, sizeof(audio->spec)) == 0 ) {
-		/* Just copy over the desired audio specification */
-		if ( obtained != NULL ) {
-			memcpy(obtained, &audio->spec, sizeof(audio->spec));
+	if ( obtained != NULL ) {
+		memcpy(obtained, &audio->spec, sizeof(audio->spec));
+	} else if ( desired->freq != audio->spec.freq ||
+                    desired->format != audio->spec.format ||
+	            desired->channels != audio->spec.channels ) {
+		/* Build an audio conversion block */
+		if ( SDL_BuildAudioCVT(&audio->convert,
+			desired->format, desired->channels,
+					desired->freq,
+			audio->spec.format, audio->spec.channels,
+					audio->spec.freq) < 0 ) {
+			SDL_CloseAudio();
+			return(-1);
 		}
-	} else {
-		/* Copy over the audio specification if possible */
-		if ( obtained != NULL ) {
-			memcpy(obtained, &audio->spec, sizeof(audio->spec));
-		} else {
-			/* Build an audio conversion block */
-			if ( SDL_BuildAudioCVT(&audio->convert,
-				desired->format, desired->channels,
-						desired->freq,
-				audio->spec.format, audio->spec.channels,
-						audio->spec.freq) < 0 ) {
+		if ( audio->convert.needed ) {
+			audio->convert.len = desired->size;
+			audio->convert.buf =(Uint8 *)SDL_AllocAudioMem(
+			   audio->convert.len*audio->convert.len_mult);
+			if ( audio->convert.buf == NULL ) {
 				SDL_CloseAudio();
+				SDL_OutOfMemory();
 				return(-1);
-			}
-			if ( audio->convert.needed ) {
-				audio->convert.len = desired->size;
-				audio->convert.buf =(Uint8 *)SDL_AllocAudioMem(
-				   audio->convert.len*audio->convert.len_mult);
-				if ( audio->convert.buf == NULL ) {
-					SDL_CloseAudio();
-					SDL_OutOfMemory();
-					return(-1);
-				}
 			}
 		}
 	}
