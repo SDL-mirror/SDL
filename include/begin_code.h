@@ -52,7 +52,7 @@
 #ifdef __SYMBIAN32__ 
 #undef DECLSPEC
 #define DECLSPEC
-#endif // __SYMBIAN32__
+#endif /* __SYMBIAN32__ */
 
 /* Force structure packing at 4 byte alignment.
    This is necessary if the header is included in code which has structure
