@@ -32,6 +32,7 @@ VideoBootStrap QZ_bootstrap = {
     "Quartz", "Mac OS X CoreGraphics", QZ_Available, QZ_CreateDevice
 };
 
+
 /* Bootstrap functions */
 static int QZ_Available () {
     return 1;
@@ -360,6 +361,16 @@ static void QZ_UnsetVideoMode (_THIS) {
         
         gamma_error = QZ_FadeGammaOut (this, &gamma_table);
 
+        /*  Release double buffer stuff */
+        if ( mode_flags & (SDL_HWSURFACE|SDL_DOUBLEBUF)) {
+            quit_thread = YES;
+            SDL_SemPost (sem1);
+            SDL_WaitThread (thread, NULL);
+            SDL_DestroySemaphore (sem1);
+            SDL_DestroySemaphore (sem2);
+            free (sw_buffers[0]);
+        }
+        
         /* 
             Release the OpenGL context
             Do this first to avoid trash on the display before fade
@@ -372,7 +383,7 @@ static void QZ_UnsetVideoMode (_THIS) {
         
         /* Restore original screen resolution/bpp */
         CGDisplaySwitchToMode (display_id, save_mode);
-        CGDisplayRelease (display_id);
+        CGReleaseAllDisplays ();
         ShowMenuBar ();
 
         /* 
@@ -408,6 +419,7 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
     int gamma_error;
     SDL_QuartzGammaTable gamma_table;
     NSRect screen_rect;
+    CGError error;
     
     /* Destroy any previous mode */
     if (video_set == SDL_TRUE)
@@ -427,7 +439,12 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
     gamma_error = QZ_FadeGammaOut (this, &gamma_table);
 
     /* Put up the blanking window (a window above all other windows) */
-    if ( CGDisplayNoErr != CGDisplayCapture (display_id) ) {
+    if (getenv ("SDL_SINGLEDISPLAY"))
+        error = CGDisplayCapture (display_id);
+    else
+        error = CGCaptureAllDisplays ();
+        
+    if ( CGDisplayNoErr != error ) {
         SDL_SetError ("Failed capturing display");
         goto ERR_NO_CAPTURE;
     }
@@ -451,11 +468,41 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
     this->UpdateRects     = QZ_DirectUpdate;
     this->LockHWSurface   = QZ_LockHWSurface;
     this->UnlockHWSurface = QZ_UnlockHWSurface;
-    
-    /* Setup some mode-dependant info */
-    if ( CGSDisplayCanHWFill (display_id) ) {
-        this->info.blit_fill = 1;
-        this->FillHWRect = QZ_FillHWRect;
+
+    /* Setup double-buffer emulation */
+    if ( flags & SDL_DOUBLEBUF ) {
+        
+        /*
+            Setup a software backing store for reasonable results when
+            double buffering is requested (since a single-buffered hardware
+            surface looks hideous).
+            
+            The actual screen blit occurs in a separate thread to allow 
+            other blitting while waiting on the VBL (and hence results in higher framerates).
+        */
+        this->LockHWSurface = NULL;
+        this->UnlockHWSurface = NULL;
+        this->UpdateRects = NULL;
+        
+        current->flags |= (SDL_HWSURFACE|SDL_DOUBLEBUF);
+        this->UpdateRects = QZ_DoubleBufferUpdate;
+        this->LockHWSurface = QZ_LockDoubleBuffer;
+        this->UnlockHWSurface = QZ_UnlockDoubleBuffer;
+        this->FlipHWSurface = QZ_FlipDoubleBuffer;
+
+        current->pixels = malloc (current->pitch * current->h * 2);
+        if (current->pixels == NULL) {
+            SDL_OutOfMemory ();
+            goto ERR_DOUBLEBUF;
+        }
+        
+        sw_buffers[0] = current->pixels;
+        sw_buffers[1] = (Uint8*)current->pixels + current->pitch * current->h;
+        
+        quit_thread = NO;
+        sem1 = SDL_CreateSemaphore (0);
+        sem2 = SDL_CreateSemaphore (1);
+        thread = SDL_CreateThread ((int (*)(void *))QZ_ThreadFlip, this);
     }
 
     if ( CGDisplayCanSetPalette (display_id) )
@@ -511,10 +558,11 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
     return current;
 
     /* Since the blanking window covers *all* windows (even force quit) correct recovery is crucial */
-ERR_NO_GL:      CGDisplaySwitchToMode (display_id, save_mode);
-ERR_NO_SWITCH:  CGDisplayRelease (display_id);
+ERR_NO_GL:      
+ERR_DOUBLEBUF:  CGDisplaySwitchToMode (display_id, save_mode);
+ERR_NO_SWITCH:  CGReleaseAllDisplays ();
 ERR_NO_CAPTURE: if (!gamma_error) { QZ_FadeGammaIn (this, &gamma_table); }
-ERR_NO_MATCH:    return NULL;
+ERR_NO_MATCH:   return NULL;
 }
 
 static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
@@ -721,6 +769,151 @@ static int QZ_SetColors (_THIS, int first_color, int num_colors,
         return 0;
 
     return 1;
+}
+
+static int QZ_LockDoubleBuffer (_THIS, SDL_Surface *surface) {
+
+    return 1;
+}
+
+static void QZ_UnlockDoubleBuffer (_THIS, SDL_Surface *surface) {
+
+}
+
+ /* The VBL delay is based on code by Ian R Ollmann's RezLib <iano@cco.caltech.edu> */
+ static AbsoluteTime QZ_SecondsToAbsolute ( double seconds ) {
+    
+    union
+    {
+        UInt64	i;
+        Nanoseconds ns;
+    } temp;
+        
+    temp.i = seconds * 1000000000.0;
+    
+    return NanosecondsToAbsolute ( temp.ns );
+}
+
+static int QZ_ThreadFlip (_THIS) {
+
+    Uint8 *src, *dst;
+    int skip, len, h;
+    
+    /*
+        Give this thread the highest scheduling priority possible,
+        in the hopes that it will immediately run after the VBL delay
+    */
+    {
+        pthread_t current_thread;
+        int policy;
+        struct sched_param param;
+        
+        current_thread = pthread_self ();
+        pthread_getschedparam (current_thread, &policy, &param);
+        policy = SCHED_RR;
+        param.sched_priority = sched_get_priority_max (policy);
+        pthread_setschedparam (current_thread, policy, &param);
+    }
+    
+    while (1) {
+    
+        SDL_SemWait (sem1);
+        if (quit_thread)
+            return 0;
+                
+        dst = CGDisplayBaseAddress (display_id);
+        src = current_buffer;
+        len = SDL_VideoSurface->w * SDL_VideoSurface->format->BytesPerPixel;
+        h = SDL_VideoSurface->h;
+        skip = SDL_VideoSurface->pitch;
+    
+        /* Wait for the VBL to occur (estimated since we don't have a hardware interrupt) */
+        {
+            
+            /* The VBL delay is based on Ian Ollmann's RezLib <iano@cco.caltech.edu> */
+            double refreshRate;
+            double linesPerSecond;
+            double target;
+            double position;
+            double adjustment;
+            AbsoluteTime nextTime;        
+            CFNumberRef refreshRateCFNumber;
+            
+            refreshRateCFNumber = CFDictionaryGetValue (mode, kCGDisplayRefreshRate);
+            if ( NULL == refreshRateCFNumber ) {
+                SDL_SetError ("Mode has no refresh rate");
+                goto ERROR;
+            }
+            
+            if ( 0 == CFNumberGetValue (refreshRateCFNumber, kCFNumberDoubleType, &refreshRate) ) {
+                SDL_SetError ("Error getting refresh rate");
+                goto ERROR;
+            }
+            
+            if ( 0 == refreshRate ) {
+               
+               SDL_SetError ("Display has no refresh rate, using 60hz");
+                
+                /* ok, for LCD's we'll emulate a 60hz refresh, which may or may not look right */
+                refreshRate = 60.0;
+            }
+            
+            linesPerSecond = refreshRate * h;
+            target = h;
+        
+            /* Figure out the first delay so we start off about right */
+            position = CGDisplayBeamPosition (display_id);
+            if (position > target)
+                position = 0;
+            
+            adjustment = (target - position) / linesPerSecond; 
+            
+            nextTime = AddAbsoluteToAbsolute (UpTime (), QZ_SecondsToAbsolute (adjustment));
+        
+            MPDelayUntil (&nextTime);
+        }
+        
+        
+        /* On error, skip VBL delay */
+        ERROR:
+        
+        while ( h-- ) {
+        
+            memcpy (dst, src, len);
+            src += skip;
+            dst += skip;
+        }
+        
+        /* signal flip completion */
+        SDL_SemPost (sem2);
+    }
+    
+    return 0;
+}
+        
+static int QZ_FlipDoubleBuffer (_THIS, SDL_Surface *surface) {
+
+    /* wait for previous flip to complete */
+    SDL_SemWait (sem2);
+    
+    current_buffer = surface->pixels;
+        
+    if (surface->pixels == sw_buffers[0])
+        surface->pixels = sw_buffers[1];
+    else
+        surface->pixels = sw_buffers[0];
+    
+    /* signal worker thread to do the flip */
+    SDL_SemPost (sem1);
+    
+    return 0;
+}
+
+
+static void QZ_DoubleBufferUpdate (_THIS, int num_rects, SDL_Rect *rects) {
+
+    /* perform a flip if someone calls updaterects on a doublebuferred surface */
+    this->FlipHWSurface (this, SDL_VideoSurface);
 }
 
 static void QZ_DirectUpdate (_THIS, int num_rects, SDL_Rect *rects) {
