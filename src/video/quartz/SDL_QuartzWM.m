@@ -77,10 +77,15 @@ void QZ_ShowMouse (_THIS) {
 }
 
 void QZ_HideMouse (_THIS) {
-    if (cursor_visible) {
+    BOOL isInGameWin = QZ_IsMouseInWindow (this);
+    if (isInGameWin && cursor_visible) {
         [ NSCursor hide ];
         cursor_visible = NO;
     }
+}
+
+BOOL QZ_IsMouseInWindow (_THIS) {
+    return (mode_flags & SDL_FULLSCREEN) ? true : NSPointInRect([ qz_window mouseLocationOutsideOfEventStream ], [ window_view frame ]);
 }
 
 int QZ_ShowWMCursor (_THIS, WMcursor *cursor) { 

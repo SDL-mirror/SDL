@@ -216,4 +216,4 @@ void         QZ_ShowMouse (_THIS);
 void         QZ_HideMouse (_THIS);
 void         QZ_PrivateGlobalToLocal (_THIS, NSPoint *p);
 void         QZ_PrivateCocoaToSDL (_THIS, NSPoint *p);
-
+BOOL         QZ_IsMouseInWindow (_THIS);

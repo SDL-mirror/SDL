@@ -316,8 +316,6 @@ static void QZ_DoActivate (_THIS)
         QZ_PrivateWarpCursor (this, cursor_loc.x, cursor_loc.y);
         QZ_ChangeGrabState (this, QZ_ENABLE_GRAB);
     }
-
-    SDL_PrivateAppActive (1, SDL_APPINPUTFOCUS);
 }
 
 static void QZ_DoDeactivate (_THIS) {
@@ -334,8 +332,6 @@ static void QZ_DoDeactivate (_THIS) {
     /* Show the cursor if it was hidden by SDL_ShowCursor() */
     if (!cursor_should_be_visible)
         QZ_ShowMouse (this);
-
-    SDL_PrivateAppActive (0, SDL_APPINPUTFOCUS);
 }
 
 void QZ_SleepNotificationHandler (void * refcon,
@@ -462,7 +458,7 @@ void QZ_PumpEvents (_THIS)
             
             type = [ event type ];
             isForGameWin = (qz_window == [ event window ]);
-            isInGameWin = (mode_flags & SDL_FULLSCREEN) ? true : NSPointInRect([event locationInWindow], [ window_view frame ]);
+            isInGameWin = QZ_IsMouseInWindow (this);
             switch (type) {
                 case NSLeftMouseDown:
                     if ( getenv("SDL_HAS3BUTTONMOUSE") ) {
@@ -538,7 +534,7 @@ void QZ_PumpEvents (_THIS)
                             provides the first known mouse position,
                             since everything after this uses deltas
                         */
-                        NSPoint p = [ event locationInWindow ];
+                        NSPoint p = [ qz_window mouseLocationOutsideOfEventStream ];
                         QZ_PrivateCocoaToSDL (this, &p);
                         SDL_PrivateMouseMotion (0, 0, p.x, p.y);
                         firstMouseEvent = 0;
@@ -561,7 +557,7 @@ void QZ_PumpEvents (_THIS)
                     if ( grab_state == QZ_VISIBLE_GRAB &&
                          !isInGameWin ) {
                        
-                        NSPoint p = [ event locationInWindow ]; 
+                        NSPoint p = [ qz_window mouseLocationOutsideOfEventStream ]; 
                         QZ_PrivateCocoaToSDL (this, &p);
 
                         if ( p.x < 0.0 ) 
@@ -582,11 +578,15 @@ void QZ_PumpEvents (_THIS)
                     if ( !isInGameWin && (SDL_GetAppState() & SDL_APPMOUSEFOCUS) ) {
                     
                         SDL_PrivateAppActive (0, SDL_APPMOUSEFOCUS);
+                        if (!cursor_should_be_visible)
+                            QZ_ShowMouse (this);
                     }
                     else
                     if ( isInGameWin && !(SDL_GetAppState() & SDL_APPMOUSEFOCUS) ) {
                     
                         SDL_PrivateAppActive (1, SDL_APPMOUSEFOCUS);
+                        if (!cursor_should_be_visible)
+                            QZ_HideMouse (this);
                     }
                     break;
                 case NSScrollWheel:
