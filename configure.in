@@ -86,7 +86,7 @@ if test x$enable_debug != xyes; then
     case "$target" in
         i486-*-*)
             if test x$ac_cv_prog_gcc = xyes; then
-                CFLAGS="$CFLAGS -march=486"
+                CFLAGS="$CFLAGS -march=i486"
             fi
             ;;
         i?86-*-*)
