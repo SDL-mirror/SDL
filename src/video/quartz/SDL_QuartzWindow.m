@@ -4,6 +4,7 @@
 {}
 - (void)miniaturize:(id)sender;
 - (void)deminiaturize:(id)sender;
+- (void)display;
 @end
 
 @implementation SDL_QuartzWindow
@@ -16,10 +17,27 @@
 
 - (void)deminiaturize:(id)sender
 {
-    /* Let the app know they have to redraw everything */
-    SDL_PrivateExpose ();
-    
     [ super deminiaturize:sender ];
 }
 
+- (void)display
+{
+    /* Do nothing to keep pinstripe pattern from drawing */
+}
+@end
+
+/* Delegate for our NSWindow to send SDLQuit() on close */
+@interface SDL_QuartzWindowDelegate : NSObject
+{}
+- (BOOL)windowShouldClose:(id)sender;
+@end
+
+@implementation SDL_QuartzWindowDelegate
+- (BOOL)windowShouldClose:(id)sender {
+
+    SDL_Event event;
+    event.type = SDL_QUIT;
+    SDL_PushEvent(&event);
+    return NO;
+}
 @end

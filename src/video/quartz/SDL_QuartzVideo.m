@@ -355,7 +355,8 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
     
     /* Manually create a window, avoids having a nib file resource */
     window = [ [ SDL_QuartzWindow alloc ] initWithContentRect:rect 
-        styleMask:(NSTitledWindowMask | NSMiniaturizableWindowMask)
+        styleMask:(NSTitledWindowMask | NSMiniaturizableWindowMask |
+                    NSClosableWindowMask)
         backing: //NSBackingStoreBuffered
             NSBackingStoreRetained
           defer:NO ];
@@ -368,10 +369,14 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
     current->w  = width;
     current->h = height;
     
+    [ window setReleasedWhenClosed:YES ];
     [ window setTitle:windowTitle ];
     [ window setAcceptsMouseMovedEvents:YES ];
+    [ window setViewsNeedDisplay:NO ];
     [ window center ];
-        
+    [ window setDelegate:
+        [ [ [ SDL_QuartzWindowDelegate alloc ] init ] autorelease ] ];
+    
     /* For OpenGL, we set the content view to a NSOpenGLView */
     if ( flags & SDL_OPENGL ) {
     
@@ -447,7 +452,7 @@ static SDL_Surface* QZ_SetVideoMode (_THIS, SDL_Surface *current, int width,
                 SDL_SetError ("24bpp is not available");
                 return NULL;
             case 32:   /* (8)-8-8-8 ARGB */
-                amask = 0xFF000000;
+                amask = 0x00000000; /* per-pixel alpha needs to be fixed */
                 rmask = 0x00FF0000;
                 gmask = 0x0000FF00;
                 bmask = 0x000000FF;
