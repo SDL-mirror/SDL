@@ -49,6 +49,7 @@ static char rcsid =
 /* The translation table from a Microsoft VK keysym to a SDL keysym */
 static SDLKey VK_keymap[SDLK_LAST];
 static SDL_keysym *TranslateKey(UINT vkey, UINT scancode, SDL_keysym *keysym, int pressed);
+static BOOL prev_shiftstates[2];
 
 /* Masks for processing the windows KEYDOWN and KEYUP messages */
 #define REPEATED_KEYMASK	(1<<30)
@@ -82,10 +83,12 @@ LONG
 					break;
 				case VK_SHIFT:
 					/* EXTENDED trick doesn't work here */
-					if ( GetKeyState(VK_LSHIFT) & 0x8000 ) {
+					if (!prev_shiftstates[0] && (GetKeyState(VK_LSHIFT) & 0x8000)) {
 						wParam = VK_LSHIFT;
-					} else if ( GetKeyState(VK_RSHIFT) & 0x8000 ) {
+						prev_shiftstates[0] = TRUE;
+					} else if (!prev_shiftstates[1] && (GetKeyState(VK_RSHIFT) & 0x8000)) {
 						wParam = VK_RSHIFT;
+						prev_shiftstates[1] = TRUE;
 					} else {
 						/* Huh? */
 					}
@@ -135,7 +138,15 @@ LONG
 					break;
 				case VK_SHIFT:
 					/* EXTENDED trick doesn't work here */
-					wParam = VK_LSHIFT;
+					if (prev_shiftstates[0] && !(GetKeyState(VK_LSHIFT) & 0x8000)) {
+						wParam = VK_LSHIFT;
+						prev_shiftstates[0] = FALSE;
+					} else if (prev_shiftstates[1] && !(GetKeyState(VK_RSHIFT) & 0x8000)) {
+						wParam = VK_RSHIFT;
+						prev_shiftstates[1] = FALSE;
+					} else {
+						/* Huh? */
+					}
 					break;
 				case VK_MENU:
 					if ( lParam&EXTENDED_KEYMASK )
@@ -311,6 +322,9 @@ void DIB_InitOSKeymap(_THIS)
 	VK_keymap[VK_SNAPSHOT] = SDLK_PRINT;
 	VK_keymap[VK_CANCEL] = SDLK_BREAK;
 	VK_keymap[VK_APPS] = SDLK_MENU;
+
+	prev_shiftstates[0] = FALSE;
+	prev_shiftstates[1] = FALSE;
 }
 
 static SDL_keysym *TranslateKey(UINT vkey, UINT scancode, SDL_keysym *keysym, int pressed)
