@@ -128,7 +128,7 @@ static __inline__ int CPU_getCPUIDFeaturesExt()
 "        movl    $0x80000000,%%eax   # Query for extended functions    \n"
 "        cpuid                       # Get extended function limit     \n"
 "        cmpl    $0x80000001,%%eax                                     \n"
-"        jbe     1f                  # Nope, we dont have function 800000001h\n"
+"        jl      1f                  # Nope, we dont have function 800000001h\n"
 "        movl    $0x80000001,%%eax   # Setup extended function 800000001h\n"
 "        cpuid                       # and get the information         \n"
 "        movl    %%edx,%0                                              \n"
@@ -143,7 +143,7 @@ static __inline__ int CPU_getCPUIDFeaturesExt()
         mov     eax,80000000h       ; Query for extended functions
         cpuid                       ; Get extended function limit
         cmp     eax,80000001h
-        jbe     done                ; Nope, we dont have function 800000001h
+        jl      done                ; Nope, we dont have function 800000001h
         mov     eax,80000001h       ; Setup extended function 800000001h
         cpuid                       ; and get the information
         mov     features,edx
