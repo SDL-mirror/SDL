@@ -392,11 +392,13 @@ static void handle_mouse(const int numevents, DIDEVICEOBJECTDATA *ptrbuf)
 					yrel = 0;
 				}
 				if((int)ptrbuf[i].dwData > 0)
+					button = 4;
+				else
+					button = 5;
 					posted = SDL_PrivateMouseButton(
-							SDL_PRESSED, 4, 0, 0);
-				else if((int)ptrbuf[i].dwData < 0)
-					posted = SDL_PrivateMouseButton(
-							SDL_PRESSED, 5, 0, 0);
+						SDL_PRESSED, button, 0, 0);
+				posted |= SDL_PrivateMouseButton(
+						SDL_RELEASED, button, 0, 0);
 				break;
 			case DIMOFS_BUTTON0:
 			case DIMOFS_BUTTON1:

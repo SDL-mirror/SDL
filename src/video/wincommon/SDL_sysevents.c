@@ -370,6 +370,8 @@ LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 						button = 5;
 					posted = SDL_PrivateMouseButton(
 						SDL_PRESSED, button, 0, 0);
+					posted |= SDL_PrivateMouseButton(
+						SDL_RELEASED, button, 0, 0);
 				}
 			}
 			return(0);
