@@ -1286,6 +1286,9 @@ EOF
       # dlltool doesn't understand --whole-archive et. al.
       whole_archive_flag_spec=
       ;;
+    netbsd*)
+      whole_archive_flag_spec=
+      ;;
     *)
       # ancient GNU ld didn't support --whole-archive et. al.
       if $LD --help 2>&1 | egrep 'no-whole-archive' > /dev/null; then

@@ -1284,7 +1284,7 @@ case "$target" in
             COPY_ARCH_SRC(src/timer, linux, SDL_systimer.c)
         fi
         # NetBSD does not define "unix"
-        CFLAGS="$CFLAGS -Dunix -D_POSIX_THREAD_SYSCALL_SOFT=1"
+        CFLAGS="$CFLAGS -Dunix"
         ;;
     *-*-openbsd*)
         ARCH=openbsd
