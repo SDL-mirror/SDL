@@ -260,7 +260,6 @@ static int DMA_ReopenAudio(_THIS, const char *audiodev, int format, int stereo,
 		SDL_SetError("Couldn't open %s: %s", audiodev, strerror(errno));
 		return(-1);
 	}
-	ioctl(audio_fd, SNDCTL_DSP_RESET, 0);
 
 	/* Calculate the final parameters for this audio specification */
 	SDL_CalculateAudioSpec(spec);
