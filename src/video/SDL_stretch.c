@@ -261,9 +261,8 @@ int SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect,
 			break;
 		    default:
 #ifdef __GNUC__
-			__asm__ __volatile__ ("
-				call _copy_row
-			"
+			__asm__ __volatile__ (
+			"call _copy_row"
 			: "=&D" (u1), "=&S" (u2)
 			: "0" (dstp), "1" (srcp)
 			: "memory" );
