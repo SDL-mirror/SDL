@@ -78,8 +78,8 @@ static void restore_mode(_THIS)
 #ifdef XFREE86_VM
 static int cmpmodes(const void *va, const void *vb)
 {
-    XF86VidModeModeInfo *a = *(XF86VidModeModeInfo**)va;
-    XF86VidModeModeInfo *b = *(XF86VidModeModeInfo**)vb;
+    const XF86VidModeModeInfo *a = *(const XF86VidModeModeInfo**)va;
+    const XF86VidModeModeInfo *b = *(const XF86VidModeModeInfo**)vb;
     if(a->hdisplay > b->hdisplay)
         return -1;
     return b->vdisplay - a->vdisplay;

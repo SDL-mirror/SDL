@@ -78,7 +78,8 @@ static void Blit_RGB888_index8(SDL_BlitInfo *info)
 #endif
 	int width, height;
 	Uint32 *src;
-	Uint8 *map, *dst;
+	const Uint8 *map;
+	Uint8 *dst;
 	int srcskip, dstskip;
 
 	/* Set up some basic variables */
@@ -107,7 +108,7 @@ static void Blit_RGB888_index8(SDL_BlitInfo *info)
 				RGB888_RGB332(*dst++, *src);
 				++src;
 			}
-			switch ( width % 4 ) {
+			switch ( width & 3 ) {
 				case 3:
 					RGB888_RGB332(*dst++, *src);
 					++src;
@@ -148,7 +149,7 @@ static void Blit_RGB888_index8(SDL_BlitInfo *info)
 				*dst++ = map[pixel];
 				++src;
 			}
-			switch ( width % 4 ) {
+			switch ( width & 3 ) {
 				case 3:
 					RGB888_RGB332(pixel, *src);
 					*dst++ = map[pixel];
@@ -235,7 +236,7 @@ static void Blit_RGB888_RGB555(SDL_BlitInfo *info)
 				dst += 2;
 			}
 			/* Get any leftovers */
-			switch (width % 4) {
+			switch (width & 3) {
 				case 3:
 					RGB888_RGB555(dst, src);
 					++src;
@@ -266,7 +267,7 @@ static void Blit_RGB888_RGB555(SDL_BlitInfo *info)
 				dst += 2;
 			}
 			/* Get any leftovers */
-			switch (width % 4) {
+			switch (width & 3) {
 				case 3:
 					RGB888_RGB555(dst, src);
 					++src;
@@ -355,7 +356,7 @@ static void Blit_RGB888_RGB565(SDL_BlitInfo *info)
 				dst += 2;
 			}
 			/* Get any leftovers */
-			switch (width % 4) {
+			switch (width & 3) {
 				case 3:
 					RGB888_RGB565(dst, src);
 					++src;
@@ -386,7 +387,7 @@ static void Blit_RGB888_RGB565(SDL_BlitInfo *info)
 				dst += 2;
 			}
 			/* Get any leftovers */
-			switch (width % 4) {
+			switch (width & 3) {
 				case 3:
 					RGB888_RGB565(dst, src);
 					++src;
@@ -418,7 +419,7 @@ static void Blit_RGB888_RGB565(SDL_BlitInfo *info)
 #else /* ( SDL_BYTEORDER == SDL_BIG_ENDIAN ) */
 #define RGB565_32(dst, src, map) (map[src[1]*2] + map[src[0]*2+1])
 #endif
-static void Blit_RGB565_32(SDL_BlitInfo *info, Uint32 *map)
+static void Blit_RGB565_32(SDL_BlitInfo *info, const Uint32 *map)
 {
 #ifndef USE_DUFFS_LOOP
 	int c;
@@ -461,7 +462,7 @@ static void Blit_RGB565_32(SDL_BlitInfo *info, Uint32 *map)
 			src += 2;
 		}
 		/* Get any leftovers */
-		switch (width % 4) {
+		switch (width & 3) {
 			case 3:
 				*dst++ = RGB565_32(dst, src, map);
 				src += 2;
@@ -480,7 +481,7 @@ static void Blit_RGB565_32(SDL_BlitInfo *info, Uint32 *map)
 }
 
 /* Special optimized blit for RGB 5-6-5 --> ARGB 8-8-8-8 */
-static Uint32 RGB565_ARGB8888_LUT[512] = {
+static const Uint32 RGB565_ARGB8888_LUT[512] = {
 		0x00000000, 0xff000000, 0x00000008, 0xff002000,
 		0x00000010, 0xff004000, 0x00000018, 0xff006100,
 		0x00000020, 0xff008100, 0x00000029, 0xff00a100,
@@ -616,7 +617,7 @@ static void Blit_RGB565_ARGB8888(SDL_BlitInfo *info)
 }
 
 /* Special optimized blit for RGB 5-6-5 --> ABGR 8-8-8-8 */
-static Uint32 RGB565_ABGR8888_LUT[512] = {
+static const Uint32 RGB565_ABGR8888_LUT[512] = {
 		0xff000000, 0x00000000, 0xff080000, 0x00002000,
 		0xff100000, 0x00004000, 0xff180000, 0x00006100,
 		0xff200000, 0x00008100, 0xff290000, 0x0000a100,
@@ -752,7 +753,7 @@ static void Blit_RGB565_ABGR8888(SDL_BlitInfo *info)
 }
 
 /* Special optimized blit for RGB 5-6-5 --> RGBA 8-8-8-8 */
-static Uint32 RGB565_RGBA8888_LUT[512] = {
+static const Uint32 RGB565_RGBA8888_LUT[512] = {
 		0x000000ff, 0x00000000, 0x000008ff, 0x00200000,
 		0x000010ff, 0x00400000, 0x000018ff, 0x00610000,
 		0x000020ff, 0x00810000, 0x000029ff, 0x00a10000,
@@ -888,7 +889,7 @@ static void Blit_RGB565_RGBA8888(SDL_BlitInfo *info)
 }
 
 /* Special optimized blit for RGB 5-6-5 --> BGRA 8-8-8-8 */
-static Uint32 RGB565_BGRA8888_LUT[512] = {
+static const Uint32 RGB565_BGRA8888_LUT[512] = {
 		0x00000000, 0x000000ff, 0x08000000, 0x002000ff,
 		0x10000000, 0x004000ff, 0x18000000, 0x006100ff,
 		0x20000000, 0x008100ff, 0x29000000, 0x00a100ff,
@@ -1039,7 +1040,8 @@ static void Blit_RGB888_index8_map(SDL_BlitInfo *info)
 	int pixel;
 	int width, height;
 	Uint32 *src;
-	Uint8 *map, *dst;
+	const Uint8 *map;
+	Uint8 *dst;
 	int srcskip, dstskip;
 
 	/* Set up some basic variables */
@@ -1078,7 +1080,7 @@ static void Blit_RGB888_index8_map(SDL_BlitInfo *info)
 			*dst++ = map[pixel];
 			++src;
 		}
-		switch ( width % 4 ) {
+		switch ( width & 3 ) {
 			case 3:
 				RGB888_RGB332(pixel, *src);
 				*dst++ = map[pixel];
@@ -1103,7 +1105,9 @@ static void BlitNto1(SDL_BlitInfo *info)
 	int c;
 #endif
 	int width, height;
-	Uint8 *src, *map, *dst;
+	Uint8 *src;
+	const Uint8 *map;
+	Uint8 *dst;
 	int srcskip, dstskip;
 	int srcbpp;
 	Uint32 pixel;
@@ -1259,7 +1263,7 @@ static void BlitNto1Key(SDL_BlitInfo *info)
 	Uint8 *dst = info->d_pixels;
 	int dstskip = info->d_skip;
 	SDL_PixelFormat *srcfmt = info->src;
-	Uint8 *palmap = info->table;
+	const Uint8 *palmap = info->table;
 	Uint32 ckey = srcfmt->colorkey;
 	Uint32 rgbmask = ~srcfmt->Amask;
 	int srcbpp;
@@ -1431,11 +1435,11 @@ struct blit_table {
 	SDL_loblit blitfunc;
         enum { NO_ALPHA, SET_ALPHA, COPY_ALPHA } alpha;
 };
-static struct blit_table normal_blit_1[] = {
+static const struct blit_table normal_blit_1[] = {
 	/* Default for 8-bit RGB source, an invalid combination */
 	{ 0,0,0, 0, 0,0,0, 0, NULL, NULL },
 };
-static struct blit_table normal_blit_2[] = {
+static const struct blit_table normal_blit_2[] = {
 #ifdef USE_ASMBLIT
     { 0x0000F800,0x000007E0,0x0000001F, 2, 0x0000001F,0x000007E0,0x0000F800,
       0, ConvertX86p16_16BGR565, ConvertX86, NO_ALPHA },
@@ -1456,11 +1460,11 @@ static struct blit_table normal_blit_2[] = {
     /* Default for 16-bit RGB source, used if no other blitter matches */
     { 0,0,0, 0, 0,0,0, 0, NULL, BlitNtoN, 0 }
 };
-static struct blit_table normal_blit_3[] = {
+static const struct blit_table normal_blit_3[] = {
 	/* Default for 24-bit RGB source, never optimized */
     { 0,0,0, 0, 0,0,0, 0, NULL, BlitNtoN, 0 }
 };
-static struct blit_table normal_blit_4[] = {
+static const struct blit_table normal_blit_4[] = {
 #ifdef USE_ASMBLIT
     { 0x00FF0000,0x0000FF00,0x000000FF, 2, 0x0000F800,0x000007E0,0x0000001F,
       MMX_CPU, ConvertMMXpII32_16RGB565, ConvertMMX, NO_ALPHA },
@@ -1497,7 +1501,7 @@ static struct blit_table normal_blit_4[] = {
 	/* Default for 32-bit RGB source, used if no other blitter matches */
 	{ 0,0,0, 0, 0,0,0, 0, NULL, BlitNtoN, 0 }
 };
-static struct blit_table *normal_blit[] = {
+static const struct blit_table *normal_blit[] = {
 	normal_blit_1, normal_blit_2, normal_blit_3, normal_blit_4
 };
 
@@ -1506,7 +1510,7 @@ SDL_loblit SDL_CalculateBlitN(SDL_Surface *surface, int blit_index)
 	struct private_swaccel *sdata;
 	SDL_PixelFormat *srcfmt;
 	SDL_PixelFormat *dstfmt;
-	struct blit_table *table;
+	const struct blit_table *table;
 	int which;
 	SDL_loblit blitfun;
 

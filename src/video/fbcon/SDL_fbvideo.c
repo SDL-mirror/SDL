@@ -62,7 +62,7 @@ static inline void outb (unsigned char value, unsigned short port)
 #endif /* FB_TYPE_VGA_PLANES */
 
 /* A list of video resolutions that we query for (sorted largest to smallest) */
-static SDL_Rect checkres[] = {
+static const SDL_Rect checkres[] = {
 	{  0, 0, 1600, 1200 },		/* 16 bpp: 0x11E, or 286 */
 	{  0, 0, 1408, 1056 },		/* 16 bpp: 0x19A, or 410 */
 	{  0, 0, 1280, 1024 },		/* 16 bpp: 0x11A, or 282 */
@@ -77,7 +77,7 @@ static SDL_Rect checkres[] = {
 	{  0, 0,  320,  240 },
 	{  0, 0,  320,  200 }
 };
-static struct {
+static const struct {
 	int xres;
 	int yres;
 	int pixclock;

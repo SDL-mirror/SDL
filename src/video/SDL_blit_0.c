@@ -55,7 +55,7 @@ static void BlitBto1(SDL_BlitInfo *info)
 		while ( height-- ) {
 		        Uint8 byte = 0, bit;
 	    		for ( c=0; c<width; ++c ) {
-				if ( (c%8) == 0 ) {
+				if ( (c&7) == 0 ) {
 					byte = *src++;
 				}
 				bit = (byte&0x80)>>7;
@@ -72,7 +72,7 @@ static void BlitBto1(SDL_BlitInfo *info)
 		while ( height-- ) {
 		        Uint8 byte = 0, bit;
 	    		for ( c=0; c<width; ++c ) {
-				if ( (c%8) == 0 ) {
+				if ( (c&7) == 0 ) {
 					byte = *src++;
 				}
 				bit = (byte&0x80)>>7;
@@ -108,7 +108,7 @@ static void BlitBto2(SDL_BlitInfo *info)
 	while ( height-- ) {
 	        Uint8 byte = 0, bit;
 	    	for ( c=0; c<width; ++c ) {
-			if ( (c%8) == 0 ) {
+			if ( (c&7) == 0 ) {
 				byte = *src++;
 			}
 			bit = (byte&0x80)>>7;
@@ -142,7 +142,7 @@ static void BlitBto3(SDL_BlitInfo *info)
 	while ( height-- ) {
 	        Uint8 byte = 0, bit;
 	    	for ( c=0; c<width; ++c ) {
-			if ( (c%8) == 0 ) {
+			if ( (c&7) == 0 ) {
 				byte = *src++;
 			}
 			bit = (byte&0x80)>>7;
@@ -180,7 +180,7 @@ static void BlitBto4(SDL_BlitInfo *info)
 	while ( height-- ) {
 	        Uint8 byte = 0, bit;
 	    	for ( c=0; c<width; ++c ) {
-			if ( (c%8) == 0 ) {
+			if ( (c&7) == 0 ) {
 				byte = *src++;
 			}
 			bit = (byte&0x80)>>7;
@@ -214,7 +214,7 @@ static void BlitBto1Key(SDL_BlitInfo *info)
 		while ( height-- ) {
 		        Uint8  byte = 0, bit;
 	    		for ( c=0; c<width; ++c ) {
-				if ( (c%8) == 0 ) {
+				if ( (c&7) == 0 ) {
 					byte = *src++;
 				}
 				bit = (byte&0x80)>>7;
@@ -231,7 +231,7 @@ static void BlitBto1Key(SDL_BlitInfo *info)
 		while ( height-- ) {
 		        Uint8  byte = 0, bit;
 	    		for ( c=0; c<width; ++c ) {
-				if ( (c%8) == 0 ) {
+				if ( (c&7) == 0 ) {
 					byte = *src++;
 				}
 				bit = (byte&0x80)>>7;
@@ -266,7 +266,7 @@ static void BlitBto2Key(SDL_BlitInfo *info)
 	while ( height-- ) {
 	        Uint8 byte = 0, bit;
 	    	for ( c=0; c<width; ++c ) {
-			if ( (c%8) == 0 ) {
+			if ( (c&7) == 0 ) {
 				byte = *src++;
 			}
 			bit = (byte&0x80)>>7;
@@ -299,7 +299,7 @@ static void BlitBto3Key(SDL_BlitInfo *info)
 	while ( height-- ) {
 	        Uint8  byte = 0, bit;
 	    	for ( c=0; c<width; ++c ) {
-			if ( (c%8) == 0 ) {
+			if ( (c&7) == 0 ) {
 				byte = *src++;
 			}
 			bit = (byte&0x80)>>7;
@@ -333,7 +333,7 @@ static void BlitBto4Key(SDL_BlitInfo *info)
 	while ( height-- ) {
 	        Uint8 byte = 0, bit;
 	    	for ( c=0; c<width; ++c ) {
-			if ( (c%8) == 0 ) {
+			if ( (c&7) == 0 ) {
 				byte = *src++;
 			}
 			bit = (byte&0x80)>>7;
@@ -369,7 +369,7 @@ static void BlitBtoNAlpha(SDL_BlitInfo *info)
 	while ( height-- ) {
 	        Uint8 byte = 0, bit;
 	    	for ( c=0; c<width; ++c ) {
-			if ( (c%8) == 0 ) {
+			if ( (c&7) == 0 ) {
 				byte = *src++;
 			}
 			bit = (byte&0x80)>>7;
@@ -416,7 +416,7 @@ static void BlitBtoNAlphaKey(SDL_BlitInfo *info)
 	while ( height-- ) {
 	        Uint8  byte = 0, bit;
 	    	for ( c=0; c<width; ++c ) {
-			if ( (c%8) == 0 ) {
+			if ( (c&7) == 0 ) {
 				byte = *src++;
 			}
 			bit = (byte&0x80)>>7;

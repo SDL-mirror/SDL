@@ -247,8 +247,8 @@ int FB_OpenKeyboard(_THIS)
 {
 	/* Open only if not already opened */
  	if ( keyboard_fd < 0 ) {
-		char *tty0[] = { "/dev/tty0", "/dev/vc/0", NULL };
-		char *vcs[] = { "/dev/vc/%d", "/dev/tty%d", NULL };
+		static const char * const tty0[] = { "/dev/tty0", "/dev/vc/0", NULL };
+		static const char * const vcs[] = { "/dev/vc/%d", "/dev/tty%d", NULL };
 		int i, tty0_fd;
 
 		/* Try to query for a free virtual terminal */
@@ -524,7 +524,7 @@ fprintf(stderr, "Using ELO touchscreen\n");
 
 	if ( mousedev == NULL ) {
 		/* FIXME someday... allow multiple mice in this driver */
-		char *ps2mice[] = {
+		static const char * const ps2mice[] = {
 		    "/dev/input/mice", "/dev/usbmouse", "/dev/psaux", NULL
 		};
 		/* First try to use GPM in repeater mode */

@@ -137,7 +137,7 @@ static void Blit1to2(SDL_BlitInfo *info)
 				dst += 4;
 			}
 			/* Get any leftovers */
-			switch (width % 4) {
+			switch (width & 3) {
 				case 3:
 					*(Uint16 *)dst = map[*src++];
 					dst += 2;
@@ -169,7 +169,7 @@ static void Blit1to2(SDL_BlitInfo *info)
 				dst += 4;
 			}
 			/* Get any leftovers */
-			switch (width % 4) {
+			switch (width & 3) {
 				case 3:
 					*(Uint16 *)dst = map[*src++];
 					dst += 2;
@@ -266,7 +266,7 @@ static void Blit1to4(SDL_BlitInfo *info)
 			*dst++ = map[*src++];
 			*dst++ = map[*src++];
 		}
-		switch ( width % 4 ) {
+		switch ( width & 3 ) {
 			case 3:
 				*dst++ = map[*src++];
 			case 2:

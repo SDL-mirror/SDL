@@ -278,8 +278,8 @@ static void PrintMode(XDGAMode *mode)
 
 static int cmpmodes(const void *va, const void *vb)
 {
-    XDGAMode *a = (XDGAMode *)va;
-    XDGAMode *b = (XDGAMode *)vb;
+    const XDGAMode *a = (const XDGAMode *)va;
+    const XDGAMode *b = (const XDGAMode *)vb;
 
     /* Prefer DirectColor visuals for otherwise equal modes */
     if ( (a->viewportWidth == b->viewportWidth) &&
