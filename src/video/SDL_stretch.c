@@ -39,8 +39,8 @@ static char rcsid =
    into the general blitting mechanism.
 */
 
-#if (defined(WIN32) && !defined(_M_ALPHA) && !defined(_WIN32_WCE)) || \
-    defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
+#if (defined(WIN32) && !defined(__FREEBCC__) && !defined(_M_ALPHA) && !defined(_WIN32_WCE)) || \
+    defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT) 
 #define USE_ASM_STRETCH
 #endif
 

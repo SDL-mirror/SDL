@@ -34,6 +34,8 @@ EXTRA_DIST =		\
 	README.Win32	\
 	README.WinCE	\
 	README-SDL.txt	\
+	BorlandC.html	\
+	Borland.zip	\
         VisualC.html	\
         VisualC.zip	\
         MPWmake.sea.bin	\

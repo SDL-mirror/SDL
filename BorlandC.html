@@ -1,0 +1,68 @@
+Date: Sun, 13 Jan 2002 13:59:56 -0600
+From: David Snopek <xevol@newtonave.net>
+To: slouken@devolution.com
+Subject: Compiling SDL with Borland C++
+
+<html>
+<title>Building SDL with Borland C++ </title>
+<body>
+
+<h1>Building SDL with Borland C++ </h1>
+<b> by <a href=mailto:xevol@users.sourceforge.net> David Snopek </a> </b> 
+
+<br>
+<br>
+
+These instructions cover how to compile SDL and its included test programs using either 
+Borland C++ Builder 5 or the free Borland compiler. <br>
+
+<h3> <b> Extract the files </b> </h3>
+
+<p> Unzip the Borland.zip archive into <b>this</b> directory.  Do not unzip it into any 
+other directory because the makefiles use relative paths to refer to the SDL sources.  This 
+should create a directory named "Borland" inside of the top level SDL source directory. 
+</p>
+
+<h3> <b> Using Borland C++ Builder 5 </b> </h3>
+
+<p> Inside of the "Borland" directory there is a "bcb5" directory that contains a number 
+of Builder project files.  Double-click on the "libSDL.bpg" file icon.  Once Builder has 
+started click on the "<u>P</u>rojects" menu on the menu-bar and go down to 
+"B<u>u</u>ild All Projects" option.  This will proceed to build SDL, SDLmain, and all 
+the <a href="#tests">test programs</a>. </p>
+
+<h3> <b> Using the free Borland compiler </b> </h3>
+
+<p> The free Borland compiler can be downloaded at no charge from <a href="http://www.borland.com/bcppbuilder/freecompiler/"> the 
+Borland website </a>.  Make sure that it is installed and properly configured. </p>
+
+<p> Open an MS-DOS Prompt.  Change to the "Borland\freebcc" directory under the 
+SDL source directory.  Type "make -f SDL.mak" to build SDL and "make -f 
+SDLmain.mak".  There are also makefiles for all of the <a href="#tests">test 
+programs</a>, if you wish to build them. </p>
+
+<h3> <b> Output files </b> </h3>
+
+No matter which compiler you used, three important files should have been produced:
+ 
+<UL>
+	<LI> SDL.dll </LI>
+	<LI> SDL.lib </LI>
+	<LI> SDLmain.lib </LI>
+</UL>
+
+Both of the *.lib files will need to be added to all the projects that use SDL and SDL.dll 
+must be placed some where the Windows dynamic linker can find it (either in your 
+project directory or on the system path, C:\WINDOWS\SYSTEM).
+
+<a name="tests">
+<h3> <b> Test programs </b> </h3>
+</a>
+
+Some of the test programs require included media files.  Before trying to run any of the 
+test programs, copy these media files from the "tests/" directory into the build directory.
+
+</body>
+</html>
+
+

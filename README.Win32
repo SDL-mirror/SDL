@@ -4,7 +4,9 @@ Using the Simple DirectMedia Layer with Windows 95,NT
 ==============================================================================
 
 These instructions are for people using the GNU free compilers.
-If you want to use Microsoft VC++ with SDL, read "VisualC.html"
+If you want to use Microsoft VC++ with SDL, read "VisualC.html" or 
+if you want to use Borland C++ Builder or the free Borland compiler,
+read "BorlandC.html".
 
 ==============================================================================
 I.  Building the Simple DirectMedia Layer libraries:

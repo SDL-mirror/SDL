@@ -41,7 +41,15 @@
 #  endif
 # else
 # ifdef WIN32
-#  define DECLSPEC	__declspec(dllexport)
+#  ifdef __BORLANDC__
+#   ifdef BUILD_SDL
+#    define DECLSPEC __declspec(dllexport)
+#   else
+#    define DECLSPEC __declspec(dllimport)
+#   endif
+#  else
+#   define DECLSPEC	__declspec(dllexport)
+#  endif
 # else
 #  define DECLSPEC
 # endif
@@ -78,7 +86,7 @@
 #define SDL_INLINE_OKAY
 #else
 /* Add any special compiler-specific cases here */
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || defined(__BORLANDC__)
 #define __inline__	__inline
 #define SDL_INLINE_OKAY
 #else
