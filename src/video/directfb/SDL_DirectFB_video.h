@@ -45,9 +45,8 @@ struct SDL_PrivateVideoData
   IDirectFBDisplayLayer *layer;
   IDirectFBEventBuffer  *eventbuffer;
 
-#define NUM_MODELISTS	4		/* 8, 16, 24, and 32 bits-per-pixel */
-  int SDL_nummodes[NUM_MODELISTS];
-  SDL_Rect **SDL_modelist[NUM_MODELISTS];
+  int nummodes;
+  SDL_Rect **modelist;
 };
 
 #define HIDDEN (this->hidden)

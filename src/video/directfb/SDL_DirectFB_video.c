@@ -29,6 +29,7 @@ static char rcsid =
 */
 
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -78,7 +79,7 @@ struct DirectFBEnumRect {
 	struct DirectFBEnumRect* next;
 };
 
-static struct DirectFBEnumRect *enumlists[NUM_MODELISTS];
+static struct DirectFBEnumRect *enumlist = NULL;
 
 
 /* DirectFB driver bootstrap functions */
@@ -150,6 +151,31 @@ VideoBootStrap DirectFB_bootstrap = {
   DirectFB_Available, DirectFB_CreateDevice
 };
 
+static DFBSurfacePixelFormat GetFormatForBpp (int bpp, IDirectFBDisplayLayer *layer)
+{
+  DFBDisplayLayerConfig dlc;
+  int                   bytes = (bpp + 7) / 8;
+
+  layer->GetConfiguration (layer, &dlc);
+
+  if (bytes == DFB_BYTES_PER_PIXEL(dlc.pixelformat))
+    return dlc.pixelformat;
+
+  switch (bytes)
+    {
+    case 1:
+      return DSPF_RGB332;
+    case 2:
+      return DSPF_RGB16;
+    case 3:
+      return DSPF_RGB24;
+    case 4:
+      return DSPF_RGB32;
+    }
+
+  return DSPF_UNKNOWN;
+}
+
 static DFBEnumerationResult EnumModesCallback (unsigned int  width,
                                                unsigned int  height,
                                                unsigned int  bpp,
@@ -158,29 +184,20 @@ static DFBEnumerationResult EnumModesCallback (unsigned int  width,
   SDL_VideoDevice *this = (SDL_VideoDevice *)data;
   struct DirectFBEnumRect *enumrect;
 
-  switch (bpp)
+  HIDDEN->nummodes++;
+
+  enumrect = calloc(1, sizeof(struct DirectFBEnumRect));
+  if (!enumrect)
     {
-    case 8:
-    case 15:
-    case 16:
-    case 24:
-    case 32:
-      bpp /= 8; --bpp;
-      ++HIDDEN->SDL_nummodes[bpp];
-      enumrect = (struct DirectFBEnumRect*)malloc(sizeof(struct DirectFBEnumRect));
-      if ( !enumrect )
-        {
-          SDL_OutOfMemory();
-          return DFENUM_CANCEL;
-        }
-      enumrect->r.x = 0;
-      enumrect->r.y = 0;
-      enumrect->r.w = width;
-      enumrect->r.h = height;
-      enumrect->next = enumlists[bpp];
-      enumlists[bpp] = enumrect;
-      break;
+      SDL_OutOfMemory();
+      return DFENUM_CANCEL;
     }
+
+  enumrect->r.w  = width;
+  enumrect->r.h  = height;
+  enumrect->next = enumlist;
+
+  enumlist = enumrect;
 
   return DFENUM_OK;
 }
@@ -219,13 +236,20 @@ static DFBSurfacePixelFormat SDLToDFBPixelFormat (SDL_PixelFormat *format)
             return DSPF_RGB15;
           break;
           
+        case 8:
+          if (format->Rmask == 0xE0 &&
+              format->Gmask == 0x1C &&
+              format->Bmask == 0x03)
+            return DSPF_RGB332;
+          break;
+          
         case 24:
           if (format->Rmask == 0xFF0000 &&
               format->Gmask == 0x00FF00 &&
               format->Bmask == 0x0000FF)
             return DSPF_RGB24;
           break;
-          
+
         case 32:
           if (format->Rmask == 0xFF0000 &&
               format->Gmask == 0x00FF00 &&
@@ -243,6 +267,8 @@ static DFBSurfacePixelFormat SDLToDFBPixelFormat (SDL_PixelFormat *format)
     {
       switch (format->BitsPerPixel)
 	{
+        case 8:
+          return DSPF_RGB332;
 	case 15:
 	  return DSPF_RGB15;
 	case 16:
@@ -257,28 +283,67 @@ static DFBSurfacePixelFormat SDLToDFBPixelFormat (SDL_PixelFormat *format)
   return DSPF_UNKNOWN;
 }
 
+static const __u8 lookup3to8[] = { 0x00, 0x24, 0x49, 0x6d, 0x92, 0xb6, 0xdb, 0xff };
+static const __u8 lookup2to8[] = { 0x00, 0x55, 0xaa, 0xff };
+
+static SDL_Palette *GenerateRGB332Palette()
+{
+  int          i;
+  SDL_Palette *palette;
+  SDL_Color   *colors;
+
+  palette = calloc (1, sizeof(SDL_Palette));
+  if (!palette)
+    {
+      SDL_OutOfMemory();
+      return NULL;
+    }
+
+  colors = calloc (256, sizeof(SDL_Color));
+  if (!colors)
+    {
+      SDL_OutOfMemory();
+      return NULL;
+    }
+
+  for (i=0; i<256; i++)
+    {
+      colors[i].r = lookup3to8[ i >> 5 ];
+      colors[i].g = lookup3to8[ (i >> 2) & 7 ];
+      colors[i].g = lookup2to8[ i & 3 ];
+    }
+
+  palette->ncolors = 256;
+  palette->colors  = colors;
+
+  return palette;
+}
+
 static int DFBToSDLPixelFormat (DFBSurfacePixelFormat pixelformat, SDL_PixelFormat *format)
 {
-  format->BitsPerPixel = 0;
   format->Amask = format->Rmask = format->Gmask = format->Bmask = 0;
+  format->BitsPerPixel = format->BytesPerPixel = 0;
 
   switch (pixelformat)
     {
     case DSPF_A8:
       format->Amask = 0x000000FF;
       break;
+
     case DSPF_RGB15:
       format->Rmask = 0x00007C00;
       format->Gmask = 0x000003E0;
       format->Bmask = 0x0000001F;
       break;
+
     case DSPF_RGB16:
       format->Rmask = 0x0000F800;
       format->Gmask = 0x000007E0;
       format->Bmask = 0x0000001F;
       break;
+
     case DSPF_ARGB:
-      format->Amask = 0xFF000000;
+      format->Amask = 0; /* apps don't seem to like that:  0xFF000000; */
       /* fall through */
     case DSPF_RGB24:
     case DSPF_RGB32:
@@ -286,11 +351,21 @@ static int DFBToSDLPixelFormat (DFBSurfacePixelFormat pixelformat, SDL_PixelForm
       format->Gmask = 0x0000FF00;
       format->Bmask = 0x000000FF;
       break;
+
+    case DSPF_RGB332:
+      format->Rmask = 0x000000E0;
+      format->Gmask = 0x0000001C;
+      format->Bmask = 0x00000003;
+
+      format->palette = GenerateRGB332Palette();
+      break;
+
     default:
       return -1;
     }
 
-  format->BitsPerPixel = DFB_BITS_PER_PIXEL(pixelformat);
+  format->BitsPerPixel  = DFB_BYTES_PER_PIXEL(pixelformat) * 8;
+  format->BytesPerPixel = DFB_BYTES_PER_PIXEL(pixelformat);
 
   return 0;
 }
@@ -298,44 +373,43 @@ static int DFBToSDLPixelFormat (DFBSurfacePixelFormat pixelformat, SDL_PixelForm
 
 int DirectFB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 {
-  int                    i, j;
-  DFBResult              ret;
-  IDirectFB             *dfb;
-  DFBCardCapabilities    caps;
-  IDirectFBDisplayLayer *layer;
-  DFBDisplayLayerConfig  dlc;
-  IDirectFBEventBuffer  *eventbuffer;
+  int                      i;
+  DFBResult                ret;
+  DFBCardCapabilities      caps;
+  DFBDisplayLayerConfig    dlc;
+  DFBSurfacePixelFormat    format;
+  struct DirectFBEnumRect *rect;
+  IDirectFB               *dfb    = NULL;
+  IDirectFBDisplayLayer   *layer  = NULL;
+  IDirectFBEventBuffer    *events = NULL;
 
 
   ret = DirectFBInit (NULL, NULL);
   if (ret)
     {
       SetDirectFBerror ("DirectFBInit", ret);
-      return -1;
+      goto error;
     }
 
   ret = DirectFBCreate (&dfb);
   if (ret)
     {
       SetDirectFBerror ("DirectFBCreate", ret);
-      return -1;
+      goto error;
     }
 
   ret = dfb->GetDisplayLayer (dfb, DLID_PRIMARY, &layer);
   if (ret)
     {
       SetDirectFBerror ("dfb->GetDisplayLayer", ret);
-      dfb->Release (dfb);
-      return -1;
+      goto error;
     }
 
-  ret = dfb->CreateEventBuffer (dfb, DICAPS_ALL, &eventbuffer);
+  ret = dfb->CreateEventBuffer (dfb, DICAPS_ALL, &events);
   if (ret)
     {
       SetDirectFBerror ("dfb->CreateEventBuffer", ret);
-      layer->Release (layer);
-      dfb->Release (dfb);
-      return -1;
+      goto error;
     }
   
   layer->EnableCursor (layer, 1);
@@ -343,42 +417,38 @@ int DirectFB_VideoInit(_THIS, SDL_PixelFormat *vformat)
   /* Query layer configuration to determine the current mode and pixelformat */
   layer->GetConfiguration (layer, &dlc);
 
-  if (DFBToSDLPixelFormat (dlc.pixelformat, vformat))
+  /* FIXME: Returning RGB332 as the default mode doesn't work (everything is black) */
+  if ((format = dlc.pixelformat) == DSPF_RGB332)
+    format = DSPF_RGB16;
+
+  if (DFBToSDLPixelFormat (format, vformat))
     {
       SDL_SetError ("Unsupported pixelformat");
-      layer->Release (layer);
-      dfb->Release (dfb);
-      return -1;
+      goto error;
     }
 
   /* Enumerate the available fullscreen modes */
-  for ( i=0; i<NUM_MODELISTS; ++i )
-    enumlists[i] = NULL;
-
   ret = dfb->EnumVideoModes (dfb, EnumModesCallback, this);
   if (ret)
     {
       SetDirectFBerror ("dfb->EnumVideoModes", ret);
-      layer->Release (layer);
-      dfb->Release (dfb);
-      return(-1);
+      goto error;
     }
-  for ( i=0; i<NUM_MODELISTS; ++i )
+
+  HIDDEN->modelist = calloc (HIDDEN->nummodes + 1, sizeof(SDL_Rect *));
+  if (!HIDDEN->modelist)
     {
-      struct DirectFBEnumRect *rect;
-      HIDDEN->SDL_modelist[i] = (SDL_Rect **) malloc
-        ((HIDDEN->SDL_nummodes[i]+1)*sizeof(SDL_Rect *));
-      if ( HIDDEN->SDL_modelist[i] == NULL )
-        {
-          SDL_OutOfMemory();
-          return(-1);
-        }
-      for ( j = 0, rect = enumlists[i]; rect; ++j, rect = rect->next )
-        {
-          HIDDEN->SDL_modelist[i][j]=(SDL_Rect *)rect;
-        }
-      HIDDEN->SDL_modelist[i][j] = NULL;
+      SDL_OutOfMemory();
+      goto error;
     }
+
+  for (i = 0, rect = enumlist; rect; ++i, rect = rect->next )
+    {
+      HIDDEN->modelist[i] = &rect->r;
+    }
+
+  HIDDEN->modelist[i] = NULL;
+
 
   /* Query card capabilities to get the video memory size */
   dfb->GetCardCapabilities (dfb, &caps);
@@ -394,15 +464,27 @@ int DirectFB_VideoInit(_THIS, SDL_PixelFormat *vformat)
   HIDDEN->initialized = 1;
   HIDDEN->dfb         = dfb;
   HIDDEN->layer       = layer;
-  HIDDEN->eventbuffer = eventbuffer;
+  HIDDEN->eventbuffer = events;
 
   return 0;
+
+ error:
+  if (events)
+    events->Release (events);
+  
+  if (layer)
+    layer->Release (layer);
+
+  if (dfb)
+    dfb->Release (dfb);
+
+  return -1;
 }
 
 static SDL_Rect **DirectFB_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
 {
   if (flags & SDL_FULLSCREEN)
-    return HIDDEN->SDL_modelist[((format->BitsPerPixel + 7) / 8) - 1];
+    return HIDDEN->modelist;
   else
     if (SDLToDFBPixelFormat (format) != DSPF_UNKNOWN)
       return (SDL_Rect**) -1;
@@ -410,7 +492,7 @@ static SDL_Rect **DirectFB_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flag
   return NULL;
 }
 
-SDL_Surface *DirectFB_SetVideoMode(_THIS, SDL_Surface *current, int width, int height, int bpp, Uint32 flags)
+static SDL_Surface *DirectFB_SetVideoMode(_THIS, SDL_Surface *current, int width, int height, int bpp, Uint32 flags)
 {
   DFBResult             ret;
   DFBSurfaceDescription dsc;
@@ -430,13 +512,12 @@ SDL_Surface *DirectFB_SetVideoMode(_THIS, SDL_Surface *current, int width, int h
   else if (!current->hwdata)
     {
       /* Allocate the hardware acceleration data */
-      current->hwdata = (struct private_hwdata *) malloc (sizeof(*current->hwdata));
+      current->hwdata = (struct private_hwdata *) calloc (1, sizeof(*current->hwdata));
       if (!current->hwdata)
         {
           SDL_OutOfMemory();
           return NULL;
 	}
-      memset (current->hwdata, 0, sizeof(*current->hwdata));
     }
 
   /* Set cooperative level depending on flag SDL_FULLSCREEN */
@@ -471,8 +552,9 @@ SDL_Surface *DirectFB_SetVideoMode(_THIS, SDL_Surface *current, int width, int h
     }
 
   /* Create primary surface */
-  dsc.flags = DSDESC_CAPS;
-  dsc.caps  = DSCAPS_PRIMARY | ((flags & SDL_DOUBLEBUF) ? DSCAPS_FLIPPING : 0);
+  dsc.flags       = DSDESC_CAPS | DSDESC_PIXELFORMAT;
+  dsc.caps        = DSCAPS_PRIMARY | ((flags & SDL_DOUBLEBUF) ? DSCAPS_FLIPPING : 0);
+  dsc.pixelformat = GetFormatForBpp (bpp, HIDDEN->layer);
 
   ret = HIDDEN->dfb->CreateSurface (HIDDEN->dfb, &dsc, &current->hwdata->surface);
   if (ret && (flags & SDL_DOUBLEBUF))
@@ -524,7 +606,7 @@ static int DirectFB_AllocHWSurface(_THIS, SDL_Surface *surface)
   dsc.flags  = DSDESC_WIDTH | DSDESC_HEIGHT | DSDESC_PIXELFORMAT | DSDESC_CAPS;
   dsc.width  = surface->w;
   dsc.height = surface->h;
-  dsc.caps   = surface->flags & SDL_DOUBLEBUF ? DSCAPS_FLIPPING : 0;
+  dsc.caps   = (surface->flags & SDL_DOUBLEBUF) ? DSCAPS_FLIPPING : 0;
 
   /* find the right pixelformat */
   dsc.pixelformat = SDLToDFBPixelFormat (surface->format);
@@ -532,7 +614,7 @@ static int DirectFB_AllocHWSurface(_THIS, SDL_Surface *surface)
     return -1;
 
   /* Allocate the hardware acceleration data */
-  surface->hwdata = (struct private_hwdata *) malloc (sizeof(*surface->hwdata));
+  surface->hwdata = (struct private_hwdata *) calloc (1, sizeof(*surface->hwdata));
   if (surface->hwdata == NULL)
     {
       SDL_OutOfMemory();
@@ -581,21 +663,12 @@ static int DirectFB_CheckHWBlit(_THIS, SDL_Surface *src, SDL_Surface *dst)
 static int DirectFB_HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,
                                 SDL_Surface *dst, SDL_Rect *dstrect)
 {
-  DFBRectangle             sr, dr;
-  IDirectFBSurface        *surface;
-  DFBSurfaceBlittingFlags  flags = DSBLIT_NOFX;
+  DFBSurfaceBlittingFlags flags = DSBLIT_NOFX;
 
-  sr.x = srcrect->x;
-  sr.y = srcrect->y;
-  sr.w = srcrect->w;
-  sr.h = srcrect->h;
+  DFBRectangle sr = { srcrect->x, srcrect->y, srcrect->w, srcrect->h };
+  DFBRectangle dr = { dstrect->x, dstrect->y, dstrect->w, dstrect->h };
 
-  dr.x = dstrect->x;
-  dr.y = dstrect->y;
-  dr.w = dstrect->w;
-  dr.h = dstrect->h;
-
-  surface = dst->hwdata->surface;
+  IDirectFBSurface *surface = dst->hwdata->surface;
 
   if (src->flags & SDL_SRCCOLORKEY)
     {
@@ -737,28 +810,46 @@ static void DirectFB_WindowedUpdate(_THIS, int numrects, SDL_Rect *rects)
 int DirectFB_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 {
   fprintf(stderr, "SDL: Unimplemented DirectFB_SetColors!\n");
-  return 0;
+  return -1;
 }
 	
 void DirectFB_VideoQuit(_THIS)
 {
-  int i, j;
+  struct DirectFBEnumRect *rect = enumlist;
 
-  HIDDEN->eventbuffer->Release (HIDDEN->eventbuffer);
-  HIDDEN->layer->Release (HIDDEN->layer);
-  HIDDEN->dfb->Release (HIDDEN->dfb);
-
-  /* Free video mode lists */
-  for ( i=0; i<NUM_MODELISTS; ++i )
+  if (HIDDEN->eventbuffer)
     {
-      if ( HIDDEN->SDL_modelist[i] != NULL )
-        {
-          for ( j=0; HIDDEN->SDL_modelist[i][j]; ++j )
-            free(HIDDEN->SDL_modelist[i][j]);
-          free(HIDDEN->SDL_modelist[i]);
-          HIDDEN->SDL_modelist[i] = NULL;
-        }
+      HIDDEN->eventbuffer->Release (HIDDEN->eventbuffer);
+      HIDDEN->eventbuffer = NULL;
     }
+
+  if (HIDDEN->layer)
+    {
+      HIDDEN->layer->Release (HIDDEN->layer);
+      HIDDEN->layer = NULL;
+    }
+
+  if (HIDDEN->dfb)
+    {
+      HIDDEN->dfb->Release (HIDDEN->dfb);
+      HIDDEN->dfb = NULL;
+    }
+
+  /* Free video mode list */
+  if (HIDDEN->modelist)
+    {
+      free (HIDDEN->modelist);
+      HIDDEN->modelist = NULL;
+    }
+
+  /* Free mode enumeration list */
+  while (rect)
+    {
+      struct DirectFBEnumRect *next = rect->next;
+      free (rect);
+      rect = next;
+    }
+  enumlist = NULL;
 
   HIDDEN->initialized = 0;
 }
