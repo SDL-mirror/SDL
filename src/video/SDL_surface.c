@@ -275,7 +275,7 @@ int SDL_SetAlpha (SDL_Surface *surface, Uint32 flag, Uint8 value)
  * return true if the rectangles intersect, false otherwise
  */
 static __inline__
-SDL_bool SDL_IntersectRect(SDL_Rect *A, SDL_Rect *B, SDL_Rect *intersection)
+SDL_bool SDL_IntersectRect(const SDL_Rect *A, const SDL_Rect *B, SDL_Rect *intersection)
 {
 	int Amin, Amax, Bmin, Bmax;
 
@@ -308,7 +308,7 @@ SDL_bool SDL_IntersectRect(SDL_Rect *A, SDL_Rect *B, SDL_Rect *intersection)
 /*
  * Set the clipping rectangle for a blittable surface
  */
-SDL_bool SDL_SetClipRect(SDL_Surface *surface, SDL_Rect *rect)
+SDL_bool SDL_SetClipRect(SDL_Surface *surface, const SDL_Rect *rect)
 {
 	SDL_Rect full_rect;
 

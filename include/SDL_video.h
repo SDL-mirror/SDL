@@ -593,7 +593,7 @@ extern DECLSPEC int SDL_SetAlpha(SDL_Surface *surface, Uint32 flag, Uint8 alpha)
  * Note that blits are automatically clipped to the edges of the source
  * and destination surfaces.
  */
-extern DECLSPEC SDL_bool SDL_SetClipRect(SDL_Surface *surface, SDL_Rect *rect);
+extern DECLSPEC SDL_bool SDL_SetClipRect(SDL_Surface *surface, const SDL_Rect *rect);
 
 /*
  * Gets the clipping rectangle for the destination surface in a blit.
