@@ -594,7 +594,8 @@ static SDL_bool EV_ConfigJoystick(SDL_Joystick *joystick, int fd)
 			if ( test_bit(i, absbit) ) {
 				int values[5];
 
-				ioctl(fd, EVIOCGABS(i), values);
+				if ( ioctl(fd, EVIOCGABS(i), values) < 0 )
+					continue;
 #ifdef DEBUG_INPUT_EVENTS
 				printf("Joystick has absolute axis: %x\n", i);
 				printf("Values = { %d, %d, %d, %d, %d }\n",
