@@ -206,24 +206,50 @@ static void     QZ_InitOSKeymap (_THIS) {
 static void QZ_DoKey (_THIS, int state, NSEvent *event) {
 
     NSString *chars;
-    int i;
+    unsigned int numChars;
     SDL_keysym key;
-
+    
     /* 
-        An event can contain multiple characters
-        I'll ignore this fact for now, since there 
-        is only one virtual key code per event, so
-        no good way to handle this.
+        A key event can contain multiple characters,
+        or no characters at all. In most cases, it
+        will contain a single character. If it contains
+        0 characters, we'll use 0 as the unicode. If it
+        contains multiple characters, we'll use 0 as
+        the scancode/keysym.
     */
     chars = [ event characters ];
-    for (i =0; i < 1 /*[ chars length ] */; i++) {
+    numChars = [ chars length ];
+
+    if (numChars == 1) {
 
         key.scancode = [ event keyCode ];
-        key.sym         = keymap [ key.scancode ];
-        key.unicode     = [ chars characterAtIndex:i];
-        key.mod         = KMOD_NONE;
+        key.sym      = keymap [ key.scancode ];
+        key.unicode  = [ chars characterAtIndex:0 ];
+        key.mod      = KMOD_NONE;
 
         SDL_PrivateKeyboard (state, &key);
+    }
+    else if (numChars == 0) {
+      
+        key.scancode = [ event keyCode ];
+        key.sym      = keymap [ key.scancode ];
+        key.unicode  = 0;
+        key.mod      = KMOD_NONE;
+
+        SDL_PrivateKeyboard (state, &key);
+    }
+    else /* (numChars > 1) */ {
+      
+        int i;
+        for (i = 0; i < numChars; i++) {
+
+            key.scancode = 0;
+            key.sym      = 0;
+            key.unicode  = [ chars characterAtIndex:i];
+            key.mod      = KMOD_NONE;
+
+            SDL_PrivateKeyboard (state, &key);
+        }
     }
 }
 

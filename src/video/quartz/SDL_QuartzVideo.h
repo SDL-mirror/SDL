@@ -52,6 +52,7 @@
 #include <OpenGL/OpenGL.h>
 #include <Carbon/Carbon.h>
 #include <QuickTime/QuickTime.h>
+#include <IOKit/IOKitLib.h>	/* For powersave handling */
 
 #include "SDL_video.h"
 #include "SDL_error.h"
