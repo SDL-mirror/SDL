@@ -52,11 +52,6 @@ static char rcsid =
 #define MAX_JOY_JOYS	2
 #define MAX_JOYS	(MAX_UHID_JOYS + MAX_JOY_JOYS)
 
-#define SDLAXIS_UINT8(v)		\
-	((v == 127) ? 0 :		\
-	 (v == 255) ? 32767 :		\
-	 -32767)
-
 struct report {
 	struct	usb_ctl_report *buf;	/* Buffer */
 	size_t	size;			/* Buffer size */
@@ -77,9 +72,20 @@ static struct {
 	{ UHID_OUTPUT_REPORT,	hid_output,	"output" },
 	{ UHID_FEATURE_REPORT,	hid_feature,	"feature" }
 };
-#define REPORT_INPUT	0
-#define REPORT_OUTPUT	1
-#define REPORT_FEATURE	2
+
+enum {
+	REPORT_INPUT = 0,
+	REPORT_OUTPUT = 1,
+	REPORT_FEATURE = 2
+};
+
+enum {
+	JOYAXE_X,
+	JOYAXE_Y,
+	JOYAXE_Z,
+	JOYAXE_SLIDER,
+	JOYAXE_WHEEL
+};
 
 struct joystick_hwdata {
 	int	fd;
@@ -90,8 +96,10 @@ struct joystick_hwdata {
 	} type;
 	struct	report_desc *repdesc;
 	struct	report inreport;
-	int	axismin[3];
-	int	axismax[3];
+#if 0
+	int	axismin[];
+	int	axismax[];
+#endif
 };
 
 static char *joynames[MAX_JOYS];
@@ -181,7 +189,8 @@ SDL_SYS_JoystickOpen(SDL_Joystick *joy)
 		goto usberr;
 	}
 	if (rep->size <= 0) {
-		SDL_SetError("Input report descriptor has invalid length");
+		SDL_SetError("%s: Input report descriptor has invalid length",
+		    hw->path);
 		goto usberr;
 	}
 
@@ -222,10 +231,14 @@ SDL_SYS_JoystickOpen(SDL_Joystick *joy)
 				case HUG_X:
 				case HUG_Y:
 				case HUG_Z:
+				case HUG_SLIDER:
+				case HUG_WHEEL:
+#if 0
 					hw->axismin[joy->naxes] =
 					    hitem.logical_minimum;
 					hw->axismax[joy->naxes] =
 					    hitem.logical_maximum;
+#endif
 					joy->naxes++;
 					break;
 				}
@@ -257,8 +270,9 @@ SDL_SYS_JoystickUpdate(SDL_Joystick *joy)
 {
 	static struct hid_item hitem;
 	static struct hid_data *hdata;
-	static int nbutton, naxe, v, max, min;
 	static struct report *rep;
+	int nbutton, naxe;
+	Sint32 v;
 	
 	rep = &joy->hwdata->inreport;
 	if (read(joy->hwdata->fd, rep->buf->data, rep->size) != rep->size) {
@@ -271,7 +285,7 @@ SDL_SYS_JoystickUpdate(SDL_Joystick *joy)
 		return;
 	}
 
-	for (nbutton = 0, naxe = 0; hid_get_item(hdata, &hitem) > 0;) {
+	for (nbutton = 0; hid_get_item(hdata, &hitem) > 0;) {
 		switch (hitem.kind) {
 		case hid_input:
 			switch (HID_PAGE(hitem.usage)) {
@@ -280,31 +294,43 @@ SDL_SYS_JoystickUpdate(SDL_Joystick *joy)
 			case HUP_GENERIC_DESKTOP:
 				switch (HID_USAGE(hitem.usage)) {
 				case HUG_X:
+					naxe = JOYAXE_X;
+					goto scaleaxe;
 				case HUG_Y:
+					naxe = JOYAXE_Y;
+					goto scaleaxe;
 				case HUG_Z:
-					v = hid_get_data(rep->buf->data,
-					    &hitem);
-
-					/*
-					 * XXX revisit later. need to test
-					 * with more devices.
-					 */
-					if (joy->hwdata->axismin[naxe] == 0 &&
-					    joy->hwdata->axismax[naxe] == 255) {
-						v = SDLAXIS_UINT8(v);
+					naxe = JOYAXE_Z;
+					goto scaleaxe;
+				case HUG_SLIDER:
+					naxe = JOYAXE_SLIDER;
+					goto scaleaxe;
+				case HUG_WHEEL:
+					naxe = JOYAXE_WHEEL;
+					goto scaleaxe;
+				}
+scaleaxe:
+				v = (Sint32)hid_get_data(rep->buf->data, &hitem);
+				if (v != 127) {
+					if (v < 127) {
+						v = -(256 - v);
+						v <<= 7;
+						v++;
+					} else {
+						v++;
+						v <<= 7;
+						v--;
 					}
-
-					if (v != joy->axes[naxe]) {
-						SDL_PrivateJoystickAxis(joy,
-						    naxe, (Sint32)v);
-					}
-					naxe++;
-					break;
+				} else {
+					v = 0;
+				}
+				if (v != joy->axes[naxe]) {
+					SDL_PrivateJoystickAxis(joy, naxe, v);
 				}
 				break;
 			case HUP_BUTTON:
-				/* XXX assume a 0..1 range */
-				v = hid_get_data(rep->buf->data, &hitem);
+				v = (Sint32)hid_get_data(rep->buf->data,
+				    &hitem);
 				if (joy->buttons[nbutton] != v) {
 					SDL_PrivateJoystickButton(joy,
 					    nbutton, v);
