@@ -59,7 +59,7 @@ static __inline__ int CPU_haveCPUID()
 "        movl    $1,%0               # We have CPUID support           \n"
 "1:                                                                    \n"
 "pop %%ecx\n"
-	: "=r" (has_CPUID)
+	: "=m" (has_CPUID)
 	:
 	: "%eax", "%ecx"
 	);
@@ -102,7 +102,7 @@ static __inline__ int CPU_getCPUIDFeatures()
 "pop %%edx\n"
 "pop %%ecx\n"
 "pop %%ebx\n"
-	: "=r" (features)
+	: "=m" (features)
 	:
 	: "%eax", "%ebx", "%ecx", "%edx"
 	);
@@ -162,7 +162,7 @@ static __inline__ int CPU_have3DNow()
 "pop %%edx\n"
 "pop %%ecx\n"
 "pop %%ebx\n"
-	: "=r" (has_3DNow)
+	: "=m" (has_3DNow)
 	:
 	: "%eax", "%ebx", "%ecx", "%edx"
 	);
