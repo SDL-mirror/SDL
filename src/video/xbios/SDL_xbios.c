@@ -654,7 +654,10 @@ static int XBIOS_FlipHWSurface(_THIS, SDL_Surface *surface)
 	Vsync();
 
 	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
-		XBIOS_fbnum ^= 1;				
+		XBIOS_fbnum ^= 1;
+		if ((surface->format->BitsPerPixel) > 8) {
+			surface->pixels=XBIOS_screens[XBIOS_fbnum];
+		}
 	}
 
 	return(0);
