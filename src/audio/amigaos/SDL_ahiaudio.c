@@ -29,10 +29,6 @@ static char rcsid =
 
 /* Allow access to a raw mixing buffer (for AmigaOS) */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "SDL_endian.h"
 #include "SDL_audio.h"
 #include "SDL_audiomem.h"

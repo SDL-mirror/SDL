@@ -38,7 +38,7 @@ static char rcsid =
 #include <graphics/scale.h>
 #include <graphics/gfx.h>
 #include <intuition/intuition.h>
-#ifdef __SASC
+#if defined(__SASC) || defined(STORMC4_WOS)
 #include <proto/exec.h>
 #include <proto/cybergraphics.h>
 #include <proto/graphics.h>
@@ -177,6 +177,7 @@ struct private_hwdata
 	APTR lock;
 	struct SDL_VideoDevice *videodata;
 	APTR mask;
+	int allocated;
 };
 
 int CGX_CheckHWBlit(_THIS,SDL_Surface *src,SDL_Surface *dst);

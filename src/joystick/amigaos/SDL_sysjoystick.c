@@ -31,7 +31,7 @@ static char rcsid =
 #include <stdio.h>		/* For the definition of NULL */
 
 #include <libraries/lowlevel.h>
-#ifdef __SASC
+#if defined(__SASC) || defined(STORMC4_WOS)
 #include <proto/exec.h>
 #include <proto/lowlevel.h>
 #include <proto/graphics.h>
@@ -72,7 +72,7 @@ ULONG joybut[]=
 	JPF_BUTTON_REVERSE,
 };
 
-struct joystick_hwdata 
+struct joystick_hwdata
 {
 	ULONG joystate;
 };
@@ -128,7 +128,7 @@ int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
 
 	for(i=0;i<20;i++)
 	{
-		temp=ReadJoyPort(joystick->index);
+		temp=ReadJoyPort(joystick->index^1); // fix to invert amiga joyports
 		WaitTOF();
 	}
 
@@ -152,7 +152,7 @@ int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
  */
 void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 {
-	ULONG data;	
+	ULONG data;
 	int i;
 
 	if(joystick->index<2)

@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997, 1998, 1999, 2000, 2001  Sam Lantinga
+    Copyright (C) 1997, 1998, 1999, 2000  Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -66,14 +66,15 @@ static void set_best_resolution(_THIS, int width, int height)
 		}
 		SDL_Display=GFX_Display=OpenScreenTags(NULL,SA_Width,width,SA_Height,height,
 											SA_Depth,depth,SA_DisplayID,idok,
+											SA_ShowTitle,FALSE,
 											TAG_DONE);
 	}
 }
 
 static void get_real_resolution(_THIS, int* w, int* h)
 {
-    *w = SDL_Display->Width;
-    *h = SDL_Display->Height;
+    *w = /*SDL_Display->Width*/ SDL_Window->Width-SDL_Window->BorderLeft-SDL_Window->BorderRight;
+    *h = /*SDL_Display->Height*/ SDL_Window->Height-SDL_Window->BorderBottom-SDL_Window->BorderTop;
 }
 
 static void move_cursor_to(_THIS, int x, int y)
@@ -144,11 +145,11 @@ int CGX_GetVideoModes(_THIS)
 						SDL_modelist = (SDL_Rect **)realloc(SDL_modelist,(nmodes+1)*sizeof(SDL_Rect *));
 						SDL_modelist[nmodes]=NULL;
 
-						if ( SDL_modelist ) 
+						if ( SDL_modelist )
 						{
 							SDL_modelist[nmodes-1] = (SDL_Rect *)malloc(sizeof(SDL_Rect));
 
-							if ( SDL_modelist[nmodes-1] == NULL ) 
+							if ( SDL_modelist[nmodes-1] == NULL )
 								break;
 
 							SDL_modelist[nmodes-1]->x = 0;
@@ -156,7 +157,7 @@ int CGX_GetVideoModes(_THIS)
 							SDL_modelist[nmodes-1]->w = info.Nominal.MaxX+1;
 							SDL_modelist[nmodes-1]->h = info.Nominal.MaxY+1;
 						}
-					}																	
+					}
 				}
 			}
 		}
@@ -267,15 +268,18 @@ void _QueueEnterFullScreen(_THIS)
 int CGX_EnterFullScreen(_THIS)
 {
     int okay;
+	 Uint32 saved_flags;
 
     okay = 1;
-    if ( ! currently_fullscreen ) 
+    saved_flags = this->screen->flags;
+
+    if ( ! currently_fullscreen )
 	{
         int real_w, real_h;
 
         /* Map the fullscreen window to blank the screen */
         get_real_resolution(this, &real_w, &real_h);
-		
+
 		CGX_DestroyWindow(this,this->screen);
 		set_best_resolution(this, real_w,real_h);
 
@@ -297,8 +301,9 @@ int CGX_EnterFullScreen(_THIS)
 #endif
 
         currently_fullscreen = 1;
+		  this->screen->flags = saved_flags;
 
-		CGX_CreateWindow(this,this->screen,real_w,real_h,GetCyberMapAttr(SDL_Display->RastPort.BitMap,CYBRMATTR_DEPTH),this->screen->flags);
+		  CGX_CreateWindow(this,this->screen,real_w,real_h,GetCyberMapAttr(SDL_Display->RastPort.BitMap,CYBRMATTR_DEPTH),this->screen->flags);
 
         /* Set the new resolution */
         okay = CGX_ResizeFullScreen(this);
@@ -311,7 +316,7 @@ int CGX_EnterFullScreen(_THIS)
 			XInstallColormap(SDL_Display, SDL_XColorMap);
 		}
 */
-    }    
+    }
 //    CGX_GrabInputNoLock(this, this->input_grab | SDL_GRAB_FULLSCREEN);
     return(okay);
 }

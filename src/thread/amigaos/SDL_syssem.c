@@ -61,7 +61,7 @@ SDL_sem *SDL_CreateSemaphore(Uint32 initial_value)
 	memset(sem,0,sizeof(*sem));
 
 	InitSemaphore(&sem->Sem);
-	
+
 	return(sem);
 }
 
@@ -143,10 +143,14 @@ int SDL_SemWait(SDL_sem *sem)
 Uint32 SDL_SemValue(SDL_sem *sem)
 {
 	Uint32 value;
-	
+
 	value = 0;
 	if ( sem ) {
+		#ifdef STORMC4_WOS
+		value = sem->Sem.ssppc_SS.ss_NestCount;
+		#else
 		value = sem->Sem.ss_NestCount;
+		#endif
 //		SDL_UnlockMutex(sem->count_lock);
 	}
 	return value;

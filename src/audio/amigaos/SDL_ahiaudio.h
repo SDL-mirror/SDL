@@ -35,6 +35,8 @@ static char rcsid =
 #else
 #include <inline/exec.h>
 #endif
+#include <stdlib.h>
+#include <string.h>
 
 #include <devices/ahi.h>
 #include "mydebug.h"
@@ -47,7 +49,7 @@ struct SDL_PrivateAudioData {
 	/* The handle for the audio device */
 	struct AHIRequest *audio_req[2];
 	struct MsgPort *audio_port;
-	Sint32 freq,type,bytespersample;
+	Sint32 freq,type,bytespersample,size;
 	Uint8 *mixbuf[2];           /* The app mixing buffer */
 	int current_buffer;
 	Uint32 playing;

@@ -52,36 +52,35 @@ static void CGX_FakeUpdate(_THIS, int numrects, SDL_Rect *rects);
 BOOL SafeDisp=TRUE,SafeChange=TRUE;
 struct MsgPort *safeport=NULL,*dispport=NULL;
 ULONG safe_sigbit,disp_sigbit;
+int use_picasso96=1;
 
 int CGX_SetupImage(_THIS, SDL_Surface *screen)
 {
-	if(screen->flags&SDL_HWSURFACE)
-	{
-		Uint32 pitch;
-		SDL_Ximage=NULL;
+	SDL_Ximage=NULL;
 
-		if(!screen->hwdata)
-		{
+	if(screen->flags&SDL_HWSURFACE) {
+		ULONG pitch;
+
+		if(!screen->hwdata) {
 			if(!(screen->hwdata=malloc(sizeof(struct private_hwdata))))
-			{
 				return -1;
-			}
+
 			D(bug("Creating system accel struct\n"));
 		}
-		screen->hwdata->lock=0;
+		screen->hwdata->lock=NULL;
+		screen->hwdata->allocated=0;
+		screen->hwdata->mask=NULL;
 		screen->hwdata->bmap=SDL_RastPort->BitMap;
 		screen->hwdata->videodata=this;
 
 		if(!(screen->hwdata->lock=LockBitMapTags(screen->hwdata->bmap,
 				LBMI_BASEADDRESS,(ULONG)&screen->pixels,
-				LBMI_BYTESPERROW,(ULONG)&pitch,TAG_DONE)))
-		{
+				LBMI_BYTESPERROW,(ULONG)&pitch,TAG_DONE))) {
 			free(screen->hwdata);
 			screen->hwdata=NULL;
 			return -1;
 		}
-		else
-		{
+		else {
 			UnLockBitMap(screen->hwdata->lock);
 			screen->hwdata->lock=NULL;
 		}
@@ -101,17 +100,6 @@ int CGX_SetupImage(_THIS, SDL_Surface *screen)
 		return(-1);
 	}
 
-/*
-	{
- 	        int bpp = screen->format->BytesPerPixel;
-			SDL_Ximage = XCreateImage(SDL_Display, SDL_Visual,
-					  this->hidden->depth, ZPixmap, 0,
-					  (char *)screen->pixels, 
-					  screen->w, screen->h,
-					  (bpp == 3) ? 32 : bpp * 8,
-					  0);
-	}
-*/
 	SDL_Ximage=screen->pixels;
 
 	if ( SDL_Ximage == NULL ) {
@@ -132,6 +120,11 @@ void CGX_DestroyImage(_THIS, SDL_Surface *screen)
 	}
 	if ( screen ) {
 		screen->pixels = NULL;
+
+		if(screen->hwdata) {
+			free(screen->hwdata);
+			screen->hwdata=NULL;
+		}
 	}
 }
 
@@ -145,21 +138,16 @@ int CGX_ResizeImage(_THIS, SDL_Surface *screen, Uint32 flags)
 {
 	int retval;
 
-	D(bug("Chiamata ResizeImage!\n"));
+	D(bug("Calling ResizeImage()\n"));
 
 	CGX_DestroyImage(this, screen);
 
-    if ( flags & SDL_OPENGL ) {  /* No image when using GL */
+	if ( flags & SDL_OPENGL ) {  /* No image when using GL */
         	retval = 0;
-    } else {
+	} else {
 		retval = CGX_SetupImage(this, screen);
 		/* We support asynchronous blitting on the display */
 		if ( flags & SDL_ASYNCBLIT ) {
-			/* This is actually slower on single-CPU systems,
-			   probably because of CPU contention between the
-			   X server and the application.
-			   Note: Is this still true with XFree86 4.0?
-			*/
 			if ( num_CPU() > 1 ) {
 				screen->flags |= SDL_ASYNCBLIT;
 			}
@@ -168,7 +156,6 @@ int CGX_ResizeImage(_THIS, SDL_Surface *screen, Uint32 flags)
 	return(retval);
 }
 
-/* We don't actually allow hardware surfaces other than the main one */
 int CGX_AllocHWSurface(_THIS, SDL_Surface *surface)
 {
 	D(bug("Alloc HW surface...%ld x %ld x %ld!\n",surface->w,surface->h,this->hidden->depth));
@@ -185,11 +172,14 @@ int CGX_AllocHWSurface(_THIS, SDL_Surface *surface)
 			return -1;
 	}
 
+	surface->hwdata->mask=NULL;
 	surface->hwdata->lock=NULL;
 	surface->hwdata->videodata=this;
+	surface->hwdata->allocated=0;
 
 	if(surface->hwdata->bmap=AllocBitMap(surface->w,surface->h,this->hidden->depth,BMF_MINPLANES,SDL_Display->RastPort.BitMap))
 	{
+		surface->hwdata->allocated=1;
 		surface->flags|=SDL_HWSURFACE;
 		D(bug("...OK\n"));
 		return 0;
@@ -211,11 +201,13 @@ void CGX_FreeHWSurface(_THIS, SDL_Surface *surface)
 		if(surface->hwdata->mask)
 			free(surface->hwdata->mask);
 
-		if(surface->hwdata->bmap)
+		if(surface->hwdata->bmap&&surface->hwdata->allocated)
 			FreeBitMap(surface->hwdata->bmap);
 
 		free(surface->hwdata);
 		surface->hwdata=NULL;
+		surface->pixels=NULL;
+		D(bug("end of free hw surface\n"));
 	}
 	return;
 }
@@ -242,11 +234,11 @@ int CGX_LockHWSurface(_THIS, SDL_Surface *surface)
 				surface->pixels=((char *)surface->pixels)+(surface->pitch*(SDL_Window->BorderTop+SDL_Window->TopEdge)+
 					surface->format->BytesPerPixel*(SDL_Window->BorderLeft+SDL_Window->LeftEdge));
 		}
-		else
-			D(bug("Already locked!!!\n"));
+		D(else bug("Already locked!!!\n"));
 	}
 	return(0);
 }
+
 void CGX_UnlockHWSurface(_THIS, SDL_Surface *surface)
 {
 	if(surface->hwdata && surface->hwdata->lock)
@@ -398,7 +390,7 @@ static void CGX_NormalUpdate(_THIS, int numrects, SDL_Rect *rects)
 #ifndef USE_CGX_WRITELUTPIXEL
 	int bpp;
 #endif
-	if(this->hidden->same_format)
+	if(this->hidden->same_format && !use_picasso96)
 	{
 		format=RECTFMT_RAW;
 	}
@@ -445,7 +437,7 @@ static void CGX_NormalUpdate(_THIS, int numrects, SDL_Rect *rects)
 	/* Check for endian-swapped X server, swap if necessary (VERY slow!) */
 	if ( swap_pixels &&
 	     ((this->screen->format->BytesPerPixel%2) == 0) ) {
-		D(bug("Swappo! Lento!\n"));
+		D(bug("Software Swapping! SLOOOW!\n"));
 		CGX_SwapPixels(this->screen, numrects, rects);
 		for ( i=0; i<numrects; ++i ) {
 			if ( ! rects[i].w ) { /* Clipped? */
@@ -633,7 +625,7 @@ static void CGX_NormalUpdate(_THIS, int numrects, SDL_Rect *rects)
 		Uint32	destpitch;
 		APTR handle;
 
-//		D(bug("Uso customroutine!\n"));
+//		D(bug("Using customroutine!\n"));
 
 		if(handle=LockBitMapTags(SDL_RastPort->BitMap,LBMI_BASEADDRESS,(ULONG)&bm_address,
 								LBMI_BYTESPERROW,(ULONG)&destpitch,TAG_DONE))
@@ -685,20 +677,8 @@ static void CGX_NormalUpdate(_THIS, int numrects, SDL_Rect *rects)
 			USE_WPA(this->screen->pixels,rects[i].x, rects[i].y,this->screen->pitch,
 					SDL_RastPort,SDL_Window->BorderLeft+rects[i].x,SDL_Window->BorderTop+rects[i].y,
 					rects[i].w,rects[i].h,format);
-
-/*
-			XPutImage(GFX_Display, SDL_Window, SDL_GC, SDL_Ximage,
-				rects[i].x, rects[i].y,
-				rects[i].x, rects[i].y, rects[i].w, rects[i].h);
-*/
 		}
 	}
-/*
-	if ( SDL_VideoSurface->flags & SDL_ASYNCBLIT ) {
-		++blit_queued;
-	} else {
-	}
-*/
 }
 
 void CGX_RefreshDisplay(_THIS)
@@ -712,7 +692,7 @@ void CGX_RefreshDisplay(_THIS)
 		return;
 	}
 
-	if(this->hidden->same_format)
+	if(this->hidden->same_format && !use_picasso96)
 	{
 		format=RECTFMT_RAW;
 	}

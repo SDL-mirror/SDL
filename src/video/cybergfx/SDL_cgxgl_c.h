@@ -25,74 +25,30 @@ static char rcsid =
  "@(#) $Id$";
 #endif
 
-#include <stdio.h>
+/* StormMesa implementation of SDL OpenGL support */
+
+#include "SDL_sysvideo.h"
+#define _THIS   SDL_VideoDevice *_this
 
 #ifdef HAVE_OPENGL
-#include <GL/glx.h>
-#include <dlfcn.h>
-#endif
-#include "SDL_sysvideo.h"
+#include <GL/Amigamesa.h>
+extern void *AmiGetGLProc(const char *proc);
+#endif /* HAVE_OPENGL */
 
 struct SDL_PrivateGLData {
-    int gl_active; /* to stop switching drivers while we have a valid context */
-
-#ifdef HAVE_OPENGL
-    GLXContext glx_context;	/* Current GL context */
-    XVisualInfo* glx_visualinfo; /* XVisualInfo* returned by glXChooseVisual */
-
-    XVisualInfo* (*glXChooseVisual)
-		( Display*		dpy,
-		  int			screen,
-		  int*		attribList );
-
-    GLXContext (*glXCreateContext)
-		( Display*		dpy,
-		  XVisualInfo*	vis,
-		  GLXContext		shareList,
-		  Bool		direct );
-
-    void (*glXDestroyContext)
-		( Display* 		dpy,
-		  GLXContext		ctx );
-
-    Bool (*glXMakeCurrent)
-		( Display*		dpy,
-		  GLXDrawable		drawable,
-		  GLXContext		ctx );
-
-    void (*glXSwapBuffers)
-		( Display*		dpy,
-		  GLXDrawable		drawable );
-
-    int (*glXGetConfig)
-	 ( Display* dpy,
-	   XVisualInfo* visual_info,
-	   int attrib,
-	   int* value );
-
-    void (*glXReleaseBuffersMESA)
-	 ( Display* dpy,
-	   GLXDrawable drawable );
-
-#endif /* HAVE_OPENGL */
+	int gl_active;
 };
 
-/* Old variable names */
-#define gl_active		(this->gl_data->gl_active)
-#define glx_context		(this->gl_data->glx_context)
-#define glx_visualinfo		(this->gl_data->glx_visualinfo)
-
 /* OpenGL functions */
-extern void *CGX_GL_GetVisual(_THIS);
-extern int CGX_GL_CreateWindow(_THIS, int w, int h);
-extern int CGX_GL_CreateContext(_THIS);
-extern void CGX_GL_Shutdown(_THIS);
+extern int CGX_GL_Init(_THIS);
+extern void CGX_GL_Quit(_THIS);
+extern int CGX_GL_Update(_THIS);
 #ifdef HAVE_OPENGL
 extern int CGX_GL_MakeCurrent(_THIS);
 extern int CGX_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value);
 extern void CGX_GL_SwapBuffers(_THIS);
-extern int CGX_GL_LoadLibrary(_THIS, const char* path);
-extern void *CGX_GL_GetProcAddress(_THIS, const char* proc);
+extern void *CGX_GL_GetProcAddress(_THIS, const char *proc);
+extern int CGX_GL_LoadLibrary(_THIS, const char *path);
 #endif
-extern void CGX_GL_UnloadLibrary(_THIS);
 
+#undef _THIS

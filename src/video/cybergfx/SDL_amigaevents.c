@@ -148,7 +148,7 @@ static int amiga_DispatchEvent(_THIS,struct IntuiMessage *msg)
 			break;
 #if 0
 	    /* Gaining input focus? */
-	    case IDCMP_ACTIVEWINDOW: 
+	    case IDCMP_ACTIVEWINDOW:
 			posted = SDL_PrivateAppActive(1, SDL_APPINPUTFOCUS);
 
 			/* Queue entry into fullscreen mode */
@@ -166,7 +166,7 @@ static int amiga_DispatchEvent(_THIS,struct IntuiMessage *msg)
 		    break;
 #endif
 	    /* Mouse motion? */
-	    case IDCMP_MOUSEMOVE: 
+	    case IDCMP_MOUSEMOVE:
 			if ( SDL_VideoSurface ) {
 				posted = SDL_PrivateMouseMotion(0, 0,
 						msg->MouseX-SDL_Window->BorderLeft,
@@ -179,14 +179,14 @@ static int amiga_DispatchEvent(_THIS,struct IntuiMessage *msg)
 
 			if(!(code&IECODE_UP_PREFIX))
 			{
-				posted = SDL_PrivateMouseButton(SDL_PRESSED, 
+				posted = SDL_PrivateMouseButton(SDL_PRESSED,
 						amiga_GetButton(code), 0, 0);
 			    }
 	    /* Mouse button release? */
 			else
 			{
 				code&=~IECODE_UP_PREFIX;
-				posted = SDL_PrivateMouseButton(SDL_RELEASED, 
+				posted = SDL_PrivateMouseButton(SDL_RELEASED,
 						amiga_GetButton(code), 0, 0);
 			}
 			break;
@@ -211,7 +211,7 @@ static int amiga_DispatchEvent(_THIS,struct IntuiMessage *msg)
 			/* Check to see if this is a repeated key */
 /*			if ( ! X11_KeyRepeat(SDL_Display, &xevent) )  */
 
-				posted = SDL_PrivateKeyboard(SDL_RELEASED, 
+				posted = SDL_PrivateKeyboard(SDL_RELEASED,
 					amiga_TranslateKey(code, &keysym));
 		    }
 		    break;
@@ -235,7 +235,7 @@ printf("MapNotify!\n");
 		posted = SDL_PrivateAppActive(1, SDL_APPACTIVE);
 
 		if ( SDL_VideoSurface &&
-		     (SDL_VideoSurface->flags & SDL_FULLSCREEN) ) 
+		     (SDL_VideoSurface->flags & SDL_FULLSCREEN) )
 		{
 			CGX_EnterFullScreen(this);
 		} else {
@@ -254,9 +254,10 @@ printf("MapNotify!\n");
 #endif
 
 	    /* Have we been resized? */
-	    case IDCMP_NEWSIZE: 
+	    case IDCMP_NEWSIZE:
 			SDL_PrivateResize(SDL_Window->Width-SDL_Window->BorderLeft-SDL_Window->BorderRight,
 		                  SDL_Window->Height-SDL_Window->BorderTop-SDL_Window->BorderBottom);
+
 			break;
 
 	    /* Have we been requested to quit? */
@@ -428,7 +429,11 @@ void amiga_InitKeymap(void)
 
 SDL_keysym *amiga_TranslateKey(int code, SDL_keysym *keysym)
 {
+	#ifdef STORMC4_WOS
+	static struct Library *KeymapBase=NULL; /* Linking failed in WOS version if ConsoleDevice was used */
+	#else
 	static struct Library *ConsoleDevice=NULL;
+	#endif
 
 	/* Get the raw keyboard scancode */
 	keysym->scancode = code;
@@ -438,10 +443,17 @@ SDL_keysym *amiga_TranslateKey(int code, SDL_keysym *keysym)
 	fprintf(stderr, "Translating key 0x%.4x (%d)\n", xsym, xkey->keycode);
 #endif
 	/* Get the translated SDL virtual keysym */
-	if ( keysym->sym==SDLK_UNKNOWN ) 
+	if ( keysym->sym==SDLK_UNKNOWN )
 	{
+		#ifdef STORMC4_WOS
+		if(!KeymapBase)
+		#else
 		if(!ConsoleDevice)
+		#endif
 		{
+			#ifdef STORMC4_WOS
+			KeymapBase=OpenLibrary("keymap.library", 0L);
+			#else
 			if(ConPort=CreateMsgPort())
 			{
 				if(ConReq=CreateIORequest(ConPort,sizeof(struct IOStdReq)))
@@ -460,9 +472,14 @@ SDL_keysym *amiga_TranslateKey(int code, SDL_keysym *keysym)
 					ConPort=NULL;
 				}
 			}
+			#endif
 		}
 
+		#ifdef STORMC4_WOS
+		if(KeymapBase)
+		#else
 		if(ConsoleDevice)
+		#endif
 		{
 			struct InputEvent event;
 			long actual;
@@ -477,7 +494,11 @@ SDL_keysym *amiga_TranslateKey(int code, SDL_keysym *keysym)
 			event.ie_NextEvent=NULL;
 			event.ie_Prev1DownCode=event.ie_Prev1DownQual=event.ie_Prev2DownCode=event.ie_Prev2DownQual=0;
 
+			#ifdef STORMC4_WOS
+			if( (actual=MapRawKey(&event,buffer,5,NULL))>=0)
+			#else
 			if( (actual=RawKeyConvert(&event,buffer,5,NULL))>=0)
+			#endif
 			{
 				if(actual>1)
 				{

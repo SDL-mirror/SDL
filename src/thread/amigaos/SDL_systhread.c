@@ -32,6 +32,7 @@ static char rcsid =
 #include "SDL_thread.h"
 #include "SDL_thread_c.h"
 #include "SDL_systhread.h"
+#include "mydebug.h"
 
 typedef struct {
 	int (*func)(void *);
@@ -47,10 +48,15 @@ __saveds __asm Uint32 RunThread(register __a0 char *args )
 #elif defined(__PPC__)
 Uint32 RunThread(char *args)
 #else
-Uint32 RunThread(char *args __asm("a0") )
+Uint32 __saveds RunThread(char *args __asm("a0") )
 #endif
 {
+	#ifdef STORMC4_WOS
+	thread_args *data=(thread_args *)args;
+	#else
 	thread_args *data=(thread_args *)atol(args);
+	#endif
+
 	struct Task *Father;
 
 	D(bug("Received data: %lx\n",data));
@@ -59,6 +65,7 @@ Uint32 RunThread(char *args __asm("a0") )
 	SDL_RunThread(data);
 
 	Signal(Father,SIGBREAKF_CTRL_F);
+	D(bug("Thread with data %lx ended\n",data));
 	return(0);
 }
 
@@ -68,7 +75,7 @@ Uint32 RunThread(char *args __asm("a0") )
 
 Uint32 RunTheThread(void)
 {
-	thread_args *data=(thread_args *)atol(REG_A0);
+	thread_args *data=(thread_args *)atol((char *)REG_A0);
 	struct Task *Father;
 
 	D(bug("Received data: %lx\n",data));
@@ -77,16 +84,18 @@ Uint32 RunTheThread(void)
 	SDL_RunThread(data);
 
 	Signal(Father,SIGBREAKF_CTRL_F);
+	D(bug("Thread with data %lx ended\n",data));
 	return(0);
 }
 
-struct EmulLibEntry RunThread=
+struct EmulLibEntry RunThreadStruct=
 {
 	TRAP_LIB,
 	0,
-	RunTheThread
+	(ULONG)RunTheThread
 };
 
+void *RunThread=&RunThreadStruct;
 #endif
 
 
@@ -100,7 +109,14 @@ int SDL_SYS_CreateThread(SDL_Thread *thread, void *args)
 	if(args)
 		sprintf(buffer,"%ld",args);
 
-
+	#ifdef STORMC4_WOS
+	thread->handle=CreateTaskPPCTags(TASKATTR_CODE,	RunThread,
+					TASKATTR_NAME,	"SDL subtask",
+					TASKATTR_STACKSIZE, 100000,
+					(args ? TASKATTR_R3 : TAG_IGNORE), args,
+					TASKATTR_INHERITR2, TRUE,
+					TAG_DONE);
+	#else
 	thread->handle=(struct Task *)CreateNewProcTags(NP_Output,Output(),
 					NP_Name,(ULONG)"SDL subtask",
 					NP_CloseOutput, FALSE,
@@ -108,6 +124,8 @@ int SDL_SYS_CreateThread(SDL_Thread *thread, void *args)
 					NP_Entry,(ULONG)RunThread,
 					args ? NP_Arguments : TAG_IGNORE,(ULONG)buffer,
 					TAG_DONE);
+	#endif
+
 	if(!thread->handle)
 	{
 		SDL_SetError("Not enough resources to create thread");

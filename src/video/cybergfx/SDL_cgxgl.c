@@ -25,189 +25,117 @@ static char rcsid =
  "@(#) $Id$";
 #endif
 
-// #include <stdlib.h>	/* For getenv() prototype */
-// #include <string.h>
+/* StormMesa implementation of SDL OpenGL support */
 
-#include "SDL_events_c.h"
 #include "SDL_error.h"
-#include "SDL_cgxvideo.h"
 #include "SDL_cgxgl_c.h"
+#include "SDL_cgxvideo.h"
 
-#define DEFAULT_OPENGL	"libGL.so.1"
+#ifdef HAVE_OPENGL
+AmigaMesaContext glcont=NULL;
+#endif
 
-/* return the preferred visual to use for openGL graphics */
-void *CGX_GL_GetVisual(_THIS)
+/* Init OpenGL */
+int CGX_GL_Init(_THIS)
 {
 #ifdef HAVE_OPENGL
-	/* 64 seems nice. */
-	int attribs[64];
-	int i;
+   int i = 0;
+	struct TagItem attributes [ 14 ]; /* 14 should be more than enough :) */
+   struct Window *win = (struct Window *)SDL_Window;
 
-	/* load the gl driver from a default path */
-	if ( ! this->gl_config.driver_loaded ) {
-	        /* no driver has been loaded, use default (ourselves) */
-	        if ( X11_GL_LoadLibrary(this, NULL) < 0 ) {
-		        return NULL;
-		}
+	// default config. Always used...
+	attributes[i].ti_Tag = AMA_Window;	attributes[i++].ti_Data = (unsigned long)win;
+	attributes[i].ti_Tag = AMA_Left;		attributes[i++].ti_Data = 0;
+	attributes[i].ti_Tag = AMA_Bottom;	attributes[i++].ti_Data = 0;
+	attributes[i].ti_Tag = AMA_Width;	attributes[i++].ti_Data = win->Width-win->BorderLeft-win->BorderRight;
+	attributes[i].ti_Tag = AMA_Height;	attributes[i++].ti_Data = win->Height-win->BorderBottom-win->BorderTop;
+	attributes[i].ti_Tag = AMA_DirectRender; attributes[i++].ti_Data = GL_TRUE;
+
+	// double buffer ?
+	attributes[i].ti_Tag = AMA_DoubleBuf;
+	if ( this->gl_config.double_buffer ) {
+		attributes[i++].ti_Data = GL_TRUE;
 	}
-
-	/* See if we already have a window which we must use */
-	if ( SDL_windowid ) {
-		XWindowAttributes a;
-		XVisualInfo vi_in;
-		int out_count;
-
-		XGetWindowAttributes(SDL_Display, SDL_Window, &a);
-		vi_in.screen = SDL_Screen;
-		vi_in.visualid = XVisualIDFromVisual(a.visual);
-		glx_visualinfo = XGetVisualInfo(SDL_Display,
-	                     VisualScreenMask|VisualIDMask, &vi_in, &out_count);
-		return glx_visualinfo;
+	else {
+		attributes[i++].ti_Data = GL_FALSE;
 	}
-
-        /* Setup our GLX attributes according to the gl_config. */
-        i = 0;
-        attribs[i++] = GLX_RGBA;
-	attribs[i++] = GLX_RED_SIZE;
-	attribs[i++] = this->gl_config.red_size;
-	attribs[i++] = GLX_GREEN_SIZE;
-	attribs[i++] = this->gl_config.green_size;
-	attribs[i++] = GLX_BLUE_SIZE;
-	attribs[i++] = this->gl_config.blue_size;
-
-	if( this->gl_config.alpha_size ) {
-		attribs[i++] = GLX_ALPHA_SIZE;
-		attribs[i++] = this->gl_config.alpha_size;
+	// RGB(A) Mode ?
+	attributes[i].ti_Tag = AMA_RGBMode;
+	if ( this->gl_config.red_size   != 0 &&
+	     this->gl_config.blue_size  != 0 &&
+	     this->gl_config.green_size != 0 ) {
+		attributes[i++].ti_Data = GL_TRUE;
 	}
-
-	if( this->gl_config.buffer_size ) {
-                attribs[i++] = GLX_BUFFER_SIZE;
-	        attribs[i++] = this->gl_config.buffer_size;
+	else {
+		attributes[i++].ti_Data = GL_FALSE;
 	}
-
-	if( this->gl_config.double_buffer ) {
-		attribs[i++] = GLX_DOUBLEBUFFER;
+	// no depth buffer ?
+	if ( this->gl_config.depth_size == 0 ) {
+		attributes[i].ti_Tag = AMA_NoDepth;
+		attributes[i++].ti_Data = GL_TRUE;
 	}
-
-	attribs[i++] = GLX_DEPTH_SIZE;
-	attribs[i++] = this->gl_config.depth_size;
-
-	if( this->gl_config.stencil_size ) {
-		attribs[i++] = GLX_STENCIL_SIZE;
-		attribs[i++] = this->gl_config.stencil_size;
+	// no stencil buffer ?
+	if ( this->gl_config.stencil_size == 0 ) {
+		attributes[i].ti_Tag = AMA_NoStencil;
+		attributes[i++].ti_Data = GL_TRUE;
 	}
-
-	if( this->gl_config.accum_red_size ) {
-	        attribs[i++] = GLX_ACCUM_RED_SIZE;
-		attribs[i++] = this->gl_config.accum_red_size;
+	// no accum buffer ?
+	if ( this->gl_config.accum_red_size   != 0 &&
+	     this->gl_config.accum_blue_size  != 0 &&
+	     this->gl_config.accum_green_size != 0 ) {
+		attributes[i].ti_Tag = AMA_NoAccum;
+		attributes[i++].ti_Data = GL_TRUE;
 	}
+	// done...
+	attributes[i].ti_Tag	= TAG_DONE;
 
-	if( this->gl_config.accum_green_size ) {
-	        attribs[i++] = GLX_ACCUM_GREEN_SIZE;
-		attribs[i++] = this->gl_config.accum_green_size;
+	glcont = AmigaMesaCreateContext(attributes);
+	if ( glcont == NULL ) {
+		SDL_SetError("Couldn't create OpenGL context");
+		return(-1);
 	}
+	this->gl_data->gl_active = 1;
+	this->gl_config.driver_loaded = 1;
 
-	if( this->gl_config.accum_blue_size ) {
-	        attribs[i++] = GLX_ACCUM_BLUE_SIZE;
-		attribs[i++] = this->gl_config.accum_blue_size;
-	}
-
-	if( this->gl_config.accum_alpha_size ) {
-	        attribs[i++] = GLX_ACCUM_ALPHA_SIZE;
-		attribs[i++] = this->gl_config.accum_alpha_size;
-	}
-
-	attribs[i++] = None;
-
- 	glx_visualinfo = this->gl_data->glXChooseVisual(GFX_Display, 
-						  SDL_Screen, attribs);
-	if( !glx_visualinfo ) {
-		SDL_SetError( "Couldn't find matching GLX visual");
-		return NULL;
-	}
-	return glx_visualinfo;
+	return(0);
 #else
-	SDL_SetError("CGX driver is not yet supporting OpenGL");
-	return NULL;
+	SDL_SetError("OpenGL support not configured");
+	return(-1);
 #endif
 }
 
-int CGX_GL_CreateWindow(_THIS, int w, int h)
+/* Quit OpenGL */
+void CGX_GL_Quit(_THIS)
 {
-	int retval;
 #ifdef HAVE_OPENGL
-	XSetWindowAttributes attributes;
-	unsigned long mask;
-	unsigned long black;
-
-	black = (glx_visualinfo->visual == DefaultVisual(SDL_Display,
-						 	SDL_Screen))
-	       	? BlackPixel(SDL_Display, SDL_Screen) : 0;
-	attributes.background_pixel = black;
-	attributes.border_pixel = black;
-	attributes.colormap = SDL_XColorMap;
-	mask = CWBackPixel | CWBorderPixel | CWColormap;
-
-	SDL_Window = XCreateWindow(SDL_Display, WMwindow,
-			0, 0, w, h, 0, glx_visualinfo->depth,
-			InputOutput, glx_visualinfo->visual,
-			mask, &attributes);
-	if ( !SDL_Window ) {
-		SDL_SetError("Could not create window");
-		return -1;
+	if ( glcont != NULL ) {
+		AmigaMesaDestroyContext(glcont);
+		glcont = NULL;
+		this->gl_data->gl_active = 0;
+		this->gl_config.driver_loaded = 0;
 	}
-	retval = 0;
-#else
-	SDL_SetError("CGX driver is not yet supporting OpenGL");
-	retval = -1;
 #endif
-	return(retval);
 }
 
-int CGX_GL_CreateContext(_THIS)
+/* Attach context to another window */
+int CGX_GL_Update(_THIS)
 {
-	int retval;
 #ifdef HAVE_OPENGL
-	/* We do this to create a clean separation between X and GLX errors. */
-	XSync( SDL_Display, False );
-	glx_context = this->gl_data->glXCreateContext(GFX_Display, 
-				     glx_visualinfo, NULL, True);
-	XSync( GFX_Display, False );
-
-	if (glx_context == NULL) {
-		SDL_SetError("Could not create GL context");
-		return -1;
+	struct TagItem tags[2];
+	struct Window *win = (struct Window*)SDL_Window;
+	if(glcont == NULL) {
+		return -1; //should never happen
 	}
+	tags[0].ti_Tag = AMA_Window;
+	tags[0].ti_Data = (unsigned long)win;
+	tags[1].ti_Tag = TAG_DONE;
+	AmigaMesaSetRast(glcont, tags);
 
-	gl_active = 1;
+	return 0;
 #else
-	SDL_SetError("CGX driver is not yet supporting OpenGL");
+	SDL_SetError("OpenGL support not configured");
+	return -1;
 #endif
-	if ( gl_active ) {
-		retval = 0;
-	} else {
-		retval = -1;
-	}
-	return(retval);
-}
-
-void CGX_GL_Shutdown(_THIS)
-{
-#ifdef HAVE_OPENGL
-	/* Clean up OpenGL */
-	if( glx_context ) {
-		this->gl_data->glXMakeCurrent(GFX_Display, None, NULL);
-
-		if (glx_context != NULL)
-			this->gl_data->glXDestroyContext(GFX_Display, glx_context);
-
-		if( this->gl_data->glXReleaseBuffersMESA ) {
-		    this->gl_data->glXReleaseBuffersMESA(GFX_Display,SDL_Window);
-		}
-		glx_context = NULL;
-	}
-	gl_active = 0;
-#endif /* HAVE_OPENGL */
 }
 
 #ifdef HAVE_OPENGL
@@ -215,175 +143,75 @@ void CGX_GL_Shutdown(_THIS)
 /* Make the current context active */
 int CGX_GL_MakeCurrent(_THIS)
 {
-	int retval;
+	if(glcont == NULL)
+		return -1;
 
-	retval = 0;
-	if ( ! this->gl_data->glXMakeCurrent(GFX_Display,
-	                                     SDL_Window, glx_context) ) {
-		SDL_SetError("Unable to make GL context current");
-		retval = -1;
-	}
-	XSync( GFX_Display, False );
-
-	/* More Voodoo X server workarounds... Grr... */
-	SDL_Lock_EventThread();
-	X11_CheckDGAMouse(this);
-	SDL_Unlock_EventThread();
-
-	return(retval);
-}
-
-/* Get attribute data from glX. */
-int CGX_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
-{
-	int retval;
-	int glx_attrib = None;
-
-	switch( attrib ) {
-	    case SDL_GL_RED_SIZE:
-		glx_attrib = GLX_RED_SIZE;
-		break;
-	    case SDL_GL_GREEN_SIZE:
-		glx_attrib = GLX_GREEN_SIZE;
-		break;
-	    case SDL_GL_BLUE_SIZE:
-		glx_attrib = GLX_BLUE_SIZE;
-		break;
-	    case SDL_GL_ALPHA_SIZE:
-		glx_attrib = GLX_ALPHA_SIZE;
-		break;
-	    case SDL_GL_DOUBLEBUFFER:
-		glx_attrib = GLX_DOUBLEBUFFER;
-		break;
-	    case SDL_GL_BUFFER_SIZE:
-		glx_attrib = GLX_BUFFER_SIZE;
-		break;
-	    case SDL_GL_DEPTH_SIZE:
-		glx_attrib = GLX_DEPTH_SIZE;
-		break;
-	    case SDL_GL_STENCIL_SIZE:
-		glx_attrib = GLX_STENCIL_SIZE;
-		break;
-	    case SDL_GL_ACCUM_RED_SIZE:
-		glx_attrib = GLX_ACCUM_RED_SIZE;
-		break;
-	    case SDL_GL_ACCUM_GREEN_SIZE:
-		glx_attrib = GLX_ACCUM_GREEN_SIZE;
-		break;
-	    case SDL_GL_ACCUM_BLUE_SIZE:
-		glx_attrib = GLX_ACCUM_BLUE_SIZE;
-		break;
-	    case SDL_GL_ACCUM_ALPHA_SIZE:
-		glx_attrib = GLX_ACCUM_ALPHA_SIZE;
-		break;
-	    default:
-		return(-1);
-	}
-
-	retval = this->gl_data->glXGetConfig(GFX_Display, glx_visualinfo, glx_attrib, value);
-
-	return retval;
+	AmigaMesaMakeCurrent(glcont, glcont->buffer);
+	return 0;
 }
 
 void CGX_GL_SwapBuffers(_THIS)
 {
-	this->gl_data->glXSwapBuffers(GFX_Display, SDL_Window);
+	AmigaMesaSwapBuffers(glcont);
 }
 
-#endif /* HAVE_OPENGL */
+int CGX_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value) {
+	GLenum mesa_attrib;
 
-void CGX_GL_UnloadLibrary(_THIS)
-{
-#ifdef HAVE_OPENGL
-	if ( this->gl_config.driver_loaded ) {
-		dlclose(this->gl_config.dll_handle);
-
-		this->gl_data->glXChooseVisual = NULL;
-		this->gl_data->glXCreateContext = NULL;
-		this->gl_data->glXDestroyContext = NULL;
-		this->gl_data->glXMakeCurrent = NULL;
-		this->gl_data->glXSwapBuffers = NULL;
-
-		this->gl_config.dll_handle = NULL;
-		this->gl_config.driver_loaded = 0;
-	}
-#endif
-}
-
-#ifdef HAVE_OPENGL
-
-/* Passing a NULL path means load pointers from the application */
-int CGX_GL_LoadLibrary(_THIS, const char* path) 
-{
-	void* handle;
-	int dlopen_flags;
-
- 	if ( gl_active ) {
- 		SDL_SetError("OpenGL context already created");
- 		return -1;
- 	}
-
-#ifdef RTLD_GLOBAL
-	dlopen_flags = RTLD_LAZY | RTLD_GLOBAL;
-#else
-	dlopen_flags = RTLD_LAZY;
-#endif
-	handle = dlopen(path, dlopen_flags);
-	/* Catch the case where the application isn't linked with GL */
-	if ( (dlsym(handle, "glXChooseVisual") == NULL) && (path == NULL) ) {
-		dlclose(handle);
-		path = getenv("SDL_VIDEO_GL_DRIVER");
-		if ( path == NULL ) {
-			path = DEFAULT_OPENGL;
-		}
-		handle = dlopen(path, dlopen_flags);
-	}
-	if ( handle == NULL ) {
-		SDL_SetError("Could not load OpenGL library");
-		return -1;
+	switch(attrib) {
+		case SDL_GL_RED_SIZE:
+			mesa_attrib = GL_RED_BITS;
+			break;
+		case SDL_GL_GREEN_SIZE:
+			mesa_attrib = GL_GREEN_BITS;
+			break;
+		case SDL_GL_BLUE_SIZE:
+			mesa_attrib = GL_BLUE_BITS;
+			break;
+		case SDL_GL_ALPHA_SIZE:
+			mesa_attrib = GL_ALPHA_BITS;
+			break;
+		case SDL_GL_DOUBLEBUFFER:
+			mesa_attrib = GL_DOUBLEBUFFER;
+			break;
+		case SDL_GL_DEPTH_SIZE:
+			mesa_attrib = GL_DEPTH_BITS;
+			break;
+		case SDL_GL_STENCIL_SIZE:
+			mesa_attrib = GL_STENCIL_BITS;
+			break;
+		case SDL_GL_ACCUM_RED_SIZE:
+			mesa_attrib = GL_ACCUM_RED_BITS;
+			break;
+		case SDL_GL_ACCUM_GREEN_SIZE:
+			mesa_attrib = GL_ACCUM_GREEN_BITS;
+			break;
+		case SDL_GL_ACCUM_BLUE_SIZE:
+			mesa_attrib = GL_ACCUM_BLUE_BITS;
+			break;
+		case SDL_GL_ACCUM_ALPHA_SIZE:
+			mesa_attrib = GL_ACCUM_ALPHA_BITS;
+			break;
+		default :
+			return -1;
 	}
 
-	/* Unload the old driver and reset the pointers */
-	X11_GL_UnloadLibrary(this);
-
-	/* Load new function pointers */
-	this->gl_data->glXChooseVisual = dlsym(handle, "glXChooseVisual");
-	this->gl_data->glXCreateContext = dlsym(handle, "glXCreateContext");
-	this->gl_data->glXDestroyContext = dlsym(handle, "glXDestroyContext");
-	this->gl_data->glXMakeCurrent = dlsym(handle, "glXMakeCurrent");
-	this->gl_data->glXSwapBuffers = dlsym(handle, "glXSwapBuffers");
-	this->gl_data->glXGetConfig = dlsym(handle, "glXGetConfig");
-	/* We don't compare below for this in case we're not using Mesa. */
-	this->gl_data->glXReleaseBuffersMESA = dlsym( handle, "glXReleaseBuffersMESA" );
-
-	if ( (this->gl_data->glXChooseVisual == NULL) || 
-	     (this->gl_data->glXCreateContext == NULL) ||
-	     (this->gl_data->glXDestroyContext == NULL) ||
-	     (this->gl_data->glXMakeCurrent == NULL) ||
-	     (this->gl_data->glXSwapBuffers == NULL) ||
-	     (this->gl_data->glXGetConfig == NULL) ) {
-		SDL_SetError("Could not retrieve OpenGL functions");
-		return -1;
-	}
-
-	this->gl_config.dll_handle = handle;
-	this->gl_config.driver_loaded = 1;
-	if ( path ) {
-		strncpy(this->gl_config.driver_path, path,
-			sizeof(this->gl_config.driver_path)-1);
-	} else {
-		strcpy(this->gl_config.driver_path, "");
-	}
+	AmigaMesaGetConfig(glcont->visual, mesa_attrib, value);
 	return 0;
 }
 
-void *CGX_GL_GetProcAddress(_THIS, const char* proc)
-{
-	void* handle;
-	
-	handle = this->gl_config.dll_handle;
+void *CGX_GL_GetProcAddress(_THIS, const char *proc) {
+	void *func = NULL;
+	func = AmiGetGLProc(proc);
+	return func;
+}
 
-	return dlsym(handle, proc);
+int CGX_GL_LoadLibrary(_THIS, const char *path) {
+	/* Library is always open */
+	this->gl_config.driver_loaded = 1;
+
+	return 0;
 }
 
 #endif /* HAVE_OPENGL */
+

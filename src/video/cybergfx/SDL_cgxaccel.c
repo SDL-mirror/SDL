@@ -1,3 +1,30 @@
+/*
+    SDL - Simple DirectMedia Layer
+    Copyright (C) 1997, 1998, 1999, 2000  Sam Lantinga
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Library General Public
+    License as published by the Free Software Foundation; either
+    version 2 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Library General Public License for more details.
+
+    You should have received a copy of the GNU Library General Public
+    License along with this library; if not, write to the Free
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+    Sam Lantinga
+    slouken@libsdl.org
+*/
+
+#ifdef SAVE_RCSID
+static char rcsid =
+ "@(#) $Id$";
+#endif
+
 #include "SDL_error.h"
 #include "SDL_endian.h"
 #include "SDL_sysvideo.h"
@@ -10,7 +37,7 @@ static int CGX_HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,
 
 // These are needed to avoid register troubles with gcc -O2!
 
-#if defined(__SASC) || defined(__PPC__)
+#if defined(__SASC) || defined(__PPC__) || defined(MORPHOS)
 #define BMKBRP(a,b,c,d,e,f,g,h,i,j) BltMaskBitMapRastPort(a,b,c,d,e,f,g,h,i,j)
 #define	BBRP(a,b,c,d,e,f,g,h,i) BltBitMapRastPort(a,b,c,d,e,f,g,h,i)
 #define BBB(a,b,c,d,e,f,g,h,i,j,k) BltBitMap(a,b,c,d,e,f,g,h,i,j,k)
@@ -18,10 +45,10 @@ static int CGX_HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,
 void BMKBRP(struct BitMap *a,WORD b, WORD c,struct RastPort *d,WORD e,WORD f,WORD g,WORD h,UBYTE i,APTR j)
 {BltMaskBitMapRastPort(a,b,c,d,e,f,g,h,i,j);}
 
-void BBRP(struct BitMap *a,WORD b, WORD c,struct RastPort *d,WORD e,WORD f,WORD g,WORD h,UBYTE i) 
+void BBRP(struct BitMap *a,WORD b, WORD c,struct RastPort *d,WORD e,WORD f,WORD g,WORD h,UBYTE i)
 {BltBitMapRastPort(a,b,c,d,e,f,g,h,i);}
 
-void BBB(struct BitMap *a,WORD b, WORD c,struct BitMap *d,WORD e,WORD f,WORD g,WORD h,UBYTE i,UBYTE j,UWORD *k) 
+void BBB(struct BitMap *a,WORD b, WORD c,struct BitMap *d,WORD e,WORD f,WORD g,WORD h,UBYTE i,UBYTE j,UWORD *k)
 {BltBitMap(a,b,c,d,e,f,g,h,i,j,k);}
 #endif
 
@@ -39,7 +66,7 @@ int CGX_SetHWColorKey(_THIS,SDL_Surface *surface, Uint32 key)
 
 			memset(surface->hwdata->mask,255,RASSIZE(surface->w,surface->h));
 
-			D(bug("Costruisco colorkey: colore: %ld, size: %ld x %ld, %ld bytes...Bpp:%ld\n",key,surface->w,surface->h,RASSIZE(surface->w,surface->h),surface->format->BytesPerPixel));
+			D(bug("Building colorkey mask: color: %ld, size: %ld x %ld, %ld bytes...Bpp:%ld\n",key,surface->w,surface->h,RASSIZE(surface->w,surface->h),surface->format->BytesPerPixel));
 
 			if(lock=LockBitMapTags(surface->hwdata->bmap,LBMI_BASEADDRESS,(ULONG)&surface->pixels,
 					LBMI_BYTESPERROW,(ULONG)&pitch,TAG_DONE))
@@ -138,7 +165,7 @@ int CGX_SetHWColorKey(_THIS,SDL_Surface *surface, Uint32 key)
 						ok=-1;
 				}
 				UnLockBitMap(lock);
-				D(bug("...Colorkey costruito!\n"));
+				D(bug("...Colorkey built!\n"));
 				return ok;
 			}
 		}
