@@ -51,7 +51,7 @@ static char rcsid =
 #endif
 
 /* The tag name used by artsc audio */
-#define ARTSC_DRIVER_NAME         "artsc"
+#define ARTSC_DRIVER_NAME         "arts"
 
 /* Audio driver functions */
 static int ARTSC_OpenAudio(_THIS, SDL_AudioSpec *spec);
