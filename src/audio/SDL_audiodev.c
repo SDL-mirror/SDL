@@ -39,7 +39,11 @@ static char rcsid =
 #include "SDL_audiodev_c.h"
 
 #ifndef _PATH_DEV_DSP
-#define _PATH_DEV_DSP	"/dev/dsp"
+#ifdef __OpenBSD__
+#define _PATH_DEV_DSP  "/dev/audio"
+#else
+#define _PATH_DEV_DSP  "/dev/dsp"
+#endif
 #endif
 #ifndef _PATH_DEV_DSP24
 #define _PATH_DEV_DSP24	"/dev/sound/dsp"

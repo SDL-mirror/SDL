@@ -99,15 +99,15 @@ typedef struct AudioBootStrap {
 	SDL_AudioDevice *(*create)(int devindex);
 } AudioBootStrap;
 
+#ifdef OBSD_SUPPORT
+extern AudioBootStrap OBSD_bootstrap;
+#endif
 #ifdef OSS_SUPPORT
 extern AudioBootStrap DSP_bootstrap;
 extern AudioBootStrap DMA_bootstrap;
 #endif
 #ifdef ALSA_SUPPORT
 extern AudioBootStrap ALSA_bootstrap;
-#endif
-#ifdef __OpenBSD__
-extern AudioBootStrap OBSD_bootstrap;
 #endif
 #if (defined(unix) && !defined(__CYGWIN32__)) && \
     !defined(OSS_SUPPORT) && !defined(ALSA_SUPPORT)

@@ -39,7 +39,13 @@ static char rcsid =
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
+#ifdef OSS_USE_SOUNDCARD_H
+/* This is installed on some systems */
+#include <soundcard.h>
+#else
+/* This is recommended by OSS */
 #include <sys/soundcard.h>
+#endif
 
 #ifndef MAP_FAILED
 #define MAP_FAILED	((Uint8 *)-1)

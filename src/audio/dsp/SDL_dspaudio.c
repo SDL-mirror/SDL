@@ -37,7 +37,13 @@ static char rcsid =
 #include <sys/time.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
+#ifdef OSS_USE_SOUNDCARD_H
+/* This is installed on some systems */
+#include <soundcard.h>
+#else
+/* This is recommended by OSS */
 #include <sys/soundcard.h>
+#endif
 
 #include "SDL_audio.h"
 #include "SDL_error.h"

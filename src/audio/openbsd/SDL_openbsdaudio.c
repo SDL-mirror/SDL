@@ -140,83 +140,95 @@ AudioBootStrap OBSD_bootstrap = {
 static void
 OBSD_WaitAudio(_THIS)
 {
-#ifndef USE_BLOCKING_WRITES
-    fd_set fdset;
-
-    /* Check to see if the thread-parent process is still alive */
-    {
-	static int cnt = 0;
-	/* Note that this only works with thread implementations 
-	   that use a different process id for each thread. */
-	if(parent && (((++cnt)%10) == 0)) { /* Check every 10 loops */
-	    if(kill(parent, 0) < 0)
-		this->enabled = 0;
+	/* Check to see if the thread-parent process is still alive */
+	{ static int cnt = 0;
+		/* Note that this only works with thread implementations 
+		   that use a different process id for each thread.
+		*/
+		if (parent && (((++cnt)%10) == 0)) { /* Check every 10 loops */
+			if ( kill(parent, 0) < 0 ) {
+				this->enabled = 0;
+			}
+		}
 	}
-    }
 
-#ifdef USE_TIMER_SYNC
-    /* See if we need to use timed audio synchronization */
-    if(frame_ticks)
-    {
-	/* Use timer for general audio synchronization */
-	Sint32 ticks;
+#ifndef USE_BLOCKING_WRITES /* Not necessary when using blocking writes */
+	/* See if we need to use timed audio synchronization */
+	if ( frame_ticks ) {
+		/* Use timer for general audio synchronization */
+		Sint32 ticks;
 
-	ticks = ((Sint32)(next_frame - SDL_GetTicks())) - FUDGE_TICKS;
-	if(ticks > 0)
-	    SDL_Delay(ticks);
-    }
-    else
-#endif /* USE_TIMER_SYNC */
-    {
-	/* Use select() for audio synchronization */
-	struct timeval timeout;
-	FD_ZERO(&fdset);
-	FD_SET(audio_fd, &fdset);
-	timeout.tv_sec = 10;
-	timeout.tv_usec = 0;
-	
-#if defined(DEBUG_AUDIO_STREAM) && defined(DEBUG_AUDIO_STREAM)
-	OBSD_Status(this);
+		ticks = ((Sint32)(next_frame - SDL_GetTicks()))-FUDGE_TICKS;
+		if ( ticks > 0 ) {
+			SDL_Delay(ticks);
+		}
+	} else {
+		/* Use select() for audio synchronization */
+		fd_set fdset;
+		struct timeval timeout;
+
+		FD_ZERO(&fdset);
+		FD_SET(audio_fd, &fdset);
+		timeout.tv_sec = 10;
+		timeout.tv_usec = 0;
+#ifdef DEBUG_AUDIO
+		fprintf(stderr, "Waiting for audio to get ready\n");
 #endif
-	if(select(audio_fd+1, NULL, &fdset, NULL, &timeout) <= 0)
-	{
-	    const char *message =
-		"Audio timeout - buggy audio driver? (disabled)";
-	    fprintf(stderr, "SDL: %s\n", message);
-	    this->enabled = 0;
-	    audio_fd = -1;
+		if ( select(audio_fd+1, NULL, &fdset, NULL, &timeout) <= 0 ) {
+			const char *message =
+			"Audio timeout - buggy audio driver? (disabled)";
+			/* In general we should never print to the screen,
+			   but in this case we have no other way of letting
+			   the user know what happened.
+			*/
+			fprintf(stderr, "SDL: %s\n", message);
+			this->enabled = 0;
+			/* Don't try to close - may hang */
+			audio_fd = -1;
+#ifdef DEBUG_AUDIO
+			fprintf(stderr, "Done disabling audio\n");
+#endif
+		}
+#ifdef DEBUG_AUDIO
+		fprintf(stderr, "Ready!\n");
+#endif
 	}
-    }
 #endif /* !USE_BLOCKING_WRITES */
-
 }
 
 static void
 OBSD_PlayAudio(_THIS)
 {
-    int written;
+	int written, p=0;
 
-    /* Write the audio data, checking for EAGAIN on broken audio drivers */
-    do
-    {
-	written = write(audio_fd, mixbuf, mixlen);
-	if((written < 0) && ((errno == 0) || (errno == EAGAIN)))
-	    SDL_Delay(1);
-    }
-    while((written < 0) &&
-	((errno == 0) || (errno == EAGAIN) || (errno == EINTR)));
+	/* Write the audio data, checking for EAGAIN on broken audio drivers */
+	do {
+		written = write(audio_fd, &mixbuf[p], mixlen-p);
+		if (written>0)
+		   p += written;
+		if (written == -1 && errno != 0 && errno != EAGAIN && errno != EINTR)
+		{
+		   /* Non recoverable error has occurred. It should be reported!!! */
+		   perror("audio");
+		   break;
+		}
 
-#ifdef USE_TIMER_SYNC
-    if(frame_ticks)
-	next_frame += frame_ticks;
-#endif
+		if ( p < written || ((written < 0) && ((errno == 0) || (errno == EAGAIN))) ) {
+			SDL_Delay(1);	/* Let a little CPU time go by */
+		}
+	} while ( p < written );
 
-    /* If we couldn't write, assume fatal error for now */
-    if(written < 0)
-	this->enabled = 0;
+	/* If timer synchronization is enabled, set the next write frame */
+	if ( frame_ticks ) {
+		next_frame += frame_ticks;
+	}
 
-#ifdef DEBUG_AUDIO_STREAM
-    fprintf(stderr, "Wrote %d bytes of audio data\n", written);
+	/* If we couldn't write, assume fatal error for now */
+	if ( written < 0 ) {
+		this->enabled = 0;
+	}
+#ifdef DEBUG_AUDIO
+	fprintf(stderr, "Wrote %d bytes of audio data\n", written);
 #endif
 }
 

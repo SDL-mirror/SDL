@@ -48,7 +48,7 @@ static char rcsid =
 #ifdef SDL_USE_PTHREADS
 
 #ifdef SDL_NO_PTHREAD_SEMAPHORES
-#include "generic/SDL_sem.c"
+#include "generic/SDL_syssem.c"
 #else
 
 #include <stdio.h>

@@ -40,15 +40,15 @@ static char rcsid =
 
 /* Available audio drivers */
 static AudioBootStrap *bootstrap[] = {
+#ifdef OBSD_SUPPORT
+	&OBSD_bootstrap,
+#endif
 #ifdef OSS_SUPPORT
 	&DSP_bootstrap,
 	&DMA_bootstrap,
 #endif
 #ifdef ALSA_SUPPORT
 	&ALSA_bootstrap,
-#endif
-#ifdef __OpenBSD__
-	&OBSD_bootstrap,
 #endif
 #if (defined(unix) && !defined(__CYGWIN32__)) && \
     !defined(OSS_SUPPORT) && !defined(ALSA_SUPPORT)

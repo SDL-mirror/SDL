@@ -245,13 +245,25 @@ CheckOSS()
     if test x$enable_audio = xyes -a x$enable_oss = xyes; then
         AC_MSG_CHECKING(for OSS audio support)
         have_oss=no
-        AC_TRY_COMPILE([
-          #include <sys/soundcard.h>
-        ],[
-          int arg = SNDCTL_DSP_SETFRAGMENT;
-        ],[
-        have_oss=yes
-        ])
+        if test x$have_oss != xyes; then
+            AC_TRY_COMPILE([
+              #include <sys/soundcard.h>
+            ],[
+              int arg = SNDCTL_DSP_SETFRAGMENT;
+            ],[
+            have_oss=yes
+            ])
+        fi
+        if test x$have_oss != xyes; then
+            AC_TRY_COMPILE([
+              #include <soundcard.h>
+            ],[
+              int arg = SNDCTL_DSP_SETFRAGMENT;
+            ],[
+            have_oss=yes
+            CFLAGS="$CFLAGS -DOSS_USE_SOUNDCARD_H"
+            ])
+        fi
         AC_MSG_RESULT($have_oss)
         if test x$have_oss = xyes; then
             CFLAGS="$CFLAGS -DOSS_SUPPORT"
@@ -286,10 +298,10 @@ dnl Check whether we want to use OpenBSD native audio or not
 CheckOPENBSDAUDIO()
 {
     AC_ARG_ENABLE(openbsdaudio,
-[  --enable-openbsdaudio   OpenBSD native audio support [default=no]],
-                  , enable_openbsdaudio=no)
+[  --enable-openbsdaudio   OpenBSD native audio support [default=yes]],
+                  , enable_openbsdaudio=yes)
     if test x$enable_audio = xyes -a x$enable_openbsdaudio = xyes; then
-        SYSTEM_LIBS="$SYSTEM_LIBS $ESD_LIBS"
+        CFLAGS="$CFLAGS -DOBSD_SUPPORT"
         AUDIO_SUBDIRS="$AUDIO_SUBDIRS openbsd"
         AUDIO_DRIVERS="$AUDIO_DRIVERS openbsd/libaudio_openbsd.la"
     fi
@@ -994,6 +1006,20 @@ CheckPTHREAD()
                 CFLAGS="$CFLAGS -DPTHREAD_NO_RECURSIVE_MUTEX"
             fi
 
+            # Check to see if pthread semaphore support is missing
+            if test x$enable_pthread_sem = xyes; then
+                AC_MSG_CHECKING(for pthread semaphores)
+                have_pthread_sem=no
+                AC_TRY_COMPILE([
+                  #include <pthread.h>
+                  #include <semaphore.h>
+                ],[
+                ],[
+                have_pthread_sem=yes
+                ])
+                AC_MSG_RESULT($have_pthread_sem)
+            fi
+
             # Check to see if this is broken glibc 2.0 pthreads
             case "$target" in
                 *-*-linux*)
@@ -1196,7 +1222,7 @@ case "$target" in
             fi
             COPY_ARCH_SRC(src/thread, linux, SDL_systhread.c)
             COPY_ARCH_SRC(src/thread, linux, SDL_systhread_c.h)
-            if test x$use_pthreads = xyes -a x$enable_pthread_sem != xyes; then
+            if test x$use_pthreads = xyes -a x$have_pthread_sem != xyes; then
                 COPY_ARCH_SRC(src/thread, generic, SDL_syssem.c)
             else
                 COPY_ARCH_SRC(src/thread, linux, SDL_syssem.c)
@@ -1303,7 +1329,7 @@ case "$target" in
             COPY_ARCH_SRC(src/thread, linux, SDL_systhread_c.h)
             COPY_ARCH_SRC(src/thread, linux, SDL_sysmutex.c)
             COPY_ARCH_SRC(src/thread, linux, SDL_sysmutex_c.h)
-            if test x$use_pthreads = xyes -a x$enable_pthread_sem != xyes; then
+            if test x$use_pthreads = xyes -a x$have_pthread_sem != xyes; then
                 COPY_ARCH_SRC(src/thread, generic, SDL_syssem.c)
             else
                 COPY_ARCH_SRC(src/thread, linux, SDL_syssem.c)
@@ -1353,7 +1379,7 @@ case "$target" in
             COPY_ARCH_SRC(src/thread, linux, SDL_systhread_c.h)
             COPY_ARCH_SRC(src/thread, linux, SDL_sysmutex.c)
             COPY_ARCH_SRC(src/thread, linux, SDL_sysmutex_c.h)
-            if test x$use_pthreads = xyes -a x$enable_pthread_sem != xyes; then
+            if test x$use_pthreads = xyes -a x$have_pthread_sem != xyes; then
                 COPY_ARCH_SRC(src/thread, generic, SDL_syssem.c)
             else
                 COPY_ARCH_SRC(src/thread, linux, SDL_syssem.c)
@@ -1373,6 +1399,7 @@ case "$target" in
         ARCH=openbsd
         CheckDummyVideo
         CheckDiskAudio
+        CheckOPENBSDAUDIO
         CheckNASM
         CheckOSS
         CheckARTSC
@@ -1385,7 +1412,15 @@ case "$target" in
         # Set up files for the main() stub
         COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         # Set up files for the audio library
-        CheckOPENBSDAUDIO
+        # We use the OSS and native API's, not the Sun audio API
+        #if test x$enable_audio = xyes; then
+        #    AUDIO_SUBDIRS="$AUDIO_SUBDIRS sun"
+        #    AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
+        #fi
+        # OpenBSD needs linking with ossaudio emulation library
+        if test x$have_oss = xyes; then
+            SYSTEM_LIBS="$SYSTEM_LIBS -lossaudio"
+        fi
         # Set up files for the joystick library
         # (No joystick support yet)
         if test x$enable_joystick = xyes; then
@@ -1402,7 +1437,7 @@ case "$target" in
             COPY_ARCH_SRC(src/thread, linux, SDL_systhread_c.h)
             COPY_ARCH_SRC(src/thread, linux, SDL_sysmutex.c)
             COPY_ARCH_SRC(src/thread, linux, SDL_sysmutex_c.h)
-            if test x$use_pthreads = xyes -a x$enable_pthread_sem != xyes; then
+            if test x$use_pthreads = xyes -a x$have_pthread_sem != xyes; then
                 COPY_ARCH_SRC(src/thread, generic, SDL_syssem.c)
             else
                 COPY_ARCH_SRC(src/thread, linux, SDL_syssem.c)
@@ -1528,7 +1563,7 @@ case "$target" in
         if test x$enable_audio = xyes; then
             AUDIO_SUBDIRS="$AUDIO_SUBDIRS dmedia"
             AUDIO_DRIVERS="$AUDIO_DRIVERS dmedia/libaudio_dmedia.la"
-            LIBS="$LIBS -laudio"
+            SYSTEM_LIBS="$SYSTEM_LIBS -laudio"
         fi
         # Set up files for the joystick library
         # (No joystick support yet)
@@ -1548,7 +1583,7 @@ case "$target" in
                 COPY_ARCH_SRC(src/thread, linux, SDL_systhread_c.h)
                 COPY_ARCH_SRC(src/thread, linux, SDL_sysmutex.c)
                 COPY_ARCH_SRC(src/thread, linux, SDL_sysmutex_c.h)
-                if test x$enable_pthread_sem != xyes; then
+                if test x$have_pthread_sem != xyes; then
                     COPY_ARCH_SRC(src/thread, generic, SDL_syssem.c)
                 else
                     COPY_ARCH_SRC(src/thread, linux, SDL_syssem.c)
@@ -1937,7 +1972,7 @@ case "$target" in
             COPY_ARCH_SRC(src/thread, linux, SDL_systhread_c.h)
             COPY_ARCH_SRC(src/thread, linux, SDL_sysmutex.c)
             COPY_ARCH_SRC(src/thread, linux, SDL_sysmutex_c.h)
-            if test x$use_pthreads = xyes -a x$enable_pthread_sem != xyes; then
+            if test x$use_pthreads = xyes -a x$have_pthread_sem != xyes; then
                 COPY_ARCH_SRC(src/thread, generic, SDL_syssem.c)
             else
                 COPY_ARCH_SRC(src/thread, linux, SDL_syssem.c)
@@ -1989,7 +2024,7 @@ if test $ARCH = solaris; then
 fi
 
 if test $ARCH = openbsd; then
-  SDL_RLD_FLAGS="-L${X11BASE}/lib -Wl,-rpath,\${exec_prefix}/lib -Wl,-rpath,${X11BASE}/lib"
+  SDL_RLD_FLAGS="-Wl,-rpath,\${exec_prefix}/lib $SYSTEM_LIBS"
 fi
 
 dnl Output the video drivers we use
