@@ -58,7 +58,6 @@ static char rcsid =
 
 /* Define this if you want to debug X11 events */
 /*#define DEBUG_XEVENTS*/
-#define DEBUG_XEVENTS
 
 /* The translation tables from an X11 keysym to a SDL keysym */
 static SDLKey ODD_keymap[256];
