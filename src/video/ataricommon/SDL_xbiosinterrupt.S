@@ -34,6 +34,7 @@ static char rcsid =
 	.text
 
 	.globl	_SDL_AtariXbios_Install
+	.globl	_SDL_AtariXbios_Restore
 	.globl	_SDL_AtariXbios_MouseVector
 	.globl	_SDL_AtariXbios_JoystickVector
 
@@ -53,6 +54,7 @@ _SDL_AtariXbios_Install:
 
 	/* Save old mouse vector, set our routine */
 
+	clrl	oldmousevector
 	movel	sp@(8),d0
 	beqs	no_new_mouse_vector
 	movel	a0@(16),oldmousevector
@@ -61,11 +63,41 @@ no_new_mouse_vector:
 
 	/* Save old joystick vector, set our routine */
 
+	clrl	oldjoystickvector
 	movel	sp@(12),d0
 	beqs	no_new_joystick_vector
 	movel	a0@(24),oldjoystickvector
 	movel	d0,a0@(24)
 no_new_joystick_vector:
+
+	/* Restart interrupts */
+
+	movew	#0x2300,sr
+
+	rts
+
+/*--- Vector restorer ---*/
+
+_SDL_AtariXbios_Restore:
+	movel	sp@(4),a0
+
+	/* Stop interrupts */
+
+	movew	#0x2700,sr
+
+	/* Restore mouse vector */
+
+	movel	oldmousevector,d0
+	beqs	no_restore_mouse
+	movel	d0,a0@(16)
+no_restore_mouse:
+
+	/* Restore joystick vector */
+
+	movel	oldjoystickvector,d0
+	beqs	no_restore_joystick
+	movel	d0,a0@(24)
+no_restore_joystick:
 
 	/* Restart interrupts */
 
@@ -138,4 +170,3 @@ _SDL_AtariXbios_JoystickVector:
 	.data
 	.even
 	.comm	_SDL_AtariXbios_joystick,2*1
-

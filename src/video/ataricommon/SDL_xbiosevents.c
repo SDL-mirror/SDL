@@ -31,8 +31,10 @@ static char rcsid =
  *	Patrice Mandin
  */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include <mint/osbind.h>
 
 #include "SDL_events_c.h"
@@ -43,9 +45,12 @@ static char rcsid =
 
 int SDL_AtariXbios_enabled=0;
 
-static _KBDVECS *kbdvecs;		/* Pointer to access vectors */
-static _KBDVECS sys_kbdvecs;	/* Backup of system vectors */
+/* Local variables */
+
+static _KBDVECS *kbdvecs;		/* Pointer to access system vectors */
 static Uint16 atari_prevmouseb;	/* buttons */
+
+/* Functions */
 
 void SDL_AtariXbios_InstallVectors(int vectors_mask)
 {
@@ -64,10 +69,7 @@ void SDL_AtariXbios_InstallVectors(int vectors_mask)
 	/* Go to supervisor mode */
 	oldpile=(void *)Super(0);
 
-	/* Backup system vectors */
-	memcpy(&sys_kbdvecs, kbdvecs, sizeof(_KBDVECS));
-
-	/* Install our vector */
+	/* Install our vectors */
 	SDL_AtariXbios_Install(
 		kbdvecs,
 		(vectors_mask & ATARI_XBIOS_MOUSEEVENTS) ? SDL_AtariXbios_MouseVector : NULL,
@@ -84,11 +86,14 @@ void SDL_AtariXbios_RestoreVectors(void)
 {
 	void *oldpile;
 
+	/* Read IKBD vectors base */
+	kbdvecs=Kbdvbase();
+
 	/* Go to supervisor mode */
 	oldpile=(void *)Super(NULL);
 
 	/* Reinstall system vector */
-	SDL_AtariXbios_Install(kbdvecs,sys_kbdvecs.mousevec,sys_kbdvecs.joyvec);
+	SDL_AtariXbios_Restore(kbdvecs);
 
 	/* Back to user mode */
 	Super(oldpile);
