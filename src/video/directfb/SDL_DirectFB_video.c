@@ -46,6 +46,7 @@ static char rcsid =
 #include "SDL_events_c.h"
 #include "SDL_DirectFB_video.h"
 #include "SDL_DirectFB_events.h"
+#include "SDL_DirectFB_yuv.h"
 
 
 /* Initialization/Query functions */
@@ -123,6 +124,7 @@ static SDL_VideoDevice *DirectFB_CreateDevice(int devindex)
   device->SetVideoMode = DirectFB_SetVideoMode;
   device->SetColors = DirectFB_SetColors;
   device->UpdateRects = NULL;
+  device->CreateYUVOverlay = DirectFB_CreateYUVOverlay;
   device->VideoQuit = DirectFB_VideoQuit;
   device->AllocHWSurface = DirectFB_AllocHWSurface;
   device->CheckHWBlit = DirectFB_CheckHWBlit;

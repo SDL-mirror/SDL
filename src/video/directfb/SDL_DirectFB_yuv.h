@@ -25,32 +25,18 @@ static char rcsid =
  "@(#) $Id$";
 #endif
 
-#ifndef _SDL_DirectFB_video_h
-#define _SDL_DirectFB_video_h
+/* This is the DirectFB implementation of YUV video overlays */
 
-#include <directfb.h>
+#include "SDL_video.h"
+#include "SDL_DirectFB_video.h"
 
-#include "SDL_mouse.h"
-#include "SDL_sysvideo.h"
+extern SDL_Overlay *DirectFB_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SDL_Surface *display);
 
-#define _THIS SDL_VideoDevice *this
+extern int DirectFB_LockYUVOverlay(_THIS, SDL_Overlay *overlay);
 
-/* Private display data */
+extern void DirectFB_UnlockYUVOverlay(_THIS, SDL_Overlay *overlay);
 
-struct SDL_PrivateVideoData
-{
-  int                    initialized;
+extern int DirectFB_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *dstrect);
 
-  IDirectFB             *dfb;
-  IDirectFBDisplayLayer *layer;
-  IDirectFBEventBuffer  *eventbuffer;
+extern void DirectFB_FreeYUVOverlay(_THIS, SDL_Overlay *overlay);
 
-  int nummodes;
-  SDL_Rect **modelist;
-};
-
-#define HIDDEN (this->hidden)
-
-void SetDirectFBerror (const char *function, DFBResult code);
-
-#endif /* _SDL_DirectFB_video_h */

@@ -12,4 +12,6 @@ DIRECTFB_SRCS = 		\
 	SDL_DirectFB_events.c	\
 	SDL_DirectFB_events.h	\
 	SDL_DirectFB_video.c	\
-	SDL_DirectFB_video.h
+	SDL_DirectFB_video.h	\
+	SDL_DirectFB_yuv.c	\
+	SDL_DirectFB_yuv.h
