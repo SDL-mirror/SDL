@@ -73,10 +73,11 @@ struct private_yuvhwdata {
 };
 
 
+static int (*X_handler)(Display *, XErrorEvent *) = NULL;
+
 #ifndef NO_SHARED_MEMORY
 /* Shared memory error handler routine */
 static int shm_error;
-static int (*X_handler)(Display *, XErrorEvent *) = NULL;
 static int shm_errhandler(Display *d, XErrorEvent *e)
 {
         if ( e->error_code == BadAccess ) {
@@ -87,6 +88,15 @@ static int shm_errhandler(Display *d, XErrorEvent *e)
 }
 #endif /* !NO_SHARED_MEMORY */
 
+static int xv_error;
+static int xv_errhandler(Display *d, XErrorEvent *e)
+{
+        if ( e->error_code == BadMatch ) {
+        	xv_error = True;
+        	return(0);
+        } else
+		return(X_handler(d,e));
+}
 
 SDL_Overlay *X11_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SDL_Surface *display)
 {
@@ -190,6 +200,30 @@ SDL_Overlay *X11_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, S
 	if ( xv_port == -1 ) {
 		SDL_SetError("No available video ports for requested format");
 		return(NULL);
+	}
+
+	/* Enable auto-painting of the overlay colorkey */
+	{
+		static const char *attr[] = { "XV_AUTOPAINT_COLORKEY", "XV_AUTOPAINT_COLOURKEY" };
+		unsigned int i;
+
+		SDL_NAME(XvSelectPortNotify)(GFX_Display, xv_port, True);
+		X_handler = XSetErrorHandler(xv_errhandler);
+		for ( i=0; i < sizeof(attr)/(sizeof attr[0]); ++i ) {
+			Atom a;
+
+			xv_error = False;
+			a = XInternAtom(GFX_Display, attr[i], True);
+			if ( a != None ) {
+     				SDL_NAME(XvSetPortAttribute)(GFX_Display, xv_port, a, 1);
+				XSync(GFX_Display, True);
+				if ( ! xv_error ) {
+					break;
+				}
+			}
+		}
+		XSetErrorHandler(X_handler);
+		SDL_NAME(XvSelectPortNotify)(GFX_Display, xv_port, False);
 	}
 
 	/* Create the overlay structure */
