@@ -127,7 +127,7 @@ static void	report_free(struct report *);
 int
 SDL_SYS_JoystickInit(void)
 {
-	char s[10];
+	char s[16];
 	int i, fd;
 
 	SDL_numjoysticks = 0;
