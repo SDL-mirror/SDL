@@ -76,7 +76,7 @@ static VideoBootStrap *bootstrap[] = {
 	&SVGALIB_bootstrap,
 #endif
 #ifdef ENABLE_AALIB
-    &AALIB_bootstrap,
+	&AALIB_bootstrap,
 #endif
 #ifdef ENABLE_DIRECTX
 	&DIRECTX_bootstrap,
@@ -105,9 +105,6 @@ static VideoBootStrap *bootstrap[] = {
 #ifdef ENABLE_EPOC
 	&EPOC_bootstrap,
 #endif
-#ifdef ENABLE_DUMMYVIDEO
-	&DUMMY_bootstrap,
-#endif
 #ifdef ENABLE_XBIOS
 	&XBIOS_bootstrap,
 #endif
@@ -119,6 +116,9 @@ static VideoBootStrap *bootstrap[] = {
 #endif
 #ifdef ENABLE_DC
 	&DC_bootstrap,
+#endif
+#ifdef ENABLE_DUMMYVIDEO
+	&DUMMY_bootstrap,
 #endif
 	NULL
 };
