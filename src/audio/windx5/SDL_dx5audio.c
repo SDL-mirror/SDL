@@ -416,6 +416,7 @@ static void DX5_CloseAudio(_THIS)
 	}
 }
 
+#ifdef USE_PRIMARY_BUFFER
 /* This function tries to create a primary audio buffer, and returns the
    number of audio chunks available in the created buffer.
 */
@@ -489,6 +490,7 @@ static int CreatePrimary(LPDIRECTSOUND sndObj, HWND focus,
 	}
 	return(numchunks);
 }
+#endif /* USE_PRIMARY_BUFFER */
 
 /* This function tries to create a secondary audio buffer, and returns the
    number of audio chunks available in the created buffer.
