@@ -310,8 +310,8 @@ int X11_GetVideoModes(_THIS)
             fclose(metro_fp);
         }
     }
-#if defined(__alpha__) || defined(__powerpc__)
-    /* The alpha and PPC XFree86 servers are also buggy */
+#if defined(__alpha__) || defined(__sparc64__) || defined(__powerpc__)
+    /* The alpha, sparc64 and PPC XFree86 servers are also buggy */
     buggy_X11 = 1;
 #endif
     /* Enumerate the available fullscreen modes */
