@@ -242,6 +242,8 @@ int ph_IconifyWindow(_THIS)
 	windowevent.rid = PtWidgetRid( window );
 	PtForwardWindowEvent( &windowevent );
 	SDL_Unlock_EventThread();
+        
+        return 0;
 }
 
 SDL_GrabMode ph_GrabInputNoLock(_THIS, SDL_GrabMode mode)

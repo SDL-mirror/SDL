@@ -33,62 +33,54 @@ static char rcsid =
 #include "SDL_endian.h"
 #include "SDL_ph_image_c.h"
 
-//printf("%s:%s:%d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__ );
-
-/* Various screen update functions available */
-//static void ph_NormalUpdate(_THIS, int numrects, SDL_Rect *rects);
-//static void ph_DummyUpdate(_THIS, int numrects, SDL_Rect *rects);
-
 int ph_SetupImage(_THIS, SDL_Surface *screen)
 {
-	int type = 0;
+    int type = 0;
 
-	/* Determine image type */
-	switch(screen->format->BitsPerPixel)
-	{
-		case 8:{
-			type = Pg_IMAGE_PALETTE_BYTE;
-		}
-		break;
-		case 15:{
-			type = Pg_IMAGE_DIRECT_555; 
-		}
-		break;
-		case 16:{
-			type = Pg_IMAGE_DIRECT_565; 
-		}
-		break;
+    /* Determine image type */
+    switch(screen->format->BitsPerPixel)
+    {
+        case 8:{
+            type = Pg_IMAGE_PALETTE_BYTE;
+        }
+        break;
+        case 15:{
+            type = Pg_IMAGE_DIRECT_555; 
+        }
+        break;
+        case 16:{
+            type = Pg_IMAGE_DIRECT_565; 
+        }
+        break;
+        case 24:{
+            type = Pg_IMAGE_DIRECT_888;
+        }
+        break;
+        case 32:{
+            type = Pg_IMAGE_DIRECT_8888;
+        }
+        break;
+        default:{
+            /* should never get here */
+            fprintf(stderr,"error: unsupported bbp = %d\n",
+                    screen->format->BitsPerPixel);
+            return -1;
+        }
+        break;
+    }
 
-		case 24:{
-			type = Pg_IMAGE_DIRECT_888;
-		}
-		break;
-		
-		case 32:{
-			type = Pg_IMAGE_DIRECT_8888;
-		}
-		break;
-		default:{
-		/* should never get here */
-			fprintf(stderr,"error: unsupported bbp = %d\n",
-					screen->format->BitsPerPixel);
-			return -1;
-		}
-		break;
-	}
+    /* using shared memory for speed (set last param to 1) */
+    if ((SDL_Image = PhCreateImage(NULL, screen->w, screen->h, type, NULL, 0, 1)) == NULL)
+    {
+        fprintf(stderr,"error: PhCreateImage failed.\n");
+        return -1;
+    }
 
-	//using shared memory for speed (set last param to 1)
-	if ((SDL_Image = PhCreateImage( NULL, screen->w, screen->h, type, NULL, 0, 1 )) == NULL)
-	{
-		fprintf(stderr,"error: PhCreateImage failed.\n");
-		return -1;
-	}
+    screen->pixels = SDL_Image->image;
 
-	screen->pixels = SDL_Image->image;
-	
-	this->UpdateRects = ph_NormalUpdate;
+    this->UpdateRects = ph_NormalUpdate;
 
-	return 0;
+    return 0;
 }
 
 int ph_SetupOCImage(_THIS, SDL_Surface *screen) //Offscreen context
@@ -172,39 +164,36 @@ int ph_SetupOCImage(_THIS, SDL_Surface *screen) //Offscreen context
 	return 0;
 }
 
+int ph_SetupOpenGLImage(_THIS, SDL_Surface* screen)
+{
+   this->UpdateRects = ph_OpenGLUpdate;
+   
+   return 0;
+}
 
 void ph_DestroyImage(_THIS, SDL_Surface *screen)
 {
-#if 0
-   if(SDL_Image == NULL)
-     return;
-#endif
+    if (OCImage.offscreen_context != NULL)
+    {
+        PhDCRelease(OCImage.offscreen_context);
+        OCImage.offscreen_context = NULL;
+        free(OCImage.FrameData0);
+        OCImage.FrameData0 = NULL;
+        free(OCImage.FrameData1);
+        OCImage.FrameData1 = NULL;
+    }
 
-   if (OCImage.offscreen_context != NULL)
-   {
-      PhDCRelease(OCImage.offscreen_context);
-      OCImage.offscreen_context = NULL;
-      free(OCImage.FrameData0);
-      OCImage.FrameData0 = NULL;
-      free(OCImage.FrameData1);
-      OCImage.FrameData1 = NULL;
-   }
+    if (SDL_Image)
+    {
+        PgShmemDestroy(SDL_Image->image);
+        free(SDL_Image);
+        SDL_Image = NULL;
+    }
 
-	if (SDL_Image)
-	{
-                // SDL_Image->flags=Ph_RELEASE_IMAGE;
-                // PhReleaseImage(SDL_Image);
-		if (SDL_Image->image)
-			PgShmemDestroy(SDL_Image->image); // Use this if you using shared memory, or uncomment
-                                                  // lines above if not (and comment this line ;-)
-                free(SDL_Image);
-		SDL_Image = NULL;
-	}
-
-	if ( screen )
-        {
-    	        screen->pixels = NULL;
-	}
+    if (screen)
+    {
+        screen->pixels = NULL;
+    }
 }
 
 int ph_ResizeImage(_THIS, SDL_Surface *screen, Uint32 flags)
@@ -213,12 +202,12 @@ int ph_ResizeImage(_THIS, SDL_Surface *screen, Uint32 flags)
     
     if(  flags & SDL_HWSURFACE)
     {
-       OCImage.flags = flags;  //needed for SDL_DOUBLEBUF check
-       return ph_SetupOCImage(this,screen);
+        OCImage.flags = flags;  /* needed for SDL_DOUBLEBUF check */
+        return ph_SetupOCImage(this, screen);
     }
-    else if(flags & SDL_OPENGL) /* No image when using GL */
+    else if(flags & SDL_OPENGL)
     {
-       return 0;
+       return ph_SetupOpenGLImage(this, screen);
     } 
     else
     {
@@ -259,6 +248,13 @@ void ph_UnlockHWSurface(_THIS, SDL_Surface *surface)
 static PhPoint_t ph_pos;
 static PhRect_t ph_rect;
 static int i;
+
+void ph_OpenGLUpdate(_THIS, int numrects, SDL_Rect* rects)
+{
+   this->GL_SwapBuffers(this);
+   
+   return;
+}
 
 void ph_NormalUpdate(_THIS, int numrects, SDL_Rect *rects)
 {

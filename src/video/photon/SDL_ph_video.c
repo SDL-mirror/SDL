@@ -56,7 +56,11 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
 static int ph_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors);
 static void ph_VideoQuit(_THIS);
 static void ph_DeleteDevice(SDL_VideoDevice *device);
+
+#ifdef HAVE_OPENGL
 static void ph_GL_SwapBuffers(_THIS);
+static int ph_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value);
+#endif /* HAVE_OPENGL */
 
 #ifdef HAVE_OPENGL
 PdOpenGLContext_t* OGLContext=NULL;
@@ -64,7 +68,7 @@ PdOpenGLContext_t* OGLContext=NULL;
 
 static int ph_Available(void)
 {
-        return 1;
+    return 1;
 }
 
 static SDL_VideoDevice *ph_CreateDevice(int devindex)
@@ -112,7 +116,7 @@ static SDL_VideoDevice *ph_CreateDevice(int devindex)
     device->SetIcon = NULL;
     device->IconifyWindow = ph_IconifyWindow;
     device->GrabInput = ph_GrabInput;
-    device->GetWMInfo = NULL;
+    device->GetWMInfo = ph_GetWMInfo;
     device->FreeWMCursor = ph_FreeWMCursor;
     device->CreateWMCursor = ph_CreateWMCursor;
     device->ShowWMCursor = ph_ShowWMCursor;
@@ -124,12 +128,13 @@ static SDL_VideoDevice *ph_CreateDevice(int devindex)
     /* OpenGL support. */
     device->GL_LoadLibrary = NULL;
     device->GL_GetProcAddress = NULL;
-    device->GL_GetAttribute = NULL;
     device->GL_MakeCurrent = NULL;
 #ifdef HAVE_OPENGL
     device->GL_SwapBuffers = ph_GL_SwapBuffers;
+    device->GL_GetAttribute = ph_GL_GetAttribute;
 #else
     device->GL_SwapBuffers = NULL;
+    device->GL_GetAttribute = NULL;
 #endif /* HAVE_OPENGL */
 
     device->free = ph_DeleteDevice;
@@ -271,10 +276,6 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
                 int width, int height, int bpp, Uint32 flags)
 {
     PgDisplaySettings_t settings;
-/*
-    PgHWCaps_t my_hwcaps;
-    PgVideoModeInfo_t mode_info;
-*/
     int mode, actual_width, actual_height;
     PtArg_t arg[5];
     PhDim_t dim;	
@@ -285,7 +286,8 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
 
 #ifdef HAVE_OPENGL
     uint64_t OGLAttrib[PH_OGL_MAX_ATTRIBS];
-#endif // HAVE_OPENGL
+    int OGLargc;
+#endif /* HAVE_OPENGL */
 
     actual_width = width;
     actual_height = height;
@@ -312,11 +314,9 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
         {
             if ((mode = get_mode(width, height, bpp)) == 0)
             {
-                 	fprintf(stderr,"error: get_mode failed\n");
-                	exit(1);
+                fprintf(stderr,"error: get_mode failed\n");
+                exit(1);
             }
-               
-           
         }
         settings.mode = mode;
         settings.refresh = 0;
@@ -327,14 +327,13 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
             fprintf(stderr,"error: PgSetVideoMode failed\n");
         }
 
-		/* Get the true height and width */
-		
-      current->flags = (flags & (~SDL_RESIZABLE)); /* no resize for Direct Context */
+        /* Get the true height and width */
 
-		 /* Begin direct mode */
-		 ph_EnterFullScreen(this);
+        current->flags = (flags & (~SDL_RESIZABLE)); /* no resize for Direct Context */
 
-       
+        /* Begin direct mode */
+
+        ph_EnterFullScreen(this);
 
     } /* end fullscreen flag */
     else
@@ -352,17 +351,40 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
 #ifdef HAVE_OPENGL       
        if (flags & SDL_OPENGL) /* for now support OpenGL in window mode only */
        {
-          OGLAttrib[0]=PHOGL_ATTRIB_DEPTH_BITS;
-          OGLAttrib[1]=bpp;
-          OGLAttrib[2]=PHOGL_ATTRIB_NONE;
-          OGLContext=PdCreateOpenGLContext(2, &dim, 0, OGLAttrib);
+          OGLargc=0;
+          if (this->gl_config.depth_size)
+          {
+             OGLAttrib[OGLargc++]=PHOGL_ATTRIB_DEPTH_BITS;
+             OGLAttrib[OGLargc++]=this->gl_config.depth_size;
+          }
+          if (this->gl_config.stencil_size)
+          {
+             OGLAttrib[OGLargc++]=PHOGL_ATTRIB_STENCIL_BITS;
+             OGLAttrib[OGLargc++]=this->gl_config.stencil_size;
+          }
+          OGLAttrib[OGLargc++]=PHOGL_ATTRIB_NONE;
+          if (this->gl_config.double_buffer)
+          {
+             OGLContext=PdCreateOpenGLContext(2, &dim, 0, OGLAttrib);
+          }
+          else
+          {
+             OGLContext=PdCreateOpenGLContext(1, &dim, 0, OGLAttrib);
+          }
           if (OGLContext==NULL)
           {
-             fprintf(stderr,"error: cannot create OpenGL context\n");
+             fprintf(stderr,"error: cannot create OpenGL context.\n");
              exit(1);
           }
           PhDCSetCurrent(OGLContext);
        }
+#else
+       if (flags & SDL_OPENGL) /* if no OpenGL support */
+       {
+          fprintf(stderr, "error: no OpenGL support, try to recompile library.\n");
+          exit(1);
+       }
+
 #endif /* HAVE_OPENGL */
        
     }
@@ -488,28 +510,28 @@ static int ph_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 #ifdef HAVE_OPENGL
 void ph_GL_SwapBuffers(_THIS)
 {
-   PgSetRegion(PtWidgetRid(window));
-   PdOpenGLContextSwapBuffers(OGLContext);
+    PgSetRegion(PtWidgetRid(window));
+    PdOpenGLContextSwapBuffers(OGLContext);
 }
-#endif // HAVE_OPENGL
 
-/*
-static int ph_ResizeWindow(_THIS,
-            SDL_Surface *screen, int w, int h, Uint32 flags)
+int ph_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
 {
-	PhWindowEvent_t winevent;
-
-	memset( &winevent, 0, sizeof(winevent) ); 
-	winevent.event_f = Ph_WM_RESIZE;
-	winevent.size.w = w;
-	winevent.size.h = h;
-	winevent.rid = PtWidgetRid( window );
-	if (PtForwardWindowEvent( &winevent ) < 0)
-	{
-		fprintf(stderr,"error: PtForwardWindowEvent failed.\n");
-	}
-	current_w = w;
-	current_h = h;
-    return(0);
+    switch (attrib)
+    {
+        case SDL_GL_DOUBLEBUFFER:
+             *value=this->gl_config.double_buffer;
+             break;
+        case SDL_GL_STENCIL_SIZE:
+             *value=this->gl_config.stencil_size;
+             break;
+        case SDL_GL_DEPTH_SIZE:
+             *value=this->gl_config.depth_size;
+             break;
+        default:
+             *value=0;
+             return(-1);
+    }
+    return 0;
 }
-*/
+
+#endif /* HAVE_OPENGL */
