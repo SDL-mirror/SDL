@@ -10,6 +10,7 @@
 
 #define SHADED_CUBE
 
+static SDL_bool USE_DEPRECATED_OPENGLBLIT = SDL_FALSE;
 
 void HotKey_ToggleFullScreen(void)
 {
@@ -95,11 +96,51 @@ int HandleEvent(SDL_Event *event)
 	return(done);
 }
 
+void SDL_GL_Enter2DMode()
+{
+	SDL_Surface *screen = SDL_GetVideoSurface();
+
+	/* Note, there may be other things you need to change,
+	   depending on how you have your OpenGL state set up.
+	*/
+	glPushAttrib(GL_ENABLE_BIT);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+	glEnable(GL_TEXTURE_2D);
+
+	glViewport(0, 0, screen->w, screen->h);
+
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+
+	glOrtho(0.0, (GLdouble)screen->w, (GLdouble)screen->h, 0.0, 0.0, 1.0);
+
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+}
+
+void SDL_GL_Leave2DMode()
+{
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
+
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+
+	glPopAttrib();
+}
+
 void DrawSDLLogo(void)
 {
 	static SDL_Surface *image = NULL;
+	static GLuint texture;
 	static int x = 0;
 	static int y = 0;
+	static int w, h;
 	static int delta_x = 1;
 	static int delta_y = 1;
 	static Uint32 last_moved = 0;
@@ -118,16 +159,16 @@ void DrawSDLLogo(void)
 				SDL_SWSURFACE,
 				temp->w, temp->h,
 				32,
-#if SDL_BYTEORDER == SDL_LIL_ENDIAN
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN /* OpenGL RGBA masks */
 				0x000000FF, 
 				0x0000FF00, 
 				0x00FF0000, 
- 			       0xFF000000
+				0xFF000000
 #else
- 			       0xFF000000,
- 			       0x00FF0000, 
- 			       0x0000FF00, 
- 			       0x000000FF
+				0xFF000000,
+				0x00FF0000, 
+				0x0000FF00, 
+				0x000000FF
 #endif
  			       );
 		if ( image != NULL ) {
@@ -137,6 +178,29 @@ void DrawSDLLogo(void)
 		if ( image == NULL ) {
 			return;
 		}
+		w = image->w;
+		h = image->h;
+
+		/* Create an OpenGL texture for the image */
+		if ( ! USE_DEPRECATED_OPENGLBLIT ) {
+			glGenTextures(1, &texture);
+			glBindTexture(GL_TEXTURE_2D, texture);
+			glTexParameteri(GL_TEXTURE_2D,
+			                GL_TEXTURE_MAG_FILTER,
+			                GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D,
+			                GL_TEXTURE_MIN_FILTER,
+			                GL_NEAREST);
+			glTexImage2D(GL_TEXTURE_2D,
+			             0,
+			             GL_RGBA,
+			             w, h,
+			             0,
+			             GL_RGBA,
+			             GL_UNSIGNED_BYTE,
+			             image->pixels);
+			SDL_FreeSurface(image); /* No longer needed */
+		}
 	}
 
 	screen = SDL_GetVideoSurface();
@@ -144,8 +208,8 @@ void DrawSDLLogo(void)
 	/* Show the image on the screen */
 	dst.x = x;
 	dst.y = y;
-	dst.w = image->w;
-	dst.h = image->h;
+	dst.w = w;
+	dst.h = h;
 
 	/* Move it around
            Note that we do not clear the old position.  This is because we
@@ -160,8 +224,8 @@ void DrawSDLLogo(void)
 			x = 0;
 			delta_x = -delta_x;
 		} else
-		if ( (x+image->w) > screen->w ) {
-			x = screen->w-image->w;
+		if ( (x+w) > screen->w ) {
+			x = screen->w-w;
 			delta_x = -delta_x;
 		}
 		y += delta_y;
@@ -169,13 +233,27 @@ void DrawSDLLogo(void)
 			y = 0;
 			delta_y = -delta_y;
 		} else
-		if ( (y+image->h) > screen->h ) {
-			y = screen->h-image->h;
+		if ( (y+h) > screen->h ) {
+			y = screen->h-h;
 			delta_y = -delta_y;
 		}
-		SDL_BlitSurface(image, NULL, screen, &dst);
+		if ( USE_DEPRECATED_OPENGLBLIT ) {
+			SDL_BlitSurface(image, NULL, screen, &dst);
+		} else {
+			SDL_GL_Enter2DMode();
+			glBindTexture(GL_TEXTURE_2D, texture);
+			glBegin(GL_TRIANGLE_STRIP);
+			glTexCoord2f(0.0, 0.0); glVertex2i(x,   y  );
+			glTexCoord2f(1.0, 0.0); glVertex2i(x+w, y  );
+			glTexCoord2f(0.0, 1.0); glVertex2i(x,   y+h);
+			glTexCoord2f(1.0, 1.0); glVertex2i(x+w, y+h);
+			glEnd();
+			SDL_GL_Leave2DMode();
+		}
 	}
-	SDL_UpdateRects(screen, 1, &dst);
+	if ( USE_DEPRECATED_OPENGLBLIT ) {
+		SDL_UpdateRects(screen, 1, &dst);
+	}
 }
 
 int RunGLTest( int argc, char* argv[],
@@ -222,7 +300,7 @@ int RunGLTest( int argc, char* argv[],
 	}
 
 	/* Set the flags we want to use for setting the video mode */
-	if ( logo ) {
+	if ( logo && USE_DEPRECATED_OPENGLBLIT ) {
 		video_flags = SDL_OPENGLBLIT;
 	} else {
 		video_flags = SDL_OPENGL;
@@ -478,6 +556,11 @@ int main(int argc, char *argv[])
 		}
 		if ( strcmp(argv[i], "-logo") == 0 ) {
 			logo = 1;
+			USE_DEPRECATED_OPENGLBLIT = SDL_FALSE;
+		}
+		if ( strcmp(argv[i], "-logoblit") == 0 ) {
+			logo = 1;
+			USE_DEPRECATED_OPENGLBLIT = SDL_TRUE;
 		}
 		if ( strcmp(argv[i], "-slow") == 0 ) {
 			slowly = 1;
