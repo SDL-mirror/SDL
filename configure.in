@@ -301,7 +301,7 @@ CheckOPENBSDAUDIO()
 [  --enable-openbsdaudio   OpenBSD native audio support [default=yes]],
                   , enable_openbsdaudio=yes)
     if test x$enable_audio = xyes -a x$enable_openbsdaudio = xyes; then
-        CFLAGS="$CFLAGS -DOBSD_SUPPORT"
+        CFLAGS="$CFLAGS -DOPENBSD_AUDIO_SUPPORT"
         AUDIO_SUBDIRS="$AUDIO_SUBDIRS openbsd"
         AUDIO_DRIVERS="$AUDIO_DRIVERS openbsd/libaudio_openbsd.la"
     fi

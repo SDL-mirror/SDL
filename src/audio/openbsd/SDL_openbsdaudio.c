@@ -131,7 +131,7 @@ static SDL_AudioDevice
     return this;
 }
 
-AudioBootStrap OBSD_bootstrap = {
+AudioBootStrap OPENBSD_AUDIO_bootstrap = {
 	OBSD_DRIVER_NAME, "Native OpenBSD audio",
 	Audio_Available, Audio_CreateDevice
 };
