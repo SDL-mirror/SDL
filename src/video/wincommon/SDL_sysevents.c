@@ -459,7 +459,6 @@ LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				(SDL_PublicSurface->flags & SDL_RESIZABLE) ) {
 				SDL_PrivateResize(w, h);
 			}
-			return(0);
 		}
 		break;
 
