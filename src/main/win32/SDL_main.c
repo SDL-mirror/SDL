@@ -19,9 +19,40 @@
 #undef main
 #endif
 
+/* Do we really not want stdio redirection with Windows CE? */
+#ifdef _WIN32_WCE
+#define NO_STDIO_REDIRECT
+#endif
+
 /* The standard output files */
-#define STDOUT_FILE	"stdout.txt"
-#define STDERR_FILE	"stderr.txt"
+#define STDOUT_FILE	TEXT("stdout.txt")
+#define STDERR_FILE	TEXT("stderr.txt")
+
+#ifdef _WIN32_WCE
+/* seems to be undefined in Win CE although in online help */
+#define isspace(a) (((CHAR)a == ' ') || ((CHAR)a == '\t'))
+
+/* seems to be undefined in Win CE although in online help */
+char *strrchr(char *str, int c)
+{
+	char *p;
+
+	/* Skip to the end of the string */
+	p=str;
+	while (*p)
+		p++;
+
+	/* Look for the given character */
+	while ( (p >= str) && (*p != (CHAR)c) )
+		p--;
+
+	/* Return NULL if character not found */
+	if ( p < str ) {
+		p = NULL;
+	}
+	return p;
+}
+#endif /* _WIN32_WCE */
 
 /* Parse a command line buffer into arguments */
 static int ParseCommandLine(char *cmdline, char **argv)
@@ -92,15 +123,18 @@ static BOOL OutOfMemory(void)
 }
 
 /* Remove the output files if there was no output written */
-static void cleanup_output(void)
+static void __cdecl cleanup_output(void)
 {
+#ifndef NO_STDIO_REDIRECT
 	FILE *file;
 	int empty;
+#endif
 
 	/* Flush the output in case anything is queued */
 	fclose(stdout);
 	fclose(stderr);
 
+#ifndef NO_STDIO_REDIRECT
 	/* See if the files have any output in them */
 	file = fopen(STDOUT_FILE, "rb");
 	if ( file ) {
@@ -118,9 +152,11 @@ static void cleanup_output(void)
 			remove(STDERR_FILE);
 		}
 	}
+#endif
 }
 
-#ifdef _MSC_VER /* The VC++ compiler needs main defined */
+#if defined(_MSC_VER) && !defined(_WIN32_WCE)
+/* The VC++ compiler needs main defined */
 #define console_main main
 #endif
 
@@ -177,13 +213,22 @@ int console_main(int argc, char *argv[])
 }
 
 /* This is where execution begins [windowed apps] */
+#ifdef _WIN32_WCE
+int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPWSTR szCmdLine, int sw)
+#else
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
+#endif
 {
 	HINSTANCE handle;
 	char **argv;
 	int argc;
 	char *cmdline;
+#ifdef _WIN32_WCE
+	wchar_t *bufp;
+	int nLen;
+#else
 	char *bufp;
+#endif
 #ifndef NO_STDIO_REDIRECT
 	FILE *newfp;
 #endif
@@ -192,7 +237,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 	   keep them open.  This is a hack.. hopefully it will be fixed 
 	   someday.  DDHELP.EXE starts up the first time DDRAW.DLL is loaded.
 	 */
-	handle = LoadLibrary("DDRAW.DLL");
+	handle = LoadLibrary(TEXT("DDRAW.DLL"));
 	if ( handle != NULL ) {
 		FreeLibrary(handle);
 	}
@@ -225,6 +270,18 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 	setbuf(stderr, NULL);			/* No buffering */
 #endif /* !NO_STDIO_REDIRECT */
 
+#ifdef _WIN32_WCE
+	nLen = wcslen(szCmdLine)+128+1;
+	bufp = (wchar_t *)alloca(nLen*2);
+	GetModuleFileName(NULL, bufp, 128);
+	wcsncpy(bufp+wcslen(bufp), szCmdLine,nLen);
+	nLen = wcslen(bufp)+1;
+	cmdline = (char *)alloca(nLen);
+	if ( cmdline == NULL ) {
+		return OutOfMemory();
+	}
+	WideCharToMultiByte(CP_ACP, 0, bufp, -1, cmdline, nLen, NULL, NULL);
+#else
 	/* Grab the command line (use alloca() on Windows) */
 	bufp = GetCommandLine();
 	cmdline = (char *)alloca(strlen(bufp)+1);
@@ -232,6 +289,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 		return OutOfMemory();
 	}
 	strcpy(cmdline, bufp);
+#endif
 
 	/* Parse it into argv and argc */
 	argc = ParseCommandLine(cmdline, NULL);

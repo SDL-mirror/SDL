@@ -303,14 +303,13 @@ int DIB_CreateWindow(_THIS)
 {
 #ifdef _WIN32_WCE
 	/* WinCE uses the UNICODE version */
-	int nLen = strlen(SDL_Appname);
-	LPWSTR lpszW = alloca((nLen+1)*2);
+	int nLen = strlen(SDL_Appname)+1;
+	LPWSTR lpszW = alloca(nLen*2);
 	MultiByteToWideChar(CP_ACP, 0, SDL_Appname, -1, lpszW, nLen);
 
 	SDL_RegisterApp("SDL_app", 0, 0);
-	SDL_Window = CreateWindow(lpszW, lpszW,
-                        (WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX),
-                                 0, 0, 0, 0, NULL, NULL, SDL_Instance, NULL);
+	SDL_Window = CreateWindow(lpszW, lpszW, WS_VISIBLE,
+                                  0, 0, 0, 0, NULL, NULL, SDL_Instance, NULL);
 	if ( SDL_Window == NULL ) {
 		SDL_SetError("Couldn't create window");
 		return(-1);

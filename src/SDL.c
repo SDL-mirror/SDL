@@ -231,3 +231,21 @@ const SDL_version * SDL_Linked_Version(void)
 	return(&version);
 }
 
+#if defined(_WIN32_WCE)
+/* Need to include DllMain() on Windows CE for some reason.. */
+#include <windows.h>
+
+BOOL APIENTRY DllMain( HANDLE hModule, 
+                       DWORD  ul_reason_for_call, 
+                       LPVOID lpReserved )
+{
+	switch (ul_reason_for_call) {
+		case DLL_PROCESS_ATTACH:
+		case DLL_THREAD_ATTACH:
+		case DLL_THREAD_DETACH:
+		case DLL_PROCESS_DETACH:
+			break;
+	}
+	return TRUE;
+}
+#endif /* _WIN32_WCE */

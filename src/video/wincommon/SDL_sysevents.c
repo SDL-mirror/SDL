@@ -496,12 +496,12 @@ int SDL_RegisterApp(char *name, Uint32 style, void *hInst)
 #ifdef _WIN32_WCE
     {
 	/* WinCE uses the UNICODE version */
-	int nLen = strlen(name);
-	LPWSTR lpszW = alloca((nLen+1)*2);
+	int nLen = strlen(name)+1;
+	LPWSTR lpszW = alloca(nLen*2);
 	MultiByteToWideChar(CP_ACP, 0, name, -1, lpszW, nLen);
 	class.hIcon		= LoadImage(hInst, lpszW, IMAGE_ICON,
 	                                    0, 0, LR_DEFAULTCOLOR);
-	class.lpszMenuName	= lpszW;
+	class.lpszMenuName	= NULL;
 	class.lpszClassName	= lpszW;
     }
 #else

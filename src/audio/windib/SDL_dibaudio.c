@@ -37,6 +37,9 @@ static char rcsid =
 #include "SDL_timer.h"
 #include "SDL_audio_c.h"
 #include "SDL_dibaudio.h"
+#if defined(_WIN32_WCE) && (_WIN32_WCE < 300)
+#include "win_ce_semaphore.h"
+#endif
 
 
 /* Audio driver functions */
@@ -112,18 +115,33 @@ static void CALLBACK FillSound(HWAVEOUT hwo, UINT uMsg, DWORD dwInstance,
 		return;
 
 	/* Signal that we are done playing a buffer */
+#if defined(_WIN32_WCE) && (_WIN32_WCE < 300)
+	ReleaseSemaphoreCE(audio_sem, 1, NULL);
+#else
 	ReleaseSemaphore(audio_sem, 1, NULL);
+#endif
 }
 
 static void SetMMerror(char *function, MMRESULT code)
 {
 	int len;
 	char errbuf[MAXERRORLENGTH];
+#ifdef _WIN32_WCE
+	wchar_t werrbuf[MAXERRORLENGTH];
+#endif
 
 	sprintf(errbuf, "%s: ", function);
 	len = strlen(errbuf);
+
+#ifdef _WIN32_WCE
+	/* UNICODE version */
+	waveOutGetErrorText(code, werrbuf, MAXERRORLENGTH-len);
+	WideCharToMultiByte(CP_ACP,0,werrbuf,-1,errbuf+len,MAXERRORLENGTH-len,NULL,NULL);
+#else
 	waveOutGetErrorText(code, errbuf+len, MAXERRORLENGTH-len);
-	SDL_SetError("%s", errbuf);
+#endif
+
+	SDL_SetError("%s",errbuf);
 }
 
 /* Set high priority for the audio thread */
@@ -135,7 +153,11 @@ static void DIB_ThreadInit(_THIS)
 void DIB_WaitAudio(_THIS)
 {
 	/* Wait for an audio chunk to finish */
+#if defined(_WIN32_WCE) && (_WIN32_WCE < 300)
+	WaitForSemaphoreCE(audio_sem, INFINITE);
+#else
 	WaitForSingleObject(audio_sem, INFINITE);
+#endif
 }
 
 Uint8 *DIB_GetAudioBuf(_THIS)
@@ -176,7 +198,11 @@ void DIB_CloseAudio(_THIS)
 
 	/* Close up audio */
 	if ( audio_sem ) {
+#if defined(_WIN32_WCE) && (_WIN32_WCE < 300)
+		CloseSynchHandle(audio_sem);
+#else
 		CloseHandle(audio_sem);
+#endif
 	}
 	if ( sound ) {
 		waveOutClose(sound);
@@ -267,7 +293,11 @@ int DIB_OpenAudio(_THIS, SDL_AudioSpec *spec)
 #endif
 
 	/* Create the audio buffer semaphore */
+#if defined(_WIN32_WCE) && (_WIN32_WCE < 300)
+	audio_sem = CreateSemaphoreCE(NULL, NUM_BUFFERS-1, NUM_BUFFERS, NULL);
+#else
 	audio_sem = CreateSemaphore(NULL, NUM_BUFFERS-1, NUM_BUFFERS, NULL);
+#endif
 	if ( audio_sem == NULL ) {
 		SDL_SetError("Couldn't create semaphore");
 		return(-1);

@@ -30,6 +30,7 @@ static char rcsid =
 */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "SDL_error.h"

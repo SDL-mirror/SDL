@@ -213,8 +213,8 @@ void WIN_SetWMCaption(_THIS, const char *title, const char *icon)
 {
 #ifdef _WIN32_WCE
 	/* WinCE uses the UNICODE version */
-	int nLen = strlen(title);
-	LPWSTR lpszW = alloca((nLen+1)*2);
+	int nLen = strlen(title)+1;
+	LPWSTR lpszW = alloca(nLen*2);
 	MultiByteToWideChar(CP_ACP, 0, title, -1, lpszW, nLen);
 	SetWindowText(SDL_Window, lpszW);
 #else

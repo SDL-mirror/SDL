@@ -440,8 +440,10 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 			(WS_POPUP);
 	const DWORD windowstyle = 
 			(WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX);
+#ifndef _WIN32_WCE
 	const DWORD resizestyle =
 			(WS_THICKFRAME|WS_MAXIMIZEBOX);
+#endif
 	int binfo_size;
 	BITMAPINFO *binfo;
 	HDC hdc;
@@ -453,10 +455,12 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 	/* See whether or not we should center the window */
 	was_visible = IsWindowVisible(SDL_Window);
 
+#ifdef HAVE_OPENGL
 	/* Clean up any GL context that may be hanging around */
 	if ( current->flags & SDL_OPENGL ) {
 		WIN_GL_ShutDown(this);
 	}
+#endif /* HAVE_OPENGL */
 
 	/* Recalculate the bitmasks if necessary */
 	if ( bpp == current->format->BitsPerPixel ) {
@@ -535,7 +539,9 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 #endif /* !NO_CHANGEDISPLAYSETTINGS */
 
 	style = GetWindowLong(SDL_Window, GWL_STYLE);
+#ifndef _WIN32_WCE
 	style &= ~(resizestyle|WS_MAXIMIZE);
+#endif
 	if ( (video->flags & SDL_FULLSCREEN) == SDL_FULLSCREEN ) {
 		style &= ~windowstyle;
 		style |= directstyle;
@@ -553,11 +559,15 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 			style &= ~directstyle;
 			style |= windowstyle;
 			if ( flags & SDL_RESIZABLE ) {
+#ifndef _WIN32_WCE
 				style |= resizestyle;
+#endif
 				video->flags |= SDL_RESIZABLE;
 			}
 		}
+#ifndef _WIN32_WCE
 		if (IsZoomed(SDL_Window)) style |= WS_MAXIMIZE;
+#endif
 	}
 	SetWindowLong(SDL_Window, GWL_STYLE, style);
 
@@ -642,7 +652,11 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		bounds.top = 0;
 		bounds.right = video->w;
 		bounds.bottom = video->h;
+#ifndef _WIN32_WCE
 		AdjustWindowRect(&bounds, GetWindowLong(SDL_Window, GWL_STYLE), FALSE);
+#else
+		AdjustWindowRectEx(&bounds, GetWindowLong(SDL_Window, GWL_STYLE), FALSE,0);
+#endif
 		width = bounds.right-bounds.left;
 		height = bounds.bottom-bounds.top;
 		x = (GetSystemMetrics(SM_CXSCREEN)-width)/2;
@@ -650,7 +664,11 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		if ( y < 0 ) { /* Cover up title bar for more client area */
 			y -= GetSystemMetrics(SM_CYCAPTION)/2;
 		}
+#ifndef _WIN32_WCE
 		swp_flags = (SWP_NOCOPYBITS | SWP_NOZORDER | SWP_SHOWWINDOW);
+#else
+		swp_flags = (SWP_NOZORDER | SWP_SHOWWINDOW);
+#endif
 		if ( was_visible && !(flags & SDL_FULLSCREEN) ) {
 			swp_flags |= SWP_NOMOVE;
 		}
@@ -659,6 +677,7 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		SetForegroundWindow(SDL_Window);
 	}
 
+#ifdef HAVE_OPENGL
 	/* Set up for OpenGL */
 	if ( flags & SDL_OPENGL ) {
 		if ( WIN_GL_SetupWindow(this) < 0 ) {
@@ -666,6 +685,8 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		}
 		video->flags |= SDL_OPENGL;
 	}
+#endif /* HAVE_OPENGL */
+
 	/* We're live! */
 	return(video);
 }
@@ -711,7 +732,11 @@ int DIB_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 {
 	RGBQUAD *pal;
 	int i;
+#ifndef _WIN32_WCE
 	HDC hdc, mdc;
+#else
+	HDC hdc;
+#endif
 
 	/* Update the display palette */
 	hdc = GetDC(SDL_Window);
@@ -723,7 +748,11 @@ int DIB_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 			entries[i].peRed   = colors[i].r;
 			entries[i].peGreen = colors[i].g;
 			entries[i].peBlue  = colors[i].b;
+#ifndef _WIN32_WCE
 			entries[i].peFlags = PC_NOCOLLAPSE;
+else
+			entries[i].peFlags = 0;
+#endif
 		}
 		SetPaletteEntries(screen_pal, firstcolor, ncolors, entries);
 		SelectPalette(hdc, screen_pal, FALSE);
@@ -740,12 +769,14 @@ int DIB_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 	}
 
 	/* Set the DIB palette and update the display */
+#ifndef _WIN32_WCE
 	mdc = CreateCompatibleDC(hdc);
 	SelectObject(mdc, screen_bmp);
 	SetDIBColorTable(mdc, firstcolor, ncolors, pal);
 	BitBlt(hdc, 0, 0, this->screen->w, this->screen->h,
 	       mdc, 0, 0, SRCCOPY);
 	DeleteDC(mdc);
+#endif
 	ReleaseDC(SDL_Window, hdc);
 	return(1);
 }
@@ -857,9 +888,11 @@ void DIB_VideoQuit(_THIS)
 				ChangeDisplaySettings(NULL, 0);
 			}
 #endif
+#ifdef HAVE_OPENGL
 			if ( this->screen->flags & SDL_OPENGL ) {
 				WIN_GL_ShutDown(this);
 			}
+#endif /* HAVE_OPENGL */
 			this->screen->pixels = NULL;
 		}
 		if ( screen_bmp ) {
