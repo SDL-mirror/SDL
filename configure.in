@@ -63,10 +63,6 @@ case "$target" in
     *-*-linux*)
         AC_PROG_CXX
         ;;
-    *-*-darwin*)
-        OBJC="???"
-        AC_SUBST(OBJC)
-        ;;
 esac
 AC_PROG_INSTALL
 AC_FUNC_ALLOCA
@@ -1192,6 +1188,21 @@ CheckCARBON()
     VIDEO_DRIVERS="$VIDEO_DRIVERS macrom/libvideo_macrom.la"
 }
 
+dnl Set up the Mac toolbox video driver for Mac OS X
+CheckQUARTZ()
+{
+    # "MACOSX" is not an official definition, but it's commonly
+    # accepted as a way to differentiate between what runs on X
+    # and what runs on older Macs - while in theory "Carbon" defns
+    # are consistent between the two, in practice Carbon is still
+    # changing. -sts Aug 2000
+    CFLAGS="$CFLAGS -I/System/Library/Frameworks/Carbon.framework/Headers \
+      -I/System/Library/Frameworks/Cocoa.framework/Headers -fpascal-strings \
+      -DENABLE_QUARTZ -DMACOSX -DTARGET_API_MAC_CARBON=1 -I\$(top_srcdir)/src/video/quartz"
+    VIDEO_SUBDIRS="$VIDEO_SUBDIRS quartz"
+    VIDEO_DRIVERS="$VIDEO_DRIVERS quartz/libvideo_quartz.la"
+}
+
 dnl Set up the kernel statistics library for Solaris
 CheckKSTAT()
 {
@@ -1994,17 +2005,17 @@ case "$target" in
         ;;
     *-*-darwin* )
         # Strictly speaking, we want "Mac OS X", not "Darwin", which is
-        # just the OS X kernel sans upper layers like Carbon.  But
-        # config.guess comes back with "darwin", so go with the flow.
-        ARCH=macos
+        # just the OS X kernel sans upper layers like Carbon and Cocoa.
+        # But config.guess comes back with "darwin", so go with the flow.
+        ARCH=macosx
         CheckDummyVideo
         CheckDiskAudio
-        CheckCARBON
+        CheckQUARTZ
         CheckMacGL
         CheckPTHREAD
         # Set up files for the main() stub
-        # COPY_ARCH_SRC(src/main, macos, SDL_main.c)
-        COPY_ARCH_SRC(src/main, linux, SDL_main.c)
+        COPY_ARCH_SRC(src/main, macosx, SDLmain.m)
+        COPY_ARCH_SRC(src/main, macosx, SDLmain.h)
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
             AUDIO_SUBDIRS="$AUDIO_SUBDIRS macrom"
@@ -2040,8 +2051,8 @@ case "$target" in
             COPY_ARCH_SRC(src/timer, linux, SDL_systimer.c)
         fi
         # The MacOS X platform requires special setup
-        SDL_CFLAGS="$SDL_CFLAGS -F/System/Library/Frameworks/Carbon.framework"
-        SDL_LIBS="-lSDLmain $SDL_LIBS -framework Carbon"
+        SDL_CFLAGS="$SDL_CFLAGS -F/System/Library/Frameworks/Carbon.framework -F/System/Library/Frameworks/Cocoa.framework"
+        SDL_LIBS="-lSDLmain $SDL_LIBS -framework Carbon -framework Cocoa"
         ;;
     *)
         AC_MSG_ERROR(Unsupported target:  Please add to configure.in)
@@ -2061,6 +2072,7 @@ AM_CONDITIONAL(TARGET_AIX, test $ARCH = aix)
 AM_CONDITIONAL(TARGET_WIN32, test $ARCH = win32)
 AM_CONDITIONAL(TARGET_BEOS, test $ARCH = beos)
 AM_CONDITIONAL(TARGET_MACOS, test $ARCH = macos)
+AM_CONDITIONAL(TARGET_MACOSX, test $ARCH = macosx)
 
 # Set conditional variables for shared and static library selection.
 # These are not used in any Makefile.am but in sdl-config.in.
@@ -2121,6 +2133,18 @@ CFLAGS="$CFLAGS -I\$(top_srcdir)/src/timer"
 CFLAGS="$CFLAGS -I\$(top_srcdir)/src/endian"
 CFLAGS="$CFLAGS -I\$(top_srcdir)/src/file"
 CXXFLAGS="$CFLAGS"
+
+
+# Check for darwin at the very end and set up the Objective C compiler
+# We do this here so that we get the full CFLAGS into OBJCFLAGS
+case "$target" in
+    *-*-darwin*)
+        OBJC="cc"
+        OBJCFLAGS="$CFLAGS"
+        AC_SUBST(OBJC)
+        AC_SUBST(OBJCFLAGS)
+        ;;
+esac
 
 # Finally create all the generated files
 dnl Important: Any directory that you want to be in the distcheck should

@@ -267,9 +267,9 @@ static void QZ_UnsetVideoMode (_THIS) {
             UnlockPortBits ( [ windowView qdPort ] );
             [ windowView release  ];
         }
-        [ window setContentView:nil ];
-        [ window setDelegate:nil ];
-        [ window close ];
+        [ qz_window setContentView:nil ];
+        [ qz_window setDelegate:nil ];
+        [ qz_window close ];
     }
     
     /* Set pixels to null (so other code doesn't try to free it) */
@@ -408,9 +408,9 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
     }
 
     /* Manually create a window, avoids having a nib file resource */
-    window = [ [ SDL_QuartzWindow alloc ] initWithContentRect:rect 
+    qz_window = [ [ SDL_QuartzWindow alloc ] initWithContentRect:rect 
         styleMask:style backing:NSBackingStoreBuffered defer:NO ];
-    if (window == nil) {
+    if (qz_window == nil) {
         SDL_SetError ("Could not create the Cocoa window");
         return NULL;
     }
@@ -419,12 +419,12 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
     current->w = width;
     current->h = height;
     
-    [ window setReleasedWhenClosed:YES ];
+    [ qz_window setReleasedWhenClosed:YES ];
     QZ_SetCaption(this, this->wm_title, this->wm_icon);
-    [ window setAcceptsMouseMovedEvents:YES ];
-    [ window setViewsNeedDisplay:NO ];
-    [ window center ];
-    [ window setDelegate:
+    [ qz_window setAcceptsMouseMovedEvents:YES ];
+    [ qz_window setViewsNeedDisplay:NO ];
+    [ qz_window center ];
+    [ qz_window setDelegate:
         [ [ [ SDL_QuartzWindowDelegate alloc ] init ] autorelease ] ];
     
     /* For OpenGL, we set the content view to a NSOpenGLView */
@@ -434,17 +434,17 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
             return NULL;
         }
         
-        [ gl_context setView: [ window contentView ] ];
+        [ gl_context setView: [ qz_window contentView ] ];
         [ gl_context makeCurrentContext];
-        [ window orderFront:nil ];
+        [ qz_window makeKeyAndOrderFront:nil ];
         current->flags |= SDL_OPENGL;
     }
     /* For 2D, we set the content view to a NSQuickDrawView */
     else {
     
         windowView = [ [ NSQuickDrawView alloc ] init ];
-        [ window setContentView:windowView ];
-        [ window orderFront:nil ];    
+        [ qz_window setContentView:windowView ];
+        [ qz_window makeKeyAndOrderFront:nil ];    
         
         LockPortBits ( [ windowView qdPort ] );
         current->pixels = GetPixBaseAddr ( GetPortPixMap ( [ windowView qdPort ] ) );

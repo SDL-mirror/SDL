@@ -10,7 +10,11 @@ ARCH_SUBDIRS = $(srcdir)/beos $(srcdir)/linux \
 # Build a separate library containing the main() entry point.
 lib_LIBRARIES = libSDLmain.a
 
+if TARGET_MACOSX
+MAINLIB_ARCH_SRCS = SDLmain.m SDLmain.h
+else
 MAINLIB_ARCH_SRCS = SDL_main.c
+endif
 
 libSDLmain_a_SOURCES = $(MAINLIB_ARCH_SRCS)
 

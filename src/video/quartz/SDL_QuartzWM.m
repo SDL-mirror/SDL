@@ -96,7 +96,7 @@ static void  QZ_PrivateWarpCursor (_THIS, int fullscreen, int h, int x, int y) {
         /* Convert to absolute screen coordinates */
         NSPoint base, screen;
         base = NSMakePoint (p.x, p.y);
-        screen = [ window convertBaseToScreen:base ];
+        screen = [ qz_window convertBaseToScreen:base ];
         p.x = screen.x;
         p.y = device_height - screen.y;
         CGDisplayMoveCursorToPoint (display_id, p);
@@ -122,16 +122,16 @@ static void QZ_CheckMouseMode   (_THIS) { }
 
 static void QZ_SetCaption    (_THIS, const char *title, const char *icon) {
 
-    if ( window != nil ) {
+    if ( qz_window != nil ) {
         NSString *string;
         if ( title != NULL ) {
             string = [ [ NSString alloc ] initWithCString:title ];
-            [ window setTitle:string ];
+            [ qz_window setTitle:string ];
             [ string release ];
         }
         if ( icon != NULL ) {
             string = [ [ NSString alloc ] initWithCString:icon ];
-            [ window setMiniwindowTitle:string ];
+            [ qz_window setMiniwindowTitle:string ];
             [ string release ];
         }
     }
@@ -144,19 +144,19 @@ static void QZ_SetIcon       (_THIS, SDL_Surface *icon, Uint8 *mask) {
 static int  QZ_IconifyWindow (_THIS) { 
 
     /* Bug! minimize erases the framebuffer */
-    if ( ! [ window isMiniaturized ] ) {
-        [ window miniaturize:nil ];
+    if ( ! [ qz_window isMiniaturized ] ) {
+        [ qz_window miniaturize:nil ];
         return 1;
     }
     else {
-        SDL_SetError ("window already iconified");
+        SDL_SetError ("qz_window already iconified");
         return 0;
     }
 }
 
 /*
 static int  QZ_GetWMInfo  (_THIS, SDL_SysWMinfo *info) { 
-    info->nsWindowPtr = window;
+    info->nsWindowPtr = qz_window;
     return 0; 
 }*/
 

@@ -223,7 +223,7 @@ static void QZ_DoDeactivate (_THIS) {
 }
 
 static void QZ_PumpEvents (_THIS)
-{ 
+{
     NSDate *distantPast;
     NSEvent *event;
     NSRect winRect;
@@ -247,27 +247,29 @@ static void QZ_PumpEvents (_THIS)
     
         if (event != nil) {
             unsigned int type;
+            BOOL isForGameWin;
 
-            #define DO_MOUSE_DOWN(button, sendToWindow)                      \
+            #define DO_MOUSE_DOWN(button, sendToWindow) do {                 \
                 if ( inForeground ) {                                        \
                     if ( (SDL_VideoSurface->flags & SDL_FULLSCREEN) ||       \
                          NSPointInRect([event locationInWindow], winRect) )  \
                         SDL_PrivateMouseButton (SDL_PRESSED, button, 0, 0);  \
-                    else if (sendToWindow)                                   \
-                            [ window sendEvent:event ];                      \
                 }                                                            \
                 else {                                                       \
                     QZ_DoActivate (this);                                    \
-                }       
-            
-            #define DO_MOUSE_UP(button, sendToWindow)                        \
+                }                                                            \
+                [ NSApp sendEvent:event ];                                   \
+                } while(0)
+                
+            #define DO_MOUSE_UP(button, sendToWindow) do {                   \
                 if ( (SDL_VideoSurface->flags & SDL_FULLSCREEN) ||           \
                      !NSPointInRect([event locationInWindow], titleBarRect) )\
                     SDL_PrivateMouseButton (SDL_RELEASED, button, 0, 0);     \
-                if (sendToWindow)                                            \
-                    [ window sendEvent:event ]
-                    
+                [ NSApp sendEvent:event ];                                   \
+                } while(0)
+
             type = [ event type ];
+            isForGameWin = (qz_window == [ event window ]);
             switch (type) {
             
             case NSLeftMouseDown:  
@@ -351,8 +353,8 @@ static void QZ_PumpEvents (_THIS)
             case NSFlagsChanged:
                 QZ_DoModifiers( [ event modifierFlags ] );
                 break;
-            case NSMouseEntered: break;
-            case NSMouseExited: break;
+//            case NSMouseEntered: break;
+//            case NSMouseExited: break;
             case NSAppKitDefined:
                 switch ( [ event subtype ] ) {
                 case NSApplicationActivatedEventType:
@@ -361,14 +363,14 @@ static void QZ_PumpEvents (_THIS)
                 case NSApplicationDeactivatedEventType:
                     QZ_DoDeactivate (this);
                     break;
-                case NSWindowMovedEventType:
-                    [ window sendEvent:event ];
-                    break;
                 }
+                [ NSApp sendEvent:event ];
                 break;
-            case NSApplicationDefined: break;
-            case NSPeriodic: break;
-            case NSCursorUpdate: break;
+//            case NSApplicationDefined: break;
+//            case NSPeriodic: break;
+//            case NSCursorUpdate: break;
+            default:
+                [ NSApp sendEvent:event ];
             }
         }
       } while (event != nil);
