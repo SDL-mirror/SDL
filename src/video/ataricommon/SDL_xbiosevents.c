@@ -126,10 +126,10 @@ void SDL_AtariXbios_PostMouseEvents(_THIS)
 			curbutton = SDL_AtariXbios_mouseb & (1<<i);
 			prevbutton = atari_prevmouseb & (1<<i);
 
-			if (curbutton & !prevbutton) {
+			if (curbutton && !prevbutton) {
 				SDL_PrivateMouseButton(SDL_PRESSED, atari_GetButton(i), 0, 0);
 			}
-			if (!curbutton & prevbutton) {
+			if (!curbutton && prevbutton) {
 				SDL_PrivateMouseButton(SDL_RELEASED, atari_GetButton(i), 0, 0);
 			}
 		}
