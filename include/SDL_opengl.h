@@ -34,18 +34,18 @@ static char rcsid =
 #endif
 #include <windows.h>
 #endif
+#ifndef NO_SDL_GLEXT
+#define __glext_h_  /* Don't let gl.h include glext.h */
+#endif
 #if defined(__APPLE__) && defined(__MACH__)
 #include <OpenGL/gl.h>	/* Header File For The OpenGL Library */
 #include <OpenGL/glu.h>	/* Header File For The GLU Library */
 #else
-#ifndef NO_SDL_GLEXT
-#define __glext_h_  /* Don't let gl.h include glext.h */
-#endif
 #include <GL/gl.h>	/* Header File For The OpenGL Library */
 #include <GL/glu.h>	/* Header File For The GLU Library */
+#endif
 #ifndef NO_SDL_GLEXT
 #undef __glext_h_
-#endif
 #endif
 
 /* This file taken from "GLext.h" from the Jeff Molofee OpenGL tutorials.
