@@ -266,7 +266,6 @@ int SDL_SemPost(SDL_sem *sem)
  */
 
 #include <errno.h>
-#include <semaphore.h>
 #include <pthread.h>
 
 /* Begin thread_private.h kluge */
