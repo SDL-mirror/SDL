@@ -143,6 +143,8 @@ int  SDL_SYS_CDInit(void)
 	static char *checklist[] = {
 #ifdef __OpenBSD__
 		"?0 cd?c", "cdrom", NULL
+#elif defined(__NetBSD__)
+		"?0 cd?d", "?0 cd?c", "cdrom", NULL
 #else
 		"?0 cd?c", "?0 acd?c", "cdrom", NULL
 #endif
