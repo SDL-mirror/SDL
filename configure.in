@@ -1176,6 +1176,10 @@ CheckPTHREAD()
             pthread_cflags="-D_REENTRANT -mthreads"
             pthread_lib="-lpthread"
             ;;
+        *-*-hpux11*)
+            pthread_cflags="-D_REENTRANT"
+            pthread_lib="-L/usr/lib -lpthread"
+            ;;
         *-*-qnx*)
             pthread_cflags=""
             pthread_lib=""
