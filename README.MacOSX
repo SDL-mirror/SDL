@@ -143,13 +143,13 @@ following locations:
 - Setting up a new project by hand
     Some of you won't want to use the Stationary so I'll give some tips:
     * Create a new "Cocoa Application"
-    * Add src/main/macosx/SDL_main.m , .h and .nib to your project
+    * Add src/main/macosx/SDLMain.m , .h and .nib to your project
     * Remove "main.c" from your project
     * Remove "MainMenu.nib" from your project
     * Add "$(HOME)/Library/Frameworks/SDL.framework/Headers" to include path
     * Add "$(HOME)/Library/Frameworks" to the frameworks search path
-    * Add "-framework SDL" to the "OTHER_LDFLAGS" variable
-    * Set the "Main Nib File" under "Application Settings" to "SDL_main.nib"
+    * Add "-framework SDL -framework Foundation -framework AppKit" to "OTHER_LDFLAGS"
+    * Set the "Main Nib File" under "Application Settings" to "SDLMain.nib"
     * Add your files
     * Clean and build
 
@@ -174,11 +174,6 @@ following locations:
         You are free to modify your Cocoa app with generally no consequence 
         to SDL. You cannot, however, easily change the SDL window itself.
         Functionality may be added in the future to help this.
-    * My development setup:
-        I am using version 1.0.1 (v63.0) of Project Builder on MacOS X 10.0.3,
-        from the Developer Tools CD for May 2001.
-        As of May 31 2001, Apple hasn't released this version of the tools to the public, 
-        but I expect that things will still work on older versions.
-        
+	
+
 Known bugs are listed in the file "BUGS"
- LocalWords:  Stuffit
