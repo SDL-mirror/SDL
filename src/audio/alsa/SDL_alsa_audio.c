@@ -187,6 +187,7 @@ static void ALSA_CloseAudio(_THIS)
 		mixbuf = NULL;
 	}
 	if ( pcm_handle ) {
+		snd_pcm_drain(pcm_handle);
 		snd_pcm_close(pcm_handle);
 		pcm_handle = NULL;
 	}
