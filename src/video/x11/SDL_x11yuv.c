@@ -123,8 +123,10 @@ SDL_Overlay *X11_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, S
 						}
 					}
 				}
+				XFree(formats);
 			}
 		}
+		SDL_NAME(XvFreeAdaptorInfo)(ainfo);
 	}
 	if ( xv_port == -1 ) {
 		SDL_SetError("No available video ports for requested format");
