@@ -495,8 +495,6 @@ static SDL_Surface* ph_SetVideoMode(_THIS, SDL_Surface *current, int width, int 
     if ((current->flags & SDL_OPENGL)==SDL_OPENGL)
     {
 #if !defined(HAVE_OPENGL)
-    if ((current->flags & SDL_OPENGL)==SDL_OPENGL)
-    {
         /* if no built-in OpenGL support */
         SDL_SetError("ph_SetVideoMode(): no OpenGL support, you need to recompile SDL.\n");
         current->flags &= ~SDL_OPENGL;
