@@ -50,6 +50,9 @@ static char rcsid =
 /* Workaround when pitch != width */
 #define PITCH_WORKAROUND
 
+/* Fix for the NVidia GeForce 2 - use the last available adaptor */
+#define USE_LAST_ADAPTOR
+
 /* The functions used to manipulate software video overlays */
 static struct private_yuvhwfuncs x11_yuvfuncs = {
 	X11_LockYUVOverlay,
@@ -81,7 +84,11 @@ SDL_Overlay *X11_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, S
 	     (Success == XvQueryAdaptors(GFX_Display,
 	                                 RootWindow(GFX_Display, SDL_Screen),
 	                                 &adaptors, &ainfo)) ) {
+#ifdef USE_LAST_ADAPTOR
+		for ( i=0; i < adaptors; ++i ) {
+#else
 		for ( i=0; (i < adaptors) && (xv_port == -1); ++i ) {
+#endif /* USE_LAST_ADAPTOR */
 			/* Check to see if the visual can be used */
 			if ( BUGGY_XFREE86(<=, 4001) ) {
 				int visual_ok = 0;
@@ -102,7 +109,11 @@ SDL_Overlay *X11_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, S
 				XvImageFormatValues *formats;
 				formats = XvListImageFormats(GFX_Display,
 				              ainfo[i].base_id, &num_formats);
+#ifdef USE_LAST_ADAPTOR
+				for ( j=0; j < num_formats; ++j ) {
+#else
 				for ( j=0; (j < num_formats) && (xv_port == -1); ++j ) {
+#endif /* USE_LAST_ADAPTOR */
 					if ( (Uint32)formats[j].id == format ) {
 						for ( k=0; k < ainfo[i].num_ports; ++k ) {
 							if ( Success == XvGrabPort(GFX_Display, ainfo[i].base_id+k, CurrentTime) ) {
