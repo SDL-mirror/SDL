@@ -15,3 +15,13 @@ nibdata_DATA =			\
 	SDLMain.nib/objects.nib	\
 	Info.plist
 endif
+
+EXTRA_DIST = SDLMain.h SDLMain.m
+
+# The nib and exports directories need to be copied into place
+# when building a distribution.
+dist-hook:
+	(cd $(distdir) && rm -f $(BUILT_SOURCES))
+	cp -rp SDLMain.nib $(distdir)
+	cp -rp exports $(distdir)
+	(cd $(distdir) && rm -rf `find . -name CVS`)
