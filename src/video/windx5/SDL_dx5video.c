@@ -405,7 +405,7 @@ static SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current, int width, int
 static int DX5_SetColors(_THIS, int firstcolor, int ncolors,
 			 SDL_Color *colors);
 static void DX5_SwapGamma(_THIS);
-#ifdef IID_IDirectDrawGammaControl
+#ifdef IDirectDrawGammaControl_SetGammaRamp
 static int DX5_SetGammaRamp(_THIS, Uint16 *ramp);
 static int DX5_GetGammaRamp(_THIS, Uint16 *ramp);
 #endif
@@ -591,7 +591,7 @@ static SDL_VideoDevice *DX5_CreateDevice(int devindex)
 	device->UnlockHWSurface = DX5_UnlockHWSurface;
 	device->FlipHWSurface = DX5_FlipHWSurface;
 	device->FreeHWSurface = DX5_FreeHWSurface;
-#ifdef IID_IDirectDrawGammaControl
+#ifdef IDirectDrawGammaControl_SetGammaRamp
 	device->SetGammaRamp = DX5_SetGammaRamp;
 	device->GetGammaRamp = DX5_GetGammaRamp;
 #endif
@@ -796,7 +796,7 @@ static int DX5_UpdateVideoInfo(_THIS)
 #if DIRECTDRAW_VERSION <= 0x300
 #error Your version of DirectX must be greater than or equal to 5.0
 #endif
-#ifndef IID_IDirectDrawGammaControl
+#ifndef IDirectDrawGammaControl_SetGammaRamp
 	/*if gamma is undefined then we really have directx <= 0x500*/
 	DDCAPS DDCaps;
 #else
@@ -2118,7 +2118,7 @@ static void DX5_SwapGamma(_THIS)
 }
 
 /* Gamma code is only available on DirectX 7 and newer */
-#ifdef IID_IDirectDrawGammaControl
+#ifdef IDirectDrawGammaControl_SetGammaRamp
 
 static int DX5_SetGammaRamp(_THIS, Uint16 *ramp)
 {
@@ -2189,7 +2189,7 @@ static int DX5_GetGammaRamp(_THIS, Uint16 *ramp)
 	return (result == DD_OK) ? 0 : -1;
 }
 
-#endif /* IID_IDirectDrawGammaControl */
+#endif /* IDirectDrawGammaControl_SetGammaRamp */
 
 void DX5_VideoQuit(_THIS)
 {
