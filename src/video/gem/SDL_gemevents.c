@@ -302,6 +302,8 @@ static void do_mouse(_THIS, short mx, short my, short mb, short ks)
 
 	/* Retrieve window coords, and generate mouse events accordingly */
 	x2 = y2 = 0;
+	w2 = VDI_w;
+	h2 = VDI_h;
 	if ((!GEM_fullscreen) && (GEM_handle>=0)) {
 		wind_get (GEM_handle, WF_WORKXYWH, &x2, &y2, &w2, &h2);
 
