@@ -312,8 +312,7 @@ static int
 OBSD_OpenAudio(_THIS, SDL_AudioSpec *spec)
 {
     char audiodev[64];
-    Uint16 setenc;
-    audio_encoding_t enc;
+    Uint16 format;
     audio_info_t info;
 
     AUDIO_INITINFO(&info);
@@ -340,66 +339,58 @@ OBSD_OpenAudio(_THIS, SDL_AudioSpec *spec)
     }
     
     mixbuf = NULL;
-    setenc = 0;
-
-    for(enc.index = 0; (ioctl(audio_fd, AUDIO_GETENC, &enc)>=0)
-	&& (enc.encoding != setenc); enc.index++)
+    AUDIO_INITINFO(&info);
+    for (format = SDL_FirstAudioFormat(spec->format); 
+    	format; format = SDL_NextAudioFormat())
     {
-	switch(spec->format)
-	{
-	    case AUDIO_U8:	/* 8-bit unsigned linear */
-		setenc = AUDIO_ENCODING_PCM8;
-		break;
-	    case AUDIO_S8:	/* 8-bit signed linear */
-		setenc = AUDIO_ENCODING_SLINEAR;
-		break;
-	    case AUDIO_U16LSB:  /* 16-bit unsigned linear, LSB */
-		setenc = AUDIO_ENCODING_ULINEAR_LE;
-		break;
-	    case AUDIO_U16MSB:  /* 16-bit unsigned linear, MSB */
-		setenc = AUDIO_ENCODING_ULINEAR_BE;
-		break;
-	    case AUDIO_S16LSB:  /* 16-bit signed linear, LSB */
-		setenc = AUDIO_ENCODING_SLINEAR_LE;
-		break;
-	    case AUDIO_S16MSB:  /* 16-bit signed linear, MSB */
-		setenc = AUDIO_ENCODING_SLINEAR_BE;
-		break;
+	switch(format) {
+	case AUDIO_U8:
+	    info.play.encoding = AUDIO_ENCODING_ULINEAR;
+	    info.play.precision = 8;
+	    break;
+	case AUDIO_S8:
+	    info.play.encoding = AUDIO_ENCODING_SLINEAR;
+	    info.play.precision = 8;
+	    break;
+	case AUDIO_S16LSB:
+	    info.play.encoding = AUDIO_ENCODING_SLINEAR_LE;
+	    info.play.precision = 16;
+	    break;
+	case AUDIO_S16MSB:
+	    info.play.encoding = AUDIO_ENCODING_SLINEAR_BE;
+	    info.play.precision = 16;
+	    break;
+	case AUDIO_U16LSB:
+	    info.play.encoding = AUDIO_ENCODING_ULINEAR_LE;
+	    info.play.precision = 16;
+	    break;
+	case AUDIO_U16MSB:
+	    info.play.encoding = AUDIO_ENCODING_ULINEAR_BE;
+	    info.play.precision = 16;
+	    break;
+	default:
+	    continue;
 	}
-#ifdef DEBUG_AUDIO
-	fprintf(stderr,"encoding #%i: \"%s\" %i-bit (0x%x) flags=%i...\n",
-	    enc.index, enc.name, enc.precision, enc.encoding, enc.flags);
-#endif
+	if (ioctl(audio_fd, AUDIO_SETINFO, &info) == 0)
+	    break;
     }
 
-    if(!setenc) {
+    if(!format) {
 	SDL_SetError("No supported encoding for 0x%x", spec->format);
 	return(-1);
     }
 
-    /* Set audio encoding */
-    info.play.encoding = enc.encoding;
-    info.play.precision = enc.precision;
-    if((ioctl(audio_fd, AUDIO_SETINFO, &info) < 0)) {
-	SDL_SetError("Couldn't set encoding to 0x%x %i-bit",
-	    enc.encoding, enc.precision);
-	return(-1);
-    }
+    spec->format = format;
 
-    /* Set audio channels */
+    AUDIO_INITINFO(&info);
     info.play.channels = spec->channels;
-    if(ioctl(audio_fd, AUDIO_SETINFO, &info) < 0) {
-	info.play.channels = (spec->channels > 1);
-	ioctl(audio_fd, AUDIO_SETINFO, &info);
-    }
-
-    /* Set the sample rate */
+    if (ioctl(audio_fd, AUDIO_SETINFO, &info) == -1)
+    	spec->channels = 1;
+    AUDIO_INITINFO(&info);
     info.play.sample_rate = spec->freq;
-    if(ioctl(audio_fd, AUDIO_SETINFO, &info) < 0) {
-	SDL_SetError("Couldn't set sample rate to %i Hz", spec->freq);
-	return(-1);
-    }
-
+    (void)ioctl(audio_fd, AUDIO_SETINFO, &info);
+    (void)ioctl(audio_fd, AUDIO_GETINFO, &info);
+    spec->freq  = info.play.sample_rate;
     /* Allocate mixing buffer */
     mixlen = spec->size;
     mixbuf = (Uint8*)SDL_AllocAudioMem(mixlen);
