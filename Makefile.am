@@ -19,9 +19,9 @@ bin_SCRIPTS = sdl-config
 EXTRA_DIST =		\
 	BUGS		\
 	TODO		\
-        COPYING		\
-        CREDITS		\
-        INSTALL		\
+	COPYING		\
+	CREDITS		\
+	INSTALL		\
 	README		\
 	README.AmigaOS	\
 	README.CVS	\
@@ -35,21 +35,21 @@ EXTRA_DIST =		\
 	README.Qtopia	\
 	README.WinCE	\
 	README-SDL.txt	\
-	BorlandC.html	\
+	Borland.html	\
 	Borland.zip	\
-        VisualC.html	\
-        VisualC.zip	\
+	VisualC.html	\
+	VisualC.zip	\
 	VisualCE.zip	\
-        MPWmake.sea.bin	\
+	MPWmake.sea.bin	\
 	CWprojects.sea.bin \
 	PBProjects.tar.gz \
 	EpocBuildFiles.zip \
-        WhatsNew	\
-        docs.html	\
+	WhatsNew	\
+	docs.html	\
 	sdl.m4		\
-        SDL.spec	\
-        autogen.sh	\
-        strip_fPIC.sh
+	SDL.spec	\
+	autogen.sh	\
+	strip_fPIC.sh
 
 # M4 macro file for inclusion with autoconf
 m4datadir = $(datadir)/aclocal
