@@ -2531,6 +2531,9 @@ case "$ARCH" in
   openbsd | netbsd | bsdi)
     SHARED_SYSTEM_LIBS="$SYSTEM_LIBS"
     ;;
+  qnx)
+    SHARED_SYSTEM_LIBS="$SYSTEM_LIBS"
+    ;;
   macosx)
     SHARED_SYSTEM_LIBS="-framework Cocoa"
     if test x$enable_video = xyes -a x$enable_video_opengl = xyes; then

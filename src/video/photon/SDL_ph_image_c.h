@@ -39,4 +39,5 @@ extern int ph_FlipHWSurface(_THIS, SDL_Surface *surface);
 
 extern void ph_NormalUpdate(_THIS, int numrects, SDL_Rect *rects);
 extern void ph_OCUpdate(_THIS, int numrects, SDL_Rect *rects);
+extern void ph_OCDCUpdate(_THIS, int numrects, SDL_Rect *rects);
 extern void ph_OpenGLUpdate(_THIS, int numrects, SDL_Rect *rects);

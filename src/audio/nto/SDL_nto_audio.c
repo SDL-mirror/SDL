@@ -163,9 +163,8 @@ static SDL_AudioDevice *Audio_CreateDevice(int devindex)
 	return this;
 }
 
-/* Don't change the name from "ALSA_bootstrap" - that's how it's called */
-AudioBootStrap ALSA_bootstrap = {
-	DRIVER_NAME, "Neutrino PCM audio",
+AudioBootStrap QNXNTOAUDIO_bootstrap = {
+	DRIVER_NAME, "QNX6 NTO PCM audio",
 	Audio_Available, Audio_CreateDevice
 };
 
@@ -489,4 +488,3 @@ static int NTO_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	/* We're ready to rock and roll. :-) */
 	return(0);
 }
-

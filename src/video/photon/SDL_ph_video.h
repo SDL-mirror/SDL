@@ -20,22 +20,23 @@
     slouken@libsdl.org
 */
 
-#ifndef _SDL_ph_video_h
-#define _SDL_ph_video_h
+#ifndef __SDL_PH_VIDEO_H__
+#define __SDL_PH_VIDEO_H__
 
 #include "SDL_mouse.h"
 #include "SDL_sysvideo.h"
 
-#include "Ph.h"
-#include "Pt.h"
+#include <Ph.h>
+#include <Pt.h>
 #include <photon/Pg.h>
 #include <photon/PdDirect.h>
+
 #ifdef HAVE_OPENGL
-#include <photon/PdGL.h>
+    #include <photon/PdGL.h>
 #endif /* HAVE_OPENGL */
 
 /* Hidden "this" pointer for the video functions */
-#define _THIS	SDL_VideoDevice *this
+#define _THIS	SDL_VideoDevice* this
 
 #define PH_OGL_MAX_ATTRIBS 32
 
@@ -43,17 +44,22 @@
 #define SDLPH_PAL_EMULATE 0x00000001L
 #define SDLPH_PAL_SYSTEM  0x00000002L
 
-typedef union vidptr{
-  uint8_t*  volatile ptr8;
-  uint16_t* volatile ptr16;
-  uint32_t* volatile ptr32;
- } VidPtr_t;
-
-typedef struct {
+typedef struct
+{
 	unsigned char* Y;
 	unsigned char* V;
 	unsigned char* U;
 } FRAMEDATA;
+
+/* Mask values for SDL_ReallocFormat() */
+struct ColourMasks
+{
+    Uint32 red;
+    Uint32 green;
+    Uint32 blue;
+    Uint32 alpha;
+    Uint32 bpp;
+};
 
 /* Private display data */
 struct SDL_PrivateVideoData {
@@ -69,8 +75,9 @@ struct SDL_PrivateVideoData {
     struct {
         PdDirectContext_t*    direct_context;
         PdOffscreenContext_t* offscreen_context;
+        PdOffscreenContext_t* offscreen_backcontext;
         PhDrawContext_t*      oldDC;
-        VidPtr_t dc_ptr;
+        uint8_t*              dc_ptr;
         unsigned char* CurrentFrameData;
         unsigned char* FrameData0;
         unsigned char* FrameData1;
@@ -85,13 +92,15 @@ struct SDL_PrivateVideoData {
     int mouse_relative;
     WMcursor* BlankCursor;
 
-    int depth;			/* current visual depth (not bpp)        */
-    int desktopbpp;             /* bpp of desktop at the moment of start */
-    int desktoppal;             /* palette mode emulation or system      */
+    int depth;			/* current visual depth (not bpp)           */
+    int desktopbpp;             /* bpp of desktop at the moment of start    */
+    int desktoppal;             /* palette mode emulation or system         */
 
     int currently_fullscreen;
+    int currently_hided;        /* 1 - window hided (minimazed), 0 - normal */
 
     PhEvent_t* event;
+    SDL_Overlay* overlay;
 };
 
 #define mode_settings        (this->hidden->mode_settings)
@@ -106,11 +115,13 @@ struct SDL_PrivateVideoData {
 #define desktoppal           (this->hidden->desktoppal)
 #define savedpal             (this->hidden->savedpal)
 #define syspalph             (this->hidden->syspalph)
+#define currently_fullscreen (this->hidden->currently_fullscreen)
+#define currently_hided      (this->hidden->currently_hided)
+#define event                (this->hidden->event)
+#define current_overlay      (this->hidden->overlay)
 
 /* Old variable names */
 #define mouse_relative       (this->hidden->mouse_relative)
-#define currently_fullscreen (this->hidden->currently_fullscreen)
-#define event                (this->hidden->event)
 #define SDL_BlankCursor      (this->hidden->BlankCursor)
 
-#endif /* _SDL_x11video_h */
+#endif /* __SDL_PH_VIDEO_H__ */

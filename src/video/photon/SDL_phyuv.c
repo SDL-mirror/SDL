@@ -25,7 +25,7 @@ static char rcsid =
  "@(#) $Id$";
 #endif
 
-/* This is the QNX Realtime Platform version for SDL YUV video overlays */
+/* This is the QNX Realtime Platform version of SDL YUV video overlays */
 
 #include <stdlib.h>
 #include <string.h>
@@ -43,36 +43,15 @@ static char rcsid =
 #define OVERLAY_STATE_ACTIVE 1
 
 /* The functions used to manipulate software video overlays */
-static struct private_yuvhwfuncs ph_yuvfuncs = {
+static struct private_yuvhwfuncs ph_yuvfuncs =
+{
     ph_LockYUVOverlay,
     ph_UnlockYUVOverlay,
     ph_DisplayYUVOverlay,
     ph_FreeYUVOverlay
 };
 
-struct private_yuvhwdata {
-    FRAMEDATA* CurrentFrameData;
-    FRAMEDATA* FrameData0;
-    FRAMEDATA* FrameData1;
-    PgScalerProps_t   props;
-    PgScalerCaps_t    caps;
-    PgVideoChannel_t* channel;
-    PhArea_t CurrentWindow;
-    long format;
-    int planar;
-    int scaler_on;
-    int current;
-    long YStride;
-    long VStride;
-    long UStride;
-    int ischromakey;
-    long chromakey;
-    unsigned long State;
-    long flags;
-    int locked;
-};
-
-int grab_ptrs2(PgVideoChannel_t* channel, FRAMEDATA* Frame0, FRAMEDATA* Frame1 )
+int grab_ptrs2(PgVideoChannel_t* channel, FRAMEDATA* Frame0, FRAMEDATA* Frame1)
 {
     int planes = 0;
 
@@ -96,11 +75,11 @@ int grab_ptrs2(PgVideoChannel_t* channel, FRAMEDATA* Frame0, FRAMEDATA* Frame1 )
     return planes;
 }
 
-SDL_Overlay* ph_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SDL_Surface *display)
+SDL_Overlay* ph_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SDL_Surface* display)
 {
-    SDL_Overlay *overlay;
-    struct private_yuvhwdata *hwdata;
-    int xv_port;
+    SDL_Overlay* overlay;
+    struct private_yuvhwdata* hwdata;
+    int vidport;
     int rtncode;
     int planes;
     int i=0;
@@ -109,15 +88,17 @@ SDL_Overlay* ph_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SD
     /* Create the overlay structure */
     overlay = calloc(1, sizeof(SDL_Overlay));
 
-    if (overlay == NULL) {
+    if (overlay == NULL)
+    {
         SDL_OutOfMemory();
-        return (NULL);
+        return NULL;
     }
 
     /* Fill in the basic members */
     overlay->format = format;
     overlay->w = width;
     overlay->h = height;
+    overlay->hwdata = NULL;
 	
     /* Set up the YUV surface function structure */
     overlay->hwfuncs = &ph_yuvfuncs;
@@ -125,36 +106,41 @@ SDL_Overlay* ph_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SD
     /* Create the pixel data and lookup tables */
     hwdata = calloc(1, sizeof(struct private_yuvhwdata));
 
-    overlay->hwdata = hwdata;
-    if (hwdata == NULL) {
+    if (hwdata == NULL)
+    {
         SDL_OutOfMemory();
         SDL_FreeYUVOverlay(overlay);
-        return(NULL);
+        return NULL;
     }
+
+    overlay->hwdata = hwdata;
 
     PhDCSetCurrent(0);
     if (overlay->hwdata->channel == NULL)
     {
-        if ((overlay->hwdata->channel = PgCreateVideoChannel(Pg_VIDEO_CHANNEL_SCALER,0)) == NULL) 
+        if ((overlay->hwdata->channel = PgCreateVideoChannel(Pg_VIDEO_CHANNEL_SCALER, 0)) == NULL)
         {
             SDL_SetError("ph_CreateYUVOverlay(): Create channel failed: %s\n", strerror(errno));
             SDL_FreeYUVOverlay(overlay);
-
-            return(NULL);
+            return NULL;
 
         }
     }
 
+    overlay->hwdata->forcedredraw=0;
+
     PtGetAbsPosition(window, &pos.x, &pos.y);
-    overlay->hwdata->CurrentWindow.pos.x = pos.x;
-    overlay->hwdata->CurrentWindow.pos.y = pos.y;
-    overlay->hwdata->CurrentWindow.size.w = width;
-    overlay->hwdata->CurrentWindow.size.h = height;
+    overlay->hwdata->CurrentWindowPos.x = pos.x;
+    overlay->hwdata->CurrentWindowPos.y = pos.y;
+    overlay->hwdata->CurrentViewPort.pos.x = 0;
+    overlay->hwdata->CurrentViewPort.pos.y = 0;
+    overlay->hwdata->CurrentViewPort.size.w = width;
+    overlay->hwdata->CurrentViewPort.size.h = height;
     overlay->hwdata->State = OVERLAY_STATE_UNINIT;
     overlay->hwdata->FrameData0 = (FRAMEDATA *) calloc(1, sizeof(FRAMEDATA));
     overlay->hwdata->FrameData1 = (FRAMEDATA *) calloc(1, sizeof(FRAMEDATA));
 
-    xv_port = -1;
+    vidport = -1;
     i=0;
     
     overlay->hwdata->ischromakey=0;
@@ -171,7 +157,7 @@ SDL_Overlay* ph_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SD
                {
                    overlay->hwdata->ischromakey=1;
                }
-               xv_port=1;
+               vidport=1;
                break;
             }
         }
@@ -183,33 +169,28 @@ SDL_Overlay* ph_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SD
     } while(1);
 
 
-    if (xv_port == -1)
+    if (vidport == -1)
     {
         SDL_SetError("No available video ports for requested format\n");
         SDL_FreeYUVOverlay(overlay);
-        return(NULL);
+        return NULL;
     }
- 
+
     overlay->hwdata->format = format;
     overlay->hwdata->props.format = format;
     overlay->hwdata->props.size = sizeof(PgScalerProps_t);
-    overlay->hwdata->props.src_dim.w = width;   
-    overlay->hwdata->props.src_dim.h = height;   
-	
-    /* Don't use chromakey for now, blitting a surface will cover the window,
-     * and therefore the chroma. */
-    overlay->hwdata->chromakey = 0;
-    PtSetResource(window, Pt_ARG_FILL_COLOR, overlay->hwdata->chromakey, 0);
+    overlay->hwdata->props.src_dim.w = width;
+    overlay->hwdata->props.src_dim.h = height;
 
-    PhAreaToRect(&overlay->hwdata->CurrentWindow, &overlay->hwdata->props.viewport);
+    overlay->hwdata->chromakey = PgGetOverlayChromaColor();
+
+    PhAreaToRect(&overlay->hwdata->CurrentViewPort, &overlay->hwdata->props.viewport);
 
     overlay->hwdata->props.flags = Pg_SCALER_PROP_DOUBLE_BUFFER;
 
     if ((overlay->hwdata->ischromakey)&&(overlay->hwdata->chromakey))
     {
         overlay->hwdata->props.flags |= Pg_SCALER_PROP_CHROMA_ENABLE;
-        overlay->hwdata->props.color_key = overlay->hwdata->chromakey;
-        overlay->hwdata->props.color_key_mask = 0x00FFFFFFUL;
     } 
     else
     {
@@ -221,9 +202,8 @@ SDL_Overlay* ph_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SD
     switch(rtncode)
     {
         case -1: SDL_SetError("PgConfigScalerChannel failed\n");
-		 SDL_FreeYUVOverlay(overlay);
-		 return(NULL);
-   		 break;
+                 SDL_FreeYUVOverlay(overlay);
+                 return NULL;
         case 1:
         case 0:
         default:
@@ -232,21 +212,39 @@ SDL_Overlay* ph_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SD
 
     planes = grab_ptrs2(overlay->hwdata->channel, overlay->hwdata->FrameData0, overlay->hwdata->FrameData1);
 
-    if(overlay->hwdata->channel->yplane1 != NULL)			
+    if(overlay->hwdata->channel->yplane1 != NULL)
         overlay->hwdata->YStride = overlay->hwdata->channel->yplane1->pitch;
-    if(overlay->hwdata->channel->uplane1 != NULL)			
+    if(overlay->hwdata->channel->uplane1 != NULL)
         overlay->hwdata->UStride = overlay->hwdata->channel->uplane1->pitch;
-    if(overlay->hwdata->channel->vplane1 != NULL)			
+    if(overlay->hwdata->channel->vplane1 != NULL)
         overlay->hwdata->VStride = overlay->hwdata->channel->vplane1->pitch;
 
+    /* check for the validness of all planes */
+    if ((overlay->hwdata->channel->yplane1 == NULL) &&
+        (overlay->hwdata->channel->uplane1 == NULL) &&
+        (overlay->hwdata->channel->vplane1 == NULL))
+    {
+       SDL_FreeYUVOverlay(overlay);
+       SDL_SetError("PgConfigScaler() returns all planes equal NULL\n");
+       return NULL;
+    }
+/*
     overlay->hwdata->current = PgNextVideoFrame(overlay->hwdata->channel);
 
-    if(overlay->hwdata->current==0)
+    if (overlay->hwdata->current==0)
+    {
         overlay->hwdata->CurrentFrameData = overlay->hwdata->FrameData0;
+    }
     else
+    {
         overlay->hwdata->CurrentFrameData = overlay->hwdata->FrameData1;
+    }
+*/
+    overlay->hwdata->CurrentFrameData = overlay->hwdata->FrameData0;
 
+/*
     overlay->hwdata->locked = 1;
+*/
 
     /* Find the pitch and offset values for the overlay */
     overlay->planes = planes;
@@ -279,29 +277,36 @@ SDL_Overlay* ph_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SD
     overlay->hwdata->scaler_on = 0;
     overlay->hw_overlay = 1;
 
-    return (overlay);
+    current_overlay=overlay;
+
+    return overlay;
 }
 
-int ph_LockYUVOverlay(_THIS, SDL_Overlay *overlay)
+int ph_LockYUVOverlay(_THIS, SDL_Overlay* overlay)
 {
     if (overlay == NULL)
-        return 0;
-
-    overlay->hwdata->current = PgNextVideoFrame(overlay->hwdata->channel);
-    if (overlay->hwdata->current == -1)
     {
-        SDL_SetError("PgNextFrame failed, bailing out\n");
-        SDL_FreeYUVOverlay(overlay);
-        return(NULL);
+        return 0;
     }
 
     overlay->hwdata->locked = 1;
 
-    /* set current frame for double buffering */
+/*  overlay->hwdata->current = PgNextVideoFrame(overlay->hwdata->channel);
+    if (overlay->hwdata->current == -1)
+    {
+        SDL_SetError("ph_LockYUVOverlay: PgNextFrame() failed, bailing out\n");
+        SDL_FreeYUVOverlay(overlay);
+        return 0;
+    }
+
     if (overlay->hwdata->current == 0)
+    {
         overlay->hwdata->CurrentFrameData = overlay->hwdata->FrameData0;
+    }
     else
+    {
         overlay->hwdata->CurrentFrameData = overlay->hwdata->FrameData1;
+    }
 
     if (overlay->planes > 0)
     {
@@ -318,67 +323,83 @@ int ph_LockYUVOverlay(_THIS, SDL_Overlay *overlay)
         overlay->pitches[2] = overlay->hwdata->channel->vplane1->pitch;
         overlay->pixels[2]  = overlay->hwdata->CurrentFrameData->V;
     }
+*/
 
     return(0);
 }
 
-void ph_UnlockYUVOverlay(_THIS, SDL_Overlay *overlay)
+void ph_UnlockYUVOverlay(_THIS, SDL_Overlay* overlay)
 {
-    int rtncode;
-
-    if(overlay == NULL)
-         return;
-
-    if(overlay->hwdata->scaler_on == 1) 
+    if (overlay == NULL)
     {
-        rtncode =PgConfigScalerChannel(overlay->hwdata->channel, &(overlay->hwdata->props));
-        switch(rtncode)
-        {
-            case -1:
-                     SDL_SetError("PgConfigScalerChannel failed\n");
-                     SDL_FreeYUVOverlay(overlay);
-                     break;
-            case 1:
-                     grab_ptrs2(overlay->hwdata->channel, overlay->hwdata->FrameData0, overlay->hwdata->FrameData1);
-                     break;
-            case 0:
-            default:
-                     break;
-        }
+         return;
     }
 
-    /* This would be the best place to draw chromakey but we do not have a SDL_Surface in the args
-     * This means we might see a chromakey flicker at startup. */
+    overlay->hwdata->locked = 0;
 }
 
-int ph_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *dstrect)
+int ph_DisplayYUVOverlay(_THIS, SDL_Overlay* overlay, SDL_Rect* dstrect)
 {
     int rtncode;
     PhPoint_t pos;
+    SDL_Rect backrect;
+    PhRect_t windowextent;
+    int winchanged=0;
 
-    if(overlay == NULL)
-        return -1;
-
-    /* If CurrentWindow has change, move the viewport */
-    if((overlay->hwdata->CurrentWindow.pos.x != dstrect->x) ||
-       (overlay->hwdata->CurrentWindow.pos.y != dstrect->y) ||
-       (overlay->hwdata->CurrentWindow.size.w != dstrect->w) ||
-       (overlay->hwdata->CurrentWindow.size.h != dstrect->h) ||
-       (overlay->hwdata->scaler_on==0))
+    if ((overlay == NULL) || (overlay->hwdata==NULL))
     {
-        if(overlay->hwdata->State == OVERLAY_STATE_UNINIT)
-            return -1;
+        return -1;
+    }
+
+    if (overlay->hwdata->State == OVERLAY_STATE_UNINIT)
+    {
+        return -1;
+    }
+
+    PtGetAbsPosition(window, &pos.x, &pos.y);
+    if ((pos.x!=overlay->hwdata->CurrentWindowPos.x) ||
+        (pos.y!=overlay->hwdata->CurrentWindowPos.y))
+    {
+       winchanged=1;
+       overlay->hwdata->CurrentWindowPos.x=pos.x;
+       overlay->hwdata->CurrentWindowPos.y=pos.y;
+    }
+
+    /* If CurrentViewPort position/size has been changed, then move/resize the viewport */
+    if ((overlay->hwdata->CurrentViewPort.pos.x != dstrect->x) ||
+        (overlay->hwdata->CurrentViewPort.pos.y != dstrect->y) ||
+        (overlay->hwdata->CurrentViewPort.size.w != dstrect->w) ||
+        (overlay->hwdata->CurrentViewPort.size.h != dstrect->h) ||
+        (overlay->hwdata->scaler_on==0) || (winchanged==1) ||
+        (overlay->hwdata->forcedredraw==1))
+    {
+
+        if (overlay->hwdata->ischromakey==1)
+        {
+            /* restore screen behind the overlay/chroma color. */
+            backrect.x=overlay->hwdata->CurrentViewPort.pos.x;
+            backrect.y=overlay->hwdata->CurrentViewPort.pos.y;
+            backrect.w=overlay->hwdata->CurrentViewPort.size.w;
+            backrect.h=overlay->hwdata->CurrentViewPort.size.h;
+            this->UpdateRects(this, 1, &backrect);
+
+            /* Draw the new rectangle of the chroma color at the viewport position */
+            PgSetFillColor(overlay->hwdata->chromakey);
+            PgDrawIRect(dstrect->x, dstrect->y, dstrect->x+dstrect->w-1, dstrect->y+dstrect->h-1, Pg_DRAW_FILL);
+            PgFlush();
+        }
 
         overlay->hwdata->props.flags |= Pg_SCALER_PROP_SCALER_ENABLE;
         overlay->hwdata->scaler_on = 1;
 
-        PtGetAbsPosition(window, &pos.x, &pos.y);
-        overlay->hwdata->CurrentWindow.pos.x = pos.x + dstrect->x;
-        overlay->hwdata->CurrentWindow.pos.y = pos.y + dstrect->y;
-        overlay->hwdata->CurrentWindow.size.w = dstrect->w;
-        overlay->hwdata->CurrentWindow.size.h = dstrect->h;
-
-        PhAreaToRect(&overlay->hwdata->CurrentWindow, &overlay->hwdata->props.viewport);
+        PhWindowQueryVisible(Ph_QUERY_CONSOLE, 0, PtWidgetRid(window), &windowextent);
+        overlay->hwdata->CurrentViewPort.pos.x = pos.x-windowextent.ul.x+dstrect->x;
+        overlay->hwdata->CurrentViewPort.pos.y = pos.y-windowextent.ul.y+dstrect->y;
+        overlay->hwdata->CurrentViewPort.size.w = dstrect->w;
+        overlay->hwdata->CurrentViewPort.size.h = dstrect->h;
+        PhAreaToRect(&overlay->hwdata->CurrentViewPort, &overlay->hwdata->props.viewport);
+        overlay->hwdata->CurrentViewPort.pos.x = dstrect->x;
+        overlay->hwdata->CurrentViewPort.pos.y = dstrect->y;
 
         rtncode = PgConfigScalerChannel(overlay->hwdata->channel, &(overlay->hwdata->props));
 
@@ -397,19 +418,26 @@ int ph_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *dstrect)
         }
     }
 
-    if (!overlay->hwdata->locked)
+
+/*
+    if (overlay->hwdata->locked==0)
     {
         overlay->hwdata->current = PgNextVideoFrame(overlay->hwdata->channel);
         if (overlay->hwdata->current == -1)
         {
-            SDL_SetError("PgNextVideoFrame failed\n");
+            SDL_SetError("ph_LockYUVOverlay: PgNextFrame() failed, bailing out\n");
             SDL_FreeYUVOverlay(overlay);
             return 0;
         }
+
         if (overlay->hwdata->current == 0)
+        {
             overlay->hwdata->CurrentFrameData = overlay->hwdata->FrameData0;
+        }
         else
+        {
             overlay->hwdata->CurrentFrameData = overlay->hwdata->FrameData1;
+        }
 
         if (overlay->planes > 0)
         {
@@ -427,17 +455,33 @@ int ph_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *dstrect)
             overlay->pixels[2]  = overlay->hwdata->CurrentFrameData->V;
         }
     }
+*/
         
     return 0;
 }
 
 void ph_FreeYUVOverlay(_THIS, SDL_Overlay *overlay)
 {
+    SDL_Rect backrect;
+
     if (overlay == NULL)
+    {
         return;
+    }
 
     if (overlay->hwdata == NULL)
+    {
         return;
+    }
+
+    current_overlay=NULL;
+
+    /* restore screen behind the overlay/chroma color. */
+    backrect.x=overlay->hwdata->CurrentViewPort.pos.x;
+    backrect.y=overlay->hwdata->CurrentViewPort.pos.y;
+    backrect.w=overlay->hwdata->CurrentViewPort.size.w;
+    backrect.h=overlay->hwdata->CurrentViewPort.size.h;
+    this->UpdateRects(this, 1, &backrect);
 
     /* it is need for some buggy drivers, that can't hide overlay before */
     /* freeing buffer, so we got trash on the srceen                     */

@@ -1,26 +1,93 @@
 README by Mike Gorchak <mike@malva.ua>, <lestat@i.com.ua>
+Last changed at 29 Jul 2003.
+
+=========================================================================
+OpenGL:
 
     OpenGL in window mode  works well  and  stable, in fullscreen
-mode too, but fullscreen mode has not been heavily tested.
-    If you have QNX RtP 6.1.0 w/ or w/o Patch A you must download
-new Photon3D runtime from http://developers.qnx.com. The versions
-of OS before 6.1.0 are not supported.
+mode too, but fullscreen mode has not been heavily tested yet.
+    If you have QNX RtP version 6.1.0 and above you must download
+new Photon3D runtime from http://developers.qnx.com or install it
+from public repository or from public CD, available with QNX. The
+versions of OS before 6.1.0 are not supported.
+    While  creating  OpenGL  context  software  renderer  mode is
+artificially selected (QSSL  made  acceleration  only for  Voodoo
+boards in fullscreen mode, sorry but I  don't have  this board to
+test OpenGL - maybe it work or maybe not :)). If you want accele-
+ration - you may remove some line in source code: find  the  file
+SDL_ph_video.c and remove the following
 
-Problems:
-1. While  creating  OpenGL  context  software  renderer  mode  is
-   artificially selected (QSSL made acceleration only for  Voodoo
-   boards in fullscreen mode, sorry but I don't have  this board,
-   if you want acceleration - you may remove some line  in source
-   code).
-2. Photon has some errors in detecting  how  much bits  per pixel
-   videomode has.
-3. No  shared  libraries  yet.  We  need  manually  set  flag  to
-   'configure' --disable-shared.
-4. Due to Photon API limitation, flag SDL_HWSURFACE supported on-
-   ly in case of desktop bpp is equal requested bpp in window mo-
-   de.
+    OGLAttrib[OGLargc++]=PHOGL_ATTRIB_FORCE_SW;
+     
+line in the ph_SetupOpenGLContext() function or  change  argument
+to the PHOGL_ATTRIB_FORCE_HW or PHOGL_ATTRIB_FAVOR_HW.
 
+=========================================================================
+Wheel and multibutton mouses:
+
+    Photon emitting keyboard events (key up and down) when  moved
+mouse wheel. But key_scan field appears valid according to flags,
+and it contain zero. It is base method of detecting  mouse  wheel
+events under photon. It looks like a hack, but it works for me :)
+on different PC configurations.
+
+I'm tested it on:
+
+1. Genius Optical NetScroll/+ (1 wheel)
+2. A4Tech Optical GreatEye WheelMouse, model: WOP-35. (2 wheels +
+   2 additional buttons). Wheel for vertical scrolling  works  as
+   usual, but second wheel for horizontal scrolling emitting  two
+   consequented events up or down, so it can  provide  more  fast
+   scrolling then the  first  wheel. Additional  buttons  doesn't
+   emitting any events, but its look like  handled by  photon  in
+   unusual way - like click to front, but works not with any win-
+   dow, looks like bug-o-feature :).
+
+=========================================================================
+CDROM handling issues:
+
+    Access to CDROM can be provided only with 'root'  previleges.
+I can't do anything with this fact. /dev/cd0 have  the brw-------
+flags and root:root rights.
+
+=========================================================================
+Video Overlays:
+
+    Overlays can flickering during the window movement, resizing,
+etc. It happens because photon driver  updates  the  real  window
+contents behind the overlay, then draws the temporary  chroma key
+color over window contents. It can be done without the chroma key
+using but it cause overlay will be  always  on top. So flickering
+during the movement much better in that case.
+    Double buffering code temporary disabled in the photon driver
+code, beacuse on my GF2-MX it  cause  accidently  buffer  switch,
+which going to the old frame showing. S3 Savage3D have  the  same
+problem, but ATI Rage 128 has not this problem. I think it can be
+fixed later. Current code works very fine, so maybe double buffe-
+ring is not needed right now.
+    Something strange appears when you tried to move window  with
+overlay beyond the left border of the screen. Overlay  trying  to
+stay at position x=0, but when tried to move  it  a  bit  more it
+jumps  at  posituin  x=-60. Really  strange, looks  like  overlay
+doesn't love the negotive coordinates.
+
+=========================================================================
+Shared library building:
+
+    Shared  library can be  built, but before  running autogen.sh
+script you  need  manually  delete  the  libtool  m4  stuff  from
+the acinclude.m4 file (it comes after ESD  detection  code  up to
+end of the file). Because libtool stuff in the  acinclude.m4 file
+very old and doesn't know anything about the QNX. Just  remove it
+and run autogen.sh script.
+
+=========================================================================
 Some building issues:
+
+    Feel free to not pass --disable-shared option  to  configure,
+if you read comment above about 'Shared library building'. Other-
+wise this option is strongly  recomended, because  the sdl-config
+script will be unfunctional.
 
     Run configure script without x11 support, e.g.:
 
@@ -41,4 +108,5 @@ support, e.g.:
     ./configure  --with-sdl-prefix=/usr/local      \
                  --with-sdl-exec-prefix=/usr/local \
                  --prefix=/usr/local --without-x
+
 

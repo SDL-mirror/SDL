@@ -75,8 +75,9 @@ int ph_IconifyWindow(_THIS)
     memset( &windowevent, 0, sizeof (event) );
     windowevent.event_f = Ph_WM_HIDE;
     windowevent.event_state = Ph_WM_EVSTATE_HIDE;
-    windowevent.rid = PtWidgetRid( window );
-    PtForwardWindowEvent( &windowevent );
+    windowevent.rid = PtWidgetRid(window);
+    PtForwardWindowEvent(&windowevent);
+
     SDL_Unlock_EventThread();
 
     return 0;

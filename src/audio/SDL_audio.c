@@ -50,6 +50,9 @@ static AudioBootStrap *bootstrap[] = {
 #ifdef ALSA_SUPPORT
 	&ALSA_bootstrap,
 #endif
+#ifdef QNXNTOAUDIO_SUPPORT
+	&QNXNTOAUDIO_bootstrap,
+#endif
 #ifdef SUNAUDIO_SUPPORT
 	&SUNAUDIO_bootstrap,
 #endif

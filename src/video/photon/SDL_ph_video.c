@@ -59,9 +59,12 @@ static void ph_DeleteDevice(SDL_VideoDevice *device);
 static void ph_UpdateMouse(_THIS);
 
 #ifdef HAVE_OPENGL
-int ph_SetupOpenGLContext(_THIS, int width, int height, int bpp, Uint32 flags);
+static int ph_SetupOpenGLContext(_THIS, int width, int height, int bpp, Uint32 flags);
 static void ph_GL_SwapBuffers(_THIS);
 static int ph_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value);
+static int ph_GL_LoadLibrary(_THIS, const char* path);
+static void* ph_GL_GetProcAddress(_THIS, const char* proc);
+
 #endif /* HAVE_OPENGL */
 
 static int ph_Available(void)
@@ -109,7 +112,7 @@ static SDL_VideoDevice *ph_CreateDevice(int devindex)
     device->ToggleFullScreen = ph_ToggleFullScreen;
     device->UpdateMouse = ph_UpdateMouse;
     device->SetColors = ph_SetColors;
-    device->UpdateRects = NULL;         /* ph_SetupUpdateFunction */
+    device->UpdateRects = NULL;         /* set up in ph_SetupUpdateFunction */
     device->VideoQuit = ph_VideoQuit;
     device->AllocHWSurface = ph_AllocHWSurface;
     device->CheckHWBlit = NULL;
@@ -134,19 +137,21 @@ static SDL_VideoDevice *ph_CreateDevice(int devindex)
     device->PumpEvents = ph_PumpEvents;
 
     /* OpenGL support. */
-    device->GL_LoadLibrary = NULL;
-    device->GL_GetProcAddress = NULL;
     device->GL_MakeCurrent = NULL;
 #ifdef HAVE_OPENGL
     device->GL_SwapBuffers = ph_GL_SwapBuffers;
     device->GL_GetAttribute = ph_GL_GetAttribute;
+    device->GL_LoadLibrary = ph_GL_LoadLibrary;
+    device->GL_GetProcAddress = ph_GL_GetProcAddress;
 #else
     device->GL_SwapBuffers = NULL;
     device->GL_GetAttribute = NULL;
+    device->GL_LoadLibrary = NULL;
+    device->GL_GetProcAddress = NULL;
 #endif /* HAVE_OPENGL */
 
     device->free = ph_DeleteDevice;
-
+    
     return device;
 }
 
@@ -179,10 +184,6 @@ static PtWidget_t *ph_CreateWindow(_THIS)
     PtWidget_t *widget;
     
     widget = PtCreateWidget(PtWindow, NULL, 0, 0);
-    if (widget == NULL)
-    {
-        SDL_SetError("Couldn't create video window");
-    }
 
     return widget;
 }
@@ -199,28 +200,38 @@ static int ph_SetupWindow(_THIS, int w, int h, int flags)
 
     if ((flags & SDL_RESIZABLE) == SDL_RESIZABLE)
     {
-        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_MANAGED_FLAGS, Pt_FALSE, Ph_WM_RESIZE | Ph_WM_MAX);
-        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_NOTIFY_FLAGS, Pt_TRUE, Ph_WM_RESIZE | Ph_WM_MAX);
-        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_RENDER_FLAGS, Pt_TRUE, Ph_WM_RENDER_RESIZE | Ph_WM_RENDER_MAX);
+        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_MANAGED_FLAGS, Pt_FALSE, Ph_WM_RESIZE | Ph_WM_CLOSE);
+        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_MANAGED_FLAGS, Pt_TRUE, Ph_WM_MAX | Ph_WM_RESTORE);
+        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_NOTIFY_FLAGS, Pt_TRUE, Ph_WM_RESIZE | Ph_WM_MOVE | Ph_WM_MAX | Ph_WM_RESTORE | Ph_WM_CLOSE);
+        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_RENDER_FLAGS, Pt_TRUE, Ph_WM_RENDER_RESIZE | Ph_WM_RENDER_MAX | Ph_WM_RENDER_COLLAPSE | Ph_WM_RENDER_RETURN);
     }
     else
     {
-        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_MANAGED_FLAGS, Pt_FALSE, Ph_WM_RESIZE | Ph_WM_MAX);
-        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_NOTIFY_FLAGS, Pt_FALSE, Ph_WM_RESIZE | Ph_WM_MAX);
-        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_RENDER_FLAGS, Pt_FALSE, Ph_WM_RENDER_RESIZE | Ph_WM_RENDER_MAX | Ph_WM_RENDER_COLLAPSE);
+        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_MANAGED_FLAGS, Pt_FALSE, Ph_WM_RESIZE | Ph_WM_MAX | Ph_WM_RESTORE | Ph_WM_CLOSE);
+        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_NOTIFY_FLAGS, Pt_FALSE, Ph_WM_RESIZE | Ph_WM_MAX | Ph_WM_RESTORE);
+        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_NOTIFY_FLAGS, Pt_TRUE, Ph_WM_MOVE | Ph_WM_CLOSE);
+        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_RENDER_FLAGS, Pt_FALSE, Ph_WM_RENDER_RESIZE | Ph_WM_RENDER_MAX | Ph_WM_RENDER_COLLAPSE | Ph_WM_RENDER_RETURN);
     }
 
     if (((flags & SDL_NOFRAME)==SDL_NOFRAME) || ((flags & SDL_FULLSCREEN)==SDL_FULLSCREEN))
     {
-        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_RENDER_FLAGS, Pt_FALSE, Pt_TRUE);
+       if ((flags & SDL_RESIZABLE) != SDL_RESIZABLE)
+       {
+           PtSetArg(&args[nargs++], Pt_ARG_WINDOW_RENDER_FLAGS, Pt_FALSE, Pt_TRUE);
+       }
+       else
+       {
+           PtSetArg(&args[nargs++], Pt_ARG_WINDOW_RENDER_FLAGS, Pt_FALSE, Pt_TRUE);
+           PtSetArg(&args[nargs++], Pt_ARG_WINDOW_RENDER_FLAGS, Pt_TRUE, Ph_WM_RENDER_RESIZE | Ph_WM_RENDER_BORDER);
+       }
     }
     else
     {
         PtSetArg(&args[nargs++], Pt_ARG_WINDOW_RENDER_FLAGS, Pt_TRUE, Ph_WM_RENDER_BORDER | Ph_WM_RENDER_TITLE |
-                                  Ph_WM_RENDER_CLOSE | Ph_WM_RENDER_MENU | Ph_WM_RENDER_MIN);
+                                 Ph_WM_RENDER_CLOSE | Ph_WM_RENDER_MENU | Ph_WM_RENDER_MIN);
     }
 
-    if (flags & SDL_FULLSCREEN)
+    if ((flags & SDL_FULLSCREEN) == SDL_FULLSCREEN)
     {
         PtSetArg(&args[nargs++], Pt_ARG_POS, &pos, 0);
         PtSetArg(&args[nargs++], Pt_ARG_WINDOW_MANAGED_FLAGS, Pt_TRUE, Ph_WM_FFRONT | Ph_WM_MAX);
@@ -231,6 +242,7 @@ static int ph_SetupWindow(_THIS, int w, int h, int flags)
     {
         PtSetArg(&args[nargs++], Pt_ARG_WINDOW_STATE, Pt_FALSE, Ph_WM_STATE_ISFRONT | Ph_WM_STATE_ISMAX | Ph_WM_STATE_ISALTKEY);
         PtSetArg(&args[nargs++], Pt_ARG_WINDOW_MANAGED_FLAGS, Pt_TRUE, Ph_WM_HIDE);
+        PtSetArg(&args[nargs++], Pt_ARG_WINDOW_NOTIFY_FLAGS, Pt_TRUE, Ph_WM_HIDE);
         PtSetArg(&args[nargs++], Pt_ARG_RESIZE_FLAGS, Pt_FALSE, Pt_RESIZE_XY_AS_REQUIRED);
     }
 
@@ -240,10 +252,38 @@ static int ph_SetupWindow(_THIS, int w, int h, int flags)
     return 0;
 }
 
+static const struct ColourMasks* ph_GetColourMasks(int bpp)
+{
+    /* The alpha mask doesn't appears to be needed */
+    static const struct ColourMasks phColorMasks[5] = {
+        /*  8 bit      */  {0, 0, 0, 0, 8},
+        /* 15 bit ARGB */  {0x7C00, 0x03E0, 0x001F, 0x8000, 15},
+        /* 16 bit  RGB */  {0xF800, 0x07E0, 0x001F, 0x0000, 16},
+        /* 24 bit  RGB */  {0xFF0000, 0x00FF00, 0x0000FF, 0x000000, 24},
+        /* 32 bit ARGB */  {0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000, 32},
+    };
+
+    switch (bpp)
+    {
+        case 8:
+             return &phColorMasks[0];
+        case 15:
+             return &phColorMasks[1];
+        case 16:
+             return &phColorMasks[2];
+        case 24:
+             return &phColorMasks[3];
+        case 32:
+             return &phColorMasks[4];
+    }
+    return NULL;
+}
+
 static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat)
 {
     PgVideoModeInfo_t my_mode_info;
     PgHWCaps_t my_hwcaps;
+    int i;
 
     window=NULL;
     desktoppal=SDLPH_PAL_NONE;
@@ -264,6 +304,7 @@ static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat)
     window = ph_CreateWindow(this);
     if (window == NULL)
     {
+        SDL_SetError("ph_VideoInit(): Couldn't create video window !\n");
         return -1;
     }
 
@@ -274,17 +315,21 @@ static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
     if (SDL_BlankCursor == NULL)
     {
-        fprintf(stderr, "ph_VideoInit(): could not create blank cursor !\n");
+        return -1;
     }
 
     if (PgGetGraphicsHWCaps(&my_hwcaps) < 0)
     {
-        fprintf(stderr,"ph_VideoInit(): GetGraphicsHWCaps failed !\n");
+        SDL_SetError("ph_VideoInit(): GetGraphicsHWCaps function failed !\n");
+        this->FreeWMCursor(this, SDL_BlankCursor);
+        return -1;
     }
 
     if (PgGetVideoModeInfo(my_hwcaps.current_video_mode, &my_mode_info) < 0)
     {
-        fprintf(stderr,"ph_VideoInit(): PgGetVideoModeInfo failed !\n");
+        SDL_SetError("ph_VideoInit(): PgGetVideoModeInfo function failed !\n");
+        this->FreeWMCursor(this, SDL_BlankCursor);
+        return -1;
     }
 
     /* We need to return BytesPerPixel as it in used by CreateRGBsurface */
@@ -298,8 +343,27 @@ static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat)
         PgGetPalette(savedpal);
         PgGetPalette(syspalph);
     }
+    else
+    {
+        for(i=0; i<_Pg_MAX_PALETTE; i++)
+        {
+            savedpal[i]=PgRGB(0, 0, 0);
+            syspalph[i]=PgRGB(0, 0, 0);
+        }
+    }
          
     currently_fullscreen = 0;
+    currently_hided = 0;
+    current_overlay = NULL;
+
+    OCImage.direct_context = NULL;
+    OCImage.offscreen_context = NULL;
+    OCImage.offscreen_backcontext = NULL;
+    OCImage.oldDC = NULL;
+    OCImage.CurrentFrameData = NULL;
+    OCImage.FrameData0 = NULL;
+    OCImage.FrameData1 = NULL;
+
     
     this->info.wm_available = 1;
     
@@ -309,18 +373,33 @@ static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat)
 static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
                 int width, int height, int bpp, Uint32 flags)
 {
-    PgDisplaySettings_t settings;
-    SDL_Color* colors;
-    int mode;
-    int rtnval;
-    int i;
+    const struct ColourMasks* mask;
 
     /* Lock the event thread, in multi-threading environments */
     SDL_Lock_EventThread();
 
     current->flags = flags;
 
-    ph_SetupWindow(this, width, height, flags);
+    /* if we do not have desired fullscreen mode, then fallback into window mode */
+    if (((current->flags & SDL_FULLSCREEN) == SDL_FULLSCREEN) && (ph_GetVideoMode(width, height, bpp)==0))
+    {
+       current->flags &= ~SDL_FULLSCREEN;
+       current->flags &= ~SDL_NOFRAME;
+       current->flags &= ~SDL_RESIZABLE;
+    }
+
+    ph_SetupWindow(this, width, height, current->flags);
+
+    mask = ph_GetColourMasks(bpp);
+    if (mask != NULL)
+    {
+        SDL_ReallocFormat(current, mask->bpp, mask->red, mask->green, mask->blue, 0);
+    }
+    else
+    {
+        SDL_SetError("ph_SetVideoMode(): desired bpp is not supported by photon !\n");
+        return NULL;
+    }
 
 #ifdef HAVE_OPENGL
     if (current->flags & SDL_OPENGL)
@@ -334,72 +413,41 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
         {
             /* if context creation fail, report no OpenGL to high level */
             current->flags &= ~SDL_OPENGL;
+            return NULL;
         }
 #else
     if (current->flags & SDL_OPENGL) /* if no built-in OpenGL support */
     {
-        fprintf(stderr, "ph_SetVideoMode(): no OpenGL support, try to recompile library.\n");
+        SDL_SetError("ph_SetVideoMode(): no OpenGL support, try to recompile library.\n");
         current->flags &= ~SDL_OPENGL;
         return NULL;
 #endif /* HAVE_OPENGL */
     }
     else
     {
-        /* Initialize the window */
-        if (current->flags & SDL_FULLSCREEN) /* Direct Context , assume SDL_HWSURFACE also set */
+        /* Initialize internal variables */
+        if ((current->flags & SDL_FULLSCREEN) == SDL_FULLSCREEN)
         {
-            /* Get the video mode and set it */
-            if (current->flags & SDL_ANYFORMAT)
-            {
-                if ((mode = get_mode_any_format(width, height, bpp)) == 0)
-                {
-                    fprintf(stderr,"ph_SetVideoMode(): get_mode_any_format failed !\n");
-                    exit(1);
-                }
-            }
-            else
-            {
-                if ((mode = get_mode(width, height, bpp)) == 0)
-                {
-                    fprintf(stderr,"ph_SetVideoMode(): get_mode failed !\n");
-                    exit(1);
-                }
-            }
-            
             if (bpp==8)
             {
                desktoppal=SDLPH_PAL_SYSTEM;
             }
-            
-            /* save old video mode caps */
-            PgGetVideoMode(&settings);
-            old_video_mode=settings.mode;
-            old_refresh_rate=settings.refresh;
-
-            /* setup new video mode */
-            settings.mode = mode;
-            settings.refresh = 0;
-            settings.flags = 0;
-
-            if (PgSetVideoMode(&settings) < 0)
-            {
-                fprintf(stderr,"ph_SetVideoMode(): PgSetVideoMode failed !\n");
-            }
 
             current->flags &= ~SDL_RESIZABLE; /* no resize for Direct Context */
-            current->flags |= SDL_HWSURFACE;
-
-            /* Begin direct mode */
-            ph_EnterFullScreen(this);
-
-        } /* end fullscreen flag */
+        }
         else
         {
-            /* Use offscreen memory iff SDL_HWSURFACE flag is set */
-            if (current->flags & SDL_HWSURFACE)
+            /* remove this if we'll support non-fullscreen sw/hw+doublebuf */
+            current->flags &= ~SDL_DOUBLEBUF;
+
+            /* Use offscreen memory if SDL_HWSURFACE flag is set */
+            if ((current->flags & SDL_HWSURFACE) == SDL_HWSURFACE)
             {
-                /* no stretch blit in offscreen context */
-                current->flags &= ~SDL_RESIZABLE;
+
+                if (desktopbpp!=bpp)
+                {
+                   current->flags &= ~SDL_HWSURFACE;
+                }
             }
 
             /* using palette emulation code in window mode */
@@ -407,33 +455,16 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
             {
                 if (desktopbpp>=15)
                 {
-                    desktoppal=SDLPH_PAL_EMULATE;
+                    desktoppal = SDLPH_PAL_EMULATE;
                 }
                 else
                 {
-                    desktoppal=SDLPH_PAL_SYSTEM;
-                }
-
-                /* fill the palette */
-                PgGetPalette(savedpal);
-                PgGetPalette(syspalph);
-
-                current->format->palette = calloc(1, sizeof(SDL_Palette));
-                current->format->palette->ncolors = _Pg_MAX_PALETTE;
-                current->format->palette->colors = (SDL_Color *)calloc(_Pg_MAX_PALETTE, sizeof(SDL_Color));
-
-                colors = current->format->palette->colors;
-
-                for(i=0; i<256; i++)
-                {
-                    colors[i].r = PgRedValue(syspalph[i]);
-                    colors[i].g = PgGreenValue(syspalph[i]);
-                    colors[i].b = PgBlueValue(syspalph[i]);
+                    desktoppal = SDLPH_PAL_SYSTEM;
                 }
             }
             else
             {
-               desktoppal=SDLPH_PAL_NONE;
+               desktoppal = SDLPH_PAL_NONE;
             }
         }
     }
@@ -441,22 +472,22 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
     current->w = width;
     current->h = height;
 
-    /* These values can be overridden in ph_SetupUpdateFunction() */
-    current->format->BitsPerPixel = bpp;
-    current->format->BytesPerPixel = (bpp+7)/8;
-    current->pitch = SDL_CalculatePitch(current);
-
-    /* Must call at least once it setup image planes */
-    rtnval = ph_SetupUpdateFunction(this, current, current->flags);
-    
-    if (rtnval==-1)
+    if (desktoppal==SDLPH_PAL_SYSTEM)
     {
-        fprintf(stderr,"ph_SetVideoMode(): ph_SetupUpdateFunction failed !\n");
+       current->flags|=SDL_HWPALETTE;
+    }
+
+    /* Must call at least once for setup image planes */
+    if (ph_SetupUpdateFunction(this, current, current->flags)==-1)
+    {
         return NULL;
     }
 
-    /* finish window drawing */
-    PtFlush();
+    /* finish window drawing, if we are not in fullscreen, of course */
+    if ((current->flags & SDL_FULLSCREEN) != SDL_FULLSCREEN)
+    {
+       PtFlush();
+    }
 
     SDL_Unlock_EventThread();
 
@@ -470,12 +501,15 @@ static void ph_VideoQuit(_THIS)
     PhRegion_t region_info;
 #endif /* HAVE_OPENGL */
 
-    ph_DestroyImage(this, SDL_VideoSurface); 
-
-    if (currently_fullscreen)
+    /* restore palette */
+    if (desktopbpp==8)
     {
-        ph_LeaveFullScreen(this);
+        PgSetPalette(syspalph, 0, -1, 0, 0, 0);
+        PgSetPalette(savedpal, 0, 0, _Pg_MAX_PALETTE, Pg_PALSET_GLOBAL | Pg_PALSET_FORCE_EXPOSE, 0);
+        PgFlush();
     }
+
+    ph_DestroyImage(this, SDL_VideoSurface); 
 
 #ifdef HAVE_OPENGL
     /* prevent double SEGFAULT during parachute mode */
@@ -509,14 +543,6 @@ static void ph_VideoQuit(_THIS)
     }
 #endif /* HAVE_OPENGL */
 
-    /* restore palette */
-    if (desktoppal!=SDLPH_PAL_NONE)
-    {
-        PgSetPalette(savedpal, 1, 0, _Pg_MAX_PALETTE, Pg_PALSET_HARD | Pg_PALSET_FORCE_EXPOSE, 0);
-        /* pass -1, to force release palette */
-        PgSetPalette(savedpal, 1, 0, -1, Pg_PALSET_HARD | Pg_PALSET_FORCE_EXPOSE, 0);
-    }
-
     if (event!=NULL)
     {
         free(event);
@@ -543,6 +569,7 @@ static int ph_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
                 syspalph[i] = PgRGB(colors[i-firstcolor].r, colors[i-firstcolor].g, colors[i-firstcolor].b);
                 SDL_Image->palette[i] = syspalph[i];
             }
+
             /* image needs to be redrawn */
             this->UpdateRects(this, 1, &updaterect);
         }
@@ -559,14 +586,14 @@ static int ph_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
             if ((this->screen->flags & SDL_FULLSCREEN) != SDL_FULLSCREEN)
             {
                  /* window mode must use soft palette */
-                PgSetPalette(&syspalph[firstcolor], 1, firstcolor, ncolors, Pg_PALSET_SOFT, 0);
+                PgSetPalette(&syspalph[firstcolor], 0, firstcolor, ncolors, Pg_PALSET_GLOBAL, 0);
                 /* image needs to be redrawn */
                 this->UpdateRects(this, 1, &updaterect);
             }
             else
             {
                 /* fullscreen mode must use hardware palette */
-                PgSetPalette(&syspalph[firstcolor], 1, firstcolor, ncolors, Pg_PALSET_HARDLOCKED, 0);
+                PgSetPalette(&syspalph[firstcolor], 0, firstcolor, ncolors, Pg_PALSET_GLOBAL, 0);
             }
         }
         else
@@ -628,7 +655,7 @@ int ph_SetupOpenGLContext(_THIS, int width, int height, int bpp, Uint32 flags)
 
     if (oglctx==NULL)
     {
-        fprintf(stderr,"ph_SetupOpenGLContext(): cannot create OpenGL context.\n");
+        SDL_SetError("ph_SetupOpenGLContext(): cannot create OpenGL context !\n");
         return (-1);
     }
 
@@ -673,6 +700,19 @@ int ph_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
              return(-1);
     }
     return 0;
+}
+
+int ph_GL_LoadLibrary(_THIS, const char* path)
+{
+   /* if code compiled with HAVE_OPENGL, the library already linked */
+   this->gl_config.driver_loaded = 1;
+
+   return 0;
+}
+
+void* ph_GL_GetProcAddress(_THIS, const char* proc)
+{
+   return NULL;
 }
 
 #endif /* HAVE_OPENGL */

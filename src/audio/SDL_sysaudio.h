@@ -114,6 +114,9 @@ extern AudioBootStrap DMA_bootstrap;
 #ifdef ALSA_SUPPORT
 extern AudioBootStrap ALSA_bootstrap;
 #endif
+#ifdef QNXNTOAUDIO_SUPPORT
+extern AudioBootStrap QNXNTOAUDIO_bootstrap;
+#endif
 #ifdef SUNAUDIO_SUPPORT
 extern AudioBootStrap SUNAUDIO_bootstrap;
 #endif

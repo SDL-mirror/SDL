@@ -35,54 +35,11 @@ static char rcsid =
 #include "SDL_video.h"
 #include "SDL_pixels_c.h"
 #include "SDL_ph_image_c.h"
-
-/* Mask values for SDL_ReallocFormat() */
-struct ColourMasks
-{
-    Uint32 red;
-    Uint32 green;
-    Uint32 blue;
-    Uint32 alpha;
-    Uint32 bpp;
-};
-
-static const struct ColourMasks *ph_GetColourMasks( int format )
-{
-    /* The alpha mask doesn't appear to be needed */
-    static const struct ColourMasks phColorMasks[5] = {
-        /*  8 bit      */  {0, 0, 0, 0, 8},
-        /* 15 bit ARGB */  {0x7C00, 0x03E0, 0x001F, 0x8000, 16},
-        /* 16 bit  RGB */  {0xF800, 0x07E0, 0x001F, 0x0000, 16},
-        /* 24 bit  RGB */  {0xFF0000, 0x00FF00, 0x0000FF, 0x000000, 24},
-        /* 32 bit ARGB */  {0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000, 32},
-    };
-
-    switch( format )
-    {
-        case Pg_IMAGE_PALETTE_BYTE:
-             return &phColorMasks[0];
-             break;
-        case Pg_IMAGE_DIRECT_1555:
-        case Pg_IMAGE_DIRECT_555:
-             return &phColorMasks[1];
-             break;
-        case Pg_IMAGE_DIRECT_565:
-             return &phColorMasks[2];
-             break;
-        case Pg_IMAGE_DIRECT_888:
-             return &phColorMasks[3];
-             break;
-        case Pg_IMAGE_DIRECT_8888:
-             return &phColorMasks[4];
-             break;
-    }
-    return NULL;
-}
+#include "SDL_ph_modes_c.h"
 
 int ph_SetupImage(_THIS, SDL_Surface *screen)
 {
     PgColor_t* palette=NULL;
-    const struct ColourMasks* mask;
     int type=0;
     int bpp;
     
@@ -112,7 +69,7 @@ int ph_SetupImage(_THIS, SDL_Surface *screen)
         }
         break;
         default:{
-            fprintf(stderr,"ph_SetupImage(): unsupported bpp=%d !\n", bpp);
+            SDL_SetError("ph_SetupImage(): unsupported bpp=%d !\n", bpp);
             return -1;
         }
         break;
@@ -123,12 +80,18 @@ int ph_SetupImage(_THIS, SDL_Surface *screen)
     {
         /* creating image palette */
         palette=malloc(_Pg_MAX_PALETTE*sizeof(PgColor_t));
+        if (palette==NULL)
+        {
+            SDL_SetError("ph_SetupImage(): can't allocate memory for palette !\n");
+            return -1;
+        }
         PgGetPalette(palette);
 
         /* using shared memory for speed (set last param to 1) */
         if ((SDL_Image = PhCreateImage(NULL, screen->w, screen->h, type, palette, _Pg_MAX_PALETTE, 1)) == NULL)
         {
-            fprintf(stderr,"ph_SetupImage(): PhCreateImage failed for bpp=8 !\n");
+            SDL_SetError("ph_SetupImage(): PhCreateImage() failed for bpp=8 !\n");
+            free(palette);
             return -1;
         }
     }
@@ -137,19 +100,13 @@ int ph_SetupImage(_THIS, SDL_Surface *screen)
         /* using shared memory for speed (set last param to 1) */
         if ((SDL_Image = PhCreateImage(NULL, screen->w, screen->h, type, NULL, 0, 1)) == NULL)
         {
-            fprintf(stderr,"ph_SetupImage: PhCreateImage failed !\n");
+            SDL_SetError("ph_SetupImage(): PhCreateImage() failed for bpp=%d !\n", bpp);
             return -1;
         }
     }
 
     screen->pixels = SDL_Image->image;
-    screen->pitch = SDL_Image->bpl; /* Recalculated pitch, created by PhCreateImage */
-
-    mask = ph_GetColourMasks(type);
-    if (mask != NULL)
-    {
-        SDL_ReallocFormat(screen, mask->bpp, mask->red, mask->green, mask->blue, 0);
-    }
+    screen->pitch = SDL_Image->bpl;
 
     this->UpdateRects = ph_NormalUpdate;
 
@@ -158,11 +115,9 @@ int ph_SetupImage(_THIS, SDL_Surface *screen)
 
 int ph_SetupOCImage(_THIS, SDL_Surface *screen)
 {
-    const struct ColourMasks *mask;
     int type = 0;
     int bpp;
 
-    screen->flags &= ~SDL_DOUBLEBUF;
     OCImage.flags = screen->flags;
     
     bpp=screen->format->BitsPerPixel;
@@ -191,7 +146,7 @@ int ph_SetupOCImage(_THIS, SDL_Surface *screen)
                 }
                 break;
         default:{
-                    fprintf(stderr,"ph_SetupOCImage(): unsupported bpp=%d !\n", bpp);
+                    SDL_SetError("ph_SetupOCImage(): unsupported bpp=%d !\n", bpp);
                     return -1;
                 }
                 break;
@@ -203,35 +158,22 @@ int ph_SetupOCImage(_THIS, SDL_Surface *screen)
 
     if (OCImage.offscreen_context == NULL)
     {
-        fprintf(stderr, "ph_SetupOCImage(): PdCreateOffscreenContext failed !\n");
+        SDL_SetError("ph_SetupOCImage(): PdCreateOffscreenContext() function failed !\n");
         return -1;
     }
 
-    /* If the bit depth of the context is different than was requested,
-     * these values need to be updated accordingly.  SDL will
-     * allocate a shadow surface if it needs to. */
-    mask = ph_GetColourMasks(OCImage.offscreen_context->format);
-    if (mask != NULL)
+    screen->pitch = OCImage.offscreen_context->pitch;
+
+    OCImage.dc_ptr = (unsigned char *) PdGetOffscreenContextPtr(OCImage.offscreen_context);
+
+    if (OCImage.dc_ptr == NULL)
     {
-        SDL_ReallocFormat(screen, mask->bpp, mask->red, mask->green, mask->blue, 0);
-
-        if (mask->bpp > 8)
-        {
-            screen->flags &= ~SDL_HWPALETTE;
-        }
-    }
-
-    screen->pitch = OCImage.offscreen_context->pitch; /* Recalculated pitch */
-
-    OCImage.dc_ptr.ptr8 = (unsigned char *) PdGetOffscreenContextPtr(OCImage.offscreen_context);
-
-    if (OCImage.dc_ptr.ptr8 == NULL)
-    {
-        fprintf(stderr, "ph_SetupOCImage(): PdGetOffscreenContextPtr failed !\n");
+        SDL_SetError("ph_SetupOCImage(): PdGetOffscreenContextPtr function failed !\n");
+        PhDCRelease(OCImage.offscreen_context);
         return -1;
     }
 
-    OCImage.FrameData0 = OCImage.dc_ptr.ptr8;
+    OCImage.FrameData0 = OCImage.dc_ptr;
     OCImage.CurrentFrameData = OCImage.FrameData0;
     OCImage.current = 0;
 
@@ -253,67 +195,108 @@ int ph_SetupOpenGLImage(_THIS, SDL_Surface* screen)
 
 int ph_SetupFullScreenImage(_THIS, SDL_Surface* screen)
 {
-    const struct ColourMasks *mask;
-    screen->flags &= ~SDL_DOUBLEBUF;
     OCImage.flags = screen->flags;
 
-    OCImage.offscreen_context = PdCreateOffscreenContext(0, 0, 0, Pg_OSC_MAIN_DISPLAY);
-
-    if (OCImage.offscreen_context == NULL)
+    /* Begin direct mode */
+    if (!ph_EnterFullScreen(this, screen))
     {
-        fprintf(stderr, "ph_SetupFullScreenImage(): PdCreateOffscreenContext failed !\n");
         return -1;
     }
 
-    /* If the bit depth of the context is different than was requested,
-     * these values need to be updated accordingly.  SDL will
-     * allocate a shadow surface if it needs to. */
-    mask = ph_GetColourMasks(OCImage.offscreen_context->format);
-    if (mask != NULL)
+    /* store palette for fullscreen */
+    if ((screen->format->BitsPerPixel==8) && (desktopbpp!=8))
     {
-        SDL_ReallocFormat(screen, mask->bpp, mask->red, mask->green, mask->blue, 0);
+        PgGetPalette(savedpal);
+        PgGetPalette(syspalph);
+    }
 
-        if (mask->bpp > 8)
+    OCImage.offscreen_context = PdCreateOffscreenContext(0, 0, 0, Pg_OSC_MAIN_DISPLAY);
+    if (OCImage.offscreen_context == NULL)
+    {
+        SDL_SetError("ph_SetupFullScreenImage(): PdCreateOffscreenContext() function failed !\n");
+        return -1;
+    }
+    
+    if ((screen->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF)
+    {
+        OCImage.offscreen_backcontext = PdDupOffscreenContext(OCImage.offscreen_context, Pg_OSC_CRTC_SAFE);
+        if (OCImage.offscreen_backcontext == NULL)
         {
-            screen->flags &= ~SDL_HWPALETTE;
+            SDL_SetError("ph_SetupFullScreenImage(): PdCreateOffscreenContext(back) function failed !\n");
+            return -1;
         }
     }
 
-    screen->pitch = OCImage.offscreen_context->pitch; /* Recalculated pitch */
-
-    OCImage.dc_ptr.ptr8 = (unsigned char *)PdGetOffscreenContextPtr(OCImage.offscreen_context);
-
-    if (OCImage.dc_ptr.ptr8 == NULL)
+    OCImage.FrameData0 = (unsigned char *)PdGetOffscreenContextPtr(OCImage.offscreen_context);
+    if (OCImage.FrameData0 == NULL)
     {
-        fprintf(stderr, "ph_SetupOCImage(): PdGetOffscreenContextPtr failed !\n");
+        SDL_SetError("ph_SetupFullScreenImage(): PdGetOffscreenContextPtr() function failed !\n");
+        ph_DestroyImage(this, screen);
         return -1;
     }
 
-    /* wait for hw */
+    if ((screen->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF)
+    {
+        OCImage.FrameData1 = (unsigned char *)PdGetOffscreenContextPtr(OCImage.offscreen_backcontext);
+        if (OCImage.FrameData1 == NULL)
+        {
+            SDL_SetError("ph_SetupFullScreenImage(back): PdGetOffscreenContextPtr() function failed !\n");
+            ph_DestroyImage(this, screen);
+            return -1;
+        }
+    }
+
+    /* wait for the hardware */
     PgWaitHWIdle();
 
-    OCImage.FrameData0 = OCImage.dc_ptr.ptr8;
-    OCImage.CurrentFrameData = OCImage.FrameData0;
-    OCImage.current = 0;
+    if ((screen->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF)
+    {
+        OCImage.current = 1;
+        PhDCSetCurrent(OCImage.offscreen_backcontext);
+        screen->pitch = OCImage.offscreen_backcontext->pitch;
+        screen->pixels = OCImage.FrameData1;
+        PgSwapDisplay(OCImage.offscreen_context, 0);
+    }
+    else
+    {
+        OCImage.current = 0;
+        PhDCSetCurrent(OCImage.offscreen_context);
+        screen->pitch = OCImage.offscreen_context->pitch;
+        screen->pixels = OCImage.FrameData0;
+    }
 
-    PhDCSetCurrent(OCImage.offscreen_context);
-
-    screen->pixels = OCImage.CurrentFrameData;
-
-    this->UpdateRects = ph_OCUpdate;
+    this->UpdateRects = ph_OCDCUpdate;
 
     return 0;
 }
 
 void ph_DestroyImage(_THIS, SDL_Surface *screen)
 {
+    if (currently_fullscreen)
+    {
+        /* if we right now in 8bpp fullscreen we must release palette */
+        if ((screen->format->BitsPerPixel==8) && (desktopbpp!=8))
+        {
+            PgSetPalette(syspalph, 0, -1, 0, 0, 0);
+            PgSetPalette(savedpal, 0, 0, _Pg_MAX_PALETTE, Pg_PALSET_GLOBAL | Pg_PALSET_FORCE_EXPOSE, 0);
+            PgFlush();
+        }
+        ph_LeaveFullScreen(this);
+    }
+
     if (OCImage.offscreen_context != NULL)
     {
         PhDCRelease(OCImage.offscreen_context);
         OCImage.offscreen_context = NULL;
         OCImage.FrameData0 = NULL;
+    }
+    if (OCImage.offscreen_backcontext != NULL)
+    {
+        PhDCRelease(OCImage.offscreen_backcontext);
+        OCImage.offscreen_backcontext = NULL;
         OCImage.FrameData1 = NULL;
     }
+    OCImage.CurrentFrameData = NULL;
 
     if (SDL_Image)
     {
@@ -354,6 +337,7 @@ int ph_SetupUpdateFunction(_THIS, SDL_Surface *screen, Uint32 flags)
 
     return ph_SetupImage(this, screen);
 }
+
 int ph_AllocHWSurface(_THIS, SDL_Surface *surface)
 {
     return(-1);
@@ -364,9 +348,41 @@ void ph_FreeHWSurface(_THIS, SDL_Surface *surface)
     return;
 }
 
-int ph_FlipHWSurface(_THIS, SDL_Surface *surface)
+int ph_FlipHWSurface(_THIS, SDL_Surface *screen)
 {
-    return(0);
+    PhArea_t area;
+
+    area.pos.x=0;
+    area.pos.y=0;
+    area.size.w=screen->w;
+    area.size.h=screen->h;
+
+    if ((screen->flags & SDL_FULLSCREEN) == SDL_FULLSCREEN)
+    {
+        if (OCImage.current==0)
+        {
+            PgSwapDisplay(OCImage.offscreen_context, 0);
+            OCImage.current=1;
+            screen->pitch = OCImage.offscreen_backcontext->pitch;
+            screen->pixels = OCImage.FrameData1;
+//            memcpy(OCImage.FrameData1, OCImage.FrameData0, OCImage.offscreen_context->shared_size);
+            PgContextBlitArea(OCImage.offscreen_context, &area, OCImage.offscreen_backcontext, &area);
+            PhDCSetCurrent(OCImage.offscreen_backcontext);
+            PgFlush();
+        }
+        else
+        {
+            PgSwapDisplay(OCImage.offscreen_backcontext, 0);
+            OCImage.current=0;
+            screen->pitch = OCImage.offscreen_context->pitch;
+            screen->pixels = OCImage.FrameData0;
+//            memcpy(OCImage.FrameData0, OCImage.FrameData1, OCImage.offscreen_context->shared_size);
+            PgContextBlitArea(OCImage.offscreen_backcontext, &area, OCImage.offscreen_context, &area);
+            PhDCSetCurrent(OCImage.offscreen_context);
+            PgFlush();
+        }
+    }
+    return 0;
 }
 
 int ph_LockHWSurface(_THIS, SDL_Surface *surface)
@@ -399,6 +415,11 @@ void ph_NormalUpdate(_THIS, int numrects, SDL_Rect *rects)
             continue;
         }
 
+    	if (rects[i].h==0) /* Clipped? */
+        { 
+            continue;
+        }
+
         ph_pos.x = rects[i].x;
         ph_pos.y = rects[i].y;
         ph_rect.ul.x = rects[i].x;
@@ -408,13 +429,13 @@ void ph_NormalUpdate(_THIS, int numrects, SDL_Rect *rects)
 
         if (PgDrawPhImageRectmx(&ph_pos, SDL_Image, &ph_rect, 0) < 0)
         {
-            fprintf(stderr,"ph_NormalUpdate(): PgDrawPhImageRectmx failed !\n");
+            SDL_SetError("ph_NormalUpdate(): PgDrawPhImageRectmx failed !\n");
         }
     }
 
     if (PgFlush() < 0)
     {
-    	fprintf(stderr,"ph_NormalUpdate(): PgFlush failed.\n");
+    	SDL_SetError("ph_NormalUpdate(): PgFlush failed.\n");
     }
 }
 
@@ -433,6 +454,11 @@ void ph_OCUpdate(_THIS, int numrects, SDL_Rect *rects)
     for (i=0; i<numrects; ++i)
     {
         if (rects[i].w == 0)  /* Clipped? */
+        {
+            continue;
+        }
+
+        if (rects[i].h == 0)  /* Clipped? */
         {
             continue;
         }
@@ -457,16 +483,16 @@ void ph_OCUpdate(_THIS, int numrects, SDL_Rect *rects)
 
     if (PgFlush() < 0)
     {
-        fprintf(stderr,"ph_OCUpdate(): PgFlush failed.\n");
+        SDL_SetError("ph_OCUpdate(): PgFlush failed.\n");
     }
-    
-    /* later used to toggling double buffer */
-    if (OCImage.current == 0)
+}
+
+void ph_OCDCUpdate(_THIS, int numrects, SDL_Rect *rects)
+{
+    PgWaitHWIdle();
+
+    if (PgFlush() < 0)
     {
-        OCImage.CurrentFrameData = OCImage.FrameData0;
-    }
-    else
-    {
-        OCImage.CurrentFrameData = OCImage.FrameData1;
+        SDL_SetError("ph_OCDCUpdate(): PgFlush failed.\n");
     }
 }

@@ -46,19 +46,18 @@ void ph_FreeWMCursor(_THIS, WMcursor *cursor)
     {
         SDL_Lock_EventThread();
 
-        if (PtSetResource( window, Pt_ARG_CURSOR_TYPE, Ph_CURSOR_INHERIT, 0) < 0)
+        if (PtSetResource(window, Pt_ARG_CURSOR_TYPE, Ph_CURSOR_INHERIT, 0) < 0)
         {
             /* TODO: output error msg */
         }
 
         SDL_Unlock_EventThread();
     }	
-    /* free(cursor->ph_cursor.images); */
+
     free(cursor);
 }
 
-WMcursor *ph_CreateWMCursor(_THIS,
-		Uint8 *data, Uint8 *mask, int w, int h, int hot_x, int hot_y)
+WMcursor *ph_CreateWMCursor(_THIS, Uint8 *data, Uint8 *mask, int w, int h, int hot_x, int hot_y)
 {
     WMcursor* cursor;
     int clen, i;
@@ -73,8 +72,12 @@ WMcursor *ph_CreateWMCursor(_THIS,
     memset(cursor,0,sizeof(WMcursor));
 
     cursor->ph_cursor = (PhCursorDef_t *) malloc(sizeof(PhCursorDef_t) + 32*4*2);
+
     if (cursor->ph_cursor == NULL)
-        printf("cursor malloc failed\n");
+    {
+        SDL_SetError("ph_CreateWMCursor(): cursor malloc failed !\n");
+        return NULL;
+    }
 
     memset(cursor->ph_cursor,0,(sizeof(PhCursorDef_t) + 32*4*2));
 
@@ -137,7 +140,7 @@ int ph_ShowWMCursor(_THIS, WMcursor *cursor)
         return (0);
     }
 
-    /* Set the photon cursor cursor, or blank if cursor is NULL */
+    /* Set the photon cursor, or blank if cursor is NULL */
     if (cursor!=NULL)
     {
         PtSetArg(&args[0], Pt_ARG_CURSOR_TYPE, Ph_CURSOR_BITMAP, 0);
@@ -148,7 +151,7 @@ int ph_ShowWMCursor(_THIS, WMcursor *cursor)
     }
     else /* Ph_CURSOR_NONE */
     {
-        PtSetArg( &args[0], Pt_ARG_CURSOR_TYPE, Ph_CURSOR_NONE, 0);
+        PtSetArg(&args[0], Pt_ARG_CURSOR_TYPE, Ph_CURSOR_NONE, 0);
         nargs = 1;
     }
 

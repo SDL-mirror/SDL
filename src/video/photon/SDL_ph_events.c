@@ -29,11 +29,12 @@ static char rcsid =
 
 #define DISABLE_X11
 
-#include <Ph.h>
 #include <stdio.h>
 #include <setjmp.h>
-#include <photon/PkKeyDef.h>
 #include <sys/time.h>
+
+#include <Ph.h>
+#include <photon/PkKeyDef.h>
 
 #include "SDL.h"
 #include "SDL_syswm.h"
@@ -44,6 +45,8 @@ static char rcsid =
 #include "SDL_ph_modes_c.h"
 #include "SDL_ph_image_c.h"
 #include "SDL_ph_events_c.h"
+#include "SDL_phyuv_c.h"
+
 
 
 /* The translation tables from a photon keysym to a SDL keysym */
@@ -90,8 +93,8 @@ static void set_motion_sensitivity(_THIS, unsigned int flags)
 
     if( window )
     {
-        rid = PtWidgetRid( window );
-        if( rid != 0 && PhRegionQuery( rid, &region, NULL, NULL, 0 ) == 0 )
+        rid = PtWidgetRid(window);
+        if( rid != 0 && PhRegionQuery(rid, &region, NULL, NULL, 0) == 0 )
         {
             region.events_sense=(region.events_sense & ~fields)|(flags & fields);
             PhRegionChange(Ph_REGION_EV_SENSE, 0, &region, NULL, NULL);
@@ -113,6 +116,8 @@ static Uint8 ph2sdl_mousebutton(unsigned short button_state)
 
     return (mouse_button);
 }
+
+//                   void* PtAppCreateContext();
 
 static int ph_DispatchEvent(_THIS)
 {
@@ -217,15 +222,56 @@ static int ph_DispatchEvent(_THIS)
             {
                 posted = SDL_PrivateQuit();
             }
+            /* request to hide/unhide */
+            else if (winEvent->event_f==Ph_WM_HIDE)
+            {
+                if (currently_hided)
+                {
+                   /* got unhide window event                                */
+                   /* TODO: restore application's palette if in palette mode */
+                   currently_hided=0;
+                }
+                else
+                {
+                   /* got hide window event                                  */
+                   /* TODO: restore original palette if in palette mode      */
+                   currently_hided=1;
+                }
+            }
             /* request to resize */
             else if (winEvent->event_f==Ph_WM_RESIZE)
             {
                 SDL_PrivateResize(winEvent->size.w, winEvent->size.h);
             }
+            /* request to move */
+            else if (winEvent->event_f==Ph_WM_MOVE)
+            {
+                if (current_overlay!=NULL)
+                {
+                   int lockedstate=current_overlay->hwdata->locked;
+                   int chromastate=current_overlay->hwdata->ischromakey;
+                   SDL_Rect target;
+
+                   current_overlay->hwdata->locked=1;
+                   target.x=current_overlay->hwdata->CurrentViewPort.pos.x;
+                   target.y=current_overlay->hwdata->CurrentViewPort.pos.y;
+                   target.w=current_overlay->hwdata->CurrentViewPort.size.w;
+                   target.h=current_overlay->hwdata->CurrentViewPort.size.h;
+                   current_overlay->hwdata->ischromakey=0;
+                   ph_DisplayYUVOverlay(this, current_overlay, &target);
+                   current_overlay->hwdata->ischromakey=chromastate;
+                   current_overlay->hwdata->locked=lockedstate;
+                }
+            }
             /* request to maximize */
             else if (winEvent->event_f==Ph_WM_MAX)
             {
-                /* TODO: get screen resolution, set window pos to 0, 0 and resize it ! */
+                /* window already moved and resized here */
+                SDL_PrivateResize(winEvent->size.w-winEvent->pos.x, winEvent->size.h-winEvent->pos.y);
+            }
+            /* request to restore */
+            else if (winEvent->event_f==Ph_WM_RESTORE)
+            {
             }
         }
         break;
@@ -233,19 +279,38 @@ static int ph_DispatchEvent(_THIS)
         /* window has been resized, moved or removed */
         case Ph_EV_EXPOSE:
         {
-            if (SDL_VideoSurface)
+            if (event->num_rects!=0)
             {
-                rect = PhGetRects(event);
-
-                for(i=0;i<event->num_rects;i++)
+                if (SDL_VideoSurface)
                 {
-                    sdlrects[i].x = rect[i].ul.x;
-                    sdlrects[i].y = rect[i].ul.y;
-                    sdlrects[i].w = rect[i].lr.x - rect[i].ul.x + 1;
-                    sdlrects[i].h = rect[i].lr.y - rect[i].ul.y + 1;
-                }
+                    rect = PhGetRects(event);
 
-                this->UpdateRects(this, event->num_rects, sdlrects);
+                    for(i=0;i<event->num_rects;i++)
+                    {
+                        sdlrects[i].x = rect[i].ul.x;
+                        sdlrects[i].y = rect[i].ul.y;
+                        sdlrects[i].w = rect[i].lr.x - rect[i].ul.x + 1;
+                        sdlrects[i].h = rect[i].lr.y - rect[i].ul.y + 1;
+                    }
+
+                    this->UpdateRects(this, event->num_rects, sdlrects);
+
+                    if (current_overlay!=NULL)
+                    {
+                        int lockedstate=current_overlay->hwdata->locked;
+                        SDL_Rect target;
+
+                        current_overlay->hwdata->locked=1;
+                        target.x=current_overlay->hwdata->CurrentViewPort.pos.x;
+                        target.y=current_overlay->hwdata->CurrentViewPort.pos.y;
+                        target.w=current_overlay->hwdata->CurrentViewPort.size.w;
+                        target.h=current_overlay->hwdata->CurrentViewPort.size.h;
+                        current_overlay->hwdata->forcedredraw=1;
+                        ph_DisplayYUVOverlay(this, current_overlay, &target);
+                        current_overlay->hwdata->forcedredraw=0;
+                        current_overlay->hwdata->locked=lockedstate;
+                    }
+                }
             }
         }
 	break;
@@ -260,13 +325,32 @@ static int ph_DispatchEvent(_THIS)
 
             if (Pk_KF_Key_Down & keyEvent->key_flags)
             {
+                /* split the wheel events from real key events */
+                if ((keyEvent->key_cap==Pk_Up) && (keyEvent->key_scan==0) && ((keyEvent->key_flags & Pk_KF_Scan_Valid)==Pk_KF_Scan_Valid))
+                {
+                   posted = SDL_PrivateMouseButton(SDL_PRESSED, SDL_BUTTON_WHEELUP, 0, 0);
+                   break;
+                }
+                if ((keyEvent->key_cap==Pk_Down) && (keyEvent->key_scan==0) && ((keyEvent->key_flags & Pk_KF_Scan_Valid)==Pk_KF_Scan_Valid))
+                {
+                   posted = SDL_PrivateMouseButton(SDL_PRESSED, SDL_BUTTON_WHEELDOWN, 0, 0);
+                   break;
+                }
                 posted = SDL_PrivateKeyboard(SDL_PRESSED, ph_TranslateKey(keyEvent, &keysym));
             }
             else /* must be key release */
             {
-                 /* Ignore repeated key release events */
-                 /* if (! Pk_KF_Key_Repeat & keyEvent->key_flags ) */
-
+                /* split the wheel events from real key events */
+                if ((keyEvent->key_cap==Pk_Up) && (keyEvent->key_scan==0) && ((keyEvent->key_flags & Pk_KF_Scan_Valid)==Pk_KF_Scan_Valid))
+                {
+                   posted = SDL_PrivateMouseButton(SDL_RELEASED, SDL_BUTTON_WHEELUP, 0, 0);
+                   break;
+                }
+                if ((keyEvent->key_cap==Pk_Down) && (keyEvent->key_scan==0) && ((keyEvent->key_flags & Pk_KF_Scan_Valid)==Pk_KF_Scan_Valid))
+                {
+                   posted = SDL_PrivateMouseButton(SDL_RELEASED, SDL_BUTTON_WHEELDOWN, 0, 0);
+                   break;
+                }
                 posted = SDL_PrivateKeyboard(SDL_RELEASED, ph_TranslateKey( keyEvent, &keysym));
             }
         }
@@ -282,9 +366,9 @@ int ph_Pending(_THIS)
     /* Flush the display connection and look to see if events are queued */
     PgFlush();
 
-    while( 1 )
-    {   /* note this is a non-blocking call */
-        switch( PhEventPeek( event, EVENT_SIZE ) )
+    while (1)
+    {
+        switch(PhEventPeek(event, EVENT_SIZE))
         {
             case Ph_EVENT_MSG:
                  return 1;
@@ -308,6 +392,7 @@ void ph_PumpEvents(_THIS)
 
     while (ph_Pending(this))
     {
+        PtEventHandler(event);
         ph_DispatchEvent(this);
     }
 }
@@ -318,11 +403,15 @@ void ph_InitKeymap(void)
 
     /* Odd keys used in international keyboards */
     for (i=0; i<SDL_TABLESIZE(ODD_keymap); ++i)
+    {
         ODD_keymap[i] = SDLK_UNKNOWN;
+    }
 
     /* Map the miscellaneous keys */
     for (i=0; i<SDL_TABLESIZE(MISC_keymap); ++i)
+    {
         MISC_keymap[i] = SDLK_UNKNOWN;
+    }
 
     MISC_keymap[Pk_BackSpace&0xFF] = SDLK_BACKSPACE;
     MISC_keymap[Pk_Tab&0xFF] = SDLK_TAB;
@@ -388,15 +477,19 @@ void ph_InitKeymap(void)
     MISC_keymap[Pk_Alt_L&0xFF] = SDLK_LALT;
     MISC_keymap[Pk_Meta_R&0xFF] = SDLK_RMETA;
     MISC_keymap[Pk_Meta_L&0xFF] = SDLK_LMETA;
-    MISC_keymap[Pk_Super_L&0xFF] = SDLK_LSUPER;   /* Left "Windows"  */
-    MISC_keymap[Pk_Super_R&0xFF] = SDLK_RSUPER;   /* Right "Windows" */
+    MISC_keymap[Pk_Super_L&0xFF] = SDLK_LSUPER;
+    MISC_keymap[Pk_Super_R&0xFF] = SDLK_RSUPER;
     MISC_keymap[Pk_Mode_switch&0xFF] = SDLK_MODE; /* "Alt Gr" key    */
 
     MISC_keymap[Pk_Help&0xFF] = SDLK_HELP;
     MISC_keymap[Pk_Print&0xFF] = SDLK_PRINT;
     MISC_keymap[Pk_Break&0xFF] = SDLK_BREAK;
-    MISC_keymap[Pk_Menu&0xFF] = SDLK_MENU;
-    MISC_keymap[Pk_Hyper_R&0xFF] = SDLK_MENU;   /* Windows "Menu" key */
+    MISC_keymap[Pk_Menu&0xFF] = SDLK_MENU;        /* Windows "Menu" key */
+
+    MISC_keymap[Pk_Hyper_R&0xFF] = SDLK_RSUPER;   /* Right "Windows" */
+
+    /* Left "Windows" key, but it can't be catched by application */
+    MISC_keymap[Pk_Hyper_L&0xFF] = SDLK_LSUPER;
 }
 
 static unsigned long cap;
@@ -447,13 +540,23 @@ SDL_keysym *ph_TranslateKey(PhKeyEvent_t *key, SDL_keysym *keysym)
         int utf8len;
         wchar_t unicode;
 
-        utf8len = PhKeyToMb(utf8, key);
-        if (utf8len > 0)
+        switch (keysym->scancode)
         {
-            utf8len = mbtowc(&unicode, utf8, utf8len);
-            if (utf8len > 0)
-                keysym->unicode = unicode;
+           case 0x01: keysym->unicode = 27;
+                      break;
+           default:
+                      utf8len = PhKeyToMb(utf8, key);
+                      if (utf8len > 0)
+                      {
+                          utf8len = mbtowc(&unicode, utf8, utf8len);
+                         if (utf8len > 0)
+                         {
+                             keysym->unicode = unicode;
+                         }
+                      }
+                      break;
         }
+
     }
 
     return (keysym);

@@ -727,6 +727,7 @@ SDL_Surface * SDL_SetVideoMode (int width, int height, int bpp, Uint32 flags)
 #ifdef HAVE_OPENGL
 	/* Load GL symbols (before MakeCurrent, where we need glGetString). */
 	if ( flags & (SDL_OPENGL | SDL_OPENGLBLIT) ) {
+#ifndef __QNXNTO__
 #define SDL_PROC(ret,func,params) \
 do { \
 	video->func = SDL_GL_GetProcAddress(#func); \
@@ -735,6 +736,9 @@ do { \
 		return(NULL); \
 	} \
 } while ( 0 );
+#else
+#define SDL_PROC(ret,func,params) video->func=func;
+#endif /* __QNXNTO__ */
 #include "SDL_glfuncs.h"
 #undef SDL_PROC	
 	}
