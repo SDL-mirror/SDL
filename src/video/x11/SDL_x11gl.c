@@ -240,7 +240,7 @@ static int ExtensionSupported(const char *extension, const char *all_extensions)
 	if (where || *extension == '\0')
 	      return 0;
 	
-	extensions = glGetString(GL_EXTENSIONS);
+	extensions = current_video->glGetString(GL_EXTENSIONS);
 	/* It takes a bit of care to be fool-proof about parsing the
 	 *      OpenGL extensions string. Don't be fooled by sub-strings,
 	 *           etc. */
