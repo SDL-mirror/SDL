@@ -59,7 +59,7 @@ static __inline__ int CPU_haveCPUID()
 	: "%eax", "%ecx"
 	);
 #elif defined(_MSC_VER)
-	__asm__ {
+	__asm {
         pushfd                      ; Get original EFLAGS
         pop     eax
         mov     ecx, eax
@@ -102,7 +102,7 @@ static __inline__ int CPU_getCPUIDFeatures()
 	: "%eax", "%ebx", "%ecx", "%edx"
 	);
 #elif defined(_MSC_VER)
-	__asm__ {
+	__asm {
         xor     eax, eax            ; Set up for CPUID instruction
         cpuid                       ; Get and save vendor ID
         cmp     eax, 1              ; Make sure 1 is valid input for CPUID
@@ -162,7 +162,7 @@ static __inline__ int CPU_have3DNow()
 	: "%eax", "%ebx", "%ecx", "%edx"
 	);
 #elif defined(_MSC_VER)
-	__asm__ {
+	__asm {
         mov     eax,80000000h       ; Query for extended functions
         cpuid                       ; Get extended function limit
         cmp     eax,80000001h
