@@ -102,11 +102,11 @@ static char rcsid =
 #include "SDL_memops.h"
 #include "SDL_RLEaccel_c.h"
 
-#if defined(i386) || defined(__x86_64__)
-#define MMX_CAPABLE
+#if (defined(i386) || defined(__x86_64__)) && defined(__GNUC__) && defined(USE_ASMBLIT)
+#define MMX_ASMBLIT
 #endif
 
-#if defined(MMX_CAPABLE) && defined(__GNUC__) && defined(USE_ASMBLIT)
+#ifdef MMX_ASMBLIT
 #include "mmx.h"
 #include "SDL_cpuinfo.h"
 #endif
@@ -134,7 +134,7 @@ do {							\
 #define OPAQUE_BLIT(to, from, length, bpp, alpha)	\
     PIXEL_COPY(to, from, length, bpp)
 
-#if defined(MMX_CAPABLE) && defined(__GNUC__) && defined(USE_ASMBLIT)
+#ifdef MMX_ASMBLIT
 
 #define ALPHA_BLIT32_888MMX(to, from, length, bpp, alpha)	\
     do {							\
@@ -515,7 +515,7 @@ do {							\
 	}								\
     } while(0)
 
-#if defined(MMX_CAPABLE) && defined(__GNUC__) && defined(USE_ASMBLIT)
+#ifdef MMX_ASMBLIT
 
 #define ALPHA_BLIT32_888_50MMX(to, from, length, bpp, alpha)		\
     do {								\
@@ -628,7 +628,7 @@ do {							\
 #define ALPHA_BLIT16_555_50(to, from, length, bpp, alpha)	\
     ALPHA_BLIT16_50(to, from, length, bpp, alpha, 0xfbde)
 
-#if defined(MMX_CAPABLE) && defined(__GNUC__) && defined(USE_ASMBLIT)
+#ifdef MMX_ASMBLIT
 
 #define CHOOSE_BLIT(blitter, alpha, fmt)				\
     do {								\

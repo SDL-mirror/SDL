@@ -31,7 +31,11 @@ static char rcsid =
 #include "SDL_video.h"
 #include "SDL_blit.h"
 
-#if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
+#if (defined(i386) || defined(__x86_64__)) && defined(__GNUC__) && defined(USE_ASMBLIT)
+#define MMX_ASMBLIT
+#endif
+
+#ifdef MMX_ASMBLIT
 /* Function to check the CPU flags */
 #include "SDL_cpuinfo.h"
 #include "mmx.h"
@@ -201,7 +205,7 @@ static void BlitNto1SurfaceAlphaKey(SDL_BlitInfo *info)
 	}
 }
 
-#if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
+#ifdef MMX_ASMBLIT
 /* fast RGB888->(A)RGB888 blending with surface alpha=128 special case */
 static void BlitRGBtoRGBSurfaceAlpha128MMX(SDL_BlitInfo *info)
 {
@@ -557,7 +561,7 @@ static void BlitRGBtoRGBPixelAlpha(SDL_BlitInfo *info)
 	}
 }
 
-#if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
+#ifdef MMX_ASMBLIT
 /* fast (as in MMX with prefetch) ARGB888->(A)RGB888 blending with pixel alpha */
 inline static void BlitRGBtoRGBPixelAlphaMMX3DNOW(SDL_BlitInfo *info)
 {
@@ -759,7 +763,7 @@ static void Blit16to16SurfaceAlpha128(SDL_BlitInfo *info, Uint16 mask)
 	}
 }
 
-#if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
+#ifdef MMX_ASMBLIT
 /* fast RGB565->RGB565 blending with surface alpha */
 static void Blit565to565SurfaceAlphaMMX(SDL_BlitInfo *info)
 {
@@ -1379,7 +1383,7 @@ SDL_loblit SDL_CalculateAlphaBlit(SDL_Surface *surface, int blit_index)
 		if(surface->map->identity) {
 		    if(df->Gmask == 0x7e0)
 		    {
-#if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
+#ifdef MMX_ASMBLIT
 		if(SDL_HasMMX())
 			return Blit565to565SurfaceAlphaMMX;
 		else
@@ -1388,7 +1392,7 @@ SDL_loblit SDL_CalculateAlphaBlit(SDL_Surface *surface, int blit_index)
 		    }
 		    else if(df->Gmask == 0x3e0)
 		    {
-#if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
+#ifdef MMX_ASMBLIT
 		if(SDL_HasMMX())
 			return Blit555to555SurfaceAlphaMMX;
 		else
@@ -1405,7 +1409,7 @@ SDL_loblit SDL_CalculateAlphaBlit(SDL_Surface *surface, int blit_index)
 		   && (sf->Rmask | sf->Gmask | sf->Bmask) == 0xffffff
 		   && sf->BytesPerPixel == 4)
 		{
-#if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
+#ifdef MMX_ASMBLIT
 		if(SDL_HasMMX())
 		    return BlitRGBtoRGBSurfaceAlphaMMX;
 		else
@@ -1445,7 +1449,7 @@ SDL_loblit SDL_CalculateAlphaBlit(SDL_Surface *surface, int blit_index)
 	       && sf->Bmask == df->Bmask
 	       && sf->BytesPerPixel == 4)
 	    {
-#if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
+#ifdef MMX_ASMBLIT
 		if(SDL_Has3DNow())
 		    return BlitRGBtoRGBPixelAlphaMMX3DNOW;
 		else

@@ -37,7 +37,11 @@ static char rcsid =
 #include "SDL_pixels_c.h"
 #include "SDL_memops.h"
 
-#if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
+#if (defined(i386) || defined(__x86_64__)) && defined(__GNUC__) && defined(USE_ASMBLIT)
+#define MMX_ASMBLIT
+#endif
+
+#if defined(MMX_ASMBLIT)
 #include "SDL_cpuinfo.h"
 #include "mmx.h"
 #endif
@@ -111,7 +115,7 @@ static int SDL_SoftBlit(SDL_Surface *src, SDL_Rect *srcrect,
 	return(okay ? 0 : -1);
 }
 
-#if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
+#ifdef MMX_ASMBLIT
 void SDL_memcpyMMX(char* to,char* from,int len)
 {
 	int i;
@@ -165,7 +169,7 @@ static void SDL_BlitCopy(SDL_BlitInfo *info)
 	dst = info->d_pixels;
 	srcskip = w+info->s_skip;
 	dstskip = w+info->d_skip;
-#if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
+#ifdef MMX_ASMBLIT
 	if(SDL_HasSSE())
 	{
 		while ( h-- ) {
