@@ -3,27 +3,17 @@
 
 noinst_LTLIBRARIES = libcdrom.la
 
-ARCH_SUBDIRS = $(srcdir)/dummy $(srcdir)/beos $(srcdir)/freebsd \
-	$(srcdir)/linux $(srcdir)/macos $(srcdir)/openbsd \
-	$(srcdir)/qnx $(srcdir)/win32
+# Define which subdirectories need to be built
+SUBDIRS = @CDROM_SUBDIRS@
+DIST_SUBDIRS = aix beos dummy freebsd linux macos openbsd qnx win32
+
+DRIVERS = @CDROM_DRIVERS@
 
 # Include the architecture-independent sources
-COMMON_SRCS = SDL_cdrom.c SDL_syscdrom.h
+COMMON_SRCS =			\
+	SDL_cdrom.c		\
+	SDL_syscdrom.h
 
-# Include the architecture-specific sources
-ARCH_SRCS = SDL_syscdrom.c
-
-libcdrom_la_SOURCES = $(COMMON_SRCS) $(ARCH_SRCS)
-
-## Let automake know that it shouldn't distribute linked sources
-BUILT_SOURCES = $(ARCH_SRCS)
-
-## Let automake know that it should remove these for distribution
-DISTCLEANFILES = $(ARCH_SRCS)
-
-# The architecture specific directories need to be copied into place
-# when building a distribution.
-dist-hook:
-	(cd $(distdir) && rm -f $(BUILT_SOURCES))
-	cp -rp $(ARCH_SUBDIRS) $(distdir)
-	(cd $(distdir) && rm -rf `find . -name CVS`)
+libcdrom_la_SOURCES = $(COMMON_SRCS)
+libcdrom_la_LIBADD = $(DRIVERS)
+libcdrom_la_DEPENDENCIES = $(DRIVERS)

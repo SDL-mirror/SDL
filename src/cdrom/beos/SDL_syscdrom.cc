@@ -37,10 +37,15 @@ static char rcsid =
 #include <unistd.h>
 
 #include <scsi.h>
+#include <Directory.h>
+#include <Entry.h>
+#include <Path.h>
 
 #include "SDL_error.h"
 #include "SDL_cdrom.h"
+extern "C" {
 #include "SDL_syscdrom.h"
+}
 
 /* Constants to help us get at the SCSI table-of-contents info */
 #define CD_NUMTRACKS(toc)	toc.toc_data[3]
@@ -76,6 +81,7 @@ static int SDL_SYS_CDResume(SDL_CD *cdrom);
 static int SDL_SYS_CDStop(SDL_CD *cdrom);
 static int SDL_SYS_CDEject(SDL_CD *cdrom);
 static void SDL_SYS_CDClose(SDL_CD *cdrom);
+int try_dir(const char *directory);
 
 
 /* Check a drive to see if it is a CD-ROM */
@@ -128,32 +134,6 @@ static void AddDrive(char *drive)
 	}
 }
 
-# if 0 /* Save this for later, when I can test it */
-/* SCSI bus scanning magic */
-static int CheckSCSI(int path, int id, int lun)
-{
-	int is_cd;
-	int fd;
-	scsiprobe_inquiry inquiry;
-
-	is_cd = 0;
-	fd = open("/dev/scsiprobe", 0);
-	if ( fd >= 0 ) {
-		inquiry.path = path;
-		inquiry.id = id;
-		inquiry.lun = lun;
-		inquiry.len = sizeof(inquiry);
-		if ( ioctl(fd, B_SCSIPROBE_INQUIRY, &inquiry) == B_NO_ERROR ) {
-			if ( (inquiry.data[0]&0x1F) == B_SCSI_CD ) {
-				is_cd = 1;
-			}
-		}
-		close(fd);
-	}
-	return(is_cd);
-}
-#endif
-		
 /* IDE bus scanning magic */
 enum {
 	IDE_GET_DEVICES_INFO = B_DEVICE_OP_CODES_END + 50,
@@ -193,7 +173,7 @@ int  SDL_SYS_CDInit(void)
 	SDLcdrom = getenv("SDL_CDROM");	/* ':' separated list of devices */
 	if ( SDLcdrom != NULL ) {
 		char *cdpath, *delim;
-		cdpath = malloc(strlen(SDLcdrom)+1);
+		cdpath = (char *)malloc(strlen(SDLcdrom)+1);
 		if ( cdpath != NULL ) {
 			strcpy(cdpath, SDLcdrom);
 			SDLcdrom = cdpath;
@@ -219,28 +199,64 @@ int  SDL_SYS_CDInit(void)
 			return(0);
 		}
 	}
-
+	
 	/* Scan the system for CD-ROM drives */
-	raw_fd = open("/dev/disk/ide/rescan", 0);
-	if ( raw_fd >= 0 ) {
-		if (ioctl(raw_fd, IDE_GET_DEVICES_INFO, &info) == B_NO_ERROR) {
-			if ( info.ide_0_master_type == B_CD ) {
-				AddDrive("/dev/disk/ide/0/master/raw");
-			}
-			if ( info.ide_0_slave_type == B_CD ) {
-				AddDrive("/dev/disk/ide/0/slave/raw");
-			}
-			if ( info.ide_1_master_type == B_CD ) {
-				AddDrive("/dev/disk/ide/1/master/raw");
-			}
-			if ( info.ide_1_slave_type == B_CD ) {
-				AddDrive("/dev/disk/ide/1/slave/raw");
-			}
-		}
-		close(raw_fd);
-	}
-	return(0);
+	try_dir("/dev/disk");
+	return 0;
 }
+
+
+int try_dir(const char *directory)
+{ 
+	BDirectory dir; 
+	dir.SetTo(directory); 
+	if(dir.InitCheck() != B_NO_ERROR) { 
+		return false; 
+	} 
+	dir.Rewind(); 
+	BEntry entry; 
+	while(dir.GetNextEntry(&entry) >= 0) { 
+		BPath path; 
+		const char *name; 
+		entry_ref e; 
+		
+		if(entry.GetPath(&path) != B_NO_ERROR) 
+			continue; 
+		name = path.Path(); 
+		
+		if(entry.GetRef(&e) != B_NO_ERROR) 
+			continue; 
+
+		if(entry.IsDirectory()) { 
+			if(strcmp(e.name, "floppy") == 0) 
+				continue; /* ignore floppy (it is not silent)  */
+			int devfd = try_dir(name);
+			if(devfd >= 0)
+				return devfd;
+		} 
+		else { 
+			int devfd; 
+			device_geometry g; 
+
+			if(strcmp(e.name, "raw") != 0) 
+				continue; /* ignore partitions */
+
+			devfd = open(name, O_RDONLY); 
+			if(devfd < 0) 
+				continue; 
+
+			if(ioctl(devfd, B_GET_GEOMETRY, &g, sizeof(g)) >= 0) {
+				if(g.device_type == B_CD)
+				{
+				AddDrive(strdup(name));
+				}
+			}
+			close(devfd);
+		} 
+	}
+	return B_ERROR;
+}
+
 
 /* General ioctl() CD-ROM command function */
 static int SDL_SYS_CDioctl(int index, int command, void *arg)
@@ -381,7 +397,7 @@ static int SDL_SYS_CDEject(SDL_CD *cdrom)
 /* Close the CD-ROM handle */
 static void SDL_SYS_CDClose(SDL_CD *cdrom)
 {
-	free(cdrom);
+	close(cdrom->id);
 }
 
 void SDL_SYS_CDQuit(void)
