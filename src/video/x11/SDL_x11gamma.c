@@ -109,7 +109,6 @@ static int X11_GetGammaNoLock(_THIS, float *red, float *green, float *blue)
         return -1;
     }
 #endif
-    SDL_SetError("Gamma correction not supported");
     return -1;
 }
 int X11_GetVidModeGamma(_THIS, float *red, float *green, float *blue)
