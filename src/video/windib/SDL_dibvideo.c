@@ -29,8 +29,9 @@ static char rcsid =
 #include <stdlib.h>
 #include <malloc.h>
 #include <windows.h>
-#ifdef HAVE_AYGSHELL
-#include <aygshell.h>
+#if defined(WIN32_PLATFORM_PSPC)
+#include <aygshell.h>                      // Add Pocket PC includes
+#pragma comment( lib, "aygshell" )         // Link Pocket PC library
 #endif
 
 /* Not yet in the mingw32 cross-compile headers */
@@ -517,7 +518,7 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 	video->h = height;
 	video->pitch = SDL_CalculatePitch(video);
 
-#ifdef HAVE_AYGSHELL
+#ifdef WIN32_PLATFORM_PSPC
 	 /* Stuff to hide that $#!^%#$ WinCE taskbar in fullscreen... */
 	if ( flags & SDL_FULLSCREEN ) {
 		if ( !(prev_flags & SDL_FULLSCREEN) ) {
@@ -918,6 +919,14 @@ void DIB_VideoQuit(_THIS)
 	if ( SDL_Window ) {
 		/* Delete the screen bitmap (also frees screen->pixels) */
 		if ( this->screen ) {
+#ifdef WIN32_PLATFORM_PSPC
+			if ( this->screen->flags & SDL_FULLSCREEN ) {
+				/* Unhide taskbar, etc. */
+				SHFullScreen(SDL_Window, SHFS_SHOWTASKBAR);
+				SHFullScreen(SDL_Window, SHFS_SHOWSIPBUTTON);
+				ShowWindow(FindWindow(TEXT("HHTaskBar"),NULL),SW_SHOWNORMAL);
+			}
+#endif
 #ifndef NO_CHANGEDISPLAYSETTINGS
 			if ( this->screen->flags & SDL_FULLSCREEN ) {
 				ChangeDisplaySettings(NULL, 0);
