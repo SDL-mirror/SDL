@@ -4,3 +4,4 @@ Makefile
 *.o
 *.lo
 *.la
+Info.plist

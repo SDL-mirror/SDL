@@ -844,7 +844,7 @@ SDL_Surface * SDL_DisplayFormat (SDL_Surface *surface)
 		return(NULL);
 	}
 	/* Set the flags appropriate for copying to display surface */
-	if ((SDL_PublicSurface->flags&SDL_HWSURFACE == SDL_HWSURFACE) && current_video->info.blit_hw)
+	if (((SDL_PublicSurface->flags&SDL_HWSURFACE) == SDL_HWSURFACE) && current_video->info.blit_hw)
 		flags = SDL_HWSURFACE;
 	else 
 		flags = SDL_SWSURFACE;
