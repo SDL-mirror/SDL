@@ -250,11 +250,9 @@ SDL_GrabMode X11_GrabInputNoLock(_THIS, SDL_GrabMode mode)
 		return(mode);	/* Will be set later on mode switch */
 	}
 	if ( mode == SDL_GRAB_OFF ) {
-printf("SDL grab OFF\n");
 		XUngrabPointer(SDL_Display, CurrentTime);
 		XUngrabKeyboard(SDL_Display, CurrentTime);
 	} else {
-printf("SDL grab ON\n");
 		if ( this->screen->flags & SDL_FULLSCREEN ) {
 			/* Unbind the mouse from the fullscreen window */
 			XUngrabPointer(SDL_Display, CurrentTime);
