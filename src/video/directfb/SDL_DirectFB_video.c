@@ -1075,14 +1075,21 @@ int DirectFB_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 void DirectFB_VideoQuit(_THIS)
 {
   struct DirectFBEnumRect *rect    = enumlist;
-  IDirectFBSurface        *surface = this->screen->hwdata->surface;
-  IDirectFBPalette        *palette = this->screen->hwdata->palette;
 
-  if (palette)
-    palette->Release (palette);
+  if (this->screen->hwdata)
+    {
+      IDirectFBSurface        *surface = this->screen->hwdata->surface;
+      IDirectFBPalette        *palette = this->screen->hwdata->palette;
 
-  if (surface)
-    surface->Release (surface);
+      if (palette)
+        palette->Release (palette);
+
+      if (surface)
+        surface->Release (surface);
+
+      this->screen->hwdata->surface = NULL;
+      this->screen->hwdata->palette = NULL;
+    }
 
   if (HIDDEN->c2frame)
     {
