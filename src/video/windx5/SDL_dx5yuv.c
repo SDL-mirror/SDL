@@ -191,6 +191,7 @@ SDL_Overlay *DX5_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, S
 	    case SDL_YV12_OVERLAY:
 	    case SDL_IYUV_OVERLAY:
 		overlay->planes = 3;
+		break;
 	    default:
 		overlay->planes = 1;
 		break;
