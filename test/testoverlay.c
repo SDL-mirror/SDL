@@ -9,41 +9,71 @@
 
 #define NOTICE(X)	printf("%s", X);
 
+#define WINDOW_WIDTH  640
+#define WINDOW_HEIGHT 480
+
 #include "SDL.h"
 
 SDL_Surface *screen, *pic;
 SDL_Overlay *overlay;
 int scale;
+int monochrome;
+int luminance;
+int w, h;
 
 /* NOTE: These RGB conversion functions are not intended for speed,
          only as examples.
 */
 
-void RGBtoYUV(Uint8 *rgb, int *yuv)
+void RGBtoYUV(Uint8 *rgb, int *yuv, int monochrome, int luminance)
 {
-	int i;
+    int i;
+
+    if (monochrome)
+    {
 #if 1 /* these are the two formulas that I found on the FourCC site... */
-	yuv[0] = 0.299*rgb[0] + 0.587*rgb[1] + 0.114*rgb[2];
-	yuv[1] = (rgb[2]-yuv[0])*0.565 + 128;
-	yuv[2] = (rgb[0]-yuv[0])*0.713 + 128;
+        yuv[0] = 0.299*rgb[0] + 0.587*rgb[1] + 0.114*rgb[2];
+        yuv[1] = 128;
+        yuv[2] = 128;
 #else
-	yuv[0] = (0.257 * rgb[0]) + (0.504 * rgb[1]) + (0.098 * rgb[2]) + 16;
-	yuv[1] = 128 - (0.148 * rgb[0]) - (0.291 * rgb[1]) + (0.439 * rgb[2]);
-	yuv[2] = 128 + (0.439 * rgb[0]) - (0.368 * rgb[1]) - (0.071 * rgb[2]);
+        yuv[0] = (0.257 * rgb[0]) + (0.504 * rgb[1]) + (0.098 * rgb[2]) + 16;
+        yuv[1] = 128;
+        yuv[2] = 128;
 #endif
-	/* clamp values...if you need to, we don't seem to have a need */
-	/*
-	for(i=0;i<3;i++)
-	{
-		if(yuv[i]<0)
-			yuv[i]=0;
-		if(yuv[i]>255)
-			yuv[i]=255;
-	}
-	*/
+    }
+    else
+    {
+#if 1 /* these are the two formulas that I found on the FourCC site... */
+        yuv[0] = 0.299*rgb[0] + 0.587*rgb[1] + 0.114*rgb[2];
+        yuv[1] = (rgb[2]-yuv[0])*0.565 + 128;
+        yuv[2] = (rgb[0]-yuv[0])*0.713 + 128;
+#else
+        yuv[0] = (0.257 * rgb[0]) + (0.504 * rgb[1]) + (0.098 * rgb[2]) + 16;
+        yuv[1] = 128 - (0.148 * rgb[0]) - (0.291 * rgb[1]) + (0.439 * rgb[2]);
+        yuv[2] = 128 + (0.439 * rgb[0]) - (0.368 * rgb[1]) - (0.071 * rgb[2]);
+#endif
+    }
+
+    if (luminance!=100)
+    {
+        yuv[0]=yuv[0]*luminance/100;
+        if (yuv[0]>255)
+            yuv[0]=255;
+    }
+
+    /* clamp values...if you need to, we don't seem to have a need */
+    /*
+    for(i=0;i<3;i++)
+    {
+        if(yuv[i]<0)
+            yuv[i]=0;
+        if(yuv[i]>255)
+            yuv[i]=255;
+    }
+    */
 }
 
-ConvertRGBtoYV12(SDL_Surface *s, SDL_Overlay *o)
+ConvertRGBtoYV12(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 {
 	int x,y;
 	int yuv[3];
@@ -68,7 +98,7 @@ ConvertRGBtoYV12(SDL_Surface *s, SDL_Overlay *o)
 		op[2]=o->pixels[2]+o->pitches[2]*(y/2);
 		for(x=0; x<s->w && x<o->w; x++)
 		{
-			RGBtoYUV(p,yuv);
+			RGBtoYUV(p, yuv, monochrome, luminance);
 			*(op[0]++)=yuv[0];
 			if(x%2==0 && y%2==0)
 			{
@@ -83,7 +113,7 @@ ConvertRGBtoYV12(SDL_Surface *s, SDL_Overlay *o)
 	SDL_UnlockSurface(s);
 }
 
-ConvertRGBtoIYUV(SDL_Surface *s, SDL_Overlay *o)
+ConvertRGBtoIYUV(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 {
 	int x,y;
 	int yuv[3];
@@ -108,7 +138,7 @@ ConvertRGBtoIYUV(SDL_Surface *s, SDL_Overlay *o)
 		op[2]=o->pixels[2]+o->pitches[2]*(y/2);
 		for(x=0; x<s->w && x<o->w; x++)
 		{
-			RGBtoYUV(p,yuv);
+			RGBtoYUV(p,yuv, monochrome, luminance);
 			*(op[0]++)=yuv[0];
 			if(x%2==0 && y%2==0)
 			{
@@ -123,7 +153,7 @@ ConvertRGBtoIYUV(SDL_Surface *s, SDL_Overlay *o)
 	SDL_UnlockSurface(s);
 }
 
-ConvertRGBtoUYVY(SDL_Surface *s, SDL_Overlay *o)
+ConvertRGBtoUYVY(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 {
 	int x,y;
 	int yuv[3];
@@ -138,7 +168,7 @@ ConvertRGBtoUYVY(SDL_Surface *s, SDL_Overlay *o)
 		op=o->pixels[0]+o->pitches[0]*y;
 		for(x=0; x<s->w && x<o->w; x++)
 		{
-			RGBtoYUV(p,yuv);
+			RGBtoYUV(p, yuv, monochrome, luminance);
 			if(x%2==0)
 			{
 				*(op++)=yuv[1];
@@ -156,7 +186,7 @@ ConvertRGBtoUYVY(SDL_Surface *s, SDL_Overlay *o)
 	SDL_UnlockSurface(s);
 }
 
-ConvertRGBtoYVYU(SDL_Surface *s, SDL_Overlay *o)
+ConvertRGBtoYVYU(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 {
 	int x,y;
 	int yuv[3];
@@ -171,7 +201,7 @@ ConvertRGBtoYVYU(SDL_Surface *s, SDL_Overlay *o)
 		op=o->pixels[0]+o->pitches[0]*y;
 		for(x=0; x<s->w && x<o->w; x++)
 		{
-			RGBtoYUV(p,yuv);
+			RGBtoYUV(p,yuv, monochrome, luminance);
 			if(x%2==0)
 			{
 				*(op++)=yuv[0];
@@ -192,7 +222,7 @@ ConvertRGBtoYVYU(SDL_Surface *s, SDL_Overlay *o)
 	SDL_UnlockSurface(s);
 }
 
-ConvertRGBtoYUY2(SDL_Surface *s, SDL_Overlay *o)
+ConvertRGBtoYUY2(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 {
 	int x,y;
 	int yuv[3];
@@ -207,7 +237,7 @@ ConvertRGBtoYUY2(SDL_Surface *s, SDL_Overlay *o)
 		op=o->pixels[0]+o->pitches[0]*y;
 		for(x=0; x<s->w && x<o->w; x++)
 		{
-			RGBtoYUV(p,yuv);
+			RGBtoYUV(p,yuv, monochrome, luminance);
 			if(x%2==0)
 			{
 				*(op++)=yuv[0];
@@ -232,12 +262,13 @@ void Draw()
 {
 	SDL_Rect rect;
 	int i;
+        int disp;
 
 	if(!scale)
 	{
 		rect.w=overlay->w;
 		rect.h=overlay->h;
-		for(i=0; i<200; i++)
+		for(i=0; i<h-rect.h && i<w-rect.w; i++)
 		{
 			rect.x=i;
 			rect.y=i;
@@ -246,22 +277,45 @@ void Draw()
 	}
 	else
 	{
-		rect.w=screen->w;
-		rect.h=screen->h;
-		for(i=0; i<200; i++)
+		rect.w=overlay->w/2;
+		rect.h=overlay->h/2;
+		rect.x=(w-rect.w)/2;
+		rect.y=(h-rect.h)/2;
+                disp=rect.y-1;
+		for(i=0; i<disp; i++)
 		{
-			rect.x=i-199;
-			rect.y=i-199;
+                        rect.w+=2;
+                        rect.h+=2;
+                        rect.x--;
+                        rect.y--;
 			SDL_DisplayYUVOverlay(overlay,&rect);
 		}
 	}
 	printf("Displayed %d times.\n",i);
 }
 
+static void PrintUsage(char *argv0)
+{
+	fprintf(stderr, "Usage: %s [arg] [arg] [arg] ...\n", argv0);
+	fprintf(stderr, "Where 'arg' is one of:\n");
+	fprintf(stderr, "	-delay <seconds>\n");
+	fprintf(stderr, "	-width <pixels>\n");
+	fprintf(stderr, "	-height <pixels>\n");
+	fprintf(stderr, "	-bpp <bits>\n");
+	fprintf(stderr, "	-format <fmt> (one of the: YV12, IYUV, YUY2, UYVY, YVYU)\n");
+	fprintf(stderr, "	-hw\n");
+	fprintf(stderr, "	-flip\n");
+	fprintf(stderr, "	-scale (test scaling features, from 50%% upto window size)\n");
+	fprintf(stderr, "	-mono (use monochromatic RGB2YUV conversion)\n");
+	fprintf(stderr, "	-lum <perc> (use luminance correction during RGB2YUV conversion,\n");
+	fprintf(stderr, "	             from 0%% to unlimited, normal is 100%%)\n");
+	fprintf(stderr, "	-help (shows this help)\n");
+	fprintf(stderr, "	-fullscreen (test overlay in fullscreen mode)\n");
+}
+
 int main(int argc, char **argv)
 {
 	int flip;
-	int w, h;
 	int delay;
 	int desired_bpp;
 	Uint32 video_flags, overlay_format;
@@ -274,9 +328,11 @@ int main(int argc, char **argv)
 	/* Set default options and check command-line */
 	flip = 0;
 	scale=0;
+        monochrome=0;
+        luminance=100;
 	delay = 1;
-	w = 640;
-	h = 480;
+	w = WINDOW_WIDTH;
+	h = WINDOW_HEIGHT;
 	desired_bpp = 0;
 	video_flags = 0;
 	overlay_format = SDL_YV12_OVERLAY;
@@ -324,6 +380,17 @@ int main(int argc, char **argv)
 				exit(1);
 			}
 		} else
+		if ( strcmp(argv[1], "-lum") == 0 ) {
+			if ( argv[2] ) {
+				luminance = atoi(argv[2]);
+				argv += 2;
+				argc -= 2;
+			} else {
+				fprintf(stderr,
+				"The -lum option requires an argument\n");
+				exit(1);
+			}
+		} else
 		if ( strcmp(argv[1], "-format") == 0 ) {
 			if ( argv[2] ) {
 				if(!strcmp(argv[2],"YV12"))
@@ -363,6 +430,15 @@ int main(int argc, char **argv)
 			scale = 1;
 			argv += 1;
 			argc -= 1;
+		} else
+		if ( strcmp(argv[1], "-mono") == 0 ) {
+			monochrome = 1;
+			argv += 1;
+			argc -= 1;
+		} else
+		if (( strcmp(argv[1], "-help") == 0 ) || (strcmp(argv[1], "-h") == 0)) {
+                        PrintUsage(argv[0]);
+                        exit(1);
 		} else
 		if ( strcmp(argv[1], "-fullscreen") == 0 ) {
 			video_flags |= SDL_FULLSCREEN;
@@ -473,19 +549,19 @@ int main(int argc, char **argv)
 	switch(overlay->format)
 	{
 		case SDL_YV12_OVERLAY:
-			ConvertRGBtoYV12(pic,overlay);
+			ConvertRGBtoYV12(pic,overlay,monochrome,luminance);
 			break;
 		case SDL_UYVY_OVERLAY:
-			ConvertRGBtoUYVY(pic,overlay);
+			ConvertRGBtoUYVY(pic,overlay,monochrome,luminance);
 			break;
 		case SDL_YVYU_OVERLAY:
-			ConvertRGBtoYVYU(pic,overlay);
+			ConvertRGBtoYVYU(pic,overlay,monochrome,luminance);
 			break;
 		case SDL_YUY2_OVERLAY:
-			ConvertRGBtoYUY2(pic,overlay);
+			ConvertRGBtoYUY2(pic,overlay,monochrome,luminance);
 			break;
 		case SDL_IYUV_OVERLAY:
-			ConvertRGBtoIYUV(pic,overlay);
+			ConvertRGBtoIYUV(pic,overlay,monochrome,luminance);
 			break;
 		default:
 			printf("cannot convert RGB picture to obtained YUV format!\n");
