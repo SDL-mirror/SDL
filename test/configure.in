@@ -28,7 +28,7 @@ case "$target" in
         MATHLIB=""
         SYS_GL_LIBS="-lGL"
         ;;
-    *-*-darwin*)
+    *-*-darwin* | *-*-mint* )
         MATHLIB=""
         SYS_GL_LIBS=""
         ;;
@@ -37,10 +37,6 @@ case "$target" in
             CFLAGS="-mthreads"
         fi
         SYS_GL_LIBS=""
-        ;;
-    *-*-mint*)
-        MATHLIB="-lm"
-        SYS_GL_LIBS="-lOSMesa"
         ;;
     *)
         MATHLIB="-lm"
