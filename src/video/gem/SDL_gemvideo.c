@@ -1276,11 +1276,8 @@ static void refresh_window(_THIS, int winhandle, short *rect)
 
 static void GEM_GL_SwapBuffers(_THIS)
 {
-	if (gl_active) {
-		gl_copyshadow(this, this->screen);
-		gl_convert(this, this->screen);
-		GEM_FlipHWSurface(this, this->screen);
-	}
+	SDL_AtariGL_SwapBuffers(this);
+	GEM_FlipHWSurface(this, this->screen);
 }
 
 #endif

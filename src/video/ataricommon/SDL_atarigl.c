@@ -156,13 +156,24 @@ int SDL_AtariGL_LoadLibrary(_THIS, const char *path)
 		return -1;
 	}
 
+	this->gl_data->glGetIntegerv = SDL_LoadFunction(handle, "glGetIntegerv");
+	this->gl_data->glFinish = SDL_LoadFunction(handle, "glFinish");
+
+	if ( (this->gl_data->glGetIntegerv == NULL) || 
+	     (this->gl_data->glFinish == NULL)) {
+		SDL_SetError("Could not retrieve OpenGL functions");
+		SDL_UnloadObject(handle);
+		/* Restore pointers to static library */
+		SDL_AtariGL_InitPointers(this);
+		return -1;
+	}
+
 	/* Load functions pointers (osmesa.ldg) */
 	this->gl_data->OSMesaCreateContextExt = SDL_LoadFunction(handle, "OSMesaCreateContextExt");
 	this->gl_data->OSMesaDestroyContext = SDL_LoadFunction(handle, "OSMesaDestroyContext");
 	this->gl_data->OSMesaMakeCurrent = SDL_LoadFunction(handle, "OSMesaMakeCurrent");
 	this->gl_data->OSMesaPixelStore = SDL_LoadFunction(handle, "OSMesaPixelStore");
 	this->gl_data->OSMesaGetProcAddress = SDL_LoadFunction(handle, "OSMesaGetProcAddress");
-	this->gl_data->glGetIntegerv = SDL_LoadFunction(handle, "glGetIntegerv");
 
 	/* Load old functions pointers (mesa_gl.ldg, tiny_gl.ldg) */
 	this->gl_data->OSMesaCreateLDG = SDL_LoadFunction(handle, "OSMesaCreateLDG");
@@ -174,12 +185,14 @@ int SDL_AtariGL_LoadLibrary(_THIS, const char *path)
 	     (this->gl_data->OSMesaDestroyContext == NULL) ||
 	     (this->gl_data->OSMesaMakeCurrent == NULL) ||
 	     (this->gl_data->OSMesaPixelStore == NULL) ||
-	     (this->gl_data->glGetIntegerv == NULL) ||
 	     (this->gl_data->OSMesaGetProcAddress == NULL)) {
 		/* Hum, maybe old library ? */
 		if ( (this->gl_data->OSMesaCreateLDG == NULL) || 
 		     (this->gl_data->OSMesaDestroyLDG == NULL)) {
-			SDL_SetError("Could not retrieve OpenGL functions");
+			SDL_SetError("Could not retrieve OSMesa functions");
+			SDL_UnloadObject(handle);
+			/* Restore pointers to static library */
+			SDL_AtariGL_InitPointers(this);
 			return -1;
 		} else {
 			gl_oldmesa = 1;
@@ -328,6 +341,13 @@ void SDL_AtariGL_SwapBuffers(_THIS)
 {
 #ifdef HAVE_OPENGL
 	if (gl_active) {
+		if (this->gl_config.dll_handle) {
+			if (this->gl_data->glFinish) {
+				this->gl_data->glFinish();
+			}
+		} else {
+			this->gl_data->glFinish();
+		}
 		gl_copyshadow(this, this->screen);
 		gl_convert(this, this->screen);
 	}
@@ -342,7 +362,12 @@ void SDL_AtariGL_InitPointers(_THIS)
 	this->gl_data->OSMesaMakeCurrent = OSMesaMakeCurrent;
 	this->gl_data->OSMesaPixelStore = OSMesaPixelStore;
 	this->gl_data->OSMesaGetProcAddress = OSMesaGetProcAddress;
+
 	this->gl_data->glGetIntegerv = glGetIntegerv;
+	this->gl_data->glFinish = glFinish;
+
+	this->gl_data->OSMesaCreateLDG = NULL;
+	this->gl_data->OSMesaDestroyLDG = NULL;
 #endif
 }
 
@@ -356,15 +381,7 @@ static void SDL_AtariGL_UnloadLibrary(_THIS)
 		this->gl_config.dll_handle = NULL;
 
 		/* Restore pointers to static library */
-		this->gl_data->OSMesaCreateContextExt = OSMesaCreateContextExt;
-		this->gl_data->OSMesaDestroyContext = OSMesaDestroyContext;
-		this->gl_data->OSMesaMakeCurrent = OSMesaMakeCurrent;
-		this->gl_data->OSMesaPixelStore = OSMesaPixelStore;
-		this->gl_data->OSMesaGetProcAddress = OSMesaGetProcAddress;
-		this->gl_data->glGetIntegerv = glGetIntegerv;
-
-		this->gl_data->OSMesaCreateLDG = NULL;
-		this->gl_data->OSMesaDestroyLDG = NULL;
+		SDL_AtariGL_InitPointers(this);
 	}
 #endif
 }

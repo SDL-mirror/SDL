@@ -883,12 +883,9 @@ static void XBIOS_VideoQuit(_THIS)
 
 static void XBIOS_GL_SwapBuffers(_THIS)
 {
-	if (gl_active) {
-		gl_copyshadow(this, this->screen);
-		gl_convert(this, this->screen);
-		XBIOS_FlipHWSurface(this, this->screen);
-		SDL_AtariGL_MakeCurrent(this);
-	}
+	SDL_AtariGL_SwapBuffers(this);
+	XBIOS_FlipHWSurface(this, this->screen);
+	SDL_AtariGL_MakeCurrent(this);
 }
 
 #endif

@@ -50,13 +50,16 @@ struct SDL_PrivateGLData {
 
 	OSMesaContext	ctx;
 
+	/* OpenGL functions */
+	void (*glGetIntegerv)( GLenum pname, GLint *value );
+	void (*glFinish)(void);
+
 	/* osmesa.ldg */
 	OSMesaContext (*OSMesaCreateContextExt)( GLenum format, GLint depthBits, GLint stencilBits, GLint accumBits, OSMesaContext sharelist);
 	void (*OSMesaDestroyContext)( OSMesaContext ctx );
 	GLboolean (*OSMesaMakeCurrent)( OSMesaContext ctx, void *buffer, GLenum type, GLsizei width, GLsizei height );
 	void (*OSMesaPixelStore)( GLint pname, GLint value );
 	void * (*OSMesaGetProcAddress)( const char *funcName );
-	void (*glGetIntegerv)( GLenum pname, GLint *value );
 
 	/* mesa_gl.ldg, tiny_gl.ldg */
 	void *(*OSMesaCreateLDG)( long format, long type, long width, long height );
