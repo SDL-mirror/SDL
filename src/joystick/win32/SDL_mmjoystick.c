@@ -38,7 +38,7 @@ static char rcsid =
 #include <windows.h>
 #include <mmsystem.h>
 
-#define MAX_JOYSTICKS	2	/* only 2 are supported in the multimedia API */
+#define MAX_JOYSTICKS	16
 #define MAX_AXES	6	/* each joystick can have up to 6 axes */
 #define MAX_BUTTONS	32	/* and 32 buttons                      */
 #define AXIS_MIN	-32768  /* minimum value for axis coordinate */
@@ -91,8 +91,10 @@ int SDL_SYS_JoystickInit(void)
 	}
 
 
-	SYS_JoystickID[0] = JOYSTICKID1;
-	SYS_JoystickID[1] = JOYSTICKID2;
+	for ( i = 0; i < MAX_JOYSTICKS; i++ ) {
+		SYS_JoystickID[i] = JOYSTICKID1 + i;
+	}
+
 
 	for ( i = 0; (i < maxdevs); ++i ) {
 		
