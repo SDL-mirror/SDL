@@ -30,10 +30,15 @@ static char rcsid =
 #include "SDL.h"
 #include "SDL_cpuinfo.h"
 
+#ifdef MACOSX
+#include <sys/sysctl.h> /* For AltiVec check */
+#endif
+
 #define CPU_HAS_RDTSC	0x00000001
 #define CPU_HAS_MMX	0x00000002
 #define CPU_HAS_3DNOW	0x00000004
 #define CPU_HAS_SSE	0x00000008
+#define CPU_HAS_ALTIVEC	0x00000010
 
 static __inline__ int CPU_haveCPUID()
 {
@@ -186,6 +191,23 @@ static __inline__ int CPU_haveSSE()
 	return 0;
 }
 
+static __inline__ int CPU_haveAltiVec()
+{
+#ifdef MACOSX
+	/* TODO: This check works on OS X. It would be nice to detect AltiVec
+	   properly on for example Linux/PPC, too. But I don't know how that
+	   is done in Linux (or FreeBSD, or whatever other OS you run PPC :-)
+	 */
+	int selectors[2] = { CTL_HW, HW_VECTORUNIT }; 
+	int hasVectorUnit = 0; 
+	size_t length = sizeof(hasVectorUnit); 
+	int error = sysctl(selectors, 2, &hasVectorUnit, &length, NULL, 0); 
+	if( 0 == error )
+		return hasVectorUnit != 0; 
+#endif
+	return 0; 
+}
+
 static Uint32 SDL_CPUFeatures = 0xFFFFFFFF;
 
 static Uint32 SDL_GetCPUFeatures()
@@ -203,6 +225,9 @@ static Uint32 SDL_GetCPUFeatures()
 		}
 		if ( CPU_haveSSE() ) {
 			SDL_CPUFeatures |= CPU_HAS_SSE;
+		}
+		if ( CPU_haveAltiVec() ) {
+			SDL_CPUFeatures |= CPU_HAS_ALTIVEC;
 		}
 	}
 	return SDL_CPUFeatures;
@@ -240,15 +265,25 @@ SDL_bool SDL_HasSSE()
 	return SDL_FALSE;
 }
 
+SDL_bool SDL_HasAltiVec()
+{
+	if ( SDL_GetCPUFeatures() & CPU_HAS_ALTIVEC ) {
+		return SDL_TRUE;
+	}
+	return SDL_FALSE;
+}
+
 #ifdef TEST_MAIN
 
 #include <stdio.h>
 
 int main()
 {
+	printf("RDTSC: %d\n", SDL_HasRDTSC());
 	printf("MMX: %d\n", SDL_HasMMX());
 	printf("3DNow: %d\n", SDL_Has3DNow());
 	printf("SSE: %d\n", SDL_HasSSE());
+	printf("AltiVec: %d\n", SDL_HasAltiVec());
 	return 0;
 }
 

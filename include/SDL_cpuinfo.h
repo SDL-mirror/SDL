@@ -53,6 +53,10 @@ extern DECLSPEC SDL_bool SDLCALL SDL_Has3DNow();
  */
 extern DECLSPEC SDL_bool SDLCALL SDL_HasSSE();
 
+/* This function returns true if the CPU has AltiVec features
+ */
+extern DECLSPEC SDL_bool SDLCALL SDL_HasAltiVec();
+
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
 }
