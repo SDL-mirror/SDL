@@ -136,17 +136,24 @@ SDL_SYS_JoystickInit(void)
 	memset(joydevnames, NULL, sizeof(joydevnames));
 
 	for (i = 0; i < MAX_UHID_JOYS; i++) {
+		SDL_Joystick nj;
+
 		sprintf(s, "/dev/uhid%d", i);
-		fd = open(s, O_RDWR);
-		if (fd > 0) {
-			joynames[SDL_numjoysticks++] = strdup(s);
-			close(fd);
+
+		nj.index = SDL_numjoysticks;
+		joynames[nj.index] = strdup(s);
+
+		if (SDL_SYS_JoystickOpen(&nj) == 0) {
+			SDL_SYS_JoystickClose(&nj);
+			SDL_numjoysticks++;
+		} else {
+			free(joynames[nj.index]);
 		}
 	}
 	for (i = 0; i < MAX_JOY_JOYS; i++) {
 		sprintf(s, "/dev/joy%d", i);
-		fd = open(s, O_RDWR);
-		if (fd > 0) {
+		fd = open(s, O_RDONLY);
+		if (fd != -1) {
 			joynames[SDL_numjoysticks++] = strdup(s);
 			close(fd);
 		}
@@ -178,7 +185,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick *joy)
 	int fd;
 
 	fd = open(path, O_RDWR);
-	if (fd < 0) {
+	if (fd == -1) {
 		SDL_SetError("%s: %s", path, strerror(errno));
 		return (-1);
 	}
@@ -400,9 +407,9 @@ report_alloc(struct report *r, struct report_desc *rd, int repind)
 	int len;
 
 #ifdef USBHID_NEW
-	len = hid_report_size(rd, repinfo[repind].kind, &r->rid);
-#else
 	len = hid_report_size(rd, repinfo[repind].kind, r->rid);
+#else
+	len = hid_report_size(rd, repinfo[repind].kind, &r->rid);
 #endif
 	if (len < 0) {
 		SDL_SetError("Negative HID report size");
