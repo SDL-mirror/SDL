@@ -119,7 +119,7 @@ int RunModeTests(SDL_Surface *screen)
 	bmp = SDL_LoadBMP("sample.bmp");
 	if ( ! bmp ) {
 		printf("Couldn't load sample.bmp: %s\n", SDL_GetError());
-		return;
+		return 0;
 	}
 	printf("Running freshly loaded blit test: %dx%d at %d bpp, flags: ",
 		bmp->w, bmp->h, bmp->format->BitsPerPixel);
@@ -140,7 +140,7 @@ int RunModeTests(SDL_Surface *screen)
 	SDL_FreeSurface(tmp);
 	if ( ! bmp ) {
 		printf("Couldn't convert sample.bmp: %s\n", SDL_GetError());
-		return;
+		return 0;
 	}
 	printf("Running display format blit test: %dx%d at %d bpp, flags: ",
 		bmp->w, bmp->h, bmp->format->BitsPerPixel);
