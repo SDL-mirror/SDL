@@ -81,7 +81,9 @@ static AudioBootStrap *bootstrap[] = {
 #ifdef ENABLE_AHI
 	&AHI_bootstrap,
 #endif
-
+#ifdef DISKAUD_SUPPORT
+	&DISKAUD_bootstrap,
+#endif
 	NULL
 };
 SDL_AudioDevice *current_audio = NULL;

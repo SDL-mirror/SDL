@@ -140,6 +140,9 @@ extern AudioBootStrap SNDMGR_bootstrap;
 #ifdef ENABLE_AHI
 extern AudioBootStrap AHI_bootstrap;
 #endif
+#ifdef DISKAUD_SUPPORT
+extern AudioBootStrap DISKAUD_bootstrap;
+#endif
 
 /* This is the current audio device */
 extern SDL_AudioDevice *current_audio;
