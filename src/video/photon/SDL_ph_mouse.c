@@ -36,25 +36,25 @@ static char rcsid =
 #include "SDL_ph_mouse_c.h"
 
 struct  WMcursor {
-	PhCursorDef_t *ph_cursor ;
+    PhCursorDef_t *ph_cursor ;
 };
 
 
 void ph_FreeWMCursor(_THIS, WMcursor *cursor)
 {
+    if (window != NULL)
+    {
+        SDL_Lock_EventThread();
 
-    if ( window != NULL ) {
-		SDL_Lock_EventThread();
-		
-		if (PtSetResource( window, Pt_ARG_CURSOR_TYPE, Ph_CURSOR_INHERIT, 0 ) < 0)
-		{
-			//TODO: output error msg
-		}
-		
-		SDL_Unlock_EventThread();
-	}	
-	//free(cursor->ph_cursor.images);
-	free(cursor);
+        if (PtSetResource( window, Pt_ARG_CURSOR_TYPE, Ph_CURSOR_INHERIT, 0 ) < 0)
+        {
+            /* TODO: output error msg */
+        }
+
+        SDL_Unlock_EventThread();
+    }	
+    /* free(cursor->ph_cursor.images); */
+    free(cursor);
 }
 
 WMcursor *ph_CreateWMCursor(_THIS,
@@ -120,7 +120,7 @@ WMcursor *ph_CreateWMCursor(_THIS,
 
 PhCursorDef_t ph_GetWMPhCursor(WMcursor *cursor)
 {
-	return(*cursor->ph_cursor);
+    return(*cursor->ph_cursor);
 }
 
 int ph_ShowWMCursor(_THIS, WMcursor *cursor)
@@ -170,22 +170,24 @@ int ph_ShowWMCursor(_THIS, WMcursor *cursor)
 
 void ph_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
 {
-	short abs_x, abs_y;
+    short abs_x, abs_y;
 
-	SDL_Lock_EventThread();
-	PtGetAbsPosition( window, &abs_x, &abs_y );
-	PhMoveCursorAbs( PhInputGroup(NULL), x + abs_x, y + abs_y );
-	SDL_Unlock_EventThread();
+    SDL_Lock_EventThread();
+    PtGetAbsPosition( window, &abs_x, &abs_y );
+    PhMoveCursorAbs( PhInputGroup(NULL), x + abs_x, y + abs_y );
+    SDL_Unlock_EventThread();
 }
 
 
 void ph_CheckMouseMode(_THIS)
 {
-        /* If the mouse is hidden and input is grabbed, we use relative mode */
-        if ( !(SDL_cursorstate & CURSOR_VISIBLE) &&
-             (this->input_grab != SDL_GRAB_OFF) ) {
-                mouse_relative = 1;
-        } else {
-                mouse_relative = 0;
-        }
+    /* If the mouse is hidden and input is grabbed, we use relative mode */
+    if ( !(SDL_cursorstate & CURSOR_VISIBLE) && (this->input_grab != SDL_GRAB_OFF))
+    {
+        mouse_relative = 1;
+    }
+    else
+    {
+        mouse_relative = 0;
+    }
 }

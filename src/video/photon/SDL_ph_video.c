@@ -150,8 +150,8 @@ static SDL_VideoDevice *ph_CreateDevice(int devindex)
 }
 
 VideoBootStrap ph_bootstrap = {
-        "photon", "QNX Photon video output",
-	ph_Available, ph_CreateDevice
+    "photon", "QNX Photon video output",
+    ph_Available, ph_CreateDevice
 };
 
 static void ph_DeleteDevice(SDL_VideoDevice *device)
@@ -175,7 +175,6 @@ static void ph_DeleteDevice(SDL_VideoDevice *device)
 
 static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat)
 {
-    PgColor_t ph_palette[_Pg_MAX_PALETTE];
     int i;
     unsigned long *tempptr;
     int rtnval;
@@ -184,6 +183,11 @@ static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
     window=NULL;
     oglctx=NULL;
+    desktoppal=SDLPH_PAL_NONE;
+    
+    captionflag=0;
+    old_video_mode=-1;
+    old_refresh_rate=-1;
 	
     if (NULL == (event = malloc(EVENT_SIZE)))
     {
@@ -213,6 +217,7 @@ static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat)
     /* We need to return BytesPerPixel as it in used by CreateRGBsurface */
     vformat->BitsPerPixel = my_mode_info.bits_per_pixel;
     vformat->BytesPerPixel = my_mode_info.bytes_per_scanline/my_mode_info.width;
+    desktopbpp = my_mode_info.bits_per_pixel;
          
     /* return a palette if we are in 256 color mode */
     if (vformat->BitsPerPixel == 8)
@@ -253,7 +258,6 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
     PtArg_t arg[32];
     PhDim_t dim;
     int rtnval;
-    PgColor_t ph_palette[_Pg_MAX_PALETTE];
     int i;
     unsigned long *tempptr;
     int pargc;
@@ -281,7 +285,7 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
 
         window=PtCreateWidget(PtWindow, NULL, pargc-1, arg);
         PtRealizeWidget(window);
-
+        
         PtFlush();
     }
 
@@ -330,21 +334,30 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
                     exit(1);
                 }
             }
+            
+            if (bpp==8)
+            {
+               desktoppal=SDLPH_PAL_SYSTEM;
+            }
+            
+            /* save old video mode caps */
+            PgGetVideoMode(&settings);
+            old_video_mode=settings.mode;
+            old_refresh_rate=settings.refresh;
+
+            /* setup new video mode */
             settings.mode = mode;
             settings.refresh = 0;
-            settings.flags  = 0;       
+            settings.flags = 0;
 
-            if (PgSetVideoMode( &settings ) < 0)
+            if (PgSetVideoMode(&settings) < 0)
             {
                 fprintf(stderr,"error: PgSetVideoMode failed\n");
             }
 
-            /* Get the true height and width */
-
             current->flags = (flags & (~SDL_RESIZABLE)); /* no resize for Direct Context */
 
             /* Begin direct mode */
-
             ph_EnterFullScreen(this);
 
         } /* end fullscreen flag */
@@ -358,6 +371,22 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
             else /* must be SDL_SWSURFACE */
             {
                 current->flags = (flags | SDL_RESIZABLE); /* yes we can resize as this is a software surface */
+            }
+            /* using palette emulation code in window mode */
+            if (bpp==8)
+            {
+                if (desktopbpp>=15)
+                {
+                    desktoppal=SDLPH_PAL_EMULATE;
+                }
+                else
+                {
+                    desktoppal=SDLPH_PAL_SYSTEM;
+                }
+            }
+            else
+            {
+               desktoppal=SDLPH_PAL_NONE;
             }
         }
 
@@ -390,10 +419,16 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
     /* Must call at least once it setup image planes */
     ph_ResizeImage(this, current, flags);
 
+    /* delayed set caption call */
+    if (captionflag)
+    {
+        ph_SetCaption(this, this->wm_title, NULL);
+    }
+
     SDL_Unlock_EventThread();
 
     /* We're done! */
-    return(current);
+    return (current);
 }
 
 static void ph_VideoQuit(_THIS)
@@ -404,19 +439,20 @@ static void ph_VideoQuit(_THIS)
 
     if (currently_fullscreen)
     {
-        PdDirectStop(directContext);
-        PdReleaseDirectContext(directContext);
-        directContext=0;	
-        currently_fullscreen=0;
+        ph_LeaveFullScreen(this);
     }
 
 #ifdef HAVE_OPENGL
-    if (((this->screen->flags & SDL_FULLSCREEN)==SDL_FULLSCREEN) &&
-        ((this->screen->flags & SDL_OPENGL)==SDL_OPENGL))
+    /* prevent double SEGFAULT with parachute mode */
+    if (this->screen)
     {
-        region_info.cursor_type=Ph_CURSOR_POINTER;
-        region_info.rid=PtWidgetRid(window);
-        PhRegionChange(Ph_REGION_CURSOR, 0, &region_info, NULL, NULL);
+        if (((this->screen->flags & SDL_FULLSCREEN)==SDL_FULLSCREEN) &&
+            ((this->screen->flags & SDL_OPENGL)==SDL_OPENGL))
+        {
+            region_info.cursor_type=Ph_CURSOR_POINTER;
+            region_info.rid=PtWidgetRid(window);
+            PhRegionChange(Ph_REGION_CURSOR, 0, &region_info, NULL, NULL);
+        }
     }
 
     PtFlush();
@@ -427,6 +463,12 @@ static void ph_VideoQuit(_THIS)
         PtUnrealizeWidget(window);
         PtDestroyWidget(window);
         window=NULL;
+    }
+    
+    /* restore palette */
+    if (desktoppal!=SDLPH_PAL_NONE)
+    {
+        PgSetPalette(ph_palette, 0, 0, _Pg_MAX_PALETTE, Pg_PALSET_GLOBAL | Pg_PALSET_FORCE_EXPOSE, 0);
     }
 
 #ifdef HAVE_OPENGL
@@ -441,60 +483,58 @@ static void ph_VideoQuit(_THIS)
 
 static int ph_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 {
-	PgColor_t *in, *out;
-	int i, j;
-	int alloct_all = 1;
+    int i;
+    PhPoint_t point={0, 0};
+    PgColor_t syspalph[_Pg_MAX_PALETTE];
 
-    	colors = this->screen->format->palette->colors;
-
-	in = alloca( ncolors*sizeof(PgColor_t)  );
-	if ( in == NULL  ) {
-		return 0;
-	}
-	memset(in,0,ncolors*sizeof(PgColor_t));
-
-    out = alloca( ncolors*sizeof(PgColor_t)  );
-    if ( out == NULL  ) {
-		return 0;
+    /* palette emulation code, using palette of the PhImage_t struct */
+    if (desktoppal==SDLPH_PAL_EMULATE)
+    {
+        if ((SDL_Image) && (SDL_Image->palette))
+        {
+            for (i=firstcolor; i<firstcolor+ncolors; i++)
+            {
+                SDL_Image->palette[i]  = 0x00000000UL;
+                SDL_Image->palette[i] |= colors[i-firstcolor].r<<16;
+                SDL_Image->palette[i] |= colors[i-firstcolor].g<<8;
+                SDL_Image->palette[i] |= colors[i-firstcolor].b;
+            }
+        }
+        /* image needs to be redrawed, very slow method */
+        PgDrawPhImage(&point, SDL_Image, 0);
     }
-	
-	for (i=0,j=firstcolor;i<ncolors;i++,j++)
-	{
-		in[i] |= colors[j].r<<16 ;
-		in[i] |= colors[j].g<<8 ;
-		in[i] |= colors[j].b ; 
-	}
+    else
+    {
+        if (desktoppal==SDLPH_PAL_SYSTEM)
+        {
+            for (i=firstcolor; i<firstcolor+ncolors; i++)
+            {
+                syspalph[i]  = 0x00000000UL;
+                syspalph[i] |= colors[i-firstcolor].r<<16;
+                syspalph[i] |= colors[i-firstcolor].g<<8;
+                syspalph[i] |= colors[i-firstcolor].b;
+            }
 
-	if ( (this->screen->flags & SDL_HWPALETTE) == SDL_HWPALETTE ) 
-	{
-		if( PgSetPalette( in, 0, 0, ncolors, Pg_PALSET_HARD, 0) < 0 )
-		{
-			fprintf(stderr,"error: PgSetPalette(..,Pg_PALSET_HARD)  failed\n");
-			return 0;
-		}  
-	}
-	else 
-	{
-		if ( PgColorMatch(ncolors, in, out) < 0 )
-        {
-            fprintf(stderr,"error: PgColorMatch failed\n");
-            return 0;
+            if ((this->screen->flags & SDL_FULLSCREEN) != SDL_FULLSCREEN)
+            {
+                /* window mode must use soft palette */
+                PgSetPalette((PgColor_t*)&syspalph, 0, firstcolor, ncolors, Pg_PALSET_SOFT, 0);
+                /* image needs to be redrawed, very slow method */
+                PgDrawPhImage(&point, SDL_Image, 0);
+            }
+            else
+            {
+                /* fullscreen mode must use hardware palette */
+                PgSetPalette((PgColor_t*)&syspalph, 0, firstcolor, ncolors, Pg_PALSET_GLOBAL, 0);
+            }
         }
-		for (i=0;i<ncolors;i++)
-		{
-			if (memcmp(&in[i],&out[i],sizeof(PgColor_t)))
-			{
-				alloct_all = 0;
-				break;
-			}
-		}
-        if( PgSetPalette( out, 0, 0, ncolors, Pg_PALSET_SOFT, 0) < 0 )
+        else
         {
-            fprintf(stderr,"error: PgSetPalette(..,Pg_PALSET_SOFT) failed\n");
-            return 0;
+            /* SDLPH_PAL_NONE do nothing */
         }
-	}
-	return alloct_all;
+    }
+    
+    return 1;
 }
 
 #ifdef HAVE_OPENGL

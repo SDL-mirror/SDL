@@ -39,6 +39,10 @@
 
 #define PH_OGL_MAX_ATTRIBS 32
 
+#define SDLPH_PAL_NONE    0x00000000L
+#define SDLPH_PAL_EMULATE 0x00000001L
+#define SDLPH_PAL_SYSTEM  0x00000002L
+
 typedef union vidptr{
   uint8_t  *volatile ptr8;
   uint16_t *volatile ptr16;
@@ -55,14 +59,13 @@ typedef struct {
 
 /* Private display data */
 struct SDL_PrivateVideoData {
-    int local_ph;		/* Flag: true if local display */
-    PtAppContext_t app;
     PgDisplaySettings_t mode_settings;	
-    PtWidget_t *Window;    /* used to handle input events */
-    PhImage_t *image;	   /* used to display image */
+    PtWidget_t *Window;                  /* used to handle input events */
+    PhImage_t *image;	                 /* used to display image       */
 #ifdef HAVE_OPENGL
-    PdOpenGLContext_t* OGLContext;
+    PdOpenGLContext_t* OGLContext;       /* OpenGL context              */
 #endif /* HAVE_OPENGL */
+    PgColor_t ph_palette[_Pg_MAX_PALETTE];
 
     struct {
         PdDirectContext_t *direct_context;
@@ -76,16 +79,9 @@ struct SDL_PrivateVideoData {
         long flags;
     } ocimage;
 
-    PhDrawContext_t *ScreenDC; //=NULL;
-    signed short old_video_mode; //=-1;
-    signed short old_refresh_rate; //=-1;
-    PgHWCaps_t graphics_card_caps;
-	
-    PdDirectContext_t *directContext;
-    PdOffscreenContext_t *Buff[2];
-    struct _Ph_ctrl* ctrl_channel;
-
-    /* The variables used for displaying graphics */
+    PgHWCaps_t graphics_card_caps;  /* Graphics card caps at the moment of start   */
+    int old_video_mode;             /* Stored mode before fullscreen switch        */
+    int old_refresh_rate;           /* Stored refresh rate befor fullscreen switch */
 
     /* The current width and height of the fullscreen mode */
     int current_w;
@@ -106,7 +102,10 @@ struct SDL_PrivateVideoData {
     int mouse_relative;
     WMcursor* BlankCursor;
 
-    int depth;			/* current visual depth (not bpp) */
+    int depth;			/* current visual depth (not bpp)        */
+    int desktopbpp;             /* bpp of desktop at the moment of start */
+    int desktoppal;             /* palette mode emulation or system      */
+    int captionflag;            /* caption setting flag                  */
 
     int use_vidmode;
     int currently_fullscreen;
@@ -118,26 +117,22 @@ struct SDL_PrivateVideoData {
     /* Prevent too many XSync() calls */
     int blit_queued;
 
-    short *iconcolors;		/* List of colors used by the icon */
     PhEvent_t* event;
 };
 
-#define local_ph             (this->hidden->local_ph)
-#define app                  (this->hidden->app)
 #define mode_settings        (this->hidden->mode_settings)
 #define window	             (this->hidden->Window)
 #define oglctx               (this->hidden->OGLContext)
-#define directContext	     (this->hidden->directContext)
-#define Buff                 (this->hidden->Buff)
-#define ctrl_channel         (this->hidden->ctrl_channel)
 #define SDL_Image            (this->hidden->image)
 #define OCImage              (this->hidden->ocimage)
 #define old_video_mode       (this->hidden->old_video_mode)
 #define old_refresh_rate     (this->hidden->old_refresh_rate)
 #define graphics_card_caps   (this->hidden->graphics_card_caps)
+#define desktopbpp           (this->hidden->desktopbpp)
+#define desktoppal           (this->hidden->desktoppal)
+#define ph_palette           (this->hidden->ph_palette)
 
 /* Old variable names */
-#define swap_pixels          (this->hidden->swap_pixels)
 #define current_w            (this->hidden->current_w)
 #define current_h            (this->hidden->current_h)
 #define mouse_last           (this->hidden->mouse_last)
@@ -150,8 +145,8 @@ struct SDL_PrivateVideoData {
 #define switch_waiting       (this->hidden->switch_waiting)
 #define switch_time          (this->hidden->switch_time)
 #define blit_queued          (this->hidden->blit_queued)
-#define SDL_iconcolorIs      (this->hidden->iconcolors)
 #define event                (this->hidden->event)
 #define SDL_BlankCursor      (this->hidden->BlankCursor)
+#define captionflag          (this->hidden->captionflag)
 
 #endif /* _SDL_x11video_h */

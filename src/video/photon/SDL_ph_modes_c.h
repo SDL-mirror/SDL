@@ -33,7 +33,6 @@ static char rcsid =
 
 #define PH_MAX_VIDEOMODES 127
 
-//extern int ph_GetVideoModes(_THIS);
 extern SDL_Rect **ph_ListModes(_THIS,SDL_PixelFormat *format, Uint32 flags);
 extern void ph_FreeVideoModes(_THIS);
 extern int ph_ResizeFullScreen(_THIS);
