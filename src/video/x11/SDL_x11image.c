@@ -44,7 +44,7 @@ static int (*X_handler)(Display *, XErrorEvent *) = NULL;
 static int shm_errhandler(Display *d, XErrorEvent *e)
 {
         if ( e->error_code == BadAccess ) {
-        	shm_error = 1;
+        	shm_error = True;
         	return(0);
         } else
 		return(X_handler(d,e));
@@ -65,7 +65,7 @@ static void try_mitshm(_THIS, SDL_Surface *screen)
 			XShmAttach(SDL_Display, &shminfo);
 			XSync(SDL_Display, True);
 			XSetErrorHandler(X_handler);
-			if (shm_error)
+			if ( shm_error )
 				shmdt(shminfo.shmaddr);
 		} else {
 			shm_error = True;
