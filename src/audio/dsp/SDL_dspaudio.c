@@ -187,6 +187,7 @@ static int DSP_OpenAudio(_THIS, SDL_AudioSpec *spec)
 		flags &= ~O_NONBLOCK;
 		if ( fcntl(audio_fd, F_SETFL, flags) < 0 ) {
 			SDL_SetError("Couldn't set audio blocking mode");
+			DSP_CloseAudio(this);
 			return(-1);
 		}
 	}
@@ -195,6 +196,7 @@ static int DSP_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	if ( ioctl(audio_fd, SNDCTL_DSP_GETFMTS, &value) < 0 ) {
 		perror("SNDCTL_DSP_GETFMTS");
 		SDL_SetError("Couldn't get audio format list");
+		DSP_CloseAudio(this);
 		return(-1);
 	}
 
@@ -252,6 +254,7 @@ static int DSP_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	}
 	if ( format == 0 ) {
 		SDL_SetError("Couldn't find any hardware audio formats");
+		DSP_CloseAudio(this);
 		return(-1);
 	}
 	spec->format = test_format;
@@ -262,6 +265,7 @@ static int DSP_OpenAudio(_THIS, SDL_AudioSpec *spec)
 						(value != format) ) {
 		perror("SNDCTL_DSP_SETFMT");
 		SDL_SetError("Couldn't set audio format");
+		DSP_CloseAudio(this);
 		return(-1);
 	}
 
@@ -270,6 +274,7 @@ static int DSP_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	if ( ioctl(audio_fd, SNDCTL_DSP_CHANNELS, &value) < 0 ) {
 		perror("SNDCTL_DSP_CHANNELS");
 		SDL_SetError("Cannot set the number of channels");
+		DSP_CloseAudio(this);
 		return(-1);
 	}
 	spec->channels = value;
@@ -279,6 +284,7 @@ static int DSP_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	if ( ioctl(audio_fd, SNDCTL_DSP_SPEED, &value) < 0 ) {
 		perror("SNDCTL_DSP_SPEED");
 		SDL_SetError("Couldn't set audio frequency");
+		DSP_CloseAudio(this);
 		return(-1);
 	}
 	spec->freq = value;
@@ -290,6 +296,7 @@ static int DSP_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	for ( frag_spec = 0; (0x01<<frag_spec) < spec->size; ++frag_spec );
 	if ( (0x01<<frag_spec) != spec->size ) {
 		SDL_SetError("Fragment size must be a power of two");
+		DSP_CloseAudio(this);
 		return(-1);
 	}
 	frag_spec |= 0x00020000;	/* two fragments, for low latency */
@@ -317,6 +324,7 @@ static int DSP_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	mixlen = spec->size;
 	mixbuf = (Uint8 *)SDL_AllocAudioMem(mixlen);
 	if ( mixbuf == NULL ) {
+	  DSP_CloseAudio(this);
 		return(-1);
 	}
 	memset(mixbuf, spec->silence, spec->size);
