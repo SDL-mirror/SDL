@@ -201,9 +201,10 @@ static int cmpmodes(const void *va, const void *vb)
 {
     SDL_Rect *a = *(SDL_Rect **)va;
     SDL_Rect *b = *(SDL_Rect **)vb;
-    if(a->w > b->w)
-        return -1;
-    return b->h - a->h;
+    if ( a->w == b->w )
+        return b->h - a->h;
+    else
+        return b->w - a->w;
 }
 
 static int DIB_AddMode(_THIS, int bpp, int w, int h)

@@ -38,34 +38,26 @@ SDL_Rect* SDL_modearray[PH_MAX_VIDEOMODES];
 
 static int compare_modes_by_res(const void* mode1, const void* mode2)
 {
-    if (PgGetVideoModeInfo(*(unsigned short*)mode1, &mode_info) < 0)
+    PgVideoModeInfo_t mode1_info;
+    PgVideoModeInfo_t mode2_info;
+
+    if (PgGetVideoModeInfo(*(unsigned short*)mode1, &mode1_info) < 0)
     {
         return 0;
     }
 
-    key1 = mode_info.width * mode_info.height;
-
-    if (PgGetVideoModeInfo(*(unsigned short*)mode2, &mode_info) < 0)
+    if (PgGetVideoModeInfo(*(unsigned short*)mode2, &mode2_info) < 0)
     {
         return 0;
     }
 
-    key2 = mode_info.width * mode_info.height;
-
-    if (key1 > key2)
+    if (mode1_info.width == mode2_info.width)
     {
-        return 1;
+        return mode2_info.height - mode1_info.height;
     }
     else
     {
-        if (key1 == key2)
-        {
-           return 0;
-        }
-        else
-        {
-            return -1;
-        }
+        return mode2_info.width - mode1_info.width;
     }
 }
 

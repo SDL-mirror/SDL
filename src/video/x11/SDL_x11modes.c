@@ -85,9 +85,10 @@ static int cmpmodes(const void *va, const void *vb)
 {
     const SDL_NAME(XF86VidModeModeInfo) *a = *(const SDL_NAME(XF86VidModeModeInfo)**)va;
     const SDL_NAME(XF86VidModeModeInfo) *b = *(const SDL_NAME(XF86VidModeModeInfo)**)vb;
-    if( (a->vdisplay > b->vdisplay) && (a->hdisplay >= b->hdisplay) )
-        return -1;
-    return b->hdisplay - a->hdisplay;
+    if ( a->hdisplay == b->hdisplay )
+        return b->vdisplay - a->vdisplay;
+    else
+        return b->hdisplay - a->hdisplay;
 }
 #endif
 

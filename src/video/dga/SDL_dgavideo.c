@@ -284,15 +284,15 @@ static int cmpmodes(const void *va, const void *vb)
     /* Prefer DirectColor visuals for otherwise equal modes */
     if ( (a->viewportWidth == b->viewportWidth) &&
          (b->viewportHeight == a->viewportHeight) ) {
-         if ( a->visualClass == DirectColor )
-             return -1;
-         if ( b->visualClass == DirectColor )
-             return 1;
-         return 0;
-    } else {
-        if(a->viewportWidth > b->viewportWidth)
+        if ( a->visualClass == DirectColor )
             return -1;
+        if ( b->visualClass == DirectColor )
+            return 1;
+        return 0;
+    } else if ( a->viewportWidth == b->viewportWidth ) {
         return b->viewportHeight - a->viewportHeight;
+    } else {
+        return b->viewportWidth - a->viewportWidth;
     }
 }
 static void UpdateHWInfo(_THIS, SDL_NAME(XDGAMode) *mode)
