@@ -362,7 +362,7 @@ int SDL_VideoModeOK (int width, int height, int bpp, Uint32 flags)
 	if ( bpp < 8 || bpp > 32 ) {
 		return(0);
 	}
-	if ( (width == 0) || (height == 0) ) {
+	if ( (width <= 0) || (height <= 0) ) {
 		return(0);
 	}
 
@@ -415,8 +415,13 @@ static int SDL_GetVideoMode (int *w, int *h, int *BitsPerPixel, Uint32 flags)
 	SDL_PixelFormat format;
 	SDL_Rect **sizes;
 
+	/* Check parameters */
+	if ( *BitsPerPixel < 8 || *BitsPerPixel > 32 ) {
+		SDL_SetError("Invalid bits per pixel (range is {8...32})");
+		return(0);
+	}
 	if ((*w <= 0) || (*h <= 0)) {
-		SDL_SetError("Invalid parameter");
+		SDL_SetError("Invalid width or height");
 		return(0);
 	}
 
