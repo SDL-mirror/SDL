@@ -55,7 +55,7 @@ typedef signed int	Sint32;
 
 /* Figure out how to support 64-bit datatypes */
 #if !defined(__STRICT_ANSI__)
-#ifdef H_MMBASIC /* mmbasic.h (Tru64 MME) */
+#ifdef __osf__ /* Tru64 */
 #define SDL_HAS_64BIT_TYPE	long
 #elif defined(__GNUC__) || defined(__MWERKS__) || defined(__SUNPRO_C) || defined(__DECC)
 #define SDL_HAS_64BIT_TYPE	long long
