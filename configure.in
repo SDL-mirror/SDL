@@ -2603,7 +2603,7 @@ AC_SUBST(SYSTEM_LIBS)
 dnl Expand the include directories for building SDL
 CFLAGS="$CFLAGS -I\$(top_srcdir)/include"
 CFLAGS="$CFLAGS -I\$(top_srcdir)/include/SDL"
-CFLAGS="$CFLAGS -I\$(top_srcdir)/src -I\$(top_srcdir)/src/$ARCH"
+CFLAGS="$CFLAGS -I\$(top_srcdir)/src -I\$(top_srcdir)/src/main/$ARCH"
 CFLAGS="$CFLAGS -I\$(top_srcdir)/src/audio"
 CFLAGS="$CFLAGS -I\$(top_srcdir)/src/video"
 CFLAGS="$CFLAGS -I\$(top_srcdir)/src/video/XFree86/extensions"
