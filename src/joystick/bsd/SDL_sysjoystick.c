@@ -29,7 +29,7 @@
 
 #ifdef SAVE_RCSID
 static char rcsid =
- "@(#) $Id $";
+ "@(#) $Id$";
 #endif
 
 #include <stdio.h>
@@ -210,7 +210,11 @@ SDL_SYS_JoystickOpen(SDL_Joystick *joy)
 		goto usberr;
 	}
 
+#ifdef USBHID_NEW
+	hdata = hid_start_parse(hw->repdesc, 1 << hid_input, rep->rid);
+#else
 	hdata = hid_start_parse(hw->repdesc, 1 << hid_input);
+#endif
 	if (hdata == NULL) {
 		SDL_SetError("%s: Cannot start HID parser", hw->path);
 		goto usberr;
@@ -296,7 +300,11 @@ SDL_SYS_JoystickUpdate(SDL_Joystick *joy)
 	if (read(joy->hwdata->fd, REP_BUF_DATA(rep), rep->size) != rep->size) {
 		return;
 	}
+#ifdef USBHID_NEW
+	hdata = hid_start_parse(joy->hwdata->repdesc, 1 << hid_input, rep->rid);
+#else
 	hdata = hid_start_parse(joy->hwdata->repdesc, 1 << hid_input);
+#endif
 	if (hdata == NULL) {
 		fprintf(stderr, "%s: Cannot start HID parser\n",
 		    joy->hwdata->path);
@@ -400,7 +408,11 @@ report_alloc(struct report *r, struct report_desc *rd, int repind)
 {
 	int len;
 
+#ifdef USBHID_NEW
+	len = hid_report_size(rd, repinfo[repind].kind, r->rid);
+#else
 	len = hid_report_size(rd, repinfo[repind].kind, &r->rid);
+#endif
 	if (len < 0) {
 		SDL_SetError("Negative HID report size");
 		return (-1);

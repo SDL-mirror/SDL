@@ -1614,6 +1614,33 @@ CheckUSBHID()
                 CFLAGS="$CFLAGS -DUSBHID_UCR_DATA"
             fi
             AC_MSG_RESULT($have_usbhid_ucr_data)
+            
+	    AC_MSG_CHECKING(for new usbhid API)
+            have_usbhid_new=no
+            AC_TRY_COMPILE([
+              #include <sys/types.h>
+              #if defined(HAVE_USB_H)
+              #include <usb.h>
+              #endif
+              #include <dev/usb/usb.h>
+              #include <dev/usb/usbhid.h>
+              #if defined(HAVE_USBHID_H)
+              #include <usbhid.h>
+              #elif defined(HAVE_LIBUSB_H)
+              #include <libusb.h>
+              #elif defined(HAVE_LIBUSBHID_H)
+              #include <libusbhid.h>
+              #endif
+            ],[
+              report_desc_t d;
+	      hid_start_parse(d, 1, 1);
+            ],[
+            have_usbhid_new=yes
+            ])
+            if test x$have_usbhid_new = xyes; then
+                CFLAGS="$CFLAGS -DUSBHID_NEW"
+            fi
+            AC_MSG_RESULT($have_usbhid_new)
 
             JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS bsd"
             JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS bsd/libjoystick_bsd.la"
