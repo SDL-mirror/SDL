@@ -53,7 +53,7 @@
 
 /* Debug print info */
 #define DEBUG_NAME "audio:dma8: "
-#if 1
+#if 0
 #define DEBUG_PRINT(what) \
 	{ \
 		printf what; \

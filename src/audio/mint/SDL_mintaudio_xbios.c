@@ -54,7 +54,7 @@
 
 /* Debug print info */
 #define DEBUG_NAME "audio:xbios: "
-#if 1
+#if 0
 #define DEBUG_PRINT(what) \
 	{ \
 		printf what; \
