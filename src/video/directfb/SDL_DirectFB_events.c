@@ -100,109 +100,100 @@ void DirectFB_InitOSKeymap (_THIS)
   for (i=0; i<SDL_TABLESIZE(keymap); ++i)
     keymap[i] = SDLK_UNKNOWN;
 
-  keymap[DIKC_A] = SDLK_a;
-  keymap[DIKC_B] = SDLK_b;
-  keymap[DIKC_C] = SDLK_c;
-  keymap[DIKC_D] = SDLK_d;
-  keymap[DIKC_E] = SDLK_e;
-  keymap[DIKC_F] = SDLK_f;
-  keymap[DIKC_G] = SDLK_g;
-  keymap[DIKC_H] = SDLK_h;
-  keymap[DIKC_I] = SDLK_i;
-  keymap[DIKC_J] = SDLK_j;
-  keymap[DIKC_K] = SDLK_k;
-  keymap[DIKC_L] = SDLK_l;
-  keymap[DIKC_M] = SDLK_m;
-  keymap[DIKC_N] = SDLK_n;
-  keymap[DIKC_O] = SDLK_o;
-  keymap[DIKC_P] = SDLK_p;
-  keymap[DIKC_Q] = SDLK_q;
-  keymap[DIKC_R] = SDLK_r;
-  keymap[DIKC_S] = SDLK_s;
-  keymap[DIKC_T] = SDLK_t;
-  keymap[DIKC_U] = SDLK_u;
-  keymap[DIKC_V] = SDLK_v;
-  keymap[DIKC_W] = SDLK_w;
-  keymap[DIKC_X] = SDLK_x;
-  keymap[DIKC_Y] = SDLK_y;
-  keymap[DIKC_Z] = SDLK_z;
+  keymap[DIKI_A] = SDLK_a;
+  keymap[DIKI_B] = SDLK_b;
+  keymap[DIKI_C] = SDLK_c;
+  keymap[DIKI_D] = SDLK_d;
+  keymap[DIKI_E] = SDLK_e;
+  keymap[DIKI_F] = SDLK_f;
+  keymap[DIKI_G] = SDLK_g;
+  keymap[DIKI_H] = SDLK_h;
+  keymap[DIKI_I] = SDLK_i;
+  keymap[DIKI_J] = SDLK_j;
+  keymap[DIKI_K] = SDLK_k;
+  keymap[DIKI_L] = SDLK_l;
+  keymap[DIKI_M] = SDLK_m;
+  keymap[DIKI_N] = SDLK_n;
+  keymap[DIKI_O] = SDLK_o;
+  keymap[DIKI_P] = SDLK_p;
+  keymap[DIKI_Q] = SDLK_q;
+  keymap[DIKI_R] = SDLK_r;
+  keymap[DIKI_S] = SDLK_s;
+  keymap[DIKI_T] = SDLK_t;
+  keymap[DIKI_U] = SDLK_u;
+  keymap[DIKI_V] = SDLK_v;
+  keymap[DIKI_W] = SDLK_w;
+  keymap[DIKI_X] = SDLK_x;
+  keymap[DIKI_Y] = SDLK_y;
+  keymap[DIKI_Z] = SDLK_z;
   
-  keymap[DIKC_0] = SDLK_0;
-  keymap[DIKC_1] = SDLK_1;
-  keymap[DIKC_2] = SDLK_2;
-  keymap[DIKC_3] = SDLK_3;
-  keymap[DIKC_4] = SDLK_4;
-  keymap[DIKC_5] = SDLK_5;
-  keymap[DIKC_6] = SDLK_6;
-  keymap[DIKC_7] = SDLK_7;
-  keymap[DIKC_8] = SDLK_8;
-  keymap[DIKC_9] = SDLK_9;
+  keymap[DIKI_0] = SDLK_0;
+  keymap[DIKI_1] = SDLK_1;
+  keymap[DIKI_2] = SDLK_2;
+  keymap[DIKI_3] = SDLK_3;
+  keymap[DIKI_4] = SDLK_4;
+  keymap[DIKI_5] = SDLK_5;
+  keymap[DIKI_6] = SDLK_6;
+  keymap[DIKI_7] = SDLK_7;
+  keymap[DIKI_8] = SDLK_8;
+  keymap[DIKI_9] = SDLK_9;
   
-  keymap[DIKC_F1] = SDLK_F1;
-  keymap[DIKC_F2] = SDLK_F2;
-  keymap[DIKC_F3] = SDLK_F3;
-  keymap[DIKC_F4] = SDLK_F4;
-  keymap[DIKC_F5] = SDLK_F5;
-  keymap[DIKC_F6] = SDLK_F6;
-  keymap[DIKC_F7] = SDLK_F7;
-  keymap[DIKC_F8] = SDLK_F8;
-  keymap[DIKC_F9] = SDLK_F9;
-  keymap[DIKC_F10] = SDLK_F10;
-  keymap[DIKC_F11] = SDLK_F11;
-  keymap[DIKC_F12] = SDLK_F12;
+  keymap[DIKI_F1] = SDLK_F1;
+  keymap[DIKI_F2] = SDLK_F2;
+  keymap[DIKI_F3] = SDLK_F3;
+  keymap[DIKI_F4] = SDLK_F4;
+  keymap[DIKI_F5] = SDLK_F5;
+  keymap[DIKI_F6] = SDLK_F6;
+  keymap[DIKI_F7] = SDLK_F7;
+  keymap[DIKI_F8] = SDLK_F8;
+  keymap[DIKI_F9] = SDLK_F9;
+  keymap[DIKI_F10] = SDLK_F10;
+  keymap[DIKI_F11] = SDLK_F11;
+  keymap[DIKI_F12] = SDLK_F12;
   
-  keymap[DIKC_ESCAPE] = SDLK_ESCAPE;
-  keymap[DIKC_LEFT] = SDLK_LEFT;
-  keymap[DIKC_RIGHT] = SDLK_RIGHT;
-  keymap[DIKC_UP] = SDLK_UP;
-  keymap[DIKC_DOWN] = SDLK_DOWN;
-  keymap[DIKC_CTRL] = SDLK_LCTRL;
-  keymap[DIKC_SHIFT] = SDLK_LSHIFT;
-  keymap[DIKC_ALT] = SDLK_LALT;
-  keymap[DIKC_ALTGR] = SDLK_RALT;
-  keymap[DIKC_TAB] = SDLK_TAB;
-  keymap[DIKC_ENTER] = SDLK_RETURN;
-  keymap[DIKC_SPACE] = SDLK_SPACE;
-  keymap[DIKC_BACKSPACE] = SDLK_BACKSPACE;
-  keymap[DIKC_INSERT] = SDLK_INSERT;
-  keymap[DIKC_DELETE] = SDLK_DELETE;
-  keymap[DIKC_HOME] = SDLK_HOME;
-  keymap[DIKC_END] = SDLK_END;
-  keymap[DIKC_PAGEUP] = SDLK_PAGEUP;
-  keymap[DIKC_PAGEDOWN] = SDLK_PAGEDOWN;
-  keymap[DIKC_CAPSLOCK] = SDLK_CAPSLOCK;
-  keymap[DIKC_NUMLOCK] = SDLK_NUMLOCK;
-  keymap[DIKC_SCRLOCK] = SDLK_SCROLLOCK;
-  keymap[DIKC_PRINT] = SDLK_PRINT;
-  keymap[DIKC_PAUSE] = SDLK_PAUSE;
-  keymap[DIKC_KP_DIV] = SDLK_KP_DIVIDE;
-  keymap[DIKC_KP_MULT] = SDLK_KP_MULTIPLY;
-  keymap[DIKC_KP_MINUS] = SDLK_KP_MINUS;
-  keymap[DIKC_KP_PLUS] = SDLK_KP_PLUS;
-  keymap[DIKC_KP_ENTER] = SDLK_KP_ENTER;
-  
-  keymap[DIKC_OK] = SDLK_RETURN;
-  keymap[DIKC_CANCEL] = SDLK_BREAK;
-  keymap[DIKC_CLEAR] = SDLK_DELETE;
-  keymap[DIKC_POWER] = SDLK_POWER;
-  keymap[DIKC_POWER2] = SDLK_POWER;
-  keymap[DIKC_MENU] = SDLK_MENU;
-  keymap[DIKC_HELP] = SDLK_HELP;
-  keymap[DIKC_BACK] = SDLK_ESCAPE;
+  keymap[DIKI_ESCAPE] = SDLK_ESCAPE;
+  keymap[DIKI_LEFT] = SDLK_LEFT;
+  keymap[DIKI_RIGHT] = SDLK_RIGHT;
+  keymap[DIKI_UP] = SDLK_UP;
+  keymap[DIKI_DOWN] = SDLK_DOWN;
+  keymap[DIKI_CTRL] = SDLK_LCTRL;
+  keymap[DIKI_SHIFT] = SDLK_LSHIFT;
+  keymap[DIKI_ALT] = SDLK_LALT;
+  keymap[DIKI_ALTGR] = SDLK_RALT;
+  keymap[DIKI_TAB] = SDLK_TAB;
+  keymap[DIKI_ENTER] = SDLK_RETURN;
+  keymap[DIKI_SPACE] = SDLK_SPACE;
+  keymap[DIKI_BACKSPACE] = SDLK_BACKSPACE;
+  keymap[DIKI_INSERT] = SDLK_INSERT;
+  keymap[DIKI_DELETE] = SDLK_DELETE;
+  keymap[DIKI_HOME] = SDLK_HOME;
+  keymap[DIKI_END] = SDLK_END;
+  keymap[DIKI_PAGE_UP] = SDLK_PAGEUP;
+  keymap[DIKI_PAGE_DOWN] = SDLK_PAGEDOWN;
+  keymap[DIKI_CAPSLOCK] = SDLK_CAPSLOCK;
+  keymap[DIKI_NUMLOCK] = SDLK_NUMLOCK;
+  keymap[DIKI_SCRLOCK] = SDLK_SCROLLOCK;
+  keymap[DIKI_PRINT] = SDLK_PRINT;
+  keymap[DIKI_PAUSE] = SDLK_PAUSE;
+  keymap[DIKI_KP_DIV] = SDLK_KP_DIVIDE;
+  keymap[DIKI_KP_MULT] = SDLK_KP_MULTIPLY;
+  keymap[DIKI_KP_MINUS] = SDLK_KP_MINUS;
+  keymap[DIKI_KP_PLUS] = SDLK_KP_PLUS;
+  keymap[DIKI_KP_ENTER] = SDLK_KP_ENTER;
 }
 
 
 static SDL_keysym *DirectFB_TranslateKey (DFBInputEvent *ev, SDL_keysym *keysym)
 {
   /* Set the keysym information */
-  keysym->scancode = ev->keycode;
-  keysym->mod = KMOD_NONE;
-  keysym->unicode = 0;
+  keysym->scancode = ev->key_id;
+  keysym->mod = KMOD_NONE; /* FIXME */
+  keysym->unicode = (DFB_KEY_TYPE (ev->key_symbol) == DIKT_UNICODE) ? ev->key_symbol : 0;
 
-  if (ev->key_ascii > 0 && ev->key_ascii < 128)
-    keysym->sym = ev->key_ascii;
+  if (ev->key_symbol > 0 && ev->key_symbol < 128)
+    keysym->sym = ev->key_symbol;
   else
-    keysym->sym = keymap[ev->keycode];
+    keysym->sym = keymap[ev->key_id];
 
   return keysym;
 }
