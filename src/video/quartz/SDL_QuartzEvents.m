@@ -449,6 +449,8 @@ static void QZ_PumpEvents (_THIS)
                         NSPoint p = [ event locationInWindow ];
                         QZ_PrivateCocoaToSDL(this, &p);
                         
+                        SDL_PrivateMouseMotion (0, 0, p.x, p.y);
+
                         firstMouseEvent = 0;
                     }
                     else {
