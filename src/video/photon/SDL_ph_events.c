@@ -27,6 +27,8 @@ static char rcsid =
 
 /* Handle the event stream, converting photon events into SDL events */
 
+#define DISABLE_X11
+
 #include <Ph.h>
 #include <stdio.h>
 #include <setjmp.h>

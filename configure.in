@@ -545,6 +545,7 @@ CheckPHOTON()
         ])
         AC_MSG_RESULT($video_photon)
         if test x$video_photon = xyes; then
+            CFLAGS="$CFLAGS -DENABLE_PHOTON"
             SYSTEM_LIBS="$SYSTEM_LIBS -lph"
             VIDEO_SUBDIRS="$VIDEO_SUBDIRS photon"
             VIDEO_DRIVERS="$VIDEO_DRIVERS photon/libvideo_photon.la"

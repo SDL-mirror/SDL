@@ -78,8 +78,7 @@ int ph_SetupImage(_THIS, SDL_Surface *screen)
 	}
 
 	//using shared memory for speed (set last param to 1)
-	if ((SDL_Image = PhCreateImage( NULL, screen->w, screen->h, type, NULL, 0, 1 )) 
-		== NULL)
+	if ((SDL_Image = PhCreateImage( NULL, screen->w, screen->h, type, NULL, 0, 1 )) == NULL)
 	{
 		fprintf(stderr,"error: PhCreateImage failed.\n");
 		return -1;
@@ -194,14 +193,16 @@ void ph_DestroyImage(_THIS, SDL_Surface *screen)
 
 	if (SDL_Image->image)
 	{
-		//free(SDL_Image->image);
-		//SDL_Image->image = NULL;
-		PhReleaseImage(SDL_Image);
-		SDL_Image = NULL;
+                // SDL_Image->flags=Ph_RELEASE_IMAGE;
+                // PhReleaseImage(SDL_Image);
+                PgShmemDestroy(SDL_Image->image); // Use this if you using shared memory, or uncomment
+                                                  // lines above if not (and comment this line ;-)
+                free(SDL_Image);
 	}
 
-	if ( screen ) {
-    	screen->pixels = NULL;
+	if ( screen )
+        {
+    	        screen->pixels = NULL;
 	}
 	
 	SDL_Image = NULL;

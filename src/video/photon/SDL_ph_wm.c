@@ -25,9 +25,14 @@ static char rcsid =
  "@(#) $Id$";
 #endif
 
+#define DISABLE_X11
+
 #include <stdlib.h>
 #include <string.h>
 #include <Ph.h>
+#include <photon/PpProto.h>
+#include <photon/PhWm.h>
+#include <photon/wmapi.h>
 #include "SDL_version.h"
 #include "SDL_error.h"
 #include "SDL_timer.h"
@@ -215,42 +220,53 @@ void ph_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 	return;
 }
 
+/* Set window caption */
 void ph_SetCaption(_THIS, const char *title, const char *icon)
 {
-
-#if 0
-	XTextProperty titleprop, iconprop;
-
-	/* Lock the event thread, in multi-threading environments */
 	SDL_Lock_EventThread();
-
 	if ( title != NULL ) {
-		XStringListToTextProperty((char **)&title, 1, &titleprop);
-		XSetWMName(SDL_Display, WMwindow, &titleprop);
-		XFree(titleprop.value);
+		PtSetResource(window, Pt_ARG_WINDOW_TITLE, title, 0);
 	}
-	if ( icon != NULL ) {
-		XStringListToTextProperty((char **)&icon, 1, &iconprop);
-		XSetWMIconName(SDL_Display, WMwindow, &iconprop);
-		XFree(iconprop.value);
-	}
-	XSync(SDL_Display, False);
-
 	SDL_Unlock_EventThread();
-#endif
 }
 
-/* Iconify the window */
+/* Iconify the window (stolen from PhHotKey sources by phearbear ;-) */
 int ph_IconifyWindow(_THIS)
 {
-	int result;
+	int result=0;
+        int myerr;
+        int num;
+        PtConnectionClient_t *Client=0;
+        WmMsg_t* Message=malloc(sizeof(WmMsg_t));
+        WmReply_t *Reply=malloc(sizeof(WmReply_t));
+        WmApiContext_t MsgStruct=malloc(sizeof(WmApiContext_t));
+        WmWindowDefinition_t **WNDDEF=malloc(sizeof(WmWindowDefinition_t)*2);
 	
-#if 0
 	SDL_Lock_EventThread();
-	result = XIconifyWindow(SDL_Display, WMwindow, SDL_Screen);
-	XSync(SDL_Display, False);
+
+        PtInit("/dev/photon");
+
+        Client=PtConnectionFindName("pwm",0,0);
+
+        if(!Client)
+        {
+           return result;
+        }
+
+        MsgStruct->input_group=PhInputGroup(0);
+        MsgStruct->connection=PtConnectionFindName("pwm",0,0);
+        myerr=WmGetFocusList(MsgStruct,2,&num,WNDDEF);
+
+        Message->hdr.type=WM_REQUEST_WIN_ACTION;
+        Message->hdr.subtype=Pt_ACTION_MIN;	   
+        Message->hdr.rid=WNDDEF[0]->rid;
+        myerr=WmSendMessage(Client,Message,Reply,0);
+
+        free(Message);
+        free(Reply);
+
 	SDL_Unlock_EventThread();
-#endif
+
 	return(result);
 }
 
@@ -335,8 +351,8 @@ static void unlock_display(void)
 	/* Make sure any X11 transactions are completed */
 	SDL_VideoDevice *this = current_video;
 	XSync(SDL_Display, False);
-	SDL_Unlock_EventThread();
 #endif
+	SDL_Unlock_EventThread();
 }
 int ph_GetWMInfo(_THIS, SDL_SysWMinfo *info)
 {
@@ -360,4 +376,7 @@ int ph_GetWMInfo(_THIS, SDL_SysWMinfo *info)
 		return(-1);
 	}
 #endif
+   return -1; // for now ...
 }
+
+	   

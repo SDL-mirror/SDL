@@ -46,6 +46,7 @@ static char rcsid =
 #include "SDL_ph_image_c.h"
 #include "SDL_ph_events_c.h"
 #include "SDL_ph_mouse_c.h"
+#include "SDL_ph_wm_c.h"
 #include "SDL_phyuv_c.h"
 #include "blank_cursor.h"
 
@@ -103,9 +104,9 @@ static SDL_VideoDevice *ph_CreateDevice(int devindex)
     device->UnlockHWSurface = ph_UnlockHWSurface;
     device->FlipHWSurface = ph_FlipHWSurface;
     device->FreeHWSurface = ph_FreeHWSurface;
-    device->SetCaption = NULL;
+    device->SetCaption = ph_SetCaption;
     device->SetIcon = NULL;
-    device->IconifyWindow = NULL;
+    device->IconifyWindow = ph_IconifyWindow;
     device->GrabInput = NULL;
     device->GetWMInfo = NULL;
     device->FreeWMCursor = ph_FreeWMCursor;
@@ -121,7 +122,7 @@ static SDL_VideoDevice *ph_CreateDevice(int devindex)
     return device;
 }
 
-VideoBootStrap X11_bootstrap = {
+VideoBootStrap ph_bootstrap = {
         "photon", "QNX Photon video output",
 	ph_Available, ph_CreateDevice
 };
@@ -183,8 +184,9 @@ static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
   	if(window == NULL)
   	{
-  		printf("PtAppInit failed\n");
-        PtExit(EXIT_FAILURE);
+  		printf("Photon application init failed, probably Photon is not running.\n");
+        	exit( EXIT_FAILURE );
+//        PtExit(EXIT_FAILURE);         // Got SEGFAULT.
   	}
 
     //PgSetDrawBufferSize(16 *1024);
@@ -244,7 +246,10 @@ static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		}
 
 
-	currently_fullscreen = 0;
+    currently_fullscreen = 0;
+    
+    this->info.wm_available = 1;
+    
     return 0;
 }
 
