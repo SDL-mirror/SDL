@@ -66,13 +66,14 @@ static const char *arts_library = ARTSC_DYNAMIC;
 static void *arts_handle = NULL;
 static int arts_loaded = 0;
 
-static int (*SDL_NAME(arts_init))();
-static int (*SDL_NAME(arts_free))();
-static int (*SDL_NAME(arts_play_stream))();
-static int (*SDL_NAME(arts_stream_set))();
-static int (*SDL_NAME(arts_stream_get))();
-static int (*SDL_NAME(arts_write))();
-static int (*SDL_NAME(arts_close_stream))();
+static int (*SDL_NAME(arts_init))(void);
+static void (*SDL_NAME(arts_free))(void);
+static arts_stream_t (*SDL_NAME(arts_play_stream))(int rate, int bits, int channels, const char *name);
+static int (*SDL_NAME(arts_stream_set))(arts_stream_t s, arts_parameter_t param, int value);
+static int (*SDL_NAME(arts_stream_get))(arts_stream_t s, arts_parameter_t param);
+static int (*SDL_NAME(arts_write))(arts_stream_t s, const void *buffer, int count);
+static void (*SDL_NAME(arts_close_stream))(arts_stream_t s);
+
 static struct {
 	const char *name;
 	void **func;
