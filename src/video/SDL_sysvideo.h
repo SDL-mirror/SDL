@@ -364,12 +364,6 @@ extern VideoBootStrap DIRECTX_bootstrap;
 #ifdef ENABLE_BWINDOW
 extern VideoBootStrap BWINDOW_bootstrap;
 #endif
-#ifdef ENABLE_DUMMYVIDEO
-extern VideoBootStrap DUMMY_bootstrap;
-#endif
-#ifdef ENABLE_PHOTON
-extern VideoBootStrap ph_bootstrap;
-#endif
 /* MacOS X gets the proper defines from configure */
 #if defined(macintosh) && !defined(MACOSX)
 #define ENABLE_TOOLBOX
@@ -388,6 +382,15 @@ extern VideoBootStrap QZ_bootstrap;
 #endif
 #ifdef ENABLE_CYBERGRAPHICS
 extern VideoBootStrap CGX_bootstrap;
+#endif
+#ifdef ENABLE_PHOTON
+extern VideoBootStrap ph_bootstrap;
+#endif
+#ifdef ENABLE_EPOC
+extern VideoBootStrap EPOC_bootstrap;
+#endif
+#ifdef ENABLE_DUMMYVIDEO
+extern VideoBootStrap DUMMY_bootstrap;
 #endif
 /* This is the current video device */
 extern SDL_VideoDevice *current_video;

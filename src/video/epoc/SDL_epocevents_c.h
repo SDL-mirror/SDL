@@ -20,34 +20,31 @@
     slouken@devolution.com
 */
 
+/*
+    SDL_epocevents_c.h
+    Handle the event stream, converting Epoc events into SDL events
+
+    Epoc version by Hannu Viitala (hannu.j.viitala@mbnet.fi)
+*/
+
+
 #ifdef SAVE_RCSID
 static char rcsid =
  "@(#) $Id$";
 #endif
 
-/* Macros for determining the byte-order of this platform */
+extern "C" {
+#include "SDL_sysvideo.h"
+};
 
-#ifndef _SDL_byteorder_h
-#define _SDL_byteorder_h
+#define MAX_SCANCODE 255
 
-/* The two types of endianness */
-#define SDL_LIL_ENDIAN	1234
-#define SDL_BIG_ENDIAN	4321
+/* Variables and functions exported by SDL_sysevents.c to other parts 
+   of the native video subsystem (SDL_sysvideo.c)
+*/
 
-/* Pardon the mess, I'm trying to determine the endianness of this host.
-   I'm doing it by preprocessor defines rather than some sort of configure
-   script so that application code can use this too.  The "right" way would
-   be to dynamically generate this file on install, but that's a lot of work.
- */
-#if  defined(__i386__) || defined(__ia64__) || defined(WIN32) || \
-    (defined(__alpha__) || defined(__alpha)) || \
-     defined(__arm__) || \
-    (defined(__mips__) && defined(__MIPSEL__)) || \
-     defined(__SYMBIAN32__) || \
-     defined(__LITTLE_ENDIAN__)
-#define SDL_BYTEORDER	SDL_LIL_ENDIAN
-#else
-#define SDL_BYTEORDER	SDL_BIG_ENDIAN
-#endif
+extern "C" {
+extern void EPOC_InitOSKeymap(_THIS);
+extern void EPOC_PumpEvents(_THIS);
+};
 
-#endif /* _SDL_byteorder_h */

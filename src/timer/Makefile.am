@@ -3,8 +3,12 @@
 
 noinst_LTLIBRARIES = libtimer.la
 
-ARCH_SUBDIRS = $(srcdir)/amigaos $(srcdir)/beos $(srcdir)/linux \
-	$(srcdir)/macos $(srcdir)/win32
+ARCH_SUBDIRS = $(srcdir)/amigaos \
+               $(srcdir)/beos \
+               $(srcdir)/epoc \
+               $(srcdir)/linux \
+               $(srcdir)/macos \
+               $(srcdir)/win32
 
 # Include the architecture-independent sources
 COMMON_SRCS = SDL_timer.c SDL_timer_c.h SDL_systimer.h

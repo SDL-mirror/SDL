@@ -54,6 +54,11 @@ typedef signed int	Sint32;
 #endif
 #endif /* !__STRICT_ANSI__ */
 
+/* The 64-bit type isn't available on EPOC/Symbian OS */
+#ifdef __SYMBIAN32__
+#undef SDL_HAS_64BIT_TYPE
+#endif
+
 /* The 64-bit datatype isn't supported on all platforms */
 #ifdef SDL_HAS_64BIT_TYPE
 typedef unsigned SDL_HAS_64BIT_TYPE Uint64;

@@ -6,8 +6,12 @@
 
 SUBDIRS = macosx
 
-ARCH_SUBDIRS = $(srcdir)/beos $(srcdir)/linux \
-               $(srcdir)/macos $(srcdir)/macosx $(srcdir)/win32
+ARCH_SUBDIRS = $(srcdir)/beos \
+               $(srcdir)/epoc \
+               $(srcdir)/linux \
+               $(srcdir)/macos \
+               $(srcdir)/macosx \
+               $(srcdir)/win32
 
 # Build a separate library containing the main() entry point.
 lib_LIBRARIES = libSDLmain.a

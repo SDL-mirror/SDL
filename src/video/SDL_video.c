@@ -96,14 +96,18 @@ static VideoBootStrap *bootstrap[] = {
 #ifdef ENABLE_CYBERGRAPHICS
 	&CGX_bootstrap,
 #endif
-#ifdef ENABLE_DUMMYVIDEO
-	&DUMMY_bootstrap,
-#endif
 #ifdef ENABLE_PHOTON
 	&ph_bootstrap,
 #endif
+#ifdef ENABLE_EPOC
+	&EPOC_bootstrap,
+#endif
+#ifdef ENABLE_DUMMYVIDEO
+	&DUMMY_bootstrap,
+#endif
 	NULL
 };
+
 SDL_VideoDevice *current_video = NULL;
 
 /* Various local functions */
