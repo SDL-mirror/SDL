@@ -490,6 +490,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 			SDL_SetError("XBIOS_SetVideoMode: Not enough memory for shadow surface");
 			return (NULL);
 		}
+		memset(XBIOS_shadowscreen, 0, new_screen_size);
 	}
 
 	/* Output buffer needs to be twice in size for the software double-line mode */
@@ -506,6 +507,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 		SDL_SetError("XBIOS_SetVideoMode: Not enough memory for video buffer");
 		return (NULL);
 	}
+	memset(XBIOS_screensmem[0], 0, new_screen_size);
 
 	XBIOS_screens[0]=(void *) (( (long) XBIOS_screensmem[0]+256) & 0xFFFFFF00UL);
 
@@ -518,6 +520,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 			SDL_SetError("XBIOS_SetVideoMode: Not enough memory for double buffer");
 			return (NULL);
 		}
+		memset(XBIOS_screensmem[1], 0, new_screen_size);
 
 		XBIOS_screens[1]=(void *) (( (long) XBIOS_screensmem[1]+256) & 0xFFFFFF00UL);
 		modeflags |= SDL_DOUBLEBUF;

@@ -119,8 +119,6 @@ ikbd_finbuffer:
 
 	.data
 	.even
-	.comm	old_ikbd,4*1
-	.even
 	.comm	ikbd_ierb,4*1
 	.even
 	.comm	ikbd_imrb,4*1
@@ -130,7 +128,8 @@ ikbd_finbuffer:
 	.text
 	.even
 	.ascii	"XBRA"
-	.ascii	"_SDL"
+	.ascii	"LSDL"
+	.comm	old_ikbd,4*1
 ikbd:
 	moveml	d0-d1/a0,sp@-
 	moveb	0xfffffc02:w,d0

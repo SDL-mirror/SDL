@@ -69,7 +69,8 @@ _SDL_AtariXbiosMouseInstall:
 	.text
 	.even
 	.ascii "XBRA"
-	.ascii "_SDL"
+	.ascii "LSDL"
+	.comm	oldvector,4*1
 _SDL_AtariXbiosMouseVector:
 	moveml	d0/a1,sp@-
 
@@ -96,10 +97,6 @@ _SDL_AtariXbiosMouseVector:
 	rts
 
 	.data
-	
-	.even
-	.comm	oldvector,4*1
-
 	.even
 	.comm	_SDL_AtariXbios_mousex,2*1
 	.even

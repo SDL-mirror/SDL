@@ -110,10 +110,6 @@ badvector:
 
 /*--- Our vbl ---*/
 
-	.text
-	.even
-	.ascii "XBRA"
-	.ascii "_SDL"
 _my_vbl:
 	/* Verify if this is not already running */
 
