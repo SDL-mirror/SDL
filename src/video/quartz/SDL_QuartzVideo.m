@@ -764,6 +764,7 @@ static void QZ_TearDownOpenGL (_THIS) {
 /* SDL OpenGL functions */
 
 static int    QZ_GL_LoadLibrary    (_THIS, const char *location) {
+    this->gl_config.driver_loaded = 1;
     return 1;
 }
 
