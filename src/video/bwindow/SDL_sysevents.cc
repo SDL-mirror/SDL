@@ -288,9 +288,12 @@ void BE_InitOSKeymap(_THIS)
 {
 	unsigned int i;
 
-	/* Initialize all the key states as "up" */
+	/* Initialize the keyboard state */
 	key_flip = 0;
-	memset(keyinfo[key_flip].key_states, 0, 16);
+	get_key_info(&keyinfo[key_flip]);
+	memcpy(keyinfo[!key_flip].key_states,
+	       keyinfo[key_flip].key_states,
+	       SDL_TABLESIZE(keyinfo[key_flip].key_states));
 
 	/* Initialize the BeOS key translation table */
 	/* Source: <be/interface/InterfaceDefs.h> and BeOS keyboard info */
