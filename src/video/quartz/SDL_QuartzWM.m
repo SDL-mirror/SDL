@@ -119,28 +119,35 @@ static void QZ_PrivateLocalToGlobal (_THIS, NSPoint *p) {
 /* Convert SDL coordinate to Cocoa coordinate */
 static void QZ_PrivateSDLToCocoa (_THIS, NSPoint *p) {
 
-    int height;
-    
     if ( CGDisplayIsCaptured (display_id) ) { /* capture signals fullscreen */
     
-        height = CGDisplayPixelsHigh (display_id);
+        p->y = CGDisplayPixelsHigh (display_id) - p->y - 1;
     }
     else {
         
-        height = NSHeight ( [ qz_window frame ] );
-        if ( [ qz_window styleMask ] & NSTitledWindowMask ) {
+        NSPoint newPoint;
         
-            height -= 22;
-        }
+        newPoint = [ window_view convertPoint:*p toView:[ qz_window contentView ] ];
+        
+        *p = newPoint;
     }
-    
-    p->y = height - p->y - 1;
 }
 
 /* Convert Cocoa coordinate to SDL coordinate */
 static void QZ_PrivateCocoaToSDL (_THIS, NSPoint *p) {
 
-    QZ_PrivateSDLToCocoa (this, p);
+    if ( CGDisplayIsCaptured (display_id) ) { /* capture signals fullscreen */
+    
+        p->y = CGDisplayPixelsHigh (display_id) - p->y - 1;
+    }
+    else {
+        
+        NSPoint newPoint;
+        
+        newPoint = [ window_view convertPoint:*p fromView:[ qz_window contentView ] ];
+        
+        *p = newPoint;
+    }
 }
 
 /* Convert SDL coordinate to window server (CoreGraphics) coordinate */
@@ -165,6 +172,7 @@ static CGPoint QZ_PrivateSDLToCG (_THIS, NSPoint *p) {
     return cgp;
 }
 
+#if 0 /* Dead code */
 /* Convert window server (CoreGraphics) coordinate to SDL coordinate */
 static void QZ_PrivateCGToSDL (_THIS, NSPoint *p) {
             
@@ -180,6 +188,7 @@ static void QZ_PrivateCGToSDL (_THIS, NSPoint *p) {
         QZ_PrivateCocoaToSDL (this, p);
     }
 }
+#endif /* Dead code */
 
 static void  QZ_PrivateWarpCursor (_THIS, int x, int y) {
     
@@ -188,7 +197,6 @@ static void  QZ_PrivateWarpCursor (_THIS, int x, int y) {
     
     p = NSMakePoint (x, y);
     cgp = QZ_PrivateSDLToCG (this, &p);
-    QZ_PrivateCGToSDL (this, &p);
     
     /* this is the magic call that fixes cursor "freezing" after warp */
     CGSetLocalEventsSuppressionInterval (0.0);

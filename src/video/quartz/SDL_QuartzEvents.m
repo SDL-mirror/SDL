@@ -251,6 +251,9 @@ static void QZ_DoKey (_THIS, int state, NSEvent *event) {
             SDL_PrivateKeyboard (state, &key);
         }
     }
+    
+    if (getenv ("SDL_ENABLEAPPEVENTS"))
+        [ NSApp sendEvent:event ];
 }
 
 static void QZ_DoModifiers (_THIS, unsigned int newMods) {
@@ -464,7 +467,7 @@ static void QZ_PumpEvents (_THIS)
             
             type = [ event type ];
             isForGameWin = (qz_window == [ event window ]);
-            isInGameWin = (mode_flags & SDL_FULLSCREEN) ? true : NSPointInRect([event locationInWindow], winRect);
+            isInGameWin = (mode_flags & SDL_FULLSCREEN) ? true : NSPointInRect([event locationInWindow], [ window_view frame ]);
             switch (type) {
                 case NSLeftMouseDown:
                     if ( getenv("SDL_HAS3BUTTONMOUSE") ) {

@@ -396,7 +396,6 @@ static void QZ_UnsetVideoMode (_THIS) {
         CGDisplaySwitchToMode (display_id, save_mode);
         CGReleaseAllDisplays ();
         ShowMenuBar ();
-
         /* 
             Reset the main screen's rectangle
             See comment in QZ_SetVideoFullscreen for why we do this
@@ -580,6 +579,7 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
                                          int height, int bpp, Uint32 flags) {
     unsigned int style;
     NSRect contentRect;
+    BOOL isCustom = NO;
     int center_window = 1;
     int origin_x, origin_y;
 
@@ -602,7 +602,41 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
              (mode_flags & SDL_OPENGL) || 
              (flags & SDL_OPENGL) )
             QZ_UnsetVideoMode (this);
-        
+    
+    /* Check for user-specified window and view */
+    {
+        char *windowPtrString = getenv ("SDL_NSWindowPointer");
+        char *viewPtrString = getenv ("SDL_NSQuickDrawViewPointer");
+    
+        if (windowPtrString && viewPtrString) {
+            
+            /* Release any previous window */
+            if ( qz_window ) {
+                [ qz_window release ];
+                qz_window = nil;
+            }
+            
+            qz_window = (NSWindow*)atoi(windowPtrString);
+            window_view = (NSQuickDrawView*)atoi(viewPtrString);
+            isCustom = YES;
+            
+            /* 
+                Retain reference to window because we
+                might release it in QZ_UnsetVideoMode
+            */
+            [ qz_window retain ];
+            
+            style = [ qz_window styleMask ];
+            /* Check resizability */
+            if ( style & NSResizableWindowMask )
+                current->flags |= SDL_RESIZABLE;
+            
+            /* Check frame */
+            if ( style & NSBorderlessWindowMask )
+                current->flags |= SDL_NOFRAME;
+        }
+    }
+    
     /* Check if we should recreate the window */
     if (qz_window == nil) {
     
@@ -650,8 +684,10 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
     /* We already have a window, just change its size */
     else {
     
-        [ qz_window setContentSize:contentRect.size ];
-        current->flags |= (SDL_NOFRAME|SDL_RESIZABLE) & mode_flags;
+        if (!isCustom) {
+            [ qz_window setContentSize:contentRect.size ];
+            current->flags |= (SDL_NOFRAME|SDL_RESIZABLE) & mode_flags;
+        }
     }
 
     /* For OpenGL, we bind the context to a subview */
@@ -692,9 +728,18 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
         current->flags |= SDL_PREALLOC;
         current->flags |= SDL_ASYNCBLIT;
         
-        /* Offset below the title bar to fill the full content region */
-        current->pixels += ((int)([ qz_window frame ].size.height) - height) * current->pitch;
-
+        /* 
+            current->pixels now points to the window's pixels
+            We want it to point to the *view's* pixels 
+        */
+        { 
+            int vOffset = [ qz_window frame ].size.height - 
+                [ window_view frame ].size.height - [ window_view frame ].origin.y;
+            
+            int hOffset = [ window_view frame ].origin.x;
+                    
+            current->pixels += (vOffset * current->pitch) + hOffset * (device_bpp/8);
+        }
         this->UpdateRects     = QZ_UpdateRects;
         this->LockHWSurface   = QZ_LockWindow;
         this->UnlockHWSurface = QZ_UnlockWindow;
