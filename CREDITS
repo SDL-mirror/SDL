@@ -5,19 +5,25 @@ Thanks to everyone who made this possible, including:
 * Cliff Matthews, for giving me a reason to start this project. :)
  -- Executor rocks!  *grin*
 
-* Scott Call, for making a home for SDL on the 'Net, Thanks! :)
+* Scott Call, for making a home for SDL on the 'Net... Thanks! :)
 
-* Michael Samuel and Loki Entertainment Software, for the SDL mailing list
+* Everybody at Loki Software, Inc. for their great contributions!
+
+* Mattias Engdegerd, for help with the Solaris port and lots of other help
+
+* Max Watson, Matt Slot, and Kyle for help with the MacOS Classic port
+
+* Stan Shebs, for the initial MacOS X port
+
+* Max Horn and Darrell Walisser for unflagging work on the MacOS X port
 
 * Patrick Trainor and Jim Boucher, for the QNX Neutrino port
 
 * Gabriele Greco, for the Amiga port
 
-* Stan Shebs, for the initial MacOS X port
-
 * Carsten Griwodz for the AIX port
 
-* Mattias Engdegerd, for help with the Solaris port and lots of other code
+* Peter Valchev for nagging me about the OpenBSD port until I got it right. :)
 
 * Kent B Mein, for a place to do the IRIX port
 
@@ -25,7 +31,7 @@ Thanks to everyone who made this possible, including:
 
 * David Sowsy, for help with the BeOS port
 
-* Max Watson, Matt Slot, and Kyle for help with the MacOS port
+* Eugenia Loli, for endless work on porting SDL games to BeOS
 
 * Jon Taylor for the GGI front-end
 
