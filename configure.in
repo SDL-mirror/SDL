@@ -2281,10 +2281,9 @@ case "$target" in
             AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
         fi
         # Set up files for the joystick library
-        # (No joystick support yet)
         if test x$enable_joystick = xyes; then
-            JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS dummy"
-            JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS dummy/libjoystick_dummy.la"
+            JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS mint"
+            JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS mint/libjoystick_mint.la"
         fi
         # Set up files for the cdrom library
         if test x$enable_cdrom = xyes; then
@@ -2489,6 +2488,7 @@ src/joystick/darwin/Makefile
 src/joystick/dummy/Makefile
 src/joystick/linux/Makefile
 src/joystick/macos/Makefile
+src/joystick/mint/Makefile
 src/joystick/win32/Makefile
 src/cdrom/Makefile
 src/cdrom/aix/Makefile

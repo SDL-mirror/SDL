@@ -49,19 +49,19 @@ Keyboard (GEMDOS, BIOS, Ikbd)
 Mouse (XBIOS, GEM, Ikbd)
 Video (XBIOS (Fullscreen), GEM (Windowed and Fullscreen))
 Timer (VBL vector)
+Joystick and joypad support (Ikbd, Hardware)
 
 - What is missing:
 Audio support (TOS)
 CDROM support (Metados, /dev/cdrom)
-Joystick and joypad support (Hardware)
 Threads support (TOS)
 
 - Driver combinations:
-Video	Kbd	Mouse	Timer
-xbios	ikbd	ikbd	vbl
-xbios	gemdos	xbios	vbl
-xbios	bios	xbios	vbl
-gem	gem	gem	vbl
+Video	Kbd	Mouse	Timer	Jstick	Joypads
+xbios	ikbd	ikbd	vbl	ikbd	hardware
+xbios	gemdos	xbios	vbl	-	hardware
+xbios	bios	xbios	vbl	-	hardware
+gem	gem	gem	vbl	-	hardware
 
 ==============================================================================
 V.  Environment variables:
@@ -74,6 +74,38 @@ SDL_ATARI_EVENTSDRIVER
 SDL_VIDEODRIVER:
 	Set to 'xbios' to force xbios video driver
 	Set to 'gem' to force gem video driver
+
+SDL_JOYSTICK_ATARI:
+	Use any of these strings in the environment variable to enable or
+	disable a joystick:
+
+	'ikbd-joy1-[on|off]' for IKBD joystick on port 1
+	'porta-pad-[on|off]' for joypad on port A
+	'porta-joy0-[on|off]' for joystick 0 on port A
+	'porta-joy1-[on|off]' for joystick 1 on port A
+	'porta-lp-[on|off]' for lightpen on port A
+	'porta-anpad-[on|off]' for analog paddle on port A
+	'portb-pad-[on|off]' for joypad on port B
+	'portb-joy0-[on|off]' for joystick 0 on port B
+	'portb-joy1-[on|off]' for joystick 1 on port B
+	'portb-anpad-[on|off]' for analog paddle on port B
+
+	Default configuration is:
+		'ikbd-joy1-on' (if IKBD events driver enabled)
+		'porta-pad-on portb-pad-on' (if available on the machine)
+
+	port[a|b]-[pad|joy?|lp|anpad]-* strings are mutually exclusives.
+	On such a port, you can only use a joypad OR 1 or 2 joysticks OR
+	a lightpen OR an analog paddle. You must disable joypad before
+	setting another controller.
+
+	IKBD joystick only available when the IKBD events driver is enabled.
+	The second joystick port on IKBD is used by the mouse, so not usable.
+
+	Joypads are multibuttons controller (Atari Jaguar console-like).
+	Joysticks are 1 button, 2 axis controllers.
+	Lightpen and analog paddle are 2 buttons, 2 axis controllers. The 2
+	buttons are those affected to 1 button joysticks on the same port.
 
 -- 
 Patrice Mandin <pmandin@caramail.com>
