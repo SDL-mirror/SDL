@@ -16,9 +16,9 @@ SDL is written in C, but works with C++ natively, and has bindings to
 several other languages, including Ada, Eiffel, ML, Perl, and Python. 
 
 The current version supports Linux, Windows, BeOS, MacOS, MacOS X,
-FreeBSD, Solaris, and IRIX.  The code contains support for Windows CE,
-OpenBSD, NetBSD, AIX, OSF/Tru64, and QNX, but these are not yet
-officially supported.
+FreeBSD, BSD/OS, Solaris, and IRIX.  The code contains support for
+Windows CE, OpenBSD, NetBSD, AIX, OSF/Tru64, and QNX, but these are
+not yet officially supported.
 
 This library is distributed under GNU LGPL version 2, which can be
 found in the file  "COPYING".  This license allows you to use SDL
