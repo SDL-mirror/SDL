@@ -85,7 +85,6 @@ struct SDL_PrivateVideoData {
     /* The variables used for displaying graphics */
     XImage *Ximage;		/* The X image for our window */
     GC	gc;			/* The graphic context for drawing */
-    int swap_pixels;		/* Flag: true if display is swapped endian */
 
     /* The current width and height of the fullscreen mode */
     int current_w;
@@ -171,7 +170,6 @@ struct SDL_PrivateVideoData {
 #define shminfo			(this->hidden->shminfo)
 #define SDL_Ximage		(this->hidden->Ximage)
 #define SDL_GC			(this->hidden->gc)
-#define swap_pixels		(this->hidden->swap_pixels)
 #define current_w		(this->hidden->current_w)
 #define current_h		(this->hidden->current_h)
 #define mouse_last		(this->hidden->mouse_last)

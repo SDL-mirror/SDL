@@ -404,25 +404,13 @@ static int X11_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	/* use default screen (from $DISPLAY) */
 	SDL_Screen = DefaultScreen(SDL_Display);
 
+	use_mitshm = 0;
 #ifndef NO_SHARED_MEMORY
 	/* Check for MIT shared memory extension */
-	use_mitshm = 0;
 	if ( local_X11 ) {
 		use_mitshm = XShmQueryExtension(SDL_Display);
 	}
 #endif /* NO_SHARED_MEMORY */
-
-	/* See whether or not we need to swap pixels */
-	swap_pixels = 0;
-	if ( SDL_BYTEORDER == SDL_LIL_ENDIAN ) {
-		if ( XImageByteOrder(SDL_Display) == MSBFirst ) {
-			swap_pixels = 1;
-		}
-	} else {
-		if ( XImageByteOrder(SDL_Display) == LSBFirst ) {
-			swap_pixels = 1;
-		}
-	}
 
 	/* Get the available video modes */
 	if(X11_GetVideoModes(this) < 0)
