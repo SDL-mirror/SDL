@@ -163,6 +163,8 @@ static SDL_VideoDevice *ROM_CreateDevice(int devindex)
 #ifdef HAVE_OPENGL
 	device->GL_MakeCurrent = Mac_GL_MakeCurrent;
 	device->GL_SwapBuffers = Mac_GL_SwapBuffers;
+	device->GL_LoadLibrary = Mac_GL_LoadLibrary;
+	device->GL_GetProcAddress = Mac_GL_GetProcAddress;
 #endif
 	device->SetCaption = Mac_SetCaption;
 	device->SetIcon = NULL;

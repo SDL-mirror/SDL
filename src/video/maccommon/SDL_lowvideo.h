@@ -89,6 +89,8 @@ struct SDL_PrivateVideoData {
 
 #ifdef HAVE_OPENGL
 	AGLContext appleGLContext;
+
+	void *libraryHandle;
 #endif
 };
 /* Old variable names */

@@ -30,6 +30,7 @@ static char rcsid =
 #include "SDL_error.h"
 #include "SDL_lowvideo.h"
 #include "SDL_macgl_c.h"
+#include "SDL_loadso.h"
 
 
 /* krat: adding OpenGL support */
@@ -154,6 +155,30 @@ int Mac_GL_MakeCurrent(_THIS)
 void Mac_GL_SwapBuffers(_THIS)
 {
 	aglSwapBuffers(glContext);
+}
+
+int Mac_GL_LoadLibrary(_THIS, const char *location)
+{
+	if (location == NULL)
+		location = "OpenGLLibrary";
+
+	this->hidden->libraryHandle = SDL_LoadObject(location);
+
+	this->gl_config.driver_loaded = 1;
+	return (this->hidden->libraryHandle != NULL) ? 0 : -1;
+}
+
+void Mac_GL_UnloadLibrary(_THIS)
+{
+	SDL_UnloadObject(this->hidden->libraryHandle);
+
+	this->hidden->libraryHandle = NULL;
+	this->gl_config.driver_loaded = 0;
+}
+
+void* Mac_GL_GetProcAddress(_THIS, const char *proc)
+{
+	return SDL_LoadFunction( this->hidden->libraryHandle, proc );
 }
 
 #endif /* HAVE_OPENGL */

@@ -384,6 +384,11 @@ static int Mac_HandleEvents(_THIS, int wait4it)
 #endif
 	  case updateEvt: {
 		BeginUpdate(SDL_Window);
+	#ifdef HAVE_OPENGL
+		if (SDL_VideoSurface->flags & SDL_OPENGL)
+			SDL_GL_SwapBuffers();
+		else
+	#endif
 		if ( (SDL_VideoSurface->flags & SDL_HWSURFACE) ==
 						SDL_SWSURFACE ) {
 			SDL_UpdateRect(SDL_VideoSurface, 0, 0, 0, 0);

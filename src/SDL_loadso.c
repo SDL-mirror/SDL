@@ -98,6 +98,7 @@ void *SDL_LoadObject(const char *sofile)
 			kLoadCFrag, &library_id, &mainAddr, errName);
 	switch (error) {
 		case noErr:
+			loaderror = NULL;
 			break;
 		case cfragNoLibraryErr:
 			loaderror = "Library not found";
