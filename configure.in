@@ -2597,6 +2597,7 @@ src/Makefile
 src/main/Makefile
 src/main/macosx/Makefile
 src/main/macosx/Info.plist
+src/audio/Makefile
 src/audio/alsa/Makefile
 src/audio/arts/Makefile
 src/audio/baudio/Makefile
@@ -2607,7 +2608,6 @@ src/audio/dmedia/Makefile
 src/audio/dsp/Makefile
 src/audio/esd/Makefile
 src/audio/macrom/Makefile
-src/audio/Makefile
 src/audio/mint/Makefile
 src/audio/nas/Makefile
 src/audio/nto/Makefile
@@ -2646,8 +2646,8 @@ src/video/windib/Makefile
 src/video/windx5/Makefile
 src/video/x11/Makefile
 src/video/xbios/Makefile
-src/video/XFree86/extensions/Makefile
 src/video/XFree86/Makefile
+src/video/XFree86/extensions/Makefile
 src/video/XFree86/Xinerama/Makefile
 src/video/XFree86/Xv/Makefile
 src/video/XFree86/Xxf86dga/Makefile
