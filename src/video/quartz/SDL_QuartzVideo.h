@@ -138,7 +138,8 @@ typedef struct SDL_PrivateVideoData {
     Uint8              expect_mouse_up;    /* used to determine when to send mouse up events */
     Uint8              grab_state;         /* used to manage grab behavior */
     NSPoint            cursor_loc;         /* saved cursor coords, for activate/deactivate when grabbed */
-    BOOL          	   cursor_visible;     /* tells if cursor was hidden or not */
+    BOOL          	   cursor_visible;     /* tells if cursor was instructed to be hidden or not (SDL_ShowCursor) */
+    BOOL               cursor_hidden;      /* tells if cursor is *actually* hidden or not */
     Uint8*             sw_buffers[2];      /* pointers to the two software buffers for double-buffer emulation */
     SDL_Thread         *thread;            /* thread for async updates to the screen */
     SDL_sem            *sem1, *sem2;       /* synchronization for async screen updates */
@@ -183,6 +184,7 @@ typedef struct SDL_PrivateVideoData {
 #define grab_state (this->hidden->grab_state)
 #define cursor_loc (this->hidden->cursor_loc)
 #define cursor_visible (this->hidden->cursor_visible)
+#define cursor_hidden (this->hidden->cursor_hidden)
 #define sw_buffers (this->hidden->sw_buffers)
 #define thread (this->hidden->thread)
 #define sem1 (this->hidden->sem1)

@@ -301,9 +301,10 @@ static void QZ_DoActivate (_THIS)
 {
     in_foreground = YES;
     
-    /* Hide the mouse cursor if was hidden */
-    if (!cursor_visible) {
+    /* Hide the cursor if it was hidden by SDL_ShowCursor() */
+    if (!cursor_visible && !cursor_hidden) {
         HideCursor ();
+        cursor_hidden = YES;
     }
 
     /* Regrab input, only if it was previously grabbed */
@@ -330,8 +331,11 @@ static void QZ_DoDeactivate (_THIS) {
     /* Reassociate mouse and cursor */
     CGAssociateMouseAndMouseCursorPosition (1);
 
-    /* Show the cursor */
-    ShowCursor ();
+    /* Show the cursor if it was hidden by SDL_ShowCursor() */
+    if (!cursor_visible && cursor_hidden) {
+        ShowCursor ();
+        cursor_hidden = NO;
+    }
 
     SDL_PrivateAppActive (0, SDL_APPINPUTFOCUS);
 }

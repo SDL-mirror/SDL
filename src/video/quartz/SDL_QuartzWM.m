@@ -72,7 +72,10 @@ static int QZ_ShowWMCursor (_THIS, WMcursor *cursor) {
 
     if ( cursor == NULL) {
         if ( cursor_visible ) {
-            HideCursor ();
+            if (!cursor_hidden) {
+                HideCursor ();
+                cursor_hidden = YES;
+            }
             cursor_visible = NO;
             QZ_ChangeGrabState (this, QZ_HIDECURSOR);
         }
@@ -80,7 +83,10 @@ static int QZ_ShowWMCursor (_THIS, WMcursor *cursor) {
     else {
         SetCursor(&cursor->curs);
         if ( ! cursor_visible ) {
-            ShowCursor ();
+            if (cursor_hidden) {
+                ShowCursor ();
+                cursor_hidden = NO;
+            }
             cursor_visible = YES;
             QZ_ChangeGrabState (this, QZ_SHOWCURSOR);
         }
