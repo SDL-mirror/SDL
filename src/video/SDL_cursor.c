@@ -348,11 +348,11 @@ void SDL_MouseRect(SDL_Rect *area)
 	}
 	clip_diff = (area->x+area->w)-SDL_VideoSurface->w;
 	if ( clip_diff > 0 ) {
-		area->w -= clip_diff;
+		area->w = area->w < clip_diff ? 0 : area->w-clip_diff;
 	}
 	clip_diff = (area->y+area->h)-SDL_VideoSurface->h;
 	if ( clip_diff > 0 ) {
-		area->h -= clip_diff;
+		area->h = area->h < clip_diff ? 0 : area->h-clip_diff;
 	}
 }
 
