@@ -113,7 +113,7 @@ no_restore_joystick:
 	.ascii "LSDL"
 	.comm	oldmousevector,4*1
 _SDL_AtariXbios_MouseVector:
-	moveml	d0/a1,sp@-
+	movel	d0,sp@-
 
 	/* Mouse buttons */
 	moveb	(a0),d0
@@ -131,10 +131,9 @@ _SDL_AtariXbios_MouseVector:
 	addw	d0,_SDL_AtariXbios_mousey
 
 	/* Jump through old vector */
-	movel	oldmousevector,a1
-	jsr	(a1)
+	movel	sp@+,d0
 
-	moveml	sp@+,d0/a1
+	movel	oldmousevector,sp@-
 	rts
 
 	.data
@@ -153,7 +152,7 @@ _SDL_AtariXbios_MouseVector:
 	.ascii "LSDL"
 	.comm	oldjoystickvector,4*1
 _SDL_AtariXbios_JoystickVector:
-	moveml	d0/a1,sp@-
+	movel	d0,sp@-
 
 	/* New joystick state */
 	moveb	a0@(1),d0
@@ -161,10 +160,9 @@ _SDL_AtariXbios_JoystickVector:
 	movew	d0,_SDL_AtariXbios_joystick
 
 	/* Jump through old vector */
-	movel	oldjoystickvector,a1
-	jsr	(a1)
+	movel	sp@+,d0
 
-	moveml	sp@+,d0/a1
+	movel	oldjoystickvector,sp@-
 	rts
 
 	.data
