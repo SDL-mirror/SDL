@@ -1626,7 +1626,7 @@ CheckAtariLdg()
         AC_CHECK_LIB(ldg, ldg_open, have_ldg_lib=yes, have_ldg_lib=no, -lgem)
         if test x$have_ldg_hdr = xyes -a x$have_ldg_lib = xyes; then
             CFLAGS="$CFLAGS -DENABLE_LDG"
-            SYSTEM_LIBS="$SYSTEM_LIBS -lldg"
+            SYSTEM_LIBS="$SYSTEM_LIBS -lldg -lgem"
         fi
     fi
 }
