@@ -1371,7 +1371,7 @@ CheckQtopia()
         AC_MSG_RESULT($video_qtopia)
         if test x$video_qtopia = xyes; then
             CFLAGS="$CFLAGS -DENABLE_QTOPIA -DQT_QWS_EBX -DQT_QWS_CUSTOM -DQWS -I${QPEDIR}/include -I${QTDIR}/include/ -DNO_DEBUG -fno-rtti -fno-exceptions"
-            SYSTEM_LIBS="$SYSTEM_LIBS -:${QPEDIR}/lib -L${QTDIR}/lib/ -lqpe -lqte"
+            SDL_LIBS="$SDL_LIBS -L${QPEDIR}/lib -L${QTDIR}/lib/ -lqpe -lqte"
             VIDEO_SUBDIRS="$VIDEO_SUBDIRS qtopia"
             VIDEO_DRIVERS="$VIDEO_DRIVERS qtopia/libvideo_qtopia.la"
         fi
