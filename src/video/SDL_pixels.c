@@ -246,7 +246,12 @@ SDL_PixelFormat *SDL_ReallocFormat(SDL_Surface *surface, int bpp,
  */
 void SDL_FormatChanged(SDL_Surface *surface)
 {
-	surface->format_version++;
+	static int format_version = 0;
+	++format_version;
+	if ( format_version < 0 ) { /* It wrapped... */
+		format_version = 1;
+	}
+	surface->format_version = format_version;
 	SDL_InvalidateMap(surface->map);
 }
 /*
