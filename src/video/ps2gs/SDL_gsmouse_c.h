@@ -37,7 +37,5 @@ static char rcsid =
 extern void GS_FreeWMCursor(_THIS, WMcursor *cursor);
 extern WMcursor *GS_CreateWMCursor(_THIS,
 		Uint8 *data, Uint8 *mask, int w, int h, int hot_x, int hot_y);
-extern void GS_DrawCursor(SDL_Surface *screen);
-extern void GS_EraseCursor(SDL_Surface *screen);
 extern void GS_MoveWMCursor(_THIS, int x, int y);
 extern int GS_ShowWMCursor(_THIS, WMcursor *cursor);
