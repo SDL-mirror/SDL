@@ -37,6 +37,7 @@ static char rcsid =
 
 #include <windows.h>
 #include <mmsystem.h>
+#include <regstr.h>
 
 #define MAX_JOYSTICKS	16
 #define MAX_AXES	6	/* each joystick can have up to 6 axes */
@@ -51,6 +52,7 @@ static char rcsid =
 /* array to hold joystick ID values */
 static UINT	SYS_JoystickID[MAX_JOYSTICKS];
 static JOYCAPS	SYS_Joystick[MAX_JOYSTICKS];
+static char	*SYS_JoystickNames[MAX_JOYSTICKS];
 
 /* The private structure used to keep track of a joystick */
 struct joystick_hwdata
@@ -69,6 +71,78 @@ struct joystick_hwdata
 /* Convert a win32 Multimedia API return code to a text message */
 static void SetMMerror(char *function, int code);
 
+
+static char *GetJoystickName(const char *szRegKey)
+{
+	/* added 7/24/2004 by Eckhard Stolberg */
+	/*
+		see if there is a joystick for the current
+		index (1-16) listed in the registry
+	*/
+	char *name = NULL;
+	HKEY hKey;
+	DWORD regsize;
+	LONG regresult;
+	unsigned char regkey[256];
+	unsigned char regvalue[256];
+	unsigned char regname[256];
+
+	sprintf(regkey, "%s\\%s\\%s",
+		REGSTR_PATH_JOYCONFIG,
+		szRegKey,
+		REGSTR_KEY_JOYCURR);
+	regresult = RegOpenKeyExA(HKEY_LOCAL_MACHINE,
+		(LPTSTR) &regkey, 0, KEY_READ, &hKey);
+	if (regresult == ERROR_SUCCESS)
+	{
+		/*
+			find the registry key name for the
+			joystick's properties
+		*/
+		regsize = sizeof(regname);
+		sprintf(regvalue,
+			"Joystick%d%s", i+1,
+			REGSTR_VAL_JOYOEMNAME);
+		regresult = RegQueryValueExA(hKey,
+			regvalue, 0, 0, (LPBYTE) &regname,
+			(LPDWORD) &regsize);
+		RegCloseKey(hKey);
+		if (regresult == ERROR_SUCCESS)
+		{
+			/* open that registry key */
+			sprintf(regkey, "%s\\%s",
+				REGSTR_PATH_JOYOEM, regname);
+			regresult = RegOpenKeyExA(HKEY_LOCAL_MACHINE,
+				regkey, 0, KEY_READ, &hKey);
+			if (regresult == ERROR_SUCCESS)
+			{
+				/* find the size for the OEM name text */
+				regsize = sizeof(regvalue);
+				regresult =
+					RegQueryValueExA(hKey,
+					REGSTR_VAL_JOYOEMNAME,
+					0, 0, NULL,
+					(LPDWORD) &regsize);
+				if (regresult == ERROR_SUCCESS)
+				{
+					/*
+						allocate enough memory
+						for the OEM name text ...
+					*/
+					name = (char *) malloc(regsize);
+					/* ... and read it from the registry */
+					regresult =
+						RegQueryValueExA(hKey,
+						REGSTR_VAL_JOYOEMNAME, 0, 0,
+						(LPBYTE) name,
+						(LPDWORD) &regsize);
+					RegCloseKey(hKey);
+				}
+			}
+		}
+	}
+	return(name);
+}
 
 /* Function to scan the system for joysticks.
  * This function should set SDL_numjoysticks to the number of available
@@ -94,6 +168,7 @@ int SDL_SYS_JoystickInit(void)
 
 	for ( i = 0; i < MAX_JOYSTICKS; i++ ) {
 		SYS_JoystickID[i] = JOYSTICKID1 + i;
+		SYS_JoystickNames[i] = NULL;
 	}
 
 
@@ -110,6 +185,7 @@ int SDL_SYS_JoystickInit(void)
 			if ( result == JOYERR_NOERROR ) {
 				SYS_JoystickID[numdevs] = SYS_JoystickID[i];
 				SYS_Joystick[numdevs] = joycaps;
+				SYS_JoystickName[numdevs] = GetJoystickName(joycaps.szRegKey);
 				numdevs++;
 			}
 		}
@@ -120,8 +196,11 @@ int SDL_SYS_JoystickInit(void)
 /* Function to get the device-dependent name of a joystick */
 const char *SDL_SYS_JoystickName(int index)
 {
-	/***-> test for invalid index ? */
-	return(SYS_Joystick[index].szPname);
+	if ( SYS_JoystickNames[index] != NULL ) {
+		return(SYS_JoystickNames[index]);
+	} else {
+		return(SYS_Joystick[index].szPname);
+	}
 }
 
 /* Function to open a joystick for use.
@@ -292,7 +371,12 @@ void SDL_SYS_JoystickClose(SDL_Joystick *joystick)
 /* Function to perform any system-specific joystick related cleanup */
 void SDL_SYS_JoystickQuit(void)
 {
-	return;
+	int i;
+	for (i = 0; i < MAX_JOYSTICKS; i++) {
+		if ( SYS_JoystickNames[i] != NULL ) {
+			free(SYS_JoystickNames[i]);
+		}
+	}
 }
 
 
