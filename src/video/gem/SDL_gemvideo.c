@@ -663,7 +663,7 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 		/* Calculate window size */
 		if (!wind_calc(WC_BORDER, GEM_win_type, 0,0,width,height, &x2,&y2,&w2,&h2)) {
 			GEM_FreeBuffers(this);
-			SDL_SetError("Can not calculate window attributes\n");
+			SDL_SetError("Can not calculate window attributes");
 			return NULL;
 		}
 
@@ -675,7 +675,7 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 		GEM_handle=wind_create(GEM_win_type, x2,y2,w2,h2);
 		if (GEM_handle<0) {
 			GEM_FreeBuffers(this);
-			SDL_SetError("Can not create window\n");
+			SDL_SetError("Can not create window");
 			return NULL;
 		}
 
