@@ -74,7 +74,7 @@ static int Audio_Available(void)
 	snd_pcm_t *handle;
 
 	available = 0;
-	status = snd_pcm_open(&handle, get_audio_device(), SND_PCM_STREAM_PLAYBACK, 0);
+	status = snd_pcm_open(&handle, get_audio_device(), SND_PCM_STREAM_PLAYBACK, SND_PCM_NONBLOCK);
 	if ( status >= 0 ) {
 		available = 1;
         	snd_pcm_close(handle);
@@ -202,7 +202,7 @@ static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	Uint16               test_format;
 
 	/* Open the audio device */
-	status = snd_pcm_open(&pcm_handle, get_audio_device(), SND_PCM_STREAM_PLAYBACK, 0);
+	status = snd_pcm_open(&pcm_handle, get_audio_device(), SND_PCM_STREAM_PLAYBACK, SND_PCM_NONBLOCK);
 	if ( status < 0 ) {
 		SDL_SetError("Couldn't open audio device: %s", snd_strerror(status));
 		return(-1);
