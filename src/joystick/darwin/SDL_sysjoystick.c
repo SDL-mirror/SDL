@@ -91,7 +91,7 @@ struct joystick_hwdata
 	recElement* firstButton;
 	recElement* firstHat;
 
-	struct recDevice* pNext;				// next device
+	struct joystick_hwdata* pNext;			// next device
 };
 typedef struct joystick_hwdata recDevice;
 
@@ -500,14 +500,14 @@ static recDevice *HIDBuildDevice (io_object_t hidDevice)
 			}
 			else
 			{
-				DisposePtr(pDevice);
+				DisposePtr((Ptr)pDevice);
 				pDevice = NULL;
 			}
 			CFRelease (hidProperties);
 		}
 		else
 		{
-			DisposePtr(pDevice);
+			DisposePtr((Ptr)pDevice);
 			pDevice = NULL;
 		}
 	}
@@ -724,7 +724,7 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 	i = 0;
 	while (element)
 	{
-		Uint8 pos;
+		Uint8 pos = 0;
 
 		value = HIDGetElementValue(device, element);
 		switch(value)
