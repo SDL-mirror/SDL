@@ -22,6 +22,24 @@
 
 #include "SDL_QuartzVideo.h"
 
+/*
+ * GL_ARB_Multisample is supposed to be available in 10.1, according to Apple:
+ *
+ *   http://developer.apple.com/opengl/extensions.html#GL_ARB_multisample
+ *
+ *  ...but it isn't in the system headers, according to Sam:
+ *
+ *   http://www.libsdl.org/pipermail/sdl/2003-December/058335.html
+ *
+ * These are normally enums and not #defines in the system headers.
+ *
+ *   --ryan.
+ */
+#if (MAC_OS_X_VERSION_MAX_ALLOWED < 1020)
+#define NSOpenGLPFASampleBuffers ((NSOpenGLPixelFormatAttribute) 55)
+#define NSOpenGLPFASamples ((NSOpenGLPixelFormatAttribute) 56)
+#endif
+
 
 @implementation NSOpenGLContext (CGLContextAccess)
 - (CGLContextObj) cglContext;
@@ -68,7 +86,6 @@ int QZ_SetupOpenGL (_THIS, int bpp, Uint32 flags) {
         attr[i++] = this->gl_config.stencil_size;
     }
 
-#if NSOPENGL_CURRENT_VERSION > 1  /* What version should this be? */
     if ( this->gl_config.multisamplebuffers != 0 ) {
         attr[i++] = NSOpenGLPFASampleBuffers;
         attr[i++] = this->gl_config.multisamplebuffers;
@@ -78,7 +95,6 @@ int QZ_SetupOpenGL (_THIS, int bpp, Uint32 flags) {
         attr[i++] = NSOpenGLPFASamples;
         attr[i++] = this->gl_config.multisamplesamples;
     }
-#endif
 
     attr[i++] = NSOpenGLPFAScreenMask;
     attr[i++] = CGDisplayIDToOpenGLDisplayMask (display_id);
