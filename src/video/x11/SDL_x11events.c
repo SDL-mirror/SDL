@@ -73,7 +73,7 @@ static int X11_KeyRepeat(Display *display, XEvent *event)
 		XPeekEvent(display, &peekevent);
 		if ( (peekevent.type == KeyPress) &&
 		     (peekevent.xkey.keycode == event->xkey.keycode) &&
-		     (peekevent.xkey.time == event->xkey.time) ) {
+		     ((peekevent.xkey.time-event->xkey.time) < 2) ) {
 			repeated = 1;
 			XNextEvent(display, &peekevent);
 		}
