@@ -703,12 +703,12 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		if ( (flags & SDL_FULLSCREEN) ) {
 			x = (GetSystemMetrics(SM_CXSCREEN)-width)/2;
 			y = (GetSystemMetrics(SM_CYSCREEN)-height)/2;
-		} else if ( SDL_windowX || SDL_windowY || window ) {
-			x = bounds.left;
-			y = bounds.top;
 		} else if ( center ) {
 			x = (GetSystemMetrics(SM_CXSCREEN)-width)/2;
 			y = (GetSystemMetrics(SM_CYSCREEN)-height)/2;
+		} else if ( SDL_windowX || SDL_windowY || window ) {
+			x = bounds.left;
+			y = bounds.top;
 		} else {
 			x = y = -1;
 			swp_flags |= SWP_NOMOVE;
