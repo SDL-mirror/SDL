@@ -2646,6 +2646,7 @@ CFLAGS="$CFLAGS -I\$(top_srcdir)/src/thread"
 CFLAGS="$CFLAGS -I\$(top_srcdir)/src/timer"
 CFLAGS="$CFLAGS -I\$(top_srcdir)/src/endian"
 CFLAGS="$CFLAGS -I\$(top_srcdir)/src/file"
+CFLAGS="$CFLAGS -I\$(top_builddir)/src/thread"
 CXXFLAGS="$CFLAGS"
 
 

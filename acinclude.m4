@@ -4,9 +4,13 @@ dnl Function to link an architecture specific file
 dnl LINK_ARCH_SRC(source_dir, arch, source_file)
 AC_DEFUN(COPY_ARCH_SRC,
 [
-  echo "Copying $1/$2/$3 -> $1/$3"
   old="$srcdir/$1/$2/$3"
-  new="$srcdir/$1/$3"
+  new="$1/$3"
+  if test ! -d $1; then
+    echo "Creating directory $1"
+    mkdir -p $1
+  fi
+  echo "Copying $old -> $new"
   cat >$new <<__EOF__
 /* WARNING:  This file was automatically generated!
  * Original: $old
