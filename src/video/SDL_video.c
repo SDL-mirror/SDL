@@ -359,7 +359,14 @@ static Uint8 SDL_closest_depths[4][8] = {
 	{ 0, 32, 16, 15, 24, 8, 0, 0 }
 };
 
-int SDL_VideoModeOK (int width, int height, int bpp, Uint32 flags) 
+
+#ifdef macintosh /* MPW optimization bug? */
+#define NEGATIVE_ONE 0xFFFFFFFF
+#else
+#define NEGATIVE_ONE -1
+#endif
+
+int SDL_VideoModeOK (int width, int height, int bpp, Uint32 flags)
 {
 	int table, b, i;
 	int supported;
@@ -387,15 +394,18 @@ int SDL_VideoModeOK (int width, int height, int bpp, Uint32 flags)
 			/* No sizes supported at this bit-depth */
 			continue;
 		} else 
-#ifdef macintosh /* MPW optimization bug? */
-		if ( (sizes == (SDL_Rect **)0xFFFFFFFF) ||
-#else
-		if ( (sizes == (SDL_Rect **)-1) ||
-#endif
-		     current_video->handles_any_size ) {
+		if (sizes == (SDL_Rect **)NEGATIVE_ONE) {
 			/* Any size supported at this bit-depth */
 			supported = 1;
 			continue;
+		} else if (current_video->handles_any_size) {
+			/* Driver can center a smaller surface to simulate fullscreen */
+			for ( i=0; sizes[i]; ++i ) {
+				if ((sizes[i]->w >= width) && (sizes[i]->h >= height)) {
+					supported = 1; /* this mode can fit the centered window. */
+					break;
+				}
+			}
 		} else
 		for ( i=0; sizes[i]; ++i ) {
 			if ((sizes[i]->w == width) && (sizes[i]->h == height)) {
