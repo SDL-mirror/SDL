@@ -66,7 +66,10 @@ extern DECLSPEC SDL_mutex * SDLCALL SDL_CreateMutex(void);
 #define SDL_LockMutex(m)	SDL_mutexP(m)
 extern DECLSPEC int SDLCALL SDL_mutexP(SDL_mutex *mutex);
 
-/* Unlock the mutex  (Returns 0, or -1 on error) */
+/* Unlock the mutex  (Returns 0, or -1 on error)
+   It is an error to unlock a mutex that has not been locked by
+   the current thread, and doing so results in undefined behavior.
+ */
 #define SDL_UnlockMutex(m)	SDL_mutexV(m)
 extern DECLSPEC int SDLCALL SDL_mutexV(SDL_mutex *mutex);
 
