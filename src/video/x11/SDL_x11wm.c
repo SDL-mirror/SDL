@@ -255,22 +255,28 @@ void X11_SetCaption(_THIS, const char *title, const char *icon)
 	SDL_Lock_EventThread();
 
 	if ( title != NULL ) {
+		int error = XLocaleNotSupported;
 #ifdef X_HAVE_UTF8_STRING
-		Xutf8TextListToTextProperty(SDL_Display, (char **)&title, 1,
-			XUTF8StringStyle, &titleprop);
-#else
-		XStringListToTextProperty((char **)&title, 1, &titleprop);
+		error = Xutf8TextListToTextProperty(SDL_Display,
+				(char **)&title, 1, XUTF8StringStyle,
+				&titleprop);
 #endif
+		if ( error != Success ) {
+			XStringListToTextProperty((char **)&title, 1,
+					&titleprop);
+		}
 		XSetWMName(SDL_Display, WMwindow, &titleprop);
 		XFree(titleprop.value);
 	}
 	if ( icon != NULL ) {
+		int error = XLocaleNotSupported;
 #ifdef X_HAVE_UTF8_STRING
-		Xutf8TextListToTextProperty(SDL_Display, (char **)&icon, 1,
-			XUTF8StringStyle, &iconprop);
-#else
-		XStringListToTextProperty((char **)&icon, 1, &iconprop);
+		error = Xutf8TextListToTextProperty(SDL_Display,
+				(char **)&icon, 1, XUTF8StringStyle, &iconprop);
 #endif
+		if ( error != Success ) {
+			XStringListToTextProperty((char **)&icon, 1, &iconprop);
+		}
 		XSetWMIconName(SDL_Display, WMwindow, &iconprop);
 		XFree(iconprop.value);
 	}
