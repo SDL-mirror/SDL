@@ -1054,7 +1054,7 @@ CheckOpenGLQNX()
             CFLAGS="$CFLAGS -DHAVE_OPENGL"
             SYSTEM_LIBS="$SYSTEM_LIBS -lGL"
             if test x$use_dlopen != xyes; then
-                AC_CHECK_LIB(ltdl, dlopen, SYSTEM_LIBS="$SYSTEM_LIBS -lltdl")
+                AC_CHECK_LIB(c, dlopen, SYSTEM_LIBS="$SYSTEM_LIBS", AC_CHECK_LIB(ltdl, dlopen, SYSTEM_LIBS="$SYSTEM_LIBS -lltdl"))
             fi
         fi
     fi
@@ -2215,7 +2215,7 @@ case "$target" in
         COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
-            CFLAGS="$CFLAGS -DALSA_SUPPORT"
+            CFLAGS="$CFLAGS -DQNXNTOAUDIO_SUPPORT"
             SYSTEM_LIBS="$SYSTEM_LIBS -lasound"
             AUDIO_SUBDIRS="$AUDIO_SUBDIRS nto"
             AUDIO_DRIVERS="$AUDIO_DRIVERS nto/libaudio_nto.la"
