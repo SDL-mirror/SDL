@@ -61,6 +61,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc docs/index.html docs/html
 %{prefix}/bin/*-config
 %{prefix}/lib/lib*.a
+%{prefix}/lib/lib*.la
 %{prefix}/lib/lib*.so
 %{prefix}/include/SDL/
 %{prefix}/man/man3/*
