@@ -86,6 +86,14 @@ int QZ_SetupOpenGL (_THIS, int bpp, Uint32 flags) {
         attr[i++] = this->gl_config.stencil_size;
     }
 
+    if ( (this->gl_config.accum_red_size +
+          this->gl_config.accum_green_size +
+          this->gl_config.accum_blue_size +
+          this->gl_config.accum_alpha_size) > 0 ) {
+        attr[i++] = NSOpenGLPFAAccumSize;
+        attr[i++] = this->gl_config.accum_red_size + this->gl_config.accum_green_size + this->gl_config.accum_blue_size + this->gl_config.accum_alpha_size;
+    }
+
     if ( this->gl_config.multisamplebuffers != 0 ) {
         attr[i++] = NSOpenGLPFASampleBuffers;
         attr[i++] = this->gl_config.multisamplebuffers;
