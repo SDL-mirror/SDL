@@ -46,7 +46,7 @@ SDL_Overlay *SDL_CreateYUVOverlay(int w, int h, Uint32 format,
 	const char *yuv_hwaccel;
 	SDL_Overlay *overlay;
 
-	if ( (SDL_VideoSurface->flags & SDL_OPENGL) == SDL_OPENGL ) {
+	if ( (display->flags & SDL_OPENGL) == SDL_OPENGL ) {
 		SDL_SetError("YUV overlays are not supported in OpenGL mode");
 		return NULL;
 	}
