@@ -44,6 +44,7 @@ static void ListTracks(SDL_CD *cdrom)
 {
 	int i;
 	int m, s, f;
+	char* trtype;
 
 	SDL_CDStatus(cdrom);
 	printf("Drive tracks: %d\n", cdrom->numtracks);
@@ -51,8 +52,20 @@ static void ListTracks(SDL_CD *cdrom)
 		FRAMES_TO_MSF(cdrom->track[i].length, &m, &s, &f);
 		if ( f > 0 )
 			++s;
-		printf("\tTrack (index %d) %d: %d:%2.2d\n", i,
-					cdrom->track[i].id, m, s);
+		switch(cdrom->track[i].type)
+		{
+		    case SDL_AUDIO_TRACK:
+			trtype="audio";
+			break;
+		    case SDL_DATA_TRACK:
+			trtype="data";
+			break;
+		    default:
+			trtype="unknown";
+			break;
+		}
+		printf("\tTrack (index %d) %d: %d:%2.2d [%s track]\n", i,
+					cdrom->track[i].id, m, s, trtype);
 	}
 }
 
