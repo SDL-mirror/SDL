@@ -644,20 +644,11 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 			modeflags |= SDL_SWSURFACE;
 		}
 	} else {
-		int posx,posy;
 		short x2,y2,w2,h2;
 
 		GEM_UnlockScreen(this);
 
-		/* Center our window */
-		posx = GEM_desk_x;
-		posy = GEM_desk_y;
-		if (width<GEM_desk_w)
-			posx += (GEM_desk_w - width) >> 1;
-		if (height<GEM_desk_h)
-			posy += (GEM_desk_h - height) >> 1;
-
-		/* Calculate our window size and position */
+		/* Set window gadgets */
 		if (!(flags & SDL_NOFRAME)) {
 			GEM_win_type=NAME|MOVER|CLOSER|SMALLER;
 			if (flags & SDL_RESIZABLE) {
@@ -669,14 +660,19 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 			modeflags |= SDL_NOFRAME;
 		}
 
-		if (!wind_calc(WC_BORDER, GEM_win_type, posx, posy, width, height, &x2, &y2, &w2, &h2)) {
+		/* Calculate window size */
+		if (!wind_calc(WC_BORDER, GEM_win_type, 0,0,width,height, &x2,&y2,&w2,&h2)) {
 			GEM_FreeBuffers(this);
 			SDL_SetError("Can not calculate window attributes\n");
 			return NULL;
 		}
 
+		/* Center window */
+		x2 = GEM_desk_x+((GEM_desk_w-w2)>>1);
+		y2 = GEM_desk_y+((GEM_desk_h-h2)>>1);
+
 		/* Create window */
-		GEM_handle=wind_create(GEM_win_type, x2, y2, w2, h2);
+		GEM_handle=wind_create(GEM_win_type, x2,y2,w2,h2);
 		if (GEM_handle<0) {
 			GEM_FreeBuffers(this);
 			SDL_SetError("Can not create window\n");
