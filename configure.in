@@ -1284,7 +1284,7 @@ case "$target" in
             COPY_ARCH_SRC(src/timer, linux, SDL_systimer.c)
         fi
         # NetBSD does not define "unix"
-        CFLAGS="$CFLAGS -Dunix"
+        CFLAGS="$CFLAGS -Dunix -D_POSIX_THREAD_SYSCALL_SOFT=1"
         ;;
     *-*-openbsd*)
         ARCH=openbsd
@@ -1871,6 +1871,7 @@ AM_CONDITIONAL(TARGET_SOLARIS, test $ARCH = solaris)
 AM_CONDITIONAL(TARGET_IRIX, test $ARCH = irix)
 AM_CONDITIONAL(TARGET_BSDI, test $ARCH = bsdi)
 AM_CONDITIONAL(TARGET_FREEBSD, test $ARCH = freebsd)
+AM_CONDITIONAL(TARGET_NETBSD, test $ARCH = netbsd)
 AM_CONDITIONAL(TARGET_OPENBSD, test $ARCH = openbsd)
 AM_CONDITIONAL(TARGET_AIX, test $ARCH = aix)
 AM_CONDITIONAL(TARGET_WIN32, test $ARCH = win32)
