@@ -85,10 +85,11 @@ SDL_Overlay *X11_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, S
 	                                 RootWindow(GFX_Display, SDL_Screen),
 	                                 &adaptors, &ainfo)) ) {
 #ifdef USE_LAST_ADAPTOR
-		for ( i=0; i < adaptors; ++i ) {
+		for ( i=0; i < adaptors; ++i )
 #else
-		for ( i=0; (i < adaptors) && (xv_port == -1); ++i ) {
+		for ( i=0; (i < adaptors) && (xv_port == -1); ++i )
 #endif /* USE_LAST_ADAPTOR */
+		{
 			/* Check to see if the visual can be used */
 			if ( BUGGY_XFREE86(<=, 4001) ) {
 				int visual_ok = 0;
@@ -110,10 +111,11 @@ SDL_Overlay *X11_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, S
 				formats = SDL_NAME(XvListImageFormats)(GFX_Display,
 				              ainfo[i].base_id, &num_formats);
 #ifdef USE_LAST_ADAPTOR
-				for ( j=0; j < num_formats; ++j ) {
+				for ( j=0; j < num_formats; ++j )
 #else
-				for ( j=0; (j < num_formats) && (xv_port == -1); ++j ) {
+				for ( j=0; (j < num_formats) && (xv_port == -1); ++j )
 #endif /* USE_LAST_ADAPTOR */
+				{
 					if ( (Uint32)formats[j].id == format ) {
 						for ( k=0; k < ainfo[i].num_ports; ++k ) {
 							if ( Success == SDL_NAME(XvGrabPort)(GFX_Display, ainfo[i].base_id+k, CurrentTime) ) {
