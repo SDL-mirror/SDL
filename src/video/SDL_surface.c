@@ -54,7 +54,7 @@ SDL_Surface * SDL_CreateRGBSurface (Uint32 flags,
 
 	/* Make sure the size requested doesn't overflow our datatypes */
 	/* Next time I write a library like SDL, I'll use int for size. :) */
-	if ( width > 16384 || height > 16384 ) {
+	if ( width >= 16384 || height >= 65536 ) {
 		SDL_SetError("Width or height is too large");
 		return(NULL);
 	}
