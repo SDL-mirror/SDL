@@ -50,7 +50,7 @@ typedef enum {
 	SDL_EFSEEK,
 	SDL_LASTERROR
 } SDL_errorcode;
-extern void SDL_Error(SDL_errorcode code);
+extern DECLSPEC void SDL_Error(SDL_errorcode code);
 
 
 /* Ends C function definitions when using C++ */
