@@ -666,6 +666,32 @@ CheckFBCON()
     fi
 }
 
+dnl See if we're running on PlayStation 2 hardware
+CheckPS2GS()
+{
+dnl    AC_ARG_ENABLE(video-ps2gs,
+dnl[  --enable-video-ps2gs    use PlayStation 2 GS video driver [default=yes]],
+dnl                  , enable_video_ps2gs=yes)
+enable_video_ps2gs=yes
+    if test x$enable_video = xyes -a x$enable_video_ps2gs = xyes; then
+        dnl AC_MSG_CHECKING(for PlayStation 2 GS support)
+        video_ps2gs=no
+        AC_TRY_COMPILE([
+         #include <linux/ps2/dev.h>
+         #include <linux/ps2/gs.h>
+        ],[
+        ],[
+        video_ps2gs=yes
+        ])
+        dnl AC_MSG_RESULT($video_ps2gs)
+        if test x$video_ps2gs = xyes; then
+            CFLAGS="$CFLAGS -DENABLE_PS2GS"
+            VIDEO_SUBDIRS="$VIDEO_SUBDIRS ps2gs"
+            VIDEO_DRIVERS="$VIDEO_DRIVERS ps2gs/libvideo_ps2gs.la"
+        fi
+    fi
+}
+
 dnl Find the GGI includes
 CheckGGI()
 {
@@ -1111,6 +1137,7 @@ case "$target" in
         CheckNANOX
         CheckDGA
         CheckFBCON
+        CheckPS2GS
         CheckGGI
         CheckSVGA
         CheckAAlib
@@ -2011,6 +2038,7 @@ src/video/x11/Makefile
 src/video/dga/Makefile
 src/video/nanox/Makefile
 src/video/fbcon/Makefile
+src/video/ps2gs/Makefile
 src/video/ggi/Makefile
 src/video/maccommon/Makefile
 src/video/macdsp/Makefile
