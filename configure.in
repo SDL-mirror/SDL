@@ -60,6 +60,7 @@ CCAS="$CC"
 AC_SUBST(CCAS)
 CCASFLAGS=""
 AC_SUBST(CCASFLAGS)
+AM_CONDITIONAL([am__fastdepOBJC], false)
 
 dnl The alpha architecture needs special flags for binary portability
 case "$target" in
@@ -2607,7 +2608,6 @@ case "$target" in
         dnl OBJCDEPMODE="depmode=gcc3"
         dnl AC_SUBST(OBJCDEPMODE, $OBJCDEPMODE)
         dnl Trying this to satisfy everybody...
-        AM_CONDITIONAL([am__fastdepOBJC], false)
         AC_MSG_RESULT(not implemented yet)
         ;;
 esac
