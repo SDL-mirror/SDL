@@ -812,7 +812,7 @@ void SDL_FreeSurface (SDL_Surface *surface)
 		SDL_FreeBlitMap(surface->map);
 		surface->map = NULL;
 	}
-	if ( (surface->flags & SDL_HWSURFACE) == SDL_HWSURFACE ) {
+	if ( surface->hwdata ) {
 		SDL_VideoDevice *video = current_video;
 		SDL_VideoDevice *this  = current_video;
 		video->FreeHWSurface(this, surface);
