@@ -23,16 +23,14 @@
 #ifndef __CDPlayer__H__
 #define __CDPlayer__H__ 1
 
+#include <string.h>
+
 #include <CoreFoundation/CoreFoundation.h>
 #include <Carbon/Carbon.h>
 
 #include <AudioUnit/AudioUnit.h>
-#include <AudioToolbox/AudioToolbox.h>
 
-#include <SDL.h>
-
-#include <string.h>
-#include <unistd.h> // for usleep
+#include "SDL.h"
 
 #ifdef __cplusplus
 extern "C" {
