@@ -495,9 +495,8 @@ int DirectFB_VideoInit(_THIS, SDL_PixelFormat *vformat)
       HIDDEN->c2layer->SetOpacity(HIDDEN->c2layer, 0x0);
 
       /* Init the surface here as it got a fixed size */
-      dlc.flags      = DLCONF_PIXELFORMAT | DLCONF_BUFFERMODE | DLCONF_OPTIONS;
+      dlc.flags      = DLCONF_PIXELFORMAT | DLCONF_BUFFERMODE;
       dlc.buffermode = DLBM_BACKVIDEO;
-      dlc.options    = DLOP_FLICKER_FILTERING;
       dlc.pixelformat = DSPF_RGB32;
       
       ret = HIDDEN->c2layer->TestConfiguration( HIDDEN->c2layer, &dlc, &failed );
