@@ -68,9 +68,9 @@ MacOS:
 	Not all of the keys are properly recognized on the keyboard.
 
 MacOS X:
-	Joystick and CD-ROM functions are not implemented yet.
+	CD-ROM functions are not implemented yet.
 
-	Window management buttons don't draw correctly.
+	Joystick code is not extensively tested yet.
 
 	Window may not close when unsetting video mode and resetting.
 
@@ -97,8 +97,6 @@ MacOS X:
 	SDL_WM_GrabInput() is implemented, but it "freezes" the hardware
 	cursor in the center of the window/screen.  Also, mouse moved events
 	are not generated, and the keyboard cannot be grabbed.
-
-	Not all of the keys are properly recognized on the keyboard.
 
 	MacOS X seems to have a broken pthread_cancel() implementation.
 

@@ -2056,8 +2056,8 @@ case "$target" in
         fi
         # Set up files for the joystick library
         if test x$enable_joystick = xyes; then
-            JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS dummy"
-            JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS dummy/libjoystick_dummy.la"
+            JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS darwin"
+            JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS darwin/libjoystick_darwin.la"
         fi
         # Set up files for the cdrom library
         if test x$enable_cdrom = xyes; then
@@ -2192,6 +2192,7 @@ include/Makefile
 src/Makefile
 src/main/Makefile
 src/main/macosx/Makefile
+src/main/macosx/Info.plist
 src/audio/Makefile
 src/audio/alsa/Makefile
 src/audio/arts/Makefile
@@ -2236,6 +2237,7 @@ src/events/Makefile
 src/joystick/Makefile
 src/joystick/amigaos/Makefile
 src/joystick/beos/Makefile
+src/joystick/darwin/Makefile
 src/joystick/dummy/Makefile
 src/joystick/linux/Makefile
 src/joystick/macos/Makefile

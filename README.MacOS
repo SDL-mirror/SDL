@@ -52,9 +52,12 @@ IV.  Enjoy! :)
   If you have a project you'd like me to know about, or want to ask questions,
   go ahead and join the SDL developer's mailing list by sending e-mail to:
 
-	majordomo@lokigames.com
+	sdl-request@libsdl.org
 
-  and put the line "subscribe sdl" in the body of the message.
+  and put "subscribe" into the subject of the message. Or alternatively you
+  can use the web interface:
+
+	http://www.libsdl.org/mailman/listinfo/sdl
   
 ==============================================================================
 

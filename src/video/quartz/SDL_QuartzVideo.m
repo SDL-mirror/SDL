@@ -25,8 +25,6 @@
 /* Some variables to share among files, put in device structure eventually */
 static SDL_GrabMode currentGrabMode = SDL_GRAB_OFF;
 static BOOL   inForeground = YES;
-static SDLKey keymap[256];
-static unsigned int currentMods = 0; /* Current keyboard modifiers, to track modifier state */
 static char QZ_Error[255]; /* Global error buffer to temporarily store more informative error messages */
 
 /* Include files into one compile unit...break apart eventually */

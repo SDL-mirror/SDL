@@ -18,11 +18,7 @@ process:
 
 (You may need to create the subdirs of /usr/local manually.)
 
-For some reason, libtool doesn't run ranlib properly, so do this
-manually:
-
-	ranlib /usr/local/lib/libSDL.a
-
+/*
 To use the library once it's built, you need to use the "Carbon
 framework", which is the port of the old Mac Toolbox to OS X.
 To do this, use the -F and -framework arguments for compiling
@@ -33,6 +29,79 @@ and linking, respectively:
 
 sdl-config knows about the linking path and -framework, so it's
 recommended to use it to fill in your Makefile variables.
+*/
+
+To use the library once it's built, you essential have two possibilities:
+use the traditional autoconf/automake/make method, or use Apple's Project Builder.
+
+==============================================================================
+Using the Simple DirectMedia Layer with a traditional Makefile
+==============================================================================
+
+In the following, it will be mostly assumed that you are using autoconf and
+automake to setup your SDL project, and furthermore that you use the AM_PATH_SDL
+macro provided by SDL in sdl.m4. If you are not using these tools, you can
+still use SDL but it will be somewhat hard to get running.
+
+Only step 1) is really required to get started, but for full OS X support you
+will want to do the other steps, too.
+
+1) Update your acinclude.m4 file in case you have copied an older version of
+   sdl.m4 into it. This is essential as AM_PATH_SDL now performs some additional
+   tasks when used on MacOS X
+
+   Rationale: AM_PATH_SDL copies /usr/local/share/sdl/Info.plist and the folder
+   /usr/local/share/sdl/SDLMain.nib/ into the directory where configure is invoked.
+   This is essential for the configure script to be able to run the test code
+   that detects SDL.
+
+2) Copy SDL's Info.plist.in file (from src/main/macosx) into your project's main
+   folder (the same spot that your configure.in sits), and edit it to suite your
+   needs. Then add it to your AC_OUTPUT list in configure.in
+
+   Rationale: The Info.plist file can be used to specify an icon file for
+   your app, and also to provide a human readable version/copyright string
+   and other meta-information to the user via the Finder's Get Info dialog.
+
+3) Add something like the following rule to your Makefile.am:
+
+APP_NAME.app: EXE_NAME
+	mkdir -p $@/Contents/MacOS
+	mkdir -p $@/Contents/Resources
+	mkdir -p $@/Contents/Resources/SDLMain.nib
+	echo "APPL????" > $@/Contents/PkgInfo
+	$(INSTALL_DATA) Info.plist $@/Contents/
+	$(INSTALL_DATA) SDLMain.nib/*.nib $@/Contents/Resources/
+	$(INSTALL_PROGRAM) $< $@/Contents/MacOS/
+
+   You should replace EXE_NAME with the name of the executable. APP_NAME is what
+   will be visible to the user in the Finder. Usually it will be the same
+   as EXE_NAME but capitalized. E.g. if EXE_NAME is "testgame" then APP_NAME 
+   usually is "TestGame"
+
+   If your project builds more than one application, you will have to do a bit more.
+   For each of your target applications, you need a seperate rule. Furthermore, each
+   needs its own Info.plist file, since that has to contain the exact name of the 
+   executable (i.e. EXE_NAME above). One way to do that is to use sed in your make rules
+   and modify a single master Info.plist.
+
+   Rationale: on Mac OS X, executables have to be put into so-called "bundles".
+   The make rule given above will construct such a bundle around the executable
+   for you. You need to make a copy of it for each target application.
+
+4) If you want the create bundles to be installed, you may want to add this
+   rule to your Makefile.am:
+
+install-exec-local: Exult.app
+	mkdir -p /Applications/
+	cp -r $< /Applications/
+
+   This rule takes the Bundle created by the rule from step 3 and installs them
+   into /Applications/. An alternate installation place would be $HOME/Applications/
+
+   Again, if you want to install multiple applications, you will have to augment
+   the make rule accordingly.
+
 
 ==============================================================================
 Using the Simple DirectMedia Layer with Project Builder
@@ -122,3 +191,4 @@ following locations:
         but I expect that things will still work on older versions.
         
 Known bugs are listed in the file "BUGS"
+ LocalWords:  Stuffit

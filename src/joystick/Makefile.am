@@ -5,7 +5,7 @@ noinst_LTLIBRARIES = libjoystick.la
 
 # Define which subdirectories need to be built
 SUBDIRS = @JOYSTICK_SUBDIRS@
-DIST_SUBDIRS = dummy amigaos beos linux macos win32
+DIST_SUBDIRS = dummy amigaos beos darwin linux macos win32
 
 DRIVERS = @JOYSTICK_DRIVERS@
 
