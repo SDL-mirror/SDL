@@ -310,6 +310,9 @@ static void HIDAddElement (CFTypeRef refElement, recDevice* pDevice)
 								case kHIDUsage_GD_Rx:
 								case kHIDUsage_GD_Ry:
 								case kHIDUsage_GD_Rz:
+								case kHIDUsage_GD_Slider:
+								case kHIDUsage_GD_Dial:
+								case kHIDUsage_GD_Wheel:
 									element = (recElement *) NewPtrClear (sizeof (recElement));
 									if (element)
 									{
