@@ -37,6 +37,7 @@ static char rcsid =
 #include "SDL_sysaudio.h"
 #include "SDL_mixer_MMX.h"
 #include "SDL_mixer_MMX_VC.h"
+#include "SDL_mixer_m68k.h"
 
 /* Function to check the CPU flags */
 #define MMX_CPU		0x800000
@@ -135,6 +136,9 @@ void SDL_MixAudio (Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 	switch (format) {
 
 		case AUDIO_U8: {
+#if defined(__M68000__) && defined(__GNUC__)
+			SDL_MixAudio_m68k_U8((char*)dst,(char*)src,(unsigned long)len,(long)volume,(char *)mix8);
+#else
 			Uint8 src_sample;
 
 			while ( len-- ) {
@@ -144,6 +148,7 @@ void SDL_MixAudio (Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 				++dst;
 				++src;
 			}
+#endif
 		}
 		break;
 
@@ -162,6 +167,9 @@ void SDL_MixAudio (Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 			}
 			else
 #endif
+#if defined(__M68000__) && defined(__GNUC__)
+			SDL_MixAudio_m68k_S8((char*)dst,(char*)src,(unsigned long)len,(long)volume);
+#else
 			{
 			Sint8 *dst8, *src8;
 			Sint8 src_sample;
@@ -187,6 +195,7 @@ void SDL_MixAudio (Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 				++src8;
 			}
 			}
+#endif
 		}
 		break;
 
@@ -204,6 +213,9 @@ void SDL_MixAudio (Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 			}
 			else
 #endif
+#if defined(__M68000__) && defined(__GNUC__)
+			SDL_MixAudio_m68k_S16LSB((short*)dst,(short*)src,(unsigned long)len,(long)volume);
+#else
 			{
 			Sint16 src1, src2;
 			int dst_sample;
@@ -229,10 +241,14 @@ void SDL_MixAudio (Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 				dst += 2;
 			}
 			}
+#endif
 		}
 		break;
 
 		case AUDIO_S16MSB: {
+#if defined(__M68000__) && defined(__GNUC__)
+			SDL_MixAudio_m68k_S16MSB((short*)dst,(short*)src,(unsigned long)len,(long)volume);
+#else
 			Sint16 src1, src2;
 			int dst_sample;
 			const int max_audioval = ((1<<(16-1))-1);
@@ -256,6 +272,7 @@ void SDL_MixAudio (Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 				dst[0] = dst_sample&0xFF;
 				dst += 2;
 			}
+#endif
 		}
 		break;
 
