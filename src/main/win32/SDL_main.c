@@ -291,7 +291,9 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 #ifdef _WIN32_WCE
 	nLen = wcslen(szCmdLine)+128+1;
 	bufp = (wchar_t *)alloca(nLen*2);
-	GetModuleFileName(NULL, bufp, 128);
+	wcscpy (bufp, "\"");
+	GetModuleFileName(NULL, bufp+1, 128-3);
+	wcscpy (bufp+wcslen(bufp), "\" ");
 	wcsncpy(bufp+wcslen(bufp), szCmdLine,nLen-wcslen(bufp));
 	nLen = wcslen(bufp)+1;
 	cmdline = (char *)alloca(nLen);
