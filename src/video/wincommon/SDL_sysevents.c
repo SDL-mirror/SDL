@@ -314,27 +314,27 @@ LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				/* Figure out which button to use */
 				switch (msg) {
 					case WM_LBUTTONDOWN:
-						button = 1;
+						button = SDL_BUTTON_LEFT;
 						state = SDL_PRESSED;
 						break;
 					case WM_LBUTTONUP:
-						button = 1;
+						button = SDL_BUTTON_LEFT;
 						state = SDL_RELEASED;
 						break;
 					case WM_MBUTTONDOWN:
-						button = 2;
+						button = SDL_BUTTON_MIDDLE;
 						state = SDL_PRESSED;
 						break;
 					case WM_MBUTTONUP:
-						button = 2;
+						button = SDL_BUTTON_MIDDLE;
 						state = SDL_RELEASED;
 						break;
 					case WM_RBUTTONDOWN:
-						button = 3;
+						button = SDL_BUTTON_RIGHT;
 						state = SDL_PRESSED;
 						break;
 					case WM_RBUTTONUP:
-						button = 3;
+						button = SDL_BUTTON_RIGHT;
 						state = SDL_RELEASED;
 						break;
 					default:
@@ -582,12 +582,12 @@ int SDL_RegisterApp(char *name, Uint32 style, void *hInst)
 	/* Register the application class */
 	class.hCursor		= NULL;
 #ifdef _WIN32_WCE
-    {
+	{
 		/* WinCE uses the UNICODE version */
 		int nLen = strlen(name)+1;
 		SDL_Appname = malloc(nLen*2);
 		MultiByteToWideChar(CP_ACP, 0, name, -1, SDL_Appname, nLen);
-    }
+	}
 #else
 	{
 		int nLen = strlen(name)+1;
