@@ -1475,7 +1475,9 @@ void SDL_GL_Lock()
 		SDL_VideoDevice *this = current_video;
 
 		this->glPushAttrib( GL_ALL_ATTRIB_BITS );	/* TODO: narrow range of what is saved */
+#ifdef GL_CLIENT_PIXEL_STORE_BIT
 		this->glPushClientAttrib( GL_CLIENT_PIXEL_STORE_BIT );
+#endif
 
 		this->glEnable(GL_TEXTURE_2D);
 		this->glEnable(GL_BLEND);
