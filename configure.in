@@ -1565,6 +1565,7 @@ CheckUSBHID()
         AC_MSG_CHECKING(for usbhid)
         have_usbhid=no
         AC_TRY_COMPILE([
+          #include <sys/types.h>
           #if defined(HAVE_USB_H)
           #include <usb.h>
           #endif
@@ -1576,6 +1577,7 @@ CheckUSBHID()
           #include <libusb.h>
           #elif defined(HAVE_LIBUSBHID_H)
           #include <libusbhid.h>
+          #endif
         ],[
           struct report_desc *repdesc;
           struct usb_ctl_report *repbuf;
@@ -1589,9 +1591,12 @@ CheckUSBHID()
             AC_MSG_CHECKING(for ucr_data member of usb_ctl_report)
             have_usbhid_ucr_data=no
             AC_TRY_COMPILE([
+              #include <sys/types.h>
+              #if defined(HAVE_USB_H)
+              #include <usb.h>
+              #endif
               #include <dev/usb/usb.h>
               #include <dev/usb/usbhid.h>
-              #include <stdio.h>
               #if defined(HAVE_USBHID_H)
               #include <usbhid.h>
               #elif defined(HAVE_LIBUSB_H)
