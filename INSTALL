@@ -3,8 +3,8 @@ To compile and install SDL:
 
     1.  Run './configure; make; make install'
 
-        If you are cross-compiling from Linux to Win32, you should read
-        the file README.Win32
+        If you are compiling for Windows using gcc, read the FAQ at:
+        http://www.libsdl.org/faq.php?action=listentries&category=4#42
 
         If you are compiling using Visual C++ on Win32, you should read
         the file VisualC.html
