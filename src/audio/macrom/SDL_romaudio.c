@@ -91,6 +91,10 @@ static SDL_AudioDevice *Audio_CreateDevice(int devindex)
     this->UnlockAudio = Mac_UnlockAudio;
     this->free        = Audio_DeleteDevice;
 
+#ifdef MACOSX	/* MacOS X uses threaded audio, so normal thread code is okay */
+    this->LockAudio   = NULL;
+    this->UnlockAudio = NULL;
+#endif
     return this;
 }
 
@@ -100,7 +104,7 @@ AudioBootStrap SNDMGR_bootstrap = {
 };
 
 #if defined(TARGET_API_MAC_CARBON) || defined(USE_RYANS_SOUNDCODE)
-/* FIXME: Does this work correctly on MacOS X as well? */
+/* This works correctly on MacOS X */
 
 #pragma options align=power
 
@@ -115,19 +119,23 @@ static volatile Uint32 fill_me = 0;
 static void mix_buffer(SDL_AudioDevice *audio, UInt8 *buffer)
 {
    if ( ! audio->paused ) {
-        if ( audio->convert.needed ) {
-                audio->spec.callback(audio->spec.userdata,
-                    (Uint8 *)audio->convert.buf,audio->convert.len);
-               SDL_ConvertAudio(&audio->convert);
-#if 0
-            if ( audio->convert.len_cvt != audio->spec.size ) {
-                /* Uh oh... probably crashes here; */
-            }
+#ifdef MACOSX
+        SDL_mutexP(audio->mixer_lock);
 #endif
+        if ( audio->convert.needed ) {
+            audio->spec.callback(audio->spec.userdata,
+                    (Uint8 *)audio->convert.buf,audio->convert.len);
+            SDL_ConvertAudio(&audio->convert);
+            if ( audio->convert.len_cvt != audio->spec.size ) {
+                /* Uh oh... probably crashes here */;
+            }
             memcpy(buffer, audio->convert.buf, audio->convert.len_cvt);
         } else {
             audio->spec.callback(audio->spec.userdata, buffer, audio->spec.size);
         }
+#ifdef MACOSX
+        SDL_mutexV(audio->mixer_lock);
+#endif
     }
 
     DecrementAtomic((SInt32 *) &need_to_mix);
