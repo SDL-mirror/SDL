@@ -230,6 +230,22 @@ int SDL_RunAudio(void *audiop)
 	return(0);
 }
 
+static void SDL_LockAudio_Default(SDL_AudioDevice *audio)
+{
+	if ( audio->thread && (SDL_ThreadID() == audio->threadid) ) {
+		return;
+	}
+	SDL_mutexP(audio->mixer_lock);
+}
+
+static void SDL_UnlockAudio_Default(SDL_AudioDevice *audio)
+{
+	if ( audio->thread && (SDL_ThreadID() == audio->threadid) ) {
+		return;
+	}
+	SDL_mutexV(audio->mixer_lock);
+}
+
 int SDL_AudioInit(const char *driver_name)
 {
 	SDL_AudioDevice *audio;
@@ -309,6 +325,10 @@ int SDL_AudioInit(const char *driver_name)
 	current_audio = audio;
 	if ( current_audio ) {
 		current_audio->name = bootstrap[i]->name;
+		if ( !current_audio->LockAudio && !current_audio->UnlockAudio ) {
+			current_audio->LockAudio = SDL_LockAudio_Default;
+			current_audio->UnlockAudio = SDL_UnlockAudio_Default;
+		}
 	}
 	return(0);
 }
@@ -506,11 +526,8 @@ void SDL_LockAudio (void)
 	SDL_AudioDevice *audio = current_audio;
 
 	/* Obtain a lock on the mixing buffers */
-	if ( audio ) {
-		if ( audio->thread && (SDL_ThreadID() == audio->threadid) ) {
-			return;
-		}
-		SDL_mutexP(audio->mixer_lock);
+	if ( audio && audio->LockAudio ) {
+		audio->LockAudio(audio);
 	}
 }
 
@@ -519,11 +536,8 @@ void SDL_UnlockAudio (void)
 	SDL_AudioDevice *audio = current_audio;
 
 	/* Release lock on the mixing buffers */
-	if ( audio ) {
-		if ( audio->thread && (SDL_ThreadID() == audio->threadid) ) {
-			return;
-		}
-		SDL_mutexV(audio->mixer_lock);
+	if ( audio && audio->UnlockAudio ) {
+		audio->UnlockAudio(audio);
 	}
 }
 

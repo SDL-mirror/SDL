@@ -59,6 +59,11 @@ struct SDL_AudioDevice {
 	void (*CloseAudio)(_THIS);
 
 	/* * * */
+	/* Lock / Unlock functions added for the Mac port */
+	void (*LockAudio)(_THIS);
+	void (*UnlockAudio)(_THIS);
+
+	/* * * */
 	/* Data common to all devices */
 
 	/* The current audio specification (shared with audio thread) */
