@@ -29,7 +29,7 @@ static char rcsid =
 
 extern int ph_SetupImage(_THIS, SDL_Surface *screen);
 extern void ph_DestroyImage(_THIS, SDL_Surface *screen);
-extern int ph_ResizeImage(_THIS, SDL_Surface *screen, Uint32 flags);
+extern int ph_SetupUpdateFunction(_THIS, SDL_Surface *screen, Uint32 flags);
 
 extern int ph_AllocHWSurface(_THIS, SDL_Surface *surface);
 extern void ph_FreeHWSurface(_THIS, SDL_Surface *surface);

@@ -188,14 +188,8 @@ QNX:  -= NOT YET SUPPORTED =-
  
 	The only hardware surface is the primary view surface.
  
-	Mouse events don't seem to be working right.
- 
 	Fullscreen doesn't display correctly.
  
-	The software surfaces could use some speed up.
- 
-	The mouse cursor doesn't look right.
-
 AmigaOS:  -= NOT YET SUPPORTED =-
 	The OpenGL support isn't implemented yet.
 

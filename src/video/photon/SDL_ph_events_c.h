@@ -27,7 +27,7 @@ static char rcsid =
 
 #include "SDL_ph_video.h"
 
-#define EVENT_SIZE sizeof( PhEvent_t ) + 1000
+#define EVENT_SIZE sizeof(PhEvent_t) + 1000
 
 /* Functions to be exported */
 extern void ph_InitOSKeymap(_THIS);

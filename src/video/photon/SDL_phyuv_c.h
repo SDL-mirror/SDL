@@ -31,11 +31,7 @@ static char rcsid =
 #include "SDL_ph_video.h"
 
 extern SDL_Overlay *ph_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SDL_Surface *display);
-
 extern int ph_LockYUVOverlay(_THIS, SDL_Overlay *overlay);
-
 extern void ph_UnlockYUVOverlay(_THIS, SDL_Overlay *overlay);
-
 extern int ph_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *dstrect);
-
 extern void ph_FreeYUVOverlay(_THIS, SDL_Overlay *overlay);

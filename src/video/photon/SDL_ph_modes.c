@@ -31,35 +31,36 @@ static unsigned long key1, key2;
 static PgVideoModeInfo_t mode_info;
 static PgVideoModes_t mode_list;
 
-  /* The current list of available video modes */
+/* The current list of available video modes */
 SDL_Rect  SDL_modelist[PH_MAX_VIDEOMODES];
 SDL_Rect* SDL_modearray[PH_MAX_VIDEOMODES];
 
 static int compare_modes_by_res(const void* mode1, const void* mode2)
 {
+    if (PgGetVideoModeInfo(*(unsigned short*)mode1, &mode_info) < 0)
+    {
+        fprintf(stderr,"error: In compare_modes_by_res PgGetVideoModeInfo failed on mode: 0x%x\n",
+            *(unsigned short*)mode1);
+        return 0;
+    }
 
-	if (PgGetVideoModeInfo(*(unsigned short*)mode1, &mode_info) < 0)
-	{
-	    fprintf(stderr,"error: In compare_modes_by_res PgGetVideoModeInfo failed on mode: 0x%x\n",
-        	    *(unsigned short*)mode1);
-    	    return 0;
-	}
-	key1 = mode_info.width * mode_info.height;
+    key1 = mode_info.width * mode_info.height;
 
-	if (PgGetVideoModeInfo(*(unsigned short*)mode2, &mode_info) < 0)
-	{
-    	    fprintf(stderr,"error: In compare_modes_by_res PgGetVideoModeInfo failed on mode: 0x%x\n",
-	            *(unsigned short*)mode2);
-	    return 0;
-	}
-        key2 = mode_info.width * mode_info.height;
+    if (PgGetVideoModeInfo(*(unsigned short*)mode2, &mode_info) < 0)
+    {
+        fprintf(stderr,"error: In compare_modes_by_res PgGetVideoModeInfo failed on mode: 0x%x\n",
+            *(unsigned short*)mode2);
+        return 0;
+    }
 
-	if (key1 > key2)
-		return 1;
-	else if (key1 == key2)
-		return 0;
-	else
-		return -1;
+    key2 = mode_info.width * mode_info.height;
+
+    if (key1 > key2)
+        return 1;
+    else if (key1 == key2)
+        return 0;
+    else
+        return -1;
 }
 
 SDL_Rect **ph_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
@@ -116,89 +117,6 @@ void ph_FreeVideoModes(_THIS)
 {
    return;
 }
-
-#if 0
-static void set_best_resolution(_THIS, int width, int height)
-{
-    /* warning ! dead variable use_vidmode ! */
-    if ( use_vidmode ) {
-		PgDisplaySettings_t 	settings;
-		PgVideoModeInfo_t		current_mode_info;
-		PgHWCaps_t my_hwcaps;
-		unsigned short			current_bpp;
-        int i;
-	/*
-		if (PgGetVideoMode( &settings ) < 0)
-		{
-			fprintf(stderr,"error: PgGetVideoMode failed\n");
-			return;
-		}
-		if (PgGetVideoModeInfo( settings.mode, &current_mode_info ) < 0)
-		{
-			fprintf(stderr,"error: PgGetVideoModeInfo failed\n");
-			return;
-		}
-		*/
-		//lu_zero 
-         if (PgGetGraphicsHWCaps(&my_hwcaps) < 0)
-         	{
-                fprintf(stderr,"set_best_resolution:  GetGraphicsHWCaps failed!! \n");
-      			//that HAVE to work
-            }
-         if (PgGetVideoModeInfo(my_hwcaps.current_video_mode, &current_mode_info) < 0)
-            {
-                fprintf(stderr,"set_best_resolution:  PgGetVideoModeInfo failed\n");
-            }
-		current_bpp = current_mode_info.bits_per_pixel;
-
-        if (PgGetVideoModeList(&mode_list) >= 0)
-		{
-			qsort(mode_list.modes, mode_list.num_modes, sizeof(unsigned short), compare_modes_by_res);
-#ifdef PH_DEBUG
-  			printf("Available modes:\n");
-  			for ( i = 0; i < mode_list.num_modes; ++i ) 
-			{
-				PgGetVideoModeInfo(mode_list.modes[i], &mode_info);
-    			printf("Mode %d: %dx%d\n", i, mode_info.width, mode_info.height);
-  			}
-#endif
-            for ( i = mode_list.num_modes-1; i >= 0 ; --i ) 
-			{
-				if (PgGetVideoModeInfo(mode_list.modes[i], &mode_info) < 0)
-				{
-					fprintf(stderr,"error: PgGetVideoModeInfo failed\n");
-				}
-                if ( (mode_info.width >= width) &&
-                     (mode_info.height >= height) &&
-					 (mode_info.bits_per_pixel == current_bpp) )
-                    break;
-            }
-			if (i >= 0)
-			{
-                if ( (mode_info.width != current_mode_info.width) ||
-                     (mode_info.height != current_mode_info.height) ) 
-				{
-					settings.mode = mode_list.modes[i];
-					if(PgSetVideoMode( &settings ) < 0)	
-					{
-						fprintf(stderr,"error: PgSetVideoMode failed\n");
-					}
-                }
-            }
-        }
-    }
-}
-
-int ph_ResizeFullScreen(_THIS)
-{
-    if (currently_fullscreen)
-    {
-        set_best_resolution(this, current_w, current_h);
-    }
-
-    return (1);
-}
-#endif /* 0 */
 
 /* return the mode associated with width, height and bpp */
 /* if there is no mode then zero is returned             */
@@ -270,7 +188,7 @@ int get_mode_any_format(int width, int height, int bpp)
 		/* get closest bpp */
 		closest = i++;
 		if (mode_info.bits_per_pixel == bpp)
-			return mode_list.modes[ closest ];
+			return mode_list.modes[closest];
 
 		min_delta = abs(mode_info.bits_per_pixel - bpp);
 		while(1)
@@ -300,15 +218,11 @@ int get_mode_any_format(int width, int height, int bpp)
 				i++;
 			}
 		}
-		return mode_list.modes[ closest ];
+		return mode_list.modes[closest];
 	}
 	else
     return 0;
 }
-
-void ph_WaitMapped(_THIS);
-void ph_WaitUnmapped(_THIS);
-void ph_QueueEnterFullScreen(_THIS);
 
 int ph_ToggleFullScreen(_THIS, int on)
 {
@@ -338,17 +252,18 @@ int ph_EnterFullScreen(_THIS)
             }
         }
 
-        if (OCImage.direct_context == NULL)
+        if (OCImage.direct_context==NULL)
         {
             OCImage.direct_context=(PdDirectContext_t*)PdCreateDirectContext();
         }
 
         if (!OCImage.direct_context)
         {
-            fprintf(stderr, "ph_EnterFullScreen: Can't create direct context\n" );
+            fprintf(stderr, "ph_EnterFullScreen(): Can't create direct context !\n");
+            return 0;
         }
 
-        PdDirectStart(OCImage.direct_context);
+        OCImage.oldDC=PdDirectStart(OCImage.direct_context);
 
         currently_fullscreen = 1;
     }
@@ -372,7 +287,8 @@ int ph_LeaveFullScreen(_THIS)
         {
             PdDirectStop(OCImage.direct_context);
             PdReleaseDirectContext(OCImage.direct_context);
-            
+            PhDCSetCurrent(OCImage.oldDC);
+
             currently_fullscreen=0;
 
             /* Restore old video mode */
@@ -384,7 +300,8 @@ int ph_LeaveFullScreen(_THIS)
                 
                 if (PgSetVideoMode(&mymode_settings) < 0)
                 {
-                    fprintf(stderr,"error: PgSetVideoMode failed\n");
+                    fprintf(stderr, "Ph_LeaveFullScreen(): PgSetVideoMode failed !\n");
+                    return 0;
                 }
             }
 

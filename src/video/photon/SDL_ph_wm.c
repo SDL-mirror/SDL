@@ -56,14 +56,10 @@ void ph_SetCaption(_THIS, const char *title, const char *icon)
 {
     SDL_Lock_EventThread();
 
-    /* check for set caption call before window init */
+    /* sanity check for set caption call before window init */
     if (window!=NULL)
     {
         PtSetResource(window, Pt_ARG_WINDOW_TITLE, title, 0);
-    }
-    else
-    {
-        captionflag=1;
     }
 
     SDL_Unlock_EventThread();
@@ -88,35 +84,34 @@ int ph_IconifyWindow(_THIS)
 
 SDL_GrabMode ph_GrabInputNoLock(_THIS, SDL_GrabMode mode)
 {
+    short abs_x, abs_y;
+
+    if( mode == SDL_GRAB_OFF )
+    {
+        PtSetResource(window, Pt_ARG_WINDOW_STATE, Pt_FALSE, Ph_WM_STATE_ISALTKEY);
+    }
+    else
+    {
+        PtSetResource(window, Pt_ARG_WINDOW_STATE, Pt_TRUE, Ph_WM_STATE_ISALTKEY);
+
+        PtGetAbsPosition(window, &abs_x, &abs_y);
+        PhMoveCursorAbs(PhInputGroup(NULL), abs_x + SDL_VideoSurface->w/2, abs_y + SDL_VideoSurface->h/2);
+    }
+
+    SDL_Unlock_EventThread();
+
     return(mode);
 }
 
 SDL_GrabMode ph_GrabInput(_THIS, SDL_GrabMode mode)
 {
-	short abs_x, abs_y;
+    SDL_Lock_EventThread();
+    mode = ph_GrabInputNoLock(this, mode);
+    SDL_Unlock_EventThread();
 
-	SDL_Lock_EventThread();
-/*	mode = ph_GrabInputNoLock(this, mode);*/
-
-	if( mode == SDL_GRAB_OFF )
-	{
-		PtSetResource(window, Pt_ARG_WINDOW_STATE, Pt_FALSE,
-				Ph_WM_STATE_ISALTKEY );
-	}
-	else
-	{
-		PtSetResource(window, Pt_ARG_WINDOW_STATE, Pt_TRUE,
-				Ph_WM_STATE_ISALTKEY );
-
-		PtGetAbsPosition( window, &abs_x, &abs_y );
-		PhMoveCursorAbs( PhInputGroup( NULL ),
-				abs_x + SDL_VideoSurface->w/2,
-				abs_y + SDL_VideoSurface->h/2 );
-	}
-
-	SDL_Unlock_EventThread();
-	return(mode);
+    return(mode);
 }
+
 
 int ph_GetWMInfo(_THIS, SDL_SysWMinfo *info)
 {

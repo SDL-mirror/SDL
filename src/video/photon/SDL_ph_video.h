@@ -44,18 +44,16 @@
 #define SDLPH_PAL_SYSTEM  0x00000002L
 
 typedef union vidptr{
-  uint8_t  *volatile ptr8;
-  uint16_t *volatile ptr16;
-  uint32_t *volatile ptr32;
+  uint8_t*  volatile ptr8;
+  uint16_t* volatile ptr16;
+  uint32_t* volatile ptr32;
  } VidPtr_t;
 
 typedef struct {
-	unsigned char *Y;
-	unsigned char *V;
-	unsigned char *U;
-}FRAMEDATA;
-
-#define EVENT_SIZE    sizeof( PhEvent_t ) + 1000
+	unsigned char* Y;
+	unsigned char* V;
+	unsigned char* U;
+} FRAMEDATA;
 
 /* Private display data */
 struct SDL_PrivateVideoData {
@@ -65,15 +63,17 @@ struct SDL_PrivateVideoData {
 #ifdef HAVE_OPENGL
     PdOpenGLContext_t* OGLContext;       /* OpenGL context              */
 #endif /* HAVE_OPENGL */
-    PgColor_t ph_palette[_Pg_MAX_PALETTE];
+    PgColor_t savedpal[_Pg_MAX_PALETTE];
+    PgColor_t syspalph[_Pg_MAX_PALETTE];
 
     struct {
-        PdDirectContext_t *direct_context;
-        PdOffscreenContext_t *offscreen_context;
+        PdDirectContext_t*    direct_context;
+        PdOffscreenContext_t* offscreen_context;
+        PhDrawContext_t*      oldDC;
         VidPtr_t dc_ptr;
-        FRAMEDATA *CurrentFrameData;
-        FRAMEDATA *FrameData0;
-        FRAMEDATA *FrameData1;
+        unsigned char* CurrentFrameData;
+        unsigned char* FrameData0;
+        unsigned char* FrameData1;
         int current;
         long flags;
     } ocimage;
@@ -82,39 +82,14 @@ struct SDL_PrivateVideoData {
     int old_video_mode;             /* Stored mode before fullscreen switch        */
     int old_refresh_rate;           /* Stored refresh rate befor fullscreen switch */
 
-    /* The current width and height of the fullscreen mode */
-    int current_w;
-    int current_h;
-
-    /* Support for internal mouse warping */
-    struct {
-        int x;
-        int y;
-    } mouse_last;
-
-    struct {
-        int numerator;
-        int denominator;
-        int threshold;
-    } mouse_accel;
-
     int mouse_relative;
     WMcursor* BlankCursor;
 
     int depth;			/* current visual depth (not bpp)        */
     int desktopbpp;             /* bpp of desktop at the moment of start */
     int desktoppal;             /* palette mode emulation or system      */
-    int captionflag;            /* caption setting flag                  */
 
-    int use_vidmode;
     int currently_fullscreen;
-
-    /* Automatic mode switching support (entering/leaving fullscreen) */
-    Uint32 switch_waiting;
-    Uint32 switch_time;
-
-    /* Prevent too many XSync() calls */
-    int blit_queued;
 
     PhEvent_t* event;
 };
@@ -129,23 +104,13 @@ struct SDL_PrivateVideoData {
 #define graphics_card_caps   (this->hidden->graphics_card_caps)
 #define desktopbpp           (this->hidden->desktopbpp)
 #define desktoppal           (this->hidden->desktoppal)
-#define ph_palette           (this->hidden->ph_palette)
+#define savedpal             (this->hidden->savedpal)
+#define syspalph             (this->hidden->syspalph)
 
 /* Old variable names */
-#define current_w            (this->hidden->current_w)
-#define current_h            (this->hidden->current_h)
-#define mouse_last           (this->hidden->mouse_last)
-#define mouse_accel          (this->hidden->mouse_accel)
 #define mouse_relative       (this->hidden->mouse_relative)
-#define saved_mode           (this->hidden->saved_mode)
-#define saved_view           (this->hidden->saved_view)
-#define use_vidmode          (this->hidden->use_vidmode)
 #define currently_fullscreen (this->hidden->currently_fullscreen)
-#define switch_waiting       (this->hidden->switch_waiting)
-#define switch_time          (this->hidden->switch_time)
-#define blit_queued          (this->hidden->blit_queued)
 #define event                (this->hidden->event)
 #define SDL_BlankCursor      (this->hidden->BlankCursor)
-#define captionflag          (this->hidden->captionflag)
 
 #endif /* _SDL_x11video_h */

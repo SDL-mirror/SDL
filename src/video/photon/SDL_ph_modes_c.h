@@ -36,9 +36,6 @@ static char rcsid =
 extern SDL_Rect **ph_ListModes(_THIS,SDL_PixelFormat *format, Uint32 flags);
 extern void ph_FreeVideoModes(_THIS);
 extern int ph_ResizeFullScreen(_THIS);
-extern void ph_WaitMapped(_THIS);
-extern void ph_WaitUnmapped(_THIS);
-extern void ph_QueueEnterFullScreen(_THIS);
 extern int ph_EnterFullScreen(_THIS);
 extern int ph_LeaveFullScreen(_THIS);
 extern int get_mode(int width, int height, int bpp);
