@@ -17,8 +17,8 @@ several other languages, including Ada, Eiffel, ML, Perl, and Python.
 
 The current version supports Linux, Windows, BeOS, MacOS, MacOS X,
 FreeBSD, OpenBSD, BSD/OS, Solaris, and IRIX.  The code contains support
-for Windows CE, Atari, QNX, NetBSD, AIX, OSF/Tru64, and SymbianOS, but
-these are not yet officially supported.
+for Windows CE, AmigaOS, Atari, QNX, NetBSD, AIX, OSF/Tru64, and SymbianOS,
+but these are not yet officially supported.
 
 This library is distributed under GNU LGPL version 2, which can be
 found in the file  "COPYING".  This license allows you to use SDL
@@ -33,11 +33,11 @@ More documentation is available in HTML format in "./docs/index.html"
 The test programs in the "test" subdirectory are in the public domain.
 
 Frequently asked questions are answered online:
-	http://www.libsdl.org/faqs.html
+	http://www.libsdl.org/faq.php
 
 If you need help with the library, or just want to discuss SDL related
 issues, you can join the developers mailing list:
-	http://www.libsdl.org/mailing-list.html
+	http://www.libsdl.org/mailing-list.php
 
 Enjoy!
 	Sam Lantinga				(slouken@libsdl.org)
