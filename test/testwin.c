@@ -335,7 +335,8 @@ int main(int argc, char *argv[])
 					w, h, desired_bpp, SDL_GetError());
 		exit(1);
 	}
-	printf("Set %dx%dx%d mode\n",
+	printf("Set%s %dx%dx%d mode\n",
+			screen->flags & SDL_FULLSCREEN ? " fullscreen" : "",
 			screen->w, screen->h, screen->format->BitsPerPixel);
 	printf("(video surface located in %s memory)\n",
 			(screen->flags&SDL_HWSURFACE) ? "video" : "system");
