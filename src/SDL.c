@@ -241,8 +241,8 @@ const SDL_version * SDL_Linked_Version(void)
 	return(&version);
 }
 
-#if defined(_WIN32_WCE)
-/* Need to include DllMain() on Windows CE for some reason.. */
+#if defined(_WIN32_WCE) || (defined(__WATCOMC__) && defined(BUILD_DLL))
+/* Need to include DllMain() on Windows CE and Watcom C for some reason.. */
 #include <windows.h>
 
 BOOL APIENTRY DllMain( HANDLE hModule, 
@@ -258,4 +258,4 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 	}
 	return TRUE;
 }
-#endif /* _WIN32_WCE */
+#endif /* _WIN32_WCE and building DLL with Watcom C */

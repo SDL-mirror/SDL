@@ -225,7 +225,7 @@ SDL_RWops *SDL_RWFromFP(FILE *fp, int autoclose)
 
 #ifdef WIN32
 	if ( ! in_sdl ) {
-		SDL_SetError("You can't pass a FILE pointer to a DLL (??)");
+		SDL_SetError("You can't pass a FILE pointer to a DLL (?)");
 		/*return(NULL);*/
 	}
 #endif

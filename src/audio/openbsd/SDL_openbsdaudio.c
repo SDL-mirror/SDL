@@ -304,7 +304,7 @@ audio mode	:   %s
     (info.mode == AUMODE_PLAY) ? "PLAY"
     : (info.mode = AUMODE_RECORD) ? "RECORD"
     : (info.mode == AUMODE_PLAY_ALL ? "PLAY_ALL"
-    : "???"));
+    : "?"));
 }
 #endif /* DEBUG_AUDIO */
 

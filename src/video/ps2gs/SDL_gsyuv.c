@@ -349,7 +349,7 @@ int GS_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *dstrect)
 		Cr =  (Uint32 *)overlay->pixels[2];
 		Cb =  (Uint32 *)overlay->pixels[1];
 	    default:
-		SDL_SetError("Unsupported YUV format in blit (??)");
+		SDL_SetError("Unsupported YUV format in blit (?)");
 		return(-1);
 	}
 	dst = (Uint32 *)hwdata->ipu_imem;
