@@ -36,6 +36,7 @@ EXTRA_DIST =		\
         WhatsNew	\
         docs.html	\
         sdl.m4		\
+        SDL.spec	\
         autogen.sh	\
         strip_fPIC.sh
 
@@ -48,8 +49,7 @@ $(PACKAGE)-$(VERSION).tar.gz: dist
 
 # Rule to build RPM distribution package
 rpm: $(PACKAGE)-$(VERSION).tar.gz
-	cp $(PACKAGE)-$(VERSION).tar.gz /usr/src/redhat/SOURCES
-	rpm -ba SDL.spec
+	rpm -ta $(PACKAGE)-$(VERSION).tar.gz
 
 # Rule to rebuild the export lists for BeOS, MacOS and Win32.
 exports:
@@ -79,7 +79,7 @@ install-hook:
 # Grab the test programs for the distribution:
 dist-hook:
 	if test -f test/Makefile; then (cd test; make distclean); fi
-	cp -rp test $(distdir)
+	cp -rp $(srcdir)/test $(distdir)
 	rm -rf `find $(distdir) -type d -name CVS -print`
 
 # Create a CVS snapshot that people can run update -d on

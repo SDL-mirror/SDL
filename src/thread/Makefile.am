@@ -3,7 +3,8 @@
 
 noinst_LTLIBRARIES = libthread.la
 
-ARCH_SUBDIRS = generic amigaos beos irix linux win32
+ARCH_SUBDIRS = $(srcdir)/generic $(srcdir)/amigaos $(srcdir)/beos \
+	$(srcdir)/irix $(srcdir)/linux $(srcdir)/win32
 
 # Older versions of Linux require an asm clone() implementation
 if USE_CLONE
