@@ -168,6 +168,8 @@ static int num_CPU(void)
                }
                fclose(pstat);
            }
+#elif defined(__sgi)
+	   num_cpus = sysconf(_SC_NPROC_ONLN);
 #elif defined(_SC_NPROCESSORS_ONLN)
 	   /* number of processors online (SVR4.0MP compliant machines) */
            num_cpus = sysconf(_SC_NPROCESSORS_ONLN);

@@ -129,7 +129,7 @@ static void AL_CloseAudio(_THIS)
 		mixbuf = NULL;
 	}
 	if ( audio_port != NULL ) {
-		ALcloseport(audio_port);
+		alClosePort(audio_port);
 		audio_port = NULL;
 	}
 }
@@ -180,7 +180,7 @@ static int AL_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	     (alSetWidth(audio_config, width) >= 0) &&
 	     (alSetQueueSize(audio_config, spec->samples*2) >= 0) &&
 	     (alSetChannels(audio_config, spec->channels) >= 0) ) {
-		audio_port = ALopenport("SDL audio", "w", audio_config);
+		audio_port = alOpenPort("SDL audio", "w", audio_config);
 	}
 	alFreeConfig(audio_config);
 	if( audio_port == NULL ) {

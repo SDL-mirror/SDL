@@ -92,7 +92,7 @@ ConvertRGBtoYV12(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 	/* Convert */
 	for(y=0; y<s->h && y<o->h; y++)
 	{
-		p=s->pixels+s->pitch*y;
+		p=((Uint8 *) s->pixels)+s->pitch*y;
 		op[0]=o->pixels[0]+o->pitches[0]*y;
 		op[1]=o->pixels[1]+o->pitches[1]*(y/2);
 		op[2]=o->pixels[2]+o->pitches[2]*(y/2);
@@ -132,7 +132,7 @@ ConvertRGBtoIYUV(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 	/* Convert */
 	for(y=0; y<s->h && y<o->h; y++)
 	{
-		p=s->pixels+s->pitch*y;
+		p=((Uint8 *) s->pixels)+s->pitch*y;
 		op[0]=o->pixels[0]+o->pitches[0]*y;
 		op[1]=o->pixels[1]+o->pitches[1]*(y/2);
 		op[2]=o->pixels[2]+o->pitches[2]*(y/2);
@@ -164,7 +164,7 @@ ConvertRGBtoUYVY(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 
 	for(y=0; y<s->h && y<o->h; y++)
 	{
-		p=s->pixels+s->pitch*y;
+		p=((Uint8 *) s->pixels)+s->pitch*y;
 		op=o->pixels[0]+o->pitches[0]*y;
 		for(x=0; x<s->w && x<o->w; x++)
 		{
@@ -197,7 +197,7 @@ ConvertRGBtoYVYU(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 
 	for(y=0; y<s->h && y<o->h; y++)
 	{
-		p=s->pixels+s->pitch*y;
+		p=((Uint8 *) s->pixels)+s->pitch*y;
 		op=o->pixels[0]+o->pitches[0]*y;
 		for(x=0; x<s->w && x<o->w; x++)
 		{
@@ -233,7 +233,7 @@ ConvertRGBtoYUY2(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 
 	for(y=0; y<s->h && y<o->h; y++)
 	{
-		p=s->pixels+s->pitch*y;
+		p=((Uint8 *) s->pixels)+s->pitch*y;
 		op=o->pixels[0]+o->pitches[0]*y;
 		for(x=0; x<s->w && x<o->w; x++)
 		{

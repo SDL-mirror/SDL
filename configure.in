@@ -415,14 +415,22 @@ CheckNAS()
         have_nas=no
         if test -r /usr/X11R6/include/audio/audiolib.h; then
             have_nas=yes
-        fi
-        AC_MSG_RESULT($have_nas)
-        if test x$have_nas = xyes; then
             CFLAGS="$CFLAGS -DNAS_SUPPORT"
             SYSTEM_LIBS="$SYSTEM_LIBS -laudio -lXt"
             AUDIO_SUBDIRS="$AUDIO_SUBDIRS nas"
             AUDIO_DRIVERS="$AUDIO_DRIVERS nas/libaudio_nas.la"
+
+        dnl On IRIX, the NAS includes are in a different directory,
+        dnl and libnas must be explicitly linked in
+
+        elif test -r /usr/freeware/include/nas/audiolib.h; then
+            have_nas=yes
+            CFLAGS="$CFLAGS -DNAS_SUPPORT"
+            SYSTEM_LIBS="$SYSTEM_LIBS -lnas -lXt"
+            AUDIO_SUBDIRS="$AUDIO_SUBDIRS nas"
+            AUDIO_DRIVERS="$AUDIO_DRIVERS nas/libaudio_nas.la"
         fi
+        AC_MSG_RESULT($have_nas)
     fi
 }
 

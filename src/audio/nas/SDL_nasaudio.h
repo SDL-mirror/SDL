@@ -32,7 +32,11 @@ static char rcsid =
 #ifndef _SDL_nasaudio_h
 #define _SDL_nasaudio_h
 
+#ifdef __sgi
+#include <nas/audiolib.h>
+#else
 #include <audio/audiolib.h>
+#endif
 #include <sys/time.h>
 #include "SDL_sysaudio.h"
 
