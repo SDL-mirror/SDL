@@ -409,9 +409,9 @@ report_alloc(struct report *r, struct report_desc *rd, int repind)
 	int len;
 
 #ifdef USBHID_NEW
-	len = hid_report_size(rd, repinfo[repind].kind, r->rid);
-#else
 	len = hid_report_size(rd, repinfo[repind].kind, &r->rid);
+#else
+	len = hid_report_size(rd, repinfo[repind].kind, r->rid);
 #endif
 	if (len < 0) {
 		SDL_SetError("Negative HID report size");
