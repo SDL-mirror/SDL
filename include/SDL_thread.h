@@ -50,7 +50,7 @@ struct SDL_Thread;
 typedef struct SDL_Thread SDL_Thread;
 
 /* Create a thread */
-extern DECLSPEC SDL_Thread * SDLCALL SDL_CreateThread(int (*fn)(void *), void *data);
+extern DECLSPEC SDL_Thread * SDLCALL SDL_CreateThread(int (SDLCALL *fn)(void *), void *data);
 
 /* Get the 32-bit thread identifier for the current thread */
 extern DECLSPEC Uint32 SDLCALL SDL_ThreadID(void);

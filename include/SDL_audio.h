@@ -59,7 +59,7 @@ typedef struct SDL_AudioSpec {
 	   Once the callback returns, the buffer will no longer be valid.
 	   Stereo samples are stored in a LRLRLR ordering.
 	*/
-	void (*callback)(void *userdata, Uint8 *stream, int len);
+	void (SDLCALL *callback)(void *userdata, Uint8 *stream, int len);
 	void  *userdata;
 } SDL_AudioSpec;
 
@@ -94,7 +94,7 @@ typedef struct SDL_AudioCVT {
 	int    len_cvt;			/* Length of converted audio buffer */
 	int    len_mult;		/* buffer must be len*len_mult big */
 	double len_ratio; 	/* Given len, final size is len*len_ratio */
-	void (*filters[10])(struct SDL_AudioCVT *cvt, Uint16 format);
+	void (SDLCALL *filters[10])(struct SDL_AudioCVT *cvt, Uint16 format);
 	int filter_index;		/* Current audio conversion function */
 } SDL_AudioCVT;
 

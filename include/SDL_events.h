@@ -285,7 +285,7 @@ extern DECLSPEC int SDLCALL SDL_PushEvent(SDL_Event *event);
 
   The filter is protypted as:
 */
-typedef int (*SDL_EventFilter)(const SDL_Event *event);
+typedef int (SDLCALL *SDL_EventFilter)(const SDL_Event *event);
 /*
   If the filter returns 1, then the event will be added to the internal queue.
   If it returns 0, then the event will be dropped from the queue, but the 
