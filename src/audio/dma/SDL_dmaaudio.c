@@ -39,21 +39,7 @@ static char rcsid =
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
-#ifdef linux
-#include <linux/soundcard.h>
-#endif
-#ifdef __bsdi__
 #include <sys/soundcard.h>
-#endif
-#ifdef __FreeBSD__
-#include <machine/soundcard.h>
-#endif
-#ifdef __OpenBSD__
-#include <soundcard.h>
-#endif
-#ifdef __USLC__
-#include <sys/soundcard.h>
-#endif
 
 #ifndef MAP_FAILED
 #define MAP_FAILED	((Uint8 *)-1)

@@ -242,21 +242,7 @@ CheckOSS()
         AC_MSG_CHECKING(for OSS audio support)
         have_oss=no
         AC_TRY_COMPILE([
-          #ifdef linux
-          #include <linux/soundcard.h>
-          #endif
-          #ifdef __FreeBSD__
-          #include <machine/soundcard.h>
-          #endif
-          #ifdef __bsdi__
           #include <sys/soundcard.h>
-          #endif
-          #ifdef __OpenBSD__
-          #include <soundcard.h>
-          #endif
-          #ifdef __USLC__
-          #include <sys/soundcard.h>
-          #endif
         ],[
 	  int arg = SNDCTL_DSP_SETFRAGMENT;
         ],[
@@ -1146,6 +1132,8 @@ case "$target" in
         CheckDummyVideo
         CheckNASM
         CheckOSS
+        CheckARTSC
+        CheckESD
         CheckNAS
         CheckX11
         CheckDGA
@@ -1386,6 +1374,7 @@ case "$target" in
         CFLAGS="$CFLAGS -D__ELF__" # Fix for nasm on Solaris x86
         CheckDummyVideo
         CheckNASM
+        CheckOSS
         CheckARTSC
         CheckESD
         CheckNAS
@@ -1488,6 +1477,7 @@ case "$target" in
     *-*-hpux*)
         ARCH=hpux
         CheckDummyVideo
+        CheckOSS
         CheckNAS
         CheckX11
         CheckGGI
@@ -1531,6 +1521,7 @@ case "$target" in
     *-*-aix*)
         ARCH=aix
         CheckDummyVideo
+        CheckOSS
         CheckNAS
         CheckX11
         CheckGGI

@@ -37,21 +37,7 @@ static char rcsid =
 #include <sys/time.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
-#ifdef linux
-#include <linux/soundcard.h>
-#endif
-#ifdef __bsdi__
 #include <sys/soundcard.h>
-#endif
-#ifdef __FreeBSD__
-#include <machine/soundcard.h>
-#endif
-#ifdef __OpenBSD__
-#include <soundcard.h>
-#endif
-#ifdef __USLC__
-#include <sys/soundcard.h>
-#endif
 
 #include "SDL_audio.h"
 #include "SDL_error.h"
