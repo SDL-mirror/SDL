@@ -36,7 +36,11 @@ void DrawBox(SDL_Surface *screen, int X, int Y, int width, int height)
 
 	/* Do it! */
 	SDL_FillRect(screen, &area, color);
-	SDL_UpdateRects(screen, 1, &area);
+	if ( screen->flags & SDL_DOUBLEBUF ) {
+		SDL_Flip(screen);
+	} else {
+		SDL_UpdateRects(screen, 1, &area);
+	}
 }
 
 SDL_Surface *CreateScreen(Uint16 w, Uint16 h, Uint8 bpp, Uint32 flags)
@@ -65,18 +69,25 @@ SDL_Surface *CreateScreen(Uint16 w, Uint16 h, Uint8 bpp, Uint32 flags)
 	SDL_SetColors(screen, palette, 0, NUM_COLORS);
 
 	/* Set the surface pixels and refresh! */
-	if ( SDL_LockSurface(screen) < 0 ) {
-		fprintf(stderr, "Couldn't lock display surface: %s\n",
-							SDL_GetError());
-		return(NULL);
+	/* Use two loops in case the surface is double-buffered (both sides) */
+	for ( i=0; i<2; ++i ) {
+		if ( SDL_LockSurface(screen) < 0 ) {
+			fprintf(stderr, "Couldn't lock display surface: %s\n",
+								SDL_GetError());
+			return(NULL);
+		}
+		buffer = (Uint8 *)screen->pixels;
+		for ( i=0; i<screen->h; ++i ) {
+			memset(buffer,(i*(NUM_COLORS-1))/screen->h, screen->w * screen->format->BytesPerPixel);
+			buffer += screen->pitch;
+		}
+		SDL_UnlockSurface(screen);
+		if ( screen->flags & SDL_DOUBLEBUF ) {
+			SDL_Flip(screen);
+		} else {
+			SDL_UpdateRect(screen, 0, 0, 0, 0);
+		}
 	}
-	buffer = (Uint8 *)screen->pixels;
-	for ( i=0; i<screen->h; ++i ) {
-		memset(buffer,(i*(NUM_COLORS-1))/screen->h, screen->w * screen->format->BytesPerPixel);
-		buffer += screen->pitch;
-	}
-	SDL_UnlockSurface(screen);
-	SDL_UpdateRect(screen, 0, 0, 0, 0);
 
 	return(screen);
 }
@@ -120,13 +131,16 @@ int main(int argc, char *argv[])
 		if ( argv[argc] && (strcmp(argv[argc], "-hwpalette") == 0) ) {
 			videoflags |= SDL_HWPALETTE;
 		} else
+		if ( argv[argc] && (strcmp(argv[argc], "-flip") == 0) ) {
+			videoflags |= SDL_DOUBLEBUF;
+		} else
 		if ( argv[argc] && (strcmp(argv[argc], "-noframe") == 0) ) {
 			videoflags |= SDL_NOFRAME;
 		} else
 		if ( argv[argc] && (strcmp(argv[argc], "-fullscreen") == 0) ) {
 			videoflags |= SDL_FULLSCREEN;
 		} else {
-			fprintf(stderr, "Usage: %s [-width] [-height] [-bpp] [-hw] [-hwpalette] [-noframe] [-fullscreen]\n",
+			fprintf(stderr, "Usage: %s [-width] [-height] [-bpp] [-hw] [-hwpalette] [-flip] [-noframe] [-fullscreen]\n",
 								argv[0]);
 			exit(1);
 		}
