@@ -4,9 +4,13 @@
 
 <IMG SRC="docs/images/rainbow.gif" ALT="[separator]" WIDTH="100%">
 <P>
-This source is in development.  It may contain API changes, and may not be
-fully tested on all supported platforms.  The current stable release may
-be found at the <A HREF="http://www.libsdl.org/"> main SDL page</A>.
+This source is stable, and is fully tested on all supported platforms.<br>
+Please send bug reports or questions to the SDL mailing list:<br>
+<a href="http://www.libsdl.org/mailing-list.php"
+        >http://www.libsdl.org/mailing-list.php</a><br>
+The latest stable release may be found on the
+	<a href="http://www.libsdl.org/">SDL website</A>.
+</P>
 <P>
 
 <H2> <A HREF="docs/index.html">API Documentation</A> </H2>
@@ -16,16 +20,62 @@ be found at the <A HREF="http://www.libsdl.org/"> main SDL page</A>.
 Major changes since SDL 1.0.0:
 </H2>
 <UL>
-	<LI> 1.2.5: Added initial support for Dreamcast (thanks HERO!)
-	<LI> 1.2.5: Updated Borland projects for Kylix 3 (thanks Dominique)
-	<LI> 1.2.5: Added project files for embedded Visual C++ 4.0
-	<LI> 1.2.5: Added SDL_BUTTON_WHEELUP (4) and SDL_BUTTON_WHEELDOWN (5)
-	<LI> 1.2.5: Added SDL_GL_STEREO for stereoscopic OpenGL contexts
-	<LI> 1.2.5: Fixed VidMode error when running on XFree86 3.3
-	<LI> 1.2.5: Added initial support for PicoGUI (thanks Micah!)
-	<LI> 1.2.5: Fixed SDL_DisplayFormatAlpha() on RGB surfaces with alpha
-	<LI> 1.2.5: Fixed setting OpenGL mode multiple times on Windows
-	<LI> 1.2.5: Added support for Qtopia on embedded systems (thanks David!)
+	<LI> 1.2.5: Added an environment variable SDL_HAS3BUTTONMOUSE for Quartz
+	<LI> 1.2.5: Added initial support for Dreamcast (thanks HERO!) 
+	<LI> 1.2.5: Implemented resizing Cocoa windows (thanks Darrell!) 
+	<LI> 1.2.5: Updated Quartz video code for MacOS X 10.2 (thanks Darrell!) 
+	<LI> 1.2.5: Added an environment variable SDL_VIDEO_WINDOW_POS for X11
+	<LI> 1.2.5: Fixed mouse focus problems caused by X11 'unclutter' hack 
+	<LI> 1.2.5: Applied John's fix for left-handed mice under Windows. 
+	<LI> 1.2.5: Gamepads and other HID devices should work under MacOS X 
+	<LI> 1.2.5: Fixed missing cursor after shadow buffer flip (thanks Jan!) 
+	<LI> 1.2.5: Updated MacOS projects with "enums as int" build option 
+	<LI> 1.2.5: Added -benchmark flag to testvidinfo for testing video speed 
+	<LI> 1.2.5: Added accelerated YUV code to DirectFB driver (thanks Denis!) 
+	<LI> 1.2.5: Command line apps on MacOS X go to forground (thanks Max!) 
+	<LI> 1.2.5: Fixed aRts runtime sound daemon detection 
+	<LI> 1.2.5: Improved the Nano-X video support (thanks Greg!) 
+	<LI> 1.2.5: Updated Borland projects for Kylix 3 (thanks Dominique) 
+	<LI> 1.2.5: Added compile-time checking for the size of enums 
+	<LI> 1.2.5: Fixed offset bug in hardware accelerated fills and blits 
+	<LI> 1.2.5: Fixed serious bugs in BSD HID joystick code (thanks Krister!) 
+	<LI> 1.2.5: Added project files for embedded Visual C++ 4.0 
+	<LI> 1.2.5: Added SDL_BUTTON_WHEELUP (4) and SDL_BUTTON_WHEELDOWN (5) 
+	<LI> 1.2.5: Added SDL_GL_STEREO for stereoscopic OpenGL contexts 
+	<LI> 1.2.5: Added the environment variable SDL_VIDEO_X11_WMCLASS 
+	<LI> 1.2.5: Fullscreen windows are always topmost in Windows 
+	<LI> 1.2.5: Fixed mouse grab going fullscreen to windowed in Windows 
+	<LI> 1.2.5: Fixed VidMode error when running on XFree86 3.3 
+	<LI> 1.2.5: Fixed Quartz mouse motion and window centering bugs 
+	<LI> 1.2.5: Updated configure.in for automake 1.6.2 
+	<LI> 1.2.5: Fixed building Windows DLL with latest native Cygwin tools 
+	<LI> 1.2.5: Added a way to get the Windows OpenGL context in SDL_syswm.h 
+	<LI> 1.2.5: Removed DDFLIP_WAIT flag from DirectX flip for performance 
+	<LI> 1.2.5: Zeroed SDL_Surface::unused1 so glSDL will work on stock SDL 
+	<LI> 1.2.5: Only modifier key state is noted when X11 window opens 
+	<LI> 1.2.5: Added initial support for PicoGUI (thanks Micah!) 
+	<LI> 1.2.5: Fixed SDL_DisplayFormatAlpha() on RGB surfaces with alpha 
+	<LI> 1.2.5: Added pthread detection for HP-UX 11.X 
+	<LI> 1.2.5: SDL_Init(SDL_INIT_JOYSTICK) on MacOS X works with no joystick 
+	<LI> 1.2.5: Fixed DirectX software surface memory leak 
+	<LI> 1.2.5: Fixed video initialization crash on Windows CE 
+	<LI> 1.2.5: Updated the QNX audio code for QNX 6.2 (thanks Travis!) 
+	<LI> 1.2.5: Fixed building with pthread and pth support on UNIX 
+	<LI> 1.2.5: Added detection of several joysticks to Linux code 
+	<LI> 1.2.5: Fixed thread detection and joystick code for NetBSD 
+	<LI> 1.2.5: Added support for audio in the Atari port (thanks Patrice!) 
+	<LI> 1.2.5: Added check for ENOMEDIUM to the Linux CDROM code 
+	<LI> 1.2.5: Added YUV hardware acceleration on MacOS X (thanks Darrell!) 
+	<LI> 1.2.5: Fixed building shared libraries on MacOS X (thanks Max!) 
+	<LI> 1.2.5: Use secondary audio buffers in DirectSound by default 
+	<LI> 1.2.5: Fixed window tab on Windows taskbar after application quit 
+	<LI> 1.2.5: Fixed setting OpenGL mode multiple times on Windows 
+	<LI> 1.2.5: Added Zaurus PDA (Qtopia) support by David Hedbor 
+	<LI> 1.2.5: Removed README.OpenBSD - SDL works out of the box on OpenBSD 
+	<LI> 1.2.5: Fixed crash in QZ_SetCaption() (thanks Darrell) 
+	<LI> 1.2.5: Updated ALSA audio support for ALSA 0.9 
+	<LI> 1.2.5: Don't build RPM archives with ALSA library dependencies 
+	<LI> 1.2.5: SDL_PollEvent()/SDL_WaitEvent() return values now match docs 
 	<LI> 1.2.4: Added initial support for Atari (thanks Patrice!)
 	<LI> 1.2.4: Added support for building SDL for EPOC/SymbianOS 6.0
 	<LI> 1.2.4: SDL now compiles and works cleanly on stock BSDI

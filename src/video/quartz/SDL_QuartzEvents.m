@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include <stdlib.h>	// For getenv()
 #include "SDL_QuartzKeys.h"
 
 static void     QZ_InitOSKeymap (_THIS) {
@@ -364,16 +365,20 @@ static void QZ_PumpEvents (_THIS)
             switch (type) {
             
                 case NSLeftMouseDown:
-                    if ( NSCommandKeyMask & current_mods ) {
-                        last_virtual_button = 3;
-                        DO_MOUSE_DOWN (3, 0);
-                    }
-                    else if ( NSAlternateKeyMask & current_mods ) {
-                        last_virtual_button = 2;
-                        DO_MOUSE_DOWN (2, 0);
-                    }
-                    else {
+                    if ( getenv("SDL_HAS3BUTTONMOUSE") ) {
                         DO_MOUSE_DOWN (1, 1);
+                    } else {
+                        if ( NSCommandKeyMask & current_mods ) {
+                            last_virtual_button = 3;
+                            DO_MOUSE_DOWN (3, 0);
+                        }
+                        else if ( NSAlternateKeyMask & current_mods ) {
+                            last_virtual_button = 2;
+                            DO_MOUSE_DOWN (2, 0);
+                        }
+                        else {
+                            DO_MOUSE_DOWN (1, 1);
+                        }
                     }
                     break;
                 case NSOtherMouseDown: DO_MOUSE_DOWN (2, 0); break;
