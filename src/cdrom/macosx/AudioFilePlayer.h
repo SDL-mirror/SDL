@@ -34,7 +34,7 @@
 #include <AudioToolbox/AudioToolbox.h>
 #include <AudioUnit/AudioUnit.h>
 
-#include "SDL_Error.h"
+#include "SDL_error.h"
 
 const char* AudioFilePlayerErrorStr (OSStatus error);
 
