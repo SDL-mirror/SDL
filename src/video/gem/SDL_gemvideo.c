@@ -627,11 +627,6 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 	}
 
 	if (flags & SDL_FULLSCREEN) {
-		/* Close window if needed */
-		if (GEM_handle >= 0) {
-			wind_close(GEM_handle);
-		}
-
 		GEM_LockScreen(this);
 
 		GEM_ClearScreen(this);
@@ -665,9 +660,7 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 		modeflags |= SDL_SWSURFACE;
 
 		/* Recreate window ? only for different widget or non-created window */
-		if ((old_win_type == GEM_win_type) && (GEM_handle >= 0)) {
-			wind_get(GEM_handle, WF_CURRXYWH, &x2,&y2,&w2,&h2);
-		} else {
+		if ((old_win_type != GEM_win_type) || (GEM_handle < 0)) {
 			/* Calculate window size */
 			if (!wind_calc(WC_BORDER, GEM_win_type, 0,0,width,height, &x2,&y2,&w2,&h2)) {
 				GEM_FreeBuffers(this);
@@ -700,10 +693,10 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 			/* Setup window name */
 			wind_set(GEM_handle,WF_NAME,(short)(((unsigned long)GEM_title_name)>>16),(short)(((unsigned long)GEM_title_name) & 0xffff),0,0);
 			GEM_refresh_name = SDL_FALSE;
+
+			/* Open the window */
+			wind_open(GEM_handle,x2,y2,w2,h2);
 		}
-	
-		/* Open the window */
-		wind_open(GEM_handle,x2,y2,w2,h2);
 
 		GEM_fullscreen = SDL_FALSE;
 	}
