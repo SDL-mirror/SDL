@@ -156,9 +156,11 @@ void DirectFB_InitOSKeymap (_THIS)
   keymap[DIKI_RIGHT] = SDLK_RIGHT;
   keymap[DIKI_UP] = SDLK_UP;
   keymap[DIKI_DOWN] = SDLK_DOWN;
-  keymap[DIKI_CTRL] = SDLK_LCTRL;
-  keymap[DIKI_SHIFT] = SDLK_LSHIFT;
-  keymap[DIKI_ALT] = SDLK_LALT;
+  keymap[DIKI_CONTROL_L] = SDLK_LCTRL;
+  keymap[DIKI_CONTROL_R] = SDLK_RCTRL;
+  keymap[DIKI_SHIFT_L] = SDLK_LSHIFT;
+  keymap[DIKI_SHIFT_R] = SDLK_RSHIFT;
+  keymap[DIKI_ALT_L] = SDLK_LALT;
   keymap[DIKI_ALTGR] = SDLK_RALT;
   keymap[DIKI_TAB] = SDLK_TAB;
   keymap[DIKI_ENTER] = SDLK_RETURN;
@@ -170,9 +172,9 @@ void DirectFB_InitOSKeymap (_THIS)
   keymap[DIKI_END] = SDLK_END;
   keymap[DIKI_PAGE_UP] = SDLK_PAGEUP;
   keymap[DIKI_PAGE_DOWN] = SDLK_PAGEDOWN;
-  keymap[DIKI_CAPSLOCK] = SDLK_CAPSLOCK;
-  keymap[DIKI_NUMLOCK] = SDLK_NUMLOCK;
-  keymap[DIKI_SCRLOCK] = SDLK_SCROLLOCK;
+  keymap[DIKI_CAPS_LOCK] = SDLK_CAPSLOCK;
+  keymap[DIKI_NUM_LOCK] = SDLK_NUMLOCK;
+  keymap[DIKI_SCROLL_LOCK] = SDLK_SCROLLOCK;
   keymap[DIKI_PRINT] = SDLK_PRINT;
   keymap[DIKI_PAUSE] = SDLK_PAUSE;
   keymap[DIKI_KP_DIV] = SDLK_KP_DIVIDE;
