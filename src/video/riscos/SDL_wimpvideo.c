@@ -80,6 +80,9 @@ extern int riscos_backbuffer;
 extern int mouseInWindow;
 extern int riscos_closeaction;
 
+/* Following needed to ensure window is shown immediately */
+extern int hasFocus;
+extern void WIMP_Poll(_THIS, int waitTime);
 
 SDL_Surface *WIMP_SetVideoMode(_THIS, SDL_Surface *current,
 				int width, int height, int bpp, Uint32 flags)
@@ -177,9 +180,21 @@ SDL_Surface *WIMP_SetVideoMode(_THIS, SDL_Surface *current,
 	/* Reset device functions for the wimp */
 	WIMP_SetDeviceMode(this);
 
-    /* Needs to set up plot info after window has been created */
-    /* Not sure why, but plots don't work if I do it earlier */
-    WIMP_SetupPlotInfo(this);
+	/* Needs to set up plot info after window has been created */
+	/* Not sure why, but plots don't work if I do it earlier */
+	WIMP_SetupPlotInfo(this);
+
+	/* Poll until window is shown */
+	{
+	   /* We wait until it gets the focus, but give up after 5 seconds
+	      in case the focus is prevented in any way.
+	   */
+	   Uint32 now = SDL_GetTicks();
+	   while (!hasFocus && SDL_GetTicks() - now < 5000)
+	   {
+	      WIMP_Poll(this, 0);
+	   }
+	}
 
 	/* We're done */
 	return(current);
