@@ -37,11 +37,22 @@ static char rcsid =
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_VideoDevice *this
 
+/* Define this if you need the DGA driver to be thread-safe */
+#define LOCK_DGA_DISPLAY
+#ifdef LOCK_DGA_DISPLAY
+#define LOCK_DISPLAY()		SDL_mutexP(event_lock)
+#define UNLOCK_DISPLAY()	SDL_mutexV(event_lock)
+#else
+#define LOCK_DISPLAY()
+#define UNLOCK_DISPLAY()
+#endif
+
 
 /* This is the structure we use to keep track of video memory */
 typedef struct vidmem_bucket {
 	struct vidmem_bucket *prev;
-	unsigned int used;
+	int used;
+	int dirty;
 	Uint8 *base;
 	unsigned int size;
 	struct vidmem_bucket *next;
@@ -82,6 +93,9 @@ struct SDL_PrivateVideoData {
 
 	/* Used to handle DGA events */
 	int event_base;
+#ifdef LOCK_DGA_DISPLAY
+	SDL_mutex *event_lock;
+#endif
 };
 /* Old variable names */
 #define DGA_Display		(this->hidden->DGA_Display)
@@ -102,5 +116,6 @@ struct SDL_PrivateVideoData {
 #define surfaces_memleft	(this->hidden->surfaces_memleft)
 #define hw_lock			(this->hidden->hw_lock)
 #define DGA_event_base		(this->hidden->event_base)
+#define event_lock		(this->hidden->event_lock)
 
 #endif /* _SDL_dgavideo_h */

@@ -97,9 +97,11 @@ static int DGA_DispatchEvent(_THIS)
 void DGA_PumpEvents(_THIS)
 {
 	/* Keep processing pending events */
+	LOCK_DISPLAY();
 	while ( X11_Pending(DGA_Display) ) {
 		DGA_DispatchEvent(this);
 	}
+	UNLOCK_DISPLAY();
 }
 
 void DGA_InitOSKeymap(_THIS)

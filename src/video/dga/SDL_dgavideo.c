@@ -58,7 +58,7 @@ static int DGA_SetGammaRamp(_THIS, Uint16 *ramp);
 static void DGA_VideoQuit(_THIS);
 
 /* Hardware surface functions */
-static int DGA_InitHWSurfaces(_THIS, Uint8 *base, int size);
+static int DGA_InitHWSurfaces(_THIS, SDL_Surface *screen, Uint8 *base, int size);
 static void DGA_FreeHWSurfaces(_THIS);
 static int DGA_AllocHWSurface(_THIS, SDL_Surface *surface);
 static int DGA_FillHWRect(_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color);
@@ -409,6 +409,11 @@ static int DGA_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		return(-1);
 	}
 
+#ifdef LOCK_DGA_DISPLAY
+	/* Create the event lock so we're thread-safe.. :-/ */
+	event_lock = SDL_CreateMutex();
+#endif /* LOCK_DGA_DISPLAY */
+
 	/* We're done! */
 	return(0);
 }
@@ -535,7 +540,7 @@ SDL_Surface *DGA_SetVideoMode(_THIS, SDL_Surface *current,
 	if ( surfaces_len < 0 ) {
 		surfaces_len = 0;
 	}
-	DGA_InitHWSurfaces(this, surfaces_mem, surfaces_len);
+	DGA_InitHWSurfaces(this, current, surfaces_mem, surfaces_len);
 
 	/* Set the update rectangle function */
 	this->UpdateRects = DGA_DirectUpdate;
@@ -581,15 +586,36 @@ static void DGA_DumpHWSurfaces(_THIS)
 }
 #endif
 
-static int DGA_InitHWSurfaces(_THIS, Uint8 *base, int size)
+static int DGA_InitHWSurfaces(_THIS, SDL_Surface *screen, Uint8 *base, int size)
 {
-	surfaces.prev = NULL;
-	surfaces.used = 0;
-	surfaces.base = base;
-	surfaces.size = size;
-	surfaces.next = NULL;
+	vidmem_bucket *bucket;
+
 	surfaces_memtotal = size;
 	surfaces_memleft = size;
+
+	if ( surfaces_memleft > 0 ) {
+		bucket = (vidmem_bucket *)malloc(sizeof(*bucket));
+		if ( bucket == NULL ) {
+			SDL_OutOfMemory();
+			return(-1);
+		}
+		bucket->prev = &surfaces;
+		bucket->used = 0;
+		bucket->dirty = 0;
+		bucket->base = base;
+		bucket->size = size;
+		bucket->next = NULL;
+	} else {
+		bucket = NULL;
+	}
+
+	surfaces.prev = NULL;
+	surfaces.used = 1;
+	surfaces.dirty = 0;
+	surfaces.base = screen->pixels;
+	surfaces.size = (unsigned int)((long)base - (long)surfaces.base);
+	surfaces.next = bucket;
+	screen->hwdata = (struct private_hwdata *)&surfaces;
 	return(0);
 }
 static void DGA_FreeHWSurfaces(_THIS)
@@ -605,11 +631,35 @@ static void DGA_FreeHWSurfaces(_THIS)
 	surfaces.next = NULL;
 }
 
+static __inline__ void DGA_AddDirtySurface(SDL_Surface *surface)
+{
+	((vidmem_bucket *)surface->hwdata)->dirty = 1;
+}
+
+static __inline__ int DGA_IsSurfaceDirty(SDL_Surface *surface)
+{
+	return ((vidmem_bucket *)surface->hwdata)->dirty;
+}
+
+static __inline__ void DGA_WaitDirtySurfaces(_THIS)
+{
+	vidmem_bucket *bucket;
+
+	/* Wait for graphic operations to complete */
+	XDGASync(DGA_Display, DGA_Screen);
+
+	/* Clear all surface dirty bits */
+	for ( bucket=&surfaces; bucket; bucket=bucket->next ) {
+		bucket->dirty = 0;
+	}
+}
+
 static int DGA_AllocHWSurface(_THIS, SDL_Surface *surface)
 {
 	vidmem_bucket *bucket;
 	int size;
 	int extra;
+	int retval = 0;
 
 /* Temporarily, we only allow surfaces the same width as display.
    Some blitters require the pitch between two hardware surfaces
@@ -624,11 +674,13 @@ surface->pitch = SDL_VideoSurface->pitch;
 #ifdef DGA_DEBUG
 	fprintf(stderr, "Allocating bucket of %d bytes\n", size);
 #endif
+	LOCK_DISPLAY();
 
 	/* Quick check for available mem */
 	if ( size > surfaces_memleft ) {
 		SDL_SetError("Not enough video memory");
-		return(-1);
+		retval = -1;
+		goto done;
 	}
 
 	/* Search for an empty bucket big enough */
@@ -639,7 +691,8 @@ surface->pitch = SDL_VideoSurface->pitch;
 	}
 	if ( bucket == NULL ) {
 		SDL_SetError("Video memory too fragmented");
-		return(-1);
+		retval = -1;
+		goto done;
 	}
 
 	/* Create a new bucket for left-over memory */
@@ -653,7 +706,8 @@ surface->pitch = SDL_VideoSurface->pitch;
 		newbucket = (vidmem_bucket *)malloc(sizeof(*newbucket));
 		if ( newbucket == NULL ) {
 			SDL_OutOfMemory();
-			return(-1);
+			retval = -1;
+			goto done;
 		}
 		newbucket->prev = bucket;
 		newbucket->used = 0;
@@ -669,24 +723,24 @@ surface->pitch = SDL_VideoSurface->pitch;
 	/* Set the current bucket values and return it! */
 	bucket->used = 1;
 	bucket->size = size;
+	bucket->dirty = 0;
 #ifdef DGA_DEBUG
 	fprintf(stderr, "Allocated %d bytes at %p\n", bucket->size, bucket->base);
 #endif
 	surfaces_memleft -= size;
 	surface->flags |= SDL_HWSURFACE;
 	surface->pixels = bucket->base;
-	return(0);
+	surface->hwdata = (struct private_hwdata *)bucket;
+done:
+	UNLOCK_DISPLAY();
+	return(retval);
 }
 static void DGA_FreeHWSurface(_THIS, SDL_Surface *surface)
 {
 	vidmem_bucket *bucket, *freeable;
 
 	/* Look for the bucket in the current list */
-	for ( bucket=&surfaces; bucket; bucket=bucket->next ) {
-		if ( bucket->base == (Uint8 *)surface->pixels ) {
-			break;
-		}
-	}
+	bucket = (vidmem_bucket *)surface->hwdata;
 	if ( (bucket == NULL) || ! bucket->used ) {
 		return;
 	}
@@ -724,6 +778,7 @@ static void DGA_FreeHWSurface(_THIS, SDL_Surface *surface)
 		free(freeable);
 	}
 	surface->pixels = NULL;
+	surface->hwdata = NULL;
 }
 
 static __inline__ void dst_to_xy(_THIS, SDL_Surface *dst, int *x, int *y)
@@ -742,6 +797,7 @@ static int DGA_FillHWRect(_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color)
 	unsigned int w, h;
 
 	/* Don't fill the visible part of the screen, wait until flipped */
+	LOCK_DISPLAY();
 	if ( was_flipped && (dst == this->screen) ) {
 		while ( XDGAGetViewportStatus(DGA_Display, DGA_Screen) )
 			/* Keep waiting for the hardware ... */ ;
@@ -756,8 +812,9 @@ static int DGA_FillHWRect(_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color)
   printf("Hardware accelerated rectangle fill: %dx%d at %d,%d\n", w, h, x, y);
 #endif
 	XDGAFillRectangle(DGA_Display, DGA_Screen, x, y, w, h, color);
-	sync_needed++;
 	XFlush(DGA_Display);
+	DGA_AddDirtySurface(dst);
+	UNLOCK_DISPLAY();
 	return(0);
 }
 
@@ -771,6 +828,7 @@ static int HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,
 
 	this = current_video;
 	/* Don't blit to the visible part of the screen, wait until flipped */
+	LOCK_DISPLAY();
 	if ( was_flipped && (dst == this->screen) ) {
 		while ( XDGAGetViewportStatus(DGA_Display, DGA_Screen) )
 			/* Keep waiting for the hardware ... */ ;
@@ -794,8 +852,10 @@ static int HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,
 		XDGACopyArea(DGA_Display, DGA_Screen,
 			srcx, srcy, w, h, dstx, dsty);
 	}
-	sync_needed++;
 	XFlush(DGA_Display);
+	DGA_AddDirtySurface(src);
+	DGA_AddDirtySurface(dst);
+	UNLOCK_DISPLAY();
 	return(0);
 }
 
@@ -826,12 +886,8 @@ static int DGA_CheckHWBlit(_THIS, SDL_Surface *src, SDL_Surface *dst)
 	return(accelerated);
 }
 
-static __inline__ void DGA_WaitHardware(_THIS)
+static __inline__ void DGA_WaitFlip(_THIS)
 {
-	if ( sync_needed ) {
-		XDGASync(DGA_Display, DGA_Screen);
-		sync_needed = 0;
-	}
 	if ( was_flipped ) {
 		while ( XDGAGetViewportStatus(DGA_Display, DGA_Screen) )
 			/* Keep waiting for the hardware ... */ ;
@@ -841,15 +897,26 @@ static __inline__ void DGA_WaitHardware(_THIS)
 
 static int DGA_LockHWSurface(_THIS, SDL_Surface *surface)
 {
-	if ( surface == SDL_VideoSurface ) {
+	if ( surface == this->screen ) {
 		SDL_mutexP(hw_lock);
-		DGA_WaitHardware(this);
+		LOCK_DISPLAY();
+		if ( DGA_IsSurfaceDirty(surface) ) {
+			DGA_WaitDirtySurfaces(this);
+		}
+		DGA_WaitFlip(this);
+		UNLOCK_DISPLAY();
+	} else {
+		if ( DGA_IsSurfaceDirty(surface) ) {
+			LOCK_DISPLAY();
+			DGA_WaitDirtySurfaces(this);
+			UNLOCK_DISPLAY();
+		}
 	}
 	return(0);
 }
 static void DGA_UnlockHWSurface(_THIS, SDL_Surface *surface)
 {
-	if ( surface == SDL_VideoSurface ) {
+	if ( surface == this->screen ) {
 		SDL_mutexV(hw_lock);
 	}
 }
@@ -857,10 +924,15 @@ static void DGA_UnlockHWSurface(_THIS, SDL_Surface *surface)
 static int DGA_FlipHWSurface(_THIS, SDL_Surface *surface)
 {
 	/* Wait for vertical retrace and then flip display */
-	DGA_WaitHardware(this);
+	LOCK_DISPLAY();
+	if ( DGA_IsSurfaceDirty(this->screen) ) {
+		DGA_WaitDirtySurfaces(this);
+	}
+	DGA_WaitFlip(this);
 	XDGASetViewport(DGA_Display, DGA_Screen,
 	                0, flip_yoffset[flip_page], XDGAFlipRetrace);
 	XFlush(DGA_Display);
+	UNLOCK_DISPLAY();
 	was_flipped = 1;
 	flip_page = !flip_page;
 
@@ -891,8 +963,10 @@ static int DGA_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 		xcmap[i].blue  = (colors[i].b<<8)|colors[i].b;
 		xcmap[i].flags = (DoRed|DoGreen|DoBlue);
 	}
+	LOCK_DISPLAY();
 	XStoreColors(DGA_Display, DGA_colormap, xcmap, ncolors);
 	XSync(DGA_Display, False);
+	UNLOCK_DISPLAY();
 
 	/* That was easy. :) */
 	return(1);
@@ -923,8 +997,10 @@ int DGA_SetGammaRamp(_THIS, Uint16 *ramp)
 		xcmap[i].blue  = ramp[2*256+c];
 		xcmap[i].flags = (DoRed|DoGreen|DoBlue);
 	}
+	LOCK_DISPLAY();
 	XStoreColors(DGA_Display, DGA_colormap, xcmap, ncolors);
 	XSync(DGA_Display, False);
+	UNLOCK_DISPLAY();
 	return(0);
 }
 
@@ -952,6 +1028,13 @@ void DGA_VideoQuit(_THIS)
 			SDL_DestroyMutex(hw_lock);
 			hw_lock = NULL;
 		}
+#ifdef LOCK_DGA_DISPLAY
+		if ( event_lock != NULL ) {
+			SDL_DestroyMutex(event_lock);
+			event_lock = NULL;
+		}
+#endif /* LOCK_DGA_DISPLAY */
+
 
 		/* Clean up defined video modes */
 		for ( i=0; i<NUM_MODELISTS; ++i ) {
