@@ -545,8 +545,8 @@ static int InitOld(_THIS, SDL_Surface *current)
 	switch (pixel_format->BitsPerPixel) {
 		case 15:
 			/* 15 bits unsupported */
-			gl_pixelsize = 2;
 			if (tinygl_present) {
+				gl_pixelsize = 3;
 				osmesa_format = VDI_RGB;
 				if (redmask == 31<<10) {
 					gl_copyshadow = CopyShadowRGBTo555;
@@ -555,6 +555,7 @@ static int InitOld(_THIS, SDL_Surface *current)
 					gl_convert = Convert565To555le;
 				}
 			} else {
+				gl_pixelsize = 4;
 				osmesa_format = OSMESA_ARGB;
 				if (redmask == 31<<10) {
 					gl_copyshadow = CopyShadow8888To555;
@@ -566,8 +567,8 @@ static int InitOld(_THIS, SDL_Surface *current)
 			break;
 		case 16:
 			/* 16 bits unsupported */
-			gl_pixelsize = 2;
 			if (tinygl_present) {
+				gl_pixelsize = 3;
 				osmesa_format = VDI_RGB;
 				gl_copyshadow = CopyShadowRGBTo565;
 				if (redmask != 31<<11) {
@@ -575,6 +576,7 @@ static int InitOld(_THIS, SDL_Surface *current)
 					gl_convert = Convert565le;
 				}
 			} else {
+				gl_pixelsize = 4;
 				osmesa_format = OSMESA_ARGB;
 				gl_copyshadow = CopyShadow8888To565;
 				if (redmask != 31<<11) {
@@ -601,8 +603,8 @@ static int InitOld(_THIS, SDL_Surface *current)
 			}
 			break;
 		case 32:
-			gl_pixelsize = 4;
 			if (tinygl_present) {
+				gl_pixelsize = 3;
 				osmesa_format = VDI_RGB;
 				gl_copyshadow = CopyShadowRGBToARGB;
 				if (redmask == 255) {
@@ -613,6 +615,7 @@ static int InitOld(_THIS, SDL_Surface *current)
 					gl_convert = CopyShadowRGBToRGBA;
 				}
 			} else {
+				gl_pixelsize = 4;
 				gl_copyshadow = CopyShadowDirect;
 				if (redmask == 255<<16) {
 					osmesa_format = OSMESA_ARGB;
@@ -698,7 +701,7 @@ static void CopyShadowRGBTo555(_THIS, SDL_Surface *surface)
 	Uint8 *srcline, *srccol;
 
 	srcline = (Uint8 *)gl_shadow;
-	srcpitch = surface->w *3;
+	srcpitch = surface->w * gl_pixelsize;
 	dstline = surface->pixels;
 	dstpitch = surface->pitch >>1;
 
@@ -726,7 +729,7 @@ static void CopyShadowRGBTo565(_THIS, SDL_Surface *surface)
 	Uint8 *srcline, *srccol;
 
 	srcline = (Uint8 *)gl_shadow;
-	srcpitch = surface->w *3;
+	srcpitch = surface->w * gl_pixelsize;
 	dstline = surface->pixels;
 	dstpitch = surface->pitch >>1;
 
@@ -755,7 +758,7 @@ static void CopyShadowRGBSwap(_THIS, SDL_Surface *surface)
 	Uint8 *srcline, *srccol;
 
 	srcline = (Uint8 *)gl_shadow;
-	srcpitch = surface->w *3;
+	srcpitch = surface->w * gl_pixelsize;
 	dstline = surface->pixels;
 	dstpitch = surface->pitch;
 
@@ -782,7 +785,7 @@ static void CopyShadowRGBToARGB(_THIS, SDL_Surface *surface)
 	Uint8 *srcline, *srccol;
 
 	srcline = (Uint8 *)gl_shadow;
-	srcpitch = surface->w *3;
+	srcpitch = surface->w * gl_pixelsize;
 	dstline = surface->pixels;
 	dstpitch = surface->pitch >>2;
 
@@ -812,7 +815,7 @@ static void CopyShadowRGBToABGR(_THIS, SDL_Surface *surface)
 	Uint8 *srcline, *srccol;
 
 	srcline = (Uint8 *)gl_shadow;
-	srcpitch = surface->w *3;
+	srcpitch = surface->w * gl_pixelsize;
 	dstline = surface->pixels;
 	dstpitch = surface->pitch >>2;
 
@@ -842,7 +845,7 @@ static void CopyShadowRGBToBGRA(_THIS, SDL_Surface *surface)
 	Uint8 *srcline, *srccol;
 
 	srcline = (Uint8 *)gl_shadow;
-	srcpitch = surface->w *3;
+	srcpitch = surface->w * gl_pixelsize;
 	dstline = surface->pixels;
 	dstpitch = surface->pitch >>2;
 
@@ -872,7 +875,7 @@ static void CopyShadowRGBToRGBA(_THIS, SDL_Surface *surface)
 	Uint8 *srcline, *srccol;
 
 	srcline = (Uint8 *)gl_shadow;
-	srcpitch = surface->w *3;
+	srcpitch = surface->w * gl_pixelsize;
 	dstline = surface->pixels;
 	dstpitch = surface->pitch >>2;
 
@@ -902,7 +905,7 @@ static void CopyShadow8888To555(_THIS, SDL_Surface *surface)
 	Uint32 *srcline, *srccol;
 
 	srcline = (Uint32 *)gl_shadow;
-	srcpitch = surface->w;
+	srcpitch = (surface->w * gl_pixelsize) >>2;
 	dstline = surface->pixels;
 	dstpitch = surface->pitch >>1;
 
@@ -932,7 +935,7 @@ static void CopyShadow8888To565(_THIS, SDL_Surface *surface)
 	Uint32 *srcline, *srccol;
 
 	srcline = (Uint32 *)gl_shadow;
-	srcpitch = surface->w;
+	srcpitch = (surface->w * gl_pixelsize) >> 2;
 	dstline = surface->pixels;
 	dstpitch = surface->pitch >>1;
 
