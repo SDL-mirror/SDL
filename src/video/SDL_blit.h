@@ -71,9 +71,6 @@ typedef struct SDL_BlitMap {
 } SDL_BlitMap;
 
 
-/* Definitions for special global blit functions */
-#include "SDL_blit_A.h"
-
 /* Functions found in SDL_blit.c */
 extern int SDL_CalculateBlit(SDL_Surface *surface);
 

@@ -21,7 +21,6 @@ COMMON_SRCS =			\
 	SDL_blit_0.c		\
 	SDL_blit_1.c		\
 	SDL_blit_A.c		\
-	SDL_blit_A.h		\
 	SDL_blit_N.c		\
 	SDL_bmp.c		\
 	SDL_cursor.c		\
