@@ -50,9 +50,11 @@ static AudioBootStrap *bootstrap[] = {
 #ifdef ALSA_SUPPORT
 	&ALSA_bootstrap,
 #endif
-#if (defined(unix) && !defined(__CYGWIN32__)) && \
-    !defined(OSS_SUPPORT) && !defined(ALSA_SUPPORT)
-	&AUDIO_bootstrap,
+#ifdef SUNAUDIO_SUPPORT
+	&SUNAUDIO_bootstrap,
+#endif
+#ifdef DMEDIA_SUPPORT
+	&DMEDIA_bootstrap,
 #endif
 #ifdef ARTSC_SUPPORT
 	&ARTSC_bootstrap,

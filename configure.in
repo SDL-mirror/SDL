@@ -307,6 +307,29 @@ CheckOPENBSDAUDIO()
     fi
 }
 
+dnl Check whether we want to use IRIX 6.5+ native audio or not
+CheckDMEDIA()
+{
+    if test x$enable_audio = xyes; then
+        AC_MSG_CHECKING(for dmedia audio support)
+        have_dmedia=no
+        AC_TRY_COMPILE([
+          #include <dmedia/audio.h>
+        ],[
+          ALport audio_port;
+        ],[
+        have_dmedia=yes
+        ])
+        # Set up files for the audio library
+        if test x$have_dmedia = xyes; then
+            CFLAGS="$CFLAGS -DDMEDIA_SUPPORT"
+            AUDIO_SUBDIRS="$AUDIO_SUBDIRS dmedia"
+            AUDIO_DRIVERS="$AUDIO_DRIVERS dmedia/libaudio_dmedia.la"
+            SYSTEM_LIBS="$SYSTEM_LIBS -laudio"
+        fi
+    fi
+}
+
 dnl Find the ESD includes and libraries
 CheckESD()
 {
@@ -1203,6 +1226,7 @@ case "$target" in
         # Set up files for the audio library
         # We use the OSS and ALSA API's, not the Sun audio API
         #if test x$enable_audio = xyes; then
+        #    CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
         #    AUDIO_SUBDIRS="$AUDIO_SUBDIRS sun"
         #    AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
         #fi
@@ -1262,6 +1286,13 @@ case "$target" in
         CheckPTHREAD
         # Set up files for the main() stub
         COPY_ARCH_SRC(src/main, linux, SDL_main.c)
+        # Set up files for the audio library
+        # We use the OSS and ALSA API's, not the Sun audio API
+        #if test x$enable_audio = xyes; then
+        #    CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
+        #    AUDIO_SUBDIRS="$AUDIO_SUBDIRS sun"
+        #    AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
+        #fi
         # Set up files for the joystick library
         # (No joystick support yet)
         if test x$enable_joystick = xyes; then
@@ -1310,6 +1341,7 @@ case "$target" in
         # Set up files for the audio library
         # We use the OSS and ALSA API's, not the Sun audio API
         #if test x$enable_audio = xyes; then
+        #    CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
         #    AUDIO_SUBDIRS="$AUDIO_SUBDIRS sun"
         #    AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
         #fi
@@ -1360,6 +1392,7 @@ case "$target" in
         COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
+            CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
             AUDIO_SUBDIRS="$AUDIO_SUBDIRS sun"
             AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
         fi
@@ -1414,6 +1447,7 @@ case "$target" in
         # Set up files for the audio library
         # We use the OSS and native API's, not the Sun audio API
         #if test x$enable_audio = xyes; then
+        #    CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
         #    AUDIO_SUBDIRS="$AUDIO_SUBDIRS sun"
         #    AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
         #fi
@@ -1471,6 +1505,7 @@ case "$target" in
         COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
+            CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
             AUDIO_SUBDIRS="$AUDIO_SUBDIRS sun"
             AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
         fi
@@ -1519,6 +1554,7 @@ case "$target" in
         COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
+            CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
             AUDIO_SUBDIRS="$AUDIO_SUBDIRS sun"
             AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
         fi
@@ -1552,6 +1588,8 @@ case "$target" in
         ARCH=irix
         CheckDummyVideo
         CheckDiskAudio
+        CheckDMEDIA
+        CheckESD
         CheckNAS
         CheckX11
         CheckAAlib
@@ -1559,12 +1597,12 @@ case "$target" in
         CheckPTHREAD
         # Set up files for the main() stub
         COPY_ARCH_SRC(src/main, linux, SDL_main.c)
-        # Set up files for the audio library
-        if test x$enable_audio = xyes; then
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS dmedia"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS dmedia/libaudio_dmedia.la"
-            SYSTEM_LIBS="$SYSTEM_LIBS -laudio"
-        fi
+        # We use the dmedia audio API, not the Sun audio API
+        #if test x$enable_audio = xyes; then
+        #    CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
+        #    AUDIO_SUBDIRS="$AUDIO_SUBDIRS sun"
+        #    AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
+        #fi
         # Set up files for the joystick library
         # (No joystick support yet)
         if test x$enable_joystick = xyes; then
@@ -1622,6 +1660,7 @@ case "$target" in
         COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
+            CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
             AUDIO_SUBDIRS="$AUDIO_SUBDIRS sun"
             AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
         fi
@@ -1710,6 +1749,7 @@ case "$target" in
         COPY_ARCH_SRC(src/main, linux, SDL_main.c)
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
+            CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
             AUDIO_SUBDIRS="$AUDIO_SUBDIRS sun"
             AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
         fi
@@ -1757,8 +1797,6 @@ case "$target" in
             SYSTEM_LIBS="$SYSTEM_LIBS -lasound"
             AUDIO_SUBDIRS="$AUDIO_SUBDIRS nto"
             AUDIO_DRIVERS="$AUDIO_DRIVERS nto/libaudio_nto.la"
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS sun"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
         fi
         # Set up files for the joystick library
         if test x$enable_joystick = xyes; then

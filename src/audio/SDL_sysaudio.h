@@ -109,9 +109,11 @@ extern AudioBootStrap DMA_bootstrap;
 #ifdef ALSA_SUPPORT
 extern AudioBootStrap ALSA_bootstrap;
 #endif
-#if (defined(unix) && !defined(__CYGWIN32__)) && \
-    !defined(OSS_SUPPORT) && !defined(ALSA_SUPPORT)
-extern AudioBootStrap AUDIO_bootstrap;
+#ifdef SUNAUDIO_SUPPORT
+extern AudioBootStrap SUNAUDIO_bootstrap;
+#endif
+#ifdef DMEDIA_SUPPORT
+extern AudioBootStrap DMEDIA_bootstrap;
 #endif
 #ifdef ARTSC_SUPPORT
 extern AudioBootStrap ARTSC_bootstrap;

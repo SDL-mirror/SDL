@@ -117,7 +117,7 @@ static SDL_AudioDevice *Audio_CreateDevice(int devindex)
 	return this;
 }
 
-AudioBootStrap AUDIO_bootstrap = {
+AudioBootStrap SUNAUDIO_bootstrap = {
 	"audio", "UNIX /dev/audio interface",
 	Audio_Available, Audio_CreateDevice
 };

@@ -91,7 +91,7 @@ static SDL_AudioDevice *Audio_CreateDevice(int devindex)
 	return this;
 }
 
-AudioBootStrap AUDIO_bootstrap = {
+AudioBootStrap DMEDIA_bootstrap = {
 	"AL", "IRIX DMedia audio",
 	Audio_Available, Audio_CreateDevice
 };
