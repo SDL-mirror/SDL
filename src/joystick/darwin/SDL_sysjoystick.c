@@ -92,6 +92,9 @@ struct joystick_hwdata
 	recElement* firstButton;
 	recElement* firstHat;
 
+	int removed;
+	int uncentered;
+
 	struct joystick_hwdata* pNext;			// next device
 };
 typedef struct joystick_hwdata recDevice;
@@ -161,6 +164,19 @@ SInt32 HIDScaledCalibratedValue (recDevice *pDevice, recElement *pElement, long 
 		return ((value - pElement->minReport) * deviceScale / readScale) + min;
 }
 
+
+static void HIDRemovalCallback(void * target,
+                               IOReturn result,
+                               void * refcon,
+                               void * sender)
+{
+	recDevice *device = (recDevice *) refcon;
+	device->removed = 1;
+	device->uncentered = 1;
+}
+
+
+
 /* Create and open an interface to device, required prior to extracting values or building queues.
  * Note: appliction now owns the device and must close and release it prior to exiting
  */
@@ -193,6 +209,9 @@ IOReturn HIDCreateOpenDeviceInterface (io_object_t hidDevice, recDevice *pDevice
 		result = (*(pDevice->interface))->open (pDevice->interface, 0);
 		if (kIOReturnSuccess != result)
 			HIDReportErrorNum ("Failed to open pDevice->interface via open.", result);
+		else
+			(*(pDevice->interface))->setRemovalCallback (pDevice->interface, HIDRemovalCallback, pDevice, pDevice);
+
 	}
 	return result;
 }
@@ -722,7 +741,27 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 	recElement *element;
 	SInt32 value;
 	int i;
-	
+
+	if (device->removed)  /* device was unplugged; ignore it. */
+	{
+		if (device->uncentered)
+		{
+			device->uncentered = 0;
+
+			/* Tell the app that everything is centered/unpressed... */
+			for (i = 0; i < device->axes; i++)
+				SDL_PrivateJoystickAxis(joystick, i, 0);
+
+			for (i = 0; i < device->buttons; i++)
+				SDL_PrivateJoystickButton(joystick, i, 0);
+
+			for (i = 0; i < device->hats; i++)
+				SDL_PrivateJoystickHat(joystick, i, SDL_HAT_CENTERED);
+		}
+
+		return;
+	}
+
 	element = device->firstAxis;
 	i = 0;
 	while (element)
