@@ -233,12 +233,12 @@ void QZ_SetCaption    (_THIS, const char *title, const char *icon) {
     if ( qz_window != nil ) {
         NSString *string;
         if ( title != NULL ) {
-            string = [ [ NSString alloc ] initWithCString:title ];
+            string = [ [ NSString alloc ] initWithUTF8String:title ];
             [ qz_window setTitle:string ];
             [ string release ];
         }
         if ( icon != NULL ) {
-            string = [ [ NSString alloc ] initWithCString:icon ];
+            string = [ [ NSString alloc ] initWithUTF8String:icon ];
             [ qz_window setMiniwindowTitle:string ];
             [ string release ];
         }
