@@ -131,13 +131,7 @@ static unsigned long	F30_palette[256];
 
 static int XBIOS_Available(void)
 {
-	const char *envr = getenv("SDL_VIDEODRIVER");
 	unsigned long cookie_vdo;
-
-	/* Check if user asked a different video driver */
-	if ((envr) && (strcmp(envr, XBIOS_VID_DRIVER_NAME)!=0)) {
-		return 0;
-	}
 
 	/* Cookie _VDO present ? if not, assume ST machine */
 	if (Getcookie(C__VDO, &cookie_vdo) != C_FOUND) {
