@@ -144,7 +144,7 @@ extern AudioBootStrap Paud_bootstrap;
 #ifdef __BEOS__
 extern AudioBootStrap BAUDIO_bootstrap;
 #endif
-#ifdef COREAUDIO_SUPPORT
+#ifdef MACOSX
 extern AudioBootStrap COREAUDIO_bootstrap;
 #endif
 #if defined(macintosh) || TARGET_API_MAC_CARBON

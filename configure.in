@@ -490,29 +490,6 @@ CheckAtariAudio()
     fi
 }
 
-dnl Check whether we want to use CoreAudio
-CheckCoreAudio()
-{
-    if test x$enable_audio = xyes; then
-        AC_MSG_CHECKING(for CoreAudio audio support)
-        have_coreaudio=no
-        AC_TRY_COMPILE([
-          #include <AudioUnit/AudioUnit.h>
-        ],[
-          AudioUnitInputCallback callback;
-        ],[
-        have_coreaudio=yes
-        ])
-        AC_MSG_RESULT($have_coreaudio)
-        # Set up files for the audio library
-        if test x$have_coreaudio = xyes; then
-            CFLAGS="$CFLAGS -DCOREAUDIO_SUPPORT"
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS macosx"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS macosx/libaudio_macosx.la"
-        fi
-    fi
-}
-
 dnl See if we can use x86 assembly blitters
 # NASM is available from: http://nasm.octium.net/
 CheckNASM()
@@ -2531,7 +2508,6 @@ case "$target" in
         ARCH=macosx
         CheckDummyVideo
         CheckDiskAudio
-        CheckCoreAudio
         CheckQUARTZ
         CheckMacGL
         CheckPTHREAD
@@ -2542,6 +2518,8 @@ case "$target" in
         fi
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
+            AUDIO_SUBDIRS="$AUDIO_SUBDIRS macosx"
+            AUDIO_DRIVERS="$AUDIO_DRIVERS macosx/libaudio_macosx.la"
             AUDIO_SUBDIRS="$AUDIO_SUBDIRS macrom"
             AUDIO_DRIVERS="$AUDIO_DRIVERS macrom/libaudio_macrom.la"
         fi

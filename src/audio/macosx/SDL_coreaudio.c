@@ -165,7 +165,7 @@ Uint8 *Core_GetAudioBuf(_THIS)
 void Core_CloseAudio(_THIS)
 {
     OSStatus result;
-    AudioUnitInputCallback callback;
+    struct AudioUnitInputCallback callback;
 
     /* stop processing the audio unit */
     result = AudioOutputUnitStop (outputAudioUnit);
@@ -209,7 +209,7 @@ int Core_OpenAudio(_THIS, SDL_AudioSpec *spec)
     OSStatus result = noErr;
     Component comp;
     ComponentDescription desc;
-    AudioUnitInputCallback callback;
+    struct AudioUnitInputCallback callback;
     AudioStreamBasicDescription requestedDesc;
 
     /* Setup a AudioStreamBasicDescription with the requested format */
