@@ -54,6 +54,9 @@ static VideoBootStrap *bootstrap[] = {
 #ifdef ENABLE_NANOX
 	&NX_bootstrap,
 #endif
+#ifdef ENABLE_QTOPIA
+	&Qtopia_bootstrap,
+#endif
 #ifdef ENABLE_FBCON
 	&FBCON_bootstrap,
 #endif
@@ -110,9 +113,6 @@ static VideoBootStrap *bootstrap[] = {
 #endif
 #ifdef ENABLE_GEM
 	&GEM_bootstrap,
-#endif
-#ifdef ENABLE_QTOPIA
-	&Qtopia_bootstrap,
 #endif
 #ifdef ENABLE_PICOGUI
 	&PG_bootstrap,

@@ -53,12 +53,12 @@ extern "C" {
   //#define QTOPIA_DEBUG
 #define QT_HIDDEN_SIZE	32	/* starting hidden window size */
 
-/* Name of the environment variable used to invert the screen rotation or not:
-   Possible values:
-   !=0 : Screen is 270° rotated
-   0: Screen is 90° rotated*/
+  /* Name of the environment variable used to invert the screen rotation or not:
+     Possible values:
+     !=0 : Screen is 270° rotated
+     0: Screen is 90° rotated*/
 #define SDL_QT_ROTATION_ENV_NAME "SDL_QT_INVERT_ROTATION"
-
+  
   /* Initialization/Query functions */
   static int QT_VideoInit(_THIS, SDL_PixelFormat *vformat);
   static SDL_Rect **QT_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags);
@@ -75,6 +75,8 @@ extern "C" {
 
   static int QT_ToggleFullScreen(_THIS, int fullscreen);
 
+  static int QT_IconifyWindow(_THIS);
+  static SDL_GrabMode QT_GrabInput(_THIS, SDL_GrabMode mode);
 
   /* FB driver bootstrap functions */
 
@@ -128,6 +130,8 @@ extern "C" {
     device->FreeHWSurface = QT_FreeHWSurface;
     device->SetIcon = NULL;
     device->SetCaption = QT_SetWMCaption;
+    device->IconifyWindow = QT_IconifyWindow;
+    device->GrabInput = QT_GrabInput;
     device->GetWMInfo = NULL;
     device->FreeWMCursor = QT_FreeWMCursor;
     device->CreateWMCursor = QT_CreateWMCursor;
@@ -281,7 +285,7 @@ extern "C" {
     QSize desktop_size = qApp->desktop()->size();
 
     
-    current->flags = SDL_FULLSCREEN; // We always run fullscreen.
+    current->flags = 0; //SDL_FULLSCREEN; // We always run fullscreen.
 
     if(width <= desktop_size.width()
 	      && height <= desktop_size.height()) {
@@ -355,14 +359,14 @@ extern "C" {
 
   static void QT_NormalUpdate(_THIS, int numrects, SDL_Rect *rects)
   {
-    int i;
-    SDL_Win->lockScreen(); 
-    for ( i=0; i<numrects; ++i ) {
-      QRect rect(rects[i].x, rects[i].y,
-		 rects[i].w, rects[i].h);
-      SDL_Win->repaintRect(rect);
+    if(SDL_Win->lockScreen()) {
+      for(int i=0; i<numrects; ++i ) {
+	QRect rect(rects[i].x, rects[i].y,
+		   rects[i].w, rects[i].h);
+	SDL_Win->repaintRect(rect);
+      }
+      SDL_Win->unlockScreen();
     }
-    SDL_Win->unlockScreen(); 
   }
   /* Is the system palette settable? */
   int QT_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
@@ -380,6 +384,25 @@ extern "C" {
     //    delete SDL_Win; 
     //    SDL_Win = 0;
     _this->screen->pixels = NULL;
+    QT_GrabInput(_this, SDL_GRAB_OFF);
   }
 
+  static int QT_IconifyWindow(_THIS) {
+    SDL_Win->hide();
+    
+    return true;
+  }
+
+  static SDL_GrabMode QT_GrabInput(_THIS, SDL_GrabMode mode) {
+    if(mode == SDL_GRAB_OFF) {
+      QPEApplication::grabKeyboard();
+      qApp->processEvents();
+      QPEApplication::ungrabKeyboard();
+    } else {
+      QPEApplication::grabKeyboard();
+    }
+    qApp->processEvents();
+    return mode;
+  }
+  
 }; /* Extern C */

@@ -129,14 +129,12 @@ void SDL_QWin::mouseReleaseEvent(QMouseEvent *e) {
   my_mouse_pos = QPoint(-1, -1);
 }
 
-#define USE_DIRECTPAINTER
-
-
-#ifndef __i386__
-static inline void gs_fastRotateBlit_3 ( unsigned short *fb,
-					 unsigned short *bits,
-					 const QRect& rect )
+static inline void
+gs_fastRotateBlit_3 ( unsigned short *fb,
+		      unsigned short *bits,
+		      const QRect& rect )
 {
+  // FIXME: this only works correctly for 240x320 displays
   int startx, starty;
   int width, height;
   
@@ -187,87 +185,193 @@ static inline void gs_fastRotateBlit_3 ( unsigned short *fb,
     dp2 += rowadd;
   }
 }
+
+static inline void
+gs_fastRotateBlit_1 ( unsigned short *fb,
+		      unsigned short *bits,
+		      const QRect& rect ) {
+  // FIXME: this only works correctly for 240x320 displays
+  int startx, starty;
+  int width, height;
+
+  startx = rect.left() >> 1;
+  starty = rect.top() >> 1;
+  width  = ((rect.right() - rect.left()) >> 1) + 2;
+  height = ((rect.bottom() - rect.top()) >> 1) + 2;
+
+  if((startx+width) > 120) {
+    width = 120 - startx; // avoid horizontal overflow
+  }
+  if((starty+height) > 160) { 
+    height = 160 - starty; // avoid vertical overflow
+  }
+
+  ulong *sp1, *sp2, *dp1, *dp2;
+  ulong stop, sbot, dtop, dbot;    
+  fb += 320*239; // Move "fb" to top left corner
+  sp1 = (ulong*)bits + startx + starty*240;
+  sp2 = sp1 + 120;
+  dp1 = (ulong*)fb - startx * 320 - starty;
+  dp2 = dp1 - 160;
+  int rowadd = (320*width) + 1;
+  int rowadd2 = 240 - width;
+  // transfer in cells of 2x2 pixels in words
+  for (int y=0; y<height; y++) {
+    for (int x=0; x<width; x++) {
+      // read
+      stop = *sp1;
+      sbot = *sp2;
+      // rotate
+      dtop = (stop & 0xffff) + ((sbot & 0xffff)<<16);
+      dbot = ((stop & 0xffff0000)>>16) + (sbot & 0xffff0000);
+      // write
+      *dp1 = dtop;
+      *dp2 = dbot;
+      // update source ptrs
+      sp1++; sp2++;
+      // update dest ptrs - 2 pix at a time
+      dp1 -= 320;
+      dp2 -= 320;
+    }
+    // adjust src ptrs - skip a row as we work in pairs
+    sp1 += rowadd2;
+    sp2 += rowadd2;
+    // adjust dest ptrs for rotation
+    dp1 += rowadd;
+    dp2 += rowadd;
+  }
+}
+
+// desktop, SL-A300 etc
+bool SDL_QWin::repaintRotation0(const QRect& rect) {
+  if(my_image->width() == width()) {
+    uchar *fb = (uchar*)my_painter->frameBuffer();
+    uchar *buf = (uchar*)my_image->bits();
+    if(rect == my_image->rect()) {
+      memcpy(fb, buf, width()*height()*2);
+    } else {
+      int h = rect.height();
+      int wd = rect.width()<<1;
+      int fblineadd = my_painter->lineStep();
+      int buflineadd = my_image->bytesPerLine();
+      fb  += (rect.left()<<1) + rect.top() * my_painter->lineStep();
+      buf += (rect.left()<<1) + rect.top() * my_image->bytesPerLine();
+      while(h--) {
+	memcpy(fb, buf, wd);
+	fb += fblineadd;
+	buf += buflineadd;
+      }
+    }
+  } else {
+    return false; // FIXME: Landscape
+  }
+#ifdef __i386__
+  my_painter->fillRect( rect, QBrush( Qt::NoBrush ) );
 #endif
+  return true;
+}
+
+  
+// Sharp Zaurus SL-5500 etc 
+bool SDL_QWin::repaintRotation3(const QRect& rect) {
+  if(my_image->width() == width()) {
+    ushort *fb = (ushort*)my_painter->frameBuffer();
+    ushort *buf = (ushort*)my_image->bits();
+    gs_fastRotateBlit_3(fb, buf, rect);
+  } else {
+    // landscape mode
+    if (screenRotation == SDL_QT_ROTATION_90) {
+      uchar *fb = (uchar*)my_painter->frameBuffer();
+      uchar *buf = (uchar*)my_image->bits();
+      if(rect == my_image->rect()) {
+	memcpy(fb, buf, width()*height()*2);
+      } else {
+	int h = rect.height();
+	int wd = rect.width()<<1;
+	int fblineadd = my_painter->lineStep();
+	int buflineadd = my_image->bytesPerLine();
+	fb  += (rect.left()<<1) + rect.top() * my_painter->lineStep();
+	buf += (rect.left()<<1) + rect.top() * my_image->bytesPerLine();
+	while(h--) {
+	  memcpy(fb, buf, wd);
+	  fb += fblineadd;
+	  buf += buflineadd;
+	}
+      }
+    } else if (screenRotation == SDL_QT_ROTATION_270) {
+      int h = rect.height();
+      int wd = rect.width();
+      int fblineadd = my_painter->lineStep() - (rect.width() << 1);
+      int buflineadd = my_image->bytesPerLine() - (rect.width() << 1);
+      int w;
+
+      uchar *fb = (uchar*)my_painter->frameBuffer();
+      uchar *buf = (uchar*)my_image->bits();
+        
+      fb += ((my_painter->width() - (rect.top() + rect.height())) * 
+	     my_painter->lineStep()) + ((my_painter->height() - ((rect.left() + 
+								  rect.width()))) << 1);
+
+      buf += my_image->bytesPerLine() * (rect.top() + rect.height()) -
+	(((my_image->width() - (rect.left() + rect.width())) << 1) + 2);
+
+      while(h--) {
+	w = wd;
+	while(w--) *((unsigned short*)fb)++ = *((unsigned short*)buf)--;
+	fb += fblineadd;
+	buf -= buflineadd;
+      }
+    }
+  }
+  return true;
+}
+
+// ipaq 3800...
+bool SDL_QWin::repaintRotation1(const QRect& rect) {
+  if(my_image->width() == width()) {
+    ushort *fb = (ushort*)my_painter->frameBuffer();
+    ushort *buf = (ushort*)my_image->bits();
+    gs_fastRotateBlit_1(fb, buf, rect);
+  } else {
+    return false; // FIXME: landscape mode
+  }
+  return true;
+}
 
 void SDL_QWin::repaintRect(const QRect& rect) {
   if(!my_painter || !rect.width() || !rect.height()) {
     return;
   }
-#ifndef __i386__
-
-  if(QPixmap::defaultDepth() == 16 &&
-     my_painter->transformOrientation() == 3 &&
-     my_painter->numRects() >= 0) {
-    if(my_image->width() == width()) {
-      ushort *fb = (ushort*)my_painter->frameBuffer();
-      ushort *buf = (ushort*)my_image->bits();
-      gs_fastRotateBlit_3(fb, buf, rect);
-    } else {
-      // landscape mode
-      if (screenRotation == SDL_QT_ROTATION_90) {
-        uchar *fb = (uchar*)my_painter->frameBuffer();
-        uchar *buf = (uchar*)my_image->bits();
-        if(rect == my_image->rect()) {
-          memcpy(fb, buf, width()*height()*2);
-        } else {
-          int h = rect.height();
-          int wd = rect.width()<<1;
-          int fblineadd = my_painter->lineStep();
-          int buflineadd = my_image->bytesPerLine();
-          fb  += (rect.left()<<1) + rect.top() * my_painter->lineStep();
-          buf += (rect.left()<<1) + rect.top() * my_image->bytesPerLine();
-          while(h--) {
-            memcpy(fb, buf, wd);
-            fb += fblineadd;
-            buf += buflineadd;
-          }
-        }
-      }
-      else if (screenRotation == SDL_QT_ROTATION_270) {
-        int h = rect.height();
-        int wd = rect.width();
-        int fblineadd = my_painter->lineStep() - (rect.width() << 1);
-        int buflineadd = my_image->bytesPerLine() - (rect.width() << 1);
-        int w;
-
-        uchar *fb = (uchar*)my_painter->frameBuffer();
-        uchar *buf = (uchar*)my_image->bits();
-        
-        fb += ((my_painter->width() - (rect.top() + rect.height())) * 
-            my_painter->lineStep()) + ((my_painter->height() - ((rect.left() + 
-                                                                 rect.width()))) << 1);
-
-        buf += my_image->bytesPerLine() * (rect.top() + rect.height()) -
-            (((my_image->width() - (rect.left() + rect.width())) << 1) + 2);
-
-        while(h--) {
-          w = wd;
-          while(w--) *((unsigned short*)fb)++ = *((unsigned short*)buf)--;
-          fb += fblineadd;
-          buf -= buflineadd;
-          }
-        }
+  
+  if(QPixmap::defaultDepth() == 16) {
+    switch(my_painter->transformOrientation()) {
+    case 3:
+      if(repaintRotation3(rect)) { return;  }
+      break;
+    case 1:
+      if(repaintRotation1(rect)) { return;  }
+      break;
+    case 0:
+      if(repaintRotation0(rect)) { return;  }
+      break;
     }
-  } else {
-#endif
-    QPainter pp(this);
-    pp.drawImage(rect.topLeft(), *my_image, rect);
-    pp.end();
-#ifndef __i386__
-  }
-#endif
+  } 
+  my_painter->drawImage(rect.topLeft(), *my_image, rect);
 }
 
 // This paints the current buffer to the screen, when desired. 
 void SDL_QWin::paintEvent(QPaintEvent *ev) {  
-  if(my_image && isVisible() && isActiveWindow()) {
-    lockScreen();
+  if(my_image) {
+    lockScreen(true);
     repaintRect(ev->rect());
     unlockScreen();
   }
 }  
 
-/* Function to translate a keyboard transition and queue the key event */
+/* Function to translate a keyboard transition and queue the key event
+ * This should probably be a table although this method isn't exactly
+ * slow.
+ */
 void SDL_QWin::QueueKey(QKeyEvent *e, int pressed)
 {  
   SDL_keysym keysym;
@@ -340,6 +444,14 @@ void SDL_QWin::QueueKey(QKeyEvent *e, int pressed)
     case Qt::Key_Super_R: scancode = SDLK_RSUPER; break;
     case Qt::Key_Menu: scancode = SDLK_MENU; break;
     case Qt::Key_Help: scancode = SDLK_HELP; break;
+
+    case Qt::Key_F33:
+      // FIXME: This is a hack to enable the OK key on
+      // Zaurii devices. SDLK_RETURN is a suitable key to use
+      // since it often is used as such.
+      //     david@hedbor.org
+      scancode = SDLK_RETURN;
+      break;
     default:
       scancode = SDLK_UNKNOWN;
       break;
@@ -392,5 +504,28 @@ void SDL_QWin::enableFullscreen() {
     // Enable fullscreen.
     showFullScreen();
     my_has_fullscreen = true;
+  }
+}
+
+bool SDL_QWin::lockScreen(bool force) {
+  if(!my_painter) {
+    if(force || (isVisible() && isActiveWindow())) {
+      my_painter = new QDirectPainter(this);
+    } else {
+      return false;
+    }
+  }
+  my_locked++; // Increate lock refcount
+  return true;
+}
+
+void SDL_QWin::unlockScreen() {
+  if(my_locked > 0) {
+    my_locked--; // decrease lock refcount;
+  }
+  if(!my_locked && my_painter) {
+    my_painter->end();
+    delete my_painter;
+    my_painter = 0;
   }
 }

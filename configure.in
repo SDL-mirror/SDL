@@ -1459,8 +1459,13 @@ CheckQtopia()
         if test x$video_qtopia = xyes; then
             CFLAGS="$CFLAGS -DENABLE_QTOPIA -DQT_QWS_EBX -DQT_QWS_CUSTOM -DQWS -I${QPEDIR}/include -I${QTDIR}/include/ -DNO_DEBUG -fno-rtti -fno-exceptions"
             SDL_LIBS="$SDL_LIBS -L${QPEDIR}/lib -L${QTDIR}/lib/ -lqpe -lqte"
+            SDL_CFLAGS="$SDL_CFLAGS -DQWS"	  
             VIDEO_SUBDIRS="$VIDEO_SUBDIRS qtopia"
             VIDEO_DRIVERS="$VIDEO_DRIVERS qtopia/libvideo_qtopia.la"
+        else
+	AC_MSG_ERROR([
+*** Failed to find Qtopia includes. Make sure that the QTDIR and QPEDIR
+*** environment variables are set correctly.])
         fi
         AC_LANG_C
     fi
