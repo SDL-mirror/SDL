@@ -37,12 +37,14 @@ static char rcsid =
 
 #define WINDIB_FULLSCREEN()						\
 (									\
+	SDL_VideoSurface &&						\
 	((SDL_VideoSurface->flags & SDL_FULLSCREEN) == SDL_FULLSCREEN) && \
 	(((SDL_VideoSurface->flags & SDL_OPENGL   ) == SDL_OPENGL    ) || \
 	 (strcmp(this->name, "windib") == 0))				\
 )
 #define DDRAW_FULLSCREEN() 						\
 (									\
+	SDL_VideoSurface &&						\
 	((SDL_VideoSurface->flags & SDL_FULLSCREEN) == SDL_FULLSCREEN) && \
 	((SDL_VideoSurface->flags & SDL_OPENGL    ) != SDL_OPENGL    ) && \
 	(strcmp(this->name, "directx") == 0)				\
