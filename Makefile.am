@@ -92,7 +92,7 @@ dist-hook:
 	rm -rf `find $(distdir) -type d -name CVS -print`
 
 # Create a CVS snapshot that people can run update -d on
-CVSROOT = :pserver:guest@libsdl.org:/home/slouken/libsdl.org/cvs
+CVSROOT = :pserver:guest@libsdl.org:/home/sdlweb/libsdl.org/cvs
 snapshot:
 	cvs -d $(CVSROOT) login
 	cvs -d $(CVSROOT) checkout SDL12
