@@ -1,6 +1,3 @@
-	.objc_class_name_SDL_QuartzWindow
-	.objc_class_name_SDL_QuartzWindowView
-	.objc_class_name_SDL_QuartzWindowDelegate
 	_SDL_Init
 	_SDL_InitSubSystem
 	_SDL_QuitSubSystem
@@ -34,8 +31,12 @@
 	_SDL_CDClose
 	_SDL_HasRDTSC
 	_SDL_HasMMX
+	_SDL_HasMMXExt
 	_SDL_Has3DNow
+	_SDL_Has3DNowExt
 	_SDL_HasSSE
+	_SDL_HasSSE2
+	_SDL_HasAltiVec
 	_SDL_ReadLE16
 	_SDL_ReadBE16
 	_SDL_ReadLE32

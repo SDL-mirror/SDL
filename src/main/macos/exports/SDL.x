@@ -31,8 +31,12 @@
 	SDL_CDClose
 	SDL_HasRDTSC
 	SDL_HasMMX
+	SDL_HasMMXExt
 	SDL_Has3DNow
+	SDL_Has3DNowExt
 	SDL_HasSSE
+	SDL_HasSSE2
+	SDL_HasAltiVec
 	SDL_ReadLE16
 	SDL_ReadBE16
 	SDL_ReadLE32
