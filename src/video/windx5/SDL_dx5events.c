@@ -849,14 +849,16 @@ int DX5_CreateWindow(_THIS)
 	SDL_RegisterApp("SDL_app", CS_BYTEALIGNCLIENT, 0);
 	if ( SDL_windowid ) {
 		SDL_Window = (HWND)strtol(SDL_windowid, NULL, 0);
+		if ( SDL_Window == NULL ) {
+			SDL_SetError("Couldn't get user specified window");
+			return(-1);
+		}
 
 		/* DJM: we want all event's for the user specified
-		   window to be handled by SDL.
+			window to be handled by SDL.
 		 */
-		if (SDL_Window) {
-			userWindowProc = (WNDPROC)GetWindowLong(SDL_Window, GWL_WNDPROC);
-			SetWindowLong(SDL_Window, GWL_WNDPROC, (LONG)WinMessage);
-		}
+		userWindowProc = (WNDPROC)GetWindowLong(SDL_Window, GWL_WNDPROC);
+		SetWindowLong(SDL_Window, GWL_WNDPROC, (LONG)WinMessage);
 	} else {
 		SDL_Window = CreateWindow(SDL_Appname, SDL_Appname,
                         (WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX),
@@ -883,5 +885,9 @@ void DX5_DestroyWindow(_THIS)
 	DX5_DInputQuit(this);
 
 	/* Destroy our window */
-	DestroyWindow(SDL_Window);
+	if ( SDL_windowid ) {
+		SetWindowLong(SDL_Window, GWL_WNDPROC, (LONG)userWindowProc);
+	} else {
+		DestroyWindow(SDL_Window);
+	}
 }
