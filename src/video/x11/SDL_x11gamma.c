@@ -37,7 +37,7 @@ static char rcsid =
 static int X11_SetGammaNoLock(_THIS, float red, float green, float blue)
 {
 #ifdef XFREE86_VMGAMMA
-    if (use_vidmode) {
+    if (use_vidmode >= 2) {
         XF86VidModeGamma gamma;
         Bool succeeded;
 
@@ -98,7 +98,7 @@ int X11_SetVidModeGamma(_THIS, float red, float green, float blue)
 static int X11_GetGammaNoLock(_THIS, float *red, float *green, float *blue)
 {
 #ifdef XFREE86_VMGAMMA
-    if (use_vidmode) {
+    if (use_vidmode >= 2) {
         XF86VidModeGamma gamma;
         if (XVidMode(GetGamma, (SDL_Display, SDL_Screen, &gamma))) {
             *red   = gamma.red;
