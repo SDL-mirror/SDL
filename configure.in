@@ -775,7 +775,7 @@ CheckVGL()
          #include <vgl.h>
         ],[
          VGLBitmap bitmap;
-         exit(bitmap.PixelBytes);
+         exit(bitmap.Bitmap);
         ],[
         video_vgl=yes
         ])
