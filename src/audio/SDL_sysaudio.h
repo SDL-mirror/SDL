@@ -148,7 +148,11 @@ extern AudioBootStrap SNDMGR_bootstrap;
 extern AudioBootStrap AHI_bootstrap;
 #endif
 #ifdef MINTAUDIO_SUPPORT
-extern AudioBootStrap MINTAUDIO_bootstrap;
+extern AudioBootStrap MINTAUDIO_GSXB_bootstrap;
+extern AudioBootStrap MINTAUDIO_MCSN_bootstrap;
+extern AudioBootStrap MINTAUDIO_STFA_bootstrap;
+extern AudioBootStrap MINTAUDIO_XBIOS_bootstrap;
+extern AudioBootStrap MINTAUDIO_DMA8_bootstrap;
 #endif
 #ifdef DISKAUD_SUPPORT
 extern AudioBootStrap DISKAUD_bootstrap;

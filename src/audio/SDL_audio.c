@@ -84,7 +84,11 @@ static AudioBootStrap *bootstrap[] = {
 	&AHI_bootstrap,
 #endif
 #ifdef MINTAUDIO_SUPPORT
-	&MINTAUDIO_bootstrap,
+	&MINTAUDIO_GSXB_bootstrap,
+	&MINTAUDIO_MCSN_bootstrap,
+	&MINTAUDIO_STFA_bootstrap,
+	&MINTAUDIO_XBIOS_bootstrap,
+	&MINTAUDIO_DMA8_bootstrap,
 #endif
 #ifdef DISKAUD_SUPPORT
 	&DISKAUD_bootstrap,

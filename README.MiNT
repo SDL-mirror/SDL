@@ -49,18 +49,18 @@ Mouse (XBIOS, GEM, Ikbd)
 Video (XBIOS (Fullscreen), GEM (Windowed and Fullscreen))
 Timer (VBL vector, GNU pth library)
 Joystick and joypad support (Ikbd, Hardware)
-Audio support (Hardware, XBIOS, GSXB, /dev/audio if threads enabled)
+Audio support (Hardware, XBIOS, GSXB, MCSN, STFA, /dev/audio if threads enabled)
 Threads support (Multitasking OS only via GNU pth library)
 
 - What is missing:
 CDROM support (Metados, /dev/cdrom)
 
 - Driver combinations:
-Video	Kbd	Mouse	Timer	Jstick	Joypads
-xbios	ikbd	ikbd	vbl(2)	ikbd	hardware
-xbios	gemdos	xbios	vbl(2)	xbios	hardware
-xbios	bios	xbios	vbl(2)	xbios	hardware
-gem	gem	gem(1)	vbl(2)	xbios	hardware
+Video	Kbd	Mouse	Timer	Joystick
+xbios	ikbd	ikbd	vbl(2)	ikbd
+xbios	gemdos	xbios	vbl(2)	xbios
+xbios	bios	xbios	vbl(2)	xbios
+gem	gem	gem(1)	vbl(2)	xbios
 
 (1) GEM does not report relative mouse motion, so xbios mouse driver is used
 to report this type event.
@@ -76,7 +76,11 @@ SDL_VIDEODRIVER:
 	Set to 'gem' to force gem video driver
 
 SDL_AUDIODRIVER:
-	Set to 'mint' to force Atari audio driver
+	Set to 'mint_gsxb' to force Atari GSXB audio driver
+	Set to 'mint_mcsn' to force Atari MCSN audio driver
+	Set to 'mint_stfa' to force Atari STFA audio driver
+	Set to 'mint_xbios' to force Atari Xbios audio driver
+	Set to 'mint_dma8' to force Atari 8 bits DMA audio driver
 	Set to 'audio' to force Sun /dev/audio audio driver
 	Set to 'disk' to force disk-writing audio driver
 
@@ -163,17 +167,30 @@ PTH timer driver:
 VBL timer driver:
 	Available on all machines (I think).
 
-Audio driver:
-	Cookie _SND is used to detect supported audio capabilities
+Audio drivers:
+	Cookies _SND, MCSN, STFA and GSXB used to detect supported audio
+	capabilities.
 
 	STE, Mega STE, TT:
 		8 bits DMA (hardware access)
-
-	Falcon, machines with GSXB driver:
+		STFA, MCSN or GSXB driver if installed
+	Falcon:
+		8 bits DMA (hardware access)
 		Xbios functions
-
+		STFA, MCSN or GSXB driver if installed
 	Other machines:
-		Not supported
+		STFA, MCSN or GSXB driver if installed
+
+	STFA driver:
+		http://removers.free.fr/softs/stfa.html
+	GSXB driver:
+		http://assemsoft.atari.org/gsxb/
+	MacSound driver:
+		http://jf.omnis.ch/software/tos/
+	MagicSound driver (MCSN,GSXB compatible):
+		http://perso.wanadoo.fr/didierm/
+	X-Sound driver (GSXB compatible):
+		http://www.uni-ulm.de/~s_thuth/atari/xsound_e.html
 
 -- 
 Patrice Mandin <pmandin@caramail.com>
