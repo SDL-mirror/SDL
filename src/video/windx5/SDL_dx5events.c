@@ -538,8 +538,8 @@ static int DX5_CheckInput(_THIS, int timeout, BOOL processInput)
 	/* Check the normal windows queue (highest preference) */
 	posted = 0;
 	while ( ! posted &&
-	        PeekMessage(&msg, NULL, 0, (WM_APP-1), PM_NOREMOVE) ) {
-		if ( GetMessage(&msg, NULL, 0, (WM_APP-1)) > 0 ) {
+	        PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE) ) {
+		if ( GetMessage(&msg, NULL, 0, 0) > 0 ) {
 			DispatchMessage(&msg);
 		} else {
 			return(-1);

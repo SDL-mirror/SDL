@@ -172,8 +172,8 @@ void DIB_PumpEvents(_THIS)
 {
 	MSG msg;
 
-	while ( PeekMessage(&msg, NULL, 0, (WM_APP-1), PM_NOREMOVE) ) {
-		if ( GetMessage(&msg, NULL, 0, (WM_APP-1)) > 0 ) {
+	while ( PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE) ) {
+		if ( GetMessage(&msg, NULL, 0, 0) > 0 ) {
 			DispatchMessage(&msg);
 		}
 	}
