@@ -381,14 +381,14 @@ void SDL_GetRGBA(Uint32 pixel, SDL_PixelFormat *fmt,
 		 */
 	        unsigned v;
 		v = (pixel & fmt->Rmask) >> fmt->Rshift;
-		*r = (v << fmt->Rloss) + (v >> (8 - fmt->Rloss));
+		*r = (v << fmt->Rloss) + (v >> (8 - (fmt->Rloss << 1)));
 		v = (pixel & fmt->Gmask) >> fmt->Gshift;
-		*g = (v << fmt->Gloss) + (v >> (8 - fmt->Gloss));
+		*g = (v << fmt->Gloss) + (v >> (8 - (fmt->Gloss << 1)));
 		v = (pixel & fmt->Bmask) >> fmt->Bshift;
-		*b = (v << fmt->Bloss) + (v >> (8 - fmt->Bloss));
+		*b = (v << fmt->Bloss) + (v >> (8 - (fmt->Bloss << 1)));
 		if(fmt->Amask) {
 		        v = (pixel & fmt->Amask) >> fmt->Ashift;
-			*a = (v << fmt->Aloss) + (v >> (8 - fmt->Aloss));
+			*a = (v << fmt->Aloss) + (v >> (8 - (fmt->Aloss << 1)));
 		} else
 		        *a = SDL_ALPHA_OPAQUE;
 	} else {
@@ -405,11 +405,11 @@ void SDL_GetRGB(Uint32 pixel, SDL_PixelFormat *fmt, Uint8 *r,Uint8 *g,Uint8 *b)
 	        /* the note for SDL_GetRGBA above applies here too */
 	        unsigned v;
 		v = (pixel & fmt->Rmask) >> fmt->Rshift;
-		*r = (v << fmt->Rloss) + (v >> (8 - fmt->Rloss));
+		*r = (v << fmt->Rloss) + (v >> (8 - (fmt->Rloss << 1)));
 		v = (pixel & fmt->Gmask) >> fmt->Gshift;
-		*g = (v << fmt->Gloss) + (v >> (8 - fmt->Gloss));
+		*g = (v << fmt->Gloss) + (v >> (8 - (fmt->Gloss << 1)));
 		v = (pixel & fmt->Bmask) >> fmt->Bshift;
-		*b = (v << fmt->Bloss) + (v >> (8 - fmt->Bloss));
+		*b = (v << fmt->Bloss) + (v >> (8 - (fmt->Bloss << 1)));
 	} else {
 		*r = fmt->palette->colors[pixel].r;
 		*g = fmt->palette->colors[pixel].g;
