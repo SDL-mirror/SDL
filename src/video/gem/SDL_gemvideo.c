@@ -479,13 +479,6 @@ static void GEM_FreeBuffers(_THIS)
 		free( GEM_buffer1 );
 		GEM_buffer1=NULL;
 	}
-
-	/* Destroy window */
-	if (GEM_handle>=0) {
-		wind_close(GEM_handle);
-		wind_delete(GEM_handle);
-		GEM_handle=-1;
-	}
 }
 
 static void GEM_ClearRect(_THIS, short *rect)
@@ -550,8 +543,6 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 	Uint32 modeflags, screensize;
 	SDL_bool use_shadow1, use_shadow2;
 
-	GEM_FreeBuffers(this);
-
 	/*--- Verify if asked mode can be used ---*/
 	if (flags & SDL_FULLSCREEN) {
 		maxwidth=VDI_w;
@@ -585,6 +576,8 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 #endif
 
 	/*--- Allocate shadow buffers if needed, and conversion operations ---*/
+	GEM_FreeBuffers(this);
+
 	GEM_bufops=0;
 	use_shadow1=use_shadow2=SDL_FALSE;
 	if (VDI_screen && (flags & SDL_FULLSCREEN)) {
@@ -633,6 +626,11 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 	}
 
 	if (flags & SDL_FULLSCREEN) {
+		/* Close window if needed */
+		if (GEM_handle >= 0) {
+			wind_close(GEM_handle);
+		}
+
 		GEM_LockScreen(this);
 
 		GEM_ClearScreen(this);
@@ -644,11 +642,13 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 			modeflags |= SDL_SWSURFACE;
 		}
 	} else {
+		int old_win_type;
 		short x2,y2,w2,h2;
 
 		GEM_UnlockScreen(this);
 
 		/* Set window gadgets */
+		old_win_type = GEM_win_type;
 		if (!(flags & SDL_NOFRAME)) {
 			GEM_win_type=NAME|MOVER|CLOSER|SMALLER;
 			if (flags & SDL_RESIZABLE) {
@@ -659,38 +659,48 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 			GEM_win_type=0;
 			modeflags |= SDL_NOFRAME;
 		}
+		modeflags |= SDL_SWSURFACE;
 
-		/* Calculate window size */
-		if (!wind_calc(WC_BORDER, GEM_win_type, 0,0,width,height, &x2,&y2,&w2,&h2)) {
-			GEM_FreeBuffers(this);
-			SDL_SetError("Can not calculate window attributes");
-			return NULL;
-		}
+		/* Recreate window ? only for different widget or non-created window */
+		if ((old_win_type == GEM_win_type) && (GEM_handle >= 0)) {
+			wind_get(GEM_handle, WF_CURRXYWH, &x2,&y2,&w2,&h2);
+		} else {
+			/* Calculate window size */
+			if (!wind_calc(WC_BORDER, GEM_win_type, 0,0,width,height, &x2,&y2,&w2,&h2)) {
+				GEM_FreeBuffers(this);
+				SDL_SetError("Can not calculate window attributes");
+				return NULL;
+			}
 
-		/* Center window */
-		x2 = GEM_desk_x+((GEM_desk_w-w2)>>1);
-		y2 = GEM_desk_y+((GEM_desk_h-h2)>>1);
+			/* Center window */
+			x2 = GEM_desk_x+((GEM_desk_w-w2)>>1);
+			y2 = GEM_desk_y+((GEM_desk_h-h2)>>1);
 
-		/* Create window */
-		GEM_handle=wind_create(GEM_win_type, x2,y2,w2,h2);
-		if (GEM_handle<0) {
-			GEM_FreeBuffers(this);
-			SDL_SetError("Can not create window");
-			return NULL;
-		}
+			/* Destroy existing window */
+			if (GEM_handle >= 0) {
+				wind_close(GEM_handle);
+				wind_delete(GEM_handle);
+			}
+
+			/* Create window */
+			GEM_handle=wind_create(GEM_win_type, x2,y2,w2,h2);
+			if (GEM_handle<0) {
+				GEM_FreeBuffers(this);
+				SDL_SetError("Can not create window");
+				return NULL;
+			}
 
 #ifdef DEBUG_VIDEO_GEM
-		printf("sdl:video:gem: handle=%d\n", GEM_handle);
+			printf("sdl:video:gem: handle=%d\n", GEM_handle);
 #endif
 
-		/* Setup window name */
-		wind_set(GEM_handle,WF_NAME,(short)(((unsigned long)GEM_title_name)>>16),(short)(((unsigned long)GEM_title_name) & 0xffff),0,0);
-		GEM_refresh_name = SDL_FALSE;
+			/* Setup window name */
+			wind_set(GEM_handle,WF_NAME,(short)(((unsigned long)GEM_title_name)>>16),(short)(((unsigned long)GEM_title_name) & 0xffff),0,0);
+			GEM_refresh_name = SDL_FALSE;
+		}
 	
 		/* Open the window */
 		wind_open(GEM_handle,x2,y2,w2,h2);
-
-		modeflags |= SDL_SWSURFACE;
 	}
 
 	/* Set up the new mode framebuffer */
@@ -1005,6 +1015,13 @@ void GEM_VideoQuit(_THIS)
 	SDL_AtariXbios_RestoreVectors();
 
 	GEM_FreeBuffers(this);
+
+	/* Destroy window */
+	if (GEM_handle>=0) {
+		wind_close(GEM_handle);
+		wind_delete(GEM_handle);
+		GEM_handle=-1;
+	}
 
 	GEM_UnlockScreen(this);
 
