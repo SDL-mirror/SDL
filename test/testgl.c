@@ -6,13 +6,7 @@
 #include "SDL.h"
 
 #ifdef HAVE_OPENGL
-#ifdef WIN32
-#include <windows.h>
-#endif
-#if defined(__APPLE__) && defined(__MACH__)
-#include <OpenGL/gl.h>
-#else
-#include <GL/gl.h>
+#include "SDL_opengl.h"
 #endif
 
 #define SHADED_CUBE
