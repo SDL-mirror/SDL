@@ -397,20 +397,63 @@ static int gpm_available(void)
 	return available;
 }
 
+
+/* rcg06112001 Set up IMPS/2 mode, if possible. This gives
+ *  us access to the mousewheel, etc. Returns zero if
+ *  writes to device failed, but you still need to query the
+ *  device to see which mode it's actually in.
+ */
+static int set_imps2_mode(int fd)
+{
+	/* If you wanted to control the mouse mode (and we do :)  ) ...
+		Set IMPS/2 protocol:
+			{0xf3,200,0xf3,100,0xf3,80}
+		Reset mouse device:
+			{0xFF}
+	*/
+	Uint8 set_imps2[] = {0xf3, 200, 0xf3, 100, 0xf3, 80};
+	Uint8 reset = 0xff;
+	fd_set fdset;
+	struct timeval tv;
+	int retval = 0;
+
+	if ( write(fd, &set_imps2, sizeof(set_imps2)) == sizeof(set_imps2) ) {
+		if (write(fd, &reset, sizeof (reset)) == sizeof (reset) ) {
+			retval = 1;
+		}
+	}
+
+	/* Get rid of any chatter from the above */
+	FD_ZERO(&fdset);
+	FD_SET(fd, &fdset);
+	tv.tv_sec = 0;
+	tv.tv_usec = 0;
+	while ( select(fd+1, &fdset, 0, 0, &tv) > 0 ) {
+		char temp[32];
+		read(fd, temp, sizeof(temp));
+	}
+
+	return retval;
+}
+
+
 /* Returns true if the mouse uses the IMPS/2 protocol */
 static int detect_imps2(int fd)
 {
 	int imps2;
 
 	imps2 = 0;
+
+	/* rcg06112001 Attempt to set IMPS/2 mode first, even with envr var... */
+	set_imps2_mode(fd);
+
 	if ( getenv("SDL_MOUSEDEV_IMPS2") ) {
 		imps2 = 1;
 	}
 	if ( ! imps2 ) {
-		unsigned char query_ps2 = 0xF2;
+		Uint8 query_ps2 = 0xF2;
 		fd_set fdset;
 		struct timeval tv;
-
 
 		/* Get rid of any mouse motion noise */
 		FD_ZERO(&fdset);
@@ -422,16 +465,10 @@ static int detect_imps2(int fd)
 			read(fd, temp, sizeof(temp));
 		}
 
-		/* Query for the type of mouse protocol */
-		if ( write(fd, &query_ps2, 1) == 1 ) {
-			unsigned char ch = 0;
+   		/* Query for the type of mouse protocol */
+   		if ( write(fd, &query_ps2, sizeof (query_ps2)) == sizeof (query_ps2)) {
+   			Uint8 ch = 0;
 
-			/* If you wanted to control the mouse mode:
-			   Set IMPS/2 protocol:
-				{0xf3,200,0xf3,100,0xf3,80}
-			   Reset mouse device:
-				{0xFF}
-			*/
 			/* Get the mouse protocol response */
 			do {
 				FD_ZERO(&fdset);
@@ -441,7 +478,7 @@ static int detect_imps2(int fd)
 				if ( select(fd+1, &fdset, 0, 0, &tv) < 1 ) {
 					break;
 				}
-			} while ( (read(fd, &ch, 1) == 1) &&
+			} while ( (read(fd, &ch, sizeof (ch)) == sizeof (ch)) &&
 			          ((ch == 0xFA) || (ch == 0xAA)) );
 
 			/* Experimental values (Logitech wheelmouse) */
@@ -502,9 +539,16 @@ fprintf(stderr, "Using GPM mouse\n");
 		}
 		/* Now try to use the new HID unified mouse device */
 		if ( mouse_fd < 0 ) {
-			mouse_fd = open("/dev/input/mice", O_RDONLY, 0);
-			if ( mouse_fd >= 0 ) {
-				mouse_drv = MOUSE_IMPS2;
+			mouse_fd = open("/dev/input/mice", O_RDWR, 0);
+			if (mouse_fd < 0) {
+				mouse_fd = open("/dev/input/mice", O_RDONLY, 0);
+			}
+			if (mouse_fd >= 0) {
+				if (detect_imps2(mouse_fd)) {
+					mouse_drv = MOUSE_IMPS2;
+				} else {
+					mouse_drv = MOUSE_PS2;
+				}
 			}
 		}
 		/* Now try to use a modern PS/2 port mouse */
