@@ -2404,8 +2404,9 @@ case "$target" in
         fi
         # Set up files for the cdrom library
         if test x$enable_cdrom = xyes; then
-            CDROM_SUBDIRS="$CDROM_SUBDIRS dummy"
-            CDROM_DRIVERS="$CDROM_DRIVERS dummy/libcdrom_dummy.la"
+            CDROM_SUBDIRS="$CDROM_SUBDIRS macosx"
+            CDROM_DRIVERS="$CDROM_DRIVERS macosx/libcdrom_macosx.la"
+            SYSTEM_LIBS="$SYSTEM_LIBS -framework AudioToolbox -framework AudioUnit -lstdc++"
         fi
         # Set up files for the thread library
         if test x$enable_threads = xyes; then
@@ -2672,6 +2673,7 @@ src/cdrom/bsdi/Makefile
 src/cdrom/freebsd/Makefile
 src/cdrom/linux/Makefile
 src/cdrom/macos/Makefile
+src/cdrom/macosx/Makefile
 src/cdrom/openbsd/Makefile
 src/cdrom/qnx/Makefile
 src/cdrom/win32/Makefile

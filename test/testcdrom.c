@@ -64,8 +64,8 @@ static void ListTracks(SDL_CD *cdrom)
 			trtype="unknown";
 			break;
 		}
-		printf("\tTrack (index %d) %d: %d:%2.2d [%s track]\n", i,
-					cdrom->track[i].id, m, s, trtype);
+		printf("\tTrack (index %d) %d: %d:%2.2d / %d [%s track]\n", i,
+					cdrom->track[i].id, m, s, cdrom->track[i].length, trtype);
 	}
 }
 
