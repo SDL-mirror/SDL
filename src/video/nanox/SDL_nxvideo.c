@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002  Sam Lantinga
+    Copyright (C) 1997-2004 Sam Lantinga
     Copyright (C) 2001  Hsieh-Fu Tsai
     Copyright (C) 2002  Greg Haerr <greg@censoft.com>
 
