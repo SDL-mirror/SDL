@@ -2211,6 +2211,7 @@ AC_SUBST(SDL_RLD_FLAGS)
 dnl Expand the libraries needed for static and dynamic linking
 AC_SUBST(STATIC_SYSTEM_LIBS)
 AC_SUBST(SHARED_SYSTEM_LIBS)
+AC_SUBST(SYSTEM_LIBS)
 
 dnl Expand the include directories for building SDL
 CFLAGS="$CFLAGS -I\$(top_srcdir)/include"
