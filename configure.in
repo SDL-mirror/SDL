@@ -1723,15 +1723,35 @@ CheckUSBHID()
     fi
 }
 
+dnl Check for altivec instruction support using gas syntax
+CheckAltivec()
+{
+    AC_MSG_CHECKING(for GCC Altivec instruction support)
+    have_gcc_altivec=no
+    AC_TRY_COMPILE([
+    ],[
+        asm volatile ("mtspr 256, %0\n\t"
+                      "vand %%v0, %%v0, %%v0"
+                      :
+                      : "r" (-1));
+    ],[
+    have_gcc_altivec=yes
+    ])
+    if test x$have_gcc_altivec = xyes; then
+        CFLAGS="$CFLAGS -DGCC_ALTIVEC"
+    fi
+    AC_MSG_RESULT($have_gcc_altivec)
+}
+
 case "$target" in
     *-*-linux*|*-*-gnu*|*-*-k*bsd*-gnu)
         case "$target" in
-	  *-*-linux*) ARCH=linux ;;
-	  *-*-kfreebsd*-gnu) ARCH=kfreebsd-gnu ;;
-	  *-*-knetbsd*-gnu) ARCH=knetbsd-gnu ;;
-	  *-*-kopenbsd*-gnu) ARCH=kopenbsd-gnu ;;
-	  *-*-gnu*) ARCH=gnu ;; # must be last
-	esac
+          *-*-linux*) ARCH=linux ;;
+          *-*-kfreebsd*-gnu) ARCH=kfreebsd-gnu ;;
+          *-*-knetbsd*-gnu) ARCH=knetbsd-gnu ;;
+          *-*-kopenbsd*-gnu) ARCH=kopenbsd-gnu ;;
+          *-*-gnu*) ARCH=gnu ;; # must be last
+        esac
         CheckDummyVideo
         CheckDiskAudio
         CheckDLOPEN
@@ -1755,6 +1775,7 @@ case "$target" in
         CheckOpenGL
         CheckInputEvents
         CheckPTHREAD
+        CheckAltivec
         # Set up files for the main() stub
         if test "x$video_qtopia" = "xyes"; then
           SDL_CFLAGS="$SDL_CFLAGS -Dmain=SDL_main"

@@ -236,7 +236,7 @@ static __inline__ int CPU_haveAltiVec()
 	int error = sysctl(selectors, 2, &hasVectorUnit, &length, NULL, 0); 
 	if( 0 == error )
 		altivec = (hasVectorUnit != 0); 
-#elseif defined(USE_SETJMP) && defined(__GNUC__) && defined(__powerpc__)
+#elif defined(USE_SETJMP) && defined(GCC_ALTIVEC)
 	void (*handler)(int sig);
 	handler = signal(SIGILL, illegal_instruction);
 	if ( setjmp(jmpbuf) == 0 ) {
