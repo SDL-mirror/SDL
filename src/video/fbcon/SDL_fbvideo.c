@@ -1423,7 +1423,7 @@ static void FB_VideoQuit(_THIS)
 	if ( this->screen ) {
 		/* Clear screen and tell SDL not to free the pixels */
 		if ( this->screen->pixels && FB_InGraphicsMode(this) ) {
-#ifdef __powerpc__	/* SIGBUS when using memset() ?? */
+#if defined(__powerpc__) || defined(__ia64__)	/* SIGBUS when using memset() ?? */
 			Uint8 *rowp = (Uint8 *)this->screen->pixels;
 			int left = this->screen->pitch*this->screen->h;
 			while ( left-- ) { *rowp++ = 0; }
