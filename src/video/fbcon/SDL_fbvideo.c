@@ -133,13 +133,14 @@ static int FB_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors);
 static void FB_VideoQuit(_THIS);
 
 /* Hardware surface functions */
-static int FB_InitHWSurfaces(_THIS, char *base, int size);
+static int FB_InitHWSurfaces(_THIS, SDL_Surface *screen, char *base, int size);
 static void FB_FreeHWSurfaces(_THIS);
 static int FB_AllocHWSurface(_THIS, SDL_Surface *surface);
 static int FB_LockHWSurface(_THIS, SDL_Surface *surface);
 static void FB_UnlockHWSurface(_THIS, SDL_Surface *surface);
 static void FB_FreeHWSurface(_THIS, SDL_Surface *surface);
 static void FB_WaitVBL(_THIS);
+static void FB_WaitIdle(_THIS);
 static int FB_FlipHWSurface(_THIS, SDL_Surface *surface);
 
 /* Internal palette functions */
@@ -191,6 +192,7 @@ static SDL_VideoDevice *FB_CreateDevice(int devindex)
 	}
 	memset(this->hidden, 0, (sizeof *this->hidden));
 	wait_vbl = FB_WaitVBL;
+	wait_idle = FB_WaitIdle;
 	mouse_fd = -1;
 	keyboard_fd = -1;
 
@@ -665,7 +667,7 @@ static SDL_Surface *FB_SetVGA16Mode(_THIS, SDL_Surface *current,
 	if ( ! SDL_ReallocFormat(current, bpp, 0, 0, 0, 0) ) {
 		return(NULL);
 	}
-    current->format->palette->ncolors = 16;
+	current->format->palette->ncolors = 16;
 
 	/* Get the fixed information about the console hardware.
 	   This is necessary since finfo.line_length changes.
@@ -759,6 +761,18 @@ static SDL_Surface *FB_SetVideoMode(_THIS, SDL_Surface *current,
 				return(NULL);
 			}
 		}
+	} else {
+		int maxheight;
+
+		/* Figure out how much video memory is available */
+		if ( flags & SDL_DOUBLEBUF ) {
+			maxheight = height*2;
+		} else {
+			maxheight = height;
+		}
+		if ( vinfo.yres_virtual > maxheight ) {
+			vinfo.yres_virtual = maxheight;
+		}
 	}
 	cache_vinfo = vinfo;
 #ifdef FBCON_DEBUG
@@ -803,6 +817,13 @@ static SDL_Surface *FB_SetVideoMode(_THIS, SDL_Surface *current,
 	current->pitch = finfo.line_length;
 	current->pixels = mapped_mem+mapped_offset;
 
+	/* Set up the information for hardware surfaces */
+	surfaces_mem = (char *)current->pixels +
+	                        vinfo.yres_virtual*current->pitch;
+	surfaces_len = (mapped_memlen-(surfaces_mem-mapped_mem));
+	FB_FreeHWSurfaces(this);
+	FB_InitHWSurfaces(this, current, surfaces_mem, surfaces_len);
+
 	/* Let the application know we have a hardware palette */
 	switch (finfo.visual) {
 	    case FB_VISUAL_PSEUDOCOLOR:
@@ -820,16 +841,11 @@ static SDL_Surface *FB_SetVideoMode(_THIS, SDL_Surface *current,
 			flip_address[0] = (char *)current->pixels;
 			flip_address[1] = (char *)current->pixels+
 			                          current->h*current->pitch;
+			this->screen = current;
 			FB_FlipHWSurface(this, current);
+			this->screen = NULL;
 		}
 	}
-
-	/* Set up the information for hardware surfaces */
-	surfaces_mem = (char *)current->pixels +
-	                        vinfo.yres_virtual*current->pitch;
-	surfaces_len = (mapped_memlen-(surfaces_mem-mapped_mem));
-	FB_FreeHWSurfaces(this);
-	FB_InitHWSurfaces(this, surfaces_mem, surfaces_len);
 
 	/* Set the update rectangle function */
 	this->UpdateRects = FB_DirectUpdate;
@@ -867,15 +883,36 @@ void FB_DumpHWSurfaces(_THIS)
 }
 #endif
 
-static int FB_InitHWSurfaces(_THIS, char *base, int size)
+static int FB_InitHWSurfaces(_THIS, SDL_Surface *screen, char *base, int size)
 {
-	surfaces.prev = NULL;
-	surfaces.used = 0;
-	surfaces.base = base;
-	surfaces.size = size;
-	surfaces.next = NULL;
+	vidmem_bucket *bucket;
+
 	surfaces_memtotal = size;
 	surfaces_memleft = size;
+
+	if ( surfaces_memleft > 0 ) {
+		bucket = (vidmem_bucket *)malloc(sizeof(*bucket));
+		if ( bucket == NULL ) {
+			SDL_OutOfMemory();
+			return(-1);
+		}
+		bucket->prev = &surfaces;
+		bucket->used = 0;
+		bucket->dirty = 0;
+		bucket->base = base;
+		bucket->size = size;
+		bucket->next = NULL;
+	} else {
+		bucket = NULL;
+	}
+
+	surfaces.prev = NULL;
+	surfaces.used = 1;
+	surfaces.dirty = 0;
+	surfaces.base = screen->pixels;
+	surfaces.size = (unsigned int)((long)base - (long)surfaces.base);
+	surfaces.next = bucket;
+	screen->hwdata = (struct private_hwdata *)&surfaces;
 	return(0);
 }
 static void FB_FreeHWSurfaces(_THIS)
@@ -956,12 +993,14 @@ surface->pitch = SDL_VideoSurface->pitch;
 	/* Set the current bucket values and return it! */
 	bucket->used = 1;
 	bucket->size = size;
+	bucket->dirty = 0;
 #ifdef FBCON_DEBUG
 	fprintf(stderr, "Allocated %d bytes at %p\n", bucket->size, bucket->base);
 #endif
 	surfaces_memleft -= size;
 	surface->flags |= SDL_HWSURFACE;
 	surface->pixels = bucket->base;
+	surface->hwdata = (struct private_hwdata *)bucket;
 	return(0);
 }
 static void FB_FreeHWSurface(_THIS, SDL_Surface *surface)
@@ -970,58 +1009,64 @@ static void FB_FreeHWSurface(_THIS, SDL_Surface *surface)
 
 	/* Look for the bucket in the current list */
 	for ( bucket=&surfaces; bucket; bucket=bucket->next ) {
-		if ( bucket->base == (char *)surface->pixels ) {
+		if ( bucket == (vidmem_bucket *)surface->hwdata ) {
 			break;
 		}
 	}
-	if ( (bucket == NULL) || ! bucket->used ) {
-		return;
-	}
-
-	/* Add the memory back to the total */
-#ifdef FBCON_DEBUG
+	if ( bucket && bucket->used ) {
+		/* Add the memory back to the total */
+#ifdef DGA_DEBUG
 	printf("Freeing bucket of %d bytes\n", bucket->size);
 #endif
-	surfaces_memleft += bucket->size;
+		surfaces_memleft += bucket->size;
 
-	/* Can we merge the space with surrounding buckets? */
-	bucket->used = 0;
-	if ( bucket->next && ! bucket->next->used ) {
-#ifdef FBCON_DEBUG
+		/* Can we merge the space with surrounding buckets? */
+		bucket->used = 0;
+		if ( bucket->next && ! bucket->next->used ) {
+#ifdef DGA_DEBUG
 	printf("Merging with next bucket, for %d total bytes\n", bucket->size+bucket->next->size);
 #endif
-		freeable = bucket->next;
-		bucket->size += bucket->next->size;
-		bucket->next = bucket->next->next;
-		if ( bucket->next ) {
-			bucket->next->prev = bucket;
+			freeable = bucket->next;
+			bucket->size += bucket->next->size;
+			bucket->next = bucket->next->next;
+			if ( bucket->next ) {
+				bucket->next->prev = bucket;
+			}
+			free(freeable);
 		}
-		free(freeable);
-	}
-	if ( bucket->prev && ! bucket->prev->used ) {
-#ifdef FBCON_DEBUG
+		if ( bucket->prev && ! bucket->prev->used ) {
+#ifdef DGA_DEBUG
 	printf("Merging with previous bucket, for %d total bytes\n", bucket->prev->size+bucket->size);
 #endif
-		freeable = bucket;
-		bucket->prev->size += bucket->size;
-		bucket->prev->next = bucket->next;
-		if ( bucket->next ) {
-			bucket->next->prev = bucket->prev;
+			freeable = bucket;
+			bucket->prev->size += bucket->size;
+			bucket->prev->next = bucket->next;
+			if ( bucket->next ) {
+				bucket->next->prev = bucket->prev;
+			}
+			free(freeable);
 		}
-		free(freeable);
 	}
 	surface->pixels = NULL;
+	surface->hwdata = NULL;
 }
 static int FB_LockHWSurface(_THIS, SDL_Surface *surface)
 {
-	if ( surface == SDL_VideoSurface ) {
+	if ( surface == this->screen ) {
 		SDL_mutexP(hw_lock);
+		if ( FB_IsSurfaceBusy(surface) ) {
+			FB_WaitBusySurfaces(this);
+		}
+	} else {
+		if ( FB_IsSurfaceBusy(surface) ) {
+			FB_WaitBusySurfaces(this);
+		}
 	}
 	return(0);
 }
 static void FB_UnlockHWSurface(_THIS, SDL_Surface *surface)
 {
-	if ( surface == SDL_VideoSurface ) {
+	if ( surface == this->screen ) {
 		SDL_mutexV(hw_lock);
 	}
 }
@@ -1034,10 +1079,18 @@ static void FB_WaitVBL(_THIS)
 	return;
 }
 
+static void FB_WaitIdle(_THIS)
+{
+	return;
+}
+
 static int FB_FlipHWSurface(_THIS, SDL_Surface *surface)
 {
 	/* Wait for vertical retrace and then flip display */
 	cache_vinfo.yoffset = flip_page*surface->h;
+	if ( FB_IsSurfaceBusy(this->screen) ) {
+		FB_WaitBusySurfaces(this);
+	}
 	wait_vbl(this);
 	if ( ioctl(console_fd, FBIOPAN_DISPLAY, &cache_vinfo) < 0 ) {
 		SDL_SetError("ioctl(FBIOPAN_DISPLAY) failed");

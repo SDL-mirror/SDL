@@ -32,18 +32,6 @@ static char rcsid =
 #include "3dfx_mmio.h"
 
 
-static int LockHWSurface(_THIS, SDL_Surface *surface)
-{
-	if ( surface == SDL_VideoSurface ) {
-		tdfx_waitidle();
-	}
-	return(0);
-}
-static void UnlockHWSurface(_THIS, SDL_Surface *surface)
-{
-	return;
-}
-
 /* Wait for vertical retrace */
 static void WaitVBL(_THIS)
 {
@@ -54,6 +42,10 @@ static void WaitVBL(_THIS)
 	/* wait until we're past the start */
 	while( (tdfx_in32(TDFX_STATUS) & STATUS_RETRACE) == 0 )
 		; 
+}
+static void WaitIdle(_THIS)
+{
+	tdfx_waitidle();
 }
 
 /* Sets video mem colorkey and accelerated blit function */
@@ -86,6 +78,9 @@ static int FillHWRect(_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color)
 	tdfx_out32(COMMAND_2D, COMMAND_2D_FILLRECT);
 	tdfx_out32(DSTSIZE, rect->w | (rect->h << 16));
 	tdfx_out32(LAUNCH_2D, dstX | (dstY << 16));
+
+	FB_AddBusySurface(dst);
+
 	return(0);
 }
 
@@ -151,6 +146,9 @@ static int HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,
 	tdfx_out32(DSTXY, dstX | (dstY << 16));
 	tdfx_out32(LAUNCH_2D, srcX | (srcY << 16));
 
+	FB_AddBusySurface(src);
+	FB_AddBusySurface(dst);
+
 	return(0);
 }
 
@@ -185,9 +183,8 @@ void FB_3DfxAccel(_THIS, __u32 card)
 {
 	/* We have hardware accelerated surface functions */
 	this->CheckHWBlit = CheckHWBlit;
-	this->LockHWSurface = LockHWSurface;
-	this->UnlockHWSurface = UnlockHWSurface;
 	wait_vbl = WaitVBL;
+	wait_idle = WaitIdle;
 
 	/* Reset the 3Dfx controller */
 	tdfx_out32(BRESERROR0, 0);
