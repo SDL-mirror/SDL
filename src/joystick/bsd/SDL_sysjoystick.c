@@ -332,23 +332,14 @@ SDL_SYS_JoystickUpdate(SDL_Joystick *joy)
 				case HUG_WHEEL:
 					naxe = JOYAXE_WHEEL;
 					goto scaleaxe;
+				default:
+					continue;
 				}
 scaleaxe:
 				v = (Sint32)hid_get_data(REP_BUF_DATA(rep),
 				    &hitem);
-				if (v != 127) {
-					if (v < 127) {
-						v = -(256 - v);
-						v <<= 7;
-						v++;
-					} else {
-						v++;
-						v <<= 7;
-						v--;
-					}
-				} else {
-					v = 0;
-				}
+				v -= (hitem.logical_maximum + hitem.logical_minimum + 1)/2;
+				v *= 32768/((hitem.logical_maximum - hitem.logical_minimum + 1)/2);
 				if (v != joy->axes[naxe]) {
 					SDL_PrivateJoystickAxis(joy, naxe, v);
 				}
