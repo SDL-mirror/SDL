@@ -100,8 +100,12 @@ static int SDL_SYS_CDEject(SDL_CD *cdrom);
 static void SDL_SYS_CDClose(SDL_CD *cdrom);
 
 /* Some ioctl() errno values which occur when the tray is empty */
+#ifndef ENOMEDIUM
+#define ENOMEDIUM ENOENT
+#endif
 #define ERRNO_TRAYEMPTY(errno)	\
-	((errno == EIO) || (errno == ENOENT) || (errno == EINVAL))
+	((errno == EIO)    || (errno == ENOENT) || \
+	 (errno == EINVAL) || (errno == ENOMEDIUM))
 
 /* Check a drive to see if it is a CD-ROM */
 static int CheckDrive(char *drive, char *mnttype, struct stat *stbuf)
