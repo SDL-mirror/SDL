@@ -548,7 +548,7 @@ CheckX11()
         AC_PATH_X
         AC_PATH_XTRA
         if test x$have_x = xyes; then
-            CFLAGS="$CFLAGS $X_CFLAGS -DENABLE_X11 -I\$(top_srcdir)/include -I\$(top_srcdir)/src/video"
+            CFLAGS="$CFLAGS $X_CFLAGS -DENABLE_X11 -I$srcdir/include -I$srcdir/src/video"
             if test x$ac_cv_func_shmat != xyes; then
                 CFLAGS="$CFLAGS -DNO_SHARED_MEMORY"
             fi

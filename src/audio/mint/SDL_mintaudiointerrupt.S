@@ -30,14 +30,17 @@
 	.text
 _SDL_MintAudio_IntDma:
 
+	/* Reenable interrupts, so other interrupts can work */
+	movew	#0x2300,sr
+
+	/* Clear service bit, so other MFP interrupts can work */
+	bclr	#5,0xfffffa0f:w
+
 	/* Check if we are not already running */
 	tstw	_SDL_MintAudio_mutex
 	bnes	intdma_end
 	notw	_SDL_MintAudio_mutex
 	
-	/* Reenable interrupts */
-	movew	#0x2300,sr
-
 	/* Swap buffers */
 	moveml	d0-d1/a0-a1,sp@-
 
@@ -76,7 +79,6 @@ intdma_buffer0:
 
 	clrw	_SDL_MintAudio_mutex
 intdma_end:
-	bclr	#5,0xfffffa0f:w
 	rte
 
 /*--- Xbios interrupt vector ---*/
@@ -84,14 +86,17 @@ intdma_end:
 	.text
 _SDL_MintAudio_IntXbios:
 
+	/* Reenable interrupts, so other interrupts can work */
+	movew	#0x2300,sr
+
+	/* Clear service bit, so other MFP interrupts can work */
+	bclr	#5,0xfffffa0f:w
+
 	/* Check if we are not already running */
 	tstw	_SDL_MintAudio_mutex
 	bnes	intxbios_end
 	notw	_SDL_MintAudio_mutex
 	
-	/* Reenable interrupts */
-	movew	#0x2300,sr
-
 	/* Swap buffers */
 	moveml	d0-d2/a0-a2,sp@-
 
@@ -123,7 +128,6 @@ intxbios_buffer0:
 
 	clrw	_SDL_MintAudio_mutex
 intxbios_end:
-	bclr	#5,0xfffffa0f:w
 	rte
 
 /*--- GSXB interrupt vector ---*/
