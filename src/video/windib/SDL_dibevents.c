@@ -369,13 +369,16 @@ int DIB_CreateWindow(_THIS)
 	if ( SDL_windowid ) {
 		SDL_Window = (HWND)strtol(SDL_windowid, NULL, 0);
 
-      /* DJM: we want all event's for the user specified
-         window to be handled by SDL.
-       */
-      if (SDL_Window) {
-         userWindowProc = (WNDPROC)GetWindowLong(SDL_Window, GWL_WNDPROC);
-         SetWindowLong(SDL_Window, GWL_WNDPROC, (LONG)WinMessage);
-      }
+		if ( SDL_Window == NULL ) {
+			SDL_SetError("Couldn't get user specified window");
+			return(-1);
+		}
+
+		/* DJM: we want all event's for the user specified
+			window to be handled by SDL.
+		 */
+		userWindowProc = (WNDPROC)GetWindowLong(SDL_Window, GWL_WNDPROC);
+		SetWindowLong(SDL_Window, GWL_WNDPROC, (LONG)WinMessage);
 	} else {
 		SDL_Window = CreateWindow(SDL_Appname, SDL_Appname,
                         (WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX),
@@ -391,7 +394,9 @@ int DIB_CreateWindow(_THIS)
 
 void DIB_DestroyWindow(_THIS)
 {
-	if ( SDL_windowid == NULL ) {
+	if ( SDL_windowid ) {
+		SetWindowLong(SDL_Window, GWL_WNDPROC, (LONG)userWindowProc);
+	} else {
 		DestroyWindow(SDL_Window);
 	}
 }
