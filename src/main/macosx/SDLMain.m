@@ -51,22 +51,22 @@ static BOOL   gFinderLaunch;
 /* Set the working directory to the .app's parent directory */
 - (void) setupWorkingDirectory:(BOOL)shouldChdir
 {
+    char parentdir[MAXPATHLEN];
+    char *c;
+    
+    strncpy ( parentdir, gArgv[0], sizeof(parentdir) );
+    c = (char*) parentdir;
+
+    while (*c != '\0')     /* go to end */
+        c++;
+    
+    while (*c != '/')      /* back up to parent */
+        c--;
+    
+    *c++ = '\0';             /* cut off last part (binary name) */
+  
     if (shouldChdir)
     {
-	  char parentdir[MAXPATHLEN];
-	  char *c;
-	  
-	  strncpy ( parentdir, gArgv[0], sizeof(parentdir) );
-	  c = (char*) parentdir;
-  
-	  while (*c != '\0')     /* go to end */
-		  c++;
-	  
-	  while (*c != '/')      /* back up to parent */
-		  c--;
-	  
-	  *c++ = '\0';             /* cut off last part (binary name) */
-	
       assert ( chdir (parentdir) == 0 );   /* chdir to the binary app's parent */
       assert ( chdir ("../../../") == 0 ); /* chdir to the .app's parent */
     }
