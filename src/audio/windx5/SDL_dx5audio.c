@@ -441,6 +441,7 @@ static int CreatePrimary(LPDIRECTSOUND sndObj, HWND focus,
 	memset(&format, 0, sizeof(format));
 	format.dwSize = sizeof(format);
 	format.dwFlags=(DSBCAPS_PRIMARYBUFFER|DSBCAPS_GETCURRENTPOSITION2);
+	format.dwFlags |= DSBCAPS_STICKYFOCUS;
 #ifdef USE_POSITION_NOTIFY
 	format.dwFlags |= DSBCAPS_CTRLPOSITIONNOTIFY;
 #endif
@@ -525,6 +526,8 @@ static int CreateSecondary(LPDIRECTSOUND sndObj, HWND focus,
 #endif
 	if ( ! focus ) {
 		format.dwFlags |= DSBCAPS_GLOBALFOCUS;
+	} else {
+		format.dwFlags |= DSBCAPS_STICKYFOCUS;
 	}
 	format.dwBufferBytes = numchunks*chunksize;
 	if ( (format.dwBufferBytes < DSBSIZE_MIN) ||
