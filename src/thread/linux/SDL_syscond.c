@@ -137,10 +137,10 @@ int SDL_CondWaitTimeout(SDL_cond *cond, SDL_mutex *mutex, Uint32 ms)
 	gettimeofday(&delta, NULL);
 
 	abstime.tv_sec = delta.tv_sec + (ms/1000);
-	abstime.tv_nsec = (delta.tv_usec+(ms%1000)) * 1000;
-        if ( abstime.tv_nsec > 1000000 ) {
+	abstime.tv_nsec = (delta.tv_usec + (ms%1000) * 1000) * 1000;
+        if ( abstime.tv_nsec > 1000000000 ) {
           abstime.tv_sec += 1;
-          abstime.tv_nsec -= 1000000;
+          abstime.tv_nsec -= 1000000000;
         }
 
   tryagain:
