@@ -93,7 +93,7 @@ void HotKey_ToggleGrab(void)
 	} else {
 		printf("Grab was off\n");
 	}
-	mode = SDL_WM_GrabInput(!mode);
+	mode = SDL_WM_GrabInput(mode ? SDL_GRAB_OFF : SDL_GRAB_ON);
 	if ( mode == SDL_GRAB_ON ) {
 		printf("Grab is now on\n");
 	} else {
