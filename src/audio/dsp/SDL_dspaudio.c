@@ -58,11 +58,7 @@ static char rcsid =
 
 /* Open the audio device for playback, and don't block if busy */
 #define USE_BLOCKING_WRITES
-#ifdef USE_BLOCKING_WRITES
-#define OPEN_FLAGS	O_WRONLY
-#else
 #define OPEN_FLAGS	(O_WRONLY|O_NONBLOCK)
-#endif
 
 /* Audio driver functions */
 static int DSP_OpenAudio(_THIS, SDL_AudioSpec *spec);
@@ -338,6 +334,18 @@ static int DSP_OpenAudio(_THIS, SDL_AudioSpec *spec)
 		return(-1);
 	}
 	mixbuf = NULL;
+
+#ifdef USE_BLOCKING_WRITES
+	/* Make the file descriptor use blocking writes with fcntl() */
+	{ long flags;
+		flags = fcntl(audio_fd, F_GETFL);
+		flags &= ~O_NONBLOCK;
+		if ( fcntl(audio_fd, F_SETFL, flags) < 0 ) {
+			SDL_SetError("Couldn't set audio blocking mode");
+			return(-1);
+		}
+	}
+#endif
 
 	/* Get a list of supported hardware formats */
 	if ( ioctl(audio_fd, SNDCTL_DSP_GETFMTS, &value) < 0 ) {
