@@ -135,6 +135,18 @@ IRIX:
 
 	The keyboard modifiers are not set to the correct state on startup.
 
+EPOC:
+    Only Crystal version of Epoc/SymbianOS is currently supported.
+
+    SDL is implemented in static library only. SDL uses static/global
+    variables and that is not allowed in EPOC dll libraries.
+
+    Sound is not yet supported.
+
+    Joystick, OpenGL and cdrom is not supported (think about cdrom in a cell phone:-).
+    
+    No console output screen. Printing to stdout do not have any effect.
+
 OpenBSD:  -= NOT YET SUPPORTED =-
 	This is reported to work, but I haven't verified this.
 
@@ -208,3 +220,4 @@ AmigaOS:  -= NOT YET SUPPORTED =-
 	Continuous relative mouse motion is not implemented.
 
 	The AmigaOS port was done by Gabriele.Greco@galactica.it
+

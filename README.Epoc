@@ -1,87 +1,75 @@
-31.8.2001 HJV
 
-SDL for EPOC/Symbian OS
-=======================
+==============================================================================
+Using the Simple DirectMedia Layer with EPOC/SymbianOS 6.0
+==============================================================================
 
-This is an Epoc port of SDL (1.2.0). It is not yet complete, but good enough for starting to port all those wonderful SDL based demos, games and other programs to Epoc! I have tested a bunch of demos and test programs in Nokia 9210 Communicator, which is a fancy device with combined PDA/GSM phone features, Symbian OS (Crystal), a full keyboard and a color screen (640x200x12bit).
+==============================================================================
+I.  Building the Simple DirectMedia Layer libraries:
 
-Btw. Also SDLDoom works over SDL Epoc port now (CDoom)!
+  You can get Symbian SDK from: 
+    http://www.symbian.com.
  
+  First create "Epoc" directory under SDL main directory and unpack 
+  EpocBuildFiles.zip in it.
+   
+  To build the librarys goto "epoc" directory and type:
+    bldmake bldfiles
+    abld makefile vc6 (for creating Microsoft Visual C++ makefiles)
+    abld build wins udeb (building for wins emulator)
+    abld build armi urel (building for real device)
 
-How to install to device
-========================
+==============================================================================
+II. Building the Simple DirectMedia Layer programs:
 
-Extract binary packets of the demo and test programs and copy the files to N9210.
+  Building SDL test programs is easy once you have built the libraries:
+    abld test build wins udeb
+    abld test build armi urel
 
+  Supported real screen resolutions
+    320 x 200 x  8 bit
+    320 x 200 x 12 bit
+    640 x 200 x  8 bit
+    640 x 200 x 12 bit
+  Supported "emulated" screen resolutions 
+    640 x 400 x  8 bit
+    640 x 400 x 12 bit
+    640 x 480 x  8 bit
+    640 x 480 x 12 bit
+  "Emulated" resolutions are implemented by by shrinking the screen vertically 
+  i.e. only every second scanline is drawn. This is mainly ment to be used for 
+  testing quick ports of programs. Using faked resolutions is a waste of memory 
+  and cpu power!
 
-How to use
-==========
+==============================================================================
+III. Running test programs
 
-Run exe's from the File manager. The Caps lock key enables or disables the virtual cursor. 
-The Esc key quits demo programs.
-Function keys are mapped as follows: 
-- F1=chr+q, F2=chr+w,..., F8=chr+i, 
-- F9=chr+a,..., F12=chr+d.
+  Copy executable to the device and run it from the File manager.   The Esc 
+  key quits demo programs. In Crystal, Exe programs do not appear in task list 
+  nor in Extras :-(. Test programs are tested in Nokia 9210 Communicator.
 
-In Crystal, Exe programs do not appear in task list nor in Extras :-(
+  Special keys used in SDL:
+    The Caps lock key enables or disables the virtual cursor. 
+    Function keys are mapped as follows: 
+    F1=chr+q, F2=chr+w,..., F8=chr+i, 
+    F9=chr+a,..., F12=chr+d.
 
+==============================================================================
+IV.  Enjoy! :)
 
-How to build
-============
+  If you have a project you'd like me to know about, or want to ask questions,
+  go ahead and join the SDL developer's mailing list by sending e-mail to:
 
-Building SDL, SDL_IMAGE and tests & demos:
-- Build files are in "\sdl\epoc\" and "\sdl_image\epoc\" directories
-- Building as usual: "bldmake bldfiles" "abld build wins udeb" "abld build armi urel"
-- Test and demos programs are build: "abld test build wins udeb" "abld test build armi urel" 
+	sdl-request@libsdl.org
 
+  and put "subscribe" into the subject of the message. Or alternatively you
+  can use the web interface:
 
-Building and sources
-====================
-Information about the Epoc implementation: 
-- Made over SDL 1.2.0
-- Ported sources: SDL, SDL_image, xflame, fire, warp, newvox, graywin, testalpha, SDLDoom(CDoom)
-- Test programs do not have any major changes: usually only screen size and depth is 
-  changed for 9210, if needed
-- Like in all the other platform implementations, the Epoc specific code is in "Epoc" subdirectories. All build files for Epoc are in the directory \sdl\epoc\. Adding a new OS support requires always some changes also in generic files (search for "#ifdef __SYMBIAN32__").
-- Currently, two resolutions and bit depths are supported: 320x200 and 640x200 with 8 or 12 bit color.
-- I addition, two faked resolutions are supported: 640x400, 640x480. These are implemented by shrinking the screen vertically i.e. only every second scanline is drawn. This can be used for testing and for non-resource intensive programs. Thought, using faked resolutions is a waste of memory and cpu power! 
+	http://www.libsdl.org/mailman/listinfo/sdl
 
-Change history
-==============
-
-31.8.2001 Alpha 0.2:
-- Now you should build ARMI binaries instead of THUMB. It runs faster. 
-- sdl_main.cpp: removed check for existing instance of sdlprogram
-- sdl_error.h: Added debug macros under conditional compilation in Epoc
-- sdl_epocevents.cpp: Added focus lost&gained event handling, added modifier handling, added a lot more key event handling (function keys and others). Function keys are mapped as follows: 
-  F1=chr+q, F2=chr+w,..., F8=chr+i, F9=chr+a,..., F12=chr+d.
-- sdl_epocvideo.h: Added EPOC_ScreenOffset variable. Added EPOC_IsWindowFocused variable (but not used for anything yet!). Added RedrawWindowL() function.
-- sdl_epocvideo.cpp: Added debugging functions: Debug_AvailMem2() and Debug_AvailMem(). 
-  Changed window to have white background. Centralize game screen if it is not full size. 
-  Added RedrawWindowL() function. Force other windows to redraw if SDL window lost focus. This cleans up possible game graphics from screen. Redraw after getting focus again.
-
-
-Todo
-====
-
-This Epoc port is (of course;-) not thoroughly tested. For testing, I have compiled and run a couple of test programs and demos in N9210. Still, e.g. thread related functions have not been tested at all.
-
-Known bugs and unimplemented features:
-- No sound
-- No console output screen. Printing to stdout do not have any effect.
-- Epoc do not allow static/global variables in DLL libraries. So I could only use static linking with SDL.
-- Some test programs may take so much cpu in 9210 that e.g. SMS sending and receiving is not possible at a same time. Also screen may look awkward if there appear visible notes, dialogs etc. when an sdl program is active. SDL program runs in the lowest possible priority for minimum interference in the system. Unfortunately, this is always not enough.  Perhaps some Delay() commands are needed.
-
-P.s. I have ported also the SDL version of MirrorMagic puzzle game to Epoc. I will put the sources and binaries available as soon as I bother to clean the ported sources a bit... 
+  You can find more info about Epoc version of SDL from Hannu Viitala's 
+  homepage
+    http://www.mbnet.fi/~haviital
+  
+==============================================================================
 
 
-Open Source & "bazaar" style software development
-=================================================
-
-You can take part in this porting project. This is Open Source software and you are very welcome to try it, test it, improve the code and implement the missing pieces. If you have any fix suggestions, improvements, code excerpts etc., contact me by email. Please start the mail subject with a string "EPOC SDL:".
-
-Cheers,
-Hannu
-
-Mail:hannu.j.viitala@mbnet.fi
-Homepage of SDL for Epoc: www.mbnet.fi/~haviital
