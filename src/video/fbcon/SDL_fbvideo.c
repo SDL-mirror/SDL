@@ -49,6 +49,8 @@ static char rcsid =
 #include "SDL_fbevents_c.h"
 #include "SDL_fb3dfx.h"
 #include "SDL_fbmatrox.h"
+#include "SDL_fbriva.h"
+
 
 #if defined(i386) && defined(FB_TYPE_VGA_PLANES)
 #define VGA16_FBCON_SUPPORT
@@ -504,6 +506,13 @@ static int FB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 			printf("3DFX hardware accelerator!\n");
 #endif
 			FB_3DfxAccel(this, finfo.accel);
+			break;
+		    case FB_ACCEL_NV3:
+		    case FB_ACCEL_NV4:
+#ifdef FBACCEL_DEBUG
+			printf("NVidia hardware accelerator!\n");
+#endif
+			FB_RivaAccel(this, finfo.accel);
 			break;
 		    default:
 #ifdef FBACCEL_DEBUG

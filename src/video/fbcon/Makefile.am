@@ -18,8 +18,12 @@ FBCON_SRCS = 			\
 	SDL_fbmatrox.h		\
 	SDL_fbmouse.c		\
 	SDL_fbmouse_c.h		\
+	SDL_fbriva.c		\
+	SDL_fbriva.h		\
 	SDL_fbvideo.c		\
 	3dfx_mmio.h		\
 	3dfx_regs.h		\
 	matrox_mmio.h		\
-	matrox_regs.h
+	matrox_regs.h		\
+	riva_mmio.h		\
+	riva_regs.h
