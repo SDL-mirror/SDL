@@ -8,7 +8,7 @@
 ---
 http://www.libsdl.org/
 
-This is the Simple DirectMedia Layer, a generic API that provides low
+This is the Simple DirectMedia Layer, a general API that provides low
 level access to audio, keyboard, mouse, joystick, 3D hardware via OpenGL,
 and 2D framebuffer across multiple platforms.
 
