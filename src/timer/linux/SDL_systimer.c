@@ -57,6 +57,7 @@ static char rcsid =
 #endif
 
 #if defined(i386) || defined(__i386__)
+/* This only works on pentium or newer x86 processors */
 /* Actually, this isn't reliable on multi-cpu systems, so is disabled */
 /*#define USE_RDTSC*/
 #endif
