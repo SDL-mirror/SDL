@@ -40,6 +40,9 @@ static char rcsid =
 # include <Strings.h>
 # include <CodeFragments.h>
 # include <Errors.h>
+#elif defined(__MINT__) && defined(ENABLE_LDG)
+# include <gem.h>
+# include <ldg.h>
 #else
 /*#error Unsupported dynamic link environment*/
 #endif /* system type */
@@ -113,6 +116,9 @@ void *SDL_LoadObject(const char *sofile)
 	if ( loaderror == NULL ) {
 		handle = (void *)(library_id);
 	}
+#elif defined(__MINT__) && defined(ENABLE_LDG)
+/* * */
+	handle = (void *)ldg_open((char *)sofile, ldg_global);
 #endif /* system type */
 
 	if ( handle == NULL ) {
@@ -163,6 +169,9 @@ void *SDL_LoadFunction(void *handle, const char *name)
 	                (char **)&symbol, &class) != noErr ) {
 		loaderror = "Symbol not found";
 	}
+#elif defined(__MINT__) && defined(ENABLE_LDG)
+/* * */
+	symbol = (void *)ldg_find((char *)name, (LDG *)handle);
 #endif /* system type */
 
 	if ( symbol == NULL ) {
@@ -193,5 +202,8 @@ void SDL_UnloadObject(void *handle)
 /* * */
 	CFragConnectionID library_id = (CFragConnectionID)handle;
 	CloseConnection(library_id);
+#elif defined(__MINT__) && defined(ENABLE_LDG)
+/* * */
+	ldg_close((LDG *)handle, ldg_global);
 #endif /* system type */
 }

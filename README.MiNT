@@ -51,6 +51,7 @@ Timer (VBL vector, GNU pth library)
 Joystick and joypad support (Ikbd, Hardware)
 Audio support (Hardware, XBIOS, GSXB, MCSN, STFA, /dev/audio if threads enabled)
 Threads support (Multitasking OS only via GNU pth library)
+Shared object support (using LDG library from http://ldg.atari.org/)
 
 - What is missing:
 CDROM support (Metados, /dev/cdrom)
