@@ -26,6 +26,7 @@
 */
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "SDL_video.h"
 #include "SDL_pixels_c.h"
