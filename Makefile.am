@@ -10,7 +10,7 @@ SUBDIRS = src include docs
 ## here, as well as have a Makefile generated at the end of configure.in
 ##
 ## This only works for subdirectories one level deep.
-DIST_SUBDIRS = $(SUBDIRS) docs
+DIST_SUBDIRS = $(SUBDIRS)
 
 # SDL runtime configuration script
 bin_SCRIPTS = sdl-config
