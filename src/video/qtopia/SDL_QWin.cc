@@ -1,0 +1,333 @@
+/*
+    SDL - Simple DirectMedia Layer
+    Copyright (C) 1997, 1998, 1999, 2000, 2001  Sam Lantinga
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Library General Public
+    License as published by the Free Software Foundation; either
+    version 2 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Library General Public License for more details.
+
+    You should have received a copy of the GNU Library General Public
+    License along with this library; if not, write to the Free
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+    Sam Lantinga
+    slouken@libsdl.org
+*/
+
+#ifdef SAVE_RCSID
+static char rcsid =
+ "@(#) $Id$";
+#endif
+
+#include "SDL_QWin.h"
+#include <qapplication.h>
+#include <qdirectpainter_qws.h>
+SDL_QWin::SDL_QWin(const QSize& size)
+  : QWidget(0, "SDL_main"), my_painter(0), my_image(0),
+    my_inhibit_resize(false), my_mouse_pos(-1,-1), my_flags(0),
+    my_has_fullscreen(false), my_locked(0)
+{
+  setBackgroundMode(NoBackground);
+}
+
+SDL_QWin::~SDL_QWin() {
+  // Nothing to do yet.
+  if(my_image) {
+    delete my_image;
+  }
+}
+
+void SDL_QWin::setImage(QImage *image) {
+  if ( my_image ) {
+    delete my_image;
+  }
+  my_image = image;
+  //  setFixedSize(image->size());
+}
+
+void SDL_QWin::resizeEvent(QResizeEvent *e) {
+  if(size() != qApp->desktop()->size()) {
+    // Widget is not the correct size, so do the fullscreen magic
+    my_has_fullscreen = false;
+    enableFullscreen();
+  }
+  if(my_inhibit_resize) {
+    my_inhibit_resize = false;
+  } else {
+    SDL_PrivateResize(e->size().width(), e->size().height());
+  }
+}
+
+void SDL_QWin::focusInEvent(QFocusEvent *) {
+  // Always do it here, no matter the size.
+  enableFullscreen();
+  SDL_PrivateAppActive(true, SDL_APPINPUTFOCUS);
+}
+
+void SDL_QWin::focusOutEvent(QFocusEvent *) {
+  my_has_fullscreen = false;
+  SDL_PrivateAppActive(false, SDL_APPINPUTFOCUS);
+}
+
+void SDL_QWin::closeEvent(QCloseEvent *e) {
+  SDL_PrivateQuit();
+  e->ignore();
+}
+
+void SDL_QWin::mouseMoveEvent(QMouseEvent *e) {
+  Qt::ButtonState button = e->button();
+  int sdlstate = 0;
+  if( (button & Qt::LeftButton)) {
+    sdlstate |= SDL_BUTTON_LMASK;
+  }
+  if( (button & Qt::RightButton)) {
+    sdlstate |= SDL_BUTTON_RMASK;
+  }
+  if( (button & Qt::MidButton)) {
+    sdlstate |= SDL_BUTTON_MMASK;
+  }
+  SDL_PrivateMouseMotion(sdlstate, 0, e->pos().x(), e->pos().y());
+}
+
+void SDL_QWin::mousePressEvent(QMouseEvent *e) {
+  my_mouse_pos = e->pos();
+  Qt::ButtonState button = e->button();
+  SDL_PrivateMouseButton(SDL_PRESSED,
+			 (button & Qt::LeftButton) ? 1 :
+			 ((button & Qt::RightButton) ? 2 : 3),
+			 e->x(), e->y());
+}
+
+void SDL_QWin::mouseReleaseEvent(QMouseEvent *e) {
+  my_mouse_pos = QPoint(-1, -1);
+  Qt::ButtonState button = e->button();
+  SDL_PrivateMouseButton(SDL_RELEASED,
+			 (button & Qt::LeftButton) ? 1 :
+			 ((button & Qt::RightButton) ? 2 : 3),
+			 e->x(), e->y());
+}
+
+#define USE_DIRECTPAINTER
+
+
+#ifndef __i386__
+static inline void gs_fastRotateBlit_3 ( unsigned short *fb,
+					 unsigned short *bits,
+					 const QRect& rect )
+{
+  int startx, starty;
+  int width, height;
+  
+  startx = rect.left() >> 1;
+  starty = rect.top() >> 1;
+  width  = ((rect.right() - rect.left()) >> 1) + 2;
+  height = ((rect.bottom() - rect.top()) >> 1) + 2;
+
+  if((startx+width) > 120) {
+    width = 120 - startx; // avoid horizontal overflow
+  }
+  if((starty+height) > 160) { 
+    height = 160 - starty; // avoid vertical overflow
+  }
+
+  ulong *sp1, *sp2, *dp1, *dp2;
+  ulong stop, sbot, dtop, dbot;    
+  
+  sp1 = (ulong*)bits + startx + starty*240;
+  sp2 = sp1 + 120;
+  dp1 = (ulong *)fb + (159 - starty) + startx*320;
+  dp2 = dp1 + 160;
+  int rowadd = (-320*width) - 1;
+  int rowadd2 = 240 - width;
+  // transfer in cells of 2x2 pixels in words
+  for (int y=0; y<height; y++) {
+    for (int x=0; x<width; x++) {
+      // read source pixels
+      stop = *sp1;
+      sbot = *sp2;
+      // rotate pixels
+      dtop = (sbot & 0xffff) + ((stop & 0xffff)<<16);
+      dbot = ((sbot & 0xffff0000)>>16) + (stop & 0xffff0000);
+      // write to framebuffer
+      *dp1 = dtop;
+      *dp2 = dbot;
+      // update source ptrs
+      sp1++; sp2++;
+      // update dest ptrs - 2 pix at a time
+      dp1 += 320;
+      dp2 += 320;
+    }
+    // adjust src ptrs - skip a row as we work in pairs
+    sp1 += rowadd2;
+    sp2 += rowadd2;
+    // adjust dest ptrs for rotation
+    dp1 += rowadd;
+    dp2 += rowadd;
+  }
+}
+#endif
+
+void SDL_QWin::repaintRect(const QRect& rect) {
+  if(!my_painter || !rect.width() || !rect.height()) {
+    return;
+  }
+#ifndef __i386__
+
+  if(QPixmap::defaultDepth() == 16 &&
+     my_painter->transformOrientation() == 3 &&
+     my_painter->numRects() >= 0) {
+    if(my_image->width() == width()) {
+      ushort *fb = (ushort*)my_painter->frameBuffer();
+      ushort *buf = (ushort*)my_image->bits();
+      gs_fastRotateBlit_3(fb, buf, rect);
+    } else {
+      // landscape mode
+      uchar *fb = (uchar*)my_painter->frameBuffer();
+      uchar *buf = (uchar*)my_image->bits();
+      int h = rect.height();
+      int wd = rect.width()<<1;
+      int fblineadd = my_painter->lineStep();
+      int buflineadd = my_image->bytesPerLine();
+      fb  += (rect.left()<<1) + rect.top() * my_painter->lineStep();
+      buf += (rect.left()<<1) + rect.top() * my_image->bytesPerLine();
+      while(h--) {
+	memcpy(fb, buf, wd);
+	fb += fblineadd;
+	buf += buflineadd;
+      }
+    }
+  } else {
+#endif
+    QPainter pp(this);
+    pp.drawImage(rect.topLeft(), *my_image, rect);
+    pp.end();
+#ifndef __i386__
+  }
+#endif
+}
+
+// This paints the current buffer to the screen, when desired. 
+void SDL_QWin::paintEvent(QPaintEvent *ev) {  
+  if(my_image && isVisible() && isActiveWindow()) {
+    lockScreen();
+    repaintRect(ev->rect());
+    unlockScreen();
+  }
+}  
+
+/* Function to translate a keyboard transition and queue the key event */
+void SDL_QWin::QueueKey(QKeyEvent *e, int pressed)
+{  
+  SDL_keysym keysym;
+  int scancode = e->key();
+  /* Set the keysym information */
+  if(scancode >= 'A' && scancode <= 'Z') {
+    // Qt sends uppercase, SDL wants lowercase
+    keysym.sym = static_cast<SDLKey>(scancode + 32);
+  } else if(scancode  >= 0x1000) {
+    // Special keys
+    switch(scancode) {
+    case Qt::Key_Escape: scancode = SDLK_ESCAPE; break;
+    case Qt::Key_Tab: scancode = SDLK_TAB; break;
+    case Qt::Key_Backspace: scancode = SDLK_BACKSPACE; break;
+    case Qt::Key_Return: scancode = SDLK_RETURN; break;
+    case Qt::Key_Enter: scancode = SDLK_KP_ENTER; break;
+    case Qt::Key_Insert: scancode = SDLK_INSERT; break;
+    case Qt::Key_Delete: scancode = SDLK_DELETE; break;
+    case Qt::Key_Pause: scancode = SDLK_PAUSE; break;
+    case Qt::Key_Print: scancode = SDLK_PRINT; break;
+    case Qt::Key_SysReq: scancode = SDLK_SYSREQ; break;
+    case Qt::Key_Home: scancode = SDLK_HOME; break;
+    case Qt::Key_End: scancode = SDLK_END; break;
+    case Qt::Key_Left: scancode = SDLK_LEFT; break;
+    case Qt::Key_Up: scancode = SDLK_UP; break;
+    case Qt::Key_Right: scancode = SDLK_RIGHT; break;
+    case Qt::Key_Down: scancode = SDLK_DOWN; break;
+    case Qt::Key_Prior: scancode = SDLK_PAGEUP; break;
+    case Qt::Key_Next: scancode = SDLK_PAGEDOWN; break;
+    case Qt::Key_Shift: scancode = SDLK_LSHIFT; break;
+    case Qt::Key_Control: scancode = SDLK_LCTRL; break;
+    case Qt::Key_Meta: scancode = SDLK_LMETA; break;
+    case Qt::Key_Alt: scancode = SDLK_LALT; break;
+    case Qt::Key_CapsLock: scancode = SDLK_CAPSLOCK; break;
+    case Qt::Key_NumLock: scancode = SDLK_NUMLOCK; break;
+    case Qt::Key_ScrollLock: scancode = SDLK_SCROLLOCK; break;
+    case Qt::Key_F1: scancode = SDLK_F1; break;
+    case Qt::Key_F2: scancode = SDLK_F2; break;
+    case Qt::Key_F3: scancode = SDLK_F3; break;
+    case Qt::Key_F4: scancode = SDLK_F4; break;
+    case Qt::Key_F5: scancode = SDLK_F5; break;
+    case Qt::Key_F6: scancode = SDLK_F6; break;
+    case Qt::Key_F7: scancode = SDLK_F7; break;
+    case Qt::Key_F8: scancode = SDLK_F8; break;
+    case Qt::Key_F9: scancode = SDLK_F9; break;
+    case Qt::Key_F10: scancode = SDLK_F10; break;
+    case Qt::Key_F11: scancode = SDLK_F11; break;
+    case Qt::Key_F12: scancode = SDLK_F12; break;
+    case Qt::Key_F13: scancode = SDLK_F13; break;
+    case Qt::Key_F14: scancode = SDLK_F14; break;
+    case Qt::Key_F15: scancode = SDLK_F15; break;
+    case Qt::Key_Super_L: scancode = SDLK_LSUPER; break;
+    case Qt::Key_Super_R: scancode = SDLK_RSUPER; break;
+    case Qt::Key_Menu: scancode = SDLK_MENU; break;
+    case Qt::Key_Help: scancode = SDLK_HELP; break;
+    default:
+      scancode = SDLK_UNKNOWN;
+      break;
+    }
+    keysym.sym = static_cast<SDLKey>(scancode);    
+  } else {
+    keysym.sym = static_cast<SDLKey>(scancode);    
+  }
+  keysym.scancode = scancode;
+  keysym.mod = KMOD_NONE;
+  ButtonState st = e->state();
+  if( (st & ShiftButton) )   { keysym.mod = static_cast<SDLMod>(keysym.mod | KMOD_LSHIFT);  }
+  if( (st & ControlButton) ) { keysym.mod = static_cast<SDLMod>(keysym.mod | KMOD_LCTRL);  }
+  if( (st & AltButton) )     { keysym.mod = static_cast<SDLMod>(keysym.mod | KMOD_LALT);  }
+  if ( SDL_TranslateUNICODE ) {
+    QChar qchar = e->text()[0];
+    keysym.unicode = qchar.unicode();
+  } else {
+    keysym.unicode = 0;
+  }
+
+  /* NUMLOCK and CAPSLOCK are implemented as double-presses in reality */
+  //	if ( (keysym.sym == SDLK_NUMLOCK) || (keysym.sym == SDLK_CAPSLOCK) ) {
+  //		pressed = 1;
+  //	}
+
+  /* Queue the key event */
+  if ( pressed ) {
+    SDL_PrivateKeyboard(SDL_PRESSED, &keysym);
+  } else {
+    SDL_PrivateKeyboard(SDL_RELEASED, &keysym);
+  }
+}
+
+void SDL_QWin::setFullscreen(bool fs_on) {
+  my_has_fullscreen = false;
+  enableFullscreen();
+}
+
+void SDL_QWin::enableFullscreen() {
+  // Make sure size is correct
+  if(!my_has_fullscreen) {
+    setFixedSize(qApp->desktop()->size());
+    // This call is needed because showFullScreen won't work
+    // correctly if the widget already considers itself to be fullscreen.
+    showNormal();
+    // This is needed because showNormal() forcefully changes the window
+    // style to WSTyle_TopLevel.
+    setWFlags(WStyle_Customize | WStyle_NoBorder);
+    // Enable fullscreen.
+    showFullScreen();
+    my_has_fullscreen = true;
+  }
+}

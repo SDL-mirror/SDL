@@ -398,6 +398,9 @@ extern VideoBootStrap XBIOS_bootstrap;
 #ifdef ENABLE_GEM
 extern VideoBootStrap GEM_bootstrap;
 #endif
+#ifdef ENABLE_QTOPIA
+extern VideoBootStrap Qtopia_bootstrap;
+#endif
 /* This is the current video device */
 extern SDL_VideoDevice *current_video;
 

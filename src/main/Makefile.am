@@ -17,9 +17,12 @@ lib_LIBRARIES = libSDLmain.a
 if TARGET_MACOSX
 MAINLIB_ARCH_SRCS = SDLMain.m SDLMain.h
 else
+if TARGET_QTOPIA
+MAINLIB_ARCH_SRCS = SDL_Qtopia_main.cc
+else
 MAINLIB_ARCH_SRCS = SDL_main.c
 endif
-
+endif
 libSDLmain_a_SOURCES = $(MAINLIB_ARCH_SRCS)
 
 # Build an internal library of any special app setup functions

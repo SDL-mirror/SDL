@@ -111,6 +111,9 @@ static VideoBootStrap *bootstrap[] = {
 #ifdef ENABLE_GEM
 	&GEM_bootstrap,
 #endif
+#ifdef ENABLE_QTOPIA
+	&Qtopia_bootstrap,
+#endif
 	NULL
 };
 
