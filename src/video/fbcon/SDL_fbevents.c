@@ -619,7 +619,8 @@ static void handle_mouse(_THIS)
 	int button = 0;
 	int dx = 0, dy = 0;
 	int packetsize = 0;
-
+	int realx, realy;
+	
 	/* Figure out the mouse packet size */
 	switch (mouse_drv) {
 		case MOUSE_NONE:
@@ -647,6 +648,18 @@ static void handle_mouse(_THIS)
 			break;
 	}
 
+	/* Special handling for the quite sensitive ELO controller */
+	if (mouse_drv == MOUSE_ELO) {
+	
+	    /* try to read the next packet */
+	    if(eloReadPosition(this, mouse_fd, &dx, &dy, &button, &realx, &realy)) {
+		button = (button & 0x01) << 2;
+    		FB_vgamousecallback(button, relative, dx, dy);
+	    }
+	    
+	    return;
+	}
+	
 	/* Read as many packets as possible */
 	nread = read(mouse_fd, &mousebuf[start], BUFSIZ-start);
 	if ( nread < 0 ) {
@@ -740,25 +753,25 @@ static void handle_mouse(_THIS)
 				dx =  (signed char)mousebuf[i+1];
 				dy = -(signed char)mousebuf[i+2];
 				break;
+			/*
 			case MOUSE_ELO:
-				/* ELO protocol has ELO_START_BYTE as first byte */
 				if ( mousebuf[i] != ELO_START_BYTE ) {
-					/* Go to next byte */
 					i -= (packetsize-1);
 					continue;
 				}
 
-				/* parse the packet */
 				if(!eloParsePacket(&(mousebuf[i]), &dx, &dy, &button)) {
-					break;
+					i -= (packetsize-1);
+					continue;
 				}
 				
 				button = (button & 0x01) << 2;
 
-				/* convert to screen coordinates */
 				eloConvertXY(this, &dx, &dy);
 				break;
+			*/
 
+			case MOUSE_ELO:
 			case NUM_MOUSE_DRVS:
 				/* Uh oh.. */
 				dx = 0;

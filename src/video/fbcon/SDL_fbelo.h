@@ -52,4 +52,10 @@ int eloInitController(int fd);
 */
 int eloParsePacket(unsigned char* mousebuf, int* dx, int* dy, int* button_state);
 
+/*	eloReadPosition
+	read a packet and get the cursor position
+*/
+
+int eloReadPosition(_THIS, int fd, int* x, int* y, int* button_state, int* realx, int* realy);
+
 #endif	/* SDL_fbelo_h */
