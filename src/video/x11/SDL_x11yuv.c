@@ -32,9 +32,11 @@ static char rcsid =
 #include <stdlib.h>
 #include <string.h>
 #include <X11/Xlib.h>
+#ifndef NO_SHARED_MEMORY
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <X11/extensions/XShm.h>
+#endif
 #include <XFree86/extensions/Xvlib.h>
 
 #include "SDL_error.h"
@@ -63,9 +65,27 @@ static struct private_yuvhwfuncs x11_yuvfuncs = {
 
 struct private_yuvhwdata {
 	int port;
+#ifndef NO_SHARED_MEMORY
+	int yuv_use_mitshm;
 	XShmSegmentInfo yuvshm;
+#endif
 	SDL_NAME(XvImage) *image;
 };
+
+
+#ifndef NO_SHARED_MEMORY
+/* Shared memory error handler routine */
+static int shm_error;
+static int (*X_handler)(Display *, XErrorEvent *) = NULL;
+static int shm_errhandler(Display *d, XErrorEvent *e)
+{
+        if ( e->error_code == BadAccess ) {
+        	shm_error = True;
+        	return(0);
+        } else
+		return(X_handler(d,e));
+}
+#endif /* !NO_SHARED_MEMORY */
 
 
 SDL_Overlay *X11_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SDL_Surface *display)
@@ -76,7 +96,10 @@ SDL_Overlay *X11_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, S
 	int i, j, k;
 	int adaptors;
 	SDL_NAME(XvAdaptorInfo) *ainfo;
+	int bpp;
+#ifndef NO_SHARED_MEMORY
 	XShmSegmentInfo *yuvshm;
+#endif
 
 	/* Look for the XVideo extension with a valid port for this format */
 	xv_port = -1;
@@ -133,6 +156,19 @@ SDL_Overlay *X11_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, S
 		SDL_NAME(XvFreeAdaptorInfo)(ainfo);
 	}
 
+	/* Precalculate the bpp for the pitch workaround below */
+	switch (format) {
+	    /* Add any other cases we need to support... */
+	    case SDL_YUY2_OVERLAY:
+	    case SDL_UYVY_OVERLAY:
+	    case SDL_YVYU_OVERLAY:
+		bpp = 2;
+		break;
+	    default:
+		bpp = 1;
+		break;
+	}
+
 #if 0
     /*
      * !!! FIXME:
@@ -183,57 +219,77 @@ SDL_Overlay *X11_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, S
 		SDL_FreeYUVOverlay(overlay);
 		return(NULL);
 	}
+	hwdata->port = xv_port;
+#ifndef NO_SHARED_MEMORY
 	yuvshm = &hwdata->yuvshm;
 	memset(yuvshm, 0, sizeof(*yuvshm));
-	hwdata->port = xv_port;
 	hwdata->image = SDL_NAME(XvShmCreateImage)(GFX_Display, xv_port, format,
-	                                 0, width, height, yuvshm);
+						   0, width, height, yuvshm);
+#ifdef PITCH_WORKAROUND
+	if ( hwdata->image != NULL && hwdata->image->pitches[0] != (width*bpp) ) {
+		/* Ajust overlay width according to pitch */ 
+		XFree(hwdata->image);
+		width = hwdata->image->pitches[0] / bpp;
+		hwdata->image = SDL_NAME(XvShmCreateImage)(GFX_Display, xv_port, format,
+							   0, width, height, yuvshm);
+	}
+#endif /* PITCH_WORKAROUND */
+	hwdata->yuv_use_mitshm = (hwdata->image != NULL);
+	if ( hwdata->yuv_use_mitshm ) {
+		yuvshm->shmid = shmget(IPC_PRIVATE, hwdata->image->data_size,
+				       IPC_CREAT | 0777);
+		if ( yuvshm->shmid >= 0 ) {
+			yuvshm->shmaddr = (char *)shmat(yuvshm->shmid, 0, 0);
+			yuvshm->readOnly = False;
+			if ( yuvshm->shmaddr != (char *)-1 ) {
+				shm_error = False;
+				X_handler = XSetErrorHandler(shm_errhandler);
+				XShmAttach(GFX_Display, yuvshm);
+				XSync(GFX_Display, True);
+				XSetErrorHandler(X_handler);
+				if ( shm_error )
+					shmdt(yuvshm->shmaddr);
+			} else {
+				shm_error = True;
+			}
+			shmctl(yuvshm->shmid, IPC_RMID, NULL);
+		} else {
+			shm_error = True;
+		}
+		if ( shm_error ) {
+			XFree(hwdata->image);
+			hwdata->yuv_use_mitshm = 0;
+		} else {
+			hwdata->image->data = yuvshm->shmaddr;
+		}
+	}
+	if ( !hwdata->yuv_use_mitshm )
+#endif /* NO_SHARED_MEMORY */
+	{
+		hwdata->image = SDL_NAME(XvCreateImage)(GFX_Display, xv_port, format,
+							0, width, height);
 
 #ifdef PITCH_WORKAROUND
-	if ( hwdata->image != NULL && hwdata->image->pitches[0] != width )
-	{
-	  /* Ajust overlay width according to pitch */ 
-	  switch (format) {
-	    case SDL_YV12_OVERLAY:
-	    case SDL_IYUV_OVERLAY:
-	        width = hwdata->image->pitches[0];
-		break;
-	    case SDL_YUY2_OVERLAY:
-	    case SDL_UYVY_OVERLAY:
-	    case SDL_YVYU_OVERLAY:
-	        width = hwdata->image->pitches[0] / 2;
-		break;
-	    default:
-		/* We should never get here (caught above) */
-		return(NULL);
-	  }
-	  
-	  XFree(hwdata->image);
-	  hwdata->image = SDL_NAME(XvShmCreateImage)(GFX_Display, xv_port, format,
-					   0, width, height, yuvshm);
+		if ( hwdata->image != NULL && hwdata->image->pitches[0] != (width*bpp) ) {
+			/* Ajust overlay width according to pitch */ 
+			XFree(hwdata->image);
+			width = hwdata->image->pitches[0] / bpp;
+			hwdata->image = SDL_NAME(XvCreateImage)(GFX_Display, xv_port, format,
+								0, width, height);
+		}
+#endif /* PITCH_WORKAROUND */
+		if ( hwdata->image == NULL ) {
+			SDL_SetError("Couldn't create XVideo image");
+			SDL_FreeYUVOverlay(overlay);
+			return(NULL);
+		}
+		hwdata->image->data = malloc(hwdata->image->data_size);
+		if ( hwdata->image->data == NULL ) {
+			SDL_OutOfMemory();
+			SDL_FreeYUVOverlay(overlay);
+			return(NULL);
+		}
 	}
-#endif
-
-	if ( hwdata->image == NULL ) {
-		SDL_OutOfMemory();
-		SDL_FreeYUVOverlay(overlay);
-		return(NULL);
-	}
-	yuvshm->shmid = shmget(IPC_PRIVATE, hwdata->image->data_size,
-	                       IPC_CREAT | 0777);
-	if ( yuvshm->shmid < 0 ) {
-		SDL_SetError("Unable to get %d bytes shared memory",
-		             hwdata->image->data_size);
-		SDL_FreeYUVOverlay(overlay);
-		return(NULL);
-	}
-	yuvshm->shmaddr  = (char *) shmat(yuvshm->shmid, 0, 0);
-	yuvshm->readOnly = False;
-	hwdata->image->data = yuvshm->shmaddr;
-
-	XShmAttach(GFX_Display, yuvshm);
-	XSync(GFX_Display, False);
-	shmctl(yuvshm->shmid, IPC_RMID, 0);
 
 	/* Find the pitch and offset values for the overlay */
 	overlay->planes = hwdata->image->num_planes;
@@ -277,9 +333,19 @@ int X11_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *dstrect)
 	struct private_yuvhwdata *hwdata;
 
 	hwdata = overlay->hwdata;
-	SDL_NAME(XvShmPutImage)(GFX_Display, hwdata->port, SDL_Window, SDL_GC,
+#ifndef NO_SHARED_MEMORY
+	if ( hwdata->yuv_use_mitshm ) {
+		SDL_NAME(XvShmPutImage)(GFX_Display, hwdata->port, SDL_Window, SDL_GC,
 	              hwdata->image, 0, 0, overlay->w, overlay->h,
 	              dstrect->x, dstrect->y, dstrect->w, dstrect->h, False);
+	}
+	else
+#endif
+	{
+		SDL_NAME(XvPutImage)(GFX_Display, hwdata->port, SDL_Window, SDL_GC,
+				     hwdata->image, 0, 0, overlay->w, overlay->h,
+				     dstrect->x, dstrect->y, dstrect->w, dstrect->h);
+	}
 	XSync(GFX_Display, False);
 	return(0);
 }
@@ -291,10 +357,12 @@ void X11_FreeYUVOverlay(_THIS, SDL_Overlay *overlay)
 	hwdata = overlay->hwdata;
 	if ( hwdata ) {
 		SDL_NAME(XvUngrabPort)(GFX_Display, hwdata->port, CurrentTime);
-		if ( hwdata->yuvshm.shmaddr ) {
+#ifndef NO_SHARED_MEMORY
+		if ( hwdata->yuv_use_mitshm ) {
 			XShmDetach(GFX_Display, &hwdata->yuvshm);
 			shmdt(hwdata->yuvshm.shmaddr);
 		}
+#endif
 		if ( hwdata->image ) {
 			XFree(hwdata->image);
 		}
