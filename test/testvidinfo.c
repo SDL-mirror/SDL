@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 	} else {
 		printf("Fullscreen video modes:\n");
 		for ( i=0; modes[i]; ++i ) {
-			printf("\t%dx%d\n", modes[i]->w, modes[i]->h);
+			printf("\t%dx%dx%d\n", modes[i]->w, modes[i]->h, info->vfmt->BitsPerPixel);
 		}
 	}
 	if ( info->wm_available ) {

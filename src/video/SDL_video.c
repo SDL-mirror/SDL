@@ -1391,7 +1391,9 @@ void SDL_GL_SwapBuffers(void)
 	SDL_VideoDevice *this = current_video;
 
 	if ( video->screen->flags & SDL_OPENGL ) {
-		video->GL_SwapBuffers( this );
+		video->GL_SwapBuffers(this);
+	} else {
+		SDL_SetError("OpenGL video mode has not been set");
 	}
 }
 

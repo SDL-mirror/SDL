@@ -25,16 +25,15 @@ static char rcsid =
  "@(#) $Id$";
 #endif
 
-
 #include "SDL_ph_modes_c.h"
 
 static unsigned long key1, key2;
 static PgVideoModeInfo_t mode_info;
 static PgVideoModes_t mode_list;
+
   /* The current list of available video modes */
- SDL_Rect SDL_modelist[127];
- SDL_Rect *SDLmod_ptr;
- SDL_Rect **SDLmod_ptrptr ;
+SDL_Rect  SDL_modelist[PH_MAX_VIDEOMODES];
+SDL_Rect* SDL_modearray[PH_MAX_VIDEOMODES];
 
 static int compare_modes_by_res(const void* mode1, const void* mode2)
 {
@@ -43,17 +42,17 @@ static int compare_modes_by_res(const void* mode1, const void* mode2)
 	{
 	    fprintf(stderr,"error: In compare_modes_by_res PgGetVideoModeInfo failed on mode: 0x%x\n",
         	    *(unsigned short*)mode1);
-    	return 0;
+    	    return 0;
 	}
 	key1 = mode_info.width * mode_info.height;
 
 	if (PgGetVideoModeInfo(*(unsigned short*)mode2, &mode_info) < 0)
 	{
-    	fprintf(stderr,"error: In compare_modes_by_res PgGetVideoModeInfo failed on mode: 0x%x\n",
+    	    fprintf(stderr,"error: In compare_modes_by_res PgGetVideoModeInfo failed on mode: 0x%x\n",
 	            *(unsigned short*)mode2);
 	    return 0;
 	}
-    key2 = mode_info.width * mode_info.height;
+        key2 = mode_info.width * mode_info.height;
 
 	if (key1 > key2)
 		return 1;
@@ -63,6 +62,7 @@ static int compare_modes_by_res(const void* mode1, const void* mode2)
 		return -1;
 }
 
+/*
 static int compare_modes_by_bpp(const void* mode1, const void* mode2)
 {
 
@@ -89,7 +89,9 @@ static int compare_modes_by_bpp(const void* mode1, const void* mode2)
     else
         return -1;
 }
+*/
 
+/*
 int ph_GetVideoModes(_THIS)
 {
 	unsigned short *front;
@@ -149,19 +151,24 @@ int ph_GetVideoModes(_THIS)
 	
 	return 0;
 }
+*/
 
-static SDL_Rect** ph_SupportedVisual( SDL_PixelFormat *format)
+SDL_Rect **ph_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
 {
 	int i = 0;
 	int j = 0;
-	SDL_Rect Amodelist[127];
+	SDL_Rect Amodelist[PH_MAX_VIDEOMODES];
 
+        for (i=0; i<PH_MAX_VIDEOMODES; i++)
+        {
+           SDL_modearray[i]=&SDL_modelist[i];
+        }
 
 	if (PgGetVideoModeList( &mode_list ) < 0)
-    {
-        fprintf(stderr,"error: PgGetVideoModeList failed\n");
-        return NULL;
-    }
+	{
+	   fprintf(stderr,"error: PgGetVideoModeList failed\n");
+	   return NULL;
+	}
 
 	mode_info.bits_per_pixel = 0;
 
@@ -173,47 +180,34 @@ static SDL_Rect** ph_SupportedVisual( SDL_PixelFormat *format)
                         mode_list.modes[i]);
                 return NULL;
             }
-            
+
             if(mode_info.bits_per_pixel == format->BitsPerPixel)
             {
-				Amodelist[j].w = mode_info.width;
-				Amodelist[j].h = mode_info.height;
-				Amodelist[j].x = 0;
-				Amodelist[j].y = 0;
-				j++;	
-			}
+		Amodelist[j].w = mode_info.width;
+		Amodelist[j].h = mode_info.height;
+		Amodelist[j].x = 0;
+		Amodelist[j].y = 0;
+		j++;	
+            }
 	}
 	
-	//reorder biggest for smallest , assume width dominates
-	   for(i=0; i< j ; i++)
-	   {
-	     SDL_modelist[i].w = Amodelist[j - i -1].w;
-	     SDL_modelist[i].h = Amodelist[j - i -1].h;
-	     SDL_modelist[i].x = Amodelist[j - i -1].x;
-	     SDL_modelist[i].y = Amodelist[j - i -1].y;
-	   }
-	
-	SDLmod_ptr = SDL_modelist;
-	SDLmod_ptrptr = &SDLmod_ptr;
-	return SDLmod_ptrptr;
-}
+	//reorder biggest for smallest, assume width dominates
 
-SDL_Rect **ph_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
-{
-    return ph_SupportedVisual( format);
+	for(i=0; i< j ; i++)
+	{
+	    SDL_modelist[i].w = Amodelist[j - i -1].w;
+	    SDL_modelist[i].h = Amodelist[j - i -1].h;
+	    SDL_modelist[i].x = Amodelist[j - i -1].x;
+	    SDL_modelist[i].y = Amodelist[j - i -1].y;
+	}
+        SDL_modearray[j]=NULL;
+	
+	return SDL_modearray;
 }
 
 void ph_FreeVideoModes(_THIS)
 {
-//    int i;
-
- //   if ( SDL_modelist ) {
- //       for ( i=0; SDL_modelist[i]; ++i ) {
- //           free(SDL_modelist[i]);
- //       }
- //       free(SDL_modelist);
- //       SDL_modelist = NULL;
-//    }
+   return;
 }
 
 static void set_best_resolution(_THIS, int width, int height)
@@ -287,6 +281,7 @@ static void set_best_resolution(_THIS, int width, int height)
     }
 }
 
+/*
 static void get_real_resolution(_THIS, int* w, int* h)
 {
 
@@ -294,13 +289,13 @@ static void get_real_resolution(_THIS, int* w, int* h)
         //PgDisplaySettings_t settings;
 	    PgVideoModeInfo_t		current_mode_info;
 	    	PgHWCaps_t my_hwcaps;
-        int unused;
-		/*
-        if (PgGetVideoMode( &settings ) >= 0) {
-			*w = settings.xres;
-			*h = settings.yres;
-            return;
-        }*/
+//        int unused;
+		
+//        if (PgGetVideoMode( &settings ) >= 0) {
+//			*w = settings.xres;
+//			*h = settings.yres;
+//            return;
+//        }
             if (PgGetGraphicsHWCaps(&my_hwcaps) >= 0)
          	{
                  if (PgGetVideoModeInfo(my_hwcaps.current_video_mode, &current_mode_info) < 0)
@@ -314,6 +309,7 @@ static void get_real_resolution(_THIS, int* w, int* h)
 //    *w = DisplayWidth(SDL_Display, SDL_Screen);
 //    *h = DisplayHeight(SDL_Display, SDL_Screen);
 }
+*/
 
 int ph_ResizeFullScreen(_THIS)
 {
@@ -496,9 +492,9 @@ int ph_LeaveFullScreen(_THIS )
 			mymode_settings.refresh= (unsigned short) old_refresh_rate;
 			mymode_settings.flags = 0;
 			if(PgSetVideoMode(&mymode_settings) < 0)
-			{
-            fprintf(stderr,"error: PgSetVideoMode failed\n");
-        	}
+                        {
+                           fprintf(stderr,"error: PgSetVideoMode failed\n");
+        	        }
 		}
 	
 		old_video_mode=-1;

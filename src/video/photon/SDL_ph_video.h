@@ -50,9 +50,12 @@ static unsigned TranslatedFillColor;
 #include "Pt.h"
 #include <photon/Pg.h>
 #include <photon/PdDirect.h>
+#include <photon/PdGL.h>
 
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_VideoDevice *this
+
+#define PH_OGL_MAX_ATTRIBS 32
 
 typedef union vidptr{
   uint8_t  *volatile ptr8;

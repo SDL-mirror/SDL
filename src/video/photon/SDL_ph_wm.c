@@ -230,168 +230,44 @@ void ph_SetCaption(_THIS, const char *title, const char *icon)
 	SDL_Unlock_EventThread();
 }
 
-/* Iconify the window (stolen from PhHotKey sources by phearbear ;-) */
+/* Iconify current window */
 int ph_IconifyWindow(_THIS)
 {
-#if 1 /* Code submitted by Luca <barbato_luca@yahoo.com> */
-	WmApiContext_t context=WmCreateContext();
-	WmWindowDefinition_t
-**wininfo=malloc(sizeof(WmWindowDefinition_t)*2);
-	int num;									
-	SDL_Lock_EventThread();
-	WmGetFocusList(context,2,&num,wininfo);
-	WmPerformFrameAction(context, wininfo[0]->rid,Pt_ACTION_MIN);
+   WmApiContext_t context=WmCreateContext();
+   WmWindowDefinition_t **wininfo=malloc(sizeof(WmWindowDefinition_t)*2);
+   int num;
 
-	WmDestroyContext (context);   
-	SDL_Unlock_EventThread();	 
-	free(wininfo);		   
-	return (0);   
-#else
-	int result=0;
-        int myerr;
-        int num;
-        PtConnectionClient_t *Client=0;
-        WmMsg_t* Message=malloc(sizeof(WmMsg_t));
-        WmReply_t *Reply=malloc(sizeof(WmReply_t));
-        WmApiContext_t MsgStruct=malloc(sizeof(WmApiContext_t));
-        WmWindowDefinition_t **WNDDEF=malloc(sizeof(WmWindowDefinition_t)*2);
-	
-	SDL_Lock_EventThread();
+   SDL_Lock_EventThread();
+   WmGetFocusList(context,2,&num,wininfo);
+   WmPerformFrameAction(context, wininfo[0]->rid,Pt_ACTION_MIN);
 
-        PtInit("/dev/photon");
+   WmDestroyContext (context);   
+   SDL_Unlock_EventThread();	 
+   free(wininfo);		   
 
-        Client=PtConnectionFindName("pwm",0,0);
-
-        if(!Client)
-        {
-           return result;
-        }
-
-        MsgStruct->input_group=PhInputGroup(0);
-        MsgStruct->connection=PtConnectionFindName("pwm",0,0);
-        myerr=WmGetFocusList(MsgStruct,2,&num,WNDDEF);
-
-        Message->hdr.type=WM_REQUEST_WIN_ACTION;
-        Message->hdr.subtype=Pt_ACTION_MIN;	   
-        Message->hdr.rid=WNDDEF[0]->rid;
-        myerr=WmSendMessage(Client,Message,Reply,0);
-
-        free(Message);
-        free(Reply);
-
-	SDL_Unlock_EventThread();
-
-	return(result);
-#endif /* 1 */
+   return (0);   
 }
 
 SDL_GrabMode ph_GrabInputNoLock(_THIS, SDL_GrabMode mode)
 {
-#if 0 /*big*/
-	int numtries, result;
-
-	if ( this->screen == NULL ) {
-		return(SDL_GRAB_OFF);
-	}
-	if ( ! SDL_Window ) {
-		return(mode);	/* Will be set later on mode switch */
-	}
-	if ( mode == SDL_GRAB_OFF ) {
-		XUngrabPointer(SDL_Display, CurrentTime);
-		if ( this->screen->flags & SDL_FULLSCREEN ) {
-			/* Rebind the mouse to the fullscreen window */
-			for ( numtries = 0; numtries < 10; ++numtries ) {
-				result = XGrabPointer(SDL_Display, FSwindow,
-						True, 0,
-						GrabModeAsync, GrabModeAsync,
-						FSwindow, None, CurrentTime);
-				if ( result == AlreadyGrabbed ) {
-					break;
-				}
-				SDL_Delay(100);
-			}
-		}
-#ifdef GRAB_FULLSCREEN
-		if ( !(this->screen->flags & SDL_FULLSCREEN) )
-#endif
-		XUngrabKeyboard(SDL_Display, CurrentTime);
-	} else {
-		if ( this->screen->flags & SDL_FULLSCREEN ) {
-			/* Unbind the mouse from the fullscreen window */
-			XUngrabPointer(SDL_Display, CurrentTime);
-		}
-		/* Try to grab the mouse */
-		for ( numtries = 0; numtries < 10; ++numtries ) {
-			result = XGrabPointer(SDL_Display, SDL_Window, True, 0,
-						GrabModeAsync, GrabModeAsync,
-						SDL_Window, None, CurrentTime);
-			if ( result != AlreadyGrabbed ) {
-				break;
-			}
-			SDL_Delay(100);
-		}
-#ifdef GRAB_FULLSCREEN
-		if ( !(this->screen->flags & SDL_FULLSCREEN) )
-#endif
-		XGrabKeyboard(SDL_Display, WMwindow, True,
-			GrabModeAsync, GrabModeAsync, CurrentTime);
-	}
-	XSync(SDL_Display, False);
-
-
-#endif /*big*/
-	return(mode);
+   return(mode);
 }
 
 SDL_GrabMode ph_GrabInput(_THIS, SDL_GrabMode mode)
 {
-#if 0
-	SDL_Lock_EventThread();
-	mode = X11_GrabInputNoLock(this, mode);
-	SDL_Unlock_EventThread();
-#endif
-	return(mode);
+   return(mode);
 }
 
-/* If 'info' is the right version, this function fills it and returns 1.
-   Otherwise, in case of a version mismatch, it returns -1.
-*/
-static void lock_display(void)
-{
-	SDL_Lock_EventThread();
-}
-static void unlock_display(void)
-{
-#if 0
-	/* Make sure any X11 transactions are completed */
-	SDL_VideoDevice *this = current_video;
-	XSync(SDL_Display, False);
-#endif
-	SDL_Unlock_EventThread();
-}
 int ph_GetWMInfo(_THIS, SDL_SysWMinfo *info)
 {
-#if 0
-	if ( info->version.major <= SDL_MAJOR_VERSION ) {
-		info->subsystem = SDL_SYSWM_X11;
-		info->info.x11.display = SDL_Display;
-		info->info.x11.window = SDL_Window;
-		if ( SDL_VERSIONNUM(info->version.major,
-		                    info->version.minor,
-		                    info->version.patch) >= 1002 ) {
-			info->info.x11.fswindow = FSwindow;
-			info->info.x11.wmwindow = WMwindow;
-		}
-		info->info.x11.lock_func = lock_display;
-		info->info.x11.unlock_func = unlock_display;
-		return(1);
-	} else {
-		SDL_SetError("Application not compiled with SDL %d.%d\n",
-					SDL_MAJOR_VERSION, SDL_MINOR_VERSION);
-		return(-1);
-	}
-#endif
-   return -1; // for now ...
+   if (info->version.major <= SDL_MAJOR_VERSION)
+   {
+      return 1;
+   }
+   else
+   {
+      SDL_SetError("Application not compiled with SDL %d.%d\n",
+                    SDL_MAJOR_VERSION, SDL_MINOR_VERSION);
+      return -1;
+   }
 }
-
-	   

@@ -85,22 +85,23 @@ WMcursor *ph_CreateWMCursor(_THIS,
 	cursor->ph_cursor->bytesperline1 = (char)w/8;
 	cursor->ph_cursor->color1 = Pg_WHITE;
 	cursor->ph_cursor->size2.x = (short)w;
-    cursor->ph_cursor->size2.y = (short)h;
-    cursor->ph_cursor->offset2.x = (short)hot_x;
-    cursor->ph_cursor->offset2.y = (short)hot_y;
-    cursor->ph_cursor->bytesperline2 = (char)w/8;
-    cursor->ph_cursor->color2 = Pg_BLACK;
+        cursor->ph_cursor->size2.y = (short)h;
+        cursor->ph_cursor->offset2.x = (short)hot_x;
+        cursor->ph_cursor->offset2.y = (short)hot_y;
+        cursor->ph_cursor->bytesperline2 = (char)w/8;
+        cursor->ph_cursor->color2 = Pg_BLACK;
       
 	clen = (w/8)*h;
 
 	/* Copy the mask and the data to different 
 	   bitmap planes */
-	for ( i=0; i<clen; ++i ) {
-        cursor->ph_cursor->images[i] = data[i];
-        cursor->ph_cursor->images[i+clen] = mask[i];
-    }
+	for ( i=0; i<clen; ++i )
+        {
+           cursor->ph_cursor->images[i] = data[i];
+           cursor->ph_cursor->images[i+clen] = mask[i];
+        }
     
-    //#bytes following the hdr struct
+        //#bytes following the hdr struct
 	cursor->ph_cursor->hdr.len =sizeof(PhCursorDef_t) + clen*2 - sizeof(PhRegionDataHdr_t); 
 
 	return (cursor);
@@ -109,7 +110,6 @@ WMcursor *ph_CreateWMCursor(_THIS,
 
 PhCursorDef_t ph_GetWMPhCursor(WMcursor *cursor)
 {
-
 	return(*cursor->ph_cursor);
 }
 
@@ -119,8 +119,6 @@ int ph_ShowWMCursor(_THIS, WMcursor *cursor)
 	PtArg_t args[3];
 	int nargs = 0;
 	short cursor_is_defined = 0;
-
-
 
 	/* Don't do anything if the display is gone */
  	if ( window == NULL ) {
@@ -145,8 +143,8 @@ int ph_ShowWMCursor(_THIS, WMcursor *cursor)
 			cursor_is_defined = 1;
 		}
 		if (cursor_is_defined)
-		 {
-    	    SDL_Lock_EventThread();
+		{
+    	                SDL_Lock_EventThread();
 			
 			if (PtSetResources( window, nargs, args ) < 0 )
 			{
@@ -163,15 +161,13 @@ int ph_ShowWMCursor(_THIS, WMcursor *cursor)
 
 void ph_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
 {
-
-	SDL_Lock_EventThread();
-	PhMoveCursorRel( PhInputGroup(NULL), x, y );	
-	SDL_Unlock_EventThread();
+   SDL_Lock_EventThread();
+   PhMoveCursorRel( PhInputGroup(NULL), x, y );	
+   SDL_Unlock_EventThread();
 }
 
 
 void ph_CheckMouseMode(_THIS)
 {
-
-	mouse_relative = 1;
+   mouse_relative = 1;
 }

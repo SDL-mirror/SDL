@@ -129,24 +129,24 @@ int ph_SetupOCImage(_THIS, SDL_Surface *screen) //Offscreen context
 		break;
 	}
 
-		OCImage.FrameData0 = (FRAMEDATA *) malloc((size_t)(sizeof( FRAMEDATA)));
-		OCImage.FrameData1 = (FRAMEDATA *) malloc((size_t)(sizeof( FRAMEDATA)));
+	OCImage.FrameData0 = (FRAMEDATA *) malloc((size_t)(sizeof( FRAMEDATA)));
+	OCImage.FrameData1 = (FRAMEDATA *) malloc((size_t)(sizeof( FRAMEDATA)));
 
 	if(OCImage.direct_context == NULL)
-	  OCImage.direct_context = PdCreateDirectContext();
+	   OCImage.direct_context = PdCreateDirectContext();
 
-	  OCImage.offscreen_context = PdCreateOffscreenContext(0,screen->w,screen->h, Pg_OSC_MEM_PAGE_ALIGN);	
+	OCImage.offscreen_context = PdCreateOffscreenContext(0,screen->w,screen->h, Pg_OSC_MEM_PAGE_ALIGN);
 				
-		if (OCImage.offscreen_context == NULL)
-		{
-			printf("PdCreateOffscreenContext  failed\n");
-			return -1;
-		}
+	if (OCImage.offscreen_context == NULL)
+	{
+	   printf("PdCreateOffscreenContext  failed\n");
+	   return -1;
+	}
 
-		OCImage.Stride = OCImage.offscreen_context->pitch;	
+	OCImage.Stride = OCImage.offscreen_context->pitch;	
 
-      if (OCImage.flags & SDL_DOUBLEBUF)
-      			printf("hardware flag for doublebuf offscreen context\n");
+        if (OCImage.flags & SDL_DOUBLEBUF)
+      	   printf("hardware flag for doublebuf offscreen context\n");
 
 			
 			OCImage.dc_ptr.ptr8 = (unsigned char *) PdGetOffscreenContextPtr(OCImage.offscreen_context);
@@ -175,21 +175,18 @@ int ph_SetupOCImage(_THIS, SDL_Surface *screen) //Offscreen context
 
 void ph_DestroyImage(_THIS, SDL_Surface *screen)
 {
-
-
    if(SDL_Image == NULL)
      return;
 
-	 if (OCImage.offscreen_context != NULL)
-	{
-			
-			PhDCRelease(OCImage.offscreen_context);
-			OCImage.offscreen_context = NULL;
-			free(OCImage.FrameData0);
-			OCImage.FrameData0 = NULL;
-			free(OCImage.FrameData1);
-			OCImage.FrameData1 = NULL;
-	}
+   if (OCImage.offscreen_context != NULL)
+   {
+      PhDCRelease(OCImage.offscreen_context);
+      OCImage.offscreen_context = NULL;
+      free(OCImage.FrameData0);
+      OCImage.FrameData0 = NULL;
+      free(OCImage.FrameData1);
+      OCImage.FrameData1 = NULL;
+   }
 
 	if (SDL_Image->image)
 	{
@@ -210,7 +207,6 @@ void ph_DestroyImage(_THIS, SDL_Surface *screen)
 
 int ph_ResizeImage(_THIS, SDL_Surface *screen, Uint32 flags)
 {
-  
     ph_DestroyImage(this, screen);
     
     if(  flags & SDL_HWSURFACE)
@@ -226,30 +222,25 @@ int ph_ResizeImage(_THIS, SDL_Surface *screen, Uint32 flags)
     {
         return ph_SetupImage(this, screen);
     }      
-
 }
 
 int ph_AllocHWSurface(_THIS, SDL_Surface *surface)
 {
-
         return(-1);
 }
 
 void ph_FreeHWSurface(_THIS, SDL_Surface *surface)
 {
-
         return;
 }
 
 int ph_FlipHWSurface(_THIS, SDL_Surface *surface)
 {
-
         return(0);
 }
 
 int ph_LockHWSurface(_THIS, SDL_Surface *surface)
 {
-
         if ( (surface == SDL_VideoSurface) && blit_queued ) {
 //                XSync(GFX_Display, False);
 				PgFlush();
@@ -260,7 +251,6 @@ int ph_LockHWSurface(_THIS, SDL_Surface *surface)
 
 void ph_UnlockHWSurface(_THIS, SDL_Surface *surface)
 {
-
         return;
 }
 
@@ -290,7 +280,7 @@ void ph_NormalUpdate(_THIS, int numrects, SDL_Rect *rects)
 		}
 	}
     if (PgFlush() < 0)
-	{
+    {
     	fprintf(stderr,"error: PgFlush failed.\n");
     }
 }
@@ -326,13 +316,13 @@ void ph_OCUpdate(_THIS, int numrects, SDL_Rect *rects)
 		
 			zero.x = zero.y = 0;
 	   		PgSetTranslation (&zero, 0);
-	       PgSetRegion(PtWidgetRid(window));
+	                PgSetRegion(PtWidgetRid(window));
 			PgSetClipping(0,NULL);
  			PgContextBlitArea(OCImage.offscreen_context, (PhArea_t *)(&src_rect), NULL, (PhArea_t *)(&dest_rect));
  			
 	}
     if (PgFlush() < 0)
-	{
+    {
     	fprintf(stderr,"error: PgFlush failed.\n");
     }
     

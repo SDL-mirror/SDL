@@ -56,10 +56,12 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
 static int ph_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors);
 static void ph_VideoQuit(_THIS);
 static void ph_DeleteDevice(SDL_VideoDevice *device);
+static void ph_GL_SwapBuffers(_THIS);
+
+PdOpenGLContext_t* OGLContext=NULL;
 
 static int ph_Available(void)
 {
-
         return 1;
 }
 
@@ -86,7 +88,7 @@ static SDL_VideoDevice *ph_CreateDevice(int devindex)
     device->handles_any_size = 1; //JB not true for fullscreen
 
     /* Set the function pointers */
-	device->CreateYUVOverlay = ph_CreateYUVOverlay;
+    device->CreateYUVOverlay = ph_CreateYUVOverlay;
     device->VideoInit = ph_VideoInit;
     device->ListModes = ph_ListModes;
     device->SetVideoMode = ph_SetVideoMode;
@@ -116,6 +118,13 @@ static SDL_VideoDevice *ph_CreateDevice(int devindex)
     device->CheckMouseMode = ph_CheckMouseMode;
     device->InitOSKeymap = ph_InitOSKeymap;
     device->PumpEvents = ph_PumpEvents;
+
+    // OpenGL support.
+    device->GL_LoadLibrary = NULL;
+    device->GL_GetProcAddress = NULL;
+    device->GL_GetAttribute = NULL;
+    device->GL_MakeCurrent = NULL;
+    device->GL_SwapBuffers = ph_GL_SwapBuffers;
 
     device->free = ph_DeleteDevice;
 
@@ -147,17 +156,17 @@ static void ph_DeleteDevice(SDL_VideoDevice *device)
 static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat)
 {
 	PtArg_t arg[1];
-    PhDim_t dim;
+	PhDim_t dim;
 	PgColor_t ph_palette[_Pg_MAX_PALETTE];
 	int i;
 	unsigned long *tempptr;
 	int rtnval;
-	PgDisplaySettings_t mysettings;
+//	PgDisplaySettings_t mysettings;
 	PgVideoModeInfo_t my_mode_info;
 	PgHWCaps_t my_hwcaps;
 	
-     if( NULL == ( event = malloc( EVENT_SIZE ) ) )
-          exit( EXIT_FAILURE );
+	if( NULL == ( event = malloc( EVENT_SIZE ) ) )
+	   exit( EXIT_FAILURE );
 
 	/* Create a widget 'window' to capture events */
     dim.w=0; //JB test320;
@@ -190,10 +199,10 @@ static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat)
 //        PtExit(EXIT_FAILURE);         // Got SEGFAULT.
   	}
 
-    //PgSetDrawBufferSize(16 *1024);
-   	PgSetRegion(PtWidgetRid(window));
-    PgSetClipping(0,NULL);
-    PtRealizeWidget(window);
+	//PgSetDrawBufferSize(16 *1024);
+	PgSetRegion(PtWidgetRid(window));
+	PgSetClipping(0,NULL);
+	PtRealizeWidget(window);
 
 
     /* Get the available video modes */
@@ -216,14 +225,15 @@ static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat)
             }
        */
          if (PgGetGraphicsHWCaps(&my_hwcaps) < 0)
-         	{
+         {
                 fprintf(stderr,"ph_VideoInit:  GetGraphicsHWCaps failed!! \n");
       			//that HAVE to work
-            }
+         }
          if (PgGetVideoModeInfo(my_hwcaps.current_video_mode, &my_mode_info) < 0)
-            {
+         {
                 fprintf(stderr,"ph_VideoInit:  PgGetVideoModeInfo failed\n");
-            }
+         }
+
        //We need to return BytesPerPixel as it in used by CreateRGBsurface
        vformat->BitsPerPixel = my_mode_info.bits_per_pixel;
        vformat->BytesPerPixel = vformat->BitsPerPixel/8;
@@ -263,32 +273,31 @@ static int ph_VideoInit(_THIS, SDL_PixelFormat *vformat)
 static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
                 int width, int height, int bpp, Uint32 flags)
 {
-    PhRegion_t region_info;
+//    PhRegion_t region_info;
     PgDisplaySettings_t settings;
     PgHWCaps_t my_hwcaps;
-	PgVideoModeInfo_t mode_info;
+    PgVideoModeInfo_t mode_info;
     int mode, actual_width, actual_height;
-	PtArg_t arg[5];
-	PhDim_t dim;	
-		int rtnval;
-	SDL_Rect ** mymodelist;
-	SDL_PixelFormat myformat;
-	PgColor_t ph_palette[_Pg_MAX_PALETTE];
-	int i;
-	unsigned long *tempptr;
+    PtArg_t arg[5];
+    PhDim_t dim;	
+    int rtnval;
+    PgColor_t ph_palette[_Pg_MAX_PALETTE];
+    int i;
+    unsigned long *tempptr;
+    uint64_t OGLAttrib[PH_OGL_MAX_ATTRIBS];
 
-	actual_width = width;
-	actual_height = height;
+    actual_width = width;
+    actual_height = height;
 
+    dim.w=width;
+    dim.h=height;
 
     /* Lock the event thread, in multi-threading environments */
     SDL_Lock_EventThread();
 
-
      /* Initialize the window */
     if (flags & SDL_FULLSCREEN) //Direct Context , assume SDL_HWSURFACE also set
     {
-
 /*  
 	if (old_video_mode==-1)
 	{
@@ -297,9 +306,7 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
 		old_refresh_rate=graphics_card_caps.current_rrate;
 	}
 */    	
-    	  	
-    	  	  	
-    	  	  	  	  	
+
         /* Get the video mode and set it */
         if (bpp == 0)
         {
@@ -309,15 +316,15 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
                 fprintf(stderr,"error: PgGetVideoMode failed\n");
             }
             */
-         if (PgGetGraphicsHWCaps(&my_hwcaps) < 0)
-         	{
-                fprintf(stderr,"ph_SetVideoMode:  GetGraphicsHWCaps failed!! \n");
-      			//that HAVE to work
-            }
-         if (PgGetVideoModeInfo(my_hwcaps.current_video_mode, &mode_info) < 0)
-            {
-                fprintf(stderr,"ph_SetVideoMode:  PgGetVideoModeInfo failed\n");
-            }
+           if (PgGetGraphicsHWCaps(&my_hwcaps) < 0)
+           {
+                   fprintf(stderr,"ph_SetVideoMode:  GetGraphicsHWCaps failed!! \n");
+      	           //that HAVE to work
+           }
+           if (PgGetVideoModeInfo(my_hwcaps.current_video_mode, &mode_info) < 0)
+           {
+               fprintf(stderr,"ph_SetVideoMode:  PgGetVideoModeInfo failed\n");
+           }
            bpp = mode_info.bits_per_pixel;
         }
         if (flags & SDL_ANYFORMAT)
@@ -341,8 +348,7 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
         settings.mode = mode;
         settings.refresh = 0;
         settings.flags  = 0;       
-             
-        
+
         if (PgSetVideoMode( &settings ) < 0)
         {
             fprintf(stderr,"error: PgSetVideoMode failed\n");
@@ -358,16 +364,33 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
        
 
     } //end fullscreen flag
-    else if (flags & SDL_HWSURFACE)  /* Use offscreen memory iff SDL_HWSURFACE flag is set */
+    else
     {
-      // Hardware surface is Offsceen Context.  ph_ResizeImage handles the switch
-      current->flags = (flags|(~SDL_RESIZABLE)); //no stretch blit in offscreen context
+       if (flags & SDL_HWSURFACE)  /* Use offscreen memory iff SDL_HWSURFACE flag is set */
+       {
+         // Hardware surface is Offsceen Context.  ph_ResizeImage handles the switch
+         current->flags = (flags|(~SDL_RESIZABLE)); //no stretch blit in offscreen context
+       }
+       else // must be SDL_SWSURFACE
+       {
+          current->flags = (flags|SDL_RESIZABLE); //yes we can resize as this is a software surface
+       }
+       
+       if (flags & SDL_OPENGL) // for now support OpenGL in window mode only
+       {
+          OGLAttrib[0]=PHOGL_ATTRIB_DEPTH_BITS;
+          OGLAttrib[1]=bpp;
+          OGLAttrib[2]=PHOGL_ATTRIB_NONE;
+          OGLContext=PdCreateOpenGLContext(2, &dim, 0, OGLAttrib);
+          if (OGLContext==NULL)
+          {
+             fprintf(stderr,"error: cannot create OpenGL context\n");
+             exit(1);
+          }
+          PhDCSetCurrent(OGLContext);
+       }
+       
     }
-    else // must be SDL_SWSURFACE
-    {
-     current->flags = (flags|SDL_RESIZABLE); //yes we can resize as this is a software surface
-     }
-
 
 	//If we are setting video to use the palette make sure we have allocated memory for it
 	if(bpp == 8)
@@ -379,7 +402,7 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
 		//fill the palette
 		rtnval = PgGetPalette(ph_palette);
 
-       tempptr = (unsigned long *)current->format->palette->colors;
+                tempptr = (unsigned long *)current->format->palette->colors;
 
 		for(i=0;i<256; i++)
 		{
@@ -397,17 +420,17 @@ static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current,
 	if((dim.w != width)||(dim.h != height))
 	{
 	    dim.w=width;
-    	dim.h=height; 
-    	PtSetArg(&arg[0], Pt_ARG_DIM, &dim,0);
-		PtSetResources( window, 1, arg ); 	
-       current->w = width;
-       current->h = height;
-       current->format->BitsPerPixel = bpp;
-		current->format->BytesPerPixel = bpp/8;
-       current->pitch = SDL_CalculatePitch(current);
-       //Must call at least once it setup image planes 
-       ph_ResizeImage(this, current, flags);
-    }
+	    dim.h=height; 
+	    PtSetArg(&arg[0], Pt_ARG_DIM, &dim,0);
+	    PtSetResources( window, 1, arg ); 	
+            current->w = width;
+            current->h = height;
+            current->format->BitsPerPixel = bpp;
+            current->format->BytesPerPixel = bpp/8;
+            current->pitch = SDL_CalculatePitch(current);
+            //Must call at least once it setup image planes 
+            ph_ResizeImage(this, current, flags);
+        }
 
 
     SDL_Unlock_EventThread();
@@ -421,8 +444,7 @@ static void ph_VideoQuit(_THIS)
 		
 	if(SDL_Image != NULL)
 	{
-	  	    ph_DestroyImage(this, SDL_VideoSurface); 
-	
+  	    ph_DestroyImage(this, SDL_VideoSurface); 
 	}
 
 	if (currently_fullscreen)
@@ -494,6 +516,13 @@ static int ph_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 	return alloct_all;
 }
 
+void ph_GL_SwapBuffers(_THIS)
+{
+   PgSetRegion(PtWidgetRid(window));
+   PdOpenGLContextSwapBuffers(OGLContext);
+}
+
+/*
 static int ph_ResizeWindow(_THIS,
             SDL_Surface *screen, int w, int h, Uint32 flags)
 {
@@ -512,5 +541,4 @@ static int ph_ResizeWindow(_THIS,
 	current_h = h;
     return(0);
 }
-
-
+*/
