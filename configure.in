@@ -55,6 +55,8 @@ AC_C_CONST
 AC_PROG_CXX
 AC_PROG_INSTALL
 AC_FUNC_ALLOCA
+ASFLAGS=""
+AC_SUBST(ASFLAGS)
 
 dnl The alpha architecture needs special flags for binary portability
 case "$target" in
