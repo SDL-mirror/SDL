@@ -36,6 +36,7 @@ static char rcsid =
 #include <sys/shm.h>
 #include <X11/extensions/XShm.h>
 #include <XFree86/extensions/Xvlib.h>
+#include <X11/Xlibint.h>
 
 #include "SDL_error.h"
 #include "SDL_video.h"
@@ -130,6 +131,19 @@ SDL_Overlay *X11_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, S
 		}
 		SDL_NAME(XvFreeAdaptorInfo)(ainfo);
 	}
+
+    /*
+     * !!! FIXME:
+     * "Here are some diffs for X11 and yuv.  Note that the last part 2nd
+     *  diff should probably be a new call to XvQueryAdaptorFree with ainfo
+     *  and the number of adaptors, instead of the loop through like I did."
+     */
+ 	for ( i=0; i < adaptors; ++i ) {
+ 	  if (ainfo[i].name != NULL) Xfree(ainfo[i].name);
+ 	  if (ainfo[i].formats != NULL) Xfree(ainfo[i].formats);
+   	}
+ 	Xfree(ainfo);
+
 	if ( xv_port == -1 ) {
 		SDL_SetError("No available video ports for requested format");
 		return(NULL);

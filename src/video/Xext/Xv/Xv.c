@@ -395,6 +395,7 @@ SDL_NAME(XvQueryEncodings)(
   *p_nEncodings = rep.num_encodings;
   *p_pEncodings = pes;
 
+  Xfree(buffer);
   UnlockDisplay(dpy);
   SyncHandle();
 
@@ -978,7 +979,6 @@ SDL_NAME(XvImage) * SDL_NAME(XvCreateImage) (
 
    UnlockDisplay(dpy);
    SyncHandle();
-
    return ret;
 }
 
