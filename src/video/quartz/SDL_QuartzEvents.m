@@ -19,6 +19,7 @@
 	Sam Lantinga
 	slouken@libsdl.org
 */
+#include <sys/time.h>
 
 #include "SDL_QuartzKeys.h"
 
@@ -305,7 +306,13 @@ static void QZ_DoDeactivate (_THIS) {
 
 static void QZ_PumpEvents (_THIS)
 {
-	NSDate *distantPast;
+	
+        static NSPoint lastMouse;
+        NSPoint mouse, saveMouse;
+        Point qdMouse;
+        CGMouseDelta dx, dy;
+        
+        NSDate *distantPast;
 	NSEvent *event;
 	NSRect winRect;
 	NSRect titleBarRect;
@@ -314,10 +321,36 @@ static void QZ_PumpEvents (_THIS)
 	pool = [ [ NSAutoreleasePool alloc ] init ];
 	distantPast = [ NSDate distantPast ];
 	
-	winRect = NSMakeRect (0, 0, SDL_VideoSurface->w + 1, SDL_VideoSurface->h + 1);
+	winRect = NSMakeRect (0, 0, SDL_VideoSurface->w, SDL_VideoSurface->h);
 	titleBarRect = NSMakeRect ( 0, SDL_VideoSurface->h, SDL_VideoSurface->w,
 		SDL_VideoSurface->h + 22 );
-			
+	
+        if (currentGrabMode != SDL_GRAB_ON) { /* if grabbed, the cursor can't move! (see fallback below) */
+        
+            /* 1/2 second after a warp, the mouse cannot move (don't ask me why) */
+            /* So, approximate motion with CGGetLastMouseDelta, which still works, somehow */
+            if (! warp_flag) {
+            
+                GetGlobalMouse (&qdMouse);  /* use Carbon since [ NSEvent mouseLocation ] is broken */
+                mouse = NSMakePoint (qdMouse.h, qdMouse.v);
+                saveMouse = mouse;
+                
+                if (mouse.x != lastMouse.x || mouse.y != lastMouse.y) {
+                
+                    QZ_PrivateCGToSDL (this, &mouse);
+                    if (inForeground && NSPointInRect (mouse, winRect)) {
+                        //printf ("Mouse Loc: (%f, %f)\n", mouse.x, mouse.y);
+                        SDL_PrivateMouseMotion (0, 0, mouse.x, mouse.y);
+                    }
+                }
+                lastMouse = saveMouse;
+            }
+        }
+        
+        /* accumulate any mouse events into one SDL mouse event */
+        dx = 0;
+        dy = 0;
+        
 	do {
 	
 		/* Poll for an event. This will not block */
@@ -330,22 +363,22 @@ static void QZ_PumpEvents (_THIS)
 			BOOL isForGameWin;
 
 			#define DO_MOUSE_DOWN(button, sendToWindow) do {				 \
-				if ( inForeground ) {										 \
+				if ( inForeground ) {			                                 \
 					if ( (SDL_VideoSurface->flags & SDL_FULLSCREEN) ||		 \
 						 NSPointInRect([event locationInWindow], winRect) )	 \
 						SDL_PrivateMouseButton (SDL_PRESSED, button, 0, 0);	 \
-				}															 \
-				else {														 \
-					QZ_DoActivate (this);									 \
-				}															 \
-				[ NSApp sendEvent:event ];									 \
+				}                                                                        \
+				else {									 \
+					QZ_DoActivate (this);                                            \
+				}									 \
+				[ NSApp sendEvent:event ];			                         \
 				} while(0)
 				
 			#define DO_MOUSE_UP(button, sendToWindow) do {					 \
 				if ( (SDL_VideoSurface->flags & SDL_FULLSCREEN) ||			 \
-					 !NSPointInRect([event locationInWindow], titleBarRect) )\
-					SDL_PrivateMouseButton (SDL_RELEASED, button, 0, 0);	 \
-				[ NSApp sendEvent:event ];									 \
+					 !NSPointInRect([event locationInWindow], titleBarRect) )        \
+					SDL_PrivateMouseButton (SDL_RELEASED, button, 0, 0);	         \
+				[ NSApp sendEvent:event ];						 \
 				} while(0)
 
 			type = [ event type ];
@@ -365,7 +398,7 @@ static void QZ_PumpEvents (_THIS)
 					DO_MOUSE_DOWN (1, 1);
 				}
 				break;
-			case 25:			   DO_MOUSE_DOWN (2, 0); break;
+			case NSOtherMouseDown: DO_MOUSE_DOWN (2, 0); break;
 			case NSRightMouseDown: DO_MOUSE_DOWN (3, 0); break;	
 			case NSLeftMouseUp:
 			
@@ -377,7 +410,7 @@ static void QZ_PumpEvents (_THIS)
 					DO_MOUSE_UP (1, 1);
 				}
 				break;
-			case 26:			   DO_MOUSE_UP (2, 0);	 break;
+			case NSOtherMouseUp:   DO_MOUSE_UP (2, 0);	 break;
 			case NSRightMouseUp:   DO_MOUSE_UP (3, 0);	 break;
 			case NSSystemDefined:
 				//if ([event subtype] == 7) {
@@ -389,30 +422,37 @@ static void QZ_PumpEvents (_THIS)
 			case NSRightMouseDragged:
 			case 27:
 			case NSMouseMoved:
-				if ( (SDL_VideoSurface->flags & SDL_FULLSCREEN)
-					|| NSPointInRect([event locationInWindow], winRect) )
-				{
-				   static int moves = 0;
-				   NSPoint p;
-			
-				   if ( SDL_VideoSurface->flags & SDL_FULLSCREEN ) {
-					   p = [ NSEvent mouseLocation ];
-					   p.y = [[NSScreen mainScreen] frame].size.height - p.y;
-				   } else {
-					   p = [ event locationInWindow ];
-					   p.y = SDL_VideoSurface->h - p.y;
-				   }
-
-				   if ( (moves % 10) == 0 ) {
-						SDL_PrivateMouseMotion (0, 0, p.x, p.y);
-				   }
-				   else {
-						CGMouseDelta dx, dy;
-						CGGetLastMouseDelta (&dx, &dy);
-						SDL_PrivateMouseMotion (0, 1, dx, dy);
-				   }
-				   moves++;
-				}
+                            
+                                if (currentGrabMode == SDL_GRAB_ON) { 
+                                    
+                                    /** 
+                                     *  If input is grabbed, we'll wing it and try to send some mouse
+                                     *  moved events with CGGetLastMouseDelta(). Not optimal, but better
+                                     *  than nothing.
+                                     **/ 
+                                     CGMouseDelta dx1, dy1;
+                                     CGGetLastMouseDelta (&dx1, &dy1);
+                                     dx += dx1;
+                                     dy += dy1;
+                                }
+                                else if (warp_flag) {
+                                
+                                    Uint32 ticks;
+                
+                                    ticks = SDL_GetTicks();
+                                    if (ticks - warp_ticks < 150) {
+                                    
+                                        CGMouseDelta dx1, dy1;
+                                        CGGetLastMouseDelta (&dx1, &dy1);
+                                        dx += dx1;
+                                        dy += dy1;
+                                    }
+                                    else {
+                                        
+                                        warp_flag = 0;
+                                    }
+                                }
+                                
 				break;
 			case NSScrollWheel:
 				{
@@ -435,8 +475,6 @@ static void QZ_PumpEvents (_THIS)
 			case NSFlagsChanged:
 				QZ_DoModifiers( [ event modifierFlags ] );
 				break;
-			/* case NSMouseEntered: break; */
-			/* case NSMouseExited: break; */
 			case NSAppKitDefined:
 				switch ( [ event subtype ] ) {
 				case NSApplicationActivatedEventType:
@@ -451,12 +489,17 @@ static void QZ_PumpEvents (_THIS)
 			/* case NSApplicationDefined: break; */
 			/* case NSPeriodic: break; */
 			/* case NSCursorUpdate: break; */
-			default:
+                        
+                        default:
 				[ NSApp sendEvent:event ];
 			}
 		}
 	  } while (event != nil);
 	
+          /* check for accumulated mouse events */
+          if (dx != 0 || dy != 0)
+            SDL_PrivateMouseMotion (0, 1, dx, dy);
+        
 	  [ pool release ];
 }
 

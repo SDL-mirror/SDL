@@ -34,25 +34,28 @@
         - Multiple monitor support (currently only main display)
         - Accelerated blitting support
         - Set the window icon (dock icon when API is available)
-        - Avoid erasing window on minimize, or disable minimize
+        - Fix white OpenGL window on minimize
+        - Find out what events should be sent/ignored if window is mimimized
+        - Find a better way to deal with resolution/depth switch while app is running
+        - Resizeable windows
+        - Check accuracy of QZ_SetGamma()
     Problems:
         - OGL not working in full screen with software renderer
         - SetColors sets palette correctly but clears framebuffer
         - Crash in CG after several mode switches
-        - Retained windows don't draw their title bar quite right (OS Bug)
-        - Should I do depth switching for windowed modes? - No, not usually.
-        - Launch times are slow, maybe prebinding will help
-        - Direct framebuffer access has some artifacts, maybe a driver issue
-        - Cursor in 8 bit modes is screwy
+        - Retained windows don't draw their title bar quite right (OS Bug) (not using retained windows)
+        - Cursor in 8 bit modes is screwy (might just be Radeon PCI bug)
+        - Warping cursor delays mouse events for a fraction of a second,
+          there is a hack around this that helps a bit
 */
 
-#include <ApplicationServices/ApplicationServices.h>
-#include <OpenGL/OpenGL.h>
 #include <Cocoa/Cocoa.h>
+#include <OpenGL/OpenGL.h>
 #include <Carbon/Carbon.h>
 
 #include "SDL_video.h"
 #include "SDL_error.h"
+#include "SDL_timer.h"
 #include "SDL_syswm.h"
 #include "SDL_sysvideo.h"
 #include "SDL_pixels_c.h"
@@ -71,21 +74,34 @@
 }
 @end
 
+/* Structure for rez switch gamma fades */
+/* We can hide the monitor flicker by setting the gamma tables to 0 */
+#define QZ_GAMMA_TABLE_SIZE 256
+
+typedef struct {
+
+    CGGammaValue red[QZ_GAMMA_TABLE_SIZE];
+    CGGammaValue green[QZ_GAMMA_TABLE_SIZE];
+    CGGammaValue blue[QZ_GAMMA_TABLE_SIZE];
+
+} SDL_QuartzGammaTable;
+
+/* Main driver structure to store required state information */
 typedef struct SDL_PrivateVideoData {
 
-    CGDirectDisplayID  display; /* 0 == main display */
-    CFDictionaryRef    mode;
-    CFDictionaryRef    save_mode;
-    CFArrayRef         mode_list;
-    CGDirectPaletteRef palette;
-    NSOpenGLContext    *gl_context;
-    Uint32             width, height, bpp;
-    Uint32             flags;
-    SDL_bool           video_is_set; /* tell if the video mode was set */
-    
-    /* Window-only fields */
-    NSWindow        *window;
-    NSQuickDrawView *view;
+    CGDirectDisplayID  display;            /* 0 == main display (only support single display) */
+    CFDictionaryRef    mode;               /* current mode of the display */
+    CFDictionaryRef    save_mode;          /* original mode of the display */
+    CFArrayRef         mode_list;          /* list of available fullscreen modes */
+    CGDirectPaletteRef palette;            /* palette of an 8-bit display */
+    NSOpenGLContext    *gl_context;        /* object that represents an OpenGL rendering context */
+    Uint32             width, height, bpp; /* frequently used data about the display */
+    Uint32             flags;              /* flags for mode, for teardown purposes */
+    Uint32             video_set;          /* boolean; indicates if video was set correctly */
+    Uint32             warp_flag;          /* boolean; notify to event loop that a warp just occured */
+    Uint32             warp_ticks;         /* timestamp when the warp occured */
+    NSWindow           *window;            /* Cocoa window to implement the SDL window */
+    NSQuickDrawView    *view;              /* the window's view; draw 2D into this view */
     
 } SDL_PrivateVideoData ;
 
@@ -95,21 +111,68 @@ typedef struct SDL_PrivateVideoData {
 #define save_mode (this->hidden->save_mode)
 #define mode_list (this->hidden->mode_list)
 #define palette (this->hidden->palette)
-#define glcontext (this->hidden->glcontext)
-#define objc_video (this->hidden->objc_video)
 #define gl_context (this->hidden->gl_context)
 #define device_width (this->hidden->width)
 #define device_height (this->hidden->height)
 #define device_bpp (this->hidden->bpp)
 #define mode_flags (this->hidden->flags)
-#define video_set (this->hidden->video_is_set)
 #define qz_window (this->hidden->window)
-#define windowView (this->hidden->view)
+#define window_view (this->hidden->view)
+#define video_set (this->hidden->video_set)
+#define warp_ticks (this->hidden->warp_ticks)
+#define warp_flag (this->hidden->warp_flag)
 
-/* Interface for hardware fill not (yet) in the public API */
-int CGSDisplayHWFill (CGDirectDisplayID id, unsigned int x, unsigned int y, 
+/* Obscuring code: maximum number of windows above ours (inclusive) */
+#define kMaxWindows 256
+
+/* Some of the Core Graphics Server API for obscuring code */
+#define kCGSWindowLevelTop          2147483632
+#define kCGSWindowLevelDockIconDrag 500
+#define kCGSWindowLevelDockMenu     101
+#define kCGSWindowLevelMenuIgnore    21
+#define kCGSWindowLevelMenu          20
+#define kCGSWindowLevelDockLabel     12
+#define kCGSWindowLevelDockIcon      11
+#define kCGSWindowLevelDock          10
+#define kCGSWindowLevelUtility        3
+#define kCGSWindowLevelNormal         0
+
+/* For completeness; We never use these window levels, they are always below us
+#define kCGSWindowLevelMBarShadow -20
+#define kCGSWindowLevelDesktopPicture -2147483647
+#define kCGSWindowLevelDesktop        -2147483648
+*/
+
+typedef CGError       CGSError;
+typedef long	      CGSWindowCount;
+typedef void *	      CGSConnectionID;
+typedef int	      CGSWindowID;
+typedef CGSWindowID*  CGSWindowIDList;
+typedef CGWindowLevel CGSWindowLevel;
+typedef NSRect        CGSRect;
+
+extern CGSConnectionID _CGSDefaultConnection ();
+
+extern CGSError CGSGetOnScreenWindowList (CGSConnectionID cid, 
+                                          CGSConnectionID owner,
+                                          CGSWindowCount listCapacity,
+                                          CGSWindowIDList list,
+                                          CGSWindowCount *listCount);
+
+extern CGSError CGSGetScreenRectForWindow (CGSConnectionID cid,
+                                           CGSWindowID wid,
+                                           CGSRect *rect);
+
+extern CGWindowLevel CGSGetWindowLevel (CGSConnectionID cid,
+                                        CGSWindowID wid,
+                                        CGSWindowLevel *level);
+                                        
+extern CGSError CGSDisplayHWFill (CGDirectDisplayID id, unsigned int x, unsigned int y, 
                       unsigned int w, unsigned int h, unsigned int color);
-int CGSDisplayCanHWFill (CGDirectDisplayID id);
+
+extern CGSError CGSDisplayCanHWFill (CGDirectDisplayID id);
+
+extern CGSError CGSGetMouseEnabledFlags (CGSConnectionID cid, CGSWindowID wid, int *flags);
 
 /* Bootstrap functions */
 static int              QZ_Available ();
@@ -156,7 +219,7 @@ static void   QZ_GL_SwapBuffers    (_THIS);
 static int    QZ_GL_LoadLibrary    (_THIS, const char *location);
 
 /* Private function to warp the cursor (used internally) */
-static void  QZ_PrivateWarpCursor (_THIS, int fullscreen, int h, int x, int y);
+static void  QZ_PrivateWarpCursor (_THIS, int x, int y);
 
 /* Cursor and Mouse functions */
 static void         QZ_FreeWMCursor     (_THIS, WMcursor *cursor);
@@ -177,3 +240,4 @@ static void QZ_SetIcon       (_THIS, SDL_Surface *icon, Uint8 *mask);
 static int  QZ_IconifyWindow (_THIS);
 static SDL_GrabMode QZ_GrabInput (_THIS, SDL_GrabMode grab_mode);
 /*static int  QZ_GetWMInfo     (_THIS, SDL_SysWMinfo *info);*/
+

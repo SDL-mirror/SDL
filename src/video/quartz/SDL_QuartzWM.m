@@ -87,40 +87,112 @@ static int QZ_ShowWMCursor (_THIS, WMcursor *cursor) {
     return 1;
 }
 
-static void  QZ_PrivateWarpCursor (_THIS, int fullscreen, int h, int x, int y) {
+/**
+ * Coordinate conversion functions, for convenience
+ * Cocoa sets the origin at the lower left corner of the window/screen
+ * SDL, CoreGraphics/WindowServer, and QuickDraw use the origin at the upper left corner
+ * The routines were written so they could be called before SetVideoMode() has finished;
+ * this might have limited usefulness at the moment, but the extra cost is trivial.
+ **/
 
-    CGPoint p;
+/* Convert Cocoa screen coordinate to Cocoa window coordinate */
+static void QZ_PrivateGlobalToLocal (_THIS, NSPoint *p) {
+
+    *p = [ qz_window convertScreenToBase:*p ];
+}
+
+
+/* Convert Cocoa window coordinate to Cocoa screen coordinate */
+static void QZ_PrivateLocalToGlobal (_THIS, NSPoint *p) {
+
+    *p = [ qz_window convertBaseToScreen:*p ];
+}
+
+/* Convert SDL coordinate to Cocoa coordinate */
+static void QZ_PrivateSDLToCocoa (_THIS, NSPoint *p) {
+
+    int height;
     
-    /* We require absolute screen coordiates for our warp */
-    p.x = x;
-    p.y = h - y;
-        
-    if ( fullscreen )
-        /* Already absolute coordinates */
-        CGDisplayMoveCursorToPoint(display_id, p);
+    if ( CGDisplayIsCaptured (display_id) ) { /* capture signals fullscreen */
+    
+        height = CGDisplayPixelsHigh (display_id);
+    }
     else {
-        /* Convert to absolute screen coordinates */
-        NSPoint base, screen;
-        base = NSMakePoint (p.x, p.y);
-        screen = [ qz_window convertBaseToScreen:base ];
-        p.x = screen.x;
-        p.y = device_height - screen.y;
-        CGDisplayMoveCursorToPoint (display_id, p);
+        
+        height = NSHeight ( [ qz_window frame ] );
+        if ( [ qz_window styleMask ] & NSTitledWindowMask ) {
+        
+            height -= 22;
+        }
+    }
+    
+    p->y = height - p->y;
+}
+
+/* Convert Cocoa coordinate to SDL coordinate */
+static void QZ_PrivateCocoaToSDL (_THIS, NSPoint *p) {
+
+    QZ_PrivateSDLToCocoa (this, p);
+}
+
+/* Convert SDL coordinate to window server (CoreGraphics) coordinate */
+static CGPoint QZ_PrivateSDLToCG (_THIS, NSPoint *p) {
+    
+    CGPoint cgp;
+    
+    if ( ! CGDisplayIsCaptured (display_id) ) { /* not captured => not fullscreen => local coord */
+    
+        int height;
+        
+        QZ_PrivateSDLToCocoa (this, p);
+        QZ_PrivateLocalToGlobal (this, p);
+        
+        height = CGDisplayPixelsHigh (display_id);
+        p->y = height - p->y;
+    }
+    
+    cgp.x = p->x;
+    cgp.y = p->y;
+    
+    return cgp;
+}
+
+/* Convert window server (CoreGraphics) coordinate to SDL coordinate */
+static void QZ_PrivateCGToSDL (_THIS, NSPoint *p) {
+            
+    if ( ! CGDisplayIsCaptured (display_id) ) { /* not captured => not fullscreen => local coord */
+    
+        int height;
+
+        /* Convert CG Global to Cocoa Global */
+        height = CGDisplayPixelsHigh (display_id);
+        p->y = height - p->y;
+
+        QZ_PrivateGlobalToLocal (this, p);
+        QZ_PrivateCocoaToSDL (this, p);
     }
 }
 
-static void QZ_WarpWMCursor     (_THIS, Uint16 x, Uint16 y) {
+static void  QZ_PrivateWarpCursor (_THIS, int x, int y) {
     
+    NSPoint p;
+    CGPoint cgp;
+    
+    p = NSMakePoint (x, y);
+    cgp = QZ_PrivateSDLToCG (this, &p);   
+    CGDisplayMoveCursorToPoint (display_id, cgp);
+    warp_ticks = SDL_GetTicks();
+    warp_flag = 1;
+}
+
+static void QZ_WarpWMCursor (_THIS, Uint16 x, Uint16 y) {
+
     /* Only allow warping when in foreground */
     if ( ! inForeground )
         return;
             
     /* Do the actual warp */
-    QZ_PrivateWarpCursor (this, SDL_VideoSurface->flags & SDL_FULLSCREEN, 
-        SDL_VideoSurface->h, x, y);
-    
-    /* Generate mouse moved event */
-    SDL_PrivateMouseMotion (SDL_RELEASED, 0, x, y);
+    QZ_PrivateWarpCursor (this, x, y);
 }
 
 static void QZ_MoveWMCursor     (_THIS, int x, int y) { }
@@ -199,6 +271,17 @@ static int  QZ_IconifyWindow (_THIS) {
         return 0;
     }
 }
+static int  QZ_IconifyWindow (_THIS) { 
+
+    if ( ! [ qz_window isMiniaturized ] ) {
+        [ qz_window miniaturize:nil ];
+        return 1;
+    }
+    else {
+        SDL_SetError ("Quartz window already iconified");
+        return 0;
+    }
+}
 
 /*
 static int  QZ_GetWMInfo  (_THIS, SDL_SysWMinfo *info) { 
@@ -221,6 +304,7 @@ static SDL_GrabMode QZ_GrabInput (_THIS, SDL_GrabMode grab_mode) {
             currentGrabMode = SDL_GRAB_ON;
             break;
         case SDL_GRAB_FULLSCREEN:
+            
             break;
     }
         
