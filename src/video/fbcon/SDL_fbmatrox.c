@@ -74,6 +74,11 @@ static int FillHWRect(_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color)
 	Uint32 ydstlen;
 	Uint32 fillop;
 
+	/* Don't blit to the display surface when switched away */
+	if ( dst == this->screen ) {
+		SDL_mutexP(hw_lock);
+	}
+
 	switch (dst->format->BytesPerPixel) {
 	    case 1:
 		color |= (color<<8);
@@ -108,13 +113,16 @@ static int FillHWRect(_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color)
 
 	FB_AddBusySurface(dst);
 
+	if ( dst == this->screen ) {
+		SDL_mutexV(hw_lock);
+	}
 	return(0);
 }
 
 static int HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,
                        SDL_Surface *dst, SDL_Rect *dstrect)
 {
-	SDL_VideoDevice *this;
+	SDL_VideoDevice *this = current_video;
 	int pitch, w, h;
 	int srcX, srcY;
 	int dstX, dstY;
@@ -128,8 +136,12 @@ static int HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,
 		return(src->map->sw_blit(src, srcrect, dst, dstrect));
 	}
 
+	/* Don't blit to the display surface when switched away */
+	if ( dst == this->screen ) {
+		SDL_mutexP(hw_lock);
+	}
+
 	/* Calculate source and destination base coordinates (in pixels) */
-	this = current_video;
 	w = dstrect->w;
 	h = dstrect->h;
 	FB_dst_to_xy(this, src, &srcX, &srcY);
@@ -201,6 +213,9 @@ static int HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,
 	FB_AddBusySurface(src);
 	FB_AddBusySurface(dst);
 
+	if ( dst == this->screen ) {
+		SDL_mutexV(hw_lock);
+	}
 	return(0);
 }
 

@@ -61,6 +61,11 @@ static int FillHWRect(_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color)
 	Uint32 format;
 	int dstX, dstY;
 
+	/* Don't blit to the display surface when switched away */
+	if ( dst == this->screen ) {
+		SDL_mutexP(hw_lock);
+	}
+
 	/* Set the destination pixel format */
 	dst_base = (char *)((char *)dst->pixels - mapped_mem);
 	bpp = dst->format->BitsPerPixel;
@@ -81,13 +86,16 @@ static int FillHWRect(_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color)
 
 	FB_AddBusySurface(dst);
 
+	if ( dst == this->screen ) {
+		SDL_mutexV(hw_lock);
+	}
 	return(0);
 }
 
 static int HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,
                        SDL_Surface *dst, SDL_Rect *dstrect)
 {
-	SDL_VideoDevice *this;
+	SDL_VideoDevice *this = current_video;
 	int bpp;
 	Uint32 src_format;
 	Uint32 dst_format;
@@ -98,8 +106,12 @@ static int HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,
 	Uint32 blitop;
 	Uint32 use_colorkey;
 
+	/* Don't blit to the display surface when switched away */
+	if ( dst == this->screen ) {
+		SDL_mutexP(hw_lock);
+	}
+
 	/* Set the source and destination pixel format */
-	this = current_video;
 	src_base = (char *)((char *)src->pixels - mapped_mem);
 	bpp = src->format->BitsPerPixel;
 	src_format = src->pitch | ((bpp+((bpp==8) ? 0 : 8)) << 13);
@@ -149,6 +161,9 @@ static int HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,
 	FB_AddBusySurface(src);
 	FB_AddBusySurface(dst);
 
+	if ( dst == this->screen ) {
+		SDL_mutexV(hw_lock);
+	}
 	return(0);
 }
 

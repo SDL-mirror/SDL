@@ -311,7 +311,7 @@ int FB_OpenKeyboard(_THIS)
 
 static enum {
 	MOUSE_NONE = -1,
-	MOUSE_GPM,	/* Note: GPM uses the MSC protocol */
+	MOUSE_MSC,	/* Note: GPM uses the MSC protocol */
 	MOUSE_PS2,
 	MOUSE_IMPS2,
 	MOUSE_MS,
@@ -535,7 +535,7 @@ fprintf(stderr, "Using ELO touchscreen\n");
 #ifdef DEBUG_MOUSE
 fprintf(stderr, "Using GPM mouse\n");
 #endif
-					mouse_drv = MOUSE_GPM;
+					mouse_drv = MOUSE_MSC;
 				}
 			}
 		}
@@ -642,7 +642,7 @@ void FB_vgamousecallback(int button, int relative, int dx, int dy)
 	}
 }
 
-/* For now, use GPM, PS/2, and MS protocols
+/* For now, use MSC, PS/2, and MS protocols
    Driver adapted from the SVGAlib mouse driver code (taken from gpm, etc.)
  */
 static void handle_mouse(_THIS)
@@ -663,7 +663,7 @@ static void handle_mouse(_THIS)
 			/* Ack! */
 			read(mouse_fd, mousebuf, BUFSIZ);
 			return;
-		case MOUSE_GPM:
+		case MOUSE_MSC:
 			packetsize = 5;
 			break;
 		case MOUSE_IMPS2:
@@ -709,8 +709,8 @@ static void handle_mouse(_THIS)
 		switch (mouse_drv) {
 			case MOUSE_NONE:
 				break;
-			case MOUSE_GPM:
-				/* GPM protocol has 0x80 in high byte */
+			case MOUSE_MSC:
+				/* MSC protocol has 0x80 in high byte */
 				if ( (mousebuf[i] & 0xF8) != 0x80 ) {
 					/* Go to next byte */
 					i -= (packetsize-1);
@@ -825,7 +825,11 @@ static void handle_mouse(_THIS)
 	return;
 }
 
-/* Handle switching to another VC, returns when our VC is back */
+/* Handle switching to another VC, returns when our VC is back.
+   This isn't necessarily the best solution.  For SDL 1.3 we need
+   a way of notifying the application when we lose access to the
+   video hardware and when we regain it.
+ */
 static void switch_vt(_THIS, unsigned short which)
 {
 	struct vt_stat vtstate;
@@ -844,6 +848,7 @@ static void switch_vt(_THIS, unsigned short which)
 
 	/* Save the contents of the screen, and go to text mode */
 	SDL_mutexP(hw_lock);
+	wait_idle(this);
 	screen = SDL_VideoSurface;
 	screen_arealen = (screen->h*screen->pitch);
 	screen_contents = (Uint8 *)malloc(screen_arealen);
@@ -908,7 +913,9 @@ static void handle_keyboard(_THIS)
 		    case SDLK_F11:
 		    case SDLK_F12:
 			if ( SDL_GetModState() & KMOD_ALT ) {
-				switch_vt(this, (keysym.sym-SDLK_F1)+1);
+				if ( pressed ) {
+					switch_vt(this, (keysym.sym-SDLK_F1)+1);
+				}
 				break;
 			}
 			/* Fall through to normal processing */
