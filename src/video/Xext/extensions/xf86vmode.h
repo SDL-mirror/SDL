@@ -37,7 +37,7 @@ from Kaleb S. KEITHLEY
 
 #include <X11/Xfuncproto.h>
 #include <X11/Xmd.h>
-#include "SDLname.h"
+#include "SDL_name.h"
 
 #define X_XF86VidModeQueryVersion	0
 #define X_XF86VidModeGetModeLine	1

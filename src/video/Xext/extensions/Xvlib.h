@@ -55,7 +55,7 @@ SOFTWARE.
 
 #include <X11/Xfuncproto.h>
 #include <XFree86/extensions/Xv.h>
-#include "SDLname.h"
+#include "SDL_name.h"
 
 typedef struct {
   int numerator;

@@ -16,7 +16,7 @@ Copyright (c) 1995  XFree86 Inc
 #define _XF86DGA1_H_
 
 #include <X11/Xfuncproto.h>
-#include "SDLname.h"
+#include "SDL_name.h"
 
 #define X_XF86DGAQueryVersion		0
 #define X_XF86DGAGetVideoLL		1

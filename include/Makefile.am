@@ -21,6 +21,7 @@ libSDLinclude_HEADERS =		\
 	SDL_main.h		\
 	SDL_mouse.h		\
 	SDL_mutex.h		\
+	SDL_name.h		\
 	SDL_opengl.h		\
 	SDL_quit.h		\
 	SDL_rwops.h		\

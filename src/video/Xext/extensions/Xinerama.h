@@ -3,7 +3,7 @@
 #ifndef _Xinerama_h
 #define _Xinerama_h
 
-#include "SDLname.h"
+#include "SDL_name.h"
 
 typedef struct {
    int   screen_number;

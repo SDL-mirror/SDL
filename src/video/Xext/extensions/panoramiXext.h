@@ -28,7 +28,7 @@ Equipment Corporation.
  */
 /* $XFree86: xc/include/extensions/panoramiXext.h,v 3.6 2001/01/17 17:53:22 dawes Exp $ */
 
-#include "SDLname.h"
+#include "SDL_name.h"
 
 /* THIS IS NOT AN X PROJECT TEAM SPECIFICATION */
 
