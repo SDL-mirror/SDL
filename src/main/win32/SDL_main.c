@@ -160,12 +160,16 @@ int console_main(int argc, char *argv[])
 	atexit(cleanup_output);
 	atexit(SDL_Quit);
 
-	/* Create and register our class, then run main code */
+#ifndef DISABLE_VIDEO
+	/* Create and register our class */
 	if ( SDL_RegisterApp(appname, CS_BYTEALIGNCLIENT, 
 	                     GetModuleHandle(NULL)) < 0 ) {
 		ShowError("WinMain() error", SDL_GetError());
 		exit(1);
 	}
+#endif /* !DISABLE_VIDEO */
+
+	/* Run the application main() code */
 	SDL_main(argc, argv);
 
 	/* Exit cleanly, calling atexit() functions */
