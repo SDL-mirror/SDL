@@ -646,9 +646,9 @@ int SDL_SYS_JoystickInit(void)
 //			HIDReportErrorNum ("IOObjectRelease error with ioHIDDeviceObject.", result);
 
 		/* Filter device list to non-keyboard/mouse stuff */ 
-		if ( device->usagePage == kHIDPage_GenericDesktop &&
-		     (device->usage != kHIDUsage_GD_Joystick &&
-		      device->usage != kHIDUsage_GD_GamePad)) {
+		if ( (device->usagePage != kHIDPage_GenericDesktop) ||
+		     ((device->usage != kHIDUsage_GD_Joystick &&
+		      device->usage != kHIDUsage_GD_GamePad)) ) {
 
 			/* release memory for the device */
 			HIDDisposeDevice (&device);
