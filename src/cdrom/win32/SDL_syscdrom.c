@@ -215,18 +215,19 @@ static int SDL_SYS_CDGetTOC(SDL_CD *cdrom)
 			}
 		}
 		if ( i == cdrom->numtracks ) {
-			flags &= ~MCI_TRACK;
+			mci_status.dwTrack = cdrom->track[i - 1].id;
 			mci_status.dwItem = MCI_STATUS_LENGTH;
 			if ( SDL_SYS_CDioctl(cdrom->id, MCI_STATUS, flags,
 							&mci_status) == 0 ) {
-				cdrom->track[i].offset = MSF_TO_FRAMES(
+				cdrom->track[i - 1].length = MSF_TO_FRAMES(
 					MCI_MSF_MINUTE(mci_status.dwReturn),
 					MCI_MSF_SECOND(mci_status.dwReturn),
-					MCI_MSF_FRAME(mci_status.dwReturn));
+					MCI_MSF_FRAME(mci_status.dwReturn)) + 1; /* +1 to fix */
+											/* MCI last track length bug */
+				/* compute lead-out offset */
+				cdrom->track[i].offset = cdrom->track[i - 1].offset +
+					cdrom->track[i - 1].length;
 				cdrom->track[i].length = 0;
-				cdrom->track[i-1].length =
-						cdrom->track[i].offset-
-						cdrom->track[i-1].offset;
 				okay = 1;
 			}
 		}
