@@ -374,6 +374,7 @@ CheckARTSC()
         else
             ARTSC_CFLAGS=`$ARTSCCONFIG --cflags`
             ARTSC_LIBS=`$ARTSCCONFIG --libs`
+            ARTSC_PREFIX=`$ARTSCCONFIG --arts-prefix`
             AC_MSG_CHECKING(for aRts development environment)
             audio_arts=no
             save_CFLAGS="$CFLAGS"
@@ -391,7 +392,7 @@ CheckARTSC()
                 AC_ARG_ENABLE(arts-shared,
 [  --enable-arts-shared    dynamically load aRts audio support [default=yes]],
                               , enable_arts_shared=yes)
-                arts_lib_spec=`echo $ARTSC_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libartsc.so.*/'`
+                arts_lib_spec="$ARTSC_PREFIX/lib/libartsc.so.*"
                 arts_lib=`ls $arts_lib_spec | head -1 | sed 's/.*\/\(.*\)/\1/'`
                 echo "-- $arts_lib_spec -> $arts_lib"
                 if test x$use_dlopen != xyes && \
