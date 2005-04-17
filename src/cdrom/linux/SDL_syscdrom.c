@@ -132,7 +132,7 @@ static int CheckDrive(char *drive, char *mnttype, struct stat *stbuf)
 	/* If it does exist, verify that it's an available CD-ROM */
 	is_cd = 0;
 	if ( S_ISCHR(stbuf->st_mode) || S_ISBLK(stbuf->st_mode) ) {
-		cdfd = open(drive, (O_RDONLY|O_EXCL|O_NONBLOCK), 0);
+		cdfd = open(drive, (O_RDONLY|O_NONBLOCK), 0);
 		if ( cdfd >= 0 ) {
 			info.cdsc_format = CDROM_MSF;
 			/* Under Linux, EIO occurs when a disk is not present.
@@ -393,7 +393,7 @@ static const char *SDL_SYS_CDName(int drive)
 
 static int SDL_SYS_CDOpen(int drive)
 {
-	return(open(SDL_cdlist[drive], (O_RDONLY|O_EXCL|O_NONBLOCK), 0));
+	return(open(SDL_cdlist[drive], (O_RDONLY|O_NONBLOCK), 0));
 }
 
 static int SDL_SYS_CDGetTOC(SDL_CD *cdrom)
