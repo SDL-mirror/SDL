@@ -60,7 +60,7 @@ typedef enum {
 } CDstatus;
 
 /* Given a status, returns true if there's a disk in the drive */
-#define CD_INDRIVE(status)	((int)status > 0)
+#define CD_INDRIVE(status)	((int)(status) > 0)
 
 typedef struct SDL_CDtrack {
 	Uint8 id;		/* Track number */
