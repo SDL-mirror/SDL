@@ -900,10 +900,11 @@ void QZ_PumpEvents (_THIS)
                     break;
                 case NSScrollWheel:
                     if ( isInGameWin ) {
-                        float dy;
+                        float dy, dx;
                         Uint8 button;
                         dy = [ event deltaY ];
-                        if ( dy > 0.0 ) /* Scroll up */
+                        dx = [ event deltaX ];
+                        if ( dy > 0.0 || dx > 0.0 ) /* Scroll up */
                             button = SDL_BUTTON_WHEELUP;
                         else /* Scroll down */
                             button = SDL_BUTTON_WHEELDOWN;
