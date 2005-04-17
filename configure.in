@@ -1839,17 +1839,18 @@ CheckAltivec()
 {
     AC_MSG_CHECKING(for GCC Altivec instruction support)
     have_gcc_altivec=no
+    save_CFLAGS="${CFLAGS}"
+    CFLAGS="${CFLAGS} -DGCC_ALTIVEC -DUSE_ALTIVEC_BLITTERS -faltivec"
     AC_TRY_COMPILE([
+    vector unsigned int vzero() {
+        return vec_splat_u32(0);
+    }
     ],[
-        asm volatile ("mtspr 256, %0\n\t"
-                      "vand %%v0, %%v0, %%v0"
-                      :
-                      : "r" (-1));
     ],[
     have_gcc_altivec=yes
     ])
-    if test x$have_gcc_altivec = xyes; then
-        CFLAGS="$CFLAGS -DGCC_ALTIVEC"
+    if test x$have_gcc_altivec = xno; then
+        CFLAGS="${save_CFLAGS}"
     fi
     AC_MSG_RESULT($have_gcc_altivec)
 }
@@ -2564,6 +2565,7 @@ case "$target" in
         CheckMacGL
         CheckPTHREAD
         CheckSIGACTION
+        CheckAltivec
         # If either the audio or CD driver is used, add the AudioUnit framework
         if test x$enable_audio = xyes -o x$enable_cdrom = xyes; then
             SYSTEM_LIBS="$SYSTEM_LIBS -framework AudioToolbox -framework AudioUnit"
