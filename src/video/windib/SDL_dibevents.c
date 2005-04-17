@@ -116,8 +116,6 @@ LONG
 				} else {
 					wParam = 0;
 				}
-			} else {
-				wParam = 0;
 			}
 #endif /* NO_GETKEYBOARDSTATE */
 			posted = SDL_PrivateKeyboard(SDL_PRESSED,
