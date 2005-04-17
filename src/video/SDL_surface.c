@@ -91,11 +91,22 @@ SDL_Surface * SDL_CreateRGBSurface (Uint32 flags,
 	}
 	surface->flags = SDL_SWSURFACE;
 	if ( (flags & SDL_HWSURFACE) == SDL_HWSURFACE ) {
-		depth = screen->format->BitsPerPixel;
-		Rmask = screen->format->Rmask;
-		Gmask = screen->format->Gmask;
-		Bmask = screen->format->Bmask;
-		Amask = screen->format->Amask;
+		if ((Amask) && (video->displayformatalphapixel))
+		{
+			depth = video->displayformatalphapixel->BitsPerPixel;
+			Rmask = video->displayformatalphapixel->Rmask;
+			Gmask = video->displayformatalphapixel->Gmask;
+			Bmask = video->displayformatalphapixel->Bmask;
+			Amask = video->displayformatalphapixel->Amask;
+		}
+		else
+		{
+			depth = screen->format->BitsPerPixel;
+			Rmask = screen->format->Rmask;
+			Gmask = screen->format->Gmask;
+			Bmask = screen->format->Bmask;
+			Amask = screen->format->Amask;
+		}
 	}
 	surface->format = SDL_AllocFormat(depth, Rmask, Gmask, Bmask, Amask);
 	if ( surface->format == NULL ) {

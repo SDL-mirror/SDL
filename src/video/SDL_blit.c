@@ -280,6 +280,17 @@ int SDL_CalculateBlit(SDL_Surface *surface)
 			video->CheckHWBlit(this, surface, surface->map->dst);
 		}
 	}
+	
+	/* if an alpha pixel format is specified, we can accelerate alpha blits */
+	if (((surface->flags & SDL_HWSURFACE) == SDL_HWSURFACE )&&(current_video->displayformatalphapixel)) 
+	{
+		if ( (surface->flags & SDL_SRCALPHA) ) 
+			if ( current_video->info.blit_hw_A ) {
+				SDL_VideoDevice *video = current_video;
+				SDL_VideoDevice *this  = current_video;
+				video->CheckHWBlit(this, surface, surface->map->dst);
+			}
+	}
 
 	/* Get the blit function index, based on surface mode */
 	/* { 0 = nothing, 1 = colorkey, 2 = alpha, 3 = colorkey+alpha } */

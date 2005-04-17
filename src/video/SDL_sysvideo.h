@@ -134,6 +134,9 @@ struct SDL_VideoDevice {
 	/* Information about the video hardware */
 	SDL_VideoInfo info;
 
+	/* The pixel format used when SDL_CreateRGBSurface creates SDL_HWSURFACEs with alpha */
+	SDL_PixelFormat* displayformatalphapixel;
+	
 	/* Allocates a surface in video memory */
 	int (*AllocHWSurface)(_THIS, SDL_Surface *surface);
 

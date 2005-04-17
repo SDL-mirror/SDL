@@ -212,6 +212,8 @@ int SDL_VideoInit (const char *driver_name, Uint32 flags)
 	video->offset_x = 0;
 	video->offset_y = 0;
 	memset(&video->info, 0, (sizeof video->info));
+	
+	video->displayformatalphapixel = NULL;
 
 	/* Set some very sane GL defaults */
 	video->gl_config.driver_loaded = 0;
