@@ -685,6 +685,15 @@ static Uint32 GetBlitFeatures( void )
 #define GetBlitFeatures() ((Uint32)(SDL_HasMMX() ? 1 : 0))
 #endif
 
+/* This is now endian dependent */
+#if ( SDL_BYTEORDER == SDL_LIL_ENDIAN )
+#define HI	1
+#define LO	0
+#else /* ( SDL_BYTEORDER == SDL_BIG_ENDIAN ) */
+#define HI	0
+#define LO	1
+#endif
+
 #ifdef USE_ASMBLIT
 
 /* Heheheh, we coerce Hermes into using SDL blit information */
@@ -697,15 +706,6 @@ static Uint32 GetBlitFeatures( void )
 #include "HeadX86.h"
 
 #else
-
-/* This is now endian dependent */
-#if ( SDL_BYTEORDER == SDL_LIL_ENDIAN )
-#define HI	1
-#define LO	0
-#else /* ( SDL_BYTEORDER == SDL_BIG_ENDIAN ) */
-#define HI	0
-#define LO	1
-#endif
 
 /* Special optimized blit for RGB 8-8-8 --> RGB 3-3-2 */
 #define RGB888_RGB332(dst, src) { \
