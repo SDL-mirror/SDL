@@ -51,7 +51,8 @@ enum {
 	MCH_ST=0,
 	MCH_STE,
 	MCH_TT,
-	MCH_F30
+	MCH_F30,
+	MCH_ARANYM
 };
 
 void (*Atari_ShutdownEvents)(void);
@@ -73,6 +74,7 @@ static void Atari_InitializeEvents(_THIS)
 		case MCH_STE:
 		case MCH_TT:
 		case MCH_F30:
+		case MCH_ARANYM:
 			this->InitOSKeymap=AtariIkbd_InitOSKeymap;
 			this->PumpEvents=AtariIkbd_PumpEvents;
 			Atari_ShutdownEvents=AtariIkbd_ShutdownEvents;

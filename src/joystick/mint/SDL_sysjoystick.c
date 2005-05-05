@@ -83,7 +83,8 @@ enum {
 	MCH_ST=0,
 	MCH_STE,
 	MCH_TT,
-	MCH_F30
+	MCH_F30,
+	MCH_ARANYM
 };
 
 /*	Joypad buttons
@@ -182,7 +183,8 @@ int SDL_SYS_JoystickInit(void)
 
 	/* Enable some default joysticks */
 	if ((cookie_mch == MCH_ST<<16) || ((cookie_mch>>16) == MCH_STE) ||
-		(cookie_mch == MCH_TT<<16) || (cookie_mch == MCH_F30<<16)) {
+		(cookie_mch == MCH_TT<<16) || (cookie_mch == MCH_F30<<16) ||
+		(cookie_mch == MCH_ARANYM<<16)) {
 		atarijoysticks[IKBD_JOY1].enabled=(SDL_AtariIkbd_enabled!=0);
 	}
 	if ((cookie_mch == MCH_STE<<16) || (cookie_mch == MCH_F30<<16)) {
@@ -197,7 +199,8 @@ int SDL_SYS_JoystickInit(void)
 	if (envr) {
 		/* IKBD on any Atari, maybe clones */
 		if ((cookie_mch == MCH_ST<<16) || ((cookie_mch>>16) == MCH_STE) ||
-			(cookie_mch == MCH_TT<<16) || (cookie_mch == MCH_F30<<16)) {
+			(cookie_mch == MCH_TT<<16) || (cookie_mch == MCH_F30<<16) ||
+			(cookie_mch == MCH_ARANYM<<16)) {
 			if (SDL_AtariIkbd_enabled!=0) {
 				TEST_JOY_ENABLED(envr, "ikbd-joy1", IKBD_JOY1);
 			}
