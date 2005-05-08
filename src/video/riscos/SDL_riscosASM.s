@@ -1,8 +1,3 @@
-Date: Wed, 26 Jan 2005 13:37:09 GMT
-From: Peter Naulls <peter@chocky.org>
-To: slouken@libsdl.org
-Subject: RISC OS SDL Patches
-
 ;
 ;    SDL - Simple DirectMedia Layer
 ;    Copyright (C) 1997-2004 Sam Lantinga
