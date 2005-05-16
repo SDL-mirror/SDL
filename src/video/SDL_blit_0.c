@@ -452,7 +452,7 @@ SDL_loblit SDL_CalculateBlit0(SDL_Surface *surface, int blit_index)
 {
 	int which;
 
-	if ( surface->format->BitsPerPixel > 1 ) {
+	if ( surface->format->BitsPerPixel != 1 ) {
 		/* We don't support sub 8-bit packed pixel modes */
 		return NULL;
 	}
