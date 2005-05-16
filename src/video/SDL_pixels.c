@@ -112,11 +112,26 @@ SDL_PixelFormat *SDL_AllocFormat(int bpp,
 		format->Rmask = ((0xFF>>format->Rloss)<<format->Rshift);
 		format->Gmask = ((0xFF>>format->Gloss)<<format->Gshift);
 		format->Bmask = ((0xFF>>format->Bloss)<<format->Bshift);
-	} else {			/* Palettized mode */
-		int i, ncolors = 1;
-		for ( i = 0; i < bpp; ++i ) {
-			ncolors *= 2;
-		}
+	} else {
+		/* Palettized formats have no mask info */
+		format->Rloss = 8;
+		format->Gloss = 8;
+		format->Bloss = 8;
+		format->Aloss = 8;
+		format->Rshift = 0;
+		format->Gshift = 0;
+		format->Bshift = 0;
+		format->Ashift = 0;
+		format->Rmask = 0;
+		format->Gmask = 0;
+		format->Bmask = 0;
+		format->Amask = 0;
+	}
+	if ( bpp <= 8 ) {			/* Palettized mode */
+		int ncolors = 1<<bpp;
+#ifdef DEBUG_PALETTE
+		fprintf(stderr,"bpp=%d ncolors=%d\n",bpp,ncolors);
+#endif
 		format->palette = (SDL_Palette *)malloc(sizeof(SDL_Palette));
 		if ( format->palette == NULL ) {
 			SDL_FreeFormat(format);
@@ -131,7 +146,75 @@ SDL_PixelFormat *SDL_AllocFormat(int bpp,
 			SDL_OutOfMemory();
 			return(NULL);
 		}
-		if ( ncolors == 2 ) {
+		if ( Rmask || Bmask || Gmask ) {
+			/* create palette according to masks */
+			int i;
+			int Rm=0,Gm=0,Bm=0;
+			int Rw=0,Gw=0,Bw=0;
+#ifdef ENABLE_PALETTE_ALPHA
+			int Am=0,Aw=0;
+#endif
+			if(Rmask)
+			{
+				Rw=8-format->Rloss;
+				for(i=format->Rloss;i>0;i-=Rw)
+					Rm|=1<<i;
+			}
+#ifdef DEBUG_PALETTE
+			fprintf(stderr,"Rw=%d Rm=0x%02X\n",Rw,Rm);
+#endif
+			if(Gmask)
+			{
+				Gw=8-format->Gloss;
+				for(i=format->Gloss;i>0;i-=Gw)
+					Gm|=1<<i;
+			}
+#ifdef DEBUG_PALETTE
+			fprintf(stderr,"Gw=%d Gm=0x%02X\n",Gw,Gm);
+#endif
+			if(Bmask)
+			{
+				Bw=8-format->Bloss;
+				for(i=format->Bloss;i>0;i-=Bw)
+					Bm|=1<<i;
+			}
+#ifdef DEBUG_PALETTE
+			fprintf(stderr,"Bw=%d Bm=0x%02X\n",Bw,Bm);
+#endif
+#ifdef ENABLE_PALETTE_ALPHA
+			if(Amask)
+			{
+				Aw=8-format->Aloss;
+				for(i=format->Aloss;i>0;i-=Aw)
+					Am|=1<<i;
+			}
+# ifdef DEBUG_PALETTE
+			fprintf(stderr,"Aw=%d Am=0x%02X\n",Aw,Am);
+# endif
+#endif
+			for(i=0; i < ncolors; ++i) {
+				int r,g,b;
+				r=(i&Rmask)>>format->Rshift;
+				r=(r<<format->Rloss)|((r*Rm)>>Rw);
+				format->palette->colors[i].r=r;
+
+				g=(i&Gmask)>>format->Gshift;
+				g=(g<<format->Gloss)|((g*Gm)>>Gw);
+				format->palette->colors[i].g=g;
+
+				b=(i&Bmask)>>format->Bshift;
+				b=(b<<format->Bloss)|((b*Bm)>>Bw);
+				format->palette->colors[i].b=b;
+
+#ifdef ENABLE_PALETTE_ALPHA
+				a=(i&Amask)>>format->Ashift;
+				a=(a<<format->Aloss)|((a*Am)>>Aw);
+				format->palette->colors[i].unused=a;
+#else
+				format->palette->colors[i].unused=0;
+#endif
+			}
+		} else if ( ncolors == 2 ) {
 			/* Create a black and white bitmap palette */
 			format->palette->colors[0].r = 0xFF;
 			format->palette->colors[0].g = 0xFF;
@@ -144,20 +227,6 @@ SDL_PixelFormat *SDL_AllocFormat(int bpp,
 			memset((format->palette)->colors, 0,
 				(format->palette)->ncolors*sizeof(SDL_Color));
 		}
-
-		/* Palettized formats have no mask info */
-		format->Rloss = 8;
-		format->Gloss = 8;
-		format->Bloss = 8;
-		format->Aloss = 8;
-		format->Rshift = 0;
-		format->Gshift = 0;
-		format->Bshift = 0;
-		format->Ashift = 0;
-		format->Rmask = 0;
-		format->Gmask = 0;
-		format->Bmask = 0;
-		format->Amask = 0;
 	}
 	return(format);
 }
