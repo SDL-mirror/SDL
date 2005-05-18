@@ -56,6 +56,7 @@ static char rcsid =
 #include "SDL_atarigl_c.h"
 #include "SDL_xbios.h"
 #include "SDL_xbios_blowup.h"
+#include "SDL_xbios_centscreen.h"
 #include "SDL_xbios_sb3.h"
 
 #define XBIOS_VID_DRIVER_NAME "xbios"
@@ -261,7 +262,7 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 {
 	int i,j8,j16;
 	xbiosmode_t *current_mode;
-	unsigned long cookie_blow, cookie_scpn;
+	unsigned long cookie_blow, cookie_scpn, cookie_cnts;
 
 	/* Initialize all variables that we clean on shutdown */
 	memset (SDL_modelist, 0, sizeof(SDL_modelist));
@@ -415,8 +416,9 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 				SDL_XBIOS_BlowupInit(this, (blow_cookie_t *)cookie_blow);
 			} else if (Getcookie(C_SCPN, &cookie_scpn) == C_FOUND) {
 				SDL_XBIOS_SB3Init(this, (scpn_cookie_t *)cookie_scpn);
+			} else if (Getcookie(C_CNTS, &cookie_cnts) == C_FOUND) {
+				SDL_XBIOS_CentscreenInit(this);
 			}
-
 			break;
 	}
 
