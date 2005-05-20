@@ -1855,6 +1855,15 @@ CheckAltivec()
     AC_MSG_RESULT($have_gcc_altivec)
 }
 
+dnl Check for a valid linux/version.h
+CheckLinuxVersion()
+{
+    AC_CHECK_HEADER(linux/version.h, have_linux_version_h=yes)
+    if test x$have_linux_version_h = xyes; then
+        CFLAGS="$CFLAGS -DHAVE_LINUX_VERSION_H"
+    fi
+}
+
 case "$target" in
     *-*-linux*|*-*-gnu*|*-*-k*bsd*-gnu)
         case "$target" in
@@ -1889,6 +1898,8 @@ case "$target" in
         CheckPTHREAD
         CheckSIGACTION
         CheckAltivec
+        CheckLinuxVersion
+
         # Set up files for the main() stub
         if test "x$video_qtopia" = "xyes"; then
           SDL_CFLAGS="$SDL_CFLAGS -Dmain=SDL_main"

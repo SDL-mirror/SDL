@@ -37,6 +37,7 @@ static char rcsid =
 #include <errno.h>
 #include <unistd.h>
 #ifdef __linux__
+#ifdef HAVE_LINUX_VERSION_H
 /* linux 2.6.9 workaround */
 #include <linux/version.h>
 #if LINUX_VERSION_CODE == KERNEL_VERSION(2,6,9)
@@ -48,6 +49,7 @@ static char rcsid =
 #define __be32 __u32
 #define __be16 __u16
 #endif /* linux 2.6.9 workaround */
+#endif /* HAVE_LINUX_VERSION_H */
 #include <linux/cdrom.h>
 #endif
 #ifdef __SVR4
