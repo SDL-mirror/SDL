@@ -155,7 +155,7 @@ _SDL_AtariXbios_JoystickVector:
 	movel	d0,sp@-
 
 	/* New joystick state */
-	moveb	a0@(1),d0
+	moveb	a0@(2),d0
 	andw	#0x8f,d0
 	movew	d0,_SDL_AtariXbios_joystick
 
