@@ -141,8 +141,8 @@ OpenGL:
 	parameters, in the standard one, it has 6 double parameters. If you want
 	to compile testdyngl, or any other SDL program that loads its OpenGL
 	library, you must change the glOrtho() prototype used in this program. In
-	osmesa.ldg, you can retrieve a glOrtho() with double parameters, by searching
-	for the function "glOrtho6d".
+	osmesa.ldg, you can retrieve a glOrtho() with double parameters, by
+	searching for the function "glOrtho6d".
 
 Xbios video:
 	Video chip is detected using the _VDO cookie.
@@ -156,8 +156,7 @@ Xbios video:
 		320x480x8 and 320x240x8 (software double-lined mode).
 	Falcon:
 		All modes supported by the current monitor (RVB or VGA).
-		BlowUp extended modes, ScreenBlaster 3 current mode, Centscreen current
-		mode.
+		BlowUp and Centscreen extended modes, ScreenBlaster 3 current mode.
 	Clones and any machine with monochrome monitor:
 		Not supported.
 

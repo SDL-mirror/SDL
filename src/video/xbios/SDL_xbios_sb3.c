@@ -28,6 +28,8 @@
 
 /*--- Includes ---*/
 
+#include <stdlib.h>
+
 #include "SDL_xbios.h"
 #include "SDL_xbios_sb3.h"
 
@@ -63,7 +65,6 @@ int SDL_XBIOS_SB3Usable(scpn_cookie_t *cookie_scpn)
 
 void SDL_XBIOS_SB3Init(_THIS, scpn_cookie_t *cookie_scpn)
 {
-	xbiosmode_t *current_mode;
 	scpn_screeninfo_t *scrinfo;
 
 	/* SB3 prevent changing video modes, we can only use current one */

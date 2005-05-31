@@ -283,6 +283,7 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	/* and save current screen status (palette, screen address, video mode) */
 	XBIOS_nummodes = 0;
 	XBIOS_modelist = NULL;
+	XBIOS_centscreen = SDL_FALSE;
 
 	switch (XBIOS_cvdo >>16) {
 		case VDO_ST:
@@ -411,14 +412,16 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 				current_mode++;
 			}
 
-			/* Initialize BlowUp or SB3 stuff if present */
+			/* Initialize BlowUp/SB3/Centscreen stuff if present */
 			if (Getcookie(C_BLOW, &cookie_blow) == C_FOUND) {
 				SDL_XBIOS_BlowupInit(this, (blow_cookie_t *)cookie_blow);
 			} else if (Getcookie(C_SCPN, &cookie_scpn) == C_FOUND) {
 				SDL_XBIOS_SB3Init(this, (scpn_cookie_t *)cookie_scpn);
 			} else if (Getcookie(C_CNTS, &cookie_cnts) == C_FOUND) {
-				SDL_XBIOS_CentscreenInit(this);
+				XBIOS_oldvmode = SDL_XBIOS_CentscreenInit(this);
+				XBIOS_centscreen = SDL_TRUE;
 			}
+
 			break;
 	}
 
@@ -680,7 +683,11 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 			break;
 		case VDO_F30:
 #ifndef DEBUG_VIDEO_XBIOS
-			Vsetmode(new_video_mode->number);
+			if (XBIOS_centscreen) {
+				SDL_XBIOS_CentscreenSetmode(this, width, height, new_depth);
+			} else {
+				Vsetmode(new_video_mode->number);
+			}
 #endif
 			break;
 	}
@@ -892,7 +899,11 @@ static void XBIOS_VideoQuit(_THIS)
 			break;
 		case VDO_F30:
 			Setscreen(-1, XBIOS_oldvbase, -1);
-			Vsetmode(XBIOS_oldvmode);
+			if (XBIOS_centscreen) {
+				SDL_XBIOS_CentscreenRestore(this, XBIOS_oldvmode);
+			} else {
+				Vsetmode(XBIOS_oldvmode);
+			}
 			if (XBIOS_oldnumcol) {
 				VsetRGB(0, XBIOS_oldnumcol, XBIOS_oldpalette);
 			}

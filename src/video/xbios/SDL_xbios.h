@@ -70,6 +70,8 @@ struct SDL_PrivateVideoData {
 	int pitch;				/* Destination line width for C2P */
 	int width, height;		/* Screen size for centered C2P */
 
+	SDL_bool centscreen;	/* Centscreen extension present ? */
+
 	SDL_Rect *SDL_modelist[NUM_MODELISTS][SDL_NUMMODES+1];
 	xbiosmode_t *videomodes[NUM_MODELISTS][SDL_NUMMODES+1];
 };
@@ -123,6 +125,7 @@ enum {
 #define XBIOS_pitch			(this->hidden->pitch)
 #define XBIOS_width			(this->hidden->width)
 #define XBIOS_height		(this->hidden->height)
+#define XBIOS_centscreen	(this->hidden->centscreen)
 
 /*--- Functions prototypes ---*/
 
