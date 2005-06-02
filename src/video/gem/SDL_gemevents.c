@@ -224,6 +224,9 @@ static int do_messages(_THIS, short *message)
 		case WM_TOPPED:
 			wind_set(message[3],WF_TOP,message[4],0,0,0);
 			SDL_PrivateAppActive(1, SDL_APPINPUTFOCUS);
+			if (this->input_grab == SDL_GRAB_OFF) {
+				SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS);
+			}
 			break;
 		case WM_REDRAW:
 			if (!GEM_lock_redraw) {
@@ -286,6 +289,9 @@ static int do_messages(_THIS, short *message)
 		case WM_BOTTOMED:
 		case WM_UNTOPPED:
 			SDL_PrivateAppActive(0, SDL_APPINPUTFOCUS);
+			if (this->input_grab == SDL_GRAB_OFF) {
+				SDL_PrivateAppActive(0, SDL_APPMOUSEFOCUS);
+			}
 			break;
 	}
 	
