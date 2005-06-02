@@ -701,6 +701,19 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 
 			/* Open the window */
 			wind_open(GEM_handle,x2,y2,w2,h2);
+		} else {
+			/* Resize window if needed, to fit asked video mode */
+			if (modeflags & SDL_RESIZABLE) {
+				wind_get (GEM_handle, WF_WORKXYWH, &x2,&y2,&w2,&h2);
+				if ((w2&15)!=0) {
+					w2=(w2|15)+1;
+				}
+				if ((w2!=width) || (h2!=height)) {
+					if (wind_calc(WC_BORDER, GEM_win_type, x2,y2,width,height, &x2,&y2,&w2,&h2)) {
+						wind_set (GEM_handle, WF_CURRXYWH, x2,y2,w2,h2);
+					}
+				}
+			}
 		}
 
 		GEM_fullscreen = SDL_FALSE;
