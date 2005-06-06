@@ -777,8 +777,6 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 		current->pitch = width * VDI_pixelsize;
 	} else {
 		current->pixels = VDI_screen;
-		current->pixels += VDI_pitch * ((VDI_h - height) >> 1);
-		current->pixels += VDI_pixelsize * ((VDI_w - width) >> 1);
 		current->pitch = VDI_pitch;
 	}
 
@@ -844,13 +842,7 @@ static void GEM_UpdateRectsFullscreen(_THIS, int numrects, SDL_Rect *rects)
 		int destpitch;
 
 		if (GEM_bufops & B2S_C2P_1TOS) {
-			int destx;
-
 			destscr = VDI_screen;
-			destscr += VDI_pitch * ((VDI_h - surface->h) >> 1);
-			destx = (VDI_w - surf_width) >> 1;
-			destx &= ~15;
-			destscr += destx;
 			destpitch = VDI_pitch;
 		} else {
 			destscr = GEM_buffer2;
@@ -902,15 +894,10 @@ static void GEM_UpdateRectsFullscreen(_THIS, int numrects, SDL_Rect *rects)
 		}
 
 		for ( i=0; i<numrects; ++i ) {
-			blitcoords[0] = rects[i].x;
-			blitcoords[1] = rects[i].y;
-			blitcoords[2] = blitcoords[0] + rects[i].w - 1;
-			blitcoords[3] = blitcoords[1] + rects[i].h - 1;
-
-			blitcoords[4] = rects[i].x + ((VDI_w - surface->w) >> 1);
-			blitcoords[5] = rects[i].y + ((VDI_h - surface->h) >> 1);
-			blitcoords[6] = blitcoords[4] + rects[i].w - 1;
-			blitcoords[7] = blitcoords[5] + rects[i].h - 1;
+			blitcoords[0] = blitcoords[4] = rects[i].x;
+			blitcoords[1] = blitcoords[5] = rects[i].y;
+			blitcoords[2] = blitcoords[6] = rects[i].x + rects[i].w - 1;
+			blitcoords[3] = blitcoords[7] = rects[i].y + rects[i].h - 1;
 
 			vro_cpyfm(VDI_handle, S_ONLY, blitcoords, &mfdb_src, &VDI_dst_mfdb);
 		}
@@ -968,13 +955,7 @@ static int GEM_FlipHWSurfaceFullscreen(_THIS, SDL_Surface *surface)
 		int destpitch;
 
 		if (GEM_bufops & B2S_C2P_1TOS) {
-			int destx;
-
 			destscr = VDI_screen;
-			destscr += VDI_pitch * ((VDI_h - surface->h) >> 1);
-			destx = (VDI_w - surf_width) >> 1;
-			destx &= ~15;
-			destscr += destx;
 			destpitch = VDI_pitch;
 		} else {
 			destscr = GEM_buffer2;
@@ -1007,15 +988,10 @@ static int GEM_FlipHWSurfaceFullscreen(_THIS, SDL_Surface *surface)
 			mfdb_src.fd_addr=GEM_buffer2;
 		}
 
-		blitcoords[0] = 0;
-		blitcoords[1] = 0;
-		blitcoords[2] = surface->w - 1;
-		blitcoords[3] = surface->h - 1;
-
-		blitcoords[4] = (VDI_w - surface->w) >> 1;
-		blitcoords[5] = (VDI_h - surface->h) >> 1;
-		blitcoords[6] = blitcoords[4] + surface->w - 1;
-		blitcoords[7] = blitcoords[5] + surface->h - 1;
+		blitcoords[0] = blitcoords[4] = 0;
+		blitcoords[1] = blitcoords[5] = 0;
+		blitcoords[2] = blitcoords[6] = surface->w - 1;
+		blitcoords[3] = blitcoords[7] = surface->h - 1;
 
 		vro_cpyfm(VDI_handle, S_ONLY, blitcoords, &mfdb_src, &VDI_dst_mfdb);
 	}

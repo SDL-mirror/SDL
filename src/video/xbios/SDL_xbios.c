@@ -727,16 +727,7 @@ static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 	surface = this->screen;
 
 	if ((surface->format->BitsPerPixel) == 8) {
-		void *destscr;
-		int destx;
 		int i;
-
-		/* Center on destination screen */
-		destscr = XBIOS_screens[XBIOS_fbnum];
-		destscr += XBIOS_pitch * ((XBIOS_height - surface->h) >> 1);
-		destx = (XBIOS_width - surface->w) >> 1;
-		destx &= ~15;
-		destscr += destx;
 
 		for (i=0;i<numrects;i++) {
 			void *source,*destination;
@@ -752,19 +743,16 @@ static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 			source += surface->pitch * rects[i].y;
 			source += x1;
 
-			destination = destscr;
+			destination = XBIOS_screens[XBIOS_fbnum];
 			destination += XBIOS_pitch * rects[i].y;
 			destination += x1;
 
 			/* Convert chunky to planar screen */
 			SDL_Atari_C2pConvert(
-				source,
-				destination,
-				x2-x1,
-				rects[i].h,
+				source, destination,
+				x2-x1, rects[i].h,
 				XBIOS_doubleline,
-				surface->pitch,
-				XBIOS_pitch
+				surface->pitch, XBIOS_pitch
 			);
 		}
 	}
@@ -785,25 +773,12 @@ static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 static int XBIOS_FlipHWSurface(_THIS, SDL_Surface *surface)
 {
 	if ((surface->format->BitsPerPixel) == 8) {
-		void *destscr;
-		int destx;
-			
-		/* Center on destination screen */
-		destscr = XBIOS_screens[XBIOS_fbnum];
-		destscr += XBIOS_pitch * ((XBIOS_height - surface->h) >> 1);
-		destx = (XBIOS_width - surface->w) >> 1;
-		destx &= ~15;
-		destscr += destx;
-
 		/* Convert chunky to planar screen */
 		SDL_Atari_C2pConvert(
-			surface->pixels,
-			destscr,
-			surface->w,
-			surface->h,
+			surface->pixels, XBIOS_screens[XBIOS_fbnum],
+			surface->w, surface->h,
 			XBIOS_doubleline,
-			surface->pitch,
-			XBIOS_pitch
+			surface->pitch, XBIOS_pitch
 		);
 	}
 
