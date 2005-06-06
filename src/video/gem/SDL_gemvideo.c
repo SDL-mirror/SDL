@@ -443,6 +443,10 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	vsf_interior(VDI_handle,1);
 	vsf_perimeter(VDI_handle,0);
 
+	/* Menu bar save buffer */
+	menubar_size = GEM_desk_w * GEM_desk_y * VDI_pixelsize;
+	GEM_menubar=Atari_SysMalloc(menubar_size,MX_PREFTTRAM);
+
 	/* Fill video modes list */
 	SDL_modelist[0] = malloc(sizeof(SDL_Rect));
 	SDL_modelist[0]->x = 0;
@@ -525,6 +529,29 @@ static void GEM_LockScreen(_THIS)
 		/* Reserve memory space, used to be sure of compatibility */
 		form_dial( FMD_START, 0,0,0,0, 0,0,VDI_w,VDI_h);
 
+		/* Save menu bar */
+		if (GEM_menubar) {
+			MFDB mfdb_src;
+			short blitcoords[8];
+
+			mfdb_src.fd_addr=GEM_menubar;
+			mfdb_src.fd_w=GEM_desk_w;
+			mfdb_src.fd_h=GEM_desk_y;
+			mfdb_src.fd_wdwidth= (GEM_desk_w*VDI_pixelsize) >> 4;
+			mfdb_src.fd_nplanes=VDI_bpp;
+			mfdb_src.fd_stand=
+				mfdb_src.fd_r1=
+				mfdb_src.fd_r2=
+				mfdb_src.fd_r3= 0;
+
+			blitcoords[0] = blitcoords[4] = 0;
+			blitcoords[1] = blitcoords[5] = 0;
+			blitcoords[2] = blitcoords[6] = GEM_desk_w-1;
+			blitcoords[3] = blitcoords[7] = GEM_desk_y-1;
+
+			vro_cpyfm(VDI_handle, S_ONLY, blitcoords, &VDI_dst_mfdb, &mfdb_src);
+		}
+
 		GEM_locked=SDL_TRUE;
 	}
 }
@@ -532,6 +559,29 @@ static void GEM_LockScreen(_THIS)
 static void GEM_UnlockScreen(_THIS)
 {
 	if (GEM_locked) {
+		/* Restore menu bar */
+		if (GEM_menubar) {
+			MFDB mfdb_src;
+			short blitcoords[8];
+
+			mfdb_src.fd_addr=GEM_menubar;
+			mfdb_src.fd_w=GEM_desk_w;
+			mfdb_src.fd_h=GEM_desk_y;
+			mfdb_src.fd_wdwidth= (GEM_desk_w*VDI_pixelsize) >> 4;
+			mfdb_src.fd_nplanes=VDI_bpp;
+			mfdb_src.fd_stand=
+				mfdb_src.fd_r1=
+				mfdb_src.fd_r2=
+				mfdb_src.fd_r3= 0;
+
+			blitcoords[0] = blitcoords[4] = 0;
+			blitcoords[1] = blitcoords[5] = 0;
+			blitcoords[2] = blitcoords[6] = GEM_desk_w-1;
+			blitcoords[3] = blitcoords[7] = GEM_desk_y-1;
+
+			vro_cpyfm(VDI_handle, S_ONLY, blitcoords, &mfdb_src, &VDI_dst_mfdb);
+		}
+
 		/* Restore screen memory, and send REDRAW to all apps */
 		form_dial( FMD_FINISH, 0,0,0,0, 0,0,VDI_w,VDI_h);
 		/* Unlock AES */
@@ -1068,6 +1118,10 @@ void GEM_VideoQuit(_THIS)
 	}
 
 	GEM_UnlockScreen(this);
+	if (GEM_menubar) {
+		Mfree(GEM_menubar);
+		GEM_menubar=NULL;
+	}
 
 	appl_exit();
 
