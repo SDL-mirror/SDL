@@ -125,5 +125,5 @@ int GEM_IconifyWindow(_THIS)
 
 SDL_GrabMode GEM_GrabInput(_THIS, SDL_GrabMode mode)
 {
-	return mode;
+	return SDL_GRAB_OFF;
 }
