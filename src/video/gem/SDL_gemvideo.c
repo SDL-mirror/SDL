@@ -481,12 +481,12 @@ static void GEM_FreeBuffers(_THIS)
 {
 	/* Release buffer */
 	if ( GEM_buffer2 ) {
-		free( GEM_buffer2 );
+		Mfree( GEM_buffer2 );
 		GEM_buffer2=NULL;
 	}
 
 	if ( GEM_buffer1 ) {
-		free( GEM_buffer1 );
+		Mfree( GEM_buffer1 );
 		GEM_buffer1=NULL;
 	}
 }
