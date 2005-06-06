@@ -299,7 +299,7 @@ static void VDI_ReadExtInfo(_THIS, short *work_out)
 
 int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 {
-	int i;
+	int i, menubar_size;
 	short work_in[12], work_out[272], dummy;
 
 	/* Open AES (Application Environment Services) */
