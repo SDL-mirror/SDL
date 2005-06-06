@@ -138,7 +138,7 @@ void GEM_PumpEvents(_THIS)
 	
 	for (;;)
 	{
-		int quit, resultat;
+		int quit, resultat, event_mask;
 		short buffer[8], kc;
 		short x2,y2,w2,h2;
 
