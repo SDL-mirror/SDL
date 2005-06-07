@@ -65,6 +65,9 @@ struct SDL_PrivateVideoData {
 	short	blit_coords[8];		/* Coordinates for bitblt */
 	MFDB	src_mfdb, dst_mfdb;	/* VDI MFDB for bitblt */
 	Uint16 old_palette[256][3];	/* Saved current palette */
+	Uint16 cur_palette[256][3];	/* SDL application palette */
+								/* Function to set/restore palette */
+	void (*setpalette)(_THIS, Uint16 newpal[256][3]);
 
 	/* GEM infos */
 	short desk_x, desk_y;		/* Desktop properties */
@@ -96,6 +99,8 @@ struct SDL_PrivateVideoData {
 #define VDI_pixelsize		(this->hidden->pixelsize)
 #define VDI_oldnumcolors	(this->hidden->old_numcolors)
 #define VDI_oldpalette		(this->hidden->old_palette)
+#define VDI_curpalette		(this->hidden->cur_palette)
+#define VDI_setpalette		(this->hidden->setpalette)
 #define VDI_pitch			(this->hidden->pitch)
 #define VDI_format			(this->hidden->format)
 #define VDI_screen			(this->hidden->screen)

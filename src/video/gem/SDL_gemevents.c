@@ -245,6 +245,9 @@ static int do_messages(_THIS, short *message)
 		case WM_TOPPED:
 			wind_set(message[3],WF_TOP,message[4],0,0,0);
 			SDL_PrivateAppActive(1, SDL_APPINPUTFOCUS);
+			if (VDI_setpalette) {
+				VDI_setpalette(this, VDI_curpalette);
+			}
 			break;
 		case WM_REDRAW:
 			if (!GEM_lock_redraw) {
@@ -307,6 +310,9 @@ static int do_messages(_THIS, short *message)
 		case WM_BOTTOMED:
 		case WM_UNTOPPED:
 			SDL_PrivateAppActive(0, SDL_APPINPUTFOCUS);
+			if (VDI_setpalette) {
+				VDI_setpalette(this, VDI_oldpalette);
+			}
 			break;
 	}
 	

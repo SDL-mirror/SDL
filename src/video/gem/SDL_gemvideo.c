@@ -106,6 +106,7 @@ static int GEM_ToggleFullScreen(_THIS, int on);
 static void GEM_FreeBuffers(_THIS);
 static void GEM_ClearScreen(_THIS);
 static void GEM_ClearRect(_THIS, short *rect);
+static void GEM_SetNewPalette(_THIS, Uint16 newpal[256][3]);
 static void GEM_LockScreen(_THIS);
 static void GEM_UnlockScreen(_THIS);
 static void refresh_window(_THIS, int winhandle, short *rect);
@@ -396,6 +397,8 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		VDI_oldpalette[i][1] = rgb[1];
 		VDI_oldpalette[i][2] = rgb[2];
 	}
+	VDI_setpalette = GEM_SetNewPalette;
+	memcpy(VDI_curpalette,VDI_oldpalette,sizeof(VDI_curpalette));
 
 	/* Setup screen info */
 	GEM_title_name = empty_name;
@@ -518,6 +521,23 @@ static void GEM_ClearScreen(_THIS)
 	GEM_ClearRect(this, pxy);
 
 	v_show_c(VDI_handle, 1);
+}
+
+static void GEM_SetNewPalette(_THIS, Uint16 newpal[256][3])
+{
+	int i;
+	short rgb[3];
+
+	if (VDI_oldnumcolors==0)
+		return;
+
+	for(i = 0; i < VDI_oldnumcolors; i++) {
+		rgb[0] = newpal[i][0];
+		rgb[1] = newpal[i][1];
+		rgb[2] = newpal[i][2];
+
+		vs_color(VDI_handle, i, rgb);
+	}
 }
 
 static void GEM_LockScreen(_THIS)
@@ -1048,9 +1068,9 @@ static int GEM_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 		g = colors[i].g;
 		b = colors[i].b;
 
-		rgb[0] = (1000 * r) / 255;
-		rgb[1] = (1000 * g) / 255;
-		rgb[2] = (1000 * b) / 255;
+		rgb[0] = VDI_curpalette[i][0] = (1000 * r) / 255;
+		rgb[1] = VDI_curpalette[i][1] =(1000 * g) / 255;
+		rgb[2] = VDI_curpalette[i][2] =(1000 * b) / 255;
 
 		vs_color(VDI_handle, vdi_index[firstcolor+i], rgb);
 	}
@@ -1101,20 +1121,7 @@ void GEM_VideoQuit(_THIS)
 
 	appl_exit();
 
-	/* Restore palette */
-	if (VDI_oldnumcolors) {
-		int i;
-
-		for(i = 0; i < VDI_oldnumcolors; i++) {
-			short	rgb[3];
-
-			rgb[0] = VDI_oldpalette[i][0];
-			rgb[1] = VDI_oldpalette[i][1];
-			rgb[2] = VDI_oldpalette[i][2];
-
-			vs_color(VDI_handle, i, rgb);
-		}
-	}
+	GEM_SetNewPalette(this, VDI_oldpalette);
 
 	/* Close VDI workstation */
 	if (VDI_handle) {
