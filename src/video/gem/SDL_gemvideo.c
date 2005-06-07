@@ -557,7 +557,7 @@ static void GEM_LockScreen(_THIS)
 			mfdb_src.fd_addr=GEM_menubar;
 			mfdb_src.fd_w=GEM_desk_w;
 			mfdb_src.fd_h=GEM_desk_y;
-			mfdb_src.fd_wdwidth= (GEM_desk_w*VDI_pixelsize) >> 4;
+			mfdb_src.fd_wdwidth=GEM_desk_w>>4;
 			mfdb_src.fd_nplanes=VDI_bpp;
 			mfdb_src.fd_stand=
 				mfdb_src.fd_r1=
@@ -587,7 +587,7 @@ static void GEM_UnlockScreen(_THIS)
 			mfdb_src.fd_addr=GEM_menubar;
 			mfdb_src.fd_w=GEM_desk_w;
 			mfdb_src.fd_h=GEM_desk_y;
-			mfdb_src.fd_wdwidth= (GEM_desk_w*VDI_pixelsize) >> 4;
+			mfdb_src.fd_wdwidth=GEM_desk_w>>4;
 			mfdb_src.fd_nplanes=VDI_bpp;
 			mfdb_src.fd_stand=
 				mfdb_src.fd_r1=
