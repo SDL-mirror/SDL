@@ -462,33 +462,29 @@ static int SDL_GetVideoMode (int *w, int *h, int *BitsPerPixel, Uint32 flags)
 	SDL_closest_depths[table][0] = *BitsPerPixel;
 	SDL_closest_depths[table][7] = SDL_VideoSurface->format->BitsPerPixel;
 	for ( b = 0; !supported && SDL_closest_depths[table][b]; ++b ) {
+		int best;
+
 		format.BitsPerPixel = SDL_closest_depths[table][b];
 		sizes = SDL_ListModes(&format, flags);
 		if ( sizes == (SDL_Rect **)0 ) {
 			/* No sizes supported at this bit-depth */
 			continue;
 		}
+		best=0;
 		for ( i=0; sizes[i]; ++i ) {
-			if ((sizes[i]->w < *w) || (sizes[i]->h < *h)) {
-				if ( i > 0 ) {
-					--i;
-					*w = sizes[i]->w;
-					*h = sizes[i]->h;
-					*BitsPerPixel = SDL_closest_depths[table][b];
+			/* Mode with both dimensions bigger or equal than asked ? */
+			if ((sizes[i]->w >= *w) && (sizes[i]->h >= *h)) {
+				/* Mode with any dimension smaller or equal than current best ? */
+				if ((sizes[i]->w <= sizes[best]->w) || (sizes[i]->h <= sizes[best]->h)) {
+					best=i;
 					supported = 1;
-				} else {
-					/* Largest mode too small... */;
 				}
-				break;
 			}
 		}
-		if ( (i > 0) && ! sizes[i] ) {
-			/* The smallest mode was larger than requested, OK */
-			--i;
-			*w = sizes[i]->w;
-			*h = sizes[i]->h;
+		if (supported) {
+			*w=sizes[best]->w;
+			*h=sizes[best]->h;
 			*BitsPerPixel = SDL_closest_depths[table][b];
-			supported = 1;
 		}
 	}
 	if ( ! supported ) {
