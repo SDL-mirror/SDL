@@ -104,7 +104,7 @@ typedef struct joystick_hwdata recDevice;
 static recDevice *gpDeviceList = NULL;
 
 
-void HIDReportErrorNum (char * strError, long numError)
+static void HIDReportErrorNum (char * strError, long numError)
 {
 	SDL_SetError(strError);
 }
@@ -115,7 +115,7 @@ static void HIDGetCollectionElements (CFMutableDictionaryRef deviceProperties, r
  * will return 0 on error conditions which should be accounted for by application
  */
 
-SInt32 HIDGetElementValue (recDevice *pDevice, recElement *pElement)
+static SInt32 HIDGetElementValue (recDevice *pDevice, recElement *pElement)
 {
 	IOReturn result = kIOReturnSuccess;
 	IOHIDEventStruct hidEvent;
@@ -140,7 +140,7 @@ SInt32 HIDGetElementValue (recDevice *pDevice, recElement *pElement)
 
 /* similiar to HIDGetElementValue, but auto-calibrates the value before returning it */
 
-SInt32 HIDCalibratedValue (recDevice *pDevice, recElement *pElement)
+static SInt32 HIDCalibratedValue (recDevice *pDevice, recElement *pElement)
 {
 	float deviceScale = pElement->max - pElement->min;
 	float readScale = pElement->maxReport - pElement->minReport;
@@ -153,7 +153,7 @@ SInt32 HIDCalibratedValue (recDevice *pDevice, recElement *pElement)
 
 /* similiar to HIDCalibratedValue but calibrates to an arbitrary scale instead of the elements default scale */
 
-SInt32 HIDScaledCalibratedValue (recDevice *pDevice, recElement *pElement, long min, long max)
+static SInt32 HIDScaledCalibratedValue (recDevice *pDevice, recElement *pElement, long min, long max)
 {
 	float deviceScale = max - min;
 	float readScale = pElement->maxReport - pElement->minReport;
@@ -181,7 +181,7 @@ static void HIDRemovalCallback(void * target,
  * Note: appliction now owns the device and must close and release it prior to exiting
  */
 
-IOReturn HIDCreateOpenDeviceInterface (io_object_t hidDevice, recDevice *pDevice)
+static IOReturn HIDCreateOpenDeviceInterface (io_object_t hidDevice, recDevice *pDevice)
 {
 	IOReturn result = kIOReturnSuccess;
 	HRESULT plugInResult = S_OK;
@@ -222,7 +222,7 @@ IOReturn HIDCreateOpenDeviceInterface (io_object_t hidDevice, recDevice *pDevice
  * (device may have to be plug and re-plugged in different location to get it working again without a restart)
  */
 
-IOReturn HIDCloseReleaseInterface (recDevice *pDevice)
+static IOReturn HIDCloseReleaseInterface (recDevice *pDevice)
 {
 	IOReturn result = kIOReturnSuccess;
 	
