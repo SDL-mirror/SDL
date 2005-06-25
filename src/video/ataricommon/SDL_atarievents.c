@@ -52,6 +52,7 @@ enum {
 	MCH_STE,
 	MCH_TT,
 	MCH_F30,
+	MCH_CLONE,
 	MCH_ARANYM
 };
 

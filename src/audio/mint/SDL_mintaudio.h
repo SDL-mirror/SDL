@@ -61,7 +61,9 @@ enum {
 	MCH_ST=0,
 	MCH_STE,
 	MCH_TT,
-	MCH_F30
+	MCH_F30,
+	MCH_CLONE,
+	MCH_ARANYM
 };
 
 /* Master clocks for replay frequencies */
