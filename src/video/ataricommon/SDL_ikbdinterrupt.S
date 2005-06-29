@@ -121,11 +121,11 @@ ikbd_finbuffer:
 	movel	sp@+,a0
 	rts
 
-	.data
+	.bss
+
 	.even
-	.comm	ikbd_ierb,4*1
-	.even
-	.comm	ikbd_imrb,4*1
+	.comm	ikbd_ierb,1
+	.comm	ikbd_imrb,1
 
 /*--- Our custom IKBD vector ---*/
 
@@ -135,31 +135,36 @@ ikbd_finbuffer:
 	.ascii	"LSDL"
 	.comm	old_ikbd,4*1
 ikbd:
+	| Check if source is IKBD or MIDI
+	
+	btst	#0,0xfffffc00.w
+	beqs	ikbd_oldmidi
+
 	moveml	d0-d1/a0,sp@-
 	moveb	0xfffffc02:w,d0
 
-	| paquet joystick ?
+	| Joystick packet ?
 	
 	cmpb	#0xff,d0
-	beq	ikbd_yes_joystick
+	beqs	ikbd_yes_joystick
 
-	| paquet souris ?
+	| Mouse packet ?
 
 	cmpb	#0xf8,d0
-	bmi	ikbd_no_mouse
+	bmis	ikbd_no_mouse
 	cmpb	#0xfc,d0
-	bpl	ikbd_no_mouse
+	bpls	ikbd_no_mouse
 
 ikbd_yes_mouse:
 	andw	#3,d0
 	movew	d0,_SDL_AtariIkbd_mouseb
 
 	movel	#ikbd_mousex,0x118:w
-	bra	ikbd_endit
+	bras	ikbd_endit_stack
 
 ikbd_yes_joystick:
 	movel	#ikbd_joystick,0x118:w
-	bra	ikbd_endit
+	bras	ikbd_endit_stack
 
 ikbd_no_mouse:
 	moveb	d0,d1
@@ -167,60 +172,77 @@ ikbd_no_mouse:
 	andl	#0x7f,d1
 	tas	d0
 	spl	a0@(0,d1:w)
-ikbd_fin:
 
-	| Fin interruption
+	| End of interrupt
 
-ikbd_endit:
+ikbd_endit_stack:
 	moveml	sp@+,d0-d1/a0
+ikbd_endit:
 	bclr	#6,0xfffffa11:w
 	rte
 
+	| Call old MIDI interrupt
+
+ikbd_oldmidi:
+	movel	old_ikbd,sp@-
+	rts
+
 ikbd_mousex:
-	movel	d0,sp@-
+	| Check if source is IKBD or MIDI
+	
+	btst	#0,0xfffffc00.w
+	beqs	ikbd_oldmidi
+
+	movew	d0,sp@-
 
 	moveb	0xfffffc02:w,d0
 	extw	d0
 	addw	d0,_SDL_AtariIkbd_mousex
 
-	movel	sp@+,d0
+	movew	sp@+,d0
 
 	movel	#ikbd_mousey,0x118:w
-	bclr	#6,0xfffffa11:w
-	rte
+	bras	ikbd_endit
 
 ikbd_mousey:
-	movel	d0,sp@-
+	| Check if source is IKBD or MIDI
+	
+	btst	#0,0xfffffc00.w
+	beqs	ikbd_oldmidi
+
+	movew	d0,sp@-
 
 	moveb	0xfffffc02:w,d0
 	extw	d0
 	addw	d0,_SDL_AtariIkbd_mousey
 
-	movel	sp@+,d0
+	movew	sp@+,d0
 
 	movel	#ikbd,0x118:w
-	bclr	#6,0xfffffa11:w
-	rte
+	bras	ikbd_endit
 
 ikbd_joystick:
+	| Check if source is IKBD or MIDI
+	
+	btst	#0,0xfffffc00.w
+	beqs	ikbd_oldmidi
+
 	moveb	0xfffffc02:w,_SDL_AtariIkbd_joystick+1
 
 	movel	#ikbd,0x118:w
-	bclr	#6,0xfffffa11:w
-	rte
+	bras	ikbd_endit
 
 	.data
 	
 	.even
 _SDL_AtariIkbd_enabled:
 	.word	0
+
+	.bss
+
 	.even
 	.comm	_SDL_AtariIkbd_keyboard,128
-	.even
-	.comm	_SDL_AtariIkbd_mousex,2*1
-	.even
-	.comm	_SDL_AtariIkbd_mousey,2*1
-	.even
-	.comm	_SDL_AtariIkbd_mouseb,2*1
-	.even
-	.comm	_SDL_AtariIkbd_joystick,2*1
+	.comm	_SDL_AtariIkbd_mousex,2
+	.comm	_SDL_AtariIkbd_mousey,2
+	.comm	_SDL_AtariIkbd_mouseb,2
+	.comm	_SDL_AtariIkbd_joystick,2
