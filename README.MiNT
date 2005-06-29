@@ -1,7 +1,17 @@
-
 ==============================================================================
 Using the Simple DirectMedia Layer on Atari
 ==============================================================================
+
+
+    If you want to build SDL from sources to create SDL programs on Atari:
+        see sections I - II.
+	
+    If you want to create SDL programs on Atari using SDL binary build,
+        download it from my web site (URL at end of this file).
+
+    If you want to configure a program using SDL on Atari,
+	    see sections IV - VI.
+
 
 ==============================================================================
 I.  Building the Simple DirectMedia Layer libraries:
