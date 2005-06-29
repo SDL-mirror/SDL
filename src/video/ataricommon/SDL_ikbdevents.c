@@ -54,11 +54,11 @@ enum {
 	K_INSERT
 };
 
-/* To save state of keyboard */
 #define ATARIBIOS_MAXKEYS 128
 
-static unsigned char ikbd_previouskeyboard[ATARIBIOS_MAXKEYS];
-static Uint16 atari_prevmouseb;	/* buttons */
+#define KEY_PRESSED		0xff
+#define KEY_UNDEFINED	0x80
+#define KEY_RELEASED	0x00
 
 /* The translation tables from a console scancode to a SDL keysym */
 #define KT_NOCHANGE -1
@@ -69,7 +69,8 @@ enum {
 	KT_CAPS=2
 };
 
-static int caps_state;
+static Uint16 atari_prevmouseb;	/* save state of mouse buttons */
+static int caps_state;			/* caps lock state */
 _KEYTAB *curtables;
 static unsigned char *tab_unshift, *tab_shift, *tab_caps;
 static SDLKey keymap[ATARIBIOS_MAXKEYS];
@@ -80,8 +81,7 @@ void AtariIkbd_InitOSKeymap(_THIS)
 {
 	int i;
 
-	memset(SDL_AtariIkbd_keyboard, 0, ATARIBIOS_MAXKEYS);
-	memset(ikbd_previouskeyboard, 0, ATARIBIOS_MAXKEYS);
+	memset(SDL_AtariIkbd_keyboard, KEY_UNDEFINED, ATARIBIOS_MAXKEYS);
 
 	/* Initialize keymap */
 	for ( i=0; i<sizeof(keymap); i++ )
@@ -152,29 +152,35 @@ void AtariIkbd_PumpEvents(_THIS)
 	/*--- Send keyboard events ---*/
 
 	/* Update caps lock state */
-	if (SDL_AtariIkbd_keyboard[SCANCODE_CAPSLOCK] && !ikbd_previouskeyboard[SCANCODE_CAPSLOCK])
+	if (SDL_AtariIkbd_keyboard[SCANCODE_CAPSLOCK]==KEY_PRESSED) {
 		caps_state ^= 1;
+	}
 
 	/* Choose the translation table */
 	specialkeys=KT_UNSHIFT;
-	if (SDL_AtariIkbd_keyboard[SCANCODE_LEFTSHIFT] || SDL_AtariIkbd_keyboard[SCANCODE_RIGHTSHIFT])
+	if ((SDL_AtariIkbd_keyboard[SCANCODE_LEFTSHIFT]==KEY_PRESSED)
+		|| (SDL_AtariIkbd_keyboard[SCANCODE_RIGHTSHIFT]==KEY_PRESSED))
+	{
 		specialkeys = KT_SHIFT;
-	if (caps_state)
+	}
+	if (caps_state) {
 		specialkeys = KT_CAPS;
+	}
 
 	/* Now generate events */
 	for (i=0; i<ATARIBIOS_MAXKEYS; i++) {
 		/* Key pressed ? */
-		if (SDL_AtariIkbd_keyboard[i] && !ikbd_previouskeyboard[i])
+		if (SDL_AtariIkbd_keyboard[i]==KEY_PRESSED) {
 			SDL_PrivateKeyboard(SDL_PRESSED, TranslateKey(i, specialkeys, &keysym));
+			SDL_AtariIkbd_keyboard[i]=KEY_UNDEFINED;
+		}
 			
-		/* Key unpressed ? */
-		if (ikbd_previouskeyboard[i] && !SDL_AtariIkbd_keyboard[i])
+		/* Key released ? */
+		if (SDL_AtariIkbd_keyboard[i]==KEY_RELEASED) {
 			SDL_PrivateKeyboard(SDL_RELEASED, TranslateKey(i, specialkeys, &keysym));
+			SDL_AtariIkbd_keyboard[i]=KEY_UNDEFINED;
+		}
 	}
-
-	/* Will be previous table */
-	memcpy(ikbd_previouskeyboard, SDL_AtariIkbd_keyboard, ATARIBIOS_MAXKEYS);
 
 	/*--- Send mouse events ---*/
 
@@ -238,4 +244,3 @@ void AtariIkbd_ShutdownEvents(void)
 {
 	Supexec(SDL_AtariIkbdUninstall);
 }
-

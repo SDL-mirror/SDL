@@ -49,7 +49,7 @@ static char rcsid =
 _SDL_AtariIkbdInstall:
 	moveml	d0-d1/a0-a1,sp@-
 
-	| Init interrupts
+	| Disable interrupts
 
 	movew	#0x2700,sr
 
@@ -57,9 +57,9 @@ _SDL_AtariIkbdInstall:
 
 	lea	0xfffffa00:w,a0
 	btst	#6,a0@(0x09)
-	sne	ikbd_ierb
+	sne		ikbd_ierb
 	btst	#6,a0@(0x15)
-	sne	ikbd_imrb
+	sne		ikbd_imrb
 
 	| Set our routine
 
@@ -68,7 +68,11 @@ _SDL_AtariIkbdInstall:
 	bset	#6,0xfffffa09:w	| IERB
 	bset	#6,0xfffffa15:w	| IMRB
 
+	| Set mouse relative mode
+
 	moveb	#8,0xfffffc02:w
+
+	| Reenable interrupts
 
 	movew	#0x2300,sr
 
@@ -84,7 +88,7 @@ _SDL_AtariIkbdInstall:
 _SDL_AtariIkbdUninstall:
 	movel	a0,sp@-
 
-	| Stop interrupt
+	| Disable interrupts
 
 	movew	#0x2700,sr
 
@@ -94,13 +98,13 @@ _SDL_AtariIkbdUninstall:
 
 	bclr	#6,a0@(0x09)
 	tstb	ikbd_ierb
-	beq	ikbd_restoreierb
+	beqs	ikbd_restoreierb
 	bset	#6,a0@(0x09)
 ikbd_restoreierb:
 
 	bclr	#6,a0@(0x15)
 	tstb	ikbd_imrb
-	beq	ikbd_restoreimrb
+	beqs	ikbd_restoreimrb
 	bset	#6,a0@(0x15)
 ikbd_restoreimrb:
 
@@ -111,10 +115,12 @@ ikbd_restoreimrb:
 	lea	0xfffffc00:w,a0
 ikbd_videbuffer:
 	btst	#0,a0@
-	beq	ikbd_finbuffer
+	beqs	ikbd_finbuffer
 	tstb	a0@(0x02)
-	bra	ikbd_videbuffer
+	bras	ikbd_videbuffer
 ikbd_finbuffer:
+
+	| Reenable interrupts
 
 	movew	#0x2300,sr
 
@@ -136,7 +142,6 @@ ikbd_finbuffer:
 	.comm	old_ikbd,4*1
 ikbd:
 	| Check if source is IKBD or MIDI
-	
 	btst	#0,0xfffffc00.w
 	beqs	ikbd_oldmidi
 
@@ -155,6 +160,8 @@ ikbd:
 	cmpb	#0xfc,d0
 	bpls	ikbd_no_mouse
 
+	| Mouse packet, byte #1
+
 ikbd_yes_mouse:
 	andw	#3,d0
 	movew	d0,_SDL_AtariIkbd_mouseb
@@ -162,16 +169,20 @@ ikbd_yes_mouse:
 	movel	#ikbd_mousex,0x118:w
 	bras	ikbd_endit_stack
 
+	| Joystick packet, byte #1
+
 ikbd_yes_joystick:
 	movel	#ikbd_joystick,0x118:w
 	bras	ikbd_endit_stack
 
+	| Keyboard press/release
+
 ikbd_no_mouse:
 	moveb	d0,d1
-	lea	_SDL_AtariIkbd_keyboard,a0
-	andl	#0x7f,d1
-	tas	d0
-	spl	a0@(0,d1:w)
+	lea		_SDL_AtariIkbd_keyboard,a0
+	andw	#0x7f,d1
+	tas		d0
+	spl		a0@(0,d1:w)
 
 	| End of interrupt
 
@@ -187,9 +198,11 @@ ikbd_oldmidi:
 	movel	old_ikbd,sp@-
 	rts
 
+	| Mouse packet, byte #2
+
 ikbd_mousex:
+
 	| Check if source is IKBD or MIDI
-	
 	btst	#0,0xfffffc00.w
 	beqs	ikbd_oldmidi
 
@@ -204,9 +217,11 @@ ikbd_mousex:
 	movel	#ikbd_mousey,0x118:w
 	bras	ikbd_endit
 
+	| Mouse packet, byte #3
+
 ikbd_mousey:
+
 	| Check if source is IKBD or MIDI
-	
 	btst	#0,0xfffffc00.w
 	beqs	ikbd_oldmidi
 
@@ -221,9 +236,11 @@ ikbd_mousey:
 	movel	#ikbd,0x118:w
 	bras	ikbd_endit
 
+	| Joystick packet, byte #2
+
 ikbd_joystick:
+
 	| Check if source is IKBD or MIDI
-	
 	btst	#0,0xfffffc00.w
 	beqs	ikbd_oldmidi
 
