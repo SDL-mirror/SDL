@@ -39,8 +39,6 @@ static char rcsid =
 
 /* Defines */
 
-#define DEBUG_VIDEO_GEM 0
-
 #define ICONWIDTH 64
 #define ICONHEIGHT 64
 
@@ -64,15 +62,8 @@ void GEM_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 	SDL_Surface *sicon;
 	SDL_Rect bounds;
 
-#ifdef DEBUG_VIDEO_GEM
-	printf("sdl:video:gem: SetIcon(0x%08x)\n", (long) icon);
-#endif
-
 #if 0
 	if ((GEM_wfeatures & (1<<WF_ICONIFY))==0) {
-#ifdef DEBUG_VIDEO_GEM
-		printf("sdl:video:gem: AES can not iconify windows\n");
-#endif
 		return;
 	}
 #endif
@@ -98,10 +89,6 @@ void GEM_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 	}
 
 	GEM_icon = sicon;
-
-#ifdef DEBUG_VIDEO_GEM
-	printf("sdl:video:gem: SetIcon(): done\n");
-#endif
 }
 
 int GEM_IconifyWindow(_THIS)
