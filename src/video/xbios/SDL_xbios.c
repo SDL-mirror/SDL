@@ -537,7 +537,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 	if (new_depth == 4) {
 		SDL_Atari_C2pConvert = SDL_Atari_C2pConvert4;
 		new_depth=8;
-		modeflags |= SDL_SWSURFACE;
+		modeflags |= SDL_SWSURFACE|SDL_HWPALETTE;
 	} else if (new_depth == 8) {
 		SDL_Atari_C2pConvert = SDL_Atari_C2pConvert8;
 		modeflags |= SDL_SWSURFACE|SDL_HWPALETTE;
@@ -646,15 +646,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 #endif
 			/* Reset palette */
 			for (i=0;i<16;i++) {
-				int c;
-
-				c = ((i>>1)<<8) | ((i>>1)<<4) | (i>>1);
-				if ((i & 1) && (i<15))
-					c += (1<<4);
-				if (i==14)
-					c -= 1<<8;
-
-				TT_palette[i]= c;
+				TT_palette[i]= ((i>>1)<<8) | (((i*8)/17)<<4) | (i>>1);
 			}
 #ifndef DEBUG_VIDEO_XBIOS
 			Setpalette(TT_palette);
