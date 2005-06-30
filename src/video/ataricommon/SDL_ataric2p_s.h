@@ -30,10 +30,6 @@ static char rcsid =
 
 #include "SDL_types.h"
 
-/*--- Variables ---*/
-
-extern Uint8 SDL_Atari_table_c2p[2048];	/* Used by conversions routines */
-
 /*--- Functions pointers ---*/
 
 /* Convert a chunky screen to bitplane screen */

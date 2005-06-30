@@ -38,7 +38,6 @@ static char rcsid =
 	.globl	_SDL_Atari_C2pConvert8
 	.globl	_SDL_Atari_C2pConvert4
 	.globl	_SDL_Atari_C2pConvert4_pal
-	.globl	_SDL_Atari_table_c2p
 
 /* ------------	Conversion C2P, 8 bits ------------ */
 
@@ -247,7 +246,7 @@ SDL_Atari_C2p8_start:
 	movel	d3,a3
 
 	cmpl	a0,a2
-	bgt	SDL_Atari_C2p8_pix16
+	bgt		SDL_Atari_C2p8_pix16
 
 	movel	a3,a1@+
 	movel	a4,a1@+
@@ -286,7 +285,7 @@ SDL_Atari_C2p8_nodblline:
 	addl	d1,c2p_curdst
 
 	subqw	#1,c2p_row
-	bne	SDL_Atari_C2p8_rowloop	
+	bne		SDL_Atari_C2p8_rowloop	
 
 	moveml	sp@+,d2-d7/a2-a6
 	rts
@@ -331,15 +330,15 @@ c2p4_bclx:
 c2p4_bcl07:
 #if defined(__M68020__)
 	moveb	a0@+,d0
-	lea	a2@(0,d0:w:4),a3
+	lea		a2@(0,d0:w:4),a3
 #else
 	moveq	#0,d0
 	moveb	a0@+,d0
 	lslw	#2,d0
-	lea	a2@(0,d0:w),a3
+	lea		a2@(0,d0:w),a3
 #endif
 	lsll	#1,d1
-	orl	a3@,d1
+	orl		a3@,d1
 	dbra	d5,c2p4_bcl07
 
 	movepl	d1,a1@(0)
@@ -353,15 +352,15 @@ c2p4_bcl07:
 c2p4_bcl815:
 #if defined(__M68020__)
 	moveb	a0@+,d0
-	lea	a2@(0,d0:w:4),a3
+	lea		a2@(0,d0:w:4),a3
 #else
 	moveq	#0,d0
 	moveb	a0@+,d0
 	lslw	#2,d0
-	lea	a2@(0,d0:w),a3
+	lea		a2@(0,d0:w),a3
 #endif
 	lsll	#1,d1
-	orl	a3@,d1
+	orl		a3@,d1
 	dbra	d5,c2p4_bcl815
 
 	movepl	d1,a1@(0)
@@ -373,7 +372,7 @@ c2p4_bcl815:
 	| Double line ?
 
 	tstl	c2p_dblligne
-	beq	c2p4_nodblligne
+	beqs	c2p4_nodblligne
 
 	movel	a5,a6			| src line
 	movel	a5,a1			| dest line
@@ -409,17 +408,17 @@ _SDL_Atari_C2pConvert4_pal:
 
 	moveml	d2-d3,sp@-
 
-	lea	_SDL_Atari_table_c2p,a1
+	lea		_SDL_Atari_table_c2p,a1
 	movew	#255,d3
 c2p_pal_initbcl:
 	movew	a0@+,d0
 	lsrw	#4,d0
-	and	#15,d0
+	andw	#15,d0
 
 	moveq	#3,d1
 c2p_pal_initbyte:
 	btst	d1,d0
-	sne	d2
+	sne		d2
 	negw	d2
 	moveb	d2,a1@(0,d1:w)
 
@@ -434,15 +433,15 @@ c2p_pal_initbyte:
 
 /* ------------	Buffers ------------ */
 
-	.data
+	.bss
 
 	.even
 	.comm	_SDL_Atari_C2pConvert,4
-	.comm	_SDL_Atari_table_c2p,2048
+	.comm	_SDL_Atari_table_c2p,1024
 
 	.comm	c2p_source,4	/* Source framebuffer */
-	.comm	c2p_dest,4	/* Destination framebuffer */
-	.comm	c2p_width,4	/* Width of zone to convert */
+	.comm	c2p_dest,4		/* Destination framebuffer */
+	.comm	c2p_width,4		/* Width of zone to convert */
 	.comm	c2p_height,4	/* Height of zone to convert */
 	.comm	c2p_dblligne,4	/* Double the lines while converting ? */
 	.comm	c2p_srcpitch,4	/* Source pitch */
@@ -450,4 +449,4 @@ c2p_pal_initbyte:
 	.comm	c2p_cursrc,4	/* Current source line */
 	.comm	c2p_curdst,4	/* Current destination line */
 	.comm	c2p_rowlen,2	/* Line length in bytes */
-	.comm	c2p_row,2	/* Current line number */
+	.comm	c2p_row,2		/* Current line number */
