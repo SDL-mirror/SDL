@@ -822,7 +822,7 @@ static int XBIOS_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors
 				v = colors[i].g;
 				b = colors[i].b;
 					
-				TT_palette[i]=((r>>4)<<8)|((v>>4)<<4)|(b>>4);
+				TT_palette[firstcolor+i]=((r>>4)<<8)|((v>>4)<<4)|(b>>4);
 			}
 #ifndef DEBUG_VIDEO_XBIOS
 			EsetPalette(firstcolor,ncolors,TT_palette);
@@ -835,7 +835,7 @@ static int XBIOS_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors
 				v = colors[i].g;
 				b = colors[i].b;
 
-				F30_palette[i]=(r<<16)|(v<<8)|b;
+				F30_palette[firstcolor+i]=(r<<16)|(v<<8)|b;
 			}
 #ifndef DEBUG_VIDEO_XBIOS
 			VsetRGB(firstcolor,ncolors,F30_palette);
