@@ -129,6 +129,11 @@ SDL_JOYSTICK_ATARI:
 	setting another controller.
 
 	The second joystick port on IKBD is used by the mouse, so not usable.
+	Another problem with the IKBD: mouse buttons and joystick fire buttons
+	are wired together at the hardware level, it means:
+		port 0					port 0				port 1
+		mouse left button	=	joystick fire 0	=	joystick fire 1
+		mouse right button	=	joystick fire 1	=	joystick fire 0
 
 	Descriptions of joysticks/joypads:
 	- Joypads: 1 hat, 17 buttons (Atari Jaguar console-like).
