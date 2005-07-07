@@ -313,6 +313,7 @@ static int do_messages(_THIS, short *message)
 			break;
 		case WM_BOTTOMED:
 		case WM_UNTOPPED:
+			wind_set(message[3],WF_BOTTOM,message[4],0,0,0);
 			SDL_PrivateAppActive(0, SDL_APPINPUTFOCUS);
 			if (VDI_setpalette) {
 				VDI_setpalette(this, VDI_oldpalette);
