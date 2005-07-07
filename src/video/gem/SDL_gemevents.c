@@ -179,12 +179,16 @@ void GEM_PumpEvents(_THIS)
 		/* Mouse entering/leaving window */
 		if (resultat & MU_M1) {
 			if (this->input_grab == SDL_GRAB_OFF) {
-				SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS);
+				if ( !(SDL_GetAppState() & SDL_APPMOUSEFOCUS) ) {
+					SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS);
+				}
 			}
 		}
 		if (resultat & MU_M2) {
 			if (this->input_grab == SDL_GRAB_OFF) {
-				SDL_PrivateAppActive(0, SDL_APPMOUSEFOCUS);
+				if ( (SDL_GetAppState() & SDL_APPMOUSEFOCUS) ) {
+					SDL_PrivateAppActive(0, SDL_APPMOUSEFOCUS);
+				]
 			}
 		}
 
@@ -260,7 +264,7 @@ static int do_messages(_THIS, short *message)
 			/* If we're active, make ourselves inactive */
 			if ( SDL_GetAppState() & SDL_APPACTIVE ) {
 				/* Send an internal deactivate event */
-				SDL_PrivateAppActive(0, SDL_APPACTIVE|SDL_APPINPUTFOCUS);
+				SDL_PrivateAppActive(0, SDL_APPACTIVE);
 			}
 			/* Update window title */
 			if (GEM_refresh_name && GEM_icon_name) {
