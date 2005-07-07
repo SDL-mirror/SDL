@@ -142,21 +142,26 @@ void GEM_PumpEvents(_THIS)
 		short buffer[8], kc;
 		short x2,y2,w2,h2;
 
-		quit = 0;
+		quit =
+			mouse_event =
+			x2=y2=w2=h2 = 0;
 
 		event_mask = MU_MESAG|MU_TIMER|MU_KEYBD;
 		if (!GEM_fullscreen && (GEM_handle>=0)) {
 			wind_get (GEM_handle, WF_WORKXYWH, &x2, &y2, &w2, &h2);
-			event_mask |= MU_M1|MU_M2;
-		} else {
-			x2=y2=w2=h2=0;
+			event_mask |= MU_M1;
+			if ( (SDL_GetAppState() & SDL_APPMOUSEFOCUS) ) {
+				mouse_event = MO_LEAVE;				
+			} else {
+				mouse_event = MO_ENTER;				
+			}
 		}
 
 		resultat = evnt_multi(
 			event_mask,
 			0,0,0,
-			MO_ENTER,x2,y2,w2,h2,
-			MO_LEAVE,x2,y2,w2,h2,
+			mouse_event,x2,y2,w2,h2,
+			0,0,0,0,0,
 			buffer,
 			10,
 			&dummy,&dummy,&dummy,&kstate,&kc,&dummy
@@ -179,16 +184,11 @@ void GEM_PumpEvents(_THIS)
 		/* Mouse entering/leaving window */
 		if (resultat & MU_M1) {
 			if (this->input_grab == SDL_GRAB_OFF) {
-				if ( !(SDL_GetAppState() & SDL_APPMOUSEFOCUS) ) {
+				if (SDL_GetAppState() & SDL_APPMOUSEFOCUS) {
+					SDL_PrivateAppActive(0, SDL_APPMOUSEFOCUS);
+				} else {
 					SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS);
 				}
-			}
-		}
-		if (resultat & MU_M2) {
-			if (this->input_grab == SDL_GRAB_OFF) {
-				if ( (SDL_GetAppState() & SDL_APPMOUSEFOCUS) ) {
-					SDL_PrivateAppActive(0, SDL_APPMOUSEFOCUS);
-				]
 			}
 		}
 
