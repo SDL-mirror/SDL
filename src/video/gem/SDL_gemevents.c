@@ -248,6 +248,8 @@ static int do_messages(_THIS, short *message)
 			break;
 		case WM_TOPPED:
 			wind_set(message[3],WF_TOP,message[4],0,0,0);
+			/* Continue with TOP event processing */
+		case WM_ONTOP:
 			SDL_PrivateAppActive(1, SDL_APPINPUTFOCUS);
 			if (VDI_setpalette) {
 				VDI_setpalette(this, VDI_curpalette);
@@ -312,8 +314,9 @@ static int do_messages(_THIS, short *message)
 			}
 			break;
 		case WM_BOTTOMED:
+			wind_set(message[3],WF_BOTTOM,0,0,0,0);
+			/* Continue with BOTTOM event processing */
 		case WM_UNTOPPED:
-			wind_set(message[3],WF_BOTTOM,message[4],0,0,0);
 			SDL_PrivateAppActive(0, SDL_APPINPUTFOCUS);
 			if (VDI_setpalette) {
 				VDI_setpalette(this, VDI_oldpalette);
