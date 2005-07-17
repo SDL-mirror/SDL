@@ -66,7 +66,7 @@ _SDL_MintAudio_GsxbInterrupt:
 	/* Swap buffers */
 	eorw	#1,_SDL_MintAudio_numbuf
 
-	moveml	d0-d2/a0-a2,sp@-
+	moveml	d0-d7/a0-a6,sp@-
 
 	/* Callback */
 	jsr	_SDL_MintAudio_Callback
@@ -90,7 +90,7 @@ _SDL_MintAudio_GsxbInterrupt:
 	trap	#14
 	lea	sp@(12),sp
 
-	moveml	sp@+,d0-d2/a0-a2
+	moveml	sp@+,d0-d7/a0-a6
 
 	clrw	_SDL_MintAudio_mutex
 _SDL_MintAudio_EmptyGsxbInterrupt:
@@ -125,7 +125,7 @@ _SDL_MintAudio_XbiosInterrupt:
 	/* Swap buffers */
 	eorw	#1,_SDL_MintAudio_numbuf
 
-	moveml	d0-d2/a0-a2,sp@-
+	moveml	d0-d7/a0-a6,sp@-
 
 	/* Callback */
 	jsr	_SDL_MintAudio_Callback
@@ -149,7 +149,7 @@ _SDL_MintAudio_XbiosInterrupt:
 	trap	#14
 	lea	sp@(12),sp
 
-	moveml	sp@+,d0-d2/a0-a2
+	moveml	sp@+,d0-d7/a0-a6
 
 	clrw	_SDL_MintAudio_mutex
 SDL_MintAudio_XbiosEnd:
@@ -173,7 +173,7 @@ _SDL_MintAudio_Dma8Interrupt:
 	/* Swap buffers */
 	eorw	#1,_SDL_MintAudio_numbuf
 
-	moveml	d0-d1/a0-a1,sp@-
+	moveml	d0-d7/a0-a6,sp@-
 
 	/* Callback */
 	jsr	_SDL_MintAudio_Callback
@@ -205,7 +205,7 @@ _SDL_MintAudio_Dma8Interrupt:
 	rorl	#8,d1
 	moveb	d1,a0@(0x0f)
 
-	moveml	sp@+,d0-d1/a0-a1
+	moveml	sp@+,d0-d7/a0-a6
 
 	clrw	_SDL_MintAudio_mutex
 SDL_MintAudio_Dma8End:
@@ -229,7 +229,7 @@ _SDL_MintAudio_StfaInterrupt:
 	/* Swap buffers */
 	eorw	#1,_SDL_MintAudio_numbuf
 
-	moveml	d0-d1/a0-a1,sp@-
+	moveml	d0-d7/a0-a6,sp@-
 
 	/* Callback */
 	jsr	_SDL_MintAudio_Callback
@@ -249,7 +249,7 @@ _SDL_MintAudio_StfaInterrupt:
 	addl	_SDL_MintAudio_audiosize,d1
 	movel	d1,a1@(STFA_SOUND_END)
 
-	moveml	sp@+,d0-d1/a0-a1
+	moveml	sp@+,d0-d7/a0-a6
 
 	clrw	_SDL_MintAudio_mutex
 SDL_MintAudio_StfaEnd:
