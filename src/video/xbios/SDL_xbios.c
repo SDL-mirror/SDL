@@ -681,6 +681,11 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 				Vsetmode(new_video_mode->number);
 			}
 #endif
+			/* Set hardware palette to black in True Colour */
+			if (new_depth == 16) {
+				memset(F30_palette, 0, sizeof(F30_palette));
+				VsetRGB(0,256,F30_palette);
+			}
 			break;
 	}
 
