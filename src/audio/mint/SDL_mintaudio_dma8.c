@@ -100,19 +100,13 @@ static int Audio_Available(void)
 	}
 
 	/* Check if we have 8 bits audio */
-/*
 	if ((cookie_snd & SND_8BIT)==0) {
 		DEBUG_PRINT((DEBUG_NAME "no 8 bits sound\n"));
 	    return(0);
 	}
-*/
-	if ((cookie_mch>>16)>MCH_F30) {
-		DEBUG_PRINT((DEBUG_NAME "unknown 8 bits audio chip\n"));
-		return 0;
-	}
 
 	/* Check if audio is lockable */
-	if ((cookie_mch>>16) == MCH_F30) {
+	if (cookie_snd & SND_16BIT) {
 		if (Locksnd()!=1) {
 			DEBUG_PRINT((DEBUG_NAME "audio locked by other application\n"));
 			return(0);
@@ -247,6 +241,7 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 			masterprediv=MASTERPREDIV_TT;
 			break;
 		case MCH_F30:
+		case MCH_ARANYM:
 			masterclock=MASTERCLOCK_FALCON1;
 			masterprediv=MASTERPREDIV_FALCON;
 			sfreq=1;
@@ -317,6 +312,12 @@ static void Mint_InitAudio(_THIS, SDL_AudioSpec *spec)
 	Jdisint(MFP_DMASOUND);
 	Xbtimer(XB_TIMERA, 8, 1, SDL_MintAudio_Dma8Interrupt);
 	Jenabint(MFP_DMASOUND);
+
+	if (cookie_snd & SND_16BIT) {
+		if (Setinterrupt(SI_TIMERA, SI_PLAY)<0) {
+			DEBUG_PRINT((DEBUG_NAME "Setinterrupt() failed\n"));
+		}
+	}
 
 	/* Go */
 	DMAAUDIO_IO.control = 3;	/* playback + repeat */
