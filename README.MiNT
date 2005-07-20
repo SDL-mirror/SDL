@@ -204,7 +204,7 @@ VBL timer driver:
 
 Audio drivers:
 	Cookies _SND, MCSN, STFA and GSXB used to detect supported audio
-	capabilities.
+	capabilities. Note: XBIOS and MCSN drivers can not be used under MiNT.
 
 	STE, Mega STE, TT:
 		8 bits DMA (hardware access)

@@ -82,7 +82,13 @@ static void Mint_InitAudio(_THIS, SDL_AudioSpec *spec);
 
 static int Audio_Available(void)
 {
+	unsigned long dummy;
 	const char *envr = getenv("SDL_AUDIODRIVER");
+
+	/* We can't use XBIOS in interrupt under MiNT */
+	if (Getcookie(C_MiNT, &dummy) == C_FOUND) {
+		return(0);
+	}
 
 	/* Check if user asked a different audio driver */
 	if ((envr) && (strcmp(envr, MINT_AUDIO_DRIVER_NAME)!=0)) {
