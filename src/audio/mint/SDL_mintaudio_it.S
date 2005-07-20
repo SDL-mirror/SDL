@@ -53,6 +53,9 @@
 	- Then we swap the buffers
 */
 
+#define	savptr	0x4a2
+#define	savamt	0x46
+
 /*--- GSXB interrupt vector ---*/
 
 	.text
@@ -130,6 +133,9 @@ _SDL_MintAudio_XbiosInterrupt:
 	/* Callback */
 	jsr	_SDL_MintAudio_Callback
 
+	/* Reserve space for registers */
+	subl	#savamt,savptr
+
 	/* Set new buffer */
 
 	moveq	#0,d0
@@ -148,6 +154,9 @@ _SDL_MintAudio_XbiosInterrupt:
 	movew	#131,sp@-
 	trap	#14
 	lea	sp@(12),sp
+
+	/* Restore registers space */
+	addl	#savamt,savptr
 
 	moveml	sp@+,d0-d7/a0-a6
 
