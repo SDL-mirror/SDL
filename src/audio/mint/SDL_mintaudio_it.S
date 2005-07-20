@@ -30,8 +30,6 @@
 
 	.globl	_SDL_MintAudio_Callback
 
-	.globl	_SDL_MintAudio_GsxbInterrupt
-	.globl	_SDL_MintAudio_EmptyGsxbInterrupt
 	.globl	_SDL_MintAudio_XbiosInterrupt
 	.globl	_SDL_MintAudio_XbiosInterruptMeasureClock
 	.globl	_SDL_MintAudio_Dma8Interrupt
@@ -55,49 +53,6 @@
 
 #define	savptr	0x4a2
 #define	savamt	0x46
-
-/*--- GSXB interrupt vector ---*/
-
-	.text
-_SDL_MintAudio_GsxbInterrupt:
-
-	/* Check if we are not already running */
-	tstw	_SDL_MintAudio_mutex
-	bnes	_SDL_MintAudio_EmptyGsxbInterrupt
-	notw	_SDL_MintAudio_mutex
-	
-	/* Swap buffers */
-	eorw	#1,_SDL_MintAudio_numbuf
-
-	moveml	d0-d7/a0-a6,sp@-
-
-	/* Callback */
-	jsr	_SDL_MintAudio_Callback
-
-	/* Set new buffer */
-
-	moveq	#0,d0
-	movel	_SDL_MintAudio_audiosize,d1
-
-	movew	_SDL_MintAudio_numbuf,d0
-	lsll	#2,d0
-	lea	_SDL_MintAudio_audiobuf,a0
-	movel	a0@(d0:l),a1
-
-	lea	a1@(d1:l),a2
-
-	movel	a2,sp@-
-	movel	a1,sp@-
-	clrw	sp@-
-	movew	#131,sp@-
-	trap	#14
-	lea	sp@(12),sp
-
-	moveml	sp@+,d0-d7/a0-a6
-
-	clrw	_SDL_MintAudio_mutex
-_SDL_MintAudio_EmptyGsxbInterrupt:
-	rts
 
 /*--- Xbios interrupt vector to measure Falcon external clock ---*/
 

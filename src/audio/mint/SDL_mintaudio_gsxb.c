@@ -77,6 +77,10 @@ static void Mint_UnlockAudio(_THIS);
 static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec);
 static void Mint_InitAudio(_THIS, SDL_AudioSpec *spec);
 
+/* GSXB callbacks */
+static void Mint_GsxbInterrupt(void);
+static void Mint_GsxbNullInterrupt(void);
+
 /*--- Audio driver bootstrap functions ---*/
 
 static int Audio_Available(void)
@@ -180,7 +184,7 @@ static void Mint_CloseAudio(_THIS)
 	Buffoper(0);
 
 	/* Uninstall interrupt */
-	if (NSetinterrupt(2, SI_NONE, SDL_MintAudio_EmptyGsxbInterrupt)<0) {
+	if (NSetinterrupt(2, SI_NONE, Mint_GsxbNullInterrupt)<0) {
 		DEBUG_PRINT((DEBUG_NAME "NSetinterrupt() failed in close\n"));
 	}
 
@@ -342,7 +346,7 @@ static void Mint_InitAudio(_THIS, SDL_AudioSpec *spec)
 	}
 	
 	/* Install interrupt */
-	if (NSetinterrupt(2, SI_PLAY, SDL_MintAudio_GsxbInterrupt)<0) {
+	if (NSetinterrupt(2, SI_PLAY, Mint_GsxbInterrupt)<0) {
 		DEBUG_PRINT((DEBUG_NAME "NSetinterrupt() failed\n"));
 	}
 
@@ -389,4 +393,25 @@ static int Mint_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	Mint_InitAudio(this, spec);
 
     return(1);	/* We don't use threaded audio */
+}
+
+static void Mint_GsxbInterrupt(void)
+{
+	Uint8 *newbuf;
+
+	if (SDL_MintAudio_mutex)
+		return;
+
+	SDL_MintAudio_mutex=1;
+
+	SDL_MintAudio_numbuf ^= 1;
+	SDL_MintAudio_Callback();
+	newbuf = SDL_MintAudio_audiobuf[SDL_MintAudio_numbuf];
+	Setbuffer(0, newbuf, newbuf + SDL_MintAudio_audiosize);
+
+	SDL_MintAudio_mutex=0;
+}
+
+static void Mint_GsxbNullInterrupt(void)
+{
 }
