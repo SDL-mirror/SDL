@@ -428,7 +428,7 @@ static void Mint_InitAudio(_THIS, SDL_AudioSpec *spec)
 		}
 		Devconnect2(DMAPLAY, DAC, CLKEXT, prediv);
 	} else {
-		Devconnect(DMAPLAY, DAC, CLK25M, prediv, 1);
+		Devconnect2(DMAPLAY, DAC, CLK25M, prediv);
 	}
 
 	/* Set buffer */
