@@ -529,7 +529,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 		return(NULL);
 	}
 
-	modeflags = SDL_FULLSCREEN;
+	modeflags = SDL_FULLSCREEN | SDL_PREALLOC;
 
 	/* Allocate needed buffers: simple/double buffer and shadow surface */
 	new_video_mode = XBIOS_videomodes[bpp][mode];

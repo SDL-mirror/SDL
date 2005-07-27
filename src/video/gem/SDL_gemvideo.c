@@ -696,7 +696,7 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 	}
 
 	/*--- Initialize screen ---*/
-	modeflags = 0;
+	modeflags = SDL_PREALLOC;
 	if (VDI_bpp == 8) {
 		modeflags |= SDL_HWPALETTE;
 	}
