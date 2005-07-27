@@ -552,7 +552,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 		XBIOS_shadowscreen = Atari_SysMalloc(new_screen_size, MX_PREFTTRAM);
 
 		if (XBIOS_shadowscreen == NULL) {
-			SDL_SetError("XBIOS_SetVideoMode: Not enough memory for shadow surface");
+			SDL_SetError("Can not allocate %d KB for shadow buffer", new_screen_size>>10);
 			return (NULL);
 		}
 		memset(XBIOS_shadowscreen, 0, new_screen_size);
@@ -569,7 +569,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 
 	if (XBIOS_screensmem[0]==NULL) {
 		XBIOS_FreeBuffers(this);
-		SDL_SetError("XBIOS_SetVideoMode: Not enough memory for video buffer");
+		SDL_SetError("Can not allocate %d KB for frame buffer", new_screen_size>>10);
 		return (NULL);
 	}
 	memset(XBIOS_screensmem[0], 0, new_screen_size);
@@ -590,7 +590,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 
 		if (XBIOS_screensmem[1]==NULL) {
 			XBIOS_FreeBuffers(this);
-			SDL_SetError("XBIOS_SetVideoMode: Not enough memory for double buffer");
+			SDL_SetError("Can not allocate %d KB for double buffer", new_screen_size>>10);
 			return (NULL);
 		}
 		memset(XBIOS_screensmem[1], 0, new_screen_size);

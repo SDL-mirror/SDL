@@ -674,7 +674,7 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 	if (use_shadow1) {
 		GEM_buffer1 = Atari_SysMalloc(screensize, MX_PREFTTRAM);
 		if (GEM_buffer1==NULL) {
-			SDL_SetError("Unable to allocate shadow buffer");
+			SDL_SetError("Can not allocate %d KB for frame buffer", screensize>>10);
 			return NULL;
 		}
 		memset(GEM_buffer1, 0, screensize);
@@ -686,7 +686,7 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 	if (use_shadow2) {
 		GEM_buffer2 = Atari_SysMalloc(screensize, MX_PREFTTRAM);
 		if (GEM_buffer2==NULL) {
-			SDL_SetError("Unable to allocate shadow buffer");
+			SDL_SetError("Can not allocate %d KB for shadow buffer", screensize>>10);
 			return NULL;
 		}
 		memset(GEM_buffer2, 0, screensize);
