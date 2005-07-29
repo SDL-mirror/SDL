@@ -131,9 +131,9 @@ SDL_JOYSTICK_ATARI:
 	The second joystick port on IKBD is used by the mouse, so not usable.
 	Another problem with the IKBD: mouse buttons and joystick fire buttons
 	are wired together at the hardware level, it means:
-		port 0					port 0				port 1
-		mouse left button	=	joystick fire 0	=	joystick fire 1
-		mouse right button	=	joystick fire 1	=	joystick fire 0
+		port 0                port 0           port 1
+		mouse left button  = joystick fire 0 = joystick fire 1
+		mouse right button = joystick fire 1 = joystick fire 0
 
 	Descriptions of joysticks/joypads:
 	- Joypads: 1 hat, 17 buttons (Atari Jaguar console-like).
@@ -204,7 +204,8 @@ VBL timer driver:
 
 Audio drivers:
 	Cookies _SND, MCSN, STFA and GSXB used to detect supported audio
-	capabilities. Note: XBIOS and MCSN drivers can not be used under MiNT.
+	capabilities. Note: XBIOS and MCSN drivers can not be used under MiNT or
+	Magic.
 
 	STE, Mega STE, TT:
 		8 bits DMA (hardware access)

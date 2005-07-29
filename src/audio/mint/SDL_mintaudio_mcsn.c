@@ -90,6 +90,11 @@ static int Audio_Available(void)
 		return(0);
 	}
 
+	/* nor with Magic */
+	if (Getcookie(C_MagX, &dummy) == C_FOUND) {
+		return(0);
+	}
+
 	/* Check if user asked a different audio driver */
 	if ((envr) && (strcmp(envr, MINT_AUDIO_DRIVER_NAME)!=0)) {
 		DEBUG_PRINT((DEBUG_NAME "user asked a different audio driver\n"));
