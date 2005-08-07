@@ -42,6 +42,7 @@ typedef struct {
 	Uint32	frequency;
 	Uint32	masterclock;
 	Uint32	predivisor;
+	int	gpio_bits;	/* in case of external clock */
 } mint_frequency_t;
 
 struct SDL_PrivateAudioData {
@@ -124,7 +125,8 @@ extern unsigned long SDL_MintAudio_clocktics;
 
 /* Functions */
 void SDL_MintAudio_Callback(void);
-void SDL_MintAudio_AddFrequency(_THIS, Uint32 frequency, Uint32 clock, Uint32 prediv);
+void SDL_MintAudio_AddFrequency(_THIS, Uint32 frequency, Uint32 clock,
+	Uint32 prediv, int gpio_bits);
 int SDL_MintAudio_SearchFrequency(_THIS, int desired_freq);
 
 /* ASM interrupt functions */

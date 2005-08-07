@@ -276,7 +276,9 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 	/* Calculate and select the closest frequency */
 	MINTAUDIO_freqcount=0;
 	for (i=1;i<4;i++) {
-		SDL_MintAudio_AddFrequency(this, MASTERCLOCK_44K/(MASTERPREDIV_MILAN*(1<<i)), MASTERCLOCK_44K, (1<<i)-1);
+		SDL_MintAudio_AddFrequency(this,
+			MASTERCLOCK_44K/(MASTERPREDIV_MILAN*(1<<i)), MASTERCLOCK_44K,
+			(1<<i)-1, -1);
 	}
 
 #if 1

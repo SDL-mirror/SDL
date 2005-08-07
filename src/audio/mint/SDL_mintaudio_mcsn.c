@@ -233,7 +233,7 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 		case MCSN_ST:
 			spec->channels=1;
 			spec->format=8; /* FIXME: is it signed or unsigned ? */
-			SDL_MintAudio_AddFrequency(this, 12500, 0, 0);
+			SDL_MintAudio_AddFrequency(this, 12500, 0, 0, -1);
 			break;
 		case MCSN_TT:	/* Also STE, Mega STE */
 			spec->format=AUDIO_S8;
@@ -244,7 +244,8 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 				masterprediv=MASTERPREDIV_TT;
 			}
 			for (i=0; i<4; i++) {
-				SDL_MintAudio_AddFrequency(this, masterclock/(masterprediv*(1<<i)), masterclock, 3-i);
+				SDL_MintAudio_AddFrequency(this, masterclock/(masterprediv*(1<<i)),
+					masterclock, 3-i, -1);
 			}
 			break;
 		case MCSN_FALCON:	/* Also Mac */
@@ -253,11 +254,13 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 				if ((i==6) || (i==8) || (i==10)) {
 					continue;
 				}
-				SDL_MintAudio_AddFrequency(this, MASTERCLOCK_FALCON1/(MASTERPREDIV_FALCON*(i+1)), CLK25M, i+1);
+				SDL_MintAudio_AddFrequency(this, MASTERCLOCK_FALCON1/(MASTERPREDIV_FALCON*(i+1)),
+					CLK25M, i+1, -1);
 			}
 			if (cookie_mcsn->res1 != 0) {
 				for (i=1; i<4; i++) {
-					SDL_MintAudio_AddFrequency(this, (cookie_mcsn->res1)/(MASTERPREDIV_FALCON*(1<<i)), CLKEXT, (1<<i)-1);
+					SDL_MintAudio_AddFrequency(this, (cookie_mcsn->res1)/(MASTERPREDIV_FALCON*(1<<i)),
+						CLKEXT, (1<<i)-1, -1);
 				}
 			}
 			spec->format |= 0x8000;	/* Audio is always signed */

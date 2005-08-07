@@ -76,7 +76,8 @@ void SDL_MintAudio_Callback(void)
 }
 
 /* Add a new frequency/clock/predivisor to the current list */
-void SDL_MintAudio_AddFrequency(_THIS, Uint32 frequency, Uint32 clock, Uint32 prediv)
+void SDL_MintAudio_AddFrequency(_THIS, Uint32 frequency, Uint32 clock,
+	Uint32 prediv, int gpio_bits)
 {
 	int i, p;
 
@@ -94,9 +95,7 @@ void SDL_MintAudio_AddFrequency(_THIS, Uint32 frequency, Uint32 clock, Uint32 pr
 	/* Put all following ones farer */
 	if (MINTAUDIO_freqcount>0) {
 		for (i=MINTAUDIO_freqcount; i>p; i--) {
-			MINTAUDIO_frequencies[i].frequency = MINTAUDIO_frequencies[i-1].frequency;
-			MINTAUDIO_frequencies[i].masterclock = MINTAUDIO_frequencies[i-1].masterclock;
-			MINTAUDIO_frequencies[i].predivisor = MINTAUDIO_frequencies[i-1].predivisor;
+			memcpy(&MINTAUDIO_frequencies[i], &MINTAUDIO_frequencies[i-1], sizeof(mint_frequency_t));
 		}
 	}
 
@@ -104,6 +103,7 @@ void SDL_MintAudio_AddFrequency(_THIS, Uint32 frequency, Uint32 clock, Uint32 pr
 	MINTAUDIO_frequencies[p].frequency = frequency;
 	MINTAUDIO_frequencies[p].masterclock = clock;
 	MINTAUDIO_frequencies[p].predivisor = prediv;
+	MINTAUDIO_frequencies[p].gpio_bits = gpio_bits;
 
 	MINTAUDIO_freqcount++;
 }

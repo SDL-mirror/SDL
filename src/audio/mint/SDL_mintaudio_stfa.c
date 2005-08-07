@@ -213,7 +213,7 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 	/* Check formats available */
 	MINTAUDIO_freqcount=0;
 	for (i=0;i<16;i++) {
-		SDL_MintAudio_AddFrequency(this, freqs[i], 0, i);
+		SDL_MintAudio_AddFrequency(this, freqs[i], 0, i, -1);
 	}
 
 #if 1

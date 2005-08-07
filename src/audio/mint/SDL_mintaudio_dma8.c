@@ -250,7 +250,8 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 	
 	MINTAUDIO_freqcount=0;
 	for (i=sfreq;i<4;i++) {
-		SDL_MintAudio_AddFrequency(this, masterclock/(masterprediv*(1<<i)), masterclock, i-sfreq);
+		SDL_MintAudio_AddFrequency(this, masterclock/(masterprediv*(1<<i)),
+			masterclock, i-sfreq, -1);
 	}
 
 #if 1

@@ -263,31 +263,28 @@ static void Devconnect2(int src, int dst, int sclk, int pre)
 	Super(oldstack);
 }
 
-static Uint32 Mint_CheckExternalClock(void)
+static void Mint_CheckExternalClock(_THIS)
 {
 #define SIZE_BUF_CLOCK_MEASURE (44100/10)
 
 	unsigned long cookie_snd;
-	Uint32 masterclock;
 	char *buffer;
-	int i;
+	int i, j;
 
 	/* DSP present with its GPIO port ? */
 	if (Getcookie(C__SND, &cookie_snd) == C_NOTFOUND) {
-		return 0;
+		return;
 	}
 	if ((cookie_snd & SND_DSP)==0) {
-		return 0;
+		return;
 	}
 
 	buffer = Atari_SysMalloc(SIZE_BUF_CLOCK_MEASURE, MX_STRAM);
 	if (buffer==NULL) {
 		DEBUG_PRINT((DEBUG_NAME "Not enough memory for the measure\n"));
-		return 0;
+		return;
 	}
 	memset(buffer, 0, SIZE_BUF_CLOCK_MEASURE);
-
-	masterclock=0;
 
 	Buffoper(0);
 	Settracks(0,0);
@@ -313,13 +310,13 @@ static Uint32 Mint_CheckExternalClock(void)
 				khz = ((SIZE_BUF_CLOCK_MEASURE/SDL_MintAudio_clocktics) +1) & 0xFFFFFFFE;
 				DEBUG_PRINT((DEBUG_NAME "measure %d: freq=%lu KHz\n", i+1, khz));
 
-				if (i==0) {
-					if(khz==44) {
-						masterclock = MASTERCLOCK_44K;
+				if(khz==44) {
+					for (j=1; j<4; j++) {
+						SDL_MintAudio_AddFrequency(this, MASTERCLOCK_44K/(MASTERPREDIV_FALCON*(1<<j)), MASTERCLOCK_44K, (1<<j)-1, 2+i);
 					}
-				} else {
-					if(khz==48) {
-						masterclock = MASTERCLOCK_48K;
+				} else if (khz==48) {
+					for (j=1; j<4; j++) {
+						SDL_MintAudio_AddFrequency(this, MASTERCLOCK_48K/(MASTERPREDIV_FALCON*(1<<j)), MASTERCLOCK_48K, (1<<j)-1, 2+i);
 					}
 				}
 			} else {
@@ -331,12 +328,9 @@ static Uint32 Mint_CheckExternalClock(void)
 
 		Buffoper(0);             /* stop */
 		Jdisint(MFP_TIMERA);     /* Uninstall interrupt */
-		if (masterclock == 0)
-			break;
 	}
 
 	Mfree(buffer);
-	return masterclock;
 }
 
 static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
@@ -356,22 +350,18 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 		spec->channels=2;	/* 16 bits always stereo */
 	}
 
-	extclock=Mint_CheckExternalClock();
+	MINTAUDIO_freqcount=0;
+
+	/* Add external clocks if present */
+	Mint_CheckExternalClock(this);
 
 	/* Standard clocks */
-	MINTAUDIO_freqcount=0;
 	for (i=1;i<12;i++) {
 		/* Remove unusable Falcon codec predivisors */
 		if ((i==6) || (i==8) || (i==10)) {
 			continue;
 		}
-		SDL_MintAudio_AddFrequency(this, MASTERCLOCK_FALCON1/(MASTERPREDIV_FALCON*(i+1)), MASTERCLOCK_FALCON1, i);
-	}
-
-	if (extclock>0) {
-		for (i=1; i<4; i++) {
-			SDL_MintAudio_AddFrequency(this, extclock/(MASTERPREDIV_FALCON*(1<<i)), extclock, (1<<i)-1);
-		}
+		SDL_MintAudio_AddFrequency(this, MASTERCLOCK_FALCON1/(MASTERPREDIV_FALCON*(i+1)), MASTERCLOCK_FALCON1, i, -1);
 	}
 
 #if 1
@@ -424,14 +414,10 @@ static void Mint_InitAudio(_THIS, SDL_AudioSpec *spec)
 
 	dmaclock = MINTAUDIO_frequencies[MINTAUDIO_numfreq].masterclock;
 	prediv = MINTAUDIO_frequencies[MINTAUDIO_numfreq].predivisor;
-	if (dmaclock != MASTERCLOCK_FALCON1) {
+	if (MINTAUDIO_frequencies[MINTAUDIO_numfreq].gpio_bits != -1) {
 		Gpio(GPIO_SET,7);		/* DSP port gpio outputs */
-		if (dmaclock == MASTERCLOCK_44K) {
-			Gpio(GPIO_WRITE,2);	/* 22.5792 MHz for 44.1KHz */
-		} else {
-			Gpio(GPIO_WRITE,3);	/* 24.576 MHz for 48KHz */
-		}
-		Devconnect2(DMAPLAY, DAC, CLKEXT, prediv);
+		Gpio(GPIO_WRITE, MINTAUDIO_frequencies[MINTAUDIO_numfreq].gpio_bits);
+		Devconnect2(DMAPLAY, DAC|EXTOUT, CLKEXT, prediv);
 	} else {
 		Devconnect2(DMAPLAY, DAC, CLK25M, prediv);
 	}
