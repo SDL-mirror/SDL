@@ -142,7 +142,7 @@ ikbd_finbuffer:
 	.comm	old_ikbd,4*1
 ikbd:
 	| Check if source is IKBD or MIDI
-	btst	#0,0xfffffc00.w
+	btst	#0,0xfffffc04.w
 	beqs	ikbd_oldmidi
 
 	moveml	d0-d1/a0,sp@-
@@ -203,7 +203,7 @@ ikbd_oldmidi:
 ikbd_mousex:
 
 	| Check if source is IKBD or MIDI
-	btst	#0,0xfffffc00.w
+	btst	#0,0xfffffc04.w
 	beqs	ikbd_oldmidi
 
 	movew	d0,sp@-
@@ -222,7 +222,7 @@ ikbd_mousex:
 ikbd_mousey:
 
 	| Check if source is IKBD or MIDI
-	btst	#0,0xfffffc00.w
+	btst	#0,0xfffffc04.w
 	beqs	ikbd_oldmidi
 
 	movew	d0,sp@-
@@ -241,7 +241,7 @@ ikbd_mousey:
 ikbd_joystick:
 
 	| Check if source is IKBD or MIDI
-	btst	#0,0xfffffc00.w
+	btst	#0,0xfffffc04.w
 	beqs	ikbd_oldmidi
 
 	moveb	0xfffffc02:w,_SDL_AtariIkbd_joystick+1
