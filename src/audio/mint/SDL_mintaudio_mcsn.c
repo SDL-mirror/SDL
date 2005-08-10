@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <support.h>
 
 /* Mint includes */
 #include <mint/osbind.h>
@@ -85,12 +86,9 @@ static int Audio_Available(void)
 	unsigned long dummy;
 	const char *envr = getenv("SDL_AUDIODRIVER");
 
-	/* We can't use XBIOS in interrupt under MiNT */
-	if (Getcookie(C_MiNT, &dummy) == C_FOUND) {
-		return(0);
-	}
+	SDL_MintAudio_mint_present = (Getcookie(C_MiNT, &dummy) == C_FOUND);
 
-	/* nor with Magic */
+	/* We can't use XBIOS in interrupt with Magic, don't know about thread */
 	if (Getcookie(C_MagX, &dummy) == C_FOUND) {
 		return(0);
 	}
@@ -197,10 +195,13 @@ static void Mint_UnlockAudio(_THIS)
 static void Mint_CloseAudio(_THIS)
 {
 	/* Stop replay */
+	SDL_MintAudio_WaitThread();
 	Buffoper(0);
 
-	/* Uninstall interrupt */
-	Jdisint(MFP_DMASOUND);
+	if (!SDL_MintAudio_mint_present) {
+		/* Uninstall interrupt */
+		Jdisint(MFP_DMASOUND);
+	}
 
 	/* Wait if currently playing sound */
 	while (SDL_MintAudio_mutex != 0) {
@@ -298,6 +299,9 @@ static void Mint_InitAudio(_THIS, SDL_AudioSpec *spec)
 	void *buffer;
 
 	/* Stop currently playing sound */
+	SDL_MintAudio_quit_thread = SDL_FALSE;
+	SDL_MintAudio_thread_finished = SDL_TRUE;
+	SDL_MintAudio_WaitThread();
 	Buffoper(0);
 
 	/* Set replay tracks */
@@ -339,13 +343,17 @@ static void Mint_InitAudio(_THIS, SDL_AudioSpec *spec)
 		DEBUG_PRINT((DEBUG_NAME "Setbuffer() failed\n"));
 	}
 	
-	/* Install interrupt */
-	Jdisint(MFP_DMASOUND);
-	Xbtimer(XB_TIMERA, 8, 1, SDL_MintAudio_XbiosInterrupt);
-	Jenabint(MFP_DMASOUND);
+	if (SDL_MintAudio_mint_present) {
+		SDL_MintAudio_thread_pid = tfork(SDL_MintAudio_Thread, 0);
+	} else {
+		/* Install interrupt */
+		Jdisint(MFP_DMASOUND);
+		Xbtimer(XB_TIMERA, 8, 1, SDL_MintAudio_XbiosInterrupt);
+		Jenabint(MFP_DMASOUND);
 
-	if (Setinterrupt(SI_TIMERA, SI_PLAY)<0) {
-		DEBUG_PRINT((DEBUG_NAME "Setinterrupt() failed\n"));
+		if (Setinterrupt(SI_TIMERA, SI_PLAY)<0) {
+			DEBUG_PRINT((DEBUG_NAME "Setinterrupt() failed\n"));
+		}
 	}
 
 	/* Go */
@@ -390,5 +398,5 @@ static int Mint_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	/* Setup audio hardware */
 	Mint_InitAudio(this, spec);
 
-    return(1);	/* We don't use threaded audio */
+    return(1);	/* We don't use SDL threaded audio */
 }

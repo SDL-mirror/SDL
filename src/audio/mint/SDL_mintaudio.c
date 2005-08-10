@@ -27,6 +27,11 @@
 */
 
 #include <string.h>
+#include <unistd.h>
+
+#include <mint/osbind.h>
+#include <mint/falcon.h>
+#include <mint/mintbind.h>
 
 #include "SDL_types.h"
 #include "SDL_audio.h"
@@ -43,6 +48,12 @@ unsigned short SDL_MintAudio_numbuf;		/* Buffer to play */
 unsigned short SDL_MintAudio_mutex;
 unsigned long SDL_MintAudio_clocktics;
 cookie_stfa_t	*SDL_MintAudio_stfa;
+
+/* MiNT thread variables */
+SDL_bool SDL_MintAudio_mint_present;
+SDL_bool SDL_MintAudio_quit_thread;
+SDL_bool SDL_MintAudio_thread_finished;
+long SDL_MintAudio_thread_pid;
 
 /* The callback function, called by each driver whenever needed */
 
@@ -128,4 +139,57 @@ int SDL_MintAudio_SearchFrequency(_THIS, int desired_freq)
 
 	/* Not in the array, give the latest */
 	return MINTAUDIO_freqcount-1;
+}
+
+/* The thread function, used under MiNT with xbios */
+int SDL_MintAudio_Thread(long param)
+{
+	SndBufPtr	pointers;
+	SDL_bool	buffers_filled[2] = {SDL_FALSE, SDL_FALSE};
+
+	SDL_MintAudio_thread_finished = SDL_FALSE;
+	while (!SDL_MintAudio_quit_thread) {
+		if (Buffptr(&pointers)!=0)
+			continue;
+
+		if (( (unsigned long)pointers.play>=(unsigned long)SDL_MintAudio_audiobuf[0])
+			&& ( (unsigned long)pointers.play<=(unsigned long)SDL_MintAudio_audiobuf[1])) 
+		{
+			/* DMA is reading buffer #0, setup buffer #1 if not already done */
+			if (!buffers_filled[1]) {
+				SDL_MintAudio_numbuf = 1;
+				SDL_MintAudio_Callback();
+				Setbuffer(0, SDL_MintAudio_audiobuf[1], SDL_MintAudio_audiobuf[1] + SDL_MintAudio_audiosize);
+				buffers_filled[1]=SDL_TRUE;
+				buffers_filled[0]=SDL_FALSE;
+			}
+		} else {
+			/* DMA is reading buffer #1, setup buffer #0 if not already done */
+			if (!buffers_filled[0]) {
+				SDL_MintAudio_numbuf = 0;
+				SDL_MintAudio_Callback();
+				Setbuffer(0, SDL_MintAudio_audiobuf[0], SDL_MintAudio_audiobuf[0] + SDL_MintAudio_audiosize);
+				buffers_filled[0]=SDL_TRUE;
+				buffers_filled[1]=SDL_FALSE;
+			}
+		}
+
+		usleep(1000);
+	}
+	SDL_MintAudio_thread_finished = SDL_TRUE;
+	return 0;
+}
+
+void SDL_MintAudio_WaitThread(void)
+{
+	if (!SDL_MintAudio_mint_present)
+		return;
+
+	if (SDL_MintAudio_thread_finished)
+		return;
+
+	SDL_MintAudio_quit_thread = SDL_TRUE;
+	while (!SDL_MintAudio_thread_finished) {
+		Syield();
+	}
 }

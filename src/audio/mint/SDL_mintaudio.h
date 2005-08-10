@@ -123,11 +123,21 @@ extern unsigned short SDL_MintAudio_mutex;
 extern cookie_stfa_t *SDL_MintAudio_stfa;
 extern unsigned long SDL_MintAudio_clocktics;
 
+/* MiNT thread variables */
+extern SDL_bool	SDL_MintAudio_mint_present;
+extern SDL_bool SDL_MintAudio_quit_thread;
+extern SDL_bool SDL_MintAudio_thread_finished;
+extern long SDL_MintAudio_thread_pid;
+
 /* Functions */
 void SDL_MintAudio_Callback(void);
 void SDL_MintAudio_AddFrequency(_THIS, Uint32 frequency, Uint32 clock,
 	Uint32 prediv, int gpio_bits);
 int SDL_MintAudio_SearchFrequency(_THIS, int desired_freq);
+
+/* MiNT thread functions */
+int SDL_MintAudio_Thread(long param);
+void SDL_MintAudio_WaitThread(void);
 
 /* ASM interrupt functions */
 void SDL_MintAudio_GsxbInterrupt(void);
