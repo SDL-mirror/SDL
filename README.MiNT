@@ -65,12 +65,26 @@ Shared object loader (using LDG library from http://ldg.atari.org/)
 Audio CD (MetaDOS)
 OpenGL (using Mesa offscreen rendering driver)
 
-- Driver combinations:
-Video   Kbd     Mouse   Timer   Joysticks Joypads	OpenGL
-xbios   ikbd    ikbd    vbl(2)  ikbd      hardware	OSMesa
-xbios   gemdos  xbios   vbl(2)  xbios     hardware	OSMesa
-xbios   bios    xbios   vbl(2)  xbios     hardware	OSMesa
-gem     gem     gem(1)  vbl(2)  xbios     hardware	OSMesa
+- Dependent driver combinations:
+Video   Kbd     Mouse   Timer   Joysticks
+xbios   ikbd    ikbd    vbl(2)  ikbd
+xbios   gemdos  xbios   vbl(2)  xbios
+xbios   bios    xbios   vbl(2)  xbios
+gem     gem     gem(1)  vbl(2)  xbios
+
+Audio   O/S     Misc
+dma8    All     Uses MFP Timer A interrupt
+xbios	TOS     Uses MFP Timer A interrupt
+xbios   MiNT    Uses MiNT thread
+xbios   Magic   Disabled
+stfa    All     Uses MFP interrupt
+mcsn	TOS     Uses MFP Timer A interrupt
+mcsn    MiNT    Uses MiNT thread
+mcsn    Magic   Disabled
+gsxb    All     Uses GSXB callback
+
+Joypad driver always uses hardware access.
+OpenGL driver always uses OSMesa.
 
 (1) GEM does not report relative mouse motion, so xbios mouse driver is used
 to report this type event.
@@ -204,8 +218,7 @@ VBL timer driver:
 
 Audio drivers:
 	Cookies _SND, MCSN, STFA and GSXB used to detect supported audio
-	capabilities. Note: XBIOS and MCSN drivers can not be used under MiNT or
-	Magic.
+	capabilities.
 
 	STE, Mega STE, TT:
 		8 bits DMA (hardware access)
