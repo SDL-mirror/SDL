@@ -32,6 +32,7 @@ extern OSErr	CPSSetFrontProcess( CPSProcessSerNum *psn);
 static int    gArgc;
 static char  **gArgv;
 static BOOL   gFinderLaunch;
+static BOOL   gCalledAppMainline = FALSE;
 
 static NSString *getApplicationName(void)
 {
@@ -226,6 +227,52 @@ static void CustomApplicationMain (argc, argv)
 
 #endif
 
+
+/*
+ * Catch document open requests...this lets us notice files when the app
+ *  was launched by double-clicking a document, or when a document was
+ *  dragged/dropped on the app's icon. You need to have a
+ *  CFBundleDocumentsType section in your Info.plist to get this message,
+ *  apparently.
+ *
+ * Files are added to gArgv, so to the app, they'll look like command line
+ *  arguments. Previously, apps launched from the finder had nothing but
+ *  an argv[0].
+ *
+ * This message may be received multiple times to open several docs on launch.
+ *
+ * This message is ignored once the app's mainline has been called.
+ */
+- (BOOL)application:(NSApplication *)theApplication openFile:(NSString *)filename
+{
+    if (gCalledAppMainline)  /* app has started, ignore this document. */
+        return FALSE;
+
+    unsigned buflen = [filename lengthOfBytesUsingEncoding:NSUTF8StringEncoding] + 1;
+    char *arg = (char *) malloc(buflen);
+    if (arg == NULL)
+        return FALSE;
+
+    char **newargv = (char **) realloc(gArgv, sizeof (char *) * (gArgc + 2));
+    if (newargv == NULL)
+    {
+        free(arg);
+        return FALSE;
+    }
+    gArgv = newargv;
+
+    BOOL rc = [filename getCString:arg maxLength:buflen encoding:NSUTF8StringEncoding];
+    if (!rc)
+        free(arg);
+    else
+    {
+        gArgv[gArgc++] = arg;
+        gArgv[gArgc] = NULL;
+    }
+    return rc;
+}
+
+
 /* Called when the internal event loop has just started running */
 - (void) applicationDidFinishLaunching: (NSNotification *) note
 {
@@ -240,6 +287,7 @@ static void CustomApplicationMain (argc, argv)
 #endif
 
     /* Hand off to main application code */
+    gCalledAppMainline = TRUE;
     status = SDL_main (gArgc, gArgv);
 
     /* We're done, thank you for playing */
@@ -300,13 +348,19 @@ int main (int argc, char **argv)
     /* Copy the arguments into a global variable */
     /* This is passed if we are launched by double-clicking */
     if ( argc >= 2 && strncmp (argv[1], "-psn", 4) == 0 ) {
+        gArgv = (char **) malloc(sizeof (char *) * 2);
+        gArgv[0] = argv[0];
+        gArgv[1] = NULL;
         gArgc = 1;
         gFinderLaunch = YES;
     } else {
+        int i;
         gArgc = argc;
+        gArgv = (char **) malloc(sizeof (char *) * (argc+1));
+        for (i = 0; i <= argc; i++)
+            gArgv[i] = argv[i];
         gFinderLaunch = NO;
     }
-    gArgv = argv;
 
 #if SDL_USE_NIB_FILE
     [SDLApplication poseAsClass:[NSApplication class]];
