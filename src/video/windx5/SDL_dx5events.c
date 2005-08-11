@@ -68,6 +68,19 @@ static SDL_keysym *TranslateKey(UINT scancode, SDL_keysym *keysym, int pressed);
    and give him a chance to handle some messages. */
 static WNDPROC userWindowProc = NULL;
 
+static HWND GetTopLevelParent(HWND hWnd)
+{
+    HWND hParentWnd;
+    while (1)
+    {
+        hParentWnd = GetParent(hWnd);
+        if (hParentWnd == NULL)
+            break;
+        hWnd = hParentWnd;
+    }
+    return hWnd;
+}
+
 /* Convert a DirectInput return code to a text message */
 static void SetDIerror(char *function, int code)
 {
@@ -168,7 +181,7 @@ static int DX5_DInputInit(_THIS)
 			SetDIerror("DirectInputDevice::QueryInterface", result);
 			return(-1);
 		}
-		topwnd =  GetAncestor(SDL_Window, GA_ROOT);
+		topwnd =  GetTopLevelParent(SDL_Window, GA_ROOT);
 		result = IDirectInputDevice2_SetCooperativeLevel(SDL_DIdev[i],
 					topwnd, inputs[i].win_level);
 		if ( result != DI_OK ) {
@@ -652,7 +665,7 @@ void DX5_DInputReset(_THIS, int fullscreen)
 				level = inputs[i].win_level;
 			}
 			IDirectInputDevice2_Unacquire(SDL_DIdev[i]);
-			topwnd = GetAncestor(SDL_Window, GA_ROOT);
+			topwnd = GetTopLevelParent(SDL_Window, GA_ROOT);
 			result = IDirectInputDevice2_SetCooperativeLevel(
 					SDL_DIdev[i], topwnd, level);
 			IDirectInputDevice2_Acquire(SDL_DIdev[i]);
