@@ -181,7 +181,7 @@ static int DX5_DInputInit(_THIS)
 			SetDIerror("DirectInputDevice::QueryInterface", result);
 			return(-1);
 		}
-		topwnd =  GetTopLevelParent(SDL_Window, GA_ROOT);
+		topwnd =  GetTopLevelParent(SDL_Window);
 		result = IDirectInputDevice2_SetCooperativeLevel(SDL_DIdev[i],
 					topwnd, inputs[i].win_level);
 		if ( result != DI_OK ) {
@@ -665,7 +665,7 @@ void DX5_DInputReset(_THIS, int fullscreen)
 				level = inputs[i].win_level;
 			}
 			IDirectInputDevice2_Unacquire(SDL_DIdev[i]);
-			topwnd = GetTopLevelParent(SDL_Window, GA_ROOT);
+			topwnd = GetTopLevelParent(SDL_Window);
 			result = IDirectInputDevice2_SetCooperativeLevel(
 					SDL_DIdev[i], topwnd, level);
 			IDirectInputDevice2_Acquire(SDL_DIdev[i]);
