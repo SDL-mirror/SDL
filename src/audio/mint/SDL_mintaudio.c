@@ -174,7 +174,7 @@ int SDL_MintAudio_Thread(long param)
 			}
 		}
 
-		usleep(1000);
+		usleep(100);
 	}
 	SDL_MintAudio_thread_finished = SDL_TRUE;
 	return 0;
