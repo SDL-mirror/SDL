@@ -287,7 +287,7 @@ int SDL_SetTimer(Uint32 ms, SDL_TimerCallback callback)
 		}
 	}
 	if ( SDL_timer_threaded ) {
-		SDL_mutexP(SDL_timer_mutex);
+		SDL_mutexV(SDL_timer_mutex);
 	}
 
 	return retval;
