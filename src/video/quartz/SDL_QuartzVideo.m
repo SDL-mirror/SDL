@@ -95,6 +95,7 @@ static int  QZ_FillHWRect (_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color
 #endif
 static int  QZ_LockHWSurface(_THIS, SDL_Surface *surface);
 static void QZ_UnlockHWSurface(_THIS, SDL_Surface *surface);
+static int QZ_AllocHWSurface(_THIS, SDL_Surface *surface);
 static void QZ_FreeHWSurface (_THIS, SDL_Surface *surface);
 /* static int  QZ_FlipHWSurface (_THIS, SDL_Surface *surface); */
 
@@ -137,6 +138,7 @@ static SDL_VideoDevice* QZ_CreateDevice (int device_index) {
 
     device->LockHWSurface   = QZ_LockHWSurface;
     device->UnlockHWSurface = QZ_UnlockHWSurface;
+    device->AllocHWSurface   = QZ_AllocHWSurface;
     device->FreeHWSurface   = QZ_FreeHWSurface;
     /* device->FlipHWSurface   = QZ_FlipHWSurface */;
 
@@ -1504,6 +1506,10 @@ static int  QZ_LockHWSurface(_THIS, SDL_Surface *surface) {
 
 static void QZ_UnlockHWSurface(_THIS, SDL_Surface *surface) {
 
+}
+
+static int QZ_AllocHWSurface(_THIS, SDL_Surface *surface) {
+    return(-1); /* unallowed (no HWSURFACE support here). */
 }
 
 static void QZ_FreeHWSurface (_THIS, SDL_Surface *surface) {
