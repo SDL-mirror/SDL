@@ -639,6 +639,9 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
     /* Save the flags to ensure correct tear-down */
     mode_flags = current->flags;
 
+    /* we're fullscreen, so flag all input states... */
+    SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS | SDL_APPINPUTFOCUS | SDL_APPACTIVE);
+
     return current;
 
     /* Since the blanking window covers *all* windows (even force quit) correct recovery is crucial */
