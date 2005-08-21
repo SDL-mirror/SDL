@@ -321,6 +321,9 @@ int SDL_KeyboardInit(void)
 	/* Done.  Whew. */
 	return(0);
 }
+void SDL_KeyboardQuit(void)
+{
+}
 
 /* We lost the keyboard, so post key up messages for all pressed keys */
 void SDL_ResetKeyboard(void)

@@ -46,6 +46,9 @@ int SDL_AppActiveInit(void)
 	/* That's it! */
 	return(0);
 }
+void SDL_AppActiveQuit(void)
+{
+}
 
 Uint8 SDL_GetAppState(void)
 {

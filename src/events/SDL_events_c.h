@@ -43,6 +43,12 @@ extern int  SDL_KeyboardInit(void);
 extern int  SDL_MouseInit(void);
 extern int  SDL_QuitInit(void);
 
+/* Event handler quit routines */
+extern void SDL_AppActiveQuit(void);
+extern void SDL_KeyboardQuit(void);
+extern void SDL_MouseQuit(void);
+extern void SDL_QuitQuit(void);
+
 /* The event filter function */
 extern SDL_EventFilter SDL_EventOK;
 

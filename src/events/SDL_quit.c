@@ -54,7 +54,7 @@ int SDL_QuitInit(void)
 	void (*ohandler)(int);
 
 	/* Both SIGINT and SIGTERM are translated into quit interrupts */
-	ohandler = signal(SIGINT,  SDL_HandleSIG);
+	ohandler = signal(SIGINT, SDL_HandleSIG);
 	if ( ohandler != SIG_DFL )
 		signal(SIGINT, ohandler);
 	ohandler = signal(SIGTERM, SDL_HandleSIG);
@@ -64,6 +64,19 @@ int SDL_QuitInit(void)
 
 	/* That's it! */
 	return(0);
+}
+void SDL_QuitQuit(void)
+{
+#ifndef NO_SIGNAL_H
+	void (*ohandler)(int);
+
+	ohandler = signal(SIGINT, SIG_DFL);
+	if ( ohandler != SDL_HandleSIG )
+		signal(SIGINT, ohandler);
+	ohandler = signal(SIGTERM, SIG_DFL);
+	if ( ohandler != SDL_HandleSIG )
+		signal(SIGTERM, ohandler);
+#endif /* NO_SIGNAL_H */
 }
 
 /* This function returns 1 if it's okay to close the application window */

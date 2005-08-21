@@ -58,6 +58,9 @@ int SDL_MouseInit(void)
 	/* That's it! */
 	return(0);
 }
+void SDL_MouseQuit(void)
+{
+}
 
 /* We lost the mouse, so post button up messages for all pressed buttons */
 void SDL_ResetMouse(void)

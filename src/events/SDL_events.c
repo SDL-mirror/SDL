@@ -196,6 +196,12 @@ void SDL_StopEventLoop(void)
 	/* Halt the event thread, if running */
 	SDL_StopEventThread();
 
+	/* Shutdown event handlers */
+	SDL_AppActiveQuit();
+	SDL_KeyboardQuit();
+	SDL_MouseQuit();
+	SDL_QuitQuit();
+
 	/* Clean out EventQ */
 	SDL_EventQ.head = 0;
 	SDL_EventQ.tail = 0;
