@@ -245,6 +245,9 @@ static void CustomApplicationMain (argc, argv)
  */
 - (BOOL)application:(NSApplication *)theApplication openFile:(NSString *)filename
 {
+    if (!gFinderLaunch)  /* MacOS is passing command line args. */
+        return FALSE;
+
     if (gCalledAppMainline)  /* app has started, ignore this document. */
         return FALSE;
 
