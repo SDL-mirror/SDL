@@ -412,7 +412,7 @@ static int SDL_SYS_CDResume(SDL_CD *cdrom)
     
     Lock ();
     
-    if (PauseFile () < 0) {
+    if (PlayFile () < 0) {
         Unlock ();
         return -2;
     }
