@@ -68,8 +68,8 @@ int SDL_OpenAudioPath(char *path, int maxlen, int flags, int classic)
 			struct stat sb;
 
 			/* Added support for /dev/sound/\* in Linux 2.4 */
-			if ( (stat("/dev/sound", &sb) == 0) &&
-			     S_ISDIR(sb.st_mode) ) {
+			if ( ((stat("/dev/sound", &sb) == 0) && S_ISDIR(sb.st_mode)) &&
+				 ((stat(_PATH_DEV_DSP24, &sb) == 0) && S_ISCHR(sb.st_mode)) ) {
 				audiodev = _PATH_DEV_DSP24;
 			} else {
 				audiodev = _PATH_DEV_DSP;
