@@ -549,6 +549,20 @@ CheckNASM()
     fi
 }
 
+dnl Do the iPod thing
+CheckIPod()
+{
+    AC_ARG_ENABLE(ipod,
+[  --enable-ipod          configure SDL to work with iPodLinux [default=yes on arm-elf]],
+	, enable_ipod=yes)
+
+    if test x$enable_ipod = xyes; then
+	CFLAGS="$CFLAGS -DENABLE_IPOD -DIPOD"
+	VIDEO_SUBDIRS="$VIDEO_SUBDIRS ipod"
+	VIDEO_DRIVERS="$VIDEO_DRIVERS ipod/libvideo_ipod.la"
+    fi
+}	
+
 dnl Find the nanox include and library directories
 CheckNANOX()
 {
@@ -1306,7 +1320,7 @@ CheckPTHREAD()
             pthread_lib="-lpthread"
             ;;
     esac
-    if test x$enable_threads = xyes -a x$enable_pthreads = xyes; then
+    if test x$enable_threads = xyes -a x$enable_pthreads = xyes -a x$enable_ipod != xyes; then
         # Save the original compiler flags and libraries
         ac_save_cflags="$CFLAGS"; ac_save_libs="$LIBS"
         # Add the pthread compiler flags and libraries
@@ -1932,6 +1946,15 @@ CheckRPATH()
 }
 
 case "$target" in
+    arm-*-elf*)
+	ARCH=linux
+	CheckDummyVideo
+	CheckIPod
+	# Set up files for the timer library
+        if test x$enable_timers = xyes; then
+            COPY_ARCH_SRC(src/timer, linux, SDL_systimer.c)
+        fi
+	;;
     *-*-linux*|*-*-gnu*|*-*-k*bsd*-gnu)
         case "$target" in
           *-*-linux*) ARCH=linux ;;
@@ -2810,6 +2833,7 @@ AM_CONDITIONAL(TARGET_MACOS, test $ARCH = macos)
 AM_CONDITIONAL(TARGET_MACOSX, test $ARCH = macosx)
 AM_CONDITIONAL(TARGET_QNX, test $ARCH = qnx)
 AM_CONDITIONAL(TARGET_MINT, test $ARCH = mint)
+AM_CONDITIONAL(TARGET_IPOD, test x$enable_ipod = xyes)
 
 # More automake conditionals
 AM_CONDITIONAL(USE_DIRECTX, test x$use_directx = xyes)
@@ -2989,6 +3013,7 @@ src/video/epoc/Makefile
 src/video/fbcon/Makefile
 src/video/gem/Makefile
 src/video/ggi/Makefile
+src/video/ipod/Makefile
 src/video/maccommon/Makefile
 src/video/macdsp/Makefile
 src/video/macrom/Makefile

@@ -74,7 +74,9 @@ void SDL_CursorQuit(void)
 int SDL_CursorInit(Uint32 multithreaded)
 {
 	/* We don't have mouse focus, and the cursor isn't drawn yet */
+#ifndef IPOD
 	SDL_cursorstate = CURSOR_VISIBLE;
+#endif
 
 	/* Create the default cursor */
 	if ( SDL_defcursor == NULL ) {

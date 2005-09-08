@@ -341,6 +341,9 @@ extern VideoBootStrap DGA_bootstrap;
 #ifdef ENABLE_NANOX
 extern VideoBootStrap NX_bootstrap;
 #endif
+#ifdef ENABLE_IPOD
+extern VideoBootStrap iPod_bootstrap;
+#endif
 #ifdef ENABLE_FBCON
 extern VideoBootStrap FBCON_bootstrap;
 #endif

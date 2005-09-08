@@ -181,7 +181,9 @@ static void SDL_StopEventThread(void)
 		SDL_EventThread = NULL;
 		SDL_DestroyMutex(SDL_EventLock.lock);
 	}
+#ifndef IPOD
 	SDL_DestroyMutex(SDL_EventQ.lock);
+#endif
 }
 
 Uint32 SDL_EventThreadID(void)

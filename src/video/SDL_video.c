@@ -57,6 +57,9 @@ static VideoBootStrap *bootstrap[] = {
 #ifdef ENABLE_NANOX
 	&NX_bootstrap,
 #endif
+#ifdef ENABLE_IPOD
+	&iPod_bootstrap,
+#endif
 #ifdef ENABLE_QTOPIA
 	&Qtopia_bootstrap,
 #endif
