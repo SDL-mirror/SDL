@@ -34,6 +34,16 @@ static char rcsid =
 #define SDL_LIL_ENDIAN	1234
 #define SDL_BIG_ENDIAN	4321
 
+#ifdef __linux__
+# include <endian.h>
+# if BYTE_ORDER == LITTLE_ENDIAN
+#  define SDL_BYTEORDER SDL_LIL_ENDIAN
+# else
+#  define SDL_BYTEORDER SDL_BIG_ENDIAN
+# endif
+
+#else
+
 /* Pardon the mess, I'm trying to determine the endianness of this host.
    I'm doing it by preprocessor defines rather than some sort of configure
    script so that application code can use this too.  The "right" way would
@@ -42,7 +52,8 @@ static char rcsid =
 #if (defined(__i386__) || defined(__i386)) || \
      defined(__ia64__) || defined(WIN32) || \
     (defined(__alpha__) || defined(__alpha)) || \
-     defined(__arm__) || \
+    (defined(__arm__) || defined(__thumb__)) || \
+    (defined(__sh__) || defined(__sh64__)) || \
     (defined(__mips__) && defined(__MIPSEL__)) || \
      defined(__SYMBIAN32__) || \
      defined(__x86_64__) || \
@@ -51,5 +62,7 @@ static char rcsid =
 #else
 #define SDL_BYTEORDER	SDL_BIG_ENDIAN
 #endif
+
+#endif /* __linux__ */
 
 #endif /* _SDL_byteorder_h */
