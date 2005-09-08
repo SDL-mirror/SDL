@@ -313,18 +313,8 @@ CheckALSA()
                 CFLAGS="$CFLAGS -DALSA_SUPPORT -DALSA_DYNAMIC=\$(alsa_lib) $ALSA_CFLAGS"
                 AC_SUBST(alsa_lib)
 
-                AC_MSG_CHECKING(for dlvsym)
                 use_dlvsym=no
-                AC_TRY_COMPILE([
-                  #include <stdio.h>
-                  #define __USE_GNU
-                  #include <dlfcn.h>
-                ],[
-                  dlvsym(NULL,"","");
-                ],[
-                use_dlvsym=yes
-                ])
-                AC_MSG_RESULT($use_dlvsym);
+                AC_CHECK_LIB(dl, dlvsym, [use_dlvsym=yes])
                 if test x$use_dlvsym = xyes; then
                     CFLAGS="$CFLAGS -DUSE_DLVSYM"
                 fi
