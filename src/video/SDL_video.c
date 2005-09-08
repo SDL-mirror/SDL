@@ -756,7 +756,7 @@ SDL_Surface * SDL_SetVideoMode (int width, int height, int bpp, Uint32 flags)
     do { \
         video->func = SDL_GL_GetProcAddress(#func); \
         if ( ! video->func ) { \
-            SDL_SetError("Couldn't load GL function: %s\n", #func); \
+            SDL_SetError("Couldn't load GL function %s: %s\n", #func, SDL_GetError()); \
         return(NULL); \
         } \
     } while ( 0 );
