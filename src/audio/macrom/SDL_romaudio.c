@@ -25,7 +25,9 @@ static char rcsid =
  "@(#) $Id$";
 #endif
 
-#if TARGET_API_MAC_CARBON
+#if defined(__APPLE__) && defined(__MACH__)
+#  include <Carbon/Carbon.h>
+#elif TARGET_API_MAC_CARBON && (UNIVERSAL_INTERFACES_VERSION > 0x0335)
 #  include <Carbon.h>
 #else
 #  include <Sound.h> /* SoundManager interface */
@@ -35,6 +37,12 @@ static char rcsid =
 
 #include <stdlib.h>
 #include <stdio.h>
+
+#if !defined(NewSndCallBackUPP) && (UNIVERSAL_INTERFACES_VERSION < 0x0335)
+#if !defined(NewSndCallBackProc) /* avoid circular redefinition... */
+#define NewSndCallBackUPP NewSndCallBackProc
+#endif
+#endif
 
 #include "SDL_endian.h"
 #include "SDL_audio.h"
@@ -229,7 +237,7 @@ static int Mac_OpenAudio(_THIS, SDL_AudioSpec *spec) {
     
     /* initialize bufferCmd header */
     memset (&header, 0, sizeof(header));
-    callback = NewSndCallBackUPP (callBackProc);
+    callback = (SndCallBackUPP) NewSndCallBackUPP (callBackProc);
     sample_bits = spec->size / spec->samples / spec->channels * 8;
 
 #ifdef DEBUG_AUDIO

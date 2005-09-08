@@ -28,7 +28,9 @@ static char rcsid =
 #include <stdlib.h>
 #include <string.h>
 
-#if TARGET_API_MAC_CARBON
+#if defined(__APPLE__) && defined(__MACH__)
+#include <Carbon/Carbon.h>
+#elif TARGET_API_MAC_CARBON && (UNIVERSAL_INTERFACES_VERSION > 0x0335)
 #include <Carbon.h>
 #else
 #include <Windows.h>

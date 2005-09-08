@@ -66,7 +66,7 @@
   System requirements (* denotes optional):
   
   1. DrawSprocket 1.7.3
-  2. *MacOS 9 or later for hardware accelerated blit / fill
+  2. *MacOS 9 or later (but *not* Mac OS X) for hardware accelerated blit / fill
   3. *May also require certain graphics hardware for (2). I trust that all Apple OEM
      hardware will work. Third party accelerators may work if they have QuickDraw
      acceleration in the drivers and the drivers have been updated for OS 9. The current
@@ -130,14 +130,19 @@ static char rcsid =
 #include <stdio.h>
 #include <stdlib.h>
 
-#if TARGET_API_MAC_CARBON
+#if defined(__APPLE__) && defined(__MACH__)
+#include <Carbon/Carbon.h>
+#include <DrawSprocket/DrawSprocket.h>
+#elif TARGET_API_MAC_CARBON && (UNIVERSAL_INTERFACES_VERSION > 0x0335)
 #include <Carbon.h>
+#include <DrawSprocket.h>
 #else
 #include <LowMem.h>
 #include <Gestalt.h>
 #include <Devices.h>
 #include <DiskInit.h>
 #include <QDOffscreen.h>
+#include <DrawSprocket.h>
 #endif
 
 #include "SDL_video.h"
@@ -145,6 +150,7 @@ static char rcsid =
 #include "SDL_error.h"
 #include "SDL_syswm.h"
 #include "SDL_sysvideo.h"
+#include "SDL_pixels_c.h"
 #include "SDL_dspvideo.h"
 #include "SDL_macgl_c.h"
 #include "SDL_macwm_c.h"
@@ -221,8 +227,12 @@ typedef private_hwdata private_swdata ; /* have same fields */
 static int DSp_Available(void)
 {
 	/* Check for DrawSprocket */
+#if ! TARGET_API_MAC_OSX
 	/* This check is only meaningful if you weak-link DrawSprocketLib */  
 	return ((Ptr)DSpStartup != (Ptr)kUnresolvedCFragSymbolAddress);
+#else
+	return 1; // DrawSprocket.framework doesn't have it all, but it's there
+#endif
 }
 
 static void DSp_DeleteDevice(SDL_VideoDevice *device)
@@ -430,6 +440,7 @@ static void DSp_IsHWAvailable (_THIS, SDL_PixelFormat *vformat)
     
     SetRect (&bounds, 0, 0, 320, 240);
     
+#if useDistantHdwrMem && useLocalHdwrMem
     err = NewGWorld (&offscreen, vformat->BitsPerPixel, &bounds, NULL, SDL_Display, useDistantHdwrMem | noNewDevice);
     if (err == noErr) {
       dsp_vram_available = SDL_TRUE;
@@ -441,6 +452,7 @@ static void DSp_IsHWAvailable (_THIS, SDL_PixelFormat *vformat)
       DisposeGWorld (offscreen);
       dsp_agp_available = SDL_TRUE;
     }
+#endif
   }
 }
 
@@ -508,8 +520,9 @@ static int DSp_GetMainDevice (_THIS, GDHandle *device)
 
 static int DSp_VideoInit(_THIS, SDL_PixelFormat *vformat)
 {
+	NumVersion dsp_version;
 	
-	NumVersion dsp_version = DSpGetVersion ();
+	dsp_version = DSpGetVersion ();
 	
 	if (  (dsp_version.majorRev == 1 && dsp_version.minorAndBugRev < 0x73) ||
 	      (dsp_version.majorRev < 1)  ) {                          
@@ -615,16 +628,16 @@ static SDL_Rect **DSp_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
 /* Various screen update functions available */
 static void DSp_DirectUpdate(_THIS, int numrects, SDL_Rect *rects);
 
+#if ! TARGET_API_MAC_OSX
+
 static volatile unsigned int retrace_count = 0; /* -dw- need volatile because it updates asychronously */
 
-#if ! TARGET_API_MAC_OSX
 Boolean DSp_VBLProc ( DSpContextReference context, void *ref_con )
 {
 	retrace_count++;
 	
 	return 1; /* Darrell, is this right? */
 }
-#endif
 
 static void DSp_SetHWError (OSStatus err, int is_agp)
 {
@@ -650,6 +663,7 @@ static void DSp_SetHWError (OSStatus err, int is_agp)
 	sprintf(message, fmt, mem);
 	SDL_SetError(message);
 }
+#endif // TARGET_API_MAC_OSX
 
 /* put up a dialog to verify display change */
 static int DSp_ConfirmSwitch () {
@@ -671,7 +685,11 @@ static int DSp_ConfirmSwitch () {
   if (dialog == NULL)
 	 return (0);
   
-  SetPort (dialog);
+#if TARGET_API_CARBON
+  SetPort (GetDialogPort(dialog));
+#else
+  SetPort ((WindowPtr) dialog);
+#endif
   
   SetDialogDefaultItem (dialog, bCancel);
   SetDialogCancelItem  (dialog, bCancel);
@@ -693,7 +711,8 @@ static int DSp_ConfirmSwitch () {
 
    } while ( item != bCancel && item != bOK && err != noErr);
 
-  DisposeWindow (dialog);
+
+  DisposeDialog (dialog);
   SetPort (savePort);
   
   SetEventMask(everyEvent - autoKeyMask);
@@ -740,9 +759,11 @@ static SDL_Surface *DSp_SetVideoMode(_THIS,
 	SDL_Surface *current, int width, int height, int bpp, Uint32 flags)
 {
 	
-	DisplayIDType        display_id;
-	DSpContextAttributes attrib;
+#if !TARGET_API_MAC_OSX
+    DisplayIDType        display_id;
 	Fixed freq;
+#endif
+	DSpContextAttributes attrib;
 	OSStatus err;
 	UInt32 rmask = 0, gmask = 0, bmask = 0;
 		
@@ -924,7 +945,11 @@ rebuild:
 	   
 	   /* Set window color to black to avoid white flash*/
 	   GetPort (&save_port);
+#if TARGET_API_MAC_CARBON
+		SetPort (GetWindowPort(SDL_Window));
+#else
 	   SetPort (SDL_Window);
+#endif
 	      RGBForeColor (&rgb);
 	      PaintRect    (&rect);	
 	   SetPort (save_port);
@@ -1031,6 +1056,7 @@ static int DSp_NewHWSurface(_THIS, CGrafPtr *port, int depth, int width, int hei
 		
 	SetRect (&bounds, 0, 0, width, height);
    
+ #if useDistantHdwrMem && useLocalHdwrMem
     if (dsp_vram_available) {
 	   /* try VRAM */
    	  err = NewGWorld (port, depth, &bounds, 0 , SDL_Display, useDistantHdwrMem | noNewDevice );
@@ -1049,6 +1075,7 @@ static int DSp_NewHWSurface(_THIS, CGrafPtr *port, int depth, int width, int hei
       else   
          return (0);     
      }  
+#endif
                   
    return (-1);  
 }
@@ -1210,8 +1237,10 @@ static int DSp_FlipHWSurface(_THIS, SDL_Surface *surface)
 		CGrafPtr dsp_front_buffer, save_port;
 		Rect rect;
 		
+    #if ! TARGET_API_MAC_OSX
 		unsigned int old_count;
-		
+	#endif
+    	
 		/* pseudo page flipping for VRAM back buffer*/ 
 		DSpContext_GetFrontBuffer (dsp_context, &dsp_front_buffer);
 		SetRect (&rect, 0, 0, surface->w-1, surface->h-1);  	

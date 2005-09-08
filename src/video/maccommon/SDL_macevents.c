@@ -27,7 +27,9 @@ static char rcsid =
 
 #include <stdio.h>
 
-#if TARGET_API_MAC_CARBON
+#if defined(__APPLE__) && defined(__MACH__)
+#include <Carbon/Carbon.h>
+#elif TARGET_API_MAC_CARBON && (UNIVERSAL_INTERFACES_VERSION > 0x0335)
 #include <Carbon.h>
 #else
 #include <Script.h>
@@ -734,10 +736,12 @@ static void Mac_DoAppleMenu(_THIS, long choice)
 #if !TARGET_API_MAC_CARBON
 /* Since we don't initialize QuickDraw, we need to get a pointer to qd */
 QDGlobals *theQD = NULL;
+#endif
 
 /* Exported to the macmain code */
 void SDL_InitQuickDraw(struct QDGlobals *the_qd)
 {
+#if !TARGET_API_MAC_CARBON
 	theQD = the_qd;
-}
 #endif
+}

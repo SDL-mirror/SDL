@@ -72,7 +72,9 @@ int SDL_SYS_JoystickInit(void)
 {
     static ISpDeviceClass classes[4] = {
         kISpDeviceClass_Joystick,
+    #if kISpDeviceClass_Gamepad
         kISpDeviceClass_Gamepad,
+    #endif
         kISpDeviceClass_Wheel,
         0
     };

@@ -19,7 +19,13 @@ if TARGET_WIN32
 MAINLIB_ARCH_SRCS = win32/SDL_win32_main.c
 else
 if TARGET_MACOSX
+if USE_COCOA
 MAINLIB_ARCH_SRCS = macosx/SDLMain.m macosx/SDLMain.h
+else
+if USE_CARBON
+MAINLIB_ARCH_SRCS = macos/SDL_main.c
+endif # USE_CARBON
+endif # USE_COCOA
 else
 if TARGET_QTOPIA
 MAINLIB_ARCH_SRCS = qtopia/SDL_qtopia_main.cc

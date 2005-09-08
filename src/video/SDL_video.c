@@ -45,6 +45,9 @@ static char rcsid =
 
 /* Available video drivers */
 static VideoBootStrap *bootstrap[] = {
+#ifdef ENABLE_QUARTZ
+	&QZ_bootstrap,
+#endif
 #ifdef ENABLE_X11
 	&X11_bootstrap,
 #endif
@@ -92,9 +95,6 @@ static VideoBootStrap *bootstrap[] = {
 #endif
 #ifdef ENABLE_DRAWSPROCKET
 	&DSp_bootstrap,
-#endif
-#ifdef ENABLE_QUARTZ
-	&QZ_bootstrap,
 #endif
 #ifdef ENABLE_CYBERGRAPHICS
 	&CGX_bootstrap,

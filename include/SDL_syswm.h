@@ -48,13 +48,25 @@ struct SDL_SysWMinfo;
 typedef struct SDL_SysWMinfo SDL_SysWMinfo;
 #else
 
+#if defined(__APPLE__) && defined(__MACH__)
+// conflicts with Quickdraw.h
+#define Cursor X11Cursor
+#endif
+
 /* This is the structure for custom window manager events */
-#if (defined(unix) || defined(__unix__) || defined(_AIX) || defined(__OpenBSD__) || defined(__NetBSD__)) && \
+#if (defined(unix) || defined(__unix__) || defined(_AIX) || \
+         defined(__OpenBSD__) || defined(__NetBSD__) || \
+         (defined(__APPLE__) && defined(__MACH__))) && \
     (!defined(DISABLE_X11) && !defined(__CYGWIN32__) && !defined(ENABLE_NANOX) && \
-     !defined(__QNXNTO__))
+         !defined(__QNXNTO__))
  /* AIX is unix, of course, but the native compiler CSet doesn't define unix */
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
+
+#if defined(__APPLE__) && defined(__MACH__)
+// matches the re-define above
+#undef Cursor
+#endif
 
 /* These are the various supported subsystems under UNIX */
 typedef enum {

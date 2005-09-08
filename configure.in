@@ -742,6 +742,28 @@ CheckX11()
     fi
 }
 
+
+dnl Check for X11 on Mac OS X / Darwin
+CheckMacX11()
+{
+    AC_ARG_ENABLE(video-x11,
+[  --enable-video-x11      use X11 video driver [default=no]],
+                  , enable_video_x11=no)
+    if test x$enable_video = xyes -a x$enable_video_x11 = xyes; then
+        AC_PATH_X
+        AC_PATH_XTRA
+        if test x$have_x = xyes; then
+            CFLAGS="$CFLAGS $X_CFLAGS -DENABLE_X11 -DXTHREADS -I$srcdir/include -I$srcdir/src/video"
+            if test x$ac_cv_func_shmat != xyes; then
+                CFLAGS="$CFLAGS -DNO_SHARED_MEMORY"
+            fi
+            SYSTEM_LIBS="$SYSTEM_LIBS $X_LIBS -lX11 -lXext"
+            VIDEO_SUBDIRS="$VIDEO_SUBDIRS x11"
+            VIDEO_DRIVERS="$VIDEO_DRIVERS x11/libvideo_x11.la"
+        fi
+    fi
+}
+
 dnl Find the X11 DGA 2.0 include and library directories
 CheckDGA()
 {
@@ -1128,7 +1150,9 @@ CheckMacGL()
         CFLAGS="$CFLAGS -DHAVE_OPENGL"
         case "$target" in
             *-*-darwin*)
-                SYSTEM_LIBS="$SYSTEM_LIBS -framework OpenGL -framework AGL"
+                SYSTEM_LIBS="$SYSTEM_LIBS -framework OpenGL"
+                # The following is probably not available in Darwin:
+                SYSTEM_LIBS="$SYSTEM_LIBS -framework AGL"
         esac
     fi
 }
@@ -1635,15 +1659,34 @@ CheckPicoGUI()
 dnl Set up the Mac toolbox video driver for Mac OS 7-9
 CheckTOOLBOX()
 {
+    CFLAGS="$CFLAGS -DENABLE_TOOLBOX -DENABLE_DRAWSPROCKET"
     VIDEO_SUBDIRS="$VIDEO_SUBDIRS maccommon"
     VIDEO_DRIVERS="$VIDEO_DRIVERS maccommon/libvideo_maccommon.la"
     VIDEO_SUBDIRS="$VIDEO_SUBDIRS macrom"
     VIDEO_DRIVERS="$VIDEO_DRIVERS macrom/libvideo_macrom.la"
+    VIDEO_SUBDIRS="$VIDEO_SUBDIRS macdsp"
+    VIDEO_DRIVERS="$VIDEO_DRIVERS macdsp/libvideo_macdsp.la"
 }
 
-dnl Set up the Mac toolbox video driver for Mac OS X
+dnl Set up the Carbon/QuickDraw video driver for Mac OS X (but not Darwin)
 CheckCARBON()
 {
+    AC_ARG_ENABLE(video-carbon,
+[  --enable-video-carbon   use Carbon/QuickDraw video driver [default=no]],
+                  , enable_video_carbon=no)
+  if test x$enable_video = xyes -a x$enable_video_carbon = xyes; then
+    AC_MSG_CHECKING(for Carbon framework)
+    have_carbon=no
+    if test x$have_carbon != xyes; then
+        AC_TRY_COMPILE([
+          #include <Carbon/Carbon.h>
+        ],[
+        ],[
+        have_carbon=yes
+        ])
+    fi
+    AC_MSG_RESULT($have_carbon)
+    if test x$have_carbon = xyes; then
     # "MACOSX" is not an official definition, but it's commonly
     # accepted as a way to differentiate between what runs on X
     # and what runs on older Macs - while in theory "Carbon" defns
@@ -1656,11 +1699,35 @@ CheckCARBON()
     VIDEO_DRIVERS="$VIDEO_DRIVERS maccommon/libvideo_maccommon.la"
     VIDEO_SUBDIRS="$VIDEO_SUBDIRS macrom"
     VIDEO_DRIVERS="$VIDEO_DRIVERS macrom/libvideo_macrom.la"
+    #VIDEO_SUBDIRS="$VIDEO_SUBDIRS macdsp"
+    #VIDEO_DRIVERS="$VIDEO_DRIVERS macdsp/libvideo_macdsp.la"
+    fi
+  fi
 }
 
-dnl Set up the Mac toolbox video driver for Mac OS X
-CheckQUARTZ()
+dnl Set up the Cocoa/Quartz video driver for Mac OS X (but not Darwin)
+CheckCOCOA()
 {
+    AC_ARG_ENABLE(video-cocoa,
+[  --enable-video-cocoa    use Cocoa/Quartz video driver [default=yes]],
+                  , enable_video_cocoa=yes)
+  if test x$enable_video = xyes -a x$enable_video_cocoa = xyes; then
+    old_CFLAGS="$CFLAGS"
+    dnl work around that we don't have Objective-C support in autoconf
+    CFLAGS="$CFLAGS -x objective-c"
+    AC_MSG_CHECKING(for Cocoa framework)
+    have_cocoa=no
+    if test x$have_cocoa != xyes; then
+        AC_TRY_COMPILE([
+          #import <Cocoa/Cocoa.h>
+        ],[
+        ],[
+        have_cocoa=yes
+        ])
+    fi
+    AC_MSG_RESULT($have_cocoa)
+    CFLAGS="$old_CFLAGS"
+    if test x$have_cocoa = xyes; then
     # "MACOSX" is not an official definition, but it's commonly
     # accepted as a way to differentiate between what runs on X
     # and what runs on older Macs - while in theory "Carbon" defns
@@ -1672,6 +1739,8 @@ CheckQUARTZ()
       -DENABLE_QUARTZ -DMACOSX -DTARGET_API_${mac_autoconf_target_workaround}_CARBON=1 -I\$(top_srcdir)/src/video/quartz"
     VIDEO_SUBDIRS="$VIDEO_SUBDIRS quartz"
     VIDEO_DRIVERS="$VIDEO_DRIVERS quartz/libvideo_quartz.la"
+    fi
+  fi
 }
 
 dnl Check for the dlfcn.h interface for dynamically loading objects
@@ -2581,13 +2650,15 @@ case "$target" in
         SDL_LIBS="-lSDLmain $SDL_LIBS"
         ;;
     *-*-darwin* )
-        # Strictly speaking, we want "Mac OS X", not "Darwin", which is
+        # This could be either full "Mac OS X", or plain "Darwin" which is
         # just the OS X kernel sans upper layers like Carbon and Cocoa.
-        # But config.guess comes back with "darwin", so go with the flow.
+        # Next line is broken, and a few files below require Mac OS X (full)
         ARCH=macosx
         CheckDummyVideo
         CheckDiskAudio
-        CheckQUARTZ
+        CheckCOCOA
+        CheckCARBON
+        CheckMacX11
         CheckMacGL
         CheckPTHREAD
         CheckSIGACTION
@@ -2625,8 +2696,16 @@ case "$target" in
         fi
         # The MacOS X platform requires special setup.
         SDL_LIBS="-lSDLmain $SDL_LIBS"
-        # The Cocoa backend still needs Carbon, and the YUV code QuickTime
-        SYSTEM_LIBS="$SYSTEM_LIBS -framework Cocoa -framework Carbon -framework QuickTime"
+        if test x$enable_video_cocoa = xyes; then
+            SYSTEM_LIBS="$SYSTEM_LIBS -framework Cocoa"
+        fi
+        if test x$enable_video_carbon = xyes -o x$enable_video_cocoa = xyes; then
+            # The Cocoa backend still needs Carbon, and the YUV code QuickTime
+            SYSTEM_LIBS="$SYSTEM_LIBS -framework Carbon -framework QuickTime"
+        fi
+        #if test x$enable_video_carbon = xyes; then
+        #    SYSTEM_LIBS="$SYSTEM_LIBS -framework DrawSprocket"
+        #fi
         ;;
     *-*-mint*)
         ARCH=mint
@@ -2746,6 +2825,8 @@ AM_CONDITIONAL(TARGET_MINT, test $ARCH = mint)
 AM_CONDITIONAL(USE_DIRECTX, test x$use_directx = xyes)
 AM_CONDITIONAL(USE_CLONE, test x$use_clone = xyes)
 AM_CONDITIONAL(HAVE_NASM, test x$use_nasm = xyes)
+AM_CONDITIONAL(USE_COCOA, test x$enable_video_cocoa = xyes)
+AM_CONDITIONAL(USE_CARBON, test x$enable_video_carbon = xyes)
 
 # Set conditional variables for shared and static library selection.
 # These are not used in any Makefile.am but in sdl-config.in.
@@ -2773,7 +2854,13 @@ case "$ARCH" in
     SHARED_SYSTEM_LIBS="$SYSTEM_LIBS"
     ;;
   macosx)
-    SHARED_SYSTEM_LIBS="-framework Cocoa"
+    SHARED_SYSTEM_LIBS=""
+    if test x$enable_video = xyes -a x$enable_video_cocoa = xyes; then
+      SHARED_SYSTEM_LIBS="$SHARED_SYSTEM_LIBS -framework Cocoa"
+    fi
+    if test x$enable_video = xyes -a x$enable_video_carbon = xyes; then
+      SHARED_SYSTEM_LIBS="$SHARED_SYSTEM_LIBS -framework Carbon"
+    fi
     if test x$enable_video = xyes -a x$enable_video_opengl = xyes; then
       SHARED_SYSTEM_LIBS="$SHARED_SYSTEM_LIBS -framework OpenGL"
     fi
@@ -2874,6 +2961,7 @@ docs/man3/Makefile
 include/Makefile
 src/Makefile
 src/main/Makefile
+src/main/macos/Makefile
 src/main/macosx/Makefile
 src/main/macosx/Info.plist
 src/audio/Makefile

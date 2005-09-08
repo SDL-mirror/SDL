@@ -28,13 +28,18 @@ static char rcsid =
 #include <stdio.h>
 #include <stdlib.h>
 
-#if TARGET_API_MAC_CARBON
+#if defined(__APPLE__) && defined(__MACH__)
+#include <Carbon/Carbon.h>
+#if USE_QUICKTIME
+#include <QuickTime/Movies.h>
+#endif
+#elif TARGET_API_MAC_CARBON && (UNIVERSAL_INTERFACES_VERSION > 0x0335)
 #include <Carbon.h>
 /* The fullscreen code requires the QuickTime framework, and the window
    is still at the back on MacOS X, which is where this code is needed.
  */
 #if USE_QUICKTIME
-#include <QuickTime/Movies.h>
+#include <Movies.h>
 #endif
 #else
 #include <LowMem.h>

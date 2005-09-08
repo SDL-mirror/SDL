@@ -1,18 +1,16 @@
-%define name @PACKAGE@
-%define version @VERSION@
-%define release 1
-
 Summary: Simple DirectMedia Layer
-Name: %{name}
-Version: %{version}
-Release: %{release}
-Source0: %{name}-%{version}.tar.gz
+Name: @PACKAGE@
+Version: @VERSION@
+Release: 1
+Source: http://www.libsdl.org/release/%{name}-%{version}.tar.gz
 URL: http://www.libsdl.org/
-Copyright: LGPL
+License: LGPL
 Group: System Environment/Libraries
-BuildRoot: /var/tmp/%{name}-buildroot
+BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
 Prefix: %{_prefix}
+%ifos linux
 Provides: libSDL-1.1.so.0
+%endif
 
 %description
 This is the Simple DirectMedia Layer, a generic API that provides low
@@ -22,7 +20,7 @@ multiple platforms.
 %package devel
 Summary: Libraries, includes and more to develop SDL applications.
 Group: Development/Libraries
-Requires: %{name}
+Requires: %{name} = %{version}
 
 %description devel
 This is the Simple DirectMedia Layer, a generic API that provides low
@@ -34,40 +32,62 @@ to develop SDL applications.
 
 
 %prep
-rm -rf ${RPM_BUILD_ROOT}
-
 %setup -q 
 
 %build
+%ifos linux
 CFLAGS="$RPM_OPT_FLAGS" ./configure --prefix=%{prefix} --disable-video-svga --disable-video-ggi --disable-video-aalib --disable-debug --enable-dlopen --enable-esd-shared --enable-arts-shared
+%else
+%configure --disable-debug --enable-dlopen
+%endif
 make
 
 %install
 rm -rf $RPM_BUILD_ROOT
+%ifos linux
 make install prefix=$RPM_BUILD_ROOT/%{prefix}
 ln -s libSDL-1.2.so.0 $RPM_BUILD_ROOT/%{prefix}/lib/libSDL-1.1.so.0
+%else
+%makeinstall
+%endif
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
+%ifnos darwin
+%define __defattr %defattr(-,root,root)
+%define __soext so
+%else
+%define __defattr %defattr(-,root,wheel)
+%define __soext dylib
+%endif
+
 %files
-%defattr(-,root,root)
+%{__defattr}
 %doc README-SDL.txt COPYING CREDITS BUGS
-%{prefix}/lib/lib*.so.*
+%ifnos darwin
+%{_libdir}/lib*.%{__soext}.*
+%else
+%{_libdir}/lib*.*.%{__soext}
+%endif
 
 %files devel
 %defattr(-,root,root)
 %doc README README-SDL.txt COPYING CREDITS BUGS WhatsNew docs.html
 %doc docs/index.html docs/html
-%{prefix}/bin/*-config
-%{prefix}/lib/lib*.a
-%{prefix}/lib/lib*.la
-%{prefix}/lib/lib*.so
-%{prefix}/include/SDL/
-%{prefix}/man/man3/*
-%{prefix}/share/aclocal/*
+%{_bindir}/*-config
+%{_libdir}/lib*.a
+%{_libdir}/lib*.la
+%{_libdir}/lib*.%{__soext}
+%dir %{_includedir}/SDL
+%{_includedir}/SDL/*.h
+%{_mandir}/man3/*
+%{_datadir}/aclocal/*
 
 %changelog
+* Mon Jan 03 2004 Anders Bjorklund <afb@algonet.se>
+- Added support for Darwin, updated spec file
+
 * Wed Jan 19 2000 Sam Lantinga <slouken@libsdl.org>
 - Re-integrated spec file into SDL distribution
 - 'name' and 'version' come from configure 
