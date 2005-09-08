@@ -520,9 +520,11 @@ static int DSp_GetMainDevice (_THIS, GDHandle *device)
 
 static int DSp_VideoInit(_THIS, SDL_PixelFormat *vformat)
 {
-	NumVersion dsp_version;
+	NumVersion dsp_version = { 0x01, 0x00, 0x00, 0x00 };
 	
+#if UNIVERSAL_INTERFACES_VERSION > 0x0320
 	dsp_version = DSpGetVersion ();
+#endif
 	
 	if (  (dsp_version.majorRev == 1 && dsp_version.minorAndBugRev < 0x73) ||
 	      (dsp_version.majorRev < 1)  ) {                          
@@ -801,7 +803,7 @@ rebuild:
 	attrib.colorNeeds           = kDSpColorNeeds_Require;
 	attrib.colorTable           = 0;
 	attrib.pageCount            = page_count;
-        #if TARGET_API_MAC_OSX
+        #if TARGET_API_MAC_OSX || UNIVERSAL_INTERFACES_VERSION == 0x0320
         
         if ( DSpFindBestContext (&attrib, &dsp_context) != noErr ) {
             SDL_SetError ("DrawSprocket couldn't find a context");

@@ -87,7 +87,7 @@ static char *GetJoystickName(int index, const char *szRegKey)
 	unsigned char regvalue[256];
 	unsigned char regname[256];
 
-	sprintf(regkey, "%s\\%s\\%s",
+	sprintf((char *) regkey, "%s\\%s\\%s",
 		REGSTR_PATH_JOYCONFIG,
 		szRegKey,
 		REGSTR_KEY_JOYCURR);
@@ -100,20 +100,20 @@ static char *GetJoystickName(int index, const char *szRegKey)
 			joystick's properties
 		*/
 		regsize = sizeof(regname);
-		sprintf(regvalue,
+		sprintf((char *) regvalue,
 			"Joystick%d%s", index+1,
 			REGSTR_VAL_JOYOEMNAME);
 		regresult = RegQueryValueExA(hKey,
-			regvalue, 0, 0, (LPBYTE) &regname,
+			(char *) regvalue, 0, 0, (LPBYTE) &regname,
 			(LPDWORD) &regsize);
 		RegCloseKey(hKey);
 		if (regresult == ERROR_SUCCESS)
 		{
 			/* open that registry key */
-			sprintf(regkey, "%s\\%s",
+			sprintf((char *) regkey, "%s\\%s",
 				REGSTR_PATH_JOYOEM, regname);
 			regresult = RegOpenKeyExA(HKEY_LOCAL_MACHINE,
-				regkey, 0, KEY_READ, &hKey);
+				(char *) regkey, 0, KEY_READ, &hKey);
 			if (regresult == ERROR_SUCCESS)
 			{
 				/* find the size for the OEM name text */

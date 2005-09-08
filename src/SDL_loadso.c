@@ -37,6 +37,7 @@ static char rcsid =
 # include <be/kernel/image.h>
 #elif defined(macintosh)
 # include <string.h>
+#define OLDP2C 1
 # include <Strings.h>
 # include <CodeFragments.h>
 # include <Errors.h>

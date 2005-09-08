@@ -42,6 +42,9 @@ static char rcsid =
 #if !defined(NewSndCallBackProc) /* avoid circular redefinition... */
 #define NewSndCallBackUPP NewSndCallBackProc
 #endif
+#if !defined(NewSndCallBackUPP)
+#define NewSndCallBackUPP NewSndCallBackProc
+#endif
 #endif
 
 #include "SDL_endian.h"
