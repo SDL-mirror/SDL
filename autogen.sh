@@ -8,9 +8,9 @@ directory=`dirname $0`
 touch $directory/configure.in
 
 # Regenerate configuration files
-aclocal
-automake --foreign --include-deps --add-missing --copy
-autoconf
+aclocal || exit 1
+automake --foreign --include-deps --add-missing --copy || exit 1
+autoconf || exit 1
 (cd test; aclocal; automake --foreign --include-deps --add-missing --copy; autoconf)
 
 # Run configure for this platform
