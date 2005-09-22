@@ -9,9 +9,8 @@ SRCS = \
 	SDL_syscdrom_c.h \
 	SDL_syscdrom.c \
 	AudioFilePlayer.h \
-	AudioFilePlayer.cpp \
-	AudioFileReaderThread.cpp \
-	CAGuard.h \
-	CAGuard.cpp \
+	AudioFilePlayer.c \
+	AudioFileReaderThread.c \
+	SDLOSXCAGuard.c \
 	CDPlayer.h \
-	CDPlayer.cpp
+	CDPlayer.c

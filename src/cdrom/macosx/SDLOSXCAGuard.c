@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2004 Sam Lantinga
+    Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002  Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -21,8 +21,7 @@
 */
 /*  
     Note: This file hasn't been modified so technically we have to keep the disclaimer :-(
-
-
+    
     Copyright:  © Copyright 2002 Apple Computer, Inc. All rights reserved.
 
     Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple Computer, Inc.
@@ -61,83 +60,123 @@
             ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /*=============================================================================
-    CAGuard.h
+    CAGuard.cp
 
 =============================================================================*/
-#if !defined(__CAGuard_h__)
-#define __CAGuard_h__
 
 //=============================================================================
 //  Includes
 //=============================================================================
 
-#include <CoreAudio/CoreAudioTypes.h>
-#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+//#define NDEBUG 1
+#include <assert.h>
 
 
+#include "SDLOSXCAGuard.h"
+
+//#warning      Need a try-based Locker too
 //=============================================================================
-//  CAGuard
-//
-//  This is your typical mutex with signalling implemented via pthreads.
-//  Lock() will return true if and only if the guard is locked on that call.
-//  A thread that already has the guard will receive 'false' if it locks it
-//  again. Use of the stack-based CAGuard::Locker class is highly recommended
-//  to properly manage the recursive nesting. The Wait calls with timeouts
-//  will return true if and only if the timeout period expired. They will
-//  return false if they receive notification any other way.
+//  SDLOSXCAGuard
 //=============================================================================
 
-class   CAGuard
+static int SDLOSXCAGuard_Lock(SDLOSXCAGuard *cag)
 {
-
-//  Construction/Destruction
-public:
-                    CAGuard();
-    virtual         ~CAGuard();
-
-//  Actions
-public:
-    virtual bool    Lock();
-    virtual void    Unlock();
-    virtual bool    Try(bool& outWasLocked);    // returns true if lock is free, false if not
-        
-    virtual void    Wait();
+    int theAnswer = 0;
     
-    virtual void    Notify();
-
-//  Implementation
-protected:
-    pthread_mutex_t mMutex;
-    pthread_cond_t  mCondVar;
-    pthread_t       mOwner;
-    
-//  Helper class to manage taking and releasing recursively
-public:
-    class           Locker
+    if(pthread_self() != cag->mOwner)
     {
-    
-    //  Construction/Destruction
-    public:
-                    Locker(CAGuard& inGuard) : mGuard(inGuard), mNeedsRelease(false) { mNeedsRelease = mGuard.Lock(); }
-                    ~Locker() { if(mNeedsRelease) { mGuard.Unlock(); } }
-    
-    private:
-                    Locker(const Locker&);
-        Locker&     operator=(const Locker&);
-    
-    //  Actions
-    public:
-        void        Wait() { mGuard.Wait(); }
-        
-        void        Notify() { mGuard.Notify(); }
+        OSStatus theError = pthread_mutex_lock(&cag->mMutex);
+        assert(theError == 0);
+        cag->mOwner = pthread_self();
+        theAnswer = 1;
+    }
 
-    //  Implementation
-    private:
-        CAGuard&    mGuard;
-        bool        mNeedsRelease;
+    return theAnswer;
+}
+
+static void    SDLOSXCAGuard_Unlock(SDLOSXCAGuard *cag)
+{
+    assert(pthread_self() == cag->mOwner);
+
+    cag->mOwner = 0;
+    OSStatus theError = pthread_mutex_unlock(&cag->mMutex);
+    assert(theError == 0);
+}
+
+static int SDLOSXCAGuard_Try (SDLOSXCAGuard *cag, int *outWasLocked)
+{
+    int theAnswer = 0;
+    *outWasLocked = 0;
     
-    };
+    if (pthread_self() == cag->mOwner) {
+        theAnswer = 1;
+        *outWasLocked = 0;
+    } else {
+        OSStatus theError = pthread_mutex_trylock(&cag->mMutex);
+        if (theError == 0) {
+            cag->mOwner = pthread_self();
+            theAnswer = 1;
+            *outWasLocked = 1;
+        }
+    }
+    
+    return theAnswer;
+}
 
-};
+static void    SDLOSXCAGuard_Wait(SDLOSXCAGuard *cag)
+{
+    assert(pthread_self() == cag->mOwner);
 
-#endif
+    cag->mOwner = 0;
+
+    OSStatus theError = pthread_cond_wait(&cag->mCondVar, &cag->mMutex);
+    assert(theError == 0);
+    cag->mOwner = pthread_self();
+}
+
+static void    SDLOSXCAGuard_Notify(SDLOSXCAGuard *cag)
+{
+    OSStatus theError = pthread_cond_signal(&cag->mCondVar);
+    assert(theError == 0);
+}
+
+
+SDLOSXCAGuard *new_SDLOSXCAGuard(void)
+{
+    SDLOSXCAGuard *cag = (SDLOSXCAGuard *) malloc(sizeof (SDLOSXCAGuard));
+    if (cag == NULL)
+        return NULL;
+    memset(cag, '\0', sizeof (*cag));
+
+    #define SET_SDLOSXCAGUARD_METHOD(m) cag->m = SDLOSXCAGuard_##m
+    SET_SDLOSXCAGUARD_METHOD(Lock);
+    SET_SDLOSXCAGUARD_METHOD(Unlock);
+    SET_SDLOSXCAGUARD_METHOD(Try);
+    SET_SDLOSXCAGUARD_METHOD(Wait);
+    SET_SDLOSXCAGUARD_METHOD(Notify);
+    #undef SET_SDLOSXCAGUARD_METHOD
+
+    OSStatus theError = pthread_mutex_init(&cag->mMutex, NULL);
+    assert(theError == 0);
+    
+    theError = pthread_cond_init(&cag->mCondVar, NULL);
+    assert(theError == 0);
+    
+    cag->mOwner = 0;
+    return cag;
+}
+
+void delete_SDLOSXCAGuard(SDLOSXCAGuard *cag)
+{
+    if (cag != NULL)
+    {
+        pthread_mutex_destroy(&cag->mMutex);
+        pthread_cond_destroy(&cag->mCondVar);
+        free(cag);
+    }
+}
+

@@ -22,10 +22,10 @@
 
 #include "CDPlayer.h"
 #include "AudioFilePlayer.h"
-#include "CAGuard.h"
+#include "SDLOSXCAGuard.h"
 
 // we're exporting these functions into C land for SDL_syscdrom.c
-extern "C" {
+//extern "C" {
 
 //ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
 //  Constants
@@ -52,7 +52,7 @@ extern "C" {
 
 #pragma mark -- Globals --
 
-static bool             playBackWasInit = false;
+static int             playBackWasInit = 0;
 static AudioUnit        theUnit;
 static AudioFilePlayer* thePlayer = NULL;
 static CDPlayerCompletionProc   completionProc = NULL;
@@ -411,38 +411,40 @@ int LoadFile (const FSRef *ref, int startFrame, int stopFrame)
     printf ("LoadFile: %d %d\n", startFrame, stopFrame);
     #endif
     
-    try {
+    //try {
     
         // create a new player, and attach to the audio unit
         
-        thePlayer = new AudioFilePlayer(ref);
+        thePlayer = new_AudioFilePlayer(ref);
         if (thePlayer == NULL) {
             SDL_SetError ("LoadFile: Could not create player");
-            throw (-3);
+            return -3; //throw (-3);
         }
             
-        thePlayer->SetDestination(theUnit);
+        if (!thePlayer->SetDestination(thePlayer, &theUnit))
+            goto bail;
         
         if (startFrame >= 0)
-            thePlayer->SetStartFrame (startFrame);
+            thePlayer->SetStartFrame (thePlayer, startFrame);
         
         if (stopFrame >= 0 && stopFrame > startFrame)
-            thePlayer->SetStopFrame (stopFrame);
+            thePlayer->SetStopFrame (thePlayer, stopFrame);
         
         // we set the notifier later
-        //thePlayer->SetNotifier(FilePlayNotificationHandler, NULL);
+        //thePlayer->SetNotifier(thePlayer, FilePlayNotificationHandler, NULL);
             
-        thePlayer->Connect();
+        if (!thePlayer->Connect(thePlayer))
+            goto bail;
     
         #if DEBUG_CDROM
-        thePlayer->Print();
+        thePlayer->Print(thePlayer);
         fflush (stdout);
         #endif
-    }
-    catch (...)
-    {
-        goto bail;
-    }
+    //}
+    //catch (...)
+    //{
+    //    goto bail;
+    //}
         
     error = 0;
 
@@ -458,24 +460,25 @@ int ReleaseFile ()
 {
     int error = -1;
         
-    try {
+    // (Don't see any way that the original C++ code could throw here.) --ryan.
+    //try {
         if (thePlayer != NULL) {
             
-            thePlayer->Disconnect();
+            thePlayer->Disconnect(thePlayer);
             
-            delete thePlayer;
+            delete_AudioFilePlayer(thePlayer);
             
             thePlayer = NULL;
         }
-    }
-    catch (...)
-    {
-        goto bail;
-    }
+    //}
+    //catch (...)
+    //{
+    //    goto bail;
+    //}
     
     error = 0;
     
-  bail:
+//  bail:
     return error;
 }
 
@@ -490,17 +493,17 @@ int PlayFile ()
     if (CheckInit () < 0)
         goto bail;
         
-    try {
+//    try {
     
         // start processing of the audio unit
         result = AudioOutputUnitStart (theUnit);
-            THROW_RESULT("PlayFile: AudioOutputUnitStart")    
+            if (result) goto bail; //THROW_RESULT("PlayFile: AudioOutputUnitStart")
         
-    }
-    catch (...)
-    {
-        goto bail;
-    }
+//    }
+//    catch (...)
+//    {
+//        goto bail;
+//    }
     
     result = 0;
     
@@ -519,16 +522,16 @@ int PauseFile ()
     if (CheckInit () < 0)
         goto bail;
             
-    try {
+    //try {
     
         // stop processing the audio unit
         result = AudioOutputUnitStop (theUnit);
-            THROW_RESULT("PauseFile: AudioOutputUnitStop")
-    }
-    catch (...)
-    {
-        goto bail;
-    }
+            if (result) goto bail;  //THROW_RESULT("PauseFile: AudioOutputUnitStop")
+    //}
+    //catch (...)
+    //{
+    //    goto bail;
+    //}
     
     result = 0;
 bail:
@@ -545,7 +548,7 @@ void SetCompletionProc (CDPlayerCompletionProc proc, SDL_CD *cdrom)
 
     theCDROM = cdrom;
     completionProc = proc;
-    thePlayer->SetNotifier (FilePlayNotificationHandler, cdrom);
+    thePlayer->SetNotifier (thePlayer, FilePlayNotificationHandler, cdrom);
 }
 
 //ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
@@ -559,7 +562,7 @@ int GetCurrentFrame ()
     if (thePlayer == NULL)
         frame = 0;
     else
-        frame = thePlayer->GetCurrentFrame ();
+        frame = thePlayer->GetCurrentFrame (thePlayer);
         
     return frame; 
 }
@@ -580,7 +583,7 @@ static OSStatus CheckInit ()
     // Start callback thread
     SDL_CreateThread(RunCallBackThread, NULL);
 
-    try {
+    { //try {
         ComponentDescription desc;
     
         desc.componentType = kAudioUnitComponentType;
@@ -592,23 +595,23 @@ static OSStatus CheckInit ()
         Component comp = FindNextComponent (NULL, &desc);
         if (comp == NULL) {
             SDL_SetError ("CheckInit: FindNextComponent returned NULL");
-            throw(internalComponentErr);
+            if (result) return -1; //throw(internalComponentErr);
         }
         
         result = OpenAComponent (comp, &theUnit);
-            THROW_RESULT("CheckInit: OpenAComponent")
+            if (result) return -1; //THROW_RESULT("CheckInit: OpenAComponent")
                     
         // you need to initialize the output unit before you set it as a destination
         result = AudioUnitInitialize (theUnit);
-            THROW_RESULT("CheckInit: AudioUnitInitialize")
+            if (result) return -1; //THROW_RESULT("CheckInit: AudioUnitInitialize")
         
                     
         playBackWasInit = true;
     }
-    catch (...)
-    {
-        return -1;
-    }
+    //catch (...)
+    //{
+    //    return -1;
+    //}
     
     return 0;
 }
@@ -657,4 +660,4 @@ static int RunCallBackThread (void *param)
     return 0;
 }
 
-}; // extern "C"
+//}; // extern "C"

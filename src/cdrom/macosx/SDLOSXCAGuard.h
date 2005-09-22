@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002  Sam Lantinga
+    Copyright (C) 1997-2004 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -21,7 +21,8 @@
 */
 /*  
     Note: This file hasn't been modified so technically we have to keep the disclaimer :-(
-    
+
+
     Copyright:  © Copyright 2002 Apple Computer, Inc. All rights reserved.
 
     Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple Computer, Inc.
@@ -60,101 +61,54 @@
             ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 /*=============================================================================
-    CAGuard.cp
+    CAGuard.h
 
 =============================================================================*/
+#if !defined(__CAGuard_h__)
+#define __CAGuard_h__
 
 //=============================================================================
 //  Includes
 //=============================================================================
 
-#include <stdio.h>
-
-//#define NDEBUG 1
-#include <assert.h>
+#include <CoreAudio/CoreAudioTypes.h>
+#include <pthread.h>
 
 
-#include "CAGuard.h"
-
-//#warning      Need a try-based Locker too
 //=============================================================================
 //  CAGuard
+//
+//  This is your typical mutex with signalling implemented via pthreads.
+//  Lock() will return true if and only if the guard is locked on that call.
+//  A thread that already has the guard will receive 'false' if it locks it
+//  again. Use of the stack-based CAGuard::Locker class is highly recommended
+//  to properly manage the recursive nesting. The Wait calls with timeouts
+//  will return true if and only if the timeout period expired. They will
+//  return false if they receive notification any other way.
 //=============================================================================
 
-CAGuard::CAGuard()
+typedef struct S_SDLOSXCAGuard
 {
-    OSStatus theError = pthread_mutex_init(&mMutex, NULL);
-    assert(theError == 0);
-    
-    theError = pthread_cond_init(&mCondVar, NULL);
-    assert(theError == 0);
-    
-    mOwner = 0;
-}
 
-CAGuard::~CAGuard()
-{
-    pthread_mutex_destroy(&mMutex);
-    pthread_cond_destroy(&mCondVar);
-}
+//  Construction/Destruction
+//public:
+//  Actions
+//public:
+    int     (*Lock)(struct S_SDLOSXCAGuard *cag);
+    void    (*Unlock)(struct S_SDLOSXCAGuard *cag);
+    int     (*Try)(struct S_SDLOSXCAGuard *cag, int *outWasLocked);    // returns true if lock is free, false if not
+    void    (*Wait)(struct S_SDLOSXCAGuard *cag);
+    void    (*Notify)(struct S_SDLOSXCAGuard *cag);
 
-bool    CAGuard::Lock()
-{
-    bool theAnswer = false;
-    
-    if(pthread_self() != mOwner)
-    {
-        OSStatus theError = pthread_mutex_lock(&mMutex);
-        assert(theError == 0);
-        mOwner = pthread_self();
-        theAnswer = true;
-    }
+//  Implementation
+//protected:
+    pthread_mutex_t mMutex;
+    pthread_cond_t  mCondVar;
+    pthread_t       mOwner;
+} SDLOSXCAGuard;
 
-    return theAnswer;
-}
+SDLOSXCAGuard *new_SDLOSXCAGuard(void);
+void delete_SDLOSXCAGuard(SDLOSXCAGuard *cag);
 
-void    CAGuard::Unlock()
-{
-    assert(pthread_self() == mOwner);
+#endif
 
-    mOwner = 0;
-    OSStatus theError = pthread_mutex_unlock(&mMutex);
-    assert(theError == 0);
-}
-
-bool    CAGuard::Try (bool& outWasLocked)
-{
-    bool theAnswer = false;
-    outWasLocked = false;
-    
-    if (pthread_self() == mOwner) {
-        theAnswer = true;
-        outWasLocked = false;
-    } else {
-        OSStatus theError = pthread_mutex_trylock(&mMutex);
-        if (theError == 0) {
-            mOwner = pthread_self();
-            theAnswer = true;
-            outWasLocked = true;
-        }
-    }
-    
-    return theAnswer;
-}
-
-void    CAGuard::Wait()
-{
-    assert(pthread_self() == mOwner);
-
-    mOwner = 0;
-
-    OSStatus theError = pthread_cond_wait(&mCondVar, &mMutex);
-    assert(theError == 0);
-    mOwner = pthread_self();
-}
-
-void    CAGuard::Notify()
-{
-    OSStatus theError = pthread_cond_signal(&mCondVar);
-    assert(theError == 0);
-}
