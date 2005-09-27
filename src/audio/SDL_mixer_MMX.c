@@ -121,7 +121,7 @@ void SDL_MixAudio_MMX_S8(char* dst,char* src,unsigned int size,int volume)
 
 "	movl %3,%%eax\n"	// eax = volume
 
-"	movd %%edx,%%mm0\n"
+"	movd %%eax,%%mm0\n"
 "	movq %%mm0,%%mm1\n"
 "	psllq $16,%%mm0\n"
 "	por %%mm1,%%mm0\n"
