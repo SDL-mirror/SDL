@@ -90,6 +90,12 @@ int SDL_SemWaitTimeout(SDL_sem *sem, Uint32 timeout)
 	    case B_NO_ERROR:
 		retval = 0;
 		break;
+	    case B_TIMED_OUT:
+		retval = SDL_MUTEX_TIMEDOUT;
+		break;
+	    case B_WOULD_BLOCK:
+		retval = SDL_MUTEX_TIMEDOUT;
+		break;
 	    default:
 		SDL_SetError("acquire_sem() failed");
 		retval = -1;
