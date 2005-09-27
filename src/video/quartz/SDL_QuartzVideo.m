@@ -450,7 +450,7 @@ static void QZ_UnsetVideoMode (_THIS) {
         gamma_error = QZ_FadeGammaOut (this, &gamma_table);
 
         /*  Release double buffer stuff */
-        if ( mode_flags & (SDL_HWSURFACE|SDL_DOUBLEBUF)) {
+        if ( mode_flags & SDL_DOUBLEBUF) {
             quit_thread = YES;
             SDL_SemPost (sem1);
             SDL_WaitThread (thread, NULL);
