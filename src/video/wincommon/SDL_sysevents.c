@@ -562,11 +562,6 @@ void *SDL_GetModuleHandle(void)
 	if ( SDL_handle ) {
 		handle = SDL_handle;
 	} else {
-		/* Warning:
-		   If SDL is built as a DLL, this will return a handle to
-		   the DLL, not the application, and DirectInput may fail
-		   to initialize.
-		 */
 		handle = GetModuleHandle(NULL);
 	}
 	return(handle);
@@ -575,17 +570,18 @@ void *SDL_GetModuleHandle(void)
 /* This allows the SDL_WINDOWID hack */
 const char *SDL_windowid = NULL;
 
+static int app_registered = 0;
+
 /* Register the class for this application -- exported for winmain.c */
 int SDL_RegisterApp(char *name, Uint32 style, void *hInst)
 {
-	static int initialized = 0;
 	WNDCLASS class;
 #ifdef WM_MOUSELEAVE
 	HMODULE handle;
 #endif
 
 	/* Only do this once... */
-	if ( initialized ) {
+	if ( app_registered ) {
 		return(0);
 	}
 
@@ -646,7 +642,26 @@ int SDL_RegisterApp(char *name, Uint32 style, void *hInst)
 	/* Check for SDL_WINDOWID hack */
 	SDL_windowid = getenv("SDL_WINDOWID");
 
-	initialized = 1;
+	app_registered = 1;
 	return(0);
+}
+
+/*
+ * Unregisters the windowclass registered in SDL_RegisterApp above.
+ *  Called from DIB_VideoQuit and DX5_VideoQuit when
+ *  SDL_QuitSubSystem(INIT_VIDEO) is called.
+ */
+void SDL_UnRegisterApp()
+{
+	WNDCLASS class;
+
+	/* SDL_RegisterApp might not have been called before */
+	if (app_registered) {
+		/* Check for any registered windowclasses. */
+		if (GetClassInfo(SDL_Instance, SDL_Appname, &class)) {
+			UnregisterClass(SDL_Appname, SDL_Instance);
+		}
+	}
+	app_registered = 0;
 }
 

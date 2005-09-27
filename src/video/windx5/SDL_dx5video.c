@@ -2387,6 +2387,7 @@ void DX5_VideoQuit(_THIS)
 	DIB_QuitGamma(this);
 	if ( SDL_Window ) {
 		DX5_DestroyWindow(this);
+		SDL_UnregisterApp();
 		FlushMessageQueue();
 	}
 

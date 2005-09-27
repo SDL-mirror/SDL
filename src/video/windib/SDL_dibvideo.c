@@ -971,6 +971,7 @@ void DIB_VideoQuit(_THIS)
 		}
 		DIB_QuitGamma(this);
 		DIB_DestroyWindow(this);
+		SDL_UnregisterApp();
 		FlushMessageQueue();
 
 		SDL_Window = NULL;

@@ -69,7 +69,8 @@ extern "C" {
 extern DECLSPEC void SDLCALL SDL_SetModuleHandle(void *hInst);
 /* This can also be called, but is no longer necessary */
 extern DECLSPEC int SDLCALL SDL_RegisterApp(char *name, Uint32 style, void *hInst);
-
+/* This can also be called, but is no longer necessary (SDL_Quit calls it) */
+extern DECLSPEC void SDLCALL SDL_UnregisterApp();
 #ifdef __cplusplus
 }
 #endif
