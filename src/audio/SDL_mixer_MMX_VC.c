@@ -107,7 +107,7 @@ void SDL_MixAudio_MMX_S8_VC(char* dst,char* src,unsigned int nSize,int volume)
 		mov		esi, src	//%1,%%esi	// esi = src
 		mov		eax, volume	//%3,%%eax	// eax = volume
 
-		movd	mm0, ebx	//%%ebx,%%mm0
+		movd	mm0, eax	//%%eax,%%mm0
 		movq	mm1, mm0	//%%mm0,%%mm1
 		psllq	mm0, 16		//$16,%%mm0
 		por		mm0, mm1	//%%mm1,%%mm0
