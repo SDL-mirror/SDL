@@ -651,7 +651,7 @@ int SDL_RegisterApp(char *name, Uint32 style, void *hInst)
  *  Called from DIB_VideoQuit and DX5_VideoQuit when
  *  SDL_QuitSubSystem(INIT_VIDEO) is called.
  */
-void SDL_UnRegisterApp()
+void SDL_UnregisterApp()
 {
 	WNDCLASS class;
 
