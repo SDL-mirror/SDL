@@ -13,6 +13,13 @@ static int visible = 1;
 static Uint8  video_bpp;
 static Uint32 video_flags;
 
+/* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
+static void quit(int rc)
+{
+	SDL_Quit();
+	exit(rc);
+}
+
 int SetVideoMode(int w, int h)
 {
 	SDL_Surface *screen;
@@ -264,9 +271,8 @@ int main(int argc, char *argv[])
 	if ( SDL_Init(SDL_INIT_VIDEO) < 0 ) {
 		fprintf(stderr,
 			"Couldn't initialize SDL: %s\n", SDL_GetError());
-		exit(1);
+		return(1);
 	}
-	atexit(SDL_Quit);
 
 	/* Check command line arguments */
 	w = 640;
@@ -333,7 +339,7 @@ int main(int argc, char *argv[])
 
 	/* Initialize the display */
 	if ( SetVideoMode(w, h) < 0 ) {
-		return(1);
+		quit(1);
 	}
 
 	/* Set an event filter that discards everything but QUIT */
@@ -355,7 +361,7 @@ int main(int argc, char *argv[])
 				/* Fall through to the quit handler */
 			case SDL_QUIT:
 				printf("Bye bye..\n");
-				return(0);
+				quit(0);
 			default:
 				/* This should never happen */
 				printf("Warning: Event %d wasn't filtered\n",
@@ -364,5 +370,6 @@ int main(int argc, char *argv[])
 		}
 	}
 	printf("SDL_WaitEvent() error: %s\n", SDL_GetError());
+	SDL_Quit();
 	return(255);
 }

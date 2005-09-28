@@ -14,6 +14,13 @@ static int done = 0;
 /* Is the cursor visible? */
 static int visible = 1;
 
+/* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
+static void quit(int rc)
+{
+	SDL_Quit();
+	exit(rc);
+}
+
 SDL_Surface *LoadIconSurface(char *file, Uint8 **maskp)
 {
 	SDL_Surface *icon;
@@ -260,9 +267,8 @@ int main(int argc, char *argv[])
 	if ( SDL_Init(init_flags) < 0 ) {
 		fprintf(stderr,
 			"Couldn't initialize SDL: %s\n", SDL_GetError());
-		exit(1);
+		return(1);
 	}
-	atexit(SDL_Quit);
 
 	/* Set the icon -- this must be done before the first mode set */
 	icon = LoadIconSurface("icon.bmp", &icon_mask);
@@ -277,7 +283,7 @@ int main(int argc, char *argv[])
 	if (  screen == NULL ) {
 		fprintf(stderr, "Couldn't set 640x480x%d video mode: %s\n",
 						video_bpp, SDL_GetError());
-		exit(1);
+		quit(1);
 	}
 	printf("Running in %s mode\n", screen->flags & SDL_FULLSCREEN ?
 						"fullscreen" : "windowed");
@@ -302,7 +308,7 @@ int main(int argc, char *argv[])
 	if ( SDL_LockSurface(screen) < 0 ) {
 		fprintf(stderr, "Couldn't lock display surface: %s\n",
 							SDL_GetError());
-		exit(2);
+		quit(2);
 	}
 	buffer = (Uint8 *)screen->pixels;
 	for ( i=0; i<screen->h; ++i ) {
@@ -326,5 +332,6 @@ int main(int argc, char *argv[])
 	}
 	SDL_WaitThread(mouse_thread, NULL);
 	SDL_WaitThread(keybd_thread, NULL);
+	SDL_Quit();
 	return(0);
 }

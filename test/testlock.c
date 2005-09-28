@@ -15,6 +15,15 @@ static SDL_mutex *mutex = NULL;
 static Uint32 mainthread;
 static SDL_Thread *threads[6];
 
+/*
+ * SDL_Quit() shouldn't be used with atexit() directly because
+ *  calling conventions may differ...
+ */
+static void SDL_Quit_Wrapper(void)
+{
+	SDL_Quit();
+}
+
 void printid(void)
 {
 	printf("Process %u:  exiting\n", SDL_ThreadID());
@@ -68,7 +77,7 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "%s\n", SDL_GetError());
 		exit(1);
 	}
-	atexit(SDL_Quit);
+	atexit(SDL_Quit_Wrapper);
 
 	if ( (mutex=SDL_CreateMutex()) == NULL ) {
 		fprintf(stderr, "Couldn't create mutex: %s\n", SDL_GetError());

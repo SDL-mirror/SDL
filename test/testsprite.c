@@ -22,6 +22,13 @@ SDL_Rect *velocities;
 int sprites_visible;
 Uint16 sprite_w, sprite_h;
 
+/* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
+static void quit(int rc)
+{
+	SDL_Quit();
+	exit(rc);
+}
+
 int LoadSprite(SDL_Surface *screen, char *file)
 {
 	SDL_Surface *temp;
@@ -159,9 +166,8 @@ int main(int argc, char *argv[])
 	/* Initialize SDL */
 	if ( SDL_Init(SDL_INIT_VIDEO) < 0 ) {
 		fprintf(stderr, "Couldn't initialize SDL: %s\n",SDL_GetError());
-		exit(1);
+		return(1);
 	}
-	atexit(SDL_Quit);
 
 	numsprites = NUM_SPRITES;
 	videoflags = SDL_SWSURFACE|SDL_ANYFORMAT;
@@ -201,7 +207,7 @@ int main(int argc, char *argv[])
 			fprintf(stderr, 
 	"Usage: %s [-bpp N] [-hw] [-flip] [-fast] [-fullscreen] [numsprites]\n",
 								argv[0]);
-			exit(1);
+			quit(1);
 		}
 	}
 
@@ -210,12 +216,12 @@ int main(int argc, char *argv[])
 	if ( ! screen ) {
 		fprintf(stderr, "Couldn't set %dx%d video mode: %s\n",
 					width, height, SDL_GetError());
-		exit(2);
+		quit(2);
 	}
 
 	/* Load the sprite */
 	if ( LoadSprite(screen, "icon.bmp") < 0 ) {
-		exit(1);
+		quit(1);
 	}
 
 	/* Allocate memory for the sprite info */
@@ -223,7 +229,7 @@ int main(int argc, char *argv[])
 	if ( mem == NULL ) {
 		SDL_FreeSurface(sprite);
 		fprintf(stderr, "Out of memory!\n");
-		exit(2);
+		quit(2);
 	}
 	sprite_rects = (SDL_Rect *)mem;
 	positions = sprite_rects;

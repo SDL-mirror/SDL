@@ -10,6 +10,13 @@
 
 static int alive = 0;
 
+/* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
+static void quit(int rc)
+{
+	SDL_Quit();
+	exit(rc);
+}
+
 int ThreadFunc(void *data)
 {
 	/* Set the child thread error string */
@@ -30,9 +37,8 @@ int main(int argc, char *argv[])
 	/* Load the SDL library */
 	if ( SDL_Init(0) < 0 ) {
 		fprintf(stderr, "Couldn't initialize SDL: %s\n",SDL_GetError());
-		exit(1);
+		return(1);
 	}
-	atexit(SDL_Quit);
 
 	/* Set the error value for the main thread */
 	SDL_SetError("No worries");
@@ -41,7 +47,7 @@ int main(int argc, char *argv[])
 	thread = SDL_CreateThread(ThreadFunc, "#1");
 	if ( thread == NULL ) {
 		fprintf(stderr, "Couldn't create thread: %s\n", SDL_GetError());
-		exit(1);
+		quit(1);
 	}
 	SDL_Delay(5*1000);
 	printf("Waiting for thread #1\n");
@@ -50,5 +56,6 @@ int main(int argc, char *argv[])
 
 	printf("Main thread error string: %s\n", SDL_GetError());
 
+	SDL_Quit();
 	return(0);
 }

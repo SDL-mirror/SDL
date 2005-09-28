@@ -10,6 +10,13 @@
 
 #include "SDL.h"
 
+/* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
+static void quit(int rc)
+{
+	SDL_Quit();
+	exit(rc);
+}
+
 static void print_modifiers(void)
 {
 	int mod;
@@ -82,9 +89,8 @@ int main(int argc, char *argv[])
 	/* Initialize SDL */
 	if ( SDL_Init(SDL_INIT_VIDEO) < 0 ) {
 		fprintf(stderr, "Couldn't initialize SDL: %s\n",SDL_GetError());
-		exit(1);
+		return(1);
 	}
-	atexit(SDL_Quit);
 
 	videoflags = SDL_SWSURFACE;
 	while( argc > 1 ) {
@@ -93,7 +99,7 @@ int main(int argc, char *argv[])
 			videoflags |= SDL_FULLSCREEN;
 		} else {
 			fprintf(stderr, "Usage: %s [-fullscreen]\n", argv[0]);
-			exit(1);
+			quit(1);
 		}
 	}
 
@@ -101,7 +107,7 @@ int main(int argc, char *argv[])
 	if ( SDL_SetVideoMode(640, 480, 0, videoflags) == NULL ) {
 		fprintf(stderr, "Couldn't set 640x480 video mode: %s\n",
 							SDL_GetError());
-		exit(2);
+		quit(2);
 	}
 
 	/* Enable UNICODE translation for keyboard input */
@@ -132,5 +138,7 @@ int main(int argc, char *argv[])
 				break;
 		}
 	}
+
+	SDL_Quit();
 	return(0);
 }

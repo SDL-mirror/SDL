@@ -13,6 +13,13 @@
 
 static char volatile time_for_threads_to_die[NUMTHREADS];
 
+/* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
+static void quit(int rc)
+{
+	SDL_Quit();
+	exit(rc);
+}
+
 int SubThreadFunc(void *data) {
 	while(! *(int volatile *)data) {
 		; /*SDL_Delay(10); /* do nothing */
@@ -57,10 +64,8 @@ int main(int argc, char *argv[])
 	/* Load the SDL library */
 	if ( SDL_Init(0) < 0 ) {
 		fprintf(stderr, "Couldn't initialize SDL: %s\n",SDL_GetError());
-		exit(1);
+		return(1);
 	}
-	atexit(SDL_Quit);
-
 
 	signal(SIGSEGV, SIG_DFL);
 	for(i = 0; i < NUMTHREADS; i++) {
@@ -70,7 +75,7 @@ int main(int argc, char *argv[])
 		if ( threads[i] == NULL ) {
 			fprintf(stderr,
 			"Couldn't create thread: %s\n", SDL_GetError());
-			exit(1);
+			quit(1);
 		}
 	}
 
@@ -81,5 +86,6 @@ int main(int argc, char *argv[])
 	for(i = NUMTHREADS-1; i >= 0; --i) {
 		SDL_WaitThread(threads[i], NULL);
 	}
-	return(0);	/* Never reached */
+	SDL_Quit();
+	return(0);
 }

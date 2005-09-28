@@ -11,6 +11,13 @@
 
 #include "SDL.h"
 
+/* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
+static void quit(int rc)
+{
+	SDL_Quit();
+	exit(rc);
+}
+
 void DrawPict(SDL_Surface *screen, char *bmpfile,
 					int speedy, int flip, int nofade)
 {
@@ -245,6 +252,13 @@ int main(int argc, char *argv[])
 	h = 480;
 	desired_bpp = 0;
 	video_flags = 0;
+
+	if ( SDL_Init(SDL_INIT_VIDEO) < 0 ) {
+		fprintf(stderr,
+			"Couldn't initialize SDL: %s\n", SDL_GetError());
+		return(1);
+	}
+
 	while ( argc > 1 ) {
 		if ( strcmp(argv[1], "-speedy") == 0 ) {
 			speedy = 1;
@@ -264,7 +278,7 @@ int main(int argc, char *argv[])
 			} else {
 				fprintf(stderr,
 				"The -delay option requires an argument\n");
-				exit(1);
+				quit(1);
 			}
 		} else
 		if ( strcmp(argv[1], "-width") == 0 ) {
@@ -274,7 +288,7 @@ int main(int argc, char *argv[])
 			} else {
 				fprintf(stderr,
 				"The -width option requires an argument\n");
-				exit(1);
+				quit(1);
 			}
 		} else
 		if ( strcmp(argv[1], "-height") == 0 ) {
@@ -284,7 +298,7 @@ int main(int argc, char *argv[])
 			} else {
 				fprintf(stderr,
 				"The -height option requires an argument\n");
-				exit(1);
+				quit(1);
 			}
 		} else
 		if ( strcmp(argv[1], "-bpp") == 0 ) {
@@ -295,7 +309,7 @@ int main(int argc, char *argv[])
 			} else {
 				fprintf(stderr,
 				"The -bpp option requires an argument\n");
-				exit(1);
+				quit(1);
 			}
 		} else
 		if ( strcmp(argv[1], "-warp") == 0 ) {
@@ -321,19 +335,12 @@ int main(int argc, char *argv[])
 			break;
 	}
 
-	if ( SDL_Init(SDL_INIT_VIDEO) < 0 ) {
-		fprintf(stderr,
-			"Couldn't initialize SDL: %s\n", SDL_GetError());
-		exit(1);
-	}
-	atexit(SDL_Quit);			/* Clean up on exit */
-
 	/* Initialize the display */
 	screen = SDL_SetVideoMode(w, h, desired_bpp, video_flags);
 	if ( screen == NULL ) {
 		fprintf(stderr, "Couldn't set %dx%dx%d video mode: %s\n",
 					w, h, desired_bpp, SDL_GetError());
-		exit(1);
+		quit(1);
 	}
 	printf("Set%s %dx%dx%d mode\n",
 			screen->flags & SDL_FULLSCREEN ? " fullscreen" : "",
@@ -358,5 +365,6 @@ int main(int argc, char *argv[])
 	DrawPict(screen, argv[1], speedy, flip, nofade);
 #endif
 	SDL_Delay(delay*1000);
+	SDL_Quit();
 	return(0);
 }

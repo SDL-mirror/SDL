@@ -8,6 +8,13 @@
 
 #include "SDL.h"
 
+/* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
+static void quit(int rc)
+{
+	SDL_Quit();
+	exit(rc);
+}
+
 /* Turn a normal gamma value into an appropriate gamma ramp */
 void CalculateGamma(double gamma, Uint16 *ramp)
 {
@@ -82,16 +89,15 @@ int main(int argc, char *argv[])
 	if ( SDL_Init(SDL_INIT_VIDEO) < 0 ) {
 		fprintf(stderr,
 			"Couldn't initialize SDL: %s\n", SDL_GetError());
-		exit(1);
+		return(1);
 	}
-	atexit(SDL_Quit);
 
 	/* Initialize the display, always use hardware palette */
 	screen = SDL_SetVideoMode(w, h, bpp, flags | SDL_HWPALETTE);
 	if ( screen == NULL ) {
 		fprintf(stderr, "Couldn't set %dx%d video mode: %s\n",
 						w, h, SDL_GetError());
-		exit(1);
+		quit(1);
 	}
 
 	/* Set the window manager title bar */
@@ -104,7 +110,7 @@ int main(int argc, char *argv[])
 	}
 	if ( SDL_SetGamma(gamma, gamma, gamma) < 0 ) {
 		fprintf(stderr, "Unable to set gamma: %s\n", SDL_GetError());
-		exit(1);
+		quit(1);
 	}
 
 #if 0 /* This isn't supported.  Integrating the gamma ramps isn't exact */
@@ -186,5 +192,6 @@ int main(int argc, char *argv[])
 	}
 	SDL_Delay(1*1000);
 
+	SDL_Quit();
 	return(0);
 }

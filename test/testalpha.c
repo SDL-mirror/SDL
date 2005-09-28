@@ -12,6 +12,14 @@
 
 #define FRAME_TICKS	(1000/30)		/* 30 frames/second */
 
+/* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
+static void quit(int rc)
+{
+	SDL_Quit();
+	exit(rc);
+}
+
+
 /* Create a "light" -- a yellowish surface with variable alpha */
 SDL_Surface *CreateLight(SDL_Surface *screen, int radius)
 {
@@ -292,9 +300,8 @@ int main(int argc, char *argv[])
 	/* Initialize SDL */
 	if ( SDL_Init(SDL_INIT_VIDEO) < 0 ) {
 		fprintf(stderr, "Couldn't initialize SDL: %s\n",SDL_GetError());
-		exit(1);
+		return(1);
 	}
-	atexit(SDL_Quit);
 
 	/* Alpha blending doesn't work well at 8-bit color */
 	info = SDL_GetVideoInfo();
@@ -327,7 +334,7 @@ int main(int argc, char *argv[])
 			fprintf(stderr, 
 			"Usage: %s [-bpp N] [-warp] [-hw] [-fullscreen]\n",
 								argv[0]);
-			exit(1);
+			quit(1);
 		}
 	}
 
@@ -335,14 +342,14 @@ int main(int argc, char *argv[])
 	if ( (screen=SDL_SetVideoMode(640,480,video_bpp,videoflags)) == NULL ) {
 		fprintf(stderr, "Couldn't set 640x480x%d video mode: %s\n",
 						video_bpp, SDL_GetError());
-		exit(2);
+		quit(2);
 	}
 
 	/* Set the surface pixels and refresh! */
 	if ( SDL_LockSurface(screen) < 0 ) {
 		fprintf(stderr, "Couldn't lock the display surface: %s\n",
 							SDL_GetError());
-		exit(2);
+		quit(2);
 	}
 	buffer=(Uint8 *)screen->pixels;
 	if (screen->format->BytesPerPixel!=2) {
@@ -371,13 +378,13 @@ int main(int argc, char *argv[])
 	/* Create the light */
 	light = CreateLight(screen, 82);
 	if ( light == NULL ) {
-		exit(1);
+		quit(1);
 	}
 
 	/* Load the sprite */
 	if ( LoadSprite(screen, "icon.bmp") < 0 ) {
 		SDL_FreeSurface(light);
-		exit(1);
+		quit(1);
 	}
 
 	/* Print out information about our surfaces */
@@ -492,5 +499,7 @@ fprintf(stderr, "Slept %d ticks\n", (SDL_GetTicks()-ticks));
 		printf("%d alpha blits, ~%4.4f ms per blit\n", 
 			flashes, (float)flashtime/flashes);
 	}
+
+	SDL_Quit();
 	return(0);
 }

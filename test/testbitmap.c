@@ -8,6 +8,13 @@
 #include "SDL.h"
 #include "picture.xbm"
 
+/* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
+static void quit(int rc)
+{
+	SDL_Quit();
+	exit(rc);
+}
+
 SDL_Surface *LoadXBM(SDL_Surface *screen, int w, int h, Uint8 *bits)
 {
 	SDL_Surface *bitmap;
@@ -61,9 +68,8 @@ int main(int argc, char *argv[])
 	/* Initialize SDL */
 	if ( SDL_Init(SDL_INIT_VIDEO) < 0 ) {
 		fprintf(stderr, "Couldn't initialize SDL: %s\n",SDL_GetError());
-		exit(1);
+		return(1);
 	}
-	atexit(SDL_Quit);
 
 	video_bpp = 0;
 	videoflags = SDL_SWSURFACE;
@@ -85,7 +91,7 @@ int main(int argc, char *argv[])
 			fprintf(stderr,
 			"Usage: %s [-bpp N] [-warp] [-hw] [-fullscreen]\n",
 								argv[0]);
-			exit(1);
+			quit(1);
 		}
 	}
 
@@ -93,7 +99,7 @@ int main(int argc, char *argv[])
 	if ( (screen=SDL_SetVideoMode(640,480,video_bpp,videoflags)) == NULL ) {
 		fprintf(stderr, "Couldn't set 640x480x%d video mode: %s\n",
 						video_bpp, SDL_GetError());
-		exit(2);
+		quit(2);
 	}
 
 	if (video_bpp==8) {
@@ -110,7 +116,7 @@ int main(int argc, char *argv[])
 	if ( SDL_LockSurface(screen) < 0 ) {
 		fprintf(stderr, "Couldn't lock the display surface: %s\n",
 							SDL_GetError());
-		exit(2);
+		quit(2);
 	}
 	buffer=(Uint8 *)screen->pixels;
 	if (screen->format->BytesPerPixel!=2) {
@@ -139,7 +145,7 @@ int main(int argc, char *argv[])
 	bitmap = LoadXBM(screen, picture_width, picture_height,
 					(Uint8 *)picture_bits);
 	if ( bitmap == NULL ) {
-		exit(1);
+		quit(1);
 	}
 
 	/* Wait for a keystroke */
@@ -173,5 +179,6 @@ int main(int argc, char *argv[])
 		}
 	}
 	SDL_FreeSurface(bitmap);
+	SDL_Quit();
 	return(0);
 }

@@ -54,10 +54,17 @@ static SDL_Color wavemap[] = {
     {0,39,172}, {0,28,152}, {0,17,132}, {0,7,114}
 };
 
+/* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
+static void quit(int rc)
+{
+	SDL_Quit();
+	exit(rc);
+}
+
 static void sdlerr(char *when)
 {
     fprintf(stderr, "SDL error: %s: %s\n", when, SDL_GetError());
-    exit(1);
+    quit(1);
 }
 
 /* create a background surface */
@@ -139,8 +146,6 @@ int main(int argc, char **argv)
     if(SDL_Init(SDL_INIT_VIDEO) < 0)
 	sdlerr("initialising SDL");
 
-    atexit(SDL_Quit);
-
     while(--argc) {
 	++argv;
 	if(strcmp(*argv, "-hw") == 0)
@@ -157,7 +162,7 @@ int main(int argc, char **argv)
 	    fprintf(stderr,
 		    "usage: testpalette "
 		    " [-hw] [-fullscreen] [-nofade] [-gamma] [-gammaramp]\n");
-	    return 1;
+	    quit(1);
 	}
     }
 
@@ -165,7 +170,7 @@ int main(int argc, char **argv)
     if(!(screen = SDL_SetVideoMode(SCRW, SCRH, 8, vidflags | SDL_HWPALETTE))) {
 	fprintf(stderr, "error setting %dx%d 8bpp indexed mode: %s\n",
 		SCRW, SCRH, SDL_GetError());
-	return 1;
+	quit(1);
     }
 
     if(!(boat[0] = SDL_LoadBMP("sail.bmp")))
@@ -327,6 +332,8 @@ int main(int argc, char **argv)
 
     printf("%d frames, %.2f fps\n",
 	   frames, 1000.0 * frames / (SDL_GetTicks() - start));
+
+    SDL_Quit();
     return 0;
 }
 

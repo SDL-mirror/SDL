@@ -41,6 +41,14 @@ SDL_Color MooseColors[84]={
     {222, 222, 222}, {231, 198, 165}, {231, 231, 231}, {239, 206, 173}
 };
 
+
+/* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
+static void quit(int rc)
+{
+	SDL_Quit();
+	exit(rc);
+}
+
 /* All RGB2YUV conversion code and some other parts of code has been taken from testoverlay.c */
 
 /* NOTE: These RGB conversion functions are not intended for speed,
@@ -288,6 +296,12 @@ int main(int argc, char **argv)
     int overlay_format=SDL_YUY2_OVERLAY;
     int scale=5;
 
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE) < 0)
+    {
+        fprintf(stderr, "Couldn't initialize SDL: %s\n", SDL_GetError());
+        return 3;
+    }
+
     while ( argc > 1 )
     {
         if (strcmp(argv[1], "-fps")== 0)
@@ -298,12 +312,12 @@ int main(int argc, char **argv)
                 if (fps==0)
                 {
                     fprintf(stderr, "The -fps option requires an argument [from 1 to 1000], default is 12.\n");
-                    return -1;
+                    quit(10);
                 }
                 if ((fps<0) || (fps>1000))
                 {
                     fprintf(stderr, "The -fps option must be in range from 1 to 1000, default is 12.\n");
-                    return -1;
+                    quit(10);
                 }
                 argv += 2;
                 argc -= 2;
@@ -311,7 +325,7 @@ int main(int argc, char **argv)
             else
             {
                 fprintf(stderr, "The -fps option requires an argument [from 1 to 1000], default is 12.\n");
-                return -1;
+                quit(10);
             }
         } else
         if (strcmp(argv[1], "-format") == 0)
@@ -331,7 +345,7 @@ int main(int argc, char **argv)
                 else
                 {
                     fprintf(stderr, "The -format option %s is not recognized, see help for info.\n", argv[2]);
-                    return -1;
+                    quit(10);
                 }
                 argv += 2;
                 argc -= 2;
@@ -339,7 +353,7 @@ int main(int argc, char **argv)
             else
             {
                 fprintf(stderr, "The -format option requires an argument, default is YUY2.\n");
-                return -1;
+                quit(10);
             }
         } else
         if (strcmp(argv[1], "-scale") == 0)
@@ -350,12 +364,12 @@ int main(int argc, char **argv)
                 if (scale==0)
                 {
                     fprintf(stderr, "The -scale option requires an argument [from 1 to 50], default is 5.\n");
-                    return -1;
+                    quit(10);
                 }
                 if ((scale<0) || (scale>50))
                 {
                     fprintf(stderr, "The -scale option must be in range from 1 to 50, default is 5.\n");
-                    return -1;
+                    quit(10);
                 }
                 argv += 2;
                 argc -= 2;
@@ -363,17 +377,17 @@ int main(int argc, char **argv)
             else
             {
                 fprintf(stderr, "The -fps option requires an argument [from 1 to 1000], default is 12.\n");
-                return -1;
+                quit(10);
             }
         } else
         if ((strcmp(argv[1], "-help") == 0 ) || (strcmp(argv[1], "-h") == 0))
         {
             PrintUsage(argv[0]);
-            return 0;
+            quit(0);
         } else
         {
             fprintf(stderr, "Unrecognized option: %s.\n", argv[1]);
-            return -1;
+            quit(10);
         }
         break;
     }
@@ -383,7 +397,7 @@ int main(int argc, char **argv)
     {
         fprintf(stderr, "Can't allocate memory for movie !\n");
         free(RawMooseData);
-        return 1;
+        quit(1);
     }
 
     /* load the trojan moose images */
@@ -392,27 +406,19 @@ int main(int argc, char **argv)
     {
         fprintf(stderr, "Can't find the file moose.dat !\n");
         free(RawMooseData);
-        return 2;
+        quit(2);
     }
    
     SDL_RWread(handle, RawMooseData, MOOSEFRAME_SIZE, MOOSEFRAMES_COUNT);
 
     SDL_RWclose(handle);
 
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE) < 0)
-    {
-        fprintf(stderr, "Couldn't initialize SDL: %s\n", SDL_GetError());
-        free(RawMooseData);
-        return 3;
-    }
-    atexit(SDL_Quit);
-
     /* Set video mode */
     if ( (screen=SDL_SetVideoMode(MOOSEPIC_W*scale, MOOSEPIC_H*scale, 0, SDL_RESIZABLE | SDL_SWSURFACE)) == NULL )
     {
         fprintf(stderr, "Couldn't set video mode: %s\n", 0, SDL_GetError());
         free(RawMooseData);
-        return 4;
+        quit(4);
     }
 
     /* Set the window manager title bar */
@@ -426,7 +432,7 @@ int main(int argc, char **argv)
         {
             fprintf(stderr, "Couldn't create SDL_Surfaces:%s\n", 0, SDL_GetError());
             free(RawMooseData);
-            return 5;
+            quit(5);
         }
         SDL_SetColors(MooseFrame[i], MooseColors, 0, 84);
 
@@ -462,7 +468,7 @@ int main(int argc, char **argv)
 		if(!newsurf)
 		{
                     fprintf(stderr, "Couldn't convert picture to 32bits RGB: %s\n", SDL_GetError());
-                    return 6;
+                    quit(6);
 		}
 		SDL_FreeSurface(MooseFrame[i]);
 		MooseFrame[i]=newsurf;
@@ -475,7 +481,7 @@ int main(int argc, char **argv)
     if (!overlay)
     {
         fprintf(stderr, "Couldn't create overlay: %s\n", SDL_GetError());
-        return 7;
+        quit(7);
     }
 
     printf("Created %dx%dx%d %s %s overlay\n",overlay->w,overlay->h,overlay->planes,
@@ -538,7 +544,7 @@ int main(int argc, char **argv)
                      {
                          SDL_FreeSurface(MooseFrame[i]);
                      }
-                     return 0;
+                     quit(0);
             }
         }
 
@@ -586,6 +592,7 @@ int main(int argc, char **argv)
         SDL_Delay(1);
     }
 
+	SDL_Quit();
     return 0;
 }
 

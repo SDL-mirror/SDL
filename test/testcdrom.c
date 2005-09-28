@@ -7,6 +7,12 @@
 
 #include "SDL.h"
 
+/* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
+static void quit(int rc)
+{
+	SDL_Quit();
+	exit(rc);
+}
 
 static void PrintStatus(int driveindex, SDL_CD *cdrom)
 {
@@ -92,14 +98,13 @@ int main(int argc, char *argv[])
 	/* Initialize SDL first */
 	if ( SDL_Init(SDL_INIT_CDROM) < 0 ) {
 		fprintf(stderr, "Couldn't initialize SDL: %s\n",SDL_GetError());
-		exit(1);
+		return(1);
 	}
-	atexit(SDL_Quit);
 
 	/* Find out how many CD-ROM drives are connected to the system */
 	if ( SDL_CDNumDrives() == 0 ) {
 		printf("No CD-ROM devices detected\n");
-		exit(0);
+		quit(0);
 	}
 	printf("Drives available: %d\n", SDL_CDNumDrives());
 	for ( i=0; i<SDL_CDNumDrives(); ++i ) {
@@ -116,7 +121,7 @@ int main(int argc, char *argv[])
 	if ( cdrom == NULL ) {
 		fprintf(stderr, "Couldn't open drive %d: %s\n", drive,
 							SDL_GetError());
-		exit(2);
+		quit(2);
 	}
 #ifdef TEST_NULLCD
 	cdrom = NULL;
@@ -192,11 +197,12 @@ int main(int argc, char *argv[])
 		} else {
 			PrintUsage(argv[0]);
 			SDL_CDClose(cdrom);
-			exit(1);
+			quit(1);
 		}
 	}
 	PrintStatus(drive, cdrom);
 	SDL_CDClose(cdrom);
+	SDL_Quit();
 
 	return(0);
 }

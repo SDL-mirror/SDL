@@ -19,6 +19,15 @@ struct {
 	int      soundpos;		/* Current play position */
 } wave;
 
+
+/* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
+static void quit(int rc)
+{
+	SDL_Quit();
+	exit(rc);
+}
+
+
 void fillerup(void *unused, Uint8 *stream, int len)
 {
 	Uint8 *waveptr;
@@ -54,13 +63,12 @@ int main(int argc, char *argv[])
 	/* Load the SDL library */
 	if ( SDL_Init(SDL_INIT_AUDIO) < 0 ) {
 		fprintf(stderr, "Couldn't initialize SDL: %s\n",SDL_GetError());
-		exit(1);
+		return(1);
 	}
-	atexit(SDL_Quit);
 
 	if ( argv[1] == NULL ) {
 		fprintf(stderr, "Usage: %s <wavefile>\n", argv[0]);
-		exit(1);
+		quit(1);
 	}
 
 	/* Load the wave file into memory */
@@ -68,7 +76,7 @@ int main(int argc, char *argv[])
 			&wave.spec, &wave.sound, &wave.soundlen) == NULL ) {
 		fprintf(stderr, "Couldn't load %s: %s\n",
 						argv[1], SDL_GetError());
-		exit(1);
+		quit(1);
 	}
 	wave.spec.callback = fillerup;
 
@@ -86,7 +94,7 @@ int main(int argc, char *argv[])
 	if ( SDL_OpenAudio(&wave.spec, NULL) < 0 ) {
 		fprintf(stderr, "Couldn't open audio: %s\n", SDL_GetError());
 		SDL_FreeWAV(wave.sound);
-		exit(2);
+		quit(2);
 	}
 	SDL_PauseAudio(0);
 
@@ -98,5 +106,6 @@ int main(int argc, char *argv[])
 	/* Clean up on signal */
 	SDL_CloseAudio();
 	SDL_FreeWAV(wave.sound);
+	SDL_Quit();
 	return(0);
 }

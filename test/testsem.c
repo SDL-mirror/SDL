@@ -13,6 +13,13 @@
 static SDL_sem *sem;
 int alive = 1;
 
+/* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
+static void quit(int rc)
+{
+	SDL_Quit();
+	exit(rc);
+}
+
 int ThreadFunc(void *data)
 {
 	while ( alive ) {
@@ -39,15 +46,14 @@ int main(int argc, char **argv)
 
 	if(argc < 2) {
 		fprintf(stderr,"Usage: %s init_value\n", argv[0]);
-		exit(1);
+		return(1);
 	}
 
 	/* Load the SDL library */
 	if ( SDL_Init(0) < 0 ) {
 		fprintf(stderr, "Couldn't initialize SDL: %s\n",SDL_GetError());
-		exit(1);
+		return(1);
 	}
-	atexit(SDL_Quit);
 	signal(SIGTERM, killed);
 	signal(SIGINT, killed);
 	
@@ -72,5 +78,6 @@ int main(int argc, char **argv)
 	printf("Finished waiting for threads\n");
 
 	SDL_DestroySemaphore(sem);
+	SDL_Quit();
 	return(0);
 }

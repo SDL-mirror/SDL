@@ -21,6 +21,13 @@ int monochrome;
 int luminance;
 int w, h;
 
+/* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
+static void quit(int rc)
+{
+	SDL_Quit();
+	exit(rc);
+}
+
 /* NOTE: These RGB conversion functions are not intended for speed,
          only as examples.
 */
@@ -347,7 +354,7 @@ int main(int argc, char **argv)
 			} else {
 				fprintf(stderr,
 				"The -delay option requires an argument\n");
-				exit(1);
+				return(1);
 			}
 		} else
 		if ( strcmp(argv[1], "-width") == 0 ) {
@@ -357,7 +364,7 @@ int main(int argc, char **argv)
 			} else {
 				fprintf(stderr,
 				"The -width option requires an argument\n");
-				exit(1);
+				return(1);
 			}
 		} else
 		if ( strcmp(argv[1], "-height") == 0 ) {
@@ -367,7 +374,7 @@ int main(int argc, char **argv)
 			} else {
 				fprintf(stderr,
 				"The -height option requires an argument\n");
-				exit(1);
+				return(1);
 			}
 		} else
 		if ( strcmp(argv[1], "-bpp") == 0 ) {
@@ -378,7 +385,7 @@ int main(int argc, char **argv)
 			} else {
 				fprintf(stderr,
 				"The -bpp option requires an argument\n");
-				exit(1);
+				return(1);
 			}
 		} else
 		if ( strcmp(argv[1], "-lum") == 0 ) {
@@ -389,7 +396,7 @@ int main(int argc, char **argv)
 			} else {
 				fprintf(stderr,
 				"The -lum option requires an argument\n");
-				exit(1);
+				return(1);
 			}
 		} else
 		if ( strcmp(argv[1], "-format") == 0 ) {
@@ -407,14 +414,14 @@ int main(int argc, char **argv)
 				else
 				{
 					fprintf(stderr, "The -format option %s is not recognized\n",argv[2]);
-					exit(1);
+					return(1);
 				}
 				argv += 2;
 				argc -= 2;
 			} else {
 				fprintf(stderr,
 				"The -format option requires an argument\n");
-				exit(1);
+				return(1);
 			}
 		} else
 		if ( strcmp(argv[1], "-hw") == 0 ) {
@@ -439,7 +446,7 @@ int main(int argc, char **argv)
 		} else
 		if (( strcmp(argv[1], "-help") == 0 ) || (strcmp(argv[1], "-h") == 0)) {
                         PrintUsage(argv0);
-                        exit(1);
+                        return(1);
 		} else
 		if ( strcmp(argv[1], "-fullscreen") == 0 ) {
 			video_flags |= SDL_FULLSCREEN;
@@ -451,16 +458,15 @@ int main(int argc, char **argv)
 	if ( SDL_Init(SDL_INIT_VIDEO) < 0 ) {
 		fprintf(stderr,
 			"Couldn't initialize SDL: %s\n", SDL_GetError());
-		exit(1);
+		return(1);
 	}
-	atexit(SDL_Quit);			/* Clean up on exit */
 
 	/* Initialize the display */
 	screen = SDL_SetVideoMode(w, h, desired_bpp, video_flags);
 	if ( screen == NULL ) {
 		fprintf(stderr, "Couldn't set %dx%dx%d video mode: %s\n",
 					w, h, desired_bpp, SDL_GetError());
-		exit(1);
+		quit(1);
 	}
 	printf("Set%s %dx%dx%d mode\n",
 			screen->flags & SDL_FULLSCREEN ? " fullscreen" : "",
@@ -481,7 +487,7 @@ int main(int argc, char **argv)
 	if ( pic == NULL ) {
 		fprintf(stderr, "Couldn't load %s: %s\n", bmpfile,
 							SDL_GetError());
-		exit(1);
+		quit(1);
 	}
 
 	/* Convert the picture to 32bits, for easy conversion */
@@ -518,7 +524,7 @@ int main(int argc, char **argv)
 		{
 			fprintf(stderr, "Couldn't convert picture to 32bits RGB: %s\n",
 							SDL_GetError());
-			exit(1);
+			quit(1);
 		}
 		SDL_FreeSurface(pic);
 		pic=newsurf;
@@ -528,7 +534,7 @@ int main(int argc, char **argv)
 	overlay = SDL_CreateYUVOverlay(pic->w, pic->h, overlay_format, screen);
 	if ( overlay == NULL ) {
 		fprintf(stderr, "Couldn't create overlay: %s\n", SDL_GetError());
-		exit(1);
+		quit(1);
 	}
 	printf("Created %dx%dx%d %s %s overlay\n",overlay->w,overlay->h,overlay->planes,
 			overlay->hw_overlay?"hardware":"software",
@@ -566,7 +572,7 @@ int main(int argc, char **argv)
 			break;
 		default:
 			printf("cannot convert RGB picture to obtained YUV format!\n");
-			exit(1);
+			quit(1);
 			break;
 	}
 #ifdef BENCHMARK_SDL
@@ -584,6 +590,7 @@ int main(int argc, char **argv)
 	printf("Time: %d milliseconds\n", now-then);
 #endif
 	SDL_Delay(delay*1000);
+	SDL_Quit();
 	return(0);
 }
 

@@ -12,6 +12,13 @@
 
 static int ticks = 0;
 
+/* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
+static void quit(int rc)
+{
+	SDL_Quit();
+	exit(rc);
+}
+
 static Uint32 ticktock(Uint32 interval)
 {
 	++ticks;
@@ -31,9 +38,8 @@ int main(int argc, char *argv[])
 
 	if ( SDL_Init(SDL_INIT_TIMER) < 0 ) {
 		fprintf(stderr, "Couldn't load SDL: %s\n", SDL_GetError());
-		exit(1);
+		return(1);
 	}
-	atexit(SDL_Quit);
 
 	/* Start the timer */
 	desired = 0;
@@ -83,5 +89,6 @@ int main(int argc, char *argv[])
 	SDL_RemoveTimer(t2);
 	SDL_RemoveTimer(t3);
 
+	SDL_Quit();
 	return(0);
 }
