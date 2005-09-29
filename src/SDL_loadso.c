@@ -31,7 +31,7 @@ static char rcsid =
 #include <stdio.h>
 #if defined(USE_DLOPEN)
 # include <dlfcn.h>
-#elif defined(WIN32)
+#elif defined(WIN32) || defined(_WIN32_WCE)
 # include <windows.h>
 #elif defined(__BEOS__)
 # include <be/kernel/image.h>
@@ -60,6 +60,30 @@ void *SDL_LoadObject(const char *sofile)
 /* * */
 	handle = dlopen(sofile, RTLD_NOW);
 	loaderror = (char *)dlerror();
+#elif defined(_WIN32_WCE)
+/* * */
+	char errbuf[512];
+
+	wchar_t *errbuf_t = malloc(512 * sizeof(wchar_t));
+	wchar_t *sofile_t = malloc((MAX_PATH+1) * sizeof(wchar_t));
+
+	MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, sofile, -1, sofile_t, MAX_PATH);
+	handle = (void *)LoadLibrary(sofile_t);
+
+	/* Generate an error message if all loads failed */
+	if ( handle == NULL ) {
+		FormatMessage((FORMAT_MESSAGE_IGNORE_INSERTS |
+					FORMAT_MESSAGE_FROM_SYSTEM),
+				NULL, GetLastError(), 
+				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+				errbuf_t, SDL_TABLESIZE(errbuf), NULL);
+		WideCharToMultiByte(CP_ACP, 0, errbuf_t, -1, errbuf, 511, NULL, NULL);
+		loaderror = errbuf;
+	}
+
+	free(sofile_t);
+	free(errbuf_t);
+
 #elif defined(WIN32)
 /* * */
 	char errbuf[512];
@@ -139,6 +163,30 @@ void *SDL_LoadFunction(void *handle, const char *name)
 	if ( symbol == NULL ) {
 		loaderror = (char *)dlerror();
 	}
+#elif defined(_WIN32_WCE)
+/* * */
+	char errbuf[512];
+	int length = strlen(name);
+
+	wchar_t *name_t = malloc((length + 1) * sizeof(wchar_t));
+	wchar_t *errbuf_t = malloc(512 * sizeof(wchar_t));
+
+	MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, name, -1, name_t, length);
+
+	symbol = (void *)GetProcAddress((HMODULE)handle, name_t);
+	if ( symbol == NULL ) {
+		FormatMessage((FORMAT_MESSAGE_IGNORE_INSERTS |
+					FORMAT_MESSAGE_FROM_SYSTEM),
+				NULL, GetLastError(), 
+				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+				errbuf_t, SDL_TABLESIZE(errbuf), NULL);
+		WideCharToMultiByte(CP_ACP, 0, errbuf_t, -1, errbuf, 511, NULL, NULL);
+		loaderror = errbuf;
+	}
+
+	free(name_t);
+	free(errbuf_t);
+
 #elif defined(WIN32)
 /* * */
 	char errbuf[512];

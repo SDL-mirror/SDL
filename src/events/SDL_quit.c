@@ -27,6 +27,10 @@ static char rcsid =
 
 /* General quit handling code for SDL */
 
+#if defined (_WIN32_WCE)
+#define NO_SIGNAL_H
+#endif
+
 #include <stdio.h>
 #ifndef NO_SIGNAL_H
 #include <signal.h>

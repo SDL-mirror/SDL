@@ -29,9 +29,13 @@ static char rcsid =
 #include <stdlib.h>
 #include <malloc.h>
 #include <windows.h>
-#if defined(WIN32_PLATFORM_PSPC)
-#include <aygshell.h>                      // Add Pocket PC includes
-#pragma comment( lib, "aygshell" )         // Link Pocket PC library
+
+
+#if defined(_WIN32_WCE)
+
+// defined and used in SDL_sysevents.c
+extern HINSTANCE aygshell;
+
 #endif
 
 /* Not yet in the mingw32 cross-compile headers */
@@ -191,7 +195,7 @@ static SDL_VideoDevice *DIB_CreateDevice(int devindex)
 }
 
 VideoBootStrap WINDIB_bootstrap = {
-	"windib", "Win95/98/NT/2000 GDI",
+	"windib", "Win95/98/NT/2000/CE GDI",
 	DIB_Available, DIB_CreateDevice
 };
 
@@ -389,12 +393,6 @@ static int DIB_SussScreenDepth()
 	hdc = GetDC(SDL_Window);
 	depth = GetDeviceCaps(hdc, PLANES) * GetDeviceCaps(hdc, BITSPIXEL);
 	ReleaseDC(SDL_Window, hdc);
-#ifndef _WIN32_WCE
-	// AFAIK 16 bit CE devices have indeed RGB 565
-	if ( depth == 16 ) {
-		depth = 15;	/* GDI defined as RGB 555 */
-	}
-#endif
 	return(depth);
 #else
     int dib_size;
@@ -518,23 +516,18 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 	video->h = height;
 	video->pitch = SDL_CalculatePitch(video);
 
-#ifdef WIN32_PLATFORM_PSPC
-	 /* Stuff to hide that $#!^%#$ WinCE taskbar in fullscreen... */
-	if ( flags & SDL_FULLSCREEN ) {
-		if ( !(prev_flags & SDL_FULLSCREEN) ) {
-			SHFullScreen(SDL_Window, SHFS_HIDETASKBAR);
-			SHFullScreen(SDL_Window, SHFS_HIDESIPBUTTON);
-			ShowWindow(FindWindow(TEXT("HHTaskBar"),NULL),SW_HIDE);
-		}
+	/* Small fix for WinCE/Win32 - when activating window
+	   SDL_VideoSurface is equal to zero, so activating code
+	   is not called properly for fullscreen windows because
+	   macros WINDIB_FULLSCREEN uses SDL_VideoSurface
+	*/
+	SDL_VideoSurface = video;
+
+#if defined(_WIN32_WCE)
+	if ( flags & SDL_FULLSCREEN )
 		video->flags |= SDL_FULLSCREEN;
-	} else {
-		if ( prev_flags & SDL_FULLSCREEN ) {
-			SHFullScreen(SDL_Window, SHFS_SHOWTASKBAR);
-			SHFullScreen(SDL_Window, SHFS_SHOWSIPBUTTON);
-			ShowWindow(FindWindow(TEXT("HHTaskBar"),NULL),SW_SHOWNORMAL);
-		}
-	}
 #endif
+
 #ifndef NO_CHANGEDISPLAYSETTINGS
 	/* Set fullscreen mode if appropriate */
 	if ( (flags & SDL_FULLSCREEN) == SDL_FULLSCREEN ) {
@@ -942,14 +935,6 @@ void DIB_VideoQuit(_THIS)
 	if ( SDL_Window ) {
 		/* Delete the screen bitmap (also frees screen->pixels) */
 		if ( this->screen ) {
-#ifdef WIN32_PLATFORM_PSPC
-			if ( this->screen->flags & SDL_FULLSCREEN ) {
-				/* Unhide taskbar, etc. */
-				SHFullScreen(SDL_Window, SHFS_SHOWTASKBAR);
-				SHFullScreen(SDL_Window, SHFS_SHOWSIPBUTTON);
-				ShowWindow(FindWindow(TEXT("HHTaskBar"),NULL),SW_SHOWNORMAL);
-			}
-#endif
 #ifndef NO_CHANGEDISPLAYSETTINGS
 			if ( this->screen->flags & SDL_FULLSCREEN ) {
 				ChangeDisplaySettings(NULL, 0);
@@ -975,6 +960,17 @@ void DIB_VideoQuit(_THIS)
 		FlushMessageQueue();
 
 		SDL_Window = NULL;
+
+#if defined(_WIN32_WCE)
+
+// Unload wince aygshell library to prevent leak
+		if( aygshell ) 
+		{
+			FreeLibrary(aygshell);
+			aygshell = NULL;
+		}
+#endif
+
 	}
 }
 

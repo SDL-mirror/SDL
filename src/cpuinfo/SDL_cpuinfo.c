@@ -101,7 +101,7 @@ CPUid by definition.  But it's nice to be able to prove it.  :)      */
 	:
 	: "%rax", "%rcx"
 	);
-#elif defined(_MSC_VER)
+#elif defined(_MSC_VER) && (defined(_M_IX86) || defined(_X86_))
 	__asm {
         pushfd                      ; Get original EFLAGS
         pop     eax
@@ -140,7 +140,7 @@ static __inline__ int CPU_getCPUIDFeatures()
 	:
 	: "%eax", "%ecx", "%edx", "%edi"
 	);
-#elif defined(_MSC_VER)
+#elif defined(_MSC_VER)  && (defined(_M_IX86) || defined(_X86_))
 	__asm {
         xor     eax, eax            ; Set up for CPUID instruction
         cpuid                       ; Get and save vendor ID
@@ -175,7 +175,7 @@ static __inline__ int CPU_getCPUIDFeaturesExt()
 	:
 	: "%eax", "%ecx", "%edx", "%edi"
 	);
-#elif defined(_MSC_VER)
+#elif defined(_MSC_VER)  && (defined(_M_IX86) || defined(_X86_))
 	__asm {
         mov     eax,80000000h       ; Query for extended functions
         cpuid                       ; Get extended function limit

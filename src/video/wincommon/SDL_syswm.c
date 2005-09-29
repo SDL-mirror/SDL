@@ -36,6 +36,8 @@ static char rcsid =
 #include "SDL_syswm_c.h"
 #include "SDL_wingl_c.h"
 #include "SDL_pixels_c.h"
+#include "SDL_loadso.h"
+
 
 #ifdef _WIN32_WCE
 #define DISABLE_ICON_SUPPORT
@@ -47,6 +49,25 @@ static char rcsid =
 
 /* The screen icon -- needs to be freed on SDL_VideoQuit() */
 HICON   screen_icn = NULL;
+
+#ifdef _WIN32_WCE
+
+BOOL (WINAPI *CoreCatchInput)(int flag) = NULL;
+int input_catched = 0;
+HINSTANCE coredll = NULL;
+
+// the same API call that gx.dll does to catch the input
+void LoadInputCatchFunc()
+{
+	coredll = SDL_LoadObject("coredll.dll");
+	if( coredll )
+	{
+		CoreCatchInput = (int (WINAPI *)(int)) GetProcAddress(coredll, (const unsigned short *) 1453);
+	}
+}
+
+#endif
+
 
 /* Win32 icon mask semantics are different from those of SDL:
      SDL applies the mask to the icon and copies result to desktop.
@@ -245,6 +266,15 @@ SDL_GrabMode WIN_GrabInput(_THIS, SDL_GrabMode mode)
 			ClientToScreen(SDL_Window, &pt);
 			SetCursorPos(pt.x,pt.y);
 		}
+#ifdef _WIN32_WCE
+		if( input_catched )
+		{
+			if( !CoreCatchInput ) LoadInputCatchFunc();
+
+			if( CoreCatchInput )
+				CoreCatchInput(0);
+		}
+#endif
 	} else {
 		ClipCursor(&SDL_bounds);
 		if ( !(SDL_cursorstate & CURSOR_VISIBLE) ) {
@@ -257,6 +287,15 @@ SDL_GrabMode WIN_GrabInput(_THIS, SDL_GrabMode mode)
 			ClientToScreen(SDL_Window, &pt);
 			SetCursorPos(pt.x, pt.y);
 		}
+#ifdef _WIN32_WCE
+		if( !input_catched )
+		{
+			if( !CoreCatchInput ) LoadInputCatchFunc();
+
+			if( CoreCatchInput )
+				CoreCatchInput(1);
+		}
+#endif
 	}
 	return(mode);
 }

@@ -339,12 +339,20 @@ int main(int argc, char *argv[])
 	}
 
 	/* Set 640x480 video mode */
+#ifndef _WIN32_WCE
 	if ( (screen=SDL_SetVideoMode(640,480,video_bpp,videoflags)) == NULL ) {
 		fprintf(stderr, "Couldn't set 640x480x%d video mode: %s\n",
 						video_bpp, SDL_GetError());
 		quit(2);
 	}
-
+#else
+	/* Pocket PC */
+	if ( (screen=SDL_SetVideoMode(240,320,video_bpp,SDL_FULLSCREEN)) == NULL ) {
+		fprintf(stderr, "Couldn't set 240x320x%d video mode: %s\n",
+						video_bpp, SDL_GetError());
+		quit(2);
+	}
+#endif
 	/* Set the surface pixels and refresh! */
 	if ( SDL_LockSurface(screen) < 0 ) {
 		fprintf(stderr, "Couldn't lock the display surface: %s\n",

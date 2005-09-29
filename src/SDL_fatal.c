@@ -25,6 +25,10 @@ static char rcsid =
  "@(#) $Id$";
 #endif
 
+#ifdef _WIN32_WCE
+#define NO_SIGNAL_H
+#endif
+ 
 /* General fatal signal handling code for SDL */
 
 #ifdef NO_SIGNAL_H

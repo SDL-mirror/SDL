@@ -40,6 +40,7 @@ static char rcsid =
 #include "SDL_lowvideo.h"
 #include "SDL_syswm_c.h"
 #include "SDL_main.h"
+#include "SDL_loadso.h"
 
 #ifdef WMMSG_DEBUG
 #include "wmmsg.h"
@@ -71,12 +72,36 @@ WORD *gamma_saved = NULL;
 
 
 /* Functions called by the message processing function */
-LONG
-(*HandleMessage)(_THIS, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)=NULL;
+LONG (*HandleMessage)(_THIS, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)=NULL;
 void (*WIN_RealizePalette)(_THIS);
 void (*WIN_PaletteChanged)(_THIS, HWND window);
 void (*WIN_WinPAINT)(_THIS, HDC hdc);
 extern void DIB_SwapGamma(_THIS);
+
+#if defined(_WIN32_WCE)
+
+// dynamically load aygshell dll because we want SDL to work on HPC and be300
+HINSTANCE aygshell = NULL;
+BOOL (WINAPI *SHFullScreen)(HWND hwndRequester, DWORD dwState) = 0;
+
+#define SHFS_SHOWTASKBAR            0x0001
+#define SHFS_HIDETASKBAR            0x0002
+#define SHFS_SHOWSIPBUTTON          0x0004
+#define SHFS_HIDESIPBUTTON          0x0008
+#define SHFS_SHOWSTARTICON          0x0010
+#define SHFS_HIDESTARTICON          0x0020
+
+static void LoadAygshell(void)
+{
+	if( !aygshell )
+		 aygshell = SDL_LoadObject("aygshell.dll");
+	if( aygshell )
+	{
+		SHFullScreen = (int (WINAPI *)(struct HWND__ *,unsigned long)) SDL_LoadFunction(aygshell, "SHFullScreen");
+	}
+}
+
+#endif
 
 static void SDL_RestoreGameMode(void)
 {
@@ -213,6 +238,18 @@ LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 						SDL_RestoreGameMode();
 					}
 				}
+#if defined(_WIN32_WCE)
+			if ( WINDIB_FULLSCREEN() )
+			{
+						LoadAygshell();
+						if( aygshell ) 
+							SHFullScreen(SDL_Window, SHFS_HIDESTARTICON|SHFS_HIDETASKBAR|SHFS_HIDESIPBUTTON);
+						else
+							ShowWindow(FindWindow(TEXT("HHTaskBar"),NULL),SW_HIDE);
+
+			}
+#endif
+
 				posted = SDL_PrivateAppActive(1, appstate);
 				WIN_GetKeyboardState();
 			} else {
@@ -230,6 +267,14 @@ LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					}
 					if ( WINDIB_FULLSCREEN() ) {
 						SDL_RestoreDesktopMode();
+#if defined(_WIN32_WCE)
+						LoadAygshell();
+						if( aygshell ) 
+							SHFullScreen(SDL_Window, SHFS_SHOWSTARTICON|SHFS_SHOWTASKBAR|SHFS_SHOWSIPBUTTON);
+						else
+							ShowWindow(FindWindow(TEXT("HHTaskBar"),NULL),SW_SHOW);
+
+#endif
 					}
 				}
 				posted = SDL_PrivateAppActive(0, appstate);
