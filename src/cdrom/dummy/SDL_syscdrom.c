@@ -40,7 +40,3 @@ void SDL_SYS_CDQuit(void)
 	return;
 }
 
-int SDL_CDROMInit(void)
-{
-	return 0;
-}
