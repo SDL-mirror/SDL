@@ -1632,10 +1632,11 @@ static Uint32 getpix_16(Uint8 *srcbuf)
 
 static Uint32 getpix_24(Uint8 *srcbuf)
 {
-    if(SDL_BYTEORDER == SDL_LIL_ENDIAN)
-	return srcbuf[0] + (srcbuf[1] << 8) + (srcbuf[2] << 16);
-    else
-	return (srcbuf[0] << 16) + (srcbuf[1] << 8) + srcbuf[2];
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
+    return srcbuf[0] + (srcbuf[1] << 8) + (srcbuf[2] << 16);
+#else
+    return (srcbuf[0] << 16) + (srcbuf[1] << 8) + srcbuf[2];
+#endif
 }
 
 static Uint32 getpix_32(Uint8 *srcbuf)

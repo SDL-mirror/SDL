@@ -712,8 +712,9 @@ int SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, Uint32 color)
 			break;
 
 		    case 3:
-			if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
+			#if SDL_BYTEORDER == SDL_BIG_ENDIAN
 				color <<= 8;
+			#endif
 			for ( y=dstrect->h; y; --y ) {
 				Uint8 *pixels = row;
 				for ( x=dstrect->w; x; --x ) {
