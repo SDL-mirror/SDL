@@ -41,7 +41,13 @@ static char rcsid =
 */
 #if (defined _POSIX_TIMERS && _POSIX_TIMERS > 0)
 #include <time.h>
-#define USE_CLOCK_GETTIME
+/*
+ * clock_gettime() is missing in my system's glibc, and apparently isn't
+ *  available before Linux kernel 2.6...you can uncomment the following
+ *  define to use it, since it may be a better solution than
+ *  gettimeofday() on systems that support the newer syscall.  --ryan.
+ */
+/*#define USE_CLOCK_GETTIME*/
 #endif
 
 #include "SDL_error.h"
