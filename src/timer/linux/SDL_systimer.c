@@ -34,6 +34,16 @@ static char rcsid =
 #include <string.h>
 #include <errno.h>
 
+/* The clock_gettime provides monotonous time, so we should use it if
+   it's available. The clock_gettime function is behind ifdef
+   for __USE_POSIX199309
+   Tommi Kyntola (tommi.kyntola@ray.fi) 27/09/2005
+*/
+#if (defined _POSIX_TIMERS && _POSIX_TIMERS > 0)
+#include <time.h>
+#define USE_CLOCK_GETTIME
+#endif
+
 #include "SDL_error.h"
 #include "SDL_timer.h"
 #include "SDL_timer_c.h"
@@ -86,6 +96,19 @@ static float calc_cpu_mhz(void)
 	float cpu_mhz;
 	unsigned long long tsc_start;
 	unsigned long long tsc_end;
+/* Slight code doubling here for the sake of readability */
+#ifdef USE_CLOCK_GETTIME
+	struct timespec tv_start, tv_end;
+	long usec_delay;
+
+	rdtsc(tsc_start);
+	clock_gettime(CLOCK_MONOTONIC,&tv_start);
+	sleep(1);
+	rdtsc(tsc_end);
+	clock_gettime(CLOCK_MONOTONIC,&tv_end);
+	usec_delay = (1000000000L * (tv_end.tv_sec - tv_start.tv_sec) +
+	                            (tv_end.tv_nsec - tv_start.tv_nsec)) / 1000;
+#else
 	struct timeval tv_start, tv_end;
 	long usec_delay;
 
@@ -96,6 +119,7 @@ static float calc_cpu_mhz(void)
 	gettimeofday(&tv_end, NULL);
 	usec_delay = 1000000L * (tv_end.tv_sec - tv_start.tv_sec) +
 	                        (tv_end.tv_usec - tv_start.tv_usec);
+#endif /* USE_CLOCK_GETTIME */
 	cpu_mhz = (float)(tsc_end-tsc_start) / usec_delay;
 #if 0
 	printf("cpu MHz\t\t: %.3f\n", cpu_mhz);
@@ -106,7 +130,11 @@ static float calc_cpu_mhz(void)
 #else
 
 /* The first ticks value of the application */
+#ifdef USE_CLOCK_GETTIME
+static struct timespec start;
+#else
 static struct timeval start;
+#endif /* USE_CLOCK_GETTIME */
 
 #endif  /* USE_RDTSC */
 
@@ -119,9 +147,11 @@ void SDL_StartTicks(void)
 		cpu_mhz1000 = calc_cpu_mhz() * 1000.0f;
 	}
 	rdtsc(start);
+#elif defined(USE_CLOCK_GETTIME)
+	clock_gettime(CLOCK_MONOTONIC,&start);
 #else
 	gettimeofday(&start, NULL);
-#endif /* USE_RDTSC */
+#endif
 }
 
 Uint32 SDL_GetTicks (void)
@@ -133,14 +163,19 @@ Uint32 SDL_GetTicks (void)
 	}
 	rdtsc(now);
 	return (Uint32)((now-start)/cpu_mhz1000);
-#else
-	struct timeval now;
+#elif defined(USE_CLOCK_GETTIME)
 	Uint32 ticks;
-
+	struct timespec now;
+	clock_gettime(CLOCK_MONOTONIC,&now);
+	ticks=(now.tv_sec-start.tv_sec)*1000+(now.tv_nsec-start.tv_nsec)/1000000;
+	return(ticks);
+#else
+	Uint32 ticks;
+	struct timeval now;
 	gettimeofday(&now, NULL);
 	ticks=(now.tv_sec-start.tv_sec)*1000+(now.tv_usec-start.tv_usec)/1000;
 	return(ticks);
-#endif /* USE_RDTSC */
+#endif
 }
 
 void SDL_Delay (Uint32 ms)
