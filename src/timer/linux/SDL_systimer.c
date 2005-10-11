@@ -55,7 +55,7 @@ static char rcsid =
 /* Linux select() changes its timeout parameter upon return to contain
    the remaining time. Most other unixen leave it unchanged or undefined. */
 #define SELECT_SETS_REMAINING
-#elif defined(__bsdi__) || defined(__FreeBSD__) || defined(__sun)
+#elif defined(__bsdi__) || defined(__FreeBSD__) || defined(__sun) || defined(MACOSX)
 #define USE_NANOSLEEP
 #endif
 
