@@ -159,6 +159,7 @@ static int X11_DispatchEvent(_THIS)
 	int posted;
 	XEvent xevent;
 
+	memset(&xevent, '\0', sizeof (XEvent));  /* valgrind fix. --ryan. */
 	XNextEvent(SDL_Display, &xevent);
 
 	posted = 0;
