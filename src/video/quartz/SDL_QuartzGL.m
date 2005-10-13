@@ -119,6 +119,8 @@ int QZ_SetupOpenGL (_THIS, int bpp, Uint32 flags) {
     gl_context = [ [ NSOpenGLContext alloc ] initWithFormat:fmt
                                                shareContext:nil];
 
+    [ fmt release ];
+
     if (gl_context == nil) {
         SDL_SetError ("Failed creating OpenGL context");
         return 0;
@@ -151,8 +153,6 @@ int QZ_SetupOpenGL (_THIS, int bpp, Uint32 flags) {
 
     /* Convince SDL that the GL "driver" is loaded */
     this->gl_config.driver_loaded = 1;
-
-    [ fmt release ];
 
     return 1;
 }
