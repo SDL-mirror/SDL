@@ -93,28 +93,29 @@ static int (*SDL_NAME(snd_pcm_hw_params))(snd_pcm_t *pcm, snd_pcm_hw_params_t *p
 static int (*SDL_NAME(snd_pcm_nonblock))(snd_pcm_t *pcm, int nonblock);
 #define snd_pcm_hw_params_sizeof SDL_NAME(snd_pcm_hw_params_sizeof)
 
+/* cast funcs to char* first, to please GCC's strict aliasing rules. */
 static struct {
 	const char *name;
 	void **func;
 } alsa_functions[] = {
-	{ "snd_pcm_open",	(void**)&SDL_NAME(snd_pcm_open)		},
-	{ "snd_pcm_close",	(void**)&SDL_NAME(snd_pcm_close)	},
-	{ "snd_pcm_writei",	(void**)&SDL_NAME(snd_pcm_writei)	},
-	{ "snd_pcm_resume",	(void**)&SDL_NAME(snd_pcm_resume)	},
-	{ "snd_pcm_prepare",	(void**)&SDL_NAME(snd_pcm_prepare)	},
-	{ "snd_pcm_drain",	(void**)&SDL_NAME(snd_pcm_drain)	},
-	{ "snd_strerror",	(void**)&SDL_NAME(snd_strerror)		},
-	{ "snd_pcm_hw_params_sizeof",		(void**)&SDL_NAME(snd_pcm_hw_params_sizeof)		},
-	{ "snd_pcm_hw_params_any",		(void**)&SDL_NAME(snd_pcm_hw_params_any)		},
-	{ "snd_pcm_hw_params_set_access",	(void**)&SDL_NAME(snd_pcm_hw_params_set_access)		},
-	{ "snd_pcm_hw_params_set_format",	(void**)&SDL_NAME(snd_pcm_hw_params_set_format)		},
-	{ "snd_pcm_hw_params_set_channels",	(void**)&SDL_NAME(snd_pcm_hw_params_set_channels)	},
-	{ "snd_pcm_hw_params_get_channels",	(void**)&SDL_NAME(snd_pcm_hw_params_get_channels)	},
-	{ "snd_pcm_hw_params_set_rate_near",	(void**)&SDL_NAME(snd_pcm_hw_params_set_rate_near)	},
-	{ "snd_pcm_hw_params_set_period_size_near",	(void**)&SDL_NAME(snd_pcm_hw_params_set_period_size_near)	},
-	{ "snd_pcm_hw_params_set_periods_near",	(void**)&SDL_NAME(snd_pcm_hw_params_set_periods_near)	},
-	{ "snd_pcm_hw_params",	(void**)&SDL_NAME(snd_pcm_hw_params)	},
-	{ "snd_pcm_nonblock",	(void**)&SDL_NAME(snd_pcm_nonblock)	},
+	{ "snd_pcm_open",	(void**)(char*)&SDL_NAME(snd_pcm_open)		},
+	{ "snd_pcm_close",	(void**)(char*)&SDL_NAME(snd_pcm_close)	},
+	{ "snd_pcm_writei",	(void**)(char*)&SDL_NAME(snd_pcm_writei)	},
+	{ "snd_pcm_resume",	(void**)(char*)&SDL_NAME(snd_pcm_resume)	},
+	{ "snd_pcm_prepare",	(void**)(char*)&SDL_NAME(snd_pcm_prepare)	},
+	{ "snd_pcm_drain",	(void**)(char*)&SDL_NAME(snd_pcm_drain)	},
+	{ "snd_strerror",	(void**)(char*)&SDL_NAME(snd_strerror)		},
+	{ "snd_pcm_hw_params_sizeof",		(void**)(char*)&SDL_NAME(snd_pcm_hw_params_sizeof)		},
+	{ "snd_pcm_hw_params_any",		(void**)(char*)&SDL_NAME(snd_pcm_hw_params_any)		},
+	{ "snd_pcm_hw_params_set_access",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params_set_access)		},
+	{ "snd_pcm_hw_params_set_format",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params_set_format)		},
+	{ "snd_pcm_hw_params_set_channels",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params_set_channels)	},
+	{ "snd_pcm_hw_params_get_channels",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params_get_channels)	},
+	{ "snd_pcm_hw_params_set_rate_near",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params_set_rate_near)	},
+	{ "snd_pcm_hw_params_set_period_size_near",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params_set_period_size_near)	},
+	{ "snd_pcm_hw_params_set_periods_near",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params_set_periods_near)	},
+	{ "snd_pcm_hw_params",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params)	},
+	{ "snd_pcm_nonblock",	(void**)(char*)&SDL_NAME(snd_pcm_nonblock)	},
 };
 
 static void UnloadALSALibrary(void) {
