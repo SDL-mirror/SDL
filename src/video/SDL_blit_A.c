@@ -62,14 +62,14 @@ static void BlitNto1SurfaceAlpha(SDL_BlitInfo *info)
 	while ( height-- ) {
 	    DUFFS_LOOP4(
 	    {
-		Uint32 pixel;
+		Uint32 Pixel;
 		unsigned sR;
 		unsigned sG;
 		unsigned sB;
 		unsigned dR;
 		unsigned dG;
 		unsigned dB;
-		DISEMBLE_RGB(src, srcbpp, srcfmt, pixel, sR, sG, sB);
+		DISEMBLE_RGB(src, srcbpp, srcfmt, Pixel, sR, sG, sB);
 		dR = dstfmt->palette->colors[*dst].r;
 		dG = dstfmt->palette->colors[*dst].g;
 		dB = dstfmt->palette->colors[*dst].b;
@@ -114,7 +114,7 @@ static void BlitNto1PixelAlpha(SDL_BlitInfo *info)
 	while ( height-- ) {
 	    DUFFS_LOOP4(
 	    {
-		Uint32 pixel;
+		Uint32 Pixel;
 		unsigned sR;
 		unsigned sG;
 		unsigned sB;
@@ -122,7 +122,7 @@ static void BlitNto1PixelAlpha(SDL_BlitInfo *info)
 		unsigned dR;
 		unsigned dG;
 		unsigned dB;
-		DISEMBLE_RGBA(src,srcbpp,srcfmt,pixel,sR,sG,sB,sA);
+		DISEMBLE_RGBA(src,srcbpp,srcfmt,Pixel,sR,sG,sB,sA);
 		dR = dstfmt->palette->colors[*dst].r;
 		dG = dstfmt->palette->colors[*dst].g;
 		dB = dstfmt->palette->colors[*dst].b;
@@ -169,15 +169,15 @@ static void BlitNto1SurfaceAlphaKey(SDL_BlitInfo *info)
 	while ( height-- ) {
 	    DUFFS_LOOP(
 	    {
-		Uint32 pixel;
+		Uint32 Pixel;
 		unsigned sR;
 		unsigned sG;
 		unsigned sB;
 		unsigned dR;
 		unsigned dG;
 		unsigned dB;
-		DISEMBLE_RGB(src, srcbpp, srcfmt, pixel, sR, sG, sB);
-		if ( pixel != ckey ) {
+		DISEMBLE_RGB(src, srcbpp, srcfmt, Pixel, sR, sG, sB);
+		if ( Pixel != ckey ) {
 		    dR = dstfmt->palette->colors[*dst].r;
 		    dG = dstfmt->palette->colors[*dst].g;
 		    dB = dstfmt->palette->colors[*dst].b;
@@ -298,7 +298,7 @@ static void BlitRGBtoRGBSurfaceAlphaMMX(SDL_BlitInfo *info)
 	                        pand_r2r(mm3, mm2); /* 0A0R0G0B -> mm2 */
 	                        packuswb_r2r(mm2, mm2);  /* ARGBARGB -> mm2 */
 	                        por_r2r(mm7, mm2); /* mm7(full alpha) | mm2 -> mm2 */
-			        movd_r2m(mm2, *dstp);/* mm2 -> pixel */
+			        movd_r2m(mm2, *dstp);/* mm2 -> Pixel */
 				++srcp;
 				++dstp;
 			},{
@@ -334,7 +334,7 @@ static void BlitRGBtoRGBSurfaceAlphaMMX(SDL_BlitInfo *info)
 	                        psllq_i2r(32, mm6); /* mm6 << 32 -> mm6 */
 	                        por_r2r(mm6, mm2); /* mm6 | mm2 -> mm2 */				
 				por_r2r(mm7, mm2); /* mm7(full alpha) | mm2 -> mm2 */
-                                movq_r2m(mm2, *dstp);/* mm2 -> 2 x pixel */
+                                movq_r2m(mm2, *dstp);/* mm2 -> 2 x Pixel */
 				srcp += 2;
 				dstp += 2;
 			}, width);
@@ -422,7 +422,21 @@ static void BlitRGBtoRGBPixelAlphaMMX(SDL_BlitInfo *info)
 #endif
 
 #ifdef USE_ALTIVEC_BLITTERS
+#include <altivec.h>
 #include <assert.h>
+
+#if ((defined MACOSX) && (__GNUC__ < 4))
+    #define VECUINT8_LITERAL(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p) \
+        (vector unsigned char) ( a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p )
+    #define VECUINT16_LITERAL(a,b,c,d,e,f,g,h) \
+        (vector unsigned short) ( a,b,c,d,e,f,g,h )
+#else
+    #define VECUINT8_LITERAL(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p) \
+        (vector unsigned char) { a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p }
+    #define VECUINT16_LITERAL(a,b,c,d,e,f,g,h) \
+        (vector unsigned short) { a,b,c,d,e,f,g,h }
+#endif
+
 #define UNALIGNED_PTR(x) (((size_t) x) & 0x0000000F)
 #define VECPRINT(msg, v) do { \
     vector unsigned int tmpvec = (vector unsigned int)(v); \
@@ -493,7 +507,7 @@ static vector unsigned char calc_swizzle32(const SDL_PixelFormat *srcfmt,
     if (!dstfmt) {
         dstfmt = &default_pixel_format;
     }
-    vector unsigned char plus = (vector unsigned char)
+    vector unsigned char plus = VECUINT8_LITERAL
                                             ( 0x00, 0x00, 0x00, 0x00,
                                               0x04, 0x04, 0x04, 0x04,
                                               0x08, 0x08, 0x08, 0x08,
@@ -512,7 +526,7 @@ static vector unsigned char calc_swizzle32(const SDL_PixelFormat *srcfmt,
         amask = 0x10101010 & ((dstfmt->Rmask | dstfmt->Gmask | dstfmt->Bmask) ^ 0xFFFFFFFF);
     }
 #undef RESHIFT  
-    ((unsigned int *)&srcvec)[0] = (rmask | gmask | bmask | amask);
+    ((unsigned int *)(char*)&srcvec)[0] = (rmask | gmask | bmask | amask);
     vswiz = vec_add(plus, (vector unsigned char)vec_splat(srcvec, 0));
     return(vswiz);
 }
@@ -533,10 +547,10 @@ static void Blit32to565PixelAlphaAltivec(SDL_BlitInfo *info)
     vector unsigned short v3_16 = vec_splat_u16(3);
     vector unsigned int v8_32 = vec_splat_u32(8);
     vector unsigned int v16_32 = vec_add(v8_32, v8_32);
-    vector unsigned short v3f = (vector unsigned short)(
+    vector unsigned short v3f = VECUINT16_LITERAL(
         0x003f, 0x003f, 0x003f, 0x003f,
         0x003f, 0x003f, 0x003f, 0x003f);
-    vector unsigned short vfc = (vector unsigned short)(
+    vector unsigned short vfc = VECUINT16_LITERAL(
         0x00fc, 0x00fc, 0x00fc, 0x00fc,
         0x00fc, 0x00fc, 0x00fc, 0x00fc);
 
@@ -545,7 +559,7 @@ static void Blit32to565PixelAlphaAltivec(SDL_BlitInfo *info)
         0x00 - 0x0e evens are the red
         0x01 - 0x0f odds are zero
     */
-    vector unsigned char vredalpha1 = (vector unsigned char)(
+    vector unsigned char vredalpha1 = VECUINT8_LITERAL(
         0x10, 0x00, 0x01, 0x01,
         0x10, 0x02, 0x01, 0x01,
         0x10, 0x04, 0x01, 0x01,
@@ -558,7 +572,7 @@ static void Blit32to565PixelAlphaAltivec(SDL_BlitInfo *info)
         0x00 - 0x0f is ARxx ARxx ARxx ARxx
         0x11 - 0x0f odds are blue
     */
-    vector unsigned char vblue1 = (vector unsigned char)(
+    vector unsigned char vblue1 = VECUINT8_LITERAL(
         0x00, 0x01, 0x02, 0x11,
         0x04, 0x05, 0x06, 0x13,
         0x08, 0x09, 0x0a, 0x15,
@@ -571,7 +585,7 @@ static void Blit32to565PixelAlphaAltivec(SDL_BlitInfo *info)
         0x00 - 0x0f is ARxB ARxB ARxB ARxB
         0x10 - 0x0e evens are green
     */
-    vector unsigned char vgreen1 = (vector unsigned char)(
+    vector unsigned char vgreen1 = VECUINT8_LITERAL(
         0x00, 0x01, 0x10, 0x03,
         0x04, 0x05, 0x12, 0x07,
         0x08, 0x09, 0x14, 0x0b,
@@ -580,7 +594,7 @@ static void Blit32to565PixelAlphaAltivec(SDL_BlitInfo *info)
     vector unsigned char vgreen2 = (vector unsigned char)(
         vec_add((vector unsigned int)vgreen1, vec_sl(v8_32, v8_32))
     );
-    vector unsigned char vgmerge = (vector unsigned char)(
+    vector unsigned char vgmerge = VECUINT8_LITERAL(
         0x00, 0x02, 0x00, 0x06,
         0x00, 0x0a, 0x00, 0x0e,
         0x00, 0x12, 0x00, 0x16,
@@ -601,9 +615,9 @@ static void Blit32to565PixelAlphaAltivec(SDL_BlitInfo *info)
 
 #define ONE_PIXEL_BLEND(condition, widthvar) \
         while (condition) { \
-            Uint32 pixel; \
+            Uint32 Pixel; \
             unsigned sR, sG, sB, dR, dG, dB, sA; \
-            DISEMBLE_RGBA(src, 4, srcfmt, pixel, sR, sG, sB, sA); \
+            DISEMBLE_RGBA(src, 4, srcfmt, Pixel, sR, sG, sB, sA); \
             if(sA) { \
                 unsigned short dstpixel = *((unsigned short *)dst); \
                 dR = (dstpixel >> 8) & 0xf8; \
@@ -727,26 +741,26 @@ static void Blit32to32SurfaceAlphaKeyAltivec(SDL_BlitInfo *info)
     vbits = (vector unsigned char)vec_splat_s8(-1);
 
     ckey &= rgbmask;
-    ((unsigned int *)&vckey)[0] = ckey;
+    ((unsigned int *)(char*)&vckey)[0] = ckey;
     vckey = vec_splat(vckey, 0);
-    ((unsigned int *)&vrgbmask)[0] = rgbmask;
+    ((unsigned int *)(char*)&vrgbmask)[0] = rgbmask;
     vrgbmask = vec_splat(vrgbmask, 0);
 
     while(height--) {
         int width = info->d_width;
 #define ONE_PIXEL_BLEND(condition, widthvar) \
         while (condition) { \
-            Uint32 pixel; \
+            Uint32 Pixel; \
             unsigned sR, sG, sB, dR, dG, dB; \
-            RETRIEVE_RGB_PIXEL(((Uint8 *)srcp), 4, pixel); \
-            if(sA && pixel != ckey) { \
-                RGB_FROM_PIXEL(pixel, srcfmt, sR, sG, sB); \
-                DISEMBLE_RGB(((Uint8 *)dstp), 4, dstfmt, pixel, dR, dG, dB); \
+            RETRIEVE_RGB_PIXEL(((Uint8 *)srcp), 4, Pixel); \
+            if(sA && Pixel != ckey) { \
+                RGB_FROM_PIXEL(Pixel, srcfmt, sR, sG, sB); \
+                DISEMBLE_RGB(((Uint8 *)dstp), 4, dstfmt, Pixel, dR, dG, dB); \
                 ACCURATE_ALPHA_BLEND(sR, sG, sB, sA, dR, dG, dB); \
                 ASSEMBLE_RGBA(((Uint8 *)dstp), 4, dstfmt, dR, dG, dB, dA); \
             } \
-            ((Uint8 *)dstp) += 4; \
-            ((Uint8 *)srcp) += 4; \
+            dstp++; \
+            srcp++; \
             widthvar--; \
         }
         ONE_PIXEL_BLEND((UNALIGNED_PTR(dstp)) && (width), width);
@@ -840,11 +854,11 @@ static void Blit32to32PixelAlphaAltivec(SDL_BlitInfo *info)
 	while ( height-- ) {
         width = info->d_width;
 #define ONE_PIXEL_BLEND(condition, widthvar) while ((condition)) { \
-            Uint32 pixel; \
+            Uint32 Pixel; \
             unsigned sR, sG, sB, dR, dG, dB, sA, dA; \
-            DISEMBLE_RGBA((Uint8 *)srcp, 4, srcfmt, pixel, sR, sG, sB, sA); \
+            DISEMBLE_RGBA((Uint8 *)srcp, 4, srcfmt, Pixel, sR, sG, sB, sA); \
             if(sA) { \
-              DISEMBLE_RGBA((Uint8 *)dstp, 4, dstfmt, pixel, dR, dG, dB, dA); \
+              DISEMBLE_RGBA((Uint8 *)dstp, 4, dstfmt, Pixel, dR, dG, dB, dA); \
               ACCURATE_ALPHA_BLEND(sR, sG, sB, sA, dR, dG, dB); \
               ASSEMBLE_RGBA((Uint8 *)dstp, 4, dstfmt, dR, dG, dB, dA); \
             } \
@@ -1040,10 +1054,10 @@ static void Blit32to32SurfaceAlphaAltivec(SDL_BlitInfo *info)
     while(height--) {
         int width = info->d_width;
 #define ONE_PIXEL_BLEND(condition, widthvar) while ((condition)) { \
-            Uint32 pixel; \
+            Uint32 Pixel; \
             unsigned sR, sG, sB, dR, dG, dB; \
-            DISEMBLE_RGB(((Uint8 *)srcp), 4, srcfmt, pixel, sR, sG, sB); \
-            DISEMBLE_RGB(((Uint8 *)dstp), 4, dstfmt, pixel, dR, dG, dB); \
+            DISEMBLE_RGB(((Uint8 *)srcp), 4, srcfmt, Pixel, sR, sG, sB); \
+            DISEMBLE_RGB(((Uint8 *)dstp), 4, dstfmt, Pixel, dR, dG, dB); \
             ACCURATE_ALPHA_BLEND(sR, sG, sB, sA, dR, dG, dB); \
             ASSEMBLE_RGBA(((Uint8 *)dstp), 4, dstfmt, dR, dG, dB, dA); \
             ++srcp; \
@@ -2002,15 +2016,15 @@ static void BlitNtoNSurfaceAlpha(SDL_BlitInfo *info)
 	  while ( height-- ) {
 	    DUFFS_LOOP4(
 	    {
-		Uint32 pixel;
+		Uint32 Pixel;
 		unsigned sR;
 		unsigned sG;
 		unsigned sB;
 		unsigned dR;
 		unsigned dG;
 		unsigned dB;
-		DISEMBLE_RGB(src, srcbpp, srcfmt, pixel, sR, sG, sB);
-		DISEMBLE_RGB(dst, dstbpp, dstfmt, pixel, dR, dG, dB);
+		DISEMBLE_RGB(src, srcbpp, srcfmt, Pixel, sR, sG, sB);
+		DISEMBLE_RGB(dst, dstbpp, dstfmt, Pixel, dR, dG, dB);
 		ALPHA_BLEND(sR, sG, sB, sA, dR, dG, dB);
 		ASSEMBLE_RGBA(dst, dstbpp, dstfmt, dR, dG, dB, dA);
 		src += srcbpp;
@@ -2043,17 +2057,17 @@ static void BlitNtoNSurfaceAlphaKey(SDL_BlitInfo *info)
 	while ( height-- ) {
 	    DUFFS_LOOP4(
 	    {
-		Uint32 pixel;
+		Uint32 Pixel;
 		unsigned sR;
 		unsigned sG;
 		unsigned sB;
 		unsigned dR;
 		unsigned dG;
 		unsigned dB;
-		RETRIEVE_RGB_PIXEL(src, srcbpp, pixel);
-		if(sA && pixel != ckey) {
-		    RGB_FROM_PIXEL(pixel, srcfmt, sR, sG, sB);
-		    DISEMBLE_RGB(dst, dstbpp, dstfmt, pixel, dR, dG, dB);
+		RETRIEVE_RGB_PIXEL(src, srcbpp, Pixel);
+		if(sA && Pixel != ckey) {
+		    RGB_FROM_PIXEL(Pixel, srcfmt, sR, sG, sB);
+		    DISEMBLE_RGB(dst, dstbpp, dstfmt, Pixel, dR, dG, dB);
 		    ALPHA_BLEND(sR, sG, sB, sA, dR, dG, dB);
 		    ASSEMBLE_RGBA(dst, dstbpp, dstfmt, dR, dG, dB, dA);
 		}
@@ -2093,7 +2107,7 @@ static void BlitNtoNPixelAlpha(SDL_BlitInfo *info)
 	while ( height-- ) {
 	    DUFFS_LOOP4(
 	    {
-		Uint32 pixel;
+		Uint32 Pixel;
 		unsigned sR;
 		unsigned sG;
 		unsigned sB;
@@ -2102,9 +2116,9 @@ static void BlitNtoNPixelAlpha(SDL_BlitInfo *info)
 		unsigned dB;
 		unsigned sA;
 		unsigned dA;
-		DISEMBLE_RGBA(src, srcbpp, srcfmt, pixel, sR, sG, sB, sA);
+		DISEMBLE_RGBA(src, srcbpp, srcfmt, Pixel, sR, sG, sB, sA);
 		if(sA) {
-		  DISEMBLE_RGBA(dst, dstbpp, dstfmt, pixel, dR, dG, dB, dA);
+		  DISEMBLE_RGBA(dst, dstbpp, dstfmt, Pixel, dR, dG, dB, dA);
 		  ALPHA_BLEND(sR, sG, sB, sA, dR, dG, dB);
 		  ASSEMBLE_RGBA(dst, dstbpp, dstfmt, dR, dG, dB, dA);
 		}

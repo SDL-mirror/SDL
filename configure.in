@@ -1910,11 +1910,16 @@ CheckUSBHID()
 dnl Check for altivec instruction support using gas syntax
 CheckAltivec()
 {
-    AC_MSG_CHECKING(for GCC Altivec instruction support)
-    have_gcc_altivec=no
+    dnl FIXME: Theoretically, you might not have altivec.h, we should check
+    dnl FIXME:  that seperately, but I think all major platforms have it
+    dnl FIXME:  at the moment...  --ryan.
+
     save_CFLAGS="${CFLAGS}"
-    CFLAGS="${CFLAGS} -DGCC_ALTIVEC -DUSE_ALTIVEC_BLITTERS -faltivec"
+    have_gcc_altivec=no
+    AC_MSG_CHECKING(for Altivec with GCC -maltivec option)
+    CFLAGS="${save_CFLAGS} -DGCC_ALTIVEC -DUSE_ALTIVEC_BLITTERS -maltivec"
     AC_TRY_COMPILE([
+    #include <altivec.h>
     vector unsigned int vzero() {
         return vec_splat_u32(0);
     }
@@ -1922,10 +1927,26 @@ CheckAltivec()
     ],[
     have_gcc_altivec=yes
     ])
+    AC_MSG_RESULT($have_gcc_altivec)
+
+    if test x$have_gcc_altivec = xno; then
+        AC_MSG_CHECKING(for Altivec with GCC -faltivec option)
+        CFLAGS="${CFLAGS} -DGCC_ALTIVEC -DUSE_ALTIVEC_BLITTERS -faltivec"
+        AC_TRY_COMPILE([
+        #include <altivec.h>
+        vector unsigned int vzero() {
+            return vec_splat_u32(0);
+        }
+        ],[
+        ],[
+        have_gcc_altivec=yes
+        ])
+        AC_MSG_RESULT($have_gcc_altivec)
+    fi
+
     if test x$have_gcc_altivec = xno; then
         CFLAGS="${save_CFLAGS}"
     fi
-    AC_MSG_RESULT($have_gcc_altivec)
 }
 
 dnl Check for a valid linux/version.h
