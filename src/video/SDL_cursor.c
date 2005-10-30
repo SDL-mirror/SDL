@@ -303,9 +303,14 @@ void SDL_WarpMouse (Uint16 x, Uint16 y)
 	}
 
 	/* If we have an offset video mode, offset the mouse coordinates */
-	x += (this->screen->offset % this->screen->pitch) /
-	      this->screen->format->BytesPerPixel;
-	y += (this->screen->offset / this->screen->pitch);
+	if (this->screen->pitch == 0) {
+		x += this->screen->offset / this->screen->format->BytesPerPixel;
+		y += this->screen->offset;
+	} else {
+		x += (this->screen->offset % this->screen->pitch) /
+		      this->screen->format->BytesPerPixel;
+		y += (this->screen->offset / this->screen->pitch);
+	}
 
 	/* This generates a mouse motion event */
 	if ( video->WarpWMCursor ) {
