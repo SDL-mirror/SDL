@@ -40,6 +40,7 @@ static char rcsid =
 #include <sys/mman.h>
 
 #include <directfb.h>
+#include <directfb_version.h>
 
 #include "SDL.h"
 #include "SDL_error.h"
@@ -376,7 +377,11 @@ int DirectFB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 {
   int                      i;
   DFBResult                ret;
+#if (DIRECTFB_MAJOR_VERSION == 0) && (DIRECTFB_MINOR_VERSION == 9) && (DIRECTFB_MICRO_VERSION < 23)
   DFBCardCapabilities      caps;
+#else
+  DFBGraphicsDeviceDescription caps;
+#endif
   DFBDisplayLayerConfig    dlc;
   struct DirectFBEnumRect *rect;
   IDirectFB               *dfb    = NULL;
@@ -448,7 +453,11 @@ int DirectFB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 
   /* Query card capabilities to get the video memory size */
+#if (DIRECTFB_MAJOR_VERSION == 0) && (DIRECTFB_MINOR_VERSION == 9) && (DIRECTFB_MICRO_VERSION < 23)
   dfb->GetCardCapabilities (dfb, &caps);
+#else
+  dfb->GetDeviceDescription (dfb, &caps);
+#endif
 
   this->info.wm_available = 1;
   this->info.hw_available = 1;
