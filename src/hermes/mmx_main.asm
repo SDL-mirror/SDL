@@ -13,6 +13,7 @@ GLOBAL _ConvertMMX
 GLOBAL _mmxreturn
 
 
+SECTION .note.GNU-stack noalloc progbits noexec nowrite
 SECTION .text
 		
 ;; _ConvertMMX:	 

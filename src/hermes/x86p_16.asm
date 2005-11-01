@@ -27,7 +27,7 @@ GLOBAL _ConvertX86p16_8RGB332
 EXTERN _ConvertX86
 EXTERN _x86return
 
-
+SECTION .note.GNU-stack noalloc progbits noexec nowrite
 SECTION .text
 
 

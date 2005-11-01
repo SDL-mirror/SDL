@@ -29,6 +29,7 @@ GLOBAL _ConvertMMXpII32_16BGR555
 
 EXTERN _mmxreturn
  
+SECTION .note.GNU-stack noalloc progbits noexec nowrite
 SECTION .data
 	
 ALIGN 8
