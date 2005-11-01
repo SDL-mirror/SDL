@@ -78,7 +78,7 @@ static int generate_rowbytes(int src_w, int dst_w, int bpp)
 
 	/* See if we need to regenerate the copy buffer */
 	if ( (src_w == last.src_w) &&
-	     (dst_w == last.src_w) && (bpp == last.bpp) ) {
+	     (dst_w == last.dst_w) && (bpp == last.bpp) ) {
 		return(0);
 	}
 	last.bpp = bpp;
