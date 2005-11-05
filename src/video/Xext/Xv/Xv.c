@@ -56,6 +56,14 @@ SOFTWARE.
 #include <X11/extensions/XShm.h>
 #include "extutil.h"
 
+#include "../../x11/SDL_x11dyn.h"
+
+/* Workaround code in headers... */
+#define _XFlush p_XFlush
+#define _XFlushGCCache p_XFlushGCCache
+#define _XReply p_XReply
+#define _XSend p_XSend
+
 static XExtensionInfo _xv_info_data;
 static XExtensionInfo *xv_info = &_xv_info_data;
 static char *xv_extension_name = XvName;
@@ -121,7 +129,7 @@ SDL_NAME(XvQueryExtension)(
 
   XvGetReq(QueryExtension, req);
 
-  if (!_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
+  if (!p_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
      UnlockDisplay(dpy);
      SyncHandle();
      return XvBadExtension;
@@ -171,7 +179,7 @@ SDL_NAME(XvQueryAdaptors)(
 
   /* READ THE REPLY */
 
-  if (_XReply(dpy, (xReply *)&rep, 0, xFalse) == 0) {
+  if (p_XReply(dpy, (xReply *)&rep, 0, xFalse) == 0) {
       UnlockDisplay(dpy);
       SyncHandle();
       return(XvBadReply);
@@ -183,7 +191,7 @@ SDL_NAME(XvQueryAdaptors)(
       SyncHandle();
       return(XvBadAlloc);
   }
-  _XRead (dpy, buffer, size);
+  p_XRead (dpy, buffer, size);
 
   u.buffer = buffer;
 
@@ -331,7 +339,7 @@ SDL_NAME(XvQueryEncodings)(
 
   /* READ THE REPLY */
 
-  if (_XReply(dpy, (xReply *)&rep, 0, xFalse) == 0) {
+  if (p_XReply(dpy, (xReply *)&rep, 0, xFalse) == 0) {
       UnlockDisplay(dpy);
       SyncHandle();
       return(XvBadReply);
@@ -343,7 +351,7 @@ SDL_NAME(XvQueryEncodings)(
       SyncHandle();
       return(XvBadAlloc);
   }
-  _XRead (dpy, buffer, size);
+  p_XRead (dpy, buffer, size);
 
   u.buffer = buffer;
 
@@ -619,7 +627,7 @@ SDL_NAME(XvGrabPort)(
   req->port = port;
   req->time = time;
 
-  if (_XReply (dpy, (xReply *) &rep, 0, xTrue) == 0) 
+  if (p_XReply (dpy, (xReply *) &rep, 0, xTrue) == 0) 
     rep.result = GrabSuccess;
 
   result = rep.result;
@@ -747,7 +755,7 @@ SDL_NAME(XvGetPortAttribute) (
 
   /* READ THE REPLY */
 
-  if (_XReply(dpy, (xReply *)&rep, 0, xFalse) == 0) {
+  if (p_XReply(dpy, (xReply *)&rep, 0, xFalse) == 0) {
       UnlockDisplay(dpy);
       SyncHandle();
       return(XvBadReply);
@@ -792,7 +800,7 @@ SDL_NAME(XvQueryBestSize)(
 
   /* READ THE REPLY */
 
-  if (_XReply(dpy, (xReply *)&rep, 0, xFalse) == 0) {
+  if (p_XReply(dpy, (xReply *)&rep, 0, xFalse) == 0) {
       UnlockDisplay(dpy);
       SyncHandle();
       return(XvBadReply);
@@ -827,7 +835,7 @@ SDL_NAME(XvQueryPortAttributes)(Display *dpy, XvPortID port, int *num)
 
   /* READ THE REPLY */
 
-  if (_XReply(dpy, (xReply *)&rep, 0, xFalse) == 0) {
+  if (p_XReply(dpy, (xReply *)&rep, 0, xFalse) == 0) {
       UnlockDisplay(dpy);
       SyncHandle();
       return ret;
@@ -842,17 +850,17 @@ SDL_NAME(XvQueryPortAttributes)(Display *dpy, XvPortID port, int *num)
 	  int i;
 	
 	  for(i = 0; i < rep.num_attributes; i++) {
-             _XRead(dpy, (char*)(&Info), sz_xvAttributeInfo);
+             p_XRead(dpy, (char*)(&Info), sz_xvAttributeInfo);
 	      ret[i].flags = (int)Info.flags;	      
 	      ret[i].min_value = Info.min;	      
 	      ret[i].max_value = Info.max;	      
 	      ret[i].name = marker;
-	      _XRead(dpy, marker, Info.size);
+	      p_XRead(dpy, marker, Info.size);
 	      marker += Info.size;
 	      (*num)++;
 	  }
       } else
-	_XEatData(dpy, rep.length << 2);
+	p_XEatData(dpy, rep.length << 2);
   }
 
   UnlockDisplay(dpy);
@@ -882,7 +890,7 @@ SDL_NAME(XvImageFormatValues) * SDL_NAME(XvListImageFormats) (
 
   /* READ THE REPLY */
 
-  if (_XReply(dpy, (xReply *)&rep, 0, xFalse) == 0) {
+  if (p_XReply(dpy, (xReply *)&rep, 0, xFalse) == 0) {
       UnlockDisplay(dpy);
       SyncHandle();
       return NULL;
@@ -896,7 +904,7 @@ SDL_NAME(XvImageFormatValues) * SDL_NAME(XvListImageFormats) (
 	  int i;
 	
 	  for(i = 0; i < rep.num_formats; i++) {
-              _XRead(dpy, (char*)(&Info), sz_xvImageFormatInfo);
+              p_XRead(dpy, (char*)(&Info), sz_xvImageFormatInfo);
 	      ret[i].id = Info.id;	      
 	      ret[i].type = Info.type;	      
 	      ret[i].byte_order = Info.byte_order;	      
@@ -922,7 +930,7 @@ SDL_NAME(XvImageFormatValues) * SDL_NAME(XvListImageFormats) (
 	      (*num)++;
 	  }
       } else
-	_XEatData(dpy, rep.length << 2);
+	p_XEatData(dpy, rep.length << 2);
   }
 
   UnlockDisplay(dpy);
@@ -956,7 +964,7 @@ SDL_NAME(XvImage) * SDL_NAME(XvCreateImage) (
 
    /* READ THE REPLY */
 
-   if (!_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
+   if (!p_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
        UnlockDisplay(dpy);
        SyncHandle();
       return NULL;
@@ -972,10 +980,10 @@ SDL_NAME(XvImage) * SDL_NAME(XvCreateImage) (
 	ret->offsets = ret->pitches + rep.num_planes;
 	ret->data = data;
 	ret->obdata = NULL;
-  	_XRead(dpy, (char*)(ret->pitches), rep.num_planes << 2);
-	_XRead(dpy, (char*)(ret->offsets), rep.num_planes << 2);
+  	p_XRead(dpy, (char*)(ret->pitches), rep.num_planes << 2);
+	p_XRead(dpy, (char*)(ret->offsets), rep.num_planes << 2);
    } else
-	_XEatData(dpy, rep.length << 2);
+	p_XEatData(dpy, rep.length << 2);
 
    UnlockDisplay(dpy);
    SyncHandle();
@@ -1124,7 +1132,7 @@ xv_wire_to_event(Display *dpy, XEvent *host, xEvent *wire)
     case XvVideoNotify:
       re->xvvideo.type = event->u.u.type & 0x7f;
       re->xvvideo.serial = 
-	_XSetLastRequestRead(dpy, (xGenericReply *)event);
+	p_XSetLastRequestRead(dpy, (xGenericReply *)event);
       re->xvvideo.send_event = ((event->u.u.type & 0x80) != 0);
       re->xvvideo.display = dpy;
       re->xvvideo.time = event->u.videoNotify.time;
@@ -1135,7 +1143,7 @@ xv_wire_to_event(Display *dpy, XEvent *host, xEvent *wire)
     case XvPortNotify:
       re->xvport.type = event->u.u.type & 0x7f;
       re->xvport.serial = 
-	_XSetLastRequestRead(dpy, (xGenericReply *)event);
+	p_XSetLastRequestRead(dpy, (xGenericReply *)event);
       re->xvport.send_event = ((event->u.u.type & 0x80) != 0);
       re->xvport.display = dpy;
       re->xvport.time = event->u.portNotify.time;

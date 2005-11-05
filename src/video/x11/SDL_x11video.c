@@ -85,15 +85,18 @@ static int X11_SetColors(_THIS, int firstcolor, int ncolors,
 static int X11_SetGammaRamp(_THIS, Uint16 *ramp);
 static void X11_VideoQuit(_THIS);
 
+
 /* X11 driver bootstrap functions */
 
 static int X11_Available(void)
 {
-	Display *display;
-
-	display = XOpenDisplay(NULL);
-	if ( display != NULL ) {
-		XCloseDisplay(display);
+	Display *display = NULL;
+	if ( SDL_X11_LoadSymbols() ) {
+		display = pXOpenDisplay(NULL);
+		if ( display != NULL ) {
+			pXCloseDisplay(display);
+		}
+		SDL_X11_UnloadSymbols();
 	}
 	return(display != NULL);
 }
@@ -108,80 +111,83 @@ static void X11_DeleteDevice(SDL_VideoDevice *device)
 			free(device->gl_data);
 		}
 		free(device);
+		SDL_X11_UnloadSymbols();
 	}
 }
 
 static SDL_VideoDevice *X11_CreateDevice(int devindex)
 {
-	SDL_VideoDevice *device;
+	SDL_VideoDevice *device = NULL;
 
-	/* Initialize all variables that we clean on shutdown */
-	device = (SDL_VideoDevice *)malloc(sizeof(SDL_VideoDevice));
-	if ( device ) {
-		memset(device, 0, (sizeof *device));
-		device->hidden = (struct SDL_PrivateVideoData *)
-				malloc((sizeof *device->hidden));
-		device->gl_data = (struct SDL_PrivateGLData *)
-				malloc((sizeof *device->gl_data));
-	}
-	if ( (device == NULL) || (device->hidden == NULL) ||
-	                         (device->gl_data == NULL) ) {
-		SDL_OutOfMemory();
-		X11_DeleteDevice(device);
-		return(0);
-	}
-	memset(device->hidden, 0, (sizeof *device->hidden));
-	memset(device->gl_data, 0, (sizeof *device->gl_data));
+	if ( SDL_X11_LoadSymbols() ) {
+		/* Initialize all variables that we clean on shutdown */
+		device = (SDL_VideoDevice *)malloc(sizeof(SDL_VideoDevice));
+		if ( device ) {
+			memset(device, 0, (sizeof *device));
+			device->hidden = (struct SDL_PrivateVideoData *)
+					malloc((sizeof *device->hidden));
+			device->gl_data = (struct SDL_PrivateGLData *)
+					malloc((sizeof *device->gl_data));
+		}
+		if ( (device == NULL) || (device->hidden == NULL) ||
+		                         (device->gl_data == NULL) ) {
+			SDL_OutOfMemory();
+			X11_DeleteDevice(device); /* calls SDL_X11_UnloadSymbols(). */
+			return(0);
+		}
+		memset(device->hidden, 0, (sizeof *device->hidden));
+		memset(device->gl_data, 0, (sizeof *device->gl_data));
 
-	/* Set the driver flags */
-	device->handles_any_size = 1;
+		/* Set the driver flags */
+		device->handles_any_size = 1;
 
-	/* Set the function pointers */
-	device->VideoInit = X11_VideoInit;
-	device->ListModes = X11_ListModes;
-	device->SetVideoMode = X11_SetVideoMode;
-	device->ToggleFullScreen = X11_ToggleFullScreen;
-	device->UpdateMouse = X11_UpdateMouse;
+		/* Set the function pointers */
+		device->VideoInit = X11_VideoInit;
+		device->ListModes = X11_ListModes;
+		device->SetVideoMode = X11_SetVideoMode;
+		device->ToggleFullScreen = X11_ToggleFullScreen;
+		device->UpdateMouse = X11_UpdateMouse;
 #ifdef XFREE86_XV
-	device->CreateYUVOverlay = X11_CreateYUVOverlay;
+		device->CreateYUVOverlay = X11_CreateYUVOverlay;
 #endif
-	device->SetColors = X11_SetColors;
-	device->UpdateRects = NULL;
-	device->VideoQuit = X11_VideoQuit;
-	device->AllocHWSurface = X11_AllocHWSurface;
-	device->CheckHWBlit = NULL;
-	device->FillHWRect = NULL;
-	device->SetHWColorKey = NULL;
-	device->SetHWAlpha = NULL;
-	device->LockHWSurface = X11_LockHWSurface;
-	device->UnlockHWSurface = X11_UnlockHWSurface;
-	device->FlipHWSurface = X11_FlipHWSurface;
-	device->FreeHWSurface = X11_FreeHWSurface;
-	device->SetGamma = X11_SetVidModeGamma;
-	device->GetGamma = X11_GetVidModeGamma;
-	device->SetGammaRamp = X11_SetGammaRamp;
-	device->GetGammaRamp = NULL;
+		device->SetColors = X11_SetColors;
+		device->UpdateRects = NULL;
+		device->VideoQuit = X11_VideoQuit;
+		device->AllocHWSurface = X11_AllocHWSurface;
+		device->CheckHWBlit = NULL;
+		device->FillHWRect = NULL;
+		device->SetHWColorKey = NULL;
+		device->SetHWAlpha = NULL;
+		device->LockHWSurface = X11_LockHWSurface;
+		device->UnlockHWSurface = X11_UnlockHWSurface;
+		device->FlipHWSurface = X11_FlipHWSurface;
+		device->FreeHWSurface = X11_FreeHWSurface;
+		device->SetGamma = X11_SetVidModeGamma;
+		device->GetGamma = X11_GetVidModeGamma;
+		device->SetGammaRamp = X11_SetGammaRamp;
+		device->GetGammaRamp = NULL;
 #ifdef HAVE_OPENGL
-	device->GL_LoadLibrary = X11_GL_LoadLibrary;
-	device->GL_GetProcAddress = X11_GL_GetProcAddress;
-	device->GL_GetAttribute = X11_GL_GetAttribute;
-	device->GL_MakeCurrent = X11_GL_MakeCurrent;
-	device->GL_SwapBuffers = X11_GL_SwapBuffers;
+		device->GL_LoadLibrary = X11_GL_LoadLibrary;
+		device->GL_GetProcAddress = X11_GL_GetProcAddress;
+		device->GL_GetAttribute = X11_GL_GetAttribute;
+		device->GL_MakeCurrent = X11_GL_MakeCurrent;
+		device->GL_SwapBuffers = X11_GL_SwapBuffers;
 #endif
-	device->SetCaption = X11_SetCaption;
-	device->SetIcon = X11_SetIcon;
-	device->IconifyWindow = X11_IconifyWindow;
-	device->GrabInput = X11_GrabInput;
-	device->GetWMInfo = X11_GetWMInfo;
-	device->FreeWMCursor = X11_FreeWMCursor;
-	device->CreateWMCursor = X11_CreateWMCursor;
-	device->ShowWMCursor = X11_ShowWMCursor;
-	device->WarpWMCursor = X11_WarpWMCursor;
-	device->CheckMouseMode = X11_CheckMouseMode;
-	device->InitOSKeymap = X11_InitOSKeymap;
-	device->PumpEvents = X11_PumpEvents;
+		device->SetCaption = X11_SetCaption;
+		device->SetIcon = X11_SetIcon;
+		device->IconifyWindow = X11_IconifyWindow;
+		device->GrabInput = X11_GrabInput;
+		device->GetWMInfo = X11_GetWMInfo;
+		device->FreeWMCursor = X11_FreeWMCursor;
+		device->CreateWMCursor = X11_CreateWMCursor;
+		device->ShowWMCursor = X11_ShowWMCursor;
+		device->WarpWMCursor = X11_WarpWMCursor;
+		device->CheckMouseMode = X11_CheckMouseMode;
+		device->InitOSKeymap = X11_InitOSKeymap;
+		device->PumpEvents = X11_PumpEvents;
 
-	device->free = X11_DeleteDevice;
+		device->free = X11_DeleteDevice;
+	}
 
 	return device;
 }
@@ -190,9 +196,6 @@ VideoBootStrap X11_bootstrap = {
 	"x11", "X Window System",
 	X11_Available, X11_CreateDevice
 };
-
-/* Shared memory information */
-extern int XShmQueryExtension(Display *dpy);	/* Not in X11 headers */
 
 /* Normal X11 error handler routine */
 static int (*X_handler)(Display *, XErrorEvent *) = NULL;
@@ -275,21 +278,21 @@ static void create_aux_windows(_THIS)
     }
 
     if(FSwindow)
-	XDestroyWindow(SDL_Display, FSwindow);
+	pXDestroyWindow(SDL_Display, FSwindow);
 
     xattr.override_redirect = True;
     xattr.background_pixel = def_vis ? BlackPixel(SDL_Display, SDL_Screen) : 0;
     xattr.border_pixel = 0;
     xattr.colormap = SDL_XColorMap;
 
-    FSwindow = XCreateWindow(SDL_Display, SDL_Root,
+    FSwindow = pXCreateWindow(SDL_Display, SDL_Root,
                              xinerama_x, xinerama_y, 32, 32, 0,
 			     this->hidden->depth, InputOutput, SDL_Visual,
 			     CWOverrideRedirect | CWBackPixel | CWBorderPixel
 			     | CWColormap,
 			     &xattr);
 
-    XSelectInput(SDL_Display, FSwindow, StructureNotifyMask);
+    pXSelectInput(SDL_Display, FSwindow, StructureNotifyMask);
 
     /* Tell KDE to keep the fullscreen window on top */
     {
@@ -299,57 +302,57 @@ static void create_aux_windows(_THIS)
 	memset(&ev, 0, sizeof(ev));
 	ev.xclient.type = ClientMessage;
 	ev.xclient.window = SDL_Root;
-	ev.xclient.message_type = XInternAtom(SDL_Display,
+	ev.xclient.message_type = pXInternAtom(SDL_Display,
 					      "KWM_KEEP_ON_TOP", False);
 	ev.xclient.format = 32;
 	ev.xclient.data.l[0] = FSwindow;
 	ev.xclient.data.l[1] = CurrentTime;
 	mask = SubstructureRedirectMask;
-	XSendEvent(SDL_Display, SDL_Root, False, mask, &ev);
+	pXSendEvent(SDL_Display, SDL_Root, False, mask, &ev);
     }
 
     hints = NULL;
     titleprop.value = iconprop.value = NULL;
     if(WMwindow) {
 	/* All window attributes must survive the recreation */
-	hints = XGetWMHints(SDL_Display, WMwindow);
-	XGetWMName(SDL_Display, WMwindow, &titleprop);
-	XGetWMIconName(SDL_Display, WMwindow, &iconprop);
-	XDestroyWindow(SDL_Display, WMwindow);
+	hints = pXGetWMHints(SDL_Display, WMwindow);
+	pXGetWMName(SDL_Display, WMwindow, &titleprop);
+	pXGetWMIconName(SDL_Display, WMwindow, &iconprop);
+	pXDestroyWindow(SDL_Display, WMwindow);
     }
 
     /* Create the window for windowed management */
     /* (reusing the xattr structure above) */
-    WMwindow = XCreateWindow(SDL_Display, SDL_Root, 0, 0, 32, 32, 0,
+    WMwindow = pXCreateWindow(SDL_Display, SDL_Root, 0, 0, 32, 32, 0,
 			     this->hidden->depth, InputOutput, SDL_Visual,
 			     CWBackPixel | CWBorderPixel | CWColormap,
 			     &xattr);
 
     /* Set the input hints so we get keyboard input */
     if(!hints) {
-	hints = XAllocWMHints();
+	hints = pXAllocWMHints();
 	hints->input = True;
 	hints->flags = InputHint;
     }
-    XSetWMHints(SDL_Display, WMwindow, hints);
-    XFree(hints);
+    pXSetWMHints(SDL_Display, WMwindow, hints);
+    pXFree(hints);
     if(titleprop.value) {
-	XSetWMName(SDL_Display, WMwindow, &titleprop);
-	XFree(titleprop.value);
+	pXSetWMName(SDL_Display, WMwindow, &titleprop);
+	pXFree(titleprop.value);
     }
     if(iconprop.value) {
-	XSetWMIconName(SDL_Display, WMwindow, &iconprop);
-	XFree(iconprop.value);
+	pXSetWMIconName(SDL_Display, WMwindow, &iconprop);
+	pXFree(iconprop.value);
     }
 
-    XSelectInput(SDL_Display, WMwindow,
+    pXSelectInput(SDL_Display, WMwindow,
 		 FocusChangeMask | KeyPressMask | KeyReleaseMask
 		 | PropertyChangeMask | StructureNotifyMask | KeymapStateMask);
 
     /* Set the class hints so we can get an icon (AfterStep) */
     {
 	XClassHint *classhints;
-	classhints = XAllocClassHint();
+	classhints = pXAllocClassHint();
 	if(classhints != NULL) {
             char *classname = getenv("SDL_VIDEO_X11_WMCLASS");
             if ( ! classname ) {
@@ -357,14 +360,14 @@ static void create_aux_windows(_THIS)
             }
 	    classhints->res_name = classname;
 	    classhints->res_class = classname;
-	    XSetClassHint(SDL_Display, WMwindow, classhints);
-	    XFree(classhints);
+	    pXSetClassHint(SDL_Display, WMwindow, classhints);
+	    pXFree(classhints);
 	}
     }
 
     /* Allow the window to be deleted by the window manager */
-    WM_DELETE_WINDOW = XInternAtom(SDL_Display, "WM_DELETE_WINDOW", False);
-    XSetWMProtocols(SDL_Display, WMwindow, &WM_DELETE_WINDOW, 1);
+    WM_DELETE_WINDOW = pXInternAtom(SDL_Display, "WM_DELETE_WINDOW", False);
+    pXSetWMProtocols(SDL_Display, WMwindow, &WM_DELETE_WINDOW, 1);
 }
 
 static int X11_VideoInit(_THIS, SDL_PixelFormat *vformat)
@@ -375,36 +378,36 @@ static int X11_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	/* Open the X11 display */
 	display = NULL;		/* Get it from DISPLAY environment variable */
 
-	if ( (strncmp(XDisplayName(display), ":", 1) == 0) ||
-	     (strncmp(XDisplayName(display), "unix:", 5) == 0) ) {
+	if ( (strncmp(pXDisplayName(display), ":", 1) == 0) ||
+	     (strncmp(pXDisplayName(display), "unix:", 5) == 0) ) {
 		local_X11 = 1;
 	} else {
 		local_X11 = 0;
 	}
-	SDL_Display = XOpenDisplay(display);
+	SDL_Display = pXOpenDisplay(display);
 	if ( SDL_Display == NULL ) {
 		SDL_SetError("Couldn't open X11 display");
 		return(-1);
 	}
 #ifdef X11_DEBUG
-	XSynchronize(SDL_Display, True);
+	pXSynchronize(SDL_Display, True);
 #endif
 
 	/* Create an alternate X display for graphics updates -- allows us
 	   to do graphics updates in a separate thread from event handling.
 	   Thread-safe X11 doesn't seem to exist.
 	 */
-	GFX_Display = XOpenDisplay(display);
+	GFX_Display = pXOpenDisplay(display);
 	if ( GFX_Display == NULL ) {
 		SDL_SetError("Couldn't open X11 display");
 		return(-1);
 	}
 
 	/* Set the normal X error handler */
-	X_handler = XSetErrorHandler(x_errhandler);
+	X_handler = pXSetErrorHandler(x_errhandler);
 
 	/* Set the error handler if we lose the X display */
-	XIO_handler = XSetIOErrorHandler(xio_errhandler);
+	XIO_handler = pXSetIOErrorHandler(xio_errhandler);
 
 	/* use default screen (from $DISPLAY) */
 	SDL_Screen = DefaultScreen(SDL_Display);
@@ -413,7 +416,7 @@ static int X11_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	/* Check for MIT shared memory extension */
 	use_mitshm = 0;
 	if ( local_X11 ) {
-		use_mitshm = XShmQueryExtension(SDL_Display);
+		use_mitshm = pXShmQueryExtension(SDL_Display);
 	}
 #endif /* NO_SHARED_MEMORY */
 
@@ -436,7 +439,7 @@ static int X11_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	if ( SDL_Visual == DefaultVisual(SDL_Display, SDL_Screen) ) {
 	    SDL_XColorMap = SDL_DisplayColormap;
 	} else {
-	    SDL_XColorMap = XCreateColormap(SDL_Display, SDL_Root,
+	    SDL_XColorMap = pXCreateColormap(SDL_Display, SDL_Root,
 					    SDL_Visual, AllocNone);
 	}
 	this->hidden->depth = this->hidden->visuals[i].depth;
@@ -463,7 +466,7 @@ static int X11_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	this->info.wm_available = 1;
 
 	/* We're done! */
-	XFlush(SDL_Display);
+	pXFlush(SDL_Display);
 	return(0);
 }
 
@@ -478,7 +481,7 @@ static void X11_DestroyWindow(_THIS, SDL_Surface *screen)
 	if ( ! SDL_windowid ) {
 		/* Hide the managed window */
 		if ( WMwindow ) {
-			XUnmapWindow(SDL_Display, WMwindow);
+			pXUnmapWindow(SDL_Display, WMwindow);
 		}
 		if ( screen && (screen->flags & SDL_FULLSCREEN) ) {
 			screen->flags &= ~SDL_FULLSCREEN;
@@ -487,7 +490,7 @@ static void X11_DestroyWindow(_THIS, SDL_Surface *screen)
 
 		/* Destroy the output window */
 		if ( SDL_Window ) {
-			XDestroyWindow(SDL_Display, SDL_Window);
+			pXDestroyWindow(SDL_Display, SDL_Window);
 		}
 
 		/* Free the colormap entries */
@@ -497,7 +500,7 @@ static void X11_DestroyWindow(_THIS, SDL_Surface *screen)
 			numcolors = SDL_Visual->map_entries;
 			for ( pixel=0; pixel<numcolors; ++pixel ) {
 				while ( SDL_XPixels[pixel] > 0 ) {
-					XFreeColors(GFX_Display,
+					pXFreeColors(GFX_Display,
 						SDL_DisplayColormap,&pixel,1,0);
 					--SDL_XPixels[pixel];
 				}
@@ -508,7 +511,7 @@ static void X11_DestroyWindow(_THIS, SDL_Surface *screen)
 
 		/* Free the graphics context */
 		if ( SDL_GC ) {
-			XFreeGC(SDL_Display, SDL_GC);
+			pXFreeGC(SDL_Display, SDL_GC);
 			SDL_GC = 0;
 		}
 	}
@@ -538,7 +541,7 @@ static void X11_SetSizeHints(_THIS, int w, int h, Uint32 flags)
 {
 	XSizeHints *hints;
 
-	hints = XAllocSizeHints();
+	hints = pXAllocSizeHints();
 	if ( hints ) {
 		if ( flags & SDL_RESIZABLE ) {
 			hints->min_width = 32;
@@ -558,13 +561,13 @@ static void X11_SetSizeHints(_THIS, int w, int h, Uint32 flags)
 		/* Center it, if desired */
 		if ( X11_WindowPosition(this, &hints->x, &hints->y, w, h) ) {
 			hints->flags |= USPosition;
-			XMoveWindow(SDL_Display, WMwindow, hints->x, hints->y);
+			pXMoveWindow(SDL_Display, WMwindow, hints->x, hints->y);
 
 			/* Flush the resize event so we don't catch it later */
-			XSync(SDL_Display, True);
+			pXSync(SDL_Display, True);
 		}
-		XSetWMNormalHints(SDL_Display, WMwindow, hints);
-		XFree(hints);
+		pXSetWMNormalHints(SDL_Display, WMwindow, hints);
+		pXFree(hints);
 	}
 
 	/* Respect the window caption style */
@@ -576,7 +579,7 @@ static void X11_SetSizeHints(_THIS, int w, int h, Uint32 flags)
 		set = SDL_FALSE;
 
 		/* First try to set MWM hints */
-		WM_HINTS = XInternAtom(SDL_Display, "_MOTIF_WM_HINTS", True);
+		WM_HINTS = pXInternAtom(SDL_Display, "_MOTIF_WM_HINTS", True);
 		if ( WM_HINTS != None ) {
 			/* Hints used by Motif compliant window managers */
 			struct {
@@ -587,7 +590,7 @@ static void X11_SetSizeHints(_THIS, int w, int h, Uint32 flags)
 				unsigned long status;
 			} MWMHints = { (1L << 1), 0, 0, 0, 0 };
 
-			XChangeProperty(SDL_Display, WMwindow,
+			pXChangeProperty(SDL_Display, WMwindow,
 			                WM_HINTS, WM_HINTS, 32,
 			                PropModeReplace,
 					(unsigned char *)&MWMHints,
@@ -595,11 +598,11 @@ static void X11_SetSizeHints(_THIS, int w, int h, Uint32 flags)
 			set = SDL_TRUE;
 		}
 		/* Now try to set KWM hints */
-		WM_HINTS = XInternAtom(SDL_Display, "KWM_WIN_DECORATION", True);
+		WM_HINTS = pXInternAtom(SDL_Display, "KWM_WIN_DECORATION", True);
 		if ( WM_HINTS != None ) {
 			long KWMHints = 0;
 
-			XChangeProperty(SDL_Display, WMwindow,
+			pXChangeProperty(SDL_Display, WMwindow,
 			                WM_HINTS, WM_HINTS, 32,
 			                PropModeReplace,
 					(unsigned char *)&KWMHints,
@@ -607,11 +610,11 @@ static void X11_SetSizeHints(_THIS, int w, int h, Uint32 flags)
 			set = SDL_TRUE;
 		}
 		/* Now try to set GNOME hints */
-		WM_HINTS = XInternAtom(SDL_Display, "_WIN_HINTS", True);
+		WM_HINTS = pXInternAtom(SDL_Display, "_WIN_HINTS", True);
 		if ( WM_HINTS != None ) {
 			long GNOMEHints = 0;
 
-			XChangeProperty(SDL_Display, WMwindow,
+			pXChangeProperty(SDL_Display, WMwindow,
 			                WM_HINTS, WM_HINTS, 32,
 			                PropModeReplace,
 					(unsigned char *)&GNOMEHints,
@@ -620,7 +623,7 @@ static void X11_SetSizeHints(_THIS, int w, int h, Uint32 flags)
 		}
 		/* Finally set the transient hints if necessary */
 		if ( ! set ) {
-			XSetTransientForHint(SDL_Display, WMwindow, SDL_Root);
+			pXSetTransientForHint(SDL_Display, WMwindow, SDL_Root);
 		}
 	} else {
 		SDL_bool set;
@@ -630,27 +633,27 @@ static void X11_SetSizeHints(_THIS, int w, int h, Uint32 flags)
 		set = SDL_FALSE;
 
 		/* First try to unset MWM hints */
-		WM_HINTS = XInternAtom(SDL_Display, "_MOTIF_WM_HINTS", True);
+		WM_HINTS = pXInternAtom(SDL_Display, "_MOTIF_WM_HINTS", True);
 		if ( WM_HINTS != None ) {
-			XDeleteProperty(SDL_Display, WMwindow, WM_HINTS);
+			pXDeleteProperty(SDL_Display, WMwindow, WM_HINTS);
 			set = SDL_TRUE;
 		}
 		/* Now try to unset KWM hints */
-		WM_HINTS = XInternAtom(SDL_Display, "KWM_WIN_DECORATION", True);
+		WM_HINTS = pXInternAtom(SDL_Display, "KWM_WIN_DECORATION", True);
 		if ( WM_HINTS != None ) {
-			XDeleteProperty(SDL_Display, WMwindow, WM_HINTS);
+			pXDeleteProperty(SDL_Display, WMwindow, WM_HINTS);
 			set = SDL_TRUE;
 		}
 		/* Now try to unset GNOME hints */
-		WM_HINTS = XInternAtom(SDL_Display, "_WIN_HINTS", True);
+		WM_HINTS = pXInternAtom(SDL_Display, "_WIN_HINTS", True);
 		if ( WM_HINTS != None ) {
-			XDeleteProperty(SDL_Display, WMwindow, WM_HINTS);
+			pXDeleteProperty(SDL_Display, WMwindow, WM_HINTS);
 			set = SDL_TRUE;
 		}
 		/* Finally unset the transient hints if necessary */
 		if ( ! set ) {
 			/* NOTE: Does this work? */
-			XSetTransientForHint(SDL_Display, WMwindow, None);
+			pXSetTransientForHint(SDL_Display, WMwindow, None);
 		}
 	}
 }
@@ -688,7 +691,7 @@ static int X11_CreateWindow(_THIS, SDL_Surface *screen,
 	} else if ( SDL_windowid ) {
 		XWindowAttributes a;
 
-		XGetWindowAttributes(SDL_Display, SDL_Window, &a);
+		pXGetWindowAttributes(SDL_Display, SDL_Window, &a);
 		vis = a.visual;
 		depth = a.depth;
 	} else {
@@ -717,7 +720,7 @@ static int X11_CreateWindow(_THIS, SDL_Surface *screen,
 
 	/* Create the appropriate colormap */
 	if ( SDL_XColorMap != SDL_DisplayColormap ) {
-		XFreeColormap(SDL_Display, SDL_XColorMap);
+		pXFreeColormap(SDL_Display, SDL_XColorMap);
 	}
 	if ( SDL_Visual->class == PseudoColor ) {
 	    int ncolors;
@@ -737,7 +740,7 @@ static int X11_CreateWindow(_THIS, SDL_Surface *screen,
 	    }
 	    if ( flags & SDL_HWPALETTE ) {
 		screen->flags |= SDL_HWPALETTE;
-		SDL_XColorMap = XCreateColormap(SDL_Display, SDL_Root,
+		SDL_XColorMap = pXCreateColormap(SDL_Display, SDL_Root,
 		                                SDL_Visual, AllocAll);
 	    } else {
 		SDL_XColorMap = SDL_DisplayColormap;
@@ -745,9 +748,9 @@ static int X11_CreateWindow(_THIS, SDL_Surface *screen,
 	} else if ( SDL_Visual->class == DirectColor ) {
 
 	    /* Create a colormap which we can manipulate for gamma */
-	    SDL_XColorMap = XCreateColormap(SDL_Display, SDL_Root,
+	    SDL_XColorMap = pXCreateColormap(SDL_Display, SDL_Root,
 		                            SDL_Visual, AllocAll);
-            XSync(SDL_Display, False);
+            pXSync(SDL_Display, False);
 
 	    /* Initialize the colormap to the identity mapping */
 	    SDL_GetGammaRamp(0, 0, 0);
@@ -756,7 +759,7 @@ static int X11_CreateWindow(_THIS, SDL_Surface *screen,
 	    this->screen = NULL;
 	} else {
 	    /* Create a read-only colormap for our window */
-	    SDL_XColorMap = XCreateColormap(SDL_Display, SDL_Root,
+	    SDL_XColorMap = pXCreateColormap(SDL_Display, SDL_Root,
 	                                    SDL_Visual, AllocNone);
 	}
 
@@ -769,8 +772,8 @@ static int X11_CreateWindow(_THIS, SDL_Surface *screen,
 	       colour (0 is white on some displays), we should reset the
 	       background to 0 here since that is what the user expects
 	       with a private colormap */
-	    XSetWindowBackground(SDL_Display, FSwindow, 0);
-	    XClearWindow(SDL_Display, FSwindow);
+	    pXSetWindowBackground(SDL_Display, FSwindow, 0);
+	    pXClearWindow(SDL_Display, FSwindow);
 	}
 
 	/* resize the (possibly new) window manager window */
@@ -778,7 +781,7 @@ static int X11_CreateWindow(_THIS, SDL_Surface *screen,
 	        X11_SetSizeHints(this, w, h, flags);
 		current_w = w;
 		current_h = h;
-		XResizeWindow(SDL_Display, WMwindow, w, h);
+		pXResizeWindow(SDL_Display, WMwindow, w, h);
 	}
 
 	/* Create (or use) the X11 display window */
@@ -793,14 +796,14 @@ static int X11_CreateWindow(_THIS, SDL_Surface *screen,
 			swa.background_pixel = 0;
 			swa.border_pixel = 0;
 			swa.colormap = SDL_XColorMap;
-			SDL_Window = XCreateWindow(SDL_Display, WMwindow,
+			SDL_Window = pXCreateWindow(SDL_Display, WMwindow,
 		                           	0, 0, w, h, 0, depth,
 		                           	InputOutput, SDL_Visual,
 		                           	CWBackPixel | CWBorderPixel
 		                           	| CWColormap, &swa);
 		}
 		/* Only manage our input if we own the window */
-		XSelectInput(SDL_Display, SDL_Window,
+		pXSelectInput(SDL_Display, SDL_Window,
 					( EnterWindowMask | LeaveWindowMask
 					| ButtonPressMask | ButtonReleaseMask
 					| PointerMotionMask | ExposureMask ));
@@ -817,7 +820,7 @@ static int X11_CreateWindow(_THIS, SDL_Surface *screen,
 		XGCValues gcv;
 
 		gcv.graphics_exposures = False;
-		SDL_GC = XCreateGC(SDL_Display, SDL_Window,
+		SDL_GC = pXCreateGC(SDL_Display, SDL_Window,
 		                   GCGraphicsExposures, &gcv);
 		if ( ! SDL_GC ) {
 			SDL_SetError("Couldn't create graphics context");
@@ -827,10 +830,10 @@ static int X11_CreateWindow(_THIS, SDL_Surface *screen,
 
 	/* Set our colormaps when not setting a GL mode */
 	if ( ! (flags & SDL_OPENGL) ) {
-		XSetWindowColormap(SDL_Display, SDL_Window, SDL_XColorMap);
+		pXSetWindowColormap(SDL_Display, SDL_Window, SDL_XColorMap);
 		if( !SDL_windowid ) {
-		    XSetWindowColormap(SDL_Display, FSwindow, SDL_XColorMap);
-		    XSetWindowColormap(SDL_Display, WMwindow, SDL_XColorMap);
+		    pXSetWindowColormap(SDL_Display, FSwindow, SDL_XColorMap);
+		    pXSetWindowColormap(SDL_Display, WMwindow, SDL_XColorMap);
 		}
 	}
 
@@ -845,7 +848,7 @@ static int X11_CreateWindow(_THIS, SDL_Surface *screen,
 		xscreen = ScreenOfDisplay(SDL_Display, SDL_Screen);
 		a.backing_store = DoesBackingStore(xscreen);
 		if ( a.backing_store != NotUseful ) {
-			XChangeWindowAttributes(SDL_Display, SDL_Window,
+			pXChangeWindowAttributes(SDL_Display, SDL_Window,
 			                        CWBackingStore, &a);
 		}
 	}
@@ -879,8 +882,8 @@ static int X11_CreateWindow(_THIS, SDL_Surface *screen,
 
 	/* Map them both and go fullscreen, if requested */
 	if ( ! SDL_windowid ) {
-		XMapWindow(SDL_Display, SDL_Window);
-		XMapWindow(SDL_Display, WMwindow);
+		pXMapWindow(SDL_Display, SDL_Window);
+		pXMapWindow(SDL_Display, WMwindow);
 		X11_WaitMapped(this, WMwindow);
 		if ( flags & SDL_FULLSCREEN ) {
 			screen->flags |= SDL_FULLSCREEN;
@@ -900,7 +903,7 @@ static int X11_ResizeWindow(_THIS,
 		X11_SetSizeHints(this, w, h, flags);
 		current_w = w;
 		current_h = h;
-		XResizeWindow(SDL_Display, WMwindow, w, h);
+		pXResizeWindow(SDL_Display, WMwindow, w, h);
 
 		/* Resize the fullscreen and display windows */
 		if ( flags & SDL_FULLSCREEN ) {
@@ -916,7 +919,7 @@ static int X11_ResizeWindow(_THIS,
 				X11_LeaveFullScreen(this);
 			}
 		}
-		XResizeWindow(SDL_Display, SDL_Window, w, h);
+		pXResizeWindow(SDL_Display, SDL_Window, w, h);
 	}
 	return(0);
 }
@@ -938,7 +941,7 @@ SDL_Surface *X11_SetVideoMode(_THIS, SDL_Surface *current,
 	}
 
 	/* Flush any delayed updates */
-	XSync(GFX_Display, False);
+	pXSync(GFX_Display, False);
 
 	/* Set up the X11 window */
 	saved_flags = current->flags;
@@ -968,7 +971,7 @@ SDL_Surface *X11_SetVideoMode(_THIS, SDL_Surface *current,
 
   done:
 	/* Release the event thread */
-	XSync(SDL_Display, False);
+	pXSync(SDL_Display, False);
 	SDL_Unlock_EventThread();
 
 	/* We're done! */
@@ -1017,7 +1020,7 @@ static void X11_UpdateMouse(_THIS)
 
 	/* Lock the event thread, in multi-threading environments */
 	SDL_Lock_EventThread();
-	if ( XQueryPointer(SDL_Display, SDL_Window, &u1, &current_win,
+	if ( pXQueryPointer(SDL_Display, SDL_Window, &u1, &current_win,
 	                   &u2, &u2, &x, &y, &mask) ) {
 		if ( (x >= 0) && (x < SDL_VideoSurface->w) &&
 		     (y >= 0) && (y < SDL_VideoSurface->h) ) {
@@ -1054,7 +1057,7 @@ static void allocate_nearest(_THIS, SDL_Color *colors,
 	 * XQueryColors sets the flags in the XColor struct, so we use
 	 * that to keep track of which colours are available
 	 */
-	XQueryColors(GFX_Display, SDL_XColorMap, all, 256);
+	pXQueryColors(GFX_Display, SDL_XColorMap, all, 256);
 
 	for(i = 0; i < nwant; i++) {
 		XColor *c;
@@ -1080,7 +1083,7 @@ static void allocate_nearest(_THIS, SDL_Color *colors,
 		if(SDL_XPixels[best])
 			continue; /* already allocated, waste no more time */
 		c = all + best;
-		if(XAllocColor(GFX_Display, SDL_XColorMap, c)) {
+		if(pXAllocColor(GFX_Display, SDL_XColorMap, c)) {
 			/* got it */
 			colors[c->pixel].r = c->red >> 8;
 			colors[c->pixel].g = c->green >> 8;
@@ -1122,8 +1125,8 @@ int X11_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 			xcmap[i].blue  = (colors[i].b<<8)|colors[i].b;
 			xcmap[i].flags = (DoRed|DoGreen|DoBlue);
 		}
-		XStoreColors(GFX_Display, SDL_XColorMap, xcmap, ncolors);
-		XSync(GFX_Display, False);
+		pXStoreColors(GFX_Display, SDL_XColorMap, xcmap, ncolors);
+		pXSync(GFX_Display, False);
 		FREEA(xcmap);
 	} else {
 	        /*
@@ -1151,7 +1154,7 @@ int X11_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 				--SDL_XPixels[pixel];
 			}
 		}
-		XFreeColors(GFX_Display, SDL_XColorMap, freelist, nfree, 0);
+		pXFreeColors(GFX_Display, SDL_XColorMap, freelist, nfree, 0);
 		FREEA(freelist);
 
 		want = ALLOCA(ncolors * sizeof(SDL_Color));
@@ -1168,7 +1171,7 @@ int X11_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 			col.green = want[i].g << 8;
 			col.blue = want[i].b << 8;
 			col.flags = DoRed | DoGreen | DoBlue;
-			if(XAllocColor(GFX_Display, SDL_XColorMap, &col)) {
+			if(pXAllocColor(GFX_Display, SDL_XColorMap, &col)) {
 			        /* We got the colour, or at least the nearest
 				   the hardware could get. */
 			        colors[col.pixel].r = col.red >> 8;
@@ -1212,8 +1215,8 @@ int X11_SetGammaRamp(_THIS, Uint16 *ramp)
 		xcmap[i].blue  = ramp[2*256+c];
 		xcmap[i].flags = (DoRed|DoGreen|DoBlue);
 	}
-	XStoreColors(GFX_Display, SDL_XColorMap, xcmap, ncolors);
-	XSync(GFX_Display, False);
+	pXStoreColors(GFX_Display, SDL_XColorMap, xcmap, ncolors);
+	pXSync(GFX_Display, False);
 	return(0);
 }
 
@@ -1226,14 +1229,14 @@ void X11_VideoQuit(_THIS)
 	/* The event thread should be done, so we can touch SDL_Display */
 	if ( SDL_Display != NULL ) {
 		/* Flush any delayed updates */
-		XSync(GFX_Display, False);
+		pXSync(GFX_Display, False);
 
 		/* Start shutting down the windows */
 		X11_DestroyImage(this, this->screen);
 		X11_DestroyWindow(this, this->screen);
 		X11_FreeVideoModes(this);
 		if ( SDL_XColorMap != SDL_DisplayColormap ) {
-			XFreeColormap(SDL_Display, SDL_XColorMap);
+			pXFreeColormap(SDL_Display, SDL_XColorMap);
 		}
 		if ( SDL_iconcolors ) {
 			unsigned long pixel;
@@ -1241,7 +1244,7 @@ void X11_VideoQuit(_THIS)
 							 SDL_Screen);
 			for(pixel = 0; pixel < 256; ++pixel) {
 				while(SDL_iconcolors[pixel] > 0) {
-					XFreeColors(GFX_Display,
+					pXFreeColors(GFX_Display,
 						    dcmap, &pixel, 1, 0);
 					--SDL_iconcolors[pixel];
 				}
@@ -1262,20 +1265,20 @@ void X11_VideoQuit(_THIS)
 
 		/* Close the X11 graphics connection */
 		if ( GFX_Display != NULL ) {
-			XCloseDisplay(GFX_Display);
+			pXCloseDisplay(GFX_Display);
 			GFX_Display = NULL;
 		}
 
 		/* Close the X11 display connection */
-		XCloseDisplay(SDL_Display);
+		pXCloseDisplay(SDL_Display);
 		SDL_Display = NULL;
 
 		/* Reset the X11 error handlers */
 		if ( XIO_handler ) {
-			XSetIOErrorHandler(XIO_handler);
+			pXSetIOErrorHandler(XIO_handler);
 		}
 		if ( X_handler ) {
-			XSetErrorHandler(X_handler);
+			pXSetErrorHandler(X_handler);
 		}
 
 		/* Unload GL library after X11 shuts down */

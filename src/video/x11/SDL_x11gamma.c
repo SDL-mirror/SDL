@@ -68,7 +68,7 @@ static int X11_SetGammaNoLock(_THIS, float red, float green, float blue)
 	}
         if ( SDL_GetAppState() & SDL_APPACTIVE ) {
             succeeded = SDL_NAME(XF86VidModeSetGamma)(SDL_Display, SDL_Screen, &gamma);
-            XSync(SDL_Display, False);
+            pXSync(SDL_Display, False);
         } else {
             gamma_saved[0] = gamma.red;
             gamma_saved[1] = gamma.green;

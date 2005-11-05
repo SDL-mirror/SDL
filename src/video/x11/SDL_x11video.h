@@ -31,11 +31,7 @@ static char rcsid =
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
-#ifndef NO_SHARED_MEMORY
-#include <sys/ipc.h>
-#include <sys/shm.h>
-#include <X11/extensions/XShm.h>
-#endif
+
 #ifdef XFREE86_DGAMOUSE
 #include <XFree86/extensions/xf86dga.h>
 #endif
@@ -50,6 +46,7 @@ static char rcsid =
 
 #include "SDL_mouse.h"
 #include "SDL_sysvideo.h"
+#include "SDL_x11dyn.h"
 
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_VideoDevice *this

@@ -4,6 +4,9 @@
 noinst_LTLIBRARIES = libvideo_x11.la
 libvideo_x11_la_SOURCES = $(X11_SRCS)
 
+x11_lib = \"@x11_lib@\"
+x11ext_lib = \"@x11ext_lib@\"
+
 # The SDL X11 video driver sources
 X11_SRCS = 			\
 	SDL_x11dga.c		\
@@ -25,4 +28,8 @@ X11_SRCS = 			\
 	SDL_x11wm.c		\
 	SDL_x11wm_c.h		\
 	SDL_x11yuv.c		\
-	SDL_x11yuv_c.h
+	SDL_x11yuv_c.h		\
+	SDL_x11dyn.c		\
+	SDL_x11dyn.h		\
+	SDL_x11sym.h
+

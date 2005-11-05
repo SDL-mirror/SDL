@@ -47,7 +47,7 @@ static int DGA_DispatchEvent(_THIS)
 	int posted;
 	SDL_NAME(XDGAEvent) xevent;
 
-	XNextEvent(DGA_Display, (XEvent *)&xevent);
+	pXNextEvent(DGA_Display, (XEvent *)&xevent);
 
 	posted = 0;
 	xevent.type -= DGA_event_base;

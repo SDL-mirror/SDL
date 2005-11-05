@@ -69,10 +69,10 @@ XVisualInfo *X11_GL_GetVisual(_THIS)
 		XVisualInfo vi_in;
 		int out_count;
 
-		XGetWindowAttributes(SDL_Display, SDL_Window, &a);
+		pXGetWindowAttributes(SDL_Display, SDL_Window, &a);
 		vi_in.screen = SDL_Screen;
-		vi_in.visualid = XVisualIDFromVisual(a.visual);
-		glx_visualinfo = XGetVisualInfo(SDL_Display,
+		vi_in.visualid = pXVisualIDFromVisual(a.visual);
+		glx_visualinfo = pXGetVisualInfo(SDL_Display,
 	                     VisualScreenMask|VisualIDMask, &vi_in, &out_count);
 		return glx_visualinfo;
 	}
@@ -188,7 +188,7 @@ int X11_GL_CreateWindow(_THIS, int w, int h)
 	attributes.colormap = SDL_XColorMap;
 	mask = CWBackPixel | CWBorderPixel | CWColormap;
 
-	SDL_Window = XCreateWindow(SDL_Display, WMwindow,
+	SDL_Window = pXCreateWindow(SDL_Display, WMwindow,
 			0, 0, w, h, 0, glx_visualinfo->depth,
 			InputOutput, glx_visualinfo->visual,
 			mask, &attributes);
@@ -209,10 +209,10 @@ int X11_GL_CreateContext(_THIS)
 	int retval;
 #ifdef HAVE_OPENGL
 	/* We do this to create a clean separation between X and GLX errors. */
-	XSync( SDL_Display, False );
+	pXSync( SDL_Display, False );
 	glx_context = this->gl_data->glXCreateContext(GFX_Display, 
 				     glx_visualinfo, NULL, True);
-	XSync( GFX_Display, False );
+	pXSync( GFX_Display, False );
 
 	if (glx_context == NULL) {
 		SDL_SetError("Could not create GL context");
@@ -296,7 +296,7 @@ int X11_GL_MakeCurrent(_THIS)
 		SDL_SetError("Unable to make GL context current");
 		retval = -1;
 	}
-	XSync( GFX_Display, False );
+	pXSync( GFX_Display, False );
 
 	/* 
 	 * The context is now current, check for glXReleaseBuffersMESA() 

@@ -35,6 +35,13 @@ Equipment Corporation.
 #include "panoramiXproto.h"		/* in ../include */
 #include "Xinerama.h"
 
+#include "../../x11/SDL_x11dyn.h"
+
+/* Workaround code in headers... */
+#define _XFlush p_XFlush
+#define _XFlushGCCache p_XFlushGCCache
+#define _XReply p_XReply
+#define _XSend p_XSend
 
 static XExtensionInfo _panoramiX_ext_info_data;
 static XExtensionInfo *panoramiX_ext_info = &_panoramiX_ext_info_data;
@@ -111,7 +118,7 @@ Status SDL_NAME(XPanoramiXQueryVersion)(
     req->panoramiXReqType = X_PanoramiXQueryVersion;
     req->clientMajor = PANORAMIX_MAJOR_VERSION;
     req->clientMinor = PANORAMIX_MINOR_VERSION;
-    if (!_XReply (dpy, (xReply *) &rep, 0, xTrue)) {
+    if (!p_XReply (dpy, (xReply *) &rep, 0, xTrue)) {
 	UnlockDisplay (dpy);
 	SyncHandle ();
 	return 0;
@@ -145,7 +152,7 @@ Status SDL_NAME(XPanoramiXGetState) (
     req->reqType = info->codes->major_opcode;
     req->panoramiXReqType = X_PanoramiXGetState;
     req->window = drawable;
-    if (!_XReply (dpy, (xReply *) &rep, 0, xTrue)) {
+    if (!p_XReply (dpy, (xReply *) &rep, 0, xTrue)) {
 	UnlockDisplay (dpy);
 	SyncHandle ();
 	return 0;
@@ -174,7 +181,7 @@ Status SDL_NAME(XPanoramiXGetScreenCount) (
     req->reqType = info->codes->major_opcode;
     req->panoramiXReqType = X_PanoramiXGetScreenCount;
     req->window = drawable;
-    if (!_XReply (dpy, (xReply *) &rep, 0, xTrue)) {
+    if (!p_XReply (dpy, (xReply *) &rep, 0, xTrue)) {
 	UnlockDisplay (dpy);
 	SyncHandle ();
 	return 0;
@@ -205,7 +212,7 @@ Status SDL_NAME(XPanoramiXGetScreenSize) (
     req->panoramiXReqType = X_PanoramiXGetScreenSize;
     req->window = drawable;
     req->screen = screen_num;			/* need to define */ 
-    if (!_XReply (dpy, (xReply *) &rep, 0, xTrue)) {
+    if (!p_XReply (dpy, (xReply *) &rep, 0, xTrue)) {
 	UnlockDisplay (dpy);
 	SyncHandle ();
 	return 0;
@@ -285,7 +292,7 @@ SDL_NAME(XineramaQueryScreens)(
     GetReq (XineramaQueryScreens, req);
     req->reqType = info->codes->major_opcode;
     req->panoramiXReqType = X_XineramaQueryScreens;
-    if (!_XReply (dpy, (xReply *) &rep, 0, xFalse)) {
+    if (!p_XReply (dpy, (xReply *) &rep, 0, xFalse)) {
 	UnlockDisplay (dpy);
 	SyncHandle ();
 	return NULL;
@@ -297,7 +304,7 @@ SDL_NAME(XineramaQueryScreens)(
 	    int i;
 
 	    for(i = 0; i < rep.number; i++) {
-		_XRead(dpy, (char*)(&scratch), sz_XineramaScreenInfo);
+		p_XRead(dpy, (char*)(&scratch), sz_XineramaScreenInfo);
 		scrnInfo[i].screen_number = i;
 		scrnInfo[i].x_org 	  = scratch.x_org;
 		scrnInfo[i].y_org 	  = scratch.y_org;
@@ -307,7 +314,7 @@ SDL_NAME(XineramaQueryScreens)(
 
 	    *number = rep.number;
 	} else
-	    _XEatData(dpy, rep.length << 2);
+	    p_XEatData(dpy, rep.length << 2);
     }
 
     UnlockDisplay (dpy);

@@ -173,9 +173,9 @@ extern XExtDisplayInfo *XextFindDisplay(
 
 #define XextHasExtension(i) ((i) && ((i)->codes))
 #define XextCheckExtension(dpy,i,name,val) \
-  if (!XextHasExtension(i)) { XMissingExtension (dpy, name); return val; }
+  if (!XextHasExtension(i)) { pXMissingExtension (dpy, name); return val; }
 #define XextSimpleCheckExtension(dpy,i,name) \
-  if (!XextHasExtension(i)) { XMissingExtension (dpy, name); return; }
+  if (!XextHasExtension(i)) { pXMissingExtension (dpy, name); return; }
 
 
 /*
@@ -188,9 +188,9 @@ extern XExtDisplayInfo *XextFindDisplay(
 XExtDisplayInfo *proc (Display *dpy) \
 { \
     XExtDisplayInfo *dpyinfo; \
-    if (!extinfo) { if (!(extinfo = XextCreateExtension())) return NULL; } \
-    if (!(dpyinfo = XextFindDisplay (extinfo, dpy))) \
-      dpyinfo = XextAddDisplay (extinfo,dpy,extname,hooks,nev,data); \
+    if (!extinfo) { if (!(extinfo = pXextCreateExtension())) return NULL; } \
+    if (!(dpyinfo = pXextFindDisplay (extinfo, dpy))) \
+      dpyinfo = pXextAddDisplay (extinfo,dpy,extname,hooks,nev,data); \
     return dpyinfo; \
 }
 
@@ -200,7 +200,7 @@ XExtDisplayInfo *proc (Display *dpy) \
 #define XEXT_GENERATE_CLOSE_DISPLAY(proc,extinfo) \
 int proc (Display *dpy, XExtCodes *codes) \
 { \
-    return XextRemoveDisplay (extinfo, dpy); \
+    return pXextRemoveDisplay (extinfo, dpy); \
 }
 
 #define XEXT_CLOSE_DISPLAY_PROTO(proc) \
@@ -213,7 +213,7 @@ char *proc (Display *dpy, int code, XExtCodes *codes, char *buf, int n) \
     if (code >= 0 && code < nerr) { \
 	char tmp[256]; \
 	sprintf (tmp, "%s.%d", extname, code); \
-	XGetErrorDatabaseText (dpy, "XProtoError", tmp, errl[code], buf, n); \
+	pXGetErrorDatabaseText (dpy, "XProtoError", tmp, errl[code], buf, n); \
 	return buf; \
     } \
     return (char *)0; \

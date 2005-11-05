@@ -51,7 +51,7 @@ SOFTWARE.
 #define XvGetReq(name, req) \
         WORD64ALIGN\
 	if ((dpy->bufptr + SIZEOF(xv##name##Req)) > dpy->bufmax)\
-		_XFlush(dpy);\
+		p_XFlush(dpy);\
 	req = (xv##name##Req *)(dpy->last_req = dpy->bufptr);\
 	req->reqType = info->codes->major_opcode;\
         req->xvReqType = xv_##name; \
@@ -63,7 +63,7 @@ SOFTWARE.
 #define XvGetReq(name, req) \
         WORD64ALIGN\
 	if ((dpy->bufptr + SIZEOF(xv/**/name/**/Req)) > dpy->bufmax)\
-		_XFlush(dpy);\
+		p_XFlush(dpy);\
 	req = (xv/**/name/**/Req *)(dpy->last_req = dpy->bufptr);\
 	req->reqType = info->codes->major_opcode;\
 	req->xvReqType = xv_/**/name;\

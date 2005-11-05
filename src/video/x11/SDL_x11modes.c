@@ -141,7 +141,7 @@ static void set_best_resolution(_THIS, int width, int height)
                  (modes[i]->vdisplay != mode.vdisplay) ) {
                 SDL_NAME(XF86VidModeSwitchToMode)(SDL_Display, SDL_Screen, modes[i]);
             }
-            XFree(modes);
+            pXFree(modes);
         }
     }
 #endif /* XFREE86_VM */
@@ -180,7 +180,7 @@ static void set_best_resolution(_THIS, int width, int height)
                                         SDL_modelist[i]->w, 
                                         SDL_modelist[i]->h, 
                                         0);
-                XSync(SDL_Display, False);
+                pXSync(SDL_Display, False);
             }
         }
     }
@@ -230,7 +230,7 @@ void X11_WaitMapped(_THIS, Window win)
 {
     XEvent event;
     do {
-        XMaskEvent(SDL_Display, StructureNotifyMask, &event);
+        pXMaskEvent(SDL_Display, StructureNotifyMask, &event);
     } while ( (event.type != MapNotify) || (event.xmap.event != win) );
 }
 
@@ -239,19 +239,19 @@ void X11_WaitUnmapped(_THIS, Window win)
 {
     XEvent event;
     do {
-        XMaskEvent(SDL_Display, StructureNotifyMask, &event);
+        pXMaskEvent(SDL_Display, StructureNotifyMask, &event);
     } while ( (event.type != UnmapNotify) || (event.xunmap.event != win) );
 }
 
 static void move_cursor_to(_THIS, int x, int y)
 {
-    XWarpPointer(SDL_Display, None, SDL_Root, 0, 0, 0, 0, x, y);
+    pXWarpPointer(SDL_Display, None, SDL_Root, 0, 0, 0, 0, x, y);
 }
 
 static int add_visual(_THIS, int depth, int class)
 {
     XVisualInfo vi;
-    if(XMatchVisualInfo(SDL_Display, SDL_Screen, depth, class, &vi)) {
+    if(pXMatchVisualInfo(SDL_Display, SDL_Screen, depth, class, &vi)) {
         int n = this->hidden->nvisuals;
         this->hidden->visuals[n].depth = vi.depth;
         this->hidden->visuals[n].visual = vi.visual;
@@ -267,13 +267,13 @@ static int add_visual_byid(_THIS, const char *visual_id)
     if ( visual_id ) {
         memset(&template, 0, (sizeof template));
         template.visualid = strtol(visual_id, NULL, 0);
-        vi = XGetVisualInfo(SDL_Display, VisualIDMask, &template, &nvis);
+        vi = pXGetVisualInfo(SDL_Display, VisualIDMask, &template, &nvis);
         if ( vi ) {
             int n = this->hidden->nvisuals;
             this->hidden->visuals[n].depth = vi->depth;
             this->hidden->visuals[n].visual = vi->visual;
             this->hidden->nvisuals++;
-            XFree(vi);
+            pXFree(vi);
         }
     }
     return(this->hidden->nvisuals);
@@ -400,7 +400,7 @@ int X11_GetVideoModes(_THIS)
             }
             SDL_modelist[n] = NULL;
         }
-        XFree(modes);
+        pXFree(modes);
 
         use_vidmode = vm_major * 100 + vm_minor;
         save_mode(this);
@@ -474,7 +474,7 @@ int X11_GetVideoModes(_THIS)
         use_xme = 0;
     }
     if ( modelist ) {
-        XFree(modelist);
+        pXFree(modelist);
     }
 #endif /* HAVE_XIGXME */
 
@@ -509,7 +509,7 @@ int X11_GetVideoModes(_THIS)
         }
             
         /* look up the pixel quantum for each depth */
-        pf = XListPixmapFormats(SDL_Display, &np);
+        pf = pXListPixmapFormats(SDL_Display, &np);
         for(i = 0; i < this->hidden->nvisuals; i++) {
             int d = this->hidden->visuals[i].depth;
             for(j = 0; j < np; j++)
@@ -518,7 +518,7 @@ int X11_GetVideoModes(_THIS)
             this->hidden->visuals[i].bpp = j < np ? pf[j].bits_per_pixel : d;
         }
 
-        XFree(pf);
+        pXFree(pf);
     }
 
     if ( SDL_modelist == NULL ) {
@@ -592,7 +592,7 @@ int X11_GetVideoModes(_THIS)
                 xinerama_y = xinerama[i].y_org;
             }
         }
-        XFree(xinerama);
+        pXFree(xinerama);
     }
 #endif /* HAVE_XINERAMA */
 
@@ -658,15 +658,15 @@ int X11_ResizeFullScreen(_THIS)
         if ( current_h > real_h ) {
             real_h = MAX(real_h, screen_h);
         }
-        XMoveResizeWindow(SDL_Display, FSwindow, x, y, real_w, real_h);
+        pXMoveResizeWindow(SDL_Display, FSwindow, x, y, real_w, real_h);
         move_cursor_to(this, real_w/2, real_h/2);
 
         /* Center and reparent the drawing window */
         x = (real_w - current_w)/2;
         y = (real_h - current_h)/2;
-        XReparentWindow(SDL_Display, SDL_Window, FSwindow, x, y);
+        pXReparentWindow(SDL_Display, SDL_Window, FSwindow, x, y);
         /* FIXME: move the mouse to the old relative location */
-        XSync(SDL_Display, True);   /* Flush spurious mode change events */
+        pXSync(SDL_Display, True);   /* Flush spurious mode change events */
     }
     return(1);
 }
@@ -676,7 +676,7 @@ void X11_QueueEnterFullScreen(_THIS)
     switch_waiting = 0x01 | SDL_FULLSCREEN;
     switch_time = SDL_GetTicks() + 1500;
 #if 0 /* This causes a BadMatch error if the window is iconified (not needed) */
-    XSetInputFocus(SDL_Display, WMwindow, RevertToNone, CurrentTime);
+    pXSetInputFocus(SDL_Display, WMwindow, RevertToNone, CurrentTime);
 #endif
 }
 
@@ -709,14 +709,14 @@ int X11_EnterFullScreen(_THIS)
     if ( current_h > real_h ) {
         real_h = MAX(real_h, screen_h);
     }
-    XMoveResizeWindow(SDL_Display, FSwindow,
+    pXMoveResizeWindow(SDL_Display, FSwindow,
                       xinerama_x, xinerama_y, real_w, real_h);
-    XMapRaised(SDL_Display, FSwindow);
+    pXMapRaised(SDL_Display, FSwindow);
     X11_WaitMapped(this, FSwindow);
 
 #if 0 /* This seems to break WindowMaker in focus-follows-mouse mode */
     /* Make sure we got to the top of the window stack */
-    if ( XQueryTree(SDL_Display, SDL_Root, &tmpwin, &tmpwin,
+    if ( pXQueryTree(SDL_Display, SDL_Root, &tmpwin, &tmpwin,
                             &windows, &nwindows) && windows ) {
         /* If not, try to put us there - if fail... oh well */
         if ( windows[nwindows-1] != FSwindow ) {
@@ -729,13 +729,13 @@ int X11_EnterFullScreen(_THIS)
                 }
             }
             windows[nwindows-1] = FSwindow;
-            XRestackWindows(SDL_Display, windows, nwindows);
-            XSync(SDL_Display, False);
+            pXRestackWindows(SDL_Display, windows, nwindows);
+            pXSync(SDL_Display, False);
         }
-        XFree(windows);
+        pXFree(windows);
     }
 #else
-    XRaiseWindow(SDL_Display, FSwindow);
+    pXRaiseWindow(SDL_Display, FSwindow);
 #endif
 
 #ifdef XFREE86_VM
@@ -753,7 +753,7 @@ int X11_EnterFullScreen(_THIS)
     }
     /* Set the colormap */
     if ( SDL_XColorMap ) {
-        XInstallColormap(SDL_Display, SDL_XColorMap);
+        pXInstallColormap(SDL_Display, SDL_XColorMap);
     }
     if ( okay )
         X11_GrabInputNoLock(this, this->input_grab | SDL_GRAB_FULLSCREEN);
@@ -774,7 +774,7 @@ int X11_EnterFullScreen(_THIS)
 int X11_LeaveFullScreen(_THIS)
 {
     if ( currently_fullscreen ) {
-        XReparentWindow(SDL_Display, SDL_Window, WMwindow, 0, 0);
+        pXReparentWindow(SDL_Display, SDL_Window, WMwindow, 0, 0);
 #ifdef XFREE86_VM
         if ( use_vidmode ) {
             restore_mode(this);
@@ -796,14 +796,14 @@ int X11_LeaveFullScreen(_THIS)
                                         saved_res.width, 
                                         saved_res.height,
                                         0);
-                XSync(SDL_Display, False);
+                pXSync(SDL_Display, False);
             }
         }
 #endif
 
-        XUnmapWindow(SDL_Display, FSwindow);
+        pXUnmapWindow(SDL_Display, FSwindow);
         X11_WaitUnmapped(this, FSwindow);
-        XSync(SDL_Display, True);   /* Flush spurious mode change events */
+        pXSync(SDL_Display, True);   /* Flush spurious mode change events */
         currently_fullscreen = 0;
     }
     /* If we get popped out of fullscreen mode for some reason, input_grab

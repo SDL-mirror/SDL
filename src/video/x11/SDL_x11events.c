@@ -74,13 +74,13 @@ static int X11_KeyRepeat(Display *display, XEvent *event)
 	int repeated;
 
 	repeated = 0;
-	if ( XPending(display) ) {
-		XPeekEvent(display, &peekevent);
+	if ( pXPending(display) ) {
+		pXPeekEvent(display, &peekevent);
 		if ( (peekevent.type == KeyPress) &&
 		     (peekevent.xkey.keycode == event->xkey.keycode) &&
 		     ((peekevent.xkey.time-event->xkey.time) < 2) ) {
 			repeated = 1;
-			XNextEvent(display, &peekevent);
+			pXNextEvent(display, &peekevent);
 		}
 	}
 	return(repeated);
@@ -115,7 +115,7 @@ static __inline__ int X11_WarpedMotion(_THIS, XEvent *xevent)
 	     (xevent->xmotion.y < MOUSE_FUDGE_FACTOR) ||
 	     (xevent->xmotion.y > (h-MOUSE_FUDGE_FACTOR)) ) {
 		/* Get the events that have accumulated */
-		while ( XCheckTypedEvent(SDL_Display, MotionNotify, xevent) ) {
+		while ( pXCheckTypedEvent(SDL_Display, MotionNotify, xevent) ) {
 			deltax = xevent->xmotion.x - mouse_last.x;
 			deltay = xevent->xmotion.y - mouse_last.y;
 #ifdef DEBUG_MOTION
@@ -127,10 +127,10 @@ static __inline__ int X11_WarpedMotion(_THIS, XEvent *xevent)
 		}
 		mouse_last.x = w/2;
 		mouse_last.y = h/2;
-		XWarpPointer(SDL_Display, None, SDL_Window, 0, 0, 0, 0,
+		pXWarpPointer(SDL_Display, None, SDL_Window, 0, 0, 0, 0,
 					mouse_last.x, mouse_last.y);
 		for ( i=0; i<10; ++i ) {
-        		XMaskEvent(SDL_Display, PointerMotionMask, xevent);
+        		pXMaskEvent(SDL_Display, PointerMotionMask, xevent);
 			if ( (xevent->xmotion.x >
 			          (mouse_last.x-MOUSE_FUDGE_FACTOR)) &&
 			     (xevent->xmotion.x <
@@ -160,7 +160,7 @@ static int X11_DispatchEvent(_THIS)
 	XEvent xevent;
 
 	memset(&xevent, '\0', sizeof (XEvent));  /* valgrind fix. --ryan. */
-	XNextEvent(SDL_Display, &xevent);
+	pXNextEvent(SDL_Display, &xevent);
 
 	posted = 0;
 	switch (xevent.type) {
@@ -437,8 +437,8 @@ printf("Unhandled event %d\n", xevent.type);
 int X11_Pending(Display *display)
 {
 	/* Flush the display connection and look to see if events are queued */
-	XFlush(display);
-	if ( XEventsQueued(display, QueuedAlready) ) {
+	pXFlush(display);
+	if ( pXEventsQueued(display, QueuedAlready) ) {
 		return(1);
 	}
 
@@ -452,7 +452,7 @@ int X11_Pending(Display *display)
 		FD_ZERO(&fdset);
 		FD_SET(x11_fd, &fdset);
 		if ( select(x11_fd+1, &fdset, NULL, NULL, &zero_time) == 1 ) {
-			return(XPending(display));
+			return(pXPending(display));
 		}
 	}
 
@@ -619,7 +619,7 @@ SDL_keysym *X11_TranslateKey(Display *display, XKeyEvent *xkey, KeyCode kc,
 
 	/* Get the raw keyboard scancode */
 	keysym->scancode = kc;
-	xsym = XKeycodeToKeysym(display, kc, 0);
+	xsym = pXKeycodeToKeysym(display, kc, 0);
 #ifdef DEBUG_KEYS
 	fprintf(stderr, "Translating key 0x%.4x (%d)\n", xsym, kc);
 #endif
@@ -711,7 +711,7 @@ SDL_keysym *X11_TranslateKey(Display *display, XKeyEvent *xkey, KeyCode kc,
 		}
 #endif
 		/* Look up the translated value for the key event */
-		if ( XLookupString(xkey, (char *)keybuf, sizeof(keybuf),
+		if ( pXLookupString(xkey, (char *)keybuf, sizeof(keybuf),
 							NULL, &state) ) {
 			/*
 			 * FIXME,: XLookupString() may yield more than one
@@ -739,12 +739,12 @@ static void get_modifier_masks(Display *display)
 	if(got_masks)
 		return;
 
-	xmods = XGetModifierMapping(display);
+	xmods = pXGetModifierMapping(display);
 	n = xmods->max_keypermod;
 	for(i = 3; i < 8; i++) {
 		for(j = 0; j < n; j++) {
 			KeyCode kc = xmods->modifiermap[i * n + j];
-			KeySym ks = XKeycodeToKeysym(display, kc, 0);
+			KeySym ks = pXKeycodeToKeysym(display, kc, 0);
 			unsigned mask = 1 << i;
 			switch(ks) {
 			case XK_Num_Lock:
@@ -762,7 +762,7 @@ static void get_modifier_masks(Display *display)
 			}
 		}
 	}
-	XFreeModifiermap(xmods);
+	pXFreeModifiermap(xmods);
 	got_masks = 1;
 }
 
@@ -804,7 +804,7 @@ Uint16 X11_KeyToUnicode(SDLKey keysym, SDLMod modifiers)
 		}
 	}
 
-	xkey.keycode = XKeysymToKeycode(xkey.display, xsym);
+	xkey.keycode = pXKeysymToKeycode(xkey.display, xsym);
 
 	get_modifier_masks(SDL_Display);
 	if(modifiers & KMOD_SHIFT)
@@ -827,7 +827,7 @@ Uint16 X11_KeyToUnicode(SDLKey keysym, SDLMod modifiers)
 		xkey.state |= num_mask;
 
 	unicode = 0;
-	if ( XLookupString(&xkey, keybuf, sizeof(keybuf), NULL, NULL) )
+	if ( pXLookupString(&xkey, keybuf, sizeof(keybuf), NULL, NULL) )
 		unicode = (unsigned char)keybuf[0];
 	return(unicode);
 }
@@ -851,14 +851,14 @@ void X11_SetKeyboardState(Display *display, const char *key_vec)
 
 	/* The first time the window is mapped, we initialize key state */
 	if ( ! key_vec ) {
-		XQueryKeymap(display, keys_return);
+		pXQueryKeymap(display, keys_return);
 		key_vec = keys_return;
 	}
 
 	/* Get the keyboard modifier state */
 	modstate = 0;
 	get_modifier_masks(display);
-	if ( XQueryPointer(display, DefaultRootWindow(display),
+	if ( pXQueryPointer(display, DefaultRootWindow(display),
 		&junk_window, &junk_window, &x, &y, &x, &y, &mask) ) {
 		if ( mask & LockMask ) {
 			modstate |= KMOD_CAPS;

@@ -48,6 +48,9 @@ static char rcsid =
 #include "SDL_dgamouse_c.h"
 #include "SDL_dgaevents_c.h"
 
+/* get function pointers... */
+#include "../x11/SDL_x11dyn.h"
+
 /* Initialization/Query functions */
 static int DGA_VideoInit(_THIS, SDL_PixelFormat *vformat);
 static SDL_Rect **DGA_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags);
@@ -72,91 +75,98 @@ static int DGA_FlipHWSurface(_THIS, SDL_Surface *surface);
 
 static int DGA_Available(void)
 {
-	const char *display;
-	Display *dpy;
-	int available;
+	const char *display = NULL;
+	Display *dpy = NULL;
+	int available = 0;
 
 	/* The driver is available is available if the display is local
 	   and the DGA 2.0+ extension is available, and we can map mem.
 	*/
-	available = 0;
-	display = NULL;
-	if ( (strncmp(XDisplayName(display), ":", 1) == 0) ||
-	     (strncmp(XDisplayName(display), "unix:", 5) == 0) ) {
-		dpy = XOpenDisplay(display);
-		if ( dpy ) {
-			int events, errors, major, minor;
+	if ( SDL_X11_LoadSymbols() ) {
+		if ( (strncmp(pXDisplayName(display), ":", 1) == 0) ||
+		     (strncmp(pXDisplayName(display), "unix:", 5) == 0) ) {
+			dpy = pXOpenDisplay(display);
+			if ( dpy ) {
+				int events, errors, major, minor;
 
-			if ( SDL_NAME(XDGAQueryExtension)(dpy, &events, &errors) &&
-			     SDL_NAME(XDGAQueryVersion)(dpy, &major, &minor) ) {
-				int screen;
+				if ( SDL_NAME(XDGAQueryExtension)(dpy, &events, &errors) &&
+				     SDL_NAME(XDGAQueryVersion)(dpy, &major, &minor) ) {
+					int screen;
 
-				screen = DefaultScreen(dpy);
-				if ( (major >= 2) && 
-				     SDL_NAME(XDGAOpenFramebuffer)(dpy, screen) ) {
-					available = 1;
-					SDL_NAME(XDGACloseFramebuffer)(dpy, screen);
+					screen = DefaultScreen(dpy);
+					if ( (major >= 2) && 
+					     SDL_NAME(XDGAOpenFramebuffer)(dpy, screen) ) {
+						available = 1;
+						SDL_NAME(XDGACloseFramebuffer)(dpy, screen);
+					}
 				}
+				pXCloseDisplay(dpy);
 			}
-			XCloseDisplay(dpy);
 		}
+		SDL_X11_UnloadSymbols();
 	}
 	return(available);
 }
 
 static void DGA_DeleteDevice(SDL_VideoDevice *device)
 {
-	free(device->hidden);
-	free(device);
+	if (device != NULL) {
+		free(device->hidden);
+		free(device);
+		SDL_X11_UnloadSymbols();
+	}
 }
 
 static SDL_VideoDevice *DGA_CreateDevice(int devindex)
 {
-	SDL_VideoDevice *device;
+	SDL_VideoDevice *device = NULL;
 
 	/* Initialize all variables that we clean on shutdown */
-	device = (SDL_VideoDevice *)malloc(sizeof(SDL_VideoDevice));
-	if ( device ) {
-		memset(device, 0, (sizeof *device));
-		device->hidden = (struct SDL_PrivateVideoData *)
-				malloc((sizeof *device->hidden));
-	}
-	if ( (device == NULL) || (device->hidden == NULL) ) {
-		SDL_OutOfMemory();
+	if (SDL_X11_LoadSymbols()) {
+		device = (SDL_VideoDevice *)malloc(sizeof(SDL_VideoDevice));
 		if ( device ) {
-			free(device);
+			memset(device, 0, (sizeof *device));
+			device->hidden = (struct SDL_PrivateVideoData *)
+					malloc((sizeof *device->hidden));
 		}
-		return(0);
+		if ( (device == NULL) || (device->hidden == NULL) ) {
+			SDL_OutOfMemory();
+			if ( device ) {
+				free(device);
+			}
+			SDL_X11_UnloadSymbols();
+			return(0);
+		}
+		memset(device->hidden, 0, (sizeof *device->hidden));
+
+		/* Set the function pointers */
+		device->VideoInit = DGA_VideoInit;
+		device->ListModes = DGA_ListModes;
+		device->SetVideoMode = DGA_SetVideoMode;
+		device->SetColors = DGA_SetColors;
+		device->UpdateRects = NULL;
+		device->VideoQuit = DGA_VideoQuit;
+		device->AllocHWSurface = DGA_AllocHWSurface;
+		device->CheckHWBlit = DGA_CheckHWBlit;
+		device->FillHWRect = DGA_FillHWRect;
+		device->SetHWColorKey = NULL;
+		device->SetHWAlpha = NULL;
+		device->LockHWSurface = DGA_LockHWSurface;
+		device->UnlockHWSurface = DGA_UnlockHWSurface;
+		device->FlipHWSurface = DGA_FlipHWSurface;
+		device->FreeHWSurface = DGA_FreeHWSurface;
+		device->SetGammaRamp = DGA_SetGammaRamp;
+		device->GetGammaRamp = NULL;
+		device->SetCaption = NULL;
+		device->SetIcon = NULL;
+		device->IconifyWindow = NULL;
+		device->GrabInput = NULL;
+		device->GetWMInfo = NULL;
+		device->InitOSKeymap = DGA_InitOSKeymap;
+		device->PumpEvents = DGA_PumpEvents;
+
+		device->free = DGA_DeleteDevice;
 	}
-	memset(device->hidden, 0, (sizeof *device->hidden));
-
-	/* Set the function pointers */
-	device->VideoInit = DGA_VideoInit;
-	device->ListModes = DGA_ListModes;
-	device->SetVideoMode = DGA_SetVideoMode;
-	device->SetColors = DGA_SetColors;
-	device->UpdateRects = NULL;
-	device->VideoQuit = DGA_VideoQuit;
-	device->AllocHWSurface = DGA_AllocHWSurface;
-	device->CheckHWBlit = DGA_CheckHWBlit;
-	device->FillHWRect = DGA_FillHWRect;
-	device->SetHWColorKey = NULL;
-	device->SetHWAlpha = NULL;
-	device->LockHWSurface = DGA_LockHWSurface;
-	device->UnlockHWSurface = DGA_UnlockHWSurface;
-	device->FlipHWSurface = DGA_FlipHWSurface;
-	device->FreeHWSurface = DGA_FreeHWSurface;
-	device->SetGammaRamp = DGA_SetGammaRamp;
-	device->GetGammaRamp = NULL;
-	device->SetCaption = NULL;
-	device->SetIcon = NULL;
-	device->IconifyWindow = NULL;
-	device->GrabInput = NULL;
-	device->GetWMInfo = NULL;
-	device->InitOSKeymap = DGA_InitOSKeymap;
-	device->PumpEvents = DGA_PumpEvents;
-
-	device->free = DGA_DeleteDevice;
 
 	return device;
 }
@@ -329,7 +339,7 @@ static int DGA_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	/* Open the X11 display */
 	display = NULL;		/* Get it from DISPLAY environment variable */
 
-	DGA_Display = XOpenDisplay(display);
+	DGA_Display = pXOpenDisplay(display);
 	if ( DGA_Display == NULL ) {
 		SDL_SetError("Couldn't open X11 display");
 		return(-1);
@@ -339,12 +349,12 @@ static int DGA_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	if ( ! SDL_NAME(XDGAQueryExtension)(DGA_Display, &event_base, &error_base) ||
 	     ! SDL_NAME(XDGAQueryVersion)(DGA_Display, &major_version, &minor_version) ) {
 		SDL_SetError("DGA extension not available");
-		XCloseDisplay(DGA_Display);
+		pXCloseDisplay(DGA_Display);
 		return(-1);
 	}
 	if ( major_version < 2 ) {
 		SDL_SetError("DGA driver requires DGA 2.0 or newer");
-		XCloseDisplay(DGA_Display);
+		pXCloseDisplay(DGA_Display);
 		return(-1);
 	}
 	DGA_event_base = event_base;
@@ -356,10 +366,10 @@ static int DGA_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		int i, num_formats;
 
 		vformat->BitsPerPixel = DefaultDepth(DGA_Display, DGA_Screen);
-		pix_format = XListPixmapFormats(DGA_Display, &num_formats);
+		pix_format = pXListPixmapFormats(DGA_Display, &num_formats);
 		if ( pix_format == NULL ) {
 			SDL_SetError("Couldn't determine screen formats");
-			XCloseDisplay(DGA_Display);
+			pXCloseDisplay(DGA_Display);
 			return(-1);
 		}
 		for ( i=0; i<num_formats; ++i ) {
@@ -368,7 +378,7 @@ static int DGA_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		}
 		if ( i != num_formats )
 			vformat->BitsPerPixel = pix_format[i].bits_per_pixel;
-		XFree((char *)pix_format);
+		pXFree((char *)pix_format);
 	}
 	if ( vformat->BitsPerPixel > 8 ) {
 		vformat->Rmask = visual->red_mask;
@@ -379,7 +389,7 @@ static int DGA_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	/* Open access to the framebuffer */
 	if ( ! SDL_NAME(XDGAOpenFramebuffer)(DGA_Display, DGA_Screen) ) {
 		SDL_SetError("Unable to map the video memory");
-		XCloseDisplay(DGA_Display);
+		pXCloseDisplay(DGA_Display);
 		return(-1);
 	}
 
@@ -399,7 +409,7 @@ static int DGA_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		}
 	}
 	UpdateHWInfo(this, modes);
-	XFree(modes);
+	pXFree(modes);
 
 	/* Create the hardware surface lock mutex */
 	hw_lock = SDL_CreateMutex();
@@ -438,7 +448,7 @@ SDL_Surface *DGA_SetVideoMode(_THIS, SDL_Surface *current,
 
 	/* Free any previous colormap */
 	if ( DGA_colormap ) {
-		XFreeColormap(DGA_Display, DGA_colormap);
+		pXFreeColormap(DGA_Display, DGA_colormap);
 		DGA_colormap = 0;
 	}
 
@@ -469,7 +479,7 @@ SDL_Surface *DGA_SetVideoMode(_THIS, SDL_Surface *current,
 
 	/* Set the video mode */
 	mode = SDL_NAME(XDGASetMode)(DGA_Display, DGA_Screen, modes[i].num);
-	XFree(modes);
+	pXFree(modes);
 	if ( mode == NULL ) {
 		SDL_SetError("Unable to switch to requested mode");
 		return(NULL);
@@ -817,7 +827,7 @@ static int DGA_FillHWRect(_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color)
 #endif
 	SDL_NAME(XDGAFillRectangle)(DGA_Display, DGA_Screen, x, y, w, h, color);
 	if ( !(this->screen->flags & SDL_DOUBLEBUF) ) {
-		XFlush(DGA_Display);
+		pXFlush(DGA_Display);
 	}
 	DGA_AddBusySurface(dst);
 	UNLOCK_DISPLAY();
@@ -859,7 +869,7 @@ static int HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,
 			srcx, srcy, w, h, dstx, dsty);
 	}
 	if ( !(this->screen->flags & SDL_DOUBLEBUF) ) {
-		XFlush(DGA_Display);
+		pXFlush(DGA_Display);
 	}
 	DGA_AddBusySurface(src);
 	DGA_AddBusySurface(dst);
@@ -939,7 +949,7 @@ static int DGA_FlipHWSurface(_THIS, SDL_Surface *surface)
 	DGA_WaitFlip(this);
 	SDL_NAME(XDGASetViewport)(DGA_Display, DGA_Screen,
 	                0, flip_yoffset[flip_page], XDGAFlipRetrace);
-	XFlush(DGA_Display);
+	pXFlush(DGA_Display);
 	UNLOCK_DISPLAY();
 	was_flipped = 1;
 	flip_page = !flip_page;
@@ -972,8 +982,8 @@ static int DGA_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 		xcmap[i].flags = (DoRed|DoGreen|DoBlue);
 	}
 	LOCK_DISPLAY();
-	XStoreColors(DGA_Display, DGA_colormap, xcmap, ncolors);
-	XSync(DGA_Display, False);
+	pXStoreColors(DGA_Display, DGA_colormap, xcmap, ncolors);
+	pXSync(DGA_Display, False);
 	UNLOCK_DISPLAY();
 
 	/* That was easy. :) */
@@ -1006,8 +1016,8 @@ int DGA_SetGammaRamp(_THIS, Uint16 *ramp)
 		xcmap[i].flags = (DoRed|DoGreen|DoBlue);
 	}
 	LOCK_DISPLAY();
-	XStoreColors(DGA_Display, DGA_colormap, xcmap, ncolors);
-	XSync(DGA_Display, False);
+	pXStoreColors(DGA_Display, DGA_colormap, xcmap, ncolors);
+	pXSync(DGA_Display, False);
 	UNLOCK_DISPLAY();
 	return(0);
 }
@@ -1019,7 +1029,7 @@ void DGA_VideoQuit(_THIS)
 	if ( DGA_Display ) {
 		/* Free colormap, if necessary */
 		if ( DGA_colormap ) {
-			XFreeColormap(DGA_Display, DGA_colormap);
+			pXFreeColormap(DGA_Display, DGA_colormap);
 			DGA_colormap = 0;
 		}
 
@@ -1059,6 +1069,6 @@ void DGA_VideoQuit(_THIS)
 		DGA_FreeHWSurfaces(this);
 
 		/* Close up the display */
-		XCloseDisplay(DGA_Display);
+		pXCloseDisplay(DGA_Display);
 	}
 }

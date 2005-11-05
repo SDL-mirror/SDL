@@ -56,7 +56,6 @@ Copyright (c) 1995,1996  The XFree86 Project, Inc
 #undef _SC_PAGESIZE
 #endif
 
-
 #define NEED_EVENTS
 #define NEED_REPLIES
 #include <X11/Xlibint.h>
@@ -64,6 +63,14 @@ Copyright (c) 1995,1996  The XFree86 Project, Inc
 #include "xf86dgastr.h"
 #include <X11/extensions/Xext.h>
 #include "extutil.h"
+
+#include "../../x11/SDL_x11dyn.h"
+
+/* Workaround code in headers... */
+#define _XFlush p_XFlush
+#define _XFlushGCCache p_XFlushGCCache
+#define _XReply p_XReply
+#define _XSend p_XSend
 
 extern XExtDisplayInfo* SDL_NAME(xdga_find_display)(Display*);
 extern char *SDL_NAME(xdga_extension_name);
@@ -112,7 +119,7 @@ Bool SDL_NAME(XF86DGAGetVideoLL)(
     req->reqType = info->codes->major_opcode;
     req->dgaReqType = X_XF86DGAGetVideoLL;
     req->screen = screen;
-    if (!_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
+    if (!p_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
 	UnlockDisplay(dpy);
 	SyncHandle();
 	return False;
@@ -147,7 +154,7 @@ Bool SDL_NAME(XF86DGADirectVideoLL)(
     req->enable = enable;
     UnlockDisplay(dpy);
     SyncHandle();
-    XSync(dpy,False);
+    pXSync(dpy,False);
     return True;
 }
 
@@ -168,7 +175,7 @@ Bool SDL_NAME(XF86DGAGetViewPortSize)(
     req->reqType = info->codes->major_opcode;
     req->dgaReqType = X_XF86DGAGetViewPortSize;
     req->screen = screen;
-    if (!_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
+    if (!p_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
 	UnlockDisplay(dpy);
 	SyncHandle();
 	return False;
@@ -203,7 +210,7 @@ Bool SDL_NAME(XF86DGASetViewPort)(
     req->y = y;
     UnlockDisplay(dpy);
     SyncHandle();
-    XSync(dpy,False);
+    pXSync(dpy,False);
     return True;
 }
 
@@ -224,7 +231,7 @@ Bool SDL_NAME(XF86DGAGetVidPage)(
     req->reqType = info->codes->major_opcode;
     req->dgaReqType = X_XF86DGAGetVidPage;
     req->screen = screen;
-    if (!_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
+    if (!p_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
 	UnlockDisplay(dpy);
 	SyncHandle();
 	return False;
@@ -255,7 +262,7 @@ Bool SDL_NAME(XF86DGASetVidPage)(
     req->vpage = vpage;
     UnlockDisplay(dpy);
     SyncHandle();
-    XSync(dpy,False);
+    pXSync(dpy,False);
     return True;
 }
 
@@ -277,7 +284,7 @@ Bool SDL_NAME(XF86DGAInstallColormap)(
     req->id = cmap;
     UnlockDisplay(dpy);
     SyncHandle();
-    XSync(dpy,False);
+    pXSync(dpy,False);
     return True;
 }
 
@@ -297,7 +304,7 @@ Bool SDL_NAME(XF86DGAQueryDirectVideo)(
     req->reqType = info->codes->major_opcode;
     req->dgaReqType = X_XF86DGAQueryDirectVideo;
     req->screen = screen;
-    if (!_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
+    if (!p_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
 	UnlockDisplay(dpy);
 	SyncHandle();
 	return False;
@@ -325,7 +332,7 @@ Bool SDL_NAME(XF86DGAViewPortChanged)(
     req->dgaReqType = X_XF86DGAViewPortChanged;
     req->screen = screen;
     req->n = n;
-    if (!_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
+    if (!p_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
 	UnlockDisplay(dpy);
 	SyncHandle();
 	return False;
@@ -598,7 +605,7 @@ SDL_NAME(XF86DGAForkApp)(int screen)
 	for (i = 0; i < numScrs; i++) {
 	    sp = scrList[i];
 	    SDL_NAME(XF86DGADirectVideoLL)(sp->display, sp->screen, 0);
-	    XSync(sp->display, False);
+	    pXSync(sp->display, False);
 	}
         if (WIFEXITED(status))
 	    _exit(0);
@@ -658,7 +665,7 @@ XF86cleanup(int sig)
     for (i = 0; i < numScrs; i++) {
 	sp = scrList[i];
 	SDL_NAME(XF86DGADirectVideo)(sp->display, sp->screen, 0);
-	XSync(sp->display, False);
+	pXSync(sp->display, False);
     }
     _exit(3);
 }
