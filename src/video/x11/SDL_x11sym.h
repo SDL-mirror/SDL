@@ -112,7 +112,9 @@ SDL_X11_SYM(XExtensionInfo*,XextCreateExtension,(void))
 SDL_X11_SYM(void,XextDestroyExtension,(XExtensionInfo*))
 SDL_X11_SYM(XExtDisplayInfo*,XextFindDisplay,(XExtensionInfo*,Display*))
 SDL_X11_SYM(int,XextRemoveDisplay,(XExtensionInfo*,Display*))
+#ifdef X_HAVE_UTF8_STRING
 SDL_X11_SYM(int,Xutf8TextListToTextProperty,(Display*,char**,int,XICCEncodingStyle,XTextProperty*))
+#endif
 SDL_X11_SYM(void,_XEatData,(Display*,unsigned long))
 SDL_X11_SYM(void,_XFlush,(Display*))
 SDL_X11_SYM(void,_XFlushGCCache,(Display*,GC))
