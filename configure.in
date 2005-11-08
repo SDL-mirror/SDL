@@ -613,20 +613,9 @@ CheckX11()
 [  --enable-x11-shared     dynamically load X11 support [default=yes]],
                           , enable_x11_shared=yes)
 
-            dnl !!! FIXME: make this work?
-            dnl x11_lib_spec=`echo $X11_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libX11.so.*/'`
-            dnl x11_lib=`ls $x11_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
-            dnl echo "-- $x11_lib_spec -> $x11_lib"
-            dnl x11ext_lib_spec=`echo $X11EXT_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libXext.so.*/'`
-            dnl x11ext_lib=`ls $x11ext_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
-            dnl echo "-- $x11ext_lib_spec -> $x11ext_lib"
-
-            x11_lib_spec='/usr/X11R6/lib/libX11.so.*'
+            dnl !!! FIXME: if a platform needs more than this, fill it in!
             x11_lib='libX11.so.6'
-            echo "-- $x11_lib_spec -> $x11_lib"
-            x11ext_lib_spec='/usr/X11R6/lib/libXext.so.*'
-            x11_lib='libXext.so.6'
-            echo "-- $x11ext_lib_spec -> $x11_lib"
+            x11ext_lib='libXext.so.6'
 
             if test x$use_dlopen != xyes && \
                test x$enable_x11_shared = xyes; then
@@ -634,7 +623,7 @@ CheckX11()
             fi
 
             if test x$use_dlopen = xyes && \
-               test x$enable_x11_shared = xyes && test x$x11_lib != x; then
+               test x$enable_x11_shared = xyes && test x$x11_lib != x && test x$x11ext_lib != x; then
                 CFLAGS="$CFLAGS $X_CFLAGS -DENABLE_X11 -DXTHREADS -DX11_DYNAMIC=\$(x11_lib) -DX11EXT_DYNAMIC=\$(x11ext_lib) -I$srcdir/include -I$srcdir/src/video"
                 SYSTEM_LIBS="$SYSTEM_LIBS $X_LIBS"
                 AC_SUBST(x11_lib)
