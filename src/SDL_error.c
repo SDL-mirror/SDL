@@ -108,8 +108,10 @@ void SDL_SetError (const char *fmt, ...)
 			    case 's':
 				{
 				  int index = error->argc;
-				  strncpy((char *)error->args[index].buf,
-					va_arg(ap, char *), ERR_MAX_STRLEN);
+				  char *str = va_arg(ap, char *);
+				  if (str == NULL)
+				      str = "(null)";
+				  strncpy((char *)error->args[index].buf, str, ERR_MAX_STRLEN);
 				  error->args[index].buf[ERR_MAX_STRLEN-1] = 0;
 				  error->argc++;
 				}
