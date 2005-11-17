@@ -28,23 +28,44 @@ static char rcsid =
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* System dependent library loading routines                           */
 
-/* !!! FIXME: includes so I don't have to update all the project files... */
-#define SDL_INTERNAL_BUILDING_LOADSO 1
-#if defined(USE_DUMMY_LOADSO)
-# include "loadso/dummy/SDL_loadso.c"
-#elif defined(MACOSX)
-# include "loadso/macosx/SDL_loadso.c"
-#elif defined(macintosh)
-# include "loadso/macos/SDL_loadso.c"
-#elif defined(USE_DLOPEN)
-# include "loadso/dlopen/SDL_loadso.c"
-#elif defined(WIN32) || defined(_WIN32_WCE)
-# include "loadso/windows/SDL_loadso.c"
-#elif defined(__BEOS__)
-# include "loadso/beos/SDL_loadso.c"
-#elif defined(__MINT__) && defined(ENABLE_LDG)
-# include "loadso/mint/SDL_loadso.c"
-#else
-# include "loadso/dummy/SDL_loadso.c"
-#endif /* system type */
+#if !SDL_INTERNAL_BUILDING_LOADSO
+#error Do not compile directly...compile src/SDL_loadso.c instead!
+#endif
+
+#if !defined(USE_DLOPEN)
+#error Compiling for the wrong platform?
+#endif
+
+#include <stdio.h>
+#include <dlfcn.h>
+
+#include "SDL_types.h"
+#include "SDL_error.h"
+#include "SDL_loadso.h"
+
+void *SDL_LoadObject(const char *sofile)
+{
+	void *handle = dlopen(sofile, RTLD_NOW);
+	const char *loaderror = (char *)dlerror();
+	if ( handle == NULL ) {
+		SDL_SetError("Failed loading %s: %s", sofile, loaderror);
+	}
+	return(handle);
+}
+
+void *SDL_LoadFunction(void *handle, const char *name)
+{
+	void *symbol = dlsym(handle, name);
+	if ( symbol == NULL ) {
+		SDL_SetError("Failed loading %s: %s", name, (const char *)dlerror());
+	}
+	return(symbol);
+}
+
+void SDL_UnloadObject(void *handle)
+{
+	if ( handle != NULL ) {
+		dlclose(handle);
+	}
+}
 

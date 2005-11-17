@@ -304,11 +304,11 @@ CheckALSA()
             alsa_lib=`ls $alsa_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
             echo "-- $alsa_lib_spec -> $alsa_lib"
 
-            if test x$use_dlopen != xyes && \
+            if test x$have_loadso != xyes && \
                test x$enable_alsa_shared = xyes; then
-                AC_MSG_ERROR([You must have dlopen() support and use the --enable-dlopen option])
+                AC_MSG_ERROR([You must have SDL_LoadObject() support])
             fi
-            if test x$use_dlopen = xyes && \
+            if test x$have_loadso = xyes && \
                test x$enable_alsa_shared = xyes && test x$alsa_lib != x; then
                 CFLAGS="$CFLAGS -DALSA_SUPPORT -DALSA_DYNAMIC=\$(alsa_lib) $ALSA_CFLAGS"
                 AC_SUBST(alsa_lib)
@@ -367,11 +367,11 @@ CheckESD()
             esd_lib_spec=`echo $ESD_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libesd.so.*/'`
             esd_lib=`ls $esd_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
             echo "-- $esd_lib_spec -> $esd_lib"
-            if test x$use_dlopen != xyes && \
+            if test x$have_loadso != xyes && \
                test x$enable_esd_shared = xyes; then
-                AC_MSG_ERROR([You must have dlopen() support and use the --enable-dlopen option])
+                AC_MSG_ERROR([You must have SDL_LoadObject() support])
             fi
-            if test x$use_dlopen = xyes && \
+            if test x$have_loadso = xyes && \
                test x$enable_esd_shared = xyes && test x$esd_lib != x; then
                 CFLAGS="$CFLAGS -DESD_SUPPORT -DESD_DYNAMIC=\$(esd_lib) $ESD_CFLAGS"
                 AC_SUBST(esd_lib)
@@ -418,11 +418,11 @@ CheckARTSC()
                 arts_lib_spec="$ARTSC_PREFIX/lib/libartsc.so.*"
                 arts_lib=`ls $arts_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
                 echo "-- $arts_lib_spec -> $arts_lib"
-                if test x$use_dlopen != xyes && \
+                if test x$have_loadso != xyes && \
                    test x$enable_arts_shared = xyes; then
-                    AC_MSG_ERROR([You must have dlopen() support and use the --enable-dlopen option])
+                    AC_MSG_ERROR([You must have SDL_LoadObject() support])
                 fi
-                if test x$use_dlopen = xyes && \
+                if test x$have_loadso = xyes && \
                    test x$enable_arts_shared = xyes && test x$arts_lib != x; then
                     CFLAGS="$CFLAGS -DARTSC_SUPPORT -DARTSC_DYNAMIC=\$(arts_lib) $ARTSC_CFLAGS"
                     AC_SUBST(arts_lib)
@@ -617,12 +617,12 @@ CheckX11()
             x11_lib='libX11.so.6'
             x11ext_lib='libXext.so.6'
 
-            if test x$use_dlopen != xyes && \
+            if test x$have_loadso != xyes && \
                test x$enable_x11_shared = xyes; then
-                AC_MSG_ERROR([You must have dlopen() support and use the --enable-dlopen option])
+                AC_MSG_ERROR([You must have SDL_LoadObject() support])
             fi
 
-            if test x$use_dlopen = xyes && \
+            if test x$have_loadso = xyes && \
                test x$enable_x11_shared = xyes && test x$x11_lib != x && test x$x11ext_lib != x; then
                 CFLAGS="$CFLAGS $X_CFLAGS -DENABLE_X11 -DXTHREADS -DX11_DYNAMIC=\$(x11_lib) -DX11EXT_DYNAMIC=\$(x11ext_lib) -I$srcdir/include -I$srcdir/src/video"
                 SYSTEM_LIBS="$SYSTEM_LIBS $X_LIBS"
@@ -1131,7 +1131,7 @@ CheckOpenGL()
         AC_MSG_RESULT($video_opengl)
         if test x$video_opengl = xyes; then
             CFLAGS="$CFLAGS -DHAVE_OPENGL"
-            if test x$use_dlopen != xyes; then
+            if test x$have_loadso != xyes; then
                 AC_CHECK_LIB(dl, dlopen, SYSTEM_LIBS="$SYSTEM_LIBS -ldl")
             fi
         fi
@@ -1154,7 +1154,7 @@ CheckOpenGLQNX()
         if test x$video_opengl = xyes; then
             CFLAGS="$CFLAGS -DHAVE_OPENGL"
             SYSTEM_LIBS="$SYSTEM_LIBS -lGL"
-            if test x$use_dlopen != xyes; then
+            if test x$have_loadso != xyes; then
                 AC_CHECK_LIB(c, dlopen, SYSTEM_LIBS="$SYSTEM_LIBS", AC_CHECK_LIB(ltdl, dlopen, SYSTEM_LIBS="$SYSTEM_LIBS -lltdl"))
             fi
         fi
@@ -1778,16 +1778,16 @@ CheckDLOPEN()
                   , enable_sdl_dlopen=yes)
     if test x$enable_sdl_dlopen = xyes; then
         AC_MSG_CHECKING(for dlopen)
-        use_dlopen=no
+        have_loadso=no
         AC_TRY_COMPILE([
          #include <dlfcn.h>
         ],[
         ],[
-        use_dlopen=yes
+        have_loadso=yes
         ])
-        AC_MSG_RESULT($use_dlopen)
+        AC_MSG_RESULT($have_loadso)
 
-        if test x$use_dlopen = xyes; then
+        if test x$have_loadso = xyes; then
             CFLAGS="$CFLAGS -DUSE_DLOPEN"
             AC_CHECK_LIB(c, dlopen, SYSTEM_LIBS="$SYSTEM_LIBS",
                AC_CHECK_LIB(dl, dlopen, SYSTEM_LIBS="$SYSTEM_LIBS -ldl",
@@ -1806,6 +1806,7 @@ CheckAtariLdg()
         AC_CHECK_HEADER(ldg.h, have_ldg_hdr=yes)
         AC_CHECK_LIB(ldg, ldg_open, have_ldg_lib=yes, have_ldg_lib=no, -lgem)
         if test x$have_ldg_hdr = xyes -a x$have_ldg_lib = xyes; then
+            have_loadso=yes
             CFLAGS="$CFLAGS -DENABLE_LDG"
             SYSTEM_LIBS="$SYSTEM_LIBS -lldg -lgem"
         fi
@@ -1989,6 +1990,7 @@ CheckRPATH()
                   , enable_rpath=yes)
 }
 
+have_loadso=no
 case "$target" in
     arm-*-elf*)
 	ARCH=linux
@@ -2560,6 +2562,7 @@ case "$target" in
         ;;
     *-*-cygwin* | *-*-mingw32*)
         ARCH=win32
+        have_loadso=yes
         if test "$build" != "$target"; then # cross-compiling
             # Default cross-compile location
             ac_default_prefix=/usr/local/cross-tools/i386-mingw32msvc
@@ -2625,6 +2628,7 @@ case "$target" in
     *-*-beos*)
         ARCH=beos
         ac_default_prefix=/boot/develop/tools/gnupro
+        have_loadso=yes
         CheckDummyVideo
         CheckDiskAudio
         CheckNASM
@@ -2668,6 +2672,7 @@ case "$target" in
         # use it at present, but Apple is working on a X-to-9 compiler
         # for which this case would be handy.
         ARCH=macos
+        have_loadso=yes
         CheckDummyVideo
         CheckDiskAudio
         CheckTOOLBOX
@@ -2711,6 +2716,7 @@ case "$target" in
         # just the OS X kernel sans upper layers like Carbon and Cocoa.
         # Next line is broken, and a few files below require Mac OS X (full)
         ARCH=macosx
+        have_loadso=yes
         CheckDummyVideo
         CheckDiskAudio
         CheckCOCOA
