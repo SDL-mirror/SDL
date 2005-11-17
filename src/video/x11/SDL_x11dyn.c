@@ -104,11 +104,10 @@ int SDL_X11_LoadSymbols(void)
 		#ifdef X11_DYNAMIC
 			x11_handle = SDL_LoadObject(x11_library);
 			x11ext_handle = SDL_LoadObject(x11ext_library);
-			if ((x11_handle != NULL) && (x11ext_handle != NULL)) {
-				#define SDL_X11_SYM(r,fn,arg) p##fn = X11_GetSym(#fn, &rc);
-				#include "SDL_x11sym.h"
-				#undef SDL_X11_SYM
-			}
+			rc = ((x11_handle != NULL) && (x11ext_handle != NULL));
+			#define SDL_X11_SYM(r,fn,arg) p##fn = X11_GetSym(#fn, &rc);
+			#include "SDL_x11sym.h"
+			#undef SDL_X11_SYM
 
 			if (!rc)
 				SDL_X11_UnloadSymbols();  /* in case one of these loaded... */
