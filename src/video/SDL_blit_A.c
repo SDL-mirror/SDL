@@ -422,7 +422,9 @@ static void BlitRGBtoRGBPixelAlphaMMX(SDL_BlitInfo *info)
 #endif
 
 #ifdef USE_ALTIVEC_BLITTERS
+#ifdef HAVE_ALTIVEC_H
 #include <altivec.h>
+#endif
 #include <assert.h>
 
 #if ((defined MACOSX) && (__GNUC__ < 4))

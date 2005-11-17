@@ -36,7 +36,9 @@ static char rcsid =
 /* Functions to blit from N-bit surfaces to other surfaces */
 
 #ifdef USE_ALTIVEC_BLITTERS
+#ifdef HAVE_ALTIVEC_H
 #include <altivec.h>
+#endif
 #include <assert.h>
 #include <stdlib.h>
 #ifdef MACOSX

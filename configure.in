@@ -1922,42 +1922,70 @@ CheckUSBHID()
 dnl Check for altivec instruction support using gas syntax
 CheckAltivec()
 {
-    dnl FIXME: Theoretically, you might not have altivec.h, we should check
-    dnl FIXME:  that seperately, but I think all major platforms have it
-    dnl FIXME:  at the moment...  --ryan.
+    have_altivec_h_hdr=no
+    AC_CHECK_HEADER(altivec.h, have_altivec_h_hdr=yes)
 
     save_CFLAGS="${CFLAGS}"
     have_gcc_altivec=no
     AC_MSG_CHECKING(for Altivec with GCC -maltivec option)
     CFLAGS="${save_CFLAGS} -DGCC_ALTIVEC -DUSE_ALTIVEC_BLITTERS -maltivec"
-    AC_TRY_COMPILE([
-    #include <altivec.h>
-    vector unsigned int vzero() {
-        return vec_splat_u32(0);
-    }
-    ],[
-    ],[
-    have_gcc_altivec=yes
-    ])
-    AC_MSG_RESULT($have_gcc_altivec)
+
+    if test x$have_altivec_h_hdr = xyes; then
+      AC_TRY_COMPILE([
+      #include <altivec.h>
+      vector unsigned int vzero() {
+          return vec_splat_u32(0);
+      }
+      ],[
+      ],[
+      have_gcc_altivec=yes
+      ])
+      AC_MSG_RESULT($have_gcc_altivec)
+    else
+      AC_TRY_COMPILE([
+      vector unsigned int vzero() {
+          return vec_splat_u32(0);
+      }
+      ],[
+      ],[
+      have_gcc_altivec=yes
+      ])
+      AC_MSG_RESULT($have_gcc_altivec)
+    fi
 
     if test x$have_gcc_altivec = xno; then
         AC_MSG_CHECKING(for Altivec with GCC -faltivec option)
-        CFLAGS="${CFLAGS} -DGCC_ALTIVEC -DUSE_ALTIVEC_BLITTERS -faltivec"
-        AC_TRY_COMPILE([
-        #include <altivec.h>
-        vector unsigned int vzero() {
-            return vec_splat_u32(0);
-        }
-        ],[
-        ],[
-        have_gcc_altivec=yes
-        ])
-        AC_MSG_RESULT($have_gcc_altivec)
+        CFLAGS="${save_CFLAGS} -DGCC_ALTIVEC -DUSE_ALTIVEC_BLITTERS -faltivec"
+        if test x$have_altivec_h_hdr = xyes; then
+          AC_TRY_COMPILE([
+          #include <altivec.h>
+          vector unsigned int vzero() {
+              return vec_splat_u32(0);
+          }
+          ],[
+          ],[
+          have_gcc_altivec=yes
+          ])
+          AC_MSG_RESULT($have_gcc_altivec)
+        else
+          AC_TRY_COMPILE([
+          vector unsigned int vzero() {
+              return vec_splat_u32(0);
+          }
+          ],[
+          ],[
+          have_gcc_altivec=yes
+          ])
+          AC_MSG_RESULT($have_gcc_altivec)
+        fi
     fi
 
     if test x$have_gcc_altivec = xno; then
         CFLAGS="${save_CFLAGS}"
+    else
+        if test x$have_altivec_h_hdr = xyes; then
+          CFLAGS="${CFLAGS} -DHAVE_ALTIVEC_H"
+        fi
     fi
 }
 
