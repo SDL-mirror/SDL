@@ -957,7 +957,7 @@ DGAMapPhysical(
            (((long)finfo.smem_start)&~(PAGE_SIZE-1)))
          */
         base = 0;
-        size = finfo.smem_len;
+        size = pMap->size = finfo.smem_len;
     }
 #else
 	return False;
