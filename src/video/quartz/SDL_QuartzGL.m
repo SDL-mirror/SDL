@@ -169,7 +169,7 @@ void QZ_TearDownOpenGL (_THIS) {
 
 int    QZ_GL_LoadLibrary    (_THIS, const char *location) {
     this->gl_config.driver_loaded = 1;
-    return 1;
+    return 0;
 }
 
 void*  QZ_GL_GetProcAddress (_THIS, const char *proc) {
