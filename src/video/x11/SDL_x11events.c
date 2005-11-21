@@ -833,7 +833,7 @@ SDL_keysym *X11_TranslateKey(Display *display, XIC ic, XKeyEvent *xkey, KeyCode 
 		/* Look up the translated value for the key event */
 
 		/* if there is no connection with the IM server, use the regular method */
-		if (ic == NULL) {
+		if (ic == NULL || xkey->type != KeyPress) {
 			unsigned char keybuf[32];
 
 			if ( pXLookupString(xkey, (char *)keybuf, sizeof(keybuf),
