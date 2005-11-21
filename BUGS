@@ -15,6 +15,7 @@ Linux:
 	It requires handling of keyboard mapping events and using the XIM
 	input translation extension.  I will implement it as requested.
 	Latin-1 keyboard input works fine.
+	(UPDATE 04/06/2004: this bug is now fixed)
 
 	The keyboard modifiers are not set to the correct state on startup.
 
@@ -100,7 +101,8 @@ FreeBSD:
 	It requires handling of keyboard mapping events and using the XIM
 	input translation extension.  I will implement it as requested.
 	Latin-1 keyboard input works fine.
-
+	(UPDATE 04/06/2004: this bug is now fixed but needs testing)
+	
 	The keyboard modifiers are not set to the correct state on startup.
 
 Solaris:
@@ -110,7 +112,8 @@ Solaris:
 	It requires handling of keyboard mapping events and using the XIM
 	input translation extension.  I will implement it as requested.
 	Latin-1 keyboard input works fine.
-
+	(UPDATE 04/06/2004: this bug is now fixed but needs testing)
+	
 	The keyboard modifiers are not set to the correct state on startup.
 
 IRIX:
@@ -122,7 +125,8 @@ IRIX:
 	It requires handling of keyboard mapping events and using the XIM
 	input translation extension.  I will implement it as requested.
 	Latin-1 keyboard input works fine.
-
+	(UPDATE 04/06/2004: this bug is now fixed but needs testing)
+	
 	The keyboard modifiers are not set to the correct state on startup.
 
 EPOC:
@@ -148,7 +152,8 @@ OpenBSD:  -= NOT YET SUPPORTED =-
 	It requires handling of keyboard mapping events and using the XIM
 	input translation extension.  I will implement it as requested.
 	Latin-1 keyboard input works fine.
-
+	(UPDATE 04/06/2004: this bug is now fixed but needs testing)
+	
 	The keyboard modifiers are not set to the correct state on startup.
 
 OSF/Tru64:  -= NOT YET SUPPORTED =-
@@ -160,7 +165,8 @@ OSF/Tru64:  -= NOT YET SUPPORTED =-
 	It requires handling of keyboard mapping events and using the XIM
 	input translation extension.  I will implement it as requested.
 	Latin-1 keyboard input works fine.
-
+	(UPDATE 04/06/2004: this bug is now fixed but needs testing)
+	
 	The keyboard modifiers are not set to the correct state on startup.
 
 AIX:  -= NOT YET SUPPORTED =-
@@ -176,7 +182,8 @@ AIX:  -= NOT YET SUPPORTED =-
 	It requires handling of keyboard mapping events and using the XIM
 	input translation extension.  I will implement it as requested.
 	Latin-1 keyboard input works fine.
-
+	(UPDATE 04/06/2004: this bug is now fixed but needs testing)
+	
 	The keyboard modifiers are not set to the correct state on startup.
 
 	The AIX port was done by Carsten.Griwodz@KOM.tu-darmstadt.de

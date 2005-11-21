@@ -114,6 +114,13 @@ SDL_X11_SYM(XExtDisplayInfo*,XextFindDisplay,(XExtensionInfo*,Display*))
 SDL_X11_SYM(int,XextRemoveDisplay,(XExtensionInfo*,Display*))
 #ifdef X_HAVE_UTF8_STRING
 SDL_X11_SYM(int,Xutf8TextListToTextProperty,(Display*,char**,int,XICCEncodingStyle,XTextProperty*))
+SDL_X11_SYM(int,Xutf8LookupString,(XIC,XKeyPressedEvent*,char*,int,KeySym*,Status*))
+SDL_X11_SYM(XIC,XCreateIC,(XIM, ...))
+SDL_X11_SYM(void,XDestroyIC,(XIC))
+SDL_X11_SYM(void,XSetICFocus,(XIC))
+SDL_X11_SYM(void,XUnsetICFocus,(XIC))
+SDL_X11_SYM(XIM,XOpenIM,(Display*,struct _XrmHashBucketRec*,char*,char*))
+SDL_X11_SYM(Status,XCloseIM,(XIM))
 #endif
 SDL_X11_SYM(void,_XEatData,(Display*,unsigned long))
 SDL_X11_SYM(void,_XFlush,(Display*))

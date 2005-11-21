@@ -62,6 +62,8 @@ struct SDL_PrivateVideoData {
     Window SDL_Window;		/* Shared by both displays (no X security?) */
     Atom WM_DELETE_WINDOW;	/* "close-window" protocol atom */
     WMcursor *BlankCursor;	/* The invisible cursor */
+    XIM X11_IM;		/* Used to communicate with the input method (IM) server */
+    XIC X11_IC;		/* Used for retaining the state, properties, and semantics of communication with                                                  the input method (IM) server */
 
     char *SDL_windowid;		/* Flag: true if we have been passed a window */
 
@@ -147,15 +149,15 @@ struct SDL_PrivateVideoData {
 #define SDL_Display		(this->hidden->X11_Display)
 #define GFX_Display		(this->hidden->GFX_Display)
 #define SDL_Screen		DefaultScreen(this->hidden->X11_Display)
-
 #define SDL_Visual		(this->hidden->vis)
-
 #define SDL_Root		RootWindow(SDL_Display, SDL_Screen)
 #define WMwindow		(this->hidden->WMwindow)
 #define FSwindow		(this->hidden->FSwindow)
 #define SDL_Window		(this->hidden->SDL_Window)
 #define WM_DELETE_WINDOW	(this->hidden->WM_DELETE_WINDOW)
 #define SDL_BlankCursor		(this->hidden->BlankCursor)
+#define SDL_IM		(this->hidden->X11_IM)
+#define SDL_IC		(this->hidden->X11_IC)
 #define SDL_windowid		(this->hidden->SDL_windowid)
 #define using_dga		(this->hidden->using_dga)
 #define use_mitshm		(this->hidden->use_mitshm)
@@ -186,7 +188,6 @@ struct SDL_PrivateVideoData {
 #define gamma_saved		(this->hidden->gamma_saved)
 #define gamma_changed		(this->hidden->gamma_changed)
 #define SDL_iconcolors		(this->hidden->iconcolors)
-
 /* Some versions of XFree86 have bugs - detect if this is one of them */
 #define BUGGY_XFREE86(condition, buggy_version) \
 ((strcmp(ServerVendor(SDL_Display), "The XFree86 Project, Inc") == 0) && \

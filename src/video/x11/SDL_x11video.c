@@ -349,6 +349,7 @@ static void create_aux_windows(_THIS)
 		 FocusChangeMask | KeyPressMask | KeyReleaseMask
 		 | PropertyChangeMask | StructureNotifyMask | KeymapStateMask);
 
+    char * savedclassname = 0;
     /* Set the class hints so we can get an icon (AfterStep) */
     {
 	XClassHint *classhints;
@@ -358,12 +359,40 @@ static void create_aux_windows(_THIS)
             if ( ! classname ) {
                 classname = "SDL_App";
             }
+	    savedclassname = strdup(classname);
 	    classhints->res_name = classname;
 	    classhints->res_class = classname;
 	    pXSetClassHint(SDL_Display, WMwindow, classhints);
 	    pXFree(classhints);
 	}
     }
+
+    /* Setup the communication with the IM server */
+    SDL_IM = NULL;
+    SDL_IC = NULL;
+
+    #ifdef X_HAVE_UTF8_STRING
+    SDL_IM = pXOpenIM(SDL_Display, NULL, savedclassname, savedclassname);
+    if (SDL_IM == NULL) {
+	SDL_SetError("no input method could be opened");
+    } else {
+	SDL_IC = pXCreateIC(SDL_IM,
+			XNClientWindow, WMwindow,
+			XNFocusWindow, WMwindow,
+			XNInputStyle, XIMPreeditNothing  | XIMStatusNothing,
+			XNResourceName, savedclassname,
+			XNResourceClass, savedclassname,
+			NULL);
+	if (SDL_IC == NULL) {
+		SDL_SetError("no input context could be created");
+		pXCloseIM(SDL_IM);
+		SDL_IM = NULL;
+	}
+    }
+    #endif
+
+    free(savedclassname);
+
 
     /* Allow the window to be deleted by the window manager */
     WM_DELETE_WINDOW = pXInternAtom(SDL_Display, "WM_DELETE_WINDOW", False);
@@ -808,7 +837,6 @@ static int X11_CreateWindow(_THIS, SDL_Surface *screen,
 					| ButtonPressMask | ButtonReleaseMask
 					| PointerMotionMask | ExposureMask ));
 	}
-
 	/* Create the graphics context here, once we have a window */
 	if ( flags & SDL_OPENGL ) {
 		if ( X11_GL_CreateContext(this) < 0 ) {
@@ -854,7 +882,7 @@ static int X11_CreateWindow(_THIS, SDL_Surface *screen,
 	}
 
 	/* Update the internal keyboard state */
-	X11_SetKeyboardState(SDL_Display, NULL);
+	X11_SetKeyboardState(SDL_Display, SDL_IC, NULL);
 
 	/* When the window is first mapped, ignore non-modifier keys */
 	{
@@ -892,6 +920,7 @@ static int X11_CreateWindow(_THIS, SDL_Surface *screen,
 			screen->flags &= ~SDL_FULLSCREEN;
 		}
 	}
+	
 	return(0);
 }
 
@@ -1230,6 +1259,18 @@ void X11_VideoQuit(_THIS)
 	if ( SDL_Display != NULL ) {
 		/* Flush any delayed updates */
 		pXSync(GFX_Display, False);
+
+		/* Close the connection with the IM server */
+		#ifdef X_HAVE_UTF8_STRING
+		if (SDL_IC == NULL) {
+			pXDestroyIC(SDL_IC);
+			SDL_IC = NULL;
+		}
+		if (SDL_IM == NULL) {
+			pXCloseIM(SDL_IM);
+			SDL_IM = NULL;
+		}
+		#endif
 
 		/* Start shutting down the windows */
 		X11_DestroyImage(this, this->screen);
