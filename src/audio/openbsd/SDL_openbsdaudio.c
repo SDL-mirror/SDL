@@ -262,21 +262,21 @@ OBSD_Status(_THIS)
 	return;
     }
 
-    fprintf(stderr,"
-[play/record info]
-buffer size	:   %d bytes
-sample rate	:   %i Hz
-channels	:   %i
-precision	:   %i-bit
-encoding	:   0x%x
-seek		:   %i
-sample count	:   %i
-EOF count	:   %i
-paused		:   %s
-error occured	:   %s
-waiting		:   %s
-active		:   %s
-",
+    fprintf(stderr,"\n"
+"[play/record info]\n"
+"buffer size	:   %d bytes\n"
+"sample rate	:   %i Hz\n"
+"channels	:   %i\n"
+"precision	:   %i-bit\n"
+"encoding	:   0x%x\n"
+"seek		:   %i\n"
+"sample count	:   %i\n"
+"EOF count	:   %i\n"
+"paused		:   %s\n"
+"error occured	:   %s\n"
+"waiting		:   %s\n"
+"active		:   %s\n"
+"",
     info.play.buffer_size,
     info.play.sample_rate,
     info.play.channels,
@@ -290,14 +290,14 @@ active		:   %s
     info.play.waiting ? "yes" : "no",
     info.play.active ? "yes": "no");
 
-    fprintf(stderr,"
-[audio info]
-monitor_gain	:   %i
-hw block size	:   %d bytes
-hi watermark	:   %i
-lo watermark	:   %i
-audio mode	:   %s
-",  
+    fprintf(stderr,"\n"
+"[audio info]\n"
+"monitor_gain	:   %i\n"
+"hw block size	:   %d bytes\n"
+"hi watermark	:   %i\n"
+"lo watermark	:   %i\n"
+"audio mode	:   %s\n"
+"",  
     info.monitor_gain,
     info.blocksize,
     info.hiwat, info.lowat,
