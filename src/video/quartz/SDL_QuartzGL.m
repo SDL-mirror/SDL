@@ -168,32 +168,61 @@ void QZ_TearDownOpenGL (_THIS) {
 /* SDL OpenGL functions */
 
 int    QZ_GL_LoadLibrary    (_THIS, const char *location) {
-    this->gl_config.driver_loaded = 1;
-    return 0;
+    CFURLRef bundleURL;
+    CFStringRef cfstr;
+
+    if ( gl_context != NULL ) {
+        SDL_SetError("OpenGL context already created");
+        return -1;
+    }
+
+    if (opengl_bundle != NULL)
+        CFRelease(opengl_bundle);
+
+    opengl_bundle = NULL;
+    this->gl_config.driver_loaded = 0;
+
+    if (location == NULL)
+        location = "/System/Library/Frameworks/OpenGL.framework";
+
+    cfstr = CFStringCreateWithCString(kCFAllocatorDefault, location,
+                                      kCFStringEncodingUTF8);
+    if (cfstr == NULL) {
+        SDL_OutOfMemory();
+        return -1;
+    }
+
+    bundleURL = CFURLCreateWithFileSystemPath (kCFAllocatorDefault,
+                        cfstr, kCFURLPOSIXPathStyle, true);
+
+    CFRelease(cfstr);
+
+    if (bundleURL == NULL) {
+        SDL_OutOfMemory();
+        return -1;
+    }
+
+    opengl_bundle = CFBundleCreate (kCFAllocatorDefault, bundleURL);
+
+    CFRelease(bundleURL);
+
+    if (opengl_bundle != NULL) {
+        this->gl_config.driver_loaded = 1;
+        return 0;
+    }
+
+    /* not exactly descriptive, but okay... */
+    SDL_SetError("Could not load OpenGL library");
+    return -1;
 }
 
 void*  QZ_GL_GetProcAddress (_THIS, const char *proc) {
-
-    /* We may want to cache the bundleRef at some point */
-    CFBundleRef bundle;
-    CFURLRef bundleURL = CFURLCreateWithFileSystemPath (kCFAllocatorDefault,
-                                                        CFSTR("/System/Library/Frameworks/OpenGL.framework"), kCFURLPOSIXPathStyle, true);
-
-    CFStringRef functionName = CFStringCreateWithCString
+    CFStringRef funcName = CFStringCreateWithCString
         (kCFAllocatorDefault, proc, kCFStringEncodingASCII);
 
-    void *function;
-
-    bundle = CFBundleCreate (kCFAllocatorDefault, bundleURL);
-    assert (bundle != NULL);
-
-    function = CFBundleGetFunctionPointerForName (bundle, functionName);
-
-    CFRelease ( bundleURL );
-    CFRelease ( functionName );
-    CFRelease ( bundle );
-
-    return function;
+    void *func = CFBundleGetFunctionPointerForName(opengl_bundle, funcName);
+    CFRelease (funcName);
+    return func;
 }
 
 int    QZ_GL_GetAttribute   (_THIS, SDL_GLattr attrib, int* value) {

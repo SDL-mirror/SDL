@@ -117,6 +117,7 @@ typedef struct SDL_PrivateVideoData {
     Sint16                  yuv_width, yuv_height;
     CGrafPtr                yuv_port;
 
+    CFBundleRef opengl_bundle;    /* dynamically loaded OpenGL library. */
 } SDL_PrivateVideoData;
 
 #define _THIS    SDL_VideoDevice *this
@@ -154,6 +155,7 @@ typedef struct SDL_PrivateVideoData {
 #define current_buffer (this->hidden->current_buffer)
 #define quit_thread (this->hidden->quit_thread)
 #define system_version (this->hidden->system_version)
+#define opengl_bundle (this->hidden->opengl_bundle)
 
 /* grab states - the input is in one of these states */
 enum {

@@ -1489,6 +1489,12 @@ static void QZ_VideoQuit (_THIS) {
     
     QZ_UnsetVideoMode (this);
     CGPaletteRelease (palette);
+
+    if (opengl_bundle) {
+        CFRelease(opengl_bundle);
+        opengl_bundle = NULL;
+    }
+    this->gl_config.driver_loaded = 0;
 }
 
 #if 0 /* Not used (apparently, it's really slow) */
