@@ -63,6 +63,9 @@ static VideoBootStrap *bootstrap[] = {
 #ifdef ENABLE_QTOPIA
 	&Qtopia_bootstrap,
 #endif
+#ifdef ENABLE_WSCONS
+	&WSCONS_bootstrap,
+#endif
 #ifdef ENABLE_FBCON
 	&FBCON_bootstrap,
 #endif

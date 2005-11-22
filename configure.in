@@ -1645,6 +1645,37 @@ CheckQtopia()
     fi
 }
 
+dnl Set up the wscons video driver if enabled
+CheckWscons()
+{
+    AC_ARG_ENABLE(video-wscons,
+[  --enable-video-wscons   use wscons video driver [default=no]],
+                  , enable_video_wscons=no)
+    if test x$enable_video = xyes -a x$enable_video_wscons = xyes; then
+        AC_MSG_CHECKING(for wscons support)
+        video_wscons=no
+        AC_LANG_C
+        AC_TRY_COMPILE([
+       #include <sys/time.h>
+       #include <dev/wscons/wsconsio.h>
+        ],[
+        ],[
+        video_wscons=yes
+        ])
+        AC_MSG_RESULT($video_wscons)
+        if test x$video_wscons = xyes; then
+            CFLAGS="$CFLAGS -DENABLE_WSCONS"
+            VIDEO_SUBDIRS="$VIDEO_SUBDIRS wscons"
+            VIDEO_DRIVERS="$VIDEO_DRIVERS wscons/libvideo_wscons.la"
+        else
+      AC_MSG_ERROR([
+*** Failed to find wscons includes.])
+        fi
+      AC_LANG_C
+    fi
+}
+
+
 dnl Set up the PicoGUI video driver if enabled
 CheckPicoGUI()
 {
@@ -2210,6 +2241,7 @@ case "$target" in
         CheckNAS
         CheckX11
         CheckAAlib
+	CheckWscons
         CheckOpenGL
         CheckPTHREAD
         CheckSIGACTION
@@ -3088,6 +3120,7 @@ src/video/photon/Makefile
 src/video/picogui/Makefile
 src/video/ps2gs/Makefile
 src/video/qtopia/Makefile
+src/video/wscons/Makefile
 src/video/quartz/Makefile
 src/video/riscos/Makefile
 src/video/svga/Makefile
