@@ -418,16 +418,23 @@ void X11_GL_UnloadLibrary(_THIS)
 
 #ifdef HAVE_OPENGL
 
+/* If this is wrong, please put some #ifdefs for your platform! */
+#define DEFAULT_GL_DRIVER_PATH "libGL.so.1"
+
 /* Passing a NULL path means load pointers from the application */
 int X11_GL_LoadLibrary(_THIS, const char* path) 
 {
 	void* handle;
 	int dlopen_flags;
 
- 	if ( gl_active ) {
- 		SDL_SetError("OpenGL context already created");
- 		return -1;
- 	}
+	if ( gl_active ) {
+		SDL_SetError("OpenGL context already created");
+		return -1;
+	}
+
+	if ( path == NULL ) {
+		path = DEFAULT_GL_DRIVER_PATH;
+	}
 
 #ifdef RTLD_GLOBAL
 	dlopen_flags = RTLD_LAZY | RTLD_GLOBAL;
