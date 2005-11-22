@@ -165,9 +165,9 @@ void DSP_WaitAudio(_THIS)
 #endif
 }
 
+static Uint8 snd2au(int sample);
 void DSP_PlayAudio(_THIS)
 {
-	static Uint8 snd2au(int sample);
 	/* Write the audio data */
 	if ( ulaw_only ) {
 		/* Assuming that this->spec.freq >= 8000 Hz */
