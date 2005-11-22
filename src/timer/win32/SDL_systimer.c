@@ -33,8 +33,11 @@ static char rcsid =
 #include "SDL_error.h"
 
 #ifdef _WIN32_WCE
-#define USE_GETTICKCOUNT
-#define USE_SETTIMER
+  #error This is WinCE. Please use src/timer/wince/SDL_systimer.c instead.
+
+  /* but if you really want to use this file, use these #defines... */
+  #define USE_GETTICKCOUNT
+  #define USE_SETTIMER
 #endif
 
 #define TIME_WRAP_VALUE	(~(DWORD)0)
