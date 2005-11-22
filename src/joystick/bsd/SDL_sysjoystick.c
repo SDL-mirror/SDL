@@ -60,7 +60,7 @@ static char rcsid =
 #include <sys/joystick.h>
 #endif
 
-#if defined(__NetBSD__) || defined(__OpenBSD__)
+#if defined(__NetBSD__) || (defined(__OpenBSD__) && defined(__i386__))
 #include <machine/joystick.h>
 #endif
 
@@ -370,7 +370,7 @@ SDL_SYS_JoystickUpdate(SDL_Joystick *joy)
 	int nbutton, naxe = -1;
 	Sint32 v;
 
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#if defined(__FreeBSD__) || defined(__NetBSD__) || (defined(__OpenBSD__) && defined(__i386__))
 	struct joystick gameport;
 	static int x, y, xmin = 0xffff, ymin = 0xffff, xmax = 0, ymax = 0;
  
