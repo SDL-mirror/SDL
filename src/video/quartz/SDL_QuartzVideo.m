@@ -656,7 +656,7 @@ ERR_NO_MATCH:   return NULL;
 }
 
 static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
-                                         int height, int bpp, Uint32 flags) {
+                                         int height, int *bpp, Uint32 flags) {
     unsigned int style;
     NSRect contentRect;
     BOOL isCustom = NO;
@@ -774,7 +774,7 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
     /* For OpenGL, we bind the context to a subview */
     if ( flags & SDL_OPENGL ) {
 
-        if ( ! QZ_SetupOpenGL (this, bpp, flags) ) {
+        if ( ! QZ_SetupOpenGL (this, *bpp, flags) ) {
             return NULL;
         }
 
@@ -789,6 +789,7 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
     }
     /* For 2D, we set the subview to an NSQuickDrawView */
     else {
+        short qdbpp = 0;
 
         /* Only recreate the view if it doesn't already exist */
         if (window_view == nil) {
@@ -803,7 +804,11 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
         LockPortBits ( [ window_view qdPort ] );
         current->pixels = GetPixBaseAddr ( GetPortPixMap ( [ window_view qdPort ] ) );
         current->pitch  = GetPixRowBytes ( GetPortPixMap ( [ window_view qdPort ] ) );
+        qdbpp           = GetPixDepth ( GetPortPixMap ( [ window_view qdPort ] ) );
         UnlockPortBits ( [ window_view qdPort ] );
+
+        /* QuickDraw may give a 16-bit shadow surface on 8-bit displays! */
+        *bpp = qdbpp;
 
         current->flags |= SDL_SWSURFACE;
         current->flags |= SDL_PREALLOC;
@@ -819,7 +824,7 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
             
             int hOffset = [ window_view frame ].origin.x;
                     
-            current->pixels += (vOffset * current->pitch) + hOffset * (device_bpp/8);
+            current->pixels += (vOffset * current->pitch) + hOffset * (qdbpp/8);
         }
         this->UpdateRects     = QZ_UpdateRects;
         this->LockHWSurface   = QZ_LockWindow;
@@ -848,7 +853,7 @@ static SDL_Surface* QZ_SetVideoMode (_THIS, SDL_Surface *current, int width,
     else {
         /* Force bpp to the device's bpp */
         bpp = device_bpp;
-        current = QZ_SetVideoWindowed (this, current, width, height, bpp, flags);
+        current = QZ_SetVideoWindowed (this, current, width, height, &bpp, flags);
         if (current == NULL)
             return NULL;
     }
