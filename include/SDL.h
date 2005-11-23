@@ -43,6 +43,7 @@ static char rcsid =
 #include "SDL_video.h"
 #include "SDL_byteorder.h"
 #include "SDL_version.h"
+#include "SDL_loadso.h"
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
