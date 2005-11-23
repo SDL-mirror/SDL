@@ -25,19 +25,21 @@ static char rcsid =
  "@(#) $Id$";
 #endif
 
-#ifdef HAVE_OPENGL
+#ifdef HAVE_OPENGL_X11
 #include <GL/glx.h>
+#ifdef USE_DLOPEN
 #include <dlfcn.h>
-#if defined(__OpenBSD__) && !defined(__ELF__)
-#define dlsym(x,y) dlsym(x, "_" y)
+#else
+#include "SDL_loadso.h"
 #endif
 #endif
+
 #include "SDL_sysvideo.h"
 
 struct SDL_PrivateGLData {
     int gl_active; /* to stop switching drivers while we have a valid context */
 
-#ifdef HAVE_OPENGL
+#ifdef HAVE_OPENGL_X11
     GLXContext glx_context;	/* Current GL context */
     XVisualInfo* glx_visualinfo; /* XVisualInfo* returned by glXChooseVisual */
 
@@ -82,7 +84,7 @@ struct SDL_PrivateGLData {
 	      int screen);
 
     
-#endif /* HAVE_OPENGL */
+#endif /* HAVE_OPENGL_X11 */
 };
 
 /* Old variable names */
@@ -95,7 +97,7 @@ extern XVisualInfo *X11_GL_GetVisual(_THIS);
 extern int X11_GL_CreateWindow(_THIS, int w, int h);
 extern int X11_GL_CreateContext(_THIS);
 extern void X11_GL_Shutdown(_THIS);
-#ifdef HAVE_OPENGL
+#ifdef HAVE_OPENGL_X11
 extern int X11_GL_MakeCurrent(_THIS);
 extern int X11_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value);
 extern void X11_GL_SwapBuffers(_THIS);

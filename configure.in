@@ -1103,7 +1103,7 @@ AC_ARG_ENABLE(video-opengl,
               , enable_video_opengl=yes)
 
 dnl Find OpenGL
-CheckOpenGL()
+CheckOpenGLX11()
 {
     if test x$enable_video = xyes -a x$enable_video_opengl = xyes; then
         AC_MSG_CHECKING(for OpenGL (GLX) support)
@@ -1118,7 +1118,7 @@ CheckOpenGL()
         ])
         AC_MSG_RESULT($video_opengl)
         if test x$video_opengl = xyes; then
-            CFLAGS="$CFLAGS -DHAVE_OPENGL"
+            CFLAGS="$CFLAGS -DHAVE_OPENGL -DHAVE_OPENGL_X11"
             if test x$have_loadso != xyes; then
                 AC_CHECK_LIB(dl, dlopen, SYSTEM_LIBS="$SYSTEM_LIBS -ldl")
             fi
@@ -2076,7 +2076,7 @@ case "$target" in
         CheckAAlib
         CheckQtopia
         CheckPicoGUI
-        CheckOpenGL
+        CheckOpenGLX11
         CheckInputEvents
         CheckPTHREAD
         CheckSIGACTION
@@ -2157,7 +2157,7 @@ case "$target" in
         CheckDGA
         CheckSVGA
         CheckAAlib
-        CheckOpenGL
+        CheckOpenGLX11
         CheckPTHREAD
         CheckSIGACTION
         CheckRPATH
@@ -2203,7 +2203,7 @@ case "$target" in
         CheckDGA
         CheckSVGA
         CheckAAlib
-        CheckOpenGL
+        CheckOpenGLX11
         CheckPTHREAD
         CheckSIGACTION
         CheckUSBHID
@@ -2242,7 +2242,7 @@ case "$target" in
         CheckX11
         CheckAAlib
 	CheckWscons
-        CheckOpenGL
+        CheckOpenGLX11
         CheckPTHREAD
         CheckSIGACTION
         CheckUSBHID
@@ -2284,7 +2284,7 @@ case "$target" in
         CheckNAS
         CheckX11
         CheckAAlib
-        CheckOpenGL
+        CheckOpenGLX11
         CheckPTHREAD
         CheckSIGACTION
         CheckUSBHID
@@ -2327,7 +2327,7 @@ case "$target" in
         CheckNAS
         CheckX11
         CheckAAlib
-        CheckOpenGL
+        CheckOpenGLX11
         CheckPTHREAD
         CheckSIGACTION
         CheckRPATH
@@ -2370,7 +2370,7 @@ case "$target" in
         CheckNAS
         CheckX11
         CheckAAlib
-        CheckOpenGL
+        CheckOpenGLX11
         CheckPTHREAD
         CheckSIGACTION
         CheckRPATH
@@ -2410,7 +2410,7 @@ case "$target" in
         CheckNAS
         CheckX11
         CheckAAlib
-        CheckOpenGL
+        CheckOpenGLX11
         CheckPTHREAD
         CheckSIGACTION
         # We use the dmedia audio API, not the Sun audio API
@@ -2461,7 +2461,7 @@ case "$target" in
         CheckX11
         CheckGGI
         CheckAAlib
-        CheckOpenGL
+        CheckOpenGLX11
         CheckPTHREAD
         CheckSIGACTION
         # Set up files for the audio library
@@ -2501,7 +2501,7 @@ case "$target" in
         CheckX11
         CheckGGI
         CheckAAlib
-        CheckOpenGL
+        CheckOpenGLX11
         CheckPTHREAD
         CheckSIGACTION
         # Set up files for the audio library
@@ -2538,7 +2538,7 @@ case "$target" in
         CheckX11
         CheckGGI
         CheckAAlib
-        CheckOpenGL
+        CheckOpenGLX11
         CheckPTHREAD
         CheckSIGACTION
         # Set up files for the audio library
@@ -2578,7 +2578,7 @@ case "$target" in
         CheckNAS
         CheckPHOTON
         CheckX11
-        CheckOpenGL
+        CheckOpenGLX11
         CheckPTHREAD
         CheckSIGACTION
         # Set up files for the audio library
@@ -2771,6 +2771,7 @@ case "$target" in
         CheckCARBON
         CheckX11
         CheckMacGL
+        CheckOpenGLX11
         CheckPTHREAD
         CheckSIGACTION
         CheckAltivec

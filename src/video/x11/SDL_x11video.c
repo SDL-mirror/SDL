@@ -166,7 +166,7 @@ static SDL_VideoDevice *X11_CreateDevice(int devindex)
 		device->GetGamma = X11_GetVidModeGamma;
 		device->SetGammaRamp = X11_SetGammaRamp;
 		device->GetGammaRamp = NULL;
-#ifdef HAVE_OPENGL
+#ifdef HAVE_OPENGL_X11
 		device->GL_LoadLibrary = X11_GL_LoadLibrary;
 		device->GL_GetProcAddress = X11_GL_GetProcAddress;
 		device->GL_GetAttribute = X11_GL_GetAttribute;
