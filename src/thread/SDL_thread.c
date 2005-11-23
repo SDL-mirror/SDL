@@ -218,7 +218,11 @@ void SDL_RunThread(void *data)
 	*statusloc = userfunc(userdata);
 }
 
-SDL_Thread *SDL_CreateThread(int (*fn)(void *), void *data)
+#ifdef __OS2__
+DECLSPEC SDL_Thread * SDLCALL SDL_CreateThread_Core(int (*fn)(void *), void *data, pfnSDL_CurrentBeginThread pfnBeginThread, pfnSDL_CurrentEndThread pfnEndThread)
+#else
+DECLSPEC SDL_Thread * SDLCALL SDL_CreateThread(int (*fn)(void *), void *data)
+#endif
 {
 	SDL_Thread *thread;
 	thread_args *args;
@@ -254,7 +258,11 @@ SDL_Thread *SDL_CreateThread(int (*fn)(void *), void *data)
 	SDL_AddThread(thread);
 
 	/* Create the thread and go! */
+#ifdef __OS2__
+        ret = SDL_SYS_CreateThread(thread, args, pfnBeginThread, pfnEndThread);
+#else
 	ret = SDL_SYS_CreateThread(thread, args);
+#endif
 	if ( ret >= 0 ) {
 		/* Wait for the thread function to use arguments */
 		SDL_SemWait(args->wait);

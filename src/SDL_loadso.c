@@ -44,6 +44,8 @@ static char rcsid =
 # include "loadso/beos/SDL_loadso.c"
 #elif defined(__MINT__) && defined(ENABLE_LDG)
 # include "loadso/mint/SDL_loadso.c"
+#elif defined(__OS2__)
+# include "loadso/os2/SDL_loadso.c"
 #else
 # include "loadso/dummy/SDL_loadso.c"
 #endif /* system type */

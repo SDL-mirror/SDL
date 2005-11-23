@@ -45,8 +45,11 @@ int SDL_PrivateResize(int w, int h)
 	SDL_Event events[32];
 
 	/* See if this event would change the video surface */
-	if ( !w || !h ||
-	     ((last_resize.w == w) && (last_resize.h == h)) ) {
+	if ( !w || !h
+#ifndef __OS2__
+            || ((last_resize.w == w) && (last_resize.h == h))
+#endif
+    ) {
 		return(0);
 	}
         last_resize.w = w;

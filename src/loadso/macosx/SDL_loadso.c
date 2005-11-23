@@ -781,6 +781,7 @@ static struct dlstatus *loadModule(const char *path, const struct stat *sbuf, in
 	const char *errstr;
 	const char *file;
 	void (*init) (void);
+
 	ofirc = NSCreateObjectFileImageFromFile(path, &ofi);
 	switch (ofirc)
 	{

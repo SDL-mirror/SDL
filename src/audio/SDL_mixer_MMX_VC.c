@@ -12,8 +12,10 @@
 // Mixing for 16 bit signed buffers
 ////////////////////////////////////////////////
 
+#ifndef __WATCOMC__
 #include <windows.h>
 #include <stdio.h>
+#endif
 
 void SDL_MixAudio_MMX_S16_VC(char* dst,char* src,unsigned int nSize,int volume)
 {
@@ -41,7 +43,9 @@ void SDL_MixAudio_MMX_S16_VC(char* dst,char* src,unsigned int nSize,int volume)
 		psllq	mm0, 16			//$16,%%mm0
 		por		mm0, mm1		//%%mm1,%%mm0			// mm0 = vol|vol|vol|vol
 
+		#ifndef __WATCOMC__
 		align	16
+		#endif
 mixloopS16:
 		movq	mm1, [esi]		//(%%esi),%%mm1\n" // mm1 = a|b|c|d
 		movq	mm2, mm1		//%%mm1,%%mm2\n" // mm2 = a|b|c|d
@@ -121,7 +125,9 @@ void SDL_MixAudio_MMX_S8_VC(char* dst,char* src,unsigned int nSize,int volume)
 		cmp		ebx, 0		//$0,%%ebx
 		je		endS8
 
+		#ifndef __WATCOMC__
 		align 16
+		#endif
 mixloopS8:
 		pxor	mm2, mm2	//%%mm2,%%mm2		// mm2 = 0
 		movq	mm1, [esi]	//(%%esi),%%mm1	// mm1 = a|b|c|d|e|f|g|h

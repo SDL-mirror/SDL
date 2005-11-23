@@ -57,7 +57,7 @@ typedef signed int	Sint32;
 #if !defined(__STRICT_ANSI__)
 #ifdef __osf__ /* Tru64 */
 #define SDL_HAS_64BIT_TYPE	long
-#elif defined(__GNUC__) || defined(__MWERKS__) || defined(__SUNPRO_C) || defined(__DECC)
+#elif defined(__GNUC__) || defined(__MWERKS__) || defined(__SUNPRO_C) || defined(__DECC) || defined(__WATCOMC__)
 #define SDL_HAS_64BIT_TYPE	long long
 #elif defined(_MSC_VER) /* VC++ */
 #define SDL_HAS_64BIT_TYPE	__int64

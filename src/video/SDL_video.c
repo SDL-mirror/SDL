@@ -126,6 +126,9 @@ static VideoBootStrap *bootstrap[] = {
 #ifdef ENABLE_RISCOS
     &RISCOS_bootstrap,
 #endif
+#ifdef __OS2__
+	&OS2FSLib_bootstrap,
+#endif
 #ifdef ENABLE_DUMMYVIDEO
 	&DUMMY_bootstrap,
 #endif
@@ -664,7 +667,10 @@ SDL_Surface * SDL_SetVideoMode (int width, int height, int bpp, Uint32 flags)
 	SDL_VideoSurface = NULL;	/* In case it's freed by driver */
 	mode = video->SetVideoMode(this, prev_mode,video_w,video_h,video_bpp,flags);
 	if ( mode ) { /* Prevent resize events from mode change */
+          /* But not on OS/2 */
+#ifndef __OS2__
 	    SDL_PrivateResize(mode->w, mode->h);
+#endif
 
 	    /* Sam - If we asked for OpenGL mode, and didn't get it, fail */
 	    if ( is_opengl && !(mode->flags & SDL_OPENGL) ) {

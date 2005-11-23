@@ -423,6 +423,9 @@ extern VideoBootStrap DC_bootstrap;
 #ifdef ENABLE_RISCOS
 extern VideoBootStrap RISCOS_bootstrap;
 #endif
+#ifdef __OS2__
+extern VideoBootStrap OS2FSLib_bootstrap;
+#endif
 /* This is the current video device */
 extern SDL_VideoDevice *current_video;
 

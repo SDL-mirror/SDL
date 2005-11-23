@@ -89,9 +89,28 @@ void SDL_Unlock_EventThread(void)
 	}
 }
 
+#ifdef __OS2__
+/*
+ * We'll increase the priority of GobbleEvents thread, so it will process
+ *  events in time for sure! For this, we need the DosSetPriority() API
+ *  from the os2.h include file.
+ */
+#define INCL_DOSPROCESS
+#include <os2.h>
+#include <time.h>
+#endif
+
 static int SDL_GobbleEvents(void *unused)
 {
 	event_thread = SDL_ThreadID();
+
+#ifdef __OS2__
+#ifdef USE_DOSSETPRIORITY
+	/* Increase thread priority, so it will process events in time for sure! */
+	DosSetPriority(PRTYS_THREAD, PRTYC_REGULAR, +16, 0);
+#endif
+#endif
+
 	while ( SDL_EventQ.active ) {
 		SDL_VideoDevice *video = current_video;
 		SDL_VideoDevice *this  = current_video;

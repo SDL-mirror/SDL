@@ -56,7 +56,19 @@
 #   define DECLSPEC	__declspec(dllexport)
 #  endif
 # else
+# ifdef __OS2__
+#  ifdef __WATCOMC__
+#   ifdef BUILD_SDL
+#    define DECLSPEC __declspec(dllexport)
+#   else
 #  define DECLSPEC
+# endif
+#  else
+#   define DECLSPEC
+#  endif
+# else
+#  define DECLSPEC
+# endif
 # endif
 # endif
 #endif
@@ -66,7 +78,13 @@
 #if defined(WIN32) && !defined(__GNUC__)
 #define SDLCALL __cdecl
 #else
+#ifdef __OS2__
+/* But on OS/2, we use the _System calling convention */
+/* to be compatible with every compiler */
+#define SDLCALL _System
+#else
 #define SDLCALL
+#endif
 #endif
 #endif /* SDLCALL */
 

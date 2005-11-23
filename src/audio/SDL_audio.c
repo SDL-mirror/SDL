@@ -38,6 +38,12 @@ static char rcsid =
 #include "SDL_audiomem.h"
 #include "SDL_sysaudio.h"
 
+#ifdef __OS2__
+// We'll need the DosSetPriority() API!
+#define INCL_DOSPROCESS
+#include <os2.h>
+#endif
+
 /* Available audio drivers */
 static AudioBootStrap *bootstrap[] = {
 #ifdef OPENBSD_AUDIO_SUPPORT
@@ -107,6 +113,9 @@ static AudioBootStrap *bootstrap[] = {
 #endif
 #ifdef DRENDERER_SUPPORT
 	&DRENDERER_bootstrap,
+#endif
+#ifdef __OS2__
+        &DART_bootstrap,
 #endif
 	NULL
 };
@@ -181,6 +190,16 @@ int SDL_RunAudio(void *audiop)
 	D(bug("Entering audio loop...\n"));
 #endif
 
+#ifdef __OS2__
+        // Increase the priority of this thread to make sure that
+        // the audio will be continuous all the time!
+#ifdef USE_DOSSETPRIORITY
+#ifdef DEBUG_BUILD
+        printf("[SDL_RunAudio] : Setting priority to ForegroundServer+0! (TID%d)\n", SDL_ThreadID());
+#endif
+        DosSetPriority(PRTYS_THREAD, PRTYC_FOREGROUNDSERVER, 0, 0);
+#endif
+#endif
 
 	/* Loop, filling the audio buffers */
 	while ( audio->enabled ) {
@@ -248,6 +267,11 @@ int SDL_RunAudio(void *audiop)
 
 	D(bug("CloseAudio..Done, subtask exiting...\n"));
 	audio_configured = 0;
+#endif
+#ifdef __OS2__
+#ifdef DEBUG_BUILD
+        printf("[SDL_RunAudio] : Task exiting. (TID%d)\n", SDL_ThreadID());
+#endif
 #endif
 	return(0);
 }

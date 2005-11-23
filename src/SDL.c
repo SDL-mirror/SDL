@@ -220,14 +220,24 @@ Uint32 SDL_WasInit(Uint32 flags)
 void SDL_Quit(void)
 {
 	/* Quit all subsystems */
+#ifdef DEBUG_BUILD
+  printf("[SDL_Quit] : Enter! Calling QuitSubSystem()\n"); fflush(stdout);
+#endif
 	SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
 
 #ifdef CHECK_LEAKS
+#ifdef DEBUG_BUILD
+  printf("[SDL_Quit] : CHECK_LEAKS\n"); fflush(stdout);
+#endif
+
 	/* Print the number of surfaces not freed */
 	if ( surfaces_allocated != 0 ) {
 		fprintf(stderr, "SDL Warning: %d SDL surfaces extant\n", 
 							surfaces_allocated);
 	}
+#endif
+#ifdef DEBUG_BUILD
+  printf("[SDL_Quit] : SDL_UninstallParachute()\n"); fflush(stdout);
 #endif
 
 	/* Uninstall any parachute signal handlers */
@@ -236,6 +246,10 @@ void SDL_Quit(void)
 #if !defined(DISABLE_THREADS) && defined(ENABLE_PTH)
 	pth_kill();
 #endif
+#ifdef DEBUG_BUILD
+  printf("[SDL_Quit] : Returning!\n"); fflush(stdout);
+#endif
+
 }
 
 /* Return the library version number */
@@ -244,6 +258,7 @@ const SDL_version * SDL_Linked_Version(void)
 	return(&version);
 }
 
+#ifndef __OS2__
 #if defined(_WIN32_WCE) || (defined(__WATCOMC__) && defined(BUILD_DLL))
 /* Need to include DllMain() on Windows CE and Watcom C for some reason.. */
 #include <windows.h>
@@ -262,3 +277,75 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 	return TRUE;
 }
 #endif /* _WIN32_WCE and building DLL with Watcom C */
+#else
+// Building for OS/2
+#ifdef __WATCOMC__
+
+#define INCL_DOSERRORS
+#define INCL_DOSEXCEPTIONS
+#include <os2.h>
+
+// Exception handler to prevent the Audio thread hanging, making a zombie process!
+ULONG _System SDL_Main_ExceptionHandler(PEXCEPTIONREPORTRECORD pERepRec,
+                                        PEXCEPTIONREGISTRATIONRECORD pERegRec,
+                                        PCONTEXTRECORD pCtxRec,
+                                        PVOID p)
+{
+  if (pERepRec->fHandlerFlags & EH_EXIT_UNWIND)
+    return XCPT_CONTINUE_SEARCH;
+  if (pERepRec->fHandlerFlags & EH_UNWINDING)
+    return XCPT_CONTINUE_SEARCH;
+  if (pERepRec->fHandlerFlags & EH_NESTED_CALL)
+    return XCPT_CONTINUE_SEARCH;
+
+  // Do cleanup at every fatal exception!
+  if (((pERepRec->ExceptionNum & XCPT_SEVERITY_CODE) == XCPT_FATAL_EXCEPTION) &&
+      (pERepRec->ExceptionNum != XCPT_BREAKPOINT) &&
+      (pERepRec->ExceptionNum != XCPT_SINGLE_STEP)
+     )
+  {
+    if (SDL_initialized & SDL_INIT_AUDIO)
+    {
+      // This removes the zombie audio thread in case of emergency.
+#ifdef DEBUG_BUILD
+      printf("[SDL_Main_ExceptionHandler] : Calling SDL_CloseAudio()!\n");
+#endif
+      SDL_CloseAudio();
+    }
+  }
+  return (XCPT_CONTINUE_SEARCH);
+}
+
+
+EXCEPTIONREGISTRATIONRECORD SDL_Main_xcpthand = {0, SDL_Main_ExceptionHandler};
+
+// The main DLL entry for DLL Initialization and Uninitialization:
+unsigned _System LibMain(unsigned hmod, unsigned termination)
+{
+  if (termination)
+  {
+#ifdef DEBUG_BUILD
+//    printf("[SDL DLL Unintialization] : Removing exception handler\n");
+#endif
+    DosUnsetExceptionHandler(&SDL_Main_xcpthand);
+    return 1;
+  } else
+  {
+#ifdef DEBUG_BUILD
+    // Make stdout and stderr unbuffered!
+    setbuf(stdout, NULL);
+    setbuf(stderr, NULL);
+#endif
+    // Fire up exception handler
+#ifdef DEBUG_BUILD
+//    printf("[SDL DLL Initialization] : Setting exception handler\n");
+#endif
+    // Set exception handler
+    DosSetExceptionHandler(&SDL_Main_xcpthand);
+
+    return 1;
+  }
+}
+
+#endif
+#endif

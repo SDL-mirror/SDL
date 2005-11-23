@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2004 Sam Lantinga
+    Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002  Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Library General Public
@@ -25,26 +25,3 @@ static char rcsid =
  "@(#) $Id$";
 #endif
 
-#include "SDL_sysvideo.h"
-
-/* Useful functions and variables from SDL_sysevents.c */
-
-#ifdef __BEOS__		/* The Be event loop runs in a separate thread */
-#define MUST_THREAD_EVENTS
-#endif
-
-#ifdef WIN32		/* Win32 doesn't allow a separate event thread */
-#define CANT_THREAD_EVENTS
-#endif
-
-#ifdef IPOD			/* iPod doesn't support threading at all */
-#define CANT_THREAD_EVENTS
-#endif
-
-#ifdef macintosh	/* MacOS 7/8 don't support preemptive multi-tasking */
-#define CANT_THREAD_EVENTS
-#endif
-
-#ifdef __OS2__		/* The OS/2 event loop runs in a separate thread */
-#define MUST_THREAD_EVENTS
-#endif

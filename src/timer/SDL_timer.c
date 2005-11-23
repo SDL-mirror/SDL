@@ -242,7 +242,7 @@ SDL_bool SDL_RemoveTimer(SDL_TimerID id)
 }
 
 /* Old style callback functions are wrapped through this */
-static Uint32 callback_wrapper(Uint32 ms, void *param)
+static Uint32 SDLCALL callback_wrapper(Uint32 ms, void *param)
 {
 	SDL_TimerCallback func = (SDL_TimerCallback) param;
 	return (*func)(ms);
