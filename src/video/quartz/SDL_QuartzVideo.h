@@ -64,6 +64,7 @@
 #include "SDL_sysvideo.h"
 #include "SDL_pixels_c.h"
 #include "SDL_events_c.h"
+#include "SDL_loadso.h"
 
 /* 
     This is a workaround to directly access NSOpenGLContext's CGL context
@@ -117,7 +118,7 @@ typedef struct SDL_PrivateVideoData {
     Sint16                  yuv_width, yuv_height;
     CGrafPtr                yuv_port;
 
-    CFBundleRef opengl_bundle;    /* dynamically loaded OpenGL library. */
+    void *opengl_library;    /* dynamically loaded OpenGL library. */
 } SDL_PrivateVideoData;
 
 #define _THIS    SDL_VideoDevice *this
@@ -155,7 +156,7 @@ typedef struct SDL_PrivateVideoData {
 #define current_buffer (this->hidden->current_buffer)
 #define quit_thread (this->hidden->quit_thread)
 #define system_version (this->hidden->system_version)
-#define opengl_bundle (this->hidden->opengl_bundle)
+#define opengl_library (this->hidden->opengl_library)
 
 /* grab states - the input is in one of these states */
 enum {

@@ -23,7 +23,6 @@
 #include "SDL_QuartzVideo.h"
 #include "SDL_QuartzWindow.h"
 
-
 /* 
     Add methods to get at private members of NSScreen. 
     Since there is a bug in Apple's screen switching code
@@ -1495,9 +1494,9 @@ static void QZ_VideoQuit (_THIS) {
     QZ_UnsetVideoMode (this);
     CGPaletteRelease (palette);
 
-    if (opengl_bundle) {
-        CFRelease(opengl_bundle);
-        opengl_bundle = NULL;
+    if (opengl_library) {
+        SDL_UnloadObject(opengl_library);
+        opengl_library = NULL;
     }
     this->gl_config.driver_loaded = 0;
 }
