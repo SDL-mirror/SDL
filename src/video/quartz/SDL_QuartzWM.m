@@ -85,7 +85,12 @@ void QZ_HideMouse (_THIS) {
 }
 
 BOOL QZ_IsMouseInWindow (_THIS) {
-    return (mode_flags & SDL_FULLSCREEN) ? true : NSPointInRect([ qz_window mouseLocationOutsideOfEventStream ], [ window_view frame ]);
+    if (mode_flags & SDL_FULLSCREEN) return YES;
+    else {
+        NSPoint p = [ qz_window mouseLocationOutsideOfEventStream ];
+        p.y -= 1.0f; /* Apparently y goes from 1 to h, not from 0 to h-1 (i.e. the "location of the mouse" seems to be defined as "the location of the top left corner of the mouse pointer's hot pixel" */
+        return NSPointInRect(p, [ window_view frame ]);
+    }
 }
 
 int QZ_ShowWMCursor (_THIS, WMcursor *cursor) { 
@@ -140,6 +145,11 @@ void QZ_PrivateSDLToCocoa (_THIS, NSPoint *p) {
     else {
        
         *p = [ window_view convertPoint:*p toView: nil ];
+        
+        /* We need a workaround in OpenGL mode */
+        if ( SDL_VideoSurface->flags & SDL_OPENGL ) {
+            p->y = [window_view frame].size.height - p->y;
+        }
     }
 }
 
@@ -156,7 +166,7 @@ void QZ_PrivateCocoaToSDL (_THIS, NSPoint *p) {
         
         /* We need a workaround in OpenGL mode */
         if ( SDL_VideoSurface->flags & SDL_OPENGL ) {
-            p->y = [window_view frame].size.height - p->y - 1;
+            p->y = [window_view frame].size.height - p->y;
         }
     }
 }
