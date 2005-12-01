@@ -2796,7 +2796,6 @@ case "$target" in
         if test x$enable_cdrom = xyes; then
             CDROM_SUBDIRS="$CDROM_SUBDIRS macosx"
             CDROM_DRIVERS="$CDROM_DRIVERS macosx/libcdrom_macosx.la"
-            SYSTEM_LIBS="$SYSTEM_LIBS -lstdc++"
         fi
         # Set up files for the thread library
         if test x$enable_threads = xyes; then
