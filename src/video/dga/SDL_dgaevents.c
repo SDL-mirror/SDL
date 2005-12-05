@@ -36,10 +36,13 @@ static char rcsid =
 #include "SDL_dgavideo.h"
 #include "SDL_dgaevents_c.h"
 
+/* get function pointers... */
+#include "../x11/SDL_x11dyn.h"
+
 /* Heheh we're using X11 event code */
 extern int X11_Pending(Display *display);
 extern void X11_InitKeymap(void);
-extern SDL_keysym *X11_TranslateKey(Display *display, XKeyEvent *xkey,
+extern SDL_keysym *X11_TranslateKey(Display *display, XIC ic, XKeyEvent *xkey,
 				    KeyCode kc, SDL_keysym *keysym);
 
 static int DGA_DispatchEvent(_THIS)
@@ -84,7 +87,7 @@ static int DGA_DispatchEvent(_THIS)
 
 		SDL_NAME(XDGAKeyEventToXKeyEvent)(&xevent.xkey, &xkey);
 		posted = SDL_PrivateKeyboard((xevent.type == KeyPress), 
-					X11_TranslateKey(DGA_Display,
+					X11_TranslateKey(DGA_Display, NULL/*no XIC*/,
 							 &xkey, xkey.keycode,
 							 &keysym));
 	    }
