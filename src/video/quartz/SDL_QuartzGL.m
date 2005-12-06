@@ -57,6 +57,12 @@ int QZ_SetupOpenGL (_THIS, int bpp, Uint32 flags) {
     int i = 0;
     int colorBits = bpp;
 
+    /* if a GL library hasn't been loaded at this point, load the default. */
+    if (!this->gl_config.driver_loaded) {
+        if (QZ_GL_LoadLibrary(this, NULL) == -1)
+            return 0;
+    }
+
     if ( flags & SDL_FULLSCREEN ) {
 
         attr[i++] = NSOpenGLPFAFullScreen;
@@ -150,9 +156,6 @@ int QZ_SetupOpenGL (_THIS, int bpp, Uint32 flags) {
     }
 
     /* End Wisdom from Apple Engineer section. --ryan. */
-
-    /* Convince SDL that the GL "driver" is loaded */
-    this->gl_config.driver_loaded = 1;
 
     return 1;
 }
