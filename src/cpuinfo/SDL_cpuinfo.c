@@ -49,7 +49,7 @@ static char rcsid =
 #define CPU_HAS_SSE2	0x00000080
 #define CPU_HAS_ALTIVEC	0x00000100
 
-#ifdef USE_SETJMP
+#if defined(USE_SETJMP) && defined(GCC_ALTIVEC)
 /* This is the brute force way of detecting instruction sets...
    the idea is borrowed from the libmpeg2 library - thanks!
  */
