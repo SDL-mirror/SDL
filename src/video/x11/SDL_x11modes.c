@@ -49,7 +49,7 @@ static char rcsid =
 Bool SDL_NAME(XF86VidModeGetModeInfo)(Display *dpy, int scr, SDL_NAME(XF86VidModeModeInfo) *info)
 {
     SDL_NAME(XF86VidModeModeLine) *l = (SDL_NAME(XF86VidModeModeLine)*)((char*)info + sizeof info->dotclock);
-    return SDL_NAME(XF86VidModeGetModeLine)(dpy, scr, &info->dotclock, l);
+    return SDL_NAME(XF86VidModeGetModeLine)(dpy, scr, (int*)&info->dotclock, l);
 }
 #endif /* XFREE86_VM */
 

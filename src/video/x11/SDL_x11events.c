@@ -613,7 +613,7 @@ void X11_InitKeymap(void)
 }
 
 #ifdef X_HAVE_UTF8_STRING
-Uint32 Utf8ToUcs4(const char * utf8)
+Uint32 Utf8ToUcs4(const unsigned char *utf8)
 {
 	Uint32 c;
 	int i = 1;

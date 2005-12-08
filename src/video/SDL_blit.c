@@ -116,7 +116,7 @@ static int SDL_SoftBlit(SDL_Surface *src, SDL_Rect *srcrect,
 }
 
 #ifdef MMX_ASMBLIT
-static __inline__ void SDL_memcpyMMX(char* to,char* from,int len)
+static __inline__ void SDL_memcpyMMX(Uint8 *to, const Uint8 *from, int len)
 {
 	int i;
 
@@ -132,7 +132,7 @@ static __inline__ void SDL_memcpyMMX(char* to,char* from,int len)
 		SDL_memcpy(to, from, len&7);
 }
 
-static __inline__ void SDL_memcpySSE(char* to,char* from,int len)
+static __inline__ void SDL_memcpySSE(Uint8 *to, const Uint8 *from, int len)
 {
 	int i;
 

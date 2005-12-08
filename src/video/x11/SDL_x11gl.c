@@ -532,7 +532,7 @@ void *X11_GL_GetProcAddress(_THIS, const char* proc)
 	
 	handle = this->gl_config.dll_handle;
 	if ( this->gl_data->glXGetProcAddress ) {
-		return this->gl_data->glXGetProcAddress(proc);
+		return this->gl_data->glXGetProcAddress((const GLubyte *)proc);
 	}
 #if defined(__OpenBSD__) && !defined(__ELF__)
 #undef do_dlsym

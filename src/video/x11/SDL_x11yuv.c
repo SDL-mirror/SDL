@@ -103,8 +103,8 @@ SDL_Overlay *X11_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, S
 	SDL_Overlay *overlay;
 	struct private_yuvhwdata *hwdata;
 	int xv_port;
-	int i, j, k;
-	int adaptors;
+	unsigned int i, j, k;
+	unsigned int adaptors;
 	SDL_NAME(XvAdaptorInfo) *ainfo;
 	int bpp;
 #ifndef NO_SHARED_MEMORY
