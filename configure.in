@@ -3075,13 +3075,7 @@ case "$target" in
         AC_SUBST(OBJC)
         OBJCFLAGS="$CFLAGS"
         AC_SUBST(OBJCFLAGS)
-        dnl _AM_DEPENDENCIES(OBJC) doesn't work, so hard code OBJCDEPMODE here
-        dnl _AM_DEPENDENCIES(OBJC)
-        dnl Of course, hard coding doesn't work for some versions of automake
-        OBJCDEPMODE="depmode=gcc"
-        AC_SUBST(OBJCDEPMODE)
-        dnl Trying this to satisfy everybody...
-        AC_MSG_RESULT(not implemented yet)
+        _AM_DEPENDENCIES(OBJC)
         ;;
 esac
 
