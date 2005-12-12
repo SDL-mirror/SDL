@@ -317,11 +317,19 @@ static enum {
 	MOUSE_MS,
 	MOUSE_BM,
 	MOUSE_ELO,
+	MOUSE_TSLIB,
 	NUM_MOUSE_DRVS
 } mouse_drv = MOUSE_NONE;
 
 void FB_CloseMouse(_THIS)
 {
+#ifdef HAVE_TSLIB
+	if (ts_dev != NULL) {
+		ts_close(ts_dev);
+		ts_dev = NULL;
+		mouse_fd = -1;
+	}
+#endif /* HAVE_TSLIB */
 	if ( mouse_fd > 0 ) {
 		close(mouse_fd);
 	}
@@ -500,6 +508,25 @@ int FB_OpenMouse(_THIS)
 	mousedev = getenv("SDL_MOUSEDEV");
 	mouse_fd = -1;
 
+#ifdef HAVE_TSLIB
+	if ((mousedrv != NULL) && (strcmp(mousedrv, "TSLIB") == 0)) {
+		if (mousedev == NULL) mousedev = getenv("TSLIB_TSDEVICE");
+		if (mousedev != NULL) {
+			ts_dev = ts_open(mousedev, 1);
+			if ((ts_dev != NULL) && (ts_config(ts_dev) >= 0)) {
+#ifdef DEBUG_MOUSE
+				fprintf(stderr, "Using tslib touchscreen\n");
+#endif
+				mouse_drv = MOUSE_TSLIB;
+				mouse_fd = ts_fd(ts_dev);
+				return mouse_fd;
+			}
+		}
+		mouse_drv = MOUSE_NONE;
+		return mouse_fd;
+	}
+#endif /* HAVE_TSLIB */
+
 	/* ELO TOUCHSCREEN SUPPORT */
 
 	if( (mousedrv != NULL) && (strcmp(mousedrv, "ELO") == 0) ) {
@@ -642,6 +669,22 @@ void FB_vgamousecallback(int button, int relative, int dx, int dy)
 	}
 }
 
+/* Handle input from tslib */
+#ifdef HAVE_TSLIB
+static void handle_tslib(_THIS)
+{
+	struct ts_sample sample;
+	int button;
+
+	while (ts_read(ts_dev, &sample, 1) > 0) {
+		button = (sample.pressure > 0) ? 1 : 0;
+		button <<= 2;	/* must report it as button 3 */
+    	FB_vgamousecallback(button, 0, sample.x, sample.y);
+	}
+	return;
+}
+#endif /* HAVE_TSLIB */
+
 /* For now, use MSC, PS/2, and MS protocols
    Driver adapted from the SVGAlib mouse driver code (taken from gpm, etc.)
  */
@@ -678,6 +721,11 @@ static void handle_mouse(_THIS)
 			packetsize = ELO_PACKET_SIZE;
 			relative = 0;
 			break;
+		case MOUSE_TSLIB:
+#ifdef HAVE_TSLIB
+			handle_tslib(this);
+#endif
+			return; /* nothing left to do */
 		case NUM_MOUSE_DRVS:
 			/* Uh oh.. */
 			packetsize = 0;
