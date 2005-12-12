@@ -1287,8 +1287,8 @@ CheckPTHREAD()
             pthread_lib="-pthread"
             ;;
         *-*-netbsd*)
-            pthread_cflags="-I/usr/pkg/include -D_REENTRANT"
-            pthread_lib="-L/usr/pkg/lib -lpthread -lsem"
+            pthread_cflags="-I/usr/include -D_REENTRANT -D_THREAD_SAFE"
+            pthread_lib="-L/usr/lib -lpthread"
             ;;
         *-*-openbsd*)
             pthread_cflags="-D_REENTRANT"
