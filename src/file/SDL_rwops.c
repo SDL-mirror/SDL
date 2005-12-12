@@ -74,7 +74,7 @@ static int stdio_close(SDL_RWops *context)
 			/* WARNING:  Check the return value here! */
 			fclose(context->hidden.stdio.fp);
 		}
-		free(context);
+		SDL_FreeRW(context);
 	}
 	return(0);
 }
@@ -145,7 +145,7 @@ static int mem_writeconst(SDL_RWops *context, const void *ptr, int size, int num
 static int mem_close(SDL_RWops *context)
 {
 	if ( context ) {
-		free(context);
+		SDL_FreeRW(context);
 	}
 	return(0);
 }
