@@ -27,10 +27,7 @@ GLOBAL _ConvertX86p16_8RGB332
 EXTERN _ConvertX86
 EXTERN _x86return
 
-SECTION .note.GNU-stack noalloc progbits noexec nowrite
 SECTION .text
-
-
 
 _ConvertX86p16_16BGR565:
 
@@ -494,3 +491,6 @@ _ConvertX86p16_8RGB332:
 .L7 pop ebp
     jmp _x86return
 
+%ifidn __OUTPUT_FORMAT__,elf
+section .note.GNU-stack noalloc noexec nowrite progbits
+%endif

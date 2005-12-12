@@ -12,8 +12,6 @@ BITS 32
 GLOBAL _ConvertMMX
 GLOBAL _mmxreturn
 
-
-SECTION .note.GNU-stack noalloc progbits noexec nowrite
 SECTION .text
 		
 ;; _ConvertMMX:	 
@@ -71,5 +69,6 @@ endconvert:
 	
 	ret		
 
-
-
+%ifidn __OUTPUT_FORMAT__,elf
+section .note.GNU-stack noalloc noexec nowrite progbits
+%endif

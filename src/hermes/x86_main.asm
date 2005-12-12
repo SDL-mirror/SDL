@@ -16,7 +16,6 @@ GLOBAL _x86return
 	
 GLOBAL _Hermes_X86_CPU
 
-SECTION .note.GNU-stack noalloc progbits noexec nowrite
 SECTION .data
 	
 cpu_flags dd 0
@@ -123,3 +122,7 @@ _Hermes_X86_CPU:
 
 .L1:	
 	ret
+
+%ifidn __OUTPUT_FORMAT__,elf
+section .note.GNU-stack noalloc noexec nowrite progbits
+%endif

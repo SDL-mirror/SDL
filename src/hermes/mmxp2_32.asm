@@ -29,7 +29,6 @@ GLOBAL _ConvertMMXpII32_16BGR555
 
 EXTERN _mmxreturn
  
-SECTION .note.GNU-stack noalloc progbits noexec nowrite
 SECTION .data
 	
 ALIGN 8
@@ -383,5 +382,6 @@ _convert_bgr555_cheat:
 .L4:		
 	jmp _mmxreturn
 
-
-
+%ifidn __OUTPUT_FORMAT__,elf
+section .note.GNU-stack noalloc noexec nowrite progbits
+%endif
