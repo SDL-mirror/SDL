@@ -265,6 +265,7 @@ static int xio_errhandler(Display *d)
 /* Create auxiliary (toplevel) windows with the current visual */
 static void create_aux_windows(_THIS)
 {
+    char * savedclassname = NULL;
     XSetWindowAttributes xattr;
     XWMHints *hints;
     XTextProperty titleprop, iconprop;
@@ -349,7 +350,6 @@ static void create_aux_windows(_THIS)
 		 FocusChangeMask | KeyPressMask | KeyReleaseMask
 		 | PropertyChangeMask | StructureNotifyMask | KeymapStateMask);
 
-    char * savedclassname = 0;
     /* Set the class hints so we can get an icon (AfterStep) */
     {
 	XClassHint *classhints;
