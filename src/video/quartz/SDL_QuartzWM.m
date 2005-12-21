@@ -231,7 +231,7 @@ void QZ_WarpWMCursor (_THIS, Uint16 x, Uint16 y) {
         return;
             
     /* Do the actual warp */
-    QZ_PrivateWarpCursor (this, x, y);
+    if (grab_state != QZ_INVISIBLE_GRAB) QZ_PrivateWarpCursor (this, x, y);
 
     /* Generate the mouse moved event */
     SDL_PrivateMouseMotion (0, 0, x, y);
