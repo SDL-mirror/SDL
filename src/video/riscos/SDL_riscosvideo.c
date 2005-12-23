@@ -150,6 +150,11 @@ static SDL_VideoDevice *RISCOS_CreateDevice(int devindex)
 	/* Set other entries for fullscreen mode */
 	FULLSCREEN_SetDeviceMode(device);
 
+	/* Mouse pointer needs to use the WIMP ShowCursor version so
+	   that it doesn't modify the pointer until the SDL Window is
+	   entered or the application goes full screen */
+	device->ShowWMCursor = WIMP_ShowWMCursor;
+
 	return device;
 }
 

@@ -280,8 +280,6 @@ void FULLSCREEN_SetDeviceMode(_THIS)
       } else
 	   this->UpdateRects = FULLSCREEN_UpdateRects; /* Default do nothing implementation */
 
-	if (this->SetColors == FULLSCREEN_SetColors) return; /* Already set up */
-
 	this->SetColors   = FULLSCREEN_SetColors;
 
 	this->FlipHWSurface = FULLSCREEN_FlipHWSurface;
@@ -368,13 +366,14 @@ static int FULLSCREEN_FlipHWSurface(_THIS, SDL_Surface *surface)
 {
    _kernel_swi_regs regs;
    regs.r[0] = 19;
-   /* Wait for Vsync */
-   _kernel_swi(OS_Byte, &regs, &regs);
 
    FULLSCREEN_SetDisplayBank(this->hidden->current_bank);
    this->hidden->current_bank ^= 1;
    FULLSCREEN_SetWriteBank(this->hidden->current_bank);
    surface->pixels = this->hidden->bank[this->hidden->current_bank];
+
+   /* Wait for Vsync */
+   _kernel_swi(OS_Byte, &regs, &regs);
 
 	return(0);
 }

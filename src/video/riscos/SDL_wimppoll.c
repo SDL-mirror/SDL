@@ -71,6 +71,7 @@ extern int riscos_using_threads;
 
 /* Mouse cursor handling */
 extern void WIMP_ReshowCursor(_THIS);
+extern void WIMP_RestoreWimpCursor();
 
 int hasFocus = 0;
 int mouseInWindow = 0;
@@ -191,10 +192,7 @@ void WIMP_Poll(_THIS, int waitTime)
 				mouseInWindow = 0;
 				//TODO: Lose buttons / dragging
 				 /* Reset to default pointer */
-   				 regs.r[0] = 106;
-				 regs.r[1] = 1;
-				 regs.r[2] = 0;
-				 _kernel_swi(OS_Byte, &regs, &regs);
+				 WIMP_RestoreWimpCursor();
 				 SDL_PrivateAppActive(0, SDL_APPMOUSEFOCUS);
 			} else
 				sysEvent = 1;
