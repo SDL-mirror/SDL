@@ -41,6 +41,7 @@ static char rcsid =
 #include "SDL_events_c.h"
 
 #include "SDL_atarikeys.h"
+#include "SDL_atarievents_c.h"
 #include "SDL_ikbdinterrupt_s.h"
 
 /* Special keys state */
@@ -75,7 +76,8 @@ _KEYTAB *curtables;
 static unsigned char *tab_unshift, *tab_shift, *tab_caps;
 static SDLKey keymap[ATARIBIOS_MAXKEYS];
 
-static SDL_keysym *TranslateKey(int scancode, int numkeytable, SDL_keysym *keysym);
+static SDL_keysym *TranslateKey(int scancode, int numkeytable, SDL_keysym *keysym,
+	SDL_bool pressed);
 
 void AtariIkbd_InitOSKeymap(_THIS)
 {
@@ -171,13 +173,15 @@ void AtariIkbd_PumpEvents(_THIS)
 	for (i=0; i<ATARIBIOS_MAXKEYS; i++) {
 		/* Key pressed ? */
 		if (SDL_AtariIkbd_keyboard[i]==KEY_PRESSED) {
-			SDL_PrivateKeyboard(SDL_PRESSED, TranslateKey(i, specialkeys, &keysym));
+			SDL_PrivateKeyboard(SDL_PRESSED,
+				TranslateKey(i, specialkeys, &keysym, SDL_TRUE));
 			SDL_AtariIkbd_keyboard[i]=KEY_UNDEFINED;
 		}
 			
 		/* Key released ? */
 		if (SDL_AtariIkbd_keyboard[i]==KEY_RELEASED) {
-			SDL_PrivateKeyboard(SDL_RELEASED, TranslateKey(i, specialkeys, &keysym));
+			SDL_PrivateKeyboard(SDL_RELEASED,
+				TranslateKey(i, specialkeys, &keysym, SDL_FALSE));
 			SDL_AtariIkbd_keyboard[i]=KEY_UNDEFINED;
 		}
 	}
@@ -209,7 +213,8 @@ void AtariIkbd_PumpEvents(_THIS)
 	}
 }
 
-static SDL_keysym *TranslateKey(int scancode, int numkeytable, SDL_keysym *keysym)
+static SDL_keysym *TranslateKey(int scancode, int numkeytable, SDL_keysym *keysym,
+	SDL_bool pressed)
 {
 	unsigned char asciicode;
 
@@ -236,6 +241,9 @@ static SDL_keysym *TranslateKey(int scancode, int numkeytable, SDL_keysym *keysy
 
 	keysym->mod = KMOD_NONE;
 	keysym->unicode = 0;
+	if (pressed && (asciicode!=0)) {
+		keysym->unicode = SDL_AtariToUnicode(asciicode);
+	}
 
 	return(keysym);
 }

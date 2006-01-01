@@ -44,4 +44,6 @@ extern void (*Atari_ShutdownEvents)(void);
 extern void Atari_InitOSKeymap(_THIS);
 extern void Atari_PumpEvents(_THIS);
 
+extern Uint16 SDL_AtariToUnicode(Uint8 caracter);
+
 #endif /* _SDL_ATARI_EVENTS_H_ */

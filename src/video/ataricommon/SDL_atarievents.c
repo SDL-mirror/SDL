@@ -127,3 +127,13 @@ void Atari_PumpEvents(_THIS)
 	/* Call choosen routine */
 	this->PumpEvents(this);
 }
+
+Uint16 SDL_AtariToUnicode(Uint8 caracter)
+{
+	/* Translate from Atari charset to Unicode */
+	if ((caracter>=32) && (caracter<=127)) {
+		return (Uint16) caracter;
+	}
+
+	return 0;
+}

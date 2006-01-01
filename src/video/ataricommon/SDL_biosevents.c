@@ -41,6 +41,7 @@ static char rcsid =
 #include "SDL_events_c.h"
 
 #include "SDL_atarikeys.h"
+#include "SDL_atarievents_c.h"
 #include "SDL_xbiosevents_c.h"
 
 /* To save state of keyboard */
@@ -64,7 +65,8 @@ enum {
 /* The translation tables from a console scancode to a SDL keysym */
 static SDLKey keymap[ATARIBIOS_MAXKEYS];
 
-static SDL_keysym *TranslateKey(int scancode, int asciicode, SDL_keysym *keysym);
+static SDL_keysym *TranslateKey(int scancode, int asciicode, SDL_keysym *keysym,
+	SDL_bool pressed);
 static void UpdateSpecialKeys(int special_keys_state);
 
 void AtariBios_InitOSKeymap(_THIS)
@@ -135,11 +137,13 @@ void AtariBios_PumpEvents(_THIS)
 	for (i=0; i<ATARIBIOS_MAXKEYS; i++) {
 		/* Key pressed ? */
 		if (bios_currentkeyboard[i] && !bios_previouskeyboard[i])
-			SDL_PrivateKeyboard(SDL_PRESSED, TranslateKey(i, bios_currentascii[i], &keysym));
+			SDL_PrivateKeyboard(SDL_PRESSED,
+				TranslateKey(i, bios_currentascii[i], &keysym, SDL_TRUE));
 			
 		/* Key unpressed ? */
 		if (bios_previouskeyboard[i] && !bios_currentkeyboard[i])
-			SDL_PrivateKeyboard(SDL_RELEASED, TranslateKey(i, bios_currentascii[i], &keysym));
+			SDL_PrivateKeyboard(SDL_RELEASED,
+				TranslateKey(i, bios_currentascii[i], &keysym, SDL_FALSE));
 	}
 
 	SDL_AtariXbios_PostMouseEvents(this);
@@ -165,7 +169,8 @@ static void UpdateSpecialKeys(int special_keys_state)
 	UPDATE_SPECIAL_KEYS(K_CAPSLOCK, SCANCODE_CAPSLOCK);
 }
 
-static SDL_keysym *TranslateKey(int scancode, int asciicode, SDL_keysym *keysym)
+static SDL_keysym *TranslateKey(int scancode, int asciicode, SDL_keysym *keysym,
+	SDL_bool pressed)
 {
 	/* Set the keysym information */
 	keysym->scancode = scancode;
@@ -177,6 +182,9 @@ static SDL_keysym *TranslateKey(int scancode, int asciicode, SDL_keysym *keysym)
 
 	keysym->mod = KMOD_NONE;
 	keysym->unicode = 0;
+	if (pressed && (asciicode!=0)) {
+		keysym->unicode = SDL_AtariToUnicode(asciicode);
+	}
 
 	return(keysym);
 }

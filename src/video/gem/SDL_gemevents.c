@@ -44,6 +44,7 @@ static char rcsid =
 #include "SDL_gemvideo.h"
 #include "SDL_gemevents_c.h"
 #include "SDL_atarikeys.h"	/* for keyboard scancodes */
+#include "SDL_atarievents_c.h"
 #include "SDL_xbiosinterrupt_s.h"
 
 /* Defines */
@@ -61,14 +62,16 @@ static SDLKey keymap[ATARIBIOS_MAXKEYS];
 
 /* Functions prototypes */
 
-static SDL_keysym *TranslateKey(int scancode, int asciicode, SDL_keysym *keysym);
+static SDL_keysym *TranslateKey(int scancode, int asciicode, SDL_keysym *keysym,
+	SDL_bool pressed);
 static int do_messages(_THIS, short *message);
 static void do_keyboard(short kc, short ks);
 static void do_mouse(_THIS, short mx, short my, short mb, short ks);
 
 /* Functions */
 
-static SDL_keysym *TranslateKey(int scancode, int asciicode, SDL_keysym *keysym)
+static SDL_keysym *TranslateKey(int scancode, int asciicode, SDL_keysym *keysym,
+	SDL_bool pressed)
 {
 	/* Set the keysym information */
 	keysym->scancode = scancode;
@@ -80,6 +83,9 @@ static SDL_keysym *TranslateKey(int scancode, int asciicode, SDL_keysym *keysym)
 
 	keysym->mod = KMOD_NONE;
 	keysym->unicode = 0;
+	if (pressed && (asciicode!=0)) {
+		keysym->unicode = SDL_AtariToUnicode(asciicode);
+	}
 
 	return(keysym);
 }
@@ -205,11 +211,13 @@ void GEM_PumpEvents(_THIS)
 	for (i=0; i<ATARIBIOS_MAXKEYS; i++) {
 		/* Key pressed ? */
 		if (gem_currentkeyboard[i] && !gem_previouskeyboard[i])
-			SDL_PrivateKeyboard(SDL_PRESSED, TranslateKey(i, gem_currentascii[i], &keysym));
+			SDL_PrivateKeyboard(SDL_PRESSED,
+				TranslateKey(i, gem_currentascii[i], &keysym, SDL_TRUE));
 			
 		/* Key unpressed ? */
 		if (gem_previouskeyboard[i] && !gem_currentkeyboard[i])
-			SDL_PrivateKeyboard(SDL_RELEASED, TranslateKey(i, gem_currentascii[i], &keysym));
+			SDL_PrivateKeyboard(SDL_RELEASED,
+				TranslateKey(i, gem_currentascii[i], &keysym, SDL_FALSE));
 	}
 
 	memcpy(gem_previouskeyboard,gem_currentkeyboard,sizeof(gem_previouskeyboard));
