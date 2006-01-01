@@ -190,7 +190,7 @@ static void setupWindowMenu(void)
 }
 
 /* Replacement for NSApplicationMain */
-static void CustomApplicationMain (argc, argv)
+static void CustomApplicationMain (int argc, char **argv)
 {
     NSAutoreleasePool	*pool = [[NSAutoreleasePool alloc] init];
     SDLMain				*sdlMain;
@@ -251,8 +251,8 @@ static void CustomApplicationMain (argc, argv)
     if (gCalledAppMainline)  /* app has started, ignore this document. */
         return FALSE;
 
-    unsigned buflen = [filename lengthOfBytesUsingEncoding:NSUTF8StringEncoding] + 1;
-    char *arg = (char *) malloc(buflen);
+    const char *temparg = [filename UTF8String];
+    char *arg = (char *) malloc(strlen(temparg) + 1);
     if (arg == NULL)
         return FALSE;
 
@@ -264,15 +264,10 @@ static void CustomApplicationMain (argc, argv)
     }
     gArgv = newargv;
 
-    BOOL rc = [filename getCString:arg maxLength:buflen encoding:NSUTF8StringEncoding];
-    if (!rc)
-        free(arg);
-    else
-    {
-        gArgv[gArgc++] = arg;
-        gArgv[gArgc] = NULL;
-    }
-    return rc;
+    strcpy(arg, temparg);
+    gArgv[gArgc++] = arg;
+    gArgv[gArgc] = NULL;
+    return TRUE;
 }
 
 
