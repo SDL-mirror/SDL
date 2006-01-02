@@ -182,8 +182,8 @@ static SDL_keysym *TranslateKey(int scancode, int asciicode, SDL_keysym *keysym,
 
 	keysym->mod = KMOD_NONE;
 	keysym->unicode = 0;
-	if (pressed && (asciicode!=0)) {
-		keysym->unicode = SDL_AtariToUnicode(asciicode);
+	if (SDL_TranslateUNICODE && pressed) {
+		keysym->unicode = SDL_AtariToUnicodeTable[asciicode];
 	}
 
 	return(keysym);
