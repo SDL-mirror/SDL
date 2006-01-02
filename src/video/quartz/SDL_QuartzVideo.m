@@ -300,6 +300,7 @@ static SDL_Rect** QZ_ListModes (_THIS, SDL_PixelFormat *format, Uint32 flags) {
                     return NULL;
                 }
 
+                rect->x = rect->y = 0;
                 rect->w = width;
                 rect->h = height;
 
