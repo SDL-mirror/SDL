@@ -975,8 +975,14 @@ static int QZ_ThreadFlip (_THIS) {
         if (quit_thread)
             return 0;
                 
-        dst = CGDisplayBaseAddress (display_id);
-        src = current_buffer;
+        /*
+         * We have to add SDL_VideoSurface->offset here, since we might be a
+         *  smaller surface in the center of the framebuffer (you asked for
+         *  a fullscreen resolution smaller than the hardware could supply
+         *  so SDL is centering it in a bigger resolution)...
+         */
+        dst = CGDisplayBaseAddress (display_id) + SDL_VideoSurface->offset;
+        src = current_buffer + SDL_VideoSurface->offset;
         len = SDL_VideoSurface->w * SDL_VideoSurface->format->BytesPerPixel;
         h = SDL_VideoSurface->h;
         skip = SDL_VideoSurface->pitch;
