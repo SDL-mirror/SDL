@@ -709,6 +709,9 @@ void QZ_PumpEvents (_THIS)
     NSRect winRect;
     NSAutoreleasePool *pool;
 
+    if (!SDL_VideoSurface)
+        return;  /* don't do anything if there's no screen surface. */
+
     /* Update activity every five seconds to prevent screensaver. --ryan. */
     static Uint32 screensaverTicks = 0;
     Uint32 nowTicks = SDL_GetTicks();
