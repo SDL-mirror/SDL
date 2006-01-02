@@ -196,6 +196,7 @@ int          QZ_ShowWMCursor     (_THIS, WMcursor *cursor);
 void         QZ_WarpWMCursor     (_THIS, Uint16 x, Uint16 y);
 void         QZ_MoveWMCursor     (_THIS, int x, int y);
 void         QZ_CheckMouseMode   (_THIS);
+void         QZ_UpdateMouse      (_THIS);
 
 /* Event functions */
 void         QZ_InitOSKeymap     (_THIS);

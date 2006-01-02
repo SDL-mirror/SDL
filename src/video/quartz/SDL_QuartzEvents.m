@@ -887,6 +887,21 @@ void QZ_PumpEvents (_THIS)
                     if ( !isInGameWin && (SDL_GetAppState() & SDL_APPMOUSEFOCUS) ) {
                     
                         SDL_PrivateAppActive (0, SDL_APPMOUSEFOCUS);
+                        if (grab_state == QZ_INVISIBLE_GRAB)
+                            /*The cursor has left the window even though it is
+                              disassociated from the mouse (and therefore
+                              shouldn't move): this can happen with Wacom
+                              tablets, and it effectively breaks the grab, since
+                              mouse down events now go to background
+                              applications. The only possibility to avoid this
+                              seems to be talking to the tablet driver
+                              (AppleEvents) to constrain its mapped area to the
+                              window, which may not be worth the effort. For
+                              now, handle the condition more gracefully than
+                              before by reassociating cursor and mouse until the
+                              cursor enters the window again, making it obvious
+                              to the user that the grab is broken.*/
+                            CGAssociateMouseAndMouseCursorPosition (1);
                         if (!cursor_should_be_visible)
                             QZ_ShowMouse (this);
                     }
@@ -896,6 +911,10 @@ void QZ_PumpEvents (_THIS)
                         SDL_PrivateAppActive (1, SDL_APPMOUSEFOCUS);
                         if (!cursor_should_be_visible)
                             QZ_HideMouse (this);
+                        if (grab_state == QZ_INVISIBLE_GRAB) { /*see comment above*/
+                            QZ_PrivateWarpCursor (this, SDL_VideoSurface->w / 2, SDL_VideoSurface->h / 2);
+                            CGAssociateMouseAndMouseCursorPosition (0);
+                        }
                     }
                     break;
                 case NSScrollWheel:
@@ -946,4 +965,12 @@ void QZ_PumpEvents (_THIS)
         SDL_PrivateMouseMotion (0, 1, dx, dy);
     
     [ pool release ];
+}
+
+void QZ_UpdateMouse (_THIS)
+{
+    NSPoint p;
+    QZ_GetMouseLocation (this, &p);
+    SDL_PrivateAppActive (QZ_IsMouseInWindow (this), SDL_APPMOUSEFOCUS);
+    SDL_PrivateMouseMotion (0, 0, p.x, p.y);
 }

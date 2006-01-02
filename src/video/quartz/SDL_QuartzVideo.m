@@ -131,6 +131,7 @@ static SDL_VideoDevice* QZ_CreateDevice (int device_index) {
     device->ListModes        = QZ_ListModes;
     device->SetVideoMode     = QZ_SetVideoMode;
     device->ToggleFullScreen = QZ_ToggleFullScreen;
+    device->UpdateMouse      = QZ_UpdateMouse;
     device->SetColors        = QZ_SetColors;
     /* device->UpdateRects      = QZ_UpdateRects; this is determined by SetVideoMode() */
     device->VideoQuit        = QZ_VideoQuit;
