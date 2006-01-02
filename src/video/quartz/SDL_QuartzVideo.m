@@ -503,7 +503,7 @@ static void QZ_UnsetVideoMode (_THIS) {
 
 static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int width,
                                            int height, int bpp, Uint32 flags) {
-    int exact_match;
+    boolean_t exact_match = 0;
     int gamma_error;
     SDL_QuartzGammaTable gamma_table;
     NSRect screen_rect;
