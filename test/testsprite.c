@@ -9,8 +9,6 @@
 
 #include "SDL.h"
 
-#define DEBUG_FLIP 1
-
 #define NUM_SPRITES	100
 #define MAX_SPEED 	1
 
@@ -20,6 +18,7 @@ SDL_Rect *sprite_rects;
 SDL_Rect *positions;
 SDL_Rect *velocities;
 int sprites_visible;
+int debug_flip;
 Uint16 sprite_w, sprite_h;
 
 /* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
@@ -92,24 +91,22 @@ void MoveSprites(SDL_Surface *screen, Uint32 background)
 		sprite_rects[nupdates++] = area;
 	}
 
-#if DEBUG_FLIP
-    {
-	if ( (screen->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF ) {
-            static int t = 0;
+	if (debug_flip) {
+		if ( (screen->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF ) {
+			static int t = 0;
 
-            Uint32 color = SDL_MapRGB (screen->format, 255, 0, 0);
-            SDL_Rect r;
-            r.x = (sin((float)t * 2 * 3.1459) + 1.0) / 2.0 * (screen->w-20);
-            r.y = 0;
-            r.w = 20;
-            r.h = screen->h;
-        
-            SDL_FillRect (screen, &r, color);
-            t+=2;
-        }
-    }
-#endif
-    
+			Uint32 color = SDL_MapRGB (screen->format, 255, 0, 0);
+			SDL_Rect r;
+			r.x = (sin((float)t * 2 * 3.1459) + 1.0) / 2.0 * (screen->w-20);
+			r.y = 0;
+			r.w = 20;
+			r.h = screen->h;
+
+			SDL_FillRect (screen, &r, color);
+			t+=2;
+		}
+	}
+
 	/* Update the screen! */
 	if ( (screen->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF ) {
 		SDL_Flip(screen);
@@ -174,6 +171,7 @@ int main(int argc, char *argv[])
 	width = 640;
 	height = 480;
 	video_bpp = 8;
+	debug_flip = 0;
 	while ( argc > 1 ) {
 		--argc;
 		if ( strcmp(argv[argc-1], "-width") == 0 ) {
@@ -197,6 +195,9 @@ int main(int argc, char *argv[])
 		} else
 		if ( strcmp(argv[argc], "-flip") == 0 ) {
 			videoflags ^= SDL_DOUBLEBUF;
+		} else
+		if ( strcmp(argv[argc], "-debugflip") == 0 ) {
+			debug_flip ^= 1;
 		} else
 		if ( strcmp(argv[argc], "-fullscreen") == 0 ) {
 			videoflags ^= SDL_FULLSCREEN;
