@@ -51,6 +51,7 @@ static char rcsid =
 #include "SDL_fbmatrox.h"
 #include "SDL_fbriva.h"
 
+/*#define FBCON_DEBUG*/
 
 #if defined(i386) && defined(FB_TYPE_VGA_PLANES)
 #define VGA16_FBCON_SUPPORT
@@ -234,6 +235,108 @@ VideoBootStrap FBCON_bootstrap = {
 	FB_Available, FB_CreateDevice
 };
 
+#define FB_MODES_DB	"/etc/fb.modes"
+
+static int read_fbmodes_line(FILE*f, char* line, int length)
+{
+	int blank;
+	char* c;
+	int i;
+	
+	blank=0;
+	/* find a relevant line */
+	do
+	{
+		if (fgets(line,length,f)<=0)
+			return 0;
+		c=line;
+		while(((*c=='\t')||(*c==' '))&&(*c!=0))
+			c++;
+		
+		if ((*c=='\n')||(*c=='#')||(*c==0))
+			blank=1;
+		else
+			blank=0;
+	}
+	while(blank);
+	/* remove whitespace at the begining of the string */
+	i=0;
+	do
+	{
+		line[i]=c[i];
+		i++;
+	}
+	while(c[i]!=0);
+	return 1;
+}
+
+static int read_fbmodes_mode(FILE *f, struct fb_var_screeninfo *vinfo)
+{
+	char line[1024];
+	char option[256];
+
+	/* Find a "geometry" */
+	do {
+		if (read_fbmodes_line(f, line, sizeof(line))==0)
+			return 0;
+		if (strncmp(line,"geometry",8)==0)
+			break;
+	}
+	while(1);
+
+	sscanf(line, "geometry %d %d %d %d %d", &vinfo->xres, &vinfo->yres, 
+			&vinfo->xres_virtual, &vinfo->yres_virtual, &vinfo->bits_per_pixel);
+	if (read_fbmodes_line(f, line, sizeof(line))==0)
+		return 0;
+			
+	sscanf(line, "timings %d %d %d %d %d %d %d", &vinfo->pixclock, 
+			&vinfo->left_margin, &vinfo->right_margin, &vinfo->upper_margin, 
+			&vinfo->lower_margin, &vinfo->hsync_len, &vinfo->vsync_len);
+		
+	vinfo->sync=0;
+	vinfo->vmode=FB_VMODE_NONINTERLACED;
+				
+	/* Parse misc options */
+	do {
+		if (read_fbmodes_line(f, line, sizeof(line))==0)
+			return 0;
+
+		if (strncmp(line,"hsync",5)==0) {
+			sscanf(line,"hsync %s",option);
+			if (strncmp(option,"high",4)==0)
+				vinfo->sync |= FB_SYNC_HOR_HIGH_ACT;
+		}
+		else if (strncmp(line,"vsync",5)==0) {
+			sscanf(line,"vsync %s",option);
+			if (strncmp(option,"high",4)==0)
+				vinfo->sync |= FB_SYNC_VERT_HIGH_ACT;
+		}
+		else if (strncmp(line,"csync",5)==0) {
+			sscanf(line,"csync %s",option);
+			if (strncmp(option,"high",4)==0)
+				vinfo->sync |= FB_SYNC_COMP_HIGH_ACT;
+		}
+		else if (strncmp(line,"extsync",5)==0) {
+			sscanf(line,"extsync %s",option);
+			if (strncmp(option,"true",4)==0)
+				vinfo->sync |= FB_SYNC_EXT;
+		}
+		else if (strncmp(line,"laced",5)==0) {
+			sscanf(line,"laced %s",option);
+			if (strncmp(option,"true",4)==0)
+				vinfo->vmode |= FB_VMODE_INTERLACED;
+		}
+		else if (strncmp(line,"double",6)==0) {
+			sscanf(line,"double %s",option);
+			if (strncmp(option,"true",4)==0)
+				vinfo->vmode |= FB_VMODE_DOUBLE;
+		}
+	}
+	while(strncmp(line,"endmode",7)!=0);
+
+	return 1;
+}
+
 static int FB_CheckMode(_THIS, struct fb_var_screeninfo *vinfo,
                         int index, unsigned int *w, unsigned int *h)
 {
@@ -259,7 +362,7 @@ static int FB_CheckMode(_THIS, struct fb_var_screeninfo *vinfo,
 	return mode_okay;
 }
 
-static int FB_AddMode(_THIS, int index, unsigned int w, unsigned int h)
+static int FB_AddMode(_THIS, int index, unsigned int w, unsigned int h, int check_timings)
 {
 	SDL_Rect *mode;
 	int i;
@@ -277,19 +380,21 @@ static int FB_AddMode(_THIS, int index, unsigned int w, unsigned int h)
 	}
 
 	/* Only allow a mode if we have a valid timing for it */
-	next_mode = -1;
-	for ( i=0; i<(sizeof(vesa_timings)/sizeof(vesa_timings[0])); ++i ) {
-		if ( (w == vesa_timings[i].xres) &&
-		     (h == vesa_timings[i].yres) && vesa_timings[i].pixclock ) {
-			next_mode = i;
-			break;
+	if ( check_timings ) {
+		int found_timing = 0;
+		for ( i=0; i<(sizeof(vesa_timings)/sizeof(vesa_timings[0])); ++i ) {
+			if ( (w == vesa_timings[i].xres) &&
+			     (h == vesa_timings[i].yres) && vesa_timings[i].pixclock ) {
+				found_timing = 1;
+				break;
+			}
 		}
-	}
-	if ( next_mode == -1 ) {
+		if ( !found_timing ) {
 #ifdef FBCON_DEBUG
-		fprintf(stderr, "No valid timing line for mode %dx%d\n", w, h);
+			fprintf(stderr, "No valid timing line for mode %dx%d\n", w, h);
 #endif
-		return(0);
+			return(0);
+		}
 	}
 
 	/* Set up the new video mode rectangle */
@@ -323,6 +428,26 @@ static int FB_AddMode(_THIS, int index, unsigned int w, unsigned int h)
 	return(0);
 }
 
+static int cmpmodes(const void *va, const void *vb)
+{
+    const SDL_Rect *a = *(const SDL_Rect**)va;
+    const SDL_Rect *b = *(const SDL_Rect**)vb;
+    if ( a->h == b->h )
+        return b->w - a->w;
+    else
+        return b->h - a->h;
+}
+
+static int FB_SortModes(_THIS)
+{
+	int i;
+	for ( i=0; i<NUM_MODELISTS; ++i ) {
+		if ( SDL_nummodes[i] > 0 ) {
+			qsort(SDL_modelist[i], SDL_nummodes[i], sizeof *SDL_modelist[i], cmpmodes);
+		}
+	}
+}
+
 static int FB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 {
 	struct fb_fix_screeninfo finfo;
@@ -332,6 +457,7 @@ static int FB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	unsigned int current_w;
 	unsigned int current_h;
 	const char *SDL_fbdev;
+	FILE *modesdb;
 
 	/* Initialize the library */
 	SDL_fbdev = getenv("SDL_FBDEV");
@@ -463,12 +589,37 @@ static int FB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	current_w = vinfo.xres;
 	current_h = vinfo.yres;
 	current_index = ((vinfo.bits_per_pixel+7)/8)-1;
+	modesdb = fopen(FB_MODES_DB, "r");
+	for ( i=0; i<NUM_MODELISTS; ++i ) {
+		SDL_nummodes[i] = 0;
+		SDL_modelist[i] = NULL;
+	}
 	if ( getenv("SDL_FB_BROKEN_MODES") != NULL ) {
-		FB_AddMode(this, current_index, current_w, current_h);
+		FB_AddMode(this, current_index, current_w, current_h, 0);
+	} else if(modesdb) {
+		while ( read_fbmodes_mode(modesdb, &vinfo) ) {
+			for ( i=0; i<NUM_MODELISTS; ++i ) {
+				unsigned int w, h;
+
+				/* See if we are querying for the current mode */
+				w = vinfo.xres;
+				h = vinfo.yres;
+				if ( i == current_index ) {
+					if ( (current_w > w) || (current_h > h) ) {
+						/* Only check once */
+						FB_AddMode(this, i, current_w, current_h, 0);
+						current_index = -1;
+					}
+				}
+				if ( FB_CheckMode(this, &vinfo, i, &w, &h) ) {
+					FB_AddMode(this, i, w, h, 0);
+				}
+			}
+		}
+		fclose(modesdb);
+		FB_SortModes(this);
 	} else {
 		for ( i=0; i<NUM_MODELISTS; ++i ) {
-			SDL_nummodes[i] = 0;
-			SDL_modelist[i] = NULL;
 			for ( j=0; j<(sizeof(checkres)/sizeof(checkres[0])); ++j ) {
 				unsigned int w, h;
 
@@ -478,12 +629,12 @@ static int FB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 				if ( i == current_index ) {
 					if ( (current_w > w) || (current_h > h) ) {
 						/* Only check once */
-						FB_AddMode(this, i, current_w, current_h);
+						FB_AddMode(this, i, current_w, current_h, 0);
 						current_index = -1;
 					}
 				}
 				if ( FB_CheckMode(this, &vinfo, i, &w, &h) ) {
-					FB_AddMode(this, i, w, h);
+					FB_AddMode(this, i, w, h, 1);
 				}
 			}
 		}
@@ -611,13 +762,21 @@ static void print_finfo(struct fb_fix_screeninfo *finfo)
 static int choose_fbmodes_mode(struct fb_var_screeninfo *vinfo)
 {
 	int matched;
-	FILE *fbmodes;
+	FILE *modesdb;
+	struct fb_var_screeninfo cinfo;
 
 	matched = 0;
-	fbmodes = fopen("/etc/fb.modes", "r");
-	if ( fbmodes ) {
-		/* FIXME: Parse the mode definition file */
-		fclose(fbmodes);
+	modesdb = fopen(FB_MODES_DB, "r");
+	if ( modesdb ) {
+		/* Parse the mode definition file */
+		while ( read_fbmodes_mode(modesdb, &cinfo) ) {
+			if ( vinfo->xres == cinfo.xres &&
+			     vinfo->yres == cinfo.yres ) {
+				matched = 1;
+				break;
+			}
+		}
+		fclose(modesdb);
 	}
 	return(matched);
 }
