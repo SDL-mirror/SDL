@@ -770,10 +770,19 @@ static int choose_fbmodes_mode(struct fb_var_screeninfo *vinfo)
 	if ( modesdb ) {
 		/* Parse the mode definition file */
 		while ( read_fbmodes_mode(modesdb, &cinfo) ) {
-			if ( vinfo->xres == cinfo.xres &&
-			     vinfo->yres == cinfo.yres ) {
+			if ( (vinfo->xres == cinfo.xres && vinfo->yres == cinfo.yres) &&
+			     (!matched || (vinfo->bits_per_pixel == cinfo.bits_per_pixel)) ) {
+				vinfo->pixclock = cinfo.pixclock;
+				vinfo->left_margin = cinfo.left_margin;
+				vinfo->right_margin = cinfo.right_margin;
+				vinfo->upper_margin = cinfo.upper_margin;
+				vinfo->lower_margin = cinfo.lower_margin;
+				vinfo->hsync_len = cinfo.hsync_len;
+				vinfo->vsync_len = cinfo.vsync_len;
+				if ( matched ) {
+					break;
+				}
 				matched = 1;
-				break;
 			}
 		}
 		fclose(modesdb);
