@@ -30,13 +30,14 @@ static char rcsid =
 #include <stdio.h>
 #include <stdlib.h>
 #include <windows.h>
+#include <process.h>
 
 #include "SDL_error.h"
 #include "SDL_thread.h"
 #include "SDL_systhread.h"
 
 
-static DWORD WINAPI RunThread(LPVOID data)
+static unsigned __stdcall RunThread(void *data)
 {
 	SDL_RunThread(data);
 	return(0);
@@ -44,9 +45,17 @@ static DWORD WINAPI RunThread(LPVOID data)
 
 int SDL_SYS_CreateThread(SDL_Thread *thread, void *args)
 {
-	DWORD  threadnum;
+	unsigned threadid;
 
-	thread->handle = CreateThread(NULL, 0, RunThread, args, 0, &threadnum);
+	/*
+	 * Avoid CreateThread: https://bugzilla.libsdl.org/show_bug.cgi?id=22
+	 *
+	 * have to use _beginthreadex if we want the returned handle
+	 * to be accessible after the thread exits
+	 * threads created with _beginthread auto-close the handle
+	 */
+	thread->handle = (SYS_ThreadHandle) _beginthreadex(NULL, 0, RunThread,
+			args, 0, &threadid);
 	if (thread->handle == NULL) {
 		SDL_SetError("Not enough resources to create thread");
 		return(-1);
