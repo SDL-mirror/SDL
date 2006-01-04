@@ -66,12 +66,6 @@ Copyright (c) 1995,1996  The XFree86 Project, Inc
 
 #include "../../x11/SDL_x11dyn.h"
 
-/* Workaround code in headers... */
-#define _XFlush p_XFlush
-#define _XFlushGCCache p_XFlushGCCache
-#define _XReply p_XReply
-#define _XSend p_XSend
-
 extern XExtDisplayInfo* SDL_NAME(xdga_find_display)(Display*);
 extern char *SDL_NAME(xdga_extension_name);
 

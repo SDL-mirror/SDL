@@ -130,6 +130,8 @@ SDL_X11_SYM(void,_XReadPad,(Display*,char*,long))
 SDL_X11_SYM(void,_XSend,(Display*,_Xconst char*,long))
 SDL_X11_SYM(Status,_XReply,(Display*,xReply*,int,Bool))
 SDL_X11_SYM(unsigned long,_XSetLastRequestRead,(Display*,xGenericReply*))
+SDL_X11_SYM(int,_XData32,(Display *dpy,register long *data,unsigned len))
+SDL_X11_SYM(void,_XRead32,(Display *dpy,register long *data,long len))
 
 #if NeedWidePrototypes
 SDL_X11_SYM(KeySym,XKeycodeToKeysym,(Display*,unsigned int,int))

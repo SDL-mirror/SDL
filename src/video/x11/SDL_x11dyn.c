@@ -22,6 +22,7 @@
 
 /*#define DEBUG_DYNAMIC_X11 1*/
 
+#define __SDL_NO_REDEFINE_X11_HEADER_SYMS 1
 #include "SDL_x11dyn.h"
 
 #ifdef DEBUG_DYNAMIC_X11

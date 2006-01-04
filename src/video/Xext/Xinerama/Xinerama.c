@@ -37,12 +37,6 @@ Equipment Corporation.
 
 #include "../../x11/SDL_x11dyn.h"
 
-/* Workaround code in headers... */
-#define _XFlush p_XFlush
-#define _XFlushGCCache p_XFlushGCCache
-#define _XReply p_XReply
-#define _XSend p_XSend
-
 static XExtensionInfo _panoramiX_ext_info_data;
 static XExtensionInfo *panoramiX_ext_info = &_panoramiX_ext_info_data;
 static /* const */ char *panoramiX_extension_name = PANORAMIX_PROTOCOL_NAME;

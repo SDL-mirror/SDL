@@ -65,6 +65,15 @@ typedef Status (*SDL_X11_XESetEventToWireRetType)(Display*,XEvent*,xEvent*);
 /* Macro in the xlib headers, not an actual symbol... */
 #define pXDestroyImage XDestroyImage
 
+/* Workaround code in headers... */
+#if !__SDL_NO_REDEFINE_X11_HEADER_SYMS
+#define _XFlush p_XFlush
+#define _XFlushGCCache p_XFlushGCCache
+#define _XReply p_XReply
+#define _XSend p_XSend
+#define _XData32 p_XData32
+#endif
+
 int SDL_X11_LoadSymbols(void);
 void SDL_X11_UnloadSymbols(void);
 

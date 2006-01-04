@@ -58,12 +58,6 @@ SOFTWARE.
 
 #include "../../x11/SDL_x11dyn.h"
 
-/* Workaround code in headers... */
-#define _XFlush p_XFlush
-#define _XFlushGCCache p_XFlushGCCache
-#define _XReply p_XReply
-#define _XSend p_XSend
-
 static XExtensionInfo _xv_info_data;
 static XExtensionInfo *xv_info = &_xv_info_data;
 static char *xv_extension_name = XvName;

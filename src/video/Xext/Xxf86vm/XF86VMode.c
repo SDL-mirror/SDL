@@ -49,12 +49,6 @@ from Kaleb S. KEITHLEY.
 
 #include "../../x11/SDL_x11dyn.h"
 
-/* Workaround code in headers... */
-#define _XFlush p_XFlush
-#define _XFlushGCCache p_XFlushGCCache
-#define _XReply p_XReply
-#define _XSend p_XSend
-
 #ifdef DEBUG
 #include <stdio.h>
 #endif

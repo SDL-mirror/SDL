@@ -30,12 +30,6 @@ Copyright (c) 1995,1996  The XFree86 Project, Inc
 
 #include "../../x11/SDL_x11dyn.h"
 
-/* Workaround code in headers... */
-#define _XFlush p_XFlush
-#define _XFlushGCCache p_XFlushGCCache
-#define _XReply p_XReply
-#define _XSend p_XSend
-
 /* If you change this, change the Bases[] array below as well */
 #define MAX_HEADS 16
 
