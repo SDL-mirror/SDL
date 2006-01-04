@@ -2427,7 +2427,7 @@ SDL_loblit SDL_CalculateBlitN(SDL_Surface *surface, int blit_index)
 		fprintf(stderr, "Using asm blit\n");
 	else
 #endif
-	if ( (blitfun == SDL_BlitNtoN) || (blitfun == SDL_BlitNto1) )
+	if ( (blitfun == BlitNtoN) || (blitfun == BlitNto1) )
 		fprintf(stderr, "Using C blit\n");
 	else
 		fprintf(stderr, "Using optimized C blit\n");
