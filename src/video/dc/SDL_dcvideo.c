@@ -30,21 +30,6 @@ static char rcsid =
  "@(#) $Id$";
 #endif
 
-/* Dummy SDL video driver implementation; this is just enough to make an
- *  SDL-based application THINK it's got a working video driver, for
- *  applications that call SDL_Init(SDL_INIT_VIDEO) when they don't need it,
- *  and also for use as a collection of stubs when porting SDL to a new
- *  platform for which you haven't yet written a valid video driver.
- *
- * This is also a great way to determine bottlenecks: if you think that SDL
- *  is a performance problem for a given platform, enable this driver, and
- *  then see if your application runs faster without video overhead.
- *
- * Initial work by Ryan C. Gordon (icculus@linuxgames.com). A good portion
- *  of this was cut-and-pasted from Stephane Peter's work in the AAlib
- *  SDL video driver.  Renamed to "DC" by Sam Lantinga.
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -170,7 +155,7 @@ VideoBootStrap DC_bootstrap = {
 
 int DC_VideoInit(_THIS, SDL_PixelFormat *vformat)
 {
-	/* Determine the screen depth (use default 8-bit depth) */
+	/* Determine the screen depth (use default 16-bit depth) */
 	/* we change this during the SDL_SetVideoMode implementation... */
 	vformat->BitsPerPixel = 16;
 	vformat->Rmask = 0x0000f800;

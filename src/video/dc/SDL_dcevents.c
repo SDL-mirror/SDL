@@ -30,9 +30,6 @@ static char rcsid =
  "@(#) $Id$";
 #endif
 
-/* Being a null driver, there's no event stream. We just define stubs for
-   most of the API. */
-
 #include "SDL.h"
 #include "SDL_sysevents.h"
 #include "SDL_events_c.h"
