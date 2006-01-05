@@ -1991,6 +1991,52 @@ static void BlitNto1(SDL_BlitInfo *info)
 		}
 	}
 }
+
+/* blits 32 bit RGB<->RGBA with both surfaces having the same R,G,B fields */
+static void Blit4to4MaskAlpha(SDL_BlitInfo *info)
+{
+	int width = info->d_width;
+	int height = info->d_height;
+	Uint32 *src = (Uint32 *)info->s_pixels;
+	int srcskip = info->s_skip;
+	Uint32 *dst = (Uint32 *)info->d_pixels;
+	int dstskip = info->d_skip;
+	SDL_PixelFormat *srcfmt = info->src;
+	SDL_PixelFormat *dstfmt = info->dst;
+
+	if (dstfmt->Amask) {
+		/* RGB->RGBA, SET_ALPHA */
+		Uint32 mask = (srcfmt->alpha >> dstfmt->Aloss) << dstfmt->Ashift;
+
+		while ( height-- ) {
+			DUFFS_LOOP(
+			{
+				*dst = *src | mask;
+				++dst;
+				++src;
+			},
+			width);
+			src = (Uint32*)((Uint8*)src + srcskip);
+			dst = (Uint32*)((Uint8*)dst + dstskip);
+		}
+	} else {
+		/* RGBA->RGB, NO_ALPHA */
+		Uint32 mask = srcfmt->Rmask | srcfmt->Gmask | srcfmt->Bmask;
+
+		while ( height-- ) {
+			DUFFS_LOOP(
+			{
+				*dst = *src & mask;
+				++dst;
+				++src;
+			},
+			width);
+			src = (Uint32*)((Uint8*)src + srcskip);
+			dst = (Uint32*)((Uint8*)dst + dstskip);
+		}
+	}
+}
+
 static void BlitNtoN(SDL_BlitInfo *info)
 {
 	int width = info->d_width;
@@ -2414,8 +2460,18 @@ SDL_loblit SDL_CalculateBlitN(SDL_Surface *surface, int blit_index)
 		}
 		sdata->aux_data = table[which].aux_data;
 		blitfun = table[which].blitfunc;
-		if(a_need == COPY_ALPHA && blitfun == BlitNtoN)
-		    blitfun = BlitNtoNCopyAlpha;
+
+		if(blitfun == BlitNtoN) {  /* default C fallback catch-all. Slow! */
+			/* Fastpath C fallback: 32bit RGB<->RGBA blit with matching RGB */
+			if ( srcfmt->BytesPerPixel == 4 && dstfmt->BytesPerPixel == 4 &&
+			     srcfmt->Rmask == dstfmt->Rmask &&
+			     srcfmt->Gmask == dstfmt->Gmask &&
+			     srcfmt->Bmask == dstfmt->Bmask ) {
+				blitfun = Blit4to4MaskAlpha;
+			} else if ( a_need == COPY_ALPHA ) {
+			    blitfun = BlitNtoNCopyAlpha;
+			}
+		}
 	}
 
 #ifdef DEBUG_ASM
