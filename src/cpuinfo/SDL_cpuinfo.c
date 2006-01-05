@@ -116,6 +116,36 @@ CPUid by definition.  But it's nice to be able to prove it.  :)      */
         mov     has_CPUID,1         ; We have CPUID support
 done:
 	}
+#elif defined(__sun) && defined(__x86)
+	    __asm (
+"       pushfl                 \n"
+"	    popl    %eax           \n"
+"	    movl    %eax,%ecx      \n"
+"	    xorl    $0x200000,%eax \n"
+"	    pushl   %eax           \n"
+"	    popfl                  \n"
+"	    pushfl                 \n"
+"	    popl    %eax           \n"
+"	    xorl    %ecx,%eax      \n"
+"	    jz      1f             \n"
+"	    movl    $1,-8(%ebp)    \n"
+"1:                            \n"
+	);
+#elif defined(__sun) && defined(__amd64)
+	__asm (
+"       pushfq                 \n"
+"       popq    %rax           \n"
+"       movq    %rax,%rcx      \n"
+"       xorl    $0x200000,%eax \n"
+"       pushq   %rax           \n"
+"       popfq                  \n"
+"       pushfq                 \n"
+"       popq    %rax           \n"
+"       xorl    %ecx,%eax      \n"
+"       jz      1f             \n"
+"       movl    $1,-8(%rbp)    \n"
+"1:                            \n"
+	);
 #endif
 	return has_CPUID;
 }
@@ -152,6 +182,23 @@ static __inline__ int CPU_getCPUIDFeatures()
         mov     features, edx
 done:
 	}
+#elif defined(__sun) && (defined(__x86) || defined(__amd64))
+	    __asm(
+"        movl    %ebx,%edi\n"
+"        xorl    %eax,%eax         \n"
+"        cpuid                     \n"
+"        cmpl    $1,%eax           \n"
+"        jl      1f                \n"
+"        xorl    %eax,%eax         \n"
+"        incl    %eax              \n"
+"        cpuid                     \n"
+#ifdef __i386
+"        movl    %edx,-8(%ebp)     \n"
+#else
+"        movl    %edx,-8(%rbp)     \n"
+#endif
+"1:                                \n"
+"        movl    %edi,%ebx\n" );
 #endif
 	return features;
 }
@@ -186,6 +233,23 @@ static __inline__ int CPU_getCPUIDFeaturesExt()
         mov     features,edx
 done:
 	}
+#elif defined(__sun) && ( defined(__i386) || defined(__amd64) )
+	    __asm (
+"        movl    %ebx,%edi\n"
+"        movl    $0x80000000,%eax \n"
+"        cpuid                    \n"
+"        cmpl    $0x80000001,%eax \n"
+"        jl      1f               \n"
+"        movl    $0x80000001,%eax \n"
+"        cpuid                    \n"
+#ifdef __i386
+"        movl    %edx,-8(%ebp)   \n"
+#else
+"        movl    %edx,-8(%rbp)   \n"
+#endif
+"1:                               \n"
+"        movl    %edi,%ebx\n"
+	    );
 #endif
 	return features;
 }
