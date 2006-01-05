@@ -39,11 +39,34 @@ static void __append_sdl_surface_flag(SDL_Surface *_surface, char *str,
 {
     if (_surface->flags & flag)
         copy_trunc_str(str, strsize, flagstr);
-} /* append_sdl_surface_flag */
+}
 
 
 #define append_sdl_surface_flag(a, b, c, fl) __append_sdl_surface_flag(a, b, c, fl, " " #fl)
 #define print_tf_state(str, val) printf("%s: {%s}\n", str, (val) ? "true" : "false" )
+
+static void output_videoinfo_details(void)
+{
+    const SDL_VideoInfo *info = SDL_GetVideoInfo();
+    printf("SDL_GetVideoInfo():\n");
+    if (info == NULL)
+        printf("  (null.)\n");
+    else
+    {
+        print_tf_state("  hardware surface available", info->hw_available);
+        print_tf_state("  window manager available", info->wm_available);
+        print_tf_state("  accelerated hardware->hardware blits", info->blit_hw);
+        print_tf_state("  accelerated hardware->hardware colorkey blits", info->blit_hw_CC);
+        print_tf_state("  accelerated hardware->hardware alpha blits", info->blit_hw_A);
+        print_tf_state("  accelerated software->hardware blits", info->blit_sw);
+        print_tf_state("  accelerated software->hardware colorkey blits", info->blit_sw_CC);
+        print_tf_state("  accelerated software->hardware alpha blits", info->blit_sw_A);
+        print_tf_state("  accelerated color fills", info->blit_fill);
+        printf("  video memory: (%d)\n", info->video_mem);
+    }
+
+    printf("\n");
+}
 
 static void output_surface_details(const char *name, SDL_Surface *surface)
 {
@@ -56,24 +79,26 @@ static void output_surface_details(const char *name, SDL_Surface *surface)
     else
     {
         char f[256];
-        printf("  width  : %d\n", surface->w);
-        printf("  height : %d\n", surface->h);
-        printf("  depth  : %d bits per pixel\n", surface->format->BitsPerPixel);
-        printf("  pitch  : %d\n", (int) surface->pitch);
+        printf("  width      : %d\n", surface->w);
+        printf("  height     : %d\n", surface->h);
+        printf("  depth      : %d bits per pixel\n", surface->format->BitsPerPixel);
+        printf("  pitch      : %d\n", (int) surface->pitch);
+        printf("  alpha      : %d\n", (int) surface->format->alpha);
+        printf("  colorkey   : 0x%X\n", (unsigned int) surface->format->colorkey);
 
-        printf("  red    : 0x%08X mask, %d shift, %d loss\n",
+        printf("  red bits   : 0x%08X mask, %d shift, %d loss\n",
                     (int) surface->format->Rmask,
                     (int) surface->format->Rshift,
                     (int) surface->format->Rloss);
-        printf("  green  : 0x%08X mask, %d shift, %d loss\n",
+        printf("  green bits : 0x%08X mask, %d shift, %d loss\n",
                     (int) surface->format->Gmask,
                     (int) surface->format->Gshift,
                     (int) surface->format->Gloss);
-        printf("  blue   : 0x%08X mask, %d shift, %d loss\n",
+        printf("  blue bits  : 0x%08X mask, %d shift, %d loss\n",
                     (int) surface->format->Bmask,
                     (int) surface->format->Bshift,
                     (int) surface->format->Bloss);
-        printf("  alpha  : 0x%08X mask, %d shift, %d loss\n",
+        printf("  alpha bits : 0x%08X mask, %d shift, %d loss\n",
                     (int) surface->format->Amask,
                     (int) surface->format->Ashift,
                     (int) surface->format->Aloss);
@@ -104,31 +129,15 @@ static void output_surface_details(const char *name, SDL_Surface *surface)
         if (f[0] == '\0')
             strcpy(f, " (none)");
 
-        printf("  flags  :%s\n", f);
-
-        #if 0
-        info = SDL_GetVideoInfo();
-        assert(info != NULL);
-
-        print_tf_state("hardware surface available", info->hw_available);
-        print_tf_state("window manager available", info->wm_available);
-        print_tf_state("accelerated hardware->hardware blits", info->blit_hw);
-        print_tf_state("accelerated hardware->hardware colorkey blits", info->blit_hw_CC);
-        print_tf_state("accelerated hardware->hardware alpha blits", info->blit_hw_A);
-        print_tf_state("accelerated software->hardware blits", info->blit_sw);
-        print_tf_state("accelerated software->hardware colorkey blits", info->blit_sw_CC);
-        print_tf_state("accelerated software->hardware alpha blits", info->blit_sw_A);
-        print_tf_state("accelerated color fills", info->blit_fill);
-
-        printf("video memory: (%d)\n", info->video_mem);
-        #endif
-    } /* else */
+        printf("  flags      :%s\n", f);
+    }
 
     printf("\n");
 }
 
 static void output_details(void)
 {
+    output_videoinfo_details();
     output_surface_details("Source Surface", src);
     output_surface_details("Destination Surface", dest);
 }
@@ -195,8 +204,14 @@ static int setup_test(int argc, char **argv)
     Uint32 srcflags = 0;
     int srcw = 640;
     int srch = 480;
+    Uint32 origsrcalphaflags = 0;
+    Uint32 origdstalphaflags = 0;
+    Uint32 srcalphaflags = 0;
+    Uint32 dstalphaflags = 0;
+    int srcalpha = 255;
+    int dstalpha = 255;
     int screenSurface = 0;
-    int i;
+    int i = 0;
 
     for (i = 1; i < argc; i++)
     {
@@ -240,7 +255,8 @@ static int setup_test(int argc, char **argv)
             screenSurface = 1;
         else if (strcmp(arg, "--dumpfile") == 0)
             dumpfile = argv[++i];
-        else
+        /* !!! FIXME: set colorkey. */
+        else if (0)  /* !!! FIXME: we handle some commandlines elsewhere now */
         {
             fprintf(stderr, "Unknown commandline option: %s\n", arg);
             return(0);
@@ -287,6 +303,43 @@ static int setup_test(int argc, char **argv)
         SDL_Quit();
         return(0);
     }
+
+    /* handle alpha settings... */
+    srcalphaflags = (src->flags&SDL_SRCALPHA) | (src->flags&SDL_RLEACCEL);
+    dstalphaflags = (dest->flags&SDL_SRCALPHA) | (dest->flags&SDL_RLEACCEL);
+    origsrcalphaflags = srcalphaflags;
+    origdstalphaflags = dstalphaflags;
+    srcalpha = src->format->alpha;
+    dstalpha = dest->format->alpha;
+    for (i = 1; i < argc; i++)
+    {
+        const char *arg = argv[i];
+
+        if (strcmp(arg, "--srcalpha") == 0)
+            srcalpha = atoi(argv[++i]);
+        else if (strcmp(arg, "--dstalpha") == 0)
+            dstalpha = atoi(argv[++i]);
+        else if (strcmp(arg, "--srcsrcalpha") == 0)
+            srcalphaflags |= SDL_SRCALPHA;
+        else if (strcmp(arg, "--srcnosrcalpha") == 0)
+            srcalphaflags &= ~SDL_SRCALPHA;
+        else if (strcmp(arg, "--srcrleaccel") == 0)
+            srcalphaflags |= SDL_RLEACCEL;
+        else if (strcmp(arg, "--srcnorleaccel") == 0)
+            srcalphaflags &= ~SDL_RLEACCEL;
+        else if (strcmp(arg, "--dstsrcalpha") == 0)
+            dstalphaflags |= SDL_SRCALPHA;
+        else if (strcmp(arg, "--dstnosrcalpha") == 0)
+            dstalphaflags &= ~SDL_SRCALPHA;
+        else if (strcmp(arg, "--dstrleaccel") == 0)
+            dstalphaflags |= SDL_RLEACCEL;
+        else if (strcmp(arg, "--dstnorleaccel") == 0)
+            dstalphaflags &= ~SDL_RLEACCEL;
+    }
+    if ((dstalphaflags != origdstalphaflags) || (dstalpha != dest->format->alpha))
+        SDL_SetAlpha(dest, dstalphaflags, (Uint8) dstalpha);
+    if ((srcalphaflags != origsrcalphaflags) || (srcalpha != src->format->alpha))
+        SDL_SetAlpha(src, srcalphaflags, (Uint8) srcalpha);
 
     /* set some sane defaults so we can see if the blit code is broken... */
     SDL_FillRect(dest, NULL, SDL_MapRGB(dest->format, 0, 0, 0));
