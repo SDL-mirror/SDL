@@ -20,7 +20,9 @@
     slouken@libsdl.org
 */
 
-/*#define DEBUG_DYNAMIC_X11 1*/
+#if 0
+#define DEBUG_DYNAMIC_X11 1
+#endif
 
 #define __SDL_NO_REDEFINE_X11_HEADER_SYMS 1
 #include "SDL_x11dyn.h"
@@ -38,7 +40,7 @@ static void *x11_handle = NULL;
 static const char *x11ext_library = X11EXT_DYNAMIC;
 static void *x11ext_handle = NULL;
 
-static void *X11_GetSym(const char *fnname, int *rc)
+static void *X11_GetSym(int required, const char *fnname, int *rc)
 {
 	void *fn = NULL;
 	if (*rc) {  /* haven't already failed on a previous lookup? */
@@ -57,7 +59,7 @@ static void *X11_GetSym(const char *fnname, int *rc)
 				printf("X11: Symbol '%s' NOT FOUND!\n", fnname);
 			#endif
 		}
-		*rc = (fn != NULL);
+		*rc = ((fn != NULL) || (!required));
 	}
 
 	return fn;
@@ -65,7 +67,7 @@ static void *X11_GetSym(const char *fnname, int *rc)
 #endif  /* defined X11_DYNAMIC */
 
 /* Define all the function pointers... */
-#define SDL_X11_SYM(ret,fn,params) ret (*p##fn) params = NULL;
+#define SDL_X11_SYM(req,ret,fn,params) ret (*p##fn) params = NULL;
 #include "SDL_x11sym.h"
 #undef SDL_X11_SYM
 
@@ -77,7 +79,7 @@ void SDL_X11_UnloadSymbols(void)
 	if (x11_load_refcount > 0) {
 		if (--x11_load_refcount == 0) {
 			/* set all the function pointers to NULL. */
-			#define SDL_X11_SYM(ret,fn,params) p##fn = NULL;
+			#define SDL_X11_SYM(req,ret,fn,params) p##fn = NULL;
 			#include "SDL_x11sym.h"
 			#undef SDL_X11_SYM
 
@@ -106,7 +108,7 @@ int SDL_X11_LoadSymbols(void)
 			x11_handle = SDL_LoadObject(x11_library);
 			x11ext_handle = SDL_LoadObject(x11ext_library);
 			rc = ((x11_handle != NULL) && (x11ext_handle != NULL));
-			#define SDL_X11_SYM(r,fn,arg) p##fn = X11_GetSym(#fn, &rc);
+			#define SDL_X11_SYM(req,r,fn,arg) p##fn = X11_GetSym(req,#fn, &rc);
 			#include "SDL_x11sym.h"
 			#undef SDL_X11_SYM
 
@@ -114,7 +116,7 @@ int SDL_X11_LoadSymbols(void)
 				SDL_X11_UnloadSymbols();  /* in case one of these loaded... */
 
 		#else
-			#define SDL_X11_SYM(r,fn,arg) p##fn = fn;
+			#define SDL_X11_SYM(req,r,fn,arg) p##fn = fn;
 			#include "SDL_x11sym.h"
 			#undef SDL_X11_SYM
 		#endif
