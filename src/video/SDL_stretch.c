@@ -285,11 +285,11 @@ int SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect,
 			__asm__ __volatile__ (
 			"call *%4"
 			: "=&D" (u1), "=&S" (u2)
-			: "0" (dstp), "1" (srcp), "r" (&copy_row)
+			: "0" (dstp), "1" (srcp), "r" (copy_row)
 			: "memory" );
 #else
 #ifdef WIN32
-		{ void *code = &copy_row;
+		{ void *code = copy_row;
 			__asm {
 				push edi
 				push esi
