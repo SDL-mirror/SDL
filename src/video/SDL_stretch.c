@@ -58,9 +58,6 @@ static char rcsid =
 #error Need assembly opcodes for this architecture
 #endif
 
-#if defined(__ELF__) && defined(__GNUC__)
-extern unsigned char _copy_row[4096] __attribute__ ((alias ("copy_row")));
-#endif
 static unsigned char copy_row[4096];
 
 static int generate_rowbytes(int src_w, int dst_w, int bpp)
@@ -288,7 +285,7 @@ int SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect,
 			__asm__ __volatile__ (
 			"call *%4"
 			: "=&D" (u1), "=&S" (u2)
-			: "0" (dstp), "1" (srcp), "r" (&_copy_row)
+			: "0" (dstp), "1" (srcp), "r" (&copy_row)
 			: "memory" );
 #else
 #ifdef WIN32
