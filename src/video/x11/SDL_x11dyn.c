@@ -56,7 +56,8 @@ static void *X11_GetSym(int required, const char *fnname, int *rc)
 			if (fn != NULL)
 				printf("X11: Found '%s' in libXext (%p)\n", fnname, fn);
 			else
-				printf("X11: Symbol '%s' NOT FOUND!\n", fnname);
+				printf("X11: Symbol '%s' NOT FOUND!%s\n", fnname
+				       required ? "" : " (...but not required!)");
 			#endif
 		}
 		*rc = ((fn != NULL) || (!required));
