@@ -384,8 +384,10 @@ static void do_mouse(_THIS, short mx, short my, short mb, short ks)
 	/* Mouse motion ? */
 	if ((prevmousex!=mx) || (prevmousey!=my)) {
 		if (GEM_mouse_relative) {
-			SDL_PrivateMouseMotion(0, 1, SDL_AtariXbios_mousex, SDL_AtariXbios_mousey);
-			SDL_AtariXbios_mousex = SDL_AtariXbios_mousey = 0;
+			if ((SDL_AtariXbios_mousex!=0) || (SDL_AtariXbios_mousey!=0)) {
+				SDL_PrivateMouseMotion(0, 1, SDL_AtariXbios_mousex, SDL_AtariXbios_mousey);
+				SDL_AtariXbios_mousex = SDL_AtariXbios_mousey = 0;
+			}
 		} else {
 			int posx, posy;
 

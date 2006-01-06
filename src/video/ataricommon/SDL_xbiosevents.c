@@ -63,6 +63,11 @@ void SDL_AtariXbios_InstallVectors(int vectors_mask)
 		SDL_AtariXbios_joystick =
 		atari_prevmouseb = 0;
 
+	if (vectors_mask==0) {
+		SDL_AtariXbios_enabled=0;
+		return;
+	}
+
 	/* Read IKBD vectors base */
 	kbdvecs=Kbdvbase();
 
@@ -85,6 +90,10 @@ void SDL_AtariXbios_InstallVectors(int vectors_mask)
 void SDL_AtariXbios_RestoreVectors(void)
 {
 	void *oldpile;
+
+	if (SDL_AtariXbios_enabled==0) {
+		return;
+	}
 
 	/* Read IKBD vectors base */
 	kbdvecs=Kbdvbase();
@@ -115,6 +124,10 @@ static int atari_GetButton(int button)
 
 void SDL_AtariXbios_PostMouseEvents(_THIS)
 {
+	if (SDL_AtariXbios_enabled==0) {
+		return;
+	}
+
 	/* Mouse motion ? */
 	if (SDL_AtariXbios_mousex || SDL_AtariXbios_mousey) {
 		SDL_PrivateMouseMotion(0, 1, SDL_AtariXbios_mousex, SDL_AtariXbios_mousey);

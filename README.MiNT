@@ -68,9 +68,9 @@ OpenGL (using Mesa offscreen rendering driver)
 - Dependent driver combinations:
 Video   Kbd     Mouse   Timer   Joysticks
 xbios   ikbd    ikbd    vbl(2)  ikbd
-xbios   gemdos  xbios   vbl(2)  xbios
-xbios   bios    xbios   vbl(2)  xbios
-gem     gem     gem(1)  vbl(2)  xbios
+xbios   gemdos  xbios   vbl(2)  xbios(3)
+xbios   bios    xbios   vbl(2)  xbios(3)
+gem     gem     gem(1)  vbl(2)  xbios(3)
 
 Audio   O/S     Misc
 dma8    All     Uses MFP Timer A interrupt
@@ -87,10 +87,13 @@ Joypad driver always uses hardware access.
 OpenGL driver always uses OSMesa.
 
 (1) GEM does not report relative mouse motion, so xbios mouse driver is used
-to report this type event.
+to report this type event. Under MiNT, using XBIOS mouse driver is not possible.
 
 (2) If you build SDL with threads using the GNU pth library, timers are
 supported via the pth library.
+
+(3) Redirecting XBIOS vectors does not work under MiNT, so it is disabled in
+this case.
 
 ==============================================================================
 V.  Environment variables:

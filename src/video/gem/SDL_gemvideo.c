@@ -137,6 +137,8 @@ static void GEM_DeleteDevice(SDL_VideoDevice *device)
 static SDL_VideoDevice *GEM_CreateDevice(int devindex)
 {
 	SDL_VideoDevice *device;
+	int vectors_mask;
+	unsigned long dummy;
 
 	/* Initialize all variables that we clean on shutdown */
 	device = (SDL_VideoDevice *)malloc(sizeof(SDL_VideoDevice));
@@ -198,7 +200,12 @@ static SDL_VideoDevice *GEM_CreateDevice(int devindex)
 #endif
 
 	/* Joystick + Mouse relative motion */
-	SDL_AtariXbios_InstallVectors(ATARI_XBIOS_MOUSEEVENTS|ATARI_XBIOS_JOYSTICKEVENTS);
+	vectors_mask = ATARI_XBIOS_MOUSEEVENTS|ATARI_XBIOS_JOYSTICKEVENTS;
+	if (Getcookie(C_MiNT, &dummy)==C_FOUND) {
+		vectors_mask = 0;
+	}
+
+	SDL_AtariXbios_InstallVectors(vectors_mask);
 
 	device->free = GEM_DeleteDevice;
 

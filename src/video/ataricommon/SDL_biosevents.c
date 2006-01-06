@@ -35,6 +35,7 @@ static char rcsid =
 
 /* Mint includes */
 #include <mint/osbind.h>
+#include <mint/cookie.h>
 
 #include "SDL.h"
 #include "SDL_sysevents.h"
@@ -71,7 +72,8 @@ static void UpdateSpecialKeys(int special_keys_state);
 
 void AtariBios_InitOSKeymap(_THIS)
 {
-	int i;
+	int i, vectors_mask;
+	unsigned long dummy;
 
 	memset(bios_currentkeyboard, 0, sizeof(bios_currentkeyboard));
 	memset(bios_previouskeyboard, 0, sizeof(bios_previouskeyboard));
@@ -106,7 +108,12 @@ void AtariBios_InitOSKeymap(_THIS)
 	keymap[SCANCODE_LEFTALT] = SDLK_LALT;
 	keymap[SCANCODE_CAPSLOCK] = SDLK_CAPSLOCK;
 
-	SDL_AtariXbios_InstallVectors(ATARI_XBIOS_MOUSEEVENTS|ATARI_XBIOS_JOYSTICKEVENTS);
+	vectors_mask = ATARI_XBIOS_MOUSEEVENTS|ATARI_XBIOS_JOYSTICKEVENTS;
+	if (Getcookie(C_MiNT, &dummy)==C_FOUND) {
+		vectors_mask = 0;
+	}
+
+	SDL_AtariXbios_InstallVectors(vectors_mask);
 }
 
 void AtariBios_PumpEvents(_THIS)
