@@ -464,6 +464,7 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 #ifdef HAVE_OPENGL
 	SDL_AtariGL_InitPointers(this);
+	SDL_AtariGL_LoadLibrary(this, NULL);
 #endif
 
 	/* We're done! */
