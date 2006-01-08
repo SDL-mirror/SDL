@@ -134,21 +134,11 @@ int SDL_AtariGL_LoadLibrary(_THIS, const char *path)
 		return -1;
 	}
 
-	/* Driver already loaded ? */
-	if (this->gl_config.driver_loaded) {
-		/* Default path ? don't change anything */
-		if (path==NULL) {
-			return 0;
-		}
-		/* Unload previous driver */
-		SDL_AtariGL_UnloadLibrary(this);
-	}
+	/* Unload previous driver */
+	SDL_AtariGL_UnloadLibrary(this);
 
 	/* Load library given by path */
-	handle = NULL
-	if (path != NULL) {
-		handle = SDL_LoadObject(path);
-	}
+	handle = SDL_LoadObject(path);
 	if (handle == NULL) {
 		/* Try to load another one */
 		path = getenv("SDL_VIDEO_GL_DRIVER");
@@ -408,7 +398,6 @@ static void SDL_AtariGL_UnloadLibrary(_THIS)
 	if (this->gl_config.dll_handle) {
 		SDL_UnloadObject(this->gl_config.dll_handle);
 		this->gl_config.dll_handle = NULL;
-		this->gl_config.driver_loaded = 0;
 
 		/* Restore pointers to static library */
 		SDL_AtariGL_InitPointers(this);
