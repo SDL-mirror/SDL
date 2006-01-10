@@ -882,6 +882,7 @@ static void handle_mouse(_THIS)
  */
 static void switch_vt(_THIS, unsigned short which)
 {
+	struct fb_var_screeninfo vinfo;
 	struct vt_stat vtstate;
 	unsigned short v_active;
 	SDL_Surface *screen;
@@ -906,6 +907,7 @@ static void switch_vt(_THIS, unsigned short which)
 		memcpy(screen_contents, screen->pixels, screen_arealen);
 	}
 	FB_SavePaletteTo(this, 256, saved_pal);
+	ioctl(console_fd, FBIOGET_VSCREENINFO, &vinfo);
 	ioctl(keyboard_fd, KDSETMODE, KD_TEXT);
 
 	/* New console, switch to it */
@@ -923,6 +925,7 @@ static void switch_vt(_THIS, unsigned short which)
 
 	/* Restore graphics mode and the contents of the screen */
 	ioctl(keyboard_fd, KDSETMODE, KD_GRAPHICS);
+	ioctl(console_fd, FBIOPUT_VSCREENINFO, &vinfo);
 	FB_RestorePaletteFrom(this, 256, saved_pal);
 	if ( screen_contents ) {
 		memcpy(screen->pixels, screen_contents, screen_arealen);
