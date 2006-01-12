@@ -12,4 +12,6 @@ noinst_HEADERS =	\
 	Xinerama.h	\
 	Xv.h		\
 	Xvlib.h		\
-	Xvproto.h
+	Xvproto.h	\
+	xme.h
+

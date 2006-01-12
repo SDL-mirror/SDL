@@ -760,19 +760,11 @@ CheckX11()
                             , enable_video_x11_xme=yes)
             if test x$enable_video_x11_xme = xyes; then
                 AC_MSG_CHECKING(for Xi Graphics XiGMiscExtension support)
-                video_x11_xme=no
-                AC_TRY_COMPILE([
-                 #include <X11/Xlib.h>
-                 #include <X11/extensions/xme.h>
-                ],[
-                 XiGMiscResolutionInfo *resolutions;
-                ],[
                 video_x11_xme=yes
-                ])
                 AC_MSG_RESULT($video_x11_xme)
                 if test x$video_x11_xme = xyes; then
                     CFLAGS="$CFLAGS -DHAVE_XIGXME"
-                    SYSTEM_LIBS="$SYSTEM_LIBS -lxme"
+                    SYSTEM_LIBS="$SYSTEM_LIBS"
                 fi
             fi
         fi

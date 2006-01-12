@@ -39,7 +39,7 @@ static char rcsid =
 #include <XFree86/extensions/xf86vmode.h>
 #endif
 #ifdef HAVE_XIGXME
-#include <X11/extensions/xme.h>
+#include <XFree86/extensions/xme.h>
 #endif
 
 #include <string.h>
