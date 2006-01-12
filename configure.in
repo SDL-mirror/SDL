@@ -764,7 +764,8 @@ CheckX11()
                 AC_MSG_RESULT($video_x11_xme)
                 if test x$video_x11_xme = xyes; then
                     CFLAGS="$CFLAGS -DHAVE_XIGXME"
-                    SYSTEM_LIBS="$SYSTEM_LIBS"
+                    VIDEO_SUBDIRS="$VIDEO_SUBDIRS XFree86/XME"
+                    VIDEO_DRIVERS="$VIDEO_DRIVERS XFree86/XME/libXME.la"
                 fi
             fi
         fi
@@ -3146,6 +3147,7 @@ src/video/XFree86/Xinerama/Makefile
 src/video/XFree86/Xv/Makefile
 src/video/XFree86/Xxf86dga/Makefile
 src/video/XFree86/Xxf86vm/Makefile
+src/video/XFree86/XME/Makefile
 src/events/Makefile
 src/joystick/Makefile
 src/joystick/amigaos/Makefile
