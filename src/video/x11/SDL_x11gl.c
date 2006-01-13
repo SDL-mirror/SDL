@@ -474,7 +474,7 @@ int X11_GL_LoadLibrary(_THIS, const char* path)
 	#else
 		handle = SDL_LoadObject(path);
 		if ( handle == NULL ) {
-			SDL_SetError("Could not load OpenGL library");
+			/* SDL_LoadObject() will call SDL_SetError() for us. */
 			return -1;
 		}
 	#endif
