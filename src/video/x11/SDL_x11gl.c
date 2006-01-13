@@ -466,15 +466,19 @@ int X11_GL_LoadLibrary(_THIS, const char* path)
 			int dlopen_flags = RTLD_LAZY;
 		#endif
 		handle = dlopen(path, dlopen_flags);
+		if ( handle == NULL ) {
+			SDL_SetError("Could not load OpenGL library: %s", (const char *) dlerror());
+			return -1;
+		}
 	}
 	#else
 		handle = SDL_LoadObject(path);
+		if ( handle == NULL ) {
+			SDL_SetError("Could not load OpenGL library");
+			return -1;
+		}
 	#endif
 
-	if ( handle == NULL ) {
-		SDL_SetError("Could not load OpenGL library");
-		return -1;
-	}
 
 	/* Unload the old driver and reset the pointers */
 	X11_GL_UnloadLibrary(this);
