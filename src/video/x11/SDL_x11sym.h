@@ -112,6 +112,8 @@ SDL_X11_SYM(1,XExtensionInfo*,XextCreateExtension,(void))
 SDL_X11_SYM(1,void,XextDestroyExtension,(XExtensionInfo*))
 SDL_X11_SYM(1,XExtDisplayInfo*,XextFindDisplay,(XExtensionInfo*,Display*))
 SDL_X11_SYM(1,int,XextRemoveDisplay,(XExtensionInfo*,Display*))
+SDL_X11_SYM(1,Bool,XQueryExtension,(Display*,_Xconst char*,int*,int*,int*))
+
 #ifdef X_HAVE_UTF8_STRING
 SDL_X11_SYM(1,int,Xutf8TextListToTextProperty,(Display*,char**,int,XICCEncodingStyle,XTextProperty*))
 SDL_X11_SYM(1,int,Xutf8LookupString,(XIC,XKeyPressedEvent*,char*,int,KeySym*,Status*))
@@ -130,8 +132,15 @@ SDL_X11_SYM(1,void,_XReadPad,(Display*,char*,long))
 SDL_X11_SYM(1,void,_XSend,(Display*,_Xconst char*,long))
 SDL_X11_SYM(1,Status,_XReply,(Display*,xReply*,int,Bool))
 SDL_X11_SYM(1,unsigned long,_XSetLastRequestRead,(Display*,xGenericReply*))
-SDL_X11_SYM(0,int,_XData32,(Display *dpy,register long *data,unsigned len))
-SDL_X11_SYM(0,void,_XRead32,(Display *dpy,register long *data,long len))
+
+/*
+ * These don't exist in 32-bit versions and are removed by Xlib macros, but
+ *  64+ bit systems will use them.
+ */
+#ifdef LONG64
+SDL_X11_SYM(1,int,_XData32,(Display *dpy,register long *data,unsigned len))
+SDL_X11_SYM(1,void,_XRead32,(Display *dpy,register long *data,long len))
+#endif
 
 #if NeedWidePrototypes
 SDL_X11_SYM(1,KeySym,XKeycodeToKeysym,(Display*,unsigned int,int))

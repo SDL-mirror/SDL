@@ -72,6 +72,7 @@ typedef Status (*SDL_X11_XESetEventToWireRetType)(Display*,XEvent*,xEvent*);
 #define _XReply p_XReply
 #define _XSend p_XSend
 #define _XData32 p_XData32
+#define XFree pXFree
 #endif
 
 int SDL_X11_LoadSymbols(void);
