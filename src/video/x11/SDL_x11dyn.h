@@ -57,6 +57,7 @@ extern "C" {
 typedef Bool (*SDL_X11_XESetWireToEventRetType)(Display*,XEvent*,xEvent*);
 typedef int (*SDL_X11_XSynchronizeRetType)(Display*);
 typedef Status (*SDL_X11_XESetEventToWireRetType)(Display*,XEvent*,xEvent*);
+typedef int (*SDL_X11_XSetExtensionErrorHandlerType)(Display *,char *,char *);
 
 #define SDL_X11_SYM(req,ret,fn,params) extern ret (*p##fn) params;
 #include "SDL_x11sym.h"

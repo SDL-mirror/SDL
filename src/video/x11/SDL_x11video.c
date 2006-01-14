@@ -220,7 +220,7 @@ static int x_errhandler(Display *d, XErrorEvent *e)
 	       (e->error_code <= (vm_error+XF86VidModeNumberErrors)))) ) {
 #ifdef XFREE86_DEBUG
 { char errmsg[1024];
-  XGetErrorText(d, e->error_code, errmsg, sizeof(errmsg));
+  pXGetErrorText(d, e->error_code, errmsg, sizeof(errmsg));
 printf("VidMode error: %s\n", errmsg);
 }
 #endif
@@ -235,7 +235,7 @@ printf("VidMode error: %s\n", errmsg);
 	      (e->error_code <= (dga_error+XF86DGANumberErrors))) ) {
 #ifdef XFREE86_DEBUG
 { char errmsg[1024];
-  XGetErrorText(d, e->error_code, errmsg, sizeof(errmsg));
+  pXGetErrorText(d, e->error_code, errmsg, sizeof(errmsg));
 printf("DGA error: %s\n", errmsg);
 }
 #endif
@@ -260,6 +260,28 @@ static int xio_errhandler(Display *d)
 
 	/* Continue with the standard X11 error handler */
 	return(XIO_handler(d));
+}
+
+static int (*Xext_handler)(Display *,char *,char *) = NULL;
+static int xext_errhandler(Display *d, char *ext_name, char *reason)
+{
+#ifdef XFREE86_DEBUG
+	printf("Xext error inside SDL (may be harmless):\n");
+	printf("  Extension \"%s\" %s on display \"%s\".\n",
+	       ext_name, reason, pXDisplayString(d));
+#endif
+
+	if (strcmp(reason, "missing") == 0) {
+		/*
+		 * Since the query itself, elsewhere, can handle a missing extension
+		 *  and the default behaviour in Xlib is to write to stderr, which
+		 *  generates unnecessary bug reports, we just ignore these.
+		 */
+		return 0;
+	}
+
+	/* Everything else goes to the default handler... */
+	return Xext_handler(d, ext_name, reason);
 }
 
 /* Create auxiliary (toplevel) windows with the current visual */
@@ -437,6 +459,9 @@ static int X11_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 	/* Set the error handler if we lose the X display */
 	XIO_handler = pXSetIOErrorHandler(xio_errhandler);
+
+	/* Set the X extension error handler */
+	Xext_handler = pXSetExtensionErrorHandler(xext_errhandler);
 
 	/* use default screen (from $DISPLAY) */
 	SDL_Screen = DefaultScreen(SDL_Display);

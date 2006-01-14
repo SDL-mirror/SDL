@@ -113,6 +113,8 @@ SDL_X11_SYM(1,void,XextDestroyExtension,(XExtensionInfo*))
 SDL_X11_SYM(1,XExtDisplayInfo*,XextFindDisplay,(XExtensionInfo*,Display*))
 SDL_X11_SYM(1,int,XextRemoveDisplay,(XExtensionInfo*,Display*))
 SDL_X11_SYM(1,Bool,XQueryExtension,(Display*,_Xconst char*,int*,int*,int*))
+SDL_X11_SYM(1,char *,XDisplayString,(Display*))
+SDL_X11_SYM(1,int,XGetErrorText,(Display*,int,char*,int))
 
 #ifdef X_HAVE_UTF8_STRING
 SDL_X11_SYM(1,int,Xutf8TextListToTextProperty,(Display*,char**,int,XICCEncodingStyle,XTextProperty*))
@@ -159,6 +161,7 @@ SDL_X11_SYM(1,Bool,XShmQueryExtension,(Display*))
 SDL_X11_SYM(1,SDL_X11_XSynchronizeRetType,XSynchronize,(Display*,Bool))
 SDL_X11_SYM(1,SDL_X11_XESetWireToEventRetType,XESetWireToEvent,(Display*,int,SDL_X11_XESetWireToEventRetType))
 SDL_X11_SYM(1,SDL_X11_XESetEventToWireRetType,XESetEventToWire,(Display*,int,SDL_X11_XESetEventToWireRetType))
+SDL_X11_SYM(1,SDL_X11_XSetExtensionErrorHandlerType,XSetExtensionErrorHandler,(SDL_X11_XSetExtensionErrorHandlerType))
 
 /* end of SDL_x11sym.h ... */
 
