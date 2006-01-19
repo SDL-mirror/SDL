@@ -11,8 +11,11 @@ graywin
 loopwave
 testalpha
 testbitmap
+testblitspeed
 testcdrom
 testcpuinfo
+testdyngl
+testendian
 testerror
 testgamma
 testgl
