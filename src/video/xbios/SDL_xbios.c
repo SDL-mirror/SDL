@@ -724,16 +724,7 @@ static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 	surface = this->screen;
 
 	if ((surface->format->BitsPerPixel) == 8) {
-		void *destscr;
-		int destx;
 		int i;
-
-		/* Center on destination screen */
-		destscr = XBIOS_screens[XBIOS_fbnum];
-		destscr += XBIOS_pitch * ((XBIOS_height - surface->h) >> 1);
-		destx = (XBIOS_width - surface->w) >> 1;
-		destx &= ~15;
-		destscr += destx;
 
 		for (i=0;i<numrects;i++) {
 			void *source,*destination;
@@ -749,7 +740,7 @@ static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 			source += surface->pitch * rects[i].y;
 			source += x1;
 
-			destination = destscr;
+			destination = XBIOS_screens[XBIOS_fbnum];
 			destination += XBIOS_pitch * rects[i].y;
 			destination += x1;
 
