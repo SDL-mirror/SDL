@@ -127,7 +127,7 @@ static VideoBootStrap *bootstrap[] = {
 	&DC_bootstrap,
 #endif
 #ifdef ENABLE_RISCOS
-    &RISCOS_bootstrap,
+	&RISCOS_bootstrap,
 #endif
 #ifdef __OS2__
 	&OS2FSLib_bootstrap,
