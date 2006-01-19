@@ -3123,6 +3123,7 @@ src/video/fbcon/Makefile
 src/video/gem/Makefile
 src/video/ggi/Makefile
 src/video/ipod/Makefile
+src/video/os2fslib/Makefile
 src/video/maccommon/Makefile
 src/video/macdsp/Makefile
 src/video/macrom/Makefile
