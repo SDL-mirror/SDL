@@ -768,14 +768,15 @@ static void DIB_NormalUpdate(_THIS, int numrects, SDL_Rect *rects)
 	ReleaseDC(SDL_Window, hdc);
 }
 
+
 int DIB_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 {
 	RGBQUAD *pal;
 	int i;
-#ifndef _WIN32_WCE
-	HDC hdc, mdc;
-#else
+#if (_WIN32_WCE < 400 )
 	HDC hdc;
+#else
+	HDC hdc, mdc;
 #endif
 
 	/* Update the display palette */
@@ -805,7 +806,7 @@ int DIB_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 	}
 
 	/* Set the DIB palette and update the display */
-#ifndef _WIN32_WCE
+#if ( _WIN32_WCE >= 400 )
 	mdc = CreateCompatibleDC(hdc);
 	SelectObject(mdc, screen_bmp);
 	SetDIBColorTable(mdc, firstcolor, ncolors, pal);
@@ -816,6 +817,7 @@ int DIB_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 	ReleaseDC(SDL_Window, hdc);
 	return(1);
 }
+
 
 static void DIB_CheckGamma(_THIS)
 {

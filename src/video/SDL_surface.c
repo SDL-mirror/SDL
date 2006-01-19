@@ -39,6 +39,7 @@ static char rcsid =
 #include "SDL_memops.h"
 #include "SDL_leaks.h"
 
+
 /* Public routines */
 /*
  * Create an empty RGB surface of the appropriate depth

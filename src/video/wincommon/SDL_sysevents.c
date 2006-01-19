@@ -47,6 +47,7 @@ static char rcsid =
 #endif
 
 #ifdef _WIN32_WCE
+#include "SDL_gapivideo.h"
 #define NO_GETKEYBOARDSTATE
 #define NO_CHANGEDISPLAYSETTINGS
 #endif
@@ -98,6 +99,38 @@ static void LoadAygshell(void)
 	if( aygshell )
 	{
 		SHFullScreen = (int (WINAPI *)(struct HWND__ *,unsigned long)) SDL_LoadFunction(aygshell, "SHFullScreen");
+	}
+}
+
+/* for gapi landscape mode */
+static void GapiTransform(SDL_ScreenOrientation rotate, char hires, Sint16 *x, Sint16 *y) {
+	Sint16 rotatedX;
+	Sint16 rotatedY;
+
+	if (hires) {
+		*x = *x * 2;
+		*y = *y * 2;
+	}
+
+	switch(rotate) {
+		case SDL_ORIENTATION_UP:
+			break;
+		case SDL_ORIENTATION_RIGHT:
+			if (!SDL_VideoSurface)
+				break;
+			rotatedX = SDL_VideoSurface->w - *y;
+			rotatedY = *x;
+			*x = rotatedX;
+			*y = rotatedY;
+			break;
+		case SDL_ORIENTATION_LEFT:
+			if (!SDL_VideoSurface)
+				break;
+			rotatedX = *y;
+			rotatedY = SDL_VideoSurface->h - *x;
+			*x = rotatedX;
+			*y = rotatedY;
+			break;
 	}
 }
 
@@ -319,6 +352,10 @@ LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 						posted = SDL_PrivateMouseMotion(0, 1, x, y);
 					}
 				} else {
+#ifdef _WIN32_WCE
+					if (SDL_VideoSurface)
+						GapiTransform(this->hidden->userOrientation, this->hidden->hiresFix, &x, &y);
+#endif
 					posted = SDL_PrivateMouseMotion(0, 0, x, y);
 				}
 			}
@@ -407,6 +444,10 @@ LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				} else {
 					x = (Sint16)LOWORD(lParam);
 					y = (Sint16)HIWORD(lParam);
+#ifdef _WIN32_WCE
+					if (SDL_VideoSurface)
+						GapiTransform(this->hidden->userOrientation, this->hidden->hiresFix, &x, &y);
+#endif
 				}
 				posted = SDL_PrivateMouseButton(
 							state, button, x, y);

@@ -201,9 +201,9 @@ static SYNCHHANDLE CleanUp (SYNCHHANDLE hSynch, DWORD Flags)
    BOOL ok = TRUE;
 
    if (hSynch == NULL) return NULL;
-   if (Flags & 4 == 1 && hSynch->hEvent == NULL) ok = FALSE;
-   if (Flags & 2 == 1 && hSynch->hMutex == NULL) ok = FALSE;
-   if (Flags & 1 == 1 && hSynch->hEvent == NULL) ok = FALSE;
+   if ((Flags & 4) == 1 && (hSynch->hEvent == NULL)) ok = FALSE;
+   if ((Flags & 2) == 1 && (hSynch->hMutex == NULL)) ok = FALSE;
+   if ((Flags & 1) == 1 && (hSynch->hEvent == NULL)) ok = FALSE;
    if (!ok) 
    {
       CloseSynchHandle (hSynch);

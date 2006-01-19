@@ -87,6 +87,9 @@ static VideoBootStrap *bootstrap[] = {
 #ifdef ENABLE_AALIB
 	&AALIB_bootstrap,
 #endif
+#ifdef ENABLE_GAPI
+	&GAPI_bootstrap,
+#endif
 #ifdef ENABLE_WINDIB
 	&WINDIB_bootstrap,
 #endif

@@ -59,6 +59,31 @@ static BOOL prev_shiftstates[2];
    and give him a chance to handle some messages. */
 static WNDPROC userWindowProc = NULL;
 
+
+#ifdef _WIN32_WCE
+
+WPARAM rotateKey(WPARAM key,SDL_ScreenOrientation direction) 
+{
+	if (direction != SDL_ORIENTATION_LEFT)
+		return key;
+
+	switch (key) {
+		case 0x26: /* up */
+			return 0x27;
+		case 0x27: /* right */
+			return 0x28;
+		case 0x28: /* down */
+			return 0x25;
+		case 0x25: /* left */
+			return 0x26;
+	}
+
+	return key;
+}
+
+#endif 
+
+
 /* The main Win32 event handler */
 LONG
  DIB_HandleMessage(_THIS, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
@@ -70,6 +95,15 @@ LONG
 		case WM_KEYDOWN: {
 			SDL_keysym keysym;
 
+#ifdef _WIN32_WCE
+			// Drop GAPI artefacts
+			if (wParam == 0x84 || wParam == 0x5B)
+				return 0;
+
+			// Rotate key if necessary
+			if (this->hidden->orientation != SDL_ORIENTATION_UP)
+				wParam = rotateKey(wParam, this->hidden->orientation);	
+#endif 
 			/* Ignore repeated keys */
 			if ( lParam&REPEATED_KEYMASK ) {
 				return(0);
@@ -126,6 +160,16 @@ LONG
 		case WM_SYSKEYUP:
 		case WM_KEYUP: {
 			SDL_keysym keysym;
+
+#ifdef _WIN32_WCE
+			// Drop GAPI artefacts
+			if (wParam == 0x84 || wParam == 0x5B)
+				return 0;
+
+			// Rotate key if necessary
+			if (this->hidden->orientation != SDL_ORIENTATION_UP)
+				wParam = rotateKey(wParam, this->hidden->orientation);	
+#endif
 
 			switch (wParam) {
 				case VK_CONTROL:

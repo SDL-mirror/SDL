@@ -30,7 +30,10 @@ static char rcsid =
 #include <stdio.h>
 #include <stdlib.h>
 #include <windows.h>
+
+#ifndef _WIN32_WCE
 #include <process.h>
+#endif
 
 #include "SDL_error.h"
 #include "SDL_thread.h"
@@ -53,9 +56,14 @@ int SDL_SYS_CreateThread(SDL_Thread *thread, void *args)
 	 * have to use _beginthreadex if we want the returned handle
 	 * to be accessible after the thread exits
 	 * threads created with _beginthread auto-close the handle
+	 * Windows CE still use CreateThread.
 	 */
+#ifdef _WIN32_WCE
+	thread->handle = CreateThread(NULL, 0, RunThread, args, 0, &threadid);
+#else
 	thread->handle = (SYS_ThreadHandle) _beginthreadex(NULL, 0, RunThread,
 			args, 0, &threadid);
+#endif
 	if (thread->handle == NULL) {
 		SDL_SetError("Not enough resources to create thread");
 		return(-1);

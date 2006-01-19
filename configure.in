@@ -3140,6 +3140,7 @@ src/video/vgl/Makefile
 src/video/wincommon/Makefile
 src/video/windib/Makefile
 src/video/windx5/Makefile
+src/video/gapi/Makefile
 src/video/x11/Makefile
 src/video/xbios/Makefile
 src/video/XFree86/Makefile

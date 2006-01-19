@@ -365,6 +365,9 @@ extern VideoBootStrap SVGALIB_bootstrap;
 #ifdef ENABLE_AALIB
 extern VideoBootStrap AALIB_bootstrap;
 #endif
+#ifdef ENABLE_GAPI
+extern VideoBootStrap GAPI_bootstrap;
+#endif
 #ifdef ENABLE_WINDIB
 extern VideoBootStrap WINDIB_bootstrap;
 #endif

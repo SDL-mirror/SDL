@@ -30,6 +30,15 @@ static char rcsid =
 
 #include <windows.h>
 
+/* for PDA */
+typedef enum
+{
+	SDL_ORIENTATION_UP,
+	SDL_ORIENTATION_DOWN,
+	SDL_ORIENTATION_LEFT,
+	SDL_ORIENTATION_RIGHT
+} SDL_ScreenOrientation;
+
 /* Private display data */
 struct SDL_PrivateVideoData {
     HBITMAP screen_bmp;
@@ -38,6 +47,10 @@ struct SDL_PrivateVideoData {
 #define NUM_MODELISTS	4		/* 8, 16, 24, and 32 bits-per-pixel */
     int SDL_nummodes[NUM_MODELISTS];
     SDL_Rect **SDL_modelist[NUM_MODELISTS];
+
+	SDL_ScreenOrientation orientation;
+	int invert;
+	char hiresFix; // using hires mode without defining hires resource
 };
 /* Old variable names */
 #define screen_bmp		(this->hidden->screen_bmp)
