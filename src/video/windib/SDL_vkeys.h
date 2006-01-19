@@ -77,3 +77,4 @@ static char rcsid =
 #define VK_RBRACKET	0xDD
 #define VK_APOSTROPHE	0xDE
 #define VK_BACKTICK	0xDF
+#define VK_OEM_102	0xE2

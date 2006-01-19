@@ -73,6 +73,8 @@ static void PrintKey(SDL_keysym *sym, int pressed)
 			/* This is a Latin-1 program, so only show 8-bits */
 			if ( !(sym->unicode & 0xFF00) )
 				printf(" (%c)", sym->unicode);
+			else
+				printf(" (0x%X)", sym->unicode);
 #endif
 		}
 	}

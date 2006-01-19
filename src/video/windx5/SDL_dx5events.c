@@ -824,11 +824,11 @@ static SDL_keysym *TranslateKey(UINT scancode, SDL_keysym *keysym, int pressed)
 	keysym->sym = DIK_keymap[scancode];
 	keysym->mod = KMOD_NONE;
 	keysym->unicode = 0;
-	if ( pressed && SDL_TranslateUNICODE ) { /* Someday use ToUnicode() */
+	if ( pressed && SDL_TranslateUNICODE ) {
 		UINT vkey;
 #ifndef NO_GETKEYBOARDSTATE
-		BYTE keystate[256];
-		BYTE chars[2];
+		BYTE	keystate[256];
+		Uint16	wchars[2];
 #endif
 
 		vkey = MapVirtualKey(scancode, 1);
@@ -837,10 +837,11 @@ static SDL_keysym *TranslateKey(UINT scancode, SDL_keysym *keysym, int pressed)
 		keysym->unicode = vkey;
 #else
 		GetKeyboardState(keystate);
-		if ( ToAscii(vkey,scancode,keystate,(WORD *)chars,0) == 1 ) {
-			keysym->unicode = chars[0];
+		if (SDL_ToUnicode(vkey, scancode, keystate, wchars, sizeof(wchars)/sizeof(wchars[0]), 0) == 1)
+		{
+			keysym->unicode = wchars[0];
 		}
-#endif
+#endif /* NO_GETKEYBOARDSTATE */
 	}
 	return(keysym);
 }

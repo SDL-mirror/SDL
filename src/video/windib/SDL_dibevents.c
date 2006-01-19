@@ -281,6 +281,7 @@ void DIB_InitOSKeymap(_THIS)
 	VK_keymap[VK_EQUALS] = SDLK_EQUALS;
 	VK_keymap[VK_LBRACKET] = SDLK_LEFTBRACKET;
 	VK_keymap[VK_BACKSLASH] = SDLK_BACKSLASH;
+	VK_keymap[VK_OEM_102] = SDLK_LESS;
 	VK_keymap[VK_RBRACKET] = SDLK_RIGHTBRACKET;
 	VK_keymap[VK_GRAVE] = SDLK_BACKQUOTE;
 	VK_keymap[VK_BACKTICK] = SDLK_BACKQUOTE;
@@ -385,17 +386,18 @@ static SDL_keysym *TranslateKey(UINT vkey, UINT scancode, SDL_keysym *keysym, in
 	keysym->sym = VK_keymap[vkey];
 	keysym->mod = KMOD_NONE;
 	keysym->unicode = 0;
-	if ( pressed && SDL_TranslateUNICODE ) { /* Someday use ToUnicode() */
+	if ( pressed && SDL_TranslateUNICODE ) {
 #ifdef NO_GETKEYBOARDSTATE
 		/* Uh oh, better hope the vkey is close enough.. */
 		keysym->unicode = vkey;
 #else
-		BYTE keystate[256];
-		BYTE chars[2];
+		BYTE	keystate[256];
+		Uint16	wchars[2];
 
 		GetKeyboardState(keystate);
-		if ( ToAscii(vkey,scancode,keystate,(WORD *)chars,0) == 1 ) {
-			keysym->unicode = chars[0];
+		if (SDL_ToUnicode(vkey, scancode, keystate, wchars, sizeof(wchars)/sizeof(wchars[0]), 0) == 1)
+		{
+			keysym->unicode = wchars[0];
 		}
 #endif /* NO_GETKEYBOARDSTATE */
 	}

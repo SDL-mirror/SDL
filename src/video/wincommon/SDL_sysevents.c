@@ -79,6 +79,15 @@ void (*WIN_PaletteChanged)(_THIS, HWND window);
 void (*WIN_WinPAINT)(_THIS, HDC hdc);
 extern void DIB_SwapGamma(_THIS);
 
+/* Variables and support functions for SDL_ToUnicode() */
+static int codepage;
+static int Is9xME();
+static int GetCodePage();
+static int WINAPI ToUnicode9xME(UINT vkey, UINT scancode, BYTE *keystate, Uint16 *wchars, int wsize, UINT flags);
+
+ToUnicodeFN SDL_ToUnicode = ToUnicode9xME;
+
+
 #if defined(_WIN32_WCE)
 
 // dynamically load aygshell dll because we want SDL to work on HPC and be300
@@ -622,6 +631,11 @@ LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		return(0);
 
+		case WM_INPUTLANGCHANGE: {
+			codepage = GetCodePage();
+		}
+		return(TRUE);
+
 		default: {
 			/* Special handling by the video driver */
 			if (HandleMessage) {
@@ -728,6 +742,10 @@ int SDL_RegisterApp(char *name, Uint32 style, void *hInst)
 	/* Check for SDL_WINDOWID hack */
 	SDL_windowid = getenv("SDL_WINDOWID");
 
+	/* Initialise variables for SDL_ToUnicode() */
+	codepage = GetCodePage();
+	SDL_ToUnicode = Is9xME() ? ToUnicode9xME : ToUnicode;
+
 	app_registered = 1;
 	return(0);
 }
@@ -749,5 +767,41 @@ void SDL_UnregisterApp()
 		}
 	}
 	app_registered = 0;
+}
+
+/* JFP: Implementation of ToUnicode() that works on 9x/ME/2K/XP */
+
+static int Is9xME()
+{
+	OSVERSIONINFO   info;
+
+	memset(&info, 0, sizeof(info));
+	info.dwOSVersionInfoSize = sizeof(info);
+	if (!GetVersionEx(&info)) {
+		return 0;
+	}
+	return (info.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS);
+}
+
+static int GetCodePage()
+{
+	char	buff[8];
+	int	lcid = MAKELCID(LOWORD(GetKeyboardLayout(0)), SORT_DEFAULT);
+	int	cp = GetACP();
+
+	if (GetLocaleInfo(lcid, LOCALE_IDEFAULTANSICODEPAGE, buff, sizeof(buff))) {
+		cp = atoi(buff);
+	}
+	return cp;
+}
+
+static int WINAPI ToUnicode9xME(UINT vkey, UINT scancode, PBYTE keystate, LPWSTR wchars, int wsize, UINT flags)
+{
+	BYTE	chars[2];
+
+	if (ToAsciiEx(vkey, scancode, keystate, (WORD*)chars, 0, GetKeyboardLayout(0)) == 1) {
+		return MultiByteToWideChar(codepage, 0, chars, 1, wchars, wsize);
+	}
+	return 0;
 }
 
