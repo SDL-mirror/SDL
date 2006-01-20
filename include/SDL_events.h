@@ -214,7 +214,7 @@ typedef struct SDL_SysWMEvent {
 } SDL_SysWMEvent;
 
 /* General event structure */
-typedef union {
+typedef union SDL_Event {
 	Uint8 type;
 	SDL_ActiveEvent active;
 	SDL_KeyboardEvent key;
