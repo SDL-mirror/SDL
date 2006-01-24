@@ -129,7 +129,7 @@ void eloConvertXY(_THIS, int *dx,  int *dy) {
 	int width = ELO_MAX_X - ELO_MIN_X;
 	int height = ELO_MAX_Y - ELO_MIN_Y;
 
-	*dx = (cache_vinfo.xres - (cache_vinfo.xres * (input_x - ELO_MIN_X)) / width);
+	*dx = ((int)cache_vinfo.xres - ((int)cache_vinfo.xres * (input_x - ELO_MIN_X)) / width);
 	*dy = (cache_vinfo.yres * (input_y - ELO_MIN_Y)) / height;
 }
 
