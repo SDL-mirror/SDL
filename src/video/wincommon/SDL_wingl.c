@@ -446,6 +446,12 @@ int WIN_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
 			*value = 0;
 		}
 		break;
+	    case SDL_GL_MULTISAMPLEBUFFERS:
+		*value = 0;
+		break;
+	    case SDL_GL_MULTISAMPLESAMPLES:
+		*value = 1;
+		break;
 	    default:
 		retval = -1;
 		break;
