@@ -489,7 +489,7 @@ static int SDL_GetVideoMode (int *w, int *h, int *BitsPerPixel, Uint32 flags)
 				/* Mode with any dimension smaller or equal than current best ? */
 				if ((sizes[i]->w <= sizes[best]->w) || (sizes[i]->h <= sizes[best]->h)) {
 					/* Now choose the mode that has less pixels */
-					if ((sizes[i]->w * sizes[i]->h) < (sizes[best]->w * sizes[best]->h)) {
+					if ((sizes[i]->w * sizes[i]->h) <= (sizes[best]->w * sizes[best]->h)) {
 						best=i;
 						supported = 1;
 					}
