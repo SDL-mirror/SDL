@@ -145,6 +145,7 @@ extern DECLSPEC int SDLCALL SDL_CondBroadcast(SDL_cond *cond);
 
 /* Wait on the condition variable, unlocking the provided mutex.
    The mutex must be locked before entering this function!
+   The mutex is re-locked once the condition variable is signaled.
    Returns 0 when it is signaled, or -1 on error.
  */
 extern DECLSPEC int SDLCALL SDL_CondWait(SDL_cond *cond, SDL_mutex *mut);
