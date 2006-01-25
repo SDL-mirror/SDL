@@ -147,8 +147,6 @@ LONG
 				if ( TranslateMessage(&m) && PeekMessage(&m, hwnd, 0, WM_USER, PM_NOREMOVE) && (m.message == WM_CHAR) ) {
 					GetMessage(&m, hwnd, 0, WM_USER);
 			    		wParam = m.wParam;
-				} else {
-					wParam = 0;
 				}
 			}
 #endif /* NO_GETKEYBOARDSTATE */
