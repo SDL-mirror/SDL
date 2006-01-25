@@ -498,7 +498,7 @@ int RunGLTest( int argc, char* argv[],
 		video_flags = SDL_OPENGL;
 	}
 	for ( i=1; argv[i]; ++i ) {
-		if ( strcmp(argv[1], "-fullscreen") == 0 ) {
+		if ( strcmp(argv[i], "-fullscreen") == 0 ) {
 			video_flags |= SDL_FULLSCREEN;
 		}
 	}
