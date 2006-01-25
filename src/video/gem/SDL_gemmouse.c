@@ -165,8 +165,8 @@ void GEM_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
 void GEM_CheckMouseMode(_THIS)
 {
 	/* If the mouse is hidden and input is grabbed, we use relative mode */
-	if ( !(SDL_cursorstate & CURSOR_VISIBLE) &&
-		(this->input_grab != SDL_GRAB_OFF) &&
+	if ( (!(SDL_cursorstate & CURSOR_VISIBLE)) &&
+		/*(this->input_grab != SDL_GRAB_OFF) && */ /* Damn GEM can not grab */
              (SDL_GetAppState() & SDL_APPACTIVE) ) {
 		GEM_mouse_relative = SDL_TRUE;
 	} else {
