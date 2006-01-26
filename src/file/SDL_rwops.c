@@ -238,6 +238,7 @@ SDL_RWops *SDL_RWFromFP(FILE *fp, int autoclose)
 
 #ifdef WIN32
 	if ( ! in_sdl ) {
+		/* It's when SDL and the app are compiled with different C runtimes */
 		SDL_SetError("You can't pass a FILE pointer to a DLL (?)");
 		/*return(NULL);*/
 	}
