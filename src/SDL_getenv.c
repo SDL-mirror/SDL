@@ -35,6 +35,70 @@ static char rcsid =
 
 #ifdef NEED_SDL_GETENV
 
+#ifdef WIN32
+
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <malloc.h>
+#include <string.h>
+
+/* Note this isn't thread-safe! */
+
+static char *SDL_envmem = NULL;	/* Ugh, memory leak */
+static DWORD SDL_envmemlen = 0;
+
+/* Put a variable of the form "name=value" into the environment */
+int SDL_putenv(const char *variable)
+{
+	DWORD bufferlen;
+	char *value;
+	const char *sep;
+
+	sep = strchr(variable, '=');
+	if ( sep == NULL ) {
+		return -1;
+	}
+	bufferlen = strlen(variable)+1;
+	if ( bufferlen > SDL_envmemlen ) {
+		char *newmem = (char *)realloc(SDL_envmem, bufferlen);
+		if ( newmem == NULL ) {
+			return -1;
+		}
+		SDL_envmem = newmem;
+		SDL_envmemlen = bufferlen;
+	}
+	strcpy(SDL_envmem, variable);
+	value = SDL_envmem + (sep - variable);
+	*value++ = '\0';
+	if ( !SetEnvironmentVariable(SDL_envmem, *value ? value : NULL) ) {
+		return -1;
+	}
+	return 0;
+}
+
+/* Retrieve a variable named "name" from the environment */
+char *SDL_getenv(const char *name)
+{
+	DWORD bufferlen;
+
+	bufferlen = GetEnvironmentVariable(name, SDL_envmem, SDL_envmemlen);
+	if ( bufferlen == 0 ) {
+		return NULL;
+	}
+	if ( bufferlen > SDL_envmemlen ) {
+		char *newmem = (char *)realloc(SDL_envmem, bufferlen);
+		if ( newmem == NULL ) {
+			return NULL;
+		}
+		SDL_envmem = newmem;
+		SDL_envmemlen = bufferlen;
+		GetEnvironmentVariable(name, SDL_envmem, SDL_envmemlen);
+	}
+	return SDL_envmem;
+}
+
+#else /* roll our own */
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -122,6 +186,8 @@ char *SDL_getenv(const char *name)
 	}
 	return value;
 }
+
+#endif /* WIN32 */
 
 #endif /* NEED_GETENV */
 
