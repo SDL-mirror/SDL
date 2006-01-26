@@ -35,7 +35,7 @@ static char rcsid =
 
 #ifdef NEED_SDL_GETENV
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(_WIN32_WCE)
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
