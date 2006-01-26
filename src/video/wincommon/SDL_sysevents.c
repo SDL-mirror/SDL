@@ -79,6 +79,7 @@ void (*WIN_PaletteChanged)(_THIS, HWND window);
 void (*WIN_WinPAINT)(_THIS, HDC hdc);
 extern void DIB_SwapGamma(_THIS);
 
+#ifndef NO_GETKEYBOARDSTATE
 /* Variables and support functions for SDL_ToUnicode() */
 static int codepage;
 static int Is9xME();
@@ -86,6 +87,7 @@ static int GetCodePage();
 static int WINAPI ToUnicode9xME(UINT vkey, UINT scancode, BYTE *keystate, Uint16 *wchars, int wsize, UINT flags);
 
 ToUnicodeFN SDL_ToUnicode = ToUnicode9xME;
+#endif /* !NO_GETKEYBOARDSTATE */
 
 
 #if defined(_WIN32_WCE)
@@ -631,10 +633,12 @@ LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		return(0);
 
+#ifndef NO_GETKEYBOARDSTATE
 		case WM_INPUTLANGCHANGE: {
 			codepage = GetCodePage();
 		}
 		return(TRUE);
+#endif
 
 		default: {
 			/* Special handling by the video driver */
@@ -742,9 +746,11 @@ int SDL_RegisterApp(char *name, Uint32 style, void *hInst)
 	/* Check for SDL_WINDOWID hack */
 	SDL_windowid = getenv("SDL_WINDOWID");
 
+#ifndef NO_GETKEYBOARDSTATE
 	/* Initialise variables for SDL_ToUnicode() */
 	codepage = GetCodePage();
 	SDL_ToUnicode = Is9xME() ? ToUnicode9xME : ToUnicode;
+#endif
 
 	app_registered = 1;
 	return(0);
@@ -769,6 +775,7 @@ void SDL_UnregisterApp()
 	app_registered = 0;
 }
 
+#ifndef NO_GETKEYBOARDSTATE
 /* JFP: Implementation of ToUnicode() that works on 9x/ME/2K/XP */
 
 static int Is9xME()
@@ -805,3 +812,4 @@ static int WINAPI ToUnicode9xME(UINT vkey, UINT scancode, PBYTE keystate, LPWSTR
 	return 0;
 }
 
+#endif /* !NO_GETKEYBOARDSTATE */
