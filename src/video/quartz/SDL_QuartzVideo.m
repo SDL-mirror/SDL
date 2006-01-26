@@ -213,6 +213,9 @@ static int QZ_VideoInit (_THIS, SDL_PixelFormat *video_format) {
     /* register for sleep notifications so wake from sleep generates SDL_VIDEOEXPOSE */
     QZ_RegisterForSleepNotifications (this);
     
+    /* Fill in some window manager capabilities */
+    this->info.wm_available = 1;
+
     return 0;
 }
 
