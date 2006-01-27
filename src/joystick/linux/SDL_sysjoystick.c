@@ -943,7 +943,7 @@ static __inline__ int EV_AxisCorrect(SDL_Joystick *joystick, int which, int valu
 	}
 
 	/* Clamp and return */
-	if ( value < -32767 ) return -32767;
+	if ( value < -32768 ) return -32768;
 	if ( value >  32767 ) return  32767;
 
 	return value;
