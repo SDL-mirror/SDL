@@ -6,4 +6,5 @@ libaudio_windx5_la_SOURCES = $(SRCS)
 
 # The SDL audio driver sources
 SRCS =	SDL_dx5audio.c	\
-	SDL_dx5audio.h
+	SDL_dx5audio.h	\
+	directx.h
