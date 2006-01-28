@@ -4,13 +4,13 @@ SDL_PixelFormat\- Stores surface format information
 .SH "STRUCTURE DEFINITION"
 .PP
 .nf
-\f(CWtypedef struct{
+\f(CWtypedef struct SDL_PixelFormat {
   SDL_Palette *palette;
   Uint8  BitsPerPixel;
   Uint8  BytesPerPixel;
-  Uint32 Rmask, Gmask, Bmask, Amask;
-  Uint8  Rshift, Gshift, Bshift, Ashift;
   Uint8  Rloss, Gloss, Bloss, Aloss;
+  Uint8  Rshift, Gshift, Bshift, Ashift;
+  Uint32 Rmask, Gmask, Bmask, Amask;
   Uint32 colorkey;
   Uint8  alpha;
 } SDL_PixelFormat;\fR
