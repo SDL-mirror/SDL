@@ -214,21 +214,27 @@ static void WIN_GetKeyboardState(void)
 	if ( GetKeyboardState(keyboard) ) {
 		if ( keyboard[VK_LSHIFT] & 0x80) {
 			state |= KMOD_LSHIFT;
+			kstate[SDLK_LSHIFT] = SDL_PRESSED;
 		}
 		if ( keyboard[VK_RSHIFT] & 0x80) {
 			state |= KMOD_RSHIFT;
+			kstate[SDLK_RSHIFT] = SDL_PRESSED;
 		}
 		if ( keyboard[VK_LCONTROL] & 0x80) {
 			state |= KMOD_LCTRL;
+			kstate[SDLK_LCTRL] = SDL_PRESSED;
 		}
 		if ( keyboard[VK_RCONTROL] & 0x80) {
 			state |= KMOD_RCTRL;
+			kstate[SDLK_RCTRL] = SDL_PRESSED;
 		}
 		if ( keyboard[VK_LMENU] & 0x80) {
 			state |= KMOD_LALT;
+			kstate[SDLK_LALT] = SDL_PRESSED;
 		}
 		if ( keyboard[VK_RMENU] & 0x80) {
 			state |= KMOD_RALT;
+			kstate[SDLK_RALT] = SDL_PRESSED;
 		}
 		if ( keyboard[VK_NUMLOCK] & 0x01) {
 			state |= KMOD_NUM;
