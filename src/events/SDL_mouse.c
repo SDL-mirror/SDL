@@ -170,6 +170,14 @@ int SDL_PrivateMouseMotion(Uint8 buttonstate, int relative, Sint16 x, Sint16 y)
 		Yrel = Y-SDL_MouseY;
 	}
 
+	/* Drop events that don't change state */
+	if ( ! Xrel && ! Yrel ) {
+#if 0
+printf("Mouse event didn't change state - dropped!\n");
+#endif
+		return(0);
+	}
+
 	/* Update internal mouse state */
 	SDL_ButtonState = buttonstate;
 	SDL_MouseX = X;

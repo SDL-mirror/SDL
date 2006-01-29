@@ -507,7 +507,7 @@ printf("The '%s' key has been %s\n", SDL_GetKeyName(keysym->sym),
 	/* Drop events that don't change state */
 	if ( SDL_KeyState[keysym->sym] == state ) {
 #if 0
-printf("Event didn't change state - dropped!\n");
+printf("Keyboard event didn't change state - dropped!\n");
 #endif
 		return(0);
 	}
