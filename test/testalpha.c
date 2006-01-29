@@ -19,6 +19,45 @@ static void quit(int rc)
 	exit(rc);
 }
 
+/* Fill the screen with a gradient */
+static void FillBackground(SDL_Surface *screen)
+{
+	Uint8 *buffer;
+	Uint16 *buffer16;
+        Uint16 color;
+        Uint8  gradient;
+	int    i, k;
+
+	/* Set the surface pixels and refresh! */
+	if ( SDL_LockSurface(screen) < 0 ) {
+		fprintf(stderr, "Couldn't lock the display surface: %s\n",
+							SDL_GetError());
+		quit(2);
+	}
+	buffer=(Uint8 *)screen->pixels;
+	if (screen->format->BytesPerPixel!=2) {
+		for ( i=0; i<screen->h; ++i ) {
+			memset(buffer,(i*255)/screen->h, screen->w*screen->format->BytesPerPixel);
+			buffer += screen->pitch;
+		}
+	}
+        else
+        {
+		for ( i=0; i<screen->h; ++i ) {
+			gradient=((i*255)/screen->h);
+                        color = SDL_MapRGB(screen->format, gradient, gradient, gradient);
+                        buffer16=(Uint16*)buffer;
+                        for (k=0; k<screen->w; k++)
+                        {
+                            *(buffer16+k)=color;
+                        }
+			buffer += screen->pitch;
+		}
+        }
+
+	SDL_UnlockSurface(screen);
+	SDL_UpdateRect(screen, 0, 0, 0, 0);
+}
 
 /* Create a "light" -- a yellowish surface with variable alpha */
 SDL_Surface *CreateLight(SDL_Surface *screen, int radius)
@@ -284,17 +323,14 @@ int main(int argc, char *argv[])
 {
 	const SDL_VideoInfo *info;
 	SDL_Surface *screen;
+	int    w, h;
 	Uint8  video_bpp;
 	Uint32 videoflags;
-	Uint8 *buffer;
-	int    i, k, done;
+	int    i, done;
 	SDL_Event event;
 	SDL_Surface *light;
 	int mouse_pressed;
 	Uint32 ticks, lastticks;
-	Uint16 *buffer16;
-        Uint16 color;
-        Uint8  gradient;
 
 
 	/* Initialize SDL */
@@ -304,6 +340,8 @@ int main(int argc, char *argv[])
 	}
 
 	/* Alpha blending doesn't work well at 8-bit color */
+	w = 640;
+	h = 480;
 	info = SDL_GetVideoInfo();
 	if ( info->vfmt->BitsPerPixel > 8 ) {
 		video_bpp = info->vfmt->BitsPerPixel;
@@ -312,27 +350,37 @@ int main(int argc, char *argv[])
                 fprintf(stderr, "forced 16 bpp mode\n");
 	}
 	videoflags = SDL_SWSURFACE;
-	while ( argc > 1 ) {
-		--argc;
-		if ( strcmp(argv[argc-1], "-bpp") == 0 ) {
-			video_bpp = atoi(argv[argc]);
+	for ( i = 1; argv[i]; ++i ) {
+		if ( strcmp(argv[i], "-bpp") == 0 ) {
+			video_bpp = atoi(argv[++i]);
                         if (video_bpp<=8) {
                             video_bpp=16;
                             fprintf(stderr, "forced 16 bpp mode\n");
                         }
-			--argc;
 		} else
-		if ( strcmp(argv[argc], "-hw") == 0 ) {
+		if ( strcmp(argv[i], "-hw") == 0 ) {
 			videoflags |= SDL_HWSURFACE;
 		} else
-		if ( strcmp(argv[argc], "-warp") == 0 ) {
+		if ( strcmp(argv[i], "-warp") == 0 ) {
 			videoflags |= SDL_HWPALETTE;
 		} else
-		if ( strcmp(argv[argc], "-fullscreen") == 0 ) {
+		if ( strcmp(argv[i], "-width") == 0 && argv[i+1] ) {
+			w = atoi(argv[++i]);
+		} else
+		if ( strcmp(argv[i], "-height") == 0 && argv[i+1] ) {
+			h = atoi(argv[++i]);
+		} else
+		if ( strcmp(argv[i], "-resize") == 0 ) {
+			videoflags |= SDL_RESIZABLE;
+		} else
+		if ( strcmp(argv[i], "-noframe") == 0 ) {
+			videoflags |= SDL_NOFRAME;
+		} else
+		if ( strcmp(argv[i], "-fullscreen") == 0 ) {
 			videoflags |= SDL_FULLSCREEN;
 		} else {
 			fprintf(stderr, 
-			"Usage: %s [-bpp N] [-warp] [-hw] [-fullscreen]\n",
+			"Usage: %s [-width N] [-height N] [-bpp N] [-warp] [-hw] [-fullscreen]\n",
 								argv[0]);
 			quit(1);
 		}
@@ -340,7 +388,7 @@ int main(int argc, char *argv[])
 
 	/* Set 640x480 video mode */
 #ifndef _WIN32_WCE
-	if ( (screen=SDL_SetVideoMode(640,480,video_bpp,videoflags)) == NULL ) {
+	if ( (screen=SDL_SetVideoMode(w,h,video_bpp,videoflags)) == NULL ) {
 		fprintf(stderr, "Couldn't set 640x480x%d video mode: %s\n",
 						video_bpp, SDL_GetError());
 		quit(2);
@@ -353,35 +401,7 @@ int main(int argc, char *argv[])
 		quit(2);
 	}
 #endif
-	/* Set the surface pixels and refresh! */
-	if ( SDL_LockSurface(screen) < 0 ) {
-		fprintf(stderr, "Couldn't lock the display surface: %s\n",
-							SDL_GetError());
-		quit(2);
-	}
-	buffer=(Uint8 *)screen->pixels;
-	if (screen->format->BytesPerPixel!=2) {
-		for ( i=0; i<screen->h; ++i ) {
-			memset(buffer,(i*255)/screen->h, screen->pitch);
-			buffer += screen->pitch;
-		}
-	}
-        else
-        {
-		for ( i=0; i<screen->h; ++i ) {
-			gradient=((i*255)/screen->h);
-                        color = SDL_MapRGB(screen->format, gradient, gradient, gradient);
-                        buffer16=(Uint16*)buffer;
-                        for (k=0; k<screen->w; k++)
-                        {
-                            *(buffer16+k)=color;
-                        }
-			buffer += screen->pitch;
-		}
-        }
-
-	SDL_UnlockSurface(screen);
-	SDL_UpdateRect(screen, 0, 0, 0, 0);
+	FillBackground(screen);
 
 	/* Create the light */
 	light = CreateLight(screen, 82);
@@ -412,14 +432,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Run a sample blit to trigger blit acceleration */
-	{ SDL_Rect dst;
-		dst.x = 0;
-		dst.y = 0;
-		dst.w = sprite->w;
-		dst.h = sprite->h;
-		SDL_BlitSurface(sprite, NULL, screen, &dst);
-		SDL_FillRect(screen, &dst, 0);
-	}
+	MoveSprite(screen, NULL);
 	if ( (sprite->flags & SDL_HWACCEL) == SDL_HWACCEL ) {
 		printf("Sprite blit uses hardware alpha acceleration\n");
 	} else {
@@ -464,6 +477,12 @@ fprintf(stderr, "Slept %d ticks\n", (SDL_GetTicks()-ticks));
 		/* Check for events */
 		while ( SDL_PollEvent(&event) ) {
 			switch (event.type) {
+				case SDL_VIDEORESIZE:
+					screen = SDL_SetVideoMode(event.resize.w, event.resize.h, video_bpp, videoflags);
+					if ( screen ) {
+						FillBackground(screen);
+					}
+					break;
 				/* Attract sprite while mouse is held down */
 				case SDL_MOUSEMOTION:
 					if (event.motion.state != 0) {
