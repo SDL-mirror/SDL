@@ -24,32 +24,28 @@
    <QPG:Values>
       <QPG:Files>
          <QPG:Add file="./COPYING" install="LicenseUrl/" handling="repdata"/>
-         <QPG:Add permissions="0755" file="./src/.libs/libSDL-@SDL_MAJOR_VERSION@.@SDL_MINOR_VERSION@.so.@SDL_BINARY_AGE@" install="/opt/lib/"/>
-         <QPG:Add filetype="symlink" file="libSDL.so" install="/opt/lib/" linkto="libSDL-@SDL_MAJOR_VERSION@.@SDL_MINOR_VERSION@.so.@SDL_BINARY_AGE@"/>
-         <QPG:Add filetype="symlink" file="libSDL-@SDL_MAJOR_VERSION@.@SDL_MINOR_VERSION@.so.0" install="/opt/lib/" linkto="libSDL-@SDL_MAJOR_VERSION@.@SDL_MINOR_VERSION@.so.@SDL_BINARY_AGE@"/>
-         <QPG:Add filetype="symlink" file="libSDL-@SDL_MAJOR_VERSION@.1.so.0" install="/opt/lib/" linkto="libSDL-@SDL_MAJOR_VERSION@.@SDL_MINOR_VERSION@.so.@SDL_BINARY_AGE@"/>
-         <QPG:Add filetype="symlink" file="libSDL-@SDL_MAJOR_VERSION@.0.so.0" install="/opt/lib/" linkto="libSDL-@SDL_MAJOR_VERSION@.@SDL_MINOR_VERSION@.so.@SDL_BINARY_AGE@"/>
-         <QPG:Add permissions="0644" file="./src/.libs/libSDL.a" install="/opt/lib/"/>
-         <QPG:Add permissions="0644" file="./src/.libs/libSDL.lai" install="/opt/lib/libSDL.la"/>
-         <QPG:Add permissions="0644" file="./src/main/libSDLmain.a" install="/opt/lib/"/>
-         <QPG:Add permissions="0644" file="./include/*.h" install="/opt/include/SDL/"/>
-         <QPG:Add permissions="0755" file="./sdl-config" install="/opt/bin/"/>
-         <QPG:Add permissions="0644" file="./BUGS" install="/usr/doc/SDL12/"/>
-         <QPG:Add permissions="0644" file="./COPYING" install="/usr/doc/SDL12/"/>
-         <QPG:Add permissions="0644" file="./CREDITS" install="/usr/doc/SDL12/"/>
-         <QPG:Add permissions="0644" file="./INSTALL" install="/usr/doc/SDL12/"/>
-         <QPG:Add permissions="0644" file="./README" install="/usr/doc/SDL12/"/>
-         <QPG:Add permissions="0644" file="./README-SDL.txt" install="/usr/doc/SDL12/"/>
-         <QPG:Add permissions="0644" file="./README.CVS" install="/usr/doc/SDL12/"/>
-         <QPG:Add permissions="0644" file="./README.QNX" install="/usr/doc/SDL12/"/>
-         <QPG:Add permissions="0644" file="./TODO" install="/usr/doc/SDL12/"/>
-         <QPG:Add permissions="0644" file="./WhatsNew" install="/usr/doc/SDL12/"/>
-         <QPG:Add permissions="0644" file="./docs.html" install="/usr/doc/SDL12/Changes.html"/>
-         <QPG:Add permissions="0644" file="./docs/index.html" install="/usr/doc/SDL12/docs/"/>
-         <QPG:Add permissions="0644" file="./docs/html/*.html" install="/usr/doc/SDL12/docs/html/"/>
-         <QPG:Add permissions="0644" file="./docs/images/rainbow.gif" install="/usr/doc/SDL12/docs/images/"/>
-         <QPG:Add permissions="0644" file="./docs/man3/*.3" install="/opt/man/man3/"/>
-         <QPG:Add permissions="0644" file="./sdl.m4" install="/opt/share/aclocal/"/>
+         <QPG:Add permissions="0755" file="./src/.libs/libSDL-@SDL_MAJOR_VERSION@.@SDL_MINOR_VERSION@.so.@LT_AGE@" install="/usr/lib/"/>
+         <QPG:Add filetype="symlink" file="libSDL.so" install="/usr/lib/" linkto="libSDL-@SDL_MAJOR_VERSION@.@SDL_MINOR_VERSION@.so.@LT_AGE@"/>
+         <QPG:Add permissions="0644" file="./src/.libs/libSDL.a" install="/usr/lib/"/>
+         <QPG:Add permissions="0644" file="./src/.libs/libSDL.lai" install="/usr/lib/libSDL.la"/>
+         <QPG:Add permissions="0644" file="./src/main/libSDLmain.a" install="/usr/lib/"/>
+         <QPG:Add permissions="0644" file="./include/*.h" install="/usr/include/SDL/"/>
+         <QPG:Add permissions="0755" file="./sdl-config" install="/usr/bin/"/>
+         <QPG:Add permissions="0644" file="./BUGS" install="/usr/share/doc/SDL12/"/>
+         <QPG:Add permissions="0644" file="./COPYING" install="/usr/share/doc/SDL12/"/>
+         <QPG:Add permissions="0644" file="./CREDITS" install="/usr/share/doc/SDL12/"/>
+         <QPG:Add permissions="0644" file="./INSTALL" install="/usr/share/doc/SDL12/"/>
+         <QPG:Add permissions="0644" file="./README" install="/usr/share/doc/SDL12/"/>
+         <QPG:Add permissions="0644" file="./README-SDL.txt" install="/usr/share/doc/SDL12/"/>
+         <QPG:Add permissions="0644" file="./README.CVS" install="/usr/share/doc/SDL12/"/>
+         <QPG:Add permissions="0644" file="./README.QNX" install="/usr/share/doc/SDL12/"/>
+         <QPG:Add permissions="0644" file="./TODO" install="/usr/share/doc/SDL12/"/>
+         <QPG:Add permissions="0644" file="./WhatsNew" install="/usr/share/doc/SDL12/"/>
+         <QPG:Add permissions="0644" file="./docs.html" install="/usr/share/doc/SDL12/Changes.html"/>
+         <QPG:Add permissions="0644" file="./docs/index.html" install="/usr/share/doc/SDL12/docs/"/>
+         <QPG:Add permissions="0644" file="./docs/html/*.html" install="/usr/share/doc/SDL12/docs/html/"/>
+         <QPG:Add permissions="0644" file="./docs/man3/*.3" install="/usr/share/man/man3/"/>
+         <QPG:Add permissions="0644" file="./sdl.m4" install="/usr/share/aclocal/"/>
       </QPG:Files>
       <QPG:PackageFilter>
          <QPM:PackageManifest>
@@ -59,14 +55,14 @@
                <QPM:PackageName>SDL</QPM:PackageName>
                <QPM:PackageReleaseNumber>1</QPM:PackageReleaseNumber>
                <QPM:PackageRepository>http://qnx.org.ru/repository</QPM:PackageRepository>
-               <QPM:FileVersion>2.0</QPM:FileVersion>
+               <QPM:FileVersion>2.6</QPM:FileVersion>
             </QPM:PackageDescription>
 
             <QPM:ProductDescription>
                <QPM:ProductName>Simple DirectMedia Layer (SDL)</QPM:ProductName>
                <QPM:ProductIdentifier>SDL</QPM:ProductIdentifier>
                <QPM:ProductEmail>slouken@libsdl.org</QPM:ProductEmail>
-               <QPM:VendorName>public</QPM:VendorName>
+               <QPM:VendorName>Public</QPM:VendorName>
                <QPM:VendorInstallName>public</QPM:VendorInstallName>
                <QPM:VendorURL>http://www.libsdl.org</QPM:VendorURL>
                <QPM:VendorEmbedURL/>
@@ -85,7 +81,7 @@
 
             <QPM:ReleaseDescription>
                <QPM:ReleaseVersion>@VERSION@</QPM:ReleaseVersion>
-               <QPM:ReleaseUrgency>High</QPM:ReleaseUrgency>
+               <QPM:ReleaseUrgency>Medium</QPM:ReleaseUrgency>
                <QPM:ReleaseStability>Stable</QPM:ReleaseStability>
                <QPM:ReleaseNoteMinor/>
                <QPM:ReleaseNoteMajor/>
@@ -96,7 +92,7 @@
 
             <QPM:ContentDescription>
                <QPM:ContentTopic xmlmultiple="true">Software Development/Libraries and Extensions/C Libraries</QPM:ContentTopic>
-               <QPM:ContentKeyword>SDL, audio, graphics, demos, games, emulators, direct, media, layer</QPM:ContentKeyword>
+               <QPM:ContentKeyword>SDL,audio,graphics,demos,games,emulators,direct,media,layer</QPM:ContentKeyword>
                <QPM:TargetOS>qnx6</QPM:TargetOS>
                <QPM:HostOS>none</QPM:HostOS>
                <QPM:DisplayEnvironment xmlmultiple="true">Photon</QPM:DisplayEnvironment>

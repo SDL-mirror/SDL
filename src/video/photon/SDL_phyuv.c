@@ -58,10 +58,10 @@ int grab_ptrs2(PgVideoChannel_t* channel, FRAMEDATA* Frame0, FRAMEDATA* Frame1)
     /* Buffers have moved; re-obtain the pointers */
     Frame0->Y = (unsigned char *)PdGetOffscreenContextPtr(channel->yplane1);
     Frame1->Y = (unsigned char *)PdGetOffscreenContextPtr(channel->yplane2);
-    Frame0->U = (unsigned char *)PdGetOffscreenContextPtr(channel->uplane1);
-    Frame1->U = (unsigned char *)PdGetOffscreenContextPtr(channel->uplane2);
-    Frame0->V = (unsigned char *)PdGetOffscreenContextPtr(channel->vplane1);
-    Frame1->V = (unsigned char *)PdGetOffscreenContextPtr(channel->vplane2);
+    Frame0->U = (unsigned char *)PdGetOffscreenContextPtr(channel->vplane1);
+    Frame1->U = (unsigned char *)PdGetOffscreenContextPtr(channel->vplane2);
+    Frame0->V = (unsigned char *)PdGetOffscreenContextPtr(channel->uplane1);
+    Frame1->V = (unsigned char *)PdGetOffscreenContextPtr(channel->uplane2);
 
     if (Frame0->Y)
         planes++;
@@ -217,10 +217,10 @@ SDL_Overlay* ph_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SD
 
     if(overlay->hwdata->channel->yplane1 != NULL)
         overlay->hwdata->YStride = overlay->hwdata->channel->yplane1->pitch;
-    if(overlay->hwdata->channel->uplane1 != NULL)
-        overlay->hwdata->UStride = overlay->hwdata->channel->uplane1->pitch;
     if(overlay->hwdata->channel->vplane1 != NULL)
-        overlay->hwdata->VStride = overlay->hwdata->channel->vplane1->pitch;
+        overlay->hwdata->UStride = overlay->hwdata->channel->vplane1->pitch;
+    if(overlay->hwdata->channel->uplane1 != NULL)
+        overlay->hwdata->VStride = overlay->hwdata->channel->uplane1->pitch;
 
     /* check for the validness of all planes */
     if ((overlay->hwdata->channel->yplane1 == NULL) &&
@@ -267,12 +267,12 @@ SDL_Overlay* ph_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SD
     }
     if (overlay->planes > 1)
     {
-        overlay->pitches[1] = overlay->hwdata->channel->uplane1->pitch;
+        overlay->pitches[1] = overlay->hwdata->channel->vplane1->pitch;
         overlay->pixels[1]  = overlay->hwdata->CurrentFrameData->U;
     }
     if (overlay->planes > 2)
     {
-        overlay->pitches[2] = overlay->hwdata->channel->vplane1->pitch;
+        overlay->pitches[2] = overlay->hwdata->channel->uplane1->pitch;
         overlay->pixels[2]  = overlay->hwdata->CurrentFrameData->V;
     }
 

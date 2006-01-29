@@ -28,7 +28,6 @@ static char rcsid =
 #include "SDL_error.h"
 #include "SDL_ph_modes_c.h"
 
-static unsigned long key1, key2;
 static PgVideoModeInfo_t mode_info;
 static PgVideoModes_t mode_list;
 
