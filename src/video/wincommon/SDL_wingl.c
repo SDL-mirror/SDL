@@ -44,15 +44,11 @@ static char rcsid =
 static int WIN_GL_ResetWindow(_THIS)
 {
 	int status = 0;
-	int can_reset = 1;
 
-	/* If we were passed a window, then we can't create a new one */
-	if ( SDL_windowid ) {
-		can_reset = 0;
-	}
 #if 0 /* This doesn't work with DirectX code (see CVS comments) */
 #ifndef _WIN32_WCE /* FIXME WinCE needs the UNICODE version of CreateWindow() */
-	if ( can_reset ) {
+	/* If we were passed a window, then we can't create a new one */
+	if ( !SDL_windowid ) {
 		/* Save the existing window attributes */
 		LONG style;
 		RECT rect = { 0, 0, 0, 0 };

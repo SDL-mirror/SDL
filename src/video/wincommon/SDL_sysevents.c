@@ -672,7 +672,7 @@ void *SDL_GetModuleHandle(void)
 }
 
 /* This allows the SDL_WINDOWID hack */
-const char *SDL_windowid = NULL;
+BOOL SDL_windowid = FALSE;
 
 static int app_registered = 0;
 
@@ -742,9 +742,6 @@ int SDL_RegisterApp(char *name, Uint32 style, void *hInst)
 		_TrackMouseEvent = WIN_TrackMouseEvent;
 	}
 #endif /* WM_MOUSELEAVE */
-
-	/* Check for SDL_WINDOWID hack */
-	SDL_windowid = getenv("SDL_WINDOWID");
 
 #ifndef NO_GETKEYBOARDSTATE
 	/* Initialise variables for SDL_ToUnicode() */

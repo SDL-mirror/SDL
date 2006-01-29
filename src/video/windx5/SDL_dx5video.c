@@ -1133,11 +1133,11 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 		}
 
 		/* DJM: Don't piss of anyone who has setup his own window */
-		if ( SDL_windowid == NULL )
+		if ( !SDL_windowid )
 			SetWindowLong(SDL_Window, GWL_STYLE, style);
 
 		/* Resize the window (copied from SDL WinDIB driver) */
-		if ( SDL_windowid == NULL ) {
+		if ( !SDL_windowid ) {
 			HWND top;
 			UINT swp_flags;
 			const char *window = getenv("SDL_VIDEO_WINDOW_POS");
@@ -1223,7 +1223,7 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 #endif
 	}
 	/* DJM: Don't piss of anyone who has setup his own window */
-	if ( SDL_windowid == NULL )
+	if ( !SDL_windowid )
 		SetWindowLong(SDL_Window, GWL_STYLE, style);
 
 	/* Set DirectDraw sharing mode.. exclusive when fullscreen */

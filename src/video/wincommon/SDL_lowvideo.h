@@ -61,7 +61,7 @@ extern LPSTR SDL_Appname;
 #endif
 extern HINSTANCE SDL_Instance;
 extern HWND SDL_Window;
-extern const char *SDL_windowid;
+extern BOOL SDL_windowid;
 
 /* Variables and functions exported to other parts of the native video
    subsystem (SDL_sysevents.c)

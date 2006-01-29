@@ -848,6 +848,7 @@ static SDL_keysym *TranslateKey(UINT scancode, SDL_keysym *keysym, int pressed)
 
 int DX5_CreateWindow(_THIS)
 {
+	char *windowid = getenv("SDL_WINDOWID");
 	int i;
 
 	/* Clear out DirectInput variables in case we fail */
@@ -861,8 +862,10 @@ int DX5_CreateWindow(_THIS)
 #define CS_BYTEALIGNCLIENT	0
 #endif
 	SDL_RegisterApp("SDL_app", CS_BYTEALIGNCLIENT, 0);
+
+	SDL_windowid = (windowid != NULL);
 	if ( SDL_windowid ) {
-		SDL_Window = (HWND)strtol(SDL_windowid, NULL, 0);
+		SDL_Window = (HWND)strtol(windowid, NULL, 0);
 		if ( SDL_Window == NULL ) {
 			SDL_SetError("Couldn't get user specified window");
 			return(-1);
