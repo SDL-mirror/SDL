@@ -44,7 +44,8 @@ extern "C" {
 #endif
 
 /* Event enumerations */
-enum { SDL_NOEVENT = 0,			/* Unused (do not remove) */
+typedef enum {
+       SDL_NOEVENT = 0,			/* Unused (do not remove) */
        SDL_ACTIVEEVENT,			/* Application loses/gains visibility */
        SDL_KEYDOWN,			/* Keys pressed */
        SDL_KEYUP,			/* Keys released */
@@ -74,11 +75,11 @@ enum { SDL_NOEVENT = 0,			/* Unused (do not remove) */
 	  It is the number of bits in the event mask datatype -- Uint32
         */
        SDL_NUMEVENTS = 32
-};
+} SDL_EventType;
 
 /* Predefined event masks */
 #define SDL_EVENTMASK(X)	(1<<(X))
-enum {
+typedef enum {
 	SDL_ACTIVEEVENTMASK	= SDL_EVENTMASK(SDL_ACTIVEEVENT),
 	SDL_KEYDOWNMASK		= SDL_EVENTMASK(SDL_KEYDOWN),
 	SDL_KEYUPMASK		= SDL_EVENTMASK(SDL_KEYUP),
@@ -102,7 +103,7 @@ enum {
 	SDL_VIDEOEXPOSEMASK	= SDL_EVENTMASK(SDL_VIDEOEXPOSE),
 	SDL_QUITMASK		= SDL_EVENTMASK(SDL_QUIT),
 	SDL_SYSWMEVENTMASK	= SDL_EVENTMASK(SDL_SYSWMEVENT)
-};
+} SDL_EventMask ;
 #define SDL_ALLEVENTS		0xFFFFFFFF
 
 /* Application visibility event structure */
