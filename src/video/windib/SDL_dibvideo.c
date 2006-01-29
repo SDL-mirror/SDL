@@ -468,6 +468,7 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 	if ( current->flags & SDL_OPENGL ) {
 		WIN_GL_ShutDown(this);
 	}
+	SDL_resizing = 1;
 
 	/* Recalculate the bitmasks if necessary */
 	if ( bpp == current->format->BitsPerPixel ) {
@@ -686,7 +687,6 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		}
 		swp_flags = (SWP_NOCOPYBITS | SWP_SHOWWINDOW);
 
-		SDL_resizing = 1;
 		bounds.left = SDL_windowX;
 		bounds.top = SDL_windowY;
 		bounds.right = SDL_windowX+video->w;
@@ -713,9 +713,13 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 			top = HWND_NOTOPMOST;
 		}
 		SetWindowPos(SDL_Window, top, x, y, width, height, swp_flags);
-		SDL_resizing = 0;
+		if ( !(flags & SDL_FULLSCREEN) ) {
+			SDL_windowX = SDL_bounds.left;
+			SDL_windowY = SDL_bounds.top;
+		}
 		SetForegroundWindow(SDL_Window);
 	}
+	SDL_resizing = 0;
 
 	/* Set up for OpenGL */
 	if ( flags & SDL_OPENGL ) {

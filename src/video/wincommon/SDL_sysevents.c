@@ -568,8 +568,12 @@ LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			GetClientRect(SDL_Window, &SDL_bounds);
 			ClientToScreen(SDL_Window, (LPPOINT)&SDL_bounds);
 			ClientToScreen(SDL_Window, (LPPOINT)&SDL_bounds+1);
-			SDL_windowX = SDL_bounds.left;
-			SDL_windowY = SDL_bounds.top;
+			if ( !SDL_resizing && !IsZoomed(SDL_Window) &&
+			     SDL_PublicSurface &&
+				!(SDL_PublicSurface->flags & SDL_FULLSCREEN) ) {
+				SDL_windowX = SDL_bounds.left;
+				SDL_windowY = SDL_bounds.top;
+			}
 			w = SDL_bounds.right-SDL_bounds.left;
 			h = SDL_bounds.bottom-SDL_bounds.top;
 			if ( this->input_grab != SDL_GRAB_OFF ) {

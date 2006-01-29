@@ -1007,6 +1007,7 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 	LPDIRECTDRAWSURFACE  dd_surface1;
 	LPDIRECTDRAWSURFACE3 dd_surface3;
 
+	SDL_resizing = 1;
 #ifdef DDRAW_DEBUG
  fprintf(stderr, "Setting %dx%dx%d video mode\n", width, height, bpp);
 #endif
@@ -1157,7 +1158,6 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 			}
 			swp_flags = (SWP_NOCOPYBITS | SWP_SHOWWINDOW);
 
-			SDL_resizing = 1;
 			bounds.left = SDL_windowX;
 			bounds.top = SDL_windowY;
 			bounds.right = SDL_windowX+video->w;
@@ -1184,9 +1184,13 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 				top = HWND_NOTOPMOST;
 			}
 			SetWindowPos(SDL_Window, top, x, y, width, height, swp_flags);
-			SDL_resizing = 0;
+			if ( !(flags & SDL_FULLSCREEN) ) {
+				SDL_windowX = SDL_bounds.left;
+				SDL_windowY = SDL_bounds.top;
+			}
 			SetForegroundWindow(SDL_Window);
 		}
+		SDL_resizing = 0;
 
 		/* Set up for OpenGL */
 		if ( WIN_GL_SetupWindow(this) < 0 ) {
@@ -1240,7 +1244,6 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 		int maxRefreshRate;
 
 		/* Cover up desktop during mode change */
-		SDL_resizing = 1;
 		bounds.left = 0;
 		bounds.top = 0;
 		bounds.right = GetSystemMetrics(SM_CXSCREEN);
@@ -1250,7 +1253,6 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 			bounds.left, bounds.top, 
 			bounds.right - bounds.left,
 			bounds.bottom - bounds.top, SWP_NOCOPYBITS);
-		SDL_resizing = 0;
 		ShowWindow(SDL_Window, SW_SHOW);
 		while ( GetForegroundWindow() != SDL_Window ) {
 			SetForegroundWindow(SDL_Window);
@@ -1559,7 +1561,6 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 			}
 			swp_flags = SWP_NOCOPYBITS;
 
-			SDL_resizing = 1;
 			bounds.left = SDL_windowX;
 			bounds.top = SDL_windowY;
 			bounds.right = SDL_windowX+video->w;
@@ -1578,12 +1579,14 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 				swp_flags |= SWP_NOMOVE;
 			}
 			SetWindowPos(SDL_Window, HWND_NOTOPMOST, x, y, width, height, swp_flags);
-			SDL_resizing = 0;
+			SDL_windowX = SDL_bounds.left;
+			SDL_windowY = SDL_bounds.top;
 		}
 
 	}
 	ShowWindow(SDL_Window, SW_SHOW);
 	SetForegroundWindow(SDL_Window);
+	SDL_resizing = 0;
 
 	/* We're live! */
 	return(video);
