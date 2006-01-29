@@ -324,7 +324,7 @@ static int DSP_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	mixlen = spec->size;
 	mixbuf = (Uint8 *)SDL_AllocAudioMem(mixlen);
 	if ( mixbuf == NULL ) {
-	  DSP_CloseAudio(this);
+		DSP_CloseAudio(this);
 		return(-1);
 	}
 	memset(mixbuf, spec->silence, spec->size);
