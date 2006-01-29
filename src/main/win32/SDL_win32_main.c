@@ -266,6 +266,12 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 	char **argv;
 	int argc;
 	char *cmdline;
+	DWORD pathlen;
+#ifdef _WIN32_WCE
+	wchar_t path[MAX_PATH];
+#else
+	char path[MAX_PATH];
+#endif
 #ifdef _WIN32_WCE
 	wchar_t *bufp;
 	int nLen;
@@ -286,7 +292,13 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 	}
 
 #ifndef NO_STDIO_REDIRECT
-	_getcwd( stdoutPath, sizeof( stdoutPath ) );
+	pathlen = GetModuleFileName(NULL, path, SDL_TABLESIZE(path));
+	while ( pathlen > 0 && path[pathlen] != '\\' ) {
+		--pathlen;
+	}
+	path[pathlen] = '\0';
+
+	strcpy( stdoutPath, path );
 	strcat( stdoutPath, DIR_SEPERATOR STDOUT_FILE );
     
 	/* Redirect standard input and standard output */
@@ -305,7 +317,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 	}
 #endif /* _WIN32_WCE */
 
-	_getcwd( stderrPath, sizeof( stderrPath ) );
+	strcpy( stderrPath, path );
 	strcat( stderrPath, DIR_SEPERATOR STDERR_FILE );
 
 	newfp = freopen(stderrPath, TEXT("w"), stderr);
