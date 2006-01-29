@@ -1003,7 +1003,6 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 			(WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX);
 	const DWORD resizestyle =
 			(WS_THICKFRAME|WS_MAXIMIZEBOX);
-	int windowX, windowY;
 	DDSURFACEDESC ddsd;
 	LPDIRECTDRAWSURFACE  dd_surface1;
 	LPDIRECTDRAWSURFACE3 dd_surface3;
@@ -1036,8 +1035,6 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 
 	/* If we are setting a GL mode, use GDI, not DirectX (yuck) */
 	if ( flags & SDL_OPENGL ) {
-		RECT bounds;
-		int x, y;
 		Uint32 Rmask, Gmask, Bmask;
 
 		/* Recalculate the bitmasks if necessary */
@@ -1137,13 +1134,17 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 			SetWindowLong(SDL_Window, GWL_STYLE, style);
 
 		/* Resize the window (copied from SDL WinDIB driver) */
-		if ( !SDL_windowid ) {
+		if ( !SDL_windowid && !IsZoomed(SDL_Window) ) {
+			RECT bounds;
+			int x, y;
 			HWND top;
 			UINT swp_flags;
-			const char *window = getenv("SDL_VIDEO_WINDOW_POS");
-			const char *center = getenv("SDL_VIDEO_CENTERED");
+			const char *window = NULL;
+			const char *center = NULL;
 
 			if ( !SDL_windowX && !SDL_windowY ) {
+				window = getenv("SDL_VIDEO_WINDOW_POS");
+				center = getenv("SDL_VIDEO_CENTERED");
 				if ( window ) {
 					if ( sscanf(window, "%d,%d", &x, &y) == 2 ) {
 						SDL_windowX = x;
@@ -1151,7 +1152,6 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 					}
 					if ( strcmp(window, "center") == 0 ) {
 						center = window;
-						window = NULL;
 					}
 				}
 			}
@@ -1178,9 +1178,6 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 				x = y = -1;
 				swp_flags |= SWP_NOMOVE;
 			}
-			if ( y < 0 ) { /* Cover up title bar for more client area */
-				y -= GetSystemMetrics(SM_CYCAPTION)/2;
-			}
 			if ( flags & SDL_FULLSCREEN ) {
 				top = HWND_TOPMOST;
 			} else {
@@ -1200,8 +1197,6 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 	}
 
 	/* Set the appropriate window style */
-	windowX = SDL_windowX;
-	windowY = SDL_windowY;
 	style = GetWindowLong(SDL_Window, GWL_STYLE);
 	style &= ~(resizestyle|WS_MAXIMIZE);
 	if ( (flags & SDL_FULLSCREEN) == SDL_FULLSCREEN ) {
@@ -1237,8 +1232,6 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 		SetDDerror("DirectDraw2::SetCooperativeLevel", result);
 		return(NULL);
 	}
-	SDL_windowX = windowX;
-	SDL_windowY = windowY;
 
 	/* Set the display mode, if we are in fullscreen mode */
 	if ( (flags & SDL_FULLSCREEN) == SDL_FULLSCREEN ) {
@@ -1513,12 +1506,6 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 
 	/* Make our window the proper size, set the clipper, then show it */
 	if ( (flags & SDL_FULLSCREEN) != SDL_FULLSCREEN ) {
-		RECT bounds;
-		int  x, y;
-		UINT swp_flags;
-		const char *window = getenv("SDL_VIDEO_WINDOW_POS");
-		const char *center = getenv("SDL_VIDEO_CENTERED");
-
 		/* Create and set a clipper on our primary surface */
 		if ( SDL_clipper == NULL ) {
 			result = IDirectDraw2_CreateClipper(ddraw2,
@@ -1549,46 +1536,50 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 			return(NULL);
 		}
 
-		if ( !SDL_windowX && !SDL_windowY ) {
-			if ( window ) {
-				if ( sscanf(window, "%d,%d", &x, &y) == 2 ) {
-					SDL_windowX = x;
-					SDL_windowY = y;
-				}
-				if ( strcmp(window, "center") == 0 ) {
-					center = window;
-					window = NULL;
+		/* Resize the window (copied from SDL WinDIB driver) */
+		if ( !SDL_windowid && !IsZoomed(SDL_Window) ) {
+			RECT bounds;
+			int  x, y;
+			UINT swp_flags;
+			const char *window = NULL;
+			const char *center = NULL;
+
+			if ( !SDL_windowX && !SDL_windowY ) {
+				window = getenv("SDL_VIDEO_WINDOW_POS");
+				center = getenv("SDL_VIDEO_CENTERED");
+				if ( window ) {
+					if ( sscanf(window, "%d,%d", &x, &y) == 2 ) {
+						SDL_windowX = x;
+						SDL_windowY = y;
+					}
+					if ( strcmp(window, "center") == 0 ) {
+						center = window;
+					}
 				}
 			}
-		}
-		swp_flags = SWP_NOCOPYBITS;
+			swp_flags = SWP_NOCOPYBITS;
 
-		SDL_resizing = 1;
-		bounds.left = SDL_windowX;
-		bounds.top = SDL_windowY;
-		bounds.right = SDL_windowX+video->w;
-		bounds.bottom = SDL_windowY+video->h;
-		AdjustWindowRectEx(&bounds, GetWindowLong(SDL_Window, GWL_STYLE), FALSE, 0);
-		width = bounds.right-bounds.left;
-		height = bounds.bottom-bounds.top;
-		if ( (flags & SDL_FULLSCREEN) ) {
-			x = (GetSystemMetrics(SM_CXSCREEN)-width)/2;
-			y = (GetSystemMetrics(SM_CYSCREEN)-height)/2;
-		} else if ( center ) {
-			x = (GetSystemMetrics(SM_CXSCREEN)-width)/2;
-			y = (GetSystemMetrics(SM_CYSCREEN)-height)/2;
-		} else if ( SDL_windowX || SDL_windowY || window ) {
-			x = bounds.left;
-			y = bounds.top;
-		} else {
-			x = y = -1;
-			swp_flags |= SWP_NOMOVE;
+			SDL_resizing = 1;
+			bounds.left = SDL_windowX;
+			bounds.top = SDL_windowY;
+			bounds.right = SDL_windowX+video->w;
+			bounds.bottom = SDL_windowY+video->h;
+			AdjustWindowRectEx(&bounds, GetWindowLong(SDL_Window, GWL_STYLE), FALSE, 0);
+			width = bounds.right-bounds.left;
+			height = bounds.bottom-bounds.top;
+			if ( center ) {
+				x = (GetSystemMetrics(SM_CXSCREEN)-width)/2;
+				y = (GetSystemMetrics(SM_CYSCREEN)-height)/2;
+			} else if ( SDL_windowX || SDL_windowY || window ) {
+				x = bounds.left;
+				y = bounds.top;
+			} else {
+				x = y = -1;
+				swp_flags |= SWP_NOMOVE;
+			}
+			SetWindowPos(SDL_Window, HWND_NOTOPMOST, x, y, width, height, swp_flags);
+			SDL_resizing = 0;
 		}
-		if ( y < 0 ) { /* Cover up title bar for more client area */
-			y -= GetSystemMetrics(SM_CYCAPTION)/2;
-		}
-		SetWindowPos(SDL_Window, HWND_NOTOPMOST, x, y, width, height, swp_flags);
-		SDL_resizing = 0;
 
 	}
 	ShowWindow(SDL_Window, SW_SHOW);

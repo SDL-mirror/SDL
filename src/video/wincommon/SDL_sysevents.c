@@ -566,13 +566,13 @@ LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			int w, h;
 
 			GetClientRect(SDL_Window, &SDL_bounds);
+			ClientToScreen(SDL_Window, (LPPOINT)&SDL_bounds);
+			ClientToScreen(SDL_Window, (LPPOINT)&SDL_bounds+1);
 			SDL_windowX = SDL_bounds.left;
 			SDL_windowY = SDL_bounds.top;
 			w = SDL_bounds.right-SDL_bounds.left;
 			h = SDL_bounds.bottom-SDL_bounds.top;
 			if ( this->input_grab != SDL_GRAB_OFF ) {
-				ClientToScreen(SDL_Window, (LPPOINT)&SDL_bounds);
-				ClientToScreen(SDL_Window, (LPPOINT)&SDL_bounds+1);
 				ClipCursor(&SDL_bounds);
 			}
 			if ( SDL_PublicSurface && 

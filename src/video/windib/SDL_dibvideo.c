@@ -665,13 +665,15 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 	}
 
 	/* Resize the window */
-	if ( !SDL_windowid ) {
+	if ( !SDL_windowid && !IsZoomed(SDL_Window) ) {
 		HWND top;
 		UINT swp_flags;
-		const char *window = getenv("SDL_VIDEO_WINDOW_POS");
-		const char *center = getenv("SDL_VIDEO_CENTERED");
+		const char *window = NULL;
+		const char *center = NULL;
 
 		if ( !SDL_windowX && !SDL_windowY ) {
+			window = getenv("SDL_VIDEO_WINDOW_POS");
+			center = getenv("SDL_VIDEO_CENTERED");
 			if ( window ) {
 				if ( sscanf(window, "%d,%d", &x, &y) == 2 ) {
 					SDL_windowX = x;
@@ -679,7 +681,6 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 				}
 				if ( strcmp(window, "center") == 0 ) {
 					center = window;
-					window = NULL;
 				}
 			}
 		}
@@ -705,9 +706,6 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		} else {
 			x = y = -1;
 			swp_flags |= SWP_NOMOVE;
-		}
-		if ( y < 0 ) { /* Cover up title bar for more client area */
-			y -= GetSystemMetrics(SM_CYCAPTION)/2;
 		}
 		if ( flags & SDL_FULLSCREEN ) {
 			top = HWND_TOPMOST;
