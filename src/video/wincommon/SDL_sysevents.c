@@ -58,6 +58,7 @@ LPWSTR SDL_Appname = NULL;
 #else
 LPSTR SDL_Appname = NULL;
 #endif
+Uint32 SDL_Appstyle = 0;
 HINSTANCE SDL_Instance = NULL;
 HWND SDL_Window = NULL;
 RECT SDL_bounds = {0, 0, 0, 0};
@@ -693,36 +694,40 @@ int SDL_RegisterApp(char *name, Uint32 style, void *hInst)
 		return(0);
 	}
 
-	/* This function needs to be passed the correct process handle
-	   by the application.
-	 */
-	if ( ! hInst ) {
-		hInst = SDL_GetModuleHandle();
+#ifndef CS_BYTEALIGNCLIENT
+#define CS_BYTEALIGNCLIENT	0
+#endif
+	if ( ! name && ! SDL_Appname ) {
+		name = "SDL_app";
+		SDL_Appstyle = CS_BYTEALIGNCLIENT;
+		SDL_Instance = hInst ? hInst : SDL_GetModuleHandle();
 	}
 
-	/* Register the application class */
-	class.hCursor		= NULL;
+	if ( name ) {
 #ifdef _WIN32_WCE
-	{
 		/* WinCE uses the UNICODE version */
 		int nLen = strlen(name)+1;
 		SDL_Appname = malloc(nLen*2);
 		MultiByteToWideChar(CP_ACP, 0, name, -1, SDL_Appname, nLen);
-	}
 #else
-	{
 		int nLen = strlen(name)+1;
 		SDL_Appname = malloc(nLen);
 		strcpy(SDL_Appname, name);
-	}
 #endif /* _WIN32_WCE */
-	class.hIcon		= LoadImage(hInst, SDL_Appname, IMAGE_ICON,
+		SDL_Appstyle = style;
+		SDL_Instance = hInst ? hInst : SDL_GetModuleHandle();
+	}
+
+	/* Register the application class */
+	class.hCursor		= NULL;
+	class.hIcon		= LoadImage(SDL_Instance, SDL_Appname,
+				            IMAGE_ICON,
 	                                    0, 0, LR_DEFAULTCOLOR);
 	class.lpszMenuName	= NULL;
 	class.lpszClassName	= SDL_Appname;
 	class.hbrBackground	= NULL;
-	class.hInstance		= hInst;
-	class.style		= style;
+	class.hInstance		= SDL_Instance;
+	class.style		= SDL_Appstyle;
 #ifdef HAVE_OPENGL
 	class.style		|= CS_OWNDC;
 #endif
@@ -733,7 +738,6 @@ int SDL_RegisterApp(char *name, Uint32 style, void *hInst)
 		SDL_SetError("Couldn't register application class");
 		return(-1);
 	}
-	SDL_Instance = hInst;
 
 #ifdef WM_MOUSELEAVE
 	/* Get the version of TrackMouseEvent() we use */
@@ -757,23 +761,19 @@ int SDL_RegisterApp(char *name, Uint32 style, void *hInst)
 	return(0);
 }
 
-/*
- * Unregisters the windowclass registered in SDL_RegisterApp above.
- *  Called from DIB_VideoQuit and DX5_VideoQuit when
- *  SDL_QuitSubSystem(INIT_VIDEO) is called.
- */
+/* Unregisters the windowclass registered in SDL_RegisterApp above. */
 void SDL_UnregisterApp()
 {
 	WNDCLASS class;
 
 	/* SDL_RegisterApp might not have been called before */
-	if (app_registered) {
-		/* Check for any registered windowclasses. */
-		if (GetClassInfo(SDL_Instance, SDL_Appname, &class)) {
+	if ( app_registered ) {
+		/* Check for any registered window classes. */
+		if ( GetClassInfo(SDL_Instance, SDL_Appname, &class) ) {
 			UnregisterClass(SDL_Appname, SDL_Instance);
 		}
+		app_registered = 0;
 	}
-	app_registered = 0;
 }
 
 #ifndef NO_GETKEYBOARDSTATE

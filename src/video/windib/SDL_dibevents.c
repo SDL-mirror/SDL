@@ -406,10 +406,7 @@ int DIB_CreateWindow(_THIS)
 {
 	char *windowid = getenv("SDL_WINDOWID");
 
-#ifndef CS_BYTEALIGNCLIENT
-#define CS_BYTEALIGNCLIENT	0
-#endif
-	SDL_RegisterApp("SDL_app", CS_BYTEALIGNCLIENT, 0);
+	SDL_RegisterApp(NULL, 0, 0);
 
 	SDL_windowid = (windowid != NULL);
 	if ( SDL_windowid ) {
@@ -452,4 +449,5 @@ void DIB_DestroyWindow(_THIS)
 	} else {
 		DestroyWindow(SDL_Window);
 	}
+	SDL_UnregisterApp();
 }
