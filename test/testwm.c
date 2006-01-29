@@ -210,7 +210,8 @@ int FilterEvents(const SDL_Event *event)
 		/* Show relative mouse motion */
 		case SDL_MOUSEMOTION:
 #if 0
-			printf("Mouse relative motion: {%d,%d}\n",
+			printf("Mouse motion: {%d,%d} (%d,%d)\n",
+				event->motion.x, event->motion.y,
 				event->motion.xrel, event->motion.yrel);
 #endif
 			return(0);
