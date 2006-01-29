@@ -6,6 +6,9 @@ config.log
 config.status
 autom4te*
 aclocal.m4
+SDL.dll
+stdout.txt
+stderr.txt
 checkkeys
 graywin
 loopwave
