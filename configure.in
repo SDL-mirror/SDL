@@ -619,6 +619,10 @@ CheckX11()
                     x11_lib='/usr/X11R6/lib/libX11.6.dylib'
                     x11ext_lib='/usr/X11R6/lib/libXext.6.dylib'
                     ;;
+                *-*-osf* )
+                    x11_lib='libX11.so'
+                    x11ext_lib='libXext.so'
+                    ;;
                 *)
                     x11_lib='libX11.so.6'
                     x11ext_lib='libXext.so.6'
@@ -2585,6 +2589,13 @@ case "$target" in
         if test x$enable_timers = xyes; then
             COPY_ARCH_SRC(src/timer, linux, SDL_systimer.c)
         fi
+        # FIXME: If building without -lX11, you get the following messages.
+        # Xlib: connection to ":0.0" refused by server
+        # Xlib: XDM authorization key matches an existing client!
+        # It only has to run xhost +localhost in a such case.
+        #if test x$enable_x11_shared = xyes; then
+        #    SYSTEM_LIBS="$SYSTEM_LIBS -lX11"
+        #fi
         ;;
     *-*-qnx*)
         ARCH=qnx

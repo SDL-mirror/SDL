@@ -139,9 +139,16 @@ SDL_X11_SYM(1,unsigned long,_XSetLastRequestRead,(Display*,xGenericReply*))
  * These don't exist in 32-bit versions and are removed by Xlib macros, but
  *  64+ bit systems will use them.
  */
-#ifdef LONG64
+#if defined(LONG64) && !defined(__osf__) || defined(X11_DYNAMIC)
 SDL_X11_SYM(1,int,_XData32,(Display *dpy,register long *data,unsigned len))
 SDL_X11_SYM(1,void,_XRead32,(Display *dpy,register long *data,long len))
+#endif
+
+#if defined(__osf__) && defined(X11_DYNAMIC)
+SDL_X11_SYM(1,void,_SmtBufferOverflow,(Display *dpy,register smtDisplayPtr))
+SDL_X11_SYM(1,void,_SmtIpError,(Display *dpy,register smtDisplayPtr, int))
+SDL_X11_SYM(1,int,ipAllocateData,(ChannelPtr, IPCard, IPDataPtr *))
+SDL_X11_SYM(1,int,ipUnallocateAndSendData,(ChannelPtr, IPCard))
 #endif
 
 #if NeedWidePrototypes

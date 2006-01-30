@@ -436,6 +436,20 @@ static int X11_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		local_X11 = 0;
 	}
 	SDL_Display = pXOpenDisplay(display);
+#if defined(__osf__) && defined(X11_DYNAMIC)
+	/* On Tru64 if linking without -lX11, it fails and you get following message.
+	 * Xlib: connection to ":0.0" refused by server
+	 * Xlib: XDM authorization key matches an existing client!
+	 *
+	 * It succeeds if retrying 1 second later
+	 * or if running xhost +localhost on shell.
+	 *
+	 */
+	if ( SDL_Display == NULL ) {
+		SDL_Delay(1000);
+		SDL_Display = pXOpenDisplay(display);
+	}
+#endif
 	if ( SDL_Display == NULL ) {
 		SDL_SetError("Couldn't open X11 display");
 		return(-1);

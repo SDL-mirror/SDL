@@ -72,9 +72,20 @@ typedef int (*SDL_X11_XSetExtensionErrorHandlerType)(Display *,char *,char *);
 #define _XFlushGCCache p_XFlushGCCache
 #define _XReply p_XReply
 #define _XSend p_XSend
-#define _XData32 p_XData32
 #define XFree pXFree
+
+#if !defined(__osf__) || defined(X11_DYNAMIC)
+#define _XData32 p_XData32
 #endif
+
+#if defined(__osf__) && defined(X11_DYNAMIC)
+#define _SmtBufferOverflow p_SmtBufferOverflow
+#define _SmtIpError p_SmtIpError
+#define ipAllocateData pipAllocateData
+#define ipUnallocateAndSendData pipUnallocateAndSendData
+#endif
+
+#endif /* !__SDL_NO_REDEFINE_X11_HEADER_SYMS */
 
 int SDL_X11_LoadSymbols(void);
 void SDL_X11_UnloadSymbols(void);
