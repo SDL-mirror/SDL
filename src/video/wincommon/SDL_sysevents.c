@@ -68,6 +68,7 @@ int SDL_resizing = 0;
 int mouse_relative = 0;
 int posted = 0;
 #ifndef NO_CHANGEDISPLAYSETTINGS
+DEVMODE SDL_desktop_mode;
 DEVMODE SDL_fullscreen_mode;
 #endif
 WORD *gamma_saved = NULL;

@@ -335,6 +335,9 @@ int DIB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	DIB_CheckGamma(this);
 
 #ifndef NO_CHANGEDISPLAYSETTINGS
+	/* Query for the desktop resolution */
+	EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &SDL_desktop_mode);
+
 	/* Query for the list of available video modes */
 	for ( i=0; EnumDisplaySettings(NULL, i, &settings); ++i ) {
 		DIB_AddMode(this, settings.dmBitsPerPel,
@@ -533,6 +536,7 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 	/* Set fullscreen mode if appropriate */
 	if ( (flags & SDL_FULLSCREEN) == SDL_FULLSCREEN ) {
 		DEVMODE settings;
+		BOOL changed;
 
 		memset(&settings, 0, sizeof(DEVMODE));
 		settings.dmSize = sizeof(DEVMODE);
@@ -540,7 +544,16 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		settings.dmPelsWidth = width;
 		settings.dmPelsHeight = height;
 		settings.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL;
-		if ( ChangeDisplaySettings(&settings, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL ) {
+		if ( width <= SDL_desktop_mode.dmPelsWidth && height <= SDL_desktop_mode.dmPelsHeight ) {
+			settings.dmDisplayFrequency = SDL_desktop_mode.dmDisplayFrequency;
+			settings.dmFields |= DM_DISPLAYFREQUENCY;
+		}
+		changed = (ChangeDisplaySettings(&settings, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL);
+		if ( ! changed && (settings.dmFields & DM_DISPLAYFREQUENCY) ) {
+			settings.dmFields &= ~DM_DISPLAYFREQUENCY;
+			changed = (ChangeDisplaySettings(&settings, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL);
+		}
+		if ( changed ) {
 			video->flags |= SDL_FULLSCREEN;
 			SDL_fullscreen_mode = settings;
 		}

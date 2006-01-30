@@ -656,6 +656,14 @@ static HRESULT WINAPI EnumModes2(DDSURFACEDESC *desc, VOID *udata)
 	int bpp = desc->ddpfPixelFormat.dwRGBBitCount;
 	int refreshRate = desc->dwRefreshRate;
 #endif
+	int maxRefreshRate;
+
+	if ( desc->dwWidth <= SDL_desktop_mode.dmPelsWidth &&
+	     desc->dwHeight <= SDL_desktop_mode.dmPelsHeight ) {
+		maxRefreshRate = SDL_desktop_mode.dmDisplayFrequency;
+	} else {
+		maxRefreshRate = 85;	/* safe value? */
+	}
 
 	switch (bpp)  {
 		case 8:
@@ -667,7 +675,7 @@ static HRESULT WINAPI EnumModes2(DDSURFACEDESC *desc, VOID *udata)
 			     enumlists[bpp]->r.w == (Uint16)desc->dwWidth &&
 			     enumlists[bpp]->r.h == (Uint16)desc->dwHeight ) {
 				if ( refreshRate > enumlists[bpp]->refreshRate &&
-				     refreshRate <= 85 /* safe value? */ ) {
+				     refreshRate <= maxRefreshRate ) {
 					enumlists[bpp]->refreshRate = refreshRate;
 #ifdef DDRAW_DEBUG
  fprintf(stderr, "New refresh rate for %d bpp: %dx%d at %d Hz\n", (bpp+1)*8, (int)desc->dwWidth, (int)desc->dwHeight, refreshRate);
@@ -926,6 +934,11 @@ int DX5_VideoInit(_THIS, SDL_PixelFormat *vformat)
 					GetDeviceCaps(hdc,BITSPIXEL);
 	ReleaseDC(SDL_Window, hdc);
 
+#ifndef NO_CHANGEDISPLAYSETTINGS
+	/* Query for the desktop resolution */
+	EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &SDL_desktop_mode);
+#endif
+
 	/* Enumerate the available fullscreen modes */
 	for ( i=0; i<NUM_MODELISTS; ++i )
 		enumlists[i] = NULL;
@@ -1093,6 +1106,7 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 		 */
 		if ( (flags & SDL_FULLSCREEN) == SDL_FULLSCREEN ) {
 			DEVMODE settings;
+			BOOL changed;
 
 			memset(&settings, 0, sizeof(DEVMODE));
 			settings.dmSize = sizeof(DEVMODE);
@@ -1100,7 +1114,16 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 			settings.dmPelsWidth = width;
 			settings.dmPelsHeight = height;
 			settings.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL;
-			if ( ChangeDisplaySettings(&settings, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL ) {
+			if ( width <= SDL_desktop_mode.dmPelsWidth && height <= SDL_desktop_mode.dmPelsHeight ) {
+				settings.dmDisplayFrequency = SDL_desktop_mode.dmDisplayFrequency;
+				settings.dmFields |= DM_DISPLAYFREQUENCY;
+			}
+			changed = (ChangeDisplaySettings(&settings, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL);
+			if ( ! changed && (settings.dmFields & DM_DISPLAYFREQUENCY) ) {
+				settings.dmFields &= ~DM_DISPLAYFREQUENCY;
+				changed = (ChangeDisplaySettings(&settings, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL);
+			}
+			if ( changed ) {
 				video->flags |= SDL_FULLSCREEN;
 				SDL_fullscreen_mode = settings;
 			}

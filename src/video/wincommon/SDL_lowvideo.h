@@ -96,6 +96,7 @@ extern int mouse_relative;
 
 /* The GDI fullscreen mode currently active */
 #ifndef NO_CHANGEDISPLAYSETTINGS
+extern DEVMODE SDL_desktop_mode;
 extern DEVMODE SDL_fullscreen_mode;
 #endif
 
