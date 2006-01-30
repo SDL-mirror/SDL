@@ -643,6 +643,7 @@ SDL_Surface * SDL_SetVideoMode (int width, int height, int bpp, Uint32 flags)
 	/* Reset the keyboard here so event callbacks can run */
 	SDL_ResetKeyboard();
 	SDL_ResetMouse();
+	SDL_cursorstate &= ~CURSOR_USINGSW;
 
 	/* Clean up any previous video mode */
 	if ( SDL_PublicSurface != NULL ) {

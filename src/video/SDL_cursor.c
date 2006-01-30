@@ -208,9 +208,9 @@ void SDL_SetCursor (SDL_Cursor *cursor)
 	if ( SDL_cursor && (SDL_cursorstate&CURSOR_VISIBLE) ) {
 		/* Use window manager cursor if possible */
 		if ( SDL_cursor->wm_cursor && 
-	             video->ShowWMCursor(this, SDL_cursor->wm_cursor) )
+	             video->ShowWMCursor(this, SDL_cursor->wm_cursor) ) {
 			SDL_cursorstate &= ~CURSOR_USINGSW;
-		else {
+		} else {
 			SDL_cursorstate |= CURSOR_USINGSW;
 			if ( video->ShowWMCursor ) {
 				video->ShowWMCursor(this, NULL);
