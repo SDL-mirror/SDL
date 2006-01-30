@@ -61,13 +61,11 @@ void SDL_SYS_KillThread(SDL_Thread *thread)
 
 #include <signal.h>
 
-#if !defined(MACOSX) /* pthread_sigmask seems to be missing on MacOS X? */
 /* List of signals to mask in the subthreads */
 static int sig_list[] = {
 	SIGHUP, SIGINT, SIGQUIT, SIGPIPE, SIGALRM, SIGTERM, SIGCHLD, SIGWINCH,
 	SIGVTALRM, SIGPROF, 0
 };
-#endif /* !MACOSX */
 
 #ifdef SDL_USE_PTHREADS
 
@@ -102,7 +100,6 @@ int SDL_SYS_CreateThread(SDL_Thread *thread, void *args)
 
 void SDL_SYS_SetupThread(void)
 {
-#if !defined(MACOSX) /* pthread_sigmask seems to be missing on MacOS X? */
 	int i;
 	sigset_t mask;
 
@@ -112,7 +109,6 @@ void SDL_SYS_SetupThread(void)
 		sigaddset(&mask, sig_list[i]);
 	}
 	pthread_sigmask(SIG_BLOCK, &mask, 0);
-#endif /* !MACOSX */
 
 #ifdef PTHREAD_CANCEL_ASYNCHRONOUS
 	/* Allow ourselves to be asynchronously cancelled */

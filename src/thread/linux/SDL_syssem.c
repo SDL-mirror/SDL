@@ -61,20 +61,12 @@ static char rcsid =
 
 #ifdef MACOSX
 #define USE_NAMED_SEMAPHORES
-/* Broken sem_getvalue() in MacOS X Public Beta */
-#define BROKEN_SEMGETVALUE
 #endif /* MACOSX */
 
 struct SDL_semaphore {
 	sem_t *sem;
 #ifndef USE_NAMED_SEMAPHORES
 	sem_t sem_data;
-#endif
-#ifdef BROKEN_SEMGETVALUE
-	/* This is a little hack for MacOS X -
-	   It's not thread-safe, but it's better than nothing
-	 */
-	int sem_value;
 #endif
 };
 
@@ -105,12 +97,6 @@ SDL_sem *SDL_CreateSemaphore(Uint32 initial_value)
 			sem->sem = &sem->sem_data;
 		}
 #endif /* USE_NAMED_SEMAPHORES */
-
-#ifdef BROKEN_SEMGETVALUE
-		if ( sem ) {
-			sem->sem_value = initial_value;
-		}
-#endif /* BROKEN_SEMGETVALUE */
 	} else {
 		SDL_OutOfMemory();
 	}
@@ -139,9 +125,6 @@ int SDL_SemTryWait(SDL_sem *sem)
 	}
 	retval = SDL_MUTEX_TIMEDOUT;
 	if ( sem_trywait(sem->sem) == 0 ) {
-#ifdef BROKEN_SEMGETVALUE
-		--sem->sem_value;
-#endif
 		retval = 0;
 	}
 	return retval;
@@ -156,9 +139,6 @@ int SDL_SemWait(SDL_sem *sem)
 		return -1;
 	}
 
-#ifdef BROKEN_SEMGETVALUE
-	--sem->sem_value;
-#endif
 	retval = sem_wait(sem->sem);
 	if ( retval < 0 ) {
 		SDL_SetError("sem_wait() failed");
@@ -200,11 +180,7 @@ Uint32 SDL_SemValue(SDL_sem *sem)
 {
 	int ret = 0;
 	if ( sem ) {
-#ifdef BROKEN_SEMGETVALUE
-		ret = sem->sem_value;
-#else
 		sem_getvalue(sem->sem, &ret);
-#endif
 		if ( ret < 0 ) {
 			ret = 0;
 		}
@@ -221,9 +197,6 @@ int SDL_SemPost(SDL_sem *sem)
 		return -1;
 	}
 
-#ifdef BROKEN_SEMGETVALUE
-	++sem->sem_value;
-#endif
 	retval = sem_post(sem->sem);
 	if ( retval < 0 ) {
 		SDL_SetError("sem_post() failed");
