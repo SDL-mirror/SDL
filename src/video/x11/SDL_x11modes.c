@@ -40,7 +40,7 @@ static char rcsid =
 #include "SDL_x11image_c.h"
 
 #ifdef HAVE_XINERAMA
-#include <XFree86/extensions/Xinerama.h>
+#include <Xext/extensions/Xinerama.h>
 #endif 
 
 #define MAX(a, b)        (a > b ? a : b)

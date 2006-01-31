@@ -670,8 +670,8 @@ CheckX11()
                 AC_MSG_RESULT($video_x11_vm)
                 if test x$video_x11_vm = xyes; then
                     CFLAGS="$CFLAGS -DXFREE86_VM"
-                    VIDEO_SUBDIRS="$VIDEO_SUBDIRS XFree86/Xxf86vm"
-                    VIDEO_DRIVERS="$VIDEO_DRIVERS XFree86/Xxf86vm/libXFree86_Xxf86vm.la"
+                    VIDEO_SUBDIRS="$VIDEO_SUBDIRS Xext/Xxf86vm"
+                    VIDEO_DRIVERS="$VIDEO_DRIVERS Xext/Xxf86vm/libXFree86_Xxf86vm.la"
                     AC_MSG_CHECKING(for XFree86 VidMode gamma support)
                     video_x11_vmgamma=no
                     AC_TRY_COMPILE([
@@ -710,8 +710,8 @@ CheckX11()
                     if test x$enable_video_x11_dgamouse = xyes; then
                         CFLAGS="$CFLAGS -DDEFAULT_DGAMOUSE"
                     fi
-                    VIDEO_SUBDIRS="$VIDEO_SUBDIRS XFree86/Xxf86dga"
-                    VIDEO_DRIVERS="$VIDEO_DRIVERS XFree86/Xxf86dga/libXFree86_Xxf86dga.la"
+                    VIDEO_SUBDIRS="$VIDEO_SUBDIRS Xext/Xxf86dga"
+                    VIDEO_DRIVERS="$VIDEO_DRIVERS Xext/Xxf86dga/libXFree86_Xxf86dga.la"
                 fi
             fi
             AC_ARG_ENABLE(video-x11-xv,
@@ -734,8 +734,8 @@ CheckX11()
                 AC_MSG_RESULT($video_x11_xv)
                 if test x$video_x11_xv = xyes; then
                     CFLAGS="$CFLAGS -DXFREE86_XV"
-                    VIDEO_SUBDIRS="$VIDEO_SUBDIRS XFree86/Xv"
-                    VIDEO_DRIVERS="$VIDEO_DRIVERS XFree86/Xv/libXFree86_Xv.la"
+                    VIDEO_SUBDIRS="$VIDEO_SUBDIRS Xext/Xv"
+                    VIDEO_DRIVERS="$VIDEO_DRIVERS Xext/Xv/libXFree86_Xv.la"
                 fi
             fi
             AC_ARG_ENABLE(video-x11-xinerama,
@@ -755,8 +755,8 @@ CheckX11()
                 AC_MSG_RESULT($video_x11_xinerama)
                 if test x$video_x11_xinerama = xyes; then
                     CFLAGS="$CFLAGS -DHAVE_XINERAMA"
-                    VIDEO_SUBDIRS="$VIDEO_SUBDIRS XFree86/Xinerama"
-                    VIDEO_DRIVERS="$VIDEO_DRIVERS XFree86/Xinerama/libXFree86_Xinerama.la"
+                    VIDEO_SUBDIRS="$VIDEO_SUBDIRS Xext/Xinerama"
+                    VIDEO_DRIVERS="$VIDEO_DRIVERS Xext/Xinerama/libXFree86_Xinerama.la"
                 fi
             fi
             AC_ARG_ENABLE(video-x11-xme,
@@ -768,8 +768,8 @@ CheckX11()
                 AC_MSG_RESULT($video_x11_xme)
                 if test x$video_x11_xme = xyes; then
                     CFLAGS="$CFLAGS -DHAVE_XIGXME"
-                    VIDEO_SUBDIRS="$VIDEO_SUBDIRS XFree86/XME"
-                    VIDEO_DRIVERS="$VIDEO_DRIVERS XFree86/XME/libXME.la"
+                    VIDEO_SUBDIRS="$VIDEO_SUBDIRS Xext/XME"
+                    VIDEO_DRIVERS="$VIDEO_DRIVERS Xext/XME/libXME.la"
                 fi
             fi
         fi
@@ -3057,7 +3057,7 @@ CFLAGS="$CFLAGS -I\$(top_srcdir)/include/SDL"
 CFLAGS="$CFLAGS -I\$(top_srcdir)/src -I\$(top_srcdir)/src/main/$ARCH"
 CFLAGS="$CFLAGS -I\$(top_srcdir)/src/audio"
 CFLAGS="$CFLAGS -I\$(top_srcdir)/src/video"
-CFLAGS="$CFLAGS -I\$(top_srcdir)/src/video/XFree86/extensions"
+CFLAGS="$CFLAGS -I\$(top_srcdir)/src/video/Xext/extensions"
 CFLAGS="$CFLAGS -I\$(top_srcdir)/src/events"
 CFLAGS="$CFLAGS -I\$(top_srcdir)/src/joystick"
 CFLAGS="$CFLAGS -I\$(top_srcdir)/src/cdrom"
@@ -3154,13 +3154,13 @@ src/video/windx5/Makefile
 src/video/gapi/Makefile
 src/video/x11/Makefile
 src/video/xbios/Makefile
-src/video/XFree86/Makefile
-src/video/XFree86/extensions/Makefile
-src/video/XFree86/Xinerama/Makefile
-src/video/XFree86/Xv/Makefile
-src/video/XFree86/Xxf86dga/Makefile
-src/video/XFree86/Xxf86vm/Makefile
-src/video/XFree86/XME/Makefile
+src/video/Xext/Makefile
+src/video/Xext/extensions/Makefile
+src/video/Xext/Xinerama/Makefile
+src/video/Xext/Xv/Makefile
+src/video/Xext/Xxf86dga/Makefile
+src/video/Xext/Xxf86vm/Makefile
+src/video/Xext/XME/Makefile
 src/events/Makefile
 src/joystick/Makefile
 src/joystick/amigaos/Makefile

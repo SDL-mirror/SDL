@@ -31,7 +31,7 @@ static char rcsid =
 #include <stdlib.h>
 #include <string.h>
 #include <X11/Xlib.h>
-#include <XFree86/extensions/xf86dga.h>
+#include <Xext/extensions/xf86dga.h>
 
 #ifdef HAVE_ALLOCA_H
 #include <alloca.h>

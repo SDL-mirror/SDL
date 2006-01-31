@@ -29,7 +29,7 @@ static char rcsid =
 
 #include <stdio.h>
 #include <X11/Xlib.h>
-#include <XFree86/extensions/xf86dga.h>
+#include <Xext/extensions/xf86dga.h>
 
 #include "SDL_sysvideo.h"
 #include "SDL_events_c.h"

@@ -33,13 +33,13 @@ static char rcsid =
 #include <X11/Xatom.h>
 
 #ifdef XFREE86_DGAMOUSE
-#include <XFree86/extensions/xf86dga.h>
+#include <Xext/extensions/xf86dga.h>
 #endif
 #ifdef XFREE86_VM
-#include <XFree86/extensions/xf86vmode.h>
+#include <Xext/extensions/xf86vmode.h>
 #endif
 #ifdef HAVE_XIGXME
-#include <XFree86/extensions/xme.h>
+#include <Xext/extensions/xme.h>
 #endif
 
 #include <string.h>

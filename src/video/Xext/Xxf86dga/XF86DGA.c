@@ -341,7 +341,7 @@ Bool SDL_NAME(XF86DGAViewPortChanged)(
 /* Helper functions */
 
 #include <X11/Xmd.h>
-#include <XFree86/extensions/xf86dga.h>
+#include <Xext/extensions/xf86dga.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
