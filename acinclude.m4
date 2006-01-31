@@ -377,40 +377,18 @@ m4_ifdef([AC_PROVIDE_IFELSE],
 # ---------------
 AC_DEFUN([AC_PROG_LIBTOOL],
 [AC_REQUIRE([_AC_PROG_LIBTOOL])dnl
-dnl Quote A][M_PROG_CXX so that aclocal doesn't bring it in needlessly.
-dnl If either AC_PROG_CXX or A][M_PROG_CXX have already been expanded, run
-dnl AC_LIBTOOL_CXX immediately, otherwise, hook it in at the end of both.
+dnl If AC_PROG_CXX has already been expanded, run AC_LIBTOOL_CXX
+dnl immediately, otherwise, hook it in at the end of AC_PROG_CXX.
   AC_PROVIDE_IFELSE([AC_PROG_CXX],
     [AC_LIBTOOL_CXX],
-    [AC_PROVIDE_IFELSE([A][M_PROG_CXX],
-      [AC_LIBTOOL_CXX],
-      [AC_PROVIDE_IFELSE([LT_AC_PROG_CXX],
-	[AC_LIBTOOL_CXX],
-      [ifdef([AC_PROG_CXX],
-	     [define([AC_PROG_CXX], defn([AC_PROG_CXX])[AC_LIBTOOL_CXX])])
-       ifdef([A][M_PROG_CXX],
-	     [define([A][M_PROG_CXX], defn([A][M_PROG_CXX])[AC_LIBTOOL_CXX])])
-       ifdef([LT_AC_PROG_CXX],
-	     [define([LT_AC_PROG_CXX],
-		defn([LT_AC_PROG_CXX])[AC_LIBTOOL_CXX])])])])
-  ])
-dnl Quote A][M_PROG_F77 so that aclocal doesn't bring it in needlessly.
-dnl If either AC_PROG_F77 or A][M_PROG_F77 have already been expanded, run
-dnl AC_LIBTOOL_F77 immediately, otherwise, hook it in at the end of both.
+    [define([AC_PROG_CXX], defn([AC_PROG_CXX])[AC_LIBTOOL_CXX
+  ])])
+dnl And a similar setup for Fortran 77 support
   AC_PROVIDE_IFELSE([AC_PROG_F77],
     [AC_LIBTOOL_F77],
-    [AC_PROVIDE_IFELSE([A][M_PROG_F77],
-      [AC_LIBTOOL_F77],
-      [AC_PROVIDE_IFELSE([LT_AC_PROG_F77],
-	[AC_LIBTOOL_F77],
-      [ifdef([AC_PROG_F77],
-	     [define([AC_PROG_F77], defn([AC_PROG_F77])[AC_LIBTOOL_F77])])
-       ifdef([A][M_PROG_F77],
-	     [define([A][M_PROG_F77], defn([A][M_PROG_F77])[AC_LIBTOOL_F77])])
-       ifdef([LT_AC_PROG_F77],
-	     [define([LT_AC_PROG_F77],
-		defn([LT_AC_PROG_F77])[AC_LIBTOOL_F77])])])])
-  ])
+    [define([AC_PROG_F77], defn([AC_PROG_F77])[AC_LIBTOOL_F77
+])])
+
 dnl Quote A][M_PROG_GCJ so that aclocal doesn't bring it in needlessly.
 dnl If either AC_PROG_GCJ or A][M_PROG_GCJ have already been expanded, run
 dnl AC_LIBTOOL_GCJ immediately, otherwise, hook it in at the end of both.
@@ -427,8 +405,7 @@ dnl AC_LIBTOOL_GCJ immediately, otherwise, hook it in at the end of both.
        ifdef([LT_AC_PROG_GCJ],
 	     [define([LT_AC_PROG_GCJ],
 		defn([LT_AC_PROG_GCJ])[AC_LIBTOOL_GCJ])])])])
-  ])
-])# AC_PROG_LIBTOOL
+])])# AC_PROG_LIBTOOL
 
 
 # _AC_PROG_LIBTOOL
