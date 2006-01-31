@@ -46,6 +46,6 @@ extern int SDL_AtariXbios_enabled;
 
 extern void SDL_AtariXbios_InstallVectors(int vectors_mask);
 extern void SDL_AtariXbios_RestoreVectors(void);
-extern void SDL_AtariXbios_PostMouseEvents(_THIS);
+extern void SDL_AtariXbios_PostMouseEvents(_THIS, SDL_bool buttonEvents);
 
 #endif /* _SDL_XBIOSEVENTS_H_ */

@@ -158,7 +158,7 @@ void AtariGemdos_PumpEvents(_THIS)
 				TranslateKey(i, gemdos_currentascii[i], &keysym, SDL_FALSE));
 	}
 
-	SDL_AtariXbios_PostMouseEvents(this);
+	SDL_AtariXbios_PostMouseEvents(this, SDL_TRUE);
 
 	/* Will be previous table */
 	memcpy(gemdos_previouskeyboard, gemdos_currentkeyboard, ATARIBIOS_MAXKEYS);

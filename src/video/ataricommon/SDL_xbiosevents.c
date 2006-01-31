@@ -122,7 +122,7 @@ static int atari_GetButton(int button)
 	}
 }
 
-void SDL_AtariXbios_PostMouseEvents(_THIS)
+void SDL_AtariXbios_PostMouseEvents(_THIS, SDL_bool buttonEvents)
 {
 	if (SDL_AtariXbios_enabled==0) {
 		return;
@@ -135,7 +135,7 @@ void SDL_AtariXbios_PostMouseEvents(_THIS)
 	}
 	
 	/* Mouse button ? */
-	if (SDL_AtariXbios_mouseb != atari_prevmouseb) {
+	if (buttonEvents && (SDL_AtariXbios_mouseb != atari_prevmouseb)) {
 		int i;
 
 		for (i=0;i<2;i++) {

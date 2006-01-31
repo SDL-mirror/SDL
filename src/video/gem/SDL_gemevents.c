@@ -45,7 +45,7 @@ static char rcsid =
 #include "SDL_gemevents_c.h"
 #include "SDL_atarikeys.h"	/* for keyboard scancodes */
 #include "SDL_atarievents_c.h"
-#include "SDL_xbiosinterrupt_s.h"
+#include "SDL_xbiosevents_c.h"
 
 /* Defines */
 
@@ -383,10 +383,7 @@ static void do_mouse(_THIS, short mx, short my, short mb, short ks)
 
 	/* Mouse motion ? */
 	if (GEM_mouse_relative) {
-		if (SDL_AtariXbios_mousex || SDL_AtariXbios_mousey) {
-			SDL_PrivateMouseMotion(0, 1, SDL_AtariXbios_mousex, SDL_AtariXbios_mousey);
-			SDL_AtariXbios_mousex = SDL_AtariXbios_mousey = 0;
-		}
+		SDL_AtariXbios_PostMouseEvents(this, SDL_FALSE);
 	} else {
 		if ((prevmousex!=mx) || (prevmousey!=my)) {
 			int posx, posy;

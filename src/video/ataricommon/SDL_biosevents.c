@@ -153,7 +153,7 @@ void AtariBios_PumpEvents(_THIS)
 				TranslateKey(i, bios_currentascii[i], &keysym, SDL_FALSE));
 	}
 
-	SDL_AtariXbios_PostMouseEvents(this);
+	SDL_AtariXbios_PostMouseEvents(this, SDL_TRUE);
 
 	/* Will be previous table */
 	memcpy(bios_previouskeyboard, bios_currentkeyboard, ATARIBIOS_MAXKEYS);
