@@ -56,7 +56,12 @@ static SDL_keysym *TranslateKey(UINT vkey, UINT scancode, SDL_keysym *keysym, in
 
 /* DJM: If the user setup the window for us, we want to save his window proc,
    and give him a chance to handle some messages. */
-static WNDPROC userWindowProc = NULL;
+#ifdef STRICT
+#define WNDPROCTYPE	WNDPROC
+#else
+#define WNDPROCTYPE	FARPROC
+#endif
+static WNDPROCTYPE userWindowProc = NULL;
 
 
 #ifdef _WIN32_WCE
@@ -427,7 +432,7 @@ int DIB_CreateWindow(_THIS)
 		/* DJM: we want all event's for the user specified
 			window to be handled by SDL.
 		 */
-		userWindowProc = (WNDPROC)GetWindowLong(SDL_Window, GWL_WNDPROC);
+		userWindowProc = (WNDPROCTYPE)GetWindowLong(SDL_Window, GWL_WNDPROC);
 		SetWindowLong(SDL_Window, GWL_WNDPROC, (LONG)WinMessage);
 	} else {
 		SDL_Window = CreateWindow(SDL_Appname, SDL_Appname,
