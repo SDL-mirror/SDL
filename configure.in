@@ -654,151 +654,59 @@ CheckX11()
             VIDEO_SUBDIRS="$VIDEO_SUBDIRS x11"
             VIDEO_DRIVERS="$VIDEO_DRIVERS x11/libvideo_x11.la"
 
+            AC_ARG_ENABLE(dga,
+[  --enable-dga            allow use of X11 DGA code [default=yes]],
+                          , enable_dga=yes)
+            if test x$enable_dga = xyes; then
+                VIDEO_SUBDIRS="$VIDEO_SUBDIRS Xext/Xxf86dga"
+                VIDEO_DRIVERS="$VIDEO_DRIVERS Xext/Xxf86dga/libXFree86_Xxf86dga.la"
+            fi
+            AC_ARG_ENABLE(video-dga,
+[  --enable-video-dga      use DGA 2.0 video driver [default=yes]],
+                  , enable_video_dga=yes)
+            if test x$enable_dga = xyes -a x$enable_video_dga = xyes; then
+                CFLAGS="$CFLAGS -DENABLE_DGA"
+                VIDEO_SUBDIRS="$VIDEO_SUBDIRS dga"
+                VIDEO_DRIVERS="$VIDEO_DRIVERS dga/libvideo_dga.la"
+            fi
+            AC_ARG_ENABLE(video-x11-dgamouse,
+[  --enable-video-x11-dgamouse  use X11 DGA for mouse events [default=yes]],
+                          , enable_video_x11_dgamouse=yes)
+            if test x$enable_dga = xyes -a x$enable_video_x11_dgamouse = xyes; then
+                CFLAGS="$CFLAGS -DXFREE86_DGAMOUSE -DDEFAULT_DGAMOUSE"
+            fi
             AC_ARG_ENABLE(video-x11-vm,
 [  --enable-video-x11-vm   use X11 VM extension for fullscreen [default=yes]],
                           , enable_video_x11_vm=yes)
             if test x$enable_video_x11_vm = xyes; then
-                AC_MSG_CHECKING(for XFree86 VidMode 1.0 support)
-                video_x11_vm=no
-                AC_TRY_COMPILE([
-                 #include <X11/Xlib.h>
-                 #include <XFree86/extensions/xf86vmode.h>
-                ],[
-                ],[
-                video_x11_vm=yes
-                ])
-                AC_MSG_RESULT($video_x11_vm)
-                if test x$video_x11_vm = xyes; then
-                    CFLAGS="$CFLAGS -DXFREE86_VM"
-                    VIDEO_SUBDIRS="$VIDEO_SUBDIRS Xext/Xxf86vm"
-                    VIDEO_DRIVERS="$VIDEO_DRIVERS Xext/Xxf86vm/libXFree86_Xxf86vm.la"
-                    AC_MSG_CHECKING(for XFree86 VidMode gamma support)
-                    video_x11_vmgamma=no
-                    AC_TRY_COMPILE([
-                     #include <X11/Xlib.h>
-                     #include <XFree86/extensions/xf86vmode.h>
-                    ],[
-                     SDL_NAME(XF86VidModeGamma) gamma;
-                    ],[
-                    video_x11_vmgamma=yes
-                    ])
-                    AC_MSG_RESULT($video_x11_vmgamma)
-                    if test x$video_x11_vmgamma = xyes; then
-                        CFLAGS="$CFLAGS -DXFREE86_VMGAMMA"
-                    fi
-                fi
-            fi
-            AC_ARG_ENABLE(dga,
-[  --enable-dga            allow use of X11 DGA code [default=yes]],
-                          , enable_dga=yes)
-            AC_ARG_ENABLE(video-x11-dgamouse,
-[  --enable-video-x11-dgamouse  use X11 DGA for mouse events [default=yes]],
-                          , enable_video_x11_dgamouse=yes)
-            if test x$enable_dga = xyes; then
-                AC_MSG_CHECKING(for XFree86 DGA 1.0 support)
-                video_x11_dga=no
-                AC_TRY_COMPILE([
-                 #include <X11/Xlib.h>
-                 #include <XFree86/extensions/xf86dga.h>
-                ],[
-                ],[
-                video_x11_dga=yes
-                ])
-                AC_MSG_RESULT($video_x11_dga)
-                if test x$video_x11_dga = xyes; then
-                    CFLAGS="$CFLAGS -DXFREE86_DGAMOUSE"
-                    if test x$enable_video_x11_dgamouse = xyes; then
-                        CFLAGS="$CFLAGS -DDEFAULT_DGAMOUSE"
-                    fi
-                    VIDEO_SUBDIRS="$VIDEO_SUBDIRS Xext/Xxf86dga"
-                    VIDEO_DRIVERS="$VIDEO_DRIVERS Xext/Xxf86dga/libXFree86_Xxf86dga.la"
-                fi
+                CFLAGS="$CFLAGS -DXFREE86_VM -DXFREE86_VMGAMMA"
+                VIDEO_SUBDIRS="$VIDEO_SUBDIRS Xext/Xxf86vm"
+                VIDEO_DRIVERS="$VIDEO_DRIVERS Xext/Xxf86vm/libXFree86_Xxf86vm.la"
             fi
             AC_ARG_ENABLE(video-x11-xv,
 [  --enable-video-x11-xv   use X11 XvImage extension for video [default=yes]],
                           , enable_video_x11_xv=yes)
             if test x$enable_video_x11_xv = xyes; then
-                AC_MSG_CHECKING(for XFree86 XvImage support)
-                video_x11_xv=no
-                AC_TRY_COMPILE([
-                 #include <X11/Xlib.h>
-                 #include <sys/ipc.h>
-                 #include <sys/shm.h>
-                 #include <X11/extensions/XShm.h>
-                 #include <XFree86/extensions/Xvlib.h>
-                ],[
-                 SDL_NAME(XvImage) *image;
-                ],[
-                video_x11_xv=yes
-                ])
-                AC_MSG_RESULT($video_x11_xv)
-                if test x$video_x11_xv = xyes; then
-                    CFLAGS="$CFLAGS -DXFREE86_XV"
-                    VIDEO_SUBDIRS="$VIDEO_SUBDIRS Xext/Xv"
-                    VIDEO_DRIVERS="$VIDEO_DRIVERS Xext/Xv/libXFree86_Xv.la"
-                fi
+                CFLAGS="$CFLAGS -DXFREE86_XV"
+                VIDEO_SUBDIRS="$VIDEO_SUBDIRS Xext/Xv"
+                VIDEO_DRIVERS="$VIDEO_DRIVERS Xext/Xv/libXFree86_Xv.la"
             fi
             AC_ARG_ENABLE(video-x11-xinerama,
 [  --enable-video-x11-xinerama   enable X11 Xinerama support [default=yes]],
                             , enable_video_x11_xinerama=yes)
             if test x$enable_video_x11_xinerama = xyes; then
-                AC_MSG_CHECKING(for X11 Xinerama support)
-                video_x11_xinerama=no
-                AC_TRY_COMPILE([
-                 #include <X11/Xlib.h>
-                 #include <XFree86/extensions/Xinerama.h>
-                ],[
-                 SDL_NAME(XineramaScreenInfo) *xinerama;
-                ],[
-                video_x11_xinerama=yes
-                ])
-                AC_MSG_RESULT($video_x11_xinerama)
-                if test x$video_x11_xinerama = xyes; then
-                    CFLAGS="$CFLAGS -DHAVE_XINERAMA"
-                    VIDEO_SUBDIRS="$VIDEO_SUBDIRS Xext/Xinerama"
-                    VIDEO_DRIVERS="$VIDEO_DRIVERS Xext/Xinerama/libXFree86_Xinerama.la"
-                fi
+                CFLAGS="$CFLAGS -DHAVE_XINERAMA"
+                VIDEO_SUBDIRS="$VIDEO_SUBDIRS Xext/Xinerama"
+                VIDEO_DRIVERS="$VIDEO_DRIVERS Xext/Xinerama/libXFree86_Xinerama.la"
             fi
             AC_ARG_ENABLE(video-x11-xme,
 [  --enable-video-x11-xme  enable Xi Graphics XME for fullscreen [default=yes]],
                             , enable_video_x11_xme=yes)
             if test x$enable_video_x11_xme = xyes; then
-                AC_MSG_CHECKING(for Xi Graphics XiGMiscExtension support)
-                video_x11_xme=yes
-                AC_MSG_RESULT($video_x11_xme)
-                if test x$video_x11_xme = xyes; then
-                    CFLAGS="$CFLAGS -DHAVE_XIGXME"
-                    VIDEO_SUBDIRS="$VIDEO_SUBDIRS Xext/XME"
-                    VIDEO_DRIVERS="$VIDEO_DRIVERS Xext/XME/libXME.la"
-                fi
+                CFLAGS="$CFLAGS -DHAVE_XIGXME"
+                VIDEO_SUBDIRS="$VIDEO_SUBDIRS Xext/XME"
+                VIDEO_DRIVERS="$VIDEO_DRIVERS Xext/XME/libXME.la"
             fi
-        fi
-    fi
-}
-
-dnl Find the X11 DGA 2.0 include and library directories
-CheckDGA()
-{
-    AC_ARG_ENABLE(video-dga,
-[  --enable-video-dga      use DGA 2.0 video driver [default=yes]],
-                  , enable_video_dga=yes)
-    if test x$video_x11_dga = xyes -a x$enable_video_dga = xyes; then
-        save_CFLAGS="$CFLAGS"; CFLAGS="$CFLAGS -Isrc/video"
-        AC_MSG_CHECKING(for XFree86 DGA 2.0 support)
-        video_x11_dga2=no
-        AC_TRY_COMPILE([
-         #include <X11/Xlib.h>
-         #include <XFree86/extensions/xf86dga.h>
-        ],[
-         SDL_NAME(XDGAEvent) xevent;
-        ],[
-        video_x11_dga2=yes
-        ])
-        AC_MSG_RESULT($video_x11_dga2)
-        if test x$video_x11_dga2 = xyes; then
-            CFLAGS="$CFLAGS -DENABLE_DGA"
-            VIDEO_SUBDIRS="$VIDEO_SUBDIRS dga"
-            VIDEO_DRIVERS="$VIDEO_DRIVERS dga/libvideo_dga.la"
         fi
     fi
 }
@@ -2087,7 +1995,6 @@ case "$target" in
         CheckNAS
         CheckX11
         CheckNANOX
-        CheckDGA
         CheckFBCON
         CheckDirectFB
         CheckPS2GS
@@ -2175,7 +2082,6 @@ case "$target" in
         CheckESD
         CheckNAS
         CheckX11
-        CheckDGA
         CheckSVGA
         CheckAAlib
         CheckOpenGLX11
@@ -2221,7 +2127,6 @@ case "$target" in
         CheckESD
         CheckNAS
         CheckX11
-        CheckDGA
         CheckSVGA
         CheckAAlib
         CheckOpenGLX11
