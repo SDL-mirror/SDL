@@ -366,6 +366,13 @@ int X11_GetVideoModes(_THIS)
             for ( i=0; i<nmodes; ++i ) {
                 int w, h;
 
+		/* Eliminate duplicate modes with different refresh rates */
+		if ( i > 0 &&
+		     modes[i]->hdisplay == modes[i-1]->hdisplay &&
+		     modes[i]->vdisplay == modes[i-1]->vdisplay ) {
+			continue;
+		}
+
                 /* Check to see if we should add the screen size (Xinerama) */
                 w = modes[i]->hdisplay;
                 h = modes[i]->vdisplay;
