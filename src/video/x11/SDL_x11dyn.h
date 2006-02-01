@@ -69,10 +69,7 @@ typedef int (*SDL_X11_XSetExtensionErrorHandlerType)(Display *,char *,char *);
 #define _XReply p_XReply
 #define _XSend p_XSend
 #define XFree pXFree
-
-#if !defined(__osf__) || defined(X11_DYNAMIC)
 #define _XData32 p_XData32
-#endif
 
 #if defined(__osf__) && defined(X11_DYNAMIC)
 #define _SmtBufferOverflow p_SmtBufferOverflow
