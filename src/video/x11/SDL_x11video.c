@@ -1296,11 +1296,11 @@ void X11_VideoQuit(_THIS)
 
 		/* Close the connection with the IM server */
 		#ifdef X_HAVE_UTF8_STRING
-		if (SDL_IC == NULL) {
+		if (SDL_IC != NULL) {
 			pXDestroyIC(SDL_IC);
 			SDL_IC = NULL;
 		}
-		if (SDL_IM == NULL) {
+		if (SDL_IM != NULL) {
 			pXCloseIM(SDL_IM);
 			SDL_IM = NULL;
 		}
