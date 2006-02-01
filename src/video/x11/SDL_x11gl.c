@@ -44,7 +44,6 @@
 #define GLX_SAMPLES_ARB                    100001
 #endif
 
-/* return the preferred visual to use for openGL graphics */
 XVisualInfo *X11_GL_GetVisual(_THIS)
 {
 #ifdef HAVE_OPENGL_X11
@@ -162,6 +161,9 @@ XVisualInfo *X11_GL_GetVisual(_THIS)
 		SDL_SetError( "Couldn't find matching GLX visual");
 		return NULL;
 	}
+/*
+	printf("Found GLX visual 0x%x\n", glx_visualinfo->visualid);
+*/
 	return glx_visualinfo;
 #else
 	SDL_SetError("X11 driver not configured with OpenGL");
@@ -238,9 +240,6 @@ void X11_GL_Shutdown(_THIS)
 		if (glx_context != NULL)
 			this->gl_data->glXDestroyContext(GFX_Display, glx_context);
 
-		if( this->gl_data->glXReleaseBuffersMESA ) {
-		    this->gl_data->glXReleaseBuffersMESA(GFX_Display,SDL_Window);
-		}
 		glx_context = NULL;
 	}
 	gl_active = 0;
@@ -248,39 +247,6 @@ void X11_GL_Shutdown(_THIS)
 }
 
 #ifdef HAVE_OPENGL_X11
-
-static int ExtensionSupported(const char *extension)
-{
-	const GLubyte *extensions = NULL;
-	const GLubyte *start;
-	GLubyte *where, *terminator;
-
-	/* Extension names should not have spaces. */
-	where = (GLubyte *) strchr(extension, ' ');
-	if (where || *extension == '\0')
-	      return 0;
-	
-	extensions = current_video->glGetString(GL_EXTENSIONS);
-	/* It takes a bit of care to be fool-proof about parsing the
-	 *      OpenGL extensions string. Don't be fooled by sub-strings,
-	 *           etc. */
-	
-	start = extensions;
-	
-	for (;;)
-	{
-		where = (GLubyte *) strstr((const char *) start, extension);
-		if (!where) break;
-		
-		terminator = where + strlen(extension);
-		if (where == start || *(where - 1) == ' ')
-	        if (*terminator == ' ' || *terminator == '\0') return 1;
-						  
-		start = terminator;
-	}
-	
-	return 0;
-}
 
 /* Make the current context active */
 int X11_GL_MakeCurrent(_THIS)
@@ -294,29 +260,6 @@ int X11_GL_MakeCurrent(_THIS)
 		retval = -1;
 	}
 	pXSync( GFX_Display, False );
-
-	/* 
-	 * The context is now current, check for glXReleaseBuffersMESA() 
-	 * extension. If extension is _not_ supported, destroy the pointer 
-	 * (to make sure it will not be called in X11_GL_Shutdown() ).
-	 * 
-	 * DRI/Mesa drivers include glXReleaseBuffersMESA() in the libGL.so, 
-	 * but there's no need to call it (is is only needed for some old 
-	 * non-DRI drivers).
-	 * 
-	 * When using for example glew (http://glew.sf.net), dlsym() for
-	 * glXReleaseBuffersMESA() returns the pointer from the glew library
-	 * (namespace conflict).
-	 *
-	 * The glXReleaseBuffersMESA() pointer in the glew is NULL, if the 
-	 * driver doesn't support this extension. So blindly calling it will
-	 * cause segfault with DRI/Mesa drivers!
-	 * 
-	 */
-	
-	if ( ! ExtensionSupported("glXReleaseBuffersMESA") ) {
-		this->gl_data->glXReleaseBuffersMESA = NULL;
-	}
 
 	/* More Voodoo X server workarounds... Grr... */
 	SDL_Lock_EventThread();
@@ -496,11 +439,7 @@ int X11_GL_LoadLibrary(_THIS, const char* path)
 	this->gl_data->glXQueryExtensionsString =
 		(const char *(*)(Display *, int)) do_dlsym(handle, "glXQueryExtensionsString");
 	
-	/* We don't compare below for this in case we're not using Mesa. */
-	this->gl_data->glXReleaseBuffersMESA =
-		(void (*)(Display *, GLXDrawable)) do_dlsym( handle, "glXReleaseBuffersMESA" );
-	
-	
+
 	if ( (this->gl_data->glXChooseVisual == NULL) || 
 	     (this->gl_data->glXCreateContext == NULL) ||
 	     (this->gl_data->glXDestroyContext == NULL) ||

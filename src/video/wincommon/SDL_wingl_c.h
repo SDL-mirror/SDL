@@ -33,7 +33,7 @@ struct SDL_PrivateGLData {
     HDC GL_hdc;
     HGLRC GL_hrc;
     int pixel_format;
-    int wgl_arb_pixel_format;
+    int WGL_ARB_pixel_format;
 
     void * (WINAPI *wglGetProcAddress)(const char *proc);
 

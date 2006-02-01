@@ -56,7 +56,7 @@ SDL_PROC_UNUSED(void,glColorMask,(GLboolean red, GLboolean green, GLboolean blue
 SDL_PROC_UNUSED(void,glColorMaterial,(GLenum face, GLenum mode))
 SDL_PROC_UNUSED(void,glColorPointer,(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer))
 SDL_PROC_UNUSED(void,glCopyPixels,(GLint x, GLint y, GLsizei width, GLsizei height, GLenum type))
-SDL_PROC(void,glCopyTexImage1D,(GLenum target, GLint level, GLenum internalFormat, GLint x, GLint y, GLsizei width, GLint border))
+SDL_PROC_UNUSED(void,glCopyTexImage1D,(GLenum target, GLint level, GLenum internalFormat, GLint x, GLint y, GLsizei width, GLint border))
 SDL_PROC_UNUSED(void,glCopyTexImage2D,(GLenum target, GLint level, GLenum internalFormat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border))
 SDL_PROC_UNUSED(void,glCopyTexSubImage1D,(GLenum target, GLint level, GLint xoffset, GLint x, GLint y, GLsizei width))
 SDL_PROC_UNUSED(void,glCopyTexSubImage2D,(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height))

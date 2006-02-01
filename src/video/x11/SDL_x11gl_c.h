@@ -43,13 +43,13 @@ struct SDL_PrivateGLData {
     XVisualInfo* (*glXChooseVisual)
 		( Display*		dpy,
 		  int			screen,
-		  int*		attribList );
+		  int*			attribList );
 
     GLXContext (*glXCreateContext)
 		( Display*		dpy,
-		  XVisualInfo*	vis,
+		  XVisualInfo*		vis,
 		  GLXContext		shareList,
-		  Bool		direct );
+		  Bool			direct );
 
     void (*glXDestroyContext)
 		( Display* 		dpy,
@@ -70,13 +70,9 @@ struct SDL_PrivateGLData {
 	   int attrib,
 	   int* value );
 
-    void (*glXReleaseBuffersMESA)
-	 ( Display* dpy,
-	   GLXDrawable drawable );
-
     const char *(*glXQueryExtensionsString)
 	    ( Display* dpy,
-	      int screen);
+	      int screen );
 
     
 #endif /* HAVE_OPENGL_X11 */

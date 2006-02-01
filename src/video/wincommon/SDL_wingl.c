@@ -20,6 +20,7 @@
     slouken@libsdl.org
 */
 
+#include <stdlib.h>
 #include <string.h>
 
 /* WGL implementation of SDL OpenGL support */
@@ -73,6 +74,41 @@ static int WIN_GL_ResetWindow(_THIS)
 }
 
 #ifdef HAVE_OPENGL
+
+static int ExtensionSupported(const char *extension, const char *extensions)
+{
+	const char *start;
+	const char *where, *terminator;
+
+	/* Extension names should not have spaces. */
+	where = strchr(extension, ' ');
+	if ( where || *extension == '\0' )
+	      return 0;
+	
+	if ( ! extensions )
+		return 0;
+
+	/* It takes a bit of care to be fool-proof about parsing the
+	 *      OpenGL extensions string. Don't be fooled by sub-strings,
+	 *           etc. */
+	
+	start = extensions;
+	
+	for (;;)
+	{
+		where = strstr(start, extension);
+		if (!where) break;
+		
+		terminator = where + strlen(extension);
+		if (where == start || *(where - 1) == ' ')
+	        if (*terminator == ' ' || *terminator == '\0') return 1;
+
+		start = terminator;
+	}
+	
+	return 0;
+}
+
 static void Init_WGL_ARB_extensions(_THIS)
 {
 	HWND hwnd;
@@ -80,10 +116,11 @@ static void Init_WGL_ARB_extensions(_THIS)
 	HGLRC hglrc;
 	int pformat;
 	const char * (WINAPI *wglGetExtensionsStringARB)(HDC) = 0;
+	const char *extensions;
 	
 	hwnd = CreateWindow(SDL_Appname, SDL_Appname, WS_POPUP | WS_DISABLED,
 	                    0, 0, 10, 10,
-	                    NULL, NULL, SDL_Instance,NULL);
+	                    NULL, NULL, SDL_Instance, NULL);
 	hdc = GetDC(hwnd);
 
 	pformat = ChoosePixelFormat(hdc, &GL_pfd);
@@ -97,7 +134,14 @@ static void Init_WGL_ARB_extensions(_THIS)
 	wglGetExtensionsStringARB = (const char * (WINAPI *)(HDC))
 		this->gl_data->wglGetProcAddress("wglGetExtensionsStringARB");
 
-	if(wglGetExtensionsStringARB && strstr(wglGetExtensionsStringARB(hdc),"WGL_ARB_pixel_format")) {
+	if( wglGetExtensionsStringARB ) {
+		extensions = wglGetExtensionsStringARB(hdc);
+	} else {
+		extensions = NULL;
+	}
+
+	this->gl_data->WGL_ARB_pixel_format = 0;
+	if( ExtensionSupported("WGL_ARB_pixel_format", extensions) ) {
 		this->gl_data->wglChoosePixelFormatARB =
 			(BOOL (WINAPI *)(HDC, const int *, const FLOAT *, UINT, int *, UINT *))
 			this->gl_data->wglGetProcAddress("wglChoosePixelFormatARB");
@@ -106,12 +150,9 @@ static void Init_WGL_ARB_extensions(_THIS)
 			this->gl_data->wglGetProcAddress("wglGetPixelFormatAttribivARB");
 
 		if( (this->gl_data->wglChoosePixelFormatARB != NULL) &&
-		    (this->gl_data->wglGetPixelFormatAttribivARB != NULL) )
-			this->gl_data->wgl_arb_pixel_format = 1;
-		else 
-			this->gl_data->wgl_arb_pixel_format = 0;
-	} else {
-		this->gl_data->wgl_arb_pixel_format = 0;
+		    (this->gl_data->wglGetPixelFormatAttribivARB != NULL) ) {
+			this->gl_data->WGL_ARB_pixel_format = 1;
+		}
 	}
 	
 	if ( hglrc ) {
@@ -121,7 +162,8 @@ static void Init_WGL_ARB_extensions(_THIS)
 	ReleaseDC(hwnd, hdc);
 	DestroyWindow(hwnd);
 }
-#endif /* !HAVE_OPENGL */
+
+#endif /* HAVE_OPENGL */
 
 int WIN_GL_SetupWindow(_THIS)
 {
@@ -198,10 +240,8 @@ int WIN_GL_SetupWindow(_THIS)
 			*iAttr++ = this->gl_config.alpha_size;
 		}
 
-		if ( this->gl_config.double_buffer ) {
-			*iAttr ++ = WGL_DOUBLE_BUFFER_ARB;
-			*iAttr ++ = GL_TRUE;
-		}
+		*iAttr++ = WGL_DOUBLE_BUFFER_ARB;
+		*iAttr++ = this->gl_config.double_buffer;
 
 		*iAttr++ = WGL_DEPTH_BITS_ARB;
 		*iAttr++ = this->gl_config.depth_size;
@@ -233,7 +273,7 @@ int WIN_GL_SetupWindow(_THIS)
 
 		if ( this->gl_config.stereo ) {
 			*iAttr++ = WGL_STEREO_ARB;
-			*iAttr++ = this->gl_config.stereo;
+			*iAttr++ = GL_TRUE;
 		}
 
 		if ( this->gl_config.multisamplebuffers ) {
@@ -249,11 +289,11 @@ int WIN_GL_SetupWindow(_THIS)
 		*iAttr = 0;
 
 		/* Choose and set the closest available pixel format */
-		if ( !this->gl_data->wgl_arb_pixel_format ||
+		if ( !this->gl_data->WGL_ARB_pixel_format ||
 		     !this->gl_data->wglChoosePixelFormatARB(GL_hdc, iAttribs, fAttribs, 1, &pixel_format, &matching) ||
 		     !matching ) {
 			pixel_format = ChoosePixelFormat(GL_hdc, &GL_pfd);
-			this->gl_data->wgl_arb_pixel_format = 0;
+			this->gl_data->WGL_ARB_pixel_format = 0;
 		}
 		if ( !pixel_format ) {
 			SDL_SetError("No matching GL pixel format available");
@@ -331,7 +371,7 @@ int WIN_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
 {
 	int retval;
 	
-	if ( this->gl_data->wgl_arb_pixel_format ) {
+	if ( this->gl_data->WGL_ARB_pixel_format ) {
 		int wgl_attrib;
 
 		switch(attrib) {
