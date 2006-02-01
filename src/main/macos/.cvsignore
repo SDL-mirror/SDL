@@ -1,0 +1,7 @@
+Makefile.in
+Makefile
+.libs
+*.o
+*.lo
+*.la
+Info.plist
