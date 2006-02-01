@@ -659,7 +659,7 @@ CheckX11()
                           , enable_dga=yes)
             if test x$enable_dga = xyes; then
                 VIDEO_SUBDIRS="$VIDEO_SUBDIRS Xext/Xxf86dga"
-                VIDEO_DRIVERS="$VIDEO_DRIVERS Xext/Xxf86dga/libXFree86_Xxf86dga.la"
+                VIDEO_DRIVERS="$VIDEO_DRIVERS Xext/Xxf86dga/libXext_Xxf86dga.la"
             fi
             AC_ARG_ENABLE(video-dga,
 [  --enable-video-dga      use DGA 2.0 video driver [default=yes]],
@@ -681,7 +681,7 @@ CheckX11()
             if test x$enable_video_x11_vm = xyes; then
                 CFLAGS="$CFLAGS -DXFREE86_VM -DXFREE86_VMGAMMA"
                 VIDEO_SUBDIRS="$VIDEO_SUBDIRS Xext/Xxf86vm"
-                VIDEO_DRIVERS="$VIDEO_DRIVERS Xext/Xxf86vm/libXFree86_Xxf86vm.la"
+                VIDEO_DRIVERS="$VIDEO_DRIVERS Xext/Xxf86vm/libXext_Xxf86vm.la"
             fi
             AC_ARG_ENABLE(video-x11-xv,
 [  --enable-video-x11-xv   use X11 XvImage extension for video [default=yes]],
@@ -689,7 +689,7 @@ CheckX11()
             if test x$enable_video_x11_xv = xyes; then
                 CFLAGS="$CFLAGS -DXFREE86_XV"
                 VIDEO_SUBDIRS="$VIDEO_SUBDIRS Xext/Xv"
-                VIDEO_DRIVERS="$VIDEO_DRIVERS Xext/Xv/libXFree86_Xv.la"
+                VIDEO_DRIVERS="$VIDEO_DRIVERS Xext/Xv/libXext_Xv.la"
             fi
             AC_ARG_ENABLE(video-x11-xinerama,
 [  --enable-video-x11-xinerama   enable X11 Xinerama support [default=yes]],
@@ -697,7 +697,7 @@ CheckX11()
             if test x$enable_video_x11_xinerama = xyes; then
                 CFLAGS="$CFLAGS -DHAVE_XINERAMA"
                 VIDEO_SUBDIRS="$VIDEO_SUBDIRS Xext/Xinerama"
-                VIDEO_DRIVERS="$VIDEO_DRIVERS Xext/Xinerama/libXFree86_Xinerama.la"
+                VIDEO_DRIVERS="$VIDEO_DRIVERS Xext/Xinerama/libXext_Xinerama.la"
             fi
             AC_ARG_ENABLE(video-x11-xme,
 [  --enable-video-x11-xme  enable Xi Graphics XME for fullscreen [default=yes]],
