@@ -11,6 +11,7 @@ HEADERS = \
 	../../../../include/SDL_endian.h \
 	../../../../include/SDL_error.h \
 	../../../../include/SDL_events.h \
+	../../../../include/SDL_getenv.h \
 	../../../../include/SDL_joystick.h \
 	../../../../include/SDL_keyboard.h \
 	../../../../include/SDL_keysym.h \
@@ -29,7 +30,7 @@ HEADERS = \
 
 all: $(EXPORTS)
 
-$(EXPORTS): $(HEADERS)
+$(EXPORTS): Makefile gendef.pl $(HEADERS)
 	perl gendef.pl $(HEADERS) >$@ || rm $@
 
 clean:

@@ -11,11 +11,11 @@ HEADERS = \
 	../../../../include/SDL_endian.h \
 	../../../../include/SDL_error.h \
 	../../../../include/SDL_events.h \
+	../../../../include/SDL_getenv.h \
 	../../../../include/SDL_joystick.h \
 	../../../../include/SDL_keyboard.h \
 	../../../../include/SDL_keysym.h \
 	../../../../include/SDL_loadso.h \
-	../../../../include/SDL_main.h \
 	../../../../include/SDL_mouse.h \
 	../../../../include/SDL_mutex.h \
 	../../../../include/SDL_quit.h \
@@ -27,9 +27,10 @@ HEADERS = \
 	../../../../include/SDL_version.h \
 	../../../../include/SDL_video.h
 
+
 all: $(EXPORTS)
 
-$(EXPORTS): $(HEADERS)
+$(EXPORTS): Makefile genexp.pl $(HEADERS)
 	perl genexp.pl $(HEADERS) >$@ || rm $@
 
 clean:

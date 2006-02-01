@@ -30,7 +30,7 @@ HEADERS = \
 
 all: $(EXPORTS)
 
-$(EXPORTS): $(HEADERS)
+$(EXPORTS): Makefile gendef.pl $(HEADERS)
 	perl gendef.pl $(HEADERS) >$@ || rm $@
 
 clean:
