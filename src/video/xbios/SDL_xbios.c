@@ -122,7 +122,7 @@ static int XBIOS_Available(void)
 				return 0;
 			break;
 		case VDO_F30:
-			if ( Montype() == MONITOR_MONO)
+			if ( VgetMonitor() == MONITOR_MONO)
 				return 0;
 			if (Getcookie(C_SCPN, &cookie_scpn) == C_FOUND) {
 				if (!SDL_XBIOS_SB3Usable((scpn_cookie_t *)cookie_scpn)) {
@@ -348,7 +348,7 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 			vformat->BitsPerPixel = 8;
 			break;
 		case VDO_F30:
-			switch (Montype())
+			switch (VgetMonitor())
 			{
 				case MONITOR_MONO:
 					/* Not usable */
@@ -382,7 +382,7 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 					break;
 			}
 			XBIOS_oldvbase=Logbase();
-			XBIOS_oldvmode=Vsetmode(-1);
+			XBIOS_oldvmode=VsetMode(-1);
 
 			XBIOS_oldnumcol= 1<< (1 << (XBIOS_oldvmode & NUMCOLS));
 			if (XBIOS_oldnumcol > 256) {
