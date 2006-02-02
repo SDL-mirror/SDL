@@ -48,6 +48,7 @@ EXTRA_DIST =		\
 	EpocBuildFiles.zip \
 	Xcode.tar.gz	\
 	Xcode21.tar.gz	\
+	XcodeUniversal.tar.gz	\
 	WhatsNew	\
 	docs.html	\
 	sdl.m4		\
