@@ -279,10 +279,54 @@ static int xext_errhandler(Display *d, char *ext_name, char *reason)
 	return Xext_handler(d, ext_name, reason);
 }
 
+/* Find out what class name we should use */
+static char *get_classname(char *classname, int maxlen)
+{
+	char *spot;
+#if defined(linux) || defined(__FreeBSD__)
+	char procfile[1024];
+	char linkfile[1024];
+	int linksize;
+#endif
+
+	/* First allow environment variable override */
+	spot = getenv("SDL_VIDEO_X11_WMCLASS");
+	if ( spot ) {
+		strncpy(classname, spot, maxlen);
+		return classname;
+	}
+
+	/* Next look at the application's executable name */
+#if defined(linux) || defined(__FreeBSD__)
+#if defined(linux)
+	sprintf(procfile, "/proc/%d/exe", getpid());
+#elif defined(__FreeBSD__)
+	sprintf(procfile, "/proc/%d/file", getpid());
+#else
+#error Where can we find the executable name?
+#endif
+	linksize = readlink(procfile, linkfile, sizeof(linkfile)-1);
+	if ( linksize > 0 ) {
+		linkfile[linksize] = '\0';
+		spot = strrchr(linkfile, '/');
+		if ( spot ) {
+			strncpy(classname, spot+1, maxlen);
+		} else {
+			strncpy(classname, linkfile, maxlen);
+		}
+		return classname;
+	}
+#endif /* linux */
+
+	/* Finally use the default we've used forever */
+	strncpy(classname, "SDL_App", maxlen);
+	return classname;
+}
+
 /* Create auxiliary (toplevel) windows with the current visual */
 static void create_aux_windows(_THIS)
 {
-    char * savedclassname = NULL;
+    char classname[1024];
     XSetWindowAttributes xattr;
     XWMHints *hints;
     XTextProperty titleprop, iconprop;
@@ -368,15 +412,11 @@ static void create_aux_windows(_THIS)
 		 | PropertyChangeMask | StructureNotifyMask | KeymapStateMask);
 
     /* Set the class hints so we can get an icon (AfterStep) */
+    get_classname(classname, sizeof(classname));
     {
 	XClassHint *classhints;
 	classhints = pXAllocClassHint();
 	if(classhints != NULL) {
-            char *classname = getenv("SDL_VIDEO_X11_WMCLASS");
-            if ( ! classname ) {
-                classname = "SDL_App";
-            }
-	    savedclassname = strdup(classname);
 	    classhints->res_name = classname;
 	    classhints->res_class = classname;
 	    pXSetClassHint(SDL_Display, WMwindow, classhints);
@@ -389,7 +429,7 @@ static void create_aux_windows(_THIS)
     SDL_IC = NULL;
 
     #ifdef X_HAVE_UTF8_STRING
-    SDL_IM = pXOpenIM(SDL_Display, NULL, savedclassname, savedclassname);
+    SDL_IM = pXOpenIM(SDL_Display, NULL, classname, classname);
     if (SDL_IM == NULL) {
 	SDL_SetError("no input method could be opened");
     } else {
@@ -397,8 +437,8 @@ static void create_aux_windows(_THIS)
 			XNClientWindow, WMwindow,
 			XNFocusWindow, WMwindow,
 			XNInputStyle, XIMPreeditNothing  | XIMStatusNothing,
-			XNResourceName, savedclassname,
-			XNResourceClass, savedclassname,
+			XNResourceName, classname,
+			XNResourceClass, classname,
 			NULL);
 	if (SDL_IC == NULL) {
 		SDL_SetError("no input context could be created");
@@ -407,9 +447,6 @@ static void create_aux_windows(_THIS)
 	}
     }
     #endif
-
-    free(savedclassname);
-
 
     /* Allow the window to be deleted by the window manager */
     WM_DELETE_WINDOW = pXInternAtom(SDL_Display, "WM_DELETE_WINDOW", False);
