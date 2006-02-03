@@ -34,7 +34,7 @@
    for __USE_POSIX199309
    Tommi Kyntola (tommi.kyntola@ray.fi) 27/09/2005
 */
-#if (defined _POSIX_TIMERS && _POSIX_TIMERS > 0)
+#if (defined _POSIX_TIMERS && _POSIX_TIMERS + 0 > 0)
 #include <time.h>
 /*
  * clock_gettime() is missing in my system's glibc, and apparently isn't
