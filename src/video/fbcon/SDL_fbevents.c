@@ -674,7 +674,7 @@ static void handle_tslib(_THIS)
 	while (ts_read(ts_dev, &sample, 1) > 0) {
 		button = (sample.pressure > 0) ? 1 : 0;
 		button <<= 2;	/* must report it as button 3 */
-    	FB_vgamousecallback(button, 0, sample.x, sample.y);
+		FB_vgamousecallback(button, 0, sample.x, sample.y);
 	}
 	return;
 }
@@ -713,15 +713,18 @@ static void handle_mouse(_THIS)
 			packetsize = 3;
 			break;
 		case MOUSE_ELO:
-			packetsize = ELO_PACKET_SIZE;
-			relative = 0;
-			break;
+			/* try to read the next packet */
+			if(eloReadPosition(this, mouse_fd, &dx, &dy, &button, &realx, &realy)) {
+				button = (button & 0x01) << 2;
+				FB_vgamousecallback(button, 0, dx, dy);
+			}
+			return; /* nothing left to do */
 		case MOUSE_TSLIB:
 #ifdef HAVE_TSLIB
 			handle_tslib(this);
 #endif
 			return; /* nothing left to do */
-		case NUM_MOUSE_DRVS:
+		default:
 			/* Uh oh.. */
 			packetsize = 0;
 			break;
@@ -730,13 +733,6 @@ static void handle_mouse(_THIS)
 	/* Special handling for the quite sensitive ELO controller */
 	if (mouse_drv == MOUSE_ELO) {
 	
-	    /* try to read the next packet */
-	    if(eloReadPosition(this, mouse_fd, &dx, &dy, &button, &realx, &realy)) {
-		button = (button & 0x01) << 2;
-    		FB_vgamousecallback(button, relative, dx, dy);
-	    }
-	    
-	    return;
 	}
 	
 	/* Read as many packets as possible */
@@ -834,26 +830,7 @@ static void handle_mouse(_THIS)
 				dx =  (signed char)mousebuf[i+1];
 				dy = -(signed char)mousebuf[i+2];
 				break;
-			/*
-			case MOUSE_ELO:
-				if ( mousebuf[i] != ELO_START_BYTE ) {
-					i -= (packetsize-1);
-					continue;
-				}
-
-				if(!eloParsePacket(&(mousebuf[i]), &dx, &dy, &button)) {
-					i -= (packetsize-1);
-					continue;
-				}
-				
-				button = (button & 0x01) << 2;
-
-				eloConvertXY(this, &dx, &dy);
-				break;
-			*/
-
-			case MOUSE_ELO:
-			case NUM_MOUSE_DRVS:
+			default:
 				/* Uh oh.. */
 				dx = 0;
 				dy = 0;
