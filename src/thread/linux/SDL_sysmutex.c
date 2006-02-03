@@ -62,15 +62,13 @@ SDL_mutex *SDL_CreateMutex (void)
 	mutex = (SDL_mutex *)calloc(1, sizeof(*mutex));
 	if ( mutex ) {
 		pthread_mutexattr_init(&attr);
-#ifdef PTHREAD_NO_RECURSIVE_MUTEX
-		/* No extra attributes necessary */
-#else
-#ifdef linux
+#if defined(PTHREAD_RECURSIVE_MUTEX)
+		pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+#elif defined(PTHREAD_RECURSIVE_MUTEX_NP)
 		pthread_mutexattr_setkind_np(&attr, PTHREAD_MUTEX_RECURSIVE_NP);
 #else
-		pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
-#endif
-#endif /* PTHREAD_NO_RECURSIVE_MUTEX */
+		/* No extra attributes necessary */
+#endif /* PTHREAD_RECURSIVE_MUTEX */
 		if ( pthread_mutex_init(&mutex->id, &attr) != 0 ) {
 			SDL_SetError("pthread_mutex_init() failed");
 			free(mutex);

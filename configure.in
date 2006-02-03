@@ -1201,6 +1201,10 @@ CheckPTHREAD()
 [  --enable-pthread-sem    use pthread semaphores [default=yes]],
                   , enable_pthread_sem=yes)
     case "$target" in
+        *-*-linux*)
+            pthread_cflags="-D_REENTRANT -D_GNU_SOURCE"
+            pthread_lib="-lpthread"
+            ;;
         *-*-bsdi*)
             pthread_cflags="-D_REENTRANT -D_THREAD_SAFE"
             pthread_lib=""
@@ -1288,29 +1292,30 @@ CheckPTHREAD()
             # Check to see if recursive mutexes are available
             AC_MSG_CHECKING(for recursive mutexes)
             has_recursive_mutexes=no
-            AC_TRY_LINK([
-              #include <pthread.h>
-            ],[
-              pthread_mutexattr_t attr;
-              #if defined(linux) && !(defined(__arm__) && defined(QWS))
-              pthread_mutexattr_setkind_np(&attr, PTHREAD_MUTEX_RECURSIVE_NP);
-              #else
-              pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
-              #endif
-            ],[
-            has_recursive_mutexes=yes
-            ])
-            # Some systems have broken recursive mutex implementations
-            case "$target" in
-                *-*-darwin*)
-                    has_recursive_mutexes=no
-                    ;;
-                *-*-solaris*)
-                    has_recursive_mutexes=no
-                    ;;
-            esac
+            if test x$has_recursive_mutexes = xno; then
+                AC_TRY_COMPILE([
+                  #include <pthread.h>
+                ],[
+                  pthread_mutexattr_t attr;
+                  pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+                ],[
+                has_recursive_mutexes=yes
+                CFLAGS="$CFLAGS -DPTHREAD_RECURSIVE_MUTEX"
+                ])
+            fi
+            if test x$has_recursive_mutexes = xno; then
+                AC_TRY_COMPILE([
+                  #include <pthread.h>
+                ],[
+                  pthread_mutexattr_t attr;
+                  pthread_mutexattr_setkind_np(&attr, PTHREAD_MUTEX_RECURSIVE_NP);
+                ],[
+                has_recursive_mutexes=yes
+                CFLAGS="$CFLAGS -DPTHREAD_RECURSIVE_MUTEX_NP"
+                ])
+            fi
             AC_MSG_RESULT($has_recursive_mutexes)
-            if test x$has_recursive_mutexes != xyes; then
+            if test x$has_recursive_mutexes = xno; then
                 CFLAGS="$CFLAGS -DPTHREAD_NO_RECURSIVE_MUTEX"
             fi
 
