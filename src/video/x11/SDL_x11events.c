@@ -332,10 +332,11 @@ printf("FocusIn!\n");
 #endif
 		posted = SDL_PrivateAppActive(1, SDL_APPINPUTFOCUS);
 
+#ifdef X_HAVE_UTF8_STRING
 		if ( SDL_IC != NULL ) {
 			pXSetICFocus(SDL_IC);
 		}
-
+#endif
 		/* Queue entry into fullscreen mode */
 		switch_waiting = 0x01 | SDL_FULLSCREEN;
 		switch_time = SDL_GetTicks() + 1500;
@@ -349,10 +350,11 @@ printf("FocusOut!\n");
 #endif
 		posted = SDL_PrivateAppActive(0, SDL_APPINPUTFOCUS);
 
+#ifdef X_HAVE_UTF8_STRING
 		if ( SDL_IC != NULL ) {
 			pXUnsetICFocus(SDL_IC);
 		}
-
+#endif
 		/* Queue leaving fullscreen mode */
 		switch_waiting = 0x01;
 		switch_time = SDL_GetTicks() + 200;
@@ -714,8 +716,12 @@ void X11_InitKeymap(void)
  	ODD_keymap[XK_dead_voiced_sound&0xFF] = SDLK_COMPOSE;
  	ODD_keymap[XK_dead_semivoiced_sound&0xFF] = SDLK_COMPOSE;
  	ODD_keymap[XK_dead_belowdot&0xFF] = SDLK_COMPOSE;
+#ifdef XK_dead_hook
  	ODD_keymap[XK_dead_hook&0xFF] = SDLK_COMPOSE;
+#endif
+#ifdef XK_dead_horn
  	ODD_keymap[XK_dead_horn&0xFF] = SDLK_COMPOSE;
+#endif
 
 #ifdef XK_dead_circumflex
 	/* These X keysyms have 0xFE as the high byte */
