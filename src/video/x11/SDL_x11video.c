@@ -953,7 +953,7 @@ static int X11_CreateWindow(_THIS, SDL_Surface *screen,
 	}
 
 	/* Update the internal keyboard state */
-	X11_SetKeyboardState(SDL_Display, SDL_IC, NULL);
+	X11_SetKeyboardState(SDL_Display, NULL);
 
 	/* When the window is first mapped, ignore non-modifier keys */
 	{

@@ -57,8 +57,128 @@
 /* The translation tables from an X11 keysym to a SDL keysym */
 static SDLKey ODD_keymap[256];
 static SDLKey MISC_keymap[256];
-SDL_keysym *X11_TranslateKey(Display *display, XIC ic, XKeyEvent *xkey, KeyCode kc,
-			     SDL_keysym *keysym);
+SDLKey X11_TranslateKeycode(Display *display, KeyCode kc);
+
+
+#ifdef X_HAVE_UTF8_STRING
+Uint32 Utf8ToUcs4(const Uint8 *utf8)
+{
+	Uint32 c;
+	int i = 1;
+	int noOctets = 0;
+	int firstOctetMask = 0;
+	unsigned char firstOctet = utf8[0];
+	if (firstOctet < 0x80) {
+		/*
+		  Characters in the range:
+		    00000000 to 01111111 (ASCII Range)
+		  are stored in one octet:
+		    0xxxxxxx (The same as its ASCII representation)
+		  The least 6 significant bits of the first octet is the most 6 significant nonzero bits
+		  of the UCS4 representation.
+		*/
+		noOctets = 1;
+		firstOctetMask = 0x7F;  /* 0(1111111) - The most significant bit is ignored */
+	} else if ((firstOctet & 0xE0) /* get the most 3 significant bits by AND'ing with 11100000 */
+	              == 0xC0 ) {  /* see if those 3 bits are 110. If so, the char is in this range */
+		/*
+		  Characters in the range:
+		    00000000 10000000 to 00000111 11111111
+		  are stored in two octets:
+		    110xxxxx 10xxxxxx
+		  The least 5 significant bits of the first octet is the most 5 significant nonzero bits
+		  of the UCS4 representation.
+		*/
+		noOctets = 2;
+		firstOctetMask = 0x1F;  /* 000(11111) - The most 3 significant bits are ignored */
+	} else if ((firstOctet & 0xF0) /* get the most 4 significant bits by AND'ing with 11110000 */
+	              == 0xE0) {  /* see if those 4 bits are 1110. If so, the char is in this range */
+		/*
+		  Characters in the range:
+		    00001000 00000000 to 11111111 11111111
+		  are stored in three octets:
+		    1110xxxx 10xxxxxx 10xxxxxx
+		  The least 4 significant bits of the first octet is the most 4 significant nonzero bits
+		  of the UCS4 representation.
+		*/
+		noOctets = 3;
+		firstOctetMask = 0x0F; /* 0000(1111) - The most 4 significant bits are ignored */
+	} else if ((firstOctet & 0xF8) /* get the most 5 significant bits by AND'ing with 11111000 */
+	              == 0xF0) {  /* see if those 5 bits are 11110. If so, the char is in this range */
+		/*
+		  Characters in the range:
+		    00000001 00000000 00000000 to 00011111 11111111 11111111
+		  are stored in four octets:
+		    11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+		  The least 3 significant bits of the first octet is the most 3 significant nonzero bits
+		  of the UCS4 representation.
+		*/
+		noOctets = 4;
+		firstOctetMask = 0x07; /* 11110(111) - The most 5 significant bits are ignored */
+	} else if ((firstOctet & 0xFC) /* get the most 6 significant bits by AND'ing with 11111100 */
+	              == 0xF8) { /* see if those 6 bits are 111110. If so, the char is in this range */
+		/*
+		  Characters in the range:
+		    00000000 00100000 00000000 00000000 to
+		    00000011 11111111 11111111 11111111
+		  are stored in five octets:
+		    111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+		  The least 2 significant bits of the first octet is the most 2 significant nonzero bits
+		  of the UCS4 representation.
+		*/
+		noOctets = 5;
+		firstOctetMask = 0x03; /* 111110(11) - The most 6 significant bits are ignored */
+	} else if ((firstOctet & 0xFE) /* get the most 7 significant bits by AND'ing with 11111110 */
+	              == 0xFC) { /* see if those 7 bits are 1111110. If so, the char is in this range */
+		/*
+		  Characters in the range:
+		    00000100 00000000 00000000 00000000 to
+		    01111111 11111111 11111111 11111111
+		  are stored in six octets:
+		    1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
+		  The least significant bit of the first octet is the most significant nonzero bit
+		  of the UCS4 representation.
+		*/
+		noOctets = 6;
+		firstOctetMask = 0x01; /* 1111110(1) - The most 7 significant bits are ignored */
+	} else
+		return 0;  /* The given chunk is not a valid UTF-8 encoded Unicode character */
+	
+	/*
+	  The least noOctets significant bits of the first octet is the most 2 significant nonzero bits
+	  of the UCS4 representation.
+	  The first 6 bits of the UCS4 representation is the least 8-noOctets-1 significant bits of
+	  firstOctet if the character is not ASCII. If so, it's the least 7 significant bits of firstOctet.
+	  This done by AND'ing firstOctet with its mask to trim the bits used for identifying the
+	  number of continuing octets (if any) and leave only the free bits (the x's)
+	  Sample:
+	  1-octet:    0xxxxxxx  &  01111111 = 0xxxxxxx
+	  2-octets:  110xxxxx  &  00011111 = 000xxxxx
+	*/
+	c = firstOctet & firstOctetMask;
+	
+	/* Now, start filling c.ucs4 with the bits from the continuing octets from utf8. */
+	for (i = 1; i < noOctets; i++) {
+		/* A valid continuing octet is of the form 10xxxxxx */
+		if ((utf8[i] & 0xC0) /* get the most 2 significant bits by AND'ing with 11000000 */
+		    != 0x80) /* see if those 2 bits are 10. If not, the is a malformed sequence. */
+			/*The given chunk is a partial sequence at the end of a string that could
+			   begin a valid character */
+			return 0;
+		
+		/* Make room for the next 6-bits */
+		c <<= 6;
+		
+		/*
+		  Take only the least 6 significance bits of the current octet (utf8[i]) and fill the created room
+		  of c.ucs4 with them.
+		  This done by AND'ing utf8[i] with 00111111 and the OR'ing the result with c.ucs4.
+		*/
+		c |= utf8[i] & 0x3F;
+	}
+	return c;
+}
+#endif
 
 /* Check to see if this is a repeated key.
    (idea shamelessly lifted from GII -- thanks guys! :)
@@ -212,6 +332,10 @@ printf("FocusIn!\n");
 #endif
 		posted = SDL_PrivateAppActive(1, SDL_APPINPUTFOCUS);
 
+		if ( SDL_IC != NULL ) {
+			pXSetICFocus(SDL_IC);
+		}
+
 		/* Queue entry into fullscreen mode */
 		switch_waiting = 0x01 | SDL_FULLSCREEN;
 		switch_time = SDL_GetTicks() + 1500;
@@ -225,6 +349,10 @@ printf("FocusOut!\n");
 #endif
 		posted = SDL_PrivateAppActive(0, SDL_APPINPUTFOCUS);
 
+		if ( SDL_IC != NULL ) {
+			pXUnsetICFocus(SDL_IC);
+		}
+
 		/* Queue leaving fullscreen mode */
 		switch_waiting = 0x01;
 		switch_time = SDL_GetTicks() + 200;
@@ -236,7 +364,7 @@ printf("FocusOut!\n");
 #ifdef DEBUG_XEVENTS
 printf("KeymapNotify!\n");
 #endif
-		X11_SetKeyboardState(SDL_Display, SDL_IC,  xevent.xkeymap.key_vector);
+		X11_SetKeyboardState(SDL_Display,  xevent.xkeymap.key_vector);
 	    }
 	    break;
 
@@ -282,32 +410,94 @@ printf("KeymapNotify!\n");
 
 	    /* Key press? */
 	    case KeyPress: {
+		static SDL_keysym saved_keysym;
 		SDL_keysym keysym;
+		KeyCode keycode = xevent.xkey.keycode;
 
 #ifdef DEBUG_XEVENTS
 printf("KeyPress (X11 keycode = 0x%X)\n", xevent.xkey.keycode);
 #endif
-		posted = SDL_PrivateKeyboard(SDL_PRESSED,
-				X11_TranslateKey(SDL_Display, SDL_IC, &xevent.xkey,
-						 xevent.xkey.keycode,
-						 &keysym));
+		/* Get the translated SDL virtual keysym */
+		if ( keycode ) {
+			keysym.scancode = keycode;
+			keysym.sym = X11_TranslateKeycode(SDL_Display, keycode);
+			keysym.mod = KMOD_NONE;
+			keysym.unicode = 0;
+		} else {
+			keysym = saved_keysym;
+		}
+
+		/* If we're not doing translation, we're done! */
+		if ( !SDL_TranslateUNICODE ) {
+			posted = SDL_PrivateKeyboard(SDL_PRESSED, &keysym);
+			break;
+		}
+
+		if ( pXFilterEvent(&xevent, None) ) {
+			if ( xevent.xkey.keycode ) {
+				posted = SDL_PrivateKeyboard(SDL_PRESSED, &keysym);
+			} else {
+				/* Save event to be associated with IM text
+				   In 1.3 we'll have a text event instead.. */
+				saved_keysym = keysym;
+			}
+			break;
+		}
+
+		/* Look up the translated value for the key event */
+#ifdef X_HAVE_UTF8_STRING
+		if ( SDL_IC != NULL ) {
+			static Status state;
+			/* A UTF-8 character can be at most 6 bytes */
+			char keybuf[6];
+			if ( pXutf8LookupString(SDL_IC, &xevent.xkey,
+			                        keybuf, sizeof(keybuf),
+			                        NULL, &state) ) {
+				keysym.unicode = Utf8ToUcs4((Uint8*)keybuf);
+			}
+		}
+		else
+#endif
+		{
+			static XComposeStatus state;
+			char keybuf[32];
+
+			if ( pXLookupString(&xevent.xkey,
+			                    keybuf, sizeof(keybuf),
+			                    NULL, &state) ) {
+				/*
+				* FIXME: XLookupString() may yield more than one
+				* character, so we need a mechanism to allow for
+				* this (perhaps null keypress events with a
+				* unicode value)
+				*/
+				keysym.unicode = (Uint8)keybuf[0];
+			}
+		}
+		posted = SDL_PrivateKeyboard(SDL_PRESSED, &keysym);
 	    }
 	    break;
 
 	    /* Key release? */
 	    case KeyRelease: {
 		SDL_keysym keysym;
+		KeyCode keycode = xevent.xkey.keycode;
 
 #ifdef DEBUG_XEVENTS
 printf("KeyRelease (X11 keycode = 0x%X)\n", xevent.xkey.keycode);
 #endif
 		/* Check to see if this is a repeated key */
-		if ( ! X11_KeyRepeat(SDL_Display, &xevent) ) {
-			posted = SDL_PrivateKeyboard(SDL_RELEASED, 
-				X11_TranslateKey(SDL_Display, SDL_IC,  &xevent.xkey,
-						 xevent.xkey.keycode,
-						 &keysym));
+		if ( X11_KeyRepeat(SDL_Display, &xevent) ) {
+			break;
 		}
+
+		/* Get the translated SDL virtual keysym */
+		keysym.scancode = keycode;
+		keysym.sym = X11_TranslateKeycode(SDL_Display, keycode);
+		keysym.mod = KMOD_NONE;
+		keysym.unicode = 0;
+
+		posted = SDL_PrivateKeyboard(SDL_RELEASED, &keysym);
 	    }
 	    break;
 
@@ -507,6 +697,26 @@ void X11_InitKeymap(void)
 	for ( i=0; i<SDL_TABLESIZE(ODD_keymap); ++i )
 		ODD_keymap[i] = SDLK_UNKNOWN;
 
+ 	/* Some of these might be mappable to an existing SDLK_ code */
+ 	ODD_keymap[XK_dead_grave&0xFF] = SDLK_COMPOSE;
+ 	ODD_keymap[XK_dead_acute&0xFF] = SDLK_COMPOSE;
+ 	ODD_keymap[XK_dead_tilde&0xFF] = SDLK_COMPOSE;
+ 	ODD_keymap[XK_dead_macron&0xFF] = SDLK_COMPOSE;
+ 	ODD_keymap[XK_dead_breve&0xFF] = SDLK_COMPOSE;
+ 	ODD_keymap[XK_dead_abovedot&0xFF] = SDLK_COMPOSE;
+ 	ODD_keymap[XK_dead_diaeresis&0xFF] = SDLK_COMPOSE;
+ 	ODD_keymap[XK_dead_abovering&0xFF] = SDLK_COMPOSE;
+ 	ODD_keymap[XK_dead_doubleacute&0xFF] = SDLK_COMPOSE;
+ 	ODD_keymap[XK_dead_caron&0xFF] = SDLK_COMPOSE;
+ 	ODD_keymap[XK_dead_cedilla&0xFF] = SDLK_COMPOSE;
+ 	ODD_keymap[XK_dead_ogonek&0xFF] = SDLK_COMPOSE;
+ 	ODD_keymap[XK_dead_iota&0xFF] = SDLK_COMPOSE;
+ 	ODD_keymap[XK_dead_voiced_sound&0xFF] = SDLK_COMPOSE;
+ 	ODD_keymap[XK_dead_semivoiced_sound&0xFF] = SDLK_COMPOSE;
+ 	ODD_keymap[XK_dead_belowdot&0xFF] = SDLK_COMPOSE;
+ 	ODD_keymap[XK_dead_hook&0xFF] = SDLK_COMPOSE;
+ 	ODD_keymap[XK_dead_horn&0xFF] = SDLK_COMPOSE;
+
 #ifdef XK_dead_circumflex
 	/* These X keysyms have 0xFE as the high byte */
 	ODD_keymap[XK_dead_circumflex&0xFF] = SDLK_CARET;
@@ -607,253 +817,83 @@ void X11_InitKeymap(void)
 	MISC_keymap[XK_Hyper_R&0xFF] = SDLK_MENU;   /* Windows "Menu" key */
 }
 
-#ifdef X_HAVE_UTF8_STRING
-Uint32 Utf8ToUcs4(const unsigned char *utf8)
-{
-	Uint32 c;
-	int i = 1;
-	int noOctets = 0;
-	int firstOctetMask = 0;
-	unsigned char firstOctet = utf8[0];
-	if (firstOctet < 0x80) {
-		/*
-		  Characters in the range:
-		    00000000 to 01111111 (ASCII Range)
-		  are stored in one octet:
-		    0xxxxxxx (The same as its ASCII representation)
-		  The least 6 significant bits of the first octet is the most 6 significant nonzero bits
-		  of the UCS4 representation.
-		*/
-		noOctets = 1;
-		firstOctetMask = 0x7F;  /* 0(1111111) - The most significant bit is ignored */
-	} else if ((firstOctet & 0xE0) /* get the most 3 significant bits by AND'ing with 11100000 */
-	              == 0xC0 ) {  /* see if those 3 bits are 110. If so, the char is in this range */
-		/*
-		  Characters in the range:
-		    00000000 10000000 to 00000111 11111111
-		  are stored in two octets:
-		    110xxxxx 10xxxxxx
-		  The least 5 significant bits of the first octet is the most 5 significant nonzero bits
-		  of the UCS4 representation.
-		*/
-		noOctets = 2;
-		firstOctetMask = 0x1F;  /* 000(11111) - The most 3 significant bits are ignored */
-	} else if ((firstOctet & 0xF0) /* get the most 4 significant bits by AND'ing with 11110000 */
-	              == 0xE0) {  /* see if those 4 bits are 1110. If so, the char is in this range */
-		/*
-		  Characters in the range:
-		    00001000 00000000 to 11111111 11111111
-		  are stored in three octets:
-		    1110xxxx 10xxxxxx 10xxxxxx
-		  The least 4 significant bits of the first octet is the most 4 significant nonzero bits
-		  of the UCS4 representation.
-		*/
-		noOctets = 3;
-		firstOctetMask = 0x0F; /* 0000(1111) - The most 4 significant bits are ignored */
-	} else if ((firstOctet & 0xF8) /* get the most 5 significant bits by AND'ing with 11111000 */
-	              == 0xF0) {  /* see if those 5 bits are 11110. If so, the char is in this range */
-		/*
-		  Characters in the range:
-		    00000001 00000000 00000000 to 00011111 11111111 11111111
-		  are stored in four octets:
-		    11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-		  The least 3 significant bits of the first octet is the most 3 significant nonzero bits
-		  of the UCS4 representation.
-		*/
-		noOctets = 4;
-		firstOctetMask = 0x07; /* 11110(111) - The most 5 significant bits are ignored */
-	} else if ((firstOctet & 0xFC) /* get the most 6 significant bits by AND'ing with 11111100 */
-	              == 0xF8) { /* see if those 6 bits are 111110. If so, the char is in this range */
-		/*
-		  Characters in the range:
-		    00000000 00100000 00000000 00000000 to
-		    00000011 11111111 11111111 11111111
-		  are stored in five octets:
-		    111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
-		  The least 2 significant bits of the first octet is the most 2 significant nonzero bits
-		  of the UCS4 representation.
-		*/
-		noOctets = 5;
-		firstOctetMask = 0x03; /* 111110(11) - The most 6 significant bits are ignored */
-	} else if ((firstOctet & 0xFE) /* get the most 7 significant bits by AND'ing with 11111110 */
-	              == 0xFC) { /* see if those 7 bits are 1111110. If so, the char is in this range */
-		/*
-		  Characters in the range:
-		    00000100 00000000 00000000 00000000 to
-		    01111111 11111111 11111111 11111111
-		  are stored in six octets:
-		    1111110x 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx
-		  The least significant bit of the first octet is the most significant nonzero bit
-		  of the UCS4 representation.
-		*/
-		noOctets = 6;
-		firstOctetMask = 0x01; /* 1111110(1) - The most 7 significant bits are ignored */
-	} else
-		return 0;  /* The given chunk is not a valid UTF-8 encoded Unicode character */
-	
-	/*
-	  The least noOctets significant bits of the first octet is the most 2 significant nonzero bits
-	  of the UCS4 representation.
-	  The first 6 bits of the UCS4 representation is the least 8-noOctets-1 significant bits of
-	  firstOctet if the character is not ASCII. If so, it's the least 7 significant bits of firstOctet.
-	  This done by AND'ing firstOctet with its mask to trim the bits used for identifying the
-	  number of continuing octets (if any) and leave only the free bits (the x's)
-	  Sample:
-	  1-octet:    0xxxxxxx  &  01111111 = 0xxxxxxx
-	  2-octets:  110xxxxx  &  00011111 = 000xxxxx
-	*/
-	c = firstOctet & firstOctetMask;
-	
-	/* Now, start filling c.ucs4 with the bits from the continuing octets from utf8. */
-	for (i = 1; i < noOctets; i++) {
-		/* A valid continuing octet is of the form 10xxxxxx */
-		if ((utf8[i] & 0xC0) /* get the most 2 significant bits by AND'ing with 11000000 */
-		    != 0x80) /* see if those 2 bits are 10. If not, the is a malformed sequence. */
-			/*The given chunk is a partial sequence at the end of a string that could
-			   begin a valid character */
-			return 0;
-		
-		/* Make room for the next 6-bits */
-		c <<= 6;
-		
-		/*
-		  Take only the least 6 significance bits of the current octet (utf8[i]) and fill the created room
-		  of c.ucs4 with them.
-		  This done by AND'ing utf8[i] with 00111111 and the OR'ing the result with c.ucs4.
-		*/
-		c |= utf8[i] & 0x3F;
-	}
-	return c;
-}
-#endif
-
-
-SDL_keysym *X11_TranslateKey(Display *display, XIC ic, XKeyEvent *xkey, KeyCode kc,
-			     SDL_keysym *keysym)
+/* Get the translated SDL virtual keysym */
+SDLKey X11_TranslateKeycode(Display *display, KeyCode kc)
 {
 	KeySym xsym;
+	SDLKey key;
 
-	/* Get the raw keyboard scancode */
-	keysym->scancode = kc;
 	xsym = pXKeycodeToKeysym(display, kc, 0);
 #ifdef DEBUG_KEYS
-	fprintf(stderr, "Translating key 0x%.4x (%d)\n", xsym, kc);
+	fprintf(stderr, "Translating key code %d -> 0x%.4x\n", kc, xsym);
 #endif
-	/* Get the translated SDL virtual keysym */
-	keysym->sym = SDLK_UNKNOWN;
+	key = SDLK_UNKNOWN;
 	if ( xsym ) {
 		switch (xsym>>8) {
-			case 0x1005FF:
+		    case 0x1005FF:
 #ifdef SunXK_F36
-				if ( xsym == SunXK_F36 )
-					keysym->sym = SDLK_F11;
+			if ( xsym == SunXK_F36 )
+				key = SDLK_F11;
 #endif
 #ifdef SunXK_F37
-				if ( xsym == SunXK_F37 )
-					keysym->sym = SDLK_F12;
+			if ( xsym == SunXK_F37 )
+				key = SDLK_F12;
 #endif
-				break;
-			case 0x00:	/* Latin 1 */
-			case 0x01:	/* Latin 2 */
-			case 0x02:	/* Latin 3 */
-			case 0x03:	/* Latin 4 */
-			case 0x04:	/* Katakana */
-			case 0x05:	/* Arabic */
-			case 0x06:	/* Cyrillic */
-			case 0x07:	/* Greek */
-			case 0x08:	/* Technical */
-			case 0x0A:	/* Publishing */
-			case 0x0C:	/* Hebrew */
-			case 0x0D:	/* Thai */
-				keysym->sym = (SDLKey)(xsym&0xFF);
-				/* Map capital letter syms to lowercase */
-				if ((keysym->sym >= 'A')&&(keysym->sym <= 'Z'))
-					keysym->sym += ('a'-'A');
-				break;
-			case 0xFE:
-				keysym->sym = ODD_keymap[xsym&0xFF];
-				break;
-			case 0xFF:
-				keysym->sym = MISC_keymap[xsym&0xFF];
-				break;
-			default:
-				fprintf(stderr,
-					"X11: Unknown xsym, sym = 0x%04x\n",
+			break;
+		    case 0x00:	/* Latin 1 */
+			key = (SDLKey)(xsym & 0xFF);
+			break;
+		    case 0x01:	/* Latin 2 */
+		    case 0x02:	/* Latin 3 */
+		    case 0x03:	/* Latin 4 */
+		    case 0x04:	/* Katakana */
+		    case 0x05:	/* Arabic */
+		    case 0x06:	/* Cyrillic */
+		    case 0x07:	/* Greek */
+		    case 0x08:	/* Technical */
+		    case 0x0A:	/* Publishing */
+		    case 0x0C:	/* Hebrew */
+		    case 0x0D:	/* Thai */
+			/* These are wrong, but it's better than nothing */
+			key = (SDLKey)(xsym & 0xFF);
+			break;
+		    case 0xFE:
+			key = ODD_keymap[xsym&0xFF];
+			break;
+		    case 0xFF:
+			key = MISC_keymap[xsym&0xFF];
+			break;
+		    default:
+			/*
+			fprintf(stderr, "X11: Unhandled xsym, sym = 0x%04x\n",
 					(unsigned int)xsym);
-				break;
+			*/
+			break;
 		}
 	} else {
 		/* X11 doesn't know how to translate the key! */
 		switch (kc) {
-			/* Caution:
-			   These keycodes are from the Microsoft Keyboard
+		    /* Caution:
+		       These keycodes are from the Microsoft Keyboard
+		     */
+		    case 115:
+			key = SDLK_LSUPER;
+			break;
+		    case 116:
+			key = SDLK_RSUPER;
+			break;
+		    case 117:
+			key = SDLK_MENU;
+			break;
+		    default:
+			/*
+			 * no point in an error message; happens for
+			 * several keys when we get a keymap notify
 			 */
-			case 115:
-				keysym->sym = SDLK_LSUPER;
-				break;
-			case 116:
-				keysym->sym = SDLK_RSUPER;
-				break;
-			case 117:
-				keysym->sym = SDLK_MENU;
-				break;
-			default:
-				/*
-				 * no point in an error message; happens for
-				 * several keys when we get a keymap notify
-				 */
-				break;
+			break;
 		}
 	}
-	keysym->mod = KMOD_NONE;
-
-	/* If UNICODE is on, get the UNICODE value for the key */
-	keysym->unicode = 0;
-	if ( SDL_TranslateUNICODE && xkey ) {
-		static XComposeStatus state;
-
-
-#define BROKEN_XFREE86_INTERNATIONAL_KBD
-/* This appears to be a magical flag that is used with AltGr on
-   international keyboards to signal alternate key translations.
-   The flag doesn't show up when in fullscreen mode (?)
-   FIXME:  Check to see if this code is safe for other servers.
-*/
-#ifdef BROKEN_XFREE86_INTERNATIONAL_KBD
-		/* Work around what appears to be a bug in XFree86 */
-		if ( SDL_GetModState() & KMOD_MODE ) {
-			xkey->state |= (1<<13);
-		}
-#endif
-		/* Look up the translated value for the key event */
-
-		/* if there is no connection with the IM server, use the regular method */
-		if (ic == NULL || xkey->type != KeyPress) {
-			unsigned char keybuf[32];
-
-			if ( pXLookupString(xkey, (char *)keybuf, sizeof(keybuf),
-								NULL, &state) ) {
-				/*
-				* FIXME,: XLookupString() may yield more than one
-				* character, so we need a mechanism to allow for
-				* this (perhaps generate null keypress events with
-				* a unicode value)
-				*/
-				keysym->unicode = keybuf[0];
-			}
-		} else {  /* else, use the IM protocol */
-			#ifdef X_HAVE_UTF8_STRING
-			/* A UTF-8 character can be at most 6 bytes */
-			unsigned char keybuf[6];
-			pXSetICFocus(ic);
-			if ( pXutf8LookupString(ic, (XKeyPressedEvent *)xkey, (char *)keybuf, sizeof(keybuf),
-			                                    NULL, (Status *)&state) )
-				keysym->unicode = Utf8ToUcs4(keybuf);
-			pXUnsetICFocus(ic);
-			#endif
-		}
-	}
-	return(keysym);
+	return key;
 }
 
 /* X11 modifier masks for various keys */
@@ -969,12 +1009,10 @@ Uint16 X11_KeyToUnicode(SDLKey keysym, SDLMod modifiers)
  * synthetic keypress/release events.
  * key_vec is a bit vector of keycodes (256 bits)
  */
-void X11_SetKeyboardState(Display *display, XIC ic, const char *key_vec)
+void X11_SetKeyboardState(Display *display, const char *key_vec)
 {
 	char keys_return[32];
 	int i;
-	KeyCode xcode[SDLK_LAST];
-	Uint8 new_kstate[SDLK_LAST];
 	Uint8 *kstate = SDL_GetKeyState(NULL);
 	SDLMod modstate;
 	Window junk_window;
@@ -1004,61 +1042,54 @@ void X11_SetKeyboardState(Display *display, XIC ic, const char *key_vec)
 	}
 
 	/* Zero the new keyboard state and generate it */
-	memset(new_kstate, SDL_RELEASED, sizeof(new_kstate));
+	memset(kstate, 0, SDLK_LAST);
 	/*
 	 * An obvious optimisation is to check entire longwords at a time in
 	 * both loops, but we can't be sure the arrays are aligned so it's not
 	 * worth the extra complexity
 	 */
-	for(i = 0; i < 32; i++) {
+	for ( i = 0; i < 32; i++ ) {
 		int j;
-		if(!key_vec[i])
+		if ( !key_vec[i] )
 			continue;
-		for(j = 0; j < 8; j++) {
-			if(key_vec[i] & (1 << j)) {
-				SDL_keysym sk;
-				KeyCode kc = i << 3 | j;
-				X11_TranslateKey(display, ic, NULL, kc, &sk);
-				new_kstate[sk.sym] = SDL_PRESSED;
-				xcode[sk.sym] = kc;
-			}
-		}
-	}
-	for(i = SDLK_FIRST+1; i < SDLK_LAST; i++) {
-		int state = new_kstate[i];
-
-		if ( state == SDL_PRESSED ) {
-			switch (i) {
-				case SDLK_LSHIFT:
+		for ( j = 0; j < 8; j++ ) {
+			if ( key_vec[i] & (1 << j) ) {
+				SDLKey key;
+				KeyCode kc = (i << 3 | j);
+				key = X11_TranslateKeycode(display, kc);
+				if ( key == SDLK_UNKNOWN ) {
+					continue;
+				}
+				kstate[key] = SDL_PRESSED;
+				switch (key) {
+				    case SDLK_LSHIFT:
 					modstate |= KMOD_LSHIFT;
 					break;
-				case SDLK_RSHIFT:
+				    case SDLK_RSHIFT:
 					modstate |= KMOD_RSHIFT;
 					break;
-				case SDLK_LCTRL:
+				    case SDLK_LCTRL:
 					modstate |= KMOD_LCTRL;
 					break;
-				case SDLK_RCTRL:
+				    case SDLK_RCTRL:
 					modstate |= KMOD_RCTRL;
 					break;
-				case SDLK_LALT:
+				    case SDLK_LALT:
 					modstate |= KMOD_LALT;
 					break;
-				case SDLK_RALT:
+				    case SDLK_RALT:
 					modstate |= KMOD_RALT;
 					break;
-				case SDLK_LMETA:
+				    case SDLK_LMETA:
 					modstate |= KMOD_LMETA;
 					break;
-				case SDLK_RMETA:
+				    case SDLK_RMETA:
 					modstate |= KMOD_RMETA;
 					break;
-				default:
+				    default:
 					break;
+				}
 			}
-		}
-		if ( kstate[i] != state ) {
-			kstate[i] = state;
 		}
 	}
 

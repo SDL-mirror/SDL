@@ -37,8 +37,7 @@
 /* Heheh we're using X11 event code */
 extern int X11_Pending(Display *display);
 extern void X11_InitKeymap(void);
-extern SDL_keysym *X11_TranslateKey(Display *display, XIC ic, XKeyEvent *xkey,
-				    KeyCode kc, SDL_keysym *keysym);
+extern SDLKey X11_TranslateKeycode(Display *display, KeyCode kc);
 
 static int DGA_DispatchEvent(_THIS)
 {
@@ -74,18 +73,62 @@ static int DGA_DispatchEvent(_THIS)
 	    }
 	    break;
 
-	    /* Key press or release? */
-	    case KeyPress:
-	    case KeyRelease: {
+	    /* Key press? */
+	    case KeyPress: {
 		SDL_keysym keysym;
+		KeyCode keycode;
 		XKeyEvent xkey;
 
 		SDL_NAME(XDGAKeyEventToXKeyEvent)(&xevent.xkey, &xkey);
-		posted = SDL_PrivateKeyboard((xevent.type == KeyPress), 
-					X11_TranslateKey(DGA_Display, NULL/*no XIC*/,
-							 &xkey, xkey.keycode,
-							 &keysym));
+		keycode = xkey.keycode;
+#ifdef DEBUG_XEVENTS
+printf("KeyPress (X11 keycode = 0x%X)\n", xkey.keycode);
+#endif
+		/* Get the translated SDL virtual keysym */
+		keysym.scancode = keycode;
+		keysym.sym = X11_TranslateKeycode(DGA_Display, keycode);
+		keysym.mod = KMOD_NONE;
+		keysym.unicode = 0;
+
+		/* Look up the translated value for the key event */
+		if ( SDL_TranslateUNICODE ) {
+			static XComposeStatus state;
+			char keybuf[32];
+
+			if ( pXLookupString(&xkey, keybuf, sizeof(keybuf), NULL, &state) ) {
+				/*
+				* FIXME: XLookupString() may yield more than one
+				* character, so we need a mechanism to allow for
+				* this (perhaps null keypress events with a
+				* unicode value)
+				*/
+				keysym.unicode = (Uint8)keybuf[0];
+			}
+		}
+		posted = SDL_PrivateKeyboard(SDL_PRESSED, &keysym);
 	    }
+	    break;
+
+	    /* Key release? */
+	    case KeyRelease: {
+		SDL_keysym keysym;
+		KeyCode keycode;
+		XKeyEvent xkey;
+
+		SDL_NAME(XDGAKeyEventToXKeyEvent)(&xevent.xkey, &xkey);
+		keycode = xkey.keycode;
+#ifdef DEBUG_XEVENTS
+printf("KeyRelease (X11 keycode = 0x%X)\n", xkey.keycode);
+#endif
+		/* Get the translated SDL virtual keysym */
+		keysym.scancode = keycode;
+		keysym.sym = X11_TranslateKeycode(DGA_Display, keycode);
+		keysym.mod = KMOD_NONE;
+		keysym.unicode = 0;
+		posted = SDL_PrivateKeyboard(SDL_RELEASED, &keysym);
+	    }
+	    break;
+
 	    break;
 
 	}

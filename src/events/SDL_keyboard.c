@@ -397,6 +397,8 @@ printf("The '%s' key has been %s\n", SDL_GetKeyName(keysym->sym),
 	if ( state == SDL_PRESSED ) {
 		keysym->mod = (SDLMod)modstate;
 		switch (keysym->sym) {
+			case SDLK_UNKNOWN:
+				break;
 			case SDLK_NUMLOCK:
 				modstate ^= KMOD_NUM;
 				if ( ! (modstate&KMOD_NUM) )
@@ -442,6 +444,8 @@ printf("The '%s' key has been %s\n", SDL_GetKeyName(keysym->sym),
 		}
 	} else {
 		switch (keysym->sym) {
+			case SDLK_UNKNOWN:
+				break;
 			case SDLK_NUMLOCK:
 			case SDLK_CAPSLOCK:
 				/* Only send keydown events */
@@ -499,17 +503,19 @@ printf("The '%s' key has been %s\n", SDL_GetKeyName(keysym->sym),
 			return(0);
 	}
 
-	/* Drop events that don't change state */
-	if ( SDL_KeyState[keysym->sym] == state ) {
+	if ( keysym->sym != SDLK_UNKNOWN ) {
+		/* Drop events that don't change state */
+		if ( SDL_KeyState[keysym->sym] == state ) {
 #if 0
 printf("Keyboard event didn't change state - dropped!\n");
 #endif
-		return(0);
-	}
+			return(0);
+		}
 
-	/* Update internal keyboard state */
-	SDL_ModState = (SDLMod)modstate;
-	SDL_KeyState[keysym->sym] = state;
+		/* Update internal keyboard state */
+		SDL_ModState = (SDLMod)modstate;
+		SDL_KeyState[keysym->sym] = state;
+	}
 
 	/* Post the event, if desired */
 	posted = 0;

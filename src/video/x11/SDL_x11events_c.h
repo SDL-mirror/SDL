@@ -25,5 +25,5 @@
 /* Functions to be exported */
 extern void X11_InitOSKeymap(_THIS);
 extern void X11_PumpEvents(_THIS);
-extern void X11_SetKeyboardState(Display *display, XIC ic, const char *key_vec);
+extern void X11_SetKeyboardState(Display *display, const char *key_vec);
 
