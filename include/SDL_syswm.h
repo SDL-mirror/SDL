@@ -119,8 +119,7 @@ typedef struct SDL_SysWMinfo {
 } SDL_SysWMinfo;
 
 #elif defined(WIN32)
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include "SDL_windows.h"
 
 /* The windows custom event structure */
 struct SDL_SysWMmsg {

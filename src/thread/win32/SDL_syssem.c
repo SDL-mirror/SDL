@@ -22,12 +22,11 @@
 
 /* Semaphore functions using the Win32 API */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <windows.h>
+#include "SDL_windows.h"
 
 #include "SDL_error.h"
 #include "SDL_thread.h"
+#include "SDL_stdlib.h"
 #if defined(_WIN32_WCE) && (_WIN32_WCE < 300)
 #include "win_ce_semaphore.h"
 #endif

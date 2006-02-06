@@ -23,7 +23,7 @@
 #ifndef _SDL_dibvideo_h
 #define _SDL_dibvideo_h
 
-#include <windows.h>
+#include "SDL_windows.h"
 
 /* for PDA */
 typedef enum

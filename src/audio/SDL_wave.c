@@ -24,17 +24,13 @@
 
 /* Microsoft WAVE file loading routines */
 
-#include <stdlib.h>
-#include <string.h>
-
 #include "SDL_error.h"
 #include "SDL_audio.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_wave.h"
 #include "SDL_endian.h"
 
-#ifndef NELEMS
-#define NELEMS(array)	((sizeof array)/(sizeof array[0]))
-#endif
 
 static int ReadChunk(SDL_RWops *src, Chunk *chunk);
 
@@ -342,9 +338,9 @@ static int IMA_ADPCM_decode(Uint8 **audio_buf, Uint32 *audio_len)
 
 	/* Check to make sure we have enough variables in the state array */
 	channels = IMA_ADPCM_state.wavefmt.channels;
-	if ( channels > NELEMS(IMA_ADPCM_state.state) ) {
+	if ( channels > SDL_arraysize(IMA_ADPCM_state.state) ) {
 		SDL_SetError("IMA ADPCM decoder can only handle %d channels",
-						NELEMS(IMA_ADPCM_state.state));
+					SDL_arraysize(IMA_ADPCM_state.state));
 		return(-1);
 	}
 	state = IMA_ADPCM_state.state;
@@ -564,7 +560,7 @@ done:
 	}
 	else {
 		// seek to the end of the file (given by the RIFF chunk)
-		SDL_RWseek(src, wavelen - chunk.length - headerDiff, SEEK_CUR);
+		SDL_RWseek(src, wavelen - chunk.length - headerDiff, RW_SEEK_CUR);
 	}
 	if ( was_error ) {
 		spec = NULL;

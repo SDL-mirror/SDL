@@ -27,7 +27,11 @@
 #ifndef _SDL_RWops_h
 #define _SDL_RWops_h
 
+#include "SDL_config.h"
+
+#ifdef HAVE_STDIO_H
 #include <stdio.h>
+#endif
 
 #include "SDL_types.h"
 
@@ -63,10 +67,12 @@ typedef struct SDL_RWops {
 
 	Uint32 type;
 	union {
+#ifdef HAVE_STDIO_H
 	    struct {
 		int autoclose;
 	 	FILE *fp;
 	    } stdio;
+#endif
 	    struct {
 		Uint8 *base;
 	 	Uint8 *here;
@@ -84,7 +90,9 @@ typedef struct SDL_RWops {
 
 extern DECLSPEC SDL_RWops * SDLCALL SDL_RWFromFile(const char *file, const char *mode);
 
+#ifdef HAVE_STDIO_H
 extern DECLSPEC SDL_RWops * SDLCALL SDL_RWFromFP(FILE *fp, int autoclose);
+#endif
 
 extern DECLSPEC SDL_RWops * SDLCALL SDL_RWFromMem(void *mem, int size);
 extern DECLSPEC SDL_RWops * SDLCALL SDL_RWFromConstMem(const void *mem, int size);
@@ -92,9 +100,13 @@ extern DECLSPEC SDL_RWops * SDLCALL SDL_RWFromConstMem(const void *mem, int size
 extern DECLSPEC SDL_RWops * SDLCALL SDL_AllocRW(void);
 extern DECLSPEC void SDLCALL SDL_FreeRW(SDL_RWops *area);
 
+#define RW_SEEK_SET	0	/* Seek from the beginning of data */
+#define RW_SEEK_CUR	1	/* Seek relative to current read point */
+#define RW_SEEK_END	2	/* Seek relative to the end of data */
+
 /* Macros to easily read and write from an SDL_RWops structure */
 #define SDL_RWseek(ctx, offset, whence)	(ctx)->seek(ctx, offset, whence)
-#define SDL_RWtell(ctx)			(ctx)->seek(ctx, 0, SEEK_CUR)
+#define SDL_RWtell(ctx)			(ctx)->seek(ctx, 0, RW_SEEK_CUR)
 #define SDL_RWread(ctx, ptr, size, n)	(ctx)->read(ctx, ptr, size, n)
 #define SDL_RWwrite(ctx, ptr, size, n)	(ctx)->write(ctx, ptr, size, n)
 #define SDL_RWclose(ctx)		(ctx)->close(ctx)

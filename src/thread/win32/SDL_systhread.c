@@ -22,43 +22,59 @@
 
 /* Win32 thread management routines for SDL */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <windows.h>
-
-#ifndef _WIN32_WCE
-#include <process.h>
-#endif
+#include "SDL_windows.h"
 
 #include "SDL_error.h"
 #include "SDL_thread.h"
+#include "SDL_stdlib.h"
 #include "SDL_systhread.h"
 
+typedef struct ThreadStartParms
+{
+  void *args;
+  pfnSDL_CurrentEndThread pfnCurrentEndThread;
+} tThreadStartParms, *pThreadStartParms;
 
 static unsigned __stdcall RunThread(void *data)
 {
-	SDL_RunThread(data);
-	return(0);
+  pThreadStartParms pThreadParms = (pThreadStartParms)data;
+  pfnSDL_CurrentEndThread pfnCurrentEndThread = NULL;
+
+  // Call the thread function!
+  SDL_RunThread(pThreadParms->args);
+
+  // Get the current endthread we have to use!
+  if (pThreadParms)
+  {
+    pfnCurrentEndThread = pThreadParms->pfnCurrentEndThread;
+    free(pThreadParms);
+  }
+  // Call endthread!
+  if (pfnCurrentEndThread)
+    (*pfnCurrentEndThread)(0);
+  return(0);
 }
 
-int SDL_SYS_CreateThread(SDL_Thread *thread, void *args)
+int SDL_SYS_CreateThread(SDL_Thread *thread, void *args, pfnSDL_CurrentBeginThread pfnBeginThread, pfnSDL_CurrentEndThread pfnEndThread)
 {
 	unsigned threadid;
+    pThreadStartParms pThreadParms = (pThreadStartParms)malloc(sizeof(tThreadStartParms));
+    if (!pThreadParms) {
+		SDL_OutOfMemory();
+        return(-1);
+    }
 
-	/*
-	 * Avoid CreateThread: https://bugzilla.libsdl.org/show_bug.cgi?id=22
-	 *
-	 * have to use _beginthreadex if we want the returned handle
-	 * to be accessible after the thread exits
-	 * threads created with _beginthread auto-close the handle
-	 * Windows CE still use CreateThread.
-	 */
-#ifdef _WIN32_WCE
-	thread->handle = CreateThread(NULL, 0, RunThread, args, 0, &threadid);
-#else
-	thread->handle = (SYS_ThreadHandle) _beginthreadex(NULL, 0, RunThread,
-			args, 0, &threadid);
-#endif
+    // Save the function which we will have to call to clear the RTL of calling app!
+    pThreadParms->pfnCurrentEndThread = pfnEndThread;
+    // Also save the real parameters we have to pass to thread function
+    pThreadParms->args = args;
+
+	if (pfnBeginThread) {
+		thread->handle = (SYS_ThreadHandle) pfnBeginThread(NULL, 0, RunThread,
+				pThreadParms, 0, &threadid);
+	} else {
+		thread->handle = CreateThread(NULL, 0, RunThread, pThreadParms, 0, &threadid);
+	}
 	if (thread->handle == NULL) {
 		SDL_SetError("Not enough resources to create thread");
 		return(-1);

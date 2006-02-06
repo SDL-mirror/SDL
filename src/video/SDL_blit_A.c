@@ -20,8 +20,6 @@
     slouken@libsdl.org
 */
 
-#include <stdio.h>
-
 #include "SDL_types.h"
 #include "SDL_video.h"
 #include "SDL_blit.h"

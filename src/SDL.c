@@ -22,7 +22,6 @@
 
 /* Initialization code for SDL */
 
-#include <stdlib.h>		/* For getenv() */
 #ifdef ENABLE_PTH
 #include <pth.h>
 #endif
@@ -30,6 +29,7 @@
 #include "SDL.h"
 #include "SDL_endian.h"
 #include "SDL_fatal.h"
+#include "SDL_stdlib.h"
 #ifndef DISABLE_VIDEO
 #include "SDL_leaks.h"
 #endif
@@ -253,26 +253,7 @@ const SDL_version * SDL_Linked_Version(void)
 	return(&version);
 }
 
-#ifndef __OS2__
-#if defined(_WIN32_WCE) || (defined(__WATCOMC__) && defined(BUILD_DLL))
-/* Need to include DllMain() on Windows CE and Watcom C for some reason.. */
-#include <windows.h>
-
-BOOL APIENTRY DllMain( HANDLE hModule, 
-                       DWORD  ul_reason_for_call, 
-                       LPVOID lpReserved )
-{
-	switch (ul_reason_for_call) {
-		case DLL_PROCESS_ATTACH:
-		case DLL_THREAD_ATTACH:
-		case DLL_THREAD_DETACH:
-		case DLL_PROCESS_DETACH:
-			break;
-	}
-	return TRUE;
-}
-#endif /* _WIN32_WCE and building DLL with Watcom C */
-#else
+#if defined(__OS2__)
 // Building for OS/2
 #ifdef __WATCOMC__
 
@@ -341,6 +322,27 @@ unsigned _System LibMain(unsigned hmod, unsigned termination)
     return 1;
   }
 }
+#endif /* __WATCOMC__ */
 
-#endif
-#endif
+#elif defined(_WIN32)
+
+#if !defined(HAVE_LIBC) || defined(_WIN32_WCE) || (defined(__WATCOMC__) && defined(BUILD_DLL))
+/* Need to include DllMain() on Windows CE and Watcom C for some reason.. */
+#include "SDL_windows.h"
+
+BOOL APIENTRY _DllMainCRTStartup( HANDLE hModule, 
+                       DWORD  ul_reason_for_call, 
+                       LPVOID lpReserved )
+{
+	switch (ul_reason_for_call) {
+		case DLL_PROCESS_ATTACH:
+		case DLL_THREAD_ATTACH:
+		case DLL_THREAD_DETACH:
+		case DLL_PROCESS_DETACH:
+			break;
+	}
+	return TRUE;
+}
+#endif /* _WIN32_WCE and building DLL with Watcom C */
+
+#endif /* OS/2 elif _WIN32 */

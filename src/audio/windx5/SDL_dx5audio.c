@@ -22,12 +22,12 @@
 
 /* Allow access to a raw mixing buffer */
 
-#include <stdio.h>
-
 #include "SDL_types.h"
 #include "SDL_error.h"
 #include "SDL_timer.h"
 #include "SDL_audio.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_audio_c.h"
 #include "SDL_dx5audio.h"
 
@@ -223,12 +223,13 @@ static void SetDSerror(const char *function, int code)
 			error = "Function not supported";
 			break;
 		default:
-			sprintf(errbuf, "%s: Unknown DirectSound error: 0x%x",
+			snprintf(errbuf, SDL_arraysize(errbuf),
+			         "%s: Unknown DirectSound error: 0x%x",
 								function, code);
 			break;
 	}
 	if ( ! errbuf[0] ) {
-		sprintf(errbuf, "%s: %s", function, error);
+		snprintf(errbuf, SDL_arraysize(errbuf), "%s: %s", function, error);
 	}
 	SDL_SetError("%s", errbuf);
 	return;

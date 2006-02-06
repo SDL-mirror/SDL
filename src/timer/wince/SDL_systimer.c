@@ -20,7 +20,7 @@
     slouken@libsdl.org
 */
 
-#include <windows.h>
+#include "SDL_windows.h"
 #include <mmsystem.h>
 
 #include "SDL_timer.h"

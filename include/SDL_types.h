@@ -25,11 +25,17 @@
 #ifndef _SDL_types_h
 #define _SDL_types_h
 
-/* The number of elements in a table */
-#define SDL_TABLESIZE(table)	(sizeof(table)/sizeof(table[0]))
+#include <sys/types.h>
+#ifdef _MSC_VER
+#include <crtdefs.h>	/* For size_t */
+#endif
+
+/* The number of elements in an array */
+#define SDL_arraysize(array)	(sizeof(array)/sizeof(array[0]))
+#define SDL_TABLESIZE(table)	SDL_arraysize(table)
 
 /* Basic data types */
-typedef enum {
+typedef enum SDL_bool {
 	SDL_FALSE = 0,
 	SDL_TRUE  = 1
 } SDL_bool;
@@ -106,10 +112,5 @@ typedef enum {
 } SDL_DUMMY_ENUM;
 
 SDL_COMPILE_TIME_ASSERT(enum, sizeof(SDL_DUMMY_ENUM) == sizeof(int));
-
-#undef SDL_COMPILE_TIME_ASSERT
-
-/* General keyboard/mouse state definitions */
-enum { SDL_PRESSED = 0x01, SDL_RELEASED = 0x00 };
 
 #endif

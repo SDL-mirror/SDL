@@ -20,17 +20,13 @@
     slouken@libsdl.org
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "SDL_error.h"
 #include "SDL_video.h"
+#include "SDL_string.h"
 #include "SDL_sysvideo.h"
 #include "SDL_blit.h"
 #include "SDL_RLEaccel_c.h"
 #include "SDL_pixels_c.h"
-#include "SDL_memops.h"
 
 #if (defined(i386) || defined(__x86_64__)) && defined(__GNUC__) && defined(USE_ASMBLIT)
 #define MMX_ASMBLIT

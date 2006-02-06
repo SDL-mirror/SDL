@@ -21,14 +21,12 @@
 */
 
 /* Allow access to a raw mixing buffer */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 
 #include "SDL.h"
 #include "SDL_audio.h"
 #include "SDL_timer.h"
 #include "SDL_error.h"
+#include "SDL_string.h"
 #include "SDL_audio_c.h"
 #include "SDL_audiomem.h"
 #include "SDL_sysaudio.h"
@@ -456,7 +454,12 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 	D(bug("Locking semaphore..."));
 	SDL_mutexP(audio->mixer_lock);
 
+#if (defined(_WIN32) && !defined(_WIN32_WCE)) && !defined(HAVE_LIBC)
+#undef SDL_CreateThread
+	audio->thread = SDL_CreateThread(SDL_RunAudio, audio, NULL, NULL);
+#else
 	audio->thread = SDL_CreateThread(SDL_RunAudio, audio);
+#endif
 	D(bug("Created thread...\n"));
 
 	if ( audio->thread == NULL ) {
@@ -516,7 +519,12 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 	switch (audio->opened) {
 		case  1:
 			/* Start the audio thread */
+#if (defined(_WIN32) && !defined(_WIN32_WCE)) && !defined(HAVE_LIBC)
+#undef SDL_CreateThread
+			audio->thread = SDL_CreateThread(SDL_RunAudio, audio, NULL, NULL);
+#else
 			audio->thread = SDL_CreateThread(SDL_RunAudio, audio);
+#endif
 			if ( audio->thread == NULL ) {
 				SDL_CloseAudio();
 				SDL_SetError("Couldn't create audio thread");

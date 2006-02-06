@@ -23,8 +23,6 @@
 #ifndef SDL_fbelo_h
 #define SDL_fbelo_h
 
-#include <stdlib.h>
-
 #include "SDL_fbvideo.h"
 
 /* ELO */

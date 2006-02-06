@@ -20,22 +20,14 @@
     slouken@libsdl.org
 */
 
-/* Not all environments have a working getenv()/putenv() */
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 
-#ifdef TEST_MAIN
-#define NEED_SDL_GETENV
-#endif
-
-#include "SDL_getenv.h"
-
-#ifdef NEED_SDL_GETENV
 
 #if defined(WIN32) && !defined(_WIN32_WCE)
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <malloc.h>
-#include <string.h>
+#include "SDL_windows.h"
+#include "SDL_string.h"
 
 /* Note this isn't thread-safe! */
 
@@ -93,9 +85,6 @@ char *SDL_getenv(const char *name)
 }
 
 #else /* roll our own */
-
-#include <stdlib.h>
-#include <string.h>
 
 static char **SDL_env = (char **)0;
 
@@ -183,8 +172,6 @@ char *SDL_getenv(const char *name)
 }
 
 #endif /* WIN32 */
-
-#endif /* NEED_GETENV */
 
 #ifdef TEST_MAIN
 #include <stdio.h>

@@ -22,14 +22,14 @@
 
 /* Allow access to a raw mixing buffer */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <windows.h>
+#include "SDL_windows.h"
 #include <mmsystem.h>
 
 #include "SDL_audio.h"
 #include "SDL_mutex.h"
 #include "SDL_timer.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_audio_c.h"
 #include "SDL_dibaudio.h"
 #if defined(_WIN32_WCE) && (_WIN32_WCE < 300)
@@ -125,7 +125,7 @@ static void SetMMerror(char *function, MMRESULT code)
 	wchar_t werrbuf[MAXERRORLENGTH];
 #endif
 
-	sprintf(errbuf, "%s: ", function);
+	snprintf(errbuf, SDL_arraysize(errbuf), "%s: ", function);
 	len = strlen(errbuf);
 
 #ifdef _WIN32_WCE

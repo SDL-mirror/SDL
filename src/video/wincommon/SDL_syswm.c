@@ -20,14 +20,14 @@
     slouken@libsdl.org
 */
 
-#include <stdio.h>
-#include <malloc.h>
-#include <windows.h>
+#include "SDL_windows.h"
 
 #include "SDL_version.h"
 #include "SDL_error.h"
 #include "SDL_video.h"
 #include "SDL_syswm.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_syswm_c.h"
 #include "SDL_wingl_c.h"
 #include "SDL_pixels_c.h"
@@ -119,7 +119,7 @@ void WIN_SetWMIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 	icon_plen = icon->h*icon_pitch;
 	icon_mlen = icon->h*mask_pitch;
 	icon_len = sizeof(*icon_win32)+icon_plen+icon_mlen;
-	icon_win32 = (struct Win32Icon *)alloca(icon_len);
+	icon_win32 = (struct Win32Icon *)SDL_stack_alloc(Uint8, icon_len);
 	if ( icon_win32 == NULL ) {
 		return;
 	}
@@ -137,6 +137,7 @@ void WIN_SetWMIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 	icon_256 = SDL_CreateRGBSurface(SDL_SWSURFACE, icon->w, icon->h,
 					 icon_win32->biBitCount, 0, 0, 0, 0);
 	if ( icon_256 == NULL ) {
+		SDL_stack_free(icon_win32);
 		return;
 	}
 	pal_256 = icon_256->format->palette;
@@ -167,17 +168,19 @@ void WIN_SetWMIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 	   be necessary, as Windows supports a variety of BMP formats, but
 	   it greatly simplifies our code.
 	*/ 
-        bounds.x = 0;
-        bounds.y = 0;
-        bounds.w = icon->w;
-        bounds.h = icon->h;
-        if ( SDL_LowerBlit(icon, &bounds, icon_256, &bounds) < 0 ) {
+    bounds.x = 0;
+    bounds.y = 0;
+    bounds.w = icon->w;
+    bounds.h = icon->h;
+    if ( SDL_LowerBlit(icon, &bounds, icon_256, &bounds) < 0 ) {
+	    SDL_stack_free(icon_win32);
 		SDL_FreeSurface(icon_256);
-                return;
+        return;
 	}
 
 	/* Copy pixels upside-down to icon BMP, masked with the icon mask */
 	if ( SDL_MUSTLOCK(icon_256) || (icon_256->pitch != icon_pitch) ) {
+		SDL_stack_free(icon_win32);
 		SDL_FreeSurface(icon_256);
 		SDL_SetError("Warning: Unexpected icon_256 characteristics");
 		return;
@@ -223,6 +226,7 @@ void WIN_SetWMIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 	} else {
 		SetClassLong(SDL_Window, GCL_HICON, (LONG)screen_icn);
 	}
+	SDL_stack_free(icon_win32);
 #endif /* DISABLE_ICON_SUPPORT */
 }
 

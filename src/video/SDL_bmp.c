@@ -34,11 +34,10 @@
    This code currently supports Win32 DIBs in uncompressed 8 and 24 bpp.
 */
 
-#include <string.h>
-
 #include "SDL_error.h"
 #include "SDL_video.h"
 #include "SDL_endian.h"
+#include "SDL_string.h"
 
 /* Compression encodings for BMP files */
 #ifndef BI_RGB
@@ -238,7 +237,7 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 	}
 
 	/* Read the surface pixels.  Note that the bmp image is upside down */
-	if ( SDL_RWseek(src, fp_offset+bfOffBits, SEEK_SET) < 0 ) {
+	if ( SDL_RWseek(src, fp_offset+bfOffBits, RW_SEEK_SET) < 0 ) {
 		SDL_Error(SDL_EFSEEK);
 		was_error = 1;
 		goto done;
@@ -319,7 +318,7 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 done:
 	if ( was_error ) {
 		if ( src ) {
-			SDL_RWseek(src, fp_offset, SEEK_SET);
+			SDL_RWseek(src, fp_offset, RW_SEEK_SET);
 		}
 		if ( surface ) {
 			SDL_FreeSurface(surface);
@@ -475,11 +474,11 @@ int SDL_SaveBMP_RW (SDL_Surface *saveme, SDL_RWops *dst, int freedst)
 
 		/* Write the bitmap offset */
 		bfOffBits = SDL_RWtell(dst)-fp_offset;
-		if ( SDL_RWseek(dst, fp_offset+10, SEEK_SET) < 0 ) {
+		if ( SDL_RWseek(dst, fp_offset+10, RW_SEEK_SET) < 0 ) {
 			SDL_Error(SDL_EFSEEK);
 		}
 		SDL_WriteLE32(dst, bfOffBits);
-		if ( SDL_RWseek(dst, fp_offset+bfOffBits, SEEK_SET) < 0 ) {
+		if ( SDL_RWseek(dst, fp_offset+bfOffBits, RW_SEEK_SET) < 0 ) {
 			SDL_Error(SDL_EFSEEK);
 		}
 
@@ -502,11 +501,11 @@ int SDL_SaveBMP_RW (SDL_Surface *saveme, SDL_RWops *dst, int freedst)
 
 		/* Write the BMP file size */
 		bfSize = SDL_RWtell(dst)-fp_offset;
-		if ( SDL_RWseek(dst, fp_offset+2, SEEK_SET) < 0 ) {
+		if ( SDL_RWseek(dst, fp_offset+2, RW_SEEK_SET) < 0 ) {
 			SDL_Error(SDL_EFSEEK);
 		}
 		SDL_WriteLE32(dst, bfSize);
-		if ( SDL_RWseek(dst, fp_offset+bfSize, SEEK_SET) < 0 ) {
+		if ( SDL_RWseek(dst, fp_offset+bfSize, RW_SEEK_SET) < 0 ) {
 			SDL_Error(SDL_EFSEEK);
 		}
 

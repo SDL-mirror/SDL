@@ -23,7 +23,7 @@
 #ifndef _SDL_lowvideo_h
 #define _SDL_lowvideo_h
 
-#include <windows.h>
+#include "SDL_windows.h"
 
 #include "SDL_sysvideo.h"
 

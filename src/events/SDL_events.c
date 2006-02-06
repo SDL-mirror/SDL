@@ -22,13 +22,11 @@
 
 /* General event handling code for SDL */
 
-#include <stdio.h>
-#include <string.h>
-
 #include "SDL.h"
 #include "SDL_thread.h"
 #include "SDL_mutex.h"
 #include "SDL_events.h"
+#include "SDL_string.h"
 #include "SDL_events_c.h"
 #include "SDL_timer_c.h"
 #ifndef DISABLE_JOYSTICK
@@ -177,7 +175,12 @@ static int SDL_StartEventThread(Uint32 flags)
 
 		/* The event thread will handle timers too */
 		SDL_SetTimerThreaded(2);
+#if (defined(_WIN32) && !defined(_WIN32_WCE)) && !defined(HAVE_LIBC)
+#undef SDL_CreateThread
+		SDL_EventThread = SDL_CreateThread(SDL_GobbleEvents, NULL, NULL, NULL);
+#else
 		SDL_EventThread = SDL_CreateThread(SDL_GobbleEvents, NULL);
+#endif
 		if ( SDL_EventThread == NULL ) {
 			return(-1);
 		}

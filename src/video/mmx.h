@@ -237,8 +237,6 @@ mmx_ok(void)
 /*	Include the stuff for printing a trace to stderr...
 */
 
-#include <stdio.h>
-
 #define	mmx_i2r(op, imm, reg) \
 	{ \
 		mmx_t mmx_trace; \

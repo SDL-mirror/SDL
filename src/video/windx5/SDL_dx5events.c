@@ -24,11 +24,12 @@
 
 #include "directx.h"
 
-#include <stdio.h>
 #include "SDL_events.h"
 #include "SDL_video.h"
 #include "SDL_error.h"
 #include "SDL_syswm.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_sysevents.h"
 #include "SDL_events_c.h"
 #include "SDL_lowvideo.h"
@@ -111,12 +112,13 @@ static void SetDIerror(char *function, int code)
 			error = "Device not initialized";
 			break;
 		default:
-			sprintf(errbuf, "%s: Unknown DirectInput error: 0x%x",
+			snprintf(errbuf, SDL_arraysize(errbuf),
+			         "%s: Unknown DirectInput error: 0x%x",
 								function, code);
 			break;
 	}
 	if ( ! errbuf[0] ) {
-		sprintf(errbuf, "%s: %s", function, error);
+		snprintf(errbuf, SDL_arraysize(errbuf), "%s: %s", function, error);
 	}
 	SDL_SetError("%s", errbuf);
 	return;
@@ -610,7 +612,7 @@ static int DX5_CheckInput(_THIS, int timeout, BOOL processInput)
 							timeout, QS_ALLEVENTS);
 	if ((event >= WAIT_OBJECT_0) && (event < (WAIT_OBJECT_0+SDL_DIndev))) {
 		DWORD numevents;
-		DIDEVICEOBJECTDATA evtbuf[INPUT_QSIZE];
+		static DIDEVICEOBJECTDATA evtbuf[INPUT_QSIZE];
 
 		event -= WAIT_OBJECT_0;
 		numevents = INPUT_QSIZE;

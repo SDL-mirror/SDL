@@ -20,10 +20,7 @@
     slouken@libsdl.org
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <malloc.h>
-#include <windows.h>
+#include "SDL_windows.h"
 #include "directx.h"
 
 /* Not yet in the mingw32 cross-compile headers */
@@ -35,6 +32,8 @@
 #include "SDL_timer.h"
 #include "SDL_events.h"
 #include "SDL_syswm.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_sysvideo.h"
 #include "SDL_blit.h"
 #include "SDL_pixels_c.h"
@@ -810,12 +809,13 @@ void SetDDerror(const char *function, int code)
 			error = "Interface not present";
 			break;
 		default:
-			sprintf(errbuf, "%s: Unknown DirectDraw error: 0x%x",
+			snprintf(errbuf, SDL_arraysize(errbuf),
+			         "%s: Unknown DirectDraw error: 0x%x",
 								function, code);
 			break;
 	}
 	if ( ! errbuf[0] ) {
-		sprintf(errbuf, "%s: %s", function, error);
+		snprintf(errbuf, SDL_arraysize(errbuf), "%s: %s", function, error);
 	}
 	SDL_SetError("%s", errbuf);
 	return;
@@ -1109,7 +1109,8 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 			settings.dmPelsWidth = width;
 			settings.dmPelsHeight = height;
 			settings.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL;
-			if ( width <= SDL_desktop_mode.dmPelsWidth && height <= SDL_desktop_mode.dmPelsHeight ) {
+			if ( width <= (int)SDL_desktop_mode.dmPelsWidth &&
+			     height <= (int)SDL_desktop_mode.dmPelsHeight ) {
 				settings.dmDisplayFrequency = SDL_desktop_mode.dmDisplayFrequency;
 				settings.dmFields |= DM_DISPLAYFREQUENCY;
 			}
@@ -2170,7 +2171,7 @@ static void DX5_CompressPalette(_THIS, SDL_Color *colors, int ncolors, int maxco
 	}
 #else
 	/* Allocate memory for the arrays we use */
-	pool = (int *)alloca(2*ncolors*sizeof(int));
+	pool = SDL_stack_alloc(int, 2*ncolors);
 	if ( pool == NULL ) {
 		/* No worries, just return */;
 		return;
@@ -2217,6 +2218,7 @@ static void DX5_CompressPalette(_THIS, SDL_Color *colors, int ncolors, int maxco
 		SDL_colors[j].peGreen = colors[order[i]].g;
 		SDL_colors[j].peBlue = colors[order[i]].b;
 	}
+	SDL_stack_free(pool);
 #endif /* SIMPLE_COMPRESSION */
 }
 
@@ -2458,12 +2460,12 @@ void DX5_PaletteChanged(_THIS, HWND window)
 	if ( palette == NULL ) { /* Sometimes we don't have a palette */
 		return;
 	}
-	entries = (PALETTEENTRY *)alloca(palette->ncolors*sizeof(*entries));
+	entries = SDL_stack_alloc(PALETTEENTRY, palette->ncolors);
 	hdc = GetDC(window);
 	GetSystemPaletteEntries(hdc, 0, palette->ncolors, entries);
 	ReleaseDC(window, hdc);
 	if ( ! colorchange_expected ) {
-		saved = (SDL_Color *)alloca(palette->ncolors*sizeof(SDL_Color));
+		saved = SDL_stack_alloc(SDL_Color, palette->ncolors);
 		memcpy(saved, palette->colors, 
 					palette->ncolors*sizeof(SDL_Color));
 	}
@@ -2472,6 +2474,7 @@ void DX5_PaletteChanged(_THIS, HWND window)
 		palette->colors[i].g = entries[i].peGreen;
 		palette->colors[i].b = entries[i].peBlue;
 	}
+	SDL_stack_free(entries);
 	if ( ! colorchange_expected ) {
 		Uint8 mapping[256];
 
@@ -2481,6 +2484,7 @@ void DX5_PaletteChanged(_THIS, HWND window)
 					saved[i].r, saved[i].g, saved[i].b);
 		}
 		DX5_Recolor8Bit(this, SDL_VideoSurface, mapping);
+		SDL_stack_free(saved);
 	}
 	colorchange_expected = 0;
 

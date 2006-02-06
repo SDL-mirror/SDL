@@ -22,14 +22,10 @@
 
 /* General keyboard handling code for SDL */
 
-#include <stdio.h>
-#include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "SDL_error.h"
 #include "SDL_events.h"
 #include "SDL_timer.h"
+#include "SDL_string.h"
 #include "SDL_events_c.h"
 #include "SDL_sysevents.h"
 
@@ -58,17 +54,14 @@ int SDL_KeyboardInit(void)
 {
 	SDL_VideoDevice *video = current_video;
 	SDL_VideoDevice *this  = current_video;
-	Uint16 i;
 
 	/* Set default mode of UNICODE translation */
 	SDL_EnableUNICODE(DEFAULT_UNICODE_TRANSLATION);
 
 	/* Initialize the tables */
 	SDL_ModState = KMOD_NONE;
-	for ( i=0; i<SDL_TABLESIZE(keynames); ++i )
-		keynames[i] = NULL;
-	for ( i=0; i<SDL_TABLESIZE(SDL_KeyState); ++i )
-		SDL_KeyState[i] = SDL_RELEASED;
+	memset(keynames, 0, sizeof(keynames));
+	memset(SDL_KeyState, 0, sizeof(SDL_KeyState));
 	video->InitOSKeymap(this);
 
 	SDL_EnableKeyRepeat(0, 0);

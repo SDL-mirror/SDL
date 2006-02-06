@@ -72,7 +72,7 @@ int SDL_SYS_CreateThread(SDL_Thread *thread, void *args, pfnSDL_CurrentBeginThre
   // Also save the real parameters we have to pass to thread function
   pThreadParms->args = args;
   // Start the thread using the runtime library of calling app!
-  thread->threadid = thread->handle = (*pfnBeginThread)(threadfunc, 512*1024, pThreadParms);
+  thread->threadid = thread->handle = (*pfnBeginThread)(threadfunc, NULL, 512*1024, pThreadParms);
   if (thread->threadid<=0)
   {
     SDL_SetError("Not enough resources to create thread");

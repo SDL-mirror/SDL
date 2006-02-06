@@ -30,7 +30,6 @@ COMMON_SRCS =			\
 	SDL_gamma.c		\
 	SDL_glfuncs.h		\
 	SDL_leaks.h		\
-	SDL_memops.h		\
 	SDL_pixels.c		\
 	SDL_pixels_c.h		\
 	SDL_surface.c		\
@@ -44,6 +43,10 @@ COMMON_SRCS =			\
 	SDL_yuv_sw_c.h		\
 	SDL_yuv_mmx.c		\
 	mmx.h			\
+	math_private.h		\
+	e_log.h			\
+	e_pow.h			\
+	e_sqrt.h		\
 	blank_cursor.h		\
 	default_cursor.h
 

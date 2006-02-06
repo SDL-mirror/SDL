@@ -37,8 +37,6 @@
          and other data sources.
 */
 
-#include <stdio.h>
-
 #include "SDL_types.h"
 #include "SDL_rwops.h"
 #include "SDL_byteorder.h"

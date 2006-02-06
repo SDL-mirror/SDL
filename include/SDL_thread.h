@@ -45,7 +45,7 @@ struct SDL_Thread;
 typedef struct SDL_Thread SDL_Thread;
 
 /* Create a thread */
-#ifdef __OS2__
+#if defined(_WIN32) || defined(__OS2__)
 /*
    We compile SDL into a DLL on OS/2. This means, that it's the DLL which
    creates a new thread for the calling process with the SDL_CreateThread()
@@ -53,39 +53,39 @@ typedef struct SDL_Thread SDL_Thread;
    be initialized for those threads, and not the RTL of the calling application!
    To solve this, we make a little hack here.
    We'll always use the caller's _beginthread() and _endthread() APIs to
-   start a new thread. This way, it it's the SDL.DLL which uses this API,
+   start a new thread. This way, if it's the SDL.DLL which uses this API,
    then the RTL of SDL.DLL will be used to create the new thread, and if it's
    the application, then the RTL of the application will be used.
    So, in short:
    Always use the _beginthread() and _endthread() of the calling runtime library!
 */
-
-#ifdef __WATCOMC__
 #include <process.h> // This has _beginthread() and _endthread() defined!
-#endif
 #ifdef __EMX__
 #include <stdlib.h> // This has _beginthread() and _endthread() defined, if -Zmt flag is used!
 #endif
 
-typedef Uint32 SDLCALL (*pfnSDL_CurrentBeginThread)(void (*pfnThreadFn)(void *), Uint32 uiStackSize, void *pParam);
-typedef void   SDLCALL (*pfnSDL_CurrentEndThread)(void);
+#ifdef __OS2__
+typedef int (__cdecl *pfnSDL_CurrentBeginThread)(void (*func)(void *), void *, unsigned, void *arg); 
+typedef void (__cdecl *pfnSDL_CurrentEndThread)(void);
+#else
+#ifdef __GNUC__
+#include <stdint.h>
+#endif
+typedef uintptr_t (__cdecl *pfnSDL_CurrentBeginThread) (void *, unsigned,
+        unsigned (__stdcall *func)(void *), void *arg, 
+        unsigned, unsigned *threadID);
+typedef void (__cdecl *pfnSDL_CurrentEndThread)(unsigned code);
+#endif
 
-extern DECLSPEC SDL_Thread * SDLCALL SDL_CreateThread_Core(int (*fn)(void *), void *data, pfnSDL_CurrentBeginThread pfnBeginThread, pfnSDL_CurrentEndThread pfnEndThread);
+extern DECLSPEC SDL_Thread * SDLCALL SDL_CreateThread(int (*fn)(void *), void *data, pfnSDL_CurrentBeginThread pfnBeginThread, pfnSDL_CurrentEndThread pfnEndThread);
 
-// Disable warnings about unreferenced symbol!
-#pragma disable_message (202)
-static Uint32 SDLCALL SDL_CurrentBeginThread(void (*pfnThreadFn)(void *), Uint32 uiStackSize, void *pParam)
-{
-  return _beginthread(pfnThreadFn, NULL, uiStackSize, pParam);
-}
-
-static void   SDLCALL SDL_CurrentEndThread(void)
-{
-  _endthread();
-}
-
-#define SDL_CreateThread(fn, data) SDL_CreateThread_Core(fn, data, SDL_CurrentBeginThread, SDL_CurrentEndThread)
-
+#ifdef __OS2__
+#define SDL_CreateThread(fn, data) SDL_CreateThread(fn, data, _beginthread, _endthread)
+#elif defined(_WIN32_WCE)
+#define SDL_CreateThread(fn, data) SDL_CreateThread(fn, data, NULL, NULL)
+#else
+#define SDL_CreateThread(fn, data) SDL_CreateThread(fn, data, _beginthreadex, _endthreadex)
+#endif
 #else
 extern DECLSPEC SDL_Thread * SDLCALL SDL_CreateThread(int (SDLCALL *fn)(void *), void *data);
 #endif

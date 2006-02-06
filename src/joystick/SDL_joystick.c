@@ -22,12 +22,10 @@
 
 /* This is the joystick API for Simple DirectMedia Layer */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "SDL_error.h"
 #include "SDL_events.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #ifndef DISABLE_EVENTS
 #include "SDL_events_c.h"
 #endif

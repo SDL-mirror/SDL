@@ -25,8 +25,6 @@
 #ifndef _SDL_audio_h
 #define _SDL_audio_h
 
-#include <stdio.h>
-
 #include "SDL_main.h"
 #include "SDL_types.h"
 #include "SDL_error.h"

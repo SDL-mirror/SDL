@@ -1,3 +1,6 @@
+#ifdef _MSC_VER
+#define USE_ASM_MIXER_VC
+#endif
 #if defined(USE_ASM_MIXER_VC)
 // headers for MMX assembler version of SDL_MixAudio
 // Copyright 2002 Stephane Marchesin (stephane.marchesin@wanadoo.fr)

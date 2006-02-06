@@ -22,6 +22,7 @@
 
 #ifndef _SDL_QWin_h
 #define _SDL_QWin_h
+
 #include <stdio.h>
 
 #include <qimage.h>

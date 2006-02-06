@@ -22,18 +22,26 @@
 
 /* Gamma correction support */
 
-#define USE_MATH_H	/* Used for calculating gamma ramps */
+#include "SDL_config.h"
 
-#ifdef USE_MATH_H
-#include <math.h>
+#ifdef HAVE_MATH_H
+#include <math.h>	/* Used for calculating gamma ramps */
 #endif
-#include <stdlib.h>
-#include <string.h>
 
 #include "SDL_error.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_sysvideo.h"
 
-#ifdef USE_MATH_H
+#ifndef HAVE_MATH_H
+#include "math_private.h"
+#include "e_sqrt.h"
+#include "e_pow.h"
+#include "e_log.h"
+#define pow(x, y)	__ieee754_pow(x, y)
+#define log(x)		__ieee754_log(x)
+#endif
+
 static void CalculateGammaRamp(float gamma, Uint16 *ramp)
 {
 	int i;
@@ -85,7 +93,6 @@ static void CalculateGammaFromRamp(float *gamma, Uint16 *ramp)
 		*gamma = 1.0f / (sum / count);
 	}
 }
-#endif /* USE_MATH_H */
 
 int SDL_SetGamma(float red, float green, float blue)
 {
@@ -94,7 +101,6 @@ int SDL_SetGamma(float red, float green, float blue)
 	SDL_VideoDevice *this  = current_video;	
 
 	succeeded = -1;
-#ifdef USE_MATH_H
 	/* Prefer using SetGammaRamp(), as it's more flexible */
 	{
 		Uint16 ramp[3][256];
@@ -104,9 +110,6 @@ int SDL_SetGamma(float red, float green, float blue)
 		CalculateGammaRamp(blue, ramp[2]);
 		succeeded = SDL_SetGammaRamp(ramp[0], ramp[1], ramp[2]);
 	}
-#else
-	SDL_SetError("Gamma correction not supported");
-#endif
 	if ( (succeeded < 0) && video->SetGamma ) {
 		SDL_ClearError();
 		succeeded = video->SetGamma(this, red, green, blue);
@@ -124,7 +127,6 @@ int SDL_GetGamma(float *red, float *green, float *blue)
 	SDL_VideoDevice *this  = current_video;	
 
 	succeeded = -1;
-#ifdef USE_MATH_H
 	/* Prefer using GetGammaRamp(), as it's more flexible */
 	{
 		Uint16 ramp[3][256];
@@ -136,9 +138,6 @@ int SDL_GetGamma(float *red, float *green, float *blue)
 			CalculateGammaFromRamp(blue, ramp[2]);
 		}
 	}
-#else
-	SDL_SetError("Gamma correction not supported");
-#endif
 	if ( (succeeded < 0) && video->GetGamma ) {
 		SDL_ClearError();
 		succeeded = video->GetGamma(this, red, green, blue);

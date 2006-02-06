@@ -22,13 +22,13 @@
 
 /* Functions for system-level CD-ROM audio control */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <windows.h>
+#include "SDL_windows.h"
 #include <mmsystem.h>
 
 #include "SDL_error.h"
 #include "SDL_cdrom.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_syscdrom.h"
 
 /* This really broken?? */
@@ -99,7 +99,7 @@ int  SDL_SYS_CDInit(void)
 
 	/* Scan the system for CD-ROM drives */
 	for ( i='A'; i<='Z'; ++i ) {
-		sprintf(drive, "%c:\\", i);
+		snprintf(drive, SDL_arraysize(drive), "%c:\\", i);
 		if ( GetDriveType(drive) == DRIVE_CDROM ) {
 			AddDrive(drive);
 		}

@@ -24,7 +24,6 @@
 	(necessary because SDL audio emulates threads with fork()
  */
 
-#include <stdlib.h>
 #ifdef FORK_HACK
 #include <sys/types.h>
 #include <sys/ipc.h>
@@ -33,6 +32,7 @@
 #endif
 
 #include "SDL_audiomem.h"
+#include "SDL_stdlib.h"
 
 /* Allocate memory that will be shared between threads (freed on exit) */
 void *SDL_AllocAudioMem(int size)

@@ -3008,6 +3008,7 @@ src/main/Makefile
 src/main/macos/Makefile
 src/main/macosx/Makefile
 src/main/macosx/Info.plist
+src/stdlib/Makefile
 src/audio/Makefile
 src/audio/alsa/Makefile
 src/audio/arts/Makefile

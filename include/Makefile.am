@@ -10,8 +10,10 @@ libSDLinclude_HEADERS =		\
 	SDL_audio.h		\
 	SDL_byteorder.h		\
 	SDL_cdrom.h		\
+	SDL_config.h		\
 	SDL_copying.h		\
 	SDL_cpuinfo.h		\
+	SDL_ctype.h		\
 	SDL_endian.h		\
 	SDL_error.h		\
 	SDL_events.h		\
@@ -27,11 +29,15 @@ libSDLinclude_HEADERS =		\
 	SDL_opengl.h		\
 	SDL_quit.h		\
 	SDL_rwops.h		\
+	SDL_stdarg.h		\
+	SDL_stdlib.h		\
+	SDL_string.h		\
 	SDL_syswm.h		\
 	SDL_thread.h		\
 	SDL_timer.h		\
 	SDL_types.h		\
 	SDL_version.h		\
 	SDL_video.h		\
+	SDL_windows.h		\
 	begin_code.h		\
 	close_code.h

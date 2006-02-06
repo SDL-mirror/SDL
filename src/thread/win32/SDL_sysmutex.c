@@ -22,12 +22,11 @@
 
 /* Mutex functions using the Win32 API */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <windows.h>
+#include "SDL_windows.h"
 
 #include "SDL_error.h"
 #include "SDL_mutex.h"
+#include "SDL_stdlib.h"
 
 
 struct SDL_mutex {

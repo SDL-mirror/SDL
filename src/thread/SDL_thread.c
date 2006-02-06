@@ -22,13 +22,11 @@
 
 /* System independent thread management routines for SDL */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "SDL_error.h"
 #include "SDL_mutex.h"
 #include "SDL_thread.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_thread_c.h"
 #include "SDL_systhread.h"
 
@@ -213,8 +211,9 @@ void SDL_RunThread(void *data)
 	*statusloc = userfunc(userdata);
 }
 
-#ifdef __OS2__
-DECLSPEC SDL_Thread * SDLCALL SDL_CreateThread_Core(int (*fn)(void *), void *data, pfnSDL_CurrentBeginThread pfnBeginThread, pfnSDL_CurrentEndThread pfnEndThread)
+#if defined(_WIN32) || defined(__OS2__)
+#undef SDL_CreateThread
+DECLSPEC SDL_Thread * SDLCALL SDL_CreateThread(int (*fn)(void *), void *data, pfnSDL_CurrentBeginThread pfnBeginThread, pfnSDL_CurrentEndThread pfnEndThread)
 #else
 DECLSPEC SDL_Thread * SDLCALL SDL_CreateThread(int (*fn)(void *), void *data)
 #endif
@@ -253,8 +252,8 @@ DECLSPEC SDL_Thread * SDLCALL SDL_CreateThread(int (*fn)(void *), void *data)
 	SDL_AddThread(thread);
 
 	/* Create the thread and go! */
-#ifdef __OS2__
-        ret = SDL_SYS_CreateThread(thread, args, pfnBeginThread, pfnEndThread);
+#if defined(_WIN32) || defined(__OS2__)
+	ret = SDL_SYS_CreateThread(thread, args, pfnBeginThread, pfnEndThread);
 #else
 	ret = SDL_SYS_CreateThread(thread, args);
 #endif

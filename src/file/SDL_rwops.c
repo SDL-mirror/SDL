@@ -24,12 +24,12 @@
    data sources.  It can easily be extended to files, memory, etc.
 */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
 #include "SDL_error.h"
 #include "SDL_rwops.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
+
+#ifdef HAVE_STDIO_H
 
 /* Functions to read/write stdio file pointers */
 
@@ -74,6 +74,8 @@ static int stdio_close(SDL_RWops *context)
 	return(0);
 }
 
+#endif /* HAVE_STDIO_H */
+
 /* Functions to read/write memory pointers */
 
 static int mem_seek(SDL_RWops *context, int offset, int whence)
@@ -81,13 +83,13 @@ static int mem_seek(SDL_RWops *context, int offset, int whence)
 	Uint8 *newpos;
 
 	switch (whence) {
-		case SEEK_SET:
+		case RW_SEEK_SET:
 			newpos = context->hidden.mem.base+offset;
 			break;
-		case SEEK_CUR:
+		case RW_SEEK_CUR:
 			newpos = context->hidden.mem.here+offset;
 			break;
-		case SEEK_END:
+		case RW_SEEK_END:
 			newpos = context->hidden.mem.stop+offset;
 			break;
 		default:
@@ -199,10 +201,9 @@ static char *unix_to_mac(const char *file)
 
 SDL_RWops *SDL_RWFromFile(const char *file, const char *mode)
 {
+	SDL_RWops *rwops = NULL;
+#ifdef HAVE_STDIO_H
 	FILE *fp;
-	SDL_RWops *rwops;
-
-	rwops = NULL;
 
 #ifdef macintosh
 	{
@@ -224,12 +225,14 @@ SDL_RWops *SDL_RWFromFile(const char *file, const char *mode)
 		rwops = SDL_RWFromFP(fp, 1);
 #endif
 	}
+#endif /* HAVE_STDIO_H */
 	return(rwops);
 }
 
+#ifdef HAVE_STDIO_H
 SDL_RWops *SDL_RWFromFP(FILE *fp, int autoclose)
 {
-	SDL_RWops *rwops;
+	SDL_RWops *rwops = NULL;
 
 #ifdef WIN32
 	if ( ! in_sdl ) {
@@ -249,6 +252,7 @@ SDL_RWops *SDL_RWFromFP(FILE *fp, int autoclose)
 	}
 	return(rwops);
 }
+#endif /* HAVE_STDIO_H */
 
 SDL_RWops *SDL_RWFromMem(void *mem, int size)
 {

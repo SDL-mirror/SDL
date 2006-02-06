@@ -22,12 +22,9 @@
 
 /* General quit handling code for SDL */
 
-#if defined (_WIN32_WCE)
-#define NO_SIGNAL_H
-#endif
+#include "SDL_config.h"
 
-#include <stdio.h>
-#ifndef NO_SIGNAL_H
+#ifdef HAVE_SIGNAL_H
 #include <signal.h>
 #endif
 
@@ -35,7 +32,7 @@
 #include "SDL_events_c.h"
 
 
-#ifndef NO_SIGNAL_H
+#ifdef HAVE_SIGNAL_H
 static void SDL_HandleSIG(int sig)
 {
 	/* Reset the signal handler */
@@ -44,12 +41,12 @@ static void SDL_HandleSIG(int sig)
 	/* Signal a quit interrupt */
 	SDL_PrivateQuit();
 }
-#endif /* NO_SIGNAL_H */
+#endif /* HAVE_SIGNAL_H */
 
 /* Public functions */
 int SDL_QuitInit(void)
 {
-#ifndef NO_SIGNAL_H
+#ifdef HAVE_SIGNAL_H
 	void (*ohandler)(int);
 
 	/* Both SIGINT and SIGTERM are translated into quit interrupts */
@@ -59,14 +56,14 @@ int SDL_QuitInit(void)
 	ohandler = signal(SIGTERM, SDL_HandleSIG);
 	if ( ohandler != SIG_DFL )
 		signal(SIGTERM, ohandler);
-#endif /* NO_SIGNAL_H */
+#endif /* HAVE_SIGNAL_H */
 
 	/* That's it! */
 	return(0);
 }
 void SDL_QuitQuit(void)
 {
-#ifndef NO_SIGNAL_H
+#ifdef HAVE_SIGNAL_H
 	void (*ohandler)(int);
 
 	ohandler = signal(SIGINT, SIG_DFL);
@@ -75,7 +72,7 @@ void SDL_QuitQuit(void)
 	ohandler = signal(SIGTERM, SIG_DFL);
 	if ( ohandler != SDL_HandleSIG )
 		signal(SIGTERM, ohandler);
-#endif /* NO_SIGNAL_H */
+#endif /* HAVE_SIGNAL_H */
 }
 
 /* This function returns 1 if it's okay to close the application window */

@@ -22,12 +22,10 @@
 
 /* This is the CD-audio control API for Simple DirectMedia Layer */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "SDL_error.h"
 #include "SDL_cdrom.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_syscdrom.h"
 
 #if !defined(macintosh)

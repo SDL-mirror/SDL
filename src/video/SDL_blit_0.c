@@ -20,11 +20,9 @@
     slouken@libsdl.org
 */
 
-#include <stdio.h>
-#include <string.h>
-
 #include "SDL_types.h"
 #include "SDL_video.h"
+#include "SDL_string.h"
 #include "SDL_blit.h"
 
 /* Functions to blit from bitmaps to other surfaces */

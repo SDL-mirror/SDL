@@ -4,7 +4,7 @@
 
 /* Include all of the DirectX 5.0 headers and adds any necessary tweaks */
 
-#include <windows.h>
+#include "SDL_windows.h"
 #include <mmsystem.h>
 #ifndef WIN32
 #define WIN32

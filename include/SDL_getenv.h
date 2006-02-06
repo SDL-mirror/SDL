@@ -23,29 +23,31 @@
 #ifndef _SDL_getenv_h
 #define _SDL_getenv_h
 
+#include "SDL_config.h"
+
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/* Not all environments have a working getenv()/putenv() */
-
-#if defined(macintosh) || defined(WIN32) || defined(_WIN32_WCE)
-#define NEED_SDL_GETENV
+#ifdef HAVE_GETENV
+#define SDL_getenv	getenv
+#else
+#define getenv		SDL_getenv
+extern DECLSPEC char * SDLCALL SDL_getenv(const char *name);
 #endif
 
-#ifdef NEED_SDL_GETENV
-
-/* Put a variable of the form "name=value" into the environment */
+#ifdef HAVE_PUTENV
+#define SDL_putenv	putenv
+#else
+#define putenv		SDL_putenv
 extern DECLSPEC int SDLCALL SDL_putenv(const char *variable);
-#define putenv(X)   SDL_putenv(X)
-
-/* Retrieve a variable named "name" from the environment */
-extern DECLSPEC char * SDLCALL SDL_getenv(const char *name);
-#define getenv(X)     SDL_getenv(X)
-
-#endif /* NEED_GETENV */
+#endif
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

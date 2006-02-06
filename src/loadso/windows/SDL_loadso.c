@@ -31,8 +31,7 @@
 #error Compiling for the wrong platform?
 #endif
 
-#include <stdio.h>
-#include <windows.h>
+#include "SDL_windows.h"
 
 #include "SDL_types.h"
 #include "SDL_error.h"

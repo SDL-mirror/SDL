@@ -1,3 +1,6 @@
+
+#include "SDL_mixer_MMX_VC.h"
+
 #if defined(USE_ASM_MIXER_VC)
 // MMX assembler version of SDL_MixAudio for signed little endian 16 bit samples and signed 8 bit samples
 // Copyright 2002 Stephane Marchesin (stephane.marchesin@wanadoo.fr)
@@ -11,11 +14,6 @@
 ////////////////////////////////////////////////
 // Mixing for 16 bit signed buffers
 ////////////////////////////////////////////////
-
-#ifndef __WATCOMC__
-#include <windows.h>
-#include <stdio.h>
-#endif
 
 void SDL_MixAudio_MMX_S16_VC(char* dst,char* src,unsigned int nSize,int volume)
 {

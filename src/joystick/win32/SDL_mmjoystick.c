@@ -22,15 +22,15 @@
 
 /* Win32 MultiMedia Joystick driver, contributed by Andrei de A. Formiga */
 
-#include <stdlib.h>
-#include <stdio.h>		/* For the definition of NULL */
-
 #include "SDL_error.h"
+#include "SDL_events.h"
 #include "SDL_joystick.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_sysjoystick.h"
 #include "SDL_joystick_c.h"
 
-#include <windows.h>
+#include "SDL_windows.h"
 #include <mmsystem.h>
 #include <regstr.h>
 
@@ -82,7 +82,7 @@ static char *GetJoystickName(int index, const char *szRegKey)
 	unsigned char regvalue[256];
 	unsigned char regname[256];
 
-	sprintf((char *) regkey, "%s\\%s\\%s",
+	snprintf((char *) regkey, SDL_arraysize(regkey), "%s\\%s\\%s",
 		REGSTR_PATH_JOYCONFIG,
 		szRegKey,
 		REGSTR_KEY_JOYCURR);
@@ -95,7 +95,7 @@ static char *GetJoystickName(int index, const char *szRegKey)
 			joystick's properties
 		*/
 		regsize = sizeof(regname);
-		sprintf((char *) regvalue,
+		snprintf((char *) regvalue, SDL_arraysize(regvalue),
 			"Joystick%d%s", index+1,
 			REGSTR_VAL_JOYOEMNAME);
 		regresult = RegQueryValueExA(hKey,
@@ -105,7 +105,7 @@ static char *GetJoystickName(int index, const char *szRegKey)
 		if (regresult == ERROR_SUCCESS)
 		{
 			/* open that registry key */
-			sprintf((char *) regkey, "%s\\%s",
+			snprintf((char *) regkey, SDL_arraysize(regkey), "%s\\%s",
 				REGSTR_PATH_JOYOEM, regname);
 			regresult = RegOpenKeyExA(HKEY_LOCAL_MACHINE,
 				(char *) regkey, 0, KEY_READ, &hKey);
@@ -379,7 +379,7 @@ void SDL_SYS_JoystickQuit(void)
 void SetMMerror(char *function, int code)
 {
 	static char *error;
-	static char  errbuf[BUFSIZ];
+	static char  errbuf[1024];
 
 	errbuf[0] = 0;
 	switch (code) 
@@ -406,13 +406,14 @@ void SetMMerror(char *function, int code)
 		break;
 
 		default:
-			sprintf(errbuf, "%s: Unknown Multimedia system error: 0x%x",
+			snprintf(errbuf, SDL_arraysize(errbuf),
+			         "%s: Unknown Multimedia system error: 0x%x",
 								function, code);
 		break;
 	}
 
 	if ( ! errbuf[0] ) {
-		sprintf(errbuf, "%s: %s", function, error);
+		snprintf(errbuf, SDL_arraysize(errbuf), "%s: %s", function, error);
 	}
 	SDL_SetError("%s", errbuf);
 }

@@ -20,11 +20,7 @@
     slouken@libsdl.org
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <malloc.h>
-#include <windows.h>
-
+#include "SDL_windows.h"
 
 #if defined(_WIN32_WCE)
 
@@ -41,6 +37,8 @@ extern HINSTANCE aygshell;
 #include "SDL.h"
 #include "SDL_mutex.h"
 #include "SDL_syswm.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_sysvideo.h"
 #include "SDL_sysevents.h"
 #include "SDL_events_c.h"
@@ -539,7 +537,8 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		settings.dmPelsWidth = width;
 		settings.dmPelsHeight = height;
 		settings.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL;
-		if ( width <= SDL_desktop_mode.dmPelsWidth && height <= SDL_desktop_mode.dmPelsHeight ) {
+		if ( width <= (int)SDL_desktop_mode.dmPelsWidth &&
+		     height <= (int)SDL_desktop_mode.dmPelsHeight ) {
 			settings.dmDisplayFrequency = SDL_desktop_mode.dmDisplayFrequency;
 			settings.dmFields |= DM_DISPLAYFREQUENCY;
 		}
@@ -794,7 +793,7 @@ int DIB_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 	if ( screen_pal ) {
 		PALETTEENTRY *entries;
 
-		entries = (PALETTEENTRY *)alloca(ncolors*sizeof(PALETTEENTRY));
+		entries = SDL_stack_alloc(PALETTEENTRY, ncolors);
 		for ( i=0; i<ncolors; ++i ) {
 			entries[i].peRed   = colors[i].r;
 			entries[i].peGreen = colors[i].g;
@@ -804,11 +803,12 @@ int DIB_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 		SetPaletteEntries(screen_pal, firstcolor, ncolors, entries);
 		SelectPalette(hdc, screen_pal, FALSE);
 		RealizePalette(hdc);
+		SDL_stack_free(entries);
 	}
 
 #if !defined(_WIN32_WCE) || (_WIN32_WCE >= 400)
 	/* Copy palette colors into DIB palette */
-	pal = (RGBQUAD *)alloca(ncolors*sizeof(RGBQUAD));
+	pal = SDL_stack_alloc(RGBQUAD, ncolors);
 	for ( i=0; i<ncolors; ++i ) {
 		pal[i].rgbRed = colors[i].r;
 		pal[i].rgbGreen = colors[i].g;
@@ -823,6 +823,7 @@ int DIB_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 	BitBlt(hdc, 0, 0, this->screen->w, this->screen->h,
 	       mdc, 0, 0, SRCCOPY);
 	DeleteDC(mdc);
+	SDL_stack_free(pal);
 #endif
 	ReleaseDC(SDL_Window, hdc);
 	return(1);

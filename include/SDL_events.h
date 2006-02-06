@@ -38,6 +38,10 @@
 extern "C" {
 #endif
 
+/* General keyboard/mouse state definitions */
+#define SDL_RELEASED	0
+#define SDL_PRESSED	1
+
 /* Event enumerations */
 typedef enum {
        SDL_NOEVENT = 0,			/* Unused (do not remove) */

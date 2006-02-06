@@ -22,13 +22,9 @@
 
 /* Simple error handling in SDL */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <string.h>
-
 #include "SDL_types.h"
-#include "SDL_getenv.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_error.h"
 #include "SDL_error_c.h"
 #ifndef DISABLE_THREADS
@@ -41,10 +37,6 @@ static SDL_error SDL_global_error;
 
 #define SDL_GetErrBuf()	(&SDL_global_error)
 #endif /* DISABLE_THREADS */
-
-#ifdef __CYGWIN__
-#define DISABLE_STDIO
-#endif
 
 #define SDL_ERRBUFIZE	1024
 
@@ -121,16 +113,10 @@ void SDL_SetError (const char *fmt, ...)
 	}
 	va_end(ap);
 
-#ifndef DISABLE_STDIO
 	/* If we are in debug mode, print out an error message */
 #ifdef DEBUG_ERROR
 	fprintf(stderr, "SDL_SetError: %s\n", SDL_GetError());
-#else
-	if ( getenv("SDL_DEBUG") ) {
-		fprintf(stderr, "SDL_SetError: %s\n", SDL_GetError());
-	}
 #endif
-#endif /* !DISABLE_STDIO */
 }
 
 /* Print out an integer value to a UNICODE buffer */
@@ -139,7 +125,7 @@ static int PrintInt(Uint16 *str, unsigned int maxlen, int value)
 	char tmp[128];
 	int len, i;
 
-	sprintf(tmp, "%d", value);
+	snprintf(tmp, SDL_arraysize(tmp), "%d", value);
 	len = 0;
 	if ( strlen(tmp) < maxlen ) {
 		for ( i=0; tmp[i]; ++i ) {
@@ -155,7 +141,7 @@ static int PrintDouble(Uint16 *str, unsigned int maxlen, double value)
 	char tmp[128];
 	int len, i;
 
-	sprintf(tmp, "%f", value);
+	snprintf(tmp, SDL_arraysize(tmp), "%f", value);
 	len = 0;
 	if ( strlen(tmp) < maxlen ) {
 		for ( i=0; tmp[i]; ++i ) {
@@ -171,7 +157,7 @@ static int PrintPointer(Uint16 *str, unsigned int maxlen, void *value)
 	char tmp[128];
 	int len, i;
 
-	sprintf(tmp, "%p", value);
+	snprintf(tmp, SDL_arraysize(tmp), "%p", value);
 	len = 0;
 	if ( strlen(tmp) < maxlen ) {
 		for ( i=0; tmp[i]; ++i ) {

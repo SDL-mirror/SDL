@@ -3,7 +3,7 @@
 
 # These are the subdirectories that are always built
 CORE_SUBDIRS =			\
-	main
+	main stdlib
 
 # These are the subdirectories which may be built
 EXTRA_SUBDIRS =			\
@@ -25,10 +25,12 @@ libSDL_la_LDFLAGS = 		\
 	-version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
 libSDL_la_LIBADD =		\
 	main/libarch.la		\
+	stdlib/libstdlib.la	\
 	@SDL_EXTRALIBS@		\
 	@SYSTEM_LIBS@
 libSDL_la_DEPENDENCIES =	\
 	main/libarch.la		\
+	stdlib/libstdlib.la	\
 	@SDL_EXTRALIBS@
 
 # The SDL library sources
@@ -38,6 +40,5 @@ GENERAL_SRCS = 		\
 	SDL_error_c.h		\
 	SDL_fatal.c		\
 	SDL_fatal.h		\
-	SDL_getenv.c		\
 	SDL_loadso.c
 

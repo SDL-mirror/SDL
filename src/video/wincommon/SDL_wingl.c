@@ -20,15 +20,14 @@
     slouken@libsdl.org
 */
 
-#include <stdlib.h>
-#include <string.h>
-
 /* WGL implementation of SDL OpenGL support */
 
 #ifdef HAVE_OPENGL
 #include "SDL_opengl.h"
 #endif
 #include "SDL_error.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_lowvideo.h"
 #include "SDL_wingl_c.h"
 
