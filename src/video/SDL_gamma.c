@@ -26,14 +26,8 @@
 
 #ifdef HAVE_MATH_H
 #include <math.h>	/* Used for calculating gamma ramps */
-#endif
-
-#include "SDL_error.h"
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
-#include "SDL_sysvideo.h"
-
-#ifndef HAVE_MATH_H
+#else
+/* Math routines from uClibc: http://www.uclibc.org */
 #include "math_private.h"
 #include "e_sqrt.h"
 #include "e_pow.h"
@@ -41,6 +35,12 @@
 #define pow(x, y)	__ieee754_pow(x, y)
 #define log(x)		__ieee754_log(x)
 #endif
+
+#include "SDL_error.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
+#include "SDL_sysvideo.h"
+
 
 static void CalculateGammaRamp(float gamma, Uint16 *ramp)
 {
