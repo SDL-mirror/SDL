@@ -32,14 +32,26 @@
 #ifdef HAVE_LIBC
 
 /* Various C library headers */
+#ifndef HAVE_CTYPE_H
 #define HAVE_CTYPE_H
+#endif
+#ifndef HAVE_STDIO_H
 #define HAVE_STDIO_H
+#endif
+#ifndef HAVE_STDLIB_H
 #define HAVE_STDLIB_H
+#endif
+#ifndef HAVE_MALLOC_H
 #define HAVE_MALLOC_H
+#endif
+#ifndef HAVE_STRING_H
 #define HAVE_STRING_H
+#endif
 #if !defined(_WIN32_WCE)
+#ifndef HAVE_SIGNAL_H
 #define HAVE_SIGNAL_H
 #endif
+#endif /* !_WIN32_WCE */
 
 /* Features provided by SDL_stdlib.h */
 #if !defined(_WIN32) /* Don't use C runtime versions of these on Windows */
@@ -49,7 +61,9 @@
 #define HAVE_MALLOC
 #define HAVE_REALLOC
 #define HAVE_FREE
+#ifndef HAVE_ALLOCA
 #define HAVE_ALLOCA
+#endif
 /*#define HAVE_QSORT*/
 
 /* Features provided by SDL_string.h */

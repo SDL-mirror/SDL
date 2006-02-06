@@ -23,6 +23,7 @@
 #include "SDL_stdlib.h"
 #include "SDL_string.h"
 
+#ifndef HAVE_GETENV
 
 #if defined(WIN32) && !defined(_WIN32_WCE)
 
@@ -172,6 +173,8 @@ char *SDL_getenv(const char *name)
 }
 
 #endif /* WIN32 */
+
+#endif /* !HAVE_GETENV */
 
 #ifdef TEST_MAIN
 #include <stdio.h>
