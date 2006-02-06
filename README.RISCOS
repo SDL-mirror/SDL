@@ -1,22 +1,36 @@
 Readme for RISC OS port of SDL
 ==============================
 
-This document last updated on 26th January 2005
+This document last updated on 2nd Februrary 2006
 
 This is a RISC OS port of the Simple Direct Media Layer (SDL) by Alan Buckley with contributions from Peter Naulls.
 
 Details of the SDL can be found at http://www.libsdl.org.
 
-The source code including the RISC OS version can be obtained from
+The source code including the RISC OS version can be obtained from:
+
 http://www.libsdl.org.
 
-RISC OS makefiles, pre built libraries and many games and applications compiled for RISC OS using this library can be downloaded from The Unix Porting Project at http://www.chocky.org/unix/index.html.
+Pre built libraries and many games and applications compiled for RISC OS using this library can be downloaded from The Unix Porting Project at http://www.riscos.info/unix/.
 
 This is released under the LGPL see the file COPYING for details.
 
 
+Compiling applications under RISC OS
+====================================
+
+Add -ISDL: for the C compiler flags if you include the files in the SDL directory. e.g. #include "SDL/SDL.h"
+Add -ISDL:SDL for the C compiler flags if you include the files directly. e.g. #include "SDL/SDL.h"
+
+Add -LSDL: -lSDL to the link stage of compilation.
+
+For example, to compile the testbitmap.c sample you could use:
+
+gcc -ISDL:SDL -LSDL: -lSDL testbitmap.c -otestbitmap
+
+
 RISC OS port of SDL runtime information
-======================================
+=======================================
 
 Runtime requirements
 --------------------
@@ -31,7 +45,7 @@ Note: As most programs ported from other OSes use high resolution graphics and a
 
 
 RISC OS runtime parameters
--------------------------
+--------------------------
 
 Several environmental variables have been defined to make porting programs easier (i.e. By setting these variable you do not need to have source code differences between OSes).
 
@@ -43,18 +57,23 @@ The <appname> used below is found as follows:
 
 The variables are:
 
-SDL$<appname>$TaskName - The name of the task for RISC OS. If omitted then <appname> is used for the task name,
+SDL$<appname>$TaskName
 
-SDL$<appname>$BackBuffer - set to 1 to use a system memory back buffer for the screen in full screen mode. Some programs on other systems assume their is always a back buffer even though the SDL specification specifies this is not the case. The current RISC OS implementation uses direct writes to the screen if a hardware fullscreen is requested.
+The name of the task for RISC OS. If omitted then <appname> is used for the task name,
+
+SDL$<appname>$BackBuffer
+
+Set to 1 to use a system memory back buffer for the screen in full screen mode. Some programs on other systems assume their is always a back buffer even though the SDL specification specifies this is not the case. The current RISC OS implementation uses direct writes to the screen if a hardware fullscreen is requested.
+
+Set to 2 to use an ARM code full word copy. This is faster than the standard back buffer, but uses aligned words only so it is possible (but unlikely) for it to corrupt the screen for 8bpp and 16bpp modes.
+
+Set to 3 to use a RISC OS sprite as the back buffer. This is usually the slowest for most SDL applications, however it may be useful in the future as Sprite acceleration is added to various hardware that runs RISC OS.
 
 SDL$<appname>$CloseAction - set the action for the close icon. Again as programs don't match the specification you can set this to 0 to remove the close icon from the main window for applications where this does not affect the program.
 
-SDL$<appname>$AudioBuffer - set the minimum size of the audio buffer in samples in steps of 512. If this is less than the minimum calculated from the parameters requested in the program by SDL_OpenAudio these will be used instead. If this parameter is not used or set to 0 the buffer size will be calculated to buffer 10 centisecond of sound. The time buffered can be calculated as specified size/frequency in seconds. The larger the buffer the more audio data that will be buffered, but this can lead to a lag between a sound being requested and it being heard, so the size should be kept to a minimum. You should only set this parameter if the sound is being missed out. 
-
-
 
 RISC OS SDL port API notes
-=========================
+==========================
 
 Current level of implementation
 -------------------------------
