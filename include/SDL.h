@@ -25,6 +25,7 @@
 #ifndef _SDL_H
 #define _SDL_H
 
+#include "SDL_config.h"
 #include "SDL_main.h"
 #include "SDL_types.h"
 #include "SDL_getenv.h"
