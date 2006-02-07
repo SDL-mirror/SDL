@@ -19,8 +19,10 @@
 
 #include "SDL_endian.h"
 
-typedef Sint32 int32_t;
-typedef Uint32 u_int32_t;
+#define int32_t 	math_int32_t
+#define u_int32_t	math_u_int32_t
+typedef Sint32 math_int32_t;
+typedef Uint32 math_u_int32_t;
 
 /* The original fdlibm code used statements like:
 	n0 = ((*(int*)&one)>>29)^1;		* index of high word *

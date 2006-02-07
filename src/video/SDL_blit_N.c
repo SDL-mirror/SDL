@@ -21,6 +21,7 @@
 */
 
 #include "SDL_types.h"
+#include "SDL_string.h"
 #include "SDL_video.h"
 #include "SDL_blit.h"
 #include "SDL_byteorder.h"
@@ -657,9 +658,7 @@ static void ConvertAltivec32to32_noprefetch(SDL_BlitInfo *info)
     Uint32 *dst = (Uint32 *) info->d_pixels;
     int dstskip = info->d_skip;
     SDL_PixelFormat *srcfmt = info->src;
-    int srcbpp = srcfmt->BytesPerPixel;
     SDL_PixelFormat *dstfmt = info->dst;
-    int dstbpp = dstfmt->BytesPerPixel;
     vector unsigned int vzero = vec_splat_u32(0);
     vector unsigned char vpermute = calc_swizzle32(srcfmt, dstfmt);
     if (dstfmt->Amask && !srcfmt->Amask) {
@@ -670,8 +669,8 @@ static void ConvertAltivec32to32_noprefetch(SDL_BlitInfo *info)
         }
     }
 
-    assert(srcbpp == 4);
-    assert(dstbpp == 4);
+    assert(srcfmt->BytesPerPixel == 4);
+    assert(dstfmt->BytesPerPixel == 4);
 
     while (height--) {
         vector unsigned char valigner;
@@ -737,9 +736,7 @@ static void ConvertAltivec32to32_prefetch(SDL_BlitInfo *info)
     Uint32 *dst = (Uint32 *) info->d_pixels;
     int dstskip = info->d_skip;
     SDL_PixelFormat *srcfmt = info->src;
-    int srcbpp = srcfmt->BytesPerPixel;
     SDL_PixelFormat *dstfmt = info->dst;
-    int dstbpp = dstfmt->BytesPerPixel;
     vector unsigned int vzero = vec_splat_u32(0);
     vector unsigned char vpermute = calc_swizzle32(srcfmt, dstfmt);
     if (dstfmt->Amask && !srcfmt->Amask) {
@@ -750,8 +747,8 @@ static void ConvertAltivec32to32_prefetch(SDL_BlitInfo *info)
         }
     }
 
-    assert(srcbpp == 4);
-    assert(dstbpp == 4);
+    assert(srcfmt->BytesPerPixel == 4);
+    assert(dstfmt->BytesPerPixel == 4);
 
     while (height--) {
         vector unsigned char valigner;
