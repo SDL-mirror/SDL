@@ -92,7 +92,7 @@ int eloParsePacket(unsigned char* mousebuf, int* dx, int* dy, int* button_state)
 	x = ((mousebuf[4] << 8) | mousebuf[3]);
 	y = ((mousebuf[6] << 8) | mousebuf[5]);
 
-	if((abs(x - last_x) > ELO_SNAP_SIZE) || (abs(y - last_y) > ELO_SNAP_SIZE)) {
+	if((SDL_abs(x - last_x) > ELO_SNAP_SIZE) || (SDL_abs(y - last_y) > ELO_SNAP_SIZE)) {
 		*dx = ((mousebuf[4] << 8) | mousebuf[3]);
 		*dy = ((mousebuf[6] << 8) | mousebuf[5]);
 	}
@@ -335,19 +335,19 @@ int eloInitController(int fd) {
 	/* try to read the calibration values */
 	buffer = SDL_getenv("SDL_ELO_MIN_X");
 	if(buffer) {
-		ELO_MIN_X = atoi(buffer);
+		ELO_MIN_X = SDL_atoi(buffer);
 	}
 	buffer = SDL_getenv("SDL_ELO_MAX_X");
 	if(buffer) {
-		ELO_MAX_X = atoi(buffer);
+		ELO_MAX_X = SDL_atoi(buffer);
 	}
 	buffer = SDL_getenv("SDL_ELO_MIN_Y");
 	if(buffer) {
-		ELO_MIN_Y = atoi(buffer);
+		ELO_MIN_Y = SDL_atoi(buffer);
 	}
 	buffer = SDL_getenv("SDL_ELO_MAX_Y");
 	if(buffer) {
-		ELO_MAX_Y = atoi(buffer);
+		ELO_MAX_Y = SDL_atoi(buffer);
 	}
 
 #ifdef DEBUG_MOUSE

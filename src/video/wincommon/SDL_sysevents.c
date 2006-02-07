@@ -798,7 +798,7 @@ static int GetCodePage()
 	int	cp = GetACP();
 
 	if (GetLocaleInfo(lcid, LOCALE_IDEFAULTANSICODEPAGE, buff, sizeof(buff))) {
-		cp = SDL_strtol(buff, NULL, 0);
+		cp = SDL_atoi(buff);
 	}
 	return cp;
 }

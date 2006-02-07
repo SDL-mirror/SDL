@@ -22,6 +22,7 @@
 
 /* Functions for system-level CD-ROM audio control */
 
+#include <string.h>	/* For strerror() */
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
@@ -215,7 +216,7 @@ static void CheckMounts(const char *mtab)
 				tmp = SDL_strstr(mntent->mnt_opts, "fs=");
 				if ( tmp ) {
 					SDL_free(mnt_type);
-					mnt_type = strdup(tmp + SDL_strlen("fs="));
+					mnt_type = SDL_strdup(tmp + SDL_strlen("fs="));
 					if ( mnt_type ) {
 						tmp = SDL_strchr(mnt_type, ',');
 						if ( tmp ) {
@@ -226,7 +227,7 @@ static void CheckMounts(const char *mtab)
 				tmp = SDL_strstr(mntent->mnt_opts, "dev=");
 				if ( tmp ) {
 					SDL_free(mnt_dev);
-					mnt_dev = strdup(tmp + SDL_strlen("dev="));
+					mnt_dev = SDL_strdup(tmp + SDL_strlen("dev="));
 					if ( mnt_dev ) {
 						tmp = SDL_strchr(mnt_dev, ',');
 						if ( tmp ) {

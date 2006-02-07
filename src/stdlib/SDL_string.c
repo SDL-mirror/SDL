@@ -25,6 +25,7 @@
 
 #include "SDL_types.h"
 #include "SDL_ctype.h"
+#include "SDL_stdlib.h"
 #include "SDL_string.h"
 
 
@@ -175,7 +176,7 @@ static size_t SDL_ScanUnsignedLongLong(const char *text, int radix, Uint64 *valu
 #endif
 #endif /* SDL_HAS_64BIT_TYPE */
 
-#ifndef HAVE_SSCANF
+#if !defined(HAVE_SSCANF) || !defined(HAVE_STRTOD)
 static size_t SDL_ScanFloat(const char *text, double *valuep)
 {
     const char *textstart = text;
@@ -319,6 +320,18 @@ char *SDL_strncpy(char *dst, const char *src, size_t maxlen)
     *dstp = '\0';
 
     return dst;
+}
+#endif
+
+#ifndef HAVE_STRDUP
+char *SDL_strdup(const char *string)
+{
+    size_t len = SDL_strlen(string);
+    char *newstr = SDL_malloc(len+1);
+    if ( newstr ) {
+        SDL_strcpy(newstr, string);
+    }
+    return newstr;
 }
 #endif
 
@@ -548,6 +561,20 @@ Sint64 SDL_strtoll(const char *string, char **endp, int base)
 #endif
 
 #endif /* SDL_HAS_64BIT_TYPE */
+
+#ifndef HAVE_STRTOD
+double SDL_strtod(const char *string, char **endp)
+{
+    size_t len;
+    double value;
+
+    len = SDL_ScanFloat(string, &value);
+    if ( endp ) {
+        *endp = (char *)string + len;
+    }
+    return value;
+}
+#endif
 
 #ifndef HAVE_STRCMP
 int SDL_strcmp(const char *str1, const char *str2)

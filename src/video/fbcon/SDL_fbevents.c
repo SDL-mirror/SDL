@@ -351,7 +351,7 @@ static int find_pid(DIR *proc, const char *wanted_name)
 				name[0] = '\0';
 				fscanf(status, "Name: %s", name);
 				if ( SDL_strcmp(name, wanted_name) == 0 ) {
-					pid = atoi(entry->d_name);
+					pid = SDL_atoi(entry->d_name);
 				}
 				fclose(status);
 			}

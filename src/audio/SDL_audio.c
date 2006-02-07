@@ -306,18 +306,20 @@ int SDL_AudioInit(const char *driver_name)
 		 */
 		for ( i=0; bootstrap[i]; ++i ) {
 			if ( SDL_strcmp(bootstrap[i]->name, "esd") == 0 ) {
+#ifdef HAVE_PUTENV
 				const char *esd_no_spawn;
 
 				/* Don't start ESD if it's not running */
-				esd_no_spawn = SDL_getenv("ESD_NO_SPAWN");
+				esd_no_spawn = getenv("ESD_NO_SPAWN");
 				if ( esd_no_spawn == NULL ) {
 					putenv("ESD_NO_SPAWN=1");
 				}
+#endif
 				if ( bootstrap[i]->available() ) {
 					audio = bootstrap[i]->create(0);
 					break;
 				}
-#ifdef linux	/* No unsetenv() on most platforms */
+#ifdef HAVE_UNSETENV
 				if ( esd_no_spawn == NULL ) {
 					unsetenv("ESD_NO_SPAWN");
 				}

@@ -26,6 +26,7 @@
 /* Output raw audio data to a file. */
 
 #include <stdio.h>
+#include <string.h>	/* For strerror() */
 #include <errno.h>
 #include <unistd.h>
 #include <sys/stat.h>
@@ -130,7 +131,7 @@ static SDL_AudioDevice *DISKAUD_CreateDevice(int devindex)
 	SDL_memset(this->hidden, 0, (sizeof *this->hidden));
 
     envr = SDL_getenv(DISKENVR_WRITEDELAY);
-    this->hidden->write_delay = (envr) ? atoi(envr) : DISKDEFAULT_WRITEDELAY;
+    this->hidden->write_delay = (envr) ? SDL_atoi(envr) : DISKDEFAULT_WRITEDELAY;
 
 	/* Set the function pointers */
 	this->OpenAudio = DISKAUD_OpenAudio;

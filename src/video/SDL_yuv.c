@@ -23,6 +23,7 @@
 /* This is the implementation of the YUV video surface support */
 
 #include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_video.h"
 #include "SDL_error.h"
 #include "SDL_sysvideo.h"
@@ -54,7 +55,7 @@ SDL_Overlay *SDL_CreateYUVOverlay(int w, int h, Uint32 format,
 	overlay = NULL;
         yuv_hwaccel = SDL_getenv("SDL_VIDEO_YUV_HWACCEL");
 	if ( ((display == SDL_VideoSurface) && video->CreateYUVOverlay) &&
-	     (!yuv_hwaccel || (*yuv_hwaccel != '0')) ) {
+	     (!yuv_hwaccel || (SDL_atoi(yuv_hwaccel) > 0)) ) {
 		overlay = video->CreateYUVOverlay(this, w, h, format, display);
 	}
 	/* If hardware YUV overlay failed ... */

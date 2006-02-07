@@ -23,6 +23,7 @@
 /* Allow access to a raw mixing buffer */
 
 #include <stdio.h>
+#include <string.h>	/* For strerror() */
 #include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>

@@ -201,6 +201,12 @@ extern DECLSPEC char * SDLCALL SDL_strncpy(char *dst, const char *src, size_t ma
 #define SDL_strncat(dst, src, n) (SDL_strncpy(dst+SDL_strlen(dst), src, n), dst)
 #endif
 
+#ifdef HAVE_STRDUP
+#define SDL_strdup     strdup
+#else
+extern DECLSPEC char * SDLCALL SDL_strdup(const char *string);
+#endif
+
 #ifdef HAVE__STRREV
 #define SDL_strrev      _strrev
 #else
@@ -288,6 +294,24 @@ extern DECLSPEC Sint64 SDLCALL SDL_strtoll(const char *string, char **endp, int 
 #endif
 
 #endif /* SDL_HAS_64BIT_TYPE */
+
+#ifdef HAVE_STRTOD
+#define SDL_strtod      strtod
+#else
+extern DECLSPEC double SDLCALL SDL_strtod(const char *string, char **endp);
+#endif
+
+#ifdef HAVE_ATOI
+#define SDL_atoi        atoi
+#else
+#define SDL_atoi(X)     SDL_strtol(X, NULL, 0)
+#endif
+
+#ifdef HAVE_ATOF
+#define SDL_atof        atof
+#else
+#define SDL_atof(X)     SDL_strtod(X, NULL)
+#endif
 
 #ifdef HAVE_STRCMP
 #define SDL_strcmp      strcmp

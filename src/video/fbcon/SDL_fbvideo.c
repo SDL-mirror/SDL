@@ -523,7 +523,7 @@ static int FB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	{ const char *fb_accel;
 		fb_accel = SDL_getenv("SDL_FBACCEL");
 		if ( fb_accel ) {
-			finfo.accel = atoi(fb_accel);
+			finfo.accel = SDL_atoi(fb_accel);
 		}
 	}
 

@@ -41,3 +41,7 @@ libSDLinclude_HEADERS =		\
 	SDL_windows.h		\
 	begin_code.h		\
 	close_code.h
+
+EXTRA_DIST =			\
+	SDL_config.h.in		\
+	SDL_config.h.minimal

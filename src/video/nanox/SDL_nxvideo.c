@@ -68,9 +68,9 @@ static void NX_DeleteDevice (SDL_VideoDevice * device)
     Dprintf ("enter NX_DeleteDevice\n") ;
 
     if (device) {
-        if (device -> hidden) free (device -> hidden) ;
-        if (device -> gl_data) free (device -> gl_data) ;
-            free (device) ;
+        if (device -> hidden) SDL_free (device -> hidden) ;
+        if (device -> gl_data) SDL_free (device -> gl_data) ;
+            SDL_free (device) ;
     }
 
     Dprintf ("leave NX_DeleteDevice\n") ;
@@ -256,9 +256,9 @@ void NX_VideoQuit (_THIS)
         GrDestroyWindow (FSwindow) ;
     }
     NX_FreeVideoModes (this) ;
-    free (GammaRamp_R) ;
-    free (GammaRamp_G) ;
-    free (GammaRamp_B) ;
+    SDL_free (GammaRamp_R) ;
+    SDL_free (GammaRamp_G) ;
+    SDL_free (GammaRamp_B) ;
 
 #ifdef ENABLE_NANOX_DIRECT_FB
     if (Clientfb)
@@ -306,7 +306,7 @@ static int NX_CreateWindow (_THIS, SDL_Surface * screen,
 
     // See if we have been given a window id
     if (SDL_windowid) {
-        SDL_Window = strtol (SDL_windowid, NULL, 0) ;
+        SDL_Window = SDL_strtol (SDL_windowid, NULL, 0) ;
     } else {
         SDL_Window = 0 ;
     }

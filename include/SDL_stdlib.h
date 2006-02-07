@@ -62,6 +62,12 @@ extern "C" {
 extern DECLSPEC void * SDLCALL SDL_malloc(size_t size);
 #endif
 
+#ifdef HAVE_CALLOC
+#define SDL_calloc	calloc
+#else
+extern DECLSPEC void * SDLCALL SDL_calloc(size_t nmemb, size_t size);
+#endif
+
 #ifdef HAVE_REALLOC
 #define SDL_realloc	realloc
 #else
@@ -99,6 +105,12 @@ extern DECLSPEC int SDLCALL SDL_putenv(const char *variable);
 #else
 extern DECLSPEC void SDLCALL SDL_qsort(void *base, size_t nmemb, size_t size,
            int (*compare)(const void *, const void *));
+#endif
+
+#ifdef HAVE_ABS
+#define SDL_abs		abs
+#else
+#define SDL_abs(X)	((X) < 0 ? -(X) : (X))
 #endif
 
 /* Ends C function definitions when using C++ */

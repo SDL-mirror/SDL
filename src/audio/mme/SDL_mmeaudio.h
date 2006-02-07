@@ -24,6 +24,8 @@
 
 #include <mme_api.h>
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_audio.h"
 #include "SDL_mutex.h"
 #include "SDL_timer.h"

@@ -6,6 +6,7 @@ echo "This may take a while ..."
 # Touch the timestamps on all the files since CVS messes them up
 directory=`dirname $0`
 touch $directory/configure.in
+touch $directory/include/SDL_config.h.in
 
 # Regenerate configuration files
 aclocal || exit 1

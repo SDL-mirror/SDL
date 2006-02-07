@@ -1,0 +1,289 @@
+/* include/SDL_config.h.in.  Generated from configure.in by autoheader.  */
+
+/*
+    SDL - Simple DirectMedia Layer
+    Copyright (C) 1997-2006 Sam Lantinga
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2.1 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+    Sam Lantinga
+    slouken@libsdl.org
+*/
+
+#ifndef _SDL_config_h
+#define _SDL_config_h
+
+/* This is a set of defines to configure the SDL features */
+
+/* Comment this if you want to build without any libc requirements */
+#undef HAVE_LIBC
+#ifdef HAVE_LIBC
+
+
+
+/* Define to one of `_getb67', `GETB67', `getb67' for Cray-2 and Cray-YMP
+   systems. This function is required for `alloca.c' support on those systems.
+   */
+#undef CRAY_STACKSEG_END
+
+/* Define to 1 if using `alloca.c'. */
+#undef C_ALLOCA
+
+/* Define to 1 if you have the `abs' function. */
+#undef HAVE_ABS
+
+/* Define to 1 if you have `alloca', as a function or macro. */
+#undef HAVE_ALLOCA
+
+/* Define to 1 if you have <alloca.h> and it should be used (not on Ultrix).
+   */
+#undef HAVE_ALLOCA_H
+
+/* Define to 1 if you have the `atof' function. */
+#undef HAVE_ATOF
+
+/* Define to 1 if you have the `atoi' function. */
+#undef HAVE_ATOI
+
+/* Define to 1 if you have the `calloc' function. */
+#undef HAVE_CALLOC
+
+/* Define to 1 if you have the <ctype.h> header file. */
+#undef HAVE_CTYPE_H
+
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#undef HAVE_DLFCN_H
+
+/* Define to 1 if you have the `free' function. */
+#undef HAVE_FREE
+
+/* Define to 1 if you have the `getenv' function. */
+#undef HAVE_GETENV
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have the `itoa' function. */
+#undef HAVE_ITOA
+
+/* Define to 1 if you have the `asound' library (-lasound). */
+#undef HAVE_LIBASOUND
+
+/* Define to 1 if you have the `malloc' function. */
+#undef HAVE_MALLOC
+
+/* Define to 1 if you have the <malloc.h> header file. */
+#undef HAVE_MALLOC_H
+
+/* Define to 1 if you have the `memcmp' function. */
+#undef HAVE_MEMCMP
+
+/* Define to 1 if you have the `memcpy' function. */
+#undef HAVE_MEMCPY
+
+/* Define to 1 if you have the `memmove' function. */
+#undef HAVE_MEMMOVE
+
+/* Define to 1 if you have the <memory.h> header file. */
+#undef HAVE_MEMORY_H
+
+/* Define to 1 if you have the `memset' function. */
+#undef HAVE_MEMSET
+
+/* Define to 1 if you have the `putenv' function. */
+#undef HAVE_PUTENV
+
+/* Define to 1 if you have the `qsort' function. */
+#undef HAVE_QSORT
+
+/* Define to 1 if you have the `realloc' function. */
+#undef HAVE_REALLOC
+
+/* Define to 1 if you have the <signal.h> header file. */
+#undef HAVE_SIGNAL_H
+
+/* Define to 1 if you have the `snprintf' function. */
+#undef HAVE_SNPRINTF
+
+/* Define to 1 if you have the `sscanf' function. */
+#undef HAVE_SSCANF
+
+/* Define to 1 if you have the <stdarg.h> header file. */
+#undef HAVE_STDARG_H
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdio.h> header file. */
+#undef HAVE_STDIO_H
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#undef HAVE_STDLIB_H
+
+/* Define to 1 if you have the `strcasecmp' function. */
+#undef HAVE_STRCASECMP
+
+/* Define to 1 if you have the `strcat' function. */
+#undef HAVE_STRCAT
+
+/* Define to 1 if you have the `strchr' function. */
+#undef HAVE_STRCHR
+
+/* Define to 1 if you have the `strcmp' function. */
+#undef HAVE_STRCMP
+
+/* Define to 1 if you have the `strcpy' function. */
+#undef HAVE_STRCPY
+
+/* Define to 1 if you have the `strdup' function. */
+#undef HAVE_STRDUP
+
+/* Define to 1 if you have the `stricmp' function. */
+#undef HAVE_STRICMP
+
+/* Define to 1 if you have the <strings.h> header file. */
+#undef HAVE_STRINGS_H
+
+/* Define to 1 if you have the <string.h> header file. */
+#undef HAVE_STRING_H
+
+/* Define to 1 if you have the `strlen' function. */
+#undef HAVE_STRLEN
+
+/* Define to 1 if you have the `strncat' function. */
+#undef HAVE_STRNCAT
+
+/* Define to 1 if you have the `strncmp' function. */
+#undef HAVE_STRNCMP
+
+/* Define to 1 if you have the `strncpy' function. */
+#undef HAVE_STRNCPY
+
+/* Define to 1 if you have the `strrchr' function. */
+#undef HAVE_STRRCHR
+
+/* Define to 1 if you have the `strstr' function. */
+#undef HAVE_STRSTR
+
+/* Define to 1 if you have the `strtol' function. */
+#undef HAVE_STRTOL
+
+/* Define to 1 if you have the `strtoll' function. */
+#undef HAVE_STRTOLL
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#undef HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#undef HAVE_UNISTD_H
+
+/* Define to 1 if you have the `vsnprintf' function. */
+#undef HAVE_VSNPRINTF
+
+/* Define to 1 if you have the `_i64toa' function. */
+#undef HAVE__I64TOA
+
+/* Define to 1 if you have the `_ltoa' function. */
+#undef HAVE__LTOA
+
+/* Define to 1 if you have the `_strlwr' function. */
+#undef HAVE__STRLWR
+
+/* Define to 1 if you have the `_strrev' function. */
+#undef HAVE__STRREV
+
+/* Define to 1 if you have the `_strupr' function. */
+#undef HAVE__STRUPR
+
+/* Define to 1 if you have the `_ui64toa' function. */
+#undef HAVE__UI64TOA
+
+/* Define to 1 if you have the `_uitoa' function. */
+#undef HAVE__UITOA
+
+/* Define to 1 if you have the `_ultoa' function. */
+#undef HAVE__ULTOA
+
+/* Name of package */
+#undef PACKAGE
+
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
+/* The size of a `char', as computed by sizeof. */
+#undef SIZEOF_CHAR
+
+/* The size of a `int', as computed by sizeof. */
+#undef SIZEOF_INT
+
+/* The size of a `long', as computed by sizeof. */
+#undef SIZEOF_LONG
+
+/* The size of a `long long', as computed by sizeof. */
+#undef SIZEOF_LONG_LONG
+
+/* The size of a `short', as computed by sizeof. */
+#undef SIZEOF_SHORT
+
+/* If using the C implementation of alloca, define if you know the
+   direction of stack growth for your system; otherwise it will be
+   automatically deduced at run-time.
+	STACK_DIRECTION > 0 => grows toward higher addresses
+	STACK_DIRECTION < 0 => grows toward lower addresses
+	STACK_DIRECTION = 0 => direction of growth unknown */
+#undef STACK_DIRECTION
+
+/* Define to 1 if you have the ANSI C header files. */
+#undef STDC_HEADERS
+
+/* Version number of package */
+#undef VERSION
+
+/* Define to 1 if the X Window System is missing or not being used. */
+#undef X_DISPLAY_MISSING
+
+/* Define to empty if `const' does not conform to ANSI C. */
+#undef const
+
+/* Define to `__inline__' or `__inline' if that's what the C compiler
+   calls it, or to nothing if 'inline' is not supported under any name.  */
+#ifndef __cplusplus
+#undef inline
+#endif
+
+/* Define to `unsigned' if <sys/types.h> does not define. */
+#undef size_t
+
+
+
+#endif /* HAVE_LIBC */
+
+#endif /* _SDL_config_h */
+

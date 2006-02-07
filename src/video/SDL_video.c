@@ -798,7 +798,7 @@ SDL_Surface * SDL_SetVideoMode (int width, int height, int bpp, Uint32 flags)
 		 */
 		if ( (bpp == 16) &&
 		     (SDL_strstr((const char *)video->glGetString(GL_EXTENSIONS), "GL_EXT_packed_pixels") ||
-		     (atof((const char *)video->glGetString(GL_VERSION)) >= 1.2f))
+		     (SDL_atof((const char *)video->glGetString(GL_VERSION)) >= 1.2f))
 		   ) {
 			video->is_32bit = 0;
 			SDL_VideoSurface = SDL_CreateRGBSurface(
