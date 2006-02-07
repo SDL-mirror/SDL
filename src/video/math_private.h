@@ -19,6 +19,7 @@
 
 #include "SDL_endian.h"
 
+#define huge		really_big /* huge is a reserved keyword in VC++ 6.0 */
 #define int32_t 	math_int32_t
 #define u_int32_t	math_u_int32_t
 typedef Sint32 math_int32_t;
