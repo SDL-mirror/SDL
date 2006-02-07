@@ -45,8 +45,8 @@
 #define ALLOCA(n) ((void*)alloca(n))
 #define FREEA(p)
 #else
-#define ALLOCA(n) malloc(n)
-#define FREEA(p) free(p)
+#define ALLOCA(n) SDL_malloc(n)
+#define FREEA(p) SDL_free(p)
 #endif
 
 #include "SDL.h"
@@ -100,12 +100,12 @@ static void X11_DeleteDevice(SDL_VideoDevice *device)
 {
 	if ( device ) {
 		if ( device->hidden ) {
-			free(device->hidden);
+			SDL_free(device->hidden);
 		}
 		if ( device->gl_data ) {
-			free(device->gl_data);
+			SDL_free(device->gl_data);
 		}
-		free(device);
+		SDL_free(device);
 		SDL_X11_UnloadSymbols();
 	}
 }
@@ -116,13 +116,13 @@ static SDL_VideoDevice *X11_CreateDevice(int devindex)
 
 	if ( SDL_X11_LoadSymbols() ) {
 		/* Initialize all variables that we clean on shutdown */
-		device = (SDL_VideoDevice *)malloc(sizeof(SDL_VideoDevice));
+		device = (SDL_VideoDevice *)SDL_malloc(sizeof(SDL_VideoDevice));
 		if ( device ) {
-			memset(device, 0, (sizeof *device));
+			SDL_memset(device, 0, (sizeof *device));
 			device->hidden = (struct SDL_PrivateVideoData *)
-					malloc((sizeof *device->hidden));
+					SDL_malloc((sizeof *device->hidden));
 			device->gl_data = (struct SDL_PrivateGLData *)
-					malloc((sizeof *device->gl_data));
+					SDL_malloc((sizeof *device->gl_data));
 		}
 		if ( (device == NULL) || (device->hidden == NULL) ||
 		                         (device->gl_data == NULL) ) {
@@ -130,8 +130,8 @@ static SDL_VideoDevice *X11_CreateDevice(int devindex)
 			X11_DeleteDevice(device); /* calls SDL_X11_UnloadSymbols(). */
 			return(0);
 		}
-		memset(device->hidden, 0, (sizeof *device->hidden));
-		memset(device->gl_data, 0, (sizeof *device->gl_data));
+		SDL_memset(device->hidden, 0, (sizeof *device->hidden));
+		SDL_memset(device->gl_data, 0, (sizeof *device->gl_data));
 
 		/* Set the driver flags */
 		device->handles_any_size = 1;
@@ -266,7 +266,7 @@ static int xext_errhandler(Display *d, char *ext_name, char *reason)
 	       ext_name, reason, pXDisplayString(d));
 #endif
 
-	if (strcmp(reason, "missing") == 0) {
+	if (SDL_strcmp(reason, "missing") == 0) {
 		/*
 		 * Since the query itself, elsewhere, can handle a missing extension
 		 *  and the default behaviour in Xlib is to write to stderr, which
@@ -290,9 +290,9 @@ static char *get_classname(char *classname, int maxlen)
 #endif
 
 	/* First allow environment variable override */
-	spot = getenv("SDL_VIDEO_X11_WMCLASS");
+	spot = SDL_getenv("SDL_VIDEO_X11_WMCLASS");
 	if ( spot ) {
-		strncpy(classname, spot, maxlen);
+		SDL_strncpy(classname, spot, maxlen);
 		return classname;
 	}
 
@@ -308,18 +308,18 @@ static char *get_classname(char *classname, int maxlen)
 	linksize = readlink(procfile, linkfile, sizeof(linkfile)-1);
 	if ( linksize > 0 ) {
 		linkfile[linksize] = '\0';
-		spot = strrchr(linkfile, '/');
+		spot = SDL_strrchr(linkfile, '/');
 		if ( spot ) {
-			strncpy(classname, spot+1, maxlen);
+			SDL_strncpy(classname, spot+1, maxlen);
 		} else {
-			strncpy(classname, linkfile, maxlen);
+			SDL_strncpy(classname, linkfile, maxlen);
 		}
 		return classname;
 	}
 #endif /* linux */
 
 	/* Finally use the default we've used forever */
-	strncpy(classname, "SDL_App", maxlen);
+	SDL_strncpy(classname, "SDL_App", maxlen);
 	return classname;
 }
 
@@ -335,7 +335,7 @@ static void create_aux_windows(_THIS)
     /* Don't create any extra windows if we are being managed */
     if ( SDL_windowid ) {
 	FSwindow = 0;
-	WMwindow = strtol(SDL_windowid, NULL, 0);
+	WMwindow = SDL_strtol(SDL_windowid, NULL, 0);
         return;
     }
 
@@ -361,7 +361,7 @@ static void create_aux_windows(_THIS)
 	XEvent ev;
 	long mask;
 
-	memset(&ev, 0, sizeof(ev));
+	SDL_memset(&ev, 0, sizeof(ev));
 	ev.xclient.type = ClientMessage;
 	ev.xclient.window = SDL_Root;
 	ev.xclient.message_type = pXInternAtom(SDL_Display,
@@ -461,8 +461,8 @@ static int X11_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	/* Open the X11 display */
 	display = NULL;		/* Get it from DISPLAY environment variable */
 
-	if ( (strncmp(pXDisplayName(display), ":", 1) == 0) ||
-	     (strncmp(pXDisplayName(display), "unix:", 5) == 0) ) {
+	if ( (SDL_strncmp(pXDisplayName(display), ":", 1) == 0) ||
+	     (SDL_strncmp(pXDisplayName(display), "unix:", 5) == 0) ) {
 		local_X11 = 1;
 	} else {
 		local_X11 = 0;
@@ -552,7 +552,7 @@ static int X11_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	X11_SaveVidModeGamma(this);
 
 	/* See if we have been passed a window to use */
-	SDL_windowid = getenv("SDL_WINDOWID");
+	SDL_windowid = SDL_getenv("SDL_WINDOWID");
 
 	/* Create the fullscreen and managed windows */
 	create_aux_windows(this);
@@ -605,7 +605,7 @@ static void X11_DestroyWindow(_THIS, SDL_Surface *screen)
 					--SDL_XPixels[pixel];
 				}
 			}
-			free(SDL_XPixels);
+			SDL_free(SDL_XPixels);
 			SDL_XPixels = NULL;
 		} 
 
@@ -619,13 +619,13 @@ static void X11_DestroyWindow(_THIS, SDL_Surface *screen)
 
 static SDL_bool X11_WindowPosition(_THIS, int *x, int *y, int w, int h)
 {
-	const char *window = getenv("SDL_VIDEO_WINDOW_POS");
-	const char *center = getenv("SDL_VIDEO_CENTERED");
+	const char *window = SDL_getenv("SDL_VIDEO_WINDOW_POS");
+	const char *center = SDL_getenv("SDL_VIDEO_CENTERED");
 	if ( window ) {
-		if ( sscanf(window, "%d,%d", x, y) == 2 ) {
+		if ( SDL_sscanf(window, "%d,%d", x, y) == 2 ) {
 			return SDL_TRUE;
 		}
-		if ( strcmp(window, "center") == 0 ) {
+		if ( SDL_strcmp(window, "center") == 0 ) {
 			center = window;
 		}
 	}
@@ -773,7 +773,7 @@ static int X11_CreateWindow(_THIS, SDL_Surface *screen,
 
 	/* See if we have been given a window id */
 	if ( SDL_windowid ) {
-		SDL_Window = strtol(SDL_windowid, NULL, 0);
+		SDL_Window = SDL_strtol(SDL_windowid, NULL, 0);
 	} else {
 		SDL_Window = 0;
 	}
@@ -827,12 +827,12 @@ static int X11_CreateWindow(_THIS, SDL_Surface *screen,
 
 	    /* Allocate the pixel flags */
 	    ncolors = SDL_Visual->map_entries;
-	    SDL_XPixels = malloc(ncolors * sizeof(int));
+	    SDL_XPixels = SDL_malloc(ncolors * sizeof(int));
 	    if(SDL_XPixels == NULL) {
 		SDL_OutOfMemory();
 		return -1;
 	    }
-	    memset(SDL_XPixels, 0, ncolors * sizeof(*SDL_XPixels));
+	    SDL_memset(SDL_XPixels, 0, ncolors * sizeof(*SDL_XPixels));
 
 	    /* always allocate a private colormap on non-default visuals */
 	    if ( SDL_Visual != DefaultVisual(SDL_Display, SDL_Screen) ) {
@@ -937,7 +937,7 @@ static int X11_CreateWindow(_THIS, SDL_Surface *screen,
 	}
 
 #if 0 /* This is an experiment - are the graphics faster now? - nope. */
-	if ( getenv("SDL_VIDEO_X11_BACKINGSTORE") )
+	if ( SDL_getenv("SDL_VIDEO_X11_BACKINGSTORE") )
 #endif
 	/* Cache the window in the server, when possible */
 	{
@@ -1259,10 +1259,10 @@ int X11_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 
 		want = ALLOCA(ncolors * sizeof(SDL_Color));
 		reject = ALLOCA(ncolors * sizeof(SDL_Color));
-		memcpy(want, colors + firstcolor, ncolors * sizeof(SDL_Color));
+		SDL_memcpy(want, colors + firstcolor, ncolors * sizeof(SDL_Color));
 		/* make sure the user isn't fooled by her own wishes
 		   (black is safe, always available in the default colormap) */
-		memset(colors + firstcolor, 0, ncolors * sizeof(SDL_Color));
+		SDL_memset(colors + firstcolor, 0, ncolors * sizeof(SDL_Color));
 
 		/* now try to allocate the colours */
 		for(i = 0; i < ncolors; i++) {
@@ -1361,7 +1361,7 @@ void X11_VideoQuit(_THIS)
 					--SDL_iconcolors[pixel];
 				}
 			}
-			free(SDL_iconcolors);
+			SDL_free(SDL_iconcolors);
 			SDL_iconcolors = NULL;
 		} 
 		/* Restore gamma settings if they've changed */

@@ -52,14 +52,14 @@ int CGX_SetHWColorKey(_THIS,SDL_Surface *surface, Uint32 key)
 	if(surface->hwdata)
 	{
 		if(surface->hwdata->mask)
-			free(surface->hwdata->mask);
+			SDL_free(surface->hwdata->mask);
 
-		if(surface->hwdata->mask=malloc(RASSIZE(surface->w,surface->h)))
+		if(surface->hwdata->mask=SDL_malloc(RASSIZE(surface->w,surface->h)))
 		{
 			Uint32 pitch,ok=0;
 			APTR lock;
 
-			memset(surface->hwdata->mask,255,RASSIZE(surface->w,surface->h));
+			SDL_memset(surface->hwdata->mask,255,RASSIZE(surface->w,surface->h));
 
 			D(bug("Building colorkey mask: color: %ld, size: %ld x %ld, %ld bytes...Bpp:%ld\n",key,surface->w,surface->h,RASSIZE(surface->w,surface->h),surface->format->BytesPerPixel));
 
@@ -155,7 +155,7 @@ int CGX_SetHWColorKey(_THIS,SDL_Surface *surface, Uint32 key)
 					break;
 					default:
 						D(bug("Pixel mode non supported for color key..."));
-						free(surface->hwdata->mask);
+						SDL_free(surface->hwdata->mask);
 						surface->hwdata->mask=NULL;
 						ok=-1;
 				}

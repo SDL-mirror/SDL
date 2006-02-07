@@ -175,13 +175,13 @@ int SDL_VideoInit (const char *driver_name, Uint32 flags)
 	video = NULL;
 	if ( driver_name != NULL ) {
 #if 0	/* This will be replaced with a better driver selection API */
-		if ( strrchr(driver_name, ':') != NULL ) {
-			index = atoi(strrchr(driver_name, ':')+1);
+		if ( SDL_strrchr(driver_name, ':') != NULL ) {
+			index = atoi(SDL_strrchr(driver_name, ':')+1);
 		}
 #endif
 		for ( i=0; bootstrap[i]; ++i ) {
-			if ( strncmp(bootstrap[i]->name, driver_name,
-			             strlen(bootstrap[i]->name)) == 0 ) {
+			if ( SDL_strncmp(bootstrap[i]->name, driver_name,
+			             SDL_strlen(bootstrap[i]->name)) == 0 ) {
 				if ( bootstrap[i]->available() ) {
 					video = bootstrap[i]->create(index);
 					break;
@@ -216,7 +216,7 @@ int SDL_VideoInit (const char *driver_name, Uint32 flags)
 	video->wm_icon  = NULL;
 	video->offset_x = 0;
 	video->offset_y = 0;
-	memset(&video->info, 0, (sizeof video->info));
+	SDL_memset(&video->info, 0, (sizeof video->info));
 	
 	video->displayformatalphapixel = NULL;
 
@@ -244,7 +244,7 @@ int SDL_VideoInit (const char *driver_name, Uint32 flags)
 	video->gl_config.multisamplesamples = 0;
 	
 	/* Initialize the video subsystem */
-	memset(&vformat, 0, sizeof(vformat));
+	SDL_memset(&vformat, 0, sizeof(vformat));
 	if ( video->VideoInit(video, &vformat) < 0 ) {
 		SDL_VideoQuit();
 		return(-1);
@@ -289,7 +289,7 @@ int SDL_VideoInit (const char *driver_name, Uint32 flags)
 char *SDL_VideoDriverName(char *namebuf, int maxlen)
 {
 	if ( current_video != NULL ) {
-		strncpy(namebuf, current_video->name, maxlen-1);
+		SDL_strncpy(namebuf, current_video->name, maxlen-1);
 		namebuf[maxlen-1] = '\0';
 		return(namebuf);
 	}
@@ -389,7 +389,7 @@ int SDL_VideoModeOK (int width, int height, int bpp, Uint32 flags)
 	}
 
 	/* Search through the list valid of modes */
-	memset(&format, 0, sizeof(format));
+	SDL_memset(&format, 0, sizeof(format));
 	supported = 0;
 	table = ((bpp+7)/8)-1;
 	SDL_closest_depths[table][0] = bpp;
@@ -461,7 +461,7 @@ static int SDL_GetVideoMode (int *w, int *h, int *BitsPerPixel, Uint32 flags)
 	}
 
 	/* No exact size match at any depth, look for closest match */
-	memset(&format, 0, sizeof(format));
+	SDL_memset(&format, 0, sizeof(format));
 	supported = 0;
 	table = ((*BitsPerPixel+7)/8)-1;
 	SDL_closest_depths[table][0] = *BitsPerPixel;
@@ -541,7 +541,7 @@ static void SDL_CreateShadowSurface(int depth)
 	if ( SDL_ShadowSurface->format->palette ) {
 		SDL_ShadowSurface->flags |= SDL_HWPALETTE;
 		if ( depth == (SDL_VideoSurface->format)->BitsPerPixel ) {
-			memcpy(SDL_ShadowSurface->format->palette->colors,
+			SDL_memcpy(SDL_ShadowSurface->format->palette->colors,
 				SDL_VideoSurface->format->palette->colors,
 				SDL_VideoSurface->format->palette->ncolors*
 							sizeof(SDL_Color));
@@ -649,12 +649,12 @@ SDL_Surface * SDL_SetVideoMode (int width, int height, int bpp, Uint32 flags)
 		SDL_FreeSurface(ready_to_go);
 	}
 	if ( video->physpal ) {
-		free(video->physpal->colors);
-		free(video->physpal);
+		SDL_free(video->physpal->colors);
+		SDL_free(video->physpal);
 		video->physpal = NULL;
 	}
 	if( video->gammacols) {
-		free(video->gammacols);
+		SDL_free(video->gammacols);
 		video->gammacols = NULL;
 	}
 
@@ -797,7 +797,7 @@ SDL_Surface * SDL_SetVideoMode (int width, int height, int bpp, Uint32 flags)
 		   support the GL_UNSIGNED_SHORT_5_6_5 texture format.
 		 */
 		if ( (bpp == 16) &&
-		     (strstr((const char *)video->glGetString(GL_EXTENSIONS), "GL_EXT_packed_pixels") ||
+		     (SDL_strstr((const char *)video->glGetString(GL_EXTENSIONS), "GL_EXT_packed_pixels") ||
 		     (atof((const char *)video->glGetString(GL_VERSION)) >= 1.2f))
 		   ) {
 			video->is_32bit = 0;
@@ -843,7 +843,7 @@ SDL_Surface * SDL_SetVideoMode (int width, int height, int bpp, Uint32 flags)
 		SDL_FreeSurface(mode);
 
 		/* Set the surface completely opaque & white by default */
-		memset( SDL_VideoSurface->pixels, 255, SDL_VideoSurface->h * SDL_VideoSurface->pitch );
+		SDL_memset( SDL_VideoSurface->pixels, 255, SDL_VideoSurface->h * SDL_VideoSurface->pitch );
 		video->glGenTextures( 1, &video->texture );
 		video->glBindTexture( GL_TEXTURE_2D, video->texture );
 		video->glTexImage2D(
@@ -1134,7 +1134,7 @@ static void SetPalette_logical(SDL_Surface *screen, SDL_Color *colors,
 	SDL_Palette *vidpal;
 
 	if ( colors != (pal->colors + firstcolor) ) {
-		memcpy(pal->colors + firstcolor, colors,
+		SDL_memcpy(pal->colors + firstcolor, colors,
 		       ncolors * sizeof(*colors));
 	}
 
@@ -1146,7 +1146,7 @@ static void SetPalette_logical(SDL_Surface *screen, SDL_Color *colors,
 		 * changes to its logical palette so that
 		 * updates are always identity blits
 		 */
-		memcpy(vidpal->colors + firstcolor, colors,
+		SDL_memcpy(vidpal->colors + firstcolor, colors,
 		       ncolors * sizeof(*colors));
 	}
 	SDL_FormatChanged(screen);
@@ -1162,7 +1162,7 @@ static int SetPalette_physical(SDL_Surface *screen,
 		/* We need to copy the new colors, since we haven't
 		 * already done the copy in the logical set above.
 		 */
-		memcpy(video->physpal->colors + firstcolor,
+		SDL_memcpy(video->physpal->colors + firstcolor,
 		       colors, ncolors * sizeof(*colors));
 	}
 	if ( screen == SDL_ShadowSurface ) {
@@ -1187,7 +1187,7 @@ static int SetPalette_physical(SDL_Surface *screen,
 					SDL_Palette *pp = video->physpal;
 					if(!pp)
 						pp = screen->format->palette;
-					video->gammacols = malloc(pp->ncolors
+					video->gammacols = SDL_malloc(pp->ncolors
 							  * sizeof(SDL_Color));
 					SDL_ApplyGamma(video->gamma,
 						       pp->colors,
@@ -1284,18 +1284,18 @@ int SDL_SetPalette(SDL_Surface *screen, int which,
 		if(!video->physpal && !(which & SDL_LOGPAL) ) {
 			/* Lazy physical palette allocation */
 			int size;
-			SDL_Palette *pp = malloc(sizeof(*pp));
+			SDL_Palette *pp = SDL_malloc(sizeof(*pp));
 			if ( !pp ) {
 				return 0;
 			}
 			current_video->physpal = pp;
 			pp->ncolors = pal->ncolors;
 			size = pp->ncolors * sizeof(SDL_Color);
-			pp->colors = malloc(size);
+			pp->colors = SDL_malloc(size);
 			if ( !pp->colors ) {
 				return 0;
 			}
-			memcpy(pp->colors, pal->colors, size);
+			SDL_memcpy(pp->colors, pal->colors, size);
 		}
 		if ( ! SetPalette_physical(screen,
 		                           colors, firstcolor, ncolors) ) {
@@ -1351,24 +1351,24 @@ void SDL_VideoQuit (void)
 
 		/* Clean up miscellaneous memory */
 		if ( video->physpal ) {
-			free(video->physpal->colors);
-			free(video->physpal);
+			SDL_free(video->physpal->colors);
+			SDL_free(video->physpal);
 			video->physpal = NULL;
 		}
 		if ( video->gammacols ) {
-			free(video->gammacols);
+			SDL_free(video->gammacols);
 			video->gammacols = NULL;
 		}
 		if ( video->gamma ) {
-			free(video->gamma);
+			SDL_free(video->gamma);
 			video->gamma = NULL;
 		}
 		if ( video->wm_title != NULL ) {
-			free(video->wm_title);
+			SDL_free(video->wm_title);
 			video->wm_title = NULL;
 		}
 		if ( video->wm_icon != NULL ) {
-			free(video->wm_icon);
+			SDL_free(video->wm_icon);
 			video->wm_icon = NULL;
 		}
 
@@ -1668,20 +1668,20 @@ void SDL_WM_SetCaption (const char *title, const char *icon)
 	if ( video ) {
 		if ( title ) {
 			if ( video->wm_title ) {
-				free(video->wm_title);
+				SDL_free(video->wm_title);
 			}
-			video->wm_title = (char *)malloc(strlen(title)+1);
+			video->wm_title = (char *)SDL_malloc(SDL_strlen(title)+1);
 			if ( video->wm_title != NULL ) {
-				strcpy(video->wm_title, title);
+				SDL_strcpy(video->wm_title, title);
 			}
 		}
 		if ( icon ) {
 			if ( video->wm_icon ) {
-				free(video->wm_icon);
+				SDL_free(video->wm_icon);
 			}
-			video->wm_icon = (char *)malloc(strlen(icon)+1);
+			video->wm_icon = (char *)SDL_malloc(SDL_strlen(icon)+1);
 			if ( video->wm_icon != NULL ) {
-				strcpy(video->wm_icon, icon);
+				SDL_strcpy(video->wm_icon, icon);
 			}
 		}
 		if ( (title || icon) && (video->SetCaption != NULL) ) {
@@ -1773,18 +1773,18 @@ void SDL_WM_SetIcon (SDL_Surface *icon, Uint8 *mask)
 		if ( mask == NULL ) {
 			int mask_len = icon->h*(icon->w+7)/8;
 			int flags = 0;
-			mask = (Uint8 *)malloc(mask_len);
+			mask = (Uint8 *)SDL_malloc(mask_len);
 			if ( mask == NULL ) {
 				return;
 			}
-			memset(mask, ~0, mask_len);
+			SDL_memset(mask, ~0, mask_len);
 			if ( icon->flags & SDL_SRCCOLORKEY ) flags |= 1;
 			if ( icon->flags & SDL_SRCALPHA ) flags |= 2;
 			if( flags ) {
 				CreateMaskFromColorKeyOrAlpha(icon, mask, flags);
 			}
 			video->SetIcon(video, icon, mask);
-			free(mask);
+			SDL_free(mask);
 		} else {
 			video->SetIcon(this, icon, mask);
 		}

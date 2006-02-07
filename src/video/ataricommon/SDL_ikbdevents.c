@@ -78,7 +78,7 @@ void AtariIkbd_InitOSKeymap(_THIS)
 {
 	int i;
 
-	memset(SDL_AtariIkbd_keyboard, KEY_UNDEFINED, ATARIBIOS_MAXKEYS);
+	SDL_memset(SDL_AtariIkbd_keyboard, KEY_UNDEFINED, ATARIBIOS_MAXKEYS);
 
 	/* Initialize keymap */
 	for ( i=0; i<sizeof(keymap); i++ )

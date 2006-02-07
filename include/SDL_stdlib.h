@@ -49,9 +49,6 @@ char *alloca ();
 #endif
 
 #include "SDL_types.h"
-#include "SDL_stdarg.h"
-#include "SDL_getenv.h"
-
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
@@ -62,21 +59,18 @@ extern "C" {
 #ifdef HAVE_MALLOC
 #define SDL_malloc	malloc
 #else
-#define malloc		SDL_malloc
 extern DECLSPEC void * SDLCALL SDL_malloc(size_t size);
 #endif
 
 #ifdef HAVE_REALLOC
 #define SDL_realloc	realloc
 #else
-#define realloc		SDL_realloc
 extern DECLSPEC void * SDLCALL SDL_realloc(void *mem, size_t size);
 #endif
 
 #ifdef HAVE_FREE
 #define SDL_free	free
 #else
-#define free		SDL_free
 extern DECLSPEC void SDLCALL SDL_free(void *mem);
 #endif
 
@@ -84,14 +78,25 @@ extern DECLSPEC void SDLCALL SDL_free(void *mem);
 #define SDL_stack_alloc(type, count)    (type*)alloca(sizeof(type)*count)
 #define SDL_stack_free(data)
 #else
-#define SDL_stack_alloc(type, count)    SDL_malloc(sizeof(type)*count)
+#define SDL_stack_alloc(type, count)    (type*)SDL_malloc(sizeof(type)*count)
 #define SDL_stack_free(data)            SDL_free(data)
+#endif
+
+#ifdef HAVE_GETENV
+#define SDL_getenv	getenv
+#else
+extern DECLSPEC char * SDLCALL SDL_getenv(const char *name);
+#endif
+
+#ifdef HAVE_PUTENV
+#define SDL_putenv	putenv
+#else
+extern DECLSPEC int SDLCALL SDL_putenv(const char *variable);
 #endif
 
 #ifdef HAVE_QSORT
 #define SDL_qsort	qsort
 #else
-#define qsort		SDL_qsort
 extern DECLSPEC void SDLCALL SDL_qsort(void *base, size_t nmemb, size_t size,
            int (*compare)(const void *, const void *));
 #endif

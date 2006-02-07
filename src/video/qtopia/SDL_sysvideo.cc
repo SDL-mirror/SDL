@@ -82,8 +82,8 @@ extern "C" {
 
   static void QT_DeleteDevice(SDL_VideoDevice *device)
   {
-    free(device->hidden);
-    free(device);
+    SDL_free(device->hidden);
+    SDL_free(device);
   }
 
   static SDL_VideoDevice *QT_CreateDevice(int devindex)
@@ -91,20 +91,20 @@ extern "C" {
     SDL_VideoDevice *device;
 
     /* Initialize all variables that we clean on shutdown */
-    device = (SDL_VideoDevice *)malloc(sizeof(SDL_VideoDevice));
+    device = (SDL_VideoDevice *)SDL_malloc(sizeof(SDL_VideoDevice));
     if ( device ) {
-      memset(device, 0, (sizeof *device));
+      SDL_memset(device, 0, (sizeof *device));
       device->hidden = (struct SDL_PrivateVideoData *)
-	malloc((sizeof *device->hidden));
+	SDL_malloc((sizeof *device->hidden));
     }
     if ( (device == NULL) || (device->hidden == NULL) ) {
       SDL_OutOfMemory();
       if ( device ) {
-	free(device);
+	SDL_free(device);
       }
       return(0);
     }
-    memset(device->hidden, 0, (sizeof *device->hidden));
+    SDL_memset(device->hidden, 0, (sizeof *device->hidden));
 
     /* Set the function pointers */
     device->VideoInit = QT_VideoInit;
@@ -185,7 +185,7 @@ extern "C" {
     }
 
     /* Set up the new video mode rectangle */
-    mode = (SDL_Rect *)malloc(sizeof *mode);
+    mode = (SDL_Rect *)SDL_malloc(sizeof *mode);
     if ( mode == NULL ) {
       SDL_OutOfMemory();
       return(-1);
@@ -201,11 +201,11 @@ extern "C" {
     /* Allocate the new list of modes, and fill in the new mode */
     next_mode = SDL_nummodes[index];
     SDL_modelist[index] = (SDL_Rect **)
-      realloc(SDL_modelist[index], (1+next_mode+1)*sizeof(SDL_Rect *));
+      SDL_realloc(SDL_modelist[index], (1+next_mode+1)*sizeof(SDL_Rect *));
     if ( SDL_modelist[index] == NULL ) {
       SDL_OutOfMemory();
       SDL_nummodes[index] = 0;
-      free(mode);
+      SDL_free(mode);
       return(-1);
     }
     SDL_modelist[index][next_mode] = mode;
@@ -288,7 +288,7 @@ extern "C" {
       current->h = desktop_size.height();
     } else if(width <= desktop_size.height() && height <= desktop_size.width()) {
       // Landscape mode
-      char * envString = getenv(SDL_QT_ROTATION_ENV_NAME);
+      char * envString = SDL_getenv(SDL_QT_ROTATION_ENV_NAME);
       int envValue = envString ? atoi(envString) : 0;
       screenRotation = envValue ? SDL_QT_ROTATION_270 : SDL_QT_ROTATION_90;
       current->h = desktop_size.width();

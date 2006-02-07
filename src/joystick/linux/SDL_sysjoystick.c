@@ -23,7 +23,7 @@
 /* This is the system specific header for the SDL joystick API */
 
 #include <stdio.h>		/* For the definition of NULL */
-#include <stdlib.h>		/* For getenv() prototype */
+#include <stdlib.h>		/* For SDL_getenv() prototype */
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -187,9 +187,9 @@ static char *mystrdup(const char *string)
 {
 	char *newstring;
 
-	newstring = (char *)malloc(strlen(string)+1);
+	newstring = (char *)SDL_malloc(SDL_strlen(string)+1);
 	if ( newstring ) {
-		strcpy(newstring, string);
+		SDL_strcpy(newstring, string);
 	}
 	return(newstring);
 }
@@ -209,7 +209,7 @@ static int CountLogicalJoysticks(int max)
 
       if (name) {
          for(j = 0; j < SDL_TABLESIZE(joystick_logicalmap); j++) {
-            if (!strcmp(name, joystick_logicalmap[j].name)) {
+            if (!SDL_strcmp(name, joystick_logicalmap[j].name)) {
 
                prev = i;
                SDL_joylist[prev].map = joystick_logicalmap+j;
@@ -243,7 +243,7 @@ static void LogicalSuffix(int logicalno, char* namebuf, int len)
       "20212223242526272829303132";
    const char* suffix;
 
-   slen = strlen(namebuf);
+   slen = SDL_strlen(namebuf);
 
    suffix = NULL;
 
@@ -306,8 +306,8 @@ int SDL_SYS_JoystickInit(void)
 	numjoysticks = 0;
 
 	/* First see if the user specified a joystick to use */
-	if ( getenv("SDL_JOYSTICK_DEVICE") != NULL ) {
-		strncpy(path, getenv("SDL_JOYSTICK_DEVICE"), sizeof(path));
+	if ( SDL_getenv("SDL_JOYSTICK_DEVICE") != NULL ) {
+		SDL_strncpy(path, SDL_getenv("SDL_JOYSTICK_DEVICE"), sizeof(path));
 		path[sizeof(path)-1] = '\0';
 		if ( stat(path, &sb) == 0 ) {
 			fd = open(path, O_RDONLY, 0);
@@ -426,7 +426,7 @@ static int allocate_hatdata(SDL_Joystick *joystick)
 {
 	int i;
 
-	joystick->hwdata->hats = (struct hwdata_hat *)malloc(
+	joystick->hwdata->hats = (struct hwdata_hat *)SDL_malloc(
 		joystick->nhats * sizeof(struct hwdata_hat));
 	if ( joystick->hwdata->hats == NULL ) {
 		return(-1);
@@ -442,7 +442,7 @@ static int allocate_balldata(SDL_Joystick *joystick)
 {
 	int i;
 
-	joystick->hwdata->balls = (struct hwdata_ball *)malloc(
+	joystick->hwdata->balls = (struct hwdata_ball *)SDL_malloc(
 		joystick->nballs * sizeof(struct hwdata_ball));
 	if ( joystick->hwdata->balls == NULL ) {
 		return(-1);
@@ -481,8 +481,8 @@ static SDL_bool JS_ConfigJoystick(SDL_Joystick *joystick, int fd)
 	old_axes = joystick->naxes;
 
 	/* Generic analog joystick support */
-	if ( strstr(name, "Analog") == name && strstr(name, "-hat") ) {
-		if ( sscanf(name,"Analog %d-axis %*d-button %d-hat",
+	if ( SDL_strstr(name, "Analog") == name && SDL_strstr(name, "-hat") ) {
+		if ( SDL_sscanf(name,"Analog %d-axis %*d-button %d-hat",
 			&tmp_naxes, &tmp_nhats) == 2 ) {
 
 			joystick->naxes = tmp_naxes;
@@ -494,7 +494,7 @@ static SDL_bool JS_ConfigJoystick(SDL_Joystick *joystick, int fd)
 
 	/* Special joystick support */
 	for ( i=0; i < SDL_TABLESIZE(special_joysticks); ++i ) {
-		if ( strcmp(name, special_joysticks[i].name) == 0 ) {
+		if ( SDL_strcmp(name, special_joysticks[i].name) == 0 ) {
 
 			joystick->naxes = special_joysticks[i].naxes;
 			joystick->nhats = special_joysticks[i].nhats;
@@ -506,16 +506,16 @@ static SDL_bool JS_ConfigJoystick(SDL_Joystick *joystick, int fd)
 	}
 
 	/* User environment joystick support */
-	if ( (env = getenv("SDL_LINUX_JOYSTICK")) ) {
-		strcpy(env_name, "");
-		if ( *env == '\'' && sscanf(env, "'%[^']s'", env_name) == 1 )
-			env += strlen(env_name)+2;
-		else if ( sscanf(env, "%s", env_name) == 1 )
-			env += strlen(env_name);
+	if ( (env = SDL_getenv("SDL_LINUX_JOYSTICK")) ) {
+		SDL_strcpy(env_name, "");
+		if ( *env == '\'' && SDL_sscanf(env, "'%[^']s'", env_name) == 1 )
+			env += SDL_strlen(env_name)+2;
+		else if ( SDL_sscanf(env, "%s", env_name) == 1 )
+			env += SDL_strlen(env_name);
 
-		if ( strcmp(name, env_name) == 0 ) {
+		if ( SDL_strcmp(name, env_name) == 0 ) {
 
-			if ( sscanf(env, "%d %d %d", &tmp_naxes, &tmp_nhats,
+			if ( SDL_sscanf(env, "%d %d %d", &tmp_naxes, &tmp_nhats,
 				&tmp_nballs) == 3 ) {
 
 				joystick->naxes = tmp_naxes;
@@ -697,13 +697,13 @@ int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
 		return(-1);
 	}
 	joystick->hwdata = (struct joystick_hwdata *)
-	                   malloc(sizeof(*joystick->hwdata));
+	                   SDL_malloc(sizeof(*joystick->hwdata));
 	if ( joystick->hwdata == NULL ) {
 		SDL_OutOfMemory();
 		close(fd);
 		return(-1);
 	}
-	memset(joystick->hwdata, 0, sizeof(*joystick->hwdata));
+	SDL_memset(joystick->hwdata, 0, sizeof(*joystick->hwdata));
 	joystick->hwdata->fd = fd;
 
 	/* Set the joystick to non-blocking read mode */
@@ -1064,12 +1064,12 @@ void SDL_SYS_JoystickClose(SDL_Joystick *joystick)
 #endif
 		close(joystick->hwdata->fd);
 		if ( joystick->hwdata->hats ) {
-			free(joystick->hwdata->hats);
+			SDL_free(joystick->hwdata->hats);
 		}
 		if ( joystick->hwdata->balls ) {
-			free(joystick->hwdata->balls);
+			SDL_free(joystick->hwdata->balls);
 		}
-		free(joystick->hwdata);
+		SDL_free(joystick->hwdata);
 		joystick->hwdata = NULL;
 	}
 }
@@ -1080,7 +1080,7 @@ void SDL_SYS_JoystickQuit(void)
 	int i;
 
 	for ( i=0; SDL_joylist[i].fname; ++i ) {
-		free(SDL_joylist[i].fname);
+		SDL_free(SDL_joylist[i].fname);
 	}
 	SDL_joylist[0].fname = NULL;
 }

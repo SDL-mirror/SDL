@@ -90,7 +90,7 @@ void amiga_CheckMouseMode(_THIS)
 						&mouse_accel.numerator, 
 						&mouse_accel.denominator,
 						&mouse_accel.threshold);
-			use_mouse_accel = getenv("SDL_VIDEO_X11_MOUSEACCEL");
+			use_mouse_accel = SDL_getenv("SDL_VIDEO_X11_MOUSEACCEL");
 			if ( use_mouse_accel ) {
 				SetMouseAccel(this, use_mouse_accel);
 			}

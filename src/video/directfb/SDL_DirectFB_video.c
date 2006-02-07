@@ -98,8 +98,8 @@ static int DirectFB_Available(void)
 
 static void DirectFB_DeleteDevice(SDL_VideoDevice *device)
 {
-  free(device->hidden);
-  free(device);
+  SDL_free(device->hidden);
+  SDL_free(device);
 }
 
 static SDL_VideoDevice *DirectFB_CreateDevice(int devindex)
@@ -107,7 +107,7 @@ static SDL_VideoDevice *DirectFB_CreateDevice(int devindex)
   SDL_VideoDevice *device;
 
   /* Initialize all variables that we clean on shutdown */
-  device = (SDL_VideoDevice *)malloc(sizeof(SDL_VideoDevice));
+  device = (SDL_VideoDevice *)SDL_malloc(sizeof(SDL_VideoDevice));
   if (device)
     {
       memset (device, 0, (sizeof *device));
@@ -467,7 +467,7 @@ int DirectFB_VideoInit(_THIS, SDL_PixelFormat *vformat)
   HIDDEN->layer       = layer;
   HIDDEN->eventbuffer = events;
 
-  if (getenv("SDL_DIRECTFB_MGA_CRTC2") != NULL)
+  if (SDL_getenv("SDL_DIRECTFB_MGA_CRTC2") != NULL)
     HIDDEN->enable_mga_crtc2 = 1;
   
   if (HIDDEN->enable_mga_crtc2)
@@ -541,10 +541,10 @@ int DirectFB_VideoInit(_THIS, SDL_PixelFormat *vformat)
       HIDDEN->c2layer->SetOpacity(HIDDEN->c2layer, 0xFF );
     
       /* Check if overscan is possibly set */
-      if (getenv("SDL_DIRECTFB_MGA_OVERSCAN") != NULL)
+      if (SDL_getenv("SDL_DIRECTFB_MGA_OVERSCAN") != NULL)
         {
 	    float overscan = 0;
-	    if (sscanf(getenv("SDL_DIRECTFB_MGA_OVERSCAN"), "%f", &overscan) == 1)
+	    if (SDL_sscanf(SDL_getenv("SDL_DIRECTFB_MGA_OVERSCAN"), "%f", &overscan) == 1)
                if (overscan > 0 && overscan < 2)
 		  HIDDEN->mga_crtc2_stretch_overscan = overscan;
 	}
@@ -714,7 +714,7 @@ static SDL_Surface *DirectFB_SetVideoMode(_THIS, SDL_Surface *current, int width
 
       HIDDEN->mga_crtc2_stretch = 0;
 
-      if (getenv("SDL_DIRECTFB_MGA_STRETCH") != NULL)
+      if (SDL_getenv("SDL_DIRECTFB_MGA_STRETCH") != NULL)
         {
 	    /* Normally assume a picture aspect ratio of 4:3 */
 	    int zoom_aspect_x = 4, zoom_aspect_y = 3, i, j;

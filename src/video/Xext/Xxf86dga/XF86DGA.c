@@ -407,12 +407,12 @@ AddMap(void)
     MapPtr *old;
 
     old = mapList;
-    mapList = realloc(mapList, sizeof(MapPtr) * (numMaps + 1));
+    mapList = SDL_realloc(mapList, sizeof(MapPtr) * (numMaps + 1));
     if (!mapList) {
 	mapList = old;
 	return NULL;
     }
-    mapList[numMaps] = malloc(sizeof(MapRec));
+    mapList[numMaps] = SDL_malloc(sizeof(MapRec));
     if (!mapList[numMaps])
 	return NULL;
     return mapList[numMaps++];
@@ -424,12 +424,12 @@ AddScr(void)
     ScrPtr *old;
 
     old = scrList;
-    scrList = realloc(scrList, sizeof(ScrPtr) * (numScrs + 1));
+    scrList = SDL_realloc(scrList, sizeof(ScrPtr) * (numScrs + 1));
     if (!scrList) {
 	scrList = old;
 	return NULL;
     }
-    scrList[numScrs] = malloc(sizeof(ScrRec));
+    scrList[numScrs] = SDL_malloc(sizeof(ScrRec));
     if (!scrList[numScrs])
 	return NULL;
     return scrList[numScrs++];

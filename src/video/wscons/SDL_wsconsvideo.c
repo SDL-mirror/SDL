@@ -96,8 +96,8 @@ static int WSCONS_Available(void)
 
 static void WSCONS_DeleteDevice(SDL_VideoDevice *device)
 {
-  free(device->hidden);
-  free(device);
+  SDL_free(device->hidden);
+  SDL_free(device);
 }
 
 static SDL_VideoDevice *WSCONS_CreateDevice(int devindex)
@@ -105,20 +105,20 @@ static SDL_VideoDevice *WSCONS_CreateDevice(int devindex)
   SDL_VideoDevice *device;
   
   /* Initialize all variables that we clean on shutdown */
-  device = (SDL_VideoDevice *)malloc(sizeof(SDL_VideoDevice));
+  device = (SDL_VideoDevice *)SDL_malloc(sizeof(SDL_VideoDevice));
   if (device == NULL) {
     SDL_OutOfMemory();
     return 0;
   }
-  memset(device, 0, (sizeof *device));
+  SDL_memset(device, 0, (sizeof *device));
   device->hidden = 
-    (struct SDL_PrivateVideoData *)malloc((sizeof *device->hidden));
+    (struct SDL_PrivateVideoData *)SDL_malloc((sizeof *device->hidden));
   if (device->hidden == NULL) {
     SDL_OutOfMemory();
-    free(device);
+    SDL_free(device);
     return(0);
   }
-  memset(device->hidden, 0, (sizeof *device->hidden));
+  SDL_memset(device->hidden, 0, (sizeof *device->hidden));
   device->hidden->fd = -1;
   
   /* Set the function pointers */
@@ -159,7 +159,7 @@ int WSCONS_VideoInit(_THIS, SDL_PixelFormat *vformat)
   int pagemask;
   int width, height;
   
-  devname = getenv("SDL_WSCONSDEV");
+  devname = SDL_getenv("SDL_WSCONSDEV");
   if (devname == NULL) {
     int activeVT;
     if (ioctl(STDIN_FILENO, VT_GETACTIVE, &activeVT) == -1) {
@@ -167,7 +167,7 @@ int WSCONS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 			 strerror(errno));
       return -1;
     }
-    snprintf(devnamebuf, sizeof(devnamebuf), WSCONSDEV_FORMAT, activeVT - 1);
+    SDL_snprintf(devnamebuf, sizeof(devnamebuf), WSCONSDEV_FORMAT, activeVT - 1);
     devname = devnamebuf;
   }
 
@@ -211,25 +211,25 @@ int WSCONS_VideoInit(_THIS, SDL_PixelFormat *vformat)
   }
   
   private->rotate = WSCONS_ROTATE_NONE;
-  rotation = getenv("SDL_VIDEO_WSCONS_ROTATION");
+  rotation = SDL_getenv("SDL_VIDEO_WSCONS_ROTATION");
   if (rotation != NULL) {
-    if (strlen(rotation) == 0) {
+    if (SDL_strlen(rotation) == 0) {
       private->shadowFB = 0;
       private->rotate = WSCONS_ROTATE_NONE;
       printf("Not rotating, no shadow\n");
-    } else if (!strcmp(rotation, "NONE")) {
+    } else if (!SDL_strcmp(rotation, "NONE")) {
       private->shadowFB = 1;
       private->rotate = WSCONS_ROTATE_NONE;
       printf("Not rotating, but still using shadow\n");
-    } else if (!strcmp(rotation, "CW")) {
+    } else if (!SDL_strcmp(rotation, "CW")) {
       private->shadowFB = 1;
       private->rotate = WSCONS_ROTATE_CW;
       printf("Rotating screen clockwise\n");
-    } else if (!strcmp(rotation, "CCW")) {
+    } else if (!SDL_strcmp(rotation, "CCW")) {
       private->shadowFB = 1;
       private->rotate = WSCONS_ROTATE_CCW;
       printf("Rotating screen counter clockwise\n");
-    } else if (!strcmp(rotation, "UD")) {
+    } else if (!SDL_strcmp(rotation, "UD")) {
       private->shadowFB = 1;
       private->rotate = WSCONS_ROTATE_UD;
       printf("Rotating screen upside down\n");
@@ -304,7 +304,7 @@ int WSCONS_VideoInit(_THIS, SDL_PixelFormat *vformat)
   }
 
   if (private->shadowFB) {
-    private->shadowmem = (Uint8 *)malloc(len);
+    private->shadowmem = (Uint8 *)SDL_malloc(len);
     if (private->shadowmem == NULL) {
       WSCONS_ReportError("No memory for shadow");
       return -1;
@@ -316,7 +316,7 @@ int WSCONS_VideoInit(_THIS, SDL_PixelFormat *vformat)
     private->fblinebytes = private->physlinebytes;
   }
   
-  private->SDL_modelist[0] = (SDL_Rect *)malloc(sizeof(SDL_Rect));
+  private->SDL_modelist[0] = (SDL_Rect *)SDL_malloc(sizeof(SDL_Rect));
   private->SDL_modelist[0]->w = width;
   private->SDL_modelist[0]->h = height;
 
@@ -374,7 +374,7 @@ SDL_Surface *WSCONS_SetVideoMode(_THIS, SDL_Surface *current,
   current->pitch = private->fblinebytes;
   current->pixels = private->fbstart;
 
-  memset(private->fbstart, 0, private->fbmem_len);
+  SDL_memset(private->fbstart, 0, private->fbmem_len);
 
   return current;
 }
@@ -583,7 +583,7 @@ void WSCONS_VideoQuit(_THIS)
   int mode = WSDISPLAYIO_MODE_EMUL;
 
   if (private->shadowmem != NULL) {
-    free(private->shadowmem);
+    SDL_free(private->shadowmem);
     private->shadowmem = NULL;
   }
   private->fbstart = NULL;
@@ -592,7 +592,7 @@ void WSCONS_VideoQuit(_THIS)
   }
 
   if (private->SDL_modelist[0] != NULL) {
-    free(private->SDL_modelist[0]);
+    SDL_free(private->SDL_modelist[0]);
     private->SDL_modelist[0] = NULL;
   }
 

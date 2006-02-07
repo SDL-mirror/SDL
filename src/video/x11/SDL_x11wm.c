@@ -93,7 +93,7 @@ void X11_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 			/* The icon has a palette as well - we just have to
 			   find those colours */
 			nwant = icon->format->palette->ncolors;
-			memcpy(want, icon->format->palette->colors,
+			SDL_memcpy(want, icon->format->palette->colors,
 			       nwant * sizeof want[0]);
 		} else {
 			/* try the standard 6x6x6 cube for lack of better
@@ -121,11 +121,11 @@ void X11_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 			pXFreeColors(GFX_Display, dcmap, freelist, nfree, 0);
 		}
 		if(!SDL_iconcolors)
-			SDL_iconcolors = malloc(256 * sizeof *SDL_iconcolors);
-		memset(SDL_iconcolors, 0, 256 * sizeof *SDL_iconcolors);
+			SDL_iconcolors = SDL_malloc(256 * sizeof *SDL_iconcolors);
+		SDL_memset(SDL_iconcolors, 0, 256 * sizeof *SDL_iconcolors);
 
 		/* try to allocate the colours */
-		memset(got, 0, sizeof got);
+		SDL_memset(got, 0, sizeof got);
 		missing = 0;
 		for(i = 0; i < nwant; i++) {
 			XColor c;
@@ -179,11 +179,11 @@ void X11_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 	/* We need the mask as given, except in LSBfirst format instead of
 	   MSBfirst. Reverse the bits in each byte. */
 	masksize = ((sicon->w + 7) >> 3) * sicon->h;
-	LSBmask = malloc(masksize);
+	LSBmask = SDL_malloc(masksize);
 	if ( LSBmask == NULL ) {
 		goto done;
 	}
-	memset(LSBmask, 0, masksize);
+	SDL_memset(LSBmask, 0, masksize);
 	for(i = 0; i < masksize; i++)
 		LSBmask[i] = reverse_byte(mask[i]);
 	mask_pixmap = pXCreatePixmapFromBitmapData(SDL_Display, WMwindow,
@@ -207,13 +207,13 @@ void X11_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 		  0, 0, 0, 0, sicon->w, sicon->h);
 	pXFreeGC(SDL_Display, gc);
 	pXDestroyImage(icon_image);
-	free(LSBmask);
+	SDL_free(LSBmask);
 	sicon->pixels = NULL;
 
 	/* Some buggy window managers (some versions of Enlightenment, it
 	   seems) need an icon window *and* icon pixmap to work properly, while
 	   it screws up others. The default is only to use a pixmap. */
-	p = getenv("SDL_VIDEO_X11_ICONWIN");
+	p = SDL_getenv("SDL_VIDEO_X11_ICONWIN");
 	if(p && *p) {
 		icon_window = pXCreateSimpleWindow(SDL_Display, SDL_Root,
 						  0, 0, sicon->w, sicon->h, 0,

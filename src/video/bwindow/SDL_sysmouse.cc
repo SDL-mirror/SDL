@@ -60,14 +60,14 @@ WMcursor *BE_CreateWMCursor(_THIS,
 	}
 
 	/* Allocate the cursor */
-	cursor = (WMcursor *)malloc(sizeof(WMcursor));
+	cursor = (WMcursor *)SDL_malloc(sizeof(WMcursor));
 	if ( cursor == NULL ) {
 		SDL_OutOfMemory();
 		return(NULL);
 	}
-	cursor->bits = (char *)malloc(4+2*((allowed_x/8)*allowed_y));
+	cursor->bits = (char *)SDL_malloc(4+2*((allowed_x/8)*allowed_y));
 	if ( cursor->bits == NULL ) {
-		free(cursor);
+		SDL_free(cursor);
 		SDL_OutOfMemory();
 		return(NULL);
 	}
@@ -81,13 +81,13 @@ WMcursor *BE_CreateWMCursor(_THIS,
 	run = PADDED_BITS(w);
 	pad = PADDED_BITS(allowed_x)-run;
 	for ( i=0; i<h; ++i ) {
-		memcpy(cptr, data, run);
-		memset(cptr+run, 0, pad);
+		SDL_memcpy(cptr, data, run);
+		SDL_memset(cptr+run, 0, pad);
 		data += run;
 		cptr += (run+pad);
 	}
 	for ( ; i<allowed_y; ++i ) {
-		memset(cptr, 0, run+pad);
+		SDL_memset(cptr, 0, run+pad);
 		cptr += (run+pad);
 	}
 	for ( i=0; i<h; ++i ) {
@@ -95,13 +95,13 @@ WMcursor *BE_CreateWMCursor(_THIS,
 		   inverted color pixels black, since inverted color pixels
 		   aren't supported under BeOS.
 		 */
-		memcpy(cptr, mask, run);
-		memset(cptr+run, 0, pad);
+		SDL_memcpy(cptr, mask, run);
+		SDL_memset(cptr+run, 0, pad);
 		mask += run;
 		cptr += (run+pad);
 	}
 	for ( ; i<allowed_y; ++i ) {
-		memset(cptr, 0, run+pad);
+		SDL_memset(cptr, 0, run+pad);
 		cptr += (run+pad);
 	}
 	return(cursor);
@@ -124,8 +124,8 @@ int BE_ShowWMCursor(_THIS, WMcursor *cursor)
 
 void BE_FreeWMCursor(_THIS, WMcursor *cursor)
 {
-	free(cursor->bits);
-	free(cursor);
+	SDL_free(cursor->bits);
+	SDL_free(cursor);
 }
 
 /* Implementation by Christian Bauer <cbauer@student.physik.uni-mainz.de> */

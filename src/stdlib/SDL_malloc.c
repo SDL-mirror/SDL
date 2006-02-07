@@ -39,6 +39,11 @@
 #define LACKS_ERRNO_H
 #define LACKS_STDLIB_H
 #define ABORT
+#define memset	SDL_memset
+#define memcpy	SDL_memcpy
+#define malloc	SDL_malloc
+#define realloc	SDL_realloc
+#define free	SDL_free
 
 /*
   This is a version (aka dlmalloc) of malloc/free/realloc written by

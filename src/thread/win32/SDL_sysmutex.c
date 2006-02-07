@@ -39,13 +39,13 @@ SDL_mutex *SDL_CreateMutex(void)
 	SDL_mutex *mutex;
 
 	/* Allocate mutex memory */
-	mutex = (SDL_mutex *)malloc(sizeof(*mutex));
+	mutex = (SDL_mutex *)SDL_malloc(sizeof(*mutex));
 	if ( mutex ) {
 		/* Create the mutex, with initial value signaled */
 		mutex->id = CreateMutex(NULL, FALSE, NULL);
 		if ( ! mutex->id ) {
 			SDL_SetError("Couldn't create mutex");
-			free(mutex);
+			SDL_free(mutex);
 			mutex = NULL;
 		}
 	} else {
@@ -62,7 +62,7 @@ void SDL_DestroyMutex(SDL_mutex *mutex)
 			CloseHandle(mutex->id);
 			mutex->id = 0;
 		}
-		free(mutex);
+		SDL_free(mutex);
 	}
 }
 

@@ -117,15 +117,15 @@ SDL_CD *SDL_CDOpen(int drive)
 		SDL_SetError("Invalid CD-ROM drive index");
 		return(NULL);
 	}
-	cdrom = (SDL_CD *)malloc(sizeof(*cdrom));
+	cdrom = (SDL_CD *)SDL_malloc(sizeof(*cdrom));
 	if ( cdrom == NULL ) {
 		SDL_OutOfMemory();
 		return(NULL);
 	}
-	memset(cdrom, 0, sizeof(*cdrom));
+	SDL_memset(cdrom, 0, sizeof(*cdrom));
 	cdrom->id = SDL_CDcaps.Open(drive);
 	if ( cdrom->id < 0 ) {
-		free(cdrom);
+		SDL_free(cdrom);
 		return(NULL);
 	}
 	default_cdrom = cdrom;
@@ -332,7 +332,7 @@ void SDL_CDClose(SDL_CD *cdrom)
 		return;
 	}
 	SDL_CDcaps.Close(cdrom);
-	free(cdrom);
+	SDL_free(cdrom);
 	default_cdrom = NULL;
 }
 

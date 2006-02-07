@@ -84,7 +84,7 @@ static void Mint_InitAudio(_THIS, SDL_AudioSpec *spec);
 static int Audio_Available(void)
 {
 	unsigned long dummy;
-	const char *envr = getenv("SDL_AUDIODRIVER");
+	const char *envr = SDL_getenv("SDL_AUDIODRIVER");
 
 	SDL_MintAudio_mint_present = (Getcookie(C_MiNT, &dummy) == C_FOUND);
 
@@ -94,7 +94,7 @@ static int Audio_Available(void)
 	}
 
 	/* Check if user asked a different audio driver */
-	if ((envr) && (strcmp(envr, MINT_AUDIO_DRIVER_NAME)!=0)) {
+	if ((envr) && (SDL_strcmp(envr, MINT_AUDIO_DRIVER_NAME)!=0)) {
 		DEBUG_PRINT((DEBUG_NAME "user asked a different audio driver\n"));
 		return(0);
 	}
@@ -141,8 +141,8 @@ static int Audio_Available(void)
 
 static void Audio_DeleteDevice(SDL_AudioDevice *device)
 {
-    free(device->hidden);
-    free(device);
+    SDL_free(device->hidden);
+    SDL_free(device);
 }
 
 static SDL_AudioDevice *Audio_CreateDevice(int devindex)
@@ -150,20 +150,20 @@ static SDL_AudioDevice *Audio_CreateDevice(int devindex)
 	SDL_AudioDevice *this;
 
 	/* Initialize all variables that we clean on shutdown */
-	this = (SDL_AudioDevice *)malloc(sizeof(SDL_AudioDevice));
+	this = (SDL_AudioDevice *)SDL_malloc(sizeof(SDL_AudioDevice));
     if ( this ) {
-        memset(this, 0, (sizeof *this));
+        SDL_memset(this, 0, (sizeof *this));
         this->hidden = (struct SDL_PrivateAudioData *)
-                malloc((sizeof *this->hidden));
+                SDL_malloc((sizeof *this->hidden));
     }
     if ( (this == NULL) || (this->hidden == NULL) ) {
         SDL_OutOfMemory();
         if ( this ) {
-            free(this);
+            SDL_free(this);
         }
         return(0);
     }
-    memset(this->hidden, 0, (sizeof *this->hidden));
+    SDL_memset(this->hidden, 0, (sizeof *this->hidden));
 
     /* Set the function pointers */
     this->OpenAudio   = Mint_OpenAudio;
@@ -388,7 +388,7 @@ static int Mint_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	}
 	SDL_MintAudio_audiobuf[1] = SDL_MintAudio_audiobuf[0] + spec->size ;
 	SDL_MintAudio_numbuf=0;
-	memset(SDL_MintAudio_audiobuf[0], spec->silence, spec->size *2);
+	SDL_memset(SDL_MintAudio_audiobuf[0], spec->silence, spec->size *2);
 	SDL_MintAudio_audiosize = spec->size;
 	SDL_MintAudio_mutex = 0;
 

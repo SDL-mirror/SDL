@@ -98,7 +98,7 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 		was_error = 1;
 		goto done;
 	}
-	if ( strncmp(magic, "BM", 2) != 0 ) {
+	if ( SDL_strncmp(magic, "BM", 2) != 0 ) {
 		SDL_SetError("File is not a Windows BMP file");
 		was_error = 1;
 		goto done;
@@ -135,7 +135,7 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 	}
 
 	/* Check for read error */
-	if ( strcmp(SDL_GetError(), "") != 0 ) {
+	if ( SDL_strcmp(SDL_GetError(), "") != 0 ) {
 		was_error = 1;
 		goto done;
 	}
@@ -519,7 +519,7 @@ int SDL_SaveBMP_RW (SDL_Surface *saveme, SDL_RWops *dst, int freedst)
 	if ( freedst && dst ) {
 		SDL_RWclose(dst);
 	}
-	return((strcmp(SDL_GetError(), "") == 0) ? 0 : -1);
+	return((SDL_strcmp(SDL_GetError(), "") == 0) ? 0 : -1);
 }
 
 #endif /* ENABLE_FILE */

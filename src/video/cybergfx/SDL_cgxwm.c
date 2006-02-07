@@ -78,7 +78,7 @@ void CGX_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 	   copy them */
 	if(SDL_Visual == dvis && SDL_XColorMap == SDL_DisplayColormap
 	   && this->screen->format->palette && sicon->format->palette) {
-	    memcpy(sicon->format->palette->colors,
+	    SDL_memcpy(sicon->format->palette->colors,
 		   this->screen->format->palette->colors,
 		   this->screen->format->palette->ncolors * sizeof(SDL_Color));
 	}
@@ -98,21 +98,21 @@ void CGX_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 		XColor wanted;
 
 		palette = sicon->format->palette;
-		color_tried = malloc(palette->ncolors);
+		color_tried = SDL_malloc(palette->ncolors);
 		if ( color_tried == NULL ) {
 			goto done;
 		}
 		if ( SDL_iconcolors != NULL ) {
-			free(SDL_iconcolors);
+			SDL_free(SDL_iconcolors);
 		}
-		SDL_iconcolors = malloc(palette->ncolors
+		SDL_iconcolors = SDL_malloc(palette->ncolors
 					* sizeof(*SDL_iconcolors));
 		if ( SDL_iconcolors == NULL ) {
-			free(color_tried);
+			SDL_free(color_tried);
 			goto done;
 		}
-		memset(color_tried, 0, palette->ncolors);
-		memset(SDL_iconcolors, 0,
+		SDL_memset(color_tried, 0, palette->ncolors);
+		SDL_memset(SDL_iconcolors, 0,
 		       palette->ncolors * sizeof(*SDL_iconcolors));
 
 		p = (Uint8 *)sicon->pixels; 
@@ -132,16 +132,16 @@ void CGX_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 		}
 	}
 	if ( color_tried != NULL ) {
-		free(color_tried);
+		SDL_free(color_tried);
 	}
 
 	/* Translate mask data to LSB order and set the icon mask */
 	i = (sicon->w/8)*sicon->h;
-	LSBmask = (Uint8 *)malloc(i);
+	LSBmask = (Uint8 *)SDL_malloc(i);
 	if ( LSBmask == NULL ) {
 		goto done;
 	}
-	memset(LSBmask, 0, i);
+	SDL_memset(LSBmask, 0, i);
 	while ( --i >= 0 ) {
 		for ( b=0; b<8; ++b )
 			LSBmask[i] |= (((mask[i]>>b)&0x01)<<(7-b));
@@ -163,7 +163,7 @@ void CGX_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 					0, 0, 0, 0, sicon->w, sicon->h);
 	XFreeGC(SDL_Display, GC);
 	XDestroyImage(icon_image);
-	free(LSBmask);
+	SDL_free(LSBmask);
 	sicon->pixels = NULL;
 
 #ifdef USE_ICON_WINDOW

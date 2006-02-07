@@ -48,7 +48,7 @@ SDL_sem *SDL_CreateSemaphore(Uint32 initial_value)
 	SDL_sem *sem;
 
 	/* Allocate sem memory */
-	sem = (SDL_sem *)malloc(sizeof(*sem));
+	sem = (SDL_sem *)SDL_malloc(sizeof(*sem));
 	if ( sem ) {
 		/* Create the semaphore, with max value 32K */
 #if defined(_WIN32_WCE) && (_WIN32_WCE < 300)
@@ -59,7 +59,7 @@ SDL_sem *SDL_CreateSemaphore(Uint32 initial_value)
 		sem->count = initial_value;
 		if ( ! sem->id ) {
 			SDL_SetError("Couldn't create semaphore");
-			free(sem);
+			SDL_free(sem);
 			sem = NULL;
 		}
 	} else {
@@ -80,7 +80,7 @@ void SDL_DestroySemaphore(SDL_sem *sem)
 #endif
 			sem->id = 0;
 		}
-		free(sem);
+		SDL_free(sem);
 	}
 }
 

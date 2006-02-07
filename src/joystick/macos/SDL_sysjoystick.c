@@ -137,7 +137,7 @@ const char *SDL_SYS_JoystickName(int index)
     if ( len >= sizeof(name) ) {
         len = (sizeof(name) - 1);
     }
-    memcpy(name, &SYS_DevDef[index].deviceName[1], len);
+    SDL_memcpy(name, &SYS_DevDef[index].deviceName[1], len);
     name[len] = '\0';
 
     return name;
@@ -161,14 +161,14 @@ int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
     index = joystick->index;
 
     /* allocate memory for system specific hardware data */
-    joystick->hwdata = (struct joystick_hwdata *) malloc(sizeof(*joystick->hwdata));
+    joystick->hwdata = (struct joystick_hwdata *) SDL_malloc(sizeof(*joystick->hwdata));
     if (joystick->hwdata == NULL)
     {
 		SDL_OutOfMemory();
 		return(-1);
     }
-    memset(joystick->hwdata, 0, sizeof(*joystick->hwdata));
-    strcpy(joystick->hwdata->name, SDL_SYS_JoystickName(index));
+    SDL_memset(joystick->hwdata, 0, sizeof(*joystick->hwdata));
+    SDL_strcpy(joystick->hwdata->name, SDL_SYS_JoystickName(index));
     joystick->name = joystick->hwdata->name;
 
     ISpElementList_ExtractByKind(

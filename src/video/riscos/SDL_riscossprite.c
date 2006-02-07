@@ -70,7 +70,7 @@ unsigned char *WIMP_CreateBuffer(int width, int height, int bpp)
 	}
 	size = bytesPerRow * height;
 
-	buffer = malloc( (size_t) size + offsetToSpriteData );
+	buffer = SDL_malloc( (size_t) size + offsetToSpriteData );
 	if (!buffer) return NULL;
 
    /* Initialise a sprite area */
@@ -129,7 +129,7 @@ unsigned char *WIMP_CreateBuffer(int width, int height, int bpp)
        }
    } else
    {
-      free(buffer);
+      SDL_free(buffer);
       buffer = NULL;
    }
 
@@ -153,14 +153,14 @@ void WIMP_SetupPlotInfo(_THIS)
    regs.r[6] = 0;
    regs.r[7] = 0;
 
-   if (this->hidden->pixtrans) free(this->hidden->pixtrans);
+   if (this->hidden->pixtrans) SDL_free(this->hidden->pixtrans);
    this->hidden->pixtrans = 0;
 
    /* Get the size required for the buffer */
    _kernel_swi(ColourTrans_GenerateTable, &regs, &regs);
    if (regs.r[4])
    {
-      this->hidden->pixtrans = malloc(regs.r[4]);
+      this->hidden->pixtrans = SDL_malloc(regs.r[4]);
     
       regs.r[4] = (unsigned int)this->hidden->pixtrans;
       /* Actually read the buffer */

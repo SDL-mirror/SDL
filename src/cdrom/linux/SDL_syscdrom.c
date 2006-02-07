@@ -142,7 +142,7 @@ static int CheckDrive(char *drive, char *mnttype, struct stat *stbuf)
 		}
 #ifdef USE_MNTENT
 		/* Even if we can't read it, it might be mounted */
-		else if ( mnttype && (strcmp(mnttype, MNTTYPE_CDROM) == 0) ) {
+		else if ( mnttype && (SDL_strcmp(mnttype, MNTTYPE_CDROM) == 0) ) {
 			is_cd = 1;
 		}
 #endif
@@ -170,12 +170,12 @@ static void AddDrive(char *drive, struct stat *stbuf)
 
 		/* Add this drive to our list */
 		i = SDL_numcds;
-		SDL_cdlist[i] = (char *)malloc(strlen(drive)+1);
+		SDL_cdlist[i] = (char *)SDL_malloc(SDL_strlen(drive)+1);
 		if ( SDL_cdlist[i] == NULL ) {
 			SDL_OutOfMemory();
 			return;
 		}
-		strcpy(SDL_cdlist[i], drive);
+		SDL_strcpy(SDL_cdlist[i], drive);
 		SDL_cdmode[i] = stbuf->st_rdev;
 		++SDL_numcds;
 #ifdef DEBUG_CDROM
@@ -198,45 +198,45 @@ static void CheckMounts(const char *mtab)
 		char *mnt_dev;
 
 		while ( (mntent=getmntent(mntfp)) != NULL ) {
-			mnt_type = malloc(strlen(mntent->mnt_type) + 1);
+			mnt_type = SDL_malloc(SDL_strlen(mntent->mnt_type) + 1);
 			if (mnt_type == NULL)
 				continue;  /* maybe you'll get lucky next time. */
 
-			mnt_dev = malloc(strlen(mntent->mnt_fsname) + 1);
+			mnt_dev = SDL_malloc(SDL_strlen(mntent->mnt_fsname) + 1);
 			if (mnt_dev == NULL) {
-				free(mnt_type);
+				SDL_free(mnt_type);
 				continue;
 			}
 
-			strcpy(mnt_type, mntent->mnt_type);
-			strcpy(mnt_dev, mntent->mnt_fsname);
+			SDL_strcpy(mnt_type, mntent->mnt_type);
+			SDL_strcpy(mnt_dev, mntent->mnt_fsname);
 
 			/* Handle "supermount" filesystem mounts */
-			if ( strcmp(mnt_type, MNTTYPE_SUPER) == 0 ) {
-				tmp = strstr(mntent->mnt_opts, "fs=");
+			if ( SDL_strcmp(mnt_type, MNTTYPE_SUPER) == 0 ) {
+				tmp = SDL_strstr(mntent->mnt_opts, "fs=");
 				if ( tmp ) {
-					free(mnt_type);
-					mnt_type = strdup(tmp + strlen("fs="));
+					SDL_free(mnt_type);
+					mnt_type = strdup(tmp + SDL_strlen("fs="));
 					if ( mnt_type ) {
-						tmp = strchr(mnt_type, ',');
+						tmp = SDL_strchr(mnt_type, ',');
 						if ( tmp ) {
 							*tmp = '\0';
 						}
 					}
 				}
-				tmp = strstr(mntent->mnt_opts, "dev=");
+				tmp = SDL_strstr(mntent->mnt_opts, "dev=");
 				if ( tmp ) {
-					free(mnt_dev);
-					mnt_dev = strdup(tmp + strlen("dev="));
+					SDL_free(mnt_dev);
+					mnt_dev = strdup(tmp + SDL_strlen("dev="));
 					if ( mnt_dev ) {
-						tmp = strchr(mnt_dev, ',');
+						tmp = SDL_strchr(mnt_dev, ',');
 						if ( tmp ) {
 							*tmp = '\0';
 						}
 					}
 				}
 			}
-			if ( strcmp(mnt_type, MNTTYPE_CDROM) == 0 ) {
+			if ( SDL_strcmp(mnt_type, MNTTYPE_CDROM) == 0 ) {
 #ifdef DEBUG_CDROM
   fprintf(stderr, "Checking mount path from %s: %s mounted on %s of %s\n",
 	mtab, mnt_dev, mntent->mnt_dir, mnt_type);
@@ -245,8 +245,8 @@ static void CheckMounts(const char *mtab)
 					AddDrive(mnt_dev, &stbuf);
 				}
 			}
-			free(mnt_dev);
-			free(mnt_type);
+			SDL_free(mnt_dev);
+			SDL_free(mnt_type);
 		}
 		endmntent(mntfp);
 	}
@@ -277,15 +277,15 @@ int  SDL_SYS_CDInit(void)
 	SDL_CDcaps.Close = SDL_SYS_CDClose;
 
 	/* Look in the environment for our CD-ROM drive list */
-	SDLcdrom = getenv("SDL_CDROM");	/* ':' separated list of devices */
+	SDLcdrom = SDL_getenv("SDL_CDROM");	/* ':' separated list of devices */
 	if ( SDLcdrom != NULL ) {
 		char *cdpath, *delim;
-		cdpath = malloc(strlen(SDLcdrom)+1);
+		cdpath = SDL_malloc(SDL_strlen(SDLcdrom)+1);
 		if ( cdpath != NULL ) {
-			strcpy(cdpath, SDLcdrom);
+			SDL_strcpy(cdpath, SDLcdrom);
 			SDLcdrom = cdpath;
 			do {
-				delim = strchr(SDLcdrom, ':');
+				delim = SDL_strchr(SDLcdrom, ':');
 				if ( delim ) {
 					*delim++ = '\0';
 				}
@@ -301,7 +301,7 @@ int  SDL_SYS_CDInit(void)
 					SDLcdrom = NULL;
 				}
 			} while ( SDLcdrom );
-			free(cdpath);
+			SDL_free(cdpath);
 		}
 
 		/* If we found our drives, there's nothing left to do */
@@ -337,7 +337,7 @@ int  SDL_SYS_CDInit(void)
 			exists = 1;
 			for ( j=checklist[i][1]; exists; ++j ) {
 				sprintf(drive, "/dev/%s", &checklist[i][3]);
-				insert = strchr(drive, '?');
+				insert = SDL_strchr(drive, '?');
 				if ( insert != NULL ) {
 					*insert = j;
 				}
@@ -551,7 +551,7 @@ void SDL_SYS_CDQuit(void)
 
 	if ( SDL_numcds > 0 ) {
 		for ( i=0; i<SDL_numcds; ++i ) {
-			free(SDL_cdlist[i]);
+			SDL_free(SDL_cdlist[i]);
 		}
 		SDL_numcds = 0;
 	}

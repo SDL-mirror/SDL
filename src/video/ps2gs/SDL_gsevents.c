@@ -78,7 +78,7 @@ static void GS_vgainitkeymaps(int fd)
 
 	/* Load all the keysym mappings */
 	for ( map=0; map<NUM_VGAKEYMAPS; ++map ) {
-		memset(vga_keymap[map], 0, NR_KEYS*sizeof(Uint16));
+		SDL_memset(vga_keymap[map], 0, NR_KEYS*sizeof(Uint16));
 		for ( i=0; i<NR_KEYS; ++i ) {
 			entry.kb_table = map;
 			entry.kb_index = i;
@@ -338,7 +338,7 @@ static int find_pid(DIR *proc, const char *wanted_name)
 			if ( status ) {
 				name[0] = '\0';
 				fscanf(status, "Name: %s", name);
-				if ( strcmp(name, wanted_name) == 0 ) {
+				if ( SDL_strcmp(name, wanted_name) == 0 ) {
 					pid = atoi(entry->d_name);
 				}
 				fclose(status);
@@ -373,10 +373,10 @@ static int gpm_available(void)
 				len = read(cmdline, args, sizeof(args));
 				arg = args;
 				while ( len > 0 ) {
-					if ( strcmp(arg, "-R") == 0 ) {
+					if ( SDL_strcmp(arg, "-R") == 0 ) {
 						available = 1;
 					}
-					arglen = strlen(arg)+1;
+					arglen = SDL_strlen(arg)+1;
 					len -= arglen;
 					arg += arglen;
 				}
@@ -435,7 +435,7 @@ static int detect_imps2(int fd)
 
 	imps2 = 0;
 
-	if ( getenv("SDL_MOUSEDEV_IMPS2") ) {
+	if ( SDL_getenv("SDL_MOUSEDEV_IMPS2") ) {
 		imps2 = 1;
 	}
 	if ( ! imps2 ) {
@@ -487,8 +487,8 @@ int GS_OpenMouse(_THIS)
 	const char *mousedev;
 	const char *mousedrv;
 
-	mousedrv = getenv("SDL_MOUSEDRV");
-	mousedev = getenv("SDL_MOUSEDEV");
+	mousedrv = SDL_getenv("SDL_MOUSEDRV");
+	mousedev = SDL_getenv("SDL_MOUSEDEV");
 	mouse_fd = -1;
 
 	/* STD MICE */
@@ -752,7 +752,7 @@ static void handle_mouse(_THIS)
 		GS_vgamousecallback(button, dx, dy);
 	}
 	if ( i < nread ) {
-		memcpy(mousebuf, &mousebuf[i], (nread-i));
+		SDL_memcpy(mousebuf, &mousebuf[i], (nread-i));
 		start = (nread-i);
 	} else {
 		start = 0;

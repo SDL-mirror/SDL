@@ -137,12 +137,12 @@ int CGX_GetVideoModes(_THIS)
 					{
 						nmodes++;
 
-						SDL_modelist = (SDL_Rect **)realloc(SDL_modelist,(nmodes+1)*sizeof(SDL_Rect *));
+						SDL_modelist = (SDL_Rect **)SDL_realloc(SDL_modelist,(nmodes+1)*sizeof(SDL_Rect *));
 						SDL_modelist[nmodes]=NULL;
 
 						if ( SDL_modelist )
 						{
-							SDL_modelist[nmodes-1] = (SDL_Rect *)malloc(sizeof(SDL_Rect));
+							SDL_modelist[nmodes-1] = (SDL_Rect *)SDL_malloc(sizeof(SDL_Rect));
 
 							if ( SDL_modelist[nmodes-1] == NULL )
 								break;
@@ -175,10 +175,10 @@ int CGX_GetVideoModes(_THIS)
 	}
 
     if ( SDL_modelist == NULL ) {
-        SDL_modelist = (SDL_Rect **)malloc((1+1)*sizeof(SDL_Rect *));
+        SDL_modelist = (SDL_Rect **)SDL_malloc((1+1)*sizeof(SDL_Rect *));
         i = 0;
         if ( SDL_modelist ) {
-            SDL_modelist[i] = (SDL_Rect *)malloc(sizeof(SDL_Rect));
+            SDL_modelist[i] = (SDL_Rect *)SDL_malloc(sizeof(SDL_Rect));
             if ( SDL_modelist[i] ) {
                 SDL_modelist[i]->x = 0;
                 SDL_modelist[i]->y = 0;
@@ -238,9 +238,9 @@ void CGX_FreeVideoModes(_THIS)
 
     if ( SDL_modelist ) {
         for ( i=0; SDL_modelist[i]; ++i ) {
-            free(SDL_modelist[i]);
+            SDL_free(SDL_modelist[i]);
         }
-        free(SDL_modelist);
+        SDL_free(SDL_modelist);
         SDL_modelist = NULL;
     }
 }

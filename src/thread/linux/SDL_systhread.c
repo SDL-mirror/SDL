@@ -172,7 +172,7 @@ int SDL_SYS_CreateThread(SDL_Thread *thread, void *args)
 	void *stack;
 
 	/* Allocate memory for thread stack */
-	stack = malloc(STACKSIZE);
+	stack = SDL_malloc(STACKSIZE);
 	if ( stack == (void *)0 ) {
 		SDL_OutOfMemory();
 		return(-1);
@@ -186,7 +186,7 @@ int SDL_SYS_CreateThread(SDL_Thread *thread, void *args)
 	thread->handle = clone(RunThread, stack,
 			(CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND), args);
 	if ( thread->handle < 0 ) {
-		free(thread->data);
+		SDL_free(thread->data);
 		SDL_SetError("Not enough resources to create thread");
 		return(-1);
 	}
@@ -233,7 +233,7 @@ void SDL_SYS_WaitThread(SDL_Thread *thread)
 	while ( system(command) == 0 )
 		sleep(1);
 #endif
-	free(thread->data);
+	SDL_free(thread->data);
 }
 
 void SDL_SYS_KillThread(SDL_Thread *thread)

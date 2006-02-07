@@ -55,8 +55,8 @@ int SDL_OpenAudioPath(char *path, int maxlen, int flags, int classic)
 	char audiopath[1024];
 
 	/* Figure out what our audio device is */
-	if ( ((audiodev=getenv("SDL_PATH_DSP")) == NULL) &&
-	     ((audiodev=getenv("AUDIODEV")) == NULL) ) {
+	if ( ((audiodev=SDL_getenv("SDL_PATH_DSP")) == NULL) &&
+	     ((audiodev=SDL_getenv("AUDIODEV")) == NULL) ) {
 		if ( classic ) {
 			audiodev = _PATH_DEV_AUDIO;
 		} else {
@@ -74,7 +74,7 @@ int SDL_OpenAudioPath(char *path, int maxlen, int flags, int classic)
 	audio_fd = open(audiodev, flags, 0);
 
 	/* If the first open fails, look for other devices */
-	if ( (audio_fd < 0) && (strlen(audiodev) < (sizeof(audiopath)-3)) ) {
+	if ( (audio_fd < 0) && (SDL_strlen(audiodev) < (sizeof(audiopath)-3)) ) {
 		int exists, instance;
 		struct stat sb;
 
@@ -90,7 +90,7 @@ int SDL_OpenAudioPath(char *path, int maxlen, int flags, int classic)
 		audiodev = audiopath;
 	}
 	if ( path != NULL ) {
-		strncpy(path, audiodev, maxlen);
+		SDL_strncpy(path, audiodev, maxlen);
 		path[maxlen-1] = '\0';
 	}
 	return(audio_fd);
@@ -130,15 +130,15 @@ static int OpenUserDefinedDevice(char *path, int maxlen, int flags)
 	int  audio_fd;
 
 	/* Figure out what our audio device is */
-	if ((audiodev=getenv("SDL_PATH_DSP")) == NULL) {
-	    audiodev=getenv("AUDIODEV");
+	if ((audiodev=SDL_getenv("SDL_PATH_DSP")) == NULL) {
+	    audiodev=SDL_getenv("AUDIODEV");
 	}
 	if ( audiodev == NULL ) {
 	    return -1;
 	}
 	audio_fd = open(audiodev, flags, 0);
 	if ( path != NULL ) {
-		strncpy(path, audiodev, maxlen);
+		SDL_strncpy(path, audiodev, maxlen);
 		path[maxlen-1] = '\0';
 	}
 	return audio_fd;
@@ -168,7 +168,7 @@ int SDL_OpenAudioPath(char *path, int maxlen, int flags, int classic)
 	    audio_fd = open(audiopath, flags, 0);
 	    if ( audio_fd > 0 ) {
 		if ( path != NULL ) {
-		    strncpy( path, audiopath, maxlen );
+		    SDL_strncpy( path, audiopath, maxlen );
 		    path[maxlen-1] = '\0';
 		}
 	        return audio_fd;

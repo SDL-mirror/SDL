@@ -706,13 +706,13 @@ int SDL_RegisterApp(char *name, Uint32 style, void *hInst)
 	if ( name ) {
 #ifdef _WIN32_WCE
 		/* WinCE uses the UNICODE version */
-		int nLen = strlen(name)+1;
-		SDL_Appname = malloc(nLen*2);
+		int nLen = SDL_strlen(name)+1;
+		SDL_Appname = SDL_malloc(nLen*2);
 		MultiByteToWideChar(CP_ACP, 0, name, -1, SDL_Appname, nLen);
 #else
-		int nLen = strlen(name)+1;
-		SDL_Appname = malloc(nLen);
-		strcpy(SDL_Appname, name);
+		int nLen = SDL_strlen(name)+1;
+		SDL_Appname = SDL_malloc(nLen);
+		SDL_strcpy(SDL_Appname, name);
 #endif /* _WIN32_WCE */
 		SDL_Appstyle = style;
 		SDL_Instance = hInst ? hInst : SDL_GetModuleHandle();
@@ -783,7 +783,7 @@ static int Is9xME()
 {
 	OSVERSIONINFO   info;
 
-	memset(&info, 0, sizeof(info));
+	SDL_memset(&info, 0, sizeof(info));
 	info.dwOSVersionInfoSize = sizeof(info);
 	if (!GetVersionEx(&info)) {
 		return 0;
@@ -798,7 +798,7 @@ static int GetCodePage()
 	int	cp = GetACP();
 
 	if (GetLocaleInfo(lcid, LOCALE_IDEFAULTANSICODEPAGE, buff, sizeof(buff))) {
-		cp = strtol(buff, NULL, 0);
+		cp = SDL_strtol(buff, NULL, 0);
 	}
 	return cp;
 }

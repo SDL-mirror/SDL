@@ -185,7 +185,7 @@ struct SDL_PrivateVideoData {
 #define SDL_iconcolors		(this->hidden->iconcolors)
 /* Some versions of XFree86 have bugs - detect if this is one of them */
 #define BUGGY_XFREE86(condition, buggy_version) \
-((strcmp(ServerVendor(SDL_Display), "The XFree86 Project, Inc") == 0) && \
+((SDL_strcmp(ServerVendor(SDL_Display), "The XFree86 Project, Inc") == 0) && \
  (VendorRelease(SDL_Display) condition buggy_version))
 
 #endif /* _SDL_x11video_h */

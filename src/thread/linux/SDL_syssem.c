@@ -68,7 +68,7 @@ struct SDL_semaphore {
 /* Create a semaphore, initialized with value */
 SDL_sem *SDL_CreateSemaphore(Uint32 initial_value)
 {
-	SDL_sem *sem = (SDL_sem *) malloc(sizeof(SDL_sem));
+	SDL_sem *sem = (SDL_sem *) SDL_malloc(sizeof(SDL_sem));
 	if ( sem ) {
 #ifdef USE_NAMED_SEMAPHORES
 		static int semnum = 0;
@@ -78,7 +78,7 @@ SDL_sem *SDL_CreateSemaphore(Uint32 initial_value)
 		sem->sem = sem_open(name, O_CREAT, 0600, initial_value);
 		if ( sem->sem == (sem_t *)SEM_FAILED ) {
 			SDL_SetError("sem_open(%s) failed", name);
-			free(sem);
+			SDL_free(sem);
 			sem = NULL;
 		} else {
 			sem_unlink(name);
@@ -86,7 +86,7 @@ SDL_sem *SDL_CreateSemaphore(Uint32 initial_value)
 #else
 		if ( sem_init(&sem->sem_data, 0, initial_value) < 0 ) {
 			SDL_SetError("sem_init() failed");
-			free(sem);
+			SDL_free(sem);
 			sem = NULL;
 		} else {
 			sem->sem = &sem->sem_data;
@@ -106,7 +106,7 @@ void SDL_DestroySemaphore(SDL_sem *sem)
 #else
 		sem_destroy(sem->sem);
 #endif
-		free(sem);
+		SDL_free(sem);
 	}
 }
 
@@ -245,7 +245,7 @@ SDL_sem *SDL_CreateSemaphore(Uint32 initial_value)
 	union semun init;
 	key_t key;
 
-	sem = (SDL_sem *)malloc(sizeof(*sem));
+	sem = (SDL_sem *)SDL_malloc(sizeof(*sem));
 	if ( sem == NULL ) {
 		SDL_OutOfMemory();
 		return(NULL);
@@ -269,7 +269,7 @@ SDL_sem *SDL_CreateSemaphore(Uint32 initial_value)
 	/* Report the error if we eventually failed */
 	if ( sem->id < 0 ) {
 		SDL_SetError("Couldn't create semaphore");
-		free(sem);
+		SDL_free(sem);
 		return(NULL);
 	}
 	init.val = initial_value;	/* Initialize semaphore */
@@ -287,7 +287,7 @@ void SDL_DestroySemaphore(SDL_sem *sem)
 		dummy.val = 0;
 		semctl(sem->id, 0, IPC_RMID, dummy);
 #endif
-		free(sem);
+		SDL_free(sem);
 	}
 }
 

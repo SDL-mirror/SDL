@@ -284,7 +284,7 @@ void WIMP_Poll(_THIS, int waitTime)
 
 			SDL_VERSION(&wmmsg.version);
 			wmmsg.eventCode = code;
-			memcpy(wmmsg.pollBlock, message, 64 * sizeof(int));
+			SDL_memcpy(wmmsg.pollBlock, message, 64 * sizeof(int));
 
 			/* Fall out of polling loop if message is successfully posted */
 			if (SDL_PrivateSysWMEvent(&wmmsg)) doPoll = 0;

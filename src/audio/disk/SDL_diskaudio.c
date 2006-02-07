@@ -62,7 +62,7 @@ static void DISKAUD_CloseAudio(_THIS);
 
 static const char *DISKAUD_GetOutputFilename(void)
 {
-    const char *envr = getenv(DISKENVR_OUTFILE);
+    const char *envr = SDL_getenv(DISKENVR_OUTFILE);
     return((envr != NULL) ? envr : DISKDEFAULT_OUTFILE);
 }
 
@@ -75,10 +75,10 @@ static int DISKAUD_Available(void)
     int exists = 0;
     struct stat statbuf;
     const char *fname = DISKAUD_GetOutputFilename();
-	const char *envr = getenv("SDL_AUDIODRIVER");
+	const char *envr = SDL_getenv("SDL_AUDIODRIVER");
 	available = 0;
 
-	if ((envr) && (strcmp(envr, DISKAUD_DRIVER_NAME) == 0)) {
+	if ((envr) && (SDL_strcmp(envr, DISKAUD_DRIVER_NAME) == 0)) {
 		if (stat(fname, &statbuf) == 0)
 			exists = 1;
 
@@ -93,8 +93,8 @@ static int DISKAUD_Available(void)
 	}
 	return(available);
 #else
-	const char *envr = getenv("SDL_AUDIODRIVER");
-	if ((envr) && (strcmp(envr, DISKAUD_DRIVER_NAME) == 0)) {
+	const char *envr = SDL_getenv("SDL_AUDIODRIVER");
+	if ((envr) && (SDL_strcmp(envr, DISKAUD_DRIVER_NAME) == 0)) {
 		return(1);
 	}
 
@@ -104,8 +104,8 @@ static int DISKAUD_Available(void)
 
 static void DISKAUD_DeleteDevice(SDL_AudioDevice *device)
 {
-	free(device->hidden);
-	free(device);
+	SDL_free(device->hidden);
+	SDL_free(device);
 }
 
 static SDL_AudioDevice *DISKAUD_CreateDevice(int devindex)
@@ -114,22 +114,22 @@ static SDL_AudioDevice *DISKAUD_CreateDevice(int devindex)
     const char *envr;
 
 	/* Initialize all variables that we clean on shutdown */
-	this = (SDL_AudioDevice *)malloc(sizeof(SDL_AudioDevice));
+	this = (SDL_AudioDevice *)SDL_malloc(sizeof(SDL_AudioDevice));
 	if ( this ) {
-		memset(this, 0, (sizeof *this));
+		SDL_memset(this, 0, (sizeof *this));
 		this->hidden = (struct SDL_PrivateAudioData *)
-				malloc((sizeof *this->hidden));
+				SDL_malloc((sizeof *this->hidden));
 	}
 	if ( (this == NULL) || (this->hidden == NULL) ) {
 		SDL_OutOfMemory();
 		if ( this ) {
-			free(this);
+			SDL_free(this);
 		}
 		return(0);
 	}
-	memset(this->hidden, 0, (sizeof *this->hidden));
+	SDL_memset(this->hidden, 0, (sizeof *this->hidden));
 
-    envr = getenv(DISKENVR_WRITEDELAY);
+    envr = SDL_getenv(DISKENVR_WRITEDELAY);
     this->hidden->write_delay = (envr) ? atoi(envr) : DISKDEFAULT_WRITEDELAY;
 
 	/* Set the function pointers */
@@ -216,7 +216,7 @@ static int DISKAUD_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	if ( this->hidden->mixbuf == NULL ) {
 		return(-1);
 	}
-	memset(this->hidden->mixbuf, spec->silence, spec->size);
+	SDL_memset(this->hidden->mixbuf, spec->silence, spec->size);
 
 	/* We're ready to rock and roll. :-) */
 	return(0);

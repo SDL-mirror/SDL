@@ -74,8 +74,8 @@ static int Audio_Available(void)
 
 static void Audio_DeleteDevice(SDL_AudioDevice *device)
 {
-	free(device->hidden);
-	free(device);
+	SDL_free(device->hidden);
+	SDL_free(device);
 }
 
 static SDL_AudioDevice *Audio_CreateDevice(int devindex)
@@ -87,20 +87,20 @@ static SDL_AudioDevice *Audio_CreateDevice(int devindex)
 #endif
 
 	/* Initialize all variables that we clean on shutdown */
-	this = (SDL_AudioDevice *)malloc(sizeof(SDL_AudioDevice));
+	this = (SDL_AudioDevice *)SDL_malloc(sizeof(SDL_AudioDevice));
 	if ( this ) {
-		memset(this, 0, (sizeof *this));
+		SDL_memset(this, 0, (sizeof *this));
 		this->hidden = (struct SDL_PrivateAudioData *)
-				malloc((sizeof *this->hidden));
+				SDL_malloc((sizeof *this->hidden));
 	}
 	if ( (this == NULL) || (this->hidden == NULL) ) {
 		SDL_OutOfMemory();
 		if ( this ) {
-			free(this);
+			SDL_free(this);
 		}
 		return(0);
 	}
-	memset(this->hidden, 0, (sizeof *this->hidden));
+	SDL_memset(this->hidden, 0, (sizeof *this->hidden));
 
 	/* Set the function pointers */
 	this->OpenAudio = AHI_OpenAudio;
@@ -316,7 +316,7 @@ static int AHI_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	
 	D(bug("Before audio_req memcpy\n"));
 
-	memcpy(audio_req[1],audio_req[0],sizeof(struct AHIRequest));
+	SDL_memcpy(audio_req[1],audio_req[0],sizeof(struct AHIRequest));
 
 	if ( mixbuf[0] == NULL || mixbuf[1] == NULL ) {
 		SDL_OutOfMemory();
@@ -325,8 +325,8 @@ static int AHI_OpenAudio(_THIS, SDL_AudioSpec *spec)
 
 	D(bug("Before mixbuf memset\n"));
 
-	memset(mixbuf[0], spec->silence, spec->size);
-	memset(mixbuf[1], spec->silence, spec->size);
+	SDL_memset(mixbuf[0], spec->silence, spec->size);
+	SDL_memset(mixbuf[1], spec->silence, spec->size);
 
 	current_buffer=0;
 	playing=0;

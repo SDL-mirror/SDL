@@ -274,7 +274,7 @@ static int X11_DispatchEvent(_THIS)
 	int posted;
 	XEvent xevent;
 
-	memset(&xevent, '\0', sizeof (XEvent));  /* valgrind fix. --ryan. */
+	SDL_memset(&xevent, '\0', sizeof (XEvent));  /* valgrind fix. --ryan. */
 	pXNextEvent(SDL_Display, &xevent);
 
 	posted = 0;
@@ -967,7 +967,7 @@ Uint16 X11_KeyToUnicode(SDLKey keysym, SDLMod modifiers)
 		return 0;
 	}
 
-	memset(&xkey, 0, sizeof(xkey));
+	SDL_memset(&xkey, 0, sizeof(xkey));
 	xkey.display = SDL_Display;
 
 	xsym = keysym;		/* last resort if not found */
@@ -1048,7 +1048,7 @@ void X11_SetKeyboardState(Display *display, const char *key_vec)
 	}
 
 	/* Zero the new keyboard state and generate it */
-	memset(kstate, 0, SDLK_LAST);
+	SDL_memset(kstate, 0, SDLK_LAST);
 	/*
 	 * An obvious optimisation is to check entire longwords at a time in
 	 * both loops, but we can't be sure the arrays are aligned so it's not

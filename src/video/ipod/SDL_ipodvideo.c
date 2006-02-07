@@ -65,7 +65,7 @@ static long iPod_GetGeneration()
     
     if ((file = fopen("/proc/cpuinfo", "r")) != NULL) {
 	while (fgets(cpuinfo, sizeof(cpuinfo), file) != NULL)
-	    if (strncmp(cpuinfo, "Revision", 8) == 0)
+	    if (SDL_strncmp(cpuinfo, "Revision", 8) == 0)
 		break;
 	fclose(file);
     }
@@ -73,7 +73,7 @@ static long iPod_GetGeneration()
     for (; isspace(cpuinfo[i]); i++);
     ptr = cpuinfo + i + 2;
     
-    return strtol(ptr, NULL, 10);
+    return SDL_strtol(ptr, NULL, 10);
 }
 
 static int iPod_Available() 

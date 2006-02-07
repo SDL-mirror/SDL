@@ -63,7 +63,7 @@ void SDL_MintAudio_Callback(void)
 	SDL_AudioDevice *audio = SDL_MintAudio_device;
 
  	buffer = SDL_MintAudio_audiobuf[SDL_MintAudio_numbuf];
-	memset(buffer, audio->spec.silence, audio->spec.size);
+	SDL_memset(buffer, audio->spec.silence, audio->spec.size);
 
 	if (audio->paused)
 		return;
@@ -76,11 +76,11 @@ void SDL_MintAudio_Callback(void)
 		} else {
 			silence = 0;
 		}
-		memset(audio->convert.buf, silence, audio->convert.len);
+		SDL_memset(audio->convert.buf, silence, audio->convert.len);
 		audio->spec.callback(audio->spec.userdata,
 			(Uint8 *)audio->convert.buf,audio->convert.len);
 		SDL_ConvertAudio(&audio->convert);
-		memcpy(buffer, audio->convert.buf, audio->convert.len_cvt);
+		SDL_memcpy(buffer, audio->convert.buf, audio->convert.len_cvt);
 	} else {
 		audio->spec.callback(audio->spec.userdata, buffer, audio->spec.size);
 	}
@@ -106,7 +106,7 @@ void SDL_MintAudio_AddFrequency(_THIS, Uint32 frequency, Uint32 clock,
 	/* Put all following ones farer */
 	if (MINTAUDIO_freqcount>0) {
 		for (i=MINTAUDIO_freqcount; i>p; i--) {
-			memcpy(&MINTAUDIO_frequencies[i], &MINTAUDIO_frequencies[i-1], sizeof(mint_frequency_t));
+			SDL_memcpy(&MINTAUDIO_frequencies[i], &MINTAUDIO_frequencies[i-1], sizeof(mint_frequency_t));
 		}
 	}
 

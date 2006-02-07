@@ -472,7 +472,7 @@ static int DX5_Available(void)
 	      LPDIRECTDRAWSURFACE3 DDrawSurf3;
 
 	      /* Try to create a DirectDrawSurface3 object */
-	      memset(&desc, 0, sizeof(desc));
+	      SDL_memset(&desc, 0, sizeof(desc));
 	      desc.dwSize = sizeof(desc);
 	      desc.dwFlags = DDSD_CAPS;
 	      desc.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE|DDSCAPS_VIDEOMEMORY;
@@ -546,12 +546,12 @@ static void DX5_DeleteDevice(SDL_VideoDevice *this)
 	DX5_Unload();
 	if ( this ) {
 		if ( this->hidden ) {
-			free(this->hidden);
+			SDL_free(this->hidden);
 		}
 		if ( this->gl_data ) {
-			free(this->gl_data);
+			SDL_free(this->gl_data);
 		}
-		free(this);
+		SDL_free(this);
 	}
 }
 
@@ -565,13 +565,13 @@ static SDL_VideoDevice *DX5_CreateDevice(int devindex)
 	}
 
 	/* Initialize all variables that we clean on shutdown */
-	device = (SDL_VideoDevice *)malloc(sizeof(SDL_VideoDevice));
+	device = (SDL_VideoDevice *)SDL_malloc(sizeof(SDL_VideoDevice));
 	if ( device ) {
-		memset(device, 0, (sizeof *device));
+		SDL_memset(device, 0, (sizeof *device));
 		device->hidden = (struct SDL_PrivateVideoData *)
-				malloc((sizeof *device->hidden));
+				SDL_malloc((sizeof *device->hidden));
 		device->gl_data = (struct SDL_PrivateGLData *)
-				malloc((sizeof *device->gl_data));
+				SDL_malloc((sizeof *device->gl_data));
 	}
 	if ( (device == NULL) || (device->hidden == NULL) ||
 		                 (device->gl_data == NULL) ) {
@@ -579,8 +579,8 @@ static SDL_VideoDevice *DX5_CreateDevice(int devindex)
 		DX5_DeleteDevice(device);
 		return(NULL);
 	}
-	memset(device->hidden, 0, (sizeof *device->hidden));
-	memset(device->gl_data, 0, (sizeof *device->gl_data));
+	SDL_memset(device->hidden, 0, (sizeof *device->hidden));
+	SDL_memset(device->gl_data, 0, (sizeof *device->gl_data));
 
 	/* Set the function pointers */
 	device->VideoInit = DX5_VideoInit;
@@ -678,7 +678,7 @@ static HRESULT WINAPI EnumModes2(DDSURFACEDESC *desc, VOID *udata)
 				break;
 			}
 			++SDL_nummodes[bpp];
-			enumrect = (struct DX5EnumRect*)malloc(sizeof(struct DX5EnumRect));
+			enumrect = (struct DX5EnumRect*)SDL_malloc(sizeof(struct DX5EnumRect));
 			if ( !enumrect ) {
 				SDL_OutOfMemory();
 				return(DDENUMRET_CANCEL);
@@ -809,13 +809,13 @@ void SetDDerror(const char *function, int code)
 			error = "Interface not present";
 			break;
 		default:
-			snprintf(errbuf, SDL_arraysize(errbuf),
+			SDL_snprintf(errbuf, SDL_arraysize(errbuf),
 			         "%s: Unknown DirectDraw error: 0x%x",
 								function, code);
 			break;
 	}
 	if ( ! errbuf[0] ) {
-		snprintf(errbuf, SDL_arraysize(errbuf), "%s: %s", function, error);
+		SDL_snprintf(errbuf, SDL_arraysize(errbuf), "%s: %s", function, error);
 	}
 	SDL_SetError("%s", errbuf);
 	return;
@@ -837,7 +837,7 @@ static int DX5_UpdateVideoInfo(_THIS)
 	HRESULT result;
 
 	/* Fill in our hardware acceleration capabilities */
-	memset(&DDCaps, 0, sizeof(DDCaps));
+	SDL_memset(&DDCaps, 0, sizeof(DDCaps));
 	DDCaps.dwSize = sizeof(DDCaps);
 	result = IDirectDraw2_GetCaps(ddraw2, (DDCAPS *)&DDCaps, NULL);
 	if ( result != DD_OK ) {
@@ -946,7 +946,7 @@ int DX5_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	for ( i=0; i<NUM_MODELISTS; ++i ) {
 		struct DX5EnumRect *rect;
 		SDL_modelist[i] = (SDL_Rect **)
-				malloc((SDL_nummodes[i]+1)*sizeof(SDL_Rect *));
+				SDL_malloc((SDL_nummodes[i]+1)*sizeof(SDL_Rect *));
 		if ( SDL_modelist[i] == NULL ) {
 			SDL_OutOfMemory();
 			return(-1);
@@ -1103,7 +1103,7 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 			DEVMODE settings;
 			BOOL changed;
 
-			memset(&settings, 0, sizeof(DEVMODE));
+			SDL_memset(&settings, 0, sizeof(DEVMODE));
 			settings.dmSize = sizeof(DEVMODE);
 			settings.dmBitsPerPel = video->format->BitsPerPixel;
 			settings.dmPelsWidth = width;
@@ -1163,14 +1163,14 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 			const char *center = NULL;
 
 			if ( !SDL_windowX && !SDL_windowY ) {
-				window = getenv("SDL_VIDEO_WINDOW_POS");
-				center = getenv("SDL_VIDEO_CENTERED");
+				window = SDL_getenv("SDL_VIDEO_WINDOW_POS");
+				center = SDL_getenv("SDL_VIDEO_CENTERED");
 				if ( window ) {
-					if ( sscanf(window, "%d,%d", &x, &y) == 2 ) {
+					if ( SDL_sscanf(window, "%d,%d", &x, &y) == 2 ) {
 						SDL_windowX = x;
 						SDL_windowY = y;
 					}
-					if ( strcmp(window, "center") == 0 ) {
+					if ( SDL_strcmp(window, "center") == 0 ) {
 						center = window;
 					}
 				}
@@ -1306,7 +1306,7 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 	DX5_UpdateVideoInfo(this);
 
 	/* Create a primary DirectDraw surface */
-	memset(&ddsd, 0, sizeof(ddsd));
+	SDL_memset(&ddsd, 0, sizeof(ddsd));
 	ddsd.dwSize = sizeof(ddsd);
 	ddsd.dwFlags = DDSD_CAPS;
 	ddsd.ddsCaps.dwCaps = (DDSCAPS_PRIMARYSURFACE|DDSCAPS_VIDEOMEMORY);
@@ -1340,7 +1340,7 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 	IDirectDrawSurface_Release(dd_surface1);
 
 	/* Get the format of the primary DirectDraw surface */
-	memset(&ddsd, 0, sizeof(ddsd));
+	SDL_memset(&ddsd, 0, sizeof(ddsd));
 	ddsd.dwSize = sizeof(ddsd);
 	ddsd.dwFlags = DDSD_PIXELFORMAT|DDSD_CAPS;
 	result = IDirectDrawSurface3_GetSurfaceDesc(SDL_primary, &ddsd);
@@ -1465,7 +1465,7 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 			video->pitch = (width*video->format->BytesPerPixel);
 			/* Pitch needs to be QWORD (8-byte) aligned */
 			video->pitch = (video->pitch + 7) & ~7;
-			video->pixels = (void *)malloc(video->h*video->pitch);
+			video->pixels = (void *)SDL_malloc(video->h*video->pitch);
 			if ( video->pixels == NULL ) {
 				if ( video != current ) {
 					SDL_FreeSurface(video);
@@ -1493,7 +1493,7 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 	} else {
 		/* Necessary if we're going from window to fullscreen */
 		if ( video->pixels != NULL ) {
-			free(video->pixels);
+			SDL_free(video->pixels);
 			video->pixels = NULL;
 		}
 		dd_surface3 = SDL_primary;
@@ -1566,14 +1566,14 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 			const char *center = NULL;
 
 			if ( !SDL_windowX && !SDL_windowY ) {
-				window = getenv("SDL_VIDEO_WINDOW_POS");
-				center = getenv("SDL_VIDEO_CENTERED");
+				window = SDL_getenv("SDL_VIDEO_WINDOW_POS");
+				center = SDL_getenv("SDL_VIDEO_CENTERED");
 				if ( window ) {
-					if ( sscanf(window, "%d,%d", &x, &y) == 2 ) {
+					if ( SDL_sscanf(window, "%d,%d", &x, &y) == 2 ) {
 						SDL_windowX = x;
 						SDL_windowY = y;
 					}
-					if ( strcmp(window, "center") == 0 ) {
+					if ( SDL_strcmp(window, "center") == 0 ) {
 						center = window;
 					}
 				}
@@ -1629,7 +1629,7 @@ static int DX5_AllocDDSurface(_THIS, SDL_Surface *surface,
 
 	/* Allocate the hardware acceleration data */
 	surface->hwdata = (struct private_hwdata *)
-					malloc(sizeof(*surface->hwdata));
+					SDL_malloc(sizeof(*surface->hwdata));
 	if ( surface->hwdata == NULL ) {
 		SDL_OutOfMemory();
 		return(-1);
@@ -1637,7 +1637,7 @@ static int DX5_AllocDDSurface(_THIS, SDL_Surface *surface,
 	dd_surface3 = NULL;
 
 	/* Set up the surface description */
-	memset(&ddsd, 0, sizeof(ddsd));
+	SDL_memset(&ddsd, 0, sizeof(ddsd));
 	ddsd.dwSize = sizeof(ddsd);
 	ddsd.dwFlags = (DDSD_WIDTH|DDSD_HEIGHT|DDSD_CAPS|
 					DDSD_PITCH|DDSD_PIXELFORMAT);
@@ -1720,7 +1720,7 @@ static int DX5_AllocDDSurface(_THIS, SDL_Surface *surface,
 	}
 
 	/* Make sure the surface format was set properly */
-	memset(&ddsd, 0, sizeof(ddsd));
+	SDL_memset(&ddsd, 0, sizeof(ddsd));
 	ddsd.dwSize = sizeof(ddsd);
 	result = IDirectDrawSurface3_Lock(dd_surface3, NULL,
 		&ddsd, (DDLOCK_NOSYSLOCK|DDLOCK_WAIT), NULL);
@@ -1804,7 +1804,7 @@ error_end:
 	if ( (dd_surface3 != NULL) && (dd_surface3 != requested) ) {
 		IDirectDrawSurface_Release(dd_surface3);
 	}
-	free(surface->hwdata);
+	SDL_free(surface->hwdata);
 	surface->hwdata = NULL;
 	return(-1);
 }
@@ -1825,7 +1825,7 @@ void PrintSurface(char *title, LPDIRECTDRAWSURFACE3 surface, Uint32 flags)
 	DDSURFACEDESC ddsd;
 
 	/* Lock and load! */
-	memset(&ddsd, 0, sizeof(ddsd));
+	SDL_memset(&ddsd, 0, sizeof(ddsd));
 	ddsd.dwSize = sizeof(ddsd);
 	if ( IDirectDrawSurface3_Lock(surface, NULL, &ddsd,
 			(DDLOCK_NOSYSLOCK|DDLOCK_WAIT), NULL) != DD_OK ) {
@@ -2013,7 +2013,7 @@ static int DX5_LockHWSurface(_THIS, SDL_Surface *surface)
 
 	/* Lock and load! */
 	dd_surface = surface->hwdata->dd_writebuf;
-	memset(&ddsd, 0, sizeof(ddsd));
+	SDL_memset(&ddsd, 0, sizeof(ddsd));
 	ddsd.dwSize = sizeof(ddsd);
 	result = IDirectDrawSurface3_Lock(dd_surface, NULL, &ddsd,
 					(DDLOCK_NOSYSLOCK|DDLOCK_WAIT), NULL);
@@ -2081,7 +2081,7 @@ static void DX5_FreeHWSurface(_THIS, SDL_Surface *surface)
 		if ( surface->hwdata->dd_surface != SDL_primary ) {
 			IDirectDrawSurface3_Release(surface->hwdata->dd_surface);
 		}
-		free(surface->hwdata);
+		SDL_free(surface->hwdata);
 		surface->hwdata = NULL;
 	}
 }
@@ -2177,7 +2177,7 @@ static void DX5_CompressPalette(_THIS, SDL_Color *colors, int ncolors, int maxco
 		return;
 	}
 	seen = pool;
-	memset(seen, 0, ncolors*sizeof(int));
+	SDL_memset(seen, 0, ncolors*sizeof(int));
 	order = pool+ncolors;
 
 	/* Start with the brightest color */
@@ -2287,9 +2287,9 @@ static int DX5_SetGammaRamp(_THIS, Uint16 *ramp)
 	}
 
 	/* Set up the gamma ramp */
-	memcpy(gamma_ramp.red, &ramp[0*256], 256*sizeof(*ramp));
-	memcpy(gamma_ramp.green, &ramp[1*256], 256*sizeof(*ramp));
-	memcpy(gamma_ramp.blue, &ramp[2*256], 256*sizeof(*ramp));
+	SDL_memcpy(gamma_ramp.red, &ramp[0*256], 256*sizeof(*ramp));
+	SDL_memcpy(gamma_ramp.green, &ramp[1*256], 256*sizeof(*ramp));
+	SDL_memcpy(gamma_ramp.blue, &ramp[2*256], 256*sizeof(*ramp));
 	result = IDirectDrawGammaControl_SetGammaRamp(gamma, 0, &gamma_ramp);
 	if ( result != DD_OK ) {
 		SetDDerror("DirectDrawGammaControl::SetGammaRamp()", result);
@@ -2335,9 +2335,9 @@ static int DX5_GetGammaRamp(_THIS, Uint16 *ramp)
 	/* Set up the gamma ramp */
 	result = IDirectDrawGammaControl_GetGammaRamp(gamma, 0, &gamma_ramp);
 	if ( result == DD_OK ) {
-		memcpy(&ramp[0*256], gamma_ramp.red, 256*sizeof(*ramp));
-		memcpy(&ramp[1*256], gamma_ramp.green, 256*sizeof(*ramp));
-		memcpy(&ramp[2*256], gamma_ramp.blue, 256*sizeof(*ramp));
+		SDL_memcpy(&ramp[0*256], gamma_ramp.red, 256*sizeof(*ramp));
+		SDL_memcpy(&ramp[1*256], gamma_ramp.green, 256*sizeof(*ramp));
+		SDL_memcpy(&ramp[2*256], gamma_ramp.blue, 256*sizeof(*ramp));
 	} else {
 		SetDDerror("DirectDrawGammaControl::GetGammaRamp()", result);
 	}
@@ -2391,8 +2391,8 @@ void DX5_VideoQuit(_THIS)
 	for ( i=0; i<NUM_MODELISTS; ++i ) {
 		if ( SDL_modelist[i] != NULL ) {
 			for ( j=0; SDL_modelist[i][j]; ++j )
-				free(SDL_modelist[i][j]);
-			free(SDL_modelist[i]);
+				SDL_free(SDL_modelist[i][j]);
+			SDL_free(SDL_modelist[i]);
 			SDL_modelist[i] = NULL;
 		}
 	}
@@ -2466,7 +2466,7 @@ void DX5_PaletteChanged(_THIS, HWND window)
 	ReleaseDC(window, hdc);
 	if ( ! colorchange_expected ) {
 		saved = SDL_stack_alloc(SDL_Color, palette->ncolors);
-		memcpy(saved, palette->colors, 
+		SDL_memcpy(saved, palette->colors, 
 					palette->ncolors*sizeof(SDL_Color));
 	}
 	for ( i=0; i<palette->ncolors; ++i ) {
@@ -2478,7 +2478,7 @@ void DX5_PaletteChanged(_THIS, HWND window)
 	if ( ! colorchange_expected ) {
 		Uint8 mapping[256];
 
-		memset(mapping, 0, sizeof(mapping));
+		SDL_memset(mapping, 0, sizeof(mapping));
 		for ( i=0; i<palette->ncolors; ++i ) {
 			mapping[i] = SDL_FindColor(palette,
 					saved[i].r, saved[i].g, saved[i].b);

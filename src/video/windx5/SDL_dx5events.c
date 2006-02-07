@@ -112,13 +112,13 @@ static void SetDIerror(char *function, int code)
 			error = "Device not initialized";
 			break;
 		default:
-			snprintf(errbuf, SDL_arraysize(errbuf),
+			SDL_snprintf(errbuf, SDL_arraysize(errbuf),
 			         "%s: Unknown DirectInput error: 0x%x",
 								function, code);
 			break;
 	}
 	if ( ! errbuf[0] ) {
-		snprintf(errbuf, SDL_arraysize(errbuf), "%s: %s", function, error);
+		SDL_snprintf(errbuf, SDL_arraysize(errbuf), "%s: %s", function, error);
 	}
 	SDL_SetError("%s", errbuf);
 	return;
@@ -199,7 +199,7 @@ static int DX5_DInputInit(_THIS)
 		}
 
 		/* Set buffered input -- we aren't polling */
-		memset(&dipdw, 0, sizeof(dipdw));
+		SDL_memset(&dipdw, 0, sizeof(dipdw));
 		dipdw.diph.dwSize = sizeof(dipdw);
 		dipdw.diph.dwHeaderSize = sizeof(dipdw.diph);
 		dipdw.diph.dwObj = 0;
@@ -598,7 +598,7 @@ static int DX5_CheckInput(_THIS, int timeout, BOOL processInput)
 			result = IDirectInputDevice2_Poll(SDL_DIdev[i]);
 			if ( (result == DIERR_INPUTLOST) ||
 					(result == DIERR_NOTACQUIRED) ) {
-				if ( strcmp(inputs[i].name, "mouse") == 0 ) {
+				if ( SDL_strcmp(inputs[i].name, "mouse") == 0 ) {
 					mouse_lost = 1;
 				}
 				IDirectInputDevice2_Acquire(SDL_DIdev[i]);
@@ -621,7 +621,7 @@ static int DX5_CheckInput(_THIS, int timeout, BOOL processInput)
 							evtbuf, &numevents, 0);
 		if ( (result == DIERR_INPUTLOST) ||
 					(result == DIERR_NOTACQUIRED) ) {
-			if ( strcmp(inputs[event].name, "mouse") == 0 ) {
+			if ( SDL_strcmp(inputs[event].name, "mouse") == 0 ) {
 				mouse_lost = 1;
 			}
 			IDirectInputDevice2_Acquire(SDL_DIdev[event]);
@@ -850,7 +850,7 @@ static SDL_keysym *TranslateKey(UINT scancode, SDL_keysym *keysym, int pressed)
 
 int DX5_CreateWindow(_THIS)
 {
-	char *windowid = getenv("SDL_WINDOWID");
+	char *windowid = SDL_getenv("SDL_WINDOWID");
 	int i;
 
 	/* Clear out DirectInput variables in case we fail */
@@ -864,7 +864,7 @@ int DX5_CreateWindow(_THIS)
 
 	SDL_windowid = (windowid != NULL);
 	if ( SDL_windowid ) {
-		SDL_Window = (HWND)strtol(windowid, NULL, 0);
+		SDL_Window = (HWND)SDL_strtol(windowid, NULL, 0);
 		if ( SDL_Window == NULL ) {
 			SDL_SetError("Couldn't get user specified window");
 			return(-1);

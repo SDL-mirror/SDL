@@ -89,12 +89,12 @@ SDL_Overlay *X11_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, S
 	}
 
 	/* Create the overlay structure */
-	overlay = (SDL_Overlay *)malloc(sizeof *overlay);
+	overlay = (SDL_Overlay *)SDL_malloc(sizeof *overlay);
 	if ( overlay == NULL ) {
 		SDL_OutOfMemory();
 		return(NULL);
 	}
-	memset(overlay, 0, (sizeof *overlay));
+	SDL_memset(overlay, 0, (sizeof *overlay));
 
 	/* Fill in the basic members */
 	overlay->format = format;
@@ -105,7 +105,7 @@ SDL_Overlay *X11_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, S
 	overlay->hwfuncs = &x11_yuvfuncs;
 
 	/* Create the pixel data and lookup tables */
-	hwdata = (struct private_yuvhwdata *)malloc(sizeof *hwdata);
+	hwdata = (struct private_yuvhwdata *)SDL_malloc(sizeof *hwdata);
 	overlay->hwdata = hwdata;
 	if ( hwdata == NULL ) {
 		SDL_OutOfMemory();
@@ -113,7 +113,7 @@ SDL_Overlay *X11_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, S
 		return(NULL);
 	}
 	yuvshm = &hwdata->yuvshm;
-	memset(yuvshm, 0, sizeof(*yuvshm));
+	SDL_memset(yuvshm, 0, sizeof(*yuvshm));
 	hwdata->port = xv_port;
 	hwdata->image = XvShmCreateImage(GFX_Display, xv_port, format,
 	                                 0, width, height, yuvshm);
@@ -179,7 +179,7 @@ void X11_FreeYUVOverlay(_THIS, SDL_Overlay *overlay)
 		if ( hwdata->image ) {
 			XFree(hwdata->image);
 		}
-		free(hwdata);
+		SDL_free(hwdata);
 	}
 }
 

@@ -139,8 +139,8 @@ SDL_SYS_JoystickInit(void)
 
 	SDL_numjoysticks = 0;
 
-	memset(joynames, 0, sizeof(joynames));
-	memset(joydevnames, 0, sizeof(joydevnames));
+	SDL_memset(joynames, 0, sizeof(joynames));
+	SDL_memset(joydevnames, 0, sizeof(joydevnames));
 
 	for (i = 0; i < MAX_UHID_JOYS; i++) {
 		SDL_Joystick nj;
@@ -154,7 +154,7 @@ SDL_SYS_JoystickInit(void)
 			SDL_SYS_JoystickClose(&nj);
 			SDL_numjoysticks++;
 		} else {
-			free(joynames[nj.index]);
+			SDL_free(joynames[nj.index]);
 			joynames[nj.index] = NULL;
 		}
 	}
@@ -241,7 +241,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick *joy)
 		return (-1);
 	}
 
-	hw = (struct joystick_hwdata *)malloc(sizeof(struct joystick_hwdata));
+	hw = (struct joystick_hwdata *)SDL_malloc(sizeof(struct joystick_hwdata));
 	if (hw == NULL) {
 		SDL_OutOfMemory();
 		close(fd);
@@ -250,7 +250,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick *joy)
 	joy->hwdata = hw;
 	hw->fd = fd;
 	hw->path = strdup(path);
-	if (! strncmp(path, "/dev/joy", 8)) {
+	if (! SDL_strncmp(path, "/dev/joy", 8)) {
 		hw->type = BSDJOY_JOY;
 		joy->naxes = 2;
 		joy->nbuttons = 2;
@@ -311,7 +311,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick *joy)
 				case HUG_JOYSTICK:
 				case HUG_GAME_PAD:
 					s = hid_usage_in_page(hitem.usage);
-					sp = malloc(strlen(s) + 5);
+					sp = SDL_malloc(SDL_strlen(s) + 5);
 					sprintf(sp, "%s (%d)", s,
 					    joy->index);
 					joydevnames[joy->index] = sp;
@@ -351,8 +351,8 @@ usbend:
 	return (0);
 usberr:
 	close(hw->fd);
-	free(hw->path);
-	free(hw);
+	SDL_free(hw->path);
+	SDL_free(hw);
 	return (-1);
 }
 
@@ -482,13 +482,13 @@ SDL_SYS_JoystickUpdate(SDL_Joystick *joy)
 void
 SDL_SYS_JoystickClose(SDL_Joystick *joy)
 {
-	if (strncmp(joy->hwdata->path, "/dev/joy", 8))	{
+	if (SDL_strncmp(joy->hwdata->path, "/dev/joy", 8))	{
 		report_free(&joy->hwdata->inreport);
 		hid_dispose_report_desc(joy->hwdata->repdesc);
 	}
 	close(joy->hwdata->fd);
-	free(joy->hwdata->path);
-	free(joy->hwdata);
+	SDL_free(joy->hwdata->path);
+	SDL_free(joy->hwdata);
 
 	return;
 }
@@ -500,9 +500,9 @@ SDL_SYS_JoystickQuit(void)
 
 	for (i = 0; i < MAX_JOYS; i++) {
 		if (joynames[i] != NULL)
-			free(joynames[i]);
+			SDL_free(joynames[i]);
 		if (joydevnames[i] != NULL)
-			free(joydevnames[i]);
+			SDL_free(joydevnames[i]);
 	}
 
 	return;
@@ -538,7 +538,7 @@ report_alloc(struct report *r, struct report_desc *rd, int repind)
 	r->size = len;
 
 	if (r->size > 0) {
-		r->buf = malloc(sizeof(*r->buf) - sizeof(REP_BUF_DATA(r)) +
+		r->buf = SDL_malloc(sizeof(*r->buf) - sizeof(REP_BUF_DATA(r)) +
 		    r->size);
 		if (r->buf == NULL) {
 			SDL_OutOfMemory();
@@ -556,7 +556,7 @@ static void
 report_free(struct report *r)
 {
 	if (r->buf != NULL) {
-		free(r->buf);
+		SDL_free(r->buf);
 	}
 	r->status = SREPORT_UNINIT;
 }

@@ -326,14 +326,14 @@ int index;		/* Index shortcut for index in joystick structure */
 int i;			/* Generic Counter */
 
 /* allocate memory for system specific hardware data */
-joystick->hwdata = (struct joystick_hwdata *) malloc(sizeof(*joystick->hwdata));
+joystick->hwdata = (struct joystick_hwdata *) SDL_malloc(sizeof(*joystick->hwdata));
 if (joystick->hwdata == NULL)
 	{
 	SDL_OutOfMemory();
 	return(-1);
 	}
 /* Reset Hardware Data */
-memset(joystick->hwdata, 0, sizeof(*joystick->hwdata));
+SDL_memset(joystick->hwdata, 0, sizeof(*joystick->hwdata));
 
 /* ShortCut Pointer */
 index = joystick->index;
@@ -517,7 +517,7 @@ void SDL_SYS_JoystickClose(SDL_Joystick *joystick)
 if (joystick->hwdata != NULL)
 	{
 	/* free system specific hardware data */
-	free(joystick->hwdata);
+	SDL_free(joystick->hwdata);
 	}
 }
 
@@ -602,7 +602,7 @@ int joyGetEnv(struct _joycfg * joydata)
 char *joyenv;				/* Pointer to tested character */
 char tempnumber[5];		/* Temporary place to put numeric texts */
 
-joyenv = getenv("SDL_OS2_JOYSTICK");
+joyenv = SDL_getenv("SDL_OS2_JOYSTICK");
 if (joyenv == NULL) return 0;
 /* Joystick Environment is defined! */
 while (*joyenv==' ' && *joyenv!=0) joyenv++; /* jump spaces... */

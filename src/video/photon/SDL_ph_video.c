@@ -76,11 +76,11 @@ static SDL_VideoDevice* ph_CreateDevice(int devindex)
     SDL_VideoDevice* device;
 
     /* Initialize all variables that we clean on shutdown */
-    device = (SDL_VideoDevice *)malloc(sizeof(SDL_VideoDevice));
+    device = (SDL_VideoDevice *)SDL_malloc(sizeof(SDL_VideoDevice));
     if (device)
     {
-        memset(device, 0, (sizeof *device));
-        device->hidden = (struct SDL_PrivateVideoData*)malloc((sizeof *device->hidden));
+        SDL_memset(device, 0, (sizeof *device));
+        device->hidden = (struct SDL_PrivateVideoData*)SDL_malloc((sizeof *device->hidden));
         device->gl_data = NULL;
     }
     if ((device == NULL) || (device->hidden == NULL))
@@ -89,7 +89,7 @@ static SDL_VideoDevice* ph_CreateDevice(int devindex)
         ph_DeleteDevice(device);
         return NULL;
     }
-    memset(device->hidden, 0, (sizeof *device->hidden));
+    SDL_memset(device->hidden, 0, (sizeof *device->hidden));
 
     /* Set the driver flags */
     device->handles_any_size = 1;
@@ -158,15 +158,15 @@ static void ph_DeleteDevice(SDL_VideoDevice *device)
     {
         if (device->hidden)
         {
-            free(device->hidden);
+            SDL_free(device->hidden);
             device->hidden = NULL;
         }
         if (device->gl_data)
         {
-            free(device->gl_data);
+            SDL_free(device->gl_data);
             device->gl_data = NULL;
         }
-        free(device);
+        SDL_free(device);
         device = NULL;
     }
 }
@@ -257,10 +257,10 @@ static int ph_SetupWindow(_THIS, int w, int h, int flags)
         }
         if (!currently_maximized)
         {
-            windowpos = getenv("SDL_VIDEO_WINDOW_POS");
-            iscentered = getenv("SDL_VIDEO_CENTERED");
+            windowpos = SDL_getenv("SDL_VIDEO_WINDOW_POS");
+            iscentered = SDL_getenv("SDL_VIDEO_CENTERED");
 
-            if ((iscentered) || ((windowpos) && (strcmp(windowpos, "center")==0)))
+            if ((iscentered) || ((windowpos) && (SDL_strcmp(windowpos, "center")==0)))
             {
                 PhWindowQueryVisible(Ph_QUERY_CONSOLE, 0, 0, &desktopextent);
                 if (desktop_mode.width>w)
@@ -280,7 +280,7 @@ static int ph_SetupWindow(_THIS, int w, int h, int flags)
             {
                 if (windowpos)
                 {
-                    if (sscanf(windowpos, "%d,%d", &x, &y) == 2)
+                    if (SDL_sscanf(windowpos, "%d,%d", &x, &y) == 2)
                     {
                         if ((x<desktop_mode.width) && (y<desktop_mode.height))
                         {
@@ -372,12 +372,12 @@ static int ph_VideoInit(_THIS, SDL_PixelFormat* vformat)
     old_video_mode=-1;
     old_refresh_rate=-1;
 	
-    if (NULL == (event = malloc(EVENT_SIZE)))
+    if (NULL == (event = SDL_malloc(EVENT_SIZE)))
     {
         SDL_OutOfMemory();
         return -1;
     }
-    memset(event, 0x00, EVENT_SIZE);
+    SDL_memset(event, 0x00, EVENT_SIZE);
 
     window = ph_CreateWindow(this);
     if (window == NULL)
@@ -592,7 +592,7 @@ static void ph_VideoQuit(_THIS)
 
     if (event!=NULL)
     {
-        free(event);
+        SDL_free(event);
         event=NULL;
     }
 }

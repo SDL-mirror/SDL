@@ -292,10 +292,10 @@ int ph_EnterFullScreen(_THIS, SDL_Surface* screen, int fmode)
         settings.refresh = 0;
         settings.flags = 0;
 
-        refreshrate=getenv("SDL_PHOTON_FULLSCREEN_REFRESH");
+        refreshrate=SDL_getenv("SDL_PHOTON_FULLSCREEN_REFRESH");
         if (refreshrate!=NULL)
         {
-           if (sscanf(refreshrate, "%d", &refreshratenum)==1)
+           if (SDL_sscanf(refreshrate, "%d", &refreshratenum)==1)
            {
                settings.refresh = refreshratenum;
            }

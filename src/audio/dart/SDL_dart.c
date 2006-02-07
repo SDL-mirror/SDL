@@ -94,7 +94,7 @@ int DART_OpenAudio(_THIS, SDL_AudioSpec *spec)
   int rc;
 
   // First thing is to try to open a given DART device!
-  memset(&AmpOpenParms, 0, sizeof(MCI_AMP_OPEN_PARMS));
+  SDL_memset(&AmpOpenParms, 0, sizeof(MCI_AMP_OPEN_PARMS));
   // pszDeviceType should contain the device type in low word, and device ordinal in high word!
   AmpOpenParms.pszDeviceType = (PSZ) (MCI_DEVTYPE_AUDIO_AMPMIX | (iDeviceOrd << 16));
 
@@ -138,7 +138,7 @@ int DART_OpenAudio(_THIS, SDL_AudioSpec *spec)
   iBufSize = spec->size;
 
   // Now query this device if it supports the given freq/bits/channels!
-  memset(&(_this->hidden->MixSetupParms), 0, sizeof(MCI_MIXSETUP_PARMS));
+  SDL_memset(&(_this->hidden->MixSetupParms), 0, sizeof(MCI_MIXSETUP_PARMS));
   _this->hidden->MixSetupParms.ulBitsPerSample = iBits;
   _this->hidden->MixSetupParms.ulFormatTag = MCI_WAVE_FORMAT_PCM;
   _this->hidden->MixSetupParms.ulSamplesPerSec = iFreq;
@@ -170,7 +170,7 @@ int DART_OpenAudio(_THIS, SDL_AudioSpec *spec)
   // Ok, the device is initialized.
   // Now we should allocate buffers. For this, we need a place where
   // the buffer descriptors will be:
-  _this->hidden->pMixBuffers = (MCI_MIX_BUFFER *) malloc(sizeof(MCI_MIX_BUFFER)*iNumBufs);
+  _this->hidden->pMixBuffers = (MCI_MIX_BUFFER *) SDL_malloc(sizeof(MCI_MIX_BUFFER)*iNumBufs);
   if (!(_this->hidden->pMixBuffers))
   { // Not enough memory!
     // Close DART, and exit with error code!
@@ -190,7 +190,7 @@ int DART_OpenAudio(_THIS, SDL_AudioSpec *spec)
   if ((rc!=MCIERR_SUCCESS) || (iNumBufs != _this->hidden->BufferParms.ulNumBuffers) || (_this->hidden->BufferParms.ulBufferSize==0))
   { // Could not allocate memory!
     // Close DART, and exit with error code!
-    free(_this->hidden->pMixBuffers); _this->hidden->pMixBuffers = NULL;
+    SDL_free(_this->hidden->pMixBuffers); _this->hidden->pMixBuffers = NULL;
     mciSendCommand(iDeviceOrd, MCI_CLOSE, MCI_WAIT, &GenericParms, 0);
     SDL_SetError("DART could not allocate buffers");
     return(-1);
@@ -200,18 +200,18 @@ int DART_OpenAudio(_THIS, SDL_AudioSpec *spec)
     int i;
     for (i=0; i<iNumBufs; i++)
     {
-      pMixBufferDesc pBufferDesc = (pMixBufferDesc) malloc(sizeof(tMixBufferDesc));;
+      pMixBufferDesc pBufferDesc = (pMixBufferDesc) SDL_malloc(sizeof(tMixBufferDesc));;
       // Check if this buffer was really allocated by DART
       if ((!(_this->hidden->pMixBuffers[i].pBuffer)) || (!pBufferDesc))
       { // Wrong buffer!
         // Close DART, and exit with error code!
         // Free buffer descriptions
         { int j;
-          for (j=0; j<i; j++) free((void *)(_this->hidden->pMixBuffers[j].ulUserParm));
+          for (j=0; j<i; j++) SDL_free((void *)(_this->hidden->pMixBuffers[j].ulUserParm));
         }
         // and cleanup
         mciSendCommand(iDeviceOrd, MCI_BUFFER, MCI_WAIT | MCI_DEALLOCATE_MEMORY, &(_this->hidden->BufferParms), 0);
-        free(_this->hidden->pMixBuffers); _this->hidden->pMixBuffers = NULL;
+        SDL_free(_this->hidden->pMixBuffers); _this->hidden->pMixBuffers = NULL;
         mciSendCommand(iDeviceOrd, MCI_CLOSE, MCI_WAIT, &GenericParms, 0);
         SDL_SetError("Error at internal buffer check");
         return(-1);
@@ -224,7 +224,7 @@ int DART_OpenAudio(_THIS, SDL_AudioSpec *spec)
       _this->hidden->pMixBuffers[i].ulFlags = 0; // Some stuff should be flagged here for DART, like end of
                                             // audio data, but as we will continously send
                                             // audio data, there will be no end.:)
-      memset(_this->hidden->pMixBuffers[i].pBuffer, iSilence, iBufSize);
+      SDL_memset(_this->hidden->pMixBuffers[i].pBuffer, iSilence, iBufSize);
     }
   }
   _this->hidden->iNextFreeBuffer = 0;
@@ -235,10 +235,10 @@ int DART_OpenAudio(_THIS, SDL_AudioSpec *spec)
     // Could not create event semaphore!
     {
       int i;
-      for (i=0; i<iNumBufs; i++) free((void *)(_this->hidden->pMixBuffers[i].ulUserParm));
+      for (i=0; i<iNumBufs; i++) SDL_free((void *)(_this->hidden->pMixBuffers[i].ulUserParm));
     }
     mciSendCommand(iDeviceOrd, MCI_BUFFER, MCI_WAIT | MCI_DEALLOCATE_MEMORY, &(_this->hidden->BufferParms), 0);
-    free(_this->hidden->pMixBuffers); _this->hidden->pMixBuffers = NULL;
+    SDL_free(_this->hidden->pMixBuffers); _this->hidden->pMixBuffers = NULL;
     mciSendCommand(iDeviceOrd, MCI_CLOSE, MCI_WAIT, &GenericParms, 0);
     SDL_SetError("Could not create event semaphore");
     return(-1);
@@ -363,14 +363,14 @@ void DART_CloseAudio(_THIS)
   // Free memory of buffer descriptions
   {
     int i;
-    for (i=0; i<_this->hidden->iCurrNumBufs; i++) free((void *)(_this->hidden->pMixBuffers[i].ulUserParm));
+    for (i=0; i<_this->hidden->iCurrNumBufs; i++) SDL_free((void *)(_this->hidden->pMixBuffers[i].ulUserParm));
   }
 
   // Deallocate buffers
   rc = mciSendCommand(_this->hidden->iCurrDeviceOrd, MCI_BUFFER, MCI_WAIT | MCI_DEALLOCATE_MEMORY, &(_this->hidden->BufferParms), 0);
 
   // Free bufferlist
-  free(_this->hidden->pMixBuffers); _this->hidden->pMixBuffers = NULL;
+  SDL_free(_this->hidden->pMixBuffers); _this->hidden->pMixBuffers = NULL;
 
   // Close dart
   rc = mciSendCommand(_this->hidden->iCurrDeviceOrd, MCI_CLOSE, MCI_WAIT, &(GenericParms), 0);
@@ -385,8 +385,8 @@ int Audio_Available(void)
 
 void Audio_DeleteDevice(SDL_AudioDevice *device)
 {
-  free(device->hidden);
-  free(device);
+  SDL_free(device->hidden);
+  SDL_free(device);
 }
 
 SDL_AudioDevice *Audio_CreateDevice(int devindex)
@@ -394,21 +394,21 @@ SDL_AudioDevice *Audio_CreateDevice(int devindex)
   SDL_AudioDevice *this;
 
   /* Initialize all variables that we clean on shutdown */
-  this = (SDL_AudioDevice *)malloc(sizeof(SDL_AudioDevice));
+  this = (SDL_AudioDevice *)SDL_malloc(sizeof(SDL_AudioDevice));
   if ( this )
   {
-    memset(this, 0, (sizeof *this));
+    SDL_memset(this, 0, (sizeof *this));
     this->hidden = (struct SDL_PrivateAudioData *)
-      malloc((sizeof *this->hidden));
+      SDL_malloc((sizeof *this->hidden));
   }
   if ( (this == NULL) || (this->hidden == NULL) )
   {
     SDL_OutOfMemory();
     if ( this )
-      free(this);
+      SDL_free(this);
     return(0);
   }
-  memset(this->hidden, 0, (sizeof *this->hidden));
+  SDL_memset(this->hidden, 0, (sizeof *this->hidden));
 
   /* Set the function pointers */
   this->OpenAudio = DART_OpenAudio;

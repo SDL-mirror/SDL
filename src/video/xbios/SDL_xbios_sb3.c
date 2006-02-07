@@ -69,7 +69,7 @@ void SDL_XBIOS_SB3Init(_THIS, scpn_cookie_t *cookie_scpn)
 
 	/* SB3 prevent changing video modes, we can only use current one */
 	if (XBIOS_modelist) {
-		free(XBIOS_modelist);
+		SDL_free(XBIOS_modelist);
 		XBIOS_nummodes = 0;
 		XBIOS_modelist = NULL;
 	}

@@ -108,8 +108,8 @@ static int VGL_Available(void)
 
 static void VGL_DeleteDevice(SDL_VideoDevice *device)
 {
-	free(device->hidden);
-	free(device);
+	SDL_free(device->hidden);
+	SDL_free(device);
 }
 
 static SDL_VideoDevice *VGL_CreateDevice(int devindex)
@@ -117,20 +117,20 @@ static SDL_VideoDevice *VGL_CreateDevice(int devindex)
 	SDL_VideoDevice *device;
 
 	/* Initialize all variables that we clean on shutdown */
-	device = (SDL_VideoDevice *)malloc(sizeof(SDL_VideoDevice));
+	device = (SDL_VideoDevice *)SDL_malloc(sizeof(SDL_VideoDevice));
 	if ( device ) {
-		memset(device, 0, (sizeof *device));
+		SDL_memset(device, 0, (sizeof *device));
 		device->hidden = (struct SDL_PrivateVideoData *)
-				  malloc((sizeof *device->hidden));
+				  SDL_malloc((sizeof *device->hidden));
 	}
 	if ( (device == NULL) || (device->hidden == NULL) ) {
 		SDL_OutOfMemory();
 		if ( device ) {
-			free(device);
+			SDL_free(device);
 		}
 		return(0);
 	}
-	memset(device->hidden, 0, (sizeof *device->hidden));
+	SDL_memset(device->hidden, 0, (sizeof *device->hidden));
 
 	/* Set the function pointers */
 	device->VideoInit = VGL_VideoInit;
@@ -188,7 +188,7 @@ static int VGL_AddMode(_THIS, VGLMode *inmode)
 	}
 
 	/* Set up the new video mode rectangle */
-	mode = (SDL_Rect *)malloc(sizeof *mode);
+	mode = (SDL_Rect *)SDL_malloc(sizeof *mode);
 	if (mode == NULL) {
 		SDL_OutOfMemory();
 		return -1;
@@ -201,11 +201,11 @@ static int VGL_AddMode(_THIS, VGLMode *inmode)
 	/* Allocate the new list of modes, and fill in the new mode */
 	next_mode = SDL_nummodes[index];
 	SDL_modelist[index] = (SDL_Rect **)
-		realloc(SDL_modelist[index], (1+next_mode+1)*sizeof(SDL_Rect *));
+		SDL_realloc(SDL_modelist[index], (1+next_mode+1)*sizeof(SDL_Rect *));
 	if (SDL_modelist[index] == NULL) {
 		SDL_OutOfMemory();
 		SDL_nummodes[index] = 0;
-		free(mode);
+		SDL_free(mode);
 		return -1;
 	}
 	SDL_modelist[index][next_mode] = mode;
@@ -243,7 +243,7 @@ int VGL_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	}
 
 	/* Enable mouse and keyboard support */
-	if (getenv("SDL_NO_RAWKBD") == NULL) {
+	if (SDL_getenv("SDL_NO_RAWKBD") == NULL) {
 		if (VGLKeyboardInit(VGL_CODEKEYS) != 0) {
 			SDL_SetError("Unable to initialize keyboard");
 			return -1;
@@ -340,7 +340,7 @@ SDL_Surface *VGL_SetVideoMode(_THIS, SDL_Surface *current,
 		return NULL;
 	}
 
-	VGLCurMode = realloc(VGLCurMode, sizeof(VGLMode));
+	VGLCurMode = SDL_realloc(VGLCurMode, sizeof(VGLMode));
 	VGLCurMode->ModeInfo = *VGLDisplay;
 	VGLCurMode->Depth = modes[i]->Depth;
 	VGLCurMode->ModeId = modes[i]->ModeId;
@@ -466,7 +466,7 @@ void VGL_VideoQuit(_THIS)
 	/* Reset the console video mode if we actually initialised one */
 	if (VGLCurMode != NULL) {
 		VGLEnd();
-		free(VGLCurMode);
+		SDL_free(VGLCurMode);
 		VGLCurMode = NULL;
 	}
 
@@ -480,9 +480,9 @@ void VGL_VideoQuit(_THIS)
 	for (i = 0; i < NUM_MODELISTS; i++) {
 		if (SDL_modelist[i] != NULL) {
 			for (j = 0; SDL_modelist[i][j] != NULL; ++j) {
-				free(SDL_modelist[i][j]);
+				SDL_free(SDL_modelist[i][j]);
 			}
-			free(SDL_modelist[i]);
+			SDL_free(SDL_modelist[i]);
 			SDL_modelist[i] = NULL;
 		}
 	}
@@ -508,7 +508,7 @@ VGLListModes(int depth, int mem_model)
   int adptype, i, modenum;
 
   if (modes == NULL) {
-    modes = malloc(sizeof(VGLMode *) * M_VESA_MODE_MAX);
+    modes = SDL_malloc(sizeof(VGLMode *) * M_VESA_MODE_MAX);
     bzero(modes, sizeof(VGLMode *) * M_VESA_MODE_MAX);
   }
   modesp = modes;
@@ -621,7 +621,7 @@ VGLListModes(int depth, int mem_model)
   }
 
   if (*modesp != NULL) {
-    free(*modesp);
+    SDL_free(*modesp);
     *modesp = NULL;
   }
 

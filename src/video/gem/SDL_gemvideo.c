@@ -125,8 +125,8 @@ static int GEM_Available(void)
 
 static void GEM_DeleteDevice(SDL_VideoDevice *device)
 {
-	free(device->hidden);
-	free(device);
+	SDL_free(device->hidden);
+	SDL_free(device);
 }
 
 static SDL_VideoDevice *GEM_CreateDevice(int devindex)
@@ -136,23 +136,23 @@ static SDL_VideoDevice *GEM_CreateDevice(int devindex)
 	unsigned long dummy;
 
 	/* Initialize all variables that we clean on shutdown */
-	device = (SDL_VideoDevice *)malloc(sizeof(SDL_VideoDevice));
+	device = (SDL_VideoDevice *)SDL_malloc(sizeof(SDL_VideoDevice));
 	if ( device ) {
-		memset(device, 0, (sizeof *device));
+		SDL_memset(device, 0, (sizeof *device));
 		device->hidden = (struct SDL_PrivateVideoData *)
-				malloc((sizeof *device->hidden));
+				SDL_malloc((sizeof *device->hidden));
 		device->gl_data = (struct SDL_PrivateGLData *)
-				malloc((sizeof *device->gl_data));
+				SDL_malloc((sizeof *device->gl_data));
 	}
 	if ( (device == NULL) || (device->hidden == NULL) ) {
 		SDL_OutOfMemory();
 		if ( device ) {
-			free(device);
+			SDL_free(device);
 		}
 		return(0);
 	}
-	memset(device->hidden, 0, (sizeof *device->hidden));
-	memset(device->gl_data, 0, sizeof(*device->gl_data));
+	SDL_memset(device->hidden, 0, (sizeof *device->hidden));
+	SDL_memset(device->gl_data, 0, sizeof(*device->gl_data));
 
 	/* Set the function pointers */
 	device->VideoInit = GEM_VideoInit;
@@ -400,7 +400,7 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		VDI_oldpalette[i][2] = rgb[2];
 	}
 	VDI_setpalette = GEM_SetNewPalette;
-	memcpy(VDI_curpalette,VDI_oldpalette,sizeof(VDI_curpalette));
+	SDL_memcpy(VDI_curpalette,VDI_oldpalette,sizeof(VDI_curpalette));
 
 	/* Setup screen info */
 	GEM_title_name = empty_name;
@@ -453,7 +453,7 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	GEM_menubar=Atari_SysMalloc(menubar_size,MX_PREFTTRAM);
 
 	/* Fill video modes list */
-	SDL_modelist[0] = malloc(sizeof(SDL_Rect));
+	SDL_modelist[0] = SDL_malloc(sizeof(SDL_Rect));
 	SDL_modelist[0]->x = 0;
 	SDL_modelist[0]->y = 0;
 	SDL_modelist[0]->w = VDI_w;
@@ -679,7 +679,7 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 			SDL_SetError("Can not allocate %d KB for frame buffer", screensize>>10);
 			return NULL;
 		}
-		memset(GEM_buffer1, 0, screensize);
+		SDL_memset(GEM_buffer1, 0, screensize);
 #ifdef DEBUG_VIDEO_GEM
 		printf("sdl:video:gem: setvideomode(): allocated buffer 1\n");
 #endif
@@ -691,7 +691,7 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 			SDL_SetError("Can not allocate %d KB for shadow buffer", screensize>>10);
 			return NULL;
 		}
-		memset(GEM_buffer2, 0, screensize);
+		SDL_memset(GEM_buffer2, 0, screensize);
 #ifdef DEBUG_VIDEO_GEM
 		printf("sdl:video:gem: setvideomode(): allocated buffer 2\n");
 #endif
@@ -1132,7 +1132,7 @@ void GEM_VideoQuit(_THIS)
 
 	/* Free mode list */
 	if (SDL_modelist[0]) {
-		free(SDL_modelist[0]);
+		SDL_free(SDL_modelist[0]);
 		SDL_modelist[0]=NULL;
 	}
 

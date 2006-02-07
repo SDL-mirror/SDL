@@ -141,7 +141,7 @@ SDL_Overlay* ph_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SD
     overlay->hwdata->ischromakey=0;
 
     do {
-        memset(&overlay->hwdata->caps, 0x00, sizeof(PgScalerCaps_t));
+        SDL_memset(&overlay->hwdata->caps, 0x00, sizeof(PgScalerCaps_t));
         overlay->hwdata->caps.size = sizeof(PgScalerCaps_t);
         rtncode = PgGetScalerCapabilities(overlay->hwdata->channel, i, &overlay->hwdata->caps);
         if (rtncode==0)
@@ -498,9 +498,9 @@ void ph_FreeYUVOverlay(_THIS, SDL_Overlay *overlay)
 
     overlay->hwdata->CurrentFrameData = NULL;  
 	
-    free(overlay->hwdata->FrameData0);
-    free(overlay->hwdata->FrameData1);
+    SDL_free(overlay->hwdata->FrameData0);
+    SDL_free(overlay->hwdata->FrameData1);
     overlay->hwdata->FrameData0 = NULL;
     overlay->hwdata->FrameData1 = NULL;
-    free(overlay->hwdata);
+    SDL_free(overlay->hwdata);
 }

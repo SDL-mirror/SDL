@@ -210,7 +210,7 @@ void RISCOS_InitOSKeymap(_THIS)
   RO_keymap[123] = SDLK_KP5;
   RO_keymap[124] = SDLK_KP2;
 
-  memset(RO_pressed, 0, ROKEYBD_ARRAYSIZE);
+  SDL_memset(RO_pressed, 0, ROKEYBD_ARRAYSIZE);
 }
 
 

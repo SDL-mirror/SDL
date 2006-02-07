@@ -60,8 +60,8 @@ int SDL_KeyboardInit(void)
 
 	/* Initialize the tables */
 	SDL_ModState = KMOD_NONE;
-	memset(keynames, 0, sizeof(keynames));
-	memset(SDL_KeyState, 0, sizeof(SDL_KeyState));
+	SDL_memset(keynames, 0, sizeof(keynames));
+	SDL_memset(SDL_KeyState, 0, sizeof(SDL_KeyState));
 	video->InitOSKeymap(this);
 
 	SDL_EnableKeyRepeat(0, 0);
@@ -319,7 +319,7 @@ void SDL_ResetKeyboard(void)
 	SDL_keysym keysym;
 	SDLKey key;
 
-	memset(&keysym, 0, (sizeof keysym));
+	SDL_memset(&keysym, 0, (sizeof keysym));
 	for ( key=SDLK_FIRST; key<SDLK_LAST; ++key ) {
 		if ( SDL_KeyState[key] == SDL_PRESSED ) {
 			keysym.sym = key;
@@ -376,7 +376,7 @@ int SDL_PrivateKeyboard(Uint8 state, SDL_keysym *keysym)
 	int posted, repeatable;
 	Uint16 modstate;
 
-	memset(&event, 0, sizeof(event));
+	SDL_memset(&event, 0, sizeof(event));
 
 #if 0
 printf("The '%s' key has been %s\n", SDL_GetKeyName(keysym->sym), 

@@ -75,8 +75,8 @@ void AtariGemdos_InitOSKeymap(_THIS)
 	int i, vectors_mask;
 	unsigned long dummy;
 
-	memset(gemdos_currentkeyboard, 0, sizeof(gemdos_currentkeyboard));
-	memset(gemdos_previouskeyboard, 0, sizeof(gemdos_previouskeyboard));
+	SDL_memset(gemdos_currentkeyboard, 0, sizeof(gemdos_currentkeyboard));
+	SDL_memset(gemdos_previouskeyboard, 0, sizeof(gemdos_previouskeyboard));
 
 	/* Initialize keymap */
 	for ( i=0; i<sizeof(keymap); i++ )
@@ -122,7 +122,7 @@ void AtariGemdos_PumpEvents(_THIS)
 	SDL_keysym keysym;
 
 	/* Update pressed keys */
-	memset(gemdos_currentkeyboard, 0, ATARIBIOS_MAXKEYS);
+	SDL_memset(gemdos_currentkeyboard, 0, ATARIBIOS_MAXKEYS);
 
 	while (Cconis()!=DEV_BUSY) {
 		unsigned long key_pressed;
@@ -156,7 +156,7 @@ void AtariGemdos_PumpEvents(_THIS)
 	SDL_AtariXbios_PostMouseEvents(this, SDL_TRUE);
 
 	/* Will be previous table */
-	memcpy(gemdos_previouskeyboard, gemdos_currentkeyboard, ATARIBIOS_MAXKEYS);
+	SDL_memcpy(gemdos_previouskeyboard, gemdos_currentkeyboard, ATARIBIOS_MAXKEYS);
 }
 
 static void UpdateSpecialKeys(int special_keys_state)

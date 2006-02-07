@@ -177,7 +177,7 @@ static int GAPI_AddMode(_THIS, int bpp, int w, int h)
 	}
 
 	/* Set up the new video mode rectangle */
-	mode = (SDL_Rect *)malloc(sizeof *mode);
+	mode = (SDL_Rect *)SDL_malloc(sizeof *mode);
 	if ( mode == NULL ) {
 		SDL_OutOfMemory();
 		return(-1);
@@ -190,11 +190,11 @@ static int GAPI_AddMode(_THIS, int bpp, int w, int h)
 	/* Allocate the new list of modes, and fill in the new mode */
 	next_mode = gapi->SDL_nummodes[index];
 	gapi->SDL_modelist[index] = (SDL_Rect **)
-	       realloc(gapi->SDL_modelist[index], (1+next_mode+1)*sizeof(SDL_Rect *));
+	       SDL_realloc(gapi->SDL_modelist[index], (1+next_mode+1)*sizeof(SDL_Rect *));
 	if ( gapi->SDL_modelist[index] == NULL ) {
 		SDL_OutOfMemory();
 		gapi->SDL_nummodes[index] = 0;
-		free(mode);
+		SDL_free(mode);
 		return(-1);
 	}
 	gapi->SDL_modelist[index][next_mode] = mode;
@@ -211,8 +211,8 @@ static void GAPI_DeleteDevice(SDL_VideoDevice *device)
 		FreeLibrary(g_hGapiLib);
 		g_hGapiLib = 0;
 	}
-	free(device->hidden);
-	free(device);
+	SDL_free(device->hidden);
+	SDL_free(device);
 }
 
 static SDL_VideoDevice *GAPI_CreateDevice(int devindex)
@@ -229,20 +229,20 @@ static SDL_VideoDevice *GAPI_CreateDevice(int devindex)
 	}
 
 	/* Initialize all variables that we clean on shutdown */
-	device = (SDL_VideoDevice *)malloc(sizeof(SDL_VideoDevice));
+	device = (SDL_VideoDevice *)SDL_malloc(sizeof(SDL_VideoDevice));
 	if ( device ) {
-		memset(device, 0, (sizeof *device));
+		SDL_memset(device, 0, (sizeof *device));
 		device->hidden = (struct SDL_PrivateVideoData *)
-				malloc((sizeof *device->hidden));
+				SDL_malloc((sizeof *device->hidden));
 	}
 	if ( (device == NULL) || (device->hidden == NULL) ) {
 		SDL_OutOfMemory();
 		if ( device ) {
-			free(device);
+			SDL_free(device);
 		}
 		return(0);
 	}
-	memset(device->hidden, 0, (sizeof *device->hidden));
+	SDL_memset(device->hidden, 0, (sizeof *device->hidden));
 
 	/* Set the function pointers */
 	device->VideoInit = GAPI_VideoInit;
@@ -661,10 +661,10 @@ SDL_Surface *GAPI_SetVideoMode(_THIS, SDL_Surface *current,
 	/* Allocate bitmap */
 	if(gapiBuffer) 
 	{
-		free(gapiBuffer);
+		SDL_free(gapiBuffer);
 		gapiBuffer = NULL;
 	}
-	gapiBuffer = malloc(video->h * video->pitch);
+	gapiBuffer = SDL_malloc(video->h * video->pitch);
 	video->pixels = gapiBuffer; 
 
 	if ( ! this->hidden->buffer ) {
@@ -672,7 +672,7 @@ SDL_Surface *GAPI_SetVideoMode(_THIS, SDL_Surface *current,
 		return(NULL);
 	}
 
-	memset(gapiBuffer, 255, video->h * video->pitch);
+	SDL_memset(gapiBuffer, 255, video->h * video->pitch);
 	MoveWindow(SDL_Window, 0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), FALSE);
 	ShowWindow(SDL_Window, SW_SHOW);
 	SetForegroundWindow(SDL_Window);
@@ -738,7 +738,7 @@ static int updateLine8to8(_THIS, unsigned char *srcPointer, unsigned char *destP
 {
 	if( gapi->dstPixelStep == 1) /* optimized blitting on most devices */
 	{
-		memcpy(destPointer, srcPointer, width);
+		SDL_memcpy(destPointer, srcPointer, width);
 		return 1;
 	} else
 	{
@@ -761,7 +761,7 @@ static int updateLine16to16(_THIS, PIXEL *srcPointer, PIXEL *destPointer, int wi
 
 	if( step == 1 ) /* optimized blitting on most devices */
 	{
-		memcpy(destPointer, srcPointer, width * sizeof(PIXEL));
+		SDL_memcpy(destPointer, srcPointer, width * sizeof(PIXEL));
 		return 1;
 	}
 	else
@@ -1062,7 +1062,7 @@ void GAPI_VideoQuit(_THIS)
 
 		if (this->screen->pixels != NULL)
 		{
-			free(this->screen->pixels);
+			SDL_free(this->screen->pixels);
 			this->screen->pixels = NULL;
 		}
 		if ( screen_icn ) {
@@ -1089,8 +1089,8 @@ void GAPI_VideoQuit(_THIS)
 	for ( i=0; i<NUM_MODELISTS; ++i ) {
 		if ( gapi->SDL_modelist[i] != NULL ) {
 			for ( j=0; gapi->SDL_modelist[i][j]; ++j )
-				free(gapi->SDL_modelist[i][j]);
-			free(gapi->SDL_modelist[i]);
+				SDL_free(gapi->SDL_modelist[i][j]);
+			SDL_free(gapi->SDL_modelist[i]);
 			gapi->SDL_modelist[i] = NULL;
 		}
 	}

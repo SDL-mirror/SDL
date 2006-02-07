@@ -54,15 +54,15 @@
 #endif /* !_WIN32_WCE */
 
 /* Features provided by SDL_stdlib.h */
-#if !defined(_WIN32) /* Don't use C runtime versions of these on Windows */
-#define HAVE_GETENV
-#define HAVE_PUTENV
-#endif
 #define HAVE_MALLOC
 #define HAVE_REALLOC
 #define HAVE_FREE
 #ifndef HAVE_ALLOCA
 #define HAVE_ALLOCA
+#endif
+#if !defined(_WIN32) /* Don't use C runtime versions of these on Windows */
+#define HAVE_GETENV
+#define HAVE_PUTENV
 #endif
 /*#define HAVE_QSORT*/
 
@@ -74,6 +74,8 @@
 #define HAVE_STRLEN
 #define HAVE_STRCPY
 #define HAVE_STRNCPY
+#define HAVE_STRCAT
+#define HAVE_STRNCAT
 /*#define HAVE__STRREV*/
 /*#define HAVE__STRUPR*/
 /*#define HAVE__STRLWR*/
@@ -94,7 +96,7 @@
 /*#define HAVE_STRCASECMP*/
 #define HAVE_SSCANF
 /*#define HAVE_SNPRINTF*/
-#define HAVE_VSNPRINTF
+/*#define HAVE_VSNPRINTF*/
 
 #endif /* HAVE_LIBC */
 

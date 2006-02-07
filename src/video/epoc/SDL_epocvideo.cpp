@@ -131,8 +131,8 @@ static int EPOC_Available(void)
 
 static void EPOC_DeleteDevice(SDL_VideoDevice *device)
 {
-	free(device->hidden);
-	free(device);
+	SDL_free(device->hidden);
+	SDL_free(device);
 }
 
 static SDL_VideoDevice *EPOC_CreateDevice(int devindex)
@@ -140,20 +140,20 @@ static SDL_VideoDevice *EPOC_CreateDevice(int devindex)
 	SDL_VideoDevice *device;
 
 	/* Allocate all variables that we free on delete */
-	device = (SDL_VideoDevice *)malloc(sizeof(SDL_VideoDevice));
+	device = (SDL_VideoDevice *)SDL_malloc(sizeof(SDL_VideoDevice));
 	if ( device ) {
-		memset(device, 0, (sizeof *device));
+		SDL_memset(device, 0, (sizeof *device));
 		device->hidden = (struct SDL_PrivateVideoData *)
-				malloc((sizeof *device->hidden));
+				SDL_malloc((sizeof *device->hidden));
 	}
 	if ( (device == NULL) || (device->hidden == NULL) ) {
 		SDL_OutOfMemory();
 		if ( device ) {
-			free(device);
+			SDL_free(device);
 		}
 		return(0);
 	}
-	memset(device->hidden, 0, (sizeof *device->hidden));
+	SDL_memset(device->hidden, 0, (sizeof *device->hidden));
 
 	/* Set the function pointers */
 	device->VideoInit = EPOC_VideoInit;
@@ -240,7 +240,7 @@ int EPOC_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	/* Initialize all variables that we clean on shutdown */   
 
 	for ( i=0; i<SDL_NUMMODES; ++i ) {
-		Private->SDL_modelist[i] = (SDL_Rect *)malloc(sizeof(SDL_Rect));
+		Private->SDL_modelist[i] = (SDL_Rect *)SDL_malloc(sizeof(SDL_Rect));
 		Private->SDL_modelist[i]->x = Private->SDL_modelist[i]->y = 0;
 	}
 	/* Modes sorted largest to smallest !!TODO:sorting order??*/
@@ -357,7 +357,7 @@ SDL_Surface *EPOC_SetVideoMode(_THIS, SDL_Surface *current,
     }
 
     if (current && current->pixels) {
-        free(current->pixels);
+        SDL_free(current->pixels);
         current->pixels = NULL;
     }
 	if ( ! SDL_ReallocFormat(current, bpp, 0, 0, 0, 0) ) {
@@ -373,8 +373,8 @@ SDL_Surface *EPOC_SetVideoMode(_THIS, SDL_Surface *current,
 	current->h = height;
     int numBytesPerPixel = ((bpp-1)>>3) + 1;   
 	current->pitch = numBytesPerPixel * width; // Number of bytes in scanline 
-	current->pixels = malloc(width * height * numBytesPerPixel);
-	memset(current->pixels, 0, width * height * numBytesPerPixel);
+	current->pixels = SDL_malloc(width * height * numBytesPerPixel);
+	SDL_memset(current->pixels, 0, width * height * numBytesPerPixel);
 
 	/* Set the blit function */
 	_this->UpdateRects = EPOC_DirectUpdate;
@@ -622,7 +622,7 @@ void EPOC_VideoQuit(_THIS)
 	/* Free video mode lists */
 	for ( i=0; i<SDL_NUMMODES; ++i ) {
 		if ( Private->SDL_modelist[i] != NULL ) {
-			free(Private->SDL_modelist[i]);
+			SDL_free(Private->SDL_modelist[i]);
 			Private->SDL_modelist[i] = NULL;
 		}
 	}
@@ -633,7 +633,7 @@ void EPOC_VideoQuit(_THIS)
 	}
 
     if (_this->screen && _this->screen->pixels) {
-        free(_this->screen->pixels);
+        SDL_free(_this->screen->pixels);
         _this->screen->pixels = NULL;
     }
 

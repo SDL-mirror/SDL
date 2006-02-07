@@ -123,7 +123,7 @@ void WIN_SetWMIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 	if ( icon_win32 == NULL ) {
 		return;
 	}
-	memset(icon_win32, 0, icon_len);
+	SDL_memset(icon_win32, 0, icon_len);
 
 	/* Set the basic BMP parameters */
 	icon_win32->biSize = sizeof(*icon_win32)-sizeof(icon_win32->biColors);
@@ -144,7 +144,7 @@ void WIN_SetWMIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 	if (icon->format->palette && 
 		(icon->format->BitsPerPixel == icon_256->format->BitsPerPixel)){
 		Uint8 black;
-		memcpy(pal_256->colors, icon->format->palette->colors,
+		SDL_memcpy(pal_256->colors, icon->format->palette->colors,
 					pal_256->ncolors*sizeof(SDL_Color));
 		/* Make sure that 0 is black! */
 		black = SDL_FindColor(pal_256, 0x00, 0x00, 0x00);
@@ -234,7 +234,7 @@ void WIN_SetWMCaption(_THIS, const char *title, const char *icon)
 {
 #ifdef _WIN32_WCE
 	/* WinCE uses the UNICODE version */
-	int nLen = strlen(title)+1;
+	int nLen = SDL_strlen(title)+1;
 	LPWSTR lpszW = alloca(nLen*2);
 	MultiByteToWideChar(CP_ACP, 0, title, -1, lpszW, nLen);
 	SetWindowText(SDL_Window, lpszW);

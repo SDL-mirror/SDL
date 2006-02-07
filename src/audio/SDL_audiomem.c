@@ -52,7 +52,7 @@ void *SDL_AllocAudioMem(int size)
 	/* Set the segment for deletion when it is detatched */
 	shmctl(semid, IPC_RMID, NULL);	/* Delets semid if shmat() fails */
 #else
-	chunk = malloc(size);
+	chunk = SDL_malloc(size);
 #endif
 	return((void *)chunk);
 }
@@ -62,6 +62,6 @@ void SDL_FreeAudioMem(void *chunk)
 #ifdef FORK_HACK
 	shmdt(chunk);
 #else
-	free(chunk);
+	SDL_free(chunk);
 #endif
 }

@@ -256,7 +256,7 @@ int SDL_SYS_TimerInit(void)
 	struct sigaction action;
 
 	/* Set the alarm handler (Linux specific) */
-	memset(&action, 0, sizeof(action));
+	SDL_memset(&action, 0, sizeof(action));
 	action.sa_handler = HandleAlarm;
 	action.sa_flags = SA_RESTART;
 	sigemptyset(&action.sa_mask);
@@ -285,7 +285,7 @@ void SDL_SYS_StopTimer(void)
 {
 	struct itimerval timer;
 
-	memset(&timer, 0, (sizeof timer));
+	SDL_memset(&timer, 0, (sizeof timer));
 	setitimer(ITIMER_REAL, &timer, NULL);
 }
 

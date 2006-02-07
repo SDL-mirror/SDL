@@ -198,7 +198,7 @@ SDL_Surface *FULLSCREEN_SetVideoMode(_THIS, SDL_Surface *current,
        if (riscos_backbuffer == 3)
           this->hidden->bank[0] = WIMP_CreateBuffer(width, height, bpp);
        else
-          this->hidden->bank[0] = malloc(height * current->pitch);
+          this->hidden->bank[0] = SDL_malloc(height * current->pitch);
        if (this->hidden->bank[0] == 0)
        {
  	       RISCOS_RestoreWimpMode();
@@ -210,7 +210,7 @@ SDL_Surface *FULLSCREEN_SetVideoMode(_THIS, SDL_Surface *current,
     }
 
     /* Store address of allocated screen bank to be freed later */
-    if (this->hidden->alloc_bank) free(this->hidden->alloc_bank);
+    if (this->hidden->alloc_bank) SDL_free(this->hidden->alloc_bank);
     if (create_back_buffer)
     {
         this->hidden->alloc_bank = this->hidden->bank[0];
@@ -223,8 +223,8 @@ SDL_Surface *FULLSCREEN_SetVideoMode(_THIS, SDL_Surface *current,
 	  this->hidden->alloc_bank = 0;
 
     // Clear both banks to black
-    memset(this->hidden->bank[0], 0, height * current->pitch);
-    memset(this->hidden->bank[1], 0, height * current->pitch);
+    SDL_memset(this->hidden->bank[0], 0, height * current->pitch);
+    SDL_memset(this->hidden->bank[1], 0, height * current->pitch);
 
  	   this->hidden->current_bank = 0;
 	   current->pixels = this->hidden->bank[0];
@@ -316,7 +316,7 @@ void FULLSCREEN_BuildModeList(_THIS)
 	/* Video memory should be in r[5] */
 	this->info.video_mem = regs.r[5]/1024;
 
-	enumInfo = (unsigned char *)malloc(-regs.r[7]);
+	enumInfo = (unsigned char *)SDL_malloc(-regs.r[7]);
 	if (enumInfo == NULL)
 	{
 		SDL_OutOfMemory();
@@ -352,7 +352,7 @@ void FULLSCREEN_BuildModeList(_THIS)
 		enum_ptr += blockInfo[0];
 	}
 
-	free(enumInfo);
+	SDL_free(enumInfo);
 		
 	/* Sort the mode lists */
 	for ( j=0; j<NUM_MODELISTS; ++j ) {
@@ -397,7 +397,7 @@ static void FULLSCREEN_UpdateRectsMemCpy(_THIS, int numrects, SDL_Rect *rects)
          to  = this->hidden->bank[1] + rects->x * xmult + rects->y * pitch;
          for (row = 0; row < rects->h; row++)
          {
-             memcpy(to, from, rects->w * xmult);
+             SDL_memcpy(to, from, rects->w * xmult);
              from += pitch;
              to += pitch;
          }
@@ -594,7 +594,7 @@ static int FULLSCREEN_AddMode(_THIS, int bpp, int w, int h)
 	}
 
 	/* Set up the new video mode rectangle */
-	mode = (SDL_Rect *)malloc(sizeof *mode);
+	mode = (SDL_Rect *)SDL_malloc(sizeof *mode);
 	if ( mode == NULL ) {
 		SDL_OutOfMemory();
 		return(-1);
@@ -607,11 +607,11 @@ static int FULLSCREEN_AddMode(_THIS, int bpp, int w, int h)
 	/* Allocate the new list of modes, and fill in the new mode */
 	next_mode = SDL_nummodes[index];
 	SDL_modelist[index] = (SDL_Rect **)
-	       realloc(SDL_modelist[index], (1+next_mode+1)*sizeof(SDL_Rect *));
+	       SDL_realloc(SDL_modelist[index], (1+next_mode+1)*sizeof(SDL_Rect *));
 	if ( SDL_modelist[index] == NULL ) {
 		SDL_OutOfMemory();
 		SDL_nummodes[index] = 0;
-		free(mode);
+		SDL_free(mode);
 		return(-1);
 	}
 	SDL_modelist[index][next_mode] = mode;
@@ -663,7 +663,7 @@ static void FULLSCREEN_EnableEscape()
 /** Store caption in case this is called before we create a window */
 void FULLSCREEN_SetWMCaption(_THIS, const char *title, const char *icon)
 {
-	strncpy(this->hidden->title, title, 255);
+	SDL_strncpy(this->hidden->title, title, 255);
 	this->hidden->title[255] = 0;
 }
 
@@ -772,7 +772,7 @@ int FULLSCREEN_ToggleFromWimp(_THIS)
 	   this->screen->pixels = this->hidden->bank[0];
 
        /* Copy back buffer to screen memory */
-       memcpy(this->hidden->bank[1], this->hidden->bank[0], width * height * this->screen->format->BytesPerPixel);
+       SDL_memcpy(this->hidden->bank[1], this->hidden->bank[0], width * height * this->screen->format->BytesPerPixel);
 
        FULLSCREEN_SetDeviceMode(this);
        return 1;

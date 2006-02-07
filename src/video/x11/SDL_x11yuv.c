@@ -222,13 +222,13 @@ SDL_Overlay *X11_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, S
 	}
 
 	/* Create the overlay structure */
-	overlay = (SDL_Overlay *)malloc(sizeof *overlay);
+	overlay = (SDL_Overlay *)SDL_malloc(sizeof *overlay);
 	if ( overlay == NULL ) {
 		SDL_NAME(XvUngrabPort)(GFX_Display, xv_port, CurrentTime);
 		SDL_OutOfMemory();
 		return(NULL);
 	}
-	memset(overlay, 0, (sizeof *overlay));
+	SDL_memset(overlay, 0, (sizeof *overlay));
 
 	/* Fill in the basic members */
 	overlay->format = format;
@@ -240,7 +240,7 @@ SDL_Overlay *X11_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, S
 	overlay->hw_overlay = 1;
 
 	/* Create the pixel data and lookup tables */
-	hwdata = (struct private_yuvhwdata *)malloc(sizeof *hwdata);
+	hwdata = (struct private_yuvhwdata *)SDL_malloc(sizeof *hwdata);
 	overlay->hwdata = hwdata;
 	if ( hwdata == NULL ) {
 		SDL_NAME(XvUngrabPort)(GFX_Display, xv_port, CurrentTime);
@@ -251,7 +251,7 @@ SDL_Overlay *X11_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, S
 	hwdata->port = xv_port;
 #ifndef NO_SHARED_MEMORY
 	yuvshm = &hwdata->yuvshm;
-	memset(yuvshm, 0, sizeof(*yuvshm));
+	SDL_memset(yuvshm, 0, sizeof(*yuvshm));
 	hwdata->image = SDL_NAME(XvShmCreateImage)(GFX_Display, xv_port, format,
 						   0, width, height, yuvshm);
 #ifdef PITCH_WORKAROUND
@@ -312,7 +312,7 @@ SDL_Overlay *X11_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, S
 			SDL_FreeYUVOverlay(overlay);
 			return(NULL);
 		}
-		hwdata->image->data = malloc(hwdata->image->data_size);
+		hwdata->image->data = SDL_malloc(hwdata->image->data_size);
 		if ( hwdata->image->data == NULL ) {
 			SDL_OutOfMemory();
 			SDL_FreeYUVOverlay(overlay);
@@ -322,8 +322,8 @@ SDL_Overlay *X11_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, S
 
 	/* Find the pitch and offset values for the overlay */
 	overlay->planes = hwdata->image->num_planes;
-	overlay->pitches = (Uint16 *)malloc(overlay->planes * sizeof(Uint16));
-	overlay->pixels = (Uint8 **)malloc(overlay->planes * sizeof(Uint8 *));
+	overlay->pitches = (Uint16 *)SDL_malloc(overlay->planes * sizeof(Uint16));
+	overlay->pixels = (Uint8 **)SDL_malloc(overlay->planes * sizeof(Uint8 *));
 	if ( !overlay->pitches || !overlay->pixels ) {
 		SDL_OutOfMemory();
 		SDL_FreeYUVOverlay(overlay);
@@ -395,14 +395,14 @@ void X11_FreeYUVOverlay(_THIS, SDL_Overlay *overlay)
 		if ( hwdata->image ) {
 			pXFree(hwdata->image);
 		}
-		free(hwdata);
+		SDL_free(hwdata);
 	}
 	if ( overlay->pitches ) {
-		free(overlay->pitches);
+		SDL_free(overlay->pitches);
 		overlay->pitches = NULL;
 	}
 	if ( overlay->pixels ) {
-		free(overlay->pixels);
+		SDL_free(overlay->pixels);
 		overlay->pixels = NULL;
 	}
 #ifdef XFREE86_REFRESH_HACK

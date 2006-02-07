@@ -82,7 +82,7 @@ static char *GetJoystickName(int index, const char *szRegKey)
 	unsigned char regvalue[256];
 	unsigned char regname[256];
 
-	snprintf((char *) regkey, SDL_arraysize(regkey), "%s\\%s\\%s",
+	SDL_snprintf((char *) regkey, SDL_arraysize(regkey), "%s\\%s\\%s",
 		REGSTR_PATH_JOYCONFIG,
 		szRegKey,
 		REGSTR_KEY_JOYCURR);
@@ -95,7 +95,7 @@ static char *GetJoystickName(int index, const char *szRegKey)
 			joystick's properties
 		*/
 		regsize = sizeof(regname);
-		snprintf((char *) regvalue, SDL_arraysize(regvalue),
+		SDL_snprintf((char *) regvalue, SDL_arraysize(regvalue),
 			"Joystick%d%s", index+1,
 			REGSTR_VAL_JOYOEMNAME);
 		regresult = RegQueryValueExA(hKey,
@@ -105,7 +105,7 @@ static char *GetJoystickName(int index, const char *szRegKey)
 		if (regresult == ERROR_SUCCESS)
 		{
 			/* open that registry key */
-			snprintf((char *) regkey, SDL_arraysize(regkey), "%s\\%s",
+			SDL_snprintf((char *) regkey, SDL_arraysize(regkey), "%s\\%s",
 				REGSTR_PATH_JOYOEM, regname);
 			regresult = RegOpenKeyExA(HKEY_LOCAL_MACHINE,
 				(char *) regkey, 0, KEY_READ, &hKey);
@@ -124,7 +124,7 @@ static char *GetJoystickName(int index, const char *szRegKey)
 						allocate enough memory
 						for the OEM name text ...
 					*/
-					name = (char *) malloc(regsize);
+					name = (char *) SDL_malloc(regsize);
 					/* ... and read it from the registry */
 					regresult =
 						RegQueryValueExA(hKey,
@@ -227,13 +227,13 @@ int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
 	axis_max[5] = SYS_Joystick[index].wVmax;
 
 	/* allocate memory for system specific hardware data */
-	joystick->hwdata = (struct joystick_hwdata *) malloc(sizeof(*joystick->hwdata));
+	joystick->hwdata = (struct joystick_hwdata *) SDL_malloc(sizeof(*joystick->hwdata));
 	if (joystick->hwdata == NULL)
 	{
 		SDL_OutOfMemory();
 		return(-1);
 	}
-	memset(joystick->hwdata, 0, sizeof(*joystick->hwdata));
+	SDL_memset(joystick->hwdata, 0, sizeof(*joystick->hwdata));
 
 	/* set hardware data */
 	joystick->hwdata->id = SYS_JoystickID[index];
@@ -359,7 +359,7 @@ void SDL_SYS_JoystickClose(SDL_Joystick *joystick)
 {
 	if (joystick->hwdata != NULL) {
 		/* free system specific hardware data */
-		free(joystick->hwdata);
+		SDL_free(joystick->hwdata);
 	}
 }
 
@@ -369,7 +369,7 @@ void SDL_SYS_JoystickQuit(void)
 	int i;
 	for (i = 0; i < MAX_JOYSTICKS; i++) {
 		if ( SYS_JoystickName[i] != NULL ) {
-			free(SYS_JoystickName[i]);
+			SDL_free(SYS_JoystickName[i]);
 		}
 	}
 }
@@ -406,14 +406,14 @@ void SetMMerror(char *function, int code)
 		break;
 
 		default:
-			snprintf(errbuf, SDL_arraysize(errbuf),
+			SDL_snprintf(errbuf, SDL_arraysize(errbuf),
 			         "%s: Unknown Multimedia system error: 0x%x",
 								function, code);
 		break;
 	}
 
 	if ( ! errbuf[0] ) {
-		snprintf(errbuf, SDL_arraysize(errbuf), "%s: %s", function, error);
+		SDL_snprintf(errbuf, SDL_arraysize(errbuf), "%s: %s", function, error);
 	}
 	SDL_SetError("%s", errbuf);
 }

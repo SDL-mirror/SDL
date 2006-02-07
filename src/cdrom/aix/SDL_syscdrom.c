@@ -128,12 +128,12 @@ static void AddDrive(char *drive, struct stat *stbuf)
 
 		/* Add this drive to our list */
 		i = SDL_numcds;
-		SDL_cdlist[i] = (char *)malloc(strlen(drive)+1);
+		SDL_cdlist[i] = (char *)SDL_malloc(SDL_strlen(drive)+1);
 		if ( SDL_cdlist[i] == NULL ) {
 			SDL_OutOfMemory();
 			return;
 		}
-		strcpy(SDL_cdlist[i], drive);
+		SDL_strcpy(SDL_cdlist[i], drive);
 		SDL_cdmode[i] = stbuf->st_rdev;
 		++SDL_numcds;
 #ifdef DEBUG_CDROM
@@ -149,7 +149,7 @@ static void CheckMounts()
     struct vmount* ptr;
     int            ret;
 
-    buffer = (char*)malloc(10);
+    buffer = (char*)SDL_malloc(10);
     bufsz  = 10;
     if ( buffer==NULL )
     {
@@ -167,8 +167,8 @@ static void CheckMounts()
             bufsz = *(int*)buffer; /* Required size is in first word.   */
 				   /* (whatever a word is in AIX 4.3.3) */
 				   /* int seems to be OK in 32bit mode. */
-            free(buffer);
-            buffer = (char*)malloc(bufsz);
+            SDL_free(buffer);
+            buffer = (char*)SDL_malloc(bufsz);
             if ( buffer==NULL )
             {
                 fprintf(stderr,
@@ -237,9 +237,9 @@ static int CheckNonmounts()
     {
         ret = getfsent_r ( &entry, &fsFile, &passNo );
         if ( ret == 0 ) {
-            char* l = strrchr(entry.fs_spec,'/');
+            char* l = SDL_strrchr(entry.fs_spec,'/');
             if ( l != NULL ) {
-                if ( !strncmp("cd",++l,2) ) {
+                if ( !SDL_strncmp("cd",++l,2) ) {
 #ifdef DEBUG_CDROM
                     fprintf(stderr,
 			    "Found unmounted CD ROM drive with device name %s\n",
@@ -266,9 +266,9 @@ static int CheckNonmounts()
     {
         entry = getfsent();
         if ( entry != NULL ) {
-            char* l = strrchr(entry->fs_spec,'/');
+            char* l = SDL_strrchr(entry->fs_spec,'/');
             if ( l != NULL ) {
-                if ( !strncmp("cd",++l,2) ) {
+                if ( !SDL_strncmp("cd",++l,2) ) {
 #ifdef DEBUG_CDROM
                     fprintf(stderr,"Found unmounted CD ROM drive with device name %s", entry->fs_spec);
 #endif
@@ -303,15 +303,15 @@ int  SDL_SYS_CDInit(void)
 	SDL_CDcaps.Close = SDL_SYS_CDClose;
 
 	/* Look in the environment for our CD-ROM drive list */
-	SDLcdrom = getenv("SDL_CDROM");	/* ':' separated list of devices */
+	SDLcdrom = SDL_getenv("SDL_CDROM");	/* ':' separated list of devices */
 	if ( SDLcdrom != NULL ) {
 		char *cdpath, *delim;
-		cdpath = malloc(strlen(SDLcdrom)+1);
+		cdpath = SDL_malloc(SDL_strlen(SDLcdrom)+1);
 		if ( cdpath != NULL ) {
-			strcpy(cdpath, SDLcdrom);
+			SDL_strcpy(cdpath, SDLcdrom);
 			SDLcdrom = cdpath;
 			do {
-				delim = strchr(SDLcdrom, ':');
+				delim = SDL_strchr(SDLcdrom, ':');
 				if ( delim ) {
 					*delim++ = '\0';
 				}
@@ -327,7 +327,7 @@ int  SDL_SYS_CDInit(void)
 					SDLcdrom = NULL;
 				}
 			} while ( SDLcdrom );
-			free(cdpath);
+			SDL_free(cdpath);
 		}
 
 		/* If we found our drives, there's nothing left to do */
@@ -369,13 +369,13 @@ static int SDL_SYS_CDOpen(int drive)
      * We found /dev/cd? drives and that is in our list. But we can
      * open only the /dev/rcd? versions of those devices for Audio CD.
      */
-    cdromname = (char*)malloc( strlen(SDL_cdlist[drive]+2) );
-    strcpy(cdromname,SDL_cdlist[drive]);
-    lastsl = strrchr(cdromname,'/');
+    cdromname = (char*)SDL_malloc( SDL_strlen(SDL_cdlist[drive]+2) );
+    SDL_strcpy(cdromname,SDL_cdlist[drive]);
+    lastsl = SDL_strrchr(cdromname,'/');
     if (lastsl) {
 	*lastsl = 0;
 	strcat(cdromname,"/r");
-	lastsl = strrchr(SDL_cdlist[drive],'/');
+	lastsl = SDL_strrchr(SDL_cdlist[drive],'/');
 	if (lastsl) {
 	    lastsl++;
 	    strcat(cdromname,lastsl);
@@ -459,7 +459,7 @@ static int SDL_SYS_CDOpen(int drive)
 #endif
 	}
     }
-    free(cdromname);
+    SDL_free(cdromname);
     return fd;
 }
 
@@ -650,7 +650,7 @@ void SDL_SYS_CDQuit(void)
 
 	if ( SDL_numcds > 0 ) {
 		for ( i=0; i<SDL_numcds; ++i ) {
-			free(SDL_cdlist[i]);
+			SDL_free(SDL_cdlist[i]);
 		}
 		SDL_numcds = 0;
 	}

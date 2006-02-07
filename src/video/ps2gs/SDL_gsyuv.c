@@ -114,12 +114,12 @@ SDL_Overlay *GS_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SD
 	}
 
 	/* Create the overlay structure */
-	overlay = (SDL_Overlay *)malloc(sizeof *overlay);
+	overlay = (SDL_Overlay *)SDL_malloc(sizeof *overlay);
 	if ( overlay == NULL ) {
 		SDL_OutOfMemory();
 		return(NULL);
 	}
-	memset(overlay, 0, (sizeof *overlay));
+	SDL_memset(overlay, 0, (sizeof *overlay));
 
 	/* Fill in the basic members */
 	overlay->format = format;
@@ -131,7 +131,7 @@ SDL_Overlay *GS_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SD
 	overlay->hw_overlay = 1;
 
 	/* Create the pixel data */
-	hwdata = (struct private_yuvhwdata *)malloc(sizeof *hwdata);
+	hwdata = (struct private_yuvhwdata *)SDL_malloc(sizeof *hwdata);
 	overlay->hwdata = hwdata;
 	if ( hwdata == NULL ) {
 		SDL_FreeYUVOverlay(overlay);
@@ -139,7 +139,7 @@ SDL_Overlay *GS_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SD
 		return(NULL);
 	}
 	hwdata->ipu_fd = -1;
-	hwdata->pixels = (Uint8 *)malloc(width*height*2);
+	hwdata->pixels = (Uint8 *)SDL_malloc(width*height*2);
 	if ( hwdata->pixels == NULL ) {
 		SDL_FreeYUVOverlay(overlay);
 		SDL_OutOfMemory();
@@ -202,7 +202,7 @@ SDL_Overlay *GS_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SD
 
 	/* Allocate memory for the DMA packets */
 	hwdata->plist.num = hwdata->macroblocks * 4 + 1;
-	hwdata->plist.packet = (struct ps2_packet *)malloc(
+	hwdata->plist.packet = (struct ps2_packet *)SDL_malloc(
 	                       hwdata->plist.num*sizeof(struct ps2_packet));
 	if ( ! hwdata->plist.packet ) {
 		SDL_FreeYUVOverlay(overlay);
@@ -453,11 +453,11 @@ void GS_FreeYUVOverlay(_THIS, SDL_Overlay *overlay)
 			munmap(hwdata->dma_mem, hwdata->dma_len);
 		}
 		if ( hwdata->plist.packet ) {
-			free(hwdata->plist.packet);
+			SDL_free(hwdata->plist.packet);
 		}
 		if ( hwdata->pixels ) {
-			free(hwdata->pixels);
+			SDL_free(hwdata->pixels);
 		}
-		free(hwdata);
+		SDL_free(hwdata);
 	}
 }

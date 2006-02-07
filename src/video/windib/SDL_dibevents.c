@@ -404,7 +404,7 @@ static SDL_keysym *TranslateKey(UINT vkey, UINT scancode, SDL_keysym *keysym, in
 
 int DIB_CreateWindow(_THIS)
 {
-	char *windowid = getenv("SDL_WINDOWID");
+	char *windowid = SDL_getenv("SDL_WINDOWID");
 
 	SDL_RegisterApp(NULL, 0, 0);
 
@@ -412,12 +412,12 @@ int DIB_CreateWindow(_THIS)
 	if ( SDL_windowid ) {
 #if defined(_WIN32_WCE) && (_WIN32_WCE < 300)
 		/* wince 2.1 does not have strtol */
-		wchar_t *windowid_t = malloc((strlen(windowid) + 1) * sizeof(wchar_t));
-		MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, windowid, -1, windowid_t, strlen(windowid) + 1);
+		wchar_t *windowid_t = SDL_malloc((SDL_strlen(windowid) + 1) * sizeof(wchar_t));
+		MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, windowid, -1, windowid_t, SDL_strlen(windowid) + 1);
 		SDL_Window = (HWND)wcstol(windowid_t, NULL, 0);
-		free(windowid_t);
+		SDL_free(windowid_t);
 #else
-		SDL_Window = (HWND)strtol(windowid, NULL, 0);
+		SDL_Window = (HWND)SDL_strtol(windowid, NULL, 0);
 #endif
 		if ( SDL_Window == NULL ) {
 			SDL_SetError("Couldn't get user specified window");

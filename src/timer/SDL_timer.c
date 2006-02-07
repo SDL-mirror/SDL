@@ -148,7 +148,7 @@ void SDL_ThreadedTimerCheck(void)
 					} else {
 						SDL_timers = next;
 					}
-					free(t);
+					SDL_free(t);
 					--SDL_timer_running;
 					removed = SDL_TRUE;
 				}
@@ -165,7 +165,7 @@ void SDL_ThreadedTimerCheck(void)
 static SDL_TimerID SDL_AddTimerInternal(Uint32 interval, SDL_NewTimerCallback callback, void *param)
 {
 	SDL_TimerID t;
-	t = (SDL_TimerID) malloc(sizeof(struct _SDL_TimerID));
+	t = (SDL_TimerID) SDL_malloc(sizeof(struct _SDL_TimerID));
 	if ( t ) {
 		t->interval = ROUND_RESOLUTION(interval);
 		t->cb = callback;
@@ -218,7 +218,7 @@ SDL_bool SDL_RemoveTimer(SDL_TimerID id)
 			} else {
 				SDL_timers = t->next;
 			}
-			free(t);
+			SDL_free(t);
 			--SDL_timer_running;
 			removed = SDL_TRUE;
 			list_changed = SDL_TRUE;
@@ -256,7 +256,7 @@ int SDL_SetTimer(Uint32 ms, SDL_TimerCallback callback)
 			while ( SDL_timers ) {
 				SDL_TimerID freeme = SDL_timers;
 				SDL_timers = SDL_timers->next;
-				free(freeme);
+				SDL_free(freeme);
 			}
 			SDL_timer_running = 0;
 			list_changed = SDL_TRUE;

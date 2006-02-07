@@ -107,7 +107,7 @@ static void keyboard_update(void)
 
 	if (addr!=old_addr) {
 		old_addr = addr;
-		memset(&old_state,0,sizeof(old_state));
+		SDL_memset(&old_state,0,sizeof(old_state));
 	}
 
 	maple_raddr(addr,&port,&unit);

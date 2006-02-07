@@ -375,7 +375,7 @@ char *SDL_strchr(const char *string, int c)
 #ifndef HAVE_STRRCHR
 char *SDL_strrchr(const char *string, int c)
 {
-    const char *bufp = string + strlen(string) - 1;
+    const char *bufp = string + SDL_strlen(string) - 1;
     while ( bufp >= string ) {
         if ( *bufp == c ) {
             return (char *)bufp;
@@ -388,9 +388,9 @@ char *SDL_strrchr(const char *string, int c)
 #ifndef HAVE_STRSTR
 char *SDL_strstr(const char *haystack, const char *needle)
 {
-    size_t length = strlen(needle);
+    size_t length = SDL_strlen(needle);
     while ( *haystack ) {
-        if ( strncmp(haystack, needle, length) == 0 ) {
+        if ( SDL_strncmp(haystack, needle, length) == 0 ) {
             return (char *)haystack;
         }
     }
@@ -429,9 +429,9 @@ char *SDL_ltoa(long value, char *string, int radix)
 
     /* The numbers went into the string backwards. :) */
     if ( *string == '-' ) {
-        _strrev(string+1);
+        SDL_strrev(string+1);
     } else {
-        _strrev(string);
+        SDL_strrev(string);
     }
 
     return string;
@@ -454,7 +454,7 @@ char *SDL_ultoa(unsigned long value, char *string, int radix)
     *bufp = '\0';
 
     /* The numbers went into the string backwards. :) */
-    _strrev(string);
+    SDL_strrev(string);
 
     return string;
 }
@@ -497,9 +497,9 @@ char *SDL_lltoa(Sint64 value, char *string, int radix)
 
     /* The numbers went into the string backwards. :) */
     if ( *string == '-' ) {
-        _strrev(string+1);
+        SDL_strrev(string+1);
     } else {
-        _strrev(string);
+        SDL_strrev(string);
     }
 
     return string;
@@ -522,7 +522,7 @@ char *SDL_ulltoa(Uint64 value, char *string, int radix)
     *bufp = '\0';
 
     /* The numbers went into the string backwards. :) */
-    _strrev(string);
+    SDL_strrev(string);
 
     return string;
 }
@@ -878,12 +878,12 @@ static size_t SDL_PrintLong(char *text, long value, int radix, size_t maxlen)
     char num[130];
     size_t size;
 
-    _ltoa(value, num, radix);
+    SDL_ltoa(value, num, radix);
     size = SDL_strlen(num);
     if ( size > maxlen ) {
         size = maxlen;
     }
-    strncpy(text, num, size);
+    SDL_strncpy(text, num, size);
 
     return size;
 }
@@ -892,12 +892,12 @@ static size_t SDL_PrintUnsignedLong(char *text, unsigned long value, int radix, 
     char num[130];
     size_t size;
 
-    _ultoa(value, num, radix);
+    SDL_ultoa(value, num, radix);
     size = SDL_strlen(num);
     if ( size > maxlen ) {
         size = maxlen;
     }
-    strncpy(text, num, size);
+    SDL_strncpy(text, num, size);
 
     return size;
 }
@@ -907,12 +907,12 @@ static size_t SDL_PrintLongLong(char *text, Sint64 value, int radix, size_t maxl
     char num[130];
     size_t size;
 
-    _i64toa(value, num, radix);
+    SDL_lltoa(value, num, radix);
     size = SDL_strlen(num);
     if ( size > maxlen ) {
         size = maxlen;
     }
-    strncpy(text, num, size);
+    SDL_strncpy(text, num, size);
 
     return size;
 }
@@ -921,12 +921,12 @@ static size_t SDL_PrintUnsignedLongLong(char *text, Uint64 value, int radix, siz
     char num[130];
     size_t size;
 
-    _ui64toa(value, num, radix);
+    SDL_ulltoa(value, num, radix);
     size = SDL_strlen(num);
     if ( size > maxlen ) {
         size = maxlen;
     }
-    strncpy(text, num, size);
+    SDL_strncpy(text, num, size);
 
     return size;
 }
@@ -1076,7 +1076,7 @@ int  SDL_vsnprintf(char *text, size_t maxlen, const char *fmt, va_list ap)
                                 break;
                         }
                         if ( do_lowercase ) {
-                            _strlwr(text);
+                            SDL_strlwr(text);
                         }
                         done = SDL_TRUE;
                         break;

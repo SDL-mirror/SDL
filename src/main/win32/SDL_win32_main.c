@@ -5,12 +5,12 @@
 */
 
 #include <stdio.h>
-#include <string.h>
-#include <ctype.h>
 #include <stdlib.h>
 
-#include <windows.h>
-#include <malloc.h>			/* For _alloca() */
+#include "SDL_windows.h"
+
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 
 #ifdef _WIN32_WCE
 # define DIR_SEPERATOR TEXT("\\")
@@ -56,7 +56,7 @@
 #define isspace(a) (((CHAR)a == ' ') || ((CHAR)a == '\t'))
 
 /* seems to be undefined in Win CE although in online help */
-char *strrchr(char *str, int c)
+char *SDL_strrchr(char *str, int c)
 {
 	char *p;
 
@@ -195,15 +195,15 @@ int console_main(int argc, char *argv[])
 
 	/* Get the class name from argv[0] */
 	appname = argv[0];
-	if ( (bufp=strrchr(argv[0], '\\')) != NULL ) {
+	if ( (bufp=SDL_strrchr(argv[0], '\\')) != NULL ) {
 		appname = bufp+1;
 	} else
-	if ( (bufp=strrchr(argv[0], '/')) != NULL ) {
+	if ( (bufp=SDL_strrchr(argv[0], '/')) != NULL ) {
 		appname = bufp+1;
 	}
 
-	if ( (bufp=strrchr(appname, '.')) == NULL )
-		n = strlen(appname);
+	if ( (bufp=SDL_strrchr(appname, '.')) == NULL )
+		n = SDL_strlen(appname);
 	else
 		n = (bufp-appname);
 
@@ -211,7 +211,7 @@ int console_main(int argc, char *argv[])
 	if ( bufp == NULL ) {
 		return OutOfMemory();
 	}
-	strncpy(bufp, appname, n);
+	SDL_strncpy(bufp, appname, n);
 	bufp[n] = '\0';
 	appname = bufp;
 
@@ -298,8 +298,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 	}
 	path[pathlen] = '\0';
 
-	strcpy( stdoutPath, path );
-	strcat( stdoutPath, DIR_SEPERATOR STDOUT_FILE );
+	SDL_strcpy( stdoutPath, path );
+	SDL_strcat( stdoutPath, DIR_SEPERATOR STDOUT_FILE );
     
 	/* Redirect standard input and standard output */
 	newfp = freopen(stdoutPath, TEXT("w"), stdout);
@@ -317,8 +317,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 	}
 #endif /* _WIN32_WCE */
 
-	strcpy( stderrPath, path );
-	strcat( stderrPath, DIR_SEPERATOR STDERR_FILE );
+	SDL_strcpy( stderrPath, path );
+	SDL_strcat( stderrPath, DIR_SEPERATOR STDERR_FILE );
 
 	newfp = freopen(stderrPath, TEXT("w"), stderr);
 #ifndef _WIN32_WCE
@@ -354,11 +354,11 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 #else
 	/* Grab the command line (use alloca() on Windows) */
 	bufp = GetCommandLine();
-	cmdline = (char *)alloca(strlen(bufp)+1);
+	cmdline = (char *)alloca(SDL_strlen(bufp)+1);
 	if ( cmdline == NULL ) {
 		return OutOfMemory();
 	}
-	strcpy(cmdline, bufp);
+	SDL_strcpy(cmdline, bufp);
 #endif
 
 	/* Parse it into argv and argc */

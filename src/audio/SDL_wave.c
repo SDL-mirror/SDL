@@ -135,7 +135,7 @@ static int MS_ADPCM_decode(Uint8 **audio_buf, Uint32 *audio_len)
 	*audio_len = (encoded_len/MS_ADPCM_state.wavefmt.blockalign) * 
 				MS_ADPCM_state.wSamplesPerBlock*
 				MS_ADPCM_state.wavefmt.channels*sizeof(Sint16);
-	*audio_buf = (Uint8 *)malloc(*audio_len);
+	*audio_buf = (Uint8 *)SDL_malloc(*audio_len);
 	if ( *audio_buf == NULL ) {
 		SDL_Error(SDL_ENOMEM);
 		return(-1);
@@ -214,7 +214,7 @@ static int MS_ADPCM_decode(Uint8 **audio_buf, Uint32 *audio_len)
 		}
 		encoded_len -= MS_ADPCM_state.wavefmt.blockalign;
 	}
-	free(freeable);
+	SDL_free(freeable);
 	return(0);
 }
 
@@ -352,7 +352,7 @@ static int IMA_ADPCM_decode(Uint8 **audio_buf, Uint32 *audio_len)
 	*audio_len = (encoded_len/IMA_ADPCM_state.wavefmt.blockalign) * 
 				IMA_ADPCM_state.wSamplesPerBlock*
 				IMA_ADPCM_state.wavefmt.channels*sizeof(Sint16);
-	*audio_buf = (Uint8 *)malloc(*audio_len);
+	*audio_buf = (Uint8 *)SDL_malloc(*audio_len);
 	if ( *audio_buf == NULL ) {
 		SDL_Error(SDL_ENOMEM);
 		return(-1);
@@ -394,7 +394,7 @@ static int IMA_ADPCM_decode(Uint8 **audio_buf, Uint32 *audio_len)
 		}
 		encoded_len -= IMA_ADPCM_state.wavefmt.blockalign;
 	}
-	free(freeable);
+	SDL_free(freeable);
 	return(0);
 }
 
@@ -444,7 +444,7 @@ SDL_AudioSpec * SDL_LoadWAV_RW (SDL_RWops *src, int freesrc,
 	chunk.data = NULL;
 	do {
 		if ( chunk.data != NULL ) {
-			free(chunk.data);
+			SDL_free(chunk.data);
 		}
 		lenread = ReadChunk(src, &chunk);
 		if ( lenread < 0 ) {
@@ -489,7 +489,7 @@ SDL_AudioSpec * SDL_LoadWAV_RW (SDL_RWops *src, int freesrc,
 			was_error = 1;
 			goto done;
 	}
-	memset(spec, 0, (sizeof *spec));
+	SDL_memset(spec, 0, (sizeof *spec));
 	spec->freq = SDL_SwapLE32(format->frequency);
 	switch (SDL_SwapLE16(format->bitspersample)) {
 		case 4:
@@ -521,7 +521,7 @@ SDL_AudioSpec * SDL_LoadWAV_RW (SDL_RWops *src, int freesrc,
 	*audio_buf = NULL;
 	do {
 		if ( *audio_buf != NULL ) {
-			free(*audio_buf);
+			SDL_free(*audio_buf);
 		}
 		lenread = ReadChunk(src, &chunk);
 		if ( lenread < 0 ) {
@@ -553,7 +553,7 @@ SDL_AudioSpec * SDL_LoadWAV_RW (SDL_RWops *src, int freesrc,
 
 done:
 	if ( format != NULL ) {
-		free(format);
+		SDL_free(format);
 	}
 	if ( freesrc && src ) {
 		SDL_RWclose(src);
@@ -574,7 +574,7 @@ done:
 void SDL_FreeWAV(Uint8 *audio_buf)
 {
 	if ( audio_buf != NULL ) {
-		free(audio_buf);
+		SDL_free(audio_buf);
 	}
 }
 
@@ -582,14 +582,14 @@ static int ReadChunk(SDL_RWops *src, Chunk *chunk)
 {
 	chunk->magic	= SDL_ReadLE32(src);
 	chunk->length	= SDL_ReadLE32(src);
-	chunk->data = (Uint8 *)malloc(chunk->length);
+	chunk->data = (Uint8 *)SDL_malloc(chunk->length);
 	if ( chunk->data == NULL ) {
 		SDL_Error(SDL_ENOMEM);
 		return(-1);
 	}
 	if ( SDL_RWread(src, chunk->data, chunk->length, 1) != 1 ) {
 		SDL_Error(SDL_EFREAD);
-		free(chunk->data);
+		SDL_free(chunk->data);
 		return(-1);
 	}
 	return(chunk->length);

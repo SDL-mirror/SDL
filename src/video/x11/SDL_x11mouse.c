@@ -49,7 +49,7 @@ void X11_FreeWMCursor(_THIS, WMcursor *cursor)
 		pXSync(SDL_Display, False);
 		SDL_Unlock_EventThread();
 	}
-	free(cursor);
+	SDL_free(cursor);
 }
 
 WMcursor *X11_CreateWMCursor(_THIS,
@@ -66,7 +66,7 @@ WMcursor *X11_CreateWMCursor(_THIS,
 	static XColor white = { 0xffff, 0xffff, 0xffff, 0xffff };
 
 	/* Allocate the cursor memory */
-	cursor = (WMcursor *)malloc(sizeof(WMcursor));
+	cursor = (WMcursor *)SDL_malloc(sizeof(WMcursor));
 	if ( cursor == NULL ) {
 		SDL_OutOfMemory();
 		return(NULL);
@@ -74,16 +74,16 @@ WMcursor *X11_CreateWMCursor(_THIS,
 
 	/* Mix the mask and the data */
 	clen = (w/8)*h;
-	x_data = (char *)malloc(clen);
+	x_data = (char *)SDL_malloc(clen);
 	if ( x_data == NULL ) {
-		free(cursor);
+		SDL_free(cursor);
 		SDL_OutOfMemory();
 		return(NULL);
 	}
-	x_mask = (char *)malloc(clen);
+	x_mask = (char *)SDL_malloc(clen);
 	if ( x_mask == NULL ) {
-		free(cursor);
-		free(x_data);
+		SDL_free(cursor);
+		SDL_free(x_data);
 		SDL_OutOfMemory();
 		return(NULL);
 	}
@@ -199,15 +199,15 @@ static void SetMouseAccel(_THIS, const char *accel_param)
 	int accel_value[3];
 	char *mouse_param, *mouse_param_buf, *pin;
 
-	mouse_param_buf = (char *)malloc(strlen(accel_param)+1);
+	mouse_param_buf = (char *)SDL_malloc(SDL_strlen(accel_param)+1);
 	if ( ! mouse_param_buf ) {
 		return;
 	}
-	strcpy(mouse_param_buf, accel_param);
+	SDL_strcpy(mouse_param_buf, accel_param);
 	mouse_param = mouse_param_buf;
 
 	for ( i=0; (i < 3) && mouse_param; ++i ) {
-		pin = strchr(mouse_param, '/');
+		pin = SDL_strchr(mouse_param, '/');
 		if ( pin ) {
 			*pin = '\0';
 		}
@@ -221,7 +221,7 @@ static void SetMouseAccel(_THIS, const char *accel_param)
 	if ( mouse_param_buf ) {
 		pXChangePointerControl(SDL_Display, True, True,
 			accel_value[0], accel_value[1], accel_value[2]);
-		free(mouse_param_buf);
+		SDL_free(mouse_param_buf);
 	}
 }
 
@@ -235,7 +235,7 @@ void X11_CheckMouseModeNoLock(_THIS)
 	   They almost never want to do this, as it seriously affects
 	   applications that rely on continuous relative mouse motion.
 	*/
-	env_override = getenv("SDL_MOUSE_RELATIVE");
+	env_override = SDL_getenv("SDL_MOUSE_RELATIVE");
 	if ( env_override ) {
 		enable_relative = atoi(env_override);
 	}
@@ -256,7 +256,7 @@ void X11_CheckMouseModeNoLock(_THIS)
 						&mouse_accel.numerator, 
 						&mouse_accel.denominator,
 						&mouse_accel.threshold);
-				xmouse_accel=getenv("SDL_VIDEO_X11_MOUSEACCEL");
+				xmouse_accel=SDL_getenv("SDL_VIDEO_X11_MOUSEACCEL");
 				if ( xmouse_accel ) {
 					SetMouseAccel(this, xmouse_accel);
 				}

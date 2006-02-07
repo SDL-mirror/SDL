@@ -78,8 +78,8 @@ static int DGA_Available(void)
 	   and the DGA 2.0+ extension is available, and we can map mem.
 	*/
 	if ( SDL_X11_LoadSymbols() ) {
-		if ( (strncmp(pXDisplayName(display), ":", 1) == 0) ||
-		     (strncmp(pXDisplayName(display), "unix:", 5) == 0) ) {
+		if ( (SDL_strncmp(pXDisplayName(display), ":", 1) == 0) ||
+		     (SDL_strncmp(pXDisplayName(display), "unix:", 5) == 0) ) {
 			dpy = pXOpenDisplay(display);
 			if ( dpy ) {
 				int events, errors, major, minor;
@@ -106,8 +106,8 @@ static int DGA_Available(void)
 static void DGA_DeleteDevice(SDL_VideoDevice *device)
 {
 	if (device != NULL) {
-		free(device->hidden);
-		free(device);
+		SDL_free(device->hidden);
+		SDL_free(device);
 		SDL_X11_UnloadSymbols();
 	}
 }
@@ -118,21 +118,21 @@ static SDL_VideoDevice *DGA_CreateDevice(int devindex)
 
 	/* Initialize all variables that we clean on shutdown */
 	if (SDL_X11_LoadSymbols()) {
-		device = (SDL_VideoDevice *)malloc(sizeof(SDL_VideoDevice));
+		device = (SDL_VideoDevice *)SDL_malloc(sizeof(SDL_VideoDevice));
 		if ( device ) {
-			memset(device, 0, (sizeof *device));
+			SDL_memset(device, 0, (sizeof *device));
 			device->hidden = (struct SDL_PrivateVideoData *)
-					malloc((sizeof *device->hidden));
+					SDL_malloc((sizeof *device->hidden));
 		}
 		if ( (device == NULL) || (device->hidden == NULL) ) {
 			SDL_OutOfMemory();
 			if ( device ) {
-				free(device);
+				SDL_free(device);
 			}
 			SDL_X11_UnloadSymbols();
 			return(0);
 		}
-		memset(device->hidden, 0, (sizeof *device->hidden));
+		SDL_memset(device->hidden, 0, (sizeof *device->hidden));
 
 		/* Set the function pointers */
 		device->VideoInit = DGA_VideoInit;
@@ -190,7 +190,7 @@ static int DGA_AddMode(_THIS, int bpp, int w, int h)
 	}
 
 	/* Set up the new video mode rectangle */
-	mode = (SDL_Rect *)malloc(sizeof *mode);
+	mode = (SDL_Rect *)SDL_malloc(sizeof *mode);
 	if ( mode == NULL ) {
 		SDL_OutOfMemory();
 		return(-1);
@@ -203,11 +203,11 @@ static int DGA_AddMode(_THIS, int bpp, int w, int h)
 	/* Allocate the new list of modes, and fill in the new mode */
 	next_mode = SDL_nummodes[index];
 	SDL_modelist[index] = (SDL_Rect **)
-	       realloc(SDL_modelist[index], (1+next_mode+1)*sizeof(SDL_Rect *));
+	       SDL_realloc(SDL_modelist[index], (1+next_mode+1)*sizeof(SDL_Rect *));
 	if ( SDL_modelist[index] == NULL ) {
 		SDL_OutOfMemory();
 		SDL_nummodes[index] = 0;
-		free(mode);
+		SDL_free(mode);
 		return(-1);
 	}
 	SDL_modelist[index][next_mode] = mode;
@@ -233,7 +233,7 @@ static Uint32 get_video_size(_THIS)
 	proc = fopen("/proc/self/maps", "r");
 	if ( proc ) {
 		while ( fgets(line, sizeof(line)-1, proc) ) {
-			sscanf(line, "%x-%x", &start, &stop);
+			SDL_sscanf(line, "%x-%x", &start, &stop);
 			if ( start == mem ) {
 				size = (Uint32)((stop-start)/1024);
 				break;
@@ -605,7 +605,7 @@ static int DGA_InitHWSurfaces(_THIS, SDL_Surface *screen, Uint8 *base, int size)
 	surfaces_memleft = size;
 
 	if ( surfaces_memleft > 0 ) {
-		bucket = (vidmem_bucket *)malloc(sizeof(*bucket));
+		bucket = (vidmem_bucket *)SDL_malloc(sizeof(*bucket));
 		if ( bucket == NULL ) {
 			SDL_OutOfMemory();
 			return(-1);
@@ -637,7 +637,7 @@ static void DGA_FreeHWSurfaces(_THIS)
 	while ( bucket ) {
 		freeable = bucket;
 		bucket = bucket->next;
-		free(freeable);
+		SDL_free(freeable);
 	}
 	surfaces.next = NULL;
 }
@@ -714,7 +714,7 @@ surface->pitch = SDL_VideoSurface->pitch;
 #ifdef DGA_DEBUG
 	fprintf(stderr, "Adding new free bucket of %d bytes\n", extra);
 #endif
-		newbucket = (vidmem_bucket *)malloc(sizeof(*newbucket));
+		newbucket = (vidmem_bucket *)SDL_malloc(sizeof(*newbucket));
 		if ( newbucket == NULL ) {
 			SDL_OutOfMemory();
 			retval = -1;
@@ -775,7 +775,7 @@ static void DGA_FreeHWSurface(_THIS, SDL_Surface *surface)
 			if ( bucket->next ) {
 				bucket->next->prev = bucket;
 			}
-			free(freeable);
+			SDL_free(freeable);
 		}
 		if ( bucket->prev && ! bucket->prev->used ) {
 #ifdef DGA_DEBUG
@@ -787,7 +787,7 @@ static void DGA_FreeHWSurface(_THIS, SDL_Surface *surface)
 			if ( bucket->next ) {
 				bucket->next->prev = bucket->prev;
 			}
-			free(freeable);
+			SDL_free(freeable);
 		}
 	}
 	surface->pixels = NULL;
@@ -1053,9 +1053,9 @@ void DGA_VideoQuit(_THIS)
 		for ( i=0; i<NUM_MODELISTS; ++i ) {
 			if ( SDL_modelist[i] != NULL ) {
 				for ( j=0; SDL_modelist[i][j]; ++j ) {
-					free(SDL_modelist[i][j]);
+					SDL_free(SDL_modelist[i][j]);
 				}
-				free(SDL_modelist[i]);
+				SDL_free(SDL_modelist[i]);
 				SDL_modelist[i] = NULL;
 			}
 		}

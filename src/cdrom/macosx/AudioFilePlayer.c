@@ -64,7 +64,7 @@ static int AudioFilePlayer_SetDestination (AudioFilePlayer *afp, AudioUnit  *inD
     if (afp->mConnected)
         return 0 ;
 
-    memcpy(&afp->mPlayUnit, inDestUnit, sizeof (afp->mPlayUnit));
+    SDL_memcpy(&afp->mPlayUnit, inDestUnit, sizeof (afp->mPlayUnit));
 
     OSStatus result = noErr;
     
@@ -155,7 +155,7 @@ void delete_AudioFilePlayer(AudioFilePlayer *afp)
             FSClose (afp->mForkRefNum);
             afp->mForkRefNum = 0;
         }
-        free(afp);
+        SDL_free(afp);
     }
 }
 
@@ -304,10 +304,10 @@ AudioFilePlayer *new_AudioFilePlayer (const FSRef *inFileRef)
 {
     SInt64 fileDataSize  = 0;
 
-    AudioFilePlayer *afp = (AudioFilePlayer *) malloc(sizeof (AudioFilePlayer));
+    AudioFilePlayer *afp = (AudioFilePlayer *) SDL_malloc(sizeof (AudioFilePlayer));
     if (afp == NULL)
         return NULL;
-    memset(afp, '\0', sizeof (*afp));
+    SDL_memset(afp, '\0', sizeof (*afp));
 
     #define SET_AUDIOFILEPLAYER_METHOD(m) afp->m = AudioFilePlayer_##m
     SET_AUDIOFILEPLAYER_METHOD(SetDestination);
@@ -326,7 +326,7 @@ AudioFilePlayer *new_AudioFilePlayer (const FSRef *inFileRef)
 
     if (!afp->OpenFile (afp, inFileRef, &fileDataSize))
     {
-        free(afp);
+        SDL_free(afp);
         return NULL;
     }
         

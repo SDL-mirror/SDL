@@ -84,11 +84,11 @@ static int Audio_Available(void)
 
 static void Audio_DeleteDevice(_THIS)
 {
-    if(this->hidden->playbuf._buffer) free(this->hidden->playbuf._buffer);
-    if(this->hidden->fillbuf._buffer) free(this->hidden->fillbuf._buffer);
+    if(this->hidden->playbuf._buffer) SDL_free(this->hidden->playbuf._buffer);
+    if(this->hidden->fillbuf._buffer) SDL_free(this->hidden->fillbuf._buffer);
     _somFree( this->hidden->umsdev );
-    free(this->hidden);
-    free(this);
+    SDL_free(this->hidden);
+    SDL_free(this);
 }
 
 static SDL_AudioDevice *Audio_CreateDevice(int devindex)
@@ -99,19 +99,19 @@ static SDL_AudioDevice *Audio_CreateDevice(int devindex)
      * Allocate and initialize management storage and private management
      * storage for this SDL-using library.
      */
-    this = (SDL_AudioDevice *)malloc(sizeof(SDL_AudioDevice));
+    this = (SDL_AudioDevice *)SDL_malloc(sizeof(SDL_AudioDevice));
     if ( this ) {
-        memset(this, 0, (sizeof *this));
-        this->hidden = (struct SDL_PrivateAudioData *)malloc((sizeof *this->hidden));
+        SDL_memset(this, 0, (sizeof *this));
+        this->hidden = (struct SDL_PrivateAudioData *)SDL_malloc((sizeof *this->hidden));
     }
     if ( (this == NULL) || (this->hidden == NULL) ) {
         SDL_OutOfMemory();
         if ( this ) {
-            free(this);
+            SDL_free(this);
         }
         return(0);
     }
-    memset(this->hidden, 0, (sizeof *this->hidden));
+    SDL_memset(this->hidden, 0, (sizeof *this->hidden));
 #ifdef DEBUG_AUDIO
     fprintf(stderr, "Creating UMS Audio device\n");
 #endif
@@ -204,9 +204,9 @@ static void UMS_PlayAudio(_THIS)
     while(samplesToWrite>0);
 
     SDL_LockAudio();
-    memcpy( &swpbuf,                &this->hidden->playbuf, sizeof(UMSAudioTypes_Buffer) );
-    memcpy( &this->hidden->playbuf, &this->hidden->fillbuf, sizeof(UMSAudioTypes_Buffer) );
-    memcpy( &this->hidden->fillbuf, &swpbuf,                sizeof(UMSAudioTypes_Buffer) );
+    SDL_memcpy( &swpbuf,                &this->hidden->playbuf, sizeof(UMSAudioTypes_Buffer) );
+    SDL_memcpy( &this->hidden->playbuf, &this->hidden->fillbuf, sizeof(UMSAudioTypes_Buffer) );
+    SDL_memcpy( &this->hidden->fillbuf, &swpbuf,                sizeof(UMSAudioTypes_Buffer) );
     SDL_UnlockAudio();
 
 #ifdef DEBUG_AUDIO
@@ -330,10 +330,10 @@ static int UMS_OpenAudio(_THIS, SDL_AudioSpec *spec)
 
     this->hidden->playbuf._length  = 0;
     this->hidden->playbuf._maximum = spec->size;
-    this->hidden->playbuf._buffer  = (unsigned char*)malloc(spec->size);
+    this->hidden->playbuf._buffer  = (unsigned char*)SDL_malloc(spec->size);
     this->hidden->fillbuf._length  = 0;
     this->hidden->fillbuf._maximum = spec->size;
-    this->hidden->fillbuf._buffer  = (unsigned char*)malloc(spec->size);
+    this->hidden->fillbuf._buffer  = (unsigned char*)SDL_malloc(spec->size);
 
     rc = UADSetBitsPerSample(this,  bitsPerSample );
     rc = UADSetDMABufferSize(this,  frag_spec, &outBufSize );

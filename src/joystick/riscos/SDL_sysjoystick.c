@@ -89,7 +89,7 @@ int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
 {
 	_kernel_swi_regs regs;
 
-	if(!(joystick->hwdata=malloc(sizeof(struct joystick_hwdata))))
+	if(!(joystick->hwdata=SDL_malloc(sizeof(struct joystick_hwdata))))
 		return -1;
 
 	regs.r[0] = joystick->index;
@@ -161,7 +161,7 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 void SDL_SYS_JoystickClose(SDL_Joystick *joystick)
 {
 	if(joystick->hwdata)
-		free(joystick->hwdata);
+		SDL_free(joystick->hwdata);
 	return;
 }
 

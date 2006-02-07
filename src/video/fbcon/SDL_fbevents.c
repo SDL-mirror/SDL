@@ -81,7 +81,7 @@ static void FB_vgainitkeymaps(int fd)
 
 	/* Load all the keysym mappings */
 	for ( map=0; map<NUM_VGAKEYMAPS; ++map ) {
-		memset(vga_keymap[map], 0, NR_KEYS*sizeof(Uint16));
+		SDL_memset(vga_keymap[map], 0, NR_KEYS*sizeof(Uint16));
 		for ( i=0; i<NR_KEYS; ++i ) {
 			entry.kb_table = map;
 			entry.kb_index = i;
@@ -350,7 +350,7 @@ static int find_pid(DIR *proc, const char *wanted_name)
 			if ( status ) {
 				name[0] = '\0';
 				fscanf(status, "Name: %s", name);
-				if ( strcmp(name, wanted_name) == 0 ) {
+				if ( SDL_strcmp(name, wanted_name) == 0 ) {
 					pid = atoi(entry->d_name);
 				}
 				fclose(status);
@@ -385,10 +385,10 @@ static int gpm_available(void)
 				len = read(cmdline, args, sizeof(args));
 				arg = args;
 				while ( len > 0 ) {
-					if ( strcmp(arg, "-R") == 0 ) {
+					if ( SDL_strcmp(arg, "-R") == 0 ) {
 						available = 1;
 					}
-					arglen = strlen(arg)+1;
+					arglen = SDL_strlen(arg)+1;
 					len -= arglen;
 					arg += arglen;
 				}
@@ -447,7 +447,7 @@ static int detect_imps2(int fd)
 
 	imps2 = 0;
 
-	if ( getenv("SDL_MOUSEDEV_IMPS2") ) {
+	if ( SDL_getenv("SDL_MOUSEDEV_IMPS2") ) {
 		imps2 = 1;
 	}
 	if ( ! imps2 ) {
@@ -499,13 +499,13 @@ int FB_OpenMouse(_THIS)
 	const char *mousedev;
 	const char *mousedrv;
 
-	mousedrv = getenv("SDL_MOUSEDRV");
-	mousedev = getenv("SDL_MOUSEDEV");
+	mousedrv = SDL_getenv("SDL_MOUSEDRV");
+	mousedev = SDL_getenv("SDL_MOUSEDEV");
 	mouse_fd = -1;
 
 #ifdef HAVE_TSLIB
-	if ((mousedrv != NULL) && (strcmp(mousedrv, "TSLIB") == 0)) {
-		if (mousedev == NULL) mousedev = getenv("TSLIB_TSDEVICE");
+	if ((mousedrv != NULL) && (SDL_strcmp(mousedrv, "TSLIB") == 0)) {
+		if (mousedev == NULL) mousedev = SDL_getenv("TSLIB_TSDEVICE");
 		if (mousedev != NULL) {
 			ts_dev = ts_open(mousedev, 1);
 			if ((ts_dev != NULL) && (ts_config(ts_dev) >= 0)) {
@@ -524,7 +524,7 @@ int FB_OpenMouse(_THIS)
 
 	/* ELO TOUCHSCREEN SUPPORT */
 
-	if( (mousedrv != NULL) && (strcmp(mousedrv, "ELO") == 0) ) {
+	if( (mousedrv != NULL) && (SDL_strcmp(mousedrv, "ELO") == 0) ) {
 		mouse_fd = open(mousedev, O_RDWR);
 		if ( mouse_fd >= 0 ) {
 			if(eloInitController(mouse_fd)) {
@@ -839,7 +839,7 @@ static void handle_mouse(_THIS)
 		FB_vgamousecallback(button, relative, dx, dy);
 	}
 	if ( i < nread ) {
-		memcpy(mousebuf, &mousebuf[i], (nread-i));
+		SDL_memcpy(mousebuf, &mousebuf[i], (nread-i));
 		start = (nread-i);
 	} else {
 		start = 0;
@@ -874,9 +874,9 @@ static void switch_vt(_THIS, unsigned short which)
 	wait_idle(this);
 	screen = SDL_VideoSurface;
 	screen_arealen = (screen->h*screen->pitch);
-	screen_contents = (Uint8 *)malloc(screen_arealen);
+	screen_contents = (Uint8 *)SDL_malloc(screen_arealen);
 	if ( screen_contents ) {
-		memcpy(screen_contents, screen->pixels, screen_arealen);
+		SDL_memcpy(screen_contents, screen->pixels, screen_arealen);
 	}
 	FB_SavePaletteTo(this, 256, saved_pal);
 	ioctl(console_fd, FBIOGET_VSCREENINFO, &vinfo);
@@ -900,8 +900,8 @@ static void switch_vt(_THIS, unsigned short which)
 	ioctl(console_fd, FBIOPUT_VSCREENINFO, &vinfo);
 	FB_RestorePaletteFrom(this, 256, saved_pal);
 	if ( screen_contents ) {
-		memcpy(screen->pixels, screen_contents, screen_arealen);
-		free(screen_contents);
+		SDL_memcpy(screen->pixels, screen_contents, screen_arealen);
+		SDL_free(screen_contents);
 	}
 	SDL_mutexV(hw_lock);
 }

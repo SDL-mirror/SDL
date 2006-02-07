@@ -39,7 +39,7 @@ void Mac_SetCaption(_THIS, const char *title, const char *icon)
 	/* Don't convert C to P string in place, because it may be read-only */
 	Str255		ptitle; /* MJS */
 	ptitle[0] = strlen (title);
-	memcpy(ptitle+1, title, ptitle[0]); /* MJS */
+	SDL_memcpy(ptitle+1, title, ptitle[0]); /* MJS */
 	if (SDL_Window)
 		SetWTitle(SDL_Window, ptitle); /* MJS */
 }

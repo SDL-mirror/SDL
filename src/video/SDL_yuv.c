@@ -44,7 +44,7 @@ SDL_Overlay *SDL_CreateYUVOverlay(int w, int h, Uint32 format,
 	}
 
 	/* Display directly on video surface, if possible */
-	if ( getenv("SDL_VIDEO_YUV_DIRECT") ) {
+	if ( SDL_getenv("SDL_VIDEO_YUV_DIRECT") ) {
 		if ( (display == SDL_PublicSurface) &&
 		     ((SDL_VideoSurface->format->BytesPerPixel == 2) ||
 		      (SDL_VideoSurface->format->BytesPerPixel == 4)) ) {
@@ -52,7 +52,7 @@ SDL_Overlay *SDL_CreateYUVOverlay(int w, int h, Uint32 format,
 		}
 	}
 	overlay = NULL;
-        yuv_hwaccel = getenv("SDL_VIDEO_YUV_HWACCEL");
+        yuv_hwaccel = SDL_getenv("SDL_VIDEO_YUV_HWACCEL");
 	if ( ((display == SDL_VideoSurface) && video->CreateYUVOverlay) &&
 	     (!yuv_hwaccel || (*yuv_hwaccel != '0')) ) {
 		overlay = video->CreateYUVOverlay(this, w, h, format, display);
@@ -85,6 +85,6 @@ void SDL_FreeYUVOverlay(SDL_Overlay *overlay)
 		if ( overlay->hwfuncs ) {
 			overlay->hwfuncs->FreeHW(current_video, overlay);
 		}
-		free(overlay);
+		SDL_free(overlay);
 	}
 }

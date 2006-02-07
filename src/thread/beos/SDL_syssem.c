@@ -37,12 +37,12 @@ SDL_sem *SDL_CreateSemaphore(Uint32 initial_value)
 {
 	SDL_sem *sem;
 
-	sem = (SDL_sem *)malloc(sizeof(*sem));
+	sem = (SDL_sem *)SDL_malloc(sizeof(*sem));
 	if ( sem ) {
 		sem->id = create_sem(initial_value, "SDL semaphore");
 		if ( sem->id < B_NO_ERROR ) {
 			SDL_SetError("create_sem() failed");
-			free(sem);
+			SDL_free(sem);
 			sem = NULL;
 		}
 	} else {
@@ -58,7 +58,7 @@ void SDL_DestroySemaphore(SDL_sem *sem)
 		if ( sem->id >= B_NO_ERROR ) {
 			delete_sem(sem->id);
 		}
-		free(sem);
+		SDL_free(sem);
 	}
 }
 

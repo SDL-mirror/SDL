@@ -48,7 +48,7 @@ struct WMcursor {
 
 void Mac_FreeWMCursor(_THIS, WMcursor *cursor)
 {
-	free(cursor);
+	SDL_free(cursor);
 }
 
 WMcursor *Mac_CreateWMCursor(_THIS,
@@ -58,12 +58,12 @@ WMcursor *Mac_CreateWMCursor(_THIS,
 	int row, bytes;
 		
 	/* Allocate the cursor memory */
-	cursor = (WMcursor *)malloc(sizeof(WMcursor));
+	cursor = (WMcursor *)SDL_malloc(sizeof(WMcursor));
 	if ( cursor == NULL ) {
 		SDL_OutOfMemory();
 		return(NULL);
 	}
-	memset(cursor, 0, sizeof(*cursor));
+	SDL_memset(cursor, 0, sizeof(*cursor));
     
     if (w > 16)
         w = 16;
@@ -74,11 +74,11 @@ WMcursor *Mac_CreateWMCursor(_THIS,
 	bytes = (w+7)/8;
 
 	for ( row=0; row<h; ++row ) {
-		memcpy(&cursor->curs.data[row], data, bytes);
+		SDL_memcpy(&cursor->curs.data[row], data, bytes);
 		data += bytes;
 	}
 	for ( row=0; row<h; ++row ) {
-		memcpy(&cursor->curs.mask[row], mask, bytes);
+		SDL_memcpy(&cursor->curs.mask[row], mask, bytes);
 		mask += bytes;
 	}
 	cursor->curs.hotSpot.h = hot_x;

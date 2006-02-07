@@ -1467,7 +1467,7 @@ static int RLEAlphaSurface(SDL_Surface *surface)
     }
 
     maxsize += sizeof(RLEDestFormat);
-    rlebuf = (Uint8 *)malloc(maxsize);
+    rlebuf = (Uint8 *)SDL_malloc(maxsize);
     if(!rlebuf) {
 	SDL_OutOfMemory();
 	return -1;
@@ -1597,13 +1597,13 @@ static int RLEAlphaSurface(SDL_Surface *surface)
     /* Now that we have it encoded, release the original pixels */
     if((surface->flags & SDL_PREALLOC) != SDL_PREALLOC
        && (surface->flags & SDL_HWSURFACE) != SDL_HWSURFACE) {
-	free( surface->pixels );
+	SDL_free( surface->pixels );
 	surface->pixels = NULL;
     }
 
     /* realloc the buffer to release unused memory */
     {
-	Uint8 *p = realloc(rlebuf, dst - rlebuf);
+	Uint8 *p = SDL_realloc(rlebuf, dst - rlebuf);
 	if(!p)
 	    p = rlebuf;
 	surface->map->sw_data->aux_data = p;
@@ -1675,7 +1675,7 @@ static int RLEColorkeySurface(SDL_Surface *surface)
 	    break;
 	}
 
-	rlebuf = (Uint8 *)malloc(maxsize);
+	rlebuf = (Uint8 *)SDL_malloc(maxsize);
 	if ( rlebuf == NULL ) {
 		SDL_OutOfMemory();
 		return(-1);
@@ -1731,14 +1731,14 @@ static int RLEColorkeySurface(SDL_Surface *surface)
 		}
 		len = MIN(run, maxn);
 		ADD_COUNTS(skip, len);
-		memcpy(dst, srcbuf + runstart * bpp, len * bpp);
+		SDL_memcpy(dst, srcbuf + runstart * bpp, len * bpp);
 		dst += len * bpp;
 		run -= len;
 		runstart += len;
 		while(run) {
 		    len = MIN(run, maxn);
 		    ADD_COUNTS(0, len);
-		    memcpy(dst, srcbuf + runstart * bpp, len * bpp);
+		    SDL_memcpy(dst, srcbuf + runstart * bpp, len * bpp);
 		    dst += len * bpp;
 		    runstart += len;
 		    run -= len;
@@ -1757,14 +1757,14 @@ static int RLEColorkeySurface(SDL_Surface *surface)
 	/* Now that we have it encoded, release the original pixels */
 	if((surface->flags & SDL_PREALLOC) != SDL_PREALLOC
 	   && (surface->flags & SDL_HWSURFACE) != SDL_HWSURFACE) {
-	    free( surface->pixels );
+	    SDL_free( surface->pixels );
 	    surface->pixels = NULL;
 	}
 
 	/* realloc the buffer to release unused memory */
 	{
 	    /* If realloc returns NULL, the original block is left intact */
-	    Uint8 *p = realloc(rlebuf, dst - rlebuf);
+	    Uint8 *p = SDL_realloc(rlebuf, dst - rlebuf);
 	    if(!p)
 		p = rlebuf;
 	    surface->map->sw_data->aux_data = p;
@@ -1845,12 +1845,12 @@ static SDL_bool UnRLEAlpha(SDL_Surface *surface)
 	uncopy_opaque = uncopy_transl = uncopy_32;
     }
 
-    surface->pixels = malloc(surface->h * surface->pitch);
+    surface->pixels = SDL_malloc(surface->h * surface->pitch);
     if ( !surface->pixels ) {
         return(SDL_FALSE);
     }
     /* fill background with transparent pixels */
-    memset(surface->pixels, 0, surface->h * surface->pitch);
+    SDL_memset(surface->pixels, 0, surface->h * surface->pitch);
 
     dst = surface->pixels;
     srcbuf = (Uint8 *)(df + 1);
@@ -1909,7 +1909,7 @@ void SDL_UnRLESurface(SDL_Surface *surface, int recode)
 		unsigned alpha_flag;
 
 		/* re-create the original surface */
-		surface->pixels = malloc(surface->h * surface->pitch);
+		surface->pixels = SDL_malloc(surface->h * surface->pitch);
 		if ( !surface->pixels ) {
 			/* Oh crap... */
 			surface->flags |= SDL_RLEACCEL;
@@ -1937,7 +1937,7 @@ void SDL_UnRLESurface(SDL_Surface *surface, int recode)
 	}
 
 	if ( surface->map && surface->map->sw_data->aux_data ) {
-	    free(surface->map->sw_data->aux_data);
+	    SDL_free(surface->map->sw_data->aux_data);
 	    surface->map->sw_data->aux_data = NULL;
 	}
     }

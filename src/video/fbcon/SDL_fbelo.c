@@ -153,7 +153,7 @@ int eloGetPacket(unsigned char* buffer, int* buffer_p, int* checksum, int fd) {
 
 	while (num_bytes) {
 		if ((*buffer_p == 0) && (buffer[0] != ELO_START_BYTE)) {
-			memcpy(&buffer[0], &buffer[1], num_bytes-1);
+			SDL_memcpy(&buffer[0], &buffer[1], num_bytes-1);
 		}
 		else {
 			if (*buffer_p < ELO_PACKET_SIZE-1) {
@@ -333,19 +333,19 @@ int eloInitController(int fd) {
 	struct termios mouse_termios;
 
 	/* try to read the calibration values */
-	buffer = getenv("SDL_ELO_MIN_X");
+	buffer = SDL_getenv("SDL_ELO_MIN_X");
 	if(buffer) {
 		ELO_MIN_X = atoi(buffer);
 	}
-	buffer = getenv("SDL_ELO_MAX_X");
+	buffer = SDL_getenv("SDL_ELO_MAX_X");
 	if(buffer) {
 		ELO_MAX_X = atoi(buffer);
 	}
-	buffer = getenv("SDL_ELO_MIN_Y");
+	buffer = SDL_getenv("SDL_ELO_MIN_Y");
 	if(buffer) {
 		ELO_MIN_Y = atoi(buffer);
 	}
-	buffer = getenv("SDL_ELO_MAX_Y");
+	buffer = SDL_getenv("SDL_ELO_MAX_Y");
 	if(buffer) {
 		ELO_MAX_Y = atoi(buffer);
 	}
@@ -359,7 +359,7 @@ int eloInitController(int fd) {
 #endif
 
 	/* set comm params */
-	memset(&mouse_termios, 0, sizeof(mouse_termios));
+	SDL_memset(&mouse_termios, 0, sizeof(mouse_termios));
 	mouse_termios.c_cflag = B9600 | CS8 | CREAD | CLOCAL;
 	mouse_termios.c_cc[VMIN] = 1;
 	result = tcsetattr(fd, TCSANOW, &mouse_termios);
@@ -371,7 +371,7 @@ int eloInitController(int fd) {
 		return 0;
 	}
 
-	memset(req, 0, ELO_PACKET_SIZE);
+	SDL_memset(req, 0, ELO_PACKET_SIZE);
 	req[1] = tolower(ELO_PARAMETER);
 	if (!eloSendQuery(req, reply, fd)) {
 #ifdef DEBUG_MOUSE
@@ -379,7 +379,7 @@ int eloInitController(int fd) {
 #endif
 	}
 
-	memset(req, 0, ELO_PACKET_SIZE);
+	SDL_memset(req, 0, ELO_PACKET_SIZE);
 	req[1] = tolower(ELO_ID);
 	if (eloSendQuery(req, reply, fd)) {
 #ifdef DEBUG_MOUSE
@@ -393,7 +393,7 @@ int eloInitController(int fd) {
 		return 0;
 	}
 
-	memset(req, 0, ELO_PACKET_SIZE);
+	SDL_memset(req, 0, ELO_PACKET_SIZE);
 	req[1] = ELO_MODE;
 	req[3] = ELO_TOUCH_MODE | ELO_STREAM_MODE | ELO_UNTOUCH_MODE;
 	req[4] = ELO_TRACKING_MODE;
@@ -404,7 +404,7 @@ int eloInitController(int fd) {
 		return 0;
 	}
 
-	memset(req, 0, ELO_PACKET_SIZE);
+	SDL_memset(req, 0, ELO_PACKET_SIZE);
 	req[1] = ELO_REPORT;
 	req[2] = ELO_UNTOUCH_DELAY;
 	req[3] = ELO_REPORT_DELAY;

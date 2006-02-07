@@ -86,7 +86,7 @@ static int FileReaderThread_TryNextRead (FileReaderThread *frt, AudioFileManager
         FileData *i = frt->mFileData;
         FileData *prev = NULL;
 
-        FileData *newfd = (FileData *) malloc(sizeof (FileData));
+        FileData *newfd = (FileData *) SDL_malloc(sizeof (FileData));
         newfd->obj = inItem;
         newfd->next = NULL;
 
@@ -136,7 +136,7 @@ static void    FileReaderThread_RemoveReader (FileReaderThread *frt, AudioFileMa
                     frt->mFileData = next;
                 else
                     prev->next = next;
-                free(i);
+                SDL_free(i);
             }
             i = next;
         }
@@ -279,7 +279,7 @@ static void    FileReaderThread_ReadNextChunk (FileReaderThread *frt)
             {
                 FileData *next = frt->mFileData->next;
                 theItem = frt->mFileData->obj;
-                free(frt->mFileData);
+                SDL_free(frt->mFileData);
                 frt->mFileData = next;
             }
 
@@ -330,21 +330,21 @@ void delete_FileReaderThread(FileReaderThread *frt)
     if (frt != NULL)
     {
         delete_SDLOSXCAGuard(frt->mGuard);
-        free(frt);
+        SDL_free(frt);
     }
 }
 
 FileReaderThread *new_FileReaderThread ()
 {
-    FileReaderThread *frt = (FileReaderThread *) malloc(sizeof (FileReaderThread));
+    FileReaderThread *frt = (FileReaderThread *) SDL_malloc(sizeof (FileReaderThread));
     if (frt == NULL)
         return NULL;
-    memset(frt, '\0', sizeof (*frt));
+    SDL_memset(frt, '\0', sizeof (*frt));
 
     frt->mGuard = new_SDLOSXCAGuard();
     if (frt->mGuard == NULL)
     {
-        free(frt);
+        SDL_free(frt);
         return NULL;
     }
 
@@ -549,7 +549,7 @@ void delete_AudioFileManager (AudioFileManager *afm)
             free (afm->mFileBuffer);
         }
 
-        free(afm);
+        SDL_free(afm);
     }
 }
 
@@ -568,10 +568,10 @@ AudioFileManager *new_AudioFileManager(AudioFilePlayer *inParent,
             return NULL;
     }
 
-    afm = (AudioFileManager *) malloc(sizeof (AudioFileManager));
+    afm = (AudioFileManager *) SDL_malloc(sizeof (AudioFileManager));
     if (afm == NULL)
         return NULL;
-    memset(afm, '\0', sizeof (*afm));
+    SDL_memset(afm, '\0', sizeof (*afm));
 
     #define SET_AUDIOFILEMANAGER_METHOD(m) afm->m = AudioFileManager_##m
     SET_AUDIOFILEMANAGER_METHOD(Disconnect);

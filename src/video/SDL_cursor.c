@@ -125,7 +125,7 @@ SDL_Cursor * SDL_CreateCursor (Uint8 *data, Uint8 *mask,
 	}
 
 	/* Allocate memory for the cursor */
-	cursor = (SDL_Cursor *)malloc(sizeof *cursor);
+	cursor = (SDL_Cursor *)SDL_malloc(sizeof *cursor);
 	if ( cursor == NULL ) {
 		SDL_OutOfMemory();
 		return(NULL);
@@ -137,9 +137,9 @@ SDL_Cursor * SDL_CreateCursor (Uint8 *data, Uint8 *mask,
 	cursor->area.h = h;
 	cursor->hot_x = hot_x;
 	cursor->hot_y = hot_y;
-	cursor->data = (Uint8 *)malloc((w/8)*h*2);
+	cursor->data = (Uint8 *)SDL_malloc((w/8)*h*2);
 	cursor->mask = cursor->data+((w/8)*h);
-	cursor->save[0] = (Uint8 *)malloc(savelen*2);
+	cursor->save[0] = (Uint8 *)SDL_malloc(savelen*2);
 	cursor->save[1] = cursor->save[0] + savelen;
 	cursor->wm_cursor = NULL;
 	if ( ! cursor->data || ! cursor->save[0] ) {
@@ -151,7 +151,7 @@ SDL_Cursor * SDL_CreateCursor (Uint8 *data, Uint8 *mask,
 		cursor->data[i] = data[i];
 		cursor->mask[i] = mask[i] | data[i];
 	}
-	memset(cursor->save[0], 0, savelen*2);
+	SDL_memset(cursor->save[0], 0, savelen*2);
 
 	/* If the window manager gives us a good cursor, we're done! */
 	if ( video->CreateWMCursor ) {
@@ -244,15 +244,15 @@ void SDL_FreeCursor (SDL_Cursor *cursor)
 			SDL_VideoDevice *this  = current_video;
 
 			if ( cursor->data ) {
-				free(cursor->data);
+				SDL_free(cursor->data);
 			}
 			if ( cursor->save[0] ) {
-				free(cursor->save[0]);
+				SDL_free(cursor->save[0]);
 			}
 			if ( video && cursor->wm_cursor ) {
 				video->FreeWMCursor(this, cursor->wm_cursor);
 			}
-			free(cursor);
+			SDL_free(cursor);
 		}
 	}
 }
@@ -448,7 +448,7 @@ static void SDL_DrawCursorFast(SDL_Surface *screen, SDL_Rect *area)
 				datab = *data++;
 				for ( i=0; i<8; ++i ) {
 					if ( maskb & 0x80 ) {
-						memset(dst,pixels[datab>>7],3);
+						SDL_memset(dst,pixels[datab>>7],3);
 					}
 					maskb <<= 1;
 					datab <<= 1;
@@ -523,7 +523,7 @@ static void SDL_DrawCursorSlow(SDL_Surface *screen, SDL_Rect *area)
 				}
 				if ( (x >= minx) && (x < maxx) ) {
 					if ( maskb & 0x80 ) {
-						memset(dst, pixels8[datab>>7], dstbpp);
+						SDL_memset(dst, pixels8[datab>>7], dstbpp);
 					}
 				}
 				maskb <<= 1;
@@ -541,7 +541,7 @@ static void SDL_DrawCursorSlow(SDL_Surface *screen, SDL_Rect *area)
 				}
 				if ( (x >= minx) && (x < maxx) ) {
 					if ( maskb & 0x80 ) {
-						memset(dst, pixels[datab>>7], dstbpp);
+						SDL_memset(dst, pixels[datab>>7], dstbpp);
 					}
 				}
 				maskb <<= 1;
@@ -616,7 +616,7 @@ void SDL_DrawCursorNoLock(SDL_Surface *screen)
 	  w = area.w*screenbpp;
 	  h = area.h;
 	  while ( h-- ) {
-		  memcpy(dst, src, w);
+		  SDL_memcpy(dst, src, w);
 		  dst += w;
 		  src += screen->pitch;
 	  }
@@ -694,7 +694,7 @@ void SDL_EraseCursorNoLock(SDL_Surface *screen)
 	  w = area.w*screenbpp;
 	  h = area.h;
 	  while ( h-- ) {
-		  memcpy(dst, src, w);
+		  SDL_memcpy(dst, src, w);
 		  src += w;
 		  dst += screen->pitch;
 	  }
@@ -748,6 +748,6 @@ void SDL_ResetCursor(void)
 		savelen = SDL_cursor->area.w*4*SDL_cursor->area.h;
 		SDL_cursor->area.x = 0;
 		SDL_cursor->area.y = 0;
-		memset(SDL_cursor->save[0], 0, savelen);
+		SDL_memset(SDL_cursor->save[0], 0, savelen);
 	}
 }

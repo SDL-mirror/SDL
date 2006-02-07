@@ -57,7 +57,7 @@ int CGX_SetupImage(_THIS, SDL_Surface *screen)
 		ULONG pitch;
 
 		if(!screen->hwdata) {
-			if(!(screen->hwdata=malloc(sizeof(struct private_hwdata))))
+			if(!(screen->hwdata=SDL_malloc(sizeof(struct private_hwdata))))
 				return -1;
 
 			D(bug("Creating system accel struct\n"));
@@ -71,7 +71,7 @@ int CGX_SetupImage(_THIS, SDL_Surface *screen)
 		if(!(screen->hwdata->lock=LockBitMapTags(screen->hwdata->bmap,
 				LBMI_BASEADDRESS,(ULONG)&screen->pixels,
 				LBMI_BYTESPERROW,(ULONG)&pitch,TAG_DONE))) {
-			free(screen->hwdata);
+			SDL_free(screen->hwdata);
 			screen->hwdata=NULL;
 			return -1;
 		}
@@ -88,7 +88,7 @@ int CGX_SetupImage(_THIS, SDL_Surface *screen)
 		return 0;
 	}
 
-	screen->pixels = malloc(screen->h*screen->pitch);
+	screen->pixels = SDL_malloc(screen->h*screen->pitch);
 
 	if ( screen->pixels == NULL ) {
 		SDL_OutOfMemory();
@@ -110,14 +110,14 @@ int CGX_SetupImage(_THIS, SDL_Surface *screen)
 void CGX_DestroyImage(_THIS, SDL_Surface *screen)
 {
 	if ( SDL_Ximage ) {
-		free(SDL_Ximage);
+		SDL_free(SDL_Ximage);
 		SDL_Ximage = NULL;
 	}
 	if ( screen ) {
 		screen->pixels = NULL;
 
 		if(screen->hwdata) {
-			free(screen->hwdata);
+			SDL_free(screen->hwdata);
 			screen->hwdata=NULL;
 		}
 	}
@@ -163,7 +163,7 @@ int CGX_AllocHWSurface(_THIS, SDL_Surface *surface)
 
 	if(!surface->hwdata)
 	{
-		if(!(surface->hwdata=malloc(sizeof(struct private_hwdata))))
+		if(!(surface->hwdata=SDL_malloc(sizeof(struct private_hwdata))))
 			return -1;
 	}
 
@@ -181,7 +181,7 @@ int CGX_AllocHWSurface(_THIS, SDL_Surface *surface)
 	}
 	else
 	{
-		free(surface->hwdata);
+		SDL_free(surface->hwdata);
 		surface->hwdata=NULL;
 	}
 
@@ -194,12 +194,12 @@ void CGX_FreeHWSurface(_THIS, SDL_Surface *surface)
 		D(bug("Free hw surface.\n"));
 
 		if(surface->hwdata->mask)
-			free(surface->hwdata->mask);
+			SDL_free(surface->hwdata->mask);
 
 		if(surface->hwdata->bmap&&surface->hwdata->allocated)
 			FreeBitMap(surface->hwdata->bmap);
 
-		free(surface->hwdata);
+		SDL_free(surface->hwdata);
 		surface->hwdata=NULL;
 		surface->pixels=NULL;
 		D(bug("end of free hw surface\n"));
@@ -654,7 +654,7 @@ static void CGX_NormalUpdate(_THIS, int numrects, SDL_Rect *rects)
 
 				for(j=rects[i].h;j;--j)
 				{
-					memcpy(dest,src,srcwidth);
+					SDL_memcpy(dest,src,srcwidth);
 					src+=this->screen->pitch;
 					dest+=destpitch;
 				}
@@ -883,13 +883,13 @@ void CGX_RefreshDisplay(_THIS)
 
 			if(this->screen->pitch==destpitch)
 			{
-				memcpy(dest,src,this->screen->pitch*this->screen->h);
+				SDL_memcpy(dest,src,this->screen->pitch*this->screen->h);
 			}
 			else
 			{
 				for(j=this->screen->h;j;--j)
 				{
-					memcpy(dest,src,this->screen->pitch);
+					SDL_memcpy(dest,src,this->screen->pitch);
 					src+=this->screen->pitch;
 					dest+=destpitch;
 				}

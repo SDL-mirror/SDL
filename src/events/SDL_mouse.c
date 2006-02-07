@@ -182,7 +182,7 @@ printf("Mouse event didn't change state - dropped!\n");
 	posted = 0;
 	if ( SDL_ProcessEvents[SDL_MOUSEMOTION] == SDL_ENABLE ) {
 		SDL_Event event;
-		memset(&event, 0, sizeof(event));
+		SDL_memset(&event, 0, sizeof(event));
 		event.type = SDL_MOUSEMOTION;
 		event.motion.state = buttonstate;
 		event.motion.x = X;
@@ -204,7 +204,7 @@ int SDL_PrivateMouseButton(Uint8 state, Uint8 button, Sint16 x, Sint16 y)
 	int move_mouse;
 	Uint8 buttonstate;
 
-	memset(&event, 0, sizeof(event));
+	SDL_memset(&event, 0, sizeof(event));
 
 	/* Check parameters */
 	if ( x || y ) {

@@ -44,7 +44,7 @@ SDL_sem *SDL_CreateSemaphore(Uint32 initial_value)
 {
 	SDL_sem *sem;
 
-	sem = (SDL_sem *)malloc(sizeof(*sem));
+	sem = (SDL_sem *)SDL_malloc(sizeof(*sem));
 
 	if ( ! sem ) {
 		SDL_OutOfMemory();
@@ -53,7 +53,7 @@ SDL_sem *SDL_CreateSemaphore(Uint32 initial_value)
 
 	D(bug("Creating semaphore %lx...\n",sem));
 
-	memset(sem,0,sizeof(*sem));
+	SDL_memset(sem,0,sizeof(*sem));
 
 	InitSemaphore(&sem->Sem);
 
@@ -66,7 +66,7 @@ void SDL_DestroySemaphore(SDL_sem *sem)
 
 	if ( sem ) {
 // Condizioni per liberare i task in attesa?
-		free(sem);
+		SDL_free(sem);
 	}
 }
 

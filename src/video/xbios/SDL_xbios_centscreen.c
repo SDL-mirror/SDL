@@ -42,7 +42,7 @@ int SDL_XBIOS_CentscreenInit(_THIS)
 
 	/* Reset current mode list */
 	if (XBIOS_modelist) {
-		free(XBIOS_modelist);
+		SDL_free(XBIOS_modelist);
 		XBIOS_nummodes = 0;
 		XBIOS_modelist = NULL;
 	}
@@ -65,7 +65,7 @@ int SDL_XBIOS_CentscreenInit(_THIS)
 					);
 				}
 			}
-			memcpy(&curmode, &listedmode, sizeof(centscreen_mode_t));
+			SDL_memcpy(&curmode, &listedmode, sizeof(centscreen_mode_t));
 			curmode.mode = curmode.physx = curmode.physy = curmode.plan =
 				curmode.logx = curmode.logy = -1;
 			result = Vnext(&curmode, &listedmode);

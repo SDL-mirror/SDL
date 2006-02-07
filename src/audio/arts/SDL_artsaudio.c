@@ -152,8 +152,8 @@ static int Audio_Available(void)
 
 static void Audio_DeleteDevice(SDL_AudioDevice *device)
 {
-	free(device->hidden);
-	free(device);
+	SDL_free(device->hidden);
+	SDL_free(device);
 	UnloadARTSLibrary();
 }
 
@@ -163,20 +163,20 @@ static SDL_AudioDevice *Audio_CreateDevice(int devindex)
 
 	/* Initialize all variables that we clean on shutdown */
 	LoadARTSLibrary();
-	this = (SDL_AudioDevice *)malloc(sizeof(SDL_AudioDevice));
+	this = (SDL_AudioDevice *)SDL_malloc(sizeof(SDL_AudioDevice));
 	if ( this ) {
-		memset(this, 0, (sizeof *this));
+		SDL_memset(this, 0, (sizeof *this));
 		this->hidden = (struct SDL_PrivateAudioData *)
-				malloc((sizeof *this->hidden));
+				SDL_malloc((sizeof *this->hidden));
 	}
 	if ( (this == NULL) || (this->hidden == NULL) ) {
 		SDL_OutOfMemory();
 		if ( this ) {
-			free(this);
+			SDL_free(this);
 		}
 		return(0);
 	}
-	memset(this->hidden, 0, (sizeof *this->hidden));
+	SDL_memset(this->hidden, 0, (sizeof *this->hidden));
 	stream = 0;
 
 	/* Set the function pointers */
@@ -331,7 +331,7 @@ static int ARTSC_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	if ( mixbuf == NULL ) {
 		return(-1);
 	}
-	memset(mixbuf, spec->silence, spec->size);
+	SDL_memset(mixbuf, spec->silence, spec->size);
 
 	/* Get the parent process id (we're the parent of the audio thread) */
 	parent = getpid();

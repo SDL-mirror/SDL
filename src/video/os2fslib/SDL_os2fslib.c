@@ -1169,8 +1169,8 @@ void os2fslib_FreeWMCursor(_THIS, WMcursor *cursor)
   {
     GpiDeleteBitmap(cursor->hbm);
     WinDestroyPointer(cursor->hptr);
-    free(cursor->pchData);
-    free(cursor);
+    SDL_free(cursor->pchData);
+    SDL_free(cursor);
   }
 }
 
@@ -1208,17 +1208,17 @@ WMcursor *os2fslib_CreateWMCursor_Win(_THIS, Uint8 *data, Uint8 *mask,
   if ((w>maxx) || (h>maxy))
     return (WMcursor *) NULL;
 
-  pResult = (WMcursor *) malloc(sizeof(WMcursor));
+  pResult = (WMcursor *) SDL_malloc(sizeof(WMcursor));
   if (!pResult) return (WMcursor *) NULL;
 
-  pchTemp = (char *) malloc((maxx + 7)/8 * maxy*2);
+  pchTemp = (char *) SDL_malloc((maxx + 7)/8 * maxy*2);
   if (!pchTemp)
   {
-    free(pResult);
+    SDL_free(pResult);
     return (WMcursor *) NULL;
   }
 
-  memset(pchTemp, 0, (maxx + 7)/8 * maxy*2);
+  SDL_memset(pchTemp, 0, (maxx + 7)/8 * maxy*2);
 
   hps = WinGetPS(_this->hidden->hwndClient);
 
@@ -1234,7 +1234,7 @@ WMcursor *os2fslib_CreateWMCursor_Win(_THIS, Uint8 *data, Uint8 *mask,
   bmi.argbColor[1].bGreen = 0x00;
   bmi.argbColor[1].bRed = 0xff;
 
-  memset(&bmih, 0, sizeof(BITMAPINFOHEADER));
+  SDL_memset(&bmih, 0, sizeof(BITMAPINFOHEADER));
   bmih.cbFix = sizeof(BITMAPINFOHEADER);
   bmih.cx = maxx;
   bmih.cy = 2*maxy;
@@ -1254,9 +1254,9 @@ WMcursor *os2fslib_CreateWMCursor_Win(_THIS, Uint8 *data, Uint8 *mask,
     memnot(aptr, mask, run);
     mask += run;
     aptr += run;
-    memset(xptr,  0, pad);
+    SDL_memset(xptr,  0, pad);
     xptr += pad;
-    memset(aptr, ~0, pad);
+    SDL_memset(aptr, ~0, pad);
     aptr += pad;
   }
   pad += run;
@@ -1265,9 +1265,9 @@ WMcursor *os2fslib_CreateWMCursor_Win(_THIS, Uint8 *data, Uint8 *mask,
     xptr = pchTemp + (maxx+7)/8 * (maxy-1-i);
     aptr = pchTemp + (maxx+7)/8 * (maxy+maxy-1-i);
 
-    memset(xptr,  0, (maxx+7)/8);
+    SDL_memset(xptr,  0, (maxx+7)/8);
     xptr += (maxx+7)/8;
-    memset(aptr, ~0, (maxx+7)/8);
+    SDL_memset(aptr, ~0, (maxx+7)/8);
     aptr += (maxx+7)/8;
   }
 
@@ -1507,18 +1507,18 @@ void os2fslib_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
   if ((w>maxx) || (h>maxy))
     return;
 
-  pchTemp = (char *) malloc(w * h*2 * 4);
+  pchTemp = (char *) SDL_malloc(w * h*2 * 4);
   if (!pchTemp)
     return;
 
-  memset(pchTemp, 0, w * h*2 * 4);
+  SDL_memset(pchTemp, 0, w * h*2 * 4);
 
   // Convert surface to RGB, if it's not RGB yet!
   icon_rgb = SDL_CreateRGBSurface(SDL_SWSURFACE, icon->w, icon->h,
                                   32, 0, 0, 0, 0);
   if ( icon_rgb == NULL )
   {
-    free(pchTemp);
+    SDL_free(pchTemp);
     return;
   }
   bounds.x = 0;
@@ -1528,7 +1528,7 @@ void os2fslib_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
   if ( SDL_LowerBlit(icon, &bounds, icon_rgb, &bounds) < 0 )
   {
     SDL_FreeSurface(icon_rgb);
-    free(pchTemp);
+    SDL_free(pchTemp);
     return;
   }
 
@@ -1596,7 +1596,7 @@ void os2fslib_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
   bmi.cPlanes = 1;
   bmi.cBitCount = 32;
 
-  memset(&bmih, 0, sizeof(BITMAPINFOHEADER));
+  SDL_memset(&bmih, 0, sizeof(BITMAPINFOHEADER));
   bmih.cbFix = sizeof(BITMAPINFOHEADER);
   bmih.cx = w;
   bmih.cy = 2*h;
@@ -1609,7 +1609,7 @@ void os2fslib_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
   WinReleasePS(hps);
 
   // Free pixel array
-  free(pchTemp);
+  SDL_free(pchTemp);
 
   // Change icon in frame window
   WinSendMsg(hwndFrame,
@@ -2116,7 +2116,7 @@ static void os2fslib_VideoQuit(_THIS)
   // no FreeListModes() call in SDL!
   if (_this->hidden->pListModesResult)
   {
-    free(_this->hidden->pListModesResult); _this->hidden->pListModesResult = NULL;
+    SDL_free(_this->hidden->pListModesResult); _this->hidden->pListModesResult = NULL;
   }
 
   // Free list of available fullscreen modes
@@ -2254,7 +2254,7 @@ static SDL_Surface *os2fslib_SetVideoMode(_THIS, SDL_Surface *current,
 
   // We'll possibly adjust the structure, so copy out the values
   // into TempModeInfo!
-  memcpy(&TempModeInfo, pModeInfoFound, sizeof(TempModeInfo));
+  SDL_memcpy(&TempModeInfo, pModeInfoFound, sizeof(TempModeInfo));
   pModeInfoFound = &TempModeInfo;
 
   if (flags & SDL_RESIZABLE)
@@ -2335,7 +2335,7 @@ static SDL_Surface *os2fslib_SetVideoMode(_THIS, SDL_Surface *current,
     pModeInfoFound->uiScanLineSize = pResult->pitch;
 
     // Store new source buffer parameters!
-    memcpy(&(_this->hidden->SrcBufferDesc), pModeInfoFound, sizeof(*pModeInfoFound));
+    SDL_memcpy(&(_this->hidden->SrcBufferDesc), pModeInfoFound, sizeof(*pModeInfoFound));
     _this->hidden->pchSrcBuffer = pResult->pixels;
 
 #ifdef DEBUG_BUILD
@@ -2446,7 +2446,7 @@ static SDL_Rect **os2fslib_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flag
   // Destroy result of previous call, if there is any
   if (_this->hidden->pListModesResult)
   {
-    free(_this->hidden->pListModesResult); _this->hidden->pListModesResult = NULL;
+    SDL_free(_this->hidden->pListModesResult); _this->hidden->pListModesResult = NULL;
   }
 
   // For resizable and windowed mode we support every resolution!
@@ -2469,7 +2469,7 @@ static SDL_Rect **os2fslib_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flag
     {
       if (pFSMode->uiBPP == format->BitsPerPixel)
       {
-        SDL_Rect *pRect = (SDL_Rect *) malloc(sizeof(SDL_Rect));
+        SDL_Rect *pRect = (SDL_Rect *) SDL_malloc(sizeof(SDL_Rect));
         if (pRect)
         {
           // Fill description
@@ -2489,14 +2489,14 @@ static SDL_Rect **os2fslib_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flag
 #endif
 
             // We're the first one to be inserted!
-            _this->hidden->pListModesResult = (SDL_Rect**) malloc(2*sizeof(SDL_Rect*));
+            _this->hidden->pListModesResult = (SDL_Rect**) SDL_malloc(2*sizeof(SDL_Rect*));
             if (_this->hidden->pListModesResult)
             {
               _this->hidden->pListModesResult[0] = pRect;
 	      _this->hidden->pListModesResult[1] = NULL;
             } else
             {
-              free(pRect);
+              SDL_free(pRect);
             }
           } else
           {
@@ -2528,7 +2528,7 @@ static SDL_Rect **os2fslib_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flag
 //            printf("!!! From %d slots, it will be at %d\n", iNumOfSlots, iPlace);
 #endif
 
-            pNewList = (SDL_Rect**) realloc(_this->hidden->pListModesResult, (iNumOfSlots+1)*sizeof(SDL_Rect*));
+            pNewList = (SDL_Rect**) SDL_realloc(_this->hidden->pListModesResult, (iNumOfSlots+1)*sizeof(SDL_Rect*));
             if (pNewList)
             {
               for (i=iNumOfSlots;i>iPlace;i--)
@@ -2537,7 +2537,7 @@ static SDL_Rect **os2fslib_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flag
               _this->hidden->pListModesResult = pNewList;
             } else
             {
-              free(pRect);
+              SDL_free(pRect);
             }
           }
         }
@@ -2611,9 +2611,9 @@ static int os2fslib_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
   // For this, we select the first available fullscreen mode as
   // current window size!
-  memcpy(&(_this->hidden->SrcBufferDesc), _this->hidden->pAvailableFSLibVideoModes, sizeof(_this->hidden->SrcBufferDesc));
+  SDL_memcpy(&(_this->hidden->SrcBufferDesc), _this->hidden->pAvailableFSLibVideoModes, sizeof(_this->hidden->SrcBufferDesc));
   // Allocate new video buffer!
-  _this->hidden->pchSrcBuffer = (char *) malloc(_this->hidden->pAvailableFSLibVideoModes->uiScanLineSize * _this->hidden->pAvailableFSLibVideoModes->uiYResolution);
+  _this->hidden->pchSrcBuffer = (char *) SDL_malloc(_this->hidden->pAvailableFSLibVideoModes->uiScanLineSize * _this->hidden->pAvailableFSLibVideoModes->uiYResolution);
   if (!_this->hidden->pchSrcBuffer)
   {
 #ifdef DEBUG_BUILD
@@ -2666,12 +2666,12 @@ static void os2fslib_DeleteDevice(_THIS)
   // Free used memory
   FSLib_FreeVideoModeList(_this->hidden->pAvailableFSLibVideoModes);
   if (_this->hidden->pListModesResult)
-    free(_this->hidden->pListModesResult);
+    SDL_free(_this->hidden->pListModesResult);
   if (_this->hidden->pchSrcBuffer)
-    free(_this->hidden->pchSrcBuffer);
+    SDL_free(_this->hidden->pchSrcBuffer);
   DosCloseMutexSem(_this->hidden->hmtxUseSrcBuffer);
-  free(_this->hidden);
-  free(_this);
+  SDL_free(_this->hidden);
+  SDL_free(_this);
   FSLib_Uninitialize();
 }
 
@@ -2703,21 +2703,21 @@ static SDL_VideoDevice *os2fslib_CreateDevice(int devindex)
 #endif
 
   /* Initialize all variables that we clean on shutdown */
-  device = (SDL_VideoDevice *)malloc(sizeof(SDL_VideoDevice));
+  device = (SDL_VideoDevice *)SDL_malloc(sizeof(SDL_VideoDevice));
   if ( device )
   {
-    memset(device, 0, (sizeof *device));
+    SDL_memset(device, 0, (sizeof *device));
     // Also allocate memory for private data
-    device->hidden = (struct SDL_PrivateVideoData *) malloc((sizeof(struct SDL_PrivateVideoData)));
+    device->hidden = (struct SDL_PrivateVideoData *) SDL_malloc((sizeof(struct SDL_PrivateVideoData)));
   }
   if ( (device == NULL) || (device->hidden == NULL) )
   {
     SDL_OutOfMemory();
     if ( device )
-      free(device);
+      SDL_free(device);
     return NULL;
   }
-  memset(device->hidden, 0, (sizeof *device->hidden));
+  SDL_memset(device->hidden, 0, (sizeof *device->hidden));
 
   /* Set the function pointers */
 #ifdef DEBUG_BUILD
@@ -2770,8 +2770,8 @@ static SDL_VideoDevice *os2fslib_CreateDevice(int devindex)
     printf("[os2fslib_CreateDevice] : Could not initialize FSLib!\n");
 #endif
     SDL_SetError("Could not initialize FSLib!");
-    free(device->hidden);
-    free(device);
+    SDL_free(device->hidden);
+    SDL_free(device);
     return NULL;
   }
   device->hidden->pAvailableFSLibVideoModes =

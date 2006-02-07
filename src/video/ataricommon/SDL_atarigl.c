@@ -141,7 +141,7 @@ int SDL_AtariGL_LoadLibrary(_THIS, const char *path)
 	handle = SDL_LoadObject(path);
 	if (handle == NULL) {
 		/* Try to load another one */
-		path = getenv("SDL_VIDEO_GL_DRIVER");
+		path = SDL_getenv("SDL_VIDEO_GL_DRIVER");
 		if ( path != NULL ) {
 			handle = SDL_LoadObject(path);
 		}
@@ -223,10 +223,10 @@ int SDL_AtariGL_LoadLibrary(_THIS, const char *path)
 
 	this->gl_config.dll_handle = handle;
 	if ( path ) {
-		strncpy(this->gl_config.driver_path, path,
+		SDL_strncpy(this->gl_config.driver_path, path,
 			sizeof(this->gl_config.driver_path)-1);
 	} else {
-		strcpy(this->gl_config.driver_path, "");
+		SDL_strcpy(this->gl_config.driver_path, "");
 	}
 
 #endif
@@ -697,7 +697,7 @@ static void CopyShadowDirect(_THIS, SDL_Surface *surface)
 	}
 
 	for (y=0; y<surface->h; y++) {
-		memcpy(dstline, srcline, srcpitch);
+		SDL_memcpy(dstline, srcline, srcpitch);
 
 		srcline += srcpitch;
 		dstline += dstpitch;

@@ -18,11 +18,11 @@ SDL_cond * SDL_CreateCond(void)
 {
 	SDL_cond *cond;
 
-	cond = (SDL_cond *) malloc(sizeof(SDL_cond));
+	cond = (SDL_cond *) SDL_malloc(sizeof(SDL_cond));
 	if ( cond ) {
 		if ( pth_cond_init(&(cond->condpth_p)) < 0 ) {
 			SDL_SetError("pthread_cond_init() failed");
-			free(cond);
+			SDL_free(cond);
 			cond = NULL;
 		}
 	} else {
@@ -35,7 +35,7 @@ SDL_cond * SDL_CreateCond(void)
 void SDL_DestroyCond(SDL_cond *cond)
 {
 	if ( cond ) {
-		free(cond);
+		SDL_free(cond);
 	}
 }
 

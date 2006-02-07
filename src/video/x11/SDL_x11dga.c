@@ -25,7 +25,7 @@
    There will be a completely separate DGA driver that is fullscreen-only.
 */
 
-#include <stdlib.h>		/* For getenv() */
+#include <stdlib.h>		/* For SDL_getenv() */
 #include "SDL_video.h"
 #include "SDL_cursor_c.h"
 #include "SDL_x11dga_c.h"
@@ -46,7 +46,7 @@ void X11_EnableDGAMouse(_THIS)
 #else
     use_dgamouse = 0;
 #endif
-    env_use_dgamouse = getenv("SDL_VIDEO_X11_DGAMOUSE");
+    env_use_dgamouse = SDL_getenv("SDL_VIDEO_X11_DGAMOUSE");
     if ( env_use_dgamouse ) {
         use_dgamouse = atoi(env_use_dgamouse);
     }

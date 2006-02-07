@@ -282,7 +282,7 @@ static void error(const char *str, ...)
 	va_start(arg, str);
 	tss = pthread_getspecific(dlerror_key);
 	err_str = tss->errstr;
-	strncpy(err_str, "dlcompat: ", ERR_STR_LEN);
+	SDL_strncpy(err_str, "dlcompat: ", ERR_STR_LEN);
 	vsnprintf(err_str + 10, ERR_STR_LEN - 10, str, arg);
 	va_end(arg);
 	debug("ERROR: %s\n", err_str);
@@ -298,7 +298,7 @@ static void warning(const char *str)
 
 static const char *safegetenv(const char *s)
 {
-	const char *ss = getenv(s);
+	const char *ss = SDL_getenv(s);
 	return ss ? ss : "";
 }
 
@@ -338,7 +338,7 @@ static const struct mach_header *get_mach_header_from_NSModule(NSModule * mod)
 	debug("Module name: %s", mod_name);
 	for (i = 0; i < count; i++)
 	{
-		if (!strcmp(mod_name, _dyld_get_image_name(i)))
+		if (!SDL_strcmp(mod_name, _dyld_get_image_name(i)))
 		{
 			mh = _dyld_get_image_header(i);
 			break;
@@ -362,14 +362,14 @@ static const char *searchList()
 	static char *buf=NULL;
 	const char *ldlp = safegetenv("LD_LIBRARY_PATH");
 	const char *dyldlp = safegetenv("DYLD_LIBRARY_PATH");
-	const char *stdpath = getenv("DYLD_FALLBACK_LIBRARY_PATH");
+	const char *stdpath = SDL_getenv("DYLD_FALLBACK_LIBRARY_PATH");
 	if (!stdpath)
 		stdpath = "/usr/local/lib:/lib:/usr/lib";
 	if (!buf)
 	{	
-		buf_size = strlen(ldlp) + strlen(dyldlp) + strlen(stdpath) + 4;
-		buf = malloc(buf_size);
-		snprintf(buf, buf_size, "%s%s%s%s%s%c", dyldlp, (dyldlp[0] ? ":" : ""), ldlp, (ldlp[0] ? ":" : ""),
+		buf_size = SDL_strlen(ldlp) + SDL_strlen(dyldlp) + SDL_strlen(stdpath) + 4;
+		buf = SDL_malloc(buf_size);
+		SDL_snprintf(buf, buf_size, "%s%s%s%s%s%c", dyldlp, (dyldlp[0] ? ":" : ""), ldlp, (ldlp[0] ? ":" : ""),
 				 stdpath, '\0');
 	}
 	return buf;
@@ -383,7 +383,7 @@ static const char *getSearchPath(int i)
 	static int end = 0;
 	static int numsize = MAX_SEARCH_PATHS;
 	static char **tmp;
-	/* So we can call free() in the "destructor" we use i=-1 to return the alloc'd array */
+	/* So we can call SDL_free() in the "destructor" we use i=-1 to return the alloc'd array */
 	if (i == -1)
 	{
 		return (const char*)path;
@@ -400,8 +400,8 @@ static const char *getSearchPath(int i)
 		tmp = (char **)calloc((MAX_SEARCH_PATHS + numsize), sizeof(char **));
 		if (tmp)
 		{
-			memcpy(tmp, path, sizeof(char **) * numsize);
-			free(path);
+			SDL_memcpy(tmp, path, sizeof(char **) * numsize);
+			SDL_free(path);
 			path = tmp;
 			numsize += MAX_SEARCH_PATHS;
 		}
@@ -428,7 +428,7 @@ static const char *getFullPath(int i, const char *file)
 	const char *path = getSearchPath(i);
 	if (path)
 	{
-		snprintf(buf, PATH_MAX, "%s/%s", path, file);
+		SDL_snprintf(buf, PATH_MAX, "%s/%s", path, file);
 	}
 	return path ? buf : 0;
 }
@@ -446,7 +446,7 @@ static const struct stat *findFile(const char *file, const char **fullPath)
 	*fullPath = file;
 	if (0 == stat(file, &sbuf))
 		return &sbuf;
-	if (strchr(file, '/'))
+	if (SDL_strchr(file, '/'))
 		return 0;				/* If the path had a / we don't look in env var places */
 	fileName = NULL;
 	if (!fileName)
@@ -567,7 +567,7 @@ static const struct mach_header *my_find_image(const char *name)
 		for (j = 0; j < i; j++)
 		{
 			id = _dyld_get_image_name(j);
-			if (!strcmp(id, name))
+			if (!SDL_strcmp(id, name))
 			{
 				mh = _dyld_get_image_header(j);
 				break;
@@ -620,7 +620,7 @@ static NSSymbol *search_linked_libs(const struct mach_header * mh, const char *s
 	return nssym;
 }
 
-/* Up to the caller to free() returned string */
+/* Up to the caller to SDL_free() returned string */
 static inline const char *dyld_error_str()
 {
 	NSLinkEditErrors dylder;
@@ -629,10 +629,10 @@ static inline const char *dyld_error_str()
 	const char *dyldfile;
 	const char* retStr = NULL;
 	NSLinkEditError(&dylder, &dylderno, &dyldfile, &dylderrstr);
-	if (dylderrstr && strlen(dylderrstr))
+	if (dylderrstr && SDL_strlen(dylderrstr))
 	{
-		retStr = malloc(strlen(dylderrstr) +1);
-		strcpy((char*)retStr,dylderrstr);
+		retStr = SDL_malloc(SDL_strlen(dylderrstr) +1);
+		SDL_strcpy((char*)retStr,dylderrstr);
 	}
 	return retStr;
 }
@@ -735,21 +735,21 @@ static void *dlsymIntern(struct dlstatus *dls, const char *symbol, int canSetErr
 			else
 			{
 				if (savedErrorStr)
-					free((char*)savedErrorStr);			
-				savedErrorStr = malloc(256);
-				snprintf((char*)savedErrorStr, 256, "Symbol \"%s\" not in global context",symbol);	
+					SDL_free((char*)savedErrorStr);			
+				savedErrorStr = SDL_malloc(256);
+				SDL_snprintf((char*)savedErrorStr, 256, "Symbol \"%s\" not in global context",symbol);	
 			}
 		}
 	}
 	/* Error reporting */
 	if (!nssym)
 	{
-		if (!savedErrorStr || !strlen(savedErrorStr))
+		if (!savedErrorStr || !SDL_strlen(savedErrorStr))
 		{
 			if (savedErrorStr)
-				free((char*)savedErrorStr);
-			savedErrorStr = malloc(256);
-			snprintf((char*)savedErrorStr, 256,"Symbol \"%s\" not found",symbol);
+				SDL_free((char*)savedErrorStr);
+			savedErrorStr = SDL_malloc(256);
+			SDL_snprintf((char*)savedErrorStr, 256,"Symbol \"%s\" not found",symbol);
 		}
 		if (canSetError)
 		{
@@ -760,7 +760,7 @@ static void *dlsymIntern(struct dlstatus *dls, const char *symbol, int canSetErr
 			debug(savedErrorStr);
 		}
 		if (savedErrorStr)
-			free((char*)savedErrorStr);
+			SDL_free((char*)savedErrorStr);
 		return NULL;
 	}
 	return NSAddressOfSymbol(nssym);
@@ -839,13 +839,13 @@ static struct dlstatus *loadModule(const char *path, const struct stat *sbuf, in
 		if (!(dls->module))
 		{
 			NSLinkEditError(&ler, &lerno, &file, &errstr);
-			if (!errstr || (!strlen(errstr)))
+			if (!errstr || (!SDL_strlen(errstr)))
 				error("Can't open this file type");
 			else
 				error(errstr);
 			if ((dls->flags & DL_IN_LIST) == 0)
 			{
-				free(dls);
+				SDL_free(dls);
 			}
 			return NULL;
 		}
@@ -867,7 +867,7 @@ static struct dlstatus *loadModule(const char *path, const struct stat *sbuf, in
 		NSLinkEditError(&ler, &lerno, &file, &errstr);
 		if ((dls->flags & DL_IN_LIST) == 0)
 		{
-			free(dls);
+			SDL_free(dls);
 		}
 		error(errstr);
 		return NULL;
@@ -917,7 +917,7 @@ static void resetdlerror()
 
 static void dlerrorfree(void *data)
 {
-	free(data);
+	SDL_free(data);
 }
 
 /* We kind of want a recursive lock here, but meet a little trouble
@@ -932,7 +932,7 @@ static inline void dolock(void)
 	tss = pthread_getspecific(dlerror_key);
 	if (!tss)
 	{
-		tss = malloc(sizeof(struct dlthread));
+		tss = SDL_malloc(sizeof(struct dlthread));
 		tss->lockcnt = 0;
 		tss->errset = 0;
 		if (pthread_setspecific(dlerror_key, tss))
@@ -1010,16 +1010,16 @@ static void *SDL_OSX_dlopen(const char *path, int mode)
 #if !FINK_BUILD
 static void *SDL_OSX_dlsym(void * dl_restrict handle, const char * dl_restrict symbol)
 {
-	int sym_len = strlen(symbol);
+	int sym_len = SDL_strlen(symbol);
 	void *value = NULL;
 	char *malloc_sym = NULL;
 	dolock();
-	malloc_sym = malloc(sym_len + 2);
+	malloc_sym = SDL_malloc(sym_len + 2);
 	if (malloc_sym)
 	{
 		sprintf(malloc_sym, "_%s", symbol);
 		value = dlsymIntern(handle, malloc_sym, 1);
-		free(malloc_sym);
+		SDL_free(malloc_sym);
 	}
 	else
 	{
@@ -1056,15 +1056,15 @@ static void *dlsym_prepend_underscore_intern(void *handle, const char *symbol)
  *	the underscore always, or not at all. These global functions need to go away
  *	for opendarwin.
  */
-	int sym_len = strlen(symbol);
+	int sym_len = SDL_strlen(symbol);
 	void *value = NULL;
 	char *malloc_sym = NULL;
-	malloc_sym = malloc(sym_len + 2);
+	malloc_sym = SDL_malloc(sym_len + 2);
 	if (malloc_sym)
 	{
 		sprintf(malloc_sym, "_%s", symbol);
 		value = dlsymIntern(handle, malloc_sym, 1);
-		free(malloc_sym);
+		SDL_free(malloc_sym);
 	}
 	else
 	{
@@ -1273,7 +1273,7 @@ static int SDL_OSX_dladdr(const void * dl_restrict p, SDL_OSX_Dl_info * dl_restr
 	{
 		if (LC_SEGMENT == lc->cmd)
 		{
-			if (!strcmp(((struct segment_command *)lc)->segname, "__LINKEDIT"))
+			if (!SDL_strcmp(((struct segment_command *)lc)->segname, "__LINKEDIT"))
 				break;
 		}
 	}
@@ -1341,15 +1341,15 @@ static dlfunc_t SDL_OSX_dlfunc(void * dl_restrict handle, const char * dl_restri
 		void *d;
 		dlfunc_t f;
 	} rv;
-	int sym_len = strlen(symbol);
+	int sym_len = SDL_strlen(symbol);
 	char *malloc_sym = NULL;
 	dolock();
-	malloc_sym = malloc(sym_len + 2);
+	malloc_sym = SDL_malloc(sym_len + 2);
 	if (malloc_sym)
 	{
 		sprintf(malloc_sym, "_%s", symbol);
 		rv.d = dlsymIntern(handle, malloc_sym, 1);
-		free(malloc_sym);
+		SDL_free(malloc_sym);
 	}
 	else
 	{

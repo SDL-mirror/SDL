@@ -66,12 +66,12 @@ static void AddDrive(char *drive)
 	if ( SDL_numcds < MAX_DRIVES ) {
 		/* Add this drive to our list */
 		i = SDL_numcds;
-		SDL_cdlist[i] = (char *)malloc(strlen(drive)+1);
+		SDL_cdlist[i] = (char *)SDL_malloc(SDL_strlen(drive)+1);
 		if ( SDL_cdlist[i] == NULL ) {
 			SDL_OutOfMemory();
 			return;
 		}
-		strcpy(SDL_cdlist[i], drive);
+		SDL_strcpy(SDL_cdlist[i], drive);
 		++SDL_numcds;
 #ifdef CDROM_DEBUG
   fprintf(stderr, "Added CD-ROM drive: %s\n", drive);
@@ -99,12 +99,12 @@ int  SDL_SYS_CDInit(void)
 
 	/* Scan the system for CD-ROM drives */
 	for ( i='A'; i<='Z'; ++i ) {
-		snprintf(drive, SDL_arraysize(drive), "%c:\\", i);
+		SDL_snprintf(drive, SDL_arraysize(drive), "%c:\\", i);
 		if ( GetDriveType(drive) == DRIVE_CDROM ) {
 			AddDrive(drive);
 		}
 	}
-	memset(SDL_mciID, 0, sizeof(SDL_mciID));
+	SDL_memset(SDL_mciID, 0, sizeof(SDL_mciID));
 	return(0);
 }
 
@@ -377,7 +377,7 @@ void SDL_SYS_CDQuit(void)
 
 	if ( SDL_numcds > 0 ) {
 		for ( i=0; i<SDL_numcds; ++i ) {
-			free(SDL_cdlist[i]);
+			SDL_free(SDL_cdlist[i]);
 		}
 		SDL_numcds = 0;
 	}

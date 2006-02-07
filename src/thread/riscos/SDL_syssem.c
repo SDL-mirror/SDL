@@ -90,11 +90,11 @@ struct SDL_semaphore {
 /* Create a semaphore, initialized with value */
 SDL_sem *SDL_CreateSemaphore(Uint32 initial_value)
 {
-	SDL_sem *sem = (SDL_sem *) malloc(sizeof(SDL_sem));
+	SDL_sem *sem = (SDL_sem *) SDL_malloc(sizeof(SDL_sem));
 	if ( sem ) {
 		if ( sem_init(&sem->sem_data, 0, initial_value) < 0 ) {
 			SDL_SetError("sem_init() failed");
-			free(sem);
+			SDL_free(sem);
 			sem = NULL;
 		} else {
 			sem->sem = &sem->sem_data;
@@ -109,7 +109,7 @@ void SDL_DestroySemaphore(SDL_sem *sem)
 {
 	if ( sem ) {
 		sem_destroy(sem->sem);
-		free(sem);
+		SDL_free(sem);
 	}
 }
 

@@ -229,12 +229,12 @@ static void AddDrive(char *drive, struct stat *stbuf)
 
 		/* Add this drive to our list */
 		i = SDL_numcds;
-		SDL_cdlist[i] = (char *)malloc(strlen(drive)+1);
+		SDL_cdlist[i] = (char *)SDL_malloc(SDL_strlen(drive)+1);
 		if ( SDL_cdlist[i] == NULL ) {
 			SDL_OutOfMemory();
 			return;
 		}
-		strcpy(SDL_cdlist[i], drive);
+		SDL_strcpy(SDL_cdlist[i], drive);
 		SDL_cdmode[i] = stbuf->st_rdev;
 		++SDL_numcds;
 #ifdef DEBUG_CDROM
@@ -267,15 +267,15 @@ int  SDL_SYS_CDInit(void)
 	SDL_CDcaps.Close = SDL_SYS_CDClose;
 
 	/* Look in the environment for our CD-ROM drive list */
-	SDLcdrom = getenv("SDL_CDROM");	/* ':' separated list of devices */
+	SDLcdrom = SDL_getenv("SDL_CDROM");	/* ':' separated list of devices */
 	if ( SDLcdrom != NULL ) {
 		char *cdpath, *delim;
-		cdpath = malloc(strlen(SDLcdrom)+1);
+		cdpath = SDL_malloc(SDL_strlen(SDLcdrom)+1);
 		if ( cdpath != NULL ) {
-			strcpy(cdpath, SDLcdrom);
+			SDL_strcpy(cdpath, SDLcdrom);
 			SDLcdrom = cdpath;
 			do {
-				delim = strchr(SDLcdrom, ':');
+				delim = SDL_strchr(SDLcdrom, ':');
 				if ( delim ) {
 					*delim++ = '\0';
 				}
@@ -288,7 +288,7 @@ int  SDL_SYS_CDInit(void)
 					SDLcdrom = NULL;
 				}
 			} while ( SDLcdrom );
-			free(cdpath);
+			SDL_free(cdpath);
 		}
 
 		/* If we found our drives, there's nothing left to do */
@@ -304,7 +304,7 @@ int  SDL_SYS_CDInit(void)
 			exists = 1;
 			for ( j=checklist[i][1]; exists; ++j ) {
 				sprintf(drive, "/dev/%sc", &checklist[i][3]);
-				insert = strchr(drive, '?');
+				insert = SDL_strchr(drive, '?');
 				if ( insert != NULL ) {
 					*insert = j;
 				}
@@ -360,7 +360,7 @@ static int SDL_SYS_CDGetTOC(SDL_CD *cdrom)
 	ntracks = last_track - first_track + 1;
 	cdrom->numtracks = ntracks;
 	toc_size = 4 + (ntracks + 1) * 8;
-	toc = (u_char *)malloc(toc_size);
+	toc = (u_char *)SDL_malloc(toc_size);
 	if	(toc == NULL)
 		return(-1);
 	bzero(cdb, sizeof (cdb));
@@ -373,7 +373,7 @@ static int SDL_SYS_CDGetTOC(SDL_CD *cdrom)
 			&sus);
 	if	(sts < 0)
 		{
-		free(toc);
+		SDL_free(toc);
 		return(-1);
 		}
 
@@ -393,7 +393,7 @@ static int SDL_SYS_CDGetTOC(SDL_CD *cdrom)
 			cdrom->track[i-1].length = cdrom->track[i].offset -
 						   cdrom->track[i-1].offset;
 		}
-	free(toc);
+	SDL_free(toc);
 	return(0);
 	}
 
@@ -535,7 +535,7 @@ void SDL_SYS_CDQuit(void)
 
 	if ( SDL_numcds > 0 ) {
 		for ( i=0; i<SDL_numcds; ++i ) {
-			free(SDL_cdlist[i]);
+			SDL_free(SDL_cdlist[i]);
 			}
 		}
 	SDL_numcds = 0;

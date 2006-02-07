@@ -151,7 +151,7 @@ SDL_Surface *WIMP_SetVideoMode(_THIS, SDL_Surface *current,
 	this->hidden->bank[1] = buffer;      /* Start of buffer */
 
 	/* Remember sprite buffer so it can be freed later */
-	if (this->hidden->alloc_bank) free(this->hidden->alloc_bank);
+	if (this->hidden->alloc_bank) SDL_free(this->hidden->alloc_bank);
 	this->hidden->alloc_bank = buffer;
 
 	current->pitch = width * bytesPerPixel;
@@ -165,7 +165,7 @@ SDL_Surface *WIMP_SetVideoMode(_THIS, SDL_Surface *current,
 
 	WIMP_ReadModeInfo(this);
 	
-    memset(this->hidden->bank[0], 0, height * current->pitch);
+    SDL_memset(this->hidden->bank[0], 0, height * current->pitch);
 
 	this->hidden->current_bank = 0;
 	current->pixels = this->hidden->bank[0];
@@ -390,7 +390,7 @@ void WIMP_SetWMCaption(_THIS, const char *title, const char *icon)
 {
 	_kernel_swi_regs regs;
 
-	strncpy(this->hidden->title, title, 255);
+	SDL_strncpy(this->hidden->title, title, 255);
 	this->hidden->title[255] = 0;
 
 	if (RISCOS_GetWimpVersion() < 380)
@@ -462,7 +462,7 @@ int WIMP_ToggleFromFullScreen(_THIS)
       if (bpp == 8) data += 2048;  /* 8bpp sprite have palette first */
 
       if (buffer == NULL) return 0;
-      memcpy(data, this->hidden->bank[0], width * height * this->screen->format->BytesPerPixel);
+      SDL_memcpy(data, this->hidden->bank[0], width * height * this->screen->format->BytesPerPixel);
    }
    /* else We've switch to full screen before so we already have a sprite */
 
@@ -488,7 +488,7 @@ int WIMP_ToggleFromFullScreen(_THIS)
 
       if (riscos_backbuffer == 0) riscos_backbuffer = 1;
 
-      if (buffer && old_alloc_bank) free(old_alloc_bank);
+      if (buffer && old_alloc_bank) SDL_free(old_alloc_bank);
 
       return 1;
    } else
@@ -497,7 +497,7 @@ int WIMP_ToggleFromFullScreen(_THIS)
       this->hidden->bank[0] = old_bank[0];
       this->hidden->bank[1] = old_bank[1];
       this->hidden->alloc_bank = old_alloc_bank;
-      if (buffer) free(buffer);
+      if (buffer) SDL_free(buffer);
       
       RISCOS_StoreWimpMode();
       FULLSCREEN_SetMode(width, height, bpp);

@@ -43,7 +43,7 @@ DECLSPEC SDL_mutex * SDLCALL SDL_CreateMutex(void)
   APIRET ulrc;
 
   /* Allocate mutex memory */
-  mutex = (SDL_mutex *)malloc(sizeof(*mutex));
+  mutex = (SDL_mutex *)SDL_malloc(sizeof(*mutex));
   if (mutex)
   {
     /* Create the mutex, with initial value signaled */
@@ -54,7 +54,7 @@ DECLSPEC SDL_mutex * SDLCALL SDL_CreateMutex(void)
     if (ulrc!=NO_ERROR)
     {
       SDL_SetError("Couldn't create mutex");
-      free(mutex);
+      SDL_free(mutex);
       mutex = NULL;
     }
   } else {
@@ -73,7 +73,7 @@ DECLSPEC void SDLCALL SDL_DestroyMutex(SDL_mutex *mutex)
       DosCloseMutexSem(mutex->hmtxID);
       mutex->hmtxID = 0;
     }
-    free(mutex);
+    SDL_free(mutex);
   }
 }
 

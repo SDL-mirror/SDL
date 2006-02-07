@@ -57,9 +57,9 @@ void GEM_FreeWMCursor(_THIS, WMcursor *cursor)
 	graf_mouse(ARROW, NULL);
 
 	if (cursor->mform_p != NULL)
-		free(cursor->mform_p);
+		SDL_free(cursor->mform_p);
 
-	free(cursor);
+	SDL_free(cursor);
 }
 
 WMcursor *GEM_CreateWMCursor(_THIS,
@@ -77,16 +77,16 @@ WMcursor *GEM_CreateWMCursor(_THIS,
 	}
 
 	/* Allocate the cursor memory */
-	cursor = (WMcursor *)malloc(sizeof(WMcursor));
+	cursor = (WMcursor *)SDL_malloc(sizeof(WMcursor));
 	if ( cursor == NULL ) {
 		SDL_OutOfMemory();
 		return(NULL);
 	}
 
 	/* Allocate mform */
-	new_mform = (MFORM *)malloc(sizeof(MFORM));		
+	new_mform = (MFORM *)SDL_malloc(sizeof(MFORM));		
 	if (new_mform == NULL) {
-		free(cursor);
+		SDL_free(cursor);
 		SDL_OutOfMemory();
 		return(NULL);
 	}

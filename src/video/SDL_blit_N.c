@@ -817,10 +817,10 @@ static Uint32 GetBlitFeatures( void )
     static Uint32 features = 0xffffffff;
     if (features == 0xffffffff) {
         /* Provide an override for testing .. */
-        char *override = getenv("SDL_ALTIVEC_BLIT_FEATURES");
+        char *override = SDL_getenv("SDL_ALTIVEC_BLIT_FEATURES");
         if (override) {
             features = 0;
-            sscanf(override, "%u", &features);
+            SDL_sscanf(override, "%u", &features);
         } else {
             features = ( 0
                 /* Feature 1 is has-MMX */

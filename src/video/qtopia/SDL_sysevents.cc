@@ -85,7 +85,7 @@ void QT_PumpEvents(_THIS)
 	}
 
 	/* If our view is active, we'll find key changes here */
-	if ( memcmp(keyinfo[0].key_states, keyinfo[1].key_states, 16) != 0 ) {
+	if ( SDL_memcmp(keyinfo[0].key_states, keyinfo[1].key_states, 16) != 0 ) {
 		for ( i=0; i<16; ++i ) {
 			Uint8 new_state, transition;
 
@@ -149,7 +149,7 @@ void QT_InitOSKeymap(_THIS)
 
   /* Initialize all the key states as "up" */
   key_flip = 0;
-  memset(keyinfo[key_flip].key_states, 0, 16);
+  SDL_memset(keyinfo[key_flip].key_states, 0, 16);
 
   /* Initialize the key translation table */
   for ( i=0; i<SDL_TABLESIZE(keymap); ++i )

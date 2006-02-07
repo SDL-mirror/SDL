@@ -67,8 +67,8 @@ int SDL_SYS_JoystickInit(void)
 	/* Search for attached joysticks */
 	nports = joystick.CountDevices();
 	numjoysticks = 0;
-	memset(SDL_joyport, 0, (sizeof SDL_joyport));
-	memset(SDL_joyname, 0, (sizeof SDL_joyname));
+	SDL_memset(SDL_joyport, 0, (sizeof SDL_joyport));
+	SDL_memset(SDL_joyname, 0, (sizeof SDL_joyname));
 	for ( i=0; (SDL_numjoysticks < MAX_JOYSTICKS) && (i < nports); ++i ) {
 		if ( joystick.GetDeviceName(i, name) == B_OK ) {
 			if ( joystick.Open(name) != B_ERROR ) {
@@ -102,12 +102,12 @@ int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
 
 	/* Create the joystick data structure */
 	joystick->hwdata = (struct joystick_hwdata *)
-	                   malloc(sizeof(*joystick->hwdata));
+	                   SDL_malloc(sizeof(*joystick->hwdata));
 	if ( joystick->hwdata == NULL ) {
 		SDL_OutOfMemory();
 		return(-1);
 	}
-	memset(joystick->hwdata, 0, sizeof(*joystick->hwdata));
+	SDL_memset(joystick->hwdata, 0, sizeof(*joystick->hwdata));
 	stick = new BJoystick;
 	joystick->hwdata->stick = stick;
 
@@ -127,9 +127,9 @@ int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
 	joystick->nhats = stick->CountHats();
 
 	joystick->hwdata->new_axes = (int16 *)
-	                  malloc(joystick->naxes*sizeof(int16));
+	                  SDL_malloc(joystick->naxes*sizeof(int16));
 	joystick->hwdata->new_hats = (uint8 *)
-	                  malloc(joystick->nhats*sizeof(uint8));
+	                  SDL_malloc(joystick->nhats*sizeof(uint8));
 	if ( ! joystick->hwdata->new_hats || ! joystick->hwdata->new_axes ) {
 		SDL_OutOfMemory();
 		SDL_SYS_JoystickClose(joystick);
@@ -208,12 +208,12 @@ void SDL_SYS_JoystickClose(SDL_Joystick *joystick)
 		joystick->hwdata->stick->Close();
 		delete joystick->hwdata->stick;
 		if ( joystick->hwdata->new_hats ) {
-			free(joystick->hwdata->new_hats);
+			SDL_free(joystick->hwdata->new_hats);
 		}
 		if ( joystick->hwdata->new_axes ) {
-			free(joystick->hwdata->new_axes);
+			SDL_free(joystick->hwdata->new_axes);
 		}
-		free(joystick->hwdata);
+		SDL_free(joystick->hwdata);
 		joystick->hwdata = NULL;
 	}
 }
@@ -224,12 +224,12 @@ void SDL_SYS_JoystickQuit(void)
 	int i;
 
 	for ( i=0; SDL_joyport[i]; ++i ) {
-		free(SDL_joyport[i]);
+		SDL_free(SDL_joyport[i]);
 	}
 	SDL_joyport[0] = NULL;
 
 	for ( i=0; SDL_joyname[i]; ++i ) {
-		free(SDL_joyname[i]);
+		SDL_free(SDL_joyname[i]);
 	}
 	SDL_joyname[0] = NULL;
 }

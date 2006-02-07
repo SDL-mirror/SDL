@@ -89,9 +89,9 @@ void GEM_InitOSKeymap(_THIS)
 {
 	int i;
 
-	memset(gem_currentkeyboard, 0, sizeof(gem_currentkeyboard));
-	memset(gem_previouskeyboard, 0, sizeof(gem_previouskeyboard));
-	memset(gem_currentascii, 0, sizeof(gem_currentascii));
+	SDL_memset(gem_currentkeyboard, 0, sizeof(gem_currentkeyboard));
+	SDL_memset(gem_previouskeyboard, 0, sizeof(gem_previouskeyboard));
+	SDL_memset(gem_currentascii, 0, sizeof(gem_currentascii));
 
 	/* Initialize keymap */
 	for ( i=0; i<sizeof(keymap); i++ )
@@ -134,7 +134,7 @@ void GEM_PumpEvents(_THIS)
 	int i;
 	SDL_keysym	keysym;
 
-	memset(gem_currentkeyboard,0,sizeof(gem_currentkeyboard));
+	SDL_memset(gem_currentkeyboard,0,sizeof(gem_currentkeyboard));
 	prevkc = prevks = 0;
 	
 	for (;;)
@@ -215,7 +215,7 @@ void GEM_PumpEvents(_THIS)
 				TranslateKey(i, gem_currentascii[i], &keysym, SDL_FALSE));
 	}
 
-	memcpy(gem_previouskeyboard,gem_currentkeyboard,sizeof(gem_previouskeyboard));
+	SDL_memcpy(gem_previouskeyboard,gem_currentkeyboard,sizeof(gem_previouskeyboard));
 
 	/* Refresh window name ? */
 	if (GEM_refresh_name) {

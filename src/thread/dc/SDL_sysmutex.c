@@ -43,7 +43,7 @@ SDL_mutex *SDL_CreateMutex(void)
 	SDL_mutex *mutex;
 
 	/* Allocate mutex memory */
-	mutex = (SDL_mutex *)malloc(sizeof(*mutex));
+	mutex = (SDL_mutex *)SDL_malloc(sizeof(*mutex));
 	if ( mutex ) {
 		spinlock_init(&mutex->mutex);
 		mutex->recursive = 0;
@@ -58,7 +58,7 @@ SDL_mutex *SDL_CreateMutex(void)
 void SDL_DestroyMutex(SDL_mutex *mutex)
 {
 	if ( mutex ) {
-		free(mutex);
+		SDL_free(mutex);
 	}
 }
 

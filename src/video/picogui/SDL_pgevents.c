@@ -44,7 +44,7 @@ int PG_HandleResize(struct pgEvent *evt)
 int PG_HandleKey(struct pgEvent *evt)
 {
         SDL_keysym sym;
-	memset(&sym,0,sizeof(sym));
+	SDL_memset(&sym,0,sizeof(sym));
 	sym.sym = evt->e.kbd.key;
 	sym.mod = evt->e.kbd.mods;
         SDL_PrivateKeyboard(evt->type == PG_WE_KBD_KEYDOWN, &sym);
@@ -54,7 +54,7 @@ int PG_HandleKey(struct pgEvent *evt)
 int PG_HandleChar(struct pgEvent *evt)
 {
         SDL_keysym sym;
-	memset(&sym,0,sizeof(sym));
+	SDL_memset(&sym,0,sizeof(sym));
 	sym.unicode = evt->e.kbd.key;
 	sym.mod = evt->e.kbd.mods;
         SDL_PrivateKeyboard(evt->type == PG_WE_KBD_KEYDOWN, &sym);

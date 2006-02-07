@@ -90,13 +90,13 @@ const char *SDL_SYS_JoystickName(int index)
 int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
 {
 	/* allocate memory for system specific hardware data */
-	joystick->hwdata = (struct joystick_hwdata *) malloc(sizeof(*joystick->hwdata));
+	joystick->hwdata = (struct joystick_hwdata *) SDL_malloc(sizeof(*joystick->hwdata));
 	if (joystick->hwdata == NULL)
 	{
 		SDL_OutOfMemory();
 		return(-1);
 	}
-	memset(joystick->hwdata, 0, sizeof(*joystick->hwdata));
+	SDL_memset(joystick->hwdata, 0, sizeof(*joystick->hwdata));
 
 	/* fill nbuttons, naxes, and nhats fields */
 	joystick->nbuttons = MAX_BUTTONS;
@@ -182,7 +182,7 @@ void SDL_SYS_JoystickClose(SDL_Joystick *joystick)
 {
 	if (joystick->hwdata != NULL) {
 		/* free system specific hardware data */
-		free(joystick->hwdata);
+		SDL_free(joystick->hwdata);
 	}
 }
 

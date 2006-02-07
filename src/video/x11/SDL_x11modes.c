@@ -51,7 +51,7 @@ Bool SDL_NAME(XF86VidModeGetModeInfo)(Display *dpy, int scr, SDL_NAME(XF86VidMod
 #ifdef XFREE86_VM
 static void save_mode(_THIS)
 {
-    memset(&saved_mode, 0, sizeof(saved_mode));
+    SDL_memset(&saved_mode, 0, sizeof(saved_mode));
     SDL_NAME(XF86VidModeGetModeInfo)(SDL_Display,SDL_Screen,&saved_mode);
     SDL_NAME(XF86VidModeGetViewPort)(SDL_Display,SDL_Screen,&saved_view.x,&saved_view.y);
 }
@@ -260,8 +260,8 @@ static int add_visual_byid(_THIS, const char *visual_id)
     int nvis;
 
     if ( visual_id ) {
-        memset(&template, 0, (sizeof template));
-        template.visualid = strtol(visual_id, NULL, 0);
+        SDL_memset(&template, 0, (sizeof template));
+        template.visualid = SDL_strtol(visual_id, NULL, 0);
         vi = pXGetVisualInfo(SDL_Display, VisualIDMask, &template, &nvis);
         if ( vi ) {
             int n = this->hidden->nvisuals;
@@ -304,7 +304,7 @@ int X11_GetVideoModes(_THIS)
        XF86VidModeGetAllModeLines() - it hangs the client.
      */
     buggy_X11 = 0;
-    if ( strcmp(ServerVendor(SDL_Display), "Metro Link Incorporated") == 0 ) {
+    if ( SDL_strcmp(ServerVendor(SDL_Display), "Metro Link Incorporated") == 0 ) {
         FILE *metro_fp;
 
         metro_fp = fopen("/usr/X11R6/lib/X11/Metro/.version", "r");
@@ -360,7 +360,7 @@ int X11_GetVideoModes(_THIS)
 #endif
 
         qsort(modes, nmodes, sizeof *modes, cmpmodes);
-        SDL_modelist = (SDL_Rect **)malloc((nmodes+2)*sizeof(SDL_Rect *));
+        SDL_modelist = (SDL_Rect **)SDL_malloc((nmodes+2)*sizeof(SDL_Rect *));
         if ( SDL_modelist ) {
             n = 0;
             for ( i=0; i<nmodes; ++i ) {
@@ -378,7 +378,7 @@ int X11_GetVideoModes(_THIS)
                 h = modes[i]->vdisplay;
                 if ( (screen_w * screen_h) >= (w * h) ) {
                     if ( (screen_w != w) || (screen_h != h) ) {
-                        SDL_modelist[n] = (SDL_Rect *)malloc(sizeof(SDL_Rect));
+                        SDL_modelist[n] = (SDL_Rect *)SDL_malloc(sizeof(SDL_Rect));
                         if ( SDL_modelist[n] ) {
                             SDL_modelist[n]->x = 0;
                             SDL_modelist[n]->y = 0;
@@ -392,7 +392,7 @@ int X11_GetVideoModes(_THIS)
                 }
 
                 /* Add the size from the video mode list */
-                SDL_modelist[n] = (SDL_Rect *)malloc(sizeof(SDL_Rect));
+                SDL_modelist[n] = (SDL_Rect *)SDL_malloc(sizeof(SDL_Rect));
                 if ( SDL_modelist[n] == NULL ) {
                     break;
                 }
@@ -449,7 +449,7 @@ int X11_GetVideoModes(_THIS)
                 nummodes, ractive);
 #endif
 
-        SDL_modelist = (SDL_Rect **)malloc((nummodes+1)*sizeof(SDL_Rect *));
+        SDL_modelist = (SDL_Rect **)SDL_malloc((nummodes+1)*sizeof(SDL_Rect *));
 
                                 /* we get the list already sorted in */
                                 /* descending order.  We'll copy it in */
@@ -457,7 +457,7 @@ int X11_GetVideoModes(_THIS)
         if (SDL_modelist) {
             for ( i=0, j=nummodes-1; j>=0; i++, j-- ) {
                 if ((SDL_modelist[i] = 
-                     (SDL_Rect *)malloc(sizeof(SDL_Rect))) == NULL)
+                     (SDL_Rect *)SDL_malloc(sizeof(SDL_Rect))) == NULL)
                   break;
 #ifdef XIG_DEBUG
                 fprintf(stderr, "XME: mode = %4d, w = %4d, h = %4d\n",
@@ -490,11 +490,11 @@ int X11_GetVideoModes(_THIS)
 
         /* Search for the visuals in deepest-first order, so that the first
            will be the richest one */
-        if ( getenv("SDL_VIDEO_X11_NODIRECTCOLOR") ) {
+        if ( SDL_getenv("SDL_VIDEO_X11_NODIRECTCOLOR") ) {
                 use_directcolor = 0;
         }
         this->hidden->nvisuals = 0;
-        if ( ! add_visual_byid(this, getenv("SDL_VIDEO_X11_VISUALID")) ) {
+        if ( ! add_visual_byid(this, SDL_getenv("SDL_VIDEO_X11_VISUALID")) ) {
                 for ( i=0; i<SDL_TABLESIZE(depth_list); ++i ) {
                         if ( depth_list[i] > 8 ) {
                                 if ( use_directcolor ) {
@@ -526,10 +526,10 @@ int X11_GetVideoModes(_THIS)
     }
 
     if ( SDL_modelist == NULL ) {
-        SDL_modelist = (SDL_Rect **)malloc((1+1)*sizeof(SDL_Rect *));
+        SDL_modelist = (SDL_Rect **)SDL_malloc((1+1)*sizeof(SDL_Rect *));
         if ( SDL_modelist ) {
             n = 0;
-            SDL_modelist[n] = (SDL_Rect *)malloc(sizeof(SDL_Rect));
+            SDL_modelist[n] = (SDL_Rect *)SDL_malloc(sizeof(SDL_Rect));
             if ( SDL_modelist[n] ) {
                 SDL_modelist[n]->x = 0;
                 SDL_modelist[n]->y = 0;
@@ -578,7 +578,7 @@ int X11_GetVideoModes(_THIS)
         printf("X11 detected Xinerama:\n");
 #endif
 #if 0 /* Apparently the vidmode extension doesn't work with Xinerama */
-        const char *variable = getenv("SDL_VIDEO_X11_XINERAMA_SCREEN");
+        const char *variable = SDL_getenv("SDL_VIDEO_X11_XINERAMA_SCREEN");
         if ( variable ) {
                 desired = atoi(variable);
         }
@@ -631,9 +631,9 @@ void X11_FreeVideoModes(_THIS)
 
     if ( SDL_modelist ) {
         for ( i=0; SDL_modelist[i]; ++i ) {
-            free(SDL_modelist[i]);
+            SDL_free(SDL_modelist[i]);
         }
-        free(SDL_modelist);
+        SDL_free(SDL_modelist);
         SDL_modelist = NULL;
     }
 }
@@ -727,7 +727,7 @@ int X11_EnterFullScreen(_THIS)
             tmpwin = windows[nwindows-1];
             for ( i=0; i<nwindows; ++i ) {
                 if ( windows[i] == FSwindow ) {
-                    memcpy(&windows[i], &windows[i+1],
+                    SDL_memcpy(&windows[i], &windows[i+1],
                            (nwindows-i-1)*sizeof(windows[i]));
                     break;
                 }

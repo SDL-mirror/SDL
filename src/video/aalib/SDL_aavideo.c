@@ -70,8 +70,8 @@ static int AA_Available(void)
 
 static void AA_DeleteDevice(SDL_VideoDevice *device)
 {
-	free(device->hidden);
-	free(device);
+	SDL_free(device->hidden);
+	SDL_free(device);
 }
 
 static SDL_VideoDevice *AA_CreateDevice(int devindex)
@@ -79,20 +79,20 @@ static SDL_VideoDevice *AA_CreateDevice(int devindex)
 	SDL_VideoDevice *device;
 
 	/* Initialize all variables that we clean on shutdown */
-	device = (SDL_VideoDevice *)malloc(sizeof(SDL_VideoDevice));
+	device = (SDL_VideoDevice *)SDL_malloc(sizeof(SDL_VideoDevice));
 	if ( device ) {
-		memset(device, 0, (sizeof *device));
+		SDL_memset(device, 0, (sizeof *device));
 		device->hidden = (struct SDL_PrivateVideoData *)
-				malloc((sizeof *device->hidden));
+				SDL_malloc((sizeof *device->hidden));
 	}
 	if ( (device == NULL) || (device->hidden == NULL) ) {
 		SDL_OutOfMemory();
 		if ( device ) {
-			free(device);
+			SDL_free(device);
 		}
 		return(0);
 	}
-	memset(device->hidden, 0, (sizeof *device->hidden));
+	SDL_memset(device->hidden, 0, (sizeof *device->hidden));
 
 	/* Set the function pointers */
 	device->VideoInit = AA_VideoInit;
@@ -138,7 +138,7 @@ int AA_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 	/* Initialize all variables that we clean on shutdown */
 	for ( i=0; i<SDL_NUMMODES; ++i ) {
-		SDL_modelist[i] = malloc(sizeof(SDL_Rect));
+		SDL_modelist[i] = SDL_malloc(sizeof(SDL_Rect));
 		SDL_modelist[i]->x = SDL_modelist[i]->y = 0;
 	}
 	/* Modes sorted largest to smallest */
@@ -179,7 +179,7 @@ int AA_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 	fprintf(stderr,"Using AAlib driver: %s (%s)\n", AA_context->driver->name, AA_context->driver->shortname);
 
-	AA_in_x11 = (strcmp(AA_context->driver->shortname,"X11") == 0);
+	AA_in_x11 = (SDL_strcmp(AA_context->driver->shortname,"X11") == 0);
 	/* Determine the screen depth (use default 8-bit depth) */
 	vformat->BitsPerPixel = 8;
 	vformat->BytesPerPixel = 1;
@@ -252,10 +252,10 @@ SDL_Surface *AA_SetVideoMode(_THIS, SDL_Surface *current,
 	int mode;
 
 	if ( AA_buffer ) {
-		free( AA_buffer );
+		SDL_free( AA_buffer );
 	}
 
-	AA_buffer = malloc(width * height);
+	AA_buffer = SDL_malloc(width * height);
 	if ( ! AA_buffer ) {
 		SDL_SetError("Couldn't allocate buffer for requested mode");
 		return(NULL);
@@ -263,8 +263,8 @@ SDL_Surface *AA_SetVideoMode(_THIS, SDL_Surface *current,
 
 /* 	printf("Setting mode %dx%d\n", width, height); */
 
-	memset(aa_image(AA_context), 0, aa_imgwidth(AA_context) * aa_imgheight(AA_context));
-	memset(AA_buffer, 0, width * height);
+	SDL_memset(aa_image(AA_context), 0, aa_imgwidth(AA_context) * aa_imgheight(AA_context));
+	SDL_memset(AA_buffer, 0, width * height);
 
 	/* Allocate the new pixel format for the screen */
 	if ( ! SDL_ReallocFormat(current, 8, 0, 0, 0, 0) ) {
@@ -379,7 +379,7 @@ void AA_VideoQuit(_THIS)
 	/* Free video mode lists */
 	for ( i=0; i<SDL_NUMMODES; ++i ) {
 		if ( SDL_modelist[i] != NULL ) {
-			free(SDL_modelist[i]);
+			SDL_free(SDL_modelist[i]);
 			SDL_modelist[i] = NULL;
 		}
 	}

@@ -133,8 +133,8 @@ static int DX5_Load(void)
 static void Audio_DeleteDevice(SDL_AudioDevice *device)
 {
 	DX5_Unload();
-	free(device->hidden);
-	free(device);
+	SDL_free(device->hidden);
+	SDL_free(device);
 }
 
 static SDL_AudioDevice *Audio_CreateDevice(int devindex)
@@ -147,20 +147,20 @@ static SDL_AudioDevice *Audio_CreateDevice(int devindex)
 	}
 
 	/* Initialize all variables that we clean on shutdown */
-	this = (SDL_AudioDevice *)malloc(sizeof(SDL_AudioDevice));
+	this = (SDL_AudioDevice *)SDL_malloc(sizeof(SDL_AudioDevice));
 	if ( this ) {
-		memset(this, 0, (sizeof *this));
+		SDL_memset(this, 0, (sizeof *this));
 		this->hidden = (struct SDL_PrivateAudioData *)
-				malloc((sizeof *this->hidden));
+				SDL_malloc((sizeof *this->hidden));
 	}
 	if ( (this == NULL) || (this->hidden == NULL) ) {
 		SDL_OutOfMemory();
 		if ( this ) {
-			free(this);
+			SDL_free(this);
 		}
 		return(0);
 	}
-	memset(this->hidden, 0, (sizeof *this->hidden));
+	SDL_memset(this->hidden, 0, (sizeof *this->hidden));
 
 	/* Set the function pointers */
 	this->OpenAudio = DX5_OpenAudio;
@@ -223,13 +223,13 @@ static void SetDSerror(const char *function, int code)
 			error = "Function not supported";
 			break;
 		default:
-			snprintf(errbuf, SDL_arraysize(errbuf),
+			SDL_snprintf(errbuf, SDL_arraysize(errbuf),
 			         "%s: Unknown DirectSound error: 0x%x",
 								function, code);
 			break;
 	}
 	if ( ! errbuf[0] ) {
-		snprintf(errbuf, SDL_arraysize(errbuf), "%s: %s", function, error);
+		SDL_snprintf(errbuf, SDL_arraysize(errbuf), "%s: %s", function, error);
 	}
 	SDL_SetError("%s", errbuf);
 	return;
@@ -386,7 +386,7 @@ static void DX5_WaitDone(_THIS)
 	/* Wait for the playing chunk to finish */
 	stream = this->GetAudioBuf(this);
 	if ( stream != NULL ) {
-		memset(stream, silence, mixlen);
+		SDL_memset(stream, silence, mixlen);
 		this->PlayAudio(this);
 	}
 	this->WaitAudio(this);
@@ -435,7 +435,7 @@ static int CreatePrimary(LPDIRECTSOUND sndObj, HWND focus,
 	}
 
 	/* Try to create the primary buffer */
-	memset(&format, 0, sizeof(format));
+	SDL_memset(&format, 0, sizeof(format));
 	format.dwSize = sizeof(format);
 	format.dwFlags=(DSBCAPS_PRIMARYBUFFER|DSBCAPS_GETCURRENTPOSITION2);
 	format.dwFlags |= DSBCAPS_STICKYFOCUS;
@@ -451,7 +451,7 @@ static int CreatePrimary(LPDIRECTSOUND sndObj, HWND focus,
 	}
 
 	/* Check the size of the fragment buffer */
-	memset(&caps, 0, sizeof(caps));
+	SDL_memset(&caps, 0, sizeof(caps));
 	caps.dwSize = sizeof(caps);
 	result = IDirectSoundBuffer_GetCaps(*sndbuf, &caps);
 	if ( result != DS_OK ) {
@@ -516,7 +516,7 @@ static int CreateSecondary(LPDIRECTSOUND sndObj, HWND focus,
 	}
 
 	/* Try to create the secondary buffer */
-	memset(&format, 0, sizeof(format));
+	SDL_memset(&format, 0, sizeof(format));
 	format.dwSize = sizeof(format);
 	format.dwFlags = DSBCAPS_GETCURRENTPOSITION2;
 #ifdef USE_POSITION_NOTIFY
@@ -550,9 +550,9 @@ static int CreateSecondary(LPDIRECTSOUND sndObj, HWND focus,
 	                                 DSBLOCK_ENTIREBUFFER);
 	if ( result == DS_OK ) {
 		if ( wavefmt->wBitsPerSample == 8 ) {
-			memset(pvAudioPtr1, 0x80, dwAudioBytes1);
+			SDL_memset(pvAudioPtr1, 0x80, dwAudioBytes1);
 		} else {
-			memset(pvAudioPtr1, 0x00, dwAudioBytes1);
+			SDL_memset(pvAudioPtr1, 0x00, dwAudioBytes1);
 		}
 		IDirectSoundBuffer_Unlock(*sndbuf,
 		                          (LPVOID)pvAudioPtr1, dwAudioBytes1,
@@ -584,7 +584,7 @@ static int CreateAudioEvent(_THIS)
 	}
 
 	/* Allocate the notify structures */
-	notify_positions = (DSBPOSITIONNOTIFY *)malloc(NUM_BUFFERS*
+	notify_positions = (DSBPOSITIONNOTIFY *)SDL_malloc(NUM_BUFFERS*
 					sizeof(*notify_positions));
 	if ( notify_positions == NULL ) {
 		goto done;
@@ -620,7 +620,7 @@ static int DX5_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	WAVEFORMATEX waveformat;
 
 	/* Set basic WAVE format parameters */
-	memset(&waveformat, 0, sizeof(waveformat));
+	SDL_memset(&waveformat, 0, sizeof(waveformat));
 	waveformat.wFormatTag = WAVE_FORMAT_PCM;
 
 	/* Determine the audio parameters from the AudioSpec */

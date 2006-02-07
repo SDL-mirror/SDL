@@ -297,7 +297,7 @@ static void BlitBto3Key(SDL_BlitInfo *info)
 			}
 			bit = (byte&0x80)>>7;
 			if ( bit != ckey ) {
-				memcpy(dst, &palmap[bit*4], 3);
+				SDL_memcpy(dst, &palmap[bit*4], 3);
 			}
 			byte <<= 1;
 			dst += 3;

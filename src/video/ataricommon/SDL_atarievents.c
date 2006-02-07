@@ -82,25 +82,25 @@ static void Atari_InitializeEvents(_THIS)
 			break;
 	}
 
-	envr = getenv("SDL_ATARI_EVENTSDRIVER");
+	envr = SDL_getenv("SDL_ATARI_EVENTSDRIVER");
 
  	if (!envr) {
 		return;
 	}
 
-	if (strcmp(envr, "ikbd") == 0) {
+	if (SDL_strcmp(envr, "ikbd") == 0) {
 		this->InitOSKeymap=AtariIkbd_InitOSKeymap;
 		this->PumpEvents=AtariIkbd_PumpEvents;
 		Atari_ShutdownEvents=AtariIkbd_ShutdownEvents;
 	}
 
-	if (strcmp(envr, "gemdos") == 0) {
+	if (SDL_strcmp(envr, "gemdos") == 0) {
 		this->InitOSKeymap=AtariGemdos_InitOSKeymap;
 		this->PumpEvents=AtariGemdos_PumpEvents;
 		Atari_ShutdownEvents=AtariGemdos_ShutdownEvents;
 	}
 
-	if (strcmp(envr, "bios") == 0) {
+	if (SDL_strcmp(envr, "bios") == 0) {
 		this->InitOSKeymap=AtariBios_InitOSKeymap;
 		this->PumpEvents=AtariBios_PumpEvents;
 		Atari_ShutdownEvents=AtariBios_ShutdownEvents;

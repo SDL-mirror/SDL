@@ -20,39 +20,4 @@
     slouken@libsdl.org
 */
 
-#ifndef _SDL_getenv_h
-#define _SDL_getenv_h
-
-#include "SDL_config.h"
-
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-
-#include "begin_code.h"
-/* Set up for C function definitions, even when using C++ */
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#ifdef HAVE_GETENV
-#define SDL_getenv	getenv
-#else
-#define getenv		SDL_getenv
-extern DECLSPEC char * SDLCALL SDL_getenv(const char *name);
-#endif
-
-#ifdef HAVE_PUTENV
-#define SDL_putenv	putenv
-#else
-#define putenv		SDL_putenv
-extern DECLSPEC int SDLCALL SDL_putenv(const char *variable);
-#endif
-
-/* Ends C function definitions when using C++ */
-#ifdef __cplusplus
-}
-#endif
-#include "close_code.h"
-
-#endif /* _SDL_getenv_h */
+#include "SDL_stdlib.h"

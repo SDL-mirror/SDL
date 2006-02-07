@@ -155,7 +155,7 @@ static int FB_Available(void)
 	int console;
 	const char *SDL_fbdev;
 
-	SDL_fbdev = getenv("SDL_FBDEV");
+	SDL_fbdev = SDL_getenv("SDL_FBDEV");
 	if ( SDL_fbdev == NULL ) {
 		SDL_fbdev = "/dev/fb0";
 	}
@@ -168,8 +168,8 @@ static int FB_Available(void)
 
 static void FB_DeleteDevice(SDL_VideoDevice *device)
 {
-	free(device->hidden);
-	free(device);
+	SDL_free(device->hidden);
+	SDL_free(device);
 }
 
 static SDL_VideoDevice *FB_CreateDevice(int devindex)
@@ -177,20 +177,20 @@ static SDL_VideoDevice *FB_CreateDevice(int devindex)
 	SDL_VideoDevice *this;
 
 	/* Initialize all variables that we clean on shutdown */
-	this = (SDL_VideoDevice *)malloc(sizeof(SDL_VideoDevice));
+	this = (SDL_VideoDevice *)SDL_malloc(sizeof(SDL_VideoDevice));
 	if ( this ) {
-		memset(this, 0, (sizeof *this));
+		SDL_memset(this, 0, (sizeof *this));
 		this->hidden = (struct SDL_PrivateVideoData *)
-				malloc((sizeof *this->hidden));
+				SDL_malloc((sizeof *this->hidden));
 	}
 	if ( (this == NULL) || (this->hidden == NULL) ) {
 		SDL_OutOfMemory();
 		if ( this ) {
-			free(this);
+			SDL_free(this);
 		}
 		return(0);
 	}
-	memset(this->hidden, 0, (sizeof *this->hidden));
+	SDL_memset(this->hidden, 0, (sizeof *this->hidden));
 	wait_vbl = FB_WaitVBL;
 	wait_idle = FB_WaitIdle;
 	mouse_fd = -1;
@@ -274,17 +274,17 @@ static int read_fbmodes_mode(FILE *f, struct fb_var_screeninfo *vinfo)
 	do {
 		if (read_fbmodes_line(f, line, sizeof(line))==0)
 			return 0;
-		if (strncmp(line,"geometry",8)==0)
+		if (SDL_strncmp(line,"geometry",8)==0)
 			break;
 	}
 	while(1);
 
-	sscanf(line, "geometry %d %d %d %d %d", &vinfo->xres, &vinfo->yres, 
+	SDL_sscanf(line, "geometry %d %d %d %d %d", &vinfo->xres, &vinfo->yres, 
 			&vinfo->xres_virtual, &vinfo->yres_virtual, &vinfo->bits_per_pixel);
 	if (read_fbmodes_line(f, line, sizeof(line))==0)
 		return 0;
 			
-	sscanf(line, "timings %d %d %d %d %d %d %d", &vinfo->pixclock, 
+	SDL_sscanf(line, "timings %d %d %d %d %d %d %d", &vinfo->pixclock, 
 			&vinfo->left_margin, &vinfo->right_margin, &vinfo->upper_margin, 
 			&vinfo->lower_margin, &vinfo->hsync_len, &vinfo->vsync_len);
 		
@@ -296,38 +296,38 @@ static int read_fbmodes_mode(FILE *f, struct fb_var_screeninfo *vinfo)
 		if (read_fbmodes_line(f, line, sizeof(line))==0)
 			return 0;
 
-		if (strncmp(line,"hsync",5)==0) {
-			sscanf(line,"hsync %s",option);
-			if (strncmp(option,"high",4)==0)
+		if (SDL_strncmp(line,"hsync",5)==0) {
+			SDL_sscanf(line,"hsync %s",option);
+			if (SDL_strncmp(option,"high",4)==0)
 				vinfo->sync |= FB_SYNC_HOR_HIGH_ACT;
 		}
-		else if (strncmp(line,"vsync",5)==0) {
-			sscanf(line,"vsync %s",option);
-			if (strncmp(option,"high",4)==0)
+		else if (SDL_strncmp(line,"vsync",5)==0) {
+			SDL_sscanf(line,"vsync %s",option);
+			if (SDL_strncmp(option,"high",4)==0)
 				vinfo->sync |= FB_SYNC_VERT_HIGH_ACT;
 		}
-		else if (strncmp(line,"csync",5)==0) {
-			sscanf(line,"csync %s",option);
-			if (strncmp(option,"high",4)==0)
+		else if (SDL_strncmp(line,"csync",5)==0) {
+			SDL_sscanf(line,"csync %s",option);
+			if (SDL_strncmp(option,"high",4)==0)
 				vinfo->sync |= FB_SYNC_COMP_HIGH_ACT;
 		}
-		else if (strncmp(line,"extsync",5)==0) {
-			sscanf(line,"extsync %s",option);
-			if (strncmp(option,"true",4)==0)
+		else if (SDL_strncmp(line,"extsync",5)==0) {
+			SDL_sscanf(line,"extsync %s",option);
+			if (SDL_strncmp(option,"true",4)==0)
 				vinfo->sync |= FB_SYNC_EXT;
 		}
-		else if (strncmp(line,"laced",5)==0) {
-			sscanf(line,"laced %s",option);
-			if (strncmp(option,"true",4)==0)
+		else if (SDL_strncmp(line,"laced",5)==0) {
+			SDL_sscanf(line,"laced %s",option);
+			if (SDL_strncmp(option,"true",4)==0)
 				vinfo->vmode |= FB_VMODE_INTERLACED;
 		}
-		else if (strncmp(line,"double",6)==0) {
-			sscanf(line,"double %s",option);
-			if (strncmp(option,"true",4)==0)
+		else if (SDL_strncmp(line,"double",6)==0) {
+			SDL_sscanf(line,"double %s",option);
+			if (SDL_strncmp(option,"true",4)==0)
 				vinfo->vmode |= FB_VMODE_DOUBLE;
 		}
 	}
-	while(strncmp(line,"endmode",7)!=0);
+	while(SDL_strncmp(line,"endmode",7)!=0);
 
 	return 1;
 }
@@ -393,7 +393,7 @@ static int FB_AddMode(_THIS, int index, unsigned int w, unsigned int h, int chec
 	}
 
 	/* Set up the new video mode rectangle */
-	mode = (SDL_Rect *)malloc(sizeof *mode);
+	mode = (SDL_Rect *)SDL_malloc(sizeof *mode);
 	if ( mode == NULL ) {
 		SDL_OutOfMemory();
 		return(-1);
@@ -409,11 +409,11 @@ static int FB_AddMode(_THIS, int index, unsigned int w, unsigned int h, int chec
 	/* Allocate the new list of modes, and fill in the new mode */
 	next_mode = SDL_nummodes[index];
 	SDL_modelist[index] = (SDL_Rect **)
-	       realloc(SDL_modelist[index], (1+next_mode+1)*sizeof(SDL_Rect *));
+	       SDL_realloc(SDL_modelist[index], (1+next_mode+1)*sizeof(SDL_Rect *));
 	if ( SDL_modelist[index] == NULL ) {
 		SDL_OutOfMemory();
 		SDL_nummodes[index] = 0;
-		free(mode);
+		SDL_free(mode);
 		return(-1);
 	}
 	SDL_modelist[index][next_mode] = mode;
@@ -455,7 +455,7 @@ static int FB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	FILE *modesdb;
 
 	/* Initialize the library */
-	SDL_fbdev = getenv("SDL_FBDEV");
+	SDL_fbdev = SDL_getenv("SDL_FBDEV");
 	if ( SDL_fbdev == NULL ) {
 		SDL_fbdev = "/dev/fb0";
 	}
@@ -518,7 +518,7 @@ static int FB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 	/* Check if the user wants to disable hardware acceleration */
 	{ const char *fb_accel;
-		fb_accel = getenv("SDL_FBACCEL");
+		fb_accel = SDL_getenv("SDL_FBACCEL");
 		if ( fb_accel ) {
 			finfo.accel = atoi(fb_accel);
 		}
@@ -589,7 +589,7 @@ static int FB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		SDL_nummodes[i] = 0;
 		SDL_modelist[i] = NULL;
 	}
-	if ( getenv("SDL_FB_BROKEN_MODES") != NULL ) {
+	if ( SDL_getenv("SDL_FB_BROKEN_MODES") != NULL ) {
 		FB_AddMode(this, current_index, current_w, current_h, 0);
 	} else if(modesdb) {
 		while ( read_fbmodes_mode(modesdb, &vinfo) ) {
@@ -682,7 +682,7 @@ static int FB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	if ( FB_OpenMouse(this) < 0 ) {
 		const char *sdl_nomouse;
 
-		sdl_nomouse = getenv("SDL_NOMOUSE");
+		sdl_nomouse = SDL_getenv("SDL_NOMOUSE");
 		if ( ! sdl_nomouse ) {
 			SDL_SetError("Unable to open mouse");
 			FB_VideoQuit(this);
@@ -867,7 +867,7 @@ static SDL_Surface *FB_SetVGA16Mode(_THIS, SDL_Surface *current,
 	current->w = vinfo.xres;
 	current->h = vinfo.yres;
 	current->pitch = current->w;
-	current->pixels = malloc(current->h*current->pitch);
+	current->pixels = SDL_malloc(current->h*current->pitch);
 
 	/* Set the update rectangle function */
 	this->UpdateRects = FB_VGA16Update;
@@ -1069,7 +1069,7 @@ static int FB_InitHWSurfaces(_THIS, SDL_Surface *screen, char *base, int size)
 	surfaces_memleft = size;
 
 	if ( surfaces_memleft > 0 ) {
-		bucket = (vidmem_bucket *)malloc(sizeof(*bucket));
+		bucket = (vidmem_bucket *)SDL_malloc(sizeof(*bucket));
 		if ( bucket == NULL ) {
 			SDL_OutOfMemory();
 			return(-1);
@@ -1101,7 +1101,7 @@ static void FB_FreeHWSurfaces(_THIS)
 	while ( bucket ) {
 		freeable = bucket;
 		bucket = bucket->next;
-		free(freeable);
+		SDL_free(freeable);
 	}
 	surfaces.next = NULL;
 }
@@ -1152,7 +1152,7 @@ surface->pitch = SDL_VideoSurface->pitch;
 #ifdef FBCON_DEBUG
 	fprintf(stderr, "Adding new free bucket of %d bytes\n", extra);
 #endif
-		newbucket = (vidmem_bucket *)malloc(sizeof(*newbucket));
+		newbucket = (vidmem_bucket *)SDL_malloc(sizeof(*newbucket));
 		if ( newbucket == NULL ) {
 			SDL_OutOfMemory();
 			return(-1);
@@ -1210,7 +1210,7 @@ static void FB_FreeHWSurface(_THIS, SDL_Surface *surface)
 			if ( bucket->next ) {
 				bucket->next->prev = bucket;
 			}
-			free(freeable);
+			SDL_free(freeable);
 		}
 		if ( bucket->prev && ! bucket->prev->used ) {
 #ifdef DGA_DEBUG
@@ -1222,7 +1222,7 @@ static void FB_FreeHWSurface(_THIS, SDL_Surface *surface)
 			if ( bucket->next ) {
 				bucket->next->prev = bucket->prev;
 			}
-			free(freeable);
+			SDL_free(freeable);
 		}
 	}
 	surface->pixels = NULL;
@@ -1489,7 +1489,7 @@ static void FB_SavePalette(_THIS, struct fb_fix_screeninfo *finfo,
 	/* Save hardware palette, if needed */
 	if ( finfo->visual == FB_VISUAL_PSEUDOCOLOR ) {
 		saved_cmaplen = 1<<vinfo->bits_per_pixel;
-		saved_cmap=(__u16 *)malloc(3*saved_cmaplen*sizeof(*saved_cmap));
+		saved_cmap=(__u16 *)SDL_malloc(3*saved_cmaplen*sizeof(*saved_cmap));
 		if ( saved_cmap != NULL ) {
 			FB_SavePaletteTo(this, saved_cmaplen, saved_cmap);
 		}
@@ -1509,7 +1509,7 @@ static void FB_SavePalette(_THIS, struct fb_fix_screeninfo *finfo,
 
 		/* Save the colormap */
 		saved_cmaplen = 256;
-		saved_cmap=(__u16 *)malloc(3*saved_cmaplen*sizeof(*saved_cmap));
+		saved_cmap=(__u16 *)SDL_malloc(3*saved_cmaplen*sizeof(*saved_cmap));
 		if ( saved_cmap != NULL ) {
 			FB_SavePaletteTo(this, saved_cmaplen, saved_cmap);
 		}
@@ -1529,7 +1529,7 @@ static void FB_RestorePalette(_THIS)
 	/* Restore the original palette */
 	if ( saved_cmap ) {
 		FB_RestorePaletteFrom(this, saved_cmaplen, saved_cmap);
-		free(saved_cmap);
+		SDL_free(saved_cmap);
 		saved_cmap = NULL;
 	}
 }
@@ -1561,9 +1561,9 @@ static int FB_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 		ncolors = this->screen->format->palette->ncolors;
 		cmap.start = 0;
 		cmap.len = ncolors;
-		memset(r, 0, sizeof(r));
-		memset(g, 0, sizeof(g));
-		memset(b, 0, sizeof(b));
+		SDL_memset(r, 0, sizeof(r));
+		SDL_memset(g, 0, sizeof(g));
+		SDL_memset(b, 0, sizeof(b));
 		if ( ioctl(console_fd, FBIOGETCMAP, &cmap) == 0 ) {
 			for ( i=ncolors-1; i>=0; --i ) {
 				colors[i].r = (r[i]>>8);
@@ -1586,12 +1586,12 @@ static void FB_VideoQuit(_THIS)
 	if ( this->screen ) {
 		/* Clear screen and tell SDL not to free the pixels */
 		if ( this->screen->pixels && FB_InGraphicsMode(this) ) {
-#if defined(__powerpc__) || defined(__ia64__)	/* SIGBUS when using memset() ?? */
+#if defined(__powerpc__) || defined(__ia64__)	/* SIGBUS when using SDL_memset() ?? */
 			Uint8 *rowp = (Uint8 *)this->screen->pixels;
 			int left = this->screen->pitch*this->screen->h;
 			while ( left-- ) { *rowp++ = 0; }
 #else
-			memset(this->screen->pixels,0,this->screen->h*this->screen->pitch);
+			SDL_memset(this->screen->pixels,0,this->screen->h*this->screen->pitch);
 #endif
 		}
 		/* This test fails when using the VGA16 shadow memory */
@@ -1611,9 +1611,9 @@ static void FB_VideoQuit(_THIS)
 	for ( i=0; i<NUM_MODELISTS; ++i ) {
 		if ( SDL_modelist[i] != NULL ) {
 			for ( j=0; SDL_modelist[i][j]; ++j ) {
-				free(SDL_modelist[i][j]);
+				SDL_free(SDL_modelist[i][j]);
 			}
-			free(SDL_modelist[i]);
+			SDL_free(SDL_modelist[i]);
 			SDL_modelist[i] = NULL;
 		}
 	}

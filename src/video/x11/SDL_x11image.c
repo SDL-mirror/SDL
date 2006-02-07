@@ -99,7 +99,7 @@ int X11_SetupImage(_THIS, SDL_Surface *screen)
 #endif /* not NO_SHARED_MEMORY */
 	{
 		int bpp;
-		screen->pixels = malloc(screen->h*screen->pitch);
+		screen->pixels = SDL_malloc(screen->h*screen->pitch);
 		if ( screen->pixels == NULL ) {
 			SDL_OutOfMemory();
 			return -1;
@@ -154,7 +154,7 @@ static int num_CPU(void)
            FILE *pstat = fopen("/proc/stat", "r");
            if ( pstat ) {
                while ( fgets(line, sizeof(line), pstat) ) {
-                   if (memcmp(line, "cpu", 3) == 0 && line[3] != ' ') {
+                   if (SDL_memcmp(line, "cpu", 3) == 0 && line[3] != ' ') {
                        ++num_cpus;
                    }
                }

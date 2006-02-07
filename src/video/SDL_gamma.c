@@ -165,13 +165,13 @@ int SDL_SetGammaRamp(const Uint16 *red, const Uint16 *green, const Uint16 *blue)
 
 	/* Fill the gamma table with the new values */
 	if ( red ) {
-		memcpy(&video->gamma[0*256], red, 256*sizeof(*video->gamma));
+		SDL_memcpy(&video->gamma[0*256], red, 256*sizeof(*video->gamma));
 	}
 	if ( green ) {
-		memcpy(&video->gamma[1*256], green, 256*sizeof(*video->gamma));
+		SDL_memcpy(&video->gamma[1*256], green, 256*sizeof(*video->gamma));
 	}
 	if ( blue ) {
-		memcpy(&video->gamma[2*256], blue, 256*sizeof(*video->gamma));
+		SDL_memcpy(&video->gamma[2*256], blue, 256*sizeof(*video->gamma));
 	}
 
 	/* Gamma correction always possible on split palettes */
@@ -204,7 +204,7 @@ int SDL_GetGammaRamp(Uint16 *red, Uint16 *green, Uint16 *blue)
 
 	/* Lazily allocate the gamma table */
 	if ( ! video->gamma ) {
-		video->gamma = malloc(3*256*sizeof(*video->gamma));
+		video->gamma = SDL_malloc(3*256*sizeof(*video->gamma));
 		if ( ! video->gamma ) {
 			SDL_OutOfMemory();
 			return -1;
@@ -225,13 +225,13 @@ int SDL_GetGammaRamp(Uint16 *red, Uint16 *green, Uint16 *blue)
 
 	/* Just copy from our internal table */
 	if ( red ) {
-		memcpy(red, &video->gamma[0*256], 256*sizeof(*red));
+		SDL_memcpy(red, &video->gamma[0*256], 256*sizeof(*red));
 	}
 	if ( green ) {
-		memcpy(green, &video->gamma[1*256], 256*sizeof(*green));
+		SDL_memcpy(green, &video->gamma[1*256], 256*sizeof(*green));
 	}
 	if ( blue ) {
-		memcpy(blue, &video->gamma[2*256], 256*sizeof(*blue));
+		SDL_memcpy(blue, &video->gamma[2*256], 256*sizeof(*blue));
 	}
 	return 0;
 }

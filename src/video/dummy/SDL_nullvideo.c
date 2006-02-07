@@ -73,8 +73,8 @@ static void DUMMY_UpdateRects(_THIS, int numrects, SDL_Rect *rects);
 
 static int DUMMY_Available(void)
 {
-	const char *envr = getenv("SDL_VIDEODRIVER");
-	if ((envr) && (strcmp(envr, DUMMYVID_DRIVER_NAME) == 0)) {
+	const char *envr = SDL_getenv("SDL_VIDEODRIVER");
+	if ((envr) && (SDL_strcmp(envr, DUMMYVID_DRIVER_NAME) == 0)) {
 		return(1);
 	}
 
@@ -83,8 +83,8 @@ static int DUMMY_Available(void)
 
 static void DUMMY_DeleteDevice(SDL_VideoDevice *device)
 {
-	free(device->hidden);
-	free(device);
+	SDL_free(device->hidden);
+	SDL_free(device);
 }
 
 static SDL_VideoDevice *DUMMY_CreateDevice(int devindex)
@@ -92,20 +92,20 @@ static SDL_VideoDevice *DUMMY_CreateDevice(int devindex)
 	SDL_VideoDevice *device;
 
 	/* Initialize all variables that we clean on shutdown */
-	device = (SDL_VideoDevice *)malloc(sizeof(SDL_VideoDevice));
+	device = (SDL_VideoDevice *)SDL_malloc(sizeof(SDL_VideoDevice));
 	if ( device ) {
-		memset(device, 0, (sizeof *device));
+		SDL_memset(device, 0, (sizeof *device));
 		device->hidden = (struct SDL_PrivateVideoData *)
-				malloc((sizeof *device->hidden));
+				SDL_malloc((sizeof *device->hidden));
 	}
 	if ( (device == NULL) || (device->hidden == NULL) ) {
 		SDL_OutOfMemory();
 		if ( device ) {
-			free(device);
+			SDL_free(device);
 		}
 		return(0);
 	}
-	memset(device->hidden, 0, (sizeof *device->hidden));
+	SDL_memset(device->hidden, 0, (sizeof *device->hidden));
 
 	/* Set the function pointers */
 	device->VideoInit = DUMMY_VideoInit;
@@ -165,10 +165,10 @@ SDL_Surface *DUMMY_SetVideoMode(_THIS, SDL_Surface *current,
 				int width, int height, int bpp, Uint32 flags)
 {
 	if ( this->hidden->buffer ) {
-		free( this->hidden->buffer );
+		SDL_free( this->hidden->buffer );
 	}
 
-	this->hidden->buffer = malloc(width * height * (bpp / 8));
+	this->hidden->buffer = SDL_malloc(width * height * (bpp / 8));
 	if ( ! this->hidden->buffer ) {
 		SDL_SetError("Couldn't allocate buffer for requested mode");
 		return(NULL);
@@ -176,11 +176,11 @@ SDL_Surface *DUMMY_SetVideoMode(_THIS, SDL_Surface *current,
 
 /* 	printf("Setting mode %dx%d\n", width, height); */
 
-	memset(this->hidden->buffer, 0, width * height * (bpp / 8));
+	SDL_memset(this->hidden->buffer, 0, width * height * (bpp / 8));
 
 	/* Allocate the new pixel format for the screen */
 	if ( ! SDL_ReallocFormat(current, bpp, 0, 0, 0, 0) ) {
-		free(this->hidden->buffer);
+		SDL_free(this->hidden->buffer);
 		this->hidden->buffer = NULL;
 		SDL_SetError("Couldn't allocate new pixel format for requested mode");
 		return(NULL);
@@ -236,7 +236,7 @@ void DUMMY_VideoQuit(_THIS)
 {
 	if (this->screen->pixels != NULL)
 	{
-		free(this->screen->pixels);
+		SDL_free(this->screen->pixels);
 		this->screen->pixels = NULL;
 	}
 }

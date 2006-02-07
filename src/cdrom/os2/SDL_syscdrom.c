@@ -81,7 +81,7 @@ SDL_CDcaps.Close = SDL_SYS_CDClose;
 
 /* Get the number of CD ROMs in the System */
 /* Clean SysInfo structure */
-memset(&msp, 0x00, sizeof(MCI_SYSINFO_PARMS));
+SDL_memset(&msp, 0x00, sizeof(MCI_SYSINFO_PARMS));
 /* Prepare structure to Ask Numer of Audio CDs */
 msp.usDeviceType = MCI_DEVTYPE_CD_AUDIO;	/* CD Audio Type */
 msp.pszReturn = (PSZ)&SysInfoRet; 	/* Return Structure */
@@ -98,13 +98,13 @@ for (i=0; i<SDL_numcds; i++)
 	{
 	msp.ulNumber = i+1;
 	mciSendCommand(0,MCI_SYSINFO, MCI_SYSINFO_NAME | MCI_WAIT,&msp, 0);
-	SDL_cdlist[i] = (char *)malloc(strlen(SysInfoRet)+1);
+	SDL_cdlist[i] = (char *)SDL_malloc(SDL_strlen(SysInfoRet)+1);
 	if ( SDL_cdlist[i] == NULL )
 		{
 		SDL_OutOfMemory();
 		return(-1);
 		}
-	strcpy(SDL_cdlist[i], SysInfoRet);
+	SDL_strcpy(SDL_cdlist[i], SysInfoRet);
 	}
 return(0);
 }
@@ -166,7 +166,7 @@ if ( cdrom->numtracks > SDL_MAX_TRACKS )
 	cdrom->numtracks = SDL_MAX_TRACKS;
 	}
 /* Alocate space for TOC data */
-mtr = (MCI_TOC_REC *)malloc(cdrom->numtracks*sizeof(MCI_TOC_REC));
+mtr = (MCI_TOC_REC *)SDL_malloc(cdrom->numtracks*sizeof(MCI_TOC_REC));
 if ( mtr == NULL )
 	{
 	SDL_OutOfMemory();
@@ -178,7 +178,7 @@ mtp.ulBufSize = cdrom->numtracks*sizeof(MCI_TOC_REC);
 if (LOUSHORT(mciSendCommand(cdrom->id,MCI_GETTOC,MCI_WAIT,&mtp, 0)) != MCIERR_SUCCESS)
 	{
 	SDL_OutOfMemory();
-	free(mtr);
+	SDL_free(mtr);
 	return(CD_ERROR);
 	}
 /* Fill SDL Tracks Structure */
@@ -193,7 +193,7 @@ for (i=0; i<cdrom->numtracks; i++)
 	msp.ulValue = (ULONG)((mtr+i)->TrackNum); /* Track Number? */
 	if (LOUSHORT(mciSendCommand(cdrom->id,MCI_STATUS,MCI_WAIT | MCI_TRACK | MCI_STATUS_ITEM,&msp, 0)) != MCIERR_SUCCESS)
 		{
-		free(mtr);
+		SDL_free(mtr);
 		return (CD_ERROR);
 		}
 	if (msp.ulReturn==MCI_CD_TRACK_AUDIO) cdrom->track[i].type = SDL_AUDIO_TRACK;
@@ -203,7 +203,7 @@ for (i=0; i<cdrom->numtracks; i++)
 	/* Set Track Offset */
 	cdrom->track[i].offset = FRAMESFROMMM((mtr+i)->ulStartAddr);
 	}
-free(mtr);
+SDL_free(mtr);
 return(0);
 }
 
@@ -386,7 +386,7 @@ if ( SDL_numcds > 0 )
 	{
 	for ( i=0; i<SDL_numcds; ++i )
 		{
-		free(SDL_cdlist[i]);
+		SDL_free(SDL_cdlist[i]);
 		}
 	SDL_numcds = 0;
 	}

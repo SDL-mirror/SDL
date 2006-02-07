@@ -243,7 +243,7 @@ bool SDL_QWin::repaintRotation0(const QRect& rect) {
     uchar *fb = (uchar*)my_painter->frameBuffer();
     uchar *buf = (uchar*)my_image->bits();
     if(rect == my_image->rect()) {
-      memcpy(fb, buf, width()*height()*2);
+      SDL_memcpy(fb, buf, width()*height()*2);
     } else {
       int h = rect.height();
       int wd = rect.width()<<1;
@@ -252,7 +252,7 @@ bool SDL_QWin::repaintRotation0(const QRect& rect) {
       fb  += (rect.left()<<1) + rect.top() * my_painter->lineStep();
       buf += (rect.left()<<1) + rect.top() * my_image->bytesPerLine();
       while(h--) {
-	memcpy(fb, buf, wd);
+	SDL_memcpy(fb, buf, wd);
 	fb += fblineadd;
 	buf += buflineadd;
       }
@@ -279,7 +279,7 @@ bool SDL_QWin::repaintRotation3(const QRect& rect) {
       uchar *fb = (uchar*)my_painter->frameBuffer();
       uchar *buf = (uchar*)my_image->bits();
       if(rect == my_image->rect()) {
-	memcpy(fb, buf, width()*height()*2);
+	SDL_memcpy(fb, buf, width()*height()*2);
       } else {
 	int h = rect.height();
 	int wd = rect.width()<<1;
@@ -288,7 +288,7 @@ bool SDL_QWin::repaintRotation3(const QRect& rect) {
 	fb  += (rect.left()<<1) + rect.top() * my_painter->lineStep();
 	buf += (rect.left()<<1) + rect.top() * my_image->bytesPerLine();
 	while(h--) {
-	  memcpy(fb, buf, wd);
+	  SDL_memcpy(fb, buf, wd);
 	  fb += fblineadd;
 	  buf += buflineadd;
 	}

@@ -960,12 +960,12 @@ SDL_Overlay *SDL_CreateYUV_SW(_THIS, int width, int height, Uint32 format, SDL_S
 	}
 
 	/* Create the overlay structure */
-	overlay = (SDL_Overlay *)malloc(sizeof *overlay);
+	overlay = (SDL_Overlay *)SDL_malloc(sizeof *overlay);
 	if ( overlay == NULL ) {
 		SDL_OutOfMemory();
 		return(NULL);
 	}
-	memset(overlay, 0, (sizeof *overlay));
+	SDL_memset(overlay, 0, (sizeof *overlay));
 
 	/* Fill in the basic members */
 	overlay->format = format;
@@ -976,7 +976,7 @@ SDL_Overlay *SDL_CreateYUV_SW(_THIS, int width, int height, Uint32 format, SDL_S
 	overlay->hwfuncs = &sw_yuvfuncs;
 
 	/* Create the pixel data and lookup tables */
-	swdata = (struct private_yuvhwdata *)malloc(sizeof *swdata);
+	swdata = (struct private_yuvhwdata *)SDL_malloc(sizeof *swdata);
 	overlay->hwdata = swdata;
 	if ( swdata == NULL ) {
 		SDL_OutOfMemory();
@@ -985,13 +985,13 @@ SDL_Overlay *SDL_CreateYUV_SW(_THIS, int width, int height, Uint32 format, SDL_S
 	}
 	swdata->stretch = NULL;
 	swdata->display = display;
-	swdata->pixels = (Uint8 *) malloc(width*height*2);
-	swdata->colortab = (int *)malloc(4*256*sizeof(int));
+	swdata->pixels = (Uint8 *) SDL_malloc(width*height*2);
+	swdata->colortab = (int *)SDL_malloc(4*256*sizeof(int));
 	Cr_r_tab = &swdata->colortab[0*256];
 	Cr_g_tab = &swdata->colortab[1*256];
 	Cb_g_tab = &swdata->colortab[2*256];
 	Cb_b_tab = &swdata->colortab[3*256];
-	swdata->rgb_2_pix = (Uint32 *)malloc(3*768*sizeof(Uint32));
+	swdata->rgb_2_pix = (Uint32 *)SDL_malloc(3*768*sizeof(Uint32));
 	r_2_pix_alloc = &swdata->rgb_2_pix[0*768];
 	g_2_pix_alloc = &swdata->rgb_2_pix[1*768];
 	b_2_pix_alloc = &swdata->rgb_2_pix[2*768];
@@ -1279,14 +1279,14 @@ void SDL_FreeYUV_SW(_THIS, SDL_Overlay *overlay)
 			SDL_FreeSurface(swdata->stretch);
 		}
 		if ( swdata->pixels ) {
-			free(swdata->pixels);
+			SDL_free(swdata->pixels);
 		}
 		if ( swdata->colortab ) {
-			free(swdata->colortab);
+			SDL_free(swdata->colortab);
 		}
 		if ( swdata->rgb_2_pix ) {
-			free(swdata->rgb_2_pix);
+			SDL_free(swdata->rgb_2_pix);
 		}
-		free(swdata);
+		SDL_free(swdata);
 	}
 }

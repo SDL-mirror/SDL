@@ -55,8 +55,8 @@ static int Audio_Available(void)
 
 static void Audio_DeleteDevice(SDL_AudioDevice *device)
 {
-	free(device->hidden);
-	free(device);
+	SDL_free(device->hidden);
+	SDL_free(device);
 }
 
 static SDL_AudioDevice *Audio_CreateDevice(int devindex)
@@ -64,20 +64,20 @@ static SDL_AudioDevice *Audio_CreateDevice(int devindex)
 	SDL_AudioDevice *this;
 
 	/* Initialize all variables that we clean on shutdown */
-	this = (SDL_AudioDevice *)malloc(sizeof(SDL_AudioDevice));
+	this = (SDL_AudioDevice *)SDL_malloc(sizeof(SDL_AudioDevice));
 	if ( this ) {
-		memset(this, 0, (sizeof *this));
+		SDL_memset(this, 0, (sizeof *this));
 		this->hidden = (struct SDL_PrivateAudioData *)
-				malloc((sizeof *this->hidden));
+				SDL_malloc((sizeof *this->hidden));
 	}
 	if ( (this == NULL) || (this->hidden == NULL) ) {
 		SDL_OutOfMemory();
 		if ( this ) {
-			free(this);
+			SDL_free(this);
 		}
 		return(0);
 	}
-	memset(this->hidden, 0, (sizeof *this->hidden));
+	SDL_memset(this->hidden, 0, (sizeof *this->hidden));
 
 	/* Set the function pointers */
 	this->OpenAudio = DIB_OpenAudio;
@@ -125,8 +125,8 @@ static void SetMMerror(char *function, MMRESULT code)
 	wchar_t werrbuf[MAXERRORLENGTH];
 #endif
 
-	snprintf(errbuf, SDL_arraysize(errbuf), "%s: ", function);
-	len = strlen(errbuf);
+	SDL_snprintf(errbuf, SDL_arraysize(errbuf), "%s: ", function);
+	len = SDL_strlen(errbuf);
 
 #ifdef _WIN32_WCE
 	/* UNICODE version */
@@ -213,7 +213,7 @@ void DIB_CloseAudio(_THIS)
 	}
 	/* Free raw mixing buffer */
 	if ( mixbuf != NULL ) {
-		free(mixbuf);
+		SDL_free(mixbuf);
 		mixbuf = NULL;
 	}
 }
@@ -232,7 +232,7 @@ int DIB_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	mixbuf = NULL;
 
 	/* Set basic WAVE format parameters */
-	memset(&waveformat, 0, sizeof(waveformat));
+	SDL_memset(&waveformat, 0, sizeof(waveformat));
 	waveformat.wFormatTag = WAVE_FORMAT_PCM;
 
 	/* Determine the audio parameters from the AudioSpec */
@@ -299,13 +299,13 @@ int DIB_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	}
 
 	/* Create the sound buffers */
-	mixbuf = (Uint8 *)malloc(NUM_BUFFERS*spec->size);
+	mixbuf = (Uint8 *)SDL_malloc(NUM_BUFFERS*spec->size);
 	if ( mixbuf == NULL ) {
 		SDL_SetError("Out of memory");
 		return(-1);
 	}
 	for ( i = 0; i < NUM_BUFFERS; ++i ) {
-		memset(&wavebuf[i], 0, sizeof(wavebuf[i]));
+		SDL_memset(&wavebuf[i], 0, sizeof(wavebuf[i]));
 		wavebuf[i].lpData = (LPSTR) &mixbuf[i*spec->size];
 		wavebuf[i].dwBufferLength = spec->size;
 		wavebuf[i].dwFlags = WHDR_DONE;

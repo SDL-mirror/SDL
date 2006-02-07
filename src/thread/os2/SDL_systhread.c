@@ -51,7 +51,7 @@ static void threadfunc(void *pparm)
   if (pThreadParms)
   {
     pfnCurrentEndThread = pThreadParms->pfnCurrentEndThread;
-    free(pThreadParms);
+    SDL_free(pThreadParms);
   }
   // Call endthread!
   if (pfnCurrentEndThread)
@@ -60,7 +60,7 @@ static void threadfunc(void *pparm)
 
 int SDL_SYS_CreateThread(SDL_Thread *thread, void *args, pfnSDL_CurrentBeginThread pfnBeginThread, pfnSDL_CurrentEndThread pfnEndThread)
 {
-  pThreadStartParms pThreadParms = malloc(sizeof(tThreadStartParms));
+  pThreadStartParms pThreadParms = SDL_malloc(sizeof(tThreadStartParms));
   if (!pThreadParms)
   {
     SDL_SetError("Not enough memory to create thread");

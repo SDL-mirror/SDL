@@ -128,13 +128,13 @@ static void AddDrive(char *drive, struct stat *stbuf)
         /* Add this drive to our list */
 
         i = SDL_numcds;
-        SDL_cdlist[i] = (char *)malloc(strlen(drive)+1);
+        SDL_cdlist[i] = (char *)SDL_malloc(SDL_strlen(drive)+1);
         if (SDL_cdlist[i] == NULL)
         {
             SDL_OutOfMemory();
             return;
         }
-        strcpy(SDL_cdlist[i], drive);
+        SDL_strcpy(SDL_cdlist[i], drive);
         SDL_cdmode[i] = stbuf->st_rdev;
         ++SDL_numcds;
     }
@@ -169,18 +169,18 @@ int SDL_SYS_CDInit(void)
     }
 
     /* Look in the environment for our CD-ROM drive list */
-    SDLcdrom = getenv("SDL_CDROM");	/* ':' separated list of devices */
+    SDLcdrom = SDL_getenv("SDL_CDROM");	/* ':' separated list of devices */
     if ( SDLcdrom != NULL )
     {
         char *cdpath, *delim;
 
-        cdpath = malloc(strlen(SDLcdrom)+1);
+        cdpath = SDL_malloc(SDL_strlen(SDLcdrom)+1);
         if (cdpath != NULL)
         {
-            strcpy(cdpath, SDLcdrom);
+            SDL_strcpy(cdpath, SDLcdrom);
             SDLcdrom = cdpath;
             do {
-                delim = strchr(SDLcdrom, ':');
+                delim = SDL_strchr(SDLcdrom, ':');
                 if (delim)
                 {
                     *delim++ = '\0';
@@ -198,7 +198,7 @@ int SDL_SYS_CDInit(void)
                     SDLcdrom = NULL;
                 }
             } while (SDLcdrom);
-            free(cdpath);
+            SDL_free(cdpath);
         }
 
         /* If we found our drives, there's nothing left to do */
@@ -219,7 +219,7 @@ int SDL_SYS_CDInit(void)
             for ( j=checklist[i][1]; exists; ++j )
             {
                 sprintf(drive, "/dev/%s", &checklist[i][3]);
-                insert = strchr(drive, '?');
+                insert = SDL_strchr(drive, '?');
                 if (insert != NULL)
                 {
                     *insert = j;
@@ -346,7 +346,7 @@ static CDstatus SDL_SYS_CDStatus(SDL_CD *cdrom, int *position)
 
     /* if media exists, then do other stuff */
 
-    memset(&info, 0x00, sizeof(info));
+    SDL_memset(&info, 0x00, sizeof(info));
     info.subch_command.data_format = CDROM_SUBCH_CURRENT_POSITION;
 
     do {
@@ -544,7 +544,7 @@ void SDL_SYS_CDQuit(void)
     {
         for (i=0; i<SDL_numcds; ++i)
         {
-            free(SDL_cdlist[i]);
+            SDL_free(SDL_cdlist[i]);
         }
         SDL_numcds = 0;
     }

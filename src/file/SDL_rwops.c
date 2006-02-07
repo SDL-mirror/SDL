@@ -120,7 +120,7 @@ static int mem_read(SDL_RWops *context, void *ptr, int size, int maxnum)
 		total_bytes = mem_available;
 	}
 
-	memcpy(ptr, context->hidden.mem.here, total_bytes);
+	SDL_memcpy(ptr, context->hidden.mem.here, total_bytes);
 	context->hidden.mem.here += total_bytes;
 
 	return (total_bytes / size);
@@ -130,7 +130,7 @@ static int mem_write(SDL_RWops *context, const void *ptr, int size, int num)
 	if ( (context->hidden.mem.here + (num*size)) > context->hidden.mem.stop ) {
 		num = (context->hidden.mem.stop-context->hidden.mem.here)/size;
 	}
-	memcpy(context->hidden.mem.here, ptr, num*size);
+	SDL_memcpy(context->hidden.mem.here, ptr, num*size);
 	context->hidden.mem.here += num*size;
 	return(num);
 }
@@ -162,8 +162,8 @@ static int in_sdl = 0;
  */
 static char *unix_to_mac(const char *file)
 {
-	int flen = strlen(file);
-	char *path = malloc(flen + 2);
+	int flen = SDL_strlen(file);
+	char *path = SDL_malloc(flen + 2);
 	const char *src = file;
 	char *dst = path;
 	if(*src == '/') {
@@ -175,7 +175,7 @@ static char *unix_to_mac(const char *file)
 			*dst++ = ':';   /* relative paths begin with ':' */
 	}
 	while(src < file + flen) {
-		const char *end = strchr(src, '/');
+		const char *end = SDL_strchr(src, '/');
 		int len;
 		if(!end)
 			end = file + flen; /* last component */
@@ -186,7 +186,7 @@ static char *unix_to_mac(const char *file)
 			if(len == 2 && src[0] == '.' && src[1] == '.') {
 				/* replace .. with the empty string */
 			} else {
-				memcpy(dst, src, len);
+				SDL_memcpy(dst, src, len);
 				dst += len;
 			}
 			if(end < file + flen)
@@ -209,7 +209,7 @@ SDL_RWops *SDL_RWFromFile(const char *file, const char *mode)
 	{
 		char *mpath = unix_to_mac(file);
 		fp = fopen(mpath, mode);
-		free(mpath);
+		SDL_free(mpath);
 	}
 #else
 	fp = fopen(file, mode);
@@ -292,7 +292,7 @@ SDL_RWops *SDL_AllocRW(void)
 {
 	SDL_RWops *area;
 
-	area = (SDL_RWops *)malloc(sizeof *area);
+	area = (SDL_RWops *)SDL_malloc(sizeof *area);
 	if ( area == NULL ) {
 		SDL_OutOfMemory();
 	}
@@ -301,5 +301,5 @@ SDL_RWops *SDL_AllocRW(void)
 
 void SDL_FreeRW(SDL_RWops *area)
 {
-	free(area);
+	SDL_free(area);
 }

@@ -57,7 +57,7 @@ static LPDIRECTDRAWSURFACE3 CreateYUVSurface(_THIS,
 	DDSURFACEDESC ddsd;
 
 	/* Set up the surface description */
-	memset(&ddsd, 0, sizeof(ddsd));
+	SDL_memset(&ddsd, 0, sizeof(ddsd));
 	ddsd.dwSize = sizeof(ddsd);
 	ddsd.dwFlags = (DDSD_WIDTH|DDSD_HEIGHT|DDSD_CAPS|DDSD_PIXELFORMAT);
 	ddsd.dwWidth = width;
@@ -86,7 +86,7 @@ static LPDIRECTDRAWSURFACE3 CreateYUVSurface(_THIS,
 	}
 
 	/* Make sure the surface format was set properly */
-	memset(&ddsd, 0, sizeof(ddsd));
+	SDL_memset(&ddsd, 0, sizeof(ddsd));
 	ddsd.dwSize = sizeof(ddsd);
 	result = IDirectDrawSurface3_Lock(dd_surface3, NULL,
 					  &ddsd, DDLOCK_NOSYSLOCK, NULL);
@@ -134,13 +134,13 @@ SDL_Overlay *DX5_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, S
 	IDirectDraw2_GetFourCCCodes(ddraw2, &numcodes, NULL);
 	if ( numcodes ) {
 		DWORD i;
-		codes = malloc(numcodes*sizeof(*codes));
+		codes = SDL_malloc(numcodes*sizeof(*codes));
 		if ( codes ) {
 			IDirectDraw2_GetFourCCCodes(ddraw2, &numcodes, codes);
 			for ( i=0; i<numcodes; ++i ) {
 				fprintf(stderr, "Code %d: 0x%x\n", i, PrintFOURCC(codes[i]));
 			}
-			free(codes);
+			SDL_free(codes);
 		}
 	} else {
 		fprintf(stderr, "No FOURCC codes supported\n");
@@ -148,12 +148,12 @@ SDL_Overlay *DX5_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, S
 #endif
 
 	/* Create the overlay structure */
-	overlay = (SDL_Overlay *)malloc(sizeof *overlay);
+	overlay = (SDL_Overlay *)SDL_malloc(sizeof *overlay);
 	if ( overlay == NULL ) {
 		SDL_OutOfMemory();
 		return(NULL);
 	}
-	memset(overlay, 0, (sizeof *overlay));
+	SDL_memset(overlay, 0, (sizeof *overlay));
 
 	/* Fill in the basic members */
 	overlay->format = format;
@@ -164,7 +164,7 @@ SDL_Overlay *DX5_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, S
 	overlay->hwfuncs = &dx5_yuvfuncs;
 
 	/* Create the pixel data and lookup tables */
-	hwdata = (struct private_yuvhwdata *)malloc(sizeof *hwdata);
+	hwdata = (struct private_yuvhwdata *)SDL_malloc(sizeof *hwdata);
 	overlay->hwdata = hwdata;
 	if ( hwdata == NULL ) {
 		SDL_OutOfMemory();
@@ -202,7 +202,7 @@ int DX5_LockYUVOverlay(_THIS, SDL_Overlay *overlay)
 	DDSURFACEDESC ddsd;
 
 	surface = overlay->hwdata->surface;
-	memset(&ddsd, 0, sizeof(ddsd));
+	SDL_memset(&ddsd, 0, sizeof(ddsd));
 	ddsd.dwSize = sizeof(ddsd);
 	result = IDirectDrawSurface3_Lock(surface, NULL,
 					  &ddsd, DDLOCK_NOSYSLOCK, NULL);
@@ -291,7 +291,7 @@ void DX5_FreeYUVOverlay(_THIS, SDL_Overlay *overlay)
 		if ( hwdata->surface ) {
 			IDirectDrawSurface_Release(hwdata->surface);
 		}
-		free(hwdata);
+		SDL_free(hwdata);
 	}
 }
 

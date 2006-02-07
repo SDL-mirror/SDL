@@ -123,7 +123,7 @@ int ph_GL_LoadLibrary(_THIS, const char* path)
     this->gl_config.dll_handle = handle;
     this->gl_config.driver_loaded = 1;
 
-    strncpy(this->gl_config.driver_path, path, sizeof(this->gl_config.driver_path)-1);
+    SDL_strncpy(this->gl_config.driver_path, path, sizeof(this->gl_config.driver_path)-1);
 
     return 0;
 }

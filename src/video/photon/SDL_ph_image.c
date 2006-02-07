@@ -77,7 +77,7 @@ int ph_SetupImage(_THIS, SDL_Surface *screen)
     if ((bpp==8) && (desktoppal==SDLPH_PAL_EMULATE))
     {
         /* creating image palette */
-        palette=malloc(_Pg_MAX_PALETTE*sizeof(PgColor_t));
+        palette=SDL_malloc(_Pg_MAX_PALETTE*sizeof(PgColor_t));
         if (palette==NULL)
         {
             SDL_SetError("ph_SetupImage(): can't allocate memory for palette !\n");
@@ -89,7 +89,7 @@ int ph_SetupImage(_THIS, SDL_Surface *screen)
         if ((SDL_Image = PhCreateImage(NULL, screen->w, screen->h, type, palette, _Pg_MAX_PALETTE, 1)) == NULL)
         {
             SDL_SetError("ph_SetupImage(): PhCreateImage() failed for bpp=8 !\n");
-            free(palette);
+            SDL_free(palette);
             return -1;
         }
     }
@@ -254,11 +254,11 @@ int ph_SetupFullScreenImage(_THIS, SDL_Surface* screen)
            
            for (i=0; i<40; i++)
            {
-              memset(screen->pixels+screen->pitch*i, 0x00, screen->pitch);
+              SDL_memset(screen->pixels+screen->pitch*i, 0x00, screen->pitch);
            }
            for (i=440; i<480; i++)
            {
-              memset(screen->pixels+screen->pitch*i, 0x00, screen->pitch);
+              SDL_memset(screen->pixels+screen->pitch*i, 0x00, screen->pitch);
            }
            screen->pixels+=screen->pitch*40;
         }
@@ -278,11 +278,11 @@ int ph_SetupFullScreenImage(_THIS, SDL_Surface* screen)
            
            for (i=0; i<40; i++)
            {
-              memset(screen->pixels+screen->pitch*i, 0x00, screen->pitch);
+              SDL_memset(screen->pixels+screen->pitch*i, 0x00, screen->pitch);
            }
            for (i=440; i<480; i++)
            {
-              memset(screen->pixels+screen->pitch*i, 0x00, screen->pitch);
+              SDL_memset(screen->pixels+screen->pitch*i, 0x00, screen->pitch);
            }
            screen->pixels+=screen->pitch*40;
         }
@@ -391,10 +391,10 @@ void ph_DestroyImage(_THIS, SDL_Surface* screen)
         /* if palette allocated, free it */
         if (SDL_Image->palette)
         {
-            free(SDL_Image->palette);
+            SDL_free(SDL_Image->palette);
         }
         PgShmemDestroy(SDL_Image->image);
-        free(SDL_Image);
+        SDL_free(SDL_Image);
     }
 
     /* Must be zeroed everytime */
@@ -531,8 +531,8 @@ int ph_AllocHWSurface(_THIS, SDL_Surface* surface)
        SDL_SetError("ph_AllocHWSurface(): hwdata already exists!\n");
        return -1;
     }
-    surface->hwdata=malloc(sizeof(struct private_hwdata));
-    memset(surface->hwdata, 0x00, sizeof(struct private_hwdata));
+    surface->hwdata=SDL_malloc(sizeof(struct private_hwdata));
+    SDL_memset(surface->hwdata, 0x00, sizeof(struct private_hwdata));
     surface->hwdata->offscreenctx=PdCreateOffscreenContext(0, surface->w, surface->h, Pg_OSC_MEM_PAGE_ALIGN);
     if (surface->hwdata->offscreenctx == NULL)
     {
@@ -601,7 +601,7 @@ void ph_FreeHWSurface(_THIS, SDL_Surface* surface)
 
     PhDCRelease(surface->hwdata->offscreenctx);
     
-    free(surface->hwdata);
+    SDL_free(surface->hwdata);
     surface->hwdata=NULL;
 
     /* Update video ram amount */

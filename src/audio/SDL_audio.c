@@ -220,7 +220,7 @@ int SDL_RunAudio(void *audiop)
 				stream = audio->fake_stream;
 			}
 		}
-		memset(stream, silence, stream_len);
+		SDL_memset(stream, silence, stream_len);
 
 		if ( ! audio->paused ) {
 			SDL_mutexP(audio->mixer_lock);
@@ -235,7 +235,7 @@ int SDL_RunAudio(void *audiop)
 			if ( stream == NULL ) {
 				stream = audio->fake_stream;
 			}
-			memcpy(stream, audio->convert.buf,
+			SDL_memcpy(stream, audio->convert.buf,
 			               audio->convert.len_cvt);
 		}
 
@@ -299,17 +299,17 @@ int SDL_AudioInit(const char *driver_name)
 	audio = NULL;
 	idx = 0;
 #ifdef unix
-	if ( (driver_name == NULL) && (getenv("ESPEAKER") != NULL) ) {
+	if ( (driver_name == NULL) && (SDL_getenv("ESPEAKER") != NULL) ) {
 		/* Ahem, we know that if ESPEAKER is set, user probably wants
 		   to use ESD, but don't start it if it's not already running.
 		   This probably isn't the place to do this, but... Shh! :)
 		 */
 		for ( i=0; bootstrap[i]; ++i ) {
-			if ( strcmp(bootstrap[i]->name, "esd") == 0 ) {
+			if ( SDL_strcmp(bootstrap[i]->name, "esd") == 0 ) {
 				const char *esd_no_spawn;
 
 				/* Don't start ESD if it's not running */
-				esd_no_spawn = getenv("ESD_NO_SPAWN");
+				esd_no_spawn = SDL_getenv("ESD_NO_SPAWN");
 				if ( esd_no_spawn == NULL ) {
 					putenv("ESD_NO_SPAWN=1");
 				}
@@ -329,13 +329,13 @@ int SDL_AudioInit(const char *driver_name)
 	if ( audio == NULL ) {
 		if ( driver_name != NULL ) {
 #if 0	/* This will be replaced with a better driver selection API */
-			if ( strrchr(driver_name, ':') != NULL ) {
-				idx = atoi(strrchr(driver_name, ':')+1);
+			if ( SDL_strrchr(driver_name, ':') != NULL ) {
+				idx = atoi(SDL_strrchr(driver_name, ':')+1);
 			}
 #endif
 			for ( i=0; bootstrap[i]; ++i ) {
-				if (strncmp(bootstrap[i]->name, driver_name,
-				            strlen(bootstrap[i]->name)) == 0) {
+				if (SDL_strncmp(bootstrap[i]->name, driver_name,
+				            SDL_strlen(bootstrap[i]->name)) == 0) {
 					if ( bootstrap[i]->available() ) {
 						audio=bootstrap[i]->create(idx);
 						break;
@@ -375,7 +375,7 @@ int SDL_AudioInit(const char *driver_name)
 char *SDL_AudioDriverName(char *namebuf, int maxlen)
 {
 	if ( current_audio != NULL ) {
-		strncpy(namebuf, current_audio->name, maxlen-1);
+		SDL_strncpy(namebuf, current_audio->name, maxlen-1);
 		namebuf[maxlen-1] = '\0';
 		return(namebuf);
 	}
@@ -436,7 +436,7 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 	SDL_CalculateAudioSpec(desired);
 
 	/* Open the audio subsystem */
-	memcpy(&audio->spec, desired, sizeof(audio->spec));
+	SDL_memcpy(&audio->spec, desired, sizeof(audio->spec));
 	audio->convert.needed = 0;
 	audio->enabled = 1;
 	audio->paused  = 1;
@@ -489,7 +489,7 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 
 	/* See if we need to do any conversion */
 	if ( obtained != NULL ) {
-		memcpy(obtained, &audio->spec, sizeof(audio->spec));
+		SDL_memcpy(obtained, &audio->spec, sizeof(audio->spec));
 	} else if ( desired->freq != audio->spec.freq ||
                     desired->format != audio->spec.format ||
 	            desired->channels != audio->spec.channels ) {

@@ -66,8 +66,8 @@ static int Audio_Available(void)
 
 static void Audio_DeleteDevice(SDL_AudioDevice *device)
 {
-    free(device->hidden);
-    free(device);
+    SDL_free(device->hidden);
+    SDL_free(device);
 }
 
 static SDL_AudioDevice *Audio_CreateDevice(int devindex)
@@ -75,20 +75,20 @@ static SDL_AudioDevice *Audio_CreateDevice(int devindex)
     SDL_AudioDevice *this;
 
     /* Initialize all variables that we clean on shutdown */
-    this = (SDL_AudioDevice *)malloc(sizeof(SDL_AudioDevice));
+    this = (SDL_AudioDevice *)SDL_malloc(sizeof(SDL_AudioDevice));
     if ( this ) {
-        memset(this, 0, (sizeof *this));
+        SDL_memset(this, 0, (sizeof *this));
         this->hidden = (struct SDL_PrivateAudioData *)
-                malloc((sizeof *this->hidden));
+                SDL_malloc((sizeof *this->hidden));
     }
     if ( (this == NULL) || (this->hidden == NULL) ) {
         SDL_OutOfMemory();
         if ( this ) {
-            free(this);
+            SDL_free(this);
         }
         return(0);
     }
-    memset(this->hidden, 0, (sizeof *this->hidden));
+    SDL_memset(this->hidden, 0, (sizeof *this->hidden));
 
     /* Set the function pointers */
     this->OpenAudio   = Mac_OpenAudio;
@@ -135,7 +135,7 @@ static void mix_buffer(SDL_AudioDevice *audio, UInt8 *buffer)
             if ( audio->convert.len_cvt != audio->spec.size ) {
                 /* Uh oh... probably crashes here */;
             }
-            memcpy(buffer, audio->convert.buf, audio->convert.len_cvt);
+            SDL_memcpy(buffer, audio->convert.buf, audio->convert.len_cvt);
         } else {
             audio->spec.callback(audio->spec.userdata, buffer, audio->spec.size);
         }
@@ -267,7 +267,7 @@ static int Mac_OpenAudio(_THIS, SDL_AudioSpec *spec) {
    }
    
    /* Create the sound manager channel */
-    channel = (SndChannelPtr)malloc(sizeof(*channel));
+    channel = (SndChannelPtr)SDL_malloc(sizeof(*channel));
     if ( channel == NULL ) {
         SDL_OutOfMemory();
         return(-1);
@@ -281,7 +281,7 @@ static int Mac_OpenAudio(_THIS, SDL_AudioSpec *spec) {
     channel->qLength = 128;
     if ( SndNewChannel(&channel, sampledSynth, initOptions, callback) != noErr ) {
         SDL_SetError("Unable to create audio channel");
-        free(channel);
+        SDL_free(channel);
         channel = NULL;
         return(-1);
     }
@@ -311,7 +311,7 @@ static void Mac_CloseAudio(_THIS) {
    
     for ( i=0; i<2; ++i ) {
         if ( buffer[i] ) {
-            free(buffer[i]);
+            SDL_free(buffer[i]);
             buffer[i] = NULL;
         }
     }
@@ -355,7 +355,7 @@ void sndDoubleBackProc (SndChannelPtr chan, SndDoubleBufferPtr newbuf)
                 /* Uh oh... probably crashes here */;
             }
 #endif
-            memcpy(newbuf->dbSoundData, audio->convert.buf,
+            SDL_memcpy(newbuf->dbSoundData, audio->convert.buf,
                             audio->convert.len_cvt);
         } else {
             audio->spec.callback(audio->spec.userdata,
@@ -400,7 +400,7 @@ static void Mac_CloseAudio(_THIS)
     }
     for ( i=0; i<2; ++i ) {
         if ( audio_buf[i] ) {
-            free(audio_buf[i]);
+            SDL_free(audio_buf[i]);
             audio_buf[i] = NULL;
         }
     }
@@ -435,7 +435,7 @@ static int Mac_OpenAudio(_THIS, SDL_AudioSpec *spec)
     SDL_CalculateAudioSpec(spec);
 
     /* initialize the double-back header */
-    memset(&audio_dbh, 0, sizeof(audio_dbh));
+    SDL_memset(&audio_dbh, 0, sizeof(audio_dbh));
     doubleBackProc = NewSndDoubleBackProc (sndDoubleBackProc);
     sample_bits = spec->size / spec->samples / spec->channels * 8;
     
@@ -467,7 +467,7 @@ static int Mac_OpenAudio(_THIS, SDL_AudioSpec *spec)
     }
 
     /* Create the sound manager channel */
-    channel = (SndChannelPtr)malloc(sizeof(*channel));
+    channel = (SndChannelPtr)SDL_malloc(sizeof(*channel));
     if ( channel == NULL ) {
         SDL_OutOfMemory();
         return(-1);
@@ -481,7 +481,7 @@ static int Mac_OpenAudio(_THIS, SDL_AudioSpec *spec)
     channel->qLength = 128;
     if ( SndNewChannel(&channel, sampledSynth, initOptions, 0L) != noErr ) {
         SDL_SetError("Unable to create audio channel");
-        free(channel);
+        SDL_free(channel);
         channel = NULL;
         return(-1);
     }

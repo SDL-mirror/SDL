@@ -589,7 +589,7 @@ int main(int argc, char *argv[])
 
     /* Parse C-string into argv and argc */
     nargs = ParseCommandLine (commandLine, NULL);
-    args = (char **)malloc((nargs+1)*(sizeof *args));
+    args = (char **)SDL_malloc((nargs+1)*(sizeof *args));
     if ( args == NULL ) {
 		exit(-1);
 	}

@@ -80,7 +80,7 @@ static int ExtensionSupported(const char *extension, const char *extensions)
 	const char *where, *terminator;
 
 	/* Extension names should not have spaces. */
-	where = strchr(extension, ' ');
+	where = SDL_strchr(extension, ' ');
 	if ( where || *extension == '\0' )
 	      return 0;
 	
@@ -95,10 +95,10 @@ static int ExtensionSupported(const char *extension, const char *extensions)
 	
 	for (;;)
 	{
-		where = strstr(start, extension);
+		where = SDL_strstr(start, extension);
 		if (!where) break;
 		
-		terminator = where + strlen(extension);
+		terminator = where + SDL_strlen(extension);
 		if (where == start || *(where - 1) == ' ')
 	        if (*terminator == ' ' || *terminator == '\0') return 1;
 
@@ -191,7 +191,7 @@ int WIN_GL_SetupWindow(_THIS)
 		}
 
 		/* Set up the pixel format descriptor with our needed format */
-		memset(&GL_pfd, 0, sizeof(GL_pfd));
+		SDL_memset(&GL_pfd, 0, sizeof(GL_pfd));
 		GL_pfd.nSize = sizeof(GL_pfd);
 		GL_pfd.nVersion = 1;
 		GL_pfd.dwFlags = (PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL);
@@ -534,7 +534,7 @@ int WIN_GL_LoadLibrary(_THIS, const char* path)
 	WIN_GL_UnloadLibrary(this);
 
 	/* Load new function pointers */
-	memset(this->gl_data, 0, sizeof(*this->gl_data));
+	SDL_memset(this->gl_data, 0, sizeof(*this->gl_data));
 	this->gl_data->wglGetProcAddress = (void * (WINAPI *)(const char *))
 		GetProcAddress(handle, "wglGetProcAddress");
 	this->gl_data->wglCreateContext = (HGLRC (WINAPI *)(HDC))
@@ -554,7 +554,7 @@ int WIN_GL_LoadLibrary(_THIS, const char* path)
 	}
 
 	this->gl_config.dll_handle = handle;
-	strcpy(this->gl_config.driver_path, path);
+	SDL_strcpy(this->gl_config.driver_path, path);
 	this->gl_config.driver_loaded = 1;
 	return 0;
 }

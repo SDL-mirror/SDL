@@ -54,13 +54,13 @@ static struct mouse_info mouseinfo;
  */
 int VGL_initkeymaps(int fd)
 {
-	vga_keymap = malloc(sizeof(keymap_t));
+	vga_keymap = SDL_malloc(sizeof(keymap_t));
 	if ( ! vga_keymap ) {
 		SDL_OutOfMemory();
 		return(-1);
 	}
 	if (ioctl(fd, GIO_KEYMAP, vga_keymap) == -1) {
-		free(vga_keymap);
+		SDL_free(vga_keymap);
 		vga_keymap = NULL;
 		SDL_SetError("Unable to get keyboard map");
 		return(-1);

@@ -73,7 +73,7 @@ int SDL_PrivateAppActive(Uint8 gain, Uint8 state)
 	posted = 0;
 	if ( SDL_ProcessEvents[SDL_ACTIVEEVENT] == SDL_ENABLE ) {
 		SDL_Event event;
-		memset(&event, 0, sizeof(event));
+		SDL_memset(&event, 0, sizeof(event));
 		event.type = SDL_ACTIVEEVENT;
 		event.active.gain = gain;
 		event.active.state = state;

@@ -63,7 +63,7 @@ void SDL_SetError (const char *fmt, ...)
 	/* Copy in the key, mark error as valid */
 	error = SDL_GetErrBuf();
 	error->error = 1;
-	strncpy((char *)error->key, fmt, sizeof(error->key));
+	SDL_strncpy((char *)error->key, fmt, sizeof(error->key));
 	error->key[sizeof(error->key)-1] = '\0';
 
 	va_start(ap, fmt);
@@ -98,7 +98,7 @@ void SDL_SetError (const char *fmt, ...)
 				  char *str = va_arg(ap, char *);
 				  if (str == NULL)
 				      str = "(null)";
-				  strncpy((char *)error->args[index].buf, str, ERR_MAX_STRLEN);
+				  SDL_strncpy((char *)error->args[index].buf, str, ERR_MAX_STRLEN);
 				  error->args[index].buf[ERR_MAX_STRLEN-1] = 0;
 				  error->argc++;
 				}
@@ -125,9 +125,9 @@ static int PrintInt(Uint16 *str, unsigned int maxlen, int value)
 	char tmp[128];
 	int len, i;
 
-	snprintf(tmp, SDL_arraysize(tmp), "%d", value);
+	SDL_snprintf(tmp, SDL_arraysize(tmp), "%d", value);
 	len = 0;
-	if ( strlen(tmp) < maxlen ) {
+	if ( SDL_strlen(tmp) < maxlen ) {
 		for ( i=0; tmp[i]; ++i ) {
 			*str++ = tmp[i];
 			++len;
@@ -141,9 +141,9 @@ static int PrintDouble(Uint16 *str, unsigned int maxlen, double value)
 	char tmp[128];
 	int len, i;
 
-	snprintf(tmp, SDL_arraysize(tmp), "%f", value);
+	SDL_snprintf(tmp, SDL_arraysize(tmp), "%f", value);
 	len = 0;
-	if ( strlen(tmp) < maxlen ) {
+	if ( SDL_strlen(tmp) < maxlen ) {
 		for ( i=0; tmp[i]; ++i ) {
 			*str++ = tmp[i];
 			++len;
@@ -157,9 +157,9 @@ static int PrintPointer(Uint16 *str, unsigned int maxlen, void *value)
 	char tmp[128];
 	int len, i;
 
-	snprintf(tmp, SDL_arraysize(tmp), "%p", value);
+	SDL_snprintf(tmp, SDL_arraysize(tmp), "%p", value);
 	len = 0;
-	if ( strlen(tmp) < maxlen ) {
+	if ( SDL_strlen(tmp) < maxlen ) {
 		for ( i=0; tmp[i]; ++i ) {
 			*str++ = tmp[i];
 			++len;
@@ -253,9 +253,9 @@ Uint8 *SDL_GetErrorMsg(Uint8 *errstr, unsigned int maxlen)
 	unsigned int i;
 
 	/* Allocate the UNICODE buffer */
-	errstr16 = (Uint16 *)malloc(maxlen * (sizeof *errstr16));
+	errstr16 = (Uint16 *)SDL_malloc(maxlen * (sizeof *errstr16));
 	if ( ! errstr16 ) {
-		strncpy((char *)errstr, "Out of memory", maxlen);
+		SDL_strncpy((char *)errstr, "Out of memory", maxlen);
 		errstr[maxlen-1] = '\0';
 		return(errstr);
 	}
@@ -269,7 +269,7 @@ Uint8 *SDL_GetErrorMsg(Uint8 *errstr, unsigned int maxlen)
 	}
 
 	/* Free UNICODE buffer (if necessary) */
-	free(errstr16);
+	SDL_free(errstr16);
 
 	return(errstr);
 }
@@ -320,7 +320,7 @@ int main(int argc, char *argv[])
 	SDL_SetError("Hi there!");
 	printf("Error 1: %s\n", SDL_GetError());
 	SDL_ClearError();
-	memset(buffer, '1', BUFSIZ);
+	SDL_memset(buffer, '1', BUFSIZ);
 	buffer[BUFSIZ] = 0;
 	SDL_SetError("This is the error: %s (%f)", buffer, 1.0);
 	printf("Error 2: %s\n", SDL_GetError());

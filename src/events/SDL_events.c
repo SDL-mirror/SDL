@@ -151,7 +151,7 @@ static int SDL_StartEventThread(Uint32 flags)
 {
 	/* Reset everything to zero */
 	SDL_EventThread = NULL;
-	memset(&SDL_EventLock, 0, sizeof(SDL_EventLock));
+	SDL_memset(&SDL_EventLock, 0, sizeof(SDL_EventLock));
 
 	/* Create the lock and set ourselves active */
 #ifndef DISABLE_THREADS
@@ -239,7 +239,7 @@ int SDL_StartEventLoop(Uint32 flags)
 
 	/* No filter to start with, process most event types */
 	SDL_EventOK = NULL;
-	memset(SDL_ProcessEvents,SDL_ENABLE,sizeof(SDL_ProcessEvents));
+	SDL_memset(SDL_ProcessEvents,SDL_ENABLE,sizeof(SDL_ProcessEvents));
 	SDL_eventstate = ~0;
 	/* It's not save to call SDL_EventState() yet */
 	SDL_eventstate &= ~(0x00000001 << SDL_SYSWMEVENT);
@@ -306,7 +306,7 @@ static int SDL_CutEvent(int spot)
 	{
 		int here, next;
 
-		/* This can probably be optimized with memcpy() -- careful! */
+		/* This can probably be optimized with SDL_memcpy() -- careful! */
 		if ( --SDL_EventQ.tail < 0 ) {
 			SDL_EventQ.tail = MAXEVENTS-1;
 		}
@@ -493,7 +493,7 @@ int SDL_PrivateSysWMEvent(SDL_SysWMmsg *message)
 	posted = 0;
 	if ( SDL_ProcessEvents[SDL_SYSWMEVENT] == SDL_ENABLE ) {
 		SDL_Event event;
-		memset(&event, 0, sizeof(event));
+		SDL_memset(&event, 0, sizeof(event));
 		event.type = SDL_SYSWMEVENT;
 		event.syswm.msg = message;
 		if ( (SDL_EventOK == NULL) || (*SDL_EventOK)(&event) ) {

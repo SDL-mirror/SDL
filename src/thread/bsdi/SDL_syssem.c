@@ -113,11 +113,11 @@ struct SDL_semaphore {
 /* Create a semaphore, initialized with value */
 SDL_sem *SDL_CreateSemaphore(Uint32 initial_value)
 {
-	SDL_sem *sem = (SDL_sem *) malloc(sizeof(SDL_sem));
+	SDL_sem *sem = (SDL_sem *) SDL_malloc(sizeof(SDL_sem));
 	if ( sem ) {
 		if ( sem_init(&sem->sem_data, 0, initial_value) < 0 ) {
 			SDL_SetError("sem_init() failed");
-			free(sem);
+			SDL_free(sem);
 			sem = NULL;
 		} else {
 			sem->sem = &sem->sem_data;
@@ -132,7 +132,7 @@ void SDL_DestroySemaphore(SDL_sem *sem)
 {
 	if ( sem ) {
 		sem_destroy(sem->sem);
-		free(sem);
+		SDL_free(sem);
 	}
 }
 
@@ -322,7 +322,7 @@ sem_init(sem_t *sem, int pshared, unsigned int value)
 		goto RETURN;
 	}
 
-	*sem = (sem_t)malloc(sizeof(struct sem));
+	*sem = (sem_t)SDL_malloc(sizeof(struct sem));
 	if (*sem == NULL) {
 		errno = ENOSPC;
 		retval = -1;
@@ -333,7 +333,7 @@ sem_init(sem_t *sem, int pshared, unsigned int value)
 	 * Initialize the semaphore.
 	 */
 	if (pthread_mutex_init(&(*sem)->lock, NULL) != 0) {
-		free(*sem);
+		SDL_free(*sem);
 		errno = ENOSPC;
 		retval = -1;
 		goto RETURN;
@@ -341,7 +341,7 @@ sem_init(sem_t *sem, int pshared, unsigned int value)
 
 	if (pthread_cond_init(&(*sem)->gtzero, NULL) != 0) {
 		pthread_mutex_destroy(&(*sem)->lock);
-		free(*sem);
+		SDL_free(*sem);
 		errno = ENOSPC;
 		retval = -1;
 		goto RETURN;
@@ -377,7 +377,7 @@ sem_destroy(sem_t *sem)
 	pthread_cond_destroy(&(*sem)->gtzero);
 	(*sem)->magic = 0;
 
-	free(*sem);
+	SDL_free(*sem);
 
 	retval = 0;
   RETURN:

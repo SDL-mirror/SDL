@@ -45,8 +45,8 @@ void *SDL_LoadObject(const char *sofile)
 #if defined(_WIN32_WCE)
 	char errbuf[512];
 
-	wchar_t *errbuf_t = malloc(512 * sizeof(wchar_t));
-	wchar_t *sofile_t = malloc((MAX_PATH+1) * sizeof(wchar_t));
+	wchar_t *errbuf_t = SDL_malloc(512 * sizeof(wchar_t));
+	wchar_t *sofile_t = SDL_malloc((MAX_PATH+1) * sizeof(wchar_t));
 
 	MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, sofile, -1, sofile_t, MAX_PATH);
 	handle = (void *)LoadLibrary(sofile_t);
@@ -62,8 +62,8 @@ void *SDL_LoadObject(const char *sofile)
 		loaderror = errbuf;
 	}
 
-	free(sofile_t);
-	free(errbuf_t);
+	SDL_free(sofile_t);
+	SDL_free(errbuf_t);
 
 #else /*if defined(WIN32)*/
 	char errbuf[512];
@@ -94,10 +94,10 @@ void *SDL_LoadFunction(void *handle, const char *name)
 
 #if defined(_WIN32_WCE)
 	char errbuf[512];
-	int length = strlen(name);
+	int length = SDL_strlen(name);
 
-	wchar_t *name_t = malloc((length + 1) * sizeof(wchar_t));
-	wchar_t *errbuf_t = malloc(512 * sizeof(wchar_t));
+	wchar_t *name_t = SDL_malloc((length + 1) * sizeof(wchar_t));
+	wchar_t *errbuf_t = SDL_malloc(512 * sizeof(wchar_t));
 
 	MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, name, -1, name_t, length);
 
@@ -112,8 +112,8 @@ void *SDL_LoadFunction(void *handle, const char *name)
 		loaderror = errbuf;
 	}
 
-	free(name_t);
-	free(errbuf_t);
+	SDL_free(name_t);
+	SDL_free(errbuf_t);
 
 #else /*if defined(WIN32)*/
 	char errbuf[512];

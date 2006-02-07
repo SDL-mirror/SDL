@@ -147,10 +147,10 @@ static void    SDLOSXCAGuard_Notify(SDLOSXCAGuard *cag)
 
 SDLOSXCAGuard *new_SDLOSXCAGuard(void)
 {
-    SDLOSXCAGuard *cag = (SDLOSXCAGuard *) malloc(sizeof (SDLOSXCAGuard));
+    SDLOSXCAGuard *cag = (SDLOSXCAGuard *) SDL_malloc(sizeof (SDLOSXCAGuard));
     if (cag == NULL)
         return NULL;
-    memset(cag, '\0', sizeof (*cag));
+    SDL_memset(cag, '\0', sizeof (*cag));
 
     #define SET_SDLOSXCAGUARD_METHOD(m) cag->m = SDLOSXCAGuard_##m
     SET_SDLOSXCAGUARD_METHOD(Lock);
@@ -176,7 +176,7 @@ void delete_SDLOSXCAGuard(SDLOSXCAGuard *cag)
     {
         pthread_mutex_destroy(&cag->mMutex);
         pthread_cond_destroy(&cag->mCondVar);
-        free(cag);
+        SDL_free(cag);
     }
 }
 

@@ -42,20 +42,20 @@ int SDL_putenv(const char *variable)
 	char *value;
 	const char *sep;
 
-	sep = strchr(variable, '=');
+	sep = SDL_strchr(variable, '=');
 	if ( sep == NULL ) {
 		return -1;
 	}
-	bufferlen = strlen(variable)+1;
+	bufferlen = SDL_strlen(variable)+1;
 	if ( bufferlen > SDL_envmemlen ) {
-		char *newmem = (char *)realloc(SDL_envmem, bufferlen);
+		char *newmem = (char *)SDL_realloc(SDL_envmem, bufferlen);
 		if ( newmem == NULL ) {
 			return -1;
 		}
 		SDL_envmem = newmem;
 		SDL_envmemlen = bufferlen;
 	}
-	strcpy(SDL_envmem, variable);
+	SDL_strcpy(SDL_envmem, variable);
 	value = SDL_envmem + (sep - variable);
 	*value++ = '\0';
 	if ( !SetEnvironmentVariable(SDL_envmem, *value ? value : NULL) ) {
@@ -74,7 +74,7 @@ char *SDL_getenv(const char *name)
 		return NULL;
 	}
 	if ( bufferlen > SDL_envmemlen ) {
-		char *newmem = (char *)realloc(SDL_envmem, bufferlen);
+		char *newmem = (char *)SDL_realloc(SDL_envmem, bufferlen);
 		if ( newmem == NULL ) {
 			return NULL;
 		}
@@ -140,7 +140,7 @@ int SDL_putenv(const char *variable)
 
 	/* Didn't find it in the environment, expand and add */
 	if ( ! added ) {
-		new_env = realloc(SDL_env, (i+2)*sizeof(char *));
+		new_env = SDL_realloc(SDL_env, (i+2)*sizeof(char *));
 		if ( new_env ) {
 			SDL_env = new_env;
 			SDL_env[i++] = new_variable;

@@ -105,12 +105,12 @@ static void DIB_DeleteDevice(SDL_VideoDevice *device)
 {
 	if ( device ) {
 		if ( device->hidden ) {
-			free(device->hidden);
+			SDL_free(device->hidden);
 		}
 		if ( device->gl_data ) {
-			free(device->gl_data);
+			SDL_free(device->gl_data);
 		}
-		free(device);
+		SDL_free(device);
 	}
 }
 
@@ -119,13 +119,13 @@ static SDL_VideoDevice *DIB_CreateDevice(int devindex)
 	SDL_VideoDevice *device;
 
 	/* Initialize all variables that we clean on shutdown */
-	device = (SDL_VideoDevice *)malloc(sizeof(SDL_VideoDevice));
+	device = (SDL_VideoDevice *)SDL_malloc(sizeof(SDL_VideoDevice));
 	if ( device ) {
-		memset(device, 0, (sizeof *device));
+		SDL_memset(device, 0, (sizeof *device));
 		device->hidden = (struct SDL_PrivateVideoData *)
-				malloc((sizeof *device->hidden));
+				SDL_malloc((sizeof *device->hidden));
 		device->gl_data = (struct SDL_PrivateGLData *)
-				malloc((sizeof *device->gl_data));
+				SDL_malloc((sizeof *device->gl_data));
 	}
 	if ( (device == NULL) || (device->hidden == NULL) ||
 		                 (device->gl_data == NULL) ) {
@@ -133,8 +133,8 @@ static SDL_VideoDevice *DIB_CreateDevice(int devindex)
 		DIB_DeleteDevice(device);
 		return(NULL);
 	}
-	memset(device->hidden, 0, (sizeof *device->hidden));
-	memset(device->gl_data, 0, (sizeof *device->gl_data));
+	SDL_memset(device->hidden, 0, (sizeof *device->hidden));
+	SDL_memset(device->gl_data, 0, (sizeof *device->gl_data));
 
 	/* Set the function pointers */
 	device->VideoInit = DIB_VideoInit;
@@ -223,7 +223,7 @@ static int DIB_AddMode(_THIS, int bpp, int w, int h)
 	}
 
 	/* Set up the new video mode rectangle */
-	mode = (SDL_Rect *)malloc(sizeof *mode);
+	mode = (SDL_Rect *)SDL_malloc(sizeof *mode);
 	if ( mode == NULL ) {
 		SDL_OutOfMemory();
 		return(-1);
@@ -236,11 +236,11 @@ static int DIB_AddMode(_THIS, int bpp, int w, int h)
 	/* Allocate the new list of modes, and fill in the new mode */
 	next_mode = SDL_nummodes[index];
 	SDL_modelist[index] = (SDL_Rect **)
-	       realloc(SDL_modelist[index], (1+next_mode+1)*sizeof(SDL_Rect *));
+	       SDL_realloc(SDL_modelist[index], (1+next_mode+1)*sizeof(SDL_Rect *));
 	if ( SDL_modelist[index] == NULL ) {
 		SDL_OutOfMemory();
 		SDL_nummodes[index] = 0;
-		free(mode);
+		SDL_free(mode);
 		return(-1);
 	}
 	SDL_modelist[index][next_mode] = mode;
@@ -270,7 +270,7 @@ static HPALETTE DIB_CreatePalette(int bpp)
 		for ( i=0; i<bpp; ++i ) {
 			ncolors *= 2;
 		}
-		palette = (LOGPALETTE *)malloc(sizeof(*palette)+
+		palette = (LOGPALETTE *)SDL_malloc(sizeof(*palette)+
 					ncolors*sizeof(PALETTEENTRY));
 		palette->palVersion = 0x300;
 		palette->palNumEntries = ncolors;
@@ -278,7 +278,7 @@ static HPALETTE DIB_CreatePalette(int bpp)
 		GetSystemPaletteEntries(hdc, 0, ncolors, palette->palPalEntry);
 		ReleaseDC(SDL_Window, hdc);
 		handle = CreatePalette(palette);
-		free(palette);
+		SDL_free(palette);
 	}
 	
 	return handle;
@@ -339,7 +339,7 @@ int DIB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	/* Sort the mode lists */
 	for ( i=0; i<NUM_MODELISTS; ++i ) {
 		if ( SDL_nummodes[i] > 0 ) {
-			qsort(SDL_modelist[i], SDL_nummodes[i], sizeof *SDL_modelist[i], cmpmodes);
+			SDL_qsort(SDL_modelist[i], SDL_nummodes[i], sizeof *SDL_modelist[i], cmpmodes);
 		}
 	}
 #endif /* !NO_CHANGEDISPLAYSETTINGS */
@@ -400,8 +400,8 @@ static int DIB_SussScreenDepth()
      * 8-bit modes) or bitfields (for 16- and 32-bit modes)
      */
     dib_size = sizeof(BITMAPINFOHEADER) + 256 * sizeof (RGBQUAD);
-    dib_hdr = (LPBITMAPINFOHEADER) malloc(dib_size);
-    memset(dib_hdr, 0, dib_size);
+    dib_hdr = (LPBITMAPINFOHEADER) SDL_malloc(dib_size);
+    SDL_memset(dib_hdr, 0, dib_size);
     dib_hdr->biSize = sizeof(BITMAPINFOHEADER);
     
     /* Get a device-dependent bitmap that's compatible with the
@@ -531,7 +531,7 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		DEVMODE settings;
 		BOOL changed;
 
-		memset(&settings, 0, sizeof(DEVMODE));
+		SDL_memset(&settings, 0, sizeof(DEVMODE));
 		settings.dmSize = sizeof(DEVMODE);
 		settings.dmBitsPerPel = video->format->BitsPerPixel;
 		settings.dmPelsWidth = width;
@@ -616,7 +616,7 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 			binfo_size += video->format->palette->ncolors *
 							sizeof(RGBQUAD);
 		}
-		binfo = (BITMAPINFO *)malloc(binfo_size);
+		binfo = (BITMAPINFO *)SDL_malloc(binfo_size);
 		if ( ! binfo ) {
 			if ( video != current ) {
 				SDL_FreeSurface(video);
@@ -645,7 +645,7 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		} else {
 			binfo->bmiHeader.biCompression = BI_RGB;	/* BI_BITFIELDS for 565 vs 555 */
 			if ( video->format->palette ) {
-				memset(binfo->bmiColors, 0,
+				SDL_memset(binfo->bmiColors, 0,
 					video->format->palette->ncolors*sizeof(RGBQUAD));
 			}
 		}
@@ -655,7 +655,7 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		screen_bmp = CreateDIBSection(hdc, binfo, DIB_RGB_COLORS,
 					(void **)(&video->pixels), NULL, 0);
 		ReleaseDC(SDL_Window, hdc);
-		free(binfo);
+		SDL_free(binfo);
 		if ( screen_bmp == NULL ) {
 			if ( video != current ) {
 				SDL_FreeSurface(video);
@@ -680,14 +680,14 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		const char *center = NULL;
 
 		if ( !SDL_windowX && !SDL_windowY ) {
-			window = getenv("SDL_VIDEO_WINDOW_POS");
-			center = getenv("SDL_VIDEO_CENTERED");
+			window = SDL_getenv("SDL_VIDEO_WINDOW_POS");
+			center = SDL_getenv("SDL_VIDEO_CENTERED");
 			if ( window ) {
-				if ( sscanf(window, "%d,%d", &x, &y) == 2 ) {
+				if ( SDL_sscanf(window, "%d,%d", &x, &y) == 2 ) {
 					SDL_windowX = x;
 					SDL_windowY = y;
 				}
-				if ( strcmp(window, "center") == 0 ) {
+				if ( SDL_strcmp(window, "center") == 0 ) {
 					center = window;
 				}
 			}
@@ -878,7 +878,7 @@ void DIB_QuitGamma(_THIS)
 		}
 
 		/* Free the saved gamma memory */
-		free(gamma_saved);
+		SDL_free(gamma_saved);
 		gamma_saved = 0;
 	}
 #endif /* !NO_GAMMA_SUPPORT */
@@ -895,7 +895,7 @@ int DIB_SetGammaRamp(_THIS, Uint16 *ramp)
 
 	/* Set the ramp for the display */
 	if ( ! gamma_saved ) {
-		gamma_saved = (WORD *)malloc(3*256*sizeof(*gamma_saved));
+		gamma_saved = (WORD *)SDL_malloc(3*256*sizeof(*gamma_saved));
 		if ( ! gamma_saved ) {
 			SDL_OutOfMemory();
 			return -1;

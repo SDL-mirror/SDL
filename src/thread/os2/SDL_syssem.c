@@ -48,13 +48,13 @@ DECLSPEC SDL_sem * SDLCALL SDL_CreateSemaphore(Uint32 initial_value)
         ULONG ulrc;
 
         /* Allocate sem memory */
-        sem = (SDL_sem *)malloc(sizeof(*sem));
+        sem = (SDL_sem *)SDL_malloc(sizeof(*sem));
         if ( sem ) {
                 /* Create the mutex semaphore */
                 ulrc = DosCreateMutexSem(NULL,&(sem->id),0,TRUE);
                 if ( ulrc ) {
                         SDL_SetError("Couldn't create semaphore");
-                        free(sem);
+                        SDL_free(sem);
                         sem = NULL;
                 } else
                 {
@@ -77,7 +77,7 @@ DECLSPEC void SDLCALL SDL_DestroySemaphore(SDL_sem *sem)
                         DosCloseMutexSem(sem->id);
                         sem->id = 0;
                 }
-                free(sem);
+                SDL_free(sem);
         }
 }
 

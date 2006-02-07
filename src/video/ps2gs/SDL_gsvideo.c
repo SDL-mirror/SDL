@@ -76,8 +76,8 @@ static int GS_Available(void)
 
 static void GS_DeleteDevice(SDL_VideoDevice *device)
 {
-	free(device->hidden);
-	free(device);
+	SDL_free(device->hidden);
+	SDL_free(device);
 }
 
 static SDL_VideoDevice *GS_CreateDevice(int devindex)
@@ -85,20 +85,20 @@ static SDL_VideoDevice *GS_CreateDevice(int devindex)
 	SDL_VideoDevice *this;
 
 	/* Initialize all variables that we clean on shutdown */
-	this = (SDL_VideoDevice *)malloc(sizeof(SDL_VideoDevice));
+	this = (SDL_VideoDevice *)SDL_malloc(sizeof(SDL_VideoDevice));
 	if ( this ) {
-		memset(this, 0, (sizeof *this));
+		SDL_memset(this, 0, (sizeof *this));
 		this->hidden = (struct SDL_PrivateVideoData *)
-				malloc((sizeof *this->hidden));
+				SDL_malloc((sizeof *this->hidden));
 	}
 	if ( (this == NULL) || (this->hidden == NULL) ) {
 		SDL_OutOfMemory();
 		if ( this ) {
-			free(this);
+			SDL_free(this);
 		}
 		return(0);
 	}
-	memset(this->hidden, 0, (sizeof *this->hidden));
+	SDL_memset(this->hidden, 0, (sizeof *this->hidden));
 	mouse_fd = -1;
 	keyboard_fd = -1;
 
@@ -335,7 +335,7 @@ static int GS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	if ( GS_OpenMouse(this) < 0 ) {
 		const char *sdl_nomouse;
 
-		sdl_nomouse = getenv("SDL_NOMOUSE");
+		sdl_nomouse = SDL_getenv("SDL_NOMOUSE");
 		if ( ! sdl_nomouse ) {
 			GS_VideoQuit(this);
 			SDL_SetError("Unable to open mouse");
@@ -531,13 +531,13 @@ static SDL_Surface *GS_SetVideoMode(_THIS, SDL_Surface *current,
 		                (mapped_mem + pixels_len);
 		image_tags_mem = (unsigned long long *)
 		                 ((caddr_t)head_tags_mem + sizeof(head_tags));
-		memcpy(head_tags_mem, head_tags, sizeof(head_tags));
+		SDL_memcpy(head_tags_mem, head_tags, sizeof(head_tags));
 		if ( saved_vinfo.mode != PS2_GS_VESA ) {
 			tex_tags_mem = (unsigned long long *)
 		                 ((caddr_t)image_tags_mem + ((2*MAXTAGS)*16));
 			scale_tags_mem = (unsigned long long *)
 		                 ((caddr_t)tex_tags_mem + sizeof(tex_tags));
-			memcpy(tex_tags_mem, tex_tags, sizeof(tex_tags));
+			SDL_memcpy(tex_tags_mem, tex_tags, sizeof(tex_tags));
 			tex_tags_mem[2] = 
 				(vinfo.h * vinfo.w) / 64 +
 	          		((unsigned long long)screen_image.fbw << 14) +
@@ -546,7 +546,7 @@ static SDL_Surface *GS_SetVideoMode(_THIS, SDL_Surface *current,
 	          		((unsigned long long)power_of_2(screen_image.h) << 30) +
 	          		((unsigned long long)1 << 34) +
 	          		((unsigned long long)1 << 35);
-			memcpy(scale_tags_mem, scale_tags, sizeof(scale_tags));
+			SDL_memcpy(scale_tags_mem, scale_tags, sizeof(scale_tags));
 			scale_tags_mem[8] =
 				((unsigned long long)screen_image.w * 16) +
 			         (((unsigned long long)screen_image.h * 16) << 16);
@@ -556,7 +556,7 @@ static SDL_Surface *GS_SetVideoMode(_THIS, SDL_Surface *current,
 		}
 	}
 	current->pixels = NULL;
-	if ( getenv("SDL_FULLSCREEN_UPDATE") ) {
+	if ( SDL_getenv("SDL_FULLSCREEN_UPDATE") ) {
 		/* Correct semantics */
 		current->flags |= SDL_ASYNCBLIT;
 	} else {

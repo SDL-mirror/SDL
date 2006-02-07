@@ -149,7 +149,7 @@ static void DestroyScreen(_THIS)
 			this->hidden->SB[0]=this->hidden->SB[1]=NULL;
 
 			if(SDL_RastPort && SDL_RastPort != &SDL_Display->RastPort)
-				free(SDL_RastPort);
+				SDL_free(SDL_RastPort);
 
 			SDL_RastPort=NULL;
 		}
@@ -181,12 +181,12 @@ static void CGX_DeleteDevice(SDL_VideoDevice *device)
 {
 	if ( device ) {
 		if ( device->hidden ) {
-			free(device->hidden);
+			SDL_free(device->hidden);
 		}
 		if ( device->gl_data ) {
-			free(device->gl_data);
+			SDL_free(device->gl_data);
 		}
-		free(device);
+		SDL_free(device);
 	}
 }
 
@@ -195,13 +195,13 @@ static SDL_VideoDevice *CGX_CreateDevice(int devindex)
 	SDL_VideoDevice *device;
 
 	/* Initialize all variables that we clean on shutdown */
-	device = (SDL_VideoDevice *)malloc(sizeof(SDL_VideoDevice));
+	device = (SDL_VideoDevice *)SDL_malloc(sizeof(SDL_VideoDevice));
 	if ( device ) {
-		memset(device, 0, (sizeof *device));
+		SDL_memset(device, 0, (sizeof *device));
 		device->hidden = (struct SDL_PrivateVideoData *)
-				malloc((sizeof *device->hidden));
+				SDL_malloc((sizeof *device->hidden));
 		device->gl_data = (struct SDL_PrivateGLData *)
-				malloc((sizeof *device->gl_data));
+				SDL_malloc((sizeof *device->gl_data));
 	}
 	if ( (device == NULL) || (device->hidden == NULL) ||
 	                         (device->gl_data == NULL) ) {
@@ -210,8 +210,8 @@ static SDL_VideoDevice *CGX_CreateDevice(int devindex)
 		CGX_DeleteDevice(device);
 		return(0);
 	}
-	memset(device->hidden, 0, sizeof(*device->hidden));
-	memset(device->gl_data, 0, sizeof(*device->gl_data));
+	SDL_memset(device->hidden, 0, sizeof(*device->hidden));
+	SDL_memset(device->gl_data, 0, sizeof(*device->gl_data));
 
 	/* Set the driver flags */
 	device->handles_any_size = 1;
@@ -581,7 +581,7 @@ static int CGX_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	}
 
 	/* See if we have been passed a window to use */
-/*	SDL_windowid = getenv("SDL_WINDOWID"); */
+/*	SDL_windowid = SDL_getenv("SDL_WINDOWID"); */
 	SDL_windowid=NULL;
 
 	/* Create the blank cursor */
@@ -649,7 +649,7 @@ void CGX_DestroyWindow(_THIS, SDL_Surface *screen)
 					}
 				}
 			}
-			free(SDL_XPixels);
+			SDL_free(SDL_XPixels);
 			SDL_XPixels = NULL;
 		}
 	}
@@ -664,7 +664,7 @@ static void CGX_SetSizeHints(_THIS, int w, int h, Uint32 flags)
 	}
 	if ( flags & SDL_FULLSCREEN ) {
 		flags&=~SDL_RESIZABLE;
-	} else if ( getenv("SDL_VIDEO_CENTERED") ) {
+	} else if ( SDL_getenv("SDL_VIDEO_CENTERED") ) {
 		int display_w, display_h;
 
 		display_w = SDL_Display->Width;
@@ -777,7 +777,7 @@ int CGX_CreateWindow(_THIS, SDL_Surface *screen,
 	    else
 		ncolors = 1 << screen->format->BitsPerPixel;
 
-	    SDL_XPixels = (Sint32 *)malloc(ncolors * sizeof(Sint32));
+	    SDL_XPixels = (Sint32 *)SDL_malloc(ncolors * sizeof(Sint32));
 
 	    if(SDL_XPixels == NULL) {
 		SDL_OutOfMemory();
@@ -836,7 +836,7 @@ int CGX_CreateWindow(_THIS, SDL_Surface *screen,
 
 	if(screen->flags & SDL_DOUBLEBUF)
 	{
-		if(SDL_RastPort=malloc(sizeof(struct RastPort)))
+		if(SDL_RastPort=SDL_malloc(sizeof(struct RastPort)))
 		{
 			InitRastPort(SDL_RastPort);
 			SDL_RastPort->BitMap=this->hidden->SB[1]->sb_BitMap;

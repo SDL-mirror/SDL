@@ -77,7 +77,7 @@ SDL_Surface * SDL_CreateRGBSurface (Uint32 flags,
 	}
 
 	/* Allocate the surface */
-	surface = (SDL_Surface *)malloc(sizeof(*surface));
+	surface = (SDL_Surface *)SDL_malloc(sizeof(*surface));
 	if ( surface == NULL ) {
 		SDL_OutOfMemory();
 		return(NULL);
@@ -103,7 +103,7 @@ SDL_Surface * SDL_CreateRGBSurface (Uint32 flags,
 	}
 	surface->format = SDL_AllocFormat(depth, Rmask, Gmask, Bmask, Amask);
 	if ( surface->format == NULL ) {
-		free(surface);
+		SDL_free(surface);
 		return(NULL);
 	}
 	if ( Amask ) {
@@ -125,14 +125,14 @@ SDL_Surface * SDL_CreateRGBSurface (Uint32 flags,
 	if ( ((flags&SDL_HWSURFACE) == SDL_SWSURFACE) || 
 				(video->AllocHWSurface(this, surface) < 0) ) {
 		if ( surface->w && surface->h ) {
-			surface->pixels = malloc(surface->h*surface->pitch);
+			surface->pixels = SDL_malloc(surface->h*surface->pitch);
 			if ( surface->pixels == NULL ) {
 				SDL_FreeSurface(surface);
 				SDL_OutOfMemory();
 				return(NULL);
 			}
 			/* This is important for bitmaps */
-			memset(surface->pixels, 0, surface->h*surface->pitch);
+			SDL_memset(surface->pixels, 0, surface->h*surface->pitch);
 		}
 	}
 
@@ -615,7 +615,7 @@ int SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, Uint32 color)
 		} else {
 #ifdef __powerpc__
 			/*
-			 * memset() on PPC (both glibc and codewarrior) uses
+			 * SDL_memset() on PPC (both glibc and codewarrior) uses
 			 * the dcbz (Data Cache Block Zero) instruction, which
 			 * causes an alignment exception if the destination is
 			 * uncachable, so only use it on software surfaces
@@ -627,7 +627,7 @@ int SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, Uint32 color)
 					 * efficient to uncached video memory
 					 */
 					double fill;
-					memset(&fill, color, (sizeof fill));
+					SDL_memset(&fill, color, (sizeof fill));
 					for(y = dstrect->h; y; y--) {
 						Uint8 *d = row;
 						unsigned n = x;
@@ -679,7 +679,7 @@ int SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, Uint32 color)
 #endif /* __powerpc__ */
 			{
 				for(y = dstrect->h; y; y--) {
-					memset(row, color, x);
+					SDL_memset(row, color, x);
 					row += dst->pitch;
 				}
 			}
@@ -711,7 +711,7 @@ int SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, Uint32 color)
 			for ( y=dstrect->h; y; --y ) {
 				Uint8 *pixels = row;
 				for ( x=dstrect->w; x; --x ) {
-					memcpy(pixels, &color, 3);
+					SDL_memcpy(pixels, &color, 3);
 					pixels += 3;
 				}
 				row += dst->pitch;
@@ -832,7 +832,7 @@ SDL_Surface * SDL_ConvertSurface (SDL_Surface *surface,
 
 	/* Copy the palette if any */
 	if ( format->palette && convert->format->palette ) {
-		memcpy(convert->format->palette->colors,
+		SDL_memcpy(convert->format->palette->colors,
 				format->palette->colors,
 				format->palette->ncolors*sizeof(SDL_Color));
 		convert->format->palette->ncolors = format->palette->ncolors;
@@ -934,9 +934,9 @@ void SDL_FreeSurface (SDL_Surface *surface)
 	}
 	if ( surface->pixels &&
 	     ((surface->flags & SDL_PREALLOC) != SDL_PREALLOC) ) {
-		free(surface->pixels);
+		SDL_free(surface->pixels);
 	}
-	free(surface);
+	SDL_free(surface);
 #ifdef CHECK_LEAKS
 	--surfaces_allocated;
 #endif

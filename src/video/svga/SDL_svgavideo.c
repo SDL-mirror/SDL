@@ -104,8 +104,8 @@ static int SVGA_Available(void)
 
 static void SVGA_DeleteDevice(SDL_VideoDevice *device)
 {
-	free(device->hidden);
-	free(device);
+	SDL_free(device->hidden);
+	SDL_free(device);
 }
 
 static SDL_VideoDevice *SVGA_CreateDevice(int devindex)
@@ -113,20 +113,20 @@ static SDL_VideoDevice *SVGA_CreateDevice(int devindex)
 	SDL_VideoDevice *device;
 
 	/* Initialize all variables that we clean on shutdown */
-	device = (SDL_VideoDevice *)malloc(sizeof(SDL_VideoDevice));
+	device = (SDL_VideoDevice *)SDL_malloc(sizeof(SDL_VideoDevice));
 	if ( device ) {
-		memset(device, 0, (sizeof *device));
+		SDL_memset(device, 0, (sizeof *device));
 		device->hidden = (struct SDL_PrivateVideoData *)
-				malloc((sizeof *device->hidden));
+				SDL_malloc((sizeof *device->hidden));
 	}
 	if ( (device == NULL) || (device->hidden == NULL) ) {
 		SDL_OutOfMemory();
 		if ( device ) {
-			free(device);
+			SDL_free(device);
 		}
 		return(0);
 	}
-	memset(device->hidden, 0, (sizeof *device->hidden));
+	SDL_memset(device->hidden, 0, (sizeof *device->hidden));
 
 	/* Set the function pointers */
 	device->VideoInit = SVGA_VideoInit;
@@ -278,24 +278,24 @@ int SVGA_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		return(-1);
 	}
 	for ( i=0; i<NUM_MODELISTS; ++i ) {
-		SDL_vgamode[i] = (int *)malloc(SDL_nummodes[i]*sizeof(int));
+		SDL_vgamode[i] = (int *)SDL_malloc(SDL_nummodes[i]*sizeof(int));
 		if ( SDL_vgamode[i] == NULL ) {
 			SDL_OutOfMemory();
 			return(-1);
 		}
 		SDL_modelist[i] = (SDL_Rect **)
-				malloc((SDL_nummodes[i]+1)*sizeof(SDL_Rect *));
+				SDL_malloc((SDL_nummodes[i]+1)*sizeof(SDL_Rect *));
 		if ( SDL_modelist[i] == NULL ) {
 			SDL_OutOfMemory();
 			return(-1);
 		}
 		for ( j=0; j<SDL_nummodes[i]; ++j ) {
-			SDL_modelist[i][j]=(SDL_Rect *)malloc(sizeof(SDL_Rect));
+			SDL_modelist[i][j]=(SDL_Rect *)SDL_malloc(sizeof(SDL_Rect));
 			if ( SDL_modelist[i][j] == NULL ) {
 				SDL_OutOfMemory();
 				return(-1);
 			}
-			memset(SDL_modelist[i][j], 0, sizeof(SDL_Rect));
+			SDL_memset(SDL_modelist[i][j], 0, sizeof(SDL_Rect));
 		}
 		SDL_modelist[i][j] = NULL;
 	}
@@ -313,7 +313,7 @@ int SVGA_VideoInit(_THIS, SDL_PixelFormat *vformat)
 			j++;
 		}
 		while ( SDL_modelist[i][j] ) {
-			free(SDL_modelist[i][j]);
+			SDL_free(SDL_modelist[i][j]);
 			SDL_modelist[i][j] = NULL;
 			j++;
 		}
@@ -497,12 +497,12 @@ void SVGA_VideoQuit(_THIS)
 	for ( i=0; i<NUM_MODELISTS; ++i ) {
 		if ( SDL_modelist[i] != NULL ) {
 			for ( j=0; SDL_modelist[i][j]; ++j )
-				free(SDL_modelist[i][j]);
-			free(SDL_modelist[i]);
+				SDL_free(SDL_modelist[i][j]);
+			SDL_free(SDL_modelist[i]);
 			SDL_modelist[i] = NULL;
 		}
 		if ( SDL_vgamode[i] != NULL ) {
-			free(SDL_vgamode[i]);
+			SDL_free(SDL_vgamode[i]);
 			SDL_vgamode[i] = NULL;
 		}
 	}

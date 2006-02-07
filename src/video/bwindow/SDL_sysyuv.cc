@@ -312,7 +312,7 @@ void BE_FreeYUVOverlay(_THIS, SDL_Overlay *overlay)
 
 	delete overlay->hwdata->bbitmap;
 
-    free(overlay->hwdata);
+    SDL_free(overlay->hwdata);
 }
 
 }; // extern "C"

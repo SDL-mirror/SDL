@@ -20,7 +20,7 @@
     slouken@libsdl.org
 */
 
-#include <stdlib.h>	/* For getenv() prototype */
+#include <stdlib.h>	/* For SDL_getenv() prototype */
 #include <string.h>
 
 #include "SDL_events_c.h"
@@ -141,7 +141,7 @@ XVisualInfo *X11_GL_GetVisual(_THIS)
 	}
 
 #ifdef GLX_DIRECT_COLOR /* Try for a DirectColor visual for gamma support */
-	if ( !getenv("SDL_VIDEO_X11_NODIRECTCOLOR") ) {
+	if ( !SDL_getenv("SDL_VIDEO_X11_NODIRECTCOLOR") ) {
 		attribs[i++] = GLX_X_VISUAL_TYPE;
 		attribs[i++] = GLX_DIRECT_COLOR;
 	}
@@ -151,7 +151,7 @@ XVisualInfo *X11_GL_GetVisual(_THIS)
  	glx_visualinfo = this->gl_data->glXChooseVisual(GFX_Display, 
 						  SDL_Screen, attribs);
 #ifdef GLX_DIRECT_COLOR
-	if( !glx_visualinfo && !getenv("SDL_VIDEO_X11_NODIRECTCOLOR") ) { /* No DirectColor visual?  Try again.. */
+	if( !glx_visualinfo && !SDL_getenv("SDL_VIDEO_X11_NODIRECTCOLOR") ) { /* No DirectColor visual?  Try again.. */
 		attribs[i-3] = None;
  		glx_visualinfo = this->gl_data->glXChooseVisual(GFX_Display, 
 						  SDL_Screen, attribs);
@@ -389,7 +389,7 @@ int X11_GL_LoadLibrary(_THIS, const char* path)
 	}
 
 	if ( path == NULL ) {
-		path = getenv("SDL_VIDEO_GL_DRIVER");
+		path = SDL_getenv("SDL_VIDEO_GL_DRIVER");
 		if ( path == NULL ) {
 			path = DEFAULT_OPENGL;
 		}
@@ -454,10 +454,10 @@ int X11_GL_LoadLibrary(_THIS, const char* path)
 	this->gl_config.dll_handle = handle;
 	this->gl_config.driver_loaded = 1;
 	if ( path ) {
-		strncpy(this->gl_config.driver_path, path,
+		SDL_strncpy(this->gl_config.driver_path, path,
 			sizeof(this->gl_config.driver_path)-1);
 	} else {
-		strcpy(this->gl_config.driver_path, "");
+		SDL_strcpy(this->gl_config.driver_path, "");
 	}
 	return 0;
 }
@@ -476,9 +476,9 @@ void *X11_GL_GetProcAddress(_THIS, const char* proc)
 #undef do_dlsym
 #endif
 	retval = do_dlsym(handle, proc);
-	if (!retval && strlen(proc) <= 1022) {
+	if (!retval && SDL_strlen(proc) <= 1022) {
 		procname[0] = '_';
-		strcpy(procname + 1, proc);
+		SDL_strcpy(procname + 1, proc);
 		retval = do_dlsym(handle, procname);
 	}
 	return retval;

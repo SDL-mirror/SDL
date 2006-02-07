@@ -94,7 +94,7 @@ static int NTO_CheckBuggyCards(_THIS, unsigned long checkfor)
 
     for (it=0; it<QSA_WA_CARDS; it++)
     {
-       if (strcmp(buggycards[it].cardname, scardname)==0)
+       if (SDL_strcmp(buggycards[it].cardname, scardname)==0)
        {
           if (buggycards[it].bugtype==checkfor)
           {
@@ -120,7 +120,7 @@ static void NTO_ThreadInit(_THIS)
 /* PCM transfer channel parameters initialize function */
 static void NTO_InitAudioParams(snd_pcm_channel_params_t* cpars)
 {
-    memset(cpars, 0, sizeof(snd_pcm_channel_params_t));
+    SDL_memset(cpars, 0, sizeof(snd_pcm_channel_params_t));
 
     cpars->channel = SND_PCM_CHANNEL_PLAYBACK;
     cpars->mode = SND_PCM_MODE_BLOCK;
@@ -172,11 +172,11 @@ static void NTO_DeleteAudioDevice(SDL_AudioDevice *device)
 {
     if ((device)&&(device->hidden))
     {
-        free(device->hidden);
+        SDL_free(device->hidden);
     }
     if (device)
     {
-        free(device);
+        SDL_free(device);
     }
 }
 
@@ -185,22 +185,22 @@ static SDL_AudioDevice* NTO_CreateAudioDevice(int devindex)
     SDL_AudioDevice *this;
 
     /* Initialize all variables that we clean on shutdown */
-    this = (SDL_AudioDevice *)malloc(sizeof(SDL_AudioDevice));
+    this = (SDL_AudioDevice *)SDL_malloc(sizeof(SDL_AudioDevice));
     if (this)
     {
-        memset(this, 0, sizeof(SDL_AudioDevice));
-        this->hidden = (struct SDL_PrivateAudioData *)malloc(sizeof(struct SDL_PrivateAudioData));
+        SDL_memset(this, 0, sizeof(SDL_AudioDevice));
+        this->hidden = (struct SDL_PrivateAudioData *)SDL_malloc(sizeof(struct SDL_PrivateAudioData));
     }
     if ((this == NULL) || (this->hidden == NULL))
     {
         SDL_OutOfMemory();
         if (this)
         {
-            free(this);
+            SDL_free(this);
 	}
         return (0);
     }
-    memset(this->hidden, 0, sizeof(struct SDL_PrivateAudioData));
+    SDL_memset(this->hidden, 0, sizeof(struct SDL_PrivateAudioData));
     audio_handle = NULL;
 
     /* Set the function pointers */
@@ -280,7 +280,7 @@ static void NTO_PlayAudio(_THIS)
             {
                 if ((errno == EINVAL) || (errno == EIO))
                 {
-                    memset(&cstatus, 0, sizeof(cstatus));
+                    SDL_memset(&cstatus, 0, sizeof(cstatus));
                     cstatus.channel = SND_PCM_CHANNEL_PLAYBACK;
                     if ((rval = snd_pcm_plugin_status(audio_handle, &cstatus)) < 0)
                     {
@@ -455,7 +455,7 @@ static int NTO_OpenAudio(_THIS, SDL_AudioSpec* spec)
     }
 
     /* Make sure channel is setup right one last time */
-    memset(&csetup, 0x00, sizeof(csetup));
+    SDL_memset(&csetup, 0x00, sizeof(csetup));
     csetup.channel = SND_PCM_CHANNEL_PLAYBACK;
     if (snd_pcm_plugin_setup(audio_handle, &csetup) < 0)
     {
@@ -483,7 +483,7 @@ static int NTO_OpenAudio(_THIS, SDL_AudioSpec* spec)
         SDL_SetError("NTO_OpenAudio(): pcm buffer allocation failed\n");
         return (-1);
     }
-    memset(pcm_buf, spec->silence, pcm_len);
+    SDL_memset(pcm_buf, spec->silence, pcm_len);
 
     /* get the file descriptor */
     if ((audio_fd = snd_pcm_file_descriptor(audio_handle, SND_PCM_CHANNEL_PLAYBACK)) < 0)

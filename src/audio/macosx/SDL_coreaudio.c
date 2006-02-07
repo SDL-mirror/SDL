@@ -52,8 +52,8 @@ static int Audio_Available(void)
 
 static void Audio_DeleteDevice(SDL_AudioDevice *device)
 {
-    free(device->hidden);
-    free(device);
+    SDL_free(device->hidden);
+    SDL_free(device);
 }
 
 static SDL_AudioDevice *Audio_CreateDevice(int devindex)
@@ -61,20 +61,20 @@ static SDL_AudioDevice *Audio_CreateDevice(int devindex)
     SDL_AudioDevice *this;
 
     /* Initialize all variables that we clean on shutdown */
-    this = (SDL_AudioDevice *)malloc(sizeof(SDL_AudioDevice));
+    this = (SDL_AudioDevice *)SDL_malloc(sizeof(SDL_AudioDevice));
     if ( this ) {
-        memset(this, 0, (sizeof *this));
+        SDL_memset(this, 0, (sizeof *this));
         this->hidden = (struct SDL_PrivateAudioData *)
-                malloc((sizeof *this->hidden));
+                SDL_malloc((sizeof *this->hidden));
     }
     if ( (this == NULL) || (this->hidden == NULL) ) {
         SDL_OutOfMemory();
         if ( this ) {
-            free(this);
+            SDL_free(this);
         }
         return(0);
     }
-    memset(this->hidden, 0, (sizeof *this->hidden));
+    SDL_memset(this->hidden, 0, (sizeof *this->hidden));
 
     /* Set the function pointers */
     this->OpenAudio = Core_OpenAudio;
@@ -106,7 +106,7 @@ static OSStatus     audioCallback (void                             *inRefCon,
 
     /* Only do anything if audio is enabled and not paused */
     if ( ! this->enabled || this->paused ) {
-        memset(ioData->mData, this->spec.silence, ioData->mDataByteSize);
+        SDL_memset(ioData->mData, this->spec.silence, ioData->mDataByteSize);
         return 0;
     }
     
@@ -121,7 +121,7 @@ static OSStatus     audioCallback (void                             *inRefCon,
     while (remaining > 0) {
         if (bufferOffset >= bufferSize) {
             /* Generate the data */
-            memset(buffer, this->spec.silence, bufferSize);
+            SDL_memset(buffer, this->spec.silence, bufferSize);
             SDL_mutexP(this->mixer_lock);
             (*this->spec.callback)(this->spec.userdata,
                         buffer, bufferSize);
@@ -132,7 +132,7 @@ static OSStatus     audioCallback (void                             *inRefCon,
         len = bufferSize - bufferOffset;
         if (len > remaining)
             len = remaining;
-        memcpy(ptr, buffer + bufferOffset, len);
+        SDL_memcpy(ptr, buffer + bufferOffset, len);
         ptr += len;
         remaining -= len;
         bufferOffset += len;
@@ -189,7 +189,7 @@ void Core_CloseAudio(_THIS)
         return;
     }
     
-    free(buffer);
+    SDL_free(buffer);
 }
 
 #define CHECK_RESULT(msg) \
@@ -269,7 +269,7 @@ int Core_OpenAudio(_THIS, SDL_AudioSpec *spec)
     
     /* Allocate a sample buffer */
     bufferOffset = bufferSize = this->spec.size;
-    buffer = malloc(bufferSize);
+    buffer = SDL_malloc(bufferSize);
     assert(buffer);
     
     /* Finally, start processing of the audio unit */

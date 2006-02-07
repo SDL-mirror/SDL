@@ -52,7 +52,7 @@ void *SDL_LoadObject(const char *sofile)
 	OSErr error;
 	char psofile[512];
 
-	strncpy(psofile, sofile, SDL_TABLESIZE(psofile));
+	SDL_strncpy(psofile, sofile, SDL_TABLESIZE(psofile));
 	psofile[SDL_TABLESIZE(psofile)-1] = '\0';
 	error = GetSharedLibrary(C2PStr(psofile), kCompiledCFragArch,
 			kLoadCFrag, &library_id, &mainAddr, errName);
@@ -90,7 +90,7 @@ void *SDL_LoadFunction(void *handle, const char *name)
 	CFragConnectionID library_id = (CFragConnectionID)handle;
 	char pname[512];
 
-	strncpy(pname, name, SDL_TABLESIZE(pname));
+	SDL_strncpy(pname, name, SDL_TABLESIZE(pname));
 	pname[SDL_TABLESIZE(pname)-1] = '\0';
 	if ( FindSymbol(library_id, C2PStr(pname),
 	                (char **)&symbol, &class) != noErr ) {

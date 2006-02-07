@@ -82,8 +82,8 @@ static int BE_Available(void)
 
 static void BE_DeleteDevice(SDL_VideoDevice *device)
 {
-	free(device->hidden);
-	free(device);
+	SDL_free(device->hidden);
+	SDL_free(device);
 }
 
 static SDL_VideoDevice *BE_CreateDevice(int devindex)
@@ -91,20 +91,20 @@ static SDL_VideoDevice *BE_CreateDevice(int devindex)
 	SDL_VideoDevice *device;
 
 	/* Initialize all variables that we clean on shutdown */
-	device = (SDL_VideoDevice *)malloc(sizeof(SDL_VideoDevice));
+	device = (SDL_VideoDevice *)SDL_malloc(sizeof(SDL_VideoDevice));
 	if ( device ) {
-		memset(device, 0, (sizeof *device));
+		SDL_memset(device, 0, (sizeof *device));
 		device->hidden = (struct SDL_PrivateVideoData *)
-				malloc((sizeof *device->hidden));
+				SDL_malloc((sizeof *device->hidden));
 	}
 	if ( (device == NULL) || (device->hidden == NULL) ) {
 		SDL_OutOfMemory();
 		if ( device ) {
-			free(device);
+			SDL_free(device);
 		}
 		return(0);
 	}
-	memset(device->hidden, 0, (sizeof *device->hidden));
+	SDL_memset(device->hidden, 0, (sizeof *device->hidden));
 
 	/* Set the function pointers */
 	/* Initialization/Query functions */
@@ -233,7 +233,7 @@ static int BE_AddMode(_THIS, int index, unsigned int w, unsigned int h)
 	}
 
 	/* Set up the new video mode rectangle */
-	mode = (SDL_Rect *)malloc(sizeof *mode);
+	mode = (SDL_Rect *)SDL_malloc(sizeof *mode);
 	if ( mode == NULL ) {
 		SDL_OutOfMemory();
 		return(-1);
@@ -249,11 +249,11 @@ static int BE_AddMode(_THIS, int index, unsigned int w, unsigned int h)
 	/* Allocate the new list of modes, and fill in the new mode */
 	next_mode = SDL_nummodes[index];
 	SDL_modelist[index] = (SDL_Rect **)
-	       realloc(SDL_modelist[index], (1+next_mode+1)*sizeof(SDL_Rect *));
+	       SDL_realloc(SDL_modelist[index], (1+next_mode+1)*sizeof(SDL_Rect *));
 	if ( SDL_modelist[index] == NULL ) {
 		SDL_OutOfMemory();
 		SDL_nummodes[index] = 0;
-		free(mode);
+		SDL_free(mode);
 		return(-1);
 	}
 	SDL_modelist[index][next_mode] = mode;
@@ -642,7 +642,7 @@ int BE_GL_LoadLibrary(_THIS, const char *path)
 				if (get_image_symbol((image_id)cookie,"glBegin",B_SYMBOL_TYPE_ANY,&location) == B_OK) {
 					_this->gl_config.dll_handle = (void*)cookie;
 					_this->gl_config.driver_loaded = 1;
-					strncpy(_this->gl_config.driver_path, "libGL.so", sizeof(_this->gl_config.driver_path)-1);
+					SDL_strncpy(_this->gl_config.driver_path, "libGL.so", sizeof(_this->gl_config.driver_path)-1);
 				}
 			}
 		}
@@ -670,7 +670,7 @@ int BE_GL_LoadLibrary(_THIS, const char *path)
 
 		if ((_this->gl_config.dll_handle = (void*)load_add_on(path)) != (void*)B_ERROR) {
 			_this->gl_config.driver_loaded = 1;
-			strncpy(_this->gl_config.driver_path, path, sizeof(_this->gl_config.driver_path)-1);
+			SDL_strncpy(_this->gl_config.driver_path, path, sizeof(_this->gl_config.driver_path)-1);
 		}*/
 	}
 
@@ -679,7 +679,7 @@ int BE_GL_LoadLibrary(_THIS, const char *path)
 	} else {
 		_this->gl_config.dll_handle = NULL;
 		_this->gl_config.driver_loaded = 0;
-		strcpy(_this->gl_config.driver_path, "");
+		SDL_strcpy(_this->gl_config.driver_path, "");
 		return -1;
 	}
 }
@@ -805,9 +805,9 @@ void BE_VideoQuit(_THIS)
 	for ( i=0; i<NUM_MODELISTS; ++i ) {
 		if ( SDL_modelist[i] ) {
 			for ( j=0; SDL_modelist[i][j]; ++j ) {
-				free(SDL_modelist[i][j]);
+				SDL_free(SDL_modelist[i][j]);
 			}
-			free(SDL_modelist[i]);
+			SDL_free(SDL_modelist[i]);
 			SDL_modelist[i] = NULL;
 		}
 	}

@@ -116,7 +116,7 @@ int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
 	ULONG temp,i;
 	D(bug("Opening joystick %ld\n",joystick->index));
 
-	if(!(joystick->hwdata=malloc(sizeof(struct joystick_hwdata))))
+	if(!(joystick->hwdata=SDL_malloc(sizeof(struct joystick_hwdata))))
 		return -1;
 
 /* This loop is to check if the controller is a joypad */
@@ -215,7 +215,7 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 void SDL_SYS_JoystickClose(SDL_Joystick *joystick)
 {
 	if(joystick->hwdata)
-		free(joystick->hwdata);
+		SDL_free(joystick->hwdata);
 	return;
 }
 

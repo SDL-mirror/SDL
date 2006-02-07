@@ -162,13 +162,13 @@ int SDL_SYS_JoystickInit(void)
 {
 	int i;
 	unsigned long cookie_mch;
-	const char *envr=getenv("SDL_JOYSTICK_ATARI");
+	const char *envr=SDL_getenv("SDL_JOYSTICK_ATARI");
 	
 #define TEST_JOY_ENABLED(env,idstring,num) \
-	if (strstr(env,idstring"-off")) { \
+	if (SDL_strstr(env,idstring"-off")) { \
 		atarijoysticks[num].enabled=SDL_FALSE; \
 	} \
-	if (strstr(env,idstring"-on")) { \
+	if (SDL_strstr(env,idstring"-on")) { \
 		atarijoysticks[num].enabled=SDL_TRUE; \
 	}
 

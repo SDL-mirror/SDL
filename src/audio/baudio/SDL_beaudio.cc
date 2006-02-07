@@ -54,8 +54,8 @@ static int Audio_Available(void)
 
 static void Audio_DeleteDevice(SDL_AudioDevice *device)
 {
-	free(device->hidden);
-	free(device);
+	SDL_free(device->hidden);
+	SDL_free(device);
 }
 
 static SDL_AudioDevice *Audio_CreateDevice(int devindex)
@@ -63,20 +63,20 @@ static SDL_AudioDevice *Audio_CreateDevice(int devindex)
 	SDL_AudioDevice *device;
 
 	/* Initialize all variables that we clean on shutdown */
-	device = (SDL_AudioDevice *)malloc(sizeof(SDL_AudioDevice));
+	device = (SDL_AudioDevice *)SDL_malloc(sizeof(SDL_AudioDevice));
 	if ( device ) {
-		memset(device, 0, (sizeof *device));
+		SDL_memset(device, 0, (sizeof *device));
 		device->hidden = (struct SDL_PrivateAudioData *)
-				malloc((sizeof *device->hidden));
+				SDL_malloc((sizeof *device->hidden));
 	}
 	if ( (device == NULL) || (device->hidden == NULL) ) {
 		SDL_OutOfMemory();
 		if ( device ) {
-			free(device);
+			SDL_free(device);
 		}
 		return(0);
 	}
-	memset(device->hidden, 0, (sizeof *device->hidden));
+	SDL_memset(device->hidden, 0, (sizeof *device->hidden));
 
 	/* Set the function pointers */
 	device->OpenAudio = BE_OpenAudio;
@@ -102,7 +102,7 @@ static void FillSound(void *device, void *stream, size_t len,
 	SDL_AudioDevice *audio = (SDL_AudioDevice *)device;
 
 	/* Silence the buffer, since it's ours */
-	memset(stream, audio->spec.silence, len);
+	SDL_memset(stream, audio->spec.silence, len);
 
 	/* Only do soemthing if audio is enabled */
 	if ( ! audio->enabled )
@@ -115,7 +115,7 @@ static void FillSound(void *device, void *stream, size_t len,
 				(Uint8 *)audio->convert.buf,audio->convert.len);
 			SDL_mutexV(audio->mixer_lock);
 			SDL_ConvertAudio(&audio->convert);
-			memcpy(stream,audio->convert.buf,audio->convert.len_cvt);
+			SDL_memcpy(stream,audio->convert.buf,audio->convert.len_cvt);
 		} else {
 			SDL_mutexP(audio->mixer_lock);
 			(*audio->spec.callback)(audio->spec.userdata,

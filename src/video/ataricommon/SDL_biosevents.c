@@ -70,8 +70,8 @@ void AtariBios_InitOSKeymap(_THIS)
 	int i, vectors_mask;
 	unsigned long dummy;
 
-	memset(bios_currentkeyboard, 0, sizeof(bios_currentkeyboard));
-	memset(bios_previouskeyboard, 0, sizeof(bios_previouskeyboard));
+	SDL_memset(bios_currentkeyboard, 0, sizeof(bios_currentkeyboard));
+	SDL_memset(bios_previouskeyboard, 0, sizeof(bios_previouskeyboard));
 
 	/* Initialize keymap */
 	for ( i=0; i<sizeof(keymap); i++ )
@@ -117,7 +117,7 @@ void AtariBios_PumpEvents(_THIS)
 	SDL_keysym keysym;
 
 	/* Update pressed keys */
-	memset(bios_currentkeyboard, 0, ATARIBIOS_MAXKEYS);
+	SDL_memset(bios_currentkeyboard, 0, ATARIBIOS_MAXKEYS);
 
 	while (Bconstat(_CON)) {
 		unsigned long key_pressed;
@@ -151,7 +151,7 @@ void AtariBios_PumpEvents(_THIS)
 	SDL_AtariXbios_PostMouseEvents(this, SDL_TRUE);
 
 	/* Will be previous table */
-	memcpy(bios_previouskeyboard, bios_currentkeyboard, ATARIBIOS_MAXKEYS);
+	SDL_memcpy(bios_previouskeyboard, bios_currentkeyboard, ATARIBIOS_MAXKEYS);
 }
 
 static void UpdateSpecialKeys(int special_keys_state)

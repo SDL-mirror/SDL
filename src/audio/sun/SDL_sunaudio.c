@@ -75,8 +75,8 @@ static int Audio_Available(void)
 
 static void Audio_DeleteDevice(SDL_AudioDevice *device)
 {
-	free(device->hidden);
-	free(device);
+	SDL_free(device->hidden);
+	SDL_free(device);
 }
 
 static SDL_AudioDevice *Audio_CreateDevice(int devindex)
@@ -84,20 +84,20 @@ static SDL_AudioDevice *Audio_CreateDevice(int devindex)
 	SDL_AudioDevice *this;
 
 	/* Initialize all variables that we clean on shutdown */
-	this = (SDL_AudioDevice *)malloc(sizeof(SDL_AudioDevice));
+	this = (SDL_AudioDevice *)SDL_malloc(sizeof(SDL_AudioDevice));
 	if ( this ) {
-		memset(this, 0, (sizeof *this));
+		SDL_memset(this, 0, (sizeof *this));
 		this->hidden = (struct SDL_PrivateAudioData *)
-				malloc((sizeof *this->hidden));
+				SDL_malloc((sizeof *this->hidden));
 	}
 	if ( (this == NULL) || (this->hidden == NULL) ) {
 		SDL_OutOfMemory();
 		if ( this ) {
-			free(this);
+			SDL_free(this);
 		}
 		return(0);
 	}
-	memset(this->hidden, 0, (sizeof *this->hidden));
+	SDL_memset(this->hidden, 0, (sizeof *this->hidden));
 	audio_fd = -1;
 
 	/* Set the function pointers */
@@ -236,7 +236,7 @@ void DSP_CloseAudio(_THIS)
 		mixbuf = NULL;
 	}
 	if ( ulaw_buf != NULL ) {
-		free(ulaw_buf);
+		SDL_free(ulaw_buf);
 		ulaw_buf = NULL;
 	}
 	close(audio_fd);
@@ -349,7 +349,7 @@ int DSP_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	        spec->freq = desired_freq;
 		fragsize = (spec->samples*1000)/(spec->freq/8);
 		frequency = 8;
-		ulaw_buf = (Uint8 *)malloc(fragsize);
+		ulaw_buf = (Uint8 *)SDL_malloc(fragsize);
 		if ( ulaw_buf == NULL ) {
 			SDL_OutOfMemory();
 			return(-1);
@@ -375,7 +375,7 @@ int DSP_OpenAudio(_THIS, SDL_AudioSpec *spec)
 		SDL_OutOfMemory();
 		return(-1);
 	}
-	memset(mixbuf, spec->silence, spec->size);
+	SDL_memset(mixbuf, spec->silence, spec->size);
 
 	/* We're ready to rock and roll. :-) */
 	return(0);

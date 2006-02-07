@@ -60,8 +60,8 @@ void WIMP_SetSDLCursorPalette();
 
 void RISCOS_FreeWMCursor(_THIS, WMcursor *cursor)
 {
-    free(cursor->data);
-	free(cursor);
+    SDL_free(cursor->data);
+	SDL_free(cursor);
 }
 
 WMcursor *RISCOS_CreateWMCursor(_THIS,
@@ -80,17 +80,17 @@ WMcursor *RISCOS_CreateWMCursor(_THIS,
 	}
 
 	/* Allocate the cursor */
-	cursor = (WMcursor *)malloc(sizeof(*cursor));
+	cursor = (WMcursor *)SDL_malloc(sizeof(*cursor));
 	if ( cursor == NULL ) {
 		SDL_SetError("Out of memory");
 		return(NULL);
 	}
 
 	/* Note: SDL says width must be a multiple of 8 */
-	cursor_data = malloc(w/4 * h);
+	cursor_data = SDL_malloc(w/4 * h);
 	if (cursor_data == NULL)
 	{
-		free(cursor);
+		SDL_free(cursor);
 		SDL_SetError("Out of memory");
 		return(NULL);
 	}

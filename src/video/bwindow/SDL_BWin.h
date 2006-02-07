@@ -331,7 +331,7 @@ public:
 
 		if ((uchar)buf[0] > 127) {
 			state = 0;
-			srclen = strlen(buf);
+			srclen = SDL_strlen(buf);
 			dstlen = sizeof(destbuf);
 			convert_from_utf8(B_UNICODE_CONVERSION, buf, &srclen, (char *)destbuf, &dstlen, &state);
 			unicode = destbuf[0];

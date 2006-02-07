@@ -139,8 +139,8 @@ static int XBIOS_Available(void)
 
 static void XBIOS_DeleteDevice(SDL_VideoDevice *device)
 {
-	free(device->hidden);
-	free(device);
+	SDL_free(device->hidden);
+	SDL_free(device);
 }
 
 static SDL_VideoDevice *XBIOS_CreateDevice(int devindex)
@@ -148,23 +148,23 @@ static SDL_VideoDevice *XBIOS_CreateDevice(int devindex)
 	SDL_VideoDevice *device;
 
 	/* Initialize all variables that we clean on shutdown */
-	device = (SDL_VideoDevice *)malloc(sizeof(SDL_VideoDevice));
+	device = (SDL_VideoDevice *)SDL_malloc(sizeof(SDL_VideoDevice));
 	if ( device ) {
-		memset(device, 0, (sizeof *device));
+		SDL_memset(device, 0, (sizeof *device));
 		device->hidden = (struct SDL_PrivateVideoData *)
-				malloc((sizeof *device->hidden));
+				SDL_malloc((sizeof *device->hidden));
 		device->gl_data = (struct SDL_PrivateGLData *)
-				malloc((sizeof *device->gl_data));
+				SDL_malloc((sizeof *device->gl_data));
 	}
 	if ( (device == NULL) || (device->hidden == NULL) ) {
 		SDL_OutOfMemory();
 		if ( device ) {
-			free(device);
+			SDL_free(device);
 		}
 		return(0);
 	}
-	memset(device->hidden, 0, (sizeof *device->hidden));
-	memset(device->gl_data, 0, sizeof(*device->gl_data));
+	SDL_memset(device->hidden, 0, (sizeof *device->hidden));
+	SDL_memset(device->gl_data, 0, sizeof(*device->gl_data));
 
 	/* Video functions */
 	device->VideoInit = XBIOS_VideoInit;
@@ -223,7 +223,7 @@ void SDL_XBIOS_AddMode(_THIS, Uint16 modecode, Uint16 width, Uint16 height,
 	}
 
 	++XBIOS_nummodes;
-	XBIOS_modelist = (xbiosmode_t *) realloc(XBIOS_modelist, XBIOS_nummodes * sizeof(xbiosmode_t));
+	XBIOS_modelist = (xbiosmode_t *) SDL_realloc(XBIOS_modelist, XBIOS_nummodes * sizeof(xbiosmode_t));
 
 	/* Keep the list sorted: bpp, width, height */
 	curpos=0;
@@ -243,7 +243,7 @@ void SDL_XBIOS_AddMode(_THIS, Uint16 modecode, Uint16 width, Uint16 height,
 
 	/* Push remaining modes further */
 	for(i=XBIOS_nummodes-1; i>curpos; i--) {
-		memcpy(&XBIOS_modelist[i], &XBIOS_modelist[i-1], sizeof(xbiosmode_t));
+		SDL_memcpy(&XBIOS_modelist[i], &XBIOS_modelist[i-1], sizeof(xbiosmode_t));
 	}
 
 	XBIOS_modelist[curpos].number = modecode;
@@ -268,7 +268,7 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	}
 
 	/* Allocate memory for old palette */
-	XBIOS_oldpalette = (void *)malloc(256*sizeof(long));
+	XBIOS_oldpalette = (void *)SDL_malloc(256*sizeof(long));
 	if ( !XBIOS_oldpalette ) {
 		SDL_SetError("Unable to allocate memory for old palette\n");
 		return(-1);
@@ -426,7 +426,7 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		switch (current_mode->depth) {
 			case 4:
 			case 8:
-				SDL_modelist[0][j8] = malloc(sizeof(SDL_Rect));
+				SDL_modelist[0][j8] = SDL_malloc(sizeof(SDL_Rect));
 				SDL_modelist[0][j8]->x = SDL_modelist[0][j8]->y = 0;
 				SDL_modelist[0][j8]->w = current_mode->width;
 				SDL_modelist[0][j8]->h = current_mode->height;
@@ -434,7 +434,7 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 				j8++;
 				break;
 			case 16:
-				SDL_modelist[1][j16] = malloc(sizeof(SDL_Rect));
+				SDL_modelist[1][j16] = SDL_malloc(sizeof(SDL_Rect));
 				SDL_modelist[1][j16]->x = SDL_modelist[1][j16]->y = 0;
 				SDL_modelist[1][j16]->w = current_mode->width;
 				SDL_modelist[1][j16]->h = current_mode->height;
@@ -550,7 +550,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 			SDL_SetError("Can not allocate %d KB for shadow buffer", new_screen_size>>10);
 			return (NULL);
 		}
-		memset(XBIOS_shadowscreen, 0, new_screen_size);
+		SDL_memset(XBIOS_shadowscreen, 0, new_screen_size);
 	}
 
 	/* Output buffer needs to be twice in size for the software double-line mode */
@@ -567,7 +567,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 		SDL_SetError("Can not allocate %d KB for frame buffer", new_screen_size>>10);
 		return (NULL);
 	}
-	memset(XBIOS_screensmem[0], 0, new_screen_size);
+	SDL_memset(XBIOS_screensmem[0], 0, new_screen_size);
 
 	XBIOS_screens[0]=(void *) (( (long) XBIOS_screensmem[0]+256) & 0xFFFFFF00UL);
 
@@ -588,7 +588,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 			SDL_SetError("Can not allocate %d KB for double buffer", new_screen_size>>10);
 			return (NULL);
 		}
-		memset(XBIOS_screensmem[1], 0, new_screen_size);
+		SDL_memset(XBIOS_screensmem[1], 0, new_screen_size);
 
 		XBIOS_screens[1]=(void *) (( (long) XBIOS_screensmem[1]+256) & 0xFFFFFF00UL);
 		modeflags |= SDL_DOUBLEBUF;
@@ -678,7 +678,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 #endif
 			/* Set hardware palette to black in True Colour */
 			if (new_depth == 16) {
-				memset(F30_palette, 0, sizeof(F30_palette));
+				SDL_memset(F30_palette, 0, sizeof(F30_palette));
 				VsetRGB(0,256,F30_palette);
 			}
 			break;
@@ -903,7 +903,7 @@ static void XBIOS_VideoQuit(_THIS)
 #endif
 
 	if (XBIOS_oldpalette) {
-		free(XBIOS_oldpalette);
+		SDL_free(XBIOS_oldpalette);
 		XBIOS_oldpalette=NULL;
 	}
 	XBIOS_FreeBuffers(this);
@@ -912,14 +912,14 @@ static void XBIOS_VideoQuit(_THIS)
 	for (j=0;j<NUM_MODELISTS;j++) {
 		for (i=0;i<SDL_NUMMODES;i++) {
 			if (SDL_modelist[j][i]!=NULL) {
-				free(SDL_modelist[j][i]);
+				SDL_free(SDL_modelist[j][i]);
 				SDL_modelist[j][i]=NULL;
 			}
 		}
 	}
 
 	if (XBIOS_modelist) {
-		free(XBIOS_modelist);
+		SDL_free(XBIOS_modelist);
 		XBIOS_nummodes=0;
 		XBIOS_modelist=NULL;
 	}

@@ -57,7 +57,7 @@ SDL_mutex *SDL_CreateMutex (void)
 #endif /* PTHREAD_NO_RECURSIVE_MUTEX */
 		if ( pthread_mutex_init(&mutex->id, &attr) != 0 ) {
 			SDL_SetError("pthread_mutex_init() failed");
-			free(mutex);
+			SDL_free(mutex);
 			mutex = NULL;
 		}
 	} else {
@@ -70,7 +70,7 @@ void SDL_DestroyMutex(SDL_mutex *mutex)
 {
 	if ( mutex ) {
 		pthread_mutex_destroy(&mutex->id);
-		free(mutex);
+		SDL_free(mutex);
 	}
 }
 
