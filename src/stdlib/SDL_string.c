@@ -72,7 +72,7 @@ static size_t SDL_ScanLong(const char *text, int radix, long *valuep)
 }
 #endif
 
-#ifndef HAVE_SSCANF
+#if !defined(HAVE_SSCANF) || !defined(HAVE_STRTOD)
 static size_t SDL_ScanUnsignedLong(const char *text, int radix, unsigned long *valuep)
 {
     const char *textstart = text;
