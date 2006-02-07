@@ -24,6 +24,7 @@
 #define _SDL_windows_h
 
 #include "SDL_config.h"
+#include "SDL_types.h"
 
 /* This includes only the windows headers needed by SDL, with no C runtime */
 #define WIN32_LEAN_AND_MEAN

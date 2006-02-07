@@ -27,7 +27,9 @@
 
 #include <sys/types.h>
 #ifdef _MSC_VER
-#include <crtdefs.h>	/* For size_t */
+/* FIXME!! */
+typedef unsigned int size_t;
+typedef size_t uintptr_t;
 #endif
 
 /* The number of elements in an array */

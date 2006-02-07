@@ -31,6 +31,10 @@
 #if defined(_MSC_VER)
 
 /* Float to long (FIXME!) */
+long _ftol()
+{
+	return 0;
+}
 long _ftol2_sse()
 {
 	return 0;
