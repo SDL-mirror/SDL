@@ -47,9 +47,16 @@
 #include <stdlib.h>
 #include <string.h>
 */
-#define assert(X)
 #include "SDL_stdlib.h"
 #include "SDL_string.h"
+
+#define assert(X)
+#define malloc	SDL_malloc
+#define free	SDL_free
+#define memcpy	SDL_memcpy
+#define memmove	SDL_memmove
+#define qsort	SDL_qsort
+
 
 #ifndef HAVE_QSORT
 
@@ -233,9 +240,9 @@ typedef struct { char * first; char * last; } stack_entry;
       /* Shift everything in [test,first)	\
        * up by one, and place |first|		\
        * where |test| is. */			\
-      SDL_memcpy(pivot,first,size);			\
-      SDL_memmove(test+size,test,first-test);	\
-      SDL_memcpy(test,pivot,size);			\
+      memcpy(pivot,first,size);			\
+      memmove(test+size,test,first-test);	\
+      memcpy(test,pivot,size);			\
     }						\
   }
 
@@ -298,7 +305,7 @@ static void qsort_nonaligned(void *base, size_t nmemb, size_t size,
   stack_entry stack[STACK_SIZE];
   int stacktop=0;
   char *first,*last;
-  char *pivot=SDL_malloc(size);
+  char *pivot=malloc(size);
   size_t trunc=TRUNC_nonaligned*size;
   assert(pivot!=0);
 
@@ -310,7 +317,7 @@ static void qsort_nonaligned(void *base, size_t nmemb, size_t size,
       /* Select pivot */
       { char * mid=first+size*((last-first)/size >> 1);
         Pivot(SWAP_nonaligned,size);
-        SDL_memcpy(pivot,mid,size);
+        memcpy(pivot,mid,size);
       }
       /* Partition. */
       Partition(SWAP_nonaligned,size);
@@ -320,7 +327,7 @@ static void qsort_nonaligned(void *base, size_t nmemb, size_t size,
   }
   PreInsertion(SWAP_nonaligned,TRUNC_nonaligned,size);
   Insertion(SWAP_nonaligned);
-  SDL_free(pivot);
+  free(pivot);
 }
 
 static void qsort_aligned(void *base, size_t nmemb, size_t size,
@@ -329,7 +336,7 @@ static void qsort_aligned(void *base, size_t nmemb, size_t size,
   stack_entry stack[STACK_SIZE];
   int stacktop=0;
   char *first,*last;
-  char *pivot=SDL_malloc(size);
+  char *pivot=malloc(size);
   size_t trunc=TRUNC_aligned*size;
   assert(pivot!=0);
 
@@ -341,7 +348,7 @@ static void qsort_aligned(void *base, size_t nmemb, size_t size,
       /* Select pivot */
       { char * mid=first+size*((last-first)/size >> 1);
         Pivot(SWAP_aligned,size);
-        SDL_memcpy(pivot,mid,size);
+        memcpy(pivot,mid,size);
       }
       /* Partition. */
       Partition(SWAP_aligned,size);
@@ -351,7 +358,7 @@ static void qsort_aligned(void *base, size_t nmemb, size_t size,
   }
   PreInsertion(SWAP_aligned,TRUNC_aligned,size);
   Insertion(SWAP_aligned);
-  SDL_free(pivot);
+  free(pivot);
 }
 
 static void qsort_words(void *base, size_t nmemb,
@@ -360,7 +367,7 @@ static void qsort_words(void *base, size_t nmemb,
   stack_entry stack[STACK_SIZE];
   int stacktop=0;
   char *first,*last;
-  char *pivot=SDL_malloc(WORD_BYTES);
+  char *pivot=malloc(WORD_BYTES);
   assert(pivot!=0);
 
   first=(char*)base; last=first+(nmemb-1)*WORD_BYTES;
@@ -398,12 +405,12 @@ fprintf(stderr,"pivot=%d\n",*(int*)pivot);
       *pr=*pl; }
     if (pr!=(int*)first) *pr=*(int*)pivot;
   }
-  SDL_free(pivot);
+  free(pivot);
 }
 
 /* ---------------------------------------------------------------------- */
 
-void SDL_qsort(void *base, size_t nmemb, size_t size,
+void qsort(void *base, size_t nmemb, size_t size,
            int (*compare)(const void *, const void *)) {
 
   if (nmemb<=1) return;
