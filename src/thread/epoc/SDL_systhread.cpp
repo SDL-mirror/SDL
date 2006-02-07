@@ -28,10 +28,6 @@
 */
 
 
-//#include <stdlib.h>
-//#include <stdio.h>
-
-
 extern "C" {
 #undef NULL
 #include "SDL_error.h"

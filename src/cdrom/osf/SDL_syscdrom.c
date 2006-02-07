@@ -31,12 +31,9 @@
 #include <io/cam/cdrom.h>
 #include <io/cam/rzdisk.h>
 #include <io/common/devgetinfo.h>
-#include <alloca.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_error.h"
 #include "SDL_cdrom.h"
 #include "SDL_syscdrom.h"
@@ -218,7 +215,7 @@ int  SDL_SYS_CDInit(void)
 	    while (devent = readdir(devdir))
 		if (SDL_memcmp(checklist[i].name, devent->d_name, name_len) == 0)
 		    if (devent->d_name[devent->d_namlen-1] == 'c') {
-			sprintf(drive, "%s/%s", checklist[i].dir, devent->d_name);
+			SDL_snprintf(drive, SDL_arraysize(drive), "%s/%s", checklist[i].dir, devent->d_name);
 #ifdef DEBUG_CDROM
 			fprintf(stderr, "Try to add drive: %s\n", drive);
 #endif

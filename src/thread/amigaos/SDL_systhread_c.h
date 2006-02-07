@@ -31,9 +31,6 @@
 #include <inline/exec.h>
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "mydebug.h"
 
 extern struct ExecBase *SysBase;

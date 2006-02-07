@@ -22,11 +22,6 @@
 
 /* Utilities for getting and setting the X display mode */
 
-/*
-#include <stdlib.h>
-#include <string.h>
-*/
-
 #include "SDL_timer.h"
 #include "SDL_error.h"
 #include "SDL_events.h"

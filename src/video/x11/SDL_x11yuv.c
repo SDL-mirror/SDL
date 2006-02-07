@@ -24,8 +24,6 @@
 
 #ifdef XFREE86_XV
 
-#include <stdlib.h>
-#include <string.h>
 #include <X11/Xlib.h>
 #ifndef NO_SHARED_MEMORY
 #include <sys/ipc.h>
@@ -34,6 +32,8 @@
 #endif
 #include <Xext/extensions/Xvlib.h>
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_error.h"
 #include "SDL_video.h"
 #include "SDL_x11yuv_c.h"

@@ -25,9 +25,7 @@
 
 /* Output raw audio data to a file. */
 
-#include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
 #include <errno.h>
 #include <unistd.h>
 #include <sys/stat.h>
@@ -36,6 +34,8 @@
 #include <fcntl.h>
 
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_audio.h"
 #include "SDL_error.h"
 #include "SDL_audiomem.h"

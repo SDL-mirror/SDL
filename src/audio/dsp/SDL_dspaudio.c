@@ -25,9 +25,7 @@
 
 /* Allow access to a raw mixing buffer */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <stdio.h>	/* For perror() ... should we really do this? */
 #include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -43,6 +41,8 @@
 #include <sys/soundcard.h>
 #endif
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_audio.h"
 #include "SDL_error.h"
 #include "SDL_audiomem.h"
@@ -303,7 +303,6 @@ static int DSP_OpenAudio(_THIS, SDL_AudioSpec *spec)
 #endif
 	if ( ioctl(audio_fd, SNDCTL_DSP_SETFRAGMENT, &frag_spec) < 0 ) {
 		perror("SNDCTL_DSP_SETFRAGMENT");
-		fprintf(stderr, "Warning: Couldn't set audio fragment size\n");
 	}
 #ifdef DEBUG_AUDIO
 	{ audio_buf_info info;

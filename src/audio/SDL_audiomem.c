@@ -31,8 +31,8 @@
 #include <stddef.h>
 #endif
 
-#include "SDL_audiomem.h"
 #include "SDL_stdlib.h"
+#include "SDL_audiomem.h"
 
 /* Allocate memory that will be shared between threads (freed on exit) */
 void *SDL_AllocAudioMem(int size)

@@ -23,15 +23,14 @@
 /* Functions for system-level CD-ROM audio control */
 
 #include <sys/types.h>
-#include <stdlib.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <stdio.h>
-#include <string.h>
 #include <errno.h>
 #include <unistd.h>
 #include <sys/cdio.h>
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_error.h"
 #include "SDL_cdrom.h"
 #include "SDL_syscdrom.h"
@@ -189,7 +188,7 @@ int  SDL_SYS_CDInit(void)
 			char *insert;
 			exists = 1;
 			for ( j=checklist[i][1]; exists; ++j ) {
-				sprintf(drive, "/dev/%sc", &checklist[i][3]);
+				SDL_snprintf(drive, SDL_arraysize(drive), "/dev/%sc", &checklist[i][3]);
 				insert = SDL_strchr(drive, '?');
 				if ( insert != NULL ) {
 					*insert = j;
@@ -209,7 +208,7 @@ int  SDL_SYS_CDInit(void)
 				}
 			}
 		} else {
-			sprintf(drive, "/dev/%s", checklist[i]);
+			SDL_snprintf(drive, SDL_arraysize(drive), "/dev/%s", checklist[i]);
 			if ( CheckDrive(drive, &stbuf) > 0 ) {
 				AddDrive(drive, &stbuf);
 			}

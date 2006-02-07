@@ -22,9 +22,6 @@
 
 /* This is the system specific header for the SDL joystick API */
 
-#include <stdio.h>		/* For the definition of NULL */
-#include <stdlib.h>		/* For SDL_getenv() prototype */
-#include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -38,6 +35,8 @@
 #include <linux/input.h>
 #endif
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_error.h"
 #include "SDL_joystick.h"
 #include "SDL_sysjoystick.h"
@@ -325,7 +324,7 @@ int SDL_SYS_JoystickInit(void)
 
 	for ( i=0; i<SDL_TABLESIZE(joydev_pattern); ++i ) {
 		for ( j=0; j < MAX_JOYSTICKS; ++j ) {
-			sprintf(path, joydev_pattern[i], j);
+			SDL_snprintf(path, SDL_arraysize(path), joydev_pattern[i], j);
 
 			/* rcg06302000 replaced access(F_OK) call with stat().
 			 * stat() will fail if the file doesn't exist, so it's

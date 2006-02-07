@@ -20,9 +20,11 @@
     slouken@libsdl.org
 */
 
-#include <stdlib.h>
+#include <stdio.h>
 #include <unistd.h>
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_error.h"
 #include "SDL_endian.h"
 #include "SDL_events_c.h"

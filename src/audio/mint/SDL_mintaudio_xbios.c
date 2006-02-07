@@ -27,9 +27,6 @@
 	Patrice Mandin, Didier Méquignon
 */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include <unistd.h>
 #include <support.h>
 
@@ -38,6 +35,8 @@
 #include <mint/falcon.h>
 #include <mint/cookie.h>
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_endian.h"
 #include "SDL_audio.h"
 #include "SDL_audio_c.h"

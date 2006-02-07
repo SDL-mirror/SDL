@@ -25,18 +25,6 @@
  * gabriele.greco@aruba.it
  */
 
-/*
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/ioctl.h>
-#ifdef MTRR_SUPPORT
-#include <asm/mtrr.h>
-#include <sys/fcntl.h>
-#endif
-*/
-
 #include "SDL.h"
 #include "SDL_error.h"
 #include "SDL_timer.h"

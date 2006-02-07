@@ -20,9 +20,6 @@
     slouken@libsdl.org
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #if defined(__APPLE__) && defined(__MACH__)
 #include <Carbon/Carbon.h>
 #if USE_QUICKTIME
@@ -44,6 +41,8 @@
 #include <QDOffscreen.h>
 #endif
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_video.h"
 #include "SDL_error.h"
 #include "SDL_syswm.h"

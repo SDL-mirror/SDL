@@ -24,8 +24,7 @@
     clare@setabox.com
 */
 
-#include <stdlib.h>
-
+#include "SDL_stdlib.h"
 #include "SDL_error.h"
 #include "SDL_events_c.h"
 
@@ -43,7 +42,7 @@ WMcursor * NX_CreateWMCursor (_THIS,
 
     Dprintf ("enter NX_CreateWMCursor\n") ;
 
-    cursor = (WMcursor *) malloc (sizeof (WMcursor)) ;
+    cursor = (WMcursor *) SDL_malloc (sizeof (WMcursor)) ;
     if (cursor == NULL) {
         SDL_OutOfMemory () ;
         return NULL ;
@@ -56,7 +55,7 @@ WMcursor * NX_CreateWMCursor (_THIS,
 void NX_FreeWMCursor (_THIS, WMcursor * cursor)
 {
     Dprintf ("NX_FreeWMCursor\n") ;
-    free (cursor) ;
+    SDL_free (cursor) ;
     return ;
 }
 

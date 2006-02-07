@@ -20,12 +20,12 @@
     slouken@libsdl.org
 */
 
-#include <stdlib.h>
-#include <string.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
 #include "SDL_version.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_error.h"
 #include "SDL_timer.h"
 #include "SDL_video.h"

@@ -22,11 +22,8 @@
 
 #include <AudioUnit/AudioUnit.h>
 
-#include <assert.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_endian.h"
 #include "SDL_audio.h"
 #include "SDL_audio_c.h"
@@ -113,8 +110,10 @@ static OSStatus     audioCallback (void                             *inRefCon,
     /* No SDL conversion should be needed here, ever, since we accept
        any input format in OpenAudio, and leave the conversion to CoreAudio.
      */
+    /*
     assert(!this->convert.needed);
     assert(this->spec.channels == ioData->mNumberChannels);
+     */
     
     remaining = ioData->mDataByteSize;
     ptr = ioData->mData;
@@ -270,8 +269,7 @@ int Core_OpenAudio(_THIS, SDL_AudioSpec *spec)
     /* Allocate a sample buffer */
     bufferOffset = bufferSize = this->spec.size;
     buffer = SDL_malloc(bufferSize);
-    assert(buffer);
-    
+
     /* Finally, start processing of the audio unit */
     result = AudioOutputUnitStart (outputAudioUnit);
     CHECK_RESULT("AudioOutputUnitStart")    

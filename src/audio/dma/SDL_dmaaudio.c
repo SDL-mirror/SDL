@@ -22,9 +22,7 @@
 
 /* Allow access to a raw mixing buffer */
 
-#include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
 #include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -46,6 +44,8 @@
 #define MAP_FAILED	((Uint8 *)-1)
 #endif
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_audio.h"
 #include "SDL_error.h"
 #include "SDL_audiomem.h"

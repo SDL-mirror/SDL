@@ -1,8 +1,6 @@
 #include <sys/types.h>
 #include <sys/ioctl.h>
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
@@ -15,6 +13,8 @@
 #include <linux/fb.h>
 
 #include "SDL.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_error.h"
 #include "SDL_video.h"
 #include "SDL_mouse.h"
@@ -93,15 +93,15 @@ static SDL_VideoDevice *iPod_CreateDevice (int devindex)
 {
     SDL_VideoDevice *this;
     
-    this = (SDL_VideoDevice *)malloc (sizeof(SDL_VideoDevice));
+    this = (SDL_VideoDevice *)SDL_malloc (sizeof(SDL_VideoDevice));
     if (this) {
 	memset (this, 0, sizeof *this);
-	this->hidden = (struct SDL_PrivateVideoData *) malloc (sizeof(struct SDL_PrivateVideoData));
+	this->hidden = (struct SDL_PrivateVideoData *) SDL_malloc (sizeof(struct SDL_PrivateVideoData));
     }
     if (!this || !this->hidden) {
 	SDL_OutOfMemory();
 	if (this)
-	    free (this);
+	    SDL_free (this);
 	return 0;
     }
     memset (this->hidden, 0, sizeof(struct SDL_PrivateVideoData));
@@ -178,7 +178,7 @@ static int iPod_VideoInit (_THIS, SDL_PixelFormat *vformat)
 	    for ( i=0; vcs[i] && (kbfd < 0); ++i ) {
 		char vtpath[12];
 		
-		sprintf(vtpath, vcs[i], curvt);
+		SDL_snprintf(vtpath, SDL_arraysize(vtpath), vcs[i], curvt);
 		kbfd = open(vtpath, O_RDWR);
 	    }
 	}
@@ -320,8 +320,8 @@ static SDL_Surface *iPod_SetVideoMode (_THIS, SDL_Surface *current, int width, i
 	Rmask = Gmask = Bmask = 0;
     }
 
-    if (this->hidden->buffer) free (this->hidden->buffer);
-    this->hidden->buffer = malloc (width * height * (bpp / 8));
+    if (this->hidden->buffer) SDL_free (this->hidden->buffer);
+    this->hidden->buffer = SDL_malloc (width * height * (bpp / 8));
     if (!this->hidden->buffer) {
 	SDL_SetError ("Couldn't allocate buffer for requested mode");
 	return 0;
@@ -331,7 +331,7 @@ static SDL_Surface *iPod_SetVideoMode (_THIS, SDL_Surface *current, int width, i
 
     if (!SDL_ReallocFormat (current, bpp, Rmask, Gmask, Bmask, 0)) {
 	SDL_SetError ("Couldn't allocate new pixel format");
-	free (this->hidden->buffer);
+	SDL_free (this->hidden->buffer);
 	this->hidden->buffer = 0;
 	return 0;
     }

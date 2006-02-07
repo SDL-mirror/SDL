@@ -22,9 +22,7 @@
 
 /* An implementation of mutexes using semaphores */
 
-#include <stdio.h>
-#include <stdlib.h>
-
+#include "SDL_stdlib.h"
 #include "SDL_error.h"
 #include "SDL_thread.h"
 #include "SDL_systhread_c.h"

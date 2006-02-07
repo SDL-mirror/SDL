@@ -24,12 +24,12 @@
 
 #include "directx.h"
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_events.h"
 #include "SDL_video.h"
 #include "SDL_error.h"
 #include "SDL_syswm.h"
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
 #include "SDL_sysevents.h"
 #include "SDL_events_c.h"
 #include "SDL_lowvideo.h"

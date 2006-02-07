@@ -20,9 +20,6 @@
     slouken@libsdl.org
 */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -34,6 +31,8 @@
 #include <sys/neutrino.h>
 #include <sys/asoundlib.h>
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_audio.h"
 #include "SDL_error.h"
 #include "SDL_audiomem.h"

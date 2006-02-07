@@ -24,10 +24,6 @@
 #define _SDL_cgxvideo_h
 
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include <exec/exec.h>
 #include <cybergraphx/cybergraphics.h>
 #include <graphics/scale.h>
@@ -47,9 +43,11 @@
 #include <inline/console.h>
 #endif
 
-#include "mydebug.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_mouse.h"
 #include "SDL_sysvideo.h"
+#include "mydebug.h"
 
 #define USE_CGX_WRITELUTPIXEL
 

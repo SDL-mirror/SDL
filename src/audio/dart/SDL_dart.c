@@ -22,10 +22,8 @@
 
 /* Allow access to a raw mixing buffer */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_types.h"
 #include "SDL_error.h"
 #include "SDL_timer.h"

@@ -27,9 +27,10 @@
      Implements Sprite plotting code for wimp display.window
 */
 
-#include <stdlib.h>
 #include "kernel.h"
 #include "swis.h"
+
+#include "SDL_stdlib.h"
 #include "SDL_riscosvideo.h"
 
 extern void WIMP_ReadModeInfo(_THIS);

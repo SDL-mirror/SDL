@@ -26,9 +26,9 @@
    implementation, written by Christopher Tate and Owen Smith.  Thanks!
  */
 
+#include "SDL_stdlib.h"
 #include "SDL_error.h"
 #include "SDL_thread.h"
-#include "SDL_stdlib.h"
 
 struct SDL_cond
 {

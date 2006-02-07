@@ -22,13 +22,11 @@
 
 /* BWindow based framebuffer implementation */
 
-#include <stdlib.h>
-#include <string.h>
-
-#include <stdio.h>
 #include <unistd.h>
 
 #include "SDL.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_BeApp.h"
 #include "SDL_BWin.h"
 #include "SDL_timer.h"
@@ -291,7 +289,7 @@ int BE_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 	/* Get the video modes we can switch to in fullscreen mode */
 	bscreen.GetModeList(&modes, &nmodes);
-	qsort(modes, nmodes, sizeof *modes, CompareModes);
+	SDL_qsort(modes, nmodes, sizeof *modes, CompareModes);
 	for ( i=0; i<nmodes; ++i ) {
 		bpp = ColorSpaceToBitsPerPixel(modes[i].space);
 		//if ( bpp != 0 ) { // There are bugs in changing colorspace

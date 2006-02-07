@@ -20,12 +20,12 @@
     slouken@libsdl.org
 */
 
-#include <stdlib.h>
-
 #include <Ph.h>
 #include <photon/Pg.h>
 
 #include "SDL.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_error.h"
 #include "SDL_endian.h"
 #include "SDL_video.h"

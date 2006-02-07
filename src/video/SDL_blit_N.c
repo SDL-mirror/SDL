@@ -32,8 +32,7 @@
 #ifdef HAVE_ALTIVEC_H
 #include <altivec.h>
 #endif
-#include <assert.h>
-#include <stdlib.h>
+#define assert(X)
 #ifdef MACOSX
 #include <sys/sysctl.h>
 static size_t GetL3CacheSize( void )
@@ -234,7 +233,6 @@ static void Blit_RGB888_RGB565Altivec(SDL_BlitInfo *info) {
         }
 
         assert(width == 0);
-
 
         /* do scalar until we can align... */
         ONE_PIXEL_BLEND((extrawidth), extrawidth);

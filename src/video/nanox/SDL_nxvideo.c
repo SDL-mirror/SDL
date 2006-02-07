@@ -25,9 +25,8 @@
     clare@setabox.com
 */
 
-#include <stdlib.h>
-#include <string.h>
-
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_video.h"
 #include "SDL_pixels_c.h"
 #include "SDL_events_c.h"
@@ -84,11 +83,11 @@ static SDL_VideoDevice * NX_CreateDevice (int devindex)
     Dprintf ("enter NX_CreateDevice\n") ;
 
     // Initialize all variables that we clean on shutdown
-    device = (SDL_VideoDevice *) malloc (sizeof (SDL_VideoDevice)) ;
+    device = (SDL_VideoDevice *) SDL_malloc (sizeof (SDL_VideoDevice)) ;
     if (device) {
-        memset (device, 0, (sizeof * device)) ;
+        SDL_memset (device, 0, (sizeof * device)) ;
         device -> hidden = (struct SDL_PrivateVideoData *)
-                malloc ((sizeof * device -> hidden)) ;
+                SDL_malloc ((sizeof * device -> hidden)) ;
         device -> gl_data = NULL ;
     }
     if ((device == NULL) || (device -> hidden == NULL)) {
@@ -96,7 +95,7 @@ static SDL_VideoDevice * NX_CreateDevice (int devindex)
         NX_DeleteDevice (device) ;
         return 0 ;
     }
-    memset (device -> hidden, 0, (sizeof * device -> hidden)) ;
+    SDL_memset (device -> hidden, 0, (sizeof * device -> hidden)) ;
 
     // Set the function pointers
     device -> VideoInit = NX_VideoInit ;
@@ -212,9 +211,9 @@ int NX_VideoInit (_THIS, SDL_PixelFormat * vformat)
     SDL_Visual.bpp = si.bpp ;
 
     // GetVideoMode
-    SDL_modelist = (SDL_Rect **) malloc (sizeof (SDL_Rect *) * 2) ;
+    SDL_modelist = (SDL_Rect **) SDL_malloc (sizeof (SDL_Rect *) * 2) ;
     if (SDL_modelist) {
-        SDL_modelist [0] = (SDL_Rect *) malloc (sizeof(SDL_Rect)) ;
+        SDL_modelist [0] = (SDL_Rect *) SDL_malloc (sizeof(SDL_Rect)) ;
         if (SDL_modelist [0]) {
             SDL_modelist [0] -> x = 0 ;
             SDL_modelist [0] -> y = 0 ;
@@ -486,9 +485,9 @@ static int NX_SetGammaRamp (_THIS, Uint16 * ramp)
     
     if (SDL_Visual.bpp != 32 && SDL_Visual.bpp != 24) return -1 ;
 
-    if (! GammaRamp_R) GammaRamp_R = (Uint16 *) malloc (sizeof (Uint16) * CI_SIZE) ;
-    if (! GammaRamp_G) GammaRamp_G = (Uint16 *) malloc (sizeof (Uint16) * CI_SIZE) ;
-    if (! GammaRamp_B) GammaRamp_B = (Uint16 *) malloc (sizeof (Uint16) * CI_SIZE) ;
+    if (! GammaRamp_R) GammaRamp_R = (Uint16 *) SDL_malloc (sizeof (Uint16) * CI_SIZE) ;
+    if (! GammaRamp_G) GammaRamp_G = (Uint16 *) SDL_malloc (sizeof (Uint16) * CI_SIZE) ;
+    if (! GammaRamp_B) GammaRamp_B = (Uint16 *) SDL_malloc (sizeof (Uint16) * CI_SIZE) ;
     if ((! GammaRamp_R) || (! GammaRamp_G) || (! GammaRamp_B)) {
         SDL_OutOfMemory () ;
         return -1 ;

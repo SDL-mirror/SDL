@@ -91,7 +91,7 @@ static void SetMMerror(char *function, MMRESULT code)
     int len;
     char errbuf[MAXERRORLENGTH];
 
-    sprintf(errbuf, "%s: ", function);
+    SDL_snprintf(errbuf, SDL_arraysize(errbuf), "%s: ", function);
     len = SDL_strlen(errbuf);
     waveOutGetErrorText(code, errbuf+len, MAXERRORLENGTH-len);
     SDL_SetError("%s",errbuf);

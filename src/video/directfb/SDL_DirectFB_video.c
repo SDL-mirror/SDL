@@ -27,9 +27,6 @@
 /* DirectFB video driver implementation.
 */
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/mman.h>
@@ -38,6 +35,8 @@
 #include <directfb_version.h>
 
 #include "SDL.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_error.h"
 #include "SDL_video.h"
 #include "SDL_mouse.h"
@@ -110,7 +109,7 @@ static SDL_VideoDevice *DirectFB_CreateDevice(int devindex)
   device = (SDL_VideoDevice *)SDL_malloc(sizeof(SDL_VideoDevice));
   if (device)
     {
-      memset (device, 0, (sizeof *device));
+      SDL_memset (device, 0, (sizeof *device));
       device->hidden = (struct SDL_PrivateVideoData *) malloc (sizeof (*device->hidden));
     }
   if (device == NULL  ||  device->hidden == NULL)
@@ -122,7 +121,7 @@ static SDL_VideoDevice *DirectFB_CreateDevice(int devindex)
         }
       return(0);
     }
-  memset (device->hidden, 0, sizeof (*device->hidden));
+  SDL_memset (device->hidden, 0, sizeof (*device->hidden));
 
   /* Set the function pointers */
   device->VideoInit = DirectFB_VideoInit;
@@ -195,7 +194,7 @@ static DFBEnumerationResult EnumModesCallback (int  width,
 
   HIDDEN->nummodes++;
 
-  enumrect = calloc(1, sizeof(struct DirectFBEnumRect));
+  enumrect = SDL_calloc(1, sizeof(struct DirectFBEnumRect));
   if (!enumrect)
     {
       SDL_OutOfMemory();
@@ -294,14 +293,14 @@ static SDL_Palette *AllocatePalette(int size)
   SDL_Palette *palette;
   SDL_Color   *colors;
 
-  palette = calloc (1, sizeof(SDL_Palette));
+  palette = SDL_calloc (1, sizeof(SDL_Palette));
   if (!palette)
     {
       SDL_OutOfMemory();
       return NULL;
     }
 
-  colors = calloc (size, sizeof(SDL_Color));
+  colors = SDL_calloc (size, sizeof(SDL_Color));
   if (!colors)
     {
       SDL_OutOfMemory();
@@ -432,7 +431,7 @@ int DirectFB_VideoInit(_THIS, SDL_PixelFormat *vformat)
       goto error;
     }
 
-  HIDDEN->modelist = calloc (HIDDEN->nummodes + 1, sizeof(SDL_Rect *));
+  HIDDEN->modelist = SDL_calloc (HIDDEN->nummodes + 1, sizeof(SDL_Rect *));
   if (!HIDDEN->modelist)
     {
       SDL_OutOfMemory();
@@ -614,7 +613,7 @@ static SDL_Surface *DirectFB_SetVideoMode(_THIS, SDL_Surface *current, int width
   else if (!current->hwdata)
     {
       /* Allocate the hardware acceleration data */
-      current->hwdata = (struct private_hwdata *) calloc (1, sizeof(*current->hwdata));
+      current->hwdata = (struct private_hwdata *) SDL_calloc (1, sizeof(*current->hwdata));
       if (!current->hwdata)
         {
           SDL_OutOfMemory();
@@ -821,7 +820,7 @@ static int DirectFB_AllocHWSurface(_THIS, SDL_Surface *surface)
     return -1;
 
   /* Allocate the hardware acceleration data */
-  surface->hwdata = (struct private_hwdata *) calloc (1, sizeof(*surface->hwdata));
+  surface->hwdata = (struct private_hwdata *) SDL_calloc (1, sizeof(*surface->hwdata));
   if (surface->hwdata == NULL)
     {
       SDL_OutOfMemory();

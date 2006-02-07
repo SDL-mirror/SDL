@@ -20,9 +20,6 @@
     slouken@libsdl.org
 */
 
-#include <stdlib.h>
-#include <string.h>
-
 #if defined(__APPLE__) && defined(__MACH__)
 #include <Carbon/Carbon.h>
 #elif TARGET_API_MAC_CARBON && (UNIVERSAL_INTERFACES_VERSION > 0x0335)
@@ -32,6 +29,7 @@
 #include <Strings.h>
 #endif
 
+#include "SDL_string.h"
 #include "SDL_macwm_c.h"
 
 void Mac_SetCaption(_THIS, const char *title, const char *icon)

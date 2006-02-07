@@ -27,9 +27,9 @@
 #endif
 
 #include "SDL.h"
+#include "SDL_stdlib.h"
 #include "SDL_endian.h"
 #include "SDL_fatal.h"
-#include "SDL_stdlib.h"
 #ifndef DISABLE_VIDEO
 #include "SDL_leaks.h"
 #endif

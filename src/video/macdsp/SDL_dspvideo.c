@@ -122,9 +122,6 @@
 #define DSP_NO_SYNC_OPENGL
 
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #if defined(__APPLE__) && defined(__MACH__)
 #include <Carbon/Carbon.h>
 #include <DrawSprocket/DrawSprocket.h>
@@ -140,6 +137,8 @@
 #include <DrawSprocket.h>
 #endif
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_video.h"
 #include "SDL_blit.h"
 #include "SDL_error.h"
@@ -265,7 +264,7 @@ static SDL_VideoDevice *DSp_CreateDevice(int devindex)
 		if ( device ) {
 			
 			if (device->hidden)
-		        free (device->hidden);			
+				SDL_free(device->hidden);			
 			
 			SDL_free(device);
 		}
@@ -390,14 +389,14 @@ static SDL_Rect**  DSp_BuildModeList (const GDHandle gDevice)
 done:
 	i++;          /* i was not incremented before kicking out of the loop */
 	
-	mode_list = (SDL_Rect**) malloc (sizeof (SDL_Rect*) * (i+1));
+	mode_list = (SDL_Rect**) SDL_malloc (sizeof (SDL_Rect*) * (i+1));
 	if (mode_list) {
 	
 	   /* -dw- new stuff: build in reverse order so largest sizes list first */
 		for (j = i-1; j >= 0; j--) {
-			mode_list [j] = (SDL_Rect*) malloc (sizeof (SDL_Rect));	
+			mode_list [j] = (SDL_Rect*) SDL_malloc (sizeof (SDL_Rect));	
 			if (mode_list [j])
-				memcpy (mode_list [j], &(temp_list [j]), sizeof (SDL_Rect));
+				SDL_memcpy (mode_list [j], &(temp_list [j]), sizeof (SDL_Rect));
 			else {
 				SDL_OutOfMemory ();
 				return NULL;
@@ -475,7 +474,7 @@ static int DSp_GetMainDevice (_THIS, GDHandle *device)
 	  return 0;
 	}
 		
-	memset (&attrib, 0, sizeof (DSpContextAttributes));
+	SDL_memset (&attrib, 0, sizeof (DSpContextAttributes));
 
 	/* These attributes are hopefully supported on all devices...*/
 	attrib.displayWidth         = 640;
@@ -657,7 +656,7 @@ static void DSp_SetHWError (OSStatus err, int is_agp)
 		fmt = "Hardware surface could not be allocated in %s - unknown error";
 		break;
 	}
-	sprintf(message, fmt, mem);
+	SDL_snprintf(message, SDL_arraysize(message), fmt, mem);
 	SDL_SetError(message);
 }
 #endif // TARGET_API_MAC_OSX
@@ -735,7 +734,7 @@ static void DSp_UnsetVideoMode(_THIS, SDL_Surface *current)
 		   DisposeGWorld (dsp_back_buffer);
 		
 		if (current->hwdata)
-		   free (current->hwdata);
+		   SDL_free(current->hwdata);
 		   
 		DSpContext_SetState (dsp_context, kDSpContextState_Inactive );
 		DSpContext_Release  (dsp_context);
@@ -788,7 +787,7 @@ rebuild:
 		page_count = 1;
 	}
 
-	memset (&attrib, 0, sizeof (DSpContextAttributes));
+	SDL_memset (&attrib, 0, sizeof (DSpContextAttributes));
 	attrib.displayWidth         = width;
 	attrib.displayHeight        = height;
 	attrib.displayBestDepth     = bpp;
@@ -867,7 +866,7 @@ rebuild:
 		/* single-buffer context */
 		DSpContext_GetFrontBuffer (dsp_context, &dsp_back_buffer);
 			
-		current->hwdata   = (private_hwdata*) malloc (sizeof (private_hwdata));
+		current->hwdata   = (private_hwdata*) SDL_malloc (sizeof (private_hwdata));
 		if (current ->hwdata == NULL) {
 			SDL_OutOfMemory ();
 	  		return NULL;		  
@@ -885,13 +884,13 @@ rebuild:
 	} 
 	else if ( DSp_NewHWSurface(this, &dsp_back_buffer, bpp, width-1, height-1) == 0 ) {
       
-      current->hwdata = (private_hwdata*) malloc (sizeof (private_hwdata));
+      current->hwdata = (private_hwdata*) SDL_malloc (sizeof (private_hwdata));
       if (current ->hwdata == NULL) {
       	SDL_OutOfMemory ();
       	return NULL;		  
       }
       
-      memset (current->hwdata, 0, sizeof (private_hwdata));
+      SDL_memset (current->hwdata, 0, sizeof (private_hwdata));
       current->hwdata->offscreen = dsp_back_buffer;
       current->flags |= SDL_DOUBLEBUF | SDL_HWSURFACE; 
       this->UpdateRects = DSp_DirectUpdate; /* hardware doesn't do update rects, must be page-flipped */	   
@@ -1084,13 +1083,13 @@ static int DSp_AllocHWSurface(_THIS, SDL_Surface *surface)
 	if ( DSp_NewHWSurface (this, &temp, surface->format->BitsPerPixel, surface->w, surface->h) < 0 )
 	   return (-1);
 			
-	surface->hwdata = (private_hwdata*) malloc (sizeof (private_hwdata));
+	surface->hwdata = (private_hwdata*) SDL_malloc (sizeof (private_hwdata));
 	if (surface->hwdata == NULL) {
 		SDL_OutOfMemory ();
 		return -1;
 	}
 	
-	memset (surface->hwdata, 0, sizeof(private_hwdata));
+	SDL_memset (surface->hwdata, 0, sizeof(private_hwdata));
 	surface->hwdata->offscreen = temp;
 	surface->pitch	 = GetPixRowBytes (GetPortPixMap (temp)) & 0x3FFF;
 	surface->pixels  = GetPixBaseAddr (GetPortPixMap (temp));
@@ -1105,7 +1104,7 @@ static void DSp_FreeHWSurface(_THIS, SDL_Surface *surface)
 {	
 	if (surface->hwdata->offscreen != NULL)
 		DisposeGWorld (surface->hwdata->offscreen);
-	free (surface->hwdata);
+	SDL_free(surface->hwdata);
 
     surface->pixels = NULL;
 }

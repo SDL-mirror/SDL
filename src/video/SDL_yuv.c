@@ -22,9 +22,9 @@
 
 /* This is the implementation of the YUV video surface support */
 
+#include "SDL_stdlib.h"
 #include "SDL_video.h"
 #include "SDL_error.h"
-#include "SDL_stdlib.h"
 #include "SDL_sysvideo.h"
 #include "SDL_yuvfuncs.h"
 #include "SDL_yuv_sw_c.h"

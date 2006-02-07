@@ -22,13 +22,13 @@
 
 /* This is the QNX Realtime Platform version of SDL YUV video overlays */
 
-#include <stdlib.h>
-#include <string.h>
 #include <errno.h>
 
 #include <Ph.h>
 #include <Pt.h>
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_error.h"
 #include "SDL_video.h"
 #include "SDL_phyuv_c.h"
@@ -81,7 +81,7 @@ SDL_Overlay* ph_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SD
     PhPoint_t pos;
 
     /* Create the overlay structure */
-    overlay = calloc(1, sizeof(SDL_Overlay));
+    overlay = SDL_calloc(1, sizeof(SDL_Overlay));
 
     if (overlay == NULL)
     {
@@ -99,7 +99,7 @@ SDL_Overlay* ph_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SD
     overlay->hwfuncs = &ph_yuvfuncs;
 
     /* Create the pixel data and lookup tables */
-    hwdata = calloc(1, sizeof(struct private_yuvhwdata));
+    hwdata = SDL_calloc(1, sizeof(struct private_yuvhwdata));
 
     if (hwdata == NULL)
     {
@@ -132,8 +132,8 @@ SDL_Overlay* ph_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SD
     overlay->hwdata->CurrentViewPort.size.w = width;
     overlay->hwdata->CurrentViewPort.size.h = height;
     overlay->hwdata->State = OVERLAY_STATE_UNINIT;
-    overlay->hwdata->FrameData0 = (FRAMEDATA *) calloc(1, sizeof(FRAMEDATA));
-    overlay->hwdata->FrameData1 = (FRAMEDATA *) calloc(1, sizeof(FRAMEDATA));
+    overlay->hwdata->FrameData0 = (FRAMEDATA *) SDL_calloc(1, sizeof(FRAMEDATA));
+    overlay->hwdata->FrameData1 = (FRAMEDATA *) SDL_calloc(1, sizeof(FRAMEDATA));
 
     vidport = -1;
     i=0;
@@ -246,8 +246,8 @@ SDL_Overlay* ph_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SD
 
     /* Find the pitch and offset values for the overlay */
     overlay->planes = planes;
-    overlay->pitches = calloc(overlay->planes, sizeof(Uint16));
-    overlay->pixels  = calloc(overlay->planes, sizeof(Uint8*));
+    overlay->pitches = SDL_calloc(overlay->planes, sizeof(Uint16));
+    overlay->pixels  = SDL_calloc(overlay->planes, sizeof(Uint8*));
     if (!overlay->pitches || !overlay->pixels)
     {
         SDL_OutOfMemory();

@@ -27,29 +27,16 @@
           if full locking is neccessary, take a look at XInitThreads().
 */
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <unistd.h>
-#include <string.h>
 #include <sys/ioctl.h>
 #ifdef MTRR_SUPPORT
 #include <asm/mtrr.h>
 #include <sys/fcntl.h>
 #endif
 
-#ifdef HAVE_ALLOCA_H
-#include <alloca.h>
-#endif
-
-#ifdef HAVE_ALLOCA
-#define ALLOCA(n) ((void*)alloca(n))
-#define FREEA(p)
-#else
-#define ALLOCA(n) SDL_malloc(n)
-#define FREEA(p) SDL_free(p)
-#endif
-
 #include "SDL.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_error.h"
 #include "SDL_timer.h"
 #include "SDL_thread.h"
@@ -299,9 +286,9 @@ static char *get_classname(char *classname, int maxlen)
 	/* Next look at the application's executable name */
 #if defined(linux) || defined(__FreeBSD__)
 #if defined(linux)
-	sprintf(procfile, "/proc/%d/exe", getpid());
+	SDL_snprintf(procfile, SDL_arraysize(procfile), "/proc/%d/exe", getpid());
 #elif defined(__FreeBSD__)
-	sprintf(procfile, "/proc/%d/file", getpid());
+	SDL_snprintf(procfile, SDL_arraysize(procfile), "/proc/%d/file", getpid());
 #else
 #error Where can we find the executable name?
 #endif
@@ -1215,7 +1202,7 @@ int X11_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 	        /* private writable colormap: just set the colours we need */
 	        XColor  *xcmap;
 		int i;
-	        xcmap = ALLOCA(ncolors*sizeof(*xcmap));
+	        xcmap = SDL_stack_alloc(XColor, ncolors);
 		if(xcmap == NULL)
 		        return 0;
 		for ( i=0; i<ncolors; ++i ) {
@@ -1227,7 +1214,7 @@ int X11_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 		}
 		pXStoreColors(GFX_Display, SDL_XColorMap, xcmap, ncolors);
 		pXSync(GFX_Display, False);
-		FREEA(xcmap);
+		SDL_stack_free(xcmap);
 	} else {
 	        /*
 		 * Shared colormap: We only allocate read-only cells, which
@@ -1245,7 +1232,7 @@ int X11_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 		int nfree = 0;
 		int nc = this->screen->format->palette->ncolors;
 	        colors = this->screen->format->palette->colors;
-		freelist = ALLOCA(nc * sizeof(*freelist));
+		freelist = SDL_stack_alloc(unsigned long, nc);
 		/* make sure multiple allocations of the same cell are freed */
 	        for(i = 0; i < ncolors; i++) {
 		        int pixel = firstcolor + i;
@@ -1255,10 +1242,10 @@ int X11_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 			}
 		}
 		pXFreeColors(GFX_Display, SDL_XColorMap, freelist, nfree, 0);
-		FREEA(freelist);
+		SDL_stack_free(freelist);
 
-		want = ALLOCA(ncolors * sizeof(SDL_Color));
-		reject = ALLOCA(ncolors * sizeof(SDL_Color));
+		want = SDL_stack_alloc(SDL_Color, ncolors);
+		reject = SDL_stack_alloc(SDL_Color, ncolors);
 		SDL_memcpy(want, colors + firstcolor, ncolors * sizeof(SDL_Color));
 		/* make sure the user isn't fooled by her own wishes
 		   (black is safe, always available in the default colormap) */
@@ -1288,8 +1275,8 @@ int X11_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 		}
 		if(nrej)
 			allocate_nearest(this, colors, reject, nrej);
-		FREEA(reject);
-		FREEA(want);
+		SDL_stack_free(reject);
+		SDL_stack_free(want);
 	}
 	return nrej == 0;
 }

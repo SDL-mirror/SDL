@@ -23,12 +23,10 @@
 /* RISC OS semiphores based on linux code */
 
 
-#include <stdlib.h>
-
+#include "SDL_stdlib.h"
 #include "SDL_error.h"
 #include "SDL_timer.h"
 #include "SDL_thread.h"
-
 #include "SDL_systhread_c.h"
 
 #ifdef DISABLE_THREADS
@@ -76,8 +74,6 @@ int SDL_SemPost(SDL_sem *sem)
 #else
 
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>			/* For getpid() */
 #include <pthread.h>
 #include <semaphore.h>

@@ -35,11 +35,9 @@
  *  SDL video driver.  Renamed to "DUMMY" by Sam Lantinga.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "SDL.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_error.h"
 #include "SDL_video.h"
 #include "SDL_mouse.h"
@@ -145,7 +143,9 @@ VideoBootStrap DUMMY_bootstrap = {
 
 int DUMMY_VideoInit(_THIS, SDL_PixelFormat *vformat)
 {
+	/*
 	fprintf(stderr, "WARNING: You are using the SDL dummy video driver!\n");
+	*/
 
 	/* Determine the screen depth (use default 8-bit depth) */
 	/* we change this during the SDL_SetVideoMode implementation... */

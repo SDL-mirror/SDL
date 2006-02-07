@@ -22,9 +22,6 @@
 
 /* Handle the event stream, converting X11 events into SDL events */
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #include <vga.h>
 #include <vgamouse.h>
 #include <vgakeyboard.h>
@@ -38,6 +35,8 @@
 #endif
 
 #include "SDL.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_sysevents.h"
 #include "SDL_events_c.h"
 #include "SDL_svgavideo.h"

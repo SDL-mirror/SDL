@@ -22,6 +22,7 @@
 
 /* Linux thread management routines for SDL */
 
+#include "SDL_stdlib.h"
 #include "SDL_error.h"
 #include "SDL_thread.h"
 #include "SDL_systhread.h"
@@ -138,7 +139,6 @@ void SDL_SYS_KillThread(SDL_Thread *thread)
 
 #else /* Linux-specific clone() based implementation */
 
-#include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
 #include <sys/wait.h>
@@ -227,7 +227,7 @@ void SDL_SYS_WaitThread(SDL_Thread *thread)
 	*/
 	char command[1024];
 
-	sprintf(command,
+	SDL_snprintf(command, SDL_arraysize(command),
 		"ps ax|fgrep -v fgrep|fgrep -v '<zombie>'|fgrep %d >/dev/null",
 								thread->handle);
 	while ( system(command) == 0 )

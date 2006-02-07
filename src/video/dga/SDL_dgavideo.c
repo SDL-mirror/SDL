@@ -23,16 +23,14 @@
 /* DGA 2.0 based SDL video driver implementation.
 */
 
-#include <stdlib.h>
-#include <string.h>
+#include <stdio.h>
+
 #include <X11/Xlib.h>
 #include <Xext/extensions/xf86dga.h>
 
-#ifdef HAVE_ALLOCA_H
-#include <alloca.h>
-#endif
-
 #include "SDL.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_error.h"
 #include "SDL_video.h"
 #include "SDL_mouse.h"
@@ -390,7 +388,7 @@ static int DGA_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 	/* Query for the list of available video modes */
 	modes = SDL_NAME(XDGAQueryModes)(DGA_Display, DGA_Screen, &num_modes);
-	qsort(modes, num_modes, sizeof *modes, cmpmodes);
+	SDL_qsort(modes, num_modes, sizeof *modes, cmpmodes);
 	for ( i=0; i<num_modes; ++i ) {
 #ifdef DGA_DEBUG
 		PrintMode(&modes[i]);
@@ -449,7 +447,7 @@ SDL_Surface *DGA_SetVideoMode(_THIS, SDL_Surface *current,
 
 	/* Search for a matching video mode */
 	modes = SDL_NAME(XDGAQueryModes)(DGA_Display, DGA_Screen, &num_modes);
-	qsort(modes, num_modes, sizeof *modes, cmpmodes);
+	SDL_qsort(modes, num_modes, sizeof *modes, cmpmodes);
 	for ( i=0; i<num_modes; ++i ) {
 		int depth;
 
@@ -968,7 +966,7 @@ static int DGA_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 	if ( ! DGA_colormap ) {
 		return(0);
 	}
-	xcmap = (XColor *)alloca(ncolors*sizeof(*xcmap));
+	xcmap = SDL_stack_alloc(XColor, ncolors);
 	for ( i=0; i<ncolors; ++i ) {
 		xcmap[i].pixel = firstcolor + i;
 		xcmap[i].red   = (colors[i].r<<8)|colors[i].r;
@@ -980,6 +978,7 @@ static int DGA_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 	pXStoreColors(DGA_Display, DGA_colormap, xcmap, ncolors);
 	pXSync(DGA_Display, False);
 	UNLOCK_DISPLAY();
+	SDL_stack_free(xcmap);
 
 	/* That was easy. :) */
 	return(1);

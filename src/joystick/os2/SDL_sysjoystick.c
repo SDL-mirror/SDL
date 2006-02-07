@@ -22,8 +22,6 @@
 
 /* OS/2 Joystick driver, contributed by Daniel Caetano */
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <mem.h>
 
 #define INCL_DOSDEVICES
@@ -32,6 +30,8 @@
 #include <os2.h>
 #include "joyos2.h"
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_error.h"
 #include "SDL_joystick.h"
 #include "SDL_sysjoystick.h"
@@ -217,7 +217,7 @@ if (numdevs > 0)
 		if (joycfg.buttons>=7) SYS_JoyData[0].buttoncalc[2]=((axis[2]->upper+axis[3]->centre)>>1);
 		if (joycfg.buttons>=8) SYS_JoyData[0].buttoncalc[3]=((axis[3]->upper+axis[3]->centre)>>1);
 		/* Intialize Joystick Name */
-		strcpy (SYS_JoyData[0].szDeviceName,joycfg.name);
+		SDL_strcpy (SYS_JoyData[0].szDeviceName,joycfg.name);
 		}
 	/* Default Init ... autoconfig */
 	else
@@ -294,7 +294,8 @@ if (numdevs > 0)
 			}
 		/* Hack to define Joystick Port Names */
 		if ( numdevs > maxdevs ) numdevs = maxdevs;
-		for (i=0; i<numdevs; i++) sprintf (SYS_JoyData[i].szDeviceName,"Default Joystick %c",'A'+SYS_JoyData[i].id);
+		for (i=0; i<numdevs; i++) {
+			SDL_sprintf (SYS_JoyData[i].szDeviceName, SDL_arraysize(szDeviceName), "Default Joystick %c", 'A'+SYS_JoyData[i].id);
 		}
 	}
 /* Return the number of devices found */

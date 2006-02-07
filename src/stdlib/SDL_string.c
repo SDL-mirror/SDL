@@ -343,7 +343,8 @@ char *SDL_strupr(char *string)
 {
     char *bufp = string;
     while ( *bufp ) {
-        *bufp++ = toupper(*bufp);
+        *bufp = toupper(*bufp);
+	++bufp;
     }
     return string;
 }
@@ -354,7 +355,8 @@ char *SDL_strlwr(char *string)
 {
     char *bufp = string;
     while ( *bufp ) {
-        *bufp++ = tolower(*bufp);
+        *bufp = tolower(*bufp);
+	++bufp;
     }
     return string;
 }
@@ -367,6 +369,7 @@ char *SDL_strchr(const char *string, int c)
         if ( *string == c ) {
             return (char *)string;
         }
+	++string;
     }
     return NULL;
 }
@@ -380,6 +383,7 @@ char *SDL_strrchr(const char *string, int c)
         if ( *bufp == c ) {
             return (char *)bufp;
         }
+	--bufp;
     }
     return NULL;
 }
@@ -393,6 +397,7 @@ char *SDL_strstr(const char *haystack, const char *needle)
         if ( SDL_strncmp(haystack, needle, length) == 0 ) {
             return (char *)haystack;
         }
+	++haystack;
     }
     return NULL;
 }

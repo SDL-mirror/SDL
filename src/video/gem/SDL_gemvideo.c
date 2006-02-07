@@ -28,10 +28,6 @@
 	Olivier Landemarre, Johan Klockars, Xavier Joubert, Claude Attard
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 /* Mint includes */
 #include <gem.h>
 #include <gemx.h>
@@ -39,6 +35,8 @@
 #include <mint/cookie.h>
 
 #include "SDL.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_error.h"
 #include "SDL_video.h"
 #include "SDL_mouse.h"

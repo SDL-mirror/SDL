@@ -58,7 +58,7 @@ static int LoadTracks (SDL_CD *cdrom)
         return 0;
         
     /* Allocate memory for tracks */
-    tracks[cdrom->id] = (FSRef*) calloc (1, sizeof(**tracks) * cdrom->numtracks);
+    tracks[cdrom->id] = (FSRef*) SDL_calloc (1, sizeof(**tracks) * cdrom->numtracks);
     if (tracks[cdrom->id] == NULL) {
         SDL_OutOfMemory ();
         return -1;
@@ -203,14 +203,14 @@ int SDL_SYS_CDInit (void)
     }
     
     /* Allocate space for volumes */
-    volumes = (FSVolumeRefNum*) calloc (1, sizeof(*volumes) * SDL_numcds);
+    volumes = (FSVolumeRefNum*) SDL_calloc (1, sizeof(*volumes) * SDL_numcds);
     if (volumes == NULL) {
         SDL_OutOfMemory ();
         return -1;
     }
     
     /* Allocate space for tracks */
-    tracks = (FSRef**) calloc (1, sizeof(*tracks) * (SDL_numcds + 1));
+    tracks = (FSRef**) SDL_calloc (1, sizeof(*tracks) * (SDL_numcds + 1));
     if (tracks == NULL) {
         SDL_OutOfMemory ();
         return -1;

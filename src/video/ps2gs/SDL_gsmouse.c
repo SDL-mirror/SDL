@@ -20,8 +20,6 @@
     slouken@libsdl.org
 */
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <sys/ioctl.h>
 
 #include "SDL_error.h"

@@ -22,13 +22,13 @@
 
 #define DISABLE_X11
 
-#include <stdlib.h>
-#include <string.h>
 #include <Ph.h>
 #include <photon/PpProto.h>
 #include <photon/PhWm.h>
 #include <photon/wmapi.h>
+
 #include "SDL_version.h"
+#include "SDL_string.h"
 #include "SDL_error.h"
 #include "SDL_timer.h"
 #include "SDL_video.h"

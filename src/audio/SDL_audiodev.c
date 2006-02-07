@@ -24,13 +24,12 @@
 
 #if defined(unix) || defined(__unix__) || defined(__riscos__)
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <string.h>
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_audiodev_c.h"
 
 #ifndef _PATH_DEV_DSP
@@ -80,7 +79,8 @@ int SDL_OpenAudioPath(char *path, int maxlen, int flags, int classic)
 
 		instance = 1;
 		do { /* Don't use errno ENOENT - it may not be thread-safe */
-			sprintf(audiopath, "%s%d", audiodev, instance++);
+			SDL_snprintf(audiopath, SDL_arraysize(audiopath),
+			             "%s%d", audiodev, instance++);
 			exists = 0;
 			if ( stat(audiopath, &sb) == 0 ) {
 				exists = 1;
@@ -100,11 +100,11 @@ int SDL_OpenAudioPath(char *path, int maxlen, int flags, int classic)
 
 /* Get the name of the audio device we use for output */
 
-#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <string.h>
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_audiodev_c.h"
 
 #ifndef _PATH_DEV_DSP
@@ -158,7 +158,7 @@ int SDL_OpenAudioPath(char *path, int maxlen, int flags, int classic)
 
     cycle    = 0;
     while( devsettings[cycle][0] != '\0' ) {
-        sprintf( audiopath,
+        SDL_snprintf( audiopath, SDL_arraysize(audiopath),
                  _PATH_DEV_DSP,
                  devsettings[cycle][0],
                  devsettings[cycle][1],

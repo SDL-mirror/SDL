@@ -26,10 +26,9 @@
 #include "../generic/SDL_sysmutex.c"
 #else
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <pthread.h>
 
+#include "SDL_stdlib.h"
 #include "SDL_error.h"
 #include "SDL_thread.h"
 
@@ -47,7 +46,7 @@ SDL_mutex *SDL_CreateMutex (void)
 	pthread_mutexattr_t attr;
 
 	/* Allocate the structure */
-	mutex = (SDL_mutex *)calloc(1, sizeof(*mutex));
+	mutex = (SDL_mutex *)SDL_calloc(1, sizeof(*mutex));
 	if ( mutex ) {
 		pthread_mutexattr_init(&attr);
 #ifdef PTHREAD_NO_RECURSIVE_MUTEX

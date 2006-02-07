@@ -20,9 +20,9 @@
     slouken@libsdl.org
 */
 
+#include "SDL_stdlib.h"
 #include "SDL_QuartzVideo.h"
 
-#include <stdlib.h> // For getenv()
 #include <IOKit/IOMessage.h> // For wake from sleep detection
 #include <IOKit/pwr_mgt/IOPMLib.h> // For wake from sleep detection
 #include "SDL_QuartzKeys.h"
@@ -295,7 +295,7 @@ static void QZ_DoKey (_THIS, int state, NSEvent *event) {
         }
     }
     
-    if (getenv ("SDL_ENABLEAPPEVENTS"))
+    if (SDL_getenv ("SDL_ENABLEAPPEVENTS"))
         [ NSApp sendEvent:event ];
 }
 
@@ -773,7 +773,7 @@ void QZ_PumpEvents (_THIS)
 
             switch (type) {
                 case NSLeftMouseDown:
-                    if ( getenv("SDL_HAS3BUTTONMOUSE") ) {
+                    if ( SDL_getenv("SDL_HAS3BUTTONMOUSE") ) {
                         DO_MOUSE_DOWN (SDL_BUTTON_LEFT);
                     } else {
                         if ( NSCommandKeyMask & current_mods ) {

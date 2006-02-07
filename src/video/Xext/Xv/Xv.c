@@ -234,7 +234,7 @@ SDL_NAME(XvQueryAdaptors)(
           SyncHandle();
 	  return(XvBadAlloc);
 	}
-      (void)SDL_strncpy(name, u.string, size);
+      (void)strncpy(name, u.string, size);
       name[size] = '\0';
       pa->name = name;
 
@@ -386,7 +386,7 @@ SDL_NAME(XvQueryEncodings)(
           SyncHandle();
 	  return(XvBadAlloc);
       }
-      SDL_strncpy(name, u.string, size);
+      strncpy(name, u.string, size);
       name[size] = '\0';
       pe->name = name;
       pe++;
@@ -902,7 +902,7 @@ SDL_NAME(XvImageFormatValues) * SDL_NAME(XvListImageFormats) (
 	      ret[i].id = Info.id;	      
 	      ret[i].type = Info.type;	      
 	      ret[i].byte_order = Info.byte_order;	      
-	      SDL_memcpy(&(ret[i].guid[0]), &(Info.guid[0]), 16);
+	      memcpy(&(ret[i].guid[0]), &(Info.guid[0]), 16);
 	      ret[i].bits_per_pixel = Info.bpp;	      
   	      ret[i].format = Info.format;	      
    	      ret[i].num_planes = Info.num_planes;	      
@@ -919,7 +919,7 @@ SDL_NAME(XvImageFormatValues) * SDL_NAME(XvListImageFormats) (
     	      ret[i].vert_y_period = Info.vert_y_period;
     	      ret[i].vert_u_period = Info.vert_u_period;
     	      ret[i].vert_v_period = Info.vert_v_period;
-	      SDL_memcpy(&(ret[i].component_order[0]), &(Info.comp_order[0]), 32);
+	      memcpy(&(ret[i].component_order[0]), &(Info.comp_order[0]), 32);
     	      ret[i].scanline_order = Info.scanline_order;
 	      (*num)++;
 	  }

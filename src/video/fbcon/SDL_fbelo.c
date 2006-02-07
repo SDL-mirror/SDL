@@ -20,12 +20,12 @@
     slouken@libsdl.org
 */
 
-#include <stdlib.h>
 #include <unistd.h>
 #include <sys/time.h>
 #include <ctype.h>
-#include <string.h>
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_fbvideo.h"
 #include "SDL_fbelo.h"
 

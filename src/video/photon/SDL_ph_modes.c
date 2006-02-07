@@ -173,7 +173,7 @@ int get_mode_any_format(int width, int height, int bpp)
         return -1;
     }
 
-    qsort(mode_list.modes, mode_list.num_modes, sizeof(unsigned short), compare_modes_by_res);
+    SDL_qsort(mode_list.modes, mode_list.num_modes, sizeof(unsigned short), compare_modes_by_res);
 
     for(i=0;i<mode_list.num_modes;i++)
     {

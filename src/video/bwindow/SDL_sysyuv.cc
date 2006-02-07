@@ -22,10 +22,7 @@
 
 /* This is the BeOS version of SDL YUV video overlays */
 
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-
+#include "SDL_stdlib.h"
 #include "SDL_error.h"
 #include "SDL_video.h"
 #include "SDL_sysyuv.h"
@@ -158,7 +155,7 @@ SDL_Overlay *BE_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SD
 	}
 
     /* Create the overlay structure */
-    overlay = (SDL_Overlay*)calloc(1, sizeof(SDL_Overlay));
+    overlay = (SDL_Overlay*)SDL_calloc(1, sizeof(SDL_Overlay));
 
     if (overlay == NULL)
     {
@@ -176,7 +173,7 @@ SDL_Overlay *BE_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SD
     overlay->hwfuncs = &be_yuvfuncs;
 
     /* Create the pixel data and lookup tables */
-    hwdata = (struct private_yuvhwdata*)calloc(1, sizeof(struct private_yuvhwdata));
+    hwdata = (struct private_yuvhwdata*)SDL_calloc(1, sizeof(struct private_yuvhwdata));
 
     if (hwdata == NULL)
     {
@@ -215,8 +212,8 @@ SDL_Overlay *BE_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SD
 	overlay->hwdata->bbitmap = bbitmap;
 	
 	overlay->planes = planes;
-	overlay->pitches = (Uint16*)calloc(overlay->planes, sizeof(Uint16));
-	overlay->pixels  = (Uint8**)calloc(overlay->planes, sizeof(Uint8*));
+	overlay->pitches = (Uint16*)SDL_calloc(overlay->planes, sizeof(Uint16));
+	overlay->pixels  = (Uint8**)SDL_calloc(overlay->planes, sizeof(Uint8*));
 	if (!overlay->pitches || !overlay->pixels)
 	{
         SDL_OutOfMemory();

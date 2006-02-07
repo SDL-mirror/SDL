@@ -22,13 +22,12 @@
 
 /* OS/2 thread management routines for SDL */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <process.h>
 #define INCL_DOSERRORS
 #define INCL_DOSPROCESS
 #include <os2.h>
 
+#include "SDL_stdlib.h"
 #include "SDL_error.h"
 #include "SDL_thread.h"
 #include "SDL_systhread.h"

@@ -30,9 +30,6 @@
 #  include <DriverServices.h>
 #endif
 
-#include <stdlib.h>
-#include <stdio.h>
-
 #if !defined(NewSndCallBackUPP) && (UNIVERSAL_INTERFACES_VERSION < 0x0335)
 #if !defined(NewSndCallBackProc) /* avoid circular redefinition... */
 #define NewSndCallBackUPP NewSndCallBackProc
@@ -42,6 +39,8 @@
 #endif
 #endif
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_endian.h"
 #include "SDL_audio.h"
 #include "SDL_audio_c.h"
@@ -455,7 +454,7 @@ static int Mac_OpenAudio(_THIS, SDL_AudioSpec *spec)
 
     /* allocate the 2 double-back buffers */
     for ( i=0; i<2; ++i ) {
-        audio_buf[i] = calloc(1, sizeof(SndDoubleBuffer)+spec->size);
+        audio_buf[i] = SDL_calloc(1, sizeof(SndDoubleBuffer)+spec->size);
         if ( audio_buf[i] == NULL ) {
             SDL_OutOfMemory();
             return(-1);

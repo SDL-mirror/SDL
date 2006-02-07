@@ -546,7 +546,7 @@ void delete_AudioFileManager (AudioFileManager *afm)
 {
     if (afm != NULL) {
         if (afm->mFileBuffer) {
-            free (afm->mFileBuffer);
+            free(afm->mFileBuffer);
         }
 
         SDL_free(afm);
@@ -594,7 +594,7 @@ AudioFileManager *new_AudioFileManager(AudioFilePlayer *inParent,
     afm->mBufferOffset = inChunkSize;
     afm->mChunkSize = inChunkSize;
     afm->mFileLength = inFileLength;
-    afm->mFileBuffer = (char*) malloc (afm->mChunkSize * 2);
+    afm->mFileBuffer = (char*) SDL_malloc(afm->mChunkSize * 2);
     FSGetForkPosition(afm->mForkRefNum, &afm->mAudioDataOffset);
     assert (afm->mFileBuffer != NULL);
     return afm;

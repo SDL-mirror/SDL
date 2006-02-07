@@ -22,9 +22,6 @@
 
 /* Handle the event stream, converting X11 events into SDL events */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <setjmp.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -37,6 +34,7 @@
 #include <unistd.h>
 
 #include "SDL.h"
+#include "SDL_string.h"
 #include "SDL_syswm.h"
 #include "SDL_sysevents.h"
 #include "SDL_sysvideo.h"

@@ -22,9 +22,9 @@
 
 /* Simple error handling in SDL */
 
-#include "SDL_types.h"
 #include "SDL_stdlib.h"
 #include "SDL_string.h"
+#include "SDL_types.h"
 #include "SDL_error.h"
 #include "SDL_error_c.h"
 #ifndef DISABLE_THREADS

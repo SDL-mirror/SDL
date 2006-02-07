@@ -24,9 +24,9 @@
 
 #include "SDL_windows.h"
 
+#include "SDL_stdlib.h"
 #include "SDL_error.h"
 #include "SDL_mutex.h"
-#include "SDL_stdlib.h"
 
 
 struct SDL_mutex {

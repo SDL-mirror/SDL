@@ -23,11 +23,8 @@
 /* SDL joystick driver for Darwin / MacOS X, based on the IOKit HID API */
 /* Written 2001 by Max Horn */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
 #include <ctype.h>
-#include <sys/errno.h>
 #include <sysexits.h>
 #include <mach/mach.h>
 #include <mach/mach_error.h>

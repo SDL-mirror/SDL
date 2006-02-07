@@ -25,7 +25,8 @@
    There will be a completely separate DGA driver that is fullscreen-only.
 */
 
-#include <stdlib.h>		/* For SDL_getenv() */
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_video.h"
 #include "SDL_cursor_c.h"
 #include "SDL_x11dga_c.h"

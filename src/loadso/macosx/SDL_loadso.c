@@ -62,9 +62,6 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 #include <pthread.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdarg.h>
@@ -72,6 +69,9 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <mach-o/dyld.h>
 #include <mach-o/nlist.h>
 #include <mach-o/getsect.h>
+
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 
 /* Just playing to see if it would compile with the freebsd headers, it does,
  * but because of the different values for RTLD_LOCAL etc, it would break binary
@@ -390,14 +390,14 @@ static const char *getSearchPath(int i)
 	}
 	if (!path)
 	{
-		path = (char **)calloc(MAX_SEARCH_PATHS, sizeof(char **));
+		path = (char **)SDL_calloc(MAX_SEARCH_PATHS, sizeof(char **));
 	}
 	if (!list && !end)
 		list = searchList();
 	if (i >= (numsize))
 	{
 		debug("Increasing size for long PATH");
-		tmp = (char **)calloc((MAX_SEARCH_PATHS + numsize), sizeof(char **));
+		tmp = (char **)SDL_calloc((MAX_SEARCH_PATHS + numsize), sizeof(char **));
 		if (tmp)
 		{
 			SDL_memcpy(tmp, path, sizeof(char **) * numsize);
@@ -515,7 +515,7 @@ static struct dlstatus *allocStatus()
 		dls = dls->next;
 	if (!dls)
 #endif
-		dls = calloc(sizeof(*dls),1);
+		dls = SDL_calloc(sizeof(*dls),1);
 	return dls;
 }
 
@@ -1017,7 +1017,7 @@ static void *SDL_OSX_dlsym(void * dl_restrict handle, const char * dl_restrict s
 	malloc_sym = SDL_malloc(sym_len + 2);
 	if (malloc_sym)
 	{
-		sprintf(malloc_sym, "_%s", symbol);
+		SDL_sprintf(malloc_sym, sym_len+2, "_%s", symbol);
 		value = dlsymIntern(handle, malloc_sym, 1);
 		SDL_free(malloc_sym);
 	}
@@ -1062,7 +1062,7 @@ static void *dlsym_prepend_underscore_intern(void *handle, const char *symbol)
 	malloc_sym = SDL_malloc(sym_len + 2);
 	if (malloc_sym)
 	{
-		sprintf(malloc_sym, "_%s", symbol);
+		SDL_snprintf(malloc_sym, sym_len+2, "_%s", symbol);
 		value = dlsymIntern(handle, malloc_sym, 1);
 		SDL_free(malloc_sym);
 	}
@@ -1347,7 +1347,7 @@ static dlfunc_t SDL_OSX_dlfunc(void * dl_restrict handle, const char * dl_restri
 	malloc_sym = SDL_malloc(sym_len + 2);
 	if (malloc_sym)
 	{
-		sprintf(malloc_sym, "_%s", symbol);
+		SDL_snprintf(malloc_sym, sym_len+2, "_%s", symbol);
 		rv.d = dlsymIntern(handle, malloc_sym, 1);
 		SDL_free(malloc_sym);
 	}

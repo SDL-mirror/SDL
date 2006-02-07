@@ -20,11 +20,6 @@
     slouken@libsdl.org
 */
 
-#include <stdlib.h>
-#include <string.h>
-
-
-#include "SDL_error.h"
 #include "SDL_QWin.h"
 
 extern "C" {

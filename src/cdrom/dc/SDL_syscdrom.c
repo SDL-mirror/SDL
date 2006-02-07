@@ -22,8 +22,6 @@
 
 /* Functions for system-level CD-ROM audio control */
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <dc/cdrom.h>
 #include <dc/spu.h>
 

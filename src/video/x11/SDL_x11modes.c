@@ -22,9 +22,10 @@
 
 /* Utilities for getting and setting the X display mode */
 
-#include <stdlib.h>
-#include <string.h>
+#include <stdio.h>
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_timer.h"
 #include "SDL_error.h"
 #include "SDL_events.h"
@@ -359,7 +360,7 @@ int X11_GetVideoModes(_THIS)
         }
 #endif
 
-        qsort(modes, nmodes, sizeof *modes, cmpmodes);
+        SDL_qsort(modes, nmodes, sizeof *modes, cmpmodes);
         SDL_modelist = (SDL_Rect **)SDL_malloc((nmodes+2)*sizeof(SDL_Rect *));
         if ( SDL_modelist ) {
             n = 0;

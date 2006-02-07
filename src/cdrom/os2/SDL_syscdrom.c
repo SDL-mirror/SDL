@@ -25,10 +25,9 @@
 #define INCL_MCIOS2
 #include <os2.h>
 #include <os2me.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_error.h"
 #include "SDL_cdrom.h"
 #include "SDL_syscdrom.h"

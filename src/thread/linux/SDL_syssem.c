@@ -20,7 +20,7 @@
     slouken@libsdl.org
 */
 
-#include <stdlib.h>
+#include "SDL_stdlib.h"
 #include "SDL_error.h"
 #include "SDL_thread.h"
 #include "SDL_timer.h"
@@ -46,9 +46,6 @@
 #include "generic/SDL_syssem.c"
 #else
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>			/* For getpid() */
 #include <pthread.h>
 #include <semaphore.h>
 
@@ -74,7 +71,7 @@ SDL_sem *SDL_CreateSemaphore(Uint32 initial_value)
 		static int semnum = 0;
 		char name[32];
 
-		sprintf(name, "/SDL_sem-%d-%4.4d", getpid(), semnum++);
+		SDL_snprintf(name, SDL_arraysize(name), "/SDL_sem-%d-%4.4d", getpid(), semnum++);
 		sem->sem = sem_open(name, O_CREAT, 0600, initial_value);
 		if ( sem->sem == (sem_t *)SEM_FAILED ) {
 			SDL_SetError("sem_open(%s) failed", name);

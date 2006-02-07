@@ -24,8 +24,6 @@
     clare@setabox.com
 */
 
-#include <stdlib.h>
-
 #include "SDL_syswm.h"
 #include "SDL_error.h"
 #include "SDL_events_c.h"

@@ -20,15 +20,13 @@
     slouken@libsdl.org
 */
 
-#include <stdlib.h>
+#include "SDL_stdlib.h"
 #include "SDL_error.h"
 #include "SDL_thread.h"
 #include "SDL_timer.h"
 
 #ifdef SDL_USE_PTHREADS
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>			/* For getpid() */
 #include <pthread.h>
 

@@ -25,10 +25,7 @@
  */
 
 #include <sys/types.h>
-#include <stdlib.h>
 #include <sys/stat.h>
-#include <stdio.h>
-#include <string.h>
 #include <unistd.h>
 
 #include <scsi.h>
@@ -36,6 +33,8 @@
 #include <Entry.h>
 #include <Path.h>
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_error.h"
 #include "SDL_cdrom.h"
 extern "C" {

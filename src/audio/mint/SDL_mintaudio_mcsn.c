@@ -27,9 +27,6 @@
 	Patrice Mandin
 */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include <support.h>
 
 /* Mint includes */
@@ -37,6 +34,8 @@
 #include <mint/falcon.h>
 #include <mint/cookie.h>
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_endian.h"
 #include "SDL_audio.h"
 #include "SDL_audio_c.h"

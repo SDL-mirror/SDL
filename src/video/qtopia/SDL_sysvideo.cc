@@ -22,16 +22,14 @@
 
 /* Qtopia based framebuffer implementation */
 
-#include <stdlib.h>
-#include <string.h>
-
-#include <stdio.h>
 #include <unistd.h>
 
 #include <qapplication.h>
 #include <qpe/qpeapplication.h>
 
 #include "SDL.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_timer.h"
 
 #include "SDL_QWin.h"

@@ -22,11 +22,8 @@
 
 /* Allow access to a raw mixing buffer */
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <string.h>
 #ifdef __NetBSD__
 #include <sys/ioctl.h>
 #include <sys/audioio.h>
@@ -39,6 +36,8 @@
 #endif
 #include <unistd.h>
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_endian.h"
 #include "SDL_audio.h"
 #include "SDL_audiomem.h"

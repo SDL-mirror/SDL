@@ -22,13 +22,12 @@
 
 /* Semaphore functions using the OS/2 API */
 
-#include <stdio.h>
-#include <stdlib.h>
 #define INCL_DOS
 #define INCL_DOSERRORS
 #define INCL_DOSSEMAPHORES
 #include <os2.h>
 
+#include "SDL_stdlib.h"
 #include "SDL_error.h"
 #include "SDL_thread.h"
 #include "SDL_timer.h"

@@ -102,7 +102,7 @@ int SDL_SYS_CreateThread(SDL_Thread *thread, void *args)
 	D(bug("Sending %lx to the new thread...\n",args));
 
 	if(args)
-		sprintf(buffer,"%ld",args);
+		SDL_snprintf(buffer, SDL_arraysize(buffer),"%ld",args);
 
 	#ifdef STORMC4_WOS
 	thread->handle=CreateTaskPPCTags(TASKATTR_CODE,	RunThread,

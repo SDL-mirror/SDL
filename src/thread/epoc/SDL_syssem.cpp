@@ -28,8 +28,6 @@
 
 /* Semaphore functions using the Win32 API */
 
-//#include <stdio.h>
-//#include <stdlib.h>
 #include <e32std.h>
 
 #include "SDL_error.h"

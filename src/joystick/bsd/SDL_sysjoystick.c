@@ -29,11 +29,8 @@
 
 #include <sys/param.h>
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <string.h>
 #include <errno.h>
 
 #if defined(HAVE_USB_H)
@@ -59,6 +56,8 @@
 #include <machine/joystick.h>
 #endif
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_error.h"
 #include "SDL_joystick.h"
 #include "SDL_sysjoystick.h"
@@ -145,7 +144,7 @@ SDL_SYS_JoystickInit(void)
 	for (i = 0; i < MAX_UHID_JOYS; i++) {
 		SDL_Joystick nj;
 
-		sprintf(s, "/dev/uhid%d", i);
+		SDL_snprintf(s, SDL_arraysize(s), "/dev/uhid%d", i);
 
 		nj.index = SDL_numjoysticks;
 		joynames[nj.index] = strdup(s);
@@ -159,7 +158,7 @@ SDL_SYS_JoystickInit(void)
 		}
 	}
 	for (i = 0; i < MAX_JOY_JOYS; i++) {
-		sprintf(s, "/dev/joy%d", i);
+		SDL_snprintf(s, SDL_arraysize(s), "/dev/joy%d", i);
 		fd = open(s, O_RDONLY);
 		if (fd != -1) {
 			joynames[SDL_numjoysticks++] = strdup(s);
@@ -312,7 +311,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick *joy)
 				case HUG_GAME_PAD:
 					s = hid_usage_in_page(hitem.usage);
 					sp = SDL_malloc(SDL_strlen(s) + 5);
-					sprintf(sp, "%s (%d)", s,
+					SDL_snprintf(sp, SDL_strlen(s) + 5, "%s (%d)", s,
 					    joy->index);
 					joydevnames[joy->index] = sp;
 				}

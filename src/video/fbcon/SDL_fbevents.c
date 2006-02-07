@@ -22,14 +22,12 @@
 
 /* Handle the event stream, converting console events into SDL events */
 
+#include <stdio.h>
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/ioctl.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <string.h>
 #include <errno.h>
 #include <limits.h>
 
@@ -42,6 +40,8 @@
 #include <linux/keyboard.h>
 
 #include "SDL.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_mutex.h"
 #include "SDL_sysevents.h"
 #include "SDL_sysvideo.h"
@@ -260,7 +260,7 @@ int FB_OpenKeyboard(_THIS)
 			for ( i=0; vcs[i] && (keyboard_fd < 0); ++i ) {
 				char vtpath[12];
 
-				sprintf(vtpath, vcs[i], current_vt);
+				SDL_snprintf(vtpath, SDL_arraysize(vtpath), vcs[i], current_vt);
 				keyboard_fd = open(vtpath, O_RDWR, 0);
 #ifdef DEBUG_KEYBOARD
 				fprintf(stderr, "vtpath = %s, fd = %d\n",
@@ -345,7 +345,7 @@ static int find_pid(DIR *proc, const char *wanted_name)
 			char path[PATH_MAX];
 			char name[PATH_MAX];
 
-			sprintf(path, "/proc/%s/status", entry->d_name);
+			SDL_snprintf(path, SDL_arraysize(path), "/proc/%s/status", entry->d_name);
 			status=fopen(path, "r");
 			if ( status ) {
 				name[0] = '\0';
@@ -379,7 +379,7 @@ static int gpm_available(void)
 	proc = opendir("/proc");
 	if ( proc ) {
 		while ( (pid=find_pid(proc, "gpm")) > 0 ) {
-			sprintf(path, "/proc/%d/cmdline", pid);
+			SDL_snprintf(path, SDL_arraysize(path), "/proc/%d/cmdline", pid);
 			cmdline = open(path, O_RDONLY, 0);
 			if ( cmdline >= 0 ) {
 				len = read(cmdline, args, sizeof(args));

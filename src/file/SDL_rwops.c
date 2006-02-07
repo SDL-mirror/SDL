@@ -24,10 +24,10 @@
    data sources.  It can easily be extended to files, memory, etc.
 */
 
-#include "SDL_error.h"
-#include "SDL_rwops.h"
 #include "SDL_stdlib.h"
 #include "SDL_string.h"
+#include "SDL_error.h"
+#include "SDL_rwops.h"
 
 #ifdef HAVE_STDIO_H
 

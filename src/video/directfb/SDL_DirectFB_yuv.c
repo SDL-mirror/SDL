@@ -22,9 +22,7 @@
 
 /* This is the DirectFB implementation of YUV video overlays */
 
-#include <stdlib.h>
-#include <string.h>
-
+#include "SDL_stdlib.h"
 #include "SDL_error.h"
 #include "SDL_video.h"
 #include "SDL_DirectFB_yuv.h"
@@ -148,7 +146,7 @@ SDL_Overlay *DirectFB_CreateYUVOverlay(_THIS, int width, int height, Uint32 form
   struct private_yuvhwdata *hwdata;
 
   /* Create the overlay structure */
-  overlay = calloc (1, sizeof(SDL_Overlay));
+  overlay = SDL_calloc (1, sizeof(SDL_Overlay));
   if (!overlay)
     {
       SDL_OutOfMemory();
@@ -164,7 +162,7 @@ SDL_Overlay *DirectFB_CreateYUVOverlay(_THIS, int width, int height, Uint32 form
   overlay->hwfuncs = &directfb_yuvfuncs;
 
   /* Create the pixel data and lookup tables */
-  hwdata = calloc(1, sizeof(struct private_yuvhwdata));
+  hwdata = SDL_calloc(1, sizeof(struct private_yuvhwdata));
   overlay->hwdata = hwdata;
   if (!hwdata)
     {

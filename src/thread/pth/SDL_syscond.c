@@ -4,10 +4,9 @@
  *	Patrice Mandin
  */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <pth.h>
 
+#include "SDL_stdlib.h"
 #include "SDL_error.h"
 #include "SDL_thread.h"
 #include "SDL_syscond_c.h"

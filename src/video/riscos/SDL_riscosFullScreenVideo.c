@@ -27,11 +27,9 @@
      Implements RISC OS full screen display.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "SDL.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_error.h"
 #include "SDL_video.h"
 #include "SDL_mouse.h"
@@ -357,7 +355,7 @@ void FULLSCREEN_BuildModeList(_THIS)
 	/* Sort the mode lists */
 	for ( j=0; j<NUM_MODELISTS; ++j ) {
 		if ( SDL_nummodes[j] > 0 ) {
-			qsort(SDL_modelist[j], SDL_nummodes[j], sizeof *SDL_modelist[j], cmpmodes);
+			SDL_qsort(SDL_modelist[j], SDL_nummodes[j], sizeof *SDL_modelist[j], cmpmodes);
 		}
 	}
 }

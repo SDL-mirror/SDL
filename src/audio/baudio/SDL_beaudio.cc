@@ -22,15 +22,14 @@
 
 /* Allow access to the audio stream on BeOS */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include <SoundPlayer.h>
 
 #include "SDL_BeApp.h"
 
 extern "C" {
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_audio.h"
 #include "SDL_audio_c.h"
 #include "SDL_sysaudio.h"

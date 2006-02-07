@@ -25,11 +25,11 @@
 #include "SDL_windows.h"
 #include <mmsystem.h>
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_audio.h"
 #include "SDL_mutex.h"
 #include "SDL_timer.h"
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
 #include "SDL_audio_c.h"
 #include "SDL_dibaudio.h"
 #if defined(_WIN32_WCE) && (_WIN32_WCE < 300)

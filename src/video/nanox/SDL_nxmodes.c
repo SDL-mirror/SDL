@@ -24,8 +24,8 @@
     clare@setabox.com
 */
 
-#include <stdlib.h>
-
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_nxmodes_c.h"
 
 SDL_Rect ** NX_ListModes (_THIS, SDL_PixelFormat * format, Uint32 flags)
@@ -46,9 +46,9 @@ void NX_FreeVideoModes (_THIS)
 
     if (SDL_modelist) {
         for (i = 0; SDL_modelist [i]; ++ i) {
-            free (SDL_modelist [i]) ;
+            SDL_free (SDL_modelist [i]) ;
         }
-        free (SDL_modelist) ;
+        SDL_free (SDL_modelist) ;
         SDL_modelist = NULL;
     }
 }

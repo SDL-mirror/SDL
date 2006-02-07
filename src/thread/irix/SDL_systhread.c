@@ -22,7 +22,6 @@
 
 /* IRIX thread management routines for SDL */
 
-#include <stdlib.h>
 #include <errno.h>
 #include <signal.h>
 #include <sys/types.h>

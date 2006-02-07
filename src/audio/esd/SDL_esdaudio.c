@@ -24,15 +24,12 @@
 
 #ifdef ESD_SUPPORT
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include <errno.h>
-#include <signal.h>
-#include <unistd.h>
 
 #include <esd.h>
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_audio.h"
 #include "SDL_error.h"
 #include "SDL_audiomem.h"
@@ -257,7 +254,7 @@ static char *get_progname(void)
 	FILE *fp;
 	static char temp[BUFSIZ];
 
-	sprintf(temp, "/proc/%d/cmdline", getpid());
+	SDL_snprintf(temp, SDL_arraysize(temp), "/proc/%d/cmdline", getpid());
 	fp = fopen(temp, "r");
 	if ( fp != NULL ) {
 		if ( fgets(temp, sizeof(temp)-1, fp) ) {

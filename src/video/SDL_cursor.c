@@ -22,12 +22,12 @@
 
 /* General cursor handling code for SDL */
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_mutex.h"
 #include "SDL_error.h"
 #include "SDL_video.h"
 #include "SDL_mouse.h"
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
 #include "SDL_blit.h"
 #include "SDL_events_c.h"
 #include "SDL_sysvideo.h"

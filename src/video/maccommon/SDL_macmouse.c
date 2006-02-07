@@ -20,8 +20,6 @@
     slouken@libsdl.org
 */
 
-#include <stdlib.h>
-#include <stdio.h>
 #if defined(__APPLE__) && defined(__MACH__)
 #include <Carbon/Carbon.h>
 #elif TARGET_API_MAC_CARBON && (UNIVERSAL_INTERFACES_VERSION > 0x0335)
@@ -35,6 +33,8 @@
 #include <CursorDevices.h>
 #endif
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_error.h"
 #include "SDL_mouse.h"
 #include "SDL_macmouse_c.h"

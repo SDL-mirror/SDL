@@ -29,19 +29,14 @@
 #ifndef HAVE_MALLOC
 
 #define LACKS_STDIO_H
-#define LACKS_UNISTD_H
-#define LACKS_FCNTL_H
-#define LACKS_SYS_PARAM_H
-#define LACKS_SYS_MMAN_H
 #define LACKS_STRINGS_H
 #define LACKS_STRING_H
-#define LACKS_SYS_TYPES_H
-#define LACKS_ERRNO_H
 #define LACKS_STDLIB_H
 #define ABORT
 #define memset	SDL_memset
 #define memcpy	SDL_memcpy
 #define malloc	SDL_malloc
+#define calloc	SDL_calloc
 #define realloc	SDL_realloc
 #define free	SDL_free
 

@@ -22,15 +22,13 @@
 
 /* This is the system specific header for the SDL joystick API */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include <be/support/String.h>
 #include <be/device/Joystick.h>
 
 extern "C" {
 
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_error.h"
 #include "SDL_joystick.h"
 #include "SDL_sysjoystick.h"

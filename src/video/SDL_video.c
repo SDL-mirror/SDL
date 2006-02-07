@@ -23,12 +23,12 @@
 /* The high-level video driver subsystem */
 
 #include "SDL.h"
+#include "SDL_stdlib.h"
+#include "SDL_string.h"
 #include "SDL_error.h"
 #include "SDL_video.h"
 #include "SDL_events.h"
 #include "SDL_mutex.h"
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
 #include "SDL_sysvideo.h"
 #include "SDL_sysevents.h"
 #include "SDL_blit.h"

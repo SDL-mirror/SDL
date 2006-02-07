@@ -26,10 +26,6 @@
  *	Patrice Mandin
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include <mint/osbind.h>
 
 #include "SDL_events_c.h"

@@ -22,9 +22,6 @@
 
 /* Allow access to a raw mixing buffer */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <mme_api.h>
 
 #include "SDL_audio.h"
