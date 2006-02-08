@@ -32,7 +32,6 @@
 #ifdef HAVE_LIBC
 
 
-
 /* Define to one of `_getb67', `GETB67', `getb67' for Cray-2 and Cray-YMP
    systems. This function is required for `alloca.c' support on those systems.
    */
@@ -177,6 +176,9 @@
 /* Define to 1 if you have the `strstr' function. */
 #undef HAVE_STRSTR
 
+/* Define to 1 if you have the `strtod' function. */
+#undef HAVE_STRTOD
+
 /* Define to 1 if you have the `strtol' function. */
 #undef HAVE_STRTOL
 
@@ -280,7 +282,6 @@
 
 /* Define to `unsigned' if <sys/types.h> does not define. */
 #undef size_t
-
 
 
 #endif /* HAVE_LIBC */

@@ -180,7 +180,7 @@ AC_CHECK_FUNCS(memset memcpy memmove memcmp)
 AC_CHECK_FUNCS(strlen strcpy strncpy strcat strncat strdup)
 AC_CHECK_FUNCS(_strrev _strupr _strlwr)
 AC_CHECK_FUNCS(strchr strrchr strstr)
-AC_CHECK_FUNCS(itoa _ltoa _uitoa _ultoa strtol _i64toa _ui64toa strtoll atoi atof)
+AC_CHECK_FUNCS(itoa _ltoa _uitoa _ultoa strtol _i64toa _ui64toa strtoll strtod atoi atof)
 AC_CHECK_FUNCS(strcmp strncmp stricmp strcasecmp)
 AC_CHECK_FUNCS(sscanf snprintf vsnprintf)
 
