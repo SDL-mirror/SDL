@@ -27,8 +27,14 @@
 
 #include <sys/types.h>
 #ifdef _MSC_VER
-/* FIXME!! */
-typedef unsigned int size_t;
+#ifndef _SIZE_T_DEFINED
+#ifdef  _WIN64
+typedef unsigned __int64    size_t;
+#else
+typedef _W64 unsigned int   size_t;
+#endif
+#define _SIZE_T_DEFINED
+#endif
 typedef size_t uintptr_t;
 #endif
 
