@@ -672,7 +672,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 			if (XBIOS_centscreen) {
 				SDL_XBIOS_CentscreenSetmode(this, width, height, new_depth);
 			} else {
-				Vsetmode(new_video_mode->number);
+				VsetMode(new_video_mode->number);
 			}
 #endif
 			/* Set hardware palette to black in True Colour */
@@ -884,7 +884,7 @@ static void XBIOS_VideoQuit(_THIS)
 			if (XBIOS_centscreen) {
 				SDL_XBIOS_CentscreenRestore(this, XBIOS_oldvmode);
 			} else {
-				Vsetmode(XBIOS_oldvmode);
+				VsetMode(XBIOS_oldvmode);
 			}
 			if (XBIOS_oldnumcol) {
 				VsetRGB(0, XBIOS_oldnumcol, XBIOS_oldpalette);

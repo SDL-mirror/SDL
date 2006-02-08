@@ -34,6 +34,7 @@
 #include "SDL_types.h"
 #include "SDL_error.h"
 #include "SDL_joystick.h"
+#include "SDL_events.h"
 #include "SDL_sysjoystick.h"
 #include "SDL_joystick_c.h"
 

@@ -33,6 +33,7 @@
 
 #include "SDL_error.h"
 #include "SDL_cdrom.h"
+#include "SDL_string.h"
 #include "SDL_syscdrom.h"
 
 /* Some ioctl() errno values which occur when the tray is empty */

@@ -26,13 +26,12 @@
  *	Patrice Mandin
  */
 
-#include <string.h>
-
 /* Mint includes */
 #include <mint/osbind.h>
 #include <mint/cookie.h>
 
 #include "SDL.h"
+#include "SDL_string.h"
 #include "SDL_sysevents.h"
 #include "SDL_events_c.h"
 
