@@ -41,6 +41,12 @@ AC_SUBST(LT_AGE)
 
 dnl Detect the canonical host and target build environment
 AC_CANONICAL_SYSTEM
+AC_C_BIGENDIAN
+if test x$ac_cv_c_bigendian = xyes; then
+    AC_DEFINE(SDL_BYTEORDER, 4321)
+else
+    AC_DEFINE(SDL_BYTEORDER, 1234)
+fi
 
 dnl Setup for automake
 AM_INIT_AUTOMAKE(SDL, $SDL_VERSION)
@@ -118,7 +124,7 @@ fi
 dnl See whether we are allowed to use the system C library
 AC_ARG_ENABLE(libc,
 [  --enable-libc           Use the system C library [default=yes]],
-              , AC_DEFINE([HAVE_LIBC]))
+              , AC_DEFINE(HAVE_LIBC))
 
 dnl Check for compiler characteristics
 AC_C_CONST
@@ -285,15 +291,6 @@ if test x$enable_timers = xyes; then
     SDL_EXTRALIBS="$SDL_EXTRALIBS timer/libtimer.la"
 else
     CFLAGS="$CFLAGS -DDISABLE_TIMERS"
-fi
-AC_ARG_ENABLE(endian,
-[  --enable-endian         Enable the endian subsystem [default=yes]],
-              , enable_endian=yes)
-if test x$enable_endian = xyes; then
-    SDL_EXTRADIRS="$SDL_EXTRADIRS endian"
-    SDL_EXTRALIBS="$SDL_EXTRALIBS endian/libendian.la"
-else
-    CFLAGS="$CFLAGS -DDISABLE_ENDIAN"
 fi
 AC_ARG_ENABLE(file,
 [  --enable-file           Enable the file subsystem [default=yes]],
@@ -3051,7 +3048,6 @@ CFLAGS="$CFLAGS -I\$(top_srcdir)/src/joystick"
 CFLAGS="$CFLAGS -I\$(top_srcdir)/src/cdrom"
 CFLAGS="$CFLAGS -I\$(top_srcdir)/src/thread"
 CFLAGS="$CFLAGS -I\$(top_srcdir)/src/timer"
-CFLAGS="$CFLAGS -I\$(top_srcdir)/src/endian"
 CFLAGS="$CFLAGS -I\$(top_srcdir)/src/file"
 CFLAGS="$CFLAGS -I\$(top_builddir)/src/thread"
 CXXFLAGS="$CFLAGS"
@@ -3180,7 +3176,6 @@ src/cdrom/qnx/Makefile
 src/cdrom/win32/Makefile
 src/thread/Makefile
 src/timer/Makefile
-src/endian/Makefile
 src/file/Makefile
 src/cpuinfo/Makefile
 src/hermes/Makefile

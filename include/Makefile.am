@@ -13,7 +13,6 @@ libSDLinclude_HEADERS =		\
 	SDL_config.h		\
 	SDL_copying.h		\
 	SDL_cpuinfo.h		\
-	SDL_ctype.h		\
 	SDL_endian.h		\
 	SDL_error.h		\
 	SDL_events.h		\
@@ -29,7 +28,7 @@ libSDLinclude_HEADERS =		\
 	SDL_opengl.h		\
 	SDL_quit.h		\
 	SDL_rwops.h		\
-	SDL_stdarg.h		\
+	SDL_stdinc.h		\
 	SDL_stdlib.h		\
 	SDL_string.h		\
 	SDL_syswm.h		\

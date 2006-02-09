@@ -23,14 +23,11 @@
 
 /* This file contains portable string manipulation functions for SDL */
 
-#include "SDL_types.h"
-#include "SDL_ctype.h"
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
+#include "SDL_stdinc.h"
 
 
-#define isupperhex(X)   (((X) >= 'A') && ((X) <= 'F'))
-#define islowerhex(X)   (((X) >= 'a') && ((X) <= 'f'))
+#define SDL_isupperhex(X)   (((X) >= 'A') && ((X) <= 'F'))
+#define SDL_islowerhex(X)   (((X) >= 'a') && ((X) <= 'f'))
 
 #if !defined(HAVE_SSCANF) || !defined(HAVE_STRTOL)
 static size_t SDL_ScanLong(const char *text, int radix, long *valuep)
@@ -48,11 +45,11 @@ static size_t SDL_ScanLong(const char *text, int radix, long *valuep)
     }
     for ( ; ; ) {
         int v;
-        if ( isdigit(*text) ) {
+        if ( SDL_isdigit(*text) ) {
             v = *text - '0';
-        } else if ( radix == 16 && isupperhex(*text) ) {
+        } else if ( radix == 16 && SDL_isupperhex(*text) ) {
             v = 10 + (*text - 'A');
-        } else if ( radix == 16 && islowerhex(*text) ) {
+        } else if ( radix == 16 && SDL_islowerhex(*text) ) {
             v = 10 + (*text - 'a');
         } else {
             break;
@@ -83,11 +80,11 @@ static size_t SDL_ScanUnsignedLong(const char *text, int radix, unsigned long *v
     }
     for ( ; ; ) {
         int v;
-        if ( isdigit(*text) ) {
+        if ( SDL_isdigit(*text) ) {
             v = *text - '0';
-        } else if ( radix == 16 && isupperhex(*text) ) {
+        } else if ( radix == 16 && SDL_isupperhex(*text) ) {
             v = 10 + (*text - 'A');
-        } else if ( radix == 16 && islowerhex(*text) ) {
+        } else if ( radix == 16 && SDL_islowerhex(*text) ) {
             v = 10 + (*text - 'a');
         } else {
             break;
@@ -120,11 +117,11 @@ static size_t SDL_ScanLongLong(const char *text, int radix, Sint64 *valuep)
     }
     for ( ; ; ) {
         int v;
-        if ( isdigit(*text) ) {
+        if ( SDL_isdigit(*text) ) {
             v = *text - '0';
-        } else if ( radix == 16 && isupperhex(*text) ) {
+        } else if ( radix == 16 && SDL_isupperhex(*text) ) {
             v = 10 + (*text - 'A');
-        } else if ( radix == 16 && islowerhex(*text) ) {
+        } else if ( radix == 16 && SDL_islowerhex(*text) ) {
             v = 10 + (*text - 'a');
         } else {
             break;
@@ -155,11 +152,11 @@ static size_t SDL_ScanUnsignedLongLong(const char *text, int radix, Uint64 *valu
     }
     for ( ; ; ) {
         int v;
-        if ( isdigit(*text) ) {
+        if ( SDL_isdigit(*text) ) {
             v = *text - '0';
-        } else if ( radix == 16 && isupperhex(*text) ) {
+        } else if ( radix == 16 && SDL_isupperhex(*text) ) {
             v = 10 + (*text - 'A');
-        } else if ( radix == 16 && islowerhex(*text) ) {
+        } else if ( radix == 16 && SDL_islowerhex(*text) ) {
             v = 10 + (*text - 'a');
         } else {
             break;
@@ -193,7 +190,7 @@ static size_t SDL_ScanFloat(const char *text, double *valuep)
     if ( *text == '.' ) {
         int mult = 10;
         ++text;
-        while ( isdigit(*text) ) {
+        while ( SDL_isdigit(*text) ) {
             lvalue = *text - '0';
             value += (double)lvalue / mult;
             mult *= 10;
@@ -632,7 +629,7 @@ int SDL_sscanf(const char *text, const char *fmt, ...)
     va_start(ap, fmt);
     while ( *fmt ) {
         if ( *fmt == ' ' ) {
-            while ( isspace(*text) ) {
+            while ( SDL_isspace(*text) ) {
                 ++text;
             }
             ++fmt;
@@ -683,7 +680,7 @@ int SDL_sscanf(const char *text, const char *fmt, ...)
                 continue;
             }
 
-            while ( isspace(*text) ) {
+            while ( SDL_isspace(*text) ) {
                 ++text;
             }
 
@@ -845,7 +842,7 @@ int SDL_sscanf(const char *text, const char *fmt, ...)
                         break;
                     case 's':
                         if ( suppress ) {
-                            while ( !isspace(*text) ) {
+                            while ( !SDL_isspace(*text) ) {
                                 ++text;
                                 if ( count ) {
                                     if ( --count == 0 ) {
@@ -855,7 +852,7 @@ int SDL_sscanf(const char *text, const char *fmt, ...)
                             }
                         } else {
                             char *valuep = va_arg(ap, char*);
-                            while ( !isspace(*text) ) {
+                            while ( !SDL_isspace(*text) ) {
                                 *valuep++ = *text++;
                                 if ( count ) {
                                     if ( --count == 0 ) {

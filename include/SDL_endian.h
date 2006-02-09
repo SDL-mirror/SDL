@@ -25,22 +25,26 @@
 #ifndef _SDL_endian_h
 #define _SDL_endian_h
 
-/* These functions read and write data of the specified endianness, 
-   dynamically translating to the host machine endianness.
+#include "SDL_stdinc.h"
 
-   e.g.: If you want to read a 16 bit value on big-endian machine from
-         an open file containing little endian values, you would use:
-		value = SDL_ReadLE16(rp);
-         Note that the read/write functions use SDL_RWops pointers
-         instead of FILE pointers.  This allows you to read and write
-         endian values from large chunks of memory as well as files 
-         and other data sources.
-*/
+/* The two types of endianness */
+#define SDL_LIL_ENDIAN	1234
+#define SDL_BIG_ENDIAN	4321
 
-#include "SDL_types.h"
-//#warning FIXME: move rwops into rwops and swapping into byteorder.h
-#include "SDL_rwops.h"
-#include "SDL_byteorder.h"
+#ifndef SDL_BYTEORDER	/* Not defined in SDL_config.h? */
+#if (defined(__i386__) || defined(__i386)) || \
+     defined(__ia64__) || defined(__x86_64__) || \
+    (defined(__alpha__) || defined(__alpha)) || \
+    (defined(__arm__) || defined(__thumb__)) || \
+    (defined(__sh__) || defined(__sh64__)) || \
+    (defined(__mips__) && defined(__MIPSEL__)) || \
+     defined(__SYMBIAN32__) || defined(__OS2__)
+#define SDL_BYTEORDER	SDL_LIL_ENDIAN
+#else
+#define SDL_BYTEORDER	SDL_BIG_ENDIAN
+#endif
+#endif /* !SDL_BYTEORDER */
+
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
@@ -179,23 +183,6 @@ static __inline__ Uint64 SDL_Swap64(Uint64 x)
 #define SDL_SwapBE32(X)	(X)
 #define SDL_SwapBE64(X)	(X)
 #endif
-
-/* Read an item of the specified endianness and return in native format */
-extern DECLSPEC Uint16 SDLCALL SDL_ReadLE16(SDL_RWops *src);
-extern DECLSPEC Uint16 SDLCALL SDL_ReadBE16(SDL_RWops *src);
-extern DECLSPEC Uint32 SDLCALL SDL_ReadLE32(SDL_RWops *src);
-extern DECLSPEC Uint32 SDLCALL SDL_ReadBE32(SDL_RWops *src);
-extern DECLSPEC Uint64 SDLCALL SDL_ReadLE64(SDL_RWops *src);
-extern DECLSPEC Uint64 SDLCALL SDL_ReadBE64(SDL_RWops *src);
-
-/* Write an item of native format to the specified endianness */
-extern DECLSPEC int SDLCALL SDL_WriteLE16(SDL_RWops *dst, Uint16 value);
-extern DECLSPEC int SDLCALL SDL_WriteBE16(SDL_RWops *dst, Uint16 value);
-extern DECLSPEC int SDLCALL SDL_WriteLE32(SDL_RWops *dst, Uint32 value);
-extern DECLSPEC int SDLCALL SDL_WriteBE32(SDL_RWops *dst, Uint32 value);
-extern DECLSPEC int SDLCALL SDL_WriteLE64(SDL_RWops *dst, Uint64 value);
-extern DECLSPEC int SDLCALL SDL_WriteBE64(SDL_RWops *dst, Uint64 value);
-
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

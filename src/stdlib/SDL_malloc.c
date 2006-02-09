@@ -23,8 +23,7 @@
 
 /* This file contains portable memory management functions for SDL */
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
+#include "SDL_stdinc.h"
 
 #ifndef HAVE_MALLOC
 

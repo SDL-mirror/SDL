@@ -23,7 +23,7 @@
 
 /* This file contains portable stdlib functions for SDL */
 
-#include "SDL_stdlib.h"
+#include "SDL_stdinc.h"
 
 #ifndef HAVE_LIBC
 /* These are some C runtime intrinsics that need to be defined */

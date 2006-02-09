@@ -27,14 +27,9 @@
 #ifndef _SDL_RWops_h
 #define _SDL_RWops_h
 
-#include "SDL_config.h"
+#include "SDL_stdinc.h"
 
-#ifdef HAVE_STDIO_H
-#include <stdio.h>
-#endif
-
-#include "SDL_types.h"
-
+#ifndef DISABLE_FILE
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
@@ -112,10 +107,28 @@ extern DECLSPEC void SDLCALL SDL_FreeRW(SDL_RWops *area);
 #define SDL_RWclose(ctx)		(ctx)->close(ctx)
 
 
+/* Read an item of the specified endianness and return in native format */
+extern DECLSPEC Uint16 SDLCALL SDL_ReadLE16(SDL_RWops *src);
+extern DECLSPEC Uint16 SDLCALL SDL_ReadBE16(SDL_RWops *src);
+extern DECLSPEC Uint32 SDLCALL SDL_ReadLE32(SDL_RWops *src);
+extern DECLSPEC Uint32 SDLCALL SDL_ReadBE32(SDL_RWops *src);
+extern DECLSPEC Uint64 SDLCALL SDL_ReadLE64(SDL_RWops *src);
+extern DECLSPEC Uint64 SDLCALL SDL_ReadBE64(SDL_RWops *src);
+
+/* Write an item of native format to the specified endianness */
+extern DECLSPEC int SDLCALL SDL_WriteLE16(SDL_RWops *dst, Uint16 value);
+extern DECLSPEC int SDLCALL SDL_WriteBE16(SDL_RWops *dst, Uint16 value);
+extern DECLSPEC int SDLCALL SDL_WriteLE32(SDL_RWops *dst, Uint32 value);
+extern DECLSPEC int SDLCALL SDL_WriteBE32(SDL_RWops *dst, Uint32 value);
+extern DECLSPEC int SDLCALL SDL_WriteLE64(SDL_RWops *dst, Uint64 value);
+extern DECLSPEC int SDLCALL SDL_WriteBE64(SDL_RWops *dst, Uint64 value);
+
+
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
 }
 #endif
 #include "close_code.h"
+#endif /* !DISABLE_FILE */
 
 #endif /* _SDL_RWops_h */

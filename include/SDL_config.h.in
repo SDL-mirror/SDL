@@ -43,6 +43,9 @@
 #undef uint64_t
 #undef uintptr_t
 
+/* Endianness */
+#undef SDL_BYTEORDER
+
 /* Comment this if you want to build without any C library requirements */
 #undef HAVE_LIBC
 #ifdef HAVE_LIBC
@@ -124,7 +127,6 @@
 #undef DISABLE_CDROM
 #undef DISABLE_THREADS
 #undef DISABLE_TIMERS
-#undef DISABLE_ENDIAN
 #undef DISABLE_FILE
 #undef DISABLE_CPUINFO
 
