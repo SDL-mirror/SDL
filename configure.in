@@ -1,42 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(README)
-AH_TOP([/*
-    SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2006 Sam Lantinga
-
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
-    License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
-
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-    Sam Lantinga
-    slouken@libsdl.org
-*/
-
-#ifndef _SDL_config_h
-#define _SDL_config_h
-
-/* This is a set of defines to configure the SDL features */
-
-/* Comment this if you want to build without any libc requirements */
-#undef HAVE_LIBC
-#ifdef HAVE_LIBC
-])
 AC_CONFIG_HEADER(include/SDL_config.h)
-AH_BOTTOM([
-#endif /* HAVE_LIBC */
-
-#endif /* _SDL_config_h */
-])
 
 dnl Set various version strings - taken gratefully from the GTk sources
 #
@@ -79,6 +43,9 @@ AC_CANONICAL_SYSTEM
 
 dnl Setup for automake
 AM_INIT_AUTOMAKE(SDL, $SDL_VERSION)
+
+dnl Disable autoheader
+AUTOHEADER=:
 
 dnl Check for tools
 
@@ -153,7 +120,7 @@ fi
 dnl See whether we are allowed to use the system C library
 AC_ARG_ENABLE(libc,
 [  --enable-libc           Use the system C library [default=yes]],
-              , AC_DEFINE(HAVE_LIBC))
+              , AC_DEFINE([HAVE_LIBC]))
 
 dnl Checks for header files.
 AC_CHECK_HEADERS(alloca.h stdint.h stdlib.h stdarg.h malloc.h)
@@ -175,7 +142,7 @@ AC_CHECK_SIZEOF(long long, 8)
 dnl Checks for library functions.
 AC_FUNC_ALLOCA
 AC_CHECK_FUNCS(malloc calloc realloc free)
-AC_CHECK_FUNCS(getenv putenv qsort abs)
+AC_CHECK_FUNCS(getenv putenv unsetenv qsort abs)
 AC_CHECK_FUNCS(memset memcpy memmove memcmp)
 AC_CHECK_FUNCS(strlen strcpy strncpy strcat strncat strdup)
 AC_CHECK_FUNCS(_strrev _strupr _strlwr)
