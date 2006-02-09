@@ -1,6 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(README)
 AC_CONFIG_HEADER(include/SDL_config.h)
+AC_GNU_SOURCE
 
 dnl Set various version strings - taken gratefully from the GTk sources
 #
@@ -53,11 +54,8 @@ AC_LIBTOOL_WIN32_DLL
 AM_PROG_LIBTOOL
 AC_PROG_MAKE_SET
 AC_PROG_CC
-AC_C_INLINE
-AC_C_CONST
 AC_PROG_CXX
 AC_PROG_INSTALL
-AC_FUNC_ALLOCA
 ASFLAGS=""
 AC_SUBST(ASFLAGS)
 CCAS="$CC"
@@ -122,34 +120,76 @@ AC_ARG_ENABLE(libc,
 [  --enable-libc           Use the system C library [default=yes]],
               , AC_DEFINE([HAVE_LIBC]))
 
-dnl Checks for header files.
-AC_CHECK_HEADERS(alloca.h stdint.h stdlib.h stdarg.h malloc.h)
-AC_CHECK_HEADERS(ctype.h)
-AC_CHECK_HEADERS(string.h)
-AC_CHECK_HEADERS(stdio.h)
-AC_CHECK_HEADERS(signal.h)
-
-dnl Checks for typedefs, structures, and compiler characteristics.
+dnl Check for compiler characteristics
 AC_C_CONST
 AC_C_INLINE
+AC_C_VOLATILE
+
+dnl Check for header files
+AC_HEADER_STDC
+AC_CHECK_HEADERS(sys/types.h stdio.h stdlib.h stddef.h stdarg.h malloc.h memory.h string.h strings.h inttypes.h stdint.h ctype.h signal.h)
+
+dnl Check for typedefs, structures, etc.
 AC_TYPE_SIZE_T
-AC_CHECK_SIZEOF(char, 1)
-AC_CHECK_SIZEOF(short, 2)
-AC_CHECK_SIZEOF(int, 4)
-AC_CHECK_SIZEOF(long, 4)
-AC_CHECK_SIZEOF(long long, 8)
+if test x$ac_cv_header_inttypes_h = xyes -o x$ac_cv_header_stdint_h = xyes; then
+    AC_CHECK_TYPE(int64_t)
+    if test x$ac_cv_type_int64_t = xyes; then
+        AC_DEFINE(SDL_HAS_64BIT_TYPE)
+    fi
+else
+    AC_CHECK_SIZEOF(char, 1)
+    AC_CHECK_SIZEOF(short, 2)
+    AC_CHECK_SIZEOF(int, 4)
+    AC_CHECK_SIZEOF(long, 4)
+    AC_CHECK_SIZEOF(long long, 8)
+    if test x$ac_cv_sizeof_char = x1; then
+        AC_DEFINE(int8_t, signed char)
+        AC_DEFINE(uint8_t, unsigned char)
+    fi
+    if test x$ac_cv_sizeof_short = x2; then
+        AC_DEFINE(int16_t, signed short)
+        AC_DEFINE(uint16_t, unsigned short)
+    else
+        if test x$ac_cv_sizeof_int = x2; then
+            AC_DEFINE(int16_t, signed int)
+            AC_DEFINE(uint16_t, unsigned int)
+        fi
+    fi
+    if test x$ac_cv_sizeof_int = x4; then
+        AC_DEFINE(int32_t, signed int)
+        AC_DEFINE(uint32_t, unsigned int)
+    else
+        if test x$ac_cv_sizeof_long = x4; then
+            AC_DEFINE(int32_t, signed long)
+            AC_DEFINE(uint32_t, unsigned long)
+        fi
+    fi
+    if test x$ac_cv_sizeof_long = x8; then
+        AC_DEFINE(int64_t, signed long)
+        AC_DEFINE(uint64_t, unsigned long)
+        AC_DEFINE(SDL_HAS_64BIT_TYPE)
+    else
+        if test x$ac_cv_sizeof_long_long = x8; then
+            AC_DEFINE(int64_t, signed long long)
+            AC_DEFINE(uint64_t, unsigned long long)
+            AC_DEFINE(SDL_HAS_64BIT_TYPE)
+        fi
+    fi
+    AC_CHECK_TYPE(uintptr_t, unsigned long)
+fi
 
 dnl Checks for library functions.
 AC_FUNC_ALLOCA
-AC_CHECK_FUNCS(malloc calloc realloc free)
-AC_CHECK_FUNCS(getenv putenv unsetenv qsort abs)
-AC_CHECK_FUNCS(memset memcpy memmove memcmp)
-AC_CHECK_FUNCS(strlen strcpy strncpy strcat strncat strdup)
-AC_CHECK_FUNCS(_strrev _strupr _strlwr)
-AC_CHECK_FUNCS(strchr strrchr strstr)
-AC_CHECK_FUNCS(itoa _ltoa _uitoa _ultoa strtol _i64toa _ui64toa strtoll strtod atoi atof)
-AC_CHECK_FUNCS(strcmp strncmp stricmp strcasecmp)
-AC_CHECK_FUNCS(sscanf snprintf vsnprintf)
+AC_FUNC_MEMCMP
+if test x$ac_cv_func_memcmp_working = xyes; then
+    AC_DEFINE(HAVE_MEMCMP)
+fi
+AC_FUNC_STRTOD
+if test x$ac_cv_func_strtod = xyes; then
+    AC_DEFINE(HAVE_STRTOD)
+fi
+AC_CHECK_FUNCS(malloc calloc realloc free getenv putenv unsetenv qsort abs bcopy memset memcpy memmove strlen strcpy strncpy strcat strncat strdup _strrev _strupr _strlwr strchr strrchr strstr itoa _ltoa _uitoa _ultoa strtol _i64toa _ui64toa strtoll atoi atof strcmp strncmp stricmp strcasecmp sscanf snprintf vsnprint)
+
 
 dnl Initialize the compiler and linker flags for SDL applications
 

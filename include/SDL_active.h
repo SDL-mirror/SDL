@@ -25,6 +25,9 @@
 #ifndef _SDL_active_h
 #define _SDL_active_h
 
+#include "SDL_stdinc.h"
+
+#ifndef DISABLE_EVENTS
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
@@ -51,5 +54,6 @@ extern DECLSPEC Uint8 SDLCALL SDL_GetAppState(void);
 }
 #endif
 #include "close_code.h"
+#endif /* !DISABLE_EVENTS */
 
 #endif /* _SDL_active_h */

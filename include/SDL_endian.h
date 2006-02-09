@@ -38,6 +38,7 @@
 */
 
 #include "SDL_types.h"
+//#warning FIXME: move rwops into rwops and swapping into byteorder.h
 #include "SDL_rwops.h"
 #include "SDL_byteorder.h"
 

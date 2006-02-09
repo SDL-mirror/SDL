@@ -25,23 +25,44 @@
 
 /* This is a set of defines to configure the SDL features */
 
-#undef HAVE_STDARG_H
+/* C language features */
+#undef const
+#undef inline
+#undef volatile
 
-/* Comment this if you want to build without any libc requirements */
+/* C datatypes */
+#undef size_t
+#undef int8_t
+#undef uint8_t
+#undef int16_t
+#undef uint16_t
+#undef int32_t
+#undef uint32_t
+#undef SDL_HAS_64BIT_TYPE
+#undef int64_t
+#undef uint64_t
+#undef uintptr_t
+
+/* Comment this if you want to build without any C library requirements */
 #undef HAVE_LIBC
 #ifdef HAVE_LIBC
 
-/* Various C library headers */
+/* Useful headers */
+#undef HAVE_SYS_TYPES_H
 #undef HAVE_STDIO_H
+#undef STDC_HEADERS
 #undef HAVE_STDLIB_H
+#undef HAVE_STDARG_H
 #undef HAVE_MALLOC_H
+#undef HAVE_MEMORY_H
 #undef HAVE_STRING_H
+#undef HAVE_STRINGS_H
+#undef HAVE_INTTYPES_H
+#undef HAVE_STDINT_H
 #undef HAVE_CTYPE_H
-#ifndef _WIN32_WCE
 #undef HAVE_SIGNAL_H
-#endif /* !_WIN32_WCE */
 
-/* Features provided by SDL_stdlib.h */
+/* C library functions */
 #undef HAVE_MALLOC
 #undef HAVE_CALLOC
 #undef HAVE_REALLOC
@@ -54,8 +75,7 @@
 #endif
 #undef HAVE_QSORT
 #undef HAVE_ABS
-
-/* Features provided by SDL_string.h */
+#undef HAVE_BCOPY
 #undef HAVE_MEMSET
 #undef HAVE_MEMCPY
 #undef HAVE_MEMMOVE
@@ -69,6 +89,8 @@
 #undef HAVE__STRREV
 #undef HAVE__STRUPR
 #undef HAVE__STRLWR
+#undef HAVE_INDEX
+#undef HAVE_RINDEX
 #undef HAVE_STRCHR
 #undef HAVE_STRRCHR
 #undef HAVE_STRSTR
@@ -92,5 +114,18 @@
 #undef HAVE_VSNPRINTF
 
 #endif /* HAVE_LIBC */
+
+
+/* Allow disabling of core subsystems */
+#undef DISABLE_AUDIO
+#undef DISABLE_VIDEO
+#undef DISABLE_EVENTS
+#undef DISABLE_JOYSTICK
+#undef DISABLE_CDROM
+#undef DISABLE_THREADS
+#undef DISABLE_TIMERS
+#undef DISABLE_ENDIAN
+#undef DISABLE_FILE
+#undef DISABLE_CPUINFO
 
 #endif /* _SDL_config_h */

@@ -20,4 +20,4 @@
     slouken@libsdl.org
 */
 
-#include "SDL_stdlib.h"
+#include "SDL_stdinc.h"
