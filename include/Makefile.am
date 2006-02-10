@@ -29,8 +29,6 @@ libSDLinclude_HEADERS =		\
 	SDL_quit.h		\
 	SDL_rwops.h		\
 	SDL_stdinc.h		\
-	SDL_stdlib.h		\
-	SDL_string.h		\
 	SDL_syswm.h		\
 	SDL_thread.h		\
 	SDL_timer.h		\

@@ -33,6 +33,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 
+#include "SDL_timer.h"
 #include "SDL_syswm.h"
 #include "SDL_sysevents.h"
 #include "SDL_sysvideo.h"
