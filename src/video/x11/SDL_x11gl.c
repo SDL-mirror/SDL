@@ -20,9 +20,6 @@
     slouken@libsdl.org
 */
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
-#include "SDL_error.h"
 #include "SDL_x11video.h"
 #include "SDL_events_c.h"
 #include "SDL_x11dga_c.h"

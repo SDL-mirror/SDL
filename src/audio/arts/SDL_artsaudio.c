@@ -22,13 +22,10 @@
 
 /* Allow access to a raw mixing buffer */
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
+#include "SDL_timer.h"
 #include "SDL_audio.h"
-#include "SDL_error.h"
 #include "SDL_audiomem.h"
 #include "SDL_audio_c.h"
-#include "SDL_timer.h"
 #include "SDL_audiodev_c.h"
 #include "SDL_artsaudio.h"
 

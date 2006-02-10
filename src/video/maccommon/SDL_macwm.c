@@ -29,7 +29,7 @@
 #include <Strings.h>
 #endif
 
-#include "SDL_string.h"
+#include "SDL_stdinc.h"
 #include "SDL_macwm_c.h"
 
 void Mac_SetCaption(_THIS, const char *title, const char *icon)

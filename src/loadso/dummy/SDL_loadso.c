@@ -27,8 +27,6 @@
 #error Do not compile directly...compile src/SDL_loadso.c instead!
 #endif
 
-#include "SDL_types.h"
-#include "SDL_error.h"
 #include "SDL_loadso.h"
 
 void *SDL_LoadObject(const char *sofile)

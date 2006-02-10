@@ -25,12 +25,10 @@
     clare@setabox.com
 */
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
+#include "SDL_thread.h"
 #include "SDL_video.h"
 #include "SDL_pixels_c.h"
 #include "SDL_events_c.h"
-#include "SDL_thread.h"
 
 #define MWINCLUDECOLORS
 #include "SDL_nxvideo.h"

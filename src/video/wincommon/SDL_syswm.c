@@ -23,9 +23,6 @@
 #include "SDL_windows.h"
 
 #include "SDL_version.h"
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
-#include "SDL_error.h"
 #include "SDL_video.h"
 #include "SDL_syswm.h"
 #include "SDL_syswm_c.h"

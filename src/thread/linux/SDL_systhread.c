@@ -22,8 +22,6 @@
 
 /* Linux thread management routines for SDL */
 
-#include "SDL_stdlib.h"
-#include "SDL_error.h"
 #include "SDL_thread.h"
 #include "SDL_systhread.h"
 

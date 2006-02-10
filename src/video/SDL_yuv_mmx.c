@@ -20,10 +20,9 @@
     slouken@libsdl.org
 */
 
+#include "SDL_stdinc.h"
 
 #if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
-
-#include "SDL_types.h"
 
 #define ASM_ARRAY(x) x[] __asm__("_" #x) __attribute__((used))
  

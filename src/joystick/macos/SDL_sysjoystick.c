@@ -26,11 +26,8 @@
     The code that follows is meant for SDL.  Use at your own risk.
 */
 
-#include <string.h>
-
 #include <InputSprocket.h>
 
-#include "SDL_error.h"
 #include "SDL_joystick.h"
 #include "SDL_sysjoystick.h"
 #include "SDL_joystick_c.h"

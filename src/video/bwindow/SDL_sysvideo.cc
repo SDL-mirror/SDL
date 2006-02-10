@@ -24,9 +24,6 @@
 
 #include <unistd.h>
 
-#include "SDL.h"
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
 #include "SDL_BeApp.h"
 #include "SDL_BWin.h"
 #include "SDL_timer.h"

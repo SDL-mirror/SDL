@@ -22,12 +22,10 @@
 
 /* This provides the default mixing callback for the SDL audio routines */
 
-#include "SDL_audio.h"
-#include "SDL_mutex.h"
+#include "SDL_cpuinfo.h"
 #include "SDL_timer.h"
-#include "SDL_cpuinfo.h"
+#include "SDL_audio.h"
 #include "SDL_sysaudio.h"
-#include "SDL_cpuinfo.h"
 #include "SDL_mixer_MMX.h"
 #include "SDL_mixer_MMX_VC.h"
 #include "SDL_mixer_m68k.h"

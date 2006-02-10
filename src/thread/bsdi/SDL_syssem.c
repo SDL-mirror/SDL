@@ -20,8 +20,6 @@
     slouken@libsdl.org
 */
 
-#include "SDL_stdlib.h"
-#include "SDL_error.h"
 #include "SDL_thread.h"
 #include "SDL_timer.h"
 

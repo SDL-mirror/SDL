@@ -33,10 +33,7 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
 #include "SDL_audio.h"
-#include "SDL_error.h"
 #include "SDL_audio_c.h"
 #include "SDL_audiodev_c.h"
 #include "SDL_umsaudio.h"

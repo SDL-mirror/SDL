@@ -23,7 +23,6 @@
 /* Utilities for getting and setting the X display mode */
 
 #include "SDL_timer.h"
-#include "SDL_error.h"
 #include "SDL_events.h"
 #include "SDL_events_c.h"
 #include "SDL_cgxvideo.h"

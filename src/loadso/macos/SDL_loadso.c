@@ -38,8 +38,6 @@
 #include <CodeFragments.h>
 #include <Errors.h>
 
-#include "SDL_types.h"
-#include "SDL_error.h"
 #include "SDL_loadso.h"
 
 void *SDL_LoadObject(const char *sofile)

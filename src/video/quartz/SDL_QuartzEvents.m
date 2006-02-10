@@ -20,7 +20,6 @@
     slouken@libsdl.org
 */
 
-#include "SDL_stdlib.h"
 #include "SDL_QuartzVideo.h"
 
 #include <IOKit/IOMessage.h> // For wake from sleep detection

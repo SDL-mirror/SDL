@@ -31,7 +31,7 @@
 #include <stddef.h>
 #endif
 
-#include "SDL_stdlib.h"
+#include "SDL_stdinc.h"
 #include "SDL_audiomem.h"
 
 /* Allocate memory that will be shared between threads (freed on exit) */

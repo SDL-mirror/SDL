@@ -24,10 +24,7 @@
 
 #include <stdio.h>
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
 #include "SDL_timer.h"
-#include "SDL_error.h"
 #include "SDL_events.h"
 #include "SDL_events_c.h"
 #include "SDL_x11video.h"

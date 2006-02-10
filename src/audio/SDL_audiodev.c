@@ -28,8 +28,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
+#include "SDL_stdinc.h"
 #include "SDL_audiodev_c.h"
 
 #ifndef _PATH_DEV_DSP
@@ -103,8 +102,7 @@ int SDL_OpenAudioPath(char *path, int maxlen, int flags, int classic)
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
+#include "SDL_stdinc.h"
 #include "SDL_audiodev_c.h"
 
 #ifndef _PATH_DEV_DSP

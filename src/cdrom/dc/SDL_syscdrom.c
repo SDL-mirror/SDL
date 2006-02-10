@@ -25,7 +25,6 @@
 #include <dc/cdrom.h>
 #include <dc/spu.h>
 
-#include "SDL_error.h"
 #include "SDL_cdrom.h"
 #include "SDL_syscdrom.h"
 

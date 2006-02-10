@@ -23,9 +23,6 @@
 #include <AppKit.h>
 #include <GameKit.h>
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
-#include "SDL_error.h"
 #include "SDL_BWin.h"
 
 extern "C" {

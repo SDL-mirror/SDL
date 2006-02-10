@@ -27,8 +27,6 @@
      Implements mouse cursor shape definitions and positioning
 */
 
-#include "SDL_stdlib.h"
-#include "SDL_error.h"
 #include "SDL_mouse.h"
 #include "SDL_events_c.h"
 

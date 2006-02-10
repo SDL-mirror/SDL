@@ -24,8 +24,7 @@
 #include <sys/time.h>
 #include <ctype.h>
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
+#include "SDL_stdinc.h"
 #include "SDL_fbvideo.h"
 #include "SDL_fbelo.h"
 

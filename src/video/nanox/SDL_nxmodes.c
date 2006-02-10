@@ -24,8 +24,7 @@
     clare@setabox.com
 */
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
+#include "SDL_stdinc.h"
 #include "SDL_nxmodes_c.h"
 
 SDL_Rect ** NX_ListModes (_THIS, SDL_PixelFormat * format, Uint32 flags)

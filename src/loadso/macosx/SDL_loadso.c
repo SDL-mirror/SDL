@@ -70,8 +70,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <mach-o/nlist.h>
 #include <mach-o/getsect.h>
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
+#include "SDL_stdinc.h"
 
 /* Just playing to see if it would compile with the freebsd headers, it does,
  * but because of the different values for RTLD_LOCAL etc, it would break binary
@@ -1382,8 +1381,6 @@ static dlfunc_t SDL_OSX_dlfunc(void * dl_restrict handle, const char * dl_restri
 #error Do not use USE_DLOPEN on Mac OS X.
 #endif
 
-#include "SDL_types.h"
-#include "SDL_error.h"
 #include "SDL_loadso.h"
 
 void *SDL_LoadObject(const char *sofile)

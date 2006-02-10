@@ -36,9 +36,6 @@
 #define log(x)		__ieee754_log(x)
 #endif
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
-#include "SDL_error.h"
 #include "SDL_sysvideo.h"
 
 

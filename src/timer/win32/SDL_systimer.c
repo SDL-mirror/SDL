@@ -25,7 +25,6 @@
 
 #include "SDL_timer.h"
 #include "SDL_timer_c.h"
-#include "SDL_error.h"
 
 #ifdef _WIN32_WCE
   #error This is WinCE. Please use src/timer/wince/SDL_systimer.c instead.

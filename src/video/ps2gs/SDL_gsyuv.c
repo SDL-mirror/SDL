@@ -28,9 +28,6 @@
 #include <sys/mman.h>
 #include <asm/page.h>		/* For definition of PAGE_SIZE */
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
-#include "SDL_error.h"
 #include "SDL_video.h"
 #include "SDL_gsyuv_c.h"
 #include "SDL_yuvfuncs.h"

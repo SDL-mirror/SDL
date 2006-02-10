@@ -22,7 +22,6 @@
 
 /* AGL implementation of SDL OpenGL support */
 
-#include "SDL_error.h"
 #include "SDL_lowvideo.h"
 #include "SDL_macgl_c.h"
 #include "SDL_loadso.h"

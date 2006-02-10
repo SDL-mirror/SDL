@@ -29,8 +29,6 @@
 #include <unistd.h>
 #include <pthread.h>
 
-#include "SDL_stdlib.h"
-#include "SDL_error.h"
 #include "SDL_thread.h"
 #include "SDL_sysmutex_c.h"
 

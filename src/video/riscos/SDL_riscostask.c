@@ -34,8 +34,7 @@
 #include "kernel.h"
 #include "swis.h"
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
+#include "SDL_stdinc.h"
 #include "SDL_riscostask.h"
 
 #ifndef DISABLE_THREADS

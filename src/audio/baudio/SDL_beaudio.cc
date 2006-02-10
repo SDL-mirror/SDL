@@ -28,8 +28,6 @@
 
 extern "C" {
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
 #include "SDL_audio.h"
 #include "SDL_audio_c.h"
 #include "SDL_sysaudio.h"

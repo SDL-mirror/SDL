@@ -9,9 +9,6 @@
 
 #include "SDL_windows.h"
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
-
 #ifdef _WIN32_WCE
 # define DIR_SEPERATOR TEXT("\\")
 # undef _getcwd

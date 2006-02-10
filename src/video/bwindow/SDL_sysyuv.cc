@@ -22,8 +22,6 @@
 
 /* This is the BeOS version of SDL YUV video overlays */
 
-#include "SDL_stdlib.h"
-#include "SDL_error.h"
 #include "SDL_video.h"
 #include "SDL_sysyuv.h"
 #include "SDL_yuvfuncs.h"

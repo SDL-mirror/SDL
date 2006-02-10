@@ -22,9 +22,6 @@
 
 /* This is the system specific header for the SDL joystick API */
 
-#include <stdio.h>		/* For the definition of NULL */
-
-#include "SDL_error.h"
 #include "SDL_joystick.h"
 #include "SDL_sysjoystick.h"
 #include "SDL_joystick_c.h"

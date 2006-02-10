@@ -28,7 +28,7 @@
 
 /*--- Includes ---*/
 
-#include "SDL_stdlib.h"
+#include "SDL_stdinc.h"
 #include "SDL_xbios.h"
 #include "SDL_xbios_sb3.h"
 

@@ -39,9 +39,6 @@
 #include <linux/kd.h>
 #include <linux/keyboard.h>
 
-#include "SDL.h"
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
 #include "SDL_mutex.h"
 #include "SDL_sysevents.h"
 #include "SDL_sysvideo.h"

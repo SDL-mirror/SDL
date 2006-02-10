@@ -353,7 +353,7 @@ char *SDL_strupr(char *string)
 {
     char *bufp = string;
     while ( *bufp ) {
-        *bufp = toupper(*bufp);
+        *bufp = SDL_toupper(*bufp);
 	++bufp;
     }
     return string;
@@ -365,7 +365,7 @@ char *SDL_strlwr(char *string)
 {
     char *bufp = string;
     while ( *bufp ) {
-        *bufp = tolower(*bufp);
+        *bufp = SDL_tolower(*bufp);
 	++bufp;
     }
     return string;
@@ -609,8 +609,8 @@ int SDL_strcasecmp(const char *str1, const char *str2)
     char a = 0;
     char b = 0;
     while (*str1 && *str2) {
-        a = tolower(*str1);
-        b = tolower(*str2);
+        a = SDL_tolower(*str1);
+        b = SDL_tolower(*str2);
         if ( a != b )
             break;
         ++str1;
@@ -713,7 +713,7 @@ int SDL_sscanf(const char *text, const char *fmt, ...)
                                 ++index;
                             }
                             if ( text[index] == '0' ) {
-                                if ( tolower(text[index+1]) == 'x' ) {
+                                if ( SDL_tolower(text[index+1]) == 'x' ) {
                                     radix = 16;
                                 } else {
                                     radix = 8;

@@ -22,9 +22,6 @@
 
 /* Allow access to a raw mixing buffer (for AmigaOS) */
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
-#include "SDL_endian.h"
 #include "SDL_audio.h"
 #include "SDL_audiomem.h"
 #include "SDL_audio_c.h"

@@ -31,10 +31,6 @@
 #include <asm/page.h>		/* For definition of PAGE_SIZE */
 #include <sys/io.h>		/* For ioperm() */
 
-#include "SDL.h"
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
-#include "SDL_error.h"
 #include "SDL_video.h"
 #include "SDL_mouse.h"
 #include "SDL_sysvideo.h"

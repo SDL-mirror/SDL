@@ -23,7 +23,7 @@
 #ifndef _ATARI_C2P_h
 #define _ATARI_C2P_h
 
-#include "SDL_types.h"
+#include "SDL_stdinc.h"
 
 /*--- Functions pointers ---*/
 

@@ -29,6 +29,7 @@
 */
 
 #include "SDL_stdinc.h"
+#include "SDL_error.h"
 
 /* Thread synchronization primitives */
 #include "SDL_mutex.h"

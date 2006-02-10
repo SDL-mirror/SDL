@@ -20,7 +20,6 @@
     slouken@libsdl.org
 */
 
-#include "SDL_error.h"
 #include "SDL_ph_modes_c.h"
 
 static PgVideoModeInfo_t mode_info;

@@ -30,7 +30,7 @@
 #include "kernel.h"
 #include "swis.h"
 
-#include "SDL_stdlib.h"
+#include "SDL_stdinc.h"
 #include "SDL_riscosvideo.h"
 
 extern void WIMP_ReadModeInfo(_THIS);

@@ -38,8 +38,6 @@
 extern struct ExecBase *SysBase;
 extern struct GfxBase *GfxBase;
 
-#include "SDL_stdlib.h"
-#include "SDL_error.h"
 #include "SDL_joystick.h"
 #include "SDL_sysjoystick.h"
 #include "SDL_joystick_c.h"

@@ -34,15 +34,11 @@
 #include <sys/fcntl.h>
 #endif
 
-#include "SDL.h"
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
-#include "SDL_error.h"
+#include "SDL_endian.h"
 #include "SDL_timer.h"
 #include "SDL_thread.h"
 #include "SDL_video.h"
 #include "SDL_mouse.h"
-#include "SDL_endian.h"
 #include "SDL_sysvideo.h"
 #include "SDL_pixels_c.h"
 #include "SDL_events_c.h"

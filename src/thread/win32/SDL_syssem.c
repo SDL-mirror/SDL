@@ -24,8 +24,6 @@
 
 #include "SDL_windows.h"
 
-#include "SDL_stdlib.h"
-#include "SDL_error.h"
 #include "SDL_thread.h"
 #if defined(_WIN32_WCE) && (_WIN32_WCE < 300)
 #include "win_ce_semaphore.h"

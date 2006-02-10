@@ -28,8 +28,6 @@
 
 #include <mint/falcon.h>
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
 #include "SDL_xbios.h"
 #include "SDL_xbios_centscreen.h"
 

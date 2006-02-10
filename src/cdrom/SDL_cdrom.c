@@ -22,9 +22,6 @@
 
 /* This is the CD-audio control API for Simple DirectMedia Layer */
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
-#include "SDL_error.h"
 #include "SDL_cdrom.h"
 #include "SDL_syscdrom.h"
 

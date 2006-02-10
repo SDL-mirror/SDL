@@ -28,7 +28,7 @@
 
 #include <mint/osbind.h>
 
-#include "SDL_types.h"
+#include "SDL_stdinc.h"
 
 /*--- Variables ---*/
 

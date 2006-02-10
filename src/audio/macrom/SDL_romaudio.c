@@ -39,9 +39,6 @@
 #endif
 #endif
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
-#include "SDL_endian.h"
 #include "SDL_audio.h"
 #include "SDL_audio_c.h"
 #include "SDL_audiomem.h"

@@ -21,7 +21,6 @@
 */
 
 #include "SDL_version.h"
-#include "SDL_error.h"
 #include "SDL_timer.h"
 #include "SDL_video.h"
 #include "SDL_syswm.h"

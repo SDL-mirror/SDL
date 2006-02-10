@@ -23,11 +23,8 @@
 /* Tru64 UNIX MME support */
 #include <mme_api.h>
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
-#include "SDL_audio.h"
-#include "SDL_mutex.h"
 #include "SDL_timer.h"
+#include "SDL_audio.h"
 #include "SDL_audio_c.h"
 
 #include "SDL_mmeaudio.h"

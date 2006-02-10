@@ -27,10 +27,6 @@
      Implements RISC OS full screen display.
 */
 
-#include "SDL.h"
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
-#include "SDL_error.h"
 #include "SDL_video.h"
 #include "SDL_mouse.h"
 #include "SDL_sysvideo.h"

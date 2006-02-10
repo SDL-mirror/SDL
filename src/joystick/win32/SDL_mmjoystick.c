@@ -22,17 +22,14 @@
 
 /* Win32 MultiMedia Joystick driver, contributed by Andrei de A. Formiga */
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
-#include "SDL_error.h"
+#include "SDL_windows.h"
+#include <mmsystem.h>
+#include <regstr.h>
+
 #include "SDL_events.h"
 #include "SDL_joystick.h"
 #include "SDL_sysjoystick.h"
 #include "SDL_joystick_c.h"
-
-#include "SDL_windows.h"
-#include <mmsystem.h>
-#include <regstr.h>
 
 #define MAX_JOYSTICKS	16
 #define MAX_AXES	6	/* each joystick can have up to 6 axes */

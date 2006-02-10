@@ -32,7 +32,6 @@
 #include "SDL_thread.h"
 #include "SDL_timer.h"
 #include "SDL_timer_c.h"
-#include "SDL_error.h"
 
 
 #define TIME_WRAP_VALUE (~(DWORD)0)

@@ -36,7 +36,6 @@
 
 #include "SDL_events.h"
 #include "SDL_video.h"
-#include "SDL_error.h"
 #include "SDL_syswm.h"
 #include "SDL_events_c.h"
 #include "SDL_cursor_c.h"

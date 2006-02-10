@@ -28,6 +28,7 @@
 #define _SDL_RWops_h
 
 #include "SDL_stdinc.h"
+#include "SDL_error.h"
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */

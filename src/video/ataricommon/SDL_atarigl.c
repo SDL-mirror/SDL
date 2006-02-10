@@ -30,11 +30,8 @@
 
 #include <mint/osbind.h>
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
-#include "SDL_video.h"
-#include "SDL_error.h"
 #include "SDL_endian.h"
+#include "SDL_video.h"
 #include "SDL_atarigl_c.h"
 #ifdef ENABLE_OSMESA_SHARED
 #include "SDL_loadso.h"

@@ -24,7 +24,6 @@
    data sources.  It can easily be extended to files, memory, etc.
 */
 
-#include "SDL_error.h"
 #include "SDL_endian.h"
 #include "SDL_rwops.h"
 

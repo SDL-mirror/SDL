@@ -26,6 +26,7 @@
 #define _SDL_quit_h
 
 #include "SDL_stdinc.h"
+#include "SDL_error.h"
 
 /* 
   An SDL_QUITEVENT is generated when the user tries to close the application

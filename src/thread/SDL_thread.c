@@ -22,9 +22,6 @@
 
 /* System independent thread management routines for SDL */
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
-#include "SDL_error.h"
 #include "SDL_mutex.h"
 #include "SDL_thread.h"
 #include "SDL_thread_c.h"

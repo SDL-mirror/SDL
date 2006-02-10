@@ -26,7 +26,6 @@
    April 27, 2000 - Sam Lantinga
 */
 
-#include "SDL_error.h"
 #include "SDL_video.h"
 #include "SDL_blit.h"
 

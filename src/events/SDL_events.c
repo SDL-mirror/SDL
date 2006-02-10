@@ -23,10 +23,6 @@
 /* General event handling code for SDL */
 
 #include "SDL.h"
-#include "SDL_thread.h"
-#include "SDL_mutex.h"
-#include "SDL_events.h"
-#include "SDL_string.h"
 #include "SDL_events_c.h"
 #include "SDL_timer_c.h"
 #ifndef DISABLE_JOYSTICK

@@ -26,7 +26,7 @@
 #define _SDL_video_h
 
 #include "SDL_stdinc.h"
-#include "SDL_mutex.h"
+#include "SDL_error.h"
 #include "SDL_rwops.h"
 
 #include "begin_code.h"

@@ -32,10 +32,7 @@
 #include <mint/falcon.h>
 #include <mint/mintbind.h>
 
-#include "SDL_types.h"
 #include "SDL_audio.h"
-#include "SDL_string.h"
-
 #include "SDL_mintaudio.h"
 #include "SDL_mintaudio_stfa.h"
 

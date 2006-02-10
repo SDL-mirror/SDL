@@ -34,10 +34,6 @@ extern HINSTANCE aygshell;
 #define CDS_FULLSCREEN	4
 #endif
 
-#include "SDL.h"
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
-#include "SDL_mutex.h"
 #include "SDL_syswm.h"
 #include "SDL_sysvideo.h"
 #include "SDL_sysevents.h"

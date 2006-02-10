@@ -26,6 +26,7 @@
 #define _SDL_keyboard_h
 
 #include "SDL_stdinc.h"
+#include "SDL_error.h"
 #include "SDL_keysym.h"
 
 #include "begin_code.h"

@@ -22,7 +22,6 @@
 
 /* StormMesa implementation of SDL OpenGL support */
 
-#include "SDL_error.h"
 #include "SDL_cgxgl_c.h"
 #include "SDL_cgxvideo.h"
 

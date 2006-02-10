@@ -20,11 +20,10 @@
     slouken@libsdl.org
 */
 
-#include "SDL_error.h"
 #include "SDL_endian.h"
+#include "SDL_video.h"
 #include "SDL_sysvideo.h"
 #include "SDL_blit.h"
-#include "SDL_video.h"
 #include "SDL_cgxvideo.h"
 
 static int CGX_HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,

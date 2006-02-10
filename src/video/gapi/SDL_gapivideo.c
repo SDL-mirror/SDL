@@ -32,9 +32,6 @@ Inspired by http://arisme.free.fr/ports/SDL.php
 // TODO: windib on SH3 PPC2000 landscape test
 // TODO: optimize 8bpp landscape mode
 
-#include "SDL.h"
-#include "SDL_stdlib.h"
-#include "SDL_error.h"
 #include "SDL_video.h"
 #include "SDL_mouse.h"
 #include "SDL_sysvideo.h"

@@ -28,7 +28,6 @@
 #include <sys/wait.h>
 #include <sys/prctl.h>
 
-#include "SDL_error.h"
 #include "SDL_thread.h"
 #include "SDL_systhread.h"
 

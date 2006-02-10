@@ -23,9 +23,6 @@
 /* Allow access to a raw mixing buffer (For IRIX 6.5 and higher) */
 /* patch for IRIX 5 by Georg Schwarz 18/07/2004 */
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
-#include "SDL_endian.h"
 #include "SDL_timer.h"
 #include "SDL_audio.h"
 #include "SDL_audiomem.h"

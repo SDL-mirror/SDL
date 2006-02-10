@@ -25,10 +25,6 @@
     clare@setabox.com
 */
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
-#include "SDL_error.h"
-
 #include "SDL_nximage_c.h"
 
 void NX_NormalUpdate (_THIS, int numrects, SDL_Rect * rects)

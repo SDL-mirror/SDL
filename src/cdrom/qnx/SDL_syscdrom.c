@@ -31,11 +31,8 @@
 #include <sys/cdrom.h>
 #include <sys/dcmd_cam.h>
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
-#include "SDL_error.h"
-#include "SDL_cdrom.h"
 #include "SDL_timer.h"
+#include "SDL_cdrom.h"
 #include "SDL_syscdrom.h"
 
 /* The maximum number of CD-ROM drives we'll detect */

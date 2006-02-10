@@ -45,7 +45,6 @@
 /*#define USE_CLOCK_GETTIME*/
 #endif
 
-#include "SDL_error.h"
 #include "SDL_timer.h"
 #include "SDL_timer_c.h"
 

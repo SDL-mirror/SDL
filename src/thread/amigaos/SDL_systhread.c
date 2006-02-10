@@ -22,7 +22,6 @@
 
 /* BeOS thread management routines for SDL */
 
-#include "SDL_error.h"
 #include "SDL_mutex.h"
 #include "SDL_thread.h"
 #include "SDL_thread_c.h"

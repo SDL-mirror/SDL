@@ -26,8 +26,6 @@
 #define INCL_DOSSEMAPHORES
 #include <os2.h>
 
-#include "SDL_stdlib.h"
-#include "SDL_error.h"
 #include "SDL_mutex.h"
 
 

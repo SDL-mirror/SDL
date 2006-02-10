@@ -22,8 +22,6 @@
 
 /* This is the DirectFB implementation of YUV video overlays */
 
-#include "SDL_stdlib.h"
-#include "SDL_error.h"
 #include "SDL_video.h"
 #include "SDL_DirectFB_yuv.h"
 #include "SDL_yuvfuncs.h"

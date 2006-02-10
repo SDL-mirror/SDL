@@ -48,7 +48,6 @@ extern struct DosLibrary *DOSBase;
 extern struct ExecBase *SysBase;
 static struct GfxBase *GfxBase;
 
-#include "SDL_error.h"
 #include "SDL_timer.h"
 #include "SDL_timer_c.h"
 

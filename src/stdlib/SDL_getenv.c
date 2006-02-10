@@ -27,7 +27,6 @@
 #if defined(WIN32) && !defined(_WIN32_WCE)
 
 #include "SDL_windows.h"
-#include "SDL_string.h"
 
 /* Note this isn't thread-safe! */
 

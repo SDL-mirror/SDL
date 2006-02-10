@@ -22,7 +22,6 @@
 
 /* Functions for audio drivers to perform runtime conversion of audio format */
 
-#include "SDL_error.h"
 #include "SDL_audio.h"
 
 

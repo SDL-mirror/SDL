@@ -26,6 +26,7 @@
 /* Header for the SDL time management routines */
 
 #include "SDL_stdinc.h"
+#include "SDL_error.h"
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */

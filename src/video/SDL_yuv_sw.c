@@ -82,9 +82,6 @@
  * SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
  */
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
-#include "SDL_error.h"
 #include "SDL_video.h"
 #include "SDL_cpuinfo.h"
 #include "SDL_stretch_c.h"

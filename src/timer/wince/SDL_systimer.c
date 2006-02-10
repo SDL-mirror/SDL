@@ -25,7 +25,6 @@
 
 #include "SDL_timer.h"
 #include "SDL_timer_c.h"
-#include "SDL_error.h"
 
 static Uint64 start_date;
 static Uint64 start_ticks;

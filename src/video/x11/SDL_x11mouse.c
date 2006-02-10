@@ -23,9 +23,6 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
-#include "SDL_stdlib.h"
-#include "SDL_string.h"
-#include "SDL_error.h"
 #include "SDL_mouse.h"
 #include "SDL_events_c.h"
 #include "SDL_cursor_c.h"

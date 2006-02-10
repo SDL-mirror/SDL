@@ -27,8 +27,10 @@
 
 #include "SDL_stdinc.h"
 #include "SDL_error.h"
-#include "SDL_rwops.h"
 #include "SDL_endian.h"
+#include "SDL_mutex.h"
+#include "SDL_thread.h"
+#include "SDL_rwops.h"
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
