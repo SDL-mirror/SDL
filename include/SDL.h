@@ -26,7 +26,6 @@
 #define _SDL_H
 
 #include "SDL_stdinc.h"
-#include "SDL_main.h"
 #include "SDL_error.h"
 #include "SDL_rwops.h"
 #include "SDL_timer.h"

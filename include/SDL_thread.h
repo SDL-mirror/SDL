@@ -28,8 +28,7 @@
 	These are independent of the other SDL routines.
 */
 
-#include "SDL_main.h"
-#include "SDL_types.h"
+#include "SDL_stdinc.h"
 
 /* Thread synchronization primitives */
 #include "SDL_mutex.h"

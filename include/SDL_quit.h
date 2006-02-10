@@ -25,6 +25,8 @@
 #ifndef _SDL_quit_h
 #define _SDL_quit_h
 
+#include "SDL_stdinc.h"
+
 /* 
   An SDL_QUITEVENT is generated when the user tries to close the application
   window.  If it is ignored or filtered out, the window will remain open.

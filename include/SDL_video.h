@@ -25,7 +25,7 @@
 #ifndef _SDL_video_h
 #define _SDL_video_h
 
-#include "SDL_types.h"
+#include "SDL_stdinc.h"
 #include "SDL_mutex.h"
 #include "SDL_rwops.h"
 

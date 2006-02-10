@@ -23,6 +23,8 @@
 #ifndef _SDL_main_h
 #define _SDL_main_h
 
+#include "SDL_stdinc.h"
+
 /* Redefine main() on Win32 and MacOS so that it is called by winmain.c */
 
 #if defined(WIN32) || defined(_WIN32) || \
@@ -53,9 +55,8 @@ extern C_LINKAGE int SDL_main(int argc, char *argv[]);
 
 /* From the SDL library code -- needed for registering the app on Win32 */
 #if defined(WIN32)
-#include "SDL_types.h"
-#include "begin_code.h"
 
+#include "begin_code.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -74,8 +75,8 @@ extern DECLSPEC void SDLCALL SDL_UnregisterApp();
 
 /* From the SDL library code -- needed for registering QuickDraw on MacOS */
 #if defined(macintosh)
-#include "begin_code.h"
 
+#include "begin_code.h"
 #ifdef __cplusplus
 extern "C" {
 #endif

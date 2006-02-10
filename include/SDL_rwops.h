@@ -29,7 +29,6 @@
 
 #include "SDL_stdinc.h"
 
-#ifndef DISABLE_FILE
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
@@ -129,6 +128,5 @@ extern DECLSPEC int SDLCALL SDL_WriteBE64(SDL_RWops *dst, Uint64 value);
 }
 #endif
 #include "close_code.h"
-#endif /* !DISABLE_FILE */
 
 #endif /* _SDL_RWops_h */

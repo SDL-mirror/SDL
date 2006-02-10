@@ -25,7 +25,7 @@
 #ifndef _SDL_events_h
 #define _SDL_events_h
 
-#include "SDL_types.h"
+#include "SDL_stdinc.h"
 #include "SDL_active.h"
 #include "SDL_keyboard.h"
 #include "SDL_mouse.h"

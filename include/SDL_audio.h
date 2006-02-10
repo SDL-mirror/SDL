@@ -26,12 +26,10 @@
 #define _SDL_audio_h
 
 #include "SDL_stdinc.h"
-#include "SDL_main.h"
 #include "SDL_error.h"
 #include "SDL_rwops.h"
-#include "SDL_byteorder.h"
+#include "SDL_endian.h"
 
-#ifndef DISABLE_AUDIO
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
@@ -249,6 +247,5 @@ extern DECLSPEC void SDLCALL SDL_CloseAudio(void);
 }
 #endif
 #include "close_code.h"
-#endif /* !DISABLE_AUDIO */
 
 #endif /* _SDL_audio_h */

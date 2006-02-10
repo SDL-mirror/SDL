@@ -23,8 +23,7 @@
 #ifndef _SDL_windows_h
 #define _SDL_windows_h
 
-#include "SDL_config.h"
-#include "SDL_types.h"
+#include "SDL_stdinc.h"
 
 /* This includes only the windows headers needed by SDL, with no C runtime */
 #define WIN32_LEAN_AND_MEAN

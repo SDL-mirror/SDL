@@ -28,7 +28,6 @@
 #ifndef _SDL_cpuinfo_h
 #define _SDL_cpuinfo_h
 
-#ifndef DISABLE_CPUINFO
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
@@ -72,6 +71,5 @@ extern DECLSPEC SDL_bool SDLCALL SDL_HasAltiVec();
 }
 #endif
 #include "close_code.h"
-#endif /* !DISABLE_CPUINFO */
 
 #endif /* _SDL_cpuinfo_h */

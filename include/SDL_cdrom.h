@@ -27,7 +27,6 @@
 
 #include "SDL_stdinc.h"
 
-#ifndef DISABLE_CDROM
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
@@ -167,6 +166,5 @@ extern DECLSPEC void SDLCALL SDL_CDClose(SDL_CD *cdrom);
 }
 #endif
 #include "close_code.h"
-#endif /* !DISABLE_CDROM */
 
 #endif /* _SDL_video_h */
