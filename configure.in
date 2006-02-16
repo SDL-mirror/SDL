@@ -557,7 +557,7 @@ AC_HELP_STRING([--enable-mintaudio], [support Atari audio driver [default=yes]])
         if test x$have_mint_falcon_hdr = xyes; then
             mintaudio=yes
             AC_DEFINE(SDL_AUDIO_DRIVER_MINT)
-            SOURCES="$SOURCES $srcdir/src/audio/ming/*.c"
+            SOURCES="$SOURCES $srcdir/src/audio/mint/*.c"
             have_audio=yes
         fi
     fi
