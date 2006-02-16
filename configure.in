@@ -49,6 +49,20 @@ else
     AC_DEFINE(SDL_BYTEORDER, 1234)
 fi
 
+dnl Set up the base CFLAGS and LIBS
+case "$target" in
+    *-*-cygwin*)
+        # We build SDL on cygwin without the UNIX emulation layer
+        BASE_CFLAGS="-I/usr/include/mingw -DWIN32 -Uunix -mno-cygwin"
+        BASE_LIBS="-mno-cygwin"
+        ;;
+    *)
+        BASE_CFLAGS="-D_GNU_SOURCE=1"
+        BASE_LIBS=""
+        ;;
+esac
+CFLAGS="$CFLAGS $BASE_CFLAGS"
+
 dnl Check for tools
 #AC_LIBTOOL_DLOPEN
 AC_LIBTOOL_WIN32_DLL
@@ -144,7 +158,7 @@ INCLUDE="-I$srcdir/include"
 if test x$srcdir != x.; then
     INCLUDE="-Iinclude $INCLUDE"
 fi
-BUILD_CFLAGS='-D_GNU_SOURCE=1 $(INCLUDE)'
+BUILD_CFLAGS="$BASE_CFLAGS \$(INCLUDE)"
 
 # Standard C sources
 SOURCES="$SOURCES $srcdir/src/*.c"
@@ -160,15 +174,13 @@ SOURCES="$SOURCES $srcdir/src/timer/*.c"
 SOURCES="$SOURCES $srcdir/src/video/*.c"
 
 # Set up the build libraries needed
-BUILD_LIBS=""
+BUILD_LIBS="$BASE_LIBS"
 
-dnl Initialize the compiler and linker flags for SDL applications
-
-SDL_CFLAGS=""
-SDL_LIBS="-lSDL"
+# Set up the compiler and linker flags for SDL applications
+SDL_CFLAGS="$BASE_CFLAGS"
+SDL_LIBS="$BASE_LIBS -lSDL"
 
 dnl Add the math library for the new gamma correction support
-
 case "$target" in
     *-*-cygwin* | *-*-mingw32*)
         MATHLIB=""
@@ -2123,17 +2135,7 @@ case "$target" in
         fi
         # The Win32 platform requires special setup
         SDL_CFLAGS="$SDL_CFLAGS -Dmain=SDL_main"
-        case "$target" in
-            *-*-cygwin*)
-                BUILD_CFLAGS="$BUILD_CFLAGS -I/usr/include/mingw -DWIN32 -Uunix -mno-cygwin"
-                SDL_CFLAGS="$SDL_CFLAGS -I/usr/include/mingw -DWIN32 -Uunix -mno-cygwin"
-                BUILD_LIBS="$BUILD_LIBS -mno-cygwin"
-                SDL_LIBS="-lmingw32 -lSDLmain $SDL_LIBS -mwindows -mno-cygwin"
-                ;;
-            *-*-mingw32*)
-                SDL_LIBS="-lmingw32 -lSDLmain $SDL_LIBS -mwindows"
-                ;;
-        esac
+        SDL_LIBS="-lmingw32 -lSDLmain $SDL_LIBS -mwindows"
         ;;
     *-*-beos*)
         ARCH=beos
