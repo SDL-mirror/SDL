@@ -1,0 +1,128 @@
+# Makefile to build and install the SDL library
+
+top_builddir = .
+srcdir  = @srcdir@
+objects = build
+depend	= build-deps
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+bindir	= @bindir@
+libdir  = @libdir@
+includedir = @includedir@
+datadir	= @datadir@
+mandir	= @mandir@
+distpath = $(srcdir)/..
+distdir = SDL-@SDL_VERSION@
+distfile = $(distdir).tar.gz
+
+SHELL	= @SHELL@
+CC      = @CC@
+INCLUDE = @INCLUDE@
+CFLAGS  = @BUILD_CFLAGS@
+LDFLAGS = @BUILD_LIBS@
+LIBTOOL = @LIBTOOL@
+INSTALL = @INSTALL@
+NASM	= @NASM@ @NASMFLAGS@
+
+TARGET  = libSDL.la
+SOURCES = @SOURCES@
+OBJECTS = @OBJECTS@
+
+DIST = acinclude.m4 autogen.sh Borland.html Borland.zip BUGS build-scripts configure configure.in COPYING CREDITS CWprojects.sea.bin docs docs.html EpocBuildFiles.zip include INSTALL Makefile.dc Makefile.in MPWmake.sea.bin PBProjects.tar.gz README* sdl-config.in sdl.m4 SDL.qpg.in SDL.spec SDL.spec.in setvars.cmd src test TODO VisualCE.zip VisualC.html VisualC.zip Watcom.mif WhatsNew Xcode21.tar.gz Xcode.tar.gz XcodeUniversal.tar.gz
+
+BUILDC	= $(LIBTOOL) --mode=compile $(CC) $(CFLAGS) -c $? -o $@
+BUILDCC	= $(LIBTOOL) --mode=compile $(CC) $(CFLAGS) -c $? -o $@
+BUILDM	= $(LIBTOOL) --mode=compile $(CC) $(CFLAGS) -c $? -o $@
+BUILDASM = $(LIBTOOL) --tag=CC --mode=compile @ac_aux_dir@/strip_fPIC.sh $(NASM) $? -o $@
+
+LT_AGE      = @LT_AGE@
+LT_CURRENT  = @LT_CURRENT@
+LT_RELEASE  = @LT_RELEASE@
+LT_REVISION = @LT_REVISION@
+LT_LDFLAGS  = -no-undefined -rpath $(libdir) -release $(LT_RELEASE) -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
+
+all: Makefile $(objects) $(objects)/$(TARGET)
+
+Makefile: $(srcdir)/Makefile.in
+	$(SHELL) config.status $@
+
+$(objects):
+	$(SHELL) @ac_aux_dir@/mkinstalldirs $@
+
+.PHONY: all depend install install-bin install-hdrs install-lib install-data install-man uninstall uninstall-bin uninstall-hdrs uninstall-lib uninstall-data uninstall-man clean distclean dist
+depend:
+	SOURCES="$(SOURCES)" INCLUDE="$(INCLUDE)" objects="$(objects)" output="$(depend)" \
+	$(SHELL) @ac_aux_dir@/makedep.sh
+
+include $(depend)
+
+$(objects)/$(TARGET): $(OBJECTS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJECTS) $(LDFLAGS) $(LIBS) $(LT_LDFLAGS)
+
+install: install-bin install-hdrs install-lib install-data install-man
+install-bin:
+	$(SHELL) @ac_aux_dir@/mkinstalldirs $(bindir)
+	$(INSTALL) -m 755 $(srcdir)/sdl-config $(bindir)/sdl-config
+install-hdrs:
+	$(SHELL) @ac_aux_dir@/mkinstalldirs $(includedir)/SDL
+	for src in $(srcdir)/include/*.h; do \
+	    file=`echo $$src | sed -e 's|^.*/||'`; \
+	    $(INSTALL) $$src $(includedir)/SDL/$$file; \
+	done
+	$(INSTALL) include/SDL_config.h $(includedir)/SDL/SDL_config.h
+install-lib:
+	$(SHELL) @ac_aux_dir@/mkinstalldirs $(libdir)
+	$(LIBTOOL) --mode=install $(INSTALL) $(objects)/$(TARGET) $(libdir)/$(TARGET)
+install-data:
+	$(SHELL) @ac_aux_dir@/mkinstalldirs $(datadir)/aclocal
+	$(INSTALL) $(srcdir)/sdl.m4 $(datadir)/aclocal/sdl.m4
+install-man:
+	$(SHELL) @ac_aux_dir@/mkinstalldirs $(mandir)/man3
+	for src in $(srcdir)/docs/man3/*.3; do \
+	    file=`echo $$src | sed -e 's|^.*/||'`; \
+	    $(INSTALL) $$src $(mandir)/man3/$$file; \
+	done
+
+uninstall: uninstall-bin uninstall-hdrs uninstall-lib uninstall-man
+uninstall-bin:
+	rm -f $(bindir)/sdl-config
+uninstall-hdrs:
+	for src in $(srcdir)/include/*.h; do \
+	    file=`echo $$src | sed -e 's|^.*/||'`; \
+	    rm -f $(includedir)/SDL/$$file; \
+	done
+	rm -f $(includedir)/SDL/SDL_config.h
+uninstall-lib:
+	$(LIBTOOL) --mode=uninstall rm -f $(libdir)/$(TARGET)
+uninstall-data:
+	rm -f $(datadir)/aclocal/sdl.m4
+uninstall-man:
+	for src in $(srcdir)/docs/man3/*.3; do \
+	    file=`echo $$src | sed -e 's|^.*/||'`; \
+	    rm -f $(mandir)/man3/$$file; \
+	done
+
+clean:
+	rm -rf $(objects)
+
+distclean: clean
+	rm -f Makefile include/SDL_config.h sdl-config
+	rm -f SDL.qpg
+	rm -f config.status config.cache config.log libtool $(depend)
+	rm -rf $(srcdir)/autom4te*
+	find $(srcdir) \
+	    -name '*~' -o -name '*.bak' -o -name '*.old' -o -name '*.rej' -o \
+	    -name '.#*' \
+	    -exec rm -f {} \;
+	cp include/SDL_config.h.minimal include/SDL_config.h
+
+dist $(distfile):
+	$(SHELL) @ac_aux_dir@/mkinstalldirs $(distdir)
+	tar cf - $(DIST) | (cd $(distdir); tar xf -)
+	rm -rf `find $(distdir) -name CVS`
+	rm -f `find $(distdir) -name '.#*'`
+	tar cvf - $(distdir) | gzip --best >$(distfile)
+	rm -rf $(distdir)
+
+rpm: $(distfile)
+	rpmbuild -ta $?
