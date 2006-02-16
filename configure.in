@@ -1255,7 +1255,7 @@ AC_HELP_STRING([--enable-video-gem], [use Atari Gem video driver [default=yes]])
         AC_CHECK_HEADER(gem.h, have_gem_hdr=yes)
         AC_CHECK_LIB(gem, appl_init, have_gem_lib=yes)
         if test x$have_gem_hdr = xyes -a x$have_gem_lib = xyes; then
-			video_gem=yes
+            video_gem=yes
             AC_DEFINE(SDL_VIDEO_DRIVER_GEM)
             SOURCES="$SOURCES $srcdir/src/video/gem/*.c"
             BUILD_LIBS="$BUILD_LIBS -lgem"
