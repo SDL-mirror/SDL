@@ -37,10 +37,10 @@
 #include "SDL_endian.h"
 #include "SDL_video.h"
 #include "SDL_mouse.h"
-#include "SDL_sysvideo.h"
-#include "SDL_pixels_c.h"
-#include "SDL_events_c.h"
-#include "SDL_cursor_c.h"
+#include "../SDL_sysvideo.h"
+#include "../SDL_pixels_c.h"
+#include "../../events/SDL_events_c.h"
+#include "../SDL_cursor_c.h"
 
 #include "SDL_ataric2p_s.h"
 #include "SDL_atarieddi_s.h"
@@ -100,7 +100,7 @@ static void GEM_LockScreen(_THIS);
 static void GEM_UnlockScreen(_THIS);
 static void refresh_window(_THIS, int winhandle, short *rect);
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 /* OpenGL functions */
 static void GEM_GL_SwapBuffers(_THIS);
 #endif
@@ -179,7 +179,7 @@ static SDL_VideoDevice *GEM_CreateDevice(int devindex)
 	device->WarpWMCursor = NULL /*GEM_WarpWMCursor*/;
 	device->CheckMouseMode = GEM_CheckMouseMode;
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	/* OpenGL functions */
 	device->GL_LoadLibrary = SDL_AtariGL_LoadLibrary;
 	device->GL_GetProcAddress = SDL_AtariGL_GetProcAddress;
@@ -455,7 +455,7 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 	SDL_modelist[1] = NULL;
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	SDL_AtariGL_InitPointers(this);
 #endif
 
@@ -796,7 +796,7 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 		current->pitch = VDI_pitch;
 	}
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	if (flags & SDL_OPENGL) {
 		if (!SDL_AtariGL_Init(this, current)) {
 			GEM_FreeBuffers(this);
@@ -1096,7 +1096,7 @@ void GEM_VideoQuit(_THIS)
 
 	GEM_FreeBuffers(this);
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	if (gl_active) {
 		SDL_AtariGL_Quit(this, SDL_TRUE);
 	}
@@ -1318,7 +1318,7 @@ static void refresh_window(_THIS, int winhandle, short *rect)
 	vro_cpyfm( VDI_handle, S_ONLY, pxy, &mfdb_src, &VDI_dst_mfdb);
 }
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 
 static void GEM_GL_SwapBuffers(_THIS)
 {

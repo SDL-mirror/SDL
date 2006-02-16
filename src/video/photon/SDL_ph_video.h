@@ -24,7 +24,7 @@
 #define __SDL_PH_VIDEO_H__
 
 #include "SDL_mouse.h"
-#include "SDL_sysvideo.h"
+#include "../SDL_sysvideo.h"
 
 #include <sys/neutrino.h>
 
@@ -33,14 +33,14 @@
 #include <photon/Pg.h>
 #include <photon/PdDirect.h>
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
     #if (_NTO_VERSION < 630)
         #include <photon/PdGL.h>
     #else
         #include <GL/qnxgl.h>
         #include <GL/GLPh.h>
     #endif /* 6.3.0 */
-#endif /* HAVE_OPENGL */
+#endif /* SDL_VIDEO_OPENGL */
 
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_VideoDevice* this
@@ -74,7 +74,7 @@ struct SDL_PrivateVideoData
     PgDisplaySettings_t mode_settings;	
     PtWidget_t *Window;                  /* used to handle input events */
     PhImage_t *image;	                 /* used to display image       */
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
     #if (_NTO_VERSION < 630)
         PdOpenGLContext_t* OGLContext;   /* OpenGL context              */
         void* OGLBuffers;                /* OpenGL buffers (unused)     */
@@ -85,7 +85,7 @@ struct SDL_PrivateVideoData
 
     Uint32 OGLFlags;                     /* OpenGL flags                */
     Uint32 OGLBPP;                       /* OpenGL bpp                  */
-#endif /* HAVE_OPENGL */
+#endif /* SDL_VIDEO_OPENGL */
     PgColor_t savedpal[_Pg_MAX_PALETTE];
     PgColor_t syspalph[_Pg_MAX_PALETTE];
 
@@ -146,11 +146,11 @@ struct SDL_PrivateVideoData
 #define SDL_BlankCursor       (this->hidden->BlankCursor)
 #define videomode_emulatemode (this->hidden->videomode_emulatemode)
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
      #define oglctx               (this->hidden->OGLContext)
      #define oglbuffers           (this->hidden->OGLBuffers)
      #define oglflags             (this->hidden->OGLFlags)
      #define oglbpp               (this->hidden->OGLBPP)
-#endif /* HAVE_OPENGL */
+#endif /* SDL_VIDEO_OPENGL */
 
 #endif /* __SDL_PH_VIDEO_H__ */

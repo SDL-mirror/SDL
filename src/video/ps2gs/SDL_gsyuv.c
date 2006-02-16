@@ -30,7 +30,7 @@
 
 #include "SDL_video.h"
 #include "SDL_gsyuv_c.h"
-#include "SDL_yuvfuncs.h"
+#include "../SDL_yuvfuncs.h"
 
 /* The maximum number of 16x16 pixel block converted at once */
 #define MAX_MACROBLOCKS	1024	/* 2^10 macroblocks at once */

@@ -27,10 +27,10 @@
  */
 
 #include "SDL_thread.h"
-#include "SDL_systhread.h"
+#include "../SDL_systhread.h"
 
-#include <signal.h>
 #include <pth.h>
+#include <signal.h>
 
 /* List of signals to mask in the subthreads */
 static int sig_list[] = {
@@ -91,7 +91,7 @@ Uint32 SDL_ThreadID(void)
 
 void SDL_SYS_WaitThread(SDL_Thread *thread)
 {
-	pth_join(thread->handle, 0);
+	pth_join(thread->handle, NULL);
 }
 
 void SDL_SYS_KillThread(SDL_Thread *thread)

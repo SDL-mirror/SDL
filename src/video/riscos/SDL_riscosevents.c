@@ -29,12 +29,12 @@
 
 
 #include "SDL.h"
-#include "SDL_sysevents.h"
-#include "SDL_events_c.h"
+#include "../../timer/SDL_timer_c.h"
+#include "../../events/SDL_sysevents.h"
+#include "../../events/SDL_events_c.h"
+#include "../SDL_cursor_c.h"
 #include "SDL_riscosvideo.h"
 #include "SDL_riscosevents_c.h"
-#include "SDL_timer_c.h"
-#include "SDL_cursor_c.h"
 
 #include "memory.h"
 #include "stdlib.h"
@@ -76,7 +76,7 @@ void RISCOS_PollKeyboard();
 
 void RISCOS_PollMouseHelper(_THIS, int fullscreen);
 
-#ifdef DISABLE_THREADS
+#if SDL_THREADS_DISABLED
 extern void DRenderer_FillBuffers();
 
 /* Timer running function */
@@ -89,7 +89,7 @@ void FULLSCREEN_PumpEvents(_THIS)
     /* Current implementation requires keyboard and mouse polling */
 	RISCOS_PollKeyboard();
 	RISCOS_PollMouse(this);
-#ifdef DISABLE_THREADS
+#if SDL_THREADS_DISABLED
 //	DRenderer_FillBuffers();
 	if (SDL_timer_running) RISCOS_CheckTimer();
 #endif

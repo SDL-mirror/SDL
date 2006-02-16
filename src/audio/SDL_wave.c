@@ -20,8 +20,6 @@
     slouken@libsdl.org
 */
 
-#ifndef DISABLE_FILE
-
 /* Microsoft WAVE file loading routines */
 
 #include "SDL_audio.h"
@@ -590,5 +588,3 @@ static int ReadChunk(SDL_RWops *src, Chunk *chunk)
 	}
 	return(chunk->length);
 }
-
-#endif /* ENABLE_FILE */

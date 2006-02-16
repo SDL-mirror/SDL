@@ -20,7 +20,7 @@
     slouken@libsdl.org
 */
 
-#include "SDL_sysvideo.h"
+#include "../video/SDL_sysvideo.h"
 
 /* Useful functions and variables from SDL_sysevents.c */
 

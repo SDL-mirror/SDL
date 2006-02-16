@@ -24,7 +24,7 @@
 
 #include "SDL_timer.h"
 #include "SDL_audio.h"
-#include "SDL_audio_c.h"
+#include "../SDL_audio_c.h"
 #include "SDL_dart.h"
 
 // Buffer states:

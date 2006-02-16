@@ -30,15 +30,15 @@
 #include "SDL_timer.h"
 #include "SDL_events.h"
 #include "SDL_syswm.h"
-#include "SDL_sysvideo.h"
-#include "SDL_blit.h"
-#include "SDL_pixels_c.h"
+#include "../SDL_sysvideo.h"
+#include "../SDL_blit.h"
+#include "../SDL_pixels_c.h"
 #include "SDL_dx5video.h"
-#include "SDL_syswm_c.h"
-#include "SDL_sysmouse_c.h"
+#include "../wincommon/SDL_syswm_c.h"
+#include "../wincommon/SDL_sysmouse_c.h"
 #include "SDL_dx5events_c.h"
 #include "SDL_dx5yuv_c.h"
-#include "SDL_wingl_c.h"
+#include "../wincommon/SDL_wingl_c.h"
 
 #ifdef _WIN32_WCE
 #define NO_CHANGEDISPLAYSETTINGS
@@ -598,7 +598,7 @@ static SDL_VideoDevice *DX5_CreateDevice(int devindex)
 	device->FreeHWSurface = DX5_FreeHWSurface;
 	device->SetGammaRamp = DX5_SetGammaRamp;
 	device->GetGammaRamp = DX5_GetGammaRamp;
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	device->GL_LoadLibrary = WIN_GL_LoadLibrary;
 	device->GL_GetProcAddress = WIN_GL_GetProcAddress;
 	device->GL_GetAttribute = WIN_GL_GetAttribute;
@@ -901,7 +901,7 @@ int DX5_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	if ( DX5_CreateWindow(this) < 0 ) {
 		return(-1);
 	}
-#ifndef DISABLE_AUDIO
+#if !SDL_AUDIO_DISABLED
 	DX5_SoundFocus(SDL_Window);
 #endif
 

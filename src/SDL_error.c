@@ -24,16 +24,15 @@
 
 #include "SDL_error.h"
 #include "SDL_error_c.h"
-#ifndef DISABLE_THREADS
-#include "SDL_thread_c.h"
-#endif
 
-#ifdef DISABLE_THREADS
-/* The default (non-thread-safe) global error variable */
+/* Routine to get the thread-specific error variable */
+#if SDL_THREADS_DISABLED
+/* The  SDL_arraysize(The ),default (non-thread-safe) global error variable */
 static SDL_error SDL_global_error;
-
 #define SDL_GetErrBuf()	(&SDL_global_error)
-#endif /* DISABLE_THREADS */
+#else
+extern SDL_error *SDL_GetErrBuf(void);
+#endif /* SDL_THREADS_DISABLED */
 
 #define SDL_ERRBUFIZE	1024
 

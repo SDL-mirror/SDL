@@ -4,14 +4,6 @@
 # This is necessary because some platforms have special program
 # entry points, which require special application initialization.
 
-ARCH_SUBDIRS = $(srcdir)/beos \
-               $(srcdir)/epoc \
-               $(srcdir)/dummy \
-               $(srcdir)/macos \
-               $(srcdir)/macosx \
-               $(srcdir)/qtopia \
-               $(srcdir)/win32
-
 # Build a separate library containing the main() entry point.
 lib_LIBRARIES = libSDLmain.a
 
@@ -48,11 +40,6 @@ endif
 libarch_la_SOURCES = $(ARCH_SRCS)
 
 exports:
-	for i in $(ARCH_SUBDIRS); do if [ -d $$i/exports ]; then (cd $$i/exports; make); fi; done
+	for i in $(srcdir)/*; do if [ -d $$i/exports ]; then (cd $$i/exports; make); fi; done
 
-# The architecture specific directories need to be copied into place
-# when building a distribution.
-dist-hook:
-	(cd $(distdir) && rm -f $(BUILT_SOURCES))
-	cp -rp $(ARCH_SUBDIRS) $(distdir)
-	(cd $(distdir) && rm -rf `find . -name CVS`)
+EXTRA_DIST = beos dummy epoc linux macos macosx qtopia win32

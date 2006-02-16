@@ -38,7 +38,7 @@
 #include </sys/dev/scsi/scsi_ioctl.h>
 
 #include "SDL_cdrom.h"
-#include "SDL_syscdrom.h"
+#include "../SDL_syscdrom.h"
 
 /*
  * The msf_to_frame and frame_to_msf were yanked from libcdrom and inlined

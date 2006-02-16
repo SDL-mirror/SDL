@@ -33,7 +33,7 @@ extern "C" {
 #include "SDL_timer.h"
 #include "SDL_video.h"
 #undef NULL
-#include "SDL_pixels_c.h"
+#include "../SDL_pixels_c.h"
 };
 
 #include "SDL_epocvideo.h"

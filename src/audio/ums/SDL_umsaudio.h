@@ -25,9 +25,9 @@
 #ifndef _SDL_UMSaudio_h
 #define _SDL_UMSaudio_h
 
-#include "SDL_sysaudio.h"
-
 #include <UMS/UMSAudioDevice.h>
+
+#include "../SDL_sysaudio.h"
 
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_AudioDevice *this

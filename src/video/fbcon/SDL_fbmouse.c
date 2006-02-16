@@ -21,7 +21,7 @@
 */
 
 #include "SDL_mouse.h"
-#include "SDL_events_c.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_fbvideo.h"
 #include "SDL_fbmouse_c.h"
 

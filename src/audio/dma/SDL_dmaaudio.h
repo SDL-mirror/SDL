@@ -23,7 +23,7 @@
 #ifndef _SDL_dspaudio_h
 #define _SDL_dspaudio_h
 
-#include "SDL_sysaudio.h"
+#include "../SDL_sysaudio.h"
 
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_AudioDevice *this

@@ -24,7 +24,7 @@
 
 #include "SDL_timer.h"
 #include "SDL_events.h"
-#include "SDL_events_c.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_cgxvideo.h"
 #include "SDL_cgxwm_c.h"
 #include "SDL_cgxmodes_c.h"
@@ -271,23 +271,6 @@ int CGX_EnterFullScreen(_THIS)
 
 		CGX_DestroyWindow(this,this->screen);
 		set_best_resolution(this, real_w,real_h);
-
-        /* Grab the mouse on the fullscreen window
-           The event handling will know when we become active, and then
-           enter fullscreen mode if we can't grab the mouse this time.
-         */
-#if 0
-        if ( (XGrabPointer(SDL_Display, FSwindow, True, 0,
-                          GrabModeAsync, GrabModeAsync,
-                          FSwindow, None, CurrentTime) != GrabSuccess) ||
-             (XGrabKeyboard(SDL_Display, WMwindow, True,
-                          GrabModeAsync, GrabModeAsync, CurrentTime) != 0) ) {
-            XUnmapWindow(SDL_Display, FSwindow);
-            X11_WaitUnmapped(this, FSwindow);
-            X11_QueueEnterFullScreen(this);
-            return(0);
-        }
-#endif
 
         currently_fullscreen = 1;
 		  this->screen->flags = saved_flags;

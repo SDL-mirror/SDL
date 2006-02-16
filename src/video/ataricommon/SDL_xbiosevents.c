@@ -28,7 +28,7 @@
 
 #include <mint/osbind.h>
 
-#include "SDL_events_c.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_xbiosevents_c.h"
 #include "SDL_xbiosinterrupt_s.h"
 

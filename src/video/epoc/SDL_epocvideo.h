@@ -32,7 +32,7 @@
 
 extern "C" {
 #include "SDL_mouse.h"
-#include "SDL_sysvideo.h"
+#include "../SDL_sysvideo.h"
 };
 
 #include <e32std.h>

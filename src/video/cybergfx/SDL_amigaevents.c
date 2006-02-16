@@ -24,9 +24,9 @@
 #include "SDL.h"
 
 #include "SDL_syswm.h"
-#include "SDL_sysevents.h"
-#include "SDL_sysvideo.h"
-#include "SDL_events_c.h"
+#include "../SDL_sysvideo.h"
+#include "../../events/SDL_sysevents.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_cgxvideo.h"
 #include "SDL_cgxmodes_c.h"
 #include "SDL_cgximage_c.h"

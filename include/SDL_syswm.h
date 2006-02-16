@@ -45,18 +45,13 @@ struct SDL_SysWMinfo;
 typedef struct SDL_SysWMinfo SDL_SysWMinfo;
 #else
 
+/* This is the structure for custom window manager events */
+#if SDL_VIDEO_DRIVER_X11
 #if defined(__APPLE__) && defined(__MACH__)
 // conflicts with Quickdraw.h
 #define Cursor X11Cursor
 #endif
 
-/* This is the structure for custom window manager events */
-#if (defined(unix) || defined(__unix__) || defined(_AIX) || \
-         defined(__OpenBSD__) || defined(__NetBSD__) || \
-         (defined(__APPLE__) && defined(__MACH__))) && \
-    (!defined(DISABLE_X11) && !defined(__CYGWIN32__) && !defined(ENABLE_NANOX) && \
-         !defined(__QNXNTO__))
- /* AIX is unix, of course, but the native compiler CSet doesn't define unix */
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 
@@ -105,7 +100,7 @@ typedef struct SDL_SysWMinfo {
 	} info;
 } SDL_SysWMinfo;
 
-#elif defined(ENABLE_NANOX)
+#elif SDL_VIDEO_DRIVER_NANOX
 #include <microwin/nano-X.h>
 
 /* The generic custom event structure */
@@ -120,7 +115,7 @@ typedef struct SDL_SysWMinfo {
 	GR_WINDOW_ID window ;	/* The display window */
 } SDL_SysWMinfo;
 
-#elif defined(WIN32)
+#elif SDL_VIDEO_DRIVER_WINDIB || SDL_VIDEO_DRIVER_DDRAW
 #include "SDL_windows.h"
 
 /* The windows custom event structure */
@@ -139,7 +134,7 @@ typedef struct SDL_SysWMinfo {
 	HGLRC hglrc;			/* The OpenGL context, if any */
 } SDL_SysWMinfo;
 
-#elif defined(__riscos__)
+#elif SDL_VIDEO_DRIVER_RISCOS
 
 /* RISC OS custom event structure */
 struct SDL_SysWMmsg {
@@ -156,7 +151,7 @@ typedef struct SDL_SysWMinfo {
 	int window;		/* The RISC OS display window */
 } SDL_SysWMinfo;
 
-#elif defined(__QNXNTO__)
+#elif SDL_VIDEO_DRIVER_PHOTON
 #include <sys/neutrino.h>
 #include <Ph.h>
 
@@ -186,7 +181,7 @@ typedef struct SDL_SysWMinfo {
 	int data;
 } SDL_SysWMinfo;
 
-#endif /* OS type */
+#endif /* video driver type */
 
 #endif /* SDL_PROTOTYPES_ONLY */
 

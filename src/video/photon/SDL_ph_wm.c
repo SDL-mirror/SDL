@@ -20,8 +20,6 @@
     slouken@libsdl.org
 */
 
-#define DISABLE_X11
-
 #include <Ph.h>
 #include <photon/PpProto.h>
 #include <photon/PhWm.h>
@@ -31,8 +29,8 @@
 #include "SDL_timer.h"
 #include "SDL_video.h"
 #include "SDL_syswm.h"
-#include "SDL_events_c.h"
-#include "SDL_pixels_c.h"
+#include "../SDL_pixels_c.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_ph_modes_c.h"
 #include "SDL_ph_wm_c.h"
 

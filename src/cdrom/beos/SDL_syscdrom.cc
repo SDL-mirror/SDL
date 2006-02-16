@@ -35,7 +35,7 @@
 
 #include "SDL_cdrom.h"
 extern "C" {
-#include "SDL_syscdrom.h"
+#include "../SDL_syscdrom.h"
 }
 
 /* Constants to help us get at the SCSI table-of-contents info */

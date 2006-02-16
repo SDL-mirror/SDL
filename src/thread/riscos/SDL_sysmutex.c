@@ -22,17 +22,17 @@
 
 /* RISC OS implementations uses pthreads based on linux code */
 
-#ifdef DISABLE_THREADS
+#include "SDL_thread.h"
+
+#if SDL_THREADS_DISABLED
 #include "../generic/SDL_sysmutex.c"
 #else
 
 #include <pthread.h>
 
-#include "SDL_thread.h"
-
 struct SDL_mutex {
 	pthread_mutex_t id;
-#ifdef PTHREAD_NO_RECURSIVE_MUTEX
+#if SDL_THREAD_PTHREAD_NO_RECURSIVE_MUTEX
 	int recursive;
 	pthread_t owner;
 #endif
@@ -47,11 +47,11 @@ SDL_mutex *SDL_CreateMutex (void)
 	mutex = (SDL_mutex *)SDL_calloc(1, sizeof(*mutex));
 	if ( mutex ) {
 		pthread_mutexattr_init(&attr);
-#ifdef PTHREAD_NO_RECURSIVE_MUTEX
+#if SDL_THREAD_PTHREAD_NO_RECURSIVE_MUTEX
 		/* No extra attributes necessary */
 #else
 		pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
-#endif /* PTHREAD_NO_RECURSIVE_MUTEX */
+#endif /* SDL_THREAD_PTHREAD_NO_RECURSIVE_MUTEX */
 		if ( pthread_mutex_init(&mutex->id, &attr) != 0 ) {
 			SDL_SetError("pthread_mutex_init() failed");
 			SDL_free(mutex);
@@ -75,7 +75,7 @@ void SDL_DestroyMutex(SDL_mutex *mutex)
 int SDL_mutexP(SDL_mutex *mutex)
 {
 	int retval;
-#ifdef PTHREAD_NO_RECURSIVE_MUTEX
+#if SDL_THREAD_PTHREAD_NO_RECURSIVE_MUTEX
 	pthread_t this_thread;
 #endif
 
@@ -85,7 +85,7 @@ int SDL_mutexP(SDL_mutex *mutex)
 	}
 
 	retval = 0;
-#ifdef PTHREAD_NO_RECURSIVE_MUTEX
+#if SDL_THREAD_PTHREAD_NO_RECURSIVE_MUTEX
 	this_thread = pthread_self();
 	if ( mutex->owner == this_thread ) {
 		++mutex->recursive;
@@ -121,7 +121,7 @@ int SDL_mutexV(SDL_mutex *mutex)
 	}
 
 	retval = 0;
-#ifdef PTHREAD_NO_RECURSIVE_MUTEX
+#if SDL_THREAD_PTHREAD_NO_RECURSIVE_MUTEX
 	/* We can only unlock the mutex if we own it */
 	if ( pthread_self() == mutex->owner ) {
 		if ( mutex->recursive ) {
@@ -145,7 +145,7 @@ int SDL_mutexV(SDL_mutex *mutex)
 		SDL_SetError("pthread_mutex_unlock() failed");
 		retval = -1;
 	}
-#endif /* PTHREAD_NO_RECURSIVE_MUTEX */
+#endif /* SDL_THREAD_PTHREAD_NO_RECURSIVE_MUTEX */
 
 	return retval;
 }

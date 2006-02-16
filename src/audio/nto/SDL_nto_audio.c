@@ -33,8 +33,8 @@
 
 #include "SDL_timer.h"
 #include "SDL_audio.h"
-#include "SDL_audiomem.h"
-#include "SDL_audio_c.h"
+#include "../SDL_audiomem.h"
+#include "../SDL_audio_c.h"
 #include "SDL_nto_audio.h"
 
 /* The tag name used by NTO audio */

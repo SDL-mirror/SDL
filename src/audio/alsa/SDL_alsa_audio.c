@@ -27,18 +27,13 @@
 #include <sys/types.h>
 #include <signal.h>	/* For kill() */
 
-#include "SDL_audio.h"
-#include "SDL_audiomem.h"
-#include "SDL_audio_c.h"
 #include "SDL_timer.h"
+#include "SDL_audio.h"
+#include "../SDL_audiomem.h"
+#include "../SDL_audio_c.h"
 #include "SDL_alsa_audio.h"
 
-#ifdef ALSA_DYNAMIC
-#ifdef USE_DLVSYM
-#ifndef __USE_GNU
-#define __USE_GNU
-#endif
-#endif
+#ifdef SDL_AUDIO_DRIVER_ALSA_DYNAMIC
 #include <dlfcn.h>
 #include "SDL_name.h"
 #include "SDL_loadso.h"
@@ -60,9 +55,9 @@ static void ALSA_PlayAudio(_THIS);
 static Uint8 *ALSA_GetAudioBuf(_THIS);
 static void ALSA_CloseAudio(_THIS);
 
-#ifdef ALSA_DYNAMIC
+#ifdef SDL_AUDIO_DRIVER_ALSA_DYNAMIC
 
-static const char *alsa_library = ALSA_DYNAMIC;
+static const char *alsa_library = SDL_AUDIO_DRIVER_ALSA_DYNAMIC;
 static void *alsa_handle = NULL;
 static int alsa_loaded = 0;
 
@@ -131,7 +126,7 @@ static int LoadALSALibrary(void) {
 		retval = 0;
 		for (i = 0; i < SDL_TABLESIZE(alsa_functions); i++) {
 /*			*alsa_functions[i].func = SDL_LoadFunction(alsa_handle,alsa_functions[i].name);*/
-#ifdef USE_DLVSYM
+#if HAVE_DLVSYM
 			*alsa_functions[i].func = dlvsym(alsa_handle,alsa_functions[i].name,"ALSA_0.9");
 			if (!*alsa_functions[i].func)
 #endif
@@ -156,7 +151,7 @@ static int LoadALSALibrary(void) {
 	return 0;
 }
 
-#endif /* ALSA_DYNAMIC */
+#endif /* SDL_AUDIO_DRIVER_ALSA_DYNAMIC */
 
 static const char *get_audio_device(int channels)
 {

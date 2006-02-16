@@ -54,7 +54,7 @@ SOFTWARE.
 */
 
 #include <X11/Xfuncproto.h>
-#include <Xext/extensions/Xv.h>
+#include "Xv.h"
 #include "SDL_name.h"
 
 typedef struct {

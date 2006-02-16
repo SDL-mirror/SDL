@@ -24,7 +24,7 @@
 
 #include "SDL_video.h"
 #include "SDL_sysyuv.h"
-#include "SDL_yuvfuncs.h"
+#include "../SDL_yuvfuncs.h"
 
 extern "C" {
 

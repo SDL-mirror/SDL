@@ -24,7 +24,7 @@
 
 /* Functions for system-level CD-ROM audio control */
 
-#define DEBUG_CDROM 1
+/*#define DEBUG_CDROM 1*/
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -41,7 +41,7 @@
 #include <sys/scdisk.h>
 
 #include "SDL_cdrom.h"
-#include "SDL_syscdrom.h"
+#include "../SDL_syscdrom.h"
 
 /* The maximum number of CD-ROM drives we'll detect */
 #define MAX_DRIVES	16	

@@ -23,16 +23,13 @@
 /* General event handling code for SDL */
 
 #include "SDL.h"
-#include "SDL_events_c.h"
-#include "SDL_timer_c.h"
-#ifndef DISABLE_JOYSTICK
-#include "SDL_joystick_c.h"
-#endif
-#ifndef ENABLE_X11
-#define DISABLE_X11
-#endif
 #include "SDL_syswm.h"
 #include "SDL_sysevents.h"
+#include "SDL_events_c.h"
+#include "../timer/SDL_timer_c.h"
+#if !SDL_JOYSTICK_DISABLED
+#include "../joystick/SDL_joystick_c.h"
+#endif
 
 /* Public data -- the event filter */
 SDL_EventFilter SDL_EventOK = NULL;
@@ -112,7 +109,7 @@ static int SDL_GobbleEvents(void *unused)
 		/* Queue pending key-repeat events */
 		SDL_CheckKeyRepeat();
 
-#ifndef DISABLE_JOYSTICK
+#if !SDL_JOYSTICK_DISABLED
 		/* Check for joystick state change */
 		if ( SDL_numjoysticks && (SDL_eventstate & SDL_JOYEVENTMASK) ) {
 			SDL_JoystickUpdate();
@@ -150,16 +147,16 @@ static int SDL_StartEventThread(Uint32 flags)
 	SDL_memset(&SDL_EventLock, 0, sizeof(SDL_EventLock));
 
 	/* Create the lock and set ourselves active */
-#ifndef DISABLE_THREADS
+#if !SDL_THREADS_DISABLED
 	SDL_EventQ.lock = SDL_CreateMutex();
 	if ( SDL_EventQ.lock == NULL ) {
-#ifdef macintosh /* On MacOS 7/8, you can't multithread, so no lock needed */
+#ifdef macintosh /* MacOS classic you can't multithread, so no lock needed */
 		;
 #else
 		return(-1);
 #endif
 	}
-#endif /* !DISABLE_THREADS */
+#endif /* !SDL_THREADS_DISABLED */
 	SDL_EventQ.active = 1;
 
 	if ( (flags&SDL_INIT_EVENTTHREAD) == SDL_INIT_EVENTTHREAD ) {
@@ -379,7 +376,7 @@ void SDL_PumpEvents(void)
 		/* Queue pending key-repeat events */
 		SDL_CheckKeyRepeat();
 
-#ifndef DISABLE_JOYSTICK
+#if !SDL_JOYSTICK_DISABLED
 		/* Check for joystick state change */
 		if ( SDL_numjoysticks && (SDL_eventstate & SDL_JOYEVENTMASK) ) {
 			SDL_JoystickUpdate();

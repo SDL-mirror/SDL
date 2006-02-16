@@ -44,7 +44,7 @@
 #endif
 
 #include "SDL_mouse.h"
-#include "SDL_sysvideo.h"
+#include "../SDL_sysvideo.h"
 #include "mydebug.h"
 
 #define USE_CGX_WRITELUTPIXEL

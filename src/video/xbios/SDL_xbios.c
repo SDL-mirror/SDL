@@ -36,9 +36,9 @@
 
 #include "SDL_video.h"
 #include "SDL_mouse.h"
-#include "SDL_sysvideo.h"
-#include "SDL_pixels_c.h"
-#include "SDL_events_c.h"
+#include "../SDL_sysvideo.h"
+#include "../SDL_pixels_c.h"
+#include "../../events/SDL_events_c.h"
 
 #include "SDL_ataric2p_s.h"
 #include "SDL_atarievents_c.h"
@@ -78,7 +78,7 @@ static void XBIOS_UnlockHWSurface(_THIS, SDL_Surface *surface);
 static void XBIOS_FreeHWSurface(_THIS, SDL_Surface *surface);
 static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects);
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 /* OpenGL functions */
 static void XBIOS_GL_SwapBuffers(_THIS);
 #endif
@@ -174,7 +174,7 @@ static SDL_VideoDevice *XBIOS_CreateDevice(int devindex)
 	device->FlipHWSurface = XBIOS_FlipHWSurface;
 	device->FreeHWSurface = XBIOS_FreeHWSurface;
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	/* OpenGL functions */
 	device->GL_LoadLibrary = SDL_AtariGL_LoadLibrary;
 	device->GL_GetProcAddress = SDL_AtariGL_GetProcAddress;
@@ -452,7 +452,7 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	/* Init chunky to planar routine */
 	SDL_Atari_C2pConvert = SDL_Atari_C2pConvert8;
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	SDL_AtariGL_InitPointers(this);
 #endif
 
@@ -566,7 +566,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 
 	XBIOS_screens[0]=(void *) (( (long) XBIOS_screensmem[0]+256) & 0xFFFFFF00UL);
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	if (flags & SDL_OPENGL) {
 		if (this->gl_config.double_buffer) {
 			flags |= SDL_DOUBLEBUF;
@@ -610,7 +610,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 
 	XBIOS_fbnum = 0;
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	if (flags & SDL_OPENGL) {
 		if (!SDL_AtariGL_Init(this, current)) {
 			XBIOS_FreeBuffers(this);
@@ -891,7 +891,7 @@ static void XBIOS_VideoQuit(_THIS)
 #endif
 
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	if (gl_active) {
 		SDL_AtariGL_Quit(this, SDL_TRUE);
 	}
@@ -922,7 +922,7 @@ static void XBIOS_VideoQuit(_THIS)
 	this->screen->pixels = NULL;	
 }
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 
 static void XBIOS_GL_SwapBuffers(_THIS)
 {

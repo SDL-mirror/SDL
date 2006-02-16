@@ -27,7 +27,7 @@
 #include "SDL_systhread_c.h"
 
 
-#ifdef DISABLE_THREADS
+#if SDL_THREADS_DISABLED
 
 SDL_sem *SDL_CreateSemaphore(Uint32 initial_value)
 {
@@ -203,4 +203,4 @@ int SDL_SemPost(SDL_sem *sem)
 	return 0;
 }
 
-#endif /* DISABLE_THREADS */
+#endif /* SDL_THREADS_DISABLED */

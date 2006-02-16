@@ -27,8 +27,8 @@
 
 #include "SDL_thread.h"
 #include "SDL_video.h"
-#include "SDL_pixels_c.h"
-#include "SDL_events_c.h"
+#include "../SDL_pixels_c.h"
+#include "../../events/SDL_events_c.h"
 
 #define MWINCLUDECOLORS
 #include "SDL_nxvideo.h"
@@ -119,7 +119,7 @@ static SDL_VideoDevice * NX_CreateDevice (int devindex)
     device -> SetGammaRamp = NX_SetGammaRamp ;
     device -> GetGammaRamp = NX_GetGammaRamp ;
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
     device -> GL_LoadLibrary = NULL ;
     device -> GL_GetProcAddress = NULL ;
     device -> GL_GetAttribute = NULL ;

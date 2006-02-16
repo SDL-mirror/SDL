@@ -23,9 +23,9 @@
 /* RISC OS version based on pthreads linux source */
 
 #include "SDL_thread.h"
-#include "SDL_systhread.h"
+#include "../SDL_systhread.h"
 
-#ifdef DISABLE_THREADS
+#if SDL_THREADS_DISABLED
 
 int SDL_SYS_CreateThread(SDL_Thread *thread, void *args)
 {

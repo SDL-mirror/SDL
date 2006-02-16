@@ -24,12 +24,12 @@
 
 #include "SDL_timer.h"
 #include "SDL_audio.h"
-#include "SDL_audiomem.h"
-#include "SDL_audio_c.h"
-#include "SDL_audiodev_c.h"
+#include "../SDL_audiomem.h"
+#include "../SDL_audio_c.h"
+#include "../SDL_audiodev_c.h"
 #include "SDL_artsaudio.h"
 
-#ifdef ARTSC_DYNAMIC
+#ifdef SDL_AUDIO_DRIVER_ARTS_DYNAMIC
 #include "SDL_name.h"
 #include "SDL_loadso.h"
 #else
@@ -37,18 +37,18 @@
 #endif
 
 /* The tag name used by artsc audio */
-#define ARTSC_DRIVER_NAME         "arts"
+#define ARTS_DRIVER_NAME         "arts"
 
 /* Audio driver functions */
-static int ARTSC_OpenAudio(_THIS, SDL_AudioSpec *spec);
-static void ARTSC_WaitAudio(_THIS);
-static void ARTSC_PlayAudio(_THIS);
-static Uint8 *ARTSC_GetAudioBuf(_THIS);
-static void ARTSC_CloseAudio(_THIS);
+static int ARTS_OpenAudio(_THIS, SDL_AudioSpec *spec);
+static void ARTS_WaitAudio(_THIS);
+static void ARTS_PlayAudio(_THIS);
+static Uint8 *ARTS_GetAudioBuf(_THIS);
+static void ARTS_CloseAudio(_THIS);
 
-#ifdef ARTSC_DYNAMIC
+#ifdef SDL_AUDIO_DRIVER_ARTS_DYNAMIC
 
-static const char *arts_library = ARTSC_DYNAMIC;
+static const char *arts_library = SDL_AUDIO_DRIVER_ARTS_DYNAMIC;
 static void *arts_handle = NULL;
 static int arts_loaded = 0;
 
@@ -114,7 +114,7 @@ static int LoadARTSLibrary(void)
 	return 0;
 }
 
-#endif /* ARTSC_DYNAMIC */
+#endif /* SDL_AUDIO_DRIVER_ARTS_DYNAMIC */
 
 /* Audio driver bootstrap functions */
 
@@ -171,24 +171,24 @@ static SDL_AudioDevice *Audio_CreateDevice(int devindex)
 	stream = 0;
 
 	/* Set the function pointers */
-	this->OpenAudio = ARTSC_OpenAudio;
-	this->WaitAudio = ARTSC_WaitAudio;
-	this->PlayAudio = ARTSC_PlayAudio;
-	this->GetAudioBuf = ARTSC_GetAudioBuf;
-	this->CloseAudio = ARTSC_CloseAudio;
+	this->OpenAudio = ARTS_OpenAudio;
+	this->WaitAudio = ARTS_WaitAudio;
+	this->PlayAudio = ARTS_PlayAudio;
+	this->GetAudioBuf = ARTS_GetAudioBuf;
+	this->CloseAudio = ARTS_CloseAudio;
 
 	this->free = Audio_DeleteDevice;
 
 	return this;
 }
 
-AudioBootStrap ARTSC_bootstrap = {
-	ARTSC_DRIVER_NAME, "Analog Realtime Synthesizer",
+AudioBootStrap ARTS_bootstrap = {
+	ARTS_DRIVER_NAME, "Analog Realtime Synthesizer",
 	Audio_Available, Audio_CreateDevice
 };
 
 /* This function waits until it is possible to write a full sound buffer */
-static void ARTSC_WaitAudio(_THIS)
+static void ARTS_WaitAudio(_THIS)
 {
 	Sint32 ticks;
 
@@ -211,7 +211,7 @@ static void ARTSC_WaitAudio(_THIS)
 	}
 }
 
-static void ARTSC_PlayAudio(_THIS)
+static void ARTS_PlayAudio(_THIS)
 {
 	int written;
 
@@ -232,12 +232,12 @@ static void ARTSC_PlayAudio(_THIS)
 #endif
 }
 
-static Uint8 *ARTSC_GetAudioBuf(_THIS)
+static Uint8 *ARTS_GetAudioBuf(_THIS)
 {
 	return(mixbuf);
 }
 
-static void ARTSC_CloseAudio(_THIS)
+static void ARTS_CloseAudio(_THIS)
 {
 	if ( mixbuf != NULL ) {
 		SDL_FreeAudioMem(mixbuf);
@@ -250,7 +250,7 @@ static void ARTSC_CloseAudio(_THIS)
 	SDL_NAME(arts_free)();
 }
 
-static int ARTSC_OpenAudio(_THIS, SDL_AudioSpec *spec)
+static int ARTS_OpenAudio(_THIS, SDL_AudioSpec *spec)
 {
 	int bits, frag_spec;
 	Uint16 test_format, format;

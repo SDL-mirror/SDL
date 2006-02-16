@@ -29,7 +29,7 @@
 
 #include <microwin/nano-X.h>
 
-#include "SDL_sysvideo.h"
+#include "../SDL_sysvideo.h"
 
 #ifdef ENABLE_NANOX_DEBUG
 #define Dprintf printf

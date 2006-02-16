@@ -26,7 +26,7 @@
 */
 
 #include "SDL_video.h"
-#include "SDL_cursor_c.h"
+#include "../SDL_cursor_c.h"
 #include "SDL_x11dga_c.h"
 
 /* Global for the error handler */
@@ -34,17 +34,13 @@ int dga_event, dga_error = -1;
 
 void X11_EnableDGAMouse(_THIS)
 {
-#ifdef XFREE86_DGAMOUSE
+#if SDL_VIDEO_DRIVER_X11_DGAMOUSE
     int dga_major, dga_minor;
     int use_dgamouse;
     const char *env_use_dgamouse;
 
     /* Check configuration to see if we should use DGA mouse */
-#ifdef DEFAULT_DGAMOUSE
     use_dgamouse = 1;
-#else
-    use_dgamouse = 0;
-#endif
     env_use_dgamouse = SDL_getenv("SDL_VIDEO_X11_DGAMOUSE");
     if ( env_use_dgamouse ) {
         use_dgamouse = atoi(env_use_dgamouse);
@@ -61,13 +57,13 @@ void X11_EnableDGAMouse(_THIS)
             using_dga |= DGA_MOUSE;
         }
     }
-#endif /* XFREE86_DGAMOUSE */
+#endif /* SDL_VIDEO_DRIVER_X11_DGAMOUSE */
 }
 
 /* Argh.  Glide resets DGA mouse mode when it makes the context current! */
 void X11_CheckDGAMouse(_THIS)
 {
-#ifdef XFREE86_DGAMOUSE
+#if SDL_VIDEO_DRIVER_X11_DGAMOUSE
     int flags;
 
     if ( using_dga & DGA_MOUSE ) {
@@ -81,10 +77,10 @@ void X11_CheckDGAMouse(_THIS)
 
 void X11_DisableDGAMouse(_THIS)
 {
-#ifdef XFREE86_DGAMOUSE
+#if SDL_VIDEO_DRIVER_X11_DGAMOUSE
     if ( using_dga & DGA_MOUSE ) {
 	SDL_NAME(XF86DGADirectVideo)(SDL_Display, SDL_Screen, 0);
         using_dga &= ~DGA_MOUSE;
     }
-#endif /* XFREE86_DGAMOUSE */
+#endif /* SDL_VIDEO_DRIVER_X11_DGAMOUSE */
 }

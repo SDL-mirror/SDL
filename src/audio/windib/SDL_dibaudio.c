@@ -27,7 +27,7 @@
 
 #include "SDL_timer.h"
 #include "SDL_audio.h"
-#include "SDL_audio_c.h"
+#include "../SDL_audio_c.h"
 #include "SDL_dibaudio.h"
 #if defined(_WIN32_WCE) && (_WIN32_WCE < 300)
 #include "win_ce_semaphore.h"

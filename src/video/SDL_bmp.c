@@ -20,8 +20,6 @@
     slouken@libsdl.org
 */
 
-#ifndef DISABLE_FILE
-
 /* 
    Code to load and save surfaces in Windows BMP format.
 
@@ -519,5 +517,3 @@ int SDL_SaveBMP_RW (SDL_Surface *saveme, SDL_RWops *dst, int freedst)
 	}
 	return((SDL_strcmp(SDL_GetError(), "") == 0) ? 0 : -1);
 }
-
-#endif /* ENABLE_FILE */

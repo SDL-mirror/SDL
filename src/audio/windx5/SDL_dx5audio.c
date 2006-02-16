@@ -24,7 +24,7 @@
 
 #include "SDL_timer.h"
 #include "SDL_audio.h"
-#include "SDL_audio_c.h"
+#include "../SDL_audio_c.h"
 #include "SDL_dx5audio.h"
 
 /* Define this if you want to use DirectX 6 DirectSoundNotify interface */

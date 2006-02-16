@@ -26,12 +26,12 @@
 #include "SDL_video.h"
 #include "SDL_mouse.h"
 #include "SDL_blit.h"
-#include "SDL_events_c.h"
 #include "SDL_sysvideo.h"
-#include "SDL_sysevents.h"
 #include "SDL_cursor_c.h"
 #include "SDL_pixels_c.h"
 #include "default_cursor.h"
+#include "../events/SDL_sysevents.h"
+#include "../events/SDL_events_c.h"
 
 /* These are static for our cursor handling code */
 volatile int SDL_cursorstate = CURSOR_VISIBLE;

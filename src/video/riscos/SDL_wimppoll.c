@@ -29,8 +29,8 @@
 
 #include "SDL.h"
 #include "SDL_syswm.h"
-#include "SDL_sysevents.h"
-#include "SDL_events_c.h"
+#include "../../events/SDL_sysevents.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_riscosvideo.h"
 #include "SDL_riscosevents_c.h"
 #include "SDL_riscosmouse_c.h"
@@ -44,7 +44,7 @@
 #include "swis.h"
 #include "unixlib/os.h"
 
-#ifndef DISABLE_THREADS
+#if !SDL_THREADS_DISABLED
 #include <pthread.h>
 #endif
 
@@ -61,10 +61,9 @@ void WIMP_PaletteChanged(_THIS);
 extern void WIMP_PollMouse(_THIS);
 extern void RISCOS_PollKeyboard();
 
-#ifdef DISABLE_THREADS
+#if SDL_THREADS_DISABLED
 /* Timer running function */
 extern void RISCOS_CheckTimer();
-
 #else
 extern int riscos_using_threads;
 #endif
@@ -84,7 +83,7 @@ void WIMP_PumpEvents(_THIS)
 	WIMP_Poll(this, 0);
 	if (hasFocus) RISCOS_PollKeyboard();
 	if (mouseInWindow) WIMP_PollMouse(this);
-#ifdef DISABLE_THREADS
+#if SDL_THREADS_DISABLED
 	if (SDL_timer_running) RISCOS_CheckTimer();
 #endif
 }
@@ -110,7 +109,7 @@ void WIMP_Poll(_THIS, int waitTime)
 
     while (doPoll)
     {
-#ifndef DISABLE_THREADS
+#if !SDL_THREADS_DISABLED
        /* Stop thread callbacks while program is paged out */
        if (riscos_using_threads) __pthread_stop_ticker();
 #endif
@@ -289,7 +288,7 @@ void WIMP_Poll(_THIS, int waitTime)
 			/* Fall out of polling loop if message is successfully posted */
 			if (SDL_PrivateSysWMEvent(&wmmsg)) doPoll = 0;
 		}
-#ifndef DISABLE_THREADS
+#if !SDL_THREADS_DISABLED
 		if (riscos_using_threads)
 		{
                    /* Restart ticker here so other thread can not interfere
@@ -324,7 +323,7 @@ void RISCOS_BackgroundTasks(void)
 	{
 		WIMP_Poll(current_video, 0);
 	}
-#ifdef DISABLE_THREADS
+#if SDL_THREADS_DISABLED
 	if (SDL_timer_running) RISCOS_CheckTimer();
 #endif
 }

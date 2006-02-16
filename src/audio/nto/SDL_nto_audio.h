@@ -23,8 +23,9 @@
 #ifndef __SDL_NTO_AUDIO_H__
 #define __SDL_NTO_AUDIO_H__
 
-#include "SDL_sysaudio.h"
 #include <sys/asoundlib.h>
+
+#include "../SDL_sysaudio.h"
 
 /* Hidden "this" pointer for the audio functions */
 #define _THIS	SDL_AudioDevice *this

@@ -23,7 +23,7 @@
 #ifndef _SDL_romaudio_h
 #define _SDL_romaudio_h
 
-#include "SDL_sysaudio.h"
+#include "../SDL_sysaudio.h"
 
 /* This is Ryan's improved MacOS sound code, with locking support */
 #define USE_RYANS_SOUNDCODE

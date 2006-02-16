@@ -49,11 +49,7 @@ extern struct ExecBase *SysBase;
 static struct GfxBase *GfxBase;
 
 #include "SDL_timer.h"
-#include "SDL_timer_c.h"
-
-#if defined(DISABLE_THREADS) || defined(FORK_HACK)
-#define USE_ITIMER
-#endif
+#include "../SDL_timer_c.h"
 
 /* The first ticks value of the application */
 

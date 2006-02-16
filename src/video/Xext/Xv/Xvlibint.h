@@ -44,8 +44,8 @@ SOFTWARE.
 #define NEED_REPLIES
 
 #include <X11/Xlibint.h>
-#include "Xvproto.h"
-#include "Xvlib.h"
+#include "../extensions/Xvproto.h"
+#include "../extensions/Xvlib.h"
 
 #if !defined(UNIXCPP)
 #define XvGetReq(name, req) \

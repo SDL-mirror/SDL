@@ -24,20 +24,17 @@
 
 #include "SDL_version.h"
 #include "SDL_video.h"
+#include "SDL_loadso.h"
 #include "SDL_syswm.h"
+#include "../SDL_pixels_c.h"
+#include "../SDL_cursor_c.h"
 #include "SDL_syswm_c.h"
 #include "SDL_wingl_c.h"
-#include "SDL_pixels_c.h"
-#include "SDL_loadso.h"
 
 
 #ifdef _WIN32_WCE
 #define DISABLE_ICON_SUPPORT
 #endif
-
-/*	RJR: March 28, 2000
-	we need "SDL_cursor_c.h" for mods to WIN_GrabInput */
-#include "SDL_cursor_c.h"
 
 /* The screen icon -- needs to be freed on SDL_VideoQuit() */
 HICON   screen_icn = NULL;
@@ -307,7 +304,7 @@ int WIN_GetWMInfo(_THIS, SDL_SysWMinfo *info)
 		                    info->version.minor,
 		                    info->version.patch) >=
 		     SDL_VERSIONNUM(1, 2, 5) ) {
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 			info->hglrc = GL_hrc;
 #else
 			info->hglrc = NULL;

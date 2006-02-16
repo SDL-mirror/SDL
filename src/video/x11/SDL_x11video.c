@@ -39,9 +39,9 @@
 #include "SDL_thread.h"
 #include "SDL_video.h"
 #include "SDL_mouse.h"
-#include "SDL_sysvideo.h"
-#include "SDL_pixels_c.h"
-#include "SDL_events_c.h"
+#include "../SDL_sysvideo.h"
+#include "../SDL_pixels_c.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_x11video.h"
 #include "SDL_x11wm_c.h"
 #include "SDL_x11mouse_c.h"
@@ -51,7 +51,7 @@
 #include "SDL_x11yuv_c.h"
 #include "SDL_x11gl_c.h"
 #include "SDL_x11gamma_c.h"
-#include "blank_cursor.h"
+#include "../blank_cursor.h"
 
 /* Initialization/Query functions */
 static int X11_VideoInit(_THIS, SDL_PixelFormat *vformat);
@@ -125,7 +125,7 @@ static SDL_VideoDevice *X11_CreateDevice(int devindex)
 		device->SetVideoMode = X11_SetVideoMode;
 		device->ToggleFullScreen = X11_ToggleFullScreen;
 		device->UpdateMouse = X11_UpdateMouse;
-#ifdef XFREE86_XV
+#if SDL_VIDEO_DRIVER_X11_XV
 		device->CreateYUVOverlay = X11_CreateYUVOverlay;
 #endif
 		device->SetColors = X11_SetColors;
@@ -144,7 +144,7 @@ static SDL_VideoDevice *X11_CreateDevice(int devindex)
 		device->GetGamma = X11_GetVidModeGamma;
 		device->SetGammaRamp = X11_SetGammaRamp;
 		device->GetGammaRamp = NULL;
-#ifdef HAVE_OPENGL_X11
+#if SDL_VIDEO_OPENGL_GLX
 		device->GL_LoadLibrary = X11_GL_LoadLibrary;
 		device->GL_GetProcAddress = X11_GL_GetProcAddress;
 		device->GL_GetAttribute = X11_GL_GetAttribute;
@@ -179,14 +179,14 @@ VideoBootStrap X11_bootstrap = {
 static int (*X_handler)(Display *, XErrorEvent *) = NULL;
 static int x_errhandler(Display *d, XErrorEvent *e)
 {
-#ifdef XFREE86_VM
+#if SDL_VIDEO_DRIVER_X11_VIDMODE
 	extern int vm_error;
 #endif
-#ifdef XFREE86_DGAMOUSE
+#if SDL_VIDEO_DRIVER_X11_DGAMOUSE
 	extern int dga_error;
 #endif
 
-#ifdef XFREE86_VM
+#if SDL_VIDEO_DRIVER_X11_VIDMODE
 	/* VidMode errors are non-fatal. :) */
 	/* Are the errors offset by one from the error base?
 	   e.g. the error base is 143, the code is 148, and the
@@ -204,9 +204,9 @@ printf("VidMode error: %s\n", errmsg);
 #endif
         	return(0);
         }
-#endif /* XFREE86_VM */
+#endif /* SDL_VIDEO_DRIVER_X11_VIDMODE */
 
-#ifdef XFREE86_DGAMOUSE
+#if SDL_VIDEO_DRIVER_X11_DGAMOUSE
 	/* DGA errors can be non-fatal. :) */
         if ( (dga_error >= 0) &&
 	     ((e->error_code > dga_error) &&
@@ -219,7 +219,7 @@ printf("DGA error: %s\n", errmsg);
 #endif
         	return(0);
         }
-#endif /* XFREE86_DGAMOUSE */
+#endif /* SDL_VIDEO_DRIVER_X11_DGAMOUSE */
 
 	return(X_handler(d,e));
 }
@@ -451,7 +451,7 @@ static int X11_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		local_X11 = 0;
 	}
 	SDL_Display = pXOpenDisplay(display);
-#if defined(__osf__) && defined(X11_DYNAMIC)
+#if defined(__osf__) && defined(SDL_VIDEO_DRIVER_X11_DYNAMIC)
 	/* On Tru64 if linking without -lX11, it fails and you get following message.
 	 * Xlib: connection to ":0.0" refused by server
 	 * Xlib: XDM authorization key matches an existing client!

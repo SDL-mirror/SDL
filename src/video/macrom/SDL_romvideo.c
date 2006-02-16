@@ -43,7 +43,7 @@
 
 #include "SDL_video.h"
 #include "SDL_syswm.h"
-#include "SDL_sysvideo.h"
+#include "../SDL_sysvideo.h"
 #include "SDL_romvideo.h"
 #include "SDL_macgl_c.h"
 #include "SDL_macwm_c.h"
@@ -156,7 +156,7 @@ static SDL_VideoDevice *ROM_CreateDevice(int devindex)
 	device->UnlockHWSurface = ROM_UnlockHWSurface;
 	device->FlipHWSurface = NULL;
 	device->FreeHWSurface = ROM_FreeHWSurface;
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	device->GL_MakeCurrent = Mac_GL_MakeCurrent;
 	device->GL_SwapBuffers = Mac_GL_SwapBuffers;
 	device->GL_LoadLibrary = Mac_GL_LoadLibrary;

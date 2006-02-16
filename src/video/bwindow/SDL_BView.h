@@ -26,7 +26,7 @@
 /* This is the event handling and graphics update portion of SDL_BWin */
 
 extern "C" {
-#include "SDL_events_c.h"
+#include "../../events/SDL_events_c.h"
 };
 
 class SDL_BView : public BView

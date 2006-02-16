@@ -26,7 +26,7 @@
 #include "SDL_RLEaccel_c.h"
 #include "SDL_pixels_c.h"
 
-#if (defined(i386) || defined(__x86_64__)) && defined(__GNUC__) && defined(USE_ASMBLIT)
+#if (i386 || __x86_64__) && __GNUC__ && SDL_ASSEMBLY_BLITTERS
 #define MMX_ASMBLIT
 #endif
 

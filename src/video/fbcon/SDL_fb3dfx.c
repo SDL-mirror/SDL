@@ -21,7 +21,7 @@
 */
 
 #include "SDL_video.h"
-#include "SDL_blit.h"
+#include "../SDL_blit.h"
 #include "SDL_fb3dfx.h"
 #include "3dfx_mmio.h"
 

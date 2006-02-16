@@ -28,8 +28,8 @@
 extern "C" {
 
 #include "SDL_joystick.h"
-#include "SDL_sysjoystick.h"
-#include "SDL_joystick_c.h"
+#include "../SDL_sysjoystick.h"
+#include "../SDL_joystick_c.h"
 
 
 /* The maximum number of joysticks we'll detect */

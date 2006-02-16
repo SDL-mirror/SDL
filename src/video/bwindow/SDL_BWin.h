@@ -27,7 +27,7 @@
 #include <AppKit.h>
 #include <InterfaceKit.h>
 #include <be/game/DirectWindow.h>
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 #include <be/opengl/GLView.h>
 #endif
 #include <support/UTF8.h>
@@ -37,7 +37,7 @@
 #include "SDL_BView.h"
 
 extern "C" {
-#include "SDL_events_c.h"
+#include "../../events/SDL_events_c.h"
 };
 
 class SDL_BWin : public BDirectWindow
@@ -49,7 +49,7 @@ public:
 		last_buttons = 0;
 
 		the_view = NULL;
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 		SDL_GLView = NULL;
 #endif
 		SDL_View = NULL;
@@ -61,7 +61,7 @@ public:
 	virtual ~SDL_BWin() {
 		Lock();
 		if ( the_view ) {
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 			if ( the_view == SDL_GLView ) {
 				SDL_GLView->UnlockGL();
 			}
@@ -70,7 +70,7 @@ public:
 			the_view = NULL;
 		}
 		Unlock();
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 		if ( SDL_GLView ) {
 			delete SDL_GLView;
 		}
@@ -218,7 +218,7 @@ public:
 		retval = 0;
 		Lock();
 		if ( flags & SDL_OPENGL ) {
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 			if ( SDL_GLView == NULL ) {
 				SDL_GLView = new BGLView(Bounds(), "SDL GLView",
 					 	B_FOLLOW_ALL_SIDES, (B_WILL_DRAW|B_FRAME_EVENTS),
@@ -242,7 +242,7 @@ public:
 			}
 			if ( the_view != SDL_View ) {
 				if ( the_view ) {
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 					if ( the_view == SDL_GLView ) {
 						SDL_GLView->UnlockGL();
 					}
@@ -260,7 +260,7 @@ public:
 		SDL_View->SetBitmap(bitmap);
 	}
 	virtual void SetXYOffset(int x, int y) {
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 		if ( the_view == SDL_GLView ) {
 			return;
 		}
@@ -268,7 +268,7 @@ public:
 		SDL_View->SetXYOffset(x, y);		
 	}
 	virtual void GetXYOffset(int &x, int &y) {
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 		if ( the_view == SDL_GLView ) {
 			x = 0;
 			y = 0;
@@ -287,7 +287,7 @@ public:
 		SDL_View->Sync();
 		Unlock();
 	}
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	virtual void SwapBuffers(void) {
 		SDL_GLView->UnlockGL();
 		SDL_GLView->LockGL();
@@ -540,7 +540,7 @@ public:
 	}
 
 private:
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	BGLView *SDL_GLView;
 #endif
 	SDL_BView *SDL_View;

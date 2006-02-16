@@ -22,16 +22,15 @@
 
 /* CPU feature detection for SDL */
 
-#ifdef unix /* FIXME: Better setjmp detection? */
-#define USE_SETJMP
+#include "SDL.h"
+#include "SDL_cpuinfo.h"
+
+#if SDL_ALTIVEC_BLITTERS && HAVE_SETJMP
 #include <signal.h>
 #include <setjmp.h>
 #endif
 
-#include "SDL.h"
-#include "SDL_cpuinfo.h"
-
-#ifdef MACOSX
+#if MACOSX
 #include <sys/sysctl.h> /* For AltiVec check */
 #endif
 
@@ -44,7 +43,7 @@
 #define CPU_HAS_SSE2	0x00000080
 #define CPU_HAS_ALTIVEC	0x00000100
 
-#if defined(USE_SETJMP) && defined(GCC_ALTIVEC)
+#if SDL_ALTIVEC_BLITTERS && HAVE_SETJMP
 /* This is the brute force way of detecting instruction sets...
    the idea is borrowed from the libmpeg2 library - thanks!
  */
@@ -53,7 +52,7 @@ static void illegal_instruction(int sig)
 {
 	longjmp(jmpbuf, 1);
 }
-#endif // USE_SETJMP
+#endif /* HAVE_SETJMP */
 
 static __inline__ int CPU_haveCPUID()
 {
@@ -112,18 +111,18 @@ CPUid by definition.  But it's nice to be able to prove it.  :)      */
 done:
 	}
 #elif defined(__sun) && defined(__x86)
-	    __asm (
+	__asm (
 "       pushfl                 \n"
-"	    popl    %eax           \n"
-"	    movl    %eax,%ecx      \n"
-"	    xorl    $0x200000,%eax \n"
-"	    pushl   %eax           \n"
-"	    popfl                  \n"
-"	    pushfl                 \n"
-"	    popl    %eax           \n"
-"	    xorl    %ecx,%eax      \n"
-"	    jz      1f             \n"
-"	    movl    $1,-8(%ebp)    \n"
+"	popl    %eax           \n"
+"	movl    %eax,%ecx      \n"
+"	xorl    $0x200000,%eax \n"
+"	pushl   %eax           \n"
+"	popfl                  \n"
+"	pushfl                 \n"
+"	popl    %eax           \n"
+"	xorl    %ecx,%eax      \n"
+"	jz      1f             \n"
+"	movl    $1,-8(%ebp)    \n"
 "1:                            \n"
 	);
 #elif defined(__sun) && defined(__amd64)
@@ -308,14 +307,14 @@ static __inline__ int CPU_haveSSE2()
 static __inline__ int CPU_haveAltiVec()
 {
 	volatile int altivec = 0;
-#ifdef MACOSX
+#if MACOSX
 	int selectors[2] = { CTL_HW, HW_VECTORUNIT }; 
 	int hasVectorUnit = 0; 
 	size_t length = sizeof(hasVectorUnit); 
 	int error = sysctl(selectors, 2, &hasVectorUnit, &length, NULL, 0); 
 	if( 0 == error )
 		altivec = (hasVectorUnit != 0); 
-#elif defined(USE_SETJMP) && defined(GCC_ALTIVEC)
+#elif SDL_ALTIVEC_BLITTERS && HAVE_SETJMP
 	void (*handler)(int sig);
 	handler = signal(SIGILL, illegal_instruction);
 	if ( setjmp(jmpbuf) == 0 ) {

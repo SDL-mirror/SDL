@@ -54,7 +54,7 @@ SOFTWARE.
 #include "Xvlibint.h"
 #include <X11/extensions/Xext.h>
 #include <X11/extensions/XShm.h>
-#include "extutil.h"
+#include "../extensions/extutil.h"
 
 #include "../../x11/SDL_x11dyn.h"
 

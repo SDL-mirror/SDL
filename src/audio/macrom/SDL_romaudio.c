@@ -40,9 +40,8 @@
 #endif
 
 #include "SDL_audio.h"
-#include "SDL_audio_c.h"
-#include "SDL_audiomem.h"
-#include "SDL_sysaudio.h"
+#include "../SDL_audio_c.h"
+#include "../SDL_sysaudio.h"
 #include "SDL_romaudio.h"
 
 /* Audio driver functions */

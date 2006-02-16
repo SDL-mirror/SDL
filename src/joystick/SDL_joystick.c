@@ -23,14 +23,14 @@
 /* This is the joystick API for Simple DirectMedia Layer */
 
 #include "SDL_events.h"
-#ifndef DISABLE_EVENTS
-#include "SDL_events_c.h"
-#endif
-#include "SDL_joystick_c.h"
 #include "SDL_sysjoystick.h"
+#include "SDL_joystick_c.h"
+#if !SDL_EVENTS_DISABLED
+#include "../events/SDL_events_c.h"
+#endif
 
 /* This is used for Quake III Arena */
-#ifdef DISABLE_EVENTS
+#if SDL_EVENTS_DISABLED
 #define SDL_Lock_EventThread()
 #define SDL_Unlock_EventThread()
 #endif
@@ -424,7 +424,7 @@ int SDL_PrivateJoystickAxis(SDL_Joystick *joystick, Uint8 axis, Sint16 value)
 
 	/* Post the event, if desired */
 	posted = 0;
-#ifndef DISABLE_EVENTS
+#if !SDL_EVENTS_DISABLED
 	if ( SDL_ProcessEvents[SDL_JOYAXISMOTION] == SDL_ENABLE ) {
 		SDL_Event event;
 		event.type = SDL_JOYAXISMOTION;
@@ -436,7 +436,7 @@ int SDL_PrivateJoystickAxis(SDL_Joystick *joystick, Uint8 axis, Sint16 value)
 			SDL_PushEvent(&event);
 		}
 	}
-#endif /* !DISABLE_EVENTS */
+#endif /* !SDL_EVENTS_DISABLED */
 	return(posted);
 }
 
@@ -449,7 +449,7 @@ int SDL_PrivateJoystickHat(SDL_Joystick *joystick, Uint8 hat, Uint8 value)
 
 	/* Post the event, if desired */
 	posted = 0;
-#ifndef DISABLE_EVENTS
+#if !SDL_EVENTS_DISABLED
 	if ( SDL_ProcessEvents[SDL_JOYHATMOTION] == SDL_ENABLE ) {
 		SDL_Event event;
 		event.jhat.type = SDL_JOYHATMOTION;
@@ -461,7 +461,7 @@ int SDL_PrivateJoystickHat(SDL_Joystick *joystick, Uint8 hat, Uint8 value)
 			SDL_PushEvent(&event);
 		}
 	}
-#endif /* !DISABLE_EVENTS */
+#endif /* !SDL_EVENTS_DISABLED */
 	return(posted);
 }
 
@@ -476,7 +476,7 @@ int SDL_PrivateJoystickBall(SDL_Joystick *joystick, Uint8 ball,
 
 	/* Post the event, if desired */
 	posted = 0;
-#ifndef DISABLE_EVENTS
+#if !SDL_EVENTS_DISABLED
 	if ( SDL_ProcessEvents[SDL_JOYBALLMOTION] == SDL_ENABLE ) {
 		SDL_Event event;
 		event.jball.type = SDL_JOYBALLMOTION;
@@ -489,14 +489,14 @@ int SDL_PrivateJoystickBall(SDL_Joystick *joystick, Uint8 ball,
 			SDL_PushEvent(&event);
 		}
 	}
-#endif /* !DISABLE_EVENTS */
+#endif /* !SDL_EVENTS_DISABLED */
 	return(posted);
 }
 
 int SDL_PrivateJoystickButton(SDL_Joystick *joystick, Uint8 button, Uint8 state)
 {
 	int posted;
-#ifndef DISABLE_EVENTS
+#if !SDL_EVENTS_DISABLED
 	SDL_Event event;
 
 	switch ( state ) {
@@ -510,14 +510,14 @@ int SDL_PrivateJoystickButton(SDL_Joystick *joystick, Uint8 button, Uint8 state)
 			/* Invalid state -- bail */
 			return(0);
 	}
-#endif /* !DISABLE_EVENTS */
+#endif /* !SDL_EVENTS_DISABLED */
 
 	/* Update internal joystick state */
 	joystick->buttons[button] = state;
 
 	/* Post the event, if desired */
 	posted = 0;
-#ifndef DISABLE_EVENTS
+#if !SDL_EVENTS_DISABLED
 	if ( SDL_ProcessEvents[event.type] == SDL_ENABLE ) {
 		event.jbutton.which = joystick->index;
 		event.jbutton.button = button;
@@ -527,7 +527,7 @@ int SDL_PrivateJoystickButton(SDL_Joystick *joystick, Uint8 button, Uint8 state)
 			SDL_PushEvent(&event);
 		}
 	}
-#endif /* !DISABLE_EVENTS */
+#endif /* !SDL_EVENTS_DISABLED */
 	return(posted);
 }
 
@@ -542,7 +542,7 @@ void SDL_JoystickUpdate(void)
 
 int SDL_JoystickEventState(int state)
 {
-#ifdef DISABLE_EVENTS
+#if SDL_EVENTS_DISABLED
 	return SDL_IGNORE;
 #else
 	const Uint8 event_list[] = {
@@ -568,5 +568,5 @@ int SDL_JoystickEventState(int state)
 			break;
 	}
 	return(state);
-#endif /* DISABLE_EVENTS */
+#endif /* SDL_EVENTS_DISABLED */
 }

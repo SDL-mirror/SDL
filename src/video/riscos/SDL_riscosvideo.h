@@ -24,8 +24,8 @@
 #define _SDL_riscosvideo_h
 
 #include "SDL_mouse.h"
-#include "SDL_sysvideo.h"
 #include "SDL_mutex.h"
+#include "../SDL_sysvideo.h"
 
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_VideoDevice *this

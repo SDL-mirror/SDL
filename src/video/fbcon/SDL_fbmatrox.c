@@ -21,7 +21,7 @@
 */
 
 #include "SDL_video.h"
-#include "SDL_blit.h"
+#include "../SDL_blit.h"
 #include "SDL_fbmatrox.h"
 #include "matrox_mmio.h"
 

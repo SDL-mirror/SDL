@@ -26,27 +26,27 @@
 
 #include "SDL_timer.h"
 #include "SDL_events.h"
-#include "SDL_events_c.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_x11video.h"
 #include "SDL_x11wm_c.h"
 #include "SDL_x11modes_c.h"
 #include "SDL_x11image_c.h"
 
-#ifdef HAVE_XINERAMA
-#include <Xext/extensions/Xinerama.h>
+#if SDL_VIDEO_DRIVER_X11_XINERAMA
+#include "../Xext/extensions/Xinerama.h"
 #endif 
 
 #define MAX(a, b)        (a > b ? a : b)
 
-#ifdef XFREE86_VM
+#if SDL_VIDEO_DRIVER_X11_VIDMODE
 Bool SDL_NAME(XF86VidModeGetModeInfo)(Display *dpy, int scr, SDL_NAME(XF86VidModeModeInfo) *info)
 {
     SDL_NAME(XF86VidModeModeLine) *l = (SDL_NAME(XF86VidModeModeLine)*)((char*)info + sizeof info->dotclock);
     return SDL_NAME(XF86VidModeGetModeLine)(dpy, scr, (int*)&info->dotclock, l);
 }
-#endif /* XFREE86_VM */
+#endif /* SDL_VIDEO_DRIVER_X11_VIDMODE */
 
-#ifdef XFREE86_VM
+#if SDL_VIDEO_DRIVER_X11_VIDMODE
 static void save_mode(_THIS)
 {
     SDL_memset(&saved_mode, 0, sizeof(saved_mode));
@@ -55,7 +55,7 @@ static void save_mode(_THIS)
 }
 #endif
 
-#ifdef XFREE86_VM
+#if SDL_VIDEO_DRIVER_X11_VIDMODE
 static void restore_mode(_THIS)
 {
     SDL_NAME(XF86VidModeModeLine) mode;
@@ -73,7 +73,7 @@ static void restore_mode(_THIS)
 }
 #endif
 
-#ifdef XFREE86_VM
+#if SDL_VIDEO_DRIVER_X11_VIDMODE
 static int cmpmodes(const void *va, const void *vb)
 {
     const SDL_NAME(XF86VidModeModeInfo) *a = *(const SDL_NAME(XF86VidModeModeInfo)**)va;
@@ -89,7 +89,7 @@ static void get_real_resolution(_THIS, int* w, int* h);
 
 static void set_best_resolution(_THIS, int width, int height)
 {
-#ifdef XFREE86_VM
+#if SDL_VIDEO_DRIVER_X11_VIDMODE
     if ( use_vidmode ) {
         SDL_NAME(XF86VidModeModeLine) mode;
         SDL_NAME(XF86VidModeModeInfo) **modes;
@@ -137,10 +137,10 @@ static void set_best_resolution(_THIS, int width, int height)
             pXFree(modes);
         }
     }
-#endif /* XFREE86_VM */
+#endif /* SDL_VIDEO_DRIVER_X11_VIDMODE */
 
                                 /* XiG */
-#ifdef HAVE_XIGXME
+#if SDL_VIDEO_DRIVER_X11_XME
 #ifdef XIG_DEBUG
     fprintf(stderr, "XME: set_best_resolution(): w = %d, h = %d\n",
             width, height);
@@ -177,13 +177,13 @@ static void set_best_resolution(_THIS, int width, int height)
             }
         }
     }
-#endif /* HAVE_XIGXME */
+#endif /* SDL_VIDEO_DRIVER_X11_XME */
 
 }
 
 static void get_real_resolution(_THIS, int* w, int* h)
 {
-#ifdef XFREE86_VM
+#if SDL_VIDEO_DRIVER_X11_VIDMODE
     if ( use_vidmode ) {
         SDL_NAME(XF86VidModeModeLine) mode;
         int unused;
@@ -196,7 +196,7 @@ static void get_real_resolution(_THIS, int* w, int* h)
     }
 #endif
 
-#ifdef HAVE_XIGXME
+#if SDL_VIDEO_DRIVER_X11_XME
     if ( use_xme ) {
         int ractive;
         XiGMiscResolutionInfo *modelist;
@@ -277,13 +277,13 @@ int vm_event, vm_error = -1;
 
 int X11_GetVideoModes(_THIS)
 {
-#ifdef XFREE86_VM
+#if SDL_VIDEO_DRIVER_X11_VIDMODE
     int buggy_X11;
     int vm_major, vm_minor;
     int nmodes;
     SDL_NAME(XF86VidModeModeInfo) **modes;
 #endif
-#ifdef HAVE_XIGXME
+#if SDL_VIDEO_DRIVER_X11_XME
     int xme_major, xme_minor;
     int ractive, nummodes;
     XiGMiscResolutionInfo *modelist;
@@ -297,7 +297,7 @@ int X11_GetVideoModes(_THIS)
     screen_w = DisplayWidth(SDL_Display, SDL_Screen);
     screen_h = DisplayHeight(SDL_Display, SDL_Screen);
 
-#ifdef XFREE86_VM
+#if SDL_VIDEO_DRIVER_X11_VIDMODE
     /* Metro-X 4.3.0 and earlier has a broken implementation of
        XF86VidModeGetAllModeLines() - it hangs the client.
      */
@@ -407,10 +407,10 @@ int X11_GetVideoModes(_THIS)
         use_vidmode = vm_major * 100 + vm_minor;
         save_mode(this);
     }
-#endif /* XFREE86_VM */
+#endif /* SDL_VIDEO_DRIVER_X11_VIDMODE */
 
                                 /* XiG */
-#ifdef HAVE_XIGXME
+#if SDL_VIDEO_DRIVER_X11_XME
     /* first lets make sure we have the extension, and it's at least v2.0 */
     if (XiGMiscQueryVersion(SDL_Display, &xme_major, &xme_minor)) {
 #ifdef XIG_DEBUG
@@ -478,7 +478,7 @@ int X11_GetVideoModes(_THIS)
     if ( modelist ) {
         pXFree(modelist);
     }
-#endif /* HAVE_XIGXME */
+#endif /* SDL_VIDEO_DRIVER_X11_XME */
 
     {
         static int depth_list[] = { 32, 24, 16, 15, 8 };
@@ -544,7 +544,7 @@ int X11_GetVideoModes(_THIS)
         printf("XFree86 VidMode is enabled\n");
     }
 
-#ifdef HAVE_XIGXME
+#if SDL_VIDEO_DRIVER_X11_XME
     if ( use_xme )
       printf("Xi Graphics XME fullscreen is enabled\n");
     else
@@ -563,7 +563,7 @@ int X11_GetVideoModes(_THIS)
     xinerama_x = 0;
     xinerama_y = 0;
 
-#ifdef HAVE_XINERAMA
+#if SDL_VIDEO_DRIVER_X11_XINERAMA
     /* Query Xinerama extention */
     if ( SDL_NAME(XineramaQueryExtension)(SDL_Display, &i, &i) &&
          SDL_NAME(XineramaIsActive)(SDL_Display) ) {
@@ -596,7 +596,7 @@ int X11_GetVideoModes(_THIS)
         }
         pXFree(xinerama);
     }
-#endif /* HAVE_XINERAMA */
+#endif /* SDL_VIDEO_DRIVER_X11_XINERAMA */
 
     return 0;
 }
@@ -740,7 +740,7 @@ int X11_EnterFullScreen(_THIS)
     pXRaiseWindow(SDL_Display, FSwindow);
 #endif
 
-#ifdef XFREE86_VM
+#if SDL_VIDEO_DRIVER_X11_VIDMODE
     /* Save the current video mode */
     if ( use_vidmode ) {
         SDL_NAME(XF86VidModeLockModeSwitch)(SDL_Display, SDL_Screen, True);
@@ -777,14 +777,14 @@ int X11_LeaveFullScreen(_THIS)
 {
     if ( currently_fullscreen ) {
         pXReparentWindow(SDL_Display, SDL_Window, WMwindow, 0, 0);
-#ifdef XFREE86_VM
+#if SDL_VIDEO_DRIVER_X11_VIDMODE
         if ( use_vidmode ) {
             restore_mode(this);
             SDL_NAME(XF86VidModeLockModeSwitch)(SDL_Display, SDL_Screen, False);
         }
 #endif
 
-#ifdef HAVE_XIGXME
+#if SDL_VIDEO_DRIVER_X11_XME
         if ( use_xme ) {
             int rw, rh;        
             

@@ -1,24 +1,3 @@
-# Local macros for the SDL configure.in script
-
-dnl Function to link an architecture specific file
-dnl LINK_ARCH_SRC(source_dir, arch, source_file)
-AC_DEFUN([COPY_ARCH_SRC],
-[
-  old="$srcdir/$1/$2/$3"
-  new="$1/$3"
-  if test ! -d $1; then
-    echo "Creating directory $1"
-    mkdir -p $1
-  fi
-  echo "Copying $old -> $new"
-  cat >$new <<__EOF__
-/* WARNING:  This file was automatically generated!
- * Original: $old
- */
-__EOF__
-  cat >>$new <$old
-])
-
 ##############################################################################
 dnl Configure Paths for Alsa
 dnl Some modifications by Richard Boulton <richard-alsa@tartarus.org>
@@ -1007,6 +986,12 @@ AC_CACHE_VAL([lt_cv_sys_max_cmd_len], [dnl
     # the test eventually succeeds (with a max line length of 256k).
     # Instead, let's just punt: use the minimum linelength reported by
     # all of the supported platforms: 8192 (on NT/2K/XP).
+    lt_cv_sys_max_cmd_len=8192;
+    ;;
+
+  beos*)
+    # On BeOS, this test takes a really really long time.
+    # So we just punt and use a minimum line length of 8192.
     lt_cv_sys_max_cmd_len=8192;
     ;;
 

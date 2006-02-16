@@ -24,8 +24,8 @@
 #define _SDL_gapivideo_h
 
 #include "SDL_mouse.h"
-#include "SDL_sysvideo.h"
 #include "SDL_mutex.h"
+#include "../SDL_sysvideo.h"
 
 /* From gx.h, since it's not really C compliant */
 

@@ -35,15 +35,15 @@ extern HINSTANCE aygshell;
 #endif
 
 #include "SDL_syswm.h"
-#include "SDL_sysvideo.h"
-#include "SDL_sysevents.h"
-#include "SDL_events_c.h"
-#include "SDL_pixels_c.h"
+#include "../SDL_sysvideo.h"
+#include "../SDL_pixels_c.h"
+#include "../../events/SDL_sysevents.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_dibvideo.h"
-#include "SDL_syswm_c.h"
-#include "SDL_sysmouse_c.h"
+#include "../wincommon/SDL_syswm_c.h"
+#include "../wincommon/SDL_sysmouse_c.h"
 #include "SDL_dibevents_c.h"
-#include "SDL_wingl_c.h"
+#include "../wincommon/SDL_wingl_c.h"
 
 #ifdef _WIN32_WCE
 #define NO_GETDIBITS
@@ -151,7 +151,7 @@ static SDL_VideoDevice *DIB_CreateDevice(int devindex)
 	device->FreeHWSurface = DIB_FreeHWSurface;
 	device->SetGammaRamp = DIB_SetGammaRamp;
 	device->GetGammaRamp = DIB_GetGammaRamp;
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	device->GL_LoadLibrary = WIN_GL_LoadLibrary;
 	device->GL_GetProcAddress = WIN_GL_GetProcAddress;
 	device->GL_GetAttribute = WIN_GL_GetAttribute;
@@ -291,7 +291,7 @@ int DIB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	if ( DIB_CreateWindow(this) < 0 ) {
 		return(-1);
 	}
-#ifndef DISABLE_AUDIO
+#if !SDL_AUDIO_DISABLED
 	DX5_SoundFocus(SDL_Window);
 #endif
 
@@ -1022,7 +1022,7 @@ static void DIB_WinPAINT(_THIS, HDC hdc)
 }
 
 /* Stub in case DirectX isn't available */
-#ifndef ENABLE_DIRECTX
+#if !SDL_AUDIO_DRIVER_DSOUND
 void DX5_SoundFocus(HWND hwnd)
 {
 	return;

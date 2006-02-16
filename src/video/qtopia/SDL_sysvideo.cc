@@ -33,10 +33,10 @@
 
 extern "C" {
 
-#include "SDL_sysvideo.h"
-#include "SDL_sysmouse_c.h"
+#include "../SDL_sysvideo.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_sysevents_c.h"
-#include "SDL_events_c.h"
+#include "SDL_sysmouse_c.h"
 #include "SDL_syswm_c.h"
 #include "SDL_lowvideo.h"
 

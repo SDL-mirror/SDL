@@ -33,7 +33,7 @@
 
 #include "SDL_timer.h"
 #include "SDL_cdrom.h"
-#include "SDL_syscdrom.h"
+#include "../SDL_syscdrom.h"
 
 /* The maximum number of CD-ROM drives we'll detect */
 #define MAX_DRIVES 16

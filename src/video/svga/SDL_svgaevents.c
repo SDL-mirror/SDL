@@ -34,8 +34,8 @@
 #error You must choose your operating system here
 #endif
 
-#include "SDL_sysevents.h"
-#include "SDL_events_c.h"
+#include "../../events/SDL_sysevents.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_svgavideo.h"
 #include "SDL_svgaevents_c.h"
 

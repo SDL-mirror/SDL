@@ -34,7 +34,7 @@
 #include "SDL_events.h"
 
 extern "C" {
-#include "SDL_events_c.h"
+#include "../../events/SDL_events_c.h"
 };
 
 typedef enum { 

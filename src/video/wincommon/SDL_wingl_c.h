@@ -22,13 +22,13 @@
 
 /* WGL implementation of SDL OpenGL support */
 
-#include "SDL_sysvideo.h"
+#include "../SDL_sysvideo.h"
 
 
 struct SDL_PrivateGLData {
     int gl_active; /* to stop switching drivers while we have a valid context */
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
     PIXELFORMATDESCRIPTOR GL_pfd;
     HDC GL_hdc;
     HGLRC GL_hrc;
@@ -52,7 +52,7 @@ struct SDL_PrivateGLData {
                                                 UINT nAttributes, 
                                                 const int *piAttributes,
                                                 int *piValues);
-#endif /* HAVE_OPENGL */
+#endif /* SDL_VIDEO_OPENGL */
 };
 
 /* Old variable names */
@@ -65,7 +65,7 @@ struct SDL_PrivateGLData {
 /* OpenGL functions */
 extern int WIN_GL_SetupWindow(_THIS);
 extern void WIN_GL_ShutDown(_THIS);
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 extern int WIN_GL_MakeCurrent(_THIS);
 extern int WIN_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value);
 extern void WIN_GL_SwapBuffers(_THIS);
@@ -74,7 +74,7 @@ extern int WIN_GL_LoadLibrary(_THIS, const char* path);
 extern void *WIN_GL_GetProcAddress(_THIS, const char* proc);
 #endif
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 
 #ifndef WGL_ARB_pixel_format
 #define WGL_NUMBER_PIXEL_FORMATS_ARB   0x2000

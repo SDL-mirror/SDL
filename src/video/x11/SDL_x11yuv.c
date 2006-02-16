@@ -22,7 +22,9 @@
 
 /* This is the XFree86 Xv extension implementation of YUV video overlays */
 
-#ifdef XFREE86_XV
+#include "SDL_config.h"
+
+#if SDL_VIDEO_DRIVER_X11_XV
 
 #include <X11/Xlib.h>
 #ifndef NO_SHARED_MEMORY
@@ -30,11 +32,10 @@
 #include <sys/shm.h>
 #include <X11/extensions/XShm.h>
 #endif
-#include <Xext/extensions/Xvlib.h>
+#include "../Xext/extensions/Xvlib.h"
 
-#include "SDL_video.h"
 #include "SDL_x11yuv_c.h"
-#include "SDL_yuvfuncs.h"
+#include "../SDL_yuvfuncs.h"
 
 #define XFREE86_REFRESH_HACK
 #ifdef XFREE86_REFRESH_HACK
@@ -407,4 +408,4 @@ void X11_FreeYUVOverlay(_THIS, SDL_Overlay *overlay)
 #endif
 }
 
-#endif /* XFREE86_XV */
+#endif /* SDL_VIDEO_DRIVER_X11_XV */

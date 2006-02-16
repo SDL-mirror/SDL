@@ -138,10 +138,10 @@
 #endif
 
 #include "SDL_video.h"
-#include "SDL_blit.h"
 #include "SDL_syswm.h"
-#include "SDL_sysvideo.h"
-#include "SDL_pixels_c.h"
+#include "../SDL_sysvideo.h"
+#include "../SDL_blit.h"
+#include "../SDL_pixels_c.h"
 #include "SDL_dspvideo.h"
 #include "SDL_macgl_c.h"
 #include "SDL_macwm_c.h"
@@ -177,7 +177,7 @@ static int DSp_HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,
                            SDL_Surface *dst, SDL_Rect *dstrect);
 static int DSp_FillHWRect(_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color);
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
    static void DSp_GL_SwapBuffers (_THIS);
 #endif
 
@@ -296,7 +296,7 @@ static SDL_VideoDevice *DSp_CreateDevice(int devindex)
 	device->UnlockHWSurface = DSp_UnlockHWSurface;
 	device->FlipHWSurface   = DSp_FlipHWSurface;
 	device->FreeHWSurface   = DSp_FreeHWSurface;
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	device->GL_MakeCurrent  = Mac_GL_MakeCurrent;
 	device->GL_SwapBuffers  = DSp_GL_SwapBuffers;
 	device->GL_LoadLibrary = Mac_GL_LoadLibrary;
@@ -1390,7 +1390,7 @@ void DSp_VideoQuit(_THIS)
    DSpShutdown ();
 }
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 
 /* swap buffers with v-sync */
 static void DSp_GL_SwapBuffers (_THIS) {

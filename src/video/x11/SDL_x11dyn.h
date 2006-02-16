@@ -29,7 +29,7 @@
 #include <X11/Xlibint.h>
 #include <X11/Xproto.h>
 
-#include <Xext/extensions/extutil.h>
+#include "../Xext/extensions/extutil.h"
 
 #ifndef NO_SHARED_MEMORY
 #include <sys/ipc.h>
@@ -71,7 +71,7 @@ typedef int (*SDL_X11_XSetExtensionErrorHandlerType)(Display *,char *,char *);
 #define XFree pXFree
 #define _XData32 p_XData32
 
-#if defined(__osf__) && defined(X11_DYNAMIC)
+#if defined(__osf__) && defined(SDL_VIDEO_DRIVER_X11_DYNAMIC)
 #define _SmtBufferOverflow p_SmtBufferOverflow
 #define _SmtIpError p_SmtIpError
 #define ipAllocateData pipAllocateData

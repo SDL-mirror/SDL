@@ -23,8 +23,8 @@
 #include <sys/ioctl.h>
 
 #include "SDL_mouse.h"
-#include "SDL_events_c.h"
-#include "SDL_cursor_c.h"
+#include "../../events/SDL_events_c.h"
+#include "../SDL_cursor_c.h"
 #include "SDL_gsvideo.h"
 #include "SDL_gsmouse_c.h"
 

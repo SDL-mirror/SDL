@@ -27,8 +27,8 @@
 #include "SDL_timer.h"
 #include "SDL_video.h"
 #include "SDL_syswm.h"
-#include "SDL_events_c.h"
-#include "SDL_pixels_c.h"
+#include "../SDL_pixels_c.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_x11modes_c.h"
 #include "SDL_x11wm_c.h"
 

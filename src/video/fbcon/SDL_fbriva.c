@@ -21,7 +21,7 @@
 */
 
 #include "SDL_video.h"
-#include "SDL_blit.h"
+#include "../SDL_blit.h"
 #include "SDL_fbriva.h"
 #include "riva_mmio.h"
 #include "riva_regs.h"

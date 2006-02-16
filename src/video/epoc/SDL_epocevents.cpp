@@ -36,8 +36,8 @@ extern "C" {
 #include "SDL_video.h"
 #include "SDL_keysym.h"
 #include "SDL_keyboard.h"
-#include "SDL_events_c.h"
 #include "SDL_timer.h"
+#include "../../events/SDL_events_c.h"
 }; /* extern "C" */
 
 #include "SDL_epocvideo.h"

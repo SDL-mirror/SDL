@@ -29,7 +29,7 @@
 #include <LowMem.h>
 
 #include "SDL_timer.h"
-#include "SDL_timer_c.h"
+#include "../SDL_timer_c.h"
 
 #define MS_PER_TICK	(1000/60)		/* MacOS tick = 1/60 second */
 

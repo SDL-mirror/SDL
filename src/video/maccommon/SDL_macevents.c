@@ -37,9 +37,9 @@
 #include "SDL_events.h"
 #include "SDL_video.h"
 #include "SDL_syswm.h"
-#include "SDL_events_c.h"
-#include "SDL_cursor_c.h"
-#include "SDL_sysevents.h"
+#include "../../events/SDL_events_c.h"
+#include "../../events/SDL_sysevents.h"
+#include "../SDL_cursor_c.h"
 #include "SDL_macevents_c.h"
 #include "SDL_mackeys.h"
 #include "SDL_macmouse_c.h"
@@ -380,7 +380,7 @@ static int Mac_HandleEvents(_THIS, int wait4it)
 #endif
 	  case updateEvt: {
 		BeginUpdate(SDL_Window);
-	#ifdef HAVE_OPENGL
+	#if SDL_VIDEO_OPENGL
 		if (SDL_VideoSurface->flags & SDL_OPENGL)
 			SDL_GL_SwapBuffers();
 		else

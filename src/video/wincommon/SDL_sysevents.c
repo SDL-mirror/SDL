@@ -25,9 +25,9 @@
 #include "SDL_events.h"
 #include "SDL_video.h"
 #include "SDL_syswm.h"
-#include "SDL_sysevents.h"
-#include "SDL_events_c.h"
-#include "SDL_sysvideo.h"
+#include "../SDL_sysvideo.h"
+#include "../../events/SDL_sysevents.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_lowvideo.h"
 #include "SDL_syswm_c.h"
 #include "SDL_main.h"
@@ -724,7 +724,7 @@ int SDL_RegisterApp(char *name, Uint32 style, void *hInst)
 	class.hbrBackground	= NULL;
 	class.hInstance		= SDL_Instance;
 	class.style		= SDL_Appstyle;
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	class.style		|= CS_OWNDC;
 #endif
 	class.lpfnWndProc	= WinMessage;

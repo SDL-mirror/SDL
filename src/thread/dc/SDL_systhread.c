@@ -23,11 +23,11 @@
 /* Thread management routines for SDL */
 
 #include "SDL_thread.h"
-#include "SDL_systhread.h"
+#include "../SDL_systhread.h"
 
 #include <kos/thread.h>
 
-#ifdef	DISABLE_THREADS
+#if SDL_THREADS_DISABLED
 int SDL_SYS_CreateThread(SDL_Thread *thread, void *args)
 {
 	SDL_SetError("Threads are not supported on this platform");

@@ -30,12 +30,12 @@
 
 #include "SDL_timer.h"
 #include "SDL_audio.h"
-#include "SDL_audiomem.h"
-#include "SDL_audio_c.h"
-#include "SDL_audiodev_c.h"
+#include "../SDL_audiomem.h"
+#include "../SDL_audio_c.h"
+#include "../SDL_audiodev_c.h"
 #include "SDL_esdaudio.h"
 
-#ifdef ESD_DYNAMIC
+#ifdef SDL_AUDIO_DRIVER_ESD_DYNAMIC
 #include "SDL_name.h"
 #include "SDL_loadso.h"
 #else
@@ -52,9 +52,9 @@ static void ESD_PlayAudio(_THIS);
 static Uint8 *ESD_GetAudioBuf(_THIS);
 static void ESD_CloseAudio(_THIS);
 
-#ifdef ESD_DYNAMIC
+#ifdef SDL_AUDIO_DRIVER_ESD_DYNAMIC
 
-static const char *esd_library = ESD_DYNAMIC;
+static const char *esd_library = SDL_AUDIO_DRIVER_ESD_DYNAMIC;
 static void *esd_handle = NULL;
 static int esd_loaded = 0;
 
@@ -112,7 +112,7 @@ static int LoadESDLibrary(void)
 	return 0;
 }
 
-#endif /* ESD_DYNAMIC */
+#endif /* SDL_AUDIO_DRIVER_ESD_DYNAMIC */
 
 /* Audio driver bootstrap functions */
 

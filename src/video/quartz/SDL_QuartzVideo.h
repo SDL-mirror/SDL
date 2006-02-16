@@ -60,11 +60,11 @@
 #include "SDL_video.h"
 #include "SDL_error.h"
 #include "SDL_timer.h"
-#include "SDL_syswm.h"
-#include "SDL_sysvideo.h"
-#include "SDL_pixels_c.h"
-#include "SDL_events_c.h"
 #include "SDL_loadso.h"
+#include "SDL_syswm.h"
+#include "../SDL_sysvideo.h"
+#include "../SDL_pixels_c.h"
+#include "../../events/SDL_events_c.h"
 
 /* 
     This is a workaround to directly access NSOpenGLContext's CGL context

@@ -31,8 +31,8 @@
 #include "joyos2.h"
 
 #include "SDL_joystick.h"
-#include "SDL_sysjoystick.h"
-#include "SDL_joystick_c.h"
+#include "../SDL_sysjoystick.h"
+#include "../SDL_joystick_c.h"
 
 HFILE hJoyPort = NULL;		/* Joystick GAME$ Port Address */
 #define MAX_JOYSTICKS	2	/* Maximum of two joysticks */

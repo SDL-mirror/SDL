@@ -21,7 +21,7 @@
 */
 
 #include "SDL_x11video.h"
-#include "SDL_events_c.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_x11dga_c.h"
 #include "SDL_x11gl_c.h"
 
@@ -42,7 +42,7 @@
 
 XVisualInfo *X11_GL_GetVisual(_THIS)
 {
-#ifdef HAVE_OPENGL_X11
+#if SDL_VIDEO_OPENGL_GLX
 	/* 64 seems nice. */
 	int attribs[64];
 	int i;
@@ -170,7 +170,7 @@ XVisualInfo *X11_GL_GetVisual(_THIS)
 int X11_GL_CreateWindow(_THIS, int w, int h)
 {
 	int retval;
-#ifdef HAVE_OPENGL_X11
+#if SDL_VIDEO_OPENGL_GLX
 	XSetWindowAttributes attributes;
 	unsigned long mask;
 	unsigned long black;
@@ -202,7 +202,7 @@ int X11_GL_CreateWindow(_THIS, int w, int h)
 int X11_GL_CreateContext(_THIS)
 {
 	int retval;
-#ifdef HAVE_OPENGL_X11
+#if SDL_VIDEO_OPENGL_GLX
 	/* We do this to create a clean separation between X and GLX errors. */
 	pXSync( SDL_Display, False );
 	glx_context = this->gl_data->glXCreateContext(GFX_Display, 
@@ -228,7 +228,7 @@ int X11_GL_CreateContext(_THIS)
 
 void X11_GL_Shutdown(_THIS)
 {
-#ifdef HAVE_OPENGL_X11
+#if SDL_VIDEO_OPENGL_GLX
 	/* Clean up OpenGL */
 	if( glx_context ) {
 		this->gl_data->glXMakeCurrent(GFX_Display, None, NULL);
@@ -239,10 +239,10 @@ void X11_GL_Shutdown(_THIS)
 		glx_context = NULL;
 	}
 	gl_active = 0;
-#endif /* HAVE_OPENGL_X11 */
+#endif /* SDL_VIDEO_OPENGL_GLX */
 }
 
-#ifdef HAVE_OPENGL_X11
+#if SDL_VIDEO_OPENGL_GLX
 
 /* Make the current context active */
 int X11_GL_MakeCurrent(_THIS)
@@ -331,19 +331,14 @@ void X11_GL_SwapBuffers(_THIS)
 	this->gl_data->glXSwapBuffers(GFX_Display, SDL_Window);
 }
 
-#endif /* HAVE_OPENGL_X11 */
+#endif /* SDL_VIDEO_OPENGL_GLX */
 
 void X11_GL_UnloadLibrary(_THIS)
 {
-#ifdef HAVE_OPENGL_X11
+#if SDL_VIDEO_OPENGL_GLX
 	if ( this->gl_config.driver_loaded ) {
 
-		/* !!! FIXME: Can we just use SDL_UnloadObject() everywhere? */
-		#ifdef USE_DLOPEN
-		dlclose(this->gl_config.dll_handle);
-		#else
 		SDL_UnloadObject(this->gl_config.dll_handle);
-		#endif
 
 		this->gl_data->glXGetProcAddress = NULL;
 		this->gl_data->glXChooseVisual = NULL;
@@ -358,21 +353,7 @@ void X11_GL_UnloadLibrary(_THIS)
 #endif
 }
 
-#ifdef HAVE_OPENGL_X11
-
-static void *do_dlsym(void *handle, const char *name)
-{
-	/* !!! FIXME: Can we just use SDL_LoadFunction() everywhere? */
-#ifdef USE_DLOPEN
-	return dlsym(handle, name);
-#else
-	return SDL_LoadFunction(handle, name);
-#endif
-}
-
-#if defined(__OpenBSD__) && !defined(__ELF__)
-#define do_dlsym(x,y) do_dlsym(x, "_" y)
-#endif
+#if SDL_VIDEO_OPENGL_GLX
 
 /* Passing a NULL path means load pointers from the application */
 int X11_GL_LoadLibrary(_THIS, const char* path) 
@@ -391,49 +372,32 @@ int X11_GL_LoadLibrary(_THIS, const char* path)
 		}
 	}
 
-	/* !!! FIXME: Can we just use SDL_LoadObject() everywhere? */
-	#ifdef USE_DLOPEN
-	{
-		#ifdef RTLD_GLOBAL
-			int dlopen_flags = RTLD_LAZY | RTLD_GLOBAL;
-		#else
-			int dlopen_flags = RTLD_LAZY;
-		#endif
-		handle = dlopen(path, dlopen_flags);
-		if ( handle == NULL ) {
-			SDL_SetError("Could not load OpenGL library: %s", (const char *) dlerror());
-			return -1;
-		}
+	handle = SDL_LoadObject(path);
+	if ( handle == NULL ) {
+		/* SDL_LoadObject() will call SDL_SetError() for us. */
+		return -1;
 	}
-	#else
-		handle = SDL_LoadObject(path);
-		if ( handle == NULL ) {
-			/* SDL_LoadObject() will call SDL_SetError() for us. */
-			return -1;
-		}
-	#endif
-
 
 	/* Unload the old driver and reset the pointers */
 	X11_GL_UnloadLibrary(this);
 
 	/* Load new function pointers */
 	this->gl_data->glXGetProcAddress =
-		(void *(*)(const GLubyte *)) do_dlsym(handle, "glXGetProcAddressARB");
+		(void *(*)(const GLubyte *)) SDL_LoadFunction(handle, "glXGetProcAddressARB");
 	this->gl_data->glXChooseVisual =
-		(XVisualInfo *(*)(Display *, int, int *)) do_dlsym(handle, "glXChooseVisual");
+		(XVisualInfo *(*)(Display *, int, int *)) SDL_LoadFunction(handle, "glXChooseVisual");
 	this->gl_data->glXCreateContext =
-		(GLXContext (*)(Display *, XVisualInfo *, GLXContext, int)) do_dlsym(handle, "glXCreateContext");
+		(GLXContext (*)(Display *, XVisualInfo *, GLXContext, int)) SDL_LoadFunction(handle, "glXCreateContext");
 	this->gl_data->glXDestroyContext =
-		(void (*)(Display *, GLXContext)) do_dlsym(handle, "glXDestroyContext");
+		(void (*)(Display *, GLXContext)) SDL_LoadFunction(handle, "glXDestroyContext");
 	this->gl_data->glXMakeCurrent =
-		(int (*)(Display *, GLXDrawable, GLXContext)) do_dlsym(handle, "glXMakeCurrent");
+		(int (*)(Display *, GLXDrawable, GLXContext)) SDL_LoadFunction(handle, "glXMakeCurrent");
 	this->gl_data->glXSwapBuffers =
-		(void (*)(Display *, GLXDrawable)) do_dlsym(handle, "glXSwapBuffers");
+		(void (*)(Display *, GLXDrawable)) SDL_LoadFunction(handle, "glXSwapBuffers");
 	this->gl_data->glXGetConfig =
-		(int (*)(Display *, XVisualInfo *, int, int *)) do_dlsym(handle, "glXGetConfig");
+		(int (*)(Display *, XVisualInfo *, int, int *)) SDL_LoadFunction(handle, "glXGetConfig");
 	this->gl_data->glXQueryExtensionsString =
-		(const char *(*)(Display *, int)) do_dlsym(handle, "glXQueryExtensionsString");
+		(const char *(*)(Display *, int)) SDL_LoadFunction(handle, "glXQueryExtensionsString");
 	
 
 	if ( (this->gl_data->glXChooseVisual == NULL) || 
@@ -460,24 +424,13 @@ int X11_GL_LoadLibrary(_THIS, const char* path)
 
 void *X11_GL_GetProcAddress(_THIS, const char* proc)
 {
-	static char procname[1024];
 	void* handle;
-	void* retval;
 	
 	handle = this->gl_config.dll_handle;
 	if ( this->gl_data->glXGetProcAddress ) {
 		return this->gl_data->glXGetProcAddress((const GLubyte *)proc);
 	}
-#if defined(__OpenBSD__) && !defined(__ELF__)
-#undef do_dlsym
-#endif
-	retval = do_dlsym(handle, proc);
-	if (!retval && SDL_strlen(proc) <= 1022) {
-		procname[0] = '_';
-		SDL_strcpy(procname + 1, proc);
-		retval = do_dlsym(handle, procname);
-	}
-	return retval;
+	return SDL_LoadFunction(handle, proc);
 }
 
-#endif /* HAVE_OPENGL_X11 */
+#endif /* SDL_VIDEO_OPENGL_GLX */

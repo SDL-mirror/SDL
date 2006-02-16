@@ -1058,7 +1058,7 @@ SDL_Overlay *SDL_CreateYUV_SW(_THIS, int width, int height, Uint32 format, SDL_S
 	    case SDL_YV12_OVERLAY:
 	    case SDL_IYUV_OVERLAY:
 		if ( display->format->BytesPerPixel == 2 ) {
-#if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
+#if i386 && __GNUC__ && SDL_ASSEMBLY_BLITTERS
 			/* inline assembly functions */
 			if ( SDL_HasMMX() && (Rmask == 0xF800) &&
 			                     (Gmask == 0x07E0) &&
@@ -1080,7 +1080,7 @@ SDL_Overlay *SDL_CreateYUV_SW(_THIS, int width, int height, Uint32 format, SDL_S
 			swdata->Display2X = Color24DitherYV12Mod2X;
 		}
 		if ( display->format->BytesPerPixel == 4 ) {
-#if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
+#if i386 && __GNUC__ && SDL_ASSEMBLY_BLITTERS
 			/* inline assembly functions */
 			if ( SDL_HasMMX() && (Rmask == 0x00FF0000) &&
 			                     (Gmask == 0x0000FF00) &&

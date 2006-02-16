@@ -21,8 +21,8 @@
 */
 
 #include "SDL_mouse.h"
-#include "SDL_events_c.h"
-#include "SDL_cursor_c.h"
+#include "../../events/SDL_events_c.h"
+#include "../SDL_cursor_c.h"
 #include "SDL_amigamouse_c.h"
 
 
@@ -73,40 +73,4 @@ void amiga_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
 /* Check to see if we need to enter or leave mouse relative mode */
 void amiga_CheckMouseMode(_THIS)
 {
-	/* If the mouse is hidden and input is grabbed, we use relative mode */
-#if 0
-	SDL_Lock_EventThread();
-	if ( !(SDL_cursorstate & CURSOR_VISIBLE) &&
-	     (this->input_grab != SDL_GRAB_OFF) ) {
-		mouse_relative = 1;
-		X11_EnableDGAMouse(this);
-		if ( ! (using_dga & DGA_MOUSE) ) {
-			char *use_mouse_accel;
-
-			SDL_GetMouseState(&mouse_last.x, &mouse_last.y);
-			/* Use as raw mouse mickeys as possible */
-			XGetPointerControl(SDL_Display,
-						&mouse_accel.numerator, 
-						&mouse_accel.denominator,
-						&mouse_accel.threshold);
-			use_mouse_accel = SDL_getenv("SDL_VIDEO_X11_MOUSEACCEL");
-			if ( use_mouse_accel ) {
-				SetMouseAccel(this, use_mouse_accel);
-			}
-		}
-	} else {
-		if ( mouse_relative ) {
-			if ( using_dga & DGA_MOUSE ) {
-				X11_DisableDGAMouse(this);
-			} else {
-				XChangePointerControl(SDL_Display, True, True,
-						mouse_accel.numerator, 
-						mouse_accel.denominator,
-						mouse_accel.threshold);
-			}
-			mouse_relative = 0;
-		}
-	}
-	SDL_Unlock_EventThread();
-#endif
 }

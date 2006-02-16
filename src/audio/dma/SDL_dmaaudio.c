@@ -33,7 +33,10 @@
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
-#ifdef OSS_USE_SOUNDCARD_H
+
+#include "SDL_config.h"
+
+#if SDL_AUDIO_DRIVER_OSS_SOUNDCARD_H
 /* This is installed on some systems */
 #include <soundcard.h>
 #else
@@ -47,9 +50,8 @@
 
 #include "SDL_timer.h"
 #include "SDL_audio.h"
-#include "SDL_audiomem.h"
-#include "SDL_audio_c.h"
-#include "SDL_audiodev_c.h"
+#include "../SDL_audio_c.h"
+#include "../SDL_audiodev_c.h"
 #include "SDL_dmaaudio.h"
 
 /* The tag name used by DMA audio */

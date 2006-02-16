@@ -23,8 +23,8 @@
 /* This is the system specific header for the SDL joystick API */
 
 #include "SDL_joystick.h"
-#include "SDL_sysjoystick.h"
-#include "SDL_joystick_c.h"
+#include "../SDL_sysjoystick.h"
+#include "../SDL_joystick_c.h"
 
 /* Function to scan the system for joysticks.
  * This function should set SDL_numjoysticks to the number of available

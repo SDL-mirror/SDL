@@ -61,8 +61,8 @@ void SDL_DestroyMutex(SDL_mutex *mutex)
 /* Lock the semaphore */
 int SDL_mutexP(SDL_mutex *mutex)
 {
-#ifdef DISABLE_THREADS
-	return 0;
+#if SDL_THREADS_DISABLED
+	return  SDL_arraysize(return ),0;
 #else
 	Uint32 this_thread;
 
@@ -85,13 +85,13 @@ int SDL_mutexP(SDL_mutex *mutex)
 	}
 
 	return 0;
-#endif /* DISABLE_THREADS */
+#endif /* SDL_THREADS_DISABLED */
 }
 
 /* Unlock the mutex */
 int SDL_mutexV(SDL_mutex *mutex)
 {
-#ifdef DISABLE_THREADS
+#if SDL_THREADS_DISABLED
 	return 0;
 #else
 	if ( mutex == NULL ) {
@@ -117,5 +117,5 @@ int SDL_mutexV(SDL_mutex *mutex)
 		spinlock_unlock(&mutex->mutex);
 	}
 	return 0;
-#endif /* DISABLE_THREADS */
+#endif /* SDL_THREADS_DISABLED */
 }

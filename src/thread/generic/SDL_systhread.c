@@ -23,7 +23,7 @@
 /* Thread management routines for SDL */
 
 #include "SDL_thread.h"
-#include "SDL_systhread.h"
+#include "../SDL_systhread.h"
 
 int SDL_SYS_CreateThread(SDL_Thread *thread, void *args)
 {

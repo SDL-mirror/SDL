@@ -27,8 +27,8 @@
 #define _SDL_pgvideo_h
 
 #include "SDL_mouse.h"
-#include "SDL_sysvideo.h"
 #include "SDL_mutex.h"
+#include "../SDL_sysvideo.h"
 
 #include <picogui.h>
 #include <sys/shm.h>

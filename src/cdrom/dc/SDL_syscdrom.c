@@ -26,7 +26,7 @@
 #include <dc/spu.h>
 
 #include "SDL_cdrom.h"
-#include "SDL_syscdrom.h"
+#include "../SDL_syscdrom.h"
 
 /* The system-dependent CD control functions */
 static const char *SDL_SYS_CDName(int drive);

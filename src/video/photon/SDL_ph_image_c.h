@@ -23,7 +23,7 @@
 #ifndef __SDL_PH_IMAGE_H__
 #define __SDL_PH_IMAGE_H__
 
-#include "SDL_events_c.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_ph_video.h"
 
 struct private_hwdata

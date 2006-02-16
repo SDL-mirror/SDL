@@ -29,10 +29,6 @@
 struct SDL_semaphore
 {
 	struct SignalSemaphore Sem;
-	Uint32 count;
-	Uint32 waiters_count;
-	SDL_mutex *count_lock;
-	SDL_cond *count_nonzero;
 };
 
 #undef D
@@ -98,20 +94,9 @@ int SDL_SemWaitTimeout(SDL_sem *sem, Uint32 timeout)
 
 	/* A timeout of 0 is an easy case */
 	if ( timeout == 0 ) {
-		return SDL_SemTryWait(sem);
+		ObtainSemaphore(&sem->Sem);
+		return 1;
 	}
-/*
-	SDL_LockMutex(sem->count_lock);
-	++sem->waiters_count;
-	retval = 0;
-	while ( (sem->count == 0) && (retval != SDL_MUTEX_TIMEDOUT) ) {
-		retval = SDL_CondWaitTimeout(sem->count_nonzero,
-		                             sem->count_lock, timeout);
-	}
-	--sem->waiters_count;
-	--sem->count;
-	SDL_UnlockMutex(sem->count_lock);
-*/
 	if(!(retval=AttemptSemaphore(&sem->Sem)))
 	{
 		SDL_Delay(timeout);
@@ -131,7 +116,6 @@ int SDL_SemWait(SDL_sem *sem)
 {
 	ObtainSemaphore(&sem->Sem);
 	return 0;
-//	return SDL_SemWaitTimeout(sem, SDL_MUTEX_MAXWAIT);
 }
 
 Uint32 SDL_SemValue(SDL_sem *sem)
@@ -145,7 +129,6 @@ Uint32 SDL_SemValue(SDL_sem *sem)
 		#else
 		value = sem->Sem.ss_NestCount;
 		#endif
-//		SDL_UnlockMutex(sem->count_lock);
 	}
 	return value;
 }
@@ -159,14 +142,6 @@ int SDL_SemPost(SDL_sem *sem)
 	D(bug("SemPost semaphore...%lx\n",sem));
 
 	ReleaseSemaphore(&sem->Sem);
-#if 0
-	SDL_LockMutex(sem->count_lock);
-	if ( sem->waiters_count > 0 ) {
-		SDL_CondSignal(sem->count_nonzero);
-	}
-	++sem->count;
-	SDL_UnlockMutex(sem->count_lock);
-#endif
 	return 0;
 }
 

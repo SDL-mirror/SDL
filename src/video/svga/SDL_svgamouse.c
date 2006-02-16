@@ -21,7 +21,7 @@
 */
 
 #include "SDL_mouse.h"
-#include "SDL_events_c.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_svgavideo.h"
 #include "SDL_svgamouse_c.h"
 

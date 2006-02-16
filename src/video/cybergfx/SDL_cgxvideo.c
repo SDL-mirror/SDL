@@ -30,9 +30,9 @@
 #include "SDL_thread.h"
 #include "SDL_video.h"
 #include "SDL_mouse.h"
-#include "SDL_sysvideo.h"
-#include "SDL_pixels_c.h"
-#include "SDL_events_c.h"
+#include "../SDL_sysvideo.h"
+#include "../SDL_pixels_c.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_cgxgl_c.h"
 #include "SDL_cgxvideo.h"
 #include "SDL_cgxwm_c.h"
@@ -40,7 +40,6 @@
 #include "SDL_amigaevents_c.h"
 #include "SDL_cgxmodes_c.h"
 #include "SDL_cgximage_c.h"
-#include "SDL_cgxyuv_c.h"
 
 /* Initialization/Query functions */
 static int CGX_VideoInit(_THIS, SDL_PixelFormat *vformat);
@@ -208,9 +207,6 @@ static SDL_VideoDevice *CGX_CreateDevice(int devindex)
 	device->SetVideoMode = CGX_SetVideoMode;
 	device->ToggleFullScreen = CGX_ToggleFullScreen;
 	device->UpdateMouse = CGX_UpdateMouse;
-#ifdef XFREE86_XV
-	device->CreateYUVOverlay = X11_CreateYUVOverlay;
-#endif
 	device->SetColors = CGX_SetColors;
 	device->UpdateRects = NULL;
 	device->VideoQuit = CGX_VideoQuit;
@@ -227,7 +223,7 @@ static SDL_VideoDevice *CGX_CreateDevice(int devindex)
 	device->GetGamma = CGX_GetGamma;
 	device->SetGammaRamp = CGX_SetGammaRamp;
 	device->GetGammaRamp = NULL;
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	device->GL_LoadLibrary = CGX_GL_LoadLibrary;
 	device->GL_GetProcAddress = CGX_GL_GetProcAddress;
 	device->GL_GetAttribute = CGX_GL_GetAttribute;

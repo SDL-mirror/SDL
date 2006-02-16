@@ -29,8 +29,8 @@
 
 #include "SDL_mouse.h"
 #include "SDL_mutex.h"
-#include "SDL_sysvideo.h"
-#ifdef HAVE_TSLIB
+#include "../SDL_sysvideo.h"
+#if SDL_INPUT_TSLIB
 #include "tslib.h"
 #endif
 
@@ -63,7 +63,7 @@ struct SDL_PrivateVideoData {
 	struct termios saved_kbd_termios;
 
 	int mouse_fd;
-#ifdef HAVE_TSLIB
+#if SDL_INPUT_TSLIB
 	struct tsdev *ts_dev;
 #endif
 
@@ -96,9 +96,9 @@ struct SDL_PrivateVideoData {
 #define saved_kbd_mode		(this->hidden->saved_kbd_mode)
 #define saved_kbd_termios	(this->hidden->saved_kbd_termios)
 #define mouse_fd		(this->hidden->mouse_fd)
-#ifdef HAVE_TSLIB
+#if SDL_INPUT_TSLIB
 #define ts_dev			(this->hidden->ts_dev)
-#endif /* HAVE_TSLIB */
+#endif
 #define cache_vinfo		(this->hidden->cache_vinfo)
 #define saved_vinfo		(this->hidden->saved_vinfo)
 #define saved_cmaplen		(this->hidden->saved_cmaplen)

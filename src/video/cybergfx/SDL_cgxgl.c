@@ -25,14 +25,14 @@
 #include "SDL_cgxgl_c.h"
 #include "SDL_cgxvideo.h"
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 AmigaMesaContext glcont=NULL;
 #endif
 
 /* Init OpenGL */
 int CGX_GL_Init(_THIS)
 {
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
    int i = 0;
 	struct TagItem attributes [ 14 ]; /* 14 should be more than enough :) */
    struct Window *win = (struct Window *)SDL_Window;
@@ -101,7 +101,7 @@ int CGX_GL_Init(_THIS)
 /* Quit OpenGL */
 void CGX_GL_Quit(_THIS)
 {
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	if ( glcont != NULL ) {
 		AmigaMesaDestroyContext(glcont);
 		glcont = NULL;
@@ -114,7 +114,7 @@ void CGX_GL_Quit(_THIS)
 /* Attach context to another window */
 int CGX_GL_Update(_THIS)
 {
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	struct TagItem tags[2];
 	struct Window *win = (struct Window*)SDL_Window;
 	if(glcont == NULL) {
@@ -132,7 +132,7 @@ int CGX_GL_Update(_THIS)
 #endif
 }
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 
 /* Make the current context active */
 int CGX_GL_MakeCurrent(_THIS)
@@ -207,5 +207,5 @@ int CGX_GL_LoadLibrary(_THIS, const char *path) {
 	return 0;
 }
 
-#endif /* HAVE_OPENGL */
+#endif /* SDL_VIDEO_OPENGL */
 

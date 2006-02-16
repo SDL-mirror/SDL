@@ -25,7 +25,7 @@
 
 #include "SDL_endian.h"
 #include "SDL_video.h"
-#include "SDL_pixels_c.h"
+#include "../SDL_pixels_c.h"
 #include "SDL_ph_video.h"
 #include "SDL_ph_image_c.h"
 #include "SDL_ph_modes_c.h"
@@ -293,7 +293,7 @@ int ph_SetupFullScreenImage(_THIS, SDL_Surface* screen)
     return 0;
 }
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 
 int ph_SetupOpenGLImage(_THIS, SDL_Surface* screen)
 {
@@ -321,12 +321,12 @@ int ph_SetupOpenGLImage(_THIS, SDL_Surface* screen)
     return 0;
 }
 
-#endif /* HAVE_OPENGL */
+#endif /* SDL_VIDEO_OPENGL */
 
 void ph_DestroyImage(_THIS, SDL_Surface* screen)
 {
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
     if ((screen->flags & SDL_OPENGL)==SDL_OPENGL)
     {
         if (oglctx)
@@ -354,7 +354,7 @@ void ph_DestroyImage(_THIS, SDL_Surface* screen)
 
         return;
     }
-#endif /* HAVE_OPENGL */
+#endif /* SDL_VIDEO_OPENGL */
 
     if (currently_fullscreen)
     {
@@ -484,14 +484,14 @@ int ph_SetupUpdateFunction(_THIS, SDL_Surface* screen, Uint32 flags)
 
     ph_DestroyImage(this, screen);
     
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
     if ((flags & SDL_OPENGL)==SDL_OPENGL)
     {
         setupresult=ph_SetupOpenGLImage(this, screen);
     }
     else
     {
-#endif /* HAVE_OPENGL */
+#endif
        if ((flags & SDL_FULLSCREEN)==SDL_FULLSCREEN)
        {
            setupresult=ph_SetupFullScreenImage(this, screen);
@@ -507,9 +507,9 @@ int ph_SetupUpdateFunction(_THIS, SDL_Surface* screen, Uint32 flags)
               setupresult=ph_SetupImage(this, screen);
           }
        }
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
     }
-#endif /* HAVE_OPENGL */
+#endif
     if (setupresult!=-1)
     {
        ph_UpdateHWInfo(this);
@@ -954,14 +954,14 @@ int ph_SetHWAlpha(_THIS, SDL_Surface* surface, Uint8 alpha)
     return 0;
 }
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 void ph_OpenGLUpdate(_THIS, int numrects, SDL_Rect* rects)
 {
    this->GL_SwapBuffers(this);
    
    return;
 }
-#endif /* HAVE_OPENGL */
+#endif /* SDL_VIDEO_OPENGL */
 
 void ph_NormalUpdate(_THIS, int numrects, SDL_Rect *rects)
 {

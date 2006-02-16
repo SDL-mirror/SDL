@@ -23,8 +23,6 @@
 #ifndef _SDL_lowaudio_h
 #define _SDL_lowaudio_h
 
-#include "SDL_sysaudio.h"
-
 #define INCL_TYPES
 #define INCL_DOSSEMAPHORES
 #define INCL_DOSRESOURCES
@@ -36,6 +34,8 @@
 #define INCL_MCIOS2
 #include <os2.h>
 #include <os2me.h>     // DART stuff and MMIO stuff
+
+#include "../SDL_sysaudio.h"
 
 /* Hidden "this" pointer for the audio functions */
 #define _THIS	SDL_AudioDevice *_this

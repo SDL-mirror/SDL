@@ -31,9 +31,9 @@
 #include <directfb.h>
 
 #include "SDL.h"
-#include "SDL_sysevents.h"
-#include "SDL_sysvideo.h"
-#include "SDL_events_c.h"
+#include "../SDL_sysvideo.h"
+#include "../../events/SDL_sysevents.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_DirectFB_video.h"
 #include "SDL_DirectFB_events.h"
 

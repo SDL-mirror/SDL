@@ -29,7 +29,7 @@
 #include <LowMem.h>
 
 #include "SDL_timer.h"
-#include "SDL_timer_c.h"
+#include "../SDL_timer_c.h"
 
 #include "FastTimes.h"
 

@@ -24,8 +24,8 @@
 #define _SDL_aavideo_h
 
 #include "SDL_mouse.h"
-#include "SDL_sysvideo.h"
 #include "SDL_mutex.h"
+#include "../SDL_sysvideo.h"
 
 #include <aalib.h>
 

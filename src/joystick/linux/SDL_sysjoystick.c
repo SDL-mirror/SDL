@@ -31,13 +31,13 @@
 #include <linux/limits.h> /* Arm cross-compiler needs this */
 #endif
 #include <linux/joystick.h>
-#ifdef USE_INPUT_EVENTS
+#if SDL_INPUT_LINUXEV
 #include <linux/input.h>
 #endif
 
 #include "SDL_joystick.h"
-#include "SDL_sysjoystick.h"
-#include "SDL_joystick_c.h"
+#include "../SDL_sysjoystick.h"
+#include "../SDL_joystick_c.h"
 
 /* Special joystick configurations */
 static struct {
@@ -168,7 +168,7 @@ struct joystick_hwdata {
 	} *balls;
 
 	/* Support for the Linux 2.4 unified input interface */
-#ifdef USE_INPUT_EVENTS
+#if SDL_INPUT_LINUXEV
 	SDL_bool is_hid;
 	Uint8 key_map[KEY_MAX-BTN_MISC];
 	Uint8 abs_map[ABS_MAX];
@@ -257,7 +257,7 @@ static void LogicalSuffix(int logicalno, char* namebuf, int len)
 
 #endif /* USE_LOGICAL_JOYSTICKS */
 
-#ifdef USE_INPUT_EVENTS
+#if SDL_INPUT_LINUXEV
 #define test_bit(nr, addr) \
 	(((1UL << ((nr) & 31)) & (((const unsigned int *) addr)[(nr) >> 5])) != 0)
 
@@ -278,14 +278,14 @@ static int EV_IsJoystick(int fd)
 	return(1);
 }
 
-#endif /* USE_INPUT_EVENTS */
+#endif /* SDL_INPUT_LINUXEV */
 
 /* Function to scan the system for joysticks */
 int SDL_SYS_JoystickInit(void)
 {
 	/* The base path of the joystick devices */
 	const char *joydev_pattern[] = {
-#ifdef USE_INPUT_EVENTS
+#if SDL_INPUT_LINUXEV
 		"/dev/input/event%d",
 #endif
 		"/dev/input/js%d",
@@ -345,7 +345,7 @@ int SDL_SYS_JoystickInit(void)
 				if ( fd < 0 ) {
 					continue;
 				}
-#ifdef USE_INPUT_EVENTS
+#if SDL_INPUT_LINUXEV
 #ifdef DEBUG_INPUT_EVENTS
 				printf("Checking %s\n", path);
 #endif
@@ -366,7 +366,7 @@ int SDL_SYS_JoystickInit(void)
 				break;
 		}
 
-#ifdef USE_INPUT_EVENTS
+#if SDL_INPUT_LINUXEV
 		/* This is a special case...
 		   If the event devices are valid then the joystick devices
 		   will be duplicates but without extra information about their
@@ -400,7 +400,7 @@ const char *SDL_SYS_JoystickName(int index)
 	fd = open(SDL_joylist[index].fname, O_RDONLY, 0);
 	if ( fd >= 0 ) {
 		if ( 
-#ifdef USE_INPUT_EVENTS
+#if SDL_INPUT_LINUXEV
 		     (ioctl(fd, EVIOCGNAME(sizeof(namebuf)), namebuf) <= 0) &&
 #endif
 		     (ioctl(fd, JSIOCGNAME(sizeof(namebuf)), namebuf) <= 0) ) {
@@ -540,7 +540,7 @@ static SDL_bool JS_ConfigJoystick(SDL_Joystick *joystick, int fd)
 	return(handled);
 }
 
-#ifdef USE_INPUT_EVENTS
+#if SDL_INPUT_LINUXEV
 
 static SDL_bool EV_ConfigJoystick(SDL_Joystick *joystick, int fd)
 {
@@ -639,7 +639,7 @@ static SDL_bool EV_ConfigJoystick(SDL_Joystick *joystick, int fd)
 	return(joystick->hwdata->is_hid);
 }
 
-#endif /* USE_INPUT_EVENTS */
+#endif /* SDL_INPUT_LINUXEV */
 
 #ifndef NO_LOGICAL_JOYSTICKS
 static void ConfigLogicalJoystick(SDL_Joystick *joystick)
@@ -711,7 +711,7 @@ int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
 		ConfigLogicalJoystick(joystick);
 	else
 #endif
-#ifdef USE_INPUT_EVENTS
+#if SDL_INPUT_LINUXEV
 	if ( ! EV_ConfigJoystick(joystick, fd) )
 #endif
 		JS_ConfigJoystick(joystick, fd);
@@ -914,7 +914,7 @@ static __inline__ void JS_HandleEvents(SDL_Joystick *joystick)
 		}
 	}
 }
-#ifdef USE_INPUT_EVENTS
+#if SDL_INPUT_LINUXEV
 static __inline__ int EV_AxisCorrect(SDL_Joystick *joystick, int which, int value)
 {
 	struct axis_correct *correct;
@@ -1016,13 +1016,13 @@ static __inline__ void EV_HandleEvents(SDL_Joystick *joystick)
 		}
 	}
 }
-#endif /* USE_INPUT_EVENTS */
+#endif /* SDL_INPUT_LINUXEV */
 
 void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 {
 	int i;
 	
-#ifdef USE_INPUT_EVENTS
+#if SDL_INPUT_LINUXEV
 	if ( joystick->hwdata->is_hid )
 		EV_HandleEvents(joystick);
 	else

@@ -29,7 +29,7 @@
 #ifndef _SDL_ATARI_GEMDOSEVENTS_H_
 #define _SDL_ATARI_GEMDOSEVENTS_H_
 
-#include "SDL_sysvideo.h"
+#include "../SDL_sysvideo.h"
 
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_VideoDevice *this

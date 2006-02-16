@@ -30,7 +30,7 @@
 /* krat: adding OpenGL support */
 int Mac_GL_Init(_THIS)
 {
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	AGLPixelFormat format;
    	int i = 0;
 	GLint attributes [ 24 ]; /* 24 is max possible in this setup */
@@ -121,7 +121,7 @@ int Mac_GL_Init(_THIS)
 
 void Mac_GL_Quit(_THIS)
 {
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	if ( glContext != NULL ) {
 		aglSetCurrentContext(NULL);
 		aglSetDrawable(glContext, NULL);
@@ -131,7 +131,7 @@ void Mac_GL_Quit(_THIS)
 #endif
 }
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 
 /* Make the current context active */
 int Mac_GL_MakeCurrent(_THIS)
@@ -175,5 +175,5 @@ void* Mac_GL_GetProcAddress(_THIS, const char *proc)
 	return SDL_LoadFunction( this->hidden->libraryHandle, proc );
 }
 
-#endif /* HAVE_OPENGL */
+#endif /* SDL_VIDEO_OPENGL */
 

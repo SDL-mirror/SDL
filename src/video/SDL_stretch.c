@@ -33,15 +33,14 @@
    into the general blitting mechanism.
 */
 
-#if (defined(WIN32) && !defined(_M_ALPHA) && !defined(_WIN32_WCE) && \
-     !defined(__WATCOMC__) && !defined(__LCC__) && !defined(__FREEBCC__)) || \
-    (defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT))
+#if ((defined(_MFC_VER) && defined(_M_IX86)/* && !defined(_WIN32_WCE) still needed? */) || \
+     (defined(i386) && defined(__GNUC__))) && SDL_ASSEMBLY_BLITTERS
 #define USE_ASM_STRETCH
 #endif
 
 #ifdef USE_ASM_STRETCH
 
-#if defined(WIN32) || defined(i386)
+#if defined(_M_IX86) || defined(i386)
 #define PREFIX16	0x66
 #define STORE_BYTE	0xAA
 #define STORE_WORD	0xAB
@@ -282,7 +281,7 @@ int SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect,
 			: "0" (dstp), "1" (srcp), "r" (copy_row)
 			: "memory" );
 #else
-#ifdef WIN32
+#ifdef _MSC_VER
 		{ void *code = copy_row;
 			__asm {
 				push edi

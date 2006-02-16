@@ -24,7 +24,7 @@
 #define _SDL_xbios_h
 
 #include "SDL_stdinc.h"
-#include "SDL_sysvideo.h"
+#include "../SDL_sysvideo.h"
 
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_VideoDevice *this

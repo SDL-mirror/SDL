@@ -24,7 +24,7 @@
 #include <unistd.h>
 
 #include "SDL_endian.h"
-#include "SDL_events_c.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_x11image_c.h"
 
 #ifndef NO_SHARED_MEMORY

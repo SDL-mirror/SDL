@@ -22,7 +22,10 @@
 
 /* These are functions that need to be implemented by a port of SDL */
 
-#include "SDL_thread_c.h"
+#ifndef _SDL_systhread_h
+#define _SDL_systhread_h
+
+#include "SDL_thread.h"
 
 /* This function creates a thread, passing args to SDL_RunThread(),
    saves a system-dependent thread id in thread->id, and returns 0
@@ -45,3 +48,4 @@ extern void SDL_SYS_WaitThread(SDL_Thread *thread);
 /* This function kills the thread and returns */
 extern void SDL_SYS_KillThread(SDL_Thread *thread);
 
+#endif /* _SDL_systhread_h */

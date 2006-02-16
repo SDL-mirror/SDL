@@ -19,7 +19,7 @@
 #include <X11/Xmd.h>
 #include <X11/Xproto.h>
 #include <X11/extensions/Xext.h>
-#include "extutil.h"
+#include "../extensions/extutil.h"
 
 #include "../../x11/SDL_x11dyn.h"
 

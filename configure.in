@@ -40,6 +40,7 @@ AC_SUBST(LT_REVISION)
 AC_SUBST(LT_AGE)
 
 dnl Detect the canonical host and target build environment
+AC_CONFIG_AUX_DIRS($srcdir/build-scripts)
 AC_CANONICAL_SYSTEM
 AC_C_BIGENDIAN
 if test x$ac_cv_c_bigendian = xyes; then
@@ -48,101 +49,54 @@ else
     AC_DEFINE(SDL_BYTEORDER, 1234)
 fi
 
-dnl Setup for automake
-AM_INIT_AUTOMAKE(SDL, $SDL_VERSION)
-
-dnl Disable autoheader
-AUTOHEADER=:
-
 dnl Check for tools
-
+#AC_LIBTOOL_DLOPEN
 AC_LIBTOOL_WIN32_DLL
-AM_PROG_LIBTOOL
-AC_PROG_MAKE_SET
+AC_PROG_LIBTOOL
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_INSTALL
-ASFLAGS=""
-AC_SUBST(ASFLAGS)
-CCAS="$CC"
-AC_SUBST(CCAS)
-CCASFLAGS=""
-AC_SUBST(CCASFLAGS)
-AM_CONDITIONAL([am__fastdepOBJC], false)
-
-dnl The alpha architecture needs special flags for binary portability
-case "$target" in
-    alpha*-*-linux*)
-        if test x$ac_cv_prog_gcc = xyes; then
-            CFLAGS="$CFLAGS -mcpu=ev4 -Wa,-mall"
-        fi
-        ;;
-esac
-
-dnl Add compiler-specific optimization flags
-
-dnl See if the user wants aggressive optimizations of the code
-AC_ARG_ENABLE(debug,
-[  --enable-debug          Disable aggressive optimizations [default=yes]],
-              , enable_debug=yes)
-if test x$enable_debug != xyes; then
-    if test x$ac_cv_prog_gcc = xyes; then
-        CFLAGS="$CFLAGS -fexpensive-optimizations"
-        # Ack! This breaks the MMX YV12 conversion on gcc 2.95.2
-        # CFLAGS="$CFLAGS -fomit-frame-pointer"
-    fi
-    case "$target" in
-        i486-*-*)
-            if test x$ac_cv_prog_gcc = xyes; then
-                CFLAGS="$CFLAGS -march=i486"
-            fi
-            ;;
-        i?86-*-*)
-            if test x$ac_cv_prog_gcc = xyes; then
-                CFLAGS="$CFLAGS -march=pentium -mcpu=pentiumpro"
-            fi
-            ;;
-        *-*-osf*)
-            if test x$ac_cv_prog_gcc != xyes; then
-                CFLAGS="-g3 -fast -arch host"
-            fi
-            ;;
-    esac
-fi
-
-dnl Add verbose warnings by default, and allow ANSI compliance checking
-AC_ARG_ENABLE(strict-ansi,
-[  --enable-strict-ansi    Enable strict ANSI compliance build [default=no]],
-              , enable_strict_ansi=no)
-if test x$ac_cv_prog_gcc = xyes; then
-    CFLAGS="$CFLAGS -Wall"
-    if test x$enable_strict_ansi = xyes; then
-        CFLAGS="$CFLAGS -ansi -pedantic -D_XOPEN_SOURCE"
-    fi
-fi
-
-dnl See whether we are allowed to use the system C library
-AC_ARG_ENABLE(libc,
-[  --enable-libc           Use the system C library [default=yes]],
-              , AC_DEFINE(HAVE_LIBC))
 
 dnl Check for compiler characteristics
 AC_C_CONST
 AC_C_INLINE
 AC_C_VOLATILE
 
-dnl Check for header files
-AC_HEADER_STDC
-AC_CHECK_HEADERS(sys/types.h stdio.h stdlib.h stddef.h stdarg.h malloc.h memory.h string.h strings.h inttypes.h stdint.h ctype.h signal.h)
+dnl See whether we are allowed to use the system C library
+AC_ARG_ENABLE(libc,
+AC_HELP_STRING([--enable-libc], [Use the system C library [default=yes]]),
+              , enable_libc=yes)
+if test x$enable_libc = xyes; then
+    AC_DEFINE(HAVE_LIBC)
 
-dnl Check for typedefs, structures, etc.
-AC_TYPE_SIZE_T
-if test x$ac_cv_header_inttypes_h = xyes -o x$ac_cv_header_stdint_h = xyes; then
-    AC_CHECK_TYPE(int64_t)
-    if test x$ac_cv_type_int64_t = xyes; then
-        AC_DEFINE(SDL_HAS_64BIT_TYPE)
+    dnl Check for C library headers
+    AC_HEADER_STDC
+    AC_CHECK_HEADERS(sys/types.h stdio.h stdlib.h stddef.h stdarg.h malloc.h memory.h string.h strings.h inttypes.h stdint.h ctype.h math.h signal.h)
+
+    dnl Check for typedefs, structures, etc.
+    AC_TYPE_SIZE_T
+    if test x$ac_cv_header_inttypes_h = xyes -o x$ac_cv_header_stdint_h = xyes; then
+        AC_CHECK_TYPE(int64_t)
+        if test x$ac_cv_type_int64_t = xyes; then
+            AC_DEFINE(SDL_HAS_64BIT_TYPE)
+        fi
+        have_inttypes=yes
     fi
-else
+
+    dnl Checks for library functions.
+    AC_FUNC_ALLOCA
+    AC_FUNC_MEMCMP
+    if test x$ac_cv_func_memcmp_working = xyes; then
+        AC_DEFINE(HAVE_MEMCMP)
+    fi
+    AC_FUNC_STRTOD
+    if test x$ac_cv_func_strtod = xyes; then
+        AC_DEFINE(HAVE_STRTOD)
+    fi
+    AC_CHECK_FUNCS(malloc calloc realloc free getenv putenv unsetenv qsort abs bcopy memset memcpy memmove strlen strcpy strncpy strcat strncat strdup _strrev _strupr _strlwr strchr strrchr strstr itoa _ltoa _uitoa _ultoa strtol _i64toa _ui64toa strtoll atoi atof strcmp strncmp stricmp strcasecmp sscanf snprintf vsnprint sigaction setjmp nanosleep)
+fi
+
+if test x$have_inttypes != xyes; then
     AC_CHECK_SIZEOF(char, 1)
     AC_CHECK_SIZEOF(short, 2)
     AC_CHECK_SIZEOF(int, 4)
@@ -181,21 +135,32 @@ else
             AC_DEFINE(SDL_HAS_64BIT_TYPE)
         fi
     fi
-    AC_CHECK_TYPE(uintptr_t, unsigned long)
+    AC_DEFINE(size_t, unsigned int)
+    AC_DEFINE(uintptr_t, unsigned long)
 fi
 
-dnl Checks for library functions.
-AC_FUNC_ALLOCA
-AC_FUNC_MEMCMP
-if test x$ac_cv_func_memcmp_working = xyes; then
-    AC_DEFINE(HAVE_MEMCMP)
+# Set up the build preprocessor flags
+INCLUDE="-I$srcdir/include"
+if test x$srcdir != x.; then
+    INCLUDE="-Iinclude $INCLUDE"
 fi
-AC_FUNC_STRTOD
-if test x$ac_cv_func_strtod = xyes; then
-    AC_DEFINE(HAVE_STRTOD)
-fi
-AC_CHECK_FUNCS(malloc calloc realloc free getenv putenv unsetenv qsort abs bcopy memset memcpy memmove strlen strcpy strncpy strcat strncat strdup _strrev _strupr _strlwr strchr strrchr strstr itoa _ltoa _uitoa _ultoa strtol _i64toa _ui64toa strtoll atoi atof strcmp strncmp stricmp strcasecmp sscanf snprintf vsnprint)
+BUILD_CFLAGS='-D_GNU_SOURCE=1 $(INCLUDE)'
 
+# Standard C sources
+SOURCES="$SOURCES $srcdir/src/*.c"
+SOURCES="$SOURCES $srcdir/src/audio/*.c"
+SOURCES="$SOURCES $srcdir/src/cdrom/*.c"
+SOURCES="$SOURCES $srcdir/src/cpuinfo/*.c"
+SOURCES="$SOURCES $srcdir/src/events/*.c"
+SOURCES="$SOURCES $srcdir/src/file/*.c"
+SOURCES="$SOURCES $srcdir/src/joystick/*.c"
+SOURCES="$SOURCES $srcdir/src/stdlib/*.c"
+SOURCES="$SOURCES $srcdir/src/thread/*.c"
+SOURCES="$SOURCES $srcdir/src/timer/*.c"
+SOURCES="$SOURCES $srcdir/src/video/*.c"
+
+# Set up the build libraries needed
+BUILD_LIBS=""
 
 dnl Initialize the compiler and linker flags for SDL applications
 
@@ -218,104 +183,82 @@ case "$target" in
         MATHLIB="-lm"
         ;;
 esac
-SYSTEM_LIBS="$SYSTEM_LIBS $MATHLIB"
+BUILD_LIBS="$BUILD_LIBS $MATHLIB"
 
 dnl Enable/disable various subsystems of the SDL library
 
 AC_ARG_ENABLE(audio,
-[  --enable-audio          Enable the audio subsystem [default=yes]],
+AC_HELP_STRING([--enable-audio], [Enable the audio subsystem [default=yes]]),
               , enable_audio=yes)
-if test x$enable_audio = xyes; then
-    SDL_EXTRADIRS="$SDL_EXTRADIRS audio"
-    SDL_EXTRALIBS="$SDL_EXTRALIBS audio/libaudio.la"
-else
-    CFLAGS="$CFLAGS -DDISABLE_AUDIO"
+if test x$enable_audio != xyes; then
+    AC_DEFINE(SDL_AUDIO_DISABLED)
 fi
 AC_ARG_ENABLE(video,
-[  --enable-video          Enable the video subsystem [default=yes]],
+AC_HELP_STRING([--enable-video], [Enable the video subsystem [default=yes]]),
               , enable_video=yes)
-if test x$enable_video = xyes; then
-    SDL_EXTRADIRS="$SDL_EXTRADIRS video"
-    SDL_EXTRALIBS="$SDL_EXTRALIBS video/libvideo.la"
-else
-    CFLAGS="$CFLAGS -DDISABLE_VIDEO"
+if test x$enable_video != xyes; then
+    AC_DEFINE(SDL_VIDEO_DISABLED)
 fi
 AC_ARG_ENABLE(events,
-[  --enable-events         Enable the events subsystem [default=yes]],
+AC_HELP_STRING([--enable-events], [Enable the events subsystem [default=yes]]),
               , enable_events=yes)
-if test x$enable_video = xyes -a x$enable_events = xyes; then
-    SDL_EXTRADIRS="$SDL_EXTRADIRS events"
-    SDL_EXTRALIBS="$SDL_EXTRALIBS events/libevents.la"
-else
-    CFLAGS="$CFLAGS -DDISABLE_EVENTS"
+if test x$enable_events != xyes; then
+    AC_DEFINE(SDL_EVENTS_DISABLED)
 fi
 AC_ARG_ENABLE(joystick,
-[  --enable-joystick       Enable the joystick subsystem [default=yes]],
+AC_HELP_STRING([--enable-joystick], [Enable the joystick subsystem [default=yes]]),
               , enable_joystick=yes)
-if test x$enable_joystick = xyes; then
-    SDL_EXTRADIRS="$SDL_EXTRADIRS joystick"
-    SDL_EXTRALIBS="$SDL_EXTRALIBS joystick/libjoystick.la"
-else
-    CFLAGS="$CFLAGS -DDISABLE_JOYSTICK"
+if test x$enable_joystick != xyes; then
+    AC_DEFINE(SDL_JOYSTICK_DISABLED)
 fi
 AC_ARG_ENABLE(cdrom,
-[  --enable-cdrom          Enable the cdrom subsystem [default=yes]],
+AC_HELP_STRING([--enable-cdrom], [Enable the cdrom subsystem [default=yes]]),
               , enable_cdrom=yes)
-if test x$enable_cdrom = xyes; then
-    SDL_EXTRADIRS="$SDL_EXTRADIRS cdrom"
-    SDL_EXTRALIBS="$SDL_EXTRALIBS cdrom/libcdrom.la"
-else
-    CFLAGS="$CFLAGS -DDISABLE_CDROM"
+if test x$enable_cdrom != xyes; then
+    AC_DEFINE(SDL_CDROM_DISABLED)
 fi
 AC_ARG_ENABLE(threads,
-[  --enable-threads        Enable the threading subsystem [default=yes]],
+AC_HELP_STRING([--enable-threads], [Enable the threading subsystem [default=yes]]),
               , enable_threads=yes)
-SDL_EXTRADIRS="$SDL_EXTRADIRS thread"
-SDL_EXTRALIBS="$SDL_EXTRALIBS thread/libthread.la"
 if test x$enable_threads != xyes; then
-    CFLAGS="$CFLAGS -DDISABLE_THREADS"
-    COPY_ARCH_SRC(src/thread, generic, SDL_systhread.c)
-    COPY_ARCH_SRC(src/thread, generic, SDL_systhread_c.h)
-    COPY_ARCH_SRC(src/thread, generic, SDL_sysmutex.c)
-    COPY_ARCH_SRC(src/thread, generic, SDL_sysmutex_c.h)
-    COPY_ARCH_SRC(src/thread, generic, SDL_syssem.c)
-    COPY_ARCH_SRC(src/thread, generic, SDL_syssem_c.h)
-    COPY_ARCH_SRC(src/thread, generic, SDL_syscond.c)
-    COPY_ARCH_SRC(src/thread, generic, SDL_syscond_c.h)
+    AC_DEFINE(SDL_THREADS_DISABLED)
 fi
 AC_ARG_ENABLE(timers,
-[  --enable-timers         Enable the timer subsystem [default=yes]],
+AC_HELP_STRING([--enable-timers], [Enable the timer subsystem [default=yes]]),
               , enable_timers=yes)
-if test x$enable_timers = xyes; then
-    SDL_EXTRADIRS="$SDL_EXTRADIRS timer"
-    SDL_EXTRALIBS="$SDL_EXTRALIBS timer/libtimer.la"
-else
-    CFLAGS="$CFLAGS -DDISABLE_TIMERS"
+if test x$enable_timers != xyes; then
+    AC_DEFINE(SDL_TIMERS_DISABLED)
 fi
 AC_ARG_ENABLE(file,
-[  --enable-file           Enable the file subsystem [default=yes]],
+AC_HELP_STRING([--enable-file], [Enable the file subsystem [default=yes]]),
               , enable_file=yes)
-if test x$enable_file = xyes; then
-    SDL_EXTRADIRS="$SDL_EXTRADIRS file"
-    SDL_EXTRALIBS="$SDL_EXTRALIBS file/libfile.la"
-else
-    CFLAGS="$CFLAGS -DDISABLE_FILE"
+if test x$enable_file != xyes; then
+    AC_DEFINE(SDL_FILE_DISABLED)
+fi
+AC_ARG_ENABLE(loadso,
+AC_HELP_STRING([--enable-loadso], [Enable the shared object loading subsystem [default=yes]]),
+              , enable_loadso=yes)
+if test x$enable_loadso != xyes; then
+    AC_DEFINE(SDL_LOADSO_DISABLED)
 fi
 AC_ARG_ENABLE(cpuinfo,
-[  --enable-cpuinfo        Enable the cpuinfo subsystem [default=yes]],
+AC_HELP_STRING([--enable-cpuinfo], [Enable the cpuinfo subsystem [default=yes]]),
               , enable_cpuinfo=yes)
-if test x$enable_cpuinfo = xyes; then
-    SDL_EXTRADIRS="$SDL_EXTRADIRS cpuinfo"
-    SDL_EXTRALIBS="$SDL_EXTRALIBS cpuinfo/libcpuinfo.la"
-else
-    CFLAGS="$CFLAGS -DDISABLE_CPUINFO"
+if test x$enable_cpuinfo != xyes; then
+    AC_DEFINE(SDL_CPUINFO_DISABLED)
+fi
+AC_ARG_ENABLE(assembly-blit,
+AC_HELP_STRING([--enable-asm-blit], [Enable assembly blitters [default=yes]]),
+              , enable_asm_blit=yes)
+if test x$enable_asm_blit = xyes; then
+    AC_DEFINE(SDL_ASSEMBLY_BLITTERS)
 fi
 
 dnl See if the OSS audio interface is supported
 CheckOSS()
 {
     AC_ARG_ENABLE(oss,
-[  --enable-oss            support the OSS audio API [default=yes]],
+AC_HELP_STRING([--enable-oss], [support the OSS audio API [default=yes]]),
                   , enable_oss=yes)
     if test x$enable_audio = xyes -a x$enable_oss = xyes; then
         AC_MSG_CHECKING(for OSS audio support)
@@ -336,16 +279,21 @@ CheckOSS()
               int arg = SNDCTL_DSP_SETFRAGMENT;
             ],[
             have_oss=yes
-            CFLAGS="$CFLAGS -DOSS_USE_SOUNDCARD_H"
+            AC_DEFINE(SDL_AUDIO_DRIVER_OSS_SOUNDCARD_H)
             ])
         fi
         AC_MSG_RESULT($have_oss)
         if test x$have_oss = xyes; then
-            CFLAGS="$CFLAGS -DOSS_SUPPORT"
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS dsp"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS dsp/libaudio_dsp.la"
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS dma"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS dma/libaudio_dma.la"
+            AC_DEFINE(SDL_AUDIO_DRIVER_OSS)
+            SOURCES="$SOURCES $srcdir/src/audio/dsp/*.c"
+            SOURCES="$SOURCES $srcdir/src/audio/dma/*.c"
+            have_audio=yes
+
+            # OpenBSD needs linking with ossaudio emulation library
+            case "$target" in
+                *-*-openbsd*)
+                    BUILD_LIBS="$BUILD_LIBS -lossaudio";;
+            esac
         fi
     fi
 }
@@ -354,7 +302,7 @@ dnl See if the ALSA audio interface is supported
 CheckALSA()
 {
     AC_ARG_ENABLE(alsa,
-[  --enable-alsa           support the ALSA audio API [default=yes]],
+AC_HELP_STRING([--enable-alsa], [support the ALSA audio API [default=yes]]),
                   , enable_alsa=yes)
     if test x$enable_audio = xyes -a x$enable_alsa = xyes; then
         AM_PATH_ALSA(0.9.0, have_alsa=yes, have_alsa=no)
@@ -362,6 +310,39 @@ CheckALSA()
         CFLAGS="$alsa_save_CFLAGS"
         LDFLAGS="$alsa_save_LDFLAGS"
         LIBS="$alsa_save_LIBS"
+        if test x$have_alsa = xyes; then
+            AC_ARG_ENABLE(alsa-shared,
+AC_HELP_STRING([--enable-alsa-shared], [dynamically load ALSA audio support [default=yes]]),
+                          , enable_alsa_shared=yes)
+            if test "x`echo $ALSA_LIBS | grep -- -L`" = "x"; then
+                if test "x`ls /lib/libasound.so.* 2> /dev/null`" != "x"; then
+                    ALSA_LIBS="-L/lib $ALSA_LIBS"
+                elif test "x`ls /usr/lib/libasound.so.* 2> /dev/null`" != "x"; then
+                    ALSA_LIBS="-L/usr/lib $ALSA_LIBS"
+                elif test "x`ls /usr/local/lib/libasound.so.* 2> /dev/null`" != "x"; then
+                    ALSA_LIBS="-L/usr/local/lib $ALSA_LIBS"
+                fi
+            fi
+            alsa_lib_spec=`echo $ALSA_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libasound.so.*/'`
+            alsa_lib=`ls $alsa_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
+            echo "-- $alsa_lib_spec -> $alsa_lib"
+
+            AC_DEFINE(SDL_AUDIO_DRIVER_ALSA)
+            SOURCES="$SOURCES $srcdir/src/audio/alsa/*.c"
+            BUILD_CFLAGS="$BUILD_CFLAGS $ALSA_CFLAGS"
+            if test x$have_loadso != xyes && \
+               test x$enable_alsa_shared = xyes; then
+                AC_MSG_ERROR([You must have SDL_LoadObject() support])
+            fi
+            if test x$have_loadso = xyes && \
+               test x$enable_alsa_shared = xyes && test x$alsa_lib != x; then
+                AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_ALSA_DYNAMIC, "$alsa_lib")
+            else
+                BUILD_LIBS="$BUILD_LIBS $ALSA_LIBS"
+            fi
+            have_audio=yes
+        fi
+    fi
         if test x$have_alsa = xyes; then
             AC_ARG_ENABLE(alsa-shared,
 [  --enable-alsa-shared     dynamically load ALSA audio support [default=yes]],
@@ -397,10 +378,8 @@ CheckALSA()
                 CFLAGS="$CFLAGS -DALSA_SUPPORT $ALSA_CFLAGS"
                 SYSTEM_LIBS="$SYSTEM_LIBS $ALSA_LIBS"
             fi
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS alsa"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS alsa/libaudio_alsa.la"
+            SDL_SRCS="$SDL_SRCS `(cd $srcdir && ls audio/alsa/*.c)`"
         fi
-    fi
 }
 
 dnl Check whether we want to use IRIX 6.5+ native audio or not
@@ -419,10 +398,10 @@ CheckDMEDIA()
         AC_MSG_RESULT($have_dmedia)
         # Set up files for the audio library
         if test x$have_dmedia = xyes; then
-            CFLAGS="$CFLAGS -DDMEDIA_SUPPORT"
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS dmedia"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS dmedia/libaudio_dmedia.la"
-            SYSTEM_LIBS="$SYSTEM_LIBS -laudio"
+            AC_DEFINE(SDL_AUDIO_DRIVER_DMEDIA)
+            SOURCES="$SOURCES $srcdir/src/audio/dmedia/*.c"
+            BUILD_LIBS="$BUILD_LIBS -laudio"
+            have_audio=yes
         fi
     fi
 }
@@ -431,13 +410,13 @@ dnl Find the ESD includes and libraries
 CheckESD()
 {
     AC_ARG_ENABLE(esd,
-[  --enable-esd            support the Enlightened Sound Daemon [default=yes]],
+AC_HELP_STRING([--enable-esd], [support the Enlightened Sound Daemon [default=yes]]),
                   , enable_esd=yes)
     if test x$enable_audio = xyes -a x$enable_esd = xyes; then
         AM_PATH_ESD(0.2.8, have_esd=yes, have_esd=no)
         if test x$have_esd = xyes; then
             AC_ARG_ENABLE(esd-shared,
-[  --enable-esd-shared     dynamically load ESD audio support [default=yes]],
+AC_HELP_STRING([--enable-esd-shared], [dynamically load ESD audio support [default=yes]]),
                           , enable_esd_shared=yes)
             esd_lib_spec=`echo $ESD_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libesd.so.*/'`
             esd_lib=`ls $esd_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
@@ -448,14 +427,13 @@ CheckESD()
             fi
             if test x$have_loadso = xyes && \
                test x$enable_esd_shared = xyes && test x$esd_lib != x; then
-                CFLAGS="$CFLAGS -DESD_SUPPORT -DESD_DYNAMIC=\$(esd_lib) $ESD_CFLAGS"
-                AC_SUBST(esd_lib)
-            else
-                CFLAGS="$CFLAGS -DESD_SUPPORT $ESD_CFLAGS"
-                SYSTEM_LIBS="$SYSTEM_LIBS $ESD_LIBS"
+                AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_ESD_DYNAMIC, "$esd_lib")
             fi
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS esd"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS esd/libaudio_esd.la"
+            AC_DEFINE(SDL_AUDIO_DRIVER_ESD)
+            SOURCES="$SOURCES $srcdir/src/audio/esd/*.c"
+            BUILD_CFLAGS="$BUILD_CFLAGS $ESD_CFLAGS"
+            BUILD_LIBS="$BUILD_LIBS $ESD_LIBS"
+            have_audio=yes
         fi
     fi
 }
@@ -463,20 +441,20 @@ CheckESD()
 CheckARTSC()
 {
     AC_ARG_ENABLE(arts,
-[  --enable-arts           support the Analog Real Time Synthesizer [default=yes]],
+AC_HELP_STRING([--enable-arts], [support the Analog Real Time Synthesizer [default=yes]]),
                   , enable_arts=yes)
     if test x$enable_audio = xyes -a x$enable_arts = xyes; then
-        AC_PATH_PROG(ARTSCCONFIG, artsc-config)
-        if test x$ARTSCCONFIG = x -o x$ARTSCCONFIG = x'"$ARTSCCONFIG"'; then
+        AC_PATH_PROG(ARTSCONFIG, artsc-config)
+        if test x$ARTSCONFIG = x -o x$ARTSCONFIG = x'"$ARTSCONFIG"'; then
             : # arts isn't installed
         else
-            ARTSC_CFLAGS=`$ARTSCCONFIG --cflags`
-            ARTSC_LIBS=`$ARTSCCONFIG --libs`
-            ARTSC_PREFIX=`$ARTSCCONFIG --arts-prefix`
+            ARTS_CFLAGS=`$ARTSCONFIG --cflags`
+            ARTS_LIBS=`$ARTSCONFIG --libs`
+            ARTS_PREFIX=`$ARTSCONFIG --arts-prefix`
             AC_MSG_CHECKING(for aRts development environment)
             audio_arts=no
             save_CFLAGS="$CFLAGS"
-            CFLAGS="$CFLAGS $ARTSC_CFLAGS"
+            CFLAGS="$CFLAGS $ARTS_CFLAGS"
             AC_TRY_COMPILE([
              #include <artsc.h>
             ],[
@@ -488,9 +466,9 @@ CheckARTSC()
             AC_MSG_RESULT($audio_arts)
             if test x$audio_arts = xyes; then
                 AC_ARG_ENABLE(arts-shared,
-[  --enable-arts-shared    dynamically load aRts audio support [default=yes]],
+AC_HELP_STRING([--enable-arts-shared], [dynamically load aRts audio support [default=yes]]),
                               , enable_arts_shared=yes)
-                arts_lib_spec="$ARTSC_PREFIX/lib/libartsc.so.*"
+                arts_lib_spec="$ARTS_PREFIX/lib/libartsc.so.*"
                 arts_lib=`ls $arts_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
                 echo "-- $arts_lib_spec -> $arts_lib"
                 if test x$have_loadso != xyes && \
@@ -499,14 +477,13 @@ CheckARTSC()
                 fi
                 if test x$have_loadso = xyes && \
                    test x$enable_arts_shared = xyes && test x$arts_lib != x; then
-                    CFLAGS="$CFLAGS -DARTSC_SUPPORT -DARTSC_DYNAMIC=\$(arts_lib) $ARTSC_CFLAGS"
-                    AC_SUBST(arts_lib)
-                else
-                    CFLAGS="$CFLAGS -DARTSC_SUPPORT $ARTSC_CFLAGS"
-                    SYSTEM_LIBS="$SYSTEM_LIBS $ARTSC_LIBS"
+                    AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_ARTS_DYNAMIC, "$arts_lib")
                 fi
-                AUDIO_SUBDIRS="$AUDIO_SUBDIRS arts"
-                AUDIO_DRIVERS="$AUDIO_DRIVERS arts/libaudio_arts.la"
+                AC_DEFINE(SDL_AUDIO_DRIVER_ARTS)
+                SOURCES="$SOURCES $srcdir/src/audio/arts/*.c"
+                BUILD_CFLAGS="$BUILD_CFLAGS $ARTS_CFLAGS"
+                BUILD_LIBS="$BUILD_LIBS $ARTS_LIBS"
+                have_audio=yes
             fi
         fi
     fi
@@ -516,29 +493,31 @@ dnl See if the NAS audio interface is supported
 CheckNAS()
 {
     AC_ARG_ENABLE(nas,
-[  --enable-nas            support the NAS audio API [default=yes]],
+AC_HELP_STRING([--enable-nas], [support the NAS audio API [default=yes]]),
                   , enable_nas=yes)
     if test x$enable_audio = xyes -a x$enable_nas = xyes; then
         AC_MSG_CHECKING(for NAS audio support)
         have_nas=no
         if test -r /usr/X11R6/include/audio/audiolib.h; then
             have_nas=yes
-            CFLAGS="$CFLAGS -DNAS_SUPPORT -I/usr/X11R6/include/"
-            SYSTEM_LIBS="$SYSTEM_LIBS -laudio -lXt"
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS nas"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS nas/libaudio_nas.la"
+            NAS_CFLAGS="-I/usr/X11R6/include/"
+            NAS_LIBS="-laudio -lXt"
 
         dnl On IRIX, the NAS includes are in a different directory,
         dnl and libnas must be explicitly linked in
 
         elif test -r /usr/freeware/include/nas/audiolib.h; then
             have_nas=yes
-            CFLAGS="$CFLAGS -DNAS_SUPPORT"
-            SYSTEM_LIBS="$SYSTEM_LIBS -lnas -lXt"
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS nas"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS nas/libaudio_nas.la"
+            NAS_LIBS="-lnas -lXt"
         fi
         AC_MSG_RESULT($have_nas)
+        if test x$have_nas = xyes; then
+            AC_DEFINE(SDL_AUDIO_DRIVER_NAS)
+            SOURCES="$SOURCES $srcdir/src/audio/nas/*.c"
+            BUILD_CFLAGS="$BUILD_CFLAGS $NAS_CFLAGS"
+            BUILD_LIBS="$BUILD_LIBS $NAS_LIBS"
+            have_audio=yes
+        fi
     fi
 }
 
@@ -546,12 +525,11 @@ dnl rcg07142001 See if the user wants the disk writer audio driver...
 CheckDiskAudio()
 {
     AC_ARG_ENABLE(diskaudio,
-[  --enable-diskaudio      support the disk writer audio driver [default=yes]],
+AC_HELP_STRING([--enable-diskaudio], [support the disk writer audio driver [default=yes]]),
                   , enable_diskaudio=yes)
     if test x$enable_audio = xyes -a x$enable_diskaudio = xyes; then
-        CFLAGS="$CFLAGS -DDISKAUD_SUPPORT"
-        AUDIO_SUBDIRS="$AUDIO_SUBDIRS disk"
-        AUDIO_DRIVERS="$AUDIO_DRIVERS disk/libaudio_disk.la"
+        AC_DEFINE(SDL_AUDIO_DRIVER_DISK)
+        SOURCES="$SOURCES $srcdir/src/audio/disk/*.c"
     fi
 }
 
@@ -559,22 +537,22 @@ dnl Set up the Atari Audio driver
 CheckAtariAudio()
 {
     AC_ARG_ENABLE(mintaudio,
-[  --enable-mintaudio      support Atari audio driver [default=yes]],
+AC_HELP_STRING([--enable-mintaudio], [support Atari audio driver [default=yes]]),
                   , enable_mintaudio=yes)
     if test x$enable_audio = xyes -a x$enable_mintaudio = xyes; then
         mintaudio=no
         AC_CHECK_HEADER(mint/falcon.h, have_mint_falcon_hdr=yes)
         if test x$have_mint_falcon_hdr = xyes; then
             mintaudio=yes
-            CFLAGS="$CFLAGS -DMINTAUDIO_SUPPORT"
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS mint"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS mint/libaudio_mintaudio.la"
+            AC_DEFINE(SDL_AUDIO_DRIVER_MINT)
+            SOURCES="$SOURCES $srcdir/src/audio/ming/*.c"
+            have_audio=yes
         fi
     fi
 }
 
 dnl See if we can use x86 assembly blitters
-# NASM is available from: http://nasm.octium.net/
+# NASM is available from: http://nasm.sourceforge.net
 CheckNASM()
 {
     dnl Make sure we are running on an x86 platform
@@ -588,14 +566,13 @@ CheckNASM()
     esac
     dnl Check for NASM (for assembly blit routines)
     AC_ARG_ENABLE(nasm,
-[  --enable-nasm           use nasm assembly blitters on x86 [default=yes]],
+AC_HELP_STRING([--enable-nasm], [use nasm assembly blitters on x86 [default=yes]]),
                   , enable_nasm=yes)
-    if test x$enable_video = xyes -a x$enable_nasm = xyes; then
+    if test x$enable_video = xyes -a x$enable_asm_blit = xyes -a x$enable_nasm = xyes; then
         AC_PATH_PROG(NASM, nasm)
-        if test x$NASM = x -o x$NASM = x'"$NASM"'; then
-            : # nasm isn't installed
-        else
-            CFLAGS="$CFLAGS -DUSE_ASMBLIT -I$srcdir/hermes"
+        if test x$NASM != x -a x$NASM != x'"$NASM"'; then
+            AC_DEFINE(SDL_HERMES_BLITTERS)
+            SOURCES="$SOURCES $srcdir/src/hermes/*.asm"
             case $ARCH in
               win32)
                   NASMFLAGS="-f win32"
@@ -607,19 +584,94 @@ CheckNASM()
                   NASMFLAGS="-f elf"
                   ;;
             esac
+            AC_SUBST(NASM)
             AC_SUBST(NASMFLAGS)
-            CFLAGS="$CFLAGS -I\$(top_srcdir)/src/hermes"
-            SDL_EXTRADIRS="$SDL_EXTRADIRS hermes"
-            SDL_EXTRALIBS="$SDL_EXTRALIBS hermes/libhermes.la"
-            use_nasm=yes
-            
+
             case "$target" in
                 # this line is needed for QNX, because it's not defined the __ELF__
-                *-*-qnx*) CFLAGS="$CFLAGS -D__ELF__"
-                          ;;
-
+                *-*-qnx*)
+                     BUILD_CFLAGS="$BUILD_CFLAGS -D__ELF__";;
+                *-*-solaris*)
+                     BUILD_CFLAGS="$BUILD_CFLAGS -D__ELF__";;
             esac
+        fi
+    fi
+}
 
+dnl Check for altivec instruction support using gas syntax
+CheckAltivec()
+{
+    AC_ARG_ENABLE(altivec,
+AC_HELP_STRING([--enable-altivec], [use altivec assembly blitters on PPC [default=yes]]),
+                  , enable_altivec=yes)
+    if test x$enable_video = xyes -a x$enable_asm_blit = xyes -a x$enable_altivec = xyes; then
+        have_altivec_h_hdr=no
+        AC_CHECK_HEADER(altivec.h, have_altivec_h_hdr=yes)
+
+        save_CFLAGS="$CFLAGS"
+        have_gcc_altivec=no
+        AC_MSG_CHECKING(for Altivec with GCC -maltivec option)
+        altivec_CFLAGS="-maltivec"
+        CFLAGS="$save_CFLAGS $altivec_CFLAGS"
+
+        if test x$have_altivec_h_hdr = xyes; then
+          AC_TRY_COMPILE([
+          #include <altivec.h>
+          vector unsigned int vzero() {
+              return vec_splat_u32(0);
+          }
+          ],[
+          ],[
+          have_gcc_altivec=yes
+          ])
+          AC_MSG_RESULT($have_gcc_altivec)
+        else
+          AC_TRY_COMPILE([
+          vector unsigned int vzero() {
+              return vec_splat_u32(0);
+          }
+          ],[
+          ],[
+          have_gcc_altivec=yes
+          ])
+          AC_MSG_RESULT($have_gcc_altivec)
+        fi
+
+        if test x$have_gcc_altivec = xno; then
+            AC_MSG_CHECKING(for Altivec with GCC -faltivec option)
+            altivec_CFLAGS="-faltivec"
+            CFLAGS="$save_CFLAGS $altivec_CFLAGS"
+            if test x$have_altivec_h_hdr = xyes; then
+              AC_TRY_COMPILE([
+              #include <altivec.h>
+              vector unsigned int vzero() {
+                  return vec_splat_u32(0);
+              }
+              ],[
+              ],[
+              have_gcc_altivec=yes
+              ])
+              AC_MSG_RESULT($have_gcc_altivec)
+            else
+              AC_TRY_COMPILE([
+              vector unsigned int vzero() {
+                  return vec_splat_u32(0);
+              }
+              ],[
+              ],[
+              have_gcc_altivec=yes
+              ])
+              AC_MSG_RESULT($have_gcc_altivec)
+            fi
+        fi
+        CFLAGS="$save_CFLAGS"
+
+        if test x$have_gcc_altivec = xyes; then
+            AC_DEFINE(SDL_ALTIVEC_BLITTERS)
+            if test x$have_altivec_h_hdr = xyes; then
+              AC_DEFINE(HAVE_ALTIVEC_H)
+            fi
+            BUILD_CFLAGS="$BUILD_CFLAGS $altivec_CFLAGS"
         fi
     fi
 }
@@ -628,49 +680,49 @@ dnl Do the iPod thing
 CheckIPod()
 {
     AC_ARG_ENABLE(ipod,
-[  --enable-ipod          configure SDL to work with iPodLinux [default=yes on arm-elf]],
-	, enable_ipod=yes)
+AC_HELP_STRING([--enable-ipod], [configure SDL to work with iPodLinux [default=yes on arm-elf]]),
+        , enable_ipod=yes)
 
     if test x$enable_ipod = xyes; then
-	CFLAGS="$CFLAGS -DENABLE_IPOD -DIPOD"
-	VIDEO_SUBDIRS="$VIDEO_SUBDIRS ipod"
-	VIDEO_DRIVERS="$VIDEO_DRIVERS ipod/libvideo_ipod.la"
+        BUILD_CFLAGS="$BUILD_CFLAGS -DIPOD"
+        AC_DEFINE(SDL_VIDEO_DRIVER_IPOD)
+        SOURCES="$SOURCES $srcdir/src/video/ipod/*.c"
     fi
-}	
+}
 
 dnl Find the nanox include and library directories
 CheckNANOX()
 {
     AC_ARG_ENABLE(video-nanox,
-        [  --enable-video-nanox use nanox video driver [default=no]],
+        AC_HELP_STRING([--enable-video-nanox], [use nanox video driver [default=no]]),
         , enable_video_nanox=no)
-    AC_ARG_ENABLE(nanox-debug,  
-        [  --enable-nanox-debug print debug messages [default=no]],
-        , enable_nanox_debug=no)
-    AC_ARG_ENABLE(nanox-share-memory,  
-        [  --enable-nanox-share-memory use share memory [default=no]],
-        , enable_nanox_share_memory=no)
-    AC_ARG_ENABLE(nanox_direct_fb, 
-        [  --enable-nanox-direct-fb use direct framebuffer access [default=no]],
-        , enable_nanox_direct_fb=no)
 
     if test x$enable_video = xyes -a x$enable_video_nanox = xyes; then
+        AC_ARG_ENABLE(nanox-debug,  
+            AC_HELP_STRING([--enable-nanox-debug], [print debug messages [default=no]]),
+            , enable_nanox_debug=no)
         if test x$enable_nanox_debug = xyes; then
-            CFLAGS="$CFLAGS -DENABLE_NANOX_DEBUG"
+            BUILD_CFLAGS="$BUILD_CFLAGS -DENABLE_NANOX_DEBUG"
         fi
 
+        AC_ARG_ENABLE(nanox-share-memory,  
+            AC_HELP_STRING([--enable-nanox-share-memory], [use share memory [default=no]]),
+            , enable_nanox_share_memory=no)
         if test x$enable_nanox_share_memory = xyes; then
-            CFLAGS="$CFLAGS -DNANOX_SHARE_MEMORY"
+            BUILD_CFLAGS="$BUILD_CFLAGS -DNANOX_SHARE_MEMORY"
         fi
 
+        AC_ARG_ENABLE(nanox_direct_fb, 
+            AC_HELP_STRING([--enable-nanox-direct-fb], [use direct framebuffer access [default=no]]),
+            , enable_nanox_direct_fb=no)
         if test x$enable_nanox_direct_fb = xyes; then
-            CFLAGS="$CFLAGS -DENABLE_NANOX_DIRECT_FB"
+            BUILD_CFLAGS="$BUILD_CFLAGS -DENABLE_NANOX_DIRECT_FB"
         fi
 
-        CFLAGS="$CFLAGS $X_CFLAGS -DENABLE_NANOX"
-        SYSTEM_LIBS="$SYSTEM_LIBS -lnano-X"
-        VIDEO_SUBDIRS="$VIDEO_SUBDIRS nanox"
-        VIDEO_DRIVERS="$VIDEO_DRIVERS nanox/libvideo_nanox.la"
+        AC_DEFINE(SDL_VIDEO_DRIVER_NANOX)
+        SOURCES="$SOURCES $srcdir/src/video/nanox/*.c"
+        BUILD_LIBS="$BUILD_LIBS -lnano-X"
+        have_video=yes
     fi
 }
 
@@ -678,17 +730,16 @@ dnl Find the X11 include and library directories
 CheckX11()
 {
     AC_ARG_ENABLE(video-x11,
-[  --enable-video-x11      use X11 video driver [default=yes]],
+AC_HELP_STRING([--enable-video-x11], [use X11 video driver [default=yes]]),
                   , enable_video_x11=yes)
     if test x$enable_video = xyes -a x$enable_video_x11 = xyes; then
         AC_PATH_X
         AC_PATH_XTRA
         if test x$have_x = xyes; then
             AC_ARG_ENABLE(x11-shared,
-[  --enable-x11-shared     dynamically load X11 support [default=yes]],
+AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [default=yes]]),
                           , enable_x11_shared=yes)
 
-            dnl !!! FIXME: if a platform needs more than this, fill it in!
             case "$target" in
                 *-*-darwin* )
                     x11_lib='/usr/X11R6/lib/libX11.6.dylib'
@@ -704,6 +755,10 @@ CheckX11()
                     ;;
             esac
 
+            X_CFLAGS="$X_CFLAGS -DXTHREADS"
+            if test x$ac_cv_func_shmat != xyes; then
+                X_CFLAGS="$X_CFLAGS -DNO_SHARED_MEMORY"
+            fi
             if test x$have_loadso != xyes && \
                test x$enable_x11_shared = xyes; then
                 AC_MSG_ERROR([You must have SDL_LoadObject() support])
@@ -711,85 +766,77 @@ CheckX11()
 
             if test x$have_loadso = xyes && \
                test x$enable_x11_shared = xyes && test x$x11_lib != x && test x$x11ext_lib != x; then
-                CFLAGS="$CFLAGS $X_CFLAGS -DENABLE_X11 -DXTHREADS -DX11_DYNAMIC=\$(x11_lib) -DX11EXT_DYNAMIC=\$(x11ext_lib) -I$srcdir/include -I$srcdir/src/video"
-                SYSTEM_LIBS="$SYSTEM_LIBS $X_LIBS"
                 echo "-- dynamic libX11 -> $x11_lib"
                 echo "-- dynamic libX11ext -> $x11ext_lib"
-                AC_SUBST(x11_lib)
-                AC_SUBST(x11ext_lib)
+                AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC, "$x11_lib")
+                AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT, "$x11ext_lib")
             else
-                CFLAGS="$CFLAGS $X_CFLAGS -DENABLE_X11 -DXTHREADS -I$srcdir/include -I$srcdir/src/video"
-                SYSTEM_LIBS="$SYSTEM_LIBS $X_LIBS -lX11 -lXext"
+                X_LIBS="$X_LIBS -lX11 -lXext"
             fi
 
-            if test x$ac_cv_func_shmat != xyes; then
-                CFLAGS="$CFLAGS -DNO_SHARED_MEMORY"
-            fi
 
-            VIDEO_SUBDIRS="$VIDEO_SUBDIRS x11"
-            VIDEO_DRIVERS="$VIDEO_DRIVERS x11/libvideo_x11.la"
+            AC_DEFINE(SDL_VIDEO_DRIVER_X11)
+            SOURCES="$SOURCES $srcdir/src/video/x11/*.c"
+            BUILD_CFLAGS="$BUILD_CFLAGS $X_CFLAGS"
+            BUILD_LIBS="$BUILD_LIBS $X_LIBS"
+            have_video=yes
 
             AC_ARG_ENABLE(dga,
-[  --enable-dga            allow use of X11 DGA code [default=yes]],
+AC_HELP_STRING([--enable-dga], [allow use of X11 DGA code [default=yes]]),
                           , enable_dga=yes)
             if test x$enable_dga = xyes; then
-                VIDEO_SUBDIRS="$VIDEO_SUBDIRS Xext/Xxf86dga"
-                VIDEO_DRIVERS="$VIDEO_DRIVERS Xext/Xxf86dga/libXext_Xxf86dga.la"
+                SOURCES="$SOURCES $srcdir/src/video/Xext/Xxf86dga/*.c"
             fi
             AC_ARG_ENABLE(video-dga,
-[  --enable-video-dga      use DGA 2.0 video driver [default=yes]],
+AC_HELP_STRING([--enable-video-dga], [use DGA 2.0 video driver [default=yes]]),
                   , enable_video_dga=yes)
             if test x$enable_dga = xyes -a x$enable_video_dga = xyes; then
-                CFLAGS="$CFLAGS -DENABLE_DGA"
-                VIDEO_SUBDIRS="$VIDEO_SUBDIRS dga"
-                VIDEO_DRIVERS="$VIDEO_DRIVERS dga/libvideo_dga.la"
+                AC_DEFINE(SDL_VIDEO_DRIVER_DGA)
+                SOURCES="$SOURCES $srcdir/src/video/dga/*.c"
             fi
             AC_ARG_ENABLE(video-x11-dgamouse,
-[  --enable-video-x11-dgamouse  use X11 DGA for mouse events [default=yes]],
+AC_HELP_STRING([--enable-video-x11-dgamouse], [use X11 DGA for mouse events [default=yes]]),
                           , enable_video_x11_dgamouse=yes)
             if test x$enable_dga = xyes -a x$enable_video_x11_dgamouse = xyes; then
-                CFLAGS="$CFLAGS -DXFREE86_DGAMOUSE -DDEFAULT_DGAMOUSE"
+                AC_DEFINE(SDL_VIDEO_DRIVER_X11_DGAMOUSE)
             fi
             AC_ARG_ENABLE(video-x11-vm,
-[  --enable-video-x11-vm   use X11 VM extension for fullscreen [default=yes]],
+AC_HELP_STRING([--enable-video-x11-vm], [use X11 VM extension for fullscreen [default=yes]]),
                           , enable_video_x11_vm=yes)
             if test x$enable_video_x11_vm = xyes; then
-                CFLAGS="$CFLAGS -DXFREE86_VM -DXFREE86_VMGAMMA"
-                VIDEO_SUBDIRS="$VIDEO_SUBDIRS Xext/Xxf86vm"
-                VIDEO_DRIVERS="$VIDEO_DRIVERS Xext/Xxf86vm/libXext_Xxf86vm.la"
+                AC_DEFINE(SDL_VIDEO_DRIVER_X11_VIDMODE)
+                SOURCES="$SOURCES $srcdir/src/video/Xext/Xxf86vm/*.c"
             fi
             AC_ARG_ENABLE(video-x11-xv,
-[  --enable-video-x11-xv   use X11 XvImage extension for video [default=yes]],
+AC_HELP_STRING([--enable-video-x11-xv], [use X11 XvImage extension for video [default=yes]]),
                           , enable_video_x11_xv=yes)
             if test x$enable_video_x11_xv = xyes; then
-                CFLAGS="$CFLAGS -DXFREE86_XV"
-                VIDEO_SUBDIRS="$VIDEO_SUBDIRS Xext/Xv"
-                VIDEO_DRIVERS="$VIDEO_DRIVERS Xext/Xv/libXext_Xv.la"
+                AC_DEFINE(SDL_VIDEO_DRIVER_X11_XV)
+                SOURCES="$SOURCES $srcdir/src/video/Xext/Xv/*.c"
             fi
             AC_ARG_ENABLE(video-x11-xinerama,
-[  --enable-video-x11-xinerama   enable X11 Xinerama support [default=yes]],
+AC_HELP_STRING([--enable-video-x11-xinerama], [enable X11 Xinerama support [default=yes]]),
                             , enable_video_x11_xinerama=yes)
             if test x$enable_video_x11_xinerama = xyes; then
-                CFLAGS="$CFLAGS -DHAVE_XINERAMA"
-                VIDEO_SUBDIRS="$VIDEO_SUBDIRS Xext/Xinerama"
-                VIDEO_DRIVERS="$VIDEO_DRIVERS Xext/Xinerama/libXext_Xinerama.la"
+                AC_DEFINE(SDL_VIDEO_DRIVER_X11_XINERAMA)
+                SOURCES="$SOURCES $srcdir/src/video/Xext/Xinerama/*.c"
             fi
             AC_ARG_ENABLE(video-x11-xme,
-[  --enable-video-x11-xme  enable Xi Graphics XME for fullscreen [default=yes]],
+AC_HELP_STRING([--enable-video-x11-xme], [enable Xi Graphics XME for fullscreen [default=yes]]),
                             , enable_video_x11_xme=yes)
             if test x$enable_video_x11_xme = xyes; then
-                CFLAGS="$CFLAGS -DHAVE_XIGXME"
-                VIDEO_SUBDIRS="$VIDEO_SUBDIRS Xext/XME"
-                VIDEO_DRIVERS="$VIDEO_DRIVERS Xext/XME/libXME.la"
+                AC_DEFINE(SDL_VIDEO_DRIVER_X11_XME)
+                SOURCES="$SOURCES $srcdir/src/video/Xext/XME/*.c"
             fi
         fi
     fi
 }
 
+dnl Check for QNX photon video driver
 CheckPHOTON()
 {
     AC_ARG_ENABLE(video-photon,
-[  --enable-video-photon   use QNX Photon video driver [default=yes]],
+AC_HELP_STRING([--enable-video-photon], [use QNX Photon video driver [default=yes]]),
                   , enable_video_photon=yes)
     if test x$enable_video = xyes -a x$enable_video_photon = xyes; then
         AC_MSG_CHECKING(for QNX Photon support)
@@ -806,11 +853,75 @@ CheckPHOTON()
         ])
         AC_MSG_RESULT($video_photon)
         if test x$video_photon = xyes; then
-            CFLAGS="$CFLAGS -DENABLE_PHOTON"
-            SYSTEM_LIBS="$SYSTEM_LIBS -lph"
-            VIDEO_SUBDIRS="$VIDEO_SUBDIRS photon"
-            VIDEO_DRIVERS="$VIDEO_DRIVERS photon/libvideo_photon.la"
+            AC_DEFINE(SDL_VIDEO_DRIVER_PHOTON)
+            SOURCES="$SOURCES $srcdir/src/video/photon/*.c"
+            BUILD_LIBS="$BUILD_LIBS -lph"
+            have_video=yes
+
             CheckOpenGLQNX
+        fi
+    fi
+}
+
+dnl Set up the BWindow video driver if enabled
+CheckBWINDOW()
+{
+    if test x$enable_video = xyes; then
+        AC_DEFINE(SDL_VIDEO_DRIVER_BWINDOW)
+        SOURCES="$SOURCES $srcdir/src/video/bwindow/*.cc"
+        have_video=yes
+    fi
+}
+
+dnl Set up the Carbon/QuickDraw video driver for Mac OS X (but not Darwin)
+CheckCARBON()
+{
+    AC_ARG_ENABLE(video-carbon,
+AC_HELP_STRING([--enable-video-carbon], [use Carbon/QuickDraw video driver [default=no]]),
+                  , enable_video_carbon=no)
+    if test x$enable_video = xyes -a x$enable_video_carbon = xyes; then
+        AC_MSG_CHECKING(for Carbon framework)
+        have_carbon=no
+        AC_TRY_COMPILE([
+          #include <Carbon/Carbon.h>
+        ],[
+        ],[
+        have_carbon=yes
+        ])
+        AC_MSG_RESULT($have_carbon)
+        if test x$have_carbon = xyes; then
+            AC_DEFINE(SDL_VIDEO_DRIVER_TOOLBOX)
+            SOURCES="$SOURCES $srcdir/src/video/maccommon/*.c"
+            SOURCES="$SOURCES $srcdir/src/video/macrom/*.c"
+            have_video=yes
+        fi
+    fi
+}
+
+dnl Set up the Cocoa/Quartz video driver for Mac OS X (but not Darwin)
+CheckCOCOA()
+{
+    AC_ARG_ENABLE(video-cocoa,
+AC_HELP_STRING([--enable-video-cocoa], [use Cocoa/Quartz video driver [default=yes]]),
+                  , enable_video_cocoa=yes)
+    if test x$enable_video = xyes -a x$enable_video_cocoa = xyes; then
+        save_CFLAGS="$CFLAGS"
+        dnl work around that we don't have Objective-C support in autoconf
+        CFLAGS="$CFLAGS -x objective-c"
+        AC_MSG_CHECKING(for Cocoa framework)
+        have_cocoa=no
+        AC_TRY_COMPILE([
+          #import <Cocoa/Cocoa.h>
+        ],[
+        ],[
+        have_cocoa=yes
+        ])
+        AC_MSG_RESULT($have_cocoa)
+        CFLAGS="$save_CFLAGS"
+        if test x$have_cocoa = xyes; then
+            AC_DEFINE(SDL_VIDEO_DRIVER_QUARTZ)
+            SOURCES="$SOURCES $srcdir/src/video/quartz/*.m"
+            have_video=yes
         fi
     fi
 }
@@ -819,7 +930,7 @@ dnl Find the framebuffer console includes
 CheckFBCON()
 {
     AC_ARG_ENABLE(video-fbcon,
-[  --enable-video-fbcon    use framebuffer console video driver [default=yes]],
+AC_HELP_STRING([--enable-video-fbcon], [use framebuffer console video driver [default=yes]]),
                   , enable_video_fbcon=yes)
     if test x$enable_video = xyes -a x$enable_video_fbcon = xyes; then
         AC_MSG_CHECKING(for framebuffer console support)
@@ -834,9 +945,9 @@ CheckFBCON()
         ])
         AC_MSG_RESULT($video_fbcon)
         if test x$video_fbcon = xyes; then
-            CFLAGS="$CFLAGS -DENABLE_FBCON"
-            VIDEO_SUBDIRS="$VIDEO_SUBDIRS fbcon"
-            VIDEO_DRIVERS="$VIDEO_DRIVERS fbcon/libvideo_fbcon.la"
+            AC_DEFINE(SDL_VIDEO_DRIVER_FBCON)
+            SOURCES="$SOURCES $srcdir/src/video/fbcon/*.c"
+            have_video=yes
         fi
     fi
 }
@@ -845,7 +956,7 @@ dnl Find DirectFB
 CheckDirectFB()
 {
     AC_ARG_ENABLE(video-directfb,
-[  --enable-video-directfb use DirectFB video driver [default=no]],
+AC_HELP_STRING([--enable-video-directfb], [use DirectFB video driver [default=no]]),
                   , enable_video_directfb=no)
     if test x$enable_video = xyes -a x$enable_video_directfb = xyes; then
         video_directfb=no
@@ -871,12 +982,11 @@ CheckDirectFB()
 
         AC_MSG_RESULT($video_directfb)
         if test x$video_directfb = xyes; then
-            CFLAGS="$CFLAGS -DENABLE_DIRECTFB"
-            VIDEO_SUBDIRS="$VIDEO_SUBDIRS directfb"
-            VIDEO_DRIVERS="$VIDEO_DRIVERS directfb/libvideo_directfb.la"
-
-            AC_SUBST(DIRECTFB_CFLAGS)
-            AC_SUBST(DIRECTFB_LIBS)
+            AC_DEFINE(SDL_VIDEO_DRIVER_DIRECTFB)
+            SOURCES="$SOURCES $srcdir/src/video/directfb/*.c"
+            BUILD_CFLAGS="$BUILD_CFLAGS $DIRECTFB_CFLAGS"
+            BUILD_LIBS="$BUILD_LIBS $DIRECTFB_LIBS"
+            have_video=yes
         fi
     fi
 }
@@ -885,7 +995,7 @@ dnl See if we're running on PlayStation 2 hardware
 CheckPS2GS()
 {
     AC_ARG_ENABLE(video-ps2gs,
-[  --enable-video-ps2gs    use PlayStation 2 GS video driver [default=yes]],
+AC_HELP_STRING([--enable-video-ps2gs], [use PlayStation 2 GS video driver [default=yes]]),
                   , enable_video_ps2gs=yes)
     if test x$enable_video = xyes -a x$enable_video_ps2gs = xyes; then
         AC_MSG_CHECKING(for PlayStation 2 GS support)
@@ -899,9 +1009,9 @@ CheckPS2GS()
         ])
         AC_MSG_RESULT($video_ps2gs)
         if test x$video_ps2gs = xyes; then
-            CFLAGS="$CFLAGS -DENABLE_PS2GS"
-            VIDEO_SUBDIRS="$VIDEO_SUBDIRS ps2gs"
-            VIDEO_DRIVERS="$VIDEO_DRIVERS ps2gs/libvideo_ps2gs.la"
+            AC_DEFINE(SDL_VIDEO_DRIVER_PS2GS)
+            SOURCES="$SOURCES $srcdir/src/video/ps2gs/*.c"
+            have_video=yes
         fi
     fi
 }
@@ -910,7 +1020,7 @@ dnl Find the GGI includes
 CheckGGI()
 {
     AC_ARG_ENABLE(video-ggi,
-[  --enable-video-ggi      use GGI video driver [default=no]],
+AC_HELP_STRING([--enable-video-ggi], [use GGI video driver [default=no]]),
                   , enable_video_ggi=no)
     if test x$enable_video = xyes -a x$enable_video_ggi = xyes; then
         AC_MSG_CHECKING(for GGI support)
@@ -924,11 +1034,10 @@ CheckGGI()
         ])
         AC_MSG_RESULT($video_ggi)
         if test x$video_ggi = xyes; then
-            CFLAGS="$CFLAGS $X_CFLAGS -DENABLE_GGI"
-            SYSTEM_LIBS="$SYSTEM_LIBS -lggi -lgii -lgg"
-
-            VIDEO_SUBDIRS="$VIDEO_SUBDIRS ggi"
-            VIDEO_DRIVERS="$VIDEO_DRIVERS ggi/libvideo_ggi.la"
+            AC_DEFINE(SDL_VIDEO_DRIVER_GGI)
+            SOURCES="$SOURCES $srcdir/src/video/ggi/*.c"
+            BUILD_LIBS="$BUILD_LIBS -lggi -lgii -lgg"
+            have_video=yes
         fi
     fi
 }
@@ -937,7 +1046,7 @@ dnl Find the SVGAlib includes and libraries
 CheckSVGA()
 {
     AC_ARG_ENABLE(video-svga,
-[  --enable-video-svga     use SVGAlib video driver [default=no]],
+AC_HELP_STRING([--enable-video-svga], [use SVGAlib video driver [default=no]]),
                   , enable_video_svga=no)
     if test x$enable_video = xyes -a x$enable_video_svga = xyes; then
         AC_MSG_CHECKING(for SVGAlib (1.4.0+) support)
@@ -955,11 +1064,10 @@ CheckSVGA()
         ])
         AC_MSG_RESULT($video_svga)
         if test x$video_svga = xyes; then
-            CFLAGS="$CFLAGS -DENABLE_SVGALIB"
-            SYSTEM_LIBS="$SYSTEM_LIBS -lvga"
-
-            VIDEO_SUBDIRS="$VIDEO_SUBDIRS svga"
-            VIDEO_DRIVERS="$VIDEO_DRIVERS svga/libvideo_svga.la"
+            AC_DEFINE(SDL_VIDEO_DRIVER_SVGALIB)
+            SOURCES="$SOURCES $srcdir/src/video/svga/*.c"
+            BUILD_LIBS="$BUILD_LIBS -lvga"
+            have_video=yes
         fi
     fi
 }
@@ -968,7 +1076,7 @@ dnl Find the VGL includes and libraries
 CheckVGL()
 {
     AC_ARG_ENABLE(video-vgl,
-[  --enable-video-vgl      use VGL video driver [default=no]],
+AC_HELP_STRING([--enable-video-vgl], [use VGL video driver [default=no]]),
                   , enable_video_vgl=no)
     if test x$enable_video = xyes -a x$enable_video_vgl = xyes; then
         AC_MSG_CHECKING(for libVGL support)
@@ -986,20 +1094,45 @@ CheckVGL()
         ])
         AC_MSG_RESULT($video_vgl)
         if test x$video_vgl = xyes; then
-            CFLAGS="$CFLAGS -DENABLE_VGL"
-            SYSTEM_LIBS="$SYSTEM_LIBS -lvgl"
-
-            VIDEO_SUBDIRS="$VIDEO_SUBDIRS vgl"
-            VIDEO_DRIVERS="$VIDEO_DRIVERS vgl/libvideo_vgl.la"
+            AC_DEFINE(SDL_VIDEO_DRIVER_VGL)
+            SOURCES="$SOURCES $srcdir/src/video/vgl/*.c"
+            BUILD_LIBS="$BUILD_LIBS -lvgl"
+            have_video=yes
         fi
     fi
 }
+
+dnl Set up the wscons video driver if enabled
+CheckWscons()
+{
+    AC_ARG_ENABLE(video-wscons,
+AC_HELP_STRING([--enable-video-wscons], [use wscons video driver [default=yes]]),
+                  , enable_video_wscons=yes)
+    if test x$enable_video = xyes -a x$enable_video_wscons = xyes; then
+        AC_MSG_CHECKING(for wscons support)
+        video_wscons=no
+        AC_TRY_COMPILE([
+       #include <sys/time.h>
+       #include <dev/wscons/wsconsio.h>
+        ],[
+        ],[
+        video_wscons=yes
+        ])
+        AC_MSG_RESULT($video_wscons)
+        if test x$video_wscons = xyes; then
+            AC_DEFINE(SDL_VIDEO_DRIVER_WSCONS)
+            SOURCES="$SOURCES $srcdir/src/video/wscons/*.c"
+            have_video=yes
+        fi
+    fi
+}
+
 
 dnl Find the AAlib includes
 CheckAAlib()
 {
     AC_ARG_ENABLE(video-aalib,
-[  --enable-video-aalib    use AAlib video driver [default=no]],
+AC_HELP_STRING([--enable-video-aalib], [use AAlib video driver [default=no]]),
                   , enable_video_aalib=no)
     if test x$enable_video = xyes -a x$enable_video_aalib = xyes; then
         AC_MSG_CHECKING(for AAlib support)
@@ -1012,46 +1145,68 @@ CheckAAlib()
         ])
         AC_MSG_RESULT($video_aalib)
         if test x$video_aalib = xyes; then
-            CFLAGS="$CFLAGS -DENABLE_AALIB"
-            SYSTEM_LIBS="$SYSTEM_LIBS -laa"
-
-            VIDEO_SUBDIRS="$VIDEO_SUBDIRS aalib"
-            VIDEO_DRIVERS="$VIDEO_DRIVERS aalib/libvideo_aa.la"
+            AC_DEFINE(SDL_VIDEO_DRIVER_AALIB)
+            SOURCES="$SOURCES $srcdir/src/video/aalib/*.c"
+            BUILD_LIBS="$BUILD_LIBS -laa"
+            have_video=yes
         fi
     fi
 }
 
-dnl Set up the Atari Xbios driver
-CheckAtariXbiosVideo()
+dnl Set up the QTopia video driver if enabled
+CheckQtopia()
 {
-    AC_ARG_ENABLE(xbios,
-[  --enable-video-xbios    use Atari Xbios video driver [default=yes]],
-                  , enable_video_xbios=yes)
-    video_xbios=no
-    if test x$enable_video = xyes -a x$enable_video_xbios = xyes; then
-        video_xbios=yes
-        CFLAGS="$CFLAGS -DENABLE_XBIOS"
-        VIDEO_SUBDIRS="$VIDEO_SUBDIRS xbios"
-        VIDEO_DRIVERS="$VIDEO_DRIVERS xbios/libvideo_xbios.la"
+    AC_ARG_ENABLE(video-qtopia,
+AC_HELP_STRING([--enable-video-qtopia], [use Qtopia video driver [default=no]]),
+                  , enable_video_qtopia=no)
+    if test x$enable_video = xyes -a x$enable_video_qtopia = xyes; then
+        AC_MSG_CHECKING(for Qtopia support)
+        video_qtopia=no
+        QTOPIA_FLAGS="-DQT_QWS_EBX -DQT_QWS_CUSTOM -DQWS -I${QPEDIR}/include -I${QTDIR}/include/ -DNO_DEBUG -fno-rtti -fno-exceptions"
+        AC_LANG_CPLUSPLUS
+        OLD_CXX="$CXXFLAGS"
+        CXXFLAGS="$QTOPIA_FLAGS"
+        AC_TRY_COMPILE([
+         #include <qpe/qpeapplication.h>
+        ],[
+        ],[
+        video_qtopia=yes
+        ])
+        CXXFLAGS="$OLD_CXX"
+        AC_MSG_RESULT($video_qtopia)
+        if test x$video_qtopia = xyes; then
+            AC_DEFINE(SDL_VIDEO_DRIVER_QTOPIA)
+            SOURCES="$SOURCES $srcdir/src/video/qtopia/*.cc"
+            BUILD_CFLAGS="$BUILD_CFLAGS $QTOPIA_FLAGS"
+            SDL_CFLAGS="$SDL_CFLAGS -DQWS -Dmain=SDL_main"
+            SDL_LIBS="-lSDLmain $SDL_LIBS -L${QPEDIR}/lib -L${QTDIR}/lib/ -lqpe -lqte"
+            have_video=yes
+        fi
+        AC_LANG_C
     fi
 }
 
-dnl Set up the Atari Gem driver
-CheckAtariGemVideo()
+dnl Set up the PicoGUI video driver if enabled
+CheckPicoGUI()
 {
-    AC_ARG_ENABLE(gem,
-[  --enable-video-gem      use Atari Gem video driver [default=yes]],
-                  , enable_video_gem=yes)
-    if test x$enable_video = xyes -a x$enable_video_gem = xyes; then
-        video_gem=no
-        AC_CHECK_HEADER(gem.h, have_gem_hdr=yes)
-        AC_CHECK_LIB(gem, appl_init, have_gem_lib=yes)
-        if test x$have_gem_hdr = xyes -a x$have_gem_lib = xyes; then
-            video_gem=yes
-            CFLAGS="$CFLAGS -DENABLE_GEM"
-            SYSTEM_LIBS="$SYSTEM_LIBS -lgem"
-            VIDEO_SUBDIRS="$VIDEO_SUBDIRS gem"
-            VIDEO_DRIVERS="$VIDEO_DRIVERS gem/libvideo_gem.la"
+    AC_ARG_ENABLE(video-picogui,
+AC_HELP_STRING([--enable-video-picogui], [use PicoGUI video driver [default=no]]),
+                  , enable_video_picogui=no)
+    if test x$enable_video = xyes -a x$enable_video_picogui = xyes; then
+        AC_MSG_CHECKING(for PicoGUI support)
+        video_picogui=no
+        AC_TRY_COMPILE([
+         #include <picogui.h>
+        ],[
+        ],[
+        video_picogui=yes
+        ])
+        AC_MSG_RESULT($video_picogui)
+        if test x$video_picogui = xyes; then
+            AC_DEFINE(SDL_VIDEO_DRIVER_PICOGUI)
+            SOURCES="$SOURCES $srcdir/src/video/picogui/*.c"
+            SDL_LIBS="$SDL_LIBS -lpgui"
+            have_video=yes
         fi
     fi
 }
@@ -1059,27 +1214,59 @@ CheckAtariGemVideo()
 dnl Set up the Atari Bios keyboard driver
 CheckAtariBiosEvent()
 {
-    CFLAGS="$CFLAGS -I\$(top_srcdir)/src/video/ataricommon"
-    VIDEO_SUBDIRS="$VIDEO_SUBDIRS ataricommon"
-    VIDEO_DRIVERS="$VIDEO_DRIVERS ataricommon/libvideo_ataricommon.la"
+    SOURCES="$SOURCES $srcdir/src/video/ataricommon/*.c"
+}
+
+dnl Set up the Atari Xbios driver
+CheckAtariXbiosVideo()
+{
+    AC_ARG_ENABLE(xbios,
+AC_HELP_STRING([--enable-video-xbios], [use Atari Xbios video driver [default=yes]]),
+                  , enable_video_xbios=yes)
+    video_xbios=no
+    if test x$enable_video = xyes -a x$enable_video_xbios = xyes; then
+        video_xbios=yes
+        AC_DEFINE(SDL_VIDEO_DRIVER_XBIOS)
+        SOURCES="$SOURCES $srcdir/src/video/xbios/*.c"
+        have_video=yes
+    fi
+}
+
+dnl Set up the Atari Gem driver
+CheckAtariGemVideo()
+{
+    AC_ARG_ENABLE(gem,
+AC_HELP_STRING([--enable-video-gem], [use Atari Gem video driver [default=yes]]),
+                  , enable_video_gem=yes)
+    if test x$enable_video = xyes -a x$enable_video_gem = xyes; then
+        video_gem=no
+        AC_CHECK_HEADER(gem.h, have_gem_hdr=yes)
+        AC_CHECK_LIB(gem, appl_init, have_gem_lib=yes)
+        if test x$have_gem_hdr = xyes -a x$have_gem_lib = xyes; then
+            AC_DEFINE(SDL_VIDEO_DRIVER_GEM)
+            SOURCES="$SOURCES $srcdir/src/video/gem/*.c"
+            BUILD_LIBS="$BUILD_LIBS -lgem"
+            have_video=yes
+        fi
+    fi
 }
 
 dnl rcg04172001 Set up the Null video driver.
 CheckDummyVideo()
 {
     AC_ARG_ENABLE(video-dummy,
-[  --enable-video-dummy    use dummy video driver [default=yes]],
+AC_HELP_STRING([--enable-video-dummy], [use dummy video driver [default=yes]]),
                   , enable_video_dummy=yes)
     if test x$enable_video_dummy = xyes; then
-      CFLAGS="$CFLAGS -DENABLE_DUMMYVIDEO"
-      VIDEO_SUBDIRS="$VIDEO_SUBDIRS dummy"
-      VIDEO_DRIVERS="$VIDEO_DRIVERS dummy/libvideo_null.la"
+        AC_DEFINE(SDL_VIDEO_DRIVER_DUMMY)
+        SOURCES="$SOURCES $srcdir/src/video/dummy/*.c"
+        have_video=yes
     fi
 }
 
 dnl Check to see if OpenGL support is desired
 AC_ARG_ENABLE(video-opengl,
-[  --enable-video-opengl   include OpenGL context creation [default=yes]],
+AC_HELP_STRING([--enable-video-opengl], [include OpenGL context creation [default=yes]]),
               , enable_video_opengl=yes)
 
 dnl Find OpenGL
@@ -1091,17 +1278,14 @@ CheckOpenGLX11()
         AC_TRY_COMPILE([
          #include <GL/gl.h>
          #include <GL/glx.h>
-         #include <dlfcn.h> /* For loading extensions */
         ],[
         ],[
         video_opengl=yes
         ])
         AC_MSG_RESULT($video_opengl)
         if test x$video_opengl = xyes; then
-            CFLAGS="$CFLAGS -DHAVE_OPENGL -DHAVE_OPENGL_X11"
-            if test x$have_loadso != xyes; then
-                AC_CHECK_LIB(dl, dlopen, SYSTEM_LIBS="$SYSTEM_LIBS -ldl")
-            fi
+            AC_DEFINE(SDL_VIDEO_OPENGL)
+            AC_DEFINE(SDL_VIDEO_OPENGL_GLX)
         fi
     fi
 }
@@ -1120,12 +1304,18 @@ CheckOpenGLQNX()
         ])
         AC_MSG_RESULT($video_opengl)
         if test x$video_opengl = xyes; then
-            CFLAGS="$CFLAGS -DHAVE_OPENGL"
-            SYSTEM_LIBS="$SYSTEM_LIBS -lGL"
-            if test x$have_loadso != xyes; then
-                AC_CHECK_LIB(c, dlopen, SYSTEM_LIBS="$SYSTEM_LIBS", AC_CHECK_LIB(ltdl, dlopen, SYSTEM_LIBS="$SYSTEM_LIBS -lltdl"))
-            fi
+            AC_DEFINE(SDL_VIDEO_OPENGL)
+            BUILD_LIBS="$BUILD_LIBS -lGL"
         fi
+    fi
+}
+
+dnl Check for Win32 OpenGL
+CheckWIN32GL()
+{
+    if test x$enable_video = xyes -a x$enable_video_opengl = xyes; then
+        AC_DEFINE(SDL_VIDEO_OPENGL)
+        AC_DEFINE(SDL_VIDEO_OPENGL_WGL)
     fi
 }
 
@@ -1133,8 +1323,8 @@ dnl Check for BeOS OpenGL
 CheckBeGL()
 {
     if test x$enable_video = xyes -a x$enable_video_opengl = xyes; then
-        CFLAGS="$CFLAGS -DHAVE_OPENGL"
-        SYSTEM_LIBS="$SYSTEM_LIBS -lGL"
+        AC_DEFINE(SDL_VIDEO_OPENGL)
+        BUILD_LIBS="$BUILD_LIBS -lGL"
     fi
 }
 
@@ -1142,12 +1332,12 @@ dnl Check for MacOS OpenGL
 CheckMacGL()
 {
     if test x$enable_video = xyes -a x$enable_video_opengl = xyes; then
-        CFLAGS="$CFLAGS -DHAVE_OPENGL"
+        AC_DEFINE(SDL_VIDEO_OPENGL)
         case "$target" in
             *-*-darwin*)
-                SYSTEM_LIBS="$SYSTEM_LIBS -framework OpenGL"
+                BUILD_LIBS="$BUILD_LIBS -framework OpenGL"
                 # The following is probably not available in Darwin:
-                SYSTEM_LIBS="$SYSTEM_LIBS -framework AGL"
+                BUILD_LIBS="$BUILD_LIBS -framework AGL"
         esac
     fi
 }
@@ -1164,26 +1354,27 @@ CheckAtariOSMesa()
         if test "x$OSMESA_CONFIG" = "xno" -o "x$enable_atari_ldg" = "xno"; then
             # -lOSMesa is really the static library
             if test "x$have_osmesa_hdr" = "xyes" -a "x$have_osmesa_lib" = "xyes"; then
-    	        CFLAGS="$CFLAGS -DHAVE_OPENGL"
-		    	SYSTEM_LIBS="$SYSTEM_LIBS -lOSMesa"
+                OSMESA_LIBS="-lOSMesa"
             fi
         else
             # -lOSMesa is a loader for OSMesa.ldg
             OSMESA_CFLAGS=`$OSMESA_CONFIG --cflags`
             OSMESA_LIBS=`$OSMESA_CONFIG --libs`
-            CFLAGS="$CFLAGS -DHAVE_OPENGL $OSMESA_CFLAGS"
-            SYSTEM_LIBS="$SYSTEM_LIBS $OSMESA_LIBS"
         fi
+        AC_DEFINE(SDL_VIDEO_OPENGL)
+        AC_DEFINE(SDL_VIDEO_OPENGL_OSMESA)
+        BUILD_CFLAGS="$BUILD_CFLAGS $OSMESA_CFLAGS"
+        BUILD_LIBS="$BUILD_LIBS $OSMESA_LIBS"
 
         AC_ARG_ENABLE(osmesa-shared,
-[  --enable-osmesa-shared  dynamically load OSMesa OpenGL support [default=yes]],
+AC_HELP_STRING([--enable-osmesa-shared], [dynamically load OSMesa OpenGL support [default=yes]]),
                               , enable_osmesa_shared=yes)
         if test "x$enable_osmesa_shared" = "xyes" -a "x$enable_atari_ldg" = "xyes"; then
             # Dynamic linking
             if test "x$have_osmesa_hdr" = "xyes"; then
-                CFLAGS="$CFLAGS -DENABLE_OSMESA_SHARED"
+                AC_DEFINE(SDL_VIDEO_OPENGL_OSMESA_DYNAMIC)
             fi
-		fi
+        fi
     fi
 }
 
@@ -1192,7 +1383,7 @@ CheckInputEvents()
 {
     dnl Check for Linux 2.4 unified input event interface support
     AC_ARG_ENABLE(input-events,
-[  --enable-input-events   use Linux 2.4 unified input interface [default=yes]],
+AC_HELP_STRING([--enable-input-events], [use Linux 2.4 unified input interface [default=yes]]),
                   , enable_input_events=yes)
     if test x$enable_input_events = xyes; then
         AC_MSG_CHECKING(for Linux 2.4 unified input interface)
@@ -1208,7 +1399,7 @@ CheckInputEvents()
         ])
         AC_MSG_RESULT($use_input_events)
         if test x$use_input_events = xyes; then
-            CFLAGS="$CFLAGS -DUSE_INPUT_EVENTS"
+            AC_DEFINE(SDL_INPUT_LINUXEV)
         fi
     fi
 }
@@ -1217,7 +1408,7 @@ dnl See if we can use the Touchscreen input library
 CheckTslib()
 {
     AC_ARG_ENABLE(input-tslib,
-[  --enable-input-tslib    use the Touchscreen library for input [default=yes]],
+AC_HELP_STRING([--enable-input-tslib], [use the Touchscreen library for input [default=yes]]),
                   , enable_input_tslib=yes)
     if test x$enable_input_tslib = xyes; then
         AC_MSG_CHECKING(for Touchscreen library support)
@@ -1230,8 +1421,8 @@ CheckTslib()
         ])
         AC_MSG_RESULT($enable_input_tslib)
         if test x$enable_input_tslib = xyes; then
-            CFLAGS="$CFLAGS -DHAVE_TSLIB"
-            SYSTEM_LIBS="$SYSTEM_LIBS -lts"
+            AC_DEFINE(SDL_INPUT_TSLIB)
+            BUILD_LIBS="$BUILD_LIBS -lts"
         fi
     fi
 }
@@ -1241,25 +1432,24 @@ CheckPTH()
 {
     dnl Check for pth support
     AC_ARG_ENABLE(pth,
-[  --enable-pth            use GNU pth library for multi-threading [default=yes]],
+AC_HELP_STRING([--enable-pth], [use GNU pth library for multi-threading [default=yes]]),
                   , enable_pth=yes)
     if test x$enable_threads = xyes -a x$enable_pth = xyes; then
         AC_PATH_PROG(PTH_CONFIG, pth-config, no)
         if test "$PTH_CONFIG" = "no"; then
             use_pth=no
         else
-            PTH_CFLAGS=`$PTH_CONFIG --cflags`
-            PTH_LIBS=`$PTH_CONFIG --libs --all`
-            SDL_CFLAGS="$SDL_CFLAGS $PTH_CFLAGS"
-            SDL_LIBS="$SDL_LIBS $PTH_LIBS"
-            CFLAGS="$CFLAGS -DENABLE_PTH"
             use_pth=yes
         fi
         AC_MSG_CHECKING(pth)
+        AC_MSG_RESULT($use_pth)
         if test "x$use_pth" = xyes; then
-            AC_MSG_RESULT(yes)
-        else
-            AC_MSG_RESULT(no)
+            AC_DEFINE(SDL_THREAD_PTH)
+            SOURCES="$SOURCES $srcdir/src/thread/pth/*.c"
+            SOURCES="$SOURCES $srcdir/src/thread/generic/SDL_syssem.c"
+            SDL_CFLAGS="$SDL_CFLAGS `$PTH_CONFIG --cflags`"
+            SDL_LIBS="$SDL_LIBS `$PTH_CONFIG --libs --all`"
+            have_threads=yes
         fi
     fi
 }
@@ -1269,15 +1459,15 @@ CheckPTHREAD()
 {
     dnl Check for pthread support
     AC_ARG_ENABLE(pthreads,
-[  --enable-pthreads       use POSIX threads for multi-threading [default=yes]],
+AC_HELP_STRING([--enable-pthreads], [use POSIX threads for multi-threading [default=yes]]),
                   , enable_pthreads=yes)
     dnl This is used on Linux for glibc binary compatibility (Doh!)
     AC_ARG_ENABLE(pthread-sem,
-[  --enable-pthread-sem    use pthread semaphores [default=yes]],
+AC_HELP_STRING([--enable-pthread-sem], [use pthread semaphores [default=yes]]),
                   , enable_pthread_sem=yes)
     case "$target" in
         *-*-linux*)
-            pthread_cflags="-D_REENTRANT -D_GNU_SOURCE"
+            pthread_cflags="-D_REENTRANT"
             pthread_lib="-lpthread"
             ;;
         *-*-bsdi*)
@@ -1294,7 +1484,7 @@ CheckPTHREAD()
             pthread_lib="-pthread"
             ;;
         *-*-netbsd*)
-            pthread_cflags="-I/usr/include -D_REENTRANT -D_THREAD_SAFE"
+            pthread_cflags="-I/usr/include -D_REENTRANT -D_THREAD_SAFE -D_POSIX_THREAD_SYSCALL_SOFT=1"
             pthread_lib="-L/usr/lib -lpthread"
             ;;
         *-*-openbsd*)
@@ -1357,10 +1547,12 @@ CheckPTHREAD()
         AC_MSG_RESULT($use_pthreads)
         # Restore the compiler flags and libraries
         CFLAGS="$ac_save_cflags"; LIBS="$ac_save_libs"
+
         # Do futher testing if we have pthread support...
         if test x$use_pthreads = xyes; then
-            CFLAGS="$CFLAGS $pthread_cflags -DSDL_USE_PTHREADS"
-            LIBS="$LIBS $pthread_lib"
+            AC_DEFINE(SDL_THREAD_PTHREAD)
+            BUILD_CFLAGS="$BUILD_CFLAGS $pthread_cflags"
+            BUILD_LIBS="$BUILD_LIBS $pthread_lib"
             SDL_CFLAGS="$SDL_CFLAGS $pthread_cflags"
             SDL_LIBS="$SDL_LIBS $pthread_lib"
 
@@ -1375,7 +1567,7 @@ CheckPTHREAD()
                   pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
                 ],[
                 has_recursive_mutexes=yes
-                CFLAGS="$CFLAGS -DPTHREAD_RECURSIVE_MUTEX"
+                AC_DEFINE(SDL_THREAD_PTHREAD_RECURSIVE_MUTEX)
                 ])
             fi
             if test x$has_recursive_mutexes = xno; then
@@ -1386,13 +1578,10 @@ CheckPTHREAD()
                   pthread_mutexattr_setkind_np(&attr, PTHREAD_MUTEX_RECURSIVE_NP);
                 ],[
                 has_recursive_mutexes=yes
-                CFLAGS="$CFLAGS -DPTHREAD_RECURSIVE_MUTEX_NP"
+                AC_DEFINE(SDL_THREAD_PTHREAD_RECURSIVE_MUTEX_NP)
                 ])
             fi
             AC_MSG_RESULT($has_recursive_mutexes)
-            if test x$has_recursive_mutexes = xno; then
-                CFLAGS="$CFLAGS -DPTHREAD_NO_RECURSIVE_MUTEX"
-            fi
 
             # Check to see if pthread semaphore support is missing
             if test x$enable_pthread_sem = xyes; then
@@ -1408,139 +1597,28 @@ CheckPTHREAD()
                 AC_MSG_RESULT($have_pthread_sem)
             fi
 
-            # Check to see if this is broken glibc 2.0 pthreads
-            case "$target" in
-                *-*-linux*)
-                    AC_MSG_CHECKING(for broken glibc 2.0 pthreads)
-                    glibc20_pthreads=no
-                    AC_TRY_COMPILE([
-                      #include <features.h>
-                      #if (__GLIBC__ == 2) && (__GLIBC_MINOR__ == 0)
-                      #warning Working around a bug in glibc 2.0 pthreads
-                      #else
-                      #error pthread implementation okay
-                      #endif /* glibc 2.0 */
-                    ],[
-                    ],[
-                    glibc20_pthreads=yes
-                    ])
-                    AC_MSG_RESULT($glibc20_pthreads)
-            esac
-        fi
-    fi
+            # Basic thread creation functions
+            SOURCES="$SOURCES $srcdir/src/thread/pthread/SDL_systhread.c"
 
-    AC_MSG_CHECKING(whether semun is defined in /usr/include/sys/sem.h)
-    have_semun=no
-    AC_TRY_COMPILE([
-      #include <sys/types.h>
-      #include <sys/sem.h>
-    ],[
-      union semun t;
-    ],[
-    have_semun=yes
-    ])
-    AC_MSG_RESULT($have_semun)
-    if test x$have_semun = xyes; then
-        CFLAGS="$CFLAGS -DHAVE_SEMUN"
-    fi
+            # Semaphores
+            # We can fake these with mutexes and condition variables if necessary
+            if test x$have_pthread_sem = xyes; then
+                SOURCES="$SOURCES $srcdir/src/thread/pthread/SDL_syssem.c"
+            else
+                SOURCES="$SOURCES $srcdir/src/thread/generic/SDL_syssem.c"
+            fi
 
-    # See if we can use GNU Pth or clone() on Linux directly
-    if test x$enable_threads = xyes -a x$use_pthreads != xyes; then
-        CheckPTH
-        if test x$use_pth != xyes; then
-            case "$target" in
-                *-*-linux*)
-                    use_clone=yes
-                    ;;
-            esac
-        fi
-    fi
-}
+            # Mutexes
+            # We can fake these with semaphores if necessary
+            SOURCES="$SOURCES $srcdir/src/thread/pthread/SDL_sysmutex.c"
 
-# Note that we need to have either semaphores or to have mutexes and
-# condition variables to implement all thread synchronization primitives
-CopyUnixThreadSource()
-{
-    if test x$use_pthreads = xyes -o x$use_clone = xyes; then
-        # Basic thread creation functions
-        COPY_ARCH_SRC(src/thread, linux, SDL_systhread.c)
-        COPY_ARCH_SRC(src/thread, linux, SDL_systhread_c.h)
+            # Condition variables
+            # We can fake these with semaphores and mutexes if necessary
+            SOURCES="$SOURCES $srcdir/src/thread/pthread/SDL_syscond.c"
 
-        # Semaphores
-        # We can fake these with mutexes and condition variables if necessary
-        if test x$use_pthreads = xyes -a x$have_pthread_sem != xyes; then
-            COPY_ARCH_SRC(src/thread, generic, SDL_syssem.c)
+            have_threads=yes
         else
-            COPY_ARCH_SRC(src/thread, linux, SDL_syssem.c)
-        fi
-        COPY_ARCH_SRC(src/thread, generic, SDL_syssem_c.h)
-
-        # Mutexes
-        # We can fake these with semaphores if necessary
-        case "$target" in
-            *-*-bsdi*)
-                COPY_ARCH_SRC(src/thread, bsdi, SDL_syssem.c)
-                COPY_ARCH_SRC(src/thread, generic, SDL_syssem_c.h)
-                COPY_ARCH_SRC(src/thread, linux, SDL_sysmutex.c)
-                COPY_ARCH_SRC(src/thread, linux, SDL_sysmutex_c.h)
-                ;;
-            *)
-                if test x$glibc20_pthreads = xyes; then
-                    COPY_ARCH_SRC(src/thread, generic, SDL_sysmutex.c)
-                    COPY_ARCH_SRC(src/thread, generic, SDL_sysmutex_c.h)
-                else
-                    COPY_ARCH_SRC(src/thread, linux, SDL_sysmutex.c)
-                    COPY_ARCH_SRC(src/thread, linux, SDL_sysmutex_c.h)
-                fi
-                ;;
-        esac
-
-        # Condition variables
-        # We can fake these with semaphores and mutexes if necessary
-        if test x$glibc20_pthreads = xyes -o x$has_recursive_mutexes != xyes; then
-            COPY_ARCH_SRC(src/thread, generic, SDL_syscond.c)
-        else
-            COPY_ARCH_SRC(src/thread, linux, SDL_syscond.c)
-        fi
-        COPY_ARCH_SRC(src/thread, generic, SDL_syscond_c.h)
-
-    elif test x$use_pth = xyes; then
-        COPY_ARCH_SRC(src/thread, pth, SDL_systhread.c)
-        COPY_ARCH_SRC(src/thread, pth, SDL_systhread_c.h)
-        COPY_ARCH_SRC(src/thread, pth, SDL_sysmutex.c)
-        COPY_ARCH_SRC(src/thread, pth, SDL_sysmutex_c.h)
-        COPY_ARCH_SRC(src/thread, pth, SDL_syscond.c)
-        COPY_ARCH_SRC(src/thread, pth, SDL_syscond_c.h)
-        COPY_ARCH_SRC(src/thread, generic, SDL_syssem.c)
-        COPY_ARCH_SRC(src/thread, generic, SDL_syssem_c.h)
-    else
-       AC_MSG_ERROR([
-*** No thread support detected
-       ])
-    fi
-}
-
-dnl See if we can use sigaction() instead of signal()
-CheckSIGACTION()
-{
-    dnl Check for sigaction support
-    AC_ARG_ENABLE(sigaction,
-[  --enable-sigaction      use sigaction instead of signal [default=yes]],
-                  , enable_sigaction=yes)
-    if test x$enable_sigaction = xyes; then
-        AC_MSG_CHECKING(sigaction)
-        have_sigaction=no
-        AC_TRY_COMPILE([
-         #include <signal.h>
-        ],[
-         struct sigaction junk;
-         sigaction(0, &junk, &junk);
-        ],[
-        have_sigaction=yes
-        ])
-        AC_MSG_RESULT($have_sigaction)
-        if test x$have_sigaction = xyes; then
-            CFLAGS="$CFLAGS -DHAVE_SIGACTION"
+            CheckPTH
         fi
     fi
 }
@@ -1565,10 +1643,17 @@ CheckWIN32()
 
     dnl See if the user wants to redirect standard output to files
     AC_ARG_ENABLE(stdio-redirect,
-[  --enable-stdio-redirect Redirect STDIO to files on Win32 [default=yes]],
+AC_HELP_STRING([--enable-stdio-redirect], [Redirect STDIO to files on Win32 [default=yes]]),
                   , enable_stdio_redirect=yes)
     if test x$enable_stdio_redirect != xyes; then
-        CFLAGS="$CFLAGS -DNO_STDIO_REDIRECT"
+        BUILD_CFLAGS="$BUILD_CFLAGS -DNO_STDIO_REDIRECT"
+    fi
+
+    if test x$enable_video = xyes; then
+        AC_DEFINE(SDL_VIDEO_DRIVER_WINDIB)
+        SOURCES="$SOURCES $srcdir/src/video/wincommon/*.c"
+        SOURCES="$SOURCES $srcdir/src/video/windib/*.c"
+        have_video=yes
     fi
 }
 
@@ -1576,249 +1661,52 @@ dnl Find the DirectX includes and libraries
 CheckDIRECTX()
 {
     AC_ARG_ENABLE(directx,
-[  --enable-directx        use DirectX for Win32 audio/video [default=yes]],
+AC_HELP_STRING([--enable-directx], [use DirectX for Win32 audio/video [default=yes]]),
                   , enable_directx=yes)
     if test x$enable_directx = xyes; then
-        AC_MSG_CHECKING(for DirectX headers and libraries)
-        use_directx=no
-        tmp_cflags=$CFLAGS
-        CFLAGS="$CFLAGS -I$srcdir"
-        AC_TRY_COMPILE([
-         #include "src/video/windx5/directx.h"
-        ],[
-        ],[
-        use_directx=yes
-        ])
-        CFLAGS=$tmp_cflags
-        AC_MSG_RESULT($use_directx)
-    fi
-
-    CFLAGS="$CFLAGS -I\$(top_srcdir)/src/video/wincommon"
-    SYSTEM_LIBS="$SYSTEM_LIBS -luser32 -lgdi32 -lwinmm"
-    VIDEO_SUBDIRS="$VIDEO_SUBDIRS wincommon"
-    VIDEO_DRIVERS="$VIDEO_DRIVERS wincommon/libvideo_wincommon.la"
-    # Enable the DIB driver
-    CFLAGS="$CFLAGS -DENABLE_WINDIB"
-    VIDEO_SUBDIRS="$VIDEO_SUBDIRS windib"
-    VIDEO_DRIVERS="$VIDEO_DRIVERS windib/libvideo_windib.la"
-    # See if we should enable the DirectX driver
-    if test x$use_directx = xyes; then
-        CFLAGS="$CFLAGS -DENABLE_DIRECTX"
-        SYSTEM_LIBS="$SYSTEM_LIBS -ldxguid"
-        VIDEO_SUBDIRS="$VIDEO_SUBDIRS windx5"
-        VIDEO_DRIVERS="$VIDEO_DRIVERS windx5/libvideo_windx5.la"
-    fi
-}
-
-dnl Set up the BWindow video driver on BeOS
-CheckBWINDOW()
-{
-    CFLAGS="$CFLAGS -DENABLE_BWINDOW"
-    VIDEO_SUBDIRS="$VIDEO_SUBDIRS bwindow"
-    VIDEO_DRIVERS="$VIDEO_DRIVERS bwindow/libvideo_bwindow.la"
-}
-
-dnl Set up the QTopia video driver if enabled
-CheckQtopia()
-{
-    AC_ARG_ENABLE(video-qtopia,
-[  --enable-video-qtopia   use Qtopia video driver [default=no]],
-                  , enable_video_qtopia=no)
-    if test x$enable_video = xyes -a x$enable_video_qtopia = xyes; then
-        AC_MSG_CHECKING(for Qtopia support)
-        video_qtopia=no
-        AC_LANG_CPLUSPLUS
-        OLD_CXX="$CXXFLAGS"
-        CXXFLAGS="-DQT_QWS_EBX -fno-rtti -fno-exceptions -DQT_QWS_CUSTOM -DQWS -I${QPEDIR}/include -I${QTDIR}/include/ -DNO_DEBUG"
-        AC_TRY_COMPILE([
-         #include <qpe/qpeapplication.h>
-        ],[
-        ],[
-        video_qtopia=yes
-        ])
-        CXXFLAGS="$OLD_CXX"
-        AC_MSG_RESULT($video_qtopia)
-        if test x$video_qtopia = xyes; then
-            CFLAGS="$CFLAGS -DENABLE_QTOPIA -DQT_QWS_EBX -DQT_QWS_CUSTOM -DQWS -I${QPEDIR}/include -I${QTDIR}/include/ -DNO_DEBUG -fno-rtti -fno-exceptions"
-            SDL_LIBS="$SDL_LIBS -L${QPEDIR}/lib -L${QTDIR}/lib/ -lqpe -lqte"
-            SDL_CFLAGS="$SDL_CFLAGS -DQWS"	  
-            VIDEO_SUBDIRS="$VIDEO_SUBDIRS qtopia"
-            VIDEO_DRIVERS="$VIDEO_DRIVERS qtopia/libvideo_qtopia.la"
-        else
-	AC_MSG_ERROR([
-*** Failed to find Qtopia includes. Make sure that the QTDIR and QPEDIR
-*** environment variables are set correctly.])
+        have_directx=no
+        AC_CHECK_HEADER(ddraw.h, have_ddraw=yes)
+        AC_CHECK_HEADER(dsound.h, have_dsound=yes)
+        AC_CHECK_HEADER(dinput.h, use_dinput=yes)
+        if test x$have_ddraw = xyes -a x$have_dsound = xyes -a x$use_dinput = xyes; then
+            have_directx=yes
         fi
-        AC_LANG_C
-    fi
-}
-
-dnl Set up the wscons video driver if enabled
-CheckWscons()
-{
-    AC_ARG_ENABLE(video-wscons,
-[  --enable-video-wscons   use wscons video driver [default=no]],
-                  , enable_video_wscons=no)
-    if test x$enable_video = xyes -a x$enable_video_wscons = xyes; then
-        AC_MSG_CHECKING(for wscons support)
-        video_wscons=no
-        AC_LANG_C
-        AC_TRY_COMPILE([
-       #include <sys/time.h>
-       #include <dev/wscons/wsconsio.h>
-        ],[
-        ],[
-        video_wscons=yes
-        ])
-        AC_MSG_RESULT($video_wscons)
-        if test x$video_wscons = xyes; then
-            CFLAGS="$CFLAGS -DENABLE_WSCONS"
-            VIDEO_SUBDIRS="$VIDEO_SUBDIRS wscons"
-            VIDEO_DRIVERS="$VIDEO_DRIVERS wscons/libvideo_wscons.la"
-        else
-      AC_MSG_ERROR([
-*** Failed to find wscons includes.])
+        if test x$enable_video = xyes -a x$have_directx = xyes; then
+            AC_DEFINE(SDL_VIDEO_DRIVER_DDRAW)
+            SOURCES="$SOURCES $srcdir/src/video/windx5/*.c"
+            have_video=yes
         fi
-      AC_LANG_C
     fi
-}
-
-
-dnl Set up the PicoGUI video driver if enabled
-CheckPicoGUI()
-{
-    AC_ARG_ENABLE(video-picogui,
-[  --enable-video-picogui  use PicoGUI video driver [default=no]],
-                  , enable_video_picogui=no)
-    if test x$enable_video = xyes -a x$enable_video_picogui = xyes; then
-        AC_MSG_CHECKING(for PicoGUI support)
-        video_picogui=no
-        AC_TRY_COMPILE([
-         #include <picogui.h>
-        ],[
-        ],[
-        video_picogui=yes
-        ])
-        AC_MSG_RESULT($video_picogui)
-        if test x$video_picogui = xyes; then
-	    SDL_LIBS="$SDL_LIBS -lpgui"
-            CFLAGS="$CFLAGS -DENABLE_PICOGUI"
-            VIDEO_SUBDIRS="$VIDEO_SUBDIRS picogui"
-            VIDEO_DRIVERS="$VIDEO_DRIVERS picogui/libvideo_picogui.la"
-        fi
-        AC_LANG_C
-    fi
-}
-
-dnl Set up the Mac toolbox video driver for Mac OS 7-9
-CheckTOOLBOX()
-{
-    CFLAGS="$CFLAGS -DENABLE_TOOLBOX -DENABLE_DRAWSPROCKET"
-    VIDEO_SUBDIRS="$VIDEO_SUBDIRS maccommon"
-    VIDEO_DRIVERS="$VIDEO_DRIVERS maccommon/libvideo_maccommon.la"
-    VIDEO_SUBDIRS="$VIDEO_SUBDIRS macrom"
-    VIDEO_DRIVERS="$VIDEO_DRIVERS macrom/libvideo_macrom.la"
-    VIDEO_SUBDIRS="$VIDEO_SUBDIRS macdsp"
-    VIDEO_DRIVERS="$VIDEO_DRIVERS macdsp/libvideo_macdsp.la"
-}
-
-dnl Set up the Carbon/QuickDraw video driver for Mac OS X (but not Darwin)
-CheckCARBON()
-{
-    AC_ARG_ENABLE(video-carbon,
-[  --enable-video-carbon   use Carbon/QuickDraw video driver [default=no]],
-                  , enable_video_carbon=no)
-  if test x$enable_video = xyes -a x$enable_video_carbon = xyes; then
-    AC_MSG_CHECKING(for Carbon framework)
-    have_carbon=no
-    if test x$have_carbon != xyes; then
-        AC_TRY_COMPILE([
-          #include <Carbon/Carbon.h>
-        ],[
-        ],[
-        have_carbon=yes
-        ])
-    fi
-    AC_MSG_RESULT($have_carbon)
-    if test x$have_carbon = xyes; then
-    # "MACOSX" is not an official definition, but it's commonly
-    # accepted as a way to differentiate between what runs on X
-    # and what runs on older Macs - while in theory "Carbon" defns
-    # are consistent between the two, in practice Carbon is still
-    # changing. -sts Aug 2000
-    mac_autoconf_target_workaround="MAC"
-    CFLAGS="$CFLAGS -I/System/Library/Frameworks/Carbon.framework/Headers \
-      -fpascal-strings -DENABLE_TOOLBOX -DMACOSX -DTARGET_API_${mac_autoconf_target_workaround}_CARBON=1 -I\$(top_srcdir)/src/video/maccommon -I\$(top_srcdir)/src/video/macrom -I\$(top_srcdir)/src/video/macdsp"
-    VIDEO_SUBDIRS="$VIDEO_SUBDIRS maccommon"
-    VIDEO_DRIVERS="$VIDEO_DRIVERS maccommon/libvideo_maccommon.la"
-    VIDEO_SUBDIRS="$VIDEO_SUBDIRS macrom"
-    VIDEO_DRIVERS="$VIDEO_DRIVERS macrom/libvideo_macrom.la"
-    #VIDEO_SUBDIRS="$VIDEO_SUBDIRS macdsp"
-    #VIDEO_DRIVERS="$VIDEO_DRIVERS macdsp/libvideo_macdsp.la"
-    fi
-  fi
-}
-
-dnl Set up the Cocoa/Quartz video driver for Mac OS X (but not Darwin)
-CheckCOCOA()
-{
-    AC_ARG_ENABLE(video-cocoa,
-[  --enable-video-cocoa    use Cocoa/Quartz video driver [default=yes]],
-                  , enable_video_cocoa=yes)
-  if test x$enable_video = xyes -a x$enable_video_cocoa = xyes; then
-    old_CFLAGS="$CFLAGS"
-    dnl work around that we don't have Objective-C support in autoconf
-    CFLAGS="$CFLAGS -x objective-c"
-    AC_MSG_CHECKING(for Cocoa framework)
-    have_cocoa=no
-    if test x$have_cocoa != xyes; then
-        AC_TRY_COMPILE([
-          #import <Cocoa/Cocoa.h>
-        ],[
-        ],[
-        have_cocoa=yes
-        ])
-    fi
-    AC_MSG_RESULT($have_cocoa)
-    CFLAGS="$old_CFLAGS"
-    if test x$have_cocoa = xyes; then
-    # "MACOSX" is not an official definition, but it's commonly
-    # accepted as a way to differentiate between what runs on X
-    # and what runs on older Macs - while in theory "Carbon" defns
-    # are consistent between the two, in practice Carbon is still
-    # changing. -sts Aug 2000
-    mac_autoconf_target_workaround="MAC"
-    CFLAGS="$CFLAGS -I/System/Library/Frameworks/Carbon.framework/Headers \
-      -I/System/Library/Frameworks/Cocoa.framework/Headers -fpascal-strings \
-      -DENABLE_QUARTZ -DMACOSX -DTARGET_API_${mac_autoconf_target_workaround}_CARBON=1 -I\$(top_srcdir)/src/video/quartz"
-    VIDEO_SUBDIRS="$VIDEO_SUBDIRS quartz"
-    VIDEO_DRIVERS="$VIDEO_DRIVERS quartz/libvideo_quartz.la"
-    fi
-  fi
 }
 
 dnl Check for the dlfcn.h interface for dynamically loading objects
 CheckDLOPEN()
 {
     AC_ARG_ENABLE(sdl-dlopen,
-[  --enable-sdl-dlopen     use dlopen for shared object loading [default=yes]],
+AC_HELP_STRING([--enable-sdl-dlopen], [use dlopen for shared object loading [default=yes]]),
                   , enable_sdl_dlopen=yes)
     if test x$enable_sdl_dlopen = xyes; then
         AC_MSG_CHECKING(for dlopen)
-        have_loadso=no
+        have_dlopen=no
         AC_TRY_COMPILE([
          #include <dlfcn.h>
         ],[
         ],[
-        have_loadso=yes
+        have_dlopen=yes
         ])
-        AC_MSG_RESULT($have_loadso)
+        AC_MSG_RESULT($have_dlopen)
 
-        if test x$have_loadso = xyes; then
-            CFLAGS="$CFLAGS -DUSE_DLOPEN"
-            AC_CHECK_LIB(c, dlopen, SYSTEM_LIBS="$SYSTEM_LIBS",
-               AC_CHECK_LIB(dl, dlopen, SYSTEM_LIBS="$SYSTEM_LIBS -ldl",
-                  AC_CHECK_LIB(ltdl, dlopen, SYSTEM_LIBS="$SYSTEM_LIBS -lltdl")))
+        if test x$have_dlopen = xyes; then
+            AC_CHECK_LIB(c, dlopen, BUILD_LIBS="$BUILD_LIBS",
+               AC_CHECK_LIB(dl, dlopen, BUILD_LIBS="$BUILD_LIBS -ldl",
+                  AC_CHECK_LIB(ltdl, dlopen, BUILD_LIBS="$BUILD_LIBS -lltdl")))
+            AC_CHECK_LIB(dl, dlvsym, have_dlvsym=yes)
+            if test x$have_dlvsym = xyes; then
+                AC_DEFINE(HAVE_DLVSYM)
+            fi
+            AC_DEFINE(SDL_LOADSO_DLOPEN)
+            SOURCES="$SOURCES $srcdir/src/loadso/dlopen/*.c"
+            have_loadso=yes
         fi
     fi
 }
@@ -1827,15 +1715,16 @@ dnl Set up the Atari LDG (shared object loader)
 CheckAtariLdg()
 {
     AC_ARG_ENABLE(atari-ldg,
-[  --enable-atari-ldg      use Atari LDG for shared object loading [default=yes]],
+AC_HELP_STRING([--enable-atari-ldg], [use Atari LDG for shared object loading [default=yes]]),
                   , enable_atari_ldg=yes)
     if test x$video_gem = xyes -a x$enable_atari_ldg = xyes; then
         AC_CHECK_HEADER(ldg.h, have_ldg_hdr=yes)
         AC_CHECK_LIB(ldg, ldg_open, have_ldg_lib=yes, have_ldg_lib=no, -lgem)
         if test x$have_ldg_hdr = xyes -a x$have_ldg_lib = xyes; then
+            AC_DEFINE(SDL_LOADSO_LDG)
+            SOURCES="$SOURCES $srcdir/src/loadso/mint/*.c"
+            BUILD_LIBS="$BUILD_LIBS -lldg -lgem"
             have_loadso=yes
-            CFLAGS="$CFLAGS -DENABLE_LDG"
-            SYSTEM_LIBS="$SYSTEM_LIBS -lldg -lgem"
         fi
     fi
 }
@@ -1844,33 +1733,16 @@ dnl Check for the usbhid(3) library on *BSD
 CheckUSBHID()
 {
     if test x$enable_joystick = xyes; then
-        have_libusbhid=no
-        have_libusb=no
-        AC_CHECK_LIB(usbhid, hid_init, have_libusbhid=yes)
-        AC_CHECK_LIB(usb, hid_init, have_libusb=yes)
-        if test x$have_libusbhid = xyes; then
-            SYSTEM_LIBS="$SYSTEM_LIBS -lusbhid"
-        fi
-        if test x$have_libusb = xyes; then
-            SYSTEM_LIBS="$SYSTEM_LIBS -lusb"
-        fi
+        AC_CHECK_HEADER(usb.h, [USB_CFLAGS="-DHAVE_USB_H"])
+        AC_CHECK_HEADER(usbhid.h, [USB_CFLAGS="-DHAVE_USBHID_H"])
+        AC_CHECK_HEADER(libusb.h, [USB_CFLAGS="-DHAVE_LIBUSB_H"])
+        AC_CHECK_HEADER(libusbhid.h, [USB_CFLAGS="-DHAVE_LIBUSBHID_H"])
+            
+        AC_CHECK_LIB(usbhid, hid_init, [USB_LIBS="$USB_LIBS -lusbhid"])
+        AC_CHECK_LIB(usb, hid_init, [USB_LIBS="$USB_LIBS -lusb"])
 
-        AC_CHECK_HEADER(usb.h, have_usb_h=yes)
-        AC_CHECK_HEADER(usbhid.h, have_usbhid_h=yes)
-        AC_CHECK_HEADER(libusb.h, have_libusb_h=yes)
-        AC_CHECK_HEADER(libusbhid.h, have_libusbhid_h=yes)
-        if test x$have_usb_h = xyes; then
-            CFLAGS="$CFLAGS -DHAVE_USB_H"
-        fi
-        if test x$have_usbhid_h = xyes; then
-            CFLAGS="$CFLAGS -DHAVE_USBHID_H"
-        fi
-        if test x$have_libusb_h = xyes; then
-            CFLAGS="$CFLAGS -DHAVE_LIBUSB_H"
-        fi
-        if test x$have_libusbhid_h = xyes; then
-            CFLAGS="$CFLAGS -DHAVE_LIBUSBHID_H"
-        fi
+        save_CFLAGS="$CFLAGS"
+        CFLAGS="$CFLAGS $USB_CFLAGS"
 
         AC_MSG_CHECKING(for usbhid)
         have_usbhid=no
@@ -1921,11 +1793,11 @@ CheckUSBHID()
             have_usbhid_ucr_data=yes
             ])
             if test x$have_usbhid_ucr_data = xyes; then
-                CFLAGS="$CFLAGS -DUSBHID_UCR_DATA"
+                USB_CFLAGS="$USB_CFLAGS -DUSBHID_UCR_DATA"
             fi
             AC_MSG_RESULT($have_usbhid_ucr_data)
             
-	    AC_MSG_CHECKING(for new usbhid API)
+            AC_MSG_CHECKING(for new usbhid API)
             have_usbhid_new=no
             AC_TRY_COMPILE([
               #include <sys/types.h>
@@ -1943,87 +1815,36 @@ CheckUSBHID()
               #endif
             ],[
               report_desc_t d;
-	      hid_start_parse(d, 1, 1);
+              hid_start_parse(d, 1, 1);
             ],[
             have_usbhid_new=yes
             ])
             if test x$have_usbhid_new = xyes; then
-                CFLAGS="$CFLAGS -DUSBHID_NEW"
+                USB_CFLAGS="$USB_CFLAGS -DUSBHID_NEW"
             fi
             AC_MSG_RESULT($have_usbhid_new)
 
-            JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS bsd"
-            JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS bsd/libjoystick_bsd.la"
+            AC_DEFINE(SDL_JOYSTICK_USBHID)
+            SOURCES="$SOURCES $srcdir/src/joystick/bsd/*.c"
+            BUILD_CFLAGS="$BUILD_CFLAGS $USB_CFLAGS"
+            BUILD_LIBS="$BUILD_CFLAGS $USB_LIBS"
+            have_joystick=yes
         fi
+        CFLAGS="$save_CFLAGS"
     fi
 }
 
-dnl Check for altivec instruction support using gas syntax
-CheckAltivec()
+dnl Check for clock_gettime()
+CheckClockGettime()
 {
-    have_altivec_h_hdr=no
-    AC_CHECK_HEADER(altivec.h, have_altivec_h_hdr=yes)
-
-    save_CFLAGS="${CFLAGS}"
-    have_gcc_altivec=no
-    AC_MSG_CHECKING(for Altivec with GCC -maltivec option)
-    CFLAGS="${save_CFLAGS} -DGCC_ALTIVEC -DUSE_ALTIVEC_BLITTERS -maltivec"
-
-    if test x$have_altivec_h_hdr = xyes; then
-      AC_TRY_COMPILE([
-      #include <altivec.h>
-      vector unsigned int vzero() {
-          return vec_splat_u32(0);
-      }
-      ],[
-      ],[
-      have_gcc_altivec=yes
-      ])
-      AC_MSG_RESULT($have_gcc_altivec)
-    else
-      AC_TRY_COMPILE([
-      vector unsigned int vzero() {
-          return vec_splat_u32(0);
-      }
-      ],[
-      ],[
-      have_gcc_altivec=yes
-      ])
-      AC_MSG_RESULT($have_gcc_altivec)
-    fi
-
-    if test x$have_gcc_altivec = xno; then
-        AC_MSG_CHECKING(for Altivec with GCC -faltivec option)
-        CFLAGS="${save_CFLAGS} -DGCC_ALTIVEC -DUSE_ALTIVEC_BLITTERS -faltivec"
-        if test x$have_altivec_h_hdr = xyes; then
-          AC_TRY_COMPILE([
-          #include <altivec.h>
-          vector unsigned int vzero() {
-              return vec_splat_u32(0);
-          }
-          ],[
-          ],[
-          have_gcc_altivec=yes
-          ])
-          AC_MSG_RESULT($have_gcc_altivec)
-        else
-          AC_TRY_COMPILE([
-          vector unsigned int vzero() {
-              return vec_splat_u32(0);
-          }
-          ],[
-          ],[
-          have_gcc_altivec=yes
-          ])
-          AC_MSG_RESULT($have_gcc_altivec)
-        fi
-    fi
-
-    if test x$have_gcc_altivec = xno; then
-        CFLAGS="${save_CFLAGS}"
-    else
-        if test x$have_altivec_h_hdr = xyes; then
-          CFLAGS="${CFLAGS} -DHAVE_ALTIVEC_H"
+    AC_ARG_ENABLE(clock_gettime,
+AC_HELP_STRING([--enable-clock_gettime], [use clock_gettime() instead of gettimeofday() on UNIX [default=no]]),
+                  , enable_clock_gettime=no)
+    if test x$enable_clock_gettime = xyes; then
+        AC_CHECK_LIB(rt, clock_gettime, have_clock_gettime=yes)
+        if test x$have_clock_gettime = xyes; then
+            AC_DEFINE(HAVE_CLOCK_GETTIME)
+            BUILD_LIBS="$BUILD_LIBS -lrt"
         fi
     fi
 }
@@ -2033,7 +1854,7 @@ CheckLinuxVersion()
 {
     AC_CHECK_HEADER(linux/version.h, have_linux_version_h=yes)
     if test x$have_linux_version_h = xyes; then
-        CFLAGS="$CFLAGS -DHAVE_LINUX_VERSION_H"
+        BUILD_CFLAGS="$BUILD_CFLAGS -DHAVE_LINUX_VERSION_H"
     fi
 }
 
@@ -2041,34 +1862,48 @@ dnl Check if we want to use RPATH
 CheckRPATH()
 {
     AC_ARG_ENABLE(rpath,
-[  --enable-rpath          use an rpath when linking SDL [default=yes]],
+AC_HELP_STRING([--enable-rpath], [use an rpath when linking SDL [default=yes]]),
                   , enable_rpath=yes)
 }
 
-have_loadso=no
+dnl Set up the configuration based on the target platform!
 case "$target" in
-    arm-*-elf*)
-	ARCH=linux
-	CheckDummyVideo
-	CheckIPod
-	# Set up files for the timer library
+    arm-*-elf*) # FIXME: Can we get more specific for iPodLinux?
+        ARCH=linux
+        CheckDummyVideo
+        CheckIPod
+        # Set up files for the timer library
         if test x$enable_timers = xyes; then
-            COPY_ARCH_SRC(src/timer, linux, SDL_systimer.c)
+            AC_DEFINE(SDL_TIMER_UNIX)
+            SOURCES="$SOURCES $srcdir/src/timer/unix/*.c"
+            have_timers=yes
         fi
-	;;
-    *-*-linux*|*-*-gnu*|*-*-k*bsd*-gnu)
+        ;;
+    *-*-linux*|*-*-gnu*|*-*-k*bsd*-gnu|*-*-bsdi*|*-*-freebsd*|*-*-netbsd*|*-*-openbsd*|*-*-sysv5*|*-*-solaris*|*-*-hpux*|*-*-irix*|*-*-aix*|*-*-osf*)
         case "$target" in
-          *-*-linux*) ARCH=linux ;;
-          *-*-kfreebsd*-gnu) ARCH=kfreebsd-gnu ;;
-          *-*-knetbsd*-gnu) ARCH=knetbsd-gnu ;;
-          *-*-kopenbsd*-gnu) ARCH=kopenbsd-gnu ;;
-          *-*-gnu*) ARCH=gnu ;; # must be last
+            *-*-linux*)         ARCH=linux ;;
+            *-*-kfreebsd*-gnu)  ARCH=kfreebsd-gnu ;;
+            *-*-knetbsd*-gnu)   ARCH=knetbsd-gnu ;;
+            *-*-kopenbsd*-gnu)  ARCH=kopenbsd-gnu ;;
+            *-*-gnu*)           ARCH=gnu ;; # must be last of the gnu variants
+            *-*-bsdi*)          ARCH=bsdi ;;
+            *-*-freebsd*)       ARCH=freebsd ;;
+            *-*-netbsd*)        ARCH=netbsd ;;
+            *-*-openbsd*)       ARCH=openbsd ;;
+            *-*-sysv5*)         ARCH=sysv5 ;;
+            *-*-solaris*)       ARCH=solaris ;;
+            *-*-hpux*)          ARCH=hpux ;;
+            *-*-irix*)          ARCH=irix ;;
+            *-*-aix*)           ARCH=aix ;;
+            *-*-osf*)           ARCH=osf ;;
         esac
         CheckDummyVideo
         CheckDiskAudio
         CheckDLOPEN
         CheckNASM
+        CheckAltivec
         CheckOSS
+        CheckDMEDIA
         CheckALSA
         CheckARTSC
         CheckESD
@@ -2080,507 +1915,115 @@ case "$target" in
         CheckPS2GS
         CheckGGI
         CheckSVGA
+        CheckVGL
+        CheckWscons
         CheckAAlib
         CheckQtopia
         CheckPicoGUI
         CheckOpenGLX11
         CheckInputEvents
         CheckTslib
+        CheckUSBHID
         CheckPTHREAD
-        CheckSIGACTION
-        CheckAltivec
+        CheckClockGettime
         CheckLinuxVersion
         CheckRPATH
-
-        # Set up files for the main() stub
-        if test "x$video_qtopia" = "xyes"; then
-          SDL_CFLAGS="$SDL_CFLAGS -Dmain=SDL_main"
-          SDL_LIBS="-lSDLmain $SDL_LIBS"
-        fi
-        # Set up files for the audio library
-        # We use the OSS and ALSA API's, not the Sun audio API
-        #if test x$enable_audio = xyes; then
-        #    CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
-        #    AUDIO_SUBDIRS="$AUDIO_SUBDIRS sun"
-        #    AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
-        #fi
-        # Set up files for the joystick library
-        if test x$enable_joystick = xyes; then
-	  case $ARCH in
-	    linux)
-              JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS linux"
-              JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS linux/libjoystick_linux.la"
-	    ;;
-	    gnu)
-              JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS dummy"
-              JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS dummy/libjoystick_dummy.la"
-	    ;;
-	    k*bsd-gnu)
-              JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS bsd"
-              JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS bsd/libjoystick_bsd.la"
-	    ;;
-	  esac
-        fi
-        # Set up files for the cdrom library
-        if test x$enable_cdrom = xyes; then
-	  case $ARCH in
-	    linux)
-              CDROM_SUBDIRS="$CDROM_SUBDIRS linux"
-              CDROM_DRIVERS="$CDROM_DRIVERS linux/libcdrom_linux.la"
-	    ;;
-	    gnu)
-              CDROM_SUBDIRS="$CDROM_SUBDIRS dummy"
-              CDROM_DRIVERS="$CDROM_DRIVERS dummy/libcdrom_dummy.la"
-	    ;;
-	    kfreebsd-gnu)
-              CDROM_SUBDIRS="$CDROM_SUBDIRS freebsd"
-              CDROM_DRIVERS="$CDROM_DRIVERS freebsd/libcdrom_freebsd.la"
-	    ;;
-	    knetbsd-gnu|kopenbsd-gnu)
-              CDROM_SUBDIRS="$CDROM_SUBDIRS openbsd"
-              CDROM_DRIVERS="$CDROM_DRIVERS openbsd/libcdrom_openbsd.la"
-	    ;;
-	  esac
-        fi
-        # Set up files for the thread library
-        if test x$enable_threads = xyes; then
-            CopyUnixThreadSource
-        fi
-        # Set up files for the timer library
-        if test x$enable_timers = xyes; then
-            COPY_ARCH_SRC(src/timer, linux, SDL_systimer.c)
-        fi
-        ;;
-    *-*-bsdi*)
-        ARCH=bsdi
-        CheckDummyVideo
-        CheckDiskAudio
-        CheckDLOPEN
-        CheckNASM
-        CheckOSS
-        CheckARTSC
-        CheckESD
-        CheckNAS
-        CheckX11
-        CheckSVGA
-        CheckAAlib
-        CheckOpenGLX11
-        CheckPTHREAD
-        CheckSIGACTION
-        CheckRPATH
-        # Set up files for the audio library
-        # We use the OSS and ALSA API's, not the Sun audio API
-        #if test x$enable_audio = xyes; then
-        #    CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
-        #    AUDIO_SUBDIRS="$AUDIO_SUBDIRS sun"
-        #    AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
-        #fi
-        # Set up files for the joystick library
-        # (No joystick support yet)
-        if test x$enable_joystick = xyes; then
-            JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS dummy"
-            JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS dummy/libjoystick_dummy.la"
-        fi
-        # Set up files for the cdrom library
-        if test x$enable_cdrom = xyes; then
-            CDROM_SUBDIRS="$CDROM_SUBDIRS bsdi"
-            CDROM_DRIVERS="$CDROM_DRIVERS bsdi/libcdrom_bsdi.la"
-        fi
-        # Set up files for the thread library
-        if test x$enable_threads = xyes; then
-            CopyUnixThreadSource
-        fi
-        # Set up files for the timer library
-        if test x$enable_timers = xyes; then
-            COPY_ARCH_SRC(src/timer, linux, SDL_systimer.c)
-        fi
-        ;;
-    *-*-freebsd*)
-        ARCH=freebsd
-        CheckDummyVideo
-        CheckDiskAudio
-        CheckDLOPEN
-        CheckVGL
-        CheckNASM
-        CheckOSS
-        CheckARTSC
-        CheckESD
-        CheckNAS
-        CheckX11
-        CheckSVGA
-        CheckAAlib
-        CheckOpenGLX11
-        CheckPTHREAD
-        CheckSIGACTION
-        CheckUSBHID
-        CheckRPATH
-        # Set up files for the audio library
-        # We use the OSS and ALSA API's, not the Sun audio API
-        #if test x$enable_audio = xyes; then
-        #    CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
-        #    AUDIO_SUBDIRS="$AUDIO_SUBDIRS sun"
-        #    AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
-        #fi
-        # Set up files for the cdrom library
-        if test x$enable_cdrom = xyes; then
-            CDROM_SUBDIRS="$CDROM_SUBDIRS freebsd"
-            CDROM_DRIVERS="$CDROM_DRIVERS freebsd/libcdrom_freebsd.la"
-        fi
-        # Set up files for the thread library
-        if test x$enable_threads = xyes; then
-            CopyUnixThreadSource
-        fi
-        # Set up files for the timer library
-        if test x$enable_timers = xyes; then
-            COPY_ARCH_SRC(src/timer, linux, SDL_systimer.c)
-        fi
-        ;;
-    *-*-netbsd*)
-        ARCH=netbsd
-        CheckDummyVideo
-        CheckDiskAudio
-        CheckDLOPEN
-        CheckNASM
-        CheckOSS
-        CheckARTSC
-        CheckESD
-        CheckNAS
-        CheckX11
-        CheckAAlib
-	CheckWscons
-        CheckOpenGLX11
-        CheckPTHREAD
-        CheckSIGACTION
-        CheckUSBHID
-        CheckRPATH
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
-            CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS sun"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
-        fi
-        # Set up files for the cdrom library
-        if test x$enable_cdrom = xyes; then
-            CDROM_SUBDIRS="$CDROM_SUBDIRS openbsd"
-            CDROM_DRIVERS="$CDROM_DRIVERS openbsd/libcdrom_openbsd.la"
-        fi
-        # Set up files for the thread library
-        if test x$enable_threads = xyes; then
-            if test x$use_pthreads = xyes; then
-                CFLAGS="$CFLAGS -D_POSIX_THREAD_SYSCALL_SOFT=1"
-            fi
-            CopyUnixThreadSource
-        fi
-        # Set up files for the timer library
-        if test x$enable_timers = xyes; then
-            COPY_ARCH_SRC(src/timer, linux, SDL_systimer.c)
-        fi
-        # NetBSD does not define "unix"
-        CFLAGS="$CFLAGS -Dunix"
-        ;;
-    *-*-openbsd*)
-        ARCH=openbsd
-        CheckDummyVideo
-        CheckDiskAudio
-        CheckDLOPEN
-        CheckNASM
-        CheckOSS
-        CheckARTSC
-        CheckESD
-        CheckNAS
-        CheckX11
-        CheckAAlib
-        CheckOpenGLX11
-        CheckPTHREAD
-        CheckSIGACTION
-        CheckUSBHID
-        CheckRPATH
-        # Set up files for the audio library
-        if test x$enable_audio = xyes; then
-            CFLAGS="$CFLAGS -DOPENBSD_AUDIO_SUPPORT"
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS openbsd"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS openbsd/libaudio_openbsd.la"
-        fi
-        # OpenBSD needs linking with ossaudio emulation library
-        if test x$have_oss = xyes; then
-            SYSTEM_LIBS="$SYSTEM_LIBS -lossaudio"
-        fi
-        # Set up files for the cdrom library
-        if test x$enable_cdrom = xyes; then
-            CDROM_SUBDIRS="$CDROM_SUBDIRS openbsd"
-            CDROM_DRIVERS="$CDROM_DRIVERS openbsd/libcdrom_openbsd.la"
-        fi
-        # Set up files for the thread library
-        if test x$enable_threads = xyes; then
-            CopyUnixThreadSource
-        fi
-        # Set up files for the timer library
-        if test x$enable_timers = xyes; then
-            COPY_ARCH_SRC(src/timer, linux, SDL_systimer.c)
-        fi
-        # OpenBSD does not define "unix"
-        CFLAGS="$CFLAGS -Dunix"
-        ;;
-    *-*-sysv5*)
-        ARCH=sysv5
-        CheckDummyVideo
-        CheckDiskAudio
-        CheckDLOPEN
-        CheckNASM
-        CheckOSS
-        CheckARTSC
-        CheckESD
-        CheckNAS
-        CheckX11
-        CheckAAlib
-        CheckOpenGLX11
-        CheckPTHREAD
-        CheckSIGACTION
-        CheckRPATH
-        # Set up files for the audio library
-        if test x$enable_audio = xyes; then
-            CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS sun"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
+          case $ARCH in
+            netbsd|sysv5|solaris|hpux)
+                AC_DEFINE(SDL_AUDIO_DRIVER_SUNAUDIO)
+                SOURCES="$SOURCES $srcdir/src/audio/sun/*.c"
+                have_audio=yes
+            ;;
+            openbsd)
+                AC_DEFINE(SDL_AUDIO_DRIVER_OPENBSD)
+                SOURCES="$SOURCES $srcdir/src/audio/openbsd/*.c"
+                have_audio=yes
+            ;;
+            aix)
+                AC_DEFINE(SDL_AUDIO_DRIVER_PAUD)
+                SOURCES="$SOURCES $srcdir/src/audio/paudio/*.c"
+                have_audio=yes
+            ;;
+            osf)
+                AC_DEFINE(SDL_AUDIO_DRIVER_MMEAUDIO)
+                SOURCES="$SOURCES $srcdir/src/audio/mme/*.c"
+                BUILD_LIBS="$BUILD_LIBS -lmme"
+                have_audio=yes
+            ;;
+          esac
         fi
         # Set up files for the joystick library
-        # (No joystick support yet)
         if test x$enable_joystick = xyes; then
-            JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS dummy"
-            JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS dummy/libjoystick_dummy.la"
+          case $ARCH in
+            linux)
+                AC_DEFINE(SDL_JOYSTICK_LINUX)
+                SOURCES="$SOURCES $srcdir/src/joystick/linux/*.c"
+                have_joystick=yes
+            ;;
+          esac
         fi
         # Set up files for the cdrom library
         if test x$enable_cdrom = xyes; then
-            CDROM_SUBDIRS="$CDROM_SUBDIRS dummy"
-            CDROM_DRIVERS="$CDROM_DRIVERS dummy/libcdrom_dummy.la"
+          case $ARCH in
+            linux|solaris)
+                AC_DEFINE(SDL_CDROM_LINUX)
+                SOURCES="$SOURCES $srcdir/src/cdrom/linux/*.c"
+                have_cdrom=yes
+            ;;
+            *freebsd*)
+                AC_DEFINE(SDL_CDROM_FREEBSD)
+                SOURCES="$SOURCES $srcdir/src/cdrom/freebsd/*.c"
+                have_cdrom=yes
+            ;;
+            *netbsd*|*openbsd*)
+                AC_DEFINE(SDL_CDROM_OPENBSD)
+                SOURCES="$SOURCES $srcdir/src/cdrom/openbsd/*.c"
+                have_cdrom=yes
+            ;;
+            bsdi)
+                AC_DEFINE(SDL_CDROM_BSDI)
+                SOURCES="$SOURCES $srcdir/src/cdrom/bsdi/*.c"
+                have_cdrom=yes
+            ;;
+            aix)
+                AC_DEFINE(SDL_CDROM_AIX)
+                SOURCES="$SOURCES $srcdir/src/cdrom/aix/*.c"
+                have_cdrom=yes
+            ;;
+            osf)
+                AC_DEFINE(SDL_CDROM_OSF)
+                SOURCES="$SOURCES $srcdir/src/cdrom/osf/*.c"
+                have_cdrom=yes
+            ;;
+          esac
         fi
         # Set up files for the thread library
-        if test x$enable_threads = xyes; then
-            CopyUnixThreadSource
+        if test x$enable_threads = xyes -a x$use_pthreads != xyes -a x$use_pth != xyes -a x$ARCH = xirix; then
+            AC_DEFINE(SDL_THREAD_SPROC)
+            SOURCES="$SOURCES $srcdir/src/thread/irix/*.c"
+            SOURCES="$SOURCES $srcdir/src/thread/generic/SDL_sysmutex.c"
+            SOURCES="$SOURCES $srcdir/src/thread/generic/SDL_syscond.c"
+            have_threads=yes
         fi
         # Set up files for the timer library
         if test x$enable_timers = xyes; then
-            COPY_ARCH_SRC(src/timer, linux, SDL_systimer.c)
+            AC_DEFINE(SDL_TIMER_UNIX)
+            SOURCES="$SOURCES $srcdir/src/timer/unix/*.c"
+            have_timers=yes
         fi
-        ;;
-    *-*-solaris*)
-        ARCH=solaris
-        CFLAGS="$CFLAGS -D__ELF__" # Fix for nasm on Solaris x86
-        CheckDummyVideo
-        CheckDiskAudio
-        CheckDLOPEN
-        CheckNASM
-        CheckOSS
-        CheckARTSC
-        CheckESD
-        CheckNAS
-        CheckX11
-        CheckAAlib
-        CheckOpenGLX11
-        CheckPTHREAD
-        CheckSIGACTION
-        CheckRPATH
-        # Set up files for the audio library
-        if test x$enable_audio = xyes; then
-            CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS sun"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
-        fi
-        # Set up files for the joystick library
-        # (No joystick support yet)
-        if test x$enable_joystick = xyes; then
-            JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS dummy"
-            JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS dummy/libjoystick_dummy.la"
-        fi
-        # Set up files for the cdrom library
-        if test x$enable_cdrom = xyes; then
-            CDROM_SUBDIRS="$CDROM_SUBDIRS linux"
-            CDROM_DRIVERS="$CDROM_DRIVERS linux/libcdrom_linux.la"
-        fi
-        # Set up files for the thread library
-        if test x$enable_threads = xyes; then
-            CopyUnixThreadSource
-        fi
-        # Set up files for the timer library
-        if test x$enable_timers = xyes; then
-            COPY_ARCH_SRC(src/timer, linux, SDL_systimer.c)
-        fi
-        ;;
-    *-*-irix*)
-        ARCH=irix
-        CheckDummyVideo
-        CheckDiskAudio
-        CheckDLOPEN
-        CheckDMEDIA
-        CheckESD
-        CheckNAS
-        CheckX11
-        CheckAAlib
-        CheckOpenGLX11
-        CheckPTHREAD
-        CheckSIGACTION
-        # We use the dmedia audio API, not the Sun audio API
-        #if test x$enable_audio = xyes; then
-        #    CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
-        #    AUDIO_SUBDIRS="$AUDIO_SUBDIRS sun"
-        #    AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
-        #fi
-        # Set up files for the joystick library
-        # (No joystick support yet)
-        if test x$enable_joystick = xyes; then
-            JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS dummy"
-            JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS dummy/libjoystick_dummy.la"
-        fi
-        # Set up files for the cdrom library
-        # (No CD-ROM support yet)
-        if test x$enable_cdrom = xyes; then
-            CDROM_SUBDIRS="$CDROM_SUBDIRS dummy"
-            CDROM_DRIVERS="$CDROM_DRIVERS dummy/libcdrom_dummy.la"
-        fi
-        # Set up files for the thread library
-        if test x$enable_threads = xyes; then
-            if test x$use_pthreads = xyes -o x$use_pth = xyes; then
-                CopyUnixThreadSource
-            else
-                COPY_ARCH_SRC(src/thread, irix, SDL_systhread.c)
-                COPY_ARCH_SRC(src/thread, irix, SDL_systhread_c.h)
-                COPY_ARCH_SRC(src/thread, linux, SDL_sysmutex.c)
-                COPY_ARCH_SRC(src/thread, linux, SDL_sysmutex_c.h)
-                COPY_ARCH_SRC(src/thread, linux, SDL_syssem.c)
-                COPY_ARCH_SRC(src/thread, generic, SDL_syssem_c.h)
-                COPY_ARCH_SRC(src/thread, generic, SDL_syscond.c)
-                COPY_ARCH_SRC(src/thread, generic, SDL_syscond_c.h)
-            fi
-        fi
-        # Set up files for the timer library
-        if test x$enable_timers = xyes; then
-            COPY_ARCH_SRC(src/timer, linux, SDL_systimer.c)
-        fi
-        ;;
-    *-*-hpux*)
-        ARCH=hpux
-        CheckDummyVideo
-        CheckDiskAudio
-        CheckDLOPEN
-        CheckOSS
-        CheckNAS
-        CheckX11
-        CheckGGI
-        CheckAAlib
-        CheckOpenGLX11
-        CheckPTHREAD
-        CheckSIGACTION
-        # Set up files for the audio library
-        if test x$enable_audio = xyes; then
-            CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS sun"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
-        fi
-        # Set up files for the joystick library
-        # (No joystick support yet)
-        if test x$enable_joystick = xyes; then
-            JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS dummy"
-            JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS dummy/libjoystick_dummy.la"
-        fi
-        # Set up files for the cdrom library
-        # (No CD-ROM support yet)
-        if test x$enable_cdrom = xyes; then
-            CDROM_SUBDIRS="$CDROM_SUBDIRS dummy"
-            CDROM_DRIVERS="$CDROM_DRIVERS dummy/libcdrom_dummy.la"
-        fi
-        # Set up files for the thread library
-        if test x$enable_threads = xyes; then
-            CopyUnixThreadSource
-        fi
-        # Set up files for the timer library
-        if test x$enable_timers = xyes; then
-            COPY_ARCH_SRC(src/timer, linux, SDL_systimer.c)
-        fi
-        ;;
-    *-*-aix*)
-        ARCH=aix
-        CheckDummyVideo
-        CheckDiskAudio
-        CheckDLOPEN
-        CheckOSS
-        CheckNAS
-        CheckX11
-        CheckGGI
-        CheckAAlib
-        CheckOpenGLX11
-        CheckPTHREAD
-        CheckSIGACTION
-        # Set up files for the audio library
-        if test x$enable_audio = xyes; then
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS paudio"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS paudio/libaudio_paudio.la"
-        fi
-        # Set up files for the joystick library
-        # (No joystick support yet)
-        if test x$enable_joystick = xyes; then
-            JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS dummy"
-            JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS dummy/libjoystick_dummy.la"
-        fi
-        # Set up files for the cdrom library
-        if test x$enable_cdrom = xyes; then
-            CDROM_SUBDIRS="$CDROM_SUBDIRS aix"
-            CDROM_DRIVERS="$CDROM_DRIVERS aix/libcdrom_aix.la"
-        fi
-        # Set up files for the thread library
-        if test x$enable_threads = xyes; then
-            CopyUnixThreadSource
-        fi
-        # Set up files for the timer library
-        if test x$enable_timers = xyes; then
-            COPY_ARCH_SRC(src/timer, linux, SDL_systimer.c)
-        fi
-        ;;
-    *-*-osf*)
-        ARCH=osf
-        CheckDummyVideo
-        CheckDiskAudio
-        CheckDLOPEN
-        CheckNAS
-        CheckX11
-        CheckGGI
-        CheckAAlib
-        CheckOpenGLX11
-        CheckPTHREAD
-        CheckSIGACTION
-        # Set up files for the audio library
-        if test x$enable_audio = xyes; then
-            CFLAGS="$CFLAGS -I/usr/include/mme -DMMEAUDIO_SUPPORT"
-            SYSTEM_LIBS="$SYSTEM_LIBS -lmme"
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS mme"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS mme/libaudio_mme.la"
-        fi
-        # Set up files for the joystick library
-        # (No joystick support yet)
-        if test x$enable_joystick = xyes; then
-            JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS dummy"
-            JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS dummy/libjoystick_dummy.la"
-        fi
-        # Set up files for the cdrom library
-        # (No cdrom support yet)
-        if test x$enable_cdrom = xyes; then
-            CDROM_SUBDIRS="$CDROM_SUBDIRS osf"
-            CDROM_DRIVERS="$CDROM_DRIVERS osf/libcdrom_osf.la"
-        fi
-        # Set up files for the thread library
-        if test x$enable_threads = xyes; then
-            CopyUnixThreadSource
-        fi
-        # Set up files for the timer library
-        if test x$enable_timers = xyes; then
-            COPY_ARCH_SRC(src/timer, linux, SDL_systimer.c)
-        fi
-        # FIXME: If building without -lX11, you get the following messages.
-        # Xlib: connection to ":0.0" refused by server
-        # Xlib: XDM authorization key matches an existing client!
-        # It only has to run xhost +localhost in a such case.
-        #if test x$enable_x11_shared = xyes; then
-        #    SYSTEM_LIBS="$SYSTEM_LIBS -lX11"
-        #fi
+        # Do any final platform setup
+        case $ARCH in
+            netbsd)
+                # NetBSD does not define "unix"
+                BUILD_CFLAGS="$BUILD_CFLAGS -Dunix"
+            ;;
+            openbsd)
+                # OpenBSD does not define "unix"
+                BUILD_CFLAGS="$BUILD_CFLAGS -Dunix"
+            ;;
+        esac
         ;;
     *-*-qnx*)
         ARCH=qnx
@@ -2593,37 +2036,28 @@ case "$target" in
         CheckX11
         CheckOpenGLX11
         CheckPTHREAD
-        CheckSIGACTION
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
-            CFLAGS="$CFLAGS -DQNXNTOAUDIO_SUPPORT"
-            SYSTEM_LIBS="$SYSTEM_LIBS -lasound"
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS nto"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS nto/libaudio_nto.la"
-        fi
-        # Set up files for the joystick library
-        if test x$enable_joystick = xyes; then
-        # (No joystick support yet)
-            JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS dummy"
-            JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS dummy/libjoystick_dummy.la"
+            AC_DEFINE(SDL_AUDIO_DRIVER_QNXNTO)
+            SOURCES="$SOURCES $srcdir/src/audio/nto/*.c"
+            BUILD_LIBS="$BUILD_LIBS -lasound"
+            have_audio=yes
         fi
         # Set up files for the cdrom library
         if test x$enable_cdrom = xyes; then
-            CDROM_SUBDIRS="$CDROM_SUBDIRS qnx"
-            CDROM_DRIVERS="$CDROM_DRIVERS qnx/libcdrom_qnx.la"
-        fi
-        # Set up files for the thread library
-        if test x$enable_threads = xyes; then
-            CopyUnixThreadSource
+            AC_DEFINE(SDL_CDROM_QNX)
+            SOURCES="$SOURCES $srcdir/src/cdrom/qnx/*.c"
+            have_cdrom=yes
         fi
         # Set up files for the timer library
         if test x$enable_timers = xyes; then
-            COPY_ARCH_SRC(src/timer, linux, SDL_systimer.c)
+            AC_DEFINE(SDL_TIMER_UNIX)
+            SOURCES="$SOURCES $srcdir/src/timer/unix/*.c"
+            have_timers=yes
         fi
         ;;
     *-*-cygwin* | *-*-mingw32*)
         ARCH=win32
-        have_loadso=yes
         if test "$build" != "$target"; then # cross-compiling
             # Default cross-compile location
             ac_default_prefix=/usr/local/cross-tools/i386-mingw32msvc
@@ -2636,49 +2070,64 @@ case "$target" in
         CheckDummyVideo
         CheckDiskAudio
         CheckWIN32
+        CheckWIN32GL
         CheckDIRECTX
         CheckNASM
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS windib"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS windib/libaudio_windib.la"
-            if test x$use_directx = xyes; then
-                AUDIO_SUBDIRS="$AUDIO_SUBDIRS windx5"
-                AUDIO_DRIVERS="$AUDIO_DRIVERS windx5/libaudio_windx5.la"
+            AC_DEFINE(SDL_AUDIO_DRIVER_WAVEOUT)
+            SOURCES="$SOURCES $srcdir/src/audio/windib/*.c"
+            if test x$have_directx = xyes; then
+                AC_DEFINE(SDL_AUDIO_DRIVER_DSOUND)
+                SOURCES="$SOURCES $srcdir/src/audio/windx5/*.c"
             fi
+            have_audio=yes
         fi
         # Set up files for the joystick library
         if test x$enable_joystick = xyes; then
-            JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS win32"
-            JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS win32/libjoystick_winmm.la"
+            AC_DEFINE(SDL_JOYSTICK_WINMM)
+            SOURCES="$SOURCES $srcdir/src/joystick/win32/*.c"
+            have_joystick=yes
         fi
         # Set up files for the cdrom library
         if test x$enable_cdrom = xyes; then
-            CDROM_SUBDIRS="$CDROM_SUBDIRS win32"
-            CDROM_DRIVERS="$CDROM_DRIVERS win32/libcdrom_win32.la"
+            AC_DEFINE(SDL_CDROM_WIN32)
+            SOURCES="$SOURCES $srcdir/src/cdrom/win32/*.c"
+            have_cdrom=yes
         fi
         # Set up files for the thread library
         if test x$enable_threads = xyes; then
-            COPY_ARCH_SRC(src/thread, win32, SDL_systhread.c)
-            COPY_ARCH_SRC(src/thread, win32, SDL_systhread_c.h)
-            COPY_ARCH_SRC(src/thread, win32, SDL_sysmutex.c)
-            COPY_ARCH_SRC(src/thread, generic, SDL_sysmutex_c.h)
-            COPY_ARCH_SRC(src/thread, win32, SDL_syssem.c)
-            COPY_ARCH_SRC(src/thread, generic, SDL_syssem_c.h)
-            COPY_ARCH_SRC(src/thread, generic, SDL_syscond.c)
-            COPY_ARCH_SRC(src/thread, generic, SDL_syscond_c.h)
+            AC_DEFINE(SDL_THREAD_WIN32)
+            SOURCES="$SOURCES $srcdir/src/thread/win32/SDL_sysmutex.c"
+            SOURCES="$SOURCES $srcdir/src/thread/win32/SDL_syssem.c"
+            SOURCES="$SOURCES $srcdir/src/thread/win32/SDL_systhread.c"
+            SOURCES="$SOURCES $srcdir/src/thread/generic/SDL_syscond.c"
+            have_threads=yes
         fi
         # Set up files for the timer library
         if test x$enable_timers = xyes; then
-            COPY_ARCH_SRC(src/timer, win32, SDL_systimer.c)
+            AC_DEFINE(SDL_TIMER_WIN32)
+            SOURCES="$SOURCES $srcdir/src/timer/win32/*.c"
+            have_timers=yes
+        fi
+        # Set up files for the shared object loading library
+        if test x$enable_loadso = xyes; then
+            AC_DEFINE(SDL_LOADSO_WIN32)
+            SOURCES="$SOURCES $srcdir/src/loadso/win32/*.c"
+            have_loadso=yes
+        fi
+        # Set up the system libraries we need
+        BUILD_LIBS="$BUILD_LIBS -luser32 -lgdi32 -lwinmm"
+        if test x$have_directx = xyes; then
+            BUILD_LIBS="$BUILD_LIBS -ldxguid"
         fi
         # The Win32 platform requires special setup
         SDL_CFLAGS="$SDL_CFLAGS -Dmain=SDL_main"
         case "$target" in
             *-*-cygwin*)
-                CFLAGS="$CFLAGS -I/usr/include/mingw -DWIN32 -Uunix -mno-cygwin"
+                BUILD_CFLAGS="$BUILD_CFLAGS -I/usr/include/mingw -DWIN32 -Uunix -mno-cygwin"
                 SDL_CFLAGS="$SDL_CFLAGS -I/usr/include/mingw -DWIN32 -Uunix -mno-cygwin"
-                LIBS="$LIBS -mno-cygwin"
+                BUILD_LIBS="$BUILD_LIBS -mno-cygwin"
                 SDL_LIBS="-lmingw32 -lSDLmain $SDL_LIBS -mwindows -mno-cygwin"
                 ;;
             *-*-mingw32*)
@@ -2689,7 +2138,6 @@ case "$target" in
     *-*-beos*)
         ARCH=beos
         ac_default_prefix=/boot/develop/tools/gnupro
-        have_loadso=yes
         CheckDummyVideo
         CheckDiskAudio
         CheckNASM
@@ -2697,139 +2145,108 @@ case "$target" in
         CheckBeGL
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS baudio"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS baudio/libaudio_baudio.la"
+            AC_DEFINE(SDL_AUDIO_DRIVER_BAUDIO)
+            SOURCES="$SOURCES $srcdir/src/audio/baudio/*.cc"
+            have_audio=yes
         fi
         # Set up files for the joystick library
         if test x$enable_joystick = xyes; then
-            JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS beos"
-            JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS beos/libjoystick_beos.la"
+            AC_DEFINE(SDL_JOYSTICK_BEOS)
+            SOURCES="$SOURCES $srcdir/src/joystick/beos/*.cc"
+            have_joystick=yes
         fi
         # Set up files for the cdrom library
         if test x$enable_cdrom = xyes; then
-            CDROM_SUBDIRS="$CDROM_SUBDIRS beos"
-            CDROM_DRIVERS="$CDROM_DRIVERS beos/libcdrom_beos.la"
+            AC_DEFINE(SDL_CDROM_BEOS)
+            SOURCES="$SOURCES $srcdir/src/cdrom/beos/*.cc"
+            have_cdrom=yes
         fi
         # Set up files for the thread library
         if test x$enable_threads = xyes; then
-            COPY_ARCH_SRC(src/thread, beos, SDL_systhread.c)
-            COPY_ARCH_SRC(src/thread, beos, SDL_systhread_c.h)
-            COPY_ARCH_SRC(src/thread, generic, SDL_sysmutex.c)
-            COPY_ARCH_SRC(src/thread, generic, SDL_sysmutex_c.h)
-            COPY_ARCH_SRC(src/thread, beos, SDL_syssem.c)
-            COPY_ARCH_SRC(src/thread, generic, SDL_syssem_c.h)
-            COPY_ARCH_SRC(src/thread, generic, SDL_syscond.c)
-            COPY_ARCH_SRC(src/thread, generic, SDL_syscond_c.h)
+            AC_DEFINE(SDL_THREAD_BEOS)
+            SOURCES="$SOURCES $srcdir/src/thread/beos/*.c"
+            SOURCES="$SOURCES $srcdir/src/thread/generic/SDL_sysmutex.c"
+            SOURCES="$SOURCES $srcdir/src/thread/generic/SDL_syscond.c"
+            have_threads=yes
         fi
         # Set up files for the timer library
         if test x$enable_timers = xyes; then
-            COPY_ARCH_SRC(src/timer, beos, SDL_systimer.c)
+            AC_DEFINE(SDL_TIMER_BEOS)
+            SOURCES="$SOURCES $srcdir/src/timer/beos/*.c"
+            have_timers=yes
+        fi
+        # Set up files for the shared object loading library
+        if test x$enable_loadso = xyes; then
+            AC_DEFINE(SDL_LOADSO_BEOS)
+            SOURCES="$SOURCES $srcdir/src/loadso/beos/*.c"
+            have_loadso=yes
         fi
         # The BeOS platform requires special libraries
-        SYSTEM_LIBS="$SYSTEM_LIBS -lroot -lbe -lmedia -lgame -ldevice -ltextencoding"
-        ;;
-    *-*-macos*)
-        # This would be used if cross-compiling to MacOS 9.  No way to
-        # use it at present, but Apple is working on a X-to-9 compiler
-        # for which this case would be handy.
-        ARCH=macos
-        have_loadso=yes
-        CheckDummyVideo
-        CheckDiskAudio
-        CheckTOOLBOX
-        CheckMacGL
-        # Set up files for the audio library
-        if test x$enable_audio = xyes; then
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS macrom"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS macrom/libaudio_macrom.la"
-        fi
-        # Set up files for the joystick library
-        if test x$enable_joystick = xyes; then
-            JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS macos"
-            JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS macos/libjoystick_macos.la"
-        fi
-        # Set up files for the cdrom library
-        if test x$enable_cdrom = xyes; then
-            CDROM_SUBDIRS="$CDROM_SUBDIRS macos"
-            CDROM_DRIVERS="$CDROM_DRIVERS macos/libcdrom_macos.la"
-        fi
-        # Set up files for the thread library
-        if test x$enable_threads = xyes; then
-            COPY_ARCH_SRC(src/thread, macos, SDL_systhread.c)
-            COPY_ARCH_SRC(src/thread, macos, SDL_systhread_c.h)
-            COPY_ARCH_SRC(src/thread, generic, SDL_sysmutex.c)
-            COPY_ARCH_SRC(src/thread, generic, SDL_sysmutex_c.h)
-            COPY_ARCH_SRC(src/thread, macos, SDL_syssem.c)
-            COPY_ARCH_SRC(src/thread, generic, SDL_syssem_c.h)
-            COPY_ARCH_SRC(src/thread, generic, SDL_syscond.c)
-            COPY_ARCH_SRC(src/thread, generic, SDL_syscond_c.h)
-        fi
-        # Set up files for the timer library
-        if test x$enable_timers = xyes; then
-            COPY_ARCH_SRC(src/timer, macos, SDL_systimer.c)
-        fi
-        # The MacOS platform requires special setup
-        SDL_CFLAGS="$SDL_CFLAGS -Dmain=SDL_main"
-        SDL_LIBS="-lSDLmain $SDL_LIBS"
+        BUILD_LIBS="$BUILD_LIBS -lroot -lbe -lmedia -lgame -ldevice -ltextencoding"
         ;;
     *-*-darwin* )
         # This could be either full "Mac OS X", or plain "Darwin" which is
         # just the OS X kernel sans upper layers like Carbon and Cocoa.
         # Next line is broken, and a few files below require Mac OS X (full)
         ARCH=macosx
-        have_loadso=yes
         CheckDummyVideo
         CheckDiskAudio
+        CheckDLOPEN
         CheckCOCOA
         CheckCARBON
         CheckX11
         CheckMacGL
         CheckOpenGLX11
         CheckPTHREAD
-        CheckSIGACTION
         CheckAltivec
-        # If either the audio or CD driver is used, add the AudioUnit framework
-        if test x$enable_audio = xyes -o x$enable_cdrom = xyes; then
-            SYSTEM_LIBS="$SYSTEM_LIBS -framework AudioToolbox -framework AudioUnit"
-        fi
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS macosx"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS macosx/libaudio_macosx.la"
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS macrom"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS macrom/libaudio_macrom.la"
+            AC_DEFINE(SDL_AUDIO_DRIVER_COREAUDIO)
+            SOURCES="$SOURCES $srcdir/src/audio/macosx/*.c"
+            AC_DEFINE(SDL_AUDIO_DRIVER_SNDMGR)
+            SOURCES="$SOURCES $srcdir/src/audio/macrom/*.c"
+            have_audio=yes
         fi
         # Set up files for the joystick library
         if test x$enable_joystick = xyes; then
-            JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS darwin"
-            JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS darwin/libjoystick_darwin.la"
-            SYSTEM_LIBS="$SYSTEM_LIBS -framework IOKit"
+            AC_DEFINE(SDL_JOYSTICK_IOKIT)
+            SOURCES="$SOURCES $srcdir/src/joystick/darwin/*.c"
+            BUILD_LIBS="$BUILD_LIBS -framework IOKit"
+            have_joystick=yes
         fi
         # Set up files for the cdrom library
         if test x$enable_cdrom = xyes; then
-            CDROM_SUBDIRS="$CDROM_SUBDIRS macosx"
-            CDROM_DRIVERS="$CDROM_DRIVERS macosx/libcdrom_macosx.la"
-        fi
-        # Set up files for the thread library
-        if test x$enable_threads = xyes; then
-            CopyUnixThreadSource
+            AC_DEFINE(SDL_CDROM_MACOSX)
+            SOURCES="$SOURCES $srcdir/src/cdrom/macosx/*.c"
+            have_cdrom=yes
         fi
         # Set up files for the timer library
         if test x$enable_timers = xyes; then
-            COPY_ARCH_SRC(src/timer, linux, SDL_systimer.c)
+            AC_DEFINE(SDL_TIMER_UNIX)
+            SOURCES="$SOURCES $srcdir/src/timer/unix/*.c"
+            have_timers=yes
+        fi
+        # Set up files for the shared object loading library
+        if test x$enable_loadso = xyes -a x$have_dlopen != xyes; then
+            AC_DEFINE(SDL_LOADSO_DLCOMPAT)
+            SOURCES="$SOURCES $srcdir/src/loadso/macosx/*.c"
+            have_loadso=yes
         fi
         # The MacOS X platform requires special setup.
+        AC_DEFINE(TARGET_API_MAC_CARBON)
+        BUILD_CFLAGS="$BUILD_CFLAGS -fpascal-strings -DMACOSX"
         SDL_LIBS="-lSDLmain $SDL_LIBS"
         if test x$enable_video_cocoa = xyes; then
-            SYSTEM_LIBS="$SYSTEM_LIBS -framework Cocoa"
+            BUILD_LIBS="$BUILD_LIBS -framework Cocoa"
         fi
         if test x$enable_video_carbon = xyes -o x$enable_video_cocoa = xyes; then
             # The Cocoa backend still needs Carbon, and the YUV code QuickTime
-            SYSTEM_LIBS="$SYSTEM_LIBS -framework Carbon -framework QuickTime"
+            BUILD_LIBS="$BUILD_LIBS -framework Carbon -framework QuickTime"
         fi
-        #if test x$enable_video_carbon = xyes; then
-        #    SYSTEM_LIBS="$SYSTEM_LIBS -framework DrawSprocket"
-        #fi
+        # If either the audio or CD driver is used, add the AudioUnit framework
+        if test x$enable_audio = xyes -o x$enable_cdrom = xyes; then
+            BUILD_LIBS="$BUILD_LIBS -framework AudioToolbox -framework AudioUnit"
+        fi
         ;;
     *-*-mint*)
         ARCH=mint
@@ -2840,123 +2257,110 @@ case "$target" in
         CheckAtariGemVideo
         CheckAtariAudio
         CheckAtariLdg
-		CheckAtariOSMesa
+        CheckAtariOSMesa
         CheckPTH
         # Set up files for the audio library
         if test x$enable_threads = xyes -a x$enable_pth = xyes; then
             if test x$enable_audio = xyes; then
-                CFLAGS="$CFLAGS -DSUNAUDIO_SUPPORT"
-                AUDIO_SUBDIRS="$AUDIO_SUBDIRS sun"
-                AUDIO_DRIVERS="$AUDIO_DRIVERS sun/libaudio_sun.la"
+                AC_DEFINE(SDL_AUDIO_DRIVER_SUNAUDIO)
+                SOURCES="$SOURCES $srcdir/src/audio/sun/*.c"
+                have_audio=yes
             fi
         fi
         # Set up files for the joystick library
         if test x$enable_joystick = xyes; then
-            JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS mint"
-            JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS mint/libjoystick_mint.la"
+            AC_DEFINE(SDL_JOYSTICK_MINT)
+            SOURCES="$SOURCES $srcdir/src/joystick/mint/*.c"
+            have_joystick=yes
         fi
         # Set up files for the cdrom library
         if test x$enable_cdrom = xyes; then
-            CDROM_SUBDIRS="$CDROM_SUBDIRS mint"
-            CDROM_DRIVERS="$CDROM_DRIVERS mint/libcdrom_mint.la"
-        fi
-        # Set up files for the thread library
-        if test x$enable_threads = xyes; then
-            CopyUnixThreadSource
+            AC_DEFINE(SDL_CDROM_MINT)
+            SOURCES="$SOURCES $srcdir/src/cdrom/mint/*.c"
+            have_cdrom=yes
         fi
         # Set up files for the timer library
         if test x$enable_timers = xyes; then
             if test x$enable_threads = xyes -a x$enable_pth = xyes; then
-                COPY_ARCH_SRC(src/timer, linux, SDL_systimer.c)
+                AC_DEFINE(SDL_TIMER_UNIX)
+                SOURCES="$SOURCES $srcdir/src/timer/unix/*.c"
             else
-                COPY_ARCH_SRC(src/timer, mint, SDL_systimer.c)
+                AC_DEFINE(SDL_TIMER_MINT)
+                SOURCES="$SOURCES $srcdir/src/timer/mint/*.c"
             fi
+            have_timers=yes
         fi
         # MiNT does not define "unix"
-        CFLAGS="$CFLAGS -Dunix"
+        BUILD_CFLAGS="$BUILD_CFLAGS -Dunix"
         ;;
     *-riscos)
         ARCH=riscos
+        CheckOSS
+        CheckPTHREAD
         # Set up files for the video library
         if test x$enable_video = xyes; then
-            VIDEO_SUBDIRS="$VIDEO_SUBDIRS riscos"
-            VIDEO_DRIVERS="$VIDEO_DRIVERS riscos/libvideo_riscos.la"
-        fi
-        # Set up files for the audio library
-        if test x$enable_audio = xyes; then
-            CFLAGS="$CFLAGS -DOSS_SUPPORT"
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS dsp"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS dsp/libaudio_dsp.la"
-            AUDIO_SUBDIRS="$AUDIO_SUBDIRS dma"
-            AUDIO_DRIVERS="$AUDIO_DRIVERS dma/libaudio_dma.la"
+            AC_DEFINE(SDL_VIDEO_DRIVER_RISCOS)
+            SOURCES="$SOURCES $srcdir/src/video/riscos/*.c"
+            have_video=yes
         fi
         # Set up files for the joystick library
         if test x$enable_joystick = xyes; then
-            JOYSTICK_SUBDIRS="$JOYSTICK_SUBDIRS riscos"
-            JOYSTICK_DRIVERS="$JOYSTICK_DRIVERS riscos/libjoystick_riscos.la"
-        fi
-        # Set up files for the cdrom library
-        if test x$enable_cdrom = xyes; then
-            CDROM_SUBDIRS="$CDROM_SUBDIRS dummy"
-            CDROM_DRIVERS="$CDROM_DRIVERS dummy/libcdrom_dummy.la"
-        fi
-        # Set up files for the thread library
-        if test x$enable_threads = xyes; then
-            COPY_ARCH_SRC(src/thread, riscos, SDL_systhread.c)
-            COPY_ARCH_SRC(src/thread, riscos, SDL_systhread_c.h)
-            COPY_ARCH_SRC(src/thread, riscos, SDL_sysmutex.c)
-            COPY_ARCH_SRC(src/thread, riscos, SDL_sysmutex_c.h)
-            COPY_ARCH_SRC(src/thread, riscos, SDL_syssem.c)
-            COPY_ARCH_SRC(src/thread, generic, SDL_syssem_c.h)
-            COPY_ARCH_SRC(src/thread, riscos, SDL_syscond.c)
-            COPY_ARCH_SRC(src/thread, generic, SDL_syscond_c.h)
-        else
-            CFLAGS="$CFLAGS -DDISABLE_THREADS"
+            AC_DEFINE(SDL_JOYSTICK_RISCOS)
+            SOURCES="$SOURCES $srcdir/src/joystick/riscos/*.c"
+            have_joystick=yes
         fi
         # Set up files for the timer library
         if test x$enable_timers = xyes; then
-            COPY_ARCH_SRC(src/timer, riscos, SDL_systimer.c)
+            AC_DEFINE(SDL_TIMER_RISCOS)
+            SOURCES="$SOURCES $srcdir/src/timer/riscos/*.c"
+            have_timers=yes
         fi
-
-        CFLAGS="$CFLAGS -DENABLE_RISCOS"
-
-        SYSTEM_LIBS="$SYSTEM_LIBS -ljpeg -ltiff -lpng -lz"
+        # The RISC OS platform requires special setup.
+        BUILD_LIBS="$BUILD_LIBS -ljpeg -ltiff -lpng -lz"
         ;;
     *)
-        AC_MSG_ERROR(Unsupported target:  Please add to configure.in)
+        AC_MSG_ERROR([
+*** Unsupported target:  Please add to configure.in
+        ])
         ;;
 esac
-AC_SUBST(ARCH)
 
-# Set the conditional variables for this target
-AM_CONDITIONAL(TARGET_LINUX, test $ARCH = linux)
-AM_CONDITIONAL(TARGET_QTOPIA, test "x$video_qtopia" = "xyes")
-AM_CONDITIONAL(TARGET_SOLARIS, test $ARCH = solaris)
-AM_CONDITIONAL(TARGET_IRIX, test $ARCH = irix)
-AM_CONDITIONAL(TARGET_BSDI, test $ARCH = bsdi)
-AM_CONDITIONAL(TARGET_FREEBSD, test $ARCH = freebsd)
-AM_CONDITIONAL(TARGET_NETBSD, test $ARCH = netbsd)
-AM_CONDITIONAL(TARGET_OPENBSD, test $ARCH = openbsd)
-AM_CONDITIONAL(TARGET_AIX, test $ARCH = aix)
-AM_CONDITIONAL(TARGET_WIN32, test $ARCH = win32)
-AM_CONDITIONAL(TARGET_BEOS, test $ARCH = beos)
-AM_CONDITIONAL(TARGET_MACOS, test $ARCH = macos)
-AM_CONDITIONAL(TARGET_MACOSX, test $ARCH = macosx)
-AM_CONDITIONAL(TARGET_QNX, test $ARCH = qnx)
-AM_CONDITIONAL(TARGET_MINT, test $ARCH = mint)
-AM_CONDITIONAL(TARGET_IPOD, test x$enable_ipod = xyes)
+# Verify that we have all the platform specific files we need
+if test x$have_joystick != xyes; then
+    if test x$enable_joystick = xyes; then
+        AC_DEFINE(SDL_JOYSTICK_DISABLED)
+    fi
+    SOURCES="$SOURCES $srcdir/src/joystick/dummy/*.c"
+fi
+if test x$have_cdrom != xyes; then
+    if test x$enable_cdrom = xyes; then
+        AC_DEFINE(SDL_CDROM_DISABLED)
+    fi
+    SOURCES="$SOURCES $srcdir/src/cdrom/dummy/*.c"
+fi
+if test x$have_threads != xyes; then
+    if test x$enable_threads = xyes; then
+        AC_DEFINE(SDL_THREADS_DISABLED)
+    fi
+    SOURCES="$SOURCES $srcdir/src/thread/generic/*.c"
+fi
+if test x$have_timers != xyes; then
+    if test x$enable_timers = xyes; then
+        AC_DEFINE(SDL_TIMERS_DISABLED)
+    fi
+    SOURCES="$SOURCES $srcdir/src/timer/dummy/*.c"
+fi
+if test x$have_loadso != xyes; then
+    if test x$enable_loadso = xyes; then
+        AC_DEFINE(SDL_LOADSO_DISABLED)
+    fi
+    SOURCES="$SOURCES $srcdir/src/loadso/dummy/*.c"
+fi
 
-# More automake conditionals
-AM_CONDITIONAL(USE_DIRECTX, test x$use_directx = xyes)
-AM_CONDITIONAL(USE_CLONE, test x$use_clone = xyes)
-AM_CONDITIONAL(HAVE_NASM, test x$use_nasm = xyes)
-AM_CONDITIONAL(USE_COCOA, test x$enable_video_cocoa = xyes)
-AM_CONDITIONAL(USE_CARBON, test x$enable_video_carbon = xyes)
-
-# Set conditional variables for shared and static library selection.
-# These are not used in any Makefile.am but in sdl-config.in.
-AM_CONDITIONAL([ENABLE_SHARED], [test "$enable_shared" = yes])
-AM_CONDITIONAL([ENABLE_STATIC], [test "$enable_static" = yes])
+OBJECTS=`echo $SOURCES | sed 's,[[^ ]]*/\([[^ ]]*\)\.asm,$(objects)/\1.lo,g'`
+OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.cc,$(objects)/\1.lo,g'`
+OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.m,$(objects)/\1.lo,g'`
+OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects)/\1.lo,g'`
 
 # Set runtime shared library paths as needed
 
@@ -3005,181 +2409,48 @@ case "$ARCH" in
     ;;
 esac
 
-
 STATIC_SYSTEM_LIBS="$SYSTEM_LIBS"
-
-dnl Output the video drivers we use
-if test x$enable_video = xtrue; then
-    if test "$VIDEO_SUBDIRS" = ""; then
-        AC_MSG_ERROR(*** No video drivers are enabled!)
-    fi
-fi
-AC_SUBST(AUDIO_SUBDIRS)
-AC_SUBST(AUDIO_DRIVERS)
-AC_SUBST(VIDEO_SUBDIRS)
-AC_SUBST(VIDEO_DRIVERS)
-AC_SUBST(JOYSTICK_SUBDIRS)
-AC_SUBST(JOYSTICK_DRIVERS)
-AC_SUBST(CDROM_SUBDIRS)
-AC_SUBST(CDROM_DRIVERS)
-AC_SUBST(SDL_EXTRADIRS)
-AC_SUBST(SDL_EXTRALIBS)
 
 dnl Expand the cflags and libraries needed by apps using SDL
 AC_SUBST(SDL_CFLAGS)
 AC_SUBST(SDL_LIBS)
 AC_SUBST(SDL_STATIC_LIBS)
 AC_SUBST(SDL_RLD_FLAGS)
+if test x$enable_shared = xyes; then
+    ENABLE_SHARED_TRUE=
+    ENABLE_SHARED_FALSE="#"
+else
+    ENABLE_SHARED_TRUE="#"
+    ENABLE_SHARED_FALSE=
+fi
+if test x$enable_static = xyes; then
+    ENABLE_STATIC_TRUE=
+    ENABLE_STATIC_FALSE="#"
+else
+    ENABLE_STATIC_TRUE="#"
+    ENABLE_STATIC_FALSE=
+fi
+AC_SUBST(ENABLE_SHARED_TRUE)
+AC_SUBST(ENABLE_SHARED_FALSE)
+AC_SUBST(ENABLE_STATIC_TRUE)
+AC_SUBST(ENABLE_STATIC_FALSE)
 
 dnl Expand the libraries needed for static and dynamic linking
 AC_SUBST(STATIC_SYSTEM_LIBS)
 AC_SUBST(SHARED_SYSTEM_LIBS)
 AC_SUBST(SYSTEM_LIBS)
 
-dnl Expand the include directories for building SDL
-CFLAGS="$CFLAGS -I\$(top_srcdir)/include"
-CFLAGS="$CFLAGS -I\$(top_srcdir)/include/SDL"
-CFLAGS="$CFLAGS -I\$(top_srcdir)/src -I\$(top_srcdir)/src/main/$ARCH"
-CFLAGS="$CFLAGS -I\$(top_srcdir)/src/audio"
-CFLAGS="$CFLAGS -I\$(top_srcdir)/src/video"
-CFLAGS="$CFLAGS -I\$(top_srcdir)/src/video/Xext/extensions"
-CFLAGS="$CFLAGS -I\$(top_srcdir)/src/events"
-CFLAGS="$CFLAGS -I\$(top_srcdir)/src/joystick"
-CFLAGS="$CFLAGS -I\$(top_srcdir)/src/cdrom"
-CFLAGS="$CFLAGS -I\$(top_srcdir)/src/thread"
-CFLAGS="$CFLAGS -I\$(top_srcdir)/src/timer"
-CFLAGS="$CFLAGS -I\$(top_srcdir)/src/file"
-CFLAGS="$CFLAGS -I\$(top_builddir)/src/thread"
-CXXFLAGS="$CFLAGS"
+dnl Expand the sources and objects needed to build the library
+AC_SUBST(ac_aux_dir)
+AC_SUBST(INCLUDE)
+AC_SUBST(SOURCES)
+AC_SUBST(OBJECTS)
+AC_SUBST(BUILD_CFLAGS)
+AC_SUBST(BUILD_LIBS)
 
-
-# Check for darwin at the very end and set up the Objective C compiler
-# We do this here so that we get the full CFLAGS into OBJCFLAGS
-case "$target" in
-    *-*-darwin*)
-        dnl AC_PROG_OBJC doesn't seem to exist, this is the SDL workaround
-        AC_MSG_CHECKING(for an Objective-C compiler)
-        OBJC="$CC"
-        AC_SUBST(OBJC)
-        OBJCFLAGS="$CFLAGS"
-        AC_SUBST(OBJCFLAGS)
-        _AM_DEPENDENCIES(OBJC)
-        ;;
-esac
-
-# Finally create all the generated files
-dnl Important: Any directory that you want to be in the distcheck should
-dnl            have a file listed here, so that configure generates the
-dnl            subdirectories on the build target.
 AC_OUTPUT([
-Makefile
-docs/Makefile
-docs/html/Makefile
-docs/man3/Makefile
-include/Makefile
-src/Makefile
-src/main/Makefile
-src/main/macos/Makefile
-src/main/macosx/Makefile
-src/main/macosx/Info.plist
-src/stdlib/Makefile
-src/audio/Makefile
-src/audio/alsa/Makefile
-src/audio/arts/Makefile
-src/audio/baudio/Makefile
-src/audio/dc/Makefile
-src/audio/disk/Makefile
-src/audio/dma/Makefile
-src/audio/dmedia/Makefile
-src/audio/dsp/Makefile
-src/audio/esd/Makefile
-src/audio/macosx/Makefile
-src/audio/macrom/Makefile
-src/audio/mint/Makefile
-src/audio/mme/Makefile
-src/audio/nas/Makefile
-src/audio/nto/Makefile
-src/audio/openbsd/Makefile
-src/audio/paudio/Makefile
-src/audio/sun/Makefile
-src/audio/ums/Makefile
-src/audio/windib/Makefile
-src/audio/windx5/Makefile
-src/video/Makefile
-src/video/aalib/Makefile
-src/video/ataricommon/Makefile
-src/video/bwindow/Makefile
-src/video/cybergfx/Makefile
-src/video/dc/Makefile
-src/video/dga/Makefile
-src/video/directfb/Makefile
-src/video/dummy/Makefile
-src/video/epoc/Makefile
-src/video/fbcon/Makefile
-src/video/gem/Makefile
-src/video/ggi/Makefile
-src/video/ipod/Makefile
-src/video/os2fslib/Makefile
-src/video/maccommon/Makefile
-src/video/macdsp/Makefile
-src/video/macrom/Makefile
-src/video/nanox/Makefile
-src/video/photon/Makefile
-src/video/picogui/Makefile
-src/video/ps2gs/Makefile
-src/video/qtopia/Makefile
-src/video/wscons/Makefile
-src/video/quartz/Makefile
-src/video/riscos/Makefile
-src/video/svga/Makefile
-src/video/vgl/Makefile
-src/video/wincommon/Makefile
-src/video/windib/Makefile
-src/video/windx5/Makefile
-src/video/gapi/Makefile
-src/video/x11/Makefile
-src/video/xbios/Makefile
-src/video/Xext/Makefile
-src/video/Xext/extensions/Makefile
-src/video/Xext/Xinerama/Makefile
-src/video/Xext/Xv/Makefile
-src/video/Xext/Xxf86dga/Makefile
-src/video/Xext/Xxf86vm/Makefile
-src/video/Xext/XME/Makefile
-src/events/Makefile
-src/joystick/Makefile
-src/joystick/amigaos/Makefile
-src/joystick/beos/Makefile
-src/joystick/bsd/Makefile
-src/joystick/darwin/Makefile
-src/joystick/dc/Makefile
-src/joystick/dummy/Makefile
-src/joystick/linux/Makefile
-src/joystick/macos/Makefile
-src/joystick/mint/Makefile
-src/joystick/riscos/Makefile
-src/joystick/win32/Makefile
-src/cdrom/Makefile
-src/cdrom/aix/Makefile
-src/cdrom/beos/Makefile
-src/cdrom/dc/Makefile
-src/cdrom/dummy/Makefile
-src/cdrom/bsdi/Makefile
-src/cdrom/freebsd/Makefile
-src/cdrom/linux/Makefile
-src/cdrom/macos/Makefile
-src/cdrom/macosx/Makefile
-src/cdrom/mint/Makefile
-src/cdrom/openbsd/Makefile
-src/cdrom/osf/Makefile
-src/cdrom/qnx/Makefile
-src/cdrom/win32/Makefile
-src/thread/Makefile
-src/timer/Makefile
-src/file/Makefile
-src/cpuinfo/Makefile
-src/hermes/Makefile
-sdl-config
-SDL.spec
-SDL.qpg
-], [chmod +x sdl-config])
+    Makefile sdl-config SDL.spec SDL.qpg
+], [
+    : >build-deps
+    make depend
+])

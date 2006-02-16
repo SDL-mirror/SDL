@@ -1,6 +1,6 @@
 Summary: Simple DirectMedia Layer
-Name: @PACKAGE@
-Version: @VERSION@
+Name: SDL
+Version: @SDL_VERSION@
 Release: 1
 Source: http://www.libsdl.org/release/%{name}-%{version}.tar.gz
 URL: http://www.libsdl.org/
@@ -45,7 +45,12 @@ make
 %install
 rm -rf $RPM_BUILD_ROOT
 %ifos linux
-make install prefix=$RPM_BUILD_ROOT/%{prefix}
+make install prefix=$RPM_BUILD_ROOT/%{prefix} \
+             bindir=$RPM_BUILD_ROOT/%{_bindir} \
+             libdir=$RPM_BUILD_ROOT/%{_libdir} \
+             includedir=$RPM_BUILD_ROOT/%{_includedir} \
+             datadir=$RPM_BUILD_ROOT/%{_datadir} \
+             mandir=$RPM_BUILD_ROOT/%{_mandir}
 ln -s libSDL-1.2.so.0 $RPM_BUILD_ROOT/%{prefix}/lib/libSDL-1.1.so.0
 %else
 %makeinstall
@@ -81,8 +86,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/lib*.%{__soext}
 %dir %{_includedir}/SDL
 %{_includedir}/SDL/*.h
-%{_mandir}/man3/*
 %{_datadir}/aclocal/*
+%{_mandir}/man3/*
 
 %changelog
 * Mon Jan 03 2004 Anders Bjorklund <afb@algonet.se>

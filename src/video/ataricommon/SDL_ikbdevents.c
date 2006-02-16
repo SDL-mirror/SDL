@@ -29,8 +29,8 @@
 /* Mint includes */
 #include <mint/osbind.h>
 
-#include "SDL_sysevents.h"
-#include "SDL_events_c.h"
+#include "../../events/SDL_sysevents.h"
+#include "../../events/SDL_events_c.h"
 
 #include "SDL_atarikeys.h"
 #include "SDL_atarievents_c.h"

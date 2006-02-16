@@ -24,6 +24,8 @@
 #define DEBUG_DYNAMIC_X11 1
 #endif
 
+#include "SDL_config.h"
+
 #define __SDL_NO_REDEFINE_X11_HEADER_SYMS 1
 #include "SDL_x11dyn.h"
 
@@ -31,13 +33,13 @@
 #include <stdio.h>
 #endif
 
-#ifdef X11_DYNAMIC
+#ifdef SDL_VIDEO_DRIVER_X11_DYNAMIC
 #include <dlfcn.h>
 #include "SDL_name.h"
 #include "SDL_loadso.h"
-static const char *x11_library = X11_DYNAMIC;
+static const char *x11_library = SDL_VIDEO_DRIVER_X11_DYNAMIC;
 static void *x11_handle = NULL;
-static const char *x11ext_library = X11EXT_DYNAMIC;
+static const char *x11ext_library = SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT;
 static void *x11ext_handle = NULL;
 
 static void *X11_GetSym(int required, const char *fnname, int *rc)
@@ -65,7 +67,7 @@ static void *X11_GetSym(int required, const char *fnname, int *rc)
 
 	return fn;
 }
-#endif  /* defined X11_DYNAMIC */
+#endif  /* SDL_VIDEO_DRIVER_X11_DYNAMIC */
 
 /* Define all the function pointers... */
 #define SDL_X11_SYM(req,ret,fn,params) ret (*p##fn) params = NULL;
@@ -84,7 +86,7 @@ void SDL_X11_UnloadSymbols(void)
 			#include "SDL_x11sym.h"
 			#undef SDL_X11_SYM
 
-			#ifdef X11_DYNAMIC
+			#ifdef SDL_VIDEO_DRIVER_X11_DYNAMIC
 			if (x11_handle != NULL) {
 				SDL_UnloadObject(x11_handle);
 				x11_handle = NULL;
@@ -105,7 +107,7 @@ int SDL_X11_LoadSymbols(void)
 
     /* deal with multiple modules (dga, x11, etc) needing these symbols... */
 	if (x11_load_refcount++ == 0) {
-		#ifdef X11_DYNAMIC
+		#ifdef SDL_VIDEO_DRIVER_X11_DYNAMIC
 			x11_handle = SDL_LoadObject(x11_library);
 			x11ext_handle = SDL_LoadObject(x11ext_library);
 			rc = ((x11_handle != NULL) && (x11ext_handle != NULL));

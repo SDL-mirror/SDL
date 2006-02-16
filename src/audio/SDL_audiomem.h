@@ -20,10 +20,5 @@
     slouken@libsdl.org
 */
 
-/* Functions to allocate audio buffer memory, shareable across threads
-	(necessary because SDL audio emulates threads with fork()
- */
-
-extern void *SDL_AllocAudioMem(int size);
-extern void SDL_FreeAudioMem(void *mem);
-
+#define SDL_AllocAudioMem	SDL_malloc
+#define SDL_FreeAudioMem	SDL_free

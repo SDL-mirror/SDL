@@ -39,9 +39,9 @@
 #include <linux/keyboard.h>
 
 #include "SDL_mutex.h"
-#include "SDL_sysevents.h"
-#include "SDL_sysvideo.h"
-#include "SDL_events_c.h"
+#include "../SDL_sysvideo.h"
+#include "../../events/SDL_sysevents.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_gsvideo.h"
 #include "SDL_gsevents_c.h"
 #include "SDL_gskeys.h"

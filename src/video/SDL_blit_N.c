@@ -27,7 +27,7 @@
 
 /* Functions to blit from N-bit surfaces to other surfaces */
 
-#ifdef USE_ALTIVEC_BLITTERS
+#if SDL_ALTIVEC_BLITTERS
 #ifdef HAVE_ALTIVEC_H
 #include <altivec.h>
 #endif
@@ -842,7 +842,7 @@ static Uint32 GetBlitFeatures( void )
 #define LO	1
 #endif
 
-#ifdef USE_ASMBLIT
+#if SDL_HERMES_BLITTERS
 
 /* Heheheh, we coerce Hermes into using SDL blit information */
 #define X86_ASSEMBLER
@@ -850,8 +850,8 @@ static Uint32 GetBlitFeatures( void )
 #define HermesClearInterface		void
 #define STACKCALL
 
-#include "HeadMMX.h"
-#include "HeadX86.h"
+#include "../hermes/HeadMMX.h"
+#include "../hermes/HeadX86.h"
 
 #else
 
@@ -1200,7 +1200,7 @@ static void Blit_RGB888_RGB565(SDL_BlitInfo *info)
 #endif /* USE_DUFFS_LOOP */
 }
 
-#endif /* USE_ASMBLIT */
+#endif /* SDL_HERMES_BLITTERS */
 
 
 /* Special optimized blit for RGB 5-6-5 --> 32-bit RGB surfaces */
@@ -2272,15 +2272,14 @@ static const struct blit_table normal_blit_1[] = {
 	{ 0,0,0, 0, 0,0,0, 0, NULL, NULL },
 };
 static const struct blit_table normal_blit_2[] = {
-#ifdef USE_ASMBLIT
+#if SDL_HERMES_BLITTERS
     { 0x0000F800,0x000007E0,0x0000001F, 2, 0x0000001F,0x000007E0,0x0000F800,
       0, ConvertX86p16_16BGR565, ConvertX86, NO_ALPHA },
     { 0x0000F800,0x000007E0,0x0000001F, 2, 0x00007C00,0x000003E0,0x0000001F,
       0, ConvertX86p16_16RGB555, ConvertX86, NO_ALPHA },
     { 0x0000F800,0x000007E0,0x0000001F, 2, 0x0000001F,0x000003E0,0x00007C00,
       0, ConvertX86p16_16BGR555, ConvertX86, NO_ALPHA },
-#endif
-#ifdef USE_ALTIVEC_BLITTERS
+#elif SDL_ALTIVEC_BLITTERS
     /* has-altivec */
     { 0x0000F800,0x000007E0,0x0000001F, 4, 0x00000000,0x00000000,0x00000000,
       2, NULL, Blit_RGB565_32Altivec, NO_ALPHA | COPY_ALPHA | SET_ALPHA },
@@ -2304,7 +2303,7 @@ static const struct blit_table normal_blit_3[] = {
     { 0,0,0, 0, 0,0,0, 0, NULL, BlitNtoN, 0 }
 };
 static const struct blit_table normal_blit_4[] = {
-#ifdef USE_ASMBLIT
+#if SDL_HERMES_BLITTERS
     { 0x00FF0000,0x0000FF00,0x000000FF, 2, 0x0000F800,0x000007E0,0x0000001F,
       1, ConvertMMXpII32_16RGB565, ConvertMMX, NO_ALPHA },
     { 0x00FF0000,0x0000FF00,0x000000FF, 2, 0x0000F800,0x000007E0,0x0000001F,
@@ -2332,7 +2331,7 @@ static const struct blit_table normal_blit_4[] = {
     { 0x00FF0000,0x0000FF00,0x000000FF, 4, 0x0000FF00,0x00FF0000,0xFF000000,
       0, ConvertX86p32_32BGRA888, ConvertX86, NO_ALPHA },
 #else
-#ifdef USE_ALTIVEC_BLITTERS
+#if SDL_ALTIVEC_BLITTERS
     /* has-altivec | dont-use-prefetch */
     { 0x00000000,0x00000000,0x00000000, 4, 0x00000000,0x00000000,0x00000000,
       6, NULL, ConvertAltivec32to32_noprefetch, NO_ALPHA | COPY_ALPHA | SET_ALPHA },
@@ -2393,7 +2392,7 @@ SDL_loblit SDL_CalculateBlitN(SDL_Surface *surface, int blit_index)
 	    else if(dstfmt->BytesPerPixel == 1)
 		return BlitNto1Key;
 	    else {
-#ifdef USE_ALTIVEC_BLITTERS
+#if SDL_ALTIVEC_BLITTERS
         if((srcfmt->BytesPerPixel == 4) && (dstfmt->BytesPerPixel == 4) && SDL_HasAltiVec()) {
             return Blit32to32KeyAltivec;
         } else
@@ -2416,7 +2415,7 @@ SDL_loblit SDL_CalculateBlitN(SDL_Surface *surface, int blit_index)
 			if ( surface->map->table ) {
 				blitfun = Blit_RGB888_index8_map;
 			} else {
-#ifdef USE_ASMBLIT
+#if SDL_HERMES_BLITTERS
 				sdata->aux_data = ConvertX86p32_8RGB332;
 				blitfun = ConvertX86;
 #else
@@ -2461,7 +2460,7 @@ SDL_loblit SDL_CalculateBlitN(SDL_Surface *surface, int blit_index)
 	}
 
 #ifdef DEBUG_ASM
-#ifdef USE_ASMBLIT
+#if SDL_HERMES_BLITTERS
 	if ( blitfun == ConvertMMX )
 		fprintf(stderr, "Using mmx blit\n");
 	else

@@ -55,13 +55,12 @@ char *alloca ();
 #else
 # if HAVE_STDLIB_H
 # include <stdlib.h>
+# elif HAVE_MALLOC_H
+# include <malloc.h>
 # endif
 # if HAVE_STDARG_H
 # include <stdarg.h>
 # endif
-#endif
-#if HAVE_MALLOC_H
-# include <malloc.h>
 #endif
 #if HAVE_STRING_H
 # if !STDC_HEADERS && HAVE_MEMORY_H

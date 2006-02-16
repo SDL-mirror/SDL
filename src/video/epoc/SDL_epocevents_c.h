@@ -29,7 +29,7 @@
 
 
 extern "C" {
-#include "SDL_sysvideo.h"
+#include "../SDL_sysvideo.h"
 };
 
 #define MAX_SCANCODE 255

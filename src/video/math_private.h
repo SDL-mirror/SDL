@@ -20,10 +20,7 @@
 #include "SDL_endian.h"
 
 #define huge		really_big /* huge is a reserved keyword in VC++ 6.0 */
-#define int32_t 	math_int32_t
-#define u_int32_t	math_u_int32_t
-typedef Sint32 math_int32_t;
-typedef Uint32 math_u_int32_t;
+#define u_int32_t	uint32_t
 
 /* The original fdlibm code used statements like:
 	n0 = ((*(int*)&one)>>29)^1;		* index of high word *

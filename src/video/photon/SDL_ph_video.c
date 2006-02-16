@@ -28,9 +28,9 @@
 #include "SDL_thread.h"
 #include "SDL_video.h"
 #include "SDL_mouse.h"
-#include "SDL_sysvideo.h"
-#include "SDL_pixels_c.h"
-#include "SDL_events_c.h"
+#include "../SDL_sysvideo.h"
+#include "../SDL_pixels_c.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_ph_video.h"
 #include "SDL_ph_modes_c.h"
 #include "SDL_ph_image_c.h"
@@ -39,7 +39,7 @@
 #include "SDL_ph_wm_c.h"
 #include "SDL_ph_gl.h"
 #include "SDL_phyuv_c.h"
-#include "blank_cursor.h"
+#include "../blank_cursor.h"
 
 static int  ph_VideoInit(_THIS, SDL_PixelFormat *vformat);
 static SDL_Surface *ph_SetVideoMode(_THIS, SDL_Surface *current, int width, int height, int bpp, Uint32 flags);
@@ -123,19 +123,13 @@ static SDL_VideoDevice* ph_CreateDevice(int devindex)
     device->PumpEvents = ph_PumpEvents;
 
     /* OpenGL support. */
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
     device->GL_MakeCurrent = ph_GL_MakeCurrent;
     device->GL_SwapBuffers = ph_GL_SwapBuffers;
     device->GL_GetAttribute = ph_GL_GetAttribute;
     device->GL_LoadLibrary = ph_GL_LoadLibrary;
     device->GL_GetProcAddress = ph_GL_GetProcAddress;
-#else
-    device->GL_MakeCurrent = NULL;
-    device->GL_SwapBuffers = NULL;
-    device->GL_GetAttribute = NULL;
-    device->GL_LoadLibrary = NULL;
-    device->GL_GetProcAddress = NULL;
-#endif /* HAVE_OPENGL */
+#endif /* SDL_VIDEO_OPENGL */
 
     device->free = ph_DeleteDevice;
     
@@ -357,12 +351,12 @@ static int ph_VideoInit(_THIS, SDL_PixelFormat* vformat)
     window=NULL;
     desktoppal=SDLPH_PAL_NONE;
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
     oglctx=NULL;
     oglbuffers=NULL;
     oglflags=0;
     oglbpp=0;
-#endif /* HAVE_OPENGL */
+#endif
     
     old_video_mode=-1;
     old_refresh_rate=-1;
@@ -478,12 +472,12 @@ static SDL_Surface* ph_SetVideoMode(_THIS, SDL_Surface *current, int width, int 
 
     if ((current->flags & SDL_OPENGL)==SDL_OPENGL)
     {
-#if !defined(HAVE_OPENGL)
+#if !SDL_VIDEO_OPENGL
         /* if no built-in OpenGL support */
         SDL_SetError("ph_SetVideoMode(): no OpenGL support, you need to recompile SDL.\n");
         current->flags &= ~SDL_OPENGL;
         return NULL;
-#endif /* HAVE_OPENGL */
+#endif /* SDL_VIDEO_OPENGL */
     }
     else
     {

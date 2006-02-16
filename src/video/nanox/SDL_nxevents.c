@@ -26,7 +26,7 @@
 */
 
 #include "SDL_keysym.h"
-#include "SDL_events_c.h"
+#include "../../events/SDL_events_c.h"
 
 #include "SDL_nxevents_c.h"
 #include "SDL_nximage_c.h"

@@ -24,7 +24,7 @@
     clare@setabox.com
 */
 
-#include "SDL_events_c.h"
+#include "../../events/SDL_events_c.h"
 
 #include "SDL_nxmouse_c.h"
 

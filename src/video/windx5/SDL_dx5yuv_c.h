@@ -23,7 +23,7 @@
 /* This is the DirectDraw implementation of YUV video overlays */
 
 #include "SDL_video.h"
-#include "SDL_lowvideo.h"
+#include "../wincommon/SDL_lowvideo.h"
 #include "SDL_dx5video.h"
 
 extern SDL_Overlay *DX5_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SDL_Surface *display);

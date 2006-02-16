@@ -29,7 +29,7 @@
 
 #include "SDL_video.h"
 #include "SDL_phyuv_c.h"
-#include "SDL_yuvfuncs.h"
+#include "../SDL_yuvfuncs.h"
 
 #define OVERLAY_STATE_UNINIT 0
 #define OVERLAY_STATE_ACTIVE 1

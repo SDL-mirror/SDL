@@ -37,7 +37,7 @@
 #include "SDL_stdinc.h"
 #include "SDL_riscostask.h"
 
-#ifndef DISABLE_THREADS
+#if !SDL_THREADS_DISABLED
 #include <pthread.h>
 pthread_t main_thread;
 #endif
@@ -110,7 +110,7 @@ int RISCOS_InitTask()
 	   return 1;
    }
 
-#ifndef DISABLE_THREADS
+#if !SDL_THREADS_DISABLED
    main_thread = pthread_self();
 #endif
 

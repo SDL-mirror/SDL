@@ -34,7 +34,7 @@
 #include <DrawSprocket.h>
 #endif
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 #ifdef MACOSX
 #include <OpenGL/gl.h> /* OpenGL.framework */
 #include <AGL/agl.h>   /* AGL.framework */
@@ -42,10 +42,10 @@
 #include <GL/gl.h>
 #include <agl.h>
 #endif /* MACOSX */
-#endif /* HAVE_OPENGL */
+#endif /* SDL_VIDEO_OPENGL */
 
 #include "SDL_video.h"
-#include "SDL_sysvideo.h"
+#include "../SDL_sysvideo.h"
 
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_VideoDevice *this
@@ -84,7 +84,7 @@ struct SDL_PrivateVideoData {
 	/* Information used by DrawSprocket driver */
 	struct DSpInfo *dspinfo;
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	AGLContext appleGLContext;
 
 	void *libraryHandle;

@@ -23,13 +23,13 @@
 #include "SDL_video.h"
 #include "SDL_blit.h"
 
-#if (defined(i386) || defined(__x86_64__)) && defined(__GNUC__) && defined(USE_ASMBLIT)
-#define MMX_ASMBLIT
+#if (defined(i386) || defined(__x86_64__)) && __GNUC__ && SDL_ASSEMBLY_BLITTERS
+#define MMX_ASMBLIT 1
 #endif
 
 /* Function to check the CPU flags */
 #include "SDL_cpuinfo.h"
-#ifdef MMX_ASMBLIT
+#if MMX_ASMBLIT
 #include "mmx.h"
 #endif
 
@@ -197,7 +197,7 @@ static void BlitNto1SurfaceAlphaKey(SDL_BlitInfo *info)
 	}
 }
 
-#ifdef MMX_ASMBLIT
+#if MMX_ASMBLIT
 /* fast RGB888->(A)RGB888 blending with surface alpha=128 special case */
 static void BlitRGBtoRGBSurfaceAlpha128MMX(SDL_BlitInfo *info)
 {
@@ -413,8 +413,8 @@ static void BlitRGBtoRGBPixelAlphaMMX(SDL_BlitInfo *info)
 }
 #endif
 
-#ifdef USE_ALTIVEC_BLITTERS
-#ifdef HAVE_ALTIVEC_H
+#if SDL_ALTIVEC_BLITTERS
+#if HAVE_ALTIVEC_H
 #include <altivec.h>
 #endif
 #include <assert.h>
@@ -1183,7 +1183,7 @@ static void BlitRGBtoRGBSurfaceAlphaAltivec(SDL_BlitInfo *info)
         dstp += dstskip;
     }
 }
-#endif /* USE_ALTIVEC_BLITTERS */
+#endif /* SDL_ALTIVEC_BLITTERS */
 
 /* fast RGB888->(A)RGB888 blending with surface alpha=128 special case */
 static void BlitRGBtoRGBSurfaceAlpha128(SDL_BlitInfo *info)
@@ -1325,7 +1325,7 @@ static void BlitRGBtoRGBPixelAlpha(SDL_BlitInfo *info)
 	}
 }
 
-#ifdef MMX_ASMBLIT
+#if MMX_ASMBLIT
 /* fast (as in MMX with prefetch) ARGB888->(A)RGB888 blending with pixel alpha */
 inline static void BlitRGBtoRGBPixelAlphaMMX3DNOW(SDL_BlitInfo *info)
 {
@@ -1527,7 +1527,7 @@ static void Blit16to16SurfaceAlpha128(SDL_BlitInfo *info, Uint16 mask)
 	}
 }
 
-#ifdef MMX_ASMBLIT
+#if MMX_ASMBLIT
 /* fast RGB565->RGB565 blending with surface alpha */
 static void Blit565to565SurfaceAlphaMMX(SDL_BlitInfo *info)
 {
@@ -2136,7 +2136,7 @@ SDL_loblit SDL_CalculateAlphaBlit(SDL_Surface *surface, int blit_index)
 	    if(df->BytesPerPixel == 1)
 		return BlitNto1SurfaceAlphaKey;
 	    else
-#ifdef USE_ALTIVEC_BLITTERS
+#if SDL_ALTIVEC_BLITTERS
 	if (sf->BytesPerPixel == 4 && df->BytesPerPixel == 4 &&
 	    !(surface->map->dst->flags & SDL_HWSURFACE) && SDL_HasAltiVec())
             return Blit32to32SurfaceAlphaKeyAltivec;
@@ -2153,7 +2153,7 @@ SDL_loblit SDL_CalculateAlphaBlit(SDL_Surface *surface, int blit_index)
 		if(surface->map->identity) {
 		    if(df->Gmask == 0x7e0)
 		    {
-#ifdef MMX_ASMBLIT
+#if MMX_ASMBLIT
 		if(SDL_HasMMX())
 			return Blit565to565SurfaceAlphaMMX;
 		else
@@ -2162,7 +2162,7 @@ SDL_loblit SDL_CalculateAlphaBlit(SDL_Surface *surface, int blit_index)
 		    }
 		    else if(df->Gmask == 0x3e0)
 		    {
-#ifdef MMX_ASMBLIT
+#if MMX_ASMBLIT
 		if(SDL_HasMMX())
 			return Blit555to555SurfaceAlphaMMX;
 		else
@@ -2179,12 +2179,12 @@ SDL_loblit SDL_CalculateAlphaBlit(SDL_Surface *surface, int blit_index)
 		   && (sf->Rmask | sf->Gmask | sf->Bmask) == 0xffffff
 		   && sf->BytesPerPixel == 4)
 		{
-#ifdef MMX_ASMBLIT
+#if MMX_ASMBLIT
 		if(SDL_HasMMX())
 		    return BlitRGBtoRGBSurfaceAlphaMMX;
 		else
 #endif
-#ifdef USE_ALTIVEC_BLITTERS
+#if SDL_ALTIVEC_BLITTERS
 	if(!(surface->map->dst->flags & SDL_HWSURFACE) && SDL_HasAltiVec())
             return BlitRGBtoRGBSurfaceAlphaAltivec;
         else
@@ -2192,7 +2192,7 @@ SDL_loblit SDL_CalculateAlphaBlit(SDL_Surface *surface, int blit_index)
 		    return BlitRGBtoRGBSurfaceAlpha;
 		}
 		else
-#ifdef USE_ALTIVEC_BLITTERS
+#if SDL_ALTIVEC_BLITTERS
         if((sf->BytesPerPixel == 4) &&
 	   !(surface->map->dst->flags & SDL_HWSURFACE) && SDL_HasAltiVec())
             return Blit32to32SurfaceAlphaAltivec;
@@ -2212,7 +2212,7 @@ SDL_loblit SDL_CalculateAlphaBlit(SDL_Surface *surface, int blit_index)
 	    return BlitNto1PixelAlpha;
 
 	case 2:
-#ifdef USE_ALTIVEC_BLITTERS
+#if SDL_ALTIVEC_BLITTERS
 	if(sf->BytesPerPixel == 4 && !(surface->map->dst->flags & SDL_HWSURFACE) &&
            df->Gmask == 0x7e0 &&
 	   df->Bmask == 0x1f && SDL_HasAltiVec())
@@ -2237,7 +2237,7 @@ SDL_loblit SDL_CalculateAlphaBlit(SDL_Surface *surface, int blit_index)
 	       && sf->Bmask == df->Bmask
 	       && sf->BytesPerPixel == 4)
 	    {
-#ifdef MMX_ASMBLIT
+#if MMX_ASMBLIT
 		if(SDL_Has3DNow())
 		    return BlitRGBtoRGBPixelAlphaMMX3DNOW;
 		else
@@ -2245,14 +2245,14 @@ SDL_loblit SDL_CalculateAlphaBlit(SDL_Surface *surface, int blit_index)
 		    return BlitRGBtoRGBPixelAlphaMMX;
 		else
 #endif
-#ifdef USE_ALTIVEC_BLITTERS
+#if SDL_ALTIVEC_BLITTERS
 	if(!(surface->map->dst->flags & SDL_HWSURFACE) && SDL_HasAltiVec())
             return BlitRGBtoRGBPixelAlphaAltivec;
         else
 #endif
 		    return BlitRGBtoRGBPixelAlpha;
 	    }
-#ifdef USE_ALTIVEC_BLITTERS
+#if SDL_ALTIVEC_BLITTERS
         if (sf->Amask && sf->BytesPerPixel == 4 &&
 	    !(surface->map->dst->flags & SDL_HWSURFACE) && SDL_HasAltiVec())
             return Blit32to32PixelAlphaAltivec;

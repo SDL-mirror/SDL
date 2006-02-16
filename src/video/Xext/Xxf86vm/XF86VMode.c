@@ -37,9 +37,9 @@ from Kaleb S. KEITHLEY.
 #define NEED_REPLIES
 #ifndef XBUILD_IN_CLIENT
 #include <X11/Xlibint.h>
-#include "xf86vmstr.h"
+#include "../extensions/xf86vmstr.h"
 #include <X11/extensions/Xext.h>
-#include "extutil.h"
+#include "../extensions/extutil.h"
 #else
 #include "lib/X11/Xlibint.h"
 #include "include/extensions/xf86vmstr.h"

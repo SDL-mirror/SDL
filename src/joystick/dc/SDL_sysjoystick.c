@@ -23,8 +23,8 @@
 /* Win32 MultiMedia Joystick driver, contributed by Andrei de A. Formiga */
 
 #include "SDL_joystick.h"
-#include "SDL_sysjoystick.h"
-#include "SDL_joystick_c.h"
+#include "../SDL_sysjoystick.h"
+#include "../SDL_joystick_c.h"
 
 #include <dc/maple.h>
 #include <dc/maple/controller.h>

@@ -59,10 +59,10 @@ Copyright (c) 1995,1996  The XFree86 Project, Inc
 #define NEED_EVENTS
 #define NEED_REPLIES
 #include <X11/Xlibint.h>
-#include "xf86dga.h"
-#include "xf86dgastr.h"
+#include "../extensions/xf86dga.h"
+#include "../extensions/xf86dgastr.h"
 #include <X11/extensions/Xext.h>
-#include "extutil.h"
+#include "../extensions/extutil.h"
 
 #include "../../x11/SDL_x11dyn.h"
 
@@ -341,7 +341,7 @@ Bool SDL_NAME(XF86DGAViewPortChanged)(
 /* Helper functions */
 
 #include <X11/Xmd.h>
-#include <Xext/extensions/xf86dga.h>
+#include "../extensions/xf86dga.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>

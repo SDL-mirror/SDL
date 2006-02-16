@@ -34,8 +34,8 @@
 #include <sys/mman.h>
 
 #include "SDL_audio.h"
-#include "SDL_audio_c.h"
-#include "SDL_audiodev_c.h"
+#include "../SDL_audio_c.h"
+#include "../SDL_audiodev_c.h"
 #include "SDL_umsaudio.h"
 
 /* The tag name used by UMS audio */

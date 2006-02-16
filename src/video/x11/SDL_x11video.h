@@ -27,20 +27,19 @@
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 
-#ifdef XFREE86_DGAMOUSE
-#include <Xext/extensions/xf86dga.h>
-#endif
-#ifdef XFREE86_VM
-#include <Xext/extensions/xf86vmode.h>
-#endif
-#ifdef HAVE_XIGXME
-#include <Xext/extensions/xme.h>
-#endif
-
-#include <string.h>
-
 #include "SDL_mouse.h"
-#include "SDL_sysvideo.h"
+#include "../SDL_sysvideo.h"
+
+#if SDL_VIDEO_DRIVER_X11_DGAMOUSE
+#include "../Xext/extensions/xf86dga.h"
+#endif
+#if SDL_VIDEO_DRIVER_X11_VIDMODE
+#include "../Xext/extensions/xf86vmode.h"
+#endif
+#if SDL_VIDEO_DRIVER_X11_XME
+#include "../Xext/extensions/xme.h"
+#endif
+
 #include "SDL_x11dyn.h"
 
 /* Hidden "this" pointer for the video functions */
@@ -106,13 +105,13 @@ struct SDL_PrivateVideoData {
     int depth;			/* current visual depth (not bpp) */
 
     /* Variables used by the X11 video mode code */
-#ifdef XFREE86_VM
+#if SDL_VIDEO_DRIVER_X11_VIDMODE
     SDL_NAME(XF86VidModeModeInfo) saved_mode;
     struct {
         int x, y;
     } saved_view;
 #endif
-#ifdef HAVE_XIGXME /* XiG XME fullscreen */
+#if SDL_VIDEO_DRIVER_X11_XME /* XiG XME fullscreen */
     int use_xme;
     XiGMiscResolutionInfo saved_res;
 #endif

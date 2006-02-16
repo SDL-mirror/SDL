@@ -30,8 +30,8 @@
 #include <string.h>
 
 #include "SDL.h"
-#include "SDL_sysevents.h"
-#include "SDL_events_c.h"
+#include "../../events/SDL_sysevents.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_wsconsvideo.h"
 #include "SDL_wsconsevents_c.h"
 

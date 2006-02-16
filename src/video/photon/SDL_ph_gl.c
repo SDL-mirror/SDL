@@ -24,7 +24,7 @@
 #include "SDL.h"
 #include "SDL_ph_gl.h"
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 
 #if (_NTO_VERSION >= 630)
     /* PhotonGL functions */
@@ -96,7 +96,7 @@ int ph_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
 #if (_NTO_VERSION < 630)
 int ph_GL_LoadLibrary(_THIS, const char* path)
 {
-    /* if code compiled with HAVE_OPENGL, that mean that library already linked */
+    /* if code compiled with SDL_VIDEO_OPENGL, that mean that library already linked */
     this->gl_config.driver_loaded = 1;
 
     return 0;
@@ -402,4 +402,4 @@ int ph_SetupOpenGLContext(_THIS, int width, int height, int bpp, Uint32 flags)
 
 #endif /* _NTO_VERSION */
 
-#endif /* HAVE_OPENGL */
+#endif /* SDL_VIDEO_OPENGL */

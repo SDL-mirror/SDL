@@ -24,102 +24,102 @@
 
 #include "SDL.h"
 #include "SDL_sysvideo.h"
-#include "SDL_sysevents.h"
 #include "SDL_blit.h"
 #include "SDL_pixels_c.h"
-#include "SDL_events_c.h"
 #include "SDL_cursor_c.h"
+#include "../events/SDL_sysevents.h"
+#include "../events/SDL_events_c.h"
 
 /* Available video drivers */
 static VideoBootStrap *bootstrap[] = {
-#ifdef ENABLE_QUARTZ
+#if SDL_VIDEO_DRIVER_QUARTZ
 	&QZ_bootstrap,
 #endif
-#ifdef ENABLE_X11
+#if SDL_VIDEO_DRIVER_X11
 	&X11_bootstrap,
 #endif
-#ifdef ENABLE_DGA
+#if SDL_VIDEO_DRIVER_DGA
 	&DGA_bootstrap,
 #endif
-#ifdef ENABLE_NANOX
+#if SDL_VIDEO_DRIVER_NANOX
 	&NX_bootstrap,
 #endif
-#ifdef ENABLE_IPOD
+#if SDL_VIDEO_DRIVER_IPOD
 	&iPod_bootstrap,
 #endif
-#ifdef ENABLE_QTOPIA
+#if SDL_VIDEO_DRIVER_QTOPIA
 	&Qtopia_bootstrap,
 #endif
-#ifdef ENABLE_WSCONS
+#if SDL_VIDEO_DRIVER_WSCONS
 	&WSCONS_bootstrap,
 #endif
-#ifdef ENABLE_FBCON
+#if SDL_VIDEO_DRIVER_FBCON
 	&FBCON_bootstrap,
 #endif
-#ifdef ENABLE_DIRECTFB
+#if SDL_VIDEO_DRIVER_DIRECTFB
 	&DirectFB_bootstrap,
 #endif
-#ifdef ENABLE_PS2GS
+#if SDL_VIDEO_DRIVER_PS2GS
 	&PS2GS_bootstrap,
 #endif
-#ifdef ENABLE_GGI
+#if SDL_VIDEO_DRIVER_GGI
 	&GGI_bootstrap,
 #endif
-#ifdef ENABLE_VGL
+#if SDL_VIDEO_DRIVER_VGL
 	&VGL_bootstrap,
 #endif
-#ifdef ENABLE_SVGALIB
+#if SDL_VIDEO_DRIVER_SVGALIB
 	&SVGALIB_bootstrap,
 #endif
-#ifdef ENABLE_AALIB
-	&AALIB_bootstrap,
-#endif
-#ifdef ENABLE_GAPI
+#if SDL_VIDEO_DRIVER_GAPI
 	&GAPI_bootstrap,
 #endif
-#ifdef ENABLE_WINDIB
+#if SDL_VIDEO_DRIVER_WINDIB
 	&WINDIB_bootstrap,
 #endif
-#ifdef ENABLE_DIRECTX
+#if SDL_VIDEO_DRIVER_DDRAW
 	&DIRECTX_bootstrap,
 #endif
-#ifdef ENABLE_BWINDOW
+#if SDL_VIDEO_DRIVER_BWINDOW
 	&BWINDOW_bootstrap,
 #endif
-#ifdef ENABLE_TOOLBOX
+#if SDL_VIDEO_DRIVER_TOOLBOX
 	&TOOLBOX_bootstrap,
 #endif
-#ifdef ENABLE_DRAWSPROCKET
+#if SDL_VIDEO_DRIVER_DRAWSPROCKET
 	&DSp_bootstrap,
 #endif
-#ifdef ENABLE_CYBERGRAPHICS
+#if SDL_VIDEO_DRIVER_CYBERGRAPHICS
 	&CGX_bootstrap,
 #endif
-#ifdef ENABLE_PHOTON
+#if SDL_VIDEO_DRIVER_PHOTON
 	&ph_bootstrap,
 #endif
-#ifdef ENABLE_EPOC
+#if SDL_VIDEO_DRIVER_EPOC
 	&EPOC_bootstrap,
 #endif
-#ifdef ENABLE_XBIOS
+#if SDL_VIDEO_DRIVER_XBIOS
 	&XBIOS_bootstrap,
 #endif
-#ifdef ENABLE_GEM
+#if SDL_VIDEO_DRIVER_GEM
 	&GEM_bootstrap,
 #endif
-#ifdef ENABLE_PICOGUI
+#if SDL_VIDEO_DRIVER_PICOGUI
 	&PG_bootstrap,
 #endif
-#ifdef ENABLE_DC
+#if SDL_VIDEO_DRIVER_DC
 	&DC_bootstrap,
 #endif
-#ifdef ENABLE_RISCOS
+#if SDL_VIDEO_DRIVER_RISCOS
 	&RISCOS_bootstrap,
 #endif
-#ifdef __OS2__
+#if SDL_VIDEO_DRIVER_OS2FS
 	&OS2FSLib_bootstrap,
 #endif
-#ifdef ENABLE_DUMMYVIDEO
+#if SDL_VIDEO_DRIVER_AALIB
+	&AALIB_bootstrap,
+#endif
+#if SDL_VIDEO_DRIVER_DUMMY
 	&DUMMY_bootstrap,
 #endif
 	NULL
@@ -133,7 +133,7 @@ void SDL_VideoQuit(void);
 void SDL_GL_UpdateRectsLock(SDL_VideoDevice* this, int numrects, SDL_Rect* rects);
 
 static SDL_GrabMode SDL_WM_GrabInputOff(void);
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 static int lock_count = 0;
 #endif
 
@@ -743,7 +743,7 @@ SDL_Surface * SDL_SetVideoMode (int width, int height, int bpp, Uint32 flags)
 	SDL_WM_GrabInput(saved_grab);
 	SDL_GetRelativeMouseState(NULL, NULL); /* Clear first large delta */
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	/* Load GL symbols (before MakeCurrent, where we need glGetString). */
 	if ( flags & (SDL_OPENGL | SDL_OPENGLBLIT) ) {
 
@@ -769,7 +769,7 @@ SDL_Surface * SDL_SetVideoMode (int width, int height, int bpp, Uint32 flags)
 #include "SDL_glfuncs.h"
 #undef SDL_PROC	
 	}
-#endif /* HAVE_OPENGL */
+#endif /* SDL_VIDEO_OPENGL */
 
 	/* If we're running OpenGL, make the context current */
 	if ( (video->screen->flags & SDL_OPENGL) &&
@@ -782,7 +782,7 @@ SDL_Surface * SDL_SetVideoMode (int width, int height, int bpp, Uint32 flags)
 	/* Set up a fake SDL surface for OpenGL "blitting" */
 	if ( (flags & SDL_OPENGLBLIT) == SDL_OPENGLBLIT ) {
 		/* Load GL functions for performing the texture updates */
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 
 		/* Create a software surface for blitting */
 #ifdef GL_VERSION_1_2
@@ -857,7 +857,7 @@ SDL_Surface * SDL_SetVideoMode (int width, int height, int bpp, Uint32 flags)
 
 		video->UpdateRects = SDL_GL_UpdateRectsLock;
 #else
-		SDL_SetError("Somebody forgot to #define HAVE_OPENGL");
+		SDL_SetError("Somebody forgot to #define SDL_VIDEO_OPENGL");
 		return(NULL);
 #endif
 	}
@@ -1513,7 +1513,7 @@ void SDL_GL_UpdateRectsLock(SDL_VideoDevice* this, int numrects, SDL_Rect *rects
 /* Update rects without state setting and changing (the caller is responsible for it) */
 void SDL_GL_UpdateRects(int numrects, SDL_Rect *rects)
 {
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	SDL_VideoDevice *this = current_video;
 	SDL_Rect update, tmp;
 	int x, y, i;
@@ -1587,7 +1587,7 @@ void SDL_GL_UpdateRects(int numrects, SDL_Rect *rects)
 /* Lock == save current state */
 void SDL_GL_Lock()
 {
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	lock_count--;
 	if (lock_count==-1)
 	{
@@ -1635,7 +1635,7 @@ void SDL_GL_Lock()
 /* Unlock == restore saved state */
 void SDL_GL_Unlock()
 {
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	lock_count++;
 	if (lock_count==0)
 	{

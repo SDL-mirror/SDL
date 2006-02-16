@@ -20,7 +20,7 @@
     slouken@libsdl.org
 */
 
-#include "SDL_lowvideo.h"
+#include "../wincommon/SDL_lowvideo.h"
 
 /* Variables and functions exported by SDL_dx5events.c to other parts 
    of the native video subsystem (SDL_dx5video.c)

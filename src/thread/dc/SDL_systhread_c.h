@@ -20,10 +20,4 @@
     slouken@libsdl.org
 */
 
-/* Stub until we implement threads on this platform */
 typedef struct kthread* SYS_ThreadHandle;
-/*
-#ifndef DISABLE_THREADS
-#define DISABLE_THREADS
-#endif
-*/

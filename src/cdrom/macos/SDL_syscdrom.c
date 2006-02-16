@@ -27,7 +27,7 @@
 #include <LowMem.h> /* Use entry table macros, not functions in InterfaceLib  */
 
 #include "SDL_cdrom.h"
-#include "SDL_syscdrom.h"
+#include "../SDL_syscdrom.h"
 #include "SDL_syscdrom_c.h"
 
 /* Added by Matt Slot */

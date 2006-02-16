@@ -22,9 +22,9 @@
 
 #include "SDL_video.h"
 #include "SDL_mouse.h"
-#include "SDL_sysvideo.h"
-#include "SDL_pixels_c.h"
-#include "SDL_events_c.h"
+#include "../SDL_sysvideo.h"
+#include "../SDL_pixels_c.h"
+#include "../../events/SDL_events_c.h"
 
 #include "SDL_dcvideo.h"
 #include "SDL_dcevents_c.h"
@@ -32,10 +32,6 @@
 
 #include <dc/video.h>
 #include <dc/pvr.h>
-
-#ifdef HAVE_OPENGL
-#include <GL/gl.h>
-#endif
 
 
 /* Initialization/Query functions */
@@ -111,7 +107,7 @@ static SDL_VideoDevice *DC_CreateDevice(int devindex)
 	device->UnlockHWSurface = DC_UnlockHWSurface;
 	device->FlipHWSurface = DC_FlipHWSurface;
 	device->FreeHWSurface = DC_FreeHWSurface;
-#ifdef	HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	device->GL_LoadLibrary = DC_GL_LoadLibrary;
 	device->GL_GetProcAddress = DC_GL_GetProcAddress;
 	device->GL_GetAttribute = DC_GL_GetAttribute;
@@ -184,7 +180,7 @@ pvr_init_params_t params = {
         512*1024
 };
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 static int pvr_inited;
 #endif
 
@@ -220,7 +216,7 @@ SDL_Surface *DC_SetVideoMode(_THIS, SDL_Surface *current,
 		Rmask = 0x00ff0000;
 		Gmask = 0x0000ff00;
 		Bmask = 0x000000ff;
-#ifdef	HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 		if (!(flags & SDL_OPENGL))
 #endif
 		break;
@@ -241,7 +237,7 @@ SDL_Surface *DC_SetVideoMode(_THIS, SDL_Surface *current,
 	current->h = height;
 	current->pitch = pitch;
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	if (pvr_inited) {
 		pvr_inited = 0;
 		pvr_shutdown();
@@ -252,7 +248,7 @@ SDL_Surface *DC_SetVideoMode(_THIS, SDL_Surface *current,
 
 	current->pixels = vram_s;
 
-#ifdef	HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	if (flags & SDL_OPENGL) {
 		this->gl_config.driver_loaded = 1;
 		current->flags = SDL_FULLSCREEN | SDL_OPENGL;
@@ -318,7 +314,7 @@ static int DC_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 */
 static void DC_VideoQuit(_THIS)
 {
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	if (pvr_inited) {
 		pvr_inited = 0;
 		pvr_shutdown();
@@ -326,7 +322,7 @@ static void DC_VideoQuit(_THIS)
 #endif
 }
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 
 void dmyfunc(void) {}
 

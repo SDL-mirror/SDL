@@ -30,8 +30,8 @@
 
 #include <mint/cookie.h>
 
-#include "SDL_sysevents.h"
-#include "SDL_events_c.h"
+#include "../../events/SDL_sysevents.h"
+#include "../../events/SDL_events_c.h"
 
 #include "SDL_atarievents_c.h"
 #include "SDL_biosevents_c.h"

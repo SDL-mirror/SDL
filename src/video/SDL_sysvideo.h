@@ -34,19 +34,16 @@
 
 /* OpenGL is pretty much available on all Windows systems */
 #ifdef WIN32
-#ifndef _WIN32_WCE
-#define HAVE_OPENGL
-#endif
 #include "SDL_windows.h"
 #endif
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 #ifdef MACOSX
 #include <OpenGL/gl.h>  /* OpenGL.framework */
 #else
 #include <GL/gl.h>
 #endif /* MACOSX */
-#endif /* HAVE_OPENGL */
+#endif /* SDL_VIDEO_OPENGL */
 
 /* The SDL video driver */
 typedef struct SDL_VideoDevice SDL_VideoDevice;
@@ -194,7 +191,7 @@ struct SDL_VideoDevice {
 	void (*GL_SwapBuffers)(_THIS);
 
   	/* OpenGL functions for SDL_OPENGLBLIT */
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 #ifndef WIN32
 #define WINAPI
 #endif
@@ -326,103 +323,97 @@ typedef struct VideoBootStrap {
 	SDL_VideoDevice *(*create)(int devindex);
 } VideoBootStrap;
 
-#ifdef ENABLE_X11
-extern VideoBootStrap X11_bootstrap;
-#endif
-#ifdef ENABLE_DGA
-extern VideoBootStrap DGA_bootstrap;
-#endif
-#ifdef ENABLE_NANOX
-extern VideoBootStrap NX_bootstrap;
-#endif
-#ifdef ENABLE_IPOD
-extern VideoBootStrap iPod_bootstrap;
-#endif
-#ifdef ENABLE_FBCON
-extern VideoBootStrap FBCON_bootstrap;
-#endif
-#ifdef ENABLE_DIRECTFB
-extern VideoBootStrap DirectFB_bootstrap;
-#endif
-#ifdef ENABLE_PS2GS
-extern VideoBootStrap PS2GS_bootstrap;
-#endif
-#ifdef ENABLE_GGI
-extern VideoBootStrap GGI_bootstrap;
-#endif
-#ifdef ENABLE_VGL
-extern VideoBootStrap VGL_bootstrap;
-#endif
-#ifdef ENABLE_SVGALIB
-extern VideoBootStrap SVGALIB_bootstrap;
-#endif
-#ifdef ENABLE_AALIB
-extern VideoBootStrap AALIB_bootstrap;
-#endif
-#ifdef ENABLE_GAPI
-extern VideoBootStrap GAPI_bootstrap;
-#endif
-#ifdef ENABLE_WINDIB
-extern VideoBootStrap WINDIB_bootstrap;
-#endif
-#ifdef ENABLE_DIRECTX
-extern VideoBootStrap DIRECTX_bootstrap;
-#endif
-#ifdef ENABLE_BWINDOW
-extern VideoBootStrap BWINDOW_bootstrap;
-#endif
-/* MacOS X gets the proper defines from configure */
-#if defined(macintosh) && !defined(MACOSX)
-#define ENABLE_TOOLBOX
-#if !TARGET_API_MAC_CARBON
-#define ENABLE_DRAWSPROCKET
-#endif
-#endif
-#ifdef ENABLE_TOOLBOX
-extern VideoBootStrap TOOLBOX_bootstrap;
-#endif
-#ifdef ENABLE_DRAWSPROCKET
-extern VideoBootStrap DSp_bootstrap;
-#endif
-#ifdef ENABLE_QUARTZ
+#if SDL_VIDEO_DRIVER_QUARTZ
 extern VideoBootStrap QZ_bootstrap;
 #endif
-#ifdef ENABLE_CYBERGRAPHICS
-extern VideoBootStrap CGX_bootstrap;
+#if SDL_VIDEO_DRIVER_X11
+extern VideoBootStrap X11_bootstrap;
 #endif
-#ifdef ENABLE_PHOTON
-extern VideoBootStrap ph_bootstrap;
+#if SDL_VIDEO_DRIVER_DGA
+extern VideoBootStrap DGA_bootstrap;
 #endif
-#ifdef ENABLE_EPOC
-extern VideoBootStrap EPOC_bootstrap;
+#if SDL_VIDEO_DRIVER_NANOX
+extern VideoBootStrap NX_bootstrap;
 #endif
-#ifdef ENABLE_DUMMYVIDEO
-extern VideoBootStrap DUMMY_bootstrap;
+#if SDL_VIDEO_DRIVER_IPOD
+extern VideoBootStrap iPod_bootstrap;
 #endif
-#ifdef ENABLE_XBIOS
-extern VideoBootStrap XBIOS_bootstrap;
-#endif
-#ifdef ENABLE_GEM
-extern VideoBootStrap GEM_bootstrap;
-#endif
-#ifdef ENABLE_QTOPIA
+#if SDL_VIDEO_DRIVER_QTOPIA
 extern VideoBootStrap Qtopia_bootstrap;
 #endif
-#ifdef ENABLE_WSCONS
+#if SDL_VIDEO_DRIVER_WSCONS
 extern VideoBootStrap WSCONS_bootstrap;
 #endif
-#ifdef ENABLE_PICOGUI
+#if SDL_VIDEO_DRIVER_FBCON
+extern VideoBootStrap FBCON_bootstrap;
+#endif
+#if SDL_VIDEO_DRIVER_DIRECTFB
+extern VideoBootStrap DirectFB_bootstrap;
+#endif
+#if SDL_VIDEO_DRIVER_PS2GS
+extern VideoBootStrap PS2GS_bootstrap;
+#endif
+#if SDL_VIDEO_DRIVER_GGI
+extern VideoBootStrap GGI_bootstrap;
+#endif
+#if SDL_VIDEO_DRIVER_VGL
+extern VideoBootStrap VGL_bootstrap;
+#endif
+#if SDL_VIDEO_DRIVER_SVGALIB
+extern VideoBootStrap SVGALIB_bootstrap;
+#endif
+#if SDL_VIDEO_DRIVER_GAPI
+extern VideoBootStrap GAPI_bootstrap;
+#endif
+#if SDL_VIDEO_DRIVER_WINDIB
+extern VideoBootStrap WINDIB_bootstrap;
+#endif
+#if SDL_VIDEO_DRIVER_DDRAW
+extern VideoBootStrap DIRECTX_bootstrap;
+#endif
+#if SDL_VIDEO_DRIVER_BWINDOW
+extern VideoBootStrap BWINDOW_bootstrap;
+#endif
+#if SDL_VIDEO_DRIVER_TOOLBOX
+extern VideoBootStrap TOOLBOX_bootstrap;
+#endif
+#if SDL_VIDEO_DRIVER_DRAWSPROCKET
+extern VideoBootStrap DSp_bootstrap;
+#endif
+#if SDL_VIDEO_DRIVER_CYBERGRAPHICS
+extern VideoBootStrap CGX_bootstrap;
+#endif
+#if SDL_VIDEO_DRIVER_PHOTON
+extern VideoBootStrap ph_bootstrap;
+#endif
+#if SDL_VIDEO_DRIVER_EPOC
+extern VideoBootStrap EPOC_bootstrap;
+#endif
+#if SDL_VIDEO_DRIVER_XBIOS
+extern VideoBootStrap XBIOS_bootstrap;
+#endif
+#if SDL_VIDEO_DRIVER_GEM
+extern VideoBootStrap GEM_bootstrap;
+#endif
+#if SDL_VIDEO_DRIVER_PICOGUI
 extern VideoBootStrap PG_bootstrap;
 #endif
-#ifdef ENABLE_DC
+#if SDL_VIDEO_DRIVER_DC
 extern VideoBootStrap DC_bootstrap;
 #endif
-#ifdef ENABLE_RISCOS
+#if SDL_VIDEO_DRIVER_RISCOS
 extern VideoBootStrap RISCOS_bootstrap;
 #endif
-#ifdef __OS2__
+#if SDL_VIDEO_DRIVER_OS2FS
 extern VideoBootStrap OS2FSLib_bootstrap;
 #endif
+#if SDL_VIDEO_DRIVER_AALIB
+extern VideoBootStrap AALIB_bootstrap;
+#endif
+#if SDL_VIDEO_DRIVER_DUMMY
+extern VideoBootStrap DUMMY_bootstrap;
+#endif
+
 /* This is the current video device */
 extern SDL_VideoDevice *current_video;
 

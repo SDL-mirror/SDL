@@ -1,4 +1,9 @@
 
+Update project files
+Create general SDL_config.h
+Create stubs for all the disabled subsystems
+Test all the platforms and drivers
+
 Wish list for the 1.3 development branch:
 
  * Use /etc/fb.modes, if available, like GGI does

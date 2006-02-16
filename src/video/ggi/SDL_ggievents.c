@@ -33,9 +33,9 @@
 #include "SDL_ggikeys.h"
 
 #include "SDL.h"
-#include "SDL_sysevents.h"
-#include "SDL_sysvideo.h"
-#include "SDL_events_c.h"
+#include "../SDL_sysvideo.h"
+#include "../../events/SDL_sysevents.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_ggivideo.h"
 #include "SDL_ggievents_c.h"
 

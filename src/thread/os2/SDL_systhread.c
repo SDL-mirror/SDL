@@ -28,7 +28,7 @@
 #include <os2.h>
 
 #include "SDL_thread.h"
-#include "SDL_systhread.h"
+#include "../SDL_systhread.h"
 
 typedef struct ThreadStartParms
 {

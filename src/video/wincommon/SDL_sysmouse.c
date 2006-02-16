@@ -23,9 +23,9 @@
 #include "SDL_windows.h"
 
 #include "SDL_mouse.h"
+#include "../../events/SDL_events_c.h"
+#include "../SDL_cursor_c.h"
 #include "SDL_sysmouse_c.h"
-#include "SDL_events_c.h"
-#include "SDL_cursor_c.h"
 #include "SDL_lowvideo.h"
 
 #ifdef _WIN32_WCE

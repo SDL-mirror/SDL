@@ -28,9 +28,9 @@
 #include "SDL_events.h"
 #include "SDL_video.h"
 #include "SDL_syswm.h"
-#include "SDL_sysevents.h"
-#include "SDL_events_c.h"
-#include "SDL_lowvideo.h"
+#include "../../events/SDL_sysevents.h"
+#include "../../events/SDL_events_c.h"
+#include "../wincommon/SDL_lowvideo.h"
 #include "SDL_dx5video.h"
 
 #ifndef WM_APP

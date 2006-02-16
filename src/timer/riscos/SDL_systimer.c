@@ -28,10 +28,10 @@
 #include <errno.h>
 
 #include "SDL_timer.h"
-#include "SDL_timer_c.h"
+#include "../SDL_timer_c.h"
 
-#ifdef DISABLE_THREADS
-/* Timer start/reset time */
+#if SDL_THREADS_DISABLED
+/* Timer  SDL_arraysize(Timer ),start/reset time */
 static Uint32 timerStart;
 /* Timer running function */
 void RISCOS_CheckTimer();
@@ -81,7 +81,7 @@ Uint32 SDL_GetTicks (void)
 void SDL_Delay (Uint32 ms)
 {
     Uint32 now,then,elapsed;
-#ifndef DISABLE_THREADS
+#if !SDL_THREADS_DISABLED
     int is_event_thread;
     if (riscos_using_threads)
     {
@@ -101,7 +101,7 @@ void SDL_Delay (Uint32 ms)
 
 	do {
 		/* Do background tasks required while sleeping as we are not multithreaded */
-#ifdef DISABLE_THREADS
+#if SDL_THREADS_DISABLED
 		RISCOS_BackgroundTasks();
 #else
 		/* For threaded build only run background tasks in event thread */
@@ -116,7 +116,7 @@ void SDL_Delay (Uint32 ms)
 			break;
 		}
 		ms -= elapsed;
-#ifndef DISABLE_THREADS
+#if !SDL_THREADS_DISABLED
             /* Need to yield to let other threads have a go */
             if (riscos_using_threads) pthread_yield();
 #endif
@@ -124,7 +124,7 @@ void SDL_Delay (Uint32 ms)
 	} while ( 1 );
 }
 
-#ifdef DISABLE_THREADS
+#if SDL_THREADS_DISABLED
 
 /* Non-threaded version of timer */
 
@@ -225,4 +225,4 @@ void SDL_SYS_StopTimer(void)
 	return;
 }
 
-#endif /* DISABLE_THREADS */
+#endif /* SDL_THREADS_DISABLED */

@@ -24,7 +24,7 @@
 
 #include "SDL_video.h"
 #include "SDL_DirectFB_yuv.h"
-#include "SDL_yuvfuncs.h"
+#include "../SDL_yuvfuncs.h"
 
 
 /* The functions used to manipulate software video overlays */

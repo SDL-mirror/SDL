@@ -34,9 +34,9 @@ Inspired by http://arisme.free.fr/ports/SDL.php
 
 #include "SDL_video.h"
 #include "SDL_mouse.h"
-#include "SDL_sysvideo.h"
-#include "SDL_pixels_c.h"
-#include "SDL_events_c.h"
+#include "../SDL_sysvideo.h"
+#include "../SDL_pixels_c.h"
+#include "../../events/SDL_events_c.h"
 
 #include "SDL_syswm_c.h"
 #include "SDL_sysmouse_c.h"

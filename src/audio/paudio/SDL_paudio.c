@@ -33,9 +33,9 @@
 
 #include "SDL_timer.h"
 #include "SDL_audio.h"
-#include "SDL_audiomem.h"
-#include "SDL_audio_c.h"
-#include "SDL_audiodev_c.h"
+#include "../SDL_audiomem.h"
+#include "../SDL_audio_c.h"
+#include "../SDL_audiodev_c.h"
 #include "SDL_paudio.h"
 
 #define DEBUG_AUDIO 1

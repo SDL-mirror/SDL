@@ -24,7 +24,7 @@
 
 #include "SDL_video.h"
 #include "SDL_dx5yuv_c.h"
-#include "SDL_yuvfuncs.h"
+#include "../SDL_yuvfuncs.h"
 
 //#define USE_DIRECTX_OVERLAY
 

@@ -26,7 +26,7 @@
 #include <mmsystem.h>
 
 #include "SDL_cdrom.h"
-#include "SDL_syscdrom.h"
+#include "../SDL_syscdrom.h"
 
 /* This really broken?? */
 #define BROKEN_MCI_PAUSE	/* Pausing actually stops play -- Doh! */

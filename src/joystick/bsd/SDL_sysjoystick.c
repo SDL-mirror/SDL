@@ -57,8 +57,8 @@
 #endif
 
 #include "SDL_joystick.h"
-#include "SDL_sysjoystick.h"
-#include "SDL_joystick_c.h"
+#include "../SDL_sysjoystick.h"
+#include "../SDL_joystick_c.h"
 
 #define MAX_UHID_JOYS	4
 #define MAX_JOY_JOYS	2

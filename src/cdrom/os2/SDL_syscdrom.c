@@ -27,7 +27,7 @@
 #include <os2me.h>
 
 #include "SDL_cdrom.h"
-#include "SDL_syscdrom.h"
+#include "../SDL_syscdrom.h"
 
 /* Size of MCI result buffer (in bytes) */
 #define MCI_CMDRETBUFSIZE	128

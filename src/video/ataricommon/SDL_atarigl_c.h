@@ -25,11 +25,13 @@
 #ifndef _SDL_ATARIGL_H_
 #define _SDL_ATARIGL_H_
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 #include <GL/osmesa.h>
 #endif
 
-#include "SDL_sysvideo.h"
+#include "../SDL_sysvideo.h"
+
+/* Hidden "this" pointer for the video functions */
 #define _THIS   SDL_VideoDevice *this
 
 struct SDL_PrivateGLData {
@@ -50,7 +52,7 @@ struct SDL_PrivateGLData {
 	/* to convert the shadow buffer to the screen format */
 	void (*CopyShadow)(_THIS, SDL_Surface *surface);	
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	OSMesaContext	ctx;
 
 	/* OpenGL functions */

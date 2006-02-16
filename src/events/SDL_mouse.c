@@ -24,8 +24,8 @@
 
 #include "SDL_events.h"
 #include "SDL_events_c.h"
-#include "SDL_cursor_c.h"
-#include "SDL_sysvideo.h"
+#include "../video/SDL_cursor_c.h"
+#include "../video/SDL_sysvideo.h"
 
 
 /* These are static for our mouse handling code */

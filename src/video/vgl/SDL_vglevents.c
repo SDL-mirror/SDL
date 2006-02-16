@@ -31,8 +31,8 @@
 
 #include "SDL.h"
 #include "SDL_thread.h"
-#include "SDL_sysevents.h"
-#include "SDL_events_c.h"
+#include "../../events/SDL_sysevents.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_vglvideo.h"
 #include "SDL_vglevents_c.h"
 

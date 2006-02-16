@@ -30,8 +30,8 @@
 #include <mint/osbind.h>
 
 #include "SDL_events.h"
-#include "SDL_sysjoystick.h"
-#include "SDL_joystick_c.h"
+#include "../SDL_sysjoystick.h"
+#include "../SDL_joystick_c.h"
 
 #include "SDL_ikbdinterrupt_s.h"
 #include "SDL_xbiosevents_c.h"

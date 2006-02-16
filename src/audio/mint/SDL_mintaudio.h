@@ -29,7 +29,7 @@
 #ifndef _SDL_mintaudio_h
 #define _SDL_mintaudio_h
 
-#include "SDL_sysaudio.h"
+#include "../SDL_sysaudio.h"
 #include "SDL_mintaudio_stfa.h"
 
 /* Hidden "this" pointer for the audio functions */

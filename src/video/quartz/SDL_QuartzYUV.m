@@ -22,7 +22,7 @@
 
 #include "SDL_QuartzVideo.h"
 #include "SDL_QuartzWindow.h"
-#include "SDL_yuvfuncs.h"
+#include "../SDL_yuvfuncs.h"
 
 
 #define yuv_idh (this->hidden->yuv_idh)

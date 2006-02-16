@@ -22,7 +22,7 @@
 
 #include "SDL_stdinc.h"
 
-#if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
+#if i386 && __GNUC__ && SDL_ASSEMBLY_BLITTERS
 
 #define ASM_ARRAY(x) x[] __asm__("_" #x) __attribute__((used))
  

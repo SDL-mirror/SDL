@@ -23,10 +23,11 @@
 #ifndef _ALSA_PCM_audio_h
 #define _ALSA_PCM_audio_h
 
-#include "SDL_sysaudio.h"
 #define ALSA_PCM_OLD_HW_PARAMS_API
 #define ALSA_PCM_OLD_SW_PARAMS_API
 #include <alsa/asoundlib.h>
+
+#include "../SDL_sysaudio.h"
 
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_AudioDevice *this

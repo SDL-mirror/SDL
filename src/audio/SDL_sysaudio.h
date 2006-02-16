@@ -99,75 +99,75 @@ typedef struct AudioBootStrap {
 	SDL_AudioDevice *(*create)(int devindex);
 } AudioBootStrap;
 
-#ifdef OPENBSD_AUDIO_SUPPORT
+#if SDL_AUDIO_DRIVER_OPENBSD
 extern AudioBootStrap OPENBSD_AUDIO_bootstrap;
 #endif
-#ifdef OSS_SUPPORT
+#if SDL_AUDIO_DRIVER_OSS
 extern AudioBootStrap DSP_bootstrap;
 extern AudioBootStrap DMA_bootstrap;
 #endif
-#ifdef ALSA_SUPPORT
+#if SDL_AUDIO_DRIVER_ALSA
 extern AudioBootStrap ALSA_bootstrap;
 #endif
-#ifdef QNXNTOAUDIO_SUPPORT
+#if SDL_AUDIO_DRIVER_QNXNTO
 extern AudioBootStrap QNXNTOAUDIO_bootstrap;
 #endif
-#ifdef SUNAUDIO_SUPPORT
+#if SDL_AUDIO_DRIVER_SUNAUDIO
 extern AudioBootStrap SUNAUDIO_bootstrap;
 #endif
-#ifdef DMEDIA_SUPPORT
+#if SDL_AUDIO_DRIVER_DMEDIA
 extern AudioBootStrap DMEDIA_bootstrap;
 #endif
-#ifdef ARTSC_SUPPORT
-extern AudioBootStrap ARTSC_bootstrap;
+#if SDL_AUDIO_DRIVER_ARTS
+extern AudioBootStrap ARTS_bootstrap;
 #endif
-#ifdef ESD_SUPPORT
+#if SDL_AUDIO_DRIVER_ESD
 extern AudioBootStrap ESD_bootstrap;
 #endif
-#ifdef NAS_SUPPORT
+#if SDL_AUDIO_DRIVER_NAS
 extern AudioBootStrap NAS_bootstrap;
 #endif
-#ifdef ENABLE_DIRECTX
+#if SDL_AUDIO_DRIVER_DSOUND
 extern AudioBootStrap DSOUND_bootstrap;
 #endif
-#ifdef ENABLE_WINDIB
+#if SDL_AUDIO_DRIVER_WAVEOUT
 extern AudioBootStrap WAVEOUT_bootstrap;
 #endif
-#ifdef _AIX
+#if SDL_AUDIO_DRIVER_PAUD
 extern AudioBootStrap Paud_bootstrap;
 #endif
-#ifdef __BEOS__
+#if SDL_AUDIO_DRIVER_BAUDIO
 extern AudioBootStrap BAUDIO_bootstrap;
 #endif
-#ifdef MACOSX
+#if SDL_AUDIO_DRIVER_COREAUDIO
 extern AudioBootStrap COREAUDIO_bootstrap;
 #endif
-#if defined(macintosh) || TARGET_API_MAC_CARBON
+#if SDL_AUDIO_DRIVER_SNDMGR
 extern AudioBootStrap SNDMGR_bootstrap;
 #endif
-#ifdef ENABLE_AHI
+#if SDL_AUDIO_DRIVER_AHI
 extern AudioBootStrap AHI_bootstrap;
 #endif
-#ifdef MINTAUDIO_SUPPORT
+#if SDL_AUDIO_DRIVER_MINT
 extern AudioBootStrap MINTAUDIO_GSXB_bootstrap;
 extern AudioBootStrap MINTAUDIO_MCSN_bootstrap;
 extern AudioBootStrap MINTAUDIO_STFA_bootstrap;
 extern AudioBootStrap MINTAUDIO_XBIOS_bootstrap;
 extern AudioBootStrap MINTAUDIO_DMA8_bootstrap;
 #endif
-#ifdef DISKAUD_SUPPORT
+#if SDL_AUDIO_DRIVER_DISK
 extern AudioBootStrap DISKAUD_bootstrap;
 #endif
-#ifdef ENABLE_DC
+#if SDL_AUDIO_DRIVER_DC
 extern AudioBootStrap DCAUD_bootstrap;
 #endif
-#ifdef DRENDERER_SUPPORT
+#if SDL_AUDIO_DRIVER_DRENDERER
 extern AudioBootStrap DRENDERER_bootstrap;
 #endif
-#ifdef MMEAUDIO_SUPPORT
+#if SDL_AUDIO_DRIVER_MMEAUDIO
 extern AudioBootStrap MMEAUDIO_bootstrap;
 #endif
-#ifdef __OS2__
+#if SDL_AUDIO_DRIVER_DART
 extern AudioBootStrap DART_bootstrap;
 #endif
 

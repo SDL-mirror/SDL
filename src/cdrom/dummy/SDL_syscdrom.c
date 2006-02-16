@@ -23,7 +23,7 @@
 /* Stub functions for system-level CD-ROM audio control */
 
 #include "SDL_cdrom.h"
-#include "SDL_syscdrom.h"
+#include "../SDL_syscdrom.h"
 
 int  SDL_SYS_CDInit(void)
 {

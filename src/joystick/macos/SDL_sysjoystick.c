@@ -29,8 +29,8 @@
 #include <InputSprocket.h>
 
 #include "SDL_joystick.h"
-#include "SDL_sysjoystick.h"
-#include "SDL_joystick_c.h"
+#include "../SDL_sysjoystick.h"
+#include "../SDL_joystick_c.h"
 
 
 /*  The max number of joysticks we will detect  */

@@ -35,9 +35,9 @@
 
 #include "SDL_timer.h"
 #include "SDL_syswm.h"
-#include "SDL_sysevents.h"
-#include "SDL_sysvideo.h"
-#include "SDL_events_c.h"
+#include "../SDL_sysvideo.h"
+#include "../../events/SDL_sysevents.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_x11video.h"
 #include "SDL_x11dga_c.h"
 #include "SDL_x11modes_c.h"

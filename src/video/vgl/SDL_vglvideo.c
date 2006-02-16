@@ -35,9 +35,9 @@
 
 #include "SDL_video.h"
 #include "SDL_mouse.h"
-#include "SDL_sysvideo.h"
-#include "SDL_pixels_c.h"
-#include "SDL_events_c.h"
+#include "../SDL_sysvideo.h"
+#include "../SDL_pixels_c.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_vglvideo.h"
 #include "SDL_vglevents_c.h"
 #include "SDL_vglmouse_c.h"

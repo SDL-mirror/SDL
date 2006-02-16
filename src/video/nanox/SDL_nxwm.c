@@ -25,7 +25,7 @@
 */
 
 #include "SDL_syswm.h"
-#include "SDL_events_c.h"
+#include "../../events/SDL_events_c.h"
 
 #include "SDL_nxwm_c.h"
 

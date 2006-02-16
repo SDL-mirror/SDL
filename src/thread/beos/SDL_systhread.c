@@ -28,8 +28,8 @@
 
 #include "SDL_mutex.h"
 #include "SDL_thread.h"
-#include "SDL_thread_c.h"
-#include "SDL_systhread.h"
+#include "../SDL_thread_c.h"
+#include "../SDL_systhread.h"
 
 
 static int sig_list[] = {

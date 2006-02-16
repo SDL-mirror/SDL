@@ -310,13 +310,9 @@ int ph_EnterFullScreen(_THIS, SDL_Surface* screen, int fmode)
         {
             if ((this->screen->flags & SDL_OPENGL)==SDL_OPENGL)
             {
-#ifdef HAVE_OPENGL
-    #if (_NTO_VERSION < 630)
-                return 0;
-    #endif /* 6.3.0 */
-#else
-                return 0;
-#endif /* HAVE_OPENGL */
+#if !SDL_VIDEO_OPENGL || (_NTO_VERSION < 630)
+                return 0; /* 6.3.0 */
+#endif
             }
         }
 
@@ -350,13 +346,9 @@ int ph_LeaveFullScreen(_THIS)
     {
         if ((this->screen) && ((this->screen->flags & SDL_OPENGL)==SDL_OPENGL))
         {
-#ifdef HAVE_OPENGL
-    #if (_NTO_VERSION < 630)
+#if !SDL_VIDEO_OPENGL || (_NTO_VERSION < 630)
             return 0;
-    #endif /* 6.3.0 */
-#else
-            return 0;
-#endif /* HAVE_OPENGL */
+#endif
         }
 
         /* release routines starts here */

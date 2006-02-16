@@ -24,7 +24,8 @@
 #define _SDL_artscaudio_h
 
 #include <artsc.h>
-#include "SDL_sysaudio.h"
+
+#include "../SDL_sysaudio.h"
 
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_AudioDevice *this

@@ -22,7 +22,7 @@
 
 #include "SDL.h"
 #include "SDL_events.h"
-#include "SDL_events_c.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_x11video.h"
 
 /* From the X server sources... */
@@ -31,7 +31,7 @@
 
 static int X11_SetGammaNoLock(_THIS, float red, float green, float blue)
 {
-#ifdef XFREE86_VMGAMMA
+#if SDL_VIDEO_DRIVER_X11_VIDMODE
     if (use_vidmode >= 200) {
         SDL_NAME(XF86VidModeGamma) gamma;
         Bool succeeded;
@@ -92,7 +92,7 @@ int X11_SetVidModeGamma(_THIS, float red, float green, float blue)
 
 static int X11_GetGammaNoLock(_THIS, float *red, float *green, float *blue)
 {
-#ifdef XFREE86_VMGAMMA
+#if SDL_VIDEO_DRIVER_X11_VIDMODE
     if (use_vidmode >= 200) {
         SDL_NAME(XF86VidModeGamma) gamma;
         if (SDL_NAME(XF86VidModeGetGamma)(SDL_Display, SDL_Screen, &gamma)) {

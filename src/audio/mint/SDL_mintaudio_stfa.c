@@ -33,9 +33,8 @@
 #include <mint/cookie.h>
 
 #include "SDL_audio.h"
-#include "SDL_audio_c.h"
-#include "SDL_audiomem.h"
-#include "SDL_sysaudio.h"
+#include "../SDL_audio_c.h"
+#include "../SDL_sysaudio.h"
 
 #include "SDL_atarimxalloc_c.h"
 
@@ -161,8 +160,8 @@ static void Mint_LockAudio(_THIS)
 
 	/* Stop replay */
 	oldpile=(void *)Super(0);
-	cookie_stfa->sound_enable=STFA_PLAY_DISABLE;
-	Super(oldpile);
+	cookie_stfa->sound_enable=STFA_PLAY_SDL_DISABLE;
+	Super( SDL_arraysize(Super),oldpile);
 }
 
 static void Mint_UnlockAudio(_THIS)

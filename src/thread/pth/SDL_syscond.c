@@ -7,8 +7,12 @@
 #include <pth.h>
 
 #include "SDL_thread.h"
-#include "SDL_syscond_c.h"
 #include "SDL_sysmutex_c.h"
+
+struct SDL_cond
+{
+	pth_cond_t	condpth_p;
+};
 
 /* Create a condition variable */
 SDL_cond * SDL_CreateCond(void)

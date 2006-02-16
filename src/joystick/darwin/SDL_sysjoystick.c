@@ -42,8 +42,8 @@
 #include <Carbon/Carbon.h> /* for NewPtrClear, DisposePtr */
 
 #include "SDL_joystick.h"
-#include "SDL_sysjoystick.h"
-#include "SDL_joystick_c.h"
+#include "../SDL_sysjoystick.h"
+#include "../SDL_joystick_c.h"
 
 struct recElement
 {

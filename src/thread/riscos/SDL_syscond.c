@@ -22,7 +22,7 @@
 
 /* RISC OS implementations uses pthreads based on linux code */
 
-#ifdef DISABLE_THREADS
+#if SDL_THREADS_DISABLED
 #include "../generic/SDL_syscond.c"
 #else
 #include <sys/time.h>

@@ -31,8 +31,8 @@
 
 #include <gem.h>
 
-#include "SDL_sysevents.h"
-#include "SDL_events_c.h"
+#include "../../events/SDL_sysevents.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_gemvideo.h"
 #include "SDL_gemevents_c.h"
 #include "SDL_atarikeys.h"	/* for keyboard scancodes */

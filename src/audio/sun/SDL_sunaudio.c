@@ -38,10 +38,10 @@
 
 #include "SDL_timer.h"
 #include "SDL_audio.h"
-#include "SDL_audiomem.h"
-#include "SDL_audiodev_c.h"
+#include "../SDL_audiomem.h"
+#include "../SDL_audio_c.h"
+#include "../SDL_audiodev_c.h"
 #include "SDL_sunaudio.h"
-#include "SDL_audio_c.h"
 
 /* Open the audio device for playback, and don't block if busy */
 #define OPEN_FLAGS	(O_WRONLY|O_NONBLOCK)

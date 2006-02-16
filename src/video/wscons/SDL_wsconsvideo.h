@@ -26,9 +26,10 @@
 #include <sys/time.h>
 #include <termios.h>
 #include <dev/wscons/wsconsio.h>
+
 #include "SDL_mouse.h"
-#include "SDL_sysvideo.h"
 #include "SDL_mutex.h"
+#include "../SDL_sysvideo.h"
 
 void WSCONS_ReportError(char *fmt, ...);
 

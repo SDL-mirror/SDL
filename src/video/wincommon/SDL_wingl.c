@@ -22,13 +22,13 @@
 
 /* WGL implementation of SDL OpenGL support */
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 #include "SDL_opengl.h"
 #endif
 #include "SDL_lowvideo.h"
 #include "SDL_wingl_c.h"
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 #define DEFAULT_GL_DRIVER_PATH "OPENGL32.DLL"
 #endif
 
@@ -69,7 +69,7 @@ static int WIN_GL_ResetWindow(_THIS)
 	return(status);
 }
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 
 static int ExtensionSupported(const char *extension, const char *extensions)
 {
@@ -159,12 +159,12 @@ static void Init_WGL_ARB_extensions(_THIS)
 	DestroyWindow(hwnd);
 }
 
-#endif /* HAVE_OPENGL */
+#endif /* SDL_VIDEO_OPENGL */
 
 int WIN_GL_SetupWindow(_THIS)
 {
 	int retval;
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	int i;
 	unsigned int matching;
 	int iAttribs[64];
@@ -330,7 +330,7 @@ int WIN_GL_SetupWindow(_THIS)
 
 void WIN_GL_ShutDown(_THIS)
 {
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	/* Clean up OpenGL */
 	if ( GL_hrc ) {
 		this->gl_data->wglMakeCurrent(NULL, NULL);
@@ -344,10 +344,10 @@ void WIN_GL_ShutDown(_THIS)
 	gl_active = 0;
 
 	WIN_GL_UnloadLibrary(this);
-#endif /* HAVE_OPENGL */
+#endif /* SDL_VIDEO_OPENGL */
 }
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 
 /* Make the current context active */
 int WIN_GL_MakeCurrent(_THIS)
@@ -569,4 +569,4 @@ void *WIN_GL_GetProcAddress(_THIS, const char* proc)
 	return func;
 }
 
-#endif /* HAVE_OPENGL */
+#endif /* SDL_VIDEO_OPENGL */

@@ -22,8 +22,6 @@
 
 /* Handle the event stream, converting photon events into SDL events */
 
-#define DISABLE_X11
-
 #include <stdio.h>
 #include <setjmp.h>
 #include <sys/time.h>
@@ -33,9 +31,9 @@
 
 #include "SDL.h"
 #include "SDL_syswm.h"
-#include "SDL_sysevents.h"
-#include "SDL_sysvideo.h"
-#include "SDL_events_c.h"
+#include "../SDL_sysvideo.h"
+#include "../../events/SDL_sysevents.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_ph_video.h"
 #include "SDL_ph_modes_c.h"
 #include "SDL_ph_image_c.h"

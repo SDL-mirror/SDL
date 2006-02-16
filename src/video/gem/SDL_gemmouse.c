@@ -29,8 +29,8 @@
 #include <gem.h>
 
 #include "SDL_mouse.h"
-#include "SDL_events_c.h"
-#include "SDL_cursor_c.h"
+#include "../../events/SDL_events_c.h"
+#include "../SDL_cursor_c.h"
 #include "SDL_gemmouse_c.h"
 
 /* Defines */

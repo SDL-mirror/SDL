@@ -27,18 +27,18 @@
 #include "SDL_BeApp.h"
 #include "SDL_BWin.h"
 #include "SDL_timer.h"
-#include "blank_cursor.h"
 
 extern "C" {
 
-#include "SDL_sysvideo.h"
+#include "../SDL_sysvideo.h"
+#include "../../events/SDL_sysevents_c.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_sysmouse_c.h"
-#include "SDL_sysevents_c.h"
-#include "SDL_events_c.h"
 #include "SDL_syswm_c.h"
 #include "SDL_lowvideo.h"
-#include "SDL_yuvfuncs.h"
+#include "../SDL_yuvfuncs.h"
 #include "SDL_sysyuv.h"
+#include "../blank_cursor.h"
 
 #define BEOS_HIDDEN_SIZE	32	/* starting hidden window size */
 
@@ -60,7 +60,7 @@ static int BE_ToggleFullScreen(_THIS, int fullscreen);
 static SDL_Overlay *BE_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SDL_Surface *display);
 
 /* OpenGL functions */
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 static int BE_GL_LoadLibrary(_THIS, const char *path);
 static void* BE_GL_GetProcAddress(_THIS, const char *proc);
 static int BE_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value);
@@ -123,7 +123,7 @@ static SDL_VideoDevice *BE_CreateDevice(int devindex)
 	device->FlipHWSurface = NULL;
 	device->FreeHWSurface = BE_FreeHWSurface;
 	/* Gamma support */
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	/* OpenGL support */
 	device->GL_LoadLibrary = BE_GL_LoadLibrary;
 	device->GL_GetProcAddress = BE_GL_GetProcAddress;
@@ -303,7 +303,7 @@ int BE_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	bounds.bottom = BEOS_HIDDEN_SIZE;
 	SDL_Win = new SDL_BWin(bounds);
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	/* testgl application doesn't load library, just tries to load symbols */
 	/* is it correct? if so we have to load library here */
 	BE_GL_LoadLibrary(_this, NULL);
@@ -624,7 +624,7 @@ static void BE_NormalUpdate(_THIS, int numrects, SDL_Rect *rects)
 	}
 }
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 /* Passing a NULL path means load pointers from the application */
 int BE_GL_LoadLibrary(_THIS, const char *path)
 {
@@ -815,7 +815,7 @@ void BE_VideoQuit(_THIS)
 		_this->screen->pixels = NULL;
 	}
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 	if (_this->gl_config.dll_handle != NULL)
 		unload_add_on((image_id)_this->gl_config.dll_handle);
 #endif

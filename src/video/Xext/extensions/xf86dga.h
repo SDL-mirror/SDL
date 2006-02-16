@@ -7,7 +7,7 @@
 #define _XF86DGA_H_
 
 #include <X11/Xfuncproto.h>
-#include <Xext/extensions/xf86dga1.h>
+#include "xf86dga1.h"
 #include "SDL_name.h"
 
 #define X_XDGAQueryVersion		0

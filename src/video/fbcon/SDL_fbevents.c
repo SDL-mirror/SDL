@@ -41,9 +41,9 @@
 
 #include "SDL_timer.h"
 #include "SDL_mutex.h"
-#include "SDL_sysevents.h"
-#include "SDL_sysvideo.h"
-#include "SDL_events_c.h"
+#include "../SDL_sysvideo.h"
+#include "../../events/SDL_sysevents.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_fbvideo.h"
 #include "SDL_fbevents_c.h"
 #include "SDL_fbkeys.h"
@@ -316,13 +316,13 @@ static enum {
 
 void FB_CloseMouse(_THIS)
 {
-#ifdef HAVE_TSLIB
+#if SDL_INPUT_TSLIB
 	if (ts_dev != NULL) {
 		ts_close(ts_dev);
 		ts_dev = NULL;
 		mouse_fd = -1;
 	}
-#endif /* HAVE_TSLIB */
+#endif /* SDL_INPUT_TSLIB */
 	if ( mouse_fd > 0 ) {
 		close(mouse_fd);
 	}
@@ -501,7 +501,7 @@ int FB_OpenMouse(_THIS)
 	mousedev = SDL_getenv("SDL_MOUSEDEV");
 	mouse_fd = -1;
 
-#ifdef HAVE_TSLIB
+#if SDL_INPUT_TSLIB
 	if ((mousedrv != NULL) && (SDL_strcmp(mousedrv, "TSLIB") == 0)) {
 		if (mousedev == NULL) mousedev = SDL_getenv("TSLIB_TSDEVICE");
 		if (mousedev != NULL) {
@@ -518,7 +518,7 @@ int FB_OpenMouse(_THIS)
 		mouse_drv = MOUSE_NONE;
 		return mouse_fd;
 	}
-#endif /* HAVE_TSLIB */
+#endif /* SDL_INPUT_TSLIB */
 
 	/* ELO TOUCHSCREEN SUPPORT */
 
@@ -663,7 +663,7 @@ void FB_vgamousecallback(int button, int relative, int dx, int dy)
 }
 
 /* Handle input from tslib */
-#ifdef HAVE_TSLIB
+#if SDL_INPUT_TSLIB
 static void handle_tslib(_THIS)
 {
 	struct ts_sample sample;
@@ -676,7 +676,7 @@ static void handle_tslib(_THIS)
 	}
 	return;
 }
-#endif /* HAVE_TSLIB */
+#endif /* SDL_INPUT_TSLIB */
 
 /* For now, use MSC, PS/2, and MS protocols
    Driver adapted from the SVGAlib mouse driver code (taken from gpm, etc.)
@@ -718,7 +718,7 @@ static void handle_mouse(_THIS)
 			}
 			return; /* nothing left to do */
 		case MOUSE_TSLIB:
-#ifdef HAVE_TSLIB
+#if SDL_INPUT_TSLIB
 			handle_tslib(this);
 #endif
 			return; /* nothing left to do */

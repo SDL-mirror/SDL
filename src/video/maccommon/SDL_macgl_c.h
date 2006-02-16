@@ -22,7 +22,7 @@
 
 /* AGL implementation of SDL OpenGL support */
 
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 #ifdef MACOSX
 #include <OpenGL/gl.h> /* OpenGL.framework */
 #include <AGL/agl.h>   /* AGL.framework */
@@ -30,12 +30,12 @@
 #include <GL/gl.h>
 #include <agl.h>
 #endif /* MACOSX */
-#endif /* HAVE_OPENGL */
+#endif /* SDL_VIDEO_OPENGL */
 
 /* OpenGL functions */
 extern int Mac_GL_Init(_THIS);
 extern void Mac_GL_Quit(_THIS);
-#ifdef HAVE_OPENGL
+#if SDL_VIDEO_OPENGL
 extern int Mac_GL_MakeCurrent(_THIS);
 extern int Mac_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value);
 extern void Mac_GL_SwapBuffers(_THIS);

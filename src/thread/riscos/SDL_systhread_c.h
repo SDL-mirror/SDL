@@ -20,7 +20,7 @@
     slouken@libsdl.org
 */
 
-#ifdef DISABLE_THREADS
+#if SDL_THREADS_DISABLED
 
 typedef int SYS_ThreadHandle;
 

@@ -35,76 +35,76 @@
 
 /* Available audio drivers */
 static AudioBootStrap *bootstrap[] = {
-#ifdef OPENBSD_AUDIO_SUPPORT
+#if SDL_AUDIO_DRIVER_OPENBSD
 	&OPENBSD_AUDIO_bootstrap,
 #endif
-#ifdef OSS_SUPPORT
+#if SDL_AUDIO_DRIVER_OSS
 	&DSP_bootstrap,
 	&DMA_bootstrap,
 #endif
-#ifdef ALSA_SUPPORT
+#if SDL_AUDIO_DRIVER_ALSA
 	&ALSA_bootstrap,
 #endif
-#ifdef QNXNTOAUDIO_SUPPORT
+#if SDL_AUDIO_DRIVER_QNXNTO
 	&QNXNTOAUDIO_bootstrap,
 #endif
-#ifdef SUNAUDIO_SUPPORT
+#if SDL_AUDIO_DRIVER_SUNAUDIO
 	&SUNAUDIO_bootstrap,
 #endif
-#ifdef DMEDIA_SUPPORT
+#if SDL_AUDIO_DRIVER_DMEDIA
 	&DMEDIA_bootstrap,
 #endif
-#ifdef ARTSC_SUPPORT
-	&ARTSC_bootstrap,
+#if SDL_AUDIO_DRIVER_ARTS
+	&ARTS_bootstrap,
 #endif
-#ifdef ESD_SUPPORT
+#if SDL_AUDIO_DRIVER_ESD
 	&ESD_bootstrap,
 #endif
-#ifdef NAS_SUPPORT
+#if SDL_AUDIO_DRIVER_NAS
 	&NAS_bootstrap,
 #endif
-#ifdef ENABLE_DIRECTX
+#if SDL_AUDIO_DRIVER_DSOUND
 	&DSOUND_bootstrap,
 #endif
-#ifdef ENABLE_WINDIB
+#if SDL_AUDIO_DRIVER_WAVEOUT
 	&WAVEOUT_bootstrap,
 #endif
-#ifdef __BEOS__
-	&BAUDIO_bootstrap,
-#endif
-#ifdef MACOSX
-	&COREAUDIO_bootstrap,
-#endif
-#if defined(macintosh) || TARGET_API_MAC_CARBON
-	&SNDMGR_bootstrap,
-#endif
-#ifdef _AIX
+#if SDL_AUDIO_DRIVER_PAUD
 	&Paud_bootstrap,
 #endif
-#ifdef ENABLE_AHI
+#if SDL_AUDIO_DRIVER_BAUDIO
+	&BAUDIO_bootstrap,
+#endif
+#if SDL_AUDIO_DRIVER_COREAUDIO
+	&COREAUDIO_bootstrap,
+#endif
+#if SDL_AUDIO_DRIVER_SNDMGR
+	&SNDMGR_bootstrap,
+#endif
+#if SDL_AUDIO_DRIVER_AHI
 	&AHI_bootstrap,
 #endif
-#ifdef MMEAUDIO_SUPPORT
-	&MMEAUDIO_bootstrap,
-#endif
-#ifdef MINTAUDIO_SUPPORT
+#if SDL_AUDIO_DRIVER_MINT
 	&MINTAUDIO_GSXB_bootstrap,
 	&MINTAUDIO_MCSN_bootstrap,
 	&MINTAUDIO_STFA_bootstrap,
 	&MINTAUDIO_XBIOS_bootstrap,
 	&MINTAUDIO_DMA8_bootstrap,
 #endif
-#ifdef DISKAUD_SUPPORT
+#if SDL_AUDIO_DRIVER_DISK
 	&DISKAUD_bootstrap,
 #endif
-#ifdef ENABLE_DC
+#if SDL_AUDIO_DRIVER_DC
 	&DCAUD_bootstrap,
 #endif
-#ifdef DRENDERER_SUPPORT
+#if SDL_AUDIO_DRIVER_DRENDERER
 	&DRENDERER_bootstrap,
 #endif
-#ifdef __OS2__
-        &DART_bootstrap,
+#if SDL_AUDIO_DRIVER_MMEAUDIO
+	&MMEAUDIO_bootstrap,
+#endif
+#if SDL_AUDIO_DRIVER_DART
+	&DART_bootstrap,
 #endif
 	NULL
 };
@@ -294,7 +294,7 @@ int SDL_AudioInit(const char *driver_name)
 	/* Select the proper audio driver */
 	audio = NULL;
 	idx = 0;
-#ifdef unix
+#if SDL_AUDIO_DRIVER_ESD
 	if ( (driver_name == NULL) && (SDL_getenv("ESPEAKER") != NULL) ) {
 		/* Ahem, we know that if ESPEAKER is set, user probably wants
 		   to use ESD, but don't start it if it's not already running.
@@ -323,7 +323,7 @@ int SDL_AudioInit(const char *driver_name)
 			}
 		}
 	}
-#endif /* unix */
+#endif /* SDL_AUDIO_DRIVER_ESD */
 	if ( audio == NULL ) {
 		if ( driver_name != NULL ) {
 #if 0	/* This will be replaced with a better driver selection API */
@@ -414,10 +414,10 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 		return(-1);
 	}
 
-#if defined(macintosh) || (defined(__riscos__) && defined(DISABLE_THREADS))
+#if defined(macintosh) || (defined(__riscos__) && SDL_THREADS_DISABLED)
 	/* FIXME: Need to implement PPC interrupt asm for SDL_LockAudio() */
 #else
-#if defined(__MINT__) && !defined(ENABLE_THREADS)
+#if defined(__MINT__) && SDL_THREADS_DISABLED
 	/* Uses interrupt driven audio, without thread */
 #else
 	/* Create a semaphore for locking the sound buffers */

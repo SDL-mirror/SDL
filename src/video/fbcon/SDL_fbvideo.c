@@ -33,9 +33,9 @@
 
 #include "SDL_video.h"
 #include "SDL_mouse.h"
-#include "SDL_sysvideo.h"
-#include "SDL_pixels_c.h"
-#include "SDL_events_c.h"
+#include "../SDL_sysvideo.h"
+#include "../SDL_pixels_c.h"
+#include "../../events/SDL_events_c.h"
 #include "SDL_fbvideo.h"
 #include "SDL_fbmouse_c.h"
 #include "SDL_fbevents_c.h"
@@ -432,7 +432,7 @@ static int cmpmodes(const void *va, const void *vb)
         return b->h - a->h;
 }
 
-static int FB_SortModes(_THIS)
+static void FB_SortModes(_THIS)
 {
 	int i;
 	for ( i=0; i<NUM_MODELISTS; ++i ) {
@@ -464,7 +464,7 @@ static int FB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		return(-1);
 	}
 
-#ifndef DISABLE_THREADS
+#if !SDL_THREADS_DISABLED
 	/* Create the hardware surface lock mutex */
 	hw_lock = SDL_CreateMutex();
 	if ( hw_lock == NULL ) {
