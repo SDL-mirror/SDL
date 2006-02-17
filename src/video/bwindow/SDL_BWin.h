@@ -23,6 +23,8 @@
 #ifndef _SDL_BWin_h
 #define _SDL_BWin_h
 
+#include "SDL_config.h"
+
 #include <stdio.h>
 #include <AppKit.h>
 #include <InterfaceKit.h>
@@ -32,7 +34,7 @@
 #endif
 #include <support/UTF8.h>
 
-#include "SDL_BeApp.h"
+#include "../../main/beos/SDL_BeApp.h"
 #include "SDL_events.h"
 #include "SDL_BView.h"
 

@@ -51,6 +51,7 @@
 #ifdef HAVE_LIBC
 
 /* Useful headers */
+#undef HAVE_ALLOCA_H
 #undef HAVE_SYS_TYPES_H
 #undef HAVE_STDIO_H
 #undef STDC_HEADERS

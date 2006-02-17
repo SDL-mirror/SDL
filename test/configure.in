@@ -18,6 +18,8 @@ dnl Check for compiler environment
 
 AC_C_CONST
 
+FIXME: add math library for testsprite
+
 dnl Figure out which math library to use
 case "$target" in
     *-*-cygwin* | *-*-mingw32*)

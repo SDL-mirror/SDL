@@ -24,15 +24,14 @@
 
 #include <unistd.h>
 
-#include "SDL_BeApp.h"
 #include "SDL_BWin.h"
 #include "SDL_timer.h"
 
 extern "C" {
 
 #include "../SDL_sysvideo.h"
-#include "../../events/SDL_sysevents_c.h"
 #include "../../events/SDL_events_c.h"
+#include "SDL_sysevents_c.h"
 #include "SDL_sysmouse_c.h"
 #include "SDL_syswm_c.h"
 #include "SDL_lowvideo.h"

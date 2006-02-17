@@ -22,10 +22,7 @@
 
 /* Allow access to an ESD network stream mixing buffer */
 
-#ifdef ESD_SUPPORT
-
 #include <errno.h>
-
 #include <esd.h>
 
 #include "SDL_timer.h"
@@ -320,5 +317,3 @@ static int ESD_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	/* We're ready to rock and roll. :-) */
 	return(0);
 }
-
-#endif /* ESD_SUPPORT */

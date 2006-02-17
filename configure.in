@@ -107,7 +107,7 @@ if test x$enable_libc = xyes; then
     if test x$ac_cv_func_strtod = xyes; then
         AC_DEFINE(HAVE_STRTOD)
     fi
-    AC_CHECK_FUNCS(malloc calloc realloc free getenv putenv unsetenv qsort abs bcopy memset memcpy memmove strlen strcpy strncpy strcat strncat strdup _strrev _strupr _strlwr strchr strrchr strstr itoa _ltoa _uitoa _ultoa strtol _i64toa _ui64toa strtoll atoi atof strcmp strncmp stricmp strcasecmp sscanf snprintf vsnprint sigaction setjmp nanosleep)
+    AC_CHECK_FUNCS(malloc calloc realloc free getenv putenv unsetenv qsort abs bcopy memset memcpy memmove strlen strcpy strncpy strcat strncat strdup _strrev _strupr _strlwr strchr strrchr strstr itoa _ltoa _uitoa _ultoa strtol _i64toa _ui64toa strtoll atoi atof strcmp strncmp stricmp strcasecmp sscanf snprintf vsnprintf sigaction setjmp nanosleep)
 fi
 
 if test x$have_inttypes != xyes; then
@@ -762,8 +762,10 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [default=yes
                     x11ext_lib='libXext.so'
                     ;;
                 *)
-                    x11_lib='libX11.so.6'
-                    x11ext_lib='libXext.so.6'
+                    x11_lib_spec=`echo $X_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libX11.so.*/'`
+                    x11_lib=`ls $x11_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
+                    x11ext_lib_spec=`echo $X_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libXext.so.*/'`
+                    x11ext_lib=`ls $x11ext_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
                     ;;
             esac
 
@@ -785,7 +787,6 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [default=yes
             else
                 X_LIBS="$X_LIBS -lX11 -lXext"
             fi
-
 
             AC_DEFINE(SDL_VIDEO_DRIVER_X11)
             SOURCES="$SOURCES $srcdir/src/video/x11/*.c"
@@ -2184,7 +2185,8 @@ case "$target" in
             SOURCES="$SOURCES $srcdir/src/loadso/beos/*.c"
             have_loadso=yes
         fi
-        # The BeOS platform requires special libraries
+        # The BeOS platform requires special setup.
+        SOURCES="$srcdir/src/main/beos/*.cc $SOURCES"
         BUILD_LIBS="$BUILD_LIBS -lroot -lbe -lmedia -lgame -ldevice -ltextencoding"
         ;;
     *-*-darwin* )
