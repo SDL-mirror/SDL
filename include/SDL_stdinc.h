@@ -28,23 +28,19 @@
 #include "SDL_config.h"
 
 /* AIX requires this to be the first thing in the file.  */
-#ifdef __GNUC__
-# define alloca __builtin_alloca
-#else
-# ifdef _MSC_VER
+#if HAVE_ALLOCA
+# if HAVE_ALLOCA_H
+#  include <alloca.h>
+# elif __GNUC__
+#  define alloca __builtin_alloca
+# elif _MSC_VER
 #  include <malloc.h>
 #  define alloca _alloca
+# elif _AIX
+  #pragma alloca
 # else
-#  if HAVE_ALLOCA_H
-#   include <alloca.h>
-#  else
-#   ifdef _AIX
- #pragma alloca
-#   else
-#    ifndef alloca /* predefined by HP cc +Olibcalls */
-char *alloca ();
-#    endif
-#   endif
+#  ifndef alloca /* predefined by HP cc +Olibcalls */
+    char *alloca ();
 #  endif
 # endif
 #endif

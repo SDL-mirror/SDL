@@ -52,12 +52,13 @@
 extern "C" {
 #endif
 
-/* Use inline functions for compilers that support them, and static
+/* Use __inline__ functions for compilers that support them, and static
    functions for those that do not.  Because these functions become
-   static for compilers that do not support inline functions, this
+   static for compilers that do not support __inline__ functions, this
    header should only be included in files that actually use them.
 */
-#if defined(__GNUC__) && defined(__i386__)
+#if defined(__GNUC__) && defined(__i386__) &&
+   !(__GNUC__ == 2 && __GNUC_MINOR__ == 95 /* broken gcc version */)
 static __inline__ Uint16 SDL_Swap16(Uint16 x)
 {
 	__asm__("xchgb %b0,%h0" : "=q" (x) :  "0" (x));
