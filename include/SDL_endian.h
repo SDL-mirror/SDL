@@ -52,9 +52,9 @@
 extern "C" {
 #endif
 
-/* Use __inline__ functions for compilers that support them, and static
+/* Use inline functions for compilers that support them, and static
    functions for those that do not.  Because these functions become
-   static for compilers that do not support __inline__ functions, this
+   static for compilers that do not support inline functions, this
    header should only be included in files that actually use them.
 */
 #if defined(__GNUC__) && defined(__i386__) &&
