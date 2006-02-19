@@ -57,7 +57,7 @@ extern "C" {
    static for compilers that do not support inline functions, this
    header should only be included in files that actually use them.
 */
-#if defined(__GNUC__) && defined(__i386__) &&
+#if defined(__GNUC__) && defined(__i386__) && \
    !(__GNUC__ == 2 && __GNUC_MINOR__ == 95 /* broken gcc version */)
 static __inline__ Uint16 SDL_Swap16(Uint16 x)
 {
