@@ -1016,7 +1016,7 @@ static void *SDL_OSX_dlsym(void * dl_restrict handle, const char * dl_restrict s
 	malloc_sym = SDL_malloc(sym_len + 2);
 	if (malloc_sym)
 	{
-		SDL_sprintf(malloc_sym, sym_len+2, "_%s", symbol);
+		SDL_snprintf(malloc_sym, sym_len+2, "_%s", symbol);
 		value = dlsymIntern(handle, malloc_sym, 1);
 		SDL_free(malloc_sym);
 	}

@@ -292,7 +292,7 @@ if (numdevs > 0)
 		/* Hack to define Joystick Port Names */
 		if ( numdevs > maxdevs ) numdevs = maxdevs;
 		for (i=0; i<numdevs; i++) {
-			SDL_sprintf (SYS_JoyData[i].szDeviceName, SDL_arraysize(szDeviceName), "Default Joystick %c", 'A'+SYS_JoyData[i].id);
+			SDL_snprintf (SYS_JoyData[i].szDeviceName, SDL_arraysize(szDeviceName), "Default Joystick %c", 'A'+SYS_JoyData[i].id);
 		}
 	}
 /* Return the number of devices found */
