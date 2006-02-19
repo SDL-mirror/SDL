@@ -179,17 +179,6 @@ struct joystick_hwdata {
 #endif
 };
 
-static char *mystrdup(const char *string)
-{
-	char *newstring;
-
-	newstring = (char *)SDL_malloc(SDL_strlen(string)+1);
-	if ( newstring ) {
-		SDL_strcpy(newstring, string);
-	}
-	return(newstring);
-}
-
 
 #ifndef NO_LOGICAL_JOYSTICKS
 
@@ -204,7 +193,7 @@ static int CountLogicalJoysticks(int max)
       name = SDL_SYS_JoystickName(i);
 
       if (name) {
-         for(j = 0; j < SDL_TABLESIZE(joystick_logicalmap); j++) {
+         for(j = 0; j < SDL_arraysize(joystick_logicalmap); j++) {
             if (!SDL_strcmp(name, joystick_logicalmap[j].name)) {
 
                prev = i;
@@ -303,13 +292,12 @@ int SDL_SYS_JoystickInit(void)
 
 	/* First see if the user specified a joystick to use */
 	if ( SDL_getenv("SDL_JOYSTICK_DEVICE") != NULL ) {
-		SDL_strncpy(path, SDL_getenv("SDL_JOYSTICK_DEVICE"), sizeof(path));
-		path[sizeof(path)-1] = '\0';
+		SDL_strlcpy(path, SDL_getenv("SDL_JOYSTICK_DEVICE"), sizeof(path));
 		if ( stat(path, &sb) == 0 ) {
 			fd = open(path, O_RDONLY, 0);
 			if ( fd >= 0 ) {
 				/* Assume the user knows what they're doing. */
-				SDL_joylist[numjoysticks].fname =mystrdup(path);
+				SDL_joylist[numjoysticks].fname = SDL_strdup(path);
 				if ( SDL_joylist[numjoysticks].fname ) {
 					dev_nums[numjoysticks] = sb.st_rdev;
 					++numjoysticks;
@@ -319,7 +307,7 @@ int SDL_SYS_JoystickInit(void)
 		}
 	}
 
-	for ( i=0; i<SDL_TABLESIZE(joydev_pattern); ++i ) {
+	for ( i=0; i<SDL_arraysize(joydev_pattern); ++i ) {
 		for ( j=0; j < MAX_JOYSTICKS; ++j ) {
 			SDL_snprintf(path, SDL_arraysize(path), joydev_pattern[i], j);
 
@@ -357,7 +345,7 @@ int SDL_SYS_JoystickInit(void)
 				close(fd);
 
 				/* We're fine, add this joystick */
-				SDL_joylist[numjoysticks].fname =mystrdup(path);
+				SDL_joylist[numjoysticks].fname = SDL_strdup(path);
 				if ( SDL_joylist[numjoysticks].fname ) {
 					dev_nums[numjoysticks] = sb.st_rdev;
 					++numjoysticks;
@@ -489,7 +477,7 @@ static SDL_bool JS_ConfigJoystick(SDL_Joystick *joystick, int fd)
 	}
 
 	/* Special joystick support */
-	for ( i=0; i < SDL_TABLESIZE(special_joysticks); ++i ) {
+	for ( i=0; i < SDL_arraysize(special_joysticks); ++i ) {
 		if ( SDL_strcmp(name, special_joysticks[i].name) == 0 ) {
 
 			joystick->naxes = special_joysticks[i].naxes;
@@ -503,7 +491,7 @@ static SDL_bool JS_ConfigJoystick(SDL_Joystick *joystick, int fd)
 
 	/* User environment joystick support */
 	if ( (env = SDL_getenv("SDL_LINUX_JOYSTICK")) ) {
-		SDL_strcpy(env_name, "");
+		*env_name = '\0';
 		if ( *env == '\'' && SDL_sscanf(env, "'%[^']s'", env_name) == 1 )
 			env += SDL_strlen(env_name)+2;
 		else if ( SDL_sscanf(env, "%s", env_name) == 1 )

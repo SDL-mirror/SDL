@@ -457,7 +457,7 @@ void Mac_InitOSKeymap(_THIS)
 	int world = SDLK_WORLD_0;
 
 	/* Map the MAC keysyms */
-	for ( i=0; i<SDL_TABLESIZE(MAC_keymap); ++i )
+	for ( i=0; i<SDL_arraysize(MAC_keymap); ++i )
 		MAC_keymap[i] = SDLK_UNKNOWN;
 
 	/* Defined MAC_* constants */

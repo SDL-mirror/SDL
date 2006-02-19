@@ -275,7 +275,7 @@ static char *get_classname(char *classname, int maxlen)
 	/* First allow environment variable override */
 	spot = SDL_getenv("SDL_VIDEO_X11_WMCLASS");
 	if ( spot ) {
-		SDL_strncpy(classname, spot, maxlen);
+		SDL_strlcpy(classname, spot, maxlen);
 		return classname;
 	}
 
@@ -293,16 +293,16 @@ static char *get_classname(char *classname, int maxlen)
 		linkfile[linksize] = '\0';
 		spot = SDL_strrchr(linkfile, '/');
 		if ( spot ) {
-			SDL_strncpy(classname, spot+1, maxlen);
+			SDL_strlcpy(classname, spot+1, maxlen);
 		} else {
-			SDL_strncpy(classname, linkfile, maxlen);
+			SDL_strlcpy(classname, linkfile, maxlen);
 		}
 		return classname;
 	}
 #endif /* linux */
 
 	/* Finally use the default we've used forever */
-	SDL_strncpy(classname, "SDL_App", maxlen);
+	SDL_strlcpy(classname, "SDL_App", maxlen);
 	return classname;
 }
 

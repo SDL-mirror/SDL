@@ -41,7 +41,7 @@ void NX_InitOSKeymap (_THIS)
     Dprintf ("enter NX_InitOSKeymap\n") ;
 
     // Map the nanox scancodes to SDL keysyms
-    for (i = 0; i < SDL_TABLESIZE (NX_NONASCII_keymap); ++ i)
+    for (i = 0; i < SDL_arraysize (NX_NONASCII_keymap); ++ i)
         NX_NONASCII_keymap [i] = SDLK_UNKNOWN ;
 
     NX_NONASCII_keymap [MWKEY_LEFT        & 0xFF] = SDLK_LEFT ;

@@ -167,12 +167,11 @@ static void AddDrive(char *drive, struct stat *stbuf)
 
 		/* Add this drive to our list */
 		i = SDL_numcds;
-		SDL_cdlist[i] = (char *)SDL_malloc(SDL_strlen(drive)+1);
+		SDL_cdlist[i] = SDL_strdup(drive);
 		if ( SDL_cdlist[i] == NULL ) {
 			SDL_OutOfMemory();
 			return;
 		}
-		SDL_strcpy(SDL_cdlist[i], drive);
 		SDL_cdmode[i] = stbuf->st_rdev;
 		++SDL_numcds;
 #ifdef DEBUG_CDROM
@@ -192,21 +191,25 @@ static void CheckMounts(const char *mtab)
 	if ( mntfp != NULL ) {
 		char *tmp;
 		char *mnt_type;
+		size_t mnt_type_len;
 		char *mnt_dev;
+		size_t mnt_dev_len;
 
 		while ( (mntent=getmntent(mntfp)) != NULL ) {
-			mnt_type = SDL_malloc(SDL_strlen(mntent->mnt_type) + 1);
+			mnt_type_len = SDL_strlen(mntent->mnt_type) + 1;
+			mnt_type = SDL_stack_alloc(char, mnt_type_len);
 			if (mnt_type == NULL)
 				continue;  /* maybe you'll get lucky next time. */
 
-			mnt_dev = SDL_malloc(SDL_strlen(mntent->mnt_fsname) + 1);
+			mnt_dev_len = SDL_strlen(mntent->mnt_fsname) + 1;
+			mnt_dev = SDL_stack_alloc(char, mnt_dev_len);
 			if (mnt_dev == NULL) {
-				SDL_free(mnt_type);
+				SDL_stack_free(mnt_type);
 				continue;
 			}
 
-			SDL_strcpy(mnt_type, mntent->mnt_type);
-			SDL_strcpy(mnt_dev, mntent->mnt_fsname);
+			SDL_strlcpy(mnt_type, mntent->mnt_type, mnt_type_len);
+			SDL_strlcpy(mnt_dev, mntent->mnt_fsname, mnt_dev_len);
 
 			/* Handle "supermount" filesystem mounts */
 			if ( SDL_strcmp(mnt_type, MNTTYPE_SUPER) == 0 ) {
@@ -242,8 +245,8 @@ static void CheckMounts(const char *mtab)
 					AddDrive(mnt_dev, &stbuf);
 				}
 			}
-			SDL_free(mnt_dev);
-			SDL_free(mnt_type);
+			SDL_stack_free(mnt_dev);
+			SDL_stack_free(mnt_type);
 		}
 		endmntent(mntfp);
 	}
@@ -277,9 +280,10 @@ int  SDL_SYS_CDInit(void)
 	SDLcdrom = SDL_getenv("SDL_CDROM");	/* ':' separated list of devices */
 	if ( SDLcdrom != NULL ) {
 		char *cdpath, *delim;
-		cdpath = SDL_malloc(SDL_strlen(SDLcdrom)+1);
+		size_t len = SDL_strlen(SDLcdrom)+1;
+		cdpath = SDL_stack_alloc(char, len);
 		if ( cdpath != NULL ) {
-			SDL_strcpy(cdpath, SDLcdrom);
+			SDL_strlcpy(cdpath, SDLcdrom, len);
 			SDLcdrom = cdpath;
 			do {
 				delim = SDL_strchr(SDLcdrom, ':');
@@ -298,7 +302,7 @@ int  SDL_SYS_CDInit(void)
 					SDLcdrom = NULL;
 				}
 			} while ( SDLcdrom );
-			SDL_free(cdpath);
+			SDL_stack_free(cdpath);
 		}
 
 		/* If we found our drives, there's nothing left to do */

@@ -384,8 +384,7 @@ void WIMP_SetWMCaption(_THIS, const char *title, const char *icon)
 {
 	_kernel_swi_regs regs;
 
-	SDL_strncpy(this->hidden->title, title, 255);
-	this->hidden->title[255] = 0;
+	SDL_strlcpy(this->hidden->title, title, SDL_arraysize(this->hidden->title));
 
 	if (RISCOS_GetWimpVersion() < 380)
 	{

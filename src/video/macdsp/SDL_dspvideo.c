@@ -355,7 +355,7 @@ static SDL_Rect**  DSp_BuildModeList (const GDHandle gDevice)
 	if ( DSpContext_GetAttributes (context, &attributes) != noErr )
 		return NULL;
 			
-	for ( i = 0; i < SDL_TABLESIZE(temp_list); i++ ) {
+	for ( i = 0; i < SDL_arraysize(temp_list); i++ ) {
 		width  = attributes.displayWidth;
 		height = attributes.displayHeight;
 		

@@ -59,8 +59,7 @@ void SDL_SetError (const char *fmt, ...)
 	/* Copy in the key, mark error as valid */
 	error = SDL_GetErrBuf();
 	error->error = 1;
-	SDL_strncpy((char *)error->key, fmt, sizeof(error->key));
-	error->key[sizeof(error->key)-1] = '\0';
+	SDL_strlcpy((char *)error->key, fmt, sizeof(error->key));
 
 	va_start(ap, fmt);
 	error->argc = 0;
@@ -94,8 +93,7 @@ void SDL_SetError (const char *fmt, ...)
 				  char *str = va_arg(ap, char *);
 				  if (str == NULL)
 				      str = "(null)";
-				  SDL_strncpy((char *)error->args[index].buf, str, ERR_MAX_STRLEN);
-				  error->args[index].buf[ERR_MAX_STRLEN-1] = 0;
+				  SDL_strlcpy((char *)error->args[index].buf, str, ERR_MAX_STRLEN);
 				  error->argc++;
 				}
 				break;
@@ -251,8 +249,7 @@ Uint8 *SDL_GetErrorMsg(Uint8 *errstr, unsigned int maxlen)
 	/* Allocate the UNICODE buffer */
 	errstr16 = (Uint16 *)SDL_malloc(maxlen * (sizeof *errstr16));
 	if ( ! errstr16 ) {
-		SDL_strncpy((char *)errstr, "Out of memory", maxlen);
-		errstr[maxlen-1] = '\0';
+		SDL_strlcpy((char *)errstr, "Out of memory", maxlen);
 		return(errstr);
 	}
 

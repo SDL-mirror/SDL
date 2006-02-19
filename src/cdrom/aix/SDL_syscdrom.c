@@ -124,12 +124,11 @@ static void AddDrive(char *drive, struct stat *stbuf)
 
 		/* Add this drive to our list */
 		i = SDL_numcds;
-		SDL_cdlist[i] = (char *)SDL_malloc(SDL_strlen(drive)+1);
+		SDL_cdlist[i] = SDL_strdup(drive);
 		if ( SDL_cdlist[i] == NULL ) {
 			SDL_OutOfMemory();
 			return;
 		}
-		SDL_strcpy(SDL_cdlist[i], drive);
 		SDL_cdmode[i] = stbuf->st_rdev;
 		++SDL_numcds;
 #ifdef DEBUG_CDROM
@@ -302,9 +301,10 @@ int  SDL_SYS_CDInit(void)
 	SDLcdrom = SDL_getenv("SDL_CDROM");	/* ':' separated list of devices */
 	if ( SDLcdrom != NULL ) {
 		char *cdpath, *delim;
-		cdpath = SDL_malloc(SDL_strlen(SDLcdrom)+1);
+		size_t len = SDL_strlen(SDLcdrom)+1;
+		cdpath = SDL_stack_alloc(char, len);
 		if ( cdpath != NULL ) {
-			SDL_strcpy(cdpath, SDLcdrom);
+			SDL_strlcpy(cdpath, SDLcdrom, len);
 			SDLcdrom = cdpath;
 			do {
 				delim = SDL_strchr(SDLcdrom, ':');
@@ -323,7 +323,7 @@ int  SDL_SYS_CDInit(void)
 					SDLcdrom = NULL;
 				}
 			} while ( SDLcdrom );
-			SDL_free(cdpath);
+			SDL_stack_free(cdpath);
 		}
 
 		/* If we found our drives, there's nothing left to do */
@@ -360,21 +360,23 @@ static int SDL_SYS_CDOpen(int drive)
     int   fd;
     char* lastsl;
     char* cdromname;
+    size_t len;
 
     /*
      * We found /dev/cd? drives and that is in our list. But we can
      * open only the /dev/rcd? versions of those devices for Audio CD.
      */
-    cdromname = (char*)SDL_malloc( SDL_strlen(SDL_cdlist[drive]+2) );
-    SDL_strcpy(cdromname,SDL_cdlist[drive]);
+    len = SDL_strlen(SDL_cdlist[drive])+2;
+    cdromname = (char*)SDL_malloc(len);
+    SDL_strlcpy(cdromname,SDL_cdlist[drive],len);
     lastsl = SDL_strrchr(cdromname,'/');
     if (lastsl) {
 	*lastsl = 0;
-	strcat(cdromname,"/r");
+	SDL_strlcat(cdromname,"/r",len);
 	lastsl = SDL_strrchr(SDL_cdlist[drive],'/');
 	if (lastsl) {
 	    lastsl++;
-	    strcat(cdromname,lastsl);
+	    SDL_strlcat(cdromname,lastsl,len);
 	}
     }
 

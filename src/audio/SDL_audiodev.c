@@ -89,7 +89,7 @@ int SDL_OpenAudioPath(char *path, int maxlen, int flags, int classic)
 		audiodev = audiopath;
 	}
 	if ( path != NULL ) {
-		SDL_strncpy(path, audiodev, maxlen);
+		SDL_strlcpy(path, audiodev, maxlen);
 		path[maxlen-1] = '\0';
 	}
 	return(audio_fd);
@@ -136,7 +136,7 @@ static int OpenUserDefinedDevice(char *path, int maxlen, int flags)
 	}
 	audio_fd = open(audiodev, flags, 0);
 	if ( path != NULL ) {
-		SDL_strncpy(path, audiodev, maxlen);
+		SDL_strlcpy(path, audiodev, maxlen);
 		path[maxlen-1] = '\0';
 	}
 	return audio_fd;
@@ -166,8 +166,7 @@ int SDL_OpenAudioPath(char *path, int maxlen, int flags, int classic)
 	    audio_fd = open(audiopath, flags, 0);
 	    if ( audio_fd > 0 ) {
 		if ( path != NULL ) {
-		    SDL_strncpy( path, audiopath, maxlen );
-		    path[maxlen-1] = '\0';
+		    SDL_strlcpy( path, audiopath, maxlen );
 		}
 	        return audio_fd;
 	    }

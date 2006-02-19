@@ -994,7 +994,7 @@ void FB_InitOSKeymap(_THIS)
 	/* Initialize the Linux key translation table */
 
 	/* First get the ascii keys and others not well handled */
-	for (i=0; i<SDL_TABLESIZE(keymap); ++i) {
+	for (i=0; i<SDL_arraysize(keymap); ++i) {
 	  switch(i) {
 	  /* These aren't handled by the x86 kernel keymapping (?) */
 	  case SCANCODE_PRINTSCREEN:
@@ -1033,7 +1033,7 @@ void FB_InitOSKeymap(_THIS)
 	    break;
           }
 	}
-	for (i=0; i<SDL_TABLESIZE(keymap); ++i) {
+	for (i=0; i<SDL_arraysize(keymap); ++i) {
 	  switch(keymap_temp[i]) {
 	    case K_F1:  keymap[i] = SDLK_F1;  break;
 	    case K_F2:  keymap[i] = SDLK_F2;  break;

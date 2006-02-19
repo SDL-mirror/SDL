@@ -36,6 +36,8 @@ in this Software without prior written authorization from The Open Group.
 #ifndef _EXTUTIL_H_
 #define _EXTUTIL_H_
 
+#include "SDL_stdinc.h"		/* For portable string functions */
+
 #include <X11/extensions/Xext.h>
 
 /*
@@ -212,7 +214,7 @@ char *proc (Display *dpy, int code, XExtCodes *codes, char *buf, int n) \
     code -= codes->first_error;  \
     if (code >= 0 && code < nerr) { \
 	char tmp[256]; \
-	sprintf (tmp, "%s.%d", extname, code); \
+	SDL_snprintf (tmp, SDL_arraysize(tmp), "%s.%d", extname, code); \
 	pXGetErrorDatabaseText (dpy, "XProtoError", tmp, errl[code], buf, n); \
 	return buf; \
     } \

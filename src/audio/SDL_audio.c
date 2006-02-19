@@ -373,8 +373,7 @@ int SDL_AudioInit(const char *driver_name)
 char *SDL_AudioDriverName(char *namebuf, int maxlen)
 {
 	if ( current_audio != NULL ) {
-		SDL_strncpy(namebuf, current_audio->name, maxlen-1);
-		namebuf[maxlen-1] = '\0';
+		SDL_strlcpy(namebuf, current_audio->name, maxlen);
 		return(namebuf);
 	}
 	return(NULL);

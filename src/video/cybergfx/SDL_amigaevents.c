@@ -301,7 +301,7 @@ void amiga_InitKeymap(void)
 	int i;
 
 	/* Map the miscellaneous keys */
-	for ( i=0; i<SDL_TABLESIZE(MISC_keymap); ++i )
+	for ( i=0; i<SDL_arraysize(MISC_keymap); ++i )
 		MISC_keymap[i] = SDLK_UNKNOWN;
 
 	/* These X keysyms have 0xFF as the high byte */

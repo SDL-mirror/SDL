@@ -85,7 +85,7 @@ static int LoadESDLibrary(void)
 	if ( esd_handle ) {
 		esd_loaded = 1;
 		retval = 0;
-		for ( i=0; i<SDL_TABLESIZE(esd_functions); ++i ) {
+		for ( i=0; i<SDL_arraysize(esd_functions); ++i ) {
 			*esd_functions[i].func = SDL_LoadFunction(esd_handle, esd_functions[i].name);
 			if ( !*esd_functions[i].func ) {
 				retval = -1;

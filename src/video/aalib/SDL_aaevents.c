@@ -122,7 +122,7 @@ void AA_InitOSKeymap(_THIS)
 	const char *std;
 
 	/* Initialize the AAlib key translation table */
-	for ( i=0; i<SDL_TABLESIZE(keymap); ++i )
+	for ( i=0; i<SDL_arraysize(keymap); ++i )
 		keymap[i] = SDLK_UNKNOWN;
 
 	keymap[AA_ESC] = SDLK_ESCAPE;

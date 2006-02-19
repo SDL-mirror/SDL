@@ -63,12 +63,11 @@ static void AddDrive(char *drive)
 	if ( SDL_numcds < MAX_DRIVES ) {
 		/* Add this drive to our list */
 		i = SDL_numcds;
-		SDL_cdlist[i] = (char *)SDL_malloc(SDL_strlen(drive)+1);
+		SDL_cdlist[i] = SDL_strdup(drive);
 		if ( SDL_cdlist[i] == NULL ) {
 			SDL_OutOfMemory();
 			return;
 		}
-		SDL_strcpy(SDL_cdlist[i], drive);
 		++SDL_numcds;
 #ifdef CDROM_DEBUG
   fprintf(stderr, "Added CD-ROM drive: %s\n", drive);

@@ -693,7 +693,7 @@ void X11_InitKeymap(void)
 	int i;
 
 	/* Odd keys used in international keyboards */
-	for ( i=0; i<SDL_TABLESIZE(ODD_keymap); ++i )
+	for ( i=0; i<SDL_arraysize(ODD_keymap); ++i )
 		ODD_keymap[i] = SDLK_UNKNOWN;
 
  	/* Some of these might be mappable to an existing SDLK_ code */
@@ -729,7 +729,7 @@ void X11_InitKeymap(void)
 #endif
 
 	/* Map the miscellaneous keys */
-	for ( i=0; i<SDL_TABLESIZE(MISC_keymap); ++i )
+	for ( i=0; i<SDL_arraysize(MISC_keymap); ++i )
 		MISC_keymap[i] = SDLK_UNKNOWN;
 
 	/* These X keysyms have 0xFF as the high byte */

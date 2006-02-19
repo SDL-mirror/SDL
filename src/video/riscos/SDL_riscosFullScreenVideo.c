@@ -657,8 +657,7 @@ static void FULLSCREEN_EnableEscape()
 /** Store caption in case this is called before we create a window */
 void FULLSCREEN_SetWMCaption(_THIS, const char *title, const char *icon)
 {
-	SDL_strncpy(this->hidden->title, title, 255);
-	this->hidden->title[255] = 0;
+	SDL_strlcpy(this->hidden->title, title, SDL_arraysize(this->hidden->title));
 }
 
 /* Set screen mode

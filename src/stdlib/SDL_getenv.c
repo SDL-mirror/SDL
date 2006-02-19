@@ -53,7 +53,7 @@ int SDL_putenv(const char *variable)
 		SDL_envmem = newmem;
 		SDL_envmemlen = bufferlen;
 	}
-	SDL_strcpy(SDL_envmem, variable);
+	SDL_strlcpy(SDL_envmem, variable, bufferlen);
 	value = SDL_envmem + (sep - variable);
 	*value++ = '\0';
 	if ( !SetEnvironmentVariable(SDL_envmem, *value ? value : NULL) ) {
@@ -111,11 +111,10 @@ int SDL_putenv(const char *variable)
 	}
 
 	/* Allocate memory for the variable */
-	new_variable = (char *)SDL_malloc(SDL_strlen(variable)+1);
+	new_variable = SDL_strdup(variable);
 	if ( ! new_variable ) {
 		return(-1);
 	}
-	SDL_strcpy(new_variable, variable);
 
 	/* Actually put it into the environment */
 	added = 0;

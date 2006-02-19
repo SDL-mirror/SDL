@@ -551,7 +551,7 @@ int WIN_GL_LoadLibrary(_THIS, const char* path)
 	}
 
 	this->gl_config.dll_handle = handle;
-	SDL_strcpy(this->gl_config.driver_path, path);
+	SDL_strlcpy(this->gl_config.driver_path, path, SDL_arraysize(this->gl_config.driver_path));
 	this->gl_config.driver_loaded = 1;
 	return 0;
 }

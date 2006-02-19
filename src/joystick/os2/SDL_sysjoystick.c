@@ -214,7 +214,7 @@ if (numdevs > 0)
 		if (joycfg.buttons>=7) SYS_JoyData[0].buttoncalc[2]=((axis[2]->upper+axis[3]->centre)>>1);
 		if (joycfg.buttons>=8) SYS_JoyData[0].buttoncalc[3]=((axis[3]->upper+axis[3]->centre)>>1);
 		/* Intialize Joystick Name */
-		SDL_strcpy (SYS_JoyData[0].szDeviceName,joycfg.name);
+		SDL_strlcpy (SYS_JoyData[0].szDeviceName,joycfg.name, SDL_arraysize(SYS_JoyData[0].szDeviceName));
 		}
 	/* Default Init ... autoconfig */
 	else

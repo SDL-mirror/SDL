@@ -493,7 +493,7 @@ int X11_GetVideoModes(_THIS)
         }
         this->hidden->nvisuals = 0;
         if ( ! add_visual_byid(this, SDL_getenv("SDL_VIDEO_X11_VISUALID")) ) {
-                for ( i=0; i<SDL_TABLESIZE(depth_list); ++i ) {
+                for ( i=0; i<SDL_arraysize(depth_list); ++i ) {
                         if ( depth_list[i] > 8 ) {
                                 if ( use_directcolor ) {
                                         add_visual(this, depth_list[i], DirectColor);

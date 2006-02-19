@@ -165,7 +165,7 @@ int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
 		return(-1);
     }
     SDL_memset(joystick->hwdata, 0, sizeof(*joystick->hwdata));
-    SDL_strcpy(joystick->hwdata->name, SDL_SYS_JoystickName(index));
+    SDL_strlcpy(joystick->hwdata->name, SDL_SYS_JoystickName(index), SDL_arraysize(joystick->hwdata->name));
     joystick->name = joystick->hwdata->name;
 
     ISpElementList_ExtractByKind(

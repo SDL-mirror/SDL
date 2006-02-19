@@ -57,7 +57,7 @@ extern int mouseInWindow; /* Mouse is in WIMP window */
 
 /* Local function */
 
-static int RISCOS_GetTaskName(char *task_name);
+static int RISCOS_GetTaskName(char *task_name, size_t maxlen);
 
 /* Uncomment next line to copy mode changes/restores to stderr */
 /* #define DUMP_MODE */
@@ -91,7 +91,7 @@ int RISCOS_InitTask()
    _kernel_swi_regs regs;
    int messages[4];
 
-   if (RISCOS_GetTaskName(task_name) == 0) return 0;
+   if (RISCOS_GetTaskName(task_name, SDL_arraysize(task_name)) == 0) return 0;
 
    messages[0] = 9;       /* Palette changed */
    messages[1] = 0x400c1; /* Mode changed */
@@ -177,7 +177,7 @@ void RISCOS_ExitTask()
 
 ***************************************************************************/
 
-int RISCOS_GetTaskName(char *task_name)
+int RISCOS_GetTaskName(char *task_name, size_t maxlen)
 {
 	_kernel_swi_regs regs;
 
@@ -187,11 +187,12 @@ int RISCOS_GetTaskName(char *task_name)
    if (_kernel_swi(OS_GetEnv, &regs, &regs) == 0)
    {
 	   char *command_line = (char *)regs.r[0];
-	   char *buffer = SDL_malloc(SDL_strlen(command_line)+1);
+	   size_t len = SDL_strlen(command_line)+1;
+	   char *buffer = SDL_stack_alloc(char, len);
 	   char *env_var;
 	   char *p;
 
-	   SDL_strcpy(buffer, command_line);
+	   SDL_strlcpy(buffer, command_line, len);
 	   p = SDL_strchr(buffer, ' ');
 	   if (p) *p = 0;
 	   p = SDL_strrchr(buffer, '.');
@@ -217,45 +218,45 @@ int RISCOS_GetTaskName(char *task_name)
 	   if (*p)
 	   {
 		   /* Read variables that effect the RISC OS SDL engine for this task */
-		   env_var = SDL_malloc(SDL_strlen(p) + 18); /* 18 is larger than the biggest variable name */
+		   len = SDL_strlen(p) + 18; /* 18 is larger than the biggest variable name */
+		   env_var = SDL_stack_alloc(char, len);
 		   if (env_var)
 		   {
 			   char *env_val;
 
 			   /* See if a variable of form SDL$<dirname>$TaskName exists */
 
-			   SDL_strcpy(env_var, "SDL$");
-			   strcat(env_var, p);
-			   strcat(env_var, "$TaskName");
+			   SDL_strlcpy(env_var, "SDL$", len);
+			   SDL_strlcat(env_var, p, len);
+			   SDL_strlcat(env_var, "$TaskName", len);
 
 			   env_val = SDL_getenv(env_var);
-			   if (env_val) SDL_strncpy(task_name, env_val, 31);
+			   if (env_val) SDL_strlcpy(task_name, env_val, maxlen);
 
-			   SDL_strcpy(env_var, "SDL$");
-			   strcat(env_var, p);
-			   strcat(env_var, "$BackBuffer");
+			   SDL_strlcpy(env_var, "SDL$", len);
+			   SDL_strlcat(env_var, p, len);
+			   SDL_strlcat(env_var, "$BackBuffer", len);
 
 			   env_val = SDL_getenv(env_var);
 			   if (env_val) riscos_backbuffer = atoi(env_val);
 
-			   SDL_strcpy(env_var, "SDL$");
-			   strcat(env_var, p);
-			   strcat(env_var, "$CloseAction");
+			   SDL_strlcpy(env_var, "SDL$", len);
+			   SDL_strlcat(env_var, p, len);
+			   SDL_strlcat(env_var, "$CloseAction", len);
 
 			   env_val = SDL_getenv(env_var);
 			   if (env_val && SDL_strcmp(env_val,"0") == 0) riscos_closeaction = 0;
 
-			   SDL_free(env_var);
+			   SDL_stack_free(env_var);
 		   }
 		   
-		   if (task_name[0] == 0) SDL_strncpy(task_name, p, 31);
-		   task_name[31] = 0;
+		   if (!*task_name) SDL_strlcpy(task_name, p, maxlen);
 	   }
 
-	   SDL_free(buffer);
+	   SDL_stack_free(buffer);
    }
 
-   if (task_name[0] == 0) SDL_strcpy(task_name, "SDL Task");
+   if (task_name[0] == 0) SDL_strlcpy(task_name, "SDL Task", maxlen);
 
    return 1;
 }

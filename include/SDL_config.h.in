@@ -87,10 +87,8 @@
 #undef HAVE_MEMMOVE
 #undef HAVE_MEMCMP
 #undef HAVE_STRLEN
-#undef HAVE_STRCPY
-#undef HAVE_STRNCPY
-#undef HAVE_STRCAT
-#undef HAVE_STRNCAT
+#undef HAVE_STRLCPY
+#undef HAVE_STRLCAT
 #undef HAVE_STRDUP
 #undef HAVE__STRREV
 #undef HAVE__STRUPR

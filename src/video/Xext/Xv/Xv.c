@@ -234,8 +234,7 @@ SDL_NAME(XvQueryAdaptors)(
           SyncHandle();
 	  return(XvBadAlloc);
 	}
-      (void)strncpy(name, u.string, size);
-      name[size] = '\0';
+      SDL_strlcpy(name, u.string, size);
       pa->name = name;
 
       u.buffer += (size + 3) & ~3;
@@ -386,8 +385,7 @@ SDL_NAME(XvQueryEncodings)(
           SyncHandle();
 	  return(XvBadAlloc);
       }
-      strncpy(name, u.string, size);
-      name[size] = '\0';
+      SDL_strlcpy(name, u.string, size);
       pe->name = name;
       pe++;
 

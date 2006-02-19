@@ -442,13 +442,13 @@ void ph_InitKeymap(void)
     int i;
 
     /* Odd keys used in international keyboards */
-    for (i=0; i<SDL_TABLESIZE(ODD_keymap); ++i)
+    for (i=0; i<SDL_arraysize(ODD_keymap); ++i)
     {
         ODD_keymap[i] = SDLK_UNKNOWN;
     }
 
     /* Map the miscellaneous keys */
-    for (i=0; i<SDL_TABLESIZE(MISC_keymap); ++i)
+    for (i=0; i<SDL_arraysize(MISC_keymap); ++i)
     {
         MISC_keymap[i] = SDLK_UNKNOWN;
     }

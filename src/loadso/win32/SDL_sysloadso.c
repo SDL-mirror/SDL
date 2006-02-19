@@ -47,7 +47,7 @@ void *SDL_LoadObject(const char *sofile)
 					FORMAT_MESSAGE_FROM_SYSTEM),
 				NULL, GetLastError(), 
 				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-				errbuf_t, SDL_TABLESIZE(errbuf), NULL);
+				errbuf_t, SDL_arraysize(errbuf), NULL);
 		WideCharToMultiByte(CP_ACP, 0, errbuf_t, -1, errbuf, 511, NULL, NULL);
 		loaderror = errbuf;
 	}
@@ -66,7 +66,7 @@ void *SDL_LoadObject(const char *sofile)
 					FORMAT_MESSAGE_FROM_SYSTEM),
 				NULL, GetLastError(), 
 				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-				errbuf, SDL_TABLESIZE(errbuf), NULL);
+				errbuf, SDL_arraysize(errbuf), NULL);
 		loaderror = errbuf;
 	}
 #endif
@@ -97,7 +97,7 @@ void *SDL_LoadFunction(void *handle, const char *name)
 					FORMAT_MESSAGE_FROM_SYSTEM),
 				NULL, GetLastError(), 
 				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-				errbuf_t, SDL_TABLESIZE(errbuf), NULL);
+				errbuf_t, SDL_arraysize(errbuf), NULL);
 		WideCharToMultiByte(CP_ACP, 0, errbuf_t, -1, errbuf, 511, NULL, NULL);
 		loaderror = errbuf;
 	}
@@ -114,7 +114,7 @@ void *SDL_LoadFunction(void *handle, const char *name)
 					FORMAT_MESSAGE_FROM_SYSTEM),
 				NULL, GetLastError(), 
 				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-				errbuf, SDL_TABLESIZE(errbuf), NULL);
+				errbuf, SDL_arraysize(errbuf), NULL);
 		loaderror = errbuf;
 	}
 #endif

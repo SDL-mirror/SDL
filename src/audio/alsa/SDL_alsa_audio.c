@@ -124,7 +124,7 @@ static int LoadALSALibrary(void) {
 	if (alsa_handle) {
 		alsa_loaded = 1;
 		retval = 0;
-		for (i = 0; i < SDL_TABLESIZE(alsa_functions); i++) {
+		for (i = 0; i < SDL_arraysize(alsa_functions); i++) {
 /*			*alsa_functions[i].func = SDL_LoadFunction(alsa_handle,alsa_functions[i].name);*/
 #if HAVE_DLVSYM
 			*alsa_functions[i].func = dlvsym(alsa_handle,alsa_functions[i].name,"ALSA_0.9");

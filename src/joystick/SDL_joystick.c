@@ -554,7 +554,7 @@ int SDL_JoystickEventState(int state)
 	switch (state) {
 		case SDL_QUERY:
 			state = SDL_IGNORE;
-			for ( i=0; i<SDL_TABLESIZE(event_list); ++i ) {
+			for ( i=0; i<SDL_arraysize(event_list); ++i ) {
 				state = SDL_EventState(event_list[i],SDL_QUERY);
 				if ( state == SDL_ENABLE ) {
 					break;
@@ -562,7 +562,7 @@ int SDL_JoystickEventState(int state)
 			}
 			break;
 		default:
-			for ( i=0; i<SDL_TABLESIZE(event_list); ++i ) {
+			for ( i=0; i<SDL_arraysize(event_list); ++i ) {
 				SDL_EventState(event_list[i], state);
 			}
 			break;

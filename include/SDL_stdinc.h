@@ -206,6 +206,9 @@ extern DECLSPEC void SDLCALL SDL_qsort(void *base, size_t nmemb, size_t size,
 #define SDL_abs(X)	((X) < 0 ? -(X) : (X))
 #endif
 
+#define SDL_min(x, y)	(((x) < (y)) ? (x) : (y))
+#define SDL_max(x, y)	(((x) > (y)) ? (x) : (y))
+
 #if HAVE_CTYPE_H
 #define SDL_isdigit(X)  isdigit(X)
 #define SDL_isspace(X)  isspace(X)
@@ -355,28 +358,16 @@ extern DECLSPEC int SDLCALL SDL_memcmp(const void *s1, const void *s2, size_t le
 extern DECLSPEC size_t SDLCALL SDL_strlen(const char *string);
 #endif
 
-#if HAVE_STRCPY
-#define SDL_strcpy     strcpy
+#if HAVE_STRLCPY
+#define SDL_strlcpy     strlcpy
 #else
-extern DECLSPEC char * SDLCALL SDL_strcpy(char *dst, const char *src);
+extern DECLSPEC size_t SDLCALL SDL_strlcpy(char *dst, const char *src, size_t maxlen);
 #endif
 
-#if HAVE_STRNCPY
-#define SDL_strncpy     strncpy
+#if HAVE_STRLCAT
+#define SDL_strlcat    strlcat
 #else
-extern DECLSPEC char * SDLCALL SDL_strncpy(char *dst, const char *src, size_t maxlen);
-#endif
-
-#if HAVE_STRCAT
-#define SDL_strcat     strcat
-#else
-#define SDL_strcat(dst, src)    (SDL_strcpy(dst+SDL_strlen(dst), src), dst)
-#endif
-
-#if HAVE_STRNCAT
-#define SDL_strncat    strncat
-#else
-#define SDL_strncat(dst, src, n) (SDL_strncpy(dst+SDL_strlen(dst), src, n), dst)
+extern DECLSPEC size_t SDLCALL SDL_strlcat(char *dst, const char *src, size_t maxlen);
 #endif
 
 #if HAVE_STRDUP

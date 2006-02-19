@@ -42,9 +42,10 @@ void *SDL_LoadFunction(void *handle, const char *name)
 {
 	void *symbol = dlsym(handle, name);
 	if ( symbol == NULL ) {
-		char *_name = SDL_stack_alloc(char, 1+SDL_strlen(name)+1);
+		size_t len = 1+SDL_strlen(name)+1;
+		char *_name = SDL_stack_alloc(char, len);
 		_name[0] = '_';
-		SDL_strcpy(&_name[1], name);
+		SDL_strlcpy(&_name[1], name, len);
 		symbol = dlsym(handle, name);
 		SDL_stack_free(_name);
 		if ( symbol == NULL ) {

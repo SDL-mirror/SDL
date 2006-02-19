@@ -283,8 +283,7 @@ int SDL_VideoInit (const char *driver_name, Uint32 flags)
 char *SDL_VideoDriverName(char *namebuf, int maxlen)
 {
 	if ( current_video != NULL ) {
-		SDL_strncpy(namebuf, current_video->name, maxlen-1);
-		namebuf[maxlen-1] = '\0';
+		SDL_strlcpy(namebuf, current_video->name, maxlen);
 		return(namebuf);
 	}
 	return(NULL);
@@ -1664,19 +1663,13 @@ void SDL_WM_SetCaption (const char *title, const char *icon)
 			if ( video->wm_title ) {
 				SDL_free(video->wm_title);
 			}
-			video->wm_title = (char *)SDL_malloc(SDL_strlen(title)+1);
-			if ( video->wm_title != NULL ) {
-				SDL_strcpy(video->wm_title, title);
-			}
+			video->wm_title = SDL_strdup(title);
 		}
 		if ( icon ) {
 			if ( video->wm_icon ) {
 				SDL_free(video->wm_icon);
 			}
-			video->wm_icon = (char *)SDL_malloc(SDL_strlen(icon)+1);
-			if ( video->wm_icon != NULL ) {
-				SDL_strcpy(video->wm_icon, icon);
-			}
+			video->wm_icon = SDL_strdup(icon);
 		}
 		if ( (title || icon) && (video->SetCaption != NULL) ) {
 			video->SetCaption(this, video->wm_title,video->wm_icon);

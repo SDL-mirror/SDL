@@ -119,7 +119,7 @@ if test x$enable_libc = xyes; then
     if test x$ac_cv_func_strtod = xyes; then
         AC_DEFINE(HAVE_STRTOD)
     fi
-    AC_CHECK_FUNCS(malloc calloc realloc free getenv putenv unsetenv qsort abs bcopy memset memcpy memmove strlen strcpy strncpy strcat strncat strdup _strrev _strupr _strlwr strchr strrchr strstr itoa _ltoa _uitoa _ultoa strtol _i64toa _ui64toa strtoll atoi atof strcmp strncmp stricmp strcasecmp sscanf snprintf vsnprintf sigaction setjmp nanosleep)
+    AC_CHECK_FUNCS(malloc calloc realloc free getenv putenv unsetenv qsort abs bcopy memset memcpy memmove strlen strlcpy strlcat strdup _strrev _strupr _strlwr strchr strrchr strstr itoa _ltoa _uitoa _ultoa strtol _i64toa _ui64toa strtoll atoi atof strcmp strncmp stricmp strcasecmp sscanf snprintf vsnprintf sigaction setjmp nanosleep)
 
     AC_CHECK_LIB(m, pow, [BUILD_LIBS="$BUILD_LIBS -lm"])
 fi

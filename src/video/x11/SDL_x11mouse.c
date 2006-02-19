@@ -191,14 +191,16 @@ void X11_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
 static void SetMouseAccel(_THIS, const char *accel_param)
 {
 	int i;
+	size_t len;
 	int accel_value[3];
 	char *mouse_param, *mouse_param_buf, *pin;
 
-	mouse_param_buf = (char *)SDL_malloc(SDL_strlen(accel_param)+1);
+	len = SDL_strlen(accel_param)+1;
+	mouse_param_buf = SDL_stack_alloc(char, len);
 	if ( ! mouse_param_buf ) {
 		return;
 	}
-	SDL_strcpy(mouse_param_buf, accel_param);
+	SDL_strlcpy(mouse_param_buf, accel_param, len);
 	mouse_param = mouse_param_buf;
 
 	for ( i=0; (i < 3) && mouse_param; ++i ) {

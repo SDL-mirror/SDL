@@ -18,7 +18,6 @@
 # define fopen		_wfopen
 # define freopen	_wfreopen
 # define remove(x)	DeleteFile(x)
-# define strcat		wcscat
 #else
 # define DIR_SEPERATOR TEXT("/")
 # include <direct.h>
@@ -208,8 +207,7 @@ int console_main(int argc, char *argv[])
 	if ( bufp == NULL ) {
 		return OutOfMemory();
 	}
-	SDL_strncpy(bufp, appname, n);
-	bufp[n] = '\0';
+	SDL_strlcpy(bufp, appname, n);
 	appname = bufp;
 
 	/* Load SDL dynamic link library */
@@ -259,10 +257,12 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 	int nLen;
 #else
 	char *bufp;
+	size_t nLen;
 #endif
 #ifndef NO_STDIO_REDIRECT
 	FILE *newfp;
 #endif
+	int retval;
 
 	/* Start up DDHELP.EXE before opening any files, so DDHELP doesn't
 	   keep them open.  This is a hack.. hopefully it will be fixed 
@@ -274,14 +274,14 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 	}
 
 #ifndef NO_STDIO_REDIRECT
-	pathlen = GetModuleFileName(NULL, path, SDL_TABLESIZE(path));
+	pathlen = GetModuleFileName(NULL, path, SDL_arraysize(path));
 	while ( pathlen > 0 && path[pathlen] != '\\' ) {
 		--pathlen;
 	}
 	path[pathlen] = '\0';
 
-	SDL_strcpy( stdoutPath, path );
-	SDL_strcat( stdoutPath, DIR_SEPERATOR STDOUT_FILE );
+	SDL_strlcpy( stdoutPath, path, SDL_arraysize(stdoutPath) );
+	SDL_strlcat( stdoutPath, DIR_SEPERATOR STDOUT_FILE, SDL_arraysize(stdoutPath) );
     
 	/* Redirect standard input and standard output */
 	newfp = freopen(stdoutPath, TEXT("w"), stdout);
@@ -299,8 +299,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 	}
 #endif /* _WIN32_WCE */
 
-	SDL_strcpy( stderrPath, path );
-	SDL_strcat( stderrPath, DIR_SEPERATOR STDERR_FILE );
+	SDL_strlcpy( stderrPath, path, SDL_arraysize(stderrPath) );
+	SDL_strlcat( stderrPath, DIR_SEPERATOR STDERR_FILE, SDL_arraysize(stderrPath) );
 
 	newfp = freopen(stderrPath, TEXT("w"), stderr);
 #ifndef _WIN32_WCE
@@ -328,7 +328,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 	wcscpy (bufp+wcslen(bufp), TEXT("\" "));
 	wcsncpy(bufp+wcslen(bufp), szCmdLine,nLen-wcslen(bufp));
 	nLen = wcslen(bufp)+1;
-	cmdline = (char *)alloca(nLen);
+	cmdline = SDL_stack_alloc(wchar_t, nLen);
 	if ( cmdline == NULL ) {
 		return OutOfMemory();
 	}
@@ -336,21 +336,26 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 #else
 	/* Grab the command line (use alloca() on Windows) */
 	bufp = GetCommandLine();
-	cmdline = (char *)alloca(SDL_strlen(bufp)+1);
+	nLen = SDL_strlen(bufp)+1;
+	cmdline = SDL_stack_alloc(char, nLen);
 	if ( cmdline == NULL ) {
 		return OutOfMemory();
 	}
-	SDL_strcpy(cmdline, bufp);
+	SDL_strlcpy(cmdline, bufp, nLen);
 #endif
 
 	/* Parse it into argv and argc */
 	argc = ParseCommandLine(cmdline, NULL);
-	argv = (char **)alloca((argc+1)*(sizeof *argv));
+	argv = SDL_stack_alloc(char*, argc+1);
 	if ( argv == NULL ) {
 		return OutOfMemory();
 	}
 	ParseCommandLine(cmdline, argv);
 
 	/* Run the main program (after a little SDL initialization) */
-	return(console_main(argc, argv));
+	retval = console_main(argc, argv);
+
+	SDL_stack_free(cmdline);
+	SDL_stack_free(argv);
+	return retval;
 }

@@ -101,7 +101,7 @@ void RISCOS_InitOSKeymap(_THIS)
 	int i;
 
 	/* Map the VK keysyms */
-	for ( i=0; i<SDL_TABLESIZE(RO_keymap); ++i )
+	for ( i=0; i<SDL_arraysize(RO_keymap); ++i )
 		RO_keymap[i] = SDLK_UNKNOWN;
 
   RO_keymap[3] = SDLK_LSHIFT;

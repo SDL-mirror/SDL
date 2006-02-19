@@ -143,7 +143,7 @@ void VGL_InitOSKeymap(_THIS)
 	int i;
 
 	/* Initialize the BeOS key translation table */
-	for ( i=0; i<SDL_TABLESIZE(keymap); ++i )
+	for ( i=0; i<SDL_arraysize(keymap); ++i )
 		keymap[i] = SDLK_UNKNOWN;
 
 	keymap[SCANCODE_ESCAPE] = SDLK_ESCAPE;

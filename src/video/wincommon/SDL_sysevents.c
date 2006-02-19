@@ -702,13 +702,13 @@ int SDL_RegisterApp(char *name, Uint32 style, void *hInst)
 	if ( name ) {
 #ifdef _WIN32_WCE
 		/* WinCE uses the UNICODE version */
-		int nLen = SDL_strlen(name)+1;
+		size_t nLen = SDL_strlen(name)+1;
 		SDL_Appname = SDL_malloc(nLen*2);
 		MultiByteToWideChar(CP_ACP, 0, name, -1, SDL_Appname, nLen);
 #else
-		int nLen = SDL_strlen(name)+1;
+		size_t nLen = SDL_strlen(name)+1;
 		SDL_Appname = SDL_malloc(nLen);
-		SDL_strcpy(SDL_Appname, name);
+		SDL_strlcpy(SDL_Appname, name, nLen);
 #endif /* _WIN32_WCE */
 		SDL_Appstyle = style;
 		SDL_Instance = hInst ? hInst : SDL_GetModuleHandle();

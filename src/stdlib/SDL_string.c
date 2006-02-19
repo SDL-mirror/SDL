@@ -294,39 +294,38 @@ size_t SDL_strlen(const char *string)
 }
 #endif
 
-#ifndef HAVE_STRCPY
-char *SDL_strcpy(char *dst, const char *src)
+#ifndef HAVE_STRLCPY
+size_t SDL_strlcpy(char *dst, const char *src, size_t maxlen)
 {
-    char *dstp = dst;
-    while ( *src ) {
-        *dstp++ = *src++;
+    size_t srclen = SDL_strlen(src);
+    if ( maxlen > 0 ) {
+        size_t len = SDL_min(srclen, maxlen-1);
+        SDL_memcpy(dst, src, len);
+        dst[len] = '\0';
     }
-    *dstp = '\0';
-
-    return dst;
+    return srclen;
 }
 #endif
 
-#ifndef HAVE_STRNCPY
-char *SDL_strncpy(char *dst, const char *src, size_t maxlen)
+#ifndef HAVE_STRLCAT
+size_t SDL_strlcat(char *dst, const char *src, size_t maxlen)
 {
-    char *dstp = dst;
-    while ( maxlen-- && *src ) {
-        *dstp++ = *src++;
+    size_t dstlen = SDL_strlen(dst);
+    size_t srclen = SDL_strlen(src);
+    if ( dstlen < maxlen ) {
+        SDL_strlcpy(dst+dstlen, src, maxlen-dstlen);
     }
-    *dstp = '\0';
-
-    return dst;
+    return dstlen+srclen;
 }
 #endif
 
 #ifndef HAVE_STRDUP
 char *SDL_strdup(const char *string)
 {
-    size_t len = SDL_strlen(string);
-    char *newstr = SDL_malloc(len+1);
+    size_t len = SDL_strlen(string)+1;
+    char *newstr = SDL_malloc(len);
     if ( newstr ) {
-        SDL_strcpy(newstr, string);
+        SDL_strlcpy(newstr, string, len);
     }
     return newstr;
 }
@@ -912,7 +911,7 @@ static size_t SDL_PrintLong(char *text, long value, int radix, size_t maxlen)
     if ( size > maxlen ) {
         size = maxlen;
     }
-    SDL_strncpy(text, num, size);
+    SDL_strlcpy(text, num, size);
 
     return size;
 }
@@ -926,7 +925,7 @@ static size_t SDL_PrintUnsignedLong(char *text, unsigned long value, int radix, 
     if ( size > maxlen ) {
         size = maxlen;
     }
-    SDL_strncpy(text, num, size);
+    SDL_strlcpy(text, num, size);
 
     return size;
 }
@@ -941,7 +940,7 @@ static size_t SDL_PrintLongLong(char *text, Sint64 value, int radix, size_t maxl
     if ( size > maxlen ) {
         size = maxlen;
     }
-    SDL_strncpy(text, num, size);
+    SDL_strlcpy(text, num, size);
 
     return size;
 }
@@ -955,7 +954,7 @@ static size_t SDL_PrintUnsignedLongLong(char *text, Uint64 value, int radix, siz
     if ( size > maxlen ) {
         size = maxlen;
     }
-    SDL_strncpy(text, num, size);
+    SDL_strlcpy(text, num, size);
 
     return size;
 }

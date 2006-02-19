@@ -414,10 +414,10 @@ int X11_GL_LoadLibrary(_THIS, const char* path)
 	this->gl_config.dll_handle = handle;
 	this->gl_config.driver_loaded = 1;
 	if ( path ) {
-		SDL_strncpy(this->gl_config.driver_path, path,
-			sizeof(this->gl_config.driver_path)-1);
+		SDL_strlcpy(this->gl_config.driver_path, path,
+			SDL_arraysize(this->gl_config.driver_path));
 	} else {
-		SDL_strcpy(this->gl_config.driver_path, "");
+		*this->gl_config.driver_path = '\0';
 	}
 	return 0;
 }

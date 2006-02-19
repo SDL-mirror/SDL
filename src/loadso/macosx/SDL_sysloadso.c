@@ -281,7 +281,7 @@ static void error(const char *str, ...)
 	va_start(arg, str);
 	tss = pthread_getspecific(dlerror_key);
 	err_str = tss->errstr;
-	SDL_strncpy(err_str, "dlcompat: ", ERR_STR_LEN);
+	SDL_strlcpy(err_str, "dlcompat: ", ERR_STR_LEN);
 	vsnprintf(err_str + 10, ERR_STR_LEN - 10, str, arg);
 	va_end(arg);
 	debug("ERROR: %s\n", err_str);
@@ -620,18 +620,17 @@ static NSSymbol *search_linked_libs(const struct mach_header * mh, const char *s
 }
 
 /* Up to the caller to SDL_free() returned string */
-static inline const char *dyld_error_str()
+static inline char *dyld_error_str()
 {
 	NSLinkEditErrors dylder;
 	int dylderno;
 	const char *dylderrstr;
 	const char *dyldfile;
-	const char* retStr = NULL;
+	char* retStr = NULL;
 	NSLinkEditError(&dylder, &dylderno, &dyldfile, &dylderrstr);
-	if (dylderrstr && SDL_strlen(dylderrstr))
+	if (dylderrstr && *dylderrstr)
 	{
-		retStr = SDL_malloc(SDL_strlen(dylderrstr) +1);
-		SDL_strcpy((char*)retStr,dylderrstr);
+		retStr = SDL_strdup(dylderrstr);
 	}
 	return retStr;
 }
@@ -645,7 +644,7 @@ static void *dlsymIntern(struct dlstatus *dls, const char *symbol, int canSetErr
 	void *caller = NULL;
 #endif
 	const struct mach_header *caller_mh = 0;
-	const char* savedErrorStr = NULL;
+	char* savedErrorStr = NULL;
 	resetdlerror();
 #ifndef RTLD_SELF
 #define	RTLD_SELF		((void *) -3)
@@ -734,9 +733,9 @@ static void *dlsymIntern(struct dlstatus *dls, const char *symbol, int canSetErr
 			else
 			{
 				if (savedErrorStr)
-					SDL_free((char*)savedErrorStr);			
+					SDL_free(savedErrorStr);			
 				savedErrorStr = SDL_malloc(256);
-				SDL_snprintf((char*)savedErrorStr, 256, "Symbol \"%s\" not in global context",symbol);	
+				SDL_snprintf(savedErrorStr, 256, "Symbol \"%s\" not in global context",symbol);	
 			}
 		}
 	}
@@ -746,9 +745,9 @@ static void *dlsymIntern(struct dlstatus *dls, const char *symbol, int canSetErr
 		if (!savedErrorStr || !SDL_strlen(savedErrorStr))
 		{
 			if (savedErrorStr)
-				SDL_free((char*)savedErrorStr);
+				SDL_free(savedErrorStr);
 			savedErrorStr = SDL_malloc(256);
-			SDL_snprintf((char*)savedErrorStr, 256,"Symbol \"%s\" not found",symbol);
+			SDL_snprintf(savedErrorStr, 256,"Symbol \"%s\" not found",symbol);
 		}
 		if (canSetError)
 		{
@@ -759,7 +758,7 @@ static void *dlsymIntern(struct dlstatus *dls, const char *symbol, int canSetErr
 			debug(savedErrorStr);
 		}
 		if (savedErrorStr)
-			SDL_free((char*)savedErrorStr);
+			SDL_free(savedErrorStr);
 		return NULL;
 	}
 	return NSAddressOfSymbol(nssym);

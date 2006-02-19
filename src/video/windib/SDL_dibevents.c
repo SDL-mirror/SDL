@@ -251,7 +251,7 @@ void DIB_InitOSKeymap(_THIS)
 	int i;
 
 	/* Map the VK keysyms */
-	for ( i=0; i<SDL_TABLESIZE(VK_keymap); ++i )
+	for ( i=0; i<SDL_arraysize(VK_keymap); ++i )
 		VK_keymap[i] = SDLK_UNKNOWN;
 
 	VK_keymap[VK_BACK] = SDLK_BACKSPACE;

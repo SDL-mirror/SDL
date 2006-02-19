@@ -100,7 +100,7 @@ static SDL_keysym *TranslateKey(int scancode, SDL_keysym *keysym)
   keysym->sym = SDLK_UNKNOWN;
   keysym->mod = KMOD_NONE;
 
-  if (scancode < SDL_TABLESIZE(keymap))
+  if (scancode < SDL_arraysize(keymap))
     keysym->sym = keymap[scancode];
 
   if (keysym->sym == SDLK_UNKNOWN)
@@ -141,7 +141,7 @@ void WSCONS_InitOSKeymap(_THIS)
   int i;
 
   /* Make sure unknown keys are mapped correctly */
-  for (i=0; i < SDL_TABLESIZE(keymap); i++) {
+  for (i=0; i < SDL_arraysize(keymap); i++) {
     keymap[i] = SDLK_UNKNOWN;
   }
 

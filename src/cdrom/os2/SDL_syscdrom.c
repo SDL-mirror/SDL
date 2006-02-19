@@ -94,13 +94,12 @@ for (i=0; i<SDL_numcds; i++)
 	{
 	msp.ulNumber = i+1;
 	mciSendCommand(0,MCI_SYSINFO, MCI_SYSINFO_NAME | MCI_WAIT,&msp, 0);
-	SDL_cdlist[i] = (char *)SDL_malloc(SDL_strlen(SysInfoRet)+1);
+	SDL_cdlist[i] = SDL_strdup(SysInfoRet);
 	if ( SDL_cdlist[i] == NULL )
 		{
 		SDL_OutOfMemory();
 		return(-1);
 		}
-	SDL_strcpy(SDL_cdlist[i], SysInfoRet);
 	}
 return(0);
 }
