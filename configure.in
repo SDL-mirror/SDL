@@ -1825,7 +1825,7 @@ CheckUSBHID()
             AC_DEFINE(SDL_JOYSTICK_USBHID)
             SOURCES="$SOURCES $srcdir/src/joystick/bsd/*.c"
             BUILD_CFLAGS="$BUILD_CFLAGS $USB_CFLAGS"
-            BUILD_LIBS="$BUILD_CFLAGS $USB_LIBS"
+            BUILD_LIBS="$BUILD_LIBS $USB_LIBS"
             have_joystick=yes
         fi
         CFLAGS="$save_CFLAGS"
