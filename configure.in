@@ -2230,7 +2230,8 @@ case "$target" in
         fi
         if test x$enable_video_carbon = xyes -o x$enable_video_cocoa = xyes; then
             # The Cocoa backend still needs Carbon, and the YUV code QuickTime
-            BUILD_LIBS="$BUILD_LIBS -framework Carbon -framework QuickTime"
+            BUILD_LIBS="$BUILD_LIBS -framework QuickTime -framework ApplicationServices"
+            BUILD_LIBS="$BUILD_LIBS -framework Carbon"
         fi
         # If either the audio or CD driver is used, add the AudioUnit framework
         if test x$enable_audio = xyes -o x$enable_cdrom = xyes; then
