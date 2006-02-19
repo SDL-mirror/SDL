@@ -63,6 +63,18 @@ case "$target" in
 esac
 CFLAGS="$CFLAGS $BASE_CFLAGS"
 
+dnl Set up the compiler and linker flags for building SDL
+INCLUDE="-I$srcdir/include"
+if test x$srcdir != x.; then
+    INCLUDE="-Iinclude $INCLUDE"
+fi
+BUILD_CFLAGS="$BASE_CFLAGS \$(INCLUDE)"
+BUILD_LIBS="$BASE_LIBS"
+
+dnl Set up the compiler and linker flags for SDL applications
+SDL_CFLAGS="$BASE_CFLAGS"
+SDL_LIBS="$BASE_LIBS -lSDL"
+
 dnl Check for tools
 #AC_LIBTOOL_DLOPEN
 AC_LIBTOOL_WIN32_DLL
@@ -108,6 +120,8 @@ if test x$enable_libc = xyes; then
         AC_DEFINE(HAVE_STRTOD)
     fi
     AC_CHECK_FUNCS(malloc calloc realloc free getenv putenv unsetenv qsort abs bcopy memset memcpy memmove strlen strcpy strncpy strcat strncat strdup _strrev _strupr _strlwr strchr strrchr strstr itoa _ltoa _uitoa _ultoa strtol _i64toa _ui64toa strtoll atoi atof strcmp strncmp stricmp strcasecmp sscanf snprintf vsnprintf sigaction setjmp nanosleep)
+
+    AC_CHECK_LIB(m, pow, [BUILD_LIBS="$BUILD_LIBS -lm"])
 fi
 
 if test x$have_inttypes != xyes; then
@@ -153,13 +167,6 @@ if test x$have_inttypes != xyes; then
     AC_DEFINE(uintptr_t, unsigned long)
 fi
 
-# Set up the build preprocessor flags
-INCLUDE="-I$srcdir/include"
-if test x$srcdir != x.; then
-    INCLUDE="-Iinclude $INCLUDE"
-fi
-BUILD_CFLAGS="$BASE_CFLAGS \$(INCLUDE)"
-
 # Standard C sources
 SOURCES="$SOURCES $srcdir/src/*.c"
 SOURCES="$SOURCES $srcdir/src/audio/*.c"
@@ -172,30 +179,6 @@ SOURCES="$SOURCES $srcdir/src/stdlib/*.c"
 SOURCES="$SOURCES $srcdir/src/thread/*.c"
 SOURCES="$SOURCES $srcdir/src/timer/*.c"
 SOURCES="$SOURCES $srcdir/src/video/*.c"
-
-# Set up the build libraries needed
-BUILD_LIBS="$BASE_LIBS"
-
-# Set up the compiler and linker flags for SDL applications
-SDL_CFLAGS="$BASE_CFLAGS"
-SDL_LIBS="$BASE_LIBS -lSDL"
-
-dnl Add the math library for the new gamma correction support
-case "$target" in
-    *-*-cygwin* | *-*-mingw32*)
-        MATHLIB=""
-        ;;
-    *-*-beos*)
-        MATHLIB=""
-        ;;
-    *-*-darwin*)
-        MATHLIB=""
-        ;;
-    *)
-        MATHLIB="-lm"
-        ;;
-esac
-BUILD_LIBS="$BUILD_LIBS $MATHLIB"
 
 dnl Enable/disable various subsystems of the SDL library
 

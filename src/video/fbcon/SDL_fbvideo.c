@@ -29,7 +29,6 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <asm/page.h>		/* For definition of PAGE_SIZE */
-#include <sys/io.h>		/* For ioperm() */
 
 #include "SDL_video.h"
 #include "SDL_mouse.h"
@@ -47,6 +46,7 @@
 
 #if defined(i386) && defined(FB_TYPE_VGA_PLANES)
 #define VGA16_FBCON_SUPPORT
+#include <sys/io.h>		/* For ioperm() */
 #ifndef FB_AUX_VGA_PLANES_VGA4
 #define FB_AUX_VGA_PLANES_VGA4	0
 #endif
