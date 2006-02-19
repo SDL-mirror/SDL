@@ -117,7 +117,7 @@ static void updateKeyboard(_THIS)
 
   if ((n = read(private->fd, buf, sizeof(buf))) > 0) {
     for (i = 0; i < n; i++) {
-      char c = buf[i] & 0x7f;
+      unsigned char c = buf[i] & 0x7f;
       if (c == 224) // special key prefix -- what should we do with it?
 	continue;
       int release = (buf[i] & 0x80) != 0;
