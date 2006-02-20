@@ -49,34 +49,30 @@ else
     AC_DEFINE(SDL_BYTEORDER, 1234)
 fi
 
-dnl Set up the base CFLAGS and LIBS
-case "$target" in
-    *-*-cygwin*)
-        # We build SDL on cygwin without the UNIX emulation layer
-        BASE_CFLAGS="-I/usr/include/mingw -DWIN32 -Uunix -mno-cygwin"
-        BASE_LIBS="-mno-cygwin"
-        ;;
-    *)
-        BASE_CFLAGS="-D_GNU_SOURCE=1"
-        BASE_LIBS=""
-        ;;
-esac
-CFLAGS="$CFLAGS $BASE_CFLAGS"
-
-dnl Set up the compiler and linker flags for building SDL
+dnl Set up the compiler and linker flags
 INCLUDE="-I$srcdir/include"
 if test x$srcdir != x.; then
     INCLUDE="-Iinclude $INCLUDE"
 fi
-BUILD_CFLAGS="$BASE_CFLAGS \$(INCLUDE)"
-BUILD_LIBS="$BASE_LIBS"
-
-dnl Set up the compiler and linker flags for SDL applications
-SDL_CFLAGS="$BASE_CFLAGS"
-SDL_LIBS="$BASE_LIBS -lSDL"
+case "$target" in
+    *-*-cygwin*)
+        # We build SDL on cygwin without the UNIX emulation layer
+        CFLAGS="$CFLAGS -I/usr/include/mingw -DWIN32 -Uunix -mno-cygwin"
+        BUILD_CFLAGS="$CFLAGS \$(INCLUDE)"
+        BUILD_LIBS="-mno-cygwin"
+        SDL_CFLAGS="-I/usr/include/mingw -DWIN32 -Uunix -mno-cygwin"
+        SDL_LIBS="-lSDL -mno-cygwin"
+        ;;
+    *)
+        CFLAGS="$CFLAGS -D_GNU_SOURCE=1"
+        BUILD_CFLAGS="$CFLAGS \$(INCLUDE)"
+        BUILD_LIBS=""
+        SDL_CFLAGS=""
+        SDL_LIBS="-lSDL"
+        ;;
+esac
 
 dnl Check for tools
-#AC_LIBTOOL_DLOPEN
 AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 AC_PROG_CC
@@ -751,9 +747,9 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [default=yes
                     ;;
                 *)
                     if test x$X_LIBS = x; then X_LIBS="-L/usr/lib"; fi
-                    x11_lib_spec=`echo $X_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libX11.so*/'`
+                    x11_lib_spec=[`echo $X_LIBS | sed 's/.*-L\([^ ]*\).*/\1\/libX11.so.[0-9]/'`]
                     x11_lib=`ls $x11_lib_spec 2>/dev/null | sort -r | sed 's/.*\/\(.*\)/\1/; q'`
-                    x11ext_lib_spec=`echo $X_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libXext.so*/'`
+                    x11ext_lib_spec=[`echo $X_LIBS | sed 's/.*-L\([^ ]*\).*/\1\/libXext.so.[0-9]/'`]
                     x11ext_lib=`ls $x11ext_lib_spec 2>/dev/null | sort -r | sed 's/.*\/\(.*\)/\1/; q'`
                     ;;
             esac
