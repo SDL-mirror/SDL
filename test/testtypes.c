@@ -1,9 +1,7 @@
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "SDL_main.h"
-#include "SDL_types.h"
+#include "SDL_stdinc.h"
 
 /*
  * Watcom C flags these as Warning 201: "Unreachable code" if you just
