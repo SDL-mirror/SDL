@@ -217,13 +217,9 @@ int SDL_VideoInit (const char *driver_name, Uint32 flags)
 	/* Set some very sane GL defaults */
 	video->gl_config.driver_loaded = 0;
 	video->gl_config.dll_handle = NULL;
-	video->gl_config.red_size = 5;
-#if 1 /* This seems to work on more video cards, as a default */
-	video->gl_config.green_size = 5;
-#else
-	video->gl_config.green_size = 6;
-#endif
-	video->gl_config.blue_size = 5;
+	video->gl_config.red_size = 3;
+	video->gl_config.green_size = 3;
+	video->gl_config.blue_size = 2;
 	video->gl_config.alpha_size = 0;
 	video->gl_config.buffer_size = 0;
 	video->gl_config.depth_size = 16;
