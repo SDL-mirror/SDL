@@ -370,7 +370,6 @@ AC_HELP_STRING([--enable-alsa-shared], [dynamically load ALSA audio support [def
                 CFLAGS="$CFLAGS -DALSA_SUPPORT $ALSA_CFLAGS"
                 SYSTEM_LIBS="$SYSTEM_LIBS $ALSA_LIBS"
             fi
-            SOURCES="$SOURCES $srcdir/src/audio/alsa/*.c"
         fi
 }
 
