@@ -16,7 +16,10 @@ Copyright (c) 1995,1996  The XFree86 Project, Inc
 
 #define NEED_EVENTS
 #define NEED_REPLIES
-#include <X11/Xlibint.h>
+
+#include "../../x11/SDL_x11dyn.h"
+
+/*#include <X11/Xlibint.h>*/
 #include "../extensions/xf86dga.h"
 #include "../extensions/xf86dgastr.h"
 #include <X11/extensions/Xext.h>
@@ -27,8 +30,6 @@ Copyright (c) 1995,1996  The XFree86 Project, Inc
 #include <sys/ioctl.h>
 #include <linux/fb.h>
 #endif
-
-#include "../../x11/SDL_x11dyn.h"
 
 /* If you change this, change the Bases[] array below as well */
 #define MAX_HEADS 16

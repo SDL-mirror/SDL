@@ -56,8 +56,6 @@ SOFTWARE.
 #include <X11/extensions/XShm.h>
 #include "../extensions/extutil.h"
 
-#include "../../x11/SDL_x11dyn.h"
-
 static XExtensionInfo _xv_info_data;
 static XExtensionInfo *xv_info = &_xv_info_data;
 static char *xv_extension_name = XvName;

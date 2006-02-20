@@ -27,15 +27,16 @@ Equipment Corporation.
 
 #define NEED_EVENTS
 #define NEED_REPLIES
-#include <X11/Xlibint.h>
+
+#include "../../x11/SDL_x11dyn.h"
+
+/*#include <X11/Xlibint.h>*/
 #include <X11/Xutil.h>
 #include <X11/extensions/Xext.h>	/* in ../include */
 #include "../extensions/extutil.h"			/* in ../include */
 #include "../extensions/panoramiXext.h"
 #include "../extensions/panoramiXproto.h"		/* in ../include */
 #include "../extensions/Xinerama.h"
-
-#include "../../x11/SDL_x11dyn.h"
 
 static XExtensionInfo _panoramiX_ext_info_data;
 static XExtensionInfo *panoramiX_ext_info = &_panoramiX_ext_info_data;

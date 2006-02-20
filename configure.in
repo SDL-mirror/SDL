@@ -737,20 +737,24 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [default=yes
                           , enable_x11_shared=yes)
 
             case "$target" in
-                *-*-darwin* )
+                *-*-darwin*)
                     x11_lib='/usr/X11R6/lib/libX11.6.dylib'
                     x11ext_lib='/usr/X11R6/lib/libXext.6.dylib'
                     ;;
-                *-*-osf* )
+                *-*-osf*)
+                    x11_lib='libX11.so'
+                    x11ext_lib='libXext.so'
+                    ;;
+                *-*-irix*) # IRIX 6.5 requires that we use /usr/lib32
                     x11_lib='libX11.so'
                     x11ext_lib='libXext.so'
                     ;;
                 *)
                     if test x$X_LIBS = x; then X_LIBS="-L/usr/lib"; fi
-                    x11_lib_spec=`echo $X_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libX11.so.*/'`
-                    x11_lib=`ls $x11_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
-                    x11ext_lib_spec=`echo $X_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libXext.so.*/'`
-                    x11ext_lib=`ls $x11ext_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
+                    x11_lib_spec=`echo $X_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libX11.so*/'`
+                    x11_lib=`ls $x11_lib_spec 2>/dev/null | sort -r | sed 's/.*\/\(.*\)/\1/; q'`
+                    x11ext_lib_spec=`echo $X_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libXext.so*/'`
+                    x11ext_lib=`ls $x11ext_lib_spec 2>/dev/null | sort -r | sed 's/.*\/\(.*\)/\1/; q'`
                     ;;
             esac
 
@@ -2352,7 +2356,7 @@ OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects)/\1.lo,g'`
 # Set runtime shared library paths as needed
 
 if test "x$enable_rpath" = "xyes"; then
-  if test $ARCH = linux -o $ARCH = freebsd -o $ARCH = bsdi; then
+  if test $ARCH = linux -o $ARCH = freebsd -o $ARCH = bsdi -o $ARCH = irix; then
     SDL_RLD_FLAGS="-Wl,-rpath,\${exec_prefix}/lib"
   fi
   if test $ARCH = solaris; then
