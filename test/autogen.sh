@@ -1,9 +1,5 @@
 #!/bin/sh
 #
-aclocal
-automake --foreign --add-missing
+# Regenerate configuration files
+cp acinclude.m4 aclocal.m4
 autoconf
-
-# Run configure for this platform
-#./configure $*
-echo "Now you are ready to run ./configure"

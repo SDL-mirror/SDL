@@ -15,6 +15,7 @@ distpath = $(srcdir)/..
 distdir = SDL-@SDL_VERSION@
 distfile = $(distdir).tar.gz
 
+@SET_MAKE@
 SHELL	= @SHELL@
 CC      = @CC@
 INCLUDE = @INCLUDE@
@@ -104,6 +105,7 @@ uninstall-man:
 
 clean:
 	rm -rf $(objects)
+	if test -f test/Makefile; then (cd test; $(MAKE) $@); fi
 
 distclean: clean
 	rm -f Makefile include/SDL_config.h sdl-config
@@ -115,6 +117,7 @@ distclean: clean
 	    -name '.#*' \
 	    -exec rm -f {} \;
 	cp include/SDL_config.h.minimal include/SDL_config.h
+	if test -f test/Makefile; then (cd test; $(MAKE) $@); fi
 
 dist $(distfile):
 	$(SHELL) @ac_aux_dir@/mkinstalldirs $(distdir)

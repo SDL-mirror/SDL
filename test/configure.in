@@ -1,14 +1,9 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(README)
 
-dnl Setup for automake
-SDL_VERSION=1.2.7
-
 dnl Detect the canonical host and target build environment
+AC_CONFIG_AUX_DIRS($srcdir/../build-scripts)
 AC_CANONICAL_SYSTEM
-
-dnl Setup for automake
-AM_INIT_AUTOMAKE(SDL_tests, $SDL_VERSION)
 
 dnl Check for tools
 
@@ -18,29 +13,32 @@ dnl Check for compiler environment
 
 AC_C_CONST
 
-FIXME: add math library for testsprite
-
 dnl Figure out which math library to use
 case "$target" in
     *-*-cygwin* | *-*-mingw32*)
+        EXE=".exe"
         MATHLIB=""
         SYS_GL_LIBS="-lopengl32"
         ;;
     *-*-beos*)
+        EXE=""
         MATHLIB=""
         SYS_GL_LIBS="-lGL"
         ;;
     *-*-darwin* )
+        EXE=""
         MATHLIB=""
         SYS_GL_LIBS=""
         ;;
     *-*-aix*)
+        EXE=""
         if test x$ac_cv_prog_gcc = xyes; then
             CFLAGS="-mthreads"
         fi
         SYS_GL_LIBS=""
         ;;
     *-*-mint*)
+        EXE=""
         MATHLIB=""
         AC_PATH_PROG(OSMESA_CONFIG, osmesa-config, no)
         if test "x$OSMESA_CONFIG" = "xyes"; then
@@ -53,21 +51,16 @@ case "$target" in
         fi
 		;;
     *)
+        EXE=""
         MATHLIB="-lm"
-        AC_PATH_X
-        AC_PATH_XTRA
-        if test x$have_x = xyes; then
-            CFLAGS="$CFLAGS $X_CFLAGS"
-            SYS_GL_LIBS="$X_LIBS -lGL"
-        else
-            SYS_GL_LIBS="-lGL"
-        fi
+        SYS_GL_LIBS="-lGL"
         ;;
 esac
+AC_SUBST(EXE)
 AC_SUBST(MATHLIB)
 
 dnl Check for SDL
-
+SDL_VERSION=1.2.7
 AM_PATH_SDL($SDL_VERSION,
             :,
 	    AC_MSG_ERROR([*** SDL version $SDL_VERSION not found!])
@@ -87,11 +80,11 @@ have_opengl=yes
 AC_MSG_RESULT($have_opengl)
 if test x$have_opengl = xyes; then
     CFLAGS="$CFLAGS -DHAVE_OPENGL"
-    GL_LIBS="$SYS_GL_LIBS"
+    GLLIB="$SYS_GL_LIBS"
 else
-    GL_LIBS=""
+    GLLIB=""
 fi
-AC_SUBST(GL_LIBS)
+AC_SUBST(GLLIB)
 
-# Finally create all the generated files
+dnl Finally create all the generated files
 AC_OUTPUT([Makefile])

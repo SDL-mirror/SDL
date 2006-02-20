@@ -1,11 +1,10 @@
-Makefile.in
-Makefile
-configure
+aclocal.m4
+autom4te*
 config.cache
 config.log
 config.status
-autom4te*
-aclocal.m4
+configure
+Makefile
 SDL.dll
 stdout.txt
 stderr.txt
@@ -38,3 +37,4 @@ testvidinfo
 testwin
 testwm
 threadwin
+torturethread

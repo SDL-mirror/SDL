@@ -4,13 +4,8 @@ config.cache
 config.log
 config.status
 configure
-depcomp
-install-sh
 libtool
 Makefile
-Makefile.in
-missing
-mkinstalldirs
 sdl-config
 SDL.spec
 SDL.qpg
