@@ -6,11 +6,11 @@ objects = build
 depend	= build-deps
 prefix = @prefix@
 exec_prefix = @exec_prefix@
-bindir	= @bindir@
-libdir  = @libdir@
-includedir = @includedir@
-datadir	= @datadir@
-mandir	= @mandir@
+bindir	= $(DESTDIR)@bindir@
+libdir  = $(DESTDIR)@libdir@
+includedir = $(DESTDIR)@includedir@
+datadir	= $(DESTDIR)@datadir@
+mandir	= $(DESTDIR)@mandir@
 distpath = $(srcdir)/..
 distdir = SDL-@SDL_VERSION@
 distfile = $(distdir).tar.gz
@@ -34,7 +34,7 @@ DIST = acinclude.m4 autogen.sh Borland.html Borland.zip BUGS build-scripts confi
 BUILDC	= $(LIBTOOL) --mode=compile $(CC) $(CFLAGS) -c `echo $? | sed 's| .*||'`  -o $@
 BUILDCC	= $(LIBTOOL) --mode=compile $(CC) $(CFLAGS) -c `echo $? | sed 's| .*||'`  -o $@
 BUILDM	= $(LIBTOOL) --mode=compile $(CC) $(CFLAGS) -c `echo $? | sed 's| .*||'`  -o $@
-BUILDASM = $(LIBTOOL) --tag=CC --mode=compile @ac_aux_dir@/strip_fPIC.sh $(NASM) $? -o $@
+BUILDASM = $(LIBTOOL) --tag=CC --mode=compile @ac_aux_dir@/strip_fPIC.sh $(NASM) `echo $? | sed 's| .*||'` -o $@
 
 LT_AGE      = @LT_AGE@
 LT_CURRENT  = @LT_CURRENT@
