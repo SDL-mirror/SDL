@@ -27,23 +27,6 @@
 
 #include "SDL_config.h"
 
-/* AIX requires this to be the first thing in the file.  */
-#if HAVE_ALLOCA
-# if HAVE_ALLOCA_H
-#  include <alloca.h>
-# elif __GNUC__
-#  define alloca __builtin_alloca
-# elif _MSC_VER
-#  include <malloc.h>
-#  define alloca _alloca
-# elif _AIX
-  #pragma alloca
-# else
-#  ifndef alloca /* predefined by HP cc +Olibcalls */
-    char *alloca ();
-#  endif
-# endif
-#endif
 
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -173,6 +156,20 @@ extern DECLSPEC void * SDLCALL SDL_realloc(void *mem, size_t size);
 extern DECLSPEC void SDLCALL SDL_free(void *mem);
 #endif
 
+#if HAVE_ALLOCA && !defined(alloca)
+# if HAVE_ALLOCA_H
+#  include <alloca.h>
+# elif __GNUC__
+#  define alloca __builtin_alloca
+# elif _MSC_VER
+#  include <malloc.h>
+#  define alloca _alloca
+# elif _AIX
+  #pragma alloca
+# else
+   char *alloca ();
+# endif
+#endif
 #if HAVE_ALLOCA
 #define SDL_stack_alloc(type, count)    (type*)alloca(sizeof(type)*count)
 #define SDL_stack_free(data)
