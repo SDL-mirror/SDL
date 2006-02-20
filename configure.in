@@ -59,14 +59,14 @@ case "$target" in
         # We build SDL on cygwin without the UNIX emulation layer
         CFLAGS="$CFLAGS -I/usr/include/mingw -DWIN32 -Uunix -mno-cygwin"
         BUILD_CFLAGS="$CFLAGS \$(INCLUDE)"
-        BUILD_LIBS="-mno-cygwin"
+        BUILD_LDFLAGS="$LDFLAGS -mno-cygwin"
         SDL_CFLAGS="-I/usr/include/mingw -DWIN32 -Uunix -mno-cygwin"
         SDL_LIBS="-lSDL -mno-cygwin"
         ;;
     *)
         CFLAGS="$CFLAGS -D_GNU_SOURCE=1"
         BUILD_CFLAGS="$CFLAGS \$(INCLUDE)"
-        BUILD_LIBS=""
+        BUILD_LDFLAGS="$LDFLAGS"
         SDL_CFLAGS=""
         SDL_LIBS="-lSDL"
         ;;
@@ -118,7 +118,7 @@ if test x$enable_libc = xyes; then
     fi
     AC_CHECK_FUNCS(malloc calloc realloc free getenv putenv unsetenv qsort abs bcopy memset memcpy memmove strlen strlcpy strlcat strdup _strrev _strupr _strlwr strchr strrchr strstr itoa _ltoa _uitoa _ultoa strtol _i64toa _ui64toa strtoll atoi atof strcmp strncmp stricmp strcasecmp sscanf snprintf vsnprintf sigaction setjmp nanosleep)
 
-    AC_CHECK_LIB(m, pow, [BUILD_LIBS="$BUILD_LIBS -lm"])
+    AC_CHECK_LIB(m, pow, [BUILD_LDFLAGS="$BUILD_LDFLAGS -lm"])
 fi
 
 if test x$have_inttypes != xyes; then
@@ -284,7 +284,7 @@ AC_HELP_STRING([--enable-oss], [support the OSS audio API [default=yes]]),
             # OpenBSD needs linking with ossaudio emulation library
             case "$target" in
                 *-*-openbsd*|*-*-netbsd*)
-                    BUILD_LIBS="$BUILD_LIBS -lossaudio";;
+                    BUILD_LDFLAGS="$BUILD_LDFLAGS -lossaudio";;
             esac
         fi
     fi
@@ -330,7 +330,7 @@ AC_HELP_STRING([--enable-alsa-shared], [dynamically load ALSA audio support [def
                test x$enable_alsa_shared = xyes && test x$alsa_lib != x; then
                 AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_ALSA_DYNAMIC, "$alsa_lib")
             else
-                BUILD_LIBS="$BUILD_LIBS $ALSA_LIBS"
+                BUILD_LDFLAGS="$BUILD_LDFLAGS $ALSA_LIBS"
             fi
             have_audio=yes
         fi
@@ -392,7 +392,7 @@ CheckDMEDIA()
         if test x$have_dmedia = xyes; then
             AC_DEFINE(SDL_AUDIO_DRIVER_DMEDIA)
             SOURCES="$SOURCES $srcdir/src/audio/dmedia/*.c"
-            BUILD_LIBS="$BUILD_LIBS -laudio"
+            BUILD_LDFLAGS="$BUILD_LDFLAGS -laudio"
             have_audio=yes
         fi
     fi
@@ -424,7 +424,7 @@ AC_HELP_STRING([--enable-esd-shared], [dynamically load ESD audio support [defau
             AC_DEFINE(SDL_AUDIO_DRIVER_ESD)
             SOURCES="$SOURCES $srcdir/src/audio/esd/*.c"
             BUILD_CFLAGS="$BUILD_CFLAGS $ESD_CFLAGS"
-            BUILD_LIBS="$BUILD_LIBS $ESD_LIBS"
+            BUILD_LDFLAGS="$BUILD_LDFLAGS $ESD_LIBS"
             have_audio=yes
         fi
     fi
@@ -474,7 +474,7 @@ AC_HELP_STRING([--enable-arts-shared], [dynamically load aRts audio support [def
                 AC_DEFINE(SDL_AUDIO_DRIVER_ARTS)
                 SOURCES="$SOURCES $srcdir/src/audio/arts/*.c"
                 BUILD_CFLAGS="$BUILD_CFLAGS $ARTS_CFLAGS"
-                BUILD_LIBS="$BUILD_LIBS $ARTS_LIBS"
+                BUILD_LDFLAGS="$BUILD_LDFLAGS $ARTS_LIBS"
                 have_audio=yes
             fi
         fi
@@ -507,7 +507,7 @@ AC_HELP_STRING([--enable-nas], [support the NAS audio API [default=yes]]),
             AC_DEFINE(SDL_AUDIO_DRIVER_NAS)
             SOURCES="$SOURCES $srcdir/src/audio/nas/*.c"
             BUILD_CFLAGS="$BUILD_CFLAGS $NAS_CFLAGS"
-            BUILD_LIBS="$BUILD_LIBS $NAS_LIBS"
+            BUILD_LDFLAGS="$BUILD_LDFLAGS $NAS_LIBS"
             have_audio=yes
         fi
     fi
@@ -713,7 +713,7 @@ CheckNANOX()
 
         AC_DEFINE(SDL_VIDEO_DRIVER_NANOX)
         SOURCES="$SOURCES $srcdir/src/video/nanox/*.c"
-        BUILD_LIBS="$BUILD_LIBS -lnano-X"
+        BUILD_LDFLAGS="$BUILD_LDFLAGS -lnano-X"
         have_video=yes
     fi
 }
@@ -776,7 +776,7 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [default=yes
             AC_DEFINE(SDL_VIDEO_DRIVER_X11)
             SOURCES="$SOURCES $srcdir/src/video/x11/*.c"
             BUILD_CFLAGS="$BUILD_CFLAGS $X_CFLAGS"
-            BUILD_LIBS="$BUILD_LIBS $X_LIBS"
+            BUILD_LDFLAGS="$BUILD_LDFLAGS $X_LIBS"
             have_video=yes
 
             AC_ARG_ENABLE(dga,
@@ -853,7 +853,7 @@ AC_HELP_STRING([--enable-video-photon], [use QNX Photon video driver [default=ye
         if test x$video_photon = xyes; then
             AC_DEFINE(SDL_VIDEO_DRIVER_PHOTON)
             SOURCES="$SOURCES $srcdir/src/video/photon/*.c"
-            BUILD_LIBS="$BUILD_LIBS -lph"
+            BUILD_LDFLAGS="$BUILD_LDFLAGS -lph"
             have_video=yes
 
             CheckOpenGLQNX
@@ -983,7 +983,7 @@ AC_HELP_STRING([--enable-video-directfb], [use DirectFB video driver [default=no
             AC_DEFINE(SDL_VIDEO_DRIVER_DIRECTFB)
             SOURCES="$SOURCES $srcdir/src/video/directfb/*.c"
             BUILD_CFLAGS="$BUILD_CFLAGS $DIRECTFB_CFLAGS"
-            BUILD_LIBS="$BUILD_LIBS $DIRECTFB_LIBS"
+            BUILD_LDFLAGS="$BUILD_LDFLAGS $DIRECTFB_LIBS"
             have_video=yes
         fi
     fi
@@ -1034,7 +1034,7 @@ AC_HELP_STRING([--enable-video-ggi], [use GGI video driver [default=no]]),
         if test x$video_ggi = xyes; then
             AC_DEFINE(SDL_VIDEO_DRIVER_GGI)
             SOURCES="$SOURCES $srcdir/src/video/ggi/*.c"
-            BUILD_LIBS="$BUILD_LIBS -lggi -lgii -lgg"
+            BUILD_LDFLAGS="$BUILD_LDFLAGS -lggi -lgii -lgg"
             have_video=yes
         fi
     fi
@@ -1064,7 +1064,7 @@ AC_HELP_STRING([--enable-video-svga], [use SVGAlib video driver [default=no]]),
         if test x$video_svga = xyes; then
             AC_DEFINE(SDL_VIDEO_DRIVER_SVGALIB)
             SOURCES="$SOURCES $srcdir/src/video/svga/*.c"
-            BUILD_LIBS="$BUILD_LIBS -lvga"
+            BUILD_LDFLAGS="$BUILD_LDFLAGS -lvga"
             have_video=yes
         fi
     fi
@@ -1094,7 +1094,7 @@ AC_HELP_STRING([--enable-video-vgl], [use VGL video driver [default=no]]),
         if test x$video_vgl = xyes; then
             AC_DEFINE(SDL_VIDEO_DRIVER_VGL)
             SOURCES="$SOURCES $srcdir/src/video/vgl/*.c"
-            BUILD_LIBS="$BUILD_LIBS -lvgl"
+            BUILD_LDFLAGS="$BUILD_LDFLAGS -lvgl"
             have_video=yes
         fi
     fi
@@ -1145,7 +1145,7 @@ AC_HELP_STRING([--enable-video-aalib], [use AAlib video driver [default=no]]),
         if test x$video_aalib = xyes; then
             AC_DEFINE(SDL_VIDEO_DRIVER_AALIB)
             SOURCES="$SOURCES $srcdir/src/video/aalib/*.c"
-            BUILD_LIBS="$BUILD_LIBS -laa"
+            BUILD_LDFLAGS="$BUILD_LDFLAGS -laa"
             have_video=yes
         fi
     fi
@@ -1244,7 +1244,7 @@ AC_HELP_STRING([--enable-video-gem], [use Atari Gem video driver [default=yes]])
             video_gem=yes
             AC_DEFINE(SDL_VIDEO_DRIVER_GEM)
             SOURCES="$SOURCES $srcdir/src/video/gem/*.c"
-            BUILD_LIBS="$BUILD_LIBS -lgem"
+            BUILD_LDFLAGS="$BUILD_LDFLAGS -lgem"
             have_video=yes
         fi
     fi
@@ -1304,7 +1304,7 @@ CheckOpenGLQNX()
         AC_MSG_RESULT($video_opengl)
         if test x$video_opengl = xyes; then
             AC_DEFINE(SDL_VIDEO_OPENGL)
-            BUILD_LIBS="$BUILD_LIBS -lGL"
+            BUILD_LDFLAGS="$BUILD_LDFLAGS -lGL"
         fi
     fi
 }
@@ -1323,7 +1323,7 @@ CheckBeGL()
 {
     if test x$enable_video = xyes -a x$enable_video_opengl = xyes; then
         AC_DEFINE(SDL_VIDEO_OPENGL)
-        BUILD_LIBS="$BUILD_LIBS -lGL"
+        BUILD_LDFLAGS="$BUILD_LDFLAGS -lGL"
     fi
 }
 
@@ -1334,9 +1334,9 @@ CheckMacGL()
         AC_DEFINE(SDL_VIDEO_OPENGL)
         case "$target" in
             *-*-darwin*)
-                BUILD_LIBS="$BUILD_LIBS -framework OpenGL"
+                BUILD_LDFLAGS="$BUILD_LDFLAGS -framework OpenGL"
                 # The following is probably not available in Darwin:
-                BUILD_LIBS="$BUILD_LIBS -framework AGL"
+                BUILD_LDFLAGS="$BUILD_LDFLAGS -framework AGL"
         esac
     fi
 }
@@ -1363,7 +1363,7 @@ CheckAtariOSMesa()
         AC_DEFINE(SDL_VIDEO_OPENGL)
         AC_DEFINE(SDL_VIDEO_OPENGL_OSMESA)
         BUILD_CFLAGS="$BUILD_CFLAGS $OSMESA_CFLAGS"
-        BUILD_LIBS="$BUILD_LIBS $OSMESA_LIBS"
+        BUILD_LDFLAGS="$BUILD_LDFLAGS $OSMESA_LIBS"
 
         AC_ARG_ENABLE(osmesa-shared,
 AC_HELP_STRING([--enable-osmesa-shared], [dynamically load OSMesa OpenGL support [default=yes]]),
@@ -1421,7 +1421,7 @@ AC_HELP_STRING([--enable-input-tslib], [use the Touchscreen library for input [d
         AC_MSG_RESULT($enable_input_tslib)
         if test x$enable_input_tslib = xyes; then
             AC_DEFINE(SDL_INPUT_TSLIB)
-            BUILD_LIBS="$BUILD_LIBS -lts"
+            BUILD_LDFLAGS="$BUILD_LDFLAGS -lts"
         fi
     fi
 }
@@ -1551,7 +1551,7 @@ AC_HELP_STRING([--enable-pthread-sem], [use pthread semaphores [default=yes]]),
         if test x$use_pthreads = xyes; then
             AC_DEFINE(SDL_THREAD_PTHREAD)
             BUILD_CFLAGS="$BUILD_CFLAGS $pthread_cflags"
-            BUILD_LIBS="$BUILD_LIBS $pthread_lib"
+            BUILD_LDFLAGS="$BUILD_LDFLAGS $pthread_lib"
             SDL_CFLAGS="$SDL_CFLAGS $pthread_cflags"
             SDL_LIBS="$SDL_LIBS $pthread_lib"
 
@@ -1696,9 +1696,9 @@ AC_HELP_STRING([--enable-sdl-dlopen], [use dlopen for shared object loading [def
         AC_MSG_RESULT($have_dlopen)
 
         if test x$have_dlopen = xyes; then
-            AC_CHECK_LIB(c, dlopen, BUILD_LIBS="$BUILD_LIBS",
-               AC_CHECK_LIB(dl, dlopen, BUILD_LIBS="$BUILD_LIBS -ldl",
-                  AC_CHECK_LIB(ltdl, dlopen, BUILD_LIBS="$BUILD_LIBS -lltdl")))
+            AC_CHECK_LIB(c, dlopen, BUILD_LDFLAGS="$BUILD_LDFLAGS",
+               AC_CHECK_LIB(dl, dlopen, BUILD_LDFLAGS="$BUILD_LDFLAGS -ldl",
+                  AC_CHECK_LIB(ltdl, dlopen, BUILD_LDFLAGS="$BUILD_LDFLAGS -lltdl")))
             AC_CHECK_LIB(dl, dlvsym, have_dlvsym=yes)
             if test x$have_dlvsym = xyes; then
                 AC_DEFINE(HAVE_DLVSYM)
@@ -1722,7 +1722,7 @@ AC_HELP_STRING([--enable-atari-ldg], [use Atari LDG for shared object loading [d
         if test x$have_ldg_hdr = xyes -a x$have_ldg_lib = xyes; then
             AC_DEFINE(SDL_LOADSO_LDG)
             SOURCES="$SOURCES $srcdir/src/loadso/mint/*.c"
-            BUILD_LIBS="$BUILD_LIBS -lldg -lgem"
+            BUILD_LDFLAGS="$BUILD_LDFLAGS -lldg -lgem"
             have_loadso=yes
         fi
     fi
@@ -1826,7 +1826,7 @@ CheckUSBHID()
             AC_DEFINE(SDL_JOYSTICK_USBHID)
             SOURCES="$SOURCES $srcdir/src/joystick/bsd/*.c"
             BUILD_CFLAGS="$BUILD_CFLAGS $USB_CFLAGS"
-            BUILD_LIBS="$BUILD_LIBS $USB_LIBS"
+            BUILD_LDFLAGS="$BUILD_LDFLAGS $USB_LIBS"
             have_joystick=yes
         fi
         CFLAGS="$save_CFLAGS"
@@ -1843,7 +1843,7 @@ AC_HELP_STRING([--enable-clock_gettime], [use clock_gettime() instead of gettime
         AC_CHECK_LIB(rt, clock_gettime, have_clock_gettime=yes)
         if test x$have_clock_gettime = xyes; then
             AC_DEFINE(HAVE_CLOCK_GETTIME)
-            BUILD_LIBS="$BUILD_LIBS -lrt"
+            BUILD_LDFLAGS="$BUILD_LDFLAGS -lrt"
         fi
     fi
 }
@@ -1948,7 +1948,7 @@ case "$target" in
             osf)
                 AC_DEFINE(SDL_AUDIO_DRIVER_MMEAUDIO)
                 SOURCES="$SOURCES $srcdir/src/audio/mme/*.c"
-                BUILD_LIBS="$BUILD_LIBS -lmme"
+                BUILD_LDFLAGS="$BUILD_LDFLAGS -lmme"
                 have_audio=yes
             ;;
           esac
@@ -2035,7 +2035,7 @@ case "$target" in
         if test x$enable_audio = xyes; then
             AC_DEFINE(SDL_AUDIO_DRIVER_QNXNTO)
             SOURCES="$SOURCES $srcdir/src/audio/nto/*.c"
-            BUILD_LIBS="$BUILD_LIBS -lasound"
+            BUILD_LDFLAGS="$BUILD_LDFLAGS -lasound"
             have_audio=yes
         fi
         # Set up files for the cdrom library
@@ -2112,9 +2112,9 @@ case "$target" in
             have_loadso=yes
         fi
         # Set up the system libraries we need
-        BUILD_LIBS="$BUILD_LIBS -luser32 -lgdi32 -lwinmm"
+        BUILD_LDFLAGS="$BUILD_LDFLAGS -luser32 -lgdi32 -lwinmm"
         if test x$have_directx = xyes; then
-            BUILD_LIBS="$BUILD_LIBS -ldxguid"
+            BUILD_LDFLAGS="$BUILD_LDFLAGS -ldxguid"
         fi
         # The Win32 platform requires special setup
         SDL_CFLAGS="$SDL_CFLAGS -Dmain=SDL_main"
@@ -2168,7 +2168,7 @@ case "$target" in
         fi
         # The BeOS platform requires special setup.
         SOURCES="$srcdir/src/main/beos/*.cc $SOURCES"
-        BUILD_LIBS="$BUILD_LIBS -lroot -lbe -lmedia -lgame -ldevice -ltextencoding"
+        BUILD_LDFLAGS="$BUILD_LDFLAGS -lroot -lbe -lmedia -lgame -ldevice -ltextencoding"
         ;;
     *-*-darwin* )
         # This could be either full "Mac OS X", or plain "Darwin" which is
@@ -2197,7 +2197,7 @@ case "$target" in
         if test x$enable_joystick = xyes; then
             AC_DEFINE(SDL_JOYSTICK_IOKIT)
             SOURCES="$SOURCES $srcdir/src/joystick/darwin/*.c"
-            BUILD_LIBS="$BUILD_LIBS -framework IOKit"
+            BUILD_LDFLAGS="$BUILD_LDFLAGS -framework IOKit"
             have_joystick=yes
         fi
         # Set up files for the cdrom library
@@ -2223,16 +2223,16 @@ case "$target" in
         BUILD_CFLAGS="$BUILD_CFLAGS -fpascal-strings -DMACOSX"
         SDL_LIBS="-lSDLmain $SDL_LIBS"
         if test x$enable_video_cocoa = xyes; then
-            BUILD_LIBS="$BUILD_LIBS -framework Cocoa"
+            BUILD_LDFLAGS="$BUILD_LDFLAGS -framework Cocoa"
         fi
         if test x$enable_video_carbon = xyes -o x$enable_video_cocoa = xyes; then
             # The Cocoa backend still needs Carbon, and the YUV code QuickTime
-            BUILD_LIBS="$BUILD_LIBS -framework QuickTime -framework ApplicationServices"
-            BUILD_LIBS="$BUILD_LIBS -framework Carbon"
+            BUILD_LDFLAGS="$BUILD_LDFLAGS -framework QuickTime -framework ApplicationServices"
+            BUILD_LDFLAGS="$BUILD_LDFLAGS -framework Carbon"
         fi
         # If either the audio or CD driver is used, add the AudioUnit framework
         if test x$enable_audio = xyes -o x$enable_cdrom = xyes; then
-            BUILD_LIBS="$BUILD_LIBS -framework AudioToolbox -framework AudioUnit"
+            BUILD_LDFLAGS="$BUILD_LDFLAGS -framework AudioToolbox -framework AudioUnit"
         fi
         ;;
     *-*-mint*)
@@ -2303,7 +2303,7 @@ case "$target" in
             have_timers=yes
         fi
         # The RISC OS platform requires special setup.
-        BUILD_LIBS="$BUILD_LIBS -ljpeg -ltiff -lpng -lz"
+        BUILD_LDFLAGS="$BUILD_LDFLAGS -ljpeg -ltiff -lpng -lz"
         ;;
     *)
         AC_MSG_ERROR([
@@ -2433,7 +2433,7 @@ AC_SUBST(INCLUDE)
 AC_SUBST(SOURCES)
 AC_SUBST(OBJECTS)
 AC_SUBST(BUILD_CFLAGS)
-AC_SUBST(BUILD_LIBS)
+AC_SUBST(BUILD_LDFLAGS)
 
 AC_OUTPUT([
     Makefile sdl-config SDL.spec SDL.qpg
