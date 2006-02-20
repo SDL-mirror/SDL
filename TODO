@@ -1,4 +1,5 @@
 
+Build libSDLmain.a
 Update project files
 Create general SDL_config.h
 Create stubs for all the disabled subsystems
