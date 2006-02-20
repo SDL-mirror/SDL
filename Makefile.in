@@ -123,6 +123,7 @@ dist $(distfile):
 	$(SHELL) @ac_aux_dir@/mkinstalldirs $(distdir)
 	tar cf - $(DIST) | (cd $(distdir); tar xf -)
 	rm -rf `find $(distdir) -name CVS`
+	rm -f `find $(distdir) -name '.cvsignore'`
 	rm -f `find $(distdir) -name '.#*'`
 	tar cvf - $(distdir) | gzip --best >$(distfile)
 	rm -rf $(distdir)
