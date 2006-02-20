@@ -41,8 +41,6 @@
 
 #if SDL_THREAD_PTH
 #include <pth.h>
-#elif _POSIX_THREAD_SYSCALL_SOFT
-#include <pthread.h>
 #endif
 
 #if SDL_THREADS_DISABLED
@@ -111,9 +109,6 @@ void SDL_Delay (Uint32 ms)
 	do {
 		errno = 0;
 
-#if _POSIX_THREAD_SYSCALL_SOFT
-		pthread_yield_np();
-#endif
 #if HAVE_NANOSLEEP
 		tv.tv_sec = elapsed.tv_sec;
 		tv.tv_nsec = elapsed.tv_nsec;

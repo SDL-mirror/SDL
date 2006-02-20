@@ -146,6 +146,7 @@ void WSCONS_InitOSKeymap(_THIS)
   }
 
   switch (private->kbdType) {
+#ifdef WSKBD_TYPE_ZAURUS
   case WSKBD_TYPE_ZAURUS:
     /* top row */
     keymap[2] = SDLK_1;
@@ -219,6 +220,7 @@ void WSCONS_InitOSKeymap(_THIS)
     keymap[77] = SDLK_RIGHT;
     keymap[80] = SDLK_DOWN;
     break;
+#endif /* WSKBD_TYPE_ZAURUS */
 
   default:
     WSCONS_ReportError("Unable to map keys for keyboard type %u", 

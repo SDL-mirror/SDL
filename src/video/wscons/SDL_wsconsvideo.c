@@ -191,10 +191,12 @@ int WSCONS_VideoInit(_THIS, SDL_PixelFormat *vformat)
       private->redMask = 0x0000ff;
       private->greenMask = 0x00ff00;
       private->blueMask = 0xff0000;
+#ifdef WSDISPLAY_TYPE_PXALCD
     } else if (wstype == WSDISPLAY_TYPE_PXALCD) {
       private->redMask = 0x1f << 11;
       private->greenMask = 0x3f << 5;
       private->blueMask = 0x1f;
+#endif
     } else {
       WSCONS_ReportError("Unknown video hardware");
       return -1;

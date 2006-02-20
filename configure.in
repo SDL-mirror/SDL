@@ -287,7 +287,7 @@ AC_HELP_STRING([--enable-oss], [support the OSS audio API [default=yes]]),
 
             # OpenBSD needs linking with ossaudio emulation library
             case "$target" in
-                *-*-openbsd*)
+                *-*-openbsd*|*-*-netbsd*)
                     BUILD_LIBS="$BUILD_LIBS -lossaudio";;
             esac
         fi
@@ -1483,7 +1483,7 @@ AC_HELP_STRING([--enable-pthread-sem], [use pthread semaphores [default=yes]]),
             pthread_lib="-pthread"
             ;;
         *-*-netbsd*)
-            pthread_cflags="-I/usr/include -D_REENTRANT -D_THREAD_SAFE -D_POSIX_THREAD_SYSCALL_SOFT=1"
+            pthread_cflags="-D_REENTRANT -D_THREAD_SAFE"
             pthread_lib="-L/usr/lib -lpthread"
             ;;
         *-*-openbsd*)
@@ -1976,7 +1976,7 @@ case "$target" in
                 SOURCES="$SOURCES $srcdir/src/cdrom/freebsd/*.c"
                 have_cdrom=yes
             ;;
-            *netbsd*|*openbsd*)
+            *openbsd*|*netbsd*)
                 AC_DEFINE(SDL_CDROM_OPENBSD)
                 SOURCES="$SOURCES $srcdir/src/cdrom/openbsd/*.c"
                 have_cdrom=yes
@@ -2014,12 +2014,8 @@ case "$target" in
         fi
         # Do any final platform setup
         case $ARCH in
-            netbsd)
-                # NetBSD does not define "unix"
-                BUILD_CFLAGS="$BUILD_CFLAGS -Dunix"
-            ;;
-            openbsd)
-                # OpenBSD does not define "unix"
+            openbsd|netbsd)
+                # OpenBSD and NetBSD do not define "unix"
                 BUILD_CFLAGS="$BUILD_CFLAGS -Dunix"
             ;;
         esac

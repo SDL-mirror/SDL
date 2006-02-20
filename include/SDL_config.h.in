@@ -38,10 +38,10 @@
 #undef uint16_t
 #undef int32_t
 #undef uint32_t
-#undef SDL_HAS_64BIT_TYPE
 #undef int64_t
 #undef uint64_t
 #undef uintptr_t
+#undef SDL_HAS_64BIT_TYPE
 
 /* Endianness */
 #undef SDL_BYTEORDER
