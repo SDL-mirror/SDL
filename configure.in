@@ -1175,6 +1175,7 @@ AC_HELP_STRING([--enable-video-qtopia], [use Qtopia video driver [default=no]]),
         if test x$video_qtopia = xyes; then
             AC_DEFINE(SDL_VIDEO_DRIVER_QTOPIA)
             SOURCES="$SOURCES $srcdir/src/video/qtopia/*.cc"
+            SDLMAIN_SOURCES="$srcdir/src/main/qtopia/*.cc"
             BUILD_CFLAGS="$BUILD_CFLAGS $QTOPIA_FLAGS"
             SDL_CFLAGS="$SDL_CFLAGS -DQWS -Dmain=SDL_main"
             SDL_LIBS="-lSDLmain $SDL_LIBS -L${QPEDIR}/lib -L${QTDIR}/lib/ -lqpe -lqte"
@@ -2117,6 +2118,7 @@ case "$target" in
             BUILD_LDFLAGS="$BUILD_LDFLAGS -ldxguid"
         fi
         # The Win32 platform requires special setup
+        SDLMAIN_SOURCES="$srcdir/src/main/win32/*.c"
         SDL_CFLAGS="$SDL_CFLAGS -Dmain=SDL_main"
         SDL_LIBS="-lmingw32 -lSDLmain $SDL_LIBS -mwindows"
         ;;
@@ -2219,6 +2221,7 @@ case "$target" in
             have_loadso=yes
         fi
         # The MacOS X platform requires special setup.
+        SDLMAIN_SOURCES="$srcdir/src/main/macosx/*.m"
         AC_DEFINE(TARGET_API_MAC_CARBON)
         BUILD_CFLAGS="$BUILD_CFLAGS -fpascal-strings -DMACOSX"
         SDL_LIBS="-lSDLmain $SDL_LIBS"
@@ -2274,13 +2277,11 @@ case "$target" in
             else
                 AC_DEFINE(SDL_TIMER_MINT)
                 SOURCES="$SOURCES $srcdir/src/timer/mint/*.c"
-                BUILD_CFLAGS="$BUILD_CFLAGS -I$srcdir/src/timer/mint"
             fi
             have_timers=yes
         fi
         # MiNT does not define "unix"
         BUILD_CFLAGS="$BUILD_CFLAGS -Dunix"
-        BUILD_CFLAGS="$BUILD_CFLAGS -I$srcdir/src/video/ataricommon"
         ;;
     *-riscos)
         ARCH=riscos
@@ -2345,11 +2346,18 @@ if test x$have_loadso != xyes; then
     fi
     SOURCES="$SOURCES $srcdir/src/loadso/dummy/*.c"
 fi
+if test x$SDLMAIN_SOURCES = x; then
+    SDLMAIN_SOURCES="$srcdir/src/main/dummy/*.c"
+fi
 
 OBJECTS=`echo $SOURCES | sed 's,[[^ ]]*/\([[^ ]]*\)\.asm,$(objects)/\1.lo,g'`
 OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.cc,$(objects)/\1.lo,g'`
 OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.m,$(objects)/\1.lo,g'`
 OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects)/\1.lo,g'`
+
+SDLMAIN_OBJECTS=`echo $SDLMAIN_SOURCES | sed 's,[[^ ]]*/\([[^ ]]*\)\.cc,$(objects)/\1.o,g'`
+SDLMAIN_OBJECTS=`echo $SDLMAIN_OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.m,$(objects)/\1.o,g'`
+SDLMAIN_OBJECTS=`echo $SDLMAIN_OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects)/\1.o,g'`
 
 # Set runtime shared library paths as needed
 
@@ -2434,6 +2442,8 @@ AC_SUBST(ac_aux_dir)
 AC_SUBST(INCLUDE)
 AC_SUBST(SOURCES)
 AC_SUBST(OBJECTS)
+AC_SUBST(SDLMAIN_SOURCES)
+AC_SUBST(SDLMAIN_OBJECTS)
 AC_SUBST(BUILD_CFLAGS)
 AC_SUBST(BUILD_LDFLAGS)
 
