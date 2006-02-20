@@ -22,37 +22,37 @@ search_deps()
     do cache=${cache_prefix}_`generate_var $file`
        if test -f $cache; then
           # We already ahve this cached
-          cat $cache
+          if test x$2 = x; then
+              cat $cache
+          else
+              cat $cache >>$2
+          fi
           continue;
        fi
        for path in $base `echo $INCLUDE | sed 's|-I||g'`
        do dep="$path/$file"
           if test -f "$dep"; then
-             echo "	$dep \\" >$cache
-             echo "	$dep \\"
-             generate_dep $dep
+             echo "	$dep \\" >>$cache
+             if test x$2 = x; then
+                  echo "	$dep \\"
+             else
+                  echo "	$dep \\" >>$2
+             fi
+             search_deps $dep $cache
              break
           fi
        done
     done
 }
 
-generate_dep()
-{
-    cat >>${output}.new <<__EOF__
-$1:	\\
-`search_deps $1`
-
-__EOF__
-}
-
 :>${output}.new
 for src in $SOURCES
 do  echo "Generating dependencies for $src"
-    generate_dep $src
     ext=`echo $src | sed 's|.*\.\(.*\)|\1|'`
     obj=`echo $src | sed "s|^.*/\([^ ]*\)\..*|$objects/\1.lo|g"`
-    echo "$obj: $src" >>${output}.new
+    echo "$obj: $src \\" >>${output}.new
+    search_deps $src | sort | uniq >>${output}.new
+    echo "" >>${output}.new
     case $ext in
         asm) echo "	\$(BUILDASM)" >>${output}.new;;
         cc)  echo "	\$(BUILDCC)" >>${output}.new;;

@@ -31,9 +31,9 @@ OBJECTS = @OBJECTS@
 
 DIST = acinclude.m4 autogen.sh Borland.html Borland.zip BUGS build-scripts configure configure.in COPYING CREDITS CWprojects.sea.bin docs docs.html EpocBuildFiles.zip include INSTALL Makefile.dc Makefile.in MPWmake.sea.bin PBProjects.tar.gz README* sdl-config.in sdl.m4 SDL.qpg.in SDL.spec SDL.spec.in setvars.cmd src test TODO VisualCE.zip VisualC.html VisualC.zip Watcom.mif WhatsNew Xcode21.tar.gz Xcode.tar.gz XcodeUniversal.tar.gz
 
-BUILDC	= $(LIBTOOL) --mode=compile $(CC) $(CFLAGS) -c $? -o $@
-BUILDCC	= $(LIBTOOL) --mode=compile $(CC) $(CFLAGS) -c $? -o $@
-BUILDM	= $(LIBTOOL) --mode=compile $(CC) $(CFLAGS) -c $? -o $@
+BUILDC	= $(LIBTOOL) --mode=compile $(CC) $(CFLAGS) -c `echo $? | sed 's| .*||'`  -o $@
+BUILDCC	= $(LIBTOOL) --mode=compile $(CC) $(CFLAGS) -c `echo $? | sed 's| .*||'`  -o $@
+BUILDM	= $(LIBTOOL) --mode=compile $(CC) $(CFLAGS) -c `echo $? | sed 's| .*||'`  -o $@
 BUILDASM = $(LIBTOOL) --tag=CC --mode=compile @ac_aux_dir@/strip_fPIC.sh $(NASM) $? -o $@
 
 LT_AGE      = @LT_AGE@
