@@ -2,6 +2,11 @@
 #
 # Generate dependencies from a list of source files
 
+BUILDC="\\\$\\(LIBTOOL\\) --mode=compile \\\$\\(CC\\) \\\$\\(CFLAGS\\) -c \$src  -o \\\$@"
+BUILDCC=$BUILDC
+BUILDM=$BUILDC
+BUILDASM="\\\$\\(LIBTOOL\\) --tag=CC --mode=compile \\\$\\(auxdir\\)/strip_fPIC.sh \\\$\\(NASM\\) \$src -o \\\$@"
+
 # Check to make sure our environment variables are set
 if test x"$INCLUDE" = x -o x"$SOURCES" = x -o x"$objects" = x -o x"$output" = x; then
     echo "SOURCES, INCLUDE, objects, and output needs to be set"
@@ -21,27 +26,19 @@ search_deps()
     while read file
     do cache=${cache_prefix}_`generate_var $file`
        if test -f $cache; then
-          # We already ahve this cached
-          if test x$2 = x; then
-              cat $cache
-          else
-              cat $cache >>$2
-          fi
-          continue;
+          : # We already ahve this cached
+       else
+           : >$cache
+           for path in $base `echo $INCLUDE | sed 's|-I||g'`
+           do dep="$path/$file"
+              if test -f "$dep"; then
+                 echo "	$dep \\" >>$cache
+                 search_deps $dep >>$cache
+                 break
+              fi
+           done
        fi
-       for path in $base `echo $INCLUDE | sed 's|-I||g'`
-       do dep="$path/$file"
-          if test -f "$dep"; then
-             echo "	$dep \\" >>$cache
-             if test x$2 = x; then
-                  echo "	$dep \\"
-             else
-                  echo "	$dep \\" >>$2
-             fi
-             search_deps $dep $cache
-             break
-          fi
-       done
+       cat $cache
     done
 }
 
@@ -54,13 +51,12 @@ do  echo "Generating dependencies for $src"
     search_deps $src | sort | uniq >>${output}.new
     echo "" >>${output}.new
     case $ext in
-        asm) echo "	\$(BUILDASM)" >>${output}.new;;
-        cc)  echo "	\$(BUILDCC)" >>${output}.new;;
-        c)   echo "	\$(BUILDC)" >>${output}.new;;
-        m)   echo "	\$(BUILDM)" >>${output}.new;;
+        c)   eval echo \\"	$BUILDC\\" >>${output}.new;;
+        cc)  eval echo \\"	$BUILDCC\\" >>${output}.new;;
+        m)   eval echo \\"	$BUILDM\\" >>${output}.new;;
+        asm) eval echo \\"	$BUILDASM\\" >>${output}.new;;
         *)   echo "Unknown file extension: $ext";;
     esac
     echo "" >>${output}.new
 done
-rm -f ${cache_prefix}*
 mv ${output}.new ${output}
