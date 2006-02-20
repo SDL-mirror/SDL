@@ -160,8 +160,8 @@ static void Mint_LockAudio(_THIS)
 
 	/* Stop replay */
 	oldpile=(void *)Super(0);
-	cookie_stfa->sound_enable=STFA_PLAY_SDL_DISABLE;
-	Super( SDL_arraysize(Super),oldpile);
+	cookie_stfa->sound_enable=STFA_PLAY_DISABLE;
+	Super(oldpile);
 }
 
 static void Mint_UnlockAudio(_THIS)
