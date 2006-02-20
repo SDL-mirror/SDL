@@ -100,6 +100,8 @@ int main(int argc,char *argv[])
 	char *gl_library = "OpenGL32.DLL";
 #elif defined(__QNXNTO__)
 	char *gl_library = "libGL.so.3";
+#elif defined(_SGI_SOURCE)
+	char *gl_library = "libGL.so";
 #else
 	char *gl_library = "libGL.so.1";
 #endif
