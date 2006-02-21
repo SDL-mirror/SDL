@@ -21,6 +21,7 @@
 */
 #include "SDL_config.h"
 
+#if 0 /* FIXME: This code needs to be rewritten to reference the static data using relocatable addresses (e.g. http://www.gentoo.org/proj/en/hardened/pic-fix-guide.xml or http://nasm.sourceforge.net/doc/html/nasmdoc8.html#section-8.2) This code currently breaks on systems with readonly text segments (hardened Linux / Intel Mac) */
 #if defined(__GNUC__) && defined(__i386__) && SDL_ASSEMBLY_ROUTINES
 
 #include "SDL_stdinc.h"
@@ -406,3 +407,4 @@ void Color565DitherYV12MMX1X( int *colortab, Uint32 *rgb_2_pix,
 }
 
 #endif /* GCC i386 inline assembly */
+#endif /* 0 */
