@@ -585,15 +585,15 @@ static recDevice *HIDDisposeDevice (recDevice **ppDevice)
 int SDL_SYS_JoystickInit(void)
 {
 	IOReturn result = kIOReturnSuccess;
-	mach_port_t masterPort = NULL;
-	io_iterator_t hidObjectIterator = NULL;
+	mach_port_t masterPort = 0;
+	io_iterator_t hidObjectIterator = 0;
 	CFMutableDictionaryRef hidMatchDictionary = NULL;
 	recDevice *device, *lastDevice;
-	io_object_t ioHIDDeviceObject = NULL;
+	io_object_t ioHIDDeviceObject = 0;
 	
 	SDL_numjoysticks = 0;
 	
-	if (NULL != gpDeviceList)
+	if (!gpDeviceList)
 	{
 		SDL_SetError("Joystick: Device list already inited.");
 		return -1;
@@ -608,7 +608,7 @@ int SDL_SYS_JoystickInit(void)
 
 	/* Set up a matching dictionary to search I/O Registry by class name for all HID class devices. */
 	hidMatchDictionary = IOServiceMatching (kIOHIDDeviceKey);
-	if ((hidMatchDictionary != NULL))
+	if (hidMatchDictionary)
 	{
 		/* Add key for device type (joystick, in this case) to refine the matching dictionary. */
 		
@@ -637,7 +637,7 @@ int SDL_SYS_JoystickInit(void)
 		SDL_SetError("Joystick: Couldn't create a HID object iterator.");
 		return -1;
 	}
-	if (NULL == hidObjectIterator) /* there are no joysticks */
+	if (!hidObjectIterator) /* there are no joysticks */
 	{
 		gpDeviceList = NULL;
 		SDL_numjoysticks = 0;
