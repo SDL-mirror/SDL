@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 #include <sys/types.h>
 #include <dev/wscons/wsdisplay_usl_io.h>

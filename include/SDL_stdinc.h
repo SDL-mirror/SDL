@@ -159,12 +159,12 @@ extern DECLSPEC void SDLCALL SDL_free(void *mem);
 #if HAVE_ALLOCA && !defined(alloca)
 # if HAVE_ALLOCA_H
 #  include <alloca.h>
-# elif __GNUC__
+# elif defined(__GNUC__)
 #  define alloca __builtin_alloca
-# elif _MSC_VER
+# elif defined(_MSC_VER)
 #  include <malloc.h>
 #  define alloca _alloca
-# elif _AIX
+# elif defined(__AIX__)
   #pragma alloca
 # else
    char *alloca ();

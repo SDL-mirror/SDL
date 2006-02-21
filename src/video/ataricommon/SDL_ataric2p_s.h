@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 #ifndef _ATARI_C2P_h
 #define _ATARI_C2P_h

@@ -23,6 +23,7 @@
     Hsieh-Fu Tsai
     clare@setabox.com
 */
+#include "SDL_config.h"
 
 #include "SDL_stdinc.h"
 #include "SDL_nxmodes_c.h"

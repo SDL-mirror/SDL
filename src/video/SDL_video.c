@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* The high-level video driver subsystem */
 
@@ -356,7 +357,7 @@ static Uint8 SDL_closest_depths[4][8] = {
 };
 
 
-#ifdef macintosh /* MPW optimization bug? */
+#ifdef __MACOS__ /* MPW optimization bug? */
 #define NEGATIVE_ONE 0xFFFFFFFF
 #else
 #define NEGATIVE_ONE -1

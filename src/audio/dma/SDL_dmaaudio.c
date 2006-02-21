@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* Allow access to a raw mixing buffer */
 
@@ -33,8 +34,6 @@
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
-
-#include "SDL_config.h"
 
 #if SDL_AUDIO_DRIVER_OSS_SOUNDCARD_H
 /* This is installed on some systems */

@@ -22,6 +22,7 @@
     This file based on Apple sample code. We haven't changed the file name, 
     so if you want to see the original search for it on apple.com/developer
 */
+#include "SDL_config.h"
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // AudioFileManager.cpp

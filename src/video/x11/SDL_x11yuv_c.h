@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* This is the XFree86 Xv extension implementation of YUV video overlays */
 

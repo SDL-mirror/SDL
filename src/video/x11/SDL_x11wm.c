@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>

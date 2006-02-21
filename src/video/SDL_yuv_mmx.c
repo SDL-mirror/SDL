@@ -19,10 +19,9 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
-#include "SDL_stdinc.h"
-
-#if i386 && __GNUC__ && SDL_ASSEMBLY_BLITTERS
+#if defined(__GNUC__) && defined(__i386__) && SDL_ASSEMBLY_ROUTINES
 
 #define ASM_ARRAY(x) x[] __asm__("_" #x) __attribute__((used))
  

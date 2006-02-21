@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* Allow access to an ESD network stream mixing buffer */
 
@@ -244,7 +245,7 @@ static void ESD_CloseAudio(_THIS)
 static char *get_progname(void)
 {
 	char *progname = NULL;
-#ifdef linux
+#ifdef __LINUX__
 	FILE *fp;
 	static char temp[BUFSIZ];
 

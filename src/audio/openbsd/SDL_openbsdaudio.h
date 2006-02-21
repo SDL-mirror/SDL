@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 #ifndef _SDL_openbsdaudio_h
 #define _SDL_openbsdaudio_h

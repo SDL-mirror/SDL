@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* Functions for system-level CD-ROM audio control */
 
@@ -29,7 +30,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <unistd.h>
-#ifdef __linux__
+#ifdef __LINUX__
 #ifdef HAVE_LINUX_VERSION_H
 /* linux 2.6.9 workaround */
 #include <linux/version.h>

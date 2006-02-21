@@ -25,6 +25,8 @@
 
 /* This is the minimal configuration that can be used to build SDL */
 
+#include "SDL_platform.h"
+
 #include <stdarg.h>
 
 typedef signed char int8_t;

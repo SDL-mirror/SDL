@@ -19,12 +19,11 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 #if 0
 #define DEBUG_DYNAMIC_X11 1
 #endif
-
-#include "SDL_config.h"
 
 #define __SDL_NO_REDEFINE_X11_HEADER_SYMS 1
 #include "SDL_x11dyn.h"

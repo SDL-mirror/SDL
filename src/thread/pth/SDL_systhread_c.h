@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 #ifndef _SDL_SYSTHREAD_C_H_
 #define _SDL_SYSTHREAD_C_H_

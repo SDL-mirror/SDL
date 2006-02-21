@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* This provides the default mixing callback for the SDL audio routines */
 
@@ -110,7 +111,7 @@ void SDL_MixAudio (Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 	switch (format) {
 
 		case AUDIO_U8: {
-#if defined(__M68000__) && defined(__GNUC__)
+#if defined(__GNUC__) && defined(__M68000__) && defined(SDL_ASSEMBLY_ROUTINES)
 			SDL_MixAudio_m68k_U8((char*)dst,(char*)src,(unsigned long)len,(long)volume,(char *)mix8);
 #else
 			Uint8 src_sample;
@@ -127,21 +128,21 @@ void SDL_MixAudio (Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 		break;
 
 		case AUDIO_S8: {
-#if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
+#if defined(__GNUC__) && defined(__i386__) && defined(SDL_ASSEMBLY_ROUTINES)
 			if (SDL_HasMMX())
 			{
 				SDL_MixAudio_MMX_S8((char*)dst,(char*)src,(unsigned int)len,(int)volume);
 			}
 			else
 #endif
-#if defined(USE_ASM_MIXER_VC)
+#if defined(_MSC_VER) && defined(M_I86) && defined(SDL_ASSEMBLY_ROUTINES)
 			if (SDL_HasMMX())
 			{
 				SDL_MixAudio_MMX_S8_VC((char*)dst,(char*)src,(unsigned int)len,(int)volume);
 			}
 			else
 #endif
-#if defined(__M68000__) && defined(__GNUC__)
+#if defined(__GNUC__) && defined(__M68000__) && defined(SDL_ASSEMBLY_ROUTINES)
 			SDL_MixAudio_m68k_S8((char*)dst,(char*)src,(unsigned long)len,(long)volume);
 #else
 			{
@@ -174,7 +175,7 @@ void SDL_MixAudio (Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 		break;
 
 		case AUDIO_S16LSB: {
-#if defined(i386) && defined(__GNUC__) && defined(USE_ASMBLIT)
+#if defined(__GNUC__) && defined(__i386__) && defined(SDL_ASSEMBLY_ROUTINES)
 			if (SDL_HasMMX())
 			{
 				SDL_MixAudio_MMX_S16((char*)dst,(char*)src,(unsigned int)len,(int)volume);
@@ -187,7 +188,7 @@ void SDL_MixAudio (Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 			}
 			else
 #endif
-#if defined(__M68000__) && defined(__GNUC__)
+#if defined(__GNUC__) && defined(__M68000__) && defined(SDL_ASSEMBLY_ROUTINES)
 			SDL_MixAudio_m68k_S16LSB((short*)dst,(short*)src,(unsigned long)len,(long)volume);
 #else
 			{
@@ -220,7 +221,7 @@ void SDL_MixAudio (Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 		break;
 
 		case AUDIO_S16MSB: {
-#if defined(__M68000__) && defined(__GNUC__)
+#if defined(__GNUC__) && defined(__M68000__) && defined(SDL_ASSEMBLY_ROUTINES)
 			SDL_MixAudio_m68k_S16MSB((short*)dst,(short*)src,(unsigned long)len,(long)volume);
 #else
 			Sint16 src1, src2;

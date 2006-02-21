@@ -19,10 +19,9 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* Gamma correction support */
-
-#include "SDL_config.h"
 
 #ifdef HAVE_MATH_H
 #include <math.h>	/* Used for calculating gamma ramps */

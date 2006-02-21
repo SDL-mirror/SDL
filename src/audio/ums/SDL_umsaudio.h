@@ -21,6 +21,7 @@
 
     based on linux/SDL_dspaudio.h by Sam Lantinga
 */
+#include "SDL_config.h"
 
 #ifndef _SDL_UMSaudio_h
 #define _SDL_UMSaudio_h

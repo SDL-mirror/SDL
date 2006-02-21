@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 #if defined(__APPLE__) && defined(__MACH__)
 #include <Carbon/Carbon.h>
@@ -498,7 +499,7 @@ static SDL_Surface *ROM_SetVideoMode(_THIS, SDL_Surface *current,
 		(SDL_modelist[0]->w-width)/2, (SDL_modelist[0]->h-height)/2);
 	}
 
-#if MACOSX && !USE_QUICKTIME
+#if defined(__MACOSX__) && !USE_QUICKTIME
 	/* Hum.. fullscreen mode is broken */
 	flags &= ~SDL_FULLSCREEN;
 #endif

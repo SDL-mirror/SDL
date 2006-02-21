@@ -1,4 +1,5 @@
 /* File "FastTimes.h" - Original code by Matt Slot <fprefect@ambrosiasw.com>  */
+#include "SDL_config.h"
 /* Created 4/24/99    - This file is hereby placed in the public domain       */
 /* Updated 5/21/99    - Calibrate to VIA, add TBR support, renamed functions  */
 /* Updated 10/4/99    - Use AbsoluteToNanoseconds() in case Absolute = double */

@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* General (mostly internal) pixel/color manipulation routines for SDL */
 

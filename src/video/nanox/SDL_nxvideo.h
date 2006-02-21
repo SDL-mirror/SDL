@@ -23,6 +23,7 @@
     Hsieh-Fu Tsai
     clare@setabox.com
 */
+#include "SDL_config.h"
 
 #ifndef _SDL_nxvideo_h
 #define _SDL_nxvideo_h

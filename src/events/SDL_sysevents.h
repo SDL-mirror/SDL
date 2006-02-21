@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 #include "../video/SDL_sysvideo.h"
 
@@ -28,7 +29,7 @@
 #define MUST_THREAD_EVENTS
 #endif
 
-#ifdef WIN32		/* Win32 doesn't allow a separate event thread */
+#ifdef __WIN32__	/* Win32 doesn't allow a separate event thread */
 #define CANT_THREAD_EVENTS
 #endif
 
@@ -36,7 +37,7 @@
 #define CANT_THREAD_EVENTS
 #endif
 
-#ifdef macintosh	/* MacOS 7/8 don't support preemptive multi-tasking */
+#ifdef __MACOS__	/* MacOS 7/8 don't support preemptive multi-tasking */
 #define CANT_THREAD_EVENTS
 #endif
 

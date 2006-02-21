@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* CPU feature detection for SDL */
 
@@ -30,7 +31,7 @@
 #include <setjmp.h>
 #endif
 
-#if MACOSX
+#ifdef __MACOSX__
 #include <sys/sysctl.h> /* For AltiVec check */
 #endif
 
@@ -307,7 +308,7 @@ static __inline__ int CPU_haveSSE2()
 static __inline__ int CPU_haveAltiVec()
 {
 	volatile int altivec = 0;
-#if MACOSX
+#ifdef __MACOSX__
 	int selectors[2] = { CTL_HW, HW_VECTORUNIT }; 
 	int hasVectorUnit = 0; 
 	size_t length = sizeof(hasVectorUnit); 

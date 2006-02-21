@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 #include "CDPlayer.h"
 #include "AudioFilePlayer.h"

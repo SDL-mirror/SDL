@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /*
  * RLE encoding for software colorkey and alpha-channel acceleration
@@ -90,7 +91,7 @@
 #include "SDL_blit.h"
 #include "SDL_RLEaccel_c.h"
 
-#if (i386 || __x86_64__) && __GNUC__ && SDL_ASSEMBLY_BLITTERS
+#if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__)) && SDL_ASSEMBLY_ROUTINES
 #define MMX_ASMBLIT
 #endif
 

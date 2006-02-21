@@ -31,11 +31,6 @@
 #endif
 #define _begin_code_h
 
-/* Make sure the correct platform symbols are defined */
-#if !defined(WIN32) && defined(_WIN32)
-#define WIN32
-#endif /* Windows */
-
 /* Some compilers use a special export keyword */
 #ifndef DECLSPEC
 # ifdef __BEOS__
@@ -45,7 +40,7 @@
 #   define DECLSPEC	__declspec(export)
 #  endif
 # else
-# ifdef WIN32
+# ifdef __WIN32__
 #  ifdef __BORLANDC__
 #   ifdef BUILD_SDL
 #    define DECLSPEC 
@@ -75,7 +70,7 @@
 
 /* By default SDL uses the C calling convention */
 #ifndef SDLCALL
-#if defined(WIN32) && !defined(__GNUC__)
+#if defined(__WIN32__) && !defined(__GNUC__)
 #define SDLCALL __cdecl
 #else
 #ifdef __OS2__
@@ -107,7 +102,7 @@
 #pragma nopackwarning
 #endif
 #pragma pack(push,4)
-#elif (defined(__MWERKS__) && defined(macintosh))
+#elif (defined(__MWERKS__) && defined(__MACOS__))
 #pragma options align=mac68k4byte
 #pragma enumsalwaysint on
 #endif /* Compiler needs structure packing set */

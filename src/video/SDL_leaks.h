@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* Define this if you want surface leak detection code enabled */
 /*#define CHECK_LEAKS*/

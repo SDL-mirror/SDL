@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* Allow access to a raw mixing buffer (For IRIX 6.5 and higher) */
 /* patch for IRIX 5 by Georg Schwarz 18/07/2004 */

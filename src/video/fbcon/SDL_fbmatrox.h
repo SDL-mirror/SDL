@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* Matrox hardware acceleration for the SDL framebuffer console driver */
 

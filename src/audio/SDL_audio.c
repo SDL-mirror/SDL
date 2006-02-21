@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* Allow access to a raw mixing buffer */
 
@@ -97,9 +98,6 @@ static AudioBootStrap *bootstrap[] = {
 #if SDL_AUDIO_DRIVER_DC
 	&DCAUD_bootstrap,
 #endif
-#if SDL_AUDIO_DRIVER_DRENDERER
-	&DRENDERER_bootstrap,
-#endif
 #if SDL_AUDIO_DRIVER_MMEAUDIO
 	&MMEAUDIO_bootstrap,
 #endif
@@ -114,7 +112,7 @@ SDL_AudioDevice *current_audio = NULL;
 int SDL_AudioInit(const char *driver_name);
 void SDL_AudioQuit(void);
 
-#ifdef ENABLE_AHI
+#if SDL_AUDIO_DRIVER_AHI
 static int audio_configured = 0;
 #endif
 
@@ -127,7 +125,7 @@ int SDL_RunAudio(void *audiop)
 	void  *udata;
 	void (*fill)(void *userdata,Uint8 *stream, int len);
 	int    silence;
-#ifdef ENABLE_AHI
+#if SDL_AUDIO_DRIVER_AHI
 	int started = 0;
 
 /* AmigaOS NEEDS that the audio driver is opened in the thread that uses it! */
@@ -153,7 +151,7 @@ int SDL_RunAudio(void *audiop)
 	fill  = audio->spec.callback;
 	udata = audio->spec.userdata;
 
-#ifdef ENABLE_AHI
+#if SDL_AUDIO_DRIVER_AHI
 	audio_configured = 1;
 
 	D(bug("Audio configured... Checking for conversion\n"));
@@ -174,7 +172,7 @@ int SDL_RunAudio(void *audiop)
 	}
 	stream = audio->fake_stream;
 
-#ifdef ENABLE_AHI
+#if SDL_AUDIO_DRIVER_AHI
 	SDL_mutexV(audio->mixer_lock);
 	D(bug("Entering audio loop...\n"));
 #endif
@@ -197,7 +195,7 @@ int SDL_RunAudio(void *audiop)
 		if ( stream == audio->fake_stream ) {
 			SDL_Delay((audio->spec.samples*1000)/audio->spec.freq);
 		} else {
-#ifdef ENABLE_AHI
+#if SDL_AUDIO_DRIVER_AHI
 			if ( started > 1 )
 #endif
 			audio->WaitAudio(audio);
@@ -238,7 +236,7 @@ int SDL_RunAudio(void *audiop)
 		/* Ready current buffer for play and change current buffer */
 		if ( stream != audio->fake_stream ) {
 			audio->PlayAudio(audio);
-#ifdef ENABLE_AHI
+#if SDL_AUDIO_DRIVER_AHI
 /* AmigaOS don't have to wait the first time audio is played! */
 			started++;
 #endif
@@ -249,7 +247,7 @@ int SDL_RunAudio(void *audiop)
 		audio->WaitDone(audio);
 	}
 
-#ifdef ENABLE_AHI
+#if SDL_AUDIO_DRIVER_AHI
 	D(bug("WaitAudio...Done\n"));
 
 	audio->CloseAudio(audio);
@@ -413,7 +411,7 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 		return(-1);
 	}
 
-#if defined(macintosh) || (defined(__riscos__) && SDL_THREADS_DISABLED)
+#if defined(__MACOS__) || (defined(__RISCOS__) && SDL_THREADS_DISABLED)
 	/* FIXME: Need to implement PPC interrupt asm for SDL_LockAudio() */
 #else
 #if defined(__MINT__) && SDL_THREADS_DISABLED
@@ -427,7 +425,7 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 		return(-1);
 	}
 #endif /* __MINT__ */
-#endif /* macintosh */
+#endif /* __MACOS__ */
 
 	/* Calculate the silence and size of the audio specification */
 	SDL_CalculateAudioSpec(desired);
@@ -438,7 +436,7 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 	audio->enabled = 1;
 	audio->paused  = 1;
 
-#ifndef ENABLE_AHI
+#if SDL_AUDIO_DRIVER_AHI
 
 /* AmigaOS opens audio inside the main loop */
 	audio->opened = audio->OpenAudio(audio, &audio->spec)+1;
@@ -450,8 +448,9 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 #else
 	D(bug("Locking semaphore..."));
 	SDL_mutexP(audio->mixer_lock);
+#endif
 
-#if (defined(_WIN32) && !defined(_WIN32_WCE)) && !defined(HAVE_LIBC)
+#if (defined(__WIN32__) && !defined(_WIN32_WCE)) && !defined(HAVE_LIBC)
 #undef SDL_CreateThread
 	audio->thread = SDL_CreateThread(SDL_RunAudio, audio, NULL, NULL);
 #else
@@ -466,6 +465,7 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 		return(-1);
 	}
 
+#if SDL_AUDIO_DRIVER_AHI
 	while(!audio_configured)
 		SDL_Delay(100);
 #endif
@@ -511,12 +511,12 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 		}
 	}
 
-#ifndef ENABLE_AHI
+#if SDL_AUDIO_DRIVER_AHI
 	/* Start the audio thread if necessary */
 	switch (audio->opened) {
 		case  1:
 			/* Start the audio thread */
-#if (defined(_WIN32) && !defined(_WIN32_WCE)) && !defined(HAVE_LIBC)
+#if (defined(__WIN32__) && !defined(_WIN32_WCE)) && !defined(HAVE_LIBC)
 #undef SDL_CreateThread
 			audio->thread = SDL_CreateThread(SDL_RunAudio, audio, NULL, NULL);
 #else
@@ -611,7 +611,7 @@ void SDL_AudioQuit(void)
 			SDL_FreeAudioMem(audio->convert.buf);
 
 		}
-#ifndef ENABLE_AHI
+#if SDL_AUDIO_DRIVER_AHI
 		if ( audio->opened ) {
 			audio->CloseAudio(audio);
 			audio->opened = 0;

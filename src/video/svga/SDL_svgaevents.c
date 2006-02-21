@@ -19,16 +19,17 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* Handle the event stream, converting X11 events into SDL events */
 
 #include <vga.h>
 #include <vgamouse.h>
 #include <vgakeyboard.h>
-#if defined(linux)
+#if defined(__LINUX__)
 #include <linux/kd.h>
 #include <linux/keyboard.h>
-#elif defined(__FreeBSD__)
+#elif defined(__FREEBSD__)
 #include <sys/kbio.h>
 #else
 #error You must choose your operating system here
@@ -43,7 +44,7 @@
 #if defined(linux)
 #define NUM_VGAKEYMAPS	(1<<KG_CAPSSHIFT)
 static Uint16 vga_keymap[NUM_VGAKEYMAPS][NR_KEYS];
-#elif defined(__FreeBSD__)
+#elif defined(__FREEBSD__)
 /* FIXME: Free the keymap when we shut down the video mode */
 static keymap_t *vga_keymap = NULL;
 #else
@@ -126,7 +127,7 @@ int SVGA_initkeymaps(int fd)
 	}
 	return(0);
 }
-#elif defined(__FreeBSD__)
+#elif defined(__FREEBSD__)
 int SVGA_initkeymaps(int fd)
 {
 	vga_keymap = SDL_malloc(sizeof(keymap_t));
@@ -374,7 +375,7 @@ static SDL_keysym *TranslateKey(int scancode, SDL_keysym *keysym)
 	}
 	return(keysym);
 }
-#elif defined(__FreeBSD__)
+#elif defined(__FREEBSD__)
 static SDL_keysym *TranslateKey(int scancode, SDL_keysym *keysym)
 {
 	/* Set the keysym information */

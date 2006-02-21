@@ -24,6 +24,7 @@
     Hsieh-Fu Tsai
     clare@setabox.com
 */
+#include "SDL_config.h"
 
 #include "SDL_nximage_c.h"
 

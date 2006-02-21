@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* These are functions that need to be implemented by a port of SDL */
 
@@ -31,7 +32,7 @@
    saves a system-dependent thread id in thread->id, and returns 0
    on success.
 */
-#if defined(_WIN32) || defined(__OS2__)
+#if defined(__WIN32__) || defined(__OS2__)
 extern int SDL_SYS_CreateThread(SDL_Thread *thread, void *args, pfnSDL_CurrentBeginThread pfnBeginThread, pfnSDL_CurrentEndThread pfnEndThread);
 #else
 extern int SDL_SYS_CreateThread(SDL_Thread *thread, void *args);

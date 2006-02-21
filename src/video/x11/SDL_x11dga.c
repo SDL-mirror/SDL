@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* This is currently only used to enable DGA mouse.
    The new fullscreen code makes it very difficult to handle DGA dynamically.

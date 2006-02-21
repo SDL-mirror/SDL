@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* This file provides a general interface for SDL to read and write
    data sources.  It can easily be extended to files, memory, etc.
@@ -147,14 +148,14 @@ static int mem_close(SDL_RWops *context)
 }
 
 /* Functions to create SDL_RWops structures from various data sources */
-#ifdef WIN32
+#ifdef __WIN32__
 /* Aggh.  You can't (apparently) open a file in an application and
    read from it in a DLL.
 */
 static int in_sdl = 0;
 #endif
 
-#ifdef macintosh
+#ifdef __MACOS__
 /*
  * translate unix-style slash-separated filename to mac-style colon-separated
  * name; return malloced string
@@ -196,7 +197,7 @@ static char *unix_to_mac(const char *file)
 	*dst++ = '\0';
 	return path;
 }
-#endif /* macintosh */
+#endif /* __MACOS__ */
 
 SDL_RWops *SDL_RWFromFile(const char *file, const char *mode)
 {
@@ -204,7 +205,7 @@ SDL_RWops *SDL_RWFromFile(const char *file, const char *mode)
 #ifdef HAVE_STDIO_H
 	FILE *fp;
 
-#ifdef macintosh
+#ifdef __MACOS__
 	{
 		char *mpath = unix_to_mac(file);
 		fp = fopen(mpath, mode);
@@ -216,7 +217,7 @@ SDL_RWops *SDL_RWFromFile(const char *file, const char *mode)
 	if ( fp == NULL ) {
 		SDL_SetError("Couldn't open %s", file);
 	} else {
-#ifdef WIN32
+#ifdef __WIN32__
 		in_sdl = 1;
 		rwops = SDL_RWFromFP(fp, 1);
 		in_sdl = 0;
@@ -233,7 +234,7 @@ SDL_RWops *SDL_RWFromFP(FILE *fp, int autoclose)
 {
 	SDL_RWops *rwops = NULL;
 
-#ifdef WIN32
+#ifdef __WIN32__
 	if ( ! in_sdl ) {
 		/* It's when SDL and the app are compiled with different C runtimes */
 		SDL_SetError("You can't pass a FILE pointer to a DLL (?)");

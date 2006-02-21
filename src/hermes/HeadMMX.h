@@ -6,6 +6,7 @@
    Please refer to the file COPYING.LIB contained in the distribution for
    licensing conditions
 */
+#include "SDL_config.h"
 
 #ifndef __HERMES_HEAD_MMX__
 #define __HERMES_HEAD_MMX__

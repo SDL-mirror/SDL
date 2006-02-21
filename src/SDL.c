@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* Initialization code for SDL */
 
@@ -322,7 +323,7 @@ unsigned _System LibMain(unsigned hmod, unsigned termination)
 }
 #endif /* __WATCOMC__ */
 
-#elif defined(_WIN32)
+#elif defined(__WIN32__)
 
 #if !defined(HAVE_LIBC) || defined(_WIN32_WCE) || (defined(__WATCOMC__) && defined(BUILD_DLL))
 /* Need to include DllMain() on Windows CE and Watcom C for some reason.. */
@@ -343,4 +344,4 @@ BOOL APIENTRY _DllMainCRTStartup( HANDLE hModule,
 }
 #endif /* _WIN32_WCE and building DLL with Watcom C */
 
-#endif /* OS/2 elif _WIN32 */
+#endif /* OS/2 elif __WIN32__ */

@@ -23,10 +23,10 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* CPU feature detection for SDL                                       */
 
-#include "SDL_stdinc.h"
-
 #ifndef _SDL_cpuinfo_h
 #define _SDL_cpuinfo_h
+
+#include "SDL_stdinc.h"
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */

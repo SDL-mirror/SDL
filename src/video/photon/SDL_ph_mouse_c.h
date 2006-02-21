@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 #ifndef __SDL_PH_MOUSE_H__
 #define __SDL_PH_MOUSE_H__

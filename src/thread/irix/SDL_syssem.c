@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 #include "SDL_thread.h"
 #include "SDL_timer.h"
@@ -103,7 +104,7 @@ SDL_sem *SDL_CreateSemaphore(Uint32 initial_value)
 void SDL_DestroySemaphore(SDL_sem *sem)
 {
 	if ( sem ) {
-#ifdef _SGI_SOURCE
+#ifdef __IRIX__
 		semctl(sem->id, 0, IPC_RMID);
 #else
 		union semun dummy;
@@ -193,7 +194,7 @@ Uint32 SDL_SemValue(SDL_sem *sem)
 	value = 0;
 	if ( sem ) {
 	  tryagain:
-#ifdef _SGI_SOURCE
+#ifdef __IRIX__
 		semval = semctl(sem->id, 0, GETVAL);
 #else
 		{

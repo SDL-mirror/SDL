@@ -23,6 +23,7 @@
     Erik Inge Bolsø
     knan@mo.himolde.no
 */
+#include "SDL_config.h"
 
 /* Allow access to a raw mixing buffer */
 

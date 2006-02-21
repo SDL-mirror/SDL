@@ -22,7 +22,9 @@
 
 /* This is a simple file to encapsulate the OpenGL API headers */
 
-#ifdef WIN32
+#include "SDL_config.h"
+
+#ifdef __WIN32__
 #define WIN32_LEAN_AND_MEAN
 #ifndef NOMINMAX
 #define NOMINMAX	/* Don't defined min() and max() */
@@ -32,7 +34,7 @@
 #ifndef NO_SDL_GLEXT
 #define __glext_h_  /* Don't let gl.h include glext.h */
 #endif
-#if defined(__APPLE__) && defined(__MACH__)
+#ifdef __MACOSX__
 #include <OpenGL/gl.h>	/* Header File For The OpenGL Library */
 #include <OpenGL/glu.h>	/* Header File For The GLU Library */
 #else

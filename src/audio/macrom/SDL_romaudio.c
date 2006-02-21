@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 #if defined(__APPLE__) && defined(__MACH__)
 #  include <Carbon/Carbon.h>
@@ -92,7 +93,7 @@ static SDL_AudioDevice *Audio_CreateDevice(int devindex)
     this->UnlockAudio = Mac_UnlockAudio;
     this->free        = Audio_DeleteDevice;
 
-#ifdef MACOSX	/* MacOS X uses threaded audio, so normal thread code is okay */
+#ifdef __MACOSX__	/* MacOS X uses threaded audio, so normal thread code is okay */
     this->LockAudio   = NULL;
     this->UnlockAudio = NULL;
 #endif
@@ -120,7 +121,7 @@ static volatile Uint32 fill_me = 0;
 static void mix_buffer(SDL_AudioDevice *audio, UInt8 *buffer)
 {
    if ( ! audio->paused ) {
-#ifdef MACOSX
+#ifdef __MACOSX__
         SDL_mutexP(audio->mixer_lock);
 #endif
         if ( audio->convert.needed ) {
@@ -134,7 +135,7 @@ static void mix_buffer(SDL_AudioDevice *audio, UInt8 *buffer)
         } else {
             audio->spec.callback(audio->spec.userdata, buffer, audio->spec.size);
         }
-#ifdef MACOSX
+#ifdef __MACOSX__
         SDL_mutexV(audio->mixer_lock);
 #endif
     }

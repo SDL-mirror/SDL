@@ -23,6 +23,7 @@
 	CRTC2 support is inspired by mplayer's dfbmga driver
 	written by Ville Syrj��<syrjala@sci.fi>
 */
+#include "SDL_config.h"
 
 /* DirectFB video driver implementation.
 */

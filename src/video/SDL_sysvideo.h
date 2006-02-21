@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 #ifndef _SDL_sysvideo_h
 #define _SDL_sysvideo_h
@@ -32,17 +33,8 @@
    This is designed to be easily converted to C++ in the future.
  */
 
-/* OpenGL is pretty much available on all Windows systems */
-#ifdef WIN32
-#include "SDL_windows.h"
-#endif
-
 #if SDL_VIDEO_OPENGL
-#ifdef MACOSX
-#include <OpenGL/gl.h>  /* OpenGL.framework */
-#else
-#include <GL/gl.h>
-#endif /* MACOSX */
+#include "SDL_opengl.h"
 #endif /* SDL_VIDEO_OPENGL */
 
 /* The SDL video driver */

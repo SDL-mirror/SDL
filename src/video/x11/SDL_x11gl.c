@@ -19,17 +19,20 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 #include "SDL_x11video.h"
 #include "../../events/SDL_events_c.h"
 #include "SDL_x11dga_c.h"
 #include "SDL_x11gl_c.h"
 
-#if defined(sgi)
+#if defined(__IRIX__)
 /* IRIX doesn't have a GL library versioning system */
 #define DEFAULT_OPENGL	"libGL.so"
-#elif defined(MACOSX)
+#elif defined(__MACOSX__)
 #define DEFAULT_OPENGL	"/usr/X11R6/lib/libGL.1.dylib"
+#elif defined(__QNXNTO__)
+#define DEFAULT_OPENGL	"libGL.so.3"
 #else
 #define DEFAULT_OPENGL	"libGL.so.1"
 #endif

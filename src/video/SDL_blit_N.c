@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 #include "SDL_video.h"
 #include "SDL_endian.h"
@@ -32,7 +33,7 @@
 #include <altivec.h>
 #endif
 #define assert(X)
-#ifdef MACOSX
+#ifdef __MACOSX__
 #include <sys/sysctl.h>
 static size_t GetL3CacheSize( void )
 {
@@ -52,9 +53,9 @@ static size_t GetL3CacheSize( void )
     /* XXX: Just guess G4 */
     return 2097152;
 }
-#endif /* MACOSX */
+#endif /* __MACOSX__ */
 
-#if ((defined MACOSX) && (__GNUC__ < 4))
+#if (defined(__MACOSX__) && (__GNUC__ < 4))
     #define VECUINT8_LITERAL(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p) \
         (vector unsigned char) ( a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p )
     #define VECUINT16_LITERAL(a,b,c,d,e,f,g,h) \

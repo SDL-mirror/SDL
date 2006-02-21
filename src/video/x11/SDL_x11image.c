@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -148,7 +149,7 @@ static int num_CPU(void)
        static int num_cpus = 0;
 
        if(!num_cpus) {
-#if defined(__linux)
+#if defined(__LINUX__)
            char line[BUFSIZ];
            FILE *pstat = fopen("/proc/stat", "r");
            if ( pstat ) {
@@ -159,7 +160,7 @@ static int num_CPU(void)
                }
                fclose(pstat);
            }
-#elif defined(__sgi)
+#elif defined(__IRIX__)
 	   num_cpus = sysconf(_SC_NPROC_ONLN);
 #elif defined(_SC_NPROCESSORS_ONLN)
 	   /* number of processors online (SVR4.0MP compliant machines) */

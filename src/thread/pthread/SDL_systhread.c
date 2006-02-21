@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 #include <pthread.h>
 #include <signal.h>
@@ -96,7 +97,7 @@ void SDL_SYS_KillThread(SDL_Thread *thread)
 #ifdef PTHREAD_CANCEL_ASYNCHRONOUS
 	pthread_cancel(thread->handle);
 #else
-#ifdef __FreeBSD__
+#ifdef __FREEBSD__
 #warning For some reason, this doesnt actually kill a thread - FreeBSD 3.2
 #endif
 	pthread_kill(thread->handle, SIGKILL);

@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 #include "SDL_video.h"
 #include "SDL_sysvideo.h"
@@ -26,7 +27,7 @@
 #include "SDL_RLEaccel_c.h"
 #include "SDL_pixels_c.h"
 
-#if (i386 || __x86_64__) && __GNUC__ && SDL_ASSEMBLY_BLITTERS
+#if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__)) && SDL_ASSEMBLY_ROUTINES
 #define MMX_ASMBLIT
 #endif
 

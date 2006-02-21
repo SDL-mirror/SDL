@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* SVGAlib based SDL video driver implementation.
 */
@@ -29,9 +30,9 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 
-#if defined(linux)
+#if defined(__LINUX__)
 #include <linux/vt.h>
-#elif defined(__FreeBSD__)
+#elif defined(__FREEBSD__)
 #include <sys/consio.h>
 #else
 #error You must choose your operating system here

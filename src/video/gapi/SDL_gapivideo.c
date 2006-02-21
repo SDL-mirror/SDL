@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* Pocket PC GAPI SDL video driver implementation;
 Implemented by Dmitry Yakimov - support@activekitten.com

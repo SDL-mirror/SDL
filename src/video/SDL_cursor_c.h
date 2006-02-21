@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* Useful variables and functions from SDL_cursor.c */
 #include "SDL_mouse.h"

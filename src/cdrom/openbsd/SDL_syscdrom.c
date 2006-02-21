@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* Functions for system-level CD-ROM audio control */
 
@@ -131,9 +132,9 @@ static void AddDrive(char *drive, struct stat *stbuf)
 int  SDL_SYS_CDInit(void)
 {
 	static char *checklist[] = {
-#ifdef __OpenBSD__
+#if defined(__OPENBSD__)
 		"?0 cd?c", "cdrom", NULL
-#elif defined(__NetBSD__)
+#elif defined(__NETBSD__)
 		"?0 cd?d", "?0 cd?c", "cdrom", NULL
 #else
 		"?0 cd?c", "?0 acd?c", "cdrom", NULL

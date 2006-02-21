@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 #ifndef _SDL_dibvideo_h
 #define _SDL_dibvideo_h

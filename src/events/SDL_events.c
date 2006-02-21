@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* General event handling code for SDL */
 
@@ -150,7 +151,7 @@ static int SDL_StartEventThread(Uint32 flags)
 #if !SDL_THREADS_DISABLED
 	SDL_EventQ.lock = SDL_CreateMutex();
 	if ( SDL_EventQ.lock == NULL ) {
-#ifdef macintosh /* MacOS classic you can't multithread, so no lock needed */
+#ifdef __MACOS__ /* MacOS classic you can't multithread, so no lock needed */
 		;
 #else
 		return(-1);
@@ -168,7 +169,7 @@ static int SDL_StartEventThread(Uint32 flags)
 
 		/* The event thread will handle timers too */
 		SDL_SetTimerThreaded(2);
-#if (defined(_WIN32) && !defined(_WIN32_WCE)) && !defined(HAVE_LIBC)
+#if (defined(__WIN32__) && !defined(_WIN32_WCE)) && !defined(HAVE_LIBC)
 #undef SDL_CreateThread
 		SDL_EventThread = SDL_CreateThread(SDL_GobbleEvents, NULL, NULL, NULL);
 #else

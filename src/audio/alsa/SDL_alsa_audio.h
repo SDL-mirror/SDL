@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 #ifndef _ALSA_PCM_audio_h
 #define _ALSA_PCM_audio_h

@@ -20,6 +20,7 @@
     slouken@libsdl.org
 
 */
+#include "SDL_config.h"
 
 /* Output dreamcast aica */
 

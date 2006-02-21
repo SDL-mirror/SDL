@@ -24,6 +24,7 @@
     Hsieh-Fu Tsai
     clare@setabox.com
 */
+#include "SDL_config.h"
 
 #include "SDL_keysym.h"
 #include "../../events/SDL_events_c.h"

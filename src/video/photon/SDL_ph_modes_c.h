@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 #ifndef __SDL_PH_MODES_H__
 #define __SDL_PH_MODES_H__

@@ -21,6 +21,7 @@
 
     based on linux/SDL_dspaudio.c by Sam Lantinga
 */
+#include "SDL_config.h"
 
 /* Allow access to a raw mixing buffer */
 

@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* Useful functions and variables from SDL_timer.c */
 #include "SDL_timer.h"

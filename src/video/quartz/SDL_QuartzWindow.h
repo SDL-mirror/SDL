@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* Subclass of NSWindow to fix genie effect and support resize events  */
 @interface SDL_QuartzWindow : NSWindow

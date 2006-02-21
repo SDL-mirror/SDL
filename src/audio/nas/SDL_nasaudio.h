@@ -23,6 +23,7 @@
     Erik Inge Bolsø
     knan@mo.himolde.no
 */
+#include "SDL_config.h"
 
 #ifndef _SDL_nasaudio_h
 #define _SDL_nasaudio_h

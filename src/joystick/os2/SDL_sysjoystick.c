@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* OS/2 Joystick driver, contributed by Daniel Caetano */
 

@@ -25,6 +25,9 @@
 
 /* This is a set of defines to configure the SDL features */
 
+/* General platform specific identifiers */
+#include "SDL_platform.h"
+
 /* C language features */
 #undef const
 #undef inline
@@ -48,7 +51,7 @@
 
 /* Comment this if you want to build without any C library requirements */
 #undef HAVE_LIBC
-#ifdef HAVE_LIBC
+#if HAVE_LIBC
 
 /* Useful headers */
 #undef HAVE_ALLOCA_H
@@ -127,10 +130,6 @@
 #include <stdarg.h>
 #endif /* HAVE_LIBC */
 
-/* General platform specific identifiers */
-#undef TARGET_API_MAC_CARBON
-#undef TARGET_API_MAC_OSX
-
 /* Allow disabling of core subsystems */
 #undef SDL_AUDIO_DISABLED
 #undef SDL_CDROM_DISABLED
@@ -155,7 +154,6 @@
 #undef SDL_AUDIO_DRIVER_DC
 #undef SDL_AUDIO_DRIVER_DISK
 #undef SDL_AUDIO_DRIVER_DMEDIA
-#undef SDL_AUDIO_DRIVER_DRENDERER
 #undef SDL_AUDIO_DRIVER_DSOUND
 #undef SDL_AUDIO_DRIVER_ESD
 #undef SDL_AUDIO_DRIVER_ESD_DYNAMIC
@@ -285,8 +283,8 @@
 #undef SDL_VIDEO_OPENGL_OSMESA
 #undef SDL_VIDEO_OPENGL_OSMESA_DYNAMIC
 
-/* Enable assembly blit routines */
-#undef SDL_ASSEMBLY_BLITTERS
+/* Enable assembly routines */
+#undef SDL_ASSEMBLY_ROUTINES
 #undef SDL_HERMES_BLITTERS
 #undef SDL_ALTIVEC_BLITTERS
 

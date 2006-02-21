@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* X11 based SDL video driver implementation.
    Note:  This implementation does not currently need X11 thread locking,
@@ -266,7 +267,7 @@ static int xext_errhandler(Display *d, char *ext_name, char *reason)
 static char *get_classname(char *classname, int maxlen)
 {
 	char *spot;
-#if defined(linux) || defined(__FreeBSD__)
+#if defined(__LINUX__) || defined(__FREEBSD__)
 	char procfile[1024];
 	char linkfile[1024];
 	int linksize;
@@ -280,10 +281,10 @@ static char *get_classname(char *classname, int maxlen)
 	}
 
 	/* Next look at the application's executable name */
-#if defined(linux) || defined(__FreeBSD__)
-#if defined(linux)
+#if defined(__LINUX__) || defined(__FREEBSD__)
+#if defined(__LINUX__)
 	SDL_snprintf(procfile, SDL_arraysize(procfile), "/proc/%d/exe", getpid());
-#elif defined(__FreeBSD__)
+#elif defined(__FREEBSD__)
 	SDL_snprintf(procfile, SDL_arraysize(procfile), "/proc/%d/file", getpid());
 #else
 #error Where can we find the executable name?
@@ -299,7 +300,7 @@ static char *get_classname(char *classname, int maxlen)
 		}
 		return classname;
 	}
-#endif /* linux */
+#endif /* __LINUX__ */
 
 	/* Finally use the default we've used forever */
 	SDL_strlcpy(classname, "SDL_App", maxlen);

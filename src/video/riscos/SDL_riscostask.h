@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /*
     This file added by Alan Buckley (alan_baa@hotmail.com) to support RISC OS 

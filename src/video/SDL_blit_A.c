@@ -19,11 +19,12 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 #include "SDL_video.h"
 #include "SDL_blit.h"
 
-#if (defined(i386) || defined(__x86_64__)) && __GNUC__ && SDL_ASSEMBLY_BLITTERS
+#if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__)) && SDL_ASSEMBLY_ROUTINES
 #define MMX_ASMBLIT 1
 #endif
 
@@ -419,7 +420,7 @@ static void BlitRGBtoRGBPixelAlphaMMX(SDL_BlitInfo *info)
 #endif
 #include <assert.h>
 
-#if ((defined MACOSX) && (__GNUC__ < 4))
+#if (defined(__MACOSX__) && (__GNUC__ < 4))
     #define VECUINT8_LITERAL(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p) \
         (vector unsigned char) ( a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p )
     #define VECUINT16_LITERAL(a,b,c,d,e,f,g,h) \

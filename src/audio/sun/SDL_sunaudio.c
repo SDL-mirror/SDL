@@ -19,12 +19,13 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* Allow access to a raw mixing buffer */
 
 #include <fcntl.h>
 #include <errno.h>
-#ifdef __NetBSD__
+#ifdef __NETBSD__
 #include <sys/ioctl.h>
 #include <sys/audioio.h>
 #endif

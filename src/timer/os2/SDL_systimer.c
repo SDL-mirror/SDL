@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 #define INCL_DOSMISC
 #define INCL_DOSERRORS

@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 #ifndef __CDPlayer__H__
 #define __CDPlayer__H__ 1

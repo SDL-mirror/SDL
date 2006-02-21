@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* This a stretch blit implementation based on ideas given to me by
    Tomasz Cejner - thanks! :)
@@ -34,7 +35,7 @@
 */
 
 #if ((defined(_MFC_VER) && defined(_M_IX86)/* && !defined(_WIN32_WCE) still needed? */) || \
-     (defined(i386) && defined(__GNUC__))) && SDL_ASSEMBLY_BLITTERS
+     (defined(__GNUC__) && defined(__i386__))) && SDL_ASSEMBLY_ROUTINES
 #define USE_ASM_STRETCH
 #endif
 

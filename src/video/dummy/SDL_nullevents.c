@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* Being a null driver, there's no event stream. We just define stubs for
    most of the API. */

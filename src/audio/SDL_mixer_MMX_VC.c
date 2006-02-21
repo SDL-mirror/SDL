@@ -1,7 +1,29 @@
+/*
+    SDL - Simple DirectMedia Layer
+    Copyright (C) 1997-2006 Sam Lantinga
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2.1 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+    Sam Lantinga
+    slouken@libsdl.org
+*/
+#include "SDL_config.h"
 
 #include "SDL_mixer_MMX_VC.h"
 
-#if defined(USE_ASM_MIXER_VC)
+#if defined(_MSC_VER) && defined(M_I86) && defined(SDL_ASSEMBLY_ROUTINES)
 // MMX assembler version of SDL_MixAudio for signed little endian 16 bit samples and signed 8 bit samples
 // Copyright 2002 Stephane Marchesin (stephane.marchesin@wanadoo.fr)
 // Converted to Intel ASM notation by Cth
@@ -156,4 +178,4 @@ endS8:
 	}
 }
 
-#endif /* USE_ASM_MIXER_VC */
+#endif /* SDL_ASSEMBLY_ROUTINES */

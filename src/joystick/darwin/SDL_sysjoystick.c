@@ -19,6 +19,7 @@
 	Sam Lantinga
 	slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* SDL joystick driver for Darwin / MacOS X, based on the IOKit HID API */
 /* Written 2001 by Max Horn */

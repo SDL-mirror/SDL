@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* System dependent library loading routines                           */
@@ -55,7 +56,7 @@ void *SDL_LoadObject(const char *sofile)
 	SDL_free(sofile_t);
 	SDL_free(errbuf_t);
 
-#else /*if defined(WIN32)*/
+#else /*if defined(__WIN32__)*/
 	char errbuf[512];
 
 	handle = (void *)LoadLibrary(sofile);

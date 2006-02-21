@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 #include <pthread.h>
 #include <semaphore.h>
@@ -28,9 +29,9 @@
 
 /* Wrapper around POSIX 1003.1b semaphores */
 
-#if MACOSX
+#ifdef __MACOSX__
 #define USE_NAMED_SEMAPHORES 1
-#endif /* MACOSX */
+#endif
 
 struct SDL_semaphore {
 	sem_t *sem;

@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 #ifndef _SDL_sysaudio_h
 #define _SDL_sysaudio_h
@@ -160,9 +161,6 @@ extern AudioBootStrap DISKAUD_bootstrap;
 #endif
 #if SDL_AUDIO_DRIVER_DC
 extern AudioBootStrap DCAUD_bootstrap;
-#endif
-#if SDL_AUDIO_DRIVER_DRENDERER
-extern AudioBootStrap DRENDERER_bootstrap;
 #endif
 #if SDL_AUDIO_DRIVER_MMEAUDIO
 extern AudioBootStrap MMEAUDIO_bootstrap;

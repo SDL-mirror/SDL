@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 #ifndef _SDL_lowvideo_h
 #define _SDL_lowvideo_h
@@ -35,14 +36,8 @@
 #endif
 
 #if SDL_VIDEO_OPENGL
-#ifdef MACOSX
-#include <OpenGL/gl.h> /* OpenGL.framework */
-#include <AGL/agl.h>   /* AGL.framework */
-#else
-#include <GL/gl.h>
-#include <agl.h>
-#endif /* MACOSX */
-#endif /* SDL_VIDEO_OPENGL */
+#include "SDL_opengl.h"
+#endif
 
 #include "SDL_video.h"
 #include "../SDL_sysvideo.h"

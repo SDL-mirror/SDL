@@ -19,10 +19,9 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* General fatal signal handling code for SDL */
-
-#include "SDL_config.h"
 
 #ifdef HAVE_SIGNAL_H
 

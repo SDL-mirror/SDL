@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 #if SDL_VIDEO_OPENGL_GLX
 #include <GL/glx.h>

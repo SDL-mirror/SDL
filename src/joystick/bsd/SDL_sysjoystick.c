@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /*
  * Joystick driver for the uhid(4) interface found in OpenBSD,
@@ -47,12 +48,12 @@
 #include <libusbhid.h>
 #endif
 
-#ifdef __FreeBSD__
+#ifdef __FREEBSD__
 #include <osreldate.h>
 #include <sys/joystick.h>
 #endif
 
-#if defined(__NetBSD__) || (defined(__OpenBSD__) && defined(__i386__))
+#if defined(__NETBSD__) || (defined(__OPENBSD__) && defined(__i386__))
 #include <machine/joystick.h>
 #endif
 
@@ -281,7 +282,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick *joy)
 		goto usberr;
 	}
 
-#if defined(USBHID_NEW) || (defined(__FreeBSD__) && __FreeBSD_version >= 500111)
+#if defined(USBHID_NEW) || (defined(__FREEBSD__) && __FreeBSD_version >= 500111)
 	hdata = hid_start_parse(hw->repdesc, 1 << hid_input, rep->rid);
 #else
 	hdata = hid_start_parse(hw->repdesc, 1 << hid_input);
@@ -361,7 +362,7 @@ SDL_SYS_JoystickUpdate(SDL_Joystick *joy)
 	int nbutton, naxe = -1;
 	Sint32 v;
 
-#if defined(__FreeBSD__) || defined(__NetBSD__) || (defined(__OpenBSD__) && defined(__i386__))
+#if defined(__FREEBSD__) || defined(__NETBSD__) || (defined(__OPENBSD__) && defined(__i386__))
 	struct joystick gameport;
 	static int x, y, xmin = 0xffff, ymin = 0xffff, xmax = 0, ymax = 0;
  
@@ -410,14 +411,14 @@ SDL_SYS_JoystickUpdate(SDL_Joystick *joy)
 		}
 		return;
 	}
-#endif /* defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) */
+#endif /* defined(__FREEBSD__) || defined(__NETBSD__) || defined(__OPENBSD__) */
 	
 	rep = &joy->hwdata->inreport;
 
 	if (read(joy->hwdata->fd, REP_BUF_DATA(rep), rep->size) != rep->size) {
 		return;
 	}
-#if defined(USBHID_NEW) || (defined(__FreeBSD__) && __FreeBSD_version >= 500111)
+#if defined(USBHID_NEW) || (defined(__FREEBSD__) && __FreeBSD_version >= 500111)
 	hdata = hid_start_parse(joy->hwdata->repdesc, 1 << hid_input, rep->rid);
 #else
 	hdata = hid_start_parse(joy->hwdata->repdesc, 1 << hid_input);
@@ -509,7 +510,7 @@ report_alloc(struct report *r, struct report_desc *rd, int repind)
 {
 	int len;
 
-#ifdef __FreeBSD__
+#ifdef __FREEBSD__
 # if (__FreeBSD_version >= 460000)
 #  if (__FreeBSD_version <= 500111)
 	len = hid_report_size(rd, r->rid, repinfo[repind].kind);

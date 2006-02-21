@@ -19,10 +19,11 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* Get the name of the audio device we use for output */
 
-#if defined(unix) || defined(__unix__) || defined(__riscos__)
+#if SDL_AUDIO_DRIVER_OPENBSD || SDL_AUDIO_DRIVER_OSS || SDL_AUDIO_DRIVER_SUNAUDIO
 
 #include <fcntl.h>
 #include <sys/types.h>
@@ -32,7 +33,7 @@
 #include "SDL_audiodev_c.h"
 
 #ifndef _PATH_DEV_DSP
-#if defined(__NetBSD__) || defined(__OpenBSD__)
+#if defined(__NETBSD__) || defined(__OPENBSD__)
 #define _PATH_DEV_DSP  "/dev/audio"
 #else
 #define _PATH_DEV_DSP  "/dev/dsp"
@@ -95,7 +96,7 @@ int SDL_OpenAudioPath(char *path, int maxlen, int flags, int classic)
 	return(audio_fd);
 }
 
-#elif defined(_AIX)
+#elif SDL_AUDIO_DRIVER_PAUD
 
 /* Get the name of the audio device we use for output */
 
@@ -175,4 +176,4 @@ int SDL_OpenAudioPath(char *path, int maxlen, int flags, int classic)
     return -1;
 }
 
-#endif /* UNIX system */
+#endif /* Audio driver selection */

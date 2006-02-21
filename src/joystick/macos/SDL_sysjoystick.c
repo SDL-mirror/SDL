@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /*  SDL stuff  --  "SDL_sysjoystick.c"
     MacOS joystick functions by Frederick Reitberger

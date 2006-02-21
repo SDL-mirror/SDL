@@ -24,8 +24,8 @@
    data sources.  It can easily be extended to files, memory, etc.
 */
 
-#ifndef _SDL_RWops_h
-#define _SDL_RWops_h
+#ifndef _SDL_rwops_h
+#define _SDL_rwops_h
 
 #include "SDL_stdinc.h"
 #include "SDL_error.h"
@@ -130,4 +130,4 @@ extern DECLSPEC int SDLCALL SDL_WriteBE64(SDL_RWops *dst, Uint64 value);
 #endif
 #include "close_code.h"
 
-#endif /* _SDL_RWops_h */
+#endif /* _SDL_rwops_h */

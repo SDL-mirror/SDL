@@ -19,7 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
-
+#include "SDL_config.h"
 
 /* This file contains portable string manipulation functions for SDL */
 

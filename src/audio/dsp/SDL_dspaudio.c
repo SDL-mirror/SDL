@@ -22,6 +22,7 @@
     Modified in Oct 2004 by Hannu Savolainen 
     hannu@opensound.com
 */
+#include "SDL_config.h"
 
 /* Allow access to a raw mixing buffer */
 
@@ -34,8 +35,6 @@
 #include <sys/time.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
-
-#include "SDL_config.h"
 
 #if SDL_AUDIO_DRIVER_OSS_SOUNDCARD_H
 /* This is installed on some systems */

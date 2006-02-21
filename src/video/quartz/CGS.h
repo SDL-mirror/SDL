@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* 
     Obscuring code: maximum number of windows above ours (inclusive) 

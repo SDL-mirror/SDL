@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /*
  Written by Darrell Walisser <dwaliss1@purdue.edu>

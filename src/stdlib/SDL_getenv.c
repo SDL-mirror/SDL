@@ -19,12 +19,13 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 #include "SDL_stdinc.h"
 
 #ifndef HAVE_GETENV
 
-#if defined(WIN32) && !defined(_WIN32_WCE)
+#if defined(__WIN32__) && !defined(_WIN32_WCE)
 
 #include "SDL_windows.h"
 
@@ -169,7 +170,7 @@ char *SDL_getenv(const char *name)
 	return value;
 }
 
-#endif /* WIN32 */
+#endif /* __WIN32__ */
 
 #endif /* !HAVE_GETENV */
 

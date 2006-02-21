@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /*
    RISC OS - Joystick support by Alan Buckley (alan_baa@hotmail.com) - 10 April 2003

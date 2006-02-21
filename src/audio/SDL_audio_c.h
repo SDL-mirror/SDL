@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* Functions and variables exported from SDL_audio.c for SDL_sysaudio.c */
 

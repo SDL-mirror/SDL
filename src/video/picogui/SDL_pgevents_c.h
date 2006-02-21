@@ -22,6 +22,7 @@
     Micah Dowty
     micahjd@users.sourceforge.net
 */
+#include "SDL_config.h"
 
 #include "SDL_pgvideo.h"
 

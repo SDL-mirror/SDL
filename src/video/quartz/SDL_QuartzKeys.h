@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* These are the Macintosh key scancode constants -- from Inside Macintosh */
 

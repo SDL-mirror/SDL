@@ -21,6 +21,7 @@
 
     based on linux/SDL_syscdrom.c by Sam Lantinga
 */
+#include "SDL_config.h"
 
 /* Functions for system-level CD-ROM audio control */
 

@@ -22,6 +22,7 @@
     This file hacked^H^H^H^H^H^Hwritten by Ryan C. Gordon
         (icculus@linuxgames.com)
 */
+#include "SDL_config.h"
 
 /* Output raw audio data to a file. */
 

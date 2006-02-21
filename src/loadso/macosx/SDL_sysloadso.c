@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* Please note that dlcompat apparently ships in current Mac OS X versions
  *  as a system library that provides compatibility with the Unix "dlopen"

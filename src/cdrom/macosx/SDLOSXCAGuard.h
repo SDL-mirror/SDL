@@ -19,6 +19,8 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
+
 /*  
     Note: This file hasn't been modified so technically we have to keep the disclaimer :-(
 
