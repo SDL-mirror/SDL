@@ -10,4 +10,5 @@ sdl-config
 SDL.spec
 SDL.qpg
 build
+build-deps
 .DS_Store
