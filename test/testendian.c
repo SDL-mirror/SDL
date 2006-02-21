@@ -14,6 +14,54 @@ int main(int argc, char *argv[])
 	Uint64 value64 = 0xEFBEADDECDAB3412LL;
 #endif
 
+	printf("This system is running %s\n",
+#if __AIX__
+			"AIX"
+#elif __AMIGA__
+			"AmigaOS"
+#elif __BEOS__
+			"BeOS"
+#elif __BSDI__
+			"BSDI"
+#elif __DREAMCAST__
+			"Dreamcast"
+#elif __FREEBSD__
+			"FreeBSD"
+#elif __HPUX__
+			"HP-UX"
+#elif __IRIX__
+			"Irix"
+#elif __LINUX__
+			"Linux"
+#elif __MACOS__
+			"MacOS Classic"
+#elif __MACOSX__
+			"MacOS X"
+#elif __NETBSD__
+			"NetBSD"
+#elif __OPENBSD__
+			"OpenBSD"
+#elif __OS2__
+			"OS/2"
+#elif __OSF__
+			"OSF/1"
+#elif __QNXNTO__
+			"QNX Neutrino"
+#elif __RISCOS__
+			"RISC OS"
+#elif __SOLARIS__
+			"Solaris"
+#elif __WIN32__
+#ifdef _WIN32_WCE
+			"Windows CE"
+#else
+			"Windows"
+#endif
+#else
+			"an unknown operating system!"
+#endif
+			);
+
 	printf("This is a %s endian machine.\n",
 		(SDL_BYTEORDER == SDL_LIL_ENDIAN) ? "little" : "big");
 	printf("Value 16 = 0x%X, swapped = 0x%X\n", value16, SDL_Swap16(value16));
