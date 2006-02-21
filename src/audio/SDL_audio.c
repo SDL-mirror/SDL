@@ -448,14 +448,9 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 #else
 	D(bug("Locking semaphore..."));
 	SDL_mutexP(audio->mixer_lock);
-#endif
 
-#if (defined(__WIN32__) && !defined(_WIN32_WCE)) && !defined(HAVE_LIBC)
-#undef SDL_CreateThread
-	audio->thread = SDL_CreateThread(SDL_RunAudio, audio, NULL, NULL);
-#else
+
 	audio->thread = SDL_CreateThread(SDL_RunAudio, audio);
-#endif
 	D(bug("Created thread...\n"));
 
 	if ( audio->thread == NULL ) {
@@ -465,7 +460,6 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 		return(-1);
 	}
 
-#if SDL_AUDIO_DRIVER_AHI
 	while(!audio_configured)
 		SDL_Delay(100);
 #endif
