@@ -23,6 +23,8 @@
 
 #if defined(__GNUC__) && defined(__i386__) && SDL_ASSEMBLY_ROUTINES
 
+#include "SDL_stdinc.h"
+
 #define ASM_ARRAY(x) x[] __asm__("_" #x) __attribute__((used))
  
 static unsigned int  ASM_ARRAY(MMX_0080w)    = {0x00800080, 0x00800080};
