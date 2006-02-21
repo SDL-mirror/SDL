@@ -22,6 +22,9 @@
 
 /* Try to get a standard set of platform defines */
 
+#ifndef _SDL_platform_h
+#define _SDL_platform_h
+
 #if defined(_AIX)
 #undef __AIX__
 #define __AIX__		1
@@ -102,3 +105,5 @@
 #undef __WIN32__
 #define __WIN32__	1
 #endif
+
+#endif /* _SDL_platform_h */

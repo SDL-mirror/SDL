@@ -436,7 +436,7 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 	audio->enabled = 1;
 	audio->paused  = 1;
 
-#if SDL_AUDIO_DRIVER_AHI
+#if !SDL_AUDIO_DRIVER_AHI
 
 /* AmigaOS opens audio inside the main loop */
 	audio->opened = audio->OpenAudio(audio, &audio->spec)+1;
@@ -511,7 +511,7 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 		}
 	}
 
-#if SDL_AUDIO_DRIVER_AHI
+#if !SDL_AUDIO_DRIVER_AHI
 	/* Start the audio thread if necessary */
 	switch (audio->opened) {
 		case  1:
@@ -611,7 +611,7 @@ void SDL_AudioQuit(void)
 			SDL_FreeAudioMem(audio->convert.buf);
 
 		}
-#if SDL_AUDIO_DRIVER_AHI
+#if !SDL_AUDIO_DRIVER_AHI
 		if ( audio->opened ) {
 			audio->CloseAudio(audio);
 			audio->opened = 0;
