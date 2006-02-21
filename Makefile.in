@@ -42,7 +42,7 @@ LT_RELEASE  = @LT_RELEASE@
 LT_REVISION = @LT_REVISION@
 LT_LDFLAGS  = -no-undefined -rpath $(libdir) -release $(LT_RELEASE) -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
 
-all: Makefile $(objects) $(objects)/$(TARGET) $(objects)/$(TARGET_SDLMAIN)
+all: Makefile $(objects) $(objects)/$(TARGET) $(objects)/$(SDLMAIN_TARGET)
 
 Makefile: $(srcdir)/Makefile.in
 	$(SHELL) config.status $@
