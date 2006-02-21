@@ -59,7 +59,7 @@ void SDL_MixAudio_MMX_S16(char* dst,char* src,unsigned int size,int volume)
 "	psllq $16,%%mm0\n"
 "	por %%mm1,%%mm0\n"		// mm0 = vol|vol|vol|vol
 
-".align 16\n"
+".align 8\n"
 "	.mixloopS16:\n"
 
 "	movq (%1),%%mm1\n" // mm1 = a|b|c|d
@@ -159,7 +159,7 @@ void SDL_MixAudio_MMX_S8(char* dst,char* src,unsigned int size,int volume)
 "	cmp $0,%%edx\n"
 "	je .endS8\n"
 
-".align 16\n"
+".align 8\n"
 "	.mixloopS8:\n"
 
 "	pxor %%mm2,%%mm2\n"		// mm2 = 0
