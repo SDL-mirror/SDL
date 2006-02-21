@@ -34,9 +34,9 @@
 #include "../SDL_sysjoystick.h"
 #include "../SDL_joystick_c.h"
 
-#include "SDL_ikbdinterrupt_s.h"
-#include "SDL_xbiosevents_c.h"
-#include "SDL_xbiosinterrupt_s.h"
+#include "../../video/ataricommon/SDL_ikbdinterrupt_s.h"
+#include "../../video/ataricommon/SDL_xbiosevents_c.h"
+#include "../../video/ataricommon/SDL_xbiosinterrupt_s.h"
 
 /*--- Const ---*/
 

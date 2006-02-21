@@ -43,16 +43,16 @@
 #include "../../events/SDL_events_c.h"
 #include "../SDL_cursor_c.h"
 
-#include "SDL_ataric2p_s.h"
-#include "SDL_atarieddi_s.h"
-#include "SDL_atarimxalloc_c.h"
-#include "SDL_atarigl_c.h"
+#include "../ataricommon/SDL_ataric2p_s.h"
+#include "../ataricommon/SDL_atarieddi_s.h"
+#include "../ataricommon/SDL_atarimxalloc_c.h"
+#include "../ataricommon/SDL_atarigl_c.h"
 
 #include "SDL_gemvideo.h"
 #include "SDL_gemevents_c.h"
 #include "SDL_gemmouse_c.h"
 #include "SDL_gemwm_c.h"
-#include "SDL_xbiosevents_c.h"
+#include "../ataricommon/SDL_xbiosevents_c.h"
 
 /* Defines */
 

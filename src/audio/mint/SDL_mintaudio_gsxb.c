@@ -37,7 +37,7 @@
 #include "../SDL_audio_c.h"
 #include "../SDL_sysaudio.h"
 
-#include "SDL_atarimxalloc_c.h"
+#include "../../video/ataricommon/SDL_atarimxalloc_c.h"
 
 #include "SDL_mintaudio.h"
 #include "SDL_mintaudio_gsxb.h"
