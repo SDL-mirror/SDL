@@ -84,6 +84,7 @@ install-lib:
 	$(SHELL) $(auxdir)/mkinstalldirs $(libdir)
 	$(LIBTOOL) --mode=install $(INSTALL) $(objects)/$(TARGET) $(libdir)/$(TARGET)
 	$(INSTALL) -m 644 $(objects)/$(SDLMAIN_TARGET) $(libdir)/$(SDLMAIN_TARGET)
+	@RANLIB@ $(libdir)/$(SDLMAIN_TARGET)
 install-data:
 	$(SHELL) $(auxdir)/mkinstalldirs $(datadir)/aclocal
 	$(INSTALL) -m 644 $(srcdir)/sdl.m4 $(datadir)/aclocal/sdl.m4
