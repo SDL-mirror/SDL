@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /* Functions for system-level CD-ROM audio control on BeOS
    (not completely implemented yet)
