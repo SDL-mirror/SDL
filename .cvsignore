@@ -9,4 +9,5 @@ Makefile
 sdl-config
 SDL.spec
 SDL.qpg
+build
 .DS_Store
