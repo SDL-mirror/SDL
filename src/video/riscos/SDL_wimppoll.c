@@ -35,7 +35,7 @@
 #include "SDL_riscosvideo.h"
 #include "SDL_riscosevents_c.h"
 #include "SDL_riscosmouse_c.h"
-#include "SDL_timer_c.h"
+#include "../../timer/SDL_timer_c.h"
 
 #include "memory.h"
 #include "stdlib.h"
