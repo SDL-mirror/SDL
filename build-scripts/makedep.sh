@@ -2,11 +2,6 @@
 #
 # Generate dependencies from a list of source files
 
-BUILDC="\\\$\\(LIBTOOL\\) --mode=compile \\\$\\(CC\\) \\\$\\(CFLAGS\\) -c \$src  -o \\\$@"
-BUILDCC=$BUILDC
-BUILDM=$BUILDC
-BUILDASM="\\\$\\(LIBTOOL\\) --tag=CC --mode=compile \\\$\\(auxdir\\)/strip_fPIC.sh \\\$\\(NASM\\) \$src -o \\\$@"
-
 # Check to make sure our environment variables are set
 if test x"$INCLUDE" = x -o x"$SOURCES" = x -o x"$objects" = x -o x"$output" = x; then
     echo "SOURCES, INCLUDE, objects, and output needs to be set"
@@ -49,12 +44,31 @@ do  echo "Generating dependencies for $src"
     obj=`echo $src | sed "s|^.*/\([^ ]*\)\..*|$objects/\1.lo|g"`
     echo "$obj: $src \\" >>${output}.new
     search_deps $src | sort | uniq >>${output}.new
-    echo "" >>${output}.new
     case $ext in
-        c)   eval echo \\"	$BUILDC\\" >>${output}.new;;
-        cc)  eval echo \\"	$BUILDCC\\" >>${output}.new;;
-        m)   eval echo \\"	$BUILDM\\" >>${output}.new;;
-        asm) eval echo \\"	$BUILDASM\\" >>${output}.new;;
+        c) cat >>${output}.new <<__EOF__
+
+	\$(LIBTOOL) --mode=compile \$(CC) \$(CFLAGS) -c $src  -o \$@
+
+__EOF__
+        ;;
+        cc) cat >>${output}.new <<__EOF__
+
+	\$(LIBTOOL) --mode=compile \$(CC) \$(CFLAGS) -c $src  -o \$@
+
+__EOF__
+        ;;
+        m) cat >>${output}.new <<__EOF__
+
+	\$(LIBTOOL) --mode=compile \$(CC) \$(CFLAGS) -c $src  -o \$@
+
+__EOF__
+        ;;
+        asm) cat >>${output}.new <<__EOF__
+
+	\$(LIBTOOL) --tag=CC --mode=compile \$(auxdir)/strip_fPIC.sh \$(NASM) $src -o \$@"
+
+__EOF__
+        ;;
         *)   echo "Unknown file extension: $ext";;
     esac
     echo "" >>${output}.new
