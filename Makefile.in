@@ -25,6 +25,8 @@ LDFLAGS = @BUILD_LDFLAGS@
 LIBTOOL = @LIBTOOL@
 INSTALL = @INSTALL@
 NASM	= @NASM@ @NASMFLAGS@
+AR	= @AR@
+RANLIB	= @RANLIB@
 
 TARGET  = libSDL.la
 SOURCES = @SOURCES@
@@ -52,9 +54,9 @@ $(objects):
 
 .PHONY: all depend install install-bin install-hdrs install-lib install-data install-man uninstall uninstall-bin uninstall-hdrs uninstall-lib uninstall-data uninstall-man clean distclean dist
 depend:
-	SOURCES="$(SOURCES)" INCLUDE="$(INCLUDE)" objects="$(objects)" output="$(depend)" \
+	@SOURCES="$(SOURCES)" INCLUDE="$(INCLUDE)" objects="$(objects)" output="$(depend)" \
 	$(SHELL) $(auxdir)/makedep.sh
-	for src in $(SDLMAIN_SOURCES); do \
+	@for src in $(SDLMAIN_SOURCES); do \
 	    obj=`echo $$src | sed -e 's|.*/||' -e 's|\.[^\.]*$$|.o|'`; \
 	    echo "$(objects)/$$obj: $$src" >>$(depend); \
 	    echo "	\$$(CC) \$$(CFLAGS) -c $$src -o \$$@" >>$(depend); \
@@ -66,8 +68,8 @@ $(objects)/$(TARGET): $(OBJECTS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJECTS) $(LDFLAGS) $(LIBS) $(LT_LDFLAGS)
 
 $(objects)/$(SDLMAIN_TARGET): $(SDLMAIN_OBJECTS)
-	@AR@ cru $@ $(SDLMAIN_OBJECTS)
-	@RANLIB@ $@
+	$(AR) cru $@ $(SDLMAIN_OBJECTS)
+	$(RANLIB) $@
 
 install: install-bin install-hdrs install-lib install-data install-man
 install-bin:
@@ -84,7 +86,7 @@ install-lib:
 	$(SHELL) $(auxdir)/mkinstalldirs $(libdir)
 	$(LIBTOOL) --mode=install $(INSTALL) $(objects)/$(TARGET) $(libdir)/$(TARGET)
 	$(INSTALL) -m 644 $(objects)/$(SDLMAIN_TARGET) $(libdir)/$(SDLMAIN_TARGET)
-	@RANLIB@ $(libdir)/$(SDLMAIN_TARGET)
+	$(RANLIB) $(libdir)/$(SDLMAIN_TARGET)
 install-data:
 	$(SHELL) $(auxdir)/mkinstalldirs $(datadir)/aclocal
 	$(INSTALL) -m 644 $(srcdir)/sdl.m4 $(datadir)/aclocal/sdl.m4
