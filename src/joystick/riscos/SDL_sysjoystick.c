@@ -30,6 +30,7 @@
 
 /* This is the system specific header for the SDL joystick API */
 
+#include "SDL_events.h"
 #include "SDL_joystick.h"
 #include "../SDL_sysjoystick.h"
 #include "../SDL_joystick_c.h"
