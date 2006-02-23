@@ -39,6 +39,7 @@
 #include "../ataricommon/SDL_atarikeys.h"	/* for keyboard scancodes */
 #include "../ataricommon/SDL_atarievents_c.h"
 #include "../ataricommon/SDL_xbiosevents_c.h"
+#include "../ataricommon/SDL_ataridevmouse_c.h"
 
 /* Defines */
 
@@ -376,7 +377,11 @@ static void do_mouse(_THIS, short mx, short my, short mb, short ks)
 
 	/* Mouse motion ? */
 	if (GEM_mouse_relative) {
-		SDL_AtariXbios_PostMouseEvents(this, SDL_FALSE);
+		if (GEM_usedevmouse) {
+			SDL_AtariDevMouse_PostMouseEvents(this, SDL_FALSE);
+		} else {
+			SDL_AtariXbios_PostMouseEvents(this, SDL_FALSE);
+		}
 	} else {
 		if ((prevmousex!=mx) || (prevmousey!=my)) {
 			int posx, posy;
