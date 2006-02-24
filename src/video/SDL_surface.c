@@ -687,7 +687,7 @@ int SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, Uint32 color)
 		    case 2:
 			for ( y=dstrect->h; y; --y ) {
 				Uint16 *pixels = (Uint16 *)row;
-				Uint16 c = color;
+				Uint16 c = (Uint16)color;
 				Uint32 cc = (Uint32)c << 16 | c;
 				int n = dstrect->w;
 				if((unsigned long)pixels & 3) {

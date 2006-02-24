@@ -78,7 +78,7 @@ extern void DIB_SwapGamma(_THIS);
 static int codepage;
 static int Is9xME();
 static int GetCodePage();
-static int WINAPI ToUnicode9xME(UINT vkey, UINT scancode, BYTE *keystate, Uint16 *wchars, int wsize, UINT flags);
+static int WINAPI ToUnicode9xME(UINT vkey, UINT scancode, BYTE *keystate, LPWSTR wchars, int wsize, UINT flags);
 
 ToUnicodeFN SDL_ToUnicode = ToUnicode9xME;
 #endif /* !NO_GETKEYBOARDSTATE */

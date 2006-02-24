@@ -858,9 +858,9 @@ static Uint32 GetBlitFeatures( void )
 
 /* Special optimized blit for RGB 8-8-8 --> RGB 3-3-2 */
 #define RGB888_RGB332(dst, src) { \
-	dst = (((src)&0x00E00000)>>16)| \
-	      (((src)&0x0000E000)>>11)| \
-	      (((src)&0x000000C0)>>6); \
+	dst = (Uint8)((((src)&0x00E00000)>>16)| \
+	              (((src)&0x0000E000)>>11)| \
+	              (((src)&0x000000C0)>>6)); \
 }
 static void Blit_RGB888_index8(SDL_BlitInfo *info)
 {
@@ -962,9 +962,9 @@ static void Blit_RGB888_index8(SDL_BlitInfo *info)
 }
 /* Special optimized blit for RGB 8-8-8 --> RGB 5-5-5 */
 #define RGB888_RGB555(dst, src) { \
-	*(Uint16 *)(dst) = (((*src)&0x00F80000)>>9)| \
-	                   (((*src)&0x0000F800)>>6)| \
-	                   (((*src)&0x000000F8)>>3); \
+	*(Uint16 *)(dst) = (Uint16)((((*src)&0x00F80000)>>9)| \
+	                            (((*src)&0x0000F800)>>6)| \
+	                            (((*src)&0x000000F8)>>3)); \
 }
 #define RGB888_RGB555_TWO(dst, src) { \
 	*(Uint32 *)(dst) = (((((src[HI])&0x00F80000)>>9)| \
@@ -1082,9 +1082,9 @@ static void Blit_RGB888_RGB555(SDL_BlitInfo *info)
 }
 /* Special optimized blit for RGB 8-8-8 --> RGB 5-6-5 */
 #define RGB888_RGB565(dst, src) { \
-	*(Uint16 *)(dst) = (((*src)&0x00F80000)>>8)| \
-	                   (((*src)&0x0000FC00)>>5)| \
-	                   (((*src)&0x000000F8)>>3); \
+	*(Uint16 *)(dst) = (Uint16)((((*src)&0x00F80000)>>8)| \
+	                            (((*src)&0x0000FC00)>>5)| \
+	                            (((*src)&0x000000F8)>>3)); \
 }
 #define RGB888_RGB565_TWO(dst, src) { \
 	*(Uint32 *)(dst) = (((((src[HI])&0x00F80000)>>8)| \
@@ -2101,7 +2101,7 @@ static void BlitNto1Key(SDL_BlitInfo *info)
 	Uint32 rgbmask = ~srcfmt->Amask;
 	int srcbpp;
 	Uint32 Pixel;
-	Uint8  sR, sG, sB;
+	unsigned sR, sG, sB;
 
 	/* Set up some basic variables */
 	srcbpp = srcfmt->BytesPerPixel;
@@ -2115,9 +2115,9 @@ static void BlitNto1Key(SDL_BlitInfo *info)
 								sR, sG, sB);
 				if ( (Pixel & rgbmask) != ckey ) {
 				  	/* Pack RGB into 8bit pixel */
-				  	*dst = ((sR>>5)<<(3+2))|
-						((sG>>5)<<(2)) |
-						((sB>>6)<<(0)) ;
+				  	*dst = (Uint8)(((sR>>5)<<(3+2))|
+						           ((sG>>5)<<(2)) |
+						           ((sB>>6)<<(0)));
 				}
 				dst++;
 				src += srcbpp;
@@ -2134,9 +2134,9 @@ static void BlitNto1Key(SDL_BlitInfo *info)
 								sR, sG, sB);
 				if ( (Pixel & rgbmask) != ckey ) {
 				  	/* Pack RGB into 8bit pixel */
-				  	*dst = palmap[((sR>>5)<<(3+2))|
-							((sG>>5)<<(2))  |
-							((sB>>6)<<(0))  ];
+				  	*dst = (Uint8)palmap[((sR>>5)<<(3+2))|
+							             ((sG>>5)<<(2))  |
+							             ((sB>>6)<<(0))  ];
 				}
 				dst++;
 				src += srcbpp;
@@ -2232,7 +2232,7 @@ static void BlitNtoNKeyCopyAlpha(SDL_BlitInfo *info)
 	Uint8 srcbpp;
 	Uint8 dstbpp;
 	Uint32 Pixel;
-	Uint8  sR, sG, sB, sA;
+	unsigned sR, sG, sB, sA;
 
 	/* Set up some basic variables */
 	srcbpp = srcfmt->BytesPerPixel;

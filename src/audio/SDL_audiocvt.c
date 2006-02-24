@@ -47,7 +47,7 @@ void SDL_ConvertMono(SDL_AudioCVT *cvt, Uint16 format)
 				if ( sample > 255 ) {
 					*dst = 255;
 				} else {
-					*dst = sample;
+					*dst = (Uint8)sample;
 				}
 				src += 2;
 				dst += 1;
@@ -68,7 +68,7 @@ void SDL_ConvertMono(SDL_AudioCVT *cvt, Uint16 format)
 				if ( sample < -128 ) {
 					*dst = -128;
 				} else {
-					*dst = sample;
+					*dst = (Sint8)sample;
 				}
 				src += 2;
 				dst += 1;
@@ -185,10 +185,8 @@ void SDL_ConvertStrip(SDL_AudioCVT *cvt, Uint16 format)
 			src = cvt->buf;
 			dst = cvt->buf;
 			for ( i=cvt->len_cvt/6; i; --i ) {
-				lsample = src[0];
-				rsample = src[1];
-				dst[0] = lsample;
-				dst[1] = rsample;
+				dst[0] = src[0];
+				dst[1] = src[1];
 				src += 6;
 				dst += 2;
 			}
@@ -201,10 +199,8 @@ void SDL_ConvertStrip(SDL_AudioCVT *cvt, Uint16 format)
 			src = (Sint8 *)cvt->buf;
 			dst = (Sint8 *)cvt->buf;
 			for ( i=cvt->len_cvt/6; i; --i ) {
-				lsample = src[0];
-				rsample = src[1];
-				dst[0] = lsample;
-				dst[1] = rsample;
+				dst[0] = src[0];
+				dst[1] = src[1];
 				src += 6;
 				dst += 2;
 			}
@@ -305,10 +301,8 @@ void SDL_ConvertStrip_2(SDL_AudioCVT *cvt, Uint16 format)
 			src = cvt->buf;
 			dst = cvt->buf;
 			for ( i=cvt->len_cvt/4; i; --i ) {
-				lsample = src[0];
-				rsample = src[1];
-				dst[0] = lsample;
-				dst[1] = rsample;
+				dst[0] = src[0];
+				dst[1] = src[1];
 				src += 4;
 				dst += 2;
 			}
@@ -321,10 +315,8 @@ void SDL_ConvertStrip_2(SDL_AudioCVT *cvt, Uint16 format)
 			src = (Sint8 *)cvt->buf;
 			dst = (Sint8 *)cvt->buf;
 			for ( i=cvt->len_cvt/4; i; --i ) {
-				lsample = src[0];
-				rsample = src[1];
-				dst[0] = lsample;
-				dst[1] = rsample;
+				dst[0] = src[0];
+				dst[1] = src[1];
 				src += 4;
 				dst += 2;
 			}

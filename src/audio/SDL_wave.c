@@ -108,9 +108,9 @@ static Sint32 MS_ADPCM_nibble(struct MS_ADPCM_decodestate *state,
 	if ( delta < 16 ) {
 		delta = 16;
 	}
-	state->iDelta = delta;
+	state->iDelta = (Uint16)delta;
 	state->iSamp2 = state->iSamp1;
-	state->iSamp1 = new_sample;
+	state->iSamp1 = (Sint16)new_sample;
 	return(new_sample);
 }
 
@@ -371,8 +371,8 @@ static int IMA_ADPCM_decode(Uint8 **audio_buf, Uint32 *audio_len)
 			}
 
 			/* Store the initial sample we start with */
-			decoded[0] = state[c].sample&0xFF;
-			decoded[1] = state[c].sample>>8;
+			decoded[0] = (Uint8)(state[c].sample&0xFF);
+			decoded[1] = (Uint8)(state[c].sample>>8);
 			decoded += 2;
 		}
 

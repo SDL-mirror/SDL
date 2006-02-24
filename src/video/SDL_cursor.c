@@ -331,7 +331,7 @@ void SDL_MoveCursor(int x, int y)
 
 /* Keep track of the current cursor colors */
 static int palette_changed = 1;
-static Uint32 pixels8[2];
+static Uint8 pixels8[2];
 
 void SDL_CursorPaletteChanged(void)
 {
@@ -377,8 +377,8 @@ static void SDL_DrawCursorFast(SDL_Surface *screen, SDL_Rect *area)
 		int dstskip;
 
 		if ( palette_changed ) {
-			pixels8[0] = SDL_MapRGB(screen->format, 255, 255, 255);
-			pixels8[1] = SDL_MapRGB(screen->format, 0, 0, 0);
+			pixels8[0] = (Uint8)SDL_MapRGB(screen->format, 255, 255, 255);
+			pixels8[1] = (Uint8)SDL_MapRGB(screen->format, 0, 0, 0);
 			palette_changed = 0;
 		}
 		dst = (Uint8 *)screen->pixels +
@@ -419,7 +419,7 @@ static void SDL_DrawCursorFast(SDL_Surface *screen, SDL_Rect *area)
 				datab = *data++;
 				for ( i=0; i<8; ++i ) {
 					if ( maskb & 0x80 ) {
-						*dst = pixels[datab>>7];
+						*dst = (Uint16)pixels[datab>>7];
 					}
 					maskb <<= 1;
 					datab <<= 1;
@@ -509,8 +509,8 @@ static void SDL_DrawCursorSlow(SDL_Surface *screen, SDL_Rect *area)
 	maxx = area->x+area->w;
 	if ( screen->format->BytesPerPixel == 1 ) {
 		if ( palette_changed ) {
-			pixels8[0] = SDL_MapRGB(screen->format, 255, 255, 255);
-			pixels8[1] = SDL_MapRGB(screen->format, 0, 0, 0);
+			pixels8[0] = (Uint8)SDL_MapRGB(screen->format, 255, 255, 255);
+			pixels8[1] = (Uint8)SDL_MapRGB(screen->format, 0, 0, 0);
 			palette_changed = 0;
 		}
 		for ( h=area->h; h; h-- ) {

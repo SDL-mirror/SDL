@@ -110,9 +110,9 @@
 #define PIXEL_COPY(to, from, len, bpp)			\
 do {							\
     if(bpp == 4) {					\
-	SDL_memcpy4(to, from, (unsigned)(len));		\
+	SDL_memcpy4(to, from, (size_t)(len));		\
     } else {						\
-	SDL_memcpy(to, from, (unsigned)(len) * (bpp));	\
+	SDL_memcpy(to, from, (size_t)(len) * (bpp));	\
     }							\
 } while(0)
 
@@ -423,7 +423,7 @@ do {							\
 	    d = (d | d << 16) & 0x07e0f81f;		\
 	    d += (s - d) * ALPHA >> 5;			\
 	    d &= 0x07e0f81f;				\
-	    *dst++ = d | d >> 16;			\
+	    *dst++ = (Uint16)(d | d >> 16);			\
 	}						\
     } while(0)
 
@@ -440,7 +440,7 @@ do {							\
 	    d = (d | d << 16) & 0x03e07c1f;		\
 	    d += (s - d) * ALPHA >> 5;			\
 	    d &= 0x03e07c1f;				\
-	    *dst++ = d | d >> 16;			\
+	    *dst++ = (Uint16)(d | d >> 16);			\
 	}						\
     } while(0)
 
@@ -482,17 +482,17 @@ do {							\
 	    PIXEL_FROM_RGB(d, fmt, rd, gd, bd);				\
 	    switch(bpp) {						\
 	    case 2:							\
-		*(Uint16 *)dst = d;					\
+		*(Uint16 *)dst = (Uint16)d;					\
 		break;							\
 	    case 3:							\
 		if(SDL_BYTEORDER == SDL_BIG_ENDIAN) {			\
-		    dst[0] = d >> 16;					\
-		    dst[1] = d >> 8;					\
-		    dst[2] = d;						\
+		    dst[0] = (Uint8)(d >> 16);					\
+		    dst[1] = (Uint8)(d >> 8);					\
+		    dst[2] = (Uint8)(d);						\
 		} else {						\
-		    dst[0] = d;						\
-		    dst[1] = d >> 8;					\
-		    dst[2] = d >> 16;					\
+		    dst[0] = (Uint8)d;						\
+		    dst[1] = (Uint8)(d >> 8);					\
+		    dst[2] = (Uint8)(d >> 16);					\
 		}							\
 		break;							\
 	    case 4:							\
@@ -575,10 +575,10 @@ do {							\
 /* helper: blend a single 16 bit pixel at 50% */
 #define BLEND16_50(dst, src, mask)			\
     do {						\
-        Uint32 s = *src++;				\
+	Uint32 s = *src++;				\
 	Uint32 d = *dst;				\
-	*dst++ = (((s & mask) + (d & mask)) >> 1)	\
-	         + (s & d & (~mask & 0xffff));		\
+	*dst++ = (Uint16)((((s & mask) + (d & mask)) >> 1) +	\
+	                  (s & d & (~mask & 0xffff)));		\
     } while(0)
 
 /* basic 16bpp blender. mask is the pixels to keep when adding. */
@@ -971,32 +971,32 @@ done:
  */
 #define BLIT_TRANSL_565(src, dst)		\
     do {					\
-        Uint32 s = src;				\
+	Uint32 s = src;				\
 	Uint32 d = dst;				\
 	unsigned alpha = (s & 0x3e0) >> 5;	\
 	s &= 0x07e0f81f;			\
 	d = (d | d << 16) & 0x07e0f81f;		\
 	d += (s - d) * alpha >> 5;		\
 	d &= 0x07e0f81f;			\
-	dst = d | d >> 16;			\
+	dst = (Uint16)(d | d >> 16);			\
     } while(0)
 
 #define BLIT_TRANSL_555(src, dst)		\
     do {					\
-        Uint32 s = src;				\
+	Uint32 s = src;				\
 	Uint32 d = dst;				\
 	unsigned alpha = (s & 0x3e0) >> 5;	\
 	s &= 0x03e07c1f;			\
 	d = (d | d << 16) & 0x03e07c1f;		\
 	d += (s - d) * alpha >> 5;		\
 	d &= 0x03e07c1f;			\
-	dst = d | d >> 16;			\
+	dst = (Uint16)(d | d >> 16);			\
     } while(0)
 
 /* used to save the destination format in the encoding. Designed to be
    macro-compatible with SDL_PixelFormat but without the unneeded fields */
 typedef struct {
-    	Uint8  BytesPerPixel;
+	Uint8  BytesPerPixel;
 	Uint8  Rloss;
 	Uint8  Gloss;
 	Uint8  Bloss;

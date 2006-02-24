@@ -167,27 +167,27 @@ static void Color16DitherYV12Mod1X( int *colortab, Uint32 *rgb_2_pix,
             ++cr; ++cb;
 
             L = *lum++;
-            *row1++ = (rgb_2_pix[ L + cr_r ] |
-                       rgb_2_pix[ L + crb_g ] |
-                       rgb_2_pix[ L + cb_b ]);
+            *row1++ = (unsigned short)(rgb_2_pix[ L + cr_r ] |
+                                       rgb_2_pix[ L + crb_g ] |
+                                       rgb_2_pix[ L + cb_b ]);
 
             L = *lum++;
-            *row1++ = (rgb_2_pix[ L + cr_r ] |
-                       rgb_2_pix[ L + crb_g ] |
-                       rgb_2_pix[ L + cb_b ]);
+            *row1++ = (unsigned short)(rgb_2_pix[ L + cr_r ] |
+                                       rgb_2_pix[ L + crb_g ] |
+                                       rgb_2_pix[ L + cb_b ]);
 
 
             /* Now, do second row.  */
 
             L = *lum2++;
-            *row2++ = (rgb_2_pix[ L + cr_r ] |
-                       rgb_2_pix[ L + crb_g ] |
-                       rgb_2_pix[ L + cb_b ]);
+            *row2++ = (unsigned short)(rgb_2_pix[ L + cr_r ] |
+                                       rgb_2_pix[ L + crb_g ] |
+                                       rgb_2_pix[ L + cb_b ]);
 
             L = *lum2++;
-            *row2++ = (rgb_2_pix[ L + cr_r ] |
-                       rgb_2_pix[ L + crb_g ] |
-                       rgb_2_pix[ L + cb_b ]);
+            *row2++ = (unsigned short)(rgb_2_pix[ L + cr_r ] |
+                                       rgb_2_pix[ L + crb_g ] |
+                                       rgb_2_pix[ L + cb_b ]);
         }
 
         /*
@@ -638,14 +638,14 @@ static void Color16DitherYUY2Mod1X( int *colortab, Uint32 *rgb_2_pix,
             cr += 4; cb += 4;
 
             L = *lum; lum += 2;
-            *row++ = (rgb_2_pix[ L + cr_r ] |
-                       rgb_2_pix[ L + crb_g ] |
-                       rgb_2_pix[ L + cb_b ]);
+            *row++ = (unsigned short)(rgb_2_pix[ L + cr_r ] |
+                                      rgb_2_pix[ L + crb_g ] |
+                                      rgb_2_pix[ L + cb_b ]);
 
             L = *lum; lum += 2;
-            *row++ = (rgb_2_pix[ L + cr_r ] |
-                       rgb_2_pix[ L + crb_g ] |
-                       rgb_2_pix[ L + cb_b ]);
+            *row++ = (unsigned short)(rgb_2_pix[ L + cr_r ] |
+                                      rgb_2_pix[ L + crb_g ] |
+                                      rgb_2_pix[ L + cb_b ]);
 
         }
 

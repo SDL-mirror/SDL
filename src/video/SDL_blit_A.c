@@ -1483,9 +1483,9 @@ static void Blit16to16SurfaceAlpha128(SDL_BlitInfo *info, Uint16 mask)
 			if(w) {
 				Uint16 d = *dstp, s;
 				if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
-					s = prev_sw;
+					s = (Uint16)prev_sw;
 				else
-					s = prev_sw >> 16;
+					s = (Uint16)(prev_sw >> 16);
 				*dstp = BLEND16_50(d, s, mask);
 				srcp++;
 				dstp++;
@@ -1858,7 +1858,7 @@ static void Blit565to565SurfaceAlpha(SDL_BlitInfo *info)
 				d = (d | d << 16) & 0x07e0f81f;
 				d += (s - d) * alpha >> 5;
 				d &= 0x07e0f81f;
-				*dstp++ = d | d >> 16;
+				*dstp++ = (Uint16)(d | d >> 16);
 			}, width);
 			srcp += srcskip;
 			dstp += dstskip;
@@ -1894,7 +1894,7 @@ static void Blit555to555SurfaceAlpha(SDL_BlitInfo *info)
 				d = (d | d << 16) & 0x03e07c1f;
 				d += (s - d) * alpha >> 5;
 				d &= 0x03e07c1f;
-				*dstp++ = d | d >> 16;
+				*dstp++ = (Uint16)(d | d >> 16);
 			}, width);
 			srcp += srcskip;
 			dstp += dstskip;
@@ -1922,8 +1922,7 @@ static void BlitARGBto565PixelAlpha(SDL_BlitInfo *info)
 		   Benchmark this! */
 		if(alpha) {   
 		  if(alpha == (SDL_ALPHA_OPAQUE >> 3)) {
-		    *dstp = (s >> 8 & 0xf800) + (s >> 5 & 0x7e0)
-			  + (s >> 3  & 0x1f);
+		    *dstp = (Uint16)((s >> 8 & 0xf800) + (s >> 5 & 0x7e0) + (s >> 3  & 0x1f));
 		  } else {
 		    Uint32 d = *dstp;
 		    /*
@@ -1935,7 +1934,7 @@ static void BlitARGBto565PixelAlpha(SDL_BlitInfo *info)
 		    d = (d | d << 16) & 0x07e0f81f;
 		    d += (s - d) * alpha >> 5;
 		    d &= 0x07e0f81f;
-		    *dstp = d | d >> 16;
+		    *dstp = (Uint16)(d | d >> 16);
 		  }
 		}
 		srcp++;
@@ -1967,8 +1966,7 @@ static void BlitARGBto555PixelAlpha(SDL_BlitInfo *info)
 		   Benchmark this! */
 		if(alpha) {   
 		  if(alpha == (SDL_ALPHA_OPAQUE >> 3)) {
-		    *dstp = (s >> 9 & 0x7c00) + (s >> 6 & 0x3e0)
-			  + (s >> 3  & 0x1f);
+		    *dstp = (Uint16)((s >> 9 & 0x7c00) + (s >> 6 & 0x3e0) + (s >> 3  & 0x1f));
 		  } else {
 		    Uint32 d = *dstp;
 		    /*
@@ -1980,7 +1978,7 @@ static void BlitARGBto555PixelAlpha(SDL_BlitInfo *info)
 		    d = (d | d << 16) & 0x03e07c1f;
 		    d += (s - d) * alpha >> 5;
 		    d &= 0x03e07c1f;
-		    *dstp = d | d >> 16;
+		    *dstp = (Uint16)(d | d >> 16);
 		  }
 		}
 		srcp++;

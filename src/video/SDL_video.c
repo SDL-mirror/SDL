@@ -995,10 +995,10 @@ void SDL_UpdateRect(SDL_Surface *screen, Sint32 x, Sint32 y, Uint32 w, Uint32 h)
 			return;
 
 		/* Fill the rectangle */
-		rect.x = x;
-		rect.y = y;
-		rect.w = w;
-		rect.h = h;
+		rect.x = (Sint16)x;
+		rect.y = (Sint16)y;
+		rect.w = (Uint16)w;
+		rect.h = (Uint16)h;
 		SDL_UpdateRects(screen, 1, &rect);
 	}
 }
