@@ -37,9 +37,6 @@
 	   __declspec(selectany) int _fltused=1;
 #endif
 #endif /* _MSC_VER */
-#define _INC_STDLIB
-#define _INC_STRING
-#define __STRALIGN_H_
 #endif/* !HAVE_LIBC */
 #include <windows.h>
 

@@ -33,6 +33,7 @@
 
 #ifndef SDL_BYTEORDER	/* Not defined in SDL_config.h? */
 #if (defined(__i386__) || defined(__i386)) || \
+     defined(_M_IX86) || \
      defined(__ia64__) || defined(__x86_64__) || \
     (defined(__alpha__) || defined(__alpha)) || \
     (defined(__arm__) || defined(__thumb__)) || \

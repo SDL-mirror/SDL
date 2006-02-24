@@ -188,6 +188,7 @@ int console_main(int argc, char *argv[])
 {
 	int n;
 	char *bufp, *appname;
+	int status;
 
 	/* Get the class name from argv[0] */
 	appname = argv[0];
@@ -203,7 +204,7 @@ int console_main(int argc, char *argv[])
 	else
 		n = (bufp-appname);
 
-	bufp = (char *)alloca(n+1);
+	bufp = SDL_stack_alloc(char, n+1);
 	if ( bufp == NULL ) {
 		return OutOfMemory();
 	}
@@ -226,13 +227,13 @@ int console_main(int argc, char *argv[])
 	SDL_SetModuleHandle(GetModuleHandle(NULL));
 
 	/* Run the application main() code */
-	SDL_main(argc, argv);
+	status = SDL_main(argc, argv);
 
 	/* Exit cleanly, calling atexit() functions */
-	exit(0);
+	exit(status);
 
 	/* Hush little compiler, don't you cry... */
-	return(0);
+	return 0;
 }
 
 /* This is where execution begins [windowed apps] */
@@ -262,7 +263,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 #ifndef NO_STDIO_REDIRECT
 	FILE *newfp;
 #endif
-	int retval;
 
 	/* Start up DDHELP.EXE before opening any files, so DDHELP doesn't
 	   keep them open.  This is a hack.. hopefully it will be fixed 
@@ -322,7 +322,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 
 #ifdef _WIN32_WCE
 	nLen = wcslen(szCmdLine)+128+1;
-	bufp = (wchar_t *)alloca(nLen*2);
+	bufp = SDL_stack_alloc(wchar_t, nLen*2);
 	wcscpy (bufp, TEXT("\""));
 	GetModuleFileName(NULL, bufp+1, 128-3);
 	wcscpy (bufp+wcslen(bufp), TEXT("\" "));
@@ -334,7 +334,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 	}
 	WideCharToMultiByte(CP_ACP, 0, bufp, -1, cmdline, nLen, NULL, NULL);
 #else
-	/* Grab the command line (use alloca() on Windows) */
+	/* Grab the command line */
 	bufp = GetCommandLine();
 	nLen = SDL_strlen(bufp)+1;
 	cmdline = SDL_stack_alloc(char, nLen);
@@ -353,9 +353,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 	ParseCommandLine(cmdline, argv);
 
 	/* Run the main program (after a little SDL initialization) */
-	retval = console_main(argc, argv);
+	console_main(argc, argv);
 
-	SDL_stack_free(cmdline);
-	SDL_stack_free(argv);
-	return retval;
+	/* Hush little compiler, don't you cry... */
+	return 0;
 }

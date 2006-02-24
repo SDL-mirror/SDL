@@ -50,7 +50,6 @@
 
 /* Enable various audio drivers */
 #define SDL_AUDIO_DRIVER_AHI	1
-#define SDL_AUDIO_DRIVER_DISK	1
 
 /* Enable various cdrom drivers */
 #define SDL_CDROM_DUMMY	1
@@ -69,7 +68,6 @@
 
 /* Enable various video drivers */
 #define SDL_VIDEO_DRIVER_CYBERGRAPHICS	1
-#define SDL_VIDEO_DRIVER_DUMMY	1
 
 /* Enable OpenGL support */
 #define SDL_VIDEO_OPENGL	1

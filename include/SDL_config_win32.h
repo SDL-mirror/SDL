@@ -25,15 +25,23 @@
 
 /* This is a set of defines to configure the SDL features */
 
+#ifdef _MSC_VER
+typedef __int8			int8_t;
+typedef unsigned __int8		uint8_t;
+typedef __int16			int16_t;
+typedef unsigned __int16	uint16_t;
+typedef __int32			int32_t;
+typedef unsigned __int32	uint32_t;
+typedef __int64			int64_t;
+typedef unsigned __int64	uint64_t;
+#endif
 #define SDL_HAS_64BIT_TYPE	1
 
 /* Useful headers */
 #define HAVE_STDARG_H	1
 #define HAVE_STDDEF_H	1
-#define HAVE_INTTYPES_H	1
 
 /* Enable various audio drivers */
-#define SDL_AUDIO_DRIVER_DISK	1
 #ifndef _WIN32_WCE
 #define SDL_AUDIO_DRIVER_DSOUND	1
 #endif
@@ -62,7 +70,6 @@
 #ifndef _WIN32_WCE
 #define SDL_VIDEO_DRIVER_DDRAW	1
 #endif
-#define SDL_VIDEO_DRIVER_DUMMY	1
 #ifdef _WIN32_WCE
 #define SDL_VIDEO_DRIVER_GAPI	1
 #endif
