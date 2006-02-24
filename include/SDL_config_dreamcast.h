@@ -41,10 +41,8 @@
 #define HAVE_REALLOC	1
 #define HAVE_FREE	1
 #define HAVE_ALLOCA	1
-#ifndef _WIN32 /* Don't use C runtime versions of these on Windows */
 #define HAVE_GETENV	1
 #define HAVE_PUTENV	1
-#endif
 #define HAVE_MEMSET	1
 #define HAVE_MEMCPY	1
 #define HAVE_MEMMOVE	1

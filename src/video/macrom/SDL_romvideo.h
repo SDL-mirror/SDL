@@ -24,6 +24,6 @@
 #ifndef _SDL_romvideo_h
 #define _SDL_romvideo_h
 
-#include "SDL_lowvideo.h"
+#include "../maccommon/SDL_lowvideo.h"
 
 #endif /* _SDL_romvideo_h */

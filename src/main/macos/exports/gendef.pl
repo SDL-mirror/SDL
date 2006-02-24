@@ -23,4 +23,28 @@ while ( ($file = shift(@ARGV)) ) {
 }
 
 # Special exports to include for this platform
+print "\tSDL_putenv\n";
+print "\tSDL_getenv\n";
+print "\tSDL_qsort\n";
+print "\tSDL_revcpy\n";
+print "\tSDL_strlen\n";
+print "\tSDL_strlcpy\n";
+print "\tSDL_strlcat\n";
+print "\tSDL_strdup\n";
+print "\tSDL_strrev\n";
+print "\tSDL_strupr\n";
+print "\tSDL_strlwr\n";
+print "\tSDL_strchr\n";
+print "\tSDL_strrchr\n";
+print "\tSDL_strstr\n";
+print "\tSDL_ltoa\n";
+print "\tSDL_ultoa\n";
+print "\tSDL_strtol\n";
+print "\tSDL_strtod\n";
+print "\tSDL_strcmp\n";
+print "\tSDL_strncmp\n";
+print "\tSDL_strcasecmp\n";
+print "\tSDL_sscanf\n";
+print "\tSDL_snprintf\n";
+print "\tSDL_vsnprintf\n";
 print "\tSDL_InitQuickDraw\n";

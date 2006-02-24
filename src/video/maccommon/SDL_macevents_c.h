@@ -21,7 +21,7 @@
 */
 #include "SDL_config.h"
 
-#include "SDL_romvideo.h"
+#include "../macrom/SDL_romvideo.h"
 
 /* Functions exported by SDL_macevents.c for the video subsystem
 */

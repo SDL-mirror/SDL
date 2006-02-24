@@ -46,10 +46,10 @@
 #include "SDL_syswm.h"
 #include "../SDL_sysvideo.h"
 #include "SDL_romvideo.h"
-#include "SDL_macgl_c.h"
-#include "SDL_macwm_c.h"
-#include "SDL_macmouse_c.h"
-#include "SDL_macevents_c.h"
+#include "../maccommon/SDL_macgl_c.h"
+#include "../maccommon/SDL_macwm_c.h"
+#include "../maccommon/SDL_macmouse_c.h"
+#include "../maccommon/SDL_macevents_c.h"
 
 /* Initialization/Query functions */
 static int ROM_VideoInit(_THIS, SDL_PixelFormat *vformat);

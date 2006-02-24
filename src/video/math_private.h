@@ -17,6 +17,7 @@
 #ifndef _MATH_PRIVATE_H_
 #define _MATH_PRIVATE_H_
 
+#include "SDL_name.h"
 #include "SDL_endian.h"
 
 #define huge		really_big /* huge is a reserved keyword in VC++ 6.0 */

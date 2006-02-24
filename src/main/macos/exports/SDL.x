@@ -37,18 +37,6 @@
 	SDL_HasSSE
 	SDL_HasSSE2
 	SDL_HasAltiVec
-	SDL_ReadLE16
-	SDL_ReadBE16
-	SDL_ReadLE32
-	SDL_ReadBE32
-	SDL_ReadLE64
-	SDL_ReadBE64
-	SDL_WriteLE16
-	SDL_WriteBE16
-	SDL_WriteLE32
-	SDL_WriteBE32
-	SDL_WriteLE64
-	SDL_WriteBE64
 	SDL_SetError
 	SDL_GetError
 	SDL_ClearError
@@ -61,8 +49,6 @@
 	SDL_SetEventFilter
 	SDL_GetEventFilter
 	SDL_EventState
-	SDL_putenv
-	SDL_getenv
 	SDL_NumJoysticks
 	SDL_JoystickName
 	SDL_JoystickOpen
@@ -119,7 +105,20 @@
 	SDL_RWFromConstMem
 	SDL_AllocRW
 	SDL_FreeRW
+	SDL_ReadLE16
+	SDL_ReadBE16
+	SDL_ReadLE32
+	SDL_ReadBE32
+	SDL_ReadLE64
+	SDL_ReadBE64
+	SDL_WriteLE16
+	SDL_WriteBE16
+	SDL_WriteLE32
+	SDL_WriteBE32
+	SDL_WriteLE64
+	SDL_WriteBE64
 	SDL_GetWMInfo
+	SDL_CreateThread
 	SDL_CreateThread
 	SDL_ThreadID
 	SDL_GetThreadID
@@ -188,4 +187,28 @@
 	SDL_WM_ToggleFullScreen
 	SDL_WM_GrabInput
 	SDL_SoftStretch
+	SDL_putenv
+	SDL_getenv
+	SDL_qsort
+	SDL_revcpy
+	SDL_strlen
+	SDL_strlcpy
+	SDL_strlcat
+	SDL_strdup
+	SDL_strrev
+	SDL_strupr
+	SDL_strlwr
+	SDL_strchr
+	SDL_strrchr
+	SDL_strstr
+	SDL_ltoa
+	SDL_ultoa
+	SDL_strtol
+	SDL_strtod
+	SDL_strcmp
+	SDL_strncmp
+	SDL_strcasecmp
+	SDL_sscanf
+	SDL_snprintf
+	SDL_vsnprintf
 	SDL_InitQuickDraw

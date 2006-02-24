@@ -21,7 +21,7 @@
 */
 #include "SDL_config.h"
 
-#include "SDL_romvideo.h"
+#include "../macrom/SDL_romvideo.h"
 
 /* Functions to be exported */
 extern void Mac_SetCaption(_THIS, const char *title, const char *icon);

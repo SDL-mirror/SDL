@@ -78,7 +78,7 @@ int TestEndian(SDL_bool verbose)
 		printf("Detected a %s endian machine.\n",
 			(SDL_BYTEORDER == SDL_LIL_ENDIAN) ? "little" : "big");
 	}
-	if ( *((char *)&value) == '1' ) {
+	if ( (*((char *)&value) >> 4) == 0x1 ) {
 		real_byteorder = SDL_BIG_ENDIAN;
 	} else {
 		real_byteorder = SDL_LIL_ENDIAN;

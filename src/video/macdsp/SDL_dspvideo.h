@@ -30,7 +30,7 @@
 #include <DrawSprocket.h>
 #endif
 
-#include "SDL_lowvideo.h"
+#include "../maccommon/SDL_lowvideo.h"
 
 /* DrawSprocket specific information */
 struct DSpInfo {

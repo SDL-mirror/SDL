@@ -88,9 +88,9 @@ static char rcsid[] = "$NetBSD: e_sqrt.c,v 1.8 1995/05/10 20:46:17 jtc Exp $";
 #include "math_private.h"
 
 #ifdef __STDC__
-	double copysign(double x, double y)
+	double SDL_NAME(copysign)(double x, double y)
 #else
-	double copysign(x,y)
+	double SDL_NAME(copysign)(x,y)
 	double x,y;
 #endif
 {
@@ -102,9 +102,9 @@ static char rcsid[] = "$NetBSD: e_sqrt.c,v 1.8 1995/05/10 20:46:17 jtc Exp $";
 }
 
 #ifdef __STDC__
-	double scalbn (double x, int n)
+	double SDL_NAME(scalbn) (double x, int n)
 #else
-	double scalbn (x,n)
+	double SDL_NAME(scalbn) (x,n)
 	double x; int n;
 #endif
 {
@@ -120,13 +120,13 @@ static char rcsid[] = "$NetBSD: e_sqrt.c,v 1.8 1995/05/10 20:46:17 jtc Exp $";
 	    }
         if (k==0x7ff) return x+x;		/* NaN or Inf */
         k = k+n;
-        if (k >  0x7fe) return huge*copysign(huge,x); /* overflow  */
+        if (k >  0x7fe) return huge*SDL_NAME(copysign)(huge,x); /* overflow  */
         if (k > 0) 				/* normal result */
 	    {SET_HIGH_WORD(x,(hx&0x800fffff)|(k<<20)); return x;}
         if (k <= -54) {
             if (n > 50000) 	/* in case integer overflow in n+k */
-		return huge*copysign(huge,x);	/*overflow*/
-	    else return tiny*copysign(tiny,x); 	/*underflow*/
+		return huge*SDL_NAME(copysign)(huge,x);	/*overflow*/
+	    else return tiny*SDL_NAME(copysign)(tiny,x); 	/*underflow*/
 	}
         k += 54;				/* subnormal result */
 	SET_HIGH_WORD(x,(hx&0x800fffff)|(k<<20));

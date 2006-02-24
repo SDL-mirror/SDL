@@ -36,7 +36,13 @@
 #endif
 
 #if SDL_VIDEO_OPENGL
-#include "SDL_opengl.h"
+#ifdef MACOSX
+#include <OpenGL/gl.h> /* OpenGL.framework */
+#include <AGL/agl.h>   /* AGL.framework */
+#else
+#include <gl.h>
+#include <agl.h>
+#endif /* MACOSX */
 #endif
 
 #include "SDL_video.h"

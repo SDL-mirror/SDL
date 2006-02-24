@@ -25,14 +25,17 @@
 
 /* This is a set of defines to configure the SDL features */
 
-#define SDL_HAS_64BIT_TYPE	1
+typedef signed char	int8_t;
+typedef unsigned char	uint8_t;
+typedef signed short	int16_t;
+typedef unsigned short	uint16_t;
+typedef signed int	int32_t;
+typedef unsigned int	uint32_t;
 
 /* Useful headers */
-#define HAVE_SYS_TYPES_H	1
 #define HAVE_STDIO_H	1
 #define STDC_HEADERS	1
 #define HAVE_STRING_H	1
-#define HAVE_INTTYPES_H	1
 #define HAVE_SIGNAL_H	1
 
 /* C library functions */
@@ -41,10 +44,6 @@
 #define HAVE_REALLOC	1
 #define HAVE_FREE	1
 #define HAVE_ALLOCA	1
-#ifndef _WIN32 /* Don't use C runtime versions of these on Windows */
-#define HAVE_GETENV	1
-#define HAVE_PUTENV	1
-#endif
 #define HAVE_MEMSET	1
 #define HAVE_MEMCPY	1
 #define HAVE_MEMMOVE	1
@@ -63,7 +62,7 @@
 #define SDL_LOADSO_MACOS	1
 
 /* Enable various threading systems */
-#define SDL_THREAD_DISABLED	1
+#define SDL_THREADS_DISABLED	1
 
 /* Enable various timer systems */
 #define SDL_TIMER_MACOS	1

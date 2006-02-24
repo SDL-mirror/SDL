@@ -296,7 +296,7 @@ ivln2_l  =  1.92596299112661746887e-08; /* 0x3E54AE0B, 0xF85DDF44 =1/ln2 tail*/
 	z  = one-(r-z);
 	GET_HIGH_WORD(j,z);
 	j += (n<<20);
-	if((j>>20)<=0) z = scalbn(z,n);	/* subnormal output */
+	if((j>>20)<=0) z = SDL_NAME(scalbn)(z,n);	/* subnormal output */
 	else SET_HIGH_WORD(z,j);
 	return s*z;
 }
