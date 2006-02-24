@@ -191,24 +191,14 @@
 	SDL_getenv
 	SDL_qsort
 	SDL_revcpy
-	SDL_strlen
 	SDL_strlcpy
 	SDL_strlcat
 	SDL_strdup
 	SDL_strrev
 	SDL_strupr
 	SDL_strlwr
-	SDL_strchr
-	SDL_strrchr
-	SDL_strstr
 	SDL_ltoa
 	SDL_ultoa
-	SDL_strtol
-	SDL_strtod
-	SDL_strcmp
-	SDL_strncmp
-	SDL_strcasecmp
-	SDL_sscanf
 	SDL_snprintf
 	SDL_vsnprintf
 	SDL_InitQuickDraw
