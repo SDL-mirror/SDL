@@ -23,9 +23,21 @@
 #ifndef _SDL_config_h
 #define _SDL_config_h
 
-/* This is the minimal configuration that can be used to build SDL */
-
 #include "SDL_platform.h"
+
+/* Add any platform that doesn't build using the configure system */
+#if defined(__AMIGA__)
+#include "SDL_config_amiga.h"
+#elif defined(__DREAMCAST__)
+#include "SDL_config_dreamcast.h"
+#elif defined(__MACOS__)
+#include "SDL_config_macos.h"
+#elif defined(__MACOSX__)
+#include "SDL_config_macosx.h"
+#elif defined(__WIN32__)
+#include "SDL_config_win32.h"
+#else
+/* This is the minimal configuration that can be used to build SDL */
 
 #include <stdarg.h>
 
@@ -37,5 +49,6 @@ typedef signed int int32_t;
 typedef unsigned int uint32_t;
 typedef unsigned int size_t;
 typedef unsigned long uintptr_t;
+#endif
 
 #endif /* _SDL_config_h */

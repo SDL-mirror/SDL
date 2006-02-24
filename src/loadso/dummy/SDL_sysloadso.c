@@ -35,7 +35,7 @@ void *SDL_LoadObject(const char *sofile)
 
 void *SDL_LoadFunction(void *handle, const char *name)
 {
-	const char *loaderror = "SDL_LoadFunction not implemented";
+	const char *loaderror = "SDL_LoadFunction() not implemented";
 	SDL_SetError("Failed loading %s: %s", name, loaderror);
 	return(NULL);
 }

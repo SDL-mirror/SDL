@@ -44,6 +44,9 @@
 # elif HAVE_MALLOC_H
 # include <malloc.h>
 # endif
+# if HAVE_STDDEF_H
+# include <stddef.h>
+# endif
 # if HAVE_STDARG_H
 # include <stdarg.h>
 # endif

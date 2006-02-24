@@ -30,7 +30,6 @@
 #define __AIX__		1
 #endif
 #if defined(AMIGA) || defined(__AMIGA) || defined(__amigados__)
-/* FIXME: is this the right test for AmigaOS? */
 #undef __AMIGA__
 #define __AMIGA__	1
 #endif
@@ -43,7 +42,6 @@
 #define __BSDI__	1
 #endif
 #if defined(DREAMCAST)
-/* FIXME: is this the right test for Dreamcast? */
 #undef __DREAMCAST__
 #define __DREAMCAST__	1
 #endif
@@ -97,7 +95,6 @@
 #define __RISCOS__	1
 #endif
 #if defined(solaris) || defined(__solaris) || defined(__solaris__)
-/* FIXME: is this the right test for Solaris? Check SDL_sunaudio.c */
 #undef __SOLARIS__
 #define __SOLARIS__	1
 #endif
