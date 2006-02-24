@@ -55,7 +55,7 @@ static void illegal_instruction(int sig)
 }
 #endif /* HAVE_SETJMP */
 
-static __inline__ int CPU_haveCPUID()
+static __inline__ int CPU_haveCPUID(void)
 {
 	int has_CPUID = 0;
 #if defined(__GNUC__) && defined(i386)
@@ -145,7 +145,7 @@ done:
 	return has_CPUID;
 }
 
-static __inline__ int CPU_getCPUIDFeatures()
+static __inline__ int CPU_getCPUIDFeatures(void)
 {
 	int features = 0;
 #if defined(__GNUC__) && ( defined(i386) || defined(__x86_64__) )
@@ -198,7 +198,7 @@ done:
 	return features;
 }
 
-static __inline__ int CPU_getCPUIDFeaturesExt()
+static __inline__ int CPU_getCPUIDFeaturesExt(void)
 {
 	int features = 0;
 #if defined(__GNUC__) && (defined(i386) || defined (__x86_64__) )
@@ -249,7 +249,7 @@ done:
 	return features;
 }
 
-static __inline__ int CPU_haveRDTSC()
+static __inline__ int CPU_haveRDTSC(void)
 {
 	if ( CPU_haveCPUID() ) {
 		return (CPU_getCPUIDFeatures() & 0x00000010);
@@ -257,7 +257,7 @@ static __inline__ int CPU_haveRDTSC()
 	return 0;
 }
 
-static __inline__ int CPU_haveMMX()
+static __inline__ int CPU_haveMMX(void)
 {
 	if ( CPU_haveCPUID() ) {
 		return (CPU_getCPUIDFeatures() & 0x00800000);
@@ -265,7 +265,7 @@ static __inline__ int CPU_haveMMX()
 	return 0;
 }
 
-static __inline__ int CPU_haveMMXExt()
+static __inline__ int CPU_haveMMXExt(void)
 {
 	if ( CPU_haveCPUID() ) {
 		return (CPU_getCPUIDFeaturesExt() & 0x00400000);
@@ -273,7 +273,7 @@ static __inline__ int CPU_haveMMXExt()
 	return 0;
 }
 
-static __inline__ int CPU_have3DNow()
+static __inline__ int CPU_have3DNow(void)
 {
 	if ( CPU_haveCPUID() ) {
 		return (CPU_getCPUIDFeaturesExt() & 0x80000000);
@@ -281,7 +281,7 @@ static __inline__ int CPU_have3DNow()
 	return 0;
 }
 
-static __inline__ int CPU_have3DNowExt()
+static __inline__ int CPU_have3DNowExt(void)
 {
 	if ( CPU_haveCPUID() ) {
 		return (CPU_getCPUIDFeaturesExt() & 0x40000000);
@@ -289,7 +289,7 @@ static __inline__ int CPU_have3DNowExt()
 	return 0;
 }
 
-static __inline__ int CPU_haveSSE()
+static __inline__ int CPU_haveSSE(void)
 {
 	if ( CPU_haveCPUID() ) {
 		return (CPU_getCPUIDFeatures() & 0x02000000);
@@ -297,7 +297,7 @@ static __inline__ int CPU_haveSSE()
 	return 0;
 }
 
-static __inline__ int CPU_haveSSE2()
+static __inline__ int CPU_haveSSE2(void)
 {
 	if ( CPU_haveCPUID() ) {
 		return (CPU_getCPUIDFeatures() & 0x04000000);
@@ -305,7 +305,7 @@ static __inline__ int CPU_haveSSE2()
 	return 0;
 }
 
-static __inline__ int CPU_haveAltiVec()
+static __inline__ int CPU_haveAltiVec(void)
 {
 	volatile int altivec = 0;
 #ifdef __MACOSX__
@@ -332,7 +332,7 @@ static __inline__ int CPU_haveAltiVec()
 
 static Uint32 SDL_CPUFeatures = 0xFFFFFFFF;
 
-static Uint32 SDL_GetCPUFeatures()
+static Uint32 SDL_GetCPUFeatures(void)
 {
 	if ( SDL_CPUFeatures == 0xFFFFFFFF ) {
 		SDL_CPUFeatures = 0;
@@ -364,7 +364,7 @@ static Uint32 SDL_GetCPUFeatures()
 	return SDL_CPUFeatures;
 }
 
-SDL_bool SDL_HasRDTSC()
+SDL_bool SDL_HasRDTSC(void)
 {
 	if ( SDL_GetCPUFeatures() & CPU_HAS_RDTSC ) {
 		return SDL_TRUE;
@@ -372,7 +372,7 @@ SDL_bool SDL_HasRDTSC()
 	return SDL_FALSE;
 }
 
-SDL_bool SDL_HasMMX()
+SDL_bool SDL_HasMMX(void)
 {
 	if ( SDL_GetCPUFeatures() & CPU_HAS_MMX ) {
 		return SDL_TRUE;
@@ -380,7 +380,7 @@ SDL_bool SDL_HasMMX()
 	return SDL_FALSE;
 }
 
-SDL_bool SDL_HasMMXExt()
+SDL_bool SDL_HasMMXExt(void)
 {
 	if ( SDL_GetCPUFeatures() & CPU_HAS_MMXEXT ) {
 		return SDL_TRUE;
@@ -388,7 +388,7 @@ SDL_bool SDL_HasMMXExt()
 	return SDL_FALSE;
 }
 
-SDL_bool SDL_Has3DNow()
+SDL_bool SDL_Has3DNow(void)
 {
 	if ( SDL_GetCPUFeatures() & CPU_HAS_3DNOW ) {
 		return SDL_TRUE;
@@ -396,7 +396,7 @@ SDL_bool SDL_Has3DNow()
 	return SDL_FALSE;
 }
 
-SDL_bool SDL_Has3DNowExt()
+SDL_bool SDL_Has3DNowExt(void)
 {
 	if ( SDL_GetCPUFeatures() & CPU_HAS_3DNOWEXT ) {
 		return SDL_TRUE;
@@ -404,7 +404,7 @@ SDL_bool SDL_Has3DNowExt()
 	return SDL_FALSE;
 }
 
-SDL_bool SDL_HasSSE()
+SDL_bool SDL_HasSSE(void)
 {
 	if ( SDL_GetCPUFeatures() & CPU_HAS_SSE ) {
 		return SDL_TRUE;
@@ -412,7 +412,7 @@ SDL_bool SDL_HasSSE()
 	return SDL_FALSE;
 }
 
-SDL_bool SDL_HasSSE2()
+SDL_bool SDL_HasSSE2(void)
 {
 	if ( SDL_GetCPUFeatures() & CPU_HAS_SSE2 ) {
 		return SDL_TRUE;
@@ -420,7 +420,7 @@ SDL_bool SDL_HasSSE2()
 	return SDL_FALSE;
 }
 
-SDL_bool SDL_HasAltiVec()
+SDL_bool SDL_HasAltiVec(void)
 {
 	if ( SDL_GetCPUFeatures() & CPU_HAS_ALTIVEC ) {
 		return SDL_TRUE;
