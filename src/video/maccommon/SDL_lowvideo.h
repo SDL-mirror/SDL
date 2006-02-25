@@ -36,13 +36,7 @@
 #endif
 
 #if SDL_VIDEO_OPENGL
-#ifdef MACOSX
-#include <OpenGL/gl.h> /* OpenGL.framework */
-#include <AGL/agl.h>   /* AGL.framework */
-#else
-#include <gl.h>
-#include <agl.h>
-#endif /* MACOSX */
+typedef struct __AGLContextRec *AGLContext;
 #endif
 
 #include "SDL_video.h"

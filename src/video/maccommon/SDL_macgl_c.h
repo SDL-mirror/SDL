@@ -25,14 +25,13 @@
 #include "SDL_config.h"
 
 #if SDL_VIDEO_OPENGL
+#include "SDL_opengl.h"
 #ifdef MACOSX
-#include <OpenGL/gl.h> /* OpenGL.framework */
 #include <AGL/agl.h>   /* AGL.framework */
 #else
-#include <gl.h>
 #include <agl.h>
-#endif /* MACOSX */
 #endif
+#endif /* SDL_VIDEO_OPENGL */
 
 /* OpenGL functions */
 extern int Mac_GL_Init(_THIS);
