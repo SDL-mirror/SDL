@@ -173,6 +173,8 @@ int main(int argc, char **argv)
 	quit(1);
     }
 
+    if (vidflags & SDL_FULLSCREEN) SDL_ShowCursor (SDL_FALSE);
+
     if(!(boat[0] = SDL_LoadBMP("sail.bmp")))
 	sdlerr("loading sail.bmp");
     /* We've chosen magenta (#ff00ff) as colour key for the boat */
@@ -333,6 +335,7 @@ int main(int argc, char **argv)
     printf("%d frames, %.2f fps\n",
 	   frames, 1000.0 * frames / (SDL_GetTicks() - start));
 
+    if (vidflags & SDL_FULLSCREEN) SDL_ShowCursor (SDL_TRUE);
     SDL_Quit();
     return 0;
 }
