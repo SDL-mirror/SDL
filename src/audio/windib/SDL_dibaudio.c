@@ -23,7 +23,8 @@
 
 /* Allow access to a raw mixing buffer */
 
-#include "SDL_windows.h"
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 #include <mmsystem.h>
 
 #include "SDL_timer.h"

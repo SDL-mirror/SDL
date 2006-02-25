@@ -27,7 +27,8 @@
 
 #if defined(__WIN32__) && !defined(_WIN32_WCE)
 
-#include "SDL_windows.h"
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 
 /* Note this isn't thread-safe! */
 

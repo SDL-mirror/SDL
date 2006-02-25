@@ -21,7 +21,8 @@
 */
 #include "SDL_config.h"
 
-#include "SDL_windows.h"
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 
 #include "SDL_version.h"
 #include "SDL_video.h"

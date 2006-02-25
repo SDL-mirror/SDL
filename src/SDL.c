@@ -327,7 +327,8 @@ unsigned _System LibMain(unsigned hmod, unsigned termination)
 
 #if !defined(HAVE_LIBC) || defined(_WIN32_WCE) || (defined(__WATCOMC__) && defined(BUILD_DLL))
 /* Need to include DllMain() on Windows CE and Watcom C for some reason.. */
-#include "SDL_windows.h"
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 
 BOOL APIENTRY _DllMainCRTStartup( HANDLE hModule, 
                        DWORD  ul_reason_for_call, 

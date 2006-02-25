@@ -24,7 +24,8 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* System dependent library loading routines                           */
 
-#include "SDL_windows.h"
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 
 #include "SDL_loadso.h"
 

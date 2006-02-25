@@ -23,7 +23,8 @@
 
 /* Functions for system-level CD-ROM audio control */
 
-#include "SDL_windows.h"
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 #include <mmsystem.h>
 
 #include "SDL_cdrom.h"

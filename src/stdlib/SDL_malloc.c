@@ -485,7 +485,8 @@ DEFAULT_MMAP_THRESHOLD       default: 256K
 #endif  /* _WIN32 */
 #endif  /* WIN32 */
 #ifdef WIN32
-#include "SDL_windows.h"
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 #define HAVE_MMAP 1
 #define HAVE_MORECORE 0
 #define LACKS_UNISTD_H

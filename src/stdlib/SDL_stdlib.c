@@ -30,6 +30,14 @@
 
 #if defined(_MSC_VER)
 
+#ifndef __FLTUSED__
+#define __FLTUSED__
+#ifdef __cplusplus
+   extern "C"
+#endif
+	   __declspec(selectany) int _fltused=1;
+#endif
+
 /* Float to long */
 void __declspec(naked) _ftol()
 {

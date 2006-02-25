@@ -28,7 +28,9 @@
       and it is not clear how to handle a mixture of WCE semaphores and normal
       events and mutexes. */
 
-#include "SDL_windows.h"
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
 #include "win_ce_semaphore.h"
 
 static SYNCHHANDLE CleanUp (SYNCHHANDLE hSynch, DWORD Flags);

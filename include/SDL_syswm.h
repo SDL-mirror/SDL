@@ -116,7 +116,8 @@ typedef struct SDL_SysWMinfo {
 } SDL_SysWMinfo;
 
 #elif SDL_VIDEO_DRIVER_WINDIB || SDL_VIDEO_DRIVER_DDRAW
-#include "SDL_windows.h"
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 
 /* The windows custom event structure */
 struct SDL_SysWMmsg {

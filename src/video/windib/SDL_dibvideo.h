@@ -24,7 +24,8 @@
 #ifndef _SDL_dibvideo_h
 #define _SDL_dibvideo_h
 
-#include "SDL_windows.h"
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 
 /* for PDA */
 typedef enum

@@ -24,7 +24,8 @@
 #ifndef _SDL_lowvideo_h
 #define _SDL_lowvideo_h
 
-#include "SDL_windows.h"
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 
 #include "../SDL_sysvideo.h"
 
