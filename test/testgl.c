@@ -245,8 +245,6 @@ void DrawLogoCursor(void)
 	static int w, h;
 	int x, y;
 
-	SDL_Surface *screen = SDL_GetVideoSurface();
-
 	if ( ! cursor_texture ) {
 		SDL_Surface *image;
 		GLfloat texcoord[4];
@@ -303,7 +301,6 @@ void DrawLogoTexture(void)
 	static int w, h;
 	static int delta_x = 1;
 	static int delta_y = 1;
-	static Uint32 last_moved = 0;
 
 	SDL_Surface *screen = SDL_GetVideoSurface();
 
@@ -377,7 +374,6 @@ void DrawLogoBlit(void)
 	static int w, h;
 	static int delta_x = 1;
 	static int delta_y = 1;
-	static Uint32 last_moved = 0;
 
 	SDL_Rect dst;
 	SDL_Surface *screen = SDL_GetVideoSurface();
@@ -657,7 +653,7 @@ int RunGLTest( int argc, char* argv[],
 			glVertex3fv(cube[2]);
 			glColor3fv(color[7]);
 			glVertex3fv(cube[7]);
-#else // flat cube
+#else /* flat cube */
 			glColor3f(1.0, 0.0, 0.0);
 			glVertex3fv(cube[0]);
 			glVertex3fv(cube[1]);
@@ -767,7 +763,7 @@ int RunGLTest( int argc, char* argv[],
 
 int main(int argc, char *argv[])
 {
-	int i, logo, logocursor;
+	int i, logo, logocursor = 0;
 	int numtests;
 	int bpp = 0;
 	int slowly;

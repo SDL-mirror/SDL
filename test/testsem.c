@@ -13,13 +13,6 @@
 static SDL_sem *sem;
 int alive = 1;
 
-/* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
-static void quit(int rc)
-{
-	SDL_Quit();
-	exit(rc);
-}
-
 int ThreadFunc(void *data)
 {
 	while ( alive ) {

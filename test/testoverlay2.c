@@ -57,8 +57,6 @@ static void quit(int rc)
 
 void RGBtoYUV(Uint8 *rgb, int *yuv, int monochrome, int luminance)
 {
-    int i;
-
     if (monochrome)
     {
 #if 1 /* these are the two formulas that I found on the FourCC site... */
@@ -92,7 +90,7 @@ void RGBtoYUV(Uint8 *rgb, int *yuv, int monochrome, int luminance)
     }
 }
 
-ConvertRGBtoYV12(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
+void ConvertRGBtoYV12(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 {
 	int x,y;
 	int yuv[3];
@@ -125,7 +123,7 @@ ConvertRGBtoYV12(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 	SDL_UnlockSurface(s);
 }
 
-ConvertRGBtoIYUV(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
+void ConvertRGBtoIYUV(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 {
 	int x,y;
 	int yuv[3];
@@ -158,7 +156,7 @@ ConvertRGBtoIYUV(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 	SDL_UnlockSurface(s);
 }
 
-ConvertRGBtoUYVY(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
+void ConvertRGBtoUYVY(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 {
 	int x,y;
 	int yuv[3];
@@ -191,7 +189,7 @@ ConvertRGBtoUYVY(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 	SDL_UnlockSurface(s);
 }
 
-ConvertRGBtoYVYU(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
+void ConvertRGBtoYVYU(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 {
 	int x,y;
 	int yuv[3];
@@ -227,7 +225,7 @@ ConvertRGBtoYVYU(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 	SDL_UnlockSurface(s);
 }
 
-ConvertRGBtoYUY2(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
+void ConvertRGBtoYUY2(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 {
 	int x,y;
 	int yuv[3];
@@ -416,7 +414,7 @@ int main(int argc, char **argv)
     /* Set video mode */
     if ( (screen=SDL_SetVideoMode(MOOSEPIC_W*scale, MOOSEPIC_H*scale, 0, SDL_RESIZABLE | SDL_SWSURFACE)) == NULL )
     {
-        fprintf(stderr, "Couldn't set video mode: %s\n", 0, SDL_GetError());
+        fprintf(stderr, "Couldn't set video mode: %s\n", SDL_GetError());
         free(RawMooseData);
         quit(4);
     }
@@ -430,7 +428,7 @@ int main(int argc, char **argv)
                                                MOOSEPIC_H, 8, MOOSEPIC_W, 0, 0, 0, 0);
         if (MooseFrame[i]==NULL)
         {
-            fprintf(stderr, "Couldn't create SDL_Surfaces:%s\n", 0, SDL_GetError());
+            fprintf(stderr, "Couldn't create SDL_Surfaces:%s\n", SDL_GetError());
             free(RawMooseData);
             quit(5);
         }

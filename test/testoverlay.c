@@ -34,8 +34,6 @@ static void quit(int rc)
 
 void RGBtoYUV(Uint8 *rgb, int *yuv, int monochrome, int luminance)
 {
-    int i;
-
     if (monochrome)
     {
 #if 1 /* these are the two formulas that I found on the FourCC site... */
@@ -80,7 +78,7 @@ void RGBtoYUV(Uint8 *rgb, int *yuv, int monochrome, int luminance)
     */
 }
 
-ConvertRGBtoYV12(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
+void ConvertRGBtoYV12(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 {
 	int x,y;
 	int yuv[3];
@@ -120,7 +118,7 @@ ConvertRGBtoYV12(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 	SDL_UnlockSurface(s);
 }
 
-ConvertRGBtoIYUV(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
+void ConvertRGBtoIYUV(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 {
 	int x,y;
 	int yuv[3];
@@ -160,7 +158,7 @@ ConvertRGBtoIYUV(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 	SDL_UnlockSurface(s);
 }
 
-ConvertRGBtoUYVY(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
+void ConvertRGBtoUYVY(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 {
 	int x,y;
 	int yuv[3];
@@ -193,7 +191,7 @@ ConvertRGBtoUYVY(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 	SDL_UnlockSurface(s);
 }
 
-ConvertRGBtoYVYU(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
+void ConvertRGBtoYVYU(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 {
 	int x,y;
 	int yuv[3];
@@ -229,7 +227,7 @@ ConvertRGBtoYVYU(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 	SDL_UnlockSurface(s);
 }
 
-ConvertRGBtoYUY2(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
+void ConvertRGBtoYUY2(SDL_Surface *s, SDL_Overlay *o, int monochrome, int luminance)
 {
 	int x,y;
 	int yuv[3];

@@ -42,6 +42,7 @@ void* get_funcaddr(const char* p)
 		printf("Unable to get function pointer for %s\n",p);
 		quit(1);
 	}
+	return NULL;
 }
 
 typedef struct
