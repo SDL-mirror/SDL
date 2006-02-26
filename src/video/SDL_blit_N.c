@@ -835,10 +835,10 @@ static Uint32 GetBlitFeatures( void )
 #endif
 
 /* This is now endian dependent */
-#if ( SDL_BYTEORDER == SDL_LIL_ENDIAN )
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
 #define HI	1
 #define LO	0
-#else /* ( SDL_BYTEORDER == SDL_BIG_ENDIAN ) */
+#else /* SDL_BYTEORDER == SDL_BIG_ENDIAN */
 #define HI	0
 #define LO	1
 #endif
