@@ -37,6 +37,14 @@ int Mac_GL_Init(_THIS)
 	GLint attributes [ 24 ]; /* 24 is max possible in this setup */
 	GLboolean noerr;
    
+	/* load the gl driver from a default path */
+	if ( ! this->gl_config.driver_loaded ) {
+		/* no driver has been loaded, use default (ourselves) */
+		if ( Mac_GL_LoadLibrary(this, NULL) < 0 ) {
+			return(-1);
+		}
+	}
+
 	attributes[i++] = AGL_RGBA;
 	if ( this->gl_config.red_size   != 0 &&
 	     this->gl_config.blue_size  != 0 &&
@@ -104,7 +112,7 @@ int Mac_GL_Init(_THIS)
 	aglDestroyPixelFormat(format);
 
     #if  TARGET_API_MAC_CARBON
-    noerr = aglSetDrawable(glContext, GetWindowPort(SDL_Window));
+	noerr = aglSetDrawable(glContext, GetWindowPort(SDL_Window));
     #else
 	noerr = aglSetDrawable(glContext, (AGLDrawable)SDL_Window);
     #endif
