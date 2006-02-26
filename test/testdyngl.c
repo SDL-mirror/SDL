@@ -96,14 +96,16 @@ int main(int argc,char *argv[])
 	SDL_Event event;
 	int done=0;
 	GLfloat pixels[NB_PIXELS*3];
-#if defined(__IRIX__)
-	const char *gl_library = "libGL.so";
+#if defined(__WIN32__)
+	const char *gl_library = "OpenGL32.DLL";
+#elif defined(__MACOS__)
+	const char *gl_library = "OpenGLLibrary";
 #elif defined(__MACOSX__)
 	const char *gl_library = "/usr/X11R6/lib/libGL.1.dylib";
+#elif defined(__IRIX__)
+	const char *gl_library = "libGL.so";
 #elif defined(__QNXNTO__)
 	const char *gl_library = "libGL.so.3";
-#elif defined(__WIN32__)
-	const char *gl_library = "OpenGL32.DLL";
 #else
 	const char *gl_library = "libGL.so.1";
 #endif
