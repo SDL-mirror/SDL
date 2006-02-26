@@ -181,10 +181,20 @@ int SDL_RunAudio(void *audiop)
         // Increase the priority of this thread to make sure that
         // the audio will be continuous all the time!
 #ifdef USE_DOSSETPRIORITY
+        if (SDL_getenv("SDL_USE_TIMECRITICAL_AUDIO"))
+        {
 #ifdef DEBUG_BUILD
-        printf("[SDL_RunAudio] : Setting priority to ForegroundServer+0! (TID%d)\n", SDL_ThreadID());
+          printf("[SDL_RunAudio] : Setting priority to TimeCritical+0! (TID%d)\n", SDL_ThreadID());
 #endif
-        DosSetPriority(PRTYS_THREAD, PRTYC_FOREGROUNDSERVER, 0, 0);
+          DosSetPriority(PRTYS_THREAD, PRTYC_TIMECRITICAL, 0, 0);
+        }
+        else
+        {
+#ifdef DEBUG_BUILD
+          printf("[SDL_RunAudio] : Setting priority to ForegroundServer+0! (TID%d)\n", SDL_ThreadID());
+#endif
+          DosSetPriority(PRTYS_THREAD, PRTYC_FOREGROUNDSERVER, 0, 0);
+        }
 #endif
 #endif
 

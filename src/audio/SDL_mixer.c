@@ -134,8 +134,7 @@ void SDL_MixAudio (Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 				SDL_MixAudio_MMX_S8((char*)dst,(char*)src,(unsigned int)len,(int)volume);
 			}
 			else
-#endif
-#if defined(_MSC_VER) && defined(M_I86) && defined(SDL_ASSEMBLY_ROUTINES)
+#elif ((defined(_MSC_VER) && defined(_M_IX86)) || defined(__WATCOMC__)) && defined(SDL_ASSEMBLY_ROUTINES)
 			if (SDL_HasMMX())
 			{
 				SDL_MixAudio_MMX_S8_VC((char*)dst,(char*)src,(unsigned int)len,(int)volume);
@@ -180,8 +179,8 @@ void SDL_MixAudio (Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 			{
 				SDL_MixAudio_MMX_S16((char*)dst,(char*)src,(unsigned int)len,(int)volume);
 			}
-			else
-#elif defined(USE_ASM_MIXER_VC)
+                        else
+#elif ((defined(_MSC_VER) && defined(_M_IX86)) || defined(__WATCOMC__)) && defined(SDL_ASSEMBLY_ROUTINES)
 			if (SDL_HasMMX())
 			{
 				SDL_MixAudio_MMX_S16_VC((char*)dst,(char*)src,(unsigned int)len,(int)volume);

@@ -293,7 +293,7 @@ if (LOUSHORT(mciSendCommand(cdrom->id,MCI_STATUS,MCI_WAIT | MCI_STATUS_ITEM,&msp
 	if (msp.ulReturn == MCI_MODE_PAUSE)
 		{
 		mgp.hwndCallback = (HWND)NULL;		// None
-		mciSendCommand(cdrom->id,MCI_RESUME,NULL,&mgp, 0);
+		mciSendCommand(cdrom->id,MCI_RESUME,0,&mgp, 0);
 		}
 	}
 /* Now play it. */
@@ -338,7 +338,7 @@ if (LOUSHORT(mciSendCommand(cdrom->id,MCI_STATUS,MCI_WAIT | MCI_STATUS_ITEM,&msp
 	if (msp.ulReturn == MCI_MODE_PAUSE)
 		{
 		mgp.hwndCallback = (HWND)NULL;		// None
-		mciSendCommand(cdrom->id,MCI_RESUME,NULL,&mgp, 0);
+		mciSendCommand(cdrom->id,MCI_RESUME,0,&mgp, 0);
 		}
 	}
 /* Now stops the media */

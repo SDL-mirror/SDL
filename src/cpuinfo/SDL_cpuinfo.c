@@ -96,7 +96,7 @@ CPUid by definition.  But it's nice to be able to prove it.  :)      */
 	:
 	: "%rax", "%rcx"
 	);
-#elif defined(_MSC_VER) && (defined(_M_IX86) || defined(_X86_))
+#elif (defined(_MSC_VER) && defined(_M_IX86)) || defined(__WATCOMC__)
 	__asm {
         pushfd                      ; Get original EFLAGS
         pop     eax
@@ -165,7 +165,7 @@ static __inline__ int CPU_getCPUIDFeatures(void)
 	:
 	: "%eax", "%ecx", "%edx", "%edi"
 	);
-#elif defined(_MSC_VER)  && (defined(_M_IX86) || defined(_X86_))
+#elif (defined(_MSC_VER) && defined(_M_IX86)) || defined(__WATCOMC__)
 	__asm {
         xor     eax, eax            ; Set up for CPUID instruction
         cpuid                       ; Get and save vendor ID
@@ -217,7 +217,7 @@ static __inline__ int CPU_getCPUIDFeaturesExt(void)
 	:
 	: "%eax", "%ecx", "%edx", "%edi"
 	);
-#elif defined(_MSC_VER)  && (defined(_M_IX86) || defined(_X86_))
+#elif (defined(_MSC_VER) && defined(_M_IX86)) || defined(__WATCOMC__)
 	__asm {
         mov     eax,80000000h       ; Query for extended functions
         cpuid                       ; Get extended function limit

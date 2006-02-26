@@ -57,8 +57,15 @@ struct SDL_PrivateVideoData
   int                 fInFocus;         // True if we're in focus!
   int                 iSkipWMMOUSEMOVE; // Number of WM_MOUSEMOVE messages to skip!
   int                 iMouseVisible;    //
+
+  PFNWP               pfnOldFrameProc;  // Old window frame procedure
+  int                 bProportionalResize; // 0: No proportional resizing
+                                           // 1: Do proportional resizing
+  ULONG               ulResizingFlag;   // First resizing flag value
 };
 
+/* OS/2 specific backdoor function to be able to set FrameControlFlags of */
+/* the SDL window before creating it. */
 extern DECLSPEC void SDLCALL SDL_OS2FSLIB_SetFCFToUse(ULONG ulFCF);
 
 #endif /* _SDL_os2fslib_h */

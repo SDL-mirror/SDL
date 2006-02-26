@@ -35,6 +35,7 @@
 */
 
 #if ((defined(_MFC_VER) && defined(_M_IX86)/* && !defined(_WIN32_WCE) still needed? */) || \
+     defined(__WATCOMC__) || \
      (defined(__GNUC__) && defined(__i386__))) && SDL_ASSEMBLY_ROUTINES
 #define USE_ASM_STRETCH
 #endif
@@ -281,8 +282,7 @@ int SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect,
 			: "=&D" (u1), "=&S" (u2)
 			: "0" (dstp), "1" (srcp), "r" (copy_row)
 			: "memory" );
-#else
-#ifdef _MSC_VER
+#elif defined(_MSC_VER) || defined(__WATCOMC__)
 		{ void *code = copy_row;
 			__asm {
 				push edi
@@ -299,7 +299,6 @@ int SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect,
 #else
 #error Need inline assembly for this compiler
 #endif
-#endif /* __GNUC__ */
 			break;
 		}
 #else

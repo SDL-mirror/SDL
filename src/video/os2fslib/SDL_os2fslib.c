@@ -21,6 +21,11 @@
 */
 #include "SDL_config.h"
 
+#define _ULS_CALLCONV_
+#define CALLCONV _System
+#include <unidef.h>                    // Unicode API
+#include <uconv.h>                     // Unicode API (codepage conversion)
+
 #include <process.h>
 #include <time.h>
 
@@ -115,8 +120,8 @@ static int  iShiftIsPressed;
 //
 /////////////////////////////////////////////////////////////////////
 static BOOL SetAccessableWindowPos(HWND hwnd, HWND hwndInsertBehind,
-				   LONG x, LONG y,
-				   LONG cx, LONG cy,
+                                   LONG x, LONG y,
+                                   LONG cx, LONG cy,
                                    ULONG fl)
 {
   SWP swpDesktop, swp;
@@ -169,6 +174,58 @@ static BOOL SetAccessableWindowPos(HWND hwnd, HWND hwndInsertBehind,
   return WinSetWindowPos(hwnd, hwndInsertBehind, x, y, cx, cy, fl);
 }
 
+static UniChar NativeCharToUniChar(int chcode)
+{
+  UniChar ucResult = (UniChar) chcode;
+  int rc;
+  UconvObject ucoTemp;
+  char     achFrom[2];
+  char     *pchFrom;
+  size_t   iFromCount;
+  UniChar  aucTo[10];
+  UniChar  *pucTo;
+  size_t   iToCount;
+  size_t   iNonIdentical;
+
+  // Create unicode convert object
+  rc = UniCreateUconvObject(L"", &ucoTemp);
+  if (rc!=ULS_SUCCESS)
+  {
+    // Could not create convert object!
+    return ucResult;
+  }
+
+  // Convert language code string to unicode string
+  achFrom[0] = (char) chcode;
+  achFrom[1] = 0;
+  iFromCount = sizeof(char) * 2;
+  iToCount = sizeof(UniChar) * 2;
+  pucTo = &(aucTo[0]);
+  pchFrom = &(achFrom[0]);
+
+  rc = UniUconvToUcs(ucoTemp,
+                     &pchFrom,
+                     &iFromCount,
+                     &pucTo,
+                     &iToCount,
+                     &iNonIdentical);
+
+  if (rc!=ULS_SUCCESS)
+  {
+    // Could not convert language code to UCS string!
+    UniFreeUconvObject(ucoTemp);
+    return ucResult;
+  }
+
+  UniFreeUconvObject(ucoTemp);
+
+#ifdef DEBUG_BUILD
+  printf("%02x converted to %02x\n", (int) chcode, (int) (aucTo[0]));
+#endif
+
+  return aucTo[0];
+}
+
 /////////////////////////////////////////////////////////////////////
 //
 // TranslateKey
@@ -184,10 +241,8 @@ static SDL_keysym *TranslateKey(int vkey, int chcode, int scancode, SDL_keysym *
 
   if (iPressed && SDL_TranslateUNICODE)
   {
-    // TODO:
-    // Implement real unicode conversion!
     if (chcode)
-      keysym->unicode = chcode;
+      keysym->unicode = NativeCharToUniChar(chcode);
     else
       keysym->unicode = vkey;
   }
@@ -207,74 +262,74 @@ static SDL_keysym *TranslateKey(int vkey, int chcode, int scancode, SDL_keysym *
     switch (keysym->sym)
     {
       case SDLK_BACKQUOTE:
-	keysym->sym = '~';
-	break;
+        keysym->sym = '~';
+        break;
       case SDLK_1:
-	keysym->sym = SDLK_EXCLAIM;
-	break;
+        keysym->sym = SDLK_EXCLAIM;
+        break;
       case SDLK_2:
-	keysym->sym = SDLK_AT;
-	break;
+        keysym->sym = SDLK_AT;
+        break;
       case SDLK_3:
-	keysym->sym = SDLK_HASH;
-	break;
+        keysym->sym = SDLK_HASH;
+        break;
       case SDLK_4:
-	keysym->sym = SDLK_DOLLAR;
-	break;
+        keysym->sym = SDLK_DOLLAR;
+        break;
       case SDLK_5:
-	keysym->sym = '%';
-	break;
+        keysym->sym = '%';
+        break;
       case SDLK_6:
-	keysym->sym = SDLK_CARET;
-	break;
+        keysym->sym = SDLK_CARET;
+        break;
       case SDLK_7:
-	keysym->sym = SDLK_AMPERSAND;
-	break;
+        keysym->sym = SDLK_AMPERSAND;
+        break;
       case SDLK_8:
-	keysym->sym = SDLK_ASTERISK;
-	break;
+        keysym->sym = SDLK_ASTERISK;
+        break;
       case SDLK_9:
-	keysym->sym = SDLK_LEFTPAREN;
-	break;
+        keysym->sym = SDLK_LEFTPAREN;
+        break;
       case SDLK_0:
-	keysym->sym = SDLK_RIGHTPAREN;
-	break;
+        keysym->sym = SDLK_RIGHTPAREN;
+        break;
       case SDLK_MINUS:
-	keysym->sym = SDLK_UNDERSCORE;
-	break;
+        keysym->sym = SDLK_UNDERSCORE;
+        break;
       case SDLK_PLUS:
-	keysym->sym = SDLK_EQUALS;
-	break;
+        keysym->sym = SDLK_EQUALS;
+        break;
 
       case SDLK_LEFTBRACKET:
-	keysym->sym = '{';
-	break;
+        keysym->sym = '{';
+        break;
       case SDLK_RIGHTBRACKET:
-	keysym->sym = '}';
-	break;
+        keysym->sym = '}';
+        break;
 
       case SDLK_SEMICOLON:
-	keysym->sym = SDLK_COLON;
-	break;
+        keysym->sym = SDLK_COLON;
+        break;
       case SDLK_QUOTE:
-	keysym->sym = SDLK_QUOTEDBL;
-	break;
+        keysym->sym = SDLK_QUOTEDBL;
+        break;
       case SDLK_BACKSLASH:
-	keysym->sym = '|';
-	break;
+        keysym->sym = '|';
+        break;
 
       case SDLK_COMMA:
-	keysym->sym = SDLK_LESS;
-	break;
+        keysym->sym = SDLK_LESS;
+        break;
       case SDLK_PERIOD:
-	keysym->sym = SDLK_GREATER;
-	break;
+        keysym->sym = SDLK_GREATER;
+        break;
       case SDLK_SLASH:
-	keysym->sym = SDLK_QUESTION;
-	break;
+        keysym->sym = SDLK_QUESTION;
+        break;
 
       default:
-	break;
+        break;
     }
   }
   return keysym;
@@ -283,33 +338,33 @@ static SDL_keysym *TranslateKey(int vkey, int chcode, int scancode, SDL_keysym *
 #define CONVERTMOUSEPOSITION()  \
         /* We have to inverse the mouse position, because every non-os/2 system */                                                \
         /* has a coordinate system where the (0;0) is the top-left corner,      */                                                \
-	/* while on os/2 it's the bottom left corner!                           */                                                \
-	if (FSLib_QueryFSMode(hwnd))                                                                                              \
-	{                                                                                                                         \
-	  /* We're in FS mode!                                                        */                                          \
-	  /* In FS mode our window is as big as fullscreen mode, but not necessary as */                                          \
-	  /* big as the source buffer (can be bigger)                                 */                                          \
+        /* while on os/2 it's the bottom left corner!                           */                                                \
+        if (FSLib_QueryFSMode(hwnd))                                                                                              \
+        {                                                                                                                         \
+          /* We're in FS mode!                                                        */                                          \
+          /* In FS mode our window is as big as fullscreen mode, but not necessary as */                                          \
+          /* big as the source buffer (can be bigger)                                 */                                          \
           /* So, limit mouse pos to source buffer size!                               */                                          \
-	  if (ppts->x<0) ppts->x = 0;                                                                                             \
-	  if (ppts->y<0) ppts->y = 0;                                                                                             \
-	  if (ppts->x>=pVideo->hidden->SrcBufferDesc.uiXResolution) ppts->x = pVideo->hidden->SrcBufferDesc.uiXResolution-1;      \
+          if (ppts->x<0) ppts->x = 0;                                                                                             \
+          if (ppts->y<0) ppts->y = 0;                                                                                             \
+          if (ppts->x>=pVideo->hidden->SrcBufferDesc.uiXResolution) ppts->x = pVideo->hidden->SrcBufferDesc.uiXResolution-1;      \
           if (ppts->y>=pVideo->hidden->SrcBufferDesc.uiYResolution) ppts->y = pVideo->hidden->SrcBufferDesc.uiYResolution-1;      \
           pVideo->hidden->iSkipWMMOUSEMOVE++; /* Don't take next WM_MOUSEMOVE into account!  */                                   \
           ptl.x = ppts->x; ptl.y = ppts->y;                                                                                       \
           WinMapWindowPoints(pVideo->hidden->hwndClient, HWND_DESKTOP, &ptl, 1);                                                  \
-	  WinSetPointerPos(HWND_DESKTOP, ptl.x, ptl.y);                                                                           \
-	  /* Then convert OS/2 position to SDL position */                                                                        \
+          WinSetPointerPos(HWND_DESKTOP, ptl.x, ptl.y);                                                                           \
+          /* Then convert OS/2 position to SDL position */                                                                        \
           ppts->y = pVideo->hidden->SrcBufferDesc.uiYResolution - ppts->y - 1;                                                    \
-	} else                                                                                                                    \
-	{                                                                                                                         \
-	  SWP swpClient;                                                                                                          \
+        } else                                                                                                                    \
+        {                                                                                                                         \
+          SWP swpClient;                                                                                                          \
           /* We're in windowed mode! */                                                                                           \
-	  WinQueryWindowPos(pVideo->hidden->hwndClient, &swpClient);                                                              \
+          WinQueryWindowPos(pVideo->hidden->hwndClient, &swpClient);                                                              \
           /* Convert OS/2 mouse position to SDL position, and also scale it! */                                                   \
-	  (ppts->x) = (ppts->x) * pVideo->hidden->SrcBufferDesc.uiXResolution / swpClient.cx;                                       \
-	  (ppts->y) = (ppts->y) * pVideo->hidden->SrcBufferDesc.uiYResolution / swpClient.cy;                                       \
-	  (ppts->y) = pVideo->hidden->SrcBufferDesc.uiYResolution - (ppts->y)  - 1;                                                 \
-	}
+          (ppts->x) = (ppts->x) * pVideo->hidden->SrcBufferDesc.uiXResolution / swpClient.cx;                                       \
+          (ppts->y) = (ppts->y) * pVideo->hidden->SrcBufferDesc.uiYResolution / swpClient.cy;                                       \
+          (ppts->y) = pVideo->hidden->SrcBufferDesc.uiYResolution - (ppts->y)  - 1;                                                 \
+        }
 
 
 
@@ -351,9 +406,9 @@ static MRESULT EXPENTRY WndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         */
 
         // If it's not repeated, then let's see if its pressed or released!
-	if (SHORT1FROMMP(mp1) & KC_KEYUP)
-	{
-	  // A key has been released
+        if (SHORT1FROMMP(mp1) & KC_KEYUP)
+        {
+          // A key has been released
           SDL_keysym keysym;
 
 #ifdef DEBUG_BUILD
@@ -362,10 +417,10 @@ static MRESULT EXPENTRY WndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
           // One problem is with F1, which gets only the keyup message because
           // it is a system key.
-	  // So, when we get keyup message, we simulate keydown too!
-	  // UPDATE:
-	  //  This problem should be solved now, that the accelerator keys are
-	  //  disabled for this window!
+          // So, when we get keyup message, we simulate keydown too!
+          // UPDATE:
+          //  This problem should be solved now, that the accelerator keys are
+          //  disabled for this window!
           /*
           if (SHORT2FROMMP(mp2)==VK_F1)
           {
@@ -373,45 +428,45 @@ static MRESULT EXPENTRY WndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                                                            SHORT1FROMMP(mp2), // Character code
                                                            CHAR4FROMMP(mp1),  // HW Scan code
                                                            &keysym,0));
-	  }*/
+          }*/
 
           SDL_PrivateKeyboard(SDL_RELEASED, TranslateKey(SHORT2FROMMP(mp2), // VK_ code
-							 SHORT1FROMMP(mp2), // Character code
-							 CHAR4FROMMP(mp1),  // HW Scan code
+                                                         SHORT1FROMMP(mp2), // Character code
+                                                         CHAR4FROMMP(mp1),  // HW Scan code
                                                          &keysym,0));
           
-	} else
-	{
+        } else
+        {
           // A key has been pressed
           SDL_keysym keysym;
 
 #ifdef DEBUG_BUILD
 //          printf("WM_CHAR, keydown, code is [0x%0x]\n", CHAR4FROMMP(mp1)); // HW scan code
 #endif
-	  // Check for fastkeys: ALT+HOME to toggle FS mode
+          // Check for fastkeys: ALT+HOME to toggle FS mode
           //                     ALT+END to close app
-	  if ((SHORT1FROMMP(mp1) & KC_ALT) &&
-	      (SHORT2FROMMP(mp2) == VK_HOME))
-	  {
+          if ((SHORT1FROMMP(mp1) & KC_ALT) &&
+              (SHORT2FROMMP(mp2) == VK_HOME))
+          {
 #ifdef DEBUG_BUILD
-	    printf(" Pressed ALT+HOME!\n"); fflush(stdout);
+            printf(" Pressed ALT+HOME!\n"); fflush(stdout);
 #endif
-	    // Only switch between fullscreen and back if it's not
-	    // a resizable mode!
+            // Only switch between fullscreen and back if it's not
+            // a resizable mode!
             if (
                 (!pVideo->hidden->pSDLSurface) ||
                 ((pVideo->hidden->pSDLSurface)
                  && ((pVideo->hidden->pSDLSurface->flags & SDL_RESIZABLE)==0)
                 )
                )
-	      FSLib_ToggleFSMode(hwnd, !FSLib_QueryFSMode(hwnd));
+              FSLib_ToggleFSMode(hwnd, !FSLib_QueryFSMode(hwnd));
 #ifdef DEBUG_BUILD
             else
-	      printf(" Resizable mode, so discarding ALT+HOME!\n"); fflush(stdout);
+              printf(" Resizable mode, so discarding ALT+HOME!\n"); fflush(stdout);
 #endif
-	  } else
-	  if ((SHORT1FROMMP(mp1) & KC_ALT) &&
-	      (SHORT2FROMMP(mp2) == VK_END))
+          } else
+          if ((SHORT1FROMMP(mp1) & KC_ALT) &&
+              (SHORT2FROMMP(mp2) == VK_END))
           {
 #ifdef DEBUG_BUILD
             printf(" Pressed ALT+END!\n"); fflush(stdout);
@@ -421,32 +476,32 @@ static MRESULT EXPENTRY WndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             // wait for it to be processed!
             SDL_PrivateQuit();
             WinPostMsg(hwnd, WM_QUIT, 0, 0);
-	  } else
+          } else
           {
             
-	    SDL_PrivateKeyboard(SDL_PRESSED, TranslateKey(SHORT2FROMMP(mp2), // VK_ code
-							  SHORT1FROMMP(mp2), // Character code
-							  CHAR4FROMMP(mp1),  // HW Scan code
+            SDL_PrivateKeyboard(SDL_PRESSED, TranslateKey(SHORT2FROMMP(mp2), // VK_ code
+                                                          SHORT1FROMMP(mp2), // Character code
+                                                          CHAR4FROMMP(mp1),  // HW Scan code
                                                           &keysym,1));
             
-	  }
-	}
+          }
+        }
       }
       return (MRESULT) TRUE;
 
     case WM_TRANSLATEACCEL:
       {
-	PQMSG pqmsg;
-	pqmsg = (PQMSG) mp1;
-	if (mp1)
-	{
-	  if (pqmsg->msg == WM_CHAR)
-	  {
-	    // WM_CHAR message!
-	    // Let's filter the ALT keypress and all other acceleration keys!
-	    return (MRESULT) FALSE;
-	  }
-	}
+        PQMSG pqmsg;
+        pqmsg = (PQMSG) mp1;
+        if (mp1)
+        {
+          if (pqmsg->msg == WM_CHAR)
+          {
+            // WM_CHAR message!
+            // Let's filter the ALT keypress and all other acceleration keys!
+            return (MRESULT) FALSE;
+          }
+        }
         break; // Default processing (pass to parent until frame control)
       }
 
@@ -560,7 +615,7 @@ static MRESULT EXPENTRY WndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 #ifdef DEBUG_BUILD
       else
       {
-	printf("WM_PAINT : No pVideo!\n"); fflush(stdout);
+        printf("WM_PAINT : No pVideo!\n"); fflush(stdout);
       }
 #endif
       WinEndPaint(ps);
@@ -573,14 +628,14 @@ static MRESULT EXPENTRY WndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     case WM_SIZE:
       {
 #ifdef DEBUG_BUILD
-	printf("WM_SIZE : (%d %d)\n",
-	       SHORT1FROMMP(mp2), SHORT2FROMMP(mp2)); fflush(stdout);
+        printf("WM_SIZE : (%d %d)\n",
+               SHORT1FROMMP(mp2), SHORT2FROMMP(mp2)); fflush(stdout);
 #endif
         iWindowSizeX = SHORT1FROMMP(mp2);
         iWindowSizeY = SHORT2FROMMP(mp2);
         bWindowResized = 1;
 
-	// Make sure the window will be redrawn
+        // Make sure the window will be redrawn
         WinInvalidateRegion(hwnd, NULL, TRUE);
       }
       break;
@@ -591,9 +646,9 @@ static MRESULT EXPENTRY WndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 #endif
       if ((int)mp1 == FSLN_TOGGLEFSMODE)
       {
-	// FS mode changed, reblit image!
-	pVideo = FSLib_GetUserParm(hwnd);
-	if (pVideo)
+        // FS mode changed, reblit image!
+        pVideo = FSLib_GetUserParm(hwnd);
+        if (pVideo)
         {
           if (!pVideo->hidden->pSDLSurface)
           {
@@ -651,7 +706,7 @@ static MRESULT EXPENTRY WndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
               DosReleaseMutexSem(pVideo->hidden->hmtxUseSrcBuffer);
             }
           }
-	}
+        }
       }
       return (MPARAM) 1;
 
@@ -670,12 +725,12 @@ static MRESULT EXPENTRY WndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
           if ((pVideo->hidden->iMouseVisible) && (!bMouseCaptured))
             WinSetPointer(HWND_DESKTOP, WinQuerySysPointer(HWND_DESKTOP, SPTR_ARROW, FALSE));
           else
-	    WinSetPointer(HWND_DESKTOP, NULL);
+            WinSetPointer(HWND_DESKTOP, NULL);
 
-	  if (bMouseCapturable)
-	  {
+          if (bMouseCapturable)
+          {
             // Re-capture the mouse, if we captured it before!
-	    WinSetCapture(HWND_DESKTOP, hwnd);
+            WinSetCapture(HWND_DESKTOP, hwnd);
             bMouseCaptured = 1;
             {
               SWP swpClient;
@@ -689,18 +744,18 @@ static MRESULT EXPENTRY WndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                                ptl.x + swpClient.cx/2,
                                ptl.y + swpClient.cy/2);
             }
-	  }
+          }
         } else
         {
           // Went out of focus
-	  WinSetPointer(HWND_DESKTOP, WinQuerySysPointer(HWND_DESKTOP, SPTR_ARROW, FALSE));
+          WinSetPointer(HWND_DESKTOP, WinQuerySysPointer(HWND_DESKTOP, SPTR_ARROW, FALSE));
 
-	  if (bMouseCaptured)
-	  {
+          if (bMouseCaptured)
+          {
             // Release the mouse
-	    WinSetCapture(HWND_DESKTOP, hwnd);
+            WinSetCapture(HWND_DESKTOP, hwnd);
             bMouseCaptured = 0;
-	  }
+          }
         }
       }
 #ifdef DEBUG_BUILD
@@ -717,16 +772,16 @@ static MRESULT EXPENTRY WndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
       pVideo = FSLib_GetUserParm(hwnd);
       if (pVideo)
       {
-	SDL_PrivateMouseButton(SDL_PRESSED,
+        SDL_PrivateMouseButton(SDL_PRESSED,
                                SDL_BUTTON_LEFT,
                                0, 0); // Don't report mouse movement!
 
-	if (bMouseCapturable)
-	{
-	  // We should capture the mouse!
-	  if (!bMouseCaptured)
-	  {
-	    WinSetCapture(HWND_DESKTOP, hwnd);
+        if (bMouseCapturable)
+        {
+          // We should capture the mouse!
+          if (!bMouseCaptured)
+          {
+            WinSetCapture(HWND_DESKTOP, hwnd);
             WinSetPointer(HWND_DESKTOP, NULL);
             bMouseCaptured = 1;
             {
@@ -741,8 +796,8 @@ static MRESULT EXPENTRY WndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                                ptl.x + swpClient.cx/2,
                                ptl.y + swpClient.cy/2);
             }
-	  }
-	}
+          }
+        }
       }
       break;
     case WM_BUTTON1UP:
@@ -761,16 +816,16 @@ static MRESULT EXPENTRY WndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
       pVideo = FSLib_GetUserParm(hwnd);
       if (pVideo)
       {
-	SDL_PrivateMouseButton(SDL_PRESSED,
+        SDL_PrivateMouseButton(SDL_PRESSED,
                                SDL_BUTTON_RIGHT,
                                0, 0); // Don't report mouse movement!
 
-	if (bMouseCapturable)
-	{
-	  // We should capture the mouse!
-	  if (!bMouseCaptured)
-	  {
-	    WinSetCapture(HWND_DESKTOP, hwnd);
+        if (bMouseCapturable)
+        {
+          // We should capture the mouse!
+          if (!bMouseCaptured)
+          {
+            WinSetCapture(HWND_DESKTOP, hwnd);
             WinSetPointer(HWND_DESKTOP, NULL);
             bMouseCaptured = 1;
             {
@@ -785,8 +840,8 @@ static MRESULT EXPENTRY WndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                                ptl.x + swpClient.cx/2,
                                ptl.y + swpClient.cy/2);
             }
-	  }
-	}
+          }
+        }
 
       }
       break;
@@ -810,12 +865,12 @@ static MRESULT EXPENTRY WndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                                SDL_BUTTON_MIDDLE,
                                0, 0); // Don't report mouse movement!
         
-	if (bMouseCapturable)
-	{
-	  // We should capture the mouse!
-	  if (!bMouseCaptured)
-	  {
-	    WinSetCapture(HWND_DESKTOP, hwnd);
+        if (bMouseCapturable)
+        {
+          // We should capture the mouse!
+          if (!bMouseCaptured)
+          {
+            WinSetCapture(HWND_DESKTOP, hwnd);
             WinSetPointer(HWND_DESKTOP, NULL);
             bMouseCaptured = 1;
             {
@@ -830,8 +885,8 @@ static MRESULT EXPENTRY WndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                                ptl.x + swpClient.cx/2,
                                ptl.y + swpClient.cy/2);
             }
-	  }
-	}
+          }
+        }
       }
       break;
     case WM_BUTTON3UP:
@@ -858,19 +913,19 @@ static MRESULT EXPENTRY WndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
           POINTS *ppts = (POINTS *) (&mp1);
           POINTL ptl;
 
-          CONVERTMOUSEPOSITION();
-
           if (bMouseCaptured)
           {
             SWP swpClient;
+
+            WinQueryWindowPos(pVideo->hidden->hwndClient, &swpClient);
+
             // Send relative mouse position, and re-center the mouse
             // Reposition the mouse to the center of the screen/window
             SDL_PrivateMouseMotion(0, // Buttons not changed
                                    1, // Relative position
-                                   ppts->x - (pVideo->hidden->SrcBufferDesc.uiXResolution/2),
-                                   ppts->y+1 - (pVideo->hidden->SrcBufferDesc.uiYResolution/2));
+                                   ppts->x - (swpClient.cx/2),
+                                   (swpClient.cy/2) - ppts->y);
 
-            WinQueryWindowPos(pVideo->hidden->hwndClient, &swpClient);
             ptl.x = 0; ptl.y = 0;
             WinMapWindowPoints(pVideo->hidden->hwndClient, HWND_DESKTOP, &ptl, 1);
             pVideo->hidden->iSkipWMMOUSEMOVE++; /* Don't take next WM_MOUSEMOVE into account!  */
@@ -880,6 +935,8 @@ static MRESULT EXPENTRY WndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                              ptl.y + swpClient.cy/2);
           } else
           {
+            CONVERTMOUSEPOSITION();
+
             // Send absolute mouse position
             SDL_PrivateMouseMotion(0, // Buttons not changed
                                    0, // Absolute position
@@ -986,6 +1043,98 @@ static MRESULT EXPENTRY WndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
 /////////////////////////////////////////////////////////////////////
 //
+// FrameWndProc
+//
+// This is the message processing window procedure for the
+// frame window of SDLWindowClass.
+//
+/////////////////////////////////////////////////////////////////////
+static MRESULT EXPENTRY FrameWndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
+{
+  PFNWP pOldFrameProc;
+  MRESULT result;
+  PTRACKINFO ti;
+  int cx, cy, ncx, ncy;
+  RECTL rclTemp;
+  PSWP pswpTemp;
+
+  SDL_VideoDevice *pVideo = NULL;
+
+  pVideo = (SDL_VideoDevice *) WinQueryWindowULong(hwnd, QWL_USER);
+
+  pOldFrameProc = pVideo->hidden->pfnOldFrameProc;
+
+  if ((pVideo->hidden->bProportionalResize) &&
+      (msg==WM_ADJUSTWINDOWPOS) &&
+      (!FSLib_QueryFSMode(pVideo->hidden->hwndClient))
+     )
+  {
+    pswpTemp = (PSWP) mp1;
+
+    /* Resizing? */
+    if (pswpTemp->fl & SWP_SIZE)
+    {
+      /* Calculate client size */
+      rclTemp.xLeft = pswpTemp->x;
+      rclTemp.xRight = pswpTemp->x + pswpTemp->cx;
+      rclTemp.yBottom = pswpTemp->y;
+      rclTemp.yTop = pswpTemp->y + pswpTemp->cy;
+      WinCalcFrameRect(hwnd, &rclTemp, TRUE);
+
+      ncx = cx = rclTemp.xRight - rclTemp.xLeft;
+      ncy = cy = rclTemp.yTop - rclTemp.yBottom;
+
+      /* Calculate new size to keep it proportional */
+
+      if ((pVideo->hidden->ulResizingFlag & TF_LEFT) || (pVideo->hidden->ulResizingFlag & TF_RIGHT))
+      {
+        /* The window is resized horizontally */
+        ncy = pVideo->hidden->SrcBufferDesc.uiYResolution * cx / pVideo->hidden->SrcBufferDesc.uiXResolution;
+      } else
+      if ((pVideo->hidden->ulResizingFlag & TF_TOP) || (pVideo->hidden->ulResizingFlag & TF_BOTTOM))
+      {
+        /* The window is resized vertically */
+        ncx = pVideo->hidden->SrcBufferDesc.uiXResolution * cy / pVideo->hidden->SrcBufferDesc.uiYResolution;
+      }
+
+      /* Calculate back frame coordinates */
+      rclTemp.xLeft = pswpTemp->x;
+      rclTemp.xRight = pswpTemp->x + ncx;
+      rclTemp.yBottom = pswpTemp->y;
+      rclTemp.yTop = pswpTemp->y + ncy;
+      WinCalcFrameRect(hwnd, &rclTemp, FALSE);
+
+      /* Store new size/position info */
+      pswpTemp->cx = rclTemp.xRight - rclTemp.xLeft;
+
+      if (!(pVideo->hidden->ulResizingFlag & TF_TOP))
+      {
+        pswpTemp->y = pswpTemp->y + pswpTemp->cy - (rclTemp.yTop - rclTemp.yBottom);
+        pswpTemp->cy = rclTemp.yTop - rclTemp.yBottom;
+      } else
+      {
+        pswpTemp->cy = rclTemp.yTop - rclTemp.yBottom;
+      }
+    }
+  }
+
+  result = (*pOldFrameProc)(hwnd, msg, mp1, mp2);
+
+  if ((pVideo->hidden->bProportionalResize) && (msg==WM_QUERYTRACKINFO))
+  {
+    ti = (PTRACKINFO) mp2;
+
+    /* Store the direction of resizing */
+    if ((ti->fs & TF_LEFT) || (ti->fs & TF_RIGHT) ||
+        (ti->fs & TF_TOP) || (ti->fs & TF_BOTTOM))
+      pVideo->hidden->ulResizingFlag = ti->fs;
+  }
+
+  return result;
+}
+
+/////////////////////////////////////////////////////////////////////
+//
 // PMThreadFunc
 //
 // This function implements the PM-Thread, which initializes the
@@ -1037,7 +1186,7 @@ static void PMThreadFunc(void *pParm)
                             &(pVideo->hidden->SrcBufferDesc),
                             WndProc,
                             &(pVideo->hidden->hwndClient),
-			    &(pVideo->hidden->hwndFrame));
+                            &(pVideo->hidden->hwndFrame));
 
 #ifdef DEBUG_BUILD
     printf("[PMThreadFunc] : FSLib_CreateWindow() rc = %d\n", rc);
@@ -1084,6 +1233,11 @@ static void PMThreadFunc(void *pParm)
                              (rectl.xRight-rectl.xLeft),
                              (rectl.yTop-rectl.yBottom),
                              SWP_SIZE | SWP_ACTIVATE | SWP_SHOW | SWP_MOVE);
+
+      // Subclass frame procedure and store old window proc address
+      pVideo->hidden->pfnOldFrameProc =
+        WinSubclassWindow(pVideo->hidden->hwndFrame, FrameWndProc);
+      WinSetWindowULong(pVideo->hidden->hwndFrame, QWL_USER, (ULONG) pVideo);
 
 #ifdef DEBUG_BUILD
       printf("[PMThreadFunc] : Entering message loop\n"); fflush(stdout);
@@ -1814,7 +1968,7 @@ int os2fslib_IconifyWindow(_THIS)
   hmqerror = WinGetLastError(hab);
 
   WinSetWindowPos(_this->hidden->hwndFrame, HWND_TOP,
-		 0, 0, 0, 0, SWP_MINIMIZE);
+                 0, 0, 0, 0, SWP_MINIMIZE);
 
   // Now destroy the message queue, if we've created it!
   if (ERRORIDERROR(hmqerror)==0)
@@ -2139,7 +2293,7 @@ static void os2fslib_VideoQuit(_THIS)
  should take care of cleaning up the current mode.
  */
 static SDL_Surface *os2fslib_SetVideoMode(_THIS, SDL_Surface *current,
-					  int width, int height, int bpp, Uint32 flags)
+                                          int width, int height, int bpp, Uint32 flags)
 {
   static int bFirstCall = 1;
   FSLib_VideoMode_p pModeInfo, pModeInfoFound;
@@ -2475,7 +2629,7 @@ static SDL_Rect **os2fslib_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flag
           pRect->h = pFSMode->uiYResolution;
 #ifdef DEBUG_BUILD
 //          printf("!!! Seems to be good!\n");
-//	  printf("F: %dx%d\n", pRect->w, pRect->h);
+//        printf("F: %dx%d\n", pRect->w, pRect->h);
 #endif
           // And insert into list of pRects
           if (!(_this->hidden->pListModesResult))
@@ -2489,7 +2643,7 @@ static SDL_Rect **os2fslib_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flag
             if (_this->hidden->pListModesResult)
             {
               _this->hidden->pListModesResult[0] = pRect;
-	      _this->hidden->pListModesResult[1] = NULL;
+              _this->hidden->pListModesResult[1] = NULL;
             } else
             {
               SDL_free(pRect);
@@ -2601,6 +2755,83 @@ static int os2fslib_VideoInit(_THIS, SDL_PixelFormat *vformat)
   _this->hidden->fInFocus = 0;
   _this->hidden->iSkipWMMOUSEMOVE = 0;
   _this->hidden->iMouseVisible = 1;
+
+  if (getenv("SDL_USE_PROPORTIONAL_WINDOW"))
+    _this->hidden->bProportionalResize = 1;
+  else
+  {
+    PPIB pib;
+    PTIB tib;
+    char *pchFileName, *pchTemp;
+    char achConfigFile[CCHMAXPATH];
+    FILE *hFile;
+
+    /* No environment variable to have proportional window.
+     * Ok, let's check if this executable is in config file!
+     */
+    _this->hidden->bProportionalResize = 0;
+
+    DosGetInfoBlocks(&tib, &pib);
+    pchTemp = pchFileName = pib->pib_pchcmd;
+    while (*pchTemp)
+    {
+      if (*pchTemp=='\\')
+        pchFileName = pchTemp+1;
+      pchTemp++;
+    }
+    if (getenv("HOME"))
+    {
+      sprintf(achConfigFile, "%s\\.sdl.proportionals", getenv("HOME"));
+      hFile = fopen(achConfigFile, "rt");
+      if (!hFile)
+      {
+        /* Seems like the file cannot be opened or does not exist.
+         * Let's try to create it with defaults!
+         */
+        hFile = fopen(achConfigFile, "wt");
+        if (hFile)
+        {
+          fprintf(hFile, "; This file is a config file of SDL/2, containing\n");
+          fprintf(hFile, "; the list of executables that must have proportional\n");
+          fprintf(hFile, "; windows.\n");
+          fprintf(hFile, ";\n");
+          fprintf(hFile, "; You can add executable filenames into this file,\n");
+          fprintf(hFile, "; one under the other. If SDL finds that a given\n");
+          fprintf(hFile, "; program is in this list, then that application\n");
+          fprintf(hFile, "; will have proportional windows, just like if\n");
+          fprintf(hFile, "; the SET SDL_USE_PROPORTIONAL_WINDOW env. variable\n");
+          fprintf(hFile, "; would have been set for that process.\n");
+          fprintf(hFile, ";\n");
+          fprintf(hFile, "\n");
+          fprintf(hFile, "dosbox.exe\n");
+          fclose(hFile);
+        }
+
+        hFile = fopen(achConfigFile, "rt");
+      }
+
+      if (hFile)
+      {
+        while (fgets(achConfigFile, sizeof(achConfigFile), hFile))
+        {
+          /* Cut \n from end of string */
+
+          while (achConfigFile[strlen(achConfigFile)-1] == '\n')
+            achConfigFile[strlen(achConfigFile)-1] = 0;
+
+          /* Compare... */
+          if (stricmp(achConfigFile, pchFileName)==0)
+          {
+            /* Found it in config file! */
+            _this->hidden->bProportionalResize = 1;
+            break;
+          }
+        }
+        fclose(hFile);
+      }
+    }
+  }
+
   DosCreateMutexSem(NULL, &(_this->hidden->hmtxUseSrcBuffer), 0, FALSE);
 
   // Now create our window with a default size
@@ -2777,7 +3008,7 @@ static SDL_VideoDevice *os2fslib_CreateDevice(int devindex)
 }
 
 VideoBootStrap OS2FSLib_bootstrap = {
-  	"os2fslib", "OS/2 Video Output using FSLib",
-	os2fslib_Available, os2fslib_CreateDevice
+        "os2fslib", "OS/2 Video Output using FSLib",
+        os2fslib_Available, os2fslib_CreateDevice
 };
 

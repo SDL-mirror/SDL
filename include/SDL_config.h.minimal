@@ -36,6 +36,8 @@
 #include "SDL_config_macosx.h"
 #elif defined(__WIN32__)
 #include "SDL_config_win32.h"
+#elif defined(__OS2__)
+#include "SDL_config_os2.h"
 #else
 /* This is the minimal configuration that can be used to build SDL */
 

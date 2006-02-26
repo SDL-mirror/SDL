@@ -65,8 +65,8 @@ typedef struct SDL_Thread SDL_Thread;
 #endif
 
 #ifdef __OS2__
-typedef int (__cdecl *pfnSDL_CurrentBeginThread)(void (*func)(void *), void *, unsigned, void *arg); 
-typedef void (__cdecl *pfnSDL_CurrentEndThread)(void);
+typedef int (*pfnSDL_CurrentBeginThread)(void (*func)(void *), void *, unsigned, void *arg); 
+typedef void (*pfnSDL_CurrentEndThread)(void);
 #else
 #ifdef __GNUC__
 #include <stdint.h>

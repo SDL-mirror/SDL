@@ -32,6 +32,7 @@
 #include "joyos2.h"
 
 #include "SDL_joystick.h"
+#include "SDL_events.h"
 #include "../SDL_sysjoystick.h"
 #include "../SDL_joystick_c.h"
 
@@ -50,7 +51,7 @@ HFILE hJoyPort = NULL;		/* Joystick GAME$ Port Address */
 #define JOY_BUTTON_FLAG(n) (1<<n)
 
 /* Joystick data... hold information about detected devices */
-struct _SYS_JoyData
+typedef struct SYS_JoyData_s
 {
 Sint8					id;								// Device ID
 char					szDeviceName[MAX_JOYNAME];	// Device Name
@@ -62,7 +63,9 @@ int					axes_min[MAX_AXES];			// minimum callibration value for axes
 int					axes_med[MAX_AXES];			// medium callibration value for axes
 int					axes_max[MAX_AXES];			// maximum callibration value for axes
 int					buttoncalc[4];					// Used for buttons 5, 6, 7 and 8.
-} SYS_JoyData[MAX_JOYSTICKS];
+} SYS_JoyData_t, *SYS_JoyData_p;
+
+SYS_JoyData_t SYS_JoyData[MAX_JOYSTICKS];
 
 
 /* Structure used to convert data from OS/2 driver format to SDL format */
@@ -292,14 +295,14 @@ if (numdevs > 0)
 			}
 		/* Hack to define Joystick Port Names */
 		if ( numdevs > maxdevs ) numdevs = maxdevs;
-		for (i=0; i<numdevs; i++) {
-			SDL_snprintf (SYS_JoyData[i].szDeviceName, SDL_arraysize(szDeviceName), "Default Joystick %c", 'A'+SYS_JoyData[i].id);
-		}
+		for (i=0; i<numdevs; i++)
+                  SDL_snprintf (SYS_JoyData[i].szDeviceName, SDL_arraysize(SYS_JoyData[i].szDeviceName), "Default Joystick %c", 'A'+SYS_JoyData[i].id);
+
+                }
 	}
 /* Return the number of devices found */
 return(numdevs);
 }
-
 
 
 /***********************************************************/

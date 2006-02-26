@@ -23,7 +23,7 @@
 
 #include "SDL_mixer_MMX_VC.h"
 
-#if defined(_MSC_VER) && defined(M_I86) && defined(SDL_ASSEMBLY_ROUTINES)
+#if ((defined(_MSC_VER) && defined(_M_IX86)) || defined(__WATCOMC__)) && defined(SDL_ASSEMBLY_ROUTINES)
 // MMX assembler version of SDL_MixAudio for signed little endian 16 bit samples and signed 8 bit samples
 // Copyright 2002 Stephane Marchesin (stephane.marchesin@wanadoo.fr)
 // Converted to Intel ASM notation by Cth
