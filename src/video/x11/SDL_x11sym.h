@@ -140,7 +140,7 @@ SDL_X11_SYM(1,unsigned long,_XSetLastRequestRead,(Display*,xGenericReply*))
  * These don't exist in 32-bit versions and are removed by Xlib macros, but
  *  64+ bit systems will use them.
  */
-#if defined(LONG64) && !defined(__osf__)
+#if defined(LONG64)
 SDL_X11_SYM(1,int,_XData32,(Display *dpy,register long *data,unsigned len))
 SDL_X11_SYM(1,void,_XRead32,(Display *dpy,register long *data,long len))
 #endif

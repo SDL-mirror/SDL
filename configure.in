@@ -397,6 +397,44 @@ CheckDMEDIA()
     fi
 }
 
+dnl Check whether we want to use Tru64 UNIX native audio or not
+CheckMME()
+{
+    dnl Make sure we are running on an Tru64 UNIX
+    case $ARCH in
+        osf)
+            ;;
+        *)
+            return
+            ;;
+    esac
+    if test x$enable_audio = xyes; then
+        AC_MSG_CHECKING(for MME audio support)
+        MME_CFLAGS="-I/usr/include/mme"
+        MME_LIBS="-lmme"
+        have_mme=no
+        save_CFLAGS="$CFLAGS"
+        CFLAGS="$CFLAGS $MME_CFLAGS"
+        AC_TRY_COMPILE([
+          #include <mme_api.h>
+        ],[
+          HWAVEOUT sound;
+        ],[
+        have_mme=yes
+        ])
+        CFLAGS="$save_CFLAGS"
+        AC_MSG_RESULT($have_mme)
+        # Set up files for the audio library
+        if test x$have_mme = xyes; then
+            AC_DEFINE(SDL_AUDIO_DRIVER_MMEAUDIO)
+            SOURCES="$SOURCES $srcdir/src/audio/mme/*.c"
+            BUILD_CFLAGS="$BUILD_CFLAGS $MME_CFLAGS"
+            BUILD_LDFLAGS="$BUILD_LDFLAGS $MME_LIBS"
+            have_audio=yes
+        fi
+    fi
+}
+
 dnl Find the ESD includes and libraries
 CheckESD()
 {
@@ -1555,6 +1593,11 @@ AC_HELP_STRING([--enable-pthread-sem], [use pthread semaphores [default=yes]]),
             SDL_CFLAGS="$SDL_CFLAGS $pthread_cflags"
             SDL_LIBS="$SDL_LIBS $pthread_lib"
 
+            # Save the original compiler flags and libraries
+            ac_save_cflags="$CFLAGS"; ac_save_libs="$LIBS"
+            # Add the pthread compiler flags and libraries
+            CFLAGS="$CFLAGS $pthread_cflags"; LIBS="$LIBS $pthread_lib"
+
             # Check to see if recursive mutexes are available
             AC_MSG_CHECKING(for recursive mutexes)
             has_recursive_mutexes=no
@@ -1595,6 +1638,9 @@ AC_HELP_STRING([--enable-pthread-sem], [use pthread semaphores [default=yes]]),
                 ])
                 AC_MSG_RESULT($have_pthread_sem)
             fi
+
+            # Restore the compiler flags and libraries
+            CFLAGS="$ac_save_cflags"; LIBS="$ac_save_libs"
 
             # Basic thread creation functions
             SOURCES="$SOURCES $srcdir/src/thread/pthread/SDL_systhread.c"
@@ -1903,6 +1949,7 @@ case "$target" in
         CheckAltivec
         CheckOSS
         CheckDMEDIA
+        CheckMME
         CheckALSA
         CheckARTSC
         CheckESD
@@ -1943,12 +1990,6 @@ case "$target" in
             aix)
                 AC_DEFINE(SDL_AUDIO_DRIVER_PAUD)
                 SOURCES="$SOURCES $srcdir/src/audio/paudio/*.c"
-                have_audio=yes
-            ;;
-            osf)
-                AC_DEFINE(SDL_AUDIO_DRIVER_MMEAUDIO)
-                SOURCES="$SOURCES $srcdir/src/audio/mme/*.c"
-                BUILD_LDFLAGS="$BUILD_LDFLAGS -lmme"
                 have_audio=yes
             ;;
           esac

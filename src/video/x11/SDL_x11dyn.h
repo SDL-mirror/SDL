@@ -50,6 +50,15 @@
 extern "C" {
 #endif
 
+#ifdef __osf__
+extern int _XData32(Display *,register long *,unsigned);
+extern void _XRead32(Display *,register long *,long);
+extern void _SmtBufferOverflow(Display *,register smtDisplayPtr);
+extern void _SmtIpError(Display *,register smtDisplayPtr, int);
+extern int ipAllocateData(ChannelPtr, IPCard, IPDataPtr *);
+extern int ipUnallocateAndSendData(ChannelPtr, IPCard);
+#endif
+
 /* evil function signatures... */
 typedef Bool (*SDL_X11_XESetWireToEventRetType)(Display*,XEvent*,xEvent*);
 typedef int (*SDL_X11_XSynchronizeRetType)(Display*);
@@ -72,7 +81,7 @@ typedef int (*SDL_X11_XSetExtensionErrorHandlerType)(Display *,char *,char *);
 #define XFree pXFree
 #define _XData32 p_XData32
 
-#if defined(__osf__) && defined(SDL_VIDEO_DRIVER_X11_DYNAMIC)
+#if defined(__osf__)
 #define _SmtBufferOverflow p_SmtBufferOverflow
 #define _SmtIpError p_SmtIpError
 #define ipAllocateData pipAllocateData
