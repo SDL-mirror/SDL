@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 	
 	rwops = SDL_RWFromFile(NULL,NULL);
 	if (rwops) RWOP_ERR_QUIT(rwops);
-	rwops = SDL_RWFromFile(NULL,"a+" WIN32_FILE_MODE);
+	rwops = SDL_RWFromFile(NULL,"ab+");
 	if (rwops) RWOP_ERR_QUIT(rwops);
 	rwops = SDL_RWFromFile(NULL,"sldfkjsldkfj");
 	if (rwops) RWOP_ERR_QUIT(rwops);
