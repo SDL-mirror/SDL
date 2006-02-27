@@ -62,20 +62,18 @@ typedef struct SDL_RWops {
 
 	Uint32 type;
 	union {
-
+#ifdef __WIN32__
+		struct {
+		int    autoclose;
+		int    append;
+		void*  h;
+		} win32io;
+#endif
 #ifdef HAVE_STDIO_H 
 	    struct {
 		int autoclose;
 	 	FILE *fp;
 	    } stdio;
-#else
-#ifdef __WIN32__
-		struct {
-			void*  h;
-			int    autoclose;
-			int    append;
-		} win32io;
-#endif
 #endif
 	    struct {
 		Uint8 *base;

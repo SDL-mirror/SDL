@@ -29,53 +29,10 @@
 #include "SDL_rwops.h"
 
 
-#ifdef HAVE_STDIO_H
-
-/* Functions to read/write stdio file pointers */
-
-static int stdio_seek(SDL_RWops *context, int offset, int whence)
-{
-	if ( fseek(context->hidden.stdio.fp, offset, whence) == 0 ) {
-		return(ftell(context->hidden.stdio.fp));
-	} else {
-		SDL_Error(SDL_EFSEEK);
-		return(-1);
-	}
-}
-static int stdio_read(SDL_RWops *context, void *ptr, int size, int maxnum)
-{
-	size_t nread;
-
-	nread = fread(ptr, size, maxnum, context->hidden.stdio.fp); 
-	if ( nread == 0 && ferror(context->hidden.stdio.fp) ) {
-		SDL_Error(SDL_EFREAD);
-	}
-	return(nread);
-}
-static int stdio_write(SDL_RWops *context, const void *ptr, int size, int num)
-{
-	size_t nwrote;
-
-	nwrote = fwrite(ptr, size, num, context->hidden.stdio.fp);
-	if ( nwrote == 0 && ferror(context->hidden.stdio.fp) ) {
-		SDL_Error(SDL_EFWRITE);
-	}
-	return(nwrote);
-}
-static int stdio_close(SDL_RWops *context)
-{
-	if ( context ) {
-		if ( context->hidden.stdio.autoclose ) {
-			/* WARNING:  Check the return value here! */
-			fclose(context->hidden.stdio.fp);
-		}
-		SDL_FreeRW(context);
-	}
-	return(0);
-}
-#else /* HAVE_STDIO_H */
-
 #ifdef __WIN32__
+
+/* Functions to read/write Win32 API file pointers */
+
 #define WINDOWS_LEAN_AND_MEAN
 #include <windows.h>
 
@@ -126,7 +83,6 @@ static int win32_file_open(SDL_RWops *context, const char *filename, const char 
 	
 	return 0; /* ok */
 }
-
 static int win32_file_seek(SDL_RWops *context, int offset, int whence) {
 	DWORD win32whence;
 	int   file_pos;
@@ -156,7 +112,6 @@ static int win32_file_seek(SDL_RWops *context, int offset, int whence) {
 	SDL_Error(SDL_EFSEEK);
 	return -1; /* error */
 }
-
 static int win32_file_read(SDL_RWops *context, void *ptr, int size, int maxnum) {
 	
 	int		total_bytes; 
@@ -174,7 +129,6 @@ static int win32_file_read(SDL_RWops *context, void *ptr, int size, int maxnum) 
 	nread = byte_read/size;
 	return nread;
 }
-
 static int win32_file_write(SDL_RWops *context, const void *ptr, int size, int num) {
 	
 	int		total_bytes; 
@@ -201,7 +155,6 @@ static int win32_file_write(SDL_RWops *context, const void *ptr, int size, int n
 	nwritten = byte_written/size;
 	return nwritten;
 }
-
 static int win32_file_close(SDL_RWops *context) {
 	
 	if ( context ) {								
@@ -213,10 +166,52 @@ static int win32_file_close(SDL_RWops *context) {
 	}
 	return(0);
 }
-
-
-
 #endif /* __WIN32__ */
+
+#ifdef HAVE_STDIO_H
+
+/* Functions to read/write stdio file pointers */
+
+static int stdio_seek(SDL_RWops *context, int offset, int whence)
+{
+	if ( fseek(context->hidden.stdio.fp, offset, whence) == 0 ) {
+		return(ftell(context->hidden.stdio.fp));
+	} else {
+		SDL_Error(SDL_EFSEEK);
+		return(-1);
+	}
+}
+static int stdio_read(SDL_RWops *context, void *ptr, int size, int maxnum)
+{
+	size_t nread;
+
+	nread = fread(ptr, size, maxnum, context->hidden.stdio.fp); 
+	if ( nread == 0 && ferror(context->hidden.stdio.fp) ) {
+		SDL_Error(SDL_EFREAD);
+	}
+	return(nread);
+}
+static int stdio_write(SDL_RWops *context, const void *ptr, int size, int num)
+{
+	size_t nwrote;
+
+	nwrote = fwrite(ptr, size, num, context->hidden.stdio.fp);
+	if ( nwrote == 0 && ferror(context->hidden.stdio.fp) ) {
+		SDL_Error(SDL_EFWRITE);
+	}
+	return(nwrote);
+}
+static int stdio_close(SDL_RWops *context)
+{
+	if ( context ) {
+		if ( context->hidden.stdio.autoclose ) {
+			/* WARNING:  Check the return value here! */
+			fclose(context->hidden.stdio.fp);
+		}
+		SDL_FreeRW(context);
+	}
+	return(0);
+}
 #endif /* !HAVE_STDIO_H */
 
 /* Functions to read/write memory pointers */
@@ -290,13 +285,8 @@ static int mem_close(SDL_RWops *context)
 	return(0);
 }
 
+
 /* Functions to create SDL_RWops structures from various data sources */
-#ifdef __WIN32__
-/* Aggh.  You can't (apparently) open a file in an application and
-   read from it in a DLL.
-*/
-static int in_sdl = 0;
-#endif
 
 #ifdef __MACOS__
 /*
@@ -345,7 +335,20 @@ static char *unix_to_mac(const char *file)
 SDL_RWops *SDL_RWFromFile(const char *file, const char *mode)
 {
 	SDL_RWops *rwops = NULL;
-#ifdef HAVE_STDIO_H
+
+#ifdef __WIN32__
+	rwops = SDL_AllocRW();
+	rwops->hidden.win32io.h = INVALID_HANDLE_VALUE;
+	if (win32_file_open(rwops,file,mode)) {
+		SDL_FreeRW(rwops);
+		return NULL;
+	}	
+	rwops->seek  = win32_file_seek;
+	rwops->read  = win32_file_read;
+	rwops->write = win32_file_write;
+	rwops->close = win32_file_close;
+
+#elif HAVE_STDIO_H
 	FILE *fp;
 
 #ifdef __MACOS__
@@ -360,28 +363,12 @@ SDL_RWops *SDL_RWFromFile(const char *file, const char *mode)
 	if ( fp == NULL ) {
 		SDL_SetError("Couldn't open %s", file);
 	} else {
-#ifdef __WIN32__
-		in_sdl = 1;
 		rwops = SDL_RWFromFP(fp, 1);
-		in_sdl = 0;
-#else
-		rwops = SDL_RWFromFP(fp, 1);
-#endif
 	}
-#else  /* HAVE_STDIO_H */
-#ifdef __WIN32__
-	rwops = SDL_AllocRW();
-	rwops->hidden.win32io.h = INVALID_HANDLE_VALUE;
-	if (win32_file_open(rwops,file,mode)) {
-		SDL_FreeRW(rwops);
-		return NULL;
-	}	
-	rwops->seek  = win32_file_seek;
-	rwops->read  = win32_file_read;
-	rwops->write = win32_file_write;
-	rwops->close = win32_file_close;
-#endif /* __WIN32__ */
+#else
+	SDL_SetError("SDL not compiled with stdio support");
 #endif /* !HAVE_STDIO_H */
+
 	return(rwops);
 }
 
@@ -390,13 +377,6 @@ SDL_RWops *SDL_RWFromFP(FILE *fp, int autoclose)
 {
 	SDL_RWops *rwops = NULL;
 
-#ifdef __WIN32__
-	if ( ! in_sdl ) {
-		/* It's when SDL and the app are compiled with different C runtimes */
-		SDL_SetError("You can't pass a FILE pointer to a DLL (?)");
-		/*return(NULL);*/
-	}
-#endif
 	rwops = SDL_AllocRW();
 	if ( rwops != NULL ) {
 		rwops->seek = stdio_seek;
