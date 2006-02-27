@@ -64,7 +64,6 @@ typedef struct SDL_RWops {
 	union {
 #ifdef __WIN32__
 	    struct {
-		int    autoclose;
 		int    append;
 		void*  h;
 	    } win32io;

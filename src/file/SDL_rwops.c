@@ -59,8 +59,8 @@ static int win32_file_open(SDL_RWops *context, const char *filename, const char 
 	must_exist = ( SDL_strchr(mode,'r') != NULL ) ? OPEN_EXISTING : 0;
 	truncate   = ( SDL_strchr(mode,'w') != NULL ) ? CREATE_ALWAYS : 0;
 	r_right    = ( SDL_strchr(mode,'+') != NULL || must_exist ) ? GENERIC_READ : 0;
-	a_mode     = ( SDL_strchr(mode,'a') != NULL );
-	w_right    = ( a_mode || SDL_strchr(mode,'w') || truncate ) ? GENERIC_WRITE : 0;
+	a_mode     = ( SDL_strchr(mode,'a') != NULL ) ? OPEN_ALWAYS : 0;
+	w_right    = ( a_mode || SDL_strchr(mode,'+') || truncate ) ? GENERIC_WRITE : 0;
 
 	if (!r_right && !w_right) /* inconsistent mode */
 		return -1; /* failed (invalid call)*/
@@ -69,7 +69,7 @@ static int win32_file_open(SDL_RWops *context, const char *filename, const char 
 	old_error_mode = SetErrorMode(SEM_NOOPENFILEERRORBOX|SEM_FAILCRITICALERRORS);	
 	
 	h = CreateFile(filename, (w_right|r_right), (w_right)? 0 : FILE_SHARE_READ, 
-		           NULL, (must_exist|truncate), FILE_ATTRIBUTE_NORMAL,NULL);
+		           NULL, (must_exist|truncate|a_mode), FILE_ATTRIBUTE_NORMAL,NULL);
 	
 	/* restore old behaviour */
 	SetErrorMode(old_error_mode);
@@ -338,6 +338,8 @@ SDL_RWops *SDL_RWFromFile(const char *file, const char *mode)
 
 #ifdef __WIN32__
 	rwops = SDL_AllocRW();
+	if (!rwops)
+		return NULL; /* SDL_SetError already setup by SDL_AllocRW() */
 	rwops->hidden.win32io.h = INVALID_HANDLE_VALUE;
 	if (win32_file_open(rwops,file,mode)) {
 		SDL_FreeRW(rwops);
