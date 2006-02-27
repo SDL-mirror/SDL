@@ -44,7 +44,7 @@ static int win32_file_open(SDL_RWops *context, const char *filename, const char 
 	DWORD	must_exist, truncate;
 	int		a_mode;
 
-	if (!context || !filename || !mode)
+	if (!context)
 		return -1;
 		
 	context->hidden.win32io.h = INVALID_HANDLE_VALUE; /* mark this as unusable */
@@ -335,6 +335,11 @@ static char *unix_to_mac(const char *file)
 SDL_RWops *SDL_RWFromFile(const char *file, const char *mode)
 {
 	SDL_RWops *rwops = NULL;
+
+	if ( !file || !*file || !mode || !*mode ) {
+		SDL_SetError("SDL_RWFromFile(): No file or no mode specified");
+		return NULL;
+	}
 
 #ifdef __WIN32__
 	rwops = SDL_AllocRW();
