@@ -73,8 +73,151 @@ static int stdio_close(SDL_RWops *context)
 	}
 	return(0);
 }
+#else /* HAVE_STDIO_H */
 
-#endif /* HAVE_STDIO_H */
+#ifdef __WIN32__
+#define WINDOWS_LEAN_AND_MEAN
+#include <windows.h>
+
+static int win32_file_open(SDL_RWops *context, const char *filename, const char *mode) {
+	
+	UINT	old_error_mode;
+	HANDLE	h;
+	DWORD	r_right, w_right;
+	DWORD	must_exist, truncate;
+	int		a_mode;
+
+	if (!context || !filename || !mode)
+		return -1;
+		
+	context->hidden.win32io.h = INVALID_HANDLE_VALUE; /* mark this as unusable */
+
+	/* "r" = reading, file must exist */
+	/* "w" = writing, truncate existing, file may not exist */
+	/* "r+"= reading or writing, file must exist            */
+	/* "a" = writing, append file may not exist             */
+	/* "a+"= append + read, file may not exist              */
+	/* "w+" = read, write, truncate. file may not exist    */
+	
+	must_exist = ( SDL_strchr(mode,'r') != NULL ) ? OPEN_EXISTING : 0;
+	truncate   = ( SDL_strchr(mode,'w') != NULL ) ? CREATE_ALWAYS : 0;
+	r_right    = ( SDL_strchr(mode,'+') != NULL || must_exist ) ? GENERIC_READ : 0;
+	a_mode     = ( SDL_strchr(mode,'a') != NULL );
+	w_right    = ( a_mode || SDL_strchr(mode,'w') || truncate ) ? GENERIC_WRITE : 0;
+
+	if (!r_right && !w_right) /* inconsistent mode */
+		return -1; /* failed (invalid call)*/
+	
+	/* Do not open a dialog box if failure */
+	old_error_mode = SetErrorMode(SEM_NOOPENFILEERRORBOX|SEM_FAILCRITICALERRORS);	
+	
+	h = CreateFile(filename, (w_right|r_right), (w_right)? 0 : FILE_SHARE_READ, 
+		           NULL, (must_exist|truncate), FILE_ATTRIBUTE_NORMAL,NULL);
+	
+	/* restore old behaviour */
+	SetErrorMode(old_error_mode);
+
+	if (h==INVALID_HANDLE_VALUE) {
+		SDL_SetError("Couldn't open %s",filename);
+		return -2; /* failed (CreateFile) */
+	}
+	context->hidden.win32io.h = h;
+	context->hidden.win32io.append = a_mode;
+	
+	return 0; /* ok */
+}
+
+static int win32_file_seek(SDL_RWops *context, int offset, int whence) {
+	DWORD win32whence;
+	int   file_pos;
+	
+	if (!context || context->hidden.win32io.h == INVALID_HANDLE_VALUE) {
+		SDL_SetError("win32_file_seek: invalid context/file not opened");
+		return -1;
+	}
+	
+	switch (whence) {
+		case RW_SEEK_SET:		
+			win32whence = FILE_BEGIN; break;
+		case RW_SEEK_CUR:
+			win32whence = FILE_CURRENT; break;
+		case RW_SEEK_END:
+			win32whence = FILE_END; break;
+		default:
+			SDL_SetError("win32_file_seek: Unknown value for 'whence'");			
+			return -1;
+	}
+	
+	file_pos = SetFilePointer(context->hidden.win32io.h,offset,NULL,win32whence);
+
+	if ( file_pos != INVALID_SET_FILE_POINTER )
+		return file_pos; /* success */
+	
+	SDL_Error(SDL_EFSEEK);
+	return -1; /* error */
+}
+
+static int win32_file_read(SDL_RWops *context, void *ptr, int size, int maxnum) {
+	
+	int		total_bytes; 
+	DWORD	byte_read,nread;
+	
+	total_bytes = size*maxnum;
+	
+	if (!context || context->hidden.win32io.h == INVALID_HANDLE_VALUE || total_bytes<=0 || !size) 	
+		return 0;
+	
+	if (!ReadFile(context->hidden.win32io.h,ptr,total_bytes,&byte_read,NULL)) {
+		SDL_Error(SDL_EFREAD);
+		return 0;
+	}
+	nread = byte_read/size;
+	return nread;
+}
+
+static int win32_file_write(SDL_RWops *context, const void *ptr, int size, int num) {
+	
+	int		total_bytes; 
+	DWORD	byte_written,nwritten;
+	
+	total_bytes = size*num;
+
+	if (!context || context->hidden.win32io.h==INVALID_HANDLE_VALUE || total_bytes<=0 || !size) 	
+		return 0;
+
+	/* if in append mode, we must go to the EOF before write */
+	if (context->hidden.win32io.append) {
+		if ( SetFilePointer(context->hidden.win32io.h,0L,NULL,FILE_END) == INVALID_SET_FILE_POINTER ) {
+			SDL_Error(SDL_EFWRITE);
+			return 0;
+		}
+	}
+	
+	if (!WriteFile(context->hidden.win32io.h,ptr,total_bytes,&byte_written,NULL)) {
+		SDL_Error(SDL_EFWRITE);
+		return 0;
+	}
+	
+	nwritten = byte_written/size;
+	return nwritten;
+}
+
+static int win32_file_close(SDL_RWops *context) {
+	
+	if ( context ) {								
+		if (context->hidden.win32io.h != INVALID_HANDLE_VALUE) {
+			CloseHandle(context->hidden.win32io.h);
+			context->hidden.win32io.h = INVALID_HANDLE_VALUE; /* to be sure */
+		}
+		SDL_FreeRW(context);
+	}
+	return(0);
+}
+
+
+
+#endif /* __WIN32__ */
+#endif /* !HAVE_STDIO_H */
 
 /* Functions to read/write memory pointers */
 
@@ -225,7 +368,20 @@ SDL_RWops *SDL_RWFromFile(const char *file, const char *mode)
 		rwops = SDL_RWFromFP(fp, 1);
 #endif
 	}
-#endif /* HAVE_STDIO_H */
+#else  /* HAVE_STDIO_H */
+#ifdef __WIN32__
+	rwops = SDL_AllocRW();
+	rwops->hidden.win32io.h = INVALID_HANDLE_VALUE;
+	if (win32_file_open(rwops,file,mode)) {
+		SDL_FreeRW(rwops);
+		return NULL;
+	}	
+	rwops->seek  = win32_file_seek;
+	rwops->read  = win32_file_read;
+	rwops->write = win32_file_write;
+	rwops->close = win32_file_close;
+#endif /* __WIN32__ */
+#endif /* !HAVE_STDIO_H */
 	return(rwops);
 }
 
