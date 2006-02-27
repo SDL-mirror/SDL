@@ -2220,6 +2220,10 @@ case "$target" in
         CheckOpenGLX11
         CheckPTHREAD
         CheckAltivec
+
+        # Need this or things might misbuild on a G3.
+        BUILD_CFLAGS="$BUILD_CFLAGS -force_cpusubtype_ALL"
+
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
             AC_DEFINE(SDL_AUDIO_DRIVER_COREAUDIO)
