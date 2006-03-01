@@ -245,8 +245,8 @@ static int mem_seek(SDL_RWops *context, int offset, int whence)
 }
 static int mem_read(SDL_RWops *context, void *ptr, int size, int maxnum)
 {
-	int total_bytes;
-	int mem_available;
+	size_t total_bytes;
+	size_t mem_available;
 
 	total_bytes = (maxnum * size);
 	if ( (maxnum <= 0) || (size <= 0) || ((total_bytes / maxnum) != size) ) {

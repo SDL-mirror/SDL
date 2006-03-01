@@ -446,6 +446,12 @@ extern DECLSPEC char * SDLCALL SDL_ultoa(unsigned long value, char *string, int 
 extern DECLSPEC long SDLCALL SDL_strtol(const char *string, char **endp, int base);
 #endif
 
+#if HAVE_STRTOUL
+#define SDL_strtoul      strtoul
+#else
+extern DECLSPEC unsigned long SDLCALL SDL_strtoul(const char *string, char **endp, int base);
+#endif
+
 #if SDL_HAS_64BIT_TYPE
 
 #if HAVE__I64TOA
@@ -464,6 +470,12 @@ extern DECLSPEC char* SDLCALL SDL_ulltoa(Uint64 value, char *string, int radix);
 #define SDL_strtoll     strtoll
 #else
 extern DECLSPEC Sint64 SDLCALL SDL_strtoll(const char *string, char **endp, int base);
+#endif
+
+#if HAVE_STRTOULL
+#define SDL_strtoull     strtoull
+#else
+extern DECLSPEC Uint64 SDLCALL SDL_strtoull(const char *string, char **endp, int base);
 #endif
 
 #endif /* SDL_HAS_64BIT_TYPE */

@@ -69,11 +69,42 @@ static size_t SDL_ScanLong(const char *text, int radix, long *valuep)
 }
 #endif
 
-#if !defined(HAVE_SSCANF) || !defined(HAVE_STRTOD)
+#if !defined(HAVE_SSCANF) || !defined(HAVE_STRTOUL) || !defined(HAVE_STRTOD)
 static size_t SDL_ScanUnsignedLong(const char *text, int radix, unsigned long *valuep)
 {
     const char *textstart = text;
     unsigned long value = 0;
+
+    if ( radix == 16 && SDL_strncmp(text, "0x", 2) == 0 ) {
+        text += 2;
+    }
+    for ( ; ; ) {
+        int v;
+        if ( SDL_isdigit(*text) ) {
+            v = *text - '0';
+        } else if ( radix == 16 && SDL_isupperhex(*text) ) {
+            v = 10 + (*text - 'A');
+        } else if ( radix == 16 && SDL_islowerhex(*text) ) {
+            v = 10 + (*text - 'a');
+        } else {
+            break;
+        }
+        value *= radix;
+        value += v;
+        ++text;
+    }
+    if ( valuep ) {
+        *valuep = value;
+    }
+    return (text - textstart);
+}
+#endif
+
+#ifndef HAVE_SSCANF
+static size_t SDL_ScanUintPtrT(const char *text, int radix, uintptr_t *valuep)
+{
+    const char *textstart = text;
+    uintptr_t value = 0;
 
     if ( radix == 16 && SDL_strncmp(text, "0x", 2) == 0 ) {
         text += 2;
@@ -141,7 +172,7 @@ static size_t SDL_ScanLongLong(const char *text, int radix, Sint64 *valuep)
 }
 #endif
 
-#ifndef HAVE_SSCANF
+#if !defined(HAVE_SSCANF) || !defined(HAVE_STRTOULL)
 static size_t SDL_ScanUnsignedLongLong(const char *text, int radix, Uint64 *valuep)
 {
     const char *textstart = text;
@@ -488,6 +519,20 @@ long SDL_strtol(const char *string, char **endp, int base)
 }
 #endif
 
+#ifndef HAVE_STRTOUL
+unsigned long SDL_strtoul(const char *string, char **endp, int base)
+{
+    size_t len;
+    unsigned long value;
+
+    len = SDL_ScanUnsignedLong(string, base ? base : 10, &value);
+    if ( endp ) {
+        *endp = (char *)string + len;
+    }
+    return value;
+}
+#endif
+
 #ifdef SDL_HAS_64BIT_TYPE
 
 #ifndef HAVE__I64TOA
@@ -549,6 +594,20 @@ Sint64 SDL_strtoll(const char *string, char **endp, int base)
     Sint64 value;
 
     len = SDL_ScanLongLong(string, base ? base : 10, &value);
+    if ( endp ) {
+        *endp = (char *)string + len;
+    }
+    return value;
+}
+#endif
+
+#ifndef HAVE_STRTOULL
+Uint64 SDL_strtoull(const char *string, char **endp, int base)
+{
+    size_t len;
+    Uint64 value;
+
+    len = SDL_ScanUnsignedLongLong(string, base ? base : 10, &value);
     if ( endp ) {
         *endp = (char *)string + len;
     }
@@ -817,8 +876,8 @@ int SDL_sscanf(const char *text, const char *fmt, ...)
                         break;
                     case 'p':
                         {
-                            unsigned long value;
-                            text += SDL_ScanUnsignedLong(text, 16, &value);
+                            uintptr_t value;
+                            text += SDL_ScanUintPtrT(text, 16, &value);
                             if ( ! suppress ) {
                                 void** valuep = va_arg(ap, void**);
                                 *valuep = (void*)value;
@@ -1003,7 +1062,7 @@ static size_t SDL_PrintString(char *text, const char *string, size_t maxlen)
     }
     return (text - textstart);
 }
-int  SDL_vsnprintf(char *text, size_t maxlen, const char *fmt, va_list ap)
+int SDL_vsnprintf(char *text, size_t maxlen, const char *fmt, va_list ap)
 {
     char *textstart = text;
     if ( maxlen <= 0 ) {

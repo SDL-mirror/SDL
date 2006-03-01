@@ -263,7 +263,7 @@ typedef struct { char * first; char * last; } stack_entry;
 
 static char * pivot_big(char *first, char *mid, char *last, size_t size,
                         int compare(const void *, const void *)) {
-  int d=(((last-first)/size)>>3)*size;
+  size_t d=(((last-first)/size)>>3)*size;
   char *m1,*m2,*m3;
   { char *a=first, *b=first+d, *c=first+2*d;
 #ifdef DEBUG_QSORT
@@ -414,7 +414,7 @@ void qsort(void *base, size_t nmemb, size_t size,
            int (*compare)(const void *, const void *)) {
 
   if (nmemb<=1) return;
-  if (((int)base|size)&(WORD_BYTES-1))
+  if (((uintptr_t)base|size)&(WORD_BYTES-1))
     qsort_nonaligned(base,nmemb,size,compare);
   else if (size!=WORD_BYTES)
     qsort_aligned(base,nmemb,size,compare);

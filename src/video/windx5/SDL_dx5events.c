@@ -476,8 +476,7 @@ static void handle_mouse(const int numevents, DIDEVICEOBJECTDATA *ptrbuf)
 }
 
 /* The main Win32 event handler */
-LONG
- DX5_HandleMessage(_THIS, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT DX5_HandleMessage(_THIS, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg) {
 #ifdef WM_ACTIVATEAPP
@@ -503,7 +502,7 @@ LONG
 
 #ifdef WM_DISPLAYCHANGE
 		case WM_DISPLAYCHANGE: {
-			WORD BitsPerPixel;
+			WPARAM BitsPerPixel;
 			WORD SizeX, SizeY;
 
 			/* Ack!  The display changed size and/or depth! */
@@ -866,7 +865,7 @@ int DX5_CreateWindow(_THIS)
 
 	SDL_windowid = (windowid != NULL);
 	if ( SDL_windowid ) {
-		SDL_Window = (HWND)SDL_strtol(windowid, NULL, 0);
+		SDL_Window = (HWND)SDL_strtoull(windowid, NULL, 0);
 		if ( SDL_Window == NULL ) {
 			SDL_SetError("Couldn't get user specified window");
 			return(-1);
@@ -875,8 +874,8 @@ int DX5_CreateWindow(_THIS)
 		/* DJM: we want all event's for the user specified
 			window to be handled by SDL.
 		 */
-		userWindowProc = (WNDPROCTYPE)GetWindowLong(SDL_Window, GWL_WNDPROC);
-		SetWindowLong(SDL_Window, GWL_WNDPROC, (LONG)WinMessage);
+		userWindowProc = (WNDPROCTYPE)GetWindowLongPtr(SDL_Window, GWL_WNDPROC);
+		SetWindowLongPtr(SDL_Window, GWL_WNDPROC, (LONG_PTR)WinMessage);
 	} else {
 		SDL_Window = CreateWindow(SDL_Appname, SDL_Appname,
                         (WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX),
@@ -904,7 +903,7 @@ void DX5_DestroyWindow(_THIS)
 
 	/* Destroy our window */
 	if ( SDL_windowid ) {
-		SetWindowLong(SDL_Window, GWL_WNDPROC, (LONG)userWindowProc);
+		SetWindowLongPtr(SDL_Window, GWL_WNDPROC, (LONG_PTR)userWindowProc);
 	} else {
 		DestroyWindow(SDL_Window);
 	}

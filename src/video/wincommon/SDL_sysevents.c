@@ -191,7 +191,7 @@ static BOOL WINAPI WIN_TrackMouseEvent(TRACKMOUSEEVENT *ptme)
 {
 	if ( ptme->dwFlags == TME_LEAVE ) {
 		return SetTimer(ptme->hwndTrack, ptme->dwFlags, 100,
-		                (TIMERPROC)TrackMouseTimerProc);
+		                (TIMERPROC)TrackMouseTimerProc) != 0;
 	}
 	return FALSE;
 }
@@ -247,7 +247,7 @@ static void WIN_GetKeyboardState(void)
 /* The main Win32 event handler
 DJM: This is no longer static as (DX5/DIB)_CreateWindow needs it
 */
-LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	SDL_VideoDevice *this = current_video;
 	static int mouse_pressed = 0;

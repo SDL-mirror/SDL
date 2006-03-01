@@ -33,12 +33,12 @@
 /* Note this isn't thread-safe! */
 
 static char *SDL_envmem = NULL;	/* Ugh, memory leak */
-static DWORD SDL_envmemlen = 0;
+static size_t SDL_envmemlen = 0;
 
 /* Put a variable of the form "name=value" into the environment */
 int SDL_putenv(const char *variable)
 {
-	DWORD bufferlen;
+	size_t bufferlen;
 	char *value;
 	const char *sep;
 
@@ -67,7 +67,7 @@ int SDL_putenv(const char *variable)
 /* Retrieve a variable named "name" from the environment */
 char *SDL_getenv(const char *name)
 {
-	DWORD bufferlen;
+	size_t bufferlen;
 
 	bufferlen = GetEnvironmentVariable(name, SDL_envmem, SDL_envmemlen);
 	if ( bufferlen == 0 ) {

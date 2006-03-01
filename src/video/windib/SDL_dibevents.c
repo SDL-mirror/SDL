@@ -84,8 +84,7 @@ WPARAM rotateKey(WPARAM key,SDL_ScreenOrientation direction)
 
 
 /* The main Win32 event handler */
-LONG
- DIB_HandleMessage(_THIS, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT DIB_HandleMessage(_THIS, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	extern int posted;
 
@@ -417,7 +416,7 @@ int DIB_CreateWindow(_THIS)
 		SDL_Window = (HWND)wcstol(windowid_t, NULL, 0);
 		SDL_free(windowid_t);
 #else
-		SDL_Window = (HWND)SDL_strtol(windowid, NULL, 0);
+		SDL_Window = (HWND)SDL_strtoull(windowid, NULL, 0);
 #endif
 		if ( SDL_Window == NULL ) {
 			SDL_SetError("Couldn't get user specified window");
@@ -427,8 +426,8 @@ int DIB_CreateWindow(_THIS)
 		/* DJM: we want all event's for the user specified
 			window to be handled by SDL.
 		 */
-		userWindowProc = (WNDPROCTYPE)GetWindowLong(SDL_Window, GWL_WNDPROC);
-		SetWindowLong(SDL_Window, GWL_WNDPROC, (LONG)WinMessage);
+		userWindowProc = (WNDPROCTYPE)GetWindowLongPtr(SDL_Window, GWL_WNDPROC);
+		SetWindowLongPtr(SDL_Window, GWL_WNDPROC, (LONG_PTR)WinMessage);
 	} else {
 		SDL_Window = CreateWindow(SDL_Appname, SDL_Appname,
                         (WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX),
@@ -445,7 +444,7 @@ int DIB_CreateWindow(_THIS)
 void DIB_DestroyWindow(_THIS)
 {
 	if ( SDL_windowid ) {
-		SetWindowLong(SDL_Window, GWL_WNDPROC, (LONG)userWindowProc);
+		SetWindowLongPtr(SDL_Window, GWL_WNDPROC, (LONG_PTR)userWindowProc);
 	} else {
 		DestroyWindow(SDL_Window);
 	}

@@ -220,7 +220,7 @@ void WIN_SetWMIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 	if ( screen_icn == NULL ) {
 		SDL_SetError("Couldn't create Win32 icon handle");
 	} else {
-		SetClassLong(SDL_Window, GCL_HICON, (LONG)screen_icn);
+		SetClassLongPtr(SDL_Window, GCL_HICON, (LONG_PTR)screen_icn);
 	}
 	SDL_stack_free(icon_win32);
 #endif /* DISABLE_ICON_SUPPORT */

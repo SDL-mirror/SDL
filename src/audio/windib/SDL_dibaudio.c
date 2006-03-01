@@ -99,7 +99,7 @@ AudioBootStrap WAVEOUT_bootstrap = {
 
 
 /* The Win32 callback for filling the WAVE device */
-static void CALLBACK FillSound(HWAVEOUT hwo, UINT uMsg, DWORD dwInstance,
+static void CALLBACK FillSound(HWAVEOUT hwo, UINT uMsg, DWORD_PTR dwInstance,
 						DWORD dwParam1, DWORD dwParam2)
 {
 	SDL_AudioDevice *this = (SDL_AudioDevice *)dwInstance;
@@ -118,7 +118,7 @@ static void CALLBACK FillSound(HWAVEOUT hwo, UINT uMsg, DWORD dwInstance,
 
 static void SetMMerror(char *function, MMRESULT code)
 {
-	int len;
+	size_t len;
 	char errbuf[MAXERRORLENGTH];
 #ifdef _WIN32_WCE
 	wchar_t werrbuf[MAXERRORLENGTH];
@@ -132,7 +132,7 @@ static void SetMMerror(char *function, MMRESULT code)
 	waveOutGetErrorText(code, werrbuf, MAXERRORLENGTH-len);
 	WideCharToMultiByte(CP_ACP,0,werrbuf,-1,errbuf+len,MAXERRORLENGTH-len,NULL,NULL);
 #else
-	waveOutGetErrorText(code, errbuf+len, MAXERRORLENGTH-len);
+	waveOutGetErrorText(code, errbuf+len, (UINT)(MAXERRORLENGTH-len));
 #endif
 
 	SDL_SetError("%s",errbuf);
@@ -266,7 +266,7 @@ int DIB_OpenAudio(_THIS, SDL_AudioSpec *spec)
 
 	/* Open the audio device */
 	result = waveOutOpen(&sound, WAVE_MAPPER, &waveformat,
-			(DWORD)FillSound, (DWORD)this, CALLBACK_FUNCTION);
+			(DWORD_PTR)FillSound, (DWORD_PTR)this, CALLBACK_FUNCTION);
 	if ( result != MMSYSERR_NOERROR ) {
 		SetMMerror("waveOutOpen()", result);
 		return(-1);

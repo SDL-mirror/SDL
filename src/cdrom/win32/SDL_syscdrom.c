@@ -111,7 +111,7 @@ static int SDL_SYS_CDioctl(int id, UINT msg, DWORD flags, void *arg)
 {
 	MCIERROR mci_error;
 
-	mci_error = mciSendCommand(SDL_mciID[id], msg, flags, (DWORD)arg);
+	mci_error = mciSendCommand(SDL_mciID[id], msg, flags, (DWORD_PTR)arg);
 	if ( mci_error ) {
 		char error[256];
 
