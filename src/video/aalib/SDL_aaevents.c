@@ -126,12 +126,6 @@ void AA_InitOSKeymap(_THIS)
 	for ( i=0; i<SDL_arraysize(keymap); ++i )
 		keymap[i] = SDLK_UNKNOWN;
 
-	keymap[AA_ESC] = SDLK_ESCAPE;
-	keymap[AA_UP] = SDLK_UP;
-	keymap[AA_DOWN] = SDLK_DOWN;
-	keymap[AA_LEFT] = SDLK_LEFT;
-	keymap[AA_RIGHT] = SDLK_RIGHT;
-
 	/* Alphabet keys */
 	for ( i = 0; i<26; ++i ){
 		keymap['a' + i] = SDLK_a+i;
@@ -179,10 +173,20 @@ void AA_InitOSKeymap(_THIS)
 	keymap[293] = SDLK_KP7;
 	keymap[295] = SDLK_KP8;
 	keymap[298] = SDLK_KP9;
+
+	keymap[AA_ESC] = SDLK_ESCAPE;
+	keymap[AA_UP] = SDLK_UP;
+	keymap[AA_DOWN] = SDLK_DOWN;
+	keymap[AA_LEFT] = SDLK_LEFT;
+	keymap[AA_RIGHT] = SDLK_RIGHT;
 }
 
 static SDL_keysym *TranslateKey(int scancode, SDL_keysym *keysym)
 {
+	/* Sanity check */
+	if ( scancode >= SDL_arraysize(keymap) )
+		scancode = AA_UNKNOWN;
+
 	/* Set the keysym information */
 	keysym->scancode = scancode;
 	keysym->sym = keymap[scancode];
