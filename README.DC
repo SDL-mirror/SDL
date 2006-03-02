@@ -9,12 +9,8 @@ this work with kos-newlib
 http://sourceforge.net/projects/dcquake/
 
 compile
-- edit KOS_BASE in Makefie.dc for your enviroment
+- source environ.sh (from the KOS distribution)
 - make -f Makefile.dc
-
-FIXME: The KOS thread files can be found on HERO's site - not in the SDL source.
-- overwrite thread/*.c to kos-1.1.7/kernel/thread
-- rebuild kos
 
 compile with gl support
 - install latest libgl from http://sourceforge.net/projects/dcquake/
@@ -34,4 +30,3 @@ beta2
 beta
 - thread, timer don't tested so much.
 - not support OpenGL
-
