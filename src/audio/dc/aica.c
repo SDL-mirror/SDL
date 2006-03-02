@@ -6,6 +6,9 @@
  */
 #include "aica.h"
 
+#include <arch/irq.h>
+#include <dc/spu.h>
+
 /* #define dc_snd_base ((volatile unsigned char *)0x00800000) */ /* arm side */
 #define dc_snd_base ((volatile unsigned char *)0xa0700000) /* dc side */
 
@@ -37,7 +40,7 @@
 
 
 void aica_init() {
-	int i, j, old;
+	int i, j, old = 0;
 	
 	/* Initialize AICA channels */	
 	G2_LOCK(old);
@@ -146,9 +149,10 @@ static inline unsigned  AICA_FREQ(unsigned freq)	{
    This routine (and the similar ones) owe a lot to Marcus' sound example -- 
    I hadn't gotten quite this far into dissecting the individual regs yet. */
 void aica_play(int ch,int mode,unsigned long smpptr,int loopst,int loopend,int freq,int vol,int pan,int loopflag) {
-	int i;
+/*	int i;
+*/
 	int val;
-	int old;
+	int old = 0;
 
 	/* Stop the channel (if it's already playing) */
 	aica_stop(ch);

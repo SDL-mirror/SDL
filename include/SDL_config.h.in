@@ -106,9 +106,11 @@
 #undef HAVE__UITOA
 #undef HAVE__ULTOA
 #undef HAVE_STRTOL
+#undef HAVE_STRTOUL
 #undef HAVE__I64TOA
 #undef HAVE__UI64TOA
 #undef HAVE_STRTOLL
+#undef HAVE_STRTOULL
 #undef HAVE_STRTOD
 #undef HAVE_ATOI
 #undef HAVE_ATOF

@@ -53,10 +53,12 @@ static int DC_FlipHWSurface(_THIS, SDL_Surface *surface);
 static void DC_UpdateRects(_THIS, int numrects, SDL_Rect *rects);
 
 /* OpenGL */
+#if SDL_VIDEO_OPENGL
 static void *DC_GL_GetProcAddress(_THIS, const char *proc);
 static int DC_GL_LoadLibrary(_THIS, const char *path);
 static int DC_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value);
 static void DC_GL_SwapBuffers(_THIS);
+#endif
 
 /* DC driver bootstrap functions */
 

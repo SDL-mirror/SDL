@@ -21,8 +21,7 @@
 */
 #include "SDL_config.h"
 
-/* Win32 MultiMedia Joystick driver, contributed by Andrei de A. Formiga */
-
+#include "SDL_events.h"
 #include "SDL_joystick.h"
 #include "../SDL_sysjoystick.h"
 #include "../SDL_joystick_c.h"

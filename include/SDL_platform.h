@@ -41,7 +41,7 @@
 #undef __BSDI__
 #define __BSDI__	1
 #endif
-#if defined(DREAMCAST)
+#if defined(_arch_dreamcast)
 #undef __DREAMCAST__
 #define __DREAMCAST__	1
 #endif

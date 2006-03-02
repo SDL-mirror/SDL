@@ -113,7 +113,7 @@ static void keyboard_update(void)
 
 	maple_raddr(addr,&port,&unit);
 
-	state = kbd_get_state(port,unit);
+	state = maple_dev_state(port,unit);
 	if (!state) return;
 
 	shiftkeys = state->shift_keys ^ old_state.shift_keys;

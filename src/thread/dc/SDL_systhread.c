@@ -24,38 +24,11 @@
 /* Thread management routines for SDL */
 
 #include "SDL_thread.h"
+#include "../SDL_thread_c.h"
 #include "../SDL_systhread.h"
 
 #include <kos/thread.h>
 
-#if SDL_THREADS_DISABLED
-int SDL_SYS_CreateThread(SDL_Thread *thread, void *args)
-{
-	SDL_SetError("Threads are not supported on this platform");
-	return(-1);
-}
-
-void SDL_SYS_SetupThread(void)
-{
-	return;
-}
-
-Uint32 SDL_ThreadID(void)
-{
-	return(0);
-}
-
-void SDL_SYS_WaitThread(SDL_Thread *thread)
-{
-	return;
-}
-
-void SDL_SYS_KillThread(SDL_Thread *thread)
-{
-	return;
-}
-
-#else
 int SDL_SYS_CreateThread(SDL_Thread *thread, void *args)
 {
 	thread->handle = thd_create(SDL_RunThread,args);
@@ -85,4 +58,3 @@ void SDL_SYS_KillThread(SDL_Thread *thread)
 {
 	thd_destroy(thread->handle);
 }
-#endif

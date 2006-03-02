@@ -86,7 +86,7 @@ static int SDL_SYS_CDGetTOC(SDL_CD *cdrom)
 		cdrom->track[i].id = i+1;
 		cdrom->track[i].type = (TOC_CTRL(toc.entry[i])==TRACK_CDDA)?SDL_AUDIO_TRACK:SDL_DATA_TRACK;
 		cdrom->track[i].offset = TOC_LBA(entry)-150;
-		cdrom->track[i].length = TOC_LBA((i+1<toc.last)?toc.entry[i+1]:toc.dunno)-TOC_LBA(entry);
+		cdrom->track[i].length = TOC_LBA((i+1<toc.last)?toc.entry[i+1]:toc.leadout_sector)-TOC_LBA(entry);
 	}
 
 	return 0;
@@ -95,7 +95,6 @@ static int SDL_SYS_CDGetTOC(SDL_CD *cdrom)
 /* Get CD-ROM status */
 static CDstatus SDL_SYS_CDStatus(SDL_CD *cdrom, int *position)
 {
-	CDstatus status;
 	int ret,dc_status,disc_type;
 
 	ret = cdrom_get_status(&dc_status,&disc_type);
