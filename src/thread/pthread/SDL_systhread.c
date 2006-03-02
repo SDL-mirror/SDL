@@ -34,6 +34,13 @@ static int sig_list[] = {
 	SIGVTALRM, SIGPROF, 0
 };
 
+#ifdef __RISCOS__
+/* RISC OS needs to know the main thread for
+ * it's timer and event processing. */
+int riscos_using_threads = 0;
+Uint32 riscos_main_thread = 0; /* Thread running events */
+#endif
+ 
 
 static void *RunThread(void *data)
 {
@@ -58,6 +65,14 @@ int SDL_SYS_CreateThread(SDL_Thread *thread, void *args)
 		SDL_SetError("Not enough resources to create thread");
 		return(-1);
 	}
+
+#ifdef __RISCOS__
+	if (riscos_using_threads == 0) {
+		riscos_using_threads = 1;
+		riscos_main_thread = SDL_ThreadID();
+	}
+#endif
+
 	return(0);
 }
 

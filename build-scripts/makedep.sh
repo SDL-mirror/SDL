@@ -69,6 +69,12 @@ __EOF__
 
 __EOF__
         ;;
+        S) cat >>${output}.new <<__EOF__
+
+	\$(LIBTOOL)  --mode=compile \$(CC) -c $src  -o \$@
+
+__EOF__
+        ;;
         *)   echo "Unknown file extension: $ext";;
     esac
     echo "" >>${output}.new
