@@ -4,10 +4,14 @@
 /* loopwaves.c is much more robust in handling WAVE files -- 
 	This is only for simple WAVEs
 */
+#include "SDL_config.h"
 
 #include <stdio.h>
 #include <stdlib.h>
+
+#if HAVE_SIGNAL_H
 #include <signal.h>
+#endif
 
 #include "SDL.h"
 #include "SDL_audio.h"
@@ -65,12 +69,9 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "Couldn't initialize SDL: %s\n",SDL_GetError());
 		return(1);
 	}
-
 	if ( argv[1] == NULL ) {
-		fprintf(stderr, "Usage: %s <wavefile>\n", argv[0]);
-		quit(1);
+		argv[1] = "sample.wav";
 	}
-
 	/* Load the wave file into memory */
 	if ( SDL_LoadWAV(argv[1],
 			&wave.spec, &wave.sound, &wave.soundlen) == NULL ) {
@@ -78,8 +79,9 @@ int main(int argc, char *argv[])
 						argv[1], SDL_GetError());
 		quit(1);
 	}
-	wave.spec.callback = fillerup;
 
+	wave.spec.callback = fillerup;
+#if HAVE_SIGNAL_H
 	/* Set the signals */
 #ifdef SIGHUP
 	signal(SIGHUP, poked);
@@ -89,6 +91,7 @@ int main(int argc, char *argv[])
 	signal(SIGQUIT, poked);
 #endif
 	signal(SIGTERM, poked);
+#endif /* HAVE_SIGNAL_H */
 
 	/* Initialize fillerup() variables */
 	if ( SDL_OpenAudio(&wave.spec, NULL) < 0 ) {
