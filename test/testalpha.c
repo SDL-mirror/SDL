@@ -45,7 +45,7 @@ static void FillBackground(SDL_Surface *screen)
         {
 		for ( i=0; i<screen->h; ++i ) {
 			gradient=((i*255)/screen->h);
-                        color = SDL_MapRGB(screen->format, gradient, gradient, gradient);
+                        color = (Uint16)SDL_MapRGB(screen->format, gradient, gradient, gradient);
                         buffer16=(Uint16*)buffer;
                         for (k=0; k<screen->w; k++)
                         {
@@ -340,8 +340,14 @@ int main(int argc, char *argv[])
 	}
 
 	/* Alpha blending doesn't work well at 8-bit color */
+#ifdef _WIN32_WCE
+	/* Pocket PC */
+	w = 240;
+	h = 320;
+#else
 	w = 640;
 	h = 480;
+#endif
 	info = SDL_GetVideoInfo();
 	if ( info->vfmt->BitsPerPixel > 8 ) {
 		video_bpp = info->vfmt->BitsPerPixel;
@@ -386,21 +392,12 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	/* Set 640x480 video mode */
-#ifndef _WIN32_WCE
+	/* Set video mode */
 	if ( (screen=SDL_SetVideoMode(w,h,video_bpp,videoflags)) == NULL ) {
-		fprintf(stderr, "Couldn't set 640x480x%d video mode: %s\n",
-						video_bpp, SDL_GetError());
+		fprintf(stderr, "Couldn't set %dx%dx%d video mode: %s\n",
+						w, h, video_bpp, SDL_GetError());
 		quit(2);
 	}
-#else
-	/* Pocket PC */
-	if ( (screen=SDL_SetVideoMode(240,320,video_bpp,SDL_FULLSCREEN)) == NULL ) {
-		fprintf(stderr, "Couldn't set 240x320x%d video mode: %s\n",
-						video_bpp, SDL_GetError());
-		quit(2);
-	}
-#endif
 	FillBackground(screen);
 
 	/* Create the light */

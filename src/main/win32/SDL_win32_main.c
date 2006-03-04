@@ -51,27 +51,6 @@
 #if defined(_WIN32_WCE) && _WIN32_WCE < 300
 /* seems to be undefined in Win CE although in online help */
 #define isspace(a) (((CHAR)a == ' ') || ((CHAR)a == '\t'))
-
-/* seems to be undefined in Win CE although in online help */
-char *SDL_strrchr(char *str, int c)
-{
-	char *p;
-
-	/* Skip to the end of the string */
-	p=str;
-	while (*p)
-		p++;
-
-	/* Look for the given character */
-	while ( (p >= str) && (*p != (CHAR)c) )
-		p--;
-
-	/* Return NULL if character not found */
-	if ( p < str ) {
-		p = NULL;
-	}
-	return p;
-}
 #endif /* _WIN32_WCE < 300 */
 
 /* Parse a command line buffer into arguments */
@@ -281,8 +260,13 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 	}
 	path[pathlen] = '\0';
 
+#ifdef _WIN32_WCE
+	wcsncpy( stdoutPath, path, SDL_arraysize(stdoutPath) );
+	wcsncat( stdoutPath, DIR_SEPERATOR STDOUT_FILE, SDL_arraysize(stdoutPath) );
+#else
 	SDL_strlcpy( stdoutPath, path, SDL_arraysize(stdoutPath) );
 	SDL_strlcat( stdoutPath, DIR_SEPERATOR STDOUT_FILE, SDL_arraysize(stdoutPath) );
+#endif
     
 	/* Redirect standard input and standard output */
 	newfp = freopen(stdoutPath, TEXT("w"), stdout);
@@ -300,8 +284,13 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 	}
 #endif /* _WIN32_WCE */
 
+#ifdef _WIN32_WCE
+	wcsncpy( stderrPath, path, SDL_arraysize(stdoutPath) );
+	wcsncat( stderrPath, DIR_SEPERATOR STDOUT_FILE, SDL_arraysize(stdoutPath) );
+#else
 	SDL_strlcpy( stderrPath, path, SDL_arraysize(stderrPath) );
 	SDL_strlcat( stderrPath, DIR_SEPERATOR STDERR_FILE, SDL_arraysize(stderrPath) );
+#endif
 
 	newfp = freopen(stderrPath, TEXT("w"), stderr);
 #ifndef _WIN32_WCE
@@ -329,7 +318,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 	wcscpy (bufp+wcslen(bufp), TEXT("\" "));
 	wcsncpy(bufp+wcslen(bufp), szCmdLine,nLen-wcslen(bufp));
 	nLen = wcslen(bufp)+1;
-	cmdline = SDL_stack_alloc(wchar_t, nLen);
+	cmdline = SDL_stack_alloc(char, nLen);
 	if ( cmdline == NULL ) {
 		return OutOfMemory();
 	}

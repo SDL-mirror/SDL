@@ -40,9 +40,13 @@
 #endif
 
 #ifdef _WIN32_WCE
-#include "SDL_gapivideo.h"
+#include "../gapi/SDL_gapivideo.h"
+
+#define IsZoomed(HWND) 1
 #define NO_GETKEYBOARDSTATE
+#if _WIN32_WCE < 420
 #define NO_CHANGEDISPLAYSETTINGS
+#endif
 #endif
 
 /* The window we use for everything... */
@@ -120,6 +124,29 @@ static void GapiTransform(SDL_ScreenOrientation rotate, char hires, Sint16 *x, S
 
 	switch(rotate) {
 		case SDL_ORIENTATION_UP:
+			{
+/* this code needs testing on a real device!
+   So it will be enabled later */
+/*
+#ifdef _WIN32_WCE
+#if _WIN32_WCE >= 420
+				// test device orientation
+				// FIXME: do not check every mouse message
+				DEVMODE settings;
+				SDL_memset(&settings, 0, sizeof(DEVMODE));
+				settings.dmSize = sizeof(DEVMODE);
+				settings.dmFields = DM_DISPLAYORIENTATION;
+				ChangeDisplaySettingsEx(NULL, &settings, NULL, CDS_TEST, NULL);
+				if( settings.dmOrientation == DMDO_90 )
+				{
+					rotatedX = SDL_VideoSurface->h - *x;
+					rotatedY = *y;
+					*x = rotatedX;
+					*y = rotatedY;
+				}
+#endif
+#endif */
+			}
 			break;
 		case SDL_ORIENTATION_RIGHT:
 			if (!SDL_VideoSurface)
@@ -144,17 +171,21 @@ static void GapiTransform(SDL_ScreenOrientation rotate, char hires, Sint16 *x, S
 
 static void SDL_RestoreGameMode(void)
 {
-#ifndef NO_CHANGEDISPLAYSETTINGS
 	ShowWindow(SDL_Window, SW_RESTORE);
+#ifndef NO_CHANGEDISPLAYSETTINGS
+#ifndef _WIN32_WCE
 	ChangeDisplaySettings(&SDL_fullscreen_mode, CDS_FULLSCREEN);
 #endif
+#endif /* NO_CHANGEDISPLAYSETTINGS */
 }
 static void SDL_RestoreDesktopMode(void)
 {
-#ifndef NO_CHANGEDISPLAYSETTINGS
 	ShowWindow(SDL_Window, SW_MINIMIZE);
+#ifndef NO_CHANGEDISPLAYSETTINGS
+#ifndef _WIN32_WCE
 	ChangeDisplaySettings(NULL, 0);
 #endif
+#endif /* NO_CHANGEDISPLAYSETTINGS */
 }
 
 #ifdef WM_MOUSELEAVE

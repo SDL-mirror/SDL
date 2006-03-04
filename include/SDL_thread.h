@@ -59,7 +59,9 @@ typedef struct SDL_Thread SDL_Thread;
    So, in short:
    Always use the _beginthread() and _endthread() of the calling runtime library!
 */
+#ifndef _WIN32_WCE
 #include <process.h> // This has _beginthread() and _endthread() defined!
+#endif
 #ifdef __EMX__
 #include <stdlib.h> // This has _beginthread() and _endthread() defined, if -Zmt flag is used!
 #endif
@@ -68,9 +70,6 @@ typedef struct SDL_Thread SDL_Thread;
 typedef int (*pfnSDL_CurrentBeginThread)(void (*func)(void *), void *, unsigned, void *arg); 
 typedef void (*pfnSDL_CurrentEndThread)(void);
 #else
-#ifdef __GNUC__
-#include <stdint.h>
-#endif
 typedef uintptr_t (__cdecl *pfnSDL_CurrentBeginThread) (void *, unsigned,
         unsigned (__stdcall *func)(void *), void *arg, 
         unsigned, unsigned *threadID);

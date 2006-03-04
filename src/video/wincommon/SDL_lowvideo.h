@@ -27,6 +27,16 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
+#ifndef SetClassLongPtr
+#define SetClassLongPtr	SetClassLong
+#endif
+#ifndef GetWindowLongPtr
+#define GetWindowLongPtr	GetWindowLong
+#endif
+#ifndef SetWindowLongPtr
+#define SetWindowLongPtr	SetWindowLong
+#endif
+
 #include "../SDL_sysvideo.h"
 
 /* Hidden "this" pointer for the video functions */

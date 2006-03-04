@@ -26,18 +26,34 @@
 /* This is a set of defines to configure the SDL features */
 
 #ifdef _MSC_VER
-typedef __int8			int8_t;
+typedef signed __int8		int8_t;
 typedef unsigned __int8		uint8_t;
-typedef __int16			int16_t;
+typedef signed __int16		int16_t;
 typedef unsigned __int16	uint16_t;
-typedef __int32			int32_t;
+typedef signed __int32		int32_t;
 typedef unsigned __int32	uint32_t;
-typedef __int64			int64_t;
+typedef signed __int64		int64_t;
 typedef unsigned __int64	uint64_t;
-#if _MSC_VER <= 1200
+#ifndef _UINTPTR_T_DEFINED
+#ifdef  _WIN64
+typedef unsigned __int64    uintptr_t;
+#else
+typedef unsigned int   uintptr_t;
+#endif
+#define _UINTPTR_T_DEFINED
+#endif
+#else
+typedef signed char int8_t;
+typedef unsigned char uint8_t;
+typedef signed short int16_t;
+typedef unsigned short uint16_t;
+typedef signed int int32_t;
+typedef unsigned int uint32_t;
+typedef signed long long int64_t;
+typedef unsigned long long uint64_t;
+typedef unsigned int size_t;
 typedef unsigned long uintptr_t;
-#endif
-#endif
+#endif /* _MSC_VER */
 #define SDL_HAS_64BIT_TYPE	1
 
 /* Useful headers */
@@ -79,8 +95,10 @@ typedef unsigned long uintptr_t;
 #define SDL_VIDEO_DRIVER_WINDIB	1
 
 /* Enable OpenGL support */
+#ifndef _WIN32_WCE
 #define SDL_VIDEO_OPENGL	1
 #define SDL_VIDEO_OPENGL_WGL	1
+#endif
 
 /* Enable assembly routines */
 #define SDL_ASSEMBLY_ROUTINES	1

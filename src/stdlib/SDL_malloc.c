@@ -27,17 +27,12 @@
 
 #ifndef HAVE_MALLOC
 
+#define LACKS_SYS_TYPES_H
 #define LACKS_STDIO_H
 #define LACKS_STRINGS_H
 #define LACKS_STRING_H
 #define LACKS_STDLIB_H
 #define ABORT
-#define memset	SDL_memset
-#define memcpy	SDL_memcpy
-#define malloc	SDL_malloc
-#define calloc	SDL_calloc
-#define realloc	SDL_realloc
-#define free	SDL_free
 
 /*
   This is a version (aka dlmalloc) of malloc/free/realloc written by
@@ -496,6 +491,7 @@ DEFAULT_MMAP_THRESHOLD       default: 256K
 #define LACKS_STRINGS_H
 #define LACKS_SYS_TYPES_H
 #define LACKS_ERRNO_H
+#define LACKS_FCNTL_H 
 #define MALLOC_FAILURE_ACTION
 #define MMAP_CLEARS 0 /* WINCE and some others apparently don't clear */
 #endif  /* WIN32 */
@@ -612,6 +608,13 @@ DEFAULT_MMAP_THRESHOLD       default: 256K
 #ifndef MALLINFO_FIELD_TYPE
 #define MALLINFO_FIELD_TYPE size_t
 #endif  /* MALLINFO_FIELD_TYPE */
+
+#define memset	SDL_memset
+#define memcpy	SDL_memcpy
+#define malloc	SDL_malloc
+#define calloc	SDL_calloc
+#define realloc	SDL_realloc
+#define free	SDL_free
 
 /*
   mallopt tuning options.  SVID/XPG defines four standard parameter

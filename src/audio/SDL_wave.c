@@ -550,12 +550,13 @@ done:
 	if ( format != NULL ) {
 		SDL_free(format);
 	}
-	if ( freesrc && src ) {
-		SDL_RWclose(src);
-	}
-	else {
-		// seek to the end of the file (given by the RIFF chunk)
-		SDL_RWseek(src, wavelen - chunk.length - headerDiff, RW_SEEK_CUR);
+	if ( src ) {
+		if ( freesrc ) {
+			SDL_RWclose(src);
+		} else {
+			// seek to the end of the file (given by the RIFF chunk)
+			SDL_RWseek(src, wavelen - chunk.length - headerDiff, RW_SEEK_CUR);
+		}
 	}
 	if ( was_error ) {
 		spec = NULL;

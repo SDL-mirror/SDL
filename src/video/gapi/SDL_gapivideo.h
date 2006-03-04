@@ -136,6 +136,7 @@ struct SDL_PrivateVideoData {
 	int invert;
 	char hiresFix; // using hires mode without defining hires resource
 // --------------
+	int useGXOpenDisplay; /* use GXOpenDispplay */
     int w, h;
 	enum SDL_ScreenOrientation gapiOrientation;
 

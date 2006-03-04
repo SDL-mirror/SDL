@@ -33,15 +33,24 @@ Inspired by http://arisme.free.fr/ports/SDL.php
 // TODO: windib on SH3 PPC2000 landscape test
 // TODO: optimize 8bpp landscape mode
 
+// there is some problems in runnings apps from a device landscape mode
+// due to WinCE bugs. Some works and some - does not.
+// TODO: finish Axim Dell X30 and user landscape mode, device landscape mode
+// TODO: finish Axim Dell X30 user portrait, device landscape stylus conversion
+// TODO: fix running GAPI apps from landscape mode - 
+//       wince goes to portrait mode, but does not update video memory
+
+
+#include "SDL.h"
+#include "SDL_error.h"
 #include "SDL_video.h"
 #include "SDL_mouse.h"
 #include "../SDL_sysvideo.h"
 #include "../SDL_pixels_c.h"
 #include "../../events/SDL_events_c.h"
-
-#include "SDL_syswm_c.h"
-#include "SDL_sysmouse_c.h"
-#include "SDL_dibevents_c.h" 
+#include "../wincommon/SDL_syswm_c.h"
+#include "../wincommon/SDL_sysmouse_c.h"
+#include "../windib/SDL_dibevents_c.h" 
 
 #include "SDL_gapivideo.h"
 
@@ -55,6 +64,8 @@ Inspired by http://arisme.free.fr/ports/SDL.php
 
 // for testing with GapiEmu
 #define USE_GAPI_EMU 0
+#define EMULATE_AXIM_X30 0
+#define WITHOUT_GAPI 0
 
 #if USE_GAPI_EMU && !REPORT_VIDEO_INFO
 #pragma message("Warning: Using GapiEmu in release build. I assume you'd like to set USE_GAPI_EMU to zero.")
@@ -113,7 +124,25 @@ static struct _RawFrameBufferInfo g_RawFrameBufferInfo = {0};
 
 #define FORMAT_565 1
 #define FORMAT_555 2
-#define FORMAT_OTHER 3 
+#define FORMAT_OTHER 3
+
+/* Dell Axim x30 hangs when we use GAPI from landscape,
+   so lets avoid using GxOpenDisplay there via GETGXINFO trick 
+   It seems that GAPI subsystem use the same ExtEscape code.
+*/
+#define GETGXINFO 0x00020000
+
+typedef struct GXDeviceInfo
+{
+long Version; //00 (should filled with 100 before calling ExtEscape)
+void * pvFrameBuffer; //04
+unsigned long cbStride; //08
+unsigned long cxWidth; //0c
+unsigned long cyHeight; //10
+unsigned long cBPP; //14
+unsigned long ffFormat; //18
+char Unused[0x84-7*4];
+} GXDeviceInfo; 
 
 static int GAPI_Available(void)
 {
@@ -122,6 +151,10 @@ static int GAPI_Available(void)
 	int result = ExtEscape(hdc, GETRAWFRAMEBUFFER, 0, NULL, sizeof(RawFrameBufferInfo), (char *)&g_RawFrameBufferInfo);
 	ReleaseDC(NULL, hdc);
 	g_bRawBufferAvailable = result > 0;
+
+#if WITHOUT_GAPI
+	return g_bRawBufferAvailable;
+#endif
 
 #if USE_GAPI_EMU
 	g_hGapiLib = LoadLibrary(_T("GAPI_Emu.dll"));
@@ -332,6 +365,8 @@ static void FillStructs(_THIS, BOOL useVga)
 		this->hidden->needUpdate = 1;
 		this->hidden->hiresFix = 0;
 		this->hidden->useVga = 0;
+		this->hidden->useGXOpenDisplay = 1;
+
 #ifdef _ARM_
 		/* check some devices and extract addition info */
 		SystemParametersInfo( SPI_GETOEMINFO, sizeof( oemstr ), oemstr, 0 );
@@ -343,6 +378,29 @@ static void FillStructs(_THIS, BOOL useVga)
 			this->hidden->gxProperties.cbxPitch = -640;
 			this->hidden->gxProperties.cbyPitch = 2;
 			this->hidden->needUpdate = 0;
+		}
+#if (EMULATE_AXIM_X30 == 0)
+		// buggy Dell Axim X30
+		if( _tcsncmp(oemstr, L"Dell Axim X30", 13) == 0 )
+#endif
+		{
+			GXDeviceInfo gxInfo = {0};
+			HDC hdc = GetDC(NULL);
+			int result;
+
+			gxInfo.Version = 100;
+			result = ExtEscape(hdc, GETGXINFO, 0, NULL, sizeof(gxInfo), (char *)&gxInfo);
+			if( result > 0 )
+			{
+				this->hidden->useGXOpenDisplay = 0;
+				this->hidden->videoMem = gxInfo.pvFrameBuffer;
+				this->hidden->needUpdate = 0;
+				this->hidden->gxProperties.cbxPitch = 2;
+				this->hidden->gxProperties.cbyPitch = 480;
+				this->hidden->gxProperties.cxWidth = gxInfo.cxWidth;
+				this->hidden->gxProperties.cyHeight = gxInfo.cyHeight;
+				this->hidden->gxProperties.ffFormat = gxInfo.ffFormat;
+			}
 		}
 #endif
 	} else
@@ -598,7 +656,7 @@ SDL_Surface *GAPI_SetVideoMode(_THIS, SDL_Surface *current,
 		return(NULL);
 	}
 
-	/* detect landscape mode */
+	/* detect user landscape mode */
 	if( (width > height) && (GetSystemMetrics(SM_CXSCREEN) < GetSystemMetrics(SM_CYSCREEN))) 
 		gapi->userOrientation = SDL_ORIENTATION_RIGHT;
 
@@ -610,7 +668,8 @@ SDL_Surface *GAPI_SetVideoMode(_THIS, SDL_Surface *current,
 			gapi->hiresFix = 1;
 	} else
 		if( (width > GetSystemMetrics(SM_CXSCREEN)) || (height > GetSystemMetrics(SM_CYSCREEN)))
-			gapi->hiresFix = 1;
+			if( !((width == GetSystemMetrics(SM_CYSCREEN)) && (height == GetSystemMetrics(SM_CXSCREEN)))) // user portrait, device landscape
+				gapi->hiresFix = 1;
 
 	switch( gapi->userOrientation )
 	{
@@ -652,7 +711,7 @@ SDL_Surface *GAPI_SetVideoMode(_THIS, SDL_Surface *current,
 
 	if (!SDL_windowid)
 		SetWindowLong(SDL_Window, GWL_STYLE, style);
- 
+
 	/* Allocate bitmap */
 	if(gapiBuffer) 
 	{
@@ -672,6 +731,14 @@ SDL_Surface *GAPI_SetVideoMode(_THIS, SDL_Surface *current,
 	ShowWindow(SDL_Window, SW_SHOW);
 	SetForegroundWindow(SDL_Window);
 
+	/* Open GAPI display */
+	if( !gapi->useVga && this->hidden->useGXOpenDisplay )
+		if( !gapi->gxFunc.GXOpenDisplay(SDL_Window, GX_FULLSCREEN) )
+		{
+			SDL_SetError("Couldn't initialize GAPI");
+			return(NULL);
+		}
+
 #if REPORT_VIDEO_INFO
 	printf("Video properties:\n");
 	printf("display bpp: %d\n", gapi->gxProperties.cBPP);
@@ -680,24 +747,24 @@ SDL_Surface *GAPI_SetVideoMode(_THIS, SDL_Surface *current,
 	printf("x pitch: %d\n", gapi->gxProperties.cbxPitch);
 	printf("y pitch: %d\n", gapi->gxProperties.cbyPitch);
 	printf("gapi flags: 0x%x\n", gapi->gxProperties.ffFormat);
+
+	if( !gapi->useVga && this->hidden->useGXOpenDisplay && gapi->needUpdate)
+	{
+		gapi->videoMem = gapi->gxFunc.GXBeginDraw(); 
+		gapi->gxFunc.GXEndDraw();
+	}
+
 	printf("video memory: 0x%x\n", gapi->videoMem);
 	printf("need update: %d\n", gapi->needUpdate);
 	printf("hi-res fix: %d\n", gapi->hiresFix);
 	printf("VGA is available on the device: %d\n", g_bRawBufferAvailable);
-	printf("use VGA resolution: %d\n", gapi->useVga);
+	printf("use raw framebuffer: %d\n", gapi->useVga);
 	printf("video surface bpp: %d\n", video->format->BitsPerPixel);
 	printf("video surface width: %d\n", video->w);
 	printf("video surface height: %d\n", video->h);
 #endif
 
-	/* Open GAPI display */
-	if( !gapi->useVga )
-		if( !gapi->gxFunc.GXOpenDisplay(SDL_Window, GX_FULLSCREEN) )
-		{
-			SDL_SetError("Couldn't initialize GAPI");
-			return(NULL);
-		}
- 
+
 	/* Blank screen */
 	allScreen.x = allScreen.y = 0;
 	allScreen.w = video->w - 1;
@@ -790,6 +857,7 @@ static int updateLine16to16(_THIS, PIXEL *srcPointer, PIXEL *destPointer, int wi
 			else
 			{
 				destPointer += gapi->gxProperties.cbyPitch / 2;
+
 				while(width--) // iPaq 3660
 				{
 					*(DWORD*)destPointer =(*line1++ << 16) | *line2++;

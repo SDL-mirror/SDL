@@ -24,13 +24,6 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-#if defined(_WIN32_WCE)
-
-// defined and used in SDL_sysevents.c
-extern HINSTANCE aygshell;
-
-#endif
-
 /* Not yet in the mingw32 cross-compile headers */
 #ifndef CDS_FULLSCREEN
 #define CDS_FULLSCREEN	4
@@ -49,8 +42,12 @@ extern HINSTANCE aygshell;
 
 #ifdef _WIN32_WCE
 #define NO_GETDIBITS
-#define NO_CHANGEDISPLAYSETTINGS
 #define NO_GAMMA_SUPPORT
+  #if _WIN32_WCE < 420
+    #define NO_CHANGEDISPLAYSETTINGS
+  #else
+    #define ChangeDisplaySettings(lpDevMode, dwFlags) ChangeDisplaySettingsEx(NULL, (lpDevMode), 0, (dwFlags), 0)
+  #endif
 #endif
 #ifndef WS_MAXIMIZE
 #define WS_MAXIMIZE	0
@@ -63,6 +60,11 @@ extern HINSTANCE aygshell;
 #endif
 #ifndef PC_NOCOLLAPSE
 #define PC_NOCOLLAPSE	0
+#endif
+
+#ifdef _WIN32_WCE
+// defined and used in SDL_sysevents.c
+extern HINSTANCE aygshell;
 #endif
 
 /* Initialization/Query functions */
@@ -190,8 +192,6 @@ VideoBootStrap WINDIB_bootstrap = {
 	DIB_Available, DIB_CreateDevice
 };
 
-#ifndef NO_CHANGEDISPLAYSETTINGS
-
 static int cmpmodes(const void *va, const void *vb)
 {
     SDL_Rect *a = *(SDL_Rect **)va;
@@ -247,8 +247,6 @@ static int DIB_AddMode(_THIS, int bpp, int w, int h)
 
 	return(0);
 }
-
-#endif /* !NO_CHANGEDISPLAYSETTINGS */
 
 static HPALETTE DIB_CreatePalette(int bpp)
 {
@@ -326,6 +324,13 @@ int DIB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	DIB_CheckGamma(this);
 
 #ifndef NO_CHANGEDISPLAYSETTINGS
+
+	settings.dmSize = sizeof(DEVMODE);
+	settings.dmDriverExtra = 0;
+#ifdef _WIN32_WCE
+	settings.dmFields = DM_DISPLAYQUERYORIENTATION;
+	this->hidden->supportRotation = ChangeDisplaySettingsEx(NULL, &settings, NULL, CDS_TEST, NULL) == DISP_CHANGE_SUCCESSFUL;
+#endif
 	/* Query for the desktop resolution */
 	EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &SDL_desktop_mode);
 
@@ -333,13 +338,30 @@ int DIB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	for ( i=0; EnumDisplaySettings(NULL, i, &settings); ++i ) {
 		DIB_AddMode(this, settings.dmBitsPerPel,
 			settings.dmPelsWidth, settings.dmPelsHeight);
+#ifdef _WIN32_WCE		
+		if( this->hidden->supportRotation )
+			DIB_AddMode(this, settings.dmBitsPerPel,
+				settings.dmPelsHeight, settings.dmPelsWidth);
+#endif
 	}
 	/* Sort the mode lists */
+	if( i > 1 )
 	for ( i=0; i<NUM_MODELISTS; ++i ) {
 		if ( SDL_nummodes[i] > 0 ) {
 			SDL_qsort(SDL_modelist[i], SDL_nummodes[i], sizeof *SDL_modelist[i], cmpmodes);
 		}
 	}
+#else
+	// WinCE and fullscreen mode:
+	// We use only vformat->BitsPerPixel that allow SDL to
+	// emulate other bpp (8, 32) and use triple buffer, 
+	// because SDL surface conversion is much faster than the WinCE one.
+	// Although it should be tested on devices with graphics accelerator.
+
+    DIB_AddMode(this, vformat->BitsPerPixel,
+			GetDeviceCaps(GetDC(NULL), HORZRES), 
+			GetDeviceCaps(GetDC(NULL), VERTRES));
+
 #endif /* !NO_CHANGEDISPLAYSETTINGS */
 
 	/* Grab an identity palette if we are in a palettized mode */
@@ -352,6 +374,10 @@ int DIB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	/* Fill in some window manager capabilities */
 	this->info.wm_available = 1;
 
+#ifdef _WIN32_WCE
+	this->hidden->origRotation = -1;
+#endif
+
 	/* We're done! */
 	return(0);
 }
@@ -359,15 +385,11 @@ int DIB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 /* We support any format at any dimension */
 SDL_Rect **DIB_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
 {
-#ifdef NO_CHANGEDISPLAYSETTINGS
-	return((SDL_Rect **)-1);
-#else
 	if ( (flags & SDL_FULLSCREEN) == SDL_FULLSCREEN ) {
 		return(SDL_modelist[((format->BitsPerPixel+7)/8)-1]);
 	} else {
 		return((SDL_Rect **)-1);
 	}
-#endif
 }
 
 
@@ -531,6 +553,61 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 
 		SDL_memset(&settings, 0, sizeof(DEVMODE));
 		settings.dmSize = sizeof(DEVMODE);
+
+#ifdef _WIN32_WCE
+		// try to rotate screen to fit requested resolution
+		if( this->hidden->supportRotation )
+		{
+			DWORD rotation;
+
+			// ask current mode
+			settings.dmFields = DM_DISPLAYORIENTATION;
+			ChangeDisplaySettingsEx(NULL, &settings, NULL, CDS_TEST, NULL);
+			rotation = settings.dmDisplayOrientation;
+
+			if( (width > GetDeviceCaps(GetDC(NULL), HORZRES))
+				&& (height < GetDeviceCaps(GetDC(NULL), VERTRES)))
+			{
+				switch( rotation )
+				{
+				case DMDO_0:
+					settings.dmDisplayOrientation = DMDO_90;
+					break;
+				case DMDO_270:
+					settings.dmDisplayOrientation = DMDO_180;
+					break;
+				}
+				if( settings.dmDisplayOrientation != rotation )
+				{
+					// go to landscape
+					this->hidden->origRotation = rotation;
+					ChangeDisplaySettingsEx(NULL,&settings,NULL,CDS_RESET,NULL);
+				}
+			}
+			if( (width < GetDeviceCaps(GetDC(NULL), HORZRES))
+				&& (height > GetDeviceCaps(GetDC(NULL), VERTRES)))
+			{
+				switch( rotation )
+				{
+				case DMDO_90:
+					settings.dmDisplayOrientation = DMDO_0;
+					break;
+				case DMDO_180:
+					settings.dmDisplayOrientation = DMDO_270;
+					break;
+				}
+				if( settings.dmDisplayOrientation != rotation )
+				{
+					// go to portrait
+					this->hidden->origRotation = rotation;
+					ChangeDisplaySettingsEx(NULL,&settings,NULL,CDS_RESET,NULL);
+				}
+			}
+
+		}
+#endif
+
+#ifndef _WIN32_WCE
 		settings.dmBitsPerPel = video->format->BitsPerPixel;
 		settings.dmPelsWidth = width;
 		settings.dmPelsHeight = height;
@@ -545,10 +622,14 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 			settings.dmFields &= ~DM_DISPLAYFREQUENCY;
 			changed = (ChangeDisplaySettings(&settings, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL);
 		}
+#else
+		changed = 1;
+#endif
 		if ( changed ) {
 			video->flags |= SDL_FULLSCREEN;
 			SDL_fullscreen_mode = settings;
 		}
+
 	}
 #endif /* !NO_CHANGEDISPLAYSETTINGS */
 
@@ -669,9 +750,12 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 			video->flags |= SDL_HWPALETTE;
 		}
 	}
-
+#ifndef _WIN32_WCE
 	/* Resize the window */
 	if ( !SDL_windowid && !IsZoomed(SDL_Window) ) {
+#else
+	if ( !SDL_windowid ) {
+#endif
 		HWND top;
 		UINT swp_flags;
 		const char *window = NULL;

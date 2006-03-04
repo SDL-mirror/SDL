@@ -46,8 +46,12 @@ struct SDL_PrivateVideoData {
     SDL_Rect **SDL_modelist[NUM_MODELISTS];
 
 	SDL_ScreenOrientation orientation;
-	int invert;
-	char hiresFix; // using hires mode without defining hires resource
+#ifdef _WIN32_WCE
+	int invert; /* do to remove, used by GAPI driver! */
+	char hiresFix; /* using hires mode without defining hires resource */
+	int supportRotation; /* for Pocket PC devices */
+	DWORD origRotation; /* for Pocket PC devices */
+#endif
 };
 /* Old variable names */
 #define screen_bmp		(this->hidden->screen_bmp)

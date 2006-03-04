@@ -29,16 +29,25 @@
 #include "SDL_rwops.h"
 
 
-#ifdef __WIN32__
+#if defined(__WIN32__)
 
 /* Functions to read/write Win32 API file pointers */
+/* Will not use it on WinCE because stdio is buffered, it means
+   faster, and all stdio functions anyway are embedded in coredll.dll - 
+   the main wince dll*/
 
 #define WINDOWS_LEAN_AND_MEAN
 #include <windows.h>
 
-static int win32_file_open(SDL_RWops *context, const char *filename, const char *mode) {
-	
+#ifndef INVALID_SET_FILE_POINTER
+#define INVALID_SET_FILE_POINTER 0xFFFFFFFF
+#endif
+
+static int win32_file_open(SDL_RWops *context, const char *filename, const char *mode)
+{
+#ifndef _WIN32_WCE
 	UINT	old_error_mode;
+#endif
 	HANDLE	h;
 	DWORD	r_right, w_right;
 	DWORD	must_exist, truncate;
@@ -64,15 +73,31 @@ static int win32_file_open(SDL_RWops *context, const char *filename, const char 
 
 	if (!r_right && !w_right) /* inconsistent mode */
 		return -1; /* failed (invalid call)*/
-	
+
+#ifdef _WIN32_WCE
+	{
+		size_t size = SDL_strlen(filename)+1;
+		wchar_t *filenameW = SDL_stack_alloc(wchar_t, size);
+
+		if ( MultiByteToWideChar(CP_UTF8, 0, filename, -1, filenameW, size) == 0 ) {
+			SDL_SetError("Unable to convert filename to Unicode");
+			SDL_stack_free(filenameW);
+			return -1;
+		}
+		h = CreateFile(filenameW, (w_right|r_right), (w_right)? 0 : FILE_SHARE_READ, 
+					   NULL, (must_exist|truncate|a_mode), FILE_ATTRIBUTE_NORMAL,NULL);
+		SDL_stack_free(filenameW);
+	}
+#else
 	/* Do not open a dialog box if failure */
-	old_error_mode = SetErrorMode(SEM_NOOPENFILEERRORBOX|SEM_FAILCRITICALERRORS);	
-	
+	old_error_mode = SetErrorMode(SEM_NOOPENFILEERRORBOX|SEM_FAILCRITICALERRORS);
+
 	h = CreateFile(filename, (w_right|r_right), (w_right)? 0 : FILE_SHARE_READ, 
 		           NULL, (must_exist|truncate|a_mode), FILE_ATTRIBUTE_NORMAL,NULL);
-	
+
 	/* restore old behaviour */
 	SetErrorMode(old_error_mode);
+#endif /* _WIN32_WCE */
 
 	if (h==INVALID_HANDLE_VALUE) {
 		SDL_SetError("Couldn't open %s",filename);
@@ -83,7 +108,8 @@ static int win32_file_open(SDL_RWops *context, const char *filename, const char 
 	
 	return 0; /* ok */
 }
-static int win32_file_seek(SDL_RWops *context, int offset, int whence) {
+static int win32_file_seek(SDL_RWops *context, int offset, int whence)
+{
 	DWORD win32whence;
 	int   file_pos;
 	
@@ -112,7 +138,8 @@ static int win32_file_seek(SDL_RWops *context, int offset, int whence) {
 	SDL_Error(SDL_EFSEEK);
 	return -1; /* error */
 }
-static int win32_file_read(SDL_RWops *context, void *ptr, int size, int maxnum) {
+static int win32_file_read(SDL_RWops *context, void *ptr, int size, int maxnum)
+{
 	
 	int		total_bytes; 
 	DWORD	byte_read,nread;
@@ -129,7 +156,8 @@ static int win32_file_read(SDL_RWops *context, void *ptr, int size, int maxnum) 
 	nread = byte_read/size;
 	return nread;
 }
-static int win32_file_write(SDL_RWops *context, const void *ptr, int size, int num) {
+static int win32_file_write(SDL_RWops *context, const void *ptr, int size, int num)
+{
 	
 	int		total_bytes; 
 	DWORD	byte_written,nwritten;
@@ -155,7 +183,8 @@ static int win32_file_write(SDL_RWops *context, const void *ptr, int size, int n
 	nwritten = byte_written/size;
 	return nwritten;
 }
-static int win32_file_close(SDL_RWops *context) {
+static int win32_file_close(SDL_RWops *context)
+{
 	
 	if ( context ) {								
 		if (context->hidden.win32io.h != INVALID_HANDLE_VALUE) {
@@ -249,7 +278,7 @@ static int mem_read(SDL_RWops *context, void *ptr, int size, int maxnum)
 	size_t mem_available;
 
 	total_bytes = (maxnum * size);
-	if ( (maxnum <= 0) || (size <= 0) || ((total_bytes / maxnum) != size) ) {
+	if ( (maxnum <= 0) || (size <= 0) || ((total_bytes / maxnum) != (size_t) size) ) {
 		return 0;
 	}
 
@@ -335,13 +364,15 @@ static char *unix_to_mac(const char *file)
 SDL_RWops *SDL_RWFromFile(const char *file, const char *mode)
 {
 	SDL_RWops *rwops = NULL;
-
+#ifdef HAVE_STDIO_H
+	FILE *fp = NULL;
+#endif
 	if ( !file || !*file || !mode || !*mode ) {
 		SDL_SetError("SDL_RWFromFile(): No file or no mode specified");
 		return NULL;
 	}
 
-#ifdef __WIN32__
+#if defined(__WIN32__)
 	rwops = SDL_AllocRW();
 	if (!rwops)
 		return NULL; /* SDL_SetError already setup by SDL_AllocRW() */
@@ -356,7 +387,6 @@ SDL_RWops *SDL_RWFromFile(const char *file, const char *mode)
 	rwops->close = win32_file_close;
 
 #elif HAVE_STDIO_H
-	FILE *fp;
 
 #ifdef __MACOS__
 	{
