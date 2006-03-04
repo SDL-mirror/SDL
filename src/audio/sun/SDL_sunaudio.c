@@ -54,6 +54,8 @@ static void DSP_PlayAudio(_THIS);
 static Uint8 *DSP_GetAudioBuf(_THIS);
 static void DSP_CloseAudio(_THIS);
 
+static Uint8 snd2au(int sample);
+
 /* Audio driver bootstrap functions */
 
 static int Audio_Available(void)
@@ -157,7 +159,6 @@ void DSP_WaitAudio(_THIS)
 #endif
 }
 
-static Uint8 snd2au(int sample);
 void DSP_PlayAudio(_THIS)
 {
 	/* Write the audio data */
