@@ -74,7 +74,7 @@ $(objects)/$(SDLMAIN_TARGET): $(SDLMAIN_OBJECTS)
 install: install-bin install-hdrs install-lib install-data install-man
 install-bin:
 	$(SHELL) $(auxdir)/mkinstalldirs $(bindir)
-	$(INSTALL) -m 755 $(srcdir)/sdl-config $(bindir)/sdl-config
+	$(INSTALL) -m 755 sdl-config $(bindir)/sdl-config
 install-hdrs:
 	$(SHELL) $(auxdir)/mkinstalldirs $(includedir)/SDL
 	for src in $(srcdir)/include/*.h; do \
