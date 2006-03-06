@@ -43,7 +43,7 @@
 
 /* The translation table from a Microsoft VK keysym to a SDL keysym */
 static SDLKey VK_keymap[SDLK_LAST];
-static SDL_keysym *TranslateKey(UINT vkey, UINT scancode, SDL_keysym *keysym, int pressed);
+static SDL_keysym *TranslateKey(WPARAM vkey, UINT scancode, SDL_keysym *keysym, int pressed);
 
 /* Masks for processing the windows KEYDOWN and KEYUP messages */
 #define REPEATED_KEYMASK	(1<<30)
@@ -376,7 +376,7 @@ void DIB_InitOSKeymap(_THIS)
 	VK_keymap[VK_APPS] = SDLK_MENU;
 }
 
-static SDL_keysym *TranslateKey(UINT vkey, UINT scancode, SDL_keysym *keysym, int pressed)
+static SDL_keysym *TranslateKey(WPARAM vkey, UINT scancode, SDL_keysym *keysym, int pressed)
 {
 	/* Set the keysym information */
 	keysym->scancode = (unsigned char) scancode;
@@ -426,8 +426,8 @@ int DIB_CreateWindow(_THIS)
 		/* DJM: we want all event's for the user specified
 			window to be handled by SDL.
 		 */
-		userWindowProc = (WNDPROCTYPE)GetWindowLongPtr(SDL_Window, GWL_WNDPROC);
-		SetWindowLongPtr(SDL_Window, GWL_WNDPROC, (LONG_PTR)WinMessage);
+		userWindowProc = (WNDPROCTYPE)GetWindowLongPtr(SDL_Window, GWLP_WNDPROC);
+		SetWindowLongPtr(SDL_Window, GWLP_WNDPROC, (LONG_PTR)WinMessage);
 	} else {
 		SDL_Window = CreateWindow(SDL_Appname, SDL_Appname,
                         (WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX),
@@ -444,7 +444,7 @@ int DIB_CreateWindow(_THIS)
 void DIB_DestroyWindow(_THIS)
 {
 	if ( SDL_windowid ) {
-		SetWindowLongPtr(SDL_Window, GWL_WNDPROC, (LONG_PTR)userWindowProc);
+		SetWindowLongPtr(SDL_Window, GWLP_WNDPROC, (LONG_PTR)userWindowProc);
 	} else {
 		DestroyWindow(SDL_Window);
 	}

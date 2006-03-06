@@ -166,7 +166,7 @@ static void __cdecl cleanup_output(void)
 /* This is where execution begins [console apps] */
 int console_main(int argc, char *argv[])
 {
-	int n;
+	size_t n;
 	char *bufp, *appname;
 	int status;
 

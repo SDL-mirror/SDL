@@ -874,8 +874,8 @@ int DX5_CreateWindow(_THIS)
 		/* DJM: we want all event's for the user specified
 			window to be handled by SDL.
 		 */
-		userWindowProc = (WNDPROCTYPE)GetWindowLongPtr(SDL_Window, GWL_WNDPROC);
-		SetWindowLongPtr(SDL_Window, GWL_WNDPROC, (LONG_PTR)WinMessage);
+		userWindowProc = (WNDPROCTYPE)GetWindowLongPtr(SDL_Window, GWLP_WNDPROC);
+		SetWindowLongPtr(SDL_Window, GWLP_WNDPROC, (LONG_PTR)WinMessage);
 	} else {
 		SDL_Window = CreateWindow(SDL_Appname, SDL_Appname,
                         (WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX),
@@ -903,7 +903,7 @@ void DX5_DestroyWindow(_THIS)
 
 	/* Destroy our window */
 	if ( SDL_windowid ) {
-		SetWindowLongPtr(SDL_Window, GWL_WNDPROC, (LONG_PTR)userWindowProc);
+		SetWindowLongPtr(SDL_Window, GWLP_WNDPROC, (LONG_PTR)userWindowProc);
 	} else {
 		DestroyWindow(SDL_Window);
 	}

@@ -172,7 +172,7 @@ WMcursor *WIN_CreateWMCursor(_THIS,
 
 	/* Create the cursor */
 	cursor->curs = CreateCursor(
-			(HINSTANCE)GetWindowLongPtr(SDL_Window, GWL_HINSTANCE),
+			(HINSTANCE)GetWindowLongPtr(SDL_Window, GWLP_HINSTANCE),
 					hot_x, hot_y, allowed_x, allowed_y, 
 						cursor->ands, cursor->xors);
 	if ( cursor->curs == NULL ) {

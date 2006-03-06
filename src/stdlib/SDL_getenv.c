@@ -69,7 +69,7 @@ char *SDL_getenv(const char *name)
 {
 	size_t bufferlen;
 
-	bufferlen = GetEnvironmentVariable(name, SDL_envmem, SDL_envmemlen);
+	bufferlen = GetEnvironmentVariable(name, SDL_envmem, (DWORD)SDL_envmemlen);
 	if ( bufferlen == 0 ) {
 		return NULL;
 	}
@@ -80,7 +80,7 @@ char *SDL_getenv(const char *name)
 		}
 		SDL_envmem = newmem;
 		SDL_envmemlen = bufferlen;
-		GetEnvironmentVariable(name, SDL_envmem, SDL_envmemlen);
+		GetEnvironmentVariable(name, SDL_envmem, (DWORD)SDL_envmemlen);
 	}
 	return SDL_envmem;
 }
