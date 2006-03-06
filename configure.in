@@ -543,6 +543,7 @@ AC_HELP_STRING([--enable-mintaudio], [support Atari audio driver [default=yes]])
             mintaudio=yes
             AC_DEFINE(SDL_AUDIO_DRIVER_MINT)
             SOURCES="$SOURCES $srcdir/src/audio/mint/*.c"
+            SOURCES="$SOURCES $srcdir/src/audio/mint/*.S"
             have_audio=yes
         fi
     fi
@@ -1217,6 +1218,7 @@ dnl Set up the Atari Bios keyboard driver
 CheckAtariBiosEvent()
 {
     SOURCES="$SOURCES $srcdir/src/video/ataricommon/*.c"
+    SOURCES="$SOURCES $srcdir/src/video/ataricommon/*.S"
 }
 
 dnl Set up the Atari Xbios driver
@@ -2279,6 +2281,7 @@ case "$target" in
             else
                 AC_DEFINE(SDL_TIMER_MINT)
                 SOURCES="$SOURCES $srcdir/src/timer/mint/*.c"
+                SOURCES="$SOURCES $srcdir/src/timer/mint/*.S"
             fi
             have_timers=yes
         fi
