@@ -52,7 +52,7 @@ typedef unsigned int uint32_t;
 typedef signed long long int64_t;
 typedef unsigned long long uint64_t;
 typedef unsigned int size_t;
-typedef unsigned long uintptr_t;
+typedef unsigned int uintptr_t;
 #endif /* _MSC_VER */
 #define SDL_HAS_64BIT_TYPE	1
 

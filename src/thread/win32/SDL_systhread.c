@@ -59,16 +59,16 @@ static unsigned __stdcall RunThread(void *data)
 int SDL_SYS_CreateThread(SDL_Thread *thread, void *args, pfnSDL_CurrentBeginThread pfnBeginThread, pfnSDL_CurrentEndThread pfnEndThread)
 {
 	unsigned threadid;
-    pThreadStartParms pThreadParms = (pThreadStartParms)SDL_malloc(sizeof(tThreadStartParms));
-    if (!pThreadParms) {
+	pThreadStartParms pThreadParms = (pThreadStartParms)SDL_malloc(sizeof(tThreadStartParms));
+	if (!pThreadParms) {
 		SDL_OutOfMemory();
-        return(-1);
-    }
+		return(-1);
+	}
 
-    // Save the function which we will have to call to clear the RTL of calling app!
-    pThreadParms->pfnCurrentEndThread = pfnEndThread;
-    // Also save the real parameters we have to pass to thread function
-    pThreadParms->args = args;
+	// Save the function which we will have to call to clear the RTL of calling app!
+	pThreadParms->pfnCurrentEndThread = pfnEndThread;
+	// Also save the real parameters we have to pass to thread function
+	pThreadParms->args = args;
 
 	if (pfnBeginThread) {
 		thread->handle = (SYS_ThreadHandle) pfnBeginThread(NULL, 0, RunThread,
