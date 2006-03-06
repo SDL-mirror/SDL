@@ -36,8 +36,8 @@
      defined(_M_IX86) || \
      defined(__ia64__) || defined(__x86_64__) || \
     (defined(__alpha__) || defined(__alpha)) || \
-    (defined(__arm__) || defined(__thumb__)) || \
-    (defined(__sh__) || defined(__sh64__)) || \
+    (defined(__arm__) || defined(__thumb__) || defined(_ARM_)) || \
+    (defined(__sh__) || defined(__sh64__) || defined(_SH4_)) || \
     (defined(__mips__) && defined(__MIPSEL__)) || \
      defined(__SYMBIAN32__) || defined(__OS2__)
 #define SDL_BYTEORDER	SDL_LIL_ENDIAN
