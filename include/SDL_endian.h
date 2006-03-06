@@ -32,17 +32,14 @@
 #define SDL_BIG_ENDIAN	4321
 
 #ifndef SDL_BYTEORDER	/* Not defined in SDL_config.h? */
-#if (defined(__i386__) || defined(__i386)) || \
-     defined(_M_IX86) || \
-     defined(__ia64__) || defined(__x86_64__) || \
-    (defined(__alpha__) || defined(__alpha)) || \
-    (defined(__arm__) || defined(__thumb__) || defined(_ARM_)) || \
-    (defined(__sh__) || defined(__sh64__) || defined(_SH4_)) || \
-    (defined(__mips__) && defined(__MIPSEL__)) || \
-     defined(__SYMBIAN32__) || defined(__OS2__)
-#define SDL_BYTEORDER	SDL_LIL_ENDIAN
-#else
+#if defined(__hppa__) || \
+    defined(__m68k__) || defined(mc68000) || \
+    (defined(__MIPS__) && defined(__MISPEB__)) || \
+    defined(__ppc__) || defined(__POWERPC__) || \
+    defined(__sparc__)
 #define SDL_BYTEORDER	SDL_BIG_ENDIAN
+#else
+#define SDL_BYTEORDER	SDL_LIL_ENDIAN
 #endif
 #endif /* !SDL_BYTEORDER */
 
