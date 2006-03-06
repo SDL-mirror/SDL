@@ -76,6 +76,8 @@
 
 /* Enable assembly routines */
 #define SDL_ASSEMBLY_ROUTINES	1
+#ifdef __ppc__
 #define SDL_ALTIVEC_BLITTERS	1
+#endif
 
 #endif /* _SDL_config_macosx_h */
