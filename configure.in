@@ -763,11 +763,14 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [default=yes
             if test x$ac_cv_func_shmat != xyes; then
                 X_CFLAGS="$X_CFLAGS -DNO_SHARED_MEMORY"
             fi
+
+            AC_DEFINE(SDL_VIDEO_DRIVER_X11)
+            SOURCES="$SOURCES $srcdir/src/video/x11/*.c"
+            BUILD_CFLAGS="$BUILD_CFLAGS $X_CFLAGS"
             if test x$have_loadso != xyes && \
                test x$enable_x11_shared = xyes; then
                 AC_MSG_WARN([You must have SDL_LoadObject() support for dynamic X11 loading])
             fi
-
             if test x$have_loadso = xyes && \
                test x$enable_x11_shared = xyes && test x$x11_lib != x && test x$x11ext_lib != x; then
                 echo "-- dynamic libX11 -> $x11_lib"
@@ -775,13 +778,8 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [default=yes
                 AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC, "$x11_lib")
                 AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT, "$x11ext_lib")
             else
-                X_LIBS="$X_LIBS -lX11 -lXext"
+                BUILD_LDFLAGS="$BUILD_LDFLAGS $X_LIBS -lX11 -lXext"
             fi
-
-            AC_DEFINE(SDL_VIDEO_DRIVER_X11)
-            SOURCES="$SOURCES $srcdir/src/video/x11/*.c"
-            BUILD_CFLAGS="$BUILD_CFLAGS $X_CFLAGS"
-            BUILD_LDFLAGS="$BUILD_LDFLAGS $X_LIBS"
             have_video=yes
 
             AC_ARG_ENABLE(dga,
