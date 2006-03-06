@@ -30,6 +30,26 @@
 #include "../SDL_thread_c.h"
 #include "../SDL_systhread.h"
 
+#ifndef SDL_PASSED_BEGINTHREAD_ENDTHREAD
+#ifndef _WIN32_WCE
+/* We'll use the C library from this DLL */
+#include <process.h>
+#endif
+
+#if __GNUC__
+typedef unsigned long (__cdecl *pfnSDL_CurrentBeginThread) (void *, unsigned,
+        unsigned (__stdcall *func)(void *), void *arg, 
+        unsigned, unsigned *threadID);
+typedef void (__cdecl *pfnSDL_CurrentEndThread)(unsigned code);
+#else
+typedef uintptr_t (__cdecl *pfnSDL_CurrentBeginThread) (void *, unsigned,
+        unsigned (__stdcall *func)(void *), void *arg, 
+        unsigned, unsigned *threadID);
+typedef void (__cdecl *pfnSDL_CurrentEndThread)(unsigned code);
+#endif
+#endif /* !SDL_PASSED_BEGINTHREAD_ENDTHREAD */
+
+
 typedef struct ThreadStartParms
 {
   void *args;
@@ -56,8 +76,20 @@ static unsigned __stdcall RunThread(void *data)
   return(0);
 }
 
+#ifdef SDL_PASSED_BEGINTHREAD_ENDTHREAD
 int SDL_SYS_CreateThread(SDL_Thread *thread, void *args, pfnSDL_CurrentBeginThread pfnBeginThread, pfnSDL_CurrentEndThread pfnEndThread)
 {
+#else
+int SDL_SYS_CreateThread(SDL_Thread *thread, void *args)
+{
+#ifdef _WIN32_WCE
+	pfnSDL_CurrentBeginThread pfnBeginThread = NULL;
+	pfnSDL_CurrentEndThread pfnEndThread = NULL;
+#else
+	pfnSDL_CurrentBeginThread pfnBeginThread = _beginthreadex;
+	pfnSDL_CurrentEndThread pfnEndThread = _endthreadex;
+#endif
+#endif /* SDL_PASSED_BEGINTHREAD_ENDTHREAD */
 	unsigned threadid;
 	pThreadStartParms pThreadParms = (pThreadStartParms)SDL_malloc(sizeof(tThreadStartParms));
 	if (!pThreadParms) {

@@ -45,7 +45,7 @@ struct SDL_Thread;
 typedef struct SDL_Thread SDL_Thread;
 
 /* Create a thread */
-#if defined(__WIN32__) || defined(__OS2__)
+#if (defined(__WIN32__) && !defined(HAVE_LIBC)) || defined(__OS2__)
 /*
    We compile SDL into a DLL on OS/2. This means, that it's the DLL which
    creates a new thread for the calling process with the SDL_CreateThread()
@@ -59,11 +59,9 @@ typedef struct SDL_Thread SDL_Thread;
    So, in short:
    Always use the _beginthread() and _endthread() of the calling runtime library!
 */
+#define SDL_PASSED_BEGINTHREAD_ENDTHREAD
 #ifndef _WIN32_WCE
-#include <process.h> // This has _beginthread() and _endthread() defined!
-#endif
-#ifdef __EMX__
-#include <stdlib.h> // This has _beginthread() and _endthread() defined, if -Zmt flag is used!
+#include <process.h> /* This has _beginthread() and _endthread() defined! */
 #endif
 
 #ifdef __OS2__

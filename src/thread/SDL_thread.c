@@ -209,7 +209,7 @@ void SDL_RunThread(void *data)
 	*statusloc = userfunc(userdata);
 }
 
-#if defined(__WIN32__) || defined(__OS2__)
+#ifdef SDL_PASSED_BEGINTHREAD_ENDTHREAD
 #undef SDL_CreateThread
 DECLSPEC SDL_Thread * SDLCALL SDL_CreateThread(int (*fn)(void *), void *data, pfnSDL_CurrentBeginThread pfnBeginThread, pfnSDL_CurrentEndThread pfnEndThread)
 #else
@@ -250,7 +250,7 @@ DECLSPEC SDL_Thread * SDLCALL SDL_CreateThread(int (*fn)(void *), void *data)
 	SDL_AddThread(thread);
 
 	/* Create the thread and go! */
-#if defined(__WIN32__) || defined(__OS2__)
+#ifdef SDL_PASSED_BEGINTHREAD_ENDTHREAD
 	ret = SDL_SYS_CreateThread(thread, args, pfnBeginThread, pfnEndThread);
 #else
 	ret = SDL_SYS_CreateThread(thread, args);

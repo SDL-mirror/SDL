@@ -51,14 +51,64 @@ typedef signed int int32_t;
 typedef unsigned int uint32_t;
 typedef signed long long int64_t;
 typedef unsigned long long uint64_t;
+#ifndef _SIZE_T_DEFINED_
+#define _SIZE_T_DEFINED_
 typedef unsigned int size_t;
+#endif
 typedef unsigned int uintptr_t;
 #endif /* _MSC_VER */
 #define SDL_HAS_64BIT_TYPE	1
 
+/* Enabled for SDL 1.2 (binary compatibility) */
+#define HAVE_LIBC	0
+#if HAVE_LIBC
 /* Useful headers */
+#define HAVE_STDIO_H 1
+#define STDC_HEADERS 1
+#define HAVE_STRING_H 1
+#define HAVE_CTYPE_H 1
+#define HAVE_MATH_H 1
+#ifndef _WIN32_WCE
+#define HAVE_SIGNAL_H 1
+#endif
+
+/* C library functions */
+#define HAVE_MALLOC 1
+#define HAVE_CALLOC 1
+#define HAVE_REALLOC 1
+#define HAVE_FREE 1
+#define HAVE_ALLOCA 1
+#define HAVE_QSORT 1
+#define HAVE_ABS 1
+#define HAVE_MEMSET 1
+#define HAVE_MEMCPY 1
+#define HAVE_MEMMOVE 1
+#define HAVE_MEMCMP 1
+#define HAVE_STRLEN 1
+#define HAVE__STRREV 1
+#define HAVE__STRUPR 1
+#define HAVE__STRLWR 1
+#define HAVE_STRCHR 1
+#define HAVE_STRRCHR 1
+#define HAVE_STRSTR 1
+#define HAVE_ITOA 1
+#define HAVE__LTOA 1
+#define HAVE__ULTOA 1
+#define HAVE_STRTOL 1
+#define HAVE_STRTOUL 1
+#define HAVE_STRTOLL 1
+#define HAVE_STRTOD 1
+#define HAVE_ATOI 1
+#define HAVE_ATOF 1
+#define HAVE_STRCMP 1
+#define HAVE_STRNCMP 1
+#define HAVE_STRICMP 1
+#define HAVE_STRCASECMP 1
+#define HAVE_SSCANF 1
+#else
 #define HAVE_STDARG_H	1
 #define HAVE_STDDEF_H	1
+#endif
 
 /* Enable various audio drivers */
 #ifndef _WIN32_WCE
