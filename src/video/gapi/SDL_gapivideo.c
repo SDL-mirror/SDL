@@ -710,7 +710,7 @@ SDL_Surface *GAPI_SetVideoMode(_THIS, SDL_Surface *current,
 	style = 0;
 
 	if (!SDL_windowid)
-		SetWindowLongPtr(SDL_Window, GWL_STYLE, style);
+		SetWindowLong(SDL_Window, GWL_STYLE, style);
 
 	/* Allocate bitmap */
 	if(gapiBuffer) 

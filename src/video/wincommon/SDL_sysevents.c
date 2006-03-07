@@ -562,7 +562,7 @@ LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			   Aparently it's too difficult for MS to check
 			   inside their function, so I have to do it here.
           		 */
-         		style = GetWindowLongPtr(hwnd, GWL_STYLE);
+         		style = GetWindowLong(hwnd, GWL_STYLE);
          		AdjustWindowRect(
 				&size,
 				style,

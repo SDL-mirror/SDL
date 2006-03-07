@@ -1123,7 +1123,7 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 		}
 #endif /* !NO_CHANGEDISPLAYSETTINGS */
 
-		style = GetWindowLongPtr(SDL_Window, GWL_STYLE);
+		style = GetWindowLong(SDL_Window, GWL_STYLE);
 		style &= ~(resizestyle|WS_MAXIMIZE);
 		if ( video->flags & SDL_FULLSCREEN ) {
 			style &= ~windowstyle;
@@ -1148,7 +1148,7 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 
 		/* DJM: Don't piss of anyone who has setup his own window */
 		if ( !SDL_windowid )
-			SetWindowLongPtr(SDL_Window, GWL_STYLE, style);
+			SetWindowLong(SDL_Window, GWL_STYLE, style);
 
 		/* Resize the window (copied from SDL WinDIB driver) */
 		if ( !SDL_windowid && !IsZoomed(SDL_Window) ) {
@@ -1178,7 +1178,7 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 			bounds.top = SDL_windowY;
 			bounds.right = SDL_windowX+video->w;
 			bounds.bottom = SDL_windowY+video->h;
-			AdjustWindowRectEx(&bounds, GetWindowLongPtr(SDL_Window, GWL_STYLE), FALSE, 0);
+			AdjustWindowRectEx(&bounds, GetWindowLong(SDL_Window, GWL_STYLE), FALSE, 0);
 			width = bounds.right-bounds.left;
 			height = bounds.bottom-bounds.top;
 			if ( (flags & SDL_FULLSCREEN) ) {
@@ -1217,7 +1217,7 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 	}
 
 	/* Set the appropriate window style */
-	style = GetWindowLongPtr(SDL_Window, GWL_STYLE);
+	style = GetWindowLong(SDL_Window, GWL_STYLE);
 	style &= ~(resizestyle|WS_MAXIMIZE);
 	if ( (flags & SDL_FULLSCREEN) == SDL_FULLSCREEN ) {
 		style &= ~windowstyle;
@@ -1239,7 +1239,7 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 	}
 	/* DJM: Don't piss of anyone who has setup his own window */
 	if ( !SDL_windowid )
-		SetWindowLongPtr(SDL_Window, GWL_STYLE, style);
+		SetWindowLong(SDL_Window, GWL_STYLE, style);
 
 	/* Set DirectDraw sharing mode.. exclusive when fullscreen */
 	if ( (flags & SDL_FULLSCREEN) == SDL_FULLSCREEN ) {
@@ -1264,7 +1264,7 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 		bounds.top = 0;
 		bounds.right = GetSystemMetrics(SM_CXSCREEN);
 		bounds.bottom = GetSystemMetrics(SM_CYSCREEN);
-		AdjustWindowRectEx(&bounds, GetWindowLongPtr(SDL_Window, GWL_STYLE), FALSE, 0);
+		AdjustWindowRectEx(&bounds, GetWindowLong(SDL_Window, GWL_STYLE), FALSE, 0);
 		SetWindowPos(SDL_Window, HWND_TOPMOST,
 			bounds.left, bounds.top, 
 			bounds.right - bounds.left,
@@ -1581,7 +1581,7 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 			bounds.top = SDL_windowY;
 			bounds.right = SDL_windowX+video->w;
 			bounds.bottom = SDL_windowY+video->h;
-			AdjustWindowRectEx(&bounds, GetWindowLongPtr(SDL_Window, GWL_STYLE), FALSE, 0);
+			AdjustWindowRectEx(&bounds, GetWindowLong(SDL_Window, GWL_STYLE), FALSE, 0);
 			width = bounds.right-bounds.left;
 			height = bounds.bottom-bounds.top;
 			if ( center ) {

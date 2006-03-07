@@ -45,7 +45,7 @@ static int WIN_GL_ResetWindow(_THIS)
 		/* Save the existing window attributes */
 		LONG style;
 		RECT rect = { 0, 0, 0, 0 };
-		style = GetWindowLongPtr(SDL_Window, GWL_STYLE);
+		style = GetWindowLong(SDL_Window, GWL_STYLE);
 		GetWindowRect(SDL_Window, &rect);
 		DestroyWindow(SDL_Window);
 		SDL_Window = CreateWindow(SDL_Appname, SDL_Appname,

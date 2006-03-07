@@ -392,7 +392,7 @@ static SDL_keysym *TranslateKey(WPARAM vkey, UINT scancode, SDL_keysym *keysym, 
 		Uint16	wchars[2];
 
 		GetKeyboardState(keystate);
-		if (SDL_ToUnicode(vkey, scancode, keystate, wchars, sizeof(wchars)/sizeof(wchars[0]), 0) == 1)
+		if (SDL_ToUnicode((UINT)vkey, scancode, keystate, wchars, sizeof(wchars)/sizeof(wchars[0]), 0) == 1)
 		{
 			keysym->unicode = wchars[0];
 		}

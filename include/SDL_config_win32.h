@@ -150,7 +150,9 @@ typedef unsigned int uintptr_t;
 #define SDL_VIDEO_OPENGL_WGL	1
 #endif
 
-/* Enable assembly routines */
+/* Enable assembly routines (Win64 doesn't have inline asm) */
+#ifndef _WIN64
 #define SDL_ASSEMBLY_ROUTINES	1
+#endif
 
 #endif /* _SDL_config_win32_h */

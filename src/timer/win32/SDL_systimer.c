@@ -128,7 +128,7 @@ void SDL_SYS_TimerQuit(void)
 /* Forward declaration because this is called by the timer callback */
 int SDL_SYS_StartTimer(void);
 
-static VOID CALLBACK TimerCallbackProc(HWND hwnd, UINT uMsg, UINT idEvent, DWORD dwTime)
+static VOID CALLBACK TimerCallbackProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
 	Uint32 ms;
 
@@ -170,8 +170,8 @@ void SDL_SYS_StopTimer(void)
 /* Data to handle a single periodic alarm */
 static UINT timerID = 0;
 
-static void CALLBACK HandleAlarm(UINT uID,  UINT uMsg, DWORD dwUser,
-						DWORD dw1, DWORD dw2)
+static void CALLBACK HandleAlarm(UINT uID,  UINT uMsg, DWORD_PTR dwUser,
+						DWORD_PTR dw1, DWORD_PTR dw2)
 {
 	SDL_ThreadedTimerCheck();
 }
