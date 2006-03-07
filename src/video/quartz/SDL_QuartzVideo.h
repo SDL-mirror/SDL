@@ -49,9 +49,6 @@
 */
 
 #include <Cocoa/Cocoa.h>
-#include <OpenGL/OpenGL.h>
-#include <OpenGL/gl.h>
-#include <OpenGL/glext.h>
 #include <Carbon/Carbon.h>
 #include <QuickTime/QuickTime.h>
 #include <IOKit/IOKitLib.h> /* For powersave handling */
@@ -62,6 +59,7 @@
 #include "SDL_error.h"
 #include "SDL_timer.h"
 #include "SDL_loadso.h"
+#include "SDL_opengl.h"
 #include "SDL_syswm.h"
 #include "../SDL_sysvideo.h"
 #include "../SDL_pixels_c.h"

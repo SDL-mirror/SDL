@@ -621,7 +621,7 @@ static NSSymbol *search_linked_libs(const struct mach_header * mh, const char *s
 }
 
 /* Up to the caller to SDL_free() returned string */
-static inline char *dyld_error_str()
+static inline const char *dyld_error_str()
 {
 	NSLinkEditErrors dylder;
 	int dylderno;
