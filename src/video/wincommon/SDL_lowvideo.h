@@ -39,6 +39,9 @@
 #ifndef GWLP_WNDPROC
 #define GWLP_WNDPROC	GWL_WNDPROC
 #endif
+#ifndef GCLP_HICON
+#define GCLP_HICON GCL_HICON
+#endif
 
 #include "../SDL_sysvideo.h"
 
@@ -118,7 +121,7 @@ extern void DX5_SoundFocus(HWND window);
 
 /* DJM: This is really from SDL_sysevents.c, we need it in
    GDL_CreateWindow as well */
-LONG CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 /* JFP: Implementation of ToUnicode() that works on 9x/ME/2K/XP */
 typedef int (WINAPI *ToUnicodeFN)(UINT, UINT, PBYTE, LPWSTR, int, UINT);
