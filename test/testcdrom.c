@@ -2,9 +2,9 @@
 /* Test the SDL CD-ROM audio functions */
 
 #include <stdlib.h>
-#include <ctype.h>
-#include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "SDL.h"
 

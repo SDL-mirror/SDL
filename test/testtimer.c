@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 	SDL_TimerID t1, t2, t3;
 
 	if ( SDL_Init(SDL_INIT_TIMER) < 0 ) {
-		fprintf(stderr, "Couldn't load SDL: %s\n", SDL_GetError());
+		fprintf(stderr, "Couldn't initialize SDL: %s\n", SDL_GetError());
 		return(1);
 	}
 

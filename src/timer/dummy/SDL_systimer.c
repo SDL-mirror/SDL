@@ -21,6 +21,9 @@
 */
 #include "SDL_config.h"
 
+#include "SDL_timer.h"
+#include "../SDL_timer_c.h"
+
 void SDL_StartTicks(void)
 {
 }

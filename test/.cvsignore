@@ -15,10 +15,9 @@ testalpha
 testbitmap
 testblitspeed
 testcdrom
-testcpuinfo
 testdyngl
-testendian
 testerror
+testfile
 testgamma
 testgl
 testhread
@@ -28,13 +27,12 @@ testlock
 testoverlay
 testoverlay2
 testpalette
+testplatform
 testsem
 testsprite
 testtimer
-testtypes
 testver
 testvidinfo
 testwin
 testwm
-threadwin
 torturethread
