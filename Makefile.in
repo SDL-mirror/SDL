@@ -36,7 +36,7 @@ SDLMAIN_TARGET = libSDLmain.a
 SDLMAIN_SOURCES = @SDLMAIN_SOURCES@
 SDLMAIN_OBJECTS = @SDLMAIN_OBJECTS@
 
-DIST = acinclude.m4 autogen.sh Borland.html Borland.zip BUGS build-scripts configure configure.in COPYING CREDITS CWprojects.sea.bin docs docs.html EpocBuildFiles.zip include INSTALL Makefile.dc Makefile.in MPWmake.sea.bin PBProjects.tar.gz README* sdl-config.in sdl.m4 SDL.qpg.in SDL.spec SDL.spec.in src test TODO VisualCE.zip VisualC.html VisualC.zip Watcom-OS2.zip WhatsNew Xcode21.tar.gz Xcode.tar.gz XcodeUniversal.tar.gz
+DIST = acinclude.m4 autogen.sh Borland.html Borland.zip BUGS build-scripts configure configure.in COPYING CREDITS CWprojects.sea.bin docs docs.html EpocBuildFiles.zip include INSTALL Makefile.dc Makefile.minimal Makefile.in MPWmake.sea.bin PBProjects.tar.gz README* sdl-config.in sdl.m4 SDL.qpg.in SDL.spec SDL.spec.in src test TODO VisualCE.zip VisualC.html VisualC.zip Watcom-OS2.zip WhatsNew Xcode21.tar.gz Xcode.tar.gz XcodeUniversal.tar.gz
 
 LT_AGE      = @LT_AGE@
 LT_CURRENT  = @LT_CURRENT@
