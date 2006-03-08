@@ -119,15 +119,15 @@ static int ph_DispatchEvent(_THIS)
 	
     posted = 0;
 	
-    switch (event->type)
+    switch (phevent->type)
     {
         case Ph_EV_BOUNDARY:
         {
-            if (event->subtype == Ph_EV_PTR_ENTER)
+            if (phevent->subtype == Ph_EV_PTR_ENTER)
             {
                 posted = SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS);
             }
-            else if (event->subtype ==Ph_EV_PTR_LEAVE)
+            else if (phevent->subtype ==Ph_EV_PTR_LEAVE)
             {
                 posted = SDL_PrivateAppActive(0, SDL_APPMOUSEFOCUS);	
             }
@@ -139,12 +139,12 @@ static int ph_DispatchEvent(_THIS)
         {
             if (SDL_VideoSurface)
             {
-                pointerEvent = PhGetData(event);
-                rect = PhGetRects(event);
+                pointerEvent = PhGetData(phevent);
+                rect = PhGetRects(phevent);
 
                 if (mouse_relative)
                 {
-                    posted = ph_WarpedMotion(this, event);
+                    posted = ph_WarpedMotion(this, phevent);
                 }
                 else
                 {
@@ -156,8 +156,8 @@ static int ph_DispatchEvent(_THIS)
 
         case Ph_EV_BUT_PRESS:
         {
-            pointerEvent = PhGetData( event );
-            buttons = ph2sdl_mousebutton( pointerEvent->buttons );
+            pointerEvent = PhGetData(phevent);
+            buttons = ph2sdl_mousebutton(pointerEvent->buttons);
             if (buttons != 0)
             {
                 posted = SDL_PrivateMouseButton(SDL_PRESSED, buttons, 0, 0);
@@ -167,13 +167,13 @@ static int ph_DispatchEvent(_THIS)
 
         case Ph_EV_BUT_RELEASE:
         {
-            pointerEvent = PhGetData(event);
+            pointerEvent = PhGetData(phevent);
             buttons = ph2sdl_mousebutton(pointerEvent->buttons);
-            if (event->subtype == Ph_EV_RELEASE_REAL && buttons != 0)
+            if (phevent->subtype == Ph_EV_RELEASE_REAL && buttons != 0)
             {
                 posted = SDL_PrivateMouseButton(SDL_RELEASED, buttons, 0, 0);
             }
-            else if(event->subtype == Ph_EV_RELEASE_PHANTOM)
+            else if(phevent->subtype == Ph_EV_RELEASE_PHANTOM)
             {
                 /* If the mouse is outside the window,
                  * only a phantom release event is sent, so
@@ -191,7 +191,7 @@ static int ph_DispatchEvent(_THIS)
 
         case Ph_EV_WM:
         {
-            winEvent = PhGetData(event);
+            winEvent = PhGetData(phevent);
 
             /* losing focus */
             if ((winEvent->event_f==Ph_WM_FOCUS) && (winEvent->event_state==Ph_WM_EVSTATE_FOCUSLOST))
@@ -279,20 +279,20 @@ static int ph_DispatchEvent(_THIS)
         /* window has been resized, moved or removed */
         case Ph_EV_EXPOSE:
         {
-            if (event->num_rects!=0)
+            if (phevent->num_rects!=0)
             {
                 int numrects;
 
                 if (SDL_VideoSurface)
                 {
-                    rect = PhGetRects(event);
-                    if (event->num_rects>PH_SDL_MAX_RECTS)
+                    rect = PhGetRects(phevent);
+                    if (phevent->num_rects>PH_SDL_MAX_RECTS)
                     {
                        /* sorry, buffers underrun, we'll update only first PH_SDL_MAX_RECTS rects */
                        numrects=PH_SDL_MAX_RECTS;
                     }
 
-                    for(i=0; i<event->num_rects; i++)
+                    for(i=0; i<phevent->num_rects; i++)
                     {
                         sdlrects[i].x = rect[i].ul.x;
                         sdlrects[i].y = rect[i].ul.y;
@@ -300,7 +300,7 @@ static int ph_DispatchEvent(_THIS)
                         sdlrects[i].h = rect[i].lr.y - rect[i].ul.y + 1;
                     }
 
-                    this->UpdateRects(this, event->num_rects, sdlrects);
+                    this->UpdateRects(this, phevent->num_rects, sdlrects);
 
                     if (current_overlay!=NULL)
                     {
@@ -332,7 +332,7 @@ static int ph_DispatchEvent(_THIS)
 
             posted = 0;
 
-            keyEvent = PhGetData( event );
+            keyEvent = PhGetData(phevent);
 
             if (Pk_KF_Key_Down & keyEvent->key_flags)
             {
@@ -369,11 +369,11 @@ static int ph_DispatchEvent(_THIS)
         
         case Ph_EV_INFO:
         {
-           if (event->subtype==Ph_OFFSCREEN_INVALID)
+           if (phevent->subtype==Ph_OFFSCREEN_INVALID)
            {
               unsigned long* EvInfoData;
 
-              EvInfoData=(unsigned long*)PhGetData(event);
+              EvInfoData=(unsigned long*)PhGetData(phevent);
 
               switch (*EvInfoData)
               {
@@ -410,7 +410,7 @@ int ph_Pending(_THIS)
 
     while (1)
     {
-        switch(PhEventPeek(event, EVENT_SIZE))
+        switch(PhEventPeek(phevent, EVENT_SIZE))
         {
             case Ph_EVENT_MSG:
                  return 1;
@@ -433,7 +433,7 @@ void ph_PumpEvents(_THIS)
 
     while (ph_Pending(this))
     {
-        PtEventHandler(event);
+        PtEventHandler(phevent);
         ph_DispatchEvent(this);
     }
 }

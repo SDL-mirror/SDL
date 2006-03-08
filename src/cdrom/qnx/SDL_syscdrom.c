@@ -170,7 +170,7 @@ int SDL_SYS_CDInit(void)
     {
         char *cdpath, *delim;
 	size_t len = SDL_strlen(SDLcdrom)+1;
-        cdpath = SDL_stack_alloc(len);
+        cdpath = SDL_stack_alloc(char, len);
         if (cdpath != NULL)
         {
             SDL_strlcpy(cdpath, SDLcdrom, len);

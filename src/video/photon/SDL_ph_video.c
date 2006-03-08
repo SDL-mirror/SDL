@@ -362,12 +362,12 @@ static int ph_VideoInit(_THIS, SDL_PixelFormat* vformat)
     old_video_mode=-1;
     old_refresh_rate=-1;
 	
-    if (NULL == (event = SDL_malloc(EVENT_SIZE)))
+    if (NULL == (phevent = SDL_malloc(EVENT_SIZE)))
     {
         SDL_OutOfMemory();
         return -1;
     }
-    SDL_memset(event, 0x00, EVENT_SIZE);
+    SDL_memset(phevent, 0x00, EVENT_SIZE);
 
     window = ph_CreateWindow(this);
     if (window == NULL)
@@ -580,10 +580,10 @@ static void ph_VideoQuit(_THIS)
         window=NULL;
     }
 
-    if (event!=NULL)
+    if (phevent!=NULL)
     {
-        SDL_free(event);
-        event=NULL;
+        SDL_free(phevent);
+        phevent=NULL;
     }
 }
 

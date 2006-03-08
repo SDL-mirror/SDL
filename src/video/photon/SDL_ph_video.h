@@ -140,7 +140,7 @@ struct SDL_PrivateVideoData
 #define currently_fullscreen  (this->hidden->currently_fullscreen)
 #define currently_hided       (this->hidden->currently_hided)
 #define currently_maximized   (this->hidden->currently_maximized)
-#define event                 (this->hidden->event)
+#define phevent               (this->hidden->event)
 #define current_overlay       (this->hidden->overlay)
 #define desktop_mode          (this->hidden->desktop_mode)
 #define mouse_relative        (this->hidden->mouse_relative)
