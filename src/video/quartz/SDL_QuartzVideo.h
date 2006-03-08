@@ -48,6 +48,9 @@
           there is a hack around this that helps a bit
 */
 
+/* Needs to be first, so QuickTime.h doesn't include glext.h (10.4) */
+#include "SDL_opengl.h"
+
 #include <Cocoa/Cocoa.h>
 #include <Carbon/Carbon.h>
 #include <QuickTime/QuickTime.h>
@@ -59,7 +62,6 @@
 #include "SDL_error.h"
 #include "SDL_timer.h"
 #include "SDL_loadso.h"
-#include "SDL_opengl.h"
 #include "SDL_syswm.h"
 #include "../SDL_sysvideo.h"
 #include "../SDL_pixels_c.h"
