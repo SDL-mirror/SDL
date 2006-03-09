@@ -31,6 +31,7 @@
 
 #ifdef __MACOSX__
 #define USE_NAMED_SEMAPHORES 1
+#include <unistd.h>
 #endif
 
 struct SDL_semaphore {

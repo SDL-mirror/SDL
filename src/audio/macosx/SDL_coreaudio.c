@@ -128,8 +128,8 @@ static OSStatus     audioCallback (void                             *inRefCon,
         len = bufferSize - bufferOffset;
         if (len > remaining)
             len = remaining;
-        SDL_memcpy(ptr, buffer + bufferOffset, len);
-        ptr += len;
+        SDL_memcpy(ptr, (char *)buffer + bufferOffset, len);
+        ptr = (char *)ptr + len;
         remaining -= len;
         bufferOffset += len;
     }

@@ -24,9 +24,9 @@
 */
 #include "SDL_config.h"
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//  AudioFilePlayer.h
-//
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    AudioFilePlayer.h
+*/
 #ifndef __AudioFilePlayer_H__
 #define __AudioFilePlayer_H__
 
@@ -62,12 +62,12 @@ struct S_AudioFileManager;
 #pragma mark __________ AudioFilePlayer
 typedef struct S_AudioFilePlayer
 {
-//public:
+/*public:*/
     int             (*SetDestination)(struct S_AudioFilePlayer *afp, AudioUnit *inDestUnit);
     void            (*SetNotifier)(struct S_AudioFilePlayer *afp, AudioFilePlayNotifier inNotifier, void *inRefCon);
-    void            (*SetStartFrame)(struct S_AudioFilePlayer *afp, int frame); // seek in the file
-    int             (*GetCurrentFrame)(struct S_AudioFilePlayer *afp); // get the current frame position
-    void            (*SetStopFrame)(struct S_AudioFilePlayer *afp, int frame);   // set limit in the file
+    void            (*SetStartFrame)(struct S_AudioFilePlayer *afp, int frame); /* seek in the file */
+    int             (*GetCurrentFrame)(struct S_AudioFilePlayer *afp); /* get the current frame position */
+    void            (*SetStopFrame)(struct S_AudioFilePlayer *afp, int frame);   /* set limit in the file */
     int             (*Connect)(struct S_AudioFilePlayer *afp);
     void            (*Disconnect)(struct S_AudioFilePlayer *afp);
     void            (*DoNotification)(struct S_AudioFilePlayer *afp, OSStatus inError);
@@ -75,7 +75,7 @@ typedef struct S_AudioFilePlayer
     AudioUnit       (*GetDestUnit)(struct S_AudioFilePlayer *afp);
     void            (*Print)(struct S_AudioFilePlayer *afp);
 
-//private:
+/*private:*/
     AudioUnit                       mPlayUnit;
     SInt16                          mForkRefNum;
     
@@ -106,19 +106,19 @@ void delete_AudioFilePlayer(AudioFilePlayer *afp);
 #pragma mark __________ AudioFileManager
 typedef struct S_AudioFileManager
 {
-//public:
-        // this method should NOT be called by an object of this class
-        // as it is called by the parent's Disconnect() method
+/*public:*/
+        /* this method should NOT be called by an object of this class
+           as it is called by the parent's Disconnect() method */
     void                (*Disconnect)(struct S_AudioFileManager *afm);
     int                 (*DoConnect)(struct S_AudioFileManager *afm);
     OSStatus            (*Read)(struct S_AudioFileManager *afm, char *buffer, UInt32 *len);
     const char*         (*GetFileBuffer)(struct S_AudioFileManager *afm);
     const AudioFilePlayer *(*GetParent)(struct S_AudioFileManager *afm);
-    void                (*SetPosition)(struct S_AudioFileManager *afm, SInt64 pos);  // seek/rewind in the file
-    int                 (*GetByteCounter)(struct S_AudioFileManager *afm);  // return actual bytes streamed to audio hardware
-    void                (*SetEndOfFile)(struct S_AudioFileManager *afm, SInt64 pos);  // set the "EOF" (will behave just like it reached eof)
+    void                (*SetPosition)(struct S_AudioFileManager *afm, SInt64 pos);  /* seek/rewind in the file */
+    int                 (*GetByteCounter)(struct S_AudioFileManager *afm);  /* return actual bytes streamed to audio hardware */
+    void                (*SetEndOfFile)(struct S_AudioFileManager *afm, SInt64 pos);  /* set the "EOF" (will behave just like it reached eof) */
    
-//protected:
+/*protected:*/
     AudioFilePlayer*    mParent;
     SInt16              mForkRefNum;
     SInt64              mAudioDataOffset;
@@ -137,20 +137,20 @@ typedef struct S_AudioFileManager
 	void*               mTmpBuffer;
 	UInt32              mBufferSize;
 	UInt32              mBufferOffset;
-//public:
+/*public:*/
     UInt32              mChunkSize;
     SInt64              mFileLength;
     SInt64              mReadFilePosition;
     int                 mWriteToFirstBuffer;
     int                 mFinishedReadingData;
 
-//protected:
+/*protected:*/
     OSStatus            (*Render)(struct S_AudioFileManager *afm, AudioBuffer *ioData);
     OSStatus            (*GetFileData)(struct S_AudioFileManager *afm, void** inOutData, UInt32 *inOutDataSize);
     void                (*AfterRender)(struct S_AudioFileManager *afm);
 
-//public:
-    //static
+/*public:*/
+    /*static*/
     OSStatus            (*FileInputProc)(void                             *inRefCon,
                                          AudioUnitRenderActionFlags      inActionFlags,
                                          const AudioTimeStamp            *inTimeStamp,

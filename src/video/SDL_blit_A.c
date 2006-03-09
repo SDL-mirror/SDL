@@ -502,7 +502,7 @@ static vector unsigned char calc_swizzle32(const SDL_PixelFormat *srcfmt,
     if (!dstfmt) {
         dstfmt = &default_pixel_format;
     }
-    vector unsigned char plus = VECUINT8_LITERAL
+    const vector unsigned char plus = VECUINT8_LITERAL
                                             ( 0x00, 0x00, 0x00, 0x00,
                                               0x04, 0x04, 0x04, 0x04,
                                               0x08, 0x08, 0x08, 0x08,
@@ -863,8 +863,8 @@ static void Blit32to32PixelAlphaAltivec(SDL_BlitInfo *info)
         }
         ONE_PIXEL_BLEND((UNALIGNED_PTR(dstp)) && (width), width);
         if (width > 0) {
-            // vsrcPermute
-            // vdstPermute
+            /* vsrcPermute */
+            /* vdstPermute */
             int extrawidth = (width % 4);
             vector unsigned char valigner = VEC_ALIGNER(srcp);
             vector unsigned char vs = (vector unsigned char)vec_ld(0, srcp);

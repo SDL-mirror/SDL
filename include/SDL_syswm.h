@@ -48,7 +48,7 @@ typedef struct SDL_SysWMinfo SDL_SysWMinfo;
 /* This is the structure for custom window manager events */
 #if SDL_VIDEO_DRIVER_X11
 #if defined(__APPLE__) && defined(__MACH__)
-// conflicts with Quickdraw.h
+/* conflicts with Quickdraw.h */
 #define Cursor X11Cursor
 #endif
 
@@ -56,7 +56,7 @@ typedef struct SDL_SysWMinfo SDL_SysWMinfo;
 #include <X11/Xatom.h>
 
 #if defined(__APPLE__) && defined(__MACH__)
-// matches the re-define above
+/* matches the re-define above */
 #undef Cursor
 #endif
 

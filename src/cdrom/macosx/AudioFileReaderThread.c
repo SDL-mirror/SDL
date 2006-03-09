@@ -24,17 +24,17 @@
 */
 #include "SDL_config.h"
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// AudioFileManager.cpp
-//
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   AudioFileManager.cpp
+*/
 #include "AudioFilePlayer.h"
-#include <mach/mach.h> //used for setting policy of thread
+#include <mach/mach.h> /* used for setting policy of thread */
 #include "SDLOSXCAGuard.h"
 #include <pthread.h>
 
-//#include <list>
+/*#include <list>*/
 
-//typedef void *FileData;
+/*typedef void *FileData;*/
 typedef struct S_FileData
 {
     AudioFileManager *obj;
@@ -43,7 +43,7 @@ typedef struct S_FileData
 
 
 typedef struct S_FileReaderThread {
-//public:
+/*public:*/
     SDLOSXCAGuard*                    (*GetGuard)(struct S_FileReaderThread *frt);
     void                        (*AddReader)(struct S_FileReaderThread *frt);
     void                        (*RemoveReader)(struct S_FileReaderThread *frt, AudioFileManager* inItem);
@@ -51,8 +51,8 @@ typedef struct S_FileReaderThread {
 
     int     mThreadShouldDie;
     
-//private:
-    //typedef std::list<AudioFileManager*> FileData;
+/*private:*/
+    /*typedef std::list<AudioFileManager*> FileData;*/
 
     SDLOSXCAGuard             *mGuard;
     UInt32              mThreadPriority;
@@ -63,9 +63,9 @@ typedef struct S_FileReaderThread {
 
     void                        (*ReadNextChunk)(struct S_FileReaderThread *frt);
     int                         (*StartFixedPriorityThread)(struct S_FileReaderThread *frt);
-    //static
+    /*static*/
     UInt32               (*GetThreadBasePriority)(pthread_t inThread);
-    //static
+    /*static*/
     void*                (*DiskReaderEntry)(void *inRefCon);
 } FileReaderThread;
 
@@ -75,15 +75,15 @@ static SDLOSXCAGuard* FileReaderThread_GetGuard(FileReaderThread *frt)
     return frt->mGuard;
 }
 
-// returns 1 if succeeded
+/* returns 1 if succeeded */
 static int FileReaderThread_TryNextRead (FileReaderThread *frt, AudioFileManager* inItem)
 {
     int didLock = 0;
     int succeeded = 0;
     if (frt->mGuard->Try(frt->mGuard, &didLock))
     {
-        //frt->mFileData.push_back (inItem);
-        // !!! FIXME: this could be faster with a "tail" member. --ryan.
+        /*frt->mFileData.push_back (inItem);*/
+        /* !!! FIXME: this could be faster with a "tail" member. --ryan. */
         FileData *i = frt->mFileData;
         FileData *prev = NULL;
 
@@ -123,7 +123,7 @@ static void    FileReaderThread_RemoveReader (FileReaderThread *frt, AudioFileMa
     {
         int bNeedsRelease = frt->mGuard->Lock(frt->mGuard);
         
-        //frt->mFileData.remove (inItem);
+        /*frt->mFileData.remove (inItem);*/
         FileData *i = frt->mFileData;
         FileData *prev = NULL;
         while (i != NULL)
@@ -144,8 +144,8 @@ static void    FileReaderThread_RemoveReader (FileReaderThread *frt, AudioFileMa
 
         if (--frt->mNumReaders == 0) {
             frt->mThreadShouldDie = 1;
-            frt->mGuard->Notify(frt->mGuard); // wake up thread so it will quit
-            frt->mGuard->Wait(frt->mGuard);   // wait for thread to die
+            frt->mGuard->Notify(frt->mGuard); /* wake up thread so it will quit */
+            frt->mGuard->Wait(frt->mGuard);   /* wait for thread to die */
         }
 
         if (bNeedsRelease) frt->mGuard->Unlock(frt->mGuard);
@@ -158,34 +158,34 @@ static int    FileReaderThread_StartFixedPriorityThread (FileReaderThread *frt)
     pthread_t           pThread;
 
     OSStatus result = pthread_attr_init(&theThreadAttrs);
-        if (result) return 0; //THROW_RESULT("pthread_attr_init - Thread attributes could not be created.")
+        if (result) return 0; /*THROW_RESULT("pthread_attr_init - Thread attributes could not be created.")*/
     
     result = pthread_attr_setdetachstate(&theThreadAttrs, PTHREAD_CREATE_DETACHED);
-        if (result) return 0; //THROW_RESULT("pthread_attr_setdetachstate - Thread attributes could not be detached.")
+        if (result) return 0; /*THROW_RESULT("pthread_attr_setdetachstate - Thread attributes could not be detached.")*/
     
     result = pthread_create (&pThread, &theThreadAttrs, frt->DiskReaderEntry, frt);
-        if (result) return 0; //THROW_RESULT("pthread_create - Create and start the thread.")
+        if (result) return 0; /*THROW_RESULT("pthread_create - Create and start the thread.")*/
     
     pthread_attr_destroy(&theThreadAttrs);
     
-    // we've now created the thread and started it
-    // we'll now set the priority of the thread to the nominated priority
-    // and we'll also make the thread fixed
+    /* we've now created the thread and started it
+       we'll now set the priority of the thread to the nominated priority
+       and we'll also make the thread fixed */
     thread_extended_policy_data_t       theFixedPolicy;
     thread_precedence_policy_data_t     thePrecedencePolicy;
     SInt32                              relativePriority;
     
-    // make thread fixed
-    theFixedPolicy.timeshare = 0;   // set to 1 for a non-fixed thread
+    /* make thread fixed */
+    theFixedPolicy.timeshare = 0;   /* set to 1 for a non-fixed thread */
     result = thread_policy_set (pthread_mach_thread_np(pThread), THREAD_EXTENDED_POLICY, (thread_policy_t)&theFixedPolicy, THREAD_EXTENDED_POLICY_COUNT);
-        if (result) return 0; //THROW_RESULT("thread_policy - Couldn't set thread as fixed priority.")
-    // set priority
-    // precedency policy's "importance" value is relative to spawning thread's priority
+        if (result) return 0; /*THROW_RESULT("thread_policy - Couldn't set thread as fixed priority.")*/
+    /* set priority */
+    /* precedency policy's "importance" value is relative to spawning thread's priority */
     relativePriority = frt->mThreadPriority - frt->GetThreadBasePriority(pthread_self());
         
     thePrecedencePolicy.importance = relativePriority;
     result = thread_policy_set (pthread_mach_thread_np(pThread), THREAD_PRECEDENCE_POLICY, (thread_policy_t)&thePrecedencePolicy, THREAD_PRECEDENCE_POLICY_COUNT);
-        if (result) return 0; //THROW_RESULT("thread_policy - Couldn't set thread priority.")
+        if (result) return 0; /*THROW_RESULT("thread_policy - Couldn't set thread priority.")*/
 
     return 1;
 }
@@ -196,7 +196,7 @@ static UInt32  FileReaderThread_GetThreadBasePriority (pthread_t inThread)
     policy_info_data_t                  thePolicyInfo;
     unsigned int                        count;
     
-    // get basic info
+    /* get basic info */
     count = THREAD_BASIC_INFO_COUNT;
     thread_info (pthread_mach_thread_np (inThread), THREAD_BASIC_INFO, (integer_t*)&threadInfo, &count);
     
@@ -250,7 +250,7 @@ static void    FileReaderThread_ReadNextChunk (FileReaderThread *frt)
 
     for (;;) 
     {
-        { // this is a scoped based lock
+        { /* this is a scoped based lock */
             int bNeedsRelease = frt->mGuard->Lock(frt->mGuard);
             
             if (frt->mThreadShouldDie) {
@@ -259,13 +259,13 @@ static void    FileReaderThread_ReadNextChunk (FileReaderThread *frt)
                 return;
             }
             
-            //if (frt->mFileData.empty())
+            /*if (frt->mFileData.empty())*/
             if (frt->mFileData == NULL)
             {
                 frt->mGuard->Wait(frt->mGuard);
             }
                         
-            // kill thread
+            /* kill thread */
             if (frt->mThreadShouldDie) {
             
                 frt->mGuard->Notify(frt->mGuard);
@@ -273,8 +273,8 @@ static void    FileReaderThread_ReadNextChunk (FileReaderThread *frt)
                 return;
             }
 
-            //theItem = frt->mFileData.front();
-            //frt->mFileData.pop_front();
+            /*theItem = frt->mFileData.front();*/
+            /*frt->mFileData.pop_front();*/
             theItem = NULL;
             if (frt->mFileData != NULL)
             {
@@ -292,16 +292,16 @@ static void    FileReaderThread_ReadNextChunk (FileReaderThread *frt)
         else
             dataChunkSize = theItem->mChunkSize;
         
-            // this is the exit condition for the thread
+            /* this is the exit condition for the thread */
         if (dataChunkSize <= 0) {
             theItem->mFinishedReadingData = 1;
             continue;
         }
-            // construct pointer
+            /* construct pointer */
         char* writePtr = (char *) (theItem->GetFileBuffer(theItem) +
                                 (theItem->mWriteToFirstBuffer ? 0 : theItem->mChunkSize));
     
-            // read data
+            /* read data */
         result = theItem->Read(theItem, writePtr, &dataChunkSize);
         if (result != noErr && result != eofErr) {
             AudioFilePlayer *afp = (AudioFilePlayer *) theItem->GetParent(theItem);
@@ -313,16 +313,16 @@ static void    FileReaderThread_ReadNextChunk (FileReaderThread *frt)
         {
             writePtr += dataChunkSize;
 
-            // can't exit yet.. we still have to pass the partial buffer back
-            memset (writePtr, 0, (theItem->mChunkSize - dataChunkSize));
+            /* can't exit yet.. we still have to pass the partial buffer back */
+            SDL_memset(writePtr, 0, (theItem->mChunkSize - dataChunkSize));
         }
         
-        theItem->mWriteToFirstBuffer = !theItem->mWriteToFirstBuffer;   // switch buffers
+        theItem->mWriteToFirstBuffer = !theItem->mWriteToFirstBuffer;   /* switch buffers */
         
         if (result == eofErr)
             theItem->mReadFilePosition = theItem->mFileLength;
         else
-            theItem->mReadFilePosition += dataChunkSize;        // increment count
+            theItem->mReadFilePosition += dataChunkSize;        /* increment count */
     }
 }
 
@@ -372,13 +372,14 @@ static int    AudioFileManager_DoConnect (AudioFileManager *afm)
 {
     if (!afm->mIsEngaged)
     {
-        //afm->mReadFilePosition = 0;
+        OSStatus result;
+
+        /*afm->mReadFilePosition = 0;*/
         afm->mFinishedReadingData = 0;
 
         afm->mNumTimesAskedSinceFinished = 0;
         afm->mLockUnsuccessful = 0;
         
-        OSStatus result;
         UInt32 dataChunkSize;
         
         if ((afm->mFileLength - afm->mReadFilePosition) < afm->mChunkSize)
@@ -387,7 +388,7 @@ static int    AudioFileManager_DoConnect (AudioFileManager *afm)
             dataChunkSize = afm->mChunkSize;
         
         result = afm->Read(afm, afm->mFileBuffer, &dataChunkSize);
-           if (result) return 0; //THROW_RESULT("AudioFileManager::DoConnect(): Read")
+           if (result) return 0; /*THROW_RESULT("AudioFileManager::DoConnect(): Read")*/
 
         afm->mReadFilePosition += dataChunkSize;
                 
@@ -398,8 +399,9 @@ static int    AudioFileManager_DoConnect (AudioFileManager *afm)
         
         afm->mIsEngaged = 1;
     }
-    //else
-    //    throw static_cast<OSStatus>(-1); //thread has already been started
+    /*
+    else
+        throw static_cast<OSStatus>(-1); */ /* thread has already been started */
 
     return 1;
 }

@@ -26,13 +26,11 @@
 #include "SDL.h"
 #include "SDL_cpuinfo.h"
 
-#if SDL_ALTIVEC_BLITTERS && HAVE_SETJMP
-#include <signal.h>
-#include <setjmp.h>
-#endif
-
 #ifdef __MACOSX__
 #include <sys/sysctl.h> /* For AltiVec check */
+#elif SDL_ALTIVEC_BLITTERS && HAVE_SETJMP
+#include <signal.h>
+#include <setjmp.h>
 #endif
 
 #define CPU_HAS_RDTSC	0x00000001
@@ -44,7 +42,7 @@
 #define CPU_HAS_SSE2	0x00000080
 #define CPU_HAS_ALTIVEC	0x00000100
 
-#if SDL_ALTIVEC_BLITTERS && HAVE_SETJMP
+#if SDL_ALTIVEC_BLITTERS && HAVE_SETJMP && !__MACOSX__
 /* This is the brute force way of detecting instruction sets...
    the idea is borrowed from the libmpeg2 library - thanks!
  */

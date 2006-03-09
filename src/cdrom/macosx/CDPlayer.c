@@ -25,16 +25,16 @@
 #include "AudioFilePlayer.h"
 #include "SDLOSXCAGuard.h"
 
-// we're exporting these functions into C land for SDL_syscdrom.c
-//extern "C" {
+/* we're exporting these functions into C land for SDL_syscdrom.c */
+/*extern "C" {*/
 
-//ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
-//  Constants
-//ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
+/*///////////////////////////////////////////////////////////////////////////
+    Constants
+  //////////////////////////////////////////////////////////////////////////*/
 
-#define kAudioCDFilesystemID   (UInt16)(('J' << 8) | 'H') // 'JH'; this avoids compiler warning
+#define kAudioCDFilesystemID   (UInt16)(('J' << 8) | 'H') /* 'JH'; this avoids compiler warning */
 
-// XML PList keys
+/* XML PList keys */
 #define kRawTOCDataString           "Format 0x02 TOC Data"
 #define kSessionsString             "Sessions"
 #define kSessionTypeString          "Session Type"
@@ -47,9 +47,9 @@
 #define kSessionNumberKeyString         "Session Number"
 #define kStartBlockKeyString            "Start Block"   
     
-//ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
-//  Globals
-//ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
+/*///////////////////////////////////////////////////////////////////////////
+    Globals
+  //////////////////////////////////////////////////////////////////////////*/
 
 #pragma mark -- Globals --
 
@@ -61,9 +61,9 @@ static SDL_mutex       *apiMutex = NULL;
 static SDL_sem         *callbackSem;
 static SDL_CD*          theCDROM;
 
-//ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
-//  Prototypes
-//ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
+/*///////////////////////////////////////////////////////////////////////////
+    Prototypes
+  //////////////////////////////////////////////////////////////////////////*/
 
 #pragma mark -- Prototypes --
 
@@ -89,10 +89,6 @@ void     Unlock ()
     SDL_mutexV(apiMutex);
 }
 
-//ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
-//  DetectAudioCDVolumes
-//ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
-
 int DetectAudioCDVolumes(FSVolumeRefNum *volumes, int numVolumes)
 {
     int volumeIndex;
@@ -116,7 +112,7 @@ int DetectAudioCDVolumes(FSVolumeRefNum *volumes, int numVolumes)
          
         if (result == noErr)
         {
-            if (volumeInfo.filesystemID == kAudioCDFilesystemID) // It's an audio CD
+            if (volumeInfo.filesystemID == kAudioCDFilesystemID) /* It's an audio CD */
             {
                 if (volumes != NULL && cdVolumeCount < numVolumes)
                     volumes[cdVolumeCount] = actualVolume;
@@ -126,17 +122,13 @@ int DetectAudioCDVolumes(FSVolumeRefNum *volumes, int numVolumes)
         }
         else 
         {
-            // I'm commenting this out because it seems to be harmless
-            //SDL_SetError ("DetectAudioCDVolumes: FSGetVolumeInfo returned %d", result);
+            /* I'm commenting this out because it seems to be harmless */
+            /*SDL_SetError ("DetectAudioCDVolumes: FSGetVolumeInfo returned %d", result);*/
         }
     }
         
     return cdVolumeCount;
 }
-
-//ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
-//  ReadTOCData
-//ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
 
 int ReadTOCData (FSVolumeRefNum theVolume, SDL_CD *theCD)
 {
@@ -154,7 +146,7 @@ int ReadTOCData (FSVolumeRefNum theVolume, SDL_CD *theCD)
     
     const char* error = "Unspecified Error";
     
-    // get stuff from .TOC.plist                                                   
+    /* get stuff from .TOC.plist */
     fsRefPB.ioCompletion = NULL;
     fsRefPB.ioNamePtr = "\p.TOC.plist";
     fsRefPB.ioVRefNum = theVolume;
@@ -167,7 +159,7 @@ int ReadTOCData (FSVolumeRefNum theVolume, SDL_CD *theCD)
         goto bail;
     }
     
-    // Load and parse the TOC XML data
+    /* Load and parse the TOC XML data */
 
     theErr = FSGetDataForkName (&dataForkName);
     if (theErr != noErr) {
@@ -187,7 +179,7 @@ int ReadTOCData (FSVolumeRefNum theVolume, SDL_CD *theCD)
         goto bail;
     }
     
-    // Allocate some memory for the XML data
+    /* Allocate some memory for the XML data */
     forkData = NewPtr (forkSize);
     if(forkData == NULL) {
         error = "NewPtr";
@@ -215,9 +207,9 @@ int ReadTOCData (FSVolumeRefNum theVolume, SDL_CD *theCD)
         goto bail;
     }
 
-    // Now we got the Property List in memory. Parse it.
+    /* Now we got the Property List in memory. Parse it. */
     
-    // First, make sure the root item is a CFDictionary. If not, release and bail.
+    /* First, make sure the root item is a CFDictionary. If not, release and bail. */
     if(CFGetTypeID(propertyListRef)== CFDictionaryGetTypeID())
     {
         CFDictionaryRef dictRef = (CFDictionaryRef)propertyListRef;
@@ -227,19 +219,19 @@ int ReadTOCData (FSVolumeRefNum theVolume, SDL_CD *theCD)
         CFIndex     numSessions;
         CFIndex     index;
         
-        // This is how we get the Raw TOC Data
+        /* This is how we get the Raw TOC Data */
         theRawTOCDataRef = (CFDataRef)CFDictionaryGetValue (dictRef, CFSTR(kRawTOCDataString));
         
-        // Get the session array info.
+        /* Get the session array info. */
         theSessionArrayRef = (CFArrayRef)CFDictionaryGetValue (dictRef, CFSTR(kSessionsString));
         
-        // Find out how many sessions there are.
+        /* Find out how many sessions there are. */
         numSessions = CFArrayGetCount (theSessionArrayRef);
         
-        // Initialize the total number of tracks to 0
+        /* Initialize the total number of tracks to 0 */
         theCD->numtracks = 0;
         
-        // Iterate over all sessions, collecting the track data
+        /* Iterate over all sessions, collecting the track data */
         for(index = 0; index < numSessions; index++)
         {
             CFDictionaryRef theSessionDict;
@@ -272,7 +264,7 @@ int ReadTOCData (FSVolumeRefNum theVolume, SDL_CD *theCD)
                 startBlock    = (CFNumberRef)  CFDictionaryGetValue (theTrackDict, CFSTR(kStartBlockKeyString));
                 isDataTrack   = (CFBooleanRef) CFDictionaryGetValue (theTrackDict, CFSTR(kDataKeyString));
                                                         
-                // Fill in the SDL_CD struct
+                /* Fill in the SDL_CD struct */
                 int idx = theCD->numtracks++;
 
                 CFNumberGetValue (trackNumber, kCFNumberSInt32Type, &value);
@@ -283,19 +275,19 @@ int ReadTOCData (FSVolumeRefNum theVolume, SDL_CD *theCD)
 
                 theCD->track[idx].type = (isDataTrack == kCFBooleanTrue) ? SDL_DATA_TRACK : SDL_AUDIO_TRACK;
 
-                // Since the track lengths are not stored in .TOC.plist we compute them.
+                /* Since the track lengths are not stored in .TOC.plist we compute them. */
                 if (trackIndex > 0) {
                     theCD->track[idx-1].length = theCD->track[idx].offset - theCD->track[idx-1].offset;
                 }
             }
             
-            // Compute the length of the last track
+            /* Compute the length of the last track */
             CFNumberGetValue (leadoutBlock, kCFNumberSInt32Type, &value);
             
             theCD->track[theCD->numtracks-1].length = 
                 value - theCD->track[theCD->numtracks-1].offset;
 
-            // Set offset to leadout track
+            /* Set offset to leadout track */
             theCD->track[theCD->numtracks].offset = value;
         }
     
@@ -319,10 +311,6 @@ cleanup:
 
     return theErr;
 }
-
-//ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
-//  ListTrackFiles
-//ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
 
 int ListTrackFiles (FSVolumeRefNum theVolume, FSRef *trackFiles, int numTracks)
 {
@@ -357,11 +345,11 @@ int ListTrackFiles (FSVolumeRefNum theVolume, FSRef *trackFiles, int numTracks)
                 CFStringRef  name;
                 name = CFStringCreateWithCharacters (NULL, nameStr.unicode, nameStr.length);
                 
-                // Look for .aiff extension
+                /* Look for .aiff extension */
                 if (CFStringHasSuffix (name, CFSTR(".aiff")) ||
                     CFStringHasSuffix (name, CFSTR(".cdda"))) {
                     
-                    // Extract the track id from the filename
+                    /* Extract the track id from the filename */
                     int trackID = 0, i = 0;
                     while (i < nameStr.length && !isdigit(nameStr.unicode[i])) {
                         ++i;
@@ -376,7 +364,7 @@ int ListTrackFiles (FSVolumeRefNum theVolume, FSRef *trackFiles, int numTracks)
                     CFStringGetCStringPtr (name, CFStringGetSystemEncoding()));
                     #endif
                     
-                    // Track ID's start at 1, but we want to start at 0
+                    /* Track ID's start at 1, but we want to start at 0 */
                     trackID--;
                     
                     assert(0 <= trackID && trackID <= SDL_MAX_TRACKS);
@@ -393,10 +381,6 @@ int ListTrackFiles (FSVolumeRefNum theVolume, FSRef *trackFiles, int numTracks)
     return 0;
 }
 
-//ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
-//  LoadFile
-//ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
-
 int LoadFile (const FSRef *ref, int startFrame, int stopFrame)
 {
     int error = -1;
@@ -404,7 +388,7 @@ int LoadFile (const FSRef *ref, int startFrame, int stopFrame)
     if (CheckInit () < 0)
         goto bail;
     
-    // release any currently playing file
+    /* release any currently playing file */
     if (ReleaseFile () < 0)
         goto bail;
     
@@ -412,14 +396,14 @@ int LoadFile (const FSRef *ref, int startFrame, int stopFrame)
     printf ("LoadFile: %d %d\n", startFrame, stopFrame);
     #endif
     
-    //try {
+    /*try {*/
     
-        // create a new player, and attach to the audio unit
+        /* create a new player, and attach to the audio unit */
         
         thePlayer = new_AudioFilePlayer(ref);
         if (thePlayer == NULL) {
             SDL_SetError ("LoadFile: Could not create player");
-            return -3; //throw (-3);
+            return -3; /*throw (-3);*/
         }
             
         if (!thePlayer->SetDestination(thePlayer, &theUnit))
@@ -431,8 +415,8 @@ int LoadFile (const FSRef *ref, int startFrame, int stopFrame)
         if (stopFrame >= 0 && stopFrame > startFrame)
             thePlayer->SetStopFrame (thePlayer, stopFrame);
         
-        // we set the notifier later
-        //thePlayer->SetNotifier(thePlayer, FilePlayNotificationHandler, NULL);
+        /* we set the notifier later */
+        /*thePlayer->SetNotifier(thePlayer, FilePlayNotificationHandler, NULL);*/
             
         if (!thePlayer->Connect(thePlayer))
             goto bail;
@@ -441,11 +425,11 @@ int LoadFile (const FSRef *ref, int startFrame, int stopFrame)
         thePlayer->Print(thePlayer);
         fflush (stdout);
         #endif
-    //}
-    //catch (...)
-    //{
-    //    goto bail;
-    //}
+    /*}
+      catch (...)
+      {
+          goto bail;
+      }*/
         
     error = 0;
 
@@ -453,16 +437,12 @@ int LoadFile (const FSRef *ref, int startFrame, int stopFrame)
     return error;
 }
 
-//ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
-//  ReleaseFile
-//ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
-
 int ReleaseFile ()
 {
     int error = -1;
         
-    // (Don't see any way that the original C++ code could throw here.) --ryan.
-    //try {
+    /* (Don't see any way that the original C++ code could throw here.) --ryan. */
+    /*try {*/
         if (thePlayer != NULL) {
             
             thePlayer->Disconnect(thePlayer);
@@ -471,21 +451,17 @@ int ReleaseFile ()
             
             thePlayer = NULL;
         }
-    //}
-    //catch (...)
-    //{
-    //    goto bail;
-    //}
+    /*}
+      catch (...)
+      {
+          goto bail;
+      }*/
     
     error = 0;
     
-//  bail:
+/*  bail: */
     return error;
 }
-
-//ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
-//  PlayFile
-//ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
 
 int PlayFile ()
 {
@@ -494,27 +470,23 @@ int PlayFile ()
     if (CheckInit () < 0)
         goto bail;
         
-//    try {
+    /*try {*/
     
         // start processing of the audio unit
         result = AudioOutputUnitStart (theUnit);
             if (result) goto bail; //THROW_RESULT("PlayFile: AudioOutputUnitStart")
         
-//    }
-//    catch (...)
-//    {
-//        goto bail;
-//    }
+    /*}
+    catch (...)
+    {
+        goto bail;
+    }*/
     
     result = 0;
     
 bail:
     return result;
 }
-
-//ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
-//  PauseFile
-//ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
 
 int PauseFile ()
 {
@@ -523,25 +495,21 @@ int PauseFile ()
     if (CheckInit () < 0)
         goto bail;
             
-    //try {
+    /*try {*/
     
-        // stop processing the audio unit
+        /* stop processing the audio unit */
         result = AudioOutputUnitStop (theUnit);
-            if (result) goto bail;  //THROW_RESULT("PauseFile: AudioOutputUnitStop")
-    //}
-    //catch (...)
-    //{
-    //    goto bail;
-    //}
+            if (result) goto bail;  /*THROW_RESULT("PauseFile: AudioOutputUnitStop")*/
+    /*}
+      catch (...)
+      {
+          goto bail;
+      }*/
     
     result = 0;
 bail:
     return result;
 }
-
-//ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
-//  SetCompletionProc
-//ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
 
 void SetCompletionProc (CDPlayerCompletionProc proc, SDL_CD *cdrom)
 {
@@ -551,10 +519,6 @@ void SetCompletionProc (CDPlayerCompletionProc proc, SDL_CD *cdrom)
     completionProc = proc;
     thePlayer->SetNotifier (thePlayer, FilePlayNotificationHandler, cdrom);
 }
-
-//ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
-//  GetCurrentFrame
-//ÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑÑ
 
 int GetCurrentFrame ()
 {    
@@ -578,13 +542,13 @@ static OSStatus CheckInit ()
     
     OSStatus result = noErr;
     
-    // Create the callback semaphore
+    /* Create the callback semaphore */
     callbackSem = SDL_CreateSemaphore(0);
 
-    // Start callback thread
+    /* Start callback thread */
     SDL_CreateThread(RunCallBackThread, NULL);
 
-    { //try {
+    { /*try {*/
         ComponentDescription desc;
     
         desc.componentType = kAudioUnitComponentType;
@@ -609,10 +573,10 @@ static OSStatus CheckInit ()
                     
         playBackWasInit = true;
     }
-    //catch (...)
-    //{
-    //    return -1;
-    //}
+    /*catch (...)
+      {
+          return -1;
+      }*/
     
     return 0;
 }
@@ -621,7 +585,7 @@ static void FilePlayNotificationHandler(void * inRefCon, OSStatus inStatus)
 {
     if (inStatus == kAudioFilePlay_FileIsFinished) {
     
-        // notify non-CA thread to perform the callback
+        /* notify non-CA thread to perform the callback */
         SDL_SemPost(callbackSem);
         
     } else if (inStatus == kAudioFilePlayErr_FilePlayUnderrun) {
@@ -661,4 +625,4 @@ static int RunCallBackThread (void *param)
     return 0;
 }
 
-//}; // extern "C"
+/*}; // extern "C" */

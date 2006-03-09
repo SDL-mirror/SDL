@@ -682,7 +682,7 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
             return NULL;
         }
     
-        //[ qz_window setReleasedWhenClosed:YES ];
+        /*[ qz_window setReleasedWhenClosed:YES ];*/
         QZ_SetCaption(this, this->wm_title, this->wm_icon);
         [ qz_window setAcceptsMouseMovedEvents:YES ];
         [ qz_window setViewsNeedDisplay:NO ];
@@ -759,7 +759,7 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
             
             int hOffset = [ window_view frame ].origin.x;
                     
-            current->pixels += (vOffset * current->pitch) + hOffset * (qdbpp/8);
+            current->pixels = (Uint8 *)current->pixels + (vOffset * current->pitch) + hOffset * (qdbpp/8);
         }
         this->UpdateRects     = QZ_UpdateRects;
         this->LockHWSurface   = QZ_LockWindow;
@@ -921,7 +921,7 @@ static int QZ_ThreadFlip (_THIS) {
          *  a fullscreen resolution smaller than the hardware could supply
          *  so SDL is centering it in a bigger resolution)...
          */
-        dst = CGDisplayBaseAddress (display_id) + SDL_VideoSurface->offset;
+        dst = (Uint8 *)CGDisplayBaseAddress (display_id) + SDL_VideoSurface->offset;
         src = current_buffer + SDL_VideoSurface->offset;
         len = SDL_VideoSurface->w * SDL_VideoSurface->format->BytesPerPixel;
         h = SDL_VideoSurface->h;
@@ -1025,7 +1025,7 @@ static void QZ_DirectUpdate (_THIS, int num_rects, SDL_Rect *rects) {
     who supplied sample code for Carbon.
 */
 
-//#define TEST_OBSCURED 1
+/*#define TEST_OBSCURED 1*/
 
 #if TEST_OBSCURED
 #include "CGS.h"
@@ -1075,7 +1075,6 @@ static int QZ_IsWindowObscured (NSWindow *window) {
 
     CGSRect contentRect;
     int     windowNumber;
-    //int     isMainWindow;
     int     firstDockIcon;
     int     dockIconCacheMiss;
     int     windowContentOffset;
@@ -1106,7 +1105,6 @@ static int QZ_IsWindowObscured (NSWindow *window) {
                 windowContentOffset = 0;
 
             windowNumber = [ window windowNumber ];
-            //isMainWindow = [ window isMainWindow ];
 
             /* The window list is sorted according to order on the screen */
             count = 0;

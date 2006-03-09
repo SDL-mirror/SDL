@@ -472,7 +472,7 @@ static int SDL_SYS_CDEject(SDL_CD *cdrom)
     
     status = CD_STOPPED;
     
-	// Eject the volume
+	/* Eject the volume */
 	pb.ioParam.ioNamePtr = NULL;
 	pb.ioParam.ioVRefNum = volumes[cdrom->id];
 	err = PBUnmountVol((ParamBlockRec *) &pb);

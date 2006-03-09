@@ -253,14 +253,14 @@ const SDL_version * SDL_Linked_Version(void)
 }
 
 #if defined(__OS2__)
-// Building for OS/2
+/* Building for OS/2 */
 #ifdef __WATCOMC__
 
 #define INCL_DOSERRORS
 #define INCL_DOSEXCEPTIONS
 #include <os2.h>
 
-// Exception handler to prevent the Audio thread hanging, making a zombie process!
+/* Exception handler to prevent the Audio thread hanging, making a zombie process! */
 ULONG _System SDL_Main_ExceptionHandler(PEXCEPTIONREPORTRECORD pERepRec,
                                         PEXCEPTIONREGISTRATIONRECORD pERegRec,
                                         PCONTEXTRECORD pCtxRec,
@@ -273,7 +273,7 @@ ULONG _System SDL_Main_ExceptionHandler(PEXCEPTIONREPORTRECORD pERepRec,
   if (pERepRec->fHandlerFlags & EH_NESTED_CALL)
     return XCPT_CONTINUE_SEARCH;
 
-  // Do cleanup at every fatal exception!
+  /* Do cleanup at every fatal exception! */
   if (((pERepRec->ExceptionNum & XCPT_SEVERITY_CODE) == XCPT_FATAL_EXCEPTION) &&
       (pERepRec->ExceptionNum != XCPT_BREAKPOINT) &&
       (pERepRec->ExceptionNum != XCPT_SINGLE_STEP)
@@ -281,7 +281,7 @@ ULONG _System SDL_Main_ExceptionHandler(PEXCEPTIONREPORTRECORD pERepRec,
   {
     if (SDL_initialized & SDL_INIT_AUDIO)
     {
-      // This removes the zombie audio thread in case of emergency.
+      /* This removes the zombie audio thread in case of emergency. */
 #ifdef DEBUG_BUILD
       printf("[SDL_Main_ExceptionHandler] : Calling SDL_CloseAudio()!\n");
 #endif
@@ -294,28 +294,28 @@ ULONG _System SDL_Main_ExceptionHandler(PEXCEPTIONREPORTRECORD pERepRec,
 
 EXCEPTIONREGISTRATIONRECORD SDL_Main_xcpthand = {0, SDL_Main_ExceptionHandler};
 
-// The main DLL entry for DLL Initialization and Uninitialization:
+/* The main DLL entry for DLL Initialization and Uninitialization: */
 unsigned _System LibMain(unsigned hmod, unsigned termination)
 {
   if (termination)
   {
 #ifdef DEBUG_BUILD
-//    printf("[SDL DLL Unintialization] : Removing exception handler\n");
+/*    printf("[SDL DLL Unintialization] : Removing exception handler\n"); */
 #endif
     DosUnsetExceptionHandler(&SDL_Main_xcpthand);
     return 1;
   } else
   {
 #ifdef DEBUG_BUILD
-    // Make stdout and stderr unbuffered!
+    /* Make stdout and stderr unbuffered! */
     setbuf(stdout, NULL);
     setbuf(stderr, NULL);
 #endif
-    // Fire up exception handler
+    /* Fire up exception handler */
 #ifdef DEBUG_BUILD
-//    printf("[SDL DLL Initialization] : Setting exception handler\n");
+/*    printf("[SDL DLL Initialization] : Setting exception handler\n"); */
 #endif
-    // Set exception handler
+    /* Set exception handler */
     DosSetExceptionHandler(&SDL_Main_xcpthand);
 
     return 1;

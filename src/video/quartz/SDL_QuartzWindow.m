@@ -144,7 +144,7 @@ static void QZ_SetPortAlphaOpaque () {
                 
                 int hOffset = newViewFrame.origin.x;
                         
-                SDL_VideoSurface->pixels += (vOffset * SDL_VideoSurface->pitch) + hOffset * (device_bpp/8);
+                SDL_VideoSurface->pixels = (Uint8 *)SDL_VideoSurface->pixels + (vOffset * SDL_VideoSurface->pitch) + hOffset * (device_bpp/8);
             }
             
             UnlockPortBits ( thePort );
@@ -177,7 +177,7 @@ static void QZ_SetPortAlphaOpaque () {
     /* restore cached image, since it may not be current, post expose event too */
     [ self restoreCachedImage ];
     
-    //SDL_PrivateExpose ();
+    /*SDL_PrivateExpose ();*/
     
     SDL_PrivateAppActive (1, SDL_APPACTIVE);
 }

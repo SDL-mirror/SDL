@@ -69,41 +69,41 @@
 #if !defined(__CAGuard_h__)
 #define __CAGuard_h__
 
-//=============================================================================
-//  Includes
-//=============================================================================
+/*=============================================================================
+    Includes
+  =============================================================================*/
 
 #include <CoreAudio/CoreAudioTypes.h>
 #include <pthread.h>
 
 
-//=============================================================================
-//  CAGuard
-//
-//  This is your typical mutex with signalling implemented via pthreads.
-//  Lock() will return true if and only if the guard is locked on that call.
-//  A thread that already has the guard will receive 'false' if it locks it
-//  again. Use of the stack-based CAGuard::Locker class is highly recommended
-//  to properly manage the recursive nesting. The Wait calls with timeouts
-//  will return true if and only if the timeout period expired. They will
-//  return false if they receive notification any other way.
-//=============================================================================
+/*=============================================================================
+    CAGuard
+  
+    This is your typical mutex with signalling implemented via pthreads.
+    Lock() will return true if and only if the guard is locked on that call.
+    A thread that already has the guard will receive 'false' if it locks it
+    again. Use of the stack-based CAGuard::Locker class is highly recommended
+    to properly manage the recursive nesting. The Wait calls with timeouts
+    will return true if and only if the timeout period expired. They will
+    return false if they receive notification any other way.
+  =============================================================================*/
 
 typedef struct S_SDLOSXCAGuard
 {
 
-//  Construction/Destruction
-//public:
-//  Actions
-//public:
+/*  Construction/Destruction */
+/*public:*/
+/*  Actions */
+/*public:*/
     int     (*Lock)(struct S_SDLOSXCAGuard *cag);
     void    (*Unlock)(struct S_SDLOSXCAGuard *cag);
-    int     (*Try)(struct S_SDLOSXCAGuard *cag, int *outWasLocked);    // returns true if lock is free, false if not
+    int     (*Try)(struct S_SDLOSXCAGuard *cag, int *outWasLocked);    /* returns true if lock is free, false if not */
     void    (*Wait)(struct S_SDLOSXCAGuard *cag);
     void    (*Notify)(struct S_SDLOSXCAGuard *cag);
 
-//  Implementation
-//protected:
+/*  Implementation */
+/*protected:*/
     pthread_mutex_t mMutex;
     pthread_cond_t  mCondVar;
     pthread_t       mOwner;

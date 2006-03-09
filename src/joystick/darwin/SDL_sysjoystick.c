@@ -48,42 +48,42 @@
 
 struct recElement
 {
-	IOHIDElementCookie cookie;				// unique value which identifies element, will NOT change
-	long min;								// reported min value possible
-	long max;								// reported max value possible
-/*
-	TODO: maybe should handle the following stuff somehow?
+	IOHIDElementCookie cookie;				/* unique value which identifies element, will NOT change */
+	long min;								/* reported min value possible */
+	long max;								/* reported max value possible */
+#if 0
+	/* TODO: maybe should handle the following stuff somehow? */
 
-	long scaledMin;							// reported scaled min value possible
-	long scaledMax;							// reported scaled max value possible
-	long size;								// size in bits of data return from element
-	Boolean relative;						// are reports relative to last report (deltas)
-	Boolean wrapping;						// does element wrap around (one value higher than max is min)
-	Boolean nonLinear;						// are the values reported non-linear relative to element movement
-	Boolean preferredState;					// does element have a preferred state (such as a button)
-	Boolean nullState;						// does element have null state
-*/
+	long scaledMin;							/* reported scaled min value possible */
+	long scaledMax;							/* reported scaled max value possible */
+	long size;								/* size in bits of data return from element */
+	Boolean relative;						/* are reports relative to last report (deltas) */
+	Boolean wrapping;						/* does element wrap around (one value higher than max is min) */
+	Boolean nonLinear;						/* are the values reported non-linear relative to element movement */
+	Boolean preferredState;					/* does element have a preferred state (such as a button) */
+	Boolean nullState;						/* does element have null state */
+#endif /* 0 */
 
 	/* runtime variables used for auto-calibration */
-	long minReport;							// min returned value
-	long maxReport;							// max returned value
+	long minReport;							/* min returned value */
+	long maxReport;							/* max returned value */
 	
-	struct recElement * pNext;				// next element in list
+	struct recElement * pNext;				/* next element in list */
 };
 typedef struct recElement recElement;
 
 struct joystick_hwdata
 {
-	IOHIDDeviceInterface ** interface;		// interface to device, NULL = no interface
+	IOHIDDeviceInterface ** interface;		/* interface to device, NULL = no interface */
 
-	char product[256];							// name of product
-	long usage;								// usage page from IOUSBHID Parser.h which defines general usage
-	long usagePage;							// usage within above page from IOUSBHID Parser.h which defines specific usage
+	char product[256];							/* name of product */
+	long usage;								/* usage page from IOUSBHID Parser.h which defines general usage */
+	long usagePage;							/* usage within above page from IOUSBHID Parser.h which defines specific usage */
 
-	long axes;								// number of axis (calculated, not reported by device)
-	long buttons;							// number of buttons (calculated, not reported by device)
-	long hats;								// number of hat switches (calculated, not reported by device)
-	long elements;							// number of total elements (shouldbe total of above) (calculated, not reported by device)
+	long axes;								/* number of axis (calculated, not reported by device) */
+	long buttons;							/* number of buttons (calculated, not reported by device) */
+	long hats;								/* number of hat switches (calculated, not reported by device) */
+	long elements;							/* number of total elements (shouldbe total of above) (calculated, not reported by device) */
 
 	recElement* firstAxis;
 	recElement* firstButton;
@@ -92,7 +92,7 @@ struct joystick_hwdata
 	int removed;
 	int uncentered;
 
-	struct joystick_hwdata* pNext;			// next device
+	struct joystick_hwdata* pNext;			/* next device */
 };
 typedef struct joystick_hwdata recDevice;
 
@@ -131,24 +131,9 @@ static SInt32 HIDGetElementValue (recDevice *pDevice, recElement *pElement)
 		}
 	}
 
-	// auto user scale
+	/* auto user scale */
 	return hidEvent.value;
 }
-
-/* similiar to HIDGetElementValue, but auto-calibrates the value before returning it */
-
-static SInt32 HIDCalibratedValue (recDevice *pDevice, recElement *pElement)
-{
-	float deviceScale = pElement->max - pElement->min;
-	float readScale = pElement->maxReport - pElement->minReport;
-	SInt32 value = HIDGetElementValue(pDevice, pElement);
-	if (readScale == 0)
-		return value; // no scaling at all
-	else
-		return ((value - pElement->minReport) * deviceScale / readScale) + pElement->min;
-}
-
-/* similiar to HIDCalibratedValue but calibrates to an arbitrary scale instead of the elements default scale */
 
 static SInt32 HIDScaledCalibratedValue (recDevice *pDevice, recElement *pElement, long min, long max)
 {
@@ -156,7 +141,7 @@ static SInt32 HIDScaledCalibratedValue (recDevice *pDevice, recElement *pElement
 	float readScale = pElement->maxReport - pElement->minReport;
 	SInt32 value = HIDGetElementValue(pDevice, pElement);
 	if (readScale == 0)
-		return value; // no scaling at all
+		return value; /* no scaling at all */
 	else
 		return ((value - pElement->minReport) * deviceScale / readScale) + min;
 }
@@ -191,7 +176,7 @@ static IOReturn HIDCreateOpenDeviceInterface (io_object_t hidDevice, recDevice *
 													kIOCFPlugInInterfaceID, &ppPlugInInterface, &score);
 		if (kIOReturnSuccess == result)
 		{
-			// Call a method of the intermediate plug-in to create the device interface
+			/* Call a method of the intermediate plug-in to create the device interface */
 			plugInResult = (*ppPlugInInterface)->QueryInterface (ppPlugInInterface,
 								CFUUIDGetUUIDBytes (kIOHIDDeviceInterfaceID), (void *) &(pDevice->interface));
 			if (S_OK != plugInResult)
@@ -225,15 +210,15 @@ static IOReturn HIDCloseReleaseInterface (recDevice *pDevice)
 	
 	if ((NULL != pDevice) && (NULL != pDevice->interface))
 	{
-		// close the interface
+		/* close the interface */
 		result = (*(pDevice->interface))->close (pDevice->interface);
 		if (kIOReturnNotOpen == result)
 		{
-			//  do nothing as device was not opened, thus can't be closed
+			/* do nothing as device was not opened, thus can't be closed */
 		}
 		else if (kIOReturnSuccess != result)
 			HIDReportErrorNum ("Failed to close IOHIDDeviceInterface.", result);
-		//release the interface
+		/* release the interface */
 		result = (*(pDevice->interface))->Release (pDevice->interface);
 		if (kIOReturnSuccess != result)
 			HIDReportErrorNum ("Failed to release IOHIDDeviceInterface.", result);
@@ -559,7 +544,7 @@ static recDevice *HIDDisposeDevice (recDevice **ppDevice)
 	recDevice *pDeviceNext = NULL;
 	if (*ppDevice)
 	{
-		// save next device prior to disposing of this device
+		/* save next device prior to disposing of this device */
 		pDeviceNext = (*ppDevice)->pNext;
 		
 		/* free element lists */
@@ -658,8 +643,9 @@ int SDL_SYS_JoystickInit(void)
 
 		/* dump device object, it is no longer needed */
 		result = IOObjectRelease (ioHIDDeviceObject);
-//		if (KERN_SUCCESS != result)
-//			HIDReportErrorNum ("IOObjectRelease error with ioHIDDeviceObject.", result);
+/*		if (KERN_SUCCESS != result)
+			HIDReportErrorNum ("IOObjectRelease error with ioHIDDeviceObject.", result);
+*/
 
 		/* Filter device list to non-keyboard/mouse stuff */ 
 		if ( (device->usagePage != kHIDPage_GenericDesktop) ||

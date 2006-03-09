@@ -119,7 +119,7 @@ static vector unsigned char calc_swizzle32(const SDL_PixelFormat *srcfmt,
     if (!dstfmt) {
         dstfmt = &default_pixel_format;
     }
-    vector unsigned char plus = VECUINT8_LITERAL(
+    const vector unsigned char plus = VECUINT8_LITERAL(
                                       0x00, 0x00, 0x00, 0x00,
                                       0x04, 0x04, 0x04, 0x04,
                                       0x08, 0x08, 0x08, 0x08,
@@ -559,10 +559,11 @@ static void Blit32to32KeyAltivec(SDL_BlitInfo *info)
     vpermute = calc_swizzle32(srcfmt, dstfmt);
     if (info->d_width < 16) {
         if(copy_alpha) {
-            return BlitNtoNKeyCopyAlpha(info);
+            BlitNtoNKeyCopyAlpha(info);
         } else {
-            return BlitNtoNKey(info);
+            BlitNtoNKey(info);
         }
+        return;
     }
     vzero = vec_splat_u8(0);
     if (alpha) {

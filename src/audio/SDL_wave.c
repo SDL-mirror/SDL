@@ -433,7 +433,7 @@ SDL_AudioSpec * SDL_LoadWAV_RW (SDL_RWops *src, int freesrc,
 		was_error = 1;
 		goto done;
 	}
-	headerDiff += sizeof(Uint32); // for WAVE
+	headerDiff += sizeof(Uint32); /* for WAVE */
 
 	/* Read the audio data format chunk */
 	chunk.data = NULL;
@@ -446,7 +446,7 @@ SDL_AudioSpec * SDL_LoadWAV_RW (SDL_RWops *src, int freesrc,
 			was_error = 1;
 			goto done;
 		}
-		// 2 Uint32's for chunk header+len, plus the lenread
+		/* 2 Uint32's for chunk header+len, plus the lenread */
 		headerDiff += lenread + 2 * sizeof(Uint32);
 	} while ( (chunk.magic == FACT) || (chunk.magic == LIST) );
 
@@ -527,7 +527,7 @@ SDL_AudioSpec * SDL_LoadWAV_RW (SDL_RWops *src, int freesrc,
 		*audio_buf = chunk.data;
 		if(chunk.magic != DATA) headerDiff += lenread + 2 * sizeof(Uint32);
 	} while ( chunk.magic != DATA );
-	headerDiff += 2 * sizeof(Uint32); // for the data chunk and len
+	headerDiff += 2 * sizeof(Uint32); /* for the data chunk and len */
 
 	if ( MS_ADPCM_encoded ) {
 		if ( MS_ADPCM_decode(audio_buf, audio_len) < 0 ) {
@@ -554,7 +554,7 @@ done:
 		if ( freesrc ) {
 			SDL_RWclose(src);
 		} else {
-			// seek to the end of the file (given by the RIFF chunk)
+			/* seek to the end of the file (given by the RIFF chunk) */
 			SDL_RWseek(src, wavelen - chunk.length - headerDiff, RW_SEEK_CUR);
 		}
 	}

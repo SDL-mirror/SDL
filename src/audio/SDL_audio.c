@@ -29,7 +29,7 @@
 #include "SDL_sysaudio.h"
 
 #ifdef __OS2__
-// We'll need the DosSetPriority() API!
+/* We'll need the DosSetPriority() API! */
 #define INCL_DOSPROCESS
 #include <os2.h>
 #endif
@@ -178,8 +178,8 @@ int SDL_RunAudio(void *audiop)
 #endif
 
 #ifdef __OS2__
-        // Increase the priority of this thread to make sure that
-        // the audio will be continuous all the time!
+        /* Increase the priority of this thread to make sure that
+           the audio will be continuous all the time! */
 #ifdef USE_DOSSETPRIORITY
         if (SDL_getenv("SDL_USE_TIMECRITICAL_AUDIO"))
         {

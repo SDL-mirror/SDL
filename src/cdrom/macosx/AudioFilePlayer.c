@@ -24,9 +24,9 @@
 */
 #include "SDL_config.h"
 
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//  AudioFilePlayer.cpp
-//
+/*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    AudioFilePlayer.cpp
+*/
 #include "AudioFilePlayer.h"
 
 /*
@@ -61,7 +61,7 @@ static void PrintStreamDesc (AudioStreamBasicDescription *inDesc)
 
 static int AudioFilePlayer_SetDestination (AudioFilePlayer *afp, AudioUnit  *inDestUnit)
 {
-    //if (afp->mConnected) throw static_cast<OSStatus>(-1); //can't set dest if already engaged
+    /*if (afp->mConnected) throw static_cast<OSStatus>(-1);*/ /* can't set dest if already engaged */
     if (afp->mConnected)
         return 0 ;
 
@@ -70,17 +70,17 @@ static int AudioFilePlayer_SetDestination (AudioFilePlayer *afp, AudioUnit  *inD
     OSStatus result = noErr;
     
 
-        //we can "down" cast a component instance to a component
+        /* we can "down" cast a component instance to a component */
     ComponentDescription desc;
     result = GetComponentInfo ((Component)*inDestUnit, &desc, 0, 0, 0);
-    if (result) return 0; //THROW_RESULT("GetComponentInfo")
+    if (result) return 0; /*THROW_RESULT("GetComponentInfo")*/
         
-        // we're going to use this to know which convert routine to call
-        // a v1 audio unit will have a type of 'aunt'
-        // a v2 audio unit will have one of several different types.
+        /* we're going to use this to know which convert routine to call
+           a v1 audio unit will have a type of 'aunt'
+           a v2 audio unit will have one of several different types. */
     if (desc.componentType != kAudioUnitComponentType) {
         result = badComponentInstance;
-        //THROW_RESULT("BAD COMPONENT")
+        /*THROW_RESULT("BAD COMPONENT")*/
         if (result) return 0;
     }
 
@@ -91,7 +91,7 @@ static int AudioFilePlayer_SetDestination (AudioFilePlayer *afp, AudioUnit  *inD
                                0,
                                &afp->mFileDescription,
                                sizeof (afp->mFileDescription));
-        //THROW_RESULT("AudioUnitSetProperty")
+        /*THROW_RESULT("AudioUnitSetProperty")*/
     if (result) return 0;
     return 1;
 }
@@ -170,7 +170,7 @@ static int    AudioFilePlayer_Connect(AudioFilePlayer *afp)
         if (!afp->mAudioFileManager->DoConnect(afp->mAudioFileManager))
             return 0;
 
-        // set the render callback for the file data to be supplied to the sound converter AU
+        /* set the render callback for the file data to be supplied to the sound converter AU */
         afp->mInputCallback.inputProc = afp->mAudioFileManager->FileInputProc;
         afp->mInputCallback.inputProcRefCon = afp->mAudioFileManager;
 
@@ -180,15 +180,15 @@ static int    AudioFilePlayer_Connect(AudioFilePlayer *afp)
                             0,
                             &afp->mInputCallback, 
                             sizeof(afp->mInputCallback));
-        if (result) return 0;  //THROW_RESULT("AudioUnitSetProperty")
+        if (result) return 0;  /*THROW_RESULT("AudioUnitSetProperty")*/
         afp->mConnected = 1;
     }
 
     return 1;
 }
 
-// warning noted, now please go away ;-)
-// #warning This should redirect the calling of notification code to some other thread
+/* warning noted, now please go away ;-) */
+/* #warning This should redirect the calling of notification code to some other thread */
 static void    AudioFilePlayer_DoNotification (AudioFilePlayer *afp, OSStatus inStatus)
 {
     if (afp->mNotifier) {
@@ -243,52 +243,53 @@ static int    AudioFilePlayer_OpenFile (AudioFilePlayer *afp, const FSRef *inRef
     ByteCount actual;
     SInt64 offset;
 
-    // Open the data fork of the input file
+    /* Open the data fork of the input file */
     result = FSGetDataForkName(&dfName);
-       if (result) return 0; //THROW_RESULT("AudioFilePlayer::OpenFile(): FSGetDataForkName")
+       if (result) return 0; /*THROW_RESULT("AudioFilePlayer::OpenFile(): FSGetDataForkName")*/
 
     result = FSOpenFork(inRef, dfName.length, dfName.unicode, fsRdPerm, &afp->mForkRefNum);
-       if (result) return 0; //THROW_RESULT("AudioFilePlayer::OpenFile(): FSOpenFork")
+       if (result) return 0; /*THROW_RESULT("AudioFilePlayer::OpenFile(): FSOpenFork")*/
  
-    // Read the file header, and check if it's indeed an AIFC file
+    /* Read the file header, and check if it's indeed an AIFC file */
     result = FSReadFork(afp->mForkRefNum, fsAtMark, 0, sizeof(chunkHeader), &chunkHeader, &actual);
-       if (result) return 0; //THROW_RESULT("AudioFilePlayer::OpenFile(): FSReadFork")
+       if (result) return 0; /*THROW_RESULT("AudioFilePlayer::OpenFile(): FSReadFork")*/
 
     if (chunkHeader.ckID != 'FORM') {
         result = -1;
-        if (result) return 0; //THROW_RESULT("AudioFilePlayer::OpenFile(): chunk id is not 'FORM'");
+        if (result) return 0; /*THROW_RESULT("AudioFilePlayer::OpenFile(): chunk id is not 'FORM'");*/
     }
 
     if (chunkHeader.formType != 'AIFC') {
         result = -1;
-        if (result) return 0; //THROW_RESULT("AudioFilePlayer::OpenFile(): file format is not 'AIFC'");
+        if (result) return 0; /*THROW_RESULT("AudioFilePlayer::OpenFile(): file format is not 'AIFC'");*/
     }
 
-    // Search for the SSND chunk. We ignore all compression etc. information
-    // in other chunks. Of course that is kind of evil, but for now we are lazy
-    // and rely on the cdfs to always give us the same fixed format.
-    // TODO: Parse the COMM chunk we currently skip to fill in mFileDescription.
+    /* Search for the SSND chunk. We ignore all compression etc. information
+       in other chunks. Of course that is kind of evil, but for now we are lazy
+       and rely on the cdfs to always give us the same fixed format.
+       TODO: Parse the COMM chunk we currently skip to fill in mFileDescription.
+    */
     offset = 0;
     do {
         result = FSReadFork(afp->mForkRefNum, fsFromMark, offset, sizeof(chunk), &chunk, &actual);
-           if (result) return 0; //THROW_RESULT("AudioFilePlayer::OpenFile(): FSReadFork")
+           if (result) return 0; /*THROW_RESULT("AudioFilePlayer::OpenFile(): FSReadFork")*/
             
-        // Skip the chunk data
+        /* Skip the chunk data */
         offset = chunk.ckSize;
     } while (chunk.ckID != 'SSND');
 
-    // Read the header of the SSND chunk. After this, we are positioned right
-    // at the start of the audio data.
+    /* Read the header of the SSND chunk. After this, we are positioned right
+       at the start of the audio data. */
     result = FSReadFork(afp->mForkRefNum, fsAtMark, 0, sizeof(ssndData), &ssndData, &actual);
-       if (result) return 0; //THROW_RESULT("AudioFilePlayer::OpenFile(): FSReadFork")
+       if (result) return 0; /*THROW_RESULT("AudioFilePlayer::OpenFile(): FSReadFork")*/
 
     result = FSSetForkPosition(afp->mForkRefNum, fsFromMark, ssndData.offset);
-       if (result) return 0; //THROW_RESULT("AudioFilePlayer::OpenFile(): FSSetForkPosition")
+       if (result) return 0; /*THROW_RESULT("AudioFilePlayer::OpenFile(): FSSetForkPosition")*/
 
-    // Data size
+    /* Data size */
     *outFileDataSize = chunk.ckSize - ssndData.offset - 8;
 
-    // File format
+    /* File format */
     afp->mFileDescription.mSampleRate = 44100;
     afp->mFileDescription.mFormatID = kAudioFormatLinearPCM;
     afp->mFileDescription.mFormatFlags = kLinearPCMFormatFlagIsPacked | kLinearPCMFormatFlagIsSignedInteger;
@@ -331,7 +332,7 @@ AudioFilePlayer *new_AudioFilePlayer (const FSRef *inFileRef)
         return NULL;
     }
         
-    // we want about 4 seconds worth of data for the buffer
+    /* we want about 4 seconds worth of data for the buffer */
     int bytesPerSecond = (UInt32) (4 * afp->mFileDescription.mSampleRate * afp->mFileDescription.mBytesPerFrame);
     
 #if DEBUG

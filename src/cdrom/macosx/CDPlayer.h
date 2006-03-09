@@ -44,7 +44,7 @@ void     Lock ();
 
 void     Unlock();
 
-int      LoadFile (const FSRef *ref, int startFrame, int endFrame); // pass -1 to do nothing
+int      LoadFile (const FSRef *ref, int startFrame, int endFrame); /* pass -1 to do nothing */
 
 int      ReleaseFile ();
 

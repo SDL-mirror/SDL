@@ -23,8 +23,8 @@
 
 #include "SDL_QuartzVideo.h"
 
-#include <IOKit/IOMessage.h> // For wake from sleep detection
-#include <IOKit/pwr_mgt/IOPMLib.h> // For wake from sleep detection
+#include <IOKit/IOMessage.h> /* For wake from sleep detection */
+#include <IOKit/pwr_mgt/IOPMLib.h> /* For wake from sleep detection */
 #include "SDL_QuartzKeys.h"
 
 /* 
@@ -681,26 +681,28 @@ void QZ_RegisterForSleepNotifications (_THIS)
 }
 
 
-// Try to map Quartz mouse buttons to SDL's lingo...
+/* Try to map Quartz mouse buttons to SDL's lingo... */
 static int QZ_OtherMouseButtonToSDL(int button)
 {
     switch (button)
     {
         case 0:
-            return(SDL_BUTTON_LEFT);   // 1
+            return(SDL_BUTTON_LEFT);   /* 1 */
         case 1:
-            return(SDL_BUTTON_RIGHT);  // 3
+            return(SDL_BUTTON_RIGHT);  /* 3 */
         case 2:
-            return(SDL_BUTTON_MIDDLE); // 2
+            return(SDL_BUTTON_MIDDLE); /* 2 */
     }
 
-    // >= 3: skip 4 & 5, since those are the SDL mousewheel buttons.
+    /* >= 3: skip 4 & 5, since those are the SDL mousewheel buttons. */
     return(button + 3);
 }
 
 
 void QZ_PumpEvents (_THIS)
 {
+    static Uint32 screensaverTicks = 0;
+    Uint32 nowTicks;
     int firstMouseEvent;
     CGMouseDelta dx, dy;
 
@@ -713,8 +715,7 @@ void QZ_PumpEvents (_THIS)
         return;  /* don't do anything if there's no screen surface. */
 
     /* Update activity every five seconds to prevent screensaver. --ryan. */
-    static Uint32 screensaverTicks = 0;
-    Uint32 nowTicks = SDL_GetTicks();
+    nowTicks = SDL_GetTicks();
     if ((nowTicks - screensaverTicks) > 5000)
     {
         UpdateSystemActivity(UsrActivity);
