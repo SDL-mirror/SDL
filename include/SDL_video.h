@@ -772,19 +772,15 @@ extern DECLSPEC void SDLCALL SDL_FreeYUVOverlay(SDL_Overlay *overlay);
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Dynamically load a GL driver, if SDL is built with dynamic GL.
+ * Dynamically load an OpenGL library, or the default one if path is NULL
  *
- * SDL links normally with the OpenGL library on your system by default,
- * but you can compile it to dynamically load the GL driver at runtime.
  * If you do this, you need to retrieve all of the GL functions used in
  * your program from the dynamic library using SDL_GL_GetProcAddress().
- *
- * This is disabled in default builds of SDL.
  */
 extern DECLSPEC int SDLCALL SDL_GL_LoadLibrary(const char *path);
 
 /*
- * Get the address of a GL function (for extension functions)
+ * Get the address of a GL function
  */
 extern DECLSPEC void * SDLCALL SDL_GL_GetProcAddress(const char* proc);
 
