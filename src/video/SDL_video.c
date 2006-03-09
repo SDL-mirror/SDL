@@ -1008,6 +1008,10 @@ void SDL_UpdateRects (SDL_Surface *screen, int numrects, SDL_Rect *rects)
 	SDL_VideoDevice *video = current_video;
 	SDL_VideoDevice *this = current_video;
 
+	if ( (screen->flags & (SDL_OPENGL | SDL_OPENGLBLIT)) == SDL_OPENGL ) {
+		SDL_SetError("OpenGL active, use SDL_GL_SwapBuffers()");
+		return;
+	}
 	if ( screen == SDL_ShadowSurface ) {
 		/* Blit the shadow surface using saved mapping */
 		SDL_Palette *pal = screen->format->palette;
