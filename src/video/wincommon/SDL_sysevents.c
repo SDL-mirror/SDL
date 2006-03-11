@@ -106,7 +106,7 @@ static void LoadAygshell(void)
 {
 	if( !aygshell )
 		 aygshell = SDL_LoadObject("aygshell.dll");
-	if( aygshell )
+	if( (aygshell != 0) && (SHFullScreen == 0) )
 	{
 		SHFullScreen = (int (WINAPI *)(struct HWND__ *,unsigned long)) SDL_LoadFunction(aygshell, "SHFullScreen");
 	}
@@ -171,7 +171,19 @@ static void GapiTransform(SDL_ScreenOrientation rotate, char hires, Sint16 *x, S
 
 static void SDL_RestoreGameMode(void)
 {
+#ifdef _WIN32_WCE
+	SDL_VideoDevice *this = current_video;
+	if(SDL_strcmp(this->name, "gapi") == 0)
+	{
+		if( this->hidden->suspended )
+		{
+			this->hidden->suspended = 0;
+		}
+	}
+#else
 	ShowWindow(SDL_Window, SW_RESTORE);
+#endif
+
 #ifndef NO_CHANGEDISPLAYSETTINGS
 #ifndef _WIN32_WCE
 	ChangeDisplaySettings(&SDL_fullscreen_mode, CDS_FULLSCREEN);
@@ -180,7 +192,21 @@ static void SDL_RestoreGameMode(void)
 }
 static void SDL_RestoreDesktopMode(void)
 {
+
+#ifdef _WIN32_WCE
+	SDL_VideoDevice *this = current_video;
+	if(SDL_strcmp(this->name, "gapi") == 0)
+	{
+		if( !this->hidden->suspended )
+		{
+			this->hidden->suspended = 1;
+		}
+	}
+#else
+	/* WinCE does not have a taskbar, so minimizing is not convenient */
 	ShowWindow(SDL_Window, SW_MINIMIZE);
+#endif
+
 #ifndef NO_CHANGEDISPLAYSETTINGS
 #ifndef _WIN32_WCE
 	ChangeDisplaySettings(NULL, 0);
@@ -318,7 +344,7 @@ LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			if ( WINDIB_FULLSCREEN() )
 			{
 						LoadAygshell();
-						if( aygshell ) 
+						if( SHFullScreen )
 							SHFullScreen(SDL_Window, SHFS_HIDESTARTICON|SHFS_HIDETASKBAR|SHFS_HIDESIPBUTTON);
 						else
 							ShowWindow(FindWindow(TEXT("HHTaskBar"),NULL),SW_HIDE);
@@ -345,7 +371,7 @@ LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 						SDL_RestoreDesktopMode();
 #if defined(_WIN32_WCE)
 						LoadAygshell();
-						if( aygshell ) 
+						if( SHFullScreen ) 
 							SHFullScreen(SDL_Window, SHFS_SHOWSTARTICON|SHFS_SHOWTASKBAR|SHFS_SHOWSIPBUTTON);
 						else
 							ShowWindow(FindWindow(TEXT("HHTaskBar"),NULL),SW_SHOW);

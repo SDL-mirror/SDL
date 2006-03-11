@@ -30,10 +30,6 @@
 
 #ifdef _WIN32_WCE
   #error This is WinCE. Please use src/timer/wince/SDL_systimer.c instead.
-
-  /* but if you really want to use this file, use these #defines... */
-  #define USE_GETTICKCOUNT
-  #define USE_SETTIMER
 #endif
 
 #define TIME_WRAP_VALUE	(~(DWORD)0)
@@ -111,62 +107,6 @@ void SDL_Delay(Uint32 ms)
 	Sleep(ms);
 }
 
-#ifdef USE_SETTIMER
-
-static UINT WIN_timer;
-
-int SDL_SYS_TimerInit(void)
-{
-	return(0);
-}
-
-void SDL_SYS_TimerQuit(void)
-{
-	return;
-}
-
-/* Forward declaration because this is called by the timer callback */
-int SDL_SYS_StartTimer(void);
-
-static VOID CALLBACK TimerCallbackProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
-{
-	Uint32 ms;
-
-	ms = SDL_alarm_callback(SDL_alarm_interval);
-	if ( ms != SDL_alarm_interval ) {
-		KillTimer(NULL, idEvent);
-		if ( ms ) {
-			SDL_alarm_interval = ROUND_RESOLUTION(ms);
-			SDL_SYS_StartTimer();
-		} else {
-			SDL_alarm_interval = 0;
-		}
-	}
-}
-
-int SDL_SYS_StartTimer(void)
-{
-	int retval;
-
-	WIN_timer = SetTimer(NULL, 0, SDL_alarm_interval, TimerCallbackProc);
-	if ( WIN_timer ) {
-		retval = 0;
-	} else {
-		retval = -1;
-	}
-	return retval;
-}
-
-void SDL_SYS_StopTimer(void)
-{
-	if ( WIN_timer ) {
-		KillTimer(NULL, WIN_timer);
-		WIN_timer = 0;
-	}
-}
-
-#else /* !USE_SETTIMER */
-
 /* Data to handle a single periodic alarm */
 static UINT timerID = 0;
 
@@ -215,4 +155,3 @@ void SDL_SYS_StopTimer(void)
 	return;
 }
 
-#endif /* USE_SETTIMER */

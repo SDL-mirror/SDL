@@ -117,10 +117,18 @@ typedef unsigned int uintptr_t;
 #define SDL_AUDIO_DRIVER_WAVEOUT	1
 
 /* Enable various cdrom drivers */
-#define SDL_CDROM_WIN32	1
+#ifdef _WIN32_WCE
+#define SDL_CDROM_DISABLED      1
+#else
+#define SDL_CDROM_WIN32		1
+#endif
 
 /* Enable various input drivers */
+#ifdef _WIN32_WCE
+#define SDL_JOYSTICK_DISABLED   1
+#else
 #define SDL_JOYSTICK_WINMM	1
+#endif
 
 /* Enable various shared object loading systems */
 #define SDL_LOADSO_WIN32	1
@@ -136,11 +144,11 @@ typedef unsigned int uintptr_t;
 #endif
 
 /* Enable various video drivers */
-#ifndef _WIN32_WCE
-#define SDL_VIDEO_DRIVER_DDRAW	1
-#endif
 #ifdef _WIN32_WCE
 #define SDL_VIDEO_DRIVER_GAPI	1
+#endif
+#ifndef _WIN32_WCE
+#define SDL_VIDEO_DRIVER_DDRAW	1
 #endif
 #define SDL_VIDEO_DRIVER_WINDIB	1
 

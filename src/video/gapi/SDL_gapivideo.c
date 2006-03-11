@@ -1088,6 +1088,9 @@ static void GAPI_UpdateRectsColor(_THIS, int numrects, SDL_Rect *rects)
 
 static void GAPI_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 {
+	// we do not want to corrupt video memory
+	if( gapi->suspended ) return;
+
 	if( gapi->needUpdate )
 		gapi->videoMem = gapi->gxFunc.GXBeginDraw(); 
 
@@ -1172,10 +1175,55 @@ static void GAPI_PaletteChanged(_THIS, HWND window)
 	OutputDebugString(TEXT("GAPI_PaletteChanged NOT IMPLEMENTED !\r\n"));
 }
 
-/* Exported for the windows message loop only */
 static void GAPI_WinPAINT(_THIS, HDC hdc)
 {
-	OutputDebugString(TEXT("GAPI_WinPAINT NOT IMPLEMENTED !\r\n"));
+	// draw current offscreen buffer on hdc
+
+	int bpp = 16; // we always use either 8 or 16 bpp internally
+
+	unsigned short *bitmapData;
+	HBITMAP hb;
+	HDC srcDC;
+
+    // Create a DIB
+    BYTE buffer[sizeof(BITMAPINFOHEADER) + 3 * sizeof(RGBQUAD)] = {0};
+    BITMAPINFO*       pBMI    = (BITMAPINFO*)buffer;
+    BITMAPINFOHEADER* pHeader = &pBMI->bmiHeader;
+    DWORD*            pColors = (DWORD*)&pBMI->bmiColors;   
+
+	// CreateDIBSection does not support 332 pixel format on wce
+	if( gapi->gxProperties.cBPP == 8 ) return;
+
+    // DIB Header
+    pHeader->biSize            = sizeof(BITMAPINFOHEADER);
+    pHeader->biWidth           = this->hidden->w;
+    pHeader->biHeight          = -this->hidden->h;
+    pHeader->biPlanes          = 1;
+    pHeader->biBitCount        = bpp;
+    pHeader->biCompression     = BI_RGB;
+    pHeader->biSizeImage       = (this->hidden->w * this->hidden->h * bpp) / 8;
+	
+    // Color masks
+	if( bpp == 16 )
+	{
+		pColors[0] = REDMASK;
+		pColors[1] = GREENMASK;
+		pColors[2] = BLUEMASK;
+		pHeader->biCompression = BI_BITFIELDS;
+	}
+    // Create the DIB
+    hb =  CreateDIBSection( 0, pBMI, DIB_RGB_COLORS, (void**)&bitmapData, 0, 0 );
+
+	// copy data
+	// FIXME: prevent misalignment, but I've never seen non aligned width of screen
+	memcpy(bitmapData, this->hidden->buffer, pHeader->biSizeImage);
+	srcDC = CreateCompatibleDC(hdc);
+	SelectObject(srcDC, hb);
+
+	BitBlt(hdc, 0, 0, this->hidden->w, this->hidden->h, srcDC, 0, 0, SRCCOPY);
+
+	DeleteObject(hb);
+	DeleteDC(srcDC);
 }
 
 int GAPI_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors) 

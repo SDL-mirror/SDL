@@ -25,6 +25,7 @@
 #include <windows.h>
 #include <mmsystem.h>
 
+#include "SDL_thread.h"
 #include "SDL_timer.h"
 #include "../SDL_timer_c.h"
 
@@ -91,53 +92,103 @@ void SDL_StartTicks(void)
 
 static UINT WIN_timer;
 
+#if ( _WIN32_WCE <= 420 )
+
+static HANDLE timersThread = 0;
+static HANDLE timersQuitEvent = 0;
+
+DWORD TimersThreadProc(void *data)
+{
+	while(WaitForSingleObject(timersQuitEvent, 10) == WAIT_TIMEOUT)
+	{
+		SDL_ThreadedTimerCheck();
+	}
+	return 0;
+}
+
 int SDL_SYS_TimerInit(void)
 {
-	return(0);
+	// create a thread to process a threaded timers
+	// SetTimer does not suit the needs because 
+	// TimerCallbackProc will be called only when WM_TIMER occured
+
+	timersQuitEvent = CreateEvent(0, TRUE, FALSE, 0);
+	if( !timersQuitEvent )
+	{
+		SDL_SetError("Cannot create event for timers thread");
+		return -1;
+	}
+	timersThread = CreateThread(NULL, 0, TimersThreadProc, 0, 0, 0);
+	if( !timersThread )
+	{
+		SDL_SetError("Cannot create timers thread, check amount of RAM available");
+		return -1;
+	}
+	SetThreadPriority(timersThread, THREAD_PRIORITY_HIGHEST);
+
+	return(SDL_SetTimerThreaded(1));
 }
 
 void SDL_SYS_TimerQuit(void)
 {
+	SetEvent(timersQuitEvent);
+	if( WaitForSingleObject(timersThread, 2000) == WAIT_TIMEOUT )
+		TerminateThread(timersThread, 0);
+	CloseHandle(timersThread);
+	CloseHandle(timersQuitEvent);
 	return;
 }
 
-/* Forward declaration because this is called by the timer callback */
-int SDL_SYS_StartTimer(void);
+#else
 
-static VOID CALLBACK TimerCallbackProc(HWND hwnd, UINT uMsg, UINT idEvent, DWORD dwTime)
+#pragma comment(lib, "mmtimer.lib")
+
+/* Data to handle a single periodic alarm */
+static UINT timerID = 0;
+
+static void CALLBACK HandleAlarm(UINT uID,  UINT uMsg, DWORD dwUser,
+						DWORD dw1, DWORD dw2)
 {
-	Uint32 ms;
-
-	ms = SDL_alarm_callback(SDL_alarm_interval);
-	if ( ms != SDL_alarm_interval ) {
-		KillTimer(NULL, idEvent);
-		if ( ms ) {
-			SDL_alarm_interval = ROUND_RESOLUTION(ms);
-			SDL_SYS_StartTimer();
-		} else {
-			SDL_alarm_interval = 0;
-		}
-	}
+	SDL_ThreadedTimerCheck();
 }
+
+
+int SDL_SYS_TimerInit(void)
+{
+	MMRESULT result;
+
+	/* Set timer resolution */
+	result = timeBeginPeriod(TIMER_RESOLUTION);
+	if ( result != TIMERR_NOERROR ) {
+		SDL_SetError("Warning: Can't set %d ms timer resolution",
+							TIMER_RESOLUTION);
+	}
+	/* Allow 10 ms of drift so we don't chew on CPU */
+	timerID = timeSetEvent(TIMER_RESOLUTION,1,HandleAlarm,0,TIME_PERIODIC);
+	if ( ! timerID ) {
+		SDL_SetError("timeSetEvent() failed");
+		return(-1);
+	}
+	return(SDL_SetTimerThreaded(1));
+}
+
+void SDL_SYS_TimerQuit(void)
+{
+	if ( timerID ) {
+		timeKillEvent(timerID);
+	}
+	timeEndPeriod(TIMER_RESOLUTION);
+}
+
+#endif
 
 int SDL_SYS_StartTimer(void)
 {
-	int retval;
-
-	WIN_timer = SetTimer(NULL, 0, SDL_alarm_interval, TimerCallbackProc);
-	if ( WIN_timer ) {
-		retval = 0;
-	} else {
-		retval = -1;
-	}
-	return retval;
+	SDL_SetError("Internal logic error: WinCE uses threaded timer");
+	return(-1);
 }
 
 void SDL_SYS_StopTimer(void)
 {
-	if ( WIN_timer ) {
-		KillTimer(NULL, WIN_timer);
-		WIN_timer = 0;
-	}
+	return;
 }
-

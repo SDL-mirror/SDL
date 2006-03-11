@@ -152,6 +152,7 @@ struct SDL_PrivateVideoData {
 	int dstPixelStep; // in bytes
 	int startOffset; // in bytes
 	int useVga;
+	int suspended; // do not pu anything into video memory
 };
 
 
