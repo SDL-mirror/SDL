@@ -130,7 +130,7 @@ distclean: clean
 	    -name '*~' -o -name '*.bak' -o -name '*.old' -o -name '*.rej' -o \
 	    -name '.#*' \
 	    -exec rm -f {} \;
-	cp include/SDL_config.h.minimal include/SDL_config.h
+	cp $(srcdir)/include/SDL_config.h.minimal $(srcdir)/include/SDL_config.h
 	if test -f test/Makefile; then (cd test; $(MAKE) $@); fi
 
 dist $(distfile):
