@@ -80,3 +80,4 @@ __EOF__
     echo "" >>${output}.new
 done
 mv ${output}.new ${output}
+rm -f ${cache_prefix}*
