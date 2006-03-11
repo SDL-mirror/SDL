@@ -578,7 +578,7 @@ int SDL_SYS_JoystickInit(void)
 	
 	SDL_numjoysticks = 0;
 	
-	if (!gpDeviceList)
+	if (gpDeviceList)
 	{
 		SDL_SetError("Joystick: Device list already inited.");
 		return -1;
