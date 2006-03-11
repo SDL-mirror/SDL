@@ -15,15 +15,16 @@ int alive = 1;
 
 int ThreadFunc(void *data)
 {
+	uintptr_t threadnum = (uintptr_t)data;
 	while ( alive ) {
 		SDL_SemWait(sem);
-		fprintf(stderr, "Thread number %d has got the semaphore (value = %d)!\n", (int)data, SDL_SemValue(sem));
+		fprintf(stderr, "Thread number %d has got the semaphore (value = %d)!\n", threadnum, SDL_SemValue(sem));
 		SDL_Delay(200);
 		SDL_SemPost(sem);
-		fprintf(stderr, "Thread number %d has released the semaphore (value = %d)!\n", (int)data, SDL_SemValue(sem));
+		fprintf(stderr, "Thread number %d has released the semaphore (value = %d)!\n", threadnum, SDL_SemValue(sem));
 		SDL_Delay(1); /* For the scheduler */
 	}
-	printf("Thread number %d exiting.\n", (int)data);
+	printf("Thread number %d exiting.\n", threadnum);
 	return 0;
 }
 
@@ -35,7 +36,8 @@ static void killed(int sig)
 int main(int argc, char **argv)
 {
 	SDL_Thread *threads[NUM_THREADS];
-	int i, init_sem;
+	uintptr_t i;
+	int init_sem;
 
 	if(argc < 2) {
 		fprintf(stderr,"Usage: %s init_value\n", argv[0]);
