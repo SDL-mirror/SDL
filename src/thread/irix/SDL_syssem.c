@@ -67,30 +67,13 @@ SDL_sem *SDL_CreateSemaphore(Uint32 initial_value)
 	extern int _creating_thread_lock;	/* SDL_threads.c */
 	SDL_sem *sem;
 	union semun init;
-	key_t key;
 
 	sem = (SDL_sem *)SDL_malloc(sizeof(*sem));
 	if ( sem == NULL ) {
 		SDL_OutOfMemory();
 		return(NULL);
 	}
-	/* This flag is true if we are creating the thread manager sem,
-	   which is never freed.  This allows us to reuse the same sem.
-	*/
-	if ( _creating_thread_lock ) {
-		key = 'S'+'D'+'L';
-	} else {
-		key = IPC_PRIVATE;
-	}
-	/* Keep trying to create sem while we don't own the requested key */
-	do {
-		if ( key != IPC_PRIVATE ) {
-			++key;
-		}
-		sem->id = semget(key, 1, (0600|IPC_CREAT));
-	} while ((sem->id < 0) && (key != IPC_PRIVATE) && (errno == EACCES));
-
-	/* Report the error if we eventually failed */
+	sem->id = semget(IPC_PRIVATE, 1, (0600|IPC_CREAT));
 	if ( sem->id < 0 ) {
 		SDL_SetError("Couldn't create semaphore");
 		SDL_free(sem);

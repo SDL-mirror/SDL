@@ -37,20 +37,13 @@ static int SDL_maxthreads = 0;
 static int SDL_numthreads = 0;
 static SDL_Thread **SDL_Threads = NULL;
 static SDL_mutex *thread_lock = NULL;
-int _creating_thread_lock = 0;
 
 int SDL_ThreadsInit(void)
 {
 	int retval;
 
 	retval = 0;
-	/* Set the thread lock creation flag so that we can reuse an
-	   existing lock on the system - since this mutex never gets
-	   destroyed (see SDL_ThreadsQuit()), we want to reuse it.
-	*/
-	_creating_thread_lock = 1;
 	thread_lock = SDL_CreateMutex();
-	_creating_thread_lock = 0;
 	if ( thread_lock == NULL ) {
 		retval = -1;
 	}
@@ -76,15 +69,13 @@ void SDL_ThreadsQuit()
 /* Routines for manipulating the thread list */
 static void SDL_AddThread(SDL_Thread *thread)
 {
-	SDL_Thread **threads;
-
 	/* WARNING:
 	   If the very first threads are created simultaneously, then
 	   there could be a race condition causing memory corruption.
 	   In practice, this isn't a problem because by definition there
 	   is only one thread running the first time this is called.
 	*/
-	if ( thread_lock == NULL ) {
+	if ( !thread_lock ) {
 		if ( SDL_ThreadsInit() < 0 ) {
 			return;
 		}
@@ -97,17 +88,14 @@ static void SDL_AddThread(SDL_Thread *thread)
 			SDL_numthreads, SDL_maxthreads);
 #endif
 	if ( SDL_numthreads == SDL_maxthreads ) {
-		threads=(SDL_Thread **)SDL_malloc((SDL_maxthreads+ARRAY_CHUNKSIZE)*
-		                              (sizeof *threads));
+		SDL_Thread **threads;
+		threads = (SDL_Thread **)SDL_realloc(SDL_Threads,
+			(SDL_maxthreads+ARRAY_CHUNKSIZE)*(sizeof *threads));
 		if ( threads == NULL ) {
 			SDL_OutOfMemory();
 			goto done;
 		}
-		SDL_memcpy(threads, SDL_Threads, SDL_numthreads*(sizeof *threads));
 		SDL_maxthreads += ARRAY_CHUNKSIZE;
-		if ( SDL_Threads ) {
-			SDL_free(SDL_Threads);
-		}
 		SDL_Threads = threads;
 	}
 	SDL_Threads[SDL_numthreads++] = thread;
@@ -119,30 +107,35 @@ static void SDL_DelThread(SDL_Thread *thread)
 {
 	int i;
 
-	if ( thread_lock ) {
-		SDL_mutexP(thread_lock);
-		for ( i=0; i<SDL_numthreads; ++i ) {
-			if ( thread == SDL_Threads[i] ) {
-				break;
-			}
+	if ( !thread_lock ) {
+		return;
+	}
+	SDL_mutexP(thread_lock);
+	for ( i=0; i<SDL_numthreads; ++i ) {
+		if ( thread == SDL_Threads[i] ) {
+			break;
 		}
-		if ( i < SDL_numthreads ) {
-			if ( --SDL_numthreads > 0 ) {
-				while ( i < SDL_numthreads ) {
-					SDL_Threads[i] = SDL_Threads[i+1];
-					++i;
-				}
-			} else {
-				SDL_maxthreads = 0;
-				SDL_free(SDL_Threads);
-				SDL_Threads = NULL;
+	}
+	if ( i < SDL_numthreads ) {
+		if ( --SDL_numthreads > 0 ) {
+			while ( i < SDL_numthreads ) {
+				SDL_Threads[i] = SDL_Threads[i+1];
+				++i;
 			}
+		} else {
+			SDL_maxthreads = 0;
+			SDL_free(SDL_Threads);
+			SDL_Threads = NULL;
+		}
 #ifdef DEBUG_THREADS
-			printf("Deleting thread (%d left - %d max)\n",
-					SDL_numthreads, SDL_maxthreads);
+		printf("Deleting thread (%d left - %d max)\n",
+				SDL_numthreads, SDL_maxthreads);
 #endif
-		}
-		SDL_mutexV(thread_lock);
+	}
+	SDL_mutexV(thread_lock);
+
+	if ( SDL_Threads == NULL ) {
+		SDL_ThreadsQuit();
 	}
 }
 
