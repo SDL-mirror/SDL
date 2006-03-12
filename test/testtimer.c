@@ -27,7 +27,7 @@ static Uint32 ticktock(Uint32 interval)
 
 static Uint32 callback(Uint32 interval, void *param)
 {
-  printf("Timer %d : param = %d\n", interval, (int) param);
+  printf("Timer %d : param = %d\n", interval, (uintptr_t)param);
   return interval;
 }
 
