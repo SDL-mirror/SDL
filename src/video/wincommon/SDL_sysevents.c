@@ -746,6 +746,7 @@ int SDL_RegisterApp(char *name, Uint32 style, void *hInst)
 
 	/* Only do this once... */
 	if ( app_registered ) {
+		++app_registered;
 		return(0);
 	}
 
@@ -822,12 +823,17 @@ void SDL_UnregisterApp()
 	WNDCLASS class;
 
 	/* SDL_RegisterApp might not have been called before */
-	if ( app_registered ) {
+	if ( !app_registered ) {
+		return;
+	}
+	--app_registered;
+	if ( app_registered == 0 ) {
 		/* Check for any registered window classes. */
 		if ( GetClassInfo(SDL_Instance, SDL_Appname, &class) ) {
 			UnregisterClass(SDL_Appname, SDL_Instance);
 		}
-		app_registered = 0;
+		SDL_free(SDL_Appname);
+		SDL_Appname = NULL;
 	}
 }
 
