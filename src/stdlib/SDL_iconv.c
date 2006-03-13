@@ -401,7 +401,7 @@ size_t SDL_iconv(SDL_iconv_t cd,
 				if ( srclen < 2 ) {
 					return SDL_ICONV_EINVAL;
 				}
-				p = src;
+				p = (Uint8 *)src;
 				W2 = ((Uint32)p[0] << 8) |
 				      (Uint32)p[1];
 				src += 2;
@@ -442,7 +442,7 @@ size_t SDL_iconv(SDL_iconv_t cd,
 				if ( srclen < 2 ) {
 					return SDL_ICONV_EINVAL;
 				}
-				p = src;
+				p = (Uint8 *)src;
 				W2 = ((Uint32)p[1] << 8) |
 				      (Uint32)p[0];
 				src += 2;

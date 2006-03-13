@@ -661,7 +661,7 @@ int SDL_strncmp(const char *str1, const char *str2, size_t maxlen)
 }
 #endif
 
-#if !defined(HAVE_STRCASECMP) && !defined(HAVE_STRICMP)
+#if !defined(HAVE_STRCASECMP) && !defined(HAVE__STRICMP)
 int SDL_strcasecmp(const char *str1, const char *str2)
 {
     char a = 0;
