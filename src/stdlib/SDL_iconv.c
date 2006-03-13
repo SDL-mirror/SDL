@@ -368,7 +368,8 @@ size_t SDL_iconv(SDL_iconv_t cd,
 					ch = UNKNOWN_UNICODE;
 				}
 				if ( (ch >= 0xD800 && ch <= 0xDFFF) ||
-				     (ch == 0xFFFE || ch == 0xFFFF) ) {
+				     (ch == 0xFFFE || ch == 0xFFFF) ||
+				     ch > 0x10FFFF ) {
 					/* Skip illegal sequences
 					return SDL_ICONV_EILSEQ;
 					*/
@@ -545,7 +546,7 @@ size_t SDL_iconv(SDL_iconv_t cd,
 		    case ENCODING_UTF8: /* RFC 3629 */
 			{
 				Uint8 *p = (Uint8 *)dst;
-				if ( ch > 0x7FFFFFFF ) {
+				if ( ch > 0x10FFFF ) {
 					ch = UNKNOWN_UNICODE;
 				}
 				if ( ch <= 0x7F ) {
