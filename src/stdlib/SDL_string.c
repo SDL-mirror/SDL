@@ -661,18 +661,36 @@ int SDL_strncmp(const char *str1, const char *str2, size_t maxlen)
 }
 #endif
 
-#ifndef HAVE_STRCASECMP
+#if !defined(HAVE_STRCASECMP) && !defined(HAVE_STRICMP)
 int SDL_strcasecmp(const char *str1, const char *str2)
 {
     char a = 0;
     char b = 0;
-    while (*str1 && *str2) {
+    while ( *str1 && *str2 ) {
         a = SDL_tolower(*str1);
         b = SDL_tolower(*str2);
         if ( a != b )
             break;
         ++str1;
         ++str2;
+    }
+    return (int)((unsigned char)a - (unsigned char)b);
+}
+#endif
+
+#ifndef HAVE_STRNCASECMP
+int SDL_strncasecmp(const char *str1, const char *str2, size_t maxlen)
+{
+    char a = 0;
+    char b = 0;
+    while ( *str1 && *str2 && maxlen ) {
+        a = SDL_tolower(*str1);
+        b = SDL_tolower(*str2);
+        if ( a != b )
+            break;
+        ++str1;
+        ++str2;
+        --maxlen;
     }
     return (int)((unsigned char)a - (unsigned char)b);
 }

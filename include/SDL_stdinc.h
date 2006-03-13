@@ -70,6 +70,9 @@
 #if HAVE_CTYPE_H
 # include <ctype.h>
 #endif
+#if HAVE_ICONV_H
+# include <iconv.h>
+#endif
 
 /* The number of elements in an array */
 #define SDL_arraysize(array)	(sizeof(array)/sizeof(array[0]))
@@ -518,6 +521,12 @@ extern DECLSPEC int SDLCALL SDL_strncmp(const char *str1, const char *str2, size
 extern DECLSPEC int SDLCALL SDL_strcasecmp(const char *str1, const char *str2);
 #endif
 
+#if HAVE_STRNCASECMP
+#define SDL_strncasecmp strncasecmp
+#else
+extern DECLSPEC int SDLCALL SDL_strncasecmp(const char *str1, const char *str2, size_t maxlen);
+#endif
+
 #if HAVE_SSCANF
 #define SDL_sscanf      sscanf
 #else
@@ -535,6 +544,32 @@ extern DECLSPEC int SDLCALL SDL_snprintf(char *text, size_t maxlen, const char *
 #else
 extern DECLSPEC int SDLCALL SDL_vsnprintf(char *text, size_t maxlen, const char *fmt, va_list ap);
 #endif
+
+/* The SDL implementation of iconv() returns these error codes */
+#define SDL_ICONV_ERROR		(size_t)-1
+#define SDL_ICONV_E2BIG		(size_t)-2
+#define SDL_ICONV_EILSEQ	(size_t)-3
+#define SDL_ICONV_EINVAL	(size_t)-4
+
+#if HAVE_ICONV
+#define SDL_iconv_t     iconv_t
+#define SDL_iconv_open  iconv_open
+#define SDL_iconv_close iconv_close
+extern DECLSPEC size_t SDLCALL SDL_iconv(SDL_iconv_t cd, char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft);
+#else
+typedef struct _SDL_iconv_t *SDL_iconv_t;
+extern DECLSPEC SDL_iconv_t SDLCALL SDL_iconv_open(const char *tocode, const char *fromcode);
+extern DECLSPEC int SDLCALL SDL_iconv_close(SDL_iconv_t cd);
+extern DECLSPEC size_t SDLCALL SDL_iconv(SDL_iconv_t cd, char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft);
+#endif
+/* This function converts a string between encodings in one pass, returning a
+   string that must be freed with SDL_free() or NULL on error.
+*/
+extern DECLSPEC char * SDLCALL SDL_iconv_string(const char *tocode, const char *fromcode, char *inbuf, size_t inbytesleft);
+#define SDL_iconv_utf8_ascii(S)		SDL_iconv_string("ASCII", "UTF-8", S, SDL_strlen(S)+1)
+#define SDL_iconv_utf8_latin1(S)	SDL_iconv_string("LATIN1", "UTF-8", S, SDL_strlen(S)+1)
+#define SDL_iconv_utf8_ucs2(S)		(Uint16 *)SDL_iconv_string("UCS-2", "UTF-8", S, SDL_strlen(S)+1)
+#define SDL_iconv_utf8_ucs4(S)		(Uint32 *)SDL_iconv_string("UCS-4", "UTF-8", S, SDL_strlen(S)+1)
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
