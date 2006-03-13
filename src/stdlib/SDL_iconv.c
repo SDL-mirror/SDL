@@ -669,7 +669,7 @@ size_t SDL_iconv(SDL_iconv_t cd,
 		    case ENCODING_UTF32BE:
 			{
 				Uint8 *p = (Uint8 *)dst;
-				if ( ch > 0x7FFFFFFF ) {
+				if ( ch > 0x10FFFF ) {
 					ch = UNKNOWN_UNICODE;
 				}
 				if ( dstlen < 4 ) {
@@ -686,7 +686,7 @@ size_t SDL_iconv(SDL_iconv_t cd,
 		    case ENCODING_UTF32LE:
 			{
 				Uint8 *p = (Uint8 *)dst;
-				if ( ch > 0x7FFFFFFF ) {
+				if ( ch > 0x10FFFF ) {
 					ch = UNKNOWN_UNICODE;
 				}
 				if ( dstlen < 4 ) {
