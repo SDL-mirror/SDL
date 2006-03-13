@@ -818,7 +818,7 @@ extern DECLSPEC void SDLCALL SDL_GL_Unlock(void);
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Sets/Gets the title and icon text of the display window
+ * Sets/Gets the title and icon text of the display window (UTF-8 encoded)
  */
 extern DECLSPEC void SDLCALL SDL_WM_SetCaption(const char *title, const char *icon);
 extern DECLSPEC void SDLCALL SDL_WM_GetCaption(char **title, char **icon);

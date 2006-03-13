@@ -255,8 +255,13 @@ void X11_SetCaption(_THIS, const char *title, const char *icon)
 				&titleprop);
 #endif
 		if ( error != Success ) {
-			pXStringListToTextProperty((char **)&title, 1,
-					&titleprop);
+			char *title_latin1 = SDL_iconv_utf8_latin1((char *)title);
+			if ( !title_latin1 ) {
+				SDL_OutOfMemory();
+				return;
+			}
+			pXStringListToTextProperty(&title_latin1, 1, &titleprop);
+			SDL_free(title_latin1);
 		}
 		pXSetWMName(SDL_Display, WMwindow, &titleprop);
 		pXFree(titleprop.value);
@@ -268,7 +273,13 @@ void X11_SetCaption(_THIS, const char *title, const char *icon)
 				(char **)&icon, 1, XUTF8StringStyle, &iconprop);
 #endif
 		if ( error != Success ) {
-			pXStringListToTextProperty((char **)&icon, 1, &iconprop);
+			char *icon_latin1 = SDL_iconv_utf8_latin1((char *)title);
+			if ( !icon_latin1 ) {
+				SDL_OutOfMemory();
+				return;
+			}
+			pXStringListToTextProperty(&icon_latin1, 1, &iconprop);
+			SDL_free(icon_latin1);
 		}
 		pXSetWMIconName(SDL_Display, WMwindow, &iconprop);
 		pXFree(iconprop.value);
