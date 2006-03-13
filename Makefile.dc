@@ -37,6 +37,7 @@ SRCS = \
 	src/SDL_error.c \
 	src/SDL_fatal.c \
 	src/stdlib/SDL_getenv.c \
+	src/stdlib/SDL_iconv.c \
 	src/stdlib/SDL_malloc.c \
 	src/stdlib/SDL_qsort.c \
 	src/stdlib/SDL_stdlib.c \
