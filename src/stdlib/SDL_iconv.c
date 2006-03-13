@@ -383,8 +383,8 @@ size_t SDL_iconv(SDL_iconv_t cd,
 				if ( srclen < 2 ) {
 					return SDL_ICONV_EINVAL;
 				}
-				W1 = ((Uint32)p[0] << 8) |
-				      (Uint32)p[1];
+				W1 = ((Uint16)p[0] << 8) |
+				      (Uint16)p[1];
 				src += 2;
 				srclen -= 2;
 				if ( W1 < 0xD800 || W1 > 0xDFFF ) {
@@ -402,8 +402,8 @@ size_t SDL_iconv(SDL_iconv_t cd,
 					return SDL_ICONV_EINVAL;
 				}
 				p = (Uint8 *)src;
-				W2 = ((Uint32)p[0] << 8) |
-				      (Uint32)p[1];
+				W2 = ((Uint16)p[0] << 8) |
+				      (Uint16)p[1];
 				src += 2;
 				srclen -= 2;
 				if ( W2 < 0xDC00 || W2 > 0xDFFF ) {
@@ -424,8 +424,8 @@ size_t SDL_iconv(SDL_iconv_t cd,
 				if ( srclen < 2 ) {
 					return SDL_ICONV_EINVAL;
 				}
-				W1 = ((Uint32)p[1] << 8) |
-				      (Uint32)p[0];
+				W1 = ((Uint16)p[1] << 8) |
+				      (Uint16)p[0];
 				src += 2;
 				srclen -= 2;
 				if ( W1 < 0xD800 || W1 > 0xDFFF ) {
@@ -443,8 +443,8 @@ size_t SDL_iconv(SDL_iconv_t cd,
 					return SDL_ICONV_EINVAL;
 				}
 				p = (Uint8 *)src;
-				W2 = ((Uint32)p[1] << 8) |
-				      (Uint32)p[0];
+				W2 = ((Uint16)p[1] << 8) |
+				      (Uint16)p[0];
 				src += 2;
 				srclen -= 2;
 				if ( W2 < 0xDC00 || W2 > 0xDFFF ) {
