@@ -5,7 +5,6 @@
 # Special exports to ignore for this platform
 $exclude{"SDL_putenv"} = 1;
 $exclude{"SDL_getenv"} = 1;
-$exclude{"SDL_CreateThread_Core"} = 1;
 
 while ( ($file = shift(@ARGV)) ) {
 	if ( ! defined(open(FILE, $file)) ) {
@@ -24,5 +23,6 @@ while ( ($file = shift(@ARGV)) ) {
 }
 
 # Special exports to include for this platform
+print "\tSDL_iconv_string\n";
 print "\t.objc_class_name_SDL_QuartzWindow\n";
 print "\t.objc_class_name_SDL_QuartzWindowDelegate\n";

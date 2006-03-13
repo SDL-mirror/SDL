@@ -31,6 +31,7 @@ typedef signed short	int16_t;
 typedef unsigned short	uint16_t;
 typedef signed int	int32_t;
 typedef unsigned int	uint32_t;
+typedef unsigned int	uintptr_t;
 
 /* Useful headers */
 #define HAVE_STDIO_H	1
@@ -62,8 +63,6 @@ typedef unsigned int	uint32_t;
 #define HAVE_ATOF	1
 #define HAVE_STRCMP	1
 #define HAVE_STRNCMP	1
-#define HAVE_STRICMP	1
-#define HAVE_STRCASECMP	1
 #define HAVE_SSCANF	1
 
 /* Enable various audio drivers */

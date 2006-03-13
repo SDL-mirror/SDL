@@ -3,7 +3,6 @@
 # Program to take a set of header files and generate DLL export definitions
 
 # Special exports to ignore for this platform
-$exclude{"SDL_CreateThread_Core"} = 1;
 
 while ( ($file = shift(@ARGV)) ) {
 	if ( ! defined(open(FILE, $file)) ) {
@@ -35,6 +34,9 @@ print "\tSDL_strupr\n";
 print "\tSDL_strlwr\n";
 print "\tSDL_ltoa\n";
 print "\tSDL_ultoa\n";
+print "\tSDL_strcasecmp\n";
+print "\tSDL_strncasecmp\n";
 print "\tSDL_snprintf\n";
 print "\tSDL_vsnprintf\n";
+print "\tSDL_iconv_string\n";
 print "\tSDL_InitQuickDraw\n";

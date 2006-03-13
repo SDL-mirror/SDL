@@ -37,18 +37,6 @@
 	_SDL_HasSSE
 	_SDL_HasSSE2
 	_SDL_HasAltiVec
-	_SDL_ReadLE16
-	_SDL_ReadBE16
-	_SDL_ReadLE32
-	_SDL_ReadBE32
-	_SDL_ReadLE64
-	_SDL_ReadBE64
-	_SDL_WriteLE16
-	_SDL_WriteBE16
-	_SDL_WriteLE32
-	_SDL_WriteBE32
-	_SDL_WriteLE64
-	_SDL_WriteBE64
 	_SDL_SetError
 	_SDL_GetError
 	_SDL_ClearError
@@ -79,6 +67,7 @@
 	_SDL_JoystickClose
 	_SDL_EnableUNICODE
 	_SDL_EnableKeyRepeat
+	_SDL_GetKeyRepeat
 	_SDL_GetKeyState
 	_SDL_GetModState
 	_SDL_SetModState
@@ -117,7 +106,20 @@
 	_SDL_RWFromConstMem
 	_SDL_AllocRW
 	_SDL_FreeRW
+	_SDL_ReadLE16
+	_SDL_ReadBE16
+	_SDL_ReadLE32
+	_SDL_ReadBE32
+	_SDL_ReadLE64
+	_SDL_ReadBE64
+	_SDL_WriteLE16
+	_SDL_WriteBE16
+	_SDL_WriteLE32
+	_SDL_WriteBE32
+	_SDL_WriteLE64
+	_SDL_WriteBE64
 	_SDL_GetWMInfo
+	_SDL_CreateThread
 	_SDL_CreateThread
 	_SDL_ThreadID
 	_SDL_GetThreadID
@@ -186,5 +188,6 @@
 	_SDL_WM_ToggleFullScreen
 	_SDL_WM_GrabInput
 	_SDL_SoftStretch
+	SDL_iconv_string
 	.objc_class_name_SDL_QuartzWindow
 	.objc_class_name_SDL_QuartzWindowDelegate

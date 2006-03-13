@@ -28,7 +28,7 @@ static void quit(int rc)
 	exit(rc);
 }
 
-int LoadSprite(SDL_Surface *screen, char *file)
+int LoadSprite(char *file)
 {
 	SDL_Surface *temp;
 
@@ -221,7 +221,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Load the sprite */
-	if ( LoadSprite(screen, "icon.bmp") < 0 ) {
+	if ( LoadSprite("icon.bmp") < 0 ) {
 		quit(1);
 	}
 

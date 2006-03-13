@@ -167,7 +167,7 @@ int main(int argc, char **argv)
     }
 
     /* Ask explicitly for 8bpp and a hardware palette */
-    if(!(screen = SDL_SetVideoMode(SCRW, SCRH, 8, vidflags | SDL_HWPALETTE))) {
+    if((screen = SDL_SetVideoMode(SCRW, SCRH, 8, vidflags | SDL_HWPALETTE)) == NULL) {
 	fprintf(stderr, "error setting %dx%d 8bpp indexed mode: %s\n",
 		SCRW, SCRH, SDL_GetError());
 	quit(1);
@@ -175,7 +175,7 @@ int main(int argc, char **argv)
 
     if (vidflags & SDL_FULLSCREEN) SDL_ShowCursor (SDL_FALSE);
 
-    if(!(boat[0] = SDL_LoadBMP("sail.bmp")))
+    if((boat[0] = SDL_LoadBMP("sail.bmp")) == NULL)
 	sdlerr("loading sail.bmp");
     /* We've chosen magenta (#ff00ff) as colour key for the boat */
     SDL_SetColorKey(boat[0], SDL_SRCCOLORKEY | SDL_RLEACCEL,

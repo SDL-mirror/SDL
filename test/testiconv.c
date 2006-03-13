@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 	char buffer[BUFSIZ];
 	char *ucs4;
 	char *test[2];
-	int i, j, index = 0;
+	int i, index = 0;
 	FILE *file;
 	int errors = 0;
 
@@ -59,8 +59,9 @@ int main(int argc, char *argv[])
 
 	while ( fgets(buffer, sizeof(buffer), file) ) {
 		/* Convert to UCS-4 */
+		size_t len;
 		ucs4 = SDL_iconv_string("UCS-4", "UTF-8", buffer, SDL_strlen(buffer)+1);
-		size_t len = (widelen(ucs4)+1)*4;
+		len = (widelen(ucs4)+1)*4;
 		for ( i = 0; i < SDL_arraysize(formats); ++i ) {
 			if ( (SDL_strncasecmp(formats[i], "UTF16", 5) == 0 ||
 			      SDL_strncasecmp(formats[i], "UTF-16", 6) == 0 ||

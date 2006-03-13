@@ -67,6 +67,7 @@
 	SDL_JoystickClose
 	SDL_EnableUNICODE
 	SDL_EnableKeyRepeat
+	SDL_GetKeyRepeat
 	SDL_GetKeyState
 	SDL_GetModState
 	SDL_SetModState
@@ -199,6 +200,9 @@
 	SDL_strlwr
 	SDL_ltoa
 	SDL_ultoa
+	SDL_strcasecmp
+	SDL_strncasecmp
 	SDL_snprintf
 	SDL_vsnprintf
+	SDL_iconv_string
 	SDL_InitQuickDraw

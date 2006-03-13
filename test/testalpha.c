@@ -60,7 +60,7 @@ static void FillBackground(SDL_Surface *screen)
 }
 
 /* Create a "light" -- a yellowish surface with variable alpha */
-SDL_Surface *CreateLight(SDL_Surface *screen, int radius)
+SDL_Surface *CreateLight(int radius)
 {
 	Uint8  trans, alphamask;
 	int    range, addition;
@@ -401,7 +401,7 @@ int main(int argc, char *argv[])
 	FillBackground(screen);
 
 	/* Create the light */
-	light = CreateLight(screen, 82);
+	light = CreateLight(82);
 	if ( light == NULL ) {
 		quit(1);
 	}
