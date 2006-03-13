@@ -21,6 +21,7 @@ testfile
 testgamma
 testgl
 testhread
+testiconv
 testjoystick
 testkeys
 testlock
