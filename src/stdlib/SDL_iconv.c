@@ -52,6 +52,10 @@ size_t SDL_iconv(SDL_iconv_t cd,
 
 #else
 
+/* Lots of useful information on Unicode at:
+	http://www.cl.cam.ac.uk/~mgk25/unicode.html
+*/
+
 #define UNICODE_BOM	0xFEFF
 
 #define UNKNOWN_ASCII	'?'
