@@ -569,3 +569,9 @@ int SDL_EnableKeyRepeat(int delay, int interval)
 	return(0);
 }
 
+void SDL_GetKeyRepeat(int *delay, int *interval)
+{
+	*delay = SDL_KeyRepeat.delay;
+	*interval = SDL_KeyRepeat.interval;
+}
+

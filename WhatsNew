@@ -3,6 +3,10 @@ This is a list of API changes in SDL's version history.
 
 Version 1.0:
 
+1.2.10:
+	Added SDL_GetKeyRepeat()
+	Added SDL_config.h, with defaults for various build environments.
+
 1.2.7:
 	Added CPU feature detection functions to SDL_cpuinfo.h:
 		SDL_HasRDTSC(), SDL_HasMMX(), SDL_Has3DNow(), SDL_HasSSE(),

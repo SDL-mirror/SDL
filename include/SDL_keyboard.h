@@ -84,6 +84,7 @@ extern DECLSPEC int SDLCALL SDL_EnableUNICODE(int enable);
  * If 'delay' is set to 0, keyboard repeat is disabled.
  */
 extern DECLSPEC int SDLCALL SDL_EnableKeyRepeat(int delay, int interval);
+extern DECLSPEC void SDLCALL SDL_GetKeyRepeat(int *delay, int *interval);
 
 /*
  * Get a snapshot of the current state of the keyboard.
