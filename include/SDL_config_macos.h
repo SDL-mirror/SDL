@@ -86,6 +86,7 @@ typedef unsigned int	uintptr_t;
 #define SDL_TIMER_MACOS	1
 
 /* Enable various video drivers */
+#define SDL_VIDEO_DRIVER_DUMMY	1
 #define SDL_VIDEO_DRIVER_DRAWSPROCKET	1
 #define SDL_VIDEO_DRIVER_TOOLBOX	1
 

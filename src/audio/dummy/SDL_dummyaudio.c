@@ -24,11 +24,7 @@
 */
 #include "SDL_config.h"
 
-/* Output raw audio data to a file. */
-
-#if HAVE_STDIO_H
-#include <stdio.h>
-#endif
+/* Output audio to nowhere... */
 
 #include "SDL_rwops.h"
 #include "SDL_timer.h"
@@ -135,11 +131,6 @@ static void DUMMYAUD_CloseAudio(_THIS)
 
 static int DUMMYAUD_OpenAudio(_THIS, SDL_AudioSpec *spec)
 {
-#if HAVE_STDIO_H
-	fprintf(stderr, "\nWARNING: You are using the SDL dummy audio driver!"
-                    " No sound will be output!\n\n");
-#endif
-
 	/* Allocate mixing buffer */
 	this->hidden->mixlen = spec->size;
 	this->hidden->mixbuf = (Uint8 *) SDL_AllocAudioMem(this->hidden->mixlen);

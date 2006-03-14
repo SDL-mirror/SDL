@@ -18,7 +18,7 @@ SOURCES = \
 	src/thread/*.c \
 	src/timer/*.c \
 	src/video/*.c \
-	src/audio/disk/*.c \
+	src/audio/dummy/*.c \
 	src/video/dummy/*.c \
 	src/joystick/dummy/*.c \
 	src/cdrom/dummy/*.c \

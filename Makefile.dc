@@ -15,6 +15,7 @@ CFLAGS=$(KOS_CFLAGS) $(DEFS) -Iinclude
 SRCS = \
 	src/audio/dc/SDL_dcaudio.c \
 	src/audio/dc/aica.c \
+	src/audio/dummy/SDL_dummyaudio.c \
 	src/audio/SDL_audio.c \
 	src/audio/SDL_audiocvt.c \
 	src/audio/SDL_audiodev.c \
@@ -51,6 +52,9 @@ SRCS = \
 	src/timer/SDL_timer.c \
 	src/video/dc/SDL_dcevents.c \
 	src/video/dc/SDL_dcvideo.c \
+	src/video/dummy/SDL_nullevents.c \
+	src/video/dummy/SDL_nullmouse.c \
+	src/video/dummy/SDL_nullvideo.c \
 	src/video/SDL_blit.c \
 	src/video/SDL_blit_0.c \
 	src/video/SDL_blit_1.c \

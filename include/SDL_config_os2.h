@@ -127,6 +127,7 @@ typedef unsigned long long  uint64_t;
 #define SDL_TIMER_OS2	1
 
 /* Enable various video drivers */
+#define SDL_VIDEO_DRIVER_DUMMY	1
 #define SDL_VIDEO_DRIVER_OS2FS	1
 
 /* Enable OpenGL support */
