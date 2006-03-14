@@ -50,6 +50,8 @@
 
 /* Enable various audio drivers */
 #define SDL_AUDIO_DRIVER_AHI	1
+#define SDL_AUDIO_DRIVER_DUMMY	1
+#define SDL_AUDIO_DRIVER_DISK	1
 
 /* Enable various cdrom drivers */
 #define SDL_CDROM_DUMMY	1

@@ -115,6 +115,8 @@ typedef unsigned int uintptr_t;
 #define SDL_AUDIO_DRIVER_DSOUND	1
 #endif
 #define SDL_AUDIO_DRIVER_WAVEOUT	1
+#define SDL_AUDIO_DRIVER_DISK	1
+#define SDL_AUDIO_DRIVER_DUMMY	1
 
 /* Enable various cdrom drivers */
 #ifdef _WIN32_WCE

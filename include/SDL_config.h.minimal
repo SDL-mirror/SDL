@@ -52,8 +52,8 @@ typedef unsigned int uint32_t;
 typedef unsigned int size_t;
 typedef unsigned long uintptr_t;
 
-/* Enable the disk audio driver (src/audio/disk/\*.c) */
-#define SDL_AUDIO_DRIVER_DISK	1
+/* Enable the dummy audio driver (src/audio/dummy/\*.c) */
+#define SDL_AUDIO_DRIVER_DUMMY	1
 
 /* Enable the stub cdrom driver (src/cdrom/dummy/\*.c) */
 #define SDL_CDROM_DISABLED	1

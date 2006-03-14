@@ -159,6 +159,9 @@ extern AudioBootStrap MINTAUDIO_DMA8_bootstrap;
 #if SDL_AUDIO_DRIVER_DISK
 extern AudioBootStrap DISKAUD_bootstrap;
 #endif
+#if SDL_AUDIO_DRIVER_DUMMY
+extern AudioBootStrap DUMMYAUD_bootstrap;
+#endif
 #if SDL_AUDIO_DRIVER_DC
 extern AudioBootStrap DCAUD_bootstrap;
 #endif

@@ -79,6 +79,7 @@ typedef unsigned long uintptr_t;
 
 /* Enable various audio drivers */
 #define SDL_AUDIO_DRIVER_DC	1
+#define SDL_AUDIO_DRIVER_DUMMY	1
 
 /* Enable various cdrom drivers */
 #define SDL_CDROM_DC	1

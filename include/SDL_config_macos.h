@@ -67,6 +67,8 @@ typedef unsigned int	uintptr_t;
 
 /* Enable various audio drivers */
 #define SDL_AUDIO_DRIVER_SNDMGR	1
+#define SDL_AUDIO_DRIVER_DISK	1
+#define SDL_AUDIO_DRIVER_DUMMY	1
 
 /* Enable various cdrom drivers */
 #define SDL_CDROM_MACOS	1

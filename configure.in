@@ -533,6 +533,18 @@ AC_HELP_STRING([--enable-diskaudio], [support the disk writer audio driver [defa
     fi
 }
 
+dnl rcg03142006 See if the user wants the dummy audio driver...
+CheckDummyAudio()
+{
+    AC_ARG_ENABLE(dummyaudio,
+AC_HELP_STRING([--enable-dummyaudio], [support the dummy audio driver [default=yes]]),
+                  , enable_dummyaudio=yes)
+    if test x$enable_audio = xyes -a x$enable_dummyaudio = xyes; then
+        AC_DEFINE(SDL_AUDIO_DRIVER_DUMMY)
+        SOURCES="$SOURCES $srcdir/src/audio/dummy/*.c"
+    fi
+}
+
 dnl Set up the Atari Audio driver
 CheckAtariAudio()
 {
@@ -1915,6 +1927,7 @@ case "$target" in
         esac
         CheckDummyVideo
         CheckDiskAudio
+        CheckDummyAudio
         CheckDLOPEN
         CheckNASM
         CheckAltivec
@@ -2029,6 +2042,7 @@ case "$target" in
         ARCH=qnx
         CheckDummyVideo
         CheckDiskAudio
+        CheckDummyAudio
         # CheckNASM
         CheckDLOPEN
         CheckNAS
@@ -2069,6 +2083,7 @@ case "$target" in
         fi
         CheckDummyVideo
         CheckDiskAudio
+        CheckDummyAudio
         CheckWIN32
         CheckWIN32GL
         CheckDIRECTX
@@ -2131,6 +2146,7 @@ case "$target" in
         ac_default_prefix=/boot/develop/tools/gnupro
         CheckDummyVideo
         CheckDiskAudio
+        CheckDummyAudio
         CheckNASM
         CheckBWINDOW
         CheckBeGL
@@ -2183,6 +2199,7 @@ case "$target" in
         ARCH=macosx
         CheckDummyVideo
         CheckDiskAudio
+        CheckDummyAudio
         CheckDLOPEN
         CheckCOCOA
         CheckCARBON
@@ -2249,6 +2266,7 @@ case "$target" in
         ARCH=mint
         CheckDummyVideo
         CheckDiskAudio
+        CheckDummyAudio
         CheckAtariBiosEvent
         CheckAtariXbiosVideo
         CheckAtariGemVideo
