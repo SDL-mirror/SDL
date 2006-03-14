@@ -19,8 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 
-    This file hacked^H^H^H^H^H^Hwritten by Ryan C. Gordon
-        (icculus@icculus.org)
+    This file written by Ryan C. Gordon (icculus@icculus.org)
 */
 #include "SDL_config.h"
 
@@ -36,10 +35,6 @@
 
 /* The tag name used by DUMMY audio */
 #define DUMMYAUD_DRIVER_NAME         "dummy"
-
-/* environment variables and defaults. */
-#define DUMMYENVR_WRITEDELAY      "SDL_DUMMYAUDIODELAY"
-#define DUMMYDEFAULT_WRITEDELAY   150
 
 /* Audio driver functions */
 static int DUMMYAUD_OpenAudio(_THIS, SDL_AudioSpec *spec);
@@ -85,9 +80,6 @@ static SDL_AudioDevice *DUMMYAUD_CreateDevice(int devindex)
 	}
 	SDL_memset(this->hidden, 0, (sizeof *this->hidden));
 
-	envr = SDL_getenv(DUMMYENVR_WRITEDELAY);
-	this->hidden->write_delay = (envr) ? SDL_atoi(envr) : DUMMYDEFAULT_WRITEDELAY;
-
 	/* Set the function pointers */
 	this->OpenAudio = DUMMYAUD_OpenAudio;
 	this->WaitAudio = DUMMYAUD_WaitAudio;
@@ -108,12 +100,16 @@ AudioBootStrap DUMMYAUD_bootstrap = {
 /* This function waits until it is possible to write a full sound buffer */
 static void DUMMYAUD_WaitAudio(_THIS)
 {
-	SDL_Delay(this->hidden->write_delay);
+	/* Don't block on first calls to simulate initial fragment filling. */
+	if (this->hidden->initial_calls)
+		this->hidden->initial_calls--;
+	else
+		SDL_Delay(this->hidden->write_delay);
 }
 
 static void DUMMYAUD_PlayAudio(_THIS)
 {
-    /* no-op...this is a null driver. */
+	/* no-op...this is a null driver. */
 }
 
 static Uint8 *DUMMYAUD_GetAudioBuf(_THIS)
@@ -131,6 +127,8 @@ static void DUMMYAUD_CloseAudio(_THIS)
 
 static int DUMMYAUD_OpenAudio(_THIS, SDL_AudioSpec *spec)
 {
+	float bytes_per_sec = 0.0f;
+
 	/* Allocate mixing buffer */
 	this->hidden->mixlen = spec->size;
 	this->hidden->mixbuf = (Uint8 *) SDL_AllocAudioMem(this->hidden->mixlen);
@@ -138,6 +136,20 @@ static int DUMMYAUD_OpenAudio(_THIS, SDL_AudioSpec *spec)
 		return(-1);
 	}
 	SDL_memset(this->hidden->mixbuf, spec->silence, spec->size);
+
+	bytes_per_sec = (float) (((spec->format & 0xFF) / 8) *
+	                   spec->channels * spec->freq);
+
+	/*
+	 * We try to make this request more audio at the correct rate for
+	 *  a given audio spec, so timing stays fairly faithful.
+	 * Also, we have it not block at all for the first two calls, so
+	 *  it seems like we're filling two audio fragments right out of the
+	 *  gate, like other SDL drivers tend to do.
+	 */
+	this->hidden->initial_calls = 2;
+	this->hidden->write_delay =
+	               (Uint32) ((((float) spec->size) / bytes_per_sec) * 1000.0f);
 
 	/* We're ready to rock and roll. :-) */
 	return(0);
