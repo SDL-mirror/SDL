@@ -79,6 +79,8 @@ extern BOOL SDL_windowid;
 /* Variables and functions exported to other parts of the native video
    subsystem (SDL_sysevents.c)
 */
+extern void WIN_FlushMessageQueue();
+
 /* Called by windows message loop when system palette is available */
 extern void (*WIN_RealizePalette)(_THIS);
 

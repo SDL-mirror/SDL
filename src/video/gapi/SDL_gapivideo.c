@@ -731,6 +731,12 @@ SDL_Surface *GAPI_SetVideoMode(_THIS, SDL_Surface *current,
 	ShowWindow(SDL_Window, SW_SHOW);
 	SetForegroundWindow(SDL_Window);
 
+	/* JC 14 Mar 2006
+		Flush the message loop or this can cause big problems later
+		Especially if the user decides to use dialog boxes or assert()!
+	*/
+	WIN_FlushMessageQueue();
+
 	/* Open GAPI display */
 	if( !gapi->useVga && this->hidden->useGXOpenDisplay )
 		if( !gapi->gxFunc.GXOpenDisplay(SDL_Window, GX_FULLSCREEN) )
@@ -1103,17 +1109,6 @@ static void GAPI_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 		gapi->gxFunc.GXEndDraw();
 }
 
-static void FlushMessageQueue()
-{
-	MSG  msg;
-	while ( PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) ) {
-		if ( msg.message == WM_QUIT ) break;
-		TranslateMessage( &msg );
-		DispatchMessage( &msg );
-	}
-}
-
-
 /* Note:  If we are terminated, this could be called in the middle of
    another SDL video routine -- notably UpdateRects.
 */
@@ -1138,7 +1133,6 @@ void GAPI_VideoQuit(_THIS)
 
 		DIB_DestroyWindow(this);
 		SDL_UnregisterApp();
-		FlushMessageQueue();
 
 		SDL_Window = NULL;
 #if defined(_WIN32_WCE)

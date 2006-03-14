@@ -892,6 +892,12 @@ int DX5_CreateWindow(_THIS)
 		return(-1);
 	}
 
+	/* JC 14 Mar 2006
+		Flush the message loop or this can cause big problems later
+		Especially if the user decides to use dialog boxes or assert()!
+	*/
+	WIN_FlushMessageQueue();
+
 	/* Ready to roll */
 	return(0);
 }
@@ -908,4 +914,10 @@ void DX5_DestroyWindow(_THIS)
 		DestroyWindow(SDL_Window);
 	}
 	SDL_UnregisterApp();
+
+	/* JC 14 Mar 2006
+		Flush the message loop or this can cause big problems later
+		Especially if the user decides to use dialog boxes or assert()!
+	*/
+	WIN_FlushMessageQueue();
 }

@@ -169,6 +169,21 @@ static void GapiTransform(SDL_ScreenOrientation rotate, char hires, Sint16 *x, S
 
 #endif
 
+/* JC 14 Mar 2006
+   This is used all over the place, in the windib driver and in the dx5 driver
+   So we may as well stick it here instead of having multiple copies scattered
+   about
+*/
+void WIN_FlushMessageQueue()
+{
+	MSG  msg;
+	while ( PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) ) {
+		if ( msg.message == WM_QUIT ) break;
+		TranslateMessage( &msg );
+		DispatchMessage( &msg );
+	}
+}
+
 static void SDL_RestoreGameMode(void)
 {
 #ifdef _WIN32_WCE

@@ -48,12 +48,16 @@ static int WIN_GL_ResetWindow(_THIS)
 		style = GetWindowLong(SDL_Window, GWL_STYLE);
 		GetWindowRect(SDL_Window, &rect);
 		DestroyWindow(SDL_Window);
+		WIN_FlushMessageQueue();
+
 		SDL_Window = CreateWindow(SDL_Appname, SDL_Appname,
 		                          style,
 		                          rect.left, rect.top,
 		                          (rect.right-rect.left)+1,
 		                          (rect.top-rect.bottom)+1,
 		                          NULL, NULL, SDL_Instance, NULL);
+		WIN_FlushMessageQueue();
+
 		if ( SDL_Window ) {
 			this->SetCaption(this, this->wm_title, this->wm_icon);
 		} else {
@@ -118,6 +122,8 @@ static void Init_WGL_ARB_extensions(_THIS)
 	hwnd = CreateWindow(SDL_Appname, SDL_Appname, WS_POPUP | WS_DISABLED,
 	                    0, 0, 10, 10,
 	                    NULL, NULL, SDL_Instance, NULL);
+	WIN_FlushMessageQueue();
+
 	hdc = GetDC(hwnd);
 
 	pformat = ChoosePixelFormat(hdc, &GL_pfd);
@@ -158,6 +164,7 @@ static void Init_WGL_ARB_extensions(_THIS)
 	}
 	ReleaseDC(hwnd, hdc);
 	DestroyWindow(hwnd);
+	WIN_FlushMessageQueue();
 }
 
 #endif /* SDL_VIDEO_OPENGL */

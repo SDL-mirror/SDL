@@ -291,6 +291,7 @@ int DIB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	if ( DIB_CreateWindow(this) < 0 ) {
 		return(-1);
 	}
+
 #if !SDL_AUDIO_DISABLED
 	DX5_SoundFocus(SDL_Window);
 #endif
@@ -818,6 +819,12 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		video->flags |= SDL_OPENGL;
 	}
 
+	/* JC 14 Mar 2006
+		Flush the message loop or this can cause big problems later
+		Especially if the user decides to use dialog boxes or assert()!
+	*/
+	WIN_FlushMessageQueue();
+
 	/* We're live! */
 	return(video);
 }
@@ -1014,16 +1021,6 @@ int DIB_GetGammaRamp(_THIS, Uint16 *ramp)
 #endif /* !NO_GAMMA_SUPPORT */
 }
 
-static void FlushMessageQueue()
-{
-	MSG  msg;
-	while ( PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) ) {
-		if ( msg.message == WM_QUIT ) break;
-		TranslateMessage( &msg );
-		DispatchMessage( &msg );
-	}
-}
-
 void DIB_VideoQuit(_THIS)
 {
 	/* Destroy the window and everything associated with it */
@@ -1051,7 +1048,6 @@ void DIB_VideoQuit(_THIS)
 		}
 		DIB_QuitGamma(this);
 		DIB_DestroyWindow(this);
-		FlushMessageQueue();
 
 		SDL_Window = NULL;
 

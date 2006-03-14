@@ -438,6 +438,13 @@ int DIB_CreateWindow(_THIS)
 		}
 		ShowWindow(SDL_Window, SW_HIDE);
 	}
+
+	/* JC 14 Mar 2006
+		Flush the message loop or this can cause big problems later
+		Especially if the user decides to use dialog boxes or assert()!
+	*/
+	WIN_FlushMessageQueue();
+
 	return(0);
 }
 
@@ -449,4 +456,10 @@ void DIB_DestroyWindow(_THIS)
 		DestroyWindow(SDL_Window);
 	}
 	SDL_UnregisterApp();
+
+	/* JC 14 Mar 2006
+		Flush the message loop or this can cause big problems later
+		Especially if the user decides to use dialog boxes or assert()!
+	*/
+	WIN_FlushMessageQueue();
 }
