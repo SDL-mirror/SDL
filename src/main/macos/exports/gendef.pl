@@ -38,5 +38,6 @@ print "\tSDL_strcasecmp\n";
 print "\tSDL_strncasecmp\n";
 print "\tSDL_snprintf\n";
 print "\tSDL_vsnprintf\n";
+print "\tSDL_iconv\n";
 print "\tSDL_iconv_string\n";
 print "\tSDL_InitQuickDraw\n";

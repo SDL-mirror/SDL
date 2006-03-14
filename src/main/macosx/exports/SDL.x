@@ -188,6 +188,14 @@
 	_SDL_WM_ToggleFullScreen
 	_SDL_WM_GrabInput
 	_SDL_SoftStretch
-	SDL_iconv_string
+	_SDL_strrev
+	_SDL_strupr
+	_SDL_strlwr
+	_SDL_ltoa
+	_SDL_ultoa
+	_SDL_lltoa
+	_SDL_ulltoa
+	_SDL_iconv
+	_SDL_iconv_string
 	.objc_class_name_SDL_QuartzWindow
 	.objc_class_name_SDL_QuartzWindowDelegate

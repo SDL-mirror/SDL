@@ -3,8 +3,6 @@
 # Program to take a set of header files and generate DLL export definitions
 
 # Special exports to ignore for this platform
-$exclude{"SDL_putenv"} = 1;
-$exclude{"SDL_getenv"} = 1;
 
 while ( ($file = shift(@ARGV)) ) {
 	if ( ! defined(open(FILE, $file)) ) {
@@ -23,6 +21,14 @@ while ( ($file = shift(@ARGV)) ) {
 }
 
 # Special exports to include for this platform
-print "\tSDL_iconv_string\n";
+print "\t_SDL_strrev\n";
+print "\t_SDL_strupr\n";
+print "\t_SDL_strlwr\n";
+print "\t_SDL_ltoa\n";
+print "\t_SDL_ultoa\n";
+print "\t_SDL_lltoa\n";
+print "\t_SDL_ulltoa\n";
+print "\t_SDL_iconv\n";
+print "\t_SDL_iconv_string\n";
 print "\t.objc_class_name_SDL_QuartzWindow\n";
 print "\t.objc_class_name_SDL_QuartzWindowDelegate\n";

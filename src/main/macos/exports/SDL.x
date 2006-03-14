@@ -204,5 +204,6 @@
 	SDL_strncasecmp
 	SDL_snprintf
 	SDL_vsnprintf
+	SDL_iconv
 	SDL_iconv_string
 	SDL_InitQuickDraw
