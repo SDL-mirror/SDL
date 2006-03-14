@@ -21,8 +21,8 @@
 */
 #include "SDL_config.h"
 
-#ifndef _SDL_diskaudio_h
-#define _SDL_diskaudio_h
+#ifndef _SDL_dcaudio_h
+#define _SDL_dcaudio_h
 
 #include "../SDL_sysaudio.h"
 
@@ -38,4 +38,4 @@ struct SDL_PrivateAudioData {
 	int nextbuf;
 };
 
-#endif /* _SDL_diskaudio_h */
+#endif /* _SDL_dcaudio_h */
