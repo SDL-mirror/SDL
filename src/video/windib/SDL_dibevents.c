@@ -160,7 +160,7 @@ LRESULT DIB_HandleMessage(_THIS, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 			SDL_keysym keysym;
 
 #ifdef _WIN32_WCE
-			// Drop GAPI artefacts
+			// Drop GAPI artifacts
 			if (wParam == 0x84 || wParam == 0x5B)
 				return 0;
 
@@ -196,6 +196,11 @@ LRESULT DIB_HandleMessage(_THIS, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 					else
 						wParam = VK_LMENU;
 					break;
+			}
+			/* Windows only reports keyup for print screen */
+			if ( wParam == VK_SNAPSHOT && SDL_GetKeyState(NULL)[SDLK_PRINT] == SDL_RELEASED ) {
+				posted = SDL_PrivateKeyboard(SDL_PRESSED,
+					TranslateKey(wParam,HIWORD(lParam),&keysym,1));
 			}
 			posted = SDL_PrivateKeyboard(SDL_RELEASED,
 				TranslateKey(wParam,HIWORD(lParam),&keysym,0));
