@@ -173,18 +173,18 @@ struct SDL_VideoDevice {
 	/* Retrieves the address of a function in the gl library */
 	void* (*GL_GetProcAddress)(_THIS, const char *proc);
 
-        /* Get attribute information from the windowing system. */
-        int (*GL_GetAttribute)(_THIS, SDL_GLattr attrib, int* value);
+	/* Get attribute information from the windowing system. */
+	int (*GL_GetAttribute)(_THIS, SDL_GLattr attrib, int* value);
 
-        /* Make the context associated with this driver current */
-        int (*GL_MakeCurrent)(_THIS);
+	/* Make the context associated with this driver current */
+	int (*GL_MakeCurrent)(_THIS);
 
 	/* Swap the current buffers in double buffer mode. */
 	void (*GL_SwapBuffers)(_THIS);
 
   	/* OpenGL functions for SDL_OPENGLBLIT */
 #if SDL_VIDEO_OPENGL
-#ifndef WIN32
+#if !defined(__WIN32__)
 #define WINAPI
 #endif
 #define SDL_PROC(ret,func,params) ret (WINAPI *func) params;
