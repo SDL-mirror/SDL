@@ -216,8 +216,7 @@ static int SDL_SYS_CDGetTOC(SDL_CD *cdrom)
 				cdrom->track[i - 1].length = MSF_TO_FRAMES(
 					MCI_MSF_MINUTE(mci_status.dwReturn),
 					MCI_MSF_SECOND(mci_status.dwReturn),
-					MCI_MSF_FRAME(mci_status.dwReturn)) + 1; /* +1 to fix */
-											/* MCI last track length bug */
+					MCI_MSF_FRAME(mci_status.dwReturn));
 				/* compute lead-out offset */
 				cdrom->track[i].offset = cdrom->track[i - 1].offset +
 					cdrom->track[i - 1].length;
