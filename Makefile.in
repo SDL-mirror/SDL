@@ -61,7 +61,7 @@ depend:
 	@for src in $(SDLMAIN_SOURCES); do \
 	    obj=`echo $$src | sed -e 's|.*/||' -e 's|\.[^\.]*$$|.o|'`; \
 	    echo "$(objects)/$$obj: $$src" >>$(depend); \
-	    echo "	\$$(CC) \$$(CFLAGS) -c $$src -o \$$@" >>$(depend); \
+	    echo "	\$$(CC) \$$(CFLAGS) \$$(EXTRA_CFLAGS) -c $$src -o \$$@" >>$(depend); \
 	done
 
 include $(depend)
