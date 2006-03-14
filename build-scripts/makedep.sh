@@ -47,19 +47,19 @@ do  echo "Generating dependencies for $src"
     case $ext in
         c) cat >>${output}.new <<__EOF__
 
-	\$(LIBTOOL) --mode=compile \$(CC) \$(CFLAGS) -c $src  -o \$@
+	\$(LIBTOOL) --mode=compile \$(CC) \$(CFLAGS) \$(EXTRA_CFLAGS) -c $src  -o \$@
 
 __EOF__
         ;;
         cc) cat >>${output}.new <<__EOF__
 
-	\$(LIBTOOL) --mode=compile \$(CC) \$(CFLAGS) -c $src  -o \$@
+	\$(LIBTOOL) --mode=compile \$(CC) \$(CFLAGS) \$(EXTRA_CFLAGS) -c $src  -o \$@
 
 __EOF__
         ;;
         m) cat >>${output}.new <<__EOF__
 
-	\$(LIBTOOL) --mode=compile \$(CC) \$(CFLAGS) -c $src  -o \$@
+	\$(LIBTOOL) --mode=compile \$(CC) \$(CFLAGS) \$(EXTRA_CFLAGS) -c $src  -o \$@
 
 __EOF__
         ;;
@@ -71,7 +71,7 @@ __EOF__
         ;;
         S) cat >>${output}.new <<__EOF__
 
-	\$(LIBTOOL)  --mode=compile \$(CC) -c $src  -o \$@
+	\$(LIBTOOL)  --mode=compile \$(CC) \$(CFLAGS) \$(EXTRA_CFLAGS) -c $src  -o \$@
 
 __EOF__
         ;;
