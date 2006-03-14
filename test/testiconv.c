@@ -3,18 +3,6 @@
 
 #include "SDL.h"
 
-static SDL_bool testutf1632(char *data)
-{
-	Uint32 *p = (Uint32 *)data;
-	while(*p) {
-		if ( *p > 0x10FFFF ) {
-			return SDL_FALSE;
-		}
-		++p;
-	}
-	return SDL_TRUE;
-}
-
 static size_t widelen(char *data)
 {
 	size_t len = 0;
@@ -63,13 +51,6 @@ int main(int argc, char *argv[])
 		ucs4 = SDL_iconv_string("UCS-4", "UTF-8", buffer, SDL_strlen(buffer)+1);
 		len = (widelen(ucs4)+1)*4;
 		for ( i = 0; i < SDL_arraysize(formats); ++i ) {
-			if ( (SDL_strncasecmp(formats[i], "UTF16", 5) == 0 ||
-			      SDL_strncasecmp(formats[i], "UTF-16", 6) == 0 ||
-			      SDL_strncasecmp(formats[i], "UTF32", 5) == 0 ||
-			      SDL_strncasecmp(formats[i], "UTF-32", 6) == 0) &&
-			      !testutf1632(ucs4) ) {
-				continue;
-			}
 			test[0] = SDL_iconv_string(formats[i], "UCS-4", ucs4, len);
 			test[1] = SDL_iconv_string("UCS-4", formats[i], test[0], len);
 			if ( SDL_memcmp(test[1], ucs4, len) != 0 ) {
