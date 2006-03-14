@@ -30,8 +30,8 @@
 
 
 /* These are static for our mouse handling code */
-static Sint16 SDL_MouseX = -1;
-static Sint16 SDL_MouseY = -1;
+static Sint16 SDL_MouseX = 0;
+static Sint16 SDL_MouseY = 0;
 static Sint16 SDL_DeltaX = 0;
 static Sint16 SDL_DeltaY = 0;
 static Uint8  SDL_ButtonState = 0;
@@ -41,8 +41,8 @@ static Uint8  SDL_ButtonState = 0;
 int SDL_MouseInit(void)
 {
 	/* The mouse is at (0,0) */
-	SDL_MouseX = -1;
-	SDL_MouseY = -1;
+	SDL_MouseX = 0;
+	SDL_MouseY = 0;
 	SDL_DeltaX = 0;
 	SDL_DeltaY = 0;
 	SDL_ButtonState = 0;
@@ -68,18 +68,10 @@ void SDL_ResetMouse(void)
 Uint8 SDL_GetMouseState (int *x, int *y)
 {
 	if ( x ) {
-		if ( SDL_MouseX < 0 ) {
-			*x = 0;
-		} else {
-			*x = SDL_MouseX;
-		}
+		*x = SDL_MouseX;
 	}
 	if ( y ) {
-		if ( SDL_MouseY < 0 ) {
-			*y = 0;
-		} else {
-			*y = SDL_MouseY;
-		}
+		*y = SDL_MouseY;
 	}
 	return(SDL_ButtonState);
 }
@@ -157,7 +149,7 @@ int SDL_PrivateMouseMotion(Uint8 buttonstate, int relative, Sint16 x, Sint16 y)
 	   This prevents lots of extraneous large delta relative motion when
 	   the screen is windowed mode and the mouse is outside the window.
 	*/
-	if ( ! relative && SDL_MouseX >= 0 && SDL_MouseY >= 0 ) {
+	if ( ! relative ) {
 		Xrel = X-SDL_MouseX;
 		Yrel = Y-SDL_MouseY;
 	}
