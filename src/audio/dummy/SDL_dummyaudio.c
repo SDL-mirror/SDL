@@ -62,7 +62,6 @@ static void DUMMYAUD_DeleteDevice(SDL_AudioDevice *device)
 static SDL_AudioDevice *DUMMYAUD_CreateDevice(int devindex)
 {
 	SDL_AudioDevice *this;
-	const char *envr;
 
 	/* Initialize all variables that we clean on shutdown */
 	this = (SDL_AudioDevice *)SDL_malloc(sizeof(SDL_AudioDevice));
