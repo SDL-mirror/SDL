@@ -2194,6 +2194,10 @@ static void BlitNtoNKey(SDL_BlitInfo *info)
 	int srcbpp = srcfmt->BytesPerPixel;
 	int dstbpp = dstfmt->BytesPerPixel;
 	unsigned alpha = dstfmt->Amask ? srcfmt->alpha : 0;
+	Uint32 rgbmask = ~srcfmt->Amask;
+
+	/* Set up some basic variables */
+	ckey &= rgbmask;
 
 	while ( height-- ) {
 		DUFFS_LOOP(
@@ -2203,7 +2207,7 @@ static void BlitNtoNKey(SDL_BlitInfo *info)
 			unsigned sG;
 			unsigned sB;
 			RETRIEVE_RGB_PIXEL(src, srcbpp, Pixel);
-			if ( Pixel != ckey ) {
+			if ( (Pixel & rgbmask) != ckey ) {
 			        RGB_FROM_PIXEL(Pixel, srcfmt, sR, sG, sB);
 				ASSEMBLE_RGBA(dst, dstbpp, dstfmt,
 					      sR, sG, sB, alpha);
