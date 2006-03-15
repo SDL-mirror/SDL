@@ -2433,7 +2433,7 @@ SDL_loblit SDL_CalculateBlitN(SDL_Surface *surface, int blit_index)
 		}
 	} else {
 		/* Now the meat, choose the blitter we want */
-		int a_need = 0;
+		int a_need = NO_ALPHA;
 		if(dstfmt->Amask)
 		    a_need = srcfmt->Amask ? COPY_ALPHA : SET_ALPHA;
 		table = normal_blit[srcfmt->BytesPerPixel-1];
