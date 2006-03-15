@@ -24,14 +24,23 @@
 #include "SDL_video.h"
 #include "SDL_blit.h"
 
-#if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__)) && SDL_ASSEMBLY_ROUTINES
+#if SDL_ASSEMBLY_ROUTINES
+#if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
 #define MMX_ASMBLIT 1
+#define GCC_ASMBLIT 1
+#elif defined(_MSC_VER) && (_MSC_VER >= 1200) && defined(_M_IX86)
+#define MMX_ASMBLIT 1
+#define MSVC_ASMBLIT 1
 #endif
+#endif /* SDL_ASSEMBLY_ROUTINES */
 
 /* Function to check the CPU flags */
 #include "SDL_cpuinfo.h"
-#if MMX_ASMBLIT
+#if GCC_ASMBLIT
 #include "mmx.h"
+#elif MSVC_ASMBLIT
+#include <mmintrin.h>
+#include <mm3dnow.h>
 #endif
 
 /* Functions to perform alpha blended blitting */
@@ -198,7 +207,7 @@ static void BlitNto1SurfaceAlphaKey(SDL_BlitInfo *info)
 	}
 }
 
-#if MMX_ASMBLIT
+#if GCC_ASMBLIT
 /* fast RGB888->(A)RGB888 blending with surface alpha=128 special case */
 static void BlitRGBtoRGBSurfaceAlpha128MMX(SDL_BlitInfo *info)
 {
@@ -208,43 +217,44 @@ static void BlitRGBtoRGBSurfaceAlpha128MMX(SDL_BlitInfo *info)
 	int srcskip = info->s_skip >> 2;
 	Uint32 *dstp = (Uint32 *)info->d_pixels;
 	int dstskip = info->d_skip >> 2;
-        Uint8 load[8];
-  
-        *(Uint64 *)load = 0x00fefefe00fefefeULL;/* alpha128 mask */
-        movq_m2r(*load, mm4); /* alpha128 mask -> mm4 */
-        *(Uint64 *)load = 0x0001010100010101ULL;/* !alpha128 mask */
-        movq_m2r(*load, mm3); /* !alpha128 mask -> mm3 */
-        *(Uint64 *)load = 0xFF000000FF000000ULL;/* dst alpha mask */
-        movq_m2r(*load, mm7); /* dst alpha mask -> mm7 */
+	Uint32 dalpha = info->dst->Amask;
+	Uint8 load[8];
+
+	*(Uint64 *)load = 0x00fefefe00fefefeULL;/* alpha128 mask */
+	movq_m2r(*load, mm4); /* alpha128 mask -> mm4 */
+	*(Uint64 *)load = 0x0001010100010101ULL;/* !alpha128 mask */
+	movq_m2r(*load, mm3); /* !alpha128 mask -> mm3 */
+	movd_m2r(dalpha, mm7); /* dst alpha mask */
+	punpckldq_r2r(mm7, mm7); /* dst alpha mask | dst alpha mask -> mm7 */
 	while(height--) {
-            DUFFS_LOOP_DOUBLE2(
-            {
-		    Uint32 s = *srcp++;
-		    Uint32 d = *dstp;
-		    *dstp++ = ((((s & 0x00fefefe) + (d & 0x00fefefe)) >> 1)
-			       + (s & d & 0x00010101)) | 0xff000000;
-            },{
-	            movq_m2r((*dstp), mm2);/* 2 x dst -> mm2(ARGBARGB) */
-	            movq_r2r(mm2, mm6); /* 2 x dst -> mm6(ARGBARGB) */
-	      
-	            movq_m2r((*srcp), mm1);/* 2 x src -> mm1(ARGBARGB) */
-	            movq_r2r(mm1, mm5); /* 2 x src -> mm5(ARGBARGB) */
-		
-	            pand_r2r(mm4, mm6); /* dst & mask -> mm6 */
-	            pand_r2r(mm4, mm5); /* src & mask -> mm5 */
-	            paddd_r2r(mm6, mm5); /* mm6 + mm5 -> mm5 */
-	            psrld_i2r(1, mm5); /* mm5 >> 1 -> mm5 */
-	
-	            pand_r2r(mm1, mm2); /* src & dst -> mm2 */
-	            pand_r2r(mm3, mm2); /* mm2 & !mask -> mm2 */
-	            paddd_r2r(mm5, mm2); /* mm5 + mm2 -> mm2 */
-	            por_r2r(mm7, mm2); /* mm7(full alpha) | mm2 -> mm2 */
-	            movq_r2m(mm2, (*dstp));/* mm2 -> 2 x dst pixels */
-	            dstp += 2;
-	            srcp += 2;
-            }, width);
-	    srcp += srcskip;
-	    dstp += dstskip;
+		DUFFS_LOOP_DOUBLE2(
+		{
+			Uint32 s = *srcp++;
+			Uint32 d = *dstp;
+			*dstp++ = ((((s & 0x00fefefe) + (d & 0x00fefefe)) >> 1)
+				   + (s & d & 0x00010101)) | dalpha;
+		},{
+			movq_m2r((*dstp), mm2);/* 2 x dst -> mm2(ARGBARGB) */
+			movq_r2r(mm2, mm6); /* 2 x dst -> mm6(ARGBARGB) */
+
+			movq_m2r((*srcp), mm1);/* 2 x src -> mm1(ARGBARGB) */
+			movq_r2r(mm1, mm5); /* 2 x src -> mm5(ARGBARGB) */
+
+			pand_r2r(mm4, mm6); /* dst & mask -> mm6 */
+			pand_r2r(mm4, mm5); /* src & mask -> mm5 */
+			paddd_r2r(mm6, mm5); /* mm6 + mm5 -> mm5 */
+			pand_r2r(mm1, mm2); /* src & dst -> mm2 */
+			psrld_i2r(1, mm5); /* mm5 >> 1 -> mm5 */
+			pand_r2r(mm3, mm2); /* mm2 & !mask -> mm2 */
+			paddd_r2r(mm5, mm2); /* mm5 + mm2 -> mm2 */
+			
+			por_r2r(mm7, mm2); /* mm7(full alpha) | mm2 -> mm2 */
+			movq_r2m(mm2, (*dstp));/* mm2 -> 2 x dst pixels */
+			dstp += 2;
+			srcp += 2;
+		}, width);
+		srcp += srcskip;
+		dstp += dstskip;
 	}
 	emms();
 }
@@ -252,8 +262,11 @@ static void BlitRGBtoRGBSurfaceAlpha128MMX(SDL_BlitInfo *info)
 /* fast RGB888->(A)RGB888 blending with surface alpha */
 static void BlitRGBtoRGBSurfaceAlphaMMX(SDL_BlitInfo *info)
 {
+	SDL_PixelFormat* df = info->dst;
 	unsigned alpha = info->src->alpha;
-	if(alpha == 128) {
+
+	if (alpha == 128 && (df->Rmask | df->Gmask | df->Bmask) == 0x00FFFFFF) {
+			/* only call a128 version when R,G,B occupy lower bits */
 		BlitRGBtoRGBSurfaceAlpha128MMX(info);
 	} else {
 		int width = info->d_width;
@@ -262,75 +275,68 @@ static void BlitRGBtoRGBSurfaceAlphaMMX(SDL_BlitInfo *info)
 		int srcskip = info->s_skip >> 2;
 		Uint32 *dstp = (Uint32 *)info->d_pixels;
 		int dstskip = info->d_skip >> 2;
-                Uint8 load[8] = {alpha, alpha, alpha, alpha,
-    					alpha, alpha, alpha, alpha};
-					
-                movq_m2r(*load, mm4); /* alpha -> mm4 */
-		*(Uint64 *)load = 0x00FF00FF00FF00FFULL;
-                movq_m2r(*load, mm3); /* mask -> mm3 */
-		pand_r2r(mm3, mm4); /* mm4 & mask -> 0A0A0A0A -> mm4 */
-		*(Uint64 *)load = 0xFF000000FF000000ULL;/* dst alpha mask */
-		movq_m2r(*load, mm7); /* dst alpha mask -> mm7 */
+
+		pxor_r2r(mm5, mm5); /* 0 -> mm5 */
+		/* form the alpha mult */
+		movd_m2r(alpha, mm4); /* 0000000A -> mm4 */
+		punpcklwd_r2r(mm4, mm4); /* 00000A0A -> mm4 */
+		punpckldq_r2r(mm4, mm4); /* 0A0A0A0A -> mm4 */
+		alpha = (0xff << df->Rshift) | (0xff << df->Gshift) | (0xff << df->Bshift);
+		movd_m2r(alpha, mm0); /* 00000FFF -> mm0 */
+		punpcklbw_r2r(mm0, mm0); /* 00FFFFFF -> mm0 */
+		pand_r2r(mm0, mm4); /* 0A0A0A0A -> mm4, minus 1 chan */
+			/* at this point mm4 can be 000A0A0A or 0A0A0A00 or another combo */
+		movd_m2r(df->Amask, mm7); /* dst alpha mask */
+		punpckldq_r2r(mm7, mm7); /* dst alpha mask | dst alpha mask -> mm7 */
 		
 		while(height--) {
 			DUFFS_LOOP_DOUBLE2({
 				/* One Pixel Blend */
-	                        movd_m2r((*srcp), mm1);/* src(ARGB) -> mm1 (0000ARGB)*/
-                                punpcklbw_r2r(mm1, mm1); /* AARRGGBB -> mm1 */
-                                pand_r2r(mm3, mm1); /* 0A0R0G0B -> mm1 */
-			  
-	                        movd_m2r((*dstp), mm2);/* dst(ARGB) -> mm2 (0000ARGB)*/
-			        movq_r2r(mm2, mm6);/* dst(ARGB) -> mm6 (0000ARGB)*/
-                                punpcklbw_r2r(mm2, mm2); /* AARRGGBB -> mm2 */
-                                pand_r2r(mm3, mm2); /* 0A0R0G0B -> mm2 */
-			  
-                                psubw_r2r(mm2, mm1);/* src - dst -> mm1 */
-	                        pmullw_r2r(mm4, mm1); /* mm1 * alpha -> mm1 */
-	                        psrlw_i2r(8, mm1); /* mm1 >> 8 -> mm1 */
-	                        paddw_r2r(mm1, mm2); /* mm1 + mm2(dst) -> mm2 */
-	                        pand_r2r(mm3, mm2); /* 0A0R0G0B -> mm2 */
-	                        packuswb_r2r(mm2, mm2);  /* ARGBARGB -> mm2 */
-	                        por_r2r(mm7, mm2); /* mm7(full alpha) | mm2 -> mm2 */
-			        movd_r2m(mm2, *dstp);/* mm2 -> Pixel */
+				movd_m2r((*srcp), mm1);/* src(ARGB) -> mm1 (0000ARGB)*/
+				movd_m2r((*dstp), mm2);/* dst(ARGB) -> mm2 (0000ARGB)*/
+				punpcklbw_r2r(mm5, mm1); /* 0A0R0G0B -> mm1(src) */
+				punpcklbw_r2r(mm5, mm2); /* 0A0R0G0B -> mm2(dst) */
+
+				psubw_r2r(mm2, mm1);/* src - dst -> mm1 */
+				pmullw_r2r(mm4, mm1); /* mm1 * alpha -> mm1 */
+				psrlw_i2r(8, mm1); /* mm1 >> 8 -> mm1 */
+				paddb_r2r(mm1, mm2); /* mm1 + mm2(dst) -> mm2 */
+
+				packuswb_r2r(mm5, mm2);  /* ARGBARGB -> mm2 */
+				por_r2r(mm7, mm2); /* mm7(full alpha) | mm2 -> mm2 */
+				movd_r2m(mm2, *dstp);/* mm2 -> pixel */
 				++srcp;
 				++dstp;
 			},{
-			        /* Two Pixels Blend */
+				/* Two Pixels Blend */
 				movq_m2r((*srcp), mm0);/* 2 x src -> mm0(ARGBARGB)*/
-			        movq_r2r(mm0, mm1); /* 2 x src -> mm1(ARGBARGB) */
-                                punpcklbw_r2r(mm0, mm0); /* low - AARRGGBB -> mm0 */
-			        pand_r2r(mm3, mm0); /* 0A0R0G0B -> mm0(src1) */
-			        punpckhbw_r2r(mm1, mm1); /* high - AARRGGBB -> mm1 */
-	                        pand_r2r(mm3, mm1); /* 0A0R0G0B -> mm1(src2) */
-	
-	                        movq_m2r((*dstp), mm2);/* 2 x dst -> mm2(ARGBARGB) */
-	                        movq_r2r(mm2, mm5); /* 2 x dst -> mm5(ARGBARGB) */
-			        movq_r2r(mm2, mm6); /* 2 x dst -> mm6(ARGBARGB) */
-                                punpcklbw_r2r(mm2, mm2); /* low - AARRGGBB -> mm2 */
-	                        punpckhbw_r2r(mm6, mm6); /* high - AARRGGBB -> mm6 */
-                                pand_r2r(mm3, mm2); /* 0A0R0G0B -> mm2(dst1) */
-	                  
-                                psubw_r2r(mm2, mm0);/* src1 - dst1 -> mm0 */
-	                        pmullw_r2r(mm4, mm0); /* mm0 * alpha -> mm0 */
-			        pand_r2r(mm3, mm6); /* 0A0R0G0B -> mm6(dst2) */
-			        psrlw_i2r(8, mm0); /* mm0 >> 8 -> mm1 */
-			        psubw_r2r(mm6, mm1);/* src2 - dst2 -> mm1 */
-	                        pmullw_r2r(mm4, mm1); /* mm1 * alpha -> mm1 */
-				paddw_r2r(mm0, mm2); /* mm0 + mm2(dst1) -> mm2 */
-	                        psrlw_i2r(8, mm1); /* mm1 >> 8 -> mm0 */
-				pand_r2r(mm3, mm2); /* 0A0R0G0B -> mm2 */
-	                        paddw_r2r(mm1, mm6); /* mm1 + mm6(dst2) -> mm6 */
-	                        pand_r2r(mm3, mm6); /* 0A0R0G0B -> mm6 */
-	                        packuswb_r2r(mm2, mm2);  /* ARGBARGB -> mm2 */
-	                        packuswb_r2r(mm6, mm6);  /* ARGBARGB -> mm6 */
-	                        psrlq_i2r(32, mm2); /* mm2 >> 32 -> mm2 */
-	                        psllq_i2r(32, mm6); /* mm6 << 32 -> mm6 */
-	                        por_r2r(mm6, mm2); /* mm6 | mm2 -> mm2 */				
-				por_r2r(mm7, mm2); /* mm7(full alpha) | mm2 -> mm2 */
-                                movq_r2m(mm2, *dstp);/* mm2 -> 2 x Pixel */
-				srcp += 2;
-				dstp += 2;
-			}, width);
+				movq_m2r((*dstp), mm2);/* 2 x dst -> mm2(ARGBARGB) */
+				movq_r2r(mm0, mm1); /* 2 x src -> mm1(ARGBARGB) */
+				movq_r2r(mm2, mm6); /* 2 x dst -> mm6(ARGBARGB) */
+
+				punpcklbw_r2r(mm5, mm0); /* low - 0A0R0G0B -> mm0(src1) */
+				punpckhbw_r2r(mm5, mm1); /* high - 0A0R0G0B -> mm1(src2) */
+				punpcklbw_r2r(mm5, mm2); /* low - 0A0R0G0B -> mm2(dst1) */
+				punpckhbw_r2r(mm5, mm6); /* high - 0A0R0G0B -> mm6(dst2) */
+
+				psubw_r2r(mm2, mm0);/* src1 - dst1 -> mm0 */
+				pmullw_r2r(mm4, mm0); /* mm0 * alpha -> mm0 */
+				psrlw_i2r(8, mm0); /* mm0 >> 8 -> mm1 */
+				paddb_r2r(mm0, mm2); /* mm0 + mm2(dst1) -> mm2 */
+
+				psubw_r2r(mm6, mm1);/* src2 - dst2 -> mm1 */
+				pmullw_r2r(mm4, mm1); /* mm1 * alpha -> mm1 */
+				psrlw_i2r(8, mm1); /* mm1 >> 8 -> mm1 */
+				paddb_r2r(mm1, mm6); /* mm1 + mm6(dst2) -> mm6 */
+
+				packuswb_r2r(mm6, mm2);  /* ARGBARGB -> mm2 */
+				por_r2r(mm7, mm2); /* mm7(dst alpha) | mm2 -> mm2 */
+				
+				movq_r2m(mm2, *dstp);/* mm2 -> 2 x pixel */
+
+  				srcp += 2;
+  				dstp += 2;
+  			}, width);
 			srcp += srcskip;
 			dstp += dstskip;
 		}
@@ -347,62 +353,65 @@ static void BlitRGBtoRGBPixelAlphaMMX(SDL_BlitInfo *info)
 	int srcskip = info->s_skip >> 2;
 	Uint32 *dstp = (Uint32 *)info->d_pixels;
 	int dstskip = info->d_skip >> 2;
-        Uint32 alpha = 0;
-        Uint8 load[8];
-	                
-	*(Uint64 *)load = 0x00FF00FF00FF00FFULL;
-        movq_m2r(*load, mm3); /* mask -> mm2 */
-	*(Uint64 *)load = 0x00FF000000000000ULL;
-        movq_m2r(*load, mm7); /* dst alpha mask -> mm2 */
-        *(Uint64 *)load = 0x00FFFFFF00FFFFFFULL;
-        movq_m2r(*load, mm0); /* alpha 255 mask -> mm0 */
-        *(Uint64 *)load = 0xFF000000FF000000ULL;
-        movq_m2r(*load, mm6); /* alpha 255 !mask -> mm6 */
+	SDL_PixelFormat* sf = info->src;
+	Uint32 amask = sf->Amask;
+
+	pxor_r2r(mm6, mm6); /* 0 -> mm6 */
+	/* form multiplication mask */
+	movd_m2r(sf->Amask, mm7); /* 0000F000 -> mm7 */
+	punpcklbw_r2r(mm7, mm7); /* FF000000 -> mm7 */
+	pcmpeqb_r2r(mm0, mm0); /* FFFFFFFF -> mm0 */
+	movq_r2r(mm0, mm3); /* FFFFFFFF -> mm3 (for later) */
+	pxor_r2r(mm0, mm7); /* 00FFFFFF -> mm7 (mult mask) */
+	/* form channel masks */
+	movq_r2r(mm7, mm0); /* 00FFFFFF -> mm0 */
+	packsswb_r2r(mm6, mm0); /* 00000FFF -> mm0 (channel mask) */
+	packsswb_r2r(mm6, mm3); /* 0000FFFF -> mm3 */
+	pxor_r2r(mm0, mm3); /* 0000F000 -> mm3 (~channel mask) */
+	/* get alpha channel shift */
+	movd_m2r(sf->Ashift, mm5); /* Ashift -> mm5 */
+
 	while(height--) {
 	    DUFFS_LOOP4({
-	        alpha = *srcp;
-	        alpha >>= 24;
+		Uint32 alpha = *srcp & amask;
 		/* FIXME: Here we special-case opaque alpha since the
-		   compositioning used (>>8 instead of /255) doesn't handle
-		   it correctly. Also special-case alpha=0 for speed?
-		   Benchmark this! */
-		if(alpha) {   
-		  if(alpha == SDL_ALPHA_OPAQUE) {
-		    movd_m2r((*srcp), mm1);/* src(ARGB) -> mm1 (0000ARGB)*/
-		    movd_m2r((*dstp), mm2);/* dst(ARGB) -> mm2 (0000ARGB)*/
-		    pand_r2r(mm0, mm1);
-		    pand_r2r(mm6, mm2);
-		    por_r2r(mm1, mm2);
-		    movd_r2m(mm2, (*dstp));
-		  } else {
-		    movd_m2r((*srcp), mm1);/* src(ARGB) -> mm1 (0000ARGB)*/
-                    punpcklbw_r2r(mm1, mm1); /* AARRGGBB -> mm1 */
-                    pand_r2r(mm3, mm1); /* 0A0R0G0B -> mm1 */
-			  
-	            movd_m2r((*dstp), mm2);/* dst(ARGB) -> mm2 (0000ARGB)*/
-                    punpcklbw_r2r(mm2, mm2); /* AARRGGBB -> mm2 */
-                    pand_r2r(mm3, mm2); /* 0A0R0G0B -> mm2 */
-		
-		    movq_r2r(mm2, mm5);/* mm2(0A0R0G0B) -> mm5 */
-		    pand_r2r(mm7, mm5); /* mm5 & dst alpha mask -> mm5(0A000000) */
-		    psrlq_i2r(24, mm5); /* mm5 >> 24 -> mm5 (0000A000)*/
-		    
-		    movq_r2r(mm1, mm4);/* mm1(0A0R0G0B) -> mm4 */
-		    psrlq_i2r(48, mm4); /* mm4 >> 48 -> mm4(0000000A) */
-		    punpcklwd_r2r(mm4, mm4); /* 00000A0A -> mm4 */
-                    punpcklwd_r2r(mm4, mm4); /* 0A0A0A0A -> mm4 */
-		                        		    
-                    /* blend */		    
-                    psubw_r2r(mm2, mm1);/* src - dst -> mm1 */
-	            pmullw_r2r(mm4, mm1); /* mm1 * alpha -> mm1 */
-	            psrlw_i2r(8, mm1); /* mm1 >> 8 -> mm1 */
-	            paddw_r2r(mm1, mm2); /* mm1 + mm2(dst) -> mm2 */
-	            pand_r2r(mm3, mm2); /* 0A0R0G0B -> mm2 */
-		    packuswb_r2r(mm2, mm2);  /* ARGBARGB -> mm2 */
-		    pand_r2r(mm0, mm2); /* 0RGB0RGB -> mm2 */
-		    por_r2r(mm5, mm2); /* dst alpha | mm2 -> mm2 */
-		    movd_r2m(mm2, *dstp);/* mm2 -> dst */
-		  }
+			compositioning used (>>8 instead of /255) doesn't handle
+			it correctly. Also special-case alpha=0 for speed?
+			Benchmark this! */
+		if(alpha == 0) {
+			/* do nothing */
+		} else if(alpha == amask) {
+			/* opaque alpha -- copy RGB, keep dst alpha */
+			/* using MMX here to free up regular registers for other things */
+			movd_m2r((*srcp), mm1);/* src(ARGB) -> mm1 (0000ARGB)*/
+			movd_m2r((*dstp), mm2);/* dst(ARGB) -> mm2 (0000ARGB)*/
+			pand_r2r(mm0, mm1); /* src & chanmask -> mm1 */
+			pand_r2r(mm3, mm2); /* dst & ~chanmask -> mm2 */
+			por_r2r(mm1, mm2); /* src | dst -> mm2 */
+			movd_r2m(mm2, (*dstp)); /* mm2 -> dst */
+		} else {
+			movd_m2r((*srcp), mm1);/* src(ARGB) -> mm1 (0000ARGB)*/
+			punpcklbw_r2r(mm6, mm1); /* 0A0R0G0B -> mm1 */
+
+			movd_m2r((*dstp), mm2);/* dst(ARGB) -> mm2 (0000ARGB)*/
+			punpcklbw_r2r(mm6, mm2); /* 0A0R0G0B -> mm2 */
+
+			__asm__ __volatile__ (
+				"movd %0, %%mm4"
+				: : "r" (alpha) ); /* 0000A000 -> mm4 */
+			psrld_r2r(mm5, mm4); /* mm4 >> mm5 -> mm4 (0000000A) */
+			punpcklwd_r2r(mm4, mm4); /* 00000A0A -> mm4 */
+			punpcklwd_r2r(mm4, mm4); /* 0A0A0A0A -> mm4 */
+			pand_r2r(mm7, mm4); /* 000A0A0A -> mm4, preserve dst alpha on add */
+
+			/* blend */		    
+			psubw_r2r(mm2, mm1);/* src - dst -> mm1 */
+			pmullw_r2r(mm4, mm1); /* mm1 * alpha -> mm1 */
+			psrlw_i2r(8, mm1); /* mm1 >> 8 -> mm1(000R0G0B) */
+			paddb_r2r(mm1, mm2); /* mm1 + mm2(dst) -> mm2 */
+			
+			packuswb_r2r(mm6, mm2);  /* 0000ARGB -> mm2 */
+			movd_r2m(mm2, *dstp);/* mm2 -> dst */
 		}
 		++srcp;
 		++dstp;
@@ -412,7 +421,220 @@ static void BlitRGBtoRGBPixelAlphaMMX(SDL_BlitInfo *info)
 	}
 	emms();
 }
-#endif
+/* End GCC_ASMBLIT */
+
+#elif MSVC_ASMBLIT
+/* fast RGB888->(A)RGB888 blending with surface alpha=128 special case */
+static void BlitRGBtoRGBSurfaceAlpha128MMX(SDL_BlitInfo *info)
+{
+	int width = info->d_width;
+	int height = info->d_height;
+	Uint32 *srcp = (Uint32 *)info->s_pixels;
+	int srcskip = info->s_skip >> 2;
+	Uint32 *dstp = (Uint32 *)info->d_pixels;
+	int dstskip = info->d_skip >> 2;
+	Uint32 dalpha = info->dst->Amask;
+
+	__m64 src1, src2, dst1, dst2, lmask, hmask, dsta;
+	
+	hmask = _mm_set_pi32(0x00fefefe, 0x00fefefe); /* alpha128 mask -> hmask */
+	lmask = _mm_set_pi32(0x00010101, 0x00010101); /* !alpha128 mask -> lmask */
+	dsta = _mm_set_pi32(dalpha, dalpha); /* dst alpha mask -> dsta */
+
+	while (height--) {
+		int n = width;
+		if ( n & 1 ) {
+			Uint32 s = *srcp++;
+			Uint32 d = *dstp;
+			*dstp++ = ((((s & 0x00fefefe) + (d & 0x00fefefe)) >> 1)
+				   + (s & d & 0x00010101)) | dalpha;
+			n--;
+		}
+		
+		for (n >>= 1; n > 0; --n) {
+			dst1 = *(__m64*)dstp; /* 2 x dst -> dst1(ARGBARGB) */
+			dst2 = dst1;   /* 2 x dst -> dst2(ARGBARGB) */
+
+			src1 = *(__m64*)srcp; /* 2 x src -> src1(ARGBARGB) */
+			src2 = src1; /* 2 x src -> src2(ARGBARGB) */
+
+			dst2 = _mm_and_si64(dst2, hmask); /* dst & mask -> dst2 */
+			src2 = _mm_and_si64(src2, hmask); /* src & mask -> src2 */
+			src2 = _mm_add_pi32(src2, dst2); /* dst2 + src2 -> src2 */
+			src2 = _mm_srli_pi32(src2, 1); /* src2 >> 1 -> src2 */
+
+			dst1 = _mm_and_si64(dst1, src1); /* src & dst -> dst1 */
+			dst1 = _mm_and_si64(dst1, lmask); /* dst1 & !mask -> dst1 */
+			dst1 = _mm_add_pi32(dst1, src2); /* src2 + dst1 -> dst1 */
+			dst1 = _mm_or_si64(dst1, dsta); /* dsta(full alpha) | dst1 -> dst1 */
+			
+			*(__m64*)dstp = dst1; /* dst1 -> 2 x dst pixels */
+			dstp += 2;
+			srcp += 2;
+		}
+		
+		srcp += srcskip;
+		dstp += dstskip;
+	}
+	_mm_empty();
+}
+
+/* fast RGB888->(A)RGB888 blending with surface alpha */
+static void BlitRGBtoRGBSurfaceAlphaMMX(SDL_BlitInfo *info)
+{
+	SDL_PixelFormat* df = info->dst;
+	Uint32 chanmask = df->Rmask | df->Gmask | df->Bmask;
+	unsigned alpha = info->src->alpha;
+
+	if (alpha == 128 && (df->Rmask | df->Gmask | df->Bmask) == 0x00FFFFFF) {
+			/* only call a128 version when R,G,B occupy lower bits */
+		BlitRGBtoRGBSurfaceAlpha128MMX(info);
+	} else {
+		int width = info->d_width;
+		int height = info->d_height;
+		Uint32 *srcp = (Uint32 *)info->s_pixels;
+		int srcskip = info->s_skip >> 2;
+		Uint32 *dstp = (Uint32 *)info->d_pixels;
+		int dstskip = info->d_skip >> 2;
+		Uint32 dalpha = df->Amask;
+		Uint32 amult;
+
+		__m64 src1, src2, dst1, dst2, mm_alpha, mm_zero, dsta;
+		
+		mm_zero = _mm_setzero_si64(); /* 0 -> mm_zero */
+		/* form the alpha mult */
+		amult = alpha | (alpha << 8);
+		amult = amult | (amult << 16);
+		chanmask = (0xff << df->Rshift) | (0xff << df->Gshift) | (0xff << df->Bshift);
+		mm_alpha = _mm_set_pi32(0, amult & chanmask); /* 0000AAAA -> mm_alpha, minus 1 chan */
+		mm_alpha = _mm_unpacklo_pi8(mm_alpha, mm_zero); /* 0A0A0A0A -> mm_alpha, minus 1 chan */
+			/* at this point mm_alpha can be 000A0A0A or 0A0A0A00 or another combo */
+		dsta = _mm_set_pi32(dalpha, dalpha); /* dst alpha mask -> dsta */
+		
+		while (height--) {
+			int n = width;
+			if (n & 1) {
+				/* One Pixel Blend */
+				src2 = _mm_cvtsi32_si64(*srcp); /* src(ARGB) -> src2 (0000ARGB)*/
+				src2 = _mm_unpacklo_pi8(src2, mm_zero); /* 0A0R0G0B -> src2 */
+
+				dst1 = _mm_cvtsi32_si64(*dstp); /* dst(ARGB) -> dst1 (0000ARGB)*/
+				dst1 = _mm_unpacklo_pi8(dst1, mm_zero); /* 0A0R0G0B -> dst1 */
+
+				src2 = _mm_sub_pi16(src2, dst1); /* src2 - dst2 -> src2 */
+				src2 = _mm_mullo_pi16(src2, mm_alpha); /* src2 * alpha -> src2 */
+				src2 = _mm_srli_pi16(src2, 8); /* src2 >> 8 -> src2 */
+				dst1 = _mm_add_pi8(src2, dst1); /* src2 + dst1 -> dst1 */
+				
+				dst1 = _mm_packs_pu16(dst1, mm_zero);  /* 0000ARGB -> dst1 */
+				dst1 = _mm_or_si64(dst1, dsta); /* dsta | dst1 -> dst1 */
+				*dstp = _mm_cvtsi64_si32(dst1); /* dst1 -> pixel */
+
+				++srcp;
+				++dstp;
+				
+				n--;
+			}
+
+			for (n >>= 1; n > 0; --n) {
+				/* Two Pixels Blend */
+				src1 = *(__m64*)srcp; /* 2 x src -> src1(ARGBARGB)*/
+				src2 = src1; /* 2 x src -> src2(ARGBARGB) */
+				src1 = _mm_unpacklo_pi8(src1, mm_zero); /* low - 0A0R0G0B -> src1 */
+				src2 = _mm_unpackhi_pi8(src2, mm_zero); /* high - 0A0R0G0B -> src2 */
+
+				dst1 = *(__m64*)dstp;/* 2 x dst -> dst1(ARGBARGB) */
+				dst2 = dst1; /* 2 x dst -> dst2(ARGBARGB) */
+				dst1 = _mm_unpacklo_pi8(dst1, mm_zero); /* low - 0A0R0G0B -> dst1 */
+				dst2 = _mm_unpackhi_pi8(dst2, mm_zero); /* high - 0A0R0G0B -> dst2 */
+
+				src1 = _mm_sub_pi16(src1, dst1);/* src1 - dst1 -> src1 */
+				src1 = _mm_mullo_pi16(src1, mm_alpha); /* src1 * alpha -> src1 */
+				src1 = _mm_srli_pi16(src1, 8); /* src1 >> 8 -> src1 */
+				dst1 = _mm_add_pi8(src1, dst1); /* src1 + dst1(dst1) -> dst1 */
+
+				src2 = _mm_sub_pi16(src2, dst2);/* src2 - dst2 -> src2 */
+				src2 = _mm_mullo_pi16(src2, mm_alpha); /* src2 * alpha -> src2 */
+				src2 = _mm_srli_pi16(src2, 8); /* src2 >> 8 -> src2 */
+				dst2 = _mm_add_pi8(src2, dst2); /* src2 + dst2(dst2) -> dst2 */
+				
+				dst1 = _mm_packs_pu16(dst1, dst2); /* 0A0R0G0B(res1), 0A0R0G0B(res2) -> dst1(ARGBARGB) */
+				dst1 = _mm_or_si64(dst1, dsta); /* dsta | dst1 -> dst1 */
+
+				*(__m64*)dstp = dst1; /* dst1 -> 2 x pixel */
+
+				srcp += 2;
+				dstp += 2;
+			}
+			srcp += srcskip;
+			dstp += dstskip;
+		}
+		_mm_empty();
+	}
+}
+
+/* fast ARGB888->(A)RGB888 blending with pixel alpha */
+static void BlitRGBtoRGBPixelAlphaMMX(SDL_BlitInfo *info)
+{
+	int width = info->d_width;
+	int height = info->d_height;
+	Uint32 *srcp = (Uint32 *)info->s_pixels;
+	int srcskip = info->s_skip >> 2;
+	Uint32 *dstp = (Uint32 *)info->d_pixels;
+	int dstskip = info->d_skip >> 2;
+	SDL_PixelFormat* sf = info->src;
+	Uint32 chanmask = sf->Rmask | sf->Gmask | sf->Bmask;
+	Uint32 amask = sf->Amask;
+	Uint32 ashift = sf->Ashift;
+	Uint64 multmask;
+
+	__m64 src1, dst1, mm_alpha, mm_zero, dmask;
+
+	mm_zero = _mm_setzero_si64(); /* 0 -> mm_zero */
+	multmask = ~(0xFFFFi64 << (ashift * 2));
+	dmask = *(__m64*) &multmask; /* dst alpha mask -> dmask */
+
+	while(height--) {
+		DUFFS_LOOP4({
+		Uint32 alpha = *srcp & amask;
+		if (alpha == 0) {
+			/* do nothing */
+		} else if (alpha == amask) {
+			/* opaque alpha -- copy RGB, keep dst alpha */
+			*dstp = (*srcp & chanmask) | (*dstp & ~chanmask);
+		} else {
+			src1 = _mm_cvtsi32_si64(*srcp); /* src(ARGB) -> src1 (0000ARGB)*/
+			src1 = _mm_unpacklo_pi8(src1, mm_zero); /* 0A0R0G0B -> src1 */
+
+			dst1 = _mm_cvtsi32_si64(*dstp); /* dst(ARGB) -> dst1 (0000ARGB)*/
+			dst1 = _mm_unpacklo_pi8(dst1, mm_zero); /* 0A0R0G0B -> dst1 */
+
+			mm_alpha = _mm_cvtsi32_si64(alpha); /* alpha -> mm_alpha (0000000A) */
+			mm_alpha = _mm_srli_si64(mm_alpha, ashift); /* mm_alpha >> ashift -> mm_alpha(0000000A) */
+			mm_alpha = _mm_unpacklo_pi16(mm_alpha, mm_alpha); /* 00000A0A -> mm_alpha */
+			mm_alpha = _mm_unpacklo_pi32(mm_alpha, mm_alpha); /* 0A0A0A0A -> mm_alpha */
+			mm_alpha = _mm_and_si64(mm_alpha, dmask); /* 000A0A0A -> mm_alpha, preserve dst alpha on add */
+
+			/* blend */		    
+			src1 = _mm_sub_pi16(src1, dst1);/* src1 - dst1 -> src1 */
+			src1 = _mm_mullo_pi16(src1, mm_alpha); /* (src1 - dst1) * alpha -> src1 */
+			src1 = _mm_srli_pi16(src1, 8); /* src1 >> 8 -> src1(000R0G0B) */
+			dst1 = _mm_add_pi8(src1, dst1); /* src1 + dst1 -> dst1(0A0R0G0B) */
+			dst1 = _mm_packs_pu16(dst1, mm_zero);  /* 0000ARGB -> dst1 */
+			
+			*dstp = _mm_cvtsi64_si32(dst1); /* dst1 -> pixel */
+		}
+		++srcp;
+		++dstp;
+	    }, width);
+	    srcp += srcskip;
+	    dstp += dstskip;
+	}
+	_mm_empty();
+}
+/* End MSVC_ASMBLIT */
+
+#endif /* GCC_ASMBLIT, MSVC_ASMBLIT */
 
 #if SDL_ALTIVEC_BLITTERS
 #if HAVE_ALTIVEC_H
@@ -1326,7 +1548,7 @@ static void BlitRGBtoRGBPixelAlpha(SDL_BlitInfo *info)
 	}
 }
 
-#if MMX_ASMBLIT
+#if GCC_ASMBLIT
 /* fast (as in MMX with prefetch) ARGB888->(A)RGB888 blending with pixel alpha */
 inline static void BlitRGBtoRGBPixelAlphaMMX3DNOW(SDL_BlitInfo *info)
 {
@@ -1336,38 +1558,61 @@ inline static void BlitRGBtoRGBPixelAlphaMMX3DNOW(SDL_BlitInfo *info)
 	int srcskip = info->s_skip >> 2;
 	Uint32 *dstp = (Uint32 *)info->d_pixels;
 	int dstskip = info->d_skip >> 2;
-
-	Uint32 s;
-	Uint32 alpha;
+	SDL_PixelFormat* sf = info->src;
+	Uint32 amask = sf->Amask;
 
 	__asm__ (
 	/* make mm6 all zeros. */
 	"pxor       %%mm6, %%mm6\n"
 	
 	/* Make a mask to preserve the alpha. */
-	"pcmpeqb   %%mm7, %%mm7\n\t"            /* mm7(s) = FF FF FF FF | FF FF FF FF */
-	"psrlq     $16, %%mm7\n\t"		    /* mm7(s) = 00 00 FF FF | FF FF FF FF */
+	"movd      %0, %%mm7\n\t"           /* 0000F000 -> mm7 */
+	"punpcklbw %%mm7, %%mm7\n\t"        /* FF000000 -> mm7 */
+	"pcmpeqb   %%mm4, %%mm4\n\t"        /* FFFFFFFF -> mm4 */
+	"movq      %%mm4, %%mm3\n\t"        /* FFFFFFFF -> mm3 (for later) */
+	"pxor      %%mm4, %%mm7\n\t"        /* 00FFFFFF -> mm7 (mult mask) */
 
-		: );
+	/* form channel masks */
+	"movq      %%mm7, %%mm4\n\t"        /* 00FFFFFF -> mm4 */
+	"packsswb  %%mm6, %%mm4\n\t"        /* 00000FFF -> mm4 (channel mask) */
+	"packsswb  %%mm6, %%mm3\n\t"        /* 0000FFFF -> mm3 */
+	"pxor      %%mm4, %%mm3\n\t"        /* 0000F000 -> mm3 (~channel mask) */
+	
+	/* get alpha channel shift */
+	"movd      %1, %%mm5\n\t" /* Ashift -> mm5 */
+
+	  : /* nothing */ : "m" (sf->Amask), "m" (sf->Ashift) );
 
 	while(height--) {
 
 	    DUFFS_LOOP4({
+		Uint32 alpha;
 
 		__asm__ (
 		"prefetch 64(%0)\n"
 		"prefetch 64(%1)\n"
 			: : "r" (srcp), "r" (dstp) );
 
-		s = *srcp;
-		alpha = s >> 24;
+		alpha = *srcp & amask;
 		/* FIXME: Here we special-case opaque alpha since the
 		   compositioning used (>>8 instead of /255) doesn't handle
 		   it correctly. Also special-case alpha=0 for speed?
 		   Benchmark this! */
-		
-		if(alpha == SDL_ALPHA_OPAQUE) {
-		    *dstp = (s & 0x00ffffff) | (*dstp & 0xff000000);
+		if(alpha == 0) {
+		    /* do nothing */
+		}
+		else if(alpha == amask) {
+			/* opaque alpha -- copy RGB, keep dst alpha */
+		    /* using MMX here to free up regular registers for other things */
+			    __asm__ (
+		    "movd      (%0),  %%mm0\n\t" /* src(ARGB) -> mm0 (0000ARGB)*/
+		    "movd      (%1),  %%mm1\n\t" /* dst(ARGB) -> mm1 (0000ARGB)*/
+		    "pand      %%mm4, %%mm0\n\t" /* src & chanmask -> mm0 */
+		    "pand      %%mm3, %%mm1\n\t" /* dst & ~chanmask -> mm2 */
+		    "por       %%mm0, %%mm1\n\t" /* src | dst -> mm1 */
+		    "movd      %%mm1, (%1) \n\t" /* mm1 -> dst */
+
+		     : : "r" (srcp), "r" (dstp) );
 		} 
 
 		else {
@@ -1383,10 +1628,11 @@ inline static void BlitRGBtoRGBPixelAlphaMMX3DNOW(SDL_BlitInfo *info)
 		    /*"psrlw     $8, %%mm2\n" */
 		    
 		    /* else: */
-		    "movq      %%mm0, %%mm2\n"
-		    "psrld     $24, %%mm2\n"                /* mm2 = 0 0 0 0 | 0  0  0  As */
+		    "movd       %2,    %%mm2\n"
+		    "psrld      %%mm5, %%mm2\n"                /* mm2 = 0 0 0 0 | 0  0  0  As */
 		    "punpcklwd	%%mm2, %%mm2\n"	            /* mm2 = 0 0 0 0 |  0 As  0  As */
 		    "punpckldq	%%mm2, %%mm2\n"             /* mm2 = 0 As 0 As |  0 As  0  As */
+		    "pand       %%mm7, %%mm2\n"              /* to preserve dest alpha */
 
 		    /* move the colors into words. */
 		    "punpcklbw %%mm6, %%mm0\n"		    /* mm0 = 0 As 0 Rs | 0 Gs 0 Bs */
@@ -1396,16 +1642,15 @@ inline static void BlitRGBtoRGBPixelAlphaMMX3DNOW(SDL_BlitInfo *info)
 		    "psubw    %%mm1, %%mm0\n"		    /* mm0 = As-Ad Rs-Rd | Gs-Gd  Bs-Bd */
 
 		    /* A * (src-dst) */
-		    "pmullw    %%mm2, %%mm0\n"		    /* mm0 = As*As-d As*Rs-d | As*Gs-d  As*Bs-d */
-		    "pand      %%mm7, %%mm0\n"              /* to preserve dest alpha */
-		    "psrlw     $8,    %%mm0\n"		    /* mm0 = Ac>>8 Rc>>8 | Gc>>8  Bc>>8 */
-		    "paddb     %%mm1, %%mm0\n"		    /* mm0 = Ac+Ad Rc+Rd | Gc+Gd  Bc+Bd */
+		    "pmullw    %%mm2, %%mm0\n"		    /* mm0 = 0*As-d As*Rs-d | As*Gs-d  As*Bs-d */
+		    "psrlw     $8,    %%mm0\n"		    /* mm0 = 0>>8 Rc>>8 | Gc>>8  Bc>>8 */
+		    "paddb     %%mm1, %%mm0\n"		    /* mm0 = 0+Ad Rc+Rd | Gc+Gd  Bc+Bd */
 
 		    "packuswb  %%mm0, %%mm0\n"              /* mm0 =             | Ac Rc Gc Bc */
 		    
 		    "movd      %%mm0, (%1)\n"               /* result in mm0 */
 
-		     : : "r" (srcp), "r" (dstp) );
+		     : : "r" (srcp), "r" (dstp), "r" (alpha) );
 
 		}
 		++srcp;
@@ -1419,7 +1664,76 @@ inline static void BlitRGBtoRGBPixelAlphaMMX3DNOW(SDL_BlitInfo *info)
 	"emms\n"
 		:   );
 }
-#endif
+/* End GCC_ASMBLIT*/
+
+#elif MSVC_ASMBLIT
+/* fast (as in MMX with prefetch) ARGB888->(A)RGB888 blending with pixel alpha */
+static void BlitRGBtoRGBPixelAlphaMMX3DNOW(SDL_BlitInfo *info)
+{
+	int width = info->d_width;
+	int height = info->d_height;
+	Uint32 *srcp = (Uint32 *)info->s_pixels;
+	int srcskip = info->s_skip >> 2;
+	Uint32 *dstp = (Uint32 *)info->d_pixels;
+	int dstskip = info->d_skip >> 2;
+	SDL_PixelFormat* sf = info->src;
+	Uint32 chanmask = sf->Rmask | sf->Gmask | sf->Bmask;
+	Uint32 amask = sf->Amask;
+	Uint32 ashift = sf->Ashift;
+	Uint64 multmask;
+	
+	__m64 src1, dst1, mm_alpha, mm_zero, dmask;
+
+	mm_zero = _mm_setzero_si64(); /* 0 -> mm_zero */
+	multmask = ~(0xFFFFi64 << (ashift * 2));
+	dmask = *(__m64*) &multmask; /* dst alpha mask -> dmask */
+
+	while(height--) {
+	    DUFFS_LOOP4({
+		Uint32 alpha;
+
+		_m_prefetch(srcp + 16);
+		_m_prefetch(dstp + 16);
+
+		alpha = *srcp & amask;
+		if (alpha == 0) {
+			/* do nothing */
+		} else if (alpha == amask) {
+			/* copy RGB, keep dst alpha */
+			*dstp = (*srcp & chanmask) | (*dstp & ~chanmask);
+		} else {
+			src1 = _mm_cvtsi32_si64(*srcp); /* src(ARGB) -> src1 (0000ARGB)*/
+			src1 = _mm_unpacklo_pi8(src1, mm_zero); /* 0A0R0G0B -> src1 */
+
+			dst1 = _mm_cvtsi32_si64(*dstp); /* dst(ARGB) -> dst1 (0000ARGB)*/
+			dst1 = _mm_unpacklo_pi8(dst1, mm_zero); /* 0A0R0G0B -> dst1 */
+
+			mm_alpha = _mm_cvtsi32_si64(alpha); /* alpha -> mm_alpha (0000000A) */
+			mm_alpha = _mm_srli_si64(mm_alpha, ashift); /* mm_alpha >> ashift -> mm_alpha(0000000A) */
+			mm_alpha = _mm_unpacklo_pi16(mm_alpha, mm_alpha); /* 00000A0A -> mm_alpha */
+			mm_alpha = _mm_unpacklo_pi32(mm_alpha, mm_alpha); /* 0A0A0A0A -> mm_alpha */
+			mm_alpha = _mm_and_si64(mm_alpha, dmask); /* 000A0A0A -> mm_alpha, preserve dst alpha on add */
+
+			/* blend */		    
+			src1 = _mm_sub_pi16(src1, dst1);/* src - dst -> src1 */
+			src1 = _mm_mullo_pi16(src1, mm_alpha); /* (src - dst) * alpha -> src1 */
+			src1 = _mm_srli_pi16(src1, 8); /* src1 >> 8 -> src1(000R0G0B) */
+			dst1 = _mm_add_pi8(src1, dst1); /* src1 + dst1(dst) -> dst1(0A0R0G0B) */
+			dst1 = _mm_packs_pu16(dst1, mm_zero);  /* 0000ARGB -> dst1 */
+			
+			*dstp = _mm_cvtsi64_si32(dst1); /* dst1 -> pixel */
+		}
+		++srcp;
+		++dstp;
+	    }, width);
+	    srcp += srcskip;
+	    dstp += dstskip;
+	}
+	_mm_empty();
+}
+/* End MSVC_ASMBLIT */
+
+#endif /* GCC_ASMBLIT, MSVC_ASMBLIT */
 
 /* 16bpp special case for per-surface alpha=50%: blend 2 pixels in parallel */
 
@@ -1530,7 +1844,7 @@ static void Blit16to16SurfaceAlpha128(SDL_BlitInfo *info, Uint16 mask)
 	}
 }
 
-#if MMX_ASMBLIT
+#if GCC_ASMBLIT
 /* fast RGB565->RGB565 blending with surface alpha */
 static void Blit565to565SurfaceAlphaMMX(SDL_BlitInfo *info)
 {
@@ -1544,28 +1858,29 @@ static void Blit565to565SurfaceAlphaMMX(SDL_BlitInfo *info)
 		int srcskip = info->s_skip >> 1;
 		Uint16 *dstp = (Uint16 *)info->d_pixels;
 		int dstskip = info->d_skip >> 1;
-	        Uint32 s, d;
-	        Uint8 load[8];
+		Uint32 s, d;
+		Uint8 load[8];
 	  
 		alpha &= ~(1+2+4);		/* cut alpha to get the exact same behaviour */
-	        *(Uint64 *)load = alpha;
+		*(Uint64 *)load = alpha;
 		alpha >>= 3;		/* downscale alpha to 5 bits */
 
-                movq_m2r(*load, mm0); /* alpha(0000000A) -> mm0 */
-                punpcklwd_r2r(mm0, mm0); /* 00000A0A -> mm0 */
-                punpcklwd_r2r(mm0, mm0); /* 0A0A0A0A -> mm0 */
+		movq_m2r(*load, mm0); /* alpha(0000000A) -> mm0 */
+		punpcklwd_r2r(mm0, mm0); /* 00000A0A -> mm0 */
+		punpcklwd_r2r(mm0, mm0); /* 0A0A0A0A -> mm0 */
+		/* position alpha to allow for mullo and mulhi on diff channels
+		   to reduce the number of operations */
+		psllq_i2r(3, mm0);
 	  
- 	        /* Setup the 565 color channel masks */
-	        *(Uint64 *)load = 0xF800F800F800F800ULL;
-		movq_m2r(*load, mm1); /* MASKRED -> mm1 */
+		/* Setup the 565 color channel masks */
 		*(Uint64 *)load = 0x07E007E007E007E0ULL;
 		movq_m2r(*load, mm4); /* MASKGREEN -> mm4 */
 		*(Uint64 *)load = 0x001F001F001F001FULL;
 		movq_m2r(*load, mm7); /* MASKBLUE -> mm7 */
 		while(height--) {
-                        DUFFS_LOOP_QUATRO2(
-                        {
-	                        s = *srcp++;
+			DUFFS_LOOP_QUATRO2(
+			{
+				s = *srcp++;
 				d = *dstp;
 				/*
 				 * shift out the middle component (green) to
@@ -1577,8 +1892,8 @@ static void Blit565to565SurfaceAlphaMMX(SDL_BlitInfo *info)
 				d += (s - d) * alpha >> 5;
 				d &= 0x07e0f81f;
 				*dstp++ = d | d >> 16;
-                        },{
-	                        s = *srcp++;
+			},{
+				s = *srcp++;
 				d = *dstp;
 				/*
 				 * shift out the middle component (green) to
@@ -1590,7 +1905,7 @@ static void Blit565to565SurfaceAlphaMMX(SDL_BlitInfo *info)
 				d += (s - d) * alpha >> 5;
 				d &= 0x07e0f81f;
 				*dstp++ = d | d >> 16;
-			        s = *srcp++;
+				s = *srcp++;
 				d = *dstp;
 				/*
 				 * shift out the middle component (green) to
@@ -1602,78 +1917,66 @@ static void Blit565to565SurfaceAlphaMMX(SDL_BlitInfo *info)
 				d += (s - d) * alpha >> 5;
 				d &= 0x07e0f81f;
 				*dstp++ = d | d >> 16;
-                        },{
-	                        movq_m2r((*dstp), mm3);/* 4 dst pixels -> mm3 */
-	                        movq_m2r((*srcp), mm2);/* 4 src pixels -> mm2 */
-			  
-	                        /* RED */
-	                        movq_r2r(mm2, mm5); /* src -> mm5 */
-	                        pand_r2r(mm1 , mm5); /* src & MASKRED -> mm5 */
-	                        psrlq_i2r(11, mm5); /* mm5 >> 11 -> mm5 [000r 000r 000r 000r] */
-	
-	                        movq_r2r(mm3, mm6); /* dst -> mm6 */
-	                        pand_r2r(mm1 , mm6); /* dst & MASKRED -> mm6 */
-	                        psrlq_i2r(11, mm6); /* mm6 >> 11 -> mm6 [000r 000r 000r 000r] */
-	
-	                        /* blend */
-	                        psubw_r2r(mm6, mm5);/* src - dst -> mm5 */
-	                        pmullw_r2r(mm0, mm5); /* mm5 * alpha -> mm5 */
-	                        psrlw_i2r(8, mm5); /* mm5 >> 8 -> mm5 */
-	                        paddw_r2r(mm5, mm6); /* mm5 + mm6(dst) -> mm6 */
-	                        psllq_i2r(11, mm6); /* mm6 << 11 -> mm6 */
-	                        pand_r2r(mm1, mm6); /* mm6 & MASKRED -> mm6 */
-	
-	                        movq_r2r(mm4, mm5); /* MASKGREEN -> mm5 */
-	                        por_r2r(mm7, mm5);  /* MASKBLUE | mm5 -> mm5 */
-	                        pand_r2r(mm5, mm3); /* mm3 & mm5(!MASKRED) -> mm3 */
-	                        por_r2r(mm6, mm3); /* save new reds in dsts */
-	
-	                        /* green */
-	                        movq_r2r(mm2, mm5); /* src -> mm5 */
-	                        pand_r2r(mm4 , mm5); /* src & MASKGREEN -> mm5 */
-	                        psrlq_i2r(5, mm5); /* mm5 >> 5 -> mm5 [000g 000g 000g 000g] */
-	
-	                        movq_r2r(mm3, mm6); /* dst -> mm6 */
-	                        pand_r2r(mm4 , mm6); /* dst & MASKGREEN -> mm6 */
-	                        psrlq_i2r(5, mm6); /* mm6 >> 5 -> mm6 [000g 000g 000g 000g] */
-	
-	                        /* blend */
-	                        psubw_r2r(mm6, mm5);/* src - dst -> mm5 */
-	                        pmullw_r2r(mm0, mm5); /* mm5 * alpha -> mm5 */
-	                        psrlw_i2r(8, mm5); /* mm5 >> 8 -> mm5 */
-	                        paddw_r2r(mm5, mm6); /* mm5 + mm6(dst) -> mm6 */
-	                        psllq_i2r(5, mm6); /* mm6 << 5 -> mm6 */
-	                        pand_r2r(mm4, mm6); /* mm6 & MASKGREEN -> mm6 */
-	
-	                        movq_r2r(mm1, mm5); /* MASKRED -> mm5 */
-	                        por_r2r(mm7, mm5);  /* MASKBLUE | mm5 -> mm5 */
-	                        pand_r2r(mm5, mm3); /* mm3 & mm5(!MASKGREEN) -> mm3 */
-	                        por_r2r(mm6, mm3); /* save new greens in dsts */
-	
-	                        /* blue */
-	                        movq_r2r(mm2, mm5); /* src -> mm5 */
-	                        pand_r2r(mm7 , mm5); /* src & MASKRED -> mm5[000b 000b 000b 000b] */
-		
-	                        movq_r2r(mm3, mm6); /* dst -> mm6 */
-	                        pand_r2r(mm7 , mm6); /* dst & MASKBLUE -> mm6[000b 000b 000b 000b] */
-	
-	                        /* blend */
-	                        psubw_r2r(mm6, mm5);/* src - dst -> mm5 */
-	                        pmullw_r2r(mm0, mm5); /* mm5 * alpha -> mm5 */
-	                        psrlw_i2r(8, mm5); /* mm5 >> 8 -> mm5 */
-	                        paddw_r2r(mm5, mm6); /* mm5 + mm6(dst) -> mm6 */
-	                        pand_r2r(mm7, mm6); /* mm6 & MASKBLUE -> mm6 */
-	
-	                        movq_r2r(mm1, mm5); /* MASKRED -> mm5 */
-	                        por_r2r(mm4, mm5);  /* MASKGREEN | mm5 -> mm5 */
-	                        pand_r2r(mm5, mm3); /* mm3 & mm5(!MASKBLUE) -> mm3 */
-	                        por_r2r(mm6, mm3); /* save new blues in dsts */
-	
-	                        movq_r2m(mm3, *dstp);/* mm3 -> 4 dst pixels */
-	
-	                        srcp += 4;
-	                        dstp += 4;
-                        }, width);			
+			},{
+				movq_m2r((*srcp), mm2);/* 4 src pixels -> mm2 */
+				movq_m2r((*dstp), mm3);/* 4 dst pixels -> mm3 */
+
+				/* red -- does not need a mask since the right shift clears
+				   the uninteresting bits */
+				movq_r2r(mm2, mm5); /* src -> mm5 */
+				movq_r2r(mm3, mm6); /* dst -> mm6 */
+				psrlw_i2r(11, mm5); /* mm5 >> 11 -> mm5 [000r 000r 000r 000r] */
+				psrlw_i2r(11, mm6); /* mm6 >> 11 -> mm6 [000r 000r 000r 000r] */
+
+				/* blend */
+				psubw_r2r(mm6, mm5);/* src - dst -> mm5 */
+				pmullw_r2r(mm0, mm5); /* mm5 * alpha -> mm5 */
+				/* alpha used is actually 11 bits
+				   11 + 5 = 16 bits, so the sign bits are lost */
+				psrlw_i2r(11, mm5); /* mm5 >> 11 -> mm5 */
+				paddw_r2r(mm5, mm6); /* mm5 + mm6(dst) -> mm6 */
+				psllw_i2r(11, mm6); /* mm6 << 11 -> mm6 */
+
+				movq_r2r(mm6, mm1); /* save new reds in dsts */
+
+				/* green -- process the bits in place */
+				movq_r2r(mm2, mm5); /* src -> mm5 */
+				movq_r2r(mm3, mm6); /* dst -> mm6 */
+				pand_r2r(mm4, mm5); /* src & MASKGREEN -> mm5 */
+				pand_r2r(mm4, mm6); /* dst & MASKGREEN -> mm6 */
+
+				/* blend */
+				psubw_r2r(mm6, mm5);/* src - dst -> mm5 */
+				pmulhw_r2r(mm0, mm5); /* mm5 * alpha -> mm5 */
+				/* 11 + 11 - 16 = 6 bits, so all the lower uninteresting
+				   bits are gone and the sign bits present */
+				psllw_i2r(5, mm5); /* mm5 << 5 -> mm5 */
+				paddw_r2r(mm5, mm6); /* mm5 + mm6(dst) -> mm6 */
+
+				por_r2r(mm6, mm1); /* save new greens in dsts */
+
+				/* blue */
+				movq_r2r(mm2, mm5); /* src -> mm5 */
+				movq_r2r(mm3, mm6); /* dst -> mm6 */
+				pand_r2r(mm7, mm5); /* src & MASKBLUE -> mm5[000b 000b 000b 000b] */
+				pand_r2r(mm7, mm6); /* dst & MASKBLUE -> mm6[000b 000b 000b 000b] */
+
+				/* blend */
+				psubw_r2r(mm6, mm5);/* src - dst -> mm5 */
+				pmullw_r2r(mm0, mm5); /* mm5 * alpha -> mm5 */
+				/* 11 + 5 = 16 bits, so the sign bits are lost and
+				   the interesting bits will need to be MASKed */
+				psrlw_i2r(11, mm5); /* mm5 >> 11 -> mm5 */
+				paddw_r2r(mm5, mm6); /* mm5 + mm6(dst) -> mm6 */
+				pand_r2r(mm7, mm6); /* mm6 & MASKBLUE -> mm6[000b 000b 000b 000b] */
+
+				por_r2r(mm6, mm1); /* save new blues in dsts */
+
+				movq_r2m(mm1, *dstp); /* mm1 -> 4 dst pixels */
+
+				srcp += 4;
+				dstp += 4;
+			}, width);			
 			srcp += srcskip;
 			dstp += dstskip;
 		}
@@ -1694,28 +1997,29 @@ static void Blit555to555SurfaceAlphaMMX(SDL_BlitInfo *info)
 		int srcskip = info->s_skip >> 1;
 		Uint16 *dstp = (Uint16 *)info->d_pixels;
 		int dstskip = info->d_skip >> 1;
-	        Uint32 s, d;
-	        Uint8 load[8];
+		Uint32 s, d;
+		Uint8 load[8];
 	  
 		alpha &= ~(1+2+4);		/* cut alpha to get the exact same behaviour */
-	        *(Uint64 *)load = alpha;
+		*(Uint64 *)load = alpha;
 		alpha >>= 3;		/* downscale alpha to 5 bits */
 
-                movq_m2r(*load, mm0); /* alpha(0000000A) -> mm0 */
-                punpcklwd_r2r(mm0, mm0); /* 00000A0A -> mm0 */
-                punpcklwd_r2r(mm0, mm0); /* 0A0A0A0A -> mm0 */
-	  
- 	        /* Setup the 555 color channel masks */
-	        *(Uint64 *)load = 0x7C007C007C007C00ULL;
-		movq_m2r(*load, mm1); /* MASKRED -> mm1 */
+		movq_m2r(*load, mm0); /* alpha(0000000A) -> mm0 */
+		punpcklwd_r2r(mm0, mm0); /* 00000A0A -> mm0 */
+		punpcklwd_r2r(mm0, mm0); /* 0A0A0A0A -> mm0 */
+		/* position alpha to allow for mullo and mulhi on diff channels
+		   to reduce the number of operations */
+		psllq_i2r(3, mm0);
+
+		/* Setup the 555 color channel masks */
 		*(Uint64 *)load = 0x03E003E003E003E0ULL;
 		movq_m2r(*load, mm4); /* MASKGREEN -> mm4 */
 		*(Uint64 *)load = 0x001F001F001F001FULL;
 		movq_m2r(*load, mm7); /* MASKBLUE -> mm7 */
 		while(height--) {
-                        DUFFS_LOOP_QUATRO2(
-                        {
-	                        s = *srcp++;
+			DUFFS_LOOP_QUATRO2(
+			{
+				s = *srcp++;
 				d = *dstp;
 				/*
 				 * shift out the middle component (green) to
@@ -1727,8 +2031,8 @@ static void Blit555to555SurfaceAlphaMMX(SDL_BlitInfo *info)
 				d += (s - d) * alpha >> 5;
 				d &= 0x03e07c1f;
 				*dstp++ = d | d >> 16;
-                        },{
-	                        s = *srcp++;
+			},{
+				s = *srcp++;
 				d = *dstp;
 				/*
 				 * shift out the middle component (green) to
@@ -1752,85 +2056,349 @@ static void Blit555to555SurfaceAlphaMMX(SDL_BlitInfo *info)
 				d += (s - d) * alpha >> 5;
 				d &= 0x03e07c1f;
 				*dstp++ = d | d >> 16;
-                        },{
-	                        movq_m2r((*dstp), mm3);/* 4 dst pixels -> mm3 */
-	                        movq_m2r((*srcp), mm2);/* 4 src pixels -> mm2 */
-			  
-	                        /* RED */
-	                        movq_r2r(mm2, mm5); /* src -> mm5 */
-	                        pand_r2r(mm1 , mm5); /* src & MASKRED -> mm5 */
-	                        psrlq_i2r(10, mm5); /* mm5 >> 10 -> mm5 [000r 000r 000r 000r] */
-	
-	                        movq_r2r(mm3, mm6); /* dst -> mm6 */
-	                        pand_r2r(mm1 , mm6); /* dst & MASKRED -> mm6 */
-	                        psrlq_i2r(10, mm6); /* mm6 >> 10 -> mm6 [000r 000r 000r 000r] */
-	
-	                        /* blend */
-	                        psubw_r2r(mm6, mm5);/* src - dst -> mm5 */
-	                        pmullw_r2r(mm0, mm5); /* mm5 * alpha -> mm5 */
-	                        psrlw_i2r(8, mm5); /* mm5 >> 8 -> mm5 */
-	                        paddw_r2r(mm5, mm6); /* mm5 + mm6(dst) -> mm6 */
-	                        psllq_i2r(10, mm6); /* mm6 << 10 -> mm6 */
-	                        pand_r2r(mm1, mm6); /* mm6 & MASKRED -> mm6 */
-	
-	                        movq_r2r(mm4, mm5); /* MASKGREEN -> mm5 */
-	                        por_r2r(mm7, mm5);  /* MASKBLUE | mm5 -> mm5 */
-	                        pand_r2r(mm5, mm3); /* mm3 & mm5(!MASKRED) -> mm3 */
-	                        por_r2r(mm6, mm3); /* save new reds in dsts */
-	
-	                        /* green */
-	                        movq_r2r(mm2, mm5); /* src -> mm5 */
-	                        pand_r2r(mm4 , mm5); /* src & MASKGREEN -> mm5 */
-	                        psrlq_i2r(5, mm5); /* mm5 >> 5 -> mm5 [000g 000g 000g 000g] */
-	
-	                        movq_r2r(mm3, mm6); /* dst -> mm6 */
-	                        pand_r2r(mm4 , mm6); /* dst & MASKGREEN -> mm6 */
-	                        psrlq_i2r(5, mm6); /* mm6 >> 5 -> mm6 [000g 000g 000g 000g] */
-	
-	                        /* blend */
-	                        psubw_r2r(mm6, mm5);/* src - dst -> mm5 */
-	                        pmullw_r2r(mm0, mm5); /* mm5 * alpha -> mm5 */
-	                        psrlw_i2r(8, mm5); /* mm5 >> 8 -> mm5 */
-	                        paddw_r2r(mm5, mm6); /* mm5 + mm6(dst) -> mm6 */
-	                        psllq_i2r(5, mm6); /* mm6 << 5 -> mm6 */
-	                        pand_r2r(mm4, mm6); /* mm6 & MASKGREEN -> mm6 */
-	
-	                        movq_r2r(mm1, mm5); /* MASKRED -> mm5 */
-	                        por_r2r(mm7, mm5);  /* MASKBLUE | mm5 -> mm5 */
-	                        pand_r2r(mm5, mm3); /* mm3 & mm5(!MASKGREEN) -> mm3 */
-	                        por_r2r(mm6, mm3); /* save new greens in dsts */
-	
-	                        /* blue */
-	                        movq_r2r(mm2, mm5); /* src -> mm5 */
-	                        pand_r2r(mm7 , mm5); /* src & MASKRED -> mm5[000b 000b 000b 000b] */
-		
-	                        movq_r2r(mm3, mm6); /* dst -> mm6 */
-	                        pand_r2r(mm7 , mm6); /* dst & MASKBLUE -> mm6[000b 000b 000b 000b] */
-	
-	                        /* blend */
-	                        psubw_r2r(mm6, mm5);/* src - dst -> mm5 */
-	                        pmullw_r2r(mm0, mm5); /* mm5 * alpha -> mm5 */
-	                        psrlw_i2r(8, mm5); /* mm5 >> 8 -> mm5 */
-	                        paddw_r2r(mm5, mm6); /* mm5 + mm6(dst) -> mm6 */
-	                        pand_r2r(mm7, mm6); /* mm6 & MASKBLUE -> mm6 */
-	
-	                        movq_r2r(mm1, mm5); /* MASKRED -> mm5 */
-	                        por_r2r(mm4, mm5);  /* MASKGREEN | mm5 -> mm5 */
-	                        pand_r2r(mm5, mm3); /* mm3 & mm5(!MASKBLUE) -> mm3 */
-	                        por_r2r(mm6, mm3); /* save new blues in dsts */
-	
-	                        movq_r2m(mm3, *dstp);/* mm3 -> 4 dst pixels */
-	
-	                        srcp += 4;
-	                        dstp += 4;
-                        }, width);			
+			},{
+				movq_m2r((*srcp), mm2);/* 4 src pixels -> mm2 */
+				movq_m2r((*dstp), mm3);/* 4 dst pixels -> mm3 */
+
+				/* red -- process the bits in place */
+				psllq_i2r(5, mm4); /* turn MASKGREEN into MASKRED */
+					/* by reusing the GREEN mask we free up another mmx
+					   register to accumulate the result */
+
+				movq_r2r(mm2, mm5); /* src -> mm5 */
+				movq_r2r(mm3, mm6); /* dst -> mm6 */
+				pand_r2r(mm4, mm5); /* src & MASKRED -> mm5 */
+				pand_r2r(mm4, mm6); /* dst & MASKRED -> mm6 */
+
+				/* blend */
+				psubw_r2r(mm6, mm5);/* src - dst -> mm5 */
+				pmulhw_r2r(mm0, mm5); /* mm5 * alpha -> mm5 */
+				/* 11 + 15 - 16 = 10 bits, uninteresting bits will be
+				   cleared by a MASK below */
+				psllw_i2r(5, mm5); /* mm5 << 5 -> mm5 */
+				paddw_r2r(mm5, mm6); /* mm5 + mm6(dst) -> mm6 */
+				pand_r2r(mm4, mm6); /* mm6 & MASKRED -> mm6 */
+
+				psrlq_i2r(5, mm4); /* turn MASKRED back into MASKGREEN */
+
+				movq_r2r(mm6, mm1); /* save new reds in dsts */
+
+				/* green -- process the bits in place */
+				movq_r2r(mm2, mm5); /* src -> mm5 */
+				movq_r2r(mm3, mm6); /* dst -> mm6 */
+				pand_r2r(mm4, mm5); /* src & MASKGREEN -> mm5 */
+				pand_r2r(mm4, mm6); /* dst & MASKGREEN -> mm6 */
+
+				/* blend */
+				psubw_r2r(mm6, mm5);/* src - dst -> mm5 */
+				pmulhw_r2r(mm0, mm5); /* mm5 * alpha -> mm5 */
+				/* 11 + 10 - 16 = 5 bits,  so all the lower uninteresting
+				   bits are gone and the sign bits present */
+				psllw_i2r(5, mm5); /* mm5 << 5 -> mm5 */
+				paddw_r2r(mm5, mm6); /* mm5 + mm6(dst) -> mm6 */
+
+				por_r2r(mm6, mm1); /* save new greens in dsts */
+
+				/* blue */
+				movq_r2r(mm2, mm5); /* src -> mm5 */
+				movq_r2r(mm3, mm6); /* dst -> mm6 */
+				pand_r2r(mm7, mm5); /* src & MASKBLUE -> mm5[000b 000b 000b 000b] */
+				pand_r2r(mm7, mm6); /* dst & MASKBLUE -> mm6[000b 000b 000b 000b] */
+
+				/* blend */
+				psubw_r2r(mm6, mm5);/* src - dst -> mm5 */
+				pmullw_r2r(mm0, mm5); /* mm5 * alpha -> mm5 */
+				/* 11 + 5 = 16 bits, so the sign bits are lost and
+				   the interesting bits will need to be MASKed */
+				psrlw_i2r(11, mm5); /* mm5 >> 11 -> mm5 */
+				paddw_r2r(mm5, mm6); /* mm5 + mm6(dst) -> mm6 */
+				pand_r2r(mm7, mm6); /* mm6 & MASKBLUE -> mm6[000b 000b 000b 000b] */
+
+				por_r2r(mm6, mm1); /* save new blues in dsts */
+
+				movq_r2m(mm1, *dstp);/* mm1 -> 4 dst pixels */
+
+				srcp += 4;
+				dstp += 4;
+			}, width);			
 			srcp += srcskip;
 			dstp += dstskip;
 		}
 		emms();
 	}
 }
-#endif
+/* End GCC_ASMBLIT */
+
+#elif MSVC_ASMBLIT
+/* fast RGB565->RGB565 blending with surface alpha */
+static void Blit565to565SurfaceAlphaMMX(SDL_BlitInfo *info)
+{
+	unsigned alpha = info->src->alpha;
+	if(alpha == 128) {
+		Blit16to16SurfaceAlpha128(info, 0xf7de);
+	} else {
+		int width = info->d_width;
+		int height = info->d_height;
+		Uint16 *srcp = (Uint16 *)info->s_pixels;
+		int srcskip = info->s_skip >> 1;
+		Uint16 *dstp = (Uint16 *)info->d_pixels;
+		int dstskip = info->d_skip >> 1;
+		Uint32 s, d;
+	  
+		__m64 src1, dst1, src2, dst2, gmask, bmask, mm_res, mm_alpha;
+
+		alpha &= ~(1+2+4);		/* cut alpha to get the exact same behaviour */
+		mm_alpha = _mm_set_pi32(0, alpha); /* 0000000A -> mm_alpha */
+		alpha >>= 3;		/* downscale alpha to 5 bits */
+
+		mm_alpha = _mm_unpacklo_pi16(mm_alpha, mm_alpha); /* 00000A0A -> mm_alpha */
+		mm_alpha = _mm_unpacklo_pi32(mm_alpha, mm_alpha); /* 0A0A0A0A -> mm_alpha */
+		/* position alpha to allow for mullo and mulhi on diff channels
+		   to reduce the number of operations */
+		mm_alpha = _mm_slli_si64(mm_alpha, 3);
+	  
+		/* Setup the 565 color channel masks */
+		gmask = _mm_set_pi32(0x07E007E0, 0x07E007E0); /* MASKGREEN -> gmask */
+		bmask = _mm_set_pi32(0x001F001F, 0x001F001F); /* MASKBLUE -> bmask */
+		
+		while(height--) {
+			DUFFS_LOOP_QUATRO2(
+			{
+				s = *srcp++;
+				d = *dstp;
+				/*
+				 * shift out the middle component (green) to
+				 * the high 16 bits, and process all three RGB
+				 * components at the same time.
+				 */
+				s = (s | s << 16) & 0x07e0f81f;
+				d = (d | d << 16) & 0x07e0f81f;
+				d += (s - d) * alpha >> 5;
+				d &= 0x07e0f81f;
+				*dstp++ = d | d >> 16;
+			},{
+				s = *srcp++;
+				d = *dstp;
+				/*
+				 * shift out the middle component (green) to
+				 * the high 16 bits, and process all three RGB
+				 * components at the same time.
+				 */
+				s = (s | s << 16) & 0x07e0f81f;
+				d = (d | d << 16) & 0x07e0f81f;
+				d += (s - d) * alpha >> 5;
+				d &= 0x07e0f81f;
+				*dstp++ = d | d >> 16;
+				s = *srcp++;
+				d = *dstp;
+				/*
+				 * shift out the middle component (green) to
+				 * the high 16 bits, and process all three RGB
+				 * components at the same time.
+				 */
+				s = (s | s << 16) & 0x07e0f81f;
+				d = (d | d << 16) & 0x07e0f81f;
+				d += (s - d) * alpha >> 5;
+				d &= 0x07e0f81f;
+				*dstp++ = d | d >> 16;
+			},{
+				src1 = *(__m64*)srcp; /* 4 src pixels -> src1 */
+				dst1 = *(__m64*)dstp; /* 4 dst pixels -> dst1 */
+
+				/* red */
+				src2 = src1;
+				src2 = _mm_srli_pi16(src2, 11); /* src2 >> 11 -> src2 [000r 000r 000r 000r] */
+
+				dst2 = dst1;
+				dst2 = _mm_srli_pi16(dst2, 11); /* dst2 >> 11 -> dst2 [000r 000r 000r 000r] */
+
+				/* blend */
+				src2 = _mm_sub_pi16(src2, dst2);/* src - dst -> src2 */
+				src2 = _mm_mullo_pi16(src2, mm_alpha); /* src2 * alpha -> src2 */
+				src2 = _mm_srli_pi16(src2, 11); /* src2 >> 11 -> src2 */
+				dst2 = _mm_add_pi16(src2, dst2); /* src2 + dst2 -> dst2 */
+				dst2 = _mm_slli_pi16(dst2, 11); /* dst2 << 11 -> dst2 */
+
+				mm_res = dst2; /* RED -> mm_res */
+
+				/* green -- process the bits in place */
+				src2 = src1;
+				src2 = _mm_and_si64(src2, gmask); /* src & MASKGREEN -> src2 */
+
+				dst2 = dst1;
+				dst2 = _mm_and_si64(dst2, gmask); /* dst & MASKGREEN -> dst2 */
+
+				/* blend */
+				src2 = _mm_sub_pi16(src2, dst2);/* src - dst -> src2 */
+				src2 = _mm_mulhi_pi16(src2, mm_alpha); /* src2 * alpha -> src2 */
+				src2 = _mm_slli_pi16(src2, 5); /* src2 << 5 -> src2 */
+				dst2 = _mm_add_pi16(src2, dst2); /* src2 + dst2 -> dst2 */
+
+				mm_res = _mm_or_si64(mm_res, dst2); /* RED | GREEN -> mm_res */
+
+				/* blue */
+				src2 = src1;
+				src2 = _mm_and_si64(src2, bmask); /* src & MASKBLUE -> src2[000b 000b 000b 000b] */
+
+				dst2 = dst1;
+				dst2 = _mm_and_si64(dst2, bmask); /* dst & MASKBLUE -> dst2[000b 000b 000b 000b] */
+
+				/* blend */
+				src2 = _mm_sub_pi16(src2, dst2);/* src - dst -> src2 */
+				src2 = _mm_mullo_pi16(src2, mm_alpha); /* src2 * alpha -> src2 */
+				src2 = _mm_srli_pi16(src2, 11); /* src2 >> 11 -> src2 */
+				dst2 = _mm_add_pi16(src2, dst2); /* src2 + dst2 -> dst2 */
+				dst2 = _mm_and_si64(dst2, bmask); /* dst2 & MASKBLUE -> dst2 */
+
+				mm_res = _mm_or_si64(mm_res, dst2); /* RED | GREEN | BLUE -> mm_res */
+
+				*(__m64*)dstp = mm_res; /* mm_res -> 4 dst pixels */
+
+				srcp += 4;
+				dstp += 4;
+			}, width);			
+			srcp += srcskip;
+			dstp += dstskip;
+		}
+		_mm_empty();
+	}
+}
+
+/* fast RGB555->RGB555 blending with surface alpha */
+static void Blit555to555SurfaceAlphaMMX(SDL_BlitInfo *info)
+{
+	unsigned alpha = info->src->alpha;
+	if(alpha == 128) {
+		Blit16to16SurfaceAlpha128(info, 0xfbde);
+	} else {
+		int width = info->d_width;
+		int height = info->d_height;
+		Uint16 *srcp = (Uint16 *)info->s_pixels;
+		int srcskip = info->s_skip >> 1;
+		Uint16 *dstp = (Uint16 *)info->d_pixels;
+		int dstskip = info->d_skip >> 1;
+		Uint32 s, d;
+	  
+		__m64 src1, dst1, src2, dst2, rmask, gmask, bmask, mm_res, mm_alpha;
+
+		alpha &= ~(1+2+4);		/* cut alpha to get the exact same behaviour */
+		mm_alpha = _mm_set_pi32(0, alpha); /* 0000000A -> mm_alpha */
+		alpha >>= 3;		/* downscale alpha to 5 bits */
+
+		mm_alpha = _mm_unpacklo_pi16(mm_alpha, mm_alpha); /* 00000A0A -> mm_alpha */
+		mm_alpha = _mm_unpacklo_pi32(mm_alpha, mm_alpha); /* 0A0A0A0A -> mm_alpha */
+		/* position alpha to allow for mullo and mulhi on diff channels
+		   to reduce the number of operations */
+		mm_alpha = _mm_slli_si64(mm_alpha, 3);
+	  
+		/* Setup the 555 color channel masks */
+		rmask = _mm_set_pi32(0x7C007C00, 0x7C007C00); /* MASKRED -> rmask */
+		gmask = _mm_set_pi32(0x03E003E0, 0x03E003E0); /* MASKGREEN -> gmask */
+		bmask = _mm_set_pi32(0x001F001F, 0x001F001F); /* MASKBLUE -> bmask */
+
+		while(height--) {
+			DUFFS_LOOP_QUATRO2(
+			{
+				s = *srcp++;
+				d = *dstp;
+				/*
+				 * shift out the middle component (green) to
+				 * the high 16 bits, and process all three RGB
+				 * components at the same time.
+				 */
+				s = (s | s << 16) & 0x03e07c1f;
+				d = (d | d << 16) & 0x03e07c1f;
+				d += (s - d) * alpha >> 5;
+				d &= 0x03e07c1f;
+				*dstp++ = d | d >> 16;
+			},{
+				s = *srcp++;
+				d = *dstp;
+				/*
+				 * shift out the middle component (green) to
+				 * the high 16 bits, and process all three RGB
+				 * components at the same time.
+				 */
+				s = (s | s << 16) & 0x03e07c1f;
+				d = (d | d << 16) & 0x03e07c1f;
+				d += (s - d) * alpha >> 5;
+				d &= 0x03e07c1f;
+				*dstp++ = d | d >> 16;
+			        s = *srcp++;
+				d = *dstp;
+				/*
+				 * shift out the middle component (green) to
+				 * the high 16 bits, and process all three RGB
+				 * components at the same time.
+				 */
+				s = (s | s << 16) & 0x03e07c1f;
+				d = (d | d << 16) & 0x03e07c1f;
+				d += (s - d) * alpha >> 5;
+				d &= 0x03e07c1f;
+				*dstp++ = d | d >> 16;
+			},{
+				src1 = *(__m64*)srcp; /* 4 src pixels -> src1 */
+				dst1 = *(__m64*)dstp; /* 4 dst pixels -> dst1 */
+
+				/* red -- process the bits in place */
+				src2 = src1;
+				src2 = _mm_and_si64(src2, rmask); /* src & MASKRED -> src2 */
+
+				dst2 = dst1;
+				dst2 = _mm_and_si64(dst2, rmask); /* dst & MASKRED -> dst2 */
+
+				/* blend */
+				src2 = _mm_sub_pi16(src2, dst2);/* src - dst -> src2 */
+				src2 = _mm_mulhi_pi16(src2, mm_alpha); /* src2 * alpha -> src2 */
+				src2 = _mm_slli_pi16(src2, 5); /* src2 << 5 -> src2 */
+				dst2 = _mm_add_pi16(src2, dst2); /* src2 + dst2 -> dst2 */
+				dst2 = _mm_and_si64(dst2, rmask); /* dst2 & MASKRED -> dst2 */
+
+				mm_res = dst2; /* RED -> mm_res */
+				
+				/* green -- process the bits in place */
+				src2 = src1;
+				src2 = _mm_and_si64(src2, gmask); /* src & MASKGREEN -> src2 */
+
+				dst2 = dst1;
+				dst2 = _mm_and_si64(dst2, gmask); /* dst & MASKGREEN -> dst2 */
+
+				/* blend */
+				src2 = _mm_sub_pi16(src2, dst2);/* src - dst -> src2 */
+				src2 = _mm_mulhi_pi16(src2, mm_alpha); /* src2 * alpha -> src2 */
+				src2 = _mm_slli_pi16(src2, 5); /* src2 << 5 -> src2 */
+				dst2 = _mm_add_pi16(src2, dst2); /* src2 + dst2 -> dst2 */
+
+				mm_res = _mm_or_si64(mm_res, dst2); /* RED | GREEN -> mm_res */
+
+				/* blue */
+				src2 = src1; /* src -> src2 */
+				src2 = _mm_and_si64(src2, bmask); /* src & MASKBLUE -> src2[000b 000b 000b 000b] */
+
+				dst2 = dst1; /* dst -> dst2 */
+				dst2 = _mm_and_si64(dst2, bmask); /* dst & MASKBLUE -> dst2[000b 000b 000b 000b] */
+
+				/* blend */
+				src2 = _mm_sub_pi16(src2, dst2);/* src - dst -> src2 */
+				src2 = _mm_mullo_pi16(src2, mm_alpha); /* src2 * alpha -> src2 */
+				src2 = _mm_srli_pi16(src2, 11); /* src2 >> 11 -> src2 */
+				dst2 = _mm_add_pi16(src2, dst2); /* src2 + dst2 -> dst2 */
+				dst2 = _mm_and_si64(dst2, bmask); /* dst2 & MASKBLUE -> dst2 */
+
+				mm_res = _mm_or_si64(mm_res, dst2); /* RED | GREEN | BLUE -> mm_res */
+
+				*(__m64*)dstp = mm_res; /* mm_res -> 4 dst pixels */
+
+				srcp += 4;
+				dstp += 4;
+			}, width);			
+			srcp += srcskip;
+			dstp += dstskip;
+		}
+		_mm_empty();
+	}
+}
+#endif /* GCC_ASMBLIT, MSVC_ASMBLIT */
 
 /* fast RGB565->RGB565 blending with surface alpha */
 static void Blit565to565SurfaceAlpha(SDL_BlitInfo *info)
@@ -2177,29 +2745,31 @@ SDL_loblit SDL_CalculateAlphaBlit(SDL_Surface *surface, int blit_index)
 		if(sf->Rmask == df->Rmask
 		   && sf->Gmask == df->Gmask
 		   && sf->Bmask == df->Bmask
-		   && (sf->Rmask | sf->Gmask | sf->Bmask) == 0xffffff
 		   && sf->BytesPerPixel == 4)
 		{
 #if MMX_ASMBLIT
-		if(SDL_HasMMX())
-		    return BlitRGBtoRGBSurfaceAlphaMMX;
-		else
+			if(sf->Rshift % 8 == 0
+			   && sf->Gshift % 8 == 0
+			   && sf->Bshift % 8 == 0
+			   && SDL_HasMMX())
+			    return BlitRGBtoRGBSurfaceAlphaMMX;
 #endif
-#if SDL_ALTIVEC_BLITTERS
-	if(!(surface->map->dst->flags & SDL_HWSURFACE) && SDL_HasAltiVec())
-            return BlitRGBtoRGBSurfaceAlphaAltivec;
-        else
+			if((sf->Rmask | sf->Gmask | sf->Bmask) == 0xffffff)
+			{
+#if USE_ALTIVEC_BLITTERS
+				if(SDL_HasAltiVec())
+					return BlitRGBtoRGBSurfaceAlphaAltivec;
 #endif
-		    return BlitRGBtoRGBSurfaceAlpha;
+				return BlitRGBtoRGBSurfaceAlpha;
+			}
 		}
-		else
 #if SDL_ALTIVEC_BLITTERS
-        if((sf->BytesPerPixel == 4) &&
-	   !(surface->map->dst->flags & SDL_HWSURFACE) && SDL_HasAltiVec())
-            return Blit32to32SurfaceAlphaAltivec;
-        else
+		if((sf->BytesPerPixel == 4) &&
+		   !(surface->map->dst->flags & SDL_HWSURFACE) && SDL_HasAltiVec())
+			return Blit32to32SurfaceAlphaAltivec;
+		else
 #endif
-		    return BlitNtoNSurfaceAlpha;
+			return BlitNtoNSurfaceAlpha;
 
 	    case 3:
 	    default:
@@ -2232,34 +2802,40 @@ SDL_loblit SDL_CalculateAlphaBlit(SDL_Surface *surface, int blit_index)
 	    return BlitNtoNPixelAlpha;
 
 	case 4:
-	    if(sf->Amask == 0xff000000
-	       && sf->Rmask == df->Rmask
+	    if(sf->Rmask == df->Rmask
 	       && sf->Gmask == df->Gmask
 	       && sf->Bmask == df->Bmask
 	       && sf->BytesPerPixel == 4)
 	    {
 #if MMX_ASMBLIT
-		if(SDL_Has3DNow())
-		    return BlitRGBtoRGBPixelAlphaMMX3DNOW;
-		else
-		if(SDL_HasMMX())
-		    return BlitRGBtoRGBPixelAlphaMMX;
-		else
+		if(sf->Rshift % 8 == 0
+		   && sf->Gshift % 8 == 0
+		   && sf->Bshift % 8 == 0
+		   && sf->Ashift % 8 == 0
+		   && sf->Aloss == 0)
+		{
+			if(SDL_Has3DNow())
+				return BlitRGBtoRGBPixelAlphaMMX3DNOW;
+			if(SDL_HasMMX())
+				return BlitRGBtoRGBPixelAlphaMMX;
+		}
 #endif
-#if SDL_ALTIVEC_BLITTERS
-	if(!(surface->map->dst->flags & SDL_HWSURFACE) && SDL_HasAltiVec())
-            return BlitRGBtoRGBPixelAlphaAltivec;
-        else
+		if(sf->Amask == 0xff000000)
+		{
+#if USE_ALTIVEC_BLITTERS
+			if(SDL_HasAltiVec())
+				return BlitRGBtoRGBPixelAlphaAltivec;
 #endif
-		    return BlitRGBtoRGBPixelAlpha;
+			return BlitRGBtoRGBPixelAlpha;
+		}
 	    }
 #if SDL_ALTIVEC_BLITTERS
-        if (sf->Amask && sf->BytesPerPixel == 4 &&
-	    !(surface->map->dst->flags & SDL_HWSURFACE) && SDL_HasAltiVec())
-            return Blit32to32PixelAlphaAltivec;
-        else
+	    if (sf->Amask && sf->BytesPerPixel == 4 &&
+	        !(surface->map->dst->flags & SDL_HWSURFACE) && SDL_HasAltiVec())
+		return Blit32to32PixelAlphaAltivec;
+	    else
 #endif
-	    return BlitNtoNPixelAlpha;
+		return BlitNtoNPixelAlpha;
 
 	case 3:
 	default:
