@@ -291,6 +291,9 @@ int EPOC_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
     #endif /* __WINS__ */
 
+    _this->info.current_w = Private->EPOC_ScreenSize.iWidth;
+    _this->info.current_h = Private->EPOC_ScreenSize.iHeight;
+
     /* The "best" video format should be returned to caller. */
 
     vformat->BitsPerPixel       = /*!!GetBpp(displayMode) */ 8;

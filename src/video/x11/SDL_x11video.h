@@ -76,8 +76,8 @@ struct SDL_PrivateVideoData {
     GC	gc;			/* The graphic context for drawing */
 
     /* The current width and height of the fullscreen mode */
-    int current_w;
-    int current_h;
+    int window_w;
+    int window_h;
 
     /* Support for internal mouse warping */
     struct {
@@ -159,8 +159,8 @@ struct SDL_PrivateVideoData {
 #define shminfo			(this->hidden->shminfo)
 #define SDL_Ximage		(this->hidden->Ximage)
 #define SDL_GC			(this->hidden->gc)
-#define current_w		(this->hidden->current_w)
-#define current_h		(this->hidden->current_h)
+#define window_w		(this->hidden->window_w)
+#define window_h		(this->hidden->window_h)
 #define mouse_last		(this->hidden->mouse_last)
 #define mouse_accel		(this->hidden->mouse_accel)
 #define mouse_relative		(this->hidden->mouse_relative)

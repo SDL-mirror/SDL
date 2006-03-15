@@ -275,6 +275,8 @@ int BE_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 	/* Save the current display mode */
 	bscreen.GetMode(&saved_mode);
+	_this->info.current_w = saved_mode.virtual_width;
+	_this->info.current_h = saved_mode.virtual_height;
 
 	/* Determine the screen depth */
 	vformat->BitsPerPixel = ColorSpaceToBitsPerPixel(bscreen.ColorSpace());

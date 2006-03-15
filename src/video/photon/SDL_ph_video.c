@@ -400,6 +400,10 @@ static int ph_VideoInit(_THIS, SDL_PixelFormat* vformat)
         return -1;
     }
 
+   /* Determine the current screen size */
+   this->info.current_w = desktop_mode.width;
+   this->info.current_h = desktop_mode.height;
+
     /* We need to return BytesPerPixel as it in used by CreateRGBsurface */
     vformat->BitsPerPixel = desktop_mode.bits_per_pixel;
     vformat->BytesPerPixel = desktop_mode.bytes_per_scanline/desktop_mode.width;

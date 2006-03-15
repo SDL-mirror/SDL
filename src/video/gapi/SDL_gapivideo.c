@@ -529,6 +529,10 @@ int GAPI_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		GAPI_AddMode(this, bpp, gapi->gxProperties.cxWidth, gapi->gxProperties.cyHeight);	
 	}
 
+	/* Determine the current screen size */
+	this->info.current_w = gapi->gxProperties.cxWidth;
+	this->info.current_h = gapi->gxProperties.cyHeight;
+
 	/* Sort the mode lists */
 	for ( i=0; i<NUM_MODELISTS; ++i ) {
 		if ( gapi->SDL_nummodes[i] > 0 ) {

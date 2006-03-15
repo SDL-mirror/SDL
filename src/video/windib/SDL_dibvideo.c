@@ -334,6 +334,8 @@ int DIB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 #endif
 	/* Query for the desktop resolution */
 	EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &SDL_desktop_mode);
+	this->info.current_w = SDL_desktop_mode.dmPelsWidth;
+	this->info.current_h = SDL_desktop_mode.dmPelsHeight;
 
 	/* Query for the list of available video modes */
 	for ( i=0; EnumDisplaySettings(NULL, i, &settings); ++i ) {

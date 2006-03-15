@@ -226,6 +226,10 @@ extern "C" {
     QT_AddMode(_this, ((vformat->BitsPerPixel+7)/8)-1,
 	       desktop_size.height(), desktop_size.width());
 
+    /* Determine the current screen size */
+    this->info.current_w = desktop_size.width();
+    this->info.current_h = desktop_size.height();
+
     /* Create the window / widget */
     SDL_Win = new SDL_QWin(QSize(QT_HIDDEN_SIZE, QT_HIDDEN_SIZE));
     ((QPEApplication*)qApp)->showMainWidget(SDL_Win);

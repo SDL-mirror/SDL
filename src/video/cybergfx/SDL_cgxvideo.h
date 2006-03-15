@@ -67,10 +67,6 @@ struct SDL_PrivateVideoData {
     Uint8 *Ximage;		/* The X image for our window */
     int swap_pixels;		/* Flag: true if display is swapped endian */
 
-    /* The current width and height of the fullscreen mode */
-    int current_w;
-    int current_h;
-
     /* Support for internal mouse warping */
     struct {
         int x;
@@ -132,8 +128,6 @@ struct SDL_PrivateVideoData {
 #define SDL_Ximage		(this->hidden->Ximage)
 #define SDL_GC			(this->hidden->gc)
 #define swap_pixels		(this->hidden->swap_pixels)
-#define current_w		(this->hidden->current_w)
-#define current_h		(this->hidden->current_h)
 #define mouse_last		(this->hidden->mouse_last)
 #define mouse_accel		(this->hidden->mouse_accel)
 #define mouse_relative		(this->hidden->mouse_relative)

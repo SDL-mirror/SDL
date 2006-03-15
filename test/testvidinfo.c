@@ -400,7 +400,8 @@ int main(int argc, char *argv[])
 	}
 	info = SDL_GetVideoInfo();
 	printf(
-"Current display: %d bits-per-pixel\n",info->vfmt->BitsPerPixel);
+"Current display: %dx%d, %d bits-per-pixel\n",
+		info->current_w, info->current_h, info->vfmt->BitsPerPixel);
 	if ( info->vfmt->palette == NULL ) {
 		printf("	Red Mask = 0x%.8x\n", info->vfmt->Rmask);
 		printf("	Green Mask = 0x%.8x\n", info->vfmt->Gmask);

@@ -197,6 +197,10 @@ int GGI_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		GGI_VideoQuit(NULL);
 	}
 
+	/* Determine the current screen size */
+	this->info.current_w = mode.virt.x;
+	this->info.current_h = mode.virt.y;
+
 	/* Set a palette for palletized modes */
 	if (GT_SCHEME(mode.graphtype) == GT_PALETTE)
 	{

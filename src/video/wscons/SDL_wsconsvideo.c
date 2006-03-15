@@ -300,6 +300,9 @@ int WSCONS_VideoInit(_THIS, SDL_PixelFormat *vformat)
     height = private->info.height;
   }
 
+  this->info.current_w = width;
+  this->info.current_h = height;
+
   if (private->shadowFB) {
     private->shadowmem = (Uint8 *)SDL_malloc(len);
     if (private->shadowmem == NULL) {

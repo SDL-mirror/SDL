@@ -463,6 +463,8 @@ static int CGX_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		SDL_SetError("Couldn't lock the display");
 		return(-1);
 	}
+	this->info.current_w = SDL_Display->Width;
+	this->info.current_h = SDL_Display->Height;
 
 	D(bug("Checking if we are using a CGX native display...\n"));
 
@@ -834,8 +836,6 @@ int CGX_CreateWindow(_THIS, SDL_Surface *screen,
 
 	if( !SDL_windowid ) {
 	    CGX_SetSizeHints(this, w, h, flags);
-		current_w = w;
-		current_h = h;
 	}
 
 	/* Set our colormaps when not setting a GL mode */
@@ -885,8 +885,6 @@ int CGX_ResizeWindow(_THIS,
 	if ( ! SDL_windowid ) {
 		/* Resize the window manager window */
 		CGX_SetSizeHints(this, w, h, flags);
-		current_w = w;
-		current_h = h;
 
 		ChangeWindowBox(SDL_Window,SDL_Window->LeftEdge,SDL_Window->TopEdge, w+SDL_Window->BorderLeft+SDL_Window->BorderRight,
 					h+SDL_Window->BorderTop+SDL_Window->BorderBottom);

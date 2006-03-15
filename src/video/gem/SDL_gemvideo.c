@@ -430,9 +430,9 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	/* Setup destination mfdb */
 	VDI_dst_mfdb.fd_addr = NULL;
 
-	/* Update hardware info */
-	this->info.hw_available = 0;
-	this->info.video_mem = 0;
+	/* Determine the current screen size */
+	this->info.current_w = VDI_w;
+	this->info.current_h = VDI_h;
 
 	/* Determine the screen depth */
 	/* we change this during the SDL_SetVideoMode implementation... */

@@ -298,7 +298,6 @@ static int GS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		return(-1);
 	}
 
-	/* Determine the current screen depth */
 	if ( ioctl(console_fd, PS2IOC_GSCREENINFO, &vinfo) < 0 ) {
 		close(memory_fd);
 		close(console_fd);
@@ -306,6 +305,12 @@ static int GS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		SDL_SetError("Couldn't get console pixel format");
 		return(-1);
 	}
+
+	/* Determine the current screen size */
+	this->info.current_w = vinfo.w;
+	this->info.current_h = vinfo.h;
+
+	/* Determine the current screen depth */
 	switch (vinfo.psm) {
 	    /* Supported pixel formats */
 	    case PS2_GS_PSMCT32:

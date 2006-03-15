@@ -287,6 +287,10 @@ static int iPod_VideoInit (_THIS, SDL_PixelFormat *vformat)
 
 	fcntl (kbfd, F_SETFL, O_RDWR | O_NONBLOCK);
 
+	/* Determine the current screen size */
+	this->info.current_w = lcd_width;
+	this->info.current_h = lcd_height;
+
 	if ((generation >= 60000) && (generation < 70000)) {
 	    vformat->BitsPerPixel = 16;
 	    vformat->Rmask = 0xF800;

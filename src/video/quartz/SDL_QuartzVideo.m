@@ -200,6 +200,11 @@ static int QZ_VideoInit (_THIS, SDL_PixelFormat *video_format) {
     CFNumberGetValue (CFDictionaryGetValue (save_mode, kCGDisplayHeight),
                       kCFNumberSInt32Type, &device_height);
 
+    /* Determine the current screen size */
+    this->info.current_w = device_width;
+    this->info.current_h = device_height;
+
+    /* Determine the default screen depth */
     video_format->BitsPerPixel = device_bpp;
 
     /* Set misc globals */

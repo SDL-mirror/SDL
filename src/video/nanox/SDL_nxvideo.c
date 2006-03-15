@@ -209,6 +209,10 @@ int NX_VideoInit (_THIS, SDL_PixelFormat * vformat)
     GrGetScreenInfo (& si) ;
     SDL_Visual.bpp = si.bpp ;
 
+    /* Determine the current screen size */
+    this->info.current_w = si.cols ;
+    this->info.current_h = si.rows ;
+
     // GetVideoMode
     SDL_modelist = (SDL_Rect **) SDL_malloc (sizeof (SDL_Rect *) * 2) ;
     if (SDL_modelist) {

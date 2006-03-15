@@ -166,6 +166,10 @@ int PG_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 	PG_InitEvents(this);
 
+	/* Determine the current screen size */
+	this->info.current_w = this->hidden->mi.lxres;
+	this->info.current_h = this->hidden->mi.lyres;
+
 	/* Determine the screen depth.
 	 * We change this during the SDL_SetVideoMode implementation... 
 	 * Round up to the nearest Bytes per pixel

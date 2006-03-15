@@ -508,6 +508,10 @@ static int X11_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	if(X11_GetVideoModes(this) < 0)
 	    return -1;
 
+	/* Determine the current screen size */
+	this->info.current_w = DisplayWidth(SDL_Display, SDL_Screen);
+	this->info.current_h = DisplayHeight(SDL_Display, SDL_Screen);
+
 	/* Determine the default screen depth:
 	   Use the default visual (or at least one with the same depth) */
 	SDL_DisplayColormap = DefaultColormap(SDL_Display, SDL_Screen);
@@ -863,8 +867,8 @@ static int X11_CreateWindow(_THIS, SDL_Surface *screen,
 	/* resize the (possibly new) window manager window */
 	if( !SDL_windowid ) {
 	        X11_SetSizeHints(this, w, h, flags);
-		current_w = w;
-		current_h = h;
+		window_w = w;
+		window_h = h;
 		pXResizeWindow(SDL_Display, WMwindow, w, h);
 	}
 
@@ -985,8 +989,8 @@ static int X11_ResizeWindow(_THIS,
 	if ( ! SDL_windowid ) {
 		/* Resize the window manager window */
 		X11_SetSizeHints(this, w, h, flags);
-		current_w = w;
-		current_h = h;
+		window_w = w;
+		window_h = h;
 		pXResizeWindow(SDL_Display, WMwindow, w, h);
 
 		/* Resize the fullscreen and display windows */

@@ -257,6 +257,10 @@ int SVGA_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	}
 	keyboard_seteventhandler(SVGA_keyboardcallback);
 
+	/* Determine the current screen size */
+	this->info.current_w = 0;
+	this->info.current_h = 0;
+
 	/* Determine the screen depth (use default 8-bit depth) */
 	vformat->BitsPerPixel = 8;
 

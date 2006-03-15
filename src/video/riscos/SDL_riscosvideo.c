@@ -175,6 +175,10 @@ int RISCOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	_kernel_swi(OS_ReadModeVariable, &regs, &regs);
 	vformat->BitsPerPixel = (1 << regs.r[2]);
 
+	/* Determine the current screen size */
+	this->info.current_w = 0; /* FIXME! */
+	this->info.current_h = 0; /* FIXME! */
+
 	/* Minimum bpp for SDL is 8 */
 	if (vformat->BitsPerPixel < 8) vformat->BitsPerPixel = 8;
 

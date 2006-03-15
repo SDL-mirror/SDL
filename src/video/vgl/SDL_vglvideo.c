@@ -257,6 +257,12 @@ int VGL_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		return -1;
 	}
 
+	/* Determine the current screen size */
+	if (VGLCurMode != NULL) {
+		this->info.current_w = VGLCurMode->ModeInfo.Xsize;
+		this->info.current_h = VGLCurMode->ModeInfo.Ysize;
+	}
+
 	/* Determine the screen depth */
 	if (VGLCurMode != NULL)
 		vformat->BitsPerPixel = VGLCurMode->Depth;

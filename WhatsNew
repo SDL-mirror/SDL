@@ -4,7 +4,15 @@ This is a list of API changes in SDL's version history.
 Version 1.0:
 
 1.2.10:
+	Added current_w and current_h to the SDL_VideoInfo structure,
+	which is set to the desktop resolution during video intialization,
+	and then set to the current resolution when a video mode is set.
+
+	SDL_SetVideoMode() now accepts 0 for width or height and will use
+	the current video mode (or the desktop mode if no mode has been set.)
+
 	Added SDL_GetKeyRepeat()
+
 	Added SDL_config.h, with defaults for various build environments.
 
 1.2.7:

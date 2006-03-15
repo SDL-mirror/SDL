@@ -203,6 +203,10 @@ static int ROM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	/* Get a handle to the main monitor */
 	SDL_Display = GetMainDevice();
 
+	/* Determine the current screen size */
+	this->info.current_w = (**SDL_Display).gdRect.right;
+	this->info.current_h = (**SDL_Display).gdRect.bottom;
+
 	/* Determine pixel format */
 	vformat->BitsPerPixel = (**(**SDL_Display).gdPMap).pixelSize;
 	switch (vformat->BitsPerPixel) {

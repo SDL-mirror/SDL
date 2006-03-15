@@ -329,7 +329,7 @@ VideoBootStrap DSp_bootstrap = {
 };
 
 /* Use DSp/Display Manager to build mode list for given screen */
-static SDL_Rect**  DSp_BuildModeList (const GDHandle gDevice)
+static SDL_Rect**  DSp_BuildModeList (const GDHandle gDevice, int *displayWidth, int *displayHeight)
 {
 	DSpContextAttributes  attributes;
 	DSpContextReference   context;
@@ -355,6 +355,9 @@ static SDL_Rect**  DSp_BuildModeList (const GDHandle gDevice)
 	
 	if ( DSpContext_GetAttributes (context, &attributes) != noErr )
 		return NULL;
+
+	*displayWidth = attributes.displayWidth;
+	*displayHeight = attributes.displayHeight;
 			
 	for ( i = 0; i < SDL_arraysize(temp_list); i++ ) {
 		width  = attributes.displayWidth;
@@ -556,14 +559,14 @@ static int DSp_VideoInit(_THIS, SDL_PixelFormat *vformat)
 			break;
 	}
    
-   if ( DSp_CreatePalette (this) < 0 ) {
-   
-      SDL_SetError ("Could not create palette");
-      return (-1);
-   }
+	if ( DSp_CreatePalette (this) < 0 ) {
+		SDL_SetError ("Could not create palette");
+		return (-1);
+	}
    
 	/* Get a list of available fullscreen modes */
-	SDL_modelist = DSp_BuildModeList (SDL_Display);
+	SDL_modelist = DSp_BuildModeList (SDL_Display,
+	                                  &this->info.current_w, &this->info.current_h);
 	if (SDL_modelist == NULL) {
 		SDL_SetError ("DrawSprocket could not build a mode list");
 		return (-1);

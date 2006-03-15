@@ -349,6 +349,10 @@ static int DGA_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	}
 	DGA_event_base = event_base;
 
+	/* Determine the current screen size */
+	this->info.current_w = DisplayWidth(DGA_Display, DGA_Screen);
+	this->info.current_h = DisplayHeight(DGA_Display, DGA_Screen);
+
 	/* Determine the current screen depth */
 	visual = DefaultVisual(DGA_Display, DGA_Screen);
 	{

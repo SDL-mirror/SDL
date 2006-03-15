@@ -416,6 +416,12 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 			break;
 	}
 
+	/* Determine the current screen size */
+	if ( XBIOS_nummodes > 0 ) {
+		this->info.current_w = XBIOS_modelist[0].width;
+		this->info.current_h = XBIOS_modelist[0].height;
+	}
+
 	current_mode = XBIOS_modelist;
 	j8 = j16 = 0;
 	for (i=0; i<XBIOS_nummodes; i++, current_mode++) {

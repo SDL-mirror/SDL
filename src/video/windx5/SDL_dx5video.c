@@ -930,6 +930,8 @@ int DX5_VideoInit(_THIS, SDL_PixelFormat *vformat)
 #ifndef NO_CHANGEDISPLAYSETTINGS
 	/* Query for the desktop resolution */
 	EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &SDL_desktop_mode);
+	this->info.current_w = SDL_desktop_mode.dmPelsWidth;
+	this->info.current_h = SDL_desktop_mode.dmPelsHeight;
 #endif
 
 	/* Enumerate the available fullscreen modes */

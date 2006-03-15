@@ -636,6 +636,8 @@ static int FB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	}
 
 	/* Fill in our hardware acceleration capabilities */
+	this->info.current_w = current_w;
+	this->info.current_h = current_h;
 	this->info.wm_available = 0;
 	this->info.hw_available = 1;
 	this->info.video_mem = finfo.smem_len/1024;

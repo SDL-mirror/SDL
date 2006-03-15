@@ -161,6 +161,8 @@ typedef struct SDL_VideoInfo {
 	Uint32 UnusedBits3  :16;
 	Uint32 video_mem;	/* The total amount of video memory (in K) */
 	SDL_PixelFormat *vfmt;	/* Value: The format of the video surface */
+	int    current_w;	/* Value: The current video mode width */
+	int    current_h;	/* Value: The current video mode height */
 } SDL_VideoInfo;
 
 

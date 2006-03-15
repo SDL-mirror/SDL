@@ -652,21 +652,21 @@ int X11_ResizeFullScreen(_THIS)
     if ( currently_fullscreen ) {
         /* Switch resolution and cover it with the FSwindow */
         move_cursor_to(this, x, y);
-        set_best_resolution(this, current_w, current_h);
+        set_best_resolution(this, window_w, window_h);
         move_cursor_to(this, x, y);
         get_real_resolution(this, &real_w, &real_h);
-        if ( current_w > real_w ) {
+        if ( window_w > real_w ) {
             real_w = MAX(real_w, screen_w);
         }
-        if ( current_h > real_h ) {
+        if ( window_h > real_h ) {
             real_h = MAX(real_h, screen_h);
         }
         pXMoveResizeWindow(SDL_Display, FSwindow, x, y, real_w, real_h);
         move_cursor_to(this, real_w/2, real_h/2);
 
         /* Center and reparent the drawing window */
-        x = (real_w - current_w)/2;
-        y = (real_h - current_h)/2;
+        x = (real_w - window_w)/2;
+        y = (real_h - window_h)/2;
         pXReparentWindow(SDL_Display, SDL_Window, FSwindow, x, y);
         /* FIXME: move the mouse to the old relative location */
         pXSync(SDL_Display, True);   /* Flush spurious mode change events */
@@ -706,10 +706,10 @@ int X11_EnterFullScreen(_THIS)
     screen_w = DisplayWidth(SDL_Display, SDL_Screen);
     screen_h = DisplayHeight(SDL_Display, SDL_Screen);
     get_real_resolution(this, &real_w, &real_h);
-    if ( current_w > real_w ) {
+    if ( window_w > real_w ) {
         real_w = MAX(real_w, screen_w);
     }
-    if ( current_h > real_h ) {
+    if ( window_h > real_h ) {
         real_h = MAX(real_h, screen_h);
     }
     pXMoveResizeWindow(SDL_Display, FSwindow,
