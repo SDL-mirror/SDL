@@ -133,7 +133,7 @@ static void DISKAUD_PlayAudio(_THIS)
                         this->hidden->mixlen);
 
 	/* If we couldn't write, assume fatal error for now */
-	if ( written != this->hidden->mixlen ) {
+	if ( (Uint32)written != this->hidden->mixlen ) {
 		this->enabled = 0;
 	}
 #ifdef DEBUG_AUDIO
