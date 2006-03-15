@@ -83,7 +83,7 @@ static int QZ_DisplayYUV (_THIS, SDL_Overlay *overlay, SDL_Rect *dstrect) {
         SDL_SetError ("DecompressSequenceFrameS failed");
     }
 
-    return err == noErr;
+    return err != noErr;
 }
 
 static void QZ_FreeHWYUV (_THIS, SDL_Overlay *overlay) {
