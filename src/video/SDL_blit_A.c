@@ -2175,7 +2175,7 @@ static void Blit565to565SurfaceAlphaMMX(SDL_BlitInfo *info)
 				d = (d | d << 16) & 0x07e0f81f;
 				d += (s - d) * alpha >> 5;
 				d &= 0x07e0f81f;
-				*dstp++ = d | d >> 16;
+				*dstp++ = (Uint16)(d | d >> 16);
 			},{
 				s = *srcp++;
 				d = *dstp;
@@ -2188,7 +2188,7 @@ static void Blit565to565SurfaceAlphaMMX(SDL_BlitInfo *info)
 				d = (d | d << 16) & 0x07e0f81f;
 				d += (s - d) * alpha >> 5;
 				d &= 0x07e0f81f;
-				*dstp++ = d | d >> 16;
+				*dstp++ = (Uint16)(d | d >> 16);
 				s = *srcp++;
 				d = *dstp;
 				/*
@@ -2200,7 +2200,7 @@ static void Blit565to565SurfaceAlphaMMX(SDL_BlitInfo *info)
 				d = (d | d << 16) & 0x07e0f81f;
 				d += (s - d) * alpha >> 5;
 				d &= 0x07e0f81f;
-				*dstp++ = d | d >> 16;
+				*dstp++ = (Uint16)(d | d >> 16);
 			},{
 				src1 = *(__m64*)srcp; /* 4 src pixels -> src1 */
 				dst1 = *(__m64*)dstp; /* 4 dst pixels -> dst1 */
@@ -2310,7 +2310,7 @@ static void Blit555to555SurfaceAlphaMMX(SDL_BlitInfo *info)
 				d = (d | d << 16) & 0x03e07c1f;
 				d += (s - d) * alpha >> 5;
 				d &= 0x03e07c1f;
-				*dstp++ = d | d >> 16;
+				*dstp++ = (Uint16)(d | d >> 16);
 			},{
 				s = *srcp++;
 				d = *dstp;
@@ -2323,7 +2323,7 @@ static void Blit555to555SurfaceAlphaMMX(SDL_BlitInfo *info)
 				d = (d | d << 16) & 0x03e07c1f;
 				d += (s - d) * alpha >> 5;
 				d &= 0x03e07c1f;
-				*dstp++ = d | d >> 16;
+				*dstp++ = (Uint16)(d | d >> 16);
 			        s = *srcp++;
 				d = *dstp;
 				/*
@@ -2335,7 +2335,7 @@ static void Blit555to555SurfaceAlphaMMX(SDL_BlitInfo *info)
 				d = (d | d << 16) & 0x03e07c1f;
 				d += (s - d) * alpha >> 5;
 				d &= 0x03e07c1f;
-				*dstp++ = d | d >> 16;
+				*dstp++ = (Uint16)(d | d >> 16);
 			},{
 				src1 = *(__m64*)srcp; /* 4 src pixels -> src1 */
 				dst1 = *(__m64*)dstp; /* 4 dst pixels -> dst1 */
