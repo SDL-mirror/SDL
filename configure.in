@@ -2306,6 +2306,8 @@ case "$target" in
             fi
             have_timers=yes
         fi
+        # Now set libraries needed in sdl-config
+        SYSTEM_LIBS="$EXTRA_LDFLAGS"
         ;;
     *-riscos)
         ARCH=riscos
