@@ -2306,8 +2306,6 @@ case "$target" in
             fi
             have_timers=yes
         fi
-        # Now set libraries needed in sdl-config
-        SYSTEM_LIBS="$EXTRA_LDFLAGS"
         ;;
     *-riscos)
         ARCH=riscos
@@ -2401,31 +2399,16 @@ else
 fi
 
 case "$ARCH" in
-  openbsd | netbsd | bsdi)
-    SHARED_SYSTEM_LIBS="$SYSTEM_LIBS"
-    ;;
-  qnx)
-    SHARED_SYSTEM_LIBS="$SYSTEM_LIBS"
-    ;;
   macosx)
-    SHARED_SYSTEM_LIBS=""
     if test x$enable_video = xyes -a x$enable_video_cocoa = xyes; then
-      SHARED_SYSTEM_LIBS="$SHARED_SYSTEM_LIBS -framework Cocoa"
+      SDL_LIBS="$SDL_LIBS -framework Cocoa"
     fi
     if test x$enable_video = xyes -a x$enable_video_carbon = xyes; then
-      SHARED_SYSTEM_LIBS="$SHARED_SYSTEM_LIBS -framework Carbon"
+      SDL_LIBS="$SDL_LIBS -framework Carbon"
     fi
     if test x$enable_video = xyes -a x$enable_video_opengl = xyes; then
-      SHARED_SYSTEM_LIBS="$SHARED_SYSTEM_LIBS -framework OpenGL"
+      SDL_LIBS="$SDL_LIBS -framework OpenGL"
     fi
-    ;;
-  *)
-    SHARED_SYSTEM_LIBS=""
-    ;;
-esac
-
-case "$ARCH" in
-  macosx)
     # Evil hack to allow static linking on Mac OS X
     SDL_STATIC_LIBS="\${exec_prefix}/lib/libSDLmain.a \${exec_prefix}/lib/libSDL.a"
     ;;
@@ -2433,8 +2416,6 @@ case "$ARCH" in
     SDL_STATIC_LIBS="$SDL_LIBS"
     ;;
 esac
-
-STATIC_SYSTEM_LIBS="$SYSTEM_LIBS"
 
 dnl Expand the cflags and libraries needed by apps using SDL
 AC_SUBST(SDL_CFLAGS)
@@ -2459,11 +2440,6 @@ AC_SUBST(ENABLE_SHARED_TRUE)
 AC_SUBST(ENABLE_SHARED_FALSE)
 AC_SUBST(ENABLE_STATIC_TRUE)
 AC_SUBST(ENABLE_STATIC_FALSE)
-
-dnl Expand the libraries needed for static and dynamic linking
-AC_SUBST(STATIC_SYSTEM_LIBS)
-AC_SUBST(SHARED_SYSTEM_LIBS)
-AC_SUBST(SYSTEM_LIBS)
 
 dnl Expand the sources and objects needed to build the library
 AC_SUBST(ac_aux_dir)
