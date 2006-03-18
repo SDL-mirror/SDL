@@ -2725,8 +2725,8 @@ static int os2fslib_VideoInit(_THIS, SDL_PixelFormat *vformat)
   }
 
   /* Determine the current screen size */
-  _this->info.current_w = 0; // FIXME!
-  _this->info.current_h = 0; // FIXME!
+  _this->info.current_w = pDesktopMode->uiXResolution;
+  _this->info.current_h = pDesktopMode->uiYResolution;
 
   /* Determine the screen depth */
   vformat->BitsPerPixel = pDesktopMode->uiBPP;

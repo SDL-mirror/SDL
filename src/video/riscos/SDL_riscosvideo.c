@@ -162,6 +162,7 @@ VideoBootStrap RISCOS_bootstrap = {
 int RISCOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 {
 	_kernel_swi_regs regs;
+	int vars[4], vals[3];
 
 	if (RISCOS_InitTask() == 0)
 	{
@@ -169,15 +170,19 @@ int RISCOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		return 0;
 	}
 
-	regs.r[0] = -1; /* Current mode */
-	regs.r[1] = 9;  /* Log base 2 bpp */
+	vars[0] = 9;  /* Log base 2 bpp */
+	vars[1] = 11; /* XWndLimit - num x pixels -1 */
+	vars[2] = 12; /* YWndLimit - num y pixels -1 */
+	vars[3] = -1; /* Terminate list */
+	regs.r[0] = (int)vars;
+	regs.r[1] = (int)vals;
 
-	_kernel_swi(OS_ReadModeVariable, &regs, &regs);
-	vformat->BitsPerPixel = (1 << regs.r[2]);
+	_kernel_swi(OS_ReadVduVariables, &regs, &regs);
+	vformat->BitsPerPixel = (1 << vals[0]);
 
 	/* Determine the current screen size */
-	this->info.current_w = 0; /* FIXME! */
-	this->info.current_h = 0; /* FIXME! */
+	this->info.current_w = vals[1] + 1;
+	this->info.current_h = vals[2] + 1;
 
 	/* Minimum bpp for SDL is 8 */
 	if (vformat->BitsPerPixel < 8) vformat->BitsPerPixel = 8;
