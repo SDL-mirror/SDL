@@ -41,6 +41,9 @@ struct SDL_PrivateVideoData {
 	int flip_page;
 	int flip_offset[2];
 	Uint8 *flip_address[2];
+
+	/* Set to 1 if we're in banked video mode */
+	int banked;
 };
 /* Old variable names */
 #define SDL_nummodes		(this->hidden->SDL_nummodes)
@@ -49,6 +52,7 @@ struct SDL_PrivateVideoData {
 #define flip_page		(this->hidden->flip_page)
 #define flip_offset		(this->hidden->flip_offset)
 #define flip_address		(this->hidden->flip_address)
+#define	banked			(this->hidden->banked)
 
 #endif /* _SDL_svgavideo_h */
 

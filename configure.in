@@ -1072,7 +1072,6 @@ AC_HELP_STRING([--enable-video-svga], [use SVGAlib video driver [default=no]]),
          #include <vga.h>
          #include <vgamouse.h>
          #include <vgakeyboard.h>
-         #include <vgagl.h>
         ],[
          if ( SCANCODE_RIGHTWIN && SCANCODE_LEFTWIN ) {
              exit(0);
@@ -1084,7 +1083,7 @@ AC_HELP_STRING([--enable-video-svga], [use SVGAlib video driver [default=no]]),
         if test x$video_svga = xyes; then
             AC_DEFINE(SDL_VIDEO_DRIVER_SVGALIB)
             SOURCES="$SOURCES $srcdir/src/video/svga/*.c"
-            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lvga -lvgagl"
+            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lvga"
             have_video=yes
         fi
     fi
