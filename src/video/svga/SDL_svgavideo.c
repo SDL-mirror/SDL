@@ -40,6 +40,7 @@
 #include <vga.h>
 #include <vgamouse.h>
 #include <vgakeyboard.h>
+#include <vgagl.h>
 
 #include "SDL_video.h"
 #include "SDL_mouse.h"
@@ -50,6 +51,8 @@
 #include "SDL_svgaevents_c.h"
 #include "SDL_svgamouse_c.h"
 
+static GraphicsContext *realgc = NULL;
+static GraphicsContext *virtgc = NULL;
 
 /* Initialization/Query functions */
 static int SVGA_VideoInit(_THIS, SDL_PixelFormat *vformat);
@@ -168,6 +171,9 @@ static int SVGA_AddMode(_THIS, int mode, int actually_add, int force)
 		int i, j;
 
 		i = modeinfo->bytesperpixel-1;
+		if ( i < 0 ) {
+			return 0;
+		}
 		if ( actually_add ) {
 			SDL_Rect saved_rect[2];
 			int      saved_mode[2];
@@ -215,7 +221,7 @@ static void SVGA_UpdateVideoInfo(_THIS)
 	vga_modeinfo *modeinfo;
 
 	this->info.wm_available = 0;
-	this->info.hw_available = 1;
+	this->info.hw_available = (virtgc ? 0 : 1);
 	modeinfo = vga_getmodeinfo(vga_getcurrentmode());
 	this->info.video_mem = modeinfo->memory;
 	/* FIXME: Add hardware accelerated blit information */
@@ -268,7 +274,7 @@ int SVGA_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	total_modes = 0;
 	for ( mode=vga_lastmodenumber(); mode; --mode ) {
 		if ( vga_hasmode(mode) ) {
-			if ( SVGA_AddMode(this, mode, 0, 0) ) {
+			if ( SVGA_AddMode(this, mode, 0, 1) ) {
 				++total_modes;
 			}
 		}
@@ -302,7 +308,7 @@ int SVGA_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	}
 	for ( mode=vga_lastmodenumber(); mode; --mode ) {
 		if ( vga_hasmode(mode) ) {
-			SVGA_AddMode(this, mode, 1, 0);
+			SVGA_AddMode(this, mode, 1, 1);
 		}
 	}
 	SVGA_AddMode(this, G320x200x256, 1, 1);
@@ -344,6 +350,18 @@ SDL_Surface *SVGA_SetVideoMode(_THIS, SDL_Surface *current,
 	vga_modeinfo *modeinfo;
 	int screenpage_len;
 
+	/* Clean up old video mode data */
+	if ( realgc ) {
+		free(realgc);
+		realgc = NULL;
+	}
+	if ( virtgc ) {
+		/* FIXME: Why does this crash?
+		gl_freecontext(virtgc);*/
+		free(virtgc);
+		virtgc = NULL;
+	}
+
 	/* Try to set the requested linear video mode */
 	bpp = (bpp+7)/8-1;
 	for ( mode=0; SDL_modelist[bpp][mode]; ++mode ) {
@@ -356,14 +374,22 @@ SDL_Surface *SVGA_SetVideoMode(_THIS, SDL_Surface *current,
 		SDL_SetError("Couldn't find requested mode in list");
 		return(NULL);
 	}
-	vga_setmode(SDL_vgamode[bpp][mode]);
+	vgamode = SDL_vgamode[bpp][mode];
+	vga_setmode(vgamode);
 	vga_setpage(0);
 
-	vgamode=SDL_vgamode[bpp][mode];
-	if ((vga_setlinearaddressing()<0) && (vgamode!=G320x200x256)) {
-		SDL_SetError("Unable to set linear addressing");
-		return(NULL);
+	if ( (vga_setlinearaddressing() < 0) && (vgamode != G320x200x256) ) {
+		gl_setcontextvga(vgamode);
+		realgc = gl_allocatecontext();
+		gl_getcontext(realgc);
+    
+		gl_setcontextvgavirtual(vgamode);
+		virtgc = gl_allocatecontext();
+		gl_getcontext(virtgc);
+    
+		flags &= ~SDL_DOUBLEBUF;
 	}
+    
 	modeinfo = vga_getmodeinfo(SDL_vgamode[bpp][mode]);
 
 	/* Update hardware acceleration info */
@@ -379,7 +405,12 @@ SDL_Surface *SVGA_SetVideoMode(_THIS, SDL_Surface *current,
 	}
 
 	/* Set up the new mode framebuffer */
-	current->flags = (SDL_FULLSCREEN|SDL_HWSURFACE);
+	current->flags = SDL_FULLSCREEN;
+	if ( virtgc ) {
+		current->flags |= SDL_SWSURFACE;
+	} else {
+		current->flags |= SDL_HWSURFACE;
+	}
 	if ( bpp == 8 ) {
 		/* FIXME: What about DirectColor? */
 		current->flags |= SDL_HWPALETTE;
@@ -387,7 +418,11 @@ SDL_Surface *SVGA_SetVideoMode(_THIS, SDL_Surface *current,
 	current->w = width;
 	current->h = height;
 	current->pitch = modeinfo->linewidth;
-	current->pixels = vga_getgraphmem();
+	if ( virtgc ) {
+		current->pixels = virtgc->vbuf;
+	} else {
+		current->pixels = vga_getgraphmem();
+	}
 
 	/* set double-buffering */
 	if ( flags & SDL_DOUBLEBUF )
@@ -418,7 +453,11 @@ SDL_Surface *SVGA_SetVideoMode(_THIS, SDL_Surface *current,
 	} 
 
 	/* Set the blit function */
-	this->UpdateRects = SVGA_DirectUpdate;
+	if ( virtgc ) {
+		this->UpdateRects = SVGA_BankedUpdate;
+	} else {
+		this->UpdateRects = SVGA_DirectUpdate;
+	}
 
 	/* Set up the mouse handler again (buggy SVGAlib 1.40) */
 	mouse_seteventhandler(SVGA_mousecallback);
@@ -450,10 +489,12 @@ static void SVGA_UnlockHWSurface(_THIS, SDL_Surface *surface)
 
 static int SVGA_FlipHWSurface(_THIS, SDL_Surface *surface)
 {
-	vga_setdisplaystart(flip_offset[flip_page]);
-	flip_page=!flip_page;
-	surface->pixels=flip_address[flip_page];
-	vga_waitretrace();
+	if ( !virtgc ) {
+		vga_setdisplaystart(flip_offset[flip_page]);
+		flip_page=!flip_page;
+		surface->pixels=flip_address[flip_page];
+		vga_waitretrace();
+	}
 	return(0);
 }
 
@@ -462,9 +503,15 @@ static void SVGA_DirectUpdate(_THIS, int numrects, SDL_Rect *rects)
 	return;
 }
 
-/* FIXME: Can this be used under SVGAlib? */
 static void SVGA_BankedUpdate(_THIS, int numrects, SDL_Rect *rects)
 {
+	int i;
+	SDL_Rect *rect;
+
+	for ( i=0; i < numrects; ++i ) {
+		rect = &rects[i];
+		gl_copyboxtocontext(rect->x, rect->y, rect->w, rect->h, realgc, rect->x, rect->y);
+	}
 	return;
 }
 
@@ -490,6 +537,16 @@ void SVGA_VideoQuit(_THIS)
 
 	/* Reset the console video mode */
 	if ( this->screen && (this->screen->w && this->screen->h) ) {
+		if ( realgc ) {
+			free(realgc);
+			realgc = NULL;
+		}
+		if ( virtgc ) {
+			/* FIXME: Why does this crash?
+			gl_freecontext(virtgc);*/
+			free(virtgc);
+			virtgc = NULL;
+		}
 		vga_setmode(TEXT);
 	}
 	keyboard_close();
