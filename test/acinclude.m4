@@ -32,7 +32,6 @@ AC_ARG_ENABLE(sdltest, [  --disable-sdltest       Do not try to compile and run 
      fi
   fi
 
-  AC_REQUIRE([AC_CANONICAL_TARGET])
   PATH="$prefix/bin:$prefix/usr/bin:$PATH"
   AC_PATH_PROG(SDL_CONFIG, sdl-config, no, [$PATH])
   min_sdl_version=ifelse([$1], ,0.11.0,$1)
@@ -121,6 +120,7 @@ int main (int argc, char *argv[])
 
 ],, no_sdl=yes,[echo $ac_n "cross compiling; assumed OK... $ac_c"])
        CFLAGS="$ac_save_CFLAGS"
+       CXXFLAGS="$ac_save_CXXFLAGS"
        LIBS="$ac_save_LIBS"
      fi
   fi
@@ -170,7 +170,6 @@ int main(int argc, char *argv[])
        fi
      fi
      SDL_CFLAGS=""
-     SDL_CXXFLAGS=""
      SDL_LIBS=""
      ifelse([$3], , :, [$3])
   fi

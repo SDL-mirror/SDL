@@ -39,9 +39,9 @@ AC_SUBST(LT_CURRENT)
 AC_SUBST(LT_REVISION)
 AC_SUBST(LT_AGE)
 
-dnl Detect the canonical host and target build environment
+dnl Detect the canonical build and host environments
 AC_CONFIG_AUX_DIRS($srcdir/build-scripts)
-AC_CANONICAL_SYSTEM
+AC_CANONICAL_HOST
 AC_C_BIGENDIAN
 if test x$ac_cv_c_bigendian = xyes; then
     AC_DEFINE(SDL_BYTEORDER, 4321)
@@ -54,7 +54,7 @@ INCLUDE="-I$srcdir/include"
 if test x$srcdir != x.; then
     INCLUDE="-Iinclude $INCLUDE"
 fi
-case "$target" in
+case "$host" in
     *-*-cygwin*)
         # We build SDL on cygwin without the UNIX emulation layer
         BASE_CFLAGS="-I/usr/include/mingw -mno-cygwin"
@@ -285,7 +285,7 @@ AC_HELP_STRING([--enable-oss], [support the OSS audio API [default=yes]]),
             have_audio=yes
 
             # OpenBSD needs linking with ossaudio emulation library
-            case "$target" in
+            case "$host" in
                 *-*-openbsd*|*-*-netbsd*)
                     EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lossaudio";;
             esac
@@ -569,7 +569,7 @@ dnl See if we can use x86 assembly blitters
 CheckNASM()
 {
     dnl Make sure we are running on an x86 platform
-    case $target in
+    case $host in
         i?86*)
             ;;
         *)
@@ -600,7 +600,7 @@ AC_HELP_STRING([--enable-nasm], [use nasm assembly blitters on x86 [default=yes]
             AC_SUBST(NASM)
             AC_SUBST(NASMFLAGS)
 
-            case "$target" in
+            case "$host" in
                 # this line is needed for QNX, because it's not defined the __ELF__
                 *-*-qnx*)
                      EXTRA_CFLAGS="$EXTRA_CFLAGS -D__ELF__";;
@@ -753,7 +753,7 @@ AC_HELP_STRING([--enable-video-x11], [use X11 video driver [default=yes]]),
 AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [default=yes]]),
                           , enable_x11_shared=yes)
 
-            case "$target" in
+            case "$host" in
                 *-*-darwin*)
                     x11_lib='/usr/X11R6/lib/libX11.6.dylib'
                     x11ext_lib='/usr/X11R6/lib/libXext.6.dylib'
@@ -1353,7 +1353,7 @@ CheckMacGL()
 {
     if test x$enable_video = xyes -a x$enable_video_opengl = xyes; then
         AC_DEFINE(SDL_VIDEO_OPENGL)
-        case "$target" in
+        case "$host" in
             *-*-darwin*)
                 EXTRA_LDFLAGS="$EXTRA_LDFLAGS -framework OpenGL"
                 # The following is probably not available in Darwin:
@@ -1485,7 +1485,7 @@ AC_HELP_STRING([--enable-pthreads], [use POSIX threads for multi-threading [defa
     AC_ARG_ENABLE(pthread-sem,
 AC_HELP_STRING([--enable-pthread-sem], [use pthread semaphores [default=yes]]),
                   , enable_pthread_sem=yes)
-    case "$target" in
+    case "$host" in
         *-*-linux*)
             pthread_cflags="-D_REENTRANT"
             pthread_lib="-lpthread"
@@ -1894,8 +1894,8 @@ AC_HELP_STRING([--enable-rpath], [use an rpath when linking SDL [default=yes]]),
                   , enable_rpath=yes)
 }
 
-dnl Set up the configuration based on the target platform!
-case "$target" in
+dnl Set up the configuration based on the host platform!
+case "$host" in
     arm-*-elf*) # FIXME: Can we get more specific for iPodLinux?
         ARCH=linux
         CheckDummyVideo
@@ -1908,7 +1908,7 @@ case "$target" in
         fi
         ;;
     *-*-linux*|*-*-gnu*|*-*-k*bsd*-gnu|*-*-bsdi*|*-*-freebsd*|*-*-netbsd*|*-*-openbsd*|*-*-sysv5*|*-*-solaris*|*-*-hpux*|*-*-irix*|*-*-aix*|*-*-osf*)
-        case "$target" in
+        case "$host" in
             *-*-linux*)         ARCH=linux ;;
             *-*-kfreebsd*-gnu)  ARCH=kfreebsd-gnu ;;
             *-*-knetbsd*-gnu)   ARCH=knetbsd-gnu ;;
@@ -2072,7 +2072,7 @@ case "$target" in
         ;;
     *-*-cygwin* | *-*-mingw32*)
         ARCH=win32
-        if test "$build" != "$target"; then # cross-compiling
+        if test "$build" != "$host"; then # cross-compiling
             # Default cross-compile location
             ac_default_prefix=/usr/local/cross-tools/i386-mingw32msvc
         else
@@ -2335,7 +2335,7 @@ case "$target" in
         ;;
     *)
         AC_MSG_ERROR([
-*** Unsupported target:  Please add to configure.in
+*** Unsupported host:  Please add to configure.in
         ])
         ;;
 esac
