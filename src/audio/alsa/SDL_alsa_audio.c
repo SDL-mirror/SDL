@@ -69,6 +69,7 @@ static int (*SDL_NAME(snd_pcm_prepare))(snd_pcm_t *pcm);
 static int (*SDL_NAME(snd_pcm_drain))(snd_pcm_t *pcm);
 static const char *(*SDL_NAME(snd_strerror))(int errnum);
 static size_t (*SDL_NAME(snd_pcm_hw_params_sizeof))(void);
+static size_t (*SDL_NAME(snd_pcm_sw_params_sizeof))(void);
 static int (*SDL_NAME(snd_pcm_hw_params_any))(snd_pcm_t *pcm, snd_pcm_hw_params_t *params);
 static int (*SDL_NAME(snd_pcm_hw_params_set_access))(snd_pcm_t *pcm, snd_pcm_hw_params_t *params, snd_pcm_access_t access);
 static int (*SDL_NAME(snd_pcm_hw_params_set_format))(snd_pcm_t *pcm, snd_pcm_hw_params_t *params, snd_pcm_format_t val);
@@ -79,7 +80,16 @@ static snd_pcm_uframes_t (*SDL_NAME(snd_pcm_hw_params_set_period_size_near))(snd
 static unsigned int (*SDL_NAME(snd_pcm_hw_params_set_periods_near))(snd_pcm_t *pcm, snd_pcm_hw_params_t *params, unsigned int val, int *dir);
 static int (*SDL_NAME(snd_pcm_hw_params))(snd_pcm_t *pcm, snd_pcm_hw_params_t *params);
 static int (*SDL_NAME(snd_pcm_nonblock))(snd_pcm_t *pcm, int nonblock);
+/*
+static unsigned int (*SDL_NAME(snd_pcm_hw_params_get_period_size))(const snd_pcm_hw_params_t *params);
+static int (*SDL_NAME(snd_pcm_hw_params_get_periods))(snd_pcm_hw_params_t *params);
+*/
+static int (*SDL_NAME(snd_pcm_sw_params_current))(snd_pcm_t *pcm, snd_pcm_sw_params_t *swparams);
+static int (*SDL_NAME(snd_pcm_sw_params_set_start_threshold))(snd_pcm_t *pcm, snd_pcm_sw_params_t *params, snd_pcm_uframes_t val);
+static int (*SDL_NAME(snd_pcm_sw_params_set_avail_min))(snd_pcm_t *pcm, snd_pcm_sw_params_t *params, snd_pcm_uframes_t val);
+static int (*SDL_NAME(snd_pcm_sw_params))(snd_pcm_t *pcm, snd_pcm_sw_params_t *params);
 #define snd_pcm_hw_params_sizeof SDL_NAME(snd_pcm_hw_params_sizeof)
+#define snd_pcm_sw_params_sizeof SDL_NAME(snd_pcm_sw_params_sizeof)
 
 /* cast funcs to char* first, to please GCC's strict aliasing rules. */
 static struct {
@@ -94,6 +104,7 @@ static struct {
 	{ "snd_pcm_drain",	(void**)(char*)&SDL_NAME(snd_pcm_drain)	},
 	{ "snd_strerror",	(void**)(char*)&SDL_NAME(snd_strerror)		},
 	{ "snd_pcm_hw_params_sizeof",		(void**)(char*)&SDL_NAME(snd_pcm_hw_params_sizeof)		},
+	{ "snd_pcm_sw_params_sizeof",		(void**)(char*)&SDL_NAME(snd_pcm_sw_params_sizeof)		},
 	{ "snd_pcm_hw_params_any",		(void**)(char*)&SDL_NAME(snd_pcm_hw_params_any)		},
 	{ "snd_pcm_hw_params_set_access",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params_set_access)		},
 	{ "snd_pcm_hw_params_set_format",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params_set_format)		},
@@ -104,6 +115,14 @@ static struct {
 	{ "snd_pcm_hw_params_set_periods_near",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params_set_periods_near)	},
 	{ "snd_pcm_hw_params",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params)	},
 	{ "snd_pcm_nonblock",	(void**)(char*)&SDL_NAME(snd_pcm_nonblock)	},
+/*
+	{ "snd_pcm_hw_params_get_period_size",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params_get_period_size)	},
+	{ "snd_pcm_hw_params_get_periods",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params_get_periods)	},
+*/
+	{ "snd_pcm_sw_params_current",	(void**)(char*)&SDL_NAME(snd_pcm_sw_params_current)	},
+	{ "snd_pcm_sw_params_set_start_threshold",	(void**)(char*)&SDL_NAME(snd_pcm_sw_params_set_start_threshold)	},
+	{ "snd_pcm_sw_params_set_avail_min",	(void**)(char*)&SDL_NAME(snd_pcm_sw_params_set_avail_min)	},
+	{ "snd_pcm_sw_params",	(void**)(char*)&SDL_NAME(snd_pcm_sw_params)	},
 };
 
 static void UnloadALSALibrary(void) {
@@ -304,7 +323,8 @@ static void ALSA_CloseAudio(_THIS)
 static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec)
 {
 	int                  status;
-	snd_pcm_hw_params_t *params;
+	snd_pcm_hw_params_t *hwparams;
+	snd_pcm_sw_params_t *swparams;
 	snd_pcm_format_t     format;
 	snd_pcm_uframes_t    frames;
 	Uint16               test_format;
@@ -319,8 +339,8 @@ static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	}
 
 	/* Figure out what the hardware is capable of */
-	snd_pcm_hw_params_alloca(&params);
-	status = SDL_NAME(snd_pcm_hw_params_any)(pcm_handle, params);
+	snd_pcm_hw_params_alloca(&hwparams);
+	status = SDL_NAME(snd_pcm_hw_params_any)(pcm_handle, hwparams);
 	if ( status < 0 ) {
 		SDL_SetError("Couldn't get hardware config: %s", SDL_NAME(snd_strerror)(status));
 		ALSA_CloseAudio(this);
@@ -328,7 +348,7 @@ static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	}
 
 	/* SDL only uses interleaved sample output */
-	status = SDL_NAME(snd_pcm_hw_params_set_access)(pcm_handle, params, SND_PCM_ACCESS_RW_INTERLEAVED);
+	status = SDL_NAME(snd_pcm_hw_params_set_access)(pcm_handle, hwparams, SND_PCM_ACCESS_RW_INTERLEAVED);
 	if ( status < 0 ) {
 		SDL_SetError("Couldn't set interleaved access: %s", SDL_NAME(snd_strerror)(status));
 		ALSA_CloseAudio(this);
@@ -363,7 +383,7 @@ static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec)
 				break;
 		}
 		if ( format != 0 ) {
-			status = SDL_NAME(snd_pcm_hw_params_set_format)(pcm_handle, params, format);
+			status = SDL_NAME(snd_pcm_hw_params_set_format)(pcm_handle, hwparams, format);
 		}
 		if ( status < 0 ) {
 			test_format = SDL_NextAudioFormat();
@@ -377,9 +397,9 @@ static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	spec->format = test_format;
 
 	/* Set the number of channels */
-	status = SDL_NAME(snd_pcm_hw_params_set_channels)(pcm_handle, params, spec->channels);
+	status = SDL_NAME(snd_pcm_hw_params_set_channels)(pcm_handle, hwparams, spec->channels);
 	if ( status < 0 ) {
-		status = SDL_NAME(snd_pcm_hw_params_get_channels)(params);
+		status = SDL_NAME(snd_pcm_hw_params_get_channels)(hwparams);
 		if ( (status <= 0) || (status > 2) ) {
 			SDL_SetError("Couldn't set audio channels");
 			ALSA_CloseAudio(this);
@@ -389,7 +409,7 @@ static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	}
 
 	/* Set the audio rate */
-	status = SDL_NAME(snd_pcm_hw_params_set_rate_near)(pcm_handle, params, spec->freq, NULL);
+	status = SDL_NAME(snd_pcm_hw_params_set_rate_near)(pcm_handle, hwparams, spec->freq, NULL);
 	if ( status < 0 ) {
 		SDL_SetError("Couldn't set audio frequency: %s", SDL_NAME(snd_strerror)(status));
 		ALSA_CloseAudio(this);
@@ -399,14 +419,50 @@ static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec)
 
 	/* Set the buffer size, in samples */
 	frames = spec->samples;
-	frames = SDL_NAME(snd_pcm_hw_params_set_period_size_near)(pcm_handle, params, frames, NULL);
+	frames = SDL_NAME(snd_pcm_hw_params_set_period_size_near)(pcm_handle, hwparams, frames, NULL);
 	spec->samples = frames;
-	SDL_NAME(snd_pcm_hw_params_set_periods_near)(pcm_handle, params, 2, NULL);
+	SDL_NAME(snd_pcm_hw_params_set_periods_near)(pcm_handle, hwparams, 2, NULL);
 
 	/* "set" the hardware with the desired parameters */
-	status = SDL_NAME(snd_pcm_hw_params)(pcm_handle, params);
+	status = SDL_NAME(snd_pcm_hw_params)(pcm_handle, hwparams);
 	if ( status < 0 ) {
-		SDL_SetError("Couldn't set audio parameters: %s", SDL_NAME(snd_strerror)(status));
+		SDL_SetError("Couldn't set hardware audio parameters: %s", SDL_NAME(snd_strerror)(status));
+		ALSA_CloseAudio(this);
+		return(-1);
+	}
+
+/*
+{ unsigned int bufsize; int fragments;
+   bufsize = SDL_NAME(snd_pcm_hw_params_get_period_size)(hwparams);
+   fragments = SDL_NAME(snd_pcm_hw_params_get_periods)(hwparams);
+
+   fprintf(stderr, "ALSA: bufsize = %ld, fragments = %d\n", bufsize, fragments);
+}
+*/
+
+	/* Set the software parameters */
+	snd_pcm_sw_params_alloca(&swparams);
+	status = SDL_NAME(snd_pcm_sw_params_current)(pcm_handle, swparams);
+	if ( status < 0 ) {
+		SDL_SetError("Couldn't get software config: %s", SDL_NAME(snd_strerror)(status));
+		ALSA_CloseAudio(this);
+		return(-1);
+	}
+	status = SDL_NAME(snd_pcm_sw_params_set_start_threshold)(pcm_handle, swparams, 0);
+	if ( status < 0 ) {
+		SDL_SetError("Couldn't set start threshold: %s", SDL_NAME(snd_strerror)(status));
+		ALSA_CloseAudio(this);
+		return(-1);
+	}
+	status = SDL_NAME(snd_pcm_sw_params_set_avail_min)(pcm_handle, swparams, frames);
+	if ( status < 0 ) {
+		SDL_SetError("Couldn't set avail min: %s", SDL_NAME(snd_strerror)(status));
+		ALSA_CloseAudio(this);
+		return(-1);
+	}
+	status = SDL_NAME(snd_pcm_sw_params)(pcm_handle, swparams);
+	if ( status < 0 ) {
+		SDL_SetError("Couldn't set software audio parameters: %s", SDL_NAME(snd_strerror)(status));
 		ALSA_CloseAudio(this);
 		return(-1);
 	}
