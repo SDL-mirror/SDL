@@ -77,17 +77,17 @@ static int (*SDL_NAME(snd_pcm_hw_params_set_channels))(snd_pcm_t *pcm, snd_pcm_h
 static int (*SDL_NAME(snd_pcm_hw_params_get_channels))(const snd_pcm_hw_params_t *params);
 static unsigned int (*SDL_NAME(snd_pcm_hw_params_set_rate_near))(snd_pcm_t *pcm, snd_pcm_hw_params_t *params, unsigned int val, int *dir);
 static snd_pcm_uframes_t (*SDL_NAME(snd_pcm_hw_params_set_period_size_near))(snd_pcm_t *pcm, snd_pcm_hw_params_t *params, snd_pcm_uframes_t val, int *dir);
+static snd_pcm_sframes_t (*SDL_NAME(snd_pcm_hw_params_get_period_size))(const snd_pcm_hw_params_t *params);
 static unsigned int (*SDL_NAME(snd_pcm_hw_params_set_periods_near))(snd_pcm_t *pcm, snd_pcm_hw_params_t *params, unsigned int val, int *dir);
-static int (*SDL_NAME(snd_pcm_hw_params))(snd_pcm_t *pcm, snd_pcm_hw_params_t *params);
-static int (*SDL_NAME(snd_pcm_nonblock))(snd_pcm_t *pcm, int nonblock);
-/*
-static unsigned int (*SDL_NAME(snd_pcm_hw_params_get_period_size))(const snd_pcm_hw_params_t *params);
 static int (*SDL_NAME(snd_pcm_hw_params_get_periods))(snd_pcm_hw_params_t *params);
+static int (*SDL_NAME(snd_pcm_hw_params))(snd_pcm_t *pcm, snd_pcm_hw_params_t *params);
+/*
 */
 static int (*SDL_NAME(snd_pcm_sw_params_current))(snd_pcm_t *pcm, snd_pcm_sw_params_t *swparams);
 static int (*SDL_NAME(snd_pcm_sw_params_set_start_threshold))(snd_pcm_t *pcm, snd_pcm_sw_params_t *params, snd_pcm_uframes_t val);
 static int (*SDL_NAME(snd_pcm_sw_params_set_avail_min))(snd_pcm_t *pcm, snd_pcm_sw_params_t *params, snd_pcm_uframes_t val);
 static int (*SDL_NAME(snd_pcm_sw_params))(snd_pcm_t *pcm, snd_pcm_sw_params_t *params);
+static int (*SDL_NAME(snd_pcm_nonblock))(snd_pcm_t *pcm, int nonblock);
 #define snd_pcm_hw_params_sizeof SDL_NAME(snd_pcm_hw_params_sizeof)
 #define snd_pcm_sw_params_sizeof SDL_NAME(snd_pcm_sw_params_sizeof)
 
@@ -112,17 +112,15 @@ static struct {
 	{ "snd_pcm_hw_params_get_channels",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params_get_channels)	},
 	{ "snd_pcm_hw_params_set_rate_near",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params_set_rate_near)	},
 	{ "snd_pcm_hw_params_set_period_size_near",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params_set_period_size_near)	},
-	{ "snd_pcm_hw_params_set_periods_near",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params_set_periods_near)	},
-	{ "snd_pcm_hw_params",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params)	},
-	{ "snd_pcm_nonblock",	(void**)(char*)&SDL_NAME(snd_pcm_nonblock)	},
-/*
 	{ "snd_pcm_hw_params_get_period_size",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params_get_period_size)	},
+	{ "snd_pcm_hw_params_set_periods_near",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params_set_periods_near)	},
 	{ "snd_pcm_hw_params_get_periods",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params_get_periods)	},
-*/
+	{ "snd_pcm_hw_params",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params)	},
 	{ "snd_pcm_sw_params_current",	(void**)(char*)&SDL_NAME(snd_pcm_sw_params_current)	},
 	{ "snd_pcm_sw_params_set_start_threshold",	(void**)(char*)&SDL_NAME(snd_pcm_sw_params_set_start_threshold)	},
 	{ "snd_pcm_sw_params_set_avail_min",	(void**)(char*)&SDL_NAME(snd_pcm_sw_params_set_avail_min)	},
 	{ "snd_pcm_sw_params",	(void**)(char*)&SDL_NAME(snd_pcm_sw_params)	},
+	{ "snd_pcm_nonblock",	(void**)(char*)&SDL_NAME(snd_pcm_nonblock)	},
 };
 
 static void UnloadALSALibrary(void) {
@@ -431,8 +429,9 @@ static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec)
 		return(-1);
 	}
 
+/* This is useful for debugging... */
 /*
-{ unsigned int bufsize; int fragments;
+{ snd_pcm_sframes_t bufsize; int fragments;
    bufsize = SDL_NAME(snd_pcm_hw_params_get_period_size)(hwparams);
    fragments = SDL_NAME(snd_pcm_hw_params_get_periods)(hwparams);
 
