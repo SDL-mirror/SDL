@@ -272,7 +272,9 @@ SDL_SYS_JoystickOpen(SDL_Joystick *joy)
 	}
 
 	rep = &hw->inreport;
-	rep->rid = 0;
+	if (ioctl(fd, USB_GET_REPORT_ID, &rep->rid) < 0) {
+		rep->rid = -1; /* XXX */
+	}
 	if (report_alloc(rep, hw->repdesc, REPORT_INPUT) < 0) {
 		goto usberr;
 	}
