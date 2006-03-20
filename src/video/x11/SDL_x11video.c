@@ -310,11 +310,18 @@ static char *get_classname(char *classname, int maxlen)
 /* Create auxiliary (toplevel) windows with the current visual */
 static void create_aux_windows(_THIS)
 {
+    Atom _NET_WM_NAME;
+    Atom _NET_WM_ICON_NAME;
     char classname[1024];
     XSetWindowAttributes xattr;
     XWMHints *hints;
-    XTextProperty titleprop, iconprop;
+    XTextProperty titleprop, titlepropUTF8, iconprop, iconpropUTF8;
     int def_vis = (SDL_Visual == DefaultVisual(SDL_Display, SDL_Screen));
+
+    /* Look up some useful Atoms */
+    WM_DELETE_WINDOW = pXInternAtom(SDL_Display, "WM_DELETE_WINDOW", False);
+    _NET_WM_NAME = pXInternAtom(SDL_Display, "_NET_WM_NAME", False);
+    _NET_WM_ICON_NAME = pXInternAtom(SDL_Display, "_NET_WM_ICON_NAME", False);
 
     /* Don't create any extra windows if we are being managed */
     if ( SDL_windowid ) {
@@ -358,12 +365,15 @@ static void create_aux_windows(_THIS)
     }
 
     hints = NULL;
-    titleprop.value = iconprop.value = NULL;
+    titleprop.value = titlepropUTF8.value = NULL;
+    iconprop.value = iconpropUTF8.value = NULL;
     if(WMwindow) {
 	/* All window attributes must survive the recreation */
 	hints = pXGetWMHints(SDL_Display, WMwindow);
-	pXGetWMName(SDL_Display, WMwindow, &titleprop);
-	pXGetWMIconName(SDL_Display, WMwindow, &iconprop);
+	pXGetTextProperty(SDL_Display, WMwindow, &titleprop, XA_WM_NAME);
+	pXGetTextProperty(SDL_Display, WMwindow, &titlepropUTF8, _NET_WM_NAME);
+	pXGetTextProperty(SDL_Display, WMwindow, &iconprop, XA_WM_ICON_NAME);
+	pXGetTextProperty(SDL_Display, WMwindow, &iconpropUTF8, _NET_WM_ICON_NAME);
 	pXDestroyWindow(SDL_Display, WMwindow);
     }
 
@@ -383,12 +393,20 @@ static void create_aux_windows(_THIS)
     pXSetWMHints(SDL_Display, WMwindow, hints);
     pXFree(hints);
     if(titleprop.value) {
-	pXSetWMName(SDL_Display, WMwindow, &titleprop);
+	pXSetTextProperty(SDL_Display, WMwindow, &titleprop, XA_WM_NAME);
 	pXFree(titleprop.value);
     }
+    if(titlepropUTF8.value) {
+	pXSetTextProperty(SDL_Display, WMwindow, &titlepropUTF8, _NET_WM_NAME);
+	pXFree(titlepropUTF8.value);
+    }
     if(iconprop.value) {
-	pXSetWMIconName(SDL_Display, WMwindow, &iconprop);
+	pXSetTextProperty(SDL_Display, WMwindow, &iconprop, XA_WM_ICON_NAME);
 	pXFree(iconprop.value);
+    }
+    if(iconpropUTF8.value) {
+	pXSetTextProperty(SDL_Display, WMwindow, &iconpropUTF8, _NET_WM_ICON_NAME);
+	pXFree(iconpropUTF8.value);
     }
 
     pXSelectInput(SDL_Display, WMwindow,
@@ -433,7 +451,6 @@ static void create_aux_windows(_THIS)
     #endif
 
     /* Allow the window to be deleted by the window manager */
-    WM_DELETE_WINDOW = pXInternAtom(SDL_Display, "WM_DELETE_WINDOW", False);
     pXSetWMProtocols(SDL_Display, WMwindow, &WM_DELETE_WINDOW, 1);
 }
 

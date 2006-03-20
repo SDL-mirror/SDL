@@ -243,46 +243,61 @@ void X11_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 void X11_SetCaption(_THIS, const char *title, const char *icon)
 {
 	XTextProperty titleprop, iconprop;
+	Status status;
+
+#ifdef X_HAVE_UTF8_STRING
+	Atom _NET_WM_NAME;
+	Atom _NET_WM_ICON_NAME;
+
+	/* Look up some useful Atoms */
+	_NET_WM_NAME = pXInternAtom(SDL_Display, "_NET_WM_NAME", False);
+	_NET_WM_ICON_NAME = pXInternAtom(SDL_Display, "_NET_WM_ICON_NAME", False);
+#endif
 
 	/* Lock the event thread, in multi-threading environments */
 	SDL_Lock_EventThread();
 
 	if ( title != NULL ) {
-		int error = XLocaleNotSupported;
-#ifdef X_HAVE_UTF8_STRING
-		error = pXutf8TextListToTextProperty(SDL_Display,
-				(char **)&title, 1, XUTF8StringStyle,
-				&titleprop);
-#endif
-		if ( error != Success ) {
-			char *title_latin1 = SDL_iconv_utf8_latin1((char *)title);
-			if ( !title_latin1 ) {
-				SDL_OutOfMemory();
-				return;
-			}
-			pXStringListToTextProperty(&title_latin1, 1, &titleprop);
-			SDL_free(title_latin1);
+		char *title_latin1 = SDL_iconv_utf8_latin1((char *)title);
+		if ( !title_latin1 ) {
+			SDL_OutOfMemory();
+			return;
 		}
-		pXSetWMName(SDL_Display, WMwindow, &titleprop);
-		pXFree(titleprop.value);
+		status = pXStringListToTextProperty(&title_latin1, 1, &titleprop);
+		SDL_free(title_latin1);
+		if ( status ) {
+			pXSetTextProperty(SDL_Display, WMwindow, &titleprop, XA_WM_NAME);
+			pXFree(titleprop.value);
+		}
+#ifdef X_HAVE_UTF8_STRING
+		status = pXutf8TextListToTextProperty(SDL_Display,
+				(char **)&title, 1, XUTF8StringStyle, &titleprop);
+		if ( status == Success ) {
+			pXSetTextProperty(SDL_Display, WMwindow, &titleprop, _NET_WM_NAME);
+			pXFree(titleprop.value);
+		}
+#endif
 	}
 	if ( icon != NULL ) {
-		int error = XLocaleNotSupported;
-#ifdef X_HAVE_UTF8_STRING
-		error = pXutf8TextListToTextProperty(SDL_Display,
-				(char **)&icon, 1, XUTF8StringStyle, &iconprop);
-#endif
-		if ( error != Success ) {
-			char *icon_latin1 = SDL_iconv_utf8_latin1((char *)title);
-			if ( !icon_latin1 ) {
-				SDL_OutOfMemory();
-				return;
-			}
-			pXStringListToTextProperty(&icon_latin1, 1, &iconprop);
-			SDL_free(icon_latin1);
+		char *icon_latin1 = SDL_iconv_utf8_latin1((char *)icon);
+		if ( !icon_latin1 ) {
+			SDL_OutOfMemory();
+			return;
 		}
-		pXSetWMIconName(SDL_Display, WMwindow, &iconprop);
-		pXFree(iconprop.value);
+		status = pXStringListToTextProperty(&icon_latin1, 1, &iconprop);
+		SDL_free(icon_latin1);
+		if ( status ) {
+			pXSetTextProperty(SDL_Display, WMwindow, &iconprop, XA_WM_ICON_NAME);
+			pXFree(iconprop.value);
+		}
+#ifdef X_HAVE_UTF8_STRING
+		status = pXutf8TextListToTextProperty(SDL_Display,
+				(char **)&icon, 1, XUTF8StringStyle, &iconprop);
+		if ( status == Success ) {
+			pXSetTextProperty(SDL_Display, WMwindow, &iconprop, _NET_WM_ICON_NAME);
+			pXFree(iconprop.value);
+		}
+#endif
 	}
 	pXSync(SDL_Display, False);
 
