@@ -174,11 +174,6 @@ int SDL_RunAudio(void *audiop)
 		stream_len = audio->spec.size;
 	}
 
-	stream = audio->GetAudioBuf(audio);
-	if ( stream == NULL ) {
-		stream = audio->fake_stream;
-	}
-
 #if SDL_AUDIO_DRIVER_AHI
 	SDL_mutexV(audio->mixer_lock);
 	D(bug("Entering audio loop...\n"));
@@ -207,16 +202,6 @@ int SDL_RunAudio(void *audiop)
 
 	/* Loop, filling the audio buffers */
 	while ( audio->enabled ) {
-
-		/* Wait for new current buffer to finish playing */
-		if ( stream == audio->fake_stream ) {
-			SDL_Delay((audio->spec.samples*1000)/audio->spec.freq);
-		} else {
-#if SDL_AUDIO_DRIVER_AHI
-			if ( started > 1 )
-#endif
-			audio->WaitAudio(audio);
-		}
 
 		/* Fill the current buffer with sound */
 		if ( audio->convert.needed ) {
@@ -253,12 +238,16 @@ int SDL_RunAudio(void *audiop)
 		/* Ready current buffer for play and change current buffer */
 		if ( stream != audio->fake_stream ) {
 			audio->PlayAudio(audio);
-#if SDL_AUDIO_DRIVER_AHI
-/* AmigaOS don't have to wait the first time audio is played! */
-			started++;
-#endif
+		}
+
+		/* Wait for an audio buffer to become available */
+		if ( stream == audio->fake_stream ) {
+			SDL_Delay((audio->spec.samples*1000)/audio->spec.freq);
+		} else {
+			audio->WaitAudio(audio);
 		}
 	}
+
 	/* Wait for the audio to drain.. */
 	if ( audio->WaitDone ) {
 		audio->WaitDone(audio);
