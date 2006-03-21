@@ -627,6 +627,12 @@ static void QZ_DoActivate (_THIS)
         QZ_PrivateWarpCursor (this, cursor_loc.x, cursor_loc.y);
         QZ_ChangeGrabState (this, QZ_ENABLE_GRAB);
     }
+    else {
+        /* Update SDL's mouse location */
+        NSPoint p;
+        QZ_GetMouseLocation (this, &p);
+        SDL_PrivateMouseMotion (0, 0, p.x, p.y);
+    }
 }
 
 static void QZ_DoDeactivate (_THIS) {
