@@ -639,7 +639,7 @@ int BE_GL_LoadLibrary(_THIS, const char *path)
 				if (get_image_symbol((image_id)cookie,"glBegin",B_SYMBOL_TYPE_ANY,&location) == B_OK) {
 					_this->gl_config.dll_handle = (void*)cookie;
 					_this->gl_config.driver_loaded = 1;
-					SDL_strncpy(_this->gl_config.driver_path, "libGL.so", sizeof(_this->gl_config.driver_path)-1);
+					SDL_strlcpy(_this->gl_config.driver_path, "libGL.so", SDL_arraysize(_this->gl_config.driver_path));
 				}
 			}
 		}
@@ -667,7 +667,7 @@ int BE_GL_LoadLibrary(_THIS, const char *path)
 
 		if ((_this->gl_config.dll_handle = (void*)load_add_on(path)) != (void*)B_ERROR) {
 			_this->gl_config.driver_loaded = 1;
-			SDL_strncpy(_this->gl_config.driver_path, path, sizeof(_this->gl_config.driver_path)-1);
+			SDL_strlcpy(_this->gl_config.driver_path, path, SDL_arraysize(_this->gl_config.driver_path));
 		}*/
 	}
 
@@ -676,7 +676,7 @@ int BE_GL_LoadLibrary(_THIS, const char *path)
 	} else {
 		_this->gl_config.dll_handle = NULL;
 		_this->gl_config.driver_loaded = 0;
-		SDL_strcpy(_this->gl_config.driver_path, "");
+		*_this->gl_config.driver_path = '\0';
 		return -1;
 	}
 }

@@ -109,16 +109,18 @@ static int CheckDrive(char *drive)
 static void AddDrive(char *drive)
 {
 	int i;
+	size_t len;
 
 	if ( SDL_numcds < MAX_DRIVES ) {
 		/* Add this drive to our list */
 		i = SDL_numcds;
-		SDL_cdlist[i] = (char *)SDL_malloc(SDL_strlen(drive)+1);
+		len = SDL_strlen(drive)+1;
+		SDL_cdlist[i] = (char *)SDL_malloc(len);
 		if ( SDL_cdlist[i] == NULL ) {
 			SDL_OutOfMemory();
 			return;
 		}
-		SDL_strcpy(SDL_cdlist[i], drive);
+		SDL_strlcpy(SDL_cdlist[i], drive, len);
 		++SDL_numcds;
 #ifdef CDROM_DEBUG
   fprintf(stderr, "Added CD-ROM drive: %s\n", drive);
@@ -165,9 +167,10 @@ int  SDL_SYS_CDInit(void)
 	SDLcdrom = SDL_getenv("SDL_CDROM");	/* ':' separated list of devices */
 	if ( SDLcdrom != NULL ) {
 		char *cdpath, *delim;
-		cdpath = (char *)SDL_malloc(SDL_strlen(SDLcdrom)+1);
+		size_t len = SDL_strlen(SDLcdrom)+1;
+		cdpath = SDL_stack_alloc(char, len);
 		if ( cdpath != NULL ) {
-			SDL_strcpy(cdpath, SDLcdrom);
+			SDL_strlcpy(cdpath, SDLcdrom, len);
 			SDLcdrom = cdpath;
 			do {
 				delim = SDL_strchr(SDLcdrom, ':');
@@ -183,7 +186,7 @@ int  SDL_SYS_CDInit(void)
 					SDLcdrom = NULL;
 				}
 			} while ( SDLcdrom );
-			SDL_free(cdpath);
+			SDL_stack_free(cdpath);
 		}
 
 		/* If we found our drives, there's nothing left to do */
