@@ -173,7 +173,11 @@ int SDL_RunAudio(void *audiop)
 		silence = audio->spec.silence;
 		stream_len = audio->spec.size;
 	}
-	stream = audio->fake_stream;
+
+	stream = audio->GetAudioBuf(audio);
+	if ( stream == NULL ) {
+		stream = audio->fake_stream;
+	}
 
 #if SDL_AUDIO_DRIVER_AHI
 	SDL_mutexV(audio->mixer_lock);
