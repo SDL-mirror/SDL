@@ -2001,8 +2001,8 @@ case "$host" in
                 have_audio=yes
             ;;
             netbsd|openbsd)
-                AC_DEFINE(SDL_AUDIO_DRIVER_OPENBSD)
-                SOURCES="$SOURCES $srcdir/src/audio/openbsd/*.c"
+                AC_DEFINE(SDL_AUDIO_DRIVER_BSD)
+                SOURCES="$SOURCES $srcdir/src/audio/bsd/*.c"
                 have_audio=yes
             ;;
             aix)

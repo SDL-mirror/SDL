@@ -22,7 +22,7 @@
 #include "SDL_config.h"
 
 /*
- * Driver for native OpenBSD audio(4).
+ * Driver for native OpenBSD/NetBSD audio(4).
  * vedge@vedge.com.ar.
  */
 
@@ -43,10 +43,12 @@
 #include "SDL_openbsdaudio.h"
 
 /* The tag name used by NetBSD/OpenBSD audio */
-#ifdef __NETBSD__
-#define OBSD_DRIVER_NAME         "netbsd"
+#ifdef __NetBSD__
+#define BSD_AUDIO_DRIVER_NAME         "netbsd"
+#define BSD_AUDIO_DRIVER_DESC         "Native NetBSD audio"
 #else
-#define OBSD_DRIVER_NAME         "openbsd"
+#define BSD_AUDIO_DRIVER_NAME         "openbsd"
+#define BSD_AUDIO_DRIVER_DESC         "Native OpenBSD audio"
 #endif
 
 /* Open the audio device for playback, and don't block if busy */
@@ -132,11 +134,7 @@ static SDL_AudioDevice
 }
 
 AudioBootStrap OPENBSD_AUDIO_bootstrap = {
-#ifdef __NETBSD__
-	OBSD_DRIVER_NAME, "Native NetBSD audio",
-#else
-	OBSD_DRIVER_NAME, "Native OpenBSD audio",
-#endif
+	BSD_DRIVER_NAME, BSD_AUDIO_DRIVER_DESC,
 	Audio_Available, Audio_CreateDevice
 };
 

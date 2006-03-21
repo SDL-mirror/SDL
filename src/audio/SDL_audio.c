@@ -36,8 +36,8 @@
 
 /* Available audio drivers */
 static AudioBootStrap *bootstrap[] = {
-#if SDL_AUDIO_DRIVER_OPENBSD
-	&OPENBSD_AUDIO_bootstrap,
+#if SDL_AUDIO_DRIVER_BSD
+	&BSD_AUDIO_bootstrap,
 #endif
 #if SDL_AUDIO_DRIVER_OSS
 	&DSP_bootstrap,
