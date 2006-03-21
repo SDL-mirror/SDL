@@ -37,8 +37,13 @@
 #if defined(HAVE_USB_H)
 #include <usb.h>
 #endif
+#ifdef __DragonFly__
+#include <bus/usb/usb.h>
+#include <bus/usb/usbhid.h>
+#else
 #include <dev/usb/usb.h>
 #include <dev/usb/usbhid.h>
+#endif
 
 #if defined(HAVE_USBHID_H)
 #include <usbhid.h>
@@ -49,11 +54,13 @@
 #endif
 
 #ifdef __FREEBSD__
+#ifndef __DragonFly__
 #include <osreldate.h>
+#endif
 #include <sys/joystick.h>
 #endif
 
-#if defined(__NETBSD__) || (defined(__OPENBSD__) && defined(__i386__))
+#if SDL_JOYSTICK_USBHID_MACHINE_JOYSTICK_H
 #include <machine/joystick.h>
 #endif
 
@@ -231,6 +238,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick *joy)
 	struct hid_data *hdata;
 	struct report *rep;
 	int fd;
+	int i;
 
 	fd = open(path, O_RDONLY);
 	if (fd == -1) {
@@ -297,6 +305,8 @@ SDL_SYS_JoystickOpen(SDL_Joystick *joy)
 	joy->nbuttons = 0;
 	joy->nhats = 0;
 	joy->nballs = 0;
+	for (i=0; i<JOYAXE_count; i++)
+		hw->axis_map[i] = -1;
 
 	while (hid_get_item(hdata, &hitem) > 0) {
 		char *sp;
@@ -323,8 +333,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick *joy)
 			    unsigned usage = HID_USAGE(hitem.usage);
 			    int joyaxe = usage_to_joyaxe(usage);
 			    if (joyaxe >= 0) {
-				hw->axis_map[joyaxe] = joy->naxes;
-				joy->naxes++;
+				hw->axis_map[joyaxe] = 1;
 			    } else if (usage == HUG_HAT_SWITCH) {
 				joy->nhats++;
 			    }
@@ -342,6 +351,9 @@ SDL_SYS_JoystickOpen(SDL_Joystick *joy)
 		}
 	}
 	hid_end_parse(hdata);
+	for (i=0; i<JOYAXE_count; i++)
+		if (hw->axis_map[i] > 0)
+			hw->axis_map[i] = joy->naxes++;
 
 usbend:
 	/* The poll blocks the event thread. */
@@ -364,7 +376,7 @@ SDL_SYS_JoystickUpdate(SDL_Joystick *joy)
 	int nbutton, naxe = -1;
 	Sint32 v;
 
-#if defined(__FREEBSD__) || defined(__NETBSD__) || (defined(__OPENBSD__) && defined(__i386__))
+#if defined(__FREEBSD__) || SDL_JOYSTICK_USBHID_MACHINE_JOYSTICK_H
 	struct joystick gameport;
 	static int x, y, xmin = 0xffff, ymin = 0xffff, xmax = 0, ymax = 0;
  
@@ -413,7 +425,7 @@ SDL_SYS_JoystickUpdate(SDL_Joystick *joy)
 		}
 		return;
 	}
-#endif /* defined(__FREEBSD__) || defined(__NETBSD__) || defined(__OPENBSD__) */
+#endif /* defined(__FREEBSD__) || SDL_JOYSTICK_USBHID_MACHINE_JOYSTICK_H */
 	
 	rep = &joy->hwdata->inreport;
 
@@ -451,7 +463,8 @@ SDL_SYS_JoystickUpdate(SDL_Joystick *joy)
 			    } else if (usage == HUG_HAT_SWITCH) {
 				v = (Sint32)hid_get_data(REP_BUF_DATA(rep),
 							 &hitem);
-				SDL_PrivateJoystickHat(joy, 0, hatval_to_sdl(v));
+				SDL_PrivateJoystickHat(joy, 0,
+					hatval_to_sdl(v)-hitem.logical_minimum);
 			    }
 			    break;
 			}
@@ -512,7 +525,9 @@ report_alloc(struct report *r, struct report_desc *rd, int repind)
 {
 	int len;
 
-#ifdef __FREEBSD__
+#ifdef __DragonFly__
+	len = hid_report_size(rd, r->rid, repinfo[repind].kind);
+#elif __FREEBSD__
 # if (__FreeBSD_version >= 460000)
 #  if (__FreeBSD_version <= 500111)
 	len = hid_report_size(rd, r->rid, repinfo[repind].kind);
@@ -521,12 +536,12 @@ report_alloc(struct report *r, struct report_desc *rd, int repind)
 #  endif
 # else
 	len = hid_report_size(rd, repinfo[repind].kind, &r->rid);
-#endif
+# endif
 #else
 # ifdef USBHID_NEW
-	len = hid_report_size(rd, repinfo[repind].kind, &r->rid);
-# else
 	len = hid_report_size(rd, repinfo[repind].kind, r->rid);
+# else
+	len = hid_report_size(rd, repinfo[repind].kind, &r->rid);
 # endif
 #endif
 

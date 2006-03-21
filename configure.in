@@ -50,9 +50,12 @@ else
 fi
 
 dnl Set up the compiler and linker flags
-INCLUDE="-I$srcdir/include"
+INCLUDE="-I$srcdir/include $INCLUDE"
 if test x$srcdir != x.; then
     INCLUDE="-Iinclude $INCLUDE"
+fi
+if test -d /usr/local/include; then
+    INCLUDE="$INCLUDE -I/usr/local/include"
 fi
 case "$host" in
     *-*-cygwin*)
@@ -284,7 +287,7 @@ AC_HELP_STRING([--enable-oss], [support the OSS audio API [default=yes]]),
             SOURCES="$SOURCES $srcdir/src/audio/dma/*.c"
             have_audio=yes
 
-            # OpenBSD needs linking with ossaudio emulation library
+            # We may need to link with ossaudio emulation library
             case "$host" in
                 *-*-openbsd*|*-*-netbsd*)
                     EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lossaudio";;
@@ -1499,7 +1502,7 @@ AC_HELP_STRING([--enable-pthread-sem], [use pthread semaphores [default=yes]]),
 # causes Carbon.p complaints?
 #            pthread_cflags="-D_REENTRANT -D_THREAD_SAFE"
             ;;
-        *-*-freebsd*)
+        *-*-freebsd*|*-*-dragonfly*)
             pthread_cflags="-D_REENTRANT -D_THREAD_SAFE"
             pthread_lib="-pthread"
             ;;
@@ -1761,14 +1764,17 @@ dnl Check for the usbhid(3) library on *BSD
 CheckUSBHID()
 {
     if test x$enable_joystick = xyes; then
-        AC_CHECK_HEADER(usb.h, [USB_CFLAGS="-DHAVE_USB_H"])
-        AC_CHECK_HEADER(usbhid.h, [USB_CFLAGS="-DHAVE_USBHID_H"])
-        AC_CHECK_HEADER(libusb.h, [USB_CFLAGS="-DHAVE_LIBUSB_H"])
-        AC_CHECK_HEADER(libusbhid.h, [USB_CFLAGS="-DHAVE_LIBUSBHID_H"])
+        AC_CHECK_LIB(usbhid, hid_init, have_libusbhid=yes)
+        if test x$have_libusbhid = xyes; then
+            AC_CHECK_HEADER(usbhid.h, [USB_CFLAGS="-DHAVE_USBHID_H"])
+            AC_CHECK_HEADER(libusbhid.h, [USB_CFLAGS="-DHAVE_LIBUSBHID_H"])
+            USB_LIBS="$USB_LIBS -lusbhid"
+        else
+            AC_CHECK_HEADER(usb.h, [USB_CFLAGS="-DHAVE_USB_H"])
+            AC_CHECK_HEADER(libusb.h, [USB_CFLAGS="-DHAVE_LIBUSB_H"])
+            AC_CHECK_LIB(usb, hid_init, [USB_LIBS="$USB_LIBS -lusb"])
+        fi
             
-        AC_CHECK_LIB(usbhid, hid_init, [USB_LIBS="$USB_LIBS -lusbhid"])
-        AC_CHECK_LIB(usb, hid_init, [USB_LIBS="$USB_LIBS -lusb"])
-
         save_CFLAGS="$CFLAGS"
         CFLAGS="$CFLAGS $USB_CFLAGS"
 
@@ -1779,8 +1785,13 @@ CheckUSBHID()
           #if defined(HAVE_USB_H)
           #include <usb.h>
           #endif
-          #include <dev/usb/usb.h>
-          #include <dev/usb/usbhid.h>
+          #ifdef __DragonFly__
+          # include <bus/usb/usb.h>
+          # include <bus/usb/usbhid.h>
+          #else
+          # include <dev/usb/usb.h>
+          # include <dev/usb/usbhid.h>
+          #endif
           #if defined(HAVE_USBHID_H)
           #include <usbhid.h>
           #elif defined(HAVE_LIBUSB_H)
@@ -1805,8 +1816,13 @@ CheckUSBHID()
               #if defined(HAVE_USB_H)
               #include <usb.h>
               #endif
-              #include <dev/usb/usb.h>
-              #include <dev/usb/usbhid.h>
+              #ifdef __DragonFly__
+              # include <bus/usb/usb.h>
+              # include <bus/usb/usbhid.h>
+              #else
+              # include <dev/usb/usb.h>
+              # include <dev/usb/usbhid.h>
+              #endif
               #if defined(HAVE_USBHID_H)
               #include <usbhid.h>
               #elif defined(HAVE_LIBUSB_H)
@@ -1852,6 +1868,20 @@ CheckUSBHID()
             fi
             AC_MSG_RESULT($have_usbhid_new)
 
+            AC_MSG_CHECKING(for struct joystick in machine/joystick.h)
+            have_machine_joystick=no
+            AC_TRY_COMPILE([
+              #include <machine/joystick.h>
+            ],[
+              struct joystick t;
+            ],[
+            have_machine_joystick=yes
+            ])
+            if test x$have_machine_joystick = xyes; then
+                AC_DEFINE(SDL_JOYSTICK_USBHID_MACHINE_JOYSTICK_H)
+            fi
+            AC_MSG_RESULT($have_machine_joystick)
+
             AC_DEFINE(SDL_JOYSTICK_USBHID)
             SOURCES="$SOURCES $srcdir/src/joystick/bsd/*.c"
             EXTRA_CFLAGS="$EXTRA_CFLAGS $USB_CFLAGS"
@@ -1861,6 +1891,7 @@ CheckUSBHID()
         CFLAGS="$save_CFLAGS"
     fi
 }
+
 
 dnl Check for clock_gettime()
 CheckClockGettime()
@@ -1907,7 +1938,7 @@ case "$host" in
             have_timers=yes
         fi
         ;;
-    *-*-linux*|*-*-gnu*|*-*-k*bsd*-gnu|*-*-bsdi*|*-*-freebsd*|*-*-netbsd*|*-*-openbsd*|*-*-sysv5*|*-*-solaris*|*-*-hpux*|*-*-irix*|*-*-aix*|*-*-osf*)
+    *-*-linux*|*-*-gnu*|*-*-k*bsd*-gnu|*-*-bsdi*|*-*-freebsd*|*-*-dragonfly*|*-*-netbsd*|*-*-openbsd*|*-*-sysv5*|*-*-solaris*|*-*-hpux*|*-*-irix*|*-*-aix*|*-*-osf*)
         case "$host" in
             *-*-linux*)         ARCH=linux ;;
             *-*-kfreebsd*-gnu)  ARCH=kfreebsd-gnu ;;
@@ -1916,6 +1947,7 @@ case "$host" in
             *-*-gnu*)           ARCH=gnu ;; # must be last of the gnu variants
             *-*-bsdi*)          ARCH=bsdi ;;
             *-*-freebsd*)       ARCH=freebsd ;;
+            *-*-dragonfly*)     ARCH=freebsd ;;
             *-*-netbsd*)        ARCH=netbsd ;;
             *-*-openbsd*)       ARCH=openbsd ;;
             *-*-sysv5*)         ARCH=sysv5 ;;
@@ -1961,12 +1993,12 @@ case "$host" in
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
           case $ARCH in
-            netbsd|sysv5|solaris|hpux)
+            sysv5|solaris|hpux)
                 AC_DEFINE(SDL_AUDIO_DRIVER_SUNAUDIO)
                 SOURCES="$SOURCES $srcdir/src/audio/sun/*.c"
                 have_audio=yes
             ;;
-            openbsd)
+            netbsd|openbsd)
                 AC_DEFINE(SDL_AUDIO_DRIVER_OPENBSD)
                 SOURCES="$SOURCES $srcdir/src/audio/openbsd/*.c"
                 have_audio=yes
@@ -2388,7 +2420,7 @@ SDLMAIN_OBJECTS=`echo $SDLMAIN_OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects
 # Set runtime shared library paths as needed
 
 if test "x$enable_rpath" = "xyes"; then
-  if test $ARCH = linux -o $ARCH = freebsd -o $ARCH = bsdi -o $ARCH = irix; then
+  if test $ARCH = bsdi -o $ARCH = freebsd -o $ARCH = irix -o $ARCH = linux -o $ARCH = netbsd; then
     SDL_RLD_FLAGS="-Wl,-rpath,\${exec_prefix}/lib"
   fi
   if test $ARCH = solaris; then

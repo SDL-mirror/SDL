@@ -42,8 +42,12 @@
 #include "../SDL_audiodev_c.h"
 #include "SDL_openbsdaudio.h"
 
-/* The tag name used by OpenBSD audio */
+/* The tag name used by NetBSD/OpenBSD audio */
+#ifdef __NETBSD__
+#define OBSD_DRIVER_NAME         "netbsd"
+#else
 #define OBSD_DRIVER_NAME         "openbsd"
+#endif
 
 /* Open the audio device for playback, and don't block if busy */
 /* #define USE_BLOCKING_WRITES */
@@ -128,7 +132,11 @@ static SDL_AudioDevice
 }
 
 AudioBootStrap OPENBSD_AUDIO_bootstrap = {
+#ifdef __NETBSD__
+	OBSD_DRIVER_NAME, "Native NetBSD audio",
+#else
 	OBSD_DRIVER_NAME, "Native OpenBSD audio",
+#endif
 	Audio_Available, Audio_CreateDevice
 };
 
@@ -136,18 +144,6 @@ AudioBootStrap OPENBSD_AUDIO_bootstrap = {
 static void
 OBSD_WaitAudio(_THIS)
 {
-	/* Check to see if the thread-parent process is still alive */
-	{ static int cnt = 0;
-		/* Note that this only works with thread implementations 
-		   that use a different process id for each thread.
-		*/
-		if (parent && (((++cnt)%10) == 0)) { /* Check every 10 loops */
-			if ( kill(parent, 0) < 0 ) {
-				this->enabled = 0;
-			}
-		}
-	}
-
 #ifndef USE_BLOCKING_WRITES /* Not necessary when using blocking writes */
 	/* See if we need to use timed audio synchronization */
 	if ( frame_ticks ) {
@@ -384,6 +380,9 @@ OBSD_OpenAudio(_THIS, SDL_AudioSpec *spec)
     	spec->channels = 1;
     AUDIO_INITINFO(&info);
     info.play.sample_rate = spec->freq;
+    info.blocksize = spec->size;
+    info.hiwat = 5;
+    info.lowat = 3;
     (void)ioctl(audio_fd, AUDIO_SETINFO, &info);
     (void)ioctl(audio_fd, AUDIO_GETINFO, &info);
     spec->freq  = info.play.sample_rate;

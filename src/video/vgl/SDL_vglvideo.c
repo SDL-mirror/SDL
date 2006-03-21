@@ -555,7 +555,7 @@ VGLListModes(int depth, int mem_model)
     case V_INFO_MM_VGAX:
       vminfop->Type = VIDBUF8X;
       break;
-#if defined(__FREEBSD__) && __FreeBSD_version >= 500000
+#if defined(__FREEBSD__) && (defined(__DragonFly__) || __FreeBSD_version >= 500000)
     case V_INFO_MM_DIRECT:
       vminfop->PixelBytes = minfo.vi_pixel_size;
       switch (vminfop->PixelBytes) {
