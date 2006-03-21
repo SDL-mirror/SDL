@@ -50,13 +50,14 @@ else
 fi
 
 dnl Set up the compiler and linker flags
-INCLUDE="-I$srcdir/include $INCLUDE"
+SDL_INCLUDE="-I$srcdir/include $SDL_INCLUDE"
 if test x$srcdir != x.; then
-    INCLUDE="-Iinclude $INCLUDE"
+    SDL_INCLUDE="-Iinclude $SDL_INCLUDE"
 fi
 if test -d /usr/local/include; then
-    INCLUDE="$INCLUDE -I/usr/local/include"
+    SDL_INCLUDE="$SDL_INCLUDE -I/usr/local/include"
 fi
+INCLUDE="$SDL_INCLUDE"
 case "$host" in
     *-*-cygwin*)
         # We build SDL on cygwin without the UNIX emulation layer
@@ -589,17 +590,19 @@ AC_HELP_STRING([--enable-nasm], [use nasm assembly blitters on x86 [default=yes]
         if test x$NASM != x -a x$NASM != x'"$NASM"'; then
             AC_DEFINE(SDL_HERMES_BLITTERS)
             SOURCES="$SOURCES $srcdir/src/hermes/*.asm"
-            case $ARCH in
-              win32)
-                  NASMFLAGS="-f win32"
-                  ;;
-              openbsd)
-                  NASMFLAGS="-f aoutb"
-                  ;;
-              *)
-                  NASMFLAGS="-f elf"
-                  ;;
-            esac
+            if test x$NASMFLAGS = x; then
+                case $ARCH in
+                  win32)
+                      NASMFLAGS="-f win32"
+                      ;;
+                  openbsd)
+                      NASMFLAGS="-f aoutb"
+                      ;;
+                  *)
+                      NASMFLAGS="-f elf"
+                      ;;
+                esac
+            fi
             AC_SUBST(NASM)
             AC_SUBST(NASMFLAGS)
 
@@ -1891,7 +1894,6 @@ CheckUSBHID()
         CFLAGS="$save_CFLAGS"
     fi
 }
-
 
 dnl Check for clock_gettime()
 CheckClockGettime()
