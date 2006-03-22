@@ -792,8 +792,8 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [default=yes
                 *-*-darwin*) # Latest Mac OS X actually ships with Xrandr/Xrender libs...
                     x11_lib='/usr/X11R6/lib/libX11.6.dylib'
                     x11ext_lib='/usr/X11R6/lib/libXext.6.dylib'
-                    xrandr_lib='/usr/X11R6/lib/libXrandr.2.dylib'
                     xrender_lib='/usr/X11R6/lib/libXrender.1.dylib'
+                    xrandr_lib='/usr/X11R6/lib/libXrandr.2.dylib'
                     ;;
                 *-*-osf*)
                     x11_lib='libX11.so'
