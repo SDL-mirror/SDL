@@ -789,9 +789,11 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [default=yes
                           , enable_x11_shared=yes)
 
             case "$host" in
-                *-*-darwin*)
+                *-*-darwin*) # Latest Mac OS X actually ships with Xrandr/Xrender libs...
                     x11_lib='/usr/X11R6/lib/libX11.6.dylib'
                     x11ext_lib='/usr/X11R6/lib/libXext.6.dylib'
+                    xrandr_lib='/usr/X11R6/lib/libXrandr.2.dylib'
+                    xrender_lib='/usr/X11R6/lib/libXrender.1.dylib'
                     ;;
                 *-*-osf*)
                     x11_lib='libX11.so'
@@ -809,6 +811,12 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [default=yes
                         fi
                         if test "x$x11ext_lib" = "x"; then
                             x11ext_lib=[`ls $path/libXext.so.[0-9] 2>/dev/null | sort -r | sed 's/.*\/\(.*\)/\1/; q'`]
+                        fi
+                        if test "x$xrender_lib" = "x"; then
+                            xrender_lib=[`ls $path/libXrender.so.[0-9] 2>/dev/null | sort -r | sed 's/.*\/\(.*\)/\1/; q'`]
+                        fi
+                        if test "x$xrandr_lib" = "x"; then
+                            xrandr_lib=[`ls $path/libXrandr.so.[0-9] 2>/dev/null | sort -r | sed 's/.*\/\(.*\)/\1/; q'`]
                         fi
                     done
                     ;;
@@ -833,6 +841,7 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [default=yes
                 AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC, "$x11_lib")
                 AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT, "$x11ext_lib")
             else
+                enable_x11_shared=no
                 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $X_LIBS -lX11 -lXext"
             fi
             have_video=yes
@@ -883,6 +892,37 @@ AC_HELP_STRING([--enable-video-x11-xme], [enable Xi Graphics XME for fullscreen 
             if test x$enable_video_x11_xme = xyes; then
                 AC_DEFINE(SDL_VIDEO_DRIVER_X11_XME)
                 SOURCES="$SOURCES $srcdir/src/video/Xext/XME/*.c"
+            fi
+            AC_ARG_ENABLE(video-x11-xrandr,
+AC_HELP_STRING([--enable-video-x11-xrandr], [enable X11 Xrandr extension for fullscreen [default=yes]]),
+                            , enable_video_x11_xrandr=yes)
+            if test x$enable_video_x11_xrandr = xyes; then
+                definitely_enable_video_x11_xrandr=no
+                AC_CHECK_HEADER(X11/extensions/Xrandr.h,
+                                have_xrandr_h_hdr=yes,
+                                have_xrandr_h_hdr=no,
+                                [#include <X11/Xlib.h>
+                                ])
+                if test x$have_xrandr_h_hdr = xyes; then
+                    if test x$enable_x11_shared = xyes && test x$xrandr_lib != x ; then
+                        echo "-- dynamic libXrender -> $xrender_lib"
+                        echo "-- dynamic libXrandr -> $xrandr_lib"
+                        AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC_XRENDER, "$xrender_lib")
+                        AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC_XRANDR, "$xrandr_lib")
+                        definitely_enable_video_x11_xrandr=yes
+                    else
+                        AC_CHECK_LIB(Xrender, XRenderQueryExtension, have_xrender_lib=yes)
+                        AC_CHECK_LIB(Xrandr, XRRQueryExtension, have_xrandr_lib=yes)
+                        if test x$have_xrender_lib = xyes && test x$have_xrandr_lib = xyes ; then
+                            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lXrandr -lXrender"
+                            definitely_enable_video_x11_xrandr=yes
+                        fi
+                    fi
+                fi
+            fi
+
+            if test x$definitely_enable_video_x11_xrandr = xyes; then
+                AC_DEFINE(SDL_VIDEO_DRIVER_X11_XRANDR)
             fi
         fi
     fi

@@ -40,6 +40,9 @@
 #if SDL_VIDEO_DRIVER_X11_XME
 #include "../Xext/extensions/xme.h"
 #endif
+#if SDL_VIDEO_DRIVER_X11_XRANDR
+#include <X11/extensions/Xrandr.h>
+#endif
 
 #include "SDL_x11dyn.h"
 
@@ -116,10 +119,16 @@ struct SDL_PrivateVideoData {
     int use_xme;
     XiGMiscResolutionInfo saved_res;
 #endif
+#if SDL_VIDEO_DRIVER_X11_XRANDR
+    XRRScreenConfiguration* screen_config;
+    int saved_size_id;
+    Rotation saved_rotation;
+#endif
 
     int xinerama_x;
     int xinerama_y;
     int use_vidmode;
+    int use_xrandr;
     int currently_fullscreen;
 
     /* Automatic mode switching support (entering/leaving fullscreen) */
@@ -169,6 +178,10 @@ struct SDL_PrivateVideoData {
 #define saved_view		(this->hidden->saved_view)
 #define use_xme			(this->hidden->use_xme)
 #define saved_res		(this->hidden->saved_res)
+#define use_xrandr		(this->hidden->use_xrandr)
+#define screen_config		(this->hidden->screen_config)
+#define saved_size_id		(this->hidden->saved_size_id)
+#define saved_rotation		(this->hidden->saved_rotation)
 #define xinerama_x		(this->hidden->xinerama_x)
 #define xinerama_y		(this->hidden->xinerama_y)
 #define use_vidmode		(this->hidden->use_vidmode)

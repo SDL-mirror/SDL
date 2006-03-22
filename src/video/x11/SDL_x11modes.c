@@ -86,6 +86,18 @@ static int cmpmodes(const void *va, const void *vb)
 }
 #endif
 
+#if SDL_VIDEO_DRIVER_X11_XRANDR
+static int cmpmodelist(const void *va, const void *vb)
+{
+    const SDL_Rect *a = *(const SDL_Rect **)va;
+    const SDL_Rect *b = *(const SDL_Rect **)vb;
+    if ( a->w == b->w )
+        return b->h - a->h;
+    else
+        return b->w - a->w;
+}
+#endif
+
 static void get_real_resolution(_THIS, int* w, int* h);
 
 static void set_best_resolution(_THIS, int width, int height)
@@ -180,6 +192,55 @@ static void set_best_resolution(_THIS, int width, int height)
     }
 #endif /* SDL_VIDEO_DRIVER_X11_XME */
 
+#if SDL_VIDEO_DRIVER_X11_XRANDR
+    if ( use_xrandr ) {
+#ifdef XRANDR_DEBUG
+        fprintf(stderr, "XRANDR: set_best_resolution(): w = %d, h = %d\n",
+                width, height);
+#endif
+        if ( SDL_modelist ) {
+            int i, nsizes;
+            XRRScreenSize *sizes;
+
+            /* find the smallest resolution that is at least as big as the user requested */
+            sizes = XRRConfigSizes(screen_config, &nsizes);
+            for ( i = (nsizes-1); i >= 0; i-- ) {
+                if ( (SDL_modelist[i]->w >= width) &&
+                     (SDL_modelist[i]->h >= height) ) {
+                    break;
+                }
+            }
+
+            if ( i >= 0 && SDL_modelist[i] ) { /* found one, lets try it */
+                int w, h;
+
+                /* check current mode so we can avoid uneccessary mode changes */
+                get_real_resolution(this, &w, &h);
+
+                if ( (SDL_modelist[i]->w != w) || (SDL_modelist[i]->h != h) ) {
+                    int size_id;
+
+#ifdef XRANDR_DEBUG
+                    fprintf(stderr, "XRANDR: set_best_resolution: "
+                            "XXRSetScreenConfig: %d %d\n",
+                            SDL_modelist[i]->w, SDL_modelist[i]->h);
+#endif
+
+                    /* find the matching size entry index */
+                    for ( size_id = 0; size_id < nsizes; ++size_id ) {
+                        if ( (sizes[size_id].width == SDL_modelist[i]->w) &&
+                             (sizes[size_id].height == SDL_modelist[i]->h) )
+                            break;
+                    }
+
+                    XRRSetScreenConfig(SDL_Display, screen_config, SDL_Root,
+                                       size_id, saved_rotation, CurrentTime);
+                }
+            }
+        }
+    }
+#endif /* SDL_VIDEO_DRIVER_X11_XRANDR */
+
 }
 
 static void get_real_resolution(_THIS, int* w, int* h)
@@ -195,7 +256,7 @@ static void get_real_resolution(_THIS, int* w, int* h)
             return;
         }
     }
-#endif
+#endif /* SDL_VIDEO_DRIVER_X11_VIDMODE */
 
 #if SDL_VIDEO_DRIVER_X11_XME
     if ( use_xme ) {
@@ -213,7 +274,30 @@ static void get_real_resolution(_THIS, int* w, int* h)
         XFree(modelist);
         return;
     }
-#endif /* XIG_XME */
+#endif /* SDL_VIDEO_DRIVER_X11_XME */
+
+#if SDL_VIDEO_DRIVER_X11_XRANDR
+    if ( use_xrandr ) {
+        int nsizes;
+        XRRScreenSize* sizes;
+
+        sizes = XRRConfigSizes(screen_config, &nsizes);
+        if ( nsizes > 0 ) {
+            int cur_size;
+            Rotation cur_rotation;
+
+            cur_size = XRRConfigCurrentConfiguration(screen_config, &cur_rotation);
+            if ( cur_size >= 0 && cur_size < nsizes ) {
+                *w = sizes[cur_size].width;
+                *h = sizes[cur_size].height;
+            }
+#ifdef XRANDR_DEBUG
+            fprintf(stderr, "XRANDR: get_real_resolution: w = %d h = %d\n", *w, *h);
+#endif
+            return;
+        }
+    }
+#endif /* SDL_VIDEO_DRIVER_X11_XRANDR */
 
     *w = DisplayWidth(SDL_Display, SDL_Screen);
     *h = DisplayHeight(SDL_Display, SDL_Screen);
@@ -289,14 +373,68 @@ int X11_GetVideoModes(_THIS)
     int ractive, nummodes;
     XiGMiscResolutionInfo *modelist;
 #endif
+#if SDL_VIDEO_DRIVER_X11_XRANDR
+    int xrandr_major, xrandr_minor;
+    int nsizes;
+    XRRScreenSize *sizes;
+#endif
     int i, n;
     int screen_w;
     int screen_h;
 
     vm_error = -1;
     use_vidmode = 0;
+    use_xrandr = 0;
     screen_w = DisplayWidth(SDL_Display, SDL_Screen);
     screen_h = DisplayHeight(SDL_Display, SDL_Screen);
+
+    /* XRandR */
+#if SDL_VIDEO_DRIVER_X11_XRANDR
+    /* require at least XRandR v1.0 (arbitrary) */
+    if ( ( SDL_X11_HAVE_XRANDR ) &&
+         ( getenv("SDL_VIDEO_X11_NO_XRANDR") == NULL ) &&
+         ( XRRQueryVersion(SDL_Display, &xrandr_major, &xrandr_minor) ) &&
+         ( xrandr_major >= 1 ) ) {
+
+#ifdef XRANDR_DEBUG
+        fprintf(stderr, "XRANDR: XRRQueryVersion: V%d.%d\n",
+                xrandr_major, xrandr_minor);
+#endif
+
+        /* save the screen configuration since we must reference it
+           each time we toggle modes.
+        */
+        screen_config = XRRGetScreenInfo(SDL_Display, SDL_Root);
+
+        /* retrieve the list of resolution */
+        sizes = XRRConfigSizes(screen_config, &nsizes);
+        if (nsizes > 0) {
+            SDL_modelist = (SDL_Rect **)malloc((nsizes+1)*sizeof(SDL_Rect *));
+            if (SDL_modelist) {
+                for ( i=0; i < nsizes; i++ ) {
+                    if ((SDL_modelist[i] =
+                         (SDL_Rect *)malloc(sizeof(SDL_Rect))) == NULL)
+                        break;
+#ifdef XRANDR_DEBUG
+                    fprintf(stderr, "XRANDR: mode = %4d, w = %4d, h = %4d\n",
+                            i, sizes[i].width, sizes[i].height);
+#endif
+
+                    SDL_modelist[i]->x = 0;
+                    SDL_modelist[i]->y = 0;
+                    SDL_modelist[i]->w = sizes[i].width;
+                    SDL_modelist[i]->h = sizes[i].height;
+
+                }
+                /* sort the mode list descending as SDL expects */
+                qsort(SDL_modelist, nsizes, sizeof *SDL_modelist, cmpmodelist);
+                SDL_modelist[i] = NULL; /* terminator */
+            }
+            use_xrandr = xrandr_major * 100 + xrandr_minor;
+            saved_size_id = XRRConfigCurrentConfiguration(screen_config, &saved_rotation);
+        }
+    }
+#endif /* SDL_VIDEO_DRIVER_X11_XRANDR */
 
 #if SDL_VIDEO_DRIVER_X11_VIDMODE
     /* Metro-X 4.3.0 and earlier has a broken implementation of
@@ -345,7 +483,7 @@ int X11_GetVideoModes(_THIS)
             buggy_X11 = 1;
         }
     }
-    if ( ! buggy_X11 &&
+    if ( ! buggy_X11 && ! use_xrandr &&
          SDL_NAME(XF86VidModeGetAllModeLines)(SDL_Display, SDL_Screen,&nmodes,&modes) ) {
 
 #ifdef XFREE86_DEBUG
@@ -426,7 +564,7 @@ int X11_GetVideoModes(_THIS)
              */
             fprintf(stderr, 
 "XME: If you are using Xi Graphics CDE and a Summit server, you need to\n"
-"XME: get the libXext update from our ftp site before fullscreen switching\n"
+"XME: get the libXext update from Xi's ftp site before fullscreen switching\n"
 "XME: will work.  Fullscreen switching is only supported on Summit Servers\n");
           }
     } else {
@@ -635,6 +773,14 @@ void X11_FreeVideoModes(_THIS)
         SDL_free(SDL_modelist);
         SDL_modelist = NULL;
     }
+
+#if SDL_VIDEO_DRIVER_X11_XRANDR
+    /* Free the Xrandr screen configuration */
+    if ( screen_config ) {
+        XRRFreeScreenConfigInfo(screen_config);
+        screen_config = NULL;
+    }
+#endif /* SDL_VIDEO_DRIVER_X11_XRANDR */
 }
 
 int X11_ResizeFullScreen(_THIS)
@@ -801,6 +947,13 @@ int X11_LeaveFullScreen(_THIS)
                                         0);
                 XSync(SDL_Display, False);
             }
+        }
+#endif
+
+#if SDL_VIDEO_DRIVER_X11_XRANDR
+        if ( use_xrandr ) {
+            XRRSetScreenConfig(SDL_Display, screen_config, SDL_Root,
+                               saved_size_id, saved_rotation, CurrentTime);
         }
 #endif
 

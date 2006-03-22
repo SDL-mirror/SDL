@@ -176,5 +176,16 @@ SDL_X11_SYM(int,ipAllocateData,(ChannelPtr a, IPCard b, IPDataPtr * c),(a,b,c),r
 SDL_X11_SYM(int,ipUnallocateAndSendData,(ChannelPtr a, IPCard b),(a,b),return)
 #endif
 
+/* Xrandr support. */
+#if SDL_VIDEO_DRIVER_X11_XRANDR
+SDL_X11_MODULE(XRANDR)
+SDL_X11_SYM(Status,XRRQueryVersion,(Display *dpy,int *major_versionp,int *minor_versionp),(dpy,major_versionp,minor_versionp),return)
+SDL_X11_SYM(XRRScreenConfiguration *,XRRGetScreenInfo,(Display *dpy,Drawable draw),(dpy,draw),return)
+SDL_X11_SYM(SizeID,XRRConfigCurrentConfiguration,(XRRScreenConfiguration *config,Rotation *rotation),(config,rotation),return)
+SDL_X11_SYM(XRRScreenSize *,XRRConfigSizes,(XRRScreenConfiguration *config, int *nsizes),(config,nsizes),return)
+SDL_X11_SYM(Status,XRRSetScreenConfig,(Display *dpy, XRRScreenConfiguration *config, Drawable draw, int size_index, Rotation rotation, Time timestamp),(dpy,config,draw,size_index,rotation,timestamp),return)
+SDL_X11_SYM(void,XRRFreeScreenConfigInfo,(XRRScreenConfiguration *config),(config),)
+#endif
+
 /* end of SDL_x11sym.h ... */
 

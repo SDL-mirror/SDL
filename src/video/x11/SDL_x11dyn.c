@@ -21,13 +21,11 @@
 */
 #include "SDL_config.h"
 
-#if 0
-#define DEBUG_DYNAMIC_X11 1
-#endif
+#define DEBUG_DYNAMIC_X11 0
 
 #include "SDL_x11dyn.h"
 
-#ifdef DEBUG_DYNAMIC_X11
+#if DEBUG_DYNAMIC_X11
 #include <stdio.h>
 #endif
 
@@ -39,6 +37,10 @@ static const char *x11_library = SDL_VIDEO_DRIVER_X11_DYNAMIC;
 static void *x11_handle = NULL;
 static const char *x11ext_library = SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT;
 static void *x11ext_handle = NULL;
+static const char *xrender_library = SDL_VIDEO_DRIVER_X11_DYNAMIC_XRENDER;
+static void *xrender_handle = NULL;
+static const char *xrandr_library = SDL_VIDEO_DRIVER_X11_DYNAMIC_XRANDR;
+static void *xrandr_handle = NULL;
 
 typedef struct
 {
@@ -54,6 +56,8 @@ static void *X11_GetSym(const char *fnname, int *rc)
 	{
 		{ x11_handle, "libX11" },
 		{ x11ext_handle, "libX11ext" },
+		{ xrender_handle, "libXrender" },
+		{ xrandr_handle, "libXrandr" },
 	};
 
 	for (i = 0; i < (sizeof (libs) / sizeof (libs[0])); i++)
@@ -130,6 +134,14 @@ void SDL_X11_UnloadSymbols(void)
 				SDL_UnloadObject(x11ext_handle);
 				x11ext_handle = NULL;
 			}
+			if (xrender_handle != NULL) {
+				SDL_UnloadObject(xrender_handle);
+				xrender_handle = NULL;
+			}
+			if (xrandr_handle != NULL) {
+				SDL_UnloadObject(xrandr_handle);
+				xrandr_handle = NULL;
+			}
 		}
 	}
 	#endif
@@ -146,6 +158,8 @@ int SDL_X11_LoadSymbols(void)
 		int *thismod = NULL;
 		x11_handle = SDL_LoadObject(x11_library);
 		x11ext_handle = SDL_LoadObject(x11ext_library);
+		xrender_handle = SDL_LoadObject(xrender_library);
+		xrandr_handle = SDL_LoadObject(xrandr_library);
 		#define SDL_X11_MODULE(modname) thismod = &SDL_X11_HAVE_##modname;
 		#define SDL_X11_SYM(a,fn,x,y,z) p##fn = X11_GetSym(#fn,thismod);
 		#include "SDL_x11sym.h"
