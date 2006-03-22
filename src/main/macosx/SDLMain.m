@@ -10,6 +10,13 @@
 #import <sys/param.h> /* for MAXPATHLEN */
 #import <unistd.h>
 
+/* For some reaon, Apple removed setAppleMenu from the headers in 10.4,
+ but the method still is there and works. To avoid warnings, we declare
+ it ourselves here. */
+@interface NSApplication(SDL_Missing_Methods)
+- (void)setAppleMenu:(NSMenu *)menu;
+@end
+
 /* Use this flag to determine whether we use SDLMain.nib or not */
 #define		SDL_USE_NIB_FILE	0
 
@@ -82,7 +89,7 @@ static NSString *getApplicationName(void)
         char parentdir[MAXPATHLEN];
 		CFURLRef url = CFBundleCopyBundleURL(CFBundleGetMainBundle());
 		CFURLRef url2 = CFURLCreateCopyDeletingLastPathComponent(0, url);
-		if (CFURLGetFileSystemRepresentation(url2, true, parentdir, MAXPATHLEN)) {
+		if (CFURLGetFileSystemRepresentation(url2, true, (UInt8 *)parentdir, MAXPATHLEN)) {
 	        assert ( chdir (parentdir) == 0 );   /* chdir to the binary app's parent */
 		}
 		CFRelease(url);
