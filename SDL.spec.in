@@ -36,9 +36,9 @@ to develop SDL applications.
 
 %build
 %ifos linux
-CFLAGS="$RPM_OPT_FLAGS" ./configure --prefix=%{prefix} --disable-video-svga --disable-video-ggi --disable-video-aalib --disable-debug --enable-dlopen --enable-esd-shared --enable-arts-shared
+CFLAGS="$RPM_OPT_FLAGS" ./configure --prefix=%{prefix} --disable-video-aalib --disable-video-directfb --disable-video-ggi --disable-video-svga
 %else
-%configure --disable-debug --enable-dlopen
+%configure
 %endif
 make
 

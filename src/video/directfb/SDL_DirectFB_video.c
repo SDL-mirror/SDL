@@ -1082,7 +1082,7 @@ void DirectFB_VideoQuit(_THIS)
 {
   struct DirectFBEnumRect *rect    = enumlist;
 
-  if (this->screen->hwdata)
+  if (this->screen && this->screen->hwdata)
     {
       IDirectFBSurface        *surface = this->screen->hwdata->surface;
       IDirectFBPalette        *palette = this->screen->hwdata->palette;

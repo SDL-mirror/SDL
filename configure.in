@@ -1012,31 +1012,46 @@ dnl Find DirectFB
 CheckDirectFB()
 {
     AC_ARG_ENABLE(video-directfb,
-AC_HELP_STRING([--enable-video-directfb], [use DirectFB video driver [default=no]]),
-                  , enable_video_directfb=no)
+AC_HELP_STRING([--enable-video-directfb], [use DirectFB video driver [default=yes]]),
+                  , enable_video_directfb=yes)
     if test x$enable_video = xyes -a x$enable_video_directfb = xyes; then
         video_directfb=no
 
-        AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
-        if test x$PKG_CONFIG = xno ; then
-            AC_MSG_WARN([*** pkg-config is required to build the DirectFB video driver.])
-        else
-            AC_MSG_CHECKING(for DirectFB support)
+        DIRECTFB_REQUIRED_VERSION=0.9.15
 
-            if ! $PKG_CONFIG --atleast-pkgconfig-version 0.7 ; then
-                AC_MSG_ERROR([*** pkg-config too old; version 0.7 or better required.])
+        AC_PATH_PROG(DIRECTFBCONFIG, directfb-config)
+        if test x$DIRECTFBCONFIG = x -o x$DIRECTFBCONFIG = x'"$DIRECTFBCONFIG"'; then
+            AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
+            if test x$PKG_CONFIG != xno ; then
+                AC_MSG_WARN([*** directfb-config or pkg-config are required to detect the DirectFB video driver.])
+            else
+                AC_MSG_CHECKING(for DirectFB $DIRECTFB_REQUIRED_VERSION support)
+
+                if ! $PKG_CONFIG --atleast-pkgconfig-version 0.7 ; then
+                    AC_MSG_ERROR([*** pkg-config too old; version 0.7 or better required.])
+                fi
+
+                if $PKG_CONFIG --atleast-version $DIRECTFB_REQUIRED_VERSION directfb ; then
+                    DIRECTFB_CFLAGS=`$PKG_CONFIG --cflags directfb`
+                    DIRECTFB_LIBS=`$PKG_CONFIG --libs directfb`
+                    video_directfb=yes
+                fi
+                AC_MSG_RESULT($video_directfb)
             fi
-
-            DIRECTFB_REQUIRED_VERSION=0.9.15
-
-            if $PKG_CONFIG --atleast-version $DIRECTFB_REQUIRED_VERSION directfb ; then
-                DIRECTFB_CFLAGS=`$PKG_CONFIG --cflags directfb`
-                DIRECTFB_LIBS=`$PKG_CONFIG --libs directfb`
+        else
+            AC_MSG_CHECKING(for DirectFB $DIRECTFB_REQUIRED_VERSION support)
+            set -- `echo $DIRECTFB_REQUIRED_VERSION | sed 's/\./ /g'`
+            NEED_VERSION=`expr $1 \* 10000 + $2 \* 100 + $3`
+            set -- `directfb-config --version | sed 's/\./ /g'`
+            HAVE_VERSION=`expr $1 \* 10000 + $2 \* 100 + $3`
+            if test $HAVE_VERSION -ge $NEED_VERSION; then
+                DIRECTFB_CFLAGS=`$DIRECTFBCONFIG --cflags`
+                DIRECTFB_LIBS=`$DIRECTFBCONFIG --libs`
                 video_directfb=yes
             fi
+            AC_MSG_RESULT($video_directfb)
         fi
 
-        AC_MSG_RESULT($video_directfb)
         if test x$video_directfb = xyes; then
             AC_DEFINE(SDL_VIDEO_DRIVER_DIRECTFB)
             SOURCES="$SOURCES $srcdir/src/video/directfb/*.c"
@@ -1102,7 +1117,7 @@ dnl Find the SVGAlib includes and libraries
 CheckSVGA()
 {
     AC_ARG_ENABLE(video-svga,
-AC_HELP_STRING([--enable-video-svga], [use SVGAlib video driver [default=no]]),
+AC_HELP_STRING([--enable-video-svga], [use SVGAlib video driver [default=yes]]),
                   , enable_video_svga=yes)
     if test x$enable_video = xyes -a x$enable_video_svga = xyes; then
         AC_MSG_CHECKING(for SVGAlib (1.4.0+) support)
@@ -1132,8 +1147,8 @@ dnl Find the VGL includes and libraries
 CheckVGL()
 {
     AC_ARG_ENABLE(video-vgl,
-AC_HELP_STRING([--enable-video-vgl], [use VGL video driver [default=no]]),
-                  , enable_video_vgl=no)
+AC_HELP_STRING([--enable-video-vgl], [use VGL video driver [default=yes]]),
+                  , enable_video_vgl=yes)
     if test x$enable_video = xyes -a x$enable_video_vgl = xyes; then
         AC_MSG_CHECKING(for libVGL support)
         video_vgl=no
