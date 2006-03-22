@@ -26,7 +26,7 @@
 #include "SDL.h"
 #include "SDL_cpuinfo.h"
 
-#ifdef __MACOSX__
+#if defined(__MACOSX__) && defined(__ppc__)
 #include <sys/sysctl.h> /* For AltiVec check */
 #elif SDL_ALTIVEC_BLITTERS && HAVE_SETJMP
 #include <signal.h>
@@ -306,7 +306,7 @@ static __inline__ int CPU_haveSSE2(void)
 static __inline__ int CPU_haveAltiVec(void)
 {
 	volatile int altivec = 0;
-#ifdef __MACOSX__
+#if defined(__MACOSX__) && defined(__ppc__)
 	int selectors[2] = { CTL_HW, HW_VECTORUNIT }; 
 	int hasVectorUnit = 0; 
 	size_t length = sizeof(hasVectorUnit); 
