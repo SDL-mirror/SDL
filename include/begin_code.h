@@ -31,44 +31,40 @@
 #endif
 #define _begin_code_h
 
-#ifdef __GNUC__
-#define SDL_GCC_ATTR_VIS_DEFAULT __attribute__((visibility("default")))
-#endif
-
 /* Some compilers use a special export keyword */
 #ifndef DECLSPEC
-# ifdef __BEOS__
+# if defined(__BEOS__)
 #  if defined(__GNUC__)
 #   define DECLSPEC	__declspec(dllexport)
 #  else
 #   define DECLSPEC	__declspec(export)
 #  endif
-# else
-# ifdef __WIN32__
+# elif defined(__WIN32__)
 #  ifdef __BORLANDC__
 #   ifdef BUILD_SDL
 #    define DECLSPEC 
 #   else
-#    define DECLSPEC __declspec(dllimport)
+#    define DECLSPEC	__declspec(dllimport)
 #   endif
 #  else
 #   define DECLSPEC	__declspec(dllexport)
 #  endif
-# else
-# ifdef __OS2__
+# elif defined(__OS2__)
 #  ifdef __WATCOMC__
 #   ifdef BUILD_SDL
-#    define DECLSPEC __declspec(dllexport)
+#    define DECLSPEC	__declspec(dllexport)
 #   else
-#  define DECLSPEC
-# endif
+#    define DECLSPEC
+#   endif
 #  else
 #   define DECLSPEC
 #  endif
 # else
-#  define DECLSPEC
-# endif
-# endif
+#  if defined(__GNUC__)
+#   define DECLSPEC	__attribute__ ((visibility("default")))
+#  else
+#   define DECLSPEC
+#  endif
 # endif
 #endif
 

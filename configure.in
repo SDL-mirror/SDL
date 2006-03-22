@@ -719,7 +719,7 @@ CheckVisibilityHidden()
     CFLAGS="$save_CFLAGS"
 
     if test x$have_gcc_fvisibility = xyes; then
-        EXTRA_CFLAGS="$EXTRA_CFLAGS $visibility_CFLAGS -DDECLSPEC=SDL_GCC_ATTR_VIS_DEFAULT"
+        EXTRA_CFLAGS="$EXTRA_CFLAGS $visibility_CFLAGS"
     fi
 }
 
