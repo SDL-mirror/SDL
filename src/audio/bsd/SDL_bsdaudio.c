@@ -40,7 +40,7 @@
 #include "../SDL_audiomem.h"
 #include "../SDL_audio_c.h"
 #include "../SDL_audiodev_c.h"
-#include "SDL_openbsdaudio.h"
+#include "SDL_bsdaudio.h"
 
 /* The tag name used by NetBSD/OpenBSD audio */
 #ifdef __NetBSD__
@@ -133,8 +133,8 @@ static SDL_AudioDevice
     return this;
 }
 
-AudioBootStrap OPENBSD_AUDIO_bootstrap = {
-	BSD_DRIVER_NAME, BSD_AUDIO_DRIVER_DESC,
+AudioBootStrap BSD_AUDIO_bootstrap = {
+	BSD_AUDIO_DRIVER_NAME, BSD_AUDIO_DRIVER_DESC,
 	Audio_Available, Audio_CreateDevice
 };
 
