@@ -420,9 +420,11 @@ static int set_imps2_mode(int fd)
 	int retval = 0;
 
 	if ( write(fd, &set_imps2, sizeof(set_imps2)) == sizeof(set_imps2) ) {
+		/* Don't reset it, that'll clear IMPS/2 mode on some mice
 		if (write(fd, &reset, sizeof (reset)) == sizeof (reset) ) {
 			retval = 1;
 		}
+		*/
 	}
 
 	/* Get rid of any chatter from the above */
@@ -545,7 +547,7 @@ fprintf(stderr, "Using ELO touchscreen\n");
 
 	if ( mousedev == NULL ) {
 		/* FIXME someday... allow multiple mice in this driver */
-		static const char * const ps2mice[] = {
+		static const char *ps2mice[] = {
 		    "/dev/input/mice", "/dev/usbmouse", "/dev/psaux", NULL
 		};
 		/* First try to use GPM in repeater mode */
@@ -568,9 +570,7 @@ fprintf(stderr, "Using GPM mouse\n");
 			}
 			if (mouse_fd >= 0) {
 				/* rcg06112001 Attempt to set IMPS/2 mode */
-				if ( i == 0 ) {
-					set_imps2_mode(mouse_fd);
-				}
+				set_imps2_mode(mouse_fd);
 				if (detect_imps2(mouse_fd)) {
 #ifdef DEBUG_MOUSE
 fprintf(stderr, "Using IMPS2 mouse\n");
