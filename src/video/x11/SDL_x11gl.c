@@ -126,7 +126,6 @@ XVisualInfo *X11_GL_GetVisual(_THIS)
 
 	if( this->gl_config.stereo ) {
 		attribs[i++] = GLX_STEREO;
-		attribs[i++] = this->gl_config.stereo;
 	}
 	
 	if( this->gl_config.multisamplebuffers ) {
