@@ -39,24 +39,17 @@
 #endif
 
 /*
- * Never reference Xlib directly...we might load it dynamically at runtime.
- *  Even if we don't, for readability, we still use the function pointers
- *  (although the symbol resolution will be done by the loader in that case).
+ * When using the "dynamic X11" functionality, we duplicate all the Xlib
+ *  symbols that would be referenced by SDL inside of SDL itself.
+ *  These duplicated symbols just serve as passthroughs to the functions
+ *  in Xlib, that was dynamically loaded.
  *
- * We define SDL_X11_SYM and include SDL_x11sym.h to accomplish various
- *  goals, without having to duplicate those function signatures.
+ * This allows us to use Xlib as-is when linking against it directly, but
+ *  also handles all the strange cases where there was code in the Xlib
+ *  headers that may or may not exist or vary on a given platform.
  */
 #ifdef __cplusplus
 extern "C" {
-#endif
-
-#ifdef __osf__
-extern int _XData32(Display *,register long *,unsigned);
-extern void _XRead32(Display *,register long *,long);
-extern void _SmtBufferOverflow(Display *,register smtDisplayPtr);
-extern void _SmtIpError(Display *,register smtDisplayPtr, int);
-extern int ipAllocateData(ChannelPtr, IPCard, IPDataPtr *);
-extern int ipUnallocateAndSendData(ChannelPtr, IPCard);
 #endif
 
 /* evil function signatures... */
@@ -65,33 +58,21 @@ typedef int (*SDL_X11_XSynchronizeRetType)(Display*);
 typedef Status (*SDL_X11_XESetEventToWireRetType)(Display*,XEvent*,xEvent*);
 typedef int (*SDL_X11_XSetExtensionErrorHandlerType)(Display *,char *,char *);
 
-#define SDL_X11_SYM(req,ret,fn,params) extern ret (*p##fn) params;
-#include "SDL_x11sym.h"
-#undef SDL_X11_SYM
-
-/* Macro in the xlib headers, not an actual symbol... */
-#define pXDestroyImage XDestroyImage
-
-/* Workaround code in headers... */
-#if !__SDL_NO_REDEFINE_X11_HEADER_SYMS
-#define _XFlush p_XFlush
-#define _XFlushGCCache p_XFlushGCCache
-#define _XReply p_XReply
-#define _XSend p_XSend
-#define XFree pXFree
-#define _XData32 p_XData32
-
-#if defined(__osf__)
-#define _SmtBufferOverflow p_SmtBufferOverflow
-#define _SmtIpError p_SmtIpError
-#define ipAllocateData pipAllocateData
-#define ipUnallocateAndSendData pipUnallocateAndSendData
-#endif
-
-#endif /* !__SDL_NO_REDEFINE_X11_HEADER_SYMS */
-
 int SDL_X11_LoadSymbols(void);
 void SDL_X11_UnloadSymbols(void);
+
+/* That's really annoying...make this a function pointer no matter what. */
+#ifdef X_HAVE_UTF8_STRING
+extern XIC (*pXCreateIC)(XIM,...);
+#endif
+
+/* These SDL_X11_HAVE_* flags are here whether you have dynamic X11 or not. */
+#define SDL_X11_MODULE(modname) extern int SDL_X11_HAVE_##modname;
+#define SDL_X11_SYM(rc,fn,params,args,ret)
+#include "SDL_x11sym.h"
+#undef SDL_X11_MODULE
+#undef SDL_X11_SYM
+
 
 #ifdef __cplusplus
 }

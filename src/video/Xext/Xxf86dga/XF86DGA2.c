@@ -107,7 +107,7 @@ xdga_wire_to_event(
   case MotionNotify:
 	mevent = (SDL_NAME(XDGAMotionEvent)*)event;
 	mevent->type = wire->u.u.type & 0x7F;
-	mevent->serial = p_XSetLastRequestRead(dpy, (xGenericReply *)wire);
+	mevent->serial = _XSetLastRequestRead(dpy, (xGenericReply *)wire);
 	mevent->display = dpy;
 	mevent->screen = wire->u.event.screen;
 	mevent->time = wire->u.event.time;
@@ -119,7 +119,7 @@ xdga_wire_to_event(
   case ButtonRelease:
 	bevent = (SDL_NAME(XDGAButtonEvent)*)event;
 	bevent->type = wire->u.u.type & 0x7F;
-	bevent->serial = p_XSetLastRequestRead(dpy, (xGenericReply *)wire);
+	bevent->serial = _XSetLastRequestRead(dpy, (xGenericReply *)wire);
 	bevent->display = dpy;
 	bevent->screen = wire->u.event.screen;
 	bevent->time = wire->u.event.time;
@@ -130,7 +130,7 @@ xdga_wire_to_event(
   case KeyRelease:
 	kevent = (SDL_NAME(XDGAKeyEvent)*)event;
 	kevent->type = wire->u.u.type & 0x7F;
-	kevent->serial = p_XSetLastRequestRead(dpy, (xGenericReply *)wire);
+	kevent->serial = _XSetLastRequestRead(dpy, (xGenericReply *)wire);
 	kevent->display = dpy;
 	kevent->screen = wire->u.event.screen;
 	kevent->time = wire->u.event.time;
@@ -175,7 +175,7 @@ Bool SDL_NAME(XDGAQueryVersion)(
     GetReq(XDGAQueryVersion, req);
     req->reqType = info->codes->major_opcode;
     req->dgaReqType = X_XDGAQueryVersion;
-    if (!p_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
+    if (!_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
 	UnlockDisplay(dpy);
 	SyncHandle();
 	return False;
@@ -192,8 +192,8 @@ Bool SDL_NAME(XDGAQueryVersion)(
 	     i < XF86DGANumberEvents;
 	     i++, j++) 
 	{
-	    pXESetWireToEvent(dpy, j, xdga_wire_to_event);
-	    pXESetEventToWire(dpy, j, xdga_event_to_wire);
+	    XESetWireToEvent(dpy, j, xdga_wire_to_event);
+	    XESetEventToWire(dpy, j, xdga_event_to_wire);
 	}
 	SDL_NAME(XDGASetClientVersion)(dpy);
     }
@@ -236,7 +236,7 @@ Bool SDL_NAME(XDGAOpenFramebuffer)(
     req->reqType = info->codes->major_opcode;
     req->dgaReqType = X_XDGAOpenFramebuffer;
     req->screen = screen;
-    if (!p_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
+    if (!_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
 	UnlockDisplay(dpy);
 	SyncHandle();
 	return False;
@@ -244,7 +244,7 @@ Bool SDL_NAME(XDGAOpenFramebuffer)(
 
     if(rep.length) {
 	deviceName = Xmalloc(rep.length << 2);
-	p_XRead(dpy, deviceName, rep.length << 2);
+	_XRead(dpy, deviceName, rep.length << 2);
     }
 
     ret = SDL_NAME(XDGAMapFramebuffer)(screen, deviceName,
@@ -301,7 +301,7 @@ SDL_NAME(XDGAMode)* SDL_NAME(XDGAQueryModes)(
     req->dgaReqType = X_XDGAQueryModes;
     req->screen = screen;
 
-    if (p_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
+    if (_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
 	if(rep.length) {
 	   xXDGAModeInfo info;
 	   int i, size;
@@ -315,7 +315,7 @@ SDL_NAME(XDGAMode)* SDL_NAME(XDGAQueryModes)(
 
 	   if(modes) {	
 	      for(i = 0; i < rep.number; i++) {
-		p_XRead(dpy, (char*)(&info), sz_xXDGAModeInfo);
+		_XRead(dpy, (char*)(&info), sz_xXDGAModeInfo);
 
 		modes[i].num = info.num;
 		modes[i].verticalRefresh = 
@@ -343,13 +343,13 @@ SDL_NAME(XDGAMode)* SDL_NAME(XDGAQueryModes)(
 		modes[i].reserved1 = info.reserved1;
 		modes[i].reserved2 = info.reserved2;	
 
-		p_XRead(dpy, offset, info.name_size);
+		_XRead(dpy, offset, info.name_size);
 		modes[i].name = offset;
 		offset += info.name_size;
 	      }
 	      *num = rep.number;
 	   } else
-		p_XEatData(dpy, rep.length << 2);
+		_XEatData(dpy, rep.length << 2);
 	}
     }
 
@@ -382,7 +382,7 @@ SDL_NAME(XDGASetMode)(
     req->mode = mode;
     req->pid = pid = XAllocID(dpy);
     
-    if (p_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
+    if (_XReply(dpy, (xReply *)&rep, 0, xFalse)) {
 	if(rep.length) {
 	   xXDGAModeInfo info;
 	   int size;
@@ -393,7 +393,7 @@ SDL_NAME(XDGASetMode)(
 	   dev = (SDL_NAME(XDGADevice)*)Xmalloc(sizeof(SDL_NAME(XDGADevice)) + size);
 	    
 	   if(dev) {
-		p_XRead(dpy, (char*)(&info), sz_xXDGAModeInfo);
+		_XRead(dpy, (char*)(&info), sz_xXDGAModeInfo);
 
 		dev->mode.num = info.num;
 		dev->mode.verticalRefresh = 
@@ -422,7 +422,7 @@ SDL_NAME(XDGASetMode)(
 		dev->mode.reserved2 = info.reserved2;
 
 		dev->mode.name = (char*)(&dev[1]);	
-		p_XRead(dpy, dev->mode.name, info.name_size);
+		_XRead(dpy, dev->mode.name, info.name_size);
 
 		dev->pixmap = (rep.flags & XDGAPixmap) ? pid : 0;
 		dev->data = SDL_NAME(XDGAGetMappedMemory)(screen);
@@ -613,7 +613,7 @@ int SDL_NAME(XDGAGetViewportStatus)(
     req->reqType = info->codes->major_opcode;
     req->dgaReqType = X_XDGAGetViewportStatus;
     req->screen = screen;
-    if (!p_XReply(dpy, (xReply *)&rep, 0, xFalse))
+    if (!_XReply(dpy, (xReply *)&rep, 0, xFalse))
 	status = rep.status;
     UnlockDisplay(dpy);
     SyncHandle();
@@ -635,7 +635,7 @@ void SDL_NAME(XDGASync)(
     req->reqType = info->codes->major_opcode;
     req->dgaReqType = X_XDGASync;
     req->screen = screen;
-    p_XReply(dpy, (xReply *)&rep, 0, xFalse);
+    _XReply(dpy, (xReply *)&rep, 0, xFalse);
     UnlockDisplay(dpy);
     SyncHandle();
 }
@@ -662,7 +662,7 @@ void SDL_NAME(XDGAChangePixmapMode)(
     req->x = *x;
     req->y = *y;
     req->flags = mode;
-    p_XReply(dpy, (xReply *)&rep, 0, xFalse);
+    _XReply(dpy, (xReply *)&rep, 0, xFalse);
     *x = rep.x;
     *y = rep.y;
     UnlockDisplay(dpy);

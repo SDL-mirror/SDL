@@ -45,7 +45,7 @@ static int DGA_DispatchEvent(_THIS)
 	int posted;
 	SDL_NAME(XDGAEvent) xevent;
 
-	pXNextEvent(DGA_Display, (XEvent *)&xevent);
+	XNextEvent(DGA_Display, (XEvent *)&xevent);
 
 	posted = 0;
 	xevent.type -= DGA_event_base;
@@ -96,7 +96,7 @@ printf("KeyPress (X11 keycode = 0x%X)\n", xkey.keycode);
 			static XComposeStatus state;
 			char keybuf[32];
 
-			if ( pXLookupString(&xkey, keybuf, sizeof(keybuf), NULL, &state) ) {
+			if ( XLookupString(&xkey, keybuf, sizeof(keybuf), NULL, &state) ) {
 				/*
 				* FIXME: XLookupString() may yield more than one
 				* character, so we need a mechanism to allow for

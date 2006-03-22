@@ -41,8 +41,8 @@ void X11_FreeWMCursor(_THIS, WMcursor *cursor)
 {
 	if ( SDL_Display != NULL ) {
 		SDL_Lock_EventThread();
-		pXFreeCursor(SDL_Display, cursor->x_cursor);
-		pXSync(SDL_Display, False);
+		XFreeCursor(SDL_Display, cursor->x_cursor);
+		XSync(SDL_Display, False);
 		SDL_Unlock_EventThread();
 	}
 	SDL_free(cursor);
@@ -96,48 +96,48 @@ WMcursor *X11_CreateWMCursor(_THIS,
 	SDL_Lock_EventThread();
 
 	/* Create the data image */
-	data_image = pXCreateImage(SDL_Display, 
+	data_image = XCreateImage(SDL_Display, 
 			DefaultVisual(SDL_Display, SDL_Screen),
 					1, XYBitmap, 0, x_data, w, h, 8, w/8);
 	data_image->byte_order = MSBFirst;
 	data_image->bitmap_bit_order = MSBFirst;
-	data_pixmap = pXCreatePixmap(SDL_Display, SDL_Root, w, h, 1);
+	data_pixmap = XCreatePixmap(SDL_Display, SDL_Root, w, h, 1);
 
 	/* Create the data mask */
-	mask_image = pXCreateImage(SDL_Display, 
+	mask_image = XCreateImage(SDL_Display, 
 			DefaultVisual(SDL_Display, SDL_Screen),
 					1, XYBitmap, 0, x_mask, w, h, 8, w/8);
 	mask_image->byte_order = MSBFirst;
 	mask_image->bitmap_bit_order = MSBFirst;
-	mask_pixmap = pXCreatePixmap(SDL_Display, SDL_Root, w, h, 1);
+	mask_pixmap = XCreatePixmap(SDL_Display, SDL_Root, w, h, 1);
 
 	/* Create the graphics context */
 	GCvalues.function = GXcopy;
 	GCvalues.foreground = ~0;
 	GCvalues.background =  0;
 	GCvalues.plane_mask = AllPlanes;
-	GCcursor = pXCreateGC(SDL_Display, data_pixmap,
+	GCcursor = XCreateGC(SDL_Display, data_pixmap,
 			(GCFunction|GCForeground|GCBackground|GCPlaneMask),
 								&GCvalues);
 
 	/* Blit the images to the pixmaps */
-	pXPutImage(SDL_Display, data_pixmap, GCcursor, data_image,
+	XPutImage(SDL_Display, data_pixmap, GCcursor, data_image,
 							0, 0, 0, 0, w, h);
-	pXPutImage(SDL_Display, mask_pixmap, GCcursor, mask_image,
+	XPutImage(SDL_Display, mask_pixmap, GCcursor, mask_image,
 							0, 0, 0, 0, w, h);
-	pXFreeGC(SDL_Display, GCcursor);
+	XFreeGC(SDL_Display, GCcursor);
 	/* These free the x_data and x_mask memory pointers */
-	pXDestroyImage(data_image);
-	pXDestroyImage(mask_image);
+	XDestroyImage(data_image);
+	XDestroyImage(mask_image);
 
 	/* Create the cursor */
-	cursor->x_cursor = pXCreatePixmapCursor(SDL_Display, data_pixmap,
+	cursor->x_cursor = XCreatePixmapCursor(SDL_Display, data_pixmap,
 				mask_pixmap, &black, &white, hot_x, hot_y);
-	pXFreePixmap(SDL_Display, data_pixmap);
-	pXFreePixmap(SDL_Display, mask_pixmap);
+	XFreePixmap(SDL_Display, data_pixmap);
+	XFreePixmap(SDL_Display, mask_pixmap);
 
 	/* Release the event thread */
-	pXSync(SDL_Display, False);
+	XSync(SDL_Display, False);
 	SDL_Unlock_EventThread();
 
 	return(cursor);
@@ -155,13 +155,13 @@ int X11_ShowWMCursor(_THIS, WMcursor *cursor)
 		SDL_Lock_EventThread();
 		if ( cursor == NULL ) {
 			if ( SDL_BlankCursor != NULL ) {
-				pXDefineCursor(SDL_Display, SDL_Window,
+				XDefineCursor(SDL_Display, SDL_Window,
 					SDL_BlankCursor->x_cursor);
 			}
 		} else {
-			pXDefineCursor(SDL_Display, SDL_Window, cursor->x_cursor);
+			XDefineCursor(SDL_Display, SDL_Window, cursor->x_cursor);
 		}
-		pXSync(SDL_Display, False);
+		XSync(SDL_Display, False);
 		SDL_Unlock_EventThread();
 	}
 	return(1);
@@ -178,8 +178,8 @@ void X11_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
 		SDL_PrivateMouseMotion(0, 0, x, y);
 	} else {
 		SDL_Lock_EventThread();
-		pXWarpPointer(SDL_Display, None, SDL_Window, 0, 0, 0, 0, x, y);
-		pXSync(SDL_Display, False);
+		XWarpPointer(SDL_Display, None, SDL_Window, 0, 0, 0, 0, x, y);
+		XSync(SDL_Display, False);
 		SDL_Unlock_EventThread();
 	}
 }
@@ -217,7 +217,7 @@ static void SetMouseAccel(_THIS, const char *accel_param)
 		}
 	}
 	if ( mouse_param_buf ) {
-		pXChangePointerControl(SDL_Display, True, True,
+		XChangePointerControl(SDL_Display, True, True,
 			accel_value[0], accel_value[1], accel_value[2]);
 		SDL_free(mouse_param_buf);
 	}
@@ -250,7 +250,7 @@ void X11_CheckMouseModeNoLock(_THIS)
 
 				SDL_GetMouseState(&mouse_last.x, &mouse_last.y);
 				/* Use as raw mouse mickeys as possible */
-				pXGetPointerControl(SDL_Display,
+				XGetPointerControl(SDL_Display,
 						&mouse_accel.numerator, 
 						&mouse_accel.denominator,
 						&mouse_accel.threshold);
@@ -266,7 +266,7 @@ void X11_CheckMouseModeNoLock(_THIS)
 			if ( using_dga & DGA_MOUSE ) {
 				X11_DisableDGAMouse(this);
 			} else {
-				pXChangePointerControl(SDL_Display, True, True,
+				XChangePointerControl(SDL_Display, True, True,
 						mouse_accel.numerator, 
 						mouse_accel.denominator,
 						mouse_accel.threshold);

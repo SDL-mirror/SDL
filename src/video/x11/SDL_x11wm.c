@@ -116,7 +116,7 @@ void X11_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 					SDL_iconcolors[i]--;
 				}
 			}
-			pXFreeColors(GFX_Display, dcmap, freelist, nfree, 0);
+			XFreeColors(GFX_Display, dcmap, freelist, nfree, 0);
 		}
 		if(!SDL_iconcolors)
 			SDL_iconcolors = SDL_malloc(256 * sizeof *SDL_iconcolors);
@@ -131,7 +131,7 @@ void X11_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 			c.green = want[i].g << 8;
 			c.blue = want[i].b << 8;
 			c.flags = DoRed | DoGreen | DoBlue;
-			if(pXAllocColor(GFX_Display, dcmap, &c)) {
+			if(XAllocColor(GFX_Display, dcmap, &c)) {
 				/* got the colour */
 				SDL_iconcolors[c.pixel]++;
 				got[c.pixel] = want[i];
@@ -145,13 +145,13 @@ void X11_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 			XColor cols[256];
 			for(i = 0; i < 256; i++)
 				cols[i].pixel = i;
-			pXQueryColors(GFX_Display, dcmap, cols, 256);
+			XQueryColors(GFX_Display, dcmap, cols, 256);
 			for(i = 0; i < 256; i++) {
 				got[i].r = cols[i].red >> 8;
 				got[i].g = cols[i].green >> 8;
 				got[i].b = cols[i].blue >> 8;
 				if(!SDL_iconcolors[i]) {
-					if(pXAllocColor(GFX_Display, dcmap,
+					if(XAllocColor(GFX_Display, dcmap,
 							cols + i)) {
 						SDL_iconcolors[i] = 1;
 					} else {
@@ -184,13 +184,13 @@ void X11_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 	SDL_memset(LSBmask, 0, masksize);
 	for(i = 0; i < masksize; i++)
 		LSBmask[i] = reverse_byte(mask[i]);
-	mask_pixmap = pXCreatePixmapFromBitmapData(SDL_Display, WMwindow,
+	mask_pixmap = XCreatePixmapFromBitmapData(SDL_Display, WMwindow,
 						  (char *)LSBmask,
 						  sicon->w, sicon->h,
 						  1L, 0L, 1);
 
 	/* Transfer the image to an X11 pixmap */
-	icon_image = pXCreateImage(SDL_Display,
+	icon_image = XCreateImage(SDL_Display,
 				  DefaultVisual(SDL_Display, SDL_Screen),
 				  DefaultDepth(SDL_Display, SDL_Screen),
 				  ZPixmap, 0, sicon->pixels,
@@ -198,13 +198,13 @@ void X11_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 				  32, 0);
 	icon_image->byte_order = (SDL_BYTEORDER == SDL_BIG_ENDIAN)
 		                 ? MSBFirst : LSBFirst;
-	icon_pixmap = pXCreatePixmap(SDL_Display, SDL_Root, sicon->w, sicon->h,
+	icon_pixmap = XCreatePixmap(SDL_Display, SDL_Root, sicon->w, sicon->h,
 				    DefaultDepth(SDL_Display, SDL_Screen));
-	gc = pXCreateGC(SDL_Display, icon_pixmap, 0, &GCvalues);
-	pXPutImage(SDL_Display, icon_pixmap, gc, icon_image,
+	gc = XCreateGC(SDL_Display, icon_pixmap, 0, &GCvalues);
+	XPutImage(SDL_Display, icon_pixmap, gc, icon_image,
 		  0, 0, 0, 0, sicon->w, sicon->h);
-	pXFreeGC(SDL_Display, gc);
-	pXDestroyImage(icon_image);
+	XFreeGC(SDL_Display, gc);
+	XDestroyImage(icon_image);
 	SDL_free(LSBmask);
 	sicon->pixels = NULL;
 
@@ -213,17 +213,17 @@ void X11_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 	   it screws up others. The default is only to use a pixmap. */
 	p = SDL_getenv("SDL_VIDEO_X11_ICONWIN");
 	if(p && *p) {
-		icon_window = pXCreateSimpleWindow(SDL_Display, SDL_Root,
+		icon_window = XCreateSimpleWindow(SDL_Display, SDL_Root,
 						  0, 0, sicon->w, sicon->h, 0,
 						  CopyFromParent,
 						  CopyFromParent);
-		pXSetWindowBackgroundPixmap(SDL_Display, icon_window,
+		XSetWindowBackgroundPixmap(SDL_Display, icon_window,
 					   icon_pixmap);
-		pXClearWindow(SDL_Display, icon_window);
+		XClearWindow(SDL_Display, icon_window);
 	}
 
 	/* Set the window icon to the icon pixmap (and icon window) */
-	wmhints = pXAllocWMHints();
+	wmhints = XAllocWMHints();
 	wmhints->flags = (IconPixmapHint | IconMaskHint);
 	wmhints->icon_pixmap = icon_pixmap;
 	wmhints->icon_mask = mask_pixmap;
@@ -231,9 +231,9 @@ void X11_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 		wmhints->flags |= IconWindowHint;
 		wmhints->icon_window = icon_window;
 	}
-	pXSetWMHints(SDL_Display, WMwindow, wmhints);
-	pXFree(wmhints);
-	pXSync(SDL_Display, False);
+	XSetWMHints(SDL_Display, WMwindow, wmhints);
+	XFree(wmhints);
+	XSync(SDL_Display, False);
 
   done:
 	SDL_Unlock_EventThread();
@@ -250,8 +250,10 @@ void X11_SetCaption(_THIS, const char *title, const char *icon)
 	Atom _NET_WM_ICON_NAME;
 
 	/* Look up some useful Atoms */
-	_NET_WM_NAME = pXInternAtom(SDL_Display, "_NET_WM_NAME", False);
-	_NET_WM_ICON_NAME = pXInternAtom(SDL_Display, "_NET_WM_ICON_NAME", False);
+	if (SDL_X11_HAVE_UTF8) {
+		_NET_WM_NAME = XInternAtom(SDL_Display, "_NET_WM_NAME", False);
+		_NET_WM_ICON_NAME = XInternAtom(SDL_Display, "_NET_WM_ICON_NAME", False);
+	}
 #endif
 
 	/* Lock the event thread, in multi-threading environments */
@@ -263,18 +265,20 @@ void X11_SetCaption(_THIS, const char *title, const char *icon)
 			SDL_OutOfMemory();
 			return;
 		}
-		status = pXStringListToTextProperty(&title_latin1, 1, &titleprop);
+		status = XStringListToTextProperty(&title_latin1, 1, &titleprop);
 		SDL_free(title_latin1);
 		if ( status ) {
-			pXSetTextProperty(SDL_Display, WMwindow, &titleprop, XA_WM_NAME);
-			pXFree(titleprop.value);
+			XSetTextProperty(SDL_Display, WMwindow, &titleprop, XA_WM_NAME);
+			XFree(titleprop.value);
 		}
 #ifdef X_HAVE_UTF8_STRING
-		status = pXutf8TextListToTextProperty(SDL_Display,
-				(char **)&title, 1, XUTF8StringStyle, &titleprop);
-		if ( status == Success ) {
-			pXSetTextProperty(SDL_Display, WMwindow, &titleprop, _NET_WM_NAME);
-			pXFree(titleprop.value);
+		if (SDL_X11_HAVE_UTF8) {
+			status = Xutf8TextListToTextProperty(SDL_Display,
+					(char **)&title, 1, XUTF8StringStyle, &titleprop);
+			if ( status == Success ) {
+				XSetTextProperty(SDL_Display, WMwindow, &titleprop, _NET_WM_NAME);
+				XFree(titleprop.value);
+			}
 		}
 #endif
 	}
@@ -284,22 +288,24 @@ void X11_SetCaption(_THIS, const char *title, const char *icon)
 			SDL_OutOfMemory();
 			return;
 		}
-		status = pXStringListToTextProperty(&icon_latin1, 1, &iconprop);
+		status = XStringListToTextProperty(&icon_latin1, 1, &iconprop);
 		SDL_free(icon_latin1);
 		if ( status ) {
-			pXSetTextProperty(SDL_Display, WMwindow, &iconprop, XA_WM_ICON_NAME);
-			pXFree(iconprop.value);
+			XSetTextProperty(SDL_Display, WMwindow, &iconprop, XA_WM_ICON_NAME);
+			XFree(iconprop.value);
 		}
 #ifdef X_HAVE_UTF8_STRING
-		status = pXutf8TextListToTextProperty(SDL_Display,
-				(char **)&icon, 1, XUTF8StringStyle, &iconprop);
-		if ( status == Success ) {
-			pXSetTextProperty(SDL_Display, WMwindow, &iconprop, _NET_WM_ICON_NAME);
-			pXFree(iconprop.value);
+		if (SDL_X11_HAVE_UTF8) {
+			status = Xutf8TextListToTextProperty(SDL_Display,
+					(char **)&icon, 1, XUTF8StringStyle, &iconprop);
+			if ( status == Success ) {
+				XSetTextProperty(SDL_Display, WMwindow, &iconprop, _NET_WM_ICON_NAME);
+				XFree(iconprop.value);
+			}
 		}
 #endif
 	}
-	pXSync(SDL_Display, False);
+	XSync(SDL_Display, False);
 
 	SDL_Unlock_EventThread();
 }
@@ -310,8 +316,8 @@ int X11_IconifyWindow(_THIS)
 	int result;
 
 	SDL_Lock_EventThread();
-	result = pXIconifyWindow(SDL_Display, WMwindow, SDL_Screen);
-	pXSync(SDL_Display, False);
+	result = XIconifyWindow(SDL_Display, WMwindow, SDL_Screen);
+	XSync(SDL_Display, False);
 	SDL_Unlock_EventThread();
 	return(result);
 }
@@ -327,12 +333,12 @@ SDL_GrabMode X11_GrabInputNoLock(_THIS, SDL_GrabMode mode)
 		return(mode);	/* Will be set later on mode switch */
 	}
 	if ( mode == SDL_GRAB_OFF ) {
-		pXUngrabPointer(SDL_Display, CurrentTime);
-		pXUngrabKeyboard(SDL_Display, CurrentTime);
+		XUngrabPointer(SDL_Display, CurrentTime);
+		XUngrabKeyboard(SDL_Display, CurrentTime);
 	} else {
 		if ( this->screen->flags & SDL_FULLSCREEN ) {
 			/* Unbind the mouse from the fullscreen window */
-			pXUngrabPointer(SDL_Display, CurrentTime);
+			XUngrabPointer(SDL_Display, CurrentTime);
 		}
 		/* Try to grab the mouse */
 #if 0 /* We'll wait here until we actually grab, otherwise behavior undefined */
@@ -340,7 +346,7 @@ SDL_GrabMode X11_GrabInputNoLock(_THIS, SDL_GrabMode mode)
 #else
 		while ( 1 ) {
 #endif
-			result = pXGrabPointer(SDL_Display, SDL_Window, True, 0,
+			result = XGrabPointer(SDL_Display, SDL_Window, True, 0,
 						GrabModeAsync, GrabModeAsync,
 						SDL_Window, None, CurrentTime);
 			if ( result == GrabSuccess ) {
@@ -352,17 +358,17 @@ SDL_GrabMode X11_GrabInputNoLock(_THIS, SDL_GrabMode mode)
 			/* Uh, oh, what do we do here? */ ;
 		}
 		/* Now grab the keyboard */
-		pXGrabKeyboard(SDL_Display, WMwindow, True,
+		XGrabKeyboard(SDL_Display, WMwindow, True,
 				GrabModeAsync, GrabModeAsync, CurrentTime);
 
 		/* Raise the window if we grab the mouse */
 		if ( !(this->screen->flags & SDL_FULLSCREEN) )
-			pXRaiseWindow(SDL_Display, WMwindow);
+			XRaiseWindow(SDL_Display, WMwindow);
 
 		/* Make sure we register input focus */
 		SDL_PrivateAppActive(1, SDL_APPINPUTFOCUS);
 	}
-	pXSync(SDL_Display, False);
+	XSync(SDL_Display, False);
 
 	return(mode);
 }
@@ -387,7 +393,7 @@ static void unlock_display(void)
 {
 	/* Make sure any X11 transactions are completed */
 	SDL_VideoDevice *this = current_video;
-	pXSync(SDL_Display, False);
+	XSync(SDL_Display, False);
 	SDL_Unlock_EventThread();
 }
 int X11_GetWMInfo(_THIS, SDL_SysWMinfo *info)

@@ -44,6 +44,10 @@ static int shm_errhandler(Display *d, XErrorEvent *e)
 
 static void try_mitshm(_THIS, SDL_Surface *screen)
 {
+	/* Dynamic X11 may not have SHM entry points on this box. */
+	if ((use_mitshm) && (!SDL_X11_HAVE_SHM))
+		use_mitshm = 0;
+
 	if(!use_mitshm)
 		return;
 	shminfo.shmid = shmget(IPC_PRIVATE, screen->h*screen->pitch,
@@ -53,10 +57,10 @@ static void try_mitshm(_THIS, SDL_Surface *screen)
 		shminfo.readOnly = False;
 		if ( shminfo.shmaddr != (char *)-1 ) {
 			shm_error = False;
-			X_handler = pXSetErrorHandler(shm_errhandler);
-			pXShmAttach(SDL_Display, &shminfo);
-			pXSync(SDL_Display, True);
-			pXSetErrorHandler(X_handler);
+			X_handler = XSetErrorHandler(shm_errhandler);
+			XShmAttach(SDL_Display, &shminfo);
+			XSync(SDL_Display, True);
+			XSetErrorHandler(X_handler);
 			if ( shm_error )
 				shmdt(shminfo.shmaddr);
 		} else {
@@ -82,13 +86,13 @@ int X11_SetupImage(_THIS, SDL_Surface *screen)
 #ifndef NO_SHARED_MEMORY
 	try_mitshm(this, screen);
 	if(use_mitshm) {
-		SDL_Ximage = pXShmCreateImage(SDL_Display, SDL_Visual,
+		SDL_Ximage = XShmCreateImage(SDL_Display, SDL_Visual,
 					     this->hidden->depth, ZPixmap,
 					     shminfo.shmaddr, &shminfo, 
 					     screen->w, screen->h);
 		if(!SDL_Ximage) {
-			pXShmDetach(SDL_Display, &shminfo);
-			pXSync(SDL_Display, False);
+			XShmDetach(SDL_Display, &shminfo);
+			XSync(SDL_Display, False);
 			shmdt(shminfo.shmaddr);
 			screen->pixels = NULL;
 			goto error;
@@ -105,7 +109,7 @@ int X11_SetupImage(_THIS, SDL_Surface *screen)
 			return -1;
 		}
  	        bpp = screen->format->BytesPerPixel;
-		SDL_Ximage = pXCreateImage(SDL_Display, SDL_Visual,
+		SDL_Ximage = XCreateImage(SDL_Display, SDL_Visual,
 					  this->hidden->depth, ZPixmap, 0,
 					  (char *)screen->pixels, 
 					  screen->w, screen->h,
@@ -128,11 +132,11 @@ error:
 void X11_DestroyImage(_THIS, SDL_Surface *screen)
 {
 	if ( SDL_Ximage ) {
-		pXDestroyImage(SDL_Ximage);
+		XDestroyImage(SDL_Ximage);
 #ifndef NO_SHARED_MEMORY
 		if ( use_mitshm ) {
-			pXShmDetach(SDL_Display, &shminfo);
-			pXSync(SDL_Display, False);
+			XShmDetach(SDL_Display, &shminfo);
+			XSync(SDL_Display, False);
 			shmdt(shminfo.shmaddr);
 		}
 #endif /* ! NO_SHARED_MEMORY */
@@ -213,7 +217,7 @@ void X11_FreeHWSurface(_THIS, SDL_Surface *surface)
 int X11_LockHWSurface(_THIS, SDL_Surface *surface)
 {
 	if ( (surface == SDL_VideoSurface) && blit_queued ) {
-		pXSync(GFX_Display, False);
+		XSync(GFX_Display, False);
 		blit_queued = 0;
 	}
 	return(0);
@@ -236,15 +240,15 @@ static void X11_NormalUpdate(_THIS, int numrects, SDL_Rect *rects)
 		if ( rects[i].w == 0 || rects[i].h == 0 ) { /* Clipped? */
 			continue;
 		}
-		pXPutImage(GFX_Display, SDL_Window, SDL_GC, SDL_Ximage,
+		XPutImage(GFX_Display, SDL_Window, SDL_GC, SDL_Ximage,
 			  rects[i].x, rects[i].y,
 			  rects[i].x, rects[i].y, rects[i].w, rects[i].h);
 	}
 	if ( SDL_VideoSurface->flags & SDL_ASYNCBLIT ) {
-		pXFlush(GFX_Display);
+		XFlush(GFX_Display);
 		blit_queued = 1;
 	} else {
-		pXSync(GFX_Display, False);
+		XSync(GFX_Display, False);
 	}
 }
 
@@ -257,16 +261,16 @@ static void X11_MITSHMUpdate(_THIS, int numrects, SDL_Rect *rects)
 		if ( rects[i].w == 0 || rects[i].h == 0 ) { /* Clipped? */
 			continue;
 		}
-		pXShmPutImage(GFX_Display, SDL_Window, SDL_GC, SDL_Ximage,
+		XShmPutImage(GFX_Display, SDL_Window, SDL_GC, SDL_Ximage,
 				rects[i].x, rects[i].y,
 				rects[i].x, rects[i].y, rects[i].w, rects[i].h,
 									False);
 	}
 	if ( SDL_VideoSurface->flags & SDL_ASYNCBLIT ) {
-		pXFlush(GFX_Display);
+		XFlush(GFX_Display);
 		blit_queued = 1;
 	} else {
-		pXSync(GFX_Display, False);
+		XSync(GFX_Display, False);
 	}
 #endif /* ! NO_SHARED_MEMORY */
 }
@@ -300,14 +304,15 @@ void X11_RefreshDisplay(_THIS)
 	}
 #ifndef NO_SHARED_MEMORY
 	if ( this->UpdateRects == X11_MITSHMUpdate ) {
-		pXShmPutImage(SDL_Display, SDL_Window, SDL_GC, SDL_Ximage,
+		XShmPutImage(SDL_Display, SDL_Window, SDL_GC, SDL_Ximage,
 				0, 0, 0, 0, this->screen->w, this->screen->h,
 				False);
 	} else
 #endif /* ! NO_SHARED_MEMORY */
 	{
-		pXPutImage(SDL_Display, SDL_Window, SDL_GC, SDL_Ximage,
+		XPutImage(SDL_Display, SDL_Window, SDL_GC, SDL_Ximage,
 			  0, 0, 0, 0, this->screen->w, this->screen->h);
 	}
-	pXSync(SDL_Display, False);
+	XSync(SDL_Display, False);
 }
+
