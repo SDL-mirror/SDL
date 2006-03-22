@@ -30,6 +30,7 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <asm/page.h>		/* For definition of PAGE_SIZE */
+#include <linux/vt.h>
 
 #include "SDL_video.h"
 #include "SDL_mouse.h"
@@ -153,15 +154,21 @@ static void FB_RestorePalette(_THIS);
 static int FB_Available(void)
 {
 	int console;
-	const char *SDL_fbdev;
+	/* Added check for /fb/0 (devfs) */
+	/* but - use environment variable first... if it fails, still check defaults */
+	int idx = 0;
+	const char *SDL_fbdevs[4] = { NULL, "/dev/fb0", "/dev/fb/0", NULL };
 
-	SDL_fbdev = SDL_getenv("SDL_FBDEV");
-	if ( SDL_fbdev == NULL ) {
-		SDL_fbdev = "/dev/fb0";
-	}
-	console = open(SDL_fbdev, O_RDWR, 0);
-	if ( console >= 0 ) {
-		close(console);
+	SDL_fbdevs[0] = SDL_getenv("SDL_FBDEV");
+	if( !SDL_fbdevs[0] )
+		idx++;
+	for( ; SDL_fbdevs[idx]; idx++ )
+	{
+		console = open(SDL_fbdevs[idx], O_RDWR, 0);
+		if ( console >= 0 ) {
+			close(console);
+			break;
+		}
 	}
 	return(console >= 0);
 }
@@ -1230,8 +1237,28 @@ static void FB_FreeHWSurface(_THIS, SDL_Surface *surface)
 	surface->pixels = NULL;
 	surface->hwdata = NULL;
 }
+
+/* Routine to check to see if the frame buffer virtual terminal */
+/* is the current(active) one.  If it is not, result will cause */
+/* Lock to fail.  (would have waited forever, since the fbevent */
+/* keyboard handler maintains a lock when switched away from    */
+/* current) */
+static __inline__ int FB_IsFrameBufferActive(_THIS)
+{
+	struct vt_stat vtstate;
+	if ( (ioctl(keyboard_fd, VT_GETSTATE, &vtstate) < 0) ||
+	     (current_vt != vtstate.v_active) ) {
+		return 0;
+	}
+	return 1;
+}
+
+
 static int FB_LockHWSurface(_THIS, SDL_Surface *surface)
 {
+	if ( !FB_IsFrameBufferActive(this) ) {
+		return -1; /* fail locking. */
+	}
 	if ( surface == this->screen ) {
 		SDL_mutexP(hw_lock);
 		if ( FB_IsSurfaceBusy(surface) ) {

@@ -505,7 +505,7 @@ int FB_OpenMouse(_THIS)
 	mouse_fd = -1;
 
 #if SDL_INPUT_TSLIB
-	if ((mousedrv != NULL) && (SDL_strcmp(mousedrv, "TSLIB") == 0)) {
+	if ( mousedrv && (SDL_strcmp(mousedrv, "TSLIB") == 0) ) {
 		if (mousedev == NULL) mousedev = SDL_getenv("TSLIB_TSDEVICE");
 		if (mousedev != NULL) {
 			ts_dev = ts_open(mousedev, 1);
@@ -525,7 +525,7 @@ int FB_OpenMouse(_THIS)
 
 	/* ELO TOUCHSCREEN SUPPORT */
 
-	if( (mousedrv != NULL) && (SDL_strcmp(mousedrv, "ELO") == 0) ) {
+	if ( mousedrv && (SDL_strcmp(mousedrv, "ELO") == 0) ) {
 		mouse_fd = open(mousedev, O_RDWR);
 		if ( mouse_fd >= 0 ) {
 			if(eloInitController(mouse_fd)) {
@@ -616,10 +616,17 @@ fprintf(stderr, "Using ADB mouse\n");
 			mouse_termios.c_cflag |= CS8;
 			mouse_termios.c_cflag |= B1200;
 			tcsetattr(mouse_fd, TCSAFLUSH, &mouse_termios);
+			if ( mousedrv && (SDL_strcmp(mousedrv, "PS2") == 0) ) {
 #ifdef DEBUG_MOUSE
-fprintf(stderr, "Using Microsoft mouse on %s\n", mousedev);
+fprintf(stderr, "Using (user specified) PS2 mouse on %s\n", mousedev);
 #endif
-			mouse_drv = MOUSE_MS;
+				mouse_drv = MOUSE_PS2;
+			} else {
+#ifdef DEBUG_MOUSE
+fprintf(stderr, "Using (default) MS mouse on %s\n", mousedev);
+#endif
+				mouse_drv = MOUSE_MS;
+			}
 		}
 	}
 	if ( mouse_fd < 0 ) {
@@ -856,10 +863,10 @@ static void switch_vt(_THIS, unsigned short which)
 	struct fb_var_screeninfo vinfo;
 	struct vt_stat vtstate;
 	unsigned short v_active;
-	SDL_Surface *screen;
 	__u16 saved_pal[3*256];
+	SDL_Surface *screen;
 	Uint32 screen_arealen;
-	Uint8 *screen_contents;
+	Uint8 *screen_contents = NULL;
 
 	/* Figure out whether or not we're switching to a new console */
 	if ( (ioctl(keyboard_fd, VT_GETSTATE, &vtstate) < 0) ||
@@ -872,10 +879,12 @@ static void switch_vt(_THIS, unsigned short which)
 	SDL_mutexP(hw_lock);
 	wait_idle(this);
 	screen = SDL_VideoSurface;
-	screen_arealen = (screen->h*screen->pitch);
-	screen_contents = (Uint8 *)SDL_malloc(screen_arealen);
-	if ( screen_contents ) {
-		SDL_memcpy(screen_contents, screen->pixels, screen_arealen);
+	if ( !SDL_ShadowSurface ) {
+		screen_arealen = (screen->h*screen->pitch);
+		screen_contents = (Uint8 *)SDL_malloc(screen_arealen);
+		if ( screen_contents ) {
+			SDL_memcpy(screen_contents, (Uint8 *)screen->pixels + screen->offset, screen_arealen);
+		}
 	}
 	FB_SavePaletteTo(this, 256, saved_pal);
 	ioctl(console_fd, FBIOGET_VSCREENINFO, &vinfo);
@@ -899,8 +908,10 @@ static void switch_vt(_THIS, unsigned short which)
 	ioctl(console_fd, FBIOPUT_VSCREENINFO, &vinfo);
 	FB_RestorePaletteFrom(this, 256, saved_pal);
 	if ( screen_contents ) {
-		SDL_memcpy(screen->pixels, screen_contents, screen_arealen);
+		SDL_memcpy((Uint8 *)screen->pixels + screen->offset, screen_contents, screen_arealen);
 		SDL_free(screen_contents);
+	} else {
+		SDL_UpdateRect(screen, 0, 0, 0, 0);
 	}
 	SDL_mutexV(hw_lock);
 }
