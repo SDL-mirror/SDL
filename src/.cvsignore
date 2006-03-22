@@ -4,4 +4,3 @@ Makefile
 *.o
 *.lo
 *.la
-SDL_config.h
