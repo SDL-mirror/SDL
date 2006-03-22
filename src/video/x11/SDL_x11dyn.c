@@ -21,7 +21,7 @@
 */
 #include "SDL_config.h"
 
-#if 1
+#if 0
 #define DEBUG_DYNAMIC_X11 1
 #endif
 
