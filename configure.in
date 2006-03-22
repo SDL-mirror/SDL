@@ -699,6 +699,31 @@ AC_HELP_STRING([--enable-altivec], [use altivec assembly blitters on PPC [defaul
     fi
 }
 
+dnl See if GCC's -fvisibility=hidden is supported (gcc4 and later, usually).
+dnl  Details of this flag are here: http://gcc.gnu.org/wiki/Visibility
+CheckVisibilityHidden()
+{
+    AC_MSG_CHECKING(for GCC -fvisibility=hidden option)
+    have_gcc_fvisibility=no
+
+    visibility_CFLAGS="-fvisibility=hidden"
+    save_CFLAGS="$CFLAGS"
+    CFLAGS="$save_CFLAGS $visibility_CFLAGS"
+    AC_TRY_COMPILE([
+        int placeholder = 1;
+    ],[
+    ],[
+    have_gcc_fvisibility=yes
+    ])
+    AC_MSG_RESULT($have_gcc_fvisibility)
+    CFLAGS="$save_CFLAGS"
+
+    if test x$have_gcc_fvisibility = xyes; then
+        EXTRA_CFLAGS="$EXTRA_CFLAGS $visibility_CFLAGS -DDECLSPEC=SDL_GCC_ATTR_VIS_DEFAULT"
+    fi
+}
+
+
 dnl Do the iPod thing
 CheckIPod()
 {
@@ -1967,6 +1992,7 @@ case "$host" in
             *-*-aix*)           ARCH=aix ;;
             *-*-osf*)           ARCH=osf ;;
         esac
+        CheckVisibilityHidden
         CheckDummyVideo
         CheckDiskAudio
         CheckDummyAudio

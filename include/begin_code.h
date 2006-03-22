@@ -31,6 +31,10 @@
 #endif
 #define _begin_code_h
 
+#ifdef __GNUC__
+#define SDL_GCC_ATTR_VIS_DEFAULT __attribute__((visibility("default")))
+#endif
+
 /* Some compilers use a special export keyword */
 #ifndef DECLSPEC
 # ifdef __BEOS__
