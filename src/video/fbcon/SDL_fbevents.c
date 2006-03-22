@@ -922,7 +922,7 @@ static void handle_keyboard(_THIS)
 			pressed = SDL_PRESSED;
 		}
 		TranslateKey(scancode, &keysym);
-		/* Handle Alt-FN for vt switch */
+		/* Handle Ctrl-Alt-FN for vt switch */
 		switch (keysym.sym) {
 		    case SDLK_F1:
 		    case SDLK_F2:
@@ -936,7 +936,8 @@ static void handle_keyboard(_THIS)
 		    case SDLK_F10:
 		    case SDLK_F11:
 		    case SDLK_F12:
-			if ( SDL_GetModState() & KMOD_ALT ) {
+			if ( (SDL_GetModState() & KMOD_CTRL) &&
+			     (SDL_GetModState() & KMOD_ALT) ) {
 				if ( pressed ) {
 					switch_vt(this, (keysym.sym-SDLK_F1)+1);
 				}
