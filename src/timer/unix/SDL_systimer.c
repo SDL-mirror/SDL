@@ -36,7 +36,7 @@
    for __USE_POSIX199309
    Tommi Kyntola (tommi.kyntola@ray.fi) 27/09/2005
 */
-#if HAVE_CLOCK_GETTIME
+#if HAVE_NANOSLEEP || HAVE_CLOCK_GETTIME
 #include <time.h>
 #endif
 
