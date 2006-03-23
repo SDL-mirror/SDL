@@ -52,7 +52,7 @@ SOFTWARE.
 
 #include <stdio.h>
 #include "Xvlibint.h"
-#include <X11/extensions/Xext.h>
+#include "../extensions/Xext.h"
 #include <X11/extensions/XShm.h>
 #include "../extensions/extutil.h"
 

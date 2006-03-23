@@ -30,6 +30,7 @@
 #include <X11/Xlibint.h>
 #include <X11/Xproto.h>
 
+#include "../Xext/extensions/Xext.h"
 #include "../Xext/extensions/extutil.h"
 
 #ifndef NO_SHARED_MEMORY
@@ -60,7 +61,6 @@ extern "C" {
 typedef Bool (*SDL_X11_XESetWireToEventRetType)(Display*,XEvent*,xEvent*);
 typedef int (*SDL_X11_XSynchronizeRetType)(Display*);
 typedef Status (*SDL_X11_XESetEventToWireRetType)(Display*,XEvent*,xEvent*);
-typedef int (*SDL_X11_XSetExtensionErrorHandlerType)(Display *,char *,char *);
 
 int SDL_X11_LoadSymbols(void);
 void SDL_X11_UnloadSymbols(void);

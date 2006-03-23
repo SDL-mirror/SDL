@@ -28,11 +28,9 @@ Equipment Corporation.
 #define NEED_EVENTS
 #define NEED_REPLIES
 
-#include "../../x11/SDL_x11dyn.h"
-
-/*#include <X11/Xlibint.h>*/
+#include <X11/Xlibint.h>
 #include <X11/Xutil.h>
-#include <X11/extensions/Xext.h>	/* in ../include */
+#include "../extensions/Xext.h"
 #include "../extensions/extutil.h"			/* in ../include */
 #include "../extensions/panoramiXext.h"
 #include "../extensions/panoramiXproto.h"		/* in ../include */

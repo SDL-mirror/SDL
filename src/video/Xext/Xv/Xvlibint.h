@@ -43,9 +43,7 @@ SOFTWARE.
 
 #define NEED_REPLIES
 
-#include "../../x11/SDL_x11dyn.h"
-
-/*#include <X11/Xlibint.h>*/
+#include <X11/Xlibint.h>
 #include "../extensions/Xvproto.h"
 #include "../extensions/Xvlib.h"
 

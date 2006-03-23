@@ -17,12 +17,10 @@ Copyright (c) 1995,1996  The XFree86 Project, Inc
 #define NEED_EVENTS
 #define NEED_REPLIES
 
-#include "../../x11/SDL_x11dyn.h"
-
-/*#include <X11/Xlibint.h>*/
+#include <X11/Xlibint.h>
 #include "../extensions/xf86dga.h"
 #include "../extensions/xf86dgastr.h"
-#include <X11/extensions/Xext.h>
+#include "../extensions/Xext.h"
 #include "../extensions/extutil.h"
 #include <stdio.h>
 

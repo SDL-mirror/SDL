@@ -38,7 +38,7 @@ in this Software without prior written authorization from The Open Group.
 
 #include "SDL_stdinc.h"		/* For portable string functions */
 
-#include <X11/extensions/Xext.h>
+#include "./Xext.h"
 
 /*
  * We need to keep a list of open displays since the Xlib display list isn't

@@ -126,7 +126,7 @@ SDL_X11_SYM(unsigned long,_XSetLastRequestRead,(Display* a,xGenericReply* b),(a,
 SDL_X11_SYM(SDL_X11_XSynchronizeRetType,XSynchronize,(Display* a,Bool b),(a,b),return)
 SDL_X11_SYM(SDL_X11_XESetWireToEventRetType,XESetWireToEvent,(Display* a,int b,SDL_X11_XESetWireToEventRetType c),(a,b,c),return)
 SDL_X11_SYM(SDL_X11_XESetEventToWireRetType,XESetEventToWire,(Display* a,int b,SDL_X11_XESetEventToWireRetType c),(a,b,c),return)
-SDL_X11_SYM(SDL_X11_XSetExtensionErrorHandlerType,XSetExtensionErrorHandler,(SDL_X11_XSetExtensionErrorHandlerType a),(a),return)
+SDL_X11_SYM(XExtensionErrorHandler,XSetExtensionErrorHandler,(XExtensionErrorHandler a),(a),return)
 
 #if NeedWidePrototypes
 SDL_X11_SYM(KeySym,XKeycodeToKeysym,(Display* a,unsigned int b,int c),(a,b,c),return)

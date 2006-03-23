@@ -36,12 +36,10 @@ from Kaleb S. KEITHLEY.
 #define NEED_EVENTS
 #define NEED_REPLIES
 
-#include "../../x11/SDL_x11dyn.h"
-
 #ifndef XBUILD_IN_CLIENT
-/*#include <X11/Xlibint.h>*/
+#include <X11/Xlibint.h>
 #include "../extensions/xf86vmstr.h"
-#include <X11/extensions/Xext.h>
+#include "../extensions/Xext.h"
 #include "../extensions/extutil.h"
 #else
 #include "lib/X11/Xlibint.h"
