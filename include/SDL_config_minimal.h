@@ -20,25 +20,9 @@
     slouken@libsdl.org
 */
 
-#ifndef _SDL_config_h
-#define _SDL_config_h
+#ifndef _SDL_config_minimal_h
+#define _SDL_config_minimal_h
 
-#include "SDL_platform.h"
-
-/* Add any platform that doesn't build using the configure system */
-#if defined(__AMIGA__)
-#include "SDL_config_amiga.h"
-#elif defined(__DREAMCAST__)
-#include "SDL_config_dreamcast.h"
-#elif defined(__MACOS__)
-#include "SDL_config_macos.h"
-#elif defined(__MACOSX__)
-#include "SDL_config_macosx.h"
-#elif defined(__WIN32__)
-#include "SDL_config_win32.h"
-#elif defined(__OS2__)
-#include "SDL_config_os2.h"
-#else
 /* This is the minimal configuration that can be used to build SDL */
 
 #include <stdarg.h>
@@ -73,6 +57,4 @@ typedef unsigned long uintptr_t;
 /* Enable the dummy video driver (src/video/dummy/\*.c) */
 #define SDL_VIDEO_DRIVER_DUMMY	1
 
-#endif /* platform config */
-
-#endif /* _SDL_config_h */
+#endif /* _SDL_config_minimal_h */
