@@ -70,10 +70,10 @@ static void WSCONS_UpdateRects(_THIS, int numrects, SDL_Rect *rects);
 void WSCONS_ReportError(char *fmt, ...)
 {
   char message[200];
+  va_list vaArgs;
   
   message[199] = '\0';
   
-  va_list vaArgs;
   va_start(vaArgs, fmt);
   vsnprintf(message, 199, fmt, vaArgs);
   va_end(vaArgs);

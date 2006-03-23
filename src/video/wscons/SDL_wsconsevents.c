@@ -121,8 +121,7 @@ static void updateKeyboard(_THIS)
       unsigned char c = buf[i] & 0x7f;
       if (c == 224) // special key prefix -- what should we do with it?
 	continue;
-      int release = (buf[i] & 0x80) != 0;
-      posted += SDL_PrivateKeyboard(release ? SDL_RELEASED : SDL_PRESSED,
+      posted += SDL_PrivateKeyboard((buf[i] & 0x80) ? SDL_RELEASED : SDL_PRESSED,
 				    TranslateKey(c, &keysym));
     }
   }
