@@ -1059,19 +1059,18 @@ AC_HELP_STRING([--enable-video-directfb], [use DirectFB video driver [default=ye
 
         DIRECTFB_REQUIRED_VERSION=0.9.15
 
-        AC_PATH_PROG(DIRECTFBCONFIG, directfb-config)
-        if test x$DIRECTFBCONFIG = x -o x$DIRECTFBCONFIG = x'"$DIRECTFBCONFIG"'; then
+        AC_PATH_PROG(DIRECTFBCONFIG, directfb-config, no)
+        if test x$DIRECTFBCONFIG = xno; then
             AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
-            if test x$PKG_CONFIG != xno ; then
-                AC_MSG_CHECKING(for DirectFB $DIRECTFB_REQUIRED_VERSION support)
-
-                if $PKG_CONFIG --atleast-pkgconfig-version 0.7 && $PKG_CONFIG --atleast-version $DIRECTFB_REQUIRED_VERSION directfb ; then then
+            AC_MSG_CHECKING(for DirectFB $DIRECTFB_REQUIRED_VERSION support)
+            if test x$PKG_CONFIG != xno; then
+                if $PKG_CONFIG --atleast-pkgconfig-version 0.7 && $PKG_CONFIG --atleast-version $DIRECTFB_REQUIRED_VERSION directfb; then
                     DIRECTFB_CFLAGS=`$PKG_CONFIG --cflags directfb`
                     DIRECTFB_LIBS=`$PKG_CONFIG --libs directfb`
                     video_directfb=yes
                 fi
-                AC_MSG_RESULT($video_directfb)
             fi
+            AC_MSG_RESULT($video_directfb)
         else
             AC_MSG_CHECKING(for DirectFB $DIRECTFB_REQUIRED_VERSION support)
             set -- `echo $DIRECTFB_REQUIRED_VERSION | sed 's/\./ /g'`
