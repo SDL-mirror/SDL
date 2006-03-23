@@ -11,4 +11,7 @@ SDL.spec
 SDL.qpg
 build
 build-deps
+VisualC
+VisualCE
+Xcode
 .DS_Store
