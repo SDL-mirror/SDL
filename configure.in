@@ -1223,9 +1223,11 @@ AC_HELP_STRING([--enable-video-wscons], [use wscons video driver [default=yes]])
         AC_MSG_CHECKING(for wscons support)
         video_wscons=no
         AC_TRY_COMPILE([
-       #include <sys/time.h>
-       #include <dev/wscons/wsconsio.h>
+         #include <sys/time.h>
+         #include <dev/wscons/wsconsio.h>
+         #include <dev/wscons/wsdisplay_usl_io.h>
         ],[
+         int wsmode = WSDISPLAYIO_MODE_DUMBFB;
         ],[
         video_wscons=yes
         ])
