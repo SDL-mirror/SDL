@@ -19,8 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 
-    This file hacked^H^H^H^H^H^Hwritten by Ryan C. Gordon
-        (icculus@linuxgames.com)
+    This file written by Ryan C. Gordon (icculus@icculus.org)
 */
 #include "SDL_config.h"
 

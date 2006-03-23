@@ -31,7 +31,7 @@
  *  is a performance problem for a given platform, enable this driver, and
  *  then see if your application runs faster without video overhead.
  *
- * Initial work by Ryan C. Gordon (icculus@linuxgames.com). A good portion
+ * Initial work by Ryan C. Gordon (icculus@icculus.org). A good portion
  *  of this was cut-and-pasted from Stephane Peter's work in the AAlib
  *  SDL video driver.  Renamed to "DUMMY" by Sam Lantinga.
  */
