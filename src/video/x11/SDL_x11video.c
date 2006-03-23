@@ -241,13 +241,13 @@ static int xio_errhandler(Display *d)
 	return(XIO_handler(d));
 }
 
-static int (*Xext_handler)(Display *,char *,char *) = NULL;
-static int xext_errhandler(Display *d, char *ext_name, char *reason)
+static int (*Xext_handler)(Display *, _Xconst char *, _Xconst char *) = NULL;
+static int xext_errhandler(Display *d, _Xconst char *ext, _Xconst char *reason)
 {
 #ifdef XFREE86_DEBUG
 	printf("Xext error inside SDL (may be harmless):\n");
 	printf("  Extension \"%s\" %s on display \"%s\".\n",
-	       ext_name, reason, XDisplayString(d));
+	       ext, reason, XDisplayString(d));
 #endif
 
 	if (SDL_strcmp(reason, "missing") == 0) {
@@ -260,7 +260,7 @@ static int xext_errhandler(Display *d, char *ext_name, char *reason)
 	}
 
 	/* Everything else goes to the default handler... */
-	return Xext_handler(d, ext_name, reason);
+	return Xext_handler(d, ext, reason);
 }
 
 /* Find out what class name we should use */
