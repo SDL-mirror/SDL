@@ -327,7 +327,7 @@ AC_HELP_STRING([--enable-alsa-shared], [dynamically load ALSA audio support [def
                 fi
             fi
             alsa_lib_spec=`echo $ALSA_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libasound.so.*/'`
-            alsa_lib=`ls $alsa_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
+            alsa_lib=`ls -- $alsa_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
             echo "-- $alsa_lib_spec -> $alsa_lib"
 
             AC_DEFINE(SDL_AUDIO_DRIVER_ALSA)
@@ -423,7 +423,7 @@ AC_HELP_STRING([--enable-esd], [support the Enlightened Sound Daemon [default=ye
 AC_HELP_STRING([--enable-esd-shared], [dynamically load ESD audio support [default=yes]]),
                           , enable_esd_shared=yes)
             esd_lib_spec=`echo $ESD_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libesd.so.*/'`
-            esd_lib=`ls $esd_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
+            esd_lib=`ls -- $esd_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
             echo "-- $esd_lib_spec -> $esd_lib"
 
             AC_DEFINE(SDL_AUDIO_DRIVER_ESD)
@@ -475,7 +475,7 @@ AC_HELP_STRING([--enable-arts], [support the Analog Real Time Synthesizer [defau
 AC_HELP_STRING([--enable-arts-shared], [dynamically load aRts audio support [default=yes]]),
                               , enable_arts_shared=yes)
                 arts_lib_spec="$ARTS_PREFIX/lib/libartsc.so.*"
-                arts_lib=`ls $arts_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
+                arts_lib=`ls -- $arts_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
                 echo "-- $arts_lib_spec -> $arts_lib"
 
                 AC_DEFINE(SDL_AUDIO_DRIVER_ARTS)
@@ -807,16 +807,16 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [default=yes
                     x11_lib_spec=[`echo $X_LIBS | sed 's/.*-L\([^ ]*\).*/\1/'`]
                     for path in $x11_lib_path /usr/lib /usr/X11/lib /usr/X11R6/lib; do
                         if test "x$x11_lib" = "x"; then
-                            x11_lib=[`ls $path/libX11.so.[0-9] 2>/dev/null | sort -r | sed 's/.*\/\(.*\)/\1/; q'`]
+                            x11_lib=[`ls -- $path/libX11.so.[0-9] 2>/dev/null | sort -r | sed 's/.*\/\(.*\)/\1/; q'`]
                         fi
                         if test "x$x11ext_lib" = "x"; then
-                            x11ext_lib=[`ls $path/libXext.so.[0-9] 2>/dev/null | sort -r | sed 's/.*\/\(.*\)/\1/; q'`]
+                            x11ext_lib=[`ls -- $path/libXext.so.[0-9] 2>/dev/null | sort -r | sed 's/.*\/\(.*\)/\1/; q'`]
                         fi
                         if test "x$xrender_lib" = "x"; then
-                            xrender_lib=[`ls $path/libXrender.so.[0-9] 2>/dev/null | sort -r | sed 's/.*\/\(.*\)/\1/; q'`]
+                            xrender_lib=[`ls -- $path/libXrender.so.[0-9] 2>/dev/null | sort -r | sed 's/.*\/\(.*\)/\1/; q'`]
                         fi
                         if test "x$xrandr_lib" = "x"; then
-                            xrandr_lib=[`ls $path/libXrandr.so.[0-9] 2>/dev/null | sort -r | sed 's/.*\/\(.*\)/\1/; q'`]
+                            xrandr_lib=[`ls -- $path/libXrandr.so.[0-9] 2>/dev/null | sort -r | sed 's/.*\/\(.*\)/\1/; q'`]
                         fi
                     done
                     ;;
