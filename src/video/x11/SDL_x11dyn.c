@@ -30,41 +30,46 @@
 #endif
 
 #ifdef SDL_VIDEO_DRIVER_X11_DYNAMIC
+
 #include <dlfcn.h>
 #include "SDL_name.h"
 #include "SDL_loadso.h"
-static const char *x11_library = SDL_VIDEO_DRIVER_X11_DYNAMIC;
-static void *x11_handle = NULL;
-static const char *x11ext_library = SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT;
-static void *x11ext_handle = NULL;
-static const char *xrender_library = SDL_VIDEO_DRIVER_X11_DYNAMIC_XRENDER;
-static void *xrender_handle = NULL;
-static const char *xrandr_library = SDL_VIDEO_DRIVER_X11_DYNAMIC_XRANDR;
-static void *xrandr_handle = NULL;
 
 typedef struct
 {
     void *lib;
     const char *libname;
-} x11libitem;
+} x11dynlib;
+
+#ifndef SDL_VIDEO_DRIVER_X11_DYNAMIC
+#define SDL_VIDEO_DRIVER_X11_DYNAMIC NULL
+#endif
+#ifndef SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT
+#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT NULL
+#endif
+#ifndef SDL_VIDEO_DRIVER_X11_DYNAMIC_XRENDER
+#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XRENDER NULL
+#endif
+#ifndef SDL_VIDEO_DRIVER_X11_DYNAMIC_XRANDR
+#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XRANDR NULL
+#endif
+
+static x11dynlib x11libs[] =
+{
+    { NULL, SDL_VIDEO_DRIVER_X11_DYNAMIC },
+    { NULL, SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT },
+    { NULL, SDL_VIDEO_DRIVER_X11_DYNAMIC_XRENDER },
+    { NULL, SDL_VIDEO_DRIVER_X11_DYNAMIC_XRANDR },
+};
 
 static void *X11_GetSym(const char *fnname, int *rc)
 {
 	int i;
 	void *fn = NULL;
-	const x11libitem libs[] =
-	{
-		{ x11_handle, "libX11" },
-		{ x11ext_handle, "libX11ext" },
-		{ xrender_handle, "libXrender" },
-		{ xrandr_handle, "libXrandr" },
-	};
-
-	for (i = 0; i < (sizeof (libs) / sizeof (libs[0])); i++)
-	{
-		if (libs[i].lib != NULL)
+	for (i = 0; i < SDL_TABLESIZE(x11libs); i++) {
+		if (x11libs[i].lib != NULL)
 		{
-			fn = SDL_LoadFunction(libs[i].lib, fnname);
+			fn = SDL_LoadFunction(x11libs[i].lib, fnname);
 			if (fn != NULL)
 				break;
 		}
@@ -72,7 +77,7 @@ static void *X11_GetSym(const char *fnname, int *rc)
 
 	#if DEBUG_DYNAMIC_X11
 	if (fn != NULL)
-	    printf("X11: Found '%s' in %s (%p)\n", fnname, libs[i].libname, fn);
+		printf("X11: Found '%s' in %s (%p)\n", fnname, x11libs[i].libname, fn);
 	else
 		printf("X11: Symbol '%s' NOT FOUND!\n", fnname);
 	#endif
@@ -115,6 +120,8 @@ void SDL_X11_UnloadSymbols(void)
 	/* Don't actually unload if more than one module is using the libs... */
 	if (x11_load_refcount > 0) {
 		if (--x11_load_refcount == 0) {
+			int i;
+
 			/* set all the function pointers to NULL. */
 			#define SDL_X11_MODULE(modname) SDL_X11_HAVE_##modname = 1;
 			#define SDL_X11_SYM(rc,fn,params,args,ret) p##fn = NULL;
@@ -122,25 +129,15 @@ void SDL_X11_UnloadSymbols(void)
 			#undef SDL_X11_MODULE
 			#undef SDL_X11_SYM
 
-            #ifdef X_HAVE_UTF8_STRING
-            pXCreateIC = NULL;
-            #endif
+			#ifdef X_HAVE_UTF8_STRING
+			pXCreateIC = NULL;
+			#endif
 
-			if (x11_handle != NULL) {
-				SDL_UnloadObject(x11_handle);
-				x11_handle = NULL;
-			}
-			if (x11ext_handle != NULL) {
-				SDL_UnloadObject(x11ext_handle);
-				x11ext_handle = NULL;
-			}
-			if (xrender_handle != NULL) {
-				SDL_UnloadObject(xrender_handle);
-				xrender_handle = NULL;
-			}
-			if (xrandr_handle != NULL) {
-				SDL_UnloadObject(xrandr_handle);
-				xrandr_handle = NULL;
+			for (i = 0; i < SDL_TABLESIZE(x11libs); i++) {
+				if (x11libs[i].lib != NULL) {
+					SDL_UnloadObject(x11libs[i].lib);
+					x11libs[i].lib = NULL;
+				}
 			}
 		}
 	}
@@ -155,11 +152,13 @@ int SDL_X11_LoadSymbols(void)
 	#ifdef SDL_VIDEO_DRIVER_X11_DYNAMIC
 	/* deal with multiple modules (dga, x11, etc) needing these symbols... */
 	if (x11_load_refcount++ == 0) {
+		int i;
 		int *thismod = NULL;
-		x11_handle = SDL_LoadObject(x11_library);
-		x11ext_handle = SDL_LoadObject(x11ext_library);
-		xrender_handle = SDL_LoadObject(xrender_library);
-		xrandr_handle = SDL_LoadObject(xrandr_library);
+		for (i = 0; i < SDL_TABLESIZE(x11libs); i++) {
+			if (x11libs[i].libname != NULL) {
+				x11libs[i].lib = SDL_LoadObject(x11libs[i].libname);
+			}
+		}
 		#define SDL_X11_MODULE(modname) thismod = &SDL_X11_HAVE_##modname;
 		#define SDL_X11_SYM(a,fn,x,y,z) p##fn = X11_GetSym(#fn,thismod);
 		#include "SDL_x11sym.h"
