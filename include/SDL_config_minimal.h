@@ -22,6 +22,9 @@
 
 #ifndef _SDL_config_minimal_h
 #define _SDL_config_minimal_h
+#ifndef _SDL_config_h
+#error This file should be included from SDL_config.h - Copy SDL_config.h.default to SDL_config.h?
+#endif
 
 /* This is the minimal configuration that can be used to build SDL */
 
