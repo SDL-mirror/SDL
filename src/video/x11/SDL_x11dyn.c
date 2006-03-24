@@ -171,6 +171,7 @@ int SDL_X11_LoadSymbols(void)
 
 		if (!SDL_X11_HAVE_BASEXLIB) {  /* some required symbol didn't load. */
 			SDL_X11_UnloadSymbols();  /* in case something got loaded... */
+			rc = 0;
 		}
 	}
 	#else
