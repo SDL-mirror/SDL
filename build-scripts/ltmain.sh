@@ -1413,19 +1413,6 @@ EOF
 	  finalize_command="$finalize_command $qarg"
 	  continue
 	  ;;
-	framework)
-	  case $host in
-	    *-*-darwin*)
-	      case "$deplibs " in
-	        *" $qarg.framework "*) ;;
-		*) deplibs="$deplibs $qarg.framework" # this is fixed later
-		   ;;
-              esac
-              ;;
-   	  esac
- 	  prev=
- 	  continue
- 	  ;;
 	shrext)
   	  shrext_cmds="$arg"
 	  prev=
@@ -1799,11 +1786,6 @@ EOF
 
       -XCClinker)
 	prev=xcclinker
-	continue
-	;;
-
-      -framework)
-        prev=framework
 	continue
 	;;
 
@@ -2190,18 +2172,6 @@ EOF
 	    fi
 	  fi
 	  ;; # -l
-	*.framework)
-	  if test "$linkmode,$pass" = "prog,link"; then
-	    compile_deplibs="$deplib $compile_deplibs"
-	    finalize_deplibs="$deplib $finalize_deplibs"
-	  else
-	    deplibs="$deplib $deplibs"
-	    if test "$linkmode" = lib ; then
-	      newdependency_libs="$deplib $newdependency_libs"
-	    fi
-	  fi
-	  continue
-	  ;;
 	-L*)
 	  case $linkmode in
 	  lib)
@@ -2345,13 +2315,6 @@ EOF
 	case $lib in
 	*/* | *\\*) . $lib ;;
 	*) . ./$lib ;;
-	esac
-
-	case $host in
-	*-*-darwin*)
-	  # Convert "-framework foo" to "foo.framework" in dependency_libs
-	  test -n "$dependency_libs" && dependency_libs=`$echo "X$dependency_libs" | $Xsed -e 's/-framework \([^ $]*\)/\1.framework/g'`
-	  ;;
 	esac
 
 	if test "$linkmode,$pass" = "lib,link" ||
@@ -2974,13 +2937,6 @@ EOF
 		  done
 		  path=""
 		  ;;
-	      *.framework)
-		case $host in
-		  *-*-darwin*)
-		    depdepl="$deplib"
-		    ;;
-		esac
-		;;
 		*) continue ;;
 		esac
 		;;
@@ -3848,13 +3804,6 @@ EOF
 	    fi
 	  fi
 	fi
-	# Time to change all our "foo.framework" stuff back to "-framework foo"
-	case $host in
-	  *-*-darwin*)
-	    newdeplibs=`$echo "X $newdeplibs" | $Xsed -e 's% \([^ $]*\).framework% -framework \1%g'`
-	    dependency_libs=`$echo "X $dependency_libs" | $Xsed -e 's% \([^ $]*\).framework%%g'`
-	    ;;
-	esac
 	# Done checking deplibs!
 	deplibs=$newdeplibs
       fi
@@ -4394,15 +4343,12 @@ EOF
       esac
 
       case $host in
-      *-*-darwin*)
+      *darwin*)
         # Don't allow lazy linking, it breaks C++ global constructors
         if test "$tagname" = CXX ; then
         compile_command="$compile_command ${wl}-bind_at_load"
         finalize_command="$finalize_command ${wl}-bind_at_load"
         fi
-	# Time to change all our "foo.framework" stuff back to "-framework foo"
-	compile_deplibs=`$echo "X $compile_deplibs" | $Xsed -e 's% \([^ $]*\).framework% -framework \1%g'`
-	finalize_deplibs=`$echo "X $finalize_deplibs" | $Xsed -e 's% \([^ $]*\).framework% -framework \1%g'`
         ;;
       esac
 
