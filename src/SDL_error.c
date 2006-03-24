@@ -90,11 +90,11 @@ void SDL_SetError (const char *fmt, ...)
 				break;
 			    case 's':
 				{
-				  int index = error->argc;
-				  char *str = va_arg(ap, char *);
+				  int i = error->argc;
+				  const char *str = va_arg(ap, const char *);
 				  if (str == NULL)
 				      str = "(null)";
-				  SDL_strlcpy((char *)error->args[index].buf, str, ERR_MAX_STRLEN);
+				  SDL_strlcpy((char *)error->args[i].buf, str, ERR_MAX_STRLEN);
 				  error->argc++;
 				}
 				break;

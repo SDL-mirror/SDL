@@ -55,7 +55,7 @@ int SDL_ThreadsInit(void)
    clean up threads here.  If any threads are still running after this call,
    they will no longer have access to any per-thread data.
  */
-void SDL_ThreadsQuit()
+void SDL_ThreadsQuit(void)
 {
 	SDL_mutex *mutex;
 

@@ -29,8 +29,8 @@ extern int SDL_StartEventLoop(Uint32 flags);
 extern void SDL_StopEventLoop(void);
 extern void SDL_QuitInterrupt(void);
 
-extern void SDL_Lock_EventThread();
-extern void SDL_Unlock_EventThread();
+extern void SDL_Lock_EventThread(void);
+extern void SDL_Unlock_EventThread(void);
 extern Uint32 SDL_EventThreadID(void);
 
 /* Event handler init routines */

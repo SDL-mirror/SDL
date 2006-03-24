@@ -288,8 +288,8 @@ static int DSP_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	SDL_CalculateAudioSpec(spec);
 
 	/* Determine the power of two of the fragment size */
-	for ( frag_spec = 0; (0x01<<frag_spec) < spec->size; ++frag_spec );
-	if ( (0x01<<frag_spec) != spec->size ) {
+	for ( frag_spec = 0; (0x01U<<frag_spec) < spec->size; ++frag_spec );
+	if ( (0x01U<<frag_spec) != spec->size ) {
 		SDL_SetError("Fragment size must be a power of two");
 		DSP_CloseAudio(this);
 		return(-1);

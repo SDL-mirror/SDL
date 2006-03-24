@@ -43,14 +43,14 @@ static void CalculateGammaRamp(float gamma, Uint16 *ramp)
 	int i;
 
 	/* 0.0 gamma is all black */
-	if ( gamma <= 0.0 ) {
+	if ( gamma <= 0.0f ) {
 		for ( i=0; i<256; ++i ) {
 			ramp[i] = 0;
 		}
 		return;
 	} else
 	/* 1.0 gamma is identity */
-	if ( gamma == 1.0 ) {
+	if ( gamma >= 1.0f ) {
 		for ( i=0; i<256; ++i ) {
 			ramp[i] = (i << 8) | i;
 		}
@@ -73,7 +73,7 @@ static void CalculateGammaFromRamp(float *gamma, Uint16 *ramp)
 	/* The following is adapted from a post by Garrett Bass on OpenGL
 	   Gamedev list, March 4, 2000.
 	 */
-	float sum = 0.0;
+	float sum = 0.0f;
 	int i, count = 0;
 
 	*gamma = 1.0;
@@ -85,7 +85,7 @@ static void CalculateGammaFromRamp(float *gamma, Uint16 *ramp)
 	        count++;
 	    }
 	}
-	if ( count && sum ) {
+	if ( count && sum > 0.0f ) {
 		*gamma = 1.0f / (sum / count);
 	}
 }

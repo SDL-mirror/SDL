@@ -329,7 +329,7 @@ static int IMA_ADPCM_decode(Uint8 **audio_buf, Uint32 *audio_len)
 	struct IMA_ADPCM_decodestate *state;
 	Uint8 *freeable, *encoded, *decoded;
 	Sint32 encoded_len, samplesleft;
-	int c, channels;
+	unsigned int c, channels;
 
 	/* Check to make sure we have enough variables in the state array */
 	channels = IMA_ADPCM_state.wavefmt.channels;

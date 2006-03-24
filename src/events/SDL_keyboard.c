@@ -34,7 +34,7 @@ static Uint8  SDL_KeyState[SDLK_LAST];
 static SDLMod SDL_ModState;
 int SDL_TranslateUNICODE = 0;
 
-static char *keynames[SDLK_LAST];	/* Array of keycode names */
+static const char *keynames[SDLK_LAST];	/* Array of keycode names */
 
 /*
  * jk 991215 - added
@@ -356,7 +356,7 @@ void SDL_SetModState (SDLMod modstate)
 
 char *SDL_GetKeyName(SDLKey key)
 {
-	char *keyname;
+	const char *keyname;
 
 	keyname = NULL;
 	if ( key < SDLK_LAST ) {
@@ -365,7 +365,8 @@ char *SDL_GetKeyName(SDLKey key)
 	if ( keyname == NULL ) {
 		keyname = "unknown key";
 	}
-	return(keyname);
+	/* FIXME: make this function const in 1.3 */
+	return (char *)(keyname);
 }
 
 /* These are global for SDL_eventloop.c */

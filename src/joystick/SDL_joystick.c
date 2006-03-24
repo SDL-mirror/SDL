@@ -550,7 +550,7 @@ int SDL_JoystickEventState(int state)
 		SDL_JOYAXISMOTION, SDL_JOYBALLMOTION, SDL_JOYHATMOTION,
 		SDL_JOYBUTTONDOWN, SDL_JOYBUTTONUP,
 	};
-	int i;
+	unsigned int i;
 
 	switch (state) {
 		case SDL_QUERY:
