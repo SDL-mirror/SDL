@@ -478,7 +478,7 @@ public:
 				if (msg->FindInt32("key", &key) == B_OK && msg->FindInt32("modifiers", &modifiers) == B_OK) {
 					SDL_keysym keysym;
 					keysym.scancode = key;
-					if (key < 128) {
+					if ((key > 0) && (key < 128)) {
 						keysym.sym = keymap[key];
 					} else {
 						keysym.sym = SDLK_UNKNOWN;
@@ -511,7 +511,7 @@ public:
 				if (msg->FindInt32("key", &key) == B_OK && msg->FindInt32("modifiers", &modifiers) == B_OK) {
 					SDL_keysym keysym;
 					keysym.scancode = key;
-					if (key < 128) {
+					if ((key > 0) && (key < 128)) {
 						keysym.sym = keymap[key];
 					} else {
 						keysym.sym = SDLK_UNKNOWN;
