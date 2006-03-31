@@ -31,7 +31,7 @@ int ThreadFunc(void *data) {
 	SDL_Thread *sub_threads[NUMTHREADS];
 	int flags[NUMTHREADS];
 	int i;
-	uintptr_t tid = (uintptr_t)data;
+	int tid = (int)(uintptr_t)data;
 
 	fprintf(stderr, "Creating Thread %d\n", tid);
 
@@ -59,7 +59,7 @@ int ThreadFunc(void *data) {
 int main(int argc, char *argv[])
 {
 	SDL_Thread *threads[NUMTHREADS];
-	uintptr_t i;
+	int i;
 
 	/* Load the SDL library */
 	if ( SDL_Init(0) < 0 ) {
@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 	signal(SIGSEGV, SIG_DFL);
 	for(i = 0; i < NUMTHREADS; i++) {
 		time_for_threads_to_die[i] = 0;
-		threads[i] = SDL_CreateThread(ThreadFunc, (void *) i);
+		threads[i] = SDL_CreateThread(ThreadFunc, (void *)(uintptr_t)i);
 	
 		if ( threads[i] == NULL ) {
 			fprintf(stderr,

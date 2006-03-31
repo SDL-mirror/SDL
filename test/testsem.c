@@ -15,7 +15,7 @@ int alive = 1;
 
 int ThreadFunc(void *data)
 {
-	uintptr_t threadnum = (uintptr_t)data;
+	int threadnum = (int)(uintptr_t)data;
 	while ( alive ) {
 		SDL_SemWait(sem);
 		fprintf(stderr, "Thread number %d has got the semaphore (value = %d)!\n", threadnum, SDL_SemValue(sem));

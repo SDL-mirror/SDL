@@ -12,13 +12,6 @@
 
 static int ticks = 0;
 
-/* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
-static void quit(int rc)
-{
-	SDL_Quit();
-	exit(rc);
-}
-
 static Uint32 ticktock(Uint32 interval)
 {
 	++ticks;
@@ -27,7 +20,7 @@ static Uint32 ticktock(Uint32 interval)
 
 static Uint32 callback(Uint32 interval, void *param)
 {
-  printf("Timer %d : param = %d\n", interval, (uintptr_t)param);
+  printf("Timer %d : param = %d\n", interval, (int)(uintptr_t)param);
   return interval;
 }
 
