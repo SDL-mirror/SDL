@@ -23,6 +23,9 @@
 
 /* Allow access to an ESD network stream mixing buffer */
 
+#include <sys/types.h>
+#include <unistd.h>
+#include <signal.h>
 #include <errno.h>
 #include <esd.h>
 
