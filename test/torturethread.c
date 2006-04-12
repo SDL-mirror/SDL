@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
 		time_for_threads_to_die[i] = 1;
 	}
 
-	for(i = NUMTHREADS-1; i >= 0; --i) {
+	for(i = 0; i < NUMTHREADS; i++) {
 		SDL_WaitThread(threads[i], NULL);
 	}
 	SDL_Quit();
