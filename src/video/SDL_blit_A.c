@@ -2756,8 +2756,9 @@ SDL_loblit SDL_CalculateAlphaBlit(SDL_Surface *surface, int blit_index)
 #endif
 			if((sf->Rmask | sf->Gmask | sf->Bmask) == 0xffffff)
 			{
-#if USE_ALTIVEC_BLITTERS
-				if(SDL_HasAltiVec())
+#if SDL_ALTIVEC_BLITTERS
+				if(!(surface->map->dst->flags & SDL_HWSURFACE)
+					&& SDL_HasAltiVec())
 					return BlitRGBtoRGBSurfaceAlphaAltivec;
 #endif
 				return BlitRGBtoRGBSurfaceAlpha;
@@ -2822,8 +2823,9 @@ SDL_loblit SDL_CalculateAlphaBlit(SDL_Surface *surface, int blit_index)
 #endif
 		if(sf->Amask == 0xff000000)
 		{
-#if USE_ALTIVEC_BLITTERS
-			if(SDL_HasAltiVec())
+#if SDL_ALTIVEC_BLITTERS
+			if(!(surface->map->dst->flags & SDL_HWSURFACE)
+				&& SDL_HasAltiVec())
 				return BlitRGBtoRGBPixelAlphaAltivec;
 #endif
 			return BlitRGBtoRGBPixelAlpha;
