@@ -63,7 +63,7 @@ typedef unsigned int uintptr_t;
 
 /* Enabled for SDL 1.2 (binary compatibility) */
 #define HAVE_LIBC	1
-#if HAVE_LIBC
+#ifdef HAVE_LIBC
 /* Useful headers */
 #define HAVE_STDIO_H 1
 #define STDC_HEADERS 1

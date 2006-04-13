@@ -28,49 +28,47 @@
 #include "SDL_config.h"
 
 
-#if HAVE_SYS_TYPES_H
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#if HAVE_STDIO_H
+#ifdef HAVE_STDIO_H
 #include <stdio.h>
 #endif
-#if STDC_HEADERS
+#if defined(STDC_HEADERS)
 # include <stdlib.h>
 # include <stddef.h>
 # include <stdarg.h>
 #else
-# if HAVE_STDLIB_H
-# include <stdlib.h>
-# elif HAVE_MALLOC_H
-# include <malloc.h>
+# if defined(HAVE_STDLIB_H)
+#  include <stdlib.h>
+# elif defined(HAVE_MALLOC_H)
+#  include <malloc.h>
 # endif
-# if HAVE_STDDEF_H
-# include <stddef.h>
+# if defined(HAVE_STDDEF_H)
+#  include <stddef.h>
 # endif
-# if HAVE_STDARG_H
-# include <stdarg.h>
+# if defined(HAVE_STDARG_H)
+#  include <stdarg.h>
 # endif
 #endif
-#if HAVE_STRING_H
-# if !STDC_HEADERS && HAVE_MEMORY_H
-# include <memory.h>
+#ifdef HAVE_STRING_H
+# if !defined(STDC_HEADERS) && defined(HAVE_MEMORY_H)
+#  include <memory.h>
 # endif
 # include <string.h>
 #endif
-#if HAVE_STRINGS_H
+#ifdef HAVE_STRINGS_H
 # include <strings.h>
 #endif
-#if HAVE_INTTYPES_H
+#if defined(HAVE_INTTYPES_H)
 # include <inttypes.h>
-#else
-# if HAVE_STDINT_H
+#elif defined(HAVE_STDINT_H)
 # include <stdint.h>
-# endif
 #endif
-#if HAVE_CTYPE_H
+#ifdef HAVE_CTYPE_H
 # include <ctype.h>
 #endif
-#if HAVE_ICONV_H
+#ifdef HAVE_ICONV_H
 # include <iconv.h>
 #endif
 
@@ -138,32 +136,32 @@ SDL_COMPILE_TIME_ASSERT(enum, sizeof(SDL_DUMMY_ENUM) == sizeof(int));
 extern "C" {
 #endif
 
-#if HAVE_MALLOC
+#ifdef HAVE_MALLOC
 #define SDL_malloc	malloc
 #else
 extern DECLSPEC void * SDLCALL SDL_malloc(size_t size);
 #endif
 
-#if HAVE_CALLOC
+#ifdef HAVE_CALLOC
 #define SDL_calloc	calloc
 #else
 extern DECLSPEC void * SDLCALL SDL_calloc(size_t nmemb, size_t size);
 #endif
 
-#if HAVE_REALLOC
+#ifdef HAVE_REALLOC
 #define SDL_realloc	realloc
 #else
 extern DECLSPEC void * SDLCALL SDL_realloc(void *mem, size_t size);
 #endif
 
-#if HAVE_FREE
+#ifdef HAVE_FREE
 #define SDL_free	free
 #else
 extern DECLSPEC void SDLCALL SDL_free(void *mem);
 #endif
 
-#if HAVE_ALLOCA && !defined(alloca)
-# if HAVE_ALLOCA_H
+#if defined(HAVE_ALLOCA) && !defined(alloca)
+# if defined(HAVE_ALLOCA_H)
 #  include <alloca.h>
 # elif defined(__GNUC__)
 #  define alloca __builtin_alloca
@@ -176,7 +174,7 @@ extern DECLSPEC void SDLCALL SDL_free(void *mem);
    char *alloca ();
 # endif
 #endif
-#if HAVE_ALLOCA
+#ifdef HAVE_ALLOCA
 #define SDL_stack_alloc(type, count)    (type*)alloca(sizeof(type)*count)
 #define SDL_stack_free(data)
 #else
@@ -184,26 +182,26 @@ extern DECLSPEC void SDLCALL SDL_free(void *mem);
 #define SDL_stack_free(data)            SDL_free(data)
 #endif
 
-#if HAVE_GETENV
+#ifdef HAVE_GETENV
 #define SDL_getenv	getenv
 #else
 extern DECLSPEC char * SDLCALL SDL_getenv(const char *name);
 #endif
 
-#if HAVE_PUTENV
+#ifdef HAVE_PUTENV
 #define SDL_putenv	putenv
 #else
 extern DECLSPEC int SDLCALL SDL_putenv(const char *variable);
 #endif
 
-#if HAVE_QSORT
+#ifdef HAVE_QSORT
 #define SDL_qsort	qsort
 #else
 extern DECLSPEC void SDLCALL SDL_qsort(void *base, size_t nmemb, size_t size,
            int (*compare)(const void *, const void *));
 #endif
 
-#if HAVE_ABS
+#ifdef HAVE_ABS
 #define SDL_abs		abs
 #else
 #define SDL_abs(X)	((X) < 0 ? -(X) : (X))
@@ -212,7 +210,7 @@ extern DECLSPEC void SDLCALL SDL_qsort(void *base, size_t nmemb, size_t size,
 #define SDL_min(x, y)	(((x) < (y)) ? (x) : (y))
 #define SDL_max(x, y)	(((x) > (y)) ? (x) : (y))
 
-#if HAVE_CTYPE_H
+#ifdef HAVE_CTYPE_H
 #define SDL_isdigit(X)  isdigit(X)
 #define SDL_isspace(X)  isspace(X)
 #define SDL_toupper(X)  toupper(X)
@@ -224,7 +222,7 @@ extern DECLSPEC void SDLCALL SDL_qsort(void *base, size_t nmemb, size_t size,
 #define SDL_tolower(X)  (((X) >= 'A') && ((X) <= 'Z') ? ('a'+((X)-'A')) : (X))
 #endif
 
-#if HAVE_MEMSET
+#ifdef HAVE_MEMSET
 #define SDL_memset      memset
 #else
 extern DECLSPEC void * SDLCALL SDL_memset(void *dst, int c, size_t len);
@@ -279,9 +277,9 @@ do {									  \
 } while(0)
 #endif
 #ifndef SDL_memcpy
-#if HAVE_MEMCPY
+#ifdef HAVE_MEMCPY
 #define SDL_memcpy      memcpy
-#elif HAVE_BCOPY
+#elif defined(HAVE_BCOPY)
 #define SDL_memcpy(d, s, n)	bcopy((s), (d), (n))
 #else
 extern DECLSPEC void * SDLCALL SDL_memcpy(void *dst, const void *src, size_t len);
@@ -334,9 +332,9 @@ do {							\
 extern DECLSPEC void * SDLCALL SDL_revcpy(void *dst, const void *src, size_t len);
 #endif
 
-#if HAVE_MEMMOVE
+#ifdef HAVE_MEMMOVE
 #define SDL_memmove     memmove
-#elif HAVE_BCOPY
+#elif defined(HAVE_BCOPY)
 #define SDL_memmove(d, s, n)	bcopy((s), (d), (n))
 #else
 #define SDL_memmove(dst, src, len)			\
@@ -349,133 +347,133 @@ do {							\
 } while(0)
 #endif
 
-#if HAVE_MEMCMP
+#ifdef HAVE_MEMCMP
 #define SDL_memcmp      memcmp
 #else
 extern DECLSPEC int SDLCALL SDL_memcmp(const void *s1, const void *s2, size_t len);
 #endif
 
-#if HAVE_STRLEN
+#ifdef HAVE_STRLEN
 #define SDL_strlen      strlen
 #else
 extern DECLSPEC size_t SDLCALL SDL_strlen(const char *string);
 #endif
 
-#if HAVE_STRLCPY
+#ifdef HAVE_STRLCPY
 #define SDL_strlcpy     strlcpy
 #else
 extern DECLSPEC size_t SDLCALL SDL_strlcpy(char *dst, const char *src, size_t maxlen);
 #endif
 
-#if HAVE_STRLCAT
+#ifdef HAVE_STRLCAT
 #define SDL_strlcat    strlcat
 #else
 extern DECLSPEC size_t SDLCALL SDL_strlcat(char *dst, const char *src, size_t maxlen);
 #endif
 
-#if HAVE_STRDUP
+#ifdef HAVE_STRDUP
 #define SDL_strdup     strdup
 #else
 extern DECLSPEC char * SDLCALL SDL_strdup(const char *string);
 #endif
 
-#if HAVE__STRREV
+#ifdef HAVE__STRREV
 #define SDL_strrev      _strrev
 #else
 extern DECLSPEC char * SDLCALL SDL_strrev(char *string);
 #endif
 
-#if HAVE__STRUPR
+#ifdef HAVE__STRUPR
 #define SDL_strupr      _strupr
 #else
 extern DECLSPEC char * SDLCALL SDL_strupr(char *string);
 #endif
 
-#if HAVE__STRLWR
+#ifdef HAVE__STRLWR
 #define SDL_strlwr      _strlwr
 #else
 extern DECLSPEC char * SDLCALL SDL_strlwr(char *string);
 #endif
 
-#if HAVE_STRCHR
+#ifdef HAVE_STRCHR
 #define SDL_strchr      strchr
-#elif HAVE_INDEX
+#elif defined(HAVE_INDEX)
 #define SDL_strchr      index
 #else
 extern DECLSPEC char * SDLCALL SDL_strchr(const char *string, int c);
 #endif
 
-#if HAVE_STRRCHR
+#ifdef HAVE_STRRCHR
 #define SDL_strrchr     strrchr
-#elif HAVE_RINDEX
+#elif defined(HAVE_RINDEX)
 #define SDL_strrchr     rindex
 #else
 extern DECLSPEC char * SDLCALL SDL_strrchr(const char *string, int c);
 #endif
 
-#if HAVE_STRSTR
+#ifdef HAVE_STRSTR
 #define SDL_strstr      strstr
 #else
 extern DECLSPEC char * SDLCALL SDL_strstr(const char *haystack, const char *needle);
 #endif
 
-#if HAVE_ITOA
+#ifdef HAVE_ITOA
 #define SDL_itoa        itoa
 #else
 #define SDL_itoa(value, string, radix)	SDL_ltoa((long)value, string, radix)
 #endif
 
-#if HAVE__LTOA
+#ifdef HAVE__LTOA
 #define SDL_ltoa        _ltoa
 #else
 extern DECLSPEC char * SDLCALL SDL_ltoa(long value, char *string, int radix);
 #endif
 
-#if HAVE__UITOA
+#ifdef HAVE__UITOA
 #define SDL_uitoa       _uitoa
 #else
 #define SDL_uitoa(value, string, radix)	SDL_ultoa((long)value, string, radix)
 #endif
 
-#if HAVE__ULTOA
+#ifdef HAVE__ULTOA
 #define SDL_ultoa       _ultoa
 #else
 extern DECLSPEC char * SDLCALL SDL_ultoa(unsigned long value, char *string, int radix);
 #endif
 
-#if HAVE_STRTOL
+#ifdef HAVE_STRTOL
 #define SDL_strtol      strtol
 #else
 extern DECLSPEC long SDLCALL SDL_strtol(const char *string, char **endp, int base);
 #endif
 
-#if HAVE_STRTOUL
+#ifdef HAVE_STRTOUL
 #define SDL_strtoul      strtoul
 #else
 extern DECLSPEC unsigned long SDLCALL SDL_strtoul(const char *string, char **endp, int base);
 #endif
 
-#if SDL_HAS_64BIT_TYPE
+#ifdef SDL_HAS_64BIT_TYPE
 
-#if HAVE__I64TOA
+#ifdef HAVE__I64TOA
 #define SDL_lltoa       _i64toa
 #else
 extern DECLSPEC char* SDLCALL SDL_lltoa(Sint64 value, char *string, int radix);
 #endif
 
-#if HAVE__UI64TOA
+#ifdef HAVE__UI64TOA
 #define SDL_ulltoa      _ui64toa
 #else
 extern DECLSPEC char* SDLCALL SDL_ulltoa(Uint64 value, char *string, int radix);
 #endif
 
-#if HAVE_STRTOLL
+#ifdef HAVE_STRTOLL
 #define SDL_strtoll     strtoll
 #else
 extern DECLSPEC Sint64 SDLCALL SDL_strtoll(const char *string, char **endp, int base);
 #endif
 
-#if HAVE_STRTOULL
+#ifdef HAVE_STRTOULL
 #define SDL_strtoull     strtoull
 #else
 extern DECLSPEC Uint64 SDLCALL SDL_strtoull(const char *string, char **endp, int base);
@@ -483,65 +481,65 @@ extern DECLSPEC Uint64 SDLCALL SDL_strtoull(const char *string, char **endp, int
 
 #endif /* SDL_HAS_64BIT_TYPE */
 
-#if HAVE_STRTOD
+#ifdef HAVE_STRTOD
 #define SDL_strtod      strtod
 #else
 extern DECLSPEC double SDLCALL SDL_strtod(const char *string, char **endp);
 #endif
 
-#if HAVE_ATOI
+#ifdef HAVE_ATOI
 #define SDL_atoi        atoi
 #else
 #define SDL_atoi(X)     SDL_strtol(X, NULL, 0)
 #endif
 
-#if HAVE_ATOF
+#ifdef HAVE_ATOF
 #define SDL_atof        atof
 #else
 #define SDL_atof(X)     SDL_strtod(X, NULL)
 #endif
 
-#if HAVE_STRCMP
+#ifdef HAVE_STRCMP
 #define SDL_strcmp      strcmp
 #else
 extern DECLSPEC int SDLCALL SDL_strcmp(const char *str1, const char *str2);
 #endif
 
-#if HAVE_STRNCMP
+#ifdef HAVE_STRNCMP
 #define SDL_strncmp     strncmp
 #else
 extern DECLSPEC int SDLCALL SDL_strncmp(const char *str1, const char *str2, size_t maxlen);
 #endif
 
-#if HAVE_STRCASECMP
+#ifdef HAVE_STRCASECMP
 #define SDL_strcasecmp  strcasecmp
-#elif HAVE__STRICMP
+#elif defined(HAVE__STRICMP)
 #define SDL_strcasecmp  _stricmp
 #else
 extern DECLSPEC int SDLCALL SDL_strcasecmp(const char *str1, const char *str2);
 #endif
 
-#if HAVE_STRNCASECMP
+#ifdef HAVE_STRNCASECMP
 #define SDL_strncasecmp strncasecmp
-#elif HAVE__STRNICMP
+#elif defined(HAVE__STRNICMP)
 #define SDL_strncasecmp _strnicmp
 #else
 extern DECLSPEC int SDLCALL SDL_strncasecmp(const char *str1, const char *str2, size_t maxlen);
 #endif
 
-#if HAVE_SSCANF
+#ifdef HAVE_SSCANF
 #define SDL_sscanf      sscanf
 #else
 extern DECLSPEC int SDLCALL SDL_sscanf(const char *text, const char *fmt, ...);
 #endif
 
-#if HAVE_SNPRINTF
+#ifdef HAVE_SNPRINTF
 #define SDL_snprintf    snprintf
 #else
 extern DECLSPEC int SDLCALL SDL_snprintf(char *text, size_t maxlen, const char *fmt, ...);
 #endif
 
-#if HAVE_VSNPRINTF
+#ifdef HAVE_VSNPRINTF
 #define SDL_vsnprintf   vsnprintf
 #else
 extern DECLSPEC int SDLCALL SDL_vsnprintf(char *text, size_t maxlen, const char *fmt, va_list ap);
@@ -553,7 +551,7 @@ extern DECLSPEC int SDLCALL SDL_vsnprintf(char *text, size_t maxlen, const char 
 #define SDL_ICONV_EILSEQ	(size_t)-3
 #define SDL_ICONV_EINVAL	(size_t)-4
 
-#if HAVE_ICONV
+#ifdef HAVE_ICONV
 #define SDL_iconv_t     iconv_t
 #define SDL_iconv_open  iconv_open
 #define SDL_iconv_close iconv_close

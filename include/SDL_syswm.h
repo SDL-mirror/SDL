@@ -46,7 +46,7 @@ typedef struct SDL_SysWMinfo SDL_SysWMinfo;
 #else
 
 /* This is the structure for custom window manager events */
-#if SDL_VIDEO_DRIVER_X11
+#if defined(SDL_VIDEO_DRIVER_X11)
 #if defined(__APPLE__) && defined(__MACH__)
 /* conflicts with Quickdraw.h */
 #define Cursor X11Cursor
@@ -100,7 +100,7 @@ typedef struct SDL_SysWMinfo {
 	} info;
 } SDL_SysWMinfo;
 
-#elif SDL_VIDEO_DRIVER_NANOX
+#elif defined(SDL_VIDEO_DRIVER_NANOX)
 #include <microwin/nano-X.h>
 
 /* The generic custom event structure */
@@ -115,7 +115,7 @@ typedef struct SDL_SysWMinfo {
 	GR_WINDOW_ID window ;	/* The display window */
 } SDL_SysWMinfo;
 
-#elif SDL_VIDEO_DRIVER_WINDIB || SDL_VIDEO_DRIVER_DDRAW
+#elif defined(SDL_VIDEO_DRIVER_WINDIB) || defined(SDL_VIDEO_DRIVER_DDRAW)
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
@@ -135,7 +135,7 @@ typedef struct SDL_SysWMinfo {
 	HGLRC hglrc;			/* The OpenGL context, if any */
 } SDL_SysWMinfo;
 
-#elif SDL_VIDEO_DRIVER_RISCOS
+#elif defined(SDL_VIDEO_DRIVER_RISCOS)
 
 /* RISC OS custom event structure */
 struct SDL_SysWMmsg {
@@ -152,7 +152,7 @@ typedef struct SDL_SysWMinfo {
 	int window;		/* The RISC OS display window */
 } SDL_SysWMinfo;
 
-#elif SDL_VIDEO_DRIVER_PHOTON
+#elif defined(SDL_VIDEO_DRIVER_PHOTON)
 #include <sys/neutrino.h>
 #include <Ph.h>
 
