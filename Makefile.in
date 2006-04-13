@@ -51,6 +51,7 @@ all: $(srcdir)/configure Makefile $(objects) $(objects)/$(TARGET) $(objects)/$(S
 $(srcdir)/configure: $(srcdir)/configure.in
 	@echo "Warning, configure.in is out of date"
 	#(cd $(srcdir) && sh autogen.sh && sh configure)
+	@sleep 3
 
 Makefile: $(srcdir)/Makefile.in
 	$(SHELL) config.status $@
