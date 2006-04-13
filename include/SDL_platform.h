@@ -65,7 +65,7 @@
 #undef __MACOS__
 #define __MACOS__	1
 #endif
-#if defined(__GNUC__) && (defined(__APPLE_CC__) || defined(__APPLE_CPP__))
+#if defined(__APPLE__)
 #undef __MACOSX__
 #define __MACOSX__	1
 #endif
@@ -93,7 +93,7 @@
 #undef __RISCOS__
 #define __RISCOS__	1
 #endif
-#if defined(solaris) || defined(__solaris) || defined(__solaris__)
+#if defined(__SVR4)
 #undef __SOLARIS__
 #define __SOLARIS__	1
 #endif
