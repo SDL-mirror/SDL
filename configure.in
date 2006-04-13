@@ -2331,7 +2331,7 @@ case "$host" in
         CheckDummyVideo
         CheckDiskAudio
         CheckDummyAudio
-        CheckDLOPEN
+        #CheckDLOPEN # Don't check dlopen(), to retain 10.2 compatibility
         CheckCOCOA
         CheckCARBON
         CheckX11
