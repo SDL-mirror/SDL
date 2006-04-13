@@ -78,15 +78,14 @@ void QZ_ShowMouse (_THIS) {
 }
 
 void QZ_HideMouse (_THIS) {
-    BOOL isInGameWin = QZ_IsMouseInWindow (this);
-    if (isInGameWin && cursor_visible) {
+    if ((SDL_GetAppState() & SDL_APPMOUSEFOCUS) && cursor_visible) {
         [ NSCursor hide ];
         cursor_visible = NO;
     }
 }
 
 BOOL QZ_IsMouseInWindow (_THIS) {
-    if (mode_flags & SDL_FULLSCREEN) return YES;
+    if (qz_window == nil) return YES; /*fullscreen*/
     else {
         NSPoint p = [ qz_window mouseLocationOutsideOfEventStream ];
         p.y -= 1.0f; /* Apparently y goes from 1 to h, not from 0 to h-1 (i.e. the "location of the mouse" seems to be defined as "the location of the top left corner of the mouse pointer's hot pixel" */
@@ -166,7 +165,7 @@ void QZ_PrivateCocoaToSDL (_THIS, NSPoint *p) {
         *p = [ window_view convertPoint:*p fromView: nil ];
         
         /* We need a workaround in OpenGL mode */
-        if ( SDL_VideoSurface->flags & SDL_OPENGL ) {
+        if ( SDL_VideoSurface != NULL && (SDL_VideoSurface->flags & SDL_OPENGL) ) {
             p->y = [window_view frame].size.height - p->y;
         }
     }

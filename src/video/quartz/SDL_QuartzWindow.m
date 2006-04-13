@@ -208,24 +208,12 @@ static void QZ_SetPortAlphaOpaque () {
 
 - (void)windowDidBecomeKey:(NSNotification *)aNotification
 {
-    SDL_PrivateAppActive (1, SDL_APPINPUTFOCUS);
+    QZ_DoActivate (current_video);
 }
 
 - (void)windowDidResignKey:(NSNotification *)aNotification
 {
-    SDL_PrivateAppActive (0, SDL_APPINPUTFOCUS);
-}
-
-- (void)windowDidBecomeMain:(NSNotification *)aNotification
-{
-    SDL_VideoDevice *this = (SDL_VideoDevice*)current_video;
-    if (this && QZ_IsMouseInWindow (this))
-        SDL_PrivateAppActive (1, SDL_APPMOUSEFOCUS);
-}
-
-- (void)windowDidResignMain:(NSNotification *)aNotification
-{
-    SDL_PrivateAppActive (0, SDL_APPMOUSEFOCUS);
+    QZ_DoDeactivate (current_video);
 }
 
 @end

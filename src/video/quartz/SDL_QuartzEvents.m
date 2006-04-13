@@ -614,8 +614,10 @@ static void QZ_GetMouseLocation (_THIS, NSPoint *p) {
     QZ_PrivateCocoaToSDL (this, p);
 }
 
-static void QZ_DoActivate (_THIS)
-{
+void QZ_DoActivate (_THIS) {
+
+    SDL_PrivateAppActive (1, SDL_APPINPUTFOCUS | (QZ_IsMouseInWindow (this) ? SDL_APPMOUSEFOCUS : 0));
+    
     /* Hide the cursor if it was hidden by SDL_ShowCursor() */
     if (!cursor_should_be_visible)
         QZ_HideMouse (this);
@@ -635,7 +637,9 @@ static void QZ_DoActivate (_THIS)
     }
 }
 
-static void QZ_DoDeactivate (_THIS) {
+void QZ_DoDeactivate (_THIS) {
+    
+    SDL_PrivateAppActive (0, SDL_APPINPUTFOCUS | SDL_APPMOUSEFOCUS);
 
     /* Get the current cursor location, for restore on activate */
     QZ_GetMouseLocation (this, &cursor_loc);
@@ -753,14 +757,9 @@ void QZ_PumpEvents (_THIS)
             BOOL isInGameWin;
             
             #define DO_MOUSE_DOWN(button) do {                                               \
-                            if ( [ NSApp isActive ] ) {                                      \
-                                if ( isInGameWin ) {                                         \
-                                    SDL_PrivateMouseButton (SDL_PRESSED, button, 0, 0);      \
-                                    expect_mouse_up |= 1<<button;                            \
-                                }                                                            \
-                            }                                                                \
-                            else {                                                           \
-                                QZ_DoActivate (this);                                        \
+                            if ( SDL_GetAppState() & SDL_APPMOUSEFOCUS ) {                   \
+                                SDL_PrivateMouseButton (SDL_PRESSED, button, 0, 0);          \
+                                expect_mouse_up |= 1<<button;                                \
                             }                                                                \
                             [ NSApp sendEvent:event ];                                       \
             } while(0)
@@ -916,7 +915,7 @@ void QZ_PumpEvents (_THIS)
                             QZ_ShowMouse (this);
                     }
                     else
-                    if ( isInGameWin && !(SDL_GetAppState() & SDL_APPMOUSEFOCUS) ) {
+                    if ( isInGameWin && (SDL_GetAppState() & (SDL_APPMOUSEFOCUS | SDL_APPINPUTFOCUS)) == SDL_APPINPUTFOCUS ) {
                     
                         SDL_PrivateAppActive (1, SDL_APPMOUSEFOCUS);
                         if (!cursor_should_be_visible)
@@ -950,17 +949,7 @@ void QZ_PumpEvents (_THIS)
                     break;
                 case NSFlagsChanged:
                     break;
-                case NSAppKitDefined:
-                    switch ( [ event subtype ] ) {
-                        case NSApplicationActivatedEventType:
-                            QZ_DoActivate (this);
-                            break;
-                        case NSApplicationDeactivatedEventType:
-                            QZ_DoDeactivate (this);
-                            break;
-                    }
-                    [ NSApp sendEvent:event ];
-                    break;
+                    /* case NSAppKitDefined: break; */
                     /* case NSApplicationDefined: break; */
                     /* case NSPeriodic: break; */
                     /* case NSCursorUpdate: break; */
