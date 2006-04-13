@@ -64,16 +64,10 @@
 #if defined(macintosh)
 #undef __MACOS__
 #define __MACOS__	1
-#define TARGET_API_MAC_OS8	1
-#define TARGET_API_MAC_CARBON	0
-#define TARGET_API_MAC_OSX	0
 #endif
 #if defined(__GNUC__) && (defined(__APPLE_CC__) || defined(__APPLE_CPP__))
 #undef __MACOSX__
 #define __MACOSX__	1
-#define TARGET_API_MAC_OS8	0
-#define TARGET_API_MAC_CARBON	1
-#define TARGET_API_MAC_OSX	1
 #endif
 #if defined(__NetBSD__)
 #undef __NETBSD__

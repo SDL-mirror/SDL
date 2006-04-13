@@ -2319,10 +2319,13 @@ case "$host" in
         # Next line is broken, and a few files below require Mac OS X (full)
         ARCH=macosx
 
-        # HACK: Reset EXTRA_LDFLAGS; the only thing it contains at this point is 
-        # -lm which is not needed under Mac OS X. But for some reasons it also
-        # tends to contain spurious -L switches, which we don't want to use
-        # here or in sdl-config. Hence we reset it.
+        # Mac OS X builds with both the Carbon and OSX APIs at the moment
+        EXTRA_CFLAGS="-DTARGET_API_MAC_CARBON -DTARGET_API_MAC_OSX"
+
+        # HACK: Reset EXTRA_LDFLAGS; the only thing it contains at this point
+        # is -lm which is not needed under Mac OS X. But for some reasons it
+        # also tends to contain spurious -L switches, which we don't want to
+        # use here or in sdl-config. Hence we reset it.
         EXTRA_LDFLAGS=""
 
         CheckDummyVideo
