@@ -93,7 +93,7 @@ static SDL_AudioDevice *Audio_CreateDevice(int devindex)
     this->UnlockAudio = Mac_UnlockAudio;
     this->free        = Audio_DeleteDevice;
 
-#ifdef __MACOSX__	/* MacOS X uses threaded audio, so normal thread code is okay */
+#ifdef __MACOSX__	/* Mac OS X uses threaded audio, so normal thread code is okay */
     this->LockAudio   = NULL;
     this->UnlockAudio = NULL;
 #endif
@@ -106,7 +106,7 @@ AudioBootStrap SNDMGR_bootstrap = {
 };
 
 #if defined(TARGET_API_MAC_CARBON) || defined(USE_RYANS_SOUNDCODE)
-/* This works correctly on MacOS X */
+/* This works correctly on Mac OS X */
 
 #pragma options align=power
 

@@ -133,7 +133,7 @@
 #define QZ_KP0			0x52
 #define QZ_KP_PERIOD	0x41
 
-/* Wierd, these keys are on my iBook under MacOS X */
+/* Wierd, these keys are on my iBook under Mac OS X */
 #define QZ_IBOOK_ENTER		0x34
 #define QZ_IBOOK_LEFT		0x3B
 #define QZ_IBOOK_RIGHT		0x3C

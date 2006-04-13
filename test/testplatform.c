@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
 #elif __MACOS__
 			"MacOS Classic"
 #elif __MACOSX__
-			"MacOS X"
+			"Mac OS X"
 #elif __NETBSD__
 			"NetBSD"
 #elif __OPENBSD__

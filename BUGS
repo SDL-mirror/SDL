@@ -68,7 +68,7 @@ MacOS:
 
 	Not all of the keys are properly recognized on the keyboard.
 
-MacOS X:
+Mac OS X:
 	Depth switching for windowed mode isn't implemented yet.
 	
 	Palette handling isn't implemented in windowed mode yet.
@@ -87,7 +87,7 @@ MacOS X:
 	cursor in the center of the window/screen.  Also, mouse moved events
 	are not generated, and the keyboard cannot be grabbed.
 
-	MacOS X seems to have a broken pthread_cancel() implementation.
+	Mac OS X seems to have a broken pthread_cancel() implementation.
 	Actually, it just only has one cancellation point defined.
 	http://lists.apple.com/archives/darwin-development/2004/Jun/24/killingapthread.001.txt
 

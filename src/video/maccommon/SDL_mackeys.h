@@ -132,7 +132,7 @@
 #define MK_KP0			0x52
 #define MK_KP_PERIOD		0x41
 
-/* Wierd, these keys are on my iBook under MacOS X */
+/* Wierd, these keys are on my iBook under Mac OS X */
 #define MK_IBOOK_ENTER		0x34
 #define MK_IBOOK_LEFT		0x3B
 #define MK_IBOOK_RIGHT		0x3C

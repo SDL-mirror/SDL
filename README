@@ -16,7 +16,7 @@ SDL is written in C, but works with C++ natively, and has bindings to
 several other languages, including Ada, C#, Eiffel, Java, Lua, ML,
 Objective C, Pascal, Perl, PHP, Pike, Python, and Ruby.
 
-The current version supports Linux, Windows, BeOS, MacOS, MacOS X,
+The current version supports Linux, Windows, BeOS, MacOS, Mac OS X,
 FreeBSD, OpenBSD, BSD/OS, Solaris, IRIX, and QNX.  The code contains
 support for Windows CE, AmigaOS, Dreamcast, Atari, NetBSD, AIX, OSF/Tru64,
 RISC OS, SymbianOS, and OS/2, but these are not officially supported.

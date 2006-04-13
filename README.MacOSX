@@ -26,7 +26,7 @@ Using the Simple DirectMedia Layer with a traditional Makefile
 ==============================================================================
 
 An existing autoconf/automake build system for your SDL app has good chances
-to work almost unchanged on OS X. However, to produce a "real" MacOS X binary
+to work almost unchanged on OS X. However, to produce a "real" Mac OS X binary
 that you can distribute to users, you need to put the generated binary into a
 so called "bundle", which basically is a fancy folder with a name like
 "MyCoolGame.app".

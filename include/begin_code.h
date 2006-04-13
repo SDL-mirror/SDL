@@ -147,4 +147,4 @@
 #define NULL ((void *)0)
 #endif
 #endif /* NULL */
-#endif /* ! MacOS X - breaks precompiled headers */
+#endif /* ! Mac OS X - breaks precompiled headers */

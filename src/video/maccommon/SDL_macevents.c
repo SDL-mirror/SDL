@@ -210,7 +210,7 @@ static int Mac_HandleEvents(_THIS, int wait4it)
 		}
 
 		/* Check for normal event keys, but we have to scan the
-		   actual keyboard state because on MacOS X a keydown event
+		   actual keyboard state because on Mac OS X a keydown event
 		   is immediately followed by a keyup event.
 		*/
 		GetKeys(keys);
@@ -573,7 +573,7 @@ void Mac_InitOSKeymap(_THIS)
 	MAC_keymap[MK_KP_PERIOD] = SDLK_KP_PERIOD;
 
 #if defined(__APPLE__) && defined(__MACH__)
-	/* Wierd, these keys are on my iBook under MacOS X
+	/* Wierd, these keys are on my iBook under Mac OS X
 	   Note that the left arrow keysym is the same as left ctrl!?
 	 */
 	MAC_keymap[MK_IBOOK_ENTER] = SDLK_KP_ENTER;
@@ -581,7 +581,7 @@ void Mac_InitOSKeymap(_THIS)
 	MAC_keymap[MK_IBOOK_DOWN] = SDLK_DOWN;
 	MAC_keymap[MK_IBOOK_UP] = SDLK_UP;
 	MAC_keymap[MK_IBOOK_LEFT] = SDLK_LEFT;
-#endif /* MacOS X */
+#endif /* Mac OS X */
 
 	/* Up there we setup a static scancode->keysym map. However, it will not
 	 * work very well on international keyboard. Hence we now query MacOS

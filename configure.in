@@ -2363,7 +2363,7 @@ case "$host" in
             SOURCES="$SOURCES $srcdir/src/loadso/macosx/*.c"
             have_loadso=yes
         fi
-        # The MacOS X platform requires special setup.
+        # The Mac OS X platform requires special setup.
         SDLMAIN_SOURCES="$srcdir/src/main/macosx/*.m"
         EXTRA_CFLAGS="$EXTRA_CFLAGS -fpascal-strings"
         SDL_LIBS="-lSDLmain $SDL_LIBS"

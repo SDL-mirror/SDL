@@ -21,7 +21,7 @@
 */
 #include "SDL_config.h"
 
-/* SDL joystick driver for Darwin / MacOS X, based on the IOKit HID API */
+/* SDL joystick driver for Darwin / Mac OS X, based on the IOKit HID API */
 /* Written 2001 by Max Horn */
 
 #include <unistd.h>
@@ -34,7 +34,7 @@
 #ifdef MACOS_10_0_4
 #include <IOKit/hidsystem/IOHIDUsageTables.h>
 #else
-/* The header was moved here in MacOS X 10.1 */
+/* The header was moved here in Mac OS X 10.1 */
 #include <Kernel/IOKit/hidsystem/IOHIDUsageTables.h>
 #endif
 #include <IOKit/hid/IOHIDLib.h>

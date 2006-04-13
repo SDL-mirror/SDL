@@ -29,7 +29,7 @@
 #elif TARGET_API_MAC_CARBON && (UNIVERSAL_INTERFACES_VERSION > 0x0335)
 #include <Carbon.h>
 /* The fullscreen code requires the QuickTime framework, and the window
-   is still at the back on MacOS X, which is where this code is needed.
+   is still at the back on Mac OS X, which is where this code is needed.
  */
 #if USE_QUICKTIME
 #include <Movies.h>

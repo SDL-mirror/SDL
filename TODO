@@ -5,7 +5,7 @@ http://bugzilla.libsdl.org/
  * Add mousewheel events (new unified event architecture?)
  * DirectInput joystick support needs to be implemented
  * Be able to enumerate and select available audio and video drivers
- * Fullscreen video mode support for MacOS X
+ * Fullscreen video mode support for Mac OS X
  * Explicit vertical retrace wait (maybe separate from SDL_Flip?)
  * Shaped windows, windows without borders
  * Multiple windows, multiple display support
