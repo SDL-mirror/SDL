@@ -35,7 +35,7 @@
 #else
 
 struct SDL_semaphore {
-	sem_t *sem;
+	sem_t sem;
 };
 
 /* Create a semaphore, initialized with value */
@@ -43,12 +43,10 @@ SDL_sem *SDL_CreateSemaphore(Uint32 initial_value)
 {
 	SDL_sem *sem = (SDL_sem *) SDL_malloc(sizeof(SDL_sem));
 	if ( sem ) {
-		if ( sem_init(&sem->sem_data, 0, initial_value) < 0 ) {
+		if ( sem_init(&sem->sem, 0, initial_value) < 0 ) {
 			SDL_SetError("sem_init() failed");
 			SDL_free(sem);
 			sem = NULL;
-		} else {
-			sem->sem = &sem->sem_data;
 		}
 	} else {
 		SDL_OutOfMemory();
@@ -59,7 +57,7 @@ SDL_sem *SDL_CreateSemaphore(Uint32 initial_value)
 void SDL_DestroySemaphore(SDL_sem *sem)
 {
 	if ( sem ) {
-		sem_destroy(sem->sem);
+		sem_destroy(&sem->sem);
 		SDL_free(sem);
 	}
 }
@@ -73,7 +71,7 @@ int SDL_SemTryWait(SDL_sem *sem)
 		return -1;
 	}
 	retval = SDL_MUTEX_TIMEDOUT;
-	if ( sem_trywait(sem->sem) == 0 ) {
+	if ( sem_trywait(&sem->sem) == 0 ) {
 		retval = 0;
 	}
 	return retval;
@@ -88,7 +86,7 @@ int SDL_SemWait(SDL_sem *sem)
 		return -1;
 	}
 
-	retval = sem_wait(sem->sem);
+	retval = sem_wait(&sem->sem);
 	if ( retval < 0 ) {
 		SDL_SetError("sem_wait() failed");
 	}
@@ -130,7 +128,7 @@ Uint32 SDL_SemValue(SDL_sem *sem)
 {
 	int ret = 0;
 	if ( sem ) {
-		sem_getvalue(sem->sem, &ret);
+		sem_getvalue(&sem->sem, &ret);
 		if ( ret < 0 ) {
 			ret = 0;
 		}
@@ -147,7 +145,7 @@ int SDL_SemPost(SDL_sem *sem)
 		return -1;
 	}
 
-	retval = sem_post(sem->sem);
+	retval = sem_post(&sem->sem);
 	if ( retval < 0 ) {
 		SDL_SetError("sem_post() failed");
 	}
