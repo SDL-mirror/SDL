@@ -87,7 +87,7 @@ SDL_sem *SDL_CreateSemaphore(Uint32 initial_value)
 	sem = (SDL_sem *)SDL_malloc(sizeof(*sem));
 	if ( ! sem ) {
 		SDL_OutOfMemory();
-		return(0);
+		return NULL;
 	}
 	sem->count = initial_value;
 	sem->waiters_count = 0;
@@ -96,10 +96,10 @@ SDL_sem *SDL_CreateSemaphore(Uint32 initial_value)
 	sem->count_nonzero = SDL_CreateCond();
 	if ( ! sem->count_lock || ! sem->count_nonzero ) {
 		SDL_DestroySemaphore(sem);
-		return(0);
+		return NULL;
 	}
 
-	return(sem);
+	return sem;
 }
 
 /* WARNING:
@@ -114,9 +114,11 @@ void SDL_DestroySemaphore(SDL_sem *sem)
 			SDL_Delay(10);
 		}
 		SDL_DestroyCond(sem->count_nonzero);
-		SDL_mutexP(sem->count_lock);
-		SDL_mutexV(sem->count_lock);
-		SDL_DestroyMutex(sem->count_lock);
+		if ( sem->count_lock ) {
+			SDL_mutexP(sem->count_lock);
+			SDL_mutexV(sem->count_lock);
+			SDL_DestroyMutex(sem->count_lock);
+		}
 		SDL_free(sem);
 	}
 }

@@ -30,15 +30,12 @@
 /* Wrapper around POSIX 1003.1b semaphores */
 
 #ifdef __MACOSX__
-#define USE_NAMED_SEMAPHORES 1
-#include <unistd.h>
-#endif
+/* Mac OS X doesn't support sem_getvalue() as of version 10.4 */
+#include "../generic/SDL_syssem.c"
+#else
 
 struct SDL_semaphore {
 	sem_t *sem;
-#if !USE_NAMED_SEMAPHORES
-	sem_t sem_data;
-#endif
 };
 
 /* Create a semaphore, initialized with value */
@@ -46,20 +43,6 @@ SDL_sem *SDL_CreateSemaphore(Uint32 initial_value)
 {
 	SDL_sem *sem = (SDL_sem *) SDL_malloc(sizeof(SDL_sem));
 	if ( sem ) {
-#if USE_NAMED_SEMAPHORES
-		static int semnum = 0;
-		char name[32];
-
-		SDL_snprintf(name, SDL_arraysize(name), "/SDL_sem-%d-%4.4d", getpid(), semnum++);
-		sem->sem = sem_open(name, O_CREAT, 0600, initial_value);
-		if ( sem->sem == (sem_t *)SEM_FAILED ) {
-			SDL_SetError("sem_open(%s) failed", name);
-			SDL_free(sem);
-			sem = NULL;
-		} else {
-			sem_unlink(name);
-		}
-#else
 		if ( sem_init(&sem->sem_data, 0, initial_value) < 0 ) {
 			SDL_SetError("sem_init() failed");
 			SDL_free(sem);
@@ -67,7 +50,6 @@ SDL_sem *SDL_CreateSemaphore(Uint32 initial_value)
 		} else {
 			sem->sem = &sem->sem_data;
 		}
-#endif /* USE_NAMED_SEMAPHORES */
 	} else {
 		SDL_OutOfMemory();
 	}
@@ -77,11 +59,7 @@ SDL_sem *SDL_CreateSemaphore(Uint32 initial_value)
 void SDL_DestroySemaphore(SDL_sem *sem)
 {
 	if ( sem ) {
-#if USE_NAMED_SEMAPHORES
-		sem_close(sem->sem);
-#else
 		sem_destroy(sem->sem);
-#endif
 		SDL_free(sem);
 	}
 }
@@ -135,6 +113,7 @@ int SDL_SemWaitTimeout(SDL_sem *sem, Uint32 timeout)
 	}
 
 	/* Ack!  We have to busy wait... */
+	/* FIXME: Use sem_timedwait()? */
 	timeout += SDL_GetTicks();
 	do {
 		retval = SDL_SemTryWait(sem);
@@ -174,3 +153,5 @@ int SDL_SemPost(SDL_sem *sem)
 	}
 	return retval;
 }
+
+#endif /* __MACOSX__ */
