@@ -2315,6 +2315,13 @@ case "$host" in
         # just the OS X kernel sans upper layers like Carbon and Cocoa.
         # Next line is broken, and a few files below require Mac OS X (full)
         ARCH=macosx
+
+        # HACK: Reset EXTRA_LDFLAGS; the only thing it contains at this point is 
+        # -lm which is not needed under Mac OS X. But for some reasons it also
+        # tends to contain spurious -L switches, which we don't want to use
+        # here or in sdl-config. Hence we reset it.
+        EXTRA_LDFLAGS=""
+
         CheckDummyVideo
         CheckDiskAudio
         CheckDummyAudio
@@ -2528,7 +2535,7 @@ case "$ARCH" in
       SDL_LIBS="$SDL_LIBS -Wl,-framework,OpenGL"
     fi
     # Evil hack to allow static linking on Mac OS X
-    SDL_STATIC_LIBS="\${exec_prefix}/lib/libSDLmain.a \${exec_prefix}/lib/libSDL.a"
+    SDL_STATIC_LIBS="\${exec_prefix}/lib/libSDLmain.a \${exec_prefix}/lib/libSDL.a $EXTRA_LDFLAGS"
     ;;
   *)
     SDL_STATIC_LIBS="$SDL_LIBS"
