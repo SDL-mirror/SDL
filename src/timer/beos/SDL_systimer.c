@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_TIMER_BEOS
+
 #include <be/kernel/OS.h>
 
 #include "SDL_thread.h"
@@ -89,3 +91,5 @@ void SDL_SYS_StopTimer(void)
 {
 	return;
 }
+
+#endif /* SDL_TIMER_BEOS */

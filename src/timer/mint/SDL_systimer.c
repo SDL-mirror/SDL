@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_TIMER_MINT
+
 /*
  *	TOS/MiNT timer driver
  *	based on vbl vector
@@ -151,3 +153,5 @@ void SDL_SYS_StopTimer(void)
 {
 	return;
 }
+
+#endif /* SDL_TIMER_MINT */

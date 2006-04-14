@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_JOYSTICK_OS2
+
 /* OS/2 Joystick driver, contributed by Daniel Caetano */
 
 #include <mem.h>
@@ -663,4 +665,4 @@ if (*joyenv==stopchar)
 return chcnt;
 }
 
-
+#endif /* SDL_JOYSTICK_OS2 */

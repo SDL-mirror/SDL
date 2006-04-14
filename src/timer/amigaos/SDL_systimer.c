@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_TIMER_AMIGA
+
 #include <stdio.h>
 #include <time.h>
 #include <signal.h>
@@ -261,3 +263,5 @@ void SDL_SYS_StopTimer(void)
 {
 	return;
 }
+
+#endif /* SDL_TIMER_AMIGA */

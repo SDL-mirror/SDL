@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_JOYSTICK_AMIGA
+
 /* This is the system specific header for the SDL joystick API */
 
 #include <libraries/lowlevel.h>
@@ -225,7 +227,7 @@ void SDL_SYS_JoystickQuit(void)
 		LowLevelBase=NULL;
 		SDL_numjoysticks=0;
 	}
-
 	return;
 }
 
+#endif /* SDL_JOYSTICK_AMIGA */

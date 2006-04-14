@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_CDROM_MINT
+
 /*
 	Atari MetaDOS CD-ROM functions
 
@@ -311,3 +313,5 @@ static int SDL_SYS_CDEject(SDL_CD *cdrom)
 {
 	return SDL_SYS_CDioctl(cdrom->id, CDROMEJECT, 0);
 }
+
+#endif /* SDL_CDROM_MINT */

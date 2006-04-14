@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_JOYSTICK_MACOS
+
 /*  SDL stuff  --  "SDL_sysjoystick.c"
     MacOS joystick functions by Frederick Reitberger
 
@@ -315,3 +317,4 @@ void SDL_SYS_JoystickQuit(void)
     ISpShutdown();
 }
 
+#endif /* SDL_JOYSTICK_MACOS */

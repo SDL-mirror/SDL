@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_JOYSTICK_RISCOS
+
 /*
    RISC OS - Joystick support by Alan Buckley (alan_baa@hotmail.com) - 10 April 2003
 
@@ -171,3 +173,4 @@ void SDL_SYS_JoystickQuit(void)
 	return;
 }
 
+#endif /* SDL_JOYSTICK_RISCOS */

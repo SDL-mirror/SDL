@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_TIMER_MACOS
+
 #include <Types.h>
 #include <Timer.h>
 #include <OSUtils.h>
@@ -146,3 +148,5 @@ void SDL_SYS_StopTimer(void)
 {
 	RmvTime((QElemPtr)&gExtendedTimerRec.tmTask);
 }
+
+#endif /* SDL_TIMER_MACOS */

@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_JOYSTICK_BEOS
+
 /* This is the system specific header for the SDL joystick API */
 
 #include <be/support/String.h>
@@ -231,3 +233,5 @@ void SDL_SYS_JoystickQuit(void)
 }
 
 }; // extern "C"
+
+#endif /* SDL_JOYSTICK_BEOS */

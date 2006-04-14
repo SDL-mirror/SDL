@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_JOYSTICK_USBHID
+
 /*
  * Joystick driver for the uhid(4) interface found in OpenBSD,
  * NetBSD and FreeBSD.
@@ -575,3 +577,4 @@ report_free(struct report *r)
 	r->status = SREPORT_UNINIT;
 }
 
+#endif /* SDL_JOYSTICK_USBHID */

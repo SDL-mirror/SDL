@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_CDROM_MACOS
+
 /* MacOS functions for system-level CD-ROM audio control */
 
 #include <Devices.h>
@@ -520,3 +522,4 @@ void SDL_SYS_CDQuit(void)
 		SDL_memset(SDL_cdlist + SDL_numcds, 0, sizeof(SDL_cdlist[0]));
 }
 
+#endif /* SDL_CDROM_MACOS */

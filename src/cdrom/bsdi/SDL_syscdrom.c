@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_CDROM_BSDI
+
 /*
  * Functions for system-level CD-ROM audio control for BSD/OS 4.x
  * This started life out as a copy of the freebsd/SDL_cdrom.c file but was
@@ -536,3 +538,5 @@ void SDL_SYS_CDQuit(void)
 		}
 	SDL_numcds = 0;
 }
+
+#endif /* SDL_CDROM_BSDI */

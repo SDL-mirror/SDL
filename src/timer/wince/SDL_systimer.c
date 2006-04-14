@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_TIMER_WINCE
+
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <mmsystem.h>
@@ -192,3 +194,5 @@ void SDL_SYS_StopTimer(void)
 {
 	return;
 }
+
+#endif /* SDL_TIMER_WINCE */

@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_LOADSO_DLCOMPAT
+
 /* Please note that dlcompat apparently ships in current Mac OS X versions
  *  as a system library that provides compatibility with the Unix "dlopen"
  *  interface. In order to allow SDL to work on older OS X releases and also
@@ -1399,3 +1401,4 @@ void SDL_UnloadObject(void *handle)
 	}
 }
 
+#endif /* SDL_LOADSO_DLCOMPAT */

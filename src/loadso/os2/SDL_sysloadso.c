@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_LOADSO_OS2
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* System dependent library loading routines                           */
 
@@ -66,3 +68,4 @@ void SDL_UnloadObject(void *handle)
         DosFreeModule((HMODULE) handle);
 }
 
+#endif /* SDL_LOADSO_OS2 */

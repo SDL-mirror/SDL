@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#if defined(SDL_LOADSO_DUMMY) || defined(SDL_LOADSO_DISABLED)
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* System dependent library loading routines                           */
 
@@ -45,3 +47,4 @@ void SDL_UnloadObject(void *handle)
     /* no-op. */
 }
 
+#endif /* SDL_LOADSO_DUMMY || SDL_LOADSO_DISABLED */

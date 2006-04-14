@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_JOYSTICK_DC
+
 #include "SDL_events.h"
 #include "SDL_joystick.h"
 #include "../SDL_sysjoystick.h"
@@ -187,3 +189,5 @@ void SDL_SYS_JoystickQuit(void)
 {
 	return;
 }
+
+#endif /* SDL_JOYSTICK_DC */

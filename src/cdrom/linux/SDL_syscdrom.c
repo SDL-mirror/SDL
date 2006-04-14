@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_CDROM_LINUX
+
 /* Functions for system-level CD-ROM audio control */
 
 #include <string.h>	/* For strerror() */
@@ -559,3 +561,4 @@ void SDL_SYS_CDQuit(void)
 	}
 }
 
+#endif /* SDL_CDROM_LINUX */

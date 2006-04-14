@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_JOYSTICK_MINT
+
 /*
  *	Atari Joystick/Joypad drivers
  *
@@ -627,3 +629,5 @@ static void UpdateJoypads(void)
 	JOYPAD_IO.directions=0xff7f;
 	jp_joypads[1] |= (((~(JOYPAD_IO.directions))>>12) & 15)<<12;
 }
+
+#endif /* SDL_JOYSTICK_MINT */

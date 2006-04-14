@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_JOYSTICK_WINMM
+
 /* Win32 MultiMedia Joystick driver, contributed by Andrei de A. Formiga */
 
 #define WIN32_LEAN_AND_MEAN
@@ -416,3 +418,5 @@ void SetMMerror(char *function, int code)
 	}
 	SDL_SetError("%s", errbuf);
 }
+
+#endif /* SDL_JOYSTICK_WINMM */

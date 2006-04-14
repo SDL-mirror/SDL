@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_CDROM_WIN32
+
 /* Functions for system-level CD-ROM audio control */
 
 #define WIN32_LEAN_AND_MEAN
@@ -379,3 +381,5 @@ void SDL_SYS_CDQuit(void)
 		SDL_numcds = 0;
 	}
 }
+
+#endif /* SDL_CDROM_WIN32 */

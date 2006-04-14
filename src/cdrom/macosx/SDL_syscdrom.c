@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_CDROM_MACOSX
+
 #include "SDL_syscdrom_c.h"
 
 #pragma mark -- Globals --
@@ -502,3 +504,4 @@ static void SDL_SYS_CDClose(SDL_CD *cdrom)
     return;
 }
 
+#endif /* SDL_CDROM_MACOSX */

@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_TIMER_OS2
+
 #define INCL_DOSMISC
 #define INCL_DOSERRORS
 #define INCL_DOSSEMAPHORES
@@ -222,4 +224,4 @@ void SDL_SYS_StopTimer(void)
         return;
 }
 
-
+#endif /* SDL_TIMER_OS2 */

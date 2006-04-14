@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_CDROM_FREEBSD
+
 /* Functions for system-level CD-ROM audio control */
 
 #include <sys/types.h>
@@ -401,3 +403,4 @@ void SDL_SYS_CDQuit(void)
 	}
 }
 
+#endif /* SDL_CDROM_FREEBSD */

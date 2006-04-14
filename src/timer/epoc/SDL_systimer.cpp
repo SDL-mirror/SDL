@@ -19,6 +19,9 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
+
+#ifdef SDL_TIMER_EPOC
 
 /*
     SDL_systimer.cpp
@@ -109,3 +112,5 @@ void SDL_SYS_StopTimer(void)
 }
 
 }; // extern "C"
+
+#endif /* SDL_TIMER_EPOC */

@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_CDROM_OSF
+
 /* Functions for system-level CD-ROM audio control */
 
 /* #define DEBUG_CDROM 1 */
@@ -439,4 +441,4 @@ void SDL_SYS_CDQuit(void)
     }
 }
 
-
+#endif /* SDL_CDROM_OSF */

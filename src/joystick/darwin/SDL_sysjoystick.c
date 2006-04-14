@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_JOYSTICK_IOKIT
+
 /* SDL joystick driver for Darwin / Mac OS X, based on the IOKit HID API */
 /* Written 2001 by Max Horn */
 
@@ -836,3 +838,5 @@ void SDL_SYS_JoystickQuit(void)
 	while (NULL != gpDeviceList)
 		gpDeviceList = HIDDisposeDevice (&gpDeviceList);
 }
+
+#endif /* SDL_JOYSTICK_IOKIT */

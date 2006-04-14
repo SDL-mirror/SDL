@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_LOADSO_LDG
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* System dependent library loading routines                           */
 
@@ -57,3 +59,4 @@ void SDL_UnloadObject(void *handle)
 	}
 }
 
+#endif /* SDL_LOADSO_LDG */

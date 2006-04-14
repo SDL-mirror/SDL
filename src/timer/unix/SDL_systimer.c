@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_TIMER_UNIX
+
 #include <stdio.h>
 #include <sys/time.h>
 #include <signal.h>
@@ -234,3 +236,5 @@ void SDL_SYS_StopTimer(void)
 }
 
 #endif /* USE_ITIMER */
+
+#endif /* SDL_TIMER_UNIX */

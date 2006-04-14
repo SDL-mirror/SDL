@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_TIMER_RISCOS
+
 #include <stdio.h>
 #include <time.h>
 #include <sys/time.h>
@@ -227,3 +229,5 @@ void SDL_SYS_StopTimer(void)
 }
 
 #endif /* SDL_THREADS_DISABLED */
+
+#endif /* SDL_TIMER_RISCOS */

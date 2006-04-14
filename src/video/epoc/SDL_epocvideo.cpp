@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
 /*
     SDL_epocvideo.cpp
@@ -26,8 +27,6 @@
 
     Epoc version by Hannu Viitala (hannu.j.viitala@mbnet.fi)
 */
-
-
 
 extern "C" {
 #include "SDL_timer.h"

@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_TIMER_DC
+
 #include <kos.h>
 
 #include "SDL_thread.h"
@@ -94,3 +96,5 @@ void SDL_SYS_StopTimer(void)
 {
 	return;
 }
+
+#endif /* SDL_TIMER_DC */

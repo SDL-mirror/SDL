@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_CDROM_OS2
+
 /* Functions for system-level CD-ROM audio control */
 
 #define INCL_MCIOS2
@@ -388,3 +390,4 @@ if ( SDL_numcds > 0 )
 	}
 }
 
+#endif /* SDL_CDROM_OS2 */

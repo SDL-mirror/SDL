@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#if defined(SDL_TIMER_DUMMY) || defined(SDL_TIMERS_DISABLED)
+
 #include "SDL_timer.h"
 #include "../SDL_timer_c.h"
 
@@ -85,3 +87,5 @@ void SDL_SYS_StopTimer(void)
 {
 	return;
 }
+
+#endif /* SDL_TIMER_DUMMY || SDL_TIMERS_DISABLED */

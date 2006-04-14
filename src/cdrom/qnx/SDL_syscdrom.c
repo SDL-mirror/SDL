@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_CDROM_QNX
+
 /* Functions for system-level CD-ROM audio control */
 
 #include <sys/types.h>
@@ -545,3 +547,5 @@ void SDL_SYS_CDQuit(void)
         SDL_numcds = 0;
     }
 }
+
+#endif /* SDL_CDROM_QNX */

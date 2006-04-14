@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#if defined(SDL_JOYSTICK_DUMMY) || defined(SDL_JOYSTICK_DISABLED)
+
 /* This is the system specific header for the SDL joystick API */
 
 #include "SDL_joystick.h"
@@ -78,3 +80,4 @@ void SDL_SYS_JoystickQuit(void)
 	return;
 }
 
+#endif /* SDL_JOYSTICK_DUMMY || SDL_JOYSTICK_DISABLED */

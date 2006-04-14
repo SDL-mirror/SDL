@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_JOYSTICK_LINUX
+
 /* This is the system specific header for the SDL joystick API */
 
 #include <sys/stat.h>
@@ -1195,3 +1197,4 @@ void SDL_SYS_JoystickQuit(void)
 	SDL_joylist[0].fname = NULL;
 }
 
+#endif /* SDL_JOYSTICK_LINUX */

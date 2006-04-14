@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_CDROM_BEOS
+
 /* Functions for system-level CD-ROM audio control on BeOS
    (not completely implemented yet)
  */
@@ -407,3 +409,4 @@ void SDL_SYS_CDQuit(void)
 	}
 }
 
+#endif /* SDL_CDROM_BEOS */
