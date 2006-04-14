@@ -61,11 +61,11 @@ $(objects):
 
 .PHONY: all depend install install-bin install-hdrs install-lib install-data install-man uninstall uninstall-bin uninstall-hdrs uninstall-lib uninstall-data uninstall-man clean distclean dist
 depend:
-	@SOURCES="$(SOURCES)" INCLUDE="$(INCLUDE)" objects="$(objects)" output="$(depend)" \
+	@SOURCES="$(SOURCES)" INCLUDE="$(INCLUDE)" output="$(depend)" \
 	$(SHELL) $(auxdir)/makedep.sh
 	@for src in $(SDLMAIN_SOURCES); do \
 	    obj=`echo $$src | sed -e 's|.*/||' -e 's|\.[^\.]*$$|.o|'`; \
-	    echo "$(objects)/$$obj: $$src" >>$(depend); \
+	    echo "\$$(objects)/$$obj: $$src" >>$(depend); \
 	    echo "	\$$(CC) \$$(CFLAGS) \$$(EXTRA_CFLAGS) -c $$src -o \$$@" >>$(depend); \
 	done
 

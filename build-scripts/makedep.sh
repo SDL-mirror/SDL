@@ -3,8 +3,8 @@
 # Generate dependencies from a list of source files
 
 # Check to make sure our environment variables are set
-if test x"$INCLUDE" = x -o x"$SOURCES" = x -o x"$objects" = x -o x"$output" = x; then
-    echo "SOURCES, INCLUDE, objects, and output needs to be set"
+if test x"$INCLUDE" = x -o x"$SOURCES" = x -o x"$output" = x; then
+    echo "SOURCES, INCLUDE, and output needs to be set"
     exit 1
 fi
 cache_prefix=".#$$"
@@ -41,8 +41,8 @@ search_deps()
 for src in $SOURCES
 do  echo "Generating dependencies for $src"
     ext=`echo $src | sed 's|.*\.\(.*\)|\1|'`
-    obj=`echo $src | sed "s|^.*/\([^ ]*\)\..*|$objects/\1.lo|g"`
-    echo "$obj: $src \\" >>${output}.new
+    obj=`echo $src | sed "s|^.*/\([^ ]*\)\..*|\1.lo|g"`
+    echo "\$(objects)/$obj: $src \\" >>${output}.new
     search_deps $src | sort | uniq >>${output}.new
     case $ext in
         c) cat >>${output}.new <<__EOF__
