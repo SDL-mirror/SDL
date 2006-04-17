@@ -241,7 +241,7 @@ void DirectFB_UnlockYUVOverlay(_THIS, SDL_Overlay *overlay)
   surface->Unlock (surface);
 }
 
-int DirectFB_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *dst)
+int DirectFB_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *src, SDL_Rect *dst)
 {
   DFBResult              ret;
   DFBDisplayLayerConfig  conf;

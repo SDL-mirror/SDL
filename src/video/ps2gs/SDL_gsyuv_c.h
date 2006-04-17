@@ -32,6 +32,6 @@ extern int GS_LockYUVOverlay(_THIS, SDL_Overlay *overlay);
 
 extern void GS_UnlockYUVOverlay(_THIS, SDL_Overlay *overlay);
 
-extern int GS_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *dstrect);
+extern int GS_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *src, SDL_Rect *dst);
 
 extern void GS_FreeYUVOverlay(_THIS, SDL_Overlay *overlay);

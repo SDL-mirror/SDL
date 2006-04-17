@@ -245,15 +245,19 @@ static int ph_DispatchEvent(_THIS)
                    int lockedstate=current_overlay->hwdata->locked;
                    int chromastate=current_overlay->hwdata->ischromakey;
                    int error;
-                   SDL_Rect target;
+                   SDL_Rect src, dst;
 
                    current_overlay->hwdata->locked=1;
-                   target.x=current_overlay->hwdata->CurrentViewPort.pos.x;
-                   target.y=current_overlay->hwdata->CurrentViewPort.pos.y;
-                   target.w=current_overlay->hwdata->CurrentViewPort.size.w;
-                   target.h=current_overlay->hwdata->CurrentViewPort.size.h;
+                   src.x = 0;
+                   src.y = 0;
+                   src.w = current_overlay->w;
+                   src.y = current_overlay->h;
+                   dst.x=current_overlay->hwdata->CurrentViewPort.pos.x;
+                   dst.y=current_overlay->hwdata->CurrentViewPort.pos.y;
+                   dst.w=current_overlay->hwdata->CurrentViewPort.size.w;
+                   dst.h=current_overlay->hwdata->CurrentViewPort.size.h;
                    current_overlay->hwdata->ischromakey=0;
-                   error=ph_DisplayYUVOverlay(this, current_overlay, &target);
+                   error=ph_DisplayYUVOverlay(this, current_overlay, &src, &dst);
                    if (!error)
                    {
                        current_overlay->hwdata->ischromakey=chromastate;
@@ -306,15 +310,19 @@ static int ph_DispatchEvent(_THIS)
                     {
                         int lockedstate=current_overlay->hwdata->locked;
                         int error;
-                        SDL_Rect target;
+                        SDL_Rect src, dst;
 
                         current_overlay->hwdata->locked=1;
-                        target.x=current_overlay->hwdata->CurrentViewPort.pos.x;
-                        target.y=current_overlay->hwdata->CurrentViewPort.pos.y;
-                        target.w=current_overlay->hwdata->CurrentViewPort.size.w;
-                        target.h=current_overlay->hwdata->CurrentViewPort.size.h;
+                        src.x = 0;
+                        src.y = 0;
+                        src.w = current_overlay->w;
+                        src.y = current_overlay->h;
+                        dst.x=current_overlay->hwdata->CurrentViewPort.pos.x;
+                        dst.y=current_overlay->hwdata->CurrentViewPort.pos.y;
+                        dst.w=current_overlay->hwdata->CurrentViewPort.size.w;
+                        dst.h=current_overlay->hwdata->CurrentViewPort.size.h;
                         current_overlay->hwdata->forcedredraw=1;
-                        error=ph_DisplayYUVOverlay(this, current_overlay, &target);
+                        error=ph_DisplayYUVOverlay(this, current_overlay, &src, &dst);
                         if (!error)
                         {
                             current_overlay->hwdata->forcedredraw=0;

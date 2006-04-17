@@ -32,6 +32,6 @@ extern int SDL_LockYUV_SW(_THIS, SDL_Overlay *overlay);
 
 extern void SDL_UnlockYUV_SW(_THIS, SDL_Overlay *overlay);
 
-extern int SDL_DisplayYUV_SW(_THIS, SDL_Overlay *overlay, SDL_Rect *dstrect);
+extern int SDL_DisplayYUV_SW(_THIS, SDL_Overlay *overlay, SDL_Rect *src, SDL_Rect *dst);
 
 extern void SDL_FreeYUV_SW(_THIS, SDL_Overlay *overlay);

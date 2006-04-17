@@ -32,7 +32,7 @@ extern int DirectFB_LockYUVOverlay(_THIS, SDL_Overlay *overlay);
 
 extern void DirectFB_UnlockYUVOverlay(_THIS, SDL_Overlay *overlay);
 
-extern int DirectFB_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *dstrect);
+extern int DirectFB_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *src, SDL_Rect *dst);
 
 extern void DirectFB_FreeYUVOverlay(_THIS, SDL_Overlay *overlay);
 

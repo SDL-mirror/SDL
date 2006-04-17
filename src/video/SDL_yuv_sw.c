@@ -1164,43 +1164,44 @@ void SDL_UnlockYUV_SW(_THIS, SDL_Overlay *overlay)
 	return;
 }
 
-int SDL_DisplayYUV_SW(_THIS, SDL_Overlay *overlay, SDL_Rect *dstrect)
+int SDL_DisplayYUV_SW(_THIS, SDL_Overlay *overlay, SDL_Rect *src, SDL_Rect *dst)
 {
 	struct private_yuvhwdata *swdata;
-	SDL_Surface *stretch;
-	SDL_Surface *display;
+	int stretch;
 	int scale_2x;
+	SDL_Surface *display;
 	Uint8 *lum, *Cr, *Cb;
-	Uint8 *dst;
+	Uint8 *dstp;
 	int mod;
 
 	swdata = overlay->hwdata;
-	scale_2x = 0;
 	stretch = 0;
-	if ( (overlay->w != dstrect->w) || (overlay->h != dstrect->h) ) {
-		if ( (dstrect->w == 2*overlay->w) &&
-		     (dstrect->h == 2*overlay->h) ) {
+	scale_2x = 0;
+	if ( src->x || src->y || src->w < overlay->w || src->h < overlay->h ) {
+		stretch = 1;
+	} else if ( (src->w != dst->w) || (src->h != dst->h) ) {
+		if ( (dst->w == 2*src->w) &&
+		     (dst->h == 2*src->h) ) {
 			scale_2x = 1;
 		} else {
-			if ( ! swdata->stretch ) {
-				display = swdata->display;
-				swdata->stretch = SDL_CreateRGBSurface(
-					SDL_SWSURFACE,
-					overlay->w, overlay->h,
-					display->format->BitsPerPixel,
-					display->format->Rmask,
-					display->format->Gmask,
-					display->format->Bmask, 0);
-				if ( ! swdata->stretch ) {
-					return(-1);
-				}
-			}
-			stretch = swdata->stretch;
+			stretch = 1;
 		}
 	}
-
 	if ( stretch ) {
-		display = stretch;
+		if ( ! swdata->stretch ) {
+			display = swdata->display;
+			swdata->stretch = SDL_CreateRGBSurface(
+				SDL_SWSURFACE,
+				overlay->w, overlay->h,
+				display->format->BitsPerPixel,
+				display->format->Rmask,
+				display->format->Gmask,
+				display->format->Bmask, 0);
+			if ( ! swdata->stretch ) {
+				return(-1);
+			}
+		}
+		display = swdata->stretch;
 	} else {
 		display = swdata->display;
 	}
@@ -1240,31 +1241,31 @@ int SDL_DisplayYUV_SW(_THIS, SDL_Overlay *overlay, SDL_Rect *dstrect)
 		}
 	}
 	if ( stretch ) {
-		dst = (Uint8 *)stretch->pixels;
+		dstp = (Uint8 *)swdata->stretch->pixels;
 	} else {
-		dst = (Uint8 *)display->pixels
-			+ dstrect->x * display->format->BytesPerPixel
-			+ dstrect->y * display->pitch;
+		dstp = (Uint8 *)display->pixels
+			+ dst->x * display->format->BytesPerPixel
+			+ dst->y * display->pitch;
 	}
 	mod = (display->pitch / display->format->BytesPerPixel);
 
 	if ( scale_2x ) {
 		mod -= (overlay->w * 2);
 		swdata->Display2X(swdata->colortab, swdata->rgb_2_pix,
-		                  lum, Cr, Cb, dst, overlay->h, overlay->w,mod);
+		                  lum, Cr, Cb, dstp, overlay->h, overlay->w, mod);
 	} else {
 		mod -= overlay->w;
 		swdata->Display1X(swdata->colortab, swdata->rgb_2_pix,
-		                  lum, Cr, Cb, dst, overlay->h, overlay->w,mod);
+		                  lum, Cr, Cb, dstp, overlay->h, overlay->w, mod);
 	}
 	if ( SDL_MUSTLOCK(display) ) {
 		SDL_UnlockSurface(display);
 	}
 	if ( stretch ) {
 		display = swdata->display;
-		SDL_SoftStretch(stretch, NULL, display, dstrect);
+		SDL_SoftStretch(swdata->stretch, src, display, dst);
 	}
-	SDL_UpdateRects(display, 1, dstrect);
+	SDL_UpdateRects(display, 1, dst);
 
 	return(0);
 }

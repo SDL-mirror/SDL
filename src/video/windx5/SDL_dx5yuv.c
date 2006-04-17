@@ -247,30 +247,30 @@ void DX5_UnlockYUVOverlay(_THIS, SDL_Overlay *overlay)
 	IDirectDrawSurface3_Unlock(surface, NULL);
 }
 
-int DX5_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *dstrect)
+int DX5_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *src, SDL_Rect *dst)
 {
 	HRESULT result;
 	LPDIRECTDRAWSURFACE3 surface;
-	RECT src, dst;
+	RECT srcrect, dstrect;
 
 	surface = overlay->hwdata->surface;
-	src.top = 0;
-	src.bottom = overlay->h;
-	src.left = 0;
-	src.right = overlay->w;
-	dst.top = SDL_bounds.top+dstrect->y;
-	dst.left = SDL_bounds.left+dstrect->x;
-	dst.bottom = dst.top+dstrect->h;
-	dst.right = dst.left+dstrect->w;
+	srcrect.top = src->y;
+	srcrect.bottom = srcrect.top+src->h;
+	srcrect.left = src->x;
+	srcrect.right = srcrect.left+src->w;
+	dstrect.top = SDL_bounds.top+dst->y;
+	dstrect.left = SDL_bounds.left+dst->x;
+	dstrect.bottom = dstrect.top+dst->h;
+	dstrect.right = dstrect.left+dst->w;
 #ifdef USE_DIRECTX_OVERLAY
-	result = IDirectDrawSurface3_UpdateOverlay(surface, &src,
-				SDL_primary, &dst, DDOVER_SHOW, NULL);
+	result = IDirectDrawSurface3_UpdateOverlay(surface, &srcrect,
+				SDL_primary, &dstrect, DDOVER_SHOW, NULL);
 	if ( result != DD_OK ) {
 		SetDDerror("DirectDrawSurface3::UpdateOverlay", result);
 		return(-1);
 	}
 #else
-	result = IDirectDrawSurface3_Blt(SDL_primary, &dst, surface, &src,
+	result = IDirectDrawSurface3_Blt(SDL_primary, &dstrect, surface, &srcrect,
 							DDBLT_WAIT, NULL);
 	if ( result != DD_OK ) {
 		SetDDerror("DirectDrawSurface3::Blt", result);

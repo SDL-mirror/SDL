@@ -65,7 +65,7 @@ extern BBitmap * BE_GetOverlayBitmap(BRect bounds, color_space cs);
 extern SDL_Overlay* BE_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SDL_Surface* display);
 extern int BE_LockYUVOverlay(_THIS, SDL_Overlay* overlay);
 extern void BE_UnlockYUVOverlay(_THIS, SDL_Overlay* overlay);
-extern int BE_DisplayYUVOverlay(_THIS, SDL_Overlay* overlay, SDL_Rect* dstrect);
+extern int BE_DisplayYUVOverlay(_THIS, SDL_Overlay* overlay, SDL_Rect* src, SDL_Rect* dst);
 extern void BE_FreeYUVOverlay(_THIS, SDL_Overlay* overlay);
 
 };

@@ -334,7 +334,7 @@ void ph_UnlockYUVOverlay(_THIS, SDL_Overlay* overlay)
     overlay->hwdata->locked = 0;
 }
 
-int ph_DisplayYUVOverlay(_THIS, SDL_Overlay* overlay, SDL_Rect* dstrect)
+int ph_DisplayYUVOverlay(_THIS, SDL_Overlay* overlay, SDL_Rect* src, SDL_Rect* dst)
 {
     int rtncode;
     PhPoint_t pos;
@@ -362,10 +362,10 @@ int ph_DisplayYUVOverlay(_THIS, SDL_Overlay* overlay, SDL_Rect* dstrect)
     }
 
     /* If CurrentViewPort position/size has been changed, then move/resize the viewport */
-    if ((overlay->hwdata->CurrentViewPort.pos.x != dstrect->x) ||
-        (overlay->hwdata->CurrentViewPort.pos.y != dstrect->y) ||
-        (overlay->hwdata->CurrentViewPort.size.w != dstrect->w) ||
-        (overlay->hwdata->CurrentViewPort.size.h != dstrect->h) ||
+    if ((overlay->hwdata->CurrentViewPort.pos.x != dst->x) ||
+        (overlay->hwdata->CurrentViewPort.pos.y != dst->y) ||
+        (overlay->hwdata->CurrentViewPort.size.w != dst->w) ||
+        (overlay->hwdata->CurrentViewPort.size.h != dst->h) ||
         (overlay->hwdata->scaler_on==0) || (winchanged==1) ||
         (overlay->hwdata->forcedredraw==1))
     {
@@ -381,7 +381,7 @@ int ph_DisplayYUVOverlay(_THIS, SDL_Overlay* overlay, SDL_Rect* dstrect)
 
             /* Draw the new rectangle of the chroma color at the viewport position */
             PgSetFillColor(overlay->hwdata->chromakey);
-            PgDrawIRect(dstrect->x, dstrect->y, dstrect->x+dstrect->w-1, dstrect->y+dstrect->h-1, Pg_DRAW_FILL);
+            PgDrawIRect(dst->x, dst->y, dst->x+dst->w-1, dst->y+dst->h-1, Pg_DRAW_FILL);
             PgFlush();
         }
 
@@ -389,13 +389,13 @@ int ph_DisplayYUVOverlay(_THIS, SDL_Overlay* overlay, SDL_Rect* dstrect)
         overlay->hwdata->scaler_on = 1;
 
         PhWindowQueryVisible(Ph_QUERY_CONSOLE, 0, PtWidgetRid(window), &windowextent);
-        overlay->hwdata->CurrentViewPort.pos.x = pos.x-windowextent.ul.x+dstrect->x;
-        overlay->hwdata->CurrentViewPort.pos.y = pos.y-windowextent.ul.y+dstrect->y;
-        overlay->hwdata->CurrentViewPort.size.w = dstrect->w;
-        overlay->hwdata->CurrentViewPort.size.h = dstrect->h;
+        overlay->hwdata->CurrentViewPort.pos.x = pos.x-windowextent.ul.x+dst->x;
+        overlay->hwdata->CurrentViewPort.pos.y = pos.y-windowextent.ul.y+dst->y;
+        overlay->hwdata->CurrentViewPort.size.w = dst->w;
+        overlay->hwdata->CurrentViewPort.size.h = dst->h;
         PhAreaToRect(&overlay->hwdata->CurrentViewPort, &overlay->hwdata->props.viewport);
-        overlay->hwdata->CurrentViewPort.pos.x = dstrect->x;
-        overlay->hwdata->CurrentViewPort.pos.y = dstrect->y;
+        overlay->hwdata->CurrentViewPort.pos.x = dst->x;
+        overlay->hwdata->CurrentViewPort.pos.y = dst->y;
 
         rtncode = PgConfigScalerChannel(overlay->hwdata->channel, &(overlay->hwdata->props));
 

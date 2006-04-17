@@ -263,7 +263,7 @@ void BE_UnlockYUVOverlay(_THIS, SDL_Overlay* overlay)
     overlay->hwdata->locked = 0;
 }
 
-int BE_DisplayYUVOverlay(_THIS, SDL_Overlay* overlay, SDL_Rect* dstrect)
+int BE_DisplayYUVOverlay(_THIS, SDL_Overlay* overlay, SDL_Rect* src, SDL_Rect *dst)
 {
     if ((overlay == NULL) || (overlay->hwdata==NULL)
         || (overlay->hwdata->bview==NULL) || (SDL_Win->View() == NULL))
@@ -277,11 +277,11 @@ int BE_DisplayYUVOverlay(_THIS, SDL_Overlay* overlay, SDL_Rect* dstrect)
     if (SDL_Win->IsFullScreen()) {
     	int left,top;
     	SDL_Win->GetXYOffset(left,top);
-	    bview->MoveTo(left+dstrect->x,top+dstrect->y);
+	    bview->MoveTo(left+dst->x,top+dst->y);
     } else {
-	    bview->MoveTo(dstrect->x,dstrect->y);
+	    bview->MoveTo(dst->x,dst->y);
     }
-    bview->ResizeTo(dstrect->w,dstrect->h);
+    bview->ResizeTo(dst->w,dst->h);
     bview->Flush();
 	if (overlay->hwdata->first_display) {
 		bview->Show();

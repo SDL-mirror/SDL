@@ -32,6 +32,6 @@
 struct private_yuvhwfuncs {
 	int (*Lock)(_THIS, SDL_Overlay *overlay);
 	void (*Unlock)(_THIS, SDL_Overlay *overlay);
-	int (*Display)(_THIS, SDL_Overlay *overlay, SDL_Rect *dstrect);
+	int (*Display)(_THIS, SDL_Overlay *overlay, SDL_Rect *src, SDL_Rect *dst);
 	void (*FreeHW)(_THIS, SDL_Overlay *overlay);
 };

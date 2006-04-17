@@ -33,6 +33,6 @@ extern int DX5_LockYUVOverlay(_THIS, SDL_Overlay *overlay);
 
 extern void DX5_UnlockYUVOverlay(_THIS, SDL_Overlay *overlay);
 
-extern int DX5_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *dstrect);
+extern int DX5_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *src, SDL_Rect *dst);
 
 extern void DX5_FreeYUVOverlay(_THIS, SDL_Overlay *overlay);

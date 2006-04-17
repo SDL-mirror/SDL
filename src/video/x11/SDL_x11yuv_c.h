@@ -34,7 +34,7 @@ extern int X11_LockYUVOverlay(_THIS, SDL_Overlay *overlay);
 
 extern void X11_UnlockYUVOverlay(_THIS, SDL_Overlay *overlay);
 
-extern int X11_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *dstrect);
+extern int X11_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *src, SDL_Rect *dst);
 
 extern void X11_FreeYUVOverlay(_THIS, SDL_Overlay *overlay);
 

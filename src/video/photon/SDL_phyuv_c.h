@@ -56,7 +56,7 @@ struct private_yuvhwdata
 extern SDL_Overlay* ph_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SDL_Surface* display);
 extern int ph_LockYUVOverlay(_THIS, SDL_Overlay* overlay);
 extern void ph_UnlockYUVOverlay(_THIS, SDL_Overlay* overlay);
-extern int ph_DisplayYUVOverlay(_THIS, SDL_Overlay* overlay, SDL_Rect* dstrect);
+extern int ph_DisplayYUVOverlay(_THIS, SDL_Overlay* overlay, SDL_Rect* src, SDL_Rect* dst);
 extern void ph_FreeYUVOverlay(_THIS, SDL_Overlay* overlay);
 
 #endif /* __SDL_PH_YUV_H__ */

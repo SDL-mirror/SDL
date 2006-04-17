@@ -354,62 +354,26 @@ void X11_UnlockYUVOverlay(_THIS, SDL_Overlay *overlay)
 	return;
 }
 
-int X11_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *dstrect)
+int X11_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *src, SDL_Rect *dst)
 {
 	struct private_yuvhwdata *hwdata;
-	int srcx, srcy, srcw, srch;
-	int dstx, dsty, dstw, dsth;
 
 	hwdata = overlay->hwdata;
-
-	/* Clip the rectangle to the screen area */
-	srcx = 0;
-	srcy = 0;
-	srcw = overlay->w;
-	srch = overlay->h;
-	dstx = dstrect->x;
-	dsty = dstrect->y;
-	dstw = dstrect->w;
-	dsth = dstrect->h;
-	if ( dstx < 0 ) {
-		srcw += (dstx * overlay->w) / dstrect->w;
-		dstw += dstx;
-		srcx -= (dstx * overlay->w) / dstrect->w;
-		dstx = 0;
-	}
-	if ( (dstx+dstw) > this->screen->w ) {
-		int extra = (dstx+dstw - this->screen->w);
-		srcw -= (extra * overlay->w) / dstrect->w;
-		dstw -= extra;
-	}
-	if ( dsty < 0 ) {
-		srch += (dsty * overlay->h) / dstrect->h;
-		dsth += dsty;
-		srcy -= (dsty * overlay->h) / dstrect->h;
-		dsty = 0;
-	}
-	if ( (dsty+dsth) > this->screen->h ) {
-		int extra = (dsty+dsth - this->screen->h);
-		srch -= (extra * overlay->h) / dstrect->h;
-		dsth -= extra;
-	}
-	if ( srcw <= 0 || srch <= 0 ||
-	     srch <= 0 || dsth <= 0 ) {
-		return;
-	}
 
 #ifndef NO_SHARED_MEMORY
 	if ( hwdata->yuv_use_mitshm ) {
 		SDL_NAME(XvShmPutImage)(GFX_Display, hwdata->port, SDL_Window, SDL_GC,
 	              hwdata->image,
-		      srcx, srcy, srcw, srch, dstx, dsty, dstw, dsth, False);
+		      src->x, src->y, src->w, src->h,
+		      dst->x, dst->y, dst->w, dst->h, False);
 	}
 	else
 #endif
 	{
 		SDL_NAME(XvPutImage)(GFX_Display, hwdata->port, SDL_Window, SDL_GC,
 				     hwdata->image,
-		                     srcx, srcy, srcw, srch, dstx, dsty, dstw, dsth);
+		                     src->x, src->y, src->w, src->h,
+		                     dst->x, dst->y, dst->w, dst->h);
 	}
 	XSync(GFX_Display, False);
 	return(0);

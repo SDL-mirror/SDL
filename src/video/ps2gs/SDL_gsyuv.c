@@ -315,7 +315,7 @@ void GS_UnlockYUVOverlay(_THIS, SDL_Overlay *overlay)
 	return;
 }
 
-int GS_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *dstrect)
+int GS_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *src, SDL_Rect *dst)
 {
 	struct private_yuvhwdata *hwdata;
 	__u32 cmd;
@@ -423,8 +423,8 @@ int GS_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *dstrect)
 
 	/* Send the current image to the screen and scale it */
 	screen = this->screen;
-	x = (unsigned int)dstrect->x;
-	y = (unsigned int)dstrect->y;
+	x = (unsigned int)dst->x;
+	y = (unsigned int)dst->y;
 	if ( screen->offset ) {
 		x += (screen->offset % screen->pitch) /
 		     screen->format->BytesPerPixel;
@@ -432,8 +432,8 @@ int GS_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *dstrect)
 	}
 	y += screen_image.y;
 	*hwdata->stretch_x1y1 = (x * 16) + ((y * 16) << 16);
-	x += (unsigned int)dstrect->w;
-	y += (unsigned int)dstrect->h;
+	x += (unsigned int)dst->w;
+	y += (unsigned int)dst->h;
 	*hwdata->stretch_x2y2 = (x * 16) + ((y * 16) << 16);
 	return ioctl(console_fd, PS2IOC_SENDL, &hwdata->plist);
 }
