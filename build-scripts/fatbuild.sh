@@ -3,8 +3,7 @@
 # Build a fat binary on Mac OS X, thanks Ryan!
 
 # PowerPC compiler flags (10.2 runtime compatibility)
-CFLAGS_PPC=-DBUILD_PPC
-xCFLAGS_PPC="-arch ppc \
+CFLAGS_PPC="-arch ppc \
 -F/Developer/SDKs/MacOSX10.2.8.sdk/System/Library/Frameworks \
 -I/Developer/SDKs/MacOSX10.2.8.sdk/Developer/Headers/FlatCarbon \
 -DMAC_OS_X_VERSION_MIN_REQUIRED=1020 \
@@ -14,18 +13,17 @@ xCFLAGS_PPC="-arch ppc \
 -isystem /Developer/SDKs/MacOSX10.2.8.sdk/usr/include"
 
 # PowerPC linker flags 
-xLFLAGS_PPC="-arch ppc -mmacosx-version-min=10.2 \
+LFLAGS_PPC="-arch ppc -mmacosx-version-min=10.2 \
 -L/Developer/SDKs/MacOSX10.2.8.sdk/usr/lib/gcc/darwin/3.3 \
 -F/Developer/SDKs/MacOSX10.2.8.sdk/System/Library/Frameworks \
 -Wl,-syslibroot,/Developer/SDKs/MacOSX10.2.8.sdk"
 
 # Intel compiler flags (10.4 runtime compatibility)
-CFLAGS_X86=-DBUILD_X86
-xCFLAGS_X86="-arch i386 -mmacosx-version-min=10.4 \
+CFLAGS_X86="-arch i386 -mmacosx-version-min=10.4 \
 -DMAC_OS_X_VERSION_MIN_REQUIRED=1040 -isysroot /Developer/SDKs/MacOSX10.4u.sdk"
 
 # Intel linker flags
-xLFLAGS_X86="-arch i386 -mmacosx-version-min=10.4 \
+LFLAGS_X86="-arch i386 -mmacosx-version-min=10.4 \
 -L/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin8/4.0.0 \
 -Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk"
 
