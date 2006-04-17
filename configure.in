@@ -1811,6 +1811,9 @@ AC_HELP_STRING([--enable-sdl-dlopen], [use dlopen for shared object loading [[de
         AC_TRY_COMPILE([
          #include <dlfcn.h>
         ],[
+         #if defined(MAC_OS_X_VERSION_MIN_REQUIRED) && MAC_OS_X_VERSION_MIN_REQUIRED <= 1020
+         #error Use dlcompat for Mac OS X 10.2 compatibility
+         #endif
         ],[
         have_dlopen=yes
         ])
@@ -2320,7 +2323,8 @@ case "$host" in
         ARCH=macosx
 
         # Mac OS X builds with both the Carbon and OSX APIs at the moment
-        EXTRA_CFLAGS="-DTARGET_API_MAC_CARBON -DTARGET_API_MAC_OSX"
+        EXTRA_CFLAGS="$EXTRA_CFLAGS -DTARGET_API_MAC_CARBON"
+        EXTRA_CFLAGS="$EXTRA_CFLAGS -DTARGET_API_MAC_OSX"
 
         # HACK: Reset EXTRA_LDFLAGS; the only thing it contains at this point
         # is -lm which is not needed under Mac OS X. But for some reasons it
@@ -2331,7 +2335,7 @@ case "$host" in
         CheckDummyVideo
         CheckDiskAudio
         CheckDummyAudio
-        #CheckDLOPEN # Don't check dlopen(), to retain 10.2 compatibility
+        CheckDLOPEN
         CheckCOCOA
         CheckCARBON
         CheckX11

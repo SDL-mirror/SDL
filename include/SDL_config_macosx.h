@@ -95,7 +95,12 @@
 #define SDL_JOYSTICK_IOKIT	1
 
 /* Enable various shared object loading systems */
+#ifdef __ppc__
+/* For Mac OS X 10.2 compatibility */
+#define SDL_LOADSO_DLCOMPAT	1
+#else
 #define SDL_LOADSO_DLOPEN	1
+#endif
 
 /* Enable various threading systems */
 #define SDL_THREAD_PTHREAD	1
