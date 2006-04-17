@@ -620,7 +620,11 @@ int X11_GetVideoModes(_THIS)
 #endif /* SDL_VIDEO_DRIVER_X11_XME */
 
     {
+	/* It's interesting to note that if we allow 32 bit depths,
+	   we get a visual with an alpha mask on composite servers.
         static int depth_list[] = { 32, 24, 16, 15, 8 };
+	*/
+        static int depth_list[] = { 24, 16, 15, 8 };
         int j, np;
         int use_directcolor = 1;
         XPixmapFormatValues *pf;

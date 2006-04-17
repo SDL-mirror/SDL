@@ -557,6 +557,9 @@ static int X11_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	  	vformat->Gmask = SDL_Visual->green_mask;
 	  	vformat->Bmask = SDL_Visual->blue_mask;
 	}
+	if ( this->hidden->depth == 32 ) {
+		vformat->Amask = (0xFFFFFFFF & ~(vformat->Rmask|vformat->Gmask|vformat->Bmask));
+	}
 	X11_SaveVidModeGamma(this);
 
 	/* See if we have been passed a window to use */
@@ -772,6 +775,7 @@ static int X11_CreateWindow(_THIS, SDL_Surface *screen,
 	int i, depth;
 	Visual *vis;
 	int vis_change;
+	Uint32 Amask;
 
 	/* If a window is already present, destroy it and start fresh */
 	if ( SDL_Window ) {
@@ -822,9 +826,15 @@ static int X11_CreateWindow(_THIS, SDL_Surface *screen,
 	this->hidden->depth = depth;
 
 	/* Allocate the new pixel format for this video mode */
+	if ( this->hidden->depth == 32 ) {
+		Amask = (0xFFFFFFFF & ~(vis->red_mask|vis->green_mask|vis->blue_mask));
+	} else {
+		Amask = 0;
+	}
 	if ( ! SDL_ReallocFormat(screen, bpp,
-			vis->red_mask, vis->green_mask, vis->blue_mask, 0) )
+			vis->red_mask, vis->green_mask, vis->blue_mask, Amask) ) {
 		return -1;
+	}
 
 	/* Create the appropriate colormap */
 	if ( SDL_XColorMap != SDL_DisplayColormap ) {
