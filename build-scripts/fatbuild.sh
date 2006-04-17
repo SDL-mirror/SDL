@@ -119,7 +119,7 @@ fi
 target=`echo build/x86/build/.libs/*.dylib | sed 's|.*/||'`
 if test x$merge = xyes; then
     (cd build && \
-     lipo -create -o $target */build/.libs/*.dylib &&
+     lipo -create -o $target */build/.libs/libSDL.dylib &&
      lipo -create -o SDLMain.o */build/SDLMain.o &&
      ar cru libSDLmain.a SDLMain.o && ranlib libSDLmain.a &&
      echo "Build complete!" &&
