@@ -2592,5 +2592,5 @@ AC_OUTPUT([
     Makefile sdl-config SDL.spec SDL.qpg
 ], [
     : >build-deps
-    make depend
+    if test x"$MAKE" = x; then MAKE=make; fi; $MAKE depend
 ])
