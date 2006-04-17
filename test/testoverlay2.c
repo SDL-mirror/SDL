@@ -526,6 +526,10 @@ int main(int argc, char **argv)
                          resized=1;
                      }
                      break;
+                case SDL_MOUSEBUTTONDOWN:
+                     overlayrect.x = event.button.x - overlayrect.w/2;
+                     overlayrect.y = event.button.y - overlayrect.h/2;
+                     break;
                 case SDL_KEYDOWN:
                      if (event.key.keysym.sym == SDLK_SPACE)
                      {
