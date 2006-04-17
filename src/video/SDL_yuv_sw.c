@@ -1178,6 +1178,11 @@ int SDL_DisplayYUV_SW(_THIS, SDL_Overlay *overlay, SDL_Rect *src, SDL_Rect *dst)
 	stretch = 0;
 	scale_2x = 0;
 	if ( src->x || src->y || src->w < overlay->w || src->h < overlay->h ) {
+		/* The source rectangle has been clipped.
+		   Using a scratch surface is easier than adding clipped
+		   source support to all the blitters, plus that would
+		   slow them down in the general unclipped case.
+		*/
 		stretch = 1;
 	} else if ( (src->w != dst->w) || (src->h != dst->h) ) {
 		if ( (dst->w == 2*src->w) &&
