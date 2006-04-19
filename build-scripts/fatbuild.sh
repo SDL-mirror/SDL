@@ -116,10 +116,12 @@ fi
 #
 # Combine into fat binary
 #
-target=`echo build/x86/build/.libs/*.dylib | sed 's|.*/||'`
+target=`find x86 -type f -name '*.dylib' | sed 's|.*/||'`
 if test x$merge = xyes; then
     (cd build && \
-     lipo -create -o $target */build/.libs/libSDL.dylib &&
+     lipo -create -o $target `find ppc x86 -type f -name "*.dylib"` &&
+     ln -s $target libSDL-1.2.0.dylib
+     ln -s $target libSDL.dylib
      lipo -create -o SDLMain.o */build/SDLMain.o &&
      ar cru libSDLmain.a SDLMain.o && ranlib libSDLmain.a &&
      echo "Build complete!" &&
