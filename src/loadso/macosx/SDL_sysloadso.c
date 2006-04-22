@@ -109,7 +109,7 @@ static int SDL_OSX_dladdr(const void * dl_restrict, SDL_OSX_Dl_info * dl_restric
 #endif /* ! _POSIX_SOURCE */
 
 static int SDL_OSX_dlclose(void * handle);
-static char * SDL_OSX_dlerror(void);
+static const char * SDL_OSX_dlerror(void);
 static void * SDL_OSX_dlopen(const char *path, int mode);
 static void * SDL_OSX_dlsym(void * dl_restrict handle, const char * dl_restrict symbol);
 
@@ -249,7 +249,7 @@ static void dlerrorfree(void *data);
 static void resetdlerror(void);
 static const struct mach_header *my_find_image(const char *name);
 static const struct mach_header *image_for_address(const void *address);
-static inline const char *dyld_error_str(void);
+static inline char *dyld_error_str(void);
 
 #if FINK_BUILD
 /* Two Global Functions */
@@ -623,7 +623,7 @@ static NSSymbol *search_linked_libs(const struct mach_header * mh, const char *s
 }
 
 /* Up to the caller to SDL_free() returned string */
-static inline const char *dyld_error_str()
+static inline char *dyld_error_str()
 {
 	NSLinkEditErrors dylder;
 	int dylderno;
@@ -647,7 +647,7 @@ static void *dlsymIntern(struct dlstatus *dls, const char *symbol, int canSetErr
 	void *caller = NULL;
 #endif
 	const struct mach_header *caller_mh = 0;
-	char* savedErrorStr = NULL;
+	char *savedErrorStr = NULL;
 	resetdlerror();
 #ifndef RTLD_SELF
 #define	RTLD_SELF		((void *) -3)
@@ -1168,7 +1168,7 @@ static int SDL_OSX_dlclose(void *handle)
 	return 1;
 }
 
-static char *SDL_OSX_dlerror(void)
+static const char *SDL_OSX_dlerror(void)
 {
 	struct dlthread  *tss;
 	const char * err_str = NULL;
@@ -1378,7 +1378,7 @@ static dlfunc_t SDL_OSX_dlfunc(void * dl_restrict handle, const char * dl_restri
 void *SDL_LoadObject(const char *sofile)
 {
 	void *handle = SDL_OSX_dlopen(sofile, RTLD_NOW);
-	const char *loaderror = (char *)SDL_OSX_dlerror();
+	const char *loaderror = SDL_OSX_dlerror();
 	if ( handle == NULL ) {
 		SDL_SetError("Failed loading %s: %s", sofile, loaderror);
 	}
@@ -1389,7 +1389,7 @@ void *SDL_LoadFunction(void *handle, const char *name)
 {
 	void *symbol = SDL_OSX_dlsym(handle, name);
 	if ( symbol == NULL ) {
-		SDL_SetError("Failed loading %s: %s", name, (const char *)SDL_OSX_dlerror());
+		SDL_SetError("Failed loading %s: %s", name, SDL_OSX_dlerror());
 	}
 	return(symbol);
 }

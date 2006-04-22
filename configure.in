@@ -65,7 +65,7 @@ case "$host" in
         BASE_LDFLAGS=""
         ;;
 esac
-BUILD_CFLAGS="$CFLAGS"
+BUILD_CFLAGS="$CFLAGS $CPPFLAGS"
 EXTRA_CFLAGS="$INCLUDE $BASE_CFLAGS"
 BUILD_LDFLAGS="$LDFLAGS"
 EXTRA_LDFLAGS="$BASE_LDFLAGS"
@@ -2336,6 +2336,15 @@ case "$host" in
         CheckDiskAudio
         CheckDummyAudio
         CheckDLOPEN
+
+        # Set up files for the shared object loading library
+        # (this needs to be done before the dynamic X11 check)
+        if test x$enable_loadso = xyes -a x$have_dlopen != xyes; then
+            AC_DEFINE(SDL_LOADSO_DLCOMPAT)
+            SOURCES="$SOURCES $srcdir/src/loadso/macosx/*.c"
+            have_loadso=yes
+        fi
+
         CheckCOCOA
         CheckCARBON
         CheckX11
@@ -2373,12 +2382,6 @@ case "$host" in
             AC_DEFINE(SDL_TIMER_UNIX)
             SOURCES="$SOURCES $srcdir/src/timer/unix/*.c"
             have_timers=yes
-        fi
-        # Set up files for the shared object loading library
-        if test x$enable_loadso = xyes -a x$have_dlopen != xyes; then
-            AC_DEFINE(SDL_LOADSO_DLCOMPAT)
-            SOURCES="$SOURCES $srcdir/src/loadso/macosx/*.c"
-            have_loadso=yes
         fi
         # The Mac OS X platform requires special setup.
         SDLMAIN_SOURCES="$srcdir/src/main/macosx/*.m"

@@ -54,7 +54,8 @@
 #include <Cocoa/Cocoa.h>
 #include <Carbon/Carbon.h>
 #include <QuickTime/QuickTime.h>
-#include <IOKit/IOKitLib.h> /* For powersave handling */
+#include <OpenGL/CGLTypes.h>	/* For CGLContextObj */
+#include <IOKit/IOKitLib.h>	/* For powersave handling */
 #include <pthread.h>
 
 #include "SDL_thread.h"

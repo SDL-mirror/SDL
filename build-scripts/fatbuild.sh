@@ -3,24 +3,28 @@
 # Build a fat binary on Mac OS X, thanks Ryan!
 
 # PowerPC compiler flags (10.2 runtime compatibility)
-CFLAGS_PPC="-arch ppc \
+CC_PPC="gcc-3.3"
+CFLAGS_PPC="-arch ppc"
+CPPFLAGS_PPC="-DMAC_OS_X_VERSION_MIN_REQUIRED=1020 \
+-nostdinc \
 -F/Developer/SDKs/MacOSX10.2.8.sdk/System/Library/Frameworks \
--I/Developer/SDKs/MacOSX10.2.8.sdk/Developer/Headers/FlatCarbon \
--DMAC_OS_X_VERSION_MIN_REQUIRED=1020 \
 -I/Developer/SDKs/MacOSX10.2.8.sdk/usr/include/gcc/darwin/3.3 \
--I/Developer/SDKs/MacOSX10.2.8.sdk/usr/include/gcc/darwin/3.3/c++ \
--I/Developer/SDKs/MacOSX10.2.8.sdk/usr/include/gcc/darwin/3.3/c++/ppc-darwin \
 -isystem /Developer/SDKs/MacOSX10.2.8.sdk/usr/include"
 
 # PowerPC linker flags 
-LFLAGS_PPC="-arch ppc -mmacosx-version-min=10.2 \
+LFLAGS_PPC="-arch ppc \
 -L/Developer/SDKs/MacOSX10.2.8.sdk/usr/lib/gcc/darwin/3.3 \
 -F/Developer/SDKs/MacOSX10.2.8.sdk/System/Library/Frameworks \
 -Wl,-syslibroot,/Developer/SDKs/MacOSX10.2.8.sdk"
 
 # Intel compiler flags (10.4 runtime compatibility)
-CFLAGS_X86="-arch i386 -mmacosx-version-min=10.4 \
--DMAC_OS_X_VERSION_MIN_REQUIRED=1040 -isysroot /Developer/SDKs/MacOSX10.4u.sdk"
+CC_X86="gcc-4.0"
+CFLAGS_X86="-arch i386 -mmacosx-version-min=10.4"
+CPPFLAGS_X86="-DMAC_OS_X_VERSION_MIN_REQUIRED=1040 \
+-nostdinc \
+-F/Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks \
+-I/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin8/4.0.1/include \
+-isystem /Developer/SDKs/MacOSX10.4u.sdk/usr/include"
 
 # Intel linker flags
 LFLAGS_X86="-arch i386 -mmacosx-version-min=10.4 \
@@ -30,7 +34,9 @@ LFLAGS_X86="-arch i386 -mmacosx-version-min=10.4 \
 #
 # Find the configure script
 #
-cd `dirname $0`/..
+srcdir=`dirname $0`/..
+auxdir=$srcdir/build-scripts
+cd $srcdir
 
 #
 # Figure out which phase to build:
@@ -76,7 +82,42 @@ case $phase in
         merge="yes"
         ;;
     install)
-        make_x86="yes"
+        install_bin="yes"
+        install_hdrs="yes"
+        install_lib="yes"
+        install_data="yes"
+        install_man="yes"
+        ;;
+    install-bin)
+        install_bin="yes"
+        ;;
+    install-hdrs)
+        install_hdrs="yes"
+        ;;
+    install-lib)
+        install_lib="yes"
+        ;;
+    install-data)
+        install_data="yes"
+        ;;
+    install-man)
+        install_man="yes"
+        ;;
+    *)
+        echo "Usage: $0 [all|configure[-ppc|-x86]|make[-ppc|-x86]|merge]"
+        exit 1
+        ;;
+esac
+case `uname -p` in
+    powerpc)
+        native_path=ppc
+        ;;
+    *86)
+        native_path=x86
+        ;;
+    *)
+        echo "Couldn't figure out native architecture path"
+        exit 1
         ;;
 esac
 
@@ -96,7 +137,7 @@ done
 #
 if test x$configure_ppc = xyes; then
     (cd build/ppc && \
-     sh ../../configure CFLAGS="$CFLAGS_PPC" LDFLAGS="$LFLAGS_PPC") || exit 2
+     sh ../../configure --build=`uname -p`-apple-darwin --host=powerpc-apple-darwin CC="$CC_PPC" CFLAGS="$CFLAGS_PPC" CPPFLAGS="$CPPFLAGS_PPC" LDFLAGS="$LFLAGS_PPC") || exit 2
 fi
 if test x$make_ppc = xyes; then
     (cd build/ppc && make) || exit 3
@@ -107,7 +148,7 @@ fi
 #
 if test x$configure_x86 = xyes; then
     (cd build/x86 && \
-     sh ../../configure CFLAGS="$CFLAGS_X86" LDFLAGS="$LFLAGS_X86") || exit 2
+     sh ../../configure --build=`uname -p`-apple-darwin --host=i686-apple-darwin CC="$CC_X86" CFLAGS="$CFLAGS_X86" CPPFLAGS="$CPPFLAGS_X86" LDFLAGS="$LFLAGS_X86") || exit 2
 fi
 if test x$make_x86 = xyes; then
     (cd build/x86 && make) || exit 3
@@ -116,22 +157,79 @@ fi
 #
 # Combine into fat binary
 #
-target=`find x86 -type f -name '*.dylib' | sed 's|.*/||'`
 if test x$merge = xyes; then
-    (cd build && \
-     lipo -create -o $target `find ppc x86 -type f -name "*.dylib"` &&
-     ln -s $target libSDL-1.2.0.dylib
-     ln -s $target libSDL.dylib
-     lipo -create -o SDLMain.o */build/SDLMain.o &&
-     ar cru libSDLmain.a SDLMain.o && ranlib libSDLmain.a &&
+    output=.libs
+    sh $auxdir/mkinstalldirs build/$output
+    cd build
+    target=`find . -mindepth 3 -type f -name '*.dylib' | head -1 | sed 's|.*/||'`
+    (lipo -create -o $output/$target `find . -mindepth 3 -type f -name "*.dylib"` &&
+     ln -sf $target $output/libSDL-1.2.0.dylib &&
+     ln -sf $target $output/libSDL.dylib &&
+     lipo -create -o $output/libSDL.a */build/.libs/libSDL.a &&
+     cp $native_path/build/.libs/libSDL.la $output &&
+     cp $native_path/build/.libs/libSDL.lai $output &&
+     cp $native_path/build/libSDL.la . &&
+     lipo -create -o libSDLmain.a */build/libSDLmain.a &&
      echo "Build complete!" &&
      echo "Files can be found in the build directory.") || exit 4
+    cd ..
 fi
 
 #
 # Install
 #
-if test x$install = xyes; then
-    echo "Install not implemented"
-    exit 1
+do_install()
+{
+    echo $*
+    $* || exit 5
+}
+if test x$prefix = x; then
+    prefix=/usr/local
+fi
+if test x$exec_prefix = x; then
+    exec_prefix=$prefix
+fi
+if test x$bindir = x; then
+    bindir=$exec_prefix/bin
+fi
+if test x$libdir = x; then
+    libdir=$exec_prefix/lib
+fi
+if test x$includedir = x; then
+    includedir=$prefix/include
+fi
+if test x$datadir = x; then
+    datadir=$prefix/share
+fi
+if test x$mandir = x; then
+    mandir=$prefix/man
+fi
+if test x$install_bin = xyes; then
+    do_install sh $auxdir/mkinstalldirs $bindir
+    do_install /usr/bin/install -c -m 755 build/$native_path/sdl-config $bindir/sdl-config
+fi
+if test x$install_hdrs = xyes; then
+    do_install sh $auxdir/mkinstalldirs $includedir/SDL
+    for src in $srcdir/include/*.h; do \
+        file=`echo $src | sed -e 's|^.*/||'`; \
+        do_install /usr/bin/install -c -m 644 $src $includedir/SDL/$file; \
+    done
+    do_install /usr/bin/install -c -m 644 $srcdir/include/SDL_config_macosx.h $includedir/SDL/SDL_config.h
+fi
+if test x$install_lib = xyes; then
+    do_install sh $auxdir/mkinstalldirs $libdir
+    do_install sh build/$native_path/libtool --mode=install /usr/bin/install -c  build/libSDL.la $libdir/libSDL.la
+    do_install /usr/bin/install -c -m 644 build/libSDLmain.a $libdir/libSDLmain.a
+    do_install ranlib $libdir/libSDLmain.a
+fi
+if test x$install_data = xyes; then
+    do_install sh $auxdir/mkinstalldirs $datadir/aclocal
+    do_install /usr/bin/install -c -m 644 $srcdir/sdl.m4 $datadir/aclocal/sdl.m4
+fi
+if test x$install_man = xyes; then
+    do_install sh $auxdir/mkinstalldirs $mandir/man3
+    for src in $srcdir/docs/man3/*.3; do \
+        file=`echo $src | sed -e 's|^.*/||'`; \
+        do_install /usr/bin/install -c -m 644 $src $mandir/man3/$file; \
+    done
 fi

@@ -31,7 +31,6 @@
 
 #ifdef SDL_VIDEO_DRIVER_X11_DYNAMIC
 
-#include <dlfcn.h>
 #include "SDL_name.h"
 #include "SDL_loadso.h"
 

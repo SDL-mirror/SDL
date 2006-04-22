@@ -47,31 +47,31 @@ static void QZ_UnlockYUV (_THIS, SDL_Overlay *overlay) {
     ;
 }
 
-static int QZ_DisplayYUV (_THIS, SDL_Overlay *overlay, SDL_Rect *dstrect) {
+static int QZ_DisplayYUV (_THIS, SDL_Overlay *overlay, SDL_Rect *src, SDL_Rect *dst) {
 
     OSErr err;
     CodecFlags flags;
 
-    if (dstrect->x != 0 || dstrect->y != 0) {
+    if (dst->x != 0 || dst->y != 0) {
 
-        SDL_SetError ("Need a dstrect at (0,0)");
+        SDL_SetError ("Need a dst at (0,0)");
         return -1;
     }
 
-    if (dstrect->w != yuv_width || dstrect->h != yuv_height) {
+    if (dst->w != yuv_width || dst->h != yuv_height) {
 
         Fixed scale_x, scale_y;
 
-        scale_x = FixDiv ( Long2Fix (dstrect->w), Long2Fix (overlay->w) );
-        scale_y = FixDiv ( Long2Fix (dstrect->h), Long2Fix (overlay->h) );
+        scale_x = FixDiv ( Long2Fix (dst->w), Long2Fix (overlay->w) );
+        scale_y = FixDiv ( Long2Fix (dst->h), Long2Fix (overlay->h) );
 
         SetIdentityMatrix (yuv_matrix);
         ScaleMatrix (yuv_matrix, scale_x, scale_y, Long2Fix (0), Long2Fix (0));
 
         SetDSequenceMatrix (yuv_seq, yuv_matrix);
 
-        yuv_width = dstrect->w;
-        yuv_height = dstrect->h;
+        yuv_width = dst->w;
+        yuv_height = dst->h;
     }
 
     if( ( err = DecompressSequenceFrameS(
