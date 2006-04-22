@@ -16,7 +16,11 @@ process:
 	make
 	sudo make install
 
-(You may need to create the subdirs of /usr/local manually.)
+You can also build SDL as a Universal library (a single binary for both
+PowerPC and Intel architectures), on Mac OS X 10.4 and newer, by using
+the fatbuild.sh script in build-scripts:
+	sh build-scripts/fatbuild.sh
+	sudo build-scripts/fatbuild.sh install
 
 To use the library once it's built, you essential have two possibilities:
 use the traditional autoconf/automake/make method, or use Project Builder.
