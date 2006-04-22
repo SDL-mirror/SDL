@@ -23,7 +23,7 @@ the fatbuild.sh script in build-scripts:
 	sudo build-scripts/fatbuild.sh install
 
 To use the library once it's built, you essential have two possibilities:
-use the traditional autoconf/automake/make method, or use Project Builder.
+use the traditional autoconf/automake/make method, or use Xcode.
 
 ==============================================================================
 Using the Simple DirectMedia Layer with a traditional Makefile
