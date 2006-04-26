@@ -150,8 +150,7 @@ dist $(distfile):
 	$(SHELL) $(auxdir)/mkinstalldirs $(distdir)
 	tar cf - $(DIST) | (cd $(distdir); tar xf -)
 	cp $(distdir)/include/SDL_config.h.default $(distdir)/include/SDL_config.h
-	rm -rf `find $(distdir) -name CVS`
-	rm -f `find $(distdir) -name '.cvsignore'`
+	rm -rf `find $(distdir) -name .svn`
 	rm -f `find $(distdir) -name '.#*'`
 	rmdir `find $(distdir) -type d -empty`
 	tar cvf - $(distdir) | gzip --best >$(distfile)
@@ -160,14 +159,12 @@ dist $(distfile):
 rpm: $(distfile)
 	rpmbuild -ta $?
 
-# Create a CVS snapshot that people can run update -d on
-CVSROOT = :pserver:guest@libsdl.org:/home/sdlweb/libsdl.org/cvs
+# Create a SVN snapshot that people can run update on
 snapshot:
-	cvs -d $(CVSROOT) login
-	cvs -d $(CVSROOT) checkout -P SDL12
-	(cd SDL12 && ./autogen.sh && rm -rf autom4te.cache)
-	cp SDL12/include/SDL_config.h.default SDL12/include/SDL_config.h
-	mv SDL12 SDL-1.2
+	svn co svn://libsdl.org/trunk/SDL
+	(cd SDL && ./autogen.sh && rm -rf autom4te.cache)
+	cp SDL/include/SDL_config.h.default SDL/include/SDL_config.h
+	mv SDL SDL-1.2
 	tar zcf $(HOME)/SDL-1.2.tar.gz SDL-1.2
 	rm -f $(HOME)/SDL-1.2.zip
 	zip -r $(HOME)/SDL-1.2.zip SDL-1.2
