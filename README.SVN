@@ -1,0 +1,18 @@
+
+The latest development version of SDL is available via Subversion.
+Subversion allows you to get up-to-the-minute fixes and enhancements;
+as a developer works on a source tree, you can use svn to mirror that
+source tree instead of waiting for an official release. Please look
+at the Subversion website ( http://subversion.tigris.org/ ) for more
+information on using svn, where you can also download software for
+MacOS, Windows, and Unix systems.
+
+  svn checkout svn://libsdl.org/trunk/SDL
+
+When you check out a fresh copy of SDL out via svn, you need to
+generate the files used by make by running the "autogen.sh"
+script, which will run aclocal, automake, autoconf and then
+run configure.
+
+There is a web interface to svn at http://www.libsdl.org/wsvn
+

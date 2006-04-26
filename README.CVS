@@ -1,13 +1,4 @@
 
-The latest development version of SDL is available via CVS:
-
-cvs -d :pserver:guest@libsdl.org:/home/sdlweb/libsdl.org/cvs login
-# No password, so just hit enter when prompted for a password
-cvs -d :pserver:guest@libsdl.org:/home/sdlweb/libsdl.org/cvs checkout SDL
-
-When you check a fresh copy of SDL out of CVS, you need to generate
-the files used by make by running the "autogen.sh" script, which will
-run aclocal, automake, autoconf and then run configure.
-
-There is a web interface to cvs at http://www.libsdl.org/cgi/cvsweb.cgi
+SDL is no longer hosted in a CVS repository. Please see README.SVN for
+information on accessing our Subversion repository.
 
