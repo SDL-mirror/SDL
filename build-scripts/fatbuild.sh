@@ -2,8 +2,17 @@
 #
 # Build a fat binary on Mac OS X, thanks Ryan!
 
+# Number of CPUs (for make -j)
+#NCPU=1
+NCPU=`sysctl -n hw.ncpu`
+
+# !!! FIXME: other CFLAGS?
+# Generic, cross-platform CFLAGS you always want go here.
+CFLAGS="-O3 -g -pipe"
+
 # PowerPC compiler flags (10.2 runtime compatibility)
 CC_PPC="gcc-3.3 -arch ppc"
+CXX_PPC="g++-3.3 -arch ppc"
 CFLAGS_PPC=""
 CPPFLAGS_PPC="-DMAC_OS_X_VERSION_MIN_REQUIRED=1020 \
 -nostdinc \
@@ -19,9 +28,10 @@ LFLAGS_PPC="-arch ppc \
 
 # Intel compiler flags (10.4 runtime compatibility)
 CC_X86="gcc-4.0 -arch i386"
+CXX_X86="g++-4.0 -arch i386"
 CFLAGS_X86="-mmacosx-version-min=10.4"
 CPPFLAGS_X86="-DMAC_OS_X_VERSION_MIN_REQUIRED=1040 \
--nostdinc \
+-nostdinc -fvisibility=hidden \
 -F/Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks \
 -I/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin8/4.0.1/include \
 -isystem /Developer/SDKs/MacOSX10.4u.sdk/usr/include"
@@ -44,6 +54,7 @@ cd $srcdir
 # configure, configure-ppc, configure-x86,
 # make, make-ppc, make-x86, merge
 # install
+# clean
 if test x"$1" = x; then
     phase=all
 else
@@ -103,8 +114,18 @@ case $phase in
     install-man)
         install_man="yes"
         ;;
+    clean)
+        clean_ppc="yes"
+        clean_x86="yes"
+        ;;
+    clean-ppc)
+        clean_ppc="yes"
+        ;;
+    clean-x86)
+        clean_x86="yes"
+        ;;
     *)
-        echo "Usage: $0 [all|configure[-ppc|-x86]|make[-ppc|-x86]|merge]"
+        echo "Usage: $0 [all|configure[-ppc|-x86]|make[-ppc|-x86]|merge|install|clean]"
         exit 1
         ;;
 esac
@@ -137,10 +158,10 @@ done
 #
 if test x$configure_ppc = xyes; then
     (cd build/ppc && \
-     sh ../../configure --build=`uname -p`-apple-darwin --host=powerpc-apple-darwin CC="$CC_PPC" CFLAGS="$CFLAGS_PPC" CPPFLAGS="$CPPFLAGS_PPC" LDFLAGS="$LFLAGS_PPC") || exit 2
+     sh ../../configure --build=`uname -p`-apple-darwin --host=powerpc-apple-darwin CC="$CC_PPC" CXX="$CXX_PPC" CFLAGS="$CFLAGS $CFLAGS_PPC" CPPFLAGS="$CPPFLAGS_PPC" LDFLAGS="$LFLAGS_PPC") || exit 2
 fi
 if test x$make_ppc = xyes; then
-    (cd build/ppc && make) || exit 3
+    (cd build/ppc && make -j$NCPU) || exit 3
 fi
 
 #
@@ -148,10 +169,10 @@ fi
 #
 if test x$configure_x86 = xyes; then
     (cd build/x86 && \
-     sh ../../configure --build=`uname -p`-apple-darwin --host=i686-apple-darwin CC="$CC_X86" CFLAGS="$CFLAGS_X86" CPPFLAGS="$CPPFLAGS_X86" LDFLAGS="$LFLAGS_X86") || exit 2
+     sh ../../configure --build=`uname -p`-apple-darwin --host=i686-apple-darwin CC="$CC_X86" CXX="$CXX_X86" CFLAGS="$CFLAGS $CFLAGS_X86" CPPFLAGS="$CPPFLAGS_X86" LDFLAGS="$LFLAGS_X86") || exit 2
 fi
 if test x$make_x86 = xyes; then
-    (cd build/x86 && make) || exit 3
+    (cd build/x86 && make -j$NCPU) || exit 3
 fi
 
 #
@@ -233,3 +254,19 @@ if test x$install_man = xyes; then
         do_install /usr/bin/install -c -m 644 $src $mandir/man3/$file; \
     done
 fi
+
+#
+# Clean up
+#
+do_clean()
+{
+    echo $*
+    $* || exit 6
+}
+if test x$clean_x86 = xyes; then
+    do_clean rm -r build/x86
+fi
+if test x$clean_ppc = xyes; then
+    do_clean rm -r build/ppc
+fi
+
