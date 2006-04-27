@@ -3,8 +3,8 @@
 # Build a fat binary on Mac OS X, thanks Ryan!
 
 # PowerPC compiler flags (10.2 runtime compatibility)
-CC_PPC="gcc-3.3"
-CFLAGS_PPC="-arch ppc"
+CC_PPC="gcc-3.3 -arch ppc"
+CFLAGS_PPC=""
 CPPFLAGS_PPC="-DMAC_OS_X_VERSION_MIN_REQUIRED=1020 \
 -nostdinc \
 -F/Developer/SDKs/MacOSX10.2.8.sdk/System/Library/Frameworks \
@@ -18,8 +18,8 @@ LFLAGS_PPC="-arch ppc \
 -Wl,-syslibroot,/Developer/SDKs/MacOSX10.2.8.sdk"
 
 # Intel compiler flags (10.4 runtime compatibility)
-CC_X86="gcc-4.0"
-CFLAGS_X86="-arch i386 -mmacosx-version-min=10.4"
+CC_X86="gcc-4.0 -arch i386"
+CFLAGS_X86="-mmacosx-version-min=10.4"
 CPPFLAGS_X86="-DMAC_OS_X_VERSION_MIN_REQUIRED=1040 \
 -nostdinc \
 -F/Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks \
