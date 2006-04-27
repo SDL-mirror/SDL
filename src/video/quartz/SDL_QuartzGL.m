@@ -251,7 +251,10 @@ int    QZ_GL_GetAttribute   (_THIS, SDL_GLattr attrib, int* value) {
         case SDL_GL_ACCELERATED_VISUAL:
         {
             long val;
+	    /* FIXME: How do we get this information here?
             [fmt getValues: &val forAttribute: NSOpenGLPFAAccelerated attr forVirtualScreen: 0];
+	    */
+	    val = (this->gl_config.accelerated != 0);;
             *value = val;
             return 0;
         }
