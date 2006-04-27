@@ -290,6 +290,11 @@ int WIN_GL_SetupWindow(_THIS)
 			*iAttr++ = this->gl_config.multisamplesamples;
 		}
 
+		if ( this->gl_config.accelerated >= 0 ) {
+			*iAttr++ = WGL_ACCELERATION_ARB;
+			*iAttr++ = (this->gl_config.accelerated ? WGL_GENERIC_ACCELERATION_ARB : WGL_NO_ACCELERATION_ARB);
+		}
+
 		*iAttr = 0;
 
 		/* Choose and set the closest available pixel format */
@@ -441,6 +446,16 @@ int WIN_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
 			break;
 		    case SDL_GL_MULTISAMPLESAMPLES:
 			wgl_attrib = WGL_SAMPLES_ARB;
+			break;
+		    case SDL_GL_ACCELERATED_VISUAL:
+			wgl_attrib = WGL_ACCELERATION_ARB;
+			this->gl_data->wglGetPixelFormatAttribivARB(GL_hdc, pixel_format, 0, 1, &wgl_attrib, value);
+			if ( *value == WGL_NO_ACCELERATION_ARB ) {
+				*value = SDL_FALSE;
+			} else {
+				*value = SDL_TRUE;
+			}
+			return 0;
 			break;
 		    case SDL_GL_SWAP_CONTROL:
 			if ( this->gl_data->wglGetSwapIntervalEXT ) {

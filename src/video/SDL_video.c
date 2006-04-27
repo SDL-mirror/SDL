@@ -233,6 +233,7 @@ int SDL_VideoInit (const char *driver_name, Uint32 flags)
 	video->gl_config.stereo = 0;
 	video->gl_config.multisamplebuffers = 0;
 	video->gl_config.multisamplesamples = 0;
+	video->gl_config.accelerated = -1; /* not known, don't set */
 	video->gl_config.swap_control = -1; /* not known, don't set */
 	
 	/* Initialize the video subsystem */
@@ -1474,6 +1475,9 @@ int SDL_GL_SetAttribute( SDL_GLattr attr, int value )
 			break;
 		case SDL_GL_MULTISAMPLESAMPLES:
 			video->gl_config.multisamplesamples = value;
+			break;
+		case SDL_GL_ACCELERATED_VISUAL:
+			video->gl_config.accelerated = value;
 			break;
 		case SDL_GL_SWAP_CONTROL:
 			video->gl_config.swap_control = value;

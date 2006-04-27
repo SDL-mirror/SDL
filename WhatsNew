@@ -6,6 +6,8 @@ Version 1.0:
 1.2.10:
 	Added SDL_GL_SWAP_CONTROL to wait for vsync in OpenGL applications.
 
+	Added SDL_GL_ACCELERATED_VISUAL to guarantee hardware acceleration.
+
 	Added current_w and current_h to the SDL_VideoInfo structure,
 	which is set to the desktop resolution during video intialization,
 	and then set to the current resolution when a video mode is set.

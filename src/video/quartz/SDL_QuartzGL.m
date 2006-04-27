@@ -112,6 +112,10 @@ int QZ_SetupOpenGL (_THIS, int bpp, Uint32 flags) {
         attr[i++] = NSOpenGLPFANoRecovery;
     }
 
+    if ( this->gl_config.accelerated > 0 ) {
+        attr[i++] = NSOpenGLPFAAccelerated;
+    }
+
     attr[i++] = NSOpenGLPFAScreenMask;
     attr[i++] = CGDisplayIDToOpenGLDisplayMask (display_id);
     attr[i] = 0;
@@ -242,8 +246,22 @@ int    QZ_GL_GetAttribute   (_THIS, SDL_GLattr attrib, int* value) {
             glGetIntegerv (GL_ALPHA_BITS, &component); bits += component;
 
             *value = bits;
+            return 0;
         }
-        return 0;
+        case SDL_GL_ACCELERATED_VISUAL:
+        {
+            long val;
+            [fmt getValues: &val forAttribute: NSOpenGLPFAAccelerated attr forVirtualScreen: 0];
+            *value = val;
+            return 0;
+        }
+        case SDL_GL_SWAP_CONTROL:
+        {
+            long val;
+            [ gl_context getValues: &val forParameter: NSOpenGLCPSwapInterval ];
+            *value = val;
+            return 0;
+        }
     }
 
     glGetIntegerv (attr, (GLint *)value);

@@ -34,7 +34,7 @@ int Mac_GL_Init(_THIS)
 #if SDL_VIDEO_OPENGL
 	AGLPixelFormat format;
    	int i = 0;
-	GLint attributes [ 24 ]; /* 24 is max possible in this setup */
+	GLint attributes [ 26 ]; /* 26 is max possible in this setup */
 	GLboolean noerr;
    
 	/* load the gl driver from a default path */
@@ -95,6 +95,11 @@ int Mac_GL_Init(_THIS)
 		attributes[i++] = this->gl_config.multisamplesamples;
 	}	
 #endif
+	if ( this->gl_config.accelerated > 0 ) {
+		attributes[i++] = AGL_ACCELERATED;
+		attributes[i++] = AGL_NO_RECOVERY;
+	}
+
 	attributes[i++] = AGL_ALL_RENDERERS;
 	attributes[i]	= AGL_NONE;
 
