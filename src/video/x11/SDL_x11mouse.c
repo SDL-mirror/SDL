@@ -226,6 +226,7 @@ static void SetMouseAccel(_THIS, const char *accel_param)
 /* Check to see if we need to enter or leave mouse relative mode */
 void X11_CheckMouseModeNoLock(_THIS)
 {
+	const Uint8 full_focus = (SDL_APPACTIVE|SDL_APPINPUTFOCUS|SDL_APPMOUSEFOCUS);
 	char *env_override;
 	int enable_relative = 1;
 
@@ -242,7 +243,7 @@ void X11_CheckMouseModeNoLock(_THIS)
 	if ( enable_relative &&
 	     !(SDL_cursorstate & CURSOR_VISIBLE) &&
 	     (this->input_grab != SDL_GRAB_OFF) &&
-             (SDL_GetAppState() & SDL_APPACTIVE) ) {
+             (SDL_GetAppState() & full_focus) == full_focus ) {
 		if ( ! mouse_relative ) {
 			X11_EnableDGAMouse(this);
 			if ( ! (using_dga & DGA_MOUSE) ) {

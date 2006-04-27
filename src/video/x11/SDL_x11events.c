@@ -666,7 +666,7 @@ void X11_PumpEvents(_THIS)
 			} else {
 				switch_time = now + 200;
 			}
-		} else if ( now >= switch_time ) {
+		} else if ( (int)(switch_time-now) <= 0 ) {
 			Uint32 go_fullscreen;
 
 			go_fullscreen = switch_waiting & SDL_FULLSCREEN;
