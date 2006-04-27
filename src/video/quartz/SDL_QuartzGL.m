@@ -132,6 +132,17 @@ int QZ_SetupOpenGL (_THIS, int bpp, Uint32 flags) {
         return 0;
     }
 
+    /* Synchronize QZ_GL_SwapBuffers() to vertical retrace.
+     * (Apple's documentation is not completely clear about what this setting
+     * exactly does, IMHO - for a detailed explanation see
+     * http://lists.apple.com/archives/mac-opengl/2006/Jan/msg00080.html )
+     */
+    if ( this->gl_config.swap_control >= 0 ) {
+        long value;
+        value = this->gl_config.swap_control;
+        [ gl_context setValues: &value forParameter: NSOpenGLCPSwapInterval ];
+    }
+
     /*
      * Wisdom from Apple engineer in reference to UT2003's OpenGL performance:
      *  "You are blowing a couple of the internal OpenGL function caches. This

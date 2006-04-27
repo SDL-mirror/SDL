@@ -205,18 +205,39 @@ int X11_GL_CreateContext(_THIS)
 {
 	int retval;
 #if SDL_VIDEO_OPENGL_GLX
+	const char *glXext;
+
 	/* We do this to create a clean separation between X and GLX errors. */
 	XSync( SDL_Display, False );
 	glx_context = this->gl_data->glXCreateContext(GFX_Display, 
 				     glx_visualinfo, NULL, True);
 	XSync( GFX_Display, False );
 
-	if (glx_context == NULL) {
+	if ( glx_context == NULL ) {
 		SDL_SetError("Could not create GL context");
-		return -1;
+		return(-1);
 	}
-
+	if ( X11_GL_MakeCurrent(this) < 0 ) {
+		return(-1);
+	}
 	gl_active = 1;
+
+	/* The use of strstr here should be safe */
+	glXext = this->gl_data->glXQueryExtensionsString(GFX_Display, DefaultScreen(GFX_Display));
+	if ( !SDL_strstr(glXext, "SGI_swap_control") ) {
+		this->gl_data->glXSwapIntervalSGI = NULL;
+	}
+	if ( !SDL_strstr(glXext, "GLX_MESA_swap_control") ) {
+		this->gl_data->glXSwapIntervalMESA = NULL;
+		this->gl_data->glXGetSwapIntervalMESA = NULL;
+	}
+	if ( this->gl_config.swap_control >= 0 ) {
+		if ( this->gl_data->glXSwapIntervalMESA ) {
+			this->gl_data->glXSwapIntervalMESA(this->gl_config.swap_control);
+		} else if ( this->gl_data->glXSwapIntervalSGI ) {
+			this->gl_data->glXSwapIntervalSGI(this->gl_config.swap_control);
+		}
+	}
 #else
 	SDL_SetError("X11 driver not configured with OpenGL");
 #endif
@@ -319,6 +340,13 @@ int X11_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
  	    case SDL_GL_MULTISAMPLESAMPLES:
  		glx_attrib = GLX_SAMPLES_ARB;
  		break;
+	    case SDL_GL_SWAP_CONTROL:
+		if ( this->gl_data->glXGetSwapIntervalMESA ) {
+			return this->gl_data->glXGetSwapIntervalMESA();
+		} else {
+			return -1 /*(this->gl_config.swap_control > 0)*/;
+		}
+		break;
 	    default:
 		return(-1);
 	}
@@ -348,6 +376,9 @@ void X11_GL_UnloadLibrary(_THIS)
 		this->gl_data->glXDestroyContext = NULL;
 		this->gl_data->glXMakeCurrent = NULL;
 		this->gl_data->glXSwapBuffers = NULL;
+		this->gl_data->glXSwapIntervalSGI = NULL;
+		this->gl_data->glXSwapIntervalMESA = NULL;
+		this->gl_data->glXGetSwapIntervalMESA = NULL;
 
 		this->gl_config.dll_handle = NULL;
 		this->gl_config.driver_loaded = 0;
@@ -400,7 +431,12 @@ int X11_GL_LoadLibrary(_THIS, const char* path)
 		(int (*)(Display *, XVisualInfo *, int, int *)) SDL_LoadFunction(handle, "glXGetConfig");
 	this->gl_data->glXQueryExtensionsString =
 		(const char *(*)(Display *, int)) SDL_LoadFunction(handle, "glXQueryExtensionsString");
-	
+	this->gl_data->glXSwapIntervalSGI =
+		(int (*)(int)) SDL_LoadFunction(handle, "glXSwapIntervalSGI");
+	this->gl_data->glXSwapIntervalMESA =
+		(GLint (*)(unsigned)) SDL_LoadFunction(handle, "glXSwapIntervalMESA");
+	this->gl_data->glXGetSwapIntervalMESA =
+		(GLint (*)(void)) SDL_LoadFunction(handle, "glXGetSwapIntervalMESA");
 
 	if ( (this->gl_data->glXChooseVisual == NULL) || 
 	     (this->gl_data->glXCreateContext == NULL) ||

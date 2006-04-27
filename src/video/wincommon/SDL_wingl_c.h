@@ -53,6 +53,8 @@ struct SDL_PrivateGLData {
                                                 UINT nAttributes, 
                                                 const int *piAttributes,
                                                 int *piValues);
+    void (WINAPI *wglSwapIntervalEXT)(int interval);
+    int (WINAPI *wglGetSwapIntervalEXT)(void);
 #endif /* SDL_VIDEO_OPENGL */
 };
 

@@ -292,6 +292,7 @@ struct SDL_VideoDevice {
 		int stereo;
 		int multisamplebuffers;
 		int multisamplesamples;
+		int swap_control;
 		int driver_loaded;
 		char driver_path[256];
 		void* dll_handle;

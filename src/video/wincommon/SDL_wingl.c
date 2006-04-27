@@ -177,6 +177,7 @@ int WIN_GL_SetupWindow(_THIS)
 	int iAttribs[64];
 	int *iAttr;
 	float fAttribs[1] = { 0 };
+	const char *wglext;
 
 	/* load the gl driver from a default path */
 	if ( ! this->gl_config.driver_loaded ) {
@@ -323,7 +324,25 @@ int WIN_GL_SetupWindow(_THIS)
 		SDL_SetError("Unable to create GL context");
 		return(-1);
 	}
+	if ( WIN_GL_MakeCurrent(this) < 0 ) {
+		return(-1);
+	}
 	gl_active = 1;
+
+	/* Vsync control under Windows.  Checking glGetString here is
+	 * somewhat a documented and reliable hack - it was originally
+	 * as a feature added by mistake, but since so many people rely
+	 * on it, it will not be removed.  strstr should be safe here.*/
+	wglext = (const char *)this->glGetString(GL_EXTENSIONS);
+	if ( !SDL_strstr(wglext, "WGL_EXT_swap_control") ) {
+		this->gl_data->wglSwapIntervalEXT = NULL;
+		this->gl_data->wglGetSwapIntervalEXT = NULL;
+	}
+	if ( this->gl_config.swap_control >= 0 ) {
+		if ( this->gl_data->wglSwapIntervalEXT ) {
+			this->gl_data->wglSwapIntervalEXT(this->gl_config.swap_control);
+		}
+	}
 #else
 	SDL_SetError("WIN driver not configured with OpenGL");
 #endif
@@ -423,6 +442,12 @@ int WIN_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
 		    case SDL_GL_MULTISAMPLESAMPLES:
 			wgl_attrib = WGL_SAMPLES_ARB;
 			break;
+		    case SDL_GL_SWAP_CONTROL:
+			if ( this->gl_data->wglGetSwapIntervalEXT ) {
+				return this->gl_data->wglGetSwapIntervalEXT();
+			} else {
+				return -1;
+			}
 		    default:
 			return(-1);
 		}
@@ -509,6 +534,8 @@ void WIN_GL_UnloadLibrary(_THIS)
 		this->gl_data->wglMakeCurrent = NULL;
 		this->gl_data->wglChoosePixelFormatARB = NULL;
 		this->gl_data->wglGetPixelFormatAttribivARB = NULL;
+		this->gl_data->wglSwapIntervalEXT = NULL;
+		this->gl_data->wglGetSwapIntervalEXT = NULL;
 
 		this->gl_config.dll_handle = NULL;
 		this->gl_config.driver_loaded = 0;
@@ -547,6 +574,10 @@ int WIN_GL_LoadLibrary(_THIS, const char* path)
 		GetProcAddress(handle, "wglDeleteContext");
 	this->gl_data->wglMakeCurrent = (BOOL (WINAPI *)(HDC, HGLRC))
 		GetProcAddress(handle, "wglMakeCurrent");
+	this->gl_data->wglSwapIntervalEXT = (void (WINAPI *)(int))
+		GetProcAddress(handle, "wglSwapIntervalEXT");
+	this->gl_data->wglGetSwapIntervalEXT = (int (WINAPI *)(void))
+		GetProcAddress(handle, "wglGetSwapIntervalEXT");
 
 	if ( (this->gl_data->wglGetProcAddress == NULL) ||
 	     (this->gl_data->wglCreateContext == NULL) ||

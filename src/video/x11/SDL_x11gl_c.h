@@ -71,7 +71,10 @@ struct SDL_PrivateGLData {
 	    ( Display* dpy,
 	      int screen );
 
-    
+    int (*glXSwapIntervalSGI) ( int interval );
+    GLint (*glXSwapIntervalMESA) ( unsigned interval );
+    GLint (*glXGetSwapIntervalMESA) ( void );
+
 #endif /* SDL_VIDEO_OPENGL_GLX */
 };
 
