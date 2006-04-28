@@ -3,16 +3,14 @@
 # Build a fat binary on Mac OS X, thanks Ryan!
 
 # Number of CPUs (for make -j)
-#NCPU=1
 NCPU=`sysctl -n hw.ncpu`
+NJOB=`expr $NCPU + 1`
 
-# !!! FIXME: other CFLAGS?
 # Generic, cross-platform CFLAGS you always want go here.
 CFLAGS="-O3 -g -pipe"
 
 # PowerPC compiler flags (10.2 runtime compatibility)
 CC_PPC="gcc-3.3 -arch ppc"
-CXX_PPC="g++-3.3 -arch ppc"
 CFLAGS_PPC=""
 CPPFLAGS_PPC="-DMAC_OS_X_VERSION_MIN_REQUIRED=1020 \
 -nostdinc \
@@ -28,10 +26,9 @@ LFLAGS_PPC="-arch ppc \
 
 # Intel compiler flags (10.4 runtime compatibility)
 CC_X86="gcc-4.0 -arch i386"
-CXX_X86="g++-4.0 -arch i386"
 CFLAGS_X86="-mmacosx-version-min=10.4"
 CPPFLAGS_X86="-DMAC_OS_X_VERSION_MIN_REQUIRED=1040 \
--nostdinc -fvisibility=hidden \
+-nostdinc \
 -F/Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks \
 -I/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin8/4.0.1/include \
 -isystem /Developer/SDKs/MacOSX10.4u.sdk/usr/include"
@@ -158,10 +155,10 @@ done
 #
 if test x$configure_ppc = xyes; then
     (cd build/ppc && \
-     sh ../../configure --build=`uname -p`-apple-darwin --host=powerpc-apple-darwin CC="$CC_PPC" CXX="$CXX_PPC" CFLAGS="$CFLAGS $CFLAGS_PPC" CPPFLAGS="$CPPFLAGS_PPC" LDFLAGS="$LFLAGS_PPC") || exit 2
+     sh ../../configure --build=`uname -p`-apple-darwin --host=powerpc-apple-darwin CC="$CC_PPC" CFLAGS="$CFLAGS $CFLAGS_PPC" CPPFLAGS="$CPPFLAGS_PPC" LDFLAGS="$LFLAGS_PPC") || exit 2
 fi
 if test x$make_ppc = xyes; then
-    (cd build/ppc && make -j$NCPU) || exit 3
+    (cd build/ppc && ls include && make -j$NJOB) || exit 3
 fi
 
 #
@@ -169,10 +166,10 @@ fi
 #
 if test x$configure_x86 = xyes; then
     (cd build/x86 && \
-     sh ../../configure --build=`uname -p`-apple-darwin --host=i686-apple-darwin CC="$CC_X86" CXX="$CXX_X86" CFLAGS="$CFLAGS $CFLAGS_X86" CPPFLAGS="$CPPFLAGS_X86" LDFLAGS="$LFLAGS_X86") || exit 2
+     sh ../../configure --build=`uname -p`-apple-darwin --host=i386-apple-darwin CC="$CC_X86" CFLAGS="$CFLAGS $CFLAGS_X86" CPPFLAGS="$CPPFLAGS_X86" LDFLAGS="$LFLAGS_X86") || exit 2
 fi
 if test x$make_x86 = xyes; then
-    (cd build/x86 && make -j$NCPU) || exit 3
+    (cd build/x86 && make -j$NJOB) || exit 3
 fi
 
 #

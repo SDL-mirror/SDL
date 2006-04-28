@@ -52,6 +52,11 @@ fi
 dnl Set up the compiler and linker flags
 INCLUDE="-I$srcdir/include"
 if test x$srcdir != x.; then
+    # Remove SDL_config.h from the source directory, since it's the
+    # default one, and we want to include the one that we generate.
+    if test -f $srcdir/include/SDL_config.h; then
+        rm $srcdir/include/SDL_config.h
+    fi
     INCLUDE="-Iinclude $INCLUDE"
 fi
 case "$host" in
@@ -2332,6 +2337,7 @@ case "$host" in
         # use here or in sdl-config. Hence we reset it.
         EXTRA_LDFLAGS=""
 
+        CheckVisibilityHidden
         CheckDummyVideo
         CheckDiskAudio
         CheckDummyAudio
