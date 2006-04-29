@@ -154,34 +154,26 @@ int SDL_SYS_JoystickInit(void)
 	JOYCAPS	joycaps;
 	MMRESULT result;
 
-	numdevs = 0;
-	maxdevs = joyGetNumDevs();
-
-	if ( maxdevs > MAX_JOYSTICKS ) {
-		maxdevs = MAX_JOYSTICKS;
-	}
-
-
-	for ( i = 0; i < MAX_JOYSTICKS; i++ ) {
-		SYS_JoystickID[i] = JOYSTICKID1 + i;
+	/* Reset the joystick ID & name mapping tables */
+	for ( i = 0; i < MAX_JOYSTICKS; ++i ) {
+		SYS_JoystickID[i] = 0;
 		SYS_JoystickName[i] = NULL;
 	}
 
-
-	for ( i = 0; (i < maxdevs); ++i ) {
+	/* Loop over all potential joystick devices */
+	numdevs = 0;
+	maxdevs = joyGetNumDevs();
+	for ( i = JOYSTICKID1; i < maxdevs && numdevs < MAX_JOYSTICKS; ++i ) {
 		
-		/* added 8/31/2001 By Vitaliy Mikitchenko */
 		joyinfo.dwSize = sizeof(joyinfo);
 		joyinfo.dwFlags = JOY_RETURNALL;
-		/* end addition */
-
 		result = joyGetPosEx(SYS_JoystickID[i], &joyinfo);
 		if ( result == JOYERR_NOERROR ) {
-			result = joyGetDevCaps(SYS_JoystickID[i], &joycaps, sizeof(joycaps));
+			result = joyGetDevCaps(i, &joycaps, sizeof(joycaps));
 			if ( result == JOYERR_NOERROR ) {
-				SYS_JoystickID[numdevs] = SYS_JoystickID[i];
+				SYS_JoystickID[numdevs] = i;
 				SYS_Joystick[numdevs] = joycaps;
-				SYS_JoystickName[numdevs] = GetJoystickName(numdevs, joycaps.szRegKey);
+				SYS_JoystickName[numdevs] = GetJoystickName(i, joycaps.szRegKey);
 				numdevs++;
 			}
 		}
