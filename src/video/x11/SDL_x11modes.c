@@ -360,10 +360,109 @@ static int add_visual_byid(_THIS, const char *visual_id)
 /* Global for the error handler */
 int vm_event, vm_error = -1;
 
+#if SDL_VIDEO_DRIVER_X11_XRANDR
+static int CheckXRandR(_THIS, int *major, int *minor)
+{
+    char *env;
+
+    /* Default the extension not available */
+    *major = *minor = 0;
+
+    /* Allow environment override */
+    env = getenv("SDL_VIDEO_X11_XRANDR");
+    if ( env && !SDL_atoi(env) ) {
+        return 0;
+    }
+
+    /* This defaults off now, due to KDE window maximize problems */
+    if ( !env ) {
+        return 0;
+    }
+
+    if ( !SDL_X11_HAVE_XRANDR ) {
+        return 0;
+    }
+
+    /* Query the extension version */
+    if ( !XRRQueryVersion(SDL_Display, major, minor) ) {
+        return 0;
+    }
+    return 1;
+}
+#endif /* SDL_VIDEO_DRIVER_X11_XRANDR */
+
+#if SDL_VIDEO_DRIVER_X11_VIDMODE
+static int CheckVidMode(_THIS, int *major, int *minor)
+{
+    char *env;
+
+    /* Default the extension not available */
+    *major = *minor = 0;
+
+    /* Allow environment override */
+    env = getenv("SDL_VIDEO_X11_VIDMODE");
+    if ( env && !SDL_atoi(env) ) {
+        return 0;
+    }
+    
+    /* Metro-X 4.3.0 and earlier has a broken implementation of
+       XF86VidModeGetAllModeLines() - it hangs the client.
+     */
+    if ( SDL_strcmp(ServerVendor(SDL_Display), "Metro Link Incorporated") == 0 ) {
+        FILE *metro_fp;
+
+        metro_fp = fopen("/usr/X11R6/lib/X11/Metro/.version", "r");
+        if ( metro_fp != NULL ) {
+            int major, minor, patch, version;
+            major = 0; minor = 0; patch = 0;
+            fscanf(metro_fp, "%d.%d.%d", &major, &minor, &patch);
+            fclose(metro_fp);
+            version = major*100+minor*10+patch;
+            if ( version < 431 ) {
+                return 0;
+            }
+        }
+    }
+
+    /* Query the extension version */
+    if ( !SDL_NAME(XF86VidModeQueryExtension)(SDL_Display, &vm_event, &vm_error) ||
+         !SDL_NAME(XF86VidModeQueryVersion)(SDL_Display, major, minor) ) {
+        return 0;
+    }
+    return 1;
+}
+#endif /* SDL_VIDEO_DRIVER_X11_VIDMODE */
+
+#if SDL_VIDEO_DRIVER_X11_XME
+static int CheckXME(_THIS, int *major, int *minor)
+{
+    char *env;
+
+    /* Default the extension not available */
+    *major = *minor = 0;
+
+    /* Allow environment override */
+    env = getenv("SDL_VIDEO_X11_VIDMODE");
+    if ( env && !SDL_atoi(env) ) {
+        return 0;
+    }
+    
+    /* Query the extension version */
+    if ( !XiGMiscQueryVersion(SDL_Display, major, minor) ) {
+        return 0;
+    }
+    return 1;
+}
+#endif /* SDL_VIDEO_DRIVER_X11_XME */
+
 int X11_GetVideoModes(_THIS)
 {
+#if SDL_VIDEO_DRIVER_X11_XRANDR
+    int xrandr_major, xrandr_minor;
+    int nsizes;
+    XRRScreenSize *sizes;
+#endif
 #if SDL_VIDEO_DRIVER_X11_VIDMODE
-    int buggy_X11;
     int vm_major, vm_minor;
     int nmodes;
     SDL_NAME(XF86VidModeModeInfo) **modes;
@@ -373,29 +472,20 @@ int X11_GetVideoModes(_THIS)
     int ractive, nummodes;
     XiGMiscResolutionInfo *modelist;
 #endif
-#if SDL_VIDEO_DRIVER_X11_XRANDR
-    int xrandr_major, xrandr_minor;
-    int nsizes;
-    XRRScreenSize *sizes;
-#endif
     int i, n;
     int screen_w;
     int screen_h;
 
-    vm_error = -1;
     use_vidmode = 0;
     use_xrandr = 0;
     screen_w = DisplayWidth(SDL_Display, SDL_Screen);
     screen_h = DisplayHeight(SDL_Display, SDL_Screen);
 
-    /* XRandR */
 #if SDL_VIDEO_DRIVER_X11_XRANDR
+    /* XRandR */
     /* require at least XRandR v1.0 (arbitrary) */
-    if ( ( SDL_X11_HAVE_XRANDR ) &&
-         ( getenv("SDL_VIDEO_X11_NO_XRANDR") == NULL ) &&
-         ( XRRQueryVersion(SDL_Display, &xrandr_major, &xrandr_minor) ) &&
-         ( xrandr_major >= 1 ) ) {
-
+    if ( CheckXRandR(this, &xrandr_major, &xrandr_minor) && (xrandr_major >= 1) )
+    {
 #ifdef XRANDR_DEBUG
         fprintf(stderr, "XRANDR: XRRQueryVersion: V%d.%d\n",
                 xrandr_major, xrandr_minor);
@@ -437,55 +527,10 @@ int X11_GetVideoModes(_THIS)
 #endif /* SDL_VIDEO_DRIVER_X11_XRANDR */
 
 #if SDL_VIDEO_DRIVER_X11_VIDMODE
-    /* Metro-X 4.3.0 and earlier has a broken implementation of
-       XF86VidModeGetAllModeLines() - it hangs the client.
-     */
-    buggy_X11 = 0;
-    if ( SDL_strcmp(ServerVendor(SDL_Display), "Metro Link Incorporated") == 0 ) {
-        FILE *metro_fp;
-
-        metro_fp = fopen("/usr/X11R6/lib/X11/Metro/.version", "r");
-        if ( metro_fp != NULL ) {
-            int major, minor, patch, version;
-            major = 0; minor = 0; patch = 0;
-            fscanf(metro_fp, "%d.%d.%d", &major, &minor, &patch);
-            version = major*100+minor*10+patch;
-            if ( version < 431 ) {
-                buggy_X11 = 1;
-            }
-            fclose(metro_fp);
-        }
-    }
-#if 0 /* Let's try this again... hopefully X servers have improved... */
-#if defined(__alpha__) || defined(__sparc64__) || defined(__powerpc__)
-    /* The alpha, sparc64 and PPC XFree86 servers are also buggy */
-    buggy_X11 = 1;
-#endif
-#endif
-    /* Enumerate the available fullscreen modes */
-    if ( ! buggy_X11 ) {
-        if ( SDL_NAME(XF86VidModeQueryExtension)(SDL_Display, &vm_event, &vm_error) &&
-              SDL_NAME(XF86VidModeQueryVersion)(SDL_Display, &vm_major, &vm_minor) ) {
-#ifdef BROKEN_XFREE86_4001
-#ifdef X_XF86VidModeGetDotClocks  /* Compiled under XFree86 4.0 */
-                /* Earlier X servers hang when doing vidmode */
-                if ( vm_major < 2 ) {
-#ifdef XFREE86_DEBUG
-                    printf("Compiled under XFree86 4.0, server is XFree86 3.X\n");
-#endif
-                    buggy_X11 = 1;
-                }
-#else
-                /* XFree86 3.X code works with XFree86 4.0 servers */;
-#endif /* XFree86 4.0 */
-#endif /* XFree86 4.02 and newer are fixed wrt backwards compatibility */
-        } else {
-            buggy_X11 = 1;
-        }
-    }
-    if ( ! buggy_X11 && ! use_xrandr &&
-         SDL_NAME(XF86VidModeGetAllModeLines)(SDL_Display, SDL_Screen,&nmodes,&modes) ) {
-
+    /* XVidMode */
+    if ( !use_xrandr && CheckVidMode(this, &vm_major, &vm_minor) &&
+         SDL_NAME(XF86VidModeGetAllModeLines)(SDL_Display, SDL_Screen,&nmodes,&modes) )
+    {
 #ifdef XFREE86_DEBUG
         printf("Available modes: (sorted)\n");
         for ( i = 0; i < nmodes; ++i ) {
@@ -548,36 +593,14 @@ int X11_GetVideoModes(_THIS)
     }
 #endif /* SDL_VIDEO_DRIVER_X11_VIDMODE */
 
-                                /* XiG */
 #if SDL_VIDEO_DRIVER_X11_XME
-    /* first lets make sure we have the extension, and it's at least v2.0 */
-    if (XiGMiscQueryVersion(SDL_Display, &xme_major, &xme_minor)) {
-#ifdef XIG_DEBUG
-        fprintf(stderr, "XME: XiGMiscQueryVersion: V%d.%d\n",
-                xme_major, xme_minor);
-#endif
-        /* work around a XiGMisc bogosity in our version of libXext */
-        if (xme_major == 0 && xme_major == 0) {
-            /* Ideally libxme would spit this out, but the problem is that
-               the right Query func will never be called if using the bogus
-               libXext version.
-             */
-            fprintf(stderr, 
-"XME: If you are using Xi Graphics CDE and a Summit server, you need to\n"
-"XME: get the libXext update from Xi's ftp site before fullscreen switching\n"
-"XME: will work.  Fullscreen switching is only supported on Summit Servers\n");
-          }
-    } else {
-        /* not there. Bummer. */
-        xme_major = xme_minor = 0;
-    }
-
+    /* XiG */
     modelist = NULL;
-    if (xme_major >= 2 && (nummodes = XiGMiscQueryResolutions(SDL_Display, 
-                                            SDL_Screen,
-                                            0, /* view */
-                                            &ractive, 
-                                            &modelist)) > 1)
+    /* first lets make sure we have the extension, and it's at least v2.0 */
+    if ( CheckXME(this, &xme_major, &xme_minor) && xme_major >= 2 &&
+         (nummodes = XiGMiscQueryResolutions(SDL_Display, SDL_Screen,
+                                             0, /* view */
+                                             &ractive, &modelist)) > 1 )
     {                                /* then we actually have some */
         int j;
 
@@ -683,6 +706,10 @@ int X11_GetVideoModes(_THIS)
     }
 
 #if defined(XFREE86_DEBUG) || defined(XIG_DEBUG)
+    if ( use_xrandr ) {
+        printf("XRandR is enabled\n");
+    }
+
     if ( use_vidmode ) {
         printf("XFree86 VidMode is enabled\n");
     }
