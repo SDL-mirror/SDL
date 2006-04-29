@@ -425,6 +425,7 @@ static int CheckVidMode(_THIS, int *major, int *minor)
     }
 
     /* Query the extension version */
+    vm_error = -1;
     if ( !SDL_NAME(XF86VidModeQueryExtension)(SDL_Display, &vm_event, &vm_error) ||
          !SDL_NAME(XF86VidModeQueryVersion)(SDL_Display, major, minor) ) {
         return 0;
