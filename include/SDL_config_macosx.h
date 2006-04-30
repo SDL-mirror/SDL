@@ -30,7 +30,10 @@
 #define SDL_HAS_64BIT_TYPE	1
 
 /* Useful headers */
+/* If we specified an SDK or have a post-PowerPC chip, then alloca.h exists. */
+#if ( (MAC_OS_X_VERSION_MIN_REQUIRED >= 1030) || (!defined(__POWERPC__)) )
 #define HAVE_ALLOCA_H		1
+#endif
 #define HAVE_SYS_TYPES_H	1
 #define HAVE_STDIO_H	1
 #define STDC_HEADERS	1
@@ -46,12 +49,7 @@
 #define HAVE_CALLOC	1
 #define HAVE_REALLOC	1
 #define HAVE_FREE	1
-
-/* If we specified an SDK or have a post-PowerPC chip, then alloca.h exists. */
-#if ( (MAC_OS_X_VERSION_MIN_REQUIRED >= 1030) || (!defined(__POWERPC__)) )
 #define HAVE_ALLOCA	1
-#endif
-
 #define HAVE_GETENV	1
 #define HAVE_PUTENV	1
 #define HAVE_UNSETENV	1
