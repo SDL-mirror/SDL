@@ -36,10 +36,10 @@
 
 /* Variables */
 
-extern Uint16 SDL_AtariXbios_mouseb;	/* buttons */
-extern Sint16 SDL_AtariXbios_mousex;	/* X relative motion */
-extern Sint16 SDL_AtariXbios_mousey;	/* Y relative motion */
-extern Uint16 SDL_AtariXbios_joystick;	/* Joystick */
+extern volatile Uint16 SDL_AtariXbios_mouseb;	/* buttons */
+extern volatile Sint16 SDL_AtariXbios_mousex;	/* X relative motion */
+extern volatile Sint16 SDL_AtariXbios_mousey;	/* Y relative motion */
+extern volatile Uint16 SDL_AtariXbios_joystick;	/* Joystick */
 
 /* Functions */ 
 
