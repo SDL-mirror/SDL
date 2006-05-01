@@ -341,7 +341,7 @@ int WIN_GL_SetupWindow(_THIS)
 	 * on it, it will not be removed.  strstr should be safe here.*/
 	glGetStringFunc = WIN_GL_GetProcAddress(this, "glGetString");
 	if ( glGetStringFunc ) {
-		wglext = (const char *)this->glGetString(GL_EXTENSIONS);
+		wglext = (const char *)glGetStringFunc(GL_EXTENSIONS);
 	} else {
 		/* Uh oh, something is seriously wrong here... */
 		wglext = NULL;
