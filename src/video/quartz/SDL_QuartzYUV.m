@@ -91,16 +91,16 @@ static void QZ_FreeHWYUV (_THIS, SDL_Overlay *overlay) {
     CDSequenceEnd (yuv_seq);
     ExitMovies();
 
-    free (overlay->hwfuncs);
-    free (overlay->pitches);
-    free (overlay->pixels);
+    SDL_free (overlay->hwfuncs);
+    SDL_free (overlay->pitches);
+    SDL_free (overlay->pixels);
 
     if (SDL_VideoSurface->flags & SDL_FULLSCREEN) {
         [ qz_window close ];
         qz_window = nil;
     }
 
-    free (yuv_matrix);
+    SDL_free (yuv_matrix);
     DisposeHandle ((Handle)yuv_idh);
 }
 
@@ -134,7 +134,7 @@ SDL_Overlay* QZ_CreateYUVOverlay (_THIS, int width, int height,
         return NULL;
     }
 
-    yuv_matrix = (MatrixRecordPtr) malloc (sizeof(MatrixRecord));
+    yuv_matrix = (MatrixRecordPtr) SDL_malloc (sizeof(MatrixRecord));
     if (yuv_matrix == NULL) {
         SDL_OutOfMemory();
         return NULL;
@@ -234,7 +234,7 @@ SDL_Overlay* QZ_CreateYUVOverlay (_THIS, int width, int height,
         return NULL;
     }
     
-    overlay = (SDL_Overlay*) malloc (sizeof(*overlay));
+    overlay = (SDL_Overlay*) SDL_malloc (sizeof(*overlay));
     if (overlay == NULL) {
         SDL_OutOfMemory();
         return NULL;
@@ -267,15 +267,15 @@ SDL_Overlay* QZ_CreateYUVOverlay (_THIS, int width, int height,
             return NULL;
         }
 
-        pixels = (Uint8**) malloc (sizeof(*pixels) * 3);
-        pitches = (Uint16*) malloc (sizeof(*pitches) * 3);
+        pixels = (Uint8**) SDL_malloc (sizeof(*pixels) * 3);
+        pitches = (Uint16*) SDL_malloc (sizeof(*pitches) * 3);
         if (pixels == NULL || pitches == NULL) {
             SDL_OutOfMemory();
             return NULL;
         }
 
         yuv_pixmap = (PlanarPixmapInfoYUV420*)
-            malloc (sizeof(PlanarPixmapInfoYUV420) +
+            SDL_malloc (sizeof(PlanarPixmapInfoYUV420) +
                     (width * height * 2));
         if (yuv_pixmap == NULL) {
             SDL_OutOfMemory ();
@@ -310,7 +310,7 @@ SDL_Overlay* QZ_CreateYUVOverlay (_THIS, int width, int height,
         overlay->pitches = pitches;
     }
 
-    overlay->hwfuncs = malloc (sizeof(*overlay->hwfuncs));
+    overlay->hwfuncs = SDL_malloc (sizeof(*overlay->hwfuncs));
     if (overlay->hwfuncs == NULL) {
         SDL_OutOfMemory();
         return NULL;

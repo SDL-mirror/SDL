@@ -41,12 +41,12 @@ WMcursor*    QZ_CreateWMCursor   (_THIS, Uint8 *data, Uint8 *mask,
     int row, bytes;
         
     /* Allocate the cursor memory */
-    cursor = (WMcursor *)malloc(sizeof(WMcursor));
+    cursor = (WMcursor *)SDL_malloc(sizeof(WMcursor));
     if ( cursor == NULL ) {
         SDL_OutOfMemory();
         return(NULL);
     }
-    memset(cursor, 0, sizeof(*cursor));
+    SDL_memset(cursor, 0, sizeof(*cursor));
     
     if (w > 16)
         w = 16;
@@ -57,11 +57,11 @@ WMcursor*    QZ_CreateWMCursor   (_THIS, Uint8 *data, Uint8 *mask,
     bytes = (w+7)/8;
 
     for ( row=0; row<h; ++row ) {
-        memcpy(&cursor->curs.data[row], data, bytes);
+        SDL_memcpy(&cursor->curs.data[row], data, bytes);
         data += bytes;
     }
     for ( row=0; row<h; ++row ) {
-        memcpy(&cursor->curs.mask[row], mask, bytes);
+        SDL_memcpy(&cursor->curs.mask[row], mask, bytes);
         mask += bytes;
     }
     cursor->curs.hotSpot.h = hot_x;

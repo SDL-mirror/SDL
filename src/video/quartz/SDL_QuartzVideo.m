@@ -117,14 +117,14 @@ static SDL_VideoDevice* QZ_CreateDevice (int device_index) {
     SDL_VideoDevice *device;
     SDL_PrivateVideoData *hidden;
 
-    device = (SDL_VideoDevice*) malloc (sizeof (*device) );
-    hidden = (SDL_PrivateVideoData*) malloc (sizeof (*hidden) );
+    device = (SDL_VideoDevice*) SDL_malloc (sizeof (*device) );
+    hidden = (SDL_PrivateVideoData*) SDL_malloc (sizeof (*hidden) );
 
     if (device == NULL || hidden == NULL)
         SDL_OutOfMemory ();
 
-    memset (device, 0, sizeof (*device) );
-    memset (hidden, 0, sizeof (*hidden) );
+    SDL_memset (device, 0, sizeof (*device) );
+    SDL_memset (hidden, 0, sizeof (*hidden) );
 
     device->hidden = hidden;
 
@@ -178,8 +178,8 @@ static SDL_VideoDevice* QZ_CreateDevice (int device_index) {
 
 static void QZ_DeleteDevice (SDL_VideoDevice *device) {
 
-    free (device->hidden);
-    free (device);
+    SDL_free (device->hidden);
+    SDL_free (device);
 }
 
 static int QZ_VideoInit (_THIS, SDL_PixelFormat *video_format) {
@@ -242,9 +242,9 @@ static SDL_Rect** QZ_ListModes (_THIS, SDL_PixelFormat *format, Uint32 flags) {
         int i;
 
         for (i = 0; client_mode_list[i] != NULL; i++)
-            free (client_mode_list[i]);
+            SDL_free (client_mode_list[i]);
 
-        free (client_mode_list);
+        SDL_free (client_mode_list);
         client_mode_list = NULL;
     }
 
@@ -297,12 +297,12 @@ static SDL_Rect** QZ_ListModes (_THIS, SDL_PixelFormat *format, Uint32 flags) {
 
                 if (client_mode_list == NULL)
                     client_mode_list = (SDL_Rect**) 
-                        malloc (sizeof(*client_mode_list) * (list_size+1) );
+                        SDL_malloc (sizeof(*client_mode_list) * (list_size+1) );
                 else
                     client_mode_list = (SDL_Rect**) 
-                        realloc (client_mode_list, sizeof(*client_mode_list) * (list_size+1));
+                        SDL_realloc (client_mode_list, sizeof(*client_mode_list) * (list_size+1));
 
-                rect = (SDL_Rect*) malloc (sizeof(**client_mode_list));
+                rect = (SDL_Rect*) SDL_malloc (sizeof(**client_mode_list));
 
                 if (client_mode_list == NULL || rect == NULL) {
                     SDL_OutOfMemory ();
@@ -372,7 +372,7 @@ static void QZ_UnsetVideoMode (_THIS, BOOL to_desktop) {
             SDL_WaitThread (thread, NULL);
             SDL_DestroySemaphore (sem1);
             SDL_DestroySemaphore (sem2);
-            free (sw_buffers[0]);
+            SDL_free (sw_buffers[0]);
         }
         
         /* 
@@ -493,7 +493,7 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
         this->UnlockHWSurface = QZ_UnlockDoubleBuffer;
         this->FlipHWSurface = QZ_FlipDoubleBuffer;
 
-        current->pixels = malloc (current->pitch * current->h * 2);
+        current->pixels = SDL_malloc (current->pitch * current->h * 2);
         if (current->pixels == NULL) {
             SDL_OutOfMemory ();
             goto ERR_DOUBLEBUF;
@@ -984,7 +984,7 @@ static int QZ_ThreadFlip (_THIS) {
         
         while ( h-- ) {
         
-            memcpy (dst, src, len);
+            SDL_memcpy (dst, src, len);
             src += skip;
             dst += skip;
         }
@@ -1211,7 +1211,7 @@ static int QZ_IsWindowObscured (NSWindow *window) {
                             dockIconCacheMiss) {
 
                             numCachedDockIcons = i - firstDockIcon;
-                            memcpy (dockIcons, &(windows[firstDockIcon]),
+                            SDL_memcpy (dockIcons, &(windows[firstDockIcon]),
                                     numCachedDockIcons * sizeof(*windows));
                         }
 
