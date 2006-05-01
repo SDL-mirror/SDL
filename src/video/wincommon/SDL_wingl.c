@@ -177,6 +177,7 @@ int WIN_GL_SetupWindow(_THIS)
 	int iAttribs[64];
 	int *iAttr;
 	float fAttribs[1] = { 0 };
+	const GLubyte *(*glGetStringFunc)(GLenum);
 	const char *wglext;
 
 	/* load the gl driver from a default path */
@@ -338,8 +339,14 @@ int WIN_GL_SetupWindow(_THIS)
 	 * somewhat a documented and reliable hack - it was originally
 	 * as a feature added by mistake, but since so many people rely
 	 * on it, it will not be removed.  strstr should be safe here.*/
-	wglext = (const char *)this->glGetString(GL_EXTENSIONS);
-	if ( !SDL_strstr(wglext, "WGL_EXT_swap_control") ) {
+	glGetStringFunc = WIN_GL_GetProcAddress(this, "glGetString");
+	if ( glGetStringFunc ) {
+		wglext = (const char *)this->glGetString(GL_EXTENSIONS);
+	} else {
+		/* Uh oh, something is seriously wrong here... */
+		wglext = NULL;
+	}
+	if ( !wglext || !SDL_strstr(wglext, "WGL_EXT_swap_control") ) {
 		this->gl_data->wglSwapIntervalEXT = NULL;
 		this->gl_data->wglGetSwapIntervalEXT = NULL;
 	}
