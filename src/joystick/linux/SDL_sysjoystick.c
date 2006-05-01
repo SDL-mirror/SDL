@@ -980,7 +980,8 @@ static __inline__ void JS_HandleEvents(SDL_Joystick *joystick)
 #ifndef NO_LOGICAL_JOYSTICKS
 	if (SDL_joylist[joystick->index].fname == NULL) {
 		SDL_joylist_head(i, joystick->index);
-		return JS_HandleEvents(SDL_joylist[i].joy);
+		JS_HandleEvents(SDL_joylist[i].joy);
+		return;
 	}
 #endif
 
