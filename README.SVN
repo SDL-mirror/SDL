@@ -9,10 +9,12 @@ MacOS, Windows, and Unix systems.
 
   svn checkout svn://libsdl.org/trunk/SDL
 
-When you check out a fresh copy of SDL out via svn, you need to
-generate the files used by make by running the "autogen.sh"
-script, which will run aclocal, automake, autoconf and then
-run configure.
+If you are building SDL with an IDE, you will need to copy the file
+include/SDL_config.h.default to include/SDL_config.h before building.
 
-There is a web interface to svn at http://www.libsdl.org/wsvn
+If you are building SDL via configure, you will need to run autogen.sh
+before running configure.
+
+There is a web interface to the subversion repository at:
+	http://www.libsdl.org/cgi/viewvc.cgi
 
