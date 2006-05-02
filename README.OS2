@@ -3,7 +3,7 @@
 SDL on OS/2
 ===========
 
-Last updated on Feb. 26, 2006.
+Last updated on May. 1, 2006.
 
 
 1. How to compile?
@@ -16,10 +16,9 @@ To compile this, you'll need the followings installed:
 - The FSLib library
   (ftp://ftp.netlabs.org/pub/SDL)
 
-First of all, you have to put the OS/2-specific Watcom makefiles into the
-source code tree by unzipping the file Watcom-OS2.zip here.  This will
-result in a Watcom.mif and a setvars.cmd file in this folder, and several
-Makefile.wat files in the src\ folder and in some of its subfolders.
+First of all, you have to unzip the Watcom-OS2.zip file. This will result in a 
+file called "makefile" and a file called "setvars.cmd" in this folder (and some
+more files...).
 
 Please edit the second, fourth and fifth lines of setvars.cmd file
 to set the folders where the toolkit, the OW compiler and the FSLib are. 
@@ -27,23 +26,22 @@ You won't need NASM yet (The Netwide Assembler), you can leave that line.
 Run setvars.cmd, and you should get a shell in which you can
 compile SDL.
 
-Check the "Watcom.mif" file. This is the file which is included by all the
-Watcom makefiles, so changes here will affect the whole build process.
-There is a line in there which determines if the resulting SDL.DLL will be
-a 'debug' or a 'release' build. The 'debug' version is full of printf()'s,
-so if something goes wrong, its output can help a lot for debugging.
+Check the "makefile" file. There is a line in there which determines if the 
+resulting SDL.DLL will be a 'debug' or a 'release' build. The 'debug' version 
+is full of printf()'s, so if something goes wrong, its output can help a lot
+for debugging.
 
-Then go to the 'src' folder, and run "wmake -f makefile.wat".
-This should create the SDL.DLL and the corresponding SDL.LIB file there.
+Then run "wmake".
+This should create the SDL.DLL and the corresponding SDL.LIB file here.
 
 To test applications, it's a good idea to use the 'debug' build of SDL, and
 redirect the standard output and standard error output to files, to see what
 happens internally in SDL.
 (like: testsprite >stdout.txt 2>stderr.txt)
 
-To rebuild SDL, use the following commands in 'src' folder:
-wmake -f makefile.wat clean
-wmake -f makefile.wat
+To rebuild SDL, use the following commands in this folder:
+wmake clean
+wmake
 
 
 
@@ -53,7 +51,7 @@ wmake -f makefile.wat
 Once you have SDL.DLL compiled, navigate into the 'test' folder, copy in there
 the newly built SDL.DLL, and copy in there FSLib.DLL.
 
-Then run "wmake -f makefile.wat" in there to compile some of the testapps.
+Then run "wmake" in there to compile some of the testapps.
 
 
 
@@ -192,6 +190,10 @@ please, be our guest and contact us!
 
 10. Changelog of the OS/2 port
 ------------------------------
+
+Version 1.2 - 2006-05-01  - Doodle
+ - Modified makefile system to have only one makefile
+ - Included FSLib headers, DLL and LIB file
 
 Version 1.2 - 2006-02-26  - Doodle
  - Updated the official SDL version with the OS/2 specific changes.
