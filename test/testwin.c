@@ -250,9 +250,9 @@ int main(int argc, char *argv[])
 	delay = 1;
 
 #ifdef _WIN32_WCE
-	w = 640;
+	w = 240;
 	h = 320;
-	desired_bpp = 0;
+	desired_bpp = 8;
 	video_flags = SDL_FULLSCREEN;
 #else
 	w = 640;

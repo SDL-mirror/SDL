@@ -115,7 +115,7 @@ typedef struct SDL_SysWMinfo {
 	GR_WINDOW_ID window ;	/* The display window */
 } SDL_SysWMinfo;
 
-#elif defined(SDL_VIDEO_DRIVER_WINDIB) || defined(SDL_VIDEO_DRIVER_DDRAW)
+#elif defined(SDL_VIDEO_DRIVER_WINDIB) || defined(SDL_VIDEO_DRIVER_DDRAW) || defined(SDL_VIDEO_DRIVER_GAPI)
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 

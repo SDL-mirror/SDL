@@ -59,7 +59,7 @@ int SDL_KeyboardInit(void)
 
 	/* Initialize the tables */
 	SDL_ModState = KMOD_NONE;
-	SDL_memset(keynames, 0, sizeof(keynames));
+	SDL_memset((void*)keynames, 0, sizeof(keynames));
 	SDL_memset(SDL_KeyState, 0, sizeof(SDL_KeyState));
 	video->InitOSKeymap(this);
 
