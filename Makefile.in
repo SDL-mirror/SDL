@@ -78,7 +78,7 @@ $(objects)/$(SDLMAIN_TARGET): $(SDLMAIN_OBJECTS)
 	$(AR) cru $@ $(SDLMAIN_OBJECTS)
 	$(RANLIB) $@
 
-install: install-bin install-hdrs install-lib install-data install-man
+install: all install-bin install-hdrs install-lib install-data install-man
 install-bin:
 	$(SHELL) $(auxdir)/mkinstalldirs $(bindir)
 	$(INSTALL) -m 755 sdl-config $(bindir)/sdl-config
