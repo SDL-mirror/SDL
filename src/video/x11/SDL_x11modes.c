@@ -842,7 +842,7 @@ int X11_GetVideoModes(_THIS)
     }
 
     if ( use_xme ) {
-      printf("Xi Graphics XME fullscreen is enabled\n");
+        printf("Xi Graphics XME fullscreen is enabled\n");
     }
 
     if ( SDL_modelist ) {
