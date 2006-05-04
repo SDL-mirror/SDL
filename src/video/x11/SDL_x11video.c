@@ -197,7 +197,7 @@ static int x_errhandler(Display *d, XErrorEvent *e)
 	     (((e->error_code == BadRequest)&&(e->request_code == vm_error)) ||
 	      ((e->error_code > vm_error) &&
 	       (e->error_code <= (vm_error+XF86VidModeNumberErrors)))) ) {
-#ifdef XFREE86_DEBUG
+#ifdef X11_DEBUG
 { char errmsg[1024];
   XGetErrorText(d, e->error_code, errmsg, sizeof(errmsg));
 printf("VidMode error: %s\n", errmsg);
@@ -212,7 +212,7 @@ printf("VidMode error: %s\n", errmsg);
         if ( (dga_error >= 0) &&
 	     ((e->error_code > dga_error) &&
 	      (e->error_code <= (dga_error+XF86DGANumberErrors))) ) {
-#ifdef XFREE86_DEBUG
+#ifdef X11_DEBUG
 { char errmsg[1024];
   XGetErrorText(d, e->error_code, errmsg, sizeof(errmsg));
 printf("DGA error: %s\n", errmsg);
@@ -244,7 +244,7 @@ static int xio_errhandler(Display *d)
 static int (*Xext_handler)(Display *, _Xconst char *, _Xconst char *) = NULL;
 static int xext_errhandler(Display *d, _Xconst char *ext, _Xconst char *reason)
 {
-#ifdef XFREE86_DEBUG
+#ifdef X11_DEBUG
 	printf("Xext error inside SDL (may be harmless):\n");
 	printf("  Extension \"%s\" %s on display \"%s\".\n",
 	       ext, reason, XDisplayString(d));
@@ -310,6 +310,7 @@ static char *get_classname(char *classname, int maxlen)
 /* Create auxiliary (toplevel) windows with the current visual */
 static void create_aux_windows(_THIS)
 {
+    int x = 0, y = 0;
     Atom _NET_WM_NAME;
     Atom _NET_WM_ICON_NAME;
     char classname[1024];
@@ -333,13 +334,19 @@ static void create_aux_windows(_THIS)
     if(FSwindow)
 	XDestroyWindow(SDL_Display, FSwindow);
 
+#if SDL_VIDEO_DRIVER_X11_VIDMODE
+    if ( use_xinerama ) {
+        x = xinerama_info.x_org;
+        y = xinerama_info.y_org;
+    }
+#endif
     xattr.override_redirect = True;
     xattr.background_pixel = def_vis ? BlackPixel(SDL_Display, SDL_Screen) : 0;
     xattr.border_pixel = 0;
     xattr.colormap = SDL_XColorMap;
 
     FSwindow = XCreateWindow(SDL_Display, SDL_Root,
-                             xinerama_x, xinerama_y, 32, 32, 0,
+                             x, y, 32, 32, 0,
 			     this->hidden->depth, InputOutput, SDL_Visual,
 			     CWOverrideRedirect | CWBackPixel | CWBorderPixel
 			     | CWColormap,
@@ -379,7 +386,8 @@ static void create_aux_windows(_THIS)
 
     /* Create the window for windowed management */
     /* (reusing the xattr structure above) */
-    WMwindow = XCreateWindow(SDL_Display, SDL_Root, 0, 0, 32, 32, 0,
+    WMwindow = XCreateWindow(SDL_Display, SDL_Root,
+                             x, y, 32, 32, 0,
 			     this->hidden->depth, InputOutput, SDL_Visual,
 			     CWBackPixel | CWBorderPixel | CWColormap,
 			     &xattr);

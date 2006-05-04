@@ -332,6 +332,13 @@ SDL_GrabMode X11_GrabInputNoLock(_THIS, SDL_GrabMode mode)
 	if ( ! SDL_Window ) {
 		return(mode);	/* Will be set later on mode switch */
 	}
+#if SDL_VIDEO_DRIVER_X11_XINERAMA
+        /* FIXME: Is this okay?
+        if ( use_xinerama ) {
+            mode &= ~SDL_GRAB_FULLSCREEN;
+        }
+        */
+#endif
 	if ( mode == SDL_GRAB_OFF ) {
 		XUngrabPointer(SDL_Display, CurrentTime);
 		XUngrabKeyboard(SDL_Display, CurrentTime);

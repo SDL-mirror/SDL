@@ -4,6 +4,9 @@ This is a list of API changes in SDL's version history.
 Version 1.0:
 
 1.2.10:
+	Added support for the SDL_VIDEO_FULLSCREEN_HEAD environment
+	variable, currently supported on X11 Xinerama configurations.
+
 	Added SDL_GL_SWAP_CONTROL to wait for vsync in OpenGL applications.
 
 	Added SDL_GL_ACCELERATED_VISUAL to guarantee hardware acceleration.

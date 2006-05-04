@@ -34,14 +34,17 @@
 #if SDL_VIDEO_DRIVER_X11_DGAMOUSE
 #include "../Xext/extensions/xf86dga.h"
 #endif
+#if SDL_VIDEO_DRIVER_X11_XINERAMA
+#include "../Xext/extensions/Xinerama.h"
+#endif 
+#if SDL_VIDEO_DRIVER_X11_XRANDR
+#include <X11/extensions/Xrandr.h>
+#endif
 #if SDL_VIDEO_DRIVER_X11_VIDMODE
 #include "../Xext/extensions/xf86vmode.h"
 #endif
 #if SDL_VIDEO_DRIVER_X11_XME
 #include "../Xext/extensions/xme.h"
-#endif
-#if SDL_VIDEO_DRIVER_X11_XRANDR
-#include <X11/extensions/Xrandr.h>
 #endif
 
 #include "SDL_x11dyn.h"
@@ -109,6 +112,14 @@ struct SDL_PrivateVideoData {
     int depth;			/* current visual depth (not bpp) */
 
     /* Variables used by the X11 video mode code */
+#if SDL_VIDEO_DRIVER_X11_XINERAMA
+    SDL_NAME(XineramaScreenInfo) xinerama_info;
+#endif
+#if SDL_VIDEO_DRIVER_X11_XRANDR
+    XRRScreenConfiguration* screen_config;
+    int saved_size_id;
+    Rotation saved_rotation;
+#endif
 #if SDL_VIDEO_DRIVER_X11_VIDMODE
     SDL_NAME(XF86VidModeModeInfo) saved_mode;
     struct {
@@ -116,19 +127,13 @@ struct SDL_PrivateVideoData {
     } saved_view;
 #endif
 #if SDL_VIDEO_DRIVER_X11_XME /* XiG XME fullscreen */
-    int use_xme;
     XiGMiscResolutionInfo saved_res;
 #endif
-#if SDL_VIDEO_DRIVER_X11_XRANDR
-    XRRScreenConfiguration* screen_config;
-    int saved_size_id;
-    Rotation saved_rotation;
-#endif
 
-    int xinerama_x;
-    int xinerama_y;
-    int use_vidmode;
+    int use_xinerama;
     int use_xrandr;
+    int use_vidmode;
+    int use_xme;
     int currently_fullscreen;
 
     /* Automatic mode switching support (entering/leaving fullscreen) */
@@ -174,17 +179,17 @@ struct SDL_PrivateVideoData {
 #define mouse_accel		(this->hidden->mouse_accel)
 #define mouse_relative		(this->hidden->mouse_relative)
 #define SDL_modelist		(this->hidden->modelist)
+#define xinerama_info		(this->hidden->xinerama_info)
 #define saved_mode		(this->hidden->saved_mode)
 #define saved_view		(this->hidden->saved_view)
-#define use_xme			(this->hidden->use_xme)
 #define saved_res		(this->hidden->saved_res)
-#define use_xrandr		(this->hidden->use_xrandr)
 #define screen_config		(this->hidden->screen_config)
 #define saved_size_id		(this->hidden->saved_size_id)
 #define saved_rotation		(this->hidden->saved_rotation)
-#define xinerama_x		(this->hidden->xinerama_x)
-#define xinerama_y		(this->hidden->xinerama_y)
+#define use_xinerama		(this->hidden->use_xinerama)
 #define use_vidmode		(this->hidden->use_vidmode)
+#define use_xrandr		(this->hidden->use_xrandr)
+#define use_xme			(this->hidden->use_xme)
 #define currently_fullscreen	(this->hidden->currently_fullscreen)
 #define switch_waiting		(this->hidden->switch_waiting)
 #define switch_time		(this->hidden->switch_time)
