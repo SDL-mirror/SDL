@@ -24,6 +24,7 @@
 #include "SDL_x11video.h"
 
 /* Functions to be exported */
+extern void X11_SetCaptionNoLock(_THIS, const char *title, const char *icon);
 extern void X11_SetCaption(_THIS, const char *title, const char *icon);
 extern void X11_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask);
 extern int X11_IconifyWindow(_THIS);

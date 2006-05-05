@@ -311,18 +311,13 @@ static char *get_classname(char *classname, int maxlen)
 static void create_aux_windows(_THIS)
 {
     int x = 0, y = 0;
-    Atom _NET_WM_NAME;
-    Atom _NET_WM_ICON_NAME;
     char classname[1024];
     XSetWindowAttributes xattr;
     XWMHints *hints;
-    XTextProperty titleprop, titlepropUTF8, iconprop, iconpropUTF8;
     int def_vis = (SDL_Visual == DefaultVisual(SDL_Display, SDL_Screen));
 
     /* Look up some useful Atoms */
     WM_DELETE_WINDOW = XInternAtom(SDL_Display, "WM_DELETE_WINDOW", False);
-    _NET_WM_NAME = XInternAtom(SDL_Display, "_NET_WM_NAME", False);
-    _NET_WM_ICON_NAME = XInternAtom(SDL_Display, "_NET_WM_ICON_NAME", False);
 
     /* Don't create any extra windows if we are being managed */
     if ( SDL_windowid ) {
@@ -372,15 +367,9 @@ static void create_aux_windows(_THIS)
     }
 
     hints = NULL;
-    titleprop.value = titlepropUTF8.value = NULL;
-    iconprop.value = iconpropUTF8.value = NULL;
     if(WMwindow) {
 	/* All window attributes must survive the recreation */
 	hints = XGetWMHints(SDL_Display, WMwindow);
-	XGetTextProperty(SDL_Display, WMwindow, &titleprop, XA_WM_NAME);
-	XGetTextProperty(SDL_Display, WMwindow, &titlepropUTF8, _NET_WM_NAME);
-	XGetTextProperty(SDL_Display, WMwindow, &iconprop, XA_WM_ICON_NAME);
-	XGetTextProperty(SDL_Display, WMwindow, &iconpropUTF8, _NET_WM_ICON_NAME);
 	XDestroyWindow(SDL_Display, WMwindow);
     }
 
@@ -400,22 +389,7 @@ static void create_aux_windows(_THIS)
     }
     XSetWMHints(SDL_Display, WMwindow, hints);
     XFree(hints);
-    if(titleprop.value) {
-	XSetTextProperty(SDL_Display, WMwindow, &titleprop, XA_WM_NAME);
-	XFree(titleprop.value);
-    }
-    if(titlepropUTF8.value) {
-	XSetTextProperty(SDL_Display, WMwindow, &titlepropUTF8, _NET_WM_NAME);
-	XFree(titlepropUTF8.value);
-    }
-    if(iconprop.value) {
-	XSetTextProperty(SDL_Display, WMwindow, &iconprop, XA_WM_ICON_NAME);
-	XFree(iconprop.value);
-    }
-    if(iconpropUTF8.value) {
-	XSetTextProperty(SDL_Display, WMwindow, &iconpropUTF8, _NET_WM_ICON_NAME);
-	XFree(iconpropUTF8.value);
-    }
+    X11_SetCaptionNoLock(this, this->wm_title, this->wm_icon);
 
     XSelectInput(SDL_Display, WMwindow,
 		 FocusChangeMask | KeyPressMask | KeyReleaseMask

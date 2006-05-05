@@ -240,7 +240,7 @@ void X11_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 	SDL_FreeSurface(sicon);
 }
 
-void X11_SetCaption(_THIS, const char *title, const char *icon)
+void X11_SetCaptionNoLock(_THIS, const char *title, const char *icon)
 {
 	XTextProperty titleprop, iconprop;
 	Status status;
@@ -255,9 +255,6 @@ void X11_SetCaption(_THIS, const char *title, const char *icon)
 		_NET_WM_ICON_NAME = XInternAtom(SDL_Display, "_NET_WM_ICON_NAME", False);
 	}
 #endif
-
-	/* Lock the event thread, in multi-threading environments */
-	SDL_Lock_EventThread();
 
 	if ( title != NULL ) {
 		char *title_latin1 = SDL_iconv_utf8_latin1((char *)title);
@@ -306,7 +303,12 @@ void X11_SetCaption(_THIS, const char *title, const char *icon)
 #endif
 	}
 	XSync(SDL_Display, False);
+}
 
+void X11_SetCaption(_THIS, const char *title, const char *icon)
+{
+	SDL_Lock_EventThread();
+	X11_SetCaptionNoLock(this, title, icon);
 	SDL_Unlock_EventThread();
 }
 
@@ -332,13 +334,6 @@ SDL_GrabMode X11_GrabInputNoLock(_THIS, SDL_GrabMode mode)
 	if ( ! SDL_Window ) {
 		return(mode);	/* Will be set later on mode switch */
 	}
-#if SDL_VIDEO_DRIVER_X11_XINERAMA
-        /* FIXME: Is this okay?
-        if ( use_xinerama ) {
-            mode &= ~SDL_GRAB_FULLSCREEN;
-        }
-        */
-#endif
 	if ( mode == SDL_GRAB_OFF ) {
 		XUngrabPointer(SDL_Display, CurrentTime);
 		XUngrabKeyboard(SDL_Display, CurrentTime);
@@ -351,7 +346,7 @@ SDL_GrabMode X11_GrabInputNoLock(_THIS, SDL_GrabMode mode)
 #if 0 /* We'll wait here until we actually grab, otherwise behavior undefined */
 		for ( numtries = 0; numtries < 10; ++numtries ) {
 #else
-		while ( 1 ) {
+		for ( ; ; ) {
 #endif
 			result = XGrabPointer(SDL_Display, SDL_Window, True, 0,
 						GrabModeAsync, GrabModeAsync,
