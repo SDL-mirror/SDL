@@ -33,6 +33,8 @@
 #include "SDL_x11modes_c.h"
 #include "SDL_x11image_c.h"
 
+/*#define X11MODES_DEBUG*/
+
 #define MAX(a, b)        (a > b ? a : b)
 
 #if SDL_VIDEO_DRIVER_X11_XRANDR
@@ -103,45 +105,37 @@ static void set_best_resolution(_THIS, int width, int height)
         SDL_NAME(XF86VidModeModeLine) mode;
         SDL_NAME(XF86VidModeModeInfo) **modes;
         int i;
-        int best_width = 0, best_height = 0;
         int nmodes;
+        int best = -1;
 
         if ( SDL_NAME(XF86VidModeGetModeLine)(SDL_Display, SDL_Screen, &i, &mode) &&
-             SDL_NAME(XF86VidModeGetAllModeLines)(SDL_Display,SDL_Screen,&nmodes,&modes)){
-#ifdef X11MODES_DEBUG
-            printf("Available modes (unsorted):\n");
-            for ( i = 0; i < nmodes; ++i ) {
-                printf("Mode %d: %d x %d @ %d\n", i,
-                        modes[i]->hdisplay, modes[i]->vdisplay,
-                        1000 * modes[i]->dotclock / (modes[i]->htotal *
-                        modes[i]->vtotal) );
-            }
-#endif
+             SDL_NAME(XF86VidModeGetAllModeLines)(SDL_Display,SDL_Screen,&nmodes,&modes) ) {
             for ( i = 0; i < nmodes ; i++ ) {
                 if ( (modes[i]->hdisplay == width) &&
-                     (modes[i]->vdisplay == height) )
-                    goto match;
-            }
-            qsort(modes, nmodes, sizeof *modes, cmpmodes);
-            for ( i = nmodes-1; i > 0 ; i-- ) {
-		if ( ! best_width ) {
-                    if ( (modes[i]->hdisplay >= width) &&
-                         (modes[i]->vdisplay >= height) ) {
-                        best_width = modes[i]->hdisplay;
-                        best_height = modes[i]->vdisplay;
-                    }
-                } else {
-                    if ( (modes[i]->hdisplay != best_width) ||
-                         (modes[i]->vdisplay != best_height) ) {
-                        i++;
-                        break;
+                     (modes[i]->vdisplay == height) ) {
+                    best = i;
+                    break;
+                }
+                if ( modes[i]->hdisplay >= width &&
+                     modes[i]->vdisplay >= height ) {
+                    if ( best < 0 ||
+                         (modes[i]->hdisplay < modes[best]->hdisplay &&
+                          modes[i]->vdisplay <= modes[best]->vdisplay) ||
+                         (modes[i]->vdisplay < modes[best]->vdisplay &&
+                          modes[i]->hdisplay <= modes[best]->hdisplay) ) {
+                        best = i;
                     }
                 }
             }
-       match:
-            if ( (modes[i]->hdisplay != mode.hdisplay) ||
-                 (modes[i]->vdisplay != mode.vdisplay) ) {
-                SDL_NAME(XF86VidModeSwitchToMode)(SDL_Display, SDL_Screen, modes[i]);
+            if ( best >= 0 &&
+                 ((modes[best]->hdisplay != mode.hdisplay) ||
+                  (modes[best]->vdisplay != mode.vdisplay)) ) {
+#ifdef X11MODES_DEBUG
+                printf("Best Mode %d: %d x %d @ %d\n", best,
+                        modes[best]->hdisplay, modes[best]->vdisplay,
+                        (modes[best]->htotal && modes[best]->vtotal) ? (1000 * modes[best]->dotclock / (modes[best]->htotal * modes[best]->vtotal)) : 0 );
+#endif
+                SDL_NAME(XF86VidModeSwitchToMode)(SDL_Display, SDL_Screen, modes[best]);
             }
             XFree(modes);
         }
@@ -150,13 +144,13 @@ static void set_best_resolution(_THIS, int width, int height)
 
                                 /* XiG */
 #if SDL_VIDEO_DRIVER_X11_XME
-#ifdef X11MODES_DEBUG
-    fprintf(stderr, "XME: set_best_resolution(): w = %d, h = %d\n",
-            width, height);
-#endif
-    if ( SDL_modelist ) {
+    if ( use_xme && SDL_modelist ) {
         int i;
 
+#ifdef X11MODES_DEBUG
+        fprintf(stderr, "XME: set_best_resolution(): w = %d, h = %d\n",
+                width, height);
+#endif
         for ( i=0; SDL_modelist[i]; ++i ) {
             if ( (SDL_modelist[i]->w >= width) &&
                  (SDL_modelist[i]->h >= height) ) {
@@ -174,8 +168,8 @@ static void set_best_resolution(_THIS, int width, int height)
 #ifdef X11MODES_DEBUG
                 fprintf(stderr, "XME: set_best_resolution: "
                         "XiGMiscChangeResolution: %d %d\n",
-                        SDL_modelist[s]->w, SDL_modelist[s]->h);
-# endif
+                        SDL_modelist[i]->w, SDL_modelist[i]->h);
+#endif
                 XiGMiscChangeResolution(SDL_Display, 
                                         SDL_Screen,
                                         0, /* view */
@@ -189,54 +183,51 @@ static void set_best_resolution(_THIS, int width, int height)
 #endif /* SDL_VIDEO_DRIVER_X11_XME */
 
 #if SDL_VIDEO_DRIVER_X11_XRANDR
-    if ( use_xrandr ) {
+    if ( use_xrandr && SDL_modelist ) {
 #ifdef X11MODES_DEBUG
         fprintf(stderr, "XRANDR: set_best_resolution(): w = %d, h = %d\n",
                 width, height);
 #endif
-        if ( SDL_modelist ) {
-            int i, nsizes;
-            XRRScreenSize *sizes;
+        int i, nsizes;
+        XRRScreenSize *sizes;
 
-            /* find the smallest resolution that is at least as big as the user requested */
-            sizes = XRRConfigSizes(screen_config, &nsizes);
-            for ( i = (nsizes-1); i >= 0; i-- ) {
-                if ( (SDL_modelist[i]->w >= width) &&
-                     (SDL_modelist[i]->h >= height) ) {
-                    break;
-                }
+        /* find the smallest resolution that is at least as big as the user requested */
+        sizes = XRRConfigSizes(screen_config, &nsizes);
+        for ( i = (nsizes-1); i >= 0; i-- ) {
+            if ( (SDL_modelist[i]->w >= width) &&
+                 (SDL_modelist[i]->h >= height) ) {
+                break;
             }
+        }
 
-            if ( i >= 0 && SDL_modelist[i] ) { /* found one, lets try it */
-                int w, h;
+        if ( i >= 0 && SDL_modelist[i] ) { /* found one, lets try it */
+            int w, h;
 
-                /* check current mode so we can avoid uneccessary mode changes */
-                get_real_resolution(this, &w, &h);
+            /* check current mode so we can avoid uneccessary mode changes */
+            get_real_resolution(this, &w, &h);
 
-                if ( (SDL_modelist[i]->w != w) || (SDL_modelist[i]->h != h) ) {
-                    int size_id;
+            if ( (SDL_modelist[i]->w != w) || (SDL_modelist[i]->h != h) ) {
+                int size_id;
 
 #ifdef X11MODES_DEBUG
-                    fprintf(stderr, "XRANDR: set_best_resolution: "
-                            "XXRSetScreenConfig: %d %d\n",
-                            SDL_modelist[i]->w, SDL_modelist[i]->h);
+                fprintf(stderr, "XRANDR: set_best_resolution: "
+                        "XXRSetScreenConfig: %d %d\n",
+                        SDL_modelist[i]->w, SDL_modelist[i]->h);
 #endif
 
-                    /* find the matching size entry index */
-                    for ( size_id = 0; size_id < nsizes; ++size_id ) {
-                        if ( (sizes[size_id].width == SDL_modelist[i]->w) &&
-                             (sizes[size_id].height == SDL_modelist[i]->h) )
-                            break;
-                    }
-
-                    XRRSetScreenConfig(SDL_Display, screen_config, SDL_Root,
-                                       size_id, saved_rotation, CurrentTime);
+                /* find the matching size entry index */
+                for ( size_id = 0; size_id < nsizes; ++size_id ) {
+                    if ( (sizes[size_id].width == SDL_modelist[i]->w) &&
+                         (sizes[size_id].height == SDL_modelist[i]->h) )
+                        break;
                 }
+
+                XRRSetScreenConfig(SDL_Display, screen_config, SDL_Root,
+                                   size_id, saved_rotation, CurrentTime);
             }
         }
     }
 #endif /* SDL_VIDEO_DRIVER_X11_XRANDR */
-
 }
 
 static void get_real_resolution(_THIS, int* w, int* h)
@@ -643,7 +634,7 @@ int X11_GetVideoModes(_THIS)
          SDL_NAME(XF86VidModeGetAllModeLines)(SDL_Display, SDL_Screen,&nmodes,&modes) )
     {
 #ifdef X11MODES_DEBUG
-        printf("Available modes: (sorted)\n");
+        printf("VidMode modes: (unsorted)\n");
         for ( i = 0; i < nmodes; ++i ) {
             printf("Mode %d: %d x %d @ %d\n", i,
                     modes[i]->hdisplay, modes[i]->vdisplay,
@@ -838,7 +829,7 @@ int X11_GetVideoModes(_THIS)
     }
 
     if ( use_vidmode ) {
-        printf("XFree86 VidMode is enabled\n");
+        printf("VidMode is enabled\n");
     }
 
     if ( use_xme ) {
