@@ -151,7 +151,6 @@ dist $(distfile):
 	cp $(distdir)/include/SDL_config.h.default $(distdir)/include/SDL_config.h
 	rm -rf `find $(distdir) -name .svn`
 	rm -f `find $(distdir) -name '.#*'`
-	rmdir `find $(distdir) -type d -empty`
 	tar cvf - $(distdir) | gzip --best >$(distfile)
 	rm -rf $(distdir)
 
