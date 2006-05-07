@@ -55,6 +55,7 @@
 #define GPM_NODE_FIFO	"/dev/gpmdata"
 #endif
 
+/*#define DEBUG_MOUSE*/
 
 /* The translation tables from a console scancode to a SDL keysym */
 #define NUM_VGAKEYMAPS	(1<<KG_CAPSSHIFT)
@@ -360,7 +361,7 @@ static int find_pid(DIR *proc, const char *wanted_name)
 }
 
 /* Returns true if /dev/gpmdata is being written to by gpm */
-static int gpm_available(void)
+static int gpm_available(char *proto, size_t protolen)
 {
 	int available;
 	DIR *proc;
@@ -370,6 +371,9 @@ static int gpm_available(void)
 	char args[PATH_MAX], *arg;
 
 	/* Don't bother looking if the fifo isn't there */
+#ifdef DEBUG_MOUSE 
+	fprintf(stderr,"testing gpm\n");
+#endif
 	if ( access(GPM_NODE_FIFO, F_OK) < 0 ) {
 		return(0);
 	}
@@ -377,17 +381,37 @@ static int gpm_available(void)
 	available = 0;
 	proc = opendir("/proc");
 	if ( proc ) {
-		while ( (pid=find_pid(proc, "gpm")) > 0 ) {
+		char raw_proto[10] = { '\0' };
+		char repeat_proto[10] = { '\0' };
+		while ( !available && (pid=find_pid(proc, "gpm")) > 0 ) {
 			SDL_snprintf(path, SDL_arraysize(path), "/proc/%d/cmdline", pid);
 			cmdline = open(path, O_RDONLY, 0);
 			if ( cmdline >= 0 ) {
 				len = read(cmdline, args, sizeof(args));
 				arg = args;
 				while ( len > 0 ) {
-					if ( SDL_strcmp(arg, "-R") == 0 ) {
-						available = 1;
-					}
 					arglen = SDL_strlen(arg)+1;
+#ifdef DEBUG_MOUSE 
+				        fprintf(stderr,"gpm arg %s len %d\n",arg,arglen);
+#endif
+					if ( SDL_strcmp(arg, "-t") == 0) {
+						/* protocol string, keep it for later */
+						char *t, *s;
+						t = arg + arglen;
+						s = SDL_strchr(t, ' ');
+						if (s) *s = 0;
+						SDL_strncpy(raw_proto, t, SDL_arraysize(raw_proto));
+						if (s) *s = ' ';
+					}
+					if ( SDL_strncmp(arg, "-R", 2) == 0 ) {
+						char *t, *s;
+						available = 1;
+						t = arg + 2;
+						s = SDL_strchr(t, ' ');
+						if (s) *s = 0;
+						SDL_strncpy(repeat_proto, t, SDL_arraysize(repeat_proto));
+						if (s) *s = ' ';
+					}
 					len -= arglen;
 					arg += arglen;
 				}
@@ -395,6 +419,16 @@ static int gpm_available(void)
 			}
 		}
 		closedir(proc);
+
+		if ( available ) {
+			if ( SDL_strcmp(repeat_proto, "raw") == 0 ) {
+				SDL_strlcpy(proto, raw_proto, protolen);
+			} else if ( *repeat_proto ) {
+				SDL_strlcpy(proto, repeat_proto, protolen);
+			} else {
+				SDL_strlcpy(proto, "msc", protolen);
+			}
+		}
 	}
 	return available;
 }
@@ -552,14 +586,35 @@ fprintf(stderr, "Using ELO touchscreen\n");
 		};
 		/* First try to use GPM in repeater mode */
 		if ( mouse_fd < 0 ) {
-			if ( gpm_available() ) {
+			char proto[10];
+			if ( gpm_available(proto, SDL_arraysize(proto)) ) {
 				mouse_fd = open(GPM_NODE_FIFO, O_RDONLY, 0);
 				if ( mouse_fd >= 0 ) {
+					if ( SDL_strcmp(proto, "msc") == 0 ) {
+						mouse_drv = MOUSE_MSC;
+					} else if ( SDL_strcmp(proto, "ps2") == 0 ) {
+						mouse_drv = MOUSE_PS2;
+					} else if ( SDL_strcmp(proto, "imps2") == 0 ) {
+						mouse_drv = MOUSE_IMPS2;
+					} else if ( SDL_strcmp(proto, "ms") == 0 ||
+					            SDL_strcmp(proto, "bare") == 0 ) {
+						mouse_drv = MOUSE_MS;
+					} else if ( SDL_strcmp(proto, "bm") == 0 ) {
+						mouse_drv = MOUSE_BM;
+					} else {
+						/* Unknown protocol... */
 #ifdef DEBUG_MOUSE
-fprintf(stderr, "Using GPM mouse\n");
+						fprintf(stderr, "GPM mouse using unknown protocol = %s\n", proto);
 #endif
-					mouse_drv = MOUSE_MSC;
+						close(mouse_fd);
+						mouse_fd = -1;
+					}
 				}
+#ifdef DEBUG_MOUSE
+				if ( mouse_fd >= 0 ) {
+					fprintf(stderr, "Using GPM mouse, protocol = %s\n", proto);
+				}
+#endif /* DEBUG_MOUSE */
 			}
 		}
 		/* Now try to use a modern PS/2 mouse */
