@@ -617,7 +617,7 @@ int X11_GetVideoModes(_THIS)
 
             }
             /* sort the mode list descending as SDL expects */
-            qsort(SDL_modelist, nsizes, sizeof *SDL_modelist, cmpmodelist);
+            SDL_qsort(SDL_modelist, nsizes, sizeof *SDL_modelist, cmpmodelist);
             SDL_modelist[i] = NULL; /* terminator */
 
             use_xrandr = xrandr_major * 100 + xrandr_minor;

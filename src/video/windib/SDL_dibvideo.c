@@ -348,7 +348,6 @@ int DIB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 #endif
 	}
 	/* Sort the mode lists */
-	if( i > 1 )
 	for ( i=0; i<NUM_MODELISTS; ++i ) {
 		if ( SDL_nummodes[i] > 0 ) {
 			SDL_qsort(SDL_modelist[i], SDL_nummodes[i], sizeof *SDL_modelist[i], cmpmodes);
@@ -361,7 +360,7 @@ int DIB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	// because SDL surface conversion is much faster than the WinCE one.
 	// Although it should be tested on devices with graphics accelerator.
 
-    DIB_AddMode(this, vformat->BitsPerPixel,
+	DIB_AddMode(this, vformat->BitsPerPixel,
 			GetDeviceCaps(GetDC(NULL), HORZRES), 
 			GetDeviceCaps(GetDC(NULL), VERTRES));
 

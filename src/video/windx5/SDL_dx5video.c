@@ -636,6 +636,16 @@ VideoBootStrap DIRECTX_bootstrap = {
 	DX5_Available, DX5_CreateDevice
 };
 
+static int cmpmodes(const void *va, const void *vb)
+{
+    SDL_Rect *a = *(SDL_Rect **)va;
+    SDL_Rect *b = *(SDL_Rect **)vb;
+    if ( a->w == b->w )
+        return b->h - a->h;
+    else
+        return b->w - a->w;
+}
+
 static HRESULT WINAPI EnumModes2(DDSURFACEDESC *desc, VOID *udata)
 {
 	SDL_VideoDevice *this = (SDL_VideoDevice *)udata;
@@ -955,6 +965,10 @@ int DX5_VideoInit(_THIS, SDL_PixelFormat *vformat)
 			SDL_modelist[i][j] = &rect->r;
 		}
 		SDL_modelist[i][j] = NULL;
+
+		if ( SDL_nummodes[i] > 0 ) {
+			SDL_qsort(SDL_modelist[i], SDL_nummodes[i], sizeof *SDL_modelist[i], cmpmodes);
+		}
 	}
 	
 	/* Fill in some window manager capabilities */
