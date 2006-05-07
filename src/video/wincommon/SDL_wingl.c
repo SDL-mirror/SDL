@@ -177,7 +177,7 @@ int WIN_GL_SetupWindow(_THIS)
 	int iAttribs[64];
 	int *iAttr;
 	float fAttribs[1] = { 0 };
-	const GLubyte *(*glGetStringFunc)(GLenum);
+	const GLubyte *(WINAPI *glGetStringFunc)(GLenum);
 	const char *wglext;
 
 	/* load the gl driver from a default path */

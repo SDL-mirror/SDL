@@ -168,7 +168,7 @@ SDL_error *SDL_GetErrBuf(void)
 
 /* Arguments and callback to setup and run the user thread function */
 typedef struct {
-	int (*func)(void *);
+	int (SDLCALL *func)(void *);
 	void *data;
 	SDL_Thread *info;
 	SDL_sem *wait;
@@ -177,7 +177,7 @@ typedef struct {
 void SDL_RunThread(void *data)
 {
 	thread_args *args;
-	int (*userfunc)(void *);
+	int (SDLCALL *userfunc)(void *);
 	void *userdata;
 	int *statusloc;
 
@@ -204,9 +204,9 @@ void SDL_RunThread(void *data)
 
 #ifdef SDL_PASSED_BEGINTHREAD_ENDTHREAD
 #undef SDL_CreateThread
-DECLSPEC SDL_Thread * SDLCALL SDL_CreateThread(int (*fn)(void *), void *data, pfnSDL_CurrentBeginThread pfnBeginThread, pfnSDL_CurrentEndThread pfnEndThread)
+DECLSPEC SDL_Thread * SDLCALL SDL_CreateThread(int (SDLCALL *fn)(void *), void *data, pfnSDL_CurrentBeginThread pfnBeginThread, pfnSDL_CurrentEndThread pfnEndThread)
 #else
-DECLSPEC SDL_Thread * SDLCALL SDL_CreateThread(int (*fn)(void *), void *data)
+DECLSPEC SDL_Thread * SDLCALL SDL_CreateThread(int (SDLCALL *fn)(void *), void *data)
 #endif
 {
 	SDL_Thread *thread;

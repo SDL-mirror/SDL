@@ -20,14 +20,14 @@ static void quit(int rc)
 	exit(rc);
 }
 
-int SubThreadFunc(void *data) {
+int SDLCALL SubThreadFunc(void *data) {
 	while(! *(int volatile *)data) {
 		; /*SDL_Delay(10);*/  /* do nothing */
 	}
 	return 0;
 }
 
-int ThreadFunc(void *data) {
+int SDLCALL ThreadFunc(void *data) {
 	SDL_Thread *sub_threads[NUMTHREADS];
 	int flags[NUMTHREADS];
 	int i;

@@ -31,4 +31,4 @@ extern Uint16 SDL_NextAudioFormat(void);
 extern void SDL_CalculateAudioSpec(SDL_AudioSpec *spec);
 
 /* The actual mixing thread function */
-extern int SDL_RunAudio(void *audiop);
+extern int SDLCALL SDL_RunAudio(void *audiop);

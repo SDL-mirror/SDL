@@ -87,7 +87,7 @@ void SDL_Unlock_EventThread(void)
 #include <time.h>
 #endif
 
-static int SDL_GobbleEvents(void *unused)
+static int SDLCALL SDL_GobbleEvents(void *unused)
 {
 	event_thread = SDL_ThreadID();
 

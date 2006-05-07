@@ -77,7 +77,7 @@ SDL_Surface *LoadIconSurface(char *file, Uint8 **maskp)
 	return(icon);
 }
 
-int FilterEvents(const SDL_Event *event)
+int SDLCALL FilterEvents(const SDL_Event *event)
 {
 	static int reallyquit = 0;
 
@@ -127,7 +127,7 @@ int FilterEvents(const SDL_Event *event)
 	}
 }
 
-int HandleMouse(void *unused)
+int SDLCALL HandleMouse(void *unused)
 {
 	SDL_Event events[10];
 	int i, found;
@@ -164,7 +164,7 @@ int HandleMouse(void *unused)
 	return(0);
 }
 
-int HandleKeyboard(void *unused)
+int SDLCALL HandleKeyboard(void *unused)
 {
 	SDL_Event events[10];
 	int i, found;

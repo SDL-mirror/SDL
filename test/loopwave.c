@@ -32,7 +32,7 @@ static void quit(int rc)
 }
 
 
-void fillerup(void *unused, Uint8 *stream, int len)
+void SDLCALL fillerup(void *unused, Uint8 *stream, int len)
 {
 	Uint8 *waveptr;
 	int    waveleft;

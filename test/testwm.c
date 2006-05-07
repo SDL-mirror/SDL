@@ -168,7 +168,7 @@ void HotKey_Quit(void)
 	SDL_PushEvent(&event);
 }
 
-int FilterEvents(const SDL_Event *event)
+int SDLCALL FilterEvents(const SDL_Event *event)
 {
 	static int reallyquit = 0;
 

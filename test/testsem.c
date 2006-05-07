@@ -13,7 +13,7 @@
 static SDL_sem *sem;
 int alive = 1;
 
-int ThreadFunc(void *data)
+int SDLCALL ThreadFunc(void *data)
 {
 	int threadnum = (int)(uintptr_t)data;
 	while ( alive ) {

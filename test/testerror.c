@@ -17,7 +17,7 @@ static void quit(int rc)
 	exit(rc);
 }
 
-int ThreadFunc(void *data)
+int SDLCALL ThreadFunc(void *data)
 {
 	/* Set the child thread error string */
 	SDL_SetError("Thread %s (%d) had a problem: %s",

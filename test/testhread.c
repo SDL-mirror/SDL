@@ -17,7 +17,7 @@ static void quit(int rc)
 	exit(rc);
 }
 
-int ThreadFunc(void *data)
+int SDLCALL ThreadFunc(void *data)
 {
 	printf("Started thread %s: My thread id is %u\n",
 				(char *)data, SDL_ThreadID());

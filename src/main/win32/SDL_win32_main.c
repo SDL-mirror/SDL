@@ -121,8 +121,15 @@ static BOOL OutOfMemory(void)
 	return FALSE;
 }
 
+/* SDL_Quit() shouldn't be used with atexit() directly because
+   calling conventions may differ... */
+static void cleanup(void)
+{
+	SDL_Quit();
+}
+
 /* Remove the output files if there was no output written */
-static void __cdecl cleanup_output(void)
+static void cleanup_output(void)
 {
 #ifndef NO_STDIO_REDIRECT
 	FILE *file;
@@ -188,7 +195,7 @@ int console_main(int argc, char *argv[])
 	if ( bufp == NULL ) {
 		return OutOfMemory();
 	}
-	SDL_strlcpy(bufp, appname, n);
+	SDL_strlcpy(bufp, appname, n+1);
 	appname = bufp;
 
 	/* Load SDL dynamic link library */
@@ -197,7 +204,7 @@ int console_main(int argc, char *argv[])
 		return(FALSE);
 	}
 	atexit(cleanup_output);
-	atexit(SDL_Quit);
+	atexit(cleanup);
 
 	/* Sam:
 	   We still need to pass in the application handle so that

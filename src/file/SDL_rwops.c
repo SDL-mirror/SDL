@@ -43,7 +43,7 @@
 #define INVALID_SET_FILE_POINTER 0xFFFFFFFF
 #endif
 
-static int win32_file_open(SDL_RWops *context, const char *filename, const char *mode)
+static int SDLCALL win32_file_open(SDL_RWops *context, const char *filename, const char *mode)
 {
 #ifndef _WIN32_WCE
 	UINT	old_error_mode;
@@ -108,7 +108,7 @@ static int win32_file_open(SDL_RWops *context, const char *filename, const char 
 	
 	return 0; /* ok */
 }
-static int win32_file_seek(SDL_RWops *context, int offset, int whence)
+static int SDLCALL win32_file_seek(SDL_RWops *context, int offset, int whence)
 {
 	DWORD win32whence;
 	int   file_pos;
@@ -138,7 +138,7 @@ static int win32_file_seek(SDL_RWops *context, int offset, int whence)
 	SDL_Error(SDL_EFSEEK);
 	return -1; /* error */
 }
-static int win32_file_read(SDL_RWops *context, void *ptr, int size, int maxnum)
+static int SDLCALL win32_file_read(SDL_RWops *context, void *ptr, int size, int maxnum)
 {
 	
 	int		total_bytes; 
@@ -156,7 +156,7 @@ static int win32_file_read(SDL_RWops *context, void *ptr, int size, int maxnum)
 	nread = byte_read/size;
 	return nread;
 }
-static int win32_file_write(SDL_RWops *context, const void *ptr, int size, int num)
+static int SDLCALL win32_file_write(SDL_RWops *context, const void *ptr, int size, int num)
 {
 	
 	int		total_bytes; 
@@ -183,7 +183,7 @@ static int win32_file_write(SDL_RWops *context, const void *ptr, int size, int n
 	nwritten = byte_written/size;
 	return nwritten;
 }
-static int win32_file_close(SDL_RWops *context)
+static int SDLCALL win32_file_close(SDL_RWops *context)
 {
 	
 	if ( context ) {								
@@ -201,7 +201,7 @@ static int win32_file_close(SDL_RWops *context)
 
 /* Functions to read/write stdio file pointers */
 
-static int stdio_seek(SDL_RWops *context, int offset, int whence)
+static int SDLCALL stdio_seek(SDL_RWops *context, int offset, int whence)
 {
 	if ( fseek(context->hidden.stdio.fp, offset, whence) == 0 ) {
 		return(ftell(context->hidden.stdio.fp));
@@ -210,7 +210,7 @@ static int stdio_seek(SDL_RWops *context, int offset, int whence)
 		return(-1);
 	}
 }
-static int stdio_read(SDL_RWops *context, void *ptr, int size, int maxnum)
+static int SDLCALL stdio_read(SDL_RWops *context, void *ptr, int size, int maxnum)
 {
 	size_t nread;
 
@@ -220,7 +220,7 @@ static int stdio_read(SDL_RWops *context, void *ptr, int size, int maxnum)
 	}
 	return(nread);
 }
-static int stdio_write(SDL_RWops *context, const void *ptr, int size, int num)
+static int SDLCALL stdio_write(SDL_RWops *context, const void *ptr, int size, int num)
 {
 	size_t nwrote;
 
@@ -230,7 +230,7 @@ static int stdio_write(SDL_RWops *context, const void *ptr, int size, int num)
 	}
 	return(nwrote);
 }
-static int stdio_close(SDL_RWops *context)
+static int SDLCALL stdio_close(SDL_RWops *context)
 {
 	if ( context ) {
 		if ( context->hidden.stdio.autoclose ) {
@@ -245,7 +245,7 @@ static int stdio_close(SDL_RWops *context)
 
 /* Functions to read/write memory pointers */
 
-static int mem_seek(SDL_RWops *context, int offset, int whence)
+static int SDLCALL mem_seek(SDL_RWops *context, int offset, int whence)
 {
 	Uint8 *newpos;
 
@@ -272,7 +272,7 @@ static int mem_seek(SDL_RWops *context, int offset, int whence)
 	context->hidden.mem.here = newpos;
 	return(context->hidden.mem.here-context->hidden.mem.base);
 }
-static int mem_read(SDL_RWops *context, void *ptr, int size, int maxnum)
+static int SDLCALL mem_read(SDL_RWops *context, void *ptr, int size, int maxnum)
 {
 	size_t total_bytes;
 	size_t mem_available;
@@ -292,7 +292,7 @@ static int mem_read(SDL_RWops *context, void *ptr, int size, int maxnum)
 
 	return (total_bytes / size);
 }
-static int mem_write(SDL_RWops *context, const void *ptr, int size, int num)
+static int SDLCALL mem_write(SDL_RWops *context, const void *ptr, int size, int num)
 {
 	if ( (context->hidden.mem.here + (num*size)) > context->hidden.mem.stop ) {
 		num = (context->hidden.mem.stop-context->hidden.mem.here)/size;
@@ -301,12 +301,12 @@ static int mem_write(SDL_RWops *context, const void *ptr, int size, int num)
 	context->hidden.mem.here += num*size;
 	return(num);
 }
-static int mem_writeconst(SDL_RWops *context, const void *ptr, int size, int num)
+static int SDLCALL mem_writeconst(SDL_RWops *context, const void *ptr, int size, int num)
 {
 	SDL_SetError("Can't write to read-only memory");
 	return(-1);
 }
-static int mem_close(SDL_RWops *context)
+static int SDLCALL mem_close(SDL_RWops *context)
 {
 	if ( context ) {
 		SDL_FreeRW(context);

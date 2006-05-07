@@ -12,13 +12,13 @@
 
 static int ticks = 0;
 
-static Uint32 ticktock(Uint32 interval)
+static Uint32 SDLCALL ticktock(Uint32 interval)
 {
 	++ticks;
 	return(interval);
 }
 
-static Uint32 callback(Uint32 interval, void *param)
+static Uint32 SDLCALL callback(Uint32 interval, void *param)
 {
   printf("Timer %d : param = %d\n", interval, (int)(uintptr_t)param);
   return interval;

@@ -168,6 +168,8 @@ extern DECLSPEC void SDLCALL SDL_free(void *mem);
 # elif defined(_MSC_VER)
 #  include <malloc.h>
 #  define alloca _alloca
+# elif defined(__WATCOMC__)
+#  include <malloc.h>
 # elif defined(__AIX__)
   #pragma alloca
 # else

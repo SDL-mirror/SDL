@@ -120,13 +120,13 @@ static int audio_configured = 0;
 #endif
 
 /* The general mixing thread function */
-int SDL_RunAudio(void *audiop)
+int SDLCALL SDL_RunAudio(void *audiop)
 {
 	SDL_AudioDevice *audio = (SDL_AudioDevice *)audiop;
 	Uint8 *stream;
 	int    stream_len;
 	void  *udata;
-	void (*fill)(void *userdata,Uint8 *stream, int len);
+	void (SDLCALL *fill)(void *userdata,Uint8 *stream, int len);
 	int    silence;
 #if SDL_AUDIO_DRIVER_AHI
 	int started = 0;
