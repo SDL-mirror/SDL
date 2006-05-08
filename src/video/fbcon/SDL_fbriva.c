@@ -77,6 +77,9 @@ static int FillHWRect(_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color)
 	RivaBitmap *Bitmap = (RivaBitmap *)(mapped_io + BITMAP_OFFSET);
 
 	/* Don't blit to the display surface when switched away */
+	if ( switched_away ) {
+		return -2; /* no hardware access */
+	}
 	if ( dst == this->screen ) {
 		SDL_mutexP(hw_lock);
 	}
@@ -120,6 +123,9 @@ static int HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,
 	}
 
 	/* Don't blit to the display surface when switched away */
+	if ( switched_away ) {
+		return -2; /* no hardware access */
+	}
 	if ( dst == this->screen ) {
 		SDL_mutexP(hw_lock);
 	}

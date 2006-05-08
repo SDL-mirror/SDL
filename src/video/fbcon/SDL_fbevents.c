@@ -209,6 +209,8 @@ int FB_EnterGraphicsMode(_THIS)
 			SDL_SetError("Unable to set keyboard in graphics mode");
 			return(-1);
 		}
+		/* Prevent switching the virtual terminal */
+		ioctl(keyboard_fd, VT_LOCKSWITCH, 1);
 	}
 	return(keyboard_fd);
 }
@@ -222,6 +224,7 @@ void FB_LeaveGraphicsMode(_THIS)
 		saved_kbd_mode = -1;
 
 		/* Head back over to the original virtual terminal */
+		ioctl(keyboard_fd, VT_UNLOCKSWITCH, 1);
 		if ( saved_vt > 0 ) {
 			ioctl(keyboard_fd, VT_ACTIVATE, saved_vt);
 		}
@@ -456,7 +459,7 @@ static int set_imps2_mode(int fd)
 			{0xFF}
 	*/
 	Uint8 set_imps2[] = {0xf3, 200, 0xf3, 100, 0xf3, 80};
-	Uint8 reset = 0xff;
+	/*Uint8 reset = 0xff;*/
 	fd_set fdset;
 	struct timeval tv;
 	int retval = 0;
@@ -916,65 +919,60 @@ static void handle_mouse(_THIS)
 	return;
 }
 
-/* Handle switching to another VC, returns when our VC is back.
-   This isn't necessarily the best solution.  For SDL 1.3 we need
-   a way of notifying the application when we lose access to the
-   video hardware and when we regain it.
- */
+/* Handle switching to another VC, returns when our VC is back */
+static void switch_vt_prep(_THIS)
+{
+	SDL_Surface *screen = SDL_VideoSurface;
+
+	SDL_PrivateAppActive(0, (SDL_APPACTIVE|SDL_APPINPUTFOCUS|SDL_APPMOUSEFOCUS));
+
+	/* Save the contents of the screen, and go to text mode */
+	wait_idle(this);
+	screen_arealen = ((screen->h + (2*this->offset_y)) * screen->pitch);
+	screen_contents = (Uint8 *)SDL_malloc(screen_arealen);
+	if ( screen_contents ) {
+		SDL_memcpy(screen_contents, screen->pixels, screen_arealen);
+	}
+	FB_SavePaletteTo(this, 256, screen_palette);
+	ioctl(console_fd, FBIOGET_VSCREENINFO, &screen_vinfo);
+	ioctl(keyboard_fd, KDSETMODE, KD_TEXT);
+	ioctl(keyboard_fd, VT_UNLOCKSWITCH, 1);
+}
+static void switch_vt_done(_THIS)
+{
+	SDL_Surface *screen = SDL_VideoSurface;
+
+	/* Restore graphics mode and the contents of the screen */
+	ioctl(keyboard_fd, VT_LOCKSWITCH, 1);
+	ioctl(keyboard_fd, KDSETMODE, KD_GRAPHICS);
+	ioctl(console_fd, FBIOPUT_VSCREENINFO, &screen_vinfo);
+	FB_RestorePaletteFrom(this, 256, screen_palette);
+	if ( screen_contents ) {
+		SDL_memcpy(screen->pixels, screen_contents, screen_arealen);
+		SDL_free(screen_contents);
+		screen_contents = NULL;
+	}
+
+	SDL_PrivateAppActive(1, (SDL_APPACTIVE|SDL_APPINPUTFOCUS|SDL_APPMOUSEFOCUS));
+}
 static void switch_vt(_THIS, unsigned short which)
 {
-	struct fb_var_screeninfo vinfo;
 	struct vt_stat vtstate;
-	unsigned short v_active;
-	__u16 saved_pal[3*256];
-	SDL_Surface *screen;
-	Uint32 screen_arealen;
-	Uint8 *screen_contents = NULL;
 
 	/* Figure out whether or not we're switching to a new console */
 	if ( (ioctl(keyboard_fd, VT_GETSTATE, &vtstate) < 0) ||
 	     (which == vtstate.v_active) ) {
 		return;
 	}
-	v_active = vtstate.v_active;
-
-	/* Save the contents of the screen, and go to text mode */
-	SDL_mutexP(hw_lock);
-	wait_idle(this);
-	screen = SDL_VideoSurface;
-	if ( !SDL_ShadowSurface ) {
-		screen_arealen = (screen->h*screen->pitch);
-		screen_contents = (Uint8 *)SDL_malloc(screen_arealen);
-		if ( screen_contents ) {
-			SDL_memcpy(screen_contents, (Uint8 *)screen->pixels + screen->offset, screen_arealen);
-		}
-	}
-	FB_SavePaletteTo(this, 256, saved_pal);
-	ioctl(console_fd, FBIOGET_VSCREENINFO, &vinfo);
-	ioctl(keyboard_fd, KDSETMODE, KD_TEXT);
 
 	/* New console, switch to it */
+	SDL_mutexP(hw_lock);
+	switch_vt_prep(this);
 	if ( ioctl(keyboard_fd, VT_ACTIVATE, which) == 0 ) {
-		/* Wait for our console to be activated again */
 		ioctl(keyboard_fd, VT_WAITACTIVE, which);
-		while ( ioctl(keyboard_fd, VT_WAITACTIVE, v_active) < 0 ) {
-			if ( (errno != EINTR) && (errno != EAGAIN) ) {
-				/* Unknown VT error - cancel this */
-				break;
-			}
-			SDL_Delay(500);
-		}
-	}
-
-	/* Restore graphics mode and the contents of the screen */
-	ioctl(keyboard_fd, KDSETMODE, KD_GRAPHICS);
-	ioctl(console_fd, FBIOPUT_VSCREENINFO, &vinfo);
-	FB_RestorePaletteFrom(this, 256, saved_pal);
-	if ( screen_contents ) {
-		SDL_memcpy((Uint8 *)screen->pixels + screen->offset, screen_contents, screen_arealen);
-		SDL_free(screen_contents);
+		switched_away = 1;
 	} else {
-		SDL_UpdateRect(screen, 0, 0, 0, 0);
+		switch_vt_done(this);
 	}
 	SDL_mutexV(hw_lock);
 }
@@ -1032,6 +1030,18 @@ void FB_PumpEvents(_THIS)
 	static struct timeval zero;
 
 	do {
+		if ( switched_away ) {
+			struct vt_stat vtstate;
+
+			SDL_mutexP(hw_lock);
+			if ( (ioctl(keyboard_fd, VT_GETSTATE, &vtstate) == 0) &&
+			     vtstate.v_active == current_vt ) {
+				switched_away = 0;
+				switch_vt_done(this);
+			}
+			SDL_mutexV(hw_lock);
+		}
+
 		posted = 0;
 
 		FD_ZERO(&fdset);

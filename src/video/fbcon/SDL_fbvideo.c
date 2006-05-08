@@ -1238,26 +1238,10 @@ static void FB_FreeHWSurface(_THIS, SDL_Surface *surface)
 	surface->hwdata = NULL;
 }
 
-/* Routine to check to see if the frame buffer virtual terminal */
-/* is the current(active) one.  If it is not, result will cause */
-/* Lock to fail.  (would have waited forever, since the fbevent */
-/* keyboard handler maintains a lock when switched away from    */
-/* current) */
-static __inline__ int FB_IsFrameBufferActive(_THIS)
-{
-	struct vt_stat vtstate;
-	if ( (ioctl(keyboard_fd, VT_GETSTATE, &vtstate) < 0) ||
-	     (current_vt != vtstate.v_active) ) {
-		return 0;
-	}
-	return 1;
-}
-
-
 static int FB_LockHWSurface(_THIS, SDL_Surface *surface)
 {
-	if ( !FB_IsFrameBufferActive(this) ) {
-		return -1; /* fail locking. */
+	if ( switched_away ) {
+		return -2; /* no hardware access */
 	}
 	if ( surface == this->screen ) {
 		SDL_mutexP(hw_lock);
@@ -1293,6 +1277,10 @@ static void FB_WaitIdle(_THIS)
 
 static int FB_FlipHWSurface(_THIS, SDL_Surface *surface)
 {
+	if ( switched_away ) {
+		return -2; /* no hardware access */
+	}
+
 	/* Wait for vertical retrace and then flip display */
 	cache_vinfo.yoffset = flip_page*surface->h;
 	if ( FB_IsSurfaceBusy(this->screen) ) {
@@ -1332,6 +1320,10 @@ static void FB_VGA16Update(_THIS, int numrects, SDL_Rect *rects)
     Uint8  s1, s2, s3, s4;
     Uint32 *src, *srcPtr;
     Uint8  *dst, *dstPtr;
+
+    if ( switched_away ) {
+        return; /* no hardware access */
+    }
 
     screen = this->screen;
     FBPitch = screen->w >> 3;

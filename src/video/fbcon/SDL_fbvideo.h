@@ -85,6 +85,11 @@ struct SDL_PrivateVideoData {
 	int surfaces_memleft;
 
 	SDL_mutex *hw_lock;
+	int switched_away;
+	struct fb_var_screeninfo screen_vinfo;
+	Uint32 screen_arealen;
+	Uint8 *screen_contents;
+	__u16  screen_palette[3*256];
 
 	void (*wait_vbl)(_THIS);
 	void (*wait_idle)(_THIS);
@@ -117,6 +122,11 @@ struct SDL_PrivateVideoData {
 #define surfaces_memtotal	(this->hidden->surfaces_memtotal)
 #define surfaces_memleft	(this->hidden->surfaces_memleft)
 #define hw_lock			(this->hidden->hw_lock)
+#define switched_away		(this->hidden->switched_away)
+#define screen_vinfo		(this->hidden->screen_vinfo)
+#define screen_arealen		(this->hidden->screen_arealen)
+#define screen_contents		(this->hidden->screen_contents)
+#define screen_palette		(this->hidden->screen_palette)
 #define wait_vbl		(this->hidden->wait_vbl)
 #define wait_idle		(this->hidden->wait_idle)
 
