@@ -544,6 +544,10 @@ static int X11_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	}
 	X11_SaveVidModeGamma(this);
 
+	/* Save DPMS and screensaver settings */
+	X11_SaveScreenSaver(this);
+	X11_DisableScreenSaver(this);
+
 	/* See if we have been passed a window to use */
 	SDL_windowid = SDL_getenv("SDL_WINDOWID");
 
@@ -1364,10 +1368,14 @@ void X11_VideoQuit(_THIS)
 			SDL_free(SDL_iconcolors);
 			SDL_iconcolors = NULL;
 		} 
+
 		/* Restore gamma settings if they've changed */
 		if ( SDL_GetAppState() & SDL_APPACTIVE ) {
 			X11_SwapVidModeGamma(this);
 		}
+
+		/* Restore DPMS and screensaver settings */
+		X11_RestoreScreenSaver(this);
 
 		/* Free that blank cursor */
 		if ( SDL_BlankCursor != NULL ) {

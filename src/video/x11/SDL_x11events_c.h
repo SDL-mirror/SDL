@@ -28,3 +28,6 @@ extern void X11_InitOSKeymap(_THIS);
 extern void X11_PumpEvents(_THIS);
 extern void X11_SetKeyboardState(Display *display, const char *key_vec);
 
+extern void X11_SaveScreenSaver(_THIS);
+extern void X11_DisableScreenSaver(_THIS);
+extern void X11_RestoreScreenSaver(_THIS);
