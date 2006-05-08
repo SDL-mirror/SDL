@@ -400,7 +400,7 @@ static int gpm_available(char *proto, size_t protolen)
 						t = arg + arglen;
 						s = SDL_strchr(t, ' ');
 						if (s) *s = 0;
-						SDL_strncpy(raw_proto, t, SDL_arraysize(raw_proto));
+						SDL_strlcpy(raw_proto, t, SDL_arraysize(raw_proto));
 						if (s) *s = ' ';
 					}
 					if ( SDL_strncmp(arg, "-R", 2) == 0 ) {
@@ -409,7 +409,7 @@ static int gpm_available(char *proto, size_t protolen)
 						t = arg + 2;
 						s = SDL_strchr(t, ' ');
 						if (s) *s = 0;
-						SDL_strncpy(repeat_proto, t, SDL_arraysize(repeat_proto));
+						SDL_strlcpy(repeat_proto, t, SDL_arraysize(repeat_proto));
 						if (s) *s = ' ';
 					}
 					len -= arglen;
