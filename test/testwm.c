@@ -180,10 +180,10 @@ int SDLCALL FilterEvents(const SDL_Event *event)
 				event->active.gain ? "gained" : "lost");
 			if ( event->active.state & SDL_APPACTIVE )
 				printf("active ");
-			if ( event->active.state & SDL_APPMOUSEFOCUS )
-				printf("mouse ");
 			if ( event->active.state & SDL_APPINPUTFOCUS )
 				printf("input ");
+			if ( event->active.state & SDL_APPMOUSEFOCUS )
+				printf("mouse ");
 			printf("focus\n");
 
 			/* See if we are iconified or restored */

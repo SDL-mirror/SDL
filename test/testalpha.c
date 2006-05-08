@@ -505,7 +505,10 @@ fprintf(stderr, "Slept %d ticks\n", (SDL_GetTicks()-ticks));
 					}
 					break;
 				case SDL_KEYDOWN:
-					/* Any keypress quits the app... */
+					if ( event.key.keysym.sym == SDLK_ESCAPE ) {
+						done = 1;
+					}
+					break;
 				case SDL_QUIT:
 					done = 1;
 					break;
