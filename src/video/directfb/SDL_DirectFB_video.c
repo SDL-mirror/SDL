@@ -191,6 +191,9 @@ static DFBEnumerationResult EnumModesCallback (int  width,
 
   HIDDEN->nummodes++;
 
+  if (enumlist && enumlist->r.w == width && enumlist->r.h == height)
+    return DFENUM_OK;
+
   enumrect = SDL_calloc(1, sizeof(struct DirectFBEnumRect));
   if (!enumrect)
     {
