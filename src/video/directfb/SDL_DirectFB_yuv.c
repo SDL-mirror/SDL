@@ -200,7 +200,7 @@ int DirectFB_LockYUVOverlay(_THIS, SDL_Overlay *overlay)
 {
   DFBResult         ret;
   void             *data;
-  unsigned int      pitch;
+  int               pitch;
   IDirectFBSurface *surface = overlay->hwdata->surface;
 
   ret = surface->Lock (surface, DSLF_READ | DSLF_WRITE, &data, &pitch);
