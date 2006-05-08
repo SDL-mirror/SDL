@@ -953,6 +953,11 @@ static void switch_vt_done(_THIS)
 		screen_contents = NULL;
 	}
 
+	/* Get updates to the shadow surface while switched away */
+	if ( SDL_ShadowSurface ) {
+		SDL_UpdateRect(SDL_ShadowSurface, 0, 0, 0, 0);
+	}
+
 	SDL_PrivateAppActive(1, (SDL_APPACTIVE|SDL_APPINPUTFOCUS|SDL_APPMOUSEFOCUS));
 }
 static void switch_vt(_THIS, unsigned short which)
