@@ -545,8 +545,8 @@ static int X11_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	X11_SaveVidModeGamma(this);
 
 	/* Save DPMS and screensaver settings */
-	X11_SaveScreenSaver(this);
-	X11_DisableScreenSaver(this);
+	X11_SaveScreenSaver(SDL_Display, &screensaver_timeout, &dpms_enabled);
+	X11_DisableScreenSaver(SDL_Display);
 
 	/* See if we have been passed a window to use */
 	SDL_windowid = SDL_getenv("SDL_WINDOWID");
@@ -1375,7 +1375,7 @@ void X11_VideoQuit(_THIS)
 		}
 
 		/* Restore DPMS and screensaver settings */
-		X11_RestoreScreenSaver(this);
+		X11_RestoreScreenSaver(SDL_Display, screensaver_timeout, dpms_enabled);
 
 		/* Free that blank cursor */
 		if ( SDL_BlankCursor != NULL ) {

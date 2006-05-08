@@ -1118,53 +1118,53 @@ void X11_InitOSKeymap(_THIS)
 	X11_InitKeymap();
 }
 
-void X11_SaveScreenSaver(_THIS)
+void X11_SaveScreenSaver(Display *display, int *saved_timeout, BOOL *dpms)
 {
 	int timeout, interval, prefer_blank, allow_exp;
-	XGetScreenSaver(SDL_Display, &timeout, &interval, &prefer_blank, &allow_exp);
-	screensaver_timeout = timeout;
+	XGetScreenSaver(display, &timeout, &interval, &prefer_blank, &allow_exp);
+	*saved_timeout = timeout;
 
 #if SDL_VIDEO_DRIVER_X11_DPMS
 	if ( SDL_X11_HAVE_DPMS ) {
 		int dummy;
-	  	if ( DPMSQueryExtension(SDL_Display, &dummy, &dummy) ) {
+	  	if ( DPMSQueryExtension(display, &dummy, &dummy) ) {
 			CARD16 state;
-			DPMSInfo(SDL_Display, &state, &dpms_enabled);
+			DPMSInfo(display, &state, dpms);
 		}
 	}
 #endif /* SDL_VIDEO_DRIVER_X11_DPMS */
 }
 
-void X11_DisableScreenSaver(_THIS)
+void X11_DisableScreenSaver(Display *display)
 {
 	int timeout, interval, prefer_blank, allow_exp;
-	XGetScreenSaver(SDL_Display, &timeout, &interval, &prefer_blank, &allow_exp);
+	XGetScreenSaver(display, &timeout, &interval, &prefer_blank, &allow_exp);
 	timeout = 0;
-	XSetScreenSaver(SDL_Display, timeout, interval, prefer_blank, allow_exp);
+	XSetScreenSaver(display, timeout, interval, prefer_blank, allow_exp);
 
 #if SDL_VIDEO_DRIVER_X11_DPMS
 	if ( SDL_X11_HAVE_DPMS ) {
 		int dummy;
-	  	if ( DPMSQueryExtension(SDL_Display, &dummy, &dummy) ) {
-			DPMSDisable(SDL_Display);
+	  	if ( DPMSQueryExtension(display, &dummy, &dummy) ) {
+			DPMSDisable(display);
 		}
 	}
 #endif /* SDL_VIDEO_DRIVER_X11_DPMS */
 }
 
-void X11_RestoreScreenSaver(_THIS)
+void X11_RestoreScreenSaver(Display *display, int saved_timeout, BOOL dpms)
 {
 	int timeout, interval, prefer_blank, allow_exp;
-	XGetScreenSaver(SDL_Display, &timeout, &interval, &prefer_blank, &allow_exp);
-	timeout = screensaver_timeout;
-	XSetScreenSaver(SDL_Display, timeout, interval, prefer_blank, allow_exp);
+	XGetScreenSaver(display, &timeout, &interval, &prefer_blank, &allow_exp);
+	timeout = saved_timeout;
+	XSetScreenSaver(display, timeout, interval, prefer_blank, allow_exp);
 
 #if SDL_VIDEO_DRIVER_X11_DPMS
 	if ( SDL_X11_HAVE_DPMS ) {
 		int dummy;
-	  	if ( DPMSQueryExtension(SDL_Display, &dummy, &dummy) ) {
-			if ( dpms_enabled ) {
-				DPMSEnable(SDL_Display);
+	  	if ( DPMSQueryExtension(display, &dummy, &dummy) ) {
+			if ( dpms ) {
+				DPMSEnable(display);
 			}
 		}
 	}

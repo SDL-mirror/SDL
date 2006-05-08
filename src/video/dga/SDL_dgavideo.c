@@ -41,6 +41,11 @@
 /* get function pointers... */
 #include "../x11/SDL_x11dyn.h"
 
+/* Heheh we're using X11 event code */
+extern void X11_SaveScreenSaver(Display *display, int *saved_timeout, BOOL *dpms);
+extern void X11_DisableScreenSaver(Display *display);
+extern void X11_RestoreScreenSaver(Display *display, int saved_timeout, BOOL dpms);
+
 /* Initialization/Query functions */
 static int DGA_VideoInit(_THIS, SDL_PixelFormat *vformat);
 static SDL_Rect **DGA_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags);
@@ -386,6 +391,10 @@ static int DGA_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		XCloseDisplay(DGA_Display);
 		return(-1);
 	}
+
+	/* Save DPMS and screensaver settings */
+	X11_SaveScreenSaver(DGA_Display, &screensaver_timeout, &dpms_enabled);
+	X11_DisableScreenSaver(DGA_Display);
 
 	/* Query for the list of available video modes */
 	modes = SDL_NAME(XDGAQueryModes)(DGA_Display, DGA_Screen, &num_modes);
@@ -1048,7 +1057,6 @@ void DGA_VideoQuit(_THIS)
 		}
 #endif /* LOCK_DGA_DISPLAY */
 
-
 		/* Clean up defined video modes */
 		for ( i=0; i<NUM_MODELISTS; ++i ) {
 			if ( SDL_modelist[i] != NULL ) {
@@ -1062,6 +1070,9 @@ void DGA_VideoQuit(_THIS)
 
 		/* Clean up the memory bucket list */
 		DGA_FreeHWSurfaces(this);
+
+		/* Restore DPMS and screensaver settings */
+		X11_RestoreScreenSaver(DGA_Display, screensaver_timeout, dpms_enabled);
 
 		/* Close up the display */
 		XCloseDisplay(DGA_Display);
