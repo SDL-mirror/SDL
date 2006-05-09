@@ -157,9 +157,7 @@ struct SDL_PrivateVideoData {
 
     /* Screensaver settings */
     int screensaver_timeout;
-#if SDL_VIDEO_DRIVER_X11_DPMS
     BOOL dpms_enabled;
-#endif
 };
 
 /* Old variable names */
