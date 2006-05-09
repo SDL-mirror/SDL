@@ -291,11 +291,10 @@ printf("Mode: NotifyUngrab\n");
 		     (xevent.xcrossing.mode != NotifyUngrab) ) {
 			if ( this->input_grab == SDL_GRAB_OFF ) {
 				posted = SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS);
-			} else {
-				posted = SDL_PrivateMouseMotion(0, 0,
-						xevent.xcrossing.x,
-						xevent.xcrossing.y);
 			}
+			posted = SDL_PrivateMouseMotion(0, 0,
+					xevent.xcrossing.x,
+					xevent.xcrossing.y);
 		}
 	    }
 	    break;
