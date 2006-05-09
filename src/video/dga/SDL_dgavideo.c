@@ -771,6 +771,13 @@ static void DGA_FreeHWSurface(_THIS, SDL_Surface *surface)
 {
 	vidmem_bucket *bucket, *freeable;
 
+	/* Wait for any pending operations involving this surface */
+	if ( DGA_IsSurfaceBusy(surface) ) {
+		LOCK_DISPLAY();
+		DGA_WaitBusySurfaces(this);
+		UNLOCK_DISPLAY();
+	}
+
 	/* Look for the bucket in the current list */
 	for ( bucket=&surfaces; bucket; bucket=bucket->next ) {
 		if ( bucket == (vidmem_bucket *)surface->hwdata ) {
@@ -1054,7 +1061,7 @@ void DGA_VideoQuit(_THIS)
 		SDL_NAME(XDGACloseFramebuffer)(DGA_Display, DGA_Screen);
 		if ( this->screen ) {
 			/* Tell SDL not to free the pixels */
-			this->screen->pixels = NULL;
+			DGA_FreeHWSurface(this, this->screen);
 		}
 		SDL_NAME(XDGASetMode)(DGA_Display, DGA_Screen, 0);
 
