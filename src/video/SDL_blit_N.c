@@ -29,6 +29,9 @@
 /* Functions to blit from N-bit surfaces to other surfaces */
 
 #if SDL_ALTIVEC_BLITTERS
+#if __MWERKS__
+#pragma altivec_model on
+#endif
 #ifdef HAVE_ALTIVEC_H
 #include <altivec.h>
 #endif
@@ -830,6 +833,9 @@ static Uint32 GetBlitFeatures( void )
     }
     return features;
 }
+#if __MWERKS__
+#pragma altivec_model off
+#endif
 #else
 /* Feature 1 is has-MMX */
 #define GetBlitFeatures() ((Uint32)(SDL_HasMMX() ? 1 : 0))

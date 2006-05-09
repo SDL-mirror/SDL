@@ -637,6 +637,9 @@ static void BlitRGBtoRGBPixelAlphaMMX(SDL_BlitInfo *info)
 #endif /* GCC_ASMBLIT, MSVC_ASMBLIT */
 
 #if SDL_ALTIVEC_BLITTERS
+#if __MWERKS__
+#pragma altivec_model on
+#endif
 #if HAVE_ALTIVEC_H
 #include <altivec.h>
 #endif
@@ -1406,6 +1409,9 @@ static void BlitRGBtoRGBSurfaceAlphaAltivec(SDL_BlitInfo *info)
         dstp += dstskip;
     }
 }
+#if __MWERKS__
+#pragma altivec_model off
+#endif
 #endif /* SDL_ALTIVEC_BLITTERS */
 
 /* fast RGB888->(A)RGB888 blending with surface alpha=128 special case */
