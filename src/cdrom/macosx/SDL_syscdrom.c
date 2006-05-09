@@ -453,8 +453,8 @@ static int SDL_SYS_CDStop(SDL_CD *cdrom)
 static int SDL_SYS_CDEject(SDL_CD *cdrom)
 {
     OSStatus err;
-	HParamBlockRec  pb;
-    
+    pid_t dissenter;
+
     if (fakeCD) {
         SDL_SetError (kErrorFakeDevice);
         return -1;
@@ -475,9 +475,7 @@ static int SDL_SYS_CDEject(SDL_CD *cdrom)
     status = CD_STOPPED;
     
 	/* Eject the volume */
-	pb.ioParam.ioNamePtr = NULL;
-	pb.ioParam.ioVRefNum = volumes[cdrom->id];
-	err = PBUnmountVol((ParamBlockRec *) &pb);
+	err = FSEjectVolumeSync(volumes[cdrom->id], kNilOptions, &dissenter);
 
 	if (err != noErr) {
         Unlock ();

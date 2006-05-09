@@ -153,7 +153,7 @@ void delete_AudioFilePlayer(AudioFilePlayer *afp)
         }
     
         if (afp->mForkRefNum) {
-            FSClose (afp->mForkRefNum);
+            FSCloseFork (afp->mForkRefNum);
             afp->mForkRefNum = 0;
         }
         SDL_free(afp);
