@@ -285,6 +285,51 @@ static void SDL_UnlockAudio_Default(SDL_AudioDevice *audio)
 	SDL_mutexV(audio->mixer_lock);
 }
 
+static Uint16 SDL_ParseAudioFormat(const char *string)
+{
+	Uint16 format = 0;
+
+	switch (*string) {
+	    case 'U':
+		++string;
+		format |= 0x0000;
+		break;
+	    case 'S':
+		++string;
+		format |= 0x8000;
+		break;
+	    default:
+		return 0;
+	}
+	switch (SDL_atoi(string)) {
+	    case 8:
+		string += 1;
+		format |= 8;
+		break;
+	    case 16:
+		string += 2;
+		format |= 16;
+		if ( SDL_strcmp(string, "LSB") == 0
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
+		     || SDL_strcmp(string, "SYS") == 0
+#endif
+		    ) {
+			format |= 0x0000;
+		}
+		if ( SDL_strcmp(string, "MSB") == 0
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+		     || SDL_strcmp(string, "SYS") == 0
+#endif
+		    ) {
+			format |= 0x1000;
+		}
+		break;
+	    default:
+		return 0;
+	}
+	return format;
+}
+
 int SDL_AudioInit(const char *driver_name)
 {
 	SDL_AudioDevice *audio;
@@ -386,6 +431,7 @@ char *SDL_AudioDriverName(char *namebuf, int maxlen)
 int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 {
 	SDL_AudioDevice *audio;
+	const char *env;
 
 	/* Start up the audio driver, if necessary */
 	if ( ! current_audio ) {
@@ -402,9 +448,35 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 	}
 
 	/* Verify some parameters */
-	if ( desired->callback == NULL ) {
-		SDL_SetError("SDL_OpenAudio() passed a NULL callback");
-		return(-1);
+	if ( desired->freq == 0 ) {
+		env = SDL_getenv("SDL_AUDIO_FREQUENCY");
+		if ( env ) {
+			desired->freq = SDL_atoi(env);
+		}
+	}
+	if ( desired->freq == 0 ) {
+		/* Pick some default audio frequency */
+		desired->freq = 22050;
+	}
+	if ( desired->format == 0 ) {
+		env = SDL_getenv("SDL_AUDIO_FORMAT");
+		if ( env ) {
+			desired->format = SDL_ParseAudioFormat(env);
+		}
+	}
+	if ( desired->format == 0 ) {
+		/* Pick some default audio format */
+		desired->format = AUDIO_S16;
+	}
+	if ( desired->channels == 0 ) {
+		env = SDL_getenv("SDL_AUDIO_CHANNELS");
+		if ( env ) {
+			desired->channels = SDL_atoi(env);
+		}
+	}
+	if ( desired->channels == 0 ) {
+		/* Pick a default number of channels */
+		desired->channels = 2;
 	}
 	switch ( desired->channels ) {
 	    case 1:	/* Mono */
@@ -414,6 +486,25 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 		break;
 	    default:
 		SDL_SetError("1 (mono) and 2 (stereo) channels supported");
+		return(-1);
+	}
+	if ( desired->samples == 0 ) {
+		env = SDL_getenv("SDL_AUDIO_SAMPLES");
+		if ( env ) {
+			desired->samples = SDL_atoi(env);
+		}
+	}
+	if ( desired->samples == 0 ) {
+		/* Pick a default of ~46 ms at desired frequency */
+		int samples = (desired->freq / 1000) * 46;
+		int power2 = 1;
+		while ( power2 < samples ) {
+			power2 *= 2;
+		}
+		desired->samples = power2;
+	}
+	if ( desired->callback == NULL ) {
+		SDL_SetError("SDL_OpenAudio() passed a NULL callback");
 		return(-1);
 	}
 

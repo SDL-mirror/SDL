@@ -4,6 +4,16 @@ This is a list of API changes in SDL's version history.
 Version 1.0:
 
 1.2.10:
+	If SDL_OpenAudio() is passed zero for the desired format
+	fields, the following environment variables will be used
+	to fill them in:
+		SDL_AUDIO_FREQUENCY
+		SDL_AUDIO_FORMAT
+		SDL_AUDIO_CHANNELS
+		SDL_AUDIO_SAMPLES
+	If an environment variable is not specified, it will be set
+	to a reasonable default value.
+
 	Added support for the SDL_VIDEO_FULLSCREEN_HEAD environment
 	variable, currently supported on X11 Xinerama configurations.
 
