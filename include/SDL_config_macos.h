@@ -73,10 +73,18 @@ typedef unsigned long	uintptr_t;
 #define SDL_AUDIO_DRIVER_DUMMY	1
 
 /* Enable various cdrom drivers */
-#define SDL_CDROM_MACOS	1
+#if TARGET_API_MAC_CARBON
+#define SDL_CDROM_DUMMY		1
+#else
+#define SDL_CDROM_MACOS		1
+#endif
 
 /* Enable various input drivers */
+#if TARGET_API_MAC_CARBON
+#define SDL_JOYSTICK_DUMMY	1
+#else
 #define SDL_JOYSTICK_MACOS	1
+#endif
 
 /* Enable various shared object loading systems */
 #define SDL_LOADSO_MACOS	1
