@@ -1131,6 +1131,8 @@ void X11_SaveScreenSaver(Display *display, int *saved_timeout, BOOL *dpms)
 			DPMSInfo(display, &state, dpms);
 		}
 	}
+#else
+	*dpms = 0;
 #endif /* SDL_VIDEO_DRIVER_X11_DPMS */
 }
 

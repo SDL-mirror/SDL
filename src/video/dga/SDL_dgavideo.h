@@ -25,6 +25,7 @@
 #define _SDL_dgavideo_h
 
 #include <X11/Xlib.h>
+#include <X11/Xproto.h>
 
 #include "SDL_mouse.h"
 #include "SDL_mutex.h"
@@ -93,9 +94,7 @@ struct SDL_PrivateVideoData {
 
 	/* Screensaver settings */
 	int screensaver_timeout;
-#if SDL_VIDEO_DRIVER_X11_DPMS
 	BOOL dpms_enabled;
-#endif
 };
 /* Old variable names */
 #define DGA_Display		(this->hidden->DGA_Display)
