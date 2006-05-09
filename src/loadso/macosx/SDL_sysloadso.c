@@ -94,6 +94,7 @@ extern "C" {
 #define dl_restrict
 #endif
 
+#if 0
 #ifndef _POSIX_SOURCE
 /*
  * Structure filled in by dladdr().
@@ -107,6 +108,7 @@ typedef struct SDL_OSX_dl_info {
 
 static int SDL_OSX_dladdr(const void * dl_restrict, SDL_OSX_Dl_info * dl_restrict);
 #endif /* ! _POSIX_SOURCE */
+#endif /* 0 */
 
 static int SDL_OSX_dlclose(void * handle);
 static const char * SDL_OSX_dlerror(void);
@@ -238,9 +240,9 @@ static void *reference(struct dlstatus *dls, int mode);
 static void *dlsymIntern(struct dlstatus *dls, const char *symbol, int canSetError);
 static struct dlstatus *allocStatus(void);
 static struct dlstatus *loadModule(const char *path, const struct stat *sbuf, int mode);
-static NSSymbol *search_linked_libs(const struct mach_header *mh, const char *symbol);
+static NSSymbol search_linked_libs(const struct mach_header *mh, const char *symbol);
 static const char *get_lib_name(const struct mach_header *mh);
-static const struct mach_header *get_mach_header_from_NSModule(NSModule * mod);
+static const struct mach_header *get_mach_header_from_NSModule(NSModule mod);
 static void dlcompat_init_func(void);
 static inline void dlcompat_init_check(void);
 static inline void dolock(void);
@@ -331,10 +333,10 @@ static const char *get_lib_name(const struct mach_header *mh)
  * and finding the one with the same name as the module. There really ought to be
  * an api for doing this, would be faster, but there isn't one right now
  */
-static const struct mach_header *get_mach_header_from_NSModule(NSModule * mod)
+static const struct mach_header *get_mach_header_from_NSModule(NSModule mod)
 {
 	const char *mod_name = NSNameOfModule(mod);
-	struct mach_header *mh = NULL;
+	const struct mach_header *mh = NULL;
 	unsigned long count = _dyld_image_count();
 	unsigned long i;
 	debug("Module name: %s", mod_name);
@@ -526,7 +528,7 @@ static int promoteLocalToGlobal(struct dlstatus *dls)
 	static int (*p) (NSModule module) = 0;
 	debug("promoting");
 	if (!p)
-		_dyld_func_lookup("__dyld_NSMakePrivateModulePublic", (unsigned long *)&p);
+		_dyld_func_lookup("__dyld_NSMakePrivateModulePublic", (void **)&p);
 	return (dls->module == MAGIC_DYLIB_MOD) || (p && p(dls->module));
 }
 
@@ -585,12 +587,12 @@ static const struct mach_header *my_find_image(const char *name)
  * bother adding the extra dependencies, if the symbols are neither in the loaded image nor
  * any of it's direct dependencies, then it probably isn't there.
  */
-static NSSymbol *search_linked_libs(const struct mach_header * mh, const char *symbol)
+static NSSymbol search_linked_libs(const struct mach_header * mh, const char *symbol)
 {
 	unsigned int n;
 	struct load_command *lc = 0;
 	struct mach_header *wh;
-	NSSymbol *nssym = 0;
+	NSSymbol nssym = 0;
 	if (dyld_NSAddImage && dyld_NSIsSymbolNameDefinedInImage && dyld_NSLookupSymbolInImage)
 	{
 		lc = (struct load_command *)((char *)mh + sizeof(struct mach_header));
@@ -640,7 +642,7 @@ static inline char *dyld_error_str()
 
 static void *dlsymIntern(struct dlstatus *dls, const char *symbol, int canSetError)
 {
-  NSSymbol *nssym = 0;
+  NSSymbol nssym = 0;
 #ifdef __GCC__  
 	void *caller = __builtin_return_address(1);	/* Be *very* careful about inlining */
 #else
@@ -899,10 +901,10 @@ inline static void dlcompat_init_check(void)
 
 static void dlcompat_init_func(void)
 {
-        _dyld_func_lookup("__dyld_NSAddImage", (unsigned long *)&dyld_NSAddImage);
+        _dyld_func_lookup("__dyld_NSAddImage", (void **)&dyld_NSAddImage);
 	_dyld_func_lookup("__dyld_NSIsSymbolNameDefinedInImage",
-			  (unsigned long *)&dyld_NSIsSymbolNameDefinedInImage);
-	_dyld_func_lookup("__dyld_NSLookupSymbolInImage", (unsigned long *)&dyld_NSLookupSymbolInImage);
+			  (void **)&dyld_NSIsSymbolNameDefinedInImage);
+	_dyld_func_lookup("__dyld_NSLookupSymbolInImage", (void **)&dyld_NSLookupSymbolInImage);
 	if (pthread_mutex_init(&dlcompat_mutex, NULL))
 	    exit(1);
 	if (pthread_key_create(&dlerror_key, &dlerrorfree))
@@ -1189,9 +1191,9 @@ static const struct mach_header *image_for_address(const void *address)
 	unsigned long i;
 	unsigned long j;
 	unsigned long count = _dyld_image_count();
-	struct mach_header *mh = 0;
+	const struct mach_header *mh = 0;
 	struct load_command *lc = 0;
-	unsigned long addr = NULL;
+	unsigned long addr = 0;
 	for (i = 0; i < count; i++)
 	{
 		addr = (unsigned long)address - _dyld_get_image_vmaddr_slide(i);
@@ -1216,6 +1218,7 @@ static const struct mach_header *image_for_address(const void *address)
 	return mh;
 }
 
+#if 0 /* unused */
 static int SDL_OSX_dladdr(const void * dl_restrict p, SDL_OSX_Dl_info * dl_restrict info)
 {
 /*
@@ -1323,7 +1326,7 @@ static int SDL_OSX_dladdr(const void * dl_restrict p, SDL_OSX_Dl_info * dl_restr
 	dounlock();
 	return 1;
 }
-
+#endif
 
 /*
  * Implement the dlfunc() interface, which behaves exactly the same as
