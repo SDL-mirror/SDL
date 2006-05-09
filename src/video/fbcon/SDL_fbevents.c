@@ -1115,6 +1115,12 @@ void FB_InitOSKeymap(_THIS)
 	  case SCANCODE_LEFTWIN:
 	    keymap[i] = SDLK_LSUPER;
 	    break;
+	  case SCANCODE_LEFTALT:
+	    keymap[i] = SDLK_LALT;
+	    break;
+	  case SCANCODE_RIGHTALT:
+	    keymap[i] = SDLK_RALT;
+	    break;
 	  case 127:
 	    keymap[i] = SDLK_MENU;
 	    break;
@@ -1216,10 +1222,10 @@ static SDL_keysym *TranslateKey(int scancode, SDL_keysym *keysym)
 		if ( modstate & KMOD_CTRL ) {
 			map |= (1<<KG_CTRL);
 		}
-		if ( modstate & KMOD_ALT ) {
+		if ( modstate & KMOD_LALT ) {
 			map |= (1<<KG_ALT);
 		}
-		if ( modstate & KMOD_MODE ) {
+		if ( modstate & KMOD_RALT ) {
 			map |= (1<<KG_ALTGR);
 		}
 		if ( KTYP(vga_keymap[map][scancode]) == KT_LETTER ) {
