@@ -95,6 +95,7 @@ void SDL_TimerQuit(void)
 	}
 	if ( SDL_timer_threaded ) {
 		SDL_DestroyMutex(SDL_timer_mutex);
+		SDL_timer_mutex = NULL;
 	}
 	SDL_timer_started = 0;
 	SDL_timer_threaded = 0;
