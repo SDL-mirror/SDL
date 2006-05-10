@@ -114,7 +114,11 @@
 
 /* Enable various video drivers */
 #define SDL_VIDEO_DRIVER_DUMMY	1
+#if TARGET_API_MAC_CARBON
+#define SDL_VIDEO_DRIVER_TOOLBOX	1
+#else
 #define SDL_VIDEO_DRIVER_QUARTZ	1
+#endif
 
 /* Enable OpenGL support */
 #define SDL_VIDEO_OPENGL	1
