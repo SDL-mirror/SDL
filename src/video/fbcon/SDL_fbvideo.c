@@ -149,6 +149,19 @@ static void FB_SavePalette(_THIS, struct fb_fix_screeninfo *finfo,
                                   struct fb_var_screeninfo *vinfo);
 static void FB_RestorePalette(_THIS);
 
+/* Small wrapper for mmap() so we can play nicely with no-mmu hosts
+ * (non-mmu hosts disallow the MAP_SHARED flag) */
+
+static void *do_mmap(void *start, size_t length, int prot, int flags, int fd, off_t offset)
+{
+	void *ret;
+	ret = mmap(start, length, prot, flags, fd, offset);
+	if ( ret == (char *)-1 && (flags & MAP_SHARED) ) {
+		ret = mmap(start, length, prot,
+		           (flags & ~MAP_SHARED) | MAP_PRIVATE, fd, offset);
+	}
+}
+
 /* FB driver bootstrap functions */
 
 static int FB_Available(void)
@@ -535,7 +548,7 @@ static int FB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	mapped_offset = (((long)finfo.smem_start) -
 	                (((long)finfo.smem_start)&~(PAGE_SIZE-1)));
 	mapped_memlen = finfo.smem_len+mapped_offset;
-	mapped_mem = mmap(NULL, mapped_memlen,
+	mapped_mem = do_mmap(NULL, mapped_memlen,
 	                  PROT_READ|PROT_WRITE, MAP_SHARED, console_fd, 0);
 	if ( mapped_mem == (char *)-1 ) {
 		SDL_SetError("Unable to memory map the video hardware");
@@ -579,7 +592,7 @@ static int FB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	ioctl(console_fd, FBIOPUT_VSCREENINFO, &vinfo);
 	if ( finfo.accel && finfo.mmio_len ) {
 		mapped_iolen = finfo.mmio_len;
-		mapped_io = mmap(NULL, mapped_iolen, PROT_READ|PROT_WRITE,
+		mapped_io = do_mmap(NULL, mapped_iolen, PROT_READ|PROT_WRITE,
 		                 MAP_SHARED, console_fd, mapped_memlen);
 		if ( mapped_io == (char *)-1 ) {
 			/* Hmm, failed to memory map I/O registers */
