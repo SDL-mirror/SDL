@@ -26,7 +26,7 @@
 
 #if SDL_VIDEO_OPENGL
 #include "SDL_opengl.h"
-#ifdef MACOSX
+#if __MACOSX__
 #include <AGL/agl.h>   /* AGL.framework */
 #else
 #include <agl.h>
