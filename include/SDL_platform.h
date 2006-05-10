@@ -61,13 +61,12 @@
 #undef __LINUX__
 #define __LINUX__	1
 #endif
-#if defined(macintosh)
-#undef __MACOS__
-#define __MACOS__	1
-#endif
 #if defined(__APPLE__)
 #undef __MACOSX__
 #define __MACOSX__	1
+#elif defined(macintosh)
+#undef __MACOS__
+#define __MACOS__	1
 #endif
 #if defined(__NetBSD__)
 #undef __NETBSD__
