@@ -168,7 +168,11 @@ void Mac_GL_SwapBuffers(_THIS)
 int Mac_GL_LoadLibrary(_THIS, const char *location)
 {
 	if (location == NULL)
+#if __MACH__
+		location = "/System/Library/Frameworks/OpenGL.framework/OpenGL";
+#else
 		location = "OpenGLLibrary";
+#endif
 
 	this->hidden->libraryHandle = SDL_LoadObject(location);
 
