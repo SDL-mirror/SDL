@@ -176,7 +176,7 @@ VideoBootStrap DGA_bootstrap = {
 static int DGA_AddMode(_THIS, int bpp, int w, int h)
 {
 	SDL_Rect *mode;
-	int i, index;
+	int index;
 	int next_mode;
 
 	/* Check to see if we already have this mode */
