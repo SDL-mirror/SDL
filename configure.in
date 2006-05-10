@@ -791,10 +791,8 @@ AC_HELP_STRING([--enable-video-x11], [use X11 video driver [[default=yes]]]),
         case "$host" in
             *-*-darwin*)
                 # This isn't necessary for X11, but fixes GLX detection
-                if test "x$x_includes" = xNONE; then
+                if test "x$x_includes" = xNONE && test "x$x_libraries" = xNONE; then
                     x_includes="/usr/X11R6/include"
-                fi
-                if test "x$x_libraries" != xNONE; then
                     x_libraries="/usr/X11R6/lib"
                 fi
                 ;;
