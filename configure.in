@@ -789,8 +789,8 @@ AC_HELP_STRING([--enable-video-x11], [use X11 video driver [[default=yes]]]),
                   , enable_video_x11=yes)
     if test x$enable_video = xyes -a x$enable_video_x11 = xyes; then
         case "$host" in
-            *-*-darwin*) # Latest Mac OS X actually ships with Xrandr/Xrender libs...
-                # This isn't strictly necessary for X11, but for GLX detection
+            *-*-darwin*)
+                # This isn't necessary for X11, but fixes GLX detection
                 if test "x$x_includes" = xNONE; then
                     x_includes="/usr/X11R6/include"
                 fi
