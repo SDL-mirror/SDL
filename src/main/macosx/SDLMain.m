@@ -252,19 +252,24 @@ static void CustomApplicationMain (int argc, char **argv)
  */
 - (BOOL)application:(NSApplication *)theApplication openFile:(NSString *)filename
 {
+    const char *temparg;
+    size_t arglen;
+    char *arg;
+    char **newargv;
+
     if (!gFinderLaunch)  /* MacOS is passing command line args. */
         return FALSE;
 
     if (gCalledAppMainline)  /* app has started, ignore this document. */
         return FALSE;
 
-    const char *temparg = [filename UTF8String];
-    size_t arglen = SDL_strlen(temparg) + 1;
-    char *arg = (char *) SDL_malloc(arglen);
+    temparg = [filename UTF8String];
+    arglen = SDL_strlen(temparg) + 1;
+    arg = (char *) SDL_malloc(arglen);
     if (arg == NULL)
         return FALSE;
 
-    char **newargv = (char **) realloc(gArgv, sizeof (char *) * (gArgc + 2));
+    newargv = (char **) realloc(gArgv, sizeof (char *) * (gArgc + 2));
     if (newargv == NULL)
     {
         SDL_free(arg);
@@ -376,3 +381,4 @@ int main (int argc, char **argv)
 #endif
     return 0;
 }
+
