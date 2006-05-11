@@ -35,6 +35,7 @@
 #include <Movies.h>
 #endif
 #else
+#include <Quickdraw.h>
 #include <LowMem.h>
 #include <Gestalt.h>
 #include <Devices.h>
@@ -637,12 +638,12 @@ static void ROM_WindowUpdate(_THIS, int numrects, SDL_Rect *rects)
 	SetPortWindowPort(SDL_Window);
 	thePort = GetWindowPort(SDL_Window);
 	memworld = (GWorldPtr)GetWRefCon(SDL_Window);
-#if TARGET_API_MAC_CARBON
+#if TARGET_API_MAC_CARBON && ACCESSOR_CALLS_ARE_FUNCTIONS
 	memBits = GetPortBitMapForCopyBits((CGrafPtr) memworld);
 #else
 	memBits = &((GrafPtr)memworld)->portBits;
 #endif
-#if TARGET_API_MAC_CARBON
+#if TARGET_API_MAC_CARBON && ACCESSOR_CALLS_ARE_FUNCTIONS
 	winBits = GetPortBitMapForCopyBits(thePort);
 #else
 	winBits = &SDL_Window->portBits;

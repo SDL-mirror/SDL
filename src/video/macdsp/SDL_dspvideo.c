@@ -682,7 +682,7 @@ static int DSp_ConfirmSwitch () {
   if (dialog == NULL)
 	 return (0);
   
-#if TARGET_API_CARBON
+#if TARGET_API_MAC_CARBON
   SetPort (GetDialogPort(dialog));
 #else
   SetPort ((WindowPtr) dialog);
