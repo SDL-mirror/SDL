@@ -262,68 +262,67 @@ void QZ_SetIcon       (_THIS, SDL_Surface *icon, Uint8 *mask)
     NSBitmapImageRep *imgrep;
     NSImage *img;
     SDL_Surface *mergedSurface;
-    int i,j;
     NSAutoreleasePool *pool;
-    SDL_Rect rrect;
-    NSSize imgSize = {icon->w, icon->h};
+    Uint8 *pixels;
+    SDL_bool iconSrcAlpha;
+    Uint8 iconAlphaValue;
+    int i, j, maskPitch, index;
     
     pool = [ [ NSAutoreleasePool alloc ] init ];
-    SDL_GetClipRect(icon, &rrect);
     
-    /* create a big endian RGBA surface */
-    mergedSurface = SDL_CreateRGBSurface(SDL_SWSURFACE|SDL_SRCALPHA, 
-                    icon->w, icon->h, 32, 0xff<<24, 0xff<<16, 0xff<<8, 0xff<<0);
-    if (mergedSurface==NULL) {
-        NSLog(@"Error creating surface for merge");
-        goto freePool;
-    }
+    imgrep = [ [ [ NSBitmapImageRep alloc ] initWithBitmapDataPlanes: NULL pixelsWide: icon->w pixelsHigh: icon->h bitsPerSample: 8 samplesPerPixel: 4 hasAlpha: YES isPlanar: NO colorSpaceName: NSDeviceRGBColorSpace bytesPerRow: 4*icon->w bitsPerPixel: 32 ] autorelease ];
+    if (imgrep == nil) goto freePool;
+    pixels = [ imgrep bitmapData ];
+    SDL_memset(pixels, 0, 4*icon->w*icon->h); /* make the background, which will survive in colorkeyed areas, completely transparent */
     
-    if (mergedSurface->pitch != 
-        mergedSurface->format->BytesPerPixel * mergedSurface->w) {
-        SDL_SetError ("merged surface has wrong format");
-        SDL_FreeSurface (mergedSurface);
-        goto freePool;
-    }
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+#define BYTEORDER_DEPENDENT_RGBA_MASKS 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF
+#else
+#define BYTEORDER_DEPENDENT_RGBA_MASKS 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000
+#endif
+    mergedSurface = SDL_CreateRGBSurfaceFrom(pixels, icon->w, icon->h, 32, 4*icon->w, BYTEORDER_DEPENDENT_RGBA_MASKS);
+    if (mergedSurface == NULL) goto freePool;
     
-    if (SDL_BlitSurface(icon,&rrect,mergedSurface,&rrect)) {
-        NSLog(@"Error blitting to mergedSurface");
-        goto freePool;
-    }
+    /* blit, with temporarily cleared SRCALPHA flag because we want to copy, not alpha-blend */
+    iconSrcAlpha = ((icon->flags & SDL_SRCALPHA) != 0);
+    iconAlphaValue = icon->format->alpha;
+    SDL_SetAlpha(icon, 0, 255);
+    SDL_BlitSurface(icon, NULL, mergedSurface, NULL);
+    if (iconSrcAlpha) SDL_SetAlpha(icon, SDL_SRCALPHA, iconAlphaValue);
     
-    if (mask) {
-
-        Uint32 *pixels = mergedSurface->pixels;
-        for (i = 0; i < mergedSurface->h; i++) {
-            for (j = 0; j < mergedSurface->w; j++) {
-                
-                int index = i * mergedSurface->w + j;
-                int mindex = index >> 3;
-                int bindex = 7 - (index & 0x7);
-                
-                if (mask[mindex] & (1 << bindex))
-                    pixels[index] |= 0x000000FF;
-                else
-                    pixels[index] &= 0xFFFFFF00;
+    SDL_FreeSurface(mergedSurface);
+    
+    /* apply mask, source alpha, and premultiply color values by alpha */
+    maskPitch = (icon->w+7)/8;
+    for (i = 0; i < icon->h; i++) {
+        for (j = 0; j < icon->w; j++) {
+            index = i*4*icon->w + j*4;
+            if (!(mask[i*maskPitch + j/8] & (128 >> j%8))) {
+                pixels[index + 3] = 0;
+            }
+            else {
+                if (iconSrcAlpha) {
+                    if (icon->format->Amask == 0) pixels[index + 3] = icon->format->alpha;
+                }
+                else {
+                    pixels[index + 3] = 255;
+                }
+            }
+            if (pixels[index + 3] < 255) {
+                pixels[index + 0] = (Uint16)pixels[index + 0]*pixels[index + 3]/255;
+                pixels[index + 1] = (Uint16)pixels[index + 1]*pixels[index + 3]/255;
+                pixels[index + 2] = (Uint16)pixels[index + 2]*pixels[index + 3]/255;
             }
         }
     }
     
-    imgrep = [ [ NSBitmapImageRep alloc] 
-                    initWithBitmapDataPlanes:(unsigned char **)&mergedSurface->pixels 
-                        pixelsWide:icon->w pixelsHigh:icon->h bitsPerSample:8 samplesPerPixel:4 
-                        hasAlpha:YES isPlanar:NO colorSpaceName:NSDeviceRGBColorSpace 
-                        bytesPerRow:icon->w<<2 bitsPerPixel:32 ];
-    
-    img = [ [ NSImage alloc ] initWithSize:imgSize ];
-    
+    img = [ [ [ NSImage alloc ] initWithSize: NSMakeSize(icon->w, icon->h) ] autorelease ];
+    if (img == nil) goto freePool;
     [ img addRepresentation: imgrep ];
     [ NSApp setApplicationIconImage:img ];
     
-    [ img release ];
-    [ imgrep release ];
-    SDL_FreeSurface(mergedSurface);
 freePool:
-    [pool release];
+    [ pool release ];
 }
 
 int  QZ_IconifyWindow (_THIS) { 
