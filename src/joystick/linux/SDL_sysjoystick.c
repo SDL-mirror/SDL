@@ -30,9 +30,6 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <limits.h>		/* For the definition of PATH_MAX */
-#ifdef __arm__
-#include <linux/limits.h> /* Arm cross-compiler needs this */
-#endif
 #include <linux/joystick.h>
 #if SDL_INPUT_LINUXEV
 #include <linux/input.h>
