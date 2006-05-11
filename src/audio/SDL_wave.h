@@ -35,6 +35,7 @@
 #define PCM_CODE	0x0001
 #define MS_ADPCM_CODE	0x0002
 #define IMA_ADPCM_CODE	0x0011
+#define MP3_CODE	0x0055
 #define WAVE_MONO	1
 #define WAVE_STEREO	2
 

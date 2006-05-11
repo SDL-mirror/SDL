@@ -985,10 +985,10 @@ static size_t SDL_PrintLong(char *text, long value, int radix, size_t maxlen)
 
     SDL_ltoa(value, num, radix);
     size = SDL_strlen(num);
-    if ( size > maxlen ) {
-        size = maxlen;
+    if ( size >= maxlen ) {
+        size = maxlen-1;
     }
-    SDL_strlcpy(text, num, size);
+    SDL_strlcpy(text, num, size+1);
 
     return size;
 }
@@ -999,10 +999,10 @@ static size_t SDL_PrintUnsignedLong(char *text, unsigned long value, int radix, 
 
     SDL_ultoa(value, num, radix);
     size = SDL_strlen(num);
-    if ( size > maxlen ) {
-        size = maxlen;
+    if ( size >= maxlen ) {
+        size = maxlen-1;
     }
-    SDL_strlcpy(text, num, size);
+    SDL_strlcpy(text, num, size+1);
 
     return size;
 }
@@ -1014,10 +1014,10 @@ static size_t SDL_PrintLongLong(char *text, Sint64 value, int radix, size_t maxl
 
     SDL_lltoa(value, num, radix);
     size = SDL_strlen(num);
-    if ( size > maxlen ) {
-        size = maxlen;
+    if ( size >= maxlen ) {
+        size = maxlen-1;
     }
-    SDL_strlcpy(text, num, size);
+    SDL_strlcpy(text, num, size+1);
 
     return size;
 }
@@ -1028,10 +1028,10 @@ static size_t SDL_PrintUnsignedLongLong(char *text, Uint64 value, int radix, siz
 
     SDL_ulltoa(value, num, radix);
     size = SDL_strlen(num);
-    if ( size > maxlen ) {
-        size = maxlen;
+    if ( size >= maxlen ) {
+        size = maxlen-1;
     }
-    SDL_strlcpy(text, num, size);
+    SDL_strlcpy(text, num, size+1);
 
     return size;
 }
@@ -1101,6 +1101,9 @@ int SDL_vsnprintf(char *text, size_t maxlen, const char *fmt, va_list ap)
 
             ++fmt;
             /* FIXME: implement more of the format specifiers */
+            while ( *fmt == '.' || (*fmt >= '0' && *fmt <= '9') ) {
+                ++fmt;
+            }
             while (!done) {
                 switch(*fmt) {
                     case '%':

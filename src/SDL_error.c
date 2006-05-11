@@ -39,15 +39,10 @@ extern SDL_error *SDL_GetErrBuf(void);
 
 /* Private functions */
 
-static void SDL_LookupString(const Uint8 *key, Uint16 *buf, int buflen)
+static const char *SDL_LookupString(const char *key)
 {
 	/* FIXME: Add code to lookup key in language string hash-table */
-
-	/* Key not found in language string hash-table */
-	while ( *key && (--buflen > 0) ) {
-		*buf++ = *key++;
-	}
-	*buf = 0;	/* NULL terminate string */
+	return key;
 }
 
 /* Public functions */
@@ -66,17 +61,20 @@ void SDL_SetError (const char *fmt, ...)
 	error->argc = 0;
 	while ( *fmt ) {
 		if ( *fmt++ == '%' ) {
+			while ( *fmt == '.' || (*fmt >= '0' && *fmt <= '9') ) {
+				++fmt;
+			}
 			switch (*fmt++) {
 			    case 0:  /* Malformed format string.. */
 				--fmt;
 				break;
-#if 0	/* What is a character anyway?  (UNICODE issues) */
 			    case 'c':
-				error->args[error->argc++].value_c =
-						va_arg(ap, unsigned char);
-				break;
-#endif
+			    case 'i':
 			    case 'd':
+			    case 'u':
+			    case 'o':
+			    case 'x':
+			    case 'X':
 				error->args[error->argc++].value_i =
 							va_arg(ap, int);
 				break;
@@ -114,124 +112,67 @@ void SDL_SetError (const char *fmt, ...)
 #endif
 }
 
-/* Print out an integer value to a UNICODE buffer */
-static int PrintInt(Uint16 *str, unsigned int maxlen, int value)
-{
-	char tmp[128];
-	int len, i;
-
-	SDL_snprintf(tmp, SDL_arraysize(tmp), "%d", value);
-	len = 0;
-	if ( SDL_strlen(tmp) < maxlen ) {
-		for ( i=0; tmp[i]; ++i ) {
-			*str++ = tmp[i];
-			++len;
-		}
-	}
-	return(len);
-}
-/* Print out a double value to a UNICODE buffer */
-static int PrintDouble(Uint16 *str, unsigned int maxlen, double value)
-{
-	char tmp[128];
-	int len, i;
-
-	SDL_snprintf(tmp, SDL_arraysize(tmp), "%f", value);
-	len = 0;
-	if ( SDL_strlen(tmp) < maxlen ) {
-		for ( i=0; tmp[i]; ++i ) {
-			*str++ = tmp[i];
-			++len;
-		}
-	}
-	return(len);
-}
-/* Print out a pointer value to a UNICODE buffer */
-static int PrintPointer(Uint16 *str, unsigned int maxlen, void *value)
-{
-	char tmp[128];
-	int len, i;
-
-	SDL_snprintf(tmp, SDL_arraysize(tmp), "%p", value);
-	len = 0;
-	if ( SDL_strlen(tmp) < maxlen ) {
-		for ( i=0; tmp[i]; ++i ) {
-			*str++ = tmp[i];
-			++len;
-		}
-	}
-	return(len);
-}
-
 /* This function has a bit more overhead than most error functions
    so that it supports internationalization and thread-safe errors.
 */
-Uint16 *SDL_GetErrorMsgUNICODE(Uint16 *errstr, unsigned int maxlen)
+char *SDL_GetErrorMsg(char *errstr, unsigned int maxlen)
 {
 	SDL_error *error;
 
 	/* Clear the error string */
-	*errstr = 0; --maxlen;
+	*errstr = '\0'; --maxlen;
 
 	/* Get the thread-safe error, and print it out */
 	error = SDL_GetErrBuf();
 	if ( error->error ) {
-		Uint16 translated[ERR_MAX_STRLEN], *fmt, *msg;
+		const char *fmt;
+		char *msg = errstr;
 		int len;
 		int argi;
 
-		/* Print out the UNICODE error message */
-		SDL_LookupString(error->key, translated, sizeof(translated));
-		msg = errstr;
+		fmt = SDL_LookupString(error->key);
 		argi = 0;
-		for ( fmt=translated; *fmt && (maxlen > 0); ) {
+		while ( *fmt && (maxlen > 0) ) {
 			if ( *fmt == '%' ) {
-				switch (fmt[1]) {
-				    case 'S':	/* Special SKIP operand */
-					argi += (fmt[2] - '0');
-					++fmt;
-					break;
+				char tmp[32], *spot = tmp;
+				*spot++ = *fmt++;
+				while ( *fmt == '.' || (*fmt >= '0' && *fmt <= '9') && spot < (tmp+SDL_arraysize(tmp)-2) ) {
+					*spot++ = *fmt++;
+				}
+				*spot++ = *fmt++;
+				*spot++ = '\0';
+				switch (spot[-2]) {
 				    case '%':
 					*msg++ = '%';
 					maxlen -= 1;
 					break;
-#if 0	/* What is a character anyway?  (UNICODE issues) */
 				    case 'c':
-                                        *msg++ = (unsigned char)
-					         error->args[argi++].value_c;
-					maxlen -= 1;
-					break;
-#endif
-				    case 'd':
-					len = PrintInt(msg, maxlen,
-						error->args[argi++].value_i);
+				    case 'i':
+			            case 'd':
+			            case 'u':
+			            case 'o':
+				    case 'x':
+				    case 'X':
+					len = SDL_snprintf(msg, maxlen, tmp, error->args[argi++].value_i);
 					msg += len;
 					maxlen -= len;
 					break;
 				    case 'f':
-					len = PrintDouble(msg, maxlen,
-						error->args[argi++].value_f);
+					len = SDL_snprintf(msg, maxlen, tmp, error->args[argi++].value_f);
 					msg += len;
 					maxlen -= len;
 					break;
 				    case 'p':
-					len = PrintPointer(msg, maxlen,
-						error->args[argi++].value_ptr);
+					len = SDL_snprintf(msg, maxlen, tmp, error->args[argi++].value_ptr);
 					msg += len;
 					maxlen -= len;
 					break;
-				    case 's': /* UNICODE string */
-					{ Uint16 buf[ERR_MAX_STRLEN], *str;
-					  SDL_LookupString(error->args[argi++].buf, buf, sizeof(buf));
-					  str = buf;
-					  while ( *str && (maxlen > 0) ) {
-						*msg++ = *str++;
-						maxlen -= 1;
-					  }
-					}
+				    case 's':
+					len = SDL_snprintf(msg, maxlen, tmp, SDL_LookupString(error->args[argi++].buf));
+					msg += len;
+					maxlen -= len;
 					break;
 				}
-				fmt += 2;
 			} else {
 				*msg++ = *fmt++;
 				maxlen -= 1;
@@ -239,32 +180,6 @@ Uint16 *SDL_GetErrorMsgUNICODE(Uint16 *errstr, unsigned int maxlen)
 		}
 		*msg = 0;	/* NULL terminate the string */
 	}
-	return(errstr);
-}
-
-Uint8 *SDL_GetErrorMsg(Uint8 *errstr, unsigned int maxlen)
-{
-	Uint16 *errstr16;
-	unsigned int i;
-
-	/* Allocate the UNICODE buffer */
-	errstr16 = (Uint16 *)SDL_malloc(maxlen * (sizeof *errstr16));
-	if ( ! errstr16 ) {
-		SDL_strlcpy((char *)errstr, "Out of memory", maxlen);
-		return(errstr);
-	}
-
-	/* Get the error message */
-	SDL_GetErrorMsgUNICODE(errstr16, maxlen);
-
-	/* Convert from UNICODE to Latin1 encoding */
-	for ( i=0; i<maxlen; ++i ) {
-		errstr[i] = (Uint8)errstr16[i];
-	}
-
-	/* Free UNICODE buffer (if necessary) */
-	SDL_free(errstr16);
-
 	return(errstr);
 }
 

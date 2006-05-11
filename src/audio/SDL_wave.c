@@ -478,6 +478,11 @@ SDL_AudioSpec * SDL_LoadWAV_RW (SDL_RWops *src, int freesrc,
 			}
 			IMA_ADPCM_encoded = 1;
 			break;
+		case MP3_CODE:
+			SDL_SetError("MPEG Layer 3 data not supported",
+					SDL_SwapLE16(format->encoding));
+			was_error = 1;
+			goto done;
 		default:
 			SDL_SetError("Unknown WAVE data format: 0x%.4x",
 					SDL_SwapLE16(format->encoding));
