@@ -36,7 +36,7 @@
 
 #include "FastTimes.h"
 
-#ifdef TARGET_API_MAC_CARBON
+#if TARGET_API_MAC_CARBON
 #define NewTimerProc NewTimerUPP
 #endif
 
@@ -71,7 +71,7 @@ void SDL_Delay(Uint32 ms)
 
         stop = SDL_GetTicks() + ms;
         do {
-            #ifdef TARGET_API_MAC_CARBON
+            #if TARGET_API_MAC_CARBON
                 MPYield();
             #else
                 SystemTask();
