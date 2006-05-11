@@ -1608,7 +1608,7 @@ AC_HELP_STRING([--enable-pthreads], [use POSIX threads for multi-threading [[def
 AC_HELP_STRING([--enable-pthread-sem], [use pthread semaphores [[default=yes]]]),
                   , enable_pthread_sem=yes)
     case "$host" in
-        *-*-linux*)
+        *-*-linux*|*-*-uclinux*)
             pthread_cflags="-D_REENTRANT"
             pthread_lib="-lpthread"
             ;;
@@ -2059,9 +2059,10 @@ case "$host" in
             have_timers=yes
         fi
         ;;
-    *-*-linux*|*-*-gnu*|*-*-k*bsd*-gnu|*-*-bsdi*|*-*-freebsd*|*-*-dragonfly*|*-*-netbsd*|*-*-openbsd*|*-*-sysv5*|*-*-solaris*|*-*-hpux*|*-*-irix*|*-*-aix*|*-*-osf*)
+    *-*-linux*|*-*-uclinux*|*-*-gnu*|*-*-k*bsd*-gnu|*-*-bsdi*|*-*-freebsd*|*-*-dragonfly*|*-*-netbsd*|*-*-openbsd*|*-*-sysv5*|*-*-solaris*|*-*-hpux*|*-*-irix*|*-*-aix*|*-*-osf*)
         case "$host" in
             *-*-linux*)         ARCH=linux ;;
+            *-*-uclinux*)       ARCH=linux ;;
             *-*-kfreebsd*-gnu)  ARCH=kfreebsd-gnu ;;
             *-*-knetbsd*-gnu)   ARCH=knetbsd-gnu ;;
             *-*-kopenbsd*-gnu)  ARCH=kopenbsd-gnu ;;
