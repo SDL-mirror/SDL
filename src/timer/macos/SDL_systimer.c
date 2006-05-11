@@ -36,6 +36,10 @@
 
 #include "FastTimes.h"
 
+#ifdef TARGET_API_MAC_CARBON
+#define NewTimerProc NewTimerUPP
+#endif
+
 #define MS_PER_TICK	(1000.0/60.0)		/* MacOS tick = 1/60 second */
 
 
@@ -67,7 +71,11 @@ void SDL_Delay(Uint32 ms)
 
         stop = SDL_GetTicks() + ms;
         do {
+            #ifdef TARGET_API_MAC_CARBON
+                MPYield();
+            #else
                 SystemTask();
+            #endif
 
                 now = SDL_GetTicks();
 

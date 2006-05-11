@@ -19,6 +19,11 @@
 
 #include "FastTimes.h"
 
+#ifdef TARGET_CPU_PPC
+#undef GENERATINGPOWERPC /* stop whining */
+#define GENERATINGPOWERPC TARGET_CPU_PPC
+#endif
+
 /* **** **** **** **** **** **** **** **** **** **** **** **** **** **** **** */
 /* **** **** **** **** **** **** **** **** **** **** **** **** **** **** **** */
 /*
