@@ -5,6 +5,10 @@
 
 #include "SDL.h"
 
+#ifdef __MACOS__
+#define HAVE_OPENGL
+#endif
+
 #ifdef HAVE_OPENGL
 
 #include "SDL_opengl.h"
