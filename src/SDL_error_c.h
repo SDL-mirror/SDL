@@ -40,7 +40,7 @@ typedef struct SDL_error {
 	   is not in the hashtable, or no hashtable is available, the key is
 	   used directly as an error message format string.
 	*/
-	unsigned char key[ERR_MAX_STRLEN];
+	char key[ERR_MAX_STRLEN];
 
 	/* These are the arguments for the error functions */
 	int argc;
@@ -51,7 +51,7 @@ typedef struct SDL_error {
 #endif
 		int value_i;
 		double value_f;
-		unsigned char buf[ERR_MAX_STRLEN];
+		char buf[ERR_MAX_STRLEN];
 	} args[ERR_MAX_ARGS];
 } SDL_error;
 

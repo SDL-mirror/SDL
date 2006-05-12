@@ -188,7 +188,7 @@ char *SDL_GetError (void)
 {
 	static char errmsg[SDL_ERRBUFIZE];
 
-	return((char *)SDL_GetErrorMsg((unsigned char *)errmsg, SDL_ERRBUFIZE));
+	return((char *)SDL_GetErrorMsg(errmsg, SDL_ERRBUFIZE));
 }
 
 void SDL_ClearError(void)
