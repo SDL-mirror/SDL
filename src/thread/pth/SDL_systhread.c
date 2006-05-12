@@ -27,11 +27,12 @@
  *	Patrice Mandin
  */
 
-#include "SDL_thread.h"
-#include "../SDL_systhread.h"
-
 #include <pth.h>
 #include <signal.h>
+
+#include "SDL_thread.h"
+#include "../SDL_thread_c.h"
+#include "../SDL_systhread.h"
 
 /* List of signals to mask in the subthreads */
 static int sig_list[] = {
