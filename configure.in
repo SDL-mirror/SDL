@@ -74,15 +74,15 @@ BUILD_CFLAGS="$CFLAGS $CPPFLAGS"
 EXTRA_CFLAGS="$INCLUDE $BASE_CFLAGS"
 BUILD_LDFLAGS="$LDFLAGS"
 EXTRA_LDFLAGS="$BASE_LDFLAGS"
-dnl I can't remember why I added this.  I'm sure it'll come to me...
-dnlfor path in /usr/local; do
-dnl    if test -d $path/include; then
-dnl        EXTRA_CFLAGS="$EXTRA_CFLAGS -I$path/include"
-dnl    fi
-dnl    if test -d $path/lib; then
-dnl        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -L$path/lib"
-dnl    fi
-dnldone
+# I can't remember why I added this.  I'm sure it'll come to me...
+#for path in /usr/local; do
+#    if test -d $path/include; then
+#        EXTRA_CFLAGS="$EXTRA_CFLAGS -I$path/include"
+#    fi
+#    if test -d $path/lib; then
+#        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -L$path/lib"
+#    fi
+#done
 SDL_CFLAGS="$BASE_CFLAGS"
 SDL_LIBS="-lSDL $BASE_LDFLAGS"
 CPPFLAGS="$CPPFLAGS $EXTRA_CFLAGS"
