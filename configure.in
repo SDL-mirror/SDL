@@ -1385,7 +1385,7 @@ AC_HELP_STRING([--enable-video-gem], [use Atari Gem video driver [[default=yes]]
             video_gem=yes
             AC_DEFINE(SDL_VIDEO_DRIVER_GEM)
             SOURCES="$SOURCES $srcdir/src/video/gem/*.c"
-            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lgem"
+            SDL_LIBS="$SDL_LIBS -lgem"
             have_video=yes
         fi
     fi
@@ -1506,8 +1506,8 @@ CheckAtariOSMesa()
         fi
         AC_DEFINE(SDL_VIDEO_OPENGL)
         AC_DEFINE(SDL_VIDEO_OPENGL_OSMESA)
-        EXTRA_CFLAGS="$EXTRA_CFLAGS $OSMESA_CFLAGS"
-        EXTRA_LDFLAGS="$EXTRA_LDFLAGS $OSMESA_LIBS"
+        SDL_CFLAGS="$SDL_CFLAGS $OSMESA_CFLAGS"
+        SDL_LIBS="$SDL_LIBS $OSMESA_LIBS"
 
         AC_ARG_ENABLE(osmesa-shared,
 AC_HELP_STRING([--enable-osmesa-shared], [dynamically load OSMesa OpenGL support [[default=yes]]]),
@@ -1877,7 +1877,7 @@ AC_HELP_STRING([--enable-atari-ldg], [use Atari LDG for shared object loading [[
         if test x$have_ldg_hdr = xyes -a x$have_ldg_lib = xyes; then
             AC_DEFINE(SDL_LOADSO_LDG)
             SOURCES="$SOURCES $srcdir/src/loadso/mint/*.c"
-            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lldg -lgem"
+            SDL_LIBS="$SDL_LIBS -lldg -lgem"
             have_loadso=yes
         fi
     fi
