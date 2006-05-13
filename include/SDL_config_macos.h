@@ -27,13 +27,19 @@
 
 /* This is a set of defines to configure the SDL features */
 
-typedef signed char	int8_t;
-typedef unsigned char	uint8_t;
-typedef signed short	int16_t;
-typedef unsigned short	uint16_t;
-typedef signed long	int32_t;
-typedef unsigned long	uint32_t;
+#include <MacTypes.h>
+
+typedef SInt8	int8_t;
+typedef UInt8	uint8_t;
+typedef SInt16	int16_t;
+typedef UInt16	uint16_t;
+typedef SInt32	int32_t;
+typedef UInt32	uint32_t;
+typedef SInt64	int64_t;
+typedef UInt64	uint64_t;
 typedef unsigned long	uintptr_t;
+
+#define SDL_HAS_64BIT_TYPE	1
 
 /* Useful headers */
 #define HAVE_STDIO_H	1
