@@ -418,6 +418,7 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 	/* Determine the current screen size */
 	if ( XBIOS_nummodes > 0 ) {
+		/* FIXME: parse video mode list to search for current mode */
 		this->info.current_w = XBIOS_modelist[0].width;
 		this->info.current_h = XBIOS_modelist[0].height;
 	}
