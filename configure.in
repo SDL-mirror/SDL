@@ -1235,6 +1235,8 @@ AC_HELP_STRING([--enable-video-vgl], [use VGL video driver [[default=yes]]]),
          #include <vgl.h>
         ],[
          VGLBitmap bitmap;
+         bitmap.Type = VIDBUF32;
+         bitmap.PixelBytes = 4;
          exit(bitmap.Bitmap);
         ],[
         video_vgl=yes
