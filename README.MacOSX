@@ -21,6 +21,10 @@ PowerPC and Intel architectures), on Mac OS X 10.4 and newer, by using
 the fatbuild.sh script in build-scripts:
 	sh build-scripts/fatbuild.sh
 	sudo build-scripts/fatbuild.sh install
+This script builds SDL with 10.2 ABI compatibility on PowerPC and 10.4
+ABI compatibility on Intel architectures.  For best compatibility you
+should compile your application the same way.  A script which wraps
+gcc to make this easy is provided in test/gcc-fat.sh
 
 To use the library once it's built, you essential have two possibilities:
 use the traditional autoconf/automake/make method, or use Xcode.
