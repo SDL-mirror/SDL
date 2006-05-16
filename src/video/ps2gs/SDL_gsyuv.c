@@ -325,7 +325,7 @@ int GS_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *src, SDL_Rect *d
 	int lum_pitch;
 	int crb_pitch;
 	Uint32 *lum_src, *Cr_src, *Cb_src;
-	Uint32 *src, *dst;
+	Uint32 *srcp, *dstp;
 	unsigned int x, y;
 	SDL_Surface *screen;
 
@@ -345,7 +345,7 @@ int GS_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *src, SDL_Rect *d
 		SDL_SetError("Unsupported YUV format in blit (?)");
 		return(-1);
 	}
-	dst = (Uint32 *)hwdata->ipu_imem;
+	dstp = (Uint32 *)hwdata->ipu_imem;
 	lum_pitch = overlay->w/4;
 	crb_pitch = (overlay->w/2)/4;
 
@@ -355,28 +355,28 @@ int GS_DisplayYUVOverlay(_THIS, SDL_Overlay *overlay, SDL_Rect *src, SDL_Rect *d
 		Cr_src = Cr;
 		Cb_src = Cb;
 		for ( w=overlay->w/16; w; --w ) {
-			src = lum_src;
+			srcp = lum_src;
 			for ( i=0; i<16; ++i ) {
-				dst[0] = src[0];
-				dst[1] = src[1];
-				dst[2] = src[2];
-				dst[3] = src[3];
-				src += lum_pitch;
-				dst += 4;
+				dstp[0] = srcp[0];
+				dstp[1] = srcp[1];
+				dstp[2] = srcp[2];
+				dstp[3] = srcp[3];
+				srcp += lum_pitch;
+				dstp += 4;
 			}
-			src = Cb_src;
+			srcp = Cb_src;
 			for ( i=0; i<8; ++i ) {
-				dst[0] = src[0];
-				dst[1] = src[1];
-				src += crb_pitch;
-				dst += 2;
+				dstp[0] = srcp[0];
+				dstp[1] = srcp[1];
+				srcp += crb_pitch;
+				dstp += 2;
 			}
-			src = Cr_src;
+			srcp = Cr_src;
 			for ( i=0; i<8; ++i ) {
-				dst[0] = src[0];
-				dst[1] = src[1];
-				src += crb_pitch;
-				dst += 2;
+				dstp[0] = srcp[0];
+				dstp[1] = srcp[1];
+				srcp += crb_pitch;
+				dstp += 2;
 			}
 			lum_src += 16 / 4;
 			Cb_src += 8 / 4;
