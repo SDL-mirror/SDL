@@ -160,13 +160,14 @@ static void *do_mmap(void *start, size_t length, int prot, int flags, int fd, of
 		ret = mmap(start, length, prot,
 		           (flags & ~MAP_SHARED) | MAP_PRIVATE, fd, offset);
 	}
+	return ret;
 }
 
 /* FB driver bootstrap functions */
 
 static int FB_Available(void)
 {
-	int console;
+	int console = -1;
 	/* Added check for /fb/0 (devfs) */
 	/* but - use environment variable first... if it fails, still check defaults */
 	int idx = 0;
