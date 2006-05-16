@@ -46,6 +46,7 @@
 #ifndef GLX_EXT_visual_rating
 #define GLX_EXT_visual_rating
 #define GLX_VISUAL_CAVEAT_EXT              0x20
+#define GLX_NONE_EXT                       0x8000
 #define GLX_SLOW_VISUAL_EXT                0x8001
 #define GLX_NON_CONFORMANT_VISUAL_EXT      0x800D
 #endif
@@ -182,7 +183,7 @@ XVisualInfo *X11_GL_GetVisual(_THIS)
 	if( this->gl_config.accelerated >= 0 &&
 	    glXExtensionSupported(this, "GLX_EXT_visual_rating") ) {
 		attribs[i++] = GLX_VISUAL_CAVEAT_EXT;
-		attribs[i++] = this->gl_config.accelerated ? GLX_NONE : GLX_DONT_CARE;
+		attribs[i++] = GLX_NONE_EXT;
 	}
 
 #ifdef GLX_DIRECT_COLOR /* Try for a DirectColor visual for gamma support */
