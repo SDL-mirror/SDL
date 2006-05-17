@@ -150,7 +150,7 @@ dist $(distfile):
 	tar cf - $(DIST) | (cd $(distdir); tar xf -)
 	cp $(distdir)/include/SDL_config.h.default $(distdir)/include/SDL_config.h
 	rm -rf `find $(distdir) -name .svn`
-	find $(srcdir) \( \
+	find $(distdir) \( \
 	    -name '*~' -o \
 	    -name '*.bak' -o \
 	    -name '*.old' -o \
