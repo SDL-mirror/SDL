@@ -150,7 +150,14 @@ dist $(distfile):
 	tar cf - $(DIST) | (cd $(distdir); tar xf -)
 	cp $(distdir)/include/SDL_config.h.default $(distdir)/include/SDL_config.h
 	rm -rf `find $(distdir) -name .svn`
-	rm -f `find $(distdir) -name '.#*'`
+	find $(srcdir) \( \
+	    -name '*~' -o \
+	    -name '*.bak' -o \
+	    -name '*.old' -o \
+	    -name '*.rej' -o \
+	    -name '*.orig' -o \
+	    -name '.#*' \) \
+	    -exec rm -f {} \;
 	tar cvf - $(distdir) | gzip --best >$(distfile)
 	rm -rf $(distdir)
 
