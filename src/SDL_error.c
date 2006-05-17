@@ -136,7 +136,7 @@ char *SDL_GetErrorMsg(char *errstr, unsigned int maxlen)
 			if ( *fmt == '%' ) {
 				char tmp[32], *spot = tmp;
 				*spot++ = *fmt++;
-				while ( *fmt == '.' || (*fmt >= '0' && *fmt <= '9') && spot < (tmp+SDL_arraysize(tmp)-2) ) {
+				while ( (*fmt == '.' || (*fmt >= '0' && *fmt <= '9')) && spot < (tmp+SDL_arraysize(tmp)-2) ) {
 					*spot++ = *fmt++;
 				}
 				*spot++ = *fmt++;
