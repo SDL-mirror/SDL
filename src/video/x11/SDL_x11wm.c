@@ -246,8 +246,8 @@ void X11_SetCaptionNoLock(_THIS, const char *title, const char *icon)
 	Status status;
 
 #ifdef X_HAVE_UTF8_STRING
-	Atom _NET_WM_NAME;
-	Atom _NET_WM_ICON_NAME;
+	Atom _NET_WM_NAME = 0;
+	Atom _NET_WM_ICON_NAME = 0;
 
 	/* Look up some useful Atoms */
 	if (SDL_X11_HAVE_UTF8) {

@@ -155,7 +155,7 @@ size_t SDL_iconv(SDL_iconv_t cd,
 	/* For simplicity, we'll convert everything to and from UCS-4 */
 	char *src, *dst;
 	size_t srclen, dstlen;
-	Uint32 ch;
+	Uint32 ch = 0;
 	size_t total;
 
 	if ( !inbuf || !*inbuf ) {
