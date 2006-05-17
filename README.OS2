@@ -3,7 +3,7 @@
 SDL on OS/2
 ===========
 
-Last updated on May. 1, 2006.
+Last updated on May. 17, 2006.
 
 
 1. How to compile?
@@ -13,8 +13,6 @@ To compile this, you'll need the followings installed:
 - The OS/2 Developer's Toolkit
 - The OpenWatcom compiler 
   (http://www.openwatcom.org)
-- The FSLib library
-  (ftp://ftp.netlabs.org/pub/SDL)
 
 First of all, you have to unzip the Watcom-OS2.zip file. This will result in a 
 file called "makefile" and a file called "setvars.cmd" in this folder (and some
@@ -32,7 +30,7 @@ is full of printf()'s, so if something goes wrong, its output can help a lot
 for debugging.
 
 Then run "wmake".
-This should create the SDL.DLL and the corresponding SDL.LIB file here.
+This should create the SDL12.DLL and the corresponding SDL12.LIB file here.
 
 To test applications, it's a good idea to use the 'debug' build of SDL, and
 redirect the standard output and standard error output to files, to see what
@@ -48,8 +46,8 @@ wmake
 2. How to compile the testapps?
 -------------------------------
 
-Once you have SDL.DLL compiled, navigate into the 'test' folder, copy in there
-the newly built SDL.DLL, and copy in there FSLib.DLL.
+Once you have SDL12.DLL compiled, navigate into the 'test' folder, copy in 
+there the newly built SDL12.DLL, and copy in there FSLib.DLL.
 
 Then run "wmake" in there to compile some of the testapps.
 
@@ -191,6 +189,10 @@ please, be our guest and contact us!
 10. Changelog of the OS/2 port
 ------------------------------
 
+Version 1.2.10 - 2006-05-17  - Doodle
+ - Small modifications for v1.2.10 release
+ - Changed DLL name to include version info (currently SDL12.dll)
+
 Version 1.2 - 2006-05-01  - Doodle
  - Modified makefile system to have only one makefile
  - Included FSLib headers, DLL and LIB file
@@ -216,7 +218,7 @@ Version 1.2.7 - 2005-12-22  - Doodle
     SET SDL_USE_PROPORTIONAL_WINDOW=1
     dosbox.exe
    )
-   or, if you have the HOME environment variable set, then SDL.DLL will
+   or, if you have the HOME environment variable set, then SDL12.DLL will
    create a file in that directory called .sdl.proportionals, and you can
    put there the name of executable files that will be automatically made
    proportional.

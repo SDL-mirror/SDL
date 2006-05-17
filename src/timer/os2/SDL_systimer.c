@@ -182,7 +182,7 @@ DECLSPEC void SDLCALL SDL_Delay(Uint32 ms)
 static int timer_alive = 0;
 static SDL_Thread *timer = NULL;
 
-static int RunTimer(void *unused)
+static int SDLCALL RunTimer(void *unused)
 {
         DosSetPriority(PRTYS_THREAD, PRTYC_TIMECRITICAL, 0, 0);
         while ( timer_alive ) {
