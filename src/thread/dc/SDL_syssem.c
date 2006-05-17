@@ -19,6 +19,9 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+
+#include <errno.h>
+
 #include "SDL_config.h"
 
 /* An implementation of semaphores using mutexes and condition variables */
@@ -135,13 +138,15 @@ int SDL_SemWaitTimeout(SDL_sem *sem, Uint32 timeout)
 
 int SDL_SemWait(SDL_sem *sem)
 {
+	int retval;
+
 	if ( ! sem ) {
 		SDL_SetError("Passed a NULL semaphore");
 		return -1;
 	}
 
-	sem_wait(&sem->sem);
-	return 0;
+	while ( ((retval = sem_wait(&sem->sem)) == -1) && (errno == EINTR) ) {}
+	return retval;
 }
 
 Uint32 SDL_SemValue(SDL_sem *sem)

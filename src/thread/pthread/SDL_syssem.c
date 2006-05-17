@@ -23,6 +23,7 @@
 
 #include <pthread.h>
 #include <semaphore.h>
+#include <errno.h>
 
 #include "SDL_thread.h"
 #include "SDL_timer.h"
@@ -86,7 +87,7 @@ int SDL_SemWait(SDL_sem *sem)
 		return -1;
 	}
 
-	retval = sem_wait(&sem->sem);
+	while ( ((retval = sem_wait(&sem->sem)) == -1) && (errno == EINTR) ) {}
 	if ( retval < 0 ) {
 		SDL_SetError("sem_wait() failed");
 	}

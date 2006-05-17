@@ -19,6 +19,9 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+
+#include <errno.h>
+
 #include "SDL_config.h"
 
 /* RISC OS semiphores based on linux code */
@@ -132,7 +135,7 @@ int SDL_SemWait(SDL_sem *sem)
 		return -1;
 	}
 
-	retval = sem_wait(sem->sem);
+	while ( ((retval = sem_wait(sem->sem)) == -1) && (errno == EINTR) ) {}
 	if ( retval < 0 ) {
 		SDL_SetError("sem_wait() failed");
 	}
