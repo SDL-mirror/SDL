@@ -158,6 +158,7 @@ dist $(distfile):
 	    -name '*.orig' -o \
 	    -name '.#*' \) \
 	    -exec rm -f {} \;
+	if test -f $(distdir)/test/Makefile; then (cd $(distdir)/test && make distclean); fi
 	tar cvf - $(distdir) | gzip --best >$(distfile)
 	rm -rf $(distdir)
 
