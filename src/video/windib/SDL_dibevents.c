@@ -122,8 +122,16 @@ LRESULT DIB_HandleMessage(_THIS, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 					} else if (state[SDLK_RSHIFT] == SDL_RELEASED && (GetKeyState(VK_RSHIFT) & 0x8000)) {
 						wParam = VK_RSHIFT;
 					} else {
-						/* Probably a key repeat */
-						return(0);
+						/* Win9x */
+						int sc = HIWORD(lParam) & 0xFF;
+
+						if (sc == 0x2A)
+							wParam = VK_LSHIFT;
+						else
+						if (sc == 0x36)
+							wParam = VK_RSHIFT;
+						else
+							wParam = VK_LSHIFT;
 					}
 					}
 					break;
@@ -185,8 +193,16 @@ LRESULT DIB_HandleMessage(_THIS, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 					} else if (state[SDLK_RSHIFT] == SDL_PRESSED && !(GetKeyState(VK_RSHIFT) & 0x8000)) {
 						wParam = VK_RSHIFT;
 					} else {
-						/* Probably a key repeat */
-						return(0);
+						/* Win9x */
+						int sc = HIWORD(lParam) & 0xFF;
+
+						if (sc == 0x2A)
+							wParam = VK_LSHIFT;
+						else
+						if (sc == 0x36)
+							wParam = VK_RSHIFT;
+						else
+							wParam = VK_LSHIFT;
 					}
 					}
 					break;
@@ -252,9 +268,22 @@ void DIB_PumpEvents(_THIS)
 	}
 }
 
+static HKL hLayoutUS = NULL;
+
 void DIB_InitOSKeymap(_THIS)
 {
-	int i;
+	int	i;
+	char	current_layout[256];
+
+	GetKeyboardLayoutName(current_layout);
+	//printf("Initial Keyboard Layout Name: '%s'\n", current_layout);
+
+	hLayoutUS = LoadKeyboardLayout("00000409", KLF_NOTELLSHELL);
+	if (!hLayoutUS) {
+		//printf("Failed to load US keyboard layout. Using current.\n");
+		hLayoutUS = GetKeyboardLayout(0);
+	}
+	LoadKeyboardLayout(current_layout, KLF_ACTIVATE);
 
 	/* Map the VK keysyms */
 	for ( i=0; i<SDL_arraysize(VK_keymap); ++i )
@@ -381,11 +410,53 @@ void DIB_InitOSKeymap(_THIS)
 	VK_keymap[VK_APPS] = SDLK_MENU;
 }
 
+#define EXTKEYPAD(keypad) ((scancode & 0x100)?(mvke):(keypad))
+
+static int SDL_MapVirtualKey(int scancode, int vkey)
+{
+	int	mvke  = MapVirtualKeyEx(scancode & 0xFF, 1, hLayoutUS);
+
+	switch(vkey) {
+		/* These are always correct */
+		case VK_DIVIDE:
+		case VK_MULTIPLY:
+		case VK_SUBTRACT:
+		case VK_ADD:
+		case VK_LWIN:
+		case VK_RWIN:
+		case VK_APPS:
+		/* These are already handled */
+		case VK_LCONTROL:
+		case VK_RCONTROL:
+		case VK_LSHIFT:
+		case VK_RSHIFT:
+		case VK_LMENU:
+		case VK_RMENU:
+		case VK_SNAPSHOT:
+		case VK_PAUSE:
+			return vkey;
+	}	
+	switch(mvke) {
+		/* Distinguish between keypad and extended keys */
+		case VK_INSERT: return EXTKEYPAD(VK_NUMPAD0);
+		case VK_DELETE: return EXTKEYPAD(VK_DECIMAL);
+		case VK_END:    return EXTKEYPAD(VK_NUMPAD1);
+		case VK_DOWN:   return EXTKEYPAD(VK_NUMPAD2);
+		case VK_NEXT:   return EXTKEYPAD(VK_NUMPAD3);
+		case VK_LEFT:   return EXTKEYPAD(VK_NUMPAD4);
+		case VK_CLEAR:  return EXTKEYPAD(VK_NUMPAD5);
+		case VK_RIGHT:  return EXTKEYPAD(VK_NUMPAD6);
+		case VK_HOME:   return EXTKEYPAD(VK_NUMPAD7);
+		case VK_UP:     return EXTKEYPAD(VK_NUMPAD8);
+		case VK_PRIOR:  return EXTKEYPAD(VK_NUMPAD9);
+	}
+	return mvke?mvke:vkey;
+}
+
 static SDL_keysym *TranslateKey(WPARAM vkey, UINT scancode, SDL_keysym *keysym, int pressed)
 {
 	/* Set the keysym information */
 	keysym->scancode = (unsigned char) scancode;
-	keysym->sym = VK_keymap[vkey];
 	keysym->mod = KMOD_NONE;
 	keysym->unicode = 0;
 	if ( pressed && SDL_TranslateUNICODE ) {
@@ -403,6 +474,30 @@ static SDL_keysym *TranslateKey(WPARAM vkey, UINT scancode, SDL_keysym *keysym, 
 		}
 #endif /* NO_GETKEYBOARDSTATE */
 	}
+
+	if ((vkey == VK_RETURN) && (scancode & 0x100)) {
+		/* No VK_ code for the keypad enter key */
+		keysym->sym = SDLK_KP_ENTER;
+	}
+	else {
+		keysym->sym = VK_keymap[SDL_MapVirtualKey(scancode, vkey)];
+	}
+
+#if 0
+	{
+		HKL     hLayoutCurrent = GetKeyboardLayout(0);
+		int     sc = scancode & 0xFF;
+
+		printf("SYM:%d, VK:0x%02X, SC:0x%04X, US:(1:0x%02X, 3:0x%02X), "
+			"Current:(1:0x%02X, 3:0x%02X)\n",
+			keysym->sym, vkey, scancode,
+			MapVirtualKeyEx(sc, 1, hLayoutUS),
+			MapVirtualKeyEx(sc, 3, hLayoutUS),
+			MapVirtualKeyEx(sc, 1, hLayoutCurrent),
+			MapVirtualKeyEx(sc, 3, hLayoutCurrent)
+		);
+	}
+#endif
 	return(keysym);
 }
 

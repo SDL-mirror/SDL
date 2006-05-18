@@ -750,7 +750,7 @@ void DX5_InitOSKeymap(_THIS)
 	DIK_keymap[DIK_GRAVE] = SDLK_BACKQUOTE;
 	DIK_keymap[DIK_LSHIFT] = SDLK_LSHIFT;
 	DIK_keymap[DIK_BACKSLASH] = SDLK_BACKSLASH;
-	DIK_keymap[DIK_OEM_102] = SDLK_BACKSLASH;
+	DIK_keymap[DIK_OEM_102] = SDLK_LESS;
 	DIK_keymap[DIK_Z] = SDLK_z;
 	DIK_keymap[DIK_X] = SDLK_x;
 	DIK_keymap[DIK_C] = SDLK_c;
