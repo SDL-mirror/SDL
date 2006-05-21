@@ -2270,13 +2270,8 @@ case "$host" in
         fi
         # Set up files for the joystick library
         if test x$enable_joystick = xyes; then
-            if test x$have_directx = xyes; then
-                AC_DEFINE(SDL_JOYSTICK_DINPUT)
-                SOURCES="$SOURCES $srcdir/src/joystick/win32/SDL_dxjoystick.c"
-            else
-                AC_DEFINE(SDL_JOYSTICK_WINMM)
-                SOURCES="$SOURCES $srcdir/src/joystick/win32/SDL_mmjoystick.c"
-            fi
+            AC_DEFINE(SDL_JOYSTICK_WINMM)
+            SOURCES="$SOURCES $srcdir/src/joystick/win32/*.c"
             have_joystick=yes
         fi
         # Set up files for the cdrom library
