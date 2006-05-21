@@ -62,7 +62,6 @@ void GGI_PumpEvents(_THIS)
 		static int buttons = 0;
 		static int mouse_x = 0, mouse_y = 0, mouse_z = 0;
 		int x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0;
-		uint32 sym;
 		int pressed_mouse, pressed_kbd;
 		SDL_keysym keysym;
 		
