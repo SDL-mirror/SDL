@@ -17,7 +17,7 @@ void WatchJoystick(SDL_Joystick *joystick)
 	int i, done;
 	SDL_Event event;
 	int x, y, draw;
-	SDL_Rect axis_area[2];
+	SDL_Rect axis_area[6][2];
 
 	/* Set a video mode to display joystick axis position */
 	screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, 16, 0);
@@ -110,36 +110,38 @@ void WatchJoystick(SDL_Joystick *joystick)
 			SDL_UpdateRects(screen, 1, &area);
 		}
 
-		/* Erase previous axes */
-		SDL_FillRect(screen, &axis_area[draw], 0x0000);
+		for ( i=0; i<SDL_JoystickNumAxes(joystick)/2 && i < SDL_arraysize(axis_area); ++i ) {
+			/* Erase previous axes */
+			SDL_FillRect(screen, &axis_area[i][draw], 0x0000);
 
-		/* Draw the X/Y axis */
-		draw = !draw;
-		x = (((int)SDL_JoystickGetAxis(joystick, 0))+32768);
-		x *= SCREEN_WIDTH;
-		x /= 65535;
-		if ( x < 0 ) {
-			x = 0;
-		} else
-		if ( x > (SCREEN_WIDTH-16) ) {
-			x = SCREEN_WIDTH-16;
-		}
-		y = (((int)SDL_JoystickGetAxis(joystick, 1))+32768);
-		y *= SCREEN_HEIGHT;
-		y /= 65535;
-		if ( y < 0 ) {
-			y = 0;
-		} else
-		if ( y > (SCREEN_HEIGHT-16) ) {
-			y = SCREEN_HEIGHT-16;
-		}
-		axis_area[draw].x = (Sint16)x;
-		axis_area[draw].y = (Sint16)y;
-		axis_area[draw].w = 16;
-		axis_area[draw].h = 16;
-		SDL_FillRect(screen, &axis_area[draw], 0xFFFF);
+			/* Draw the X/Y axis */
+			draw = !draw;
+			x = (((int)SDL_JoystickGetAxis(joystick, i*2+0))+32768);
+			x *= SCREEN_WIDTH;
+			x /= 65535;
+			if ( x < 0 ) {
+				x = 0;
+			} else
+			if ( x > (SCREEN_WIDTH-16) ) {
+				x = SCREEN_WIDTH-16;
+			}
+			y = (((int)SDL_JoystickGetAxis(joystick, i*2+1))+32768);
+			y *= SCREEN_HEIGHT;
+			y /= 65535;
+			if ( y < 0 ) {
+				y = 0;
+			} else
+			if ( y > (SCREEN_HEIGHT-16) ) {
+				y = SCREEN_HEIGHT-16;
+			}
+			axis_area[i][draw].x = (Sint16)x;
+			axis_area[i][draw].y = (Sint16)y;
+			axis_area[i][draw].w = 16;
+			axis_area[i][draw].h = 16;
+			SDL_FillRect(screen, &axis_area[i][draw], 0xFFFF);
 
-		SDL_UpdateRects(screen, 2, axis_area);
+			SDL_UpdateRects(screen, 2, axis_area[i]);
+		}
 	}
 }
 

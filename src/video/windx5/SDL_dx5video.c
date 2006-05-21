@@ -436,102 +436,98 @@ extern int DIB_SetGammaRamp(_THIS, Uint16 *ramp);
 extern int DIB_GetGammaRamp(_THIS, Uint16 *ramp);
 extern void DIB_QuitGamma(_THIS);
 
+/* Functions for loading the DirectX functions dynamically */
+static int DX5_loaded = 0;
+static HINSTANCE DDrawDLL = NULL;
+static HINSTANCE DInputDLL = NULL;
+
+void DX5_Unload(void)
+{
+	if ( --DX5_loaded == 0 ) {
+		if ( DDrawDLL != NULL ) {
+			FreeLibrary(DDrawDLL);
+			DDrawCreate = NULL;
+			DDrawDLL = NULL;
+		}
+		if ( DInputDLL != NULL ) {
+			FreeLibrary(DInputDLL);
+			DInputCreate = NULL;
+			DInputDLL = NULL;
+		}
+	}
+}
+int DX5_Load(void)
+{
+	int status = 0;
+
+	if ( ++DX5_loaded == 1 ) {
+		DDrawDLL = LoadLibrary(TEXT("DDRAW.DLL"));
+		if ( DDrawDLL != NULL ) {
+			DDrawCreate = (void *)GetProcAddress(DDrawDLL,
+						TEXT("DirectDrawCreate"));
+		}
+		DInputDLL = LoadLibrary(TEXT("DINPUT.DLL"));
+		if ( DInputDLL != NULL ) {
+			DInputCreate = (void *)GetProcAddress(DInputDLL,
+						TEXT("DirectInputCreateA"));
+		}
+		if ( DDrawDLL && DDrawCreate && DInputDLL && DInputCreate ) {
+			status = 0;
+		} else {
+			DX5_Unload();
+			status = -1;
+		}
+	}
+	return status;
+}
+
 /* DX5 driver bootstrap functions */
 
 static int DX5_Available(void)
 {
-	HINSTANCE DInputDLL;
-	HINSTANCE DDrawDLL;
-	int dinput_ok;
-	int ddraw_ok;
+	int ddraw_ok = 0;
+	HRESULT (WINAPI *DDrawCreate)(GUID *,LPDIRECTDRAW *,IUnknown *);
+	LPDIRECTDRAW DDraw;
 
 	/* Version check DINPUT.DLL and DDRAW.DLL (Is DirectX okay?) */
-	dinput_ok = 0;
-	DInputDLL = LoadLibrary(TEXT("DINPUT.DLL"));
-	if ( DInputDLL != NULL ) {
-		dinput_ok = 1;
-	  	FreeLibrary(DInputDLL);
+	if ( DX5_Load() < 0 ) {
+		return -1;
 	}
-	ddraw_ok = 0;
-	DDrawDLL = LoadLibrary(TEXT("DDRAW.DLL"));
-	if ( DDrawDLL != NULL ) {
-	  HRESULT (WINAPI *DDrawCreate)(GUID *,LPDIRECTDRAW *,IUnknown *);
-	  LPDIRECTDRAW DDraw;
 
-	  /* Try to create a valid DirectDraw object */
-	  DDrawCreate = (void *)GetProcAddress(DDrawDLL, TEXT("DirectDrawCreate"));
-	  if ( (DDrawCreate != NULL)
+	/* Try to create a valid DirectDraw object */
+	DDrawCreate = (void *)GetProcAddress(DDrawDLL, TEXT("DirectDrawCreate"));
+	if ( (DDrawCreate != NULL)
 			&& !FAILED(DDrawCreate(NULL, &DDraw, NULL)) ) {
-	    if ( !FAILED(IDirectDraw_SetCooperativeLevel(DDraw,
+	  if ( !FAILED(IDirectDraw_SetCooperativeLevel(DDraw,
 							NULL, DDSCL_NORMAL)) ) {
-	      DDSURFACEDESC desc;
-	      LPDIRECTDRAWSURFACE  DDrawSurf;
-	      LPDIRECTDRAWSURFACE3 DDrawSurf3;
+	    DDSURFACEDESC desc;
+	    LPDIRECTDRAWSURFACE  DDrawSurf;
+	    LPDIRECTDRAWSURFACE3 DDrawSurf3;
 
-	      /* Try to create a DirectDrawSurface3 object */
-	      SDL_memset(&desc, 0, sizeof(desc));
-	      desc.dwSize = sizeof(desc);
-	      desc.dwFlags = DDSD_CAPS;
-	      desc.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE|DDSCAPS_VIDEOMEMORY;
-	      if ( !FAILED(IDirectDraw_CreateSurface(DDraw, &desc,
+	    /* Try to create a DirectDrawSurface3 object */
+	    SDL_memset(&desc, 0, sizeof(desc));
+	    desc.dwSize = sizeof(desc);
+	    desc.dwFlags = DDSD_CAPS;
+	    desc.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE|DDSCAPS_VIDEOMEMORY;
+	    if ( !FAILED(IDirectDraw_CreateSurface(DDraw, &desc,
 							&DDrawSurf, NULL)) ) {
-	        if ( !FAILED(IDirectDrawSurface_QueryInterface(DDrawSurf,
+	      if ( !FAILED(IDirectDrawSurface_QueryInterface(DDrawSurf,
 			&IID_IDirectDrawSurface3, (LPVOID *)&DDrawSurf3)) ) {
-	          /* Yay! */
-		  ddraw_ok = 1;
+	        /* Yay! */
+		ddraw_ok = 1;
 
-	          /* Clean up.. */
-	          IDirectDrawSurface3_Release(DDrawSurf3);
-	        }
-	        IDirectDrawSurface_Release(DDrawSurf);
+	        /* Clean up.. */
+	        IDirectDrawSurface3_Release(DDrawSurf3);
 	      }
+	      IDirectDrawSurface_Release(DDrawSurf);
 	    }
-	    IDirectDraw_Release(DDraw);
 	  }
-	  FreeLibrary(DDrawDLL);
+	  IDirectDraw_Release(DDraw);
 	}
-	return(dinput_ok && ddraw_ok);
-}
-
-/* Functions for loading the DirectX functions dynamically */
-static HINSTANCE DDrawDLL = NULL;
-static HINSTANCE DInputDLL = NULL;
-
-static void DX5_Unload(void)
-{
-	if ( DDrawDLL != NULL ) {
-		FreeLibrary(DDrawDLL);
-		DDrawCreate = NULL;
-		DDrawDLL = NULL;
-	}
-	if ( DInputDLL != NULL ) {
-		FreeLibrary(DInputDLL);
-		DInputCreate = NULL;
-		DInputDLL = NULL;
-	}
-}
-static int DX5_Load(void)
-{
-	int status;
 
 	DX5_Unload();
-	DDrawDLL = LoadLibrary(TEXT("DDRAW.DLL"));
-	if ( DDrawDLL != NULL ) {
-		DDrawCreate = (void *)GetProcAddress(DDrawDLL,
-					TEXT("DirectDrawCreate"));
-	}
-	DInputDLL = LoadLibrary(TEXT("DINPUT.DLL"));
-	if ( DInputDLL != NULL ) {
-		DInputCreate = (void *)GetProcAddress(DInputDLL,
-					TEXT("DirectInputCreateA"));
-	}
-	if ( DDrawDLL && DDrawCreate && DInputDLL && DInputCreate ) {
-		status = 0;
-	} else {
-		DX5_Unload();
-		status = -1;
-	}
-	return status;
+
+	return ddraw_ok;
 }
 
 static void DX5_DeleteDevice(SDL_VideoDevice *this)
@@ -541,6 +537,7 @@ static void DX5_DeleteDevice(SDL_VideoDevice *this)
 		IDirectDraw2_Release(ddraw2);
 	}
 	DX5_Unload();
+
 	if ( this ) {
 		if ( this->hidden ) {
 			SDL_free(this->hidden);
