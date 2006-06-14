@@ -104,12 +104,12 @@ int main(int argc, char *argv[])
 			}
 		}	
 		if (screen->flags & SDL_DOUBLEBUF) {
+			SDL_Flip(screen);
+		} else {
 			if (first_time) {
 				SDL_UpdateRects(screen, 1, &update_area);
 				first_time = SDL_FALSE;
 			}
-		} else {
-			SDL_Flip(screen);
 		}	
 		SDL_Delay(1);
 	}
