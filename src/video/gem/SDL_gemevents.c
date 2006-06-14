@@ -186,8 +186,18 @@ void GEM_PumpEvents(_THIS)
 			if (this->input_grab == SDL_GRAB_OFF) {
 				if (SDL_GetAppState() & SDL_APPMOUSEFOCUS) {
 					SDL_PrivateAppActive(0, SDL_APPMOUSEFOCUS);
+					if (SDL_GetAppState() & SDL_APPINPUTFOCUS) {
+						graf_mouse(ARROW, NULL);
+					}
 				} else {
 					SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS);
+					if (SDL_GetAppState() & SDL_APPINPUTFOCUS) {
+						if (GEM_cursor == (void *) -1) {
+							graf_mouse(M_OFF, NULL);
+						} else if (GEM_cursor) {
+							graf_mouse(USER_DEF, GEM_cursor->mform_p);
+						}
+					}
 				}
 			}
 		}

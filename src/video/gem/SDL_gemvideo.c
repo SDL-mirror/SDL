@@ -440,6 +440,7 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 	/* Set mouse cursor to arrow */
 	graf_mouse(ARROW, NULL);
+	GEM_cursor = NULL;
 
 	/* Init chunky to planar routine */
 	SDL_Atari_C2pConvert = SDL_Atari_C2pConvert8;

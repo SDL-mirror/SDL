@@ -27,6 +27,11 @@
 #include "SDL_mutex.h"
 #include "../SDL_sysvideo.h"
 
+/* The implementation dependent data for the window manager cursor */
+struct WMcursor {
+	MFORM *mform_p;
+};
+
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_VideoDevice *this
 
@@ -82,6 +87,7 @@ struct SDL_PrivateVideoData {
 	short message[8];			/* To self-send an AES message */
 	void *menubar;				/* Menu bar save buffer when going fullscreen */
 	SDL_bool use_dev_mouse;		/* Use /dev/mouse ? */
+	WMcursor *cursor;			/* To restore cursor when leaving/entering window */
 
 	SDL_bool fullscreen;		/* Fullscreen or windowed mode ? */
 	SDL_Rect *SDL_modelist[SDL_NUMMODES+1];	/* Mode list */
@@ -131,6 +137,7 @@ struct SDL_PrivateVideoData {
 #define GEM_fullscreen		(this->hidden->fullscreen)
 #define GEM_menubar			(this->hidden->menubar)
 #define GEM_usedevmouse		(this->hidden->use_dev_mouse)
+#define GEM_cursor			(this->hidden->cursor)
 
 #define GEM_buffer1			(this->hidden->buffer1)
 #define GEM_buffer2			(this->hidden->buffer2)
