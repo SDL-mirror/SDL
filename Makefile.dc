@@ -100,8 +100,12 @@ TEST = \
 	test/threadwin.c \
 	test/torturethread.c \
 
-$(TARGET): $(OBJS)
-	$(AR) rcs $(TARGET) $(OBJS)
+$(TARGET): copy_config \
+	$(OBJS)
+	$(AR) rcs $(TARGET) $(OBJS) 
+
+copy_config:
+	@cp include/SDL_config.h.default include/SDL_config.h
 
 clean:
-	rm -f $(OBJS)
+	rm -f include/SDL_config.h $(OBJS)
