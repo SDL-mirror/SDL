@@ -50,7 +50,7 @@ static void CalculateGammaRamp(float gamma, Uint16 *ramp)
 		return;
 	} else
 	/* 1.0 gamma is identity */
-	if ( gamma >= 1.0f ) {
+	if ( gamma == 1.0f ) {
 		for ( i=0; i<256; ++i ) {
 			ramp[i] = (i << 8) | i;
 		}
