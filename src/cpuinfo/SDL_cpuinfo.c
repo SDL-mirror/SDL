@@ -109,7 +109,7 @@ CPUid by definition.  But it's nice to be able to prove it.  :)      */
         mov     has_CPUID,1         ; We have CPUID support
 done:
 	}
-#elif defined(__sun) && defined(__x86)
+#elif defined(__sun) && defined(__i386)
 	__asm (
 "       pushfl                 \n"
 "	popl    %eax           \n"
@@ -175,7 +175,7 @@ static __inline__ int CPU_getCPUIDFeatures(void)
         mov     features, edx
 done:
 	}
-#elif defined(__sun) && (defined(__x86) || defined(__amd64))
+#elif defined(__sun) && (defined(__i386) || defined(__amd64))
 	    __asm(
 "        movl    %ebx,%edi\n"
 "        xorl    %eax,%eax         \n"
