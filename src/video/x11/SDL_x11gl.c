@@ -422,12 +422,24 @@ void X11_GL_SwapBuffers(_THIS)
 
 #endif /* SDL_VIDEO_OPENGL_GLX */
 
+#define OPENGL_REQUIRS_DLOPEN
+#if defined(OPENGL_REQUIRS_DLOPEN) && defined(SDL_LOADSO_DLOPEN)
+#include <dlfcn.h>
+#define GL_LoadObject(X)	dlopen(X, (RTLD_NOW|RTLD_GLOBAL))
+#define GL_LoadFunction		dlsym
+#define GL_UnloadObject		dlclose
+#else
+#define GL_LoadObject	SDL_LoadObject
+#define GL_LoadFunction	SDL_LoadFunction
+#define GL_UnloadObject	SDL_UnloadObject
+#endif
+
 void X11_GL_UnloadLibrary(_THIS)
 {
 #if SDL_VIDEO_OPENGL_GLX
 	if ( this->gl_config.driver_loaded ) {
 
-		SDL_UnloadObject(this->gl_config.dll_handle);
+		GL_UnloadObject(this->gl_config.dll_handle);
 
 		this->gl_data->glXGetProcAddress = NULL;
 		this->gl_data->glXChooseVisual = NULL;
@@ -464,7 +476,7 @@ int X11_GL_LoadLibrary(_THIS, const char* path)
 		}
 	}
 
-	handle = SDL_LoadObject(path);
+	handle = GL_LoadObject(path);
 	if ( handle == NULL ) {
 		/* SDL_LoadObject() will call SDL_SetError() for us. */
 		return -1;
@@ -475,27 +487,27 @@ int X11_GL_LoadLibrary(_THIS, const char* path)
 
 	/* Load new function pointers */
 	this->gl_data->glXGetProcAddress =
-		(void *(*)(const GLubyte *)) SDL_LoadFunction(handle, "glXGetProcAddressARB");
+		(void *(*)(const GLubyte *)) GL_LoadFunction(handle, "glXGetProcAddressARB");
 	this->gl_data->glXChooseVisual =
-		(XVisualInfo *(*)(Display *, int, int *)) SDL_LoadFunction(handle, "glXChooseVisual");
+		(XVisualInfo *(*)(Display *, int, int *)) GL_LoadFunction(handle, "glXChooseVisual");
 	this->gl_data->glXCreateContext =
-		(GLXContext (*)(Display *, XVisualInfo *, GLXContext, int)) SDL_LoadFunction(handle, "glXCreateContext");
+		(GLXContext (*)(Display *, XVisualInfo *, GLXContext, int)) GL_LoadFunction(handle, "glXCreateContext");
 	this->gl_data->glXDestroyContext =
-		(void (*)(Display *, GLXContext)) SDL_LoadFunction(handle, "glXDestroyContext");
+		(void (*)(Display *, GLXContext)) GL_LoadFunction(handle, "glXDestroyContext");
 	this->gl_data->glXMakeCurrent =
-		(int (*)(Display *, GLXDrawable, GLXContext)) SDL_LoadFunction(handle, "glXMakeCurrent");
+		(int (*)(Display *, GLXDrawable, GLXContext)) GL_LoadFunction(handle, "glXMakeCurrent");
 	this->gl_data->glXSwapBuffers =
-		(void (*)(Display *, GLXDrawable)) SDL_LoadFunction(handle, "glXSwapBuffers");
+		(void (*)(Display *, GLXDrawable)) GL_LoadFunction(handle, "glXSwapBuffers");
 	this->gl_data->glXGetConfig =
-		(int (*)(Display *, XVisualInfo *, int, int *)) SDL_LoadFunction(handle, "glXGetConfig");
+		(int (*)(Display *, XVisualInfo *, int, int *)) GL_LoadFunction(handle, "glXGetConfig");
 	this->gl_data->glXQueryExtensionsString =
-		(const char *(*)(Display *, int)) SDL_LoadFunction(handle, "glXQueryExtensionsString");
+		(const char *(*)(Display *, int)) GL_LoadFunction(handle, "glXQueryExtensionsString");
 	this->gl_data->glXSwapIntervalSGI =
-		(int (*)(int)) SDL_LoadFunction(handle, "glXSwapIntervalSGI");
+		(int (*)(int)) GL_LoadFunction(handle, "glXSwapIntervalSGI");
 	this->gl_data->glXSwapIntervalMESA =
-		(GLint (*)(unsigned)) SDL_LoadFunction(handle, "glXSwapIntervalMESA");
+		(GLint (*)(unsigned)) GL_LoadFunction(handle, "glXSwapIntervalMESA");
 	this->gl_data->glXGetSwapIntervalMESA =
-		(GLint (*)(void)) SDL_LoadFunction(handle, "glXGetSwapIntervalMESA");
+		(GLint (*)(void)) GL_LoadFunction(handle, "glXGetSwapIntervalMESA");
 
 	if ( (this->gl_data->glXChooseVisual == NULL) || 
 	     (this->gl_data->glXCreateContext == NULL) ||
@@ -527,7 +539,7 @@ void *X11_GL_GetProcAddress(_THIS, const char* proc)
 	if ( this->gl_data->glXGetProcAddress ) {
 		return this->gl_data->glXGetProcAddress((const GLubyte *)proc);
 	}
-	return SDL_LoadFunction(handle, proc);
+	return GL_LoadFunction(handle, proc);
 }
 
 #endif /* SDL_VIDEO_OPENGL_GLX */
