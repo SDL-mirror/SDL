@@ -2636,7 +2636,7 @@ AC_SUBST(BUILD_LDFLAGS)
 AC_SUBST(EXTRA_LDFLAGS)
 
 AC_OUTPUT([
-    Makefile sdl-config SDL.spec SDL.qpg
+    Makefile sdl-config SDL.spec SDL.qpg sdl.pc
 ], [
     : >build-deps
     if test x"$MAKE" = x; then MAKE=make; fi; $MAKE depend

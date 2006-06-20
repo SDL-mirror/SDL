@@ -38,7 +38,7 @@ SDLMAIN_TARGET = libSDLmain.a
 SDLMAIN_SOURCES = @SDLMAIN_SOURCES@
 SDLMAIN_OBJECTS = @SDLMAIN_OBJECTS@
 
-DIST = acinclude.m4 autogen.sh Borland.html Borland.zip BUGS build-scripts configure configure.in COPYING CREDITS CWprojects.sea.bin docs docs.html EpocBuildFiles.zip include INSTALL Makefile.dc Makefile.minimal Makefile.in MPWmake.sea.bin README* sdl-config.in sdl.m4 SDL.qpg.in SDL.spec SDL.spec.in src test TODO VisualCE.zip VisualC.html VisualC.zip Watcom-OS2.zip Watcom-Win32.zip WhatsNew Xcode.tar.gz
+DIST = acinclude.m4 autogen.sh Borland.html Borland.zip BUGS build-scripts configure configure.in COPYING CREDITS CWprojects.sea.bin docs docs.html EpocBuildFiles.zip include INSTALL Makefile.dc Makefile.minimal Makefile.in MPWmake.sea.bin README* sdl-config.in sdl.m4 sdl.pc.in SDL.qpg.in SDL.spec SDL.spec.in src test TODO VisualCE.zip VisualC.html VisualC.zip Watcom-OS2.zip Watcom-Win32.zip WhatsNew Xcode.tar.gz
 
 LT_AGE      = @LT_AGE@
 LT_CURRENT  = @LT_CURRENT@
@@ -97,6 +97,8 @@ install-lib:
 install-data:
 	$(SHELL) $(auxdir)/mkinstalldirs $(datadir)/aclocal
 	$(INSTALL) -m 644 $(srcdir)/sdl.m4 $(datadir)/aclocal/sdl.m4
+	$(SHELL) $(auxdir)/mkinstalldirs $(libdir)/pkgconfig
+	$(INSTALL) -m 644 $(srcdir)/sdl.pc $(libdir)/pkgconfig
 install-man:
 	$(SHELL) $(auxdir)/mkinstalldirs $(mandir)/man3
 	for src in $(srcdir)/docs/man3/*.3; do \
