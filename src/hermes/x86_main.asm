@@ -11,10 +11,12 @@
 
 BITS 32
 
-GLOBAL _ConvertX86
-GLOBAL _x86return
+%include "common.asm"
+
+SDL_FUNC _ConvertX86
+SDL_FUNC _x86return
 	
-GLOBAL _Hermes_X86_CPU
+SDL_FUNC _Hermes_X86_CPU
 
 SECTION .text
 		

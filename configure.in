@@ -596,11 +596,14 @@ CheckNASM()
 AC_HELP_STRING([--enable-nasm], [use nasm assembly blitters on x86 [[default=yes]]]),
                   , enable_nasm=yes)
     if test x$enable_video = xyes -a x$enable_assembly = xyes -a x$enable_nasm = xyes; then
-        AC_PATH_PROG(NASM, nasm)
-        if test x$NASM != x -a x$NASM != x'"$NASM"'; then
+        AC_PATH_PROG(NASM, yasm)
+        if test "x$NASM" = x -o "x$NASM" = x'"$NASM"'; then
+            AC_PATH_PROG(NASM, nasm)
+        fi
+        if test "x$NASM" != x -a "x$NASM" != x'"$NASM"'; then
             AC_DEFINE(SDL_HERMES_BLITTERS)
             SOURCES="$SOURCES $srcdir/src/hermes/*.asm"
-            if test x$NASMFLAGS = x; then
+            if test x"$NASMFLAGS" = x; then
                 case $ARCH in
                   win32)
                       NASMFLAGS="-f win32"
@@ -613,6 +616,15 @@ AC_HELP_STRING([--enable-nasm], [use nasm assembly blitters on x86 [[default=yes
                       ;;
                 esac
             fi
+            NASMFLAGS="$NASMFLAGS -i $srcdir/src/hermes/"
+
+            dnl See if hidden visibility is supported
+            echo 'GLOBAL _bar:function hidden' > nasm_vis.asm
+            if $NASM $NASMFLAGS nasm_vis.asm -o nasm_vis.o >&AS_MESSAGE_LOG_FD ; then
+                NASMFLAGS="$NASMFLAGS -DHIDDEN_VISIBILITY"
+            fi
+            rm -f nasm_vis.asm nasm_vis.o
+
             AC_SUBST(NASM)
             AC_SUBST(NASMFLAGS)
 

@@ -9,8 +9,10 @@
 
 BITS 32
 
-GLOBAL _ConvertMMX
-GLOBAL _mmxreturn
+%include "common.asm"
+
+SDL_FUNC _ConvertMMX
+SDL_FUNC _mmxreturn
 
 SECTION .text
 		
