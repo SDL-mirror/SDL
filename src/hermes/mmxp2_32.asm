@@ -20,7 +20,7 @@
 
 BITS 32
 
-%include "common.asm"
+%include "common.inc"
 	
 SDL_FUNC _ConvertMMXpII32_24RGB888
 SDL_FUNC _ConvertMMXpII32_16RGB565

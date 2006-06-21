@@ -11,7 +11,7 @@
 
 BITS 32
 
-%include "common.asm"
+%include "common.inc"
 
 SDL_FUNC _ConvertX86p32_32BGR888
 SDL_FUNC _ConvertX86p32_32RGBA888

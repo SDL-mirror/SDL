@@ -9,7 +9,7 @@
 
 BITS 32
 
-%include "common.asm"
+%include "common.inc"
 
 SDL_FUNC _ConvertMMX
 SDL_FUNC _mmxreturn

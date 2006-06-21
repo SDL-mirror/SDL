@@ -12,7 +12,7 @@
 
 BITS 32
 
-%include "common.asm"
+%include "common.inc"
 
 SDL_FUNC _ConvertX86p16_16BGR565
 SDL_FUNC _ConvertX86p16_16RGB555
