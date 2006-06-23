@@ -171,6 +171,9 @@ int SDL_X11_LoadSymbols(void)
 		}
 	}
 	#else
+		#if DEBUG_DYNAMIC_X11
+		printf("X11: No dynamic X11 support in this build of SDL.\n");
+		#endif
 		#ifdef X_HAVE_UTF8_STRING
 		pXCreateIC = XCreateIC;
 		#endif
