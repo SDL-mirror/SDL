@@ -876,7 +876,15 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [[default=ye
             if test x$have_loadso != xyes && \
                test x$enable_x11_shared = xyes; then
                 AC_MSG_WARN([You must have SDL_LoadObject() support for dynamic X11 loading])
+                enable_x11_shared=no
             fi
+
+            if test x$have_gcc_fvisibility != xyes && \
+               test x$enable_x11_shared = xyes; then
+                AC_MSG_WARN([You must have gcc4 (-fvisibility=hidden) for dynamic X11 loading])
+                enable_x11_shared=no
+            fi
+
             if test x$have_loadso = xyes && \
                test x$enable_x11_shared = xyes && test x$x11_lib != x && test x$x11ext_lib != x; then
                 echo "-- dynamic libX11 -> $x11_lib"
