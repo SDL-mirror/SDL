@@ -37,7 +37,7 @@ struct SDL_PrivateAudioData {
 	LPDIRECTSOUNDBUFFER mixbuf;
 	int NUM_BUFFERS;
 	int mixlen, silence;
-	DWORD playing;
+	DWORD lastchunk;
 	Uint8 *locked_buf;
 	HANDLE audio_event;
 };
@@ -48,7 +48,7 @@ struct SDL_PrivateAudioData {
 #define NUM_BUFFERS		(this->hidden->NUM_BUFFERS)
 #define mixlen			(this->hidden->mixlen)
 #define silence			(this->hidden->silence)
-#define playing			(this->hidden->playing)
+#define lastchunk		(this->hidden->lastchunk)
 #define locked_buf		(this->hidden->locked_buf)
 #define audio_event		(this->hidden->audio_event)
 
