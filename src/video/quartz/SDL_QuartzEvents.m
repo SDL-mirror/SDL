@@ -260,23 +260,27 @@ static void QZ_DoKey (_THIS, int state, NSEvent *event) {
         contains multiple characters, we'll use 0 as
         the scancode/keysym.
     */
-    chars = [ event characters ];
-    numChars = [ chars length ];
-
-    if (numChars == 1) {
-
-        key.scancode = [ event keyCode ];
-        key.sym      = keymap [ key.scancode ];
-        key.unicode  = [ chars characterAtIndex:0 ];
-        key.mod      = KMOD_NONE;
-
-        SDL_PrivateKeyboard (state, &key);
+    if (SDL_TranslateUNICODE) {
+        chars = [ event characters ];
+        numChars = [ chars length ];
+    } else {
+        numChars = 0;
     }
-    else if (numChars == 0) {
+
+    if (numChars == 0) {
       
         key.scancode = [ event keyCode ];
         key.sym      = keymap [ key.scancode ];
         key.unicode  = 0;
+        key.mod      = KMOD_NONE;
+
+        SDL_PrivateKeyboard (state, &key);
+    }
+    else if (numChars == 1) {
+
+        key.scancode = [ event keyCode ];
+        key.sym      = keymap [ key.scancode ];
+        key.unicode  = [ chars characterAtIndex:0 ];
         key.mod      = KMOD_NONE;
 
         SDL_PrivateKeyboard (state, &key);
