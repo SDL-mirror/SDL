@@ -413,6 +413,7 @@ static int DIB_SussScreenDepth()
 	ReleaseDC(SDL_Window, hdc);
 	return(depth);
 #else
+    int depth;
     int dib_size;
     LPBITMAPINFOHEADER dib_hdr;
     HDC hdc;
@@ -441,21 +442,23 @@ static int DIB_SussScreenDepth()
     DeleteObject(hbm);
     ReleaseDC(NULL, hdc);
 
+    depth = 0;
     switch( dib_hdr->biBitCount )
     {
-    case 8:     return 8;
-    case 24:    return 24;
-    case 32:    return 32;
+    case 8:     depth = 8; break;
+    case 24:    depth = 24; break;
+    case 32:    depth = 32; break;
     case 16:
         if( dib_hdr->biCompression == BI_BITFIELDS ) {
             /* check the red mask */
             switch( ((DWORD*)((char*)dib_hdr + dib_hdr->biSize))[0] ) {
-                case 0xf800: return 16;    /* 565 */
-                case 0x7c00: return 15;    /* 555 */
+                case 0xf800: depth = 16; break;   /* 565 */
+                case 0x7c00: depth = 15; break;   /* 555 */
             }
         }
     }
-    return 0;    /* poo. */
+    SDL_free(dib_hdr);
+    return depth;
 #endif /* NO_GETDIBITS */
 }
 
@@ -1024,6 +1027,8 @@ int DIB_GetGammaRamp(_THIS, Uint16 *ramp)
 
 void DIB_VideoQuit(_THIS)
 {
+	int i, j;
+
 	/* Destroy the window and everything associated with it */
 	if ( SDL_Window ) {
 		/* Delete the screen bitmap (also frees screen->pixels) */
@@ -1061,7 +1066,18 @@ void DIB_VideoQuit(_THIS)
 			aygshell = NULL;
 		}
 #endif
+	}
 
+	for ( i=0; i < SDL_arraysize(SDL_modelist); ++i ) {
+		if ( !SDL_modelist[i] ) {
+			continue;
+		}
+		for ( j=0; SDL_modelist[i][j]; ++j ) {
+			SDL_free(SDL_modelist[i][j]);
+		}
+		SDL_free(SDL_modelist[i]);
+		SDL_modelist[i] = NULL;
+		SDL_nummodes[i] = 0;
 	}
 }
 
