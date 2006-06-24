@@ -55,6 +55,10 @@ Uint16 cursor_mask[16]={
 	0xff00
 };
 
+/* another test cursor: smaller than 16x16, and with an odd height */
+
+Uint8 small_cursor_data[11] = { 0x00, 0x18, 0x08, 0x38, 0x44, 0x54, 0x44, 0x38, 0x20, 0x20, 0x00 };
+Uint8 small_cursor_mask[11] = { 0x3C, 0x3C, 0x3C, 0x7C, 0xC6, 0xC6, 0xC6, 0x7C, 0x78, 0x70, 0x70 };
 
 /* XPM */
 static const char *arrow[] = {
@@ -139,7 +143,7 @@ int main(int argc, char *argv[])
 {
 	SDL_Surface *screen;
 	SDL_bool quit = SDL_FALSE, first_time = SDL_TRUE;
-	SDL_Cursor *cursor[2];
+	SDL_Cursor *cursor[3];
 	int current;
 
 	/* Load the SDL library */
@@ -170,6 +174,13 @@ int main(int argc, char *argv[])
 		SDL_Quit();
 		return(1);
 	}
+	cursor[2] = SDL_CreateCursor(small_cursor_data, small_cursor_mask,
+		8, 11, 3, 5);
+	if (cursor[2]==NULL) {
+		fprintf(stderr, "Couldn't initialize test cursor: %s\n",SDL_GetError());
+		SDL_Quit();
+		return(1);
+	}
 
 	current = 0;
 	SDL_SetCursor(cursor[current]);
@@ -179,7 +190,7 @@ int main(int argc, char *argv[])
 		while (SDL_PollEvent(&event)) {
 			switch(event.type) {
 				case SDL_MOUSEBUTTONDOWN:
-					current = !current;
+					current = (current + 1)%3;
 					SDL_SetCursor(cursor[current]);
 					break;
 				case SDL_KEYDOWN:

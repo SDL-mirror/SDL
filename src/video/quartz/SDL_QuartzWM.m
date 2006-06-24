@@ -25,49 +25,69 @@
 
 
 struct WMcursor {
-    Cursor curs;
+    NSCursor *nscursor;
 };
 
 void QZ_FreeWMCursor     (_THIS, WMcursor *cursor) { 
 
-    if ( cursor != NULL )
+    if ( cursor != NULL ) {
+        [ cursor->nscursor release ];
         free (cursor);
+    }
 }
 
-/* Use the Carbon cursor routines for now */
 WMcursor*    QZ_CreateWMCursor   (_THIS, Uint8 *data, Uint8 *mask, 
                                          int w, int h, int hot_x, int hot_y) { 
     WMcursor *cursor;
-    int row, bytes;
-        
+    NSBitmapImageRep *imgrep;
+    NSImage *img;
+    unsigned char *planes[5];
+    int i;
+    NSAutoreleasePool *pool;
+    
+    pool = [ [ NSAutoreleasePool alloc ] init ];
+    
     /* Allocate the cursor memory */
     cursor = (WMcursor *)SDL_malloc(sizeof(WMcursor));
-    if ( cursor == NULL ) {
-        SDL_OutOfMemory();
-        return(NULL);
+    if (cursor == NULL) goto outOfMemory;
+    
+    /* create the image representation and get the pointers to its storage */
+    imgrep = [ [ [ NSBitmapImageRep alloc ] initWithBitmapDataPlanes: NULL pixelsWide: w pixelsHigh: h bitsPerSample: 1 samplesPerPixel: 2 hasAlpha: YES isPlanar: YES colorSpaceName: NSDeviceBlackColorSpace bytesPerRow: (w+7)/8 bitsPerPixel: 0 ] autorelease ];
+    if (imgrep == nil) goto outOfMemory;
+    [ imgrep getBitmapDataPlanes: planes ];
+    
+    /* copy data and mask, extending the mask to all black pixels because the inversion effect doesn't work with Cocoa's alpha-blended cursors */
+    for (i = 0; i < (w+7)/8*h; i++) {
+        planes[0][i] = data[i];
+        planes[1][i] = mask[i] | data[i];
     }
-    SDL_memset(cursor, 0, sizeof(*cursor));
     
-    if (w > 16)
-        w = 16;
-    
-    if (h > 16)
-        h = 16;
-    
-    bytes = (w+7)/8;
-
-    for ( row=0; row<h; ++row ) {
-        SDL_memcpy(&cursor->curs.data[row], data, bytes);
-        data += bytes;
+    /* create image and cursor */
+    img = [ [ [ NSImage alloc ] initWithSize: NSMakeSize(w, h) ] autorelease ];
+    if (img == nil) goto outOfMemory;
+    [ img addRepresentation: imgrep ];
+    if (system_version < 0x1030) { /* on 10.2, cursors must be 16*16 */
+        if (w > 16 || h > 16) { /* too big: scale it down */
+            [ img setScalesWhenResized: YES ];
+            hot_x = hot_x*16/w;
+            hot_y = hot_y*16/h;
+        }
+        else { /* too small (or just right): extend it (from the bottom left corner, so hot_y must be adjusted) */
+            hot_y += 16 - h;
+        }
+        [ img setSize: NSMakeSize(16, 16) ];
     }
-    for ( row=0; row<h; ++row ) {
-        SDL_memcpy(&cursor->curs.mask[row], mask, bytes);
-        mask += bytes;
-    }
-    cursor->curs.hotSpot.h = hot_x;
-    cursor->curs.hotSpot.v = hot_y;
+    cursor->nscursor = [ [ NSCursor alloc ] initWithImage: img hotSpot: NSMakePoint(hot_x, hot_y) ];
+    if (cursor->nscursor == nil) goto outOfMemory;
     
+    [ pool release ];
     return(cursor);
+
+outOfMemory:
+    [ pool release ];
+    if (cursor != NULL) SDL_free(cursor);
+    SDL_OutOfMemory();
+    return(NULL);
 }
 
 void QZ_ShowMouse (_THIS) {
@@ -103,7 +123,7 @@ int QZ_ShowWMCursor (_THIS, WMcursor *cursor) {
         }
     }
     else {
-        SetCursor(&cursor->curs);
+        [ cursor->nscursor set ];
         if ( ! cursor_should_be_visible ) {
             QZ_ShowMouse (this);
             cursor_should_be_visible = YES;
