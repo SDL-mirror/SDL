@@ -346,7 +346,10 @@ int WIN_GL_SetupWindow(_THIS)
 		/* Uh oh, something is seriously wrong here... */
 		wglext = NULL;
 	}
-	if ( !wglext || !SDL_strstr(wglext, "WGL_EXT_swap_control") ) {
+	if ( wglext && SDL_strstr(wglext, "WGL_EXT_swap_control") ) {
+		this->gl_data->wglSwapIntervalEXT = WIN_GL_GetProcAddress(this, "wglSwapIntervalEXT");
+		this->gl_data->wglGetSwapIntervalEXT = WIN_GL_GetProcAddress(this, "wglGetSwapIntervalEXT");
+	} else {
 		this->gl_data->wglSwapIntervalEXT = NULL;
 		this->gl_data->wglGetSwapIntervalEXT = NULL;
 	}
@@ -466,10 +469,12 @@ int WIN_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
 			break;
 		    case SDL_GL_SWAP_CONTROL:
 			if ( this->gl_data->wglGetSwapIntervalEXT ) {
-				return this->gl_data->wglGetSwapIntervalEXT();
+				*value = this->gl_data->wglGetSwapIntervalEXT();
+				return 0;
 			} else {
 				return -1;
 			}
+			break;
 		    default:
 			return(-1);
 		}
@@ -532,6 +537,14 @@ int WIN_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
 		break;
 	    case SDL_GL_MULTISAMPLESAMPLES:
 		*value = 1;
+		break;
+	    case SDL_GL_SWAP_CONTROL:
+		if ( this->gl_data->wglGetSwapIntervalEXT ) {
+			*value = this->gl_data->wglGetSwapIntervalEXT();
+			return 0;
+		} else {
+			return -1;
+		}
 		break;
 	    default:
 		retval = -1;
