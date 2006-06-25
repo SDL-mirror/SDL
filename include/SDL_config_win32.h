@@ -27,7 +27,9 @@
 
 /* This is a set of defines to configure the SDL features */
 
-#ifdef _MSC_VER
+#ifdef __GNUC__
+#define HAVE_STDINT_H	1
+#elif defined(_MSC_VER)
 typedef signed __int8		int8_t;
 typedef unsigned __int8		uint8_t;
 typedef signed __int16		int16_t;
@@ -44,9 +46,7 @@ typedef unsigned int   uintptr_t;
 #endif
 #define _UINTPTR_T_DEFINED
 #endif
-#elif defined(__GNUC__)
-#define HAVE_STDINT_H	1
-#else
+#else	/* !__GNUC__ && !_MSC_VER */
 typedef signed char int8_t;
 typedef unsigned char uint8_t;
 typedef signed short int16_t;
@@ -60,7 +60,7 @@ typedef unsigned long long uint64_t;
 typedef unsigned int size_t;
 #endif
 typedef unsigned int uintptr_t;
-#endif /* _MSC_VER */
+#endif /* __GNUC__ || _MSC_VER */
 #define SDL_HAS_64BIT_TYPE	1
 
 /* Enabled for SDL 1.2 (binary compatibility) */
