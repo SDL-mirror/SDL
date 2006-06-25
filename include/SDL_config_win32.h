@@ -44,6 +44,8 @@ typedef unsigned int   uintptr_t;
 #endif
 #define _UINTPTR_T_DEFINED
 #endif
+#elif defined(__GNUC__)
+#define HAVE_STDINT_H	1
 #else
 typedef signed char int8_t;
 typedef unsigned char uint8_t;
