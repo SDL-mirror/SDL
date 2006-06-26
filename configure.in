@@ -622,7 +622,8 @@ AC_HELP_STRING([--enable-nasm], [use nasm assembly blitters on x86 [[default=yes
             NASMFLAGS="$NASMFLAGS -i $srcdir/src/hermes/"
 
             dnl See if hidden visibility is supported
-            echo 'GLOBAL _bar:function hidden' > nasm_vis.asm
+            echo "GLOBAL _bar:function hidden" > nasm_vis.asm
+            echo "_bar:" >>nasm_vis.asm
             if $NASM $NASMFLAGS nasm_vis.asm -o nasm_vis.o >&AS_MESSAGE_LOG_FD 2>&1; then
                 NASMFLAGS="$NASMFLAGS -DHIDDEN_VISIBILITY"
             fi
