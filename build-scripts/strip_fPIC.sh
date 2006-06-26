@@ -8,6 +8,9 @@ while [ $# -gt 0 ]; do
         -?PIC)
             # Ignore -fPIC and -DPIC options
             ;;
+        -fno-common)
+            # Ignore -fPIC and -DPIC options
+            ;;
         *)
             command="$command $1"
             ;;
