@@ -68,6 +68,9 @@ Notes:
  To use the library in your own projects with Open Watcom, you can use
  the way the tests are built as base of your own build environment.
 
+ The library can also be built with the stack calling convention of the
+ compiler (-6s instead of -6r).
+
 
 Test applications
 -----------------
@@ -100,12 +103,13 @@ testsprite      +
 testtimer       +
 testver         +
 testvidinfo     +
-testwin         - (fading doesn't seem right)
+testwin         ? (fading doesn't seem right)
 testwm          +
 torturethread   +
 testcdrom       +
 testjoystick    not tested
 threadwin       +
+testcursor      +
 
 
 TODO
