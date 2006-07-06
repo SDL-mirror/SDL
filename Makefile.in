@@ -98,7 +98,7 @@ install-data:
 	$(SHELL) $(auxdir)/mkinstalldirs $(datadir)/aclocal
 	$(INSTALL) -m 644 $(srcdir)/sdl.m4 $(datadir)/aclocal/sdl.m4
 	$(SHELL) $(auxdir)/mkinstalldirs $(libdir)/pkgconfig
-	$(INSTALL) -m 644 $(srcdir)/sdl.pc $(libdir)/pkgconfig
+	$(INSTALL) -m 644 sdl.pc $(libdir)/pkgconfig
 install-man:
 	$(SHELL) $(auxdir)/mkinstalldirs $(mandir)/man3
 	for src in $(srcdir)/docs/man3/*.3; do \
