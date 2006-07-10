@@ -36,7 +36,7 @@ struct SDL_PrivateAudioData
     /* The audio device handle */
     int cardno;
     int deviceno;
-    snd_pcm_t* audio_handle;
+    snd_pcm_t *audio_handle;
 
     /* The audio file descriptor */
     int audio_fd;
@@ -45,13 +45,13 @@ struct SDL_PrivateAudioData
     pid_t parent;
 
     /* Raw mixing buffer */
-    Uint8* pcm_buf;
+    Uint8 *pcm_buf;
     Uint32 pcm_len;
 
     /* QSA parameters */
     snd_pcm_channel_status_t cstatus;
     snd_pcm_channel_params_t cparams;
-    snd_pcm_channel_setup_t  csetup;
+    snd_pcm_channel_setup_t csetup;
 };
 
 #define cardno          (this->hidden->cardno)
@@ -66,3 +66,4 @@ struct SDL_PrivateAudioData
 #define csetup          (this->hidden->csetup)
 
 #endif /* __SDL_NTO_AUDIO_H__ */
+/* vi: set ts=4 sw=4 expandtab: */

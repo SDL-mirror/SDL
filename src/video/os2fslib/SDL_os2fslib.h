@@ -42,26 +42,26 @@
 /* Private display data */
 struct SDL_PrivateVideoData
 {
-  FSLib_VideoMode_p   pAvailableFSLibVideoModes;
-  SDL_Rect          **pListModesResult; // Allocated memory to return list of modes for os2fslib_ListModes() API
+    FSLib_VideoMode_p pAvailableFSLibVideoModes;
+    SDL_Rect **pListModesResult;        // Allocated memory to return list of modes for os2fslib_ListModes() API
 
-  FSLib_VideoMode     SrcBufferDesc;    // Description of current source image buffer
-  char               *pchSrcBuffer;     // The source image buffer itself
-  SDL_Surface        *pSDLSurface;      // The SDL surface describing the buffer
-  HMTX                hmtxUseSrcBuffer; // Mutex semaphore to manipulate src buffer
-  HWND                hwndFrame, hwndClient;  // Window handle of frame and client
-  int                 iPMThreadStatus;  // 0: Not running
-                                        // 1: Running
-                                        // Other: Not running, had an error
-  int                 tidPMThread;      // Thread ID of PM Thread
-  int                 fInFocus;         // True if we're in focus!
-  int                 iSkipWMMOUSEMOVE; // Number of WM_MOUSEMOVE messages to skip!
-  int                 iMouseVisible;    //
+    FSLib_VideoMode SrcBufferDesc;      // Description of current source image buffer
+    char *pchSrcBuffer;         // The source image buffer itself
+    SDL_Surface *pSDLSurface;   // The SDL surface describing the buffer
+    HMTX hmtxUseSrcBuffer;      // Mutex semaphore to manipulate src buffer
+    HWND hwndFrame, hwndClient; // Window handle of frame and client
+    int iPMThreadStatus;        // 0: Not running
+    // 1: Running
+    // Other: Not running, had an error
+    int tidPMThread;            // Thread ID of PM Thread
+    int fInFocus;               // True if we're in focus!
+    int iSkipWMMOUSEMOVE;       // Number of WM_MOUSEMOVE messages to skip!
+    int iMouseVisible;          //
 
-  PFNWP               pfnOldFrameProc;  // Old window frame procedure
-  int                 bProportionalResize; // 0: No proportional resizing
-                                           // 1: Do proportional resizing
-  ULONG               ulResizingFlag;   // First resizing flag value
+    PFNWP pfnOldFrameProc;      // Old window frame procedure
+    int bProportionalResize;    // 0: No proportional resizing
+    // 1: Do proportional resizing
+    ULONG ulResizingFlag;       // First resizing flag value
 };
 
 /* OS/2 specific backdoor function to be able to set FrameControlFlags of */
@@ -69,3 +69,4 @@ struct SDL_PrivateVideoData
 extern DECLSPEC void SDLCALL SDL_OS2FSLIB_SetFCFToUse(ULONG ulFCF);
 
 #endif /* _SDL_os2fslib_h */
+/* vi: set ts=4 sw=4 expandtab: */

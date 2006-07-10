@@ -24,4 +24,4 @@
 #include <sys/types.h>
 
 typedef pid_t SYS_ThreadHandle;
-
+/* vi: set ts=4 sw=4 expandtab: */

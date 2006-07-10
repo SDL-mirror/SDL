@@ -27,11 +27,6 @@
 #include "SDL_mutex.h"
 #include "../SDL_sysvideo.h"
 
-/* The implementation dependent data for the window manager cursor */
-struct WMcursor {
-	MFORM *mform_p;
-};
-
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_VideoDevice *this
 
@@ -40,58 +35,58 @@ void GEM_wind_redraw(_THIS, int winhandle, short *inside);
 
 /* Private display data */
 
-#define B2S_C2P_1TO2		(1<<0)	/* C2P convert buffer 1 to buffer 2 */
-#define B2S_C2P_1TOS		(1<<1)	/* C2P convert buffer 1 to screen */
-#define B2S_VROCPYFM_1TOS	(1<<2)	/* vro_cpyfm() buffer 1 to screen */
-#define B2S_VROCPYFM_2TOS	(1<<3)	/* vro_cpyfm() buffer 2 to screen */
+#define B2S_C2P_1TO2		(1<<0)  /* C2P convert buffer 1 to buffer 2 */
+#define B2S_C2P_1TOS		(1<<1)  /* C2P convert buffer 1 to screen */
+#define B2S_VROCPYFM_1TOS	(1<<2)  /* vro_cpyfm() buffer 1 to screen */
+#define B2S_VROCPYFM_2TOS	(1<<3)  /* vro_cpyfm() buffer 2 to screen */
 
-#define SDL_NUMMODES	1		/* Fullscreen */
+#define SDL_NUMMODES	1       /* Fullscreen */
 
-struct SDL_PrivateVideoData {
-	Uint16	buf2scr_ops;		/* Operations to get buffer to screen */
-    void *buffer1;				/* Our shadow buffers */
-	void *buffer2;
+struct SDL_PrivateVideoData
+{
+    Uint16 buf2scr_ops;         /* Operations to get buffer to screen */
+    void *buffer1;              /* Our shadow buffers */
+    void *buffer2;
 
-	/* VDI infos */
-	short vdi_handle;			/* VDI handle */
-	short full_w, full_h;		/* Fullscreen size */
-    short bpp;					/* Colour depth */
-	short pixelsize;			/* Bytes per pixel */
-	short old_numcolors;		/* Number of colors in saved palette */
-	Uint16 pitch;				/* Line length */
-	Uint16 format;				/* Screen format */
-	void *screen;				/* Screen address */
-	Uint32 red, green, blue, alpha;	/* Screen components */
-	Uint32 screensize;
-	short	blit_coords[8];		/* Coordinates for bitblt */
-	MFDB	src_mfdb, dst_mfdb;	/* VDI MFDB for bitblt */
-	Uint16 old_palette[256][3];	/* Saved current palette */
-	Uint16 cur_palette[256][3];	/* SDL application palette */
-								/* Function to set/restore palette */
-	void (*setpalette)(_THIS, Uint16 newpal[256][3]);
+    /* VDI infos */
+    short vdi_handle;           /* VDI handle */
+    short full_w, full_h;       /* Fullscreen size */
+    short bpp;                  /* Colour depth */
+    short pixelsize;            /* Bytes per pixel */
+    short old_numcolors;        /* Number of colors in saved palette */
+    Uint16 pitch;               /* Line length */
+    Uint16 format;              /* Screen format */
+    void *screen;               /* Screen address */
+    Uint32 red, green, blue, alpha;     /* Screen components */
+    Uint32 screensize;
+    short blit_coords[8];       /* Coordinates for bitblt */
+    MFDB src_mfdb, dst_mfdb;    /* VDI MFDB for bitblt */
+    Uint16 old_palette[256][3]; /* Saved current palette */
+    Uint16 cur_palette[256][3]; /* SDL application palette */
+    /* Function to set/restore palette */
+    void (*setpalette) (_THIS, Uint16 newpal[256][3]);
 
-	/* GEM infos */
-	short desk_x, desk_y;		/* Desktop properties */
-	short desk_w, desk_h;
-	short win_handle;			/* Our window handle */
-	int window_type;			/* Window type */
-	const char *title_name;		/* Window title */
-	const char *icon_name;		/* Icon title */
-	short version;				/* AES version */
-	short wfeatures;			/* AES window features */
-	SDL_bool refresh_name;		/* Change window title ? */
-	SDL_bool window_fulled;		/* Window maximized ? */
-	SDL_bool mouse_relative;	/* Report relative mouse movement */
-	SDL_bool locked;			/* AES locked for fullscreen ? */
-	SDL_bool lock_redraw;		/* Prevent redraw till buffers are setup */
-	short message[8];			/* To self-send an AES message */
-	void *menubar;				/* Menu bar save buffer when going fullscreen */
-	SDL_bool use_dev_mouse;		/* Use /dev/mouse ? */
-	WMcursor *cursor;			/* To restore cursor when leaving/entering window */
+    /* GEM infos */
+    short desk_x, desk_y;       /* Desktop properties */
+    short desk_w, desk_h;
+    short win_handle;           /* Our window handle */
+    int window_type;            /* Window type */
+    const char *title_name;     /* Window title */
+    const char *icon_name;      /* Icon title */
+    short version;              /* AES version */
+    short wfeatures;            /* AES window features */
+    SDL_bool refresh_name;      /* Change window title ? */
+    SDL_bool window_fulled;     /* Window maximized ? */
+    SDL_bool mouse_relative;    /* Report relative mouse movement */
+    SDL_bool locked;            /* AES locked for fullscreen ? */
+    SDL_bool lock_redraw;       /* Prevent redraw till buffers are setup */
+    short message[8];           /* To self-send an AES message */
+    void *menubar;              /* Menu bar save buffer when going fullscreen */
+    SDL_bool use_dev_mouse;     /* Use /dev/mouse ? */
 
-	SDL_bool fullscreen;		/* Fullscreen or windowed mode ? */
-	SDL_Rect *SDL_modelist[SDL_NUMMODES+1];	/* Mode list */
-	SDL_Surface *icon;			/* The icon */
+    SDL_bool fullscreen;        /* Fullscreen or windowed mode ? */
+    SDL_Rect *SDL_modelist[SDL_NUMMODES + 1];   /* Mode list */
+    SDL_Surface *icon;          /* The icon */
 };
 
 /* Hidden structure -> variables names */
@@ -137,7 +132,6 @@ struct SDL_PrivateVideoData {
 #define GEM_fullscreen		(this->hidden->fullscreen)
 #define GEM_menubar			(this->hidden->menubar)
 #define GEM_usedevmouse		(this->hidden->use_dev_mouse)
-#define GEM_cursor			(this->hidden->cursor)
 
 #define GEM_buffer1			(this->hidden->buffer1)
 #define GEM_buffer2			(this->hidden->buffer2)
@@ -189,3 +183,4 @@ struct SDL_PrivateVideoData {
 */
 
 #endif /* _SDL_gemvideo_h */
+/* vi: set ts=4 sw=4 expandtab: */

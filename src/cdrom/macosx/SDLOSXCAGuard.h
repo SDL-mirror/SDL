@@ -96,21 +96,21 @@ typedef struct S_SDLOSXCAGuard
 /*public:*/
 /*  Actions */
 /*public:*/
-    int     (*Lock)(struct S_SDLOSXCAGuard *cag);
-    void    (*Unlock)(struct S_SDLOSXCAGuard *cag);
-    int     (*Try)(struct S_SDLOSXCAGuard *cag, int *outWasLocked);    /* returns true if lock is free, false if not */
-    void    (*Wait)(struct S_SDLOSXCAGuard *cag);
-    void    (*Notify)(struct S_SDLOSXCAGuard *cag);
+    int (*Lock) (struct S_SDLOSXCAGuard * cag);
+    void (*Unlock) (struct S_SDLOSXCAGuard * cag);
+    int (*Try) (struct S_SDLOSXCAGuard * cag, int *outWasLocked);       /* returns true if lock is free, false if not */
+    void (*Wait) (struct S_SDLOSXCAGuard * cag);
+    void (*Notify) (struct S_SDLOSXCAGuard * cag);
 
 /*  Implementation */
 /*protected:*/
     pthread_mutex_t mMutex;
-    pthread_cond_t  mCondVar;
-    pthread_t       mOwner;
+    pthread_cond_t mCondVar;
+    pthread_t mOwner;
 } SDLOSXCAGuard;
 
 SDLOSXCAGuard *new_SDLOSXCAGuard(void);
-void delete_SDLOSXCAGuard(SDLOSXCAGuard *cag);
+void delete_SDLOSXCAGuard(SDLOSXCAGuard * cag);
 
 #endif
-
+/* vi: set ts=4 sw=4 expandtab: */

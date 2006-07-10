@@ -37,8 +37,10 @@
 // Mixing for 16 bit signed buffers
 ////////////////////////////////////////////////
 
-void SDL_MixAudio_MMX_S16_VC(char* dst,char* src,unsigned int nSize,int volume)
+void
+SDL_MixAudio_MMX_S16_VC(char *dst, char *src, unsigned int nSize, int volume)
 {
+    /* *INDENT-OFF* */
 	__asm
 	{
 
@@ -111,15 +113,17 @@ ends16:
 		pop		esi
 		pop		edi
 	}
-
+    /* *INDENT-ON* */
 }
 
 ////////////////////////////////////////////////
 // Mixing for 8 bit signed buffers
 ////////////////////////////////////////////////
 
-void SDL_MixAudio_MMX_S8_VC(char* dst,char* src,unsigned int nSize,int volume)
+void
+SDL_MixAudio_MMX_S8_VC(char *dst, char *src, unsigned int nSize, int volume)
 {
+    /* *INDENT-OFF* */
 	_asm
 	{
 
@@ -176,6 +180,9 @@ endS8:
 		pop		esi
 		pop		edi
 	}
+    /* *INDENT-ON* */
 }
 
 #endif /* SDL_ASSEMBLY_ROUTINES */
+
+/* vi: set ts=4 sw=4 expandtab: */

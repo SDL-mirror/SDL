@@ -40,3 +40,4 @@ extern void AtariBios_PumpEvents(_THIS);
 extern void AtariBios_ShutdownEvents(void);
 
 #endif /* _SDL_ATARI_BIOSEVENTS_H_ */
+/* vi: set ts=4 sw=4 expandtab: */

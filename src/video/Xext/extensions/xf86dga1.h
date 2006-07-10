@@ -41,129 +41,127 @@ Copyright (c) 1995  XFree86 Inc
 
 #ifndef _XF86DGA_SERVER_
 
-_XFUNCPROTOBEGIN
-
-Bool SDL_NAME(XF86DGAQueryVersion)(
+_XFUNCPROTOBEGIN Bool SDL_NAME(XF86DGAQueryVersion) (
 #if NeedFunctionPrototypes
-    Display*		/* dpy */,
-    int*		/* majorVersion */,
-    int*		/* minorVersion */
+                                                        Display * /* dpy */ ,
+                                                        int *
+                                                        /* majorVersion */ ,
+                                                        int *   /* minorVersion */
 #endif
-);
+    );
 
-Bool SDL_NAME(XF86DGAQueryExtension)(
+Bool SDL_NAME(XF86DGAQueryExtension) (
 #if NeedFunctionPrototypes
-    Display*		/* dpy */,
-    int*		/* event_base */,
-    int*		/* error_base */
+                                         Display * /* dpy */ ,
+                                         int * /* event_base */ ,
+                                         int *  /* error_base */
 #endif
-);
+    );
 
-Status SDL_NAME(XF86DGAGetVideoLL)(
+Status SDL_NAME(XF86DGAGetVideoLL) (
 #if NeedFunctionPrototypes
-    Display*			/* dpy */,
-    int				/* screen */,
-    int *			/* base addr */,
-    int *			/* width */,
-    int *			/* bank_size */,
-    int *			/* ram_size */ 
+                                       Display * /* dpy */ ,
+                                       int /* screen */ ,
+                                       int * /* base addr */ ,
+                                       int * /* width */ ,
+                                       int * /* bank_size */ ,
+                                       int *    /* ram_size */
 #endif
-);
+    );
 
-Status SDL_NAME(XF86DGAGetVideo)(
+Status SDL_NAME(XF86DGAGetVideo) (
 #if NeedFunctionPrototypes
-    Display*			/* dpy */,
-    int				/* screen */,
-    char **			/* base addr */,
-    int *			/* width */,
-    int *			/* bank_size */,
-    int *			/* ram_size */
+                                     Display * /* dpy */ ,
+                                     int /* screen */ ,
+                                     char ** /* base addr */ ,
+                                     int * /* width */ ,
+                                     int * /* bank_size */ ,
+                                     int *      /* ram_size */
 #endif
-);
+    );
 
-Status SDL_NAME(XF86DGADirectVideo)(
+Status SDL_NAME(XF86DGADirectVideo) (
 #if NeedFunctionPrototypes
-    Display*			/* dpy */,
-    int				/* screen */,
-    int 			/* enable */
+                                        Display * /* dpy */ ,
+                                        int /* screen */ ,
+                                        int     /* enable */
 #endif
-);
+    );
 
-Status SDL_NAME(XF86DGADirectVideoLL)(
+Status SDL_NAME(XF86DGADirectVideoLL) (
 #if NeedFunctionPrototypes
-    Display*			/* dpy */,
-    int				/* screen */,
-    int 			/* enable */
+                                          Display * /* dpy */ ,
+                                          int /* screen */ ,
+                                          int   /* enable */
 #endif
-);
+    );
 
-Status SDL_NAME(XF86DGAGetViewPortSize)(
+Status SDL_NAME(XF86DGAGetViewPortSize) (
 #if NeedFunctionPrototypes
-    Display*			/* dpy */,
-    int				/* screen */,
-    int *			/* width */,
-    int *			/* height */
+                                            Display * /* dpy */ ,
+                                            int /* screen */ ,
+                                            int * /* width */ ,
+                                            int *       /* height */
 #endif
-);
+    );
 
-Status SDL_NAME(XF86DGASetViewPort)(
+Status SDL_NAME(XF86DGASetViewPort) (
 #if NeedFunctionPrototypes
-    Display*			/* dpy */,
-    int				/* screen */,
-    int x			/* X */,
-    int y			/* Y */
+                                        Display * /* dpy */ ,
+                                        int /* screen */ ,
+                                        int x /* X */ ,
+                                        int y   /* Y */
 #endif
-);
+    );
 
-Status SDL_NAME(XF86DGAGetVidPage)(
+Status SDL_NAME(XF86DGAGetVidPage) (
 #if NeedFunctionPrototypes
-    Display*			/* dpy */,
-    int				/* screen */,
-    int *			/* vid page */
+                                       Display * /* dpy */ ,
+                                       int /* screen */ ,
+                                       int *    /* vid page */
 #endif
-);
+    );
 
-Status SDL_NAME(XF86DGASetVidPage)(
+Status SDL_NAME(XF86DGASetVidPage) (
 #if NeedFunctionPrototypes
-    Display*			/* dpy */,
-    int				/* screen */,
-    int				/* vid page */
+                                       Display * /* dpy */ ,
+                                       int /* screen */ ,
+                                       int      /* vid page */
 #endif
-);
+    );
 
-Status SDL_NAME(XF86DGAInstallColormap)(
+Status SDL_NAME(XF86DGAInstallColormap) (
 #if NeedFunctionPrototypes
-    Display*			/* dpy */,
-    int				/* screen */,
-    Colormap			/*Colormap */
+                                            Display * /* dpy */ ,
+                                            int /* screen */ ,
+                                            Colormap    /*Colormap */
 #endif
-);
+    );
 
-int SDL_NAME(XF86DGAForkApp)(
+int SDL_NAME(XF86DGAForkApp) (
 #if NeedFunctionPrototypes
-    int screen
+                                 int screen
 #endif
-);
+    );
 
-Status SDL_NAME(XF86DGAQueryDirectVideo)(
+Status SDL_NAME(XF86DGAQueryDirectVideo) (
 #if NeedFunctionPrototypes
-    Display *		/* dpy */,
-    int			/* screen */,
-    int *		/* flags */
+                                             Display * /* dpy */ ,
+                                             int /* screen */ ,
+                                             int *      /* flags */
 #endif
-);
+    );
 
-Bool SDL_NAME(XF86DGAViewPortChanged)(
+Bool SDL_NAME(XF86DGAViewPortChanged) (
 #if NeedFunctionPrototypes
-    Display *		/* dpy */,
-    int			/* screen */,
-    int			/* n */
+                                          Display * /* dpy */ ,
+                                          int /* screen */ ,
+                                          int   /* n */
 #endif
-);
+    );
 
 
 _XFUNCPROTOEND
-
 #endif /* _XF86DGA_SERVER_ */
-
 #endif /* _XF86DGA1_H_ */
+/* vi: set ts=4 sw=4 expandtab: */

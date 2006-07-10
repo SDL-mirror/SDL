@@ -40,23 +40,24 @@
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_AudioDevice *this
 
-struct SDL_PrivateAudioData {
-	AuServer*  aud;
-	AuFlowID   flow;
-	AuDeviceID dev;
-	
-	/* The parent process id, to detect when application quits */
-	pid_t parent;
+struct SDL_PrivateAudioData
+{
+    AuServer *aud;
+    AuFlowID flow;
+    AuDeviceID dev;
 
-	/* Raw mixing buffer */
-	Uint8 *mixbuf;
-	int    mixlen;
+    /* The parent process id, to detect when application quits */
+    pid_t parent;
 
-	int written;
-	int really;
-	int bps;
-	struct timeval last_tv;
-	int buf_free;
+    /* Raw mixing buffer */
+    Uint8 *mixbuf;
+    int mixlen;
+
+    int written;
+    int really;
+    int bps;
+    struct timeval last_tv;
+    int buf_free;
 };
 #endif /* _SDL_nasaudio_h */
-
+/* vi: set ts=4 sw=4 expandtab: */

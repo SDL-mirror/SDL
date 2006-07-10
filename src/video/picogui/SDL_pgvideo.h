@@ -40,11 +40,13 @@
 
 /* Private display data */
 
-struct SDL_PrivateVideoData {
-  pghandle wApp, wCanvas;        /* PicoGUI widgets */
-  pghandle bitmap;
-  struct pgshmbitmap shm;        /* shared memory info */
-  struct pgmodeinfo mi;          /* PicoGUI video mode info structure */
+struct SDL_PrivateVideoData
+{
+    pghandle wApp, wCanvas;     /* PicoGUI widgets */
+    pghandle bitmap;
+    struct pgshmbitmap shm;     /* shared memory info */
+    struct pgmodeinfo mi;       /* PicoGUI video mode info structure */
 };
 
 #endif /* _SDL_pgvideo_h */
+/* vi: set ts=4 sw=4 expandtab: */

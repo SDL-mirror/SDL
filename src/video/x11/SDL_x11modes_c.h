@@ -32,12 +32,13 @@
 */
 #define GRAB_FULLSCREEN
 
+extern int X11_GetVisuals(_THIS);
 extern int X11_GetVideoModes(_THIS);
-extern SDL_Rect **X11_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags);
-extern void X11_FreeVideoModes(_THIS);
 extern int X11_ResizeFullScreen(_THIS);
 extern void X11_WaitMapped(_THIS, Window win);
 extern void X11_WaitUnmapped(_THIS, Window win);
 extern void X11_QueueEnterFullScreen(_THIS);
 extern int X11_EnterFullScreen(_THIS);
 extern int X11_LeaveFullScreen(_THIS);
+extern Uint32 X11_VisualToFormat(const Visual * visual, int depth, int bpp);
+/* vi: set ts=4 sw=4 expandtab: */

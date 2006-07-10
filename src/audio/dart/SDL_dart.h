@@ -34,7 +34,7 @@
 #define INCL_MMIOOS2
 #define INCL_MCIOS2
 #include <os2.h>
-#include <os2me.h>     // DART stuff and MMIO stuff
+#include <os2me.h>              // DART stuff and MMIO stuff
 
 #include "../SDL_sysaudio.h"
 
@@ -44,20 +44,21 @@
 /* The DirectSound objects */
 struct SDL_PrivateAudioData
 {
-  int iCurrDeviceOrd;
-  int iCurrFreq;
-  int iCurrBits;
-  int iCurrChannels;
-  int iCurrNumBufs;
-  int iCurrBufSize;
+    int iCurrDeviceOrd;
+    int iCurrFreq;
+    int iCurrBits;
+    int iCurrChannels;
+    int iCurrNumBufs;
+    int iCurrBufSize;
 
-  int iLastPlayedBuf;
-  int iNextFreeBuffer;
+    int iLastPlayedBuf;
+    int iNextFreeBuffer;
 
-  MCI_BUFFER_PARMS BufferParms;     // Sound buffer parameters
-  MCI_MIX_BUFFER *pMixBuffers;      // Sound buffers
-  MCI_MIXSETUP_PARMS MixSetupParms; // Mixer setup parameters
-  HEV hevAudioBufferPlayed;         // Event semaphore to indicate that an audio buffer has been played by DART
+    MCI_BUFFER_PARMS BufferParms;       // Sound buffer parameters
+    MCI_MIX_BUFFER *pMixBuffers;        // Sound buffers
+    MCI_MIXSETUP_PARMS MixSetupParms;   // Mixer setup parameters
+    HEV hevAudioBufferPlayed;   // Event semaphore to indicate that an audio buffer has been played by DART
 };
 
 #endif /* _SDL_lowaudio_h */
+/* vi: set ts=4 sw=4 expandtab: */

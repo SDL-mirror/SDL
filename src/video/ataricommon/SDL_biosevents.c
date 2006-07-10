@@ -48,122 +48,129 @@ static unsigned char bios_currentascii[ATARIBIOS_MAXKEYS];
 static SDL_bool use_dev_mouse = SDL_FALSE;
 
 /* Special keys state */
-enum {
-	K_RSHIFT=0,
-	K_LSHIFT,
-	K_CTRL,
-	K_ALT,
-	K_CAPSLOCK,
-	K_CLRHOME,
-	K_INSERT
+enum
+{
+    K_RSHIFT = 0,
+    K_LSHIFT,
+    K_CTRL,
+    K_ALT,
+    K_CAPSLOCK,
+    K_CLRHOME,
+    K_INSERT
 };
 
 /* The translation tables from a console scancode to a SDL keysym */
 static SDLKey keymap[ATARIBIOS_MAXKEYS];
 
-static SDL_keysym *TranslateKey(int scancode, int asciicode, SDL_keysym *keysym,
-	SDL_bool pressed);
+static SDL_keysym *TranslateKey(int scancode, int asciicode,
+                                SDL_keysym * keysym, SDL_bool pressed);
 static void UpdateSpecialKeys(int special_keys_state);
 
-void AtariBios_InitOSKeymap(_THIS)
+void
+AtariBios_InitOSKeymap(_THIS)
 {
-	int i, vectors_mask;
-	unsigned long dummy;
+    int i, vectors_mask;
+    unsigned long dummy;
 
-	SDL_memset(bios_currentkeyboard, 0, sizeof(bios_currentkeyboard));
-	SDL_memset(bios_previouskeyboard, 0, sizeof(bios_previouskeyboard));
+    SDL_memset(bios_currentkeyboard, 0, sizeof(bios_currentkeyboard));
+    SDL_memset(bios_previouskeyboard, 0, sizeof(bios_previouskeyboard));
 
-	/* Initialize keymap */
-	for ( i=0; i<sizeof(keymap); i++ )
-		keymap[i] = SDLK_UNKNOWN;
+    /* Initialize keymap */
+    for (i = 0; i < sizeof(keymap); i++)
+        keymap[i] = SDLK_UNKNOWN;
 
-	/* Functions keys */
-	for ( i = 0; i<10; i++ )
-		keymap[SCANCODE_F1 + i] = SDLK_F1+i;
+    /* Functions keys */
+    for (i = 0; i < 10; i++)
+        keymap[SCANCODE_F1 + i] = SDLK_F1 + i;
 
-	/* Cursor keypad */
-	keymap[SCANCODE_HELP] = SDLK_HELP;
-	keymap[SCANCODE_UNDO] = SDLK_UNDO;
-	keymap[SCANCODE_INSERT] = SDLK_INSERT;
-	keymap[SCANCODE_CLRHOME] = SDLK_HOME;
-	keymap[SCANCODE_UP] = SDLK_UP;
-	keymap[SCANCODE_DOWN] = SDLK_DOWN;
-	keymap[SCANCODE_RIGHT] = SDLK_RIGHT;
-	keymap[SCANCODE_LEFT] = SDLK_LEFT;
+    /* Cursor keypad */
+    keymap[SCANCODE_HELP] = SDLK_HELP;
+    keymap[SCANCODE_UNDO] = SDLK_UNDO;
+    keymap[SCANCODE_INSERT] = SDLK_INSERT;
+    keymap[SCANCODE_CLRHOME] = SDLK_HOME;
+    keymap[SCANCODE_UP] = SDLK_UP;
+    keymap[SCANCODE_DOWN] = SDLK_DOWN;
+    keymap[SCANCODE_RIGHT] = SDLK_RIGHT;
+    keymap[SCANCODE_LEFT] = SDLK_LEFT;
 
-	/* Special keys */
-	keymap[SCANCODE_ESCAPE] = SDLK_ESCAPE;
-	keymap[SCANCODE_BACKSPACE] = SDLK_BACKSPACE;
-	keymap[SCANCODE_TAB] = SDLK_TAB;
-	keymap[SCANCODE_ENTER] = SDLK_RETURN;
-	keymap[SCANCODE_DELETE] = SDLK_DELETE;
-	keymap[SCANCODE_LEFTCONTROL] = SDLK_LCTRL;
-	keymap[SCANCODE_LEFTSHIFT] = SDLK_LSHIFT;
-	keymap[SCANCODE_RIGHTSHIFT] = SDLK_RSHIFT;
-	keymap[SCANCODE_LEFTALT] = SDLK_LALT;
-	keymap[SCANCODE_CAPSLOCK] = SDLK_CAPSLOCK;
+    /* Special keys */
+    keymap[SCANCODE_ESCAPE] = SDLK_ESCAPE;
+    keymap[SCANCODE_BACKSPACE] = SDLK_BACKSPACE;
+    keymap[SCANCODE_TAB] = SDLK_TAB;
+    keymap[SCANCODE_ENTER] = SDLK_RETURN;
+    keymap[SCANCODE_DELETE] = SDLK_DELETE;
+    keymap[SCANCODE_LEFTCONTROL] = SDLK_LCTRL;
+    keymap[SCANCODE_LEFTSHIFT] = SDLK_LSHIFT;
+    keymap[SCANCODE_RIGHTSHIFT] = SDLK_RSHIFT;
+    keymap[SCANCODE_LEFTALT] = SDLK_LALT;
+    keymap[SCANCODE_CAPSLOCK] = SDLK_CAPSLOCK;
 
-	use_dev_mouse = (SDL_AtariDevMouse_Open()!=0) ? SDL_TRUE : SDL_FALSE;
+    use_dev_mouse = (SDL_AtariDevMouse_Open() != 0) ? SDL_TRUE : SDL_FALSE;
 
-	vectors_mask = ATARI_XBIOS_JOYSTICKEVENTS;	/* XBIOS joystick events */
-	if (!use_dev_mouse) {
-		vectors_mask |= ATARI_XBIOS_MOUSEEVENTS;	/* XBIOS mouse events */
-	}
-	if (Getcookie(C_MiNT, &dummy)==C_FOUND) {
-		vectors_mask = 0;
-	}
+    vectors_mask = ATARI_XBIOS_JOYSTICKEVENTS;  /* XBIOS joystick events */
+    if (!use_dev_mouse) {
+        vectors_mask |= ATARI_XBIOS_MOUSEEVENTS;        /* XBIOS mouse events */
+    }
+    if (Getcookie(C_MiNT, &dummy) == C_FOUND) {
+        vectors_mask = 0;
+    }
 
-	SDL_AtariXbios_InstallVectors(vectors_mask);
+    SDL_AtariXbios_InstallVectors(vectors_mask);
 }
 
-void AtariBios_PumpEvents(_THIS)
+void
+AtariBios_PumpEvents(_THIS)
 {
-	int i;
-	SDL_keysym keysym;
+    int i;
+    SDL_keysym keysym;
 
-	/* Update pressed keys */
-	SDL_memset(bios_currentkeyboard, 0, ATARIBIOS_MAXKEYS);
+    /* Update pressed keys */
+    SDL_memset(bios_currentkeyboard, 0, ATARIBIOS_MAXKEYS);
 
-	while (Bconstat(_CON)) {
-		unsigned long key_pressed;
-		unsigned char asciicode, scancode;
+    while (Bconstat(_CON)) {
+        unsigned long key_pressed;
+        unsigned char asciicode, scancode;
 
-		key_pressed=Bconin(_CON);
+        key_pressed = Bconin(_CON);
 
-		asciicode = key_pressed;
-		scancode = key_pressed >> 16;
+        asciicode = key_pressed;
+        scancode = key_pressed >> 16;
 
-		bios_currentkeyboard[scancode]=0xFF;
-		bios_currentascii[scancode]=asciicode;
-	}
+        bios_currentkeyboard[scancode] = 0xFF;
+        bios_currentascii[scancode] = asciicode;
+    }
 
-	/* Read special keys */
-	UpdateSpecialKeys(Kbshift(-1));
+    /* Read special keys */
+    UpdateSpecialKeys(Kbshift(-1));
 
-	/* Now generate events */
-	for (i=0; i<ATARIBIOS_MAXKEYS; i++) {
-		/* Key pressed ? */
-		if (bios_currentkeyboard[i] && !bios_previouskeyboard[i])
-			SDL_PrivateKeyboard(SDL_PRESSED,
-				TranslateKey(i, bios_currentascii[i], &keysym, SDL_TRUE));
-			
-		/* Key unpressed ? */
-		if (bios_previouskeyboard[i] && !bios_currentkeyboard[i])
-			SDL_PrivateKeyboard(SDL_RELEASED,
-				TranslateKey(i, bios_currentascii[i], &keysym, SDL_FALSE));
-	}
+    /* Now generate events */
+    for (i = 0; i < ATARIBIOS_MAXKEYS; i++) {
+        /* Key pressed ? */
+        if (bios_currentkeyboard[i] && !bios_previouskeyboard[i])
+            SDL_PrivateKeyboard(SDL_PRESSED,
+                                TranslateKey(i, bios_currentascii[i],
+                                             &keysym, SDL_TRUE));
 
-	if (use_dev_mouse) {
-		SDL_AtariDevMouse_PostMouseEvents(this, SDL_TRUE);
-	} else {
-		SDL_AtariXbios_PostMouseEvents(this, SDL_TRUE);
-	}
+        /* Key unpressed ? */
+        if (bios_previouskeyboard[i] && !bios_currentkeyboard[i])
+            SDL_PrivateKeyboard(SDL_RELEASED,
+                                TranslateKey(i, bios_currentascii[i],
+                                             &keysym, SDL_FALSE));
+    }
 
-	/* Will be previous table */
-	SDL_memcpy(bios_previouskeyboard, bios_currentkeyboard, ATARIBIOS_MAXKEYS);
+    if (use_dev_mouse) {
+        SDL_AtariDevMouse_PostMouseEvents(this, SDL_TRUE);
+    } else {
+        SDL_AtariXbios_PostMouseEvents(this, SDL_TRUE);
+    }
+
+    /* Will be previous table */
+    SDL_memcpy(bios_previouskeyboard, bios_currentkeyboard,
+               ATARIBIOS_MAXKEYS);
 }
 
-static void UpdateSpecialKeys(int special_keys_state)
+static void
+UpdateSpecialKeys(int special_keys_state)
 {
 #define UPDATE_SPECIAL_KEYS(numbit,scancode) \
 	{	\
@@ -173,37 +180,41 @@ static void UpdateSpecialKeys(int special_keys_state)
 		}	\
 	}
 
-	UPDATE_SPECIAL_KEYS(K_RSHIFT, SCANCODE_RIGHTSHIFT);
-	UPDATE_SPECIAL_KEYS(K_LSHIFT, SCANCODE_LEFTSHIFT);
-	UPDATE_SPECIAL_KEYS(K_CTRL, SCANCODE_LEFTCONTROL);
-	UPDATE_SPECIAL_KEYS(K_ALT, SCANCODE_LEFTALT);
-	UPDATE_SPECIAL_KEYS(K_CAPSLOCK, SCANCODE_CAPSLOCK);
+    UPDATE_SPECIAL_KEYS(K_RSHIFT, SCANCODE_RIGHTSHIFT);
+    UPDATE_SPECIAL_KEYS(K_LSHIFT, SCANCODE_LEFTSHIFT);
+    UPDATE_SPECIAL_KEYS(K_CTRL, SCANCODE_LEFTCONTROL);
+    UPDATE_SPECIAL_KEYS(K_ALT, SCANCODE_LEFTALT);
+    UPDATE_SPECIAL_KEYS(K_CAPSLOCK, SCANCODE_CAPSLOCK);
 }
 
-static SDL_keysym *TranslateKey(int scancode, int asciicode, SDL_keysym *keysym,
-	SDL_bool pressed)
+static SDL_keysym *
+TranslateKey(int scancode, int asciicode, SDL_keysym * keysym,
+             SDL_bool pressed)
 {
-	/* Set the keysym information */
-	keysym->scancode = scancode;
+    /* Set the keysym information */
+    keysym->scancode = scancode;
 
-	if (asciicode)
-		keysym->sym = asciicode;		
-	else
-		keysym->sym = keymap[scancode];
+    if (asciicode)
+        keysym->sym = asciicode;
+    else
+        keysym->sym = keymap[scancode];
 
-	keysym->mod = KMOD_NONE;
-	keysym->unicode = 0;
-	if (SDL_TranslateUNICODE && pressed) {
-		keysym->unicode = SDL_AtariToUnicodeTable[asciicode];
-	}
+    keysym->mod = KMOD_NONE;
+    keysym->unicode = 0;
+    if (SDL_TranslateUNICODE && pressed) {
+        keysym->unicode = SDL_AtariToUnicodeTable[asciicode];
+    }
 
-	return(keysym);
+    return (keysym);
 }
 
-void AtariBios_ShutdownEvents(void)
+void
+AtariBios_ShutdownEvents(void)
 {
-	SDL_AtariXbios_RestoreVectors();
-	if (use_dev_mouse) {
-		SDL_AtariDevMouse_Close();
-	}
+    SDL_AtariXbios_RestoreVectors();
+    if (use_dev_mouse) {
+        SDL_AtariDevMouse_Close();
+    }
 }
+
+/* vi: set ts=4 sw=4 expandtab: */

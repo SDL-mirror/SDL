@@ -27,7 +27,7 @@
  */
 
 #ifndef _SDL_ATARIKEYS_H_
-#define _SDL_ATARIKEYS_H_ 
+#define _SDL_ATARIKEYS_H_
 
 /* --- Keyboard scancodes --- */
 /* taken from svgalib/vgakeyboard.h */
@@ -138,3 +138,4 @@
 #define SCANCODE_LEFT		0x4b
 
 #endif /* _SDL_ATARIKEYS_H_ */
+/* vi: set ts=4 sw=4 expandtab: */

@@ -34,23 +34,24 @@
 
 /* Private display data */
 
-struct SDL_PrivateVideoData {
+struct SDL_PrivateVideoData
+{
     unsigned char *bank[2];
     int current_bank;
-	unsigned char *alloc_bank;
+    unsigned char *alloc_bank;
     int height;
     int xeig;
     int yeig;
-	int screen_bpp;
-	int screen_width;
-	int screen_height;
-	char *pixtrans;
+    int screen_bpp;
+    int screen_width;
+    int screen_height;
+    char *pixtrans;
 
-	/* Wimp variables */
-	unsigned int window_handle;
-	char title[256];
+    /* Wimp variables */
+    unsigned int window_handle;
+    char title[256];
 
-#define NUM_MODELISTS	4		/* 8, 16, 24, and 32 bits-per-pixel */
+#define NUM_MODELISTS	4       /* 8, 16, 24, and 32 bits-per-pixel */
     int SDL_nummodes[NUM_MODELISTS];
     SDL_Rect **SDL_modelist[NUM_MODELISTS];
 };
@@ -60,3 +61,4 @@ struct SDL_PrivateVideoData {
 #define SDL_modelist		(this->hidden->SDL_modelist)
 
 #endif /* _SDL_risosvideo_h */
+/* vi: set ts=4 sw=4 expandtab: */

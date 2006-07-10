@@ -21,4 +21,5 @@
 */
 #include "SDL_config.h"
 
-typedef struct kthread* SYS_ThreadHandle;
+typedef struct kthread *SYS_ThreadHandle;
+/* vi: set ts=4 sw=4 expandtab: */

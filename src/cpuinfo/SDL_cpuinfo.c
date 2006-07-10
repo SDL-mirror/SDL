@@ -27,7 +27,7 @@
 #include "SDL_cpuinfo.h"
 
 #if defined(__MACOSX__) && defined(__ppc__)
-#include <sys/sysctl.h> /* For AltiVec check */
+#include <sys/sysctl.h>         /* For AltiVec check */
 #elif SDL_ALTIVEC_BLITTERS && HAVE_SETJMP
 #include <signal.h>
 #include <setjmp.h>
@@ -47,15 +47,18 @@
    the idea is borrowed from the libmpeg2 library - thanks!
  */
 static jmp_buf jmpbuf;
-static void illegal_instruction(int sig)
+static void
+illegal_instruction(int sig)
 {
-	longjmp(jmpbuf, 1);
+    longjmp(jmpbuf, 1);
 }
 #endif /* HAVE_SETJMP */
 
-static __inline__ int CPU_haveCPUID(void)
+static __inline__ int
+CPU_haveCPUID(void)
 {
-	int has_CPUID = 0;
+    int has_CPUID = 0;
+/* *INDENT-OFF* */
 #if defined(__GNUC__) && defined(i386)
 	__asm__ (
 "        pushfl                      # Get original EFLAGS             \n"
@@ -140,12 +143,15 @@ done:
 "1:                            \n"
 	);
 #endif
-	return has_CPUID;
+/* *INDENT-ON* */
+    return has_CPUID;
 }
 
-static __inline__ int CPU_getCPUIDFeatures(void)
+static __inline__ int
+CPU_getCPUIDFeatures(void)
 {
-	int features = 0;
+    int features = 0;
+/* *INDENT-OFF* */
 #if defined(__GNUC__) && ( defined(i386) || defined(__x86_64__) )
 	__asm__ (
 "        movl    %%ebx,%%edi\n"
@@ -193,12 +199,15 @@ done:
 "1:                                \n"
 "        movl    %edi,%ebx\n" );
 #endif
-	return features;
+/* *INDENT-ON* */
+    return features;
 }
 
-static __inline__ int CPU_getCPUIDFeaturesExt(void)
+static __inline__ int
+CPU_getCPUIDFeaturesExt(void)
 {
-	int features = 0;
+    int features = 0;
+/* *INDENT-OFF* */
 #if defined(__GNUC__) && (defined(i386) || defined (__x86_64__) )
 	__asm__ (
 "        movl    %%ebx,%%edi\n"
@@ -244,203 +253,221 @@ done:
 "        movl    %edi,%ebx\n"
 	    );
 #endif
-	return features;
+/* *INDENT-ON* */
+    return features;
 }
 
-static __inline__ int CPU_haveRDTSC(void)
+static __inline__ int
+CPU_haveRDTSC(void)
 {
-	if ( CPU_haveCPUID() ) {
-		return (CPU_getCPUIDFeatures() & 0x00000010);
-	}
-	return 0;
+    if (CPU_haveCPUID()) {
+        return (CPU_getCPUIDFeatures() & 0x00000010);
+    }
+    return 0;
 }
 
-static __inline__ int CPU_haveMMX(void)
+static __inline__ int
+CPU_haveMMX(void)
 {
-	if ( CPU_haveCPUID() ) {
-		return (CPU_getCPUIDFeatures() & 0x00800000);
-	}
-	return 0;
+    if (CPU_haveCPUID()) {
+        return (CPU_getCPUIDFeatures() & 0x00800000);
+    }
+    return 0;
 }
 
-static __inline__ int CPU_haveMMXExt(void)
+static __inline__ int
+CPU_haveMMXExt(void)
 {
-	if ( CPU_haveCPUID() ) {
-		return (CPU_getCPUIDFeaturesExt() & 0x00400000);
-	}
-	return 0;
+    if (CPU_haveCPUID()) {
+        return (CPU_getCPUIDFeaturesExt() & 0x00400000);
+    }
+    return 0;
 }
 
-static __inline__ int CPU_have3DNow(void)
+static __inline__ int
+CPU_have3DNow(void)
 {
-	if ( CPU_haveCPUID() ) {
-		return (CPU_getCPUIDFeaturesExt() & 0x80000000);
-	}
-	return 0;
+    if (CPU_haveCPUID()) {
+        return (CPU_getCPUIDFeaturesExt() & 0x80000000);
+    }
+    return 0;
 }
 
-static __inline__ int CPU_have3DNowExt(void)
+static __inline__ int
+CPU_have3DNowExt(void)
 {
-	if ( CPU_haveCPUID() ) {
-		return (CPU_getCPUIDFeaturesExt() & 0x40000000);
-	}
-	return 0;
+    if (CPU_haveCPUID()) {
+        return (CPU_getCPUIDFeaturesExt() & 0x40000000);
+    }
+    return 0;
 }
 
-static __inline__ int CPU_haveSSE(void)
+static __inline__ int
+CPU_haveSSE(void)
 {
-	if ( CPU_haveCPUID() ) {
-		return (CPU_getCPUIDFeatures() & 0x02000000);
-	}
-	return 0;
+    if (CPU_haveCPUID()) {
+        return (CPU_getCPUIDFeatures() & 0x02000000);
+    }
+    return 0;
 }
 
-static __inline__ int CPU_haveSSE2(void)
+static __inline__ int
+CPU_haveSSE2(void)
 {
-	if ( CPU_haveCPUID() ) {
-		return (CPU_getCPUIDFeatures() & 0x04000000);
-	}
-	return 0;
+    if (CPU_haveCPUID()) {
+        return (CPU_getCPUIDFeatures() & 0x04000000);
+    }
+    return 0;
 }
 
-static __inline__ int CPU_haveAltiVec(void)
+static __inline__ int
+CPU_haveAltiVec(void)
 {
-	volatile int altivec = 0;
+    volatile int altivec = 0;
 #if defined(__MACOSX__) && defined(__ppc__)
-	int selectors[2] = { CTL_HW, HW_VECTORUNIT }; 
-	int hasVectorUnit = 0; 
-	size_t length = sizeof(hasVectorUnit); 
-	int error = sysctl(selectors, 2, &hasVectorUnit, &length, NULL, 0); 
-	if( 0 == error )
-		altivec = (hasVectorUnit != 0); 
+    int selectors[2] = { CTL_HW, HW_VECTORUNIT };
+    int hasVectorUnit = 0;
+    size_t length = sizeof(hasVectorUnit);
+    int error = sysctl(selectors, 2, &hasVectorUnit, &length, NULL, 0);
+    if (0 == error)
+        altivec = (hasVectorUnit != 0);
 #elif SDL_ALTIVEC_BLITTERS && HAVE_SETJMP
-	void (*handler)(int sig);
-	handler = signal(SIGILL, illegal_instruction);
-	if ( setjmp(jmpbuf) == 0 ) {
-		asm volatile ("mtspr 256, %0\n\t"
-			      "vand %%v0, %%v0, %%v0"
-			      :
-			      : "r" (-1));
-		altivec = 1;
-	}
-	signal(SIGILL, handler);
+    void (*handler) (int sig);
+    handler = signal(SIGILL, illegal_instruction);
+    if (setjmp(jmpbuf) == 0) {
+        asm volatile ("mtspr 256, %0\n\t" "vand %%v0, %%v0, %%v0"::"r" (-1));
+        altivec = 1;
+    }
+    signal(SIGILL, handler);
 #endif
-	return altivec; 
+    return altivec;
 }
 
 static Uint32 SDL_CPUFeatures = 0xFFFFFFFF;
 
-static Uint32 SDL_GetCPUFeatures(void)
+static Uint32
+SDL_GetCPUFeatures(void)
 {
-	if ( SDL_CPUFeatures == 0xFFFFFFFF ) {
-		SDL_CPUFeatures = 0;
-		if ( CPU_haveRDTSC() ) {
-			SDL_CPUFeatures |= CPU_HAS_RDTSC;
-		}
-		if ( CPU_haveMMX() ) {
-			SDL_CPUFeatures |= CPU_HAS_MMX;
-		}
-		if ( CPU_haveMMXExt() ) {
-			SDL_CPUFeatures |= CPU_HAS_MMXEXT;
-		}
-		if ( CPU_have3DNow() ) {
-			SDL_CPUFeatures |= CPU_HAS_3DNOW;
-		}
-		if ( CPU_have3DNowExt() ) {
-			SDL_CPUFeatures |= CPU_HAS_3DNOWEXT;
-		}
-		if ( CPU_haveSSE() ) {
-			SDL_CPUFeatures |= CPU_HAS_SSE;
-		}
-		if ( CPU_haveSSE2() ) {
-			SDL_CPUFeatures |= CPU_HAS_SSE2;
-		}
-		if ( CPU_haveAltiVec() ) {
-			SDL_CPUFeatures |= CPU_HAS_ALTIVEC;
-		}
-	}
-	return SDL_CPUFeatures;
+    if (SDL_CPUFeatures == 0xFFFFFFFF) {
+        SDL_CPUFeatures = 0;
+        if (CPU_haveRDTSC()) {
+            SDL_CPUFeatures |= CPU_HAS_RDTSC;
+        }
+        if (CPU_haveMMX()) {
+            SDL_CPUFeatures |= CPU_HAS_MMX;
+        }
+        if (CPU_haveMMXExt()) {
+            SDL_CPUFeatures |= CPU_HAS_MMXEXT;
+        }
+        if (CPU_have3DNow()) {
+            SDL_CPUFeatures |= CPU_HAS_3DNOW;
+        }
+        if (CPU_have3DNowExt()) {
+            SDL_CPUFeatures |= CPU_HAS_3DNOWEXT;
+        }
+        if (CPU_haveSSE()) {
+            SDL_CPUFeatures |= CPU_HAS_SSE;
+        }
+        if (CPU_haveSSE2()) {
+            SDL_CPUFeatures |= CPU_HAS_SSE2;
+        }
+        if (CPU_haveAltiVec()) {
+            SDL_CPUFeatures |= CPU_HAS_ALTIVEC;
+        }
+    }
+    return SDL_CPUFeatures;
 }
 
-SDL_bool SDL_HasRDTSC(void)
+SDL_bool
+SDL_HasRDTSC(void)
 {
-	if ( SDL_GetCPUFeatures() & CPU_HAS_RDTSC ) {
-		return SDL_TRUE;
-	}
-	return SDL_FALSE;
+    if (SDL_GetCPUFeatures() & CPU_HAS_RDTSC) {
+        return SDL_TRUE;
+    }
+    return SDL_FALSE;
 }
 
-SDL_bool SDL_HasMMX(void)
+SDL_bool
+SDL_HasMMX(void)
 {
-	if ( SDL_GetCPUFeatures() & CPU_HAS_MMX ) {
-		return SDL_TRUE;
-	}
-	return SDL_FALSE;
+    if (SDL_GetCPUFeatures() & CPU_HAS_MMX) {
+        return SDL_TRUE;
+    }
+    return SDL_FALSE;
 }
 
-SDL_bool SDL_HasMMXExt(void)
+SDL_bool
+SDL_HasMMXExt(void)
 {
-	if ( SDL_GetCPUFeatures() & CPU_HAS_MMXEXT ) {
-		return SDL_TRUE;
-	}
-	return SDL_FALSE;
+    if (SDL_GetCPUFeatures() & CPU_HAS_MMXEXT) {
+        return SDL_TRUE;
+    }
+    return SDL_FALSE;
 }
 
-SDL_bool SDL_Has3DNow(void)
+SDL_bool
+SDL_Has3DNow(void)
 {
-	if ( SDL_GetCPUFeatures() & CPU_HAS_3DNOW ) {
-		return SDL_TRUE;
-	}
-	return SDL_FALSE;
+    if (SDL_GetCPUFeatures() & CPU_HAS_3DNOW) {
+        return SDL_TRUE;
+    }
+    return SDL_FALSE;
 }
 
-SDL_bool SDL_Has3DNowExt(void)
+SDL_bool
+SDL_Has3DNowExt(void)
 {
-	if ( SDL_GetCPUFeatures() & CPU_HAS_3DNOWEXT ) {
-		return SDL_TRUE;
-	}
-	return SDL_FALSE;
+    if (SDL_GetCPUFeatures() & CPU_HAS_3DNOWEXT) {
+        return SDL_TRUE;
+    }
+    return SDL_FALSE;
 }
 
-SDL_bool SDL_HasSSE(void)
+SDL_bool
+SDL_HasSSE(void)
 {
-	if ( SDL_GetCPUFeatures() & CPU_HAS_SSE ) {
-		return SDL_TRUE;
-	}
-	return SDL_FALSE;
+    if (SDL_GetCPUFeatures() & CPU_HAS_SSE) {
+        return SDL_TRUE;
+    }
+    return SDL_FALSE;
 }
 
-SDL_bool SDL_HasSSE2(void)
+SDL_bool
+SDL_HasSSE2(void)
 {
-	if ( SDL_GetCPUFeatures() & CPU_HAS_SSE2 ) {
-		return SDL_TRUE;
-	}
-	return SDL_FALSE;
+    if (SDL_GetCPUFeatures() & CPU_HAS_SSE2) {
+        return SDL_TRUE;
+    }
+    return SDL_FALSE;
 }
 
-SDL_bool SDL_HasAltiVec(void)
+SDL_bool
+SDL_HasAltiVec(void)
 {
-	if ( SDL_GetCPUFeatures() & CPU_HAS_ALTIVEC ) {
-		return SDL_TRUE;
-	}
-	return SDL_FALSE;
+    if (SDL_GetCPUFeatures() & CPU_HAS_ALTIVEC) {
+        return SDL_TRUE;
+    }
+    return SDL_FALSE;
 }
 
 #ifdef TEST_MAIN
 
 #include <stdio.h>
 
-int main()
+int
+main()
 {
-	printf("RDTSC: %d\n", SDL_HasRDTSC());
-	printf("MMX: %d\n", SDL_HasMMX());
-	printf("MMXExt: %d\n", SDL_HasMMXExt());
-	printf("3DNow: %d\n", SDL_Has3DNow());
-	printf("3DNowExt: %d\n", SDL_Has3DNowExt());
-	printf("SSE: %d\n", SDL_HasSSE());
-	printf("SSE2: %d\n", SDL_HasSSE2());
-	printf("AltiVec: %d\n", SDL_HasAltiVec());
-	return 0;
+    printf("RDTSC: %d\n", SDL_HasRDTSC());
+    printf("MMX: %d\n", SDL_HasMMX());
+    printf("MMXExt: %d\n", SDL_HasMMXExt());
+    printf("3DNow: %d\n", SDL_Has3DNow());
+    printf("3DNowExt: %d\n", SDL_Has3DNowExt());
+    printf("SSE: %d\n", SDL_HasSSE());
+    printf("SSE2: %d\n", SDL_HasSSE2());
+    printf("AltiVec: %d\n", SDL_HasAltiVec());
+    return 0;
 }
 
 #endif /* TEST_MAIN */
+
+/* vi: set ts=4 sw=4 expandtab: */

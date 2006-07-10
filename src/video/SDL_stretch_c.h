@@ -24,6 +24,6 @@
 /* Perform a stretch blit between two surfaces of the same format.
    NOTE:  This function is not safe to call from multiple threads!
 */
-extern int SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect,
-                           SDL_Surface *dst, SDL_Rect *dstrect);
-
+extern int SDL_SoftStretch(SDL_Surface * src, SDL_Rect * srcrect,
+                           SDL_Surface * dst, SDL_Rect * dstrect);
+/* vi: set ts=4 sw=4 expandtab: */

@@ -42,36 +42,38 @@
 #define _THIS   SDL_VideoDevice * this
 
 // Private display data
-typedef struct NX_SDL_VISUAL {
-    int    bpp ;
-    Uint32 red_mask ;
-    Uint32 green_mask ;
-    Uint32 blue_mask ;
-} nx_sdl_visual_t ;
+typedef struct NX_SDL_VISUAL
+{
+    int bpp;
+    Uint32 red_mask;
+    Uint32 green_mask;
+    Uint32 blue_mask;
+} nx_sdl_visual_t;
 
-struct SDL_PrivateVideoData {
-    GR_WINDOW_ID    SDL_Window ;
-    GR_WINDOW_ID    FSwindow ;
+struct SDL_PrivateVideoData
+{
+    GR_WINDOW_ID SDL_Window;
+    GR_WINDOW_ID FSwindow;
     // Flag: true if we have been passed a window
-    char            * SDL_windowid ;
-    GR_GC_ID        GC ;
-    unsigned char   * Image ;
-    unsigned char   * Image_buff ;	/* for GrArea*/
-    unsigned char   * Clientfb;		/* for DirectFB*/
-    nx_sdl_visual_t SDL_Visual ;
+    char *SDL_windowid;
+    GR_GC_ID GC;
+    unsigned char *Image;
+    unsigned char *Image_buff;  /* for GrArea */
+    unsigned char *Clientfb;    /* for DirectFB */
+    nx_sdl_visual_t SDL_Visual;
     // The current list of available video modes
-    SDL_Rect        ** modelist ;
-    int             currently_fullscreen ;
+    SDL_Rect **modelist;
+    int currently_fullscreen;
     // for fullscreen
-    int             OffsetX, OffsetY ;
+    int OffsetX, OffsetY;
     // for GammaRamp
-    Uint16          * GammaRamp_R, * GammaRamp_G, * GammaRamp_B ;
+    Uint16 *GammaRamp_R, *GammaRamp_G, *GammaRamp_B;
     // for GrArea, r_mask, g_mask, b_mask
-    int             pixel_type ;
+    int pixel_type;
 #ifdef ENABLE_NANOX_DIRECT_FB
     GR_WINDOW_FB_INFO fbinfo;
 #endif
-} ;
+};
 
 #define SDL_Window           (this -> hidden -> SDL_Window)
 #define FSwindow             (this -> hidden -> FSwindow)
@@ -91,6 +93,7 @@ struct SDL_PrivateVideoData {
 #define pixel_type           (this -> hidden -> pixel_type)
 #define fbinfo               (this -> hidden -> fbinfo)
 
-#define CI_SIZE 256   // color index size
+#define CI_SIZE 256             // color index size
 
-#endif  // _SDL_nxvideo_h
+#endif // _SDL_nxvideo_h
+/* vi: set ts=4 sw=4 expandtab: */

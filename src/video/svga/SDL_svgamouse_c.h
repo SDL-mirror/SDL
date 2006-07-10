@@ -24,3 +24,4 @@
 #include "SDL_svgavideo.h"
 
 /* Functions to be exported */
+/* vi: set ts=4 sw=4 expandtab: */

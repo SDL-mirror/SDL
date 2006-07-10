@@ -27,6 +27,8 @@
 
 
 /* The implementation dependent data for the window manager cursor */
-struct WMcursor {
-	int unused;
+struct WMcursor
+{
+    int unused;
 };
+/* vi: set ts=4 sw=4 expandtab: */

@@ -40,3 +40,4 @@ extern void SDL_AtariDevMouse_Close(void);
 extern void SDL_AtariDevMouse_PostMouseEvents(_THIS, SDL_bool buttonEvents);
 
 #endif /* _SDL_ATARI_DEVMOUSE_H_ */
+/* vi: set ts=4 sw=4 expandtab: */

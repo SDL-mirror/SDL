@@ -116,20 +116,20 @@
 #define SCANCODE_KEYPADDIVIDE		98
 #define SCANCODE_PRINTSCREEN		99
 #define SCANCODE_RIGHTALT		100
-#define SCANCODE_BREAK			101	/* Beware: is 119     */
-#define SCANCODE_BREAK_ALTERNATIVE	119	/* on some keyboards! */
+#define SCANCODE_BREAK			101     /* Beware: is 119     */
+#define SCANCODE_BREAK_ALTERNATIVE	119     /* on some keyboards! */
 
 #define SCANCODE_HOME			102
-#define SCANCODE_CURSORBLOCKUP		90	/* Cursor key block */
+#define SCANCODE_CURSORBLOCKUP		90      /* Cursor key block */
 #define SCANCODE_PAGEUP			104
-#define SCANCODE_CURSORBLOCKLEFT	92	/* Cursor key block */
-#define SCANCODE_CURSORBLOCKRIGHT	94	/* Cursor key block */
+#define SCANCODE_CURSORBLOCKLEFT	92      /* Cursor key block */
+#define SCANCODE_CURSORBLOCKRIGHT	94      /* Cursor key block */
 #define SCANCODE_END			107
-#define SCANCODE_CURSORBLOCKDOWN	108	/* Cursor key block */
+#define SCANCODE_CURSORBLOCKDOWN	108     /* Cursor key block */
 #define SCANCODE_PAGEDOWN		109
 #define SCANCODE_INSERT			110
 #define SCANCODE_REMOVE			111
 
 #define SCANCODE_RIGHTWIN		126
 #define SCANCODE_LEFTWIN		125
-
+/* vi: set ts=4 sw=4 expandtab: */

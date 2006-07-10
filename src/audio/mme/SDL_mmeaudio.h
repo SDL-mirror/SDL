@@ -32,14 +32,16 @@
 #define _THIS	SDL_AudioDevice *this
 #define NUM_BUFFERS 2
 
-struct SharedMem {
+struct SharedMem
+{
     HWAVEOUT sound;
     WAVEHDR wHdr[NUM_BUFFERS];
     PCMWAVEFORMAT wFmt;
 };
 
-struct SDL_PrivateAudioData {
-    Uint8 *mixbuf;          /* The raw allocated mixing buffer */
+struct SDL_PrivateAudioData
+{
+    Uint8 *mixbuf;              /* The raw allocated mixing buffer */
     struct SharedMem *shm;
     int next_buffer;
 };
@@ -49,3 +51,4 @@ struct SDL_PrivateAudioData {
 #define next_buffer		(this->hidden->next_buffer)
 /* Old variable names */
 #endif /* _SDL_lowaudio_h */
+/* vi: set ts=4 sw=4 expandtab: */

@@ -36,7 +36,7 @@
 struct SDL_PrivateAudioData
 {
     /* Pointer to the (open) UMS audio device */
-    Environment*   ev;
+    Environment *ev;
     UMSAudioDevice umsdev;
 
     /* Raw mixing buffer */
@@ -47,4 +47,4 @@ struct SDL_PrivateAudioData
 };
 
 #endif /* _SDL_UMSaudio_h */
-
+/* vi: set ts=4 sw=4 expandtab: */

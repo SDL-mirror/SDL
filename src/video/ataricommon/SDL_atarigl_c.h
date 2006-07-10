@@ -35,47 +35,54 @@
 /* Hidden "this" pointer for the video functions */
 #define _THIS   SDL_VideoDevice *this
 
-struct SDL_PrivateGLData {
+struct SDL_PrivateGLData
+{
 
-    int gl_active; 	/* to stop switching drivers while we have a valid context */
-	
-	int gl_oldmesa;	/* Old OpenGL support ? */
+    int gl_active;              /* to stop switching drivers while we have a valid context */
 
-	int	gl_pixelsize;	/* for CopyShadow functions */
+    int gl_oldmesa;             /* Old OpenGL support ? */
 
-	SDL_bool gl_upsidedown; /* Some implementations draw upside down */
+    int gl_pixelsize;           /* for CopyShadow functions */
 
-	Uint8 *gl_shadow;	/* Shadow buffer for old implementations */
+    SDL_bool gl_upsidedown;     /* Some implementations draw upside down */
 
-	/* for unsupported OSMesa buffer formats */
-	void (*ConvertSurface)(_THIS, SDL_Surface *surface);	
+    Uint8 *gl_shadow;           /* Shadow buffer for old implementations */
 
-	/* to convert the shadow buffer to the screen format */
-	void (*CopyShadow)(_THIS, SDL_Surface *surface);	
+    /* for unsupported OSMesa buffer formats */
+    void (*ConvertSurface) (_THIS, SDL_Surface * surface);
+
+    /* to convert the shadow buffer to the screen format */
+    void (*CopyShadow) (_THIS, SDL_Surface * surface);
 
 #if SDL_VIDEO_OPENGL
-	OSMesaContext	ctx;
+    OSMesaContext ctx;
 
-	/* OpenGL functions */
-	void (*glGetIntegerv)( GLenum pname, GLint *value );
-	void (*glFinish)(void);
-	void (*glFlush)(void);
+    /* OpenGL functions */
+    void (*glGetIntegerv) (GLenum pname, GLint * value);
+    void (*glFinish) (void);
+    void (*glFlush) (void);
 
-	/* osmesa.ldg */
-	OSMesaContext (*OSMesaCreateContextExt)( GLenum format, GLint depthBits, GLint stencilBits, GLint accumBits, OSMesaContext sharelist);
-	void (*OSMesaDestroyContext)( OSMesaContext ctx );
-	GLboolean (*OSMesaMakeCurrent)( OSMesaContext ctx, void *buffer, GLenum type, GLsizei width, GLsizei height );
-	void (*OSMesaPixelStore)( GLint pname, GLint value );
-	void * (*OSMesaGetProcAddress)( const char *funcName );
+    /* osmesa.ldg */
+      OSMesaContext(*OSMesaCreateContextExt) (GLenum format, GLint depthBits,
+                                              GLint stencilBits,
+                                              GLint accumBits,
+                                              OSMesaContext sharelist);
+    void (*OSMesaDestroyContext) (OSMesaContext ctx);
+      GLboolean(*OSMesaMakeCurrent) (OSMesaContext ctx, void *buffer,
+                                     GLenum type, GLsizei width,
+                                     GLsizei height);
+    void (*OSMesaPixelStore) (GLint pname, GLint value);
+    void *(*OSMesaGetProcAddress) (const char *funcName);
 
-	/* mesa_gl.ldg, tiny_gl.ldg */
-	void *(*OSMesaCreateLDG)( long format, long type, long width, long height );
-	void (*OSMesaDestroyLDG)(void);
+    /* mesa_gl.ldg, tiny_gl.ldg */
+    void *(*OSMesaCreateLDG) (long format, long type, long width,
+                              long height);
+    void (*OSMesaDestroyLDG) (void);
 
-	/* Info needed to compare existing context with new asked one */
-	int width, height;
-	GLenum format;
-	GLint depth,stencil,accum;
+    /* Info needed to compare existing context with new asked one */
+    int width, height;
+    GLenum format;
+    GLint depth, stencil, accum;
 #endif
 };
 
@@ -96,14 +103,15 @@ struct SDL_PrivateGLData {
 #define gl_curheight	(this->gl_data->height)
 
 /* OpenGL functions */
-extern int SDL_AtariGL_Init(_THIS, SDL_Surface *current);
+extern int SDL_AtariGL_Init(_THIS, SDL_Surface * current);
 extern void SDL_AtariGL_Quit(_THIS, SDL_bool unload);
 extern void SDL_AtariGL_InitPointers(_THIS);
 
 extern int SDL_AtariGL_LoadLibrary(_THIS, const char *path);
 extern void *SDL_AtariGL_GetProcAddress(_THIS, const char *proc);
-extern int SDL_AtariGL_GetAttribute(_THIS, SDL_GLattr attrib, int* value);
+extern int SDL_AtariGL_GetAttribute(_THIS, SDL_GLattr attrib, int *value);
 extern int SDL_AtariGL_MakeCurrent(_THIS);
 extern void SDL_AtariGL_SwapBuffers(_THIS);
 
 #endif /* _SDL_ATARIGL_H_ */
+/* vi: set ts=4 sw=4 expandtab: */

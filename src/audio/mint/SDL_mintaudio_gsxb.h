@@ -30,7 +30,7 @@
 #ifndef _SDL_mintaudio_gsxb_h
 #define _SDL_mintaudio_gsxb_h
 
-#include <mint/falcon.h>	/* for trap_14_xxx macros */
+#include <mint/falcon.h>        /* for trap_14_xxx macros */
 
 /* GSXB Cookie */
 
@@ -42,12 +42,12 @@
 
 /* NSoundcmd modes */
 
-#define SETRATE			7	/* Set sample rate */
-#define SET8BITFORMAT	8	/* 8 bits format */
-#define SET16BITFORMAT	9	/* 16 bits format */
-#define SET24BITFORMAT	10	/* 24 bits format */
-#define SET32BITFORMAT	11	/* 32 bits format */
-#define LTATTEN_MASTER	12	/* Attenuation */
+#define SETRATE			7       /* Set sample rate */
+#define SET8BITFORMAT	8       /* 8 bits format */
+#define SET16BITFORMAT	9       /* 16 bits format */
+#define SET24BITFORMAT	10      /* 24 bits format */
+#define SET32BITFORMAT	11      /* 32 bits format */
+#define LTATTEN_MASTER	12      /* Attenuation */
 #define RTATTEN_MASTER	13
 #define LTATTEN_MICIN	14
 #define RTATTEN_MICIN	15
@@ -106,3 +106,4 @@
 		(long)(inth_addr))
 
 #endif /* _SDL_mintaudio_gsxb_h */
+/* vi: set ts=4 sw=4 expandtab: */

@@ -23,33 +23,33 @@
 
 #include "SDL_BWin.h"
 
-extern "C" {
+extern "C"
+{
 
 #include "SDL_syswm_c.h"
 #include "SDL_error.h"
 
-void BE_SetWMCaption(_THIS, const char *title, const char *icon)
-{
-	SDL_Win->SetTitle(title);
-}
-
-int BE_IconifyWindow(_THIS)
-{
-	SDL_Win->Minimize(true);
-}
-
-int BE_GetWMInfo(_THIS, SDL_SysWMinfo *info)
-{
-    if (info->version.major <= SDL_MAJOR_VERSION)
+    void BE_SetWMCaption(_THIS, const char *title, const char *icon)
     {
-        return 1;
+        SDL_Win->SetTitle(title);
     }
-    else
-    {
-        SDL_SetError("Application not compiled with SDL %d.%d\n",
-                      SDL_MAJOR_VERSION, SDL_MINOR_VERSION);
-        return -1;
-    }
-}
 
-}; /* Extern C */
+    int BE_IconifyWindow(_THIS)
+    {
+        SDL_Win->Minimize(true);
+    }
+
+    int BE_GetWMInfo(_THIS, SDL_SysWMinfo * info)
+    {
+        if (info->version.major <= SDL_MAJOR_VERSION) {
+            return 1;
+        } else {
+            SDL_SetError("Application not compiled with SDL %d.%d\n",
+                         SDL_MAJOR_VERSION, SDL_MINOR_VERSION);
+            return -1;
+        }
+    }
+
+};                              /* Extern C */
+
+/* vi: set ts=4 sw=4 expandtab: */

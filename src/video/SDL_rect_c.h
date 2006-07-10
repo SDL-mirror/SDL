@@ -21,13 +21,21 @@
 */
 #include "SDL_config.h"
 
-#include "SDL_mouse.h"
-#include "../../events/SDL_events_c.h"
+typedef struct SDL_DirtyRect
+{
+    SDL_Rect rect;
+    struct SDL_DirtyRect *next;
+} SDL_DirtyRect;
 
-#include "SDL_nullmouse_c.h"
+typedef struct SDL_DirtyRectList
+{
+    int count;
+    SDL_DirtyRect *list;
+    SDL_DirtyRect *free;
+} SDL_DirtyRectList;
 
+extern void SDL_AddDirtyRect(SDL_DirtyRectList * list, const SDL_Rect * rect);
+extern void SDL_ClearDirtyRects(SDL_DirtyRectList * list);
+extern void SDL_FreeDirtyRects(SDL_DirtyRectList * list);
 
-/* The implementation dependent data for the window manager cursor */
-struct WMcursor {
-	int unused;
-};
+/* vi: set ts=4 sw=4 expandtab: */

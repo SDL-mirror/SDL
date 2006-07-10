@@ -43,3 +43,4 @@
 extern void *Atari_SysMalloc(Uint32 size, Uint16 alloc_type);
 
 #endif /* _SDL_ATARI_MXALLOC_H_ */
+/* vi: set ts=4 sw=4 expandtab: */

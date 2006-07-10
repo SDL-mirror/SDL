@@ -20,7 +20,7 @@
 #include "SDL_name.h"
 #include "SDL_endian.h"
 
-#define huge		really_big /* huge is a reserved keyword in VC++ 6.0 */
+#define huge		really_big      /* huge is a reserved keyword in VC++ 6.0 */
 #define u_int32_t	uint32_t
 
 /* The original fdlibm code used statements like:
@@ -48,24 +48,24 @@
 
 typedef union
 {
-  double value;
-  struct
-  {
-    u_int32_t msw;
-    u_int32_t lsw;
-  } parts;
+    double value;
+    struct
+    {
+        u_int32_t msw;
+        u_int32_t lsw;
+    } parts;
 } ieee_double_shape_type;
 
 #else
 
 typedef union
 {
-  double value;
-  struct
-  {
-    u_int32_t lsw;
-    u_int32_t msw;
-  } parts;
+    double value;
+    struct
+    {
+        u_int32_t lsw;
+        u_int32_t msw;
+    } parts;
 } ieee_double_shape_type;
 
 #endif
@@ -133,8 +133,8 @@ do {								\
 
 typedef union
 {
-  float value;
-  u_int32_t word;
+    float value;
+    u_int32_t word;
 } ieee_float_shape_type;
 
 /* Get a 32 bit int from a float.  */
@@ -161,13 +161,10 @@ static const double
 #else
 static double
 #endif
-zero    =  0.0,
-one	=  1.0,
-two	=  2.0,
-two53	=  9007199254740992.0,	/* 0x43400000, 0x00000000 */
-two54   =  1.80143985094819840000e+16, /* 0x43500000, 0x00000000 */
-twom54  =  5.55111512312578270212e-17, /* 0x3C900000, 0x00000000 */
-huge   = 1.0e+300,
-tiny   = 1.0e-300;
+  zero = 0.0, one = 1.0, two = 2.0, two53 = 9007199254740992.0, /* 0x43400000, 0x00000000 */
+    two54 = 1.80143985094819840000e+16, /* 0x43500000, 0x00000000 */
+    twom54 = 5.55111512312578270212e-17,        /* 0x3C900000, 0x00000000 */
+    huge = 1.0e+300, tiny = 1.0e-300;
 
 #endif /* _MATH_PRIVATE_H_ */
+/* vi: set ts=4 sw=4 expandtab: */

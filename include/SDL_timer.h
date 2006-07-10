@@ -23,7 +23,11 @@
 #ifndef _SDL_timer_h
 #define _SDL_timer_h
 
-/* Header for the SDL time management routines */
+/**
+ * \file SDL_timer.h
+ *
+ * Header for the SDL time management routines
+ */
 
 #include "SDL_stdinc.h"
 #include "SDL_error.h"
@@ -31,25 +35,27 @@
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
+/* *INDENT-OFF* */
 extern "C" {
+/* *INDENT-ON* */
 #endif
 
 /* This is the OS scheduler timeslice, in milliseconds */
 #define SDL_TIMESLICE		10
 
 /* This is the maximum resolution of the SDL timer on all platforms */
-#define TIMER_RESOLUTION	10	/* Experimentally determined */
+#define TIMER_RESOLUTION	10      /* Experimentally determined */
 
 /* Get the number of milliseconds since the SDL library initialization.
  * Note that this value wraps if the program runs for more than ~49 days.
- */ 
+ */
 extern DECLSPEC Uint32 SDLCALL SDL_GetTicks(void);
 
 /* Wait a specified number of milliseconds before returning */
 extern DECLSPEC void SDLCALL SDL_Delay(Uint32 ms);
 
 /* Function prototype for the timer callback function */
-typedef Uint32 (SDLCALL *SDL_TimerCallback)(Uint32 interval);
+typedef Uint32(SDLCALL * SDL_TimerCallback) (Uint32 interval);
 
 /* Set a callback to run after the specified number of milliseconds has
  * elapsed. The callback function is passed the current timer interval
@@ -79,7 +85,8 @@ typedef Uint32 (SDLCALL *SDL_TimerCallback)(Uint32 interval);
  *
  * This function returns 0 if successful, or -1 if there was an error.
  */
-extern DECLSPEC int SDLCALL SDL_SetTimer(Uint32 interval, SDL_TimerCallback callback);
+extern DECLSPEC int SDLCALL SDL_SetTimer(Uint32 interval,
+                                         SDL_TimerCallback callback);
 
 /* New timer API, supports multiple timers
  * Written by Stephane Peter <megastep@lokigames.com>
@@ -91,7 +98,7 @@ extern DECLSPEC int SDLCALL SDL_SetTimer(Uint32 interval, SDL_TimerCallback call
  * passed in, the periodic alarm continues, otherwise a new alarm is
  * scheduled.  If the callback returns 0, the periodic alarm is cancelled.
  */
-typedef Uint32 (SDLCALL *SDL_NewTimerCallback)(Uint32 interval, void *param);
+typedef Uint32(SDLCALL * SDL_NewTimerCallback) (Uint32 interval, void *param);
 
 /* Definition of the timer ID type */
 typedef struct _SDL_TimerID *SDL_TimerID;
@@ -99,7 +106,9 @@ typedef struct _SDL_TimerID *SDL_TimerID;
 /* Add a new timer to the pool of timers already running.
    Returns a timer ID, or NULL when an error occurs.
  */
-extern DECLSPEC SDL_TimerID SDLCALL SDL_AddTimer(Uint32 interval, SDL_NewTimerCallback callback, void *param);
+extern DECLSPEC SDL_TimerID SDLCALL SDL_AddTimer(Uint32 interval,
+                                                 SDL_NewTimerCallback
+                                                 callback, void *param);
 
 /* Remove one of the multiple timers knowing its ID.
  * Returns a boolean value indicating success.
@@ -108,8 +117,12 @@ extern DECLSPEC SDL_bool SDLCALL SDL_RemoveTimer(SDL_TimerID t);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
+/* *INDENT-OFF* */
 }
+/* *INDENT-ON* */
 #endif
 #include "close_code.h"
 
 #endif /* _SDL_timer_h */
+
+/* vi: set ts=4 sw=4 expandtab: */

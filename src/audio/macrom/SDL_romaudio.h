@@ -32,14 +32,15 @@
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_AudioDevice *this
 
-struct SDL_PrivateAudioData {
-	/* Sound manager audio channel */
-	SndChannelPtr channel;
+struct SDL_PrivateAudioData
+{
+    /* Sound manager audio channel */
+    SndChannelPtr channel;
 #if defined(TARGET_API_MAC_CARBON) || defined(USE_RYANS_SOUNDCODE)
-	/* FIXME: Add Ryan's static data here */
+    /* FIXME: Add Ryan's static data here */
 #else
-	/* Double buffering variables */
-	SndDoubleBufferPtr audio_buf[2];
+    /* Double buffering variables */
+    SndDoubleBufferPtr audio_buf[2];
 #endif
 };
 
@@ -48,3 +49,4 @@ struct SDL_PrivateAudioData {
 #define audio_buf	(this->hidden->audio_buf)
 
 #endif /* _SDL_romaudio_h */
+/* vi: set ts=4 sw=4 expandtab: */

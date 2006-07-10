@@ -34,7 +34,7 @@
 	Convert the raw coordinates from the ELO controller
 	to a screen position.
 */
-void eloConvertXY(_THIS, int *dx,  int *dy);
+void eloConvertXY(_THIS, int *dx, int *dy);
 
 /*	eloInitController(int fd)
 	Initialize the ELO serial touchscreen controller
@@ -44,12 +44,15 @@ int eloInitController(int fd);
 /*	eloParsePacket
 	extract position and button state from a packet
 */
-int eloParsePacket(unsigned char* mousebuf, int* dx, int* dy, int* button_state);
+int eloParsePacket(unsigned char *mousebuf, int *dx, int *dy,
+                   int *button_state);
 
 /*	eloReadPosition
 	read a packet and get the cursor position
 */
 
-int eloReadPosition(_THIS, int fd, int* x, int* y, int* button_state, int* realx, int* realy);
+int eloReadPosition(_THIS, int fd, int *x, int *y, int *button_state,
+                    int *realx, int *realy);
 
-#endif	/* SDL_fbelo_h */
+#endif /* SDL_fbelo_h */
+/* vi: set ts=4 sw=4 expandtab: */

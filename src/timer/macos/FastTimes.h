@@ -16,12 +16,13 @@
 /* **** **** **** **** **** **** **** **** **** **** **** **** **** **** **** */
 /* **** **** **** **** **** **** **** **** **** **** **** **** **** **** **** */
 
-extern void			FastInitialize(void);
-extern UInt64		FastMicroseconds(void);
-extern UInt64		FastMilliseconds(void);
-extern StringPtr	FastMethod(void);
+extern void FastInitialize(void);
+extern UInt64 FastMicroseconds(void);
+extern UInt64 FastMilliseconds(void);
+extern StringPtr FastMethod(void);
 
 /* **** **** **** **** **** **** **** **** **** **** **** **** **** **** **** */
 /* **** **** **** **** **** **** **** **** **** **** **** **** **** **** **** */
 
 #endif /* __FAST_TIMES_HEADER__ */
+/* vi: set ts=4 sw=4 expandtab: */

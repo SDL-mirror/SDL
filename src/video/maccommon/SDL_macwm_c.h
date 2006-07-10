@@ -25,4 +25,4 @@
 
 /* Functions to be exported */
 extern void Mac_SetCaption(_THIS, const char *title, const char *icon);
-
+/* vi: set ts=4 sw=4 expandtab: */

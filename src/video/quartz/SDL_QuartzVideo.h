@@ -54,8 +54,8 @@
 #include <Cocoa/Cocoa.h>
 #include <Carbon/Carbon.h>
 #include <QuickTime/QuickTime.h>
-#include <OpenGL/CGLTypes.h>	/* For CGLContextObj */
-#include <IOKit/IOKitLib.h>	/* For powersave handling */
+#include <OpenGL/CGLTypes.h>    /* For CGLContextObj */
+#include <IOKit/IOKitLib.h>     /* For powersave handling */
 #include <pthread.h>
 
 #include "SDL_thread.h"
@@ -72,56 +72,97 @@
     This is a workaround to directly access NSOpenGLContext's CGL context
     We need this to check for errors NSOpenGLContext doesn't support
 */
-@interface NSOpenGLContext (CGLContextAccess)
-- (CGLContextObj) cglContext;
+@ interface NSOpenGLContext(CGLContextAccess) - (CGLContextObj) cglContext;
 @end
-
-
 /* Main driver structure to store required state information */
-typedef struct SDL_PrivateVideoData {
+     typedef struct SDL_PrivateVideoData
+     {
 
-    CGDirectDisplayID  display;            /* 0 == main display (only support single display) */
-    CFDictionaryRef    mode;               /* current mode of the display */
-    CFDictionaryRef    save_mode;          /* original mode of the display */
-    CFArrayRef         mode_list;          /* list of available fullscreen modes */
-    CGDirectPaletteRef palette;            /* palette of an 8-bit display */
-    NSOpenGLContext    *gl_context;        /* OpenGL rendering context */
-    Uint32             width, height, bpp; /* frequently used data about the display */
-    Uint32             flags;              /* flags for current mode, for teardown purposes */
-    Uint32             video_set;          /* boolean; indicates if video was set correctly */
-    Uint32             warp_flag;          /* boolean; notify to event loop that a warp just occured */
-    Uint32             warp_ticks;         /* timestamp when the warp occured */
-    NSWindow           *window;            /* Cocoa window to implement the SDL window */
-    NSQuickDrawView    *view;              /* the window's view; draw 2D and OpenGL into this view */
-    SDL_Surface        *resize_icon;       /* icon for the resize badge, we have to draw it by hand */
-    SDL_GrabMode       current_grab_mode;  /* default value is SDL_GRAB_OFF */
-    SDL_Rect           **client_mode_list; /* resolution list to pass back to client */
-    SDLKey             keymap[256];        /* Mac OS X to SDL key mapping */
-    Uint32             current_mods;       /* current keyboard modifiers, to track modifier state */
-    Uint32             last_virtual_button;/* last virtual mouse button pressed */
-    io_connect_t       power_connection;   /* used with IOKit to detect wake from sleep */
-    Uint8              expect_mouse_up;    /* used to determine when to send mouse up events */
-    Uint8              grab_state;         /* used to manage grab behavior */
-    NSPoint            cursor_loc;         /* saved cursor coords, for activate/deactivate when grabbed */
-    BOOL               cursor_should_be_visible;     /* tells if cursor is supposed to be visible (SDL_ShowCursor) */
-    BOOL               cursor_visible;     /* tells if cursor is *actually* visible or not */
-    Uint8*             sw_buffers[2];      /* pointers to the two software buffers for double-buffer emulation */
-    SDL_Thread         *thread;            /* thread for async updates to the screen */
-    SDL_sem            *sem1, *sem2;       /* synchronization for async screen updates */
-    Uint8              *current_buffer;    /* the buffer being copied to the screen */
-    BOOL               quit_thread;        /* used to quit the async blitting thread */
-    SInt32             system_version;     /* used to dis-/enable workarounds depending on the system version */
-    
-    ImageDescriptionHandle yuv_idh;
-    MatrixRecordPtr        yuv_matrix;
-    DecompressorComponent  yuv_codec;
-    ImageSequence          yuv_seq;
-    PlanarPixmapInfoYUV420 *yuv_pixmap;
-    Sint16                  yuv_width, yuv_height;
-    CGrafPtr                yuv_port;
+         CGDirectDisplayID
+             display;           /* 0 == main display (only support single display) */
+         CFDictionaryRef
+             mode;              /* current mode of the display */
+         CFDictionaryRef
+             save_mode;         /* original mode of the display */
+         CFArrayRef
+             mode_list;         /* list of available fullscreen modes */
+         CGDirectPaletteRef
+             palette;           /* palette of an 8-bit display */
+         NSOpenGLContext *
+             gl_context;        /* OpenGL rendering context */
+         Uint32
+             width,
+             height,
+             bpp;               /* frequently used data about the display */
+         Uint32
+             flags;             /* flags for current mode, for teardown purposes */
+         Uint32
+             video_set;         /* boolean; indicates if video was set correctly */
+         Uint32
+             warp_flag;         /* boolean; notify to event loop that a warp just occured */
+         Uint32
+             warp_ticks;        /* timestamp when the warp occured */
+         NSWindow *
+             window;            /* Cocoa window to implement the SDL window */
+         NSQuickDrawView *
+             view;              /* the window's view; draw 2D and OpenGL into this view */
+         SDL_Surface *
+             resize_icon;       /* icon for the resize badge, we have to draw it by hand */
+         SDL_GrabMode
+             current_grab_mode; /* default value is SDL_GRAB_OFF */
+         SDL_Rect **
+             client_mode_list;  /* resolution list to pass back to client */
+         SDLKey
+             keymap[256];       /* Mac OS X to SDL key mapping */
+         Uint32
+             current_mods;      /* current keyboard modifiers, to track modifier state */
+         Uint32
+             last_virtual_button;       /* last virtual mouse button pressed */
+         io_connect_t
+             power_connection;  /* used with IOKit to detect wake from sleep */
+         Uint8
+             expect_mouse_up;   /* used to determine when to send mouse up events */
+         Uint8
+             grab_state;        /* used to manage grab behavior */
+         NSPoint
+             cursor_loc;        /* saved cursor coords, for activate/deactivate when grabbed */
+         BOOL
+             cursor_should_be_visible;  /* tells if cursor is supposed to be visible (SDL_ShowCursor) */
+         BOOL
+             cursor_visible;    /* tells if cursor is *actually* visible or not */
+         Uint8 *
+             sw_buffers[2];     /* pointers to the two software buffers for double-buffer emulation */
+         SDL_Thread *
+             thread;            /* thread for async updates to the screen */
+         SDL_sem *
+         sem1, *
+             sem2;              /* synchronization for async screen updates */
+         Uint8 *
+             current_buffer;    /* the buffer being copied to the screen */
+         BOOL
+             quit_thread;       /* used to quit the async blitting thread */
+         SInt32
+             system_version;    /* used to dis-/enable workarounds depending on the system version */
 
-    void *opengl_library;    /* dynamically loaded OpenGL library. */
-} SDL_PrivateVideoData;
+         ImageDescriptionHandle
+             yuv_idh;
+         MatrixRecordPtr
+             yuv_matrix;
+         DecompressorComponent
+             yuv_codec;
+         ImageSequence
+             yuv_seq;
+         PlanarPixmapInfoYUV420 *
+             yuv_pixmap;
+         Sint16
+             yuv_width,
+             yuv_height;
+         CGrafPtr
+             yuv_port;
+
+         void *
+             opengl_library;    /* dynamically loaded OpenGL library. */
+     } SDL_PrivateVideoData;
 
 #define _THIS    SDL_VideoDevice *this
 #define display_id (this->hidden->display)
@@ -161,69 +202,97 @@ typedef struct SDL_PrivateVideoData {
 #define opengl_library (this->hidden->opengl_library)
 
 /* grab states - the input is in one of these states */
-enum {
-    QZ_UNGRABBED = 0,
-    QZ_VISIBLE_GRAB,
-    QZ_INVISIBLE_GRAB
-};
+     enum
+     {
+         QZ_UNGRABBED = 0,
+         QZ_VISIBLE_GRAB,
+         QZ_INVISIBLE_GRAB
+     };
 
 /* grab actions - these can change the grabbed state */
-enum {
-    QZ_ENABLE_GRAB = 0,
-    QZ_DISABLE_GRAB,
-    QZ_HIDECURSOR,
-    QZ_SHOWCURSOR
-};
+     enum
+     {
+         QZ_ENABLE_GRAB = 0,
+         QZ_DISABLE_GRAB,
+         QZ_HIDECURSOR,
+         QZ_SHOWCURSOR
+     };
 
 /* Gamma Functions */
-int    QZ_SetGamma          (_THIS, float red, float green, float blue);
-int    QZ_GetGamma          (_THIS, float *red, float *green, float *blue);
-int    QZ_SetGammaRamp      (_THIS, Uint16 *ramp);
-int    QZ_GetGammaRamp      (_THIS, Uint16 *ramp);
+     int
+     QZ_SetGamma(_THIS, float red, float green, float blue);
+     int
+     QZ_GetGamma(_THIS, float *red, float *green, float *blue);
+     int
+     QZ_SetGammaRamp(_THIS, Uint16 * ramp);
+     int
+     QZ_GetGammaRamp(_THIS, Uint16 * ramp);
 
 /* OpenGL functions */
-int    QZ_SetupOpenGL       (_THIS, int bpp, Uint32 flags);
-void   QZ_TearDownOpenGL    (_THIS);
-void*  QZ_GL_GetProcAddress (_THIS, const char *proc);
-int    QZ_GL_GetAttribute   (_THIS, SDL_GLattr attrib, int* value);
-int    QZ_GL_MakeCurrent    (_THIS);
-void   QZ_GL_SwapBuffers    (_THIS);
-int    QZ_GL_LoadLibrary    (_THIS, const char *location);
+     int
+     QZ_SetupOpenGL(_THIS, int bpp, Uint32 flags);
+     void
+     QZ_TearDownOpenGL(_THIS);
+     void *
+     QZ_GL_GetProcAddress(_THIS, const char *proc);
+     int
+     QZ_GL_GetAttribute(_THIS, SDL_GLattr attrib, int *value);
+     int
+     QZ_GL_MakeCurrent(_THIS);
+     void
+     QZ_GL_SwapBuffers(_THIS);
+     int
+     QZ_GL_LoadLibrary(_THIS, const char *location);
 
 /* Cursor and Mouse functions */
-void         QZ_FreeWMCursor     (_THIS, WMcursor *cursor);
-WMcursor*    QZ_CreateWMCursor   (_THIS, Uint8 *data, Uint8 *mask,
-                                  int w, int h, int hot_x, int hot_y);
-int          QZ_ShowWMCursor     (_THIS, WMcursor *cursor);
-void         QZ_WarpWMCursor     (_THIS, Uint16 x, Uint16 y);
-void         QZ_MoveWMCursor     (_THIS, int x, int y);
-void         QZ_CheckMouseMode   (_THIS);
-void         QZ_UpdateMouse      (_THIS);
+     void
+     QZ_FreeWMCursor(_THIS, WMcursor * cursor);
+     WMcursor *
+     QZ_CreateWMCursor(_THIS, Uint8 * data, Uint8 * mask,
+                       int w, int h, int hot_x, int hot_y);
+     int
+     QZ_ShowWMCursor(_THIS, WMcursor * cursor);
+     void
+     QZ_WarpWMCursor(_THIS, Uint16 x, Uint16 y);
+     void
+     QZ_MoveWMCursor(_THIS, int x, int y);
+     void
+     QZ_CheckMouseMode(_THIS);
+     void
+     QZ_UpdateMouse(_THIS);
 
 /* Event functions */
-void         QZ_InitOSKeymap     (_THIS);
-void         QZ_PumpEvents       (_THIS);
+     void
+     QZ_InitOSKeymap(_THIS);
+     void
+     QZ_PumpEvents(_THIS);
 
 /* Window Manager functions */
-void         QZ_SetCaption       (_THIS, const char *title, const char *icon);
-void         QZ_SetIcon          (_THIS, SDL_Surface *icon, Uint8 *mask);
-int          QZ_IconifyWindow    (_THIS);
-SDL_GrabMode QZ_GrabInput        (_THIS, SDL_GrabMode grab_mode);
+     void
+     QZ_SetCaption(_THIS, const char *title, const char *icon);
+     void
+     QZ_SetIcon(_THIS, SDL_Surface * icon, Uint8 * mask);
+     int
+     QZ_IconifyWindow(_THIS);
+SDL_GrabMode
+QZ_GrabInput(_THIS, SDL_GrabMode grab_mode);
 /*int          QZ_GetWMInfo        (_THIS, SDL_SysWMinfo *info);*/
 
 /* YUV functions */
-SDL_Overlay* QZ_CreateYUVOverlay (_THIS, int width, int height,
-                                         Uint32 format, SDL_Surface *display);
+     SDL_Overlay *QZ_CreateYUVOverlay(_THIS, int width, int height,
+                                      Uint32 format, SDL_Surface * display);
 
 
 /* Private functions (used internally) */
-void         QZ_PrivateWarpCursor (_THIS, int x, int y);
-void         QZ_ChangeGrabState (_THIS, int action);
-void         QZ_RegisterForSleepNotifications (_THIS);
-void         QZ_ShowMouse (_THIS);
-void         QZ_HideMouse (_THIS);
-void         QZ_PrivateGlobalToLocal (_THIS, NSPoint *p);
-void         QZ_PrivateCocoaToSDL (_THIS, NSPoint *p);
-BOOL         QZ_IsMouseInWindow (_THIS);
-void         QZ_DoActivate (_THIS);
-void         QZ_DoDeactivate (_THIS);
+     void QZ_PrivateWarpCursor(_THIS, int x, int y);
+     void QZ_ChangeGrabState(_THIS, int action);
+     void QZ_RegisterForSleepNotifications(_THIS);
+     void QZ_ShowMouse(_THIS);
+     void QZ_HideMouse(_THIS);
+     void QZ_PrivateGlobalToLocal(_THIS, NSPoint * p);
+     void QZ_PrivateCocoaToSDL(_THIS, NSPoint * p);
+BOOL
+QZ_IsMouseInWindow(_THIS);
+     void QZ_DoActivate(_THIS);
+     void QZ_DoDeactivate(_THIS);
+/* vi: set ts=4 sw=4 expandtab: */

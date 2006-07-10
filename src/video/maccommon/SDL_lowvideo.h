@@ -45,44 +45,45 @@ typedef struct __AGLContextRec *AGLContext;
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_VideoDevice *this
 
-#if !TARGET_API_MAC_CARBON  /* not available in OS X (or more accurately, Carbon) */
+#if !TARGET_API_MAC_CARBON      /* not available in OS X (or more accurately, Carbon) */
 /* Global QuickDraw data */
 extern QDGlobals *theQD;
 #endif
 
 /* Private display data */
-struct SDL_PrivateVideoData {
-	GDevice **SDL_Display;
-	WindowRef SDL_Window;
-	SDL_Rect **SDL_modelist;
-	CTabHandle SDL_CTab;
-	PaletteHandle SDL_CPal;
+struct SDL_PrivateVideoData
+{
+    GDevice **SDL_Display;
+    WindowRef SDL_Window;
+    SDL_Rect **SDL_modelist;
+    CTabHandle SDL_CTab;
+    PaletteHandle SDL_CPal;
 
 #if TARGET_API_MAC_CARBON
-	/* For entering and leaving fullscreen mode */
-	Ptr fullscreen_ctx;
+    /* For entering and leaving fullscreen mode */
+    Ptr fullscreen_ctx;
 #endif
 
-	/* The current window document style */
-	int current_style;
+    /* The current window document style */
+    int current_style;
 
-	/* Information about the last cursor position */
-	Point last_where;
+    /* Information about the last cursor position */
+    Point last_where;
 
-	/* Information about the last keys down */
-	EventModifiers last_mods;
-	KeyMap last_keys;
+    /* Information about the last keys down */
+    EventModifiers last_mods;
+    KeyMap last_keys;
 
-	/* A handle to the Apple Menu */
-	MenuRef apple_menu;
+    /* A handle to the Apple Menu */
+    MenuRef apple_menu;
 
-	/* Information used by DrawSprocket driver */
-	struct DSpInfo *dspinfo;
+    /* Information used by DrawSprocket driver */
+    struct DSpInfo *dspinfo;
 
 #if SDL_VIDEO_OPENGL
-	AGLContext appleGLContext;
+    AGLContext appleGLContext;
 
-	void *libraryHandle;
+    void *libraryHandle;
 #endif
 };
 /* Old variable names */
@@ -100,3 +101,4 @@ struct SDL_PrivateVideoData {
 #define glContext		(this->hidden->appleGLContext)
 
 #endif /* _SDL_lowvideo_h */
+/* vi: set ts=4 sw=4 expandtab: */

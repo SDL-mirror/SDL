@@ -33,31 +33,36 @@
 int SDL_QPEAppActive = 0;
 static QPEApplication *app;
 
-int SDL_InitQPEApp() {
-  if(SDL_QPEAppActive <= 0) {
-    if(!qApp) {
-      int argc = 1;
-      char *argv[] = { { "SDLApp" } };
-      app = new QPEApplication(argc, argv);
-      QWidget dummy;
-      app->showMainWidget(&dummy);
-    } else {
-      app = (QPEApplication*)qApp;
+int
+SDL_InitQPEApp()
+{
+    if (SDL_QPEAppActive <= 0) {
+        if (!qApp) {
+            int argc = 1;
+            char *argv[] = { {"SDLApp"} };
+            app = new QPEApplication(argc, argv);
+            QWidget dummy;
+            app->showMainWidget(&dummy);
+        } else {
+            app = (QPEApplication *) qApp;
+        }
+        SDL_QPEAppActive++;
     }
-    SDL_QPEAppActive++;
-  }
-  return 0;  
+    return 0;
 }
 
 /* Quit the QPE Application, if there's nothing left to do */
-void SDL_QuitQPEApp(void)
+void
+SDL_QuitQPEApp(void)
 {
-  /* Decrement the application reference count */
-  SDL_QPEAppActive--;
-  /* If the reference count reached zero, clean up the app */
-  if ( SDL_QPEAppActive == 0 && app) {
-    delete app;
-    app = 0;
-    qApp = 0;
-  }
+    /* Decrement the application reference count */
+    SDL_QPEAppActive--;
+    /* If the reference count reached zero, clean up the app */
+    if (SDL_QPEAppActive == 0 && app) {
+        delete app;
+        app = 0;
+        qApp = 0;
+    }
 }
+
+/* vi: set ts=4 sw=4 expandtab: */

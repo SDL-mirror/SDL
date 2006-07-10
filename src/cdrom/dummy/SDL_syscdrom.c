@@ -28,14 +28,17 @@
 #include "SDL_cdrom.h"
 #include "../SDL_syscdrom.h"
 
-int  SDL_SYS_CDInit(void)
+int
+SDL_SYS_CDInit(void)
 {
-	return(0);
+    return (0);
 }
 
-void SDL_SYS_CDQuit(void)
+void
+SDL_SYS_CDQuit(void)
 {
-	return;
+    return;
 }
 
 #endif /* SDL_CDROM_DUMMY || SDL_CDROM_DISABLED */
+/* vi: set ts=4 sw=4 expandtab: */

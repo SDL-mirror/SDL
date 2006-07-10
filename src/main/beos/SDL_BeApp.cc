@@ -37,73 +37,79 @@
 int SDL_BeAppActive = 0;
 static SDL_Thread *SDL_AppThread = NULL;
 
-static int StartBeApp(void *unused)
+static int
+StartBeApp(void *unused)
 {
-	BApplication *App;
+    BApplication *App;
 
-	App = new BApplication("application/x-SDL-executable");
+    App = new BApplication("application/x-SDL-executable");
 
-	App->Run();
-	delete App;
-	return(0);
+    App->Run();
+    delete App;
+    return (0);
 }
 
 /* Initialize the Be Application, if it's not already started */
-int SDL_InitBeApp(void)
+int
+SDL_InitBeApp(void)
 {
-	/* Create the BApplication that handles appserver interaction */
-	if ( SDL_BeAppActive <= 0 ) {
-		SDL_AppThread = SDL_CreateThread(StartBeApp, NULL);
-		if ( SDL_AppThread == NULL ) {
-			SDL_SetError("Couldn't create BApplication thread");
-			return(-1);
-		}
-		
-		/* Change working to directory to that of executable */
-		app_info info;
-		if (B_OK == be_app->GetAppInfo(&info)) {
-			entry_ref ref = info.ref;
-			BEntry entry;
-			if (B_OK == entry.SetTo(&ref)) {
-				BPath path;
-				if (B_OK == path.SetTo(&entry)) {
-					if (B_OK == path.GetParent(&path)) {
-						chdir(path.Path());
-					}
-				}
-			}
-		}	
-		
-		do {
-			SDL_Delay(10);
-		} while ( (be_app == NULL) || be_app->IsLaunching() );
+    /* Create the BApplication that handles appserver interaction */
+    if (SDL_BeAppActive <= 0) {
+        SDL_AppThread = SDL_CreateThread(StartBeApp, NULL);
+        if (SDL_AppThread == NULL) {
+            SDL_SetError("Couldn't create BApplication thread");
+            return (-1);
+        }
 
-		/* Mark the application active */
-		SDL_BeAppActive = 0;
-	}
+        /* Change working to directory to that of executable */
+        app_info info;
+        if (B_OK == be_app->GetAppInfo(&info)) {
+            entry_ref ref = info.ref;
+            BEntry entry;
+            if (B_OK == entry.SetTo(&ref)) {
+                BPath path;
+                if (B_OK == path.SetTo(&entry)) {
+                    if (B_OK == path.GetParent(&path)) {
+                        chdir(path.Path());
+                    }
+                }
+            }
+        }
 
-	/* Increment the application reference count */
-	++SDL_BeAppActive;
+        do {
+            SDL_Delay(10);
+        }
+        while ((be_app == NULL) || be_app->IsLaunching());
 
-	/* The app is running, and we're ready to go */
-	return(0);
+        /* Mark the application active */
+        SDL_BeAppActive = 0;
+    }
+
+    /* Increment the application reference count */
+    ++SDL_BeAppActive;
+
+    /* The app is running, and we're ready to go */
+    return (0);
 }
 
 /* Quit the Be Application, if there's nothing left to do */
-void SDL_QuitBeApp(void)
+void
+SDL_QuitBeApp(void)
 {
-	/* Decrement the application reference count */
-	--SDL_BeAppActive;
+    /* Decrement the application reference count */
+    --SDL_BeAppActive;
 
-	/* If the reference count reached zero, clean up the app */
-	if ( SDL_BeAppActive == 0 ) {
-		if ( SDL_AppThread != NULL ) {
-			if ( be_app != NULL ) { /* Not tested */
-				be_app->PostMessage(B_QUIT_REQUESTED);
-			}
-			SDL_WaitThread(SDL_AppThread, NULL);
-			SDL_AppThread = NULL;
-		}
-		/* be_app should now be NULL since be_app has quit */
-	}
+    /* If the reference count reached zero, clean up the app */
+    if (SDL_BeAppActive == 0) {
+        if (SDL_AppThread != NULL) {
+            if (be_app != NULL) {       /* Not tested */
+                be_app->PostMessage(B_QUIT_REQUESTED);
+            }
+            SDL_WaitThread(SDL_AppThread, NULL);
+            SDL_AppThread = NULL;
+        }
+        /* be_app should now be NULL since be_app has quit */
+    }
 }
+
+/* vi: set ts=4 sw=4 expandtab: */

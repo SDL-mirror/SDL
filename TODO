@@ -2,6 +2,9 @@
 Wish list for the 1.3 development branch:
 http://bugzilla.libsdl.org/
 
+ * Add a way to register custom events
+ * Add internal support for adding video modes and refresh rates
+ * Support querying and setting refresh rate with video modes
  * Add mousewheel events (new unified event architecture?)
  * DirectInput joystick support needs to be implemented
  * Be able to enumerate and select available audio and video drivers

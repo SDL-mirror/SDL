@@ -23,8 +23,8 @@
 
 #include "SDL_QuartzVideo.h"
 
-#include <IOKit/IOMessage.h> /* For wake from sleep detection */
-#include <IOKit/pwr_mgt/IOPMLib.h> /* For wake from sleep detection */
+#include <IOKit/IOMessage.h>    /* For wake from sleep detection */
+#include <IOKit/pwr_mgt/IOPMLib.h>      /* For wake from sleep detection */
 #include "SDL_QuartzKeys.h"
 
 /* 
@@ -39,38 +39,40 @@
  * on systems without these, I will define if they don't exist.
  */
 #ifndef NX_DEVICERCTLKEYMASK
-    #define NX_DEVICELCTLKEYMASK    0x00000001
+#define NX_DEVICELCTLKEYMASK    0x00000001
 #endif
 #ifndef NX_DEVICELSHIFTKEYMASK
-    #define NX_DEVICELSHIFTKEYMASK  0x00000002
+#define NX_DEVICELSHIFTKEYMASK  0x00000002
 #endif
 #ifndef NX_DEVICERSHIFTKEYMASK
-    #define NX_DEVICERSHIFTKEYMASK  0x00000004
+#define NX_DEVICERSHIFTKEYMASK  0x00000004
 #endif
 #ifndef NX_DEVICELCMDKEYMASK
-    #define NX_DEVICELCMDKEYMASK    0x00000008
+#define NX_DEVICELCMDKEYMASK    0x00000008
 #endif
 #ifndef NX_DEVICERCMDKEYMASK
-    #define NX_DEVICERCMDKEYMASK    0x00000010
+#define NX_DEVICERCMDKEYMASK    0x00000010
 #endif
 #ifndef NX_DEVICELALTKEYMASK
-    #define NX_DEVICELALTKEYMASK    0x00000020
+#define NX_DEVICELALTKEYMASK    0x00000020
 #endif
 #ifndef NX_DEVICERALTKEYMASK
-    #define NX_DEVICERALTKEYMASK    0x00000040
+#define NX_DEVICERALTKEYMASK    0x00000040
 #endif
 #ifndef NX_DEVICERCTLKEYMASK
-    #define NX_DEVICERCTLKEYMASK    0x00002000
+#define NX_DEVICERCTLKEYMASK    0x00002000
 #endif
 
-void     QZ_InitOSKeymap (_THIS) {
+void
+QZ_InitOSKeymap (_THIS)
+{
     const void *KCHRPtr;
     UInt32 state;
     UInt32 value;
     int i;
     int world = SDLK_WORLD_0;
 
-    for ( i=0; i<SDL_TABLESIZE(keymap); ++i )
+    for (i = 0; i < SDL_TABLESIZE (keymap); ++i)
         keymap[i] = SDLK_UNKNOWN;
 
     /* This keymap is almost exactly the same as the OS 9 one */
@@ -182,51 +184,49 @@ void     QZ_InitOSKeymap (_THIS) {
     keymap[QZ_IBOOK_ENTER] = SDLK_KP_ENTER;
     keymap[QZ_IBOOK_RIGHT] = SDLK_RIGHT;
     keymap[QZ_IBOOK_DOWN] = SDLK_DOWN;
-    keymap[QZ_IBOOK_UP]      = SDLK_UP;
+    keymap[QZ_IBOOK_UP] = SDLK_UP;
     keymap[QZ_IBOOK_LEFT] = SDLK_LEFT;
 
     /* 
-        Up there we setup a static scancode->keysym map. However, it will not
-        work very well on international keyboard. Hence we now query MacOS
-        for its own keymap to adjust our own mapping table. However, this is
-        basically only useful for ascii char keys. This is also the reason
-        why we keep the static table, too.
+       Up there we setup a static scancode->keysym map. However, it will not
+       work very well on international keyboard. Hence we now query MacOS
+       for its own keymap to adjust our own mapping table. However, this is
+       basically only useful for ascii char keys. This is also the reason
+       why we keep the static table, too.
      */
 
     /* Get a pointer to the systems cached KCHR */
-    KCHRPtr = (void *)GetScriptManagerVariable(smKCHRCache);
-    if (KCHRPtr)
-    {
+    KCHRPtr = (void *) GetScriptManagerVariable (smKCHRCache);
+    if (KCHRPtr) {
         /* Loop over all 127 possible scan codes */
-        for (i = 0; i < 0x7F; i++)
-        {
+        for (i = 0; i < 0x7F; i++) {
             /* We pretend a clean start to begin with (i.e. no dead keys active */
             state = 0;
 
             /* Now translate the key code to a key value */
-            value = KeyTranslate(KCHRPtr, i, &state) & 0xff;
+            value = KeyTranslate (KCHRPtr, i, &state) & 0xff;
 
             /* If the state become 0, it was a dead key. We need to translate again,
-                passing in the new state, to get the actual key value */
+               passing in the new state, to get the actual key value */
             if (state != 0)
-                value = KeyTranslate(KCHRPtr, i, &state) & 0xff;
+                value = KeyTranslate (KCHRPtr, i, &state) & 0xff;
 
             /* Now we should have an ascii value, or 0. Try to figure out to which SDL symbol it maps */
-            if (value >= 128)     /* Some non-ASCII char, map it to SDLK_WORLD_* */
+            if (value >= 128)   /* Some non-ASCII char, map it to SDLK_WORLD_* */
                 keymap[i] = world++;
-            else if (value >= 32)     /* non-control ASCII char */
+            else if (value >= 32)       /* non-control ASCII char */
                 keymap[i] = value;
         }
     }
 
     /* 
-        The keypad codes are re-setup here, because the loop above cannot
-        distinguish between a key on the keypad and a regular key. We maybe
-        could get around this problem in another fashion: NSEvent's flags
-        include a "NSNumericPadKeyMask" bit; we could check that and modify
-        the symbol we return on the fly. However, this flag seems to exhibit
-        some weird behaviour related to the num lock key
-    */
+       The keypad codes are re-setup here, because the loop above cannot
+       distinguish between a key on the keypad and a regular key. We maybe
+       could get around this problem in another fashion: NSEvent's flags
+       include a "NSNumericPadKeyMask" bit; we could check that and modify
+       the symbol we return on the fly. However, this flag seems to exhibit
+       some weird behaviour related to the num lock key
+     */
     keymap[QZ_KP0] = SDLK_KP0;
     keymap[QZ_KP1] = SDLK_KP1;
     keymap[QZ_KP2] = SDLK_KP2;
@@ -246,104 +246,102 @@ void     QZ_InitOSKeymap (_THIS) {
     keymap[QZ_KP_ENTER] = SDLK_KP_ENTER;
 }
 
-static void QZ_DoKey (_THIS, int state, NSEvent *event) {
+static void
+QZ_DoKey (_THIS, int state, NSEvent * event)
+{
 
     NSString *chars;
     unsigned int numChars;
     SDL_keysym key;
-    
+
     /* 
-        A key event can contain multiple characters,
-        or no characters at all. In most cases, it
-        will contain a single character. If it contains
-        0 characters, we'll use 0 as the unicode. If it
-        contains multiple characters, we'll use 0 as
-        the scancode/keysym.
-    */
-    if (SDL_TranslateUNICODE) {
-        chars = [ event characters ];
-        numChars = [ chars length ];
-    } else {
-        numChars = 0;
-    }
+       A key event can contain multiple characters,
+       or no characters at all. In most cases, it
+       will contain a single character. If it contains
+       0 characters, we'll use 0 as the unicode. If it
+       contains multiple characters, we'll use 0 as
+       the scancode/keysym.
+     */
+    chars =[event characters];
+    numChars =[chars length];
 
-    if (numChars == 0) {
-      
-        key.scancode = [ event keyCode ];
-        key.sym      = keymap [ key.scancode ];
-        key.unicode  = 0;
-        key.mod      = KMOD_NONE;
+    if (numChars == 1) {
+
+        key.scancode =[event keyCode];
+        key.sym = keymap[key.scancode];
+      key.unicode =[chars characterAtIndex:0];
+        key.mod = KMOD_NONE;
 
         SDL_PrivateKeyboard (state, &key);
-    }
-    else if (numChars == 1) {
+    } else if (numChars == 0) {
 
-        key.scancode = [ event keyCode ];
-        key.sym      = keymap [ key.scancode ];
-        key.unicode  = [ chars characterAtIndex:0 ];
-        key.mod      = KMOD_NONE;
+        key.scancode =[event keyCode];
+        key.sym = keymap[key.scancode];
+        key.unicode = 0;
+        key.mod = KMOD_NONE;
 
         SDL_PrivateKeyboard (state, &key);
-    }
-    else /* (numChars > 1) */ {
-      
+    } else {                    /* (numChars > 1) */
+
+
         int i;
         for (i = 0; i < numChars; i++) {
 
             key.scancode = 0;
-            key.sym      = 0;
-            key.unicode  = [ chars characterAtIndex:i];
-            key.mod      = KMOD_NONE;
+            key.sym = 0;
+          key.unicode =[chars characterAtIndex:i];
+            key.mod = KMOD_NONE;
 
             SDL_PrivateKeyboard (state, &key);
         }
     }
-    
+
     if (SDL_getenv ("SDL_ENABLEAPPEVENTS"))
-        [ NSApp sendEvent:event ];
+      [NSApp sendEvent:event];
 }
 
 /* This is the original behavior, before support was added for 
  * differentiating between left and right versions of the keys.
  */
-static void QZ_DoUnsidedModifiers (_THIS, unsigned int newMods) {
+static void
+QZ_DoUnsidedModifiers (_THIS, unsigned int newMods)
+{
 
-    const int mapping[] = { SDLK_CAPSLOCK, SDLK_LSHIFT, SDLK_LCTRL, SDLK_LALT, SDLK_LMETA };
+    const int mapping[] =
+        { SDLK_CAPSLOCK, SDLK_LSHIFT, SDLK_LCTRL, SDLK_LALT, SDLK_LMETA };
 
     int i;
     int bit;
     SDL_keysym key;
-    
-    key.scancode    = 0;
-    key.sym         = SDLK_UNKNOWN;
-    key.unicode     = 0;
-    key.mod         = KMOD_NONE;
+
+    key.scancode = 0;
+    key.sym = SDLK_UNKNOWN;
+    key.unicode = 0;
+    key.mod = KMOD_NONE;
 
     /* Iterate through the bits, testing each against the current modifiers */
-    for (i = 0, bit = NSAlphaShiftKeyMask; bit <= NSCommandKeyMask; bit <<= 1, ++i) {
+    for (i = 0, bit = NSAlphaShiftKeyMask; bit <= NSCommandKeyMask;
+         bit <<= 1, ++i) {
 
         unsigned int currentMask, newMask;
 
         currentMask = current_mods & bit;
-        newMask     = newMods & bit;
+        newMask = newMods & bit;
 
-        if ( currentMask &&
-             currentMask != newMask ) {     /* modifier up event */
+        if (currentMask && currentMask != newMask) {    /* modifier up event */
 
-             key.sym = mapping[i];
-             /* If this was Caps Lock, we need some additional voodoo to make SDL happy */
-             if (bit == NSAlphaShiftKeyMask)
-                  SDL_PrivateKeyboard (SDL_PRESSED, &key);
-             SDL_PrivateKeyboard (SDL_RELEASED, &key);
-        }
-        else if ( newMask &&
-                  currentMask != newMask ) {     /* modifier down event */
-        
-             key.sym = mapping[i];
-             SDL_PrivateKeyboard (SDL_PRESSED, &key);
-             /* If this was Caps Lock, we need some additional voodoo to make SDL happy */
-             if (bit == NSAlphaShiftKeyMask)
-                  SDL_PrivateKeyboard (SDL_RELEASED, &key);
+            key.sym = mapping[i];
+            /* If this was Caps Lock, we need some additional voodoo to make SDL happy */
+            if (bit == NSAlphaShiftKeyMask)
+                SDL_PrivateKeyboard (SDL_PRESSED, &key);
+            SDL_PrivateKeyboard (SDL_RELEASED, &key);
+        } else if (newMask && currentMask != newMask) { /* modifier down event */
+
+            key.sym = mapping[i];
+            SDL_PrivateKeyboard (SDL_PRESSED, &key);
+            /* If this was Caps Lock, we need some additional voodoo to make SDL happy */
+            if (bit == NSAlphaShiftKeyMask)
+                SDL_PrivateKeyboard (SDL_RELEASED, &key);
         }
     }
 }
@@ -352,62 +350,63 @@ static void QZ_DoUnsidedModifiers (_THIS, unsigned int newMods) {
  * function reverts back to behavior before the distinction between
  * sides was made.
  */
-static void QZ_HandleNonDeviceModifier ( _THIS, unsigned int device_independent_mask, unsigned int newMods, unsigned int key_sym) {
+static void
+QZ_HandleNonDeviceModifier (_THIS, unsigned int device_independent_mask,
+                            unsigned int newMods, unsigned int key_sym)
+{
     unsigned int currentMask, newMask;
     SDL_keysym key;
-    
-    key.scancode    = 0;
-    key.sym         = key_sym;
-    key.unicode     = 0;
-    key.mod         = KMOD_NONE;
-    
+
+    key.scancode = 0;
+    key.sym = key_sym;
+    key.unicode = 0;
+    key.mod = KMOD_NONE;
+
     /* Isolate just the bits we care about in the depedent bits so we can 
      * figure out what changed
-     */ 
+     */
     currentMask = current_mods & device_independent_mask;
-    newMask     = newMods & device_independent_mask;
-    
-    if ( currentMask &&
-         currentMask != newMask ) {     /* modifier up event */
-         SDL_PrivateKeyboard (SDL_RELEASED, &key);
-    }
-    else if ( newMask &&
-          currentMask != newMask ) {     /* modifier down event */
-          SDL_PrivateKeyboard (SDL_PRESSED, &key);
+    newMask = newMods & device_independent_mask;
+
+    if (currentMask && currentMask != newMask) {        /* modifier up event */
+        SDL_PrivateKeyboard (SDL_RELEASED, &key);
+    } else if (newMask && currentMask != newMask) {     /* modifier down event */
+        SDL_PrivateKeyboard (SDL_PRESSED, &key);
     }
 }
 
 /* This is a helper function for QZ_HandleModifierSide. 
  * This function sets the actual SDL_PrivateKeyboard event.
  */
-static void QZ_HandleModifierOneSide ( _THIS, unsigned int newMods,
-                                       unsigned int key_sym, 
-                                       unsigned int sided_device_dependent_mask ) {
-    
+static void
+QZ_HandleModifierOneSide (_THIS, unsigned int newMods,
+                          unsigned int key_sym,
+                          unsigned int sided_device_dependent_mask)
+{
+
     SDL_keysym key;
     unsigned int current_dep_mask, new_dep_mask;
-    
-    key.scancode    = 0;
-    key.sym         = key_sym;
-    key.unicode     = 0;
-    key.mod         = KMOD_NONE;
-    
+
+    key.scancode = 0;
+    key.sym = key_sym;
+    key.unicode = 0;
+    key.mod = KMOD_NONE;
+
     /* Isolate just the bits we care about in the depedent bits so we can 
      * figure out what changed
-     */ 
+     */
     current_dep_mask = current_mods & sided_device_dependent_mask;
-    new_dep_mask     = newMods & sided_device_dependent_mask;
-    
+    new_dep_mask = newMods & sided_device_dependent_mask;
+
     /* We now know that this side bit flipped. But we don't know if
      * it went pressed to released or released to pressed, so we must 
      * find out which it is.
      */
-    if( new_dep_mask &&
-        current_dep_mask != new_dep_mask ) { 
+    if (new_dep_mask && current_dep_mask != new_dep_mask) {
         /* Modifier down event */
         SDL_PrivateKeyboard (SDL_PRESSED, &key);
-    }
-    else /* Modifier up event */ {
+    } else {                    /* Modifier up event */
+
         SDL_PrivateKeyboard (SDL_RELEASED, &key);
     }
 }
@@ -416,70 +415,79 @@ static void QZ_HandleModifierOneSide ( _THIS, unsigned int newMods,
  * This function will figure out if the modifier key is the left or right side, 
  * e.g. left-shift vs right-shift. 
  */
-static void QZ_HandleModifierSide ( _THIS, int device_independent_mask, 
-                                    unsigned int newMods, 
-                                    unsigned int left_key_sym, 
-                                    unsigned int right_key_sym,
-                                    unsigned int left_device_dependent_mask, 
-                                    unsigned int right_device_dependent_mask ) {
+static void
+QZ_HandleModifierSide (_THIS, int device_independent_mask,
+                       unsigned int newMods,
+                       unsigned int left_key_sym,
+                       unsigned int right_key_sym,
+                       unsigned int left_device_dependent_mask,
+                       unsigned int right_device_dependent_mask)
+{
     unsigned int device_dependent_mask = 0;
     unsigned int diff_mod = 0;
-    
-    device_dependent_mask = left_device_dependent_mask | right_device_dependent_mask;
+
+    device_dependent_mask =
+        left_device_dependent_mask | right_device_dependent_mask;
     /* On the basis that the device independent mask is set, but there are 
      * no device dependent flags set, we'll assume that we can't detect this 
      * keyboard and revert to the unsided behavior.
      */
-    if ( (device_dependent_mask & newMods) == 0 ) {
+    if ((device_dependent_mask & newMods) == 0) {
         /* Revert to the old behavior */
-        QZ_HandleNonDeviceModifier ( this, device_independent_mask, newMods, left_key_sym );
+        QZ_HandleNonDeviceModifier (this, device_independent_mask, newMods,
+                                    left_key_sym);
         return;
     }
-        
+
     /* XOR the previous state against the new state to see if there's a change */
     diff_mod = (device_dependent_mask & current_mods)
         ^ (device_dependent_mask & newMods);
 
-    if ( diff_mod ) {
+    if (diff_mod) {
         /* A change in state was found. Isolate the left and right bits 
          * to handle them separately just in case the values can simulataneously
          * change or if the bits don't both exist.
          */
-        if ( left_device_dependent_mask & diff_mod ) {
-            QZ_HandleModifierOneSide ( this, newMods, left_key_sym, left_device_dependent_mask );
+        if (left_device_dependent_mask & diff_mod) {
+            QZ_HandleModifierOneSide (this, newMods, left_key_sym,
+                                      left_device_dependent_mask);
         }
-        if ( right_device_dependent_mask & diff_mod ) {
-            QZ_HandleModifierOneSide ( this, newMods, right_key_sym, right_device_dependent_mask );
+        if (right_device_dependent_mask & diff_mod) {
+            QZ_HandleModifierOneSide (this, newMods, right_key_sym,
+                                      right_device_dependent_mask);
         }
     }
 }
-   
+
 /* This is a helper function for QZ_DoSidedModifiers.
  * This function will release a key press in the case that 
  * it is clear that the modifier has been released (i.e. one side 
  * can't still be down).
  */
-static void QZ_ReleaseModifierSide ( _THIS, 
-                                     unsigned int device_independent_mask, 
-                                     unsigned int newMods,
-                                     unsigned int left_key_sym, 
-                                     unsigned int right_key_sym,
-                                     unsigned int left_device_dependent_mask, 
-                                     unsigned int right_device_dependent_mask ) {
+static void
+QZ_ReleaseModifierSide (_THIS,
+                        unsigned int device_independent_mask,
+                        unsigned int newMods,
+                        unsigned int left_key_sym,
+                        unsigned int right_key_sym,
+                        unsigned int left_device_dependent_mask,
+                        unsigned int right_device_dependent_mask)
+{
     unsigned int device_dependent_mask = 0;
     SDL_keysym key;
-    
-    key.scancode    = 0;
-    key.sym         = SDLK_UNKNOWN;
-    key.unicode     = 0;
-    key.mod         = KMOD_NONE;
-    
-    device_dependent_mask = left_device_dependent_mask | right_device_dependent_mask;
+
+    key.scancode = 0;
+    key.sym = SDLK_UNKNOWN;
+    key.unicode = 0;
+    key.mod = KMOD_NONE;
+
+    device_dependent_mask =
+        left_device_dependent_mask | right_device_dependent_mask;
     /* On the basis that the device independent mask is set, but there are 
      * no device dependent flags set, we'll assume that we can't detect this 
      * keyboard and revert to the unsided behavior.
      */
-    if ( (device_dependent_mask & current_mods) == 0 ) {
+    if ((device_dependent_mask & current_mods) == 0) {
         /* In this case, we can't detect the keyboard, so use the left side 
          * to represent both, and release it. 
          */
@@ -488,19 +496,19 @@ static void QZ_ReleaseModifierSide ( _THIS,
 
         return;
     }
-        
-        
+
+
     /* 
      * This could have been done in an if-else case because at this point,
      * we know that all keys have been released when calling this function. 
      * But I'm being paranoid so I want to handle each separately,
      * so I hope this doesn't cause other problems.
      */
-    if ( left_device_dependent_mask & current_mods ) {
+    if (left_device_dependent_mask & current_mods) {
         key.sym = left_key_sym;
         SDL_PrivateKeyboard (SDL_RELEASED, &key);
     }
-    if ( right_device_dependent_mask & current_mods ) {
+    if (right_device_dependent_mask & current_mods) {
         key.sym = right_key_sym;
         SDL_PrivateKeyboard (SDL_RELEASED, &key);
     }
@@ -509,26 +517,25 @@ static void QZ_ReleaseModifierSide ( _THIS,
 /* This is a helper function for QZ_DoSidedModifiers.
  * This function handles the CapsLock case.
  */
-static void QZ_HandleCapsLock (_THIS, unsigned int newMods) {
+static void
+QZ_HandleCapsLock (_THIS, unsigned int newMods)
+{
     unsigned int currentMask, newMask;
     SDL_keysym key;
-    
-    key.scancode    = 0;
-    key.sym         = SDLK_CAPSLOCK;
-    key.unicode     = 0;
-    key.mod         = KMOD_NONE;
-    
-    currentMask = current_mods & NSAlphaShiftKeyMask;
-    newMask     = newMods & NSAlphaShiftKeyMask;
 
-    if ( currentMask &&
-         currentMask != newMask ) {     /* modifier up event */
-         /* If this was Caps Lock, we need some additional voodoo to make SDL happy */
-         SDL_PrivateKeyboard (SDL_PRESSED, &key);
-         SDL_PrivateKeyboard (SDL_RELEASED, &key);
-    }
-    else if ( newMask &&
-              currentMask != newMask ) {     /* modifier down event */
+    key.scancode = 0;
+    key.sym = SDLK_CAPSLOCK;
+    key.unicode = 0;
+    key.mod = KMOD_NONE;
+
+    currentMask = current_mods & NSAlphaShiftKeyMask;
+    newMask = newMods & NSAlphaShiftKeyMask;
+
+    if (currentMask && currentMask != newMask) {        /* modifier up event */
+        /* If this was Caps Lock, we need some additional voodoo to make SDL happy */
+        SDL_PrivateKeyboard (SDL_PRESSED, &key);
+        SDL_PrivateKeyboard (SDL_RELEASED, &key);
+    } else if (newMask && currentMask != newMask) {     /* modifier down event */
         /* If this was Caps Lock, we need some additional voodoo to make SDL happy */
         SDL_PrivateKeyboard (SDL_PRESSED, &key);
         SDL_PrivateKeyboard (SDL_RELEASED, &key);
@@ -538,50 +545,59 @@ static void QZ_HandleCapsLock (_THIS, unsigned int newMods) {
 /* This function will handle the modifier keys and also determine the 
  * correct side of the key.
  */
-static void QZ_DoSidedModifiers (_THIS, unsigned int newMods) {
-	/* Set up arrays for the key syms for the left and right side. */
-    const unsigned int left_mapping[]  = { SDLK_LSHIFT, SDLK_LCTRL, SDLK_LALT, SDLK_LMETA };
-    const unsigned int right_mapping[] = { SDLK_RSHIFT, SDLK_RCTRL, SDLK_RALT, SDLK_RMETA };
-	/* Set up arrays for the device dependent masks with indices that 
+static void
+QZ_DoSidedModifiers (_THIS, unsigned int newMods)
+{
+    /* Set up arrays for the key syms for the left and right side. */
+    const unsigned int left_mapping[] =
+        { SDLK_LSHIFT, SDLK_LCTRL, SDLK_LALT, SDLK_LMETA };
+    const unsigned int right_mapping[] =
+        { SDLK_RSHIFT, SDLK_RCTRL, SDLK_RALT, SDLK_RMETA };
+    /* Set up arrays for the device dependent masks with indices that 
      * correspond to the _mapping arrays 
      */
-    const unsigned int left_device_mapping[]  = { NX_DEVICELSHIFTKEYMASK, NX_DEVICELCTLKEYMASK, NX_DEVICELALTKEYMASK, NX_DEVICELCMDKEYMASK };
-    const unsigned int right_device_mapping[] = { NX_DEVICERSHIFTKEYMASK, NX_DEVICERCTLKEYMASK, NX_DEVICERALTKEYMASK, NX_DEVICERCMDKEYMASK };
+    const unsigned int left_device_mapping[] =
+        { NX_DEVICELSHIFTKEYMASK, NX_DEVICELCTLKEYMASK, NX_DEVICELALTKEYMASK,
+        NX_DEVICELCMDKEYMASK
+    };
+    const unsigned int right_device_mapping[] =
+        { NX_DEVICERSHIFTKEYMASK, NX_DEVICERCTLKEYMASK, NX_DEVICERALTKEYMASK,
+        NX_DEVICERCMDKEYMASK
+    };
 
     unsigned int i;
     unsigned int bit;
-    
+
     /* Handle CAPSLOCK separately because it doesn't have a left/right side */
-    QZ_HandleCapsLock ( this, newMods );
-        
+    QZ_HandleCapsLock (this, newMods);
+
     /* Iterate through the bits, testing each against the current modifiers */
     for (i = 0, bit = NSShiftKeyMask; bit <= NSCommandKeyMask; bit <<= 1, ++i) {
-		
+
         unsigned int currentMask, newMask;
-		
+
         currentMask = current_mods & bit;
-        newMask     = newMods & bit;
-		
+        newMask = newMods & bit;
+
         /* If the bit is set, we must always examine it because the left
          * and right side keys may alternate or both may be pressed.
          */
-        if ( newMask ) {
-            QZ_HandleModifierSide ( this, bit, newMods, 
-                                       left_mapping[i],
-                                       right_mapping[i],
-                                       left_device_mapping[i],
-                                       right_device_mapping[i] );
+        if (newMask) {
+            QZ_HandleModifierSide (this, bit, newMods,
+                                   left_mapping[i],
+                                   right_mapping[i],
+                                   left_device_mapping[i],
+                                   right_device_mapping[i]);
         }
         /* If the state changed from pressed to unpressed, we must examine
-            * the device dependent bits to release the correct keys.
-            */
-        else if ( currentMask &&
-                  currentMask != newMask ) { /* modifier up event */
-                  QZ_ReleaseModifierSide ( this, bit, newMods,
-                                           left_mapping[i],
-                                           right_mapping[i],
-                                           left_device_mapping[i],
-                                           right_device_mapping[i] );
+         * the device dependent bits to release the correct keys.
+         */
+        else if (currentMask && currentMask != newMask) {       /* modifier up event */
+            QZ_ReleaseModifierSide (this, bit, newMods,
+                                    left_mapping[i],
+                                    right_mapping[i],
+                                    left_device_mapping[i],
+                                    right_device_mapping[i]);
         }
     }
 }
@@ -592,48 +608,54 @@ static void QZ_DoSidedModifiers (_THIS, unsigned int newMods) {
  * operating system version supports it. Otherwise, the code 
  * will not try to make the distinction.
  */
-static void QZ_DoModifiers (_THIS, unsigned int newMods) {
-	
+static void
+QZ_DoModifiers (_THIS, unsigned int newMods)
+{
+
     if (current_mods == newMods)
-    	return;
-    
+        return;
+
     /* 
      * Starting with Panther (10.3.0), the ability to distinguish between 
      * left side and right side modifiers is available.
      */
-    if( system_version >= 0x1030 ) {
+    if (system_version >= 0x1030) {
         QZ_DoSidedModifiers (this, newMods);
-    }
-    else {
+    } else {
         QZ_DoUnsidedModifiers (this, newMods);
     }
-    
+
     current_mods = newMods;
 }
 
-static void QZ_GetMouseLocation (_THIS, NSPoint *p) {
-    *p = [ NSEvent mouseLocation ]; /* global coordinates */
+static void
+QZ_GetMouseLocation (_THIS, NSPoint * p)
+{
+    *p =[NSEvent mouseLocation];        /* global coordinates */
     if (qz_window)
         QZ_PrivateGlobalToLocal (this, p);
     QZ_PrivateCocoaToSDL (this, p);
 }
 
-void QZ_DoActivate (_THIS) {
+void
+QZ_DoActivate (_THIS)
+{
 
-    SDL_PrivateAppActive (1, SDL_APPINPUTFOCUS | (QZ_IsMouseInWindow (this) ? SDL_APPMOUSEFOCUS : 0));
-    
+    SDL_PrivateAppActive (1,
+                          SDL_APPINPUTFOCUS | (QZ_IsMouseInWindow (this) ?
+                                               SDL_APPMOUSEFOCUS : 0));
+
     /* Hide the cursor if it was hidden by SDL_ShowCursor() */
     if (!cursor_should_be_visible)
         QZ_HideMouse (this);
 
     /* Regrab input, only if it was previously grabbed */
-    if ( current_grab_mode == SDL_GRAB_ON ) {
-        
+    if (current_grab_mode == SDL_GRAB_ON) {
+
         /* Restore cursor location if input was grabbed */
         QZ_PrivateWarpCursor (this, cursor_loc.x, cursor_loc.y);
         QZ_ChangeGrabState (this, QZ_ENABLE_GRAB);
-    }
-    else {
+    } else {
         /* Update SDL's mouse location */
         NSPoint p;
         QZ_GetMouseLocation (this, &p);
@@ -641,13 +663,15 @@ void QZ_DoActivate (_THIS) {
     }
 }
 
-void QZ_DoDeactivate (_THIS) {
-    
+void
+QZ_DoDeactivate (_THIS)
+{
+
     SDL_PrivateAppActive (0, SDL_APPINPUTFOCUS | SDL_APPMOUSEFOCUS);
 
     /* Get the current cursor location, for restore on activate */
     QZ_GetMouseLocation (this, &cursor_loc);
-    
+
     /* Reassociate mouse and cursor */
     CGAssociateMouseAndMouseCursorPosition (1);
 
@@ -656,64 +680,68 @@ void QZ_DoDeactivate (_THIS) {
         QZ_ShowMouse (this);
 }
 
-void QZ_SleepNotificationHandler (void * refcon,
-                                  io_service_t service,
-                                  natural_t messageType,
-                                  void * messageArgument )
+void
+QZ_SleepNotificationHandler (void *refcon,
+                             io_service_t service,
+                             natural_t messageType, void *messageArgument)
 {
-     SDL_VideoDevice *this = (SDL_VideoDevice*)refcon;
-     
-     switch(messageType)
-     {
-         case kIOMessageSystemWillSleep:
-             IOAllowPowerChange(power_connection, (long) messageArgument);
-             break;
-         case kIOMessageCanSystemSleep:
-             IOAllowPowerChange(power_connection, (long) messageArgument);
-             break;
-         case kIOMessageSystemHasPoweredOn:
-            /* awake */
-            SDL_PrivateExpose();
-            break;
-     }
+    SDL_VideoDevice *this = (SDL_VideoDevice *) refcon;
+
+    switch (messageType) {
+    case kIOMessageSystemWillSleep:
+        IOAllowPowerChange (power_connection, (long) messageArgument);
+        break;
+    case kIOMessageCanSystemSleep:
+        IOAllowPowerChange (power_connection, (long) messageArgument);
+        break;
+    case kIOMessageSystemHasPoweredOn:
+        /* awake */
+        SDL_PrivateExpose ();
+        break;
+    }
 }
 
-void QZ_RegisterForSleepNotifications (_THIS)
+void
+QZ_RegisterForSleepNotifications (_THIS)
 {
-     CFRunLoopSourceRef rls;
-     IONotificationPortRef thePortRef;
-     io_object_t notifier;
+    CFRunLoopSourceRef rls;
+    IONotificationPortRef thePortRef;
+    io_object_t notifier;
 
-     power_connection = IORegisterForSystemPower (this, &thePortRef, QZ_SleepNotificationHandler, &notifier);
+    power_connection =
+        IORegisterForSystemPower (this, &thePortRef,
+                                  QZ_SleepNotificationHandler, &notifier);
 
-     if (power_connection == 0)
-         NSLog(@"SDL: QZ_SleepNotificationHandler() IORegisterForSystemPower failed.");
+    if (power_connection == 0)
+        NSLog
+            (@"SDL: QZ_SleepNotificationHandler() IORegisterForSystemPower failed.");
 
-     rls = IONotificationPortGetRunLoopSource (thePortRef);
-     CFRunLoopAddSource (CFRunLoopGetCurrent(), rls, kCFRunLoopDefaultMode);
-     CFRelease (rls);
+    rls = IONotificationPortGetRunLoopSource (thePortRef);
+    CFRunLoopAddSource (CFRunLoopGetCurrent (), rls, kCFRunLoopDefaultMode);
+    CFRelease (rls);
 }
 
 
 /* Try to map Quartz mouse buttons to SDL's lingo... */
-static int QZ_OtherMouseButtonToSDL(int button)
+static int
+QZ_OtherMouseButtonToSDL (int button)
 {
-    switch (button)
-    {
-        case 0:
-            return(SDL_BUTTON_LEFT);   /* 1 */
-        case 1:
-            return(SDL_BUTTON_RIGHT);  /* 3 */
-        case 2:
-            return(SDL_BUTTON_MIDDLE); /* 2 */
+    switch (button) {
+    case 0:
+        return (SDL_BUTTON_LEFT);       /* 1 */
+    case 1:
+        return (SDL_BUTTON_RIGHT);      /* 3 */
+    case 2:
+        return (SDL_BUTTON_MIDDLE);     /* 2 */
     }
 
     /* >= 3: skip 4 & 5, since those are the SDL mousewheel buttons. */
-    return(button + 3);
+    return (button + 3);
 }
 
 
-void QZ_PumpEvents (_THIS)
+void
+QZ_PumpEvents (_THIS)
 {
     static Uint32 screensaverTicks = 0;
     Uint32 nowTicks;
@@ -726,251 +754,246 @@ void QZ_PumpEvents (_THIS)
     NSAutoreleasePool *pool;
 
     if (!SDL_VideoSurface)
-        return;  /* don't do anything if there's no screen surface. */
+        return;                 /* don't do anything if there's no screen surface. */
 
     /* Update activity every five seconds to prevent screensaver. --ryan. */
-    nowTicks = SDL_GetTicks();
-    if ((nowTicks - screensaverTicks) > 5000)
-    {
-        UpdateSystemActivity(UsrActivity);
+    nowTicks = SDL_GetTicks ();
+    if ((nowTicks - screensaverTicks) > 5000) {
+        UpdateSystemActivity (UsrActivity);
         screensaverTicks = nowTicks;
     }
 
-    pool = [ [ NSAutoreleasePool alloc ] init ];
-    distantPast = [ NSDate distantPast ];
+    pool =[[NSAutoreleasePool alloc] init];
+    distantPast =[NSDate distantPast];
 
     winRect = NSMakeRect (0, 0, SDL_VideoSurface->w, SDL_VideoSurface->h);
-    
+
     /* send the first mouse event in absolute coordinates */
     firstMouseEvent = 1;
-    
+
     /* accumulate any additional mouse moved events into one SDL mouse event */
     dx = 0;
     dy = 0;
-    
+
     do {
-    
+
         /* Poll for an event. This will not block */
-        event = [ NSApp nextEventMatchingMask:NSAnyEventMask
-                                    untilDate:distantPast
-                                    inMode: NSDefaultRunLoopMode dequeue:YES ];
+      event =[NSApp nextEventMatchingMask: NSAnyEventMask untilDate: distantPast inMode: NSDefaultRunLoopMode dequeue:YES];
         if (event != nil) {
 
             int button;
             unsigned int type;
             BOOL isInGameWin;
-            
-            #define DO_MOUSE_DOWN(button) do {                                               \
+
+#define DO_MOUSE_DOWN(button) do {                                               \
                             if ( SDL_GetAppState() & SDL_APPMOUSEFOCUS ) {                   \
                                 SDL_PrivateMouseButton (SDL_PRESSED, button, 0, 0);          \
                                 expect_mouse_up |= 1<<button;                                \
                             }                                                                \
                             [ NSApp sendEvent:event ];                                       \
             } while(0)
-            
-            #define DO_MOUSE_UP(button) do {                                            \
+
+#define DO_MOUSE_UP(button) do {                                            \
                             if ( expect_mouse_up & (1<<button) ) {                      \
                                 SDL_PrivateMouseButton (SDL_RELEASED, button, 0, 0);    \
                                 expect_mouse_up &= ~(1<<button);                        \
                             }                                                           \
                             [ NSApp sendEvent:event ];                                  \
             } while(0)
-            
-            type = [ event type ];
+
+            type =[event type];
             isInGameWin = QZ_IsMouseInWindow (this);
 
-            QZ_DoModifiers(this, [ event modifierFlags ] );
+            QZ_DoModifiers (this,[event modifierFlags]);
 
             switch (type) {
-                case NSLeftMouseDown:
-                    if ( SDL_getenv("SDL_HAS3BUTTONMOUSE") ) {
-                        DO_MOUSE_DOWN (SDL_BUTTON_LEFT);
+            case NSLeftMouseDown:
+                if (SDL_getenv ("SDL_HAS3BUTTONMOUSE")) {
+                    DO_MOUSE_DOWN (SDL_BUTTON_LEFT);
+                } else {
+                    if (NSCommandKeyMask & current_mods) {
+                        last_virtual_button = SDL_BUTTON_RIGHT;
+                        DO_MOUSE_DOWN (SDL_BUTTON_RIGHT);
+                    } else if (NSAlternateKeyMask & current_mods) {
+                        last_virtual_button = SDL_BUTTON_MIDDLE;
+                        DO_MOUSE_DOWN (SDL_BUTTON_MIDDLE);
                     } else {
-                        if ( NSCommandKeyMask & current_mods ) {
-                            last_virtual_button = SDL_BUTTON_RIGHT;
-                            DO_MOUSE_DOWN (SDL_BUTTON_RIGHT);
-                        }
-                        else if ( NSAlternateKeyMask & current_mods ) {
-                            last_virtual_button = SDL_BUTTON_MIDDLE;
-                            DO_MOUSE_DOWN (SDL_BUTTON_MIDDLE);
-                        }
-                        else {
-                            DO_MOUSE_DOWN (SDL_BUTTON_LEFT);
-                        }
+                        DO_MOUSE_DOWN (SDL_BUTTON_LEFT);
                     }
-                    break;
+                }
+                break;
 
-                case NSLeftMouseUp:
-                    if ( last_virtual_button != 0 ) {
-                        DO_MOUSE_UP (last_virtual_button);
-                        last_virtual_button = 0;
-                    }
-                    else {
-                        DO_MOUSE_UP (SDL_BUTTON_LEFT);
-                    }
-                    break;
+            case NSLeftMouseUp:
+                if (last_virtual_button != 0) {
+                    DO_MOUSE_UP (last_virtual_button);
+                    last_virtual_button = 0;
+                } else {
+                    DO_MOUSE_UP (SDL_BUTTON_LEFT);
+                }
+                break;
 
-                case NSOtherMouseDown:
-                case NSRightMouseDown:
-                    button = QZ_OtherMouseButtonToSDL([ event buttonNumber ]);
-                    DO_MOUSE_DOWN (button);
-                    break;
+            case NSOtherMouseDown:
+            case NSRightMouseDown:
+                button = QZ_OtherMouseButtonToSDL ([event buttonNumber]);
+                DO_MOUSE_DOWN (button);
+                break;
 
-                case NSOtherMouseUp:
-                case NSRightMouseUp:
-                    button = QZ_OtherMouseButtonToSDL([ event buttonNumber ]);
-                    DO_MOUSE_UP (button);
-                    break;
+            case NSOtherMouseUp:
+            case NSRightMouseUp:
+                button = QZ_OtherMouseButtonToSDL ([event buttonNumber]);
+                DO_MOUSE_UP (button);
+                break;
 
-                case NSSystemDefined:
+            case NSSystemDefined:
+                /*
+                   Future: up to 32 "mouse" buttons can be handled.
+                   if ([event subtype] == 7) {
+                   unsigned int buttons;
+                   buttons = [ event data2 ];
+                 */
+                break;
+            case NSLeftMouseDragged:
+            case NSRightMouseDragged:
+            case NSOtherMouseDragged:  /* usually middle mouse dragged */
+            case NSMouseMoved:
+                if (grab_state == QZ_INVISIBLE_GRAB) {
+
                     /*
-                        Future: up to 32 "mouse" buttons can be handled.
-                        if ([event subtype] == 7) {
-                            unsigned int buttons;
-                            buttons = [ event data2 ];
-                    */
-                    break;
-                case NSLeftMouseDragged:
-                case NSRightMouseDragged:
-                case NSOtherMouseDragged: /* usually middle mouse dragged */
-                case NSMouseMoved:
-                    if ( grab_state == QZ_INVISIBLE_GRAB ) {
-                
-                        /*
-                            If input is grabbed+hidden, the cursor doesn't move,
-                            so we have to call the lowlevel window server
-                            function. This is less accurate but works OK.                         
-                        */
-                        CGMouseDelta dx1, dy1;
-                        CGGetLastMouseDelta (&dx1, &dy1);
-                        dx += dx1;
-                        dy += dy1;
-                    }
-                    else if (firstMouseEvent) {
-                        
-                        /*
-                            Get the first mouse event in a possible
-                            sequence of mouse moved events. Since we
-                            use absolute coordinates, this serves to
-                            compensate any inaccuracy in deltas, and
-                            provides the first known mouse position,
-                            since everything after this uses deltas
-                        */
-                        NSPoint p;
-                        QZ_GetMouseLocation (this, &p);
-                        SDL_PrivateMouseMotion (0, 0, p.x, p.y);
-                        firstMouseEvent = 0;
-                   }
-                    else {
-                    
-                        /*
-                            Get the amount moved since the last drag or move event,
-                            add it on for one big move event at the end.
-                        */
-                        dx += [ event deltaX ];
-                        dy += [ event deltaY ];
-                    }
-                    
-                    /* 
-                        Handle grab input+cursor visible by warping the cursor back
-                        into the game window. This still generates a mouse moved event,
-                        but not as a result of the warp (so it's in the right direction).
-                    */
-                    if ( grab_state == QZ_VISIBLE_GRAB &&
-                         !isInGameWin ) {
-                       
-                        NSPoint p;
-                        QZ_GetMouseLocation (this, &p);
+                       If input is grabbed+hidden, the cursor doesn't move,
+                       so we have to call the lowlevel window server
+                       function. This is less accurate but works OK.                         
+                     */
+                    CGMouseDelta dx1, dy1;
+                    CGGetLastMouseDelta (&dx1, &dy1);
+                    dx += dx1;
+                    dy += dy1;
+                } else if (firstMouseEvent) {
 
-                        if ( p.x < 0.0 ) 
-                            p.x = 0.0;
-                        
-                        if ( p.y < 0.0 ) 
-                            p.y = 0.0;
-                        
-                        if ( p.x >= winRect.size.width ) 
-                            p.x = winRect.size.width-1;
-                        
-                        if ( p.y >= winRect.size.height ) 
-                            p.y = winRect.size.height-1;
-                        
-                        QZ_PrivateWarpCursor (this, p.x, p.y);
+                    /*
+                       Get the first mouse event in a possible
+                       sequence of mouse moved events. Since we
+                       use absolute coordinates, this serves to
+                       compensate any inaccuracy in deltas, and
+                       provides the first known mouse position,
+                       since everything after this uses deltas
+                     */
+                    NSPoint p;
+                    QZ_GetMouseLocation (this, &p);
+                    SDL_PrivateMouseMotion (0, 0, p.x, p.y);
+                    firstMouseEvent = 0;
+                } else {
+
+                    /*
+                       Get the amount moved since the last drag or move event,
+                       add it on for one big move event at the end.
+                     */
+                    dx +=[event deltaX];
+                    dy +=[event deltaY];
+                }
+
+                /* 
+                   Handle grab input+cursor visible by warping the cursor back
+                   into the game window. This still generates a mouse moved event,
+                   but not as a result of the warp (so it's in the right direction).
+                 */
+                if (grab_state == QZ_VISIBLE_GRAB && !isInGameWin) {
+
+                    NSPoint p;
+                    QZ_GetMouseLocation (this, &p);
+
+                    if (p.x < 0.0)
+                        p.x = 0.0;
+
+                    if (p.y < 0.0)
+                        p.y = 0.0;
+
+                    if (p.x >= winRect.size.width)
+                        p.x = winRect.size.width - 1;
+
+                    if (p.y >= winRect.size.height)
+                        p.y = winRect.size.height - 1;
+
+                    QZ_PrivateWarpCursor (this, p.x, p.y);
+                } else if (!isInGameWin
+                           && (SDL_GetAppState () & SDL_APPMOUSEFOCUS)) {
+
+                    SDL_PrivateAppActive (0, SDL_APPMOUSEFOCUS);
+                    if (grab_state == QZ_INVISIBLE_GRAB)
+                        /*The cursor has left the window even though it is
+                           disassociated from the mouse (and therefore
+                           shouldn't move): this can happen with Wacom
+                           tablets, and it effectively breaks the grab, since
+                           mouse down events now go to background
+                           applications. The only possibility to avoid this
+                           seems to be talking to the tablet driver
+                           (AppleEvents) to constrain its mapped area to the
+                           window, which may not be worth the effort. For
+                           now, handle the condition more gracefully than
+                           before by reassociating cursor and mouse until the
+                           cursor enters the window again, making it obvious
+                           to the user that the grab is broken. */
+                        CGAssociateMouseAndMouseCursorPosition (1);
+                    if (!cursor_should_be_visible)
+                        QZ_ShowMouse (this);
+                } else if (isInGameWin
+                           && (SDL_GetAppState () &
+                               (SDL_APPMOUSEFOCUS | SDL_APPINPUTFOCUS)) ==
+                           SDL_APPINPUTFOCUS) {
+
+                    SDL_PrivateAppActive (1, SDL_APPMOUSEFOCUS);
+                    if (!cursor_should_be_visible)
+                        QZ_HideMouse (this);
+                    if (grab_state == QZ_INVISIBLE_GRAB) {      /*see comment above */
+                        QZ_PrivateWarpCursor (this,
+                                              SDL_VideoSurface->w /
+                                              2, SDL_VideoSurface->h / 2);
+                        CGAssociateMouseAndMouseCursorPosition (0);
                     }
-                    else
-                    if ( !isInGameWin && (SDL_GetAppState() & SDL_APPMOUSEFOCUS) ) {
-                    
-                        SDL_PrivateAppActive (0, SDL_APPMOUSEFOCUS);
-                        if (grab_state == QZ_INVISIBLE_GRAB)
-                            /*The cursor has left the window even though it is
-                              disassociated from the mouse (and therefore
-                              shouldn't move): this can happen with Wacom
-                              tablets, and it effectively breaks the grab, since
-                              mouse down events now go to background
-                              applications. The only possibility to avoid this
-                              seems to be talking to the tablet driver
-                              (AppleEvents) to constrain its mapped area to the
-                              window, which may not be worth the effort. For
-                              now, handle the condition more gracefully than
-                              before by reassociating cursor and mouse until the
-                              cursor enters the window again, making it obvious
-                              to the user that the grab is broken.*/
-                            CGAssociateMouseAndMouseCursorPosition (1);
-                        if (!cursor_should_be_visible)
-                            QZ_ShowMouse (this);
-                    }
-                    else
-                    if ( isInGameWin && (SDL_GetAppState() & (SDL_APPMOUSEFOCUS | SDL_APPINPUTFOCUS)) == SDL_APPINPUTFOCUS ) {
-                    
-                        SDL_PrivateAppActive (1, SDL_APPMOUSEFOCUS);
-                        if (!cursor_should_be_visible)
-                            QZ_HideMouse (this);
-                        if (grab_state == QZ_INVISIBLE_GRAB) { /*see comment above*/
-                            QZ_PrivateWarpCursor (this, SDL_VideoSurface->w / 2, SDL_VideoSurface->h / 2);
-                            CGAssociateMouseAndMouseCursorPosition (0);
-                        }
-                    }
-                    break;
-                case NSScrollWheel:
-                    if ( isInGameWin ) {
-                        float dy, dx;
-                        Uint8 button;
-                        dy = [ event deltaY ];
-                        dx = [ event deltaX ];
-                        if ( dy > 0.0 || dx > 0.0 ) /* Scroll up */
-                            button = SDL_BUTTON_WHEELUP;
-                        else /* Scroll down */
-                            button = SDL_BUTTON_WHEELDOWN;
-                        /* For now, wheel is sent as a quick down+up */
-                        SDL_PrivateMouseButton (SDL_PRESSED, button, 0, 0);
-                        SDL_PrivateMouseButton (SDL_RELEASED, button, 0, 0);
-                    }
-                    break;
-                case NSKeyUp:
-                    QZ_DoKey (this, SDL_RELEASED, event);
-                    break;
-                case NSKeyDown:
-                    QZ_DoKey (this, SDL_PRESSED, event);
-                    break;
-                case NSFlagsChanged:
-                    break;
-                    /* case NSAppKitDefined: break; */
-                    /* case NSApplicationDefined: break; */
-                    /* case NSPeriodic: break; */
-                    /* case NSCursorUpdate: break; */
-                default:
-                    [ NSApp sendEvent:event ];
+                }
+                break;
+            case NSScrollWheel:
+                if (isInGameWin) {
+                    float dy, dx;
+                    Uint8 button;
+                    dy =[event deltaY];
+                    dx =[event deltaX];
+                    if (dy > 0.0 || dx > 0.0)   /* Scroll up */
+                        button = SDL_BUTTON_WHEELUP;
+                    else        /* Scroll down */
+                        button = SDL_BUTTON_WHEELDOWN;
+                    /* For now, wheel is sent as a quick down+up */
+                    SDL_PrivateMouseButton (SDL_PRESSED, button, 0, 0);
+                    SDL_PrivateMouseButton (SDL_RELEASED, button, 0, 0);
+                }
+                break;
+            case NSKeyUp:
+                QZ_DoKey (this, SDL_RELEASED, event);
+                break;
+            case NSKeyDown:
+                QZ_DoKey (this, SDL_PRESSED, event);
+                break;
+            case NSFlagsChanged:
+                break;
+                /* case NSAppKitDefined: break; */
+                /* case NSApplicationDefined: break; */
+                /* case NSPeriodic: break; */
+                /* case NSCursorUpdate: break; */
+            default:
+              [NSApp sendEvent:event];
             }
         }
-    } while (event != nil);
-    
+    }
+    while (event != nil);
+
     /* handle accumulated mouse moved events */
     if (dx != 0 || dy != 0)
         SDL_PrivateMouseMotion (0, 1, dx, dy);
-    
-    [ pool release ];
+
+    [pool release];
 }
 
-void QZ_UpdateMouse (_THIS)
+void
+QZ_UpdateMouse (_THIS)
 {
     NSPoint p;
     QZ_GetMouseLocation (this, &p);

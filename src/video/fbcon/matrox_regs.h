@@ -15,7 +15,7 @@
  *			g.desbief@aix.pacwan.net
  *		MGA1064SG Mystique register file
  */
-  
+
 
 #ifndef _MGA_REG_H_
 #define _MGA_REG_H_
@@ -153,7 +153,7 @@
 /* z drawing mode. use MGADWG_NOZCMP for always */
 
 #define MGADWG_NOZCMP		( 0x00 << 8 )
-#define MGADWG_ZE		( 0x02 << 8 ) 
+#define MGADWG_ZE		( 0x02 << 8 )
 #define MGADWG_ZNE		( 0x03 << 8 )
 #define MGADWG_ZLT		( 0x04 << 8 )
 #define MGADWG_ZLTE		( 0x05 << 8 )
@@ -190,7 +190,7 @@
 #define MGADWG_BU24BGR		( 0x0b << 25 )
 #define MGADWG_BU24RGB		( 0x0f << 25 )
 
-#define MGADWG_REPLACE		0x000C0000	/* From Linux kernel sources */
+#define MGADWG_REPLACE		0x000C0000      /* From Linux kernel sources */
 #define MGADWG_PATTERN		( 0x01 << 29 )
 #define MGADWG_TRANSC		( 0x01 << 30 )
 #define MGADWG_NOCLIP		( 0x01 << 31 )
@@ -204,7 +204,7 @@
 #define MGAREG_MISC_CLK_SEL_MGA_MSK	(0x3 << 2)
 #define MGAREG_MISC_VIDEO_DIS	(0x1 << 4)
 #define MGAREG_MISC_HIGH_PG_SEL	(0x1 << 5)
- 
+
 /* MMIO VGA registers */
 #define MGAREG_CRTC_INDEX	0x1fd4
 #define MGAREG_CRTC_DATA	0x1fd5
@@ -373,4 +373,4 @@
 #define MGA1064_PIX_PLL_STAT	0x4f
 
 #endif
-
+/* vi: set ts=4 sw=4 expandtab: */

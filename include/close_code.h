@@ -38,4 +38,3 @@
 #pragma pack(pop)
 #endif
 #endif /* Compiler needs structure packing set */
-

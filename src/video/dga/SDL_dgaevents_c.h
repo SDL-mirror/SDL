@@ -26,3 +26,4 @@
 /* Functions to be exported */
 extern void DGA_PumpEvents(_THIS);
 extern void DGA_InitOSKeymap(_THIS);
+/* vi: set ts=4 sw=4 expandtab: */

@@ -33,18 +33,20 @@
 
 /* Screen format */
 
-enum {
-	VDI_FORMAT_UNKNOWN=-1,
-	VDI_FORMAT_INTER=0,	/* Interleaved bitplanes */
-	VDI_FORMAT_VDI=1,	/* VDI independent */
-	VDI_FORMAT_PACK=2	/* Packed pixels */
+enum
+{
+    VDI_FORMAT_UNKNOWN = -1,
+    VDI_FORMAT_INTER = 0,       /* Interleaved bitplanes */
+    VDI_FORMAT_VDI = 1,         /* VDI independent */
+    VDI_FORMAT_PACK = 2         /* Packed pixels */
 };
 
 /* CLUT types */
-enum {
-	VDI_CLUT_NONE=0,	/* Monochrome mode */
-	VDI_CLUT_HARDWARE,	/* <256 colours mode */
-	VDI_CLUT_SOFTWARE	/* True colour mode */
+enum
+{
+    VDI_CLUT_NONE = 0,          /* Monochrome mode */
+    VDI_CLUT_HARDWARE,          /* <256 colours mode */
+    VDI_CLUT_SOFTWARE           /* True colour mode */
 };
 
 /*--- Functions ---*/
@@ -52,3 +54,4 @@ enum {
 unsigned long Atari_get_EdDI_version(void *function_pointer);
 
 #endif /* _SDL_Atari_eddi_s_h */
+/* vi: set ts=4 sw=4 expandtab: */

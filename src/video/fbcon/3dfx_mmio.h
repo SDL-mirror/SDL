@@ -53,4 +53,4 @@
 		i = (tdfx_in32(TDFX_STATUS) & STATUS_BUSY) ? 0 : i + 1;	\
 	} while ( i != 3 );						\
 }
-
+/* vi: set ts=4 sw=4 expandtab: */

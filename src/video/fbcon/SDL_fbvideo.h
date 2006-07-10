@@ -40,59 +40,61 @@
 
 
 /* This is the structure we use to keep track of video memory */
-typedef struct vidmem_bucket {
-	struct vidmem_bucket *prev;
-	int used;
-	int dirty;
-	char *base;
-	unsigned int size;
-	struct vidmem_bucket *next;
+typedef struct vidmem_bucket
+{
+    struct vidmem_bucket *prev;
+    int used;
+    int dirty;
+    char *base;
+    unsigned int size;
+    struct vidmem_bucket *next;
 } vidmem_bucket;
 
 /* Private display data */
-struct SDL_PrivateVideoData {
-	int console_fd;
-	struct fb_var_screeninfo cache_vinfo;
-	struct fb_var_screeninfo saved_vinfo;
-	int saved_cmaplen;
-	__u16 *saved_cmap;
+struct SDL_PrivateVideoData
+{
+    int console_fd;
+    struct fb_var_screeninfo cache_vinfo;
+    struct fb_var_screeninfo saved_vinfo;
+    int saved_cmaplen;
+    __u16 *saved_cmap;
 
-	int current_vt;
-	int saved_vt;
-	int keyboard_fd;
-	int saved_kbd_mode;
-	struct termios saved_kbd_termios;
+    int current_vt;
+    int saved_vt;
+    int keyboard_fd;
+    int saved_kbd_mode;
+    struct termios saved_kbd_termios;
 
-	int mouse_fd;
+    int mouse_fd;
 #if SDL_INPUT_TSLIB
-	struct tsdev *ts_dev;
+    struct tsdev *ts_dev;
 #endif
 
-	char *mapped_mem;
-	int mapped_memlen;
-	int mapped_offset;
-	char *mapped_io;
-	long mapped_iolen;
-	int flip_page;
-	char *flip_address[2];
+    char *mapped_mem;
+    int mapped_memlen;
+    int mapped_offset;
+    char *mapped_io;
+    long mapped_iolen;
+    int flip_page;
+    char *flip_address[2];
 
-#define NUM_MODELISTS	4		/* 8, 16, 24, and 32 bits-per-pixel */
-	int SDL_nummodes[NUM_MODELISTS];
-	SDL_Rect **SDL_modelist[NUM_MODELISTS];
+#define NUM_MODELISTS	4       /* 8, 16, 24, and 32 bits-per-pixel */
+    int SDL_nummodes[NUM_MODELISTS];
+    SDL_Rect **SDL_modelist[NUM_MODELISTS];
 
-	vidmem_bucket surfaces;
-	int surfaces_memtotal;
-	int surfaces_memleft;
+    vidmem_bucket surfaces;
+    int surfaces_memtotal;
+    int surfaces_memleft;
 
-	SDL_mutex *hw_lock;
-	int switched_away;
-	struct fb_var_screeninfo screen_vinfo;
-	Uint32 screen_arealen;
-	Uint8 *screen_contents;
-	__u16  screen_palette[3*256];
+    SDL_mutex *hw_lock;
+    int switched_away;
+    struct fb_var_screeninfo screen_vinfo;
+    Uint32 screen_arealen;
+    Uint8 *screen_contents;
+    __u16 screen_palette[3 * 256];
 
-	void (*wait_vbl)(_THIS);
-	void (*wait_idle)(_THIS);
+    void (*wait_vbl) (_THIS);
+    void (*wait_idle) (_THIS);
 };
 /* Old variable names */
 #define console_fd		(this->hidden->console_fd)
@@ -134,49 +136,54 @@ struct SDL_PrivateVideoData {
    necessarily in the kernel headers on the system we compile on.
 */
 #ifndef FB_ACCEL_MATROX_MGAG400
-#define FB_ACCEL_MATROX_MGAG400	26	/* Matrox G400			*/
+#define FB_ACCEL_MATROX_MGAG400	26      /* Matrox G400                  */
 #endif
 #ifndef FB_ACCEL_3DFX_BANSHEE
-#define FB_ACCEL_3DFX_BANSHEE	31	/* 3Dfx Banshee			*/
+#define FB_ACCEL_3DFX_BANSHEE	31      /* 3Dfx Banshee                 */
 #endif
 
 /* These functions are defined in SDL_fbvideo.c */
-extern void FB_SavePaletteTo(_THIS, int palette_len, __u16 *area);
-extern void FB_RestorePaletteFrom(_THIS, int palette_len, __u16 *area);
+extern void FB_SavePaletteTo(_THIS, int palette_len, __u16 * area);
+extern void FB_RestorePaletteFrom(_THIS, int palette_len, __u16 * area);
 
 /* These are utility functions for working with video surfaces */
 
-static __inline__ void FB_AddBusySurface(SDL_Surface *surface)
+static __inline__ void
+FB_AddBusySurface(SDL_Surface * surface)
 {
-	((vidmem_bucket *)surface->hwdata)->dirty = 1;
+    ((vidmem_bucket *) surface->hwdata)->dirty = 1;
 }
 
-static __inline__ int FB_IsSurfaceBusy(SDL_Surface *surface)
+static __inline__ int
+FB_IsSurfaceBusy(SDL_Surface * surface)
 {
-	return ((vidmem_bucket *)surface->hwdata)->dirty;
+    return ((vidmem_bucket *) surface->hwdata)->dirty;
 }
 
-static __inline__ void FB_WaitBusySurfaces(_THIS)
+static __inline__ void
+FB_WaitBusySurfaces(_THIS)
 {
-	vidmem_bucket *bucket;
+    vidmem_bucket *bucket;
 
-	/* Wait for graphic operations to complete */
-	wait_idle(this);
+    /* Wait for graphic operations to complete */
+    wait_idle(this);
 
-	/* Clear all surface dirty bits */
-	for ( bucket=&surfaces; bucket; bucket=bucket->next ) {
-		bucket->dirty = 0;
-	}
+    /* Clear all surface dirty bits */
+    for (bucket = &surfaces; bucket; bucket = bucket->next) {
+        bucket->dirty = 0;
+    }
 }
 
-static __inline__ void FB_dst_to_xy(_THIS, SDL_Surface *dst, int *x, int *y)
+static __inline__ void
+FB_dst_to_xy(_THIS, SDL_Surface * dst, int *x, int *y)
 {
-	*x = (long)((char *)dst->pixels - mapped_mem)%this->screen->pitch;
-	*y = (long)((char *)dst->pixels - mapped_mem)/this->screen->pitch;
-	if ( dst == this->screen ) {
-		*x += this->offset_x;
-		*y += this->offset_y;
-	}
+    *x = (long) ((char *) dst->pixels - mapped_mem) % this->screen->pitch;
+    *y = (long) ((char *) dst->pixels - mapped_mem) / this->screen->pitch;
+    if (dst == this->screen) {
+        *x += this->offset_x;
+        *y += this->offset_y;
+    }
 }
 
 #endif /* _SDL_fbvideo_h */
+/* vi: set ts=4 sw=4 expandtab: */

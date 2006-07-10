@@ -34,9 +34,11 @@
 
 /* Private display data */
 
-struct SDL_PrivateVideoData {
+struct SDL_PrivateVideoData
+{
     int w, h;
     void *buffer;
 };
 
 #endif /* _SDL_dcvideo_h */
+/* vi: set ts=4 sw=4 expandtab: */

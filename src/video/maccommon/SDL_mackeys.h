@@ -109,7 +109,7 @@
 #define MK_COMMA		0x2B
 #define MK_PERIOD		0x2F
 #define MK_SLASH		0x2C
-#if 0	/* These are the same as the left versions - use left by default */
+#if 0                           /* These are the same as the left versions - use left by default */
 #define MK_RSHIFT		0x38
 #endif
 #define MK_UP			0x7E
@@ -121,7 +121,7 @@
 #define MK_LALT			0x3A
 #define MK_LMETA		0x37
 #define MK_SPACE		0x31
-#if 0	/* These are the same as the left versions - use left by default */
+#if 0                           /* These are the same as the left versions - use left by default */
 #define MK_RMETA		0x37
 #define MK_RALT			0x3A
 #define MK_RCTRL		0x3B
@@ -138,3 +138,4 @@
 #define MK_IBOOK_RIGHT		0x3C
 #define MK_IBOOK_DOWN		0x3D
 #define MK_IBOOK_UP		0x3E
+/* vi: set ts=4 sw=4 expandtab: */

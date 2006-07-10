@@ -20,7 +20,56 @@
     slouken@libsdl.org
 */
 
-/* Main include header for the SDL library */
+/**
+ * \file SDL.h
+ *
+ * Main include header for the SDL library
+ */
+/**
+ * \mainpage Simple DirectMedia Layer (SDL)
+
+http://www.libsdl.org/
+
+* \section intro_sec Introduction
+
+This is the Simple DirectMedia Layer, a general API that provides low
+level access to audio, keyboard, mouse, joystick, 3D hardware via OpenGL,
+and 2D framebuffer across multiple platforms.
+
+The current version supports Linux, Windows, Windows CE, BeOS, MacOS,
+Mac OS X, FreeBSD, NetBSD, OpenBSD, BSD/OS, Solaris, IRIX, and QNX.
+The code contains support for AmigaOS, Dreamcast, Atari, AIX, OSF/Tru64,
+RISC OS, SymbianOS, and OS/2, but these are not officially supported.
+
+SDL is written in C, but works with C++ natively, and has bindings to
+several other languages, including Ada, C#, Eiffel, Erlang, Euphoria,
+Guile, Haskell, Java, Lisp, Lua, ML, Objective C, Pascal, Perl, PHP,
+Pike, Pliant, Python, Ruby, and Smalltalk.
+
+This library is distributed under GNU LGPL version 2, which can be
+found in the file  "COPYING".  This license allows you to use SDL
+freely in commercial programs as long as you link with the dynamic
+library.
+
+The best way to learn how to use SDL is to check out the header files in
+the "include" subdirectory and the programs in the "test" subdirectory.
+The header files and test programs are well commented and always up to date.
+More documentation is available in HTML format in "docs/index.html", and
+a documentation wiki is available online at:
+	http://www.libsdl.org/cgi/docwiki.cgi
+
+The test programs in the "test" subdirectory are in the public domain.
+
+Frequently asked questions are answered online:
+	http://www.libsdl.org/faq.php
+
+If you need help with the library, or just want to discuss SDL related
+issues, you can join the developers mailing list:
+	http://www.libsdl.org/mailing-list.php
+
+Enjoy!
+	Sam Lantinga				(slouken@libsdl.org)
+ */
 
 #ifndef _SDL_H
 #define _SDL_H
@@ -40,11 +89,14 @@
 #include "SDL_timer.h"
 #include "SDL_video.h"
 #include "SDL_version.h"
+#include "SDL_compat.h"
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
+/* *INDENT-OFF* */
 extern "C" {
+/* *INDENT-ON* */
 #endif
 
 /* As of version 0.5, SDL is loaded dynamically into the application */
@@ -57,8 +109,8 @@ extern "C" {
 #define SDL_INIT_VIDEO		0x00000020
 #define SDL_INIT_CDROM		0x00000100
 #define SDL_INIT_JOYSTICK	0x00000200
-#define SDL_INIT_NOPARACHUTE	0x00100000	/* Don't catch fatal signals */
-#define SDL_INIT_EVENTTHREAD	0x01000000	/* Not supported on all OS's */
+#define SDL_INIT_NOPARACHUTE	0x00100000      /* Don't catch fatal signals */
+#define SDL_INIT_EVENTTHREAD	0x01000000      /* Not supported on all OS's */
 #define SDL_INIT_EVERYTHING	0x0000FFFF
 
 /* This function loads the SDL dynamically linked library and initializes 
@@ -87,8 +139,12 @@ extern DECLSPEC void SDLCALL SDL_Quit(void);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
+/* *INDENT-OFF* */
 }
+/* *INDENT-ON* */
 #endif
 #include "close_code.h"
 
 #endif /* _SDL_H */
+
+/* vi: set ts=4 sw=4 expandtab: */

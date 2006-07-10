@@ -133,4 +133,4 @@
 #include "CDPlayer.h"
 
 #define kErrorFakeDevice "Error: Cannot proceed since we're faking a CD-ROM device. Reinit the CD-ROM subsystem to scan for new volumes."
-
+/* vi: set ts=4 sw=4 expandtab: */

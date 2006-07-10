@@ -42,16 +42,17 @@
 #endif
 
 
-@implementation NSOpenGLContext (CGLContextAccess)
-- (CGLContextObj) cglContext;
+@ implementation NSOpenGLContext (CGLContextAccess)
+    - (CGLContextObj) cglContext;
 {
     return _contextAuxiliary;
 }
+
 @end
-
 /* OpenGL helper functions (used internally) */
-
-int QZ_SetupOpenGL (_THIS, int bpp, Uint32 flags) {
+    int
+QZ_SetupOpenGL (_THIS, int bpp, Uint32 flags)
+{
 
     NSOpenGLPixelFormatAttribute attr[32];
     NSOpenGLPixelFormat *fmt;
@@ -60,16 +61,16 @@ int QZ_SetupOpenGL (_THIS, int bpp, Uint32 flags) {
 
     /* if a GL library hasn't been loaded at this point, load the default. */
     if (!this->gl_config.driver_loaded) {
-        if (QZ_GL_LoadLibrary(this, NULL) == -1)
+        if (QZ_GL_LoadLibrary (this, NULL) == -1)
             return 0;
     }
 
-    if ( flags & SDL_FULLSCREEN ) {
+    if (flags & SDL_FULLSCREEN) {
 
         attr[i++] = NSOpenGLPFAFullScreen;
     }
     /* In windowed mode, the OpenGL pixel depth must match device pixel depth */
-    else if ( colorBits != device_bpp ) {
+    else if (colorBits != device_bpp) {
 
         colorBits = device_bpp;
     }
@@ -80,39 +81,43 @@ int QZ_SetupOpenGL (_THIS, int bpp, Uint32 flags) {
     attr[i++] = NSOpenGLPFADepthSize;
     attr[i++] = this->gl_config.depth_size;
 
-    if ( this->gl_config.double_buffer ) {
+    if (this->gl_config.double_buffer) {
         attr[i++] = NSOpenGLPFADoubleBuffer;
     }
 
-    if ( this->gl_config.stereo ) {
+    if (this->gl_config.stereo) {
         attr[i++] = NSOpenGLPFAStereo;
     }
 
-    if ( this->gl_config.stencil_size != 0 ) {
+    if (this->gl_config.stencil_size != 0) {
         attr[i++] = NSOpenGLPFAStencilSize;
         attr[i++] = this->gl_config.stencil_size;
     }
 
-    if ( (this->gl_config.accum_red_size +
-          this->gl_config.accum_green_size +
-          this->gl_config.accum_blue_size +
-          this->gl_config.accum_alpha_size) > 0 ) {
+    if ((this->gl_config.accum_red_size +
+         this->gl_config.accum_green_size +
+         this->gl_config.accum_blue_size +
+         this->gl_config.accum_alpha_size) > 0) {
         attr[i++] = NSOpenGLPFAAccumSize;
-        attr[i++] = this->gl_config.accum_red_size + this->gl_config.accum_green_size + this->gl_config.accum_blue_size + this->gl_config.accum_alpha_size;
+        attr[i++] =
+            this->gl_config.accum_red_size +
+            this->gl_config.accum_green_size +
+            this->gl_config.accum_blue_size +
+            this->gl_config.accum_alpha_size;
     }
 
-    if ( this->gl_config.multisamplebuffers != 0 ) {
+    if (this->gl_config.multisamplebuffers != 0) {
         attr[i++] = NSOpenGLPFASampleBuffers;
         attr[i++] = this->gl_config.multisamplebuffers;
     }
 
-    if ( this->gl_config.multisamplesamples != 0 ) {
+    if (this->gl_config.multisamplesamples != 0) {
         attr[i++] = NSOpenGLPFASamples;
         attr[i++] = this->gl_config.multisamplesamples;
         attr[i++] = NSOpenGLPFANoRecovery;
     }
 
-    if ( this->gl_config.accelerated > 0 ) {
+    if (this->gl_config.accelerated > 0) {
         attr[i++] = NSOpenGLPFAAccelerated;
     }
 
@@ -120,16 +125,15 @@ int QZ_SetupOpenGL (_THIS, int bpp, Uint32 flags) {
     attr[i++] = CGDisplayIDToOpenGLDisplayMask (display_id);
     attr[i] = 0;
 
-    fmt = [ [ NSOpenGLPixelFormat alloc ] initWithAttributes:attr ];
+  fmt =[[NSOpenGLPixelFormat alloc] initWithAttributes:attr];
     if (fmt == nil) {
         SDL_SetError ("Failed creating OpenGL pixel format");
         return 0;
     }
 
-    gl_context = [ [ NSOpenGLContext alloc ] initWithFormat:fmt
-                                               shareContext:nil];
+  gl_context =[[NSOpenGLContext alloc] initWithFormat: fmt shareContext:nil];
 
-    [ fmt release ];
+    [fmt release];
 
     if (gl_context == nil) {
         SDL_SetError ("Failed creating OpenGL context");
@@ -141,10 +145,10 @@ int QZ_SetupOpenGL (_THIS, int bpp, Uint32 flags) {
      * exactly does, IMHO - for a detailed explanation see
      * http://lists.apple.com/archives/mac-opengl/2006/Jan/msg00080.html )
      */
-    if ( this->gl_config.swap_control >= 0 ) {
+    if (this->gl_config.swap_control >= 0) {
         long value;
         value = this->gl_config.swap_control;
-        [ gl_context setValues: &value forParameter: NSOpenGLCPSwapInterval ];
+      [gl_context setValues: &value forParameter:NSOpenGLCPSwapInterval];
     }
 
     /*
@@ -155,17 +159,17 @@ int QZ_SetupOpenGL (_THIS, int bpp, Uint32 flags) {
      *  the OpenGL context.  The default cache size is 16."    --ryan.
      */
 
-    #ifndef GLI_ARRAY_FUNC_CACHE_MAX
-    #define GLI_ARRAY_FUNC_CACHE_MAX 284
-    #endif
+#ifndef GLI_ARRAY_FUNC_CACHE_MAX
+#define GLI_ARRAY_FUNC_CACHE_MAX 284
+#endif
 
-    #ifndef GLI_SUBMIT_FUNC_CACHE_MAX
-    #define GLI_SUBMIT_FUNC_CACHE_MAX 280
-    #endif
+#ifndef GLI_SUBMIT_FUNC_CACHE_MAX
+#define GLI_SUBMIT_FUNC_CACHE_MAX 280
+#endif
 
     {
         long cache_max = 64;
-        CGLContextObj ctx = [ gl_context cglContext ];
+        CGLContextObj ctx =[gl_context cglContext];
         CGLSetParameter (ctx, GLI_SUBMIT_FUNC_CACHE_MAX, &cache_max);
         CGLSetParameter (ctx, GLI_ARRAY_FUNC_CACHE_MAX, &cache_max);
     }
@@ -175,11 +179,13 @@ int QZ_SetupOpenGL (_THIS, int bpp, Uint32 flags) {
     return 1;
 }
 
-void QZ_TearDownOpenGL (_THIS) {
+void
+QZ_TearDownOpenGL (_THIS)
+{
 
-    [ NSOpenGLContext clearCurrentContext ];
-    [ gl_context clearDrawable ];
-    [ gl_context release ];
+    [NSOpenGLContext clearCurrentContext];
+    [gl_context clearDrawable];
+    [gl_context release];
 }
 
 
@@ -187,19 +193,21 @@ void QZ_TearDownOpenGL (_THIS) {
 static const char *DEFAULT_OPENGL_LIB_NAME =
     "/System/Library/Frameworks/OpenGL.framework/Libraries/libGL.dylib";
 
-int    QZ_GL_LoadLibrary    (_THIS, const char *location) {
-    if ( gl_context != NULL ) {
-        SDL_SetError("OpenGL context already created");
+int
+QZ_GL_LoadLibrary (_THIS, const char *location)
+{
+    if (gl_context != NULL) {
+        SDL_SetError ("OpenGL context already created");
         return -1;
     }
 
     if (opengl_library != NULL)
-        SDL_UnloadObject(opengl_library);
+        SDL_UnloadObject (opengl_library);
 
     if (location == NULL)
         location = DEFAULT_OPENGL_LIB_NAME;
 
-    opengl_library = SDL_LoadObject(location);
+    opengl_library = SDL_LoadObject (location);
     if (opengl_library != NULL) {
         this->gl_config.driver_loaded = 1;
         return 0;
@@ -209,73 +217,113 @@ int    QZ_GL_LoadLibrary    (_THIS, const char *location) {
     return -1;
 }
 
-void*  QZ_GL_GetProcAddress (_THIS, const char *proc) {
-    return SDL_LoadFunction(opengl_library, proc);
+void *
+QZ_GL_GetProcAddress (_THIS, const char *proc)
+{
+    return SDL_LoadFunction (opengl_library, proc);
 }
 
-int    QZ_GL_GetAttribute   (_THIS, SDL_GLattr attrib, int* value) {
+int
+QZ_GL_GetAttribute (_THIS, SDL_GLattr attrib, int *value)
+{
 
     GLenum attr = 0;
 
     QZ_GL_MakeCurrent (this);
 
     switch (attrib) {
-        case SDL_GL_RED_SIZE: attr = GL_RED_BITS;   break;
-        case SDL_GL_BLUE_SIZE: attr = GL_BLUE_BITS;  break;
-        case SDL_GL_GREEN_SIZE: attr = GL_GREEN_BITS; break;
-        case SDL_GL_ALPHA_SIZE: attr = GL_ALPHA_BITS; break;
-        case SDL_GL_DOUBLEBUFFER: attr = GL_DOUBLEBUFFER; break;
-        case SDL_GL_DEPTH_SIZE: attr = GL_DEPTH_BITS;  break;
-        case SDL_GL_STENCIL_SIZE: attr = GL_STENCIL_BITS; break;
-        case SDL_GL_ACCUM_RED_SIZE: attr = GL_ACCUM_RED_BITS; break;
-        case SDL_GL_ACCUM_GREEN_SIZE: attr = GL_ACCUM_GREEN_BITS; break;
-        case SDL_GL_ACCUM_BLUE_SIZE: attr = GL_ACCUM_BLUE_BITS; break;
-        case SDL_GL_ACCUM_ALPHA_SIZE: attr = GL_ACCUM_ALPHA_BITS; break;
-        case SDL_GL_STEREO: attr = GL_STEREO; break;
-        case SDL_GL_MULTISAMPLEBUFFERS: attr = GL_SAMPLE_BUFFERS_ARB; break;
-        case SDL_GL_MULTISAMPLESAMPLES: attr = GL_SAMPLES_ARB; break;
-        case SDL_GL_BUFFER_SIZE:
+    case SDL_GL_RED_SIZE:
+        attr = GL_RED_BITS;
+        break;
+    case SDL_GL_BLUE_SIZE:
+        attr = GL_BLUE_BITS;
+        break;
+    case SDL_GL_GREEN_SIZE:
+        attr = GL_GREEN_BITS;
+        break;
+    case SDL_GL_ALPHA_SIZE:
+        attr = GL_ALPHA_BITS;
+        break;
+    case SDL_GL_DOUBLEBUFFER:
+        attr = GL_DOUBLEBUFFER;
+        break;
+    case SDL_GL_DEPTH_SIZE:
+        attr = GL_DEPTH_BITS;
+        break;
+    case SDL_GL_STENCIL_SIZE:
+        attr = GL_STENCIL_BITS;
+        break;
+    case SDL_GL_ACCUM_RED_SIZE:
+        attr = GL_ACCUM_RED_BITS;
+        break;
+    case SDL_GL_ACCUM_GREEN_SIZE:
+        attr = GL_ACCUM_GREEN_BITS;
+        break;
+    case SDL_GL_ACCUM_BLUE_SIZE:
+        attr = GL_ACCUM_BLUE_BITS;
+        break;
+    case SDL_GL_ACCUM_ALPHA_SIZE:
+        attr = GL_ACCUM_ALPHA_BITS;
+        break;
+    case SDL_GL_STEREO:
+        attr = GL_STEREO;
+        break;
+    case SDL_GL_MULTISAMPLEBUFFERS:
+        attr = GL_SAMPLE_BUFFERS_ARB;
+        break;
+    case SDL_GL_MULTISAMPLESAMPLES:
+        attr = GL_SAMPLES_ARB;
+        break;
+    case SDL_GL_BUFFER_SIZE:
         {
             GLint bits = 0;
             GLint component;
 
             /* there doesn't seem to be a single flag in OpenGL for this! */
-            glGetIntegerv (GL_RED_BITS, &component);   bits += component;
-            glGetIntegerv (GL_GREEN_BITS,&component);  bits += component;
-            glGetIntegerv (GL_BLUE_BITS, &component);  bits += component;
-            glGetIntegerv (GL_ALPHA_BITS, &component); bits += component;
+            glGetIntegerv (GL_RED_BITS, &component);
+            bits += component;
+            glGetIntegerv (GL_GREEN_BITS, &component);
+            bits += component;
+            glGetIntegerv (GL_BLUE_BITS, &component);
+            bits += component;
+            glGetIntegerv (GL_ALPHA_BITS, &component);
+            bits += component;
 
             *value = bits;
             return 0;
         }
-        case SDL_GL_ACCELERATED_VISUAL:
+    case SDL_GL_ACCELERATED_VISUAL:
         {
             long val;
-	    /* FIXME: How do we get this information here?
-            [fmt getValues: &val forAttribute: NSOpenGLPFAAccelerated attr forVirtualScreen: 0];
-	    */
-	    val = (this->gl_config.accelerated != 0);;
+            /* FIXME: How do we get this information here?
+               [fmt getValues: &val forAttribute: NSOpenGLPFAAccelerated attr forVirtualScreen: 0];
+             */
+            val = (this->gl_config.accelerated != 0);;
             *value = val;
             return 0;
         }
-        case SDL_GL_SWAP_CONTROL:
+    case SDL_GL_SWAP_CONTROL:
         {
             long val;
-            [ gl_context getValues: &val forParameter: NSOpenGLCPSwapInterval ];
+          [gl_context getValues: &val forParameter:NSOpenGLCPSwapInterval];
             *value = val;
             return 0;
         }
     }
 
-    glGetIntegerv (attr, (GLint *)value);
+    glGetIntegerv (attr, (GLint *) value);
     return 0;
 }
 
-int    QZ_GL_MakeCurrent    (_THIS) {
-    [ gl_context makeCurrentContext ];
+int
+QZ_GL_MakeCurrent (_THIS)
+{
+    [gl_context makeCurrentContext];
     return 0;
 }
 
-void   QZ_GL_SwapBuffers    (_THIS) {
-    [ gl_context flushBuffer ];
+void
+QZ_GL_SwapBuffers (_THIS)
+{
+    [gl_context flushBuffer];
 }

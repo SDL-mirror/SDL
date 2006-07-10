@@ -29,15 +29,15 @@
 
 #include <MacTypes.h>
 
-typedef SInt8	int8_t;
-typedef UInt8	uint8_t;
-typedef SInt16	int16_t;
-typedef UInt16	uint16_t;
-typedef SInt32	int32_t;
-typedef UInt32	uint32_t;
-typedef SInt64	int64_t;
-typedef UInt64	uint64_t;
-typedef unsigned long	uintptr_t;
+typedef SInt8 int8_t;
+typedef UInt8 uint8_t;
+typedef SInt16 int16_t;
+typedef UInt16 uint16_t;
+typedef SInt32 int32_t;
+typedef UInt32 uint32_t;
+typedef SInt64 int64_t;
+typedef UInt64 uint64_t;
+typedef unsigned long uintptr_t;
 
 #define SDL_HAS_64BIT_TYPE	1
 
@@ -104,6 +104,7 @@ typedef unsigned long	uintptr_t;
 /* Enable various video drivers */
 #define SDL_VIDEO_DRIVER_DUMMY	1
 #define SDL_VIDEO_DRIVER_DRAWSPROCKET	1
+#define SDL_VIDEO_DRIVER_GLSDL	1
 #define SDL_VIDEO_DRIVER_TOOLBOX	1
 
 /* Enable OpenGL support */

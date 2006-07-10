@@ -52,15 +52,17 @@
 #include "../SDL_error_c.h"
 
 /* This is the system-independent thread info structure */
-struct SDL_Thread {
-	Uint32 threadid;
-	SYS_ThreadHandle handle;
-	int status;
-	SDL_error errbuf;
-	void *data;
+struct SDL_Thread
+{
+    Uint32 threadid;
+    SYS_ThreadHandle handle;
+    int status;
+    SDL_error errbuf;
+    void *data;
 };
 
 /* This is the function called to run a thread */
 extern void SDL_RunThread(void *data);
 
 #endif /* _SDL_thread_c_h */
+/* vi: set ts=4 sw=4 expandtab: */

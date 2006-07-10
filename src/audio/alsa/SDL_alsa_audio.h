@@ -33,16 +33,17 @@
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_AudioDevice *this
 
-struct SDL_PrivateAudioData {
-	/* The audio device handle */
-	snd_pcm_t *pcm_handle;
+struct SDL_PrivateAudioData
+{
+    /* The audio device handle */
+    snd_pcm_t *pcm_handle;
 
-	/* The parent process id, to detect when application quits */
-	pid_t parent;
+    /* The parent process id, to detect when application quits */
+    pid_t parent;
 
-	/* Raw mixing buffer */
-	Uint8 *mixbuf;
-	int    mixlen;
+    /* Raw mixing buffer */
+    Uint8 *mixbuf;
+    int mixlen;
 };
 
 /* Old variable names */
@@ -52,3 +53,4 @@ struct SDL_PrivateAudioData {
 #define mixlen			(this->hidden->mixlen)
 
 #endif /* _ALSA_PCM_audio_h */
+/* vi: set ts=4 sw=4 expandtab: */

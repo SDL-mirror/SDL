@@ -80,4 +80,4 @@
 #define STATUS_BUSY			BIT(9)
 
 #endif /* _3DFX_REGS_H */
-
+/* vi: set ts=4 sw=4 expandtab: */

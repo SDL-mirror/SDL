@@ -23,34 +23,39 @@
 
 #include "SDL_QWin.h"
 
-extern "C" {
+extern "C"
+{
 
 #include "SDL_sysmouse_c.h"
 
 /* The implementation dependent data for the window manager cursor */
-struct WMcursor {
-	char *bits;
-};
-WMcursor *QT_CreateWMCursor(_THIS,
-		Uint8 *data, Uint8 *mask, int w, int h, int hot_x, int hot_y)
-{
-  static WMcursor dummy;
-  dummy.bits = 0;
-  return &dummy;
-}
+    struct WMcursor
+    {
+        char *bits;
+    };
+    WMcursor *QT_CreateWMCursor(_THIS,
+                                Uint8 * data, Uint8 * mask, int w, int h,
+                                int hot_x, int hot_y)
+    {
+        static WMcursor dummy;
+          dummy.bits = 0;
+          return &dummy;
+    }
 
-int QT_ShowWMCursor(_THIS, WMcursor *cursor)
-{
-  return 1;
-}
+    int QT_ShowWMCursor(_THIS, WMcursor * cursor)
+    {
+        return 1;
+    }
 
-void QT_FreeWMCursor(_THIS, WMcursor *cursor)
-{
-}
+    void QT_FreeWMCursor(_THIS, WMcursor * cursor)
+    {
+    }
 
-void QT_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
-{
-  SDL_Win->setMousePos(QPoint(x, y));
-}
+    void QT_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
+    {
+        SDL_Win->setMousePos(QPoint(x, y));
+    }
 
-}; /* Extern C */
+};                              /* Extern C */
+
+/* vi: set ts=4 sw=4 expandtab: */

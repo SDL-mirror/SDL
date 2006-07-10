@@ -28,26 +28,28 @@
 
 /* Functions to blit from 8-bit surfaces to other surfaces */
 
-static void Blit1to1(SDL_BlitInfo *info)
+static void
+Blit1to1(SDL_BlitInfo * info)
 {
 #ifndef USE_DUFFS_LOOP
-	int c;
+    int c;
 #endif
-	int width, height;
-	Uint8 *src, *map, *dst;
-	int srcskip, dstskip;
+    int width, height;
+    Uint8 *src, *map, *dst;
+    int srcskip, dstskip;
 
-	/* Set up some basic variables */
-	width = info->d_width;
-	height = info->d_height;
-	src = info->s_pixels;
-	srcskip = info->s_skip;
-	dst = info->d_pixels;
-	dstskip = info->d_skip;
-	map = info->table;
+    /* Set up some basic variables */
+    width = info->d_width;
+    height = info->d_height;
+    src = info->s_pixels;
+    srcskip = info->s_skip;
+    dst = info->d_pixels;
+    dstskip = info->d_skip;
+    map = info->table;
 
-	while ( height-- ) {
+    while (height--) {
 #ifdef USE_DUFFS_LOOP
+        /* *INDENT-OFF* */
 		DUFFS_LOOP(
 			{
 			  *dst = map[*src];
@@ -55,17 +57,19 @@ static void Blit1to1(SDL_BlitInfo *info)
 			dst++;
 			src++;
 		, width);
+        /* *INDENT-ON* */
 #else
-		for ( c=width; c; --c ) {
-		        *dst = map[*src];
-			dst++;
-			src++;
-		}
+        for (c = width; c; --c) {
+            *dst = map[*src];
+            dst++;
+            src++;
+        }
 #endif
-		src += srcskip;
-		dst += dstskip;
-	}
+        src += srcskip;
+        dst += dstskip;
+    }
 }
+
 /* This is now endian dependent */
 #if ( SDL_BYTEORDER == SDL_LIL_ENDIAN )
 #define HI	1
@@ -74,136 +78,135 @@ static void Blit1to1(SDL_BlitInfo *info)
 #define HI	0
 #define LO	1
 #endif
-static void Blit1to2(SDL_BlitInfo *info)
+static void
+Blit1to2(SDL_BlitInfo * info)
 {
 #ifndef USE_DUFFS_LOOP
-	int c;
+    int c;
 #endif
-	int width, height;
-	Uint8 *src, *dst;
-	Uint16 *map;
-	int srcskip, dstskip;
+    int width, height;
+    Uint8 *src, *dst;
+    Uint16 *map;
+    int srcskip, dstskip;
 
-	/* Set up some basic variables */
-	width = info->d_width;
-	height = info->d_height;
-	src = info->s_pixels;
-	srcskip = info->s_skip;
-	dst = info->d_pixels;
-	dstskip = info->d_skip;
-	map = (Uint16 *)info->table;
+    /* Set up some basic variables */
+    width = info->d_width;
+    height = info->d_height;
+    src = info->s_pixels;
+    srcskip = info->s_skip;
+    dst = info->d_pixels;
+    dstskip = info->d_skip;
+    map = (Uint16 *) info->table;
 
 #ifdef USE_DUFFS_LOOP
-	while ( height-- ) {
+    while (height--) {
+		/* *INDENT-OFF* */
 		DUFFS_LOOP(
 		{
 			*(Uint16 *)dst = map[*src++];
 			dst += 2;
 		},
 		width);
-		src += srcskip;
-		dst += dstskip;
-	}
+		/* *INDENT-ON* */
+        src += srcskip;
+        dst += dstskip;
+    }
 #else
-	/* Memory align at 4-byte boundary, if necessary */
-	if ( (long)dst & 0x03 ) {
-		/* Don't do anything if width is 0 */
-		if ( width == 0 ) {
-			return;
-		}
-		--width;
+    /* Memory align at 4-byte boundary, if necessary */
+    if ((long) dst & 0x03) {
+        /* Don't do anything if width is 0 */
+        if (width == 0) {
+            return;
+        }
+        --width;
 
-		while ( height-- ) {
-			/* Perform copy alignment */
-			*(Uint16 *)dst = map[*src++];
-			dst += 2;
+        while (height--) {
+            /* Perform copy alignment */
+            *(Uint16 *) dst = map[*src++];
+            dst += 2;
 
-			/* Copy in 4 pixel chunks */
-			for ( c=width/4; c; --c ) {
-				*(Uint32 *)dst =
-					(map[src[HI]]<<16)|(map[src[LO]]);
-				src += 2;
-				dst += 4;
-				*(Uint32 *)dst =
-					(map[src[HI]]<<16)|(map[src[LO]]);
-				src += 2;
-				dst += 4;
-			}
-			/* Get any leftovers */
-			switch (width & 3) {
-				case 3:
-					*(Uint16 *)dst = map[*src++];
-					dst += 2;
-				case 2:
-					*(Uint32 *)dst =
-					  (map[src[HI]]<<16)|(map[src[LO]]);
-					src += 2;
-					dst += 4;
-					break;
-				case 1:
-					*(Uint16 *)dst = map[*src++];
-					dst += 2;
-					break;
-			}
-			src += srcskip;
-			dst += dstskip;
-		}
-	} else { 
-		while ( height-- ) {
-			/* Copy in 4 pixel chunks */
-			for ( c=width/4; c; --c ) {
-				*(Uint32 *)dst =
-					(map[src[HI]]<<16)|(map[src[LO]]);
-				src += 2;
-				dst += 4;
-				*(Uint32 *)dst =
-					(map[src[HI]]<<16)|(map[src[LO]]);
-				src += 2;
-				dst += 4;
-			}
-			/* Get any leftovers */
-			switch (width & 3) {
-				case 3:
-					*(Uint16 *)dst = map[*src++];
-					dst += 2;
-				case 2:
-					*(Uint32 *)dst =
-					  (map[src[HI]]<<16)|(map[src[LO]]);
-					src += 2;
-					dst += 4;
-					break;
-				case 1:
-					*(Uint16 *)dst = map[*src++];
-					dst += 2;
-					break;
-			}
-			src += srcskip;
-			dst += dstskip;
-		}
-	}
+            /* Copy in 4 pixel chunks */
+            for (c = width / 4; c; --c) {
+                *(Uint32 *) dst = (map[src[HI]] << 16) | (map[src[LO]]);
+                src += 2;
+                dst += 4;
+                *(Uint32 *) dst = (map[src[HI]] << 16) | (map[src[LO]]);
+                src += 2;
+                dst += 4;
+            }
+            /* Get any leftovers */
+            switch (width & 3) {
+            case 3:
+                *(Uint16 *) dst = map[*src++];
+                dst += 2;
+            case 2:
+                *(Uint32 *) dst = (map[src[HI]] << 16) | (map[src[LO]]);
+                src += 2;
+                dst += 4;
+                break;
+            case 1:
+                *(Uint16 *) dst = map[*src++];
+                dst += 2;
+                break;
+            }
+            src += srcskip;
+            dst += dstskip;
+        }
+    } else {
+        while (height--) {
+            /* Copy in 4 pixel chunks */
+            for (c = width / 4; c; --c) {
+                *(Uint32 *) dst = (map[src[HI]] << 16) | (map[src[LO]]);
+                src += 2;
+                dst += 4;
+                *(Uint32 *) dst = (map[src[HI]] << 16) | (map[src[LO]]);
+                src += 2;
+                dst += 4;
+            }
+            /* Get any leftovers */
+            switch (width & 3) {
+            case 3:
+                *(Uint16 *) dst = map[*src++];
+                dst += 2;
+            case 2:
+                *(Uint32 *) dst = (map[src[HI]] << 16) | (map[src[LO]]);
+                src += 2;
+                dst += 4;
+                break;
+            case 1:
+                *(Uint16 *) dst = map[*src++];
+                dst += 2;
+                break;
+            }
+            src += srcskip;
+            dst += dstskip;
+        }
+    }
 #endif /* USE_DUFFS_LOOP */
 }
-static void Blit1to3(SDL_BlitInfo *info)
+static void
+Blit1to3(SDL_BlitInfo * info)
 {
 #ifndef USE_DUFFS_LOOP
-	int c;
+    int c;
 #endif
-	int o;
-	int width, height;
-	Uint8 *src, *map, *dst;
-	int srcskip, dstskip;
+    int o;
+    int width, height;
+    Uint8 *src, *map, *dst;
+    int srcskip, dstskip;
 
-	/* Set up some basic variables */
-	width = info->d_width;
-	height = info->d_height;
-	src = info->s_pixels;
-	srcskip = info->s_skip;
-	dst = info->d_pixels;
-	dstskip = info->d_skip;
-	map = info->table;
+    /* Set up some basic variables */
+    width = info->d_width;
+    height = info->d_height;
+    src = info->s_pixels;
+    srcskip = info->s_skip;
+    dst = info->d_pixels;
+    dstskip = info->d_skip;
+    map = info->table;
 
-	while ( height-- ) {
+    while (height--) {
 #ifdef USE_DUFFS_LOOP
+		/* *INDENT-OFF* */
 		DUFFS_LOOP(
 			{
 				o = *src * 4;
@@ -214,78 +217,84 @@ static void Blit1to3(SDL_BlitInfo *info)
 			src++;
 			dst += 3;
 		, width);
+		/* *INDENT-ON* */
 #else
-		for ( c=width; c; --c ) {
-			o = *src * 4;
-			dst[0] = map[o++];
-			dst[1] = map[o++];
-			dst[2] = map[o++];
-			src++;
-			dst += 3;
-		}
+        for (c = width; c; --c) {
+            o = *src * 4;
+            dst[0] = map[o++];
+            dst[1] = map[o++];
+            dst[2] = map[o++];
+            src++;
+            dst += 3;
+        }
 #endif /* USE_DUFFS_LOOP */
-		src += srcskip;
-		dst += dstskip;
-	}
+        src += srcskip;
+        dst += dstskip;
+    }
 }
-static void Blit1to4(SDL_BlitInfo *info)
+static void
+Blit1to4(SDL_BlitInfo * info)
 {
 #ifndef USE_DUFFS_LOOP
-	int c;
+    int c;
 #endif
-	int width, height;
-	Uint8 *src;
-	Uint32 *map, *dst;
-	int srcskip, dstskip;
+    int width, height;
+    Uint8 *src;
+    Uint32 *map, *dst;
+    int srcskip, dstskip;
 
-	/* Set up some basic variables */
-	width = info->d_width;
-	height = info->d_height;
-	src = info->s_pixels;
-	srcskip = info->s_skip;
-	dst = (Uint32 *)info->d_pixels;
-	dstskip = info->d_skip/4;
-	map = (Uint32 *)info->table;
+    /* Set up some basic variables */
+    width = info->d_width;
+    height = info->d_height;
+    src = info->s_pixels;
+    srcskip = info->s_skip;
+    dst = (Uint32 *) info->d_pixels;
+    dstskip = info->d_skip / 4;
+    map = (Uint32 *) info->table;
 
-	while ( height-- ) {
+    while (height--) {
 #ifdef USE_DUFFS_LOOP
+		/* *INDENT-OFF* */
 		DUFFS_LOOP(
 			*dst++ = map[*src++];
 		, width);
+		/* *INDENT-ON* */
 #else
-		for ( c=width/4; c; --c ) {
-			*dst++ = map[*src++];
-			*dst++ = map[*src++];
-			*dst++ = map[*src++];
-			*dst++ = map[*src++];
-		}
-		switch ( width & 3 ) {
-			case 3:
-				*dst++ = map[*src++];
-			case 2:
-				*dst++ = map[*src++];
-			case 1:
-				*dst++ = map[*src++];
-		}
+        for (c = width / 4; c; --c) {
+            *dst++ = map[*src++];
+            *dst++ = map[*src++];
+            *dst++ = map[*src++];
+            *dst++ = map[*src++];
+        }
+        switch (width & 3) {
+        case 3:
+            *dst++ = map[*src++];
+        case 2:
+            *dst++ = map[*src++];
+        case 1:
+            *dst++ = map[*src++];
+        }
 #endif /* USE_DUFFS_LOOP */
-		src += srcskip;
-		dst += dstskip;
-	}
+        src += srcskip;
+        dst += dstskip;
+    }
 }
 
-static void Blit1to1Key(SDL_BlitInfo *info)
+static void
+Blit1to1Key(SDL_BlitInfo * info)
 {
-	int width = info->d_width;
-	int height = info->d_height;
-	Uint8 *src = info->s_pixels;
-	int srcskip = info->s_skip;
-	Uint8 *dst = info->d_pixels;
-	int dstskip = info->d_skip;
-	Uint8 *palmap = info->table;
-	Uint32 ckey = info->src->colorkey;
-        
-	if ( palmap ) {
-		while ( height-- ) {
+    int width = info->d_width;
+    int height = info->d_height;
+    Uint8 *src = info->s_pixels;
+    int srcskip = info->s_skip;
+    Uint8 *dst = info->d_pixels;
+    int dstskip = info->d_skip;
+    Uint8 *palmap = info->table;
+    Uint32 ckey = info->src->colorkey;
+
+    if (palmap) {
+        while (height--) {
+			/* *INDENT-OFF* */
 			DUFFS_LOOP(
 			{
 				if ( *src != ckey ) {
@@ -295,11 +304,13 @@ static void Blit1to1Key(SDL_BlitInfo *info)
 				src++;
 			},
 			width);
-			src += srcskip;
-			dst += dstskip;
-		}
-	} else {
-		while ( height-- ) {
+			/* *INDENT-ON* */
+            src += srcskip;
+            dst += dstskip;
+        }
+    } else {
+        while (height--) {
+			/* *INDENT-OFF* */
 			DUFFS_LOOP(
 			{
 				if ( *src != ckey ) {
@@ -309,27 +320,30 @@ static void Blit1to1Key(SDL_BlitInfo *info)
 				src++;
 			},
 			width);
-			src += srcskip;
-			dst += dstskip;
-		}
-	}
+			/* *INDENT-ON* */
+            src += srcskip;
+            dst += dstskip;
+        }
+    }
 }
 
-static void Blit1to2Key(SDL_BlitInfo *info)
+static void
+Blit1to2Key(SDL_BlitInfo * info)
 {
-	int width = info->d_width;
-	int height = info->d_height;
-	Uint8 *src = info->s_pixels;
-	int srcskip = info->s_skip;
-	Uint16 *dstp = (Uint16 *)info->d_pixels;
-	int dstskip = info->d_skip;
-	Uint16 *palmap = (Uint16 *)info->table;
-	Uint32 ckey = info->src->colorkey;
+    int width = info->d_width;
+    int height = info->d_height;
+    Uint8 *src = info->s_pixels;
+    int srcskip = info->s_skip;
+    Uint16 *dstp = (Uint16 *) info->d_pixels;
+    int dstskip = info->d_skip;
+    Uint16 *palmap = (Uint16 *) info->table;
+    Uint32 ckey = info->src->colorkey;
 
-	/* Set up some basic variables */
-	dstskip /= 2;
+    /* Set up some basic variables */
+    dstskip /= 2;
 
-	while ( height-- ) {
+    while (height--) {
+		/* *INDENT-OFF* */
 		DUFFS_LOOP(
 		{
 			if ( *src != ckey ) {
@@ -339,24 +353,27 @@ static void Blit1to2Key(SDL_BlitInfo *info)
 			dstp++;
 		},
 		width);
-		src += srcskip;
-		dstp += dstskip;
-	}
+		/* *INDENT-ON* */
+        src += srcskip;
+        dstp += dstskip;
+    }
 }
 
-static void Blit1to3Key(SDL_BlitInfo *info)
+static void
+Blit1to3Key(SDL_BlitInfo * info)
 {
-	int width = info->d_width;
-	int height = info->d_height;
-	Uint8 *src = info->s_pixels;
-	int srcskip = info->s_skip;
-	Uint8 *dst = info->d_pixels;
-	int dstskip = info->d_skip;
-	Uint8 *palmap = info->table;
-	Uint32 ckey = info->src->colorkey;
-	int o;
+    int width = info->d_width;
+    int height = info->d_height;
+    Uint8 *src = info->s_pixels;
+    int srcskip = info->s_skip;
+    Uint8 *dst = info->d_pixels;
+    int dstskip = info->d_skip;
+    Uint8 *palmap = info->table;
+    Uint32 ckey = info->src->colorkey;
+    int o;
 
-	while ( height-- ) {
+    while (height--) {
+		/* *INDENT-OFF* */
 		DUFFS_LOOP(
 		{
 			if ( *src != ckey ) {
@@ -369,26 +386,29 @@ static void Blit1to3Key(SDL_BlitInfo *info)
 			dst += 3;
 		},
 		width);
-		src += srcskip;
-		dst += dstskip;
-	}
+		/* *INDENT-ON* */
+        src += srcskip;
+        dst += dstskip;
+    }
 }
 
-static void Blit1to4Key(SDL_BlitInfo *info)
+static void
+Blit1to4Key(SDL_BlitInfo * info)
 {
-	int width = info->d_width;
-	int height = info->d_height;
-	Uint8 *src = info->s_pixels;
-	int srcskip = info->s_skip;
-	Uint32 *dstp = (Uint32 *)info->d_pixels;
-	int dstskip = info->d_skip;
-	Uint32 *palmap = (Uint32 *)info->table;
-	Uint32 ckey = info->src->colorkey;
+    int width = info->d_width;
+    int height = info->d_height;
+    Uint8 *src = info->s_pixels;
+    int srcskip = info->s_skip;
+    Uint32 *dstp = (Uint32 *) info->d_pixels;
+    int dstskip = info->d_skip;
+    Uint32 *palmap = (Uint32 *) info->table;
+    Uint32 ckey = info->src->colorkey;
 
-	/* Set up some basic variables */
-	dstskip /= 4;
+    /* Set up some basic variables */
+    dstskip /= 4;
 
-	while ( height-- ) {
+    while (height--) {
+		/* *INDENT-OFF* */
 		DUFFS_LOOP(
 		{
 			if ( *src != ckey ) {
@@ -398,30 +418,33 @@ static void Blit1to4Key(SDL_BlitInfo *info)
 			dstp++;
 		},
 		width);
-		src += srcskip;
-		dstp += dstskip;
-	}
+		/* *INDENT-ON* */
+        src += srcskip;
+        dstp += dstskip;
+    }
 }
 
-static void Blit1toNAlpha(SDL_BlitInfo *info)
+static void
+Blit1toNAlpha(SDL_BlitInfo * info)
 {
-	int width = info->d_width;
-	int height = info->d_height;
-	Uint8 *src = info->s_pixels;
-	int srcskip = info->s_skip;
-	Uint8 *dst = info->d_pixels;
-	int dstskip = info->d_skip;
-	SDL_PixelFormat *dstfmt = info->dst;
-	const SDL_Color *srcpal	= info->src->palette->colors;
-	int dstbpp;
-	const int A = info->src->alpha;
+    int width = info->d_width;
+    int height = info->d_height;
+    Uint8 *src = info->s_pixels;
+    int srcskip = info->s_skip;
+    Uint8 *dst = info->d_pixels;
+    int dstskip = info->d_skip;
+    SDL_PixelFormat *dstfmt = info->dst;
+    const SDL_Color *srcpal = info->src->palette->colors;
+    int dstbpp;
+    const int A = info->src->alpha;
 
-	/* Set up some basic variables */
-	dstbpp = dstfmt->BytesPerPixel;
+    /* Set up some basic variables */
+    dstbpp = dstfmt->BytesPerPixel;
 
-	while ( height-- ) {
-	        int sR, sG, sB;
-		int dR, dG, dB;
+    while (height--) {
+        int sR, sG, sB;
+        int dR, dG, dB;
+	    	/* *INDENT-OFF* */
 	    	DUFFS_LOOP4(
 			{
 			        Uint32 pixel;
@@ -436,32 +459,35 @@ static void Blit1toNAlpha(SDL_BlitInfo *info)
 				dst += dstbpp;
 			},
 			width);
-		src += srcskip;
-		dst += dstskip;
-	}
+	    	/* *INDENT-ON* */
+        src += srcskip;
+        dst += dstskip;
+    }
 }
 
-static void Blit1toNAlphaKey(SDL_BlitInfo *info)
+static void
+Blit1toNAlphaKey(SDL_BlitInfo * info)
 {
-	int width = info->d_width;
-	int height = info->d_height;
-	Uint8 *src = info->s_pixels;
-	int srcskip = info->s_skip;
-	Uint8 *dst = info->d_pixels;
-	int dstskip = info->d_skip;
-	SDL_PixelFormat *srcfmt = info->src;
-	SDL_PixelFormat *dstfmt = info->dst;
-	const SDL_Color *srcpal	= info->src->palette->colors;
-	Uint32 ckey = srcfmt->colorkey;
-	int dstbpp;
-	const int A = srcfmt->alpha;
+    int width = info->d_width;
+    int height = info->d_height;
+    Uint8 *src = info->s_pixels;
+    int srcskip = info->s_skip;
+    Uint8 *dst = info->d_pixels;
+    int dstskip = info->d_skip;
+    SDL_PixelFormat *srcfmt = info->src;
+    SDL_PixelFormat *dstfmt = info->dst;
+    const SDL_Color *srcpal = info->src->palette->colors;
+    Uint32 ckey = srcfmt->colorkey;
+    int dstbpp;
+    const int A = srcfmt->alpha;
 
-	/* Set up some basic variables */
-	dstbpp = dstfmt->BytesPerPixel;
+    /* Set up some basic variables */
+    dstbpp = dstfmt->BytesPerPixel;
 
-	while ( height-- ) {
-	        int sR, sG, sB;
-		int dR, dG, dB;
+    while (height--) {
+        int sR, sG, sB;
+        int dR, dG, dB;
+		/* *INDENT-OFF* */
 		DUFFS_LOOP(
 		{
 			if ( *src != ckey ) {
@@ -478,46 +504,50 @@ static void Blit1toNAlphaKey(SDL_BlitInfo *info)
 			dst += dstbpp;
 		},
 		width);
-		src += srcskip;
-		dst += dstskip;
-	}
+		/* *INDENT-ON* */
+        src += srcskip;
+        dst += dstskip;
+    }
 }
 
 static SDL_loblit one_blit[] = {
-	NULL, Blit1to1, Blit1to2, Blit1to3, Blit1to4
+    NULL, Blit1to1, Blit1to2, Blit1to3, Blit1to4
 };
 
 static SDL_loblit one_blitkey[] = {
-        NULL, Blit1to1Key, Blit1to2Key, Blit1to3Key, Blit1to4Key
+    NULL, Blit1to1Key, Blit1to2Key, Blit1to3Key, Blit1to4Key
 };
 
-SDL_loblit SDL_CalculateBlit1(SDL_Surface *surface, int blit_index)
+SDL_loblit
+SDL_CalculateBlit1(SDL_Surface * surface, int blit_index)
 {
-	int which;
-	SDL_PixelFormat *dstfmt;
+    int which;
+    SDL_PixelFormat *dstfmt;
 
-	dstfmt = surface->map->dst->format;
-	if ( dstfmt->BitsPerPixel < 8 ) {
-		which = 0;
-	} else {
-		which = dstfmt->BytesPerPixel;
-	}
-	switch(blit_index) {
-	case 0:			/* copy */
-	    return one_blit[which];
+    dstfmt = surface->map->dst->format;
+    if (dstfmt->BitsPerPixel < 8) {
+        which = 0;
+    } else {
+        which = dstfmt->BytesPerPixel;
+    }
+    switch (blit_index) {
+    case 0:                    /* copy */
+        return one_blit[which];
 
-	case 1:			/* colorkey */
-	    return one_blitkey[which];
+    case 1:                    /* colorkey */
+        return one_blitkey[which];
 
-	case 2:			/* alpha */
-	    /* Supporting 8bpp->8bpp alpha is doable but requires lots of
-	       tables which consume space and takes time to precompute,
-	       so is better left to the user */
-	    return which >= 2 ? Blit1toNAlpha : NULL;
+    case 2:                    /* alpha */
+        /* Supporting 8bpp->8bpp alpha is doable but requires lots of
+           tables which consume space and takes time to precompute,
+           so is better left to the user */
+        return which >= 2 ? Blit1toNAlpha : NULL;
 
-	case 3:			/* alpha + colorkey */
-	    return which >= 2 ? Blit1toNAlphaKey : NULL;
+    case 3:                    /* alpha + colorkey */
+        return which >= 2 ? Blit1toNAlphaKey : NULL;
 
-	}
-	return NULL;
+    }
+    return NULL;
 }
+
+/* vi: set ts=4 sw=4 expandtab: */

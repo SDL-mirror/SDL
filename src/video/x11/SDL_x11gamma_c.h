@@ -30,3 +30,4 @@ extern void X11_SaveVidModeGamma(_THIS);
 extern void X11_SwapVidModeGamma(_THIS);
 
 #endif
+/* vi: set ts=4 sw=4 expandtab: */

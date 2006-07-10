@@ -17,54 +17,55 @@
 
 /* Ok, we start with normal function definitions */
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 
-void STACKCALL ConvertX86(HermesConverterInterface *);
-void STACKCALL ClearX86_32(HermesClearInterface *);
-void STACKCALL ClearX86_24(HermesClearInterface *);
-void STACKCALL ClearX86_16(HermesClearInterface *);
-void STACKCALL ClearX86_8(HermesClearInterface *);
+    void STACKCALL ConvertX86(HermesConverterInterface *);
+    void STACKCALL ClearX86_32(HermesClearInterface *);
+    void STACKCALL ClearX86_24(HermesClearInterface *);
+    void STACKCALL ClearX86_16(HermesClearInterface *);
+    void STACKCALL ClearX86_8(HermesClearInterface *);
 
-int STACKCALL Hermes_X86_CPU();
+    int STACKCALL Hermes_X86_CPU();
 
-void ConvertX86p32_32BGR888();
-void ConvertX86p32_32RGBA888();
-void ConvertX86p32_32BGRA888();
-void ConvertX86p32_24RGB888();
-void ConvertX86p32_24BGR888();
-void ConvertX86p32_16RGB565();
-void ConvertX86p32_16BGR565();
-void ConvertX86p32_16RGB555();
-void ConvertX86p32_16BGR555();
-void ConvertX86p32_8RGB332();
+    void ConvertX86p32_32BGR888();
+    void ConvertX86p32_32RGBA888();
+    void ConvertX86p32_32BGRA888();
+    void ConvertX86p32_24RGB888();
+    void ConvertX86p32_24BGR888();
+    void ConvertX86p32_16RGB565();
+    void ConvertX86p32_16BGR565();
+    void ConvertX86p32_16RGB555();
+    void ConvertX86p32_16BGR555();
+    void ConvertX86p32_8RGB332();
 
-void ConvertX86p16_32RGB888();
-void ConvertX86p16_32BGR888();
-void ConvertX86p16_32RGBA888();
-void ConvertX86p16_32BGRA888();
-void ConvertX86p16_24RGB888();
-void ConvertX86p16_24BGR888();
-void ConvertX86p16_16BGR565();
-void ConvertX86p16_16RGB555();
-void ConvertX86p16_16BGR555();
-void ConvertX86p16_8RGB332();
+    void ConvertX86p16_32RGB888();
+    void ConvertX86p16_32BGR888();
+    void ConvertX86p16_32RGBA888();
+    void ConvertX86p16_32BGRA888();
+    void ConvertX86p16_24RGB888();
+    void ConvertX86p16_24BGR888();
+    void ConvertX86p16_16BGR565();
+    void ConvertX86p16_16RGB555();
+    void ConvertX86p16_16BGR555();
+    void ConvertX86p16_8RGB332();
 
-void CopyX86p_4byte();
-void CopyX86p_3byte();
-void CopyX86p_2byte();
-void CopyX86p_1byte();
+    void CopyX86p_4byte();
+    void CopyX86p_3byte();
+    void CopyX86p_2byte();
+    void CopyX86p_1byte();
 
-void ConvertX86pI8_32();
-void ConvertX86pI8_24();
-void ConvertX86pI8_16();
+    void ConvertX86pI8_32();
+    void ConvertX86pI8_24();
+    void ConvertX86pI8_16();
 
-extern int ConvertX86p16_32RGB888_LUT_X86[512];
-extern int ConvertX86p16_32BGR888_LUT_X86[512];
-extern int ConvertX86p16_32RGBA888_LUT_X86[512];
-extern int ConvertX86p16_32BGRA888_LUT_X86[512];
-  
+    extern int ConvertX86p16_32RGB888_LUT_X86[512];
+    extern int ConvertX86p16_32BGR888_LUT_X86[512];
+    extern int ConvertX86p16_32RGBA888_LUT_X86[512];
+    extern int ConvertX86p16_32BGRA888_LUT_X86[512];
+
 #ifdef __cplusplus
 }
 #endif
@@ -75,57 +76,58 @@ extern int ConvertX86p16_32BGRA888_LUT_X86[512];
 /* Now fix up the ELF underscore problem */
 
 #if defined(__ELF__) && defined(__GNUC__)
-  #ifdef __cplusplus
-  extern "C" {
-  #endif
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
-  extern int _Hermes_X86_CPU();
+    extern int _Hermes_X86_CPU();
 
-  extern void _ConvertX86(HermesConverterInterface *);
+    extern void _ConvertX86(HermesConverterInterface *);
 
-  extern void _ConvertX86p32_32BGR888();
-  extern void _ConvertX86p32_32RGBA888();
-  extern void _ConvertX86p32_32BGRA888();
-  extern void _ConvertX86p32_24RGB888();
-  extern void _ConvertX86p32_24BGR888();
-  extern void _ConvertX86p32_16RGB565();
-  extern void _ConvertX86p32_16BGR565();
-  extern void _ConvertX86p32_16RGB555();
-  extern void _ConvertX86p32_16BGR555();
-  extern void _ConvertX86p32_8RGB332();
+    extern void _ConvertX86p32_32BGR888();
+    extern void _ConvertX86p32_32RGBA888();
+    extern void _ConvertX86p32_32BGRA888();
+    extern void _ConvertX86p32_24RGB888();
+    extern void _ConvertX86p32_24BGR888();
+    extern void _ConvertX86p32_16RGB565();
+    extern void _ConvertX86p32_16BGR565();
+    extern void _ConvertX86p32_16RGB555();
+    extern void _ConvertX86p32_16BGR555();
+    extern void _ConvertX86p32_8RGB332();
 
-  extern void _ConvertX86p16_16BGR565();
-  extern void _ConvertX86p16_16RGB555();
-  extern void _ConvertX86p16_16BGR555();
-  extern void _ConvertX86p16_8RGB332();
-
-
-  #define Hermes_X86_CPU _Hermes_X86_CPU
-
-  #define ConvertX86 _ConvertX86
-
-  #define ConvertX86p32_32BGR888 _ConvertX86p32_32BGR888
-  #define ConvertX86p32_32RGBA888 _ConvertX86p32_32RGBA888
-  #define ConvertX86p32_32BGRA888 _ConvertX86p32_32BGRA888
-  #define ConvertX86p32_24RGB888 _ConvertX86p32_24RGB888
-  #define ConvertX86p32_24BGR888 _ConvertX86p32_24BGR888
-  #define ConvertX86p32_16RGB565 _ConvertX86p32_16RGB565
-  #define ConvertX86p32_16BGR565 _ConvertX86p32_16BGR565
-  #define ConvertX86p32_16RGB555 _ConvertX86p32_16RGB555
-  #define ConvertX86p32_16BGR555 _ConvertX86p32_16BGR555
-  #define ConvertX86p32_8RGB332 _ConvertX86p32_8RGB332
-
-  #define ConvertX86p16_16BGR565 _ConvertX86p16_16BGR565
-  #define ConvertX86p16_16RGB555 _ConvertX86p16_16RGB555
-  #define ConvertX86p16_16BGR555 _ConvertX86p16_16BGR555
-  #define ConvertX86p16_8RGB332 _ConvertX86p16_8RGB332
+    extern void _ConvertX86p16_16BGR565();
+    extern void _ConvertX86p16_16RGB555();
+    extern void _ConvertX86p16_16BGR555();
+    extern void _ConvertX86p16_8RGB332();
 
 
-  #ifdef __cplusplus
-  }
-  #endif
+#define Hermes_X86_CPU _Hermes_X86_CPU
 
-#endif /* ELF & GNU */
+#define ConvertX86 _ConvertX86
+
+#define ConvertX86p32_32BGR888 _ConvertX86p32_32BGR888
+#define ConvertX86p32_32RGBA888 _ConvertX86p32_32RGBA888
+#define ConvertX86p32_32BGRA888 _ConvertX86p32_32BGRA888
+#define ConvertX86p32_24RGB888 _ConvertX86p32_24RGB888
+#define ConvertX86p32_24BGR888 _ConvertX86p32_24BGR888
+#define ConvertX86p32_16RGB565 _ConvertX86p32_16RGB565
+#define ConvertX86p32_16BGR565 _ConvertX86p32_16BGR565
+#define ConvertX86p32_16RGB555 _ConvertX86p32_16RGB555
+#define ConvertX86p32_16BGR555 _ConvertX86p32_16BGR555
+#define ConvertX86p32_8RGB332 _ConvertX86p32_8RGB332
+
+#define ConvertX86p16_16BGR565 _ConvertX86p16_16BGR565
+#define ConvertX86p16_16RGB555 _ConvertX86p16_16RGB555
+#define ConvertX86p16_16BGR555 _ConvertX86p16_16BGR555
+#define ConvertX86p16_8RGB332 _ConvertX86p16_8RGB332
+
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif                          /* ELF & GNU */
 
 
 
@@ -177,10 +179,11 @@ extern int ConvertX86p16_32BGRA888_LUT_X86[512];
 #pragma aux ConvertX86p16_32RGBA888_LUT_X86 "_*"
 #pragma aux ConvertX86p16_32BGRA888_LUT_X86 "_*"
 
-#endif /* __WATCOMC__ */
+#endif                          /* __WATCOMC__ */
 
 
-#endif /* X86_ASSEMBLER */
+#endif                          /* X86_ASSEMBLER */
 
 
-#endif 
+#endif
+/* vi: set ts=4 sw=4 expandtab: */

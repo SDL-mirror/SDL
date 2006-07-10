@@ -139,17 +139,18 @@ extern void VGL_PumpEvents(_THIS);
 #define SCANCODE_KEYPADDIVIDE		91
 #define SCANCODE_PRINTSCREEN		92
 #define SCANCODE_RIGHTALT		93
-#define SCANCODE_BREAK			104	/* Beware: is 119     */
-#define SCANCODE_BREAK_ALTERNATIVE	104	/* on some keyboards! */
+#define SCANCODE_BREAK			104     /* Beware: is 119     */
+#define SCANCODE_BREAK_ALTERNATIVE	104     /* on some keyboards! */
 #define SCANCODE_HOME			94
-#define SCANCODE_CURSORBLOCKUP		95	/* Cursor key block */
+#define SCANCODE_CURSORBLOCKUP		95      /* Cursor key block */
 #define SCANCODE_PAGEUP			96
-#define SCANCODE_CURSORBLOCKLEFT	97	/* Cursor key block */
-#define SCANCODE_CURSORBLOCKRIGHT	98	/* Cursor key block */
+#define SCANCODE_CURSORBLOCKLEFT	97      /* Cursor key block */
+#define SCANCODE_CURSORBLOCKRIGHT	98      /* Cursor key block */
 #define SCANCODE_END			99
-#define SCANCODE_CURSORBLOCKDOWN	100	/* Cursor key block */
+#define SCANCODE_CURSORBLOCKDOWN	100     /* Cursor key block */
 #define SCANCODE_PAGEDOWN		101
 #define SCANCODE_INSERT			102
 #define SCANCODE_REMOVE			103
 #define SCANCODE_RIGHTWIN		106
 #define SCANCODE_LEFTWIN		105
+/* vi: set ts=4 sw=4 expandtab: */

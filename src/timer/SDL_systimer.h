@@ -38,3 +38,4 @@ extern int SDL_SYS_StartTimer(void);
 
 /* Stop a previously started timer */
 extern void SDL_SYS_StopTimer(void);
+/* vi: set ts=4 sw=4 expandtab: */

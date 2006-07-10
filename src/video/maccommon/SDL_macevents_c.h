@@ -30,3 +30,4 @@ extern void Mac_QuitEvents(_THIS);
 
 extern void Mac_InitOSKeymap(_THIS);
 extern void Mac_PumpEvents(_THIS);
+/* vi: set ts=4 sw=4 expandtab: */

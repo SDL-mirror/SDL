@@ -40,3 +40,4 @@ extern void AtariGemdos_PumpEvents(_THIS);
 extern void AtariGemdos_ShutdownEvents(void);
 
 #endif /* _SDL_ATARI_GEMDOSEVENTS_H_ */
+/* vi: set ts=4 sw=4 expandtab: */

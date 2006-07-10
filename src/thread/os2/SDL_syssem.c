@@ -32,161 +32,163 @@
 #include "SDL_timer.h"
 
 
-struct SDL_semaphore {
-        HMTX id;
-        HEV  changed;
-        Uint32 value;
+struct SDL_semaphore
+{
+    HMTX id;
+    HEV changed;
+    Uint32 value;
 };
 
 
 /* Create a semaphore */
-DECLSPEC SDL_sem * SDLCALL SDL_CreateSemaphore(Uint32 initial_value)
+DECLSPEC SDL_sem *SDLCALL
+SDL_CreateSemaphore(Uint32 initial_value)
 {
-        SDL_sem *sem;
-        ULONG ulrc;
+    SDL_sem *sem;
+    ULONG ulrc;
 
-        /* Allocate sem memory */
-        sem = (SDL_sem *)SDL_malloc(sizeof(*sem));
-        if ( sem ) {
-                /* Create the mutex semaphore */
-                ulrc = DosCreateMutexSem(NULL,&(sem->id),0,TRUE);
-                if ( ulrc ) {
-                        SDL_SetError("Couldn't create semaphore");
-                        SDL_free(sem);
-                        sem = NULL;
-                } else
-                {
-                    DosCreateEventSem(NULL, &(sem->changed), 0, FALSE);
-                    sem->value = initial_value;
-                    DosReleaseMutexSem(sem->id);
-                }
+    /* Allocate sem memory */
+    sem = (SDL_sem *) SDL_malloc(sizeof(*sem));
+    if (sem) {
+        /* Create the mutex semaphore */
+        ulrc = DosCreateMutexSem(NULL, &(sem->id), 0, TRUE);
+        if (ulrc) {
+            SDL_SetError("Couldn't create semaphore");
+            SDL_free(sem);
+            sem = NULL;
         } else {
-                SDL_OutOfMemory();
+            DosCreateEventSem(NULL, &(sem->changed), 0, FALSE);
+            sem->value = initial_value;
+            DosReleaseMutexSem(sem->id);
         }
-        return(sem);
+    } else {
+        SDL_OutOfMemory();
+    }
+    return (sem);
 }
 
 /* Free the semaphore */
-DECLSPEC void SDLCALL SDL_DestroySemaphore(SDL_sem *sem)
+DECLSPEC void SDLCALL
+SDL_DestroySemaphore(SDL_sem * sem)
 {
-        if ( sem ) {
-                if ( sem->id ) {
-                        DosCloseEventSem(sem->changed);
-                        DosCloseMutexSem(sem->id);
-                        sem->id = 0;
-                }
-                SDL_free(sem);
+    if (sem) {
+        if (sem->id) {
+            DosCloseEventSem(sem->changed);
+            DosCloseMutexSem(sem->id);
+            sem->id = 0;
         }
+        SDL_free(sem);
+    }
 }
 
-DECLSPEC int SDLCALL SDL_SemWaitTimeout(SDL_sem *sem, Uint32 timeout)
+DECLSPEC int SDLCALL
+SDL_SemWaitTimeout(SDL_sem * sem, Uint32 timeout)
 {
-        ULONG ulrc;
+    ULONG ulrc;
 
-        if ( ! sem ) {
-                SDL_SetError("Passed a NULL sem");
-                return -1;
-        }
+    if (!sem) {
+        SDL_SetError("Passed a NULL sem");
+        return -1;
+    }
 
-        if ( timeout == SDL_MUTEX_MAXWAIT ) {
-           while (1) {
-              ulrc = DosRequestMutexSem(sem->id, SEM_INDEFINITE_WAIT);
-              if (ulrc) {
-                 /* if error waiting mutex */
-                 SDL_SetError("DosRequestMutexSem() failed");
-                 return -1;
-              } else if (sem->value) {
-                        sem->value--;
-                        DosReleaseMutexSem(sem->id);
-                        return 0;
-                     } else {
-                        ULONG ulPostCount;
-                        DosResetEventSem(sem->changed, &ulPostCount);
-                        DosReleaseMutexSem(sem->id);
-                        /* continue waiting until somebody posts the semaphore */
-                        DosWaitEventSem(sem->changed, SEM_INDEFINITE_WAIT);
-                     }
-           }
-        } else
-        if ( timeout == 0 )
-        {
-            ulrc = DosRequestMutexSem(sem->id, SEM_INDEFINITE_WAIT);
-            if (ulrc==NO_ERROR)
-            {
-                if (sem->value)
-                {
-                    sem->value--;
-                    DosReleaseMutexSem(sem->id);
-                    return 0;
-                } else
-                {
-                    DosReleaseMutexSem(sem->id);
-                    return SDL_MUTEX_TIMEDOUT;
-                }
-            } else
-            {
-                SDL_SetError("DosRequestMutexSem() failed");
-                return -1;
-            }
-        } else {
+    if (timeout == SDL_MUTEX_MAXWAIT) {
+        while (1) {
             ulrc = DosRequestMutexSem(sem->id, SEM_INDEFINITE_WAIT);
             if (ulrc) {
-               /* if error waiting mutex */
-               SDL_SetError("DosRequestMutexSem() failed");
-               return -1;
-            } else
-              if (sem->value) {
+                /* if error waiting mutex */
+                SDL_SetError("DosRequestMutexSem() failed");
+                return -1;
+            } else if (sem->value) {
                 sem->value--;
                 DosReleaseMutexSem(sem->id);
                 return 0;
-              } else {
+            } else {
                 ULONG ulPostCount;
                 DosResetEventSem(sem->changed, &ulPostCount);
                 DosReleaseMutexSem(sem->id);
                 /* continue waiting until somebody posts the semaphore */
-                ulrc = DosWaitEventSem(sem->changed, timeout);
-                if (ulrc==NO_ERROR)
-                  return 0;
-                else
-                  return SDL_MUTEX_TIMEDOUT;
-              }
+                DosWaitEventSem(sem->changed, SEM_INDEFINITE_WAIT);
+            }
         }
-        /* never reached */
-        return -1;
+    } else if (timeout == 0) {
+        ulrc = DosRequestMutexSem(sem->id, SEM_INDEFINITE_WAIT);
+        if (ulrc == NO_ERROR) {
+            if (sem->value) {
+                sem->value--;
+                DosReleaseMutexSem(sem->id);
+                return 0;
+            } else {
+                DosReleaseMutexSem(sem->id);
+                return SDL_MUTEX_TIMEDOUT;
+            }
+        } else {
+            SDL_SetError("DosRequestMutexSem() failed");
+            return -1;
+        }
+    } else {
+        ulrc = DosRequestMutexSem(sem->id, SEM_INDEFINITE_WAIT);
+        if (ulrc) {
+            /* if error waiting mutex */
+            SDL_SetError("DosRequestMutexSem() failed");
+            return -1;
+        } else if (sem->value) {
+            sem->value--;
+            DosReleaseMutexSem(sem->id);
+            return 0;
+        } else {
+            ULONG ulPostCount;
+            DosResetEventSem(sem->changed, &ulPostCount);
+            DosReleaseMutexSem(sem->id);
+            /* continue waiting until somebody posts the semaphore */
+            ulrc = DosWaitEventSem(sem->changed, timeout);
+            if (ulrc == NO_ERROR)
+                return 0;
+            else
+                return SDL_MUTEX_TIMEDOUT;
+        }
+    }
+    /* never reached */
+    return -1;
 }
 
-DECLSPEC int SDLCALL SDL_SemTryWait(SDL_sem *sem)
+DECLSPEC int SDLCALL
+SDL_SemTryWait(SDL_sem * sem)
 {
-        return SDL_SemWaitTimeout(sem, 0);
+    return SDL_SemWaitTimeout(sem, 0);
 }
 
-DECLSPEC int SDLCALL SDL_SemWait(SDL_sem *sem)
+DECLSPEC int SDLCALL
+SDL_SemWait(SDL_sem * sem)
 {
-        return SDL_SemWaitTimeout(sem, SDL_MUTEX_MAXWAIT);
+    return SDL_SemWaitTimeout(sem, SDL_MUTEX_MAXWAIT);
 }
 
 /* Returns the current count of the semaphore */
-DECLSPEC Uint32 SDLCALL SDL_SemValue(SDL_sem *sem)
+DECLSPEC Uint32 SDLCALL
+SDL_SemValue(SDL_sem * sem)
 {
-        if ( ! sem ) {
-                SDL_SetError("Passed a NULL sem");
-                return 0;
-        }
-        return sem->value;
+    if (!sem) {
+        SDL_SetError("Passed a NULL sem");
+        return 0;
+    }
+    return sem->value;
 }
 
-DECLSPEC int SDLCALL SDL_SemPost(SDL_sem *sem)
+DECLSPEC int SDLCALL
+SDL_SemPost(SDL_sem * sem)
 {
-        if ( ! sem ) {
-                SDL_SetError("Passed a NULL sem");
-                return -1;
-        }
-        if ( DosRequestMutexSem(sem->id,SEM_INDEFINITE_WAIT) ) {
-                SDL_SetError("DosRequestMutexSem() failed");
-                return -1;
-        }
-        sem->value++;
-        DosPostEventSem(sem->changed);
-        DosReleaseMutexSem(sem->id);
-        return 0;
+    if (!sem) {
+        SDL_SetError("Passed a NULL sem");
+        return -1;
+    }
+    if (DosRequestMutexSem(sem->id, SEM_INDEFINITE_WAIT)) {
+        SDL_SetError("DosRequestMutexSem() failed");
+        return -1;
+    }
+    sem->value++;
+    DosPostEventSem(sem->changed);
+    DosReleaseMutexSem(sem->id);
+    return 0;
 }
+
+/* vi: set ts=4 sw=4 expandtab: */

@@ -32,3 +32,4 @@ typedef int SYS_ThreadHandle;
 typedef pthread_t SYS_ThreadHandle;
 
 #endif
+/* vi: set ts=4 sw=4 expandtab: */

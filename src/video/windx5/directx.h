@@ -82,3 +82,4 @@
 #include <dinput.h>
 
 #endif /* _directx_h */
+/* vi: set ts=4 sw=4 expandtab: */

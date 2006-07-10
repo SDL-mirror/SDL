@@ -35,12 +35,12 @@
 #include <photon/PdDirect.h>
 
 #if SDL_VIDEO_OPENGL
-    #if (_NTO_VERSION < 630)
-        #include <photon/PdGL.h>
-    #else
-        #include <GL/qnxgl.h>
-        #include <GL/GLPh.h>
-    #endif /* 6.3.0 */
+#if (_NTO_VERSION < 630)
+#include <photon/PdGL.h>
+#else
+#include <GL/qnxgl.h>
+#include <GL/GLPh.h>
+#endif /* 6.3.0 */
 #endif /* SDL_VIDEO_OPENGL */
 
 /* Hidden "this" pointer for the video functions */
@@ -54,9 +54,9 @@
 
 typedef struct
 {
-    unsigned char* Y;
-    unsigned char* V;
-    unsigned char* U;
+    unsigned char *Y;
+    unsigned char *V;
+    unsigned char *U;
 } FRAMEDATA;
 
 /* Mask values for SDL_ReallocFormat() */
@@ -72,57 +72,57 @@ struct ColourMasks
 /* Private display data */
 struct SDL_PrivateVideoData
 {
-    PgDisplaySettings_t mode_settings;	
-    PtWidget_t *Window;                  /* used to handle input events */
-    PhImage_t *image;	                 /* used to display image       */
+    PgDisplaySettings_t mode_settings;
+    PtWidget_t *Window;         /* used to handle input events */
+    PhImage_t *image;           /* used to display image       */
 #if SDL_VIDEO_OPENGL
-    #if (_NTO_VERSION < 630)
-        PdOpenGLContext_t* OGLContext;   /* OpenGL context              */
-        void* OGLBuffers;                /* OpenGL buffers (unused)     */
-    #else
-        qnxglc_t* OGLContext;            /* OpenGL context for the 6.3  */
-        qnxgl_bufs_t* OGLBuffers;        /* OpenGL buffers for the 6.3  */
-    #endif /* 630 */
+#if (_NTO_VERSION < 630)
+    PdOpenGLContext_t *OGLContext;      /* OpenGL context              */
+    void *OGLBuffers;           /* OpenGL buffers (unused)     */
+#else
+    qnxglc_t *OGLContext;       /* OpenGL context for the 6.3  */
+    qnxgl_bufs_t *OGLBuffers;   /* OpenGL buffers for the 6.3  */
+#endif                          /* 630 */
 
-    Uint32 OGLFlags;                     /* OpenGL flags                */
-    Uint32 OGLBPP;                       /* OpenGL bpp                  */
-#endif /* SDL_VIDEO_OPENGL */
+    Uint32 OGLFlags;            /* OpenGL flags                */
+    Uint32 OGLBPP;              /* OpenGL bpp                  */
+#endif                          /* SDL_VIDEO_OPENGL */
     PgColor_t savedpal[_Pg_MAX_PALETTE];
     PgColor_t syspalph[_Pg_MAX_PALETTE];
 
     struct
     {
-        PdDirectContext_t*    direct_context;
-        PdOffscreenContext_t* offscreen_context;
-        PdOffscreenContext_t* offscreen_backcontext;
-        PhDrawContext_t*      oldDC;
-        uint8_t*              dc_ptr;
-        unsigned char*        CurrentFrameData;
-        unsigned char*        FrameData0;
-        unsigned char*        FrameData1;
-        Uint32                current;
-        Uint32                flags;
+        PdDirectContext_t *direct_context;
+        PdOffscreenContext_t *offscreen_context;
+        PdOffscreenContext_t *offscreen_backcontext;
+        PhDrawContext_t *oldDC;
+        uint8_t *dc_ptr;
+        unsigned char *CurrentFrameData;
+        unsigned char *FrameData0;
+        unsigned char *FrameData1;
+        Uint32 current;
+        Uint32 flags;
     } ocimage;
 
-    PgHWCaps_t graphics_card_caps;  /* Graphics card caps at the moment of start   */
-    PgVideoModeInfo_t desktop_mode; /* Current desktop video mode information      */
-    int old_video_mode;             /* Stored mode before fullscreen switch        */
-    int old_refresh_rate;           /* Stored refresh rate befor fullscreen switch */
+    PgHWCaps_t graphics_card_caps;      /* Graphics card caps at the moment of start   */
+    PgVideoModeInfo_t desktop_mode;     /* Current desktop video mode information      */
+    int old_video_mode;         /* Stored mode before fullscreen switch        */
+    int old_refresh_rate;       /* Stored refresh rate befor fullscreen switch */
 
     int mouse_relative;
-    WMcursor* BlankCursor;
+    WMcursor *BlankCursor;
     uint32_t videomode_emulatemode;
 
-    Uint32 visualbpp;	            /* current visual bpp                          */
-    Uint32 desktopbpp;              /* bpp of desktop at the moment of start       */
-    Uint32 desktoppal;              /* palette mode emulation or system            */
+    Uint32 visualbpp;           /* current visual bpp                          */
+    Uint32 desktopbpp;          /* bpp of desktop at the moment of start       */
+    Uint32 desktoppal;          /* palette mode emulation or system            */
 
     int currently_fullscreen;
-    int currently_hided;            /* 1 - window hided (minimazed), 0 - normal    */
-    int currently_maximized;        /* 1 - window hided (minimazed), 0 - normal    */
+    int currently_hided;        /* 1 - window hided (minimazed), 0 - normal    */
+    int currently_maximized;    /* 1 - window hided (minimazed), 0 - normal    */
 
-    PhEvent_t* event;
-    SDL_Overlay* overlay;
+    PhEvent_t *event;
+    SDL_Overlay *overlay;
 };
 
 #define mode_settings         (this->hidden->mode_settings)
@@ -148,10 +148,11 @@ struct SDL_PrivateVideoData
 #define videomode_emulatemode (this->hidden->videomode_emulatemode)
 
 #if SDL_VIDEO_OPENGL
-     #define oglctx               (this->hidden->OGLContext)
-     #define oglbuffers           (this->hidden->OGLBuffers)
-     #define oglflags             (this->hidden->OGLFlags)
-     #define oglbpp               (this->hidden->OGLBPP)
+#define oglctx               (this->hidden->OGLContext)
+#define oglbuffers           (this->hidden->OGLBuffers)
+#define oglflags             (this->hidden->OGLFlags)
+#define oglbpp               (this->hidden->OGLBPP)
 #endif /* SDL_VIDEO_OPENGL */
 
 #endif /* __SDL_PH_VIDEO_H__ */
+/* vi: set ts=4 sw=4 expandtab: */

@@ -38,34 +38,35 @@
 
 
 /* Private display data */
-struct SDL_PrivateVideoData {
-	/* Gotta love that simple PS2 graphics interface. :) */
-	int console_fd;
-	int memory_fd;
-	struct ps2_screeninfo saved_vinfo;
+struct SDL_PrivateVideoData
+{
+    /* Gotta love that simple PS2 graphics interface. :) */
+    int console_fd;
+    int memory_fd;
+    struct ps2_screeninfo saved_vinfo;
 
-	/* Ye olde linux keyboard code */
-	int current_vt;
-	int saved_vt;
-	int keyboard_fd;
-	int saved_kbd_mode;
-	struct termios saved_kbd_termios;
+    /* Ye olde linux keyboard code */
+    int current_vt;
+    int saved_vt;
+    int keyboard_fd;
+    int saved_kbd_mode;
+    struct termios saved_kbd_termios;
 
-	/* Ye olde linux mouse code */
-	int mouse_fd;
-	int cursor_drawn;
+    /* Ye olde linux mouse code */
+    int mouse_fd;
+    int cursor_drawn;
 
-	/* The memory mapped DMA area and associated variables */
-	caddr_t mapped_mem;
-	int pixels_len;
-	int mapped_len;
-	struct ps2_image screen_image;
-	int screen_image_size;
-	unsigned long long *head_tags_mem;
-	unsigned long long *image_tags_mem;
-	unsigned long long *tex_tags_mem;
-	unsigned long long *scale_tags_mem;
-	int dma_pending;
+    /* The memory mapped DMA area and associated variables */
+    caddr_t mapped_mem;
+    int pixels_len;
+    int mapped_len;
+    struct ps2_image screen_image;
+    int screen_image_size;
+    unsigned long long *head_tags_mem;
+    unsigned long long *image_tags_mem;
+    unsigned long long *tex_tags_mem;
+    unsigned long long *scale_tags_mem;
+    int dma_pending;
 };
 /* Old variable names */
 #define console_fd		(this->hidden->console_fd)
@@ -91,5 +92,7 @@ struct SDL_PrivateVideoData {
 
 /* Shared between the mouse and video code for screen update scaling */
 extern int scaleimage_nonblock(int fd,
-                               unsigned long long *tm, unsigned long long *sm);
+                               unsigned long long *tm,
+                               unsigned long long *sm);
 #endif /* _SDL_gsvideo_h */
+/* vi: set ts=4 sw=4 expandtab: */

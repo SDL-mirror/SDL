@@ -30,7 +30,7 @@
 #ifndef _SDL_xbios_centscreen_h
 #define _SDL_xbios_centscreen_h
 
-#include <mint/falcon.h>	/* for trap_14_xxx macros */
+#include <mint/falcon.h>        /* for trap_14_xxx macros */
 
 #include "SDL_xbios.h"
 
@@ -50,21 +50,22 @@
 
 /*--- Structures ---*/
 
-typedef struct {
-	unsigned short	handle;	/* videomode handle */
-	unsigned short	mode;	/* Falcon videomode code */
-	unsigned short	physx;	/* visible width */
-	unsigned short	physy;	/* visible height */
-	unsigned short	plan;	/* bitplanes */
-	unsigned short	logx;	/* virtual width */
-	unsigned short	logy;	/* virtual height */
-	unsigned short	eco;	/* screen saver delay */
-	unsigned short	eco2;	/* energy star screen saver delay */
-	unsigned short	wsize;	/* screen width (mm) */
-	unsigned short	hsize;	/* screen height (mm) */
-	unsigned short	dummy[21];
-	unsigned char	name[32];	/* videomode name */
-} __attribute__((packed)) centscreen_mode_t;
+typedef struct
+{
+    unsigned short handle;      /* videomode handle */
+    unsigned short mode;        /* Falcon videomode code */
+    unsigned short physx;       /* visible width */
+    unsigned short physy;       /* visible height */
+    unsigned short plan;        /* bitplanes */
+    unsigned short logx;        /* virtual width */
+    unsigned short logy;        /* virtual height */
+    unsigned short eco;         /* screen saver delay */
+    unsigned short eco2;        /* energy star screen saver delay */
+    unsigned short wsize;       /* screen width (mm) */
+    unsigned short hsize;       /* screen height (mm) */
+    unsigned short dummy[21];
+    unsigned char name[32];     /* videomode name */
+} __attribute__ ((packed)) centscreen_mode_t;
 
 /*--- Functions prototypes ---*/
 
@@ -116,3 +117,4 @@ void SDL_XBIOS_CentscreenSetmode(_THIS, int width, int height, int planes);
 void SDL_XBIOS_CentscreenRestore(_THIS, int prev_handle);
 
 #endif /* _SDL_xbios_centscreen_h */
+/* vi: set ts=4 sw=4 expandtab: */

@@ -48,4 +48,4 @@
 	while ( mga_in32(MGAREG_STATUS) & 0x10000 )			\
 		;							\
 }
-
+/* vi: set ts=4 sw=4 expandtab: */

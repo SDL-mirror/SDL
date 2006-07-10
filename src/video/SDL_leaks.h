@@ -29,3 +29,4 @@
 #ifdef CHECK_LEAKS
 extern int surfaces_allocated;
 #endif
+/* vi: set ts=4 sw=4 expandtab: */

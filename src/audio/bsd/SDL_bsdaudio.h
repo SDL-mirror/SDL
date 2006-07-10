@@ -38,14 +38,14 @@ struct SDL_PrivateAudioData
 
     /* Raw mixing buffer */
     Uint8 *mixbuf;
-    int    mixlen;
+    int mixlen;
 
     /* Support for audio timing using a timer, in addition to select() */
     float frame_ticks;
     float next_frame;
 };
 
-#define FUDGE_TICKS	10	/* The scheduler overhead ticks per frame */
+#define FUDGE_TICKS	10      /* The scheduler overhead ticks per frame */
 
 /* Old variable names */
 #define audio_fd		(this->hidden->audio_fd)
@@ -56,3 +56,4 @@ struct SDL_PrivateAudioData
 #define next_frame		(this->hidden->next_frame)
 
 #endif /* _SDL_openbsdaudio_h */
+/* vi: set ts=4 sw=4 expandtab: */

@@ -126,4 +126,4 @@ typedef XID XvEncodingID;
 #define XvBadAlloc 5
 
 #endif /* XV_H */
-
+/* vi: set ts=4 sw=4 expandtab: */

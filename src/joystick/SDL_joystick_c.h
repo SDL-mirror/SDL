@@ -28,11 +28,12 @@
 extern Uint8 SDL_numjoysticks;
 
 /* Internal event queueing functions */
-extern int SDL_PrivateJoystickAxis(SDL_Joystick *joystick,
+extern int SDL_PrivateJoystickAxis(SDL_Joystick * joystick,
                                    Uint8 axis, Sint16 value);
-extern int SDL_PrivateJoystickBall(SDL_Joystick *joystick,
+extern int SDL_PrivateJoystickBall(SDL_Joystick * joystick,
                                    Uint8 ball, Sint16 xrel, Sint16 yrel);
-extern int SDL_PrivateJoystickHat(SDL_Joystick *joystick,
-                                 Uint8 hat, Uint8 value);
-extern int SDL_PrivateJoystickButton(SDL_Joystick *joystick,
+extern int SDL_PrivateJoystickHat(SDL_Joystick * joystick,
+                                  Uint8 hat, Uint8 value);
+extern int SDL_PrivateJoystickButton(SDL_Joystick * joystick,
                                      Uint8 button, Uint8 state);
+/* vi: set ts=4 sw=4 expandtab: */

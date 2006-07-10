@@ -54,25 +54,28 @@
 #define _THIS	SDL_VideoDevice *this
 
 /* Private display data */
-struct SDL_PrivateVideoData {
-    struct Screen *Public_Display; /* Used for events and window management */
-    struct Screen *GFX_Display;	/* Used for graphics and colormap stuff */
-    Uint32 SDL_VisualUnused;		/* The visual used by our window */
-    struct Window *SDL_Window;	/* Shared by both displays (no X security?) */
-    unsigned char *BlankCursor;	/* The invisible cursor */
+struct SDL_PrivateVideoData
+{
+    struct Screen *Public_Display;      /* Used for events and window management */
+    struct Screen *GFX_Display; /* Used for graphics and colormap stuff */
+    Uint32 SDL_VisualUnused;    /* The visual used by our window */
+    struct Window *SDL_Window;  /* Shared by both displays (no X security?) */
+    unsigned char *BlankCursor; /* The invisible cursor */
 
-    char *SDL_windowid;		/* Flag: true if we have been passed a window */
+    char *SDL_windowid;         /* Flag: true if we have been passed a window */
 
     /* The variables used for displaying graphics */
-    Uint8 *Ximage;		/* The X image for our window */
-    int swap_pixels;		/* Flag: true if display is swapped endian */
+    Uint8 *Ximage;              /* The X image for our window */
+    int swap_pixels;            /* Flag: true if display is swapped endian */
 
     /* Support for internal mouse warping */
-    struct {
+    struct
+    {
         int x;
         int y;
     } mouse_last;
-    struct {
+    struct
+    {
         int numerator;
         int denominator;
         int threshold;
@@ -83,17 +86,18 @@ struct SDL_PrivateVideoData {
     SDL_Rect **modelist;
 
     /* available visuals of interest to us, sorted deepest first */
-    struct {
-		Uint32 visual;
-		int depth;		/* number of significant bits/pixel */
-		int bpp;		/* pixel quantum in bits */
-    } visuals[5];		/* at most entries for 8, 15, 16, 24 */
+    struct
+    {
+        Uint32 visual;
+        int depth;              /* number of significant bits/pixel */
+        int bpp;                /* pixel quantum in bits */
+    } visuals[5];               /* at most entries for 8, 15, 16, 24 */
     int nvisuals;
 
-    Uint32 vis;		/* current visual in use */
-    int depth;			/* current visual depth (not bpp) */
+    Uint32 vis;                 /* current visual in use */
+    int depth;                  /* current visual depth (not bpp) */
     int BytesPerPixel;
-    int currently_fullscreen,same_format,dbuffer;
+    int currently_fullscreen, same_format, dbuffer;
 
     /* Automatic mode switching support (entering/leaving fullscreen) */
     Uint32 switch_waiting;
@@ -104,10 +108,10 @@ struct SDL_PrivateVideoData {
 
     /* Colormap handling */
     LONG Pens;
-    Sint32 *XPixels;		/* A list of pixels that have been allocated, the size depends on the screen format */
-	struct ScreenBuffer *SB[2];
-	struct RastPort *RP;
-    short *iconcolors;		/* List of colors used by the icon */
+    Sint32 *XPixels;            /* A list of pixels that have been allocated, the size depends on the screen format */
+    struct ScreenBuffer *SB[2];
+    struct RastPort *RP;
+    short *iconcolors;          /* List of colors used by the icon */
 };
 
 /* Old variable names */
@@ -144,12 +148,12 @@ struct SDL_PrivateVideoData {
 /* Used to get the X cursor from a window-manager specific cursor */
 // extern Cursor SDL_GetWMXCursor(WMcursor *cursor);
 
-extern int CGX_CreateWindow(_THIS, SDL_Surface *screen,
-			    int w, int h, int bpp, Uint32 flags);
+extern int CGX_CreateWindow(_THIS, SDL_Surface * screen,
+                            int w, int h, int bpp, Uint32 flags);
 extern int CGX_ResizeWindow(_THIS,
-			SDL_Surface *screen, int w, int h, Uint32 flags);
+                            SDL_Surface * screen, int w, int h, Uint32 flags);
 
-extern void CGX_DestroyWindow(_THIS, SDL_Surface *screen);
+extern void CGX_DestroyWindow(_THIS, SDL_Surface * screen);
 
 extern struct Library *CyberGfxBase;
 extern struct IntuitionBase *IntuitionBase;
@@ -159,14 +163,16 @@ extern struct DosLibrary *DOSBase;
 
 struct private_hwdata
 {
-	struct BitMap *bmap;
-	APTR lock;
-	struct SDL_VideoDevice *videodata;
-	APTR mask;
-	int allocated;
+    struct BitMap *bmap;
+    APTR lock;
+    struct SDL_VideoDevice *videodata;
+    APTR mask;
+    int allocated;
 };
 
-int CGX_CheckHWBlit(_THIS,SDL_Surface *src,SDL_Surface *dst);
-int CGX_FillHWRect(_THIS,SDL_Surface *dst,SDL_Rect *dstrect,Uint32 color);
-int CGX_SetHWColorKey(_THIS,SDL_Surface *surface, Uint32 key);
+int CGX_CheckHWBlit(_THIS, SDL_Surface * src, SDL_Surface * dst);
+int CGX_FillHWRect(_THIS, SDL_Surface * dst, SDL_Rect * dstrect,
+                   Uint32 color);
+int CGX_SetHWColorKey(_THIS, SDL_Surface * surface, Uint32 key);
 #endif /* _SDL_x11video_h */
+/* vi: set ts=4 sw=4 expandtab: */

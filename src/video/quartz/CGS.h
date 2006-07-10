@@ -49,36 +49,37 @@
     #define kCGSWindowLevelDesktop        -2147483648
 */
 
-typedef CGError       CGSError;
-typedef long          CGSWindowCount;
-typedef void *        CGSConnectionID;
-typedef int           CGSWindowID;
-typedef CGSWindowID*  CGSWindowIDList;
+typedef CGError CGSError;
+typedef long CGSWindowCount;
+typedef void *CGSConnectionID;
+typedef int CGSWindowID;
+typedef CGSWindowID *CGSWindowIDList;
 typedef CGWindowLevel CGSWindowLevel;
-typedef NSRect        CGSRect;
+typedef NSRect CGSRect;
 
-extern CGSConnectionID _CGSDefaultConnection ();
+extern CGSConnectionID _CGSDefaultConnection();
 
-extern CGSError CGSGetOnScreenWindowList (CGSConnectionID cid,
-                                          CGSConnectionID owner,
-                                          CGSWindowCount listCapacity,
-                                          CGSWindowIDList list,
-                                          CGSWindowCount *listCount);
+extern CGSError CGSGetOnScreenWindowList(CGSConnectionID cid,
+                                         CGSConnectionID owner,
+                                         CGSWindowCount listCapacity,
+                                         CGSWindowIDList list,
+                                         CGSWindowCount * listCount);
 
-extern CGSError CGSGetScreenRectForWindow (CGSConnectionID cid,
-                                           CGSWindowID wid,
-                                           CGSRect *rect);
+extern CGSError CGSGetScreenRectForWindow(CGSConnectionID cid,
+                                          CGSWindowID wid, CGSRect * rect);
 
-extern CGWindowLevel CGSGetWindowLevel (CGSConnectionID cid,
-                                        CGSWindowID wid,
-                                        CGSWindowLevel *level);
+extern CGWindowLevel CGSGetWindowLevel(CGSConnectionID cid,
+                                       CGSWindowID wid,
+                                       CGSWindowLevel * level);
 
-extern CGSError CGSDisplayHWFill (CGDirectDisplayID id, unsigned int x, unsigned int y,
-                                  unsigned int w, unsigned int h, unsigned int color);
+extern CGSError CGSDisplayHWFill(CGDirectDisplayID id, unsigned int x,
+                                 unsigned int y, unsigned int w,
+                                 unsigned int h, unsigned int color);
 
-extern CGSError CGSDisplayCanHWFill (CGDirectDisplayID id);
+extern CGSError CGSDisplayCanHWFill(CGDirectDisplayID id);
 
-extern CGSError CGSGetMouseEnabledFlags (CGSConnectionID cid, CGSWindowID wid, int *flags);
+extern CGSError CGSGetMouseEnabledFlags(CGSConnectionID cid, CGSWindowID wid,
+                                        int *flags);
 
-int CGSDisplayHWSync (CGDirectDisplayID id);
-
+int CGSDisplayHWSync(CGDirectDisplayID id);
+/* vi: set ts=4 sw=4 expandtab: */

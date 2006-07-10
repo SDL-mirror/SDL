@@ -26,4 +26,4 @@
 /* Functions to be exported */
 extern void DirectFB_InitOSKeymap(_THIS);
 extern void DirectFB_PumpEvents(_THIS);
-
+/* vi: set ts=4 sw=4 expandtab: */

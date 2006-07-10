@@ -57,5 +57,5 @@ extern struct DosLibrary *DOSBase;
 #else
 
 #define SYS_ThreadHandle struct Task *
-#endif /*STORMC4_WOS*/
-
+#endif /*STORMC4_WOS */
+/* vi: set ts=4 sw=4 expandtab: */

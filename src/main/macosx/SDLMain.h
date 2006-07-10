@@ -7,5 +7,5 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface SDLMain : NSObject
-@end
+@ interface SDLMain:NSObject @ end
+/* vi: set ts=4 sw=4 expandtab: */

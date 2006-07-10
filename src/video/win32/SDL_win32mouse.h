@@ -21,6 +21,12 @@
 */
 #include "SDL_config.h"
 
-#include "SDL_nullvideo.h"
+#ifndef _SDL_win32mouse_h
+#define _SDL_win32mouse_h
 
-/* Functions to be exported */
+extern void WIN_InitMouse(_THIS);
+extern void WIN_QuitMouse(_THIS);
+
+#endif /* _SDL_win32mouse_h */
+
+/* vi: set ts=4 sw=4 expandtab: */

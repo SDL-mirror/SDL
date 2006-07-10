@@ -35,7 +35,7 @@
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_VideoDevice *this
 
-extern void (*Atari_ShutdownEvents)(void);
+extern void (*Atari_ShutdownEvents) (void);
 
 extern void Atari_InitOSKeymap(_THIS);
 extern void Atari_PumpEvents(_THIS);
@@ -44,3 +44,4 @@ extern void Atari_PumpEvents(_THIS);
 extern Uint16 SDL_AtariToUnicodeTable[256];
 
 #endif /* _SDL_ATARI_EVENTS_H_ */
+/* vi: set ts=4 sw=4 expandtab: */

@@ -32,31 +32,35 @@
 
 #include "SDL_loadso.h"
 
-void *SDL_LoadObject(const char *sofile)
+void *
+SDL_LoadObject(const char *sofile)
 {
-	const char *loaderror = "Unknown error";
-	void *handle = (void *)ldg_open((char *)sofile, ldg_global);
-	if ( handle == NULL ) {
-		SDL_SetError("Failed loading %s: %s", sofile, loaderror);
-	}
-	return(handle);
+    const char *loaderror = "Unknown error";
+    void *handle = (void *) ldg_open((char *) sofile, ldg_global);
+    if (handle == NULL) {
+        SDL_SetError("Failed loading %s: %s", sofile, loaderror);
+    }
+    return (handle);
 }
 
-void *SDL_LoadFunction(void *handle, const char *name)
+void *
+SDL_LoadFunction(void *handle, const char *name)
 {
-	const char *loaderror = "Unknown error";
-	void *symbol = (void *)ldg_find((char *)name, (LDG *)handle);
-	if ( symbol == NULL ) {
-		SDL_SetError("Failed loading %s: %s", name, loaderror);
-	}
-	return(symbol);
+    const char *loaderror = "Unknown error";
+    void *symbol = (void *) ldg_find((char *) name, (LDG *) handle);
+    if (symbol == NULL) {
+        SDL_SetError("Failed loading %s: %s", name, loaderror);
+    }
+    return (symbol);
 }
 
-void SDL_UnloadObject(void *handle)
+void
+SDL_UnloadObject(void *handle)
 {
-	if ( handle != NULL ) {
-		ldg_close((LDG *)handle, ldg_global);
-	}
+    if (handle != NULL) {
+        ldg_close((LDG *) handle, ldg_global);
+    }
 }
 
 #endif /* SDL_LOADSO_LDG */
+/* vi: set ts=4 sw=4 expandtab: */

@@ -31,15 +31,10 @@
 #include "SDL_nullvideo.h"
 #include "SDL_nullevents_c.h"
 
-void DUMMY_PumpEvents(_THIS)
+void
+DUMMY_PumpEvents(_THIS)
 {
-	/* do nothing. */
+    /* do nothing. */
 }
 
-void DUMMY_InitOSKeymap(_THIS)
-{
-	/* do nothing. */
-}
-
-/* end of SDL_nullevents.c ... */
-
+/* vi: set ts=4 sw=4 expandtab: */

@@ -24,3 +24,4 @@
 #include <pthread.h>
 
 typedef pthread_t SYS_ThreadHandle;
+/* vi: set ts=4 sw=4 expandtab: */

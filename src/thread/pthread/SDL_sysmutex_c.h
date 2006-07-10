@@ -24,8 +24,10 @@
 #ifndef _SDL_mutex_c_h
 #define _SDL_mutex_c_h
 
-struct SDL_mutex {
-	pthread_mutex_t id;
+struct SDL_mutex
+{
+    pthread_mutex_t id;
 };
 
 #endif /* _SDL_mutex_c_h */
+/* vi: set ts=4 sw=4 expandtab: */

@@ -20,7 +20,11 @@
     slouken@libsdl.org
 */
 
-/* Include file for SDL quit event handling */
+/**
+ * \file SDL_quit.h
+ *
+ * Include file for SDL quit event handling
+ */
 
 #ifndef _SDL_quit_h
 #define _SDL_quit_h

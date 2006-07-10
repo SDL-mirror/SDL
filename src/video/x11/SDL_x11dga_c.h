@@ -31,3 +31,4 @@
 extern void X11_EnableDGAMouse(_THIS);
 extern void X11_CheckDGAMouse(_THIS);
 extern void X11_DisableDGAMouse(_THIS);
+/* vi: set ts=4 sw=4 expandtab: */

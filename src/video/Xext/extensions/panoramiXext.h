@@ -35,18 +35,22 @@ Equipment Corporation.
 #define PANORAMIX_MAJOR_VERSION         1       /* current version number */
 #define PANORAMIX_MINOR_VERSION         1
 
-typedef struct {
-    Window  window;         /* PanoramiX window - may not exist */
-    int	    screen;
-    int     State;          /* PanroamiXOff, PanoramiXOn */
-    int	    width;	    /* width of this screen */
-    int     height;	    /* height of this screen */
-    int     ScreenCount;    /* real physical number of screens */
-    XID     eventMask;      /* selected events for this client */
-} SDL_NAME(XPanoramiXInfo);    
+typedef struct
+{
+    Window window;              /* PanoramiX window - may not exist */
+    int screen;
+    int State;                  /* PanroamiXOff, PanoramiXOn */
+    int width;                  /* width of this screen */
+    int height;                 /* height of this screen */
+    int ScreenCount;            /* real physical number of screens */
+    XID eventMask;              /* selected events for this client */
+} SDL_NAME(XPanoramiXInfo);
 
-extern SDL_NAME(XPanoramiXInfo) *SDL_NAME(XPanoramiXAllocInfo) (
+extern
+SDL_NAME(XPanoramiXInfo) *
+SDL_NAME(XPanoramiXAllocInfo) (
 #if NeedFunctionPrototypes
-    void
+                                  void
 #endif
-);        
+    );
+/* vi: set ts=4 sw=4 expandtab: */

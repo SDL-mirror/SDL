@@ -36,3 +36,4 @@ extern void FB_LeaveGraphicsMode(_THIS);
 
 extern void FB_InitOSKeymap(_THIS);
 extern void FB_PumpEvents(_THIS);
+/* vi: set ts=4 sw=4 expandtab: */

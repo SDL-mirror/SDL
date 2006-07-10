@@ -40,3 +40,4 @@ extern void AtariIkbd_PumpEvents(_THIS);
 extern void AtariIkbd_ShutdownEvents(void);
 
 #endif /* _SDL_ATARI_IKBDEVENTS_H_ */
+/* vi: set ts=4 sw=4 expandtab: */

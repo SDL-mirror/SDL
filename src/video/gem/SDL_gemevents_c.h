@@ -30,4 +30,4 @@ extern void GEM_InitOSKeymap(_THIS);
 extern void GEM_PumpEvents(_THIS);
 
 /* end of SDL_gemevents_c.h */
-
+/* vi: set ts=4 sw=4 expandtab: */

@@ -35,3 +35,4 @@ extern void ph_InitOSKeymap(_THIS);
 extern void ph_PumpEvents(_THIS);
 
 #endif /* __SDL_PH_EVENTS_H__ */
+/* vi: set ts=4 sw=4 expandtab: */

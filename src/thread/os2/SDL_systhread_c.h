@@ -25,4 +25,4 @@
 #include <os2.h>
 
 typedef TID SYS_ThreadHandle;
-
+/* vi: set ts=4 sw=4 expandtab: */

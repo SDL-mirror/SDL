@@ -28,29 +28,36 @@
 
 
 /* The implementation dependent data for the window manager cursor */
-struct WMcursor {
-	int unused;
+struct WMcursor
+{
+    int unused;
 };
 
 
-void VGL_FreeWMCursor(_THIS, WMcursor *cursor)
+void
+VGL_FreeWMCursor(_THIS, WMcursor * cursor)
 {
-	return;
+    return;
 }
 
-WMcursor *VGL_CreateWMCursor(_THIS,
-		Uint8 *data, Uint8 *mask, int w, int h, int hot_x, int hot_y)
+WMcursor *
+VGL_CreateWMCursor(_THIS,
+                   Uint8 * data, Uint8 * mask, int w, int h, int hot_x,
+                   int hot_y)
 {
-	return(NULL);
+    return (NULL);
 }
 
-int VGL_ShowWMCursor(_THIS, WMcursor *cursor)
+int
+VGL_ShowWMCursor(_THIS, WMcursor * cursor)
 {
-	return(0);
+    return (0);
 }
 
-void VGL_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
+void
+VGL_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
 {
-	SDL_PrivateMouseMotion(0, 0, x, y);
+    SDL_PrivateMouseMotion(0, 0, x, y);
 }
 
+/* vi: set ts=4 sw=4 expandtab: */

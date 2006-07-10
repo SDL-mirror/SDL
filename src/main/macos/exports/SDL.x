@@ -178,9 +178,6 @@
 	SDL_GL_SetAttribute
 	SDL_GL_GetAttribute
 	SDL_GL_SwapBuffers
-	SDL_GL_UpdateRects
-	SDL_GL_Lock
-	SDL_GL_Unlock
 	SDL_WM_SetCaption
 	SDL_WM_GetCaption
 	SDL_WM_SetIcon

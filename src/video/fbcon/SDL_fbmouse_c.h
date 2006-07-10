@@ -24,3 +24,4 @@
 #include "SDL_fbvideo.h"
 
 /* Functions to be exported */
+/* vi: set ts=4 sw=4 expandtab: */

@@ -29,10 +29,12 @@
 #ifndef _SDL_ipodvideo_h
 #define _SDL_ipodvideo_h
 
-struct SDL_PrivateVideoData {
+struct SDL_PrivateVideoData
+{
     char *buffer;
     int w, h;
 };
 
 
 #endif
+/* vi: set ts=4 sw=4 expandtab: */

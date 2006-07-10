@@ -1,7 +1,11 @@
 
 This is a list of API changes in SDL's version history.
 
-Version 1.0:
+1.3.0:
+	Added SDL_GetNumVideoDrivers() and SDL_GetVideoDriver().
+	Replaced SDL_VideoDriverName() with SDL_GetCurrentVideoDriver()
+	Added SDL_GetNumAudioDrivers() and SDL_GetAudioDriver().
+	Replaced SDL_AudioDriverName() with SDL_GetCurrentAudioDriver()
 
 1.2.10:
 	If SDL_OpenAudio() is passed zero for the desired format
@@ -416,8 +420,6 @@ Version 1.0:
 1.0.0:
 	New public release
 
-Version 0.11:
-
 0.11.5:
 	A new function SDL_GetVideoSurface() has been added, and returns
 	a pointer to the current display surface.
@@ -435,8 +437,6 @@ Version 0.11:
 	A new flag for SDL_Init(), SDL_INIT_NOPARACHUTE, prevents SDL from
 	installing fatal signal handlers on operating systems that support
 	them.
-
-Version 0.9:
 
 0.9.15:
 	SDL_CreateColorCursor() has been removed.  Color cursors should

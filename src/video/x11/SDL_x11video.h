@@ -36,7 +36,7 @@
 #endif
 #if SDL_VIDEO_DRIVER_X11_XINERAMA
 #include "../Xext/extensions/Xinerama.h"
-#endif 
+#endif
 #if SDL_VIDEO_DRIVER_X11_XRANDR
 #include <X11/extensions/Xrandr.h>
 #endif
@@ -56,20 +56,21 @@
 #define _THIS	SDL_VideoDevice *this
 
 /* Private display data */
-struct SDL_PrivateVideoData {
-    int local_X11;		/* Flag: true if local display */
-    Display *X11_Display;	/* Used for events and window management */
-    Display *GFX_Display;	/* Used for graphics and colormap stuff */
-    Visual *SDL_Visual;		/* The visual used by our window */
-    Window WMwindow;		/* Input window, managed by window manager */
-    Window FSwindow;		/* Fullscreen window, completely unmanaged */
-    Window SDL_Window;		/* Shared by both displays (no X security?) */
-    Atom WM_DELETE_WINDOW;	/* "close-window" protocol atom */
-    WMcursor *BlankCursor;	/* The invisible cursor */
-    XIM X11_IM;		/* Used to communicate with the input method (IM) server */
-    XIC X11_IC;		/* Used for retaining the state, properties, and semantics of communication with                                                  the input method (IM) server */
+struct SDL_PrivateVideoData
+{
+    int local_X11;              /* Flag: true if local display */
+    Display *X11_Display;       /* Used for events and window management */
+    Display *GFX_Display;       /* Used for graphics and colormap stuff */
+    Visual *SDL_Visual;         /* The visual used by our window */
+    Window WMwindow;            /* Input window, managed by window manager */
+    Window FSwindow;            /* Fullscreen window, completely unmanaged */
+    Window SDL_Window;          /* Shared by both displays (no X security?) */
+    Atom WM_DELETE_WINDOW;      /* "close-window" protocol atom */
+    WMcursor *BlankCursor;      /* The invisible cursor */
+    XIM X11_IM;                 /* Used to communicate with the input method (IM) server */
+    XIC X11_IC;                 /* Used for retaining the state, properties, and semantics of communication with                                                  the input method (IM) server */
 
-    char *SDL_windowid;		/* Flag: true if we have been passed a window */
+    char *SDL_windowid;         /* Flag: true if we have been passed a window */
 
     /* Direct Graphics Access extension information */
     int using_dga;
@@ -81,55 +82,56 @@ struct SDL_PrivateVideoData {
 #endif
 
     /* The variables used for displaying graphics */
-    XImage *Ximage;		/* The X image for our window */
-    GC	gc;			/* The graphic context for drawing */
+    XImage *Ximage;             /* The X image for our window */
+    GC gc;                      /* The graphic context for drawing */
 
     /* The current width and height of the fullscreen mode */
     int window_w;
     int window_h;
 
     /* Support for internal mouse warping */
-    struct {
+    struct
+    {
         int x;
         int y;
     } mouse_last;
-    struct {
+    struct
+    {
         int numerator;
         int denominator;
         int threshold;
     } mouse_accel;
     int mouse_relative;
 
-    /* The current list of available video modes */
-    SDL_Rect **modelist;
-
     /* available visuals of interest to us, sorted deepest first */
-    struct {
-	Visual *visual;
-	int depth;		/* number of significant bits/pixel */
-	int bpp;		/* pixel quantum in bits */
-    } visuals[2*5];		/* at most 2 entries for 8, 15, 16, 24, 32 */
+    struct
+    {
+        Visual *visual;
+        int depth;              /* number of significant bits/pixel */
+        int bpp;                /* pixel quantum in bits */
+    } visuals[2 * 5];           /* at most 2 entries for 8, 15, 16, 24, 32 */
     int nvisuals;
 
-    Visual *vis;		/* current visual in use */
-    int depth;			/* current visual depth (not bpp) */
+    Visual *vis;                /* current visual in use */
+    int depth;                  /* current visual depth (not bpp) */
 
     /* Variables used by the X11 video mode code */
 #if SDL_VIDEO_DRIVER_X11_XINERAMA
-    SDL_NAME(XineramaScreenInfo) xinerama_info;
+      SDL_NAME(XineramaScreenInfo) * xinerama;
 #endif
 #if SDL_VIDEO_DRIVER_X11_XRANDR
-    XRRScreenConfiguration* screen_config;
+    XRRScreenConfiguration *screen_config;
     int saved_size_id;
     Rotation saved_rotation;
 #endif
 #if SDL_VIDEO_DRIVER_X11_VIDMODE
-    SDL_NAME(XF86VidModeModeInfo) saved_mode;
-    struct {
+      SDL_NAME(XF86VidModeModeInfo) saved_mode;
+    struct
+    {
         int x, y;
     } saved_view;
 #endif
-#if SDL_VIDEO_DRIVER_X11_XME /* XiG XME fullscreen */
+#if SDL_VIDEO_DRIVER_X11_XME    /* XiG XME fullscreen */
     XiGMiscResolutionInfo saved_res;
 #endif
 
@@ -147,13 +149,13 @@ struct SDL_PrivateVideoData {
     int blit_queued;
 
     /* Colormap handling */
-    Colormap DisplayColormap;	/* The default display colormap */
-    Colormap XColorMap;		/* The current window colormap */
-    int *XPixels;		/* pixels value allocation counts */
-    float gamma_saved[3];	/* Saved gamma values for VidMode gamma */
-    int gamma_changed;		/* flag: has VidMode gamma been modified? */
+    Colormap DisplayColormap;   /* The default display colormap */
+    Colormap XColorMap;         /* The current window colormap */
+    int *XPixels;               /* pixels value allocation counts */
+    float gamma_saved[3];       /* Saved gamma values for VidMode gamma */
+    int gamma_changed;          /* flag: has VidMode gamma been modified? */
 
-    short *iconcolors;		/* List of colors used by the icon */
+    short *iconcolors;          /* List of colors used by the icon */
 
     /* Screensaver settings */
     int screensaver_timeout;
@@ -186,7 +188,7 @@ struct SDL_PrivateVideoData {
 #define mouse_accel		(this->hidden->mouse_accel)
 #define mouse_relative		(this->hidden->mouse_relative)
 #define SDL_modelist		(this->hidden->modelist)
-#define xinerama_info		(this->hidden->xinerama_info)
+#define xinerama		(this->hidden->xinerama)
 #define saved_mode		(this->hidden->saved_mode)
 #define saved_view		(this->hidden->saved_view)
 #define saved_res		(this->hidden->saved_res)
@@ -216,3 +218,4 @@ struct SDL_PrivateVideoData {
  (VendorRelease(SDL_Display) condition buggy_version))
 
 #endif /* _SDL_x11video_h */
+/* vi: set ts=4 sw=4 expandtab: */

@@ -27,9 +27,10 @@
    of the native video subsystem (SDL_dibvideo.c)
 */
 extern LONG
- DIB_HandleMessage(_THIS, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+DIB_HandleMessage(_THIS, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 extern int DIB_CreateWindow(_THIS);
 extern void DIB_DestroyWindow(_THIS);
 
 extern void DIB_PumpEvents(_THIS);
 extern void DIB_InitOSKeymap(_THIS);
+/* vi: set ts=4 sw=4 expandtab: */

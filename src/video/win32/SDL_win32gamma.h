@@ -21,17 +21,12 @@
 */
 #include "SDL_config.h"
 
-/* This is the definition of the YUV video surface function structure */
+#ifndef _SDL_win32gamma_h
+#define _SDL_win32gamma_h
 
-#include "SDL_video.h"
-#include "SDL_sysvideo.h"
+extern int WIN_SetDisplayGammaRamp(_THIS, Uint16 * ramp);
+extern int WIN_GetDisplayGammaRamp(_THIS, Uint16 * ramp);
 
-#ifndef _THIS
-#define _THIS	SDL_VideoDevice *_this
-#endif
-struct private_yuvhwfuncs {
-	int (*Lock)(_THIS, SDL_Overlay *overlay);
-	void (*Unlock)(_THIS, SDL_Overlay *overlay);
-	int (*Display)(_THIS, SDL_Overlay *overlay, SDL_Rect *src, SDL_Rect *dst);
-	void (*FreeHW)(_THIS, SDL_Overlay *overlay);
-};
+#endif /* _SDL_win32gamma_h */
+
+/* vi: set ts=4 sw=4 expandtab: */

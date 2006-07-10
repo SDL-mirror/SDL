@@ -40,14 +40,15 @@
 /* Hidden "this" pointer for the audio functions */
 #define _THIS	SDL_AudioDevice *this
 
-struct SDL_PrivateAudioData {
-	/* The handle for the audio device */
-	struct AHIRequest *audio_req[2];
-	struct MsgPort *audio_port;
-	Sint32 freq,type,bytespersample,size;
-	Uint8 *mixbuf[2];           /* The app mixing buffer */
-	int current_buffer;
-	Uint32 playing;
+struct SDL_PrivateAudioData
+{
+    /* The handle for the audio device */
+    struct AHIRequest *audio_req[2];
+    struct MsgPort *audio_port;
+    Sint32 freq, type, bytespersample, size;
+    Uint8 *mixbuf[2];           /* The app mixing buffer */
+    int current_buffer;
+    Uint32 playing;
 };
 
 /* Old variable names */
@@ -58,3 +59,4 @@ struct SDL_PrivateAudioData {
 #define playing			(this->hidden->playing)
 
 #endif /* _SDL_ahiaudio_h */
+/* vi: set ts=4 sw=4 expandtab: */

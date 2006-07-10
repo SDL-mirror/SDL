@@ -31,11 +31,12 @@
 /* Hidden "this" pointer for the audio functions */
 #define _THIS	SDL_AudioDevice *this
 
-struct SDL_PrivateAudioData {
-	/* The handle for the audio device */
-	ALport audio_port;
+struct SDL_PrivateAudioData
+{
+    /* The handle for the audio device */
+    ALport audio_port;
 
-	Uint8 *mixbuf;           /* The app mixing buffer */
+    Uint8 *mixbuf;              /* The app mixing buffer */
 };
 
 /* Old variable names */
@@ -43,3 +44,4 @@ struct SDL_PrivateAudioData {
 #define mixbuf			(this->hidden->mixbuf)
 
 #endif /* _SDL_lowaudio_h */
+/* vi: set ts=4 sw=4 expandtab: */

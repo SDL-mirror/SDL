@@ -27,3 +27,4 @@
 
 /* Set up the driver for 3Dfx acceleration */
 extern void FB_3DfxAccel(_THIS, __u32 card);
+/* vi: set ts=4 sw=4 expandtab: */

@@ -31,123 +31,129 @@
 
 #include <pthread.h>
 
-struct SDL_mutex {
-	pthread_mutex_t id;
+struct SDL_mutex
+{
+    pthread_mutex_t id;
 #if SDL_THREAD_PTHREAD_NO_RECURSIVE_MUTEX
-	int recursive;
-	pthread_t owner;
+    int recursive;
+    pthread_t owner;
 #endif
 };
 
-SDL_mutex *SDL_CreateMutex (void)
+SDL_mutex *
+SDL_CreateMutex(void)
 {
-	SDL_mutex *mutex;
-	pthread_mutexattr_t attr;
+    SDL_mutex *mutex;
+    pthread_mutexattr_t attr;
 
-	/* Allocate the structure */
-	mutex = (SDL_mutex *)SDL_calloc(1, sizeof(*mutex));
-	if ( mutex ) {
-		pthread_mutexattr_init(&attr);
+    /* Allocate the structure */
+    mutex = (SDL_mutex *) SDL_calloc(1, sizeof(*mutex));
+    if (mutex) {
+        pthread_mutexattr_init(&attr);
 #if SDL_THREAD_PTHREAD_NO_RECURSIVE_MUTEX
-		/* No extra attributes necessary */
+        /* No extra attributes necessary */
 #else
-		pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+        pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
 #endif /* SDL_THREAD_PTHREAD_NO_RECURSIVE_MUTEX */
-		if ( pthread_mutex_init(&mutex->id, &attr) != 0 ) {
-			SDL_SetError("pthread_mutex_init() failed");
-			SDL_free(mutex);
-			mutex = NULL;
-		}
-	} else {
-		SDL_OutOfMemory();
-	}
-	return(mutex);
+        if (pthread_mutex_init(&mutex->id, &attr) != 0) {
+            SDL_SetError("pthread_mutex_init() failed");
+            SDL_free(mutex);
+            mutex = NULL;
+        }
+    } else {
+        SDL_OutOfMemory();
+    }
+    return (mutex);
 }
 
-void SDL_DestroyMutex(SDL_mutex *mutex)
+void
+SDL_DestroyMutex(SDL_mutex * mutex)
 {
-	if ( mutex ) {
-		pthread_mutex_destroy(&mutex->id);
-		SDL_free(mutex);
-	}
+    if (mutex) {
+        pthread_mutex_destroy(&mutex->id);
+        SDL_free(mutex);
+    }
 }
 
 /* Lock the mutex */
-int SDL_mutexP(SDL_mutex *mutex)
+int
+SDL_mutexP(SDL_mutex * mutex)
 {
-	int retval;
+    int retval;
 #if SDL_THREAD_PTHREAD_NO_RECURSIVE_MUTEX
-	pthread_t this_thread;
+    pthread_t this_thread;
 #endif
 
-	if ( mutex == NULL ) {
-		SDL_SetError("Passed a NULL mutex");
-		return -1;
-	}
+    if (mutex == NULL) {
+        SDL_SetError("Passed a NULL mutex");
+        return -1;
+    }
 
-	retval = 0;
+    retval = 0;
 #if SDL_THREAD_PTHREAD_NO_RECURSIVE_MUTEX
-	this_thread = pthread_self();
-	if ( mutex->owner == this_thread ) {
-		++mutex->recursive;
-	} else {
-		/* The order of operations is important.
-		   We set the locking thread id after we obtain the lock
-		   so unlocks from other threads will fail.
-		*/
-		if ( pthread_mutex_lock(&mutex->id) == 0 ) {
-			mutex->owner = this_thread;
-			mutex->recursive = 0;
-		} else {
-			SDL_SetError("pthread_mutex_lock() failed");
-			retval = -1;
-		}
-	}
+    this_thread = pthread_self();
+    if (mutex->owner == this_thread) {
+        ++mutex->recursive;
+    } else {
+        /* The order of operations is important.
+           We set the locking thread id after we obtain the lock
+           so unlocks from other threads will fail.
+         */
+        if (pthread_mutex_lock(&mutex->id) == 0) {
+            mutex->owner = this_thread;
+            mutex->recursive = 0;
+        } else {
+            SDL_SetError("pthread_mutex_lock() failed");
+            retval = -1;
+        }
+    }
 #else
-	if ( pthread_mutex_lock(&mutex->id) < 0 ) {
-		SDL_SetError("pthread_mutex_lock() failed");
-		retval = -1;
-	}
+    if (pthread_mutex_lock(&mutex->id) < 0) {
+        SDL_SetError("pthread_mutex_lock() failed");
+        retval = -1;
+    }
 #endif
-	return retval;
+    return retval;
 }
 
-int SDL_mutexV(SDL_mutex *mutex)
+int
+SDL_mutexV(SDL_mutex * mutex)
 {
-	int retval;
+    int retval;
 
-	if ( mutex == NULL ) {
-		SDL_SetError("Passed a NULL mutex");
-		return -1;
-	}
+    if (mutex == NULL) {
+        SDL_SetError("Passed a NULL mutex");
+        return -1;
+    }
 
-	retval = 0;
+    retval = 0;
 #if SDL_THREAD_PTHREAD_NO_RECURSIVE_MUTEX
-	/* We can only unlock the mutex if we own it */
-	if ( pthread_self() == mutex->owner ) {
-		if ( mutex->recursive ) {
-			--mutex->recursive;
-		} else {
-			/* The order of operations is important.
-			   First reset the owner so another thread doesn't lock
-			   the mutex and set the ownership before we reset it,
-			   then release the lock semaphore.
-			 */
-			mutex->owner = 0;
-			pthread_mutex_unlock(&mutex->id);
-		}
-	} else {
-		SDL_SetError("mutex not owned by this thread");
-		retval = -1;
-	}
+    /* We can only unlock the mutex if we own it */
+    if (pthread_self() == mutex->owner) {
+        if (mutex->recursive) {
+            --mutex->recursive;
+        } else {
+            /* The order of operations is important.
+               First reset the owner so another thread doesn't lock
+               the mutex and set the ownership before we reset it,
+               then release the lock semaphore.
+             */
+            mutex->owner = 0;
+            pthread_mutex_unlock(&mutex->id);
+        }
+    } else {
+        SDL_SetError("mutex not owned by this thread");
+        retval = -1;
+    }
 
 #else
-	if ( pthread_mutex_unlock(&mutex->id) < 0 ) {
-		SDL_SetError("pthread_mutex_unlock() failed");
-		retval = -1;
-	}
+    if (pthread_mutex_unlock(&mutex->id) < 0) {
+        SDL_SetError("pthread_mutex_unlock() failed");
+        retval = -1;
+    }
 #endif /* SDL_THREAD_PTHREAD_NO_RECURSIVE_MUTEX */
 
-	return retval;
+    return retval;
 }
 #endif
+/* vi: set ts=4 sw=4 expandtab: */

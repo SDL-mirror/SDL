@@ -31,6 +31,7 @@
    Assumes buffer size in bytes is a multiple of 16
    Assumes SDL_MIX_MAXVOLUME = 128
 */
-void SDL_MixAudio_MMX_S16_VC(char* ,char* ,unsigned int ,int );
-void SDL_MixAudio_MMX_S8_VC(char* ,char* ,unsigned int ,int );
+void SDL_MixAudio_MMX_S16_VC(char *, char *, unsigned int, int);
+void SDL_MixAudio_MMX_S8_VC(char *, char *, unsigned int, int);
 #endif
+/* vi: set ts=4 sw=4 expandtab: */

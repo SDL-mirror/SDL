@@ -19,6 +19,12 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
-/* DEPRECATED */
-#include "SDL_stdinc.h"
+/* SDL surface based renderer implementation */
+
+#if SDL_VIDEO_RENDER_GDI
+extern void GDI_AddRenderDriver(_THIS);
+#endif
+
+/* vi: set ts=4 sw=4 expandtab: */

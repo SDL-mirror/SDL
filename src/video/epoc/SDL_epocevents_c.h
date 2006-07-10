@@ -29,7 +29,8 @@
 */
 
 
-extern "C" {
+extern "C"
+{
 #include "../SDL_sysvideo.h"
 };
 
@@ -39,8 +40,9 @@ extern "C" {
    of the native video subsystem (SDL_sysvideo.c)
 */
 
-extern "C" {
-extern void EPOC_InitOSKeymap(_THIS);
-extern void EPOC_PumpEvents(_THIS);
+extern "C"
+{
+    extern void EPOC_InitOSKeymap(_THIS);
+    extern void EPOC_PumpEvents(_THIS);
 };
-
+/* vi: set ts=4 sw=4 expandtab: */

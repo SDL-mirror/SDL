@@ -32,20 +32,21 @@
 #define _THIS	SDL_VideoDevice *_this
 
 /* Private display data */
-struct SDL_PrivateVideoData {
-	/* The main window */
-	SDL_BWin *SDL_Win;
+struct SDL_PrivateVideoData
+{
+    /* The main window */
+    SDL_BWin *SDL_Win;
 
-	/* The fullscreen mode list */
-	display_mode saved_mode;
-#define NUM_MODELISTS	4		/* 8, 16, 24, and 32 bits-per-pixel */
-	int SDL_nummodes[NUM_MODELISTS];
-	SDL_Rect **SDL_modelist[NUM_MODELISTS];
+    /* The fullscreen mode list */
+    display_mode saved_mode;
+#define NUM_MODELISTS	4       /* 8, 16, 24, and 32 bits-per-pixel */
+    int SDL_nummodes[NUM_MODELISTS];
+    SDL_Rect **SDL_modelist[NUM_MODELISTS];
 
-	/* A completely clear cursor */
-	WMcursor *BlankCursor;
+    /* A completely clear cursor */
+    WMcursor *BlankCursor;
 
-	SDL_Overlay *overlay;
+    SDL_Overlay *overlay;
 };
 /* Old variable names */
 #define SDL_Win		(_this->hidden->SDL_Win)
@@ -56,3 +57,4 @@ struct SDL_PrivateVideoData {
 #define current_overlay (_this->hidden->overlay)
 
 #endif /* _SDL_lowvideo_h */
+/* vi: set ts=4 sw=4 expandtab: */

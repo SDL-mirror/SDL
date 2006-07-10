@@ -55,6 +55,7 @@ SRCS = \
 	src/video/dummy/SDL_nullevents.c \
 	src/video/dummy/SDL_nullmouse.c \
 	src/video/dummy/SDL_nullvideo.c \
+	src/video/glsdl/SDL_glsdl.c \
 	src/video/SDL_blit.c \
 	src/video/SDL_blit_0.c \
 	src/video/SDL_blit_1.c \

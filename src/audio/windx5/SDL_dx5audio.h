@@ -32,14 +32,15 @@
 #define _THIS	SDL_AudioDevice *this
 
 /* The DirectSound objects */
-struct SDL_PrivateAudioData {
-	LPDIRECTSOUND sound;
-	LPDIRECTSOUNDBUFFER mixbuf;
-	int NUM_BUFFERS;
-	int mixlen, silence;
-	DWORD lastchunk;
-	Uint8 *locked_buf;
-	HANDLE audio_event;
+struct SDL_PrivateAudioData
+{
+    LPDIRECTSOUND sound;
+    LPDIRECTSOUNDBUFFER mixbuf;
+    int NUM_BUFFERS;
+    int mixlen, silence;
+    DWORD lastchunk;
+    Uint8 *locked_buf;
+    HANDLE audio_event;
 };
 
 /* Old variable names */
@@ -53,3 +54,5 @@ struct SDL_PrivateAudioData {
 #define audio_event		(this->hidden->audio_event)
 
 #endif /* _SDL_lowaudio_h */
+
+/* vi: set ts=4 sw=4 expandtab: */

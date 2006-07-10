@@ -31,4 +31,4 @@ extern void FULLSCREEN_PumpEvents(_THIS);
 extern void WIMP_PumpEvents(_THIS);
 
 /* end of SDL_nullevents_c.h ... */
-
+/* vi: set ts=4 sw=4 expandtab: */

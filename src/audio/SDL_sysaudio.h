@@ -35,69 +35,71 @@ typedef struct SDL_AudioDevice SDL_AudioDevice;
 #ifndef _STATUS
 #define _STATUS	SDL_status *status
 #endif
-struct SDL_AudioDevice {
-	/* * * */
-	/* The name of this audio driver */
-	const char *name;
+struct SDL_AudioDevice
+{
+    /* * * */
+    /* The name of this audio driver */
+    const char *name;
 
-	/* * * */
-	/* The description of this audio driver */
-	const char *desc;
+    /* * * */
+    /* The description of this audio driver */
+    const char *desc;
 
-	/* * * */
-	/* Public driver functions */
-	int  (*OpenAudio)(_THIS, SDL_AudioSpec *spec);
-	void (*ThreadInit)(_THIS);	/* Called by audio thread at start */
-	void (*WaitAudio)(_THIS);
-	void (*PlayAudio)(_THIS);
-	Uint8 *(*GetAudioBuf)(_THIS);
-	void (*WaitDone)(_THIS);
-	void (*CloseAudio)(_THIS);
+    /* * * */
+    /* Public driver functions */
+    int (*OpenAudio) (_THIS, SDL_AudioSpec * spec);
+    void (*ThreadInit) (_THIS); /* Called by audio thread at start */
+    void (*WaitAudio) (_THIS);
+    void (*PlayAudio) (_THIS);
+    Uint8 *(*GetAudioBuf) (_THIS);
+    void (*WaitDone) (_THIS);
+    void (*CloseAudio) (_THIS);
 
-	/* * * */
-	/* Lock / Unlock functions added for the Mac port */
-	void (*LockAudio)(_THIS);
-	void (*UnlockAudio)(_THIS);
+    /* * * */
+    /* Lock / Unlock functions added for the Mac port */
+    void (*LockAudio) (_THIS);
+    void (*UnlockAudio) (_THIS);
 
-	/* * * */
-	/* Data common to all devices */
+    /* * * */
+    /* Data common to all devices */
 
-	/* The current audio specification (shared with audio thread) */
-	SDL_AudioSpec spec;
+    /* The current audio specification (shared with audio thread) */
+    SDL_AudioSpec spec;
 
-	/* An audio conversion block for audio format emulation */
-	SDL_AudioCVT convert;
+    /* An audio conversion block for audio format emulation */
+    SDL_AudioCVT convert;
 
-	/* Current state flags */
-	int enabled;
-	int paused;
-	int opened;
+    /* Current state flags */
+    int enabled;
+    int paused;
+    int opened;
 
-	/* Fake audio buffer for when the audio hardware is busy */
-	Uint8 *fake_stream;
+    /* Fake audio buffer for when the audio hardware is busy */
+    Uint8 *fake_stream;
 
-	/* A semaphore for locking the mixing buffers */
-	SDL_mutex *mixer_lock;
+    /* A semaphore for locking the mixing buffers */
+    SDL_mutex *mixer_lock;
 
-	/* A thread to feed the audio device */
-	SDL_Thread *thread;
-	Uint32 threadid;
+    /* A thread to feed the audio device */
+    SDL_Thread *thread;
+    Uint32 threadid;
 
-	/* * * */
-	/* Data private to this driver */
-	struct SDL_PrivateAudioData *hidden;
+    /* * * */
+    /* Data private to this driver */
+    struct SDL_PrivateAudioData *hidden;
 
-	/* * * */
-	/* The function used to dispose of this structure */
-	void (*free)(_THIS);
+    /* * * */
+    /* The function used to dispose of this structure */
+    void (*free) (_THIS);
 };
 #undef _THIS
 
-typedef struct AudioBootStrap {
-	const char *name;
-	const char *desc;
-	int (*available)(void);
-	SDL_AudioDevice *(*create)(int devindex);
+typedef struct AudioBootStrap
+{
+    const char *name;
+    const char *desc;
+    int (*available) (void);
+    SDL_AudioDevice *(*create) (int devindex);
 } AudioBootStrap;
 
 #if SDL_AUDIO_DRIVER_BSD
@@ -176,3 +178,4 @@ extern AudioBootStrap DART_bootstrap;
 extern SDL_AudioDevice *current_audio;
 
 #endif /* _SDL_sysaudio_h */
+/* vi: set ts=4 sw=4 expandtab: */

@@ -34,17 +34,19 @@
  * joysticks.  Joystick 0 should be the system default joystick.
  * It should return 0, or -1 on an unrecoverable fatal error.
  */
-int SDL_SYS_JoystickInit(void)
+int
+SDL_SYS_JoystickInit(void)
 {
-	SDL_numjoysticks = 0;
-	return(0);
+    SDL_numjoysticks = 0;
+    return (0);
 }
 
 /* Function to get the device-dependent name of a joystick */
-const char *SDL_SYS_JoystickName(int index)
+const char *
+SDL_SYS_JoystickName(int index)
 {
-	SDL_SetError("Logic error: No joysticks available");
-	return(NULL);
+    SDL_SetError("Logic error: No joysticks available");
+    return (NULL);
 }
 
 /* Function to open a joystick for use.
@@ -52,10 +54,11 @@ const char *SDL_SYS_JoystickName(int index)
    This should fill the nbuttons and naxes fields of the joystick structure.
    It returns 0, or -1 if there is an error.
  */
-int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
+int
+SDL_SYS_JoystickOpen(SDL_Joystick * joystick)
 {
-	SDL_SetError("Logic error: No joysticks available");
-	return(-1);
+    SDL_SetError("Logic error: No joysticks available");
+    return (-1);
 }
 
 /* Function to update the state of a joystick - called as a device poll.
@@ -63,21 +66,25 @@ int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
  * but instead should call SDL_PrivateJoystick*() to deliver events
  * and update joystick device state.
  */
-void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
+void
+SDL_SYS_JoystickUpdate(SDL_Joystick * joystick)
 {
-	return;
+    return;
 }
 
 /* Function to close a joystick after use */
-void SDL_SYS_JoystickClose(SDL_Joystick *joystick)
+void
+SDL_SYS_JoystickClose(SDL_Joystick * joystick)
 {
-	return;
+    return;
 }
 
 /* Function to perform any system-specific joystick related cleanup */
-void SDL_SYS_JoystickQuit(void)
+void
+SDL_SYS_JoystickQuit(void)
 {
-	return;
+    return;
 }
 
 #endif /* SDL_JOYSTICK_DUMMY || SDL_JOYSTICK_DISABLED */
+/* vi: set ts=4 sw=4 expandtab: */

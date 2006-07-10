@@ -31,3 +31,4 @@ extern void SDL_QuitBeApp(void);
 
 /* Flag to tell whether the app is active or not */
 extern int SDL_BeAppActive;
+/* vi: set ts=4 sw=4 expandtab: */

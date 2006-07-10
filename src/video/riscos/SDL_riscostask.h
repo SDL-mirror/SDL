@@ -37,3 +37,4 @@ extern int RISCOS_GetTaskHandle();
 /* Wimp mode saveing/restoring */
 extern void RISCOS_StoreWimpMode();
 extern void RISCOS_RestoreWimpMode();
+/* vi: set ts=4 sw=4 expandtab: */

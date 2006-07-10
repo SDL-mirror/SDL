@@ -27,3 +27,4 @@
 #include "../maccommon/SDL_lowvideo.h"
 
 #endif /* _SDL_romvideo_h */
+/* vi: set ts=4 sw=4 expandtab: */

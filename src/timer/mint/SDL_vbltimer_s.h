@@ -31,3 +31,4 @@
 /* Functions prototypes */
 extern int SDL_AtariVblInstall(void *newvector);
 extern void SDL_AtariVblUninstall(void *newvector);
+/* vi: set ts=4 sw=4 expandtab: */

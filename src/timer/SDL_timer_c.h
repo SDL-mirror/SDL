@@ -44,3 +44,4 @@ extern void SDL_TimerQuit(void);
 
 /* This function is called from the SDL event thread if it is available */
 extern void SDL_ThreadedTimerCheck(void);
+/* vi: set ts=4 sw=4 expandtab: */

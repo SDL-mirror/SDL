@@ -44,116 +44,123 @@ static int mouseb, prev_mouseb;
 
 /* Functions */
 
-int SDL_AtariDevMouse_Open(void)
+int
+SDL_AtariDevMouse_Open(void)
 {
-	int r;
-	const char *mousedev;
+    int r;
+    const char *mousedev;
 
-	/*
-		TODO: Fix the MiNT device driver, that locks mouse for other
-		applications, so this is disabled till fixed
-	 */
-	return 0;
+    /*
+       TODO: Fix the MiNT device driver, that locks mouse for other
+       applications, so this is disabled till fixed
+     */
+    return 0;
 
-	/* First, try SDL_MOUSEDEV device */
-	mousedev = SDL_getenv("SDL_MOUSEDEV");
-	if (!mousedev) {
-		handle = open(mousedev, 0);
-	}
+    /* First, try SDL_MOUSEDEV device */
+    mousedev = SDL_getenv("SDL_MOUSEDEV");
+    if (!mousedev) {
+        handle = open(mousedev, 0);
+    }
 
-	/* Failed, try default device */
-	if (handle<0) {
-		handle = open(DEVICE_NAME, 0);
-	}
+    /* Failed, try default device */
+    if (handle < 0) {
+        handle = open(DEVICE_NAME, 0);
+    }
 
-	if (handle<0) {
-		handle = -1;
-		return 0;
-	}
+    if (handle < 0) {
+        handle = -1;
+        return 0;
+    }
 
-	/* Set non blocking mode */
-	r = fcntl(handle, F_GETFL, 0);
-	if (r<0) {
-		close(handle);
-		handle = -1;
-		return 0;
-	}
+    /* Set non blocking mode */
+    r = fcntl(handle, F_GETFL, 0);
+    if (r < 0) {
+        close(handle);
+        handle = -1;
+        return 0;
+    }
 
-	r |= O_NDELAY;
+    r |= O_NDELAY;
 
-	r = fcntl(handle, F_SETFL, r);
-	if (r<0) {
-		close(handle);
-		handle = -1;
-		return 0;
-	}
+    r = fcntl(handle, F_SETFL, r);
+    if (r < 0) {
+        close(handle);
+        handle = -1;
+        return 0;
+    }
 
-	prev_mouseb = 7;
-	return 1;
+    prev_mouseb = 7;
+    return 1;
 }
 
-void SDL_AtariDevMouse_Close(void)
+void
+SDL_AtariDevMouse_Close(void)
 {
-	if (handle>0) {
-		close(handle);
-		handle = -1;
-	}
+    if (handle > 0) {
+        close(handle);
+        handle = -1;
+    }
 }
 
-static int atari_GetButton(int button)
+static int
+atari_GetButton(int button)
 {
-	switch(button)
-	{
-		case 0:
-			return SDL_BUTTON_RIGHT;
-		case 1:
-			return SDL_BUTTON_MIDDLE;
-		default:
-			break;
-	}
+    switch (button) {
+    case 0:
+        return SDL_BUTTON_RIGHT;
+    case 1:
+        return SDL_BUTTON_MIDDLE;
+    default:
+        break;
+    }
 
-	return SDL_BUTTON_LEFT;
+    return SDL_BUTTON_LEFT;
 }
 
-void SDL_AtariDevMouse_PostMouseEvents(_THIS, SDL_bool buttonEvents)
+void
+SDL_AtariDevMouse_PostMouseEvents(_THIS, SDL_bool buttonEvents)
 {
-	unsigned char buffer[3];
-	int mousex, mousey;
+    unsigned char buffer[3];
+    int mousex, mousey;
 
-	if (handle<0) {
-		return;
-	}
+    if (handle < 0) {
+        return;
+    }
 
-	mousex = mousey = 0;
-	while (read(handle, buffer, sizeof(buffer))==sizeof(buffer)) {
-		mouseb = buffer[0] & 7;
-		mousex += (char) buffer[1];
-		mousey += (char) buffer[2];
+    mousex = mousey = 0;
+    while (read(handle, buffer, sizeof(buffer)) == sizeof(buffer)) {
+        mouseb = buffer[0] & 7;
+        mousex += (char) buffer[1];
+        mousey += (char) buffer[2];
 
-		/* Mouse button events */
-		if (buttonEvents && (mouseb != prev_mouseb)) {
-			int i;
+        /* Mouse button events */
+        if (buttonEvents && (mouseb != prev_mouseb)) {
+            int i;
 
-			for (i=0;i<3;i++) {
-				int curbutton, prevbutton;
+            for (i = 0; i < 3; i++) {
+                int curbutton, prevbutton;
 
-				curbutton = mouseb & (1<<i);
-				prevbutton = prev_mouseb & (1<<i);
-			
-				if (curbutton && !prevbutton) {
-					SDL_PrivateMouseButton(SDL_RELEASED, atari_GetButton(i), 0, 0);
-				}
-				if (!curbutton && prevbutton) {
-					SDL_PrivateMouseButton(SDL_PRESSED, atari_GetButton(i), 0, 0);
-				}
-			}
+                curbutton = mouseb & (1 << i);
+                prevbutton = prev_mouseb & (1 << i);
 
-			prev_mouseb = mouseb;
-		}
-	}
+                if (curbutton && !prevbutton) {
+                    SDL_PrivateMouseButton(SDL_RELEASED,
+                                           atari_GetButton(i), 0, 0);
+                }
+                if (!curbutton && prevbutton) {
+                    SDL_PrivateMouseButton(SDL_PRESSED,
+                                           atari_GetButton(i), 0, 0);
+                }
+            }
 
-	/* Mouse motion event */
-	if (mousex || mousey) {
-		SDL_PrivateMouseMotion(0, 1, mousex, -mousey);
-	}
+            prev_mouseb = mouseb;
+        }
+    }
+
+    /* Mouse motion event */
+    if (mousex || mousey) {
+        SDL_PrivateMouseMotion(0, 1, mousex, -mousey);
+    }
 }
+
+/* vi: set ts=4 sw=4 expandtab: */

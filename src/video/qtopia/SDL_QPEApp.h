@@ -31,3 +31,4 @@ extern void SDL_QuitQPEApp(void);
 
 /* Flag to tell whether the app is active or not */
 extern int SDL_QPEAppActive;
+/* vi: set ts=4 sw=4 expandtab: */

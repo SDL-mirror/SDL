@@ -44,7 +44,7 @@
 /*
  * Typedefs to force certain sized values.
  */
-typedef Uint8  U008;
+typedef Uint8 U008;
 typedef Uint16 U016;
 typedef Uint32 U032;
 
@@ -161,14 +161,14 @@ typedef volatile struct
     U016 FifoFree;
     U016 Nop;
     U032 reserved01[0x0BB];
-    U032 reserved03[(0x040)-1];
+    U032 reserved03[(0x040) - 1];
     U032 Color1A;
     struct
     {
         U032 TopLeft;
         U032 WidthHeight;
     } UnclippedRectangle[64];
-    U032 reserved04[(0x080)-3];
+    U032 reserved04[(0x080) - 3];
     struct
     {
         U032 TopLeft;
@@ -180,7 +180,7 @@ typedef volatile struct
         U032 TopLeft;
         U032 BottomRight;
     } ClippedRectangle[64];
-    U032 reserved05[(0x080)-5];
+    U032 reserved05[(0x080) - 5];
     struct
     {
         U032 TopLeft;
@@ -190,7 +190,7 @@ typedef volatile struct
     U032 WidthHeightC;
     U032 PointC;
     U032 MonochromeData1C;
-    U032 reserved06[(0x080)+121];
+    U032 reserved06[(0x080) + 121];
     struct
     {
         U032 TopLeft;
@@ -201,7 +201,7 @@ typedef volatile struct
     U032 WidthHeightOutD;
     U032 PointD;
     U032 MonochromeData1D;
-    U032 reserved07[(0x080)+120];
+    U032 reserved07[(0x080) + 120];
     struct
     {
         U032 TopLeft;
@@ -283,27 +283,31 @@ typedef volatile struct
     U016 FifoFree;
     U016 Nop[1];
     U032 reserved01[0x0BC];
-    U032 Color;             /* source color               0304-0307*/
+    U032 Color;                 /* source color               0304-0307 */
     U032 Reserved02[0x03e];
-    struct {                /* start aliased methods in array   0400-    */
-        U032 point0;        /* y_x S16_S16 in pixels            0-   3*/
-        U032 point1;        /* y_x S16_S16 in pixels            4-   7*/
-    } Lin[16];              /* end of aliased methods in array      -047f*/
-    struct {                /* start aliased methods in array   0480-    */
-        U032 point0X;       /* in pixels, 0 at left                0-   3*/
-        U032 point0Y;       /* in pixels, 0 at top                 4-   7*/
-        U032 point1X;       /* in pixels, 0 at left                8-   b*/
-        U032 point1Y;       /* in pixels, 0 at top                 c-   f*/
-    } Lin32[8];             /* end of aliased methods in array      -04ff*/
-    U032 PolyLin[32];       /* y_x S16_S16 in pixels         0500-057f*/
-    struct {                /* start aliased methods in array   0580-    */
-        U032 x;             /* in pixels, 0 at left                0-   3*/
-        U032 y;             /* in pixels, 0 at top                 4-   7*/
-    } PolyLin32[16];        /* end of aliased methods in array      -05ff*/
-    struct {                /* start aliased methods in array   0600-    */
-        U032 color;         /* source color                     0-   3*/
-        U032 point;         /* y_x S16_S16 in pixels            4-   7*/
-    } ColorPolyLin[16];     /* end of aliased methods in array      -067f*/
+    struct
+    {                           /* start aliased methods in array   0400-    */
+        U032 point0;            /* y_x S16_S16 in pixels            0-   3 */
+        U032 point1;            /* y_x S16_S16 in pixels            4-   7 */
+    } Lin[16];                  /* end of aliased methods in array      -047f */
+    struct
+    {                           /* start aliased methods in array   0480-    */
+        U032 point0X;           /* in pixels, 0 at left                0-   3 */
+        U032 point0Y;           /* in pixels, 0 at top                 4-   7 */
+        U032 point1X;           /* in pixels, 0 at left                8-   b */
+        U032 point1Y;           /* in pixels, 0 at top                 c-   f */
+    } Lin32[8];                 /* end of aliased methods in array      -04ff */
+    U032 PolyLin[32];           /* y_x S16_S16 in pixels         0500-057f */
+    struct
+    {                           /* start aliased methods in array   0580-    */
+        U032 x;                 /* in pixels, 0 at left                0-   3 */
+        U032 y;                 /* in pixels, 0 at top                 4-   7 */
+    } PolyLin32[16];            /* end of aliased methods in array      -05ff */
+    struct
+    {                           /* start aliased methods in array   0600-    */
+        U032 color;             /* source color                     0-   3 */
+        U032 point;             /* y_x S16_S16 in pixels            4-   7 */
+    } ColorPolyLin[16];         /* end of aliased methods in array      -067f */
 } RivaLine;
 /*
  * 2D/3D surfaces
@@ -326,7 +330,7 @@ typedef volatile struct
     U032 RenderBufferOffset;
     U032 ZBufferOffset;
 } RivaSurface3D;
-    
+
 /***************************************************************************\
 *                                                                           *
 *                        Virtualized RIVA H/W interface.                    *
@@ -377,15 +381,17 @@ typedef struct _riva_hw_inst
     /*
      * Common chip functions.
      */
-    int  (*Busy)(struct _riva_hw_inst *);
-    void (*CalcStateExt)(struct _riva_hw_inst *,struct _riva_hw_state *,int,int,int,int,int,int,int,int,int,int,int,int,int);
-    void (*LoadStateExt)(struct _riva_hw_inst *,struct _riva_hw_state *);
-    void (*UnloadStateExt)(struct _riva_hw_inst *,struct _riva_hw_state *);
-    void (*SetStartAddress)(struct _riva_hw_inst *,U032);
-    void (*SetSurfaces2D)(struct _riva_hw_inst *,U032,U032);
-    void (*SetSurfaces3D)(struct _riva_hw_inst *,U032,U032);
-    int  (*ShowHideCursor)(struct _riva_hw_inst *,int);
-    void (*LockUnlock)(struct _riva_hw_inst *, int);
+    int (*Busy) (struct _riva_hw_inst *);
+    void (*CalcStateExt) (struct _riva_hw_inst *, struct _riva_hw_state *,
+                          int, int, int, int, int, int, int, int, int, int,
+                          int, int, int);
+    void (*LoadStateExt) (struct _riva_hw_inst *, struct _riva_hw_state *);
+    void (*UnloadStateExt) (struct _riva_hw_inst *, struct _riva_hw_state *);
+    void (*SetStartAddress) (struct _riva_hw_inst *, U032);
+    void (*SetSurfaces2D) (struct _riva_hw_inst *, U032, U032);
+    void (*SetSurfaces3D) (struct _riva_hw_inst *, U032, U032);
+    int (*ShowHideCursor) (struct _riva_hw_inst *, int);
+    void (*LockUnlock) (struct _riva_hw_inst *, int);
     /*
      * Current extended mode settings.
      */
@@ -393,15 +399,15 @@ typedef struct _riva_hw_inst
     /*
      * FIFO registers.
      */
-    RivaRop                 *Rop;
-    RivaPattern             *Patt;
-    RivaClip                *Clip;
-    RivaPixmap              *Pixmap;
-    RivaScreenBlt           *Blt;
-    RivaBitmap              *Bitmap;
-    RivaLine                *Line;
-    RivaTexturedTriangle03  *Tri03;
-    RivaTexturedTriangle05  *Tri05;
+    RivaRop *Rop;
+    RivaPattern *Patt;
+    RivaClip *Clip;
+    RivaPixmap *Pixmap;
+    RivaScreenBlt *Blt;
+    RivaBitmap *Bitmap;
+    RivaLine *Line;
+    RivaTexturedTriangle03 *Tri03;
+    RivaTexturedTriangle05 *Tri05;
 } RIVA_HW_INST;
 /*
  * Extended mode state information.
@@ -446,4 +452,4 @@ typedef struct _riva_hw_state
    FifoFreeCount -= (cnt);                                         \
 }
 #endif /* __RIVA_HW_H__ */
-
+/* vi: set ts=4 sw=4 expandtab: */

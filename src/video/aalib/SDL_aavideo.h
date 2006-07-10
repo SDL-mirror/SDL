@@ -36,12 +36,13 @@
 #define SDL_NUMMODES 6
 
 /* Private display data */
-struct SDL_PrivateVideoData {
-	SDL_Rect *SDL_modelist[SDL_NUMMODES+1];
-	aa_context *context;
-	aa_palette palette;
-	aa_renderparams *rparams;
-	double x_ratio, y_ratio;
+struct SDL_PrivateVideoData
+{
+    SDL_Rect *SDL_modelist[SDL_NUMMODES + 1];
+    aa_context *context;
+    aa_palette palette;
+    aa_renderparams *rparams;
+    double x_ratio, y_ratio;
     int w, h;
     SDL_mutex *mutex;
     int in_x11;
@@ -64,3 +65,4 @@ struct SDL_PrivateVideoData {
 #define AA_h                (this->hidden->h)
 
 #endif /* _SDL_aavideo_h */
+/* vi: set ts=4 sw=4 expandtab: */

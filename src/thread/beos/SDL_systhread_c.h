@@ -27,5 +27,7 @@
 typedef thread_id SYS_ThreadHandle;
 
 /* Functions needed to work with system threads in other portions of SDL */
-extern void SDL_MaskSignals(sigset_t *omask);
-extern void SDL_UnmaskSignals(sigset_t *omask);
+extern void SDL_MaskSignals(sigset_t * omask);
+extern void SDL_UnmaskSignals(sigset_t * omask);
+
+/* vi: set ts=4 sw=4 expandtab: */

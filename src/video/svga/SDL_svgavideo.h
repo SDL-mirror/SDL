@@ -31,19 +31,20 @@
 #define _THIS	SDL_VideoDevice *this
 
 /* Private display data */
-struct SDL_PrivateVideoData {
-#define NUM_MODELISTS	4		/* 8, 16, 24, and 32 bits-per-pixel */
-	int SDL_nummodes[NUM_MODELISTS];
-	SDL_Rect **SDL_modelist[NUM_MODELISTS];
-	int *SDL_vgamode[NUM_MODELISTS];
+struct SDL_PrivateVideoData
+{
+#define NUM_MODELISTS	4       /* 8, 16, 24, and 32 bits-per-pixel */
+    int SDL_nummodes[NUM_MODELISTS];
+    SDL_Rect **SDL_modelist[NUM_MODELISTS];
+    int *SDL_vgamode[NUM_MODELISTS];
 
-	/* information for double-buffering */
-	int flip_page;
-	int flip_offset[2];
-	Uint8 *flip_address[2];
+    /* information for double-buffering */
+    int flip_page;
+    int flip_offset[2];
+    Uint8 *flip_address[2];
 
-	/* Set to 1 if we're in banked video mode */
-	int banked;
+    /* Set to 1 if we're in banked video mode */
+    int banked;
 };
 /* Old variable names */
 #define SDL_nummodes		(this->hidden->SDL_nummodes)
@@ -55,4 +56,4 @@ struct SDL_PrivateVideoData {
 #define	banked			(this->hidden->banked)
 
 #endif /* _SDL_svgavideo_h */
-
+/* vi: set ts=4 sw=4 expandtab: */

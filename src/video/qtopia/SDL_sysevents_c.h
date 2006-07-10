@@ -29,3 +29,4 @@
 
 extern void QT_InitOSKeymap(_THIS);
 extern void QT_PumpEvents(_THIS);
+/* vi: set ts=4 sw=4 expandtab: */

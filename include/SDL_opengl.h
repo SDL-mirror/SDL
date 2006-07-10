@@ -27,33 +27,35 @@
 #ifdef __WIN32__
 #define WIN32_LEAN_AND_MEAN
 #ifndef NOMINMAX
-#define NOMINMAX	/* Don't defined min() and max() */
+#define NOMINMAX                /* Don't defined min() and max() */
 #endif
 #include <windows.h>
 #endif
 #ifndef NO_SDL_GLEXT
-#define __glext_h_  /* Don't let gl.h include glext.h */
+#define __glext_h_              /* Don't let gl.h include glext.h */
 #endif
 #if defined(__MACOSX__)
-#include <OpenGL/gl.h>	/* Header File For The OpenGL Library */
-#include <OpenGL/glu.h>	/* Header File For The GLU Library */
+#include <OpenGL/gl.h>          /* Header File For The OpenGL Library */
+#include <OpenGL/glu.h>         /* Header File For The GLU Library */
 #elif defined(__MACOS__)
-#include <gl.h>		/* Header File For The OpenGL Library */
-#include <glu.h>	/* Header File For The GLU Library */
+#include <gl.h>                 /* Header File For The OpenGL Library */
+#include <glu.h>                /* Header File For The GLU Library */
 #else
-#include <GL/gl.h>	/* Header File For The OpenGL Library */
-#include <GL/glu.h>	/* Header File For The GLU Library */
+#include <GL/gl.h>              /* Header File For The OpenGL Library */
+#include <GL/glu.h>             /* Header File For The GLU Library */
 #endif
 #ifndef NO_SDL_GLEXT
 #undef __glext_h_
 #endif
 
-/* This file taken from "GLext.h" from the Jeff Molofee OpenGL tutorials.
-   It is included here because glext.h is not available on some systems.
+/* This file is included because glext.h is not available on some systems.
    If you don't want this version included, simply define "NO_SDL_GLEXT"
+   The latest version is available from:
+	http://oss.sgi.com/projects/ogl-sample/registry/
  */
-#ifndef NO_SDL_GLEXT
-#if !defined(__glext_h_) && !defined(GL_GLEXT_LEGACY)
+#if !defined(NO_SDL_GLEXT) && !defined(GL_GLEXT_LEGACY)
+/* *INDENT-OFF* */
+#ifndef __glext_h_
 #define __glext_h_
 
 #ifdef __cplusplus
@@ -6548,4 +6550,5 @@ typedef void (APIENTRYP PFNGLSTRINGMARKERGREMEDYPROC) (GLsizei len, const GLvoid
 #endif
 
 #endif
+/* *INDENT-ON* */
 #endif /* NO_SDL_GLEXT */

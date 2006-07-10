@@ -59,7 +59,7 @@ SOFTWARE.
 	dpy->bufptr += SIZEOF(xv##name##Req);\
 	dpy->request++
 
-#else  /* non-ANSI C uses empty comment instead of "##" for token concatenation */
+#else /* non-ANSI C uses empty comment instead of "##" for token concatenation */
 #define XvGetReq(name, req) \
         WORD64ALIGN\
 	if ((dpy->bufptr + SIZEOF(xv/**/name/**/Req)) > dpy->bufmax)\
@@ -74,3 +74,4 @@ SOFTWARE.
 
 
 #endif /* XVLIBINT_H */
+/* vi: set ts=4 sw=4 expandtab: */

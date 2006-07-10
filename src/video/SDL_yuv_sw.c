@@ -21,7 +21,7 @@
 */
 #include "SDL_config.h"
 
-/* This is the software implementation of the YUV video overlay support */
+/* This is the software implementation of the YUV texture support */
 
 /* This code was derived from code carrying the following copyright notices:
 
@@ -86,108 +86,104 @@
 #include "SDL_video.h"
 #include "SDL_cpuinfo.h"
 #include "SDL_stretch_c.h"
-#include "SDL_yuvfuncs.h"
 #include "SDL_yuv_sw_c.h"
 
-/* The functions used to manipulate software video overlays */
-static struct private_yuvhwfuncs sw_yuvfuncs = {
-	SDL_LockYUV_SW,
-	SDL_UnlockYUV_SW,
-	SDL_DisplayYUV_SW,
-	SDL_FreeYUV_SW
+
+struct SDL_SW_YUVTexture
+{
+    SDL_Texture *texture;
+
+    Uint32 target_format;
+    Uint8 *pixels;
+    int *colortab;
+    Uint32 *rgb_2_pix;
+    void (*Display1X) (int *colortab, Uint32 * rgb_2_pix,
+                       unsigned char *lum, unsigned char *cr,
+                       unsigned char *cb, unsigned char *out,
+                       int rows, int cols, int mod);
+    void (*Display2X) (int *colortab, Uint32 * rgb_2_pix,
+                       unsigned char *lum, unsigned char *cr,
+                       unsigned char *cb, unsigned char *out,
+                       int rows, int cols, int mod);
+
+    /* These are just so we don't have to allocate them separately */
+    Uint16 pitches[3];
+    Uint8 *planes[3];
+
+    /* This is a temporary surface in case we have to stretch copy */
+    SDL_Surface *stretch;
+    SDL_Surface *display;
 };
-
-/* RGB conversion lookup tables */
-struct private_yuvhwdata {
-	SDL_Surface *stretch;
-	SDL_Surface *display;
-	Uint8 *pixels;
-	int *colortab;
-	Uint32 *rgb_2_pix;
-	void (*Display1X)(int *colortab, Uint32 *rgb_2_pix,
-                          unsigned char *lum, unsigned char *cr,
-                          unsigned char *cb, unsigned char *out,
-                          int rows, int cols, int mod );
-	void (*Display2X)(int *colortab, Uint32 *rgb_2_pix,
-	                  unsigned char *lum, unsigned char *cr,
-                          unsigned char *cb, unsigned char *out,
-                          int rows, int cols, int mod );
-
-	/* These are just so we don't have to allocate them separately */
-	Uint16 pitches[3];
-	Uint8 *planes[3];
-};
-
 
 /* The colorspace conversion functions */
 
-#if 0 /*defined(__GNUC__) && defined(__i386__) && SDL_ASSEMBLY_ROUTINES*/
-extern void Color565DitherYV12MMX1X( int *colortab, Uint32 *rgb_2_pix,
-                                     unsigned char *lum, unsigned char *cr,
-                                     unsigned char *cb, unsigned char *out,
-                                     int rows, int cols, int mod );
-extern void ColorRGBDitherYV12MMX1X( int *colortab, Uint32 *rgb_2_pix,
-                                     unsigned char *lum, unsigned char *cr,
-                                     unsigned char *cb, unsigned char *out,
-                                     int rows, int cols, int mod );
-#endif 
-
-static void Color16DitherYV12Mod1X( int *colortab, Uint32 *rgb_2_pix,
+#if 0                           /*defined(__GNUC__) && defined(__i386__) && SDL_ASSEMBLY_ROUTINES */
+extern void Color565DitherYV12MMX1X(int *colortab, Uint32 * rgb_2_pix,
                                     unsigned char *lum, unsigned char *cr,
                                     unsigned char *cb, unsigned char *out,
-                                    int rows, int cols, int mod )
+                                    int rows, int cols, int mod);
+extern void ColorRGBDitherYV12MMX1X(int *colortab, Uint32 * rgb_2_pix,
+                                    unsigned char *lum, unsigned char *cr,
+                                    unsigned char *cb, unsigned char *out,
+                                    int rows, int cols, int mod);
+#endif
+
+static void
+Color16DitherYV12Mod1X(int *colortab, Uint32 * rgb_2_pix,
+                       unsigned char *lum, unsigned char *cr,
+                       unsigned char *cb, unsigned char *out,
+                       int rows, int cols, int mod)
 {
-    unsigned short* row1;
-    unsigned short* row2;
-    unsigned char* lum2;
+    unsigned short *row1;
+    unsigned short *row2;
+    unsigned char *lum2;
     int x, y;
     int cr_r;
     int crb_g;
     int cb_b;
     int cols_2 = cols / 2;
 
-    row1 = (unsigned short*) out;
+    row1 = (unsigned short *) out;
     row2 = row1 + cols + mod;
     lum2 = lum + cols;
 
     mod += cols + mod;
 
     y = rows / 2;
-    while( y-- )
-    {
+    while (y--) {
         x = cols_2;
-        while( x-- )
-        {
+        while (x--) {
             register int L;
 
-            cr_r   = 0*768+256 + colortab[ *cr + 0*256 ];
-            crb_g  = 1*768+256 + colortab[ *cr + 1*256 ]
-                               + colortab[ *cb + 2*256 ];
-            cb_b   = 2*768+256 + colortab[ *cb + 3*256 ];
-            ++cr; ++cb;
+            cr_r = 0 * 768 + 256 + colortab[*cr + 0 * 256];
+            crb_g = 1 * 768 + 256 + colortab[*cr + 1 * 256]
+                + colortab[*cb + 2 * 256];
+            cb_b = 2 * 768 + 256 + colortab[*cb + 3 * 256];
+            ++cr;
+            ++cb;
 
             L = *lum++;
-            *row1++ = (unsigned short)(rgb_2_pix[ L + cr_r ] |
-                                       rgb_2_pix[ L + crb_g ] |
-                                       rgb_2_pix[ L + cb_b ]);
+            *row1++ = (unsigned short) (rgb_2_pix[L + cr_r] |
+                                        rgb_2_pix[L + crb_g] |
+                                        rgb_2_pix[L + cb_b]);
 
             L = *lum++;
-            *row1++ = (unsigned short)(rgb_2_pix[ L + cr_r ] |
-                                       rgb_2_pix[ L + crb_g ] |
-                                       rgb_2_pix[ L + cb_b ]);
+            *row1++ = (unsigned short) (rgb_2_pix[L + cr_r] |
+                                        rgb_2_pix[L + crb_g] |
+                                        rgb_2_pix[L + cb_b]);
 
 
             /* Now, do second row.  */
 
             L = *lum2++;
-            *row2++ = (unsigned short)(rgb_2_pix[ L + cr_r ] |
-                                       rgb_2_pix[ L + crb_g ] |
-                                       rgb_2_pix[ L + cb_b ]);
+            *row2++ = (unsigned short) (rgb_2_pix[L + cr_r] |
+                                        rgb_2_pix[L + crb_g] |
+                                        rgb_2_pix[L + cb_b]);
 
             L = *lum2++;
-            *row2++ = (unsigned short)(rgb_2_pix[ L + cr_r ] |
-                                       rgb_2_pix[ L + crb_g ] |
-                                       rgb_2_pix[ L + cb_b ]);
+            *row2++ = (unsigned short) (rgb_2_pix[L + cr_r] |
+                                        rgb_2_pix[L + crb_g] |
+                                        rgb_2_pix[L + cb_b]);
         }
 
         /*
@@ -195,22 +191,23 @@ static void Color16DitherYV12Mod1X( int *colortab, Uint32 *rgb_2_pix,
          * to the ++'s above),but they need to be at the start
          * of the line after that.
          */
-        lum  += cols;
+        lum += cols;
         lum2 += cols;
         row1 += mod;
         row2 += mod;
     }
 }
 
-static void Color24DitherYV12Mod1X( int *colortab, Uint32 *rgb_2_pix,
-                                    unsigned char *lum, unsigned char *cr,
-                                    unsigned char *cb, unsigned char *out,
-                                    int rows, int cols, int mod )
+static void
+Color24DitherYV12Mod1X(int *colortab, Uint32 * rgb_2_pix,
+                       unsigned char *lum, unsigned char *cr,
+                       unsigned char *cb, unsigned char *out,
+                       int rows, int cols, int mod)
 {
     unsigned int value;
-    unsigned char* row1;
-    unsigned char* row2;
-    unsigned char* lum2;
+    unsigned char *row1;
+    unsigned char *row2;
+    unsigned char *lum2;
     int x, y;
     int cr_r;
     int crb_g;
@@ -218,59 +215,54 @@ static void Color24DitherYV12Mod1X( int *colortab, Uint32 *rgb_2_pix,
     int cols_2 = cols / 2;
 
     row1 = out;
-    row2 = row1 + cols*3 + mod*3;
+    row2 = row1 + cols * 3 + mod * 3;
     lum2 = lum + cols;
 
     mod += cols + mod;
     mod *= 3;
 
     y = rows / 2;
-    while( y-- )
-    {
+    while (y--) {
         x = cols_2;
-        while( x-- )
-        {
+        while (x--) {
             register int L;
 
-            cr_r   = 0*768+256 + colortab[ *cr + 0*256 ];
-            crb_g  = 1*768+256 + colortab[ *cr + 1*256 ]
-                               + colortab[ *cb + 2*256 ];
-            cb_b   = 2*768+256 + colortab[ *cb + 3*256 ];
-            ++cr; ++cb;
+            cr_r = 0 * 768 + 256 + colortab[*cr + 0 * 256];
+            crb_g = 1 * 768 + 256 + colortab[*cr + 1 * 256]
+                + colortab[*cb + 2 * 256];
+            cb_b = 2 * 768 + 256 + colortab[*cb + 3 * 256];
+            ++cr;
+            ++cb;
 
             L = *lum++;
-            value = (rgb_2_pix[ L + cr_r ] |
-                     rgb_2_pix[ L + crb_g ] |
-                     rgb_2_pix[ L + cb_b ]);
-            *row1++ = (value      ) & 0xFF;
-            *row1++ = (value >>  8) & 0xFF;
+            value = (rgb_2_pix[L + cr_r] |
+                     rgb_2_pix[L + crb_g] | rgb_2_pix[L + cb_b]);
+            *row1++ = (value) & 0xFF;
+            *row1++ = (value >> 8) & 0xFF;
             *row1++ = (value >> 16) & 0xFF;
 
             L = *lum++;
-            value = (rgb_2_pix[ L + cr_r ] |
-                     rgb_2_pix[ L + crb_g ] |
-                     rgb_2_pix[ L + cb_b ]);
-            *row1++ = (value      ) & 0xFF;
-            *row1++ = (value >>  8) & 0xFF;
+            value = (rgb_2_pix[L + cr_r] |
+                     rgb_2_pix[L + crb_g] | rgb_2_pix[L + cb_b]);
+            *row1++ = (value) & 0xFF;
+            *row1++ = (value >> 8) & 0xFF;
             *row1++ = (value >> 16) & 0xFF;
 
 
             /* Now, do second row.  */
 
             L = *lum2++;
-            value = (rgb_2_pix[ L + cr_r ] |
-                     rgb_2_pix[ L + crb_g ] |
-                     rgb_2_pix[ L + cb_b ]);
-            *row2++ = (value      ) & 0xFF;
-            *row2++ = (value >>  8) & 0xFF;
+            value = (rgb_2_pix[L + cr_r] |
+                     rgb_2_pix[L + crb_g] | rgb_2_pix[L + cb_b]);
+            *row2++ = (value) & 0xFF;
+            *row2++ = (value >> 8) & 0xFF;
             *row2++ = (value >> 16) & 0xFF;
 
             L = *lum2++;
-            value = (rgb_2_pix[ L + cr_r ] |
-                     rgb_2_pix[ L + crb_g ] |
-                     rgb_2_pix[ L + cb_b ]);
-            *row2++ = (value      ) & 0xFF;
-            *row2++ = (value >>  8) & 0xFF;
+            value = (rgb_2_pix[L + cr_r] |
+                     rgb_2_pix[L + crb_g] | rgb_2_pix[L + cb_b]);
+            *row2++ = (value) & 0xFF;
+            *row2++ = (value >> 8) & 0xFF;
             *row2++ = (value >> 16) & 0xFF;
         }
 
@@ -279,69 +271,65 @@ static void Color24DitherYV12Mod1X( int *colortab, Uint32 *rgb_2_pix,
          * to the ++'s above),but they need to be at the start
          * of the line after that.
          */
-        lum  += cols;
+        lum += cols;
         lum2 += cols;
         row1 += mod;
         row2 += mod;
     }
 }
 
-static void Color32DitherYV12Mod1X( int *colortab, Uint32 *rgb_2_pix,
-                                    unsigned char *lum, unsigned char *cr,
-                                    unsigned char *cb, unsigned char *out,
-                                    int rows, int cols, int mod )
+static void
+Color32DitherYV12Mod1X(int *colortab, Uint32 * rgb_2_pix,
+                       unsigned char *lum, unsigned char *cr,
+                       unsigned char *cb, unsigned char *out,
+                       int rows, int cols, int mod)
 {
-    unsigned int* row1;
-    unsigned int* row2;
-    unsigned char* lum2;
+    unsigned int *row1;
+    unsigned int *row2;
+    unsigned char *lum2;
     int x, y;
     int cr_r;
     int crb_g;
     int cb_b;
     int cols_2 = cols / 2;
 
-    row1 = (unsigned int*) out;
+    row1 = (unsigned int *) out;
     row2 = row1 + cols + mod;
     lum2 = lum + cols;
 
     mod += cols + mod;
 
     y = rows / 2;
-    while( y-- )
-    {
+    while (y--) {
         x = cols_2;
-        while( x-- )
-        {
+        while (x--) {
             register int L;
 
-            cr_r   = 0*768+256 + colortab[ *cr + 0*256 ];
-            crb_g  = 1*768+256 + colortab[ *cr + 1*256 ]
-                               + colortab[ *cb + 2*256 ];
-            cb_b   = 2*768+256 + colortab[ *cb + 3*256 ];
-            ++cr; ++cb;
+            cr_r = 0 * 768 + 256 + colortab[*cr + 0 * 256];
+            crb_g = 1 * 768 + 256 + colortab[*cr + 1 * 256]
+                + colortab[*cb + 2 * 256];
+            cb_b = 2 * 768 + 256 + colortab[*cb + 3 * 256];
+            ++cr;
+            ++cb;
 
             L = *lum++;
-            *row1++ = (rgb_2_pix[ L + cr_r ] |
-                       rgb_2_pix[ L + crb_g ] |
-                       rgb_2_pix[ L + cb_b ]);
+            *row1++ = (rgb_2_pix[L + cr_r] |
+                       rgb_2_pix[L + crb_g] | rgb_2_pix[L + cb_b]);
 
             L = *lum++;
-            *row1++ = (rgb_2_pix[ L + cr_r ] |
-                       rgb_2_pix[ L + crb_g ] |
-                       rgb_2_pix[ L + cb_b ]);
+            *row1++ = (rgb_2_pix[L + cr_r] |
+                       rgb_2_pix[L + crb_g] | rgb_2_pix[L + cb_b]);
 
 
             /* Now, do second row.  */
 
             L = *lum2++;
-            *row2++ = (rgb_2_pix[ L + cr_r ] |
-                       rgb_2_pix[ L + crb_g ] |
-                       rgb_2_pix[ L + cb_b ]);
+            *row2++ = (rgb_2_pix[L + cr_r] |
+                       rgb_2_pix[L + crb_g] | rgb_2_pix[L + cb_b]);
 
             L = *lum2++;
-            *row2++ = (rgb_2_pix[ L + cr_r ] |
-                       rgb_2_pix[ L + crb_g ] |
-                       rgb_2_pix[ L + cb_b ]);
+            *row2++ = (rgb_2_pix[L + cr_r] |
+                       rgb_2_pix[L + crb_g] | rgb_2_pix[L + cb_b]);
         }
 
         /*
@@ -349,7 +337,7 @@ static void Color32DitherYV12Mod1X( int *colortab, Uint32 *rgb_2_pix,
          * to the ++'s above),but they need to be at the start
          * of the line after that.
          */
-        lum  += cols;
+        lum += cols;
         lum2 += cols;
         row1 += mod;
         row2 += mod;
@@ -361,15 +349,16 @@ static void Color32DitherYV12Mod1X( int *colortab, Uint32 *rgb_2_pix,
  * 16 bits replicated in the upper 16. This means I can write ints and get
  * the horisontal doubling for free (almost).
  */
-static void Color16DitherYV12Mod2X( int *colortab, Uint32 *rgb_2_pix,
-                                    unsigned char *lum, unsigned char *cr,
-                                    unsigned char *cb, unsigned char *out,
-                                    int rows, int cols, int mod )
+static void
+Color16DitherYV12Mod2X(int *colortab, Uint32 * rgb_2_pix,
+                       unsigned char *lum, unsigned char *cr,
+                       unsigned char *cb, unsigned char *out,
+                       int rows, int cols, int mod)
 {
-    unsigned int* row1 = (unsigned int*) out;
-    const int next_row = cols+(mod/2);
-    unsigned int* row2 = row1 + 2*next_row;
-    unsigned char* lum2;
+    unsigned int *row1 = (unsigned int *) out;
+    const int next_row = cols + (mod / 2);
+    unsigned int *row2 = row1 + 2 * next_row;
+    unsigned char *lum2;
     int x, y;
     int cr_r;
     int crb_g;
@@ -378,47 +367,46 @@ static void Color16DitherYV12Mod2X( int *colortab, Uint32 *rgb_2_pix,
 
     lum2 = lum + cols;
 
-    mod = (next_row * 3) + (mod/2);
+    mod = (next_row * 3) + (mod / 2);
 
     y = rows / 2;
-    while( y-- )
-    {
+    while (y--) {
         x = cols_2;
-        while( x-- )
-        {
+        while (x--) {
             register int L;
 
-            cr_r   = 0*768+256 + colortab[ *cr + 0*256 ];
-            crb_g  = 1*768+256 + colortab[ *cr + 1*256 ]
-                               + colortab[ *cb + 2*256 ];
-            cb_b   = 2*768+256 + colortab[ *cb + 3*256 ];
-            ++cr; ++cb;
+            cr_r = 0 * 768 + 256 + colortab[*cr + 0 * 256];
+            crb_g = 1 * 768 + 256 + colortab[*cr + 1 * 256]
+                + colortab[*cb + 2 * 256];
+            cb_b = 2 * 768 + 256 + colortab[*cb + 3 * 256];
+            ++cr;
+            ++cb;
 
             L = *lum++;
-            row1[0] = row1[next_row] = (rgb_2_pix[ L + cr_r ] |
-                                        rgb_2_pix[ L + crb_g ] |
-                                        rgb_2_pix[ L + cb_b ]);
+            row1[0] = row1[next_row] = (rgb_2_pix[L + cr_r] |
+                                        rgb_2_pix[L + crb_g] |
+                                        rgb_2_pix[L + cb_b]);
             row1++;
 
             L = *lum++;
-            row1[0] = row1[next_row] = (rgb_2_pix[ L + cr_r ] |
-                                        rgb_2_pix[ L + crb_g ] |
-                                        rgb_2_pix[ L + cb_b ]);
+            row1[0] = row1[next_row] = (rgb_2_pix[L + cr_r] |
+                                        rgb_2_pix[L + crb_g] |
+                                        rgb_2_pix[L + cb_b]);
             row1++;
 
 
             /* Now, do second row. */
 
             L = *lum2++;
-            row2[0] = row2[next_row] = (rgb_2_pix[ L + cr_r ] |
-                                        rgb_2_pix[ L + crb_g ] |
-                                        rgb_2_pix[ L + cb_b ]);
+            row2[0] = row2[next_row] = (rgb_2_pix[L + cr_r] |
+                                        rgb_2_pix[L + crb_g] |
+                                        rgb_2_pix[L + cb_b]);
             row2++;
 
             L = *lum2++;
-            row2[0] = row2[next_row] = (rgb_2_pix[ L + cr_r ] |
-                                        rgb_2_pix[ L + crb_g ] |
-                                        rgb_2_pix[ L + cb_b ]);
+            row2[0] = row2[next_row] = (rgb_2_pix[L + cr_r] |
+                                        rgb_2_pix[L + crb_g] |
+                                        rgb_2_pix[L + cb_b]);
             row2++;
         }
 
@@ -427,23 +415,24 @@ static void Color16DitherYV12Mod2X( int *colortab, Uint32 *rgb_2_pix,
          * to the ++'s above),but they need to be at the start
          * of the line after that.
          */
-        lum  += cols;
+        lum += cols;
         lum2 += cols;
         row1 += mod;
         row2 += mod;
     }
 }
 
-static void Color24DitherYV12Mod2X( int *colortab, Uint32 *rgb_2_pix,
-                                    unsigned char *lum, unsigned char *cr,
-                                    unsigned char *cb, unsigned char *out,
-                                    int rows, int cols, int mod )
+static void
+Color24DitherYV12Mod2X(int *colortab, Uint32 * rgb_2_pix,
+                       unsigned char *lum, unsigned char *cr,
+                       unsigned char *cb, unsigned char *out,
+                       int rows, int cols, int mod)
 {
     unsigned int value;
-    unsigned char* row1 = out;
-    const int next_row = (cols*2 + mod) * 3;
-    unsigned char* row2 = row1 + 2*next_row;
-    unsigned char* lum2;
+    unsigned char *row1 = out;
+    const int next_row = (cols * 2 + mod) * 3;
+    unsigned char *row2 = row1 + 2 * next_row;
+    unsigned char *lum2;
     int x, y;
     int cr_r;
     int crb_g;
@@ -452,72 +441,67 @@ static void Color24DitherYV12Mod2X( int *colortab, Uint32 *rgb_2_pix,
 
     lum2 = lum + cols;
 
-    mod = next_row*3 + mod*3;
+    mod = next_row * 3 + mod * 3;
 
     y = rows / 2;
-    while( y-- )
-    {
+    while (y--) {
         x = cols_2;
-        while( x-- )
-        {
+        while (x--) {
             register int L;
 
-            cr_r   = 0*768+256 + colortab[ *cr + 0*256 ];
-            crb_g  = 1*768+256 + colortab[ *cr + 1*256 ]
-                               + colortab[ *cb + 2*256 ];
-            cb_b   = 2*768+256 + colortab[ *cb + 3*256 ];
-            ++cr; ++cb;
+            cr_r = 0 * 768 + 256 + colortab[*cr + 0 * 256];
+            crb_g = 1 * 768 + 256 + colortab[*cr + 1 * 256]
+                + colortab[*cb + 2 * 256];
+            cb_b = 2 * 768 + 256 + colortab[*cb + 3 * 256];
+            ++cr;
+            ++cb;
 
             L = *lum++;
-            value = (rgb_2_pix[ L + cr_r ] |
-                     rgb_2_pix[ L + crb_g ] |
-                     rgb_2_pix[ L + cb_b ]);
-            row1[0+0] = row1[3+0] = row1[next_row+0] = row1[next_row+3+0] =
-                     (value      ) & 0xFF;
-            row1[0+1] = row1[3+1] = row1[next_row+1] = row1[next_row+3+1] =
-                     (value >>  8) & 0xFF;
-            row1[0+2] = row1[3+2] = row1[next_row+2] = row1[next_row+3+2] =
-                     (value >> 16) & 0xFF;
-            row1 += 2*3;
+            value = (rgb_2_pix[L + cr_r] |
+                     rgb_2_pix[L + crb_g] | rgb_2_pix[L + cb_b]);
+            row1[0 + 0] = row1[3 + 0] = row1[next_row + 0] =
+                row1[next_row + 3 + 0] = (value) & 0xFF;
+            row1[0 + 1] = row1[3 + 1] = row1[next_row + 1] =
+                row1[next_row + 3 + 1] = (value >> 8) & 0xFF;
+            row1[0 + 2] = row1[3 + 2] = row1[next_row + 2] =
+                row1[next_row + 3 + 2] = (value >> 16) & 0xFF;
+            row1 += 2 * 3;
 
             L = *lum++;
-            value = (rgb_2_pix[ L + cr_r ] |
-                     rgb_2_pix[ L + crb_g ] |
-                     rgb_2_pix[ L + cb_b ]);
-            row1[0+0] = row1[3+0] = row1[next_row+0] = row1[next_row+3+0] =
-                     (value      ) & 0xFF;
-            row1[0+1] = row1[3+1] = row1[next_row+1] = row1[next_row+3+1] =
-                     (value >>  8) & 0xFF;
-            row1[0+2] = row1[3+2] = row1[next_row+2] = row1[next_row+3+2] =
-                     (value >> 16) & 0xFF;
-            row1 += 2*3;
+            value = (rgb_2_pix[L + cr_r] |
+                     rgb_2_pix[L + crb_g] | rgb_2_pix[L + cb_b]);
+            row1[0 + 0] = row1[3 + 0] = row1[next_row + 0] =
+                row1[next_row + 3 + 0] = (value) & 0xFF;
+            row1[0 + 1] = row1[3 + 1] = row1[next_row + 1] =
+                row1[next_row + 3 + 1] = (value >> 8) & 0xFF;
+            row1[0 + 2] = row1[3 + 2] = row1[next_row + 2] =
+                row1[next_row + 3 + 2] = (value >> 16) & 0xFF;
+            row1 += 2 * 3;
 
 
             /* Now, do second row. */
 
             L = *lum2++;
-            value = (rgb_2_pix[ L + cr_r ] |
-                     rgb_2_pix[ L + crb_g ] |
-                     rgb_2_pix[ L + cb_b ]);
-            row2[0+0] = row2[3+0] = row2[next_row+0] = row2[next_row+3+0] =
-                     (value      ) & 0xFF;
-            row2[0+1] = row2[3+1] = row2[next_row+1] = row2[next_row+3+1] =
-                     (value >>  8) & 0xFF;
-            row2[0+2] = row2[3+2] = row2[next_row+2] = row2[next_row+3+2] =
-                     (value >> 16) & 0xFF;
-            row2 += 2*3;
+            value = (rgb_2_pix[L + cr_r] |
+                     rgb_2_pix[L + crb_g] | rgb_2_pix[L + cb_b]);
+            row2[0 + 0] = row2[3 + 0] = row2[next_row + 0] =
+                row2[next_row + 3 + 0] = (value) & 0xFF;
+            row2[0 + 1] = row2[3 + 1] = row2[next_row + 1] =
+                row2[next_row + 3 + 1] = (value >> 8) & 0xFF;
+            row2[0 + 2] = row2[3 + 2] = row2[next_row + 2] =
+                row2[next_row + 3 + 2] = (value >> 16) & 0xFF;
+            row2 += 2 * 3;
 
             L = *lum2++;
-            value = (rgb_2_pix[ L + cr_r ] |
-                     rgb_2_pix[ L + crb_g ] |
-                     rgb_2_pix[ L + cb_b ]);
-            row2[0+0] = row2[3+0] = row2[next_row+0] = row2[next_row+3+0] =
-                     (value      ) & 0xFF;
-            row2[0+1] = row2[3+1] = row2[next_row+1] = row2[next_row+3+1] =
-                     (value >>  8) & 0xFF;
-            row2[0+2] = row2[3+2] = row2[next_row+2] = row2[next_row+3+2] =
-                     (value >> 16) & 0xFF;
-            row2 += 2*3;
+            value = (rgb_2_pix[L + cr_r] |
+                     rgb_2_pix[L + crb_g] | rgb_2_pix[L + cb_b]);
+            row2[0 + 0] = row2[3 + 0] = row2[next_row + 0] =
+                row2[next_row + 3 + 0] = (value) & 0xFF;
+            row2[0 + 1] = row2[3 + 1] = row2[next_row + 1] =
+                row2[next_row + 3 + 1] = (value >> 8) & 0xFF;
+            row2[0 + 2] = row2[3 + 2] = row2[next_row + 2] =
+                row2[next_row + 3 + 2] = (value >> 16) & 0xFF;
+            row2 += 2 * 3;
         }
 
         /*
@@ -525,22 +509,23 @@ static void Color24DitherYV12Mod2X( int *colortab, Uint32 *rgb_2_pix,
          * to the ++'s above),but they need to be at the start
          * of the line after that.
          */
-        lum  += cols;
+        lum += cols;
         lum2 += cols;
         row1 += mod;
         row2 += mod;
     }
 }
 
-static void Color32DitherYV12Mod2X( int *colortab, Uint32 *rgb_2_pix,
-                                    unsigned char *lum, unsigned char *cr,
-                                    unsigned char *cb, unsigned char *out,
-                                    int rows, int cols, int mod )
+static void
+Color32DitherYV12Mod2X(int *colortab, Uint32 * rgb_2_pix,
+                       unsigned char *lum, unsigned char *cr,
+                       unsigned char *cb, unsigned char *out,
+                       int rows, int cols, int mod)
 {
-    unsigned int* row1 = (unsigned int*) out;
-    const int next_row = cols*2+mod;
-    unsigned int* row2 = row1 + 2*next_row;
-    unsigned char* lum2;
+    unsigned int *row1 = (unsigned int *) out;
+    const int next_row = cols * 2 + mod;
+    unsigned int *row2 = row1 + 2 * next_row;
+    unsigned char *lum2;
     int x, y;
     int cr_r;
     int crb_g;
@@ -552,48 +537,43 @@ static void Color32DitherYV12Mod2X( int *colortab, Uint32 *rgb_2_pix,
     mod = (next_row * 3) + mod;
 
     y = rows / 2;
-    while( y-- )
-    {
+    while (y--) {
         x = cols_2;
-        while( x-- )
-        {
+        while (x--) {
             register int L;
 
-            cr_r   = 0*768+256 + colortab[ *cr + 0*256 ];
-            crb_g  = 1*768+256 + colortab[ *cr + 1*256 ]
-                               + colortab[ *cb + 2*256 ];
-            cb_b   = 2*768+256 + colortab[ *cb + 3*256 ];
-            ++cr; ++cb;
+            cr_r = 0 * 768 + 256 + colortab[*cr + 0 * 256];
+            crb_g = 1 * 768 + 256 + colortab[*cr + 1 * 256]
+                + colortab[*cb + 2 * 256];
+            cb_b = 2 * 768 + 256 + colortab[*cb + 3 * 256];
+            ++cr;
+            ++cb;
 
             L = *lum++;
-            row1[0] = row1[1] = row1[next_row] = row1[next_row+1] =
-                                       (rgb_2_pix[ L + cr_r ] |
-                                        rgb_2_pix[ L + crb_g ] |
-                                        rgb_2_pix[ L + cb_b ]);
+            row1[0] = row1[1] = row1[next_row] = row1[next_row + 1] =
+                (rgb_2_pix[L + cr_r] |
+                 rgb_2_pix[L + crb_g] | rgb_2_pix[L + cb_b]);
             row1 += 2;
 
             L = *lum++;
-            row1[0] = row1[1] = row1[next_row] = row1[next_row+1] =
-                                       (rgb_2_pix[ L + cr_r ] |
-                                        rgb_2_pix[ L + crb_g ] |
-                                        rgb_2_pix[ L + cb_b ]);
+            row1[0] = row1[1] = row1[next_row] = row1[next_row + 1] =
+                (rgb_2_pix[L + cr_r] |
+                 rgb_2_pix[L + crb_g] | rgb_2_pix[L + cb_b]);
             row1 += 2;
 
 
             /* Now, do second row. */
 
             L = *lum2++;
-            row2[0] = row2[1] = row2[next_row] = row2[next_row+1] =
-                                       (rgb_2_pix[ L + cr_r ] |
-                                        rgb_2_pix[ L + crb_g ] |
-                                        rgb_2_pix[ L + cb_b ]);
+            row2[0] = row2[1] = row2[next_row] = row2[next_row + 1] =
+                (rgb_2_pix[L + cr_r] |
+                 rgb_2_pix[L + crb_g] | rgb_2_pix[L + cb_b]);
             row2 += 2;
 
             L = *lum2++;
-            row2[0] = row2[1] = row2[next_row] = row2[next_row+1] =
-                                       (rgb_2_pix[ L + cr_r ] |
-                                        rgb_2_pix[ L + crb_g ] |
-                                        rgb_2_pix[ L + cb_b ]);
+            row2[0] = row2[1] = row2[next_row] = row2[next_row + 1] =
+                (rgb_2_pix[L + cr_r] |
+                 rgb_2_pix[L + crb_g] | rgb_2_pix[L + cb_b]);
             row2 += 2;
         }
 
@@ -602,50 +582,52 @@ static void Color32DitherYV12Mod2X( int *colortab, Uint32 *rgb_2_pix,
          * to the ++'s above),but they need to be at the start
          * of the line after that.
          */
-        lum  += cols;
+        lum += cols;
         lum2 += cols;
         row1 += mod;
         row2 += mod;
     }
 }
 
-static void Color16DitherYUY2Mod1X( int *colortab, Uint32 *rgb_2_pix,
-                                    unsigned char *lum, unsigned char *cr,
-                                    unsigned char *cb, unsigned char *out,
-                                    int rows, int cols, int mod )
+static void
+Color16DitherYUY2Mod1X(int *colortab, Uint32 * rgb_2_pix,
+                       unsigned char *lum, unsigned char *cr,
+                       unsigned char *cb, unsigned char *out,
+                       int rows, int cols, int mod)
 {
-    unsigned short* row;
+    unsigned short *row;
     int x, y;
     int cr_r;
     int crb_g;
     int cb_b;
     int cols_2 = cols / 2;
 
-    row = (unsigned short*) out;
+    row = (unsigned short *) out;
 
     y = rows;
-    while( y-- )
-    {
+    while (y--) {
         x = cols_2;
-        while( x-- )
-        {
+        while (x--) {
             register int L;
 
-            cr_r   = 0*768+256 + colortab[ *cr + 0*256 ];
-            crb_g  = 1*768+256 + colortab[ *cr + 1*256 ]
-                               + colortab[ *cb + 2*256 ];
-            cb_b   = 2*768+256 + colortab[ *cb + 3*256 ];
-            cr += 4; cb += 4;
+            cr_r = 0 * 768 + 256 + colortab[*cr + 0 * 256];
+            crb_g = 1 * 768 + 256 + colortab[*cr + 1 * 256]
+                + colortab[*cb + 2 * 256];
+            cb_b = 2 * 768 + 256 + colortab[*cb + 3 * 256];
+            cr += 4;
+            cb += 4;
 
-            L = *lum; lum += 2;
-            *row++ = (unsigned short)(rgb_2_pix[ L + cr_r ] |
-                                      rgb_2_pix[ L + crb_g ] |
-                                      rgb_2_pix[ L + cb_b ]);
+            L = *lum;
+            lum += 2;
+            *row++ = (unsigned short) (rgb_2_pix[L + cr_r] |
+                                       rgb_2_pix[L + crb_g] |
+                                       rgb_2_pix[L + cb_b]);
 
-            L = *lum; lum += 2;
-            *row++ = (unsigned short)(rgb_2_pix[ L + cr_r ] |
-                                      rgb_2_pix[ L + crb_g ] |
-                                      rgb_2_pix[ L + cb_b ]);
+            L = *lum;
+            lum += 2;
+            *row++ = (unsigned short) (rgb_2_pix[L + cr_r] |
+                                       rgb_2_pix[L + crb_g] |
+                                       rgb_2_pix[L + cb_b]);
 
         }
 
@@ -653,49 +635,49 @@ static void Color16DitherYUY2Mod1X( int *colortab, Uint32 *rgb_2_pix,
     }
 }
 
-static void Color24DitherYUY2Mod1X( int *colortab, Uint32 *rgb_2_pix,
-                                    unsigned char *lum, unsigned char *cr,
-                                    unsigned char *cb, unsigned char *out,
-                                    int rows, int cols, int mod )
+static void
+Color24DitherYUY2Mod1X(int *colortab, Uint32 * rgb_2_pix,
+                       unsigned char *lum, unsigned char *cr,
+                       unsigned char *cb, unsigned char *out,
+                       int rows, int cols, int mod)
 {
     unsigned int value;
-    unsigned char* row;
+    unsigned char *row;
     int x, y;
     int cr_r;
     int crb_g;
     int cb_b;
     int cols_2 = cols / 2;
 
-    row = (unsigned char*) out;
+    row = (unsigned char *) out;
     mod *= 3;
     y = rows;
-    while( y-- )
-    {
+    while (y--) {
         x = cols_2;
-        while( x-- )
-        {
+        while (x--) {
             register int L;
 
-            cr_r   = 0*768+256 + colortab[ *cr + 0*256 ];
-            crb_g  = 1*768+256 + colortab[ *cr + 1*256 ]
-                               + colortab[ *cb + 2*256 ];
-            cb_b   = 2*768+256 + colortab[ *cb + 3*256 ];
-            cr += 4; cb += 4;
+            cr_r = 0 * 768 + 256 + colortab[*cr + 0 * 256];
+            crb_g = 1 * 768 + 256 + colortab[*cr + 1 * 256]
+                + colortab[*cb + 2 * 256];
+            cb_b = 2 * 768 + 256 + colortab[*cb + 3 * 256];
+            cr += 4;
+            cb += 4;
 
-            L = *lum; lum += 2;
-            value = (rgb_2_pix[ L + cr_r ] |
-                     rgb_2_pix[ L + crb_g ] |
-                     rgb_2_pix[ L + cb_b ]);
-            *row++ = (value      ) & 0xFF;
-            *row++ = (value >>  8) & 0xFF;
+            L = *lum;
+            lum += 2;
+            value = (rgb_2_pix[L + cr_r] |
+                     rgb_2_pix[L + crb_g] | rgb_2_pix[L + cb_b]);
+            *row++ = (value) & 0xFF;
+            *row++ = (value >> 8) & 0xFF;
             *row++ = (value >> 16) & 0xFF;
 
-            L = *lum; lum += 2;
-            value = (rgb_2_pix[ L + cr_r ] |
-                     rgb_2_pix[ L + crb_g ] |
-                     rgb_2_pix[ L + cb_b ]);
-            *row++ = (value      ) & 0xFF;
-            *row++ = (value >>  8) & 0xFF;
+            L = *lum;
+            lum += 2;
+            value = (rgb_2_pix[L + cr_r] |
+                     rgb_2_pix[L + crb_g] | rgb_2_pix[L + cb_b]);
+            *row++ = (value) & 0xFF;
+            *row++ = (value >> 8) & 0xFF;
             *row++ = (value >> 16) & 0xFF;
 
         }
@@ -703,42 +685,42 @@ static void Color24DitherYUY2Mod1X( int *colortab, Uint32 *rgb_2_pix,
     }
 }
 
-static void Color32DitherYUY2Mod1X( int *colortab, Uint32 *rgb_2_pix,
-                                    unsigned char *lum, unsigned char *cr,
-                                    unsigned char *cb, unsigned char *out,
-                                    int rows, int cols, int mod )
+static void
+Color32DitherYUY2Mod1X(int *colortab, Uint32 * rgb_2_pix,
+                       unsigned char *lum, unsigned char *cr,
+                       unsigned char *cb, unsigned char *out,
+                       int rows, int cols, int mod)
 {
-    unsigned int* row;
+    unsigned int *row;
     int x, y;
     int cr_r;
     int crb_g;
     int cb_b;
     int cols_2 = cols / 2;
 
-    row = (unsigned int*) out;
+    row = (unsigned int *) out;
     y = rows;
-    while( y-- )
-    {
+    while (y--) {
         x = cols_2;
-        while( x-- )
-        {
+        while (x--) {
             register int L;
 
-            cr_r   = 0*768+256 + colortab[ *cr + 0*256 ];
-            crb_g  = 1*768+256 + colortab[ *cr + 1*256 ]
-                               + colortab[ *cb + 2*256 ];
-            cb_b   = 2*768+256 + colortab[ *cb + 3*256 ];
-            cr += 4; cb += 4;
+            cr_r = 0 * 768 + 256 + colortab[*cr + 0 * 256];
+            crb_g = 1 * 768 + 256 + colortab[*cr + 1 * 256]
+                + colortab[*cb + 2 * 256];
+            cb_b = 2 * 768 + 256 + colortab[*cb + 3 * 256];
+            cr += 4;
+            cb += 4;
 
-            L = *lum; lum += 2;
-            *row++ = (rgb_2_pix[ L + cr_r ] |
-                       rgb_2_pix[ L + crb_g ] |
-                       rgb_2_pix[ L + cb_b ]);
+            L = *lum;
+            lum += 2;
+            *row++ = (rgb_2_pix[L + cr_r] |
+                      rgb_2_pix[L + crb_g] | rgb_2_pix[L + cb_b]);
 
-            L = *lum; lum += 2;
-            *row++ = (rgb_2_pix[ L + cr_r ] |
-                       rgb_2_pix[ L + crb_g ] |
-                       rgb_2_pix[ L + cb_b ]);
+            L = *lum;
+            lum += 2;
+            *row++ = (rgb_2_pix[L + cr_r] |
+                      rgb_2_pix[L + crb_g] | rgb_2_pix[L + cb_b]);
 
 
         }
@@ -751,13 +733,14 @@ static void Color32DitherYUY2Mod1X( int *colortab, Uint32 *rgb_2_pix,
  * 16 bits replicated in the upper 16. This means I can write ints and get
  * the horisontal doubling for free (almost).
  */
-static void Color16DitherYUY2Mod2X( int *colortab, Uint32 *rgb_2_pix,
-                                    unsigned char *lum, unsigned char *cr,
-                                    unsigned char *cb, unsigned char *out,
-                                    int rows, int cols, int mod )
+static void
+Color16DitherYUY2Mod2X(int *colortab, Uint32 * rgb_2_pix,
+                       unsigned char *lum, unsigned char *cr,
+                       unsigned char *cb, unsigned char *out,
+                       int rows, int cols, int mod)
 {
-    unsigned int* row = (unsigned int*) out;
-    const int next_row = cols+(mod/2);
+    unsigned int *row = (unsigned int *) out;
+    const int next_row = cols + (mod / 2);
     int x, y;
     int cr_r;
     int crb_g;
@@ -765,29 +748,30 @@ static void Color16DitherYUY2Mod2X( int *colortab, Uint32 *rgb_2_pix,
     int cols_2 = cols / 2;
 
     y = rows;
-    while( y-- )
-    {
+    while (y--) {
         x = cols_2;
-        while( x-- )
-        {
+        while (x--) {
             register int L;
 
-            cr_r   = 0*768+256 + colortab[ *cr + 0*256 ];
-            crb_g  = 1*768+256 + colortab[ *cr + 1*256 ]
-                               + colortab[ *cb + 2*256 ];
-            cb_b   = 2*768+256 + colortab[ *cb + 3*256 ];
-            cr += 4; cb += 4;
+            cr_r = 0 * 768 + 256 + colortab[*cr + 0 * 256];
+            crb_g = 1 * 768 + 256 + colortab[*cr + 1 * 256]
+                + colortab[*cb + 2 * 256];
+            cb_b = 2 * 768 + 256 + colortab[*cb + 3 * 256];
+            cr += 4;
+            cb += 4;
 
-            L = *lum; lum += 2;
-            row[0] = row[next_row] = (rgb_2_pix[ L + cr_r ] |
-                                        rgb_2_pix[ L + crb_g ] |
-                                        rgb_2_pix[ L + cb_b ]);
+            L = *lum;
+            lum += 2;
+            row[0] = row[next_row] = (rgb_2_pix[L + cr_r] |
+                                      rgb_2_pix[L + crb_g] |
+                                      rgb_2_pix[L + cb_b]);
             row++;
 
-            L = *lum; lum += 2;
-            row[0] = row[next_row] = (rgb_2_pix[ L + cr_r ] |
-                                        rgb_2_pix[ L + crb_g ] |
-                                        rgb_2_pix[ L + cb_b ]);
+            L = *lum;
+            lum += 2;
+            row[0] = row[next_row] = (rgb_2_pix[L + cr_r] |
+                                      rgb_2_pix[L + crb_g] |
+                                      rgb_2_pix[L + cb_b]);
             row++;
 
         }
@@ -795,101 +779,101 @@ static void Color16DitherYUY2Mod2X( int *colortab, Uint32 *rgb_2_pix,
     }
 }
 
-static void Color24DitherYUY2Mod2X( int *colortab, Uint32 *rgb_2_pix,
-                                    unsigned char *lum, unsigned char *cr,
-                                    unsigned char *cb, unsigned char *out,
-                                    int rows, int cols, int mod )
+static void
+Color24DitherYUY2Mod2X(int *colortab, Uint32 * rgb_2_pix,
+                       unsigned char *lum, unsigned char *cr,
+                       unsigned char *cb, unsigned char *out,
+                       int rows, int cols, int mod)
 {
     unsigned int value;
-    unsigned char* row = out;
-    const int next_row = (cols*2 + mod) * 3;
+    unsigned char *row = out;
+    const int next_row = (cols * 2 + mod) * 3;
     int x, y;
     int cr_r;
     int crb_g;
     int cb_b;
     int cols_2 = cols / 2;
     y = rows;
-    while( y-- )
-    {
+    while (y--) {
         x = cols_2;
-        while( x-- )
-        {
+        while (x--) {
             register int L;
 
-            cr_r   = 0*768+256 + colortab[ *cr + 0*256 ];
-            crb_g  = 1*768+256 + colortab[ *cr + 1*256 ]
-                               + colortab[ *cb + 2*256 ];
-            cb_b   = 2*768+256 + colortab[ *cb + 3*256 ];
-            cr += 4; cb += 4;
+            cr_r = 0 * 768 + 256 + colortab[*cr + 0 * 256];
+            crb_g = 1 * 768 + 256 + colortab[*cr + 1 * 256]
+                + colortab[*cb + 2 * 256];
+            cb_b = 2 * 768 + 256 + colortab[*cb + 3 * 256];
+            cr += 4;
+            cb += 4;
 
-            L = *lum; lum += 2;
-            value = (rgb_2_pix[ L + cr_r ] |
-                     rgb_2_pix[ L + crb_g ] |
-                     rgb_2_pix[ L + cb_b ]);
-            row[0+0] = row[3+0] = row[next_row+0] = row[next_row+3+0] =
-                     (value      ) & 0xFF;
-            row[0+1] = row[3+1] = row[next_row+1] = row[next_row+3+1] =
-                     (value >>  8) & 0xFF;
-            row[0+2] = row[3+2] = row[next_row+2] = row[next_row+3+2] =
-                     (value >> 16) & 0xFF;
-            row += 2*3;
+            L = *lum;
+            lum += 2;
+            value = (rgb_2_pix[L + cr_r] |
+                     rgb_2_pix[L + crb_g] | rgb_2_pix[L + cb_b]);
+            row[0 + 0] = row[3 + 0] = row[next_row + 0] =
+                row[next_row + 3 + 0] = (value) & 0xFF;
+            row[0 + 1] = row[3 + 1] = row[next_row + 1] =
+                row[next_row + 3 + 1] = (value >> 8) & 0xFF;
+            row[0 + 2] = row[3 + 2] = row[next_row + 2] =
+                row[next_row + 3 + 2] = (value >> 16) & 0xFF;
+            row += 2 * 3;
 
-            L = *lum; lum += 2;
-            value = (rgb_2_pix[ L + cr_r ] |
-                     rgb_2_pix[ L + crb_g ] |
-                     rgb_2_pix[ L + cb_b ]);
-            row[0+0] = row[3+0] = row[next_row+0] = row[next_row+3+0] =
-                     (value      ) & 0xFF;
-            row[0+1] = row[3+1] = row[next_row+1] = row[next_row+3+1] =
-                     (value >>  8) & 0xFF;
-            row[0+2] = row[3+2] = row[next_row+2] = row[next_row+3+2] =
-                     (value >> 16) & 0xFF;
-            row += 2*3;
+            L = *lum;
+            lum += 2;
+            value = (rgb_2_pix[L + cr_r] |
+                     rgb_2_pix[L + crb_g] | rgb_2_pix[L + cb_b]);
+            row[0 + 0] = row[3 + 0] = row[next_row + 0] =
+                row[next_row + 3 + 0] = (value) & 0xFF;
+            row[0 + 1] = row[3 + 1] = row[next_row + 1] =
+                row[next_row + 3 + 1] = (value >> 8) & 0xFF;
+            row[0 + 2] = row[3 + 2] = row[next_row + 2] =
+                row[next_row + 3 + 2] = (value >> 16) & 0xFF;
+            row += 2 * 3;
 
         }
         row += next_row;
     }
 }
 
-static void Color32DitherYUY2Mod2X( int *colortab, Uint32 *rgb_2_pix,
-                                    unsigned char *lum, unsigned char *cr,
-                                    unsigned char *cb, unsigned char *out,
-                                    int rows, int cols, int mod )
+static void
+Color32DitherYUY2Mod2X(int *colortab, Uint32 * rgb_2_pix,
+                       unsigned char *lum, unsigned char *cr,
+                       unsigned char *cb, unsigned char *out,
+                       int rows, int cols, int mod)
 {
-    unsigned int* row = (unsigned int*) out;
-    const int next_row = cols*2+mod;
+    unsigned int *row = (unsigned int *) out;
+    const int next_row = cols * 2 + mod;
     int x, y;
     int cr_r;
     int crb_g;
     int cb_b;
     int cols_2 = cols / 2;
-    mod+=mod;
+    mod += mod;
     y = rows;
-    while( y-- )
-    {
+    while (y--) {
         x = cols_2;
-        while( x-- )
-        {
+        while (x--) {
             register int L;
 
-            cr_r   = 0*768+256 + colortab[ *cr + 0*256 ];
-            crb_g  = 1*768+256 + colortab[ *cr + 1*256 ]
-                               + colortab[ *cb + 2*256 ];
-            cb_b   = 2*768+256 + colortab[ *cb + 3*256 ];
-            cr += 4; cb += 4;
+            cr_r = 0 * 768 + 256 + colortab[*cr + 0 * 256];
+            crb_g = 1 * 768 + 256 + colortab[*cr + 1 * 256]
+                + colortab[*cb + 2 * 256];
+            cb_b = 2 * 768 + 256 + colortab[*cb + 3 * 256];
+            cr += 4;
+            cb += 4;
 
-            L = *lum; lum += 2;
-            row[0] = row[1] = row[next_row] = row[next_row+1] =
-                                       (rgb_2_pix[ L + cr_r ] |
-                                        rgb_2_pix[ L + crb_g ] |
-                                        rgb_2_pix[ L + cb_b ]);
+            L = *lum;
+            lum += 2;
+            row[0] = row[1] = row[next_row] = row[next_row + 1] =
+                (rgb_2_pix[L + cr_r] |
+                 rgb_2_pix[L + crb_g] | rgb_2_pix[L + cb_b]);
             row += 2;
 
-            L = *lum; lum += 2;
-            row[0] = row[1] = row[next_row] = row[next_row+1] =
-                                       (rgb_2_pix[ L + cr_r ] |
-                                        rgb_2_pix[ L + crb_g ] |
-                                        rgb_2_pix[ L + cb_b ]);
+            L = *lum;
+            lum += 2;
+            row[0] = row[1] = row[next_row] = row[next_row + 1] =
+                (rgb_2_pix[L + cr_r] |
+                 rgb_2_pix[L + crb_g] | rgb_2_pix[L + cb_b]);
             row += 2;
 
 
@@ -903,396 +887,465 @@ static void Color32DitherYUY2Mod2X( int *colortab, Uint32 *rgb_2_pix,
  * How many 1 bits are there in the Uint32.
  * Low performance, do not call often.
  */
-static int number_of_bits_set( Uint32 a )
+static int
+number_of_bits_set(Uint32 a)
 {
-    if(!a) return 0;
-    if(a & 1) return 1 + number_of_bits_set(a >> 1);
-    return(number_of_bits_set(a >> 1));
+    if (!a)
+        return 0;
+    if (a & 1)
+        return 1 + number_of_bits_set(a >> 1);
+    return (number_of_bits_set(a >> 1));
 }
 
 /*
  * How many 0 bits are there at least significant end of Uint32.
  * Low performance, do not call often.
  */
-static int free_bits_at_bottom( Uint32 a )
+static int
+free_bits_at_bottom(Uint32 a)
 {
-      /* assume char is 8 bits */
-    if(!a) return sizeof(Uint32) * 8;
-    if(((Sint32)a) & 1l) return 0;
-    return 1 + free_bits_at_bottom ( a >> 1);
+    /* assume char is 8 bits */
+    if (!a)
+        return sizeof(Uint32) * 8;
+    if (((Sint32) a) & 1l)
+        return 0;
+    return 1 + free_bits_at_bottom(a >> 1);
 }
 
-
-SDL_Overlay *SDL_CreateYUV_SW(_THIS, int width, int height, Uint32 format, SDL_Surface *display)
+static int
+SDL_SW_SetupYUVDisplay(SDL_SW_YUVTexture * swdata, Uint32 target_format)
 {
-	SDL_Overlay *overlay;
-	struct private_yuvhwdata *swdata;
-	int *Cr_r_tab;
-	int *Cr_g_tab;
-	int *Cb_g_tab;
-	int *Cb_b_tab;
-	Uint32 *r_2_pix_alloc;
-	Uint32 *g_2_pix_alloc;
-	Uint32 *b_2_pix_alloc;
-	int i;
-	int CR, CB;
-	Uint32 Rmask, Gmask, Bmask;
+    Uint32 *r_2_pix_alloc;
+    Uint32 *g_2_pix_alloc;
+    Uint32 *b_2_pix_alloc;
+    int i;
+    int bpp;
+    Uint32 Rmask, Gmask, Bmask, Amask;
 
-	/* Only RGB packed pixel conversion supported */
-	if ( (display->format->BytesPerPixel != 2) &&
-	     (display->format->BytesPerPixel != 3) &&
-	     (display->format->BytesPerPixel != 4) ) {
-		SDL_SetError("Can't use YUV data on non 16/24/32 bit surfaces");
-		return(NULL);
-	}
+    if (!SDL_PixelFormatEnumToMasks
+        (target_format, &bpp, &Rmask, &Gmask, &Bmask, &Amask) || bpp < 15) {
+        SDL_SetError("Unsupported YUV destination format");
+        return -1;
+    }
 
-	/* Verify that we support the format */
-	switch (format) {
-	    case SDL_YV12_OVERLAY:
-	    case SDL_IYUV_OVERLAY:
-	    case SDL_YUY2_OVERLAY:
-	    case SDL_UYVY_OVERLAY:
-	    case SDL_YVYU_OVERLAY:
-		break;
-	    default:
-		SDL_SetError("Unsupported YUV format");
-		return(NULL);
-	}
+    swdata->target_format = target_format;
+    r_2_pix_alloc = &swdata->rgb_2_pix[0 * 768];
+    g_2_pix_alloc = &swdata->rgb_2_pix[1 * 768];
+    b_2_pix_alloc = &swdata->rgb_2_pix[2 * 768];
 
-	/* Create the overlay structure */
-	overlay = (SDL_Overlay *)SDL_malloc(sizeof *overlay);
-	if ( overlay == NULL ) {
-		SDL_OutOfMemory();
-		return(NULL);
-	}
-	SDL_memset(overlay, 0, (sizeof *overlay));
+    /* 
+     * Set up entries 0-255 in rgb-to-pixel value tables.
+     */
+    for (i = 0; i < 256; ++i) {
+        r_2_pix_alloc[i + 256] = i >> (8 - number_of_bits_set(Rmask));
+        r_2_pix_alloc[i + 256] <<= free_bits_at_bottom(Rmask);
+        g_2_pix_alloc[i + 256] = i >> (8 - number_of_bits_set(Gmask));
+        g_2_pix_alloc[i + 256] <<= free_bits_at_bottom(Gmask);
+        b_2_pix_alloc[i + 256] = i >> (8 - number_of_bits_set(Bmask));
+        b_2_pix_alloc[i + 256] <<= free_bits_at_bottom(Bmask);
+    }
 
-	/* Fill in the basic members */
-	overlay->format = format;
-	overlay->w = width;
-	overlay->h = height;
+    /*
+     * If we have 16-bit output depth, then we double the value
+     * in the top word. This means that we can write out both
+     * pixels in the pixel doubling mode with one op. It is 
+     * harmless in the normal case as storing a 32-bit value
+     * through a short pointer will lose the top bits anyway.
+     */
+    if (SDL_BYTESPERPIXEL(target_format) == 2) {
+        for (i = 0; i < 256; ++i) {
+            r_2_pix_alloc[i + 256] |= (r_2_pix_alloc[i + 256]) << 16;
+            g_2_pix_alloc[i + 256] |= (g_2_pix_alloc[i + 256]) << 16;
+            b_2_pix_alloc[i + 256] |= (b_2_pix_alloc[i + 256]) << 16;
+        }
+    }
 
-	/* Set up the YUV surface function structure */
-	overlay->hwfuncs = &sw_yuvfuncs;
+    /*
+     * Spread out the values we have to the rest of the array so that
+     * we do not need to check for overflow.
+     */
+    for (i = 0; i < 256; ++i) {
+        r_2_pix_alloc[i] = r_2_pix_alloc[256];
+        r_2_pix_alloc[i + 512] = r_2_pix_alloc[511];
+        g_2_pix_alloc[i] = g_2_pix_alloc[256];
+        g_2_pix_alloc[i + 512] = g_2_pix_alloc[511];
+        b_2_pix_alloc[i] = b_2_pix_alloc[256];
+        b_2_pix_alloc[i + 512] = b_2_pix_alloc[511];
+    }
 
-	/* Create the pixel data and lookup tables */
-	swdata = (struct private_yuvhwdata *)SDL_malloc(sizeof *swdata);
-	overlay->hwdata = swdata;
-	if ( swdata == NULL ) {
-		SDL_OutOfMemory();
-		SDL_FreeYUVOverlay(overlay);
-		return(NULL);
-	}
-	swdata->stretch = NULL;
-	swdata->display = display;
-	swdata->pixels = (Uint8 *) SDL_malloc(width*height*2);
-	swdata->colortab = (int *)SDL_malloc(4*256*sizeof(int));
-	Cr_r_tab = &swdata->colortab[0*256];
-	Cr_g_tab = &swdata->colortab[1*256];
-	Cb_g_tab = &swdata->colortab[2*256];
-	Cb_b_tab = &swdata->colortab[3*256];
-	swdata->rgb_2_pix = (Uint32 *)SDL_malloc(3*768*sizeof(Uint32));
-	r_2_pix_alloc = &swdata->rgb_2_pix[0*768];
-	g_2_pix_alloc = &swdata->rgb_2_pix[1*768];
-	b_2_pix_alloc = &swdata->rgb_2_pix[2*768];
-	if ( ! swdata->pixels || ! swdata->colortab || ! swdata->rgb_2_pix ) {
-		SDL_OutOfMemory();
-		SDL_FreeYUVOverlay(overlay);
-		return(NULL);
-	}
-
-	/* Generate the tables for the display surface */
-	for (i=0; i<256; i++) {
-		/* Gamma correction (luminescence table) and chroma correction
-		   would be done here.  See the Berkeley mpeg_play sources.
-		*/
-		CB = CR = (i-128);
-		Cr_r_tab[i] = (int) ( (0.419/0.299) * CR);
-		Cr_g_tab[i] = (int) (-(0.299/0.419) * CR);
-		Cb_g_tab[i] = (int) (-(0.114/0.331) * CB); 
-		Cb_b_tab[i] = (int) ( (0.587/0.331) * CB);
-	}
-
-	/* 
-	 * Set up entries 0-255 in rgb-to-pixel value tables.
-	 */
-	Rmask = display->format->Rmask;
-	Gmask = display->format->Gmask;
-	Bmask = display->format->Bmask;
-	for ( i=0; i<256; ++i ) {
-		r_2_pix_alloc[i+256] = i >> (8 - number_of_bits_set(Rmask));
-		r_2_pix_alloc[i+256] <<= free_bits_at_bottom(Rmask);
-		g_2_pix_alloc[i+256] = i >> (8 - number_of_bits_set(Gmask));
-		g_2_pix_alloc[i+256] <<= free_bits_at_bottom(Gmask);
-		b_2_pix_alloc[i+256] = i >> (8 - number_of_bits_set(Bmask));
-		b_2_pix_alloc[i+256] <<= free_bits_at_bottom(Bmask);
-	}
-
-	/*
-	 * If we have 16-bit output depth, then we double the value
-	 * in the top word. This means that we can write out both
-	 * pixels in the pixel doubling mode with one op. It is 
-	 * harmless in the normal case as storing a 32-bit value
-	 * through a short pointer will lose the top bits anyway.
-	 */
-	if( display->format->BytesPerPixel == 2 ) {
-		for ( i=0; i<256; ++i ) {
-			r_2_pix_alloc[i+256] |= (r_2_pix_alloc[i+256]) << 16;
-			g_2_pix_alloc[i+256] |= (g_2_pix_alloc[i+256]) << 16;
-			b_2_pix_alloc[i+256] |= (b_2_pix_alloc[i+256]) << 16;
-		}
-	}
-
-	/*
-	 * Spread out the values we have to the rest of the array so that
-	 * we do not need to check for overflow.
-	 */
-	for ( i=0; i<256; ++i ) {
-		r_2_pix_alloc[i] = r_2_pix_alloc[256];
-		r_2_pix_alloc[i+512] = r_2_pix_alloc[511];
-		g_2_pix_alloc[i] = g_2_pix_alloc[256];
-		g_2_pix_alloc[i+512] = g_2_pix_alloc[511];
-		b_2_pix_alloc[i] = b_2_pix_alloc[256];
-		b_2_pix_alloc[i+512] = b_2_pix_alloc[511];
-	}
-
-	/* You have chosen wisely... */
-	switch (format) {
-	    case SDL_YV12_OVERLAY:
-	    case SDL_IYUV_OVERLAY:
-		if ( display->format->BytesPerPixel == 2 ) {
-#if 0 /*defined(__GNUC__) && defined(__i386__) && SDL_ASSEMBLY_ROUTINES*/
-			/* inline assembly functions */
-			if ( SDL_HasMMX() && (Rmask == 0xF800) &&
-			                     (Gmask == 0x07E0) &&
-				             (Bmask == 0x001F) &&
-			                     (width & 15) == 0) {
+    /* You have chosen wisely... */
+    switch (swdata->texture->format) {
+    case SDL_PixelFormat_YV12:
+    case SDL_PixelFormat_IYUV:
+        if (SDL_BYTESPERPIXEL(target_format) == 2) {
+#if 0                           /*defined(__GNUC__) && defined(__i386__) && SDL_ASSEMBLY_ROUTINES */
+            /* inline assembly functions */
+            if (SDL_HasMMX() && (Rmask == 0xF800) &&
+                (Gmask == 0x07E0) && (Bmask == 0x001F) && (width & 15) == 0) {
 /*printf("Using MMX 16-bit 565 dither\n");*/
-				swdata->Display1X = Color565DitherYV12MMX1X;
-			} else {
+                swdata->Display1X = Color565DitherYV12MMX1X;
+            } else {
 /*printf("Using C 16-bit dither\n");*/
-				swdata->Display1X = Color16DitherYV12Mod1X;
-			}
+                swdata->Display1X = Color16DitherYV12Mod1X;
+            }
 #else
-			swdata->Display1X = Color16DitherYV12Mod1X;
+            swdata->Display1X = Color16DitherYV12Mod1X;
 #endif
-			swdata->Display2X = Color16DitherYV12Mod2X;
-		}
-		if ( display->format->BytesPerPixel == 3 ) {
-			swdata->Display1X = Color24DitherYV12Mod1X;
-			swdata->Display2X = Color24DitherYV12Mod2X;
-		}
-		if ( display->format->BytesPerPixel == 4 ) {
-#if 0 /*defined(__GNUC__) && defined(__i386__) && SDL_ASSEMBLY_ROUTINES*/
-			/* inline assembly functions */
-			if ( SDL_HasMMX() && (Rmask == 0x00FF0000) &&
-			                     (Gmask == 0x0000FF00) &&
-				             (Bmask == 0x000000FF) && 
-			                     (width & 15) == 0) {
+            swdata->Display2X = Color16DitherYV12Mod2X;
+        }
+        if (SDL_BYTESPERPIXEL(target_format) == 3) {
+            swdata->Display1X = Color24DitherYV12Mod1X;
+            swdata->Display2X = Color24DitherYV12Mod2X;
+        }
+        if (SDL_BYTESPERPIXEL(target_format) == 4) {
+#if 0                           /*defined(__GNUC__) && defined(__i386__) && SDL_ASSEMBLY_ROUTINES */
+            /* inline assembly functions */
+            if (SDL_HasMMX() && (Rmask == 0x00FF0000) &&
+                (Gmask == 0x0000FF00) &&
+                (Bmask == 0x000000FF) && (width & 15) == 0) {
 /*printf("Using MMX 32-bit dither\n");*/
-				swdata->Display1X = ColorRGBDitherYV12MMX1X;
-			} else {
+                swdata->Display1X = ColorRGBDitherYV12MMX1X;
+            } else {
 /*printf("Using C 32-bit dither\n");*/
-				swdata->Display1X = Color32DitherYV12Mod1X;
-			}
+                swdata->Display1X = Color32DitherYV12Mod1X;
+            }
 #else
-			swdata->Display1X = Color32DitherYV12Mod1X;
+            swdata->Display1X = Color32DitherYV12Mod1X;
 #endif
-			swdata->Display2X = Color32DitherYV12Mod2X;
-		}
-		break;
-	    case SDL_YUY2_OVERLAY:
-	    case SDL_UYVY_OVERLAY:
-	    case SDL_YVYU_OVERLAY:
-		if ( display->format->BytesPerPixel == 2 ) {
-			swdata->Display1X = Color16DitherYUY2Mod1X;
-			swdata->Display2X = Color16DitherYUY2Mod2X;
-		}
-		if ( display->format->BytesPerPixel == 3 ) {
-			swdata->Display1X = Color24DitherYUY2Mod1X;
-			swdata->Display2X = Color24DitherYUY2Mod2X;
-		}
-		if ( display->format->BytesPerPixel == 4 ) {
-			swdata->Display1X = Color32DitherYUY2Mod1X;
-			swdata->Display2X = Color32DitherYUY2Mod2X;
-		}
-		break;
-	    default:
-		/* We should never get here (caught above) */
-		break;
-	}
+            swdata->Display2X = Color32DitherYV12Mod2X;
+        }
+        break;
+    case SDL_PixelFormat_YUY2:
+    case SDL_PixelFormat_UYVY:
+    case SDL_PixelFormat_YVYU:
+        if (SDL_BYTESPERPIXEL(target_format) == 2) {
+            swdata->Display1X = Color16DitherYUY2Mod1X;
+            swdata->Display2X = Color16DitherYUY2Mod2X;
+        }
+        if (SDL_BYTESPERPIXEL(target_format) == 3) {
+            swdata->Display1X = Color24DitherYUY2Mod1X;
+            swdata->Display2X = Color24DitherYUY2Mod2X;
+        }
+        if (SDL_BYTESPERPIXEL(target_format) == 4) {
+            swdata->Display1X = Color32DitherYUY2Mod1X;
+            swdata->Display2X = Color32DitherYUY2Mod2X;
+        }
+        break;
+    default:
+        /* We should never get here (caught above) */
+        break;
+    }
 
-	/* Find the pitch and offset values for the overlay */
-	overlay->pitches = swdata->pitches;
-	overlay->pixels = swdata->planes;
-	switch (format) {
-	    case SDL_YV12_OVERLAY:
-	    case SDL_IYUV_OVERLAY:
-		overlay->pitches[0] = overlay->w;
-		overlay->pitches[1] = overlay->pitches[0] / 2;
-		overlay->pitches[2] = overlay->pitches[0] / 2;
-	        overlay->pixels[0] = swdata->pixels;
-	        overlay->pixels[1] = overlay->pixels[0] +
-		                     overlay->pitches[0] * overlay->h;
-	        overlay->pixels[2] = overlay->pixels[1] +
-		                     overlay->pitches[1] * overlay->h / 2;
-		overlay->planes = 3;
-		break;
-	    case SDL_YUY2_OVERLAY:
-	    case SDL_UYVY_OVERLAY:
-	    case SDL_YVYU_OVERLAY:
-		overlay->pitches[0] = overlay->w*2;
-	        overlay->pixels[0] = swdata->pixels;
-		overlay->planes = 1;
-		break;
-	    default:
-		/* We should never get here (caught above) */
-		break;
-	}
-
-	/* We're all done.. */
-	return(overlay);
+    if (swdata->display) {
+        SDL_FreeSurface(swdata->display);
+        swdata->display = NULL;
+    }
+    return 0;
 }
 
-int SDL_LockYUV_SW(_THIS, SDL_Overlay *overlay)
+SDL_SW_YUVTexture *
+SDL_SW_CreateYUVTexture(SDL_Texture * texture)
 {
-	return(0);
+    SDL_SW_YUVTexture *swdata;
+    int *Cr_r_tab;
+    int *Cr_g_tab;
+    int *Cb_g_tab;
+    int *Cb_b_tab;
+    int i;
+    int CR, CB;
+
+    swdata = (SDL_SW_YUVTexture *) SDL_malloc(sizeof(*swdata));
+    if (!swdata) {
+        SDL_OutOfMemory();
+        return NULL;
+    }
+    SDL_zerop(swdata);
+
+    switch (texture->format) {
+    case SDL_PixelFormat_YV12:
+    case SDL_PixelFormat_IYUV:
+    case SDL_PixelFormat_YUY2:
+    case SDL_PixelFormat_UYVY:
+    case SDL_PixelFormat_YVYU:
+        break;
+    default:
+        SDL_SetError("Unsupported YUV format");
+        return NULL;
+    }
+
+    swdata->texture = texture;
+    swdata->target_format = SDL_PixelFormat_Unknown;
+    swdata->pixels = (Uint8 *) SDL_malloc(texture->w * texture->h * 2);
+    swdata->colortab = (int *) SDL_malloc(4 * 256 * sizeof(int));
+    swdata->rgb_2_pix = (Uint32 *) SDL_malloc(3 * 768 * sizeof(Uint32));
+    if (!swdata->pixels || !swdata->colortab || !swdata->rgb_2_pix) {
+        SDL_OutOfMemory();
+        SDL_SW_DestroyYUVTexture(swdata);
+        return NULL;
+    }
+
+    /* Generate the tables for the display surface */
+    Cr_r_tab = &swdata->colortab[0 * 256];
+    Cr_g_tab = &swdata->colortab[1 * 256];
+    Cb_g_tab = &swdata->colortab[2 * 256];
+    Cb_b_tab = &swdata->colortab[3 * 256];
+    for (i = 0; i < 256; i++) {
+        /* Gamma correction (luminescence table) and chroma correction
+           would be done here.  See the Berkeley mpeg_play sources.
+         */
+        CB = CR = (i - 128);
+        Cr_r_tab[i] = (int) ((0.419 / 0.299) * CR);
+        Cr_g_tab[i] = (int) (-(0.299 / 0.419) * CR);
+        Cb_g_tab[i] = (int) (-(0.114 / 0.331) * CB);
+        Cb_b_tab[i] = (int) ((0.587 / 0.331) * CB);
+    }
+
+    /* Find the pitch and offset values for the overlay */
+    switch (texture->format) {
+    case SDL_PixelFormat_YV12:
+    case SDL_PixelFormat_IYUV:
+        swdata->pitches[0] = texture->w;
+        swdata->pitches[1] = swdata->pitches[0] / 2;
+        swdata->pitches[2] = swdata->pitches[0] / 2;
+        swdata->planes[0] = swdata->pixels;
+        swdata->planes[1] =
+            swdata->planes[0] + swdata->pitches[0] * texture->h;
+        swdata->planes[2] =
+            swdata->planes[1] + swdata->pitches[1] * texture->h / 2;
+        break;
+    case SDL_PixelFormat_YUY2:
+    case SDL_PixelFormat_UYVY:
+    case SDL_PixelFormat_YVYU:
+        swdata->pitches[0] = texture->w * 2;
+        swdata->planes[0] = swdata->pixels;
+        break;
+    default:
+        /* We should never get here (caught above) */
+        break;
+    }
+
+    /* We're all done.. */
+    return (swdata);
 }
 
-void SDL_UnlockYUV_SW(_THIS, SDL_Overlay *overlay)
+int
+SDL_SW_QueryYUVTexturePixels(SDL_SW_YUVTexture * swdata, void **pixels,
+                             int *pitch)
 {
-	return;
+    *pixels = swdata->planes[0];
+    *pitch = swdata->pitches[0];
+    return 0;
 }
 
-int SDL_DisplayYUV_SW(_THIS, SDL_Overlay *overlay, SDL_Rect *src, SDL_Rect *dst)
+int
+SDL_SW_UpdateYUVTexture(SDL_SW_YUVTexture * swdata, const SDL_Rect * rect,
+                        const void *pixels, int pitch)
 {
-	struct private_yuvhwdata *swdata;
-	int stretch;
-	int scale_2x;
-	SDL_Surface *display;
-	Uint8 *lum, *Cr, *Cb;
-	Uint8 *dstp;
-	int mod;
+    SDL_Texture *texture = swdata->texture;
 
-	swdata = overlay->hwdata;
-	stretch = 0;
-	scale_2x = 0;
-	if ( src->x || src->y || src->w < overlay->w || src->h < overlay->h ) {
-		/* The source rectangle has been clipped.
-		   Using a scratch surface is easier than adding clipped
-		   source support to all the blitters, plus that would
-		   slow them down in the general unclipped case.
-		*/
-		stretch = 1;
-	} else if ( (src->w != dst->w) || (src->h != dst->h) ) {
-		if ( (dst->w == 2*src->w) &&
-		     (dst->h == 2*src->h) ) {
-			scale_2x = 1;
-		} else {
-			stretch = 1;
-		}
-	}
-	if ( stretch ) {
-		if ( ! swdata->stretch ) {
-			display = swdata->display;
-			swdata->stretch = SDL_CreateRGBSurface(
-				SDL_SWSURFACE,
-				overlay->w, overlay->h,
-				display->format->BitsPerPixel,
-				display->format->Rmask,
-				display->format->Gmask,
-				display->format->Bmask, 0);
-			if ( ! swdata->stretch ) {
-				return(-1);
-			}
-		}
-		display = swdata->stretch;
-	} else {
-		display = swdata->display;
-	}
-	switch (overlay->format) {
-	    case SDL_YV12_OVERLAY:
-		lum = overlay->pixels[0];
-		Cr =  overlay->pixels[1];
-		Cb =  overlay->pixels[2];
-		break;
-	    case SDL_IYUV_OVERLAY:
-		lum = overlay->pixels[0];
-		Cr =  overlay->pixels[2];
-		Cb =  overlay->pixels[1];
-		break;
-	    case SDL_YUY2_OVERLAY:
-		lum = overlay->pixels[0];
-		Cr = lum + 3;
-		Cb = lum + 1;
-		break;
-	    case SDL_UYVY_OVERLAY:
-		lum = overlay->pixels[0]+1;
-		Cr = lum + 1;
-		Cb = lum - 1;
-		break;
-	    case SDL_YVYU_OVERLAY:
-		lum = overlay->pixels[0];
-		Cr = lum + 1;
-		Cb = lum + 3;
-		break;
-	    default:
-		SDL_SetError("Unsupported YUV format in blit");
-		return(-1);
-	}
-	if ( SDL_MUSTLOCK(display) ) {
-        	if ( SDL_LockSurface(display) < 0 ) {
-			return(-1);
-		}
-	}
-	if ( stretch ) {
-		dstp = (Uint8 *)swdata->stretch->pixels;
-	} else {
-		dstp = (Uint8 *)display->pixels
-			+ dst->x * display->format->BytesPerPixel
-			+ dst->y * display->pitch;
-	}
-	mod = (display->pitch / display->format->BytesPerPixel);
+    switch (texture->format) {
+    case SDL_PixelFormat_YV12:
+    case SDL_PixelFormat_IYUV:
+        if (rect
+            && (rect->x != 0 || rect->y != 0 || rect->w != texture->w
+                || rect->h != texture->h)) {
+            SDL_SetError
+                ("YV12 and IYUV textures only support full surface updates");
+            return -1;
+        }
+        SDL_memcpy(swdata->pixels, pixels, texture->h * texture->w * 2);
+        break;
+    case SDL_PixelFormat_YUY2:
+    case SDL_PixelFormat_UYVY:
+    case SDL_PixelFormat_YVYU:
+        {
+            Uint8 *src, *dst;
+            int row;
+            size_t length;
 
-	if ( scale_2x ) {
-		mod -= (overlay->w * 2);
-		swdata->Display2X(swdata->colortab, swdata->rgb_2_pix,
-		                  lum, Cr, Cb, dstp, overlay->h, overlay->w, mod);
-	} else {
-		mod -= overlay->w;
-		swdata->Display1X(swdata->colortab, swdata->rgb_2_pix,
-		                  lum, Cr, Cb, dstp, overlay->h, overlay->w, mod);
-	}
-	if ( SDL_MUSTLOCK(display) ) {
-		SDL_UnlockSurface(display);
-	}
-	if ( stretch ) {
-		display = swdata->display;
-		SDL_SoftStretch(swdata->stretch, src, display, dst);
-	}
-	SDL_UpdateRects(display, 1, dst);
-
-	return(0);
+            src = (Uint8 *) pixels;
+            dst =
+                swdata->planes[0] + rect->y * swdata->pitches[0] +
+                rect->x * 2;
+            length = rect->w * 2;
+            for (row = 0; row < rect->h; ++row) {
+                SDL_memcpy(dst, src, length);
+                src += pitch;
+                dst += swdata->pitches[0];
+            }
+        }
+        break;
+    }
+    return 0;
 }
 
-void SDL_FreeYUV_SW(_THIS, SDL_Overlay *overlay)
+int
+SDL_SW_LockYUVTexture(SDL_SW_YUVTexture * swdata, const SDL_Rect * rect,
+                      int markDirty, void **pixels, int *pitch)
 {
-	struct private_yuvhwdata *swdata;
+    SDL_Texture *texture = swdata->texture;
 
-	swdata = overlay->hwdata;
-	if ( swdata ) {
-		if ( swdata->stretch ) {
-			SDL_FreeSurface(swdata->stretch);
-		}
-		if ( swdata->pixels ) {
-			SDL_free(swdata->pixels);
-		}
-		if ( swdata->colortab ) {
-			SDL_free(swdata->colortab);
-		}
-		if ( swdata->rgb_2_pix ) {
-			SDL_free(swdata->rgb_2_pix);
-		}
-		SDL_free(swdata);
-	}
+    switch (texture->format) {
+    case SDL_PixelFormat_YV12:
+    case SDL_PixelFormat_IYUV:
+        if (rect
+            && (rect->x != 0 || rect->y != 0 || rect->w != texture->w
+                || rect->h != texture->h)) {
+            SDL_SetError
+                ("YV12 and IYUV textures only support full surface locks");
+            return -1;
+        }
+        break;
+    }
+
+    *pixels = swdata->planes[0] + rect->y * swdata->pitches[0] + rect->x * 2;
+    *pitch = swdata->pitches[0];
+    return 0;
 }
+
+void
+SDL_SW_UnlockYUVTexture(SDL_SW_YUVTexture * swdata)
+{
+}
+
+int
+SDL_SW_CopyYUVToRGB(SDL_SW_YUVTexture * swdata, const SDL_Rect * srcrect,
+                    Uint32 target_format, int w, int h, void *pixels,
+                    int pitch)
+{
+    SDL_Texture *texture = swdata->texture;
+    int stretch;
+    int scale_2x;
+    Uint8 *lum, *Cr, *Cb;
+    int mod;
+
+    /* Make sure we're set up to display in the desired format */
+    if (target_format != swdata->target_format) {
+        if (SDL_SW_SetupYUVDisplay(swdata, target_format) < 0) {
+            return -1;
+        }
+    }
+
+    stretch = 0;
+    scale_2x = 0;
+    if (srcrect->x || srcrect->y || srcrect->w < texture->w
+        || srcrect->h < texture->h) {
+        /* The source rectangle has been clipped.
+           Using a scratch surface is easier than adding clipped
+           source support to all the blitters, plus that would
+           slow them down in the general unclipped case.
+         */
+        stretch = 1;
+    } else if ((srcrect->w != w) || (srcrect->h != h)) {
+        if ((w == 2 * srcrect->w) && (h == 2 * srcrect->h)) {
+            scale_2x = 1;
+        } else {
+            stretch = 1;
+        }
+    }
+    if (stretch) {
+        int bpp;
+        Uint32 Rmask, Gmask, Bmask, Amask;
+
+        if (swdata->display) {
+            swdata->display->w = w;
+            swdata->display->h = h;
+            swdata->display->pixels = pixels;
+            swdata->display->pitch = pitch;
+        } else {
+            /* This must have succeeded in SDL_SW_SetupYUVDisplay() earlier */
+            SDL_PixelFormatEnumToMasks(target_format, &bpp, &Rmask, &Gmask,
+                                       &Bmask, &Amask);
+            swdata->display =
+                SDL_CreateRGBSurfaceFrom(pixels, w, h, bpp, pitch, Rmask,
+                                         Gmask, Bmask, Amask);
+            if (!swdata->display) {
+                return (-1);
+            }
+        }
+        if (!swdata->stretch) {
+            /* This must have succeeded in SDL_SW_SetupYUVDisplay() earlier */
+            SDL_PixelFormatEnumToMasks(target_format, &bpp, &Rmask, &Gmask,
+                                       &Bmask, &Amask);
+            swdata->stretch =
+                SDL_CreateRGBSurface(0, texture->w, texture->h, bpp, Rmask,
+                                     Gmask, Bmask, Amask);
+            if (!swdata->stretch) {
+                return (-1);
+            }
+        }
+        pixels = swdata->stretch->pixels;
+        pitch = swdata->stretch->pitch;
+    }
+    switch (texture->format) {
+    case SDL_PixelFormat_YV12:
+        lum = swdata->planes[0];
+        Cr = swdata->planes[1];
+        Cb = swdata->planes[2];
+        break;
+    case SDL_PixelFormat_IYUV:
+        lum = swdata->planes[0];
+        Cr = swdata->planes[2];
+        Cb = swdata->planes[1];
+        break;
+    case SDL_PixelFormat_YUY2:
+        lum = swdata->planes[0];
+        Cr = lum + 3;
+        Cb = lum + 1;
+        break;
+    case SDL_PixelFormat_UYVY:
+        lum = swdata->planes[0] + 1;
+        Cr = lum + 1;
+        Cb = lum - 1;
+        break;
+    case SDL_PixelFormat_YVYU:
+        lum = swdata->planes[0];
+        Cr = lum + 1;
+        Cb = lum + 3;
+        break;
+    default:
+        SDL_SetError("Unsupported YUV format in copy");
+        return (-1);
+    }
+    mod = (pitch / SDL_BYTESPERPIXEL(target_format));
+
+    if (scale_2x) {
+        mod -= (texture->w * 2);
+        swdata->Display2X(swdata->colortab, swdata->rgb_2_pix,
+                          lum, Cr, Cb, pixels, texture->h, texture->w, mod);
+    } else {
+        mod -= texture->w;
+        swdata->Display1X(swdata->colortab, swdata->rgb_2_pix,
+                          lum, Cr, Cb, pixels, texture->h, texture->w, mod);
+    }
+    if (stretch) {
+        SDL_Rect rect = *srcrect;
+        SDL_SoftStretch(swdata->stretch, &rect, swdata->display, NULL);
+    }
+    return 0;
+}
+
+void
+SDL_SW_DestroyYUVTexture(SDL_SW_YUVTexture * swdata)
+{
+    if (swdata) {
+        if (swdata->pixels) {
+            SDL_free(swdata->pixels);
+        }
+        if (swdata->colortab) {
+            SDL_free(swdata->colortab);
+        }
+        if (swdata->rgb_2_pix) {
+            SDL_free(swdata->rgb_2_pix);
+        }
+        if (swdata->stretch) {
+            SDL_FreeSurface(swdata->stretch);
+        }
+        if (swdata->display) {
+            SDL_FreeSurface(swdata->display);
+        }
+        SDL_free(swdata);
+    }
+}
+
+/* vi: set ts=4 sw=4 expandtab: */

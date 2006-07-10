@@ -19,24 +19,25 @@
 
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-void STACKCALL ConvertMMX(HermesConverterInterface *);
+    void STACKCALL ConvertMMX(HermesConverterInterface *);
 
-void STACKCALL ClearMMX_32(HermesClearInterface *);
-void STACKCALL ClearMMX_24(HermesClearInterface *);
-void STACKCALL ClearMMX_16(HermesClearInterface *);
-void STACKCALL ClearMMX_8(HermesClearInterface *);
+    void STACKCALL ClearMMX_32(HermesClearInterface *);
+    void STACKCALL ClearMMX_24(HermesClearInterface *);
+    void STACKCALL ClearMMX_16(HermesClearInterface *);
+    void STACKCALL ClearMMX_8(HermesClearInterface *);
 
-void ConvertMMXpII32_24RGB888();
-void ConvertMMXpII32_16RGB565();
-void ConvertMMXpII32_16BGR565();
-void ConvertMMXpII32_16RGB555();
-void ConvertMMXpII32_16BGR565();
-void ConvertMMXpII32_16BGR555();
+    void ConvertMMXpII32_24RGB888();
+    void ConvertMMXpII32_16RGB565();
+    void ConvertMMXpII32_16BGR565();
+    void ConvertMMXpII32_16RGB555();
+    void ConvertMMXpII32_16BGR565();
+    void ConvertMMXpII32_16BGR555();
 
-void ConvertMMXp32_16RGB555();
+    void ConvertMMXp32_16RGB555();
 
 #ifdef __cplusplus
 }
@@ -47,29 +48,30 @@ void ConvertMMXp32_16RGB555();
 /* Fix the underscore business with ELF compilers */
 
 #if defined(__ELF__) && defined(__GNUC__)
-  #ifdef __cplusplus 
-  extern "C" {   
-  #endif
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
-  extern void _ConvertMMX(HermesConverterInterface *);
-  extern void _ConvertMMXpII32_24RGB888();
-  extern void _ConvertMMXpII32_16RGB565();
-  extern void _ConvertMMXpII32_16BGR565();
-  extern void _ConvertMMXpII32_16RGB555();
-  extern void _ConvertMMXpII32_16BGR555();
+    extern void _ConvertMMX(HermesConverterInterface *);
+    extern void _ConvertMMXpII32_24RGB888();
+    extern void _ConvertMMXpII32_16RGB565();
+    extern void _ConvertMMXpII32_16BGR565();
+    extern void _ConvertMMXpII32_16RGB555();
+    extern void _ConvertMMXpII32_16BGR555();
 
-  #define ConvertMMX _ConvertMMX
-  #define ConvertMMXpII32_24RGB888 _ConvertMMXpII32_24RGB888
-  #define ConvertMMXpII32_16RGB565 _ConvertMMXpII32_16RGB565
-  #define ConvertMMXpII32_16BGR565 _ConvertMMXpII32_16BGR565
-  #define ConvertMMXpII32_16RGB555 _ConvertMMXpII32_16RGB555
-  #define ConvertMMXpII32_16BGR555 _ConvertMMXpII32_16BGR555
+#define ConvertMMX _ConvertMMX
+#define ConvertMMXpII32_24RGB888 _ConvertMMXpII32_24RGB888
+#define ConvertMMXpII32_16RGB565 _ConvertMMXpII32_16RGB565
+#define ConvertMMXpII32_16BGR565 _ConvertMMXpII32_16BGR565
+#define ConvertMMXpII32_16RGB555 _ConvertMMXpII32_16RGB555
+#define ConvertMMXpII32_16BGR555 _ConvertMMXpII32_16BGR555
 
-  #ifdef __cplusplus
-  }
-  #endif
+#ifdef __cplusplus
+}
+#endif
 
-#endif /* ELF and GNUC */
+#endif                          /* ELF and GNUC */
 
 
 
@@ -92,9 +94,10 @@ void ConvertMMXp32_16RGB555();
 #pragma aux ConvertMMXpII32_16BGR555 "_*"
 #pragma aux ConvertMMXp32_16RGB555 "_*"
 
-#endif /* WATCOM */
+#endif                          /* WATCOM */
 
-#endif /* X86_ASSEMBLER */
+#endif                          /* X86_ASSEMBLER */
 
 
 #endif
+/* vi: set ts=4 sw=4 expandtab: */

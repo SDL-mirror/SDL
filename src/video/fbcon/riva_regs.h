@@ -40,4 +40,4 @@
 #define PCIO_OFFSET	0x00601000
 
 #endif /* _RIVA_REGS_H */
-
+/* vi: set ts=4 sw=4 expandtab: */

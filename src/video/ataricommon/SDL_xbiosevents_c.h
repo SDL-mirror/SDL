@@ -45,3 +45,4 @@ extern void SDL_AtariXbios_RestoreVectors(void);
 extern void SDL_AtariXbios_PostMouseEvents(_THIS, SDL_bool buttonEvents);
 
 #endif /* _SDL_XBIOSEVENTS_H_ */
+/* vi: set ts=4 sw=4 expandtab: */

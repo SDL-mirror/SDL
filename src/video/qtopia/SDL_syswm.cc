@@ -23,13 +23,15 @@
 
 #include "SDL_QWin.h"
 
-extern "C" {
+extern "C"
+{
 
 #include "SDL_syswm_c.h"
 
-void QT_SetWMCaption(_THIS, const char *title, const char *icon)
-{
-	SDL_Win->setCaption(title);
-}
+    void QT_SetWMCaption(_THIS, const char *title, const char *icon)
+    {
+        SDL_Win->setCaption(title);
+    }
 
-}; /* Extern C */
+};                              /* Extern C */
+/* vi: set ts=4 sw=4 expandtab: */

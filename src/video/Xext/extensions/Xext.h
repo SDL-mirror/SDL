@@ -29,22 +29,18 @@ in this Software without prior written authorization from The Open Group.
 #include <X11/Xfuncproto.h>
 
 _XFUNCPROTOBEGIN
+    typedef int (*XExtensionErrorHandler) (Display *, _Xconst char *,
+                                           _Xconst char *);
 
-typedef int (*XExtensionErrorHandler)(Display *, _Xconst char *,
-				      _Xconst char *);
+extern XExtensionErrorHandler
+XSetExtensionErrorHandler(XExtensionErrorHandler handler);
 
-extern XExtensionErrorHandler XSetExtensionErrorHandler(
-	XExtensionErrorHandler handler
-);
-
-extern int XMissingExtension(
-    Display*		/* dpy */,
-    _Xconst char*	/* ext_name */
-);
+extern int XMissingExtension(Display * /* dpy */ ,
+                             _Xconst char *     /* ext_name */
+    );
 
 _XFUNCPROTOEND
-
 #define X_EXTENSION_UNKNOWN "unknown"
 #define X_EXTENSION_MISSING "missing"
-
 #endif /* _XEXT_H_ */
+/* vi: set ts=4 sw=4 expandtab: */

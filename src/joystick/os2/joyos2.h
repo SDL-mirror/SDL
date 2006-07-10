@@ -13,27 +13,28 @@
 #define JOYOS2_H
 
 /****** GAMEPORT.SYS joystick definitions, start *****************************/
-#define GAME_VERSION    0x20           /* 2.0 First IBM version */
+#define GAME_VERSION    0x20    /* 2.0 First IBM version */
 #define GAMEPDDNAME     "GAME$   "
 #define IOCTL_CAT_USER	0x80
-#define GAME_PORT_GET	0x20		/* read GAMEPORT.SYS values */
-#define GAME_PORT_RESET 0x60		/* reset joystick mask with given value */
+#define GAME_PORT_GET	0x20    /* read GAMEPORT.SYS values */
+#define GAME_PORT_RESET 0x60    /* reset joystick mask with given value */
 
-#pragma pack(1)				/* pack structure size is 1 byte */
-typedef struct {			/* GAMEPORT.SYS structure */
-	USHORT	usJs_AxCnt;		/* Joystick_A X position */
-	USHORT	usJs_AyCnt;		/* Joystick_A Y position */
-	USHORT	usJs_BxCnt;		/* Joystick_B X position */
-	USHORT	usJs_ByCnt;		/* Joystick_B Y position */
-	USHORT	usJs_ButtonA1Cnt;	/* button A1 press count */
-	USHORT	usJs_ButtonA2Cnt;	/* button A2 press count */
-	USHORT	usJs_ButtonB1Cnt;	/* button B1 press count */
-	USHORT	usJs_ButtonB2Cnt;	/* button B2 press count */
-	UCHAR	ucJs_JoyStickMask;	/* mask of connected joystick pots */
-	UCHAR	ucJs_ButtonStatus;	/* bits of switches down */
-	ULONG	ulJs_Ticks;		/* joystick clock ticks */
+#pragma pack(1)                 /* pack structure size is 1 byte */
+typedef struct
+{                               /* GAMEPORT.SYS structure */
+    USHORT usJs_AxCnt;          /* Joystick_A X position */
+    USHORT usJs_AyCnt;          /* Joystick_A Y position */
+    USHORT usJs_BxCnt;          /* Joystick_B X position */
+    USHORT usJs_ByCnt;          /* Joystick_B Y position */
+    USHORT usJs_ButtonA1Cnt;    /* button A1 press count */
+    USHORT usJs_ButtonA2Cnt;    /* button A2 press count */
+    USHORT usJs_ButtonB1Cnt;    /* button B1 press count */
+    USHORT usJs_ButtonB2Cnt;    /* button B2 press count */
+    UCHAR ucJs_JoyStickMask;    /* mask of connected joystick pots */
+    UCHAR ucJs_ButtonStatus;    /* bits of switches down */
+    ULONG ulJs_Ticks;           /* joystick clock ticks */
 } GAME_PORT_STRUCT;
-#pragma pack()				/*reset to normal pack size */
+#pragma pack()                  /*reset to normal pack size */
 /****** GAMEPORT.SYS joystick definitions, end *******************************/
 
 
@@ -70,31 +71,31 @@ typedef struct {			/* GAMEPORT.SYS structure */
 
 /****************************************************************************/
 // 1-D position struct used for each axis
-typedef SHORT   GAME_POS;       /* some data formats require signed values */
+typedef SHORT GAME_POS;         /* some data formats require signed values */
 
 // simple 2-D position for each joystick
 typedef struct
 {
-        GAME_POS                x;
-        GAME_POS                y;
+    GAME_POS x;
+    GAME_POS y;
 }
 GAME_2DPOS_STRUCT;
 
 // struct defining the instantaneous state of both sticks and all buttons
 typedef struct
 {
-        GAME_2DPOS_STRUCT       A;
-        GAME_2DPOS_STRUCT       B;
-        USHORT                  butMask;
+    GAME_2DPOS_STRUCT A;
+    GAME_2DPOS_STRUCT B;
+    USHORT butMask;
 }
 GAME_DATA_STRUCT;
 
 // struct to be used for calibration and digital response on each axis
 typedef struct
 {
-        GAME_POS                lower;
-        GAME_POS                centre;
-        GAME_POS                upper;
+    GAME_POS lower;
+    GAME_POS centre;
+    GAME_POS upper;
 }
 GAME_3POS_STRUCT;
 /****************************************************************************/
@@ -104,11 +105,11 @@ GAME_3POS_STRUCT;
 // current data for all sticks as well as button counts since last read
 typedef struct
 {
-        GAME_DATA_STRUCT        curdata;
-        USHORT                  b1cnt;
-        USHORT                  b2cnt;
-        USHORT                  b3cnt;
-        USHORT                  b4cnt;
+    GAME_DATA_STRUCT curdata;
+    USHORT b1cnt;
+    USHORT b2cnt;
+    USHORT b3cnt;
+    USHORT b4cnt;
 }
 GAME_STATUS_STRUCT;
 /****************************************************************************/
@@ -135,14 +136,14 @@ GAME_STATUS_STRUCT;
 // parameters defining the operation of the driver
 typedef struct
 {
-        USHORT                  useA;           /* new bitmasks: see above */
-        USHORT                  useB;
-        USHORT                  mode;           /* see consts above */
-        USHORT                  format;         /* see consts above */
-        USHORT                  sampDiv;        /* samp freq = 32 / n */
-        USHORT                  scale;          /* scaling factor */
-        USHORT                  res1;           /* must be 0 */
-        USHORT                  res2;           /* must be 0 */
+    USHORT useA;                /* new bitmasks: see above */
+    USHORT useB;
+    USHORT mode;                /* see consts above */
+    USHORT format;              /* see consts above */
+    USHORT sampDiv;             /* samp freq = 32 / n */
+    USHORT scale;               /* scaling factor */
+    USHORT res1;                /* must be 0 */
+    USHORT res2;                /* must be 0 */
 }
 GAME_PARM_STRUCT;
 /****************************************************************************/
@@ -154,10 +155,10 @@ GAME_PARM_STRUCT;
 //      - lower limit on value to be considered in upper range
 typedef struct
 {
-        GAME_3POS_STRUCT        Ax;
-        GAME_3POS_STRUCT        Ay;
-        GAME_3POS_STRUCT        Bx;
-        GAME_3POS_STRUCT        By;
+    GAME_3POS_STRUCT Ax;
+    GAME_3POS_STRUCT Ay;
+    GAME_3POS_STRUCT Bx;
+    GAME_3POS_STRUCT By;
 }
 GAME_CALIB_STRUCT;
 /****************************************************************************/
@@ -166,12 +167,13 @@ GAME_CALIB_STRUCT;
 // struct defining the digital response values for all axes
 typedef struct
 {
-        GAME_3POS_STRUCT        Ax;
-        GAME_3POS_STRUCT        Ay;
-        GAME_3POS_STRUCT        Bx;
-        GAME_3POS_STRUCT        By;
+    GAME_3POS_STRUCT Ax;
+    GAME_3POS_STRUCT Ay;
+    GAME_3POS_STRUCT Bx;
+    GAME_3POS_STRUCT By;
 }
 GAME_DIGSET_STRUCT;
 /****************************************************************************/
 
 #endif
+/* vi: set ts=4 sw=4 expandtab: */

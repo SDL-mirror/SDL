@@ -34,4 +34,4 @@ extern void PG_InitEvents(_THIS);
 extern void PG_InitOSKeymap(_THIS);
 
 /* end of SDL_pgevents_c.h ... */
-
+/* vi: set ts=4 sw=4 expandtab: */

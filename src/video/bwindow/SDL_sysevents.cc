@@ -29,18 +29,21 @@
 #include "SDL_BWin.h"
 #include "SDL_lowvideo.h"
 
-extern "C" {
+extern "C"
+{
 
 #include "../../events/SDL_sysevents.h"
 #include "../../events/SDL_events_c.h"
 #include "SDL_sysevents_c.h"
 
-void BE_PumpEvents(_THIS)
-{
-}
+    void BE_PumpEvents(_THIS)
+    {
+    }
 
-void BE_InitOSKeymap(_THIS)
-{
-}
+    void BE_InitOSKeymap(_THIS)
+    {
+    }
 
-}; /* Extern C */
+};                              /* Extern C */
+
+/* vi: set ts=4 sw=4 expandtab: */

@@ -30,50 +30,58 @@
 #include "SDL_nxmouse_c.h"
 
 // The implementation dependent data for the window manager cursor
-struct WMcursor {
-    int unused ;
-} ;
-
-WMcursor * NX_CreateWMCursor (_THIS,
-        Uint8 * data, Uint8 * mask, int w, int h, int hot_x, int hot_y)
+struct WMcursor
 {
-    WMcursor * cursor ;
+    int unused;
+};
 
-    Dprintf ("enter NX_CreateWMCursor\n") ;
+WMcursor *
+NX_CreateWMCursor(_THIS,
+                  Uint8 * data, Uint8 * mask, int w, int h, int hot_x,
+                  int hot_y)
+{
+    WMcursor *cursor;
 
-    cursor = (WMcursor *) SDL_malloc (sizeof (WMcursor)) ;
+    Dprintf("enter NX_CreateWMCursor\n");
+
+    cursor = (WMcursor *) SDL_malloc(sizeof(WMcursor));
     if (cursor == NULL) {
-        SDL_OutOfMemory () ;
-        return NULL ;
+        SDL_OutOfMemory();
+        return NULL;
     }
 
-    Dprintf ("leave NX_CreateWMCursor\n") ;
-    return cursor ;
+    Dprintf("leave NX_CreateWMCursor\n");
+    return cursor;
 }
 
-void NX_FreeWMCursor (_THIS, WMcursor * cursor)
+void
+NX_FreeWMCursor(_THIS, WMcursor * cursor)
 {
-    Dprintf ("NX_FreeWMCursor\n") ;
-    SDL_free (cursor) ;
-    return ;
+    Dprintf("NX_FreeWMCursor\n");
+    SDL_free(cursor);
+    return;
 }
 
-void NX_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
+void
+NX_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
 {
-    GR_WINDOW_INFO info ;
+    GR_WINDOW_INFO info;
 
-    Dprintf ("enter NX_WarpWMCursor\n") ;
-    SDL_Lock_EventThread () ;
-    
-    GrGetWindowInfo (SDL_Window, & info) ;
-    GrMoveCursor (info.x + x, info.y + y) ;
+    Dprintf("enter NX_WarpWMCursor\n");
+    SDL_Lock_EventThread();
 
-    SDL_Unlock_EventThread () ;
-    Dprintf ("leave NX_WarpWMCursor\n") ;
+    GrGetWindowInfo(SDL_Window, &info);
+    GrMoveCursor(info.x + x, info.y + y);
+
+    SDL_Unlock_EventThread();
+    Dprintf("leave NX_WarpWMCursor\n");
 }
 
-int NX_ShowWMCursor (_THIS, WMcursor * cursor)
+int
+NX_ShowWMCursor(_THIS, WMcursor * cursor)
 {
-    Dprintf ("NX_ShowWMCursor\n") ;
-    return 1 ;
+    Dprintf("NX_ShowWMCursor\n");
+    return 1;
 }
+
+/* vi: set ts=4 sw=4 expandtab: */

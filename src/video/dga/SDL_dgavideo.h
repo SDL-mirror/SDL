@@ -50,51 +50,53 @@
 
 
 /* This is the structure we use to keep track of video memory */
-typedef struct vidmem_bucket {
-	struct vidmem_bucket *prev;
-	int used;
-	int dirty;
-	Uint8 *base;
-	unsigned int size;
-	struct vidmem_bucket *next;
+typedef struct vidmem_bucket
+{
+    struct vidmem_bucket *prev;
+    int used;
+    int dirty;
+    Uint8 *base;
+    unsigned int size;
+    struct vidmem_bucket *next;
 } vidmem_bucket;
 
 /* Private display data */
-struct SDL_PrivateVideoData {
-	Display *DGA_Display;
-	Colormap DGA_colormap;
-	int visualClass;
+struct SDL_PrivateVideoData
+{
+    Display *DGA_Display;
+    Colormap DGA_colormap;
+    int visualClass;
 
-#define NUM_MODELISTS	4		/* 8, 16, 24, and 32 bits-per-pixel */
-	int SDL_nummodes[NUM_MODELISTS];
-	SDL_Rect **SDL_modelist[NUM_MODELISTS];
+#define NUM_MODELISTS	4       /* 8, 16, 24, and 32 bits-per-pixel */
+    int SDL_nummodes[NUM_MODELISTS];
+    SDL_Rect **SDL_modelist[NUM_MODELISTS];
 
-	/* Information for the video surface */
-	Uint8 *memory_base;
-	int memory_pitch;
-	SDL_mutex *hw_lock;
-	int sync_needed;
-	int was_flipped;
+    /* Information for the video surface */
+    Uint8 *memory_base;
+    int memory_pitch;
+    SDL_mutex *hw_lock;
+    int sync_needed;
+    int was_flipped;
 
-	/* Information for hardware surfaces */
-	vidmem_bucket surfaces;
-	int surfaces_memtotal;
-	int surfaces_memleft;
+    /* Information for hardware surfaces */
+    vidmem_bucket surfaces;
+    int surfaces_memtotal;
+    int surfaces_memleft;
 
-	/* Information for double-buffering */
-	int flip_page;
-	int flip_yoffset[2];
-	Uint8 *flip_address[2];
+    /* Information for double-buffering */
+    int flip_page;
+    int flip_yoffset[2];
+    Uint8 *flip_address[2];
 
-	/* Used to handle DGA events */
-	int event_base;
+    /* Used to handle DGA events */
+    int event_base;
 #ifdef LOCK_DGA_DISPLAY
-	SDL_mutex *event_lock;
+    SDL_mutex *event_lock;
 #endif
 
-	/* Screensaver settings */
-	int screensaver_timeout;
-	BOOL dpms_enabled;
+    /* Screensaver settings */
+    int screensaver_timeout;
+    BOOL dpms_enabled;
 };
 /* Old variable names */
 #define DGA_Display		(this->hidden->DGA_Display)
@@ -120,3 +122,4 @@ struct SDL_PrivateVideoData {
 #define dpms_enabled		(this->hidden->dpms_enabled)
 
 #endif /* _SDL_dgavideo_h */
+/* vi: set ts=4 sw=4 expandtab: */

@@ -72,3 +72,4 @@
 #define VK_RBRACKET	0xDD
 #define VK_APOSTROPHE	0xDE
 #define VK_BACKTICK	0xDF
+/* vi: set ts=4 sw=4 expandtab: */

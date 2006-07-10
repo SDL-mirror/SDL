@@ -29,3 +29,4 @@
 typedef pth_t SYS_ThreadHandle;
 
 #endif /* _SDL_SYSTHREAD_C_H_ */
+/* vi: set ts=4 sw=4 expandtab: */

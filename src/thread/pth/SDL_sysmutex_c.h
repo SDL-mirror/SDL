@@ -24,8 +24,10 @@
 #ifndef _SDL_SYSMUTEX_C_H_
 #define _SDL_SYSMUTEX_C_H_
 
-struct SDL_mutex {
-	pth_mutex_t mutexpth_p;
+struct SDL_mutex
+{
+    pth_mutex_t mutexpth_p;
 };
 
 #endif /* _SDL_SYSMUTEX_C_H_ */
+/* vi: set ts=4 sw=4 expandtab: */

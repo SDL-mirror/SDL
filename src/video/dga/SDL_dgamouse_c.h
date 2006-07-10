@@ -24,3 +24,4 @@
 #include "SDL_dgavideo.h"
 
 /* Functions to be exported */
+/* vi: set ts=4 sw=4 expandtab: */

@@ -30,23 +30,23 @@
 #ifdef __GNUC__
 #define HAVE_STDINT_H	1
 #elif defined(_MSC_VER)
-typedef signed __int8		int8_t;
-typedef unsigned __int8		uint8_t;
-typedef signed __int16		int16_t;
-typedef unsigned __int16	uint16_t;
-typedef signed __int32		int32_t;
-typedef unsigned __int32	uint32_t;
-typedef signed __int64		int64_t;
-typedef unsigned __int64	uint64_t;
+typedef signed __int8 int8_t;
+typedef unsigned __int8 uint8_t;
+typedef signed __int16 int16_t;
+typedef unsigned __int16 uint16_t;
+typedef signed __int32 int32_t;
+typedef unsigned __int32 uint32_t;
+typedef signed __int64 int64_t;
+typedef unsigned __int64 uint64_t;
 #ifndef _UINTPTR_T_DEFINED
 #ifdef  _WIN64
-typedef unsigned __int64    uintptr_t;
+typedef unsigned __int64 uintptr_t;
 #else
-typedef unsigned int   uintptr_t;
+typedef unsigned int uintptr_t;
 #endif
 #define _UINTPTR_T_DEFINED
 #endif
-#else	/* !__GNUC__ && !_MSC_VER */
+#else /* !__GNUC__ && !_MSC_VER */
 typedef signed char int8_t;
 typedef unsigned char uint8_t;
 typedef signed short int16_t;
@@ -150,19 +150,17 @@ typedef unsigned int uintptr_t;
 #endif
 
 /* Enable various video drivers */
-#ifdef _WIN32_WCE
-#define SDL_VIDEO_DRIVER_GAPI	1
-#endif
-#ifndef _WIN32_WCE
-#define SDL_VIDEO_DRIVER_DDRAW	1
-#endif
 #define SDL_VIDEO_DRIVER_DUMMY	1
-#define SDL_VIDEO_DRIVER_WINDIB	1
+#define SDL_VIDEO_DRIVER_WIN32	1
+
+#define SDL_VIDEO_RENDER_D3D	1
+#define SDL_VIDEO_RENDER_GDI	1
 
 /* Enable OpenGL support */
 #ifndef _WIN32_WCE
 #define SDL_VIDEO_OPENGL	1
 #define SDL_VIDEO_OPENGL_WGL	1
+#define SDL_VIDEO_RENDER_OGL	1
 #endif
 
 /* Enable assembly routines (Win64 doesn't have inline asm) */

@@ -30,27 +30,28 @@
 /* for PDA */
 typedef enum
 {
-	SDL_ORIENTATION_UP,
-	SDL_ORIENTATION_DOWN,
-	SDL_ORIENTATION_LEFT,
-	SDL_ORIENTATION_RIGHT
+    SDL_ORIENTATION_UP,
+    SDL_ORIENTATION_DOWN,
+    SDL_ORIENTATION_LEFT,
+    SDL_ORIENTATION_RIGHT
 } SDL_ScreenOrientation;
 
 /* Private display data */
-struct SDL_PrivateVideoData {
+struct SDL_PrivateVideoData
+{
     HBITMAP screen_bmp;
     HPALETTE screen_pal;
 
-#define NUM_MODELISTS	4		/* 8, 16, 24, and 32 bits-per-pixel */
+#define NUM_MODELISTS	4       /* 8, 16, 24, and 32 bits-per-pixel */
     int SDL_nummodes[NUM_MODELISTS];
     SDL_Rect **SDL_modelist[NUM_MODELISTS];
 
-	SDL_ScreenOrientation orientation;
+    SDL_ScreenOrientation orientation;
 #ifdef _WIN32_WCE
-	int invert; /* do to remove, used by GAPI driver! */
-	char hiresFix; /* using hires mode without defining hires resource */
-	int supportRotation; /* for Pocket PC devices */
-	DWORD origRotation; /* for Pocket PC devices */
+    int invert;                 /* do to remove, used by GAPI driver! */
+    char hiresFix;              /* using hires mode without defining hires resource */
+    int supportRotation;        /* for Pocket PC devices */
+    DWORD origRotation;         /* for Pocket PC devices */
 #endif
 };
 /* Old variable names */
@@ -60,3 +61,4 @@ struct SDL_PrivateVideoData {
 #define SDL_modelist		(this->hidden->SDL_modelist)
 
 #endif /* _SDL_dibvideo_h */
+/* vi: set ts=4 sw=4 expandtab: */

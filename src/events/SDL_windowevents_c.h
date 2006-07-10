@@ -19,6 +19,14 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
 
-/* DEPRECATED */
-#include "SDL_endian.h"
+#ifndef _SDL_windowevents_c_h
+#define _SDL_windowevents_c_h
+
+extern int SDL_SendWindowEvent(SDL_WindowID windowID, Uint8 windowevent,
+                               int data1, int data2);
+
+#endif /* _SDL_windowevents_c_h */
+
+/* vi: set ts=4 sw=4 expandtab: */

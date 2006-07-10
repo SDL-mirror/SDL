@@ -19,4 +19,3 @@
     Sam Lantinga
     slouken@libsdl.org
 */
-

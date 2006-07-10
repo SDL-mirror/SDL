@@ -29,11 +29,12 @@
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_AudioDevice *this
 
-struct SDL_PrivateAudioData {
-	AudioUnit outputAudioUnit;
-	void *buffer;
-	UInt32 bufferOffset;
-	UInt32 bufferSize;
+struct SDL_PrivateAudioData
+{
+    AudioUnit outputAudioUnit;
+    void *buffer;
+    UInt32 bufferOffset;
+    UInt32 bufferSize;
 };
 
 /* Old variable names */
@@ -43,3 +44,4 @@ struct SDL_PrivateAudioData {
 #define bufferSize		(this->hidden->bufferSize)
 
 #endif /* _SDL_coreaudio_h */
+/* vi: set ts=4 sw=4 expandtab: */

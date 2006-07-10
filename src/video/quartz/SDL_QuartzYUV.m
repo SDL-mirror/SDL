@@ -37,17 +37,23 @@
 #define yuv_port (this->hidden->yuv_port)
 
 
-static int QZ_LockYUV (_THIS, SDL_Overlay *overlay) {
+static int
+QZ_LockYUV (_THIS, SDL_Overlay * overlay)
+{
 
     return 0;
 }
 
-static void QZ_UnlockYUV (_THIS, SDL_Overlay *overlay) {
+static void
+QZ_UnlockYUV (_THIS, SDL_Overlay * overlay)
+{
 
     ;
 }
 
-static int QZ_DisplayYUV (_THIS, SDL_Overlay *overlay, SDL_Rect *src, SDL_Rect *dst) {
+static int
+QZ_DisplayYUV (_THIS, SDL_Overlay * overlay, SDL_Rect * src, SDL_Rect * dst)
+{
 
     OSErr err;
     CodecFlags flags;
@@ -62,11 +68,12 @@ static int QZ_DisplayYUV (_THIS, SDL_Overlay *overlay, SDL_Rect *src, SDL_Rect *
 
         Fixed scale_x, scale_y;
 
-        scale_x = FixDiv ( Long2Fix (dst->w), Long2Fix (overlay->w) );
-        scale_y = FixDiv ( Long2Fix (dst->h), Long2Fix (overlay->h) );
+        scale_x = FixDiv (Long2Fix (dst->w), Long2Fix (overlay->w));
+        scale_y = FixDiv (Long2Fix (dst->h), Long2Fix (overlay->h));
 
         SetIdentityMatrix (yuv_matrix);
-        ScaleMatrix (yuv_matrix, scale_x, scale_y, Long2Fix (0), Long2Fix (0));
+        ScaleMatrix (yuv_matrix, scale_x, scale_y, Long2Fix (0),
+                     Long2Fix (0));
 
         SetDSequenceMatrix (yuv_seq, yuv_matrix);
 
@@ -74,34 +81,35 @@ static int QZ_DisplayYUV (_THIS, SDL_Overlay *overlay, SDL_Rect *src, SDL_Rect *
         yuv_height = dst->h;
     }
 
-    if( ( err = DecompressSequenceFrameS(
-                                         yuv_seq,
-                                         (void*)yuv_pixmap,
+    if ((err = DecompressSequenceFrameS (yuv_seq,
+                                         (void *) yuv_pixmap,
                                          sizeof (PlanarPixmapInfoYUV420),
-                                         codecFlagUseImageBuffer, &flags, nil ) != noErr ) )
-    {
+                                         codecFlagUseImageBuffer, &flags,
+                                         nil) != noErr)) {
         SDL_SetError ("DecompressSequenceFrameS failed");
     }
 
     return err != noErr;
 }
 
-static void QZ_FreeHWYUV (_THIS, SDL_Overlay *overlay) {
+static void
+QZ_FreeHWYUV (_THIS, SDL_Overlay * overlay)
+{
 
     CDSequenceEnd (yuv_seq);
-    ExitMovies();
+    ExitMovies ();
 
     SDL_free (overlay->hwfuncs);
     SDL_free (overlay->pitches);
     SDL_free (overlay->pixels);
 
     if (SDL_VideoSurface->flags & SDL_FULLSCREEN) {
-        [ qz_window close ];
+        [qz_window close];
         qz_window = nil;
     }
 
     SDL_free (yuv_matrix);
-    DisposeHandle ((Handle)yuv_idh);
+    DisposeHandle ((Handle) yuv_idh);
 }
 
 /* check for 16 byte alignment, bail otherwise */
@@ -110,37 +118,38 @@ static void QZ_FreeHWYUV (_THIS, SDL_Overlay *overlay) {
 /* align a byte offset, return how much to add to make it a multiple of 16 */
 #define ALIGN(x) ((16 - (x & 15)) & 15)
 
-SDL_Overlay* QZ_CreateYUVOverlay (_THIS, int width, int height,
-                                         Uint32 format, SDL_Surface *display) {
+SDL_Overlay *
+QZ_CreateYUVOverlay (_THIS, int width, int height,
+                     Uint32 format, SDL_Surface * display)
+{
 
     Uint32 codec;
     OSStatus err;
     CGrafPtr port;
     SDL_Overlay *overlay;
 
-    if (format == SDL_YV12_OVERLAY ||
-        format == SDL_IYUV_OVERLAY) {
+    if (format == SDL_YV12_OVERLAY || format == SDL_IYUV_OVERLAY) {
 
         codec = kYUV420CodecType;
-    }
-    else {
+    } else {
         SDL_SetError ("Hardware: unsupported video format");
         return NULL;
     }
 
-    yuv_idh = (ImageDescriptionHandle) NewHandleClear (sizeof(ImageDescription));
+    yuv_idh =
+        (ImageDescriptionHandle) NewHandleClear (sizeof (ImageDescription));
     if (yuv_idh == NULL) {
-        SDL_OutOfMemory();
+        SDL_OutOfMemory ();
         return NULL;
     }
 
-    yuv_matrix = (MatrixRecordPtr) SDL_malloc (sizeof(MatrixRecord));
+    yuv_matrix = (MatrixRecordPtr) SDL_malloc (sizeof (MatrixRecord));
     if (yuv_matrix == NULL) {
-        SDL_OutOfMemory();
+        SDL_OutOfMemory ();
         return NULL;
     }
 
-    if ( EnterMovies() != noErr ) {
+    if (EnterMovies () != noErr) {
         SDL_SetError ("Could not init QuickTime for YUV playback");
         return NULL;
     }
@@ -154,68 +163,64 @@ SDL_Overlay* QZ_CreateYUVOverlay (_THIS, int width, int height,
     if (SDL_VideoSurface->flags & SDL_FULLSCREEN) {
 
         /*
-          Acceleration requires a window to be present.
-          A CGrafPtr that points to the screen isn't good enough
-        */
-        NSRect content = NSMakeRect (0, 0, SDL_VideoSurface->w, SDL_VideoSurface->h);
+           Acceleration requires a window to be present.
+           A CGrafPtr that points to the screen isn't good enough
+         */
+        NSRect content =
+            NSMakeRect (0, 0, SDL_VideoSurface->w, SDL_VideoSurface->h);
 
-        qz_window = [ [ SDL_QuartzWindow alloc ]
-                            initWithContentRect:content
-                            styleMask:NSBorderlessWindowMask
-                            backing:NSBackingStoreBuffered defer:NO ];
+      qz_window =[[SDL_QuartzWindow alloc] initWithContentRect: content styleMask: NSBorderlessWindowMask backing: NSBackingStoreBuffered defer:NO];
 
         if (qz_window == nil) {
             SDL_SetError ("Could not create the Cocoa window");
             return NULL;
         }
 
-        [ qz_window setContentView:[ [ NSQuickDrawView alloc ] init ] ];
-        [ qz_window setReleasedWhenClosed:YES ];
-        [ qz_window center ];
-        [ qz_window setAcceptsMouseMovedEvents:YES ];
-        [ qz_window setLevel:CGShieldingWindowLevel() ];
-        [ qz_window makeKeyAndOrderFront:nil ];
+      [qz_window setContentView:[[NSQuickDrawView alloc] init]];
+      [qz_window setReleasedWhenClosed:YES];
+        [qz_window center];
+      [qz_window setAcceptsMouseMovedEvents:YES];
+      [qz_window setLevel:CGShieldingWindowLevel ()];
+      [qz_window makeKeyAndOrderFront:nil];
 
-        port = [ [ qz_window contentView ] qdPort ];
+        port =[[qz_window contentView] qdPort];
         SetPort (port);
-        
+
         /*
-            BUG: would like to remove white flash when window kicks in
-            {
-                Rect r;
-                SetRect (&r, 0, 0, SDL_VideoSurface->w, SDL_VideoSurface->h);
-                PaintRect (&r);
-                QDFlushPortBuffer (port, nil);
-            }
-        */
-    }
-    else {
-        port = [ window_view qdPort ];
+           BUG: would like to remove white flash when window kicks in
+           {
+           Rect r;
+           SetRect (&r, 0, 0, SDL_VideoSurface->w, SDL_VideoSurface->h);
+           PaintRect (&r);
+           QDFlushPortBuffer (port, nil);
+           }
+         */
+    } else {
+        port =[window_view qdPort];
         SetPort (port);
     }
-    
+
     SetIdentityMatrix (yuv_matrix);
-    
-    HLock ((Handle)yuv_idh);
-    
-    (**yuv_idh).idSize = sizeof(ImageDescription);
-    (**yuv_idh).cType  = codec;
+
+    HLock ((Handle) yuv_idh);
+
+    (**yuv_idh).idSize = sizeof (ImageDescription);
+    (**yuv_idh).cType = codec;
     (**yuv_idh).version = 1;
     (**yuv_idh).revisionLevel = 0;
     (**yuv_idh).width = width;
     (**yuv_idh).height = height;
-    (**yuv_idh).hRes = Long2Fix(72);
-    (**yuv_idh).vRes = Long2Fix(72);
+    (**yuv_idh).hRes = Long2Fix (72);
+    (**yuv_idh).vRes = Long2Fix (72);
     (**yuv_idh).spatialQuality = codecLosslessQuality;
     (**yuv_idh).frameCount = 1;
     (**yuv_idh).clutID = -1;
     (**yuv_idh).dataSize = 0;
     (**yuv_idh).depth = 24;
-    
-    HUnlock ((Handle)yuv_idh);
-    
-    err = DecompressSequenceBeginS (
-                                    &yuv_seq,
+
+    HUnlock ((Handle) yuv_idh);
+
+    err = DecompressSequenceBeginS (&yuv_seq,
                                     yuv_idh,
                                     NULL,
                                     0,
@@ -226,68 +231,65 @@ SDL_Overlay* QZ_CreateYUVOverlay (_THIS, int width, int height,
                                     0,
                                     NULL,
                                     codecFlagUseImageBuffer,
-                                    codecLosslessQuality,
-                                    yuv_codec);
-    
+                                    codecLosslessQuality, yuv_codec);
+
     if (err != noErr) {
         SDL_SetError ("Error trying to start YUV codec.");
         return NULL;
     }
-    
-    overlay = (SDL_Overlay*) SDL_malloc (sizeof(*overlay));
+
+    overlay = (SDL_Overlay *) SDL_malloc (sizeof (*overlay));
     if (overlay == NULL) {
-        SDL_OutOfMemory();
+        SDL_OutOfMemory ();
         return NULL;
     }
-    
-    overlay->format      = format;
-    overlay->w           = width;
-    overlay->h           = height;
-    overlay->planes      = 3;
-    overlay->hw_overlay  = 1;
+
+    overlay->format = format;
+    overlay->w = width;
+    overlay->h = height;
+    overlay->planes = 3;
+    overlay->hw_overlay = 1;
     {
-        int      offset;
-        Uint8  **pixels;
-        Uint16  *pitches;
-        int      plane2, plane3;
+        int offset;
+        Uint8 **pixels;
+        Uint16 *pitches;
+        int plane2, plane3;
 
         if (format == SDL_IYUV_OVERLAY) {
 
-            plane2 = 1; /* Native codec format */
+            plane2 = 1;         /* Native codec format */
             plane3 = 2;
-        }
-        else if (format == SDL_YV12_OVERLAY) {
+        } else if (format == SDL_YV12_OVERLAY) {
 
             /* switch the U and V planes */
-            plane2 = 2; /* U plane maps to plane 3 */
-            plane3 = 1; /* V plane maps to plane 2 */
-        }
-        else {
-            SDL_SetError("Unsupported YUV format");
+            plane2 = 2;         /* U plane maps to plane 3 */
+            plane3 = 1;         /* V plane maps to plane 2 */
+        } else {
+            SDL_SetError ("Unsupported YUV format");
             return NULL;
         }
 
-        pixels = (Uint8**) SDL_malloc (sizeof(*pixels) * 3);
-        pitches = (Uint16*) SDL_malloc (sizeof(*pitches) * 3);
+        pixels = (Uint8 **) SDL_malloc (sizeof (*pixels) * 3);
+        pitches = (Uint16 *) SDL_malloc (sizeof (*pitches) * 3);
         if (pixels == NULL || pitches == NULL) {
-            SDL_OutOfMemory();
+            SDL_OutOfMemory ();
             return NULL;
         }
 
-        yuv_pixmap = (PlanarPixmapInfoYUV420*)
-            SDL_malloc (sizeof(PlanarPixmapInfoYUV420) +
-                    (width * height * 2));
+        yuv_pixmap = (PlanarPixmapInfoYUV420 *)
+            SDL_malloc (sizeof (PlanarPixmapInfoYUV420) +
+                        (width * height * 2));
         if (yuv_pixmap == NULL) {
             SDL_OutOfMemory ();
             return NULL;
         }
 
         /* CHECK_ALIGN(yuv_pixmap); */
-        offset  = sizeof(PlanarPixmapInfoYUV420);
+        offset = sizeof (PlanarPixmapInfoYUV420);
         /* offset += ALIGN(offset); */
         /* CHECK_ALIGN(offset); */
 
-        pixels[0] = (Uint8*)yuv_pixmap + offset;
+        pixels[0] = (Uint8 *) yuv_pixmap + offset;
         /* CHECK_ALIGN(pixels[0]); */
 
         pitches[0] = width;
@@ -295,13 +297,13 @@ SDL_Overlay* QZ_CreateYUVOverlay (_THIS, int width, int height,
         yuv_pixmap->componentInfoY.rowBytes = width;
 
         offset += width * height;
-        pixels[plane2] = (Uint8*)yuv_pixmap + offset;
+        pixels[plane2] = (Uint8 *) yuv_pixmap + offset;
         pitches[plane2] = width / 2;
         yuv_pixmap->componentInfoCb.offset = offset;
         yuv_pixmap->componentInfoCb.rowBytes = width / 2;
 
         offset += (width * height / 4);
-        pixels[plane3] = (Uint8*)yuv_pixmap + offset;
+        pixels[plane3] = (Uint8 *) yuv_pixmap + offset;
         pitches[plane3] = width / 2;
         yuv_pixmap->componentInfoCr.offset = offset;
         yuv_pixmap->componentInfoCr.rowBytes = width / 2;
@@ -310,19 +312,19 @@ SDL_Overlay* QZ_CreateYUVOverlay (_THIS, int width, int height,
         overlay->pitches = pitches;
     }
 
-    overlay->hwfuncs = SDL_malloc (sizeof(*overlay->hwfuncs));
+    overlay->hwfuncs = SDL_malloc (sizeof (*overlay->hwfuncs));
     if (overlay->hwfuncs == NULL) {
-        SDL_OutOfMemory();
+        SDL_OutOfMemory ();
         return NULL;
     }
-    
-    overlay->hwfuncs->Lock    = QZ_LockYUV;
-    overlay->hwfuncs->Unlock  = QZ_UnlockYUV;
+
+    overlay->hwfuncs->Lock = QZ_LockYUV;
+    overlay->hwfuncs->Unlock = QZ_UnlockYUV;
     overlay->hwfuncs->Display = QZ_DisplayYUV;
-    overlay->hwfuncs->FreeHW  = QZ_FreeHWYUV;
+    overlay->hwfuncs->FreeHW = QZ_FreeHWYUV;
 
     yuv_width = overlay->w;
     yuv_height = overlay->h;
-    
+
     return overlay;
 }

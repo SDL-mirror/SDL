@@ -24,14 +24,21 @@
 #include "SDL_video.h"
 #include "SDL_sysvideo.h"
 
-/* This is the software implementation of the YUV video overlay support */
+/* This is the software implementation of the YUV texture support */
 
-extern SDL_Overlay *SDL_CreateYUV_SW(_THIS, int width, int height, Uint32 format, SDL_Surface *display);
+typedef struct SDL_SW_YUVTexture SDL_SW_YUVTexture;
 
-extern int SDL_LockYUV_SW(_THIS, SDL_Overlay *overlay);
+SDL_SW_YUVTexture *SDL_SW_CreateYUVTexture(SDL_Texture * texture);
+int SDL_SW_QueryYUVTexturePixels(SDL_SW_YUVTexture * swdata, void **pixels,
+                                 int *pitch);
+int SDL_SW_UpdateYUVTexture(SDL_SW_YUVTexture * swdata, const SDL_Rect * rect,
+                            const void *pixels, int pitch);
+int SDL_SW_LockYUVTexture(SDL_SW_YUVTexture * swdata, const SDL_Rect * rect,
+                          int markDirty, void **pixels, int *pitch);
+void SDL_SW_UnlockYUVTexture(SDL_SW_YUVTexture * swdata);
+int SDL_SW_CopyYUVToRGB(SDL_SW_YUVTexture * swdata, const SDL_Rect * srcrect,
+                        Uint32 target_format, int w, int h, void *pixels,
+                        int pitch);
+void SDL_SW_DestroyYUVTexture(SDL_SW_YUVTexture * swdata);
 
-extern void SDL_UnlockYUV_SW(_THIS, SDL_Overlay *overlay);
-
-extern int SDL_DisplayYUV_SW(_THIS, SDL_Overlay *overlay, SDL_Rect *src, SDL_Rect *dst);
-
-extern void SDL_FreeYUV_SW(_THIS, SDL_Overlay *overlay);
+/* vi: set ts=4 sw=4 expandtab: */
