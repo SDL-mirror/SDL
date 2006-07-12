@@ -442,7 +442,8 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
     }
 
     /* Create a renderer for the window */
-    if (SDL_CreateRenderer(SDL_VideoWindow, -1, 0) < 0) {
+    if (SDL_CreateRenderer(SDL_VideoWindow, -1, SDL_Renderer_SingleBuffer) <
+        0) {
         return NULL;
     }
 
@@ -517,6 +518,7 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
 
     /* Clear the surface for display */
     SDL_FillRect(SDL_PublicSurface, NULL, 0);
+    SDL_UpdateRect(SDL_PublicSurface, 0, 0, 0, 0);
 
     /* We're finally done! */
     return SDL_PublicSurface;
@@ -617,21 +619,11 @@ SDL_UpdateRect(SDL_Surface * screen, Sint32 x, Sint32 y, Uint32 w, Uint32 h)
     if (screen) {
         SDL_Rect rect;
 
-        /* Perform some checking */
-        if (w == 0)
-            w = screen->w;
-        if (h == 0)
-            h = screen->h;
-        if ((int) (x + w) > screen->w)
-            return;
-        if ((int) (y + h) > screen->h)
-            return;
-
         /* Fill the rectangle */
-        rect.x = (Sint16) x;
-        rect.y = (Sint16) y;
-        rect.w = (Uint16) w;
-        rect.h = (Uint16) h;
+        rect.x = (int) x;
+        rect.y = (int) y;
+        rect.w = (int) (w ? w : screen->w);
+        rect.h = (int) (h ? h : screen->h);
         SDL_UpdateRects(screen, 1, &rect);
     }
 }

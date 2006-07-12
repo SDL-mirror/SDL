@@ -170,14 +170,14 @@ typedef enum
  */
 typedef enum
 {
-    SDL_Renderer_PresentDiscard = 0x00000001,   /**< Present leaves the contents of the backbuffer undefined */
+    SDL_Renderer_SingleBuffer = 0x00000001,     /**< Render directly to the window, if possible */
     SDL_Renderer_PresentCopy = 0x00000002,      /**< Present uses a copy from back buffer to the front buffer */
     SDL_Renderer_PresentFlip2 = 0x00000004,     /**< Present uses a flip, swapping back buffer and front buffer */
     SDL_Renderer_PresentFlip3 = 0x00000008,     /**< Present uses a flip, rotating between two back buffers and a front buffer */
-    SDL_Renderer_PresentVSync = 0x00000010,     /**< Present is synchronized with the refresh rate */
-    SDL_Renderer_RenderTarget = 0x00000020,     /**< The renderer can create texture render targets */
-    SDL_Renderer_Accelerated = 0x00000040,      /**< The renderer uses hardware acceleration */
-    SDL_Renderer_ = 0x00000080,      /**< The renderer uses hardware acceleration */
+    SDL_Renderer_PresentDiscard = 0x00000010,   /**< Present leaves the contents of the backbuffer undefined */
+    SDL_Renderer_PresentVSync = 0x00000020,     /**< Present is synchronized with the refresh rate */
+    SDL_Renderer_RenderTarget = 0x00000040,     /**< The renderer can create texture render targets */
+    SDL_Renderer_Accelerated = 0x00000080,      /**< The renderer uses hardware acceleration */
     SDL_Renderer_Minimal = 0x00000100,          /**< The renderer only supports the read/write pixel and present functions */
 } SDL_RendererFlags;
 

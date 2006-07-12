@@ -1769,9 +1769,8 @@ SDL_RenderFill(const SDL_Rect * rect, Uint32 color)
             return 0;
         }
     }
-    rect = &real_rect;
 
-    return renderer->RenderFill(renderer, rect, color);
+    return renderer->RenderFill(renderer, &real_rect, color);
 }
 
 int
@@ -1793,25 +1792,26 @@ SDL_RenderCopy(SDL_TextureID textureID, const SDL_Rect * srcrect,
         return -1;
     }
 
-    /* FIXME: implement clipping */
     window = SDL_GetWindowFromID(renderer->window);
-    real_srcrect.x = 0;
-    real_srcrect.y = 0;
-    real_srcrect.w = texture->w;
-    real_srcrect.h = texture->h;
-    real_dstrect.x = 0;
-    real_dstrect.y = 0;
-    real_dstrect.w = window->w;
-    real_dstrect.h = window->h;
-    if (!srcrect) {
-        srcrect = &real_srcrect;
+    if (srcrect) {
+        real_srcrect = *srcrect;
+    } else {
+        real_srcrect.x = 0;
+        real_srcrect.y = 0;
+        real_srcrect.w = texture->w;
+        real_srcrect.h = texture->h;
     }
-    if (!dstrect) {
-        dstrect = &real_dstrect;
+    if (dstrect) {
+        real_dstrect = *dstrect;
+    } else {
+        real_dstrect.x = 0;
+        real_dstrect.y = 0;
+        real_dstrect.w = window->w;
+        real_dstrect.h = window->h;
     }
 
-    return renderer->RenderCopy(renderer, texture, srcrect, dstrect,
-                                blendMode, scaleMode);
+    return renderer->RenderCopy(renderer, texture, &real_srcrect,
+                                &real_dstrect, blendMode, scaleMode);
 }
 
 int
@@ -1882,6 +1882,9 @@ SDL_RenderPresent(void)
         return;
     }
 
+    if (renderer->SelectRenderTexture) {
+        renderer->SelectRenderTexture(renderer, NULL);
+    }
     renderer->RenderPresent(renderer);
 }
 

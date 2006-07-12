@@ -77,12 +77,11 @@ SDL_RenderDriver SDL_SW_RenderDriver = {
     SDL_SW_CreateRenderer,
     {
      "software",
-     (SDL_Renderer_PresentDiscard |
-      SDL_Renderer_PresentCopy |
-      SDL_Renderer_PresentFlip2 |
-      SDL_Renderer_PresentFlip3 | SDL_Renderer_RenderTarget),
-     (SDL_TextureBlendMode_None |
-      SDL_TextureBlendMode_Mask | SDL_TextureBlendMode_Blend),
+     (SDL_Renderer_SingleBuffer | SDL_Renderer_PresentCopy |
+      SDL_Renderer_PresentFlip2 | SDL_Renderer_PresentFlip3 |
+      SDL_Renderer_PresentDiscard | SDL_Renderer_RenderTarget),
+     (SDL_TextureBlendMode_None | SDL_TextureBlendMode_Mask |
+      SDL_TextureBlendMode_Blend),
      (SDL_TextureScaleMode_None | SDL_TextureScaleMode_Fast),
      11,
      {
@@ -108,6 +107,7 @@ typedef struct
     SDL_Surface *target;
     SDL_Renderer *renderer;
     SDL_DirtyRectList dirty;
+    SDL_bool makedirty;
 } SDL_SW_RenderData;
 
 SDL_Renderer *
@@ -185,13 +185,16 @@ SDL_SW_CreateRenderer(SDL_Window * window, Uint32 flags)
     }
     data->current_screen = 0;
     data->target = data->screens[0];
+    data->makedirty = SDL_TRUE;
 
     /* Find a render driver that we can use to display data */
     for (i = 0; i < display->num_render_drivers; ++i) {
         SDL_RenderDriver *driver = &display->render_drivers[i];
         if (driver->info.name != SDL_SW_RenderDriver.info.name) {
             data->renderer =
-                driver->CreateRenderer(window, SDL_Renderer_PresentDiscard);
+                driver->CreateRenderer(window,
+                                       (SDL_Renderer_SingleBuffer |
+                                        SDL_Renderer_PresentDiscard));
             if (data->renderer) {
                 break;
             }
@@ -351,8 +354,10 @@ SDL_SW_SelectRenderTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     if (texture) {
         data->target = (SDL_Surface *) texture->driverdata;
+        data->makedirty = SDL_FALSE;
     } else {
         data->target = data->screens[data->current_screen];
+        data->makedirty = SDL_TRUE;
     }
 }
 
@@ -364,7 +369,9 @@ SDL_SW_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect,
     SDL_Rect real_rect = *rect;
     Uint8 r, g, b, a;
 
-    SDL_AddDirtyRect(&data->dirty, rect);
+    if (data->makedirty) {
+        SDL_AddDirtyRect(&data->dirty, rect);
+    }
 
     a = (Uint8) ((color >> 24) & 0xFF);
     r = (Uint8) ((color >> 16) & 0xFF);
@@ -384,7 +391,9 @@ SDL_SW_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
     SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
 
-    SDL_AddDirtyRect(&data->dirty, dstrect);
+    if (data->makedirty) {
+        SDL_AddDirtyRect(&data->dirty, dstrect);
+    }
 
     if (SDL_ISPIXELFORMAT_FOURCC(texture->format)) {
         SDL_Surface *target = data->target;
@@ -450,7 +459,9 @@ SDL_SW_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
     int row;
     size_t length;
 
-    SDL_AddDirtyRect(&data->dirty, rect);
+    if (data->makedirty) {
+        SDL_AddDirtyRect(&data->dirty, rect);
+    }
 
     src = (Uint8 *) pixels;
     dst =
@@ -471,7 +482,6 @@ SDL_SW_RenderPresent(SDL_Renderer * renderer)
     SDL_SW_RenderData *data = (SDL_SW_RenderData *) renderer->driverdata;
     SDL_Surface *surface = data->screens[data->current_screen];
     SDL_DirtyRect *dirty;
-    int new_screen;
 
     /* Send the data to the display */
     for (dirty = data->dirty.list; dirty; dirty = dirty->next) {
@@ -485,19 +495,14 @@ SDL_SW_RenderPresent(SDL_Renderer * renderer)
     SDL_ClearDirtyRects(&data->dirty);
     data->renderer->RenderPresent(data->renderer);
 
-
     /* Update the flipping chain, if any */
     if (renderer->info.flags & SDL_Renderer_PresentFlip2) {
-        new_screen = (data->current_screen + 1) % 2;
+        data->current_screen = (data->current_screen + 1) % 2;
+        data->target = data->screens[data->current_screen];
     } else if (renderer->info.flags & SDL_Renderer_PresentFlip3) {
-        new_screen = (data->current_screen + 1) % 3;
-    } else {
-        new_screen = 0;
+        data->current_screen = (data->current_screen + 1) % 3;
+        data->target = data->screens[data->current_screen];
     }
-    if (data->target == data->screens[data->current_screen]) {
-        data->target = data->screens[new_screen];
-    }
-    data->current_screen = new_screen;
 }
 
 static void
