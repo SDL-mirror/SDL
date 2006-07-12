@@ -79,7 +79,8 @@ SDL_RenderDriver SDL_GDI_RenderDriver = {
     SDL_GDI_CreateRenderer,
     {
      "gdi",
-     (SDL_Renderer_SingleBuffer | SDL_Renderer_PresentCopy |
+     (//SDL_Renderer_Minimal |
+      SDL_Renderer_SingleBuffer | SDL_Renderer_PresentCopy |
       SDL_Renderer_PresentFlip2 | SDL_Renderer_PresentFlip3 |
       SDL_Renderer_PresentDiscard | SDL_Renderer_RenderTarget),
      (SDL_TextureBlendMode_None | SDL_TextureBlendMode_Mask |
@@ -491,13 +492,16 @@ SDL_GDI_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
     if (data->yuv) {
         return SDL_SW_LockYUVTexture(data->yuv, rect, markDirty, pixels,
                                      pitch);
-    } else {
+    } else if (data->pixels) {
         GdiFlush();
         *pixels =
             (void *) ((Uint8 *) data->pixels + rect->y * data->pitch +
                       rect->x * SDL_BYTESPERPIXEL(texture->format));
         *pitch = data->pitch;
         return 0;
+    } else {
+        SDL_SetError("No pixels available");
+        return -1;
     }
 }
 
