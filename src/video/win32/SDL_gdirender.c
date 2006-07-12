@@ -554,7 +554,7 @@ SDL_GDI_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect,
     SDL_GDI_RenderData *data = (SDL_GDI_RenderData *) renderer->driverdata;
     Uint8 r, g, b;
     RECT rc;
-    static HBRUSH brush;
+    HBRUSH brush;
     int status;
 
     if (data->makedirty) {
@@ -738,7 +738,6 @@ SDL_GDI_RenderPresent(SDL_Renderer * renderer)
     int new_hbm;
 
     /* Send the data to the display */
-/*
     if (!(renderer->info.flags & SDL_Renderer_SingleBuffer)) {
         for (dirty = data->dirty.list; dirty; dirty = dirty->next) {
             const SDL_Rect *rect = &dirty->rect;
@@ -747,8 +746,6 @@ SDL_GDI_RenderPresent(SDL_Renderer * renderer)
         }
         SDL_ClearDirtyRects(&data->dirty);
     }
-*/
-    BitBlt(data->window_hdc, 0, 0, 640, 480, data->render_hdc, 0, 0, SRCCOPY);
 
     /* Update the flipping chain, if any */
     if (renderer->info.flags & SDL_Renderer_PresentFlip2) {
