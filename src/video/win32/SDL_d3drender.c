@@ -287,6 +287,7 @@ SDL_D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
         pparams.Windowed = TRUE;
     }
     pparams.FullScreen_RefreshRateInHz = 0;     /* FIXME */
+    pparams.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 
     result = IDirect3D9_CreateDevice(videodata->d3d, D3DADAPTER_DEFAULT,        /* FIXME */
                                      D3DDEVTYPE_HAL,
@@ -431,6 +432,7 @@ SDL_D3D_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect,
                    Uint32 color)
 {
     SDL_D3D_RenderData *data = (SDL_D3D_RenderData *) renderer->driverdata;
+    D3DRECT d3drect;
     HRESULT result;
 
     if (data->beginScene) {
@@ -438,9 +440,12 @@ SDL_D3D_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect,
         data->beginScene = SDL_FALSE;
     }
 
-    result =
-        IDirect3DDevice9_Clear(data->device, 0, NULL, D3DCLEAR_TARGET,
-                               (D3DCOLOR) color, 1.0f, 0);
+    d3drect.x1 = rect->x;
+    d3drect.x2 = rect->x+rect->w;
+    d3drect.y1 = rect->y;
+    d3drect.y2 = rect->y+rect->h;
+
+    result = IDirect3DDevice9_Clear(data->device, 1, &d3drect, D3DCLEAR_TARGET, (D3DCOLOR) color, 1.0f, 0);
     if (FAILED(result)) {
         D3D_SetError("Clear()", result);
         return -1;

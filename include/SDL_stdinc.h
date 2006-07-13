@@ -413,6 +413,12 @@ extern DECLSPEC int SDLCALL SDL_memcmp(const void *s1, const void *s2,
 extern DECLSPEC size_t SDLCALL SDL_strlen(const char *string);
 #endif
 
+#ifdef HAVE_WCSLEN
+#define SDL_wcslen      wcslen
+#else
+extern DECLSPEC size_t SDLCALL SDL_wcslen(const wchar_t *string);
+#endif
+
 #ifdef HAVE_STRLCPY
 #define SDL_strlcpy     strlcpy
 #else

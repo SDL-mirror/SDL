@@ -79,7 +79,7 @@ SDL_RenderDriver SDL_GDI_RenderDriver = {
     SDL_GDI_CreateRenderer,
     {
      "gdi",
-     (                          //SDL_Renderer_Minimal |
+     (SDL_Renderer_Minimal |
          SDL_Renderer_SingleBuffer | SDL_Renderer_PresentCopy |
          SDL_Renderer_PresentFlip2 | SDL_Renderer_PresentFlip3 |
          SDL_Renderer_PresentDiscard | SDL_Renderer_RenderTarget),
@@ -735,7 +735,6 @@ SDL_GDI_RenderPresent(SDL_Renderer * renderer)
 {
     SDL_GDI_RenderData *data = (SDL_GDI_RenderData *) renderer->driverdata;
     SDL_DirtyRect *dirty;
-    int new_hbm;
 
     /* Send the data to the display */
     if (!(renderer->info.flags & SDL_Renderer_SingleBuffer)) {

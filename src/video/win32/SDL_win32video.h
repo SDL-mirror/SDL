@@ -32,7 +32,9 @@
 #include <windows.h>
 
 #if SDL_VIDEO_RENDER_D3D
-#include <d3d9.h>
+//#include <d3d9.h>
+#define D3D_DEBUG_INFO
+#include "d3d9.h"
 #endif
 
 #include "SDL_win32events.h"
@@ -43,10 +45,10 @@
 #include "SDL_win32window.h"
 
 #ifdef UNICODE
-#define WIN_StringToUTF8(S) SDL_iconv_string("UTF-8", "UCS-2", (char *)S, (wcslen(S)+1)*sizeof(WCHAR))
+#define WIN_StringToUTF8(S) SDL_iconv_string("UTF-8", "UCS-2", (char *)S, (SDL_wcslen(S)+1)*sizeof(WCHAR))
 #define WIN_UTF8ToString(S) (WCHAR *)SDL_iconv_string("UCS-2", "UTF-8", (char *)S, SDL_strlen(S)+1)
 #else
-#define WIN_StringToUTF8(S) SDL_iconv_string("UTF-8", "ASCII", (char *)S, (strlen(S)+1))
+#define WIN_StringToUTF8(S) SDL_iconv_string("UTF-8", "ASCII", (char *)S, (SDL_strlen(S)+1))
 #define WIN_UTF8ToString(S) SDL_iconv_string("ASCII", "UTF-8", (char *)S, SDL_strlen(S)+1)
 #endif
 

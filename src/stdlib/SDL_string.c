@@ -336,6 +336,18 @@ SDL_strlen(const char *string)
 }
 #endif
 
+#ifndef HAVE_WCSLEN
+size_t
+SDL_wcslen(const wchar_t *string)
+{
+    size_t len = 0;
+    while (*string++) {
+        ++len;
+    }
+    return len;
+}
+#endif
+
 #ifndef HAVE_STRLCPY
 size_t
 SDL_strlcpy(char *dst, const char *src, size_t maxlen)
