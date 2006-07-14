@@ -1296,18 +1296,25 @@ SDL_CreateRenderer(SDL_WindowID windowID, int index, Uint32 flags)
     }
 
     if (index < 0) {
+        const char *override = SDL_getenv("SDL_VIDEO_RENDERER");
         int n = SDL_GetNumRenderers();
         for (index = 0; index < n; ++index) {
             SDL_RenderDriver *driver =
                 &SDL_CurrentDisplay.render_drivers[index];
 
-            /* Skip minimal drivers in automatic scans */
-            if (!(flags & SDL_Renderer_Minimal)
-                && (driver->info.flags & SDL_Renderer_Minimal)) {
-                continue;
-            }
-            if ((driver->info.flags & flags) == flags) {
-                break;
+            if (override) {
+                if (SDL_strcasecmp(override, driver->info.name) == 0) {
+                    break;
+                }
+            } else {
+                /* Skip minimal drivers in automatic scans */
+                if (!(flags & SDL_Renderer_Minimal)
+                    && (driver->info.flags & SDL_Renderer_Minimal)) {
+                    continue;
+                }
+                if ((driver->info.flags & flags) == flags) {
+                    break;
+                }
             }
         }
         if (index == n) {

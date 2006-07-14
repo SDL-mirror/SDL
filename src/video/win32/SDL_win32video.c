@@ -140,11 +140,11 @@ WIN_VideoInit(_THIS)
 {
     WIN_InitModes(_this);
 
-#if SDL_VIDEO_RENDER_GDI
-    GDI_AddRenderDriver(_this);
-#endif
 #if SDL_VIDEO_RENDER_D3D
     D3D_AddRenderDriver(_this);
+#endif
+#if SDL_VIDEO_RENDER_GDI
+    GDI_AddRenderDriver(_this);
 #endif
 
     WIN_InitKeyboard(_this);

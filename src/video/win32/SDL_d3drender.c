@@ -74,10 +74,9 @@ SDL_RenderDriver SDL_D3D_RenderDriver = {
     SDL_D3D_CreateRenderer,
     {
      "d3d",
-     (                          //SDL_Renderer_Minimal |
-         SDL_Renderer_SingleBuffer | SDL_Renderer_PresentCopy |
-         SDL_Renderer_PresentFlip2 | SDL_Renderer_PresentFlip3 |
-         SDL_Renderer_PresentDiscard | SDL_Renderer_RenderTarget),
+     (SDL_Renderer_SingleBuffer | SDL_Renderer_PresentCopy |
+      SDL_Renderer_PresentFlip2 | SDL_Renderer_PresentFlip3 |
+      SDL_Renderer_PresentDiscard | SDL_Renderer_RenderTarget),
      (SDL_TextureBlendMode_None |
       SDL_TextureBlendMode_Mask | SDL_TextureBlendMode_Blend),
      (SDL_TextureScaleMode_None | SDL_TextureScaleMode_Fast),
@@ -102,6 +101,8 @@ SDL_RenderDriver SDL_D3D_RenderDriver = {
 typedef struct
 {
     IDirect3DDevice9 *device;
+    IDirect3DSurface9 *surface;
+    IDirect3DSurface9 *offscreen;
     SDL_bool beginScene;
 } SDL_D3D_RenderData;
 
@@ -530,6 +531,8 @@ static void
 SDL_D3D_SelectRenderTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     SDL_D3D_RenderData *data = (SDL_D3D_RenderData *) renderer->driverdata;
+
+    /* FIXME */
 }
 
 static int
@@ -640,6 +643,7 @@ SDL_D3D_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
 {
     SDL_D3D_RenderData *data = (SDL_D3D_RenderData *) renderer->driverdata;
 
+    /* FIXME */
     return 0;
 }
 
@@ -647,7 +651,75 @@ static int
 SDL_D3D_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                           const void *pixels, int pitch)
 {
+    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
     SDL_D3D_RenderData *data = (SDL_D3D_RenderData *) renderer->driverdata;
+    RECT d3drect;
+    POINT point;
+    D3DLOCKED_RECT locked;
+    const Uint8 *src;
+    Uint8 *dst;
+    int row, length;
+    HRESULT result;
+
+    if (!data->surface) {
+        result =
+            IDirect3DDevice9_GetBackBuffer(data->device, 0, 0,
+                                           D3DBACKBUFFER_TYPE_MONO,
+                                           &data->surface);
+        if (FAILED(result)) {
+            D3D_SetError("GetBackBuffer()", result);
+            return -1;
+        }
+    }
+    if (!data->offscreen) {
+        result =
+            IDirect3DDevice9_CreateOffscreenPlainSurface(data->device,
+                                                         window->w, window->h,
+                                                         PixelFormatToD3DFMT
+                                                         (display->
+                                                          current_mode.
+                                                          format),
+                                                         D3DPOOL_SYSTEMMEM,
+                                                         &data->offscreen,
+                                                         NULL);
+        if (FAILED(result)) {
+            D3D_SetError("CreateOffscreenPlainSurface()", result);
+            return -1;
+        }
+    }
+
+    d3drect.left = rect->x;
+    d3drect.right = rect->x + rect->w;
+    d3drect.top = rect->y;
+    d3drect.bottom = rect->y + rect->h;
+
+    result =
+        IDirect3DSurface9_LockRect(data->offscreen, &locked, &d3drect, 0);
+    if (FAILED(result)) {
+        D3D_SetError("LockRect()", result);
+        return -1;
+    }
+
+    src = pixels;
+    dst = locked.pBits;
+    length = rect->w * SDL_BYTESPERPIXEL(display->current_mode.format);
+    for (row = 0; row < rect->h; ++row) {
+        SDL_memcpy(dst, src, length);
+        src += pitch;
+        dst += locked.Pitch;
+    }
+    IDirect3DSurface9_UnlockRect(data->offscreen);
+
+    point.x = rect->x;
+    point.y = rect->y;
+    result =
+        IDirect3DDevice9_UpdateSurface(data->device, data->offscreen,
+                                       &d3drect, data->surface, &point);
+    if (FAILED(result)) {
+        D3D_SetError("UpdateSurface()", result);
+        return -1;
+    }
 
     return 0;
 }
@@ -692,6 +764,12 @@ SDL_D3D_DestroyRenderer(SDL_Renderer * renderer)
     if (data) {
         if (data->device) {
             IDirect3DDevice9_Release(data->device);
+        }
+        if (data->surface) {
+            IDirect3DSurface9_Release(data->surface);
+        }
+        if (data->offscreen) {
+            IDirect3DSurface9_Release(data->offscreen);
         }
         SDL_free(data);
     }

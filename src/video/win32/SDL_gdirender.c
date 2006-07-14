@@ -79,8 +79,7 @@ SDL_RenderDriver SDL_GDI_RenderDriver = {
     SDL_GDI_CreateRenderer,
     {
      "gdi",
-     (SDL_Renderer_Minimal |
-      SDL_Renderer_SingleBuffer | SDL_Renderer_PresentCopy |
+     (SDL_Renderer_SingleBuffer | SDL_Renderer_PresentCopy |
       SDL_Renderer_PresentFlip2 | SDL_Renderer_PresentFlip3 |
       SDL_Renderer_PresentDiscard | SDL_Renderer_RenderTarget),
      (SDL_TextureBlendMode_None | SDL_TextureBlendMode_Mask |
