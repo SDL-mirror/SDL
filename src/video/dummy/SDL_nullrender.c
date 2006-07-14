@@ -44,7 +44,7 @@ static void SDL_DUMMY_DestroyRenderer(SDL_Renderer * renderer);
 SDL_RenderDriver SDL_DUMMY_RenderDriver = {
     SDL_DUMMY_CreateRenderer,
     {
-     "minimal",
+     "dummy",
      (SDL_Renderer_Minimal | SDL_Renderer_PresentDiscard |
       SDL_Renderer_PresentCopy),
      SDL_TextureBlendMode_None,
