@@ -5,7 +5,7 @@
 
 #include "SDL.h"
 
-#define NUM_WINDOWS 1
+#define NUM_WINDOWS 4
 #define WINDOW_W    640
 #define WINDOW_H    480
 #define NUM_SPRITES	100
@@ -141,22 +141,23 @@ main(int argc, char *argv[])
     num_sprites = NUM_SPRITES;
     window_w = WINDOW_W;
     window_h = WINDOW_H;
-    while (argc > 1) {
-        if (strcmp(argv[argc - 1], "-width") == 0) {
-            window_w = atoi(argv[argc]);
-            --argc;
-        } else if (strcmp(argv[argc - 1], "-height") == 0) {
-            window_h = atoi(argv[argc]);
-            --argc;
-        } else if (strcmp(argv[argc - 1], "-fullscreen") == 0) {
+    for (i = 1; i < argc; ++i) {
+        if (strcmp(argv[i], "-width") == 0 && (i + 1 < argc)) {
+            window_w = atoi(argv[++i]);
+        } else if (strcmp(argv[i], "-height") == 0 && (i + 1 < argc)) {
+            window_h = atoi(argv[++i]);
+        } else if (strcmp(argv[i], "-windows") == 0 && (i + 1 < argc)) {
+            num_windows = atoi(argv[++i]);
+            window_flags &= ~SDL_WINDOW_FULLSCREEN;
+        } else if (strcmp(argv[i], "-fullscreen") == 0) {
             num_windows = 1;
             window_flags |= SDL_WINDOW_FULLSCREEN;
-            --argc;
-        } else if (isdigit(argv[argc][0])) {
-            num_sprites = atoi(argv[argc]);
+        } else if (isdigit(argv[i][0])) {
+            num_sprites = atoi(argv[i]);
         } else {
             fprintf(stderr,
-                    "Usage: %s [-width] [-height] [numsprites]\n", argv[0]);
+                    "Usage: %s [-width N] [-height N] [-windows N] [-fullscreen] [numsprites]\n",
+                    argv[0]);
             quit(1);
         }
     }
@@ -240,8 +241,7 @@ main(int argc, char *argv[])
                 }
                 break;
             case SDL_KEYDOWN:
-                ///* Any keypress quits the app... */
-                break;
+                /* Any keypress quits the app... */
             case SDL_QUIT:
                 done = 1;
                 break;

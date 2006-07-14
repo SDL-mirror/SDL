@@ -113,7 +113,8 @@ typedef struct
 typedef struct
 {
     float x, y, z;
-    float tu, tv;
+    float rhw;
+    float u, v;
 } Vertex;
 
 static void
@@ -330,9 +331,17 @@ SDL_D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     data->beginScene = SDL_TRUE;
 
     /* Set up parameters for rendering */
+    IDirect3DDevice9_SetVertexShader(data->device, NULL);
+    IDirect3DDevice9_SetFVF(data->device, D3DFVF_XYZRHW | D3DFVF_TEX1);
     IDirect3DDevice9_SetRenderState(data->device, D3DRS_CULLMODE,
                                     D3DCULL_NONE);
-    IDirect3DDevice9_SetFVF(data->device, D3DFVF_XYZ | D3DFVF_TEX1);
+    IDirect3DDevice9_SetRenderState(data->device, D3DRS_LIGHTING, FALSE);
+    IDirect3DDevice9_SetRenderState(data->device, D3DRS_ALPHABLENDENABLE,
+                                    TRUE);
+    IDirect3DDevice9_SetRenderState(data->device, D3DRS_SRCBLEND,
+                                    D3DBLEND_SRCALPHA);
+    IDirect3DDevice9_SetRenderState(data->device, D3DRS_DESTBLEND,
+                                    D3DBLEND_INVSRCALPHA);
 
     return renderer;
 }
@@ -560,7 +569,7 @@ SDL_D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     SDL_D3D_TextureData *texturedata =
         (SDL_D3D_TextureData *) texture->driverdata;
     float minx, miny, maxx, maxy;
-    float mintu, maxtu, mintv, maxtv;
+    float minu, maxu, minv, maxv;
     Vertex vertices[4];
     HRESULT result;
 
@@ -569,36 +578,43 @@ SDL_D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         data->beginScene = SDL_FALSE;
     }
 
-    minx = (float) dstrect->x;
-    miny = (float) dstrect->y;
-    maxx = (float) dstrect->x + dstrect->w;
-    maxy = (float) dstrect->y + dstrect->h;
+    minx = (float) dstrect->x - 0.5f;
+    miny = (float) dstrect->y - 0.5f;
+    maxx = (float) dstrect->x + dstrect->w - 0.5f;
+    maxy = (float) dstrect->y + dstrect->h - 0.5f;
 
-    mintu = (float) srcrect->x / texture->w;
-    maxtu = (float) (srcrect->x + srcrect->w) / texture->w;
-    mintv = (float) srcrect->y / texture->h;
-    maxtv = (float) (srcrect->y + srcrect->h) / texture->h;
+    minu = (float) srcrect->x / texture->w;
+    maxu = (float) (srcrect->x + srcrect->w) / texture->w;
+    minv = (float) srcrect->y / texture->h;
+    maxv = (float) (srcrect->y + srcrect->h) / texture->h;
 
     vertices[0].x = minx;
     vertices[0].y = miny;
     vertices[0].z = 0.0f;
-    vertices[0].tu = mintu;
-    vertices[0].tv = mintv;
+    vertices[0].rhw = 1.0f;
+    vertices[0].u = minu;
+    vertices[0].v = minv;
+
     vertices[1].x = maxx;
     vertices[1].y = miny;
     vertices[1].z = 0.0f;
-    vertices[1].tu = maxtu;
-    vertices[1].tv = mintv;
+    vertices[1].rhw = 1.0f;
+    vertices[1].u = maxu;
+    vertices[1].v = minv;
+
     vertices[2].x = maxx;
     vertices[2].y = maxy;
     vertices[2].z = 0.0f;
-    vertices[2].tu = maxtu;
-    vertices[2].tv = maxtv;
+    vertices[2].rhw = 1.0f;
+    vertices[2].u = maxu;
+    vertices[2].v = maxv;
+
     vertices[3].x = minx;
     vertices[3].y = maxy;
     vertices[3].z = 0.0f;
-    vertices[3].tu = mintu;
-    vertices[3].tv = maxtv;
+    vertices[3].rhw = 1.0f;
+    vertices[3].u = minu;
+    vertices[3].v = maxv;
 
     result =
         IDirect3DDevice9_SetTexture(data->device, 0,
