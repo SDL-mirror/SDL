@@ -338,7 +338,7 @@ SDL_strlen(const char *string)
 
 #ifndef HAVE_WCSLEN
 size_t
-SDL_wcslen(const wchar_t *string)
+SDL_wcslen(const wchar_t * string)
 {
     size_t len = 0;
     while (*string++) {

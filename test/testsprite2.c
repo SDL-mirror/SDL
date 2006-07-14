@@ -5,7 +5,7 @@
 
 #include "SDL.h"
 
-#define NUM_WINDOWS 4
+#define NUM_WINDOWS 1
 #define WINDOW_W    640
 #define WINDOW_H    480
 #define NUM_SPRITES	100
@@ -91,10 +91,13 @@ MoveSprites(SDL_WindowID window, SDL_TextureID sprite)
 
     /* Move the sprite, bounce at the wall, and draw */
     n = 0;
-    for (i = 0; i < num_sprites; ++i) {
-        position = &positions[i];
-        SDL_RenderFill(position, BACKGROUND);
-    }
+    SDL_RenderFill(NULL, BACKGROUND);
+    /*
+       for (i = 0; i < num_sprites; ++i) {
+       position = &positions[i];
+       SDL_RenderFill(position, BACKGROUND);
+       }
+     */
     for (i = 0; i < num_sprites; ++i) {
         position = &positions[i];
         velocity = &velocities[i];
@@ -237,7 +240,8 @@ main(int argc, char *argv[])
                 }
                 break;
             case SDL_KEYDOWN:
-                /* Any keypress quits the app... */
+                ///* Any keypress quits the app... */
+                break;
             case SDL_QUIT:
                 done = 1;
                 break;

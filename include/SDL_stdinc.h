@@ -416,7 +416,7 @@ extern DECLSPEC size_t SDLCALL SDL_strlen(const char *string);
 #ifdef HAVE_WCSLEN
 #define SDL_wcslen      wcslen
 #else
-extern DECLSPEC size_t SDLCALL SDL_wcslen(const wchar_t *string);
+extern DECLSPEC size_t SDLCALL SDL_wcslen(const wchar_t * string);
 #endif
 
 #ifdef HAVE_STRLCPY
