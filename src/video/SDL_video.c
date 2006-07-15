@@ -201,6 +201,9 @@ SDL_VideoInit(const char *driver_name, Uint32 flags)
     /* Select the proper video driver */
     index = 0;
     video = NULL;
+    if (driver_name == NULL) {
+        driver_name = SDL_getenv("SDL_VIDEODRIVER");
+    }
     if (driver_name != NULL) {
         for (i = 0; bootstrap[i]; ++i) {
             if (SDL_strncmp(bootstrap[i]->name, driver_name,

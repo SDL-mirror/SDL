@@ -361,6 +361,9 @@ SDL_AudioInit(const char *driver_name)
     /* Select the proper audio driver */
     audio = NULL;
     idx = 0;
+    if (driver_name == NULL) {
+        driver_name = SDL_getenv("SDL_AUDIODRIVER");
+    }
 #if SDL_AUDIO_DRIVER_ESD
     if ((driver_name == NULL) && (SDL_getenv("ESPEAKER") != NULL)) {
         /* Ahem, we know that if ESPEAKER is set, user probably wants
@@ -393,11 +396,6 @@ SDL_AudioInit(const char *driver_name)
 #endif /* SDL_AUDIO_DRIVER_ESD */
     if (audio == NULL) {
         if (driver_name != NULL) {
-#if 0                           /* This will be replaced with a better driver selection API */
-            if (SDL_strrchr(driver_name, ':') != NULL) {
-                idx = atoi(SDL_strrchr(driver_name, ':') + 1);
-            }
-#endif
             for (i = 0; bootstrap[i]; ++i) {
                 if (SDL_strncmp(bootstrap[i]->name, driver_name,
                                 SDL_strlen(bootstrap[i]->name)) == 0) {
@@ -423,9 +421,10 @@ SDL_AudioInit(const char *driver_name)
             } else {
                 SDL_SetError("No available audio device");
             }
-#if 0                           /* Don't fail SDL_Init() if audio isn't available.
-                                   SDL_OpenAudio() will handle it at that point.  *sigh*
-                                 */
+#if 0
+            /* Don't fail SDL_Init() if audio isn't available.
+               SDL_OpenAudio() will handle it at that point.  *sigh*
+             */
             return (-1);
 #endif
         }

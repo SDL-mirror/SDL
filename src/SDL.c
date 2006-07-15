@@ -62,8 +62,7 @@ SDL_InitSubSystem(Uint32 flags)
 #if !SDL_VIDEO_DISABLED
     /* Initialize the video/event subsystem */
     if ((flags & SDL_INIT_VIDEO) && !(SDL_initialized & SDL_INIT_VIDEO)) {
-        if (SDL_VideoInit(SDL_getenv("SDL_VIDEODRIVER"),
-                          (flags & SDL_INIT_EVENTTHREAD)) < 0) {
+        if (SDL_VideoInit(NULL, (flags & SDL_INIT_EVENTTHREAD)) < 0) {
             return (-1);
         }
         SDL_initialized |= SDL_INIT_VIDEO;
@@ -78,7 +77,7 @@ SDL_InitSubSystem(Uint32 flags)
 #if !SDL_AUDIO_DISABLED
     /* Initialize the audio subsystem */
     if ((flags & SDL_INIT_AUDIO) && !(SDL_initialized & SDL_INIT_AUDIO)) {
-        if (SDL_AudioInit(SDL_getenv("SDL_AUDIODRIVER")) < 0) {
+        if (SDL_AudioInit(NULL) < 0) {
             return (-1);
         }
         SDL_initialized |= SDL_INIT_AUDIO;
