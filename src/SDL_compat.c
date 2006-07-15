@@ -31,6 +31,7 @@
 
 
 static SDL_WindowID SDL_VideoWindow;
+static SDL_RendererInfo SDL_VideoRendererInfo;
 static SDL_TextureID SDL_VideoTexture;
 static SDL_Surface *SDL_VideoSurface;
 static SDL_Surface *SDL_ShadowSurface;
@@ -442,10 +443,12 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
     }
 
     /* Create a renderer for the window */
-    if (SDL_CreateRenderer(SDL_VideoWindow, -1, SDL_Renderer_SingleBuffer) <
-        0) {
+    if (SDL_CreateRenderer
+        (SDL_VideoWindow, -1,
+         SDL_Renderer_SingleBuffer | SDL_Renderer_PresentDiscard) < 0) {
         return NULL;
     }
+    SDL_GetRendererInfo(-1, &SDL_VideoRendererInfo);
 
     /* Create a texture for the screen surface */
     SDL_VideoTexture =
@@ -642,8 +645,19 @@ SDL_UpdateRects(SDL_Surface * screen, int numrects, SDL_Rect * rects)
         screen = SDL_VideoSurface;
     }
     if (screen == SDL_VideoSurface) {
-        for (i = 0; i < numrects; ++i) {
-            SDL_RenderCopy(SDL_VideoTexture, &rects[i], &rects[i],
+        if (SDL_VideoRendererInfo.flags & SDL_Renderer_PresentCopy) {
+            for (i = 0; i < numrects; ++i) {
+                SDL_RenderCopy(SDL_VideoTexture, &rects[i], &rects[i],
+                               SDL_TextureBlendMode_None,
+                               SDL_TextureScaleMode_None);
+            }
+        } else {
+            SDL_Rect rect;
+            rect.x = 0;
+            rect.y = 0;
+            rect.w = screen->w;
+            rect.h = screen->h;
+            SDL_RenderCopy(SDL_VideoTexture, &rect, &rect,
                            SDL_TextureBlendMode_None,
                            SDL_TextureScaleMode_None);
         }

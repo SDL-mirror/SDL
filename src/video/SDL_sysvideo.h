@@ -73,17 +73,11 @@ struct SDL_Renderer
     void (*UnlockTexture) (SDL_Renderer * renderer, SDL_Texture * texture);
     void (*DirtyTexture) (SDL_Renderer * renderer, SDL_Texture * texture,
                           int numrects, const SDL_Rect * rects);
-    void (*SelectRenderTexture) (SDL_Renderer * renderer,
-                                 SDL_Texture * texture);
     int (*RenderFill) (SDL_Renderer * renderer, const SDL_Rect * rect,
                        Uint32 color);
     int (*RenderCopy) (SDL_Renderer * renderer, SDL_Texture * texture,
                        const SDL_Rect * srcrect, const SDL_Rect * dstrect,
                        int blendMode, int scaleMode);
-    int (*RenderReadPixels) (SDL_Renderer * renderer, const SDL_Rect * rect,
-                             void *pixels, int pitch);
-    int (*RenderWritePixels) (SDL_Renderer * renderer, const SDL_Rect * rect,
-                              const void *pixels, int pitch);
     void (*RenderPresent) (SDL_Renderer * renderer);
     void (*DestroyTexture) (SDL_Renderer * renderer, SDL_Texture * texture);
 

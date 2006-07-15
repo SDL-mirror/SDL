@@ -1,6 +1,7 @@
 /* Simple program:  Move N sprites around on the screen as fast as possible */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <time.h>
 
 #include "SDL.h"
@@ -126,6 +127,7 @@ main(int argc, char *argv[])
 {
     int window_w, window_h;
     Uint32 window_flags = SDL_WINDOW_SHOWN;
+    Uint32 render_flags = 0;
     SDL_DisplayMode *mode, fullscreen_mode;
     int i, done;
     SDL_Event event;
@@ -152,11 +154,13 @@ main(int argc, char *argv[])
         } else if (strcmp(argv[i], "-fullscreen") == 0) {
             num_windows = 1;
             window_flags |= SDL_WINDOW_FULLSCREEN;
+        } else if (strcmp(argv[i], "-sync") == 0) {
+            render_flags |= SDL_Renderer_PresentVSync;
         } else if (isdigit(argv[i][0])) {
             num_sprites = atoi(argv[i]);
         } else {
             fprintf(stderr,
-                    "Usage: %s [-width N] [-height N] [-windows N] [-fullscreen] [numsprites]\n",
+                    "Usage: %s [-width N] [-height N] [-windows N] [-fullscreen] [-sync] [numsprites]\n",
                     argv[0]);
             quit(1);
         }
@@ -189,7 +193,7 @@ main(int argc, char *argv[])
             quit(2);
         }
 
-        if (SDL_CreateRenderer(windows[i], -1, 0) < 0) {
+        if (SDL_CreateRenderer(windows[i], -1, render_flags) < 0) {
             fprintf(stderr, "Couldn't create renderer: %s\n", SDL_GetError());
             quit(2);
         }

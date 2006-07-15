@@ -1277,12 +1277,24 @@ SDL_GetNumRenderers(void)
 int
 SDL_GetRendererInfo(int index, SDL_RendererInfo * info)
 {
-    if (index < 0 || index >= SDL_GetNumRenderers()) {
+    if (!_this) {
+        return -1;
+    }
+
+    if (index >= SDL_GetNumRenderers()) {
         SDL_SetError("index must be in the range of 0 - %d",
                      SDL_GetNumRenderers() - 1);
         return -1;
     }
-    *info = SDL_CurrentDisplay.render_drivers[index].info;
+    if (index < 0) {
+        if (!SDL_CurrentDisplay.current_renderer) {
+            SDL_SetError("There is no current renderer");
+            return -1;
+        }
+        *info = SDL_CurrentDisplay.current_renderer->info;
+    } else {
+        *info = SDL_CurrentDisplay.render_drivers[index].info;
+    }
     return 0;
 }
 
@@ -1307,11 +1319,6 @@ SDL_CreateRenderer(SDL_WindowID windowID, int index, Uint32 flags)
                     break;
                 }
             } else {
-                /* Skip minimal drivers in automatic scans */
-                if (!(flags & SDL_Renderer_Minimal)
-                    && (driver->info.flags & SDL_Renderer_Minimal)) {
-                    continue;
-                }
                 if ((driver->info.flags & flags) == flags) {
                     break;
                 }
@@ -1734,22 +1741,6 @@ SDL_DirtyTexture(SDL_TextureID textureID, int numrects,
     renderer->DirtyTexture(renderer, texture, numrects, rects);
 }
 
-void
-SDL_SelectRenderTexture(SDL_TextureID textureID)
-{
-    SDL_Texture *texture = SDL_GetTextureFromID(textureID);
-    SDL_Renderer *renderer;
-
-    if (!texture || texture->access != SDL_TextureAccess_Render) {
-        return;
-    }
-    renderer = texture->renderer;
-    if (!renderer->SelectRenderTexture) {
-        return;
-    }
-    renderer->SelectRenderTexture(renderer, texture);
-}
-
 int
 SDL_RenderFill(const SDL_Rect * rect, Uint32 color)
 {
@@ -1821,60 +1812,6 @@ SDL_RenderCopy(SDL_TextureID textureID, const SDL_Rect * srcrect,
                                 &real_dstrect, blendMode, scaleMode);
 }
 
-int
-SDL_RenderReadPixels(const SDL_Rect * rect, void *pixels, int pitch)
-{
-    SDL_Renderer *renderer;
-    SDL_Rect full_rect;
-
-    if (!_this) {
-        return -1;
-    }
-
-    renderer = SDL_CurrentDisplay.current_renderer;
-    if (!renderer || !renderer->RenderReadPixels) {
-        return -1;
-    }
-
-    if (!rect) {
-        SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-        full_rect.x = 0;
-        full_rect.y = 0;
-        full_rect.w = window->w;
-        full_rect.h = window->h;
-        rect = &full_rect;
-    }
-
-    return renderer->RenderReadPixels(renderer, rect, pixels, pitch);
-}
-
-int
-SDL_RenderWritePixels(const SDL_Rect * rect, const void *pixels, int pitch)
-{
-    SDL_Renderer *renderer;
-    SDL_Rect full_rect;
-
-    if (!_this) {
-        return -1;
-    }
-
-    renderer = SDL_CurrentDisplay.current_renderer;
-    if (!renderer || !renderer->RenderWritePixels) {
-        return -1;
-    }
-
-    if (!rect) {
-        SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-        full_rect.x = 0;
-        full_rect.y = 0;
-        full_rect.w = window->w;
-        full_rect.h = window->h;
-        rect = &full_rect;
-    }
-
-    return renderer->RenderWritePixels(renderer, rect, pixels, pitch);
-}
-
 void
 SDL_RenderPresent(void)
 {
@@ -1887,10 +1824,6 @@ SDL_RenderPresent(void)
     renderer = SDL_CurrentDisplay.current_renderer;
     if (!renderer || !renderer->RenderPresent) {
         return;
-    }
-
-    if (renderer->SelectRenderTexture) {
-        renderer->SelectRenderTexture(renderer, NULL);
     }
     renderer->RenderPresent(renderer);
 }

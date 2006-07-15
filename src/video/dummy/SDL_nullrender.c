@@ -31,12 +31,6 @@ static SDL_Renderer *SDL_DUMMY_CreateRenderer(SDL_Window * window,
                                               Uint32 flags);
 static int SDL_DUMMY_CreateTexture(SDL_Renderer * renderer,
                                    SDL_Texture * texture);
-static int SDL_DUMMY_RenderReadPixels(SDL_Renderer * renderer,
-                                      const SDL_Rect * rect, void *pixels,
-                                      int pitch);
-static int SDL_DUMMY_RenderWritePixels(SDL_Renderer * renderer,
-                                       const SDL_Rect * rect,
-                                       const void *pixels, int pitch);
 static void SDL_DUMMY_RenderPresent(SDL_Renderer * renderer);
 static void SDL_DUMMY_DestroyRenderer(SDL_Renderer * renderer);
 
@@ -45,8 +39,7 @@ SDL_RenderDriver SDL_DUMMY_RenderDriver = {
     SDL_DUMMY_CreateRenderer,
     {
      "dummy",
-     (SDL_Renderer_Minimal | SDL_Renderer_PresentDiscard |
-      SDL_Renderer_PresentCopy),
+     (SDL_Renderer_PresentDiscard | SDL_Renderer_PresentCopy),
      SDL_TextureBlendMode_None,
      SDL_TextureScaleMode_None,
      0,
@@ -91,8 +84,6 @@ SDL_DUMMY_CreateRenderer(SDL_Window * window, Uint32 flags)
     }
     SDL_zerop(data);
 
-    renderer->RenderReadPixels = SDL_DUMMY_RenderReadPixels;
-    renderer->RenderWritePixels = SDL_DUMMY_RenderWritePixels;
     renderer->RenderPresent = SDL_DUMMY_RenderPresent;
     renderer->DestroyRenderer = SDL_DUMMY_DestroyRenderer;
     renderer->info = SDL_DUMMY_RenderDriver.info;
@@ -109,54 +100,6 @@ SDL_DUMMY_CreateRenderer(SDL_Window * window, Uint32 flags)
     SDL_SetSurfacePalette(data->surface, display->palette);
 
     return renderer;
-}
-
-int
-SDL_DUMMY_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
-                           void *pixels, int pitch)
-{
-    SDL_DUMMY_RenderData *data =
-        (SDL_DUMMY_RenderData *) renderer->driverdata;
-    SDL_Surface *surface = data->surface;
-    Uint8 *src, *dst;
-    int row;
-    size_t length;
-
-    src =
-        (Uint8 *) surface->pixels + rect->y * surface->pitch +
-        rect->x * surface->format->BytesPerPixel;
-    dst = (Uint8 *) pixels;
-    length = rect->w * surface->format->BytesPerPixel;
-    for (row = 0; row < rect->h; ++row) {
-        SDL_memcpy(dst, src, length);
-        src += surface->pitch;
-        dst += pitch;
-    }
-    return 0;
-}
-
-int
-SDL_DUMMY_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
-                            const void *pixels, int pitch)
-{
-    SDL_DUMMY_RenderData *data =
-        (SDL_DUMMY_RenderData *) renderer->driverdata;
-    SDL_Surface *surface = data->surface;
-    Uint8 *src, *dst;
-    int row;
-    size_t length;
-
-    src = (Uint8 *) pixels;
-    dst =
-        (Uint8 *) surface->pixels + rect->y * surface->pitch +
-        rect->x * surface->format->BytesPerPixel;
-    length = rect->w * surface->format->BytesPerPixel;
-    for (row = 0; row < rect->h; ++row) {
-        SDL_memcpy(dst, src, length);
-        src += pitch;
-        dst += surface->pitch;
-    }
-    return 0;
 }
 
 void

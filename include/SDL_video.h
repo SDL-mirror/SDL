@@ -176,9 +176,7 @@ typedef enum
     SDL_Renderer_PresentFlip3 = 0x00000008,     /**< Present uses a flip, rotating between two back buffers and a front buffer */
     SDL_Renderer_PresentDiscard = 0x00000010,   /**< Present leaves the contents of the backbuffer undefined */
     SDL_Renderer_PresentVSync = 0x00000020,     /**< Present is synchronized with the refresh rate */
-    SDL_Renderer_RenderTarget = 0x00000040,     /**< The renderer can create texture render targets */
-    SDL_Renderer_Accelerated = 0x00000080,      /**< The renderer uses hardware acceleration */
-    SDL_Renderer_Minimal = 0x00000100,          /**< The renderer only supports the read/write pixel and present functions */
+    SDL_Renderer_Accelerated = 0x00000040,      /**< The renderer uses hardware acceleration */
 } SDL_RendererFlags;
 
 /**
@@ -193,7 +191,7 @@ typedef struct SDL_RendererInfo
     Uint32 blend_modes;         /**< A mask of supported blend modes */
     Uint32 scale_modes;         /**< A mask of supported scale modes */
     Uint32 num_texture_formats; /**< The number of available texture formats */
-    Uint32 texture_formats[32]; /**< The available texture formats */
+    Uint32 texture_formats[16]; /**< The available texture formats */
     int max_texture_width;      /**< The maximimum texture width */
     int max_texture_height;     /**< The maximimum texture height */
 } SDL_RendererInfo;
@@ -205,9 +203,8 @@ typedef struct SDL_RendererInfo
  */
 typedef enum
 {
-    SDL_TextureAccess_Render,   /**< Unlockable video memory, rendering allowed */
-    SDL_TextureAccess_Remote,   /**< Unlockable video memory */
     SDL_TextureAccess_Local,    /**< Lockable system memory */
+    SDL_TextureAccess_Remote,   /**< Unlockable video memory */
 } SDL_TextureAccess;
 
 /**
@@ -836,10 +833,15 @@ extern DECLSPEC void SDLCALL SDL_DestroyWindow(SDL_WindowID windowID);
 extern DECLSPEC int SDLCALL SDL_GetNumRenderers(void);
 
 /**
- * \fn SDL_RendererInfo *SDL_GetRendererInfo(int index)
+ * \fn int SDL_GetRendererInfo(int index, SDL_RendererInfo *info)
  *
  * \brief Get information about a specific render manager on the current
  *        display.
+ *
+ * \param index The index to query information about, or -1 to query the currently renderer
+ * \param info A pointer to an SDL_RendererInfo struct to be filled with information on the renderer
+ *
+ * \return 0 on success, -1 if the index was out of range
  *
  * \sa SDL_CreateRenderer()
  */

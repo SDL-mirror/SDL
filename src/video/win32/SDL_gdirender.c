@@ -55,20 +55,12 @@ static void SDL_GDI_UnlockTexture(SDL_Renderer * renderer,
 static void SDL_GDI_DirtyTexture(SDL_Renderer * renderer,
                                  SDL_Texture * texture, int numrects,
                                  const SDL_Rect * rects);
-static void SDL_GDI_SelectRenderTexture(SDL_Renderer * renderer,
-                                        SDL_Texture * texture);
 static int SDL_GDI_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect,
                               Uint32 color);
 static int SDL_GDI_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                               const SDL_Rect * srcrect,
                               const SDL_Rect * dstrect, int blendMode,
                               int scaleMode);
-static int SDL_GDI_RenderReadPixels(SDL_Renderer * renderer,
-                                    const SDL_Rect * rect, void *pixels,
-                                    int pitch);
-static int SDL_GDI_RenderWritePixels(SDL_Renderer * renderer,
-                                     const SDL_Rect * rect,
-                                     const void *pixels, int pitch);
 static void SDL_GDI_RenderPresent(SDL_Renderer * renderer);
 static void SDL_GDI_DestroyTexture(SDL_Renderer * renderer,
                                    SDL_Texture * texture);
@@ -81,7 +73,7 @@ SDL_RenderDriver SDL_GDI_RenderDriver = {
      "gdi",
      (SDL_Renderer_SingleBuffer | SDL_Renderer_PresentCopy |
       SDL_Renderer_PresentFlip2 | SDL_Renderer_PresentFlip3 |
-      SDL_Renderer_PresentDiscard | SDL_Renderer_RenderTarget),
+      SDL_Renderer_PresentDiscard),
      (SDL_TextureBlendMode_None | SDL_TextureBlendMode_Mask |
       SDL_TextureBlendMode_Blend),
      (SDL_TextureScaleMode_None | SDL_TextureScaleMode_Fast),
@@ -114,9 +106,6 @@ typedef struct
     int current_hbm;
     SDL_DirtyRectList dirty;
     SDL_bool makedirty;
-    HBITMAP window_dib;
-    void *window_pixels;
-    int window_pitch;
 } SDL_GDI_RenderData;
 
 typedef struct
@@ -182,11 +171,8 @@ SDL_GDI_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->LockTexture = SDL_GDI_LockTexture;
     renderer->UnlockTexture = SDL_GDI_UnlockTexture;
     renderer->DirtyTexture = SDL_GDI_DirtyTexture;
-    renderer->SelectRenderTexture = SDL_GDI_SelectRenderTexture;
     renderer->RenderFill = SDL_GDI_RenderFill;
     renderer->RenderCopy = SDL_GDI_RenderCopy;
-    renderer->RenderReadPixels = SDL_GDI_RenderReadPixels;
-    renderer->RenderWritePixels = SDL_GDI_RenderWritePixels;
     renderer->RenderPresent = SDL_GDI_RenderPresent;
     renderer->DestroyTexture = SDL_GDI_DestroyTexture;
     renderer->DestroyRenderer = SDL_GDI_DestroyRenderer;
@@ -194,7 +180,7 @@ SDL_GDI_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->window = window->id;
     renderer->driverdata = data;
 
-    renderer->info.flags = SDL_Renderer_RenderTarget;
+    renderer->info.flags = SDL_Renderer_Accelerated;
 
     data->hwnd = windowdata->hwnd;
     data->window_hdc = GetDC(data->hwnd);
@@ -218,7 +204,8 @@ SDL_GDI_CreateRenderer(SDL_Window * window, Uint32 flags)
     DeleteObject(hbm);
 
     if (flags & SDL_Renderer_SingleBuffer) {
-        renderer->info.flags |= SDL_Renderer_SingleBuffer;
+        renderer->info.flags |=
+            (SDL_Renderer_SingleBuffer | SDL_Renderer_PresentCopy);
         n = 0;
     } else if (flags & SDL_Renderer_PresentFlip2) {
         renderer->info.flags |= SDL_Renderer_PresentFlip2;
@@ -271,10 +258,6 @@ SDL_GDI_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     texture->driverdata = data;
 
     if (SDL_ISPIXELFORMAT_FOURCC(texture->format)) {
-        if (texture->access == SDL_TextureAccess_Render) {
-            SDL_SetError("Rendering to YUV format textures is not supported");
-            return -1;
-        }
         data->yuv = SDL_SW_CreateYUVTexture(texture);
         if (!data->yuv) {
             SDL_GDI_DestroyTexture(renderer, texture);
@@ -521,31 +504,6 @@ SDL_GDI_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 {
 }
 
-static void
-SDL_GDI_SelectRenderTexture(SDL_Renderer * renderer, SDL_Texture * texture)
-{
-    SDL_GDI_RenderData *data = (SDL_GDI_RenderData *) renderer->driverdata;
-
-    if (texture) {
-        SDL_GDI_TextureData *texturedata =
-            (SDL_GDI_TextureData *) texture->driverdata;
-        SelectObject(data->render_hdc, texturedata->hbm);
-        if (texturedata->hpal) {
-            SelectPalette(data->render_hdc, texturedata->hpal, TRUE);
-            RealizePalette(data->render_hdc);
-        }
-        data->current_hdc = data->render_hdc;
-        data->makedirty = SDL_FALSE;
-    } else if (renderer->info.flags & SDL_Renderer_SingleBuffer) {
-        data->current_hdc = data->window_hdc;
-        data->makedirty = SDL_FALSE;
-    } else {
-        SelectObject(data->render_hdc, data->hbm[data->current_hbm]);
-        data->current_hdc = data->render_hdc;
-        data->makedirty = SDL_TRUE;
-    }
-}
-
 static int
 SDL_GDI_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect,
                    Uint32 color)
@@ -637,98 +595,6 @@ SDL_GDI_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     return 0;
 }
 
-static int
-CreateWindowDIB(SDL_GDI_RenderData * data, SDL_Window * window)
-{
-    data->window_pitch = window->w * (data->bmi->bmiHeader.biBitCount / 8);
-    data->bmi->bmiHeader.biWidth = window->w;
-    data->bmi->bmiHeader.biHeight = -window->h;
-    data->bmi->bmiHeader.biSizeImage =
-        window->h * (data->bmi->bmiHeader.biBitCount / 8);
-    data->window_dib =
-        CreateDIBSection(data->window_hdc, data->bmi, DIB_RGB_COLORS,
-                         &data->window_pixels, NULL, 0);
-    if (!data->window_dib) {
-        WIN_SetError("CreateDIBSection()");
-        return -1;
-    }
-    return 0;
-}
-
-static int
-SDL_GDI_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
-                         void *pixels, int pitch)
-{
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    SDL_GDI_RenderData *data = (SDL_GDI_RenderData *) renderer->driverdata;
-
-    if (!data->window_dib) {
-        if (CreateWindowDIB(data, window) < 0) {
-            return -1;
-        }
-    }
-
-    SelectObject(data->memory_hdc, data->window_dib);
-    BitBlt(data->memory_hdc, rect->x, rect->y, rect->w, rect->h,
-           data->current_hdc, rect->x, rect->y, SRCCOPY);
-
-    {
-        int bpp = data->bmi->bmiHeader.biBitCount / 8;
-        Uint8 *src =
-            (Uint8 *) data->window_pixels + rect->y * data->window_pitch +
-            rect->x * bpp;
-        Uint8 *dst = (Uint8 *) pixels;
-        int row;
-
-        for (row = 0; row < rect->h; ++row) {
-            SDL_memcpy(dst, src, rect->w * bpp);
-            src += data->window_pitch;
-            dst += pitch;
-        }
-    }
-
-    return 0;
-}
-
-static int
-SDL_GDI_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
-                          const void *pixels, int pitch)
-{
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    SDL_GDI_RenderData *data = (SDL_GDI_RenderData *) renderer->driverdata;
-
-    if (data->makedirty) {
-        SDL_AddDirtyRect(&data->dirty, rect);
-    }
-
-    if (!data->window_dib) {
-        if (CreateWindowDIB(data, window) < 0) {
-            return -1;
-        }
-    }
-
-    {
-        int bpp = data->bmi->bmiHeader.biBitCount / 8;
-        Uint8 *src = (Uint8 *) pixels;
-        Uint8 *dst =
-            (Uint8 *) data->window_pixels + rect->y * data->window_pitch +
-            rect->x * bpp;
-        int row;
-
-        for (row = 0; row < rect->h; ++row) {
-            SDL_memcpy(dst, src, rect->w * bpp);
-            src += pitch;
-            dst += data->window_pitch;
-        }
-    }
-
-    SelectObject(data->memory_hdc, data->window_dib);
-    BitBlt(data->current_hdc, rect->x, rect->y, rect->w, rect->h,
-           data->memory_hdc, rect->x, rect->y, SRCCOPY);
-
-    return 0;
-}
-
 static void
 SDL_GDI_RenderPresent(SDL_Renderer * renderer)
 {
@@ -795,9 +661,6 @@ SDL_GDI_DestroyRenderer(SDL_Renderer * renderer)
             }
         }
         SDL_FreeDirtyRects(&data->dirty);
-        if (data->window_dib) {
-            DeleteObject(data->window_dib);
-        }
         SDL_free(data);
     }
     SDL_free(renderer);
