@@ -457,15 +457,15 @@ RunGLTest(int argc, char *argv[],
     if (accel) {
         SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     }
-    if (sync) {
-        SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, 1);
-    } else {
-        SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, 0);
-    }
     if (SDL_SetVideoMode(w, h, bpp, video_flags) == NULL) {
         fprintf(stderr, "Couldn't set GL mode: %s\n", SDL_GetError());
         SDL_Quit();
         exit(1);
+    }
+    if (sync) {
+        SDL_GL_SetSwapInterval(1);
+    } else {
+        SDL_GL_SetSwapInterval(0);
     }
 
     printf("Screen BPP: %d\n", SDL_GetVideoSurface()->format->BitsPerPixel);
@@ -498,8 +498,8 @@ RunGLTest(int argc, char *argv[],
         printf("SDL_GL_ACCELERATED_VISUAL: requested 1, got %d\n", value);
     }
     if (sync) {
-        SDL_GL_GetAttribute(SDL_GL_SWAP_CONTROL, &value);
-        printf("SDL_GL_SWAP_CONTROL: requested 1, got %d\n", value);
+        printf("Buffer swap interval: requested 1, got %d\n",
+               SDL_GL_GetSwapInterval());
     }
 
     /* Set the window manager title bar */

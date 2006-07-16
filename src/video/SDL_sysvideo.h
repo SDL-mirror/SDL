@@ -227,36 +227,21 @@ struct SDL_VideoDevice
     void (*VideoQuit) (_THIS);
 
     /* * * */
-    /* OpenGL support */
-
-    /* Sets the dll to use for OpenGL and loads it */
-    int (*GL_LoadLibrary) (_THIS, const char *path);
-
-    /* Retrieves the address of a function in the gl library */
-    void *(*GL_GetProcAddress) (_THIS, const char *proc);
-
-    /* Get attribute information from the windowing system. */
-    int (*GL_GetAttribute) (_THIS, SDL_GLattr attrib, int *value);
-
-    /* Make the context associated with this driver current */
-    int (*GL_MakeCurrent) (_THIS);
-
-    /* Swap the current buffers in double buffer mode. */
-    void (*GL_SwapBuffers) (_THIS);
-
-    /* Determine whether the mouse should be in relative mode or not.
-       This function is called when the input grab state or cursor
-       visibility state changes.
-       If the cursor is not visible, and the input is grabbed, the
-       driver can place the mouse in relative mode, which may result
-       in higher accuracy sampling of the pointer motion.
+    /* OpenGL support
      */
-    void (*CheckMouseMode) (_THIS);
+    int (*GL_LoadLibrary) (_THIS, const char *path);
+    void *(*GL_GetProcAddress) (_THIS, const char *proc);
+    int (*GL_GetAttribute) (_THIS, SDL_GLattr attrib, int *value);
+      SDL_GLContext(*GL_CreateContext) (_THIS, SDL_Window * window);
+    int (*GL_MakeCurrent) (_THIS, SDL_Window * window, SDL_GLContext context);
+    int (*GL_SetSwapInterval) (_THIS, int interval);
+    int (*GL_GetSwapInterval) (_THIS);
+    void (*GL_SwapWindow) (_THIS, SDL_Window * window);
+    void (*GL_DeleteContext) (_THIS, SDL_GLContext context);
 
     /* * * */
-    /* Event manager functions */
-
-    /* Handle any queued OS events */
+    /* Event manager functions
+     */
     void (*PumpEvents) (_THIS);
 
     /* * * */
@@ -265,8 +250,6 @@ struct SDL_VideoDevice
     SDL_VideoDisplay *displays;
     int current_display;
     Uint32 next_object_id;
-
-    /* Driver information flags */
 
     /* * * */
     /* Data used by the GL drivers */

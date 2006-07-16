@@ -36,6 +36,7 @@ static SDL_TextureID SDL_VideoTexture;
 static SDL_Surface *SDL_VideoSurface;
 static SDL_Surface *SDL_ShadowSurface;
 static SDL_Surface *SDL_PublicSurface;
+static SDL_GLContext *SDL_VideoContext;
 static char *wm_title;
 
 char *
@@ -335,6 +336,11 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
         SDL_FreeSurface(SDL_VideoSurface);
         SDL_VideoSurface = NULL;
     }
+    if (SDL_VideoContext) {
+        SDL_GL_MakeCurrent(0, SDL_VideoContext);
+        SDL_GL_DeleteContext(SDL_VideoContext);
+        SDL_VideoContext = NULL;
+    }
     if (SDL_VideoWindow) {
         SDL_GetWindowPosition(SDL_VideoWindow, &window_x, &window_y);
     }
@@ -432,6 +438,13 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
 
     /* If we're in OpenGL mode, just create a stub surface and we're done! */
     if (flags & SDL_OPENGL) {
+        SDL_VideoContext = SDL_GL_CreateContext(SDL_VideoWindow);
+        if (!SDL_VideoContext) {
+            return NULL;
+        }
+        if (SDL_GL_MakeCurrent(SDL_VideoWindow, SDL_VideoContext) < 0) {
+            return NULL;
+        }
         SDL_VideoSurface =
             SDL_CreateRGBSurfaceFrom(NULL, width, height, bpp, 0, 0, 0, 0, 0);
         if (!SDL_VideoSurface) {
@@ -1416,6 +1429,18 @@ SDL_FreeYUVOverlay(SDL_Overlay * overlay)
         }
         SDL_free(overlay);
     }
+}
+
+int
+SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
+{
+    return SDL_GL_GetWindowAttribute(SDL_VideoWindow, attr, value);
+}
+
+void
+SDL_GL_SwapBuffers(void)
+{
+    SDL_GL_SwapWindow(SDL_VideoWindow);
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -1499,6 +1499,10 @@ extern DECLSPEC int SDLCALL SDL_GL_MakeCurrent(SDL_WindowID windowID,
  *
  * \brief Set the swap interval for the current OpenGL context.
  *
+ * \param interval 0 for immediate updates, 1 for updates synchronized with the vertical retrace
+ *
+ * \return 0 on success, or -1 if setting the swap interval is not supported.
+ *
  * \sa SDL_GL_GetSwapInterval()
  */
 extern DECLSPEC int SDLCALL SDL_GL_SetSwapInterval(int interval);
@@ -1508,16 +1512,18 @@ extern DECLSPEC int SDLCALL SDL_GL_SetSwapInterval(int interval);
  *
  * \brief Get the swap interval for the current OpenGL context.
  *
+ * \return 0 if there is no vertical retrace synchronization, 1 if the buffer swap is synchronized with the vertical retrace, and -1 if getting the swap interval is not supported.
+ *
  * \sa SDL_GL_SetSwapInterval()
  */
 extern DECLSPEC int SDLCALL SDL_GL_GetSwapInterval(void);
 
 /**
- * \fn void SDL_GL_SwapBuffers(void)
+ * \fn void SDL_GL_SwapWindow(SDL_WindowID windowID)
  *
- * Swap the OpenGL buffers, if double-buffering is supported.
+ * \brief Swap the OpenGL buffers for the window, if double-buffering is supported.
  */
-extern DECLSPEC void SDLCALL SDL_GL_SwapBuffers(void);
+extern DECLSPEC void SDLCALL SDL_GL_SwapWindow(SDL_WindowID windowID);
 
 /**
  * \fn void SDL_GL_DeleteContext(SDL_GLContext context)

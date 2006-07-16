@@ -28,47 +28,51 @@
 
 /* SDL surface based renderer implementation */
 
-static SDL_Renderer *SDL_DUMMY_CreateRenderer(SDL_Window * window, Uint32 flags);
+static SDL_Renderer *SDL_DUMMY_CreateRenderer(SDL_Window * window,
+                                              Uint32 flags);
 static int SDL_DUMMY_CreateTexture(SDL_Renderer * renderer,
-                                SDL_Texture * texture);
+                                   SDL_Texture * texture);
 static int SDL_DUMMY_QueryTexturePixels(SDL_Renderer * renderer,
-                                     SDL_Texture * texture, void **pixels,
-                                     int *pitch);
+                                        SDL_Texture * texture, void **pixels,
+                                        int *pitch);
 static int SDL_DUMMY_SetTexturePalette(SDL_Renderer * renderer,
-                                    SDL_Texture * texture,
-                                    const SDL_Color * colors, int firstcolor,
-                                    int ncolors);
+                                       SDL_Texture * texture,
+                                       const SDL_Color * colors,
+                                       int firstcolor, int ncolors);
 static int SDL_DUMMY_GetTexturePalette(SDL_Renderer * renderer,
-                                    SDL_Texture * texture, SDL_Color * colors,
-                                    int firstcolor, int ncolors);
+                                       SDL_Texture * texture,
+                                       SDL_Color * colors, int firstcolor,
+                                       int ncolors);
 static int SDL_DUMMY_UpdateTexture(SDL_Renderer * renderer,
-                                SDL_Texture * texture, const SDL_Rect * rect,
-                                const void *pixels, int pitch);
-static int SDL_DUMMY_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
-                              const SDL_Rect * rect, int markDirty,
-                              void **pixels, int *pitch);
-static void SDL_DUMMY_UnlockTexture(SDL_Renderer * renderer,
-                                 SDL_Texture * texture);
-static void SDL_DUMMY_DirtyTexture(SDL_Renderer * renderer,
-                                SDL_Texture * texture, int numrects,
-                                const SDL_Rect * rects);
-static void SDL_DUMMY_SelectRenderTexture(SDL_Renderer * renderer,
-                                       SDL_Texture * texture);
-static int SDL_DUMMY_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect,
-                             Uint32 color);
-static int SDL_DUMMY_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
-                             const SDL_Rect * srcrect,
-                             const SDL_Rect * dstrect, int blendMode,
-                             int scaleMode);
-static int SDL_DUMMY_RenderReadPixels(SDL_Renderer * renderer,
-                                   const SDL_Rect * rect, void *pixels,
+                                   SDL_Texture * texture,
+                                   const SDL_Rect * rect, const void *pixels,
                                    int pitch);
+static int SDL_DUMMY_LockTexture(SDL_Renderer * renderer,
+                                 SDL_Texture * texture, const SDL_Rect * rect,
+                                 int markDirty, void **pixels, int *pitch);
+static void SDL_DUMMY_UnlockTexture(SDL_Renderer * renderer,
+                                    SDL_Texture * texture);
+static void SDL_DUMMY_DirtyTexture(SDL_Renderer * renderer,
+                                   SDL_Texture * texture, int numrects,
+                                   const SDL_Rect * rects);
+static void SDL_DUMMY_SelectRenderTexture(SDL_Renderer * renderer,
+                                          SDL_Texture * texture);
+static int SDL_DUMMY_RenderFill(SDL_Renderer * renderer,
+                                const SDL_Rect * rect, Uint32 color);
+static int SDL_DUMMY_RenderCopy(SDL_Renderer * renderer,
+                                SDL_Texture * texture,
+                                const SDL_Rect * srcrect,
+                                const SDL_Rect * dstrect, int blendMode,
+                                int scaleMode);
+static int SDL_DUMMY_RenderReadPixels(SDL_Renderer * renderer,
+                                      const SDL_Rect * rect, void *pixels,
+                                      int pitch);
 static int SDL_DUMMY_RenderWritePixels(SDL_Renderer * renderer,
-                                    const SDL_Rect * rect, const void *pixels,
-                                    int pitch);
+                                       const SDL_Rect * rect,
+                                       const void *pixels, int pitch);
 static void SDL_DUMMY_RenderPresent(SDL_Renderer * renderer);
 static void SDL_DUMMY_DestroyTexture(SDL_Renderer * renderer,
-                                  SDL_Texture * texture);
+                                     SDL_Texture * texture);
 static void SDL_DUMMY_DestroyRenderer(SDL_Renderer * renderer);
 
 
@@ -195,7 +199,9 @@ SDL_DUMMY_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
             return -1;
         }
 
-        texture->driverdata = SDL_CreateRGBSurface(0, texture->w, texture->h, bpp, Rmask, Gmask, Bmask, Amask);
+        texture->driverdata =
+            SDL_CreateRGBSurface(0, texture->w, texture->h, bpp, Rmask, Gmask,
+                                 Bmask, Amask);
     }
 
     if (!texture->driverdata) {
@@ -206,10 +212,11 @@ SDL_DUMMY_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
 static int
 SDL_DUMMY_QueryTexturePixels(SDL_Renderer * renderer, SDL_Texture * texture,
-                          void **pixels, int *pitch)
+                             void **pixels, int *pitch)
 {
     if (SDL_ISPIXELFORMAT_FOURCC(texture->format)) {
-        return SDL_SW_QueryYUVTexturePixels((SDL_SW_YUVTexture *) texture->driverdata, pixels, pitch);
+        return SDL_SW_QueryYUVTexturePixels((SDL_SW_YUVTexture *) texture->
+                                            driverdata, pixels, pitch);
     } else {
         SDL_Surface *surface = (SDL_Surface *) texture->driverdata;
 
@@ -221,8 +228,8 @@ SDL_DUMMY_QueryTexturePixels(SDL_Renderer * renderer, SDL_Texture * texture,
 
 static int
 SDL_DUMMY_SetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
-                         const SDL_Color * colors, int firstcolor,
-                         int ncolors)
+                            const SDL_Color * colors, int firstcolor,
+                            int ncolors)
 {
     if (SDL_ISPIXELFORMAT_FOURCC(texture->format)) {
         SDL_SetError("YUV textures don't have a palette");
@@ -237,7 +244,7 @@ SDL_DUMMY_SetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
 
 static int
 SDL_DUMMY_GetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
-                         SDL_Color * colors, int firstcolor, int ncolors)
+                            SDL_Color * colors, int firstcolor, int ncolors)
 {
     if (SDL_ISPIXELFORMAT_FOURCC(texture->format)) {
         SDL_SetError("YUV textures don't have a palette");
@@ -253,7 +260,7 @@ SDL_DUMMY_GetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
 
 static int
 SDL_DUMMY_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
-                     const SDL_Rect * rect, const void *pixels, int pitch)
+                        const SDL_Rect * rect, const void *pixels, int pitch)
 {
     if (SDL_ISPIXELFORMAT_FOURCC(texture->format)) {
         return SDL_SW_UpdateYUVTexture((SDL_SW_YUVTexture *) texture->
@@ -280,8 +287,8 @@ SDL_DUMMY_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 
 static int
 SDL_DUMMY_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
-                   const SDL_Rect * rect, int markDirty, void **pixels,
-                   int *pitch)
+                      const SDL_Rect * rect, int markDirty, void **pixels,
+                      int *pitch)
 {
     if (SDL_ISPIXELFORMAT_FOURCC(texture->format)) {
         return SDL_SW_LockYUVTexture((SDL_SW_YUVTexture *) texture->
@@ -308,15 +315,16 @@ SDL_DUMMY_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
 static void
 SDL_DUMMY_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
-                    int numrects, const SDL_Rect * rects)
+                       int numrects, const SDL_Rect * rects)
 {
 }
 
 static int
 SDL_DUMMY_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect,
-                  Uint32 color)
+                     Uint32 color)
 {
-    SDL_DUMMY_RenderData *data = (SDL_DUMMY_RenderData *) renderer->driverdata;
+    SDL_DUMMY_RenderData *data =
+        (SDL_DUMMY_RenderData *) renderer->driverdata;
     SDL_Surface *target = data->screens[data->current_screen];
     SDL_Rect real_rect = *rect;
     Uint8 r, g, b, a;
@@ -332,10 +340,11 @@ SDL_DUMMY_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect,
 
 static int
 SDL_DUMMY_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
-                  const SDL_Rect * srcrect, const SDL_Rect * dstrect,
-                  int blendMode, int scaleMode)
+                     const SDL_Rect * srcrect, const SDL_Rect * dstrect,
+                     int blendMode, int scaleMode)
 {
-    SDL_DUMMY_RenderData *data = (SDL_DUMMY_RenderData *) renderer->driverdata;
+    SDL_DUMMY_RenderData *data =
+        (SDL_DUMMY_RenderData *) renderer->driverdata;
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
     SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
 
@@ -362,9 +371,11 @@ SDL_DUMMY_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         }
         if (scaleMode != SDL_TextureScaleMode_None &&
             (srcrect->w != dstrect->w || srcrect->h != dstrect->h)) {
-            return SDL_SoftStretch(surface, &real_srcrect, target, &real_dstrect);
+            return SDL_SoftStretch(surface, &real_srcrect, target,
+                                   &real_dstrect);
         } else {
-            return SDL_LowerBlit(surface, &real_srcrect, target, &real_dstrect);
+            return SDL_LowerBlit(surface, &real_srcrect, target,
+                                 &real_dstrect);
         }
     }
 }
@@ -373,7 +384,8 @@ static void
 SDL_DUMMY_RenderPresent(SDL_Renderer * renderer)
 {
     static int frame_number;
-    SDL_DUMMY_RenderData *data = (SDL_DUMMY_RenderData *) renderer->driverdata;
+    SDL_DUMMY_RenderData *data =
+        (SDL_DUMMY_RenderData *) renderer->driverdata;
 
     /* Send the data to the display */
     if (SDL_getenv("SDL_VIDEO_DUMMY_SAVE_FRAMES")) {
@@ -406,7 +418,8 @@ SDL_DUMMY_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 static void
 SDL_DUMMY_DestroyRenderer(SDL_Renderer * renderer)
 {
-    SDL_DUMMY_RenderData *data = (SDL_DUMMY_RenderData *) renderer->driverdata;
+    SDL_DUMMY_RenderData *data =
+        (SDL_DUMMY_RenderData *) renderer->driverdata;
     int i;
 
     if (data) {

@@ -153,6 +153,12 @@ cmpmodes(const void *A, const void *B)
     return 0;
 }
 
+static void
+SDL_UninitializedVideo()
+{
+    SDL_SetError("Video subsystem has not been initialized");
+}
+
 int
 SDL_GetNumVideoDrivers(void)
 {
@@ -285,6 +291,7 @@ const char *
 SDL_GetCurrentVideoDriver()
 {
     if (!_this) {
+        SDL_UninitializedVideo();
         return NULL;
     }
     return _this->name;
@@ -334,6 +341,7 @@ int
 SDL_GetNumVideoDisplays(void)
 {
     if (!_this) {
+        SDL_UninitializedVideo();
         return 0;
     }
     return _this->num_displays;
@@ -343,7 +351,7 @@ int
 SDL_SelectVideoDisplay(int index)
 {
     if (!_this) {
-        SDL_SetError("Video subsystem has not been initialized");
+        SDL_UninitializedVideo();
         return (-1);
     }
     if (index >= 0) {
@@ -535,7 +543,7 @@ SDL_SetDisplayMode(const SDL_DisplayMode * mode)
     int i, ncolors;
 
     if (!_this) {
-        SDL_SetError("Video subsystem has not been initialized");
+        SDL_UninitializedVideo();
         return -1;
     }
 
@@ -621,7 +629,7 @@ SDL_SetFullscreenDisplayMode(const SDL_DisplayMode * mode)
     int i;
 
     if (!_this) {
-        SDL_SetError("Video subsystem has not been initialized");
+        SDL_UninitializedVideo();
         return -1;
     }
 
@@ -659,7 +667,7 @@ SDL_SetDisplayPalette(const SDL_Color * colors, int firstcolor, int ncolors)
     int status = 0;
 
     if (!_this) {
-        SDL_SetError("Video subsystem has not been initialized");
+        SDL_UninitializedVideo();
         return -1;
     }
     palette = SDL_CurrentDisplay.palette;
@@ -684,7 +692,7 @@ SDL_GetDisplayPalette(SDL_Color * colors, int firstcolor, int ncolors)
     SDL_Palette *palette;
 
     if (!_this) {
-        SDL_SetError("Video subsystem has not been initialized");
+        SDL_UninitializedVideo();
         return -1;
     }
 
@@ -721,7 +729,12 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
     SDL_Window *windows;
 
     if (!_this) {
-        SDL_SetError("Video subsystem has not been initialized");
+        SDL_UninitializedVideo();
+        return 0;
+    }
+
+    if ((flags & SDL_WINDOW_OPENGL) && !_this->GL_CreateContext) {
+        SDL_SetError("No OpenGL support in video driver");
         return 0;
     }
 
@@ -783,7 +796,7 @@ SDL_CreateWindowFrom(const void *data)
     SDL_Window *windows;
 
     if (!_this) {
-        SDL_SetError("Video subsystem has not been initialized");
+        SDL_UninitializedVideo();
         return (0);
     }
 
@@ -822,6 +835,7 @@ SDL_GetWindowFromID(SDL_WindowID windowID)
     int i, j;
 
     if (!_this) {
+        SDL_UninitializedVideo();
         return NULL;
     }
 
@@ -841,6 +855,7 @@ SDL_VideoDisplay *
 SDL_GetDisplayFromWindow(SDL_Window * window)
 {
     if (!_this) {
+        SDL_UninitializedVideo();
         return NULL;
     }
     return &_this->displays[window->display];
@@ -1281,6 +1296,7 @@ int
 SDL_GetRendererInfo(int index, SDL_RendererInfo * info)
 {
     if (!_this) {
+        SDL_UninitializedVideo();
         return -1;
     }
 
@@ -1374,6 +1390,7 @@ SDL_CreateTexture(Uint32 format, int access, int w, int h)
     SDL_Texture *texture;
 
     if (!_this) {
+        SDL_UninitializedVideo();
         return 0;
     }
 
@@ -1752,6 +1769,7 @@ SDL_RenderFill(const SDL_Rect * rect, Uint32 color)
     SDL_Rect real_rect;
 
     if (!_this) {
+        SDL_UninitializedVideo();
         return -1;
     }
 
@@ -1821,6 +1839,7 @@ SDL_RenderPresent(void)
     SDL_Renderer *renderer;
 
     if (!_this) {
+        SDL_UninitializedVideo();
         return;
     }
 
@@ -1839,6 +1858,7 @@ SDL_DestroyTexture(SDL_TextureID textureID)
     SDL_Renderer *renderer;
 
     if (!_this) {
+        SDL_UninitializedVideo();
         return;
     }
 
@@ -1977,21 +1997,21 @@ SDL_VideoQuit(void)
     _this = NULL;
 }
 
-/* Load the GL driver library */
 int
 SDL_GL_LoadLibrary(const char *path)
 {
     int retval;
 
-    retval = -1;
-    if (_this == NULL) {
-        SDL_SetError("Video subsystem has not been initialized");
+    if (!_this) {
+        SDL_UninitializedVideo();
+        return -1;
+    }
+
+    if (_this->GL_LoadLibrary) {
+        retval = _this->GL_LoadLibrary(_this, path);
     } else {
-        if (_this->GL_LoadLibrary) {
-            retval = _this->GL_LoadLibrary(_this, path);
-        } else {
-            SDL_SetError("No dynamic GL support in video driver");
-        }
+        SDL_SetError("No dynamic GL support in video driver");
+        retval = -1;
     }
     return (retval);
 }
@@ -2000,6 +2020,11 @@ void *
 SDL_GL_GetProcAddress(const char *proc)
 {
     void *func;
+
+    if (!_this) {
+        SDL_UninitializedVideo();
+        return NULL;
+    }
 
     func = NULL;
     if (_this->GL_GetProcAddress) {
@@ -2014,11 +2039,15 @@ SDL_GL_GetProcAddress(const char *proc)
     return func;
 }
 
-/* Set the specified GL attribute for setting up a GL video mode */
 int
 SDL_GL_SetAttribute(SDL_GLattr attr, int value)
 {
     int retval;
+
+    if (!_this) {
+        SDL_UninitializedVideo();
+        return -1;
+    }
 
     retval = 0;
     switch (attr) {
@@ -2075,30 +2104,113 @@ SDL_GL_SetAttribute(SDL_GLattr attr, int value)
         retval = -1;
         break;
     }
-    return (retval);
+    return retval;
 }
 
-/* Retrieve an attribute value from the windowing system. */
 int
-SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
+SDL_GL_GetWindowAttribute(SDL_WindowID windowID, SDL_GLattr attr, int *value)
 {
-    int retval = -1;
+    SDL_Window *window = SDL_GetWindowFromID(windowID);
+    int retval;
+
+    if (!window) {
+        return -1;
+    }
 
     if (_this->GL_GetAttribute) {
         retval = _this->GL_GetAttribute(_this, attr, value);
     } else {
         *value = 0;
         SDL_SetError("GL_GetAttribute not supported");
+        retval = -1;
     }
     return retval;
 }
 
-/* Perform a GL buffer swap on the current GL context */
-void
-SDL_GL_SwapBuffers(void)
+SDL_GLContext
+SDL_GL_CreateContext(SDL_WindowID windowID)
 {
-    // FIXME: Track the current window context - do we provide N contexts, and match them to M windows, or is there a one-to-one mapping?
-    _this->GL_SwapBuffers(_this);
+    SDL_Window *window = SDL_GetWindowFromID(windowID);
+
+    if (!window) {
+        return NULL;
+    }
+    if (!(window->flags & SDL_WINDOW_OPENGL)) {
+        SDL_SetError("The specified window isn't an OpenGL window");
+        return NULL;
+    }
+    return _this->GL_CreateContext(_this, window);
+}
+
+int
+SDL_GL_MakeCurrent(SDL_WindowID windowID, SDL_GLContext context)
+{
+    SDL_Window *window = SDL_GetWindowFromID(windowID);
+
+    if (!window || !context) {
+        return -1;
+    }
+    if (!(window->flags & SDL_WINDOW_OPENGL)) {
+        SDL_SetError("The specified window isn't an OpenGL window");
+        return -1;
+    }
+    return _this->GL_MakeCurrent(_this, window, context);
+}
+
+int
+SDL_GL_SetSwapInterval(int interval)
+{
+    if (!_this) {
+        SDL_UninitializedVideo();
+        return -1;
+    }
+
+    if (_this->GL_SetSwapInterval) {
+        return _this->GL_SetSwapInterval(_this, interval);
+    } else {
+        SDL_SetError("Setting the swap interval is not supported");
+        return -1;
+    }
+}
+
+int
+SDL_GL_GetSwapInterval(void)
+{
+    if (!_this) {
+        SDL_UninitializedVideo();
+        return -1;
+    }
+
+    if (_this->GL_GetSwapInterval) {
+        return _this->GL_GetSwapInterval(_this);
+    } else {
+        SDL_SetError("Getting the swap interval is not supported");
+        return -1;
+    }
+}
+
+void
+SDL_GL_SwapWindow(SDL_WindowID windowID)
+{
+    SDL_Window *window = SDL_GetWindowFromID(windowID);
+
+    if (!window) {
+        return;
+    }
+    if (!(window->flags & SDL_WINDOW_OPENGL)) {
+        SDL_SetError("The specified window isn't an OpenGL window");
+        return;
+    }
+    return _this->GL_SwapWindow(_this, window);
+}
+
+void
+SDL_GL_DeleteContext(SDL_GLContext context)
+{
+    if (!_this || !context) {
+        return;
+    }
+    _this->GL_DeleteContext(_this, context);
 }
 
 #if 0                           // FIXME
