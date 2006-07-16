@@ -2494,15 +2494,9 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         # The Mac OS X platform requires special setup.
         SDLMAIN_SOURCES="$srcdir/src/main/macosx/*.m"
         EXTRA_CFLAGS="$EXTRA_CFLAGS -fpascal-strings"
+        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,Cocoa"
+        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,Carbon"
         SDL_LIBS="-lSDLmain $SDL_LIBS"
-        if test x$enable_video_cocoa = xyes; then
-            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,Cocoa"
-        fi
-        if test x$enable_video_carbon = xyes -o x$enable_video_cocoa = xyes; then
-            # The Cocoa backend still needs Carbon, and the YUV code QuickTime
-            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,QuickTime -Wl,-framework,ApplicationServices"
-            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,Carbon"
-        fi
         # If either the audio or CD driver is used, add the AudioUnit framework
         if test x$enable_audio = xyes -o x$enable_cdrom = xyes; then
             EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,AudioToolbox -Wl,-framework,AudioUnit"
@@ -2647,12 +2641,11 @@ fi
 
 case "$ARCH" in
   macosx)
-    if test x$enable_video = xyes -a x$enable_video_cocoa = xyes; then
-      SDL_LIBS="$SDL_LIBS -Wl,-framework,Cocoa"
-    fi
-    if test x$enable_video = xyes -a x$enable_video_carbon = xyes; then
-      SDL_LIBS="$SDL_LIBS -Wl,-framework,Carbon"
-    fi
+    SDL_LIBS="$SDL_LIBS -Wl,-framework,Cocoa"
+    # Is this still needed?
+    #if test x$enable_video = xyes -a x$enable_video_carbon = xyes; then
+    #  SDL_LIBS="$SDL_LIBS -Wl,-framework,Carbon"
+    #fi
     # Evil hack to allow static linking on Mac OS X
     SDL_STATIC_LIBS="\${exec_prefix}/lib/libSDLmain.a \${exec_prefix}/lib/libSDL.a $EXTRA_LDFLAGS"
     ;;
