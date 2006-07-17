@@ -89,8 +89,8 @@ DUMMY_CreateDevice(int devindex)
 
     /* Set the function pointers */
     device->VideoInit = DUMMY_VideoInit;
-    device->SetDisplayMode = DUMMY_SetDisplayMode;
     device->VideoQuit = DUMMY_VideoQuit;
+    device->SetDisplayMode = DUMMY_SetDisplayMode;
     device->PumpEvents = DUMMY_PumpEvents;
 
     device->free = DUMMY_DeleteDevice;

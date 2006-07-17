@@ -2117,11 +2117,11 @@ SDL_GL_GetWindowAttribute(SDL_WindowID windowID, SDL_GLattr attr, int *value)
         return -1;
     }
 
-    if (_this->GL_GetAttribute) {
-        retval = _this->GL_GetAttribute(_this, attr, value);
+    if (_this->GL_GetWindowAttribute) {
+        retval = _this->GL_GetWindowAttribute(_this, window, attr, value);
     } else {
         *value = 0;
-        SDL_SetError("GL_GetAttribute not supported");
+        SDL_SetError("GL_GetWindowAttribute not supported");
         retval = -1;
     }
     return retval;
@@ -2147,10 +2147,7 @@ SDL_GL_MakeCurrent(SDL_WindowID windowID, SDL_GLContext context)
 {
     SDL_Window *window = SDL_GetWindowFromID(windowID);
 
-    if (!window || !context) {
-        return -1;
-    }
-    if (!(window->flags & SDL_WINDOW_OPENGL)) {
+    if (window && !(window->flags & SDL_WINDOW_OPENGL)) {
         SDL_SetError("The specified window isn't an OpenGL window");
         return -1;
     }

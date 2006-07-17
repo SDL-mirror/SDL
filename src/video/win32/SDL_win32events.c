@@ -29,6 +29,7 @@
 
 /*#define WMMSG_DEBUG*/
 #ifdef WMMSG_DEBUG
+#include <stdio.h>
 #include "wmmsg.h"
 #endif
 
@@ -398,13 +399,17 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         return CallWindowProc(DefWindowProc, hwnd, msg, wParam, lParam);
     }
 #ifdef WMMSG_DEBUG
-    fprintf(stderr, "Received windows message:  ");
-    if (msg > MAX_WMMSG) {
-        fprintf(stderr, "%d", msg);
-    } else {
-        fprintf(stderr, "%s", wmtab[msg]);
+    {
+        FILE *log = fopen("wmmsg.txt", "a");
+        fprintf(log, "Received windows message: %p ", hwnd);
+        if (msg > MAX_WMMSG) {
+            fprintf(log, "%d", msg);
+        } else {
+            fprintf(log, "%s", wmtab[msg]);
+        }
+        fprintf(log, " -- 0x%X, 0x%X\n", wParam, lParam);
+        fclose(log);
     }
-    fprintf(stderr, " -- 0x%X, 0x%X\n", wParam, lParam);
 #endif
 
     /* Send a SDL_SYSWMEVENT if the application wants them */

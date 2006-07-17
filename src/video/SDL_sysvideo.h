@@ -172,6 +172,11 @@ struct SDL_VideoDevice
      */
     int (*VideoInit) (_THIS);
 
+    /* Reverse the effects VideoInit() -- called if VideoInit() fails
+       or if the application is shutting down the video subsystem.
+     */
+    void (*VideoQuit) (_THIS);
+
     /* * * */
     /* Display functions
      */
@@ -221,17 +226,13 @@ struct SDL_VideoDevice
       SDL_bool(*GetWindowWMInfo) (_THIS, SDL_Window * window,
                                   struct SDL_SysWMinfo * info);
 
-    /* Reverse the effects VideoInit() -- called if VideoInit() fails
-       or if the application is shutting down the video subsystem.
-     */
-    void (*VideoQuit) (_THIS);
-
     /* * * */
     /* OpenGL support
      */
     int (*GL_LoadLibrary) (_THIS, const char *path);
     void *(*GL_GetProcAddress) (_THIS, const char *proc);
-    int (*GL_GetAttribute) (_THIS, SDL_GLattr attrib, int *value);
+    int (*GL_GetWindowAttribute) (_THIS, SDL_Window * window,
+                                  SDL_GLattr attrib, int *value);
       SDL_GLContext(*GL_CreateContext) (_THIS, SDL_Window * window);
     int (*GL_MakeCurrent) (_THIS, SDL_Window * window, SDL_GLContext context);
     int (*GL_SetSwapInterval) (_THIS, int interval);
@@ -279,7 +280,7 @@ struct SDL_VideoDevice
     /* * * */
     /* Data private to this driver */
     void *driverdata;
-    struct SDL_PrivateGLData *gl_data;
+    struct SDL_GLDriverData *gl_data;
 
     /* * * */
     /* The function used to dispose of this structure */

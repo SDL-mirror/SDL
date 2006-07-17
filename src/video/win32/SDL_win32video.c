@@ -101,11 +101,11 @@ WIN_CreateDevice(int devindex)
 
     /* Set the function pointers */
     device->VideoInit = WIN_VideoInit;
+    device->VideoQuit = WIN_VideoQuit;
     device->GetDisplayModes = WIN_GetDisplayModes;
     device->SetDisplayMode = WIN_SetDisplayMode;
     device->SetDisplayGammaRamp = WIN_SetDisplayGammaRamp;
     device->GetDisplayGammaRamp = WIN_GetDisplayGammaRamp;
-    device->VideoQuit = WIN_VideoQuit;
     device->PumpEvents = WIN_PumpEvents;
 
 #undef CreateWindow
@@ -123,6 +123,17 @@ WIN_CreateDevice(int devindex)
     device->SetWindowGrab = WIN_SetWindowGrab;
     device->DestroyWindow = WIN_DestroyWindow;
     device->GetWindowWMInfo = WIN_GetWindowWMInfo;
+#ifdef SDL_VIDEO_OPENGL
+    device->GL_LoadLibrary = WIN_GL_LoadLibrary;
+    device->GL_GetProcAddress = WIN_GL_GetProcAddress;
+    device->GL_GetWindowAttribute = WIN_GL_GetWindowAttribute;
+    device->GL_CreateContext = WIN_GL_CreateContext;
+    device->GL_MakeCurrent = WIN_GL_MakeCurrent;
+    device->GL_SetSwapInterval = WIN_GL_SetSwapInterval;
+    device->GL_GetSwapInterval = WIN_GL_GetSwapInterval;
+    device->GL_SwapWindow = WIN_GL_SwapWindow;
+    device->GL_DeleteContext = WIN_GL_DeleteContext;
+#endif
 
     device->free = WIN_DeleteDevice;
 

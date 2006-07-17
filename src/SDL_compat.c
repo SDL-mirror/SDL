@@ -337,7 +337,7 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
         SDL_VideoSurface = NULL;
     }
     if (SDL_VideoContext) {
-        SDL_GL_MakeCurrent(0, SDL_VideoContext);
+        SDL_GL_MakeCurrent(0, NULL);
         SDL_GL_DeleteContext(SDL_VideoContext);
         SDL_VideoContext = NULL;
     }

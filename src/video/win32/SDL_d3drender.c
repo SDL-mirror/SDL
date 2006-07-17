@@ -27,43 +27,37 @@
 
 /* Direct3D renderer implementation */
 
-static SDL_Renderer *SDL_D3D_CreateRenderer(SDL_Window * window,
-                                            Uint32 flags);
-static int SDL_D3D_CreateTexture(SDL_Renderer * renderer,
-                                 SDL_Texture * texture);
-static int SDL_D3D_SetTexturePalette(SDL_Renderer * renderer,
-                                     SDL_Texture * texture,
-                                     const SDL_Color * colors, int firstcolor,
-                                     int ncolors);
-static int SDL_D3D_GetTexturePalette(SDL_Renderer * renderer,
-                                     SDL_Texture * texture,
-                                     SDL_Color * colors, int firstcolor,
-                                     int ncolors);
-static int SDL_D3D_UpdateTexture(SDL_Renderer * renderer,
-                                 SDL_Texture * texture, const SDL_Rect * rect,
-                                 const void *pixels, int pitch);
-static int SDL_D3D_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
-                               const SDL_Rect * rect, int markDirty,
-                               void **pixels, int *pitch);
-static void SDL_D3D_UnlockTexture(SDL_Renderer * renderer,
-                                  SDL_Texture * texture);
-static void SDL_D3D_DirtyTexture(SDL_Renderer * renderer,
-                                 SDL_Texture * texture, int numrects,
-                                 const SDL_Rect * rects);
-static int SDL_D3D_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect,
-                              Uint32 color);
-static int SDL_D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
-                              const SDL_Rect * srcrect,
-                              const SDL_Rect * dstrect, int blendMode,
-                              int scaleMode);
-static void SDL_D3D_RenderPresent(SDL_Renderer * renderer);
-static void SDL_D3D_DestroyTexture(SDL_Renderer * renderer,
-                                   SDL_Texture * texture);
-static void SDL_D3D_DestroyRenderer(SDL_Renderer * renderer);
+static SDL_Renderer *D3D_CreateRenderer(SDL_Window * window, Uint32 flags);
+static int D3D_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture);
+static int D3D_SetTexturePalette(SDL_Renderer * renderer,
+                                 SDL_Texture * texture,
+                                 const SDL_Color * colors, int firstcolor,
+                                 int ncolors);
+static int D3D_GetTexturePalette(SDL_Renderer * renderer,
+                                 SDL_Texture * texture, SDL_Color * colors,
+                                 int firstcolor, int ncolors);
+static int D3D_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
+                             const SDL_Rect * rect, const void *pixels,
+                             int pitch);
+static int D3D_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
+                           const SDL_Rect * rect, int markDirty,
+                           void **pixels, int *pitch);
+static void D3D_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
+static void D3D_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
+                             int numrects, const SDL_Rect * rects);
+static int D3D_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect,
+                          Uint32 color);
+static int D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
+                          const SDL_Rect * srcrect, const SDL_Rect * dstrect,
+                          int blendMode, int scaleMode);
+static void D3D_RenderPresent(SDL_Renderer * renderer);
+static void D3D_DestroyTexture(SDL_Renderer * renderer,
+                               SDL_Texture * texture);
+static void D3D_DestroyRenderer(SDL_Renderer * renderer);
 
 
-SDL_RenderDriver SDL_D3D_RenderDriver = {
-    SDL_D3D_CreateRenderer,
+SDL_RenderDriver D3D_RenderDriver = {
+    D3D_CreateRenderer,
     {
      "d3d",
      (SDL_Renderer_SingleBuffer | SDL_Renderer_PresentCopy |
@@ -93,12 +87,12 @@ typedef struct
 {
     IDirect3DDevice9 *device;
     SDL_bool beginScene;
-} SDL_D3D_RenderData;
+} D3D_RenderData;
 
 typedef struct
 {
     IDirect3DTexture9 *texture;
-} SDL_D3D_TextureData;
+} D3D_TextureData;
 
 typedef struct
 {
@@ -225,18 +219,18 @@ D3D_AddRenderDriver(_THIS)
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
     if (data->d3d) {
-        SDL_AddRenderDriver(0, &SDL_D3D_RenderDriver);
+        SDL_AddRenderDriver(0, &D3D_RenderDriver);
     }
 }
 
 SDL_Renderer *
-SDL_D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
+D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
 {
     SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
     SDL_VideoData *videodata = (SDL_VideoData *) display->device->driverdata;
     SDL_WindowData *windowdata = (SDL_WindowData *) window->driverdata;
     SDL_Renderer *renderer;
-    SDL_D3D_RenderData *data;
+    D3D_RenderData *data;
     HRESULT result;
     D3DPRESENT_PARAMETERS pparams;
     IDirect3DSwapChain9 *chain;
@@ -248,27 +242,27 @@ SDL_D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     }
     SDL_zerop(renderer);
 
-    data = (SDL_D3D_RenderData *) SDL_malloc(sizeof(*data));
+    data = (D3D_RenderData *) SDL_malloc(sizeof(*data));
     if (!data) {
-        SDL_D3D_DestroyRenderer(renderer);
+        D3D_DestroyRenderer(renderer);
         SDL_OutOfMemory();
         return NULL;
     }
     SDL_zerop(data);
 
-    renderer->CreateTexture = SDL_D3D_CreateTexture;
-    renderer->SetTexturePalette = SDL_D3D_SetTexturePalette;
-    renderer->GetTexturePalette = SDL_D3D_GetTexturePalette;
-    renderer->UpdateTexture = SDL_D3D_UpdateTexture;
-    renderer->LockTexture = SDL_D3D_LockTexture;
-    renderer->UnlockTexture = SDL_D3D_UnlockTexture;
-    renderer->DirtyTexture = SDL_D3D_DirtyTexture;
-    renderer->RenderFill = SDL_D3D_RenderFill;
-    renderer->RenderCopy = SDL_D3D_RenderCopy;
-    renderer->RenderPresent = SDL_D3D_RenderPresent;
-    renderer->DestroyTexture = SDL_D3D_DestroyTexture;
-    renderer->DestroyRenderer = SDL_D3D_DestroyRenderer;
-    renderer->info = SDL_D3D_RenderDriver.info;
+    renderer->CreateTexture = D3D_CreateTexture;
+    renderer->SetTexturePalette = D3D_SetTexturePalette;
+    renderer->GetTexturePalette = D3D_GetTexturePalette;
+    renderer->UpdateTexture = D3D_UpdateTexture;
+    renderer->LockTexture = D3D_LockTexture;
+    renderer->UnlockTexture = D3D_UnlockTexture;
+    renderer->DirtyTexture = D3D_DirtyTexture;
+    renderer->RenderFill = D3D_RenderFill;
+    renderer->RenderCopy = D3D_RenderCopy;
+    renderer->RenderPresent = D3D_RenderPresent;
+    renderer->DestroyTexture = D3D_DestroyTexture;
+    renderer->DestroyRenderer = D3D_DestroyRenderer;
+    renderer->info = D3D_RenderDriver.info;
     renderer->window = window->id;
     renderer->driverdata = data;
 
@@ -316,7 +310,7 @@ SDL_D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
                                      D3DCREATE_SOFTWARE_VERTEXPROCESSING,
                                      &pparams, &data->device);
     if (FAILED(result)) {
-        SDL_D3D_DestroyRenderer(renderer);
+        D3D_DestroyRenderer(renderer);
         D3D_SetError("CreateDevice()", result);
         return NULL;
     }
@@ -325,14 +319,14 @@ SDL_D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     /* Get presentation parameters to fill info */
     result = IDirect3DDevice9_GetSwapChain(data->device, 0, &chain);
     if (FAILED(result)) {
-        SDL_D3D_DestroyRenderer(renderer);
+        D3D_DestroyRenderer(renderer);
         D3D_SetError("GetSwapChain()", result);
         return NULL;
     }
     result = IDirect3DSwapChain9_GetPresentParameters(chain, &pparams);
     if (FAILED(result)) {
         IDirect3DSwapChain9_Release(chain);
-        SDL_D3D_DestroyRenderer(renderer);
+        D3D_DestroyRenderer(renderer);
         D3D_SetError("GetPresentParameters()", result);
         return NULL;
     }
@@ -376,17 +370,16 @@ SDL_D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
 }
 
 static int
-SDL_D3D_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
+D3D_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-    SDL_D3D_RenderData *renderdata =
-        (SDL_D3D_RenderData *) renderer->driverdata;
+    D3D_RenderData *renderdata = (D3D_RenderData *) renderer->driverdata;
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
     SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
-    SDL_D3D_TextureData *data;
+    D3D_TextureData *data;
     D3DPOOL pool;
     HRESULT result;
 
-    data = (SDL_D3D_TextureData *) SDL_malloc(sizeof(*data));
+    data = (D3D_TextureData *) SDL_malloc(sizeof(*data));
     if (!data) {
         SDL_OutOfMemory();
         return -1;
@@ -415,33 +408,30 @@ SDL_D3D_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 }
 
 static int
-SDL_D3D_SetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
-                          const SDL_Color * colors, int firstcolor,
-                          int ncolors)
+D3D_SetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
+                      const SDL_Color * colors, int firstcolor, int ncolors)
 {
-    SDL_D3D_RenderData *renderdata =
-        (SDL_D3D_RenderData *) renderer->driverdata;
-    SDL_D3D_TextureData *data = (SDL_D3D_TextureData *) texture->driverdata;
+    D3D_RenderData *renderdata = (D3D_RenderData *) renderer->driverdata;
+    D3D_TextureData *data = (D3D_TextureData *) texture->driverdata;
 
     return 0;
 }
 
 static int
-SDL_D3D_GetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
-                          SDL_Color * colors, int firstcolor, int ncolors)
+D3D_GetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
+                      SDL_Color * colors, int firstcolor, int ncolors)
 {
-    SDL_D3D_TextureData *data = (SDL_D3D_TextureData *) texture->driverdata;
+    D3D_TextureData *data = (D3D_TextureData *) texture->driverdata;
 
     return 0;
 }
 
 static int
-SDL_D3D_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
-                      const SDL_Rect * rect, const void *pixels, int pitch)
+D3D_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
+                  const SDL_Rect * rect, const void *pixels, int pitch)
 {
-    SDL_D3D_TextureData *data = (SDL_D3D_TextureData *) texture->driverdata;
-    SDL_D3D_RenderData *renderdata =
-        (SDL_D3D_RenderData *) renderer->driverdata;
+    D3D_TextureData *data = (D3D_TextureData *) texture->driverdata;
+    D3D_RenderData *renderdata = (D3D_RenderData *) renderer->driverdata;
     IDirect3DTexture9 *temp;
     RECT d3drect;
     D3DLOCKED_RECT locked;
@@ -496,11 +486,11 @@ SDL_D3D_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 }
 
 static int
-SDL_D3D_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
-                    const SDL_Rect * rect, int markDirty, void **pixels,
-                    int *pitch)
+D3D_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
+                const SDL_Rect * rect, int markDirty, void **pixels,
+                int *pitch)
 {
-    SDL_D3D_TextureData *data = (SDL_D3D_TextureData *) texture->driverdata;
+    D3D_TextureData *data = (D3D_TextureData *) texture->driverdata;
     RECT d3drect;
     D3DLOCKED_RECT locked;
     HRESULT result;
@@ -528,18 +518,18 @@ SDL_D3D_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 }
 
 static void
-SDL_D3D_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
+D3D_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-    SDL_D3D_TextureData *data = (SDL_D3D_TextureData *) texture->driverdata;
+    D3D_TextureData *data = (D3D_TextureData *) texture->driverdata;
 
     IDirect3DTexture9_UnlockRect(data->texture, 0);
 }
 
 static void
-SDL_D3D_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
-                     int numrects, const SDL_Rect * rects)
+D3D_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture, int numrects,
+                 const SDL_Rect * rects)
 {
-    SDL_D3D_TextureData *data = (SDL_D3D_TextureData *) texture->driverdata;
+    D3D_TextureData *data = (D3D_TextureData *) texture->driverdata;
     RECT d3drect;
     int i;
 
@@ -556,10 +546,9 @@ SDL_D3D_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 }
 
 static int
-SDL_D3D_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect,
-                   Uint32 color)
+D3D_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect, Uint32 color)
 {
-    SDL_D3D_RenderData *data = (SDL_D3D_RenderData *) renderer->driverdata;
+    D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
     D3DRECT d3drect;
     HRESULT result;
 
@@ -584,13 +573,12 @@ SDL_D3D_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect,
 }
 
 static int
-SDL_D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
-                   const SDL_Rect * srcrect, const SDL_Rect * dstrect,
-                   int blendMode, int scaleMode)
+D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
+               const SDL_Rect * srcrect, const SDL_Rect * dstrect,
+               int blendMode, int scaleMode)
 {
-    SDL_D3D_RenderData *data = (SDL_D3D_RenderData *) renderer->driverdata;
-    SDL_D3D_TextureData *texturedata =
-        (SDL_D3D_TextureData *) texture->driverdata;
+    D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
+    D3D_TextureData *texturedata = (D3D_TextureData *) texture->driverdata;
     float minx, miny, maxx, maxy;
     float minu, maxu, minv, maxv;
     Vertex vertices[4];
@@ -658,9 +646,9 @@ SDL_D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 }
 
 static void
-SDL_D3D_RenderPresent(SDL_Renderer * renderer)
+D3D_RenderPresent(SDL_Renderer * renderer)
 {
-    SDL_D3D_RenderData *data = (SDL_D3D_RenderData *) renderer->driverdata;
+    D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
     HRESULT result;
 
     if (!data->beginScene) {
@@ -675,9 +663,9 @@ SDL_D3D_RenderPresent(SDL_Renderer * renderer)
 }
 
 static void
-SDL_D3D_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture)
+D3D_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-    SDL_D3D_TextureData *data = (SDL_D3D_TextureData *) texture->driverdata;
+    D3D_TextureData *data = (D3D_TextureData *) texture->driverdata;
 
     if (!data) {
         return;
@@ -690,9 +678,9 @@ SDL_D3D_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 }
 
 void
-SDL_D3D_DestroyRenderer(SDL_Renderer * renderer)
+D3D_DestroyRenderer(SDL_Renderer * renderer)
 {
-    SDL_D3D_RenderData *data = (SDL_D3D_RenderData *) renderer->driverdata;
+    D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
 
     if (data) {
         if (data->device) {

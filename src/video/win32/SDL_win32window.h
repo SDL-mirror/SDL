@@ -31,6 +31,7 @@ typedef struct
 {
     SDL_WindowID windowID;
     HWND hwnd;
+    HDC hdc;
     WNDPROC wndproc;
     BOOL created;
     int mouse_pressed;

@@ -43,12 +43,14 @@ SetupWindowData(SDL_Window * window, HWND hwnd, BOOL created)
     }
     data->windowID = window->id;
     data->hwnd = hwnd;
+    data->hdc = GetDC(hwnd);
     data->created = created;
     data->mouse_pressed = SDL_FALSE;
     data->videodata = (SDL_VideoData *) SDL_GetVideoDevice()->driverdata;
 
     /* Associate the data with the window */
     if (!SetProp(hwnd, TEXT("SDL_WindowData"), data)) {
+        ReleaseDC(hwnd, data->hdc);
         SDL_free(data);
         WIN_SetError("SetProp() failed");
         return -1;
@@ -133,7 +135,7 @@ WIN_CreateWindow(_THIS, SDL_Window * window)
     LPTSTR title = NULL;
     HWND top;
     RECT rect;
-    DWORD style = 0;
+    DWORD style = (WS_CLIPSIBLINGS | WS_CLIPCHILDREN);
     int x, y;
     int w, h;
 
@@ -210,6 +212,14 @@ WIN_CreateWindow(_THIS, SDL_Window * window)
         DestroyWindow(hwnd);
         return -1;
     }
+#ifdef SDL_VIDEO_OPENGL
+    if (window->flags & SDL_WINDOW_OPENGL) {
+        if (WIN_GL_SetupWindow(_this, window) < 0) {
+            WIN_DestroyWindow(_this, window);
+            return -1;
+        }
+    }
+#endif
     return 0;
 }
 
@@ -408,6 +418,12 @@ WIN_DestroyWindow(_THIS, SDL_Window * window)
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
 
     if (data) {
+#ifdef SDL_VIDEO_OPENGL
+        if (window->flags & SDL_WINDOW_OPENGL) {
+            WIN_GL_CleanupWindow(_this, window);
+        }
+#endif
+        ReleaseDC(data->hwnd, data->hdc);
         if (data->created) {
             DestroyWindow(data->hwnd);
         }

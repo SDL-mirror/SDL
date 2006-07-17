@@ -42,6 +42,7 @@
 #include "SDL_win32keyboard.h"
 #include "SDL_win32modes.h"
 #include "SDL_win32mouse.h"
+#include "SDL_win32opengl.h"
 #include "SDL_win32window.h"
 
 #ifdef UNICODE

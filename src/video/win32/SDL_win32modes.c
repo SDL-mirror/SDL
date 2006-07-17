@@ -24,10 +24,6 @@
 #include "SDL_win32video.h"
 
 
-/* FIXME: Each call to EnumDisplaySettings() takes about 6 ms on my laptop.
-          With 500 or so modes, this takes almost 3 seconds to run!
-*/
-
 static SDL_bool
 WIN_GetDisplayMode(LPCTSTR deviceName, DWORD index, SDL_DisplayMode * mode)
 {
@@ -58,8 +54,8 @@ WIN_GetDisplayMode(LPCTSTR deviceName, DWORD index, SDL_DisplayMode * mode)
     mode->refresh_rate = devmode.dmDisplayFrequency;
     mode->driverdata = data;
 
-    hdc = CreateDC(deviceName, NULL, NULL, &devmode);
-    if (hdc) {
+    if (index == ENUM_CURRENT_SETTINGS
+        && (hdc = CreateDC(deviceName, NULL, NULL, NULL)) != NULL) {
         char bmi_data[sizeof(BITMAPINFOHEADER) + 256 * sizeof(RGBQUAD)];
         LPBITMAPINFO bmi;
         HBITMAP hbm;
@@ -92,6 +88,7 @@ WIN_GetDisplayMode(LPCTSTR deviceName, DWORD index, SDL_DisplayMode * mode)
             mode->format = SDL_PixelFormat_Index8;
         }
     } else {
+        /* FIXME: Can we tell what this will be? */
         switch (devmode.dmBitsPerPel) {
         case 32:
             mode->format = SDL_PixelFormat_RGB888;
