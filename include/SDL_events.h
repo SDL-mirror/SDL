@@ -119,7 +119,7 @@ typedef enum
 /**
  * \struct SDL_WindowEvent
  *
- * \brief Window state change event data
+ * \brief Window state change event data (event.window.*)
  */
 typedef struct SDL_WindowEvent
 {
@@ -133,7 +133,7 @@ typedef struct SDL_WindowEvent
 /**
  * \struct SDL_KeyboardEvent
  *
- * \brief Keyboard button event structure
+ * \brief Keyboard button event structure (event.key.*)
  */
 typedef struct SDL_KeyboardEvent
 {
@@ -147,7 +147,7 @@ typedef struct SDL_KeyboardEvent
 /**
  * \struct SDL_TextInputEvent
  *
- * \brief Keyboard text input event structure
+ * \brief Keyboard text input event structure (event.text.*)
  */
 typedef struct SDL_TextInputEvent
 {
@@ -160,7 +160,7 @@ typedef struct SDL_TextInputEvent
 /**
  * \struct SDL_MouseMotionEvent
  *
- * \brief Mouse motion event structure
+ * \brief Mouse motion event structure (event.motion.*)
  */
 typedef struct SDL_MouseMotionEvent
 {
@@ -177,7 +177,7 @@ typedef struct SDL_MouseMotionEvent
 /**
  * \struct SDL_MouseButtonEvent
  *
- * \brief Mouse button event structure
+ * \brief Mouse button event structure (event.button.*)
  */
 typedef struct SDL_MouseButtonEvent
 {
@@ -193,20 +193,20 @@ typedef struct SDL_MouseButtonEvent
 /**
  * \struct SDL_MouseWheelEvent
  *
- * \brief Mouse wheel event structure
+ * \brief Mouse wheel event structure (event.wheel.*)
  */
 typedef struct SDL_MouseWheelEvent
 {
     Uint8 type;             /**< SDL_MOUSEWHEEL */
     Uint8 which;            /**< The mouse device index */
-    int motion;                                 /**< The direction and distance scrolled */
+    int motion;             /**< The direction and distance scrolled */
     SDL_WindowID windowID;  /**< The window with mouse focus, if any */
 } SDL_MouseWheelEvent;
 
 /**
  * \struct SDL_JoyAxisEvent
  *
- * \brief Joystick axis motion event structure
+ * \brief Joystick axis motion event structure (event.jaxis.*)
  */
 typedef struct SDL_JoyAxisEvent
 {
@@ -219,7 +219,7 @@ typedef struct SDL_JoyAxisEvent
 /**
  * \struct SDL_JoyBallEvent
  *
- * \brief Joystick trackball motion event structure
+ * \brief Joystick trackball motion event structure (event.jball.*)
  */
 typedef struct SDL_JoyBallEvent
 {
@@ -233,7 +233,7 @@ typedef struct SDL_JoyBallEvent
 /**
  * \struct SDL_JoyHatEvent
  *
- * \brief Joystick hat position change event structure
+ * \brief Joystick hat position change event structure (event.jhat.*)
  */
 typedef struct SDL_JoyHatEvent
 {
@@ -251,7 +251,7 @@ typedef struct SDL_JoyHatEvent
 /**
  * \struct SDL_JoyButtonEvent
  *
- * \brief Joystick button event structure
+ * \brief Joystick button event structure (event.jbutton.*)
  */
 typedef struct SDL_JoyButtonEvent
 {
@@ -274,7 +274,7 @@ typedef struct SDL_QuitEvent
 /**
  * \struct SDL_UserEvent
  *
- * \brief A user-defined event type
+ * \brief A user-defined event type (event.user.*)
  */
 typedef struct SDL_UserEvent
 {
@@ -287,7 +287,7 @@ typedef struct SDL_UserEvent
 /**
  * \struct SDL_SysWMEvent
  *
- * \brief A video driver dependent system event
+ * \brief A video driver dependent system event (event.syswm.*)
  *
  * \note If you want to use this event, you should include SDL_syswm.h
  */

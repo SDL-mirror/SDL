@@ -7,9 +7,12 @@ EXE	= @EXE@
 CFLAGS  = @CFLAGS@
 LIBS	= @LIBS@
 
-TARGETS = checkkeys$(EXE) graywin$(EXE) loopwave$(EXE) testalpha$(EXE) testbitmap$(EXE) testblitspeed$(EXE) testcdrom$(EXE) testcursor$(EXE) testdyngl$(EXE) testerror$(EXE) testfile$(EXE) testgamma$(EXE) testgl$(EXE) testhread$(EXE) testiconv$(EXE) testjoystick$(EXE) testkeys$(EXE) testlock$(EXE) testoverlay2$(EXE) testoverlay$(EXE) testpalette$(EXE) testplatform$(EXE) testsem$(EXE) testsprite$(EXE) testsprite2$(EXE) testtimer$(EXE) testver$(EXE) testvidinfo$(EXE) testwin$(EXE) testwm$(EXE) testwm2$(EXE) threadwin$(EXE) torturethread$(EXE)
+TARGETS = checkkeys$(EXE) graywin$(EXE) loopwave$(EXE) testalpha$(EXE) testbitmap$(EXE) testblitspeed$(EXE) testcdrom$(EXE) testcursor$(EXE) testdyngl$(EXE) testerror$(EXE) testfile$(EXE) testgamma$(EXE) testgl$(EXE) testgl2$(EXE) testhread$(EXE) testiconv$(EXE) testjoystick$(EXE) testkeys$(EXE) testlock$(EXE) testoverlay2$(EXE) testoverlay$(EXE) testpalette$(EXE) testplatform$(EXE) testsem$(EXE) testsprite$(EXE) testsprite2$(EXE) testtimer$(EXE) testver$(EXE) testvidinfo$(EXE) testwin$(EXE) testwm$(EXE) testwm2$(EXE) threadwin$(EXE) torturethread$(EXE)
 
-all: $(TARGETS)
+all: Makefile $(TARGETS)
+
+Makefile: $(srcdir)/Makefile.in
+	$(SHELL) config.status $@
 
 checkkeys$(EXE): $(srcdir)/checkkeys.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
@@ -50,6 +53,9 @@ testgamma$(EXE): $(srcdir)/testgamma.c
 testgl$(EXE): $(srcdir)/testgl.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS) @GLLIB@ @MATHLIB@
 
+testgl2$(EXE): $(srcdir)/testgl2.c
+	$(CC) -o $@ $? $(CFLAGS) $(LIBS) @GLLIB@ @MATHLIB@
+
 testhread$(EXE): $(srcdir)/testhread.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
 
@@ -83,8 +89,8 @@ testsem$(EXE): $(srcdir)/testsem.c
 testsprite$(EXE): $(srcdir)/testsprite.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS) @MATHLIB@
 
-testsprite2$(EXE): $(srcdir)/testsprite2.c
-	$(CC) -o $@ $? $(CFLAGS) $(LIBS) @MATHLIB@
+testsprite2$(EXE): $(srcdir)/testsprite2.c $(srcdir)/common.c
+	$(CC) -o $@ $(srcdir)/testsprite2.c $(srcdir)/common.c $(CFLAGS) $(LIBS) @MATHLIB@
 
 testtimer$(EXE): $(srcdir)/testtimer.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)

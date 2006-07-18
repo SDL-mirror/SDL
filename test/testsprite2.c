@@ -4,18 +4,14 @@
 #include <stdio.h>
 #include <time.h>
 
-#include "SDL.h"
+#include "common.h"
 
-#define NUM_WINDOWS 4
-#define WINDOW_W    640
-#define WINDOW_H    480
 #define NUM_SPRITES	100
 #define MAX_SPEED 	1
 #define BACKGROUND  0x00FFFFFF
 
-static int num_windows;
+static CommonState *state;
 static int num_sprites;
-static SDL_WindowID *windows;
 static SDL_TextureID *sprites;
 static SDL_Rect *positions;
 static SDL_Rect *velocities;
@@ -25,9 +21,6 @@ static int sprite_w, sprite_h;
 static void
 quit(int rc)
 {
-    if (windows) {
-        SDL_free(windows);
-    }
     if (sprites) {
         SDL_free(sprites);
     }
@@ -37,7 +30,7 @@ quit(int rc)
     if (velocities) {
         SDL_free(velocities);
     }
-    SDL_Quit();
+    CommonQuit(state);
     exit(rc);
 }
 
@@ -62,8 +55,8 @@ LoadSprite(char *file)
     }
 
     /* Create textures from the image */
-    for (i = 0; i < num_windows; ++i) {
-        SDL_SelectRenderer(windows[i]);
+    for (i = 0; i < state->num_windows; ++i) {
+        SDL_SelectRenderer(state->windows[i]);
         sprites[i] =
             SDL_CreateTextureFromSurface(0, SDL_TextureAccess_Remote, temp);
         if (!sprites[i]) {
@@ -125,78 +118,45 @@ MoveSprites(SDL_WindowID window, SDL_TextureID sprite)
 int
 main(int argc, char *argv[])
 {
-    int window_w, window_h;
-    Uint32 window_flags = SDL_WINDOW_SHOWN;
-    Uint32 render_flags = 0;
-    SDL_DisplayMode *mode, fullscreen_mode;
     int i, done;
     SDL_Event event;
     Uint32 then, now, frames;
 
-    /* Initialize SDL */
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        fprintf(stderr, "Couldn't initialize SDL: %s\n", SDL_GetError());
-        return (1);
-    }
-
-    num_windows = NUM_WINDOWS;
+    /* Initialize parameters */
     num_sprites = NUM_SPRITES;
-    window_w = WINDOW_W;
-    window_h = WINDOW_H;
-    for (i = 1; i < argc; ++i) {
-        if (strcmp(argv[i], "-width") == 0 && (i + 1 < argc)) {
-            window_w = atoi(argv[++i]);
-        } else if (strcmp(argv[i], "-height") == 0 && (i + 1 < argc)) {
-            window_h = atoi(argv[++i]);
-        } else if (strcmp(argv[i], "-windows") == 0 && (i + 1 < argc)) {
-            num_windows = atoi(argv[++i]);
-            window_flags &= ~SDL_WINDOW_FULLSCREEN;
-        } else if (strcmp(argv[i], "-fullscreen") == 0) {
-            num_windows = 1;
-            window_flags |= SDL_WINDOW_FULLSCREEN;
-        } else if (strcmp(argv[i], "-sync") == 0) {
-            render_flags |= SDL_Renderer_PresentVSync;
-        } else if (isdigit(argv[i][0])) {
-            num_sprites = atoi(argv[i]);
-        } else {
-            fprintf(stderr,
-                    "Usage: %s [-width N] [-height N] [-windows N] [-fullscreen] [-sync] [numsprites]\n",
-                    argv[0]);
+
+    /* Initialize test framework */
+    state = CommonCreateState(argv, SDL_INIT_VIDEO);
+    if (!state) {
+        return 1;
+    }
+    for (i = 1; i < argc;) {
+        int consumed;
+
+        consumed = CommonArg(state, i);
+        if (consumed < 0) {
+            fprintf(stderr, "Usage: %s %s", argv[0], CommonUsage(state));
             quit(1);
         }
+        if (consumed == 0) {
+            num_sprites = SDL_atoi(argv[i]);
+            consumed = 1;
+        }
+        i += consumed;
     }
-
-    if (window_flags & SDL_WINDOW_FULLSCREEN) {
-        SDL_zero(fullscreen_mode);
-        fullscreen_mode.w = window_w;
-        fullscreen_mode.h = window_h;
-        SDL_SetFullscreenDisplayMode(&fullscreen_mode);
+    if (!CommonInit(state)) {
+        quit(2);
     }
 
     /* Create the windows, initialize the renderers, and load the textures */
-    windows = (SDL_WindowID *) SDL_malloc(num_windows * sizeof(*windows));
-    sprites = (SDL_TextureID *) SDL_malloc(num_windows * sizeof(*sprites));
-    if (!windows || !sprites) {
+    sprites =
+        (SDL_TextureID *) SDL_malloc(state->num_windows * sizeof(*sprites));
+    if (!sprites) {
         fprintf(stderr, "Out of memory!\n");
         quit(2);
     }
-    for (i = 0; i < num_windows; ++i) {
-        char title[32];
-
-        SDL_snprintf(title, sizeof(title), "testsprite %d", i + 1);
-        windows[i] =
-            SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED,
-                             SDL_WINDOWPOS_UNDEFINED, window_w, window_h,
-                             window_flags);
-        if (!windows[i]) {
-            fprintf(stderr, "Couldn't create window: %s\n", SDL_GetError());
-            quit(2);
-        }
-
-        if (SDL_CreateRenderer(windows[i], -1, render_flags) < 0) {
-            fprintf(stderr, "Couldn't create renderer: %s\n", SDL_GetError());
-            quit(2);
-        }
+    for (i = 0; i < state->num_windows; ++i) {
+        SDL_SelectRenderer(state->windows[i]);
         SDL_RenderFill(NULL, BACKGROUND);
     }
     if (LoadSprite("icon.bmp") < 0) {
@@ -212,8 +172,8 @@ main(int argc, char *argv[])
     }
     srand(time(NULL));
     for (i = 0; i < num_sprites; ++i) {
-        positions[i].x = rand() % (window_w - sprite_w);
-        positions[i].y = rand() % (window_h - sprite_h);
+        positions[i].x = rand() % (state->window_w - sprite_w);
+        positions[i].y = rand() % (state->window_h - sprite_h);
         positions[i].w = sprite_w;
         positions[i].h = sprite_h;
         velocities[i].x = 0;
@@ -232,6 +192,7 @@ main(int argc, char *argv[])
         /* Check for events */
         ++frames;
         while (SDL_PollEvent(&event)) {
+            CommonEvent(state, &event, &done);
             switch (event.type) {
             case SDL_WINDOWEVENT:
                 switch (event.window.event) {
@@ -239,22 +200,14 @@ main(int argc, char *argv[])
                     SDL_SelectRenderer(event.window.windowID);
                     SDL_RenderFill(NULL, BACKGROUND);
                     break;
-                case SDL_WINDOWEVENT_CLOSE:
-                    done = 1;
-                    break;
                 }
-                break;
-            case SDL_KEYDOWN:
-                /* Any keypress quits the app... */
-            case SDL_QUIT:
-                done = 1;
                 break;
             default:
                 break;
             }
         }
-        for (i = 0; i < num_windows; ++i) {
-            MoveSprites(windows[i], sprites[i]);
+        for (i = 0; i < state->num_windows; ++i) {
+            MoveSprites(state->windows[i], sprites[i]);
         }
     }
 
