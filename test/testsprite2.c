@@ -134,13 +134,13 @@ main(int argc, char *argv[])
         int consumed;
 
         consumed = CommonArg(state, i);
-        if (consumed < 0) {
-            fprintf(stderr, "Usage: %s %s", argv[0], CommonUsage(state));
-            quit(1);
-        }
         if (consumed == 0) {
             num_sprites = SDL_atoi(argv[i]);
             consumed = 1;
+        }
+        if (consumed < 0) {
+            fprintf(stderr, "Usage: %s %s", argv[0], CommonUsage(state));
+            quit(1);
         }
         i += consumed;
     }
@@ -184,7 +184,7 @@ main(int argc, char *argv[])
         }
     }
 
-    /* Loop, blitting sprites and waiting for a keystroke */
+    /* Main render loop */
     frames = 0;
     then = SDL_GetTicks();
     done = 0;

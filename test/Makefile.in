@@ -53,8 +53,8 @@ testgamma$(EXE): $(srcdir)/testgamma.c
 testgl$(EXE): $(srcdir)/testgl.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS) @GLLIB@ @MATHLIB@
 
-testgl2$(EXE): $(srcdir)/testgl2.c
-	$(CC) -o $@ $? $(CFLAGS) $(LIBS) @GLLIB@ @MATHLIB@
+testgl2$(EXE): $(srcdir)/testgl2.c $(srcdir)/common.c
+	$(CC) -o $@ $(srcdir)/testgl2.c $(srcdir)/common.c $(CFLAGS) $(LIBS) @GLLIB@ @MATHLIB@
 
 testhread$(EXE): $(srcdir)/testhread.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
