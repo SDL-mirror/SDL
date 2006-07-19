@@ -359,12 +359,6 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     IDirect3DDevice9_SetRenderState(data->device, D3DRS_CULLMODE,
                                     D3DCULL_NONE);
     IDirect3DDevice9_SetRenderState(data->device, D3DRS_LIGHTING, FALSE);
-    IDirect3DDevice9_SetRenderState(data->device, D3DRS_ALPHABLENDENABLE,
-                                    TRUE);
-    IDirect3DDevice9_SetRenderState(data->device, D3DRS_SRCBLEND,
-                                    D3DBLEND_SRCALPHA);
-    IDirect3DDevice9_SetRenderState(data->device, D3DRS_DESTBLEND,
-                                    D3DBLEND_INVSRCALPHA);
 
     return renderer;
 }
@@ -626,6 +620,38 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     vertices[3].rhw = 1.0f;
     vertices[3].u = minu;
     vertices[3].v = maxv;
+
+    switch (blendMode) {
+    case SDL_TextureBlendMode_None:
+        IDirect3DDevice9_SetRenderState(data->device, D3DRS_ALPHABLENDENABLE,
+                                        FALSE);
+        break;
+    case SDL_TextureBlendMode_Mask:
+    case SDL_TextureBlendMode_Blend:
+        IDirect3DDevice9_SetRenderState(data->device, D3DRS_ALPHABLENDENABLE,
+                                        TRUE);
+        IDirect3DDevice9_SetRenderState(data->device, D3DRS_SRCBLEND,
+                                        D3DBLEND_SRCALPHA);
+        IDirect3DDevice9_SetRenderState(data->device, D3DRS_DESTBLEND,
+                                        D3DBLEND_INVSRCALPHA);
+        break;
+    case SDL_TextureBlendMode_Add:
+        IDirect3DDevice9_SetRenderState(data->device, D3DRS_ALPHABLENDENABLE,
+                                        TRUE);
+        IDirect3DDevice9_SetRenderState(data->device, D3DRS_SRCBLEND,
+                                        D3DBLEND_SRCALPHA);
+        IDirect3DDevice9_SetRenderState(data->device, D3DRS_DESTBLEND,
+                                        D3DBLEND_ONE);
+        break;
+    case SDL_TextureBlendMode_Mod:
+        IDirect3DDevice9_SetRenderState(data->device, D3DRS_ALPHABLENDENABLE,
+                                        TRUE);
+        IDirect3DDevice9_SetRenderState(data->device, D3DRS_SRCBLEND,
+                                        D3DBLEND_ZERO);
+        IDirect3DDevice9_SetRenderState(data->device, D3DRS_DESTBLEND,
+                                        D3DBLEND_SRCCOLOR);
+        break;
+    }
 
     result =
         IDirect3DDevice9_SetTexture(data->device, 0,

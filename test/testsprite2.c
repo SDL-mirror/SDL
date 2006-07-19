@@ -8,7 +8,7 @@
 
 #define NUM_SPRITES	100
 #define MAX_SPEED 	1
-#define BACKGROUND  0x00FFFFFF
+#define BACKGROUND  0x00A0A0A0
 
 static CommonState *state;
 static int num_sprites;
@@ -16,6 +16,7 @@ static SDL_TextureID *sprites;
 static SDL_Rect *positions;
 static SDL_Rect *velocities;
 static int sprite_w, sprite_h;
+static SDL_TextureBlendMode blendMode = SDL_TextureBlendMode_Mask;
 
 /* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
 static void
@@ -107,7 +108,7 @@ MoveSprites(SDL_WindowID window, SDL_TextureID sprite)
         }
 
         /* Blit the sprite onto the screen */
-        SDL_RenderCopy(sprite, NULL, position, SDL_TextureBlendMode_Mask,
+        SDL_RenderCopy(sprite, NULL, position, blendMode,
                        SDL_TextureScaleMode_None);
     }
 
@@ -135,11 +136,31 @@ main(int argc, char *argv[])
 
         consumed = CommonArg(state, i);
         if (consumed == 0) {
-            num_sprites = SDL_atoi(argv[i]);
-            consumed = 1;
+            consumed = -1;
+            if (SDL_strcasecmp(argv[i], "--blend") == 0) {
+                if (argv[i + 1]) {
+                    if (SDL_strcasecmp(argv[i + 1], "none") == 0) {
+                        blendMode = SDL_TextureBlendMode_None;
+                        consumed = 2;
+                    } else if (SDL_strcasecmp(argv[i + 1], "blend") == 0) {
+                        blendMode = SDL_TextureBlendMode_Blend;
+                        consumed = 2;
+                    } else if (SDL_strcasecmp(argv[i + 1], "add") == 0) {
+                        blendMode = SDL_TextureBlendMode_Add;
+                        consumed = 2;
+                    } else if (SDL_strcasecmp(argv[i + 1], "mod") == 0) {
+                        blendMode = SDL_TextureBlendMode_Mod;
+                        consumed = 2;
+                    }
+                }
+            } else if (SDL_isdigit(*argv[i])) {
+                num_sprites = SDL_atoi(argv[i]);
+                consumed = 1;
+            }
         }
         if (consumed < 0) {
-            fprintf(stderr, "Usage: %s %s", argv[0], CommonUsage(state));
+            fprintf(stderr, "Usage: %s %s [--blend none|blend|add|mod]",
+                    argv[0], CommonUsage(state));
             quit(1);
         }
         i += consumed;

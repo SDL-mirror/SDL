@@ -105,7 +105,7 @@ CommonArg(CommonState * state, int index)
     }
     if (SDL_strcasecmp(argv[index], "--windows") == 0) {
         ++index;
-        if (!argv[index] || !isdigit(*argv[index])) {
+        if (!argv[index] || !SDL_isdigit(*argv[index])) {
             return -1;
         }
         if (!(state->window_flags & SDL_WINDOW_FULLSCREEN)) {

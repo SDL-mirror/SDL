@@ -193,7 +193,7 @@ main(int argc, char *argv[])
             }
         }
         if (consumed < 0) {
-            fprintf(stderr, "Usage: %s [--fsaa] [--accel] %s", argv[0],
+            fprintf(stderr, "Usage: %s %s [--fsaa] [--accel]", argv[0],
                     CommonUsage(state));
             quit(1);
         }
