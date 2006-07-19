@@ -27,6 +27,7 @@
 #include "SDL_sysvideo.h"
 #include "SDL_blit.h"
 #include "SDL_pixels_c.h"
+#include "SDL_renderer_gl.h"
 #include "SDL_renderer_sw.h"
 #include "../events/SDL_sysevents.h"
 #include "../events/SDL_events_c.h"
@@ -279,7 +280,10 @@ SDL_VideoInit(const char *driver_name, Uint32 flags)
     /* The software renderer is always available */
     for (i = 0; i < _this->num_displays; ++i) {
         if (_this->displays[i].num_render_drivers > 0) {
-            SDL_AddRenderDriver(i, &SDL_SW_RenderDriver);
+#if SDL_VIDEO_OPENGL
+            SDL_AddRenderDriver(i, &GL_RenderDriver);
+#endif
+            SDL_AddRenderDriver(i, &SW_RenderDriver);
         }
     }
 

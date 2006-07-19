@@ -21,8 +21,8 @@
 */
 #include "SDL_config.h"
 
-/* SDL surface based renderer implementation */
+/* OpenGL renderer implementation */
 
-extern SDL_RenderDriver SW_RenderDriver;
+extern SDL_RenderDriver GL_RenderDriver;
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -67,7 +67,7 @@ SDL_RenderDriver GDI_RenderDriver = {
      "gdi",
      (SDL_Renderer_SingleBuffer | SDL_Renderer_PresentCopy |
       SDL_Renderer_PresentFlip2 | SDL_Renderer_PresentFlip3 |
-      SDL_Renderer_PresentDiscard),
+      SDL_Renderer_PresentDiscard | SDL_Renderer_Accelerated),
      (SDL_TextureBlendMode_None | SDL_TextureBlendMode_Mask |
       SDL_TextureBlendMode_Blend),
      (SDL_TextureScaleMode_None | SDL_TextureScaleMode_Fast),

@@ -62,9 +62,13 @@ SDL_RenderDriver D3D_RenderDriver = {
      "d3d",
      (SDL_Renderer_SingleBuffer | SDL_Renderer_PresentCopy |
       SDL_Renderer_PresentFlip2 | SDL_Renderer_PresentFlip3 |
-      SDL_Renderer_PresentDiscard | SDL_Renderer_PresentVSync),
-     (SDL_TextureBlendMode_None | SDL_TextureBlendMode_Mask | SDL_TextureBlendMode_Blend),      /* FIXME */
-     (SDL_TextureScaleMode_None | SDL_TextureScaleMode_Fast),   /* FIXME */
+      SDL_Renderer_PresentDiscard | SDL_Renderer_PresentVSync |
+      SDL_Renderer_Accelerated),
+     (SDL_TextureBlendMode_None | SDL_TextureBlendMode_Mask |
+      SDL_TextureBlendMode_Blend | SDL_TextureBlendMode_Add |
+      SDL_TextureBlendMode_Mod),
+     (SDL_TextureScaleMode_None | SDL_TextureScaleMode_Fast |
+      SDL_TextureScaleMode_Best),
      12,
      {
       SDL_PixelFormat_Index8,
@@ -352,6 +356,8 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     if (pparams.PresentationInterval == D3DPRESENT_INTERVAL_ONE) {
         renderer->info.flags |= SDL_Renderer_PresentVSync;
     }
+
+    /* FIXME: Query maximum texture size */
 
     /* Set up parameters for rendering */
     IDirect3DDevice9_SetVertexShader(data->device, NULL);
