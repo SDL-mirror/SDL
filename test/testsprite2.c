@@ -17,6 +17,7 @@ static SDL_Rect *positions;
 static SDL_Rect *velocities;
 static int sprite_w, sprite_h;
 static SDL_TextureBlendMode blendMode = SDL_TextureBlendMode_Mask;
+static SDL_TextureScaleMode scaleMode = SDL_TextureScaleMode_None;
 
 /* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
 static void
@@ -87,12 +88,6 @@ MoveSprites(SDL_WindowID window, SDL_TextureID sprite)
     /* Move the sprite, bounce at the wall, and draw */
     n = 0;
     SDL_RenderFill(NULL, BACKGROUND);
-    /*
-       for (i = 0; i < num_sprites; ++i) {
-       position = &positions[i];
-       SDL_RenderFill(position, BACKGROUND);
-       }
-     */
     for (i = 0; i < num_sprites; ++i) {
         position = &positions[i];
         velocity = &velocities[i];
@@ -108,8 +103,7 @@ MoveSprites(SDL_WindowID window, SDL_TextureID sprite)
         }
 
         /* Blit the sprite onto the screen */
-        SDL_RenderCopy(sprite, NULL, position, blendMode,
-                       SDL_TextureScaleMode_None);
+        SDL_RenderCopy(sprite, NULL, position, blendMode, scaleMode);
     }
 
     /* Update the screen! */
@@ -142,6 +136,9 @@ main(int argc, char *argv[])
                     if (SDL_strcasecmp(argv[i + 1], "none") == 0) {
                         blendMode = SDL_TextureBlendMode_None;
                         consumed = 2;
+                    } else if (SDL_strcasecmp(argv[i + 1], "mask") == 0) {
+                        blendMode = SDL_TextureBlendMode_Mask;
+                        consumed = 2;
                     } else if (SDL_strcasecmp(argv[i + 1], "blend") == 0) {
                         blendMode = SDL_TextureBlendMode_Blend;
                         consumed = 2;
@@ -153,13 +150,30 @@ main(int argc, char *argv[])
                         consumed = 2;
                     }
                 }
+            } else if (SDL_strcasecmp(argv[i], "--scale") == 0) {
+                if (argv[i + 1]) {
+                    if (SDL_strcasecmp(argv[i + 1], "none") == 0) {
+                        scaleMode = SDL_TextureScaleMode_None;
+                        consumed = 2;
+                    } else if (SDL_strcasecmp(argv[i + 1], "fast") == 0) {
+                        scaleMode = SDL_TextureScaleMode_Fast;
+                        consumed = 2;
+                    } else if (SDL_strcasecmp(argv[i + 1], "slow") == 0) {
+                        scaleMode = SDL_TextureScaleMode_Slow;
+                        consumed = 2;
+                    } else if (SDL_strcasecmp(argv[i + 1], "best") == 0) {
+                        scaleMode = SDL_TextureScaleMode_Best;
+                        consumed = 2;
+                    }
+                }
             } else if (SDL_isdigit(*argv[i])) {
                 num_sprites = SDL_atoi(argv[i]);
                 consumed = 1;
             }
         }
         if (consumed < 0) {
-            fprintf(stderr, "Usage: %s %s [--blend none|blend|add|mod]",
+            fprintf(stderr,
+                    "Usage: %s %s [--blend none|mask|blend|add|mod] [--scale none|fast|slow|best]",
                     argv[0], CommonUsage(state));
             quit(1);
         }
@@ -192,6 +206,10 @@ main(int argc, char *argv[])
         quit(2);
     }
     srand(time(NULL));
+    if (scaleMode != SDL_TextureScaleMode_None) {
+        sprite_w += sprite_w / 2;
+        sprite_h += sprite_h / 2;
+    }
     for (i = 0; i < num_sprites; ++i) {
         positions[i].x = rand() % (state->window_w - sprite_w);
         positions[i].y = rand() % (state->window_h - sprite_h);

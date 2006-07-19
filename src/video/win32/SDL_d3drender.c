@@ -653,6 +653,28 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         break;
     }
 
+    switch (scaleMode) {
+    case SDL_TextureScaleMode_None:
+    case SDL_TextureScaleMode_Fast:
+        IDirect3DDevice9_SetSamplerState(data->device, 0, D3DSAMP_MINFILTER,
+                                         D3DTEXF_POINT);
+        IDirect3DDevice9_SetSamplerState(data->device, 0, D3DSAMP_MAGFILTER,
+                                         D3DTEXF_POINT);
+        break;
+    case SDL_TextureScaleMode_Slow:
+        IDirect3DDevice9_SetSamplerState(data->device, 0, D3DSAMP_MINFILTER,
+                                         D3DTEXF_LINEAR);
+        IDirect3DDevice9_SetSamplerState(data->device, 0, D3DSAMP_MAGFILTER,
+                                         D3DTEXF_LINEAR);
+        break;
+    case SDL_TextureScaleMode_Best:
+        IDirect3DDevice9_SetSamplerState(data->device, 0, D3DSAMP_MINFILTER,
+                                         D3DTEXF_GAUSSIANQUAD);
+        IDirect3DDevice9_SetSamplerState(data->device, 0, D3DSAMP_MAGFILTER,
+                                         D3DTEXF_GAUSSIANQUAD);
+        break;
+    }
+
     result =
         IDirect3DDevice9_SetTexture(data->device, 0,
                                     (IDirect3DBaseTexture9 *) texturedata->
