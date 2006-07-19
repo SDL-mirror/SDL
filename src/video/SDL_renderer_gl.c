@@ -22,7 +22,7 @@
 #include "SDL_config.h"
 
 #if SDL_VIDEO_OPENGL
-
+#if 0
 #include "SDL_win32video.h"
 
 /* OpenGL renderer implementation */
@@ -539,6 +539,7 @@ GL_DestroyRenderer(SDL_Renderer * renderer)
     SDL_free(renderer);
 }
 
+#endif /* 0 */
 #endif /* SDL_VIDEO_OPENGL */
 
 /* vi: set ts=4 sw=4 expandtab: */
