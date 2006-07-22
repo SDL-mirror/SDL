@@ -249,7 +249,6 @@ GDI_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     if (SDL_ISPIXELFORMAT_FOURCC(texture->format)) {
         data->yuv = SDL_SW_CreateYUVTexture(texture);
         if (!data->yuv) {
-            GDI_DestroyTexture(renderer, texture);
             return -1;
         }
         data->format = display->current_mode.format;
@@ -266,7 +265,6 @@ GDI_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         bmi_size = sizeof(BITMAPINFOHEADER) + 256 * sizeof(RGBQUAD);
         bmi = (LPBITMAPINFO) SDL_calloc(1, bmi_size);
         if (!bmi) {
-            GDI_DestroyTexture(renderer, texture);
             SDL_OutOfMemory();
             return -1;
         }
@@ -291,7 +289,6 @@ GDI_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
                                           ncolors * sizeof(PALETTEENTRY));
             if (!palette) {
                 SDL_free(bmi);
-                GDI_DestroyTexture(renderer, texture);
                 SDL_OutOfMemory();
                 return -1;
             }
@@ -327,7 +324,6 @@ GDI_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         data->pixels = NULL;
     }
     if (!data->hbm) {
-        GDI_DestroyTexture(renderer, texture);
         WIN_SetError("Couldn't create bitmap");
         return -1;
     }

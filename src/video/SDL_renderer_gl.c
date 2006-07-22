@@ -72,7 +72,7 @@ SDL_RenderDriver GL_RenderDriver = {
       SDL_TextureBlendMode_Mod),
      (SDL_TextureScaleMode_None | SDL_TextureScaleMode_Fast |
       SDL_TextureScaleMode_Slow),
-     18,
+     16,
      {
       SDL_PixelFormat_Index1LSB,
       SDL_PixelFormat_Index1MSB,
@@ -88,10 +88,8 @@ SDL_RenderDriver GL_RenderDriver = {
       SDL_PixelFormat_RGB888,
       SDL_PixelFormat_BGR888,
       SDL_PixelFormat_ARGB8888,
-      SDL_PixelFormat_RGBA8888,
       SDL_PixelFormat_ABGR8888,
-      SDL_PixelFormat_BGRA8888,
-      SDL_PixelFormat_ARGB2101010},     /* FIXME: YUV texture support */
+      SDL_PixelFormat_ARGB2101010},
      0,
      0}
 };
@@ -115,6 +113,43 @@ typedef struct
 } GL_TextureData;
 
 
+static void
+GL_SetError(const char *prefix, GLenum result)
+{
+    const char *error;
+
+    switch (result) {
+    case GL_NO_ERROR:
+        error = "GL_NO_ERROR";
+        break;
+    case GL_INVALID_ENUM:
+        error = "GL_INVALID_ENUM";
+        break;
+    case GL_INVALID_VALUE:
+        error = "GL_INVALID_VALUE";
+        break;
+    case GL_INVALID_OPERATION:
+        error = "GL_INVALID_OPERATION";
+        break;
+    case GL_STACK_OVERFLOW:
+        error = "GL_STACK_OVERFLOW";
+        break;
+    case GL_STACK_UNDERFLOW:
+        error = "GL_STACK_UNDERFLOW";
+        break;
+    case GL_OUT_OF_MEMORY:
+        error = "GL_OUT_OF_MEMORY";
+        break;
+    case GL_TABLE_TOO_LARGE:
+        error = "GL_TABLE_TOO_LARGE";
+        break;
+    default:
+        error = "UNKNOWN";
+        break;
+    }
+    SDL_SetError("%s: %s", prefix, error);
+}
+
 void
 GL_AddRenderDriver(_THIS)
 {
@@ -130,9 +165,10 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     GL_RenderData *data;
 
     if (!(window->flags & SDL_WINDOW_OPENGL)) {
-        SDL_SetError
-            ("The OpenGL renderer can only be used on OpenGL windows");
-        return NULL;
+        window->flags |= SDL_WINDOW_OPENGL;
+        if (SDL_RecreateWindow(window) < 0) {
+            return NULL;
+        }
     }
 
     renderer = (SDL_Renderer *) SDL_calloc(1, sizeof(*renderer));
@@ -239,6 +275,7 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     GLint internalFormat;
     GLenum format, type;
     int texture_w, texture_h;
+    GLenum result;
 
     switch (texture->format) {
     case SDL_PixelFormat_Index1LSB:
@@ -289,8 +326,8 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         break;
     case SDL_PixelFormat_RGB888:
         internalFormat = GL_RGB8;
-        format = GL_RGB;
-        type = GL_UNSIGNED_INT_8_8_8_8;
+        format = GL_BGRA;
+        type = GL_UNSIGNED_BYTE;
         break;
     case SDL_PixelFormat_BGR24:
         internalFormat = GL_RGB8;
@@ -299,28 +336,18 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         break;
     case SDL_PixelFormat_BGR888:
         internalFormat = GL_RGB8;
-        format = GL_BGR;
-        type = GL_UNSIGNED_INT_8_8_8_8;
+        format = GL_RGBA;
+        type = GL_UNSIGNED_BYTE;
         break;
     case SDL_PixelFormat_ARGB8888:
         internalFormat = GL_RGBA8;
         format = GL_BGRA;
-        type = GL_UNSIGNED_INT_8_8_8_8_REV;
-        break;
-    case SDL_PixelFormat_RGBA8888:
-        internalFormat = GL_RGBA8;
-        format = GL_RGBA;
-        type = GL_UNSIGNED_INT_8_8_8_8;
+        type = GL_UNSIGNED_BYTE;
         break;
     case SDL_PixelFormat_ABGR8888:
         internalFormat = GL_RGBA8;
         format = GL_RGBA;
-        type = GL_UNSIGNED_INT_8_8_8_8_REV;
-        break;
-    case SDL_PixelFormat_BGRA8888:
-        internalFormat = GL_RGBA8;
-        format = GL_BGRA;
-        type = GL_UNSIGNED_INT_8_8_8_8;
+        type = GL_UNSIGNED_BYTE;
         break;
     case SDL_PixelFormat_ARGB2101010:
         internalFormat = GL_RGB10_A2;
@@ -340,7 +367,7 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     texture->driverdata = data;
 
-    /* FIXME: Check for GL_ARB_texture_rectangle and GL_EXT_texture_rectangle */
+    glGetError();
     glGenTextures(1, &data->texture);
 #ifdef USE_GL_TEXTURE_RECTANGLE
     data->type = GL_TEXTURE_RECTANGLE_ARB;
@@ -360,7 +387,11 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     glBindTexture(data->type, data->texture);
     glTexImage2D(data->type, 0, internalFormat, texture_w, texture_h, 0,
                  format, type, NULL);
-
+    result = glGetError();
+    if (result != GL_NO_ERROR) {
+        GL_SetError("glTexImage2D()", result);
+        return -1;
+    }
     return 0;
 }
 
@@ -383,19 +414,36 @@ GL_GetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
     return 0;
 }
 
+static void
+SetupTextureUpdate(SDL_Texture * texture, int pitch)
+{
+    if (texture->format == SDL_PixelFormat_Index1LSB) {
+        glPixelStorei(GL_UNPACK_LSB_FIRST, 1);
+    } else if (texture->format == SDL_PixelFormat_Index1MSB) {
+        glPixelStorei(GL_UNPACK_LSB_FIRST, 0);
+    }
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glPixelStorei(GL_UNPACK_ROW_LENGTH,
+                  pitch / SDL_BYTESPERPIXEL(texture->format));
+}
+
 static int
 GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                  const SDL_Rect * rect, const void *pixels, int pitch)
 {
     GL_TextureData *data = (GL_TextureData *) texture->driverdata;
+    GLenum result;
 
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);      /* FIXME, what to use for RGB 4 byte formats? */
-    glPixelStorei(GL_UNPACK_ROW_LENGTH,
-                  pitch / SDL_BYTESPERPIXEL(texture->format));
+    glGetError();
+    SetupTextureUpdate(texture, pitch);
     glBindTexture(data->type, data->texture);
     glTexSubImage2D(data->type, 0, rect->x, rect->y, rect->w, rect->h,
                     data->format, data->formattype, pixels);
-    /* FIXME: check for errors */
+    result = glGetError();
+    if (result != GL_NO_ERROR) {
+        GL_SetError("glTexSubImage2D()", result);
+        return -1;
+    }
     return 0;
 }
 
@@ -478,9 +526,7 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         int bpp = SDL_BYTESPERPIXEL(texture->format);
         int pitch = texturedata->pitch;
 
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);  /* FIXME, what to use for RGB 4 byte formats? */
-        glPixelStorei(GL_UNPACK_ROW_LENGTH,
-                      pitch / SDL_BYTESPERPIXEL(texture->format));
+        SetupTextureUpdate(texture, pitch);
         glBindTexture(texturedata->type, texturedata->texture);
         for (dirty = texturedata->dirty.list; dirty; dirty = dirty->next) {
             SDL_Rect *rect = &dirty->rect;

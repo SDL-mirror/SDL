@@ -833,6 +833,20 @@ SDL_CreateWindowFrom(const void *data)
     return window.id;
 }
 
+int
+SDL_RecreateWindow(SDL_Window * window)
+{
+    if ((window->flags & SDL_WINDOW_OPENGL) && !_this->GL_CreateContext) {
+        window->flags &= ~SDL_WINDOW_OPENGL;
+        SDL_SetError("No OpenGL support in video driver");
+        return -1;
+    }
+    if (_this->DestroyWindow) {
+        _this->DestroyWindow(_this, window);
+    }
+    return _this->CreateWindow(_this, window);
+}
+
 SDL_Window *
 SDL_GetWindowFromID(SDL_WindowID windowID)
 {
@@ -1259,6 +1273,7 @@ SDL_DestroyWindow(SDL_WindowID windowID)
             if (window->title) {
                 SDL_free(window->title);
             }
+            SDL_free(window);
             if (j != display->num_windows - 1) {
                 SDL_memcpy(&display->windows[i],
                            &display->windows[i + 1],
@@ -1421,6 +1436,9 @@ SDL_CreateTexture(Uint32 format, int access, int w, int h)
     texture->renderer = renderer;
 
     if (renderer->CreateTexture(renderer, texture) < 0) {
+        if (renderer->DestroyTexture) {
+            renderer->DestroyTexture(renderer, texture);
+        }
         SDL_free(texture);
         return 0;
     }

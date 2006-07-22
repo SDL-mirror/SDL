@@ -396,7 +396,6 @@ D3D_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
                                        PixelFormatToD3DFMT(texture->format),
                                        pool, &data->texture, NULL);
     if (FAILED(result)) {
-        SDL_free(data);
         D3D_SetError("CreateTexture()", result);
         return -1;
     }

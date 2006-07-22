@@ -55,9 +55,6 @@ CommonArg(CommonState * state, int index)
         if (!argv[index]) {
             return -1;
         }
-        if (SDL_strcasecmp(argv[index], "opengl") == 0) {
-            state->window_flags |= SDL_WINDOW_OPENGL;
-        }
         state->renderdriver = argv[index];
         return 2;
     }

@@ -397,6 +397,7 @@ extern SDL_bool SDL_AddDisplayMode(int displayIndex,
 extern void SDL_AddRenderDriver(int displayIndex,
                                 const SDL_RenderDriver * driver);
 
+extern int SDL_RecreateWindow(SDL_Window * window);
 extern SDL_Window *SDL_GetWindowFromID(SDL_WindowID windowID);
 extern SDL_VideoDisplay *SDL_GetDisplayFromWindow(SDL_Window * window);
 
