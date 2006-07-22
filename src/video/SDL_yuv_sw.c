@@ -1054,12 +1054,11 @@ SDL_SW_CreateYUVTexture(SDL_Texture * texture)
     int i;
     int CR, CB;
 
-    swdata = (SDL_SW_YUVTexture *) SDL_malloc(sizeof(*swdata));
+    swdata = (SDL_SW_YUVTexture *) SDL_calloc(1, sizeof(*swdata));
     if (!swdata) {
         SDL_OutOfMemory();
         return NULL;
     }
-    SDL_zerop(swdata);
 
     switch (texture->format) {
     case SDL_PixelFormat_YV12:

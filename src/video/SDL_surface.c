@@ -42,12 +42,11 @@ SDL_CreateRGBSurface(Uint32 flags,
     SDL_Surface *surface;
 
     /* Allocate the surface */
-    surface = (SDL_Surface *) SDL_malloc(sizeof(*surface));
+    surface = (SDL_Surface *) SDL_calloc(1, sizeof(*surface));
     if (surface == NULL) {
         SDL_OutOfMemory();
         return NULL;
     }
-    SDL_zerop(surface);
 
     surface->format = SDL_AllocFormat(depth, Rmask, Gmask, Bmask, Amask);
     if (!surface->format) {

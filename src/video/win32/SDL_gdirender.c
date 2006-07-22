@@ -142,20 +142,18 @@ GDI_CreateRenderer(SDL_Window * window, Uint32 flags)
     HBITMAP hbm;
     int i, n;
 
-    renderer = (SDL_Renderer *) SDL_malloc(sizeof(*renderer));
+    renderer = (SDL_Renderer *) SDL_calloc(1, sizeof(*renderer));
     if (!renderer) {
         SDL_OutOfMemory();
         return NULL;
     }
-    SDL_zerop(renderer);
 
-    data = (GDI_RenderData *) SDL_malloc(sizeof(*data));
+    data = (GDI_RenderData *) SDL_calloc(1, sizeof(*data));
     if (!data) {
         GDI_DestroyRenderer(renderer);
         SDL_OutOfMemory();
         return NULL;
     }
-    SDL_zerop(data);
 
     renderer->CreateTexture = GDI_CreateTexture;
     renderer->QueryTexturePixels = GDI_QueryTexturePixels;
@@ -183,13 +181,12 @@ GDI_CreateRenderer(SDL_Window * window, Uint32 flags)
 
     /* Fill in the compatible bitmap info */
     bmi_size = sizeof(BITMAPINFOHEADER) + 256 * sizeof(RGBQUAD);
-    data->bmi = (LPBITMAPINFO) SDL_malloc(bmi_size);
+    data->bmi = (LPBITMAPINFO) SDL_calloc(1, bmi_size);
     if (!data->bmi) {
         GDI_DestroyRenderer(renderer);
         SDL_OutOfMemory();
         return NULL;
     }
-    SDL_memset(data->bmi, 0, bmi_size);
     data->bmi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
 
     hbm = CreateCompatibleBitmap(data->window_hdc, 1, 1);
@@ -241,12 +238,11 @@ GDI_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
     GDI_TextureData *data;
 
-    data = (GDI_TextureData *) SDL_malloc(sizeof(*data));
+    data = (GDI_TextureData *) SDL_calloc(1, sizeof(*data));
     if (!data) {
         SDL_OutOfMemory();
         return -1;
     }
-    SDL_zerop(data);
 
     texture->driverdata = data;
 
@@ -268,13 +264,12 @@ GDI_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         LPBITMAPINFO bmi;
 
         bmi_size = sizeof(BITMAPINFOHEADER) + 256 * sizeof(RGBQUAD);
-        bmi = (LPBITMAPINFO) SDL_malloc(bmi_size);
+        bmi = (LPBITMAPINFO) SDL_calloc(1, bmi_size);
         if (!bmi) {
             GDI_DestroyTexture(renderer, texture);
             SDL_OutOfMemory();
             return -1;
         }
-        SDL_memset(bmi, 0, bmi_size);
         bmi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
         bmi->bmiHeader.biWidth = texture->w;
         bmi->bmiHeader.biHeight = -texture->h;  /* topdown bitmap */

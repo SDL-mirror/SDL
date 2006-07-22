@@ -105,13 +105,12 @@ CreateTexture(SDL_Renderer * renderer, Uint32 format, int w, int h)
 {
     SDL_Texture *texture;
 
-    texture = (SDL_Texture *) SDL_malloc(sizeof(*texture));
+    texture = (SDL_Texture *) SDL_calloc(1, sizeof(*texture));
     if (!texture) {
         SDL_OutOfMemory();
         return NULL;
     }
 
-    SDL_zerop(texture);
     texture->format = format;
     texture->access = SDL_TextureAccess_Local;
     texture->w = w;
@@ -173,13 +172,12 @@ SW_CreateRenderer(SDL_Window * window, Uint32 flags)
         return NULL;
     }
 
-    data = (SW_RenderData *) SDL_malloc(sizeof(*data));
+    data = (SW_RenderData *) SDL_calloc(1, sizeof(*data));
     if (!data) {
         SW_DestroyRenderer(renderer);
         SDL_OutOfMemory();
         return NULL;
     }
-    SDL_zerop(data);
 
     renderer->CreateTexture = SW_CreateTexture;
     renderer->QueryTexturePixels = SW_QueryTexturePixels;

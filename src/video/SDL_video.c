@@ -279,10 +279,10 @@ SDL_VideoInit(const char *driver_name, Uint32 flags)
 
     /* The software renderer is always available */
     for (i = 0; i < _this->num_displays; ++i) {
-        if (_this->displays[i].num_render_drivers > 0) {
-#if 0 //SDL_VIDEO_OPENGL
-            SDL_AddRenderDriver(i, &GL_RenderDriver);
+#if SDL_VIDEO_OPENGL
+        SDL_AddRenderDriver(i, &GL_RenderDriver);
 #endif
+        if (_this->displays[i].num_render_drivers > 0) {
             SDL_AddRenderDriver(i, &SW_RenderDriver);
         }
     }
@@ -1403,13 +1403,12 @@ SDL_CreateTexture(Uint32 format, int access, int w, int h)
         return 0;
     }
 
-    texture = (SDL_Texture *) SDL_malloc(sizeof(*texture));
+    texture = (SDL_Texture *) SDL_calloc(1, sizeof(*texture));
     if (!texture) {
         SDL_OutOfMemory();
         return 0;
     }
 
-    SDL_zerop(texture);
     texture->id = _this->next_object_id++;
     texture->format = format;
     texture->access = access;

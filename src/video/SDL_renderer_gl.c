@@ -22,8 +22,13 @@
 #include "SDL_config.h"
 
 #if SDL_VIDEO_OPENGL
-#if 0
-#include "SDL_win32video.h"
+
+#include "SDL_video.h"
+#include "SDL_opengl.h"
+#include "SDL_sysvideo.h"
+#include "SDL_pixels_c.h"
+#include "SDL_rect_c.h"
+#include "SDL_yuv_sw_c.h"
 
 /* OpenGL renderer implementation */
 
@@ -66,8 +71,10 @@ SDL_RenderDriver GL_RenderDriver = {
       SDL_TextureBlendMode_Mod),
      (SDL_TextureScaleMode_None | SDL_TextureScaleMode_Fast |
       SDL_TextureScaleMode_Best),
-     12,
+     18,
      {
+      SDL_PixelFormat_Index1LSB,
+      SDL_PixelFormat_Index1MSB,
       SDL_PixelFormat_Index8,
       SDL_PixelFormat_RGB332,
       SDL_PixelFormat_RGB444,
@@ -75,11 +82,15 @@ SDL_RenderDriver GL_RenderDriver = {
       SDL_PixelFormat_ARGB4444,
       SDL_PixelFormat_ARGB1555,
       SDL_PixelFormat_RGB565,
+      SDL_PixelFormat_RGB24,
+      SDL_PixelFormat_BGR24,
       SDL_PixelFormat_RGB888,
+      SDL_PixelFormat_BGR888,
       SDL_PixelFormat_ARGB8888,
-      SDL_PixelFormat_ARGB2101010,
-      SDL_PixelFormat_UYVY,
-      SDL_PixelFormat_YUY2},
+      SDL_PixelFormat_RGBA8888,
+      SDL_PixelFormat_ABGR8888,
+      SDL_PixelFormat_BGRA8888,
+      SDL_PixelFormat_ARGB2101010},     /* FIXME: YUV texture support */
      0,
      0}
 };
@@ -87,57 +98,26 @@ SDL_RenderDriver GL_RenderDriver = {
 typedef struct
 {
     SDL_GLContext context;
-    SDL_bool beginScene;
 } GL_RenderData;
 
 typedef struct
 {
     GLuint texture;
+    GLenum type;
     GLfloat texw;
     GLfloat texh;
+    GLenum format;
+    GLenum formattype;
     void *pixels;
     int pitch;
+    SDL_DirtyRectList dirty;
 } GL_TextureData;
 
-static GLFORMAT
-PixelFormatToOpenGL(Uint32 format,)
-{
-    switch (format) {
-    case SDL_PixelFormat_Index8:
-        return GLFMT_P8;
-    case SDL_PixelFormat_RGB332:
-        return GLFMT_R3G3B2;
-    case SDL_PixelFormat_RGB444:
-        return GLFMT_X4R4G4B4;
-    case SDL_PixelFormat_RGB555:
-        return GLFMT_X1R5G5B5;
-    case SDL_PixelFormat_ARGB4444:
-        return GLFMT_A4R4G4B4;
-    case SDL_PixelFormat_ARGB1555:
-        return GLFMT_A1R5G5B5;
-    case SDL_PixelFormat_RGB565:
-        return GLFMT_R5G6B5;
-    case SDL_PixelFormat_RGB888:
-        return GLFMT_X8R8G8B8;
-    case SDL_PixelFormat_ARGB8888:
-        return GLFMT_A8R8G8B8;
-    case SDL_PixelFormat_ARGB2101010:
-        return GLFMT_A2R10G10B10;
-    case SDL_PixelFormat_UYVY:
-        return GLFMT_UYVY;
-    case SDL_PixelFormat_YUY2:
-        return GLFMT_YUY2;
-    default:
-        return GLFMT_UNKNOWN;
-    }
-}
 
 void
 GL_AddRenderDriver(_THIS)
 {
-    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
-
-    if (data->d3d) {
+    if (_this->GL_CreateContext) {
         SDL_AddRenderDriver(0, &GL_RenderDriver);
     }
 }
@@ -145,14 +125,8 @@ GL_AddRenderDriver(_THIS)
 SDL_Renderer *
 GL_CreateRenderer(SDL_Window * window, Uint32 flags)
 {
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
-    SDL_VideoData *videodata = (SDL_VideoData *) display->device->driverdata;
-    SDL_WindowData *windowdata = (SDL_WindowData *) window->driverdata;
     SDL_Renderer *renderer;
     GL_RenderData *data;
-    HRESULT result;
-    GLPRESENT_PARAMETERS pparams;
-    IDirect3DSwapChain9 *chain;
 
     if (!(window->flags & SDL_WINDOW_OPENGL)) {
         SDL_SetError
@@ -160,20 +134,18 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
         return NULL;
     }
 
-    renderer = (SDL_Renderer *) SDL_malloc(sizeof(*renderer));
+    renderer = (SDL_Renderer *) SDL_calloc(1, sizeof(*renderer));
     if (!renderer) {
         SDL_OutOfMemory();
         return NULL;
     }
-    SDL_zerop(renderer);
 
-    data = (GL_RenderData *) SDL_malloc(sizeof(*data));
+    data = (GL_RenderData *) SDL_calloc(1, sizeof(*data));
     if (!data) {
         GL_DestroyRenderer(renderer);
         SDL_OutOfMemory();
         return NULL;
     }
-    SDL_zerop(data);
 
     renderer->CreateTexture = GL_CreateTexture;
     renderer->SetTexturePalette = GL_SetTexturePalette;
@@ -203,7 +175,6 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
         GL_DestroyRenderer(renderer);
         return NULL;
     }
-    data->beginScene = SDL_TRUE;
 
     if (flags & SDL_Renderer_PresentVSync) {
         SDL_GL_SetSwapInterval(1);
@@ -214,31 +185,26 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
         renderer->info.flags |= SDL_Renderer_PresentVSync;
     }
 
+    /* FIXME: Add a function to make the rendering context current when selecting the renderer */
+
+    /* FIXME: Query maximum texture size */
+
+    /* FIXME: Check for GL_ARB_texture_rectangle and GL_EXT_texture_rectangle */
+
     /* Set up parameters for rendering */
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
     glEnable(GL_TEXTURE_2D);
+    glEnable(GL_TEXTURE_RECTANGLE_ARB);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glViewport(0, 0, window->w, window->h);
     glOrtho(0.0, (GLdouble) window->w, (GLdouble) window->h, 0.0, 0.0, 1.0);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 
     return renderer;
-}
-
-/* Quick utility function for texture creation */
-static int
-power_of_two(int input)
-{
-    int value = 1;
-
-    while (value < input) {
-        value <<= 1;
-    }
-    return value;
 }
 
 static int
@@ -246,35 +212,120 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     GL_RenderData *renderdata = (GL_RenderData *) renderer->driverdata;
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
     GL_TextureData *data;
-    GLPOOL pool;
-    HRESULT result;
+    GLint internalFormat;
+    GLenum format, type;
 
-    data = (GL_TextureData *) SDL_malloc(sizeof(*data));
+    switch (texture->format) {
+    case SDL_PixelFormat_Index1LSB:
+    case SDL_PixelFormat_Index1MSB:
+        internalFormat = GL_RGB;
+        format = GL_COLOR_INDEX;
+        type = GL_BITMAP;
+        break;
+    case SDL_PixelFormat_Index8:
+        internalFormat = GL_RGB;
+        format = GL_COLOR_INDEX;
+        type = GL_UNSIGNED_BYTE;
+        break;
+    case SDL_PixelFormat_RGB332:
+        internalFormat = GL_R3_G3_B2;
+        format = GL_RGB;
+        type = GL_UNSIGNED_BYTE_3_3_2;
+        break;
+    case SDL_PixelFormat_RGB444:
+        internalFormat = GL_RGB4;
+        format = GL_RGB;
+        type = GL_UNSIGNED_SHORT_4_4_4_4;
+        break;
+    case SDL_PixelFormat_RGB555:
+        internalFormat = GL_RGB5;
+        format = GL_RGB;
+        type = GL_UNSIGNED_SHORT_5_5_5_1;
+        break;
+    case SDL_PixelFormat_ARGB4444:
+        internalFormat = GL_RGBA4;
+        format = GL_BGRA;
+        type = GL_UNSIGNED_SHORT_4_4_4_4_REV;
+        break;
+    case SDL_PixelFormat_ARGB1555:
+        internalFormat = GL_RGB5_A1;
+        format = GL_BGRA;
+        type = GL_UNSIGNED_SHORT_1_5_5_5_REV;
+        break;
+    case SDL_PixelFormat_RGB565:
+        internalFormat = GL_RGB8;
+        format = GL_RGB;
+        type = GL_UNSIGNED_SHORT_5_6_5;
+        break;
+    case SDL_PixelFormat_RGB24:
+        internalFormat = GL_RGB8;
+        format = GL_RGB;
+        type = GL_UNSIGNED_BYTE;
+        break;
+    case SDL_PixelFormat_RGB888:
+        internalFormat = GL_RGB8;
+        format = GL_RGB;
+        type = GL_UNSIGNED_INT_8_8_8_8;
+        break;
+    case SDL_PixelFormat_BGR24:
+        internalFormat = GL_RGB8;
+        format = GL_BGR;
+        type = GL_UNSIGNED_BYTE;
+        break;
+    case SDL_PixelFormat_BGR888:
+        internalFormat = GL_RGB8;
+        format = GL_BGR;
+        type = GL_UNSIGNED_INT_8_8_8_8;
+        break;
+    case SDL_PixelFormat_ARGB8888:
+        internalFormat = GL_RGBA8;
+        format = GL_BGRA;
+        type = GL_UNSIGNED_INT_8_8_8_8_REV;
+        break;
+    case SDL_PixelFormat_RGBA8888:
+        internalFormat = GL_RGBA8;
+        format = GL_BGRA;
+        type = GL_UNSIGNED_INT_8_8_8_8;
+        break;
+    case SDL_PixelFormat_ABGR8888:
+        internalFormat = GL_RGBA8;
+        format = GL_RGBA;
+        type = GL_UNSIGNED_INT_8_8_8_8_REV;
+        break;
+    case SDL_PixelFormat_BGRA8888:
+        internalFormat = GL_RGBA8;
+        format = GL_BGRA;
+        type = GL_UNSIGNED_INT_8_8_8_8;
+        break;
+    case SDL_PixelFormat_ARGB2101010:
+        internalFormat = GL_RGB10_A2;
+        format = GL_BGRA;
+        type = GL_UNSIGNED_INT_2_10_10_10_REV;
+        break;
+    default:
+        SDL_SetError("Unsupported texture format");
+        return -1;
+    }
+
+    data = (GL_TextureData *) SDL_calloc(1, sizeof(*data));
     if (!data) {
         SDL_OutOfMemory();
         return -1;
     }
-    SDL_zerop(data);
 
     texture->driverdata = data;
 
-    if (texture->access == SDL_TextureAccess_Local) {
-        pool = GLPOOL_MANAGED;
-    } else {
-        pool = GLPOOL_DEFAULT;
-    }
-    result =
-        IDirect3DDevice9_CreateTexture(renderdata->device, texture->w,
-                                       texture->h, 1, 0,
-                                       PixelFormatToGLFMT(texture->format),
-                                       pool, &data->texture, NULL);
-    if (FAILED(result)) {
-        SDL_free(data);
-        GL_SetError("CreateTexture()", result);
-        return -1;
-    }
+    /* FIXME: Check for GL_ARB_texture_rectangle and GL_EXT_texture_rectangle */
+    glGenTextures(1, &data->texture);
+    data->type = GL_TEXTURE_RECTANGLE_ARB;
+    data->texw = (GLfloat) texture->w;
+    data->texh = (GLfloat) texture->h;
+    data->format = format;
+    data->formattype = type;
+    glBindTexture(data->type, data->texture);
+    glTexImage2D(data->type, 0, internalFormat, texture->w, texture->h, 0,
+                 format, type, NULL);
 
     return 0;
 }
@@ -303,57 +354,14 @@ GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                  const SDL_Rect * rect, const void *pixels, int pitch)
 {
     GL_TextureData *data = (GL_TextureData *) texture->driverdata;
-    GL_RenderData *renderdata = (GL_RenderData *) renderer->driverdata;
-    IDirect3DTexture9 *temp;
-    RECT d3drect;
-    GLLOCKED_RECT locked;
-    const Uint8 *src;
-    Uint8 *dst;
-    int row, length;
-    HRESULT result;
 
-    result =
-        IDirect3DDevice9_CreateTexture(renderdata->device, texture->w,
-                                       texture->h, 1, 0,
-                                       PixelFormatToGLFMT(texture->format),
-                                       GLPOOL_SYSTEMMEM, &temp, NULL);
-    if (FAILED(result)) {
-        GL_SetError("CreateTexture()", result);
-        return -1;
-    }
-
-    d3drect.left = rect->x;
-    d3drect.right = rect->x + rect->w;
-    d3drect.top = rect->y;
-    d3drect.bottom = rect->y + rect->h;
-
-    result = IDirect3DTexture9_LockRect(temp, 0, &locked, &d3drect, 0);
-    if (FAILED(result)) {
-        IDirect3DTexture9_Release(temp);
-        GL_SetError("LockRect()", result);
-        return -1;
-    }
-
-    src = pixels;
-    dst = locked.pBits;
-    length = rect->w * SDL_BYTESPERPIXEL(texture->format);
-    for (row = 0; row < rect->h; ++row) {
-        SDL_memcpy(dst, src, length);
-        src += pitch;
-        dst += locked.Pitch;
-    }
-    IDirect3DTexture9_UnlockRect(temp, 0);
-
-    result =
-        IDirect3DDevice9_UpdateTexture(renderdata->device,
-                                       (IDirect3DBaseTexture9 *) temp,
-                                       (IDirect3DBaseTexture9 *) data->
-                                       texture);
-    IDirect3DTexture9_Release(temp);
-    if (FAILED(result)) {
-        GL_SetError("UpdateTexture()", result);
-        return -1;
-    }
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);      /* FIXME, what to use for RGB 4 byte formats? */
+    glPixelStorei(GL_UNPACK_ROW_LENGTH,
+                  pitch / SDL_BYTESPERPIXEL(texture->format));
+    glBindTexture(data->type, data->texture);
+    glTexSubImage2D(data->type, 0, rect->x, rect->y, rect->w, rect->h,
+                    data->format, data->formattype, pixels);
+    /* FIXME: check for errors */
     return 0;
 }
 
@@ -363,38 +371,30 @@ GL_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                int *pitch)
 {
     GL_TextureData *data = (GL_TextureData *) texture->driverdata;
-    RECT d3drect;
-    GLLOCKED_RECT locked;
-    HRESULT result;
 
-    if (texture->access != SDL_TextureAccess_Local) {
-        SDL_SetError("Can't lock remote video memory");
-        return -1;
+    if (!data->pixels) {
+        data->pitch = texture->w * SDL_BYTESPERPIXEL(texture->format);
+        data->pixels = SDL_malloc(texture->h * data->pitch);
+        if (!data->pixels) {
+            SDL_OutOfMemory();
+            return -1;
+        }
     }
 
-    d3drect.left = rect->x;
-    d3drect.right = rect->x + rect->w;
-    d3drect.top = rect->y;
-    d3drect.bottom = rect->y + rect->h;
-
-    result =
-        IDirect3DTexture9_LockRect(data->texture, 0, &locked, &d3drect,
-                                   markDirty ? 0 : GLLOCK_NO_DIRTY_UPDATE);
-    if (FAILED(result)) {
-        GL_SetError("LockRect()", result);
-        return -1;
+    if (markDirty) {
+        SDL_AddDirtyRect(&data->dirty, rect);
     }
-    *pixels = locked.pBits;
-    *pitch = locked.Pitch;
+
+    *pixels =
+        (void *) ((Uint8 *) data->pixels + rect->y * data->pitch +
+                  rect->x * SDL_BYTESPERPIXEL(texture->format));
+    *pitch = data->pitch;
     return 0;
 }
 
 static void
 GL_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-    GL_TextureData *data = (GL_TextureData *) texture->driverdata;
-
-    IDirect3DTexture9_UnlockRect(data->texture, 0);
 }
 
 static void
@@ -402,18 +402,10 @@ GL_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture, int numrects,
                 const SDL_Rect * rects)
 {
     GL_TextureData *data = (GL_TextureData *) texture->driverdata;
-    RECT d3drect;
     int i;
 
     for (i = 0; i < numrects; ++i) {
-        const SDL_Rect *rect = &rects[i];
-
-        d3drect.left = rect->x;
-        d3drect.right = rect->x + rect->w;
-        d3drect.top = rect->y;
-        d3drect.bottom = rect->y + rect->h;
-
-        IDirect3DTexture9_AddDirtyRect(data->texture, &d3drect);
+        SDL_AddDirtyRect(&data->dirty, &rects[i]);
     }
 }
 
@@ -446,17 +438,43 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     int minx, miny, maxx, maxy;
     GLfloat minu, maxu, minv, maxv;
 
+    if (texturedata->dirty.count > 0) {
+        SDL_DirtyRect *dirty;
+        void *pixels;
+        int bpp = SDL_BYTESPERPIXEL(texture->format);
+        int pitch = texturedata->pitch;
+
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);  /* FIXME, what to use for RGB 4 byte formats? */
+        glPixelStorei(GL_UNPACK_ROW_LENGTH,
+                      pitch / SDL_BYTESPERPIXEL(texture->format));
+        glBindTexture(texturedata->type, texturedata->texture);
+        for (dirty = texturedata->dirty.list; dirty; dirty = dirty->next) {
+            SDL_Rect *rect = &dirty->rect;
+            pixels =
+                (void *) ((Uint8 *) texturedata->pixels + rect->y * pitch +
+                          rect->x * bpp);
+            glTexSubImage2D(texturedata->type, 0, rect->x, rect->y, rect->w,
+                            rect->h, texturedata->format,
+                            texturedata->formattype, pixels);
+        }
+        SDL_ClearDirtyRects(&texturedata->dirty);
+    }
+
     minx = dstrect->x;
     miny = dstrect->y;
     maxx = dstrect->x + dstrect->w;
     maxy = dstrect->y + dstrect->h;
 
     minu = (GLfloat) srcrect->x / texture->w;
+    minu *= texturedata->texw;
     maxu = (GLfloat) (srcrect->x + srcrect->w) / texture->w;
+    maxu *= texturedata->texw;
     minv = (GLfloat) srcrect->y / texture->h;
+    minv *= texturedata->texh;
     maxv = (GLfloat) (srcrect->y + srcrect->h) / texture->h;
+    maxv *= texturedata->texh;
 
-    glBindTexture(GL_TEXTURE_2D, texturedata->texture);
+    glBindTexture(texturedata->type, texturedata->texture);
 
     switch (blendMode) {
     case SDL_TextureBlendMode_None:
@@ -480,13 +498,13 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     switch (scaleMode) {
     case SDL_TextureScaleMode_None:
     case SDL_TextureScaleMode_Fast:
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(texturedata->type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(texturedata->type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         break;
     case SDL_TextureScaleMode_Slow:
     case SDL_TextureScaleMode_Best:
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(texturedata->type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(texturedata->type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         break;
     }
 
@@ -519,8 +537,12 @@ GL_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         return;
     }
     if (data->texture) {
-        IDirect3DTexture9_Release(data->texture);
+        glDeleteTextures(1, &data->texture);
     }
+    if (data->pixels) {
+        SDL_free(data->pixels);
+    }
+    SDL_FreeDirtyRects(&data->dirty);
     SDL_free(data);
     texture->driverdata = NULL;
 }
@@ -531,15 +553,15 @@ GL_DestroyRenderer(SDL_Renderer * renderer)
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
 
     if (data) {
-        if (data->device) {
-            IDirect3DDevice9_Release(data->device);
+        if (data->context) {
+            SDL_GL_MakeCurrent(0, NULL);
+            SDL_GL_DeleteContext(data->context);
         }
         SDL_free(data);
     }
     SDL_free(renderer);
 }
 
-#endif /* 0 */
 #endif /* SDL_VIDEO_OPENGL */
 
 /* vi: set ts=4 sw=4 expandtab: */

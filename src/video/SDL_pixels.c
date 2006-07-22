@@ -346,12 +346,11 @@ SDL_AllocFormat(int bpp,
     Uint32 mask;
 
     /* Allocate an empty pixel format structure */
-    format = SDL_malloc(sizeof(*format));
+    format = SDL_calloc(1, sizeof(*format));
     if (format == NULL) {
         SDL_OutOfMemory();
         return (NULL);
     }
-    SDL_memset(format, 0, sizeof(*format));
     format->alpha = SDL_ALPHA_OPAQUE;
 
     /* Set up the format */
@@ -714,22 +713,20 @@ SDL_AllocBlitMap(void)
     SDL_BlitMap *map;
 
     /* Allocate the empty map */
-    map = (SDL_BlitMap *) SDL_malloc(sizeof(*map));
+    map = (SDL_BlitMap *) SDL_calloc(1, sizeof(*map));
     if (map == NULL) {
         SDL_OutOfMemory();
         return (NULL);
     }
-    SDL_memset(map, 0, sizeof(*map));
 
     /* Allocate the software blit data */
     map->sw_data =
-        (struct private_swaccel *) SDL_malloc(sizeof(*map->sw_data));
+        (struct private_swaccel *) SDL_calloc(1, sizeof(*map->sw_data));
     if (map->sw_data == NULL) {
         SDL_FreeBlitMap(map);
         SDL_OutOfMemory();
         return (NULL);
     }
-    SDL_memset(map->sw_data, 0, sizeof(*map->sw_data));
 
     /* It's ready to go */
     return (map);

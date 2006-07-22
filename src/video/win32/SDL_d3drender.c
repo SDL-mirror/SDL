@@ -239,20 +239,18 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     D3DPRESENT_PARAMETERS pparams;
     IDirect3DSwapChain9 *chain;
 
-    renderer = (SDL_Renderer *) SDL_malloc(sizeof(*renderer));
+    renderer = (SDL_Renderer *) SDL_calloc(1, sizeof(*renderer));
     if (!renderer) {
         SDL_OutOfMemory();
         return NULL;
     }
-    SDL_zerop(renderer);
 
-    data = (D3D_RenderData *) SDL_malloc(sizeof(*data));
+    data = (D3D_RenderData *) SDL_calloc(1, sizeof(*data));
     if (!data) {
         D3D_DestroyRenderer(renderer);
         SDL_OutOfMemory();
         return NULL;
     }
-    SDL_zerop(data);
 
     renderer->CreateTexture = D3D_CreateTexture;
     renderer->SetTexturePalette = D3D_SetTexturePalette;
@@ -379,12 +377,11 @@ D3D_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     D3DPOOL pool;
     HRESULT result;
 
-    data = (D3D_TextureData *) SDL_malloc(sizeof(*data));
+    data = (D3D_TextureData *) SDL_calloc(1, sizeof(*data));
     if (!data) {
         SDL_OutOfMemory();
         return -1;
     }
-    SDL_zerop(data);
 
     texture->driverdata = data;
 
