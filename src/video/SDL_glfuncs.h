@@ -16,9 +16,9 @@ SDL_PROC_UNUSED(void, glBitmap,
 SDL_PROC(void, glBlendFunc, (GLenum, GLenum))
 SDL_PROC_UNUSED(void, glCallList, (GLuint))
 SDL_PROC_UNUSED(void, glCallLists, (GLsizei, GLenum, const GLvoid *))
-SDL_PROC_UNUSED(void, glClear, (GLbitfield))
+SDL_PROC(void, glClear, (GLbitfield))
 SDL_PROC_UNUSED(void, glClearAccum, (GLfloat, GLfloat, GLfloat, GLfloat))
-SDL_PROC_UNUSED(void, glClearColor, (GLclampf, GLclampf, GLclampf, GLclampf))
+SDL_PROC(void, glClearColor, (GLclampf, GLclampf, GLclampf, GLclampf))
 SDL_PROC_UNUSED(void, glClearDepth, (GLclampd))
 SDL_PROC_UNUSED(void, glClearIndex, (GLfloat))
 SDL_PROC_UNUSED(void, glClearStencil, (GLint))
@@ -33,7 +33,7 @@ SDL_PROC_UNUSED(void, glColor3i, (GLint, GLint, GLint))
 SDL_PROC_UNUSED(void, glColor3iv, (const GLint *))
 SDL_PROC_UNUSED(void, glColor3s, (GLshort, GLshort, GLshort))
 SDL_PROC_UNUSED(void, glColor3sv, (const GLshort *))
-SDL_PROC(void, glColor3ub, (GLubyte, GLubyte, GLubyte))
+SDL_PROC_UNUSED(void, glColor3ub, (GLubyte, GLubyte, GLubyte))
 SDL_PROC_UNUSED(void, glColor3ubv, (const GLubyte *))
 SDL_PROC_UNUSED(void, glColor3ui, (GLuint, GLuint, GLuint))
 SDL_PROC_UNUSED(void, glColor3uiv, (const GLuint *))
@@ -43,14 +43,14 @@ SDL_PROC_UNUSED(void, glColor4b, (GLbyte, GLbyte, GLbyte, GLbyte))
 SDL_PROC_UNUSED(void, glColor4bv, (const GLbyte *))
 SDL_PROC_UNUSED(void, glColor4d, (GLdouble, GLdouble, GLdouble, GLdouble))
 SDL_PROC_UNUSED(void, glColor4dv, (const GLdouble *))
-SDL_PROC(void, glColor4f, (GLfloat, GLfloat, GLfloat, GLfloat))
+SDL_PROC_UNUSED(void, glColor4f, (GLfloat, GLfloat, GLfloat, GLfloat))
 SDL_PROC_UNUSED(void, glColor4fv, (const GLfloat *))
 SDL_PROC_UNUSED(void, glColor4i, (GLint, GLint, GLint, GLint))
 SDL_PROC_UNUSED(void, glColor4iv, (const GLint *))
 SDL_PROC_UNUSED(void, glColor4s, (GLshort, GLshort, GLshort, GLshort))
 SDL_PROC_UNUSED(void, glColor4sv, (const GLshort *))
-SDL_PROC(void, glColor4ub,
-         (GLubyte red, GLubyte green, GLubyte blue, GLubyte alpha))
+SDL_PROC_UNUSED(void, glColor4ub,
+                (GLubyte red, GLubyte green, GLubyte blue, GLubyte alpha))
 SDL_PROC_UNUSED(void, glColor4ubv, (const GLubyte * v))
 SDL_PROC_UNUSED(void, glColor4ui,
                 (GLuint red, GLuint green, GLuint blue, GLuint alpha))
@@ -89,7 +89,7 @@ SDL_PROC_UNUSED(void, glDepthRange, (GLclampd zNear, GLclampd zFar))
 SDL_PROC(void, glDisable, (GLenum cap))
 SDL_PROC_UNUSED(void, glDisableClientState, (GLenum array))
 SDL_PROC_UNUSED(void, glDrawArrays, (GLenum mode, GLint first, GLsizei count))
-SDL_PROC(void, glDrawBuffer, (GLenum mode))
+SDL_PROC_UNUSED(void, glDrawBuffer, (GLenum mode))
 SDL_PROC_UNUSED(void, glDrawElements,
                 (GLenum mode, GLsizei count, GLenum type,
                  const GLvoid * indices))
@@ -119,8 +119,8 @@ SDL_PROC_UNUSED(void, glEvalPoint1, (GLint i))
 SDL_PROC_UNUSED(void, glEvalPoint2, (GLint i, GLint j))
 SDL_PROC_UNUSED(void, glFeedbackBuffer,
                 (GLsizei size, GLenum type, GLfloat * buffer))
-SDL_PROC(void, glFinish, (void))
-SDL_PROC(void, glFlush, (void))
+SDL_PROC_UNUSED(void, glFinish, (void))
+SDL_PROC_UNUSED(void, glFlush, (void))
 SDL_PROC_UNUSED(void, glFogf, (GLenum pname, GLfloat param))
 SDL_PROC_UNUSED(void, glFogfv, (GLenum pname, const GLfloat * params))
 SDL_PROC_UNUSED(void, glFogi, (GLenum pname, GLint param))
@@ -153,7 +153,7 @@ SDL_PROC_UNUSED(void, glGetPixelMapuiv, (GLenum map, GLuint * values))
 SDL_PROC_UNUSED(void, glGetPixelMapusv, (GLenum map, GLushort * values))
 SDL_PROC_UNUSED(void, glGetPointerv, (GLenum pname, GLvoid * *params))
 SDL_PROC_UNUSED(void, glGetPolygonStipple, (GLubyte * mask))
-SDL_PROC(const GLubyte *, glGetString, (GLenum name))
+SDL_PROC_UNUSED(const GLubyte *, glGetString, (GLenum name))
 SDL_PROC_UNUSED(void, glGetTexEnvfv,
                 (GLenum target, GLenum pname, GLfloat * params))
 SDL_PROC_UNUSED(void, glGetTexEnviv,
@@ -276,16 +276,16 @@ SDL_PROC_UNUSED(void, glPointSize, (GLfloat size))
 SDL_PROC_UNUSED(void, glPolygonMode, (GLenum face, GLenum mode))
 SDL_PROC_UNUSED(void, glPolygonOffset, (GLfloat factor, GLfloat units))
 SDL_PROC_UNUSED(void, glPolygonStipple, (const GLubyte * mask))
-SDL_PROC(void, glPopAttrib, (void))
-SDL_PROC(void, glPopClientAttrib, (void))
-SDL_PROC(void, glPopMatrix, (void))
+SDL_PROC_UNUSED(void, glPopAttrib, (void))
+SDL_PROC_UNUSED(void, glPopClientAttrib, (void))
+SDL_PROC_UNUSED(void, glPopMatrix, (void))
 SDL_PROC_UNUSED(void, glPopName, (void))
 SDL_PROC_UNUSED(void, glPrioritizeTextures,
                 (GLsizei n, const GLuint * textures,
                  const GLclampf * priorities))
-SDL_PROC(void, glPushAttrib, (GLbitfield mask))
-SDL_PROC(void, glPushClientAttrib, (GLbitfield mask))
-SDL_PROC(void, glPushMatrix, (void))
+SDL_PROC_UNUSED(void, glPushAttrib, (GLbitfield mask))
+SDL_PROC_UNUSED(void, glPushClientAttrib, (GLbitfield mask))
+SDL_PROC_UNUSED(void, glPushMatrix, (void))
 SDL_PROC_UNUSED(void, glPushName, (GLuint name))
 SDL_PROC_UNUSED(void, glRasterPos2d, (GLdouble x, GLdouble y))
 SDL_PROC_UNUSED(void, glRasterPos2dv, (const GLdouble * v))
@@ -315,9 +315,9 @@ SDL_PROC_UNUSED(void, glRasterPos4s,
                 (GLshort x, GLshort y, GLshort z, GLshort w))
 SDL_PROC_UNUSED(void, glRasterPos4sv, (const GLshort * v))
 SDL_PROC_UNUSED(void, glReadBuffer, (GLenum mode))
-SDL_PROC(void, glReadPixels,
-         (GLint x, GLint y, GLsizei width, GLsizei height, GLenum format,
-          GLenum type, GLvoid * pixels))
+SDL_PROC_UNUSED(void, glReadPixels,
+                (GLint x, GLint y, GLsizei width, GLsizei height,
+                 GLenum format, GLenum type, GLvoid * pixels))
 SDL_PROC_UNUSED(void, glRectd,
                 (GLdouble x1, GLdouble y1, GLdouble x2, GLdouble y2))
 SDL_PROC_UNUSED(void, glRectdv, (const GLdouble * v1, const GLdouble * v2))
@@ -418,7 +418,7 @@ SDL_PROC(void, glTexSubImage2D,
          (GLenum target, GLint level, GLint xoffset, GLint yoffset,
           GLsizei width, GLsizei height, GLenum format, GLenum type,
           const GLvoid * pixels))
-SDL_PROC(void, glTranslated, (GLdouble x, GLdouble y, GLdouble z))
+SDL_PROC_UNUSED(void, glTranslated, (GLdouble x, GLdouble y, GLdouble z))
 SDL_PROC_UNUSED(void, glTranslatef, (GLfloat x, GLfloat y, GLfloat z))
 SDL_PROC_UNUSED(void, glVertex2d, (GLdouble x, GLdouble y))
 SDL_PROC_UNUSED(void, glVertex2dv, (const GLdouble * v))
@@ -451,4 +451,5 @@ SDL_PROC_UNUSED(void, glVertexPointer,
                 (GLint size, GLenum type, GLsizei stride,
                  const GLvoid * pointer))
 SDL_PROC(void, glViewport, (GLint x, GLint y, GLsizei width, GLsizei height))
+
 /* vi: set ts=4 sw=4 expandtab: */
