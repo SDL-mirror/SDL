@@ -304,6 +304,9 @@ PrintRendererFlag(Uint32 flag)
     case SDL_Renderer_PresentVSync:
         fprintf(stderr, "PresentVSync");
         break;
+    case SDL_Renderer_Accelerated:
+        fprintf(stderr, "Accelerated");
+        break;
     default:
         fprintf(stderr, "0x%8.8x", flag);
         break;

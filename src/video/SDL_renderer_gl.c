@@ -70,7 +70,7 @@ SDL_RenderDriver GL_RenderDriver = {
       SDL_TextureBlendMode_Blend | SDL_TextureBlendMode_Add |
       SDL_TextureBlendMode_Mod),
      (SDL_TextureScaleMode_None | SDL_TextureScaleMode_Fast |
-      SDL_TextureScaleMode_Best),
+      SDL_TextureScaleMode_Slow),
      18,
      {
       SDL_PixelFormat_Index1LSB,
@@ -285,7 +285,7 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         break;
     case SDL_PixelFormat_RGBA8888:
         internalFormat = GL_RGBA8;
-        format = GL_BGRA;
+        format = GL_RGBA;
         type = GL_UNSIGNED_INT_8_8_8_8;
         break;
     case SDL_PixelFormat_ABGR8888:
@@ -502,7 +502,6 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         glTexParameteri(texturedata->type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         break;
     case SDL_TextureScaleMode_Slow:
-    case SDL_TextureScaleMode_Best:
         glTexParameteri(texturedata->type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(texturedata->type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         break;
@@ -514,7 +513,7 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     glTexCoord2f(maxu, minv);
     glVertex2i(maxx, miny);
     glTexCoord2f(minu, maxv);
-    glVertex2i(miny, maxy);
+    glVertex2i(minx, maxy);
     glTexCoord2f(maxu, maxv);
     glVertex2i(maxx, maxy);
     glEnd();

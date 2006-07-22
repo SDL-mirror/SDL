@@ -68,7 +68,7 @@ SDL_RenderDriver D3D_RenderDriver = {
       SDL_TextureBlendMode_Blend | SDL_TextureBlendMode_Add |
       SDL_TextureBlendMode_Mod),
      (SDL_TextureScaleMode_None | SDL_TextureScaleMode_Fast |
-      SDL_TextureScaleMode_Best),
+      SDL_TextureScaleMode_Slow | SDL_TextureScaleMode_Best),
      12,
      {
       SDL_PixelFormat_Index8,
