@@ -238,6 +238,7 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     HRESULT result;
     D3DPRESENT_PARAMETERS pparams;
     IDirect3DSwapChain9 *chain;
+    D3DCAPS9 caps;
 
     renderer = (SDL_Renderer *) SDL_calloc(1, sizeof(*renderer));
     if (!renderer) {
@@ -355,7 +356,9 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
         renderer->info.flags |= SDL_Renderer_PresentVSync;
     }
 
-    /* FIXME: Query maximum texture size */
+    IDirect3DDevice9_GetDeviceCaps(data->device, &caps);
+    renderer->info.max_texture_width = caps.MaxTextureWidth;
+    renderer->info.max_texture_height = caps.MaxTextureHeight;
 
     /* Set up parameters for rendering */
     IDirect3DDevice9_SetVertexShader(data->device, NULL);
