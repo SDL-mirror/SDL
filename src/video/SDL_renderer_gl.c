@@ -97,6 +97,7 @@ SDL_RenderDriver GL_RenderDriver = {
 typedef struct
 {
     SDL_GLContext context;
+    SDL_bool GL_ARB_texture_rectangle_supported;
 } GL_RenderData;
 
 typedef struct
@@ -226,16 +227,19 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &renderer->info.max_texture_width);
     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &renderer->info.max_texture_height);
 
-    /* FIXME: Check for GL_ARB_texture_rectangle and GL_EXT_texture_rectangle */
+    if (SDL_GL_ExtensionSupported("GL_ARB_texture_rectangle")
+        || SDL_GL_ExtensionSupported("GL_EXT_texture_rectangle")) {
+        data->GL_ARB_texture_rectangle_supported = SDL_TRUE;
+    }
 
     /* Set up parameters for rendering */
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
-#ifdef USE_GL_TEXTURE_RECTANGLE
-    glEnable(GL_TEXTURE_RECTANGLE_ARB);
-#else
-    glEnable(GL_TEXTURE_2D);
-#endif
+    if (data->GL_ARB_texture_rectangle_supported) {
+        glEnable(GL_TEXTURE_RECTANGLE_ARB);
+    } else {
+        glEnable(GL_TEXTURE_2D);
+    }
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glMatrixMode(GL_MODELVIEW);
@@ -369,19 +373,19 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     glGetError();
     glGenTextures(1, &data->texture);
-#ifdef USE_GL_TEXTURE_RECTANGLE
-    data->type = GL_TEXTURE_RECTANGLE_ARB;
-    texture_w = texture->w;
-    texture_h = texture->h;
-    data->texw = (GLfloat) texture->w;
-    data->texh = (GLfloat) texture->h;
-#else
-    data->type = GL_TEXTURE_2D;
-    texture_w = power_of_2(texture->w);
-    texture_h = power_of_2(texture->h);
-    data->texw = (GLfloat) texture->w / texture_w;
-    data->texh = (GLfloat) texture->h / texture_h;
-#endif
+    if (renderdata->GL_ARB_texture_rectangle_supported) {
+        data->type = GL_TEXTURE_RECTANGLE_ARB;
+        texture_w = texture->w;
+        texture_h = texture->h;
+        data->texw = (GLfloat) texture->w;
+        data->texh = (GLfloat) texture->h;
+    } else {
+        data->type = GL_TEXTURE_2D;
+        texture_w = power_of_2(texture->w);
+        texture_h = power_of_2(texture->h);
+        data->texw = (GLfloat) texture->w / texture_w;
+        data->texh = (GLfloat) texture->h / texture_h;
+    }
     data->format = format;
     data->formattype = type;
     glBindTexture(data->type, data->texture);

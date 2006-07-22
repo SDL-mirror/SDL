@@ -32,6 +32,15 @@
 #include "../events/SDL_sysevents.h"
 #include "../events/SDL_events_c.h"
 
+#if SDL_VIDEO_OPENGL
+#include "SDL_opengl.h"
+
+/* On Windows, windows.h defines CreateWindow */
+#ifdef CreateWindow
+#undef CreateWindow
+#endif
+#endif /* SDL_VIDEO_OPENGL */
+
 /* Available video drivers */
 static VideoBootStrap *bootstrap[] = {
 #if SDL_VIDEO_DRIVER_QUARTZ
@@ -2062,6 +2071,62 @@ SDL_GL_GetProcAddress(const char *proc)
         SDL_SetError("No dynamic GL support in video driver");
     }
     return func;
+}
+
+SDL_bool
+SDL_GL_ExtensionSupported(const char *extension)
+{
+#if SDL_VIDEO_OPENGL
+    const GLubyte *(APIENTRY * glGetStringFunc) (GLenum);
+    const char *extensions;
+    const char *start;
+    const char *where, *terminator;
+
+    /* Extension names should not have spaces. */
+    where = SDL_strchr(extension, ' ');
+    if (where || *extension == '\0') {
+        return SDL_FALSE;
+    }
+
+    /* See if there's an environment variable override */
+    start = SDL_getenv(extension);
+    if (start && *start == '0') {
+        return SDL_FALSE;
+    }
+
+    /* Lookup the available extensions */
+    glGetStringFunc = SDL_GL_GetProcAddress("glGetString");
+    if (glGetStringFunc) {
+        extensions = (const char *) glGetStringFunc(GL_EXTENSIONS);
+    } else {
+        extensions = NULL;
+    }
+    if (!extensions) {
+        return SDL_FALSE;
+    }
+
+    /* It takes a bit of care to be fool-proof about parsing the
+     * OpenGL extensions string. Don't be fooled by sub-strings,
+     * etc. */
+
+    start = extensions;
+
+    for (;;) {
+        where = SDL_strstr(start, extension);
+        if (!where)
+            break;
+
+        terminator = where + SDL_strlen(extension);
+        if (where == start || *(where - 1) == ' ')
+            if (*terminator == ' ' || *terminator == '\0')
+                return SDL_TRUE;
+
+        start = terminator;
+    }
+    return SDL_FALSE;
+#else
+    return SDL_FALSE;
+#endif
 }
 
 int

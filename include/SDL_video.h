@@ -1459,6 +1459,14 @@ extern DECLSPEC int SDLCALL SDL_GL_LoadLibrary(const char *path);
 extern DECLSPEC void *SDLCALL SDL_GL_GetProcAddress(const char *proc);
 
 /**
+ * \fn SDL_bool SDL_GL_ExtensionSupported(const char *extension)
+ *
+ * \brief Return true if an OpenGL extension is supported for the current context.
+ */
+extern DECLSPEC SDL_bool SDLCALL SDL_GL_ExtensionSupported(const char
+                                                           *extension);
+
+/**
  * \fn int SDL_GL_SetAttribute(SDL_GLattr attr, int value)
  *
  * \brief Set an OpenGL window attribute before window creation.

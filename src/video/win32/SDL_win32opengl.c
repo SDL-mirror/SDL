@@ -196,7 +196,6 @@ WIN_GL_InitExtensions(_THIS)
     int pixel_format;
     HGLRC hglrc;
     const char *(WINAPI * wglGetExtensionsStringARB) (HDC) = 0;
-    const GLubyte *(WINAPI * glGetStringFunc) (GLenum);
     const char *extensions;
 
     hwnd =
@@ -239,14 +238,6 @@ WIN_GL_InitExtensions(_THIS)
             (_this->gl_data->wglGetPixelFormatAttribivARB != NULL)) {
             _this->gl_data->WGL_ARB_pixel_format = 1;
         }
-    }
-
-    glGetStringFunc = WIN_GL_GetProcAddress(_this, "glGetString");
-    if (glGetStringFunc) {
-        extensions = (const char *) glGetStringFunc(GL_EXTENSIONS);
-    } else {
-        /* Uh oh, something is seriously wrong here... */
-        extensions = NULL;
     }
 
     /* Check for WGL_EXT_swap_control */
