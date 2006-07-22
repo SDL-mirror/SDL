@@ -33,6 +33,7 @@
 /* OpenGL renderer implementation */
 
 static SDL_Renderer *GL_CreateRenderer(SDL_Window * window, Uint32 flags);
+static int GL_ActivateRenderer(SDL_Renderer * renderer);
 static int GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static int GL_SetTexturePalette(SDL_Renderer * renderer,
                                 SDL_Texture * texture,
@@ -147,6 +148,7 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
         return NULL;
     }
 
+    renderer->ActivateRenderer = GL_ActivateRenderer;
     renderer->CreateTexture = GL_CreateTexture;
     renderer->SetTexturePalette = GL_SetTexturePalette;
     renderer->GetTexturePalette = GL_GetTexturePalette;
@@ -185,9 +187,8 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
         renderer->info.flags |= SDL_Renderer_PresentVSync;
     }
 
-    /* FIXME: Add a function to make the rendering context current when selecting the renderer */
-
-    /* FIXME: Query maximum texture size */
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &renderer->info.max_texture_width);
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &renderer->info.max_texture_height);
 
     /* FIXME: Check for GL_ARB_texture_rectangle and GL_EXT_texture_rectangle */
 
@@ -207,6 +208,15 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     glOrtho(0.0, (GLdouble) window->w, (GLdouble) window->h, 0.0, 0.0, 1.0);
 
     return renderer;
+}
+
+static int
+GL_ActivateRenderer(SDL_Renderer * renderer)
+{
+    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
+    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+
+    return SDL_GL_MakeCurrent(window->id, data->context);
 }
 
 static __inline__ int

@@ -55,6 +55,7 @@ struct SDL_Texture
 /* Define the SDL renderer structure */
 struct SDL_Renderer
 {
+    int (*ActivateRenderer) (SDL_Renderer * renderer);
     int (*CreateTexture) (SDL_Renderer * renderer, SDL_Texture * texture);
     int (*QueryTexturePixels) (SDL_Renderer * renderer, SDL_Texture * texture,
                                void **pixels, int *pitch);

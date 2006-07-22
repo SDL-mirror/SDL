@@ -1366,10 +1366,7 @@ SDL_CreateRenderer(SDL_WindowID windowID, int index, Uint32 flags)
     window->renderer =
         SDL_CurrentDisplay.render_drivers[index].CreateRenderer(window,
                                                                 flags);
-    if (!window->renderer) {
-        return -1;
-    }
-    SDL_CurrentDisplay.current_renderer = window->renderer;
+    SDL_SelectRenderer(window->id);
 
     return 0;
 }
@@ -1378,11 +1375,18 @@ int
 SDL_SelectRenderer(SDL_WindowID windowID)
 {
     SDL_Window *window = SDL_GetWindowFromID(windowID);
+    SDL_Renderer *renderer;
 
     if (!window || !window->renderer) {
         return -1;
     }
-    SDL_CurrentDisplay.current_renderer = window->renderer;
+    renderer = window->renderer;
+    if (renderer && renderer->ActivateRenderer) {
+        if (renderer->ActivateRenderer(renderer) < 0) {
+            return -1;
+        }
+    }
+    SDL_CurrentDisplay.current_renderer = renderer;
     return 0;
 }
 

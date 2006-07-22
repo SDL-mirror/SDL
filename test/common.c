@@ -610,7 +610,7 @@ CommonInit(CommonState * state)
             if (n == 0) {
                 fprintf(stderr, "No built-in render drivers\n");
             } else {
-                fprintf(stderr, "Built-in render video drivers:\n");
+                fprintf(stderr, "Built-in render drivers:\n");
                 for (i = 0; i < n; ++i) {
                     SDL_GetRendererInfo(i, &info);
                     PrintRenderer(&info);
@@ -689,6 +689,13 @@ CommonInit(CommonState * state)
                     fprintf(stderr, "Couldn't create renderer: %s\n",
                             SDL_GetError());
                     return SDL_FALSE;
+                }
+                if (state->verbose & VERBOSE_RENDER) {
+                    SDL_RendererInfo info;
+
+                    fprintf(stderr, "Current renderer:\n");
+                    SDL_GetRendererInfo(-1, &info);
+                    PrintRenderer(&info);
                 }
             }
         }
