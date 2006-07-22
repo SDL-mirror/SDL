@@ -194,9 +194,11 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     /* Set up parameters for rendering */
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
-    glEnable(GL_TEXTURE_2D);
+#ifdef USE_GL_TEXTURE_RECTANGLE
     glEnable(GL_TEXTURE_RECTANGLE_ARB);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+#else
+    glEnable(GL_TEXTURE_2D);
+#endif
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glMatrixMode(GL_MODELVIEW);
@@ -207,6 +209,17 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     return renderer;
 }
 
+static __inline__ int
+power_of_2(int input)
+{
+    int value = 1;
+
+    while (value < input) {
+        value <<= 1;
+    }
+    return value;
+}
+
 static int
 GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
@@ -215,6 +228,7 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     GL_TextureData *data;
     GLint internalFormat;
     GLenum format, type;
+    int texture_w, texture_h;
 
     switch (texture->format) {
     case SDL_PixelFormat_Index1LSB:
@@ -318,13 +332,23 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     /* FIXME: Check for GL_ARB_texture_rectangle and GL_EXT_texture_rectangle */
     glGenTextures(1, &data->texture);
+#ifdef USE_GL_TEXTURE_RECTANGLE
     data->type = GL_TEXTURE_RECTANGLE_ARB;
+    texture_w = texture->w;
+    texture_h = texture->h;
     data->texw = (GLfloat) texture->w;
     data->texh = (GLfloat) texture->h;
+#else
+    data->type = GL_TEXTURE_2D;
+    texture_w = power_of_2(texture->w);
+    texture_h = power_of_2(texture->h);
+    data->texw = (GLfloat) texture->w / texture_w;
+    data->texh = (GLfloat) texture->h / texture_h;
+#endif
     data->format = format;
     data->formattype = type;
     glBindTexture(data->type, data->texture);
-    glTexImage2D(data->type, 0, internalFormat, texture->w, texture->h, 0,
+    glTexImage2D(data->type, 0, internalFormat, texture_w, texture_h, 0,
                  format, type, NULL);
 
     return 0;
@@ -478,18 +502,22 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
     switch (blendMode) {
     case SDL_TextureBlendMode_None:
+        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
         glDisable(GL_BLEND);
         break;
     case SDL_TextureBlendMode_Mask:
     case SDL_TextureBlendMode_Blend:
+        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         break;
     case SDL_TextureBlendMode_Add:
+        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
         break;
     case SDL_TextureBlendMode_Mod:
+        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
         glEnable(GL_BLEND);
         glBlendFunc(GL_ZERO, GL_SRC_COLOR);
         break;
@@ -502,6 +530,7 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         glTexParameteri(texturedata->type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         break;
     case SDL_TextureScaleMode_Slow:
+    case SDL_TextureScaleMode_Best:
         glTexParameteri(texturedata->type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(texturedata->type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         break;
