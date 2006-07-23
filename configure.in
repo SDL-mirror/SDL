@@ -1046,36 +1046,11 @@ CheckBWINDOW()
     fi
 }
 
-dnl Set up the Carbon/QuickDraw video driver for Mac OS X (but not Darwin)
-CheckCARBON()
-{
-    AC_ARG_ENABLE(video-carbon,
-AC_HELP_STRING([--enable-video-carbon], [use Carbon/QuickDraw video driver [[default=no]]]),
-                  , enable_video_carbon=no)
-    if test x$enable_video = xyes -a x$enable_video_carbon = xyes; then
-        AC_MSG_CHECKING(for Carbon framework)
-        have_carbon=no
-        AC_TRY_COMPILE([
-          #include <Carbon/Carbon.h>
-        ],[
-        ],[
-        have_carbon=yes
-        ])
-        AC_MSG_RESULT($have_carbon)
-        if test x$have_carbon = xyes; then
-            AC_DEFINE(SDL_VIDEO_DRIVER_TOOLBOX)
-            SOURCES="$SOURCES $srcdir/src/video/maccommon/*.c"
-            SOURCES="$SOURCES $srcdir/src/video/macrom/*.c"
-            have_video=yes
-        fi
-    fi
-}
-
-dnl Set up the Cocoa/Quartz video driver for Mac OS X (but not Darwin)
+dnl Set up the Cocoa video driver for Mac OS X (but not Darwin)
 CheckCOCOA()
 {
     AC_ARG_ENABLE(video-cocoa,
-AC_HELP_STRING([--enable-video-cocoa], [use Cocoa/Quartz video driver [[default=yes]]]),
+AC_HELP_STRING([--enable-video-cocoa], [use Cocoa video driver [[default=yes]]]),
                   , enable_video_cocoa=yes)
     if test x$enable_video = xyes -a x$enable_video_cocoa = xyes; then
         save_CFLAGS="$CFLAGS"
@@ -1092,8 +1067,8 @@ AC_HELP_STRING([--enable-video-cocoa], [use Cocoa/Quartz video driver [[default=
         AC_MSG_RESULT($have_cocoa)
         CFLAGS="$save_CFLAGS"
         if test x$have_cocoa = xyes; then
-            AC_DEFINE(SDL_VIDEO_DRIVER_QUARTZ)
-            SOURCES="$SOURCES $srcdir/src/video/quartz/*.m"
+            AC_DEFINE(SDL_VIDEO_DRIVER_COCOA)
+            SOURCES="$SOURCES $srcdir/src/video/cocoa/*.m"
             have_video=yes
         fi
     fi
@@ -1525,9 +1500,6 @@ CheckMacGL()
             *-*-darwin*)
                 if test x$enable_video_cocoa = xyes; then
                     EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,OpenGL"
-                fi
-                if test x$enable_video_carbon = xyes; then
-                    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,AGL"
                 fi
         esac
     fi
@@ -2453,7 +2425,6 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         fi
 
         CheckCOCOA
-        CheckCARBON
         CheckX11
         CheckMacGL
         CheckOpenGLX11
@@ -2492,11 +2463,9 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
             have_timers=yes
         fi
         # The Mac OS X platform requires special setup.
-        SDLMAIN_SOURCES="$srcdir/src/main/macosx/*.m"
         EXTRA_CFLAGS="$EXTRA_CFLAGS -fpascal-strings"
         EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,Cocoa"
         EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,Carbon"
-        SDL_LIBS="-lSDLmain $SDL_LIBS"
         # If either the audio or CD driver is used, add the AudioUnit framework
         if test x$enable_audio = xyes -o x$enable_cdrom = xyes; then
             EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,AudioToolbox -Wl,-framework,AudioUnit"
@@ -2623,7 +2592,6 @@ OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects)/\1.lo,g'`
 OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.S,$(objects)/\1.lo,g'`
 
 SDLMAIN_OBJECTS=`echo $SDLMAIN_SOURCES | sed 's,[[^ ]]*/\([[^ ]]*\)\.cc,$(objects)/\1.o,g'`
-SDLMAIN_OBJECTS=`echo $SDLMAIN_OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.m,$(objects)/\1.o,g'`
 SDLMAIN_OBJECTS=`echo $SDLMAIN_OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects)/\1.o,g'`
 
 # Set runtime shared library paths as needed
@@ -2642,12 +2610,8 @@ fi
 case "$ARCH" in
   macosx)
     SDL_LIBS="$SDL_LIBS -Wl,-framework,Cocoa"
-    # Is this still needed?
-    #if test x$enable_video = xyes -a x$enable_video_carbon = xyes; then
-    #  SDL_LIBS="$SDL_LIBS -Wl,-framework,Carbon"
-    #fi
     # Evil hack to allow static linking on Mac OS X
-    SDL_STATIC_LIBS="\${exec_prefix}/lib/libSDLmain.a \${exec_prefix}/lib/libSDL.a $EXTRA_LDFLAGS"
+    SDL_STATIC_LIBS="\${exec_prefix}/lib/libSDL.a $EXTRA_LDFLAGS"
     ;;
   *)
     SDL_STATIC_LIBS="$SDL_LIBS"

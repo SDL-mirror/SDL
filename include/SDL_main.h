@@ -25,11 +25,11 @@
 
 #include "SDL_stdinc.h"
 
-/* Redefine main() on Win32 and MacOS so that it is called by winmain.c */
+/* Redefine main() on some platforms so that it is called by SDL */
 
 #if defined(__WIN32__) || \
     (defined(__MWERKS__) && !defined(__BEOS__)) || \
-    defined(__MACOS__) || defined(__MACOSX__) || \
+    defined(__MACOS__) || \
     defined(__SYMBIAN32__) || defined(QWS)
 
 #ifdef __cplusplus

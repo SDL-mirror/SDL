@@ -43,8 +43,8 @@
 
 /* Available video drivers */
 static VideoBootStrap *bootstrap[] = {
-#if SDL_VIDEO_DRIVER_QUARTZ
-    &QZ_bootstrap,
+#if SDL_VIDEO_DRIVER_COCOA
+    &COCOA_bootstrap,
 #endif
 #if SDL_VIDEO_DRIVER_X11
     &X11_bootstrap,
