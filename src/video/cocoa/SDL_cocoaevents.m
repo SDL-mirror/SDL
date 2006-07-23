@@ -157,7 +157,7 @@ Cocoa_PumpEvents(_THIS)
     NSAutoreleasePool *pool;
 
     pool = [[NSAutoreleasePool alloc] init];
-    for ( ; [NSApp isRunning]; ) {
+    while ([NSApp isRunning]) {
         NSEvent *event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:[NSDate distantPast] inMode:NSDefaultRunLoopMode dequeue:YES ];
         if ( event == nil ) {
             break;
