@@ -2288,7 +2288,7 @@ SDL_GL_SwapWindow(SDL_WindowID windowID)
         SDL_SetError("The specified window isn't an OpenGL window");
         return;
     }
-    return _this->GL_SwapWindow(_this, window);
+    _this->GL_SwapWindow(_this, window);
 }
 
 void

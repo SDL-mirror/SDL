@@ -408,8 +408,6 @@ SW_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect, Uint32 color)
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
     Uint8 r, g, b, a;
-    void *pixels;
-    int pitch;
     SDL_Rect real_rect;
     int status;
 
