@@ -843,16 +843,16 @@ SDL_CreateWindowFrom(const void *data)
 }
 
 int
-SDL_RecreateWindow(SDL_Window * window)
+SDL_RecreateWindow(SDL_Window * window, Uint32 flags)
 {
-    if ((window->flags & SDL_WINDOW_OPENGL) && !_this->GL_CreateContext) {
-        window->flags &= ~SDL_WINDOW_OPENGL;
+    if ((flags & SDL_WINDOW_OPENGL) && !_this->GL_CreateContext) {
         SDL_SetError("No OpenGL support in video driver");
         return -1;
     }
     if (_this->DestroyWindow) {
         _this->DestroyWindow(_this, window);
     }
+    window->flags = flags;
     return _this->CreateWindow(_this, window);
 }
 

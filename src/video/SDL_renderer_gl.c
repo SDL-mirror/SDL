@@ -199,8 +199,7 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     GL_RenderData *data;
 
     if (!(window->flags & SDL_WINDOW_OPENGL)) {
-        window->flags |= SDL_WINDOW_OPENGL;
-        if (SDL_RecreateWindow(window) < 0) {
+        if (SDL_RecreateWindow(window, window->flags | SDL_WINDOW_OPENGL) < 0) {
             return NULL;
         }
     }
