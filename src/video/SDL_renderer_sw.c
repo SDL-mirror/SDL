@@ -159,6 +159,7 @@ SW_CreateRenderer(SDL_Window * window, Uint32 flags)
     int bpp;
     Uint32 Rmask, Gmask, Bmask, Amask;
     Uint32 renderer_flags;
+    const char *desired_driver;
 
     if (!SDL_PixelFormatEnumToMasks
         (displayMode->format, &bpp, &Rmask, &Gmask, &Bmask, &Amask)) {
@@ -216,13 +217,19 @@ SW_CreateRenderer(SDL_Window * window, Uint32 flags)
     if (flags & SDL_Renderer_PresentVSync) {
         renderer_flags |= SDL_Renderer_PresentVSync;
     }
+    desired_driver = SDL_getenv("SDL_VIDEO_RENDERER_SWDRIVER");
     for (i = 0; i < display->num_render_drivers; ++i) {
         SDL_RenderDriver *driver = &display->render_drivers[i];
-        if (driver->info.name != SW_RenderDriver.info.name) {
-            data->renderer = driver->CreateRenderer(window, renderer_flags);
-            if (data->renderer) {
-                break;
-            }
+        if (driver->info.name == SW_RenderDriver.info.name) {
+            continue;
+        }
+        if (desired_driver
+            && SDL_strcasecmp(desired_driver, driver->info.name) != 0) {
+            continue;
+        }
+        data->renderer = driver->CreateRenderer(window, renderer_flags);
+        if (data->renderer) {
+            break;
         }
     }
     if (i == display->num_render_drivers) {
