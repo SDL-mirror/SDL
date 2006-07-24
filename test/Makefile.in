@@ -107,8 +107,8 @@ testwin$(EXE): $(srcdir)/testwin.c
 testwm$(EXE): $(srcdir)/testwm.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
 
-testwm2$(EXE): $(srcdir)/testwm.c
-	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
+testwm2$(EXE): $(srcdir)/testwm2.c $(srcdir)/common.c
+	$(CC) -o $@ $(srcdir)/testwm2.c $(srcdir)/common.c $(CFLAGS) $(LIBS)
 
 threadwin$(EXE): $(srcdir)/threadwin.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)

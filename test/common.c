@@ -660,8 +660,9 @@ CommonInit(CommonState * state)
                 return SDL_FALSE;
             }
 
-            if (state->renderdriver
-                || !(state->window_flags & SDL_WINDOW_OPENGL)) {
+            if (!state->skip_renderer
+                && (state->renderdriver
+                    || !(state->window_flags & SDL_WINDOW_OPENGL))) {
                 m = -1;
                 if (state->renderdriver) {
                     SDL_RendererInfo info;
@@ -783,6 +784,9 @@ PrintEvent(SDL_Event * event)
         case SDL_WINDOWEVENT_FOCUS_LOST:
             fprintf(stderr, "Window %d lost keyboard focus",
                     event->window.windowID);
+            break;
+        case SDL_WINDOWEVENT_CLOSE:
+            fprintf(stderr, "Window %d closed", event->window.windowID);
             break;
         default:
             fprintf(stderr, "Window %d got unknown event %d",

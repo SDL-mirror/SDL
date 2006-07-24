@@ -1282,7 +1282,6 @@ SDL_DestroyWindow(SDL_WindowID windowID)
             if (window->title) {
                 SDL_free(window->title);
             }
-            SDL_free(window);
             if (j != display->num_windows - 1) {
                 SDL_memcpy(&display->windows[i],
                            &display->windows[i + 1],

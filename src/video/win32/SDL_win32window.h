@@ -24,9 +24,6 @@
 #ifndef _SDL_win32window_h
 #define _SDL_win32window_h
 
-#include "../SDL_sysvideo.h"
-#include "SDL_win32video.h"
-
 typedef struct
 {
     SDL_WindowID windowID;

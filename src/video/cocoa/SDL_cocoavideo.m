@@ -73,7 +73,6 @@ Cocoa_CreateDevice(int devindex)
     device->SetDisplayMode = Cocoa_SetDisplayMode;
     device->PumpEvents = Cocoa_PumpEvents;
 
-    /*
     device->CreateWindow = Cocoa_CreateWindow;
     device->CreateWindowFrom = Cocoa_CreateWindowFrom;
     device->SetWindowTitle = Cocoa_SetWindowTitle;
@@ -88,6 +87,7 @@ Cocoa_CreateDevice(int devindex)
     device->SetWindowGrab = Cocoa_SetWindowGrab;
     device->DestroyWindow = Cocoa_DestroyWindow;
     device->GetWindowWMInfo = Cocoa_GetWindowWMInfo;
+    /*
 #ifdef SDL_VIDEO_OPENGL
     device->GL_LoadLibrary = Cocoa_GL_LoadLibrary;
     device->GL_GetProcAddress = Cocoa_GL_GetProcAddress;

@@ -33,6 +33,7 @@ typedef struct
     /* Renderer info */
     const char *renderdriver;
     Uint32 render_flags;
+    SDL_bool skip_renderer;
 
     /* Audio info */
     const char *audiodriver;
