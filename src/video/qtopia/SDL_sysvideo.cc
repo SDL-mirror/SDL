@@ -234,8 +234,8 @@ extern "C"
                    desktop_size.height(), desktop_size.width());
 
         /* Determine the current screen size */
-        this->info.current_w = desktop_size.width();
-        this->info.current_h = desktop_size.height();
+        _this->info.current_w = desktop_size.width();
+        _this->info.current_h = desktop_size.height();
 
         /* Create the window / widget */
         SDL_Win = new SDL_QWin(QSize(QT_HIDDEN_SIZE, QT_HIDDEN_SIZE));
