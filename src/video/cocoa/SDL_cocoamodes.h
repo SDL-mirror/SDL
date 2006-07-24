@@ -24,6 +24,16 @@
 #ifndef _SDL_cocoamodes_h
 #define _SDL_cocoamodes_h
 
+typedef struct
+{
+    CGDirectDisplayID display;
+} SDL_DisplayData;
+
+typedef struct
+{
+    CFDictionaryRef moderef;
+} SDL_DisplayModeData;
+
 extern void Cocoa_InitModes(_THIS);
 extern void Cocoa_GetDisplayModes(_THIS);
 extern int Cocoa_SetDisplayMode(_THIS, SDL_DisplayMode * mode);

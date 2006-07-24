@@ -24,6 +24,7 @@
 #ifndef _SDL_cocoavideo_h
 #define _SDL_cocoavideo_h
 
+#include <ApplicationServices/ApplicationServices.h>
 #include <Cocoa/Cocoa.h>
 
 #include "../SDL_sysvideo.h"
