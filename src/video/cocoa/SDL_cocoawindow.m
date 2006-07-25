@@ -419,6 +419,7 @@ Cocoa_CreateWindowFrom(_THIS, SDL_Window * window, const void *data)
 void
 Cocoa_SetWindowTitle(_THIS, SDL_Window * window)
 {
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->window;
     NSString *string;
 
@@ -426,11 +427,13 @@ Cocoa_SetWindowTitle(_THIS, SDL_Window * window)
     [nswindow setTitle:string];
     [nswindow setMiniwindowTitle:string];
     [string release];
+    [pool release];
 }
 
 void
 Cocoa_SetWindowPosition(_THIS, SDL_Window * window)
 {
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->window;
     NSRect rect;
 
@@ -441,25 +444,30 @@ Cocoa_SetWindowPosition(_THIS, SDL_Window * window)
     ConvertNSRect(&rect);
     rect = [nswindow frameRectForContentRect:rect];
     [nswindow setFrameOrigin:rect.origin];
+    [pool release];
 }
 
 void
 Cocoa_SetWindowSize(_THIS, SDL_Window * window)
 {
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->window;
     NSSize size;
 
     size.width = window->w;
     size.height = window->h;
     [nswindow setContentSize:size];
+    [pool release];
 }
 
 void
 Cocoa_ShowWindow(_THIS, SDL_Window * window)
 {
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->window;
 
     [nswindow makeKeyAndOrderFront:nil];
+    [pool release];
 }
 
 void
@@ -473,25 +481,31 @@ Cocoa_HideWindow(_THIS, SDL_Window * window)
 void
 Cocoa_RaiseWindow(_THIS, SDL_Window * window)
 {
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->window;
 
     [nswindow makeKeyAndOrderFront:nil];
+    [pool release];
 }
 
 void
 Cocoa_MaximizeWindow(_THIS, SDL_Window * window)
 {
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->window;
 
     [nswindow performZoom:nil];
+    [pool release];
 }
 
 void
 Cocoa_MinimizeWindow(_THIS, SDL_Window * window)
 {
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->window;
 
     [nswindow performMiniaturize:nil];
+    [pool release];
 }
 
 void
@@ -516,24 +530,23 @@ Cocoa_SetWindowGrab(_THIS, SDL_Window * window)
 void
 Cocoa_DestroyWindow(_THIS, SDL_Window * window)
 {
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
 
     if (data) {
-        NSAutoreleasePool *pool;
 #ifdef SDL_VIDEO_OPENGL
         if (window->flags & SDL_WINDOW_OPENGL) {
             Cocoa_GL_CleanupWindow(_this, window);
         }
 #endif
-        pool = [[NSAutoreleasePool alloc] init];
         [data->listener close];
         [data->listener release];
         if (data->created) {
             [data->window close];
         }
         SDL_free(data);
-        [pool release];
     }
+    [pool release];
 }
 
 SDL_bool

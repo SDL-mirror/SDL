@@ -37,6 +37,18 @@
 }
 @end
 
+@interface SDLAppDelegate : NSObject
+- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender;
+@end
+
+@implementation SDLAppDelegate : NSObject
+- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender
+{
+    SDL_SendQuit();
+    return NSTerminateCancel;
+}
+@end
+
 static NSString *
 GetApplicationName(void)
 {
@@ -138,6 +150,9 @@ Cocoa_RegisterApp(void)
             CreateApplicationMenus();
         }
         [NSApp finishLaunching];
+    }
+    if ([NSApp delegate] == nil) {
+        [NSApp setDelegate:[[SDLAppDelegate alloc] init]];
     }
     [NSApp setRunning];
     [pool release];
