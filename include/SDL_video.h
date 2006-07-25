@@ -1444,6 +1444,10 @@ extern DECLSPEC int SDLCALL SDL_SoftStretch(SDL_Surface * src,
  *
  * \return 0 on success, or -1 if the library couldn't be loaded
  *
+ * This should be done after initializing the video driver, but before
+ * creating any OpenGL windows.  If no OpenGL library is loaded, the default
+ * library will be loaded upon creation of the first OpenGL window.
+ *
  * \note If you do this, you need to retrieve all of the GL functions used in
  *       your program from the dynamic library using SDL_GL_GetProcAddress().
  *
@@ -1476,11 +1480,9 @@ extern DECLSPEC int SDLCALL SDL_GL_SetAttribute(SDL_GLattr attr, int value);
 /**
  * \fn int SDL_GL_GetWindowAttribute(SDL_WindowID windowID, SDL_GLattr attr, int *value)
  *
- * \brief Get the actual value for an OpenGL window attribute.
+ * \brief Get the actual value for an attribute from the current context.
  */
-extern DECLSPEC int SDLCALL SDL_GL_GetWindowAttribute(SDL_WindowID windowID,
-                                                      SDL_GLattr attr,
-                                                      int *value);
+extern DECLSPEC int SDLCALL SDL_GL_GetAttribute(SDL_GLattr attr, int *value);
 
 /**
  * \fn SDL_GLContext SDL_GL_CreateContext(SDL_WindowID windowID)

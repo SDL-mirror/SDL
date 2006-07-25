@@ -31,6 +31,7 @@
 
 static __inline__ void ConvertNSRect(NSRect *r)
 {
+    /* FIXME: Cache the display used for this window */
     r->origin.y = CGDisplayPixelsHigh(kCGDirectMainDisplay) - r->origin.y - r->size.height;
 }
 
@@ -325,6 +326,7 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
     NSRect rect;
     unsigned int style;
     NSString *title;
+    int status;
 
     pool = [[NSAutoreleasePool alloc] init];
 
@@ -380,18 +382,15 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
 
     if (SetupWindowData(window, nswindow, YES) < 0) {
         [nswindow release];
-        [pool release];
         return -1;
     }
 #ifdef SDL_VIDEO_OPENGL
-    /*
     if (window->flags & SDL_WINDOW_OPENGL) {
         if (Cocoa_GL_SetupWindow(_this, window) < 0) {
             Cocoa_DestroyWindow(_this, window);
             return -1;
         }
     }
-    */
 #endif
     return 0;
 }
@@ -522,11 +521,9 @@ Cocoa_DestroyWindow(_THIS, SDL_Window * window)
     if (data) {
         NSAutoreleasePool *pool;
 #ifdef SDL_VIDEO_OPENGL
-        /*
         if (window->flags & SDL_WINDOW_OPENGL) {
             Cocoa_GL_CleanupWindow(_this, window);
         }
-        */
 #endif
         pool = [[NSAutoreleasePool alloc] init];
         [data->listener close];

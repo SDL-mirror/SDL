@@ -1432,12 +1432,6 @@ SDL_FreeYUVOverlay(SDL_Overlay * overlay)
     }
 }
 
-int
-SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
-{
-    return SDL_GL_GetWindowAttribute(SDL_VideoWindow, attr, value);
-}
-
 void
 SDL_GL_SwapBuffers(void)
 {

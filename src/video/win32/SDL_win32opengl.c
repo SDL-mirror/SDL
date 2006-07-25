@@ -28,7 +28,7 @@
 #if SDL_VIDEO_OPENGL
 #include "SDL_opengl.h"
 
-#define DEFAULT_GL_DRIVER_PATH "OPENGL32.DLL"
+#define DEFAULT_OPENGL_PATH "OPENGL32.DLL"
 
 
 int
@@ -47,7 +47,7 @@ WIN_GL_LoadLibrary(_THIS, const char *path)
         }
     }
     if (path == NULL) {
-        path = DEFAULT_GL_DRIVER_PATH;
+        path = DEFAULT_OPENGL_PATH;
     }
     wpath = WIN_UTF8ToString(path);
     handle = LoadLibrary(wpath);
@@ -414,153 +414,6 @@ WIN_GL_CleanupWindow(_THIS, SDL_Window * window)
     WIN_GL_Shutdown(_this);
 }
 
-int
-WIN_GL_GetWindowAttribute(_THIS, SDL_Window * window, SDL_GLattr attrib,
-                          int *value)
-{
-    HDC hdc = ((SDL_WindowData *) window->driverdata)->hdc;
-    int pixel_format;
-
-    pixel_format = GetPixelFormat(hdc);
-
-    if (_this->gl_data->WGL_ARB_pixel_format) {
-        int wgl_attrib;
-
-        switch (attrib) {
-        case SDL_GL_RED_SIZE:
-            wgl_attrib = WGL_RED_BITS_ARB;
-            break;
-        case SDL_GL_GREEN_SIZE:
-            wgl_attrib = WGL_GREEN_BITS_ARB;
-            break;
-        case SDL_GL_BLUE_SIZE:
-            wgl_attrib = WGL_BLUE_BITS_ARB;
-            break;
-        case SDL_GL_ALPHA_SIZE:
-            wgl_attrib = WGL_ALPHA_BITS_ARB;
-            break;
-        case SDL_GL_DOUBLEBUFFER:
-            wgl_attrib = WGL_DOUBLE_BUFFER_ARB;
-            break;
-        case SDL_GL_BUFFER_SIZE:
-            wgl_attrib = WGL_COLOR_BITS_ARB;
-            break;
-        case SDL_GL_DEPTH_SIZE:
-            wgl_attrib = WGL_DEPTH_BITS_ARB;
-            break;
-        case SDL_GL_STENCIL_SIZE:
-            wgl_attrib = WGL_STENCIL_BITS_ARB;
-            break;
-        case SDL_GL_ACCUM_RED_SIZE:
-            wgl_attrib = WGL_ACCUM_RED_BITS_ARB;
-            break;
-        case SDL_GL_ACCUM_GREEN_SIZE:
-            wgl_attrib = WGL_ACCUM_GREEN_BITS_ARB;
-            break;
-        case SDL_GL_ACCUM_BLUE_SIZE:
-            wgl_attrib = WGL_ACCUM_BLUE_BITS_ARB;
-            break;
-        case SDL_GL_ACCUM_ALPHA_SIZE:
-            wgl_attrib = WGL_ACCUM_ALPHA_BITS_ARB;
-            break;
-        case SDL_GL_STEREO:
-            wgl_attrib = WGL_STEREO_ARB;
-            break;
-        case SDL_GL_MULTISAMPLEBUFFERS:
-            wgl_attrib = WGL_SAMPLE_BUFFERS_ARB;
-            break;
-        case SDL_GL_MULTISAMPLESAMPLES:
-            wgl_attrib = WGL_SAMPLES_ARB;
-            break;
-        case SDL_GL_ACCELERATED_VISUAL:
-            wgl_attrib = WGL_ACCELERATION_ARB;
-            _this->gl_data->wglGetPixelFormatAttribivARB(hdc, pixel_format, 0,
-                                                         1, &wgl_attrib,
-                                                         value);
-            if (*value == WGL_NO_ACCELERATION_ARB) {
-                *value = SDL_FALSE;
-            } else {
-                *value = SDL_TRUE;
-            }
-            return 0;
-            break;
-        default:
-            return (-1);
-        }
-        _this->gl_data->wglGetPixelFormatAttribivARB(hdc, pixel_format, 0, 1,
-                                                     &wgl_attrib, value);
-        return 0;
-    } else {
-        PIXELFORMATDESCRIPTOR pfd;
-        int retval;
-
-        if (!DescribePixelFormat(hdc, pixel_format, sizeof(pfd), &pfd)) {
-            WIN_SetError("DescribePixelFormat()");
-            return -1;
-        }
-        retval = 0;
-        switch (attrib) {
-        case SDL_GL_RED_SIZE:
-            *value = pfd.cRedBits;
-            break;
-        case SDL_GL_GREEN_SIZE:
-            *value = pfd.cGreenBits;
-            break;
-        case SDL_GL_BLUE_SIZE:
-            *value = pfd.cBlueBits;
-            break;
-        case SDL_GL_ALPHA_SIZE:
-            *value = pfd.cAlphaBits;
-            break;
-        case SDL_GL_DOUBLEBUFFER:
-            if (pfd.dwFlags & PFD_DOUBLEBUFFER) {
-                *value = 1;
-            } else {
-                *value = 0;
-            }
-            break;
-        case SDL_GL_BUFFER_SIZE:
-            *value = pfd.cColorBits;
-            break;
-        case SDL_GL_DEPTH_SIZE:
-            *value = pfd.cDepthBits;
-            break;
-        case SDL_GL_STENCIL_SIZE:
-            *value = pfd.cStencilBits;
-            break;
-        case SDL_GL_ACCUM_RED_SIZE:
-            *value = pfd.cAccumRedBits;
-            break;
-        case SDL_GL_ACCUM_GREEN_SIZE:
-            *value = pfd.cAccumGreenBits;
-            break;
-        case SDL_GL_ACCUM_BLUE_SIZE:
-            *value = pfd.cAccumBlueBits;
-            break;
-        case SDL_GL_ACCUM_ALPHA_SIZE:
-            *value = pfd.cAccumAlphaBits;
-            break;
-        case SDL_GL_STEREO:
-            if (pfd.dwFlags & PFD_STEREO) {
-                *value = 1;
-            } else {
-                *value = 0;
-            }
-            break;
-        case SDL_GL_MULTISAMPLEBUFFERS:
-            *value = 0;
-            break;
-        case SDL_GL_MULTISAMPLESAMPLES:
-            *value = 1;
-            break;
-        default:
-            retval = -1;
-            break;
-        }
-        return retval;
-    }
-}
-
 SDL_GLContext
 WIN_GL_CreateContext(_THIS, SDL_Window * window)
 {
@@ -623,9 +476,7 @@ WIN_GL_SwapWindow(_THIS, SDL_Window * window)
 void
 WIN_GL_DeleteContext(_THIS, SDL_GLContext context)
 {
-    if (context) {
-        _this->gl_data->wglDeleteContext((HGLRC) context);
-    }
+    _this->gl_data->wglDeleteContext((HGLRC) context);
 }
 
 #endif /* SDL_VIDEO_OPENGL */

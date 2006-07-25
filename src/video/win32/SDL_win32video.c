@@ -126,7 +126,6 @@ WIN_CreateDevice(int devindex)
 #ifdef SDL_VIDEO_OPENGL
     device->GL_LoadLibrary = WIN_GL_LoadLibrary;
     device->GL_GetProcAddress = WIN_GL_GetProcAddress;
-    device->GL_GetWindowAttribute = WIN_GL_GetWindowAttribute;
     device->GL_CreateContext = WIN_GL_CreateContext;
     device->GL_MakeCurrent = WIN_GL_MakeCurrent;
     device->GL_SetSwapInterval = WIN_GL_SetSwapInterval;

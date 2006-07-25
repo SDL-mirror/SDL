@@ -2131,6 +2131,7 @@ SDL_GL_ExtensionSupported(const char *extension)
 int
 SDL_GL_SetAttribute(SDL_GLattr attr, int value)
 {
+#if SDL_VIDEO_OPENGL
     int retval;
 
     if (!_this) {
@@ -2194,26 +2195,101 @@ SDL_GL_SetAttribute(SDL_GLattr attr, int value)
         break;
     }
     return retval;
+#else
+    SDL_Unsupported();
+    return -1;
+#endif /* SDL_VIDEO_OPENGL */
 }
 
 int
-SDL_GL_GetWindowAttribute(SDL_WindowID windowID, SDL_GLattr attr, int *value)
+SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
 {
-    SDL_Window *window = SDL_GetWindowFromID(windowID);
-    int retval;
+#if SDL_VIDEO_OPENGL
+    void (APIENTRY * glGetIntegervFunc) (GLenum pname, GLint * params);
+    GLenum attrib = 0;
 
-    if (!window) {
+    glGetIntegervFunc = SDL_GL_GetProcAddress("glGetIntegerv");
+    if (!glGetIntegervFunc) {
+        return -1;
+    }
+    switch (attr) {
+    case SDL_GL_RED_SIZE:
+        attrib = GL_RED_BITS;
+        break;
+    case SDL_GL_BLUE_SIZE:
+        attrib = GL_BLUE_BITS;
+        break;
+    case SDL_GL_GREEN_SIZE:
+        attrib = GL_GREEN_BITS;
+        break;
+    case SDL_GL_ALPHA_SIZE:
+        attrib = GL_ALPHA_BITS;
+        break;
+    case SDL_GL_DOUBLEBUFFER:
+        attrib = GL_DOUBLEBUFFER;
+        break;
+    case SDL_GL_DEPTH_SIZE:
+        attrib = GL_DEPTH_BITS;
+        break;
+    case SDL_GL_STENCIL_SIZE:
+        attrib = GL_STENCIL_BITS;
+        break;
+    case SDL_GL_ACCUM_RED_SIZE:
+        attrib = GL_ACCUM_RED_BITS;
+        break;
+    case SDL_GL_ACCUM_GREEN_SIZE:
+        attrib = GL_ACCUM_GREEN_BITS;
+        break;
+    case SDL_GL_ACCUM_BLUE_SIZE:
+        attrib = GL_ACCUM_BLUE_BITS;
+        break;
+    case SDL_GL_ACCUM_ALPHA_SIZE:
+        attrib = GL_ACCUM_ALPHA_BITS;
+        break;
+    case SDL_GL_STEREO:
+        attrib = GL_STEREO;
+        break;
+    case SDL_GL_MULTISAMPLEBUFFERS:
+        attrib = GL_SAMPLE_BUFFERS_ARB;
+        break;
+    case SDL_GL_MULTISAMPLESAMPLES:
+        attrib = GL_SAMPLES_ARB;
+        break;
+    case SDL_GL_BUFFER_SIZE:
+        {
+            GLint bits = 0;
+            GLint component;
+
+            /* there doesn't seem to be a single flag in OpenGL for this! */
+            glGetIntegerv(GL_RED_BITS, &component);
+            bits += component;
+            glGetIntegerv(GL_GREEN_BITS, &component);
+            bits += component;
+            glGetIntegerv(GL_BLUE_BITS, &component);
+            bits += component;
+            glGetIntegerv(GL_ALPHA_BITS, &component);
+            bits += component;
+
+            *value = bits;
+            return 0;
+        }
+    case SDL_GL_ACCELERATED_VISUAL:
+        {
+            /* FIXME: How do we get this information? */
+            *value = (_this->gl_config.accelerated != 0);
+            return 0;
+        }
+    default:
+        SDL_SetError("Unknown OpenGL attribute");
         return -1;
     }
 
-    if (_this->GL_GetWindowAttribute) {
-        retval = _this->GL_GetWindowAttribute(_this, window, attr, value);
-    } else {
-        *value = 0;
-        SDL_SetError("GL_GetWindowAttribute not supported");
-        retval = -1;
-    }
-    return retval;
+    glGetIntegerv(attrib, (GLint *) value);
+    return 0;
+#else
+    SDL_Unsupported();
+    return -1;
+#endif /* SDL_VIDEO_OPENGL */
 }
 
 SDL_GLContext
@@ -2239,6 +2315,9 @@ SDL_GL_MakeCurrent(SDL_WindowID windowID, SDL_GLContext context)
     if (window && !(window->flags & SDL_WINDOW_OPENGL)) {
         SDL_SetError("The specified window isn't an OpenGL window");
         return -1;
+    }
+    if (!context) {
+        window = NULL;
     }
     return _this->GL_MakeCurrent(_this, window, context);
 }
@@ -2296,6 +2375,7 @@ SDL_GL_DeleteContext(SDL_GLContext context)
     if (!_this || !context) {
         return;
     }
+    _this->GL_MakeCurrent(_this, NULL, NULL);
     _this->GL_DeleteContext(_this, context);
 }
 

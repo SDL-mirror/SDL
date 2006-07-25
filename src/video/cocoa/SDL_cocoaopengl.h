@@ -21,29 +21,31 @@
 */
 #include "SDL_config.h"
 
-#ifndef _SDL_cocoavideo_h
-#define _SDL_cocoavideo_h
+#ifndef _SDL_cocoaopengl_h
+#define _SDL_cocoaopengl_h
 
-#include <ApplicationServices/ApplicationServices.h>
-#include <Cocoa/Cocoa.h>
+#if SDL_VIDEO_OPENGL
 
-#include "../SDL_sysvideo.h"
-
-#include "SDL_cocoaevents.h"
-#include "SDL_cocoakeyboard.h"
-#include "SDL_cocoamodes.h"
-#include "SDL_cocoamouse.h"
-#include "SDL_cocoaopengl.h"
-#include "SDL_cocoawindow.h"
-
-/* Private display data */
-
-typedef struct SDL_VideoData
+struct SDL_GLDriverData
 {
-    int mouse;
-    int keyboard;
-} SDL_VideoData;
+    int initialized;
+};
 
-#endif /* _SDL_cocoavideo_h */
+/* OpenGL functions */
+extern int Cocoa_GL_LoadLibrary(_THIS, const char *path);
+extern void *Cocoa_GL_GetProcAddress(_THIS, const char *proc);
+extern int Cocoa_GL_SetupWindow(_THIS, SDL_Window * window);
+extern void Cocoa_GL_CleanupWindow(_THIS, SDL_Window * window);
+extern SDL_GLContext Cocoa_GL_CreateContext(_THIS, SDL_Window * window);
+extern int Cocoa_GL_MakeCurrent(_THIS, SDL_Window * window,
+                                SDL_GLContext context);
+extern int Cocoa_GL_SetSwapInterval(_THIS, int interval);
+extern int Cocoa_GL_GetSwapInterval(_THIS);
+extern void Cocoa_GL_SwapWindow(_THIS, SDL_Window * window);
+extern void Cocoa_GL_DeleteContext(_THIS, SDL_GLContext context);
+
+#endif /* SDL_VIDEO_OPENGL */
+
+#endif /* _SDL_cocoaopengl_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

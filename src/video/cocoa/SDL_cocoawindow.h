@@ -26,6 +26,7 @@
 
 typedef struct SDL_WindowData SDL_WindowData;
 
+/* *INDENT-OFF* */
 @interface Cocoa_WindowListener:NSResponder {
     SDL_WindowData *_data;
 }
@@ -58,7 +59,10 @@ typedef struct SDL_WindowData SDL_WindowData;
 -(void) mouseExited:(NSEvent *) theEvent;
 -(void) keyDown:(NSEvent *) theEvent;
 -(void) keyUp:(NSEvent *) theEvent;
-@end struct SDL_WindowData
+@end
+/* *INDENT-ON* */
+
+struct SDL_WindowData
 {
     SDL_WindowID windowID;
     NSWindow *window;

@@ -55,8 +55,6 @@ extern int WIN_GL_LoadLibrary(_THIS, const char *path);
 extern void *WIN_GL_GetProcAddress(_THIS, const char *proc);
 extern int WIN_GL_SetupWindow(_THIS, SDL_Window * window);
 extern void WIN_GL_CleanupWindow(_THIS, SDL_Window * window);
-extern int WIN_GL_GetWindowAttribute(_THIS, SDL_Window * window,
-                                     SDL_GLattr attrib, int *value);
 extern SDL_GLContext WIN_GL_CreateContext(_THIS, SDL_Window * window);
 extern int WIN_GL_MakeCurrent(_THIS, SDL_Window * window,
                               SDL_GLContext context);

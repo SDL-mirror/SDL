@@ -87,11 +87,9 @@ Cocoa_CreateDevice(int devindex)
     device->SetWindowGrab = Cocoa_SetWindowGrab;
     device->DestroyWindow = Cocoa_DestroyWindow;
     device->GetWindowWMInfo = Cocoa_GetWindowWMInfo;
-    /*
 #ifdef SDL_VIDEO_OPENGL
     device->GL_LoadLibrary = Cocoa_GL_LoadLibrary;
     device->GL_GetProcAddress = Cocoa_GL_GetProcAddress;
-    device->GL_GetWindowAttribute = Cocoa_GL_GetWindowAttribute;
     device->GL_CreateContext = Cocoa_GL_CreateContext;
     device->GL_MakeCurrent = Cocoa_GL_MakeCurrent;
     device->GL_SetSwapInterval = Cocoa_GL_SetSwapInterval;
@@ -99,7 +97,6 @@ Cocoa_CreateDevice(int devindex)
     device->GL_SwapWindow = Cocoa_GL_SwapWindow;
     device->GL_DeleteContext = Cocoa_GL_DeleteContext;
 #endif
-    */
 
     device->free = Cocoa_DeleteDevice;
 

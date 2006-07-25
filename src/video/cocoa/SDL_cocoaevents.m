@@ -30,20 +30,11 @@
 @end
 #endif
 
-@interface SDLApplication : NSApplication
+@implementation NSApplication(SDL)
+- (void)setRunning
 {
-}
-- (void)finishLaunching;
-@end
-
-@implementation SDLApplication
-
-- (void)finishLaunching
-{
-    [super finishLaunching];
     _running = 1;
 }
-
 @end
 
 static NSString *
@@ -141,13 +132,14 @@ Cocoa_RegisterApp(void)
 
     pool = [[NSAutoreleasePool alloc] init];
     if (NSApp == nil) {
-        [SDLApplication sharedApplication];
+        [NSApplication sharedApplication];
 
         if ([NSApp mainMenu] == nil) {
             CreateApplicationMenus();
         }
         [NSApp finishLaunching];
     }
+    [NSApp setRunning];
     [pool release];
 }
 
