@@ -2609,7 +2609,6 @@ fi
 
 case "$ARCH" in
   macosx)
-    SDL_LIBS="$SDL_LIBS -Wl,-framework,Cocoa"
     # Evil hack to allow static linking on Mac OS X
     SDL_STATIC_LIBS="\${exec_prefix}/lib/libSDL.a $EXTRA_LDFLAGS"
     ;;
