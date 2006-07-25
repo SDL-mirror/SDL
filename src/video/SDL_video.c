@@ -2261,13 +2261,13 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
             GLint component;
 
             /* there doesn't seem to be a single flag in OpenGL for this! */
-            glGetIntegerv(GL_RED_BITS, &component);
+            glGetIntegervFunc(GL_RED_BITS, &component);
             bits += component;
-            glGetIntegerv(GL_GREEN_BITS, &component);
+            glGetIntegervFunc(GL_GREEN_BITS, &component);
             bits += component;
-            glGetIntegerv(GL_BLUE_BITS, &component);
+            glGetIntegervFunc(GL_BLUE_BITS, &component);
             bits += component;
-            glGetIntegerv(GL_ALPHA_BITS, &component);
+            glGetIntegervFunc(GL_ALPHA_BITS, &component);
             bits += component;
 
             *value = bits;
@@ -2284,7 +2284,7 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
         return -1;
     }
 
-    glGetIntegerv(attrib, (GLint *) value);
+    glGetIntegervFunc(attrib, (GLint *) value);
     return 0;
 #else
     SDL_Unsupported();
