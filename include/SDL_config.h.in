@@ -249,7 +249,6 @@
 #undef SDL_TIMER_WINCE
 
 /* Enable various video drivers */
-#undef SDL_VIDEO_DRIVER_AALIB
 #undef SDL_VIDEO_DRIVER_BWINDOW
 #undef SDL_VIDEO_DRIVER_COCOA
 #undef SDL_VIDEO_DRIVER_CYBERGRAPHICS

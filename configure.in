@@ -1268,32 +1268,6 @@ AC_HELP_STRING([--enable-video-wscons], [use wscons video driver [[default=yes]]
     fi
 }
 
-
-dnl Find the AAlib includes
-CheckAAlib()
-{
-    AC_ARG_ENABLE(video-aalib,
-AC_HELP_STRING([--enable-video-aalib], [use AAlib video driver [[default=no]]]),
-                  , enable_video_aalib=no)
-    if test x$enable_video = xyes -a x$enable_video_aalib = xyes; then
-        AC_MSG_CHECKING(for AAlib support)
-        video_aalib=no
-        AC_TRY_COMPILE([
-         #include <aalib.h>
-        ],[
-        ],[
-        video_aalib=yes
-        ])
-        AC_MSG_RESULT($video_aalib)
-        if test x$video_aalib = xyes; then
-            AC_DEFINE(SDL_VIDEO_DRIVER_AALIB)
-            SOURCES="$SOURCES $srcdir/src/video/aalib/*.c"
-            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -laa"
-            have_video=yes
-        fi
-    fi
-}
-
 dnl Set up the QTopia video driver if enabled
 CheckQtopia()
 {
@@ -2088,7 +2062,6 @@ case "$host" in
         CheckSVGA
         CheckVGL
         CheckWscons
-        CheckAAlib
         CheckQtopia
         CheckPicoGUI
         CheckOpenGLX11
