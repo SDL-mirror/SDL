@@ -1,0 +1,196 @@
+/*
+    SDL - Simple DirectMedia Layer
+    Copyright (C) 1997-2006 Sam Lantinga
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2.1 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+    Sam Lantinga
+    slouken@libsdl.org
+*/
+#include "SDL_config.h"
+
+#include "SDL_video.h"
+#include "SDL_mouse.h"
+#include "../SDL_sysvideo.h"
+#include "../SDL_pixels_c.h"
+
+#include "SDL_x11video.h"
+//#include "SDL_d3drender.h"
+//#include "SDL_gdirender.h"
+
+/* Initialization/Query functions */
+static int X11_VideoInit(_THIS);
+static void X11_VideoQuit(_THIS);
+
+/* X11 driver bootstrap functions */
+
+static int
+X11_Available(void)
+{
+    Display *display = NULL;
+    if (SDL_X11_LoadSymbols()) {
+        display = XOpenDisplay(NULL);
+        if (display != NULL) {
+            XCloseDisplay(display);
+        }
+        SDL_X11_UnloadSymbols();
+    }
+    return (display != NULL);
+}
+
+static void
+X11_DeleteDevice(SDL_VideoDevice * device)
+{
+    SDL_VideoData *data = (SDL_VideoData *) device->driverdata;
+
+    if (data->display) {
+        XCloseDisplay(data->display);
+    }
+    SDL_free(device->driverdata);
+    SDL_free(device);
+
+    SDL_X11_UnloadSymbols();
+}
+
+static SDL_VideoDevice *
+X11_CreateDevice(int devindex)
+{
+    SDL_VideoDevice *device;
+    SDL_VideoData *data;
+    const char *display = NULL; /* Use the DISPLAY environment variable */
+
+    if (!SDL_X11_LoadSymbols()) {
+        return NULL;
+    }
+
+    /* Initialize all variables that we clean on shutdown */
+    device = (SDL_VideoDevice *) SDL_calloc(1, sizeof(SDL_VideoDevice));
+    if (device) {
+        data = (struct SDL_VideoData *) SDL_calloc(1, sizeof(SDL_VideoData));
+    }
+    if (!device || !data) {
+        SDL_OutOfMemory();
+        if (device) {
+            SDL_free(device);
+        }
+        return NULL;
+    }
+    device->driverdata = data;
+
+    /* FIXME: Do we need this?
+       if ( (SDL_strncmp(XDisplayName(display), ":", 1) == 0) ||
+       (SDL_strncmp(XDisplayName(display), "unix:", 5) == 0) ) {
+       local_X11 = 1;
+       } else {
+       local_X11 = 0;
+       }
+     */
+    data->display = XOpenDisplay(display);
+#if defined(__osf__) && defined(SDL_VIDEO_DRIVER_X11_DYNAMIC)
+    /* On Tru64 if linking without -lX11, it fails and you get following message.
+     * Xlib: connection to ":0.0" refused by server
+     * Xlib: XDM authorization key matches an existing client!
+     *
+     * It succeeds if retrying 1 second later
+     * or if running xhost +localhost on shell.
+     */
+    if (data->display == NULL) {
+        SDL_Delay(1000);
+        data->display = XOpenDisplay(display);
+    }
+#endif
+    if (data->display == NULL) {
+        SDL_free(device);
+        SDL_SetError("Couldn't open X11 display");
+        return NULL;
+    }
+#ifdef X11_DEBUG
+    XSynchronize(data->display, True);
+#endif
+
+    /* Set the function pointers */
+    device->VideoInit = X11_VideoInit;
+    device->VideoQuit = X11_VideoQuit;
+    device->GetDisplayModes = X11_GetDisplayModes;
+    device->SetDisplayMode = X11_SetDisplayMode;
+//    device->SetDisplayGammaRamp = X11_SetDisplayGammaRamp;
+//    device->GetDisplayGammaRamp = X11_GetDisplayGammaRamp;
+//    device->PumpEvents = X11_PumpEvents;
+
+/*
+    device->CreateWindow = X11_CreateWindow;
+    device->CreateWindowFrom = X11_CreateWindowFrom;
+    device->SetWindowTitle = X11_SetWindowTitle;
+    device->SetWindowPosition = X11_SetWindowPosition;
+    device->SetWindowSize = X11_SetWindowSize;
+    device->ShowWindow = X11_ShowWindow;
+    device->HideWindow = X11_HideWindow;
+    device->RaiseWindow = X11_RaiseWindow;
+    device->MaximizeWindow = X11_MaximizeWindow;
+    device->MinimizeWindow = X11_MinimizeWindow;
+    device->RestoreWindow = X11_RestoreWindow;
+    device->SetWindowGrab = X11_SetWindowGrab;
+    device->DestroyWindow = X11_DestroyWindow;
+    device->GetWindowWMInfo = X11_GetWindowWMInfo;
+#ifdef SDL_VIDEO_OPENGL
+    device->GL_LoadLibrary = X11_GL_LoadLibrary;
+    device->GL_GetProcAddress = X11_GL_GetProcAddress;
+    device->GL_CreateContext = X11_GL_CreateContext;
+    device->GL_MakeCurrent = X11_GL_MakeCurrent;
+    device->GL_SetSwapInterval = X11_GL_SetSwapInterval;
+    device->GL_GetSwapInterval = X11_GL_GetSwapInterval;
+    device->GL_SwapWindow = X11_GL_SwapWindow;
+    device->GL_DeleteContext = X11_GL_DeleteContext;
+#endif
+*/
+
+    device->free = X11_DeleteDevice;
+
+    return device;
+}
+
+VideoBootStrap X11_bootstrap = {
+    "x11", "SDL X11 video driver",
+    X11_Available, X11_CreateDevice
+};
+
+
+int
+X11_VideoInit(_THIS)
+{
+    X11_InitModes(_this);
+
+//#if SDL_VIDEO_RENDER_D3D
+//    D3D_AddRenderDriver(_this);
+//#endif
+//#if SDL_VIDEO_RENDER_GDI
+//    GDI_AddRenderDriver(_this);
+//#endif
+
+    X11_InitKeyboard(_this);
+    X11_InitMouse(_this);
+
+    return 0;
+}
+
+void
+X11_VideoQuit(_THIS)
+{
+    X11_QuitModes(_this);
+    X11_QuitKeyboard(_this);
+    X11_QuitMouse(_this);
+}
+
+/* vim: set ts=4 sw=4 expandtab: */
