@@ -911,25 +911,6 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [[default=ma
             fi
             have_video=yes
 
-            AC_ARG_ENABLE(dga,
-AC_HELP_STRING([--enable-dga], [allow use of X11 DGA code [[default=yes]]]),
-                          , enable_dga=yes)
-            if test x$enable_dga = xyes; then
-                SOURCES="$SOURCES $srcdir/src/video/Xext/Xxf86dga/*.c"
-            fi
-            AC_ARG_ENABLE(video-dga,
-AC_HELP_STRING([--enable-video-dga], [use DGA 2.0 video driver [[default=yes]]]),
-                  , enable_video_dga=yes)
-            if test x$enable_dga = xyes -a x$enable_video_dga = xyes; then
-                AC_DEFINE(SDL_VIDEO_DRIVER_DGA)
-                SOURCES="$SOURCES $srcdir/src/video/dga/*.c"
-            fi
-            AC_ARG_ENABLE(video-x11-dgamouse,
-AC_HELP_STRING([--enable-video-x11-dgamouse], [use X11 DGA for mouse events [[default=yes]]]),
-                          , enable_video_x11_dgamouse=yes)
-            if test x$enable_dga = xyes -a x$enable_video_x11_dgamouse = xyes; then
-                AC_DEFINE(SDL_VIDEO_DRIVER_X11_DGAMOUSE)
-            fi
             AC_ARG_ENABLE(video-x11-vm,
 AC_HELP_STRING([--enable-video-x11-vm], [use X11 VM extension for fullscreen [[default=yes]]]),
                           , enable_video_x11_vm=yes)
