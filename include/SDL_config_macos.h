@@ -104,7 +104,6 @@ typedef unsigned long uintptr_t;
 /* Enable various video drivers */
 #define SDL_VIDEO_DRIVER_DUMMY	1
 #define SDL_VIDEO_DRIVER_DRAWSPROCKET	1
-#define SDL_VIDEO_DRIVER_GLSDL	1
 #define SDL_VIDEO_DRIVER_TOOLBOX	1
 
 /* Enable OpenGL support */
