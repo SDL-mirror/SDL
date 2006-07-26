@@ -109,9 +109,6 @@ static VideoBootStrap *bootstrap[] = {
 #if SDL_VIDEO_DRIVER_GEM
     &GEM_bootstrap,
 #endif
-#if SDL_VIDEO_DRIVER_PICOGUI
-    &PG_bootstrap,
-#endif
 #if SDL_VIDEO_DRIVER_DC
     &DC_bootstrap,
 #endif

@@ -1302,31 +1302,6 @@ AC_HELP_STRING([--enable-video-qtopia], [use Qtopia video driver [[default=no]]]
     fi
 }
 
-dnl Set up the PicoGUI video driver if enabled
-CheckPicoGUI()
-{
-    AC_ARG_ENABLE(video-picogui,
-AC_HELP_STRING([--enable-video-picogui], [use PicoGUI video driver [[default=no]]]),
-                  , enable_video_picogui=no)
-    if test x$enable_video = xyes -a x$enable_video_picogui = xyes; then
-        AC_MSG_CHECKING(for PicoGUI support)
-        video_picogui=no
-        AC_TRY_COMPILE([
-         #include <picogui.h>
-        ],[
-        ],[
-        video_picogui=yes
-        ])
-        AC_MSG_RESULT($video_picogui)
-        if test x$video_picogui = xyes; then
-            AC_DEFINE(SDL_VIDEO_DRIVER_PICOGUI)
-            SOURCES="$SOURCES $srcdir/src/video/picogui/*.c"
-            SDL_LIBS="$SDL_LIBS -lpgui"
-            have_video=yes
-        fi
-    fi
-}
-
 dnl Set up the Atari Bios keyboard driver
 CheckAtariBiosEvent()
 {
@@ -2063,7 +2038,6 @@ case "$host" in
         CheckVGL
         CheckWscons
         CheckQtopia
-        CheckPicoGUI
         CheckOpenGLX11
         CheckInputEvents
         CheckTslib
