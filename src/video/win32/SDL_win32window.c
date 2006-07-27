@@ -31,8 +31,9 @@
 
 
 static int
-SetupWindowData(SDL_Window * window, HWND hwnd, BOOL created)
+SetupWindowData(_THIS, SDL_Window * window, HWND hwnd, SDL_bool created)
 {
+    SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
     SDL_WindowData *data;
 
     /* Allocate the window data */
@@ -46,7 +47,7 @@ SetupWindowData(SDL_Window * window, HWND hwnd, BOOL created)
     data->hdc = GetDC(hwnd);
     data->created = created;
     data->mouse_pressed = SDL_FALSE;
-    data->videodata = (SDL_VideoData *) SDL_GetVideoDevice()->driverdata;
+    data->videodata = videodata;
 
     /* Associate the data with the window */
     if (!SetProp(hwnd, TEXT("SDL_WindowData"), data)) {
@@ -208,7 +209,7 @@ WIN_CreateWindow(_THIS, SDL_Window * window)
         return -1;
     }
 
-    if (SetupWindowData(window, hwnd, TRUE) < 0) {
+    if (SetupWindowData(_this, window, hwnd, SDL_TRUE) < 0) {
         DestroyWindow(hwnd);
         return -1;
     }
@@ -245,7 +246,7 @@ WIN_CreateWindowFrom(_THIS, SDL_Window * window, const void *data)
         SDL_stack_free(title);
     }
 
-    if (SetupWindowData(window, hwnd, FALSE) < 0) {
+    if (SetupWindowData(_this, window, hwnd, SDL_FALSE) < 0) {
         return -1;
     }
     return 0;

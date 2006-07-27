@@ -22,7 +22,6 @@
 #include "SDL_config.h"
 
 #include "SDL_win32video.h"
-#include "SDL_version.h"
 #include "SDL_syswm.h"
 #include "SDL_vkeys.h"
 #include "../../events/SDL_events_c.h"
@@ -393,6 +392,18 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     SDL_WindowData *data;
 
+    /* Send a SDL_SYSWMEVENT if the application wants them */
+    if (SDL_ProcessEvents[SDL_SYSWMEVENT] == SDL_ENABLE) {
+        SDL_SysWMmsg wmmsg;
+
+        SDL_VERSION(&wmmsg.version);
+        wmmsg.hwnd = hwnd;
+        wmmsg.msg = msg;
+        wmmsg.wParam = wParam;
+        wmmsg.lParam = lParam;
+        SDL_SendSysWMEvent(&wmmsg);
+    }
+
     /* Get the window data for the window */
     data = (SDL_WindowData *) GetProp(hwnd, TEXT("SDL_WindowData"));
     if (!data) {
@@ -411,18 +422,6 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         fclose(log);
     }
 #endif
-
-    /* Send a SDL_SYSWMEVENT if the application wants them */
-    if (SDL_ProcessEvents[SDL_SYSWMEVENT] == SDL_ENABLE) {
-        SDL_SysWMmsg wmmsg;
-
-        SDL_VERSION(&wmmsg.version);
-        wmmsg.hwnd = hwnd;
-        wmmsg.msg = msg;
-        wmmsg.wParam = wParam;
-        wmmsg.lParam = lParam;
-        SDL_SendSysWMEvent(&wmmsg);
-    }
 
     switch (msg) {
 

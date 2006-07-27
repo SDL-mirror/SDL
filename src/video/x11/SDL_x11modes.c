@@ -106,6 +106,7 @@ X11_InitModes(_THIS)
         }
         displaydata->screen = screen;
         displaydata->visual = vinfo.visual;
+        displaydata->depth = vinfo.depth;
 
         SDL_zero(display);
         display.desktop_mode = mode;

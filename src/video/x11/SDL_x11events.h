@@ -21,27 +21,16 @@
 */
 #include "SDL_config.h"
 
-#ifndef _SDL_x11modes_h
-#define _SDL_x11modes_h
+#ifndef _SDL_x11events_h
+#define _SDL_x11events_h
 
-typedef struct
-{
-    int screen;
-    Visual *visual;
-    int depth;
-} SDL_DisplayData;
+extern void X11_PumpEvents(_THIS);
+extern void X11_SaveScreenSaver(Display * display, int *saved_timeout,
+                                BOOL * dpms);
+extern void X11_DisableScreenSaver(Display * display);
+extern void X11_RestoreScreenSaver(Display * display, int saved_timeout,
+                                   BOOL dpms);
 
-//typedef struct
-//{
-//    TCHAR DeviceName[32];
-//    DEVMODE DeviceMode;
-//} SDL_DisplayModeData;
-
-extern void X11_InitModes(_THIS);
-extern void X11_GetDisplayModes(_THIS);
-extern int X11_SetDisplayMode(_THIS, SDL_DisplayMode * mode);
-extern void X11_QuitModes(_THIS);
-
-#endif /* _SDL_x11modes_h */
+#endif /* _SDL_x11events_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

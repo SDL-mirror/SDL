@@ -34,6 +34,49 @@
 static int X11_VideoInit(_THIS);
 static void X11_VideoQuit(_THIS);
 
+/* Find out what class name we should use */
+static char *
+get_classname()
+{
+    char *spot;
+#if defined(__LINUX__) || defined(__FREEBSD__)
+    char procfile[1024];
+    char linkfile[1024];
+    int linksize;
+#endif
+
+    /* First allow environment variable override */
+    spot = SDL_getenv("SDL_VIDEO_X11_WMCLASS");
+    if (spot) {
+        return SDL_strdup(spot);
+    }
+
+    /* Next look at the application's executable name */
+#if defined(__LINUX__) || defined(__FREEBSD__)
+#if defined(__LINUX__)
+    SDL_snprintf(procfile, SDL_arraysize(procfile), "/proc/%d/exe", getpid());
+#elif defined(__FREEBSD__)
+    SDL_snprintf(procfile, SDL_arraysize(procfile), "/proc/%d/file",
+                 getpid());
+#else
+#error Where can we find the executable name?
+#endif
+    linksize = readlink(procfile, linkfile, sizeof(linkfile) - 1);
+    if (linksize > 0) {
+        linkfile[linksize] = '\0';
+        spot = SDL_strrchr(linkfile, '/');
+        if (spot) {
+            return SDL_strdup(spot + 1);
+        } else {
+            return SDL_strdup(linkfile);
+        }
+    }
+#endif /* __LINUX__ || __FREEBSD__ */
+
+    /* Finally use the default we've used forever */
+    return SDL_strdup("SDL_App");
+}
+
 /* X11 driver bootstrap functions */
 
 static int
@@ -127,9 +170,8 @@ X11_CreateDevice(int devindex)
     device->SetDisplayMode = X11_SetDisplayMode;
 //    device->SetDisplayGammaRamp = X11_SetDisplayGammaRamp;
 //    device->GetDisplayGammaRamp = X11_GetDisplayGammaRamp;
-//    device->PumpEvents = X11_PumpEvents;
+    device->PumpEvents = X11_PumpEvents;
 
-/*
     device->CreateWindow = X11_CreateWindow;
     device->CreateWindowFrom = X11_CreateWindowFrom;
     device->SetWindowTitle = X11_SetWindowTitle;
@@ -144,6 +186,7 @@ X11_CreateDevice(int devindex)
     device->SetWindowGrab = X11_SetWindowGrab;
     device->DestroyWindow = X11_DestroyWindow;
     device->GetWindowWMInfo = X11_GetWindowWMInfo;
+/*
 #ifdef SDL_VIDEO_OPENGL
     device->GL_LoadLibrary = X11_GL_LoadLibrary;
     device->GL_GetProcAddress = X11_GL_GetProcAddress;
@@ -170,6 +213,28 @@ VideoBootStrap X11_bootstrap = {
 int
 X11_VideoInit(_THIS)
 {
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+
+    /* Get the window class name, usually the name of the application */
+    data->classname = get_classname();
+
+    /* Open a connection to the X input manager */
+#ifdef X_HAVE_UTF8_STRING
+    if (SDL_X11_HAVE_UTF8) {
+        data->im =
+            XOpenIM(data->display, NULL, data->classname, data->classname);
+    }
+#endif
+
+    /* Save DPMS and screensaver settings */
+    X11_SaveScreenSaver(data->display, &data->screensaver_timeout,
+                        &data->dpms_enabled);
+    X11_DisableScreenSaver(data->display);
+
+    /* Look up some useful Atoms */
+    data->WM_DELETE_WINDOW =
+        XInternAtom(data->display, "WM_DELETE_WINDOW", False);
+
     X11_InitModes(_this);
 
 //#if SDL_VIDEO_RENDER_D3D
@@ -188,6 +253,19 @@ X11_VideoInit(_THIS)
 void
 X11_VideoQuit(_THIS)
 {
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+
+    if (data->classname) {
+        SDL_free(data->classname);
+    }
+#ifdef X_HAVE_UTF8_STRING
+    if (data->im) {
+        XCloseIM(data->im);
+    }
+#endif
+    X11_RestoreScreenSaver(data->display, data->screensaver_timeout,
+                           data->dpms_enabled);
+
     X11_QuitModes(_this);
     X11_QuitKeyboard(_this);
     X11_QuitMouse(_this);

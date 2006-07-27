@@ -66,7 +66,7 @@ struct SDL_WindowData
 {
     SDL_WindowID windowID;
     NSWindow *window;
-    BOOL created;
+    SDL_bool created;
     Cocoa_WindowListener *listener;
     struct SDL_VideoData *videodata;
 };

@@ -30,14 +30,6 @@
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 
-//#include "SDL_x11events.h"
-//#include "SDL_x11gamma.h"
-#include "SDL_x11keyboard.h"
-#include "SDL_x11modes.h"
-#include "SDL_x11mouse.h"
-//#include "SDL_x11opengl.h"
-//#include "SDL_x11window.h"
-
 #if SDL_VIDEO_DRIVER_X11_XINERAMA
 #include "../Xext/extensions/Xinerama.h"
 #endif
@@ -56,13 +48,28 @@
 
 #include "SDL_x11dyn.h"
 
+#include "SDL_x11events.h"
+//#include "SDL_x11gamma.h"
+#include "SDL_x11keyboard.h"
+#include "SDL_x11modes.h"
+#include "SDL_x11mouse.h"
+//#include "SDL_x11opengl.h"
+#include "SDL_x11window.h"
+
 /* Private display data */
 
 typedef struct SDL_VideoData
 {
     Display *display;
+    char *classname;
+    XIM im;
+    int screensaver_timeout;
+    BOOL dpms_enabled;
+    int numwindows;
+    SDL_WindowData **windowlist;
     int mouse;
     int keyboard;
+    Atom WM_DELETE_WINDOW;
 } SDL_VideoData;
 
 #endif /* _SDL_x11video_h */

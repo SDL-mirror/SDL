@@ -242,9 +242,10 @@ fprintf(stderr, "keyUp\n");
 @end
 
 static int
-SetupWindowData(SDL_Window * window, NSWindow *nswindow, BOOL created)
+SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created)
 {
     NSAutoreleasePool *pool;
+    SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
     SDL_WindowData *data;
 
     /* Allocate the window data */
@@ -256,7 +257,7 @@ SetupWindowData(SDL_Window * window, NSWindow *nswindow, BOOL created)
     data->windowID = window->id;
     data->window = nswindow;
     data->created = created;
-    data->videodata = (SDL_VideoData *) SDL_GetVideoDevice()->driverdata;
+    data->videodata = videodata;
 
     pool = [[NSAutoreleasePool alloc] init];
 
@@ -380,7 +381,7 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
 
     [pool release];
 
-    if (SetupWindowData(window, nswindow, YES) < 0) {
+    if (SetupWindowData(_this, window, nswindow, SDL_TRUE) < 0) {
         [nswindow release];
         return -1;
     }
@@ -413,7 +414,7 @@ Cocoa_CreateWindowFrom(_THIS, SDL_Window * window, const void *data)
 
     [pool release];
 
-    return SetupWindowData(window, nswindow, NO);
+    return SetupWindowData(_this, window, nswindow, SDL_FALSE);
 }
 
 void
