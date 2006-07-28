@@ -21,7 +21,7 @@
 */
 #include "SDL_config.h"
 
-#if SDL_VIDEO_OPENGL
+#if SDL_VIDEO_RENDER_OGL
 
 #include "SDL_video.h"
 #include "SDL_opengl.h"
@@ -197,6 +197,7 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
 {
     SDL_Renderer *renderer;
     GL_RenderData *data;
+    GLint value;
 
     if (!(window->flags & SDL_WINDOW_OPENGL)) {
         if (SDL_RecreateWindow(window, window->flags | SDL_WINDOW_OPENGL) < 0) {
@@ -261,10 +262,10 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
         renderer->info.flags |= SDL_Renderer_PresentVSync;
     }
 
-    data->glGetIntegerv(GL_MAX_TEXTURE_SIZE,
-                        &renderer->info.max_texture_width);
-    data->glGetIntegerv(GL_MAX_TEXTURE_SIZE,
-                        &renderer->info.max_texture_height);
+    data->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &value);
+    renderer->info.max_texture_width = value;
+    data->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &value);
+    renderer->info.max_texture_height = value;
 
     if (SDL_GL_ExtensionSupported("GL_ARB_texture_rectangle")
         || SDL_GL_ExtensionSupported("GL_EXT_texture_rectangle")) {
@@ -706,6 +707,6 @@ GL_DestroyRenderer(SDL_Renderer * renderer)
     SDL_free(renderer);
 }
 
-#endif /* SDL_VIDEO_OPENGL */
+#endif /* SDL_VIDEO_RENDER_OGL */
 
 /* vi: set ts=4 sw=4 expandtab: */

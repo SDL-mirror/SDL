@@ -135,7 +135,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     SDL_DisplayData *displaydata =
-        (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
+        (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
     Visual *visual;
     int depth;
     XSetWindowAttributes xattr;
@@ -153,9 +153,23 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     }
 */
 #endif
+#ifdef SDL_VIDEO_OPENGL_GLX
     if (window->flags & SDL_WINDOW_OPENGL) {
-        /* FIXME: get the glx visual */
-    } else {
+        XVisualInfo *vinfo;
+
+        if (X11_GL_Initialize(_this) < 0) {
+            return -1;
+        }
+        vinfo = X11_GL_GetVisual(_this, data->display, displaydata->screen);
+        if (!vinfo) {
+            return -1;
+        }
+        visual = vinfo->visual;
+        depth = vinfo->depth;
+        XFree(vinfo);
+    } else
+#endif
+    {
         visual = displaydata->visual;
         depth = displaydata->depth;
     }
@@ -203,6 +217,15 @@ X11_CreateWindow(_THIS, SDL_Window * window)
                       window->w, window->h, 0, depth, InputOutput, visual,
                       (CWOverrideRedirect | CWBackPixel | CWBorderPixel |
                        CWColormap), &xattr);
+    if (!w) {
+#ifdef SDL_VIDEO_OPENGL_GLX
+        if (window->flags & SDL_WINDOW_OPENGL) {
+            X11_GL_Shutdown(_this);
+        }
+#endif
+        SDL_SetError("Couldn't create window");
+        return -1;
+    }
 
     sizehints = XAllocSizeHints();
     if (sizehints) {
@@ -370,27 +393,26 @@ X11_CreateWindow(_THIS, SDL_Window * window)
 
     /* Finally, show the window */
     if (window->flags & SDL_WINDOW_SHOWN) {
+        XEvent event;
+
         XMapRaised(data->display, w);
+        do {
+            XCheckWindowEvent(data->display, w, StructureNotifyMask, &event);
+        } while (event.type != MapNotify);
     }
-    XSync(data->display, False);
 
     if (SetupWindowData(_this, window, w, SDL_TRUE) < 0) {
+#ifdef SDL_VIDEO_OPENGL_GLX
+        if (window->flags & SDL_WINDOW_OPENGL) {
+            X11_GL_Shutdown(_this);
+        }
+#endif
         XDestroyWindow(data->display, w);
         return -1;
     }
 
     X11_SetWindowTitle(_this, window);
 
-#ifdef SDL_VIDEO_OPENGL
-    /*
-       if (window->flags & SDL_WINDOW_OPENGL) {
-       if (X11_GL_SetupWindow(_this, window) < 0) {
-       X11_DestroyWindow(_this, window);
-       return -1;
-       }
-       }
-     */
-#endif
     return 0;
 }
 
@@ -486,7 +508,7 @@ X11_SetWindowPosition(_THIS, SDL_Window * window)
 {
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     SDL_DisplayData *displaydata =
-        (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
+        (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
     Display *display = data->videodata->display;
     int x, y;
 
@@ -576,12 +598,10 @@ X11_DestroyWindow(_THIS, SDL_Window * window)
 
     if (data) {
         Display *display = data->videodata->display;
-#ifdef SDL_VIDEO_OPENGL
-        /*
-           if (window->flags & SDL_WINDOW_OPENGL) {
-           X11_GL_CleanupWindow(_this, window);
-           }
-         */
+#ifdef SDL_VIDEO_OPENGL_GLX
+        if (window->flags & SDL_WINDOW_OPENGL) {
+            X11_GL_Shutdown(_this);
+        }
 #endif
 #ifdef X_HAVE_UTF8_STRING
         if (data->ic) {

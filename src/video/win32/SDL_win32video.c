@@ -123,7 +123,7 @@ WIN_CreateDevice(int devindex)
     device->SetWindowGrab = WIN_SetWindowGrab;
     device->DestroyWindow = WIN_DestroyWindow;
     device->GetWindowWMInfo = WIN_GetWindowWMInfo;
-#ifdef SDL_VIDEO_OPENGL
+#ifdef SDL_VIDEO_OPENGL_WGL
     device->GL_LoadLibrary = WIN_GL_LoadLibrary;
     device->GL_GetProcAddress = WIN_GL_GetProcAddress;
     device->GL_CreateContext = WIN_GL_CreateContext;

@@ -24,7 +24,7 @@
 #ifndef _SDL_cocoaopengl_h
 #define _SDL_cocoaopengl_h
 
-#if SDL_VIDEO_OPENGL
+#if SDL_VIDEO_OPENGL_CGL
 
 struct SDL_GLDriverData
 {
@@ -44,7 +44,7 @@ extern int Cocoa_GL_GetSwapInterval(_THIS);
 extern void Cocoa_GL_SwapWindow(_THIS, SDL_Window * window);
 extern void Cocoa_GL_DeleteContext(_THIS, SDL_GLContext context);
 
-#endif /* SDL_VIDEO_OPENGL */
+#endif /* SDL_VIDEO_OPENGL_CGL */
 
 #endif /* _SDL_cocoaopengl_h */
 

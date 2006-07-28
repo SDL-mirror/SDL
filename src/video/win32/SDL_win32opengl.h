@@ -24,7 +24,7 @@
 #ifndef _SDL_win32opengl_h
 #define _SDL_win32opengl_h
 
-#if SDL_VIDEO_OPENGL
+#if SDL_VIDEO_OPENGL_WGL
 
 struct SDL_GLDriverData
 {
@@ -120,7 +120,7 @@ extern void WIN_GL_DeleteContext(_THIS, SDL_GLContext context);
 #define WGL_SAMPLES_ARB                0x2042
 #endif
 
-#endif /* SDL_VIDEO_OPENGL */
+#endif /* SDL_VIDEO_OPENGL_WGL */
 
 #endif /* _SDL_win32opengl_h */
 

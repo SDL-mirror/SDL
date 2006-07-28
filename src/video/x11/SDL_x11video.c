@@ -186,8 +186,7 @@ X11_CreateDevice(int devindex)
     device->SetWindowGrab = X11_SetWindowGrab;
     device->DestroyWindow = X11_DestroyWindow;
     device->GetWindowWMInfo = X11_GetWindowWMInfo;
-/*
-#ifdef SDL_VIDEO_OPENGL
+#ifdef SDL_VIDEO_OPENGL_GLX
     device->GL_LoadLibrary = X11_GL_LoadLibrary;
     device->GL_GetProcAddress = X11_GL_GetProcAddress;
     device->GL_CreateContext = X11_GL_CreateContext;
@@ -197,7 +196,6 @@ X11_CreateDevice(int devindex)
     device->GL_SwapWindow = X11_GL_SwapWindow;
     device->GL_DeleteContext = X11_GL_DeleteContext;
 #endif
-*/
 
     device->free = X11_DeleteDevice;
 

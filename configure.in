@@ -1359,7 +1359,7 @@ AC_HELP_STRING([--enable-video-dummy], [use dummy video driver [[default=yes]]])
 
 dnl Check to see if OpenGL support is desired
 AC_ARG_ENABLE(video-opengl,
-AC_HELP_STRING([--enable-video-opengl], [include OpenGL context creation [[default=yes]]]),
+AC_HELP_STRING([--enable-video-opengl], [include OpenGL support [[default=yes]]]),
               , enable_video_opengl=yes)
 
 dnl Find OpenGL
@@ -1379,6 +1379,7 @@ CheckOpenGLX11()
         if test x$video_opengl = xyes; then
             AC_DEFINE(SDL_VIDEO_OPENGL)
             AC_DEFINE(SDL_VIDEO_OPENGL_GLX)
+            AC_DEFINE(SDL_VIDEO_RENDER_OGL)
         fi
     fi
 }
@@ -1398,6 +1399,7 @@ CheckOpenGLQNX()
         AC_MSG_RESULT($video_opengl)
         if test x$video_opengl = xyes; then
             AC_DEFINE(SDL_VIDEO_OPENGL)
+            AC_DEFINE(SDL_VIDEO_RENDER_OGL)
             EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lGL"
         fi
     fi
@@ -1409,6 +1411,7 @@ CheckWIN32GL()
     if test x$enable_video = xyes -a x$enable_video_opengl = xyes; then
         AC_DEFINE(SDL_VIDEO_OPENGL)
         AC_DEFINE(SDL_VIDEO_OPENGL_WGL)
+        AC_DEFINE(SDL_VIDEO_RENDER_OGL)
     fi
 }
 
@@ -1417,6 +1420,8 @@ CheckBeGL()
 {
     if test x$enable_video = xyes -a x$enable_video_opengl = xyes; then
         AC_DEFINE(SDL_VIDEO_OPENGL)
+        AC_DEFINE(SDL_VIDEO_OPENGL_BGL)
+        AC_DEFINE(SDL_VIDEO_RENDER_OGL)
         EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lGL"
     fi
 }
@@ -1426,6 +1431,8 @@ CheckMacGL()
 {
     if test x$enable_video = xyes -a x$enable_video_opengl = xyes; then
         AC_DEFINE(SDL_VIDEO_OPENGL)
+        AC_DEFINE(SDL_VIDEO_OPENGL_CGL)
+        AC_DEFINE(SDL_VIDEO_RENDER_OGL)
         case "$host" in
             *-*-darwin*)
                 if test x$enable_video_cocoa = xyes; then
@@ -1456,6 +1463,7 @@ CheckAtariOSMesa()
         fi
         AC_DEFINE(SDL_VIDEO_OPENGL)
         AC_DEFINE(SDL_VIDEO_OPENGL_OSMESA)
+        AC_DEFINE(SDL_VIDEO_RENDER_OGL)
         SDL_CFLAGS="$SDL_CFLAGS $OSMESA_CFLAGS"
         SDL_LIBS="$SDL_LIBS $OSMESA_LIBS"
 

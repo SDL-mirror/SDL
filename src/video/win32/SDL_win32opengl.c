@@ -25,10 +25,10 @@
 
 /* WGL implementation of SDL OpenGL support */
 
-#if SDL_VIDEO_OPENGL
+#if SDL_VIDEO_OPENGL_WGL
 #include "SDL_opengl.h"
 
-#define DEFAULT_OPENGL_PATH "OPENGL32.DLL"
+#define DEFAULT_OPENGL "OPENGL32.DLL"
 
 
 int
@@ -47,7 +47,10 @@ WIN_GL_LoadLibrary(_THIS, const char *path)
         }
     }
     if (path == NULL) {
-        path = DEFAULT_OPENGL_PATH;
+        path = SDL_getenv("SDL_OPENGL_LIBRARY");
+    }
+    if (path == NULL) {
+        path = DEFAULT_OPENGL;
     }
     wpath = WIN_UTF8ToString(path);
     handle = LoadLibrary(wpath);
@@ -257,19 +260,6 @@ WIN_GL_InitExtensions(_THIS)
     WIN_PumpEvents(_this);
 }
 
-static void
-WIN_GL_Shutdown(_THIS)
-{
-    if (!_this->gl_data || (--_this->gl_data->initialized > 0)) {
-        return;
-    }
-
-    WIN_GL_UnloadLibrary(_this);
-
-    SDL_free(_this->gl_data);
-    _this->gl_data = NULL;
-}
-
 static int
 WIN_GL_Initialize(_THIS)
 {
@@ -296,6 +286,19 @@ WIN_GL_Initialize(_THIS)
     WIN_GL_InitExtensions(_this);
 
     return 0;
+}
+
+static void
+WIN_GL_Shutdown(_THIS)
+{
+    if (!_this->gl_data || (--_this->gl_data->initialized > 0)) {
+        return;
+    }
+
+    WIN_GL_UnloadLibrary(_this);
+
+    SDL_free(_this->gl_data);
+    _this->gl_data = NULL;
 }
 
 int
@@ -479,7 +482,6 @@ WIN_GL_DeleteContext(_THIS, SDL_GLContext context)
     _this->gl_data->wglDeleteContext((HGLRC) context);
 }
 
-#endif /* SDL_VIDEO_OPENGL */
-
+#endif /* SDL_VIDEO_OPENGL_WGL */
 
 /* vi: set ts=4 sw=4 expandtab: */

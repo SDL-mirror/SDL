@@ -385,7 +385,7 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
         [nswindow release];
         return -1;
     }
-#ifdef SDL_VIDEO_OPENGL
+#ifdef SDL_VIDEO_OPENGL_CGL
     if (window->flags & SDL_WINDOW_OPENGL) {
         if (Cocoa_GL_SetupWindow(_this, window) < 0) {
             Cocoa_DestroyWindow(_this, window);
@@ -535,7 +535,7 @@ Cocoa_DestroyWindow(_THIS, SDL_Window * window)
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
 
     if (data) {
-#ifdef SDL_VIDEO_OPENGL
+#ifdef SDL_VIDEO_OPENGL_CGL
         if (window->flags & SDL_WINDOW_OPENGL) {
             Cocoa_GL_CleanupWindow(_this, window);
         }

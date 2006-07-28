@@ -276,7 +276,7 @@ SDL_VideoInit(const char *driver_name, Uint32 flags)
 
     /* The software renderer is always available */
     for (i = 0; i < _this->num_displays; ++i) {
-#if SDL_VIDEO_OPENGL
+#if SDL_VIDEO_RENDER_OGL
         SDL_AddRenderDriver(i, &GL_RenderDriver);
 #endif
         if (_this->displays[i].num_render_drivers > 0) {

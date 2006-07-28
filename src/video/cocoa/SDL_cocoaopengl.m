@@ -25,14 +25,14 @@
 
 /* NSOpenGL implementation of SDL OpenGL support */
 
-#if SDL_VIDEO_OPENGL
+#if SDL_VIDEO_OPENGL_CGL
 #include <OpenGL/CGLTypes.h>
 
 #include "SDL_loadso.h"
 #include "SDL_opengl.h"
 
 
-#define DEFAULT_OPENGL_PATH  "/System/Library/Frameworks/OpenGL.framework/Libraries/libGL.dylib"
+#define DEFAULT_OPENGL  "/System/Library/Frameworks/OpenGL.framework/Libraries/libGL.dylib"
 
 /* This is implemented in Mac OS X 10.3 and above */
 #if MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_3
@@ -57,7 +57,10 @@ Cocoa_GL_LoadLibrary(_THIS, const char *path)
         }
     }
     if (path == NULL) {
-        path = DEFAULT_OPENGL_PATH;
+        path = SDL_getenv("SDL_OPENGL_LIBRARY");
+    }
+    if (path == NULL) {
+        path = DEFAULT_OPENGL;
     }
     _this->gl_config.dll_handle = SDL_LoadObject(path);
     if (!_this->gl_config.dll_handle) {
@@ -87,19 +90,6 @@ Cocoa_GL_UnloadLibrary(_THIS)
     }
 }
 
-static void
-Cocoa_GL_Shutdown(_THIS)
-{
-    if (!_this->gl_data || (--_this->gl_data->initialized > 0)) {
-        return;
-    }
-
-    Cocoa_GL_UnloadLibrary(_this);
-
-    SDL_free(_this->gl_data);
-    _this->gl_data = NULL;
-}
-
 static int
 Cocoa_GL_Initialize(_THIS)
 {
@@ -122,6 +112,19 @@ Cocoa_GL_Initialize(_THIS)
         return -1;
     }
     return 0;
+}
+
+static void
+Cocoa_GL_Shutdown(_THIS)
+{
+    if (!_this->gl_data || (--_this->gl_data->initialized > 0)) {
+        return;
+    }
+
+    Cocoa_GL_UnloadLibrary(_this);
+
+    SDL_free(_this->gl_data);
+    _this->gl_data = NULL;
 }
 
 int
@@ -352,6 +355,6 @@ Cocoa_GL_DeleteContext(_THIS, SDL_GLContext context)
     [pool release];
 }
 
-#endif /* SDL_VIDEO_OPENGL */
+#endif /* SDL_VIDEO_OPENGL_CGL */
 
 /* vi: set ts=4 sw=4 expandtab: */

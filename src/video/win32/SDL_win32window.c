@@ -213,7 +213,7 @@ WIN_CreateWindow(_THIS, SDL_Window * window)
         DestroyWindow(hwnd);
         return -1;
     }
-#ifdef SDL_VIDEO_OPENGL
+#ifdef SDL_VIDEO_OPENGL_WGL
     if (window->flags & SDL_WINDOW_OPENGL) {
         if (WIN_GL_SetupWindow(_this, window) < 0) {
             WIN_DestroyWindow(_this, window);
@@ -419,7 +419,7 @@ WIN_DestroyWindow(_THIS, SDL_Window * window)
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
 
     if (data) {
-#ifdef SDL_VIDEO_OPENGL
+#ifdef SDL_VIDEO_OPENGL_WGL
         if (window->flags & SDL_WINDOW_OPENGL) {
             WIN_GL_CleanupWindow(_this, window);
         }
