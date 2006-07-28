@@ -109,15 +109,12 @@ X11_GL_LoadLibrary(_THIS, const char *path)
     _this->gl_data->glXSwapBuffers =
         (void (*)(Display *, GLXDrawable)) GL_LoadFunction(handle,
                                                            "glXSwapBuffers");
-    _this->gl_data->glXGetConfig =
-        (int (*)(Display *, XVisualInfo *, int, int *))
-        GL_LoadFunction(handle, "glXGetConfig");
 
     if (!_this->gl_data->glXChooseVisual ||
         !_this->gl_data->glXCreateContext ||
         !_this->gl_data->glXDestroyContext ||
         !_this->gl_data->glXMakeCurrent ||
-        !_this->gl_data->glXSwapBuffers || !_this->gl_data->glXGetConfig) {
+        !_this->gl_data->glXSwapBuffers) {
         SDL_SetError("Could not retrieve OpenGL functions");
         return -1;
     }

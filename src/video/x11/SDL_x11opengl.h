@@ -50,9 +50,6 @@ struct SDL_GLDriverData
     void (*glXSwapBuffers)
       (Display * dpy, GLXDrawable drawable);
 
-    int (*glXGetConfig)
-      (Display * dpy, XVisualInfo * visual_info, int attrib, int *value);
-
     int (*glXSwapIntervalSGI) (int interval);
       GLint(*glXSwapIntervalMESA) (unsigned interval);
       GLint(*glXGetSwapIntervalMESA) (void);
