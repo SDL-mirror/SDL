@@ -148,7 +148,6 @@ struct SDL_SysWMinfo
 {
     SDL_version version;
     HWND window;                /* The Win32 display window */
-    HGLRC hglrc;                /* The OpenGL context, if any */
 };
 
 #elif defined(SDL_VIDEO_DRIVER_RISCOS)

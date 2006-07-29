@@ -113,8 +113,7 @@ X11_GL_LoadLibrary(_THIS, const char *path)
     if (!_this->gl_data->glXChooseVisual ||
         !_this->gl_data->glXCreateContext ||
         !_this->gl_data->glXDestroyContext ||
-        !_this->gl_data->glXMakeCurrent ||
-        !_this->gl_data->glXSwapBuffers) {
+        !_this->gl_data->glXMakeCurrent || !_this->gl_data->glXSwapBuffers) {
         SDL_SetError("Could not retrieve OpenGL functions");
         return -1;
     }

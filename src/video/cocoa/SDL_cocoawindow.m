@@ -195,6 +195,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
 - (void)mouseMoved:(NSEvent *)theEvent
 {
+    SDL_Window *window = SDL_GetWindowFromID(_data->windowID);
     int index;
     SDL_Mouse *mouse;
     NSPoint point;
@@ -207,6 +208,18 @@ static __inline__ void ConvertNSRect(NSRect *r)
     }
 
     point = [NSEvent mouseLocation];
+    if (point.x < rect.origin.x ||
+        point.x > (rect.origin.x + rect.size.width) ||
+        point.y < rect.origin.y ||
+        point.y > (rect.origin.y + rect.size.height)) {
+        if (window->flags & SDL_WINDOW_MOUSE_FOCUS) {
+            SDL_SendWindowEvent(_data->windowID, SDL_WINDOWEVENT_LEAVE, 0, 0);
+        }
+    } else {
+        if (!(window->flags & SDL_WINDOW_MOUSE_FOCUS)) {
+            SDL_SendWindowEvent(_data->windowID, SDL_WINDOWEVENT_ENTER, 0, 0);
+        }
+    }
     point.x = point.x - rect.origin.x;
     point.y = rect.size.height - (point.y - rect.origin.y);
     SDL_SendMouseMotion(index, 0, (int)point.x, (int)point.y);
@@ -215,18 +228,6 @@ static __inline__ void ConvertNSRect(NSRect *r)
 - (void)scrollWheel:(NSEvent *)theEvent
 {
 fprintf(stderr, "scrollWheel\n");
-}
-
-- (void)mouseEntered:(NSEvent *)theEvent
-{
-fprintf(stderr, "mouseEntered\n");
-    SDL_SendWindowEvent(_data->windowID, SDL_WINDOWEVENT_ENTER, 0, 0);
-}
-
-- (void)mouseExited:(NSEvent *)theEvent
-{
-fprintf(stderr, "mouseExited\n");
-    SDL_SendWindowEvent(_data->windowID, SDL_WINDOWEVENT_LEAVE, 0, 0);
 }
 
 - (void)keyDown:(NSEvent *)theEvent
@@ -282,7 +283,7 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
     {
         unsigned int style = [nswindow styleMask];
 
-        if (style == NSBorderlessWindowMask) {
+        if ((style & ~NSResizableWindowMask) == NSBorderlessWindowMask) {
             window->flags |= SDL_WINDOW_BORDERLESS;
         } else {
             window->flags &= ~SDL_WINDOW_BORDERLESS;
@@ -331,16 +332,14 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
 
     pool = [[NSAutoreleasePool alloc] init];
 
-    if ((window->flags & SDL_WINDOW_FULLSCREEN) ||
-        window->x == SDL_WINDOWPOS_CENTERED) {
+    if (window->x == SDL_WINDOWPOS_CENTERED) {
         rect.origin.x = (CGDisplayPixelsWide(kCGDirectMainDisplay) - window->w) / 2;
     } else if (window->x == SDL_WINDOWPOS_UNDEFINED) {
         rect.origin.x = 0;
     } else {
         rect.origin.x = window->x;
     }
-    if ((window->flags & SDL_WINDOW_FULLSCREEN) ||
-        window->y == SDL_WINDOWPOS_CENTERED) {
+    if (window->y == SDL_WINDOWPOS_CENTERED) {
         rect.origin.y = (CGDisplayPixelsHigh(kCGDirectMainDisplay) - window->h) / 2;
     } else if (window->y == SDL_WINDOWPOS_UNDEFINED) {
         rect.origin.y = 0;
@@ -361,23 +360,6 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
     }
 
     nswindow = [[NSWindow alloc] initWithContentRect:rect styleMask:style backing:NSBackingStoreBuffered defer:FALSE];
-
-    if (window->flags & SDL_WINDOW_SHOWN) {
-        [nswindow makeKeyAndOrderFront:nil];
-    }
-    if (window->flags & SDL_WINDOW_MAXIMIZED) {
-        [nswindow performZoom:nil];
-    }
-    if (window->flags & SDL_WINDOW_MINIMIZED) {
-        [nswindow performMiniaturize:nil];
-    }
-
-    if (window->title) {
-        title = [[NSString alloc] initWithUTF8String:window->title];
-        [nswindow setTitle:title];
-        [nswindow setMiniwindowTitle:title];
-        [title release];
-    }
 
     [pool release];
 
@@ -424,10 +406,14 @@ Cocoa_SetWindowTitle(_THIS, SDL_Window * window)
     NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->window;
     NSString *string;
 
-    string = [[NSString alloc] initWithUTF8String:window->title];
+    if(window->title) {
+        string = [[NSString alloc] initWithUTF8String:window->title];
+    } else {
+        string = [[NSString alloc] init];
+    }
     [nswindow setTitle:string];
-    [nswindow setMiniwindowTitle:string];
     [string release];
+
     [pool release];
 }
 
@@ -467,16 +453,20 @@ Cocoa_ShowWindow(_THIS, SDL_Window * window)
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->window;
 
-    [nswindow makeKeyAndOrderFront:nil];
+    if (![nswindow isMiniaturized]) {
+        [nswindow makeKeyAndOrderFront:nil];
+    }
     [pool release];
 }
 
 void
 Cocoa_HideWindow(_THIS, SDL_Window * window)
 {
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->window;
 
-    /* FIXME */
+    [nswindow orderOut:nil];
+    [pool release];
 }
 
 void
@@ -495,7 +485,7 @@ Cocoa_MaximizeWindow(_THIS, SDL_Window * window)
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->window;
 
-    [nswindow performZoom:nil];
+    [nswindow zoom:nil];
     [pool release];
 }
 
@@ -505,16 +495,22 @@ Cocoa_MinimizeWindow(_THIS, SDL_Window * window)
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->window;
 
-    [nswindow performMiniaturize:nil];
+    [nswindow miniaturize:nil];
     [pool release];
 }
 
 void
 Cocoa_RestoreWindow(_THIS, SDL_Window * window)
 {
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->window;
 
-    /* FIXME */
+    if ([nswindow isMiniaturized]) {
+        [nswindow deminiaturize:nil];
+    } else if ([nswindow isZoomed]) {
+        [nswindow zoom:nil];
+    }
+    [pool release];
 }
 
 void

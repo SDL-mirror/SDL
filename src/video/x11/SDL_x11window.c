@@ -193,8 +193,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
                             visual, AllocNone);
     }
 
-    if ((window->flags & SDL_WINDOW_FULLSCREEN) ||
-        window->x == SDL_WINDOWPOS_CENTERED) {
+    if (window->x == SDL_WINDOWPOS_CENTERED) {
         x = (DisplayWidth(data->display, displaydata->screen) -
              window->w) / 2;
     } else if (window->x == SDL_WINDOWPOS_UNDEFINED) {
@@ -202,8 +201,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     } else {
         x = window->x;
     }
-    if ((window->flags & SDL_WINDOW_FULLSCREEN) ||
-        window->y == SDL_WINDOWPOS_CENTERED) {
+    if (window->y == SDL_WINDOWPOS_CENTERED) {
         y = (DisplayHeight(data->display, displaydata->screen) -
              window->h) / 2;
     } else if (window->y == SDL_WINDOWPOS_UNDEFINED) {
@@ -360,14 +358,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     wmhints = XAllocWMHints();
     if (wmhints) {
         wmhints->input = True;
-        if (window->flags & SDL_WINDOW_MINIMIZED) {
-            wmhints->initial_state = IconicState;
-        } else if (window->flags & SDL_WINDOW_SHOWN) {
-            wmhints->initial_state = NormalState;
-        } else {
-            wmhints->initial_state = WithdrawnState;
-        }
-        wmhints->flags = InputHint | StateHint;
+        wmhints->flags = InputHint;
         XSetWMHints(data->display, w, wmhints);
         XFree(wmhints);
     }
@@ -391,16 +382,6 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     /* Allow the window to be deleted by the window manager */
     XSetWMProtocols(data->display, w, &data->WM_DELETE_WINDOW, 1);
 
-    /* Finally, show the window */
-    if (window->flags & SDL_WINDOW_SHOWN) {
-        XEvent event;
-
-        XMapRaised(data->display, w);
-        do {
-            XCheckWindowEvent(data->display, w, StructureNotifyMask, &event);
-        } while (event.type != MapNotify);
-    }
-
     if (SetupWindowData(_this, window, w, SDL_TRUE) < 0) {
 #ifdef SDL_VIDEO_OPENGL_GLX
         if (window->flags & SDL_WINDOW_OPENGL) {
@@ -410,9 +391,6 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         XDestroyWindow(data->display, w);
         return -1;
     }
-
-    X11_SetWindowTitle(_this, window);
-
     return 0;
 }
 
@@ -510,25 +488,8 @@ X11_SetWindowPosition(_THIS, SDL_Window * window)
     SDL_DisplayData *displaydata =
         (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
     Display *display = data->videodata->display;
-    int x, y;
 
-    if ((window->flags & SDL_WINDOW_FULLSCREEN) ||
-        window->x == SDL_WINDOWPOS_CENTERED) {
-        x = (DisplayWidth(display, displaydata->screen) - window->w) / 2;
-    } else if (window->x == SDL_WINDOWPOS_UNDEFINED) {
-        x = 0;
-    } else {
-        x = window->x;
-    }
-    if ((window->flags & SDL_WINDOW_FULLSCREEN) ||
-        window->y == SDL_WINDOWPOS_CENTERED) {
-        y = (DisplayHeight(display, displaydata->screen) - window->h) / 2;
-    } else if (window->y == SDL_WINDOWPOS_UNDEFINED) {
-        y = 0;
-    } else {
-        y = window->y;
-    }
-    XMoveWindow(display, data->window, x, y);
+    XMoveWindow(display, data->window, window->x, window->y);
 }
 
 void

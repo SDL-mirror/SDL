@@ -133,35 +133,19 @@ int
 WIN_CreateWindow(_THIS, SDL_Window * window)
 {
     HWND hwnd;
-    LPTSTR title = NULL;
     HWND top;
     RECT rect;
     DWORD style = (WS_CLIPSIBLINGS | WS_CLIPCHILDREN);
     int x, y;
     int w, h;
 
-    if (window->title) {
-        title = WIN_UTF8ToString(window->title);
-    } else {
-        title = NULL;
-    }
-
-    if (window->flags & SDL_WINDOW_SHOWN) {
-        style |= WS_VISIBLE;
-    }
-    if ((window->flags & (SDL_WINDOW_FULLSCREEN | SDL_WINDOW_BORDERLESS))) {
+    if (window->flags & SDL_WINDOW_BORDERLESS) {
         style |= WS_POPUP;
     } else {
         style |= (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX);
     }
     if (window->flags & SDL_WINDOW_RESIZABLE) {
         style |= (WS_THICKFRAME | WS_MAXIMIZEBOX);
-    }
-    if (window->flags & SDL_WINDOW_MAXIMIZED) {
-        style |= WS_MAXIMIZE;
-    }
-    if (window->flags & SDL_WINDOW_MINIMIZED) {
-        style |= WS_MINIMIZE;
     }
 
     /* Figure out what the window area will be */
@@ -178,16 +162,14 @@ WIN_CreateWindow(_THIS, SDL_Window * window)
     w = (rect.right - rect.left);
     h = (rect.bottom - rect.top);
 
-    if ((window->flags & SDL_WINDOW_FULLSCREEN) ||
-        window->x == SDL_WINDOWPOS_CENTERED) {
+    if (window->x == SDL_WINDOWPOS_CENTERED) {
         x = (GetSystemMetrics(SM_CXSCREEN) - w) / 2;
     } else if (window->x == SDL_WINDOWPOS_UNDEFINED) {
         x = CW_USEDEFAULT;
     } else {
         x = window->x + rect.left;
     }
-    if ((window->flags & SDL_WINDOW_FULLSCREEN) ||
-        window->y == SDL_WINDOWPOS_CENTERED) {
+    if (window->y == SDL_WINDOWPOS_CENTERED) {
         y = (GetSystemMetrics(SM_CYSCREEN) - h) / 2;
     } else if (window->y == SDL_WINDOWPOS_UNDEFINED) {
         y = CW_USEDEFAULT;
@@ -195,14 +177,10 @@ WIN_CreateWindow(_THIS, SDL_Window * window)
         y = window->y + rect.top;
     }
 
-    hwnd = CreateWindow(SDL_Appname,
-                        title ? title : TEXT(""),
-                        style, x, y, w, h, NULL, NULL, SDL_Instance, NULL);
+    hwnd =
+        CreateWindow(SDL_Appname, TEXT(""), style, x, y, w, h, NULL, NULL,
+                     SDL_Instance, NULL);
     WIN_PumpEvents(_this);
-
-    if (title) {
-        SDL_free(title);
-    }
 
     if (!hwnd) {
         WIN_SetError("Couldn't create window");
@@ -277,7 +255,6 @@ WIN_SetWindowPosition(_THIS, SDL_Window * window)
     DWORD style;
     HWND top;
     int x, y;
-    int w, h;
 
     /* Figure out what the window area will be */
     if (window->flags & SDL_WINDOW_FULLSCREEN) {
@@ -293,24 +270,10 @@ WIN_SetWindowPosition(_THIS, SDL_Window * window)
     AdjustWindowRectEx(&rect, style,
                        (style & WS_CHILDWINDOW) ? FALSE : (GetMenu(hwnd) !=
                                                            NULL), 0);
-    w = (rect.right - rect.left);
-    h = (rect.bottom - rect.top);
+    x = window->x + rect.left;
+    y = window->y + rect.top;
 
-    if ((window->flags & SDL_WINDOW_FULLSCREEN) ||
-        window->x == SDL_WINDOWPOS_CENTERED) {
-        x = (GetSystemMetrics(SM_CXSCREEN) - w) / 2;
-        window->x = x - rect.left;
-    } else {
-        x = window->x + rect.left;
-    }
-    if ((window->flags & SDL_WINDOW_FULLSCREEN) ||
-        window->y == SDL_WINDOWPOS_CENTERED) {
-        y = (GetSystemMetrics(SM_CYSCREEN) - h) / 2;
-        window->y = y - rect.top;
-    } else {
-        y = window->y + rect.top;
-    }
-    SetWindowPos(hwnd, top, x, y, h, w, (SWP_NOCOPYBITS | SWP_NOSIZE));
+    SetWindowPos(hwnd, top, x, y, 0, 0, (SWP_NOCOPYBITS | SWP_NOSIZE));
 }
 
 void
@@ -438,8 +401,6 @@ WIN_GetWindowWMInfo(_THIS, SDL_Window * window, SDL_SysWMinfo * info)
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
     if (info->version.major <= SDL_MAJOR_VERSION) {
         info->window = hwnd;
-        /* FIXME! */
-        info->hglrc = NULL;
         return SDL_TRUE;
     } else {
         SDL_SetError("Application not compiled with SDL %d.%d\n",
