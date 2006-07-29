@@ -55,6 +55,8 @@ typedef struct SDL_WindowData SDL_WindowData;
 -(void) otherMouseUp:(NSEvent *) theEvent;
 -(void) mouseMoved:(NSEvent *) theEvent;
 -(void) mouseDragged:(NSEvent *) theEvent;
+-(void) rightMouseDragged:(NSEvent *) theEvent;
+-(void) otherMouseDragged:(NSEvent *) theEvent;
 -(void) scrollWheel:(NSEvent *) theEvent;
 -(void) keyDown:(NSEvent *) theEvent;
 -(void) keyUp:(NSEvent *) theEvent;

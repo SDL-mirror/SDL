@@ -218,6 +218,16 @@ static __inline__ void ConvertNSRect(NSRect *r)
     [self mouseMoved:theEvent];
 }
 
+- (void)rightMouseDragged:(NSEvent *)theEvent
+{
+    [self mouseMoved:theEvent];
+}
+
+- (void)otherMouseDragged:(NSEvent *)theEvent
+{
+    [self mouseMoved:theEvent];
+}
+
 - (void)scrollWheel:(NSEvent *)theEvent
 {
     int index;
