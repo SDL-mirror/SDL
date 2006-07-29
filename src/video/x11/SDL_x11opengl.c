@@ -412,7 +412,7 @@ X11_GL_CreateContext(_THIS, SDL_Window * window)
     int n;
     GLXContext context = NULL;
 
-    /* We do _this to create a clean separation between X and GLX errors. */
+    /* We do this to create a clean separation between X and GLX errors. */
     XSync(display, False);
     XGetWindowAttributes(display, data->window, &xattr);
     v.screen = screen;
