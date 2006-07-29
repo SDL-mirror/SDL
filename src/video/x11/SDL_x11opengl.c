@@ -288,7 +288,11 @@ X11_GL_Shutdown(_THIS)
         return;
     }
 
-    X11_GL_UnloadLibrary(_this);
+    /* Don't actually unload the library, since it may have registered
+     * X11 shutdown hooks, per the notes at:
+     * http://dri.sourceforge.net/doc/DRIuserguide.html
+     * //X11_GL_UnloadLibrary(_this);
+     */
 
     SDL_free(_this->gl_data);
     _this->gl_data = NULL;
