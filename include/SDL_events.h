@@ -60,11 +60,11 @@ typedef enum
     SDL_WINDOWEVENT,            /**< Window state change */
     SDL_KEYDOWN,                /**< Keys pressed */
     SDL_KEYUP,                  /**< Keys released */
-    SDL_TEXTINPUT,                              /**< Keyboard text input */
+    SDL_TEXTINPUT,              /**< Keyboard text input */
     SDL_MOUSEMOTION,            /**< Mouse moved */
     SDL_MOUSEBUTTONDOWN,        /**< Mouse button pressed */
     SDL_MOUSEBUTTONUP,          /**< Mouse button released */
-    SDL_MOUSEWHEEL,                             /**< Mouse wheel motion */
+    SDL_MOUSEWHEEL,             /**< Mouse wheel motion */
     SDL_JOYAXISMOTION,          /**< Joystick axis motion */
     SDL_JOYBALLMOTION,          /**< Joystick trackball motion */
     SDL_JOYHATMOTION,           /**< Joystick hat position change */

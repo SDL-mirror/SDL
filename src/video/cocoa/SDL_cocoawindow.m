@@ -208,26 +208,22 @@ static __inline__ void ConvertNSRect(NSRect *r)
     }
 
     point = [NSEvent mouseLocation];
-    if (point.x < rect.origin.x ||
-        point.x > (rect.origin.x + rect.size.width) ||
-        point.y < rect.origin.y ||
-        point.y > (rect.origin.y + rect.size.height)) {
-        if (window->flags & SDL_WINDOW_MOUSE_FOCUS) {
-            SDL_SendWindowEvent(_data->windowID, SDL_WINDOWEVENT_LEAVE, 0, 0);
-        }
-    } else {
-        if (!(window->flags & SDL_WINDOW_MOUSE_FOCUS)) {
-            SDL_SendWindowEvent(_data->windowID, SDL_WINDOWEVENT_ENTER, 0, 0);
-        }
-    }
     point.x = point.x - rect.origin.x;
     point.y = rect.size.height - (point.y - rect.origin.y);
     SDL_SendMouseMotion(index, 0, (int)point.x, (int)point.y);
 }
 
+- (void)mouseDragged:(NSEvent *)theEvent
+{
+    [self mouseMoved:theEvent];
+}
+
 - (void)scrollWheel:(NSEvent *)theEvent
 {
-fprintf(stderr, "scrollWheel\n");
+    int index;
+
+    index = _data->videodata->mouse;
+    SDL_SendMouseWheel(index, (int)([theEvent deltaY]+0.9f));
 }
 
 - (void)keyDown:(NSEvent *)theEvent

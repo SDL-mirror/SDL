@@ -827,7 +827,7 @@ PrintEvent(SDL_Event * event)
     case SDL_MOUSEWHEEL:
         fprintf(stderr, "Mouse %d: wheel scrolled %d in window %d",
                 event->wheel.which, event->wheel.motion,
-                event->button.windowID);
+                event->wheel.windowID);
         break;
     case SDL_JOYBALLMOTION:
         fprintf(stderr, "Joystick %d: ball %d moved by %d,%d",
