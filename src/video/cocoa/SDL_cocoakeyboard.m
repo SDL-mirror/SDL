@@ -530,7 +530,6 @@ Cocoa_HandleKeyEvent(_THIS, NSEvent *event)
         if ([event isARepeat]) {
             break;
         }
-printf("NSKeyDown: %x, %x\n", scancode, [event modifierFlags]);
         SDL_SendKeyboardKey(data->keyboard, SDL_PRESSED, (Uint8)scancode,
                             data->keymap[scancode]);
         text = [[event characters] UTF8String];
@@ -539,12 +538,10 @@ printf("NSKeyDown: %x, %x\n", scancode, [event modifierFlags]);
         }
         break;
     case NSKeyUp:
-printf("NSKeyUp: %x, %x\n", scancode, [event modifierFlags]);
         SDL_SendKeyboardKey(data->keyboard, SDL_RELEASED, (Uint8)scancode,
                             data->keymap[scancode]);
         break;
     case NSFlagsChanged:
-printf("NSFlagsChanged: %x, %x\n", scancode, [event modifierFlags]);
         HandleModifiers(_this, scancode, [event modifierFlags]);
         break;
     }
