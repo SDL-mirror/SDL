@@ -174,7 +174,9 @@ Cocoa_PumpEvents(_THIS)
         case NSKeyUp:
         case NSFlagsChanged:
             Cocoa_HandleKeyEvent(_this, event);
-            /* Fall through to pass event to NSApp */
+            /* Fall through to pass event to NSApp; er, nevermind... */
+            /* FIXME: Find a way to stop the beeping, using delegate */
+            break;
         default:
             [NSApp sendEvent:event];
             break;

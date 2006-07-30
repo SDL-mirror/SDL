@@ -58,8 +58,6 @@ typedef struct SDL_WindowData SDL_WindowData;
 -(void) rightMouseDragged:(NSEvent *) theEvent;
 -(void) otherMouseDragged:(NSEvent *) theEvent;
 -(void) scrollWheel:(NSEvent *) theEvent;
--(void) keyDown:(NSEvent *) theEvent;
--(void) keyUp:(NSEvent *) theEvent;
 @end
 /* *INDENT-ON* */
 

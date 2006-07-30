@@ -127,12 +127,18 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
 - (void)windowDidBecomeKey:(NSNotification *)aNotification
 {
-    SDL_SendWindowEvent(_data->windowID, SDL_WINDOWEVENT_FOCUS_GAINED, 0, 0);
+    int index;
+
+    index = _data->videodata->keyboard;
+    SDL_SetKeyboardFocus(index, _data->windowID);
 }
 
 - (void)windowDidResignKey:(NSNotification *)aNotification
 {
-    SDL_SendWindowEvent(_data->windowID, SDL_WINDOWEVENT_FOCUS_LOST, 0, 0);
+    int index;
+
+    index = _data->videodata->keyboard;
+    SDL_SetKeyboardFocus(index, 0);
 }
 
 - (void)windowDidHide:(NSNotification *)aNotification
@@ -252,26 +258,6 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
     index = _data->videodata->mouse;
     SDL_SendMouseWheel(index, (int)([theEvent deltaY]+0.9f));
-}
-
-- (void)keyDown:(NSEvent *)theEvent
-{
-    int index;
-
-    index = _data->videodata->keyboard;
-fprintf(stderr, "keyDown\n");
-    const char *text = [[theEvent characters] UTF8String];
-    if(text && *text) {
-        SDL_SendKeyboardText(index, text);
-    }
-}
-
-- (void)keyUp:(NSEvent *)theEvent
-{
-    int index;
-
-    index = _data->videodata->keyboard;
-fprintf(stderr, "keyUp\n");
 }
 
 @end
