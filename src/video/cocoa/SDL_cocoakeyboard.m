@@ -423,6 +423,14 @@ HandleCapsLock(int keyboard, unsigned short scancode,
         SDL_SendKeyboardKey(keyboard, SDL_PRESSED, (Uint8)scancode, SDLK_CAPSLOCK);
         SDL_SendKeyboardKey(keyboard, SDL_RELEASED, (Uint8)scancode, SDLK_CAPSLOCK);
     }
+
+    oldMask = oldMods & NSNumericPadKeyMask;
+    newMask = newMods & NSNumericPadKeyMask;
+
+    if (oldMask != newMask) {
+        SDL_SendKeyboardKey(keyboard, SDL_PRESSED, (Uint8)scancode, SDLK_NUMLOCK);
+        SDL_SendKeyboardKey(keyboard, SDL_RELEASED, (Uint8)scancode, SDLK_NUMLOCK);
+    }
 }
 
 /* This function will handle the modifier keys and also determine the 
