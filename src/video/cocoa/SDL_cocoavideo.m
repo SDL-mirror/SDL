@@ -66,6 +66,9 @@ Cocoa_CreateDevice(int devindex)
     }
     device->driverdata = data;
 
+    /* Find out what version of Mac OS X we're running */
+    Gestalt(gestaltSystemVersion, &data->osversion);
+
     /* Set the function pointers */
     device->VideoInit = Cocoa_VideoInit;
     device->VideoQuit = Cocoa_VideoQuit;

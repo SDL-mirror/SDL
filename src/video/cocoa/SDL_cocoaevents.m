@@ -89,9 +89,9 @@ CreateApplicationMenus(void)
     [appleMenu addItem:[NSMenuItem separatorItem]];
 
     title = [@"Hide " stringByAppendingString:appName];
-    [appleMenu addItemWithTitle:title action:@selector(hide:) keyEquivalent:@"h"];
+    [appleMenu addItemWithTitle:title action:@selector(hide:) keyEquivalent:@/*"h"*/""];
 
-    menuItem = (NSMenuItem *)[appleMenu addItemWithTitle:@"Hide Others" action:@selector(hideOtherApplications:) keyEquivalent:@"h"];
+    menuItem = (NSMenuItem *)[appleMenu addItemWithTitle:@"Hide Others" action:@selector(hideOtherApplications:) keyEquivalent:@/*"h"*/""];
     [menuItem setKeyEquivalentModifierMask:(NSAlternateKeyMask|NSCommandKeyMask)];
 
     [appleMenu addItemWithTitle:@"Show All" action:@selector(unhideAllApplications:) keyEquivalent:@""];
@@ -99,7 +99,7 @@ CreateApplicationMenus(void)
     [appleMenu addItem:[NSMenuItem separatorItem]];
 
     title = [@"Quit " stringByAppendingString:appName];
-    [appleMenu addItemWithTitle:title action:@selector(terminate:) keyEquivalent:@"q"];
+    [appleMenu addItemWithTitle:title action:@selector(terminate:) keyEquivalent:@/*"q"*/""];
     
     /* Put menu into the menubar */
     menuItem = [[NSMenuItem alloc] initWithTitle:@"" action:nil keyEquivalent:@""];
@@ -116,7 +116,7 @@ CreateApplicationMenus(void)
     windowMenu = [[NSMenu alloc] initWithTitle:@"Window"];
     
     /* "Minimize" item */
-    menuItem = [[NSMenuItem alloc] initWithTitle:@"Minimize" action:@selector(performMiniaturize:) keyEquivalent:@"m"];
+    menuItem = [[NSMenuItem alloc] initWithTitle:@"Minimize" action:@selector(performMiniaturize:) keyEquivalent:@/*"m"*/""];
     [windowMenu addItem:menuItem];
     [menuItem release];
     
@@ -169,7 +169,16 @@ Cocoa_PumpEvents(_THIS)
         if ( event == nil ) {
             break;
         }
-        [NSApp sendEvent:event];
+        switch ([event type]) {
+        case NSKeyDown:
+        case NSKeyUp:
+        case NSFlagsChanged:
+            Cocoa_HandleKeyEvent(_this, event);
+            /* Fall through to pass event to NSApp */
+        default:
+            [NSApp sendEvent:event];
+            break;
+        }
     }
     [pool release];
 }

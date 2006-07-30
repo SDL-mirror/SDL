@@ -148,49 +148,67 @@ static __inline__ void ConvertNSRect(NSRect *r)
 - (void)mouseDown:(NSEvent *)theEvent
 {
     int index;
+    int button;
 
     index = _data->videodata->mouse;
-    SDL_SendMouseButton(index, SDL_PRESSED, SDL_BUTTON_LEFT);
+    switch ([theEvent buttonNumber]) {
+    case 0:
+        button = SDL_BUTTON_LEFT;
+        break;
+    case 1:
+        button = SDL_BUTTON_RIGHT;
+        break;
+    case 2:
+        button = SDL_BUTTON_MIDDLE;
+        break;
+    default:
+        button = [theEvent buttonNumber];
+        break;
+    }
+    SDL_SendMouseButton(index, SDL_PRESSED, button);
 }
 
 - (void)rightMouseDown:(NSEvent *)theEvent
 {
-    int index;
-
-    index = _data->videodata->mouse;
-    SDL_SendMouseButton(index, SDL_PRESSED, SDL_BUTTON_RIGHT);
+    [self mouseDown:theEvent];
 }
 
 - (void)otherMouseDown:(NSEvent *)theEvent
 {
-    int index;
-
-    index = _data->videodata->mouse;
-    SDL_SendMouseButton(index, SDL_PRESSED, SDL_BUTTON_MIDDLE);
+    [self mouseDown:theEvent];
 }
 
 - (void)mouseUp:(NSEvent *)theEvent
 {
     int index;
+    int button;
 
     index = _data->videodata->mouse;
-    SDL_SendMouseButton(index, SDL_RELEASED, SDL_BUTTON_LEFT);
+    switch ([theEvent buttonNumber]) {
+    case 0:
+        button = SDL_BUTTON_LEFT;
+        break;
+    case 1:
+        button = SDL_BUTTON_RIGHT;
+        break;
+    case 2:
+        button = SDL_BUTTON_MIDDLE;
+        break;
+    default:
+        button = [theEvent buttonNumber];
+        break;
+    }
+    SDL_SendMouseButton(index, SDL_RELEASED, button);
 }
 
 - (void)rightMouseUp:(NSEvent *)theEvent
 {
-    int index;
-
-    index = _data->videodata->mouse;
-    SDL_SendMouseButton(index, SDL_RELEASED, SDL_BUTTON_RIGHT);
+    [self mouseUp:theEvent];
 }
 
 - (void)otherMouseUp:(NSEvent *)theEvent
 {
-    int index;
-
-    index = _data->videodata->mouse;
-    SDL_SendMouseButton(index, SDL_RELEASED, SDL_BUTTON_MIDDLE);
+    [self mouseUp:theEvent];
 }
 
 - (void)mouseMoved:(NSEvent *)theEvent
@@ -238,11 +256,21 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
 - (void)keyDown:(NSEvent *)theEvent
 {
+    int index;
+
+    index = _data->videodata->keyboard;
 fprintf(stderr, "keyDown\n");
+    const char *text = [[theEvent characters] UTF8String];
+    if(text && *text) {
+        SDL_SendKeyboardText(index, text);
+    }
 }
 
 - (void)keyUp:(NSEvent *)theEvent
 {
+    int index;
+
+    index = _data->videodata->keyboard;
 fprintf(stderr, "keyUp\n");
 }
 

@@ -654,6 +654,7 @@ SDL_SendKeyboardKey(int index, Uint8 state, Uint8 scancode, SDLKey key)
         event.key.keysym.mod = modstate;
         event.key.keysym.unicode = 0;
         event.key.windowID = keyboard->focus;
+        /* FIXME: This doesn't make sense anymore... */
         /*
          * jk 991215 - Added
          */
@@ -688,7 +689,7 @@ SDL_SendKeyboardText(int index, const char *text)
         event.text.type = SDL_TEXTINPUT;
         event.text.which = (Uint8) index;
         SDL_strlcpy(event.text.text, text, SDL_arraysize(event.text.text));
-        event.key.windowID = keyboard->focus;
+        event.text.windowID = keyboard->focus;
         posted = (SDL_PushEvent(&event) > 0);
     }
     return (posted);

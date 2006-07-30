@@ -27,6 +27,7 @@
 #include <ApplicationServices/ApplicationServices.h>
 #include <Cocoa/Cocoa.h>
 
+#include "SDL_keysym.h"
 #include "../SDL_sysvideo.h"
 
 #include "SDL_cocoaevents.h"
@@ -40,6 +41,9 @@
 
 typedef struct SDL_VideoData
 {
+    SInt32 osversion;
+    SDLKey keymap[256];
+    unsigned int modifierFlags;
     int mouse;
     int keyboard;
 } SDL_VideoData;
