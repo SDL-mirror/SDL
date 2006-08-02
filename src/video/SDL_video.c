@@ -355,13 +355,21 @@ SDL_SelectVideoDisplay(int index)
         SDL_UninitializedVideo();
         return (-1);
     }
-    if (index >= 0) {
-        if (index >= _this->num_displays) {
-            SDL_SetError("index must be in the range 0 - %d",
-                         _this->num_displays - 1);
-            return -1;
-        }
-        _this->current_display = index;
+    if (index < 0 || index >= _this->num_displays) {
+        SDL_SetError("index must be in the range 0 - %d",
+                     _this->num_displays - 1);
+        return -1;
+    }
+    _this->current_display = index;
+    return 0;
+}
+
+int
+SDL_GetCurrentVideoDisplay(void)
+{
+    if (!_this) {
+        SDL_UninitializedVideo();
+        return (-1);
     }
     return _this->current_display;
 }

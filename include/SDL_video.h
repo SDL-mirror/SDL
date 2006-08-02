@@ -403,13 +403,24 @@ extern DECLSPEC int SDLCALL SDL_GetNumVideoDisplays(void);
  *
  * \brief Set the index of the currently selected display.
  *
- * \return The index of the currently selected display.
- *
- * \note You can query the currently selected display by passing an index of -1.
+ * \return 0 on success, or -1 if the index is out of range.
  *
  * \sa SDL_GetNumVideoDisplays()
+ * \sa SDL_GetCurrentVideoDisplay()
  */
 extern DECLSPEC int SDLCALL SDL_SelectVideoDisplay(int index);
+
+/**
+ * \fn int SDL_GetCurrentVideoDisplay(void)
+ *
+ * \brief Get the index of the currently selected display.
+ *
+ * \return The index of the currently selected display.
+ *
+ * \sa SDL_GetNumVideoDisplays()
+ * \sa SDL_SelectVideoDisplay()
+ */
+extern DECLSPEC int SDLCALL SDL_GetCurrentVideoDisplay(void);
 
 /**
  * \fn int SDL_GetNumDisplayModes(void)
