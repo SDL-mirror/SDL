@@ -44,11 +44,13 @@ extern "C" {
 /* *INDENT-ON* */
 #endif
 
+typedef Uint16 SDL_AudioFormat;
+
 /* The calculated values in this structure are calculated by SDL_OpenAudio() */
 typedef struct SDL_AudioSpec
 {
     int freq;                   /* DSP frequency -- samples per second */
-    Uint16 format;              /* Audio data format */
+    SDL_AudioFormat format;     /* Audio data format */
     Uint8 channels;             /* Number of channels: 1 mono, 2 stereo */
     Uint8 silence;              /* Audio buffer silence value (calculated) */
     Uint16 samples;             /* Audio buffer size in samples (power of 2) */
@@ -64,6 +66,36 @@ typedef struct SDL_AudioSpec
     void *userdata;
 } SDL_AudioSpec;
 
+
+/*
+ These are what the 16 bits in SDL_AudioFormat currently mean...
+ (Unspecified bits are always zero.)
+
+ ++-----------------------sample is signed if set
+ ||
+ ||       ++-----------sample is bigendian if set
+ ||       ||
+ ||       ||          ++---sample is float if set
+ ||       ||          ||
+ ||       ||          || +---sample bit size---+
+ ||       ||          || |                     |
+ 15 14 13 12 11 10 09 08 07 06 05 04 03 02 01 00
+
+ There are macros in SDL 1.3 and later to query these bits.
+*/
+
+#define SDL_AUDIO_MASK_BITSIZE       (0xFF)
+#define SDL_AUDIO_MASK_DATATYPE      (1<<8)
+#define SDL_AUDIO_MASK_ENDIAN        (1<<12)
+#define SDL_AUDIO_MASK_SIGNED        (1<<15)
+#define SDL_AUDIO_BITSIZE(x)         (x & SDL_AUDIO_MASK_BITSIZE)
+#define SDL_AUDIO_ISFLOAT(x)         (x & SDL_AUDIO_MASK_DATATYPE)
+#define SDL_AUDIO_ISBIGENDIAN(x)     (x & SDL_AUDIO_MASK_ENDIAN)
+#define SDL_AUDIO_ISSIGNED(x)        (x & SDL_AUDIO_MASK_SIGNED)
+#define SDL_AUDIO_ISINT(x)           (!SDL_AUDIO_ISFLOAT(x))
+#define SDL_AUDIO_ISLITTLEENDIAN(x)  (!SDL_AUDIO_ISBIGENDIAN(x))
+#define SDL_AUDIO_ISUNSIGNED(x)      (!SDL_AUDIO_ISSIGNED(x))
+
 /* Audio format flags (defaults to LSB byte order) */
 #define AUDIO_U8	0x0008  /* Unsigned 8-bit samples */
 #define AUDIO_S8	0x8008  /* Signed 8-bit samples */
@@ -74,13 +106,32 @@ typedef struct SDL_AudioSpec
 #define AUDIO_U16	AUDIO_U16LSB
 #define AUDIO_S16	AUDIO_S16LSB
 
+/* int32 support new to SDL 1.3 */
+#define AUDIO_S32LSB	0x8020  /* 32-bit integer samples */
+#define AUDIO_S32MSB	0x9020  /* As above, but big-endian byte order */
+#define AUDIO_S32	AUDIO_S32LSB
+#define AUDIO_U32LSB	0x0020  /* Unsigned 32-bit integer samples */
+#define AUDIO_U32MSB	0x1020  /* As above, but big-endian byte order */
+#define AUDIO_U32	AUDIO_U32LSB
+
+/* float32 support new to SDL 1.3 */
+#define AUDIO_F32LSB	0x8120  /* 32-bit floating point samples */
+#define AUDIO_F32MSB	0x9120  /* As above, but big-endian byte order */
+#define AUDIO_F32	AUDIO_F32LSB
+
 /* Native audio byte ordering */
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN
 #define AUDIO_U16SYS	AUDIO_U16LSB
 #define AUDIO_S16SYS	AUDIO_S16LSB
+#define AUDIO_S32SYS	AUDIO_S32LSB
+#define AUDIO_U32SYS	AUDIO_U32LSB
+#define AUDIO_F32SYS	AUDIO_F32LSB
 #else
 #define AUDIO_U16SYS	AUDIO_U16MSB
 #define AUDIO_S16SYS	AUDIO_S16MSB
+#define AUDIO_S32SYS	AUDIO_S32MSB
+#define AUDIO_U32SYS	AUDIO_U32MSB
+#define AUDIO_F32SYS	AUDIO_F32MSB
 #endif
 
 
@@ -166,6 +217,43 @@ extern DECLSPEC int SDLCALL SDL_OpenAudio(SDL_AudioSpec * desired,
                                           SDL_AudioSpec * obtained);
 
 /*
+ * SDL Audio Device IDs.
+ * A successful call to SDL_OpenAudio() is always device id 1, and legacy
+ *  SDL audio APIs assume you want this device ID. SDL_OpenAudioDevice() calls
+ *  always returns devices >= 2 on success. The legacy calls are good both
+ *  for backwards compatibility and when you don't care about multiple,
+ *  specific, or capture devices.
+ */
+typedef Uint32 SDL_AudioDeviceID;
+
+/*
+ * Get the number of available devices exposed by the current driver.
+ *  Only valid after a successfully initializing the audio subsystem.
+ */
+extern DECLSPEC int SDLCALL SDL_GetNumAudioDevices(int iscapture);
+
+/*
+ * Get the human-readable name of a specific audio device.
+ *  Must be a value between 0 and (number of audio devices-1).
+ *  Only valid after a successfully initializing the audio subsystem.
+ */
+extern DECLSPEC const char *SDLCALL SDL_GetAudioDevice(int index, int iscapture);
+
+
+/*
+ * Open a specific audio device. Passing in a device name of NULL is
+ *  equivalent to SDL_OpenAudio(). Returns 0 on error, a valid device ID
+ *  on success.
+ */
+extern DECLSPEC SDL_AudioDeviceID SDLCALL SDL_OpenAudioDevice(
+                                                const char * device,
+                                                int iscapture,
+                                                const SDL_AudioSpec * desired,
+                                                SDL_AudioSpec * obtained);
+
+
+
+/*
  * Get the current audio state:
  */
 typedef enum
@@ -176,6 +264,9 @@ typedef enum
 } SDL_audiostatus;
 extern DECLSPEC SDL_audiostatus SDLCALL SDL_GetAudioStatus(void);
 
+extern DECLSPEC SDL_audiostatus SDLCALL SDL_GetAudioDeviceStatus(
+                                                        SDL_AudioDeviceID dev);
+
 /*
  * This function pauses and unpauses the audio callback processing.
  * It should be called with a parameter of 0 after opening the audio
@@ -184,6 +275,8 @@ extern DECLSPEC SDL_audiostatus SDLCALL SDL_GetAudioStatus(void);
  * Silence will be written to the audio device during the pause.
  */
 extern DECLSPEC void SDLCALL SDL_PauseAudio(int pause_on);
+extern DECLSPEC void SDLCALL SDL_PauseAudioDevice(SDL_AudioDeviceID dev,
+                                                  int pause_on);
 
 /*
  * This function loads a WAVE from the data source, automatically freeing
@@ -222,7 +315,8 @@ extern DECLSPEC void SDLCALL SDL_FreeWAV(Uint8 * audio_buf);
  * and rate, and initializes the 'cvt' structure with information needed
  * by SDL_ConvertAudio() to convert a buffer of audio data from one format
  * to the other.
- * This function returns 0, or -1 if there was an error.
+ * Returns -1 if the format conversion is not supported, 0 if there's
+ *  no conversion needed, or 1 if the audio filter is set up.
  */
 extern DECLSPEC int SDLCALL SDL_BuildAudioCVT(SDL_AudioCVT * cvt,
                                               Uint16 src_format,
@@ -254,18 +348,35 @@ extern DECLSPEC void SDLCALL SDL_MixAudio(Uint8 * dst, const Uint8 * src,
                                           Uint32 len, int volume);
 
 /*
+ * This works like SDL_MixAudio, but you specify the audio format instead of
+ *  using the format of audio device 1. Thus it can be used when no audio
+ *  device is open at all.
+ */
+extern DECLSPEC void SDLCALL SDL_MixAudioFormat(Uint8 * dst, const Uint8 * src,
+                                                SDL_AudioFormat format,
+                                                Uint32 len, int volume);
+
+/*
  * The lock manipulated by these functions protects the callback function.
  * During a LockAudio/UnlockAudio pair, you can be guaranteed that the
  * callback function is not running.  Do not call these from the callback
  * function or you will cause deadlock.
  */
 extern DECLSPEC void SDLCALL SDL_LockAudio(void);
+extern DECLSPEC void SDLCALL SDL_LockAudioDevice(SDL_AudioDeviceID dev);
 extern DECLSPEC void SDLCALL SDL_UnlockAudio(void);
+extern DECLSPEC void SDLCALL SDL_UnlockAudioDevice(SDL_AudioDeviceID dev);
 
 /*
  * This function shuts down audio processing and closes the audio device.
  */
 extern DECLSPEC void SDLCALL SDL_CloseAudio(void);
+extern DECLSPEC void SDLCALL SDL_CloseAudioDevice(SDL_AudioDeviceID dev);
+
+/*
+ * Returns 1 if audio device is still functioning, zero if not, -1 on error.
+ */
+extern DECLSPEC int SDLCALL SDL_AudioDeviceConnected(SDL_AudioDeviceID dev);
 
 
 /* Ends C function definitions when using C++ */
