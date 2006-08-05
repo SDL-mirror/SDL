@@ -545,7 +545,7 @@ CommonInit(CommonState * state)
         }
 
         if (state->verbose & VERBOSE_MODES) {
-            const SDL_DisplayMode *mode;
+            SDL_DisplayMode mode;
             int bpp;
             Uint32 Rmask, Gmask, Bmask, Amask;
 
@@ -555,12 +555,12 @@ CommonInit(CommonState * state)
                 fprintf(stderr, "Display %d:\n", i);
                 SDL_SelectVideoDisplay(i);
 
-                mode = SDL_GetDesktopDisplayMode();
-                SDL_PixelFormatEnumToMasks(mode->format, &bpp, &Rmask, &Gmask,
+                SDL_GetDesktopDisplayMode(&mode);
+                SDL_PixelFormatEnumToMasks(mode.format, &bpp, &Rmask, &Gmask,
                                            &Bmask, &Amask);
                 fprintf(stderr,
                         "  Current mode: %dx%d@%dHz, %d bits-per-pixel\n",
-                        mode->w, mode->h, mode->refresh_rate, bpp);
+                        mode.w, mode.h, mode.refresh_rate, bpp);
                 if (Rmask || Gmask || Bmask) {
                     fprintf(stderr, "      Red Mask = 0x%.8x\n", Rmask);
                     fprintf(stderr, "      Green Mask = 0x%.8x\n", Gmask);
@@ -576,12 +576,12 @@ CommonInit(CommonState * state)
                 } else {
                     fprintf(stderr, "  Fullscreen video modes:\n");
                     for (j = 0; j < m; ++j) {
-                        mode = SDL_GetDisplayMode(j);
-                        SDL_PixelFormatEnumToMasks(mode->format, &bpp, &Rmask,
+                        SDL_GetDisplayMode(j, &mode);
+                        SDL_PixelFormatEnumToMasks(mode.format, &bpp, &Rmask,
                                                    &Gmask, &Bmask, &Amask);
                         fprintf(stderr,
                                 "    Mode %d: %dx%d@%dHz, %d bits-per-pixel\n",
-                                j, mode->w, mode->h, mode->refresh_rate, bpp);
+                                j, mode.w, mode.h, mode.refresh_rate, bpp);
                         if (Rmask || Gmask || Bmask) {
                             fprintf(stderr, "        Red Mask = 0x%.8x\n",
                                     Rmask);

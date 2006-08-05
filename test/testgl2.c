@@ -165,6 +165,7 @@ main(int argc, char *argv[])
     int fsaa, accel;
     int value;
     int i, done;
+    SDL_DisplayMode mode;
     SDL_Event event;
     Uint32 then, now, frames;
 
@@ -235,8 +236,8 @@ main(int argc, char *argv[])
         SDL_GL_SetSwapInterval(0);
     }
 
-    printf("Screen BPP: %d\n",
-           SDL_BITSPERPIXEL(SDL_GetCurrentDisplayMode()->format));
+    SDL_GetCurrentDisplayMode(&mode);
+    printf("Screen BPP: %d\n", SDL_BITSPERPIXEL(mode.format));
     printf("\n");
     printf("Vendor     : %s\n", glGetString(GL_VENDOR));
     printf("Renderer   : %s\n", glGetString(GL_RENDERER));

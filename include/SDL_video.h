@@ -432,7 +432,7 @@ extern DECLSPEC int SDLCALL SDL_GetCurrentVideoDisplay(void);
 extern DECLSPEC int SDLCALL SDL_GetNumDisplayModes(void);
 
 /**
- * \fn const SDL_DisplayMode *SDL_GetDisplayMode(int index)
+ * \fn int SDL_GetDisplayMode(int index, SDL_DisplayMode *mode)
  *
  * \brief Retrieve information about a specific display mode.
  *
@@ -444,23 +444,22 @@ extern DECLSPEC int SDLCALL SDL_GetNumDisplayModes(void);
  *
  * \sa SDL_GetNumDisplayModes()
  */
-extern DECLSPEC const SDL_DisplayMode *SDLCALL SDL_GetDisplayMode(int index);
+extern DECLSPEC int SDLCALL SDL_GetDisplayMode(int index,
+                                               SDL_DisplayMode * mode);
 
 /**
- * \fn const SDL_DisplayMode *SDL_GetDesktopDisplayMode(void)
+ * \fn int SDL_GetDesktopDisplayMode(SDL_DisplayMode *mode)
  *
  * \brief Retrieve information about the desktop display mode for the current display.
  */
-extern DECLSPEC const SDL_DisplayMode *SDLCALL
-SDL_GetDesktopDisplayMode(void);
+extern DECLSPEC int SDLCALL SDL_GetDesktopDisplayMode(SDL_DisplayMode * mode);
 
 /**
- * \fn const SDL_DisplayMode *SDL_GetCurrentDisplayMode(void)
+ * \fn int SDL_GetCurrentDisplayMode(SDL_DisplayMode *mode)
  *
  * \brief Retrieve information about the current display mode.
  */
-extern DECLSPEC const SDL_DisplayMode *SDLCALL
-SDL_GetCurrentDisplayMode(void);
+extern DECLSPEC int SDLCALL SDL_GetCurrentDisplayMode(SDL_DisplayMode * mode);
 
 /**
  * \fn SDL_DisplayMode *SDL_GetClosestDisplayMode(const SDL_DisplayMode *mode, SDL_DisplayMode *closest)
@@ -499,13 +498,13 @@ extern DECLSPEC int SDLCALL SDL_SetFullscreenDisplayMode(const SDL_DisplayMode
                                                          * mode);
 
 /**
- * \fn const SDL_DisplayMode *SDL_GetFullscreenDisplayMode(void)
+ * \fn int SDL_GetFullscreenDisplayMode(SDL_DisplayMode *mode)
  *
  * \brief Query the display mode used when a fullscreen window is visible
  *        on the currently selected display.
  */
-extern DECLSPEC const SDL_DisplayMode *SDLCALL
-SDL_GetFullscreenDisplayMode(void);
+extern DECLSPEC int SDLCALL SDL_GetFullscreenDisplayMode(SDL_DisplayMode *
+                                                         mode);
 
 /**
  * \fn int SDL_SetDisplayPalette(const SDL_Color *colors, int firstcolor, int ncolors)

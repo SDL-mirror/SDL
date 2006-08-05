@@ -237,7 +237,8 @@ extern DECLSPEC int SDLCALL SDL_GetNumAudioDevices(int iscapture);
  *  Must be a value between 0 and (number of audio devices-1).
  *  Only valid after a successfully initializing the audio subsystem.
  */
-extern DECLSPEC const char *SDLCALL SDL_GetAudioDevice(int index, int iscapture);
+extern DECLSPEC const char *SDLCALL SDL_GetAudioDevice(int index,
+                                                       int iscapture);
 
 
 /*
@@ -245,11 +246,14 @@ extern DECLSPEC const char *SDLCALL SDL_GetAudioDevice(int index, int iscapture)
  *  equivalent to SDL_OpenAudio(). Returns 0 on error, a valid device ID
  *  on success.
  */
-extern DECLSPEC SDL_AudioDeviceID SDLCALL SDL_OpenAudioDevice(
-                                                const char * device,
-                                                int iscapture,
-                                                const SDL_AudioSpec * desired,
-                                                SDL_AudioSpec * obtained);
+extern DECLSPEC SDL_AudioDeviceID SDLCALL SDL_OpenAudioDevice(const char
+                                                              *device,
+                                                              int iscapture,
+                                                              const
+                                                              SDL_AudioSpec *
+                                                              desired,
+                                                              SDL_AudioSpec *
+                                                              obtained);
 
 
 
@@ -264,8 +268,8 @@ typedef enum
 } SDL_audiostatus;
 extern DECLSPEC SDL_audiostatus SDLCALL SDL_GetAudioStatus(void);
 
-extern DECLSPEC SDL_audiostatus SDLCALL SDL_GetAudioDeviceStatus(
-                                                        SDL_AudioDeviceID dev);
+extern DECLSPEC SDL_audiostatus SDLCALL
+SDL_GetAudioDeviceStatus(SDL_AudioDeviceID dev);
 
 /*
  * This function pauses and unpauses the audio callback processing.
@@ -352,7 +356,8 @@ extern DECLSPEC void SDLCALL SDL_MixAudio(Uint8 * dst, const Uint8 * src,
  *  using the format of audio device 1. Thus it can be used when no audio
  *  device is open at all.
  */
-extern DECLSPEC void SDLCALL SDL_MixAudioFormat(Uint8 * dst, const Uint8 * src,
+extern DECLSPEC void SDLCALL SDL_MixAudioFormat(Uint8 * dst,
+                                                const Uint8 * src,
                                                 SDL_AudioFormat format,
                                                 Uint32 len, int volume);
 

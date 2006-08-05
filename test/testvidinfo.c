@@ -419,7 +419,7 @@ main(int argc, char *argv[])
     const SDL_VideoInfo *info;
     int i, d, n;
     const char *driver;
-    const SDL_DisplayMode *mode;
+    SDL_DisplayMode mode;
     int bpp;
     Uint32 Rmask, Gmask, Bmask, Amask;
     int nmodes;
@@ -452,11 +452,11 @@ main(int argc, char *argv[])
         printf("Display %d:\n", d);
         SDL_SelectVideoDisplay(d);
 
-        mode = SDL_GetDesktopDisplayMode();
-        SDL_PixelFormatEnumToMasks(mode->format, &bpp, &Rmask, &Gmask, &Bmask,
+        SDL_GetDesktopDisplayMode(&mode);
+        SDL_PixelFormatEnumToMasks(mode.format, &bpp, &Rmask, &Gmask, &Bmask,
                                    &Amask);
-        printf("  Current mode: %dx%d@%dHz, %d bits-per-pixel\n", mode->w,
-               mode->h, mode->refresh_rate, bpp);
+        printf("  Current mode: %dx%d@%dHz, %d bits-per-pixel\n", mode.w,
+               mode.h, mode.refresh_rate, bpp);
         if (Rmask || Gmask || Bmask) {
             printf("      Red Mask = 0x%.8x\n", Rmask);
             printf("      Green Mask = 0x%.8x\n", Gmask);
@@ -472,11 +472,11 @@ main(int argc, char *argv[])
         } else {
             printf("  Fullscreen video modes:\n");
             for (i = 0; i < nmodes; ++i) {
-                mode = SDL_GetDisplayMode(i);
-                SDL_PixelFormatEnumToMasks(mode->format, &bpp, &Rmask,
+                SDL_GetDisplayMode(i, &mode);
+                SDL_PixelFormatEnumToMasks(mode.format, &bpp, &Rmask,
                                            &Gmask, &Bmask, &Amask);
                 printf("    Mode %d: %dx%d@%dHz, %d bits-per-pixel\n", i,
-                       mode->w, mode->h, mode->refresh_rate, bpp);
+                       mode.w, mode.h, mode.refresh_rate, bpp);
                 if (Rmask || Gmask || Bmask) {
                     printf("        Red Mask = 0x%.8x\n", Rmask);
                     printf("        Green Mask = 0x%.8x\n", Gmask);

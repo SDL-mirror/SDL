@@ -25,7 +25,7 @@
 #define _SDL_cocoakeyboard_h
 
 extern void Cocoa_InitKeyboard(_THIS);
-extern void Cocoa_HandleKeyEvent(_THIS, NSEvent *event);
+extern void Cocoa_HandleKeyEvent(_THIS, NSEvent * event);
 extern void Cocoa_QuitKeyboard(_THIS);
 
 #endif /* _SDL_cocoakeyboard_h */

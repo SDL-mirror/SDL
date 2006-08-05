@@ -65,14 +65,15 @@ const SDL_VideoInfo *
 SDL_GetVideoInfo(void)
 {
     static SDL_VideoInfo info;
+    SDL_DisplayMode mode;
 
     /* Memory leak, compatibility code, who cares? */
-    if (!info.vfmt && SDL_GetDesktopDisplayMode()) {
+    if (!info.vfmt && SDL_GetDesktopDisplayMode(&mode) == 0) {
         int bpp;
         Uint32 Rmask, Gmask, Bmask, Amask;
 
-        SDL_PixelFormatEnumToMasks(SDL_GetDesktopDisplayMode()->format, &bpp,
-                                   &Rmask, &Gmask, &Bmask, &Amask);
+        SDL_PixelFormatEnumToMasks(mode.format, &bpp, &Rmask, &Gmask, &Bmask,
+                                   &Amask);
         info.vfmt = SDL_AllocFormat(bpp, Rmask, Gmask, Bmask, Amask);
     }
     return &info;
@@ -88,17 +89,20 @@ SDL_VideoModeOK(int width, int height, int bpp, Uint32 flags)
     }
 
     if (!(flags & SDL_FULLSCREEN)) {
-        return SDL_BITSPERPIXEL(SDL_GetDesktopDisplayMode()->format);
+        SDL_DisplayMode mode;
+        SDL_GetDesktopDisplayMode(&mode);
+        return SDL_BITSPERPIXEL(mode.format);
     }
 
     for (i = 0; i < SDL_GetNumDisplayModes(); ++i) {
-        const SDL_DisplayMode *mode = SDL_GetDisplayMode(i);
-        if (!mode->w || !mode->h || (width == mode->w && height == mode->h)) {
-            if (!mode->format) {
+        SDL_DisplayMode mode;
+        SDL_GetDisplayMode(i, &mode);
+        if (!mode.w || !mode.h || (width == mode.w && height == mode.h)) {
+            if (!mode.format) {
                 return bpp;
             }
-            if (SDL_BITSPERPIXEL(mode->format) >= (Uint32) bpp) {
-                actual_bpp = SDL_BITSPERPIXEL(mode->format);
+            if (SDL_BITSPERPIXEL(mode.format) >= (Uint32) bpp) {
+                actual_bpp = SDL_BITSPERPIXEL(mode.format);
             }
         }
     }
@@ -123,15 +127,16 @@ SDL_ListModes(SDL_PixelFormat * format, Uint32 flags)
     nmodes = 0;
     modes = NULL;
     for (i = 0; i < SDL_GetNumDisplayModes(); ++i) {
-        const SDL_DisplayMode *mode = SDL_GetDisplayMode(i);
-        if (!mode->w || !mode->h) {
+        SDL_DisplayMode mode;
+        SDL_GetDisplayMode(i, &mode);
+        if (!mode.w || !mode.h) {
             return (SDL_Rect **) (-1);
         }
-        if (SDL_BITSPERPIXEL(mode->format) != format->BitsPerPixel) {
+        if (SDL_BITSPERPIXEL(mode.format) != format->BitsPerPixel) {
             continue;
         }
-        if (nmodes > 0 && modes[nmodes - 1]->w == mode->w
-            && modes[nmodes - 1]->h == mode->h) {
+        if (nmodes > 0 && modes[nmodes - 1]->w == mode.w
+            && modes[nmodes - 1]->h == mode.h) {
             continue;
         }
 
@@ -145,8 +150,8 @@ SDL_ListModes(SDL_PixelFormat * format, Uint32 flags)
         }
         modes[nmodes]->x = 0;
         modes[nmodes]->y = 0;
-        modes[nmodes]->w = mode->w;
-        modes[nmodes]->h = mode->h;
+        modes[nmodes]->w = mode.w;
+        modes[nmodes]->h = mode.h;
         ++nmodes;
     }
     if (modes) {
@@ -300,16 +305,17 @@ GetEnvironmentWindowPosition(int w, int h, int *x, int *y)
         }
     }
     if (center) {
-        const SDL_DisplayMode *current = SDL_GetDesktopDisplayMode();
-        *x = (current->w - w) / 2;
-        *y = (current->h - h) / 2;
+        SDL_DisplayMode mode;
+        SDL_GetDesktopDisplayMode(&mode);
+        *x = (mode.w - w) / 2;
+        *y = (mode.h - h) / 2;
     }
 }
 
 SDL_Surface *
 SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
 {
-    const SDL_DisplayMode *desktop_mode;
+    SDL_DisplayMode desktop_mode;
     SDL_DisplayMode mode;
     int window_x = SDL_WINDOWPOS_UNDEFINED;
     int window_y = SDL_WINDOWPOS_UNDEFINED;
@@ -390,8 +396,8 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
     }
 
     /* Set up the desired display mode */
-    desktop_mode = SDL_GetDesktopDisplayMode();
-    desktop_format = desktop_mode->format;
+    SDL_GetDesktopDisplayMode(&desktop_mode);
+    desktop_format = desktop_mode.format;
     if (desktop_format && ((flags & SDL_ANYFORMAT)
                            || (bpp == SDL_BITSPERPIXEL(desktop_format)))) {
         desired_format = desktop_format;

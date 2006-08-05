@@ -422,33 +422,44 @@ SDL_GetNumDisplayModes()
     return 0;
 }
 
-const SDL_DisplayMode *
-SDL_GetDisplayMode(int index)
+int
+SDL_GetDisplayMode(int index, SDL_DisplayMode * mode)
 {
     if (index < 0 || index >= SDL_GetNumDisplayModes()) {
         SDL_SetError("index must be in the range of 0 - %d",
                      SDL_GetNumDisplayModes() - 1);
-        return NULL;
+        return -1;
     }
-    return &SDL_CurrentDisplay.display_modes[index];
+    if (mode) {
+        *mode = SDL_CurrentDisplay.display_modes[index];
+    }
+    return 0;
 }
 
-const SDL_DisplayMode *
-SDL_GetDesktopDisplayMode(void)
+int
+SDL_GetDesktopDisplayMode(SDL_DisplayMode * mode)
 {
-    if (_this) {
-        return &SDL_CurrentDisplay.desktop_mode;
+    if (!_this) {
+        SDL_UninitializedVideo();
+        return -1;
     }
-    return NULL;
+    if (mode) {
+        *mode = SDL_CurrentDisplay.desktop_mode;
+    }
+    return 0;
 }
 
-const SDL_DisplayMode *
-SDL_GetCurrentDisplayMode(void)
+int
+SDL_GetCurrentDisplayMode(SDL_DisplayMode * mode)
 {
-    if (_this) {
-        return &SDL_CurrentDisplay.current_mode;
+    if (!_this) {
+        SDL_UninitializedVideo();
+        return -1;
     }
-    return NULL;
+    if (mode) {
+        *mode = SDL_CurrentDisplay.current_mode;
+    }
+    return 0;
 }
 
 SDL_DisplayMode *
@@ -549,6 +560,7 @@ SDL_SetDisplayMode(const SDL_DisplayMode * mode)
 {
     SDL_VideoDisplay *display;
     SDL_DisplayMode display_mode;
+    SDL_DisplayMode current_mode;
     int i, ncolors;
 
     if (!_this) {
@@ -556,10 +568,10 @@ SDL_SetDisplayMode(const SDL_DisplayMode * mode)
         return -1;
     }
 
-    if (!mode) {
-        mode = SDL_GetDesktopDisplayMode();
-    }
     display = &SDL_CurrentDisplay;
+    if (!mode) {
+        mode = &display->desktop_mode;
+    }
     display_mode = *mode;
 
     /* Default to the current mode */
@@ -584,9 +596,8 @@ SDL_SetDisplayMode(const SDL_DisplayMode * mode)
     }
 
     /* See if there's anything left to do */
-    if (SDL_memcmp
-        (&display_mode, SDL_GetCurrentDisplayMode(),
-         sizeof(display_mode)) == 0) {
+    SDL_GetCurrentDisplayMode(&current_mode);
+    if (SDL_memcmp(&display_mode, &current_mode, sizeof(display_mode)) == 0) {
         return 0;
     }
 
@@ -659,13 +670,17 @@ SDL_SetFullscreenDisplayMode(const SDL_DisplayMode * mode)
     return 0;
 }
 
-const SDL_DisplayMode *
-SDL_GetFullscreenDisplayMode(void)
+int
+SDL_GetFullscreenDisplayMode(SDL_DisplayMode * mode)
 {
-    if (_this) {
-        return SDL_CurrentDisplay.fullscreen_mode;
+    if (!_this) {
+        SDL_UninitializedVideo();
+        return -1;
     }
-    return NULL;
+    if (mode) {
+        *mode = *SDL_CurrentDisplay.fullscreen_mode;
+    }
+    return 0;
 }
 
 int
