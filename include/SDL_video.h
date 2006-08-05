@@ -434,7 +434,7 @@ extern DECLSPEC int SDLCALL SDL_GetNumDisplayModes(void);
 /**
  * \fn int SDL_GetDisplayMode(int index, SDL_DisplayMode *mode)
  *
- * \brief Retrieve information about a specific display mode.
+ * \brief Fill in information about a specific display mode.
  *
  * \note The display modes are sorted in this priority:
  *       \li bits per pixel -> more colors to fewer colors
@@ -450,14 +450,14 @@ extern DECLSPEC int SDLCALL SDL_GetDisplayMode(int index,
 /**
  * \fn int SDL_GetDesktopDisplayMode(SDL_DisplayMode *mode)
  *
- * \brief Retrieve information about the desktop display mode for the current display.
+ * \brief Fill in information about the desktop display mode for the current display.
  */
 extern DECLSPEC int SDLCALL SDL_GetDesktopDisplayMode(SDL_DisplayMode * mode);
 
 /**
  * \fn int SDL_GetCurrentDisplayMode(SDL_DisplayMode *mode)
  *
- * \brief Retrieve information about the current display mode.
+ * \brief Fill in information about the current display mode.
  */
 extern DECLSPEC int SDLCALL SDL_GetCurrentDisplayMode(SDL_DisplayMode * mode);
 
@@ -500,8 +500,8 @@ extern DECLSPEC int SDLCALL SDL_SetFullscreenDisplayMode(const SDL_DisplayMode
 /**
  * \fn int SDL_GetFullscreenDisplayMode(SDL_DisplayMode *mode)
  *
- * \brief Query the display mode used when a fullscreen window is visible
- *        on the currently selected display.
+ * \brief Fill in information about the display mode used when a fullscreen
+ *        window is visible on the currently selected display.
  */
 extern DECLSPEC int SDLCALL SDL_GetFullscreenDisplayMode(SDL_DisplayMode *
                                                          mode);
