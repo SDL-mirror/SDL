@@ -948,7 +948,7 @@ extern DECLSPEC int SDLCALL SDL_QueryTexture(SDL_TextureID textureID,
  *
  * \brief Query the pixels of a texture, if the texture does not need to be locked for pixel access.
  *
- * \param texture A texture to be queried, which was created with SDL_TextureAccess_Local
+ * \param texture A texture to be queried, which was created with SDL_TEXTUREACCESS_LOCAL
  * \param pixels A pointer filled with a pointer to the pixels for the texture 
  * \param pitch A pointer filled in with the pitch of the pixel data
  *
@@ -1003,7 +1003,7 @@ extern DECLSPEC int SDLCALL SDL_GetTexturePalette(SDL_TextureID textureID,
  *
  * \return 0 on success, or -1 if the texture is not valid
  *
- * \note This is a very slow function for textures not created with SDL_TextureAccess_Local.
+ * \note This is a very slow function for textures not created with SDL_TEXTUREACCESS_LOCAL.
  */
 extern DECLSPEC int SDLCALL SDL_UpdateTexture(SDL_TextureID textureID,
                                               const SDL_Rect * rect,
@@ -1014,13 +1014,13 @@ extern DECLSPEC int SDLCALL SDL_UpdateTexture(SDL_TextureID textureID,
  *
  * \brief Lock a portion of the texture for pixel access.
  *
- * \param texture The texture to lock for access, which must have been created with SDL_TextureAccess_Local.
+ * \param texture The texture to lock for access, which must have been created with SDL_TEXTUREACCESS_LOCAL.
  * \param rect A pointer to the rectangle to lock for access. If the rect is NULL, the entire texture will be locked.
  * \param markDirty If this is nonzero, the locked area will be marked dirty when the texture is unlocked.
  * \param pixels This is filled in with a pointer to the locked pixels, appropriately offset by the locked area.
  * \param pitch This is filled in with the pitch of the locked pixels.
  *
- * \return 0 on success, or -1 if the texture is not valid or was created with SDL_TextureAccess_Remote
+ * \return 0 on success, or -1 if the texture is not valid or was created with SDL_TEXTUREACCESS_REMOTe
  *
  * \sa SDL_DirtyTexture()
  * \sa SDL_UnlockTexture()
@@ -1045,7 +1045,7 @@ extern DECLSPEC void SDLCALL SDL_UnlockTexture(SDL_TextureID textureID);
  *
  * \brief Mark the specified rectangles of the texture as dirty.
  *
- * \note The texture must have been created with SDL_TextureAccess_Local.
+ * \note The texture must have been created with SDL_TEXTUREACCESS_LOCAL.
  *
  * \sa SDL_LockTexture()
  * \sa SDL_UnlockTexture()
@@ -1053,15 +1053,6 @@ extern DECLSPEC void SDLCALL SDL_UnlockTexture(SDL_TextureID textureID);
 extern DECLSPEC void SDLCALL SDL_DirtyTexture(SDL_TextureID textureID,
                                               int numrects,
                                               const SDL_Rect * rects);
-
-/**
- * \fn void SDL_SelectRenderTexture(SDL_TextureID textureID)
- *
- * \brief Select a texture as the rendering target, or 0 to reselect the current window.
- *
- * \note The texture must have been created with SDL_TextureAccess_Render.
- */
-extern DECLSPEC void SDLCALL SDL_SelectRenderTexture(SDL_TextureID textureID);
 
 /**
  * \fn void SDL_RenderFill(const SDL_Rect *rect, Uint32 color)
