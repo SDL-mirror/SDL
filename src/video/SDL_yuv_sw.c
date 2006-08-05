@@ -975,8 +975,8 @@ SDL_SW_SetupYUVDisplay(SDL_SW_YUVTexture * swdata, Uint32 target_format)
 
     /* You have chosen wisely... */
     switch (swdata->texture->format) {
-    case SDL_PixelFormat_YV12:
-    case SDL_PixelFormat_IYUV:
+    case SDL_PIXELFORMAT_YV12:
+    case SDL_PIXELFORMAT_IYUV:
         if (SDL_BYTESPERPIXEL(target_format) == 2) {
 #if 0                           /*defined(__GNUC__) && defined(__i386__) && SDL_ASSEMBLY_ROUTINES */
             /* inline assembly functions */
@@ -1015,9 +1015,9 @@ SDL_SW_SetupYUVDisplay(SDL_SW_YUVTexture * swdata, Uint32 target_format)
             swdata->Display2X = Color32DitherYV12Mod2X;
         }
         break;
-    case SDL_PixelFormat_YUY2:
-    case SDL_PixelFormat_UYVY:
-    case SDL_PixelFormat_YVYU:
+    case SDL_PIXELFORMAT_YUY2:
+    case SDL_PIXELFORMAT_UYVY:
+    case SDL_PIXELFORMAT_YVYU:
         if (SDL_BYTESPERPIXEL(target_format) == 2) {
             swdata->Display1X = Color16DitherYUY2Mod1X;
             swdata->Display2X = Color16DitherYUY2Mod2X;
@@ -1061,11 +1061,11 @@ SDL_SW_CreateYUVTexture(SDL_Texture * texture)
     }
 
     switch (texture->format) {
-    case SDL_PixelFormat_YV12:
-    case SDL_PixelFormat_IYUV:
-    case SDL_PixelFormat_YUY2:
-    case SDL_PixelFormat_UYVY:
-    case SDL_PixelFormat_YVYU:
+    case SDL_PIXELFORMAT_YV12:
+    case SDL_PIXELFORMAT_IYUV:
+    case SDL_PIXELFORMAT_YUY2:
+    case SDL_PIXELFORMAT_UYVY:
+    case SDL_PIXELFORMAT_YVYU:
         break;
     default:
         SDL_SetError("Unsupported YUV format");
@@ -1073,7 +1073,7 @@ SDL_SW_CreateYUVTexture(SDL_Texture * texture)
     }
 
     swdata->texture = texture;
-    swdata->target_format = SDL_PixelFormat_Unknown;
+    swdata->target_format = SDL_PIXELFORMAT_UNKNOWN;
     swdata->pixels = (Uint8 *) SDL_malloc(texture->w * texture->h * 2);
     swdata->colortab = (int *) SDL_malloc(4 * 256 * sizeof(int));
     swdata->rgb_2_pix = (Uint32 *) SDL_malloc(3 * 768 * sizeof(Uint32));
@@ -1101,8 +1101,8 @@ SDL_SW_CreateYUVTexture(SDL_Texture * texture)
 
     /* Find the pitch and offset values for the overlay */
     switch (texture->format) {
-    case SDL_PixelFormat_YV12:
-    case SDL_PixelFormat_IYUV:
+    case SDL_PIXELFORMAT_YV12:
+    case SDL_PIXELFORMAT_IYUV:
         swdata->pitches[0] = texture->w;
         swdata->pitches[1] = swdata->pitches[0] / 2;
         swdata->pitches[2] = swdata->pitches[0] / 2;
@@ -1112,9 +1112,9 @@ SDL_SW_CreateYUVTexture(SDL_Texture * texture)
         swdata->planes[2] =
             swdata->planes[1] + swdata->pitches[1] * texture->h / 2;
         break;
-    case SDL_PixelFormat_YUY2:
-    case SDL_PixelFormat_UYVY:
-    case SDL_PixelFormat_YVYU:
+    case SDL_PIXELFORMAT_YUY2:
+    case SDL_PIXELFORMAT_UYVY:
+    case SDL_PIXELFORMAT_YVYU:
         swdata->pitches[0] = texture->w * 2;
         swdata->planes[0] = swdata->pixels;
         break;
@@ -1143,8 +1143,8 @@ SDL_SW_UpdateYUVTexture(SDL_SW_YUVTexture * swdata, const SDL_Rect * rect,
     SDL_Texture *texture = swdata->texture;
 
     switch (texture->format) {
-    case SDL_PixelFormat_YV12:
-    case SDL_PixelFormat_IYUV:
+    case SDL_PIXELFORMAT_YV12:
+    case SDL_PIXELFORMAT_IYUV:
         if (rect
             && (rect->x != 0 || rect->y != 0 || rect->w != texture->w
                 || rect->h != texture->h)) {
@@ -1154,9 +1154,9 @@ SDL_SW_UpdateYUVTexture(SDL_SW_YUVTexture * swdata, const SDL_Rect * rect,
         }
         SDL_memcpy(swdata->pixels, pixels, texture->h * texture->w * 2);
         break;
-    case SDL_PixelFormat_YUY2:
-    case SDL_PixelFormat_UYVY:
-    case SDL_PixelFormat_YVYU:
+    case SDL_PIXELFORMAT_YUY2:
+    case SDL_PIXELFORMAT_UYVY:
+    case SDL_PIXELFORMAT_YVYU:
         {
             Uint8 *src, *dst;
             int row;
@@ -1185,8 +1185,8 @@ SDL_SW_LockYUVTexture(SDL_SW_YUVTexture * swdata, const SDL_Rect * rect,
     SDL_Texture *texture = swdata->texture;
 
     switch (texture->format) {
-    case SDL_PixelFormat_YV12:
-    case SDL_PixelFormat_IYUV:
+    case SDL_PIXELFORMAT_YV12:
+    case SDL_PIXELFORMAT_IYUV:
         if (rect
             && (rect->x != 0 || rect->y != 0 || rect->w != texture->w
                 || rect->h != texture->h)) {
@@ -1277,27 +1277,27 @@ SDL_SW_CopyYUVToRGB(SDL_SW_YUVTexture * swdata, const SDL_Rect * srcrect,
         pitch = swdata->stretch->pitch;
     }
     switch (texture->format) {
-    case SDL_PixelFormat_YV12:
+    case SDL_PIXELFORMAT_YV12:
         lum = swdata->planes[0];
         Cr = swdata->planes[1];
         Cb = swdata->planes[2];
         break;
-    case SDL_PixelFormat_IYUV:
+    case SDL_PIXELFORMAT_IYUV:
         lum = swdata->planes[0];
         Cr = swdata->planes[2];
         Cb = swdata->planes[1];
         break;
-    case SDL_PixelFormat_YUY2:
+    case SDL_PIXELFORMAT_YUY2:
         lum = swdata->planes[0];
         Cr = lum + 3;
         Cb = lum + 1;
         break;
-    case SDL_PixelFormat_UYVY:
+    case SDL_PIXELFORMAT_UYVY:
         lum = swdata->planes[0] + 1;
         Cr = lum + 1;
         Cb = lum - 1;
         break;
-    case SDL_PixelFormat_YVYU:
+    case SDL_PIXELFORMAT_YVYU:
         lum = swdata->planes[0];
         Cr = lum + 1;
         Cb = lum + 3;

@@ -229,7 +229,7 @@ main(int argc, char *argv[])
         quit(2);
     }
 
-    if (state->render_flags & SDL_Renderer_PresentVSync) {
+    if (state->render_flags & SDL_RENDERER_PRESENTVSYNC) {
         SDL_GL_SetSwapInterval(1);
     } else {
         SDL_GL_SetSwapInterval(0);

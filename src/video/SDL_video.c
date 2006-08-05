@@ -531,7 +531,7 @@ SDL_GetClosestDisplayMode(const SDL_DisplayMode * mode,
 
         /* Pick some reasonable defaults if the app and driver don't care */
         if (!closest->format) {
-            closest->format = SDL_PixelFormat_RGB888;
+            closest->format = SDL_PIXELFORMAT_RGB888;
         }
         if (!closest->w) {
             closest->w = 640;

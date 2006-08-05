@@ -65,31 +65,31 @@ SDL_RenderDriver GL_RenderDriver = {
     GL_CreateRenderer,
     {
      "opengl",
-     (SDL_Renderer_PresentDiscard | SDL_Renderer_PresentVSync |
-      SDL_Renderer_Accelerated),
-     (SDL_TextureBlendMode_None | SDL_TextureBlendMode_Mask |
-      SDL_TextureBlendMode_Blend | SDL_TextureBlendMode_Add |
-      SDL_TextureBlendMode_Mod),
-     (SDL_TextureScaleMode_None | SDL_TextureScaleMode_Fast |
-      SDL_TextureScaleMode_Slow),
+     (SDL_RENDERER_PRESENTDISCARD | SDL_RENDERER_PRESENTVSYNC |
+      SDL_RENDERER_ACCELERATED),
+     (SDL_TEXTUREBLENDMODE_NONE | SDL_TEXTUREBLENDMODE_MASK |
+      SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD |
+      SDL_TEXTUREBLENDMODE_MOD),
+     (SDL_TEXTURESCALEMODE_NONE | SDL_TEXTURESCALEMODE_FAST |
+      SDL_TEXTURESCALEMODE_SLOW),
      16,
      {
-      SDL_PixelFormat_Index1LSB,
-      SDL_PixelFormat_Index1MSB,
-      SDL_PixelFormat_Index8,
-      SDL_PixelFormat_RGB332,
-      SDL_PixelFormat_RGB444,
-      SDL_PixelFormat_RGB555,
-      SDL_PixelFormat_ARGB4444,
-      SDL_PixelFormat_ARGB1555,
-      SDL_PixelFormat_RGB565,
-      SDL_PixelFormat_RGB24,
-      SDL_PixelFormat_BGR24,
-      SDL_PixelFormat_RGB888,
-      SDL_PixelFormat_BGR888,
-      SDL_PixelFormat_ARGB8888,
-      SDL_PixelFormat_ABGR8888,
-      SDL_PixelFormat_ARGB2101010},
+      SDL_PIXELFORMAT_INDEX1LSB,
+      SDL_PIXELFORMAT_INDEX1MSB,
+      SDL_PIXELFORMAT_INDEX8,
+      SDL_PIXELFORMAT_RGB332,
+      SDL_PIXELFORMAT_RGB444,
+      SDL_PIXELFORMAT_RGB555,
+      SDL_PIXELFORMAT_ARGB4444,
+      SDL_PIXELFORMAT_ARGB1555,
+      SDL_PIXELFORMAT_RGB565,
+      SDL_PIXELFORMAT_RGB24,
+      SDL_PIXELFORMAT_BGR24,
+      SDL_PIXELFORMAT_RGB888,
+      SDL_PIXELFORMAT_BGR888,
+      SDL_PIXELFORMAT_ARGB8888,
+      SDL_PIXELFORMAT_ABGR8888,
+      SDL_PIXELFORMAT_ARGB2101010},
      0,
      0}
 };
@@ -236,7 +236,7 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->driverdata = data;
 
     renderer->info.flags =
-        (SDL_Renderer_PresentDiscard | SDL_Renderer_Accelerated);
+        (SDL_RENDERER_PRESENTDISCARD | SDL_RENDERER_ACCELERATED);
 
     if (GL_LoadFunctions(data) < 0) {
         GL_DestroyRenderer(renderer);
@@ -253,13 +253,13 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
         return NULL;
     }
 
-    if (flags & SDL_Renderer_PresentVSync) {
+    if (flags & SDL_RENDERER_PRESENTVSYNC) {
         SDL_GL_SetSwapInterval(1);
     } else {
         SDL_GL_SetSwapInterval(0);
     }
     if (SDL_GL_GetSwapInterval() > 0) {
-        renderer->info.flags |= SDL_Renderer_PresentVSync;
+        renderer->info.flags |= SDL_RENDERER_PRESENTVSYNC;
     }
 
     data->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &value);
@@ -325,78 +325,78 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     GLenum result;
 
     switch (texture->format) {
-    case SDL_PixelFormat_Index1LSB:
-    case SDL_PixelFormat_Index1MSB:
+    case SDL_PIXELFORMAT_INDEX1LSB:
+    case SDL_PIXELFORMAT_INDEX1MSB:
         internalFormat = GL_RGB;
         format = GL_COLOR_INDEX;
         type = GL_BITMAP;
         break;
-    case SDL_PixelFormat_Index8:
+    case SDL_PIXELFORMAT_INDEX8:
         internalFormat = GL_RGB;
         format = GL_COLOR_INDEX;
         type = GL_UNSIGNED_BYTE;
         break;
-    case SDL_PixelFormat_RGB332:
+    case SDL_PIXELFORMAT_RGB332:
         internalFormat = GL_R3_G3_B2;
         format = GL_RGB;
         type = GL_UNSIGNED_BYTE_3_3_2;
         break;
-    case SDL_PixelFormat_RGB444:
+    case SDL_PIXELFORMAT_RGB444:
         internalFormat = GL_RGB4;
         format = GL_RGB;
         type = GL_UNSIGNED_SHORT_4_4_4_4;
         break;
-    case SDL_PixelFormat_RGB555:
+    case SDL_PIXELFORMAT_RGB555:
         internalFormat = GL_RGB5;
         format = GL_RGB;
         type = GL_UNSIGNED_SHORT_5_5_5_1;
         break;
-    case SDL_PixelFormat_ARGB4444:
+    case SDL_PIXELFORMAT_ARGB4444:
         internalFormat = GL_RGBA4;
         format = GL_BGRA;
         type = GL_UNSIGNED_SHORT_4_4_4_4_REV;
         break;
-    case SDL_PixelFormat_ARGB1555:
+    case SDL_PIXELFORMAT_ARGB1555:
         internalFormat = GL_RGB5_A1;
         format = GL_BGRA;
         type = GL_UNSIGNED_SHORT_1_5_5_5_REV;
         break;
-    case SDL_PixelFormat_RGB565:
+    case SDL_PIXELFORMAT_RGB565:
         internalFormat = GL_RGB8;
         format = GL_RGB;
         type = GL_UNSIGNED_SHORT_5_6_5;
         break;
-    case SDL_PixelFormat_RGB24:
+    case SDL_PIXELFORMAT_RGB24:
         internalFormat = GL_RGB8;
         format = GL_RGB;
         type = GL_UNSIGNED_BYTE;
         break;
-    case SDL_PixelFormat_RGB888:
+    case SDL_PIXELFORMAT_RGB888:
         internalFormat = GL_RGB8;
         format = GL_BGRA;
         type = GL_UNSIGNED_BYTE;
         break;
-    case SDL_PixelFormat_BGR24:
+    case SDL_PIXELFORMAT_BGR24:
         internalFormat = GL_RGB8;
         format = GL_BGR;
         type = GL_UNSIGNED_BYTE;
         break;
-    case SDL_PixelFormat_BGR888:
+    case SDL_PIXELFORMAT_BGR888:
         internalFormat = GL_RGB8;
         format = GL_RGBA;
         type = GL_UNSIGNED_BYTE;
         break;
-    case SDL_PixelFormat_ARGB8888:
+    case SDL_PIXELFORMAT_ARGB8888:
         internalFormat = GL_RGBA8;
         format = GL_BGRA;
         type = GL_UNSIGNED_BYTE;
         break;
-    case SDL_PixelFormat_ABGR8888:
+    case SDL_PIXELFORMAT_ABGR8888:
         internalFormat = GL_RGBA8;
         format = GL_RGBA;
         type = GL_UNSIGNED_BYTE;
         break;
-    case SDL_PixelFormat_ARGB2101010:
+    case SDL_PIXELFORMAT_ARGB2101010:
         internalFormat = GL_RGB10_A2;
         format = GL_BGRA;
         type = GL_UNSIGNED_INT_2_10_10_10_REV;
@@ -465,9 +465,9 @@ static void
 SetupTextureUpdate(GL_RenderData * renderdata, SDL_Texture * texture,
                    int pitch)
 {
-    if (texture->format == SDL_PixelFormat_Index1LSB) {
+    if (texture->format == SDL_PIXELFORMAT_INDEX1LSB) {
         renderdata->glPixelStorei(GL_UNPACK_LSB_FIRST, 1);
-    } else if (texture->format == SDL_PixelFormat_Index1MSB) {
+    } else if (texture->format == SDL_PIXELFORMAT_INDEX1MSB) {
         renderdata->glPixelStorei(GL_UNPACK_LSB_FIRST, 0);
     }
     renderdata->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -608,22 +608,22 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
     if (blendMode != data->blendMode) {
         switch (blendMode) {
-        case SDL_TextureBlendMode_None:
+        case SDL_TEXTUREBLENDMODE_NONE:
             data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
             data->glDisable(GL_BLEND);
             break;
-        case SDL_TextureBlendMode_Mask:
-        case SDL_TextureBlendMode_Blend:
+        case SDL_TEXTUREBLENDMODE_MASK:
+        case SDL_TEXTUREBLENDMODE_BLEND:
             data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
             data->glEnable(GL_BLEND);
             data->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             break;
-        case SDL_TextureBlendMode_Add:
+        case SDL_TEXTUREBLENDMODE_ADD:
             data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
             data->glEnable(GL_BLEND);
             data->glBlendFunc(GL_SRC_ALPHA, GL_ONE);
             break;
-        case SDL_TextureBlendMode_Mod:
+        case SDL_TEXTUREBLENDMODE_MOD:
             data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
             data->glEnable(GL_BLEND);
             data->glBlendFunc(GL_ZERO, GL_SRC_COLOR);
@@ -634,15 +634,15 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
     if (scaleMode != data->scaleMode) {
         switch (scaleMode) {
-        case SDL_TextureScaleMode_None:
-        case SDL_TextureScaleMode_Fast:
+        case SDL_TEXTURESCALEMODE_NONE:
+        case SDL_TEXTURESCALEMODE_FAST:
             data->glTexParameteri(texturedata->type, GL_TEXTURE_MIN_FILTER,
                                   GL_NEAREST);
             data->glTexParameteri(texturedata->type, GL_TEXTURE_MAG_FILTER,
                                   GL_NEAREST);
             break;
-        case SDL_TextureScaleMode_Slow:
-        case SDL_TextureScaleMode_Best:
+        case SDL_TEXTURESCALEMODE_SLOW:
+        case SDL_TEXTURESCALEMODE_BEST:
             data->glTexParameteri(texturedata->type, GL_TEXTURE_MIN_FILTER,
                                   GL_LINEAR);
             data->glTexParameteri(texturedata->type, GL_TEXTURE_MAG_FILTER,

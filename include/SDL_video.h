@@ -170,13 +170,13 @@ typedef enum
  */
 typedef enum
 {
-    SDL_Renderer_SingleBuffer = 0x00000001,     /**< Render directly to the window, if possible */
-    SDL_Renderer_PresentCopy = 0x00000002,      /**< Present uses a copy from back buffer to the front buffer */
-    SDL_Renderer_PresentFlip2 = 0x00000004,     /**< Present uses a flip, swapping back buffer and front buffer */
-    SDL_Renderer_PresentFlip3 = 0x00000008,     /**< Present uses a flip, rotating between two back buffers and a front buffer */
-    SDL_Renderer_PresentDiscard = 0x00000010,   /**< Present leaves the contents of the backbuffer undefined */
-    SDL_Renderer_PresentVSync = 0x00000020,     /**< Present is synchronized with the refresh rate */
-    SDL_Renderer_Accelerated = 0x00000040,      /**< The renderer uses hardware acceleration */
+    SDL_RENDERER_SINGLEBUFFER = 0x00000001,     /**< Render directly to the window, if possible */
+    SDL_RENDERER_PRESENTCOPY = 0x00000002,      /**< Present uses a copy from back buffer to the front buffer */
+    SDL_RENDERER_PRESENTFLIP2 = 0x00000004,     /**< Present uses a flip, swapping back buffer and front buffer */
+    SDL_RENDERER_PRESENTFLIP3 = 0x00000008,     /**< Present uses a flip, rotating between two back buffers and a front buffer */
+    SDL_RENDERER_PRESENTDISCARD = 0x00000010,   /**< Present leaves the contents of the backbuffer undefined */
+    SDL_RENDERER_PRESENTVSYNC = 0x00000020,     /**< Present is synchronized with the refresh rate */
+    SDL_RENDERER_ACCELERATED = 0x00000040,      /**< The renderer uses hardware acceleration */
 } SDL_RendererFlags;
 
 /**
@@ -203,8 +203,8 @@ typedef struct SDL_RendererInfo
  */
 typedef enum
 {
-    SDL_TextureAccess_Local,    /**< Lockable system memory */
-    SDL_TextureAccess_Remote,   /**< Unlockable video memory */
+    SDL_TEXTUREACCESS_LOCAL,    /**< Lockable system memory */
+    SDL_TEXTUREACCESS_REMOTE,   /**< Unlockable video memory */
 } SDL_TextureAccess;
 
 /**
@@ -214,11 +214,11 @@ typedef enum
  */
 typedef enum
 {
-    SDL_TextureBlendMode_None = 0x00000000,     /**< No blending */
-    SDL_TextureBlendMode_Mask = 0x00000001,     /**< dst = A ? src : dst (alpha is mask) */
-    SDL_TextureBlendMode_Blend = 0x00000002,    /**< dst = (src * A) + (dst * (1-A)) */
-    SDL_TextureBlendMode_Add = 0x00000004,      /**< dst = (src * A) + dst */
-    SDL_TextureBlendMode_Mod = 0x00000008,      /**< dst = src * dst */
+    SDL_TEXTUREBLENDMODE_NONE = 0x00000000,     /**< No blending */
+    SDL_TEXTUREBLENDMODE_MASK = 0x00000001,     /**< dst = A ? src : dst (alpha is mask) */
+    SDL_TEXTUREBLENDMODE_BLEND = 0x00000002,    /**< dst = (src * A) + (dst * (1-A)) */
+    SDL_TEXTUREBLENDMODE_ADD = 0x00000004,      /**< dst = (src * A) + dst */
+    SDL_TEXTUREBLENDMODE_MOD = 0x00000008,      /**< dst = src * dst */
 } SDL_TextureBlendMode;
 
 /**
@@ -228,10 +228,10 @@ typedef enum
  */
 typedef enum
 {
-    SDL_TextureScaleMode_None = 0x00000000,     /**< No scaling, rectangles must match dimensions */
-    SDL_TextureScaleMode_Fast = 0x00000001,     /**< Point sampling or equivalent algorithm */
-    SDL_TextureScaleMode_Slow = 0x00000002,     /**< Linear filtering or equivalent algorithm */
-    SDL_TextureScaleMode_Best = 0x00000004,     /**< Bicubic filtering or equivalent algorithm */
+    SDL_TEXTURESCALEMODE_NONE = 0x00000000,     /**< No scaling, rectangles must match dimensions */
+    SDL_TEXTURESCALEMODE_FAST = 0x00000001,     /**< Point sampling or equivalent algorithm */
+    SDL_TEXTURESCALEMODE_SLOW = 0x00000002,     /**< Linear filtering or equivalent algorithm */
+    SDL_TEXTURESCALEMODE_BEST = 0x00000004,     /**< Bicubic filtering or equivalent algorithm */
 } SDL_TextureScaleMode;
 
 /**

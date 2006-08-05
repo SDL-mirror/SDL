@@ -67,25 +67,25 @@ SDL_RenderDriver SW_RenderDriver = {
     SW_CreateRenderer,
     {
      "software",
-     (SDL_Renderer_SingleBuffer | SDL_Renderer_PresentCopy |
-      SDL_Renderer_PresentFlip2 | SDL_Renderer_PresentFlip3 |
-      SDL_Renderer_PresentDiscard | SDL_Renderer_PresentVSync),
-     (SDL_TextureBlendMode_None | SDL_TextureBlendMode_Mask |
-      SDL_TextureBlendMode_Blend),
-     (SDL_TextureScaleMode_None | SDL_TextureScaleMode_Fast),
+     (SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTCOPY |
+      SDL_RENDERER_PRESENTFLIP2 | SDL_RENDERER_PRESENTFLIP3 |
+      SDL_RENDERER_PRESENTDISCARD | SDL_RENDERER_PRESENTVSYNC),
+     (SDL_TEXTUREBLENDMODE_NONE | SDL_TEXTUREBLENDMODE_MASK |
+      SDL_TEXTUREBLENDMODE_BLEND),
+     (SDL_TEXTURESCALEMODE_NONE | SDL_TEXTURESCALEMODE_FAST),
      11,
      {
-      SDL_PixelFormat_Index8,
-      SDL_PixelFormat_RGB555,
-      SDL_PixelFormat_RGB565,
-      SDL_PixelFormat_RGB888,
-      SDL_PixelFormat_BGR888,
-      SDL_PixelFormat_ARGB8888,
-      SDL_PixelFormat_RGBA8888,
-      SDL_PixelFormat_ABGR8888,
-      SDL_PixelFormat_BGRA8888,
-      SDL_PixelFormat_YUY2,
-      SDL_PixelFormat_UYVY},
+      SDL_PIXELFORMAT_INDEX8,
+      SDL_PIXELFORMAT_RGB555,
+      SDL_PIXELFORMAT_RGB565,
+      SDL_PIXELFORMAT_RGB888,
+      SDL_PIXELFORMAT_BGR888,
+      SDL_PIXELFORMAT_ARGB8888,
+      SDL_PIXELFORMAT_RGBA8888,
+      SDL_PIXELFORMAT_ABGR8888,
+      SDL_PIXELFORMAT_BGRA8888,
+      SDL_PIXELFORMAT_YUY2,
+      SDL_PIXELFORMAT_UYVY},
      0,
      0}
 };
@@ -112,7 +112,7 @@ CreateTexture(SDL_Renderer * renderer, Uint32 format, int w, int h)
     }
 
     texture->format = format;
-    texture->access = SDL_TextureAccess_Local;
+    texture->access = SDL_TEXTUREACCESS_LOCAL;
     texture->w = w;
     texture->h = h;
     texture->renderer = renderer;
@@ -199,23 +199,23 @@ SW_CreateRenderer(SDL_Window * window, Uint32 flags)
 
     renderer->info.flags = 0;
 
-    if (flags & SDL_Renderer_PresentFlip2) {
-        renderer->info.flags |= SDL_Renderer_PresentFlip2;
+    if (flags & SDL_RENDERER_PRESENTFLIP2) {
+        renderer->info.flags |= SDL_RENDERER_PRESENTFLIP2;
         n = 2;
-    } else if (flags & SDL_Renderer_PresentFlip3) {
-        renderer->info.flags |= SDL_Renderer_PresentFlip3;
+    } else if (flags & SDL_RENDERER_PRESENTFLIP3) {
+        renderer->info.flags |= SDL_RENDERER_PRESENTFLIP3;
         n = 3;
     } else {
-        renderer->info.flags |= SDL_Renderer_PresentCopy;
+        renderer->info.flags |= SDL_RENDERER_PRESENTCOPY;
         n = 1;
     }
     data->format = displayMode->format;
 
     /* Find a render driver that we can use to display data */
-    renderer_flags = (SDL_Renderer_SingleBuffer |
-                      SDL_Renderer_PresentDiscard);
-    if (flags & SDL_Renderer_PresentVSync) {
-        renderer_flags |= SDL_Renderer_PresentVSync;
+    renderer_flags = (SDL_RENDERER_SINGLEBUFFER |
+                      SDL_RENDERER_PRESENTDISCARD);
+    if (flags & SDL_RENDERER_PRESENTVSYNC) {
+        renderer_flags |= SDL_RENDERER_PRESENTVSYNC;
     }
     desired_driver = SDL_getenv("SDL_VIDEO_RENDERER_SWDRIVER");
     for (i = 0; i < display->num_render_drivers; ++i) {
@@ -237,8 +237,8 @@ SW_CreateRenderer(SDL_Window * window, Uint32 flags)
         SDL_SetError("Couldn't find display render driver");
         return NULL;
     }
-    if (data->renderer->info.flags & SDL_Renderer_PresentVSync) {
-        renderer->info.flags |= SDL_Renderer_PresentVSync;
+    if (data->renderer->info.flags & SDL_RENDERER_PRESENTVSYNC) {
+        renderer->info.flags |= SDL_RENDERER_PRESENTVSYNC;
     }
 
     /* Create the textures we'll use for display */
@@ -411,7 +411,7 @@ SW_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect, Uint32 color)
     SDL_Rect real_rect;
     int status;
 
-    if (data->renderer->info.flags & SDL_Renderer_PresentCopy) {
+    if (data->renderer->info.flags & SDL_RENDERER_PRESENTCOPY) {
         SDL_AddDirtyRect(&data->dirty, rect);
     }
 
@@ -449,7 +449,7 @@ SW_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
     int status;
 
-    if (data->renderer->info.flags & SDL_Renderer_PresentCopy) {
+    if (data->renderer->info.flags & SDL_RENDERER_PRESENTCOPY) {
         SDL_AddDirtyRect(&data->dirty, dstrect);
     }
 
@@ -477,12 +477,12 @@ SW_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         real_dstrect = data->surface.clip_rect;
 
         if (blendMode &
-            (SDL_TextureBlendMode_Mask | SDL_TextureBlendMode_Blend)) {
+            (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND)) {
             SDL_SetAlpha(surface, SDL_SRCALPHA, 0);
         } else {
             SDL_SetAlpha(surface, 0, 0);
         }
-        if (scaleMode != SDL_TextureScaleMode_None &&
+        if (scaleMode != SDL_TEXTURESCALEMODE_NONE &&
             (srcrect->w != dstrect->w || srcrect->h != dstrect->h)) {
             status =
                 SDL_SoftStretch(surface, &real_srcrect, &data->surface,
@@ -505,13 +505,13 @@ SW_RenderPresent(SDL_Renderer * renderer)
     SDL_Texture *texture = data->texture[data->current_texture];
 
     /* Send the data to the display */
-    if (data->renderer->info.flags & SDL_Renderer_PresentCopy) {
+    if (data->renderer->info.flags & SDL_RENDERER_PRESENTCOPY) {
         SDL_DirtyRect *dirty;
         for (dirty = data->dirty.list; dirty; dirty = dirty->next) {
             data->renderer->RenderCopy(data->renderer, texture, &dirty->rect,
                                        &dirty->rect,
-                                       SDL_TextureBlendMode_None,
-                                       SDL_TextureScaleMode_None);
+                                       SDL_TEXTUREBLENDMODE_NONE,
+                                       SDL_TEXTURESCALEMODE_NONE);
         }
         SDL_ClearDirtyRects(&data->dirty);
     } else {
@@ -521,15 +521,15 @@ SW_RenderPresent(SDL_Renderer * renderer)
         rect.w = texture->w;
         rect.h = texture->h;
         data->renderer->RenderCopy(data->renderer, texture, &rect, &rect,
-                                   SDL_TextureBlendMode_None,
-                                   SDL_TextureScaleMode_None);
+                                   SDL_TEXTUREBLENDMODE_NONE,
+                                   SDL_TEXTURESCALEMODE_NONE);
     }
     data->renderer->RenderPresent(data->renderer);
 
     /* Update the flipping chain, if any */
-    if (renderer->info.flags & SDL_Renderer_PresentFlip2) {
+    if (renderer->info.flags & SDL_RENDERER_PRESENTFLIP2) {
         data->current_texture = (data->current_texture + 1) % 2;
-    } else if (renderer->info.flags & SDL_Renderer_PresentFlip3) {
+    } else if (renderer->info.flags & SDL_RENDERER_PRESENTFLIP3) {
         data->current_texture = (data->current_texture + 1) % 3;
     }
 }

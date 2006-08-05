@@ -170,7 +170,7 @@ CommonArg(CommonState * state, int index)
         return 2;
     }
     if (SDL_strcasecmp(argv[index], "--vsync") == 0) {
-        state->render_flags |= SDL_Renderer_PresentVSync;
+        state->render_flags |= SDL_RENDERER_PRESENTVSYNC;
         return 1;
     }
     if (SDL_strcasecmp(argv[index], "--noframe") == 0) {
@@ -283,25 +283,25 @@ static void
 PrintRendererFlag(Uint32 flag)
 {
     switch (flag) {
-    case SDL_Renderer_SingleBuffer:
+    case SDL_RENDERER_SINGLEBUFFER:
         fprintf(stderr, "SingleBuffer");
         break;
-    case SDL_Renderer_PresentCopy:
+    case SDL_RENDERER_PRESENTCOPY:
         fprintf(stderr, "PresentCopy");
         break;
-    case SDL_Renderer_PresentFlip2:
+    case SDL_RENDERER_PRESENTFLIP2:
         fprintf(stderr, "PresentFlip2");
         break;
-    case SDL_Renderer_PresentFlip3:
+    case SDL_RENDERER_PRESENTFLIP3:
         fprintf(stderr, "PresentFlip3");
         break;
-    case SDL_Renderer_PresentDiscard:
+    case SDL_RENDERER_PRESENTDISCARD:
         fprintf(stderr, "PresentDiscard");
         break;
-    case SDL_Renderer_PresentVSync:
+    case SDL_RENDERER_PRESENTVSYNC:
         fprintf(stderr, "PresentVSync");
         break;
-    case SDL_Renderer_Accelerated:
+    case SDL_RENDERER_ACCELERATED:
         fprintf(stderr, "Accelerated");
         break;
     default:
@@ -314,19 +314,19 @@ static void
 PrintBlendMode(Uint32 flag)
 {
     switch (flag) {
-    case SDL_TextureBlendMode_None:
+    case SDL_TEXTUREBLENDMODE_NONE:
         fprintf(stderr, "None");
         break;
-    case SDL_TextureBlendMode_Mask:
+    case SDL_TEXTUREBLENDMODE_MASK:
         fprintf(stderr, "Mask");
         break;
-    case SDL_TextureBlendMode_Blend:
+    case SDL_TEXTUREBLENDMODE_BLEND:
         fprintf(stderr, "Blend");
         break;
-    case SDL_TextureBlendMode_Add:
+    case SDL_TEXTUREBLENDMODE_ADD:
         fprintf(stderr, "Add");
         break;
-    case SDL_TextureBlendMode_Mod:
+    case SDL_TEXTUREBLENDMODE_MOD:
         fprintf(stderr, "Mod");
         break;
     default:
@@ -339,16 +339,16 @@ static void
 PrintScaleMode(Uint32 flag)
 {
     switch (flag) {
-    case SDL_TextureScaleMode_None:
+    case SDL_TEXTURESCALEMODE_NONE:
         fprintf(stderr, "None");
         break;
-    case SDL_TextureScaleMode_Fast:
+    case SDL_TEXTURESCALEMODE_FAST:
         fprintf(stderr, "Fast");
         break;
-    case SDL_TextureScaleMode_Slow:
+    case SDL_TEXTURESCALEMODE_SLOW:
         fprintf(stderr, "Slow");
         break;
-    case SDL_TextureScaleMode_Best:
+    case SDL_TEXTURESCALEMODE_BEST:
         fprintf(stderr, "Best");
         break;
     default:
@@ -361,82 +361,82 @@ static void
 PrintPixelFormat(Uint32 format)
 {
     switch (format) {
-    case SDL_PixelFormat_Unknown:
+    case SDL_PIXELFORMAT_UNKNOWN:
         fprintf(stderr, "Unknwon");
         break;
-    case SDL_PixelFormat_Index1LSB:
+    case SDL_PIXELFORMAT_INDEX1LSB:
         fprintf(stderr, "Index1LSB");
         break;
-    case SDL_PixelFormat_Index1MSB:
+    case SDL_PIXELFORMAT_INDEX1MSB:
         fprintf(stderr, "Index1MSB");
         break;
-    case SDL_PixelFormat_Index4LSB:
+    case SDL_PIXELFORMAT_INDEX4LSB:
         fprintf(stderr, "Index4LSB");
         break;
-    case SDL_PixelFormat_Index4MSB:
+    case SDL_PIXELFORMAT_INDEX4MSB:
         fprintf(stderr, "Index4MSB");
         break;
-    case SDL_PixelFormat_Index8:
+    case SDL_PIXELFORMAT_INDEX8:
         fprintf(stderr, "Index8");
         break;
-    case SDL_PixelFormat_RGB332:
+    case SDL_PIXELFORMAT_RGB332:
         fprintf(stderr, "RGB332");
         break;
-    case SDL_PixelFormat_RGB444:
+    case SDL_PIXELFORMAT_RGB444:
         fprintf(stderr, "RGB444");
         break;
-    case SDL_PixelFormat_RGB555:
+    case SDL_PIXELFORMAT_RGB555:
         fprintf(stderr, "RGB555");
         break;
-    case SDL_PixelFormat_ARGB4444:
+    case SDL_PIXELFORMAT_ARGB4444:
         fprintf(stderr, "ARGB4444");
         break;
-    case SDL_PixelFormat_ARGB1555:
+    case SDL_PIXELFORMAT_ARGB1555:
         fprintf(stderr, "ARGB1555");
         break;
-    case SDL_PixelFormat_RGB565:
+    case SDL_PIXELFORMAT_RGB565:
         fprintf(stderr, "RGB565");
         break;
-    case SDL_PixelFormat_RGB24:
+    case SDL_PIXELFORMAT_RGB24:
         fprintf(stderr, "RGB24");
         break;
-    case SDL_PixelFormat_BGR24:
+    case SDL_PIXELFORMAT_BGR24:
         fprintf(stderr, "BGR24");
         break;
-    case SDL_PixelFormat_RGB888:
+    case SDL_PIXELFORMAT_RGB888:
         fprintf(stderr, "RGB888");
         break;
-    case SDL_PixelFormat_BGR888:
+    case SDL_PIXELFORMAT_BGR888:
         fprintf(stderr, "BGR888");
         break;
-    case SDL_PixelFormat_ARGB8888:
+    case SDL_PIXELFORMAT_ARGB8888:
         fprintf(stderr, "ARGB8888");
         break;
-    case SDL_PixelFormat_RGBA8888:
+    case SDL_PIXELFORMAT_RGBA8888:
         fprintf(stderr, "RGBA8888");
         break;
-    case SDL_PixelFormat_ABGR8888:
+    case SDL_PIXELFORMAT_ABGR8888:
         fprintf(stderr, "ABGR8888");
         break;
-    case SDL_PixelFormat_BGRA8888:
+    case SDL_PIXELFORMAT_BGRA8888:
         fprintf(stderr, "BGRA8888");
         break;
-    case SDL_PixelFormat_ARGB2101010:
+    case SDL_PIXELFORMAT_ARGB2101010:
         fprintf(stderr, "ARGB2101010");
         break;
-    case SDL_PixelFormat_YV12:
+    case SDL_PIXELFORMAT_YV12:
         fprintf(stderr, "YV12");
         break;
-    case SDL_PixelFormat_IYUV:
+    case SDL_PIXELFORMAT_IYUV:
         fprintf(stderr, "IYUV");
         break;
-    case SDL_PixelFormat_YUY2:
+    case SDL_PIXELFORMAT_YUY2:
         fprintf(stderr, "YUY2");
         break;
-    case SDL_PixelFormat_UYVY:
+    case SDL_PIXELFORMAT_UYVY:
         fprintf(stderr, "UYVY");
         break;
-    case SDL_PixelFormat_YVYU:
+    case SDL_PIXELFORMAT_YVYU:
         fprintf(stderr, "YVYU");
         break;
     default:
@@ -617,16 +617,16 @@ CommonInit(CommonState * state)
 
         switch (state->depth) {
         case 8:
-            fullscreen_mode.format = SDL_PixelFormat_Index8;
+            fullscreen_mode.format = SDL_PIXELFORMAT_INDEX8;
             break;
         case 15:
-            fullscreen_mode.format = SDL_PixelFormat_RGB555;
+            fullscreen_mode.format = SDL_PIXELFORMAT_RGB555;
             break;
         case 16:
-            fullscreen_mode.format = SDL_PixelFormat_RGB565;
+            fullscreen_mode.format = SDL_PIXELFORMAT_RGB565;
             break;
         default:
-            fullscreen_mode.format = SDL_PixelFormat_RGB888;
+            fullscreen_mode.format = SDL_PIXELFORMAT_RGB888;
             break;
         }
         fullscreen_mode.w = state->window_w;
@@ -909,6 +909,11 @@ CommonEvent(CommonState * state, SDL_Event * event, int *done)
     case SDL_KEYDOWN:
         switch (event->key.keysym.sym) {
             /* Add hotkeys here */
+        case SDLK_g:
+            if (event->key.keysym.mod & KMOD_CTRL) {
+                /* Ctrl-G toggle grab */
+            }
+            break;
         case SDLK_ESCAPE:
             *done = 1;
             break;

@@ -48,7 +48,7 @@ WIN_GetDisplayMode(LPCTSTR deviceName, DWORD index, SDL_DisplayMode * mode)
          DM_DISPLAYFLAGS);
 
     /* Fill in the mode information */
-    mode->format = SDL_PixelFormat_Unknown;
+    mode->format = SDL_PIXELFORMAT_UNKNOWN;
     mode->w = devmode.dmPelsWidth;
     mode->h = devmode.dmPelsHeight;
     mode->refresh_rate = devmode.dmDisplayFrequency;
@@ -72,38 +72,38 @@ WIN_GetDisplayMode(LPCTSTR deviceName, DWORD index, SDL_DisplayMode * mode)
         if (bmi->bmiHeader.biCompression == BI_BITFIELDS) {
             switch (*(Uint32 *) bmi->bmiColors) {
             case 0x00FF0000:
-                mode->format = SDL_PixelFormat_RGB888;
+                mode->format = SDL_PIXELFORMAT_RGB888;
                 break;
             case 0x000000FF:
-                mode->format = SDL_PixelFormat_BGR888;
+                mode->format = SDL_PIXELFORMAT_BGR888;
                 break;
             case 0xF800:
-                mode->format = SDL_PixelFormat_RGB565;
+                mode->format = SDL_PIXELFORMAT_RGB565;
                 break;
             case 0x7C00:
-                mode->format = SDL_PixelFormat_RGB555;
+                mode->format = SDL_PIXELFORMAT_RGB555;
                 break;
             }
         } else if (bmi->bmiHeader.biBitCount == 8) {
-            mode->format = SDL_PixelFormat_Index8;
+            mode->format = SDL_PIXELFORMAT_INDEX8;
         }
     } else {
         /* FIXME: Can we tell what this will be? */
         switch (devmode.dmBitsPerPel) {
         case 32:
-            mode->format = SDL_PixelFormat_RGB888;
+            mode->format = SDL_PIXELFORMAT_RGB888;
             break;
         case 24:
-            mode->format = SDL_PixelFormat_RGB24;
+            mode->format = SDL_PIXELFORMAT_RGB24;
             break;
         case 16:
-            mode->format = SDL_PixelFormat_RGB565;
+            mode->format = SDL_PIXELFORMAT_RGB565;
             break;
         case 15:
-            mode->format = SDL_PixelFormat_RGB555;
+            mode->format = SDL_PIXELFORMAT_RGB555;
             break;
         case 8:
-            mode->format = SDL_PixelFormat_Index8;
+            mode->format = SDL_PIXELFORMAT_INDEX8;
             break;
         }
     }

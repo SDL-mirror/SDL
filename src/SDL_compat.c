@@ -401,23 +401,23 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
             if (desktop_format) {
                 desired_format = desktop_format;
             } else {
-                desired_format = SDL_PixelFormat_RGB888;
+                desired_format = SDL_PIXELFORMAT_RGB888;
             }
             break;
         case 8:
-            desired_format = SDL_PixelFormat_Index8;
+            desired_format = SDL_PIXELFORMAT_INDEX8;
             break;
         case 15:
-            desired_format = SDL_PixelFormat_RGB555;
+            desired_format = SDL_PIXELFORMAT_RGB555;
             break;
         case 16:
-            desired_format = SDL_PixelFormat_RGB565;
+            desired_format = SDL_PIXELFORMAT_RGB565;
             break;
         case 24:
-            desired_format = SDL_PixelFormat_RGB24;
+            desired_format = SDL_PIXELFORMAT_RGB24;
             break;
         case 32:
-            desired_format = SDL_PixelFormat_RGB888;
+            desired_format = SDL_PIXELFORMAT_RGB888;
             break;
         default:
             SDL_SetError("Unsupported bpp in SDL_SetVideoMode()");
@@ -458,18 +458,18 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
     /* Create a renderer for the window */
     if (SDL_CreateRenderer
         (SDL_VideoWindow, -1,
-         SDL_Renderer_SingleBuffer | SDL_Renderer_PresentDiscard) < 0) {
+         SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTDISCARD) < 0) {
         return NULL;
     }
     SDL_GetRendererInfo(-1, &SDL_VideoRendererInfo);
 
     /* Create a texture for the screen surface */
     SDL_VideoTexture =
-        SDL_CreateTexture(desired_format, SDL_TextureAccess_Local, width,
+        SDL_CreateTexture(desired_format, SDL_TEXTUREACCESS_LOCAL, width,
                           height);
     if (!SDL_VideoTexture) {
         SDL_VideoTexture =
-            SDL_CreateTexture(SDL_PixelFormat_RGB888, SDL_TextureAccess_Local,
+            SDL_CreateTexture(SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_LOCAL,
                               width, height);
     }
     if (!SDL_VideoTexture) {
@@ -659,11 +659,11 @@ SDL_UpdateRects(SDL_Surface * screen, int numrects, SDL_Rect * rects)
         screen = SDL_VideoSurface;
     }
     if (screen == SDL_VideoSurface) {
-        if (SDL_VideoRendererInfo.flags & SDL_Renderer_PresentCopy) {
+        if (SDL_VideoRendererInfo.flags & SDL_RENDERER_PRESENTCOPY) {
             for (i = 0; i < numrects; ++i) {
                 SDL_RenderCopy(SDL_VideoTexture, &rects[i], &rects[i],
-                               SDL_TextureBlendMode_None,
-                               SDL_TextureScaleMode_None);
+                               SDL_TEXTUREBLENDMODE_NONE,
+                               SDL_TEXTURESCALEMODE_NONE);
             }
         } else {
             SDL_Rect rect;
@@ -672,8 +672,8 @@ SDL_UpdateRects(SDL_Surface * screen, int numrects, SDL_Rect * rects)
             rect.w = screen->w;
             rect.h = screen->h;
             SDL_RenderCopy(SDL_VideoTexture, &rect, &rect,
-                           SDL_TextureBlendMode_None,
-                           SDL_TextureScaleMode_None);
+                           SDL_TEXTUREBLENDMODE_NONE,
+                           SDL_TEXTURESCALEMODE_NONE);
         }
         SDL_RenderPresent();
     }
@@ -1304,19 +1304,19 @@ SDL_CreateYUVOverlay(int w, int h, Uint32 format, SDL_Surface * display)
 
     switch (format) {
     case SDL_YV12_OVERLAY:
-        texture_format = SDL_PixelFormat_YV12;
+        texture_format = SDL_PIXELFORMAT_YV12;
         break;
     case SDL_IYUV_OVERLAY:
-        texture_format = SDL_PixelFormat_IYUV;
+        texture_format = SDL_PIXELFORMAT_IYUV;
         break;
     case SDL_YUY2_OVERLAY:
-        texture_format = SDL_PixelFormat_YUY2;
+        texture_format = SDL_PIXELFORMAT_YUY2;
         break;
     case SDL_UYVY_OVERLAY:
-        texture_format = SDL_PixelFormat_UYVY;
+        texture_format = SDL_PIXELFORMAT_UYVY;
         break;
     case SDL_YVYU_OVERLAY:
-        texture_format = SDL_PixelFormat_YVYU;
+        texture_format = SDL_PIXELFORMAT_YVYU;
         break;
     default:
         SDL_SetError("Unknown YUV format");
@@ -1364,7 +1364,7 @@ SDL_CreateYUVOverlay(int w, int h, Uint32 format, SDL_Surface * display)
     }
 
     overlay->hwdata->textureID =
-        SDL_CreateTexture(texture_format, SDL_TextureAccess_Local, w, h);
+        SDL_CreateTexture(texture_format, SDL_TEXTUREACCESS_LOCAL, w, h);
     if (!overlay->hwdata->textureID) {
         SDL_FreeYUVOverlay(overlay);
         return NULL;
@@ -1410,8 +1410,8 @@ int
 SDL_DisplayYUVOverlay(SDL_Overlay * overlay, SDL_Rect * dstrect)
 {
     if (SDL_RenderCopy(overlay->hwdata->textureID, NULL, dstrect,
-                       SDL_TextureBlendMode_None,
-                       SDL_TextureScaleMode_Fast) < 0) {
+                       SDL_TEXTUREBLENDMODE_NONE,
+                       SDL_TEXTURESCALEMODE_FAST) < 0) {
         return -1;
     }
     SDL_RenderPresent();

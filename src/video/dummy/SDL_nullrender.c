@@ -80,25 +80,25 @@ SDL_RenderDriver SDL_DUMMY_RenderDriver = {
     SDL_DUMMY_CreateRenderer,
     {
      "dummy",
-     (SDL_Renderer_SingleBuffer | SDL_Renderer_PresentCopy |
-      SDL_Renderer_PresentFlip2 | SDL_Renderer_PresentFlip3 |
-      SDL_Renderer_PresentDiscard),
-     (SDL_TextureBlendMode_None | SDL_TextureBlendMode_Mask |
-      SDL_TextureBlendMode_Blend),
-     (SDL_TextureScaleMode_None | SDL_TextureScaleMode_Fast),
+     (SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTCOPY |
+      SDL_RENDERER_PRESENTFLIP2 | SDL_RENDERER_PRESENTFLIP3 |
+      SDL_RENDERER_PRESENTDISCARD),
+     (SDL_TEXTUREBLENDMODE_NONE | SDL_TEXTUREBLENDMODE_MASK |
+      SDL_TEXTUREBLENDMODE_BLEND),
+     (SDL_TEXTURESCALEMODE_NONE | SDL_TEXTURESCALEMODE_FAST),
      11,
      {
-      SDL_PixelFormat_Index8,
-      SDL_PixelFormat_RGB555,
-      SDL_PixelFormat_RGB565,
-      SDL_PixelFormat_RGB888,
-      SDL_PixelFormat_BGR888,
-      SDL_PixelFormat_ARGB8888,
-      SDL_PixelFormat_RGBA8888,
-      SDL_PixelFormat_ABGR8888,
-      SDL_PixelFormat_BGRA8888,
-      SDL_PixelFormat_YUY2,
-      SDL_PixelFormat_UYVY},
+      SDL_PIXELFORMAT_INDEX8,
+      SDL_PIXELFORMAT_RGB555,
+      SDL_PIXELFORMAT_RGB565,
+      SDL_PIXELFORMAT_RGB888,
+      SDL_PIXELFORMAT_BGR888,
+      SDL_PIXELFORMAT_ARGB8888,
+      SDL_PIXELFORMAT_RGBA8888,
+      SDL_PIXELFORMAT_ABGR8888,
+      SDL_PIXELFORMAT_BGRA8888,
+      SDL_PIXELFORMAT_YUY2,
+      SDL_PIXELFORMAT_UYVY},
      0,
      0}
 };
@@ -159,14 +159,14 @@ SDL_DUMMY_CreateRenderer(SDL_Window * window, Uint32 flags)
 
     renderer->info.flags = 0;
 
-    if (flags & SDL_Renderer_PresentFlip2) {
-        renderer->info.flags |= SDL_Renderer_PresentFlip2;
+    if (flags & SDL_RENDERER_PRESENTFLIP2) {
+        renderer->info.flags |= SDL_RENDERER_PRESENTFLIP2;
         n = 2;
-    } else if (flags & SDL_Renderer_PresentFlip3) {
-        renderer->info.flags |= SDL_Renderer_PresentFlip3;
+    } else if (flags & SDL_RENDERER_PRESENTFLIP3) {
+        renderer->info.flags |= SDL_RENDERER_PRESENTFLIP3;
         n = 3;
     } else {
-        renderer->info.flags |= SDL_Renderer_PresentCopy;
+        renderer->info.flags |= SDL_RENDERER_PRESENTCOPY;
         n = 1;
     }
     for (i = 0; i < n; ++i) {
@@ -364,12 +364,12 @@ SDL_DUMMY_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         SDL_Rect real_dstrect = *dstrect;
 
         if (blendMode &
-            (SDL_TextureBlendMode_Mask | SDL_TextureBlendMode_Blend)) {
+            (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND)) {
             SDL_SetAlpha(surface, SDL_SRCALPHA, 0);
         } else {
             SDL_SetAlpha(surface, 0, 0);
         }
-        if (scaleMode != SDL_TextureScaleMode_None &&
+        if (scaleMode != SDL_TEXTURESCALEMODE_NONE &&
             (srcrect->w != dstrect->w || srcrect->h != dstrect->h)) {
             return SDL_SoftStretch(surface, &real_srcrect, target,
                                    &real_dstrect);
@@ -396,9 +396,9 @@ SDL_DUMMY_RenderPresent(SDL_Renderer * renderer)
     }
 
     /* Update the flipping chain, if any */
-    if (renderer->info.flags & SDL_Renderer_PresentFlip2) {
+    if (renderer->info.flags & SDL_RENDERER_PRESENTFLIP2) {
         data->current_screen = (data->current_screen + 1) % 2;
-    } else if (renderer->info.flags & SDL_Renderer_PresentFlip3) {
+    } else if (renderer->info.flags & SDL_RENDERER_PRESENTFLIP3) {
         data->current_screen = (data->current_screen + 1) % 3;
     }
 }

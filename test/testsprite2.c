@@ -16,8 +16,8 @@ static SDL_TextureID *sprites;
 static SDL_Rect *positions;
 static SDL_Rect *velocities;
 static int sprite_w, sprite_h;
-static SDL_TextureBlendMode blendMode = SDL_TextureBlendMode_Mask;
-static SDL_TextureScaleMode scaleMode = SDL_TextureScaleMode_None;
+static SDL_TextureBlendMode blendMode = SDL_TEXTUREBLENDMODE_MASK;
+static SDL_TextureScaleMode scaleMode = SDL_TEXTURESCALEMODE_NONE;
 
 /* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
 static void
@@ -60,7 +60,7 @@ LoadSprite(char *file)
     for (i = 0; i < state->num_windows; ++i) {
         SDL_SelectRenderer(state->windows[i]);
         sprites[i] =
-            SDL_CreateTextureFromSurface(0, SDL_TextureAccess_Remote, temp);
+            SDL_CreateTextureFromSurface(0, SDL_TEXTUREACCESS_REMOTE, temp);
         if (!sprites[i]) {
             fprintf(stderr, "Couldn't create texture: %s\n", SDL_GetError());
             SDL_FreeSurface(temp);
@@ -134,35 +134,35 @@ main(int argc, char *argv[])
             if (SDL_strcasecmp(argv[i], "--blend") == 0) {
                 if (argv[i + 1]) {
                     if (SDL_strcasecmp(argv[i + 1], "none") == 0) {
-                        blendMode = SDL_TextureBlendMode_None;
+                        blendMode = SDL_TEXTUREBLENDMODE_NONE;
                         consumed = 2;
                     } else if (SDL_strcasecmp(argv[i + 1], "mask") == 0) {
-                        blendMode = SDL_TextureBlendMode_Mask;
+                        blendMode = SDL_TEXTUREBLENDMODE_MASK;
                         consumed = 2;
                     } else if (SDL_strcasecmp(argv[i + 1], "blend") == 0) {
-                        blendMode = SDL_TextureBlendMode_Blend;
+                        blendMode = SDL_TEXTUREBLENDMODE_BLEND;
                         consumed = 2;
                     } else if (SDL_strcasecmp(argv[i + 1], "add") == 0) {
-                        blendMode = SDL_TextureBlendMode_Add;
+                        blendMode = SDL_TEXTUREBLENDMODE_ADD;
                         consumed = 2;
                     } else if (SDL_strcasecmp(argv[i + 1], "mod") == 0) {
-                        blendMode = SDL_TextureBlendMode_Mod;
+                        blendMode = SDL_TEXTUREBLENDMODE_MOD;
                         consumed = 2;
                     }
                 }
             } else if (SDL_strcasecmp(argv[i], "--scale") == 0) {
                 if (argv[i + 1]) {
                     if (SDL_strcasecmp(argv[i + 1], "none") == 0) {
-                        scaleMode = SDL_TextureScaleMode_None;
+                        scaleMode = SDL_TEXTURESCALEMODE_NONE;
                         consumed = 2;
                     } else if (SDL_strcasecmp(argv[i + 1], "fast") == 0) {
-                        scaleMode = SDL_TextureScaleMode_Fast;
+                        scaleMode = SDL_TEXTURESCALEMODE_FAST;
                         consumed = 2;
                     } else if (SDL_strcasecmp(argv[i + 1], "slow") == 0) {
-                        scaleMode = SDL_TextureScaleMode_Slow;
+                        scaleMode = SDL_TEXTURESCALEMODE_SLOW;
                         consumed = 2;
                     } else if (SDL_strcasecmp(argv[i + 1], "best") == 0) {
-                        scaleMode = SDL_TextureScaleMode_Best;
+                        scaleMode = SDL_TEXTURESCALEMODE_BEST;
                         consumed = 2;
                     }
                 }
@@ -206,7 +206,7 @@ main(int argc, char *argv[])
         quit(2);
     }
     srand(time(NULL));
-    if (scaleMode != SDL_TextureScaleMode_None) {
+    if (scaleMode != SDL_TEXTURESCALEMODE_NONE) {
         sprite_w += sprite_w / 2;
         sprite_h += sprite_h / 2;
     }

@@ -60,29 +60,29 @@ SDL_RenderDriver D3D_RenderDriver = {
     D3D_CreateRenderer,
     {
      "d3d",
-     (SDL_Renderer_SingleBuffer | SDL_Renderer_PresentCopy |
-      SDL_Renderer_PresentFlip2 | SDL_Renderer_PresentFlip3 |
-      SDL_Renderer_PresentDiscard | SDL_Renderer_PresentVSync |
-      SDL_Renderer_Accelerated),
-     (SDL_TextureBlendMode_None | SDL_TextureBlendMode_Mask |
-      SDL_TextureBlendMode_Blend | SDL_TextureBlendMode_Add |
-      SDL_TextureBlendMode_Mod),
-     (SDL_TextureScaleMode_None | SDL_TextureScaleMode_Fast |
-      SDL_TextureScaleMode_Slow | SDL_TextureScaleMode_Best),
+     (SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTCOPY |
+      SDL_RENDERER_PRESENTFLIP2 | sDL_RENDERER_PRESENTFLIP3 |
+      SDL_RENDERER_PRESENTDISCARD | SDL_RENDERER_PRESENTVSYNC |
+      SDL_RENDERER_ACCELERATED),
+     (SDL_TEXTUREBLENDMODE_NONE | SDL_TEXTUREBLENDMODE_MASK |
+      SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD |
+      SDL_TEXTUREBLENDMODE_MOD),
+     (SDL_TEXTURESCALEMODE_NONE | SDL_TEXTURESCALEMODE_FAST |
+      SDL_TEXTURESCALEMODE_SLOW | SDL_TEXTURESCALEMODE_BEST),
      12,
      {
-      SDL_PixelFormat_Index8,
-      SDL_PixelFormat_RGB332,
-      SDL_PixelFormat_RGB444,
-      SDL_PixelFormat_RGB555,
-      SDL_PixelFormat_ARGB4444,
-      SDL_PixelFormat_ARGB1555,
-      SDL_PixelFormat_RGB565,
-      SDL_PixelFormat_RGB888,
-      SDL_PixelFormat_ARGB8888,
-      SDL_PixelFormat_ARGB2101010,
-      SDL_PixelFormat_UYVY,
-      SDL_PixelFormat_YUY2},
+      SDL_PIXELFORMAT_INDEX8,
+      SDL_PIXELFORMAT_RGB332,
+      SDL_PIXELFORMAT_RGB444,
+      SDL_PIXELFORMAT_RGB555,
+      SDL_PIXELFORMAT_ARGB4444,
+      SDL_PIXELFORMAT_ARGB1555,
+      SDL_PIXELFORMAT_RGB565,
+      SDL_PIXELFORMAT_RGB888,
+      SDL_PIXELFORMAT_ARGB8888,
+      SDL_PIXELFORMAT_ARGB2101010,
+      SDL_PIXELFORMAT_UYVY,
+      SDL_PIXELFORMAT_YUY2},
      0,
      0}
 };
@@ -188,29 +188,29 @@ static D3DFORMAT
 PixelFormatToD3DFMT(Uint32 format)
 {
     switch (format) {
-    case SDL_PixelFormat_Index8:
+    case SDL_PIXELFORMAT_INDEX8:
         return D3DFMT_P8;
-    case SDL_PixelFormat_RGB332:
+    case SDL_PIXELFORMAT_RGB332:
         return D3DFMT_R3G3B2;
-    case SDL_PixelFormat_RGB444:
+    case SDL_PIXELFORMAT_RGB444:
         return D3DFMT_X4R4G4B4;
-    case SDL_PixelFormat_RGB555:
+    case SDL_PIXELFORMAT_RGB555:
         return D3DFMT_X1R5G5B5;
-    case SDL_PixelFormat_ARGB4444:
+    case SDL_PIXELFORMAT_ARGB4444:
         return D3DFMT_A4R4G4B4;
-    case SDL_PixelFormat_ARGB1555:
+    case SDL_PIXELFORMAT_ARGB1555:
         return D3DFMT_A1R5G5B5;
-    case SDL_PixelFormat_RGB565:
+    case SDL_PIXELFORMAT_RGB565:
         return D3DFMT_R5G6B5;
-    case SDL_PixelFormat_RGB888:
+    case SDL_PIXELFORMAT_RGB888:
         return D3DFMT_X8R8G8B8;
-    case SDL_PixelFormat_ARGB8888:
+    case SDL_PIXELFORMAT_ARGB8888:
         return D3DFMT_A8R8G8B8;
-    case SDL_PixelFormat_ARGB2101010:
+    case SDL_PIXELFORMAT_ARGB2101010:
         return D3DFMT_A2R10G10B10;
-    case SDL_PixelFormat_UYVY:
+    case SDL_PIXELFORMAT_UYVY:
         return D3DFMT_UYVY;
-    case SDL_PixelFormat_YUY2:
+    case SDL_PIXELFORMAT_YUY2:
         return D3DFMT_YUY2;
     default:
         return D3DFMT_UNKNOWN;
@@ -269,7 +269,7 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->window = window->id;
     renderer->driverdata = data;
 
-    renderer->info.flags = SDL_Renderer_Accelerated;
+    renderer->info.flags = SDL_RENDERER_ACCELERATED;
 
     SDL_zero(pparams);
     pparams.BackBufferWidth = window->w;
@@ -280,13 +280,13 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     } else {
         pparams.BackBufferFormat = D3DFMT_UNKNOWN;
     }
-    if (flags & SDL_Renderer_PresentFlip2) {
+    if (flags & SDL_RENDERER_PRESENTFLIP2) {
         pparams.BackBufferCount = 2;
         pparams.SwapEffect = D3DSWAPEFFECT_FLIP;
-    } else if (flags & SDL_Renderer_PresentFlip3) {
+    } else if (flags & SDL_RENDERER_PRESENTFLIP3) {
         pparams.BackBufferCount = 3;
         pparams.SwapEffect = D3DSWAPEFFECT_FLIP;
-    } else if (flags & SDL_Renderer_PresentCopy) {
+    } else if (flags & SDL_RENDERER_PRESENTCOPY) {
         pparams.BackBufferCount = 1;
         pparams.SwapEffect = D3DSWAPEFFECT_COPY;
     } else {
@@ -301,7 +301,7 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
         pparams.Windowed = TRUE;
         pparams.FullScreen_RefreshRateInHz = 0;
     }
-    if (flags & SDL_Renderer_PresentVSync) {
+    if (flags & SDL_RENDERER_PRESENTVSYNC) {
         pparams.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
     } else {
         pparams.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
@@ -336,24 +336,24 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     IDirect3DSwapChain9_Release(chain);
     switch (pparams.SwapEffect) {
     case D3DSWAPEFFECT_COPY:
-        renderer->info.flags |= SDL_Renderer_PresentCopy;
+        renderer->info.flags |= SDL_RENDERER_PRESENTCOPY;
         break;
     case D3DSWAPEFFECT_FLIP:
         switch (pparams.BackBufferCount) {
         case 2:
-            renderer->info.flags |= SDL_Renderer_PresentFlip2;
+            renderer->info.flags |= SDL_RENDERER_PRESENTFLIP2;
             break;
         case 3:
-            renderer->info.flags |= SDL_Renderer_PresentFlip3;
+            renderer->info.flags |= SDL_RENDERER_PRESENTFLIP3;
             break;
         }
         break;
     case D3DSWAPEFFECT_DISCARD:
-        renderer->info.flags |= SDL_Renderer_PresentDiscard;
+        renderer->info.flags |= SDL_RENDERER_PRESENTDISCARD;
         break;
     }
     if (pparams.PresentationInterval == D3DPRESENT_INTERVAL_ONE) {
-        renderer->info.flags |= SDL_Renderer_PresentVSync;
+        renderer->info.flags |= SDL_RENDERER_PRESENTVSYNC;
     }
 
     IDirect3DDevice9_GetDeviceCaps(data->device, &caps);
@@ -388,7 +388,7 @@ D3D_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     texture->driverdata = data;
 
-    if (texture->access == SDL_TextureAccess_Local) {
+    if (texture->access == SDL_TEXTUREACCESS_LOCAL) {
         pool = D3DPOOL_MANAGED;
     } else {
         pool = D3DPOOL_DEFAULT;
@@ -494,7 +494,7 @@ D3D_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
     D3DLOCKED_RECT locked;
     HRESULT result;
 
-    if (texture->access != SDL_TextureAccess_Local) {
+    if (texture->access != SDL_TEXTUREACCESS_LOCAL) {
         SDL_SetError("Can't lock remote video memory");
         return -1;
     }
@@ -627,12 +627,12 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     vertices[3].v = maxv;
 
     switch (blendMode) {
-    case SDL_TextureBlendMode_None:
+    case SDL_TEXTUREBLENDMODE_NONE:
         IDirect3DDevice9_SetRenderState(data->device, D3DRS_ALPHABLENDENABLE,
                                         FALSE);
         break;
-    case SDL_TextureBlendMode_Mask:
-    case SDL_TextureBlendMode_Blend:
+    case SDL_TEXTUREBLENDMODE_MASK:
+    case SDL_TEXTUREBLENDMODE_BLEND:
         IDirect3DDevice9_SetRenderState(data->device, D3DRS_ALPHABLENDENABLE,
                                         TRUE);
         IDirect3DDevice9_SetRenderState(data->device, D3DRS_SRCBLEND,
@@ -640,7 +640,7 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         IDirect3DDevice9_SetRenderState(data->device, D3DRS_DESTBLEND,
                                         D3DBLEND_INVSRCALPHA);
         break;
-    case SDL_TextureBlendMode_Add:
+    case SDL_TEXTUREBLENDMODE_ADD:
         IDirect3DDevice9_SetRenderState(data->device, D3DRS_ALPHABLENDENABLE,
                                         TRUE);
         IDirect3DDevice9_SetRenderState(data->device, D3DRS_SRCBLEND,
@@ -648,7 +648,7 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         IDirect3DDevice9_SetRenderState(data->device, D3DRS_DESTBLEND,
                                         D3DBLEND_ONE);
         break;
-    case SDL_TextureBlendMode_Mod:
+    case SDL_TEXTUREBLENDMODE_MOD:
         IDirect3DDevice9_SetRenderState(data->device, D3DRS_ALPHABLENDENABLE,
                                         TRUE);
         IDirect3DDevice9_SetRenderState(data->device, D3DRS_SRCBLEND,
@@ -659,20 +659,20 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     }
 
     switch (scaleMode) {
-    case SDL_TextureScaleMode_None:
-    case SDL_TextureScaleMode_Fast:
+    case SDL_TEXTURESCALEMODE_NONE:
+    case SDL_TEXTURESCALEMODE_FAST:
         IDirect3DDevice9_SetSamplerState(data->device, 0, D3DSAMP_MINFILTER,
                                          D3DTEXF_POINT);
         IDirect3DDevice9_SetSamplerState(data->device, 0, D3DSAMP_MAGFILTER,
                                          D3DTEXF_POINT);
         break;
-    case SDL_TextureScaleMode_Slow:
+    case SDL_TEXTURESCALEMODE_SLOW:
         IDirect3DDevice9_SetSamplerState(data->device, 0, D3DSAMP_MINFILTER,
                                          D3DTEXF_LINEAR);
         IDirect3DDevice9_SetSamplerState(data->device, 0, D3DSAMP_MAGFILTER,
                                          D3DTEXF_LINEAR);
         break;
-    case SDL_TextureScaleMode_Best:
+    case SDL_TEXTURESCALEMODE_BEST:
         IDirect3DDevice9_SetSamplerState(data->device, 0, D3DSAMP_MINFILTER,
                                          D3DTEXF_GAUSSIANQUAD);
         IDirect3DDevice9_SetSamplerState(data->device, 0, D3DSAMP_MAGFILTER,

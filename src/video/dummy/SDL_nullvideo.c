@@ -110,7 +110,7 @@ DUMMY_VideoInit(_THIS)
     SDL_DisplayMode mode;
 
     /* Use a fake 32-bpp desktop mode */
-    mode.format = SDL_PixelFormat_RGB888;
+    mode.format = SDL_PIXELFORMAT_RGB888;
     mode.w = 1024;
     mode.h = 768;
     mode.refresh_rate = 0;
