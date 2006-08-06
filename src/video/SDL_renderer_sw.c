@@ -289,11 +289,29 @@ static int
 SW_DisplayModeChanged(SDL_Renderer * renderer)
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
+    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    int i, n;
 
     if (data->renderer && data->renderer->DisplayModeChanged) {
         if (data->renderer->DisplayModeChanged(data->renderer) < 0) {
             return -1;
         }
+    }
+
+    /* Recreate the textures for the new window size */
+    if (renderer->info.flags & SDL_RENDERER_PRESENTFLIP2) {
+        n = 2;
+    } else if (renderer->info.flags & SDL_RENDERER_PRESENTFLIP3) {
+        n = 3;
+    } else {
+        n = 1;
+    }
+    for (i = 0; i < n; ++i) {
+        if (data->texture[i]) {
+            DestroyTexture(data->renderer, data->texture[i]);
+        }
+        data->texture[i] =
+            CreateTexture(data->renderer, data->format, window->w, window->h);
     }
     return 0;
 }
