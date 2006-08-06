@@ -66,8 +66,8 @@ SDL_RenderDriver GL_RenderDriver = {
     GL_CreateRenderer,
     {
      "opengl",
-     (SDL_RENDERER_PRESENTDISCARD | SDL_RENDERER_PRESENTVSYNC |
-      SDL_RENDERER_ACCELERATED),
+     (SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTDISCARD |
+      SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED),
      (SDL_TEXTUREBLENDMODE_NONE | SDL_TEXTUREBLENDMODE_MASK |
       SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD |
       SDL_TEXTUREBLENDMODE_MOD),
@@ -99,6 +99,7 @@ typedef struct
 {
     SDL_GLContext context;
     SDL_bool updateSize;
+    SDL_bool GL_EXT_paletted_texture_supported;
     SDL_bool GL_ARB_texture_rectangle_supported;
     int blendMode;
     int scaleMode;
@@ -107,6 +108,8 @@ typedef struct
 #define SDL_PROC(ret,func,params) ret (APIENTRY *func) params;
 #include "SDL_glfuncs.h"
 #undef SDL_PROC
+
+    PFNGLCOLORTABLEEXTPROC glColorTableEXT;
 } GL_RenderData;
 
 typedef struct
@@ -117,6 +120,7 @@ typedef struct
     GLfloat texh;
     GLenum format;
     GLenum formattype;
+    Uint8 *palette;
     void *pixels;
     int pitch;
     SDL_DirtyRectList dirty;
@@ -200,7 +204,14 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     SDL_Renderer *renderer;
     GL_RenderData *data;
     GLint value;
+    int doublebuffer;
 
+    /* Render directly to the window, unless we're compositing */
+#ifndef __MACOSX__
+    if (flags & SDL_RENDERER_SINGLEBUFFER) {
+        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 0);
+    }
+#endif
     if (!(window->flags & SDL_WINDOW_OPENGL)) {
         if (SDL_RecreateWindow(window, window->flags | SDL_WINDOW_OPENGL) < 0) {
             return NULL;
@@ -265,6 +276,12 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
         renderer->info.flags |= SDL_RENDERER_PRESENTVSYNC;
     }
 
+    if (SDL_GL_GetAttribute(SDL_GL_DOUBLEBUFFER, &doublebuffer) == 0) {
+        if (!doublebuffer) {
+            renderer->info.flags |= SDL_RENDERER_SINGLEBUFFER;
+        }
+    }
+
     data->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &value);
     renderer->info.max_texture_width = value;
     data->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &value);
@@ -273,6 +290,21 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     if (SDL_GL_ExtensionSupported("GL_ARB_texture_rectangle")
         || SDL_GL_ExtensionSupported("GL_EXT_texture_rectangle")) {
         data->GL_ARB_texture_rectangle_supported = SDL_TRUE;
+    }
+    if (SDL_GL_ExtensionSupported("GL_EXT_paletted_texture")) {
+        data->GL_EXT_paletted_texture_supported = SDL_TRUE;
+        data->glColorTableEXT =
+            (PFNGLCOLORTABLEEXTPROC) SDL_GL_GetProcAddress("glColorTableEXT");
+    } else {
+        /* Don't advertise support for 8-bit indexed texture format */
+        Uint32 i, j;
+        SDL_RendererInfo *info = &renderer->info;
+        for (i = 0, j = 0; i < info->num_texture_formats; ++i) {
+            if (info->texture_formats[i] != SDL_PIXELFORMAT_INDEX8) {
+                info->texture_formats[j++] = info->texture_formats[i];
+            }
+        }
+        --info->num_texture_formats;
     }
 
     /* Set up parameters for rendering */
@@ -351,7 +383,11 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         type = GL_BITMAP;
         break;
     case SDL_PIXELFORMAT_INDEX8:
-        internalFormat = GL_RGB;
+        if (!renderdata->GL_EXT_paletted_texture_supported) {
+            SDL_SetError("Unsupported texture format");
+            return -1;
+        }
+        internalFormat = GL_COLOR_INDEX8_EXT;
         format = GL_COLOR_INDEX;
         type = GL_UNSIGNED_BYTE;
         break;
@@ -431,6 +467,16 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         return -1;
     }
 
+    if (texture->format == SDL_PIXELFORMAT_INDEX8) {
+        data->palette = (Uint8 *) SDL_malloc(3 * 256 * sizeof(Uint8));
+        if (!data->palette) {
+            SDL_OutOfMemory();
+            SDL_free(data);
+            return -1;
+        }
+        SDL_memset(data->palette, 0xFF, 3 * 256 * sizeof(Uint8));
+    }
+
     texture->driverdata = data;
 
     renderdata->glGetError();
@@ -467,7 +513,22 @@ GL_SetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
 {
     GL_RenderData *renderdata = (GL_RenderData *) renderer->driverdata;
     GL_TextureData *data = (GL_TextureData *) texture->driverdata;
+    Uint8 *palette;
 
+    if (!data->palette) {
+        SDL_SetError("Texture doesn't have a palette");
+        return -1;
+    }
+    palette = data->palette + firstcolor * 3;
+    while (ncolors--) {
+        *palette++ = colors->r;
+        *palette++ = colors->g;
+        *palette++ = colors->b;
+        ++colors;
+    }
+    renderdata->glBindTexture(data->type, data->texture);
+    renderdata->glColorTableEXT(data->type, GL_RGB8, 256, GL_RGB,
+                                GL_UNSIGNED_BYTE, data->palette);
     return 0;
 }
 
@@ -475,8 +536,22 @@ static int
 GL_GetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
                      SDL_Color * colors, int firstcolor, int ncolors)
 {
+    GL_RenderData *renderdata = (GL_RenderData *) renderer->driverdata;
     GL_TextureData *data = (GL_TextureData *) texture->driverdata;
+    Uint8 *palette;
 
+    if (!data->palette) {
+        SDL_SetError("Texture doesn't have a palette");
+        return -1;
+    }
+    palette = data->palette + firstcolor * 3;
+    while (ncolors--) {
+        colors->r = *palette++;
+        colors->g = *palette++;
+        colors->b = *palette++;
+        colors->unused = SDL_ALPHA_OPAQUE;
+        ++colors;
+    }
     return 0;
 }
 
@@ -702,6 +777,9 @@ GL_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     }
     if (data->texture) {
         renderdata->glDeleteTextures(1, &data->texture);
+    }
+    if (data->palette) {
+        SDL_free(data->palette);
     }
     if (data->pixels) {
         SDL_free(data->pixels);

@@ -286,7 +286,13 @@ SDL_VideoPaletteChanged(void *userdata, SDL_Palette * palette)
         }
     }
     if (userdata == SDL_VideoSurface) {
-        return SDL_SetDisplayPalette(palette->colors, 0, palette->ncolors);
+        if (SDL_SetDisplayPalette(palette->colors, 0, palette->ncolors) < 0) {
+            return -1;
+        }
+        if (SDL_SetTexturePalette
+            (SDL_VideoTexture, palette->colors, 0, palette->ncolors) < 0) {
+            return -1;
+        }
     }
     return 0;
 }
