@@ -56,6 +56,7 @@ struct SDL_Texture
 struct SDL_Renderer
 {
     int (*ActivateRenderer) (SDL_Renderer * renderer);
+    int (*DisplayModeChanged) (SDL_Renderer * renderer);
     int (*CreateTexture) (SDL_Renderer * renderer, SDL_Texture * texture);
     int (*QueryTexturePixels) (SDL_Renderer * renderer, SDL_Texture * texture,
                                void **pixels, int *pitch);
@@ -133,8 +134,7 @@ struct SDL_VideoDisplay
     SDL_DisplayMode *display_modes;
     SDL_DisplayMode desktop_mode;
     SDL_DisplayMode current_mode;
-    SDL_DisplayMode desired_mode;
-    SDL_DisplayMode *fullscreen_mode;
+    SDL_DisplayMode fullscreen_mode;
     SDL_Palette *palette;
 
     Uint16 *gamma;
@@ -389,6 +389,7 @@ extern SDL_VideoDisplay *SDL_GetDisplayFromWindow(SDL_Window * window);
 
 extern void SDL_OnWindowShown(SDL_Window * window);
 extern void SDL_OnWindowHidden(SDL_Window * window);
+extern void SDL_OnWindowResized(SDL_Window * window);
 extern void SDL_OnWindowFocusGained(SDL_Window * window);
 extern void SDL_OnWindowFocusLost(SDL_Window * window);
 extern SDL_WindowID SDL_GetFocusWindow(void);

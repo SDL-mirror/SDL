@@ -645,6 +645,7 @@ int
 SDL_SetFullscreenDisplayMode(const SDL_DisplayMode * mode)
 {
     SDL_VideoDisplay *display;
+    SDL_DisplayMode fullscreen_mode;
     int i;
 
     if (!_this) {
@@ -653,18 +654,29 @@ SDL_SetFullscreenDisplayMode(const SDL_DisplayMode * mode)
     }
 
     display = &SDL_CurrentDisplay;
-    if (mode) {
-        SDL_GetClosestDisplayMode(mode, &display->desired_mode);
-        display->fullscreen_mode = &display->desired_mode;
-    } else {
-        display->fullscreen_mode = NULL;
+    if (!mode) {
+        mode = &display->desktop_mode;
     }
+
+    SDL_GetClosestDisplayMode(mode, &fullscreen_mode);
+    if (SDL_memcmp
+        (&fullscreen_mode, &display->fullscreen_mode,
+         sizeof(fullscreen_mode)) == 0) {
+        /* Nothing to do... */
+        return 0;
+    }
+    display->fullscreen_mode = fullscreen_mode;
 
     /* Actually set the mode if we have a fullscreen window visible */
     for (i = 0; i < display->num_windows; ++i) {
         SDL_Window *window = &display->windows[i];
         if (FULLSCREEN_VISIBLE(window)) {
-            return SDL_SetDisplayMode(display->fullscreen_mode);
+            if (SDL_SetDisplayMode(&display->fullscreen_mode) < 0) {
+                return -1;
+            }
+        }
+        if (window->flags & SDL_WINDOW_FULLSCREEN) {
+            SDL_OnWindowResized(window);
         }
     }
     return 0;
@@ -678,7 +690,7 @@ SDL_GetFullscreenDisplayMode(SDL_DisplayMode * mode)
         return -1;
     }
     if (mode) {
-        *mode = *SDL_CurrentDisplay.fullscreen_mode;
+        *mode = SDL_CurrentDisplay.fullscreen_mode;
     }
     return 0;
 }
@@ -1197,7 +1209,7 @@ SDL_SetWindowFullscreen(SDL_WindowID windowID, int fullscreen)
                 }
             }
 
-            SDL_SetDisplayMode(display->fullscreen_mode);
+            SDL_SetDisplayMode(&display->fullscreen_mode);
         }
     } else {
         window->flags &= ~SDL_WINDOW_FULLSCREEN;
@@ -1252,12 +1264,22 @@ SDL_OnWindowHidden(SDL_Window * window)
 }
 
 void
+SDL_OnWindowResized(SDL_Window * window)
+{
+    SDL_Renderer *renderer = window->renderer;
+
+    if (renderer && renderer->DisplayModeChanged) {
+        renderer->DisplayModeChanged(renderer);
+    }
+}
+
+void
 SDL_OnWindowFocusGained(SDL_Window * window)
 {
     SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
 
     if (window->flags & SDL_WINDOW_FULLSCREEN) {
-        SDL_SetDisplayMode(display->fullscreen_mode);
+        SDL_SetDisplayMode(&display->fullscreen_mode);
     }
     if (display->gamma && _this->SetDisplayGammaRamp) {
         _this->SetDisplayGammaRamp(_this, display->gamma);

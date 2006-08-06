@@ -749,15 +749,15 @@ PrintEvent(SDL_Event * event)
             fprintf(stderr, "Window %d hidden", event->window.windowID);
             break;
         case SDL_WINDOWEVENT_EXPOSED:
-            fprintf(stderr, "Window %d exposed: %d", event->window.windowID);
+            fprintf(stderr, "Window %d exposed", event->window.windowID);
             break;
         case SDL_WINDOWEVENT_MOVED:
-            fprintf(stderr, "Window %d moved to %d,%d: %d",
+            fprintf(stderr, "Window %d moved to %d,%d",
                     event->window.windowID, event->window.data1,
                     event->window.data2);
             break;
         case SDL_WINDOWEVENT_RESIZED:
-            fprintf(stderr, "Window %d resized to %dx%d: %d",
+            fprintf(stderr, "Window %d resized to %dx%d",
                     event->window.windowID, event->window.data1,
                     event->window.data2);
             break;

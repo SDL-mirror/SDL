@@ -31,6 +31,8 @@
 /* SDL surface based renderer implementation */
 
 static SDL_Renderer *SW_CreateRenderer(SDL_Window * window, Uint32 flags);
+static int SW_ActivateRenderer(SDL_Renderer * renderer);
+static int SW_DisplayModeChanged(SDL_Renderer * renderer);
 static int SW_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static int SW_QueryTexturePixels(SDL_Renderer * renderer,
                                  SDL_Texture * texture, void **pixels,
@@ -179,7 +181,8 @@ SW_CreateRenderer(SDL_Window * window, Uint32 flags)
         SDL_OutOfMemory();
         return NULL;
     }
-
+    renderer->ActivateRenderer = SW_ActivateRenderer;
+    renderer->DisplayModeChanged = SW_DisplayModeChanged;
     renderer->CreateTexture = SW_CreateTexture;
     renderer->QueryTexturePixels = SW_QueryTexturePixels;
     renderer->SetTexturePalette = SW_SetTexturePalette;
@@ -267,6 +270,32 @@ SW_CreateRenderer(SDL_Window * window, Uint32 flags)
     }
 
     return renderer;
+}
+
+static int
+SW_ActivateRenderer(SDL_Renderer * renderer)
+{
+    SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
+
+    if (data->renderer && data->renderer->ActivateRenderer) {
+        if (data->renderer->ActivateRenderer(data->renderer) < 0) {
+            return -1;
+        }
+    }
+    return 0;
+}
+
+static int
+SW_DisplayModeChanged(SDL_Renderer * renderer)
+{
+    SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
+
+    if (data->renderer && data->renderer->DisplayModeChanged) {
+        if (data->renderer->DisplayModeChanged(data->renderer) < 0) {
+            return -1;
+        }
+    }
+    return 0;
 }
 
 static int

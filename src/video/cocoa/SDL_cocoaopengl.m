@@ -268,6 +268,7 @@ Cocoa_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
         NSOpenGLContext *nscontext = (NSOpenGLContext *)context;
 
         [nscontext setView:[windowdata->window contentView]];
+        [nscontext update];
         [nscontext makeCurrentContext];
     } else {
         [NSOpenGLContext clearCurrentContext];

@@ -34,6 +34,7 @@
 
 static SDL_Renderer *GL_CreateRenderer(SDL_Window * window, Uint32 flags);
 static int GL_ActivateRenderer(SDL_Renderer * renderer);
+static int GL_DisplayModeChanged(SDL_Renderer * renderer);
 static int GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static int GL_SetTexturePalette(SDL_Renderer * renderer,
                                 SDL_Texture * texture,
@@ -97,6 +98,7 @@ SDL_RenderDriver GL_RenderDriver = {
 typedef struct
 {
     SDL_GLContext context;
+    SDL_bool updateSize;
     SDL_bool GL_ARB_texture_rectangle_supported;
     int blendMode;
     int scaleMode;
@@ -219,6 +221,7 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     }
 
     renderer->ActivateRenderer = GL_ActivateRenderer;
+    renderer->DisplayModeChanged = GL_DisplayModeChanged;
     renderer->CreateTexture = GL_CreateTexture;
     renderer->SetTexturePalette = GL_SetTexturePalette;
     renderer->GetTexturePalette = GL_GetTexturePalette;
@@ -282,13 +285,7 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     } else {
         data->glEnable(GL_TEXTURE_2D);
     }
-    data->glMatrixMode(GL_PROJECTION);
-    data->glLoadIdentity();
-    data->glMatrixMode(GL_MODELVIEW);
-    data->glLoadIdentity();
-    data->glViewport(0, 0, window->w, window->h);
-    data->glOrtho(0.0, (GLdouble) window->w, (GLdouble) window->h, 0.0, 0.0,
-                  1.0);
+    data->updateSize = SDL_TRUE;
 
     return renderer;
 }
@@ -299,7 +296,29 @@ GL_ActivateRenderer(SDL_Renderer * renderer)
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
 
-    return SDL_GL_MakeCurrent(window->id, data->context);
+    if (SDL_GL_MakeCurrent(window->id, data->context) < 0) {
+        return -1;
+    }
+    if (data->updateSize) {
+        data->glMatrixMode(GL_PROJECTION);
+        data->glLoadIdentity();
+        data->glMatrixMode(GL_MODELVIEW);
+        data->glLoadIdentity();
+        data->glViewport(0, 0, window->w, window->h);
+        data->glOrtho(0.0, (GLdouble) window->w, (GLdouble) window->h, 0.0,
+                      0.0, 1.0);
+        data->updateSize = SDL_FALSE;
+    }
+    return 0;
+}
+
+static int
+GL_DisplayModeChanged(SDL_Renderer * renderer)
+{
+    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
+
+    data->updateSize = SDL_TRUE;
+    return 0;
 }
 
 static __inline__ int
