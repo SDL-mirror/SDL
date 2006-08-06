@@ -262,6 +262,24 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
 @end
 
+@interface SDLWindow : NSWindow
+/* These are needed for borderless/fullscreen windows */
+- (BOOL)canBecomeKeyWindow;
+- (BOOL)canBecomeMainWindow;
+@end
+
+@implementation SDLWindow
+- (BOOL)canBecomeKeyWindow
+{
+    return YES;
+}
+
+- (BOOL)canBecomeMainWindow
+{
+    return YES;
+}
+@end
+
 static int
 SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created)
 {
@@ -379,7 +397,7 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
         style |= NSResizableWindowMask;
     }
 
-    nswindow = [[NSWindow alloc] initWithContentRect:rect styleMask:style backing:NSBackingStoreBuffered defer:FALSE];
+    nswindow = [[SDLWindow alloc] initWithContentRect:rect styleMask:style backing:NSBackingStoreBuffered defer:FALSE];
 
     [pool release];
 

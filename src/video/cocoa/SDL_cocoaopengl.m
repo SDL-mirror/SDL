@@ -247,11 +247,6 @@ Cocoa_GL_CreateContext(_THIS, SDL_Window * window)
 
     /* End Wisdom from Apple Engineer section. --ryan. */
 
-    /* FIXME: should this go somewhere else? */
-    if (window->flags & SDL_WINDOW_FULLSCREEN) {
-        [nscontext setFullScreen];
-    }
-
     [pool release];
     return nscontext;
 }
@@ -267,8 +262,12 @@ Cocoa_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
         SDL_WindowData *windowdata = (SDL_WindowData *)window->driverdata;
         NSOpenGLContext *nscontext = (NSOpenGLContext *)context;
 
-        [nscontext setView:[windowdata->window contentView]];
-        [nscontext update];
+        if (window->flags & SDL_WINDOW_FULLSCREEN) {
+            [nscontext setFullScreen];
+        } else {
+            [nscontext setView:[windowdata->window contentView]];
+            [nscontext update];
+        }
         [nscontext makeCurrentContext];
     } else {
         [NSOpenGLContext clearCurrentContext];
