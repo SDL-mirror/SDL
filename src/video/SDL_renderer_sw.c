@@ -95,6 +95,7 @@ SDL_RenderDriver SW_RenderDriver = {
 typedef struct
 {
     Uint32 format;
+    SDL_bool updateSize;
     int current_texture;
     SDL_Texture *texture[3];
     SDL_Surface surface;
@@ -276,11 +277,38 @@ static int
 SW_ActivateRenderer(SDL_Renderer * renderer)
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
+    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    int i, n;
 
     if (data->renderer && data->renderer->ActivateRenderer) {
         if (data->renderer->ActivateRenderer(data->renderer) < 0) {
             return -1;
         }
+    }
+    if (data->updateSize) {
+        /* Recreate the textures for the new window size */
+        if (renderer->info.flags & SDL_RENDERER_PRESENTFLIP2) {
+            n = 2;
+        } else if (renderer->info.flags & SDL_RENDERER_PRESENTFLIP3) {
+            n = 3;
+        } else {
+            n = 1;
+        }
+        for (i = 0; i < n; ++i) {
+            if (data->texture[i]) {
+                DestroyTexture(data->renderer, data->texture[i]);
+                data->texture[i] = 0;
+            }
+        }
+        for (i = 0; i < n; ++i) {
+            data->texture[i] =
+                CreateTexture(data->renderer, data->format, window->w,
+                              window->h);
+            if (!data->texture[i]) {
+                return -1;
+            }
+        }
+        data->updateSize = SDL_FALSE;
     }
     return 0;
 }
@@ -289,30 +317,13 @@ static int
 SW_DisplayModeChanged(SDL_Renderer * renderer)
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    int i, n;
 
     if (data->renderer && data->renderer->DisplayModeChanged) {
         if (data->renderer->DisplayModeChanged(data->renderer) < 0) {
             return -1;
         }
     }
-
-    /* Recreate the textures for the new window size */
-    if (renderer->info.flags & SDL_RENDERER_PRESENTFLIP2) {
-        n = 2;
-    } else if (renderer->info.flags & SDL_RENDERER_PRESENTFLIP3) {
-        n = 3;
-    } else {
-        n = 1;
-    }
-    for (i = 0; i < n; ++i) {
-        if (data->texture[i]) {
-            DestroyTexture(data->renderer, data->texture[i]);
-        }
-        data->texture[i] =
-            CreateTexture(data->renderer, data->format, window->w, window->h);
-    }
+    data->updateSize = SDL_TRUE;
     return 0;
 }
 
