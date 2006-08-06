@@ -166,7 +166,7 @@ typedef enum
 /**
  * \enum SDL_RendererFlags
  *
- * \brief Flags used when initializing a render manager.
+ * \brief Flags used when creating a rendering context
  */
 typedef enum
 {
@@ -182,7 +182,7 @@ typedef enum
 /**
  * \struct SDL_RendererInfo
  *
- * \brief Information on the capabilities of a render manager.
+ * \brief Information on the capabilities of a render driver or context
  */
 typedef struct SDL_RendererInfo
 {
@@ -827,34 +827,33 @@ extern DECLSPEC SDL_bool SDLCALL SDL_GetWindowWMInfo(SDL_WindowID windowID,
 extern DECLSPEC void SDLCALL SDL_DestroyWindow(SDL_WindowID windowID);
 
 /**
- * \fn int SDL_GetNumRenderers(void)
+ * \fn int SDL_GetNumRenderDrivers(void)
  *
- * \brief Get the number of render managers on the current display.
+ * \brief Get the number of 2D rendering drivers available for the current display.
  *
- * A render manager is a set of code that handles rendering and texture
+ * A render driver is a set of code that handles rendering and texture
  * management on a particular display.  Normally there is only one, but
  * some drivers may have several available with different capabilities.
  *
- * \sa SDL_GetRendererInfo()
+ * \sa SDL_GetRenderDriverInfo()
  * \sa SDL_CreateRenderer()
  */
-extern DECLSPEC int SDLCALL SDL_GetNumRenderers(void);
+extern DECLSPEC int SDLCALL SDL_GetNumRenderDrivers(void);
 
 /**
- * \fn int SDL_GetRendererInfo(int index, SDL_RendererInfo *info)
+ * \fn int SDL_GetRenderDriverInfo(int index, SDL_RendererInfo *info)
  *
- * \brief Get information about a specific render manager on the current
- *        display.
+ * \brief Get information about a specific 2D rendering driver for the current display.
  *
- * \param index The index to query information about, or -1 to query the currently renderer
- * \param info A pointer to an SDL_RendererInfo struct to be filled with information on the renderer
+ * \param index The index of the driver to query information about.
+ * \param info A pointer to an SDL_RendererInfo struct to be filled with information on the rendering driver.
  *
  * \return 0 on success, -1 if the index was out of range
  *
  * \sa SDL_CreateRenderer()
  */
-extern DECLSPEC int SDLCALL SDL_GetRendererInfo(int index,
-                                                SDL_RendererInfo * info);
+extern DECLSPEC int SDLCALL SDL_GetRenderDriverInfo(int index,
+                                                    SDL_RendererInfo * info);
 
 /**
  * \fn int SDL_CreateRenderer(SDL_WindowID window, int index, Uint32 flags)
@@ -862,13 +861,14 @@ extern DECLSPEC int SDLCALL SDL_GetRendererInfo(int index,
  * \brief Create and make active a 2D rendering context for a window.
  *
  * \param windowID The window used for rendering
- * \param index The index of the render manager to initialize, or -1 to initialize the first one supporting the requested flags.
+ * \param index The index of the rendering driver to initialize, or -1 to initialize the first one supporting the requested flags.
  * \param flags SDL_RendererFlags
  *
  * \return 0 on success, -1 if the flags were not supported, or -2 if
  *         there isn't enough memory to support the requested flags
  *
  * \sa SDL_SelectRenderer()
+ * \sa SDL_GetRendererInfo()
  * \sa SDL_DestroyRenderer()
  */
 extern DECLSPEC int SDLCALL SDL_CreateRenderer(SDL_WindowID windowID,
@@ -885,6 +885,13 @@ extern DECLSPEC int SDLCALL SDL_CreateRenderer(SDL_WindowID windowID,
 extern DECLSPEC int SDLCALL SDL_SelectRenderer(SDL_WindowID windowID);
 
 /**
+ * \fn int SDL_GetRendererInfo(SDL_RendererInfo *info)
+ *
+ * \brief Get information about the current rendering context.
+ */
+extern DECLSPEC int SDLCALL SDL_GetRendererInfo(SDL_RendererInfo * info);
+
+/**
  * \fn SDL_TextureID SDL_CreateTexture(Uint32 format, int access, int w, int h)
  *
  * \brief Create a texture for the current rendering context.
@@ -894,7 +901,7 @@ extern DECLSPEC int SDLCALL SDL_SelectRenderer(SDL_WindowID windowID);
  * \param w The width of the texture in pixels
  * \param h The height of the texture in pixels
  *
- * \return The created texture is returned, or 0 if no render manager was active,  the format was unsupported, or the width or height were out of range.
+ * \return The created texture is returned, or 0 if no rendering context was active,  the format was unsupported, or the width or height were out of range.
  *
  * \sa SDL_QueryTexture()
  * \sa SDL_DestroyTexture()
@@ -912,7 +919,7 @@ extern DECLSPEC SDL_TextureID SDLCALL SDL_CreateTexture(Uint32 format,
  * \param access One of the enumerated values in SDL_TextureAccess
  * \param surface The surface containing pixel data used to fill the texture
  *
- * \return The created texture is returned, or 0 if no render manager was active,  the format was unsupported, or the surface width or height were out of range.
+ * \return The created texture is returned, or 0 if no rendering context was active,  the format was unsupported, or the surface width or height were out of range.
  *
  * \note The surface is not modified or freed by this function.
  *
@@ -1061,7 +1068,7 @@ extern DECLSPEC void SDLCALL SDL_DirtyTexture(SDL_TextureID textureID,
  * \param rect A pointer to the destination rectangle, or NULL for the entire rendering target.
  * \param color An ARGB color value.
  *
- * \return 0 on success, or -1 if there is no renderer current
+ * \return 0 on success, or -1 if there is no rendering context current
  */
 extern DECLSPEC int SDLCALL SDL_RenderFill(const SDL_Rect * rect,
                                            Uint32 color);
@@ -1077,7 +1084,7 @@ extern DECLSPEC int SDLCALL SDL_RenderFill(const SDL_Rect * rect,
  * \param blendMode SDL_TextureBlendMode to be used if the source texture has an alpha channel.
  * \param scaleMode SDL_TextureScaleMode to be used if the source and destination rectangles don't have the same width and height.
  *
- * \return 0 on success, or -1 if there is no renderer current, or the driver doesn't support the requested operation.
+ * \return 0 on success, or -1 if there is no rendering context current, or the driver doesn't support the requested operation.
  *
  * \note You can check the video driver info to see what operations are supported.
  */

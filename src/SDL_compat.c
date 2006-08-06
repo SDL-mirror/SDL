@@ -467,7 +467,7 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
          SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTDISCARD) < 0) {
         return NULL;
     }
-    SDL_GetRendererInfo(-1, &SDL_VideoRendererInfo);
+    SDL_GetRenderDriverInfo(-1, &SDL_VideoRendererInfo);
 
     /* Create a texture for the screen surface */
     SDL_VideoTexture =

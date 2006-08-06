@@ -603,13 +603,13 @@ CommonInit(CommonState * state)
         if (state->verbose & VERBOSE_RENDER) {
             SDL_RendererInfo info;
 
-            n = SDL_GetNumRenderers();
+            n = SDL_GetNumRenderDrivers();
             if (n == 0) {
                 fprintf(stderr, "No built-in render drivers\n");
             } else {
                 fprintf(stderr, "Built-in render drivers:\n");
                 for (i = 0; i < n; ++i) {
-                    SDL_GetRendererInfo(i, &info);
+                    SDL_GetRenderDriverInfo(i, &info);
                     PrintRenderer(&info);
                 }
             }
@@ -666,9 +666,9 @@ CommonInit(CommonState * state)
                 m = -1;
                 if (state->renderdriver) {
                     SDL_RendererInfo info;
-                    n = SDL_GetNumRenderers();
+                    n = SDL_GetNumRenderDrivers();
                     for (j = 0; j < n; ++j) {
-                        SDL_GetRendererInfo(j, &info);
+                        SDL_GetRenderDriverInfo(j, &info);
                         if (SDL_strcasecmp(info.name, state->renderdriver) ==
                             0) {
                             m = j;
@@ -692,7 +692,7 @@ CommonInit(CommonState * state)
                     SDL_RendererInfo info;
 
                     fprintf(stderr, "Current renderer:\n");
-                    SDL_GetRendererInfo(-1, &info);
+                    SDL_GetRendererInfo(&info);
                     PrintRenderer(&info);
                 }
             }

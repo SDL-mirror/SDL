@@ -94,16 +94,16 @@ GetDisplayMode(CFDictionaryRef moderef, SDL_DisplayMode *mode)
     number = CFDictionaryGetValue(moderef, kCGDisplayRefreshRate);
     CFNumberGetValue(number, kCFNumberLongType, &refreshRate);
 
-    mode->format = SDL_PixelFormat_Unknown;
+    mode->format = SDL_PIXELFORMAT_UNKNOWN;
     switch (bpp) {
     case 8:
-        mode->format = SDL_PixelFormat_Index8;
+        mode->format = SDL_PIXELFORMAT_INDEX8;
         break;
     case 16:
-        mode->format = SDL_PixelFormat_RGB555;
+        mode->format = SDL_PIXELFORMAT_RGB555;
         break;
     case 32:
-        mode->format = SDL_PixelFormat_RGB888;
+        mode->format = SDL_PIXELFORMAT_RGB888;
         break;
     }
     mode->w = width;

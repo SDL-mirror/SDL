@@ -1362,7 +1362,7 @@ SDL_AddRenderDriver(int displayIndex, const SDL_RenderDriver * driver)
 }
 
 int
-SDL_GetNumRenderers(void)
+SDL_GetNumRenderDrivers(void)
 {
     if (_this) {
         return SDL_CurrentDisplay.num_render_drivers;
@@ -1371,27 +1371,19 @@ SDL_GetNumRenderers(void)
 }
 
 int
-SDL_GetRendererInfo(int index, SDL_RendererInfo * info)
+SDL_GetRenderDriverInfo(int index, SDL_RendererInfo * info)
 {
     if (!_this) {
         SDL_UninitializedVideo();
         return -1;
     }
 
-    if (index >= SDL_GetNumRenderers()) {
+    if (index < 0 || index >= SDL_GetNumRenderDrivers()) {
         SDL_SetError("index must be in the range of 0 - %d",
-                     SDL_GetNumRenderers() - 1);
+                     SDL_GetNumRenderDrivers() - 1);
         return -1;
     }
-    if (index < 0) {
-        if (!SDL_CurrentDisplay.current_renderer) {
-            SDL_SetError("There is no current renderer");
-            return -1;
-        }
-        *info = SDL_CurrentDisplay.current_renderer->info;
-    } else {
-        *info = SDL_CurrentDisplay.render_drivers[index].info;
-    }
+    *info = SDL_CurrentDisplay.render_drivers[index].info;
     return 0;
 }
 
@@ -1406,7 +1398,7 @@ SDL_CreateRenderer(SDL_WindowID windowID, int index, Uint32 flags)
 
     if (index < 0) {
         const char *override = SDL_getenv("SDL_VIDEO_RENDERER");
-        int n = SDL_GetNumRenderers();
+        int n = SDL_GetNumRenderDrivers();
         for (index = 0; index < n; ++index) {
             SDL_RenderDriver *driver =
                 &SDL_CurrentDisplay.render_drivers[index];
@@ -1427,9 +1419,9 @@ SDL_CreateRenderer(SDL_WindowID windowID, int index, Uint32 flags)
         }
     }
 
-    if (index >= SDL_GetNumRenderers()) {
+    if (index >= SDL_GetNumRenderDrivers()) {
         SDL_SetError("index must be -1 or in the range of 0 - %d",
-                     SDL_GetNumRenderers() - 1);
+                     SDL_GetNumRenderDrivers() - 1);
         return -1;
     }
 
@@ -1461,6 +1453,22 @@ SDL_SelectRenderer(SDL_WindowID windowID)
         }
     }
     SDL_CurrentDisplay.current_renderer = renderer;
+    return 0;
+}
+
+int
+SDL_GetRendererInfo(SDL_RendererInfo * info)
+{
+    if (!_this) {
+        SDL_UninitializedVideo();
+        return -1;
+    }
+
+    if (!SDL_CurrentDisplay.current_renderer) {
+        SDL_SetError("There is no current renderer");
+        return -1;
+    }
+    *info = SDL_CurrentDisplay.current_renderer->info;
     return 0;
 }
 
