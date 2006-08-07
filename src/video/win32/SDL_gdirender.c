@@ -30,6 +30,7 @@
 /* GDI renderer implementation */
 
 static SDL_Renderer *GDI_CreateRenderer(SDL_Window * window, Uint32 flags);
+static int GDI_DisplayModeChanged(SDL_Renderer * renderer);
 static int GDI_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static int GDI_QueryTexturePixels(SDL_Renderer * renderer,
                                   SDL_Texture * texture, void **pixels,
@@ -66,7 +67,7 @@ SDL_RenderDriver GDI_RenderDriver = {
     {
      "gdi",
      (SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTCOPY |
-      SDL_RENDERER_PRESENTFLIP2 | sDL_RENDERER_PRESENTFLIP3 |
+      SDL_RENDERER_PRESENTFLIP2 | SDL_RENDERER_PRESENTFLIP3 |
       SDL_RENDERER_PRESENTDISCARD | SDL_RENDERER_ACCELERATED),
      (SDL_TEXTUREBLENDMODE_NONE | SDL_TEXTUREBLENDMODE_MASK |
       SDL_TEXTUREBLENDMODE_BLEND),
@@ -155,6 +156,7 @@ GDI_CreateRenderer(SDL_Window * window, Uint32 flags)
         return NULL;
     }
 
+    renderer->DisplayModeChanged = GDI_DisplayModeChanged;
     renderer->CreateTexture = GDI_CreateTexture;
     renderer->QueryTexturePixels = GDI_QueryTexturePixels;
     renderer->SetTexturePalette = GDI_SetTexturePalette;
@@ -196,7 +198,7 @@ GDI_CreateRenderer(SDL_Window * window, Uint32 flags)
 
     if (flags & SDL_RENDERER_SINGLEBUFFER) {
         renderer->info.flags |=
-            (SDL_RENDERER_SINGLEBUFFER | sDL_RENDERER_PRESENTCOPY);
+            (SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTCOPY);
         n = 0;
     } else if (flags & SDL_RENDERER_PRESENTFLIP2) {
         renderer->info.flags |= SDL_RENDERER_PRESENTFLIP2;
@@ -231,6 +233,42 @@ GDI_CreateRenderer(SDL_Window * window, Uint32 flags)
 }
 
 static int
+GDI_DisplayModeChanged(SDL_Renderer * renderer)
+{
+    GDI_RenderData *data = (GDI_RenderData *) renderer->driverdata;
+    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    int i, n;
+
+    if (renderer->info.flags & SDL_RENDERER_SINGLEBUFFER) {
+        n = 0;
+    } else if (renderer->info.flags & SDL_RENDERER_PRESENTFLIP2) {
+        n = 2;
+    } else if (renderer->info.flags & SDL_RENDERER_PRESENTFLIP3) {
+        n = 3;
+    } else {
+        n = 1;
+    }
+    for (i = 0; i < n; ++i) {
+        if (data->hbm[i]) {
+            DeleteObject(data->hbm[i]);
+            data->hbm[i] = NULL;
+        }
+    }
+    for (i = 0; i < n; ++i) {
+        data->hbm[i] =
+            CreateCompatibleBitmap(data->window_hdc, window->w, window->h);
+        if (!data->hbm[i]) {
+            WIN_SetError("CreateCompatibleBitmap()");
+            return -1;
+        }
+    }
+    if (n > 0) {
+        SelectObject(data->render_hdc, data->hbm[0]);
+    }
+    return 0;
+}
+
+static int
 GDI_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     GDI_RenderData *renderdata = (GDI_RenderData *) renderer->driverdata;
@@ -258,7 +296,7 @@ GDI_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     data->pitch = (texture->w * SDL_BYTESPERPIXEL(data->format));
 
     if (data->yuv || texture->access == SDL_TEXTUREACCESS_LOCAL
-        || texture->format != SDL_GetCurrentDisplayMode()->format) {
+        || texture->format != display->current_mode.format) {
         int bmi_size;
         LPBITMAPINFO bmi;
 
@@ -621,7 +659,7 @@ GDI_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     texture->driverdata = NULL;
 }
 
-void
+static void
 GDI_DestroyRenderer(SDL_Renderer * renderer)
 {
     GDI_RenderData *data = (GDI_RenderData *) renderer->driverdata;

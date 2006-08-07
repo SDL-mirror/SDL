@@ -789,7 +789,7 @@ GL_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     texture->driverdata = NULL;
 }
 
-void
+static void
 GL_DestroyRenderer(SDL_Renderer * renderer)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;

@@ -28,6 +28,7 @@
 /* Direct3D renderer implementation */
 
 static SDL_Renderer *D3D_CreateRenderer(SDL_Window * window, Uint32 flags);
+static int D3D_DisplayModeChanged(SDL_Renderer * renderer);
 static int D3D_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static int D3D_SetTexturePalette(SDL_Renderer * renderer,
                                  SDL_Texture * texture,
@@ -61,7 +62,7 @@ SDL_RenderDriver D3D_RenderDriver = {
     {
      "d3d",
      (SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTCOPY |
-      SDL_RENDERER_PRESENTFLIP2 | sDL_RENDERER_PRESENTFLIP3 |
+      SDL_RENDERER_PRESENTFLIP2 | SDL_RENDERER_PRESENTFLIP3 |
       SDL_RENDERER_PRESENTDISCARD | SDL_RENDERER_PRESENTVSYNC |
       SDL_RENDERER_ACCELERATED),
      (SDL_TEXTUREBLENDMODE_NONE | SDL_TEXTUREBLENDMODE_MASK |
@@ -90,6 +91,7 @@ SDL_RenderDriver D3D_RenderDriver = {
 typedef struct
 {
     IDirect3DDevice9 *device;
+    D3DPRESENT_PARAMETERS pparams;
     SDL_bool beginScene;
 } D3D_RenderData;
 
@@ -182,6 +184,7 @@ D3D_SetError(const char *prefix, HRESULT result)
         break;
     }
     SDL_SetError("%s: %s", prefix, error);
+    fprintf(stderr, "%s: %s\n", prefix, error);
 }
 
 static D3DFORMAT
@@ -253,6 +256,7 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
         return NULL;
     }
 
+    renderer->DisplayModeChanged = D3D_DisplayModeChanged;
     renderer->CreateTexture = D3D_CreateTexture;
     renderer->SetTexturePalette = D3D_SetTexturePalette;
     renderer->GetTexturePalette = D3D_GetTexturePalette;
@@ -276,7 +280,7 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     pparams.BackBufferHeight = window->h;
     if (window->flags & SDL_WINDOW_FULLSCREEN) {
         pparams.BackBufferFormat =
-            PixelFormatToD3DFMT(display->fullscreen_mode->format);
+            PixelFormatToD3DFMT(display->fullscreen_mode.format);
     } else {
         pparams.BackBufferFormat = D3DFMT_UNKNOWN;
     }
@@ -296,7 +300,7 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     if (window->flags & SDL_WINDOW_FULLSCREEN) {
         pparams.Windowed = FALSE;
         pparams.FullScreen_RefreshRateInHz =
-            display->fullscreen_mode->refresh_rate;
+            display->fullscreen_mode.refresh_rate;
     } else {
         pparams.Windowed = TRUE;
         pparams.FullScreen_RefreshRateInHz = 0;
@@ -355,6 +359,7 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     if (pparams.PresentationInterval == D3DPRESENT_INTERVAL_ONE) {
         renderer->info.flags |= SDL_RENDERER_PRESENTVSYNC;
     }
+    data->pparams = pparams;
 
     IDirect3DDevice9_GetDeviceCaps(data->device, &caps);
     renderer->info.max_texture_width = caps.MaxTextureWidth;
@@ -368,6 +373,48 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     IDirect3DDevice9_SetRenderState(data->device, D3DRS_LIGHTING, FALSE);
 
     return renderer;
+}
+
+static int
+D3D_Reset(SDL_Renderer * renderer)
+{
+    D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
+    HRESULT result;
+
+    result = IDirect3DDevice9_Reset(data->device, &data->pparams);
+    if (FAILED(result)) {
+        if (result == D3DERR_DEVICELOST) {
+            /* Don't worry about it, we'll reset later... */
+            return 0;
+        } else {
+            D3D_SetError("Reset()", result);
+            return -1;
+        }
+    }
+    IDirect3DDevice9_SetVertexShader(data->device, NULL);
+    IDirect3DDevice9_SetFVF(data->device, D3DFVF_XYZRHW | D3DFVF_TEX1);
+    IDirect3DDevice9_SetRenderState(data->device, D3DRS_CULLMODE,
+                                    D3DCULL_NONE);
+    IDirect3DDevice9_SetRenderState(data->device, D3DRS_LIGHTING, FALSE);
+    return 0;
+}
+
+static int
+D3D_DisplayModeChanged(SDL_Renderer * renderer)
+{
+    D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
+    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+
+    data->pparams.BackBufferWidth = window->w;
+    data->pparams.BackBufferHeight = window->h;
+    if (window->flags & SDL_WINDOW_FULLSCREEN) {
+        data->pparams.BackBufferFormat =
+            PixelFormatToD3DFMT(display->fullscreen_mode.format);
+    } else {
+        data->pparams.BackBufferFormat = D3DFMT_UNKNOWN;
+    }
+    return D3D_Reset(renderer);
 }
 
 static int
@@ -388,6 +435,12 @@ D3D_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     texture->driverdata = data;
 
+#if 1
+    /* FIXME: Do we want non-managed textures?
+       They need to be freed on device reset and then reloaded by the app...
+     */
+    texture->access = SDL_TEXTUREACCESS_LOCAL;
+#endif
     if (texture->access == SDL_TEXTUREACCESS_LOCAL) {
         pool = D3DPOOL_MANAGED;
     } else {
@@ -709,6 +762,14 @@ D3D_RenderPresent(SDL_Renderer * renderer)
         data->beginScene = SDL_TRUE;
     }
 
+    result = IDirect3DDevice9_TestCooperativeLevel(data->device);
+    if (result == D3DERR_DEVICELOST) {
+        /* We'll reset later */
+        return;
+    }
+    if (result == D3DERR_DEVICENOTRESET) {
+        D3D_Reset(renderer);
+    }
     result = IDirect3DDevice9_Present(data->device, NULL, NULL, NULL, NULL);
     if (FAILED(result)) {
         D3D_SetError("Present()", result);
@@ -730,7 +791,7 @@ D3D_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     texture->driverdata = NULL;
 }
 
-void
+static void
 D3D_DestroyRenderer(SDL_Renderer * renderer)
 {
     D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
