@@ -184,7 +184,6 @@ D3D_SetError(const char *prefix, HRESULT result)
         break;
     }
     SDL_SetError("%s: %s", prefix, error);
-    fprintf(stderr, "%s: %s\n", prefix, error);
 }
 
 static D3DFORMAT
