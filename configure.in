@@ -1268,40 +1268,6 @@ AC_HELP_STRING([--enable-video-wscons], [use wscons video driver [[default=yes]]
     fi
 }
 
-dnl Set up the QTopia video driver if enabled
-CheckQtopia()
-{
-    AC_ARG_ENABLE(video-qtopia,
-AC_HELP_STRING([--enable-video-qtopia], [use Qtopia video driver [[default=no]]]),
-                  , enable_video_qtopia=no)
-    if test x$enable_video = xyes -a x$enable_video_qtopia = xyes; then
-        AC_MSG_CHECKING(for Qtopia support)
-        video_qtopia=no
-        QTOPIA_FLAGS="-DQT_QWS_EBX -DQT_QWS_CUSTOM -DQWS -I${QPEDIR}/include -I${QTDIR}/include/ -DNO_DEBUG -fno-rtti -fno-exceptions"
-        AC_LANG_CPLUSPLUS
-        OLD_CXX="$CXXFLAGS"
-        CXXFLAGS="$QTOPIA_FLAGS"
-        AC_TRY_COMPILE([
-         #include <qpe/qpeapplication.h>
-        ],[
-        ],[
-        video_qtopia=yes
-        ])
-        CXXFLAGS="$OLD_CXX"
-        AC_MSG_RESULT($video_qtopia)
-        if test x$video_qtopia = xyes; then
-            AC_DEFINE(SDL_VIDEO_DRIVER_QTOPIA)
-            SOURCES="$SOURCES $srcdir/src/video/qtopia/*.cc"
-            SDLMAIN_SOURCES="$srcdir/src/main/qtopia/*.cc"
-            EXTRA_CFLAGS="$EXTRA_CFLAGS $QTOPIA_FLAGS"
-            SDL_CFLAGS="$SDL_CFLAGS -DQWS -Dmain=SDL_main"
-            SDL_LIBS="-lSDLmain $SDL_LIBS -L${QPEDIR}/lib -L${QTDIR}/lib/ -lqpe -lqte"
-            have_video=yes
-        fi
-        AC_LANG_C
-    fi
-}
-
 dnl Set up the Atari Bios keyboard driver
 CheckAtariBiosEvent()
 {
@@ -2045,7 +2011,6 @@ case "$host" in
         CheckSVGA
         CheckVGL
         CheckWscons
-        CheckQtopia
         CheckOpenGLX11
         CheckInputEvents
         CheckTslib

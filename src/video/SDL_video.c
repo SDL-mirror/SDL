@@ -55,9 +55,6 @@ static VideoBootStrap *bootstrap[] = {
 #if SDL_VIDEO_DRIVER_IPOD
     &iPod_bootstrap,
 #endif
-#if SDL_VIDEO_DRIVER_QTOPIA
-    &Qtopia_bootstrap,
-#endif
 #if SDL_VIDEO_DRIVER_WSCONS
     &WSCONS_bootstrap,
 #endif
