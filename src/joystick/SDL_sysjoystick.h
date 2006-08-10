@@ -81,4 +81,5 @@ extern void SDL_SYS_JoystickClose(SDL_Joystick * joystick);
 
 /* Function to perform any system-specific joystick related cleanup */
 extern void SDL_SYS_JoystickQuit(void);
+
 /* vi: set ts=4 sw=4 expandtab: */

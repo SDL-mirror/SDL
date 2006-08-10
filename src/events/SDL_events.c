@@ -157,11 +157,7 @@ SDL_StartEventThread(Uint32 flags)
 #if !SDL_THREADS_DISABLED
     SDL_EventQ.lock = SDL_CreateMutex();
     if (SDL_EventQ.lock == NULL) {
-#ifdef __MACOS__                /* MacOS classic you can't multithread, so no lock needed */
-        ;
-#else
         return (-1);
-#endif
     }
 #endif /* !SDL_THREADS_DISABLED */
     SDL_EventQ.active = 1;

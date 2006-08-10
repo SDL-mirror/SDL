@@ -74,4 +74,5 @@ extern int SDL_SYS_CDInit(void);
 
 /* Function to perform any system-specific CD-ROM related cleanup */
 extern void SDL_SYS_CDQuit(void);
+
 /* vi: set ts=4 sw=4 expandtab: */

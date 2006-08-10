@@ -29,7 +29,6 @@
 
 #if defined(__WIN32__) || \
     (defined(__MWERKS__) && !defined(__BEOS__)) || \
-    defined(__MACOS__) || \
     defined(__SYMBIAN32__) || defined(QWS)
 
 #ifdef __cplusplus
@@ -67,30 +66,6 @@ extern "C" {
 extern DECLSPEC int SDLCALL SDL_RegisterApp(char *name, Uint32 style,
                                             void *hInst);
 extern DECLSPEC void SDLCALL SDL_UnregisterApp(void);
-
-#ifdef __cplusplus
-/* *INDENT-OFF* */
-}
-/* *INDENT-ON* */
-#endif
-#include "close_code.h"
-#endif
-
-/* From the SDL library code -- needed for registering QuickDraw on MacOS */
-#if defined(__MACOS__)
-
-#include "begin_code.h"
-#ifdef __cplusplus
-/* *INDENT-OFF* */
-extern "C" {
-/* *INDENT-ON* */
-#endif
-
-/* Forward declaration so we don't need to include QuickDraw.h */
-struct QDGlobals;
-
-/* This should be called from your main() function, if any */
-extern DECLSPEC void SDLCALL SDL_InitQuickDraw(struct QDGlobals *the_qd);
 
 #ifdef __cplusplus
 /* *INDENT-OFF* */

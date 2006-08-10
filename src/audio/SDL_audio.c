@@ -532,9 +532,6 @@ SDL_OpenAudio(SDL_AudioSpec * desired, SDL_AudioSpec * obtained)
         SDL_SetError("SDL_OpenAudio() passed a NULL callback");
         return (-1);
     }
-#if defined(__MACOS__) || (defined(__RISCOS__) && SDL_THREADS_DISABLED)
-    /* FIXME: Need to implement PPC interrupt asm for SDL_LockAudio() */
-#else
 #if defined(__MINT__) && SDL_THREADS_DISABLED
     /* Uses interrupt driven audio, without thread */
 #else
@@ -546,7 +543,6 @@ SDL_OpenAudio(SDL_AudioSpec * desired, SDL_AudioSpec * obtained)
         return (-1);
     }
 #endif /* __MINT__ */
-#endif /* __MACOS__ */
 
     /* Calculate the silence and size of the audio specification */
     SDL_CalculateAudioSpec(desired);

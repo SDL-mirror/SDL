@@ -102,9 +102,6 @@
 #pragma nopackwarning
 #endif
 #pragma pack(push,4)
-#elif (defined(__MWERKS__) && defined(__MACOS__))
-#pragma options align=mac68k4byte
-#pragma enumsalwaysint on
 #endif /* Compiler needs structure packing set */
 
 /* Set up compiler-specific options for inlining functions */

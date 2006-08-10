@@ -336,12 +336,6 @@ extern VideoBootStrap WIN32_bootstrap;
 #if SDL_VIDEO_DRIVER_BWINDOW
 extern VideoBootStrap BWINDOW_bootstrap;
 #endif
-#if SDL_VIDEO_DRIVER_TOOLBOX
-extern VideoBootStrap TOOLBOX_bootstrap;
-#endif
-#if SDL_VIDEO_DRIVER_DRAWSPROCKET
-extern VideoBootStrap DSp_bootstrap;
-#endif
 #if SDL_VIDEO_DRIVER_CYBERGRAPHICS
 extern VideoBootStrap CGX_bootstrap;
 #endif

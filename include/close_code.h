@@ -31,10 +31,5 @@
 #ifdef __BORLANDC__
 #pragma nopackwarning
 #endif
-#if (defined(__MWERKS__) && defined(__MACOS__))
-#pragma options align=reset
-#pragma enumsalwaysint reset
-#else
 #pragma pack(pop)
-#endif
 #endif /* Compiler needs structure packing set */

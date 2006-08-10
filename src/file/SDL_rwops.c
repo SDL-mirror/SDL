@@ -349,51 +349,6 @@ mem_close(SDL_RWops * context)
 
 /* Functions to create SDL_RWops structures from various data sources */
 
-#ifdef __MACOS__
-/*
- * translate unix-style slash-separated filename to mac-style colon-separated
- * name; return malloced string
- */
-static char *
-unix_to_mac(const char *file)
-{
-    int flen = SDL_strlen(file);
-    char *path = SDL_malloc(flen + 2);
-    const char *src = file;
-    char *dst = path;
-    if (*src == '/') {
-        /* really depends on filesystem layout, hope for the best */
-        src++;
-    } else {
-        /* Check if this is a MacOS path to begin with */
-        if (*src != ':')
-            *dst++ = ':';       /* relative paths begin with ':' */
-    }
-    while (src < file + flen) {
-        const char *end = SDL_strchr(src, '/');
-        int len;
-        if (!end)
-            end = file + flen;  /* last component */
-        len = end - src;
-        if (len == 0 || (len == 1 && src[0] == '.')) {
-            /* remove repeated slashes and . */
-        } else {
-            if (len == 2 && src[0] == '.' && src[1] == '.') {
-                /* replace .. with the empty string */
-            } else {
-                SDL_memcpy(dst, src, len);
-                dst += len;
-            }
-            if (end < file + flen)
-                *dst++ = ':';
-        }
-        src = end + 1;
-    }
-    *dst++ = '\0';
-    return path;
-}
-#endif /* __MACOS__ */
-
 SDL_RWops *
 SDL_RWFromFile(const char *file, const char *mode)
 {
@@ -421,15 +376,7 @@ SDL_RWFromFile(const char *file, const char *mode)
 
 #elif HAVE_STDIO_H
 
-#ifdef __MACOS__
-    {
-        char *mpath = unix_to_mac(file);
-        fp = fopen(mpath, mode);
-        SDL_free(mpath);
-    }
-#else
     fp = fopen(file, mode);
-#endif
     if (fp == NULL) {
         SDL_SetError("Couldn't open %s", file);
     } else {

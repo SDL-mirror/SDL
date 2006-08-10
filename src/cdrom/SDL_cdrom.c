@@ -26,9 +26,7 @@
 #include "SDL_cdrom.h"
 #include "SDL_syscdrom.h"
 
-#if !defined(__MACOS__)
 #define CLIP_FRAMES	10      /* Some CD-ROMs won't go all the way */
-#endif
 
 static int SDL_cdinitted = 0;
 static SDL_CD *default_cdrom;
