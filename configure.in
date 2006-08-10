@@ -1153,32 +1153,6 @@ AC_HELP_STRING([--enable-video-ps2gs], [use PlayStation 2 GS video driver [[defa
     fi
 }
 
-dnl Find the GGI includes
-CheckGGI()
-{
-    AC_ARG_ENABLE(video-ggi,
-AC_HELP_STRING([--enable-video-ggi], [use GGI video driver [[default=no]]]),
-                  , enable_video_ggi=no)
-    if test x$enable_video = xyes -a x$enable_video_ggi = xyes; then
-        AC_MSG_CHECKING(for GGI support)
-        video_ggi=no
-        AC_TRY_COMPILE([
-         #include <ggi/ggi.h>
-         #include <ggi/gii.h>
-        ],[
-        ],[
-        video_ggi=yes
-        ])
-        AC_MSG_RESULT($video_ggi)
-        if test x$video_ggi = xyes; then
-            AC_DEFINE(SDL_VIDEO_DRIVER_GGI)
-            SOURCES="$SOURCES $srcdir/src/video/ggi/*.c"
-            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lggi -lgii -lgg"
-            have_video=yes
-        fi
-    fi
-}
-
 dnl Find the SVGAlib includes and libraries
 CheckSVGA()
 {
@@ -2007,7 +1981,6 @@ case "$host" in
         CheckFBCON
         CheckDirectFB
         CheckPS2GS
-        CheckGGI
         CheckSVGA
         CheckVGL
         CheckWscons
