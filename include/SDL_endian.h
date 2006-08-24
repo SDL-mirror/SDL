@@ -192,21 +192,35 @@ SDL_Swap64(Uint64 x)
 #endif /* SDL_HAS_64BIT_TYPE */
 
 
+static __inline__ float
+SDL_SwapFloat(float x)
+{
+    union { float f; Uint32 ui32; } swapper;
+    swapper.f = x;
+    swapper.ui32 = SDL_Swap32(swapper.ui32);
+    return swapper.f;
+}
+
+
 /* Byteswap item from the specified endianness to the native endianness */
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN
 #define SDL_SwapLE16(X)	(X)
 #define SDL_SwapLE32(X)	(X)
 #define SDL_SwapLE64(X)	(X)
+#define SDL_SwapFloatLE(X)	(X)
 #define SDL_SwapBE16(X)	SDL_Swap16(X)
 #define SDL_SwapBE32(X)	SDL_Swap32(X)
 #define SDL_SwapBE64(X)	SDL_Swap64(X)
+#define SDL_SwapFloatBE(X)	SDL_SwapFloat(X)
 #else
 #define SDL_SwapLE16(X)	SDL_Swap16(X)
 #define SDL_SwapLE32(X)	SDL_Swap32(X)
 #define SDL_SwapLE64(X)	SDL_Swap64(X)
+#define SDL_SwapFloatLE(X)	SDL_SwapFloat(X)
 #define SDL_SwapBE16(X)	(X)
 #define SDL_SwapBE32(X)	(X)
 #define SDL_SwapBE64(X)	(X)
+#define SDL_SwapFloatBE(X)	(X)
 #endif
 
 /* Ends C function definitions when using C++ */
