@@ -172,7 +172,7 @@ DSP_OpenAudio(_THIS, SDL_AudioSpec * spec)
     int format;
     int value;
     int frag_spec;
-    Uint16 test_format;
+    SDL_AudioFormat test_format;
 
     /* Open the audio device */
     audio_fd = SDL_OpenAudioPath(audiodev, sizeof(audiodev), OPEN_FLAGS, 0);

@@ -274,7 +274,7 @@ static int
 ARTS_OpenAudio(_THIS, SDL_AudioSpec * spec)
 {
     int bits, frag_spec;
-    Uint16 test_format, format;
+    SDL_AudioFormat test_format, format;
 
     /* Reset the timer synchronization flag */
     frame_ticks = 0.0;

@@ -237,7 +237,7 @@ NAS_OpenAudio(_THIS, SDL_AudioSpec * spec)
 {
     AuElement elms[3];
     int buffer_size;
-    Uint16 test_format, format;
+    SDL_AudioFormat test_format, format;
 
     this->hidden->mixbuf = NULL;
 

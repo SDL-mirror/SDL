@@ -321,7 +321,7 @@ DMA_OpenAudio(_THIS, SDL_AudioSpec * spec)
     int format;
     int stereo;
     int value;
-    Uint16 test_format;
+    SDL_AudioFormat test_format;
     struct audio_buf_info info;
 
     /* Reset the timer synchronization flag */

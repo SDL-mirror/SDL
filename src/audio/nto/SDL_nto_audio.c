@@ -348,7 +348,7 @@ NTO_OpenAudio(_THIS, SDL_AudioSpec * spec)
 {
     int rval;
     int format;
-    Uint16 test_format;
+    SDL_AudioFormat test_format;
     int found;
 
     audio_handle = NULL;

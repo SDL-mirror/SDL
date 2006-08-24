@@ -34,7 +34,7 @@ struct SDL_PrivateAudioData
     /* The file descriptor for the audio device */
     int audio_fd;
 
-    Uint16 audio_fmt;           /* The app audio format */
+    SDL_AudioFormat audio_fmt;  /* The app audio format */
     Uint8 *mixbuf;              /* The app mixing buffer */
     int ulaw_only;              /* Flag -- does hardware only output U-law? */
     Uint8 *ulaw_buf;            /* The U-law mixing buffer */

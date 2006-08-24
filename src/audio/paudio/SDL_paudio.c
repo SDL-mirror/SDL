@@ -244,7 +244,7 @@ Paud_OpenAudio(_THIS, SDL_AudioSpec * spec)
     char audiodev[1024];
     int format;
     int bytes_per_sample;
-    Uint16 test_format;
+    SDL_AudioFormat test_format;
     audio_init paud_init;
     audio_buffer paud_bufinfo;
     audio_status paud_status;

@@ -331,7 +331,7 @@ static int
 OBSD_OpenAudio(_THIS, SDL_AudioSpec * spec)
 {
     char audiodev[64];
-    Uint16 format;
+    SDL_AudioFormat format;
     audio_info_t info;
 
     AUDIO_INITINFO(&info);

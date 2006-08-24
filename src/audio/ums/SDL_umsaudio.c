@@ -250,7 +250,7 @@ UMS_OpenAudio(_THIS, SDL_AudioSpec * spec)
     long bitsPerSample;
     long samplesPerSec;
     long success;
-    Uint16 test_format;
+    SDL_AudioFormat test_format;
     int frag_spec;
     UMSAudioDevice_ReturnCode rc;
 

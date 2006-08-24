@@ -483,7 +483,7 @@ ALSA_OpenAudio(_THIS, SDL_AudioSpec * spec)
     snd_pcm_sw_params_t *swparams;
     snd_pcm_format_t format;
     snd_pcm_uframes_t frames;
-    Uint16 test_format;
+    SDL_AudioFormat test_format;
 
     /* Open the audio device */
     /* Name of device should depend on # channels in spec */
