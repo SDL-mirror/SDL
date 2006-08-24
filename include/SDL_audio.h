@@ -110,9 +110,6 @@ typedef struct SDL_AudioSpec
 #define AUDIO_S32LSB	0x8020  /* 32-bit integer samples */
 #define AUDIO_S32MSB	0x9020  /* As above, but big-endian byte order */
 #define AUDIO_S32	AUDIO_S32LSB
-#define AUDIO_U32LSB	0x0020  /* Unsigned 32-bit integer samples */
-#define AUDIO_U32MSB	0x1020  /* As above, but big-endian byte order */
-#define AUDIO_U32	AUDIO_U32LSB
 
 /* float32 support new to SDL 1.3 */
 #define AUDIO_F32LSB	0x8120  /* 32-bit floating point samples */
@@ -124,31 +121,33 @@ typedef struct SDL_AudioSpec
 #define AUDIO_U16SYS	AUDIO_U16LSB
 #define AUDIO_S16SYS	AUDIO_S16LSB
 #define AUDIO_S32SYS	AUDIO_S32LSB
-#define AUDIO_U32SYS	AUDIO_U32LSB
 #define AUDIO_F32SYS	AUDIO_F32LSB
 #else
 #define AUDIO_U16SYS	AUDIO_U16MSB
 #define AUDIO_S16SYS	AUDIO_S16MSB
 #define AUDIO_S32SYS	AUDIO_S32MSB
-#define AUDIO_U32SYS	AUDIO_U32MSB
 #define AUDIO_F32SYS	AUDIO_F32MSB
 #endif
 
 
 /* A structure to hold a set of audio conversion filters and buffers */
+struct SDL_AudioCVT;
+typedef void (SDLCALL * SDL_AudioFilter)(struct SDL_AudioCVT *cvt,
+                                         SDL_AudioFormat format);
+
 typedef struct SDL_AudioCVT
 {
-    int needed;                 /* Set to 1 if conversion possible */
-    Uint16 src_format;          /* Source audio format */
-    Uint16 dst_format;          /* Target audio format */
-    double rate_incr;           /* Rate conversion increment */
-    Uint8 *buf;                 /* Buffer to hold entire audio data */
-    int len;                    /* Length of original audio buffer */
-    int len_cvt;                /* Length of converted audio buffer */
-    int len_mult;               /* buffer must be len*len_mult big */
-    double len_ratio;           /* Given len, final size is len*len_ratio */
-    void (SDLCALL * filters[10]) (struct SDL_AudioCVT * cvt, Uint16 format);
-    int filter_index;           /* Current audio conversion function */
+    int needed;                  /* Set to 1 if conversion possible */
+    SDL_AudioFormat src_format;  /* Source audio format */
+    SDL_AudioFormat dst_format;  /* Target audio format */
+    double rate_incr;            /* Rate conversion increment */
+    Uint8 *buf;                  /* Buffer to hold entire audio data */
+    int len;                     /* Length of original audio buffer */
+    int len_cvt;                 /* Length of converted audio buffer */
+    int len_mult;                /* buffer must be len*len_mult big */
+    double len_ratio;            /* Given len, final size is len*len_ratio */
+    SDL_AudioFilter filters[10]; /* Filter list */
+    int filter_index;            /* Current audio conversion function */
 } SDL_AudioCVT;
 
 
@@ -323,10 +322,10 @@ extern DECLSPEC void SDLCALL SDL_FreeWAV(Uint8 * audio_buf);
  *  no conversion needed, or 1 if the audio filter is set up.
  */
 extern DECLSPEC int SDLCALL SDL_BuildAudioCVT(SDL_AudioCVT * cvt,
-                                              Uint16 src_format,
+                                              SDL_AudioFormat src_format,
                                               Uint8 src_channels,
                                               int src_rate,
-                                              Uint16 dst_format,
+                                              SDL_AudioFormat dst_format,
                                               Uint8 dst_channels,
                                               int dst_rate);
 
