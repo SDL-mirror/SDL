@@ -113,6 +113,7 @@ typedef struct
 {
     float x, y, z;
     float rhw;
+    DWORD color;
     float u, v;
 } Vertex;
 
@@ -379,7 +380,8 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
 
     /* Set up parameters for rendering */
     IDirect3DDevice9_SetVertexShader(data->device, NULL);
-    IDirect3DDevice9_SetFVF(data->device, D3DFVF_XYZRHW | D3DFVF_TEX1);
+    IDirect3DDevice9_SetFVF(data->device,
+                            D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1);
     IDirect3DDevice9_SetRenderState(data->device, D3DRS_CULLMODE,
                                     D3DCULL_NONE);
     IDirect3DDevice9_SetRenderState(data->device, D3DRS_LIGHTING, FALSE);
@@ -404,7 +406,8 @@ D3D_Reset(SDL_Renderer * renderer)
         }
     }
     IDirect3DDevice9_SetVertexShader(data->device, NULL);
-    IDirect3DDevice9_SetFVF(data->device, D3DFVF_XYZRHW | D3DFVF_TEX1);
+    IDirect3DDevice9_SetFVF(data->device,
+                            D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1);
     IDirect3DDevice9_SetRenderState(data->device, D3DRS_CULLMODE,
                                     D3DCULL_NONE);
     IDirect3DDevice9_SetRenderState(data->device, D3DRS_LIGHTING, FALSE);
@@ -493,15 +496,13 @@ D3D_GetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
 static int
 D3D_SetTextureColorMod(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-    /* FIXME: implement vertex coloring */
-    return -1;
+    return 0;
 }
 
 static int
 D3D_SetTextureAlphaMod(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-    /* FIXME: implement vertex coloring */
-    return -1;
+    return 0;
 }
 
 static int
@@ -693,6 +694,7 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     D3D_TextureData *texturedata = (D3D_TextureData *) texture->driverdata;
     float minx, miny, maxx, maxy;
     float minu, maxu, minv, maxv;
+    DWORD color;
     Vertex vertices[4];
     HRESULT result;
 
@@ -711,10 +713,13 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     minv = (float) srcrect->y / texture->h;
     maxv = (float) (srcrect->y + srcrect->h) / texture->h;
 
+    color = D3DCOLOR_ARGB(texture->a, texture->r, texture->g, texture->b);
+
     vertices[0].x = minx;
     vertices[0].y = miny;
     vertices[0].z = 0.0f;
     vertices[0].rhw = 1.0f;
+    vertices[0].color = color;
     vertices[0].u = minu;
     vertices[0].v = minv;
 
@@ -722,6 +727,7 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     vertices[1].y = miny;
     vertices[1].z = 0.0f;
     vertices[1].rhw = 1.0f;
+    vertices[1].color = color;
     vertices[1].u = maxu;
     vertices[1].v = minv;
 
@@ -729,6 +735,7 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     vertices[2].y = maxy;
     vertices[2].z = 0.0f;
     vertices[2].rhw = 1.0f;
+    vertices[2].color = color;
     vertices[2].u = maxu;
     vertices[2].v = maxv;
 
@@ -736,6 +743,7 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     vertices[3].y = maxy;
     vertices[3].z = 0.0f;
     vertices[3].rhw = 1.0f;
+    vertices[3].color = color;
     vertices[3].u = minu;
     vertices[3].v = maxv;
 
