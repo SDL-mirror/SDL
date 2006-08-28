@@ -382,9 +382,24 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     IDirect3DDevice9_SetVertexShader(data->device, NULL);
     IDirect3DDevice9_SetFVF(data->device,
                             D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1);
+    IDirect3DDevice9_SetRenderState(data->device, D3DRS_ZENABLE, D3DZB_FALSE);
     IDirect3DDevice9_SetRenderState(data->device, D3DRS_CULLMODE,
                                     D3DCULL_NONE);
     IDirect3DDevice9_SetRenderState(data->device, D3DRS_LIGHTING, FALSE);
+    /* Enable color modulation by diffuse color */
+    IDirect3DDevice9_SetTextureStageState(data->device, 0, D3DTSS_COLOROP,
+                                          D3DTOP_MODULATE);
+    IDirect3DDevice9_SetTextureStageState(data->device, 0, D3DTSS_COLORARG1,
+                                          D3DTA_TEXTURE);
+    IDirect3DDevice9_SetTextureStageState(data->device, 0, D3DTSS_COLORARG2,
+                                          D3DTA_DIFFUSE);
+    /* Enable alpha modulation by diffuse alpha */
+    IDirect3DDevice9_SetTextureStageState(data->device, 0, D3DTSS_ALPHAOP,
+                                          D3DTOP_MODULATE);
+    IDirect3DDevice9_SetTextureStageState(data->device, 0, D3DTSS_ALPHAARG1,
+                                          D3DTA_TEXTURE);
+    IDirect3DDevice9_SetTextureStageState(data->device, 0, D3DTSS_ALPHAARG2,
+                                          D3DTA_DIFFUSE);
 
     return renderer;
 }
