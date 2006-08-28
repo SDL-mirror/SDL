@@ -36,7 +36,7 @@ SDL_ConvertMono(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 #ifdef DEBUG_CONVERT
     fprintf(stderr, "Converting to mono\n");
 #endif
-    switch (format & (SDL_AUDIO_MASK_SIGNED|SDL_AUDIO_MASK_BITSIZE)) {
+    switch (format & (SDL_AUDIO_MASK_SIGNED | SDL_AUDIO_MASK_BITSIZE)) {
     case AUDIO_U8:
         {
             Uint8 *src, *dst;
@@ -170,15 +170,15 @@ SDL_ConvertMono(SDL_AudioCVT * cvt, SDL_AudioFormat format)
             if (SDL_AUDIO_ISBIGENDIAN(format)) {
                 for (i = cvt->len_cvt / 8; i; --i, src += 2) {
                     const Sint64 added =
-                                    (((Sint64) (Sint32) SDL_SwapBE32(src[0])) +
-                                     ((Sint64) (Sint32) SDL_SwapBE32(src[1])));
+                        (((Sint64) (Sint32) SDL_SwapBE32(src[0])) +
+                         ((Sint64) (Sint32) SDL_SwapBE32(src[1])));
                     *(dst++) = SDL_SwapBE32((Uint32) ((Sint32) (added >> 1)));
                 }
             } else {
                 for (i = cvt->len_cvt / 8; i; --i, src += 2) {
                     const Sint64 added =
-                                    (((Sint64) (Sint32) SDL_SwapLE32(src[0])) +
-                                     ((Sint64) (Sint32) SDL_SwapLE32(src[1])));
+                        (((Sint64) (Sint32) SDL_SwapLE32(src[0])) +
+                         ((Sint64) (Sint32) SDL_SwapLE32(src[1])));
                     *(dst++) = SDL_SwapLE32((Uint32) ((Sint32) (added >> 1)));
                 }
             }
@@ -188,7 +188,11 @@ SDL_ConvertMono(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     case AUDIO_F32:
         {
             /* !!! FIXME: this convert union is nasty. */
-            union { float f; Uint32 ui32; } f2i;
+            union
+            {
+                float f;
+                Uint32 ui32;
+            } f2i;
             const Uint32 *src = (const Uint32 *) cvt->buf;
             Uint32 *dst = (Uint32 *) cvt->buf;
             if (SDL_AUDIO_ISBIGENDIAN(format)) {
@@ -235,7 +239,7 @@ SDL_ConvertStrip(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Converting down from 6 channels to stereo\n");
 #endif
 
-    #define strip_chans_6_to_2(type) \
+#define strip_chans_6_to_2(type) \
     { \
         const type *src = (const type *) cvt->buf; \
         type *dst = (type *) cvt->buf; \
@@ -249,18 +253,18 @@ SDL_ConvertStrip(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 
     /* this function only cares about typesize, and data as a block of bits. */
     switch (SDL_AUDIO_BITSIZE(format)) {
-        case 8:
-            strip_chans_6_to_2(Uint8);
-            break;
-        case 16:
-            strip_chans_6_to_2(Uint16);
-            break;
-        case 32:
-            strip_chans_6_to_2(Uint32);
-            break;
+    case 8:
+        strip_chans_6_to_2(Uint8);
+        break;
+    case 16:
+        strip_chans_6_to_2(Uint16);
+        break;
+    case 32:
+        strip_chans_6_to_2(Uint32);
+        break;
     }
 
-    #undef strip_chans_6_to_2
+#undef strip_chans_6_to_2
 
     cvt->len_cvt /= 3;
     if (cvt->filters[++cvt->filter_index]) {
@@ -279,7 +283,7 @@ SDL_ConvertStrip_2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Converting 6 down to quad\n");
 #endif
 
-    #define strip_chans_6_to_4(type) \
+#define strip_chans_6_to_4(type) \
     { \
         const type *src = (const type *) cvt->buf; \
         type *dst = (type *) cvt->buf; \
@@ -295,18 +299,18 @@ SDL_ConvertStrip_2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 
     /* this function only cares about typesize, and data as a block of bits. */
     switch (SDL_AUDIO_BITSIZE(format)) {
-        case 8:
-            strip_chans_6_to_4(Uint8);
-            break;
-        case 16:
-            strip_chans_6_to_4(Uint16);
-            break;
-        case 32:
-            strip_chans_6_to_4(Uint32);
-            break;
+    case 8:
+        strip_chans_6_to_4(Uint8);
+        break;
+    case 16:
+        strip_chans_6_to_4(Uint16);
+        break;
+    case 32:
+        strip_chans_6_to_4(Uint32);
+        break;
     }
 
-    #undef strip_chans_6_to_4
+#undef strip_chans_6_to_4
 
     cvt->len_cvt /= 6;
     cvt->len_cvt *= 4;
@@ -325,7 +329,7 @@ SDL_ConvertStereo(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Converting to stereo\n");
 #endif
 
-    #define dup_chans_1_to_2(type) \
+#define dup_chans_1_to_2(type) \
     { \
         const type *src = (const type *) (cvt->buf + cvt->len_cvt); \
         type *dst = (type *) (cvt->buf + cvt->len_cvt * 2); \
@@ -338,18 +342,18 @@ SDL_ConvertStereo(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 
     /* this function only cares about typesize, and data as a block of bits. */
     switch (SDL_AUDIO_BITSIZE(format)) {
-        case 8:
-            dup_chans_1_to_2(Uint8);
-            break;
-        case 16:
-            dup_chans_1_to_2(Uint16);
-            break;
-        case 32:
-            dup_chans_1_to_2(Uint32);
-            break;
+    case 8:
+        dup_chans_1_to_2(Uint8);
+        break;
+    case 16:
+        dup_chans_1_to_2(Uint16);
+        break;
+    case 32:
+        dup_chans_1_to_2(Uint32);
+        break;
     }
 
-    #undef dup_chans_1_to_2
+#undef dup_chans_1_to_2
 
     cvt->len_cvt *= 2;
     if (cvt->filters[++cvt->filter_index]) {
@@ -368,7 +372,7 @@ SDL_ConvertSurround(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Converting stereo to surround\n");
 #endif
 
-    switch (format & (SDL_AUDIO_MASK_SIGNED|SDL_AUDIO_MASK_BITSIZE)) {
+    switch (format & (SDL_AUDIO_MASK_SIGNED | SDL_AUDIO_MASK_BITSIZE)) {
     case AUDIO_U8:
         {
             Uint8 *src, *dst, lf, rf, ce;
@@ -573,7 +577,11 @@ SDL_ConvertSurround(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 
     case AUDIO_F32:
         {
-            union { float f; Uint32 ui32; } f2i;  /* !!! FIXME: lame. */
+            union
+            {
+                float f;
+                Uint32 ui32;
+            } f2i;              /* !!! FIXME: lame. */
             float lf, rf, ce;
             const Uint32 *src = (const Uint32 *) cvt->buf + cvt->len_cvt;
             Uint32 *dst = (Uint32 *) cvt->buf + cvt->len_cvt * 3;
@@ -640,7 +648,7 @@ SDL_ConvertSurround_4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Converting stereo to quad\n");
 #endif
 
-    switch (format & (SDL_AUDIO_MASK_SIGNED|SDL_AUDIO_MASK_BITSIZE)) {
+    switch (format & (SDL_AUDIO_MASK_SIGNED | SDL_AUDIO_MASK_BITSIZE)) {
     case AUDIO_U8:
         {
             Uint8 *src, *dst, lf, rf, ce;
@@ -831,7 +839,7 @@ SDL_RateMUL2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Converting audio rate * 2 (mono)\n");
 #endif
 
-    #define mul2_mono(type) { \
+#define mul2_mono(type) { \
         const type *src = (const type *) (cvt->buf + cvt->len_cvt); \
         type *dst = (type *) (cvt->buf + (cvt->len_cvt * 2)); \
         for (i = cvt->len_cvt / sizeof (type); i; --i) { \
@@ -853,7 +861,7 @@ SDL_RateMUL2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
         break;
     }
 
-    #undef mul2_mono
+#undef mul2_mono
 
     cvt->len_cvt *= 2;
     if (cvt->filters[++cvt->filter_index]) {
@@ -872,7 +880,7 @@ SDL_RateMUL2_c2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Converting audio rate * 2 (stereo)\n");
 #endif
 
-    #define mul2_stereo(type) { \
+#define mul2_stereo(type) { \
         const type *src = (const type *) (cvt->buf + cvt->len_cvt); \
         type *dst = (type *) (cvt->buf + (cvt->len_cvt * 2)); \
         for (i = cvt->len_cvt / (sizeof (type) * 2); i; --i) { \
@@ -899,7 +907,7 @@ SDL_RateMUL2_c2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
         break;
     }
 
-    #undef mul2_stereo
+#undef mul2_stereo
 
     cvt->len_cvt *= 2;
     if (cvt->filters[++cvt->filter_index]) {
@@ -917,7 +925,7 @@ SDL_RateMUL2_c4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Converting audio rate * 2 (quad)\n");
 #endif
 
-    #define mul2_quad(type) { \
+#define mul2_quad(type) { \
         const type *src = (const type *) (cvt->buf + cvt->len_cvt); \
         type *dst = (type *) (cvt->buf + (cvt->len_cvt * 2)); \
         for (i = cvt->len_cvt / (sizeof (type) * 4); i; --i) { \
@@ -950,7 +958,7 @@ SDL_RateMUL2_c4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
         break;
     }
 
-    #undef mul2_quad
+#undef mul2_quad
 
     cvt->len_cvt *= 2;
     if (cvt->filters[++cvt->filter_index]) {
@@ -969,7 +977,7 @@ SDL_RateMUL2_c6(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Converting audio rate * 2 (six channels)\n");
 #endif
 
-    #define mul2_chansix(type) { \
+#define mul2_chansix(type) { \
         const type *src = (const type *) (cvt->buf + cvt->len_cvt); \
         type *dst = (type *) (cvt->buf + (cvt->len_cvt * 2)); \
         for (i = cvt->len_cvt / (sizeof (type) * 6); i; --i) { \
@@ -1008,7 +1016,7 @@ SDL_RateMUL2_c6(SDL_AudioCVT * cvt, SDL_AudioFormat format)
         break;
     }
 
-    #undef mul2_chansix
+#undef mul2_chansix
 
     cvt->len_cvt *= 2;
     if (cvt->filters[++cvt->filter_index]) {
@@ -1026,7 +1034,7 @@ SDL_RateDIV2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Converting audio rate / 2 (mono)\n");
 #endif
 
-    #define div2_mono(type) { \
+#define div2_mono(type) { \
         const type *src = (const type *) cvt->buf; \
         type *dst = (type *) cvt->buf; \
         for (i = cvt->len_cvt / (sizeof (type) * 2); i; --i) { \
@@ -1048,7 +1056,7 @@ SDL_RateDIV2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
         break;
     }
 
-    #undef div2_mono
+#undef div2_mono
 
     cvt->len_cvt /= 2;
     if (cvt->filters[++cvt->filter_index]) {
@@ -1067,7 +1075,7 @@ SDL_RateDIV2_c2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Converting audio rate / 2 (stereo)\n");
 #endif
 
-    #define div2_stereo(type) { \
+#define div2_stereo(type) { \
         const type *src = (const type *) cvt->buf; \
         type *dst = (type *) cvt->buf; \
         for (i = cvt->len_cvt / (sizeof (type) * 4); i; --i) { \
@@ -1090,7 +1098,7 @@ SDL_RateDIV2_c2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
         break;
     }
 
-    #undef div2_stereo
+#undef div2_stereo
 
     cvt->len_cvt /= 2;
     if (cvt->filters[++cvt->filter_index]) {
@@ -1109,7 +1117,7 @@ SDL_RateDIV2_c4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Converting audio rate / 2 (quad)\n");
 #endif
 
-    #define div2_quad(type) { \
+#define div2_quad(type) { \
         const type *src = (const type *) cvt->buf; \
         type *dst = (type *) cvt->buf; \
         for (i = cvt->len_cvt / (sizeof (type) * 8); i; --i) { \
@@ -1134,7 +1142,7 @@ SDL_RateDIV2_c4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
         break;
     }
 
-    #undef div2_quad
+#undef div2_quad
 
     cvt->len_cvt /= 2;
     if (cvt->filters[++cvt->filter_index]) {
@@ -1152,7 +1160,7 @@ SDL_RateDIV2_c6(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Converting audio rate / 2 (six channels)\n");
 #endif
 
-    #define div2_chansix(type) { \
+#define div2_chansix(type) { \
         const type *src = (const type *) cvt->buf; \
         type *dst = (type *) cvt->buf; \
         for (i = cvt->len_cvt / (sizeof (type) * 12); i; --i) { \
@@ -1179,7 +1187,7 @@ SDL_RateDIV2_c6(SDL_AudioCVT * cvt, SDL_AudioFormat format)
         break;
     }
 
-    #undef div_chansix
+#undef div_chansix
 
     cvt->len_cvt /= 2;
     if (cvt->filters[++cvt->filter_index]) {
@@ -1309,7 +1317,7 @@ SDL_HandTunedTypeCVT(SDL_AudioFormat src_fmt, SDL_AudioFormat dst_fmt)
      *  processor, platform, compiler, or library here.
      */
 
-    return NULL;  /* no specialized converter code available. */
+    return NULL;                /* no specialized converter code available. */
 }
 
 
@@ -1340,7 +1348,7 @@ SDL_BuildAudioTypeCVT(SDL_AudioCVT * cvt,
             }
 
             if (filter == NULL) {
-                return -1;  /* Still no matching converter?! */
+                return -1;      /* Still no matching converter?! */
             }
         }
 
@@ -1354,10 +1362,10 @@ SDL_BuildAudioTypeCVT(SDL_AudioCVT * cvt,
             cvt->len_ratio /= (src_bitsize / dst_bitsize);
         }
 
-        return 1;  /* added a converter. */
+        return 1;               /* added a converter. */
     }
 
-    return 0;  /* no conversion necessary. */
+    return 0;                   /* no conversion necessary. */
 }
 
 
@@ -1379,11 +1387,10 @@ SDL_BuildAudioCVT(SDL_AudioCVT * cvt,
     if ((SDL_AUDIO_BITSIZE(dst_fmt) > 16) && (!SDL_AUDIO_ISSIGNED(dst_fmt))) {
         return -1;
     }
-
-    #ifdef DEBUG_CONVERT
+#ifdef DEBUG_CONVERT
     printf("Build format %04x->%04x, channels %u->%u, rate %d->%d\n",
-		    src_fmt, dst_fmt, src_channels, dst_channels, src_rate, dst_rate);
-    #endif
+           src_fmt, dst_fmt, src_channels, dst_channels, src_rate, dst_rate);
+#endif
 
     /* Start off with no conversion necessary */
 
@@ -1397,7 +1404,7 @@ SDL_BuildAudioCVT(SDL_AudioCVT * cvt,
 
     /* Convert data types, if necessary. Updates (cvt). */
     if (SDL_BuildAudioTypeCVT(cvt, src_fmt, dst_fmt) == -1)
-        return -1;  /* shouldn't happen, but just in case... */
+        return -1;              /* shouldn't happen, but just in case... */
 
     /* Channel conversion */
     if (src_channels != dst_channels) {

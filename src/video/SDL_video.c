@@ -1510,6 +1510,10 @@ SDL_CreateTexture(Uint32 format, int access, int w, int h)
     texture->access = access;
     texture->w = w;
     texture->h = h;
+    texture->r = 255;
+    texture->g = 255;
+    texture->b = 255;
+    texture->a = 255;
     texture->renderer = renderer;
 
     if (renderer->CreateTexture(renderer, texture) < 0) {
@@ -1772,6 +1776,162 @@ SDL_GetTexturePalette(SDL_TextureID textureID, SDL_Color * colors,
 }
 
 int
+SDL_SetTextureColorMod(SDL_TextureID textureID, Uint8 r, Uint8 g, Uint8 b)
+{
+    SDL_Texture *texture = SDL_GetTextureFromID(textureID);
+    SDL_Renderer *renderer;
+
+    if (!texture) {
+        return -1;
+    }
+
+    renderer = texture->renderer;
+    if (!renderer->SetTextureColorMod) {
+        return -1;
+    }
+    if (r < 255 | g < 255 | b < 255) {
+        texture->modMode |= SDL_TEXTUREMODULATE_COLOR;
+    } else {
+        texture->modMode &= ~SDL_TEXTUREMODULATE_COLOR;
+    }
+    texture->r = r;
+    texture->g = g;
+    texture->b = b;
+    return renderer->SetTextureColorMod(renderer, texture);
+}
+
+int
+SDL_GetTextureColorMod(SDL_TextureID textureID, Uint8 * r, Uint8 * g,
+                       Uint8 * b)
+{
+    SDL_Texture *texture = SDL_GetTextureFromID(textureID);
+    SDL_Renderer *renderer;
+
+    if (!texture) {
+        return -1;
+    }
+
+    renderer = texture->renderer;
+    if (r) {
+        *r = texture->r;
+    }
+    if (g) {
+        *g = texture->g;
+    }
+    if (b) {
+        *b = texture->b;
+    }
+    return 0;
+}
+
+int
+SDL_SetTextureAlphaMod(SDL_TextureID textureID, Uint8 alpha)
+{
+    SDL_Texture *texture = SDL_GetTextureFromID(textureID);
+    SDL_Renderer *renderer;
+
+    if (!texture) {
+        return -1;
+    }
+
+    renderer = texture->renderer;
+    if (!renderer->SetTextureAlphaMod) {
+        return -1;
+    }
+    if (alpha < 255) {
+        texture->modMode |= SDL_TEXTUREMODULATE_ALPHA;
+    } else {
+        texture->modMode &= ~SDL_TEXTUREMODULATE_ALPHA;
+    }
+    texture->a = alpha;
+    return renderer->SetTextureAlphaMod(renderer, texture);
+}
+
+int
+SDL_GetTextureAlphaMod(SDL_TextureID textureID, Uint8 * alpha)
+{
+    SDL_Texture *texture = SDL_GetTextureFromID(textureID);
+    SDL_Renderer *renderer;
+
+    if (!texture) {
+        return -1;
+    }
+
+    if (alpha) {
+        *alpha = texture->a;
+    }
+    return 0;
+}
+
+int
+SDL_SetTextureBlendMode(SDL_TextureID textureID, int blendMode)
+{
+    SDL_Texture *texture = SDL_GetTextureFromID(textureID);
+    SDL_Renderer *renderer;
+
+    if (!texture) {
+        return -1;
+    }
+
+    renderer = texture->renderer;
+    if (!renderer->SetTextureBlendMode) {
+        return -1;
+    }
+    texture->blendMode = blendMode;
+    return renderer->SetTextureBlendMode(renderer, texture);
+}
+
+int
+SDL_GetTextureBlendMode(SDL_TextureID textureID, int *blendMode)
+{
+    SDL_Texture *texture = SDL_GetTextureFromID(textureID);
+    SDL_Renderer *renderer;
+
+    if (!texture) {
+        return -1;
+    }
+
+    if (blendMode) {
+        *blendMode = texture->blendMode;
+    }
+    return 0;
+}
+
+int
+SDL_SetTextureScaleMode(SDL_TextureID textureID, int scaleMode)
+{
+    SDL_Texture *texture = SDL_GetTextureFromID(textureID);
+    SDL_Renderer *renderer;
+
+    if (!texture) {
+        return -1;
+    }
+
+    renderer = texture->renderer;
+    if (!renderer->SetTextureScaleMode) {
+        return -1;
+    }
+    texture->scaleMode = scaleMode;
+    return renderer->SetTextureScaleMode(renderer, texture);
+}
+
+int
+SDL_GetTextureScaleMode(SDL_TextureID textureID, int *scaleMode)
+{
+    SDL_Texture *texture = SDL_GetTextureFromID(textureID);
+    SDL_Renderer *renderer;
+
+    if (!texture) {
+        return -1;
+    }
+
+    if (scaleMode) {
+        *scaleMode = texture->scaleMode;
+    }
+    return 0;
+}
+
+int
 SDL_UpdateTexture(SDL_TextureID textureID, const SDL_Rect * rect,
                   const void *pixels, int pitch)
 {
@@ -1864,7 +2024,7 @@ SDL_DirtyTexture(SDL_TextureID textureID, int numrects,
 }
 
 int
-SDL_RenderFill(const SDL_Rect * rect, Uint32 color)
+SDL_RenderFill(Uint8 r, Uint8 g, Uint8 b, Uint8 a, const SDL_Rect * rect)
 {
     SDL_Renderer *renderer;
     SDL_Window *window;
@@ -1891,12 +2051,12 @@ SDL_RenderFill(const SDL_Rect * rect, Uint32 color)
         }
     }
 
-    return renderer->RenderFill(renderer, &real_rect, color);
+    return renderer->RenderFill(renderer, r, g, b, a, &real_rect);
 }
 
 int
 SDL_RenderCopy(SDL_TextureID textureID, const SDL_Rect * srcrect,
-               const SDL_Rect * dstrect, int blendMode, int scaleMode)
+               const SDL_Rect * dstrect)
 {
     SDL_Texture *texture = SDL_GetTextureFromID(textureID);
     SDL_Renderer *renderer;
@@ -1932,7 +2092,7 @@ SDL_RenderCopy(SDL_TextureID textureID, const SDL_Rect * srcrect,
     }
 
     return renderer->RenderCopy(renderer, texture, &real_srcrect,
-                                &real_dstrect, blendMode, scaleMode);
+                                &real_dstrect);
 }
 
 void

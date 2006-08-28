@@ -26,6 +26,7 @@
 #include "SDL_pixels_c.h"
 #include "SDL_rect_c.h"
 #include "SDL_yuv_sw_c.h"
+#include "SDL_rendercopy.h"
 
 
 /* SDL surface based renderer implementation */
@@ -44,22 +45,28 @@ static int SW_SetTexturePalette(SDL_Renderer * renderer,
 static int SW_GetTexturePalette(SDL_Renderer * renderer,
                                 SDL_Texture * texture, SDL_Color * colors,
                                 int firstcolor, int ncolors);
-static int SW_UpdateTexture(SDL_Renderer * renderer,
-                            SDL_Texture * texture, const SDL_Rect * rect,
-                            const void *pixels, int pitch);
+static int SW_SetTextureColorMod(SDL_Renderer * renderer,
+                                 SDL_Texture * texture);
+static int SW_SetTextureAlphaMod(SDL_Renderer * renderer,
+                                 SDL_Texture * texture);
+static int SW_SetTextureBlendMode(SDL_Renderer * renderer,
+                                  SDL_Texture * texture);
+static int SW_SetTextureScaleMode(SDL_Renderer * renderer,
+                                  SDL_Texture * texture);
+static int SW_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
+                            const SDL_Rect * rect, const void *pixels,
+                            int pitch);
 static int SW_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
-                          const SDL_Rect * rect, int markDirty,
-                          void **pixels, int *pitch);
+                          const SDL_Rect * rect, int markDirty, void **pixels,
+                          int *pitch);
 static void SW_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static void SW_DirtyTexture(SDL_Renderer * renderer,
                             SDL_Texture * texture, int numrects,
                             const SDL_Rect * rects);
-static int SW_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect,
-                         Uint32 color);
+static int SW_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b,
+                         Uint8 a, const SDL_Rect * rect);
 static int SW_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
-                         const SDL_Rect * srcrect,
-                         const SDL_Rect * dstrect, int blendMode,
-                         int scaleMode);
+                         const SDL_Rect * srcrect, const SDL_Rect * dstrect);
 static void SW_RenderPresent(SDL_Renderer * renderer);
 static void SW_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static void SW_DestroyRenderer(SDL_Renderer * renderer);
@@ -72,8 +79,11 @@ SDL_RenderDriver SW_RenderDriver = {
      (SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTCOPY |
       SDL_RENDERER_PRESENTFLIP2 | SDL_RENDERER_PRESENTFLIP3 |
       SDL_RENDERER_PRESENTDISCARD | SDL_RENDERER_PRESENTVSYNC),
+     (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_COLOR |
+      SDL_TEXTUREMODULATE_ALPHA),
      (SDL_TEXTUREBLENDMODE_NONE | SDL_TEXTUREBLENDMODE_MASK |
-      SDL_TEXTUREBLENDMODE_BLEND),
+      SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD |
+      SDL_TEXTUREBLENDMODE_MOD),
      (SDL_TEXTURESCALEMODE_NONE | SDL_TEXTURESCALEMODE_FAST),
      11,
      {
@@ -188,6 +198,10 @@ SW_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->QueryTexturePixels = SW_QueryTexturePixels;
     renderer->SetTexturePalette = SW_SetTexturePalette;
     renderer->GetTexturePalette = SW_GetTexturePalette;
+    renderer->SetTextureColorMod = SW_SetTextureColorMod;
+    renderer->SetTextureAlphaMod = SW_SetTextureAlphaMod;
+    renderer->SetTextureBlendMode = SW_SetTextureBlendMode;
+    renderer->SetTextureScaleMode = SW_SetTextureScaleMode;
     renderer->UpdateTexture = SW_UpdateTexture;
     renderer->LockTexture = SW_LockTexture;
     renderer->UnlockTexture = SW_UnlockTexture;
@@ -333,6 +347,7 @@ SW_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     if (SDL_ISPIXELFORMAT_FOURCC(texture->format)) {
         texture->driverdata = SDL_SW_CreateYUVTexture(texture);
     } else {
+        SDL_Surface *surface;
         int bpp;
         Uint32 Rmask, Gmask, Bmask, Amask;
 
@@ -400,6 +415,72 @@ SW_GetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
     }
 }
 
+static void
+SW_UpdateRenderCopyFunc(SDL_Renderer * renderer, SDL_Texture * texture)
+{
+    SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
+    SDL_Surface *surface = (SDL_Surface *) texture->driverdata;
+
+    surface->userdata =
+        SDL_GetRenderCopyFunc(texture->format, data->format, texture->modMode,
+                              texture->blendMode, texture->scaleMode);
+}
+
+static int
+SW_SetTextureColorMod(SDL_Renderer * renderer, SDL_Texture * texture)
+{
+    SW_UpdateRenderCopyFunc(renderer, texture);
+    return 0;
+}
+
+static int
+SW_SetTextureAlphaMod(SDL_Renderer * renderer, SDL_Texture * texture)
+{
+    SW_UpdateRenderCopyFunc(renderer, texture);
+    return 0;
+}
+
+static int
+SW_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
+{
+    switch (texture->blendMode) {
+    case SDL_TEXTUREBLENDMODE_NONE:
+    case SDL_TEXTUREBLENDMODE_MASK:
+    case SDL_TEXTUREBLENDMODE_BLEND:
+    case SDL_TEXTUREBLENDMODE_ADD:
+    case SDL_TEXTUREBLENDMODE_MOD:
+        SW_UpdateRenderCopyFunc(renderer, texture);
+        return 0;
+    default:
+        SDL_Unsupported();
+        texture->blendMode = SDL_TEXTUREBLENDMODE_NONE;
+        SW_UpdateRenderCopyFunc(renderer, texture);
+        return -1;
+    }
+}
+
+static int
+SW_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture)
+{
+    switch (texture->scaleMode) {
+    case SDL_TEXTURESCALEMODE_NONE:
+    case SDL_TEXTURESCALEMODE_FAST:
+        SW_UpdateRenderCopyFunc(renderer, texture);
+        return 0;
+    case SDL_TEXTURESCALEMODE_SLOW:
+    case SDL_TEXTURESCALEMODE_BEST:
+        SDL_Unsupported();
+        texture->scaleMode = SDL_TEXTURESCALEMODE_FAST;
+        SW_UpdateRenderCopyFunc(renderer, texture);
+        return -1;
+    default:
+        SDL_Unsupported();
+        texture->scaleMode = SDL_TEXTURESCALEMODE_NONE;
+        SW_UpdateRenderCopyFunc(renderer, texture);
+        return -1;
+    }
+}
+
 static int
 SW_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                  const SDL_Rect * rect, const void *pixels, int pitch)
@@ -462,10 +543,11 @@ SW_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 }
 
 static int
-SW_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect, Uint32 color)
+SW_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b, Uint8 a,
+              const SDL_Rect * rect)
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
-    Uint8 r, g, b, a;
+    Uint32 color;
     SDL_Rect real_rect;
     int status;
 
@@ -473,10 +555,6 @@ SW_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect, Uint32 color)
         SDL_AddDirtyRect(&data->dirty, rect);
     }
 
-    a = (Uint8) ((color >> 24) & 0xFF);
-    r = (Uint8) ((color >> 16) & 0xFF);
-    g = (Uint8) ((color >> 8) & 0xFF);
-    b = (Uint8) (color & 0xFF);
     color = SDL_MapRGBA(data->surface.format, r, g, b, a);
 
     if (data->renderer->
@@ -500,8 +578,7 @@ SW_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect, Uint32 color)
 
 static int
 SW_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
-              const SDL_Rect * srcrect, const SDL_Rect * dstrect,
-              int blendMode, int scaleMode)
+              const SDL_Rect * srcrect, const SDL_Rect * dstrect)
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
@@ -525,27 +602,55 @@ SW_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                                 data->surface.pixels, data->surface.pitch);
     } else {
         SDL_Surface *surface = (SDL_Surface *) texture->driverdata;
-        SDL_Rect real_srcrect = *srcrect;
-        SDL_Rect real_dstrect;
+        SDL_RenderCopyFunc copyfunc = (SDL_RenderCopyFunc) surface->userdata;
 
-        data->surface.w = dstrect->w;
-        data->surface.h = dstrect->h;
-        data->surface.clip_rect.w = dstrect->w;
-        data->surface.clip_rect.h = dstrect->h;
-        real_dstrect = data->surface.clip_rect;
+        if (copyfunc) {
+            SDL_RenderCopyData copydata;
 
-        if (blendMode &
-            (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND)) {
-            SDL_SetAlpha(surface, SDL_SRCALPHA, 0);
+            copydata.src =
+                (Uint8 *) surface->pixels + srcrect->y * surface->pitch +
+                srcrect->x * surface->format->BytesPerPixel;
+            copydata.src_w = srcrect->w;
+            copydata.src_h = srcrect->h;
+            copydata.src_pitch = surface->pitch;
+            copydata.dst = (Uint8 *) data->surface.pixels;
+            copydata.dst_w = dstrect->w;
+            copydata.dst_h = dstrect->h;
+            copydata.dst_pitch = data->surface.pitch;
+            copydata.flags = 0;
+            if (texture->modMode & SDL_TEXTUREMODULATE_COLOR) {
+                copydata.flags |= SDL_RENDERCOPY_MODULATE_COLOR;
+                copydata.r = texture->r;
+                copydata.g = texture->g;
+                copydata.b = texture->b;
+            }
+            if (texture->modMode & SDL_TEXTUREMODULATE_ALPHA) {
+                copydata.flags |= SDL_RENDERCOPY_MODULATE_ALPHA;
+                copydata.a = texture->a;
+            }
+            if (texture->
+                blendMode & (SDL_TEXTUREBLENDMODE_MASK |
+                             SDL_TEXTUREBLENDMODE_BLEND)) {
+                copydata.flags |= SDL_RENDERCOPY_BLEND;
+            } else if (texture->blendMode & SDL_TEXTUREBLENDMODE_ADD) {
+                copydata.flags |= SDL_RENDERCOPY_ADD;
+            } else if (texture->blendMode & SDL_TEXTUREBLENDMODE_MOD) {
+                copydata.flags |= SDL_RENDERCOPY_MOD;
+            }
+            if (texture->scaleMode) {
+                copydata.flags |= SDL_RENDERCOPY_NEAREST;
+            }
+            status = copyfunc(&copydata);
         } else {
-            SDL_SetAlpha(surface, 0, 0);
-        }
-        if (scaleMode != SDL_TEXTURESCALEMODE_NONE &&
-            (srcrect->w != dstrect->w || srcrect->h != dstrect->h)) {
-            status =
-                SDL_SoftStretch(surface, &real_srcrect, &data->surface,
-                                &real_dstrect);
-        } else {
+            SDL_Rect real_srcrect = *srcrect;
+            SDL_Rect real_dstrect;
+
+            data->surface.w = dstrect->w;
+            data->surface.h = dstrect->h;
+            data->surface.clip_rect.w = dstrect->w;
+            data->surface.clip_rect.h = dstrect->h;
+            real_dstrect = data->surface.clip_rect;
+
             status =
                 SDL_LowerBlit(surface, &real_srcrect, &data->surface,
                               &real_dstrect);
@@ -567,9 +672,7 @@ SW_RenderPresent(SDL_Renderer * renderer)
         SDL_DirtyRect *dirty;
         for (dirty = data->dirty.list; dirty; dirty = dirty->next) {
             data->renderer->RenderCopy(data->renderer, texture, &dirty->rect,
-                                       &dirty->rect,
-                                       SDL_TEXTUREBLENDMODE_NONE,
-                                       SDL_TEXTURESCALEMODE_NONE);
+                                       &dirty->rect);
         }
         SDL_ClearDirtyRects(&data->dirty);
     } else {
@@ -578,9 +681,7 @@ SW_RenderPresent(SDL_Renderer * renderer)
         rect.y = 0;
         rect.w = texture->w;
         rect.h = texture->h;
-        data->renderer->RenderCopy(data->renderer, texture, &rect, &rect,
-                                   SDL_TEXTUREBLENDMODE_NONE,
-                                   SDL_TEXTURESCALEMODE_NONE);
+        data->renderer->RenderCopy(data->renderer, texture, &rect, &rect);
     }
     data->renderer->RenderPresent(data->renderer);
 

@@ -42,6 +42,12 @@ static int GDI_SetTexturePalette(SDL_Renderer * renderer,
 static int GDI_GetTexturePalette(SDL_Renderer * renderer,
                                  SDL_Texture * texture, SDL_Color * colors,
                                  int firstcolor, int ncolors);
+static int GDI_SetTextureAlphaMod(SDL_Renderer * renderer,
+                                  SDL_Texture * texture);
+static int GDI_SetTextureBlendMode(SDL_Renderer * renderer,
+                                   SDL_Texture * texture);
+static int GDI_SetTextureScaleMode(SDL_Renderer * renderer,
+                                   SDL_Texture * texture);
 static int GDI_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                              const SDL_Rect * rect, const void *pixels,
                              int pitch);
@@ -51,11 +57,10 @@ static int GDI_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static void GDI_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static void GDI_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                              int numrects, const SDL_Rect * rects);
-static int GDI_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect,
-                          Uint32 color);
+static int GDI_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b,
+                          Uint8 a, const SDL_Rect * rect);
 static int GDI_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
-                          const SDL_Rect * srcrect, const SDL_Rect * dstrect,
-                          int blendMode, int scaleMode);
+                          const SDL_Rect * srcrect, const SDL_Rect * dstrect);
 static void GDI_RenderPresent(SDL_Renderer * renderer);
 static void GDI_DestroyTexture(SDL_Renderer * renderer,
                                SDL_Texture * texture);
@@ -69,6 +74,7 @@ SDL_RenderDriver GDI_RenderDriver = {
      (SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTCOPY |
       SDL_RENDERER_PRESENTFLIP2 | SDL_RENDERER_PRESENTFLIP3 |
       SDL_RENDERER_PRESENTDISCARD | SDL_RENDERER_ACCELERATED),
+     (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_ALPHA),
      (SDL_TEXTUREBLENDMODE_NONE | SDL_TEXTUREBLENDMODE_MASK |
       SDL_TEXTUREBLENDMODE_BLEND),
      (SDL_TEXTURESCALEMODE_NONE | SDL_TEXTURESCALEMODE_FAST),
@@ -161,6 +167,9 @@ GDI_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->QueryTexturePixels = GDI_QueryTexturePixels;
     renderer->SetTexturePalette = GDI_SetTexturePalette;
     renderer->GetTexturePalette = GDI_GetTexturePalette;
+    renderer->SetTextureAlphaMod = GDI_SetTextureAlphaMod;
+    renderer->SetTextureBlendMode = GDI_SetTextureBlendMode;
+    renderer->SetTextureScaleMode = GDI_SetTextureScaleMode;
     renderer->UpdateTexture = GDI_UpdateTexture;
     renderer->LockTexture = GDI_LockTexture;
     renderer->UnlockTexture = GDI_UnlockTexture;
@@ -438,6 +447,47 @@ GDI_GetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
 }
 
 static int
+GDI_SetTextureAlphaMod(SDL_Renderer * renderer, SDL_Texture * texture)
+{
+    return 0;
+}
+
+static int
+GDI_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
+{
+    switch (texture->blendMode) {
+    case SDL_TEXTUREBLENDMODE_NONE:
+    case SDL_TEXTUREBLENDMODE_MASK:
+    case SDL_TEXTUREBLENDMODE_BLEND:
+        return 0;
+    default:
+        SDL_Unsupported();
+        texture->blendMode = SDL_TEXTUREBLENDMODE_NONE;
+        return -1;
+    }
+}
+
+static int
+GDI_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture)
+{
+    switch (texture->scaleMode) {
+    case SDL_TEXTURESCALEMODE_NONE:
+    case SDL_TEXTURESCALEMODE_FAST:
+        return 0;
+    case SDL_TEXTURESCALEMODE_SLOW:
+    case SDL_TEXTURESCALEMODE_BEST:
+        SDL_Unsupported();
+        texture->scaleMode = SDL_TEXTURESCALEMODE_FAST;
+        return -1;
+    default:
+        SDL_Unsupported();
+        texture->scaleMode = SDL_TEXTURESCALEMODE_NONE;
+        return -1;
+    }
+    return 0;
+}
+
+static int
 GDI_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                   const SDL_Rect * rect, const void *pixels, int pitch)
 {
@@ -524,10 +574,10 @@ GDI_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture, int numrects,
 }
 
 static int
-GDI_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect, Uint32 color)
+GDI_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b, Uint8 a,
+               const SDL_Rect * rect)
 {
     GDI_RenderData *data = (GDI_RenderData *) renderer->driverdata;
-    Uint8 r, g, b;
     RECT rc;
     HBRUSH brush;
     int status;
@@ -535,10 +585,6 @@ GDI_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect, Uint32 color)
     if (data->makedirty) {
         SDL_AddDirtyRect(&data->dirty, rect);
     }
-
-    r = (Uint8) ((color >> 16) & 0xFF);
-    g = (Uint8) ((color >> 8) & 0xFF);
-    b = (Uint8) (color & 0xFF);
 
     rc.left = rect->x;
     rc.top = rect->y;
@@ -560,8 +606,7 @@ GDI_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect, Uint32 color)
 
 static int
 GDI_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
-               const SDL_Rect * srcrect, const SDL_Rect * dstrect,
-               int blendMode, int scaleMode)
+               const SDL_Rect * srcrect, const SDL_Rect * dstrect)
 {
     GDI_RenderData *data = (GDI_RenderData *) renderer->driverdata;
     GDI_TextureData *texturedata = (GDI_TextureData *) texture->driverdata;
@@ -575,11 +620,13 @@ GDI_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         SelectPalette(data->memory_hdc, texturedata->hpal, TRUE);
         RealizePalette(data->memory_hdc);
     }
-    if (blendMode & (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND)) {
-        static BLENDFUNCTION blendFunc = {
+    if (texture->
+        blendMode & (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND))
+    {
+        BLENDFUNCTION blendFunc = {
             AC_SRC_OVER,
             0,
-            255,
+            texture->a,
             AC_SRC_ALPHA
         };
         /* FIXME: GDI uses premultiplied alpha! */

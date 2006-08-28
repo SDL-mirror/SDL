@@ -37,6 +37,14 @@ static int D3D_SetTexturePalette(SDL_Renderer * renderer,
 static int D3D_GetTexturePalette(SDL_Renderer * renderer,
                                  SDL_Texture * texture, SDL_Color * colors,
                                  int firstcolor, int ncolors);
+static int D3D_SetTextureColorMod(SDL_Renderer * renderer,
+                                  SDL_Texture * texture);
+static int D3D_SetTextureAlphaMod(SDL_Renderer * renderer,
+                                  SDL_Texture * texture);
+static int D3D_SetTextureBlendMode(SDL_Renderer * renderer,
+                                   SDL_Texture * texture);
+static int D3D_SetTextureScaleMode(SDL_Renderer * renderer,
+                                   SDL_Texture * texture);
 static int D3D_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                              const SDL_Rect * rect, const void *pixels,
                              int pitch);
@@ -46,11 +54,10 @@ static int D3D_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static void D3D_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static void D3D_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                              int numrects, const SDL_Rect * rects);
-static int D3D_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect,
-                          Uint32 color);
+static int D3D_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b,
+                          Uint8 a, const SDL_Rect * rect);
 static int D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
-                          const SDL_Rect * srcrect, const SDL_Rect * dstrect,
-                          int blendMode, int scaleMode);
+                          const SDL_Rect * srcrect, const SDL_Rect * dstrect);
 static void D3D_RenderPresent(SDL_Renderer * renderer);
 static void D3D_DestroyTexture(SDL_Renderer * renderer,
                                SDL_Texture * texture);
@@ -65,6 +72,8 @@ SDL_RenderDriver D3D_RenderDriver = {
       SDL_RENDERER_PRESENTFLIP2 | SDL_RENDERER_PRESENTFLIP3 |
       SDL_RENDERER_PRESENTDISCARD | SDL_RENDERER_PRESENTVSYNC |
       SDL_RENDERER_ACCELERATED),
+     (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_COLOR |
+      SDL_TEXTUREMODULATE_ALPHA),
      (SDL_TEXTUREBLENDMODE_NONE | SDL_TEXTUREBLENDMODE_MASK |
       SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD |
       SDL_TEXTUREBLENDMODE_MOD),
@@ -259,6 +268,10 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->CreateTexture = D3D_CreateTexture;
     renderer->SetTexturePalette = D3D_SetTexturePalette;
     renderer->GetTexturePalette = D3D_GetTexturePalette;
+    renderer->SetTextureColorMod = D3D_SetTextureColorMod;
+    renderer->SetTextureAlphaMod = D3D_SetTextureAlphaMod;
+    renderer->SetTextureBlendMode = D3D_SetTextureBlendMode;
+    renderer->SetTextureScaleMode = D3D_SetTextureScaleMode;
     renderer->UpdateTexture = D3D_UpdateTexture;
     renderer->LockTexture = D3D_LockTexture;
     renderer->UnlockTexture = D3D_UnlockTexture;
@@ -478,6 +491,54 @@ D3D_GetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
 }
 
 static int
+D3D_SetTextureColorMod(SDL_Renderer * renderer, SDL_Texture * texture)
+{
+    /* FIXME: implement vertex coloring */
+    return -1;
+}
+
+static int
+D3D_SetTextureAlphaMod(SDL_Renderer * renderer, SDL_Texture * texture)
+{
+    /* FIXME: implement vertex coloring */
+    return -1;
+}
+
+static int
+D3D_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
+{
+    switch (texture->blendMode) {
+    case SDL_TEXTUREBLENDMODE_NONE:
+    case SDL_TEXTUREBLENDMODE_MASK:
+    case SDL_TEXTUREBLENDMODE_BLEND:
+    case SDL_TEXTUREBLENDMODE_ADD:
+    case SDL_TEXTUREBLENDMODE_MOD:
+        return 0;
+    default:
+        SDL_Unsupported();
+        texture->blendMode = SDL_TEXTUREBLENDMODE_NONE;
+        return -1;
+    }
+}
+
+static int
+D3D_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture)
+{
+    switch (texture->scaleMode) {
+    case SDL_TEXTURESCALEMODE_NONE:
+    case SDL_TEXTURESCALEMODE_FAST:
+    case SDL_TEXTURESCALEMODE_SLOW:
+    case SDL_TEXTURESCALEMODE_BEST:
+        return 0;
+    default:
+        SDL_Unsupported();
+        texture->scaleMode = SDL_TEXTURESCALEMODE_NONE;
+        return -1;
+    }
+    return 0;
+}
+
+static int
 D3D_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                   const SDL_Rect * rect, const void *pixels, int pitch)
 {
@@ -597,7 +658,8 @@ D3D_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture, int numrects,
 }
 
 static int
-D3D_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect, Uint32 color)
+D3D_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b, Uint8 a,
+               const SDL_Rect * rect)
 {
     D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
     D3DRECT d3drect;
@@ -615,7 +677,7 @@ D3D_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect, Uint32 color)
 
     result =
         IDirect3DDevice9_Clear(data->device, 1, &d3drect, D3DCLEAR_TARGET,
-                               (D3DCOLOR) color, 1.0f, 0);
+                               D3DCOLOR_ARGB(a, r, g, b), 1.0f, 0);
     if (FAILED(result)) {
         D3D_SetError("Clear()", result);
         return -1;
@@ -625,8 +687,7 @@ D3D_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect, Uint32 color)
 
 static int
 D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
-               const SDL_Rect * srcrect, const SDL_Rect * dstrect,
-               int blendMode, int scaleMode)
+               const SDL_Rect * srcrect, const SDL_Rect * dstrect)
 {
     D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
     D3D_TextureData *texturedata = (D3D_TextureData *) texture->driverdata;
@@ -678,7 +739,7 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     vertices[3].u = minu;
     vertices[3].v = maxv;
 
-    switch (blendMode) {
+    switch (texture->blendMode) {
     case SDL_TEXTUREBLENDMODE_NONE:
         IDirect3DDevice9_SetRenderState(data->device, D3DRS_ALPHABLENDENABLE,
                                         FALSE);
@@ -710,7 +771,7 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         break;
     }
 
-    switch (scaleMode) {
+    switch (texture->scaleMode) {
     case SDL_TEXTURESCALEMODE_NONE:
     case SDL_TEXTURESCALEMODE_FAST:
         IDirect3DDevice9_SetSamplerState(data->device, 0, D3DSAMP_MINFILTER,

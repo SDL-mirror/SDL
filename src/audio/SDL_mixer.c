@@ -263,8 +263,8 @@ SDL_MixAudioFormat(Uint8 * dst, const Uint8 * src, SDL_AudioFormat format,
             Uint32 *dst32 = (Uint32 *) dst;
             Sint32 src1, src2;
             Sint64 dst_sample;
-            const Sint64 max_audioval = ((((Sint64)1) << (32 - 1)) - 1);
-            const Sint64 min_audioval = -(((Sint64)1) << (32 - 1));
+            const Sint64 max_audioval = ((((Sint64) 1) << (32 - 1)) - 1);
+            const Sint64 min_audioval = -(((Sint64) 1) << (32 - 1));
 
             len /= 4;
             while (len--) {
@@ -289,8 +289,8 @@ SDL_MixAudioFormat(Uint8 * dst, const Uint8 * src, SDL_AudioFormat format,
             Uint32 *dst32 = (Uint32 *) dst;
             Sint32 src1, src2;
             Sint64 dst_sample;
-            const Sint64 max_audioval = ((((Sint64)1) << (32 - 1)) - 1);
-            const Sint64 min_audioval = -(((Sint64)1) << (32 - 1));
+            const Sint64 max_audioval = ((((Sint64) 1) << (32 - 1)) - 1);
+            const Sint64 min_audioval = -(((Sint64) 1) << (32 - 1));
 
             len /= 4;
             while (len--) {
@@ -322,7 +322,11 @@ SDL_MixAudioFormat(Uint8 * dst, const Uint8 * src, SDL_AudioFormat format,
             const double min_audioval = -3.40282347e+38F;
 
             /* !!! FIXME: this is a little nasty. */
-            union { float f; Uint32 ui32; } cvt;
+            union
+            {
+                float f;
+                Uint32 ui32;
+            } cvt;
 
             len /= 4;
             while (len--) {
@@ -360,7 +364,11 @@ SDL_MixAudioFormat(Uint8 * dst, const Uint8 * src, SDL_AudioFormat format,
             const double min_audioval = -3.40282347e+38F;
 
             /* !!! FIXME: this is a little nasty. */
-            union { float f; Uint32 ui32; } cvt;
+            union
+            {
+                float f;
+                Uint32 ui32;
+            } cvt;
 
             len /= 4;
             while (len--) {

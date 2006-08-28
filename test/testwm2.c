@@ -34,7 +34,7 @@ main(int argc, char *argv[])
             consumed = -1;
         }
         if (consumed < 0) {
-            fprintf(stderr, "Usage: %s %s", argv[0], CommonUsage(state));
+            fprintf(stderr, "Usage: %s %s\n", argv[0], CommonUsage(state));
             quit(1);
         }
         i += consumed;

@@ -8,11 +8,15 @@
 
 #define NUM_SPRITES	100
 #define MAX_SPEED 	1
-#define BACKGROUND  0x00A0A0A0
 
 static CommonState *state;
 static int num_sprites;
 static SDL_TextureID *sprites;
+static SDL_bool cycle_color;
+static SDL_bool cycle_alpha;
+static int cycle_direction = 1;
+static int current_alpha = 0;
+static int current_color = 0;
 static SDL_Rect *positions;
 static SDL_Rect *velocities;
 static int sprite_w, sprite_h;
@@ -66,6 +70,8 @@ LoadSprite(char *file)
             SDL_FreeSurface(temp);
             return (-1);
         }
+        SDL_SetTextureBlendMode(sprites[i], blendMode);
+        SDL_SetTextureScaleMode(sprites[i], scaleMode);
     }
     SDL_FreeSurface(temp);
 
@@ -85,9 +91,36 @@ MoveSprites(SDL_WindowID window, SDL_TextureID sprite)
     /* Query the sizes */
     SDL_GetWindowSize(window, &window_w, &window_h);
 
+    /* Cycle the color and alpha, if desired */
+    if (cycle_color) {
+        current_color += cycle_direction;
+        if (current_color < 0) {
+            current_color = 0;
+            cycle_direction = -cycle_direction;
+        }
+        if (current_color > 255) {
+            current_color = 255;
+            cycle_direction = -cycle_direction;
+        }
+        SDL_SetTextureColorMod(sprite, 255, (Uint8) current_color,
+                               (Uint8) current_color);
+    }
+    if (cycle_alpha) {
+        current_alpha += cycle_direction;
+        if (current_alpha < 0) {
+            current_alpha = 0;
+            cycle_direction = -cycle_direction;
+        }
+        if (current_alpha > 255) {
+            current_alpha = 255;
+            cycle_direction = -cycle_direction;
+        }
+        SDL_SetTextureAlphaMod(sprite, (Uint8) current_alpha);
+    }
+
     /* Move the sprite, bounce at the wall, and draw */
     n = 0;
-    SDL_RenderFill(NULL, BACKGROUND);
+    SDL_RenderFill(0xA0, 0xA0, 0xA0, 0xFF, NULL);
     for (i = 0; i < num_sprites; ++i) {
         position = &positions[i];
         velocity = &velocities[i];
@@ -103,7 +136,7 @@ MoveSprites(SDL_WindowID window, SDL_TextureID sprite)
         }
 
         /* Blit the sprite onto the screen */
-        SDL_RenderCopy(sprite, NULL, position, blendMode, scaleMode);
+        SDL_RenderCopy(sprite, NULL, position);
     }
 
     /* Update the screen! */
@@ -166,6 +199,12 @@ main(int argc, char *argv[])
                         consumed = 2;
                     }
                 }
+            } else if (SDL_strcasecmp(argv[i], "--cyclecolor") == 0) {
+                cycle_color = SDL_TRUE;
+                consumed = 1;
+            } else if (SDL_strcasecmp(argv[i], "--cyclealpha") == 0) {
+                cycle_alpha = SDL_TRUE;
+                consumed = 1;
             } else if (SDL_isdigit(*argv[i])) {
                 num_sprites = SDL_atoi(argv[i]);
                 consumed = 1;
@@ -173,7 +212,7 @@ main(int argc, char *argv[])
         }
         if (consumed < 0) {
             fprintf(stderr,
-                    "Usage: %s %s [--blend none|mask|blend|add|mod] [--scale none|fast|slow|best]",
+                    "Usage: %s %s [--blend none|mask|blend|add|mod] [--scale none|fast|slow|best] [--cyclecolor] [--cyclealpha]\n",
                     argv[0], CommonUsage(state));
             quit(1);
         }
@@ -192,7 +231,7 @@ main(int argc, char *argv[])
     }
     for (i = 0; i < state->num_windows; ++i) {
         SDL_SelectRenderer(state->windows[i]);
-        SDL_RenderFill(NULL, BACKGROUND);
+        SDL_RenderFill(0xA0, 0xA0, 0xA0, 0xFF, NULL);
     }
     if (LoadSprite("icon.bmp") < 0) {
         quit(2);
@@ -237,7 +276,7 @@ main(int argc, char *argv[])
                 switch (event.window.event) {
                 case SDL_WINDOWEVENT_EXPOSED:
                     SDL_SelectRenderer(event.window.windowID);
-                    SDL_RenderFill(NULL, BACKGROUND);
+                    SDL_RenderFill(0xA0, 0xA0, 0xA0, 0xFF, NULL);
                     break;
                 }
                 break;

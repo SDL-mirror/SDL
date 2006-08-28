@@ -121,30 +121,33 @@ generate_rowbytes(int src_w, int dst_w, int bpp)
 
 #else
 
-#define DEFINE_COPY_ROW(name, type)			\
-void name(type *src, int src_w, type *dst, int dst_w)	\
-{							\
-	int i;						\
-	int pos, inc;					\
-	type pixel = 0;					\
-							\
-	pos = 0x10000;					\
-	inc = (src_w << 16) / dst_w;			\
-	for ( i=dst_w; i>0; --i ) {			\
-		while ( pos >= 0x10000L ) {		\
-			pixel = *src++;			\
-			pos -= 0x10000L;		\
-		}					\
-		*dst++ = pixel;				\
-		pos += inc;				\
-	}						\
+#define DEFINE_COPY_ROW(name, type)                     \
+void name(type *src, int src_w, type *dst, int dst_w)   \
+{                                                       \
+    int i;                                              \
+    int pos, inc;                                       \
+    type pixel = 0;                                     \
+                                                        \
+    pos = 0x10000;                                      \
+    inc = (src_w << 16) / dst_w;                        \
+    for ( i=dst_w; i>0; --i ) {                         \
+        while ( pos >= 0x10000L ) {                     \
+            pixel = *src++;                             \
+            pos -= 0x10000L;                            \
+        }                                               \
+        *dst++ = pixel;                                 \
+        pos += inc;                                     \
+    }                                                   \
 }
+/* *INDENT-OFF* */
 DEFINE_COPY_ROW(copy_row1, Uint8)
-    DEFINE_COPY_ROW(copy_row2, Uint16) DEFINE_COPY_ROW(copy_row4, Uint32)
+DEFINE_COPY_ROW(copy_row2, Uint16)
+DEFINE_COPY_ROW(copy_row4, Uint32)
+/* *INDENT-ON* */
 #endif /* USE_ASM_STRETCH */
 /* The ASM code doesn't handle 24-bpp stretch blits */
-     void
-     copy_row3(Uint8 * src, int src_w, Uint8 * dst, int dst_w)
+void
+copy_row3(Uint8 * src, int src_w, Uint8 * dst, int dst_w)
 {
     int i;
     int pos, inc;
@@ -278,14 +281,20 @@ SDL_SoftStretch(SDL_Surface * src, SDL_Rect * srcrect,
 #ifdef __GNUC__
           __asm__ __volatile__("call *%4": "=&D"(u1), "=&S"(u2): "0"(dstp), "1"(srcp), "r"(copy_row):"memory");
 #elif defined(_MSC_VER) || defined(__WATCOMC__)
+            /* *INDENT-OFF* */
             {
                 void *code = copy_row;
                 __asm {
-                push edi
-                        push esi
-                        mov edi, dstp
-                        mov esi, srcp call dword ptr code pop esi pop edi}
+                    push edi
+                    push esi
+                    mov edi, dstp
+                    mov esi, srcp
+                    call dword ptr code
+                    pop esi
+                    pop edi
+                }
             }
+            /* *INDENT-ON* */
 #else
 #error Need inline assembly for this compiler
 #endif

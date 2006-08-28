@@ -176,7 +176,7 @@ typedef enum
     SDL_RENDERER_PRESENTFLIP3 = 0x00000008,     /**< Present uses a flip, rotating between two back buffers and a front buffer */
     SDL_RENDERER_PRESENTDISCARD = 0x00000010,   /**< Present leaves the contents of the backbuffer undefined */
     SDL_RENDERER_PRESENTVSYNC = 0x00000020,     /**< Present is synchronized with the refresh rate */
-    SDL_RENDERER_ACCELERATED = 0x00000040,      /**< The renderer uses hardware acceleration */
+    SDL_RENDERER_ACCELERATED = 0x0000040,       /**< The renderer uses hardware acceleration */
 } SDL_RendererFlags;
 
 /**
@@ -188,6 +188,7 @@ typedef struct SDL_RendererInfo
 {
     const char *name;           /**< The name of the renderer */
     Uint32 flags;               /**< Supported SDL_RendererFlags */
+    Uint32 mod_modes;           /**< A mask of supported channel modulation */
     Uint32 blend_modes;         /**< A mask of supported blend modes */
     Uint32 scale_modes;         /**< A mask of supported scale modes */
     Uint32 num_texture_formats; /**< The number of available texture formats */
@@ -208,9 +209,21 @@ typedef enum
 } SDL_TextureAccess;
 
 /**
+ * \enum SDL_TextureModulate
+ *
+ * \brief The texture channel modulation used in SDL_RenderCopy()
+ */
+typedef enum
+{
+    SDL_TEXTUREMODULATE_NONE = 0x00000000,     /**< No modulation */
+    SDL_TEXTUREMODULATE_COLOR = 0x00000001,    /**< srcC = srcC * color */
+    SDL_TEXTUREMODULATE_ALPHA = 0x00000002,    /**< srcA = srcA * alpha */
+} SDL_TextureModulate;
+
+/**
  * \enum SDL_TextureBlendMode
  *
- * \brief The blend mode used in SDL_RenderCopy()
+ * \brief The texture blend mode used in SDL_RenderCopy()
  */
 typedef enum
 {
@@ -224,7 +237,7 @@ typedef enum
 /**
  * \enum SDL_TextureScaleMode
  *
- * \brief The scale mode used in SDL_RenderCopy()
+ * \brief The texture scale mode used in SDL_RenderCopy()
  */
 typedef enum
 {
@@ -272,12 +285,15 @@ typedef struct SDL_Surface
     int pitch;                  /* Read-only */
     void *pixels;               /* Read-write */
 
+    /* Application data associated with the surfade */
+    void *userdata;             /* Read-write */
+
     /* texture associated with the surface, if any */
-    SDL_TextureID textureID;
+    SDL_TextureID textureID;    /* Read-only */
 
     /* information needed for surfaces requiring locks */
-    int locked;
-    void *lock_data;
+    int locked;                 /* Read-only */
+    void *lock_data;            /* Read-only */
 
     /* clipping information */
     SDL_Rect clip_rect;         /* Read-only */
@@ -998,6 +1014,136 @@ extern DECLSPEC int SDLCALL SDL_GetTexturePalette(SDL_TextureID textureID,
                                                   int ncolors);
 
 /**
+ * \fn int SDL_SetTextureColorMod(SDL_TextureID textureID, Uint8 r, Uint8 g, Uint8 b)
+ *
+ * \brief Set an additional color value used in render copy operations
+ *
+ * \param texture The texture to update
+ * \param r The red source color value multiplied into copy operations
+ * \param g The green source color value multiplied into copy operations
+ * \param b The blue source color value multiplied into copy operations
+ *
+ * \return 0 on success, or -1 if the texture is not valid or color modulation is not supported
+ *
+ * \sa SDL_GetTextureColorMod()
+ */
+extern DECLSPEC int SDLCALL SDL_SetTextureColorMod(SDL_TextureID textureID,
+                                                   Uint8 r, Uint8 g, Uint8 b);
+
+
+/**
+ * \fn int SDL_GetTextureColorMod(SDL_TextureID textureID, Uint8 *r, Uint8 *g, Uint8 *b)
+ *
+ * \brief Get the additional color value used in render copy operations
+ *
+ * \param texture The texture to query
+ * \param r A pointer filled in with the source red color value
+ * \param g A pointer filled in with the source green color value
+ * \param b A pointer filled in with the source blue color value
+ *
+ * \return 0 on success, or -1 if the texture is not valid
+ *
+ * \sa SDL_SetTextureColorMod()
+ */
+extern DECLSPEC int SDLCALL SDL_GetTextureColorMod(SDL_TextureID textureID,
+                                                   Uint8 * r, Uint8 * g,
+                                                   Uint8 * b);
+
+/**
+ * \fn int SDL_SetTextureAlphaMod(SDL_TextureID textureID, Uint8 alpha)
+ *
+ * \brief Set an additional alpha value used in render copy operations
+ *
+ * \param texture The texture to update
+ * \param alpha The source alpha value multiplied into copy operations.
+ *
+ * \return 0 on success, or -1 if the texture is not valid or alpha modulation is not supported
+ *
+ * \sa SDL_GetTextureAlphaMod()
+ */
+extern DECLSPEC int SDLCALL SDL_SetTextureAlphaMod(SDL_TextureID textureID,
+                                                   Uint8 alpha);
+
+/**
+ * \fn int SDL_GetTextureAlphaMod(SDL_TextureID textureID, Uint8 *alpha)
+ *
+ * \brief Get the additional alpha value used in render copy operations
+ *
+ * \param texture The texture to query
+ * \param alpha A pointer filled in with the source alpha value
+ *
+ * \return 0 on success, or -1 if the texture is not valid
+ *
+ * \sa SDL_SetTextureAlphaMod()
+ */
+extern DECLSPEC int SDLCALL SDL_GetTextureAlphaMod(SDL_TextureID textureID,
+                                                   Uint8 * alpha);
+
+/**
+ * \fn int SDL_SetTextureBlendMode(SDL_TextureID textureID, int blendMode)
+ *
+ * \brief Set the blend mode used for texture copy operations
+ *
+ * \param texture The texture to update
+ * \param blendMode SDL_TextureBlendMode to use for texture blending
+ *
+ * \return 0 on success, or -1 if the texture is not valid or the blend mode is not supported
+ *
+ * \note If the blend mode is not supported, the closest supported mode is chosen.
+ *
+ * \sa SDL_GetTextureBlendMode()
+ */
+extern DECLSPEC int SDLCALL SDL_SetTextureBlendMode(SDL_TextureID textureID,
+                                                    int blendMode);
+
+/**
+ * \fn int SDL_GetTextureBlendMode(SDL_TextureID textureID, int *blendMode)
+ *
+ * \brief Get the blend mode used for texture copy operations
+ *
+ * \param texture The texture to query
+ * \param blendMode A pointer filled in with the current blend mode
+ *
+ * \return 0 on success, or -1 if the texture is not valid
+ *
+ * \sa SDL_SetTextureBlendMode()
+ */
+extern DECLSPEC int SDLCALL SDL_GetTextureBlendMode(SDL_TextureID textureID,
+                                                    int *blendMode);
+
+/**
+ * \fn int SDL_SetTextureScaleMode(SDL_TextureID textureID, int scaleMode)
+ *
+ * \brief Set the scale mode used for texture copy operations
+ *
+ * \param texture The texture to update
+ * \param scaleMode SDL_TextureScaleMode to use for texture scaling
+ *
+ * \return 0 on success, or -1 if the texture is not valid or the scale mode is not supported
+ *
+ * \note If the scale mode is not supported, the closest supported mode is chosen.
+ *
+ * \sa SDL_GetTextureScaleMode()
+ */
+extern DECLSPEC int SDLCALL SDL_SetTextureScaleMode(SDL_TextureID textureID,
+                                                    int scaleMode);
+
+/**
+ * \fn int SDL_GetTextureScaleMode(SDL_TextureID textureID, int *scaleMode)
+ *
+ * \brief Get the scale mode used for texture copy operations
+ *
+ * \param texture The texture to query
+ * \param scaleMode A pointer filled in with the current scale mode
+ *
+ * \return 0 on success, or -1 if the texture is not valid
+ *
+ * \sa SDL_SetTextureScaleMode()
+ */
+extern DECLSPEC int SDLCALL SDL_GetTextureScaleMode(SDL_TextureID textureID,
+                                                    int *scaleMode);
+
+/**
  * \fn int SDL_UpdateTexture(SDL_TextureID textureID, const SDL_Rect *rect, const void *pixels, int pitch)
  *
  * \brief Update the given texture rectangle with new pixel data.
@@ -1061,37 +1207,35 @@ extern DECLSPEC void SDLCALL SDL_DirtyTexture(SDL_TextureID textureID,
                                               const SDL_Rect * rects);
 
 /**
- * \fn void SDL_RenderFill(const SDL_Rect *rect, Uint32 color)
+ * \fn void SDL_RenderFill(Uint8 r, Uint8 g, Uint8 b, Uint8 a, const SDL_Rect *rect)
  *
  * \brief Fill the current rendering target with the specified color.
  *
+ * \param r The red value used to fill the rendering target
+ * \param g The green value used to fill the rendering target
+ * \param b The blue value used to fill the rendering target
+ * \param a The alpha value used to fill the rendering target, usually SDL_ALPHA_OPAQUE (255)
  * \param rect A pointer to the destination rectangle, or NULL for the entire rendering target.
- * \param color An ARGB color value.
  *
  * \return 0 on success, or -1 if there is no rendering context current
  */
-extern DECLSPEC int SDLCALL SDL_RenderFill(const SDL_Rect * rect,
-                                           Uint32 color);
+extern DECLSPEC int SDLCALL SDL_RenderFill(Uint8 r, Uint8 g, Uint8 b, Uint8 a,
+                                           const SDL_Rect * rect);
 
 /**
- * \fn int SDL_RenderCopy(SDL_TextureID textureID, const SDL_Rect *srcrect, const SDL_Rect *dstrect, Uint32 blendMode, Uint32 scaleMode)
+ * \fn int SDL_RenderCopy(SDL_TextureID textureID, const SDL_Rect *srcrect, const SDL_Rect *dstrect)
  *
  * \brief Copy a portion of the texture to the current rendering target.
  *
  * \param texture The source texture.
  * \param srcrect A pointer to the source rectangle, or NULL for the entire texture.
  * \param dstrect A pointer to the destination rectangle, or NULL for the entire rendering target.
- * \param blendMode SDL_TextureBlendMode to be used if the source texture has an alpha channel.
- * \param scaleMode SDL_TextureScaleMode to be used if the source and destination rectangles don't have the same width and height.
  *
  * \return 0 on success, or -1 if there is no rendering context current, or the driver doesn't support the requested operation.
- *
- * \note You can check the video driver info to see what operations are supported.
  */
 extern DECLSPEC int SDLCALL SDL_RenderCopy(SDL_TextureID textureID,
                                            const SDL_Rect * srcrect,
-                                           const SDL_Rect * dstrect,
-                                           int blendMode, int scaleMode);
+                                           const SDL_Rect * dstrect);
 
 /**
  * \fn int SDL_RenderReadPixels(const SDL_Rect *rect, void *pixels, int pitch)

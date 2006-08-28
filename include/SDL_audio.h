@@ -132,22 +132,22 @@ typedef struct SDL_AudioSpec
 
 /* A structure to hold a set of audio conversion filters and buffers */
 struct SDL_AudioCVT;
-typedef void (SDLCALL * SDL_AudioFilter)(struct SDL_AudioCVT *cvt,
-                                         SDL_AudioFormat format);
+typedef void (SDLCALL * SDL_AudioFilter) (struct SDL_AudioCVT * cvt,
+                                          SDL_AudioFormat format);
 
 typedef struct SDL_AudioCVT
 {
-    int needed;                  /* Set to 1 if conversion possible */
-    SDL_AudioFormat src_format;  /* Source audio format */
-    SDL_AudioFormat dst_format;  /* Target audio format */
-    double rate_incr;            /* Rate conversion increment */
-    Uint8 *buf;                  /* Buffer to hold entire audio data */
-    int len;                     /* Length of original audio buffer */
-    int len_cvt;                 /* Length of converted audio buffer */
-    int len_mult;                /* buffer must be len*len_mult big */
-    double len_ratio;            /* Given len, final size is len*len_ratio */
-    SDL_AudioFilter filters[10]; /* Filter list */
-    int filter_index;            /* Current audio conversion function */
+    int needed;                 /* Set to 1 if conversion possible */
+    SDL_AudioFormat src_format; /* Source audio format */
+    SDL_AudioFormat dst_format; /* Target audio format */
+    double rate_incr;           /* Rate conversion increment */
+    Uint8 *buf;                 /* Buffer to hold entire audio data */
+    int len;                    /* Length of original audio buffer */
+    int len_cvt;                /* Length of converted audio buffer */
+    int len_mult;               /* buffer must be len*len_mult big */
+    double len_ratio;           /* Given len, final size is len*len_ratio */
+    SDL_AudioFilter filters[10];        /* Filter list */
+    int filter_index;           /* Current audio conversion function */
 } SDL_AudioCVT;
 
 

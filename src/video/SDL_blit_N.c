@@ -2108,7 +2108,7 @@ BlitNtoN(SDL_BlitInfo * info)
 		/* *INDENT-OFF* */
 		DUFFS_LOOP(
 		{
-		        Uint32 Pixel;
+            Uint32 Pixel;
 			unsigned sR;
 			unsigned sG;
 			unsigned sB;
@@ -2278,15 +2278,14 @@ BlitNtoNKey(SDL_BlitInfo * info)
 		/* *INDENT-OFF* */
 		DUFFS_LOOP(
 		{
-		        Uint32 Pixel;
+            Uint32 Pixel;
 			unsigned sR;
 			unsigned sG;
 			unsigned sB;
 			RETRIEVE_RGB_PIXEL(src, srcbpp, Pixel);
 			if ( (Pixel & rgbmask) != ckey ) {
-			        RGB_FROM_PIXEL(Pixel, srcfmt, sR, sG, sB);
-				ASSEMBLE_RGBA(dst, dstbpp, dstfmt,
-					      sR, sG, sB, alpha);
+                RGB_FROM_PIXEL(Pixel, srcfmt, sR, sG, sB);
+				ASSEMBLE_RGBA(dst, dstbpp, dstfmt, sR, sG, sB, alpha);
 			}
 			dst += dstbpp;
 			src += srcbpp;
@@ -2327,11 +2326,9 @@ BlitNtoNKeyCopyAlpha(SDL_BlitInfo * info)
 		/* *INDENT-OFF* */
 		DUFFS_LOOP(
 		{
-			DISEMBLE_RGBA(src, srcbpp, srcfmt, Pixel,
-				      sR, sG, sB, sA);
+			DISEMBLE_RGBA(src, srcbpp, srcfmt, Pixel, sR, sG, sB, sA);
 			if ( (Pixel & rgbmask) != ckey ) {
-				  ASSEMBLE_RGBA(dst, dstbpp, dstfmt,
-						sR, sG, sB, sA);
+				  ASSEMBLE_RGBA(dst, dstbpp, dstfmt, sR, sG, sB, sA);
 			}
 			dst += dstbpp;
 			src += srcbpp;

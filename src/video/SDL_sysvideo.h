@@ -44,6 +44,10 @@ struct SDL_Texture
     int access;         /**< SDL_TextureAccess */
     int w;              /**< The width of the texture */
     int h;              /**< The height of the texture */
+    int modMode;        /**< The texture modulation mode */
+    int blendMode;      /**< The texture blend mode */
+    int scaleMode;      /**< The texture scale mode */
+    Uint8 r, g, b, a;   /**< Texture modulation values */
 
     SDL_Renderer *renderer;
 
@@ -66,6 +70,14 @@ struct SDL_Renderer
     int (*GetTexturePalette) (SDL_Renderer * renderer, SDL_Texture * texture,
                               SDL_Color * colors, int firstcolor,
                               int ncolors);
+    int (*SetTextureColorMod) (SDL_Renderer * renderer,
+                               SDL_Texture * texture);
+    int (*SetTextureAlphaMod) (SDL_Renderer * renderer,
+                               SDL_Texture * texture);
+    int (*SetTextureBlendMode) (SDL_Renderer * renderer,
+                                SDL_Texture * texture);
+    int (*SetTextureScaleMode) (SDL_Renderer * renderer,
+                                SDL_Texture * texture);
     int (*UpdateTexture) (SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * rect, const void *pixels,
                           int pitch);
@@ -75,11 +87,10 @@ struct SDL_Renderer
     void (*UnlockTexture) (SDL_Renderer * renderer, SDL_Texture * texture);
     void (*DirtyTexture) (SDL_Renderer * renderer, SDL_Texture * texture,
                           int numrects, const SDL_Rect * rects);
-    int (*RenderFill) (SDL_Renderer * renderer, const SDL_Rect * rect,
-                       Uint32 color);
+    int (*RenderFill) (SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b,
+                       Uint8 a, const SDL_Rect * rect);
     int (*RenderCopy) (SDL_Renderer * renderer, SDL_Texture * texture,
-                       const SDL_Rect * srcrect, const SDL_Rect * dstrect,
-                       int blendMode, int scaleMode);
+                       const SDL_Rect * srcrect, const SDL_Rect * dstrect);
     void (*RenderPresent) (SDL_Renderer * renderer);
     void (*DestroyTexture) (SDL_Renderer * renderer, SDL_Texture * texture);
 

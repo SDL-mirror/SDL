@@ -673,9 +673,7 @@ SDL_UpdateRects(SDL_Surface * screen, int numrects, SDL_Rect * rects)
     if (screen == SDL_VideoSurface) {
         if (SDL_VideoRendererInfo.flags & SDL_RENDERER_PRESENTCOPY) {
             for (i = 0; i < numrects; ++i) {
-                SDL_RenderCopy(SDL_VideoTexture, &rects[i], &rects[i],
-                               SDL_TEXTUREBLENDMODE_NONE,
-                               SDL_TEXTURESCALEMODE_NONE);
+                SDL_RenderCopy(SDL_VideoTexture, &rects[i], &rects[i]);
             }
         } else {
             SDL_Rect rect;
@@ -683,9 +681,7 @@ SDL_UpdateRects(SDL_Surface * screen, int numrects, SDL_Rect * rects)
             rect.y = 0;
             rect.w = screen->w;
             rect.h = screen->h;
-            SDL_RenderCopy(SDL_VideoTexture, &rect, &rect,
-                           SDL_TEXTUREBLENDMODE_NONE,
-                           SDL_TEXTURESCALEMODE_NONE);
+            SDL_RenderCopy(SDL_VideoTexture, &rect, &rect);
         }
         SDL_RenderPresent();
     }
@@ -1421,9 +1417,7 @@ SDL_UnlockYUVOverlay(SDL_Overlay * overlay)
 int
 SDL_DisplayYUVOverlay(SDL_Overlay * overlay, SDL_Rect * dstrect)
 {
-    if (SDL_RenderCopy(overlay->hwdata->textureID, NULL, dstrect,
-                       SDL_TEXTUREBLENDMODE_NONE,
-                       SDL_TEXTURESCALEMODE_FAST) < 0) {
+    if (SDL_RenderCopy(overlay->hwdata->textureID, NULL, dstrect) < 0) {
         return -1;
     }
     SDL_RenderPresent();

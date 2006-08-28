@@ -32,6 +32,8 @@
 
 /* OpenGL renderer implementation */
 
+static const float inv255f = 1.0f / 255.0f;
+
 static SDL_Renderer *GL_CreateRenderer(SDL_Window * window, Uint32 flags);
 static int GL_ActivateRenderer(SDL_Renderer * renderer);
 static int GL_DisplayModeChanged(SDL_Renderer * renderer);
@@ -43,20 +45,27 @@ static int GL_SetTexturePalette(SDL_Renderer * renderer,
 static int GL_GetTexturePalette(SDL_Renderer * renderer,
                                 SDL_Texture * texture, SDL_Color * colors,
                                 int firstcolor, int ncolors);
+static int GL_SetTextureColorMod(SDL_Renderer * renderer,
+                                 SDL_Texture * texture);
+static int GL_SetTextureAlphaMod(SDL_Renderer * renderer,
+                                 SDL_Texture * texture);
+static int GL_SetTextureBlendMode(SDL_Renderer * renderer,
+                                  SDL_Texture * texture);
+static int GL_SetTextureScaleMode(SDL_Renderer * renderer,
+                                  SDL_Texture * texture);
 static int GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                             const SDL_Rect * rect, const void *pixels,
                             int pitch);
 static int GL_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
-                          const SDL_Rect * rect, int markDirty,
-                          void **pixels, int *pitch);
+                          const SDL_Rect * rect, int markDirty, void **pixels,
+                          int *pitch);
 static void GL_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static void GL_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                             int numrects, const SDL_Rect * rects);
-static int GL_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect,
-                         Uint32 color);
+static int GL_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b,
+                         Uint8 a, const SDL_Rect * rect);
 static int GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
-                         const SDL_Rect * srcrect, const SDL_Rect * dstrect,
-                         int blendMode, int scaleMode);
+                         const SDL_Rect * srcrect, const SDL_Rect * dstrect);
 static void GL_RenderPresent(SDL_Renderer * renderer);
 static void GL_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static void GL_DestroyRenderer(SDL_Renderer * renderer);
@@ -68,6 +77,8 @@ SDL_RenderDriver GL_RenderDriver = {
      "opengl",
      (SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTDISCARD |
       SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED),
+     (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_COLOR |
+      SDL_TEXTUREMODULATE_ALPHA),
      (SDL_TEXTUREBLENDMODE_NONE | SDL_TEXTUREBLENDMODE_MASK |
       SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD |
       SDL_TEXTUREBLENDMODE_MOD),
@@ -236,6 +247,10 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->CreateTexture = GL_CreateTexture;
     renderer->SetTexturePalette = GL_SetTexturePalette;
     renderer->GetTexturePalette = GL_GetTexturePalette;
+    renderer->SetTextureColorMod = GL_SetTextureColorMod;
+    renderer->SetTextureAlphaMod = GL_SetTextureAlphaMod;
+    renderer->SetTextureBlendMode = GL_SetTextureBlendMode;
+    renderer->SetTextureScaleMode = GL_SetTextureScaleMode;
     renderer->UpdateTexture = GL_UpdateTexture;
     renderer->LockTexture = GL_LockTexture;
     renderer->UnlockTexture = GL_UnlockTexture;
@@ -570,6 +585,54 @@ SetupTextureUpdate(GL_RenderData * renderdata, SDL_Texture * texture,
 }
 
 static int
+GL_SetTextureColorMod(SDL_Renderer * renderer, SDL_Texture * texture)
+{
+    return -1;
+}
+
+static int
+GL_SetTextureAlphaMod(SDL_Renderer * renderer, SDL_Texture * texture)
+{
+    return -1;
+}
+
+static int
+GL_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
+{
+    switch (texture->blendMode) {
+    case SDL_TEXTUREBLENDMODE_NONE:
+    case SDL_TEXTUREBLENDMODE_MASK:
+    case SDL_TEXTUREBLENDMODE_BLEND:
+    case SDL_TEXTUREBLENDMODE_ADD:
+    case SDL_TEXTUREBLENDMODE_MOD:
+        return 0;
+    default:
+        SDL_Unsupported();
+        texture->blendMode = SDL_TEXTUREBLENDMODE_NONE;
+        return -1;
+    }
+}
+
+static int
+GL_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture)
+{
+    switch (texture->scaleMode) {
+    case SDL_TEXTURESCALEMODE_NONE:
+    case SDL_TEXTURESCALEMODE_FAST:
+    case SDL_TEXTURESCALEMODE_SLOW:
+        return 0;
+    case SDL_TEXTURESCALEMODE_BEST:
+        SDL_Unsupported();
+        texture->scaleMode = SDL_TEXTURESCALEMODE_SLOW;
+        return -1;
+    default:
+        SDL_Unsupported();
+        texture->scaleMode = SDL_TEXTURESCALEMODE_NONE;
+        return -1;
+    }
+}
+
+static int
 GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                  const SDL_Rect * rect, const void *pixels, int pitch)
 {
@@ -636,18 +699,14 @@ GL_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture, int numrects,
 }
 
 static int
-GL_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect, Uint32 color)
+GL_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b, Uint8 a,
+              const SDL_Rect * rect)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    GLclampf r, g, b, a;
 
-    a = ((GLclampf) ((color >> 24) & 0xFF)) / 255.0f;
-    r = ((GLclampf) ((color >> 16) & 0xFF)) / 255.0f;
-    g = ((GLclampf) ((color >> 8) & 0xFF)) / 255.0f;
-    b = ((GLclampf) (color & 0xFF)) / 255.0f;
-
-    data->glClearColor(r, g, b, a);
+    data->glClearColor((GLclampf) r * inv255f, (GLclampf) g * inv255f,
+                       (GLclampf) b * inv255f, (GLclampf) a * inv255f);
     data->glViewport(rect->x, window->h - rect->y, rect->w, rect->h);
     data->glClear(GL_COLOR_BUFFER_BIT);
     data->glViewport(0, 0, window->w, window->h);
@@ -656,8 +715,7 @@ GL_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect, Uint32 color)
 
 static int
 GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
-              const SDL_Rect * srcrect, const SDL_Rect * dstrect,
-              int blendMode, int scaleMode)
+              const SDL_Rect * srcrect, const SDL_Rect * dstrect)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     GL_TextureData *texturedata = (GL_TextureData *) texture->driverdata;
@@ -700,8 +758,17 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
     data->glBindTexture(texturedata->type, texturedata->texture);
 
-    if (blendMode != data->blendMode) {
-        switch (blendMode) {
+    if (texture->modMode) {
+        data->glColor4f((GLfloat) texture->r * inv255f,
+                        (GLfloat) texture->g * inv255f,
+                        (GLfloat) texture->b * inv255f,
+                        (GLfloat) texture->a * inv255f);
+    } else {
+        data->glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+    }
+
+    if (texture->blendMode != data->blendMode) {
+        switch (texture->blendMode) {
         case SDL_TEXTUREBLENDMODE_NONE:
             data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
             data->glDisable(GL_BLEND);
@@ -723,11 +790,11 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
             data->glBlendFunc(GL_ZERO, GL_SRC_COLOR);
             break;
         }
-        data->blendMode = blendMode;
+        data->blendMode = texture->blendMode;
     }
 
-    if (scaleMode != data->scaleMode) {
-        switch (scaleMode) {
+    if (texture->scaleMode != data->scaleMode) {
+        switch (texture->scaleMode) {
         case SDL_TEXTURESCALEMODE_NONE:
         case SDL_TEXTURESCALEMODE_FAST:
             data->glTexParameteri(texturedata->type, GL_TEXTURE_MIN_FILTER,
@@ -743,7 +810,7 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                                   GL_LINEAR);
             break;
         }
-        data->scaleMode = scaleMode;
+        data->scaleMode = texture->scaleMode;
     }
 
     data->glBegin(GL_TRIANGLE_STRIP);
