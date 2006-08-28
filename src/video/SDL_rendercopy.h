@@ -26,9 +26,10 @@
 
 #define SDL_RENDERCOPY_MODULATE_COLOR   0x0001
 #define SDL_RENDERCOPY_MODULATE_ALPHA   0x0002
-#define SDL_RENDERCOPY_BLEND            0x0010
-#define SDL_RENDERCOPY_ADD              0x0020
-#define SDL_RENDERCOPY_MOD              0x0040
+#define SDL_RENDERCOPY_MASK             0x0010
+#define SDL_RENDERCOPY_BLEND            0x0020
+#define SDL_RENDERCOPY_ADD              0x0040
+#define SDL_RENDERCOPY_MOD              0x0080
 #define SDL_RENDERCOPY_NEAREST          0x0100
 
 typedef struct {

@@ -215,11 +215,20 @@ int SDL_RenderCopy_RGB888_RGB888_Blend(SDL_RenderCopyData *data)
             dstR = (Uint8)(dstpixel >> 16); dstG = (Uint8)(dstpixel >> 8); dstB = (Uint8)dstpixel; dstA = 0xFF;
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -287,11 +296,20 @@ int SDL_RenderCopy_RGB888_RGB888_Blend_Scale(SDL_RenderCopyData *data)
             dstR = (Uint8)(dstpixel >> 16); dstG = (Uint8)(dstpixel >> 8); dstB = (Uint8)dstpixel; dstA = 0xFF;
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -340,6 +358,9 @@ int SDL_RenderCopy_RGB888_RGB888_Modulate(SDL_RenderCopyData *data)
                 R = (R * modulateR) / 255;
                 G = (G * modulateG) / 255;
                 B = (B * modulateB) / 255;
+            }
+            if (flags & SDL_RENDERCOPY_MODULATE_ALPHA) {
+                A = (A * modulateA) / 255;
             }
             pixel = ((Uint32)R << 16) | ((Uint32)G << 8) | B;
             *dst = pixel;
@@ -395,6 +416,9 @@ int SDL_RenderCopy_RGB888_RGB888_Modulate_Scale(SDL_RenderCopyData *data)
                 G = (G * modulateG) / 255;
                 B = (B * modulateB) / 255;
             }
+            if (flags & SDL_RENDERCOPY_MODULATE_ALPHA) {
+                A = (A * modulateA) / 255;
+            }
             pixel = ((Uint32)R << 16) | ((Uint32)G << 8) | B;
             *dst = pixel;
             posx += incx;
@@ -437,11 +461,20 @@ int SDL_RenderCopy_RGB888_RGB888_Modulate_Blend(SDL_RenderCopyData *data)
             }
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -521,11 +554,20 @@ int SDL_RenderCopy_RGB888_RGB888_Modulate_Blend_Scale(SDL_RenderCopyData *data)
             }
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -641,11 +683,20 @@ int SDL_RenderCopy_RGB888_BGR888_Blend(SDL_RenderCopyData *data)
             dstB = (Uint8)(dstpixel >> 16); dstG = (Uint8)(dstpixel >> 8); dstR = (Uint8)dstpixel; dstA = 0xFF;
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -713,11 +764,20 @@ int SDL_RenderCopy_RGB888_BGR888_Blend_Scale(SDL_RenderCopyData *data)
             dstB = (Uint8)(dstpixel >> 16); dstG = (Uint8)(dstpixel >> 8); dstR = (Uint8)dstpixel; dstA = 0xFF;
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -766,6 +826,9 @@ int SDL_RenderCopy_RGB888_BGR888_Modulate(SDL_RenderCopyData *data)
                 R = (R * modulateR) / 255;
                 G = (G * modulateG) / 255;
                 B = (B * modulateB) / 255;
+            }
+            if (flags & SDL_RENDERCOPY_MODULATE_ALPHA) {
+                A = (A * modulateA) / 255;
             }
             pixel = ((Uint32)B << 16) | ((Uint32)G << 8) | R;
             *dst = pixel;
@@ -821,6 +884,9 @@ int SDL_RenderCopy_RGB888_BGR888_Modulate_Scale(SDL_RenderCopyData *data)
                 G = (G * modulateG) / 255;
                 B = (B * modulateB) / 255;
             }
+            if (flags & SDL_RENDERCOPY_MODULATE_ALPHA) {
+                A = (A * modulateA) / 255;
+            }
             pixel = ((Uint32)B << 16) | ((Uint32)G << 8) | R;
             *dst = pixel;
             posx += incx;
@@ -863,11 +929,20 @@ int SDL_RenderCopy_RGB888_BGR888_Modulate_Blend(SDL_RenderCopyData *data)
             }
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -947,11 +1022,20 @@ int SDL_RenderCopy_RGB888_BGR888_Modulate_Blend_Scale(SDL_RenderCopyData *data)
             }
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -1067,11 +1151,20 @@ int SDL_RenderCopy_BGR888_RGB888_Blend(SDL_RenderCopyData *data)
             dstR = (Uint8)(dstpixel >> 16); dstG = (Uint8)(dstpixel >> 8); dstB = (Uint8)dstpixel; dstA = 0xFF;
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -1139,11 +1232,20 @@ int SDL_RenderCopy_BGR888_RGB888_Blend_Scale(SDL_RenderCopyData *data)
             dstR = (Uint8)(dstpixel >> 16); dstG = (Uint8)(dstpixel >> 8); dstB = (Uint8)dstpixel; dstA = 0xFF;
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -1192,6 +1294,9 @@ int SDL_RenderCopy_BGR888_RGB888_Modulate(SDL_RenderCopyData *data)
                 R = (R * modulateR) / 255;
                 G = (G * modulateG) / 255;
                 B = (B * modulateB) / 255;
+            }
+            if (flags & SDL_RENDERCOPY_MODULATE_ALPHA) {
+                A = (A * modulateA) / 255;
             }
             pixel = ((Uint32)R << 16) | ((Uint32)G << 8) | B;
             *dst = pixel;
@@ -1247,6 +1352,9 @@ int SDL_RenderCopy_BGR888_RGB888_Modulate_Scale(SDL_RenderCopyData *data)
                 G = (G * modulateG) / 255;
                 B = (B * modulateB) / 255;
             }
+            if (flags & SDL_RENDERCOPY_MODULATE_ALPHA) {
+                A = (A * modulateA) / 255;
+            }
             pixel = ((Uint32)R << 16) | ((Uint32)G << 8) | B;
             *dst = pixel;
             posx += incx;
@@ -1289,11 +1397,20 @@ int SDL_RenderCopy_BGR888_RGB888_Modulate_Blend(SDL_RenderCopyData *data)
             }
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -1373,11 +1490,20 @@ int SDL_RenderCopy_BGR888_RGB888_Modulate_Blend_Scale(SDL_RenderCopyData *data)
             }
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -1464,11 +1590,20 @@ int SDL_RenderCopy_BGR888_BGR888_Blend(SDL_RenderCopyData *data)
             dstB = (Uint8)(dstpixel >> 16); dstG = (Uint8)(dstpixel >> 8); dstR = (Uint8)dstpixel; dstA = 0xFF;
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -1536,11 +1671,20 @@ int SDL_RenderCopy_BGR888_BGR888_Blend_Scale(SDL_RenderCopyData *data)
             dstB = (Uint8)(dstpixel >> 16); dstG = (Uint8)(dstpixel >> 8); dstR = (Uint8)dstpixel; dstA = 0xFF;
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -1589,6 +1733,9 @@ int SDL_RenderCopy_BGR888_BGR888_Modulate(SDL_RenderCopyData *data)
                 R = (R * modulateR) / 255;
                 G = (G * modulateG) / 255;
                 B = (B * modulateB) / 255;
+            }
+            if (flags & SDL_RENDERCOPY_MODULATE_ALPHA) {
+                A = (A * modulateA) / 255;
             }
             pixel = ((Uint32)B << 16) | ((Uint32)G << 8) | R;
             *dst = pixel;
@@ -1644,6 +1791,9 @@ int SDL_RenderCopy_BGR888_BGR888_Modulate_Scale(SDL_RenderCopyData *data)
                 G = (G * modulateG) / 255;
                 B = (B * modulateB) / 255;
             }
+            if (flags & SDL_RENDERCOPY_MODULATE_ALPHA) {
+                A = (A * modulateA) / 255;
+            }
             pixel = ((Uint32)B << 16) | ((Uint32)G << 8) | R;
             *dst = pixel;
             posx += incx;
@@ -1686,11 +1836,20 @@ int SDL_RenderCopy_BGR888_BGR888_Modulate_Blend(SDL_RenderCopyData *data)
             }
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -1770,11 +1929,20 @@ int SDL_RenderCopy_BGR888_BGR888_Modulate_Blend_Scale(SDL_RenderCopyData *data)
             }
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -1890,11 +2058,20 @@ int SDL_RenderCopy_ARGB8888_RGB888_Blend(SDL_RenderCopyData *data)
             dstR = (Uint8)(dstpixel >> 16); dstG = (Uint8)(dstpixel >> 8); dstB = (Uint8)dstpixel; dstA = 0xFF;
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -1962,11 +2139,20 @@ int SDL_RenderCopy_ARGB8888_RGB888_Blend_Scale(SDL_RenderCopyData *data)
             dstR = (Uint8)(dstpixel >> 16); dstG = (Uint8)(dstpixel >> 8); dstB = (Uint8)dstpixel; dstA = 0xFF;
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -2015,6 +2201,9 @@ int SDL_RenderCopy_ARGB8888_RGB888_Modulate(SDL_RenderCopyData *data)
                 R = (R * modulateR) / 255;
                 G = (G * modulateG) / 255;
                 B = (B * modulateB) / 255;
+            }
+            if (flags & SDL_RENDERCOPY_MODULATE_ALPHA) {
+                A = (A * modulateA) / 255;
             }
             pixel = ((Uint32)R << 16) | ((Uint32)G << 8) | B;
             *dst = pixel;
@@ -2070,6 +2259,9 @@ int SDL_RenderCopy_ARGB8888_RGB888_Modulate_Scale(SDL_RenderCopyData *data)
                 G = (G * modulateG) / 255;
                 B = (B * modulateB) / 255;
             }
+            if (flags & SDL_RENDERCOPY_MODULATE_ALPHA) {
+                A = (A * modulateA) / 255;
+            }
             pixel = ((Uint32)R << 16) | ((Uint32)G << 8) | B;
             *dst = pixel;
             posx += incx;
@@ -2112,11 +2304,20 @@ int SDL_RenderCopy_ARGB8888_RGB888_Modulate_Blend(SDL_RenderCopyData *data)
             }
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -2196,11 +2397,20 @@ int SDL_RenderCopy_ARGB8888_RGB888_Modulate_Blend_Scale(SDL_RenderCopyData *data
             }
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -2316,11 +2526,20 @@ int SDL_RenderCopy_ARGB8888_BGR888_Blend(SDL_RenderCopyData *data)
             dstB = (Uint8)(dstpixel >> 16); dstG = (Uint8)(dstpixel >> 8); dstR = (Uint8)dstpixel; dstA = 0xFF;
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -2388,11 +2607,20 @@ int SDL_RenderCopy_ARGB8888_BGR888_Blend_Scale(SDL_RenderCopyData *data)
             dstB = (Uint8)(dstpixel >> 16); dstG = (Uint8)(dstpixel >> 8); dstR = (Uint8)dstpixel; dstA = 0xFF;
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -2441,6 +2669,9 @@ int SDL_RenderCopy_ARGB8888_BGR888_Modulate(SDL_RenderCopyData *data)
                 R = (R * modulateR) / 255;
                 G = (G * modulateG) / 255;
                 B = (B * modulateB) / 255;
+            }
+            if (flags & SDL_RENDERCOPY_MODULATE_ALPHA) {
+                A = (A * modulateA) / 255;
             }
             pixel = ((Uint32)B << 16) | ((Uint32)G << 8) | R;
             *dst = pixel;
@@ -2496,6 +2727,9 @@ int SDL_RenderCopy_ARGB8888_BGR888_Modulate_Scale(SDL_RenderCopyData *data)
                 G = (G * modulateG) / 255;
                 B = (B * modulateB) / 255;
             }
+            if (flags & SDL_RENDERCOPY_MODULATE_ALPHA) {
+                A = (A * modulateA) / 255;
+            }
             pixel = ((Uint32)B << 16) | ((Uint32)G << 8) | R;
             *dst = pixel;
             posx += incx;
@@ -2538,11 +2772,20 @@ int SDL_RenderCopy_ARGB8888_BGR888_Modulate_Blend(SDL_RenderCopyData *data)
             }
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -2622,11 +2865,20 @@ int SDL_RenderCopy_ARGB8888_BGR888_Modulate_Blend_Scale(SDL_RenderCopyData *data
             }
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -2742,11 +2994,20 @@ int SDL_RenderCopy_RGBA8888_RGB888_Blend(SDL_RenderCopyData *data)
             dstR = (Uint8)(dstpixel >> 16); dstG = (Uint8)(dstpixel >> 8); dstB = (Uint8)dstpixel; dstA = 0xFF;
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -2814,11 +3075,20 @@ int SDL_RenderCopy_RGBA8888_RGB888_Blend_Scale(SDL_RenderCopyData *data)
             dstR = (Uint8)(dstpixel >> 16); dstG = (Uint8)(dstpixel >> 8); dstB = (Uint8)dstpixel; dstA = 0xFF;
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -2867,6 +3137,9 @@ int SDL_RenderCopy_RGBA8888_RGB888_Modulate(SDL_RenderCopyData *data)
                 R = (R * modulateR) / 255;
                 G = (G * modulateG) / 255;
                 B = (B * modulateB) / 255;
+            }
+            if (flags & SDL_RENDERCOPY_MODULATE_ALPHA) {
+                A = (A * modulateA) / 255;
             }
             pixel = ((Uint32)R << 16) | ((Uint32)G << 8) | B;
             *dst = pixel;
@@ -2922,6 +3195,9 @@ int SDL_RenderCopy_RGBA8888_RGB888_Modulate_Scale(SDL_RenderCopyData *data)
                 G = (G * modulateG) / 255;
                 B = (B * modulateB) / 255;
             }
+            if (flags & SDL_RENDERCOPY_MODULATE_ALPHA) {
+                A = (A * modulateA) / 255;
+            }
             pixel = ((Uint32)R << 16) | ((Uint32)G << 8) | B;
             *dst = pixel;
             posx += incx;
@@ -2964,11 +3240,20 @@ int SDL_RenderCopy_RGBA8888_RGB888_Modulate_Blend(SDL_RenderCopyData *data)
             }
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -3048,11 +3333,20 @@ int SDL_RenderCopy_RGBA8888_RGB888_Modulate_Blend_Scale(SDL_RenderCopyData *data
             }
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -3168,11 +3462,20 @@ int SDL_RenderCopy_RGBA8888_BGR888_Blend(SDL_RenderCopyData *data)
             dstB = (Uint8)(dstpixel >> 16); dstG = (Uint8)(dstpixel >> 8); dstR = (Uint8)dstpixel; dstA = 0xFF;
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -3240,11 +3543,20 @@ int SDL_RenderCopy_RGBA8888_BGR888_Blend_Scale(SDL_RenderCopyData *data)
             dstB = (Uint8)(dstpixel >> 16); dstG = (Uint8)(dstpixel >> 8); dstR = (Uint8)dstpixel; dstA = 0xFF;
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -3293,6 +3605,9 @@ int SDL_RenderCopy_RGBA8888_BGR888_Modulate(SDL_RenderCopyData *data)
                 R = (R * modulateR) / 255;
                 G = (G * modulateG) / 255;
                 B = (B * modulateB) / 255;
+            }
+            if (flags & SDL_RENDERCOPY_MODULATE_ALPHA) {
+                A = (A * modulateA) / 255;
             }
             pixel = ((Uint32)B << 16) | ((Uint32)G << 8) | R;
             *dst = pixel;
@@ -3348,6 +3663,9 @@ int SDL_RenderCopy_RGBA8888_BGR888_Modulate_Scale(SDL_RenderCopyData *data)
                 G = (G * modulateG) / 255;
                 B = (B * modulateB) / 255;
             }
+            if (flags & SDL_RENDERCOPY_MODULATE_ALPHA) {
+                A = (A * modulateA) / 255;
+            }
             pixel = ((Uint32)B << 16) | ((Uint32)G << 8) | R;
             *dst = pixel;
             posx += incx;
@@ -3390,11 +3708,20 @@ int SDL_RenderCopy_RGBA8888_BGR888_Modulate_Blend(SDL_RenderCopyData *data)
             }
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -3474,11 +3801,20 @@ int SDL_RenderCopy_RGBA8888_BGR888_Modulate_Blend_Scale(SDL_RenderCopyData *data
             }
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -3594,11 +3930,20 @@ int SDL_RenderCopy_ABGR8888_RGB888_Blend(SDL_RenderCopyData *data)
             dstR = (Uint8)(dstpixel >> 16); dstG = (Uint8)(dstpixel >> 8); dstB = (Uint8)dstpixel; dstA = 0xFF;
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -3666,11 +4011,20 @@ int SDL_RenderCopy_ABGR8888_RGB888_Blend_Scale(SDL_RenderCopyData *data)
             dstR = (Uint8)(dstpixel >> 16); dstG = (Uint8)(dstpixel >> 8); dstB = (Uint8)dstpixel; dstA = 0xFF;
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -3719,6 +4073,9 @@ int SDL_RenderCopy_ABGR8888_RGB888_Modulate(SDL_RenderCopyData *data)
                 R = (R * modulateR) / 255;
                 G = (G * modulateG) / 255;
                 B = (B * modulateB) / 255;
+            }
+            if (flags & SDL_RENDERCOPY_MODULATE_ALPHA) {
+                A = (A * modulateA) / 255;
             }
             pixel = ((Uint32)R << 16) | ((Uint32)G << 8) | B;
             *dst = pixel;
@@ -3774,6 +4131,9 @@ int SDL_RenderCopy_ABGR8888_RGB888_Modulate_Scale(SDL_RenderCopyData *data)
                 G = (G * modulateG) / 255;
                 B = (B * modulateB) / 255;
             }
+            if (flags & SDL_RENDERCOPY_MODULATE_ALPHA) {
+                A = (A * modulateA) / 255;
+            }
             pixel = ((Uint32)R << 16) | ((Uint32)G << 8) | B;
             *dst = pixel;
             posx += incx;
@@ -3816,11 +4176,20 @@ int SDL_RenderCopy_ABGR8888_RGB888_Modulate_Blend(SDL_RenderCopyData *data)
             }
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -3900,11 +4269,20 @@ int SDL_RenderCopy_ABGR8888_RGB888_Modulate_Blend_Scale(SDL_RenderCopyData *data
             }
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -4020,11 +4398,20 @@ int SDL_RenderCopy_ABGR8888_BGR888_Blend(SDL_RenderCopyData *data)
             dstB = (Uint8)(dstpixel >> 16); dstG = (Uint8)(dstpixel >> 8); dstR = (Uint8)dstpixel; dstA = 0xFF;
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -4092,11 +4479,20 @@ int SDL_RenderCopy_ABGR8888_BGR888_Blend_Scale(SDL_RenderCopyData *data)
             dstB = (Uint8)(dstpixel >> 16); dstG = (Uint8)(dstpixel >> 8); dstR = (Uint8)dstpixel; dstA = 0xFF;
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -4145,6 +4541,9 @@ int SDL_RenderCopy_ABGR8888_BGR888_Modulate(SDL_RenderCopyData *data)
                 R = (R * modulateR) / 255;
                 G = (G * modulateG) / 255;
                 B = (B * modulateB) / 255;
+            }
+            if (flags & SDL_RENDERCOPY_MODULATE_ALPHA) {
+                A = (A * modulateA) / 255;
             }
             pixel = ((Uint32)B << 16) | ((Uint32)G << 8) | R;
             *dst = pixel;
@@ -4200,6 +4599,9 @@ int SDL_RenderCopy_ABGR8888_BGR888_Modulate_Scale(SDL_RenderCopyData *data)
                 G = (G * modulateG) / 255;
                 B = (B * modulateB) / 255;
             }
+            if (flags & SDL_RENDERCOPY_MODULATE_ALPHA) {
+                A = (A * modulateA) / 255;
+            }
             pixel = ((Uint32)B << 16) | ((Uint32)G << 8) | R;
             *dst = pixel;
             posx += incx;
@@ -4242,11 +4644,20 @@ int SDL_RenderCopy_ABGR8888_BGR888_Modulate_Blend(SDL_RenderCopyData *data)
             }
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -4326,11 +4737,20 @@ int SDL_RenderCopy_ABGR8888_BGR888_Modulate_Blend_Scale(SDL_RenderCopyData *data
             }
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -4446,11 +4866,20 @@ int SDL_RenderCopy_BGRA8888_RGB888_Blend(SDL_RenderCopyData *data)
             dstR = (Uint8)(dstpixel >> 16); dstG = (Uint8)(dstpixel >> 8); dstB = (Uint8)dstpixel; dstA = 0xFF;
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -4518,11 +4947,20 @@ int SDL_RenderCopy_BGRA8888_RGB888_Blend_Scale(SDL_RenderCopyData *data)
             dstR = (Uint8)(dstpixel >> 16); dstG = (Uint8)(dstpixel >> 8); dstB = (Uint8)dstpixel; dstA = 0xFF;
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -4571,6 +5009,9 @@ int SDL_RenderCopy_BGRA8888_RGB888_Modulate(SDL_RenderCopyData *data)
                 R = (R * modulateR) / 255;
                 G = (G * modulateG) / 255;
                 B = (B * modulateB) / 255;
+            }
+            if (flags & SDL_RENDERCOPY_MODULATE_ALPHA) {
+                A = (A * modulateA) / 255;
             }
             pixel = ((Uint32)R << 16) | ((Uint32)G << 8) | B;
             *dst = pixel;
@@ -4626,6 +5067,9 @@ int SDL_RenderCopy_BGRA8888_RGB888_Modulate_Scale(SDL_RenderCopyData *data)
                 G = (G * modulateG) / 255;
                 B = (B * modulateB) / 255;
             }
+            if (flags & SDL_RENDERCOPY_MODULATE_ALPHA) {
+                A = (A * modulateA) / 255;
+            }
             pixel = ((Uint32)R << 16) | ((Uint32)G << 8) | B;
             *dst = pixel;
             posx += incx;
@@ -4668,11 +5112,20 @@ int SDL_RenderCopy_BGRA8888_RGB888_Modulate_Blend(SDL_RenderCopyData *data)
             }
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -4752,11 +5205,20 @@ int SDL_RenderCopy_BGRA8888_RGB888_Modulate_Blend_Scale(SDL_RenderCopyData *data
             }
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -4872,11 +5334,20 @@ int SDL_RenderCopy_BGRA8888_BGR888_Blend(SDL_RenderCopyData *data)
             dstB = (Uint8)(dstpixel >> 16); dstG = (Uint8)(dstpixel >> 8); dstR = (Uint8)dstpixel; dstA = 0xFF;
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -4944,11 +5415,20 @@ int SDL_RenderCopy_BGRA8888_BGR888_Blend_Scale(SDL_RenderCopyData *data)
             dstB = (Uint8)(dstpixel >> 16); dstG = (Uint8)(dstpixel >> 8); dstR = (Uint8)dstpixel; dstA = 0xFF;
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -4997,6 +5477,9 @@ int SDL_RenderCopy_BGRA8888_BGR888_Modulate(SDL_RenderCopyData *data)
                 R = (R * modulateR) / 255;
                 G = (G * modulateG) / 255;
                 B = (B * modulateB) / 255;
+            }
+            if (flags & SDL_RENDERCOPY_MODULATE_ALPHA) {
+                A = (A * modulateA) / 255;
             }
             pixel = ((Uint32)B << 16) | ((Uint32)G << 8) | R;
             *dst = pixel;
@@ -5052,6 +5535,9 @@ int SDL_RenderCopy_BGRA8888_BGR888_Modulate_Scale(SDL_RenderCopyData *data)
                 G = (G * modulateG) / 255;
                 B = (B * modulateB) / 255;
             }
+            if (flags & SDL_RENDERCOPY_MODULATE_ALPHA) {
+                A = (A * modulateA) / 255;
+            }
             pixel = ((Uint32)B << 16) | ((Uint32)G << 8) | R;
             *dst = pixel;
             posx += incx;
@@ -5094,11 +5580,20 @@ int SDL_RenderCopy_BGRA8888_BGR888_Modulate_Blend(SDL_RenderCopyData *data)
             }
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;
@@ -5178,11 +5673,20 @@ int SDL_RenderCopy_BGRA8888_BGR888_Modulate_Blend_Scale(SDL_RenderCopyData *data
             }
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                srcR = (srcR * srcA) / 255;
-                srcG = (srcG * srcA) / 255;
-                srcB = (srcB * srcA) / 255;
+                if (srcA < 255) {
+                    srcR = (srcR * srcA) / 255;
+                    srcG = (srcG * srcA) / 255;
+                    srcB = (srcB * srcA) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (srcA) {
+                    dstR = srcR;
+                    dstG = srcG;
+                    dstB = srcB;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
                 dstR = srcR + ((255 - srcA) * dstR) / 255;
                 dstG = srcG + ((255 - srcA) * dstG) / 255;

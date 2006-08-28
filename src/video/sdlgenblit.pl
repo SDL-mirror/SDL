@@ -125,9 +125,10 @@ sub output_copydefs
     print FILE <<__EOF__;
 #define SDL_RENDERCOPY_MODULATE_COLOR   0x0001
 #define SDL_RENDERCOPY_MODULATE_ALPHA   0x0002
-#define SDL_RENDERCOPY_BLEND            0x0010
-#define SDL_RENDERCOPY_ADD              0x0020
-#define SDL_RENDERCOPY_MOD              0x0040
+#define SDL_RENDERCOPY_MASK             0x0010
+#define SDL_RENDERCOPY_BLEND            0x0020
+#define SDL_RENDERCOPY_ADD              0x0040
+#define SDL_RENDERCOPY_MOD              0x0080
 #define SDL_RENDERCOPY_NEAREST          0x0100
 
 typedef struct {
@@ -214,19 +215,35 @@ sub output_copycore
     my $dst = shift;
     my $modulate = shift;
     my $blend = shift;
+    my $s = "";
+    my $d = "";
+
+    # Nice and easy...
+    if ( $src eq $dst && !$modulate && !$blend ) {
+        print FILE <<__EOF__;
+            *dst = *src;
+__EOF__
+        return;
+    }
+        
+    if ( $blend ) {
+        get_rgba("src", $src);
+        get_rgba("dst", $dst);
+        $s = "src";
+        $d = "dst";
+    } else {
+        get_rgba("", $src);
+    }
+
     if ( $modulate ) {
         print FILE <<__EOF__;
             if (flags & SDL_RENDERCOPY_MODULATE_COLOR) {
-                ${src}R = (${src}R * modulateR) / 255;
-                ${src}G = (${src}G * modulateG) / 255;
-                ${src}B = (${src}B * modulateB) / 255;
+                ${s}R = (${s}R * modulateR) / 255;
+                ${s}G = (${s}G * modulateG) / 255;
+                ${s}B = (${s}B * modulateB) / 255;
             }
-__EOF__
-    }
-    if ( $modulate && $blend ) {
-        print FILE <<__EOF__;
             if (flags & SDL_RENDERCOPY_MODULATE_ALPHA) {
-                ${src}A = (${src}A * modulateA) / 255;
+                ${s}A = (${s}A * modulateA) / 255;
             }
 __EOF__
     }
@@ -234,28 +251,42 @@ __EOF__
         print FILE <<__EOF__;
             if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
-                ${src}R = (${src}R * ${src}A) / 255;
-                ${src}G = (${src}G * ${src}A) / 255;
-                ${src}B = (${src}B * ${src}A) / 255;
+                if (${s}A < 255) {
+                    ${s}R = (${s}R * ${s}A) / 255;
+                    ${s}G = (${s}G * ${s}A) / 255;
+                    ${s}B = (${s}B * ${s}A) / 255;
+                }
             }
-            switch (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
+            case SDL_RENDERCOPY_MASK:
+                if (${s}A) {
+                    ${d}R = ${s}R;
+                    ${d}G = ${s}G;
+                    ${d}B = ${s}B;
+                }
+                break;
             case SDL_RENDERCOPY_BLEND:
-                ${dst}R = ${src}R + ((255 - ${src}A) * ${dst}R) / 255;
-                ${dst}G = ${src}G + ((255 - ${src}A) * ${dst}G) / 255;
-                ${dst}B = ${src}B + ((255 - ${src}A) * ${dst}B) / 255;
+                ${d}R = ${s}R + ((255 - ${s}A) * ${d}R) / 255;
+                ${d}G = ${s}G + ((255 - ${s}A) * ${d}G) / 255;
+                ${d}B = ${s}B + ((255 - ${s}A) * ${d}B) / 255;
                 break;
             case SDL_RENDERCOPY_ADD:
-                ${dst}R = ${src}R + ${dst}R; if (${dst}R > 255) ${dst}R = 255;
-                ${dst}G = ${src}G + ${dst}G; if (${dst}G > 255) ${dst}G = 255;
-                ${dst}B = ${src}B + ${dst}B; if (${dst}B > 255) ${dst}B = 255;
+                ${d}R = ${s}R + ${d}R; if (${d}R > 255) ${d}R = 255;
+                ${d}G = ${s}G + ${d}G; if (${d}G > 255) ${d}G = 255;
+                ${d}B = ${s}B + ${d}B; if (${d}B > 255) ${d}B = 255;
                 break;
             case SDL_RENDERCOPY_MOD:
-                ${dst}R = (${src}R * ${dst}R) / 255;
-                ${dst}G = (${src}G * ${dst}G) / 255;
-                ${dst}B = (${src}B * ${dst}B) / 255;
+                ${d}R = (${s}R * ${d}R) / 255;
+                ${d}G = (${s}G * ${d}G) / 255;
+                ${d}B = (${s}B * ${d}B) / 255;
                 break;
             }
 __EOF__
+    }
+    if ( $blend ) {
+        set_rgba("dst", $dst);
+    } else {
+        set_rgba("", $dst);
     }
 }
 
@@ -325,20 +356,7 @@ __EOF__
         print FILE <<__EOF__;
             }
 __EOF__
-        if ( $blend ) {
-            get_rgba("src", $src);
-            get_rgba("dst", $dst);
-            output_copycore("src", "dst", $modulate, $blend);
-            set_rgba("dst", $dst);
-        } elsif ( $modulate || $src ne $dst ) {
-            get_rgba("", $src);
-            output_copycore("", "", $modulate, $blend);
-            set_rgba("", $dst);
-        } else {
-            print FILE <<__EOF__;
-            *dst = *src;
-__EOF__
-        }
+        output_copycore($src, $dst, $modulate, $blend);
         print FILE <<__EOF__;
             posx += incx;
             ++dst;
@@ -356,20 +374,7 @@ __EOF__
         int n = data->dst_w;
         while (n--) {
 __EOF__
-        if ( $blend ) {
-            get_rgba("src", $src);
-            get_rgba("dst", $dst);
-            output_copycore("src", "dst", $modulate, $blend);
-            set_rgba("dst", $dst);
-        } elsif ( $modulate || $src ne $dst ) {
-            get_rgba("", $src);
-            output_copycore("", "", $modulate, $blend);
-            set_rgba("", $dst);
-        } else {
-            print FILE <<__EOF__;
-            *dst = *src;
-__EOF__
-        }
+        output_copycore($src, $dst, $modulate, $blend);
         print FILE <<__EOF__;
             ++src;
             ++dst;

@@ -628,9 +628,9 @@ SW_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                 copydata.flags |= SDL_RENDERCOPY_MODULATE_ALPHA;
                 copydata.a = texture->a;
             }
-            if (texture->
-                blendMode & (SDL_TEXTUREBLENDMODE_MASK |
-                             SDL_TEXTUREBLENDMODE_BLEND)) {
+            if (texture->blendMode & SDL_TEXTUREBLENDMODE_MASK) {
+                copydata.flags |= SDL_RENDERCOPY_MASK;
+            } else if (texture->blendMode & SDL_TEXTUREBLENDMODE_BLEND) {
                 copydata.flags |= SDL_RENDERCOPY_BLEND;
             } else if (texture->blendMode & SDL_TEXTUREBLENDMODE_ADD) {
                 copydata.flags |= SDL_RENDERCOPY_ADD;
