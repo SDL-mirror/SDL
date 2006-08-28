@@ -587,13 +587,13 @@ SetupTextureUpdate(GL_RenderData * renderdata, SDL_Texture * texture,
 static int
 GL_SetTextureColorMod(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-    return -1;
+    return 0;
 }
 
 static int
 GL_SetTextureAlphaMod(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-    return -1;
+    return 0;
 }
 
 static int

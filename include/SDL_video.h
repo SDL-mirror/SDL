@@ -176,7 +176,7 @@ typedef enum
     SDL_RENDERER_PRESENTFLIP3 = 0x00000008,     /**< Present uses a flip, rotating between two back buffers and a front buffer */
     SDL_RENDERER_PRESENTDISCARD = 0x00000010,   /**< Present leaves the contents of the backbuffer undefined */
     SDL_RENDERER_PRESENTVSYNC = 0x00000020,     /**< Present is synchronized with the refresh rate */
-    SDL_RENDERER_ACCELERATED = 0x0000040,       /**< The renderer uses hardware acceleration */
+    SDL_RENDERER_ACCELERATED = 0x00000040,      /**< The renderer uses hardware acceleration */
 } SDL_RendererFlags;
 
 /**
