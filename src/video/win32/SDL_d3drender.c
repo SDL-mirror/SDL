@@ -400,6 +400,11 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
                                           D3DTA_TEXTURE);
     IDirect3DDevice9_SetTextureStageState(data->device, 0, D3DTSS_ALPHAARG2,
                                           D3DTA_DIFFUSE);
+    /* Disable second texture stage, since we're done */
+    IDirect3DDevice9_SetTextureStageState(data->device, 1, D3DTSS_COLOROP,
+                                          D3DTOP_DISABLE);
+    IDirect3DDevice9_SetTextureStageState(data->device, 1, D3DTSS_ALPHAOP,
+                                          D3DTOP_DISABLE);
 
     return renderer;
 }
