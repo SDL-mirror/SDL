@@ -55,7 +55,6 @@ extern int SDLCALL SDL_RenderCopy_RGB888_RGB888_Modulate(SDL_RenderCopyData *dat
 extern int SDLCALL SDL_RenderCopy_RGB888_RGB888_Modulate_Scale(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_RGB888_RGB888_Modulate_Blend(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_RGB888_RGB888_Modulate_Blend_Scale(SDL_RenderCopyData *data);
-extern int SDLCALL SDL_RenderCopy_RGB888_BGR888(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_RGB888_BGR888_Scale(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_RGB888_BGR888_Blend(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_RGB888_BGR888_Blend_Scale(SDL_RenderCopyData *data);
@@ -63,7 +62,6 @@ extern int SDLCALL SDL_RenderCopy_RGB888_BGR888_Modulate(SDL_RenderCopyData *dat
 extern int SDLCALL SDL_RenderCopy_RGB888_BGR888_Modulate_Scale(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_RGB888_BGR888_Modulate_Blend(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_RGB888_BGR888_Modulate_Blend_Scale(SDL_RenderCopyData *data);
-extern int SDLCALL SDL_RenderCopy_BGR888_RGB888(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_BGR888_RGB888_Scale(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_BGR888_RGB888_Blend(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_BGR888_RGB888_Blend_Scale(SDL_RenderCopyData *data);
@@ -78,7 +76,6 @@ extern int SDLCALL SDL_RenderCopy_BGR888_BGR888_Modulate(SDL_RenderCopyData *dat
 extern int SDLCALL SDL_RenderCopy_BGR888_BGR888_Modulate_Scale(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_BGR888_BGR888_Modulate_Blend(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_BGR888_BGR888_Modulate_Blend_Scale(SDL_RenderCopyData *data);
-extern int SDLCALL SDL_RenderCopy_ARGB8888_RGB888(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_ARGB8888_RGB888_Scale(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_ARGB8888_RGB888_Blend(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_ARGB8888_RGB888_Blend_Scale(SDL_RenderCopyData *data);
@@ -86,7 +83,6 @@ extern int SDLCALL SDL_RenderCopy_ARGB8888_RGB888_Modulate(SDL_RenderCopyData *d
 extern int SDLCALL SDL_RenderCopy_ARGB8888_RGB888_Modulate_Scale(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_ARGB8888_RGB888_Modulate_Blend(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_ARGB8888_RGB888_Modulate_Blend_Scale(SDL_RenderCopyData *data);
-extern int SDLCALL SDL_RenderCopy_ARGB8888_BGR888(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_ARGB8888_BGR888_Scale(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_ARGB8888_BGR888_Blend(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_ARGB8888_BGR888_Blend_Scale(SDL_RenderCopyData *data);
@@ -94,7 +90,6 @@ extern int SDLCALL SDL_RenderCopy_ARGB8888_BGR888_Modulate(SDL_RenderCopyData *d
 extern int SDLCALL SDL_RenderCopy_ARGB8888_BGR888_Modulate_Scale(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_ARGB8888_BGR888_Modulate_Blend(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_ARGB8888_BGR888_Modulate_Blend_Scale(SDL_RenderCopyData *data);
-extern int SDLCALL SDL_RenderCopy_RGBA8888_RGB888(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_RGBA8888_RGB888_Scale(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_RGBA8888_RGB888_Blend(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_RGBA8888_RGB888_Blend_Scale(SDL_RenderCopyData *data);
@@ -102,7 +97,6 @@ extern int SDLCALL SDL_RenderCopy_RGBA8888_RGB888_Modulate(SDL_RenderCopyData *d
 extern int SDLCALL SDL_RenderCopy_RGBA8888_RGB888_Modulate_Scale(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_RGBA8888_RGB888_Modulate_Blend(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_RGBA8888_RGB888_Modulate_Blend_Scale(SDL_RenderCopyData *data);
-extern int SDLCALL SDL_RenderCopy_RGBA8888_BGR888(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_RGBA8888_BGR888_Scale(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_RGBA8888_BGR888_Blend(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_RGBA8888_BGR888_Blend_Scale(SDL_RenderCopyData *data);
@@ -110,7 +104,6 @@ extern int SDLCALL SDL_RenderCopy_RGBA8888_BGR888_Modulate(SDL_RenderCopyData *d
 extern int SDLCALL SDL_RenderCopy_RGBA8888_BGR888_Modulate_Scale(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_RGBA8888_BGR888_Modulate_Blend(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_RGBA8888_BGR888_Modulate_Blend_Scale(SDL_RenderCopyData *data);
-extern int SDLCALL SDL_RenderCopy_ABGR8888_RGB888(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_ABGR8888_RGB888_Scale(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_ABGR8888_RGB888_Blend(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_ABGR8888_RGB888_Blend_Scale(SDL_RenderCopyData *data);
@@ -118,7 +111,6 @@ extern int SDLCALL SDL_RenderCopy_ABGR8888_RGB888_Modulate(SDL_RenderCopyData *d
 extern int SDLCALL SDL_RenderCopy_ABGR8888_RGB888_Modulate_Scale(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_ABGR8888_RGB888_Modulate_Blend(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_ABGR8888_RGB888_Modulate_Blend_Scale(SDL_RenderCopyData *data);
-extern int SDLCALL SDL_RenderCopy_ABGR8888_BGR888(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_ABGR8888_BGR888_Scale(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_ABGR8888_BGR888_Blend(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_ABGR8888_BGR888_Blend_Scale(SDL_RenderCopyData *data);
@@ -126,7 +118,6 @@ extern int SDLCALL SDL_RenderCopy_ABGR8888_BGR888_Modulate(SDL_RenderCopyData *d
 extern int SDLCALL SDL_RenderCopy_ABGR8888_BGR888_Modulate_Scale(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_ABGR8888_BGR888_Modulate_Blend(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_ABGR8888_BGR888_Modulate_Blend_Scale(SDL_RenderCopyData *data);
-extern int SDLCALL SDL_RenderCopy_BGRA8888_RGB888(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_BGRA8888_RGB888_Scale(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_BGRA8888_RGB888_Blend(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_BGRA8888_RGB888_Blend_Scale(SDL_RenderCopyData *data);
@@ -134,7 +125,6 @@ extern int SDLCALL SDL_RenderCopy_BGRA8888_RGB888_Modulate(SDL_RenderCopyData *d
 extern int SDLCALL SDL_RenderCopy_BGRA8888_RGB888_Modulate_Scale(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_BGRA8888_RGB888_Modulate_Blend(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_BGRA8888_RGB888_Modulate_Blend_Scale(SDL_RenderCopyData *data);
-extern int SDLCALL SDL_RenderCopy_BGRA8888_BGR888(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_BGRA8888_BGR888_Scale(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_BGRA8888_BGR888_Blend(SDL_RenderCopyData *data);
 extern int SDLCALL SDL_RenderCopy_BGRA8888_BGR888_Blend_Scale(SDL_RenderCopyData *data);

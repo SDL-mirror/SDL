@@ -398,7 +398,7 @@ sub output_copyfunc_h
     for (my $modulate = 0; $modulate <= 1; ++$modulate) {
         for (my $blend = 0; $blend <= 1; ++$blend) {
             for (my $scale = 0; $scale <= 1; ++$scale) {
-                if ( $modulate != 0 || $blend != 0 || $scale != 0 || $src ne $dst ) {
+                if ( $modulate || $blend || $scale ) {
                     output_copyfuncname("extern int SDLCALL", $src, $dst, $modulate, $blend, $scale, 1, ";\n");
                 }
             }
@@ -434,7 +434,7 @@ __EOF__
             for (my $modulate = 0; $modulate <= 1; ++$modulate) {
                 for (my $blend = 0; $blend <= 1; ++$blend) {
                     for (my $scale = 0; $scale <= 1; ++$scale) {
-                        if ( $modulate != 0 || $blend != 0 || $scale != 0 || $src ne $dst ) {
+                        if ( $modulate || $blend || $scale ) {
                             print FILE "    { SDL_PIXELFORMAT_$src, SDL_PIXELFORMAT_$dst, ";
                             if ( $modulate ) {
                                 print FILE "(SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), ";
@@ -497,7 +497,7 @@ sub output_copyfunc_c
     for (my $modulate = 0; $modulate <= 1; ++$modulate) {
         for (my $blend = 0; $blend <= 1; ++$blend) {
             for (my $scale = 0; $scale <= 1; ++$scale) {
-                if ( $modulate != 0 || $blend != 0 || $scale != 0 || $src ne $dst ) {
+                if ( $modulate || $blend || $scale ) {
                     output_copyfunc($src, $dst, $modulate, $blend, $scale);
                 }
             }

@@ -280,10 +280,19 @@ SDL_DUMMY_UpdateRenderCopyFunc(SDL_Renderer * renderer, SDL_Texture * texture)
     SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
     SDL_Surface *surface = (SDL_Surface *) texture->driverdata;
 
-    surface->userdata =
-        SDL_GetRenderCopyFunc(texture->format, display->current_mode.format,
-                              texture->modMode, texture->blendMode,
-                              texture->scaleMode);
+    /* We only need a special copy function for advanced features */
+    if (texture->modMode
+        || (texture->
+            blendMode & (SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD))
+        || texture->scaleMode) {
+        surface->userdata =
+            SDL_GetRenderCopyFunc(texture->format,
+                                  display->current_mode.format,
+                                  texture->modMode, texture->blendMode,
+                                  texture->scaleMode);
+    } else {
+        surface->userdata = NULL;
+    }
 }
 
 static int

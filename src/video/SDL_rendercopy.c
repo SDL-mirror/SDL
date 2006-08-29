@@ -42,7 +42,6 @@ static struct {
     { SDL_PIXELFORMAT_RGB888, SDL_PIXELFORMAT_RGB888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), 0, SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_RGB888_RGB888_Modulate_Scale },
     { SDL_PIXELFORMAT_RGB888, SDL_PIXELFORMAT_RGB888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), 0,  SDL_RenderCopy_RGB888_RGB888_Modulate_Blend },
     { SDL_PIXELFORMAT_RGB888, SDL_PIXELFORMAT_RGB888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_RGB888_RGB888_Modulate_Blend_Scale },
-    { SDL_PIXELFORMAT_RGB888, SDL_PIXELFORMAT_BGR888, 0, 0, 0,  SDL_RenderCopy_RGB888_BGR888 },
     { SDL_PIXELFORMAT_RGB888, SDL_PIXELFORMAT_BGR888, 0, 0, SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_RGB888_BGR888_Scale },
     { SDL_PIXELFORMAT_RGB888, SDL_PIXELFORMAT_BGR888, 0, (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), 0,  SDL_RenderCopy_RGB888_BGR888_Blend },
     { SDL_PIXELFORMAT_RGB888, SDL_PIXELFORMAT_BGR888, 0, (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_RGB888_BGR888_Blend_Scale },
@@ -50,7 +49,6 @@ static struct {
     { SDL_PIXELFORMAT_RGB888, SDL_PIXELFORMAT_BGR888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), 0, SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_RGB888_BGR888_Modulate_Scale },
     { SDL_PIXELFORMAT_RGB888, SDL_PIXELFORMAT_BGR888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), 0,  SDL_RenderCopy_RGB888_BGR888_Modulate_Blend },
     { SDL_PIXELFORMAT_RGB888, SDL_PIXELFORMAT_BGR888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_RGB888_BGR888_Modulate_Blend_Scale },
-    { SDL_PIXELFORMAT_BGR888, SDL_PIXELFORMAT_RGB888, 0, 0, 0,  SDL_RenderCopy_BGR888_RGB888 },
     { SDL_PIXELFORMAT_BGR888, SDL_PIXELFORMAT_RGB888, 0, 0, SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_BGR888_RGB888_Scale },
     { SDL_PIXELFORMAT_BGR888, SDL_PIXELFORMAT_RGB888, 0, (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), 0,  SDL_RenderCopy_BGR888_RGB888_Blend },
     { SDL_PIXELFORMAT_BGR888, SDL_PIXELFORMAT_RGB888, 0, (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_BGR888_RGB888_Blend_Scale },
@@ -65,7 +63,6 @@ static struct {
     { SDL_PIXELFORMAT_BGR888, SDL_PIXELFORMAT_BGR888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), 0, SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_BGR888_BGR888_Modulate_Scale },
     { SDL_PIXELFORMAT_BGR888, SDL_PIXELFORMAT_BGR888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), 0,  SDL_RenderCopy_BGR888_BGR888_Modulate_Blend },
     { SDL_PIXELFORMAT_BGR888, SDL_PIXELFORMAT_BGR888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_BGR888_BGR888_Modulate_Blend_Scale },
-    { SDL_PIXELFORMAT_ARGB8888, SDL_PIXELFORMAT_RGB888, 0, 0, 0,  SDL_RenderCopy_ARGB8888_RGB888 },
     { SDL_PIXELFORMAT_ARGB8888, SDL_PIXELFORMAT_RGB888, 0, 0, SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_ARGB8888_RGB888_Scale },
     { SDL_PIXELFORMAT_ARGB8888, SDL_PIXELFORMAT_RGB888, 0, (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), 0,  SDL_RenderCopy_ARGB8888_RGB888_Blend },
     { SDL_PIXELFORMAT_ARGB8888, SDL_PIXELFORMAT_RGB888, 0, (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_ARGB8888_RGB888_Blend_Scale },
@@ -73,7 +70,6 @@ static struct {
     { SDL_PIXELFORMAT_ARGB8888, SDL_PIXELFORMAT_RGB888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), 0, SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_ARGB8888_RGB888_Modulate_Scale },
     { SDL_PIXELFORMAT_ARGB8888, SDL_PIXELFORMAT_RGB888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), 0,  SDL_RenderCopy_ARGB8888_RGB888_Modulate_Blend },
     { SDL_PIXELFORMAT_ARGB8888, SDL_PIXELFORMAT_RGB888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_ARGB8888_RGB888_Modulate_Blend_Scale },
-    { SDL_PIXELFORMAT_ARGB8888, SDL_PIXELFORMAT_BGR888, 0, 0, 0,  SDL_RenderCopy_ARGB8888_BGR888 },
     { SDL_PIXELFORMAT_ARGB8888, SDL_PIXELFORMAT_BGR888, 0, 0, SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_ARGB8888_BGR888_Scale },
     { SDL_PIXELFORMAT_ARGB8888, SDL_PIXELFORMAT_BGR888, 0, (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), 0,  SDL_RenderCopy_ARGB8888_BGR888_Blend },
     { SDL_PIXELFORMAT_ARGB8888, SDL_PIXELFORMAT_BGR888, 0, (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_ARGB8888_BGR888_Blend_Scale },
@@ -81,7 +77,6 @@ static struct {
     { SDL_PIXELFORMAT_ARGB8888, SDL_PIXELFORMAT_BGR888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), 0, SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_ARGB8888_BGR888_Modulate_Scale },
     { SDL_PIXELFORMAT_ARGB8888, SDL_PIXELFORMAT_BGR888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), 0,  SDL_RenderCopy_ARGB8888_BGR888_Modulate_Blend },
     { SDL_PIXELFORMAT_ARGB8888, SDL_PIXELFORMAT_BGR888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_ARGB8888_BGR888_Modulate_Blend_Scale },
-    { SDL_PIXELFORMAT_RGBA8888, SDL_PIXELFORMAT_RGB888, 0, 0, 0,  SDL_RenderCopy_RGBA8888_RGB888 },
     { SDL_PIXELFORMAT_RGBA8888, SDL_PIXELFORMAT_RGB888, 0, 0, SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_RGBA8888_RGB888_Scale },
     { SDL_PIXELFORMAT_RGBA8888, SDL_PIXELFORMAT_RGB888, 0, (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), 0,  SDL_RenderCopy_RGBA8888_RGB888_Blend },
     { SDL_PIXELFORMAT_RGBA8888, SDL_PIXELFORMAT_RGB888, 0, (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_RGBA8888_RGB888_Blend_Scale },
@@ -89,7 +84,6 @@ static struct {
     { SDL_PIXELFORMAT_RGBA8888, SDL_PIXELFORMAT_RGB888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), 0, SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_RGBA8888_RGB888_Modulate_Scale },
     { SDL_PIXELFORMAT_RGBA8888, SDL_PIXELFORMAT_RGB888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), 0,  SDL_RenderCopy_RGBA8888_RGB888_Modulate_Blend },
     { SDL_PIXELFORMAT_RGBA8888, SDL_PIXELFORMAT_RGB888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_RGBA8888_RGB888_Modulate_Blend_Scale },
-    { SDL_PIXELFORMAT_RGBA8888, SDL_PIXELFORMAT_BGR888, 0, 0, 0,  SDL_RenderCopy_RGBA8888_BGR888 },
     { SDL_PIXELFORMAT_RGBA8888, SDL_PIXELFORMAT_BGR888, 0, 0, SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_RGBA8888_BGR888_Scale },
     { SDL_PIXELFORMAT_RGBA8888, SDL_PIXELFORMAT_BGR888, 0, (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), 0,  SDL_RenderCopy_RGBA8888_BGR888_Blend },
     { SDL_PIXELFORMAT_RGBA8888, SDL_PIXELFORMAT_BGR888, 0, (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_RGBA8888_BGR888_Blend_Scale },
@@ -97,7 +91,6 @@ static struct {
     { SDL_PIXELFORMAT_RGBA8888, SDL_PIXELFORMAT_BGR888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), 0, SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_RGBA8888_BGR888_Modulate_Scale },
     { SDL_PIXELFORMAT_RGBA8888, SDL_PIXELFORMAT_BGR888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), 0,  SDL_RenderCopy_RGBA8888_BGR888_Modulate_Blend },
     { SDL_PIXELFORMAT_RGBA8888, SDL_PIXELFORMAT_BGR888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_RGBA8888_BGR888_Modulate_Blend_Scale },
-    { SDL_PIXELFORMAT_ABGR8888, SDL_PIXELFORMAT_RGB888, 0, 0, 0,  SDL_RenderCopy_ABGR8888_RGB888 },
     { SDL_PIXELFORMAT_ABGR8888, SDL_PIXELFORMAT_RGB888, 0, 0, SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_ABGR8888_RGB888_Scale },
     { SDL_PIXELFORMAT_ABGR8888, SDL_PIXELFORMAT_RGB888, 0, (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), 0,  SDL_RenderCopy_ABGR8888_RGB888_Blend },
     { SDL_PIXELFORMAT_ABGR8888, SDL_PIXELFORMAT_RGB888, 0, (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_ABGR8888_RGB888_Blend_Scale },
@@ -105,7 +98,6 @@ static struct {
     { SDL_PIXELFORMAT_ABGR8888, SDL_PIXELFORMAT_RGB888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), 0, SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_ABGR8888_RGB888_Modulate_Scale },
     { SDL_PIXELFORMAT_ABGR8888, SDL_PIXELFORMAT_RGB888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), 0,  SDL_RenderCopy_ABGR8888_RGB888_Modulate_Blend },
     { SDL_PIXELFORMAT_ABGR8888, SDL_PIXELFORMAT_RGB888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_ABGR8888_RGB888_Modulate_Blend_Scale },
-    { SDL_PIXELFORMAT_ABGR8888, SDL_PIXELFORMAT_BGR888, 0, 0, 0,  SDL_RenderCopy_ABGR8888_BGR888 },
     { SDL_PIXELFORMAT_ABGR8888, SDL_PIXELFORMAT_BGR888, 0, 0, SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_ABGR8888_BGR888_Scale },
     { SDL_PIXELFORMAT_ABGR8888, SDL_PIXELFORMAT_BGR888, 0, (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), 0,  SDL_RenderCopy_ABGR8888_BGR888_Blend },
     { SDL_PIXELFORMAT_ABGR8888, SDL_PIXELFORMAT_BGR888, 0, (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_ABGR8888_BGR888_Blend_Scale },
@@ -113,7 +105,6 @@ static struct {
     { SDL_PIXELFORMAT_ABGR8888, SDL_PIXELFORMAT_BGR888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), 0, SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_ABGR8888_BGR888_Modulate_Scale },
     { SDL_PIXELFORMAT_ABGR8888, SDL_PIXELFORMAT_BGR888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), 0,  SDL_RenderCopy_ABGR8888_BGR888_Modulate_Blend },
     { SDL_PIXELFORMAT_ABGR8888, SDL_PIXELFORMAT_BGR888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_ABGR8888_BGR888_Modulate_Blend_Scale },
-    { SDL_PIXELFORMAT_BGRA8888, SDL_PIXELFORMAT_RGB888, 0, 0, 0,  SDL_RenderCopy_BGRA8888_RGB888 },
     { SDL_PIXELFORMAT_BGRA8888, SDL_PIXELFORMAT_RGB888, 0, 0, SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_BGRA8888_RGB888_Scale },
     { SDL_PIXELFORMAT_BGRA8888, SDL_PIXELFORMAT_RGB888, 0, (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), 0,  SDL_RenderCopy_BGRA8888_RGB888_Blend },
     { SDL_PIXELFORMAT_BGRA8888, SDL_PIXELFORMAT_RGB888, 0, (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_BGRA8888_RGB888_Blend_Scale },
@@ -121,7 +112,6 @@ static struct {
     { SDL_PIXELFORMAT_BGRA8888, SDL_PIXELFORMAT_RGB888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), 0, SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_BGRA8888_RGB888_Modulate_Scale },
     { SDL_PIXELFORMAT_BGRA8888, SDL_PIXELFORMAT_RGB888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), 0,  SDL_RenderCopy_BGRA8888_RGB888_Modulate_Blend },
     { SDL_PIXELFORMAT_BGRA8888, SDL_PIXELFORMAT_RGB888, (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_BGRA8888_RGB888_Modulate_Blend_Scale },
-    { SDL_PIXELFORMAT_BGRA8888, SDL_PIXELFORMAT_BGR888, 0, 0, 0,  SDL_RenderCopy_BGRA8888_BGR888 },
     { SDL_PIXELFORMAT_BGRA8888, SDL_PIXELFORMAT_BGR888, 0, 0, SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_BGRA8888_BGR888_Scale },
     { SDL_PIXELFORMAT_BGRA8888, SDL_PIXELFORMAT_BGR888, 0, (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), 0,  SDL_RenderCopy_BGRA8888_BGR888_Blend },
     { SDL_PIXELFORMAT_BGRA8888, SDL_PIXELFORMAT_BGR888, 0, (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), SDL_TEXTURESCALEMODE_FAST,  SDL_RenderCopy_BGRA8888_BGR888_Blend_Scale },
@@ -595,30 +585,6 @@ int SDL_RenderCopy_RGB888_RGB888_Modulate_Blend_Scale(SDL_RenderCopyData *data)
     return 0;
 }
 
-int SDL_RenderCopy_RGB888_BGR888(SDL_RenderCopyData *data)
-{
-    const int flags = data->flags;
-    Uint32 pixel;
-    Uint32 R, G, B, A;
-
-    while (data->dst_h--) {
-        Uint32 *src = (Uint32 *)data->src;
-        Uint32 *dst = (Uint32 *)data->dst;
-        int n = data->dst_w;
-        while (n--) {
-            pixel = *src;
-            R = (Uint8)(pixel >> 16); G = (Uint8)(pixel >> 8); B = (Uint8)pixel; A = 0xFF;
-            pixel = ((Uint32)B << 16) | ((Uint32)G << 8) | R;
-            *dst = pixel;
-            ++src;
-            ++dst;
-        }
-        data->src += data->src_pitch;
-        data->dst += data->dst_pitch;
-    }
-    return 0;
-}
-
 int SDL_RenderCopy_RGB888_BGR888_Scale(SDL_RenderCopyData *data)
 {
     const int flags = data->flags;
@@ -1058,30 +1024,6 @@ int SDL_RenderCopy_RGB888_BGR888_Modulate_Blend_Scale(SDL_RenderCopyData *data)
             ++dst;
         }
         posy += incy;
-        data->dst += data->dst_pitch;
-    }
-    return 0;
-}
-
-int SDL_RenderCopy_BGR888_RGB888(SDL_RenderCopyData *data)
-{
-    const int flags = data->flags;
-    Uint32 pixel;
-    Uint32 R, G, B, A;
-
-    while (data->dst_h--) {
-        Uint32 *src = (Uint32 *)data->src;
-        Uint32 *dst = (Uint32 *)data->dst;
-        int n = data->dst_w;
-        while (n--) {
-            pixel = *src;
-            B = (Uint8)(pixel >> 16); G = (Uint8)(pixel >> 8); R = (Uint8)pixel; A = 0xFF;
-            pixel = ((Uint32)R << 16) | ((Uint32)G << 8) | B;
-            *dst = pixel;
-            ++src;
-            ++dst;
-        }
-        data->src += data->src_pitch;
         data->dst += data->dst_pitch;
     }
     return 0;
@@ -1970,30 +1912,6 @@ int SDL_RenderCopy_BGR888_BGR888_Modulate_Blend_Scale(SDL_RenderCopyData *data)
     return 0;
 }
 
-int SDL_RenderCopy_ARGB8888_RGB888(SDL_RenderCopyData *data)
-{
-    const int flags = data->flags;
-    Uint32 pixel;
-    Uint32 R, G, B, A;
-
-    while (data->dst_h--) {
-        Uint32 *src = (Uint32 *)data->src;
-        Uint32 *dst = (Uint32 *)data->dst;
-        int n = data->dst_w;
-        while (n--) {
-            pixel = *src;
-            A = (Uint8)(pixel >> 24); R = (Uint8)(pixel >> 16); G = (Uint8)(pixel >> 8); B = (Uint8)pixel;
-            pixel = ((Uint32)R << 16) | ((Uint32)G << 8) | B;
-            *dst = pixel;
-            ++src;
-            ++dst;
-        }
-        data->src += data->src_pitch;
-        data->dst += data->dst_pitch;
-    }
-    return 0;
-}
-
 int SDL_RenderCopy_ARGB8888_RGB888_Scale(SDL_RenderCopyData *data)
 {
     const int flags = data->flags;
@@ -2433,30 +2351,6 @@ int SDL_RenderCopy_ARGB8888_RGB888_Modulate_Blend_Scale(SDL_RenderCopyData *data
             ++dst;
         }
         posy += incy;
-        data->dst += data->dst_pitch;
-    }
-    return 0;
-}
-
-int SDL_RenderCopy_ARGB8888_BGR888(SDL_RenderCopyData *data)
-{
-    const int flags = data->flags;
-    Uint32 pixel;
-    Uint32 R, G, B, A;
-
-    while (data->dst_h--) {
-        Uint32 *src = (Uint32 *)data->src;
-        Uint32 *dst = (Uint32 *)data->dst;
-        int n = data->dst_w;
-        while (n--) {
-            pixel = *src;
-            A = (Uint8)(pixel >> 24); R = (Uint8)(pixel >> 16); G = (Uint8)(pixel >> 8); B = (Uint8)pixel;
-            pixel = ((Uint32)B << 16) | ((Uint32)G << 8) | R;
-            *dst = pixel;
-            ++src;
-            ++dst;
-        }
-        data->src += data->src_pitch;
         data->dst += data->dst_pitch;
     }
     return 0;
@@ -2906,30 +2800,6 @@ int SDL_RenderCopy_ARGB8888_BGR888_Modulate_Blend_Scale(SDL_RenderCopyData *data
     return 0;
 }
 
-int SDL_RenderCopy_RGBA8888_RGB888(SDL_RenderCopyData *data)
-{
-    const int flags = data->flags;
-    Uint32 pixel;
-    Uint32 R, G, B, A;
-
-    while (data->dst_h--) {
-        Uint32 *src = (Uint32 *)data->src;
-        Uint32 *dst = (Uint32 *)data->dst;
-        int n = data->dst_w;
-        while (n--) {
-            pixel = *src;
-            R = (Uint8)(pixel >> 24); G = (Uint8)(pixel >> 16); B = (Uint8)(pixel >> 8); A = (Uint8)pixel;
-            pixel = ((Uint32)R << 16) | ((Uint32)G << 8) | B;
-            *dst = pixel;
-            ++src;
-            ++dst;
-        }
-        data->src += data->src_pitch;
-        data->dst += data->dst_pitch;
-    }
-    return 0;
-}
-
 int SDL_RenderCopy_RGBA8888_RGB888_Scale(SDL_RenderCopyData *data)
 {
     const int flags = data->flags;
@@ -3369,30 +3239,6 @@ int SDL_RenderCopy_RGBA8888_RGB888_Modulate_Blend_Scale(SDL_RenderCopyData *data
             ++dst;
         }
         posy += incy;
-        data->dst += data->dst_pitch;
-    }
-    return 0;
-}
-
-int SDL_RenderCopy_RGBA8888_BGR888(SDL_RenderCopyData *data)
-{
-    const int flags = data->flags;
-    Uint32 pixel;
-    Uint32 R, G, B, A;
-
-    while (data->dst_h--) {
-        Uint32 *src = (Uint32 *)data->src;
-        Uint32 *dst = (Uint32 *)data->dst;
-        int n = data->dst_w;
-        while (n--) {
-            pixel = *src;
-            R = (Uint8)(pixel >> 24); G = (Uint8)(pixel >> 16); B = (Uint8)(pixel >> 8); A = (Uint8)pixel;
-            pixel = ((Uint32)B << 16) | ((Uint32)G << 8) | R;
-            *dst = pixel;
-            ++src;
-            ++dst;
-        }
-        data->src += data->src_pitch;
         data->dst += data->dst_pitch;
     }
     return 0;
@@ -3842,30 +3688,6 @@ int SDL_RenderCopy_RGBA8888_BGR888_Modulate_Blend_Scale(SDL_RenderCopyData *data
     return 0;
 }
 
-int SDL_RenderCopy_ABGR8888_RGB888(SDL_RenderCopyData *data)
-{
-    const int flags = data->flags;
-    Uint32 pixel;
-    Uint32 R, G, B, A;
-
-    while (data->dst_h--) {
-        Uint32 *src = (Uint32 *)data->src;
-        Uint32 *dst = (Uint32 *)data->dst;
-        int n = data->dst_w;
-        while (n--) {
-            pixel = *src;
-            A = (Uint8)(pixel >> 24); B = (Uint8)(pixel >> 16); G = (Uint8)(pixel >> 8); R = (Uint8)pixel;
-            pixel = ((Uint32)R << 16) | ((Uint32)G << 8) | B;
-            *dst = pixel;
-            ++src;
-            ++dst;
-        }
-        data->src += data->src_pitch;
-        data->dst += data->dst_pitch;
-    }
-    return 0;
-}
-
 int SDL_RenderCopy_ABGR8888_RGB888_Scale(SDL_RenderCopyData *data)
 {
     const int flags = data->flags;
@@ -4305,30 +4127,6 @@ int SDL_RenderCopy_ABGR8888_RGB888_Modulate_Blend_Scale(SDL_RenderCopyData *data
             ++dst;
         }
         posy += incy;
-        data->dst += data->dst_pitch;
-    }
-    return 0;
-}
-
-int SDL_RenderCopy_ABGR8888_BGR888(SDL_RenderCopyData *data)
-{
-    const int flags = data->flags;
-    Uint32 pixel;
-    Uint32 R, G, B, A;
-
-    while (data->dst_h--) {
-        Uint32 *src = (Uint32 *)data->src;
-        Uint32 *dst = (Uint32 *)data->dst;
-        int n = data->dst_w;
-        while (n--) {
-            pixel = *src;
-            A = (Uint8)(pixel >> 24); B = (Uint8)(pixel >> 16); G = (Uint8)(pixel >> 8); R = (Uint8)pixel;
-            pixel = ((Uint32)B << 16) | ((Uint32)G << 8) | R;
-            *dst = pixel;
-            ++src;
-            ++dst;
-        }
-        data->src += data->src_pitch;
         data->dst += data->dst_pitch;
     }
     return 0;
@@ -4778,30 +4576,6 @@ int SDL_RenderCopy_ABGR8888_BGR888_Modulate_Blend_Scale(SDL_RenderCopyData *data
     return 0;
 }
 
-int SDL_RenderCopy_BGRA8888_RGB888(SDL_RenderCopyData *data)
-{
-    const int flags = data->flags;
-    Uint32 pixel;
-    Uint32 R, G, B, A;
-
-    while (data->dst_h--) {
-        Uint32 *src = (Uint32 *)data->src;
-        Uint32 *dst = (Uint32 *)data->dst;
-        int n = data->dst_w;
-        while (n--) {
-            pixel = *src;
-            B = (Uint8)(pixel >> 24); G = (Uint8)(pixel >> 16); R = (Uint8)(pixel >> 8); A = (Uint8)pixel;
-            pixel = ((Uint32)R << 16) | ((Uint32)G << 8) | B;
-            *dst = pixel;
-            ++src;
-            ++dst;
-        }
-        data->src += data->src_pitch;
-        data->dst += data->dst_pitch;
-    }
-    return 0;
-}
-
 int SDL_RenderCopy_BGRA8888_RGB888_Scale(SDL_RenderCopyData *data)
 {
     const int flags = data->flags;
@@ -5241,30 +5015,6 @@ int SDL_RenderCopy_BGRA8888_RGB888_Modulate_Blend_Scale(SDL_RenderCopyData *data
             ++dst;
         }
         posy += incy;
-        data->dst += data->dst_pitch;
-    }
-    return 0;
-}
-
-int SDL_RenderCopy_BGRA8888_BGR888(SDL_RenderCopyData *data)
-{
-    const int flags = data->flags;
-    Uint32 pixel;
-    Uint32 R, G, B, A;
-
-    while (data->dst_h--) {
-        Uint32 *src = (Uint32 *)data->src;
-        Uint32 *dst = (Uint32 *)data->dst;
-        int n = data->dst_w;
-        while (n--) {
-            pixel = *src;
-            B = (Uint8)(pixel >> 24); G = (Uint8)(pixel >> 16); R = (Uint8)(pixel >> 8); A = (Uint8)pixel;
-            pixel = ((Uint32)B << 16) | ((Uint32)G << 8) | R;
-            *dst = pixel;
-            ++src;
-            ++dst;
-        }
-        data->src += data->src_pitch;
         data->dst += data->dst_pitch;
     }
     return 0;
