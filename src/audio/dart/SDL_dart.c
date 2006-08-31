@@ -74,6 +74,7 @@ DARTEventFunc(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags)
 int
 DART_OpenAudio(_THIS, SDL_AudioSpec * spec)
 {
+    SDL_AudioFormat test_format = SDL_FirstAudioFormat(spec->format);
     MCI_AMP_OPEN_PARMS AmpOpenParms;
     MCI_GENERIC_PARMS GenericParms;
     int iDeviceOrd = 0;         // Default device to be used
@@ -105,25 +106,39 @@ DART_OpenAudio(_THIS, SDL_AudioSpec * spec)
     iDeviceOrd = AmpOpenParms.usDeviceID;
 
     // Determine the audio parameters from the AudioSpec
-    switch (spec->format & 0xFF) {
-    case 8:
-        /* Unsigned 8 bit audio data */
-        spec->format = AUDIO_U8;
-        iSilence = 0x80;
-        iBits = 8;
-        break;
-    case 16:
-        /* Signed 16 bit audio data */
-        spec->format = AUDIO_S16;
-        iSilence = 0x00;
-        iBits = 16;
-        break;
-    default:
+    if (spec->channels > 2)
+        spec->channels = 2;  // !!! FIXME: more than stereo support in OS/2?
+
+    while (test_format) {
+        spec->format = test_format;
+        switch (test_format) {
+            case AUDIO_U8:
+                // Unsigned 8 bit audio data
+                iSilence = 0x80;
+                iBits = 8;
+                break;
+
+            case AUDIO_S16LSB:
+                // Signed 16 bit audio data
+                iSilence = 0x00;
+                iBits = 16;
+                break;
+
+            // !!! FIXME: int32?
+
+            default:
+                test_format = SDL_NextAudioFormat();
+                break;
+        }
+    }
+
+    if (!test_format) { // shouldn't happen, but just in case...
         // Close DART, and exit with error code!
         mciSendCommand(iDeviceOrd, MCI_CLOSE, MCI_WAIT, &GenericParms, 0);
         SDL_SetError("Unsupported audio format");
         return (-1);
     }
+
     iFreq = spec->freq;
     iChannels = spec->channels;
     /* Update the fragment size as size in bytes */
