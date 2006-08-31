@@ -34,6 +34,7 @@
 #define DATA		0x61746164      /* "data" */
 #define PCM_CODE	0x0001
 #define MS_ADPCM_CODE	0x0002
+#define IEEE_FLOAT_CODE	0x0003
 #define IMA_ADPCM_CODE	0x0011
 #define MP3_CODE	0x0055
 #define WAVE_MONO	1

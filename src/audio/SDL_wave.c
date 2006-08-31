@@ -413,7 +413,7 @@ SDL_LoadWAV_RW(SDL_RWops * src, int freesrc,
     int was_error;
     Chunk chunk;
     int lenread;
-    int MS_ADPCM_encoded, IMA_ADPCM_encoded;
+    int IEEE_float_encoded, MS_ADPCM_encoded, IMA_ADPCM_encoded;
     int samplesize;
 
     /* WAV magic header */
@@ -472,9 +472,13 @@ SDL_LoadWAV_RW(SDL_RWops * src, int freesrc,
         was_error = 1;
         goto done;
     }
-    MS_ADPCM_encoded = IMA_ADPCM_encoded = 0;
+    IEEE_float_encoded = MS_ADPCM_encoded = IMA_ADPCM_encoded = 0;
     switch (SDL_SwapLE16(format->encoding)) {
     case PCM_CODE:
+        /* We can understand this */
+        break;
+    case IEEE_FLOAT_CODE:
+        IEEE_float_encoded = 1;
         /* We can understand this */
         break;
     case MS_ADPCM_CODE:
@@ -506,24 +510,37 @@ SDL_LoadWAV_RW(SDL_RWops * src, int freesrc,
     }
     SDL_memset(spec, 0, (sizeof *spec));
     spec->freq = SDL_SwapLE32(format->frequency);
-    switch (SDL_SwapLE16(format->bitspersample)) {
-    case 4:
-        if (MS_ADPCM_encoded || IMA_ADPCM_encoded) {
-            spec->format = AUDIO_S16;
-        } else {
+
+    if (IEEE_float_encoded) {
+        if ((SDL_SwapLE16(format->bitspersample)) != 32) {
             was_error = 1;
+        } else {
+            spec->format = AUDIO_F32;
         }
-        break;
-    case 8:
-        spec->format = AUDIO_U8;
-        break;
-    case 16:
-        spec->format = AUDIO_S16;
-        break;
-    default:
-        was_error = 1;
-        break;
+    } else {
+        switch (SDL_SwapLE16(format->bitspersample)) {
+        case 4:
+            if (MS_ADPCM_encoded || IMA_ADPCM_encoded) {
+                spec->format = AUDIO_S16;
+            } else {
+                was_error = 1;
+            }
+            break;
+        case 8:
+            spec->format = AUDIO_U8;
+            break;
+        case 16:
+            spec->format = AUDIO_S16;
+            break;
+        case 32:
+            spec->format = AUDIO_S32;
+            break;
+        default:
+            was_error = 1;
+            break;
+        }
     }
+
     if (was_error) {
         SDL_SetError("Unknown %d-bit PCM data format",
                      SDL_SwapLE16(format->bitspersample));
