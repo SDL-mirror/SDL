@@ -227,16 +227,14 @@ AHI_OpenAudio(_THIS, SDL_AudioSpec * spec)
 {
 //      int width;
     SDL_AudioFormat test_format = SDL_FirstAudioFormat(spec->format);
-    int valid_datatype = 0;
 
     D(bug("AHI opening...\n"));
 
     /* Determine the audio parameters from the AudioSpec */
-    while ((!valid_datatype) && (test_format)) {
+    while (test_format) {
         switch (test_format) {
             case AUDIO_S8:
                 D(bug("AUDIO_S8...\n"));
-                valid_datatype = 1;
                 spec->format = AUDIO_S8;
                 this->hidden->bytespersample = 1;
                 if (spec->channels < 2)
@@ -247,7 +245,6 @@ AHI_OpenAudio(_THIS, SDL_AudioSpec * spec)
 
             case AUDIO_S16MSB:
                 D(bug("AUDIO_S16MSB...\n"));
-                valid_datatype = 1;
                 spec->format = AUDIO_S16MSB;
                 this->hidden->bytespersample = 2;
                 if (spec->channels < 2)
@@ -258,7 +255,6 @@ AHI_OpenAudio(_THIS, SDL_AudioSpec * spec)
 
             case AUDIO_S32MSB:
                 D(bug("AUDIO_S32MSB...\n"));
-                valid_datatype = 1;
                 spec->format = AUDIO_S32MSB;
                 this->hidden->bytespersample = 4;
                 if (spec->channels < 2)
@@ -273,7 +269,7 @@ AHI_OpenAudio(_THIS, SDL_AudioSpec * spec)
         }
     }
 
-    if (!valid_datatype) { /* shouldn't happen, but just in case... */
+    if (!test_format) { /* shouldn't happen, but just in case... */
         SDL_SetError("Unsupported audio format");
         return (-1);
     }
