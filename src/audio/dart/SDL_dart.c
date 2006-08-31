@@ -75,6 +75,7 @@ int
 DART_OpenAudio(_THIS, SDL_AudioSpec * spec)
 {
     SDL_AudioFormat test_format = SDL_FirstAudioFormat(spec->format);
+    int valid_datatype = 0;
     MCI_AMP_OPEN_PARMS AmpOpenParms;
     MCI_GENERIC_PARMS GenericParms;
     int iDeviceOrd = 0;         // Default device to be used
@@ -109,8 +110,9 @@ DART_OpenAudio(_THIS, SDL_AudioSpec * spec)
     if (spec->channels > 2)
         spec->channels = 2;  // !!! FIXME: more than stereo support in OS/2?
 
-    while (test_format) {
+    while ((!valid_datatype) && (test_format)) {
         spec->format = test_format;
+        valid_datatype = 1;
         switch (test_format) {
             case AUDIO_U8:
                 // Unsigned 8 bit audio data
@@ -127,12 +129,13 @@ DART_OpenAudio(_THIS, SDL_AudioSpec * spec)
             // !!! FIXME: int32?
 
             default:
+                valid_datatype = 0;
                 test_format = SDL_NextAudioFormat();
                 break;
         }
     }
 
-    if (!test_format) { // shouldn't happen, but just in case...
+    if (!valid_datatype) { // shouldn't happen, but just in case...
         // Close DART, and exit with error code!
         mciSendCommand(iDeviceOrd, MCI_CLOSE, MCI_WAIT, &GenericParms, 0);
         SDL_SetError("Unsupported audio format");

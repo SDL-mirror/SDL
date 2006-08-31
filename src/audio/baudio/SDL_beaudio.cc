@@ -155,6 +155,7 @@ extern "C"
 
     int BE_OpenAudio(_THIS, SDL_AudioSpec * spec)
     {
+        int valid_datatype = 0;
         media_raw_audio_format format;
         SDL_AudioFormat test_format = SDL_FirstAudioFormat(spec->format);
 
@@ -163,7 +164,8 @@ extern "C"
         format.byte_order = B_MEDIA_LITTLE_ENDIAN;
         format.frame_rate = (float) spec->freq;
         format.channel_count = spec->channels;  /* !!! FIXME: support > 2? */
-        while (test_format) {
+        while ((!valid_datatype) && (test_format)) {
+            valid_datatype = 1;
             spec->format = test_format;
             switch (test_format) {
                 case AUDIO_S8:
@@ -202,6 +204,7 @@ extern "C"
                     break;
 
                 default:
+                    valid_datatype = 0;
                     test_format = SDL_NextAudioFormat();
                     break;
             }
@@ -209,7 +212,7 @@ extern "C"
 
         format.buffer_size = spec->samples;
 
-        if (!test_format) { /* shouldn't happen, but just in case... */
+        if (!valid_datatype) { /* shouldn't happen, but just in case... */
             SDL_SetError("Unsupported audio format");
             return (-1);
         }
