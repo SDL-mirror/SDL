@@ -201,6 +201,8 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 {
 	long snd_format;
 	int i, resolution, format_signed, format_bigendian;
+    SDL_AudioFormat test_format = SDL_FirstAudioFormat(spec->format);
+    int valid_datatype = 0;
 
 	resolution = spec->format & 0x00ff;
 	format_signed = ((spec->format & 0x8000)!=0);
@@ -212,28 +214,46 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 	DEBUG_PRINT(("channels=%d, ", spec->channels));
 	DEBUG_PRINT(("freq=%d\n", spec->freq));
 
-	/* Check formats available */
-	snd_format = Sndstatus(SND_QUERYFORMATS);
-	switch (resolution) {
-		case 8:
-			if ((snd_format & SND_FORMAT8)==0) {
-				SDL_SetError("Mint_CheckAudio: 8 bits samples not supported");
-				return -1;
-			}
-			snd_format = Sndstatus(SND_QUERY8BIT);
-			break;
-		case 16:
-			if ((snd_format & SND_FORMAT16)==0) {
-				SDL_SetError("Mint_CheckAudio: 16 bits samples not supported");
-				return -1;
-			}
-			snd_format = Sndstatus(SND_QUERY16BIT);
-			break;
-		default:
-			SDL_SetError("Mint_CheckAudio: Unsupported sample resolution");
-			return -1;
-			break;
-	}
+    if (spec->channels > 2) {
+        spec->channels = 2;  /* no more than stereo! */
+    }
+
+    while ((!valid_datatype) && (test_format)) {
+        /* Check formats available */
+        snd_format = Sndstatus(SND_QUERYFORMATS);
+        spec->format = test_format;
+        resolution = SDL_AUDIO_BITSIZE(spec->format);
+        format_signed = SDL_AUDIO_ISSIGNED(spec->format);
+        format_bigendian = SDL_AUDIO_ISBIGENDIAN(spec->format);
+        switch (test_format) {
+            case AUDIO_U8:
+            case AUDIO_S8:
+                if (snd_format & SND_FORMAT8) {
+                    valid_datatype = 1;
+                    snd_format = Sndstatus(SND_QUERY8BIT);
+                }
+                break;
+
+            case AUDIO_U16LSB:
+            case AUDIO_S16LSB:
+            case AUDIO_U16MSB:
+            case AUDIO_S16MSB:
+                if (snd_format & SND_FORMAT16) {
+                    valid_datatype = 1;
+                    snd_format = Sndstatus(SND_QUERY16BIT);
+                }
+                break;
+
+            default:
+                test_format = SDL_NextAudioFormat();
+                break;
+        }
+    }
+
+    if (!valid_datatype) {
+        SDL_SetError("Unsupported audio format");
+        return (-1);
+    }
 
 	/* Check signed/unsigned format */
 	if (format_signed) {

@@ -341,6 +341,10 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 	DEBUG_PRINT(("channels=%d, ", spec->channels));
 	DEBUG_PRINT(("freq=%d\n", spec->freq));
 
+    if (spec->channels > 2) {
+        spec->channels = 2;  /* no more than stereo! */
+    }
+
 	spec->format |= 0x8000;	/* Audio is always signed */
 	if ((spec->format & 0x00ff)==16) {
 		spec->format |= 0x1000;	/* Audio is always big endian */

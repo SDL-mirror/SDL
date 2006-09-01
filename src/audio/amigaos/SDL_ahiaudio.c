@@ -220,47 +220,50 @@ static void AHI_CloseAudio(_THIS)
 
 static int AHI_OpenAudio(_THIS, SDL_AudioSpec *spec)
 {	
-//	int width;
+    SDL_AudioFormat test_format = SDL_FirstAudioFormat(spec->format);
+    int valid_datatype = 1;
 
-	D(bug("AHI opening...\n"));
+    D(bug("AHI opening...\n"));
 
-	/* Determine the audio parameters from the AudioSpec */
-	switch ( spec->format & 0xFF ) {
+    /* Determine the audio parameters from the AudioSpec */
+    while ((!valid_datatype) && (test_format)) {
+        valid_datatype = 1;
+        switch (test_format) {
+            case AUDIO_S8:
+                D(bug("AUDIO_S8...\n"));
+                spec->format = AUDIO_S8;
+                this->hidden->bytespersample = 1;
+                if (spec->channels < 2)
+                    this->hidden->type = AHIST_M8S;
+                else
+                    this->hidden->type = AHIST_S8S;
+                break;
 
-		case 8: { /* Signed 8 bit audio data */
-			D(bug("Samples a 8 bit...\n"));
-			spec->format = AUDIO_S8;
-			this->hidden->bytespersample=1;
-			if(spec->channels<2)
-				this->hidden->type = AHIST_M8S;
-			else
-				this->hidden->type = AHIST_S8S;
-		}
-		break;
+            case AUDIO_S16MSB:
+                D(bug("AUDIO_S16MSB...\n"));
+                spec->format = AUDIO_S16MSB;
+                this->hidden->bytespersample = 2;
+                if (spec->channels < 2)
+                    this->hidden->type = AHIST_M16S;
+                else
+                    this->hidden->type = AHIST_S16S;
+                break;
 
-		case 16: { /* Signed 16 bit audio data */
-			D(bug("Samples a 16 bit...\n"));
-			spec->format = AUDIO_S16MSB;
-			this->hidden->bytespersample=2;
-			if(spec->channels<2)
-				this->hidden->type = AHIST_M16S;
-			else
-				this->hidden->type = AHIST_S16S;
-		}
-		break;
+            default:
+                valid_datatype = 0;
+                test_format = SDL_NextAudioFormat();
+                break;
+        }
+    }
 
-		default: {
-			SDL_SetError("Unsupported audio format");
-			return(-1);
-		}
-	}
+    if (!valid_datatype) { /* shouldn't happen, but just in case... */
+        SDL_SetError("Unsupported audio format");
+        return (-1);
+    }
 
-	if(spec->channels!=1 && spec->channels!=2)
-	{
-		D(bug("Wrong channel number!\n"));
-		SDL_SetError("Channel number non supported");
-		return -1;
-	}
+    if (spec->channels > 2) {
+        spec->channels = 2;  /* will convert at higher level. */
+    }
 
 	D(bug("Before CalculateAudioSpec\n"));
 	/* Update the fragment size as size in bytes */
