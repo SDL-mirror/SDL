@@ -321,32 +321,19 @@ SDL_MixAudioFormat(Uint8 * dst, const Uint8 * src, SDL_AudioFormat format,
             const double max_audioval = 3.40282347e+38F;
             const double min_audioval = -3.40282347e+38F;
 
-            /* !!! FIXME: this is a little nasty. */
-            union
-            {
-                float f;
-                Uint32 ui32;
-            } cvt;
-
             len /= 4;
             while (len--) {
-                cvt.f = *(src32++);
-                cvt.ui32 = SDL_SwapLE32(cvt.ui32);
-                src1 = ((cvt.f * fvolume) * fmaxvolume);
+                src1 = ((SDL_SwapFloatLE(*src32) * fvolume) * fmaxvolume);
+                src2 = SDL_SwapFloatLE(*dst32);
+                src32++;
 
-                cvt.f = *dst32;
-                cvt.ui32 = SDL_SwapLE32(cvt.ui32);
-                src2 = cvt.f;
-
-                dst_sample = src1 + src2;
+                dst_sample = ((double) src1) + ((double) src2);
                 if (dst_sample > max_audioval) {
                     dst_sample = max_audioval;
                 } else if (dst_sample < min_audioval) {
                     dst_sample = min_audioval;
                 }
-                cvt.f = ((float) dst_sample);
-                cvt.ui32 = SDL_SwapLE32(cvt.ui32);
-                *(dst32++) = cvt.f;
+                *(dst32++) = SDL_SwapFloatLE((float) dst_sample);
             }
         }
         break;
@@ -363,32 +350,19 @@ SDL_MixAudioFormat(Uint8 * dst, const Uint8 * src, SDL_AudioFormat format,
             const double max_audioval = 3.40282347e+38F;
             const double min_audioval = -3.40282347e+38F;
 
-            /* !!! FIXME: this is a little nasty. */
-            union
-            {
-                float f;
-                Uint32 ui32;
-            } cvt;
-
             len /= 4;
             while (len--) {
-                cvt.f = *(src32++);
-                cvt.ui32 = SDL_SwapBE32(cvt.ui32);
-                src1 = ((cvt.f * fvolume) * fmaxvolume);
+                src1 = ((SDL_SwapFloatBE(*src32) * fvolume) * fmaxvolume);
+                src2 = SDL_SwapFloatBE(*dst32);
+                src32++;
 
-                cvt.f = *dst32;
-                cvt.ui32 = SDL_SwapBE32(cvt.ui32);
-                src2 = cvt.f;
-
-                dst_sample = src1 + src2;
+                dst_sample = ((double) src1) + ((double) src2);
                 if (dst_sample > max_audioval) {
                     dst_sample = max_audioval;
                 } else if (dst_sample < min_audioval) {
                     dst_sample = min_audioval;
                 }
-                cvt.f = ((float) dst_sample);
-                cvt.ui32 = SDL_SwapBE32(cvt.ui32);
-                *(dst32++) = cvt.f;
+                *(dst32++) = SDL_SwapFloatBE((float) dst_sample);
             }
         }
         break;

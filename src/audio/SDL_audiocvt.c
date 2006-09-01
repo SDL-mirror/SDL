@@ -187,35 +187,25 @@ SDL_ConvertMono(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 
     case AUDIO_F32:
         {
-            /* !!! FIXME: this convert union is nasty. */
-            union
-            {
-                float f;
-                Uint32 ui32;
-            } f2i;
-            const Uint32 *src = (const Uint32 *) cvt->buf;
-            Uint32 *dst = (Uint32 *) cvt->buf;
+            const float *src = (const float *) cvt->buf;
+            float *dst = (float *) cvt->buf;
             if (SDL_AUDIO_ISBIGENDIAN(format)) {
                 for (i = cvt->len_cvt / 8; i; --i, src += 2) {
                     float src1, src2;
-                    f2i.ui32 = SDL_SwapBE32(src[0]);
-                    src1 = f2i.f;
-                    f2i.ui32 = SDL_SwapBE32(src[1]);
-                    src2 = f2i.f;
+                    src1 = SDL_SwapFloatBE(src[0]);
+                    src2 = SDL_SwapFloatBE(src[1]);
                     const double added = ((double) src1) + ((double) src2);
-                    f2i.f = (float) (added * 0.5);
-                    *(dst++) = SDL_SwapBE32(f2i.ui32);
+                    src1 = (float) (added * 0.5);
+                    *(dst++) = SDL_SwapFloatBE(src1);
                 }
             } else {
                 for (i = cvt->len_cvt / 8; i; --i, src += 2) {
                     float src1, src2;
-                    f2i.ui32 = SDL_SwapLE32(src[0]);
-                    src1 = f2i.f;
-                    f2i.ui32 = SDL_SwapLE32(src[1]);
-                    src2 = f2i.f;
+                    src1 = SDL_SwapFloatLE(src[0]);
+                    src2 = SDL_SwapFloatLE(src[1]);
                     const double added = ((double) src1) + ((double) src2);
-                    f2i.f = (float) (added * 0.5);
-                    *(dst++) = SDL_SwapLE32(f2i.ui32);
+                    src1 = (float) (added * 0.5);
+                    *(dst++) = SDL_SwapFloatLE(src1);
                 }
             }
         }
@@ -577,54 +567,35 @@ SDL_ConvertSurround(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 
     case AUDIO_F32:
         {
-            union
-            {
-                float f;
-                Uint32 ui32;
-            } f2i;              /* !!! FIXME: lame. */
             float lf, rf, ce;
-            const Uint32 *src = (const Uint32 *) cvt->buf + cvt->len_cvt;
-            Uint32 *dst = (Uint32 *) cvt->buf + cvt->len_cvt * 3;
+            const float *src = (const float *) cvt->buf + cvt->len_cvt;
+            float *dst = (float *) cvt->buf + cvt->len_cvt * 3;
 
             if (SDL_AUDIO_ISBIGENDIAN(format)) {
                 for (i = cvt->len_cvt / 8; i; --i) {
                     dst -= 6;
                     src -= 2;
-                    f2i.ui32 = SDL_SwapBE32(src[0]);
-                    lf = f2i.f;
-                    f2i.ui32 = SDL_SwapBE32(src[1]);
-                    rf = f2i.f;
+                    lf = SDL_SwapFloatBE(src[0]);
+                    rf = SDL_SwapFloatBE(src[1]);
                     ce = (lf * 0.5f) + (rf * 0.5f);
                     dst[0] = src[0];
                     dst[1] = src[1];
-                    f2i.f = (lf - ce);
-                    dst[2] = SDL_SwapBE32(f2i.ui32);
-                    f2i.f = (rf - ce);
-                    dst[3] = SDL_SwapBE32(f2i.ui32);
-                    f2i.f = ce;
-                    f2i.ui32 = SDL_SwapBE32(f2i.ui32);
-                    dst[4] = f2i.ui32;
-                    dst[5] = f2i.ui32;
+                    dst[2] = SDL_SwapFloatBE(lf - ce);
+                    dst[3] = SDL_SwapFloatBE(rf - ce);
+                    dst[4] = dst[5] = SDL_SwapFloatBE(ce);
                 }
             } else {
                 for (i = cvt->len_cvt / 8; i; --i) {
                     dst -= 6;
                     src -= 2;
-                    f2i.ui32 = SDL_SwapLE32(src[0]);
-                    lf = f2i.f;
-                    f2i.ui32 = SDL_SwapLE32(src[1]);
-                    rf = f2i.f;
+                    lf = SDL_SwapFloatLE(src[0]);
+                    rf = SDL_SwapFloatLE(src[1]);
                     ce = (lf * 0.5f) + (rf * 0.5f);
                     dst[0] = src[0];
                     dst[1] = src[1];
-                    f2i.f = (lf - ce);
-                    dst[2] = SDL_SwapLE32(f2i.ui32);
-                    f2i.f = (rf - ce);
-                    dst[3] = SDL_SwapLE32(f2i.ui32);
-                    f2i.f = ce;
-                    f2i.ui32 = SDL_SwapLE32(f2i.ui32);
-                    dst[4] = f2i.ui32;
-                    dst[5] = f2i.ui32;
+                    dst[2] = SDL_SwapFloatLE(lf - ce);
+                    dst[3] = SDL_SwapFloatLE(rf - ce);
+                    dst[4] = dst[5] = SDL_SwapFloatLE(ce);
                 }
             }
         }
