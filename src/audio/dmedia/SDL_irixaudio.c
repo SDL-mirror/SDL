@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include <errno.h>
 #include "SDL_config.h"
 
 /* Allow access to a raw mixing buffer (For IRIX 6.5 and higher) */
@@ -149,70 +150,99 @@ AL_CloseAudio(_THIS)
 static int
 AL_OpenAudio(_THIS, SDL_AudioSpec * spec)
 {
-    ALconfig audio_config;
+    SDL_AudioFormat test_format = SDL_FirstAudioFormat(spec->format);
+    long width = 0;
+    long fmt = 0;
+    int valid = 0;
+
 #ifdef OLD_IRIX_AUDIO
-    long audio_param[2];
+    {
+        long audio_param[2];
+        audio_param[0] = AL_OUTPUT_RATE;
+        audio_param[1] = spec->freq;
+        valid = (ALsetparams(AL_DEFAULT_DEVICE, audio_param, 2) < 0);
+    }
 #else
-    ALpv audio_param;
+    {
+        ALpv audio_param;
+        audio_param.param = AL_RATE;
+        audio_param.value.i = spec->freq;
+        valid = (alSetParams(AL_DEFAULT_OUTPUT, &audio_param, 1) < 0);
+    }
 #endif
-    int width;
 
-    /* Determine the audio parameters from the AudioSpec */
-    switch (spec->format & 0xFF) {
+    while ((!valid) && (test_format)) {
+        valid = 1;
+        spec->format = test_format;
 
-    case 8:
-        {                       /* Signed 8 bit audio data */
-            spec->format = AUDIO_S8;
-            width = AL_SAMPLE_8;
+        switch (test_format) {
+            case AUDIO_S8:
+                width = AL_SAMPLE_8;
+                fmt = AL_SAMPFMT_TWOSCOMP;
+                break;
+
+            case AUDIO_S16SYS:
+                width = AL_SAMPLE_16;
+                fmt = AL_SAMPFMT_TWOSCOMP;
+                break;
+
+            case AUDIO_F32SYS:
+                width = 0;  /* not used here... */
+                fmt = AL_SAMPFMT_FLOAT;
+                break;
+
+            /* Docs say there is int24, but not int32.... */
+
+            default:
+                valid = 0;
+                test_format = SDL_NextAudioFormat();
+                break;
         }
-        break;
 
-    case 16:
-        {                       /* Signed 16 bit audio data */
-            spec->format = AUDIO_S16MSB;
-            width = AL_SAMPLE_16;
-        }
-        break;
+        if (valid) {
+            ALconfig audio_config = alNewConfig();
+            valid = 0;
+            if (audio_config) {
+                if (alSetChannels(audio_config, spec->channels) < 0) {
+                    if (spec->channels > 2) {  /* can't handle > stereo? */
+                        spec->channels = 2;  /* try again below. */
+                    }
+                }
 
-    default:
-        {
-            SDL_SetError("Unsupported audio format");
-            return (-1);
+                if ((alSetSampFmt(audio_config, fmt) >= 0) &&
+                    ((!width) || (alSetWidth(audio_config, width) >= 0)) &&
+                    (alSetQueueSize(audio_config, spec->samples * 2) >= 0) &&
+                    (alSetChannels(audio_config, spec->channels) >= 0)) {
+
+                    audio_port = alOpenPort("SDL audio", "w", audio_config);
+                    if (audio_port == NULL) {
+                        /* docs say AL_BAD_CHANNELS happens here, too. */
+                        int err = oserror();
+                        if (err == AL_BAD_CHANNELS) {
+                            spec->channels = 2;
+                            alSetChannels(audio_config, spec->channels);
+                            audio_port = alOpenPort("SDL audio", "w",
+                                                    audio_config);
+                        }
+                    }
+
+                    if (audio_port != NULL) {
+                        valid = 1;
+                    }
+                }
+
+                alFreeConfig(audio_config);
+            }
         }
+    }
+
+    if (!valid) {
+        SDL_SetError("Unsupported audio format");
+        return (-1);
     }
 
     /* Update the fragment size as size in bytes */
     SDL_CalculateAudioSpec(spec);
-
-    /* Set output frequency */
-#ifdef OLD_IRIX_AUDIO
-    audio_param[0] = AL_OUTPUT_RATE;
-    audio_param[1] = spec->freq;
-    if (ALsetparams(AL_DEFAULT_DEVICE, audio_param, 2) < 0) {
-#else
-    audio_param.param = AL_RATE;
-    audio_param.value.i = spec->freq;
-    if (alSetParams(AL_DEFAULT_OUTPUT, &audio_param, 1) < 0) {
-#endif
-        SDL_SetError("alSetParams failed");
-        return (-1);
-    }
-
-    /* Open the audio port with the requested frequency */
-    audio_port = NULL;
-    audio_config = alNewConfig();
-    if (audio_config &&
-        (alSetSampFmt(audio_config, AL_SAMPFMT_TWOSCOMP) >= 0) &&
-        (alSetWidth(audio_config, width) >= 0) &&
-        (alSetQueueSize(audio_config, spec->samples * 2) >= 0) &&
-        (alSetChannels(audio_config, spec->channels) >= 0)) {
-        audio_port = alOpenPort("SDL audio", "w", audio_config);
-    }
-    alFreeConfig(audio_config);
-    if (audio_port == NULL) {
-        SDL_SetError("Unable to open audio port");
-        return (-1);
-    }
 
     /* Allocate mixing buffer */
     mixbuf = (Uint8 *) SDL_AllocAudioMem(spec->size);
