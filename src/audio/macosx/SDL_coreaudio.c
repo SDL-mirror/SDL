@@ -207,25 +207,56 @@ Core_OpenAudio(_THIS, SDL_AudioSpec * spec)
     Component comp;
     ComponentDescription desc;
     struct AudioUnitInputCallback callback;
-    AudioStreamBasicDescription requestedDesc;
+    AudioStreamBasicDescription desc;
+    SDL_AudioFormat test_format = SDL_FirstAudioFormat(spec->format);
+    int valid_datatype = 0;
 
     /* Setup a AudioStreamBasicDescription with the requested format */
-    requestedDesc.mFormatID = kAudioFormatLinearPCM;
-    requestedDesc.mFormatFlags = kLinearPCMFormatFlagIsPacked;
-    requestedDesc.mChannelsPerFrame = spec->channels;
-    requestedDesc.mSampleRate = spec->freq;
+    memset(&desc, '\0', sizeof (AudioStreamBasicDescription));
+    desc.mFormatID = kAudioFormatLinearPCM;
+    desc.mFormatFlags = kLinearPCMFormatFlagIsPacked;
+    desc.mChannelsPerFrame = spec->channels;
+    desc.mSampleRate = spec->freq;
+    desc.mFramesPerPacket = 1;
 
-    requestedDesc.mBitsPerChannel = spec->format & 0xFF;
-    if (spec->format & 0x8000)
-        requestedDesc.mFormatFlags |= kLinearPCMFormatFlagIsSignedInteger;
-    if (spec->format & 0x1000)
-        requestedDesc.mFormatFlags |= kLinearPCMFormatFlagIsBigEndian;
+    while ((!valid_datatype) && (test_format)) {
+        spec->format = test_format;
+        desc.mFormatFlags = 0;
+        /* Just a list of valid SDL formats, so people don't pass junk here. */
+        switch (test_format) {
+            case AUDIO_U8:
+            case AUDIO_S8:
+            case AUDIO_U16LSB:
+            case AUDIO_S16LSB:
+            case AUDIO_U16MSB:
+            case AUDIO_S16MSB:
+            case AUDIO_S32LSB:
+            case AUDIO_S32MSB:
+            case AUDIO_F32LSB:
+            case AUDIO_F32MSB:
+                valid_datatype = 1;
+                desc.mBitsPerChannel = SDL_AUDIO_BITSIZE(spec->format);
 
-    requestedDesc.mFramesPerPacket = 1;
-    requestedDesc.mBytesPerFrame =
-        requestedDesc.mBitsPerChannel * requestedDesc.mChannelsPerFrame / 8;
-    requestedDesc.mBytesPerPacket =
-        requestedDesc.mBytesPerFrame * requestedDesc.mFramesPerPacket;
+                if (SDL_AUDIO_ISFLOAT(spec->format))
+                    desc.mFormatFlags |= kLinearPCMFormatFlagIsFloat;
+                else if (SDL_AUDIO_ISSIGNED(spec->format))
+                    desc.mFormatFlags |= kLinearPCMFormatFlagIsSignedInteger;
+
+                if (SDL_AUDIO_ISBIGENDIAN(spec->format))
+                    desc.mFormatFlags |= kLinearPCMFormatFlagIsBigEndian;
+                break;
+        }
+    }
+
+    if (!valid_datatype) {  /* shouldn't happen, but just in case... */
+        SDL_SetError("Unsupported audio format");
+        return (-1);
+    }
+
+    desc.mBytesPerFrame =
+        desc.mBitsPerChannel * desc.mChannelsPerFrame / 8;
+    desc.mBytesPerPacket =
+        desc.mBytesPerFrame * desc.mFramesPerPacket;
 
 
     /* Locate the default output audio unit */
@@ -252,7 +283,7 @@ Core_OpenAudio(_THIS, SDL_AudioSpec * spec)
                                       kAudioUnitProperty_StreamFormat,
                                       kAudioUnitScope_Input,
                                       0,
-                                      &requestedDesc, sizeof(requestedDesc));
+                                      &desc, sizeof (desc));
     CHECK_RESULT("AudioUnitSetProperty (kAudioUnitProperty_StreamFormat)")
         /* Set the audio callback */
         callback.inputProc = audioCallback;
