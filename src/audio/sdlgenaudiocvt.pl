@@ -54,7 +54,7 @@ sub outputHeader {
 
 EOF
 
-    my @vals = ( 127, 255, 32767, 65535, 2147483647 );
+    my @vals = ( 127, 32767, 2147483647 );
     foreach (@vals) {
         my $val = $_;
         my $fval = 1.0 / $val;
@@ -113,38 +113,28 @@ sub getSwapFunc {
 
 
 sub maxIntVal {
-    my ($signed, $size) = @_;
-    if ($signed) {
-        if ($size == 8) {
-            return 0x7F;
-        } elsif ($size == 16) {
-            return 0x7FFF;
-        } elsif ($size == 32) {
-            return 0x7FFFFFFF;
-        }
-    } else {
-        if ($size == 8) {
-            return 0xFF;
-        } elsif ($size == 16) {
-            return 0xFFFF;
-        } elsif ($size == 32) {
-            return 0xFFFFFFFF;
-        }
+    my $size = shift;
+    if ($size == 8) {
+        return 0x7F;
+    } elsif ($size == 16) {
+        return 0x7FFF;
+    } elsif ($size == 32) {
+        return 0x7FFFFFFF;
     }
 
     die("bug in script.\n");
 }
 
 sub getFloatToIntMult {
-    my ($signed, $size) = @_;
-    my $val = maxIntVal($signed, $size) . '.0';
+    my $size = shift;
+    my $val = maxIntVal($size) . '.0';
     $val .= 'f' if ($size < 32);
     return $val;
 }
 
 sub getIntToFloatDivBy {
-    my ($signed, $size) = @_;
-    return 'DIVBY' . maxIntVal($signed, $size);
+    my $size = shift;
+    return 'DIVBY' . maxIntVal($size);
 }
 
 sub getSignFlipVal {
@@ -215,13 +205,19 @@ EOF
         my $code = getSwapFunc($fsize, $fsigned, $ffloat, $fendian, '*src');
         if ($ffloat != $tfloat) {
             if ($ffloat) {
-                my $mult = getFloatToIntMult($tsigned, $tsize);
+                my $mult = getFloatToIntMult($tsize);
+                if (!$tsigned) {   # bump from -1.0f/1.0f to 0.0f/2.0f
+                    $code = "($code + 1.0f)";
+                }
                 $code = "(($tctype) ($code * $mult))";
             } else {
                 # $divby will be the reciprocal, to avoid pipeline stalls
                 #  from floating point division...so multiply it.
-                my $divby = getIntToFloatDivBy($fsigned, $fsize);
+                my $divby = getIntToFloatDivBy($fsize);
                 $code = "(((float) $code) * $divby)";
+                if (!$fsigned) {   # bump from 0.0f/2.0f to -1.0f/1.0f.
+                    $code = "($code - 1.0f)";
+                }
             }
         } else {
             # All integer conversions here.

@@ -28,9 +28,7 @@
 /* *INDENT-OFF* */
 
 #define DIVBY127 0.0078740157480315f
-#define DIVBY255 0.00392156862745098f
 #define DIVBY32767 3.05185094759972e-05f
-#define DIVBY65535 1.52590218966964e-05f
 #define DIVBY2147483647 4.6566128752458e-10f
 
 static void SDLCALL
@@ -221,7 +219,7 @@ SDL_Convert_U8_to_F32LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     src = (const Uint8 *) (cvt->buf + cvt->len_cvt);
     dst = (float *) (cvt->buf + cvt->len_cvt * 4);
     for (i = cvt->len_cvt / sizeof (Uint8); i; --i, --src, --dst) {
-        const float val = (((float) *src) * DIVBY255);
+        const float val = ((((float) *src) * DIVBY127) - 1.0f);
         *dst = SDL_SwapFloatLE(val);
     }
 
@@ -246,7 +244,7 @@ SDL_Convert_U8_to_F32MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     src = (const Uint8 *) (cvt->buf + cvt->len_cvt);
     dst = (float *) (cvt->buf + cvt->len_cvt * 4);
     for (i = cvt->len_cvt / sizeof (Uint8); i; --i, --src, --dst) {
-        const float val = (((float) *src) * DIVBY255);
+        const float val = ((((float) *src) * DIVBY127) - 1.0f);
         *dst = SDL_SwapFloatBE(val);
     }
 
@@ -667,7 +665,7 @@ SDL_Convert_U16LSB_to_F32LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     src = (const Uint16 *) (cvt->buf + cvt->len_cvt);
     dst = (float *) (cvt->buf + cvt->len_cvt * 2);
     for (i = cvt->len_cvt / sizeof (Uint16); i; --i, --src, --dst) {
-        const float val = (((float) SDL_SwapLE16(*src)) * DIVBY65535);
+        const float val = ((((float) SDL_SwapLE16(*src)) * DIVBY32767) - 1.0f);
         *dst = SDL_SwapFloatLE(val);
     }
 
@@ -692,7 +690,7 @@ SDL_Convert_U16LSB_to_F32MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     src = (const Uint16 *) (cvt->buf + cvt->len_cvt);
     dst = (float *) (cvt->buf + cvt->len_cvt * 2);
     for (i = cvt->len_cvt / sizeof (Uint16); i; --i, --src, --dst) {
-        const float val = (((float) SDL_SwapLE16(*src)) * DIVBY65535);
+        const float val = ((((float) SDL_SwapLE16(*src)) * DIVBY32767) - 1.0f);
         *dst = SDL_SwapFloatBE(val);
     }
 
@@ -1111,7 +1109,7 @@ SDL_Convert_U16MSB_to_F32LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     src = (const Uint16 *) (cvt->buf + cvt->len_cvt);
     dst = (float *) (cvt->buf + cvt->len_cvt * 2);
     for (i = cvt->len_cvt / sizeof (Uint16); i; --i, --src, --dst) {
-        const float val = (((float) SDL_SwapBE16(*src)) * DIVBY65535);
+        const float val = ((((float) SDL_SwapBE16(*src)) * DIVBY32767) - 1.0f);
         *dst = SDL_SwapFloatLE(val);
     }
 
@@ -1136,7 +1134,7 @@ SDL_Convert_U16MSB_to_F32MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     src = (const Uint16 *) (cvt->buf + cvt->len_cvt);
     dst = (float *) (cvt->buf + cvt->len_cvt * 2);
     for (i = cvt->len_cvt / sizeof (Uint16); i; --i, --src, --dst) {
-        const float val = (((float) SDL_SwapBE16(*src)) * DIVBY65535);
+        const float val = ((((float) SDL_SwapBE16(*src)) * DIVBY32767) - 1.0f);
         *dst = SDL_SwapFloatBE(val);
     }
 
@@ -1827,7 +1825,7 @@ SDL_Convert_F32LSB_to_U8(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     src = (const float *) cvt->buf;
     dst = (Uint8 *) cvt->buf;
     for (i = cvt->len_cvt / sizeof (float); i; --i, ++src, ++dst) {
-        const Uint8 val = ((Uint8) (SDL_SwapFloatLE(*src) * 255.0f));
+        const Uint8 val = ((Uint8) ((SDL_SwapFloatLE(*src) + 1.0f) * 127.0f));
         *dst = val;
     }
 
@@ -1877,7 +1875,7 @@ SDL_Convert_F32LSB_to_U16LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     src = (const float *) cvt->buf;
     dst = (Uint16 *) cvt->buf;
     for (i = cvt->len_cvt / sizeof (float); i; --i, ++src, ++dst) {
-        const Uint16 val = ((Uint16) (SDL_SwapFloatLE(*src) * 65535.0f));
+        const Uint16 val = ((Uint16) ((SDL_SwapFloatLE(*src) + 1.0f) * 32767.0f));
         *dst = SDL_SwapLE16(val);
     }
 
@@ -1927,7 +1925,7 @@ SDL_Convert_F32LSB_to_U16MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     src = (const float *) cvt->buf;
     dst = (Uint16 *) cvt->buf;
     for (i = cvt->len_cvt / sizeof (float); i; --i, ++src, ++dst) {
-        const Uint16 val = ((Uint16) (SDL_SwapFloatLE(*src) * 65535.0f));
+        const Uint16 val = ((Uint16) ((SDL_SwapFloatLE(*src) + 1.0f) * 32767.0f));
         *dst = SDL_SwapBE16(val);
     }
 
@@ -2049,7 +2047,7 @@ SDL_Convert_F32MSB_to_U8(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     src = (const float *) cvt->buf;
     dst = (Uint8 *) cvt->buf;
     for (i = cvt->len_cvt / sizeof (float); i; --i, ++src, ++dst) {
-        const Uint8 val = ((Uint8) (SDL_SwapFloatBE(*src) * 255.0f));
+        const Uint8 val = ((Uint8) ((SDL_SwapFloatBE(*src) + 1.0f) * 127.0f));
         *dst = val;
     }
 
@@ -2099,7 +2097,7 @@ SDL_Convert_F32MSB_to_U16LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     src = (const float *) cvt->buf;
     dst = (Uint16 *) cvt->buf;
     for (i = cvt->len_cvt / sizeof (float); i; --i, ++src, ++dst) {
-        const Uint16 val = ((Uint16) (SDL_SwapFloatBE(*src) * 65535.0f));
+        const Uint16 val = ((Uint16) ((SDL_SwapFloatBE(*src) + 1.0f) * 32767.0f));
         *dst = SDL_SwapLE16(val);
     }
 
@@ -2149,7 +2147,7 @@ SDL_Convert_F32MSB_to_U16MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     src = (const float *) cvt->buf;
     dst = (Uint16 *) cvt->buf;
     for (i = cvt->len_cvt / sizeof (float); i; --i, ++src, ++dst) {
-        const Uint16 val = ((Uint16) (SDL_SwapFloatBE(*src) * 65535.0f));
+        const Uint16 val = ((Uint16) ((SDL_SwapFloatBE(*src) + 1.0f) * 32767.0f));
         *dst = SDL_SwapBE16(val);
     }
 
