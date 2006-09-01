@@ -265,7 +265,7 @@ DSP_OpenAudio(_THIS, SDL_AudioSpec * spec)
     ulaw_buf = NULL;
 
     /* Determine the audio parameters from the AudioSpec */
-    switch (spec->format & 0xFF) {
+    switch (SDL_AUDIO_BITSIZE(spec->format)) {
 
     case 8:
         {                       /* Unsigned 8 bit audio data */
@@ -287,6 +287,7 @@ DSP_OpenAudio(_THIS, SDL_AudioSpec * spec)
 
     default:
         {
+            /* !!! FIXME: fallback to conversion on unsupported types! */
             SDL_SetError("Unsupported audio format");
             return (-1);
         }
