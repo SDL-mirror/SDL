@@ -208,38 +208,70 @@ Mint_CheckAudio(_THIS, SDL_AudioSpec * spec)
 {
     long snd_format;
     int i, resolution, format_signed, format_bigendian;
+    SDL_AudioFormat test_format = SDL_FirstAudioFormat(spec->format);
+    int valid_datatype = 0;
 
-    resolution = spec->format & 0x00ff;
-    format_signed = ((spec->format & 0x8000) != 0);
-    format_bigendian = ((spec->format & 0x1000) != 0);
+    resolution = SDL_AUDIO_BITSIZE(spec->format);
+    format_signed = SDL_AUDIO_ISSIGNED(spec->format);
+    format_bigendian = SDL_AUDIO_ISBIGENDIAN(spec->format);
 
-    DEBUG_PRINT((DEBUG_NAME "asked: %d bits, ", spec->format & 0x00ff));
-    DEBUG_PRINT(("signed=%d, ", ((spec->format & 0x8000) != 0)));
-    DEBUG_PRINT(("big endian=%d, ", ((spec->format & 0x1000) != 0)));
+    DEBUG_PRINT((DEBUG_NAME "asked: %d bits, ", resolution));
+    DEBUG_PRINT(("float=%d, ", SDL_AUDIO_ISFLOAT(spec->format)));
+    DEBUG_PRINT(("signed=%d, ", format_signed));
+    DEBUG_PRINT(("big endian=%d, ", format_bigendian));
     DEBUG_PRINT(("channels=%d, ", spec->channels));
     DEBUG_PRINT(("freq=%d\n", spec->freq));
 
-    /* Check formats available */
-    snd_format = Sndstatus(SND_QUERYFORMATS);
-    switch (resolution) {
-    case 8:
-        if ((snd_format & SND_FORMAT8) == 0) {
-            SDL_SetError("Mint_CheckAudio: 8 bits samples not supported");
-            return -1;
+    if (spec->channels > 2) {
+        spec->channels = 2;  /* no more than stereo! */
+    }
+
+    while ((!valid_datatype) && (test_format)) {
+        spec->format = test_format;
+        switch (test_format) {
+            case AUDIO_U8:
+            case AUDIO_S8:
+            case AUDIO_U16LSB:
+            case AUDIO_S16LSB:
+            case AUDIO_U16MSB:
+            case AUDIO_S16MSB:
+            case AUDIO_S32LSB:
+            case AUDIO_S32MSB:
+            /* no float support... */
+                resolution = SDL_AUDIO_BITSIZE(spec->format);
+                format_signed = SDL_AUDIO_ISSIGNED(spec->format);
+                format_bigendian = SDL_AUDIO_ISBIGENDIAN(spec->format);
+
+                /* Check formats available */
+                snd_format = Sndstatus(SND_QUERYFORMATS);
+                switch (resolution) {
+                    case 8:
+                        if (snd_format & SND_FORMAT8) {
+                            valid_datatype = 1;
+                            snd_format = Sndstatus(SND_QUERY8BIT);
+                        }
+                        break;
+                    case 16:
+                        if (snd_format & SND_FORMAT16) {
+                            valid_datatype = 1;
+                            snd_format = Sndstatus(SND_QUERY16BIT);
+                        }
+                        break;
+                    case 32:
+                        if (snd_format & SND_FORMAT32) {
+                            valid_datatype = 1;
+                            snd_format = Sndstatus(SND_QUERY32BIT);
+                        }
+                        break;
+                }
+
+                break;
         }
-        snd_format = Sndstatus(SND_QUERY8BIT);
-        break;
-    case 16:
-        if ((snd_format & SND_FORMAT16) == 0) {
-            SDL_SetError("Mint_CheckAudio: 16 bits samples not supported");
-            return -1;
-        }
-        snd_format = Sndstatus(SND_QUERY16BIT);
-        break;
-    default:
-        SDL_SetError("Mint_CheckAudio: Unsupported sample resolution");
-        return -1;
-        break;
+    }
+
+    if (!valid_datatype) {
+        SDL_SetError("Unsupported audio format");
+        return (-1);
     }
 
     /* Check signed/unsigned format */
@@ -248,14 +280,14 @@ Mint_CheckAudio(_THIS, SDL_AudioSpec * spec)
             /* Ok */
         } else if (snd_format & SND_FORMATUNSIGNED) {
             /* Give unsigned format */
-            spec->format = spec->format & (~0x8000);
+            spec->format = spec->format & (~SDL_AUDIO_MASK_SIGNED);
         }
     } else {
         if (snd_format & SND_FORMATUNSIGNED) {
             /* Ok */
         } else if (snd_format & SND_FORMATSIGNED) {
             /* Give signed format */
-            spec->format |= 0x8000;
+            spec->format |= SDL_AUDIO_MASK_SIGNED;
         }
     }
 
@@ -264,14 +296,14 @@ Mint_CheckAudio(_THIS, SDL_AudioSpec * spec)
             /* Ok */
         } else if (snd_format & SND_FORMATLITTLEENDIAN) {
             /* Give little endian format */
-            spec->format = spec->format & (~0x1000);
+            spec->format = spec->format & (~SDL_AUDIO_MASK_ENDIAN);
         }
     } else {
         if (snd_format & SND_FORMATLITTLEENDIAN) {
             /* Ok */
         } else if (snd_format & SND_FORMATBIGENDIAN) {
             /* Give big endian format */
-            spec->format |= 0x1000;
+            spec->format |= SDL_AUDIO_MASK_ENDIAN;
         }
     }
 
@@ -296,9 +328,10 @@ Mint_CheckAudio(_THIS, SDL_AudioSpec * spec)
     MINTAUDIO_numfreq = SDL_MintAudio_SearchFrequency(this, spec->freq);
     spec->freq = MINTAUDIO_frequencies[MINTAUDIO_numfreq].frequency;
 
-    DEBUG_PRINT((DEBUG_NAME "obtained: %d bits, ", spec->format & 0x00ff));
-    DEBUG_PRINT(("signed=%d, ", ((spec->format & 0x8000) != 0)));
-    DEBUG_PRINT(("big endian=%d, ", ((spec->format & 0x1000) != 0)));
+    DEBUG_PRINT((DEBUG_NAME "obtained: %d bits, ", SDL_AUDIO_BITSIZE(spec->format)));
+    DEBUG_PRINT(("float=%d, ", SDL_AUDIO_ISFLOAT(spec->format)));
+    DEBUG_PRINT(("signed=%d, ", SDL_AUDIO_ISSIGNED(spec->format)));
+    DEBUG_PRINT(("big endian=%d, ", SDL_AUDIO_ISBIGENDIAN(spec->format)));
     DEBUG_PRINT(("channels=%d, ", spec->channels));
     DEBUG_PRINT(("freq=%d\n", spec->freq));
 
@@ -319,7 +352,7 @@ Mint_InitAudio(_THIS, SDL_AudioSpec * spec)
     Setmontracks(0);
 
     /* Select replay format */
-    switch (spec->format & 0xff) {
+    switch (SDL_AUDIO_BITSIZE(spec->format)) {
     case 8:
         if (spec->channels == 2) {
             channels_mode = STEREO8;
@@ -332,6 +365,13 @@ Mint_InitAudio(_THIS, SDL_AudioSpec * spec)
             channels_mode = STEREO16;
         } else {
             channels_mode = MONO16;
+        }
+        break;
+    case 32:
+        if (spec->channels == 2) {
+            channels_mode = STEREO32;
+        } else {
+            channels_mode = MONO32;
         }
         break;
     default:

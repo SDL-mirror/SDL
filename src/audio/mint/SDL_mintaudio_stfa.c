@@ -206,11 +206,20 @@ Mint_CheckAudio(_THIS, SDL_AudioSpec * spec)
 {
     int i;
 
-    DEBUG_PRINT((DEBUG_NAME "asked: %d bits, ", spec->format & 0x00ff));
-    DEBUG_PRINT(("signed=%d, ", ((spec->format & 0x8000) != 0)));
-    DEBUG_PRINT(("big endian=%d, ", ((spec->format & 0x1000) != 0)));
+    DEBUG_PRINT((DEBUG_NAME "asked: %d bits, ", SDL_AUDIO_BITSIZE(spec->format)));
+    DEBUG_PRINT(("float=%d, ", SDL_AUDIO_ISFLOAT(spec->format)));
+    DEBUG_PRINT(("signed=%d, ", SDL_AUDIO_ISSIGNED(spec->format)));
+    DEBUG_PRINT(("big endian=%d, ", SDL_AUDIO_ISBIGENDIAN(spec->format)));
     DEBUG_PRINT(("channels=%d, ", spec->channels));
     DEBUG_PRINT(("freq=%d\n", spec->freq));
+
+    if (SDL_AUDIO_BITSIZE(spec->format) > 16) {
+        spec->format = AUDIO_S16SYS;  /* clamp out int32/float32 ... */
+    }
+
+    if (spec->channels > 2) {
+        spec->channels = 2;  /* no more than stereo! */
+    }
 
     /* Check formats available */
     MINTAUDIO_freqcount = 0;
@@ -230,9 +239,10 @@ Mint_CheckAudio(_THIS, SDL_AudioSpec * spec)
     MINTAUDIO_numfreq = SDL_MintAudio_SearchFrequency(this, spec->freq);
     spec->freq = MINTAUDIO_frequencies[MINTAUDIO_numfreq].frequency;
 
-    DEBUG_PRINT((DEBUG_NAME "obtained: %d bits, ", spec->format & 0x00ff));
-    DEBUG_PRINT(("signed=%d, ", ((spec->format & 0x8000) != 0)));
-    DEBUG_PRINT(("big endian=%d, ", ((spec->format & 0x1000) != 0)));
+    DEBUG_PRINT((DEBUG_NAME "obtained: %d bits, ", SDL_AUDIO_BITSIZE(spec->format)));
+    DEBUG_PRINT(("float=%d, ", SDL_AUDIO_ISFLOAT(spec->format)));
+    DEBUG_PRINT(("signed=%d, ", SDL_AUDIO_ISSIGNED(spec->format)));
+    DEBUG_PRINT(("big endian=%d, ", SDL_AUDIO_ISBIGENDIAN(spec->format)));
     DEBUG_PRINT(("channels=%d, ", spec->channels));
     DEBUG_PRINT(("freq=%d\n", spec->freq));
 
@@ -255,7 +265,7 @@ Mint_InitAudio(_THIS, SDL_AudioSpec * spec)
     /* Select replay format */
     cookie_stfa->sound_control =
         MINTAUDIO_frequencies[MINTAUDIO_numfreq].predivisor;
-    if ((spec->format & 0xff) == 8) {
+    if (SDL_AUDIO_BITSIZE(spec->format) == 8) {
         cookie_stfa->sound_control |= STFA_FORMAT_8BIT;
     } else {
         cookie_stfa->sound_control |= STFA_FORMAT_16BIT;
@@ -265,12 +275,12 @@ Mint_InitAudio(_THIS, SDL_AudioSpec * spec)
     } else {
         cookie_stfa->sound_control |= STFA_FORMAT_MONO;
     }
-    if ((spec->format & 0x8000) != 0) {
+    if (SDL_AUDIO_ISSIGNED(spec->format) != 0) {
         cookie_stfa->sound_control |= STFA_FORMAT_SIGNED;
     } else {
         cookie_stfa->sound_control |= STFA_FORMAT_UNSIGNED;
     }
-    if ((spec->format & 0x1000) != 0) {
+    if (SDL_AUDIO_ISBIGENDIAN(spec->format) != 0) {
         cookie_stfa->sound_control |= STFA_FORMAT_BIGENDIAN;
     } else {
         cookie_stfa->sound_control |= STFA_FORMAT_LITENDIAN;

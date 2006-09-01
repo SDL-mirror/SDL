@@ -218,11 +218,16 @@ Mint_CheckAudio(_THIS, SDL_AudioSpec * spec)
     int i, masterprediv, sfreq;
     unsigned long masterclock;
 
-    DEBUG_PRINT((DEBUG_NAME "asked: %d bits, ", spec->format & 0x00ff));
-    DEBUG_PRINT(("signed=%d, ", ((spec->format & 0x8000) != 0)));
-    DEBUG_PRINT(("big endian=%d, ", ((spec->format & 0x1000) != 0)));
+    DEBUG_PRINT((DEBUG_NAME "asked: %d bits, ", SDL_AUDIO_BITSIZE(spec->format)));
+    DEBUG_PRINT(("float=%d, ", SDL_AUDIO_ISFLOAT(spec->format)));
+    DEBUG_PRINT(("signed=%d, ", SDL_AUDIO_ISSIGNED(spec->format)));
+    DEBUG_PRINT(("big endian=%d, ", SDL_AUDIO_ISBIGENDIAN(spec->format)));
     DEBUG_PRINT(("channels=%d, ", spec->channels));
     DEBUG_PRINT(("freq=%d\n", spec->freq));
+
+    if (spec->channels > 2) {
+        spec->channels = 2;  /* no more than stereo! */
+    }
 
     /* Check formats available */
     spec->format = AUDIO_S8;
@@ -269,9 +274,10 @@ Mint_CheckAudio(_THIS, SDL_AudioSpec * spec)
     MINTAUDIO_numfreq = SDL_MintAudio_SearchFrequency(this, spec->freq);
     spec->freq = MINTAUDIO_frequencies[MINTAUDIO_numfreq].frequency;
 
-    DEBUG_PRINT((DEBUG_NAME "obtained: %d bits, ", spec->format & 0x00ff));
-    DEBUG_PRINT(("signed=%d, ", ((spec->format & 0x8000) != 0)));
-    DEBUG_PRINT(("big endian=%d, ", ((spec->format & 0x1000) != 0)));
+    DEBUG_PRINT((DEBUG_NAME "obtained: %d bits, ", SDL_AUDIO_BITSIZE(spec->format)));
+    DEBUG_PRINT(("float=%d, ", SDL_AUDIO_ISFLOAT(spec->format)));
+    DEBUG_PRINT(("signed=%d, ", SDL_AUDIO_ISSIGNED(spec->format)));
+    DEBUG_PRINT(("big endian=%d, ", SDL_AUDIO_ISBIGENDIAN(spec->format)));
     DEBUG_PRINT(("channels=%d, ", spec->channels));
     DEBUG_PRINT(("freq=%d\n", spec->freq));
 
