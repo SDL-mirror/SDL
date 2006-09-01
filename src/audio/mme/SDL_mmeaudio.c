@@ -135,7 +135,7 @@ MME_OpenAudio(_THIS, SDL_AudioSpec * spec)
     shm->wFmt.wf.wFormatTag = WAVE_FORMAT_PCM;
 
     /* Determine the audio parameters from the AudioSpec */
-    switch (spec->format & 0xFF) {
+    switch (SDL_AUDIO_BITSIZE(spec->format)) {
     case 8:
         /* Unsigned 8 bit audio data */
         spec->format = AUDIO_U8;
@@ -146,11 +146,17 @@ MME_OpenAudio(_THIS, SDL_AudioSpec * spec)
         spec->format = AUDIO_S16;
         shm->wFmt.wBitsPerSample = 16;
         break;
+    case 32:
+        /* Signed 32 bit audio data */
+        spec->format = AUDIO_S32;
+        shm->wFmt.wBitsPerSample = 32;
+        break;
     default:
         SDL_SetError("Unsupported audio format");
         return (-1);
     }
 
+    /* !!! FIXME: Can this handle more than stereo? */
     shm->wFmt.wf.nChannels = spec->channels;
     shm->wFmt.wf.nSamplesPerSec = spec->freq;
     shm->wFmt.wf.nBlockAlign =
