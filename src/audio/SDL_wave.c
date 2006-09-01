@@ -582,7 +582,7 @@ SDL_LoadWAV_RW(SDL_RWops * src, int freesrc,
     }
 
     /* Don't return a buffer that isn't a multiple of samplesize */
-    samplesize = ((spec->format & 0xFF) / 8) * spec->channels;
+    samplesize = ((SDL_AUDIO_BITSIZE(spec->format)) / 8) * spec->channels;
     *audio_len &= ~(samplesize - 1);
 
   done:
