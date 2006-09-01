@@ -414,6 +414,22 @@ NTO_OpenAudio(_THIS, SDL_AudioSpec * spec)
             format = SND_PCM_SFMT_U16_BE;
             found = 1;
             break;
+        case AUDIO_S32LSB:
+            format = SND_PCM_SFMT_S32_LE;
+            found = 1;
+            break;
+        case AUDIO_S32MSB:
+            format = SND_PCM_SFMT_S32_BE;
+            found = 1;
+            break;
+        case AUDIO_F32LSB:
+            format = SND_PCM_SFMT_FLOAT_LE;
+            found = 1;
+            break;
+        case AUDIO_F32MSB:
+            format = SND_PCM_SFMT_FLOAT_BE;
+            found = 1;
+            break;
         default:
             break;
         }
