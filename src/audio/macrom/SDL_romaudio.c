@@ -238,6 +238,9 @@ Mac_OpenAudio(_THIS, SDL_AudioSpec * spec)
     case AUDIO_U16MSB:
         spec->format = AUDIO_S16MSB;
         break;
+    case AUDIO_F32LSB:
+        spec->format = AUDIO_F32MSB;
+        break;
     }
     SDL_CalculateAudioSpec(spec);
 
@@ -259,9 +262,18 @@ Mac_OpenAudio(_THIS, SDL_AudioSpec * spec)
     header.encode = cmpSH;
 
     /* Note that we install the 16bitLittleEndian Converter if needed. */
-    if (spec->format == 0x8010) {
+    if (spec->format == AUDIO_S16LSB) {
         header.compressionID = fixedCompression;
         header.format = k16BitLittleEndianFormat;
+    } else if (spec->format == AUDIO_S32MSB) {
+        header.compressionID = fixedCompression;
+        header.format = k32BitFormat;
+    } else if (spec->format == AUDIO_S32LSB) {
+        header.compressionID = fixedCompression;
+        header.format = k32BitLittleEndianFormat;
+    } else if (spec->format == AUDIO_F32MSB) {
+        header.compressionID = fixedCompression;
+        header.format = kFloat32Format;
     }
 
     /* allocate 2 buffers */
