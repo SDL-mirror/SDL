@@ -658,7 +658,7 @@ DX5_OpenAudio(_THIS, SDL_AudioSpec * spec)
     waveformat.wFormatTag = WAVE_FORMAT_PCM;
 
     /* Determine the audio parameters from the AudioSpec */
-    switch (spec->format & 0xFF) {
+    switch (SDL_AUDIO_BITSIZE(spec->format)) {
     case 8:
         /* Unsigned 8 bit audio data */
         spec->format = AUDIO_U8;
@@ -670,6 +670,12 @@ DX5_OpenAudio(_THIS, SDL_AudioSpec * spec)
         spec->format = AUDIO_S16;
         silence = 0x00;
         waveformat.wBitsPerSample = 16;
+        break;
+    case 32:
+        /* Signed 32 bit audio data */
+        spec->format = AUDIO_S32;
+        silence = 0x00;
+        waveformat.wBitsPerSample = 32;
         break;
     default:
         SDL_SetError("Unsupported audio format");

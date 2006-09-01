@@ -248,7 +248,7 @@ DIB_OpenAudio(_THIS, SDL_AudioSpec * spec)
     waveformat.wFormatTag = WAVE_FORMAT_PCM;
 
     /* Determine the audio parameters from the AudioSpec */
-    switch (spec->format & 0xFF) {
+    switch (SDL_AUDIO_BITSIZE(spec->format)) {
     case 8:
         /* Unsigned 8 bit audio data */
         spec->format = AUDIO_U8;
@@ -258,6 +258,11 @@ DIB_OpenAudio(_THIS, SDL_AudioSpec * spec)
         /* Signed 16 bit audio data */
         spec->format = AUDIO_S16;
         waveformat.wBitsPerSample = 16;
+        break;
+    case 16:
+        /* Signed 32 bit audio data */
+        spec->format = AUDIO_S32;
+        waveformat.wBitsPerSample = 32;
         break;
     default:
         SDL_SetError("Unsupported audio format");
