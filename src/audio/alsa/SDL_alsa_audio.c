@@ -544,10 +544,10 @@ ALSA_OpenAudio(_THIS, SDL_AudioSpec * spec)
             format = SND_PCM_FORMAT_U16_BE;
             break;
         case AUDIO_S32LSB:
-            format = SND_PCM_FORMAT_U32_LE;
+            format = SND_PCM_FORMAT_S32_LE;
             break;
         case AUDIO_S32MSB:
-            format = SND_PCM_FORMAT_U32_BE;
+            format = SND_PCM_FORMAT_S32_BE;
             break;
         case AUDIO_F32LSB:
             format = SND_PCM_FORMAT_FLOAT_LE;
