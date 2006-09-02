@@ -207,21 +207,20 @@ Core_OpenAudio(_THIS, SDL_AudioSpec * spec)
     Component comp;
     ComponentDescription desc;
     struct AudioUnitInputCallback callback;
-    AudioStreamBasicDescription desc;
+    AudioStreamBasicDescription strdesc;
     SDL_AudioFormat test_format = SDL_FirstAudioFormat(spec->format);
     int valid_datatype = 0;
 
     /* Setup a AudioStreamBasicDescription with the requested format */
-    memset(&desc, '\0', sizeof (AudioStreamBasicDescription));
-    desc.mFormatID = kAudioFormatLinearPCM;
-    desc.mFormatFlags = kLinearPCMFormatFlagIsPacked;
-    desc.mChannelsPerFrame = spec->channels;
-    desc.mSampleRate = spec->freq;
-    desc.mFramesPerPacket = 1;
+    memset(&strdesc, '\0', sizeof (AudioStreamBasicDescription));
+    strdesc.mFormatID = kAudioFormatLinearPCM;
+    strdesc.mFormatFlags = kLinearPCMFormatFlagIsPacked;
+    strdesc.mChannelsPerFrame = spec->channels;
+    strdesc.mSampleRate = spec->freq;
+    strdesc.mFramesPerPacket = 1;
 
     while ((!valid_datatype) && (test_format)) {
         spec->format = test_format;
-        desc.mFormatFlags = 0;
         /* Just a list of valid SDL formats, so people don't pass junk here. */
         switch (test_format) {
             case AUDIO_U8:
@@ -235,15 +234,14 @@ Core_OpenAudio(_THIS, SDL_AudioSpec * spec)
             case AUDIO_F32LSB:
             case AUDIO_F32MSB:
                 valid_datatype = 1;
-                desc.mBitsPerChannel = SDL_AUDIO_BITSIZE(spec->format);
+                strdesc.mBitsPerChannel = SDL_AUDIO_BITSIZE(spec->format);
+                if (SDL_AUDIO_ISBIGENDIAN(spec->format))
+                    strdesc.mFormatFlags |= kLinearPCMFormatFlagIsBigEndian;
 
                 if (SDL_AUDIO_ISFLOAT(spec->format))
-                    desc.mFormatFlags |= kLinearPCMFormatFlagIsFloat;
+                    strdesc.mFormatFlags |= kLinearPCMFormatFlagIsFloat;
                 else if (SDL_AUDIO_ISSIGNED(spec->format))
-                    desc.mFormatFlags |= kLinearPCMFormatFlagIsSignedInteger;
-
-                if (SDL_AUDIO_ISBIGENDIAN(spec->format))
-                    desc.mFormatFlags |= kLinearPCMFormatFlagIsBigEndian;
+                    strdesc.mFormatFlags |= kLinearPCMFormatFlagIsSignedInteger;
                 break;
         }
     }
@@ -253,13 +251,13 @@ Core_OpenAudio(_THIS, SDL_AudioSpec * spec)
         return (-1);
     }
 
-    desc.mBytesPerFrame =
-        desc.mBitsPerChannel * desc.mChannelsPerFrame / 8;
-    desc.mBytesPerPacket =
-        desc.mBytesPerFrame * desc.mFramesPerPacket;
-
+    strdesc.mBytesPerFrame =
+        strdesc.mBitsPerChannel * strdesc.mChannelsPerFrame / 8;
+    strdesc.mBytesPerPacket =
+        strdesc.mBytesPerFrame * strdesc.mFramesPerPacket;
 
     /* Locate the default output audio unit */
+    memset(&desc, '\0', sizeof (ComponentDescription));
     desc.componentType = kAudioUnitComponentType;
     desc.componentSubType = kAudioUnitSubType_Output;
     desc.componentManufacturer = kAudioUnitID_DefaultOutput;
