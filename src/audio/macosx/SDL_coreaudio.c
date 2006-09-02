@@ -195,7 +195,7 @@ Core_CloseAudio(_THIS)
 
 #define CHECK_RESULT(msg) \
     if (result != noErr) { \
-        SDL_SetError("Failed to start CoreAudio: " msg); \
+        SDL_SetError("CoreAudio error (%s): %d", msg, (int) result); \
         return -1; \
     }
 
@@ -281,7 +281,7 @@ Core_OpenAudio(_THIS, SDL_AudioSpec * spec)
                                       kAudioUnitProperty_StreamFormat,
                                       kAudioUnitScope_Input,
                                       0,
-                                      &desc, sizeof (desc));
+                                      &strdesc, sizeof (strdesc));
     CHECK_RESULT("AudioUnitSetProperty (kAudioUnitProperty_StreamFormat)")
         /* Set the audio callback */
         callback.inputProc = audioCallback;
