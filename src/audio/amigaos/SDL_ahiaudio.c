@@ -220,7 +220,7 @@ static void AHI_CloseAudio(_THIS)
 
 static int AHI_OpenAudio(_THIS, SDL_AudioSpec *spec)
 {	
-    SDL_AudioFormat test_format = SDL_FirstAudioFormat(spec->format);
+    Uint16 test_format = SDL_FirstAudioFormat(spec->format);
     int valid_datatype = 1;
 
     D(bug("AHI opening...\n"));

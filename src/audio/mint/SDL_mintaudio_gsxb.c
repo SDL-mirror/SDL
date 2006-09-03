@@ -201,7 +201,7 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 {
 	long snd_format;
 	int i, resolution, format_signed, format_bigendian;
-    SDL_AudioFormat test_format = SDL_FirstAudioFormat(spec->format);
+    Uint16 test_format = SDL_FirstAudioFormat(spec->format);
     int valid_datatype = 0;
 
 	resolution = spec->format & 0x00ff;
@@ -222,9 +222,9 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
         /* Check formats available */
         snd_format = Sndstatus(SND_QUERYFORMATS);
         spec->format = test_format;
-        resolution = SDL_AUDIO_BITSIZE(spec->format);
-        format_signed = SDL_AUDIO_ISSIGNED(spec->format);
-        format_bigendian = SDL_AUDIO_ISBIGENDIAN(spec->format);
+        resolution = spec->format & 0xff;
+        format_signed = (spec->format & (1<<15));
+        format_bigendian = (spec->format & (1<<12));
         switch (test_format) {
             case AUDIO_U8:
             case AUDIO_S8:

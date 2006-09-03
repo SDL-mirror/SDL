@@ -75,7 +75,7 @@ LONG APIENTRY DARTEventFunc(ULONG ulStatus,
 
 int DART_OpenAudio(_THIS, SDL_AudioSpec *spec)
 {
-  SDL_AudioFormat test_format = SDL_FirstAudioFormat(spec->format);
+  Uint16 test_format = SDL_FirstAudioFormat(spec->format);
   int valid_datatype = 0;
   MCI_AMP_OPEN_PARMS AmpOpenParms;
   MCI_GENERIC_PARMS GenericParms;

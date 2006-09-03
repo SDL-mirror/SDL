@@ -201,7 +201,7 @@ static void DCAUD_CloseAudio(_THIS)
 
 static int DCAUD_OpenAudio(_THIS, SDL_AudioSpec *spec)
 {
-    SDL_AudioFormat test_format = SDL_FirstAudioFormat(spec->format);
+    Uint16 test_format = SDL_FirstAudioFormat(spec->format);
     int valid_datatype = 0;
     while ((!valid_datatype) && (test_format)) {
         spec->format = test_format;

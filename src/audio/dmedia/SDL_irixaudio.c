@@ -141,7 +141,7 @@ static void AL_CloseAudio(_THIS)
 
 static int AL_OpenAudio(_THIS, SDL_AudioSpec * spec)
 {
-	SDL_AudioFormat test_format = SDL_FirstAudioFormat(spec->format);
+	Uint16 test_format = SDL_FirstAudioFormat(spec->format);
 	long width = 0;
 	long fmt = 0;
 	int valid = 0;

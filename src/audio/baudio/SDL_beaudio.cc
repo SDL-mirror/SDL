@@ -154,7 +154,7 @@ int BE_OpenAudio(_THIS, SDL_AudioSpec *spec)
 {
     int valid_datatype = 0;
     media_raw_audio_format format;
-    SDL_AudioFormat test_format = SDL_FirstAudioFormat(spec->format);
+    Uint16 test_format = SDL_FirstAudioFormat(spec->format);
 
     /* Parse the audio format and fill the Be raw audio format */
     memset(&format, '\0', sizeof (media_raw_audio_format));
