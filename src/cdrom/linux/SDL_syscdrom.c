@@ -218,7 +218,7 @@ static void CheckMounts(const char *mtab)
 			if ( SDL_strcmp(mnt_type, MNTTYPE_SUPER) == 0 ) {
 				tmp = SDL_strstr(mntent->mnt_opts, "fs=");
 				if ( tmp ) {
-					SDL_free(mnt_type);
+					SDL_stack_free(mnt_type);
 					mnt_type = SDL_strdup(tmp + SDL_strlen("fs="));
 					if ( mnt_type ) {
 						tmp = SDL_strchr(mnt_type, ',');
@@ -229,7 +229,7 @@ static void CheckMounts(const char *mtab)
 				}
 				tmp = SDL_strstr(mntent->mnt_opts, "dev=");
 				if ( tmp ) {
-					SDL_free(mnt_dev);
+					SDL_stack_free(mnt_dev);
 					mnt_dev = SDL_strdup(tmp + SDL_strlen("dev="));
 					if ( mnt_dev ) {
 						tmp = SDL_strchr(mnt_dev, ',');
