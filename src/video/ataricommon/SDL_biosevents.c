@@ -74,7 +74,7 @@ void AtariBios_InitOSKeymap(_THIS)
 	SDL_memset(bios_previouskeyboard, 0, sizeof(bios_previouskeyboard));
 
 	/* Initialize keymap */
-	for ( i=0; i<sizeof(keymap); i++ )
+	for ( i=0; i<ATARIBIOS_MAXKEYS; i++ )
 		keymap[i] = SDLK_UNKNOWN;
 
 	/* Functions keys */
