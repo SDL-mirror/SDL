@@ -172,6 +172,7 @@ GEM_CheckMouseMode(_THIS)
         GEM_mouse_relative = SDL_TRUE;
     } else {
         GEM_mouse_relative = SDL_FALSE;
+        graf_mouse(M_ON, NULL);
     }
 }
 
