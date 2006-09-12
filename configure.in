@@ -1059,8 +1059,8 @@ dnl Find the framebuffer console includes
 CheckFBCON()
 {
     AC_ARG_ENABLE(video-fbcon,
-AC_HELP_STRING([--enable-video-fbcon], [use framebuffer console video driver [[default=yes]]]),
-                  , enable_video_fbcon=yes)
+AC_HELP_STRING([--enable-video-fbcon], [use framebuffer console video driver [[default=no]]]),
+                  , enable_video_fbcon=no)
     if test x$enable_video = xyes -a x$enable_video_fbcon = xyes; then
         AC_MSG_CHECKING(for framebuffer console support)
         video_fbcon=no
