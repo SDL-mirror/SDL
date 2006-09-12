@@ -83,7 +83,8 @@ Audio_Available(void)
     unsigned long dummy;
     const char *envr = SDL_getenv("SDL_AUDIODRIVER");
 
-    SDL_MintAudio_mint_present = (Getcookie(C_MiNT, &dummy) == C_FOUND);
+    /*SDL_MintAudio_mint_present = (Getcookie(C_MiNT, &dummy) == C_FOUND);*/
+    SDL_MintAudio_mint_present = SDL_FALSE;
 
     /* We can't use XBIOS in interrupt with Magic, don't know about thread */
     if (Getcookie(C_MagX, &dummy) == C_FOUND) {
@@ -467,7 +468,8 @@ Mint_InitAudio(_THIS, SDL_AudioSpec * spec)
     } else {
         /* Install interrupt */
         Jdisint(MFP_DMASOUND);
-        Xbtimer(XB_TIMERA, 8, 1, SDL_MintAudio_XbiosInterrupt);
+        /*Xbtimer(XB_TIMERA, 8, 1, SDL_MintAudio_XbiosInterrupt);*/
+        Xbtimer(XB_TIMERA, 8, 1, SDL_MintAudio_Dma8Interrupt);
         Jenabint(MFP_DMASOUND);
 
         if (Setinterrupt(SI_TIMERA, SI_PLAY) < 0) {
