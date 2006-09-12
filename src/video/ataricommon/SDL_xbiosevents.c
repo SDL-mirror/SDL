@@ -50,7 +50,8 @@ SDL_AtariXbios_InstallVectors(int vectors_mask)
     void *oldpile;
 
     /* Clear variables */
-    SDL_AtariXbios_mouseb =
+    SDL_AtariXbios_mouselock =
+        SDL_AtariXbios_mouseb =
         SDL_AtariXbios_mousex =
         SDL_AtariXbios_mousey =
         SDL_AtariXbios_joystick = atari_prevmouseb = 0;
@@ -151,4 +152,8 @@ SDL_AtariXbios_PostMouseEvents(_THIS, SDL_bool buttonEvents)
     }
 }
 
+void SDL_AtariXbios_LockMousePosition(SDL_bool lockPosition)
+{
+    SDL_AtariXbios_mouselock = lockPosition;
+}
 /* vi: set ts=4 sw=4 expandtab: */

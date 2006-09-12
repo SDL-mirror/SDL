@@ -33,6 +33,7 @@
 	.globl	_SDL_AtariXbios_MouseVector
 	.globl	_SDL_AtariXbios_JoystickVector
 
+	.globl	_SDL_AtariXbios_mouselock
 	.globl	_SDL_AtariXbios_mouseb
 	.globl	_SDL_AtariXbios_mousex
 	.globl	_SDL_AtariXbios_mousey
@@ -125,6 +126,13 @@ _SDL_AtariXbios_MouseVector:
 	extw	d0
 	addw	d0,_SDL_AtariXbios_mousey
 
+	/* Lock mouse position ? */
+	tstw	_SDL_AtariXbios_mouselock
+	beq.s	no_mouse_lock
+	clrb	a0@(1)
+	clrb	a0@(2)
+no_mouse_lock:
+
 	/* Jump through old vector */
 	movel	sp@+,d0
 
@@ -133,10 +141,9 @@ _SDL_AtariXbios_MouseVector:
 
 	.data
 	.even
+	.comm	_SDL_AtariXbios_mouselock,2*1
 	.comm	_SDL_AtariXbios_mousex,2*1
-	.even
 	.comm	_SDL_AtariXbios_mousey,2*1
-	.even
 	.comm	_SDL_AtariXbios_mouseb,2*1
 
 /*--- Our joystick vector ---*/
