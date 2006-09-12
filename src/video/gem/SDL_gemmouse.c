@@ -176,10 +176,12 @@ void GEM_CheckMouseMode(_THIS)
 
 	/* If the mouse is hidden and input is grabbed, we use relative mode */
 	if ( (!(SDL_cursorstate & CURSOR_VISIBLE)) &&
-		/*(this->input_grab != SDL_GRAB_OFF) && */ /* Damn GEM can not grab */
+		(this->input_grab != SDL_GRAB_OFF) &&
              (SDL_GetAppState() & SDL_APPACTIVE) ) {
+		SDL_AtariXbios_LockMousePosition(SDL_TRUE);
 		GEM_mouse_relative = SDL_TRUE;
 	} else {
+		SDL_AtariXbios_LockMousePosition(SDL_FALSE);
 		GEM_mouse_relative = SDL_FALSE;
 		graf_mouse(M_ON, NULL);
 	}
