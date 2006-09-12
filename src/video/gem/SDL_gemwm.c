@@ -113,7 +113,11 @@ GEM_IconifyWindow(_THIS)
 SDL_GrabMode
 GEM_GrabInput(_THIS, SDL_GrabMode mode)
 {
-    return SDL_GRAB_OFF;
+    if (this->screen == NULL) {
+        return SDL_GRAB_OFF;
+    }
+
+    return mode;
 }
 
 /* vi: set ts=4 sw=4 expandtab: */
