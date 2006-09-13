@@ -41,89 +41,28 @@
 #include "../ataricommon/SDL_xbiosevents_c.h"
 #include "../ataricommon/SDL_ataridevmouse_c.h"
 
-/* Defines */
-
-#define ATARIBIOS_MAXKEYS 128
-
 /* Variables */
 
 static unsigned char gem_currentkeyboard[ATARIBIOS_MAXKEYS];
 static unsigned char gem_previouskeyboard[ATARIBIOS_MAXKEYS];
-static unsigned char gem_currentascii[ATARIBIOS_MAXKEYS];
-
-/* The translation tables from a console scancode to a SDL keysym */
-static SDLKey keymap[ATARIBIOS_MAXKEYS];
 
 /* Functions prototypes */
 
-static SDL_keysym *TranslateKey(int scancode, int asciicode, SDL_keysym *keysym,
-	SDL_bool pressed);
 static int do_messages(_THIS, short *message);
 static void do_keyboard(short kc, short ks);
 static void do_mouse(_THIS, short mx, short my, short mb, short ks);
 
 /* Functions */
 
-static SDL_keysym *TranslateKey(int scancode, int asciicode, SDL_keysym *keysym,
-	SDL_bool pressed)
-{
-	/* Set the keysym information */
-	keysym->scancode = scancode;
-
-	if (asciicode)
-		keysym->sym = asciicode;		
-	else
-		keysym->sym = keymap[scancode];
-
-	keysym->mod = KMOD_NONE;
-	keysym->unicode = 0;
-	if (SDL_TranslateUNICODE && pressed) {
-		keysym->unicode = SDL_AtariToUnicodeTable[asciicode];
-	}
-
-	return(keysym);
-}
-
 void GEM_InitOSKeymap(_THIS)
 {
-	int i;
-
 	SDL_memset(gem_currentkeyboard, 0, sizeof(gem_currentkeyboard));
 	SDL_memset(gem_previouskeyboard, 0, sizeof(gem_previouskeyboard));
-	SDL_memset(gem_currentascii, 0, sizeof(gem_currentascii));
-
-	/* Initialize keymap */
-	for ( i=0; i<ATARIBIOS_MAXKEYS; i++ )
-		keymap[i] = SDLK_UNKNOWN;
-
-	/* Functions keys */
-	for ( i = 0; i<10; i++ )
-		keymap[SCANCODE_F1 + i] = SDLK_F1+i;
-
-	/* Cursor keypad */
-	keymap[SCANCODE_HELP] = SDLK_HELP;
-	keymap[SCANCODE_UNDO] = SDLK_UNDO;
-	keymap[SCANCODE_INSERT] = SDLK_INSERT;
-	keymap[SCANCODE_CLRHOME] = SDLK_HOME;
-	keymap[SCANCODE_UP] = SDLK_UP;
-	keymap[SCANCODE_DOWN] = SDLK_DOWN;
-	keymap[SCANCODE_RIGHT] = SDLK_RIGHT;
-	keymap[SCANCODE_LEFT] = SDLK_LEFT;
-
-	/* Special keys */
-	keymap[SCANCODE_ESCAPE] = SDLK_ESCAPE;
-	keymap[SCANCODE_BACKSPACE] = SDLK_BACKSPACE;
-	keymap[SCANCODE_TAB] = SDLK_TAB;
-	keymap[SCANCODE_ENTER] = SDLK_RETURN;
-	keymap[SCANCODE_DELETE] = SDLK_DELETE;
-	keymap[SCANCODE_LEFTCONTROL] = SDLK_LCTRL;
-	keymap[SCANCODE_LEFTSHIFT] = SDLK_LSHIFT;
-	keymap[SCANCODE_RIGHTSHIFT] = SDLK_RSHIFT;
-	keymap[SCANCODE_LEFTALT] = SDLK_LALT;
-	keymap[SCANCODE_CAPSLOCK] = SDLK_CAPSLOCK;
 
 	/* Mouse init */
 	GEM_mouse_relative = SDL_FALSE;
+
+	SDL_Atari_InitInternalKeymap(this);
 }
 
 void GEM_PumpEvents(_THIS)
@@ -216,12 +155,12 @@ void GEM_PumpEvents(_THIS)
 		/* Key pressed ? */
 		if (gem_currentkeyboard[i] && !gem_previouskeyboard[i])
 			SDL_PrivateKeyboard(SDL_PRESSED,
-				TranslateKey(i, gem_currentascii[i], &keysym, SDL_TRUE));
+				SDL_Atari_TranslateKey(i, &keysym, SDL_TRUE));
 			
 		/* Key unpressed ? */
 		if (gem_previouskeyboard[i] && !gem_currentkeyboard[i])
 			SDL_PrivateKeyboard(SDL_RELEASED,
-				TranslateKey(i, gem_currentascii[i], &keysym, SDL_FALSE));
+				SDL_Atari_TranslateKey(i, &keysym, SDL_FALSE));
 	}
 
 	SDL_memcpy(gem_previouskeyboard,gem_currentkeyboard,sizeof(gem_previouskeyboard));
@@ -341,14 +280,11 @@ static int do_messages(_THIS, short *message)
 
 static void do_keyboard(short kc, short ks)
 {
-	int			scancode, asciicode;
+	int scancode;
 
 	if (kc) {
-		scancode=(kc>>8) & 127;
-		asciicode=kc & 255;
-
+		scancode=(kc>>8) & (ATARIBIOS_MAXKEYS-1);
 		gem_currentkeyboard[scancode]=0xFF;
-		gem_currentascii[scancode]=asciicode;
 	}
 
 	/* Read special keys */
