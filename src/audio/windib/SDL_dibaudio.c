@@ -259,7 +259,7 @@ DIB_OpenAudio(_THIS, SDL_AudioSpec * spec)
         spec->format = AUDIO_S16;
         waveformat.wBitsPerSample = 16;
         break;
-    case 16:
+    case 32:
         /* Signed 32 bit audio data */
         spec->format = AUDIO_S32;
         waveformat.wBitsPerSample = 32;
