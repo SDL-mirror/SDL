@@ -40,6 +40,7 @@
 	.globl	_SDL_MintAudio_numbuf
 	.globl	_SDL_MintAudio_audiosize
 	.globl	_SDL_MintAudio_clocktics
+	.globl	_SDL_MintAudio_hasfpu
 
 	.globl	_SDL_MintAudio_stfa
 
@@ -77,7 +78,7 @@ _SDL_MintAudio_XbiosInterrupt:
 
 	/* Check if we are not already running */
 	tstw	_SDL_MintAudio_mutex
-	bnes	SDL_MintAudio_XbiosEnd
+	bne	SDL_MintAudio_XbiosEnd
 	notw	_SDL_MintAudio_mutex
 	
 	/* Swap buffers */
@@ -85,8 +86,24 @@ _SDL_MintAudio_XbiosInterrupt:
 
 	moveml	d0-d7/a0-a6,sp@-
 
+	/* Save FPU if needed */
+	tstw	_SDL_MintAudio_hasfpu
+	beqs	SDL_MintAudio_Xbios_nofpu1
+	fsave	sp@-
+	fmoveml fpcr/fpsr/fpiar,sp@-
+	fmovemx	fp0-fp7,sp@-
+SDL_MintAudio_Xbios_nofpu1:
+
 	/* Callback */
 	jsr	_SDL_MintAudio_Callback
+
+	/* Restore FPU if needed */
+	tstw	_SDL_MintAudio_hasfpu
+	beqs	SDL_MintAudio_Xbios_nofpu2
+	fmovemx	sp@+,fp0-fp7
+	fmoveml	sp@+,fpcr/fpsr/fpiar
+	frestore	sp@+
+SDL_MintAudio_Xbios_nofpu2:
 
 	/* Reserve space for registers */
 	subl	#savamt,savptr
@@ -131,7 +148,7 @@ _SDL_MintAudio_Dma8Interrupt:
 
 	/* Check if we are not already running */
 	tstw	_SDL_MintAudio_mutex
-	bnes	SDL_MintAudio_Dma8End
+	bne	SDL_MintAudio_Dma8End
 	notw	_SDL_MintAudio_mutex
 	
 	/* Swap buffers */
@@ -139,8 +156,24 @@ _SDL_MintAudio_Dma8Interrupt:
 
 	moveml	d0-d1/a0-a1,sp@-
 
+	/* Save FPU if needed */
+	tstw	_SDL_MintAudio_hasfpu
+	beqs	SDL_MintAudio_Dma8_nofpu1
+	fsave	sp@-
+	fmoveml fpcr/fpsr/fpiar,sp@-
+	fmovemx	fp0-fp7,sp@-
+SDL_MintAudio_Dma8_nofpu1:
+
 	/* Callback */
 	jsr	_SDL_MintAudio_Callback
+
+	/* Restore FPU if needed */
+	tstw	_SDL_MintAudio_hasfpu
+	beqs	SDL_MintAudio_Dma8_nofpu2
+	fmovemx	sp@+,fp0-fp7
+	fmoveml	sp@+,fpcr/fpsr/fpiar
+	frestore	sp@+
+SDL_MintAudio_Dma8_nofpu2:
 
 	/* Set new buffer */
 
@@ -195,8 +228,24 @@ _SDL_MintAudio_StfaInterrupt:
 
 	moveml	d0-d7/a0-a6,sp@-
 
+	/* Save FPU if needed */
+	tstw	_SDL_MintAudio_hasfpu
+	beqs	SDL_MintAudio_Stfa_nofpu1
+	fsave	sp@-
+	fmoveml fpcr/fpsr/fpiar,sp@-
+	fmovemx	fp0-fp7,sp@-
+SDL_MintAudio_Stfa_nofpu1:
+
 	/* Callback */
 	jsr	_SDL_MintAudio_Callback
+
+	/* Restore FPU if needed */
+	tstw	_SDL_MintAudio_hasfpu
+	beqs	SDL_MintAudio_Stfa_nofpu2
+	fmovemx	sp@+,fp0-fp7
+	fmoveml	sp@+,fpcr/fpsr/fpiar
+	frestore	sp@+
+SDL_MintAudio_Stfa_nofpu2:
 
 	/* Set new buffer */
 
