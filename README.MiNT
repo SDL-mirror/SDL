@@ -124,12 +124,12 @@ SDL_JOYSTICK_ATARI:
 
 	'ikbd-joy1-[on|off]' for IKBD joystick on port 1 (hardware access)
 	'xbios-joy1-[on|off]' for IKBD joystick on port 1 (xbios access)
-	'porta-pad-[on|off]' for joypad on port A
+	'porta-pad-[on|off]' for joypad and/or teamtap on port A
 	'porta-joy0-[on|off]' for joystick 0 on port A
 	'porta-joy1-[on|off]' for joystick 1 on port A
 	'porta-lp-[on|off]' for lightpen on port A
 	'porta-anpad-[on|off]' for analog paddle on port A
-	'portb-pad-[on|off]' for joypad on port B
+	'portb-pad-[on|off]' for joypad and/or teamtap on port B
 	'portb-joy0-[on|off]' for joystick 0 on port B
 	'portb-joy1-[on|off]' for joystick 1 on port B
 	'portb-anpad-[on|off]' for analog paddle on port B
