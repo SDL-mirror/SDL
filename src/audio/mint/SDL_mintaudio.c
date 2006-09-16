@@ -32,6 +32,7 @@
 #include <mint/osbind.h>
 #include <mint/falcon.h>
 #include <mint/mintbind.h>
+#include <mint/cookie.h>
 
 #include "SDL_audio.h"
 #include "SDL_mintaudio.h"
@@ -46,6 +47,7 @@ volatile unsigned short SDL_MintAudio_numbuf;		/* Buffer to play */
 volatile unsigned short SDL_MintAudio_mutex;
 volatile unsigned long SDL_MintAudio_clocktics;
 cookie_stfa_t	*SDL_MintAudio_stfa;
+unsigned short SDL_MintAudio_hasfpu;
 
 /* MiNT thread variables */
 SDL_bool SDL_MintAudio_mint_present;
@@ -137,6 +139,26 @@ int SDL_MintAudio_SearchFrequency(_THIS, int desired_freq)
 
 	/* Not in the array, give the latest */
 	return MINTAUDIO_freqcount-1;
+}
+
+/* Check if FPU is present */
+void SDL_MintAudio_CheckFpu(void)
+{
+	unsigned long cookie_fpu;
+
+	SDL_MintAudio_hasfpu = 0;
+	if (Getcookie(C__FPU, &cookie_fpu) != C_FOUND) {
+		return;
+	}
+	switch ((cookie_fpu>>16)&0xfffe) {
+		case 2:
+		case 4:
+		case 6:
+		case 8:
+		case 16:
+			SDL_MintAudio_hasfpu = 1;
+			break;
+	}
 }
 
 /* The thread function, used under MiNT with xbios */
