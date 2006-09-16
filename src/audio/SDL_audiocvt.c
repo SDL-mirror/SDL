@@ -1374,7 +1374,7 @@ int SDL_BuildAudioCVT(SDL_AudioCVT *cvt,
 
 	/* First filter:  Endian conversion from src to dst */
 	if ( (src_format & 0x1000) != (dst_format & 0x1000)
-	     && ((src_format & 0xff) != 8) ) {
+	     && ((src_format & 0xff) == 16) && ((dst_format & 0xff) == 16)) {
 		cvt->filters[cvt->filter_index++] = SDL_ConvertEndian;
 	}
 	
