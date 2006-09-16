@@ -137,7 +137,7 @@ _SDL_MintAudio_Dma8Interrupt:
 	/* Swap buffers */
 	eorw	#1,_SDL_MintAudio_numbuf
 
-	moveml	d0-d7/a0-a6,sp@-
+	moveml	d0-d1/a0-a1,sp@-
 
 	/* Callback */
 	jsr	_SDL_MintAudio_Callback
@@ -169,7 +169,7 @@ _SDL_MintAudio_Dma8Interrupt:
 	rorl	#8,d1
 	moveb	d1,a0@(0x0f)
 
-	moveml	sp@+,d0-d7/a0-a6
+	moveml	sp@+,d0-d1/a0-a1
 
 	clrw	_SDL_MintAudio_mutex
 SDL_MintAudio_Dma8End:
