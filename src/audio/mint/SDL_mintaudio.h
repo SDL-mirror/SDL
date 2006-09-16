@@ -128,6 +128,7 @@ extern volatile unsigned short SDL_MintAudio_numbuf;    /* Buffer to play */
 extern volatile unsigned short SDL_MintAudio_mutex;
 extern cookie_stfa_t *SDL_MintAudio_stfa;
 extern volatile unsigned long SDL_MintAudio_clocktics;
+extern unsigned short SDL_MintAudio_hasfpu;	/* To preserve fpu registers if needed */
 
 /* MiNT thread variables */
 extern SDL_bool SDL_MintAudio_mint_present;
@@ -140,6 +141,7 @@ void SDL_MintAudio_Callback(void);
 void SDL_MintAudio_AddFrequency(_THIS, Uint32 frequency, Uint32 clock,
                                 Uint32 prediv, int gpio_bits);
 int SDL_MintAudio_SearchFrequency(_THIS, int desired_freq);
+void SDL_MintAudio_CheckFpu(void);
 
 /* MiNT thread functions */
 int SDL_MintAudio_Thread(long param);

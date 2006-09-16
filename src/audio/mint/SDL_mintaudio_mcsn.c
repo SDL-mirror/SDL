@@ -415,6 +415,8 @@ Mint_OpenAudio(_THIS, SDL_AudioSpec * spec)
     DEBUG_PRINT((DEBUG_NAME "buffer 1 at 0x%08x\n",
                  SDL_MintAudio_audiobuf[1]));
 
+    SDL_MintAudio_CheckFpu();
+
     /* Setup audio hardware */
     Mint_InitAudio(this, spec);
 

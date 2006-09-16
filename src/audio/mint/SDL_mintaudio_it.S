@@ -40,6 +40,7 @@
 	.globl	_SDL_MintAudio_numbuf
 	.globl	_SDL_MintAudio_audiosize
 	.globl	_SDL_MintAudio_clocktics
+	.globl	_SDL_MintAudio_hasfpu
 
 	.globl	_SDL_MintAudio_stfa
 
@@ -85,8 +86,28 @@ _SDL_MintAudio_XbiosInterrupt:
 
 	moveml	d0-d7/a0-a6,sp@-
 
+	/* Save FPU if needed */
+	tstw	_SDL_MintAudio_hasfpu
+	beqs	SDL_MintAudio_Xbios_nofpu1
+	.chip	68060
+	fsave	sp@-
+	fmoveml fpcr/fpsr/fpiar,sp@-
+	fmovemx	fp0-fp7,sp@-
+	.chip	68000
+SDL_MintAudio_Xbios_nofpu1:
+
 	/* Callback */
 	jsr	_SDL_MintAudio_Callback
+
+	/* Restore FPU if needed */
+	tstw	_SDL_MintAudio_hasfpu
+	beqs	SDL_MintAudio_Xbios_nofpu2
+	.chip	68060
+	fmovemx	sp@+,fp0-fp7
+	fmoveml	sp@+,fpcr/fpsr/fpiar
+	frestore	sp@+
+	.chip	68000
+SDL_MintAudio_Xbios_nofpu2:
 
 	/* Reserve space for registers */
 	subl	#savamt,savptr
@@ -137,10 +158,30 @@ _SDL_MintAudio_Dma8Interrupt:
 	/* Swap buffers */
 	eorw	#1,_SDL_MintAudio_numbuf
 
-	moveml	d0-d7/a0-a6,sp@-
+	moveml	d0-d1/a0-a1,sp@-
+
+	/* Save FPU if needed */
+	tstw	_SDL_MintAudio_hasfpu
+	beqs	SDL_MintAudio_Dma8_nofpu1
+	.chip	68060
+	fsave	sp@-
+	fmoveml fpcr/fpsr/fpiar,sp@-
+	fmovemx	fp0-fp7,sp@-
+	.chip	68000
+SDL_MintAudio_Dma8_nofpu1:
 
 	/* Callback */
 	jsr	_SDL_MintAudio_Callback
+
+	/* Restore FPU if needed */
+	tstw	_SDL_MintAudio_hasfpu
+	beqs	SDL_MintAudio_Dma8_nofpu2
+	.chip	68060
+	fmovemx	sp@+,fp0-fp7
+	fmoveml	sp@+,fpcr/fpsr/fpiar
+	frestore	sp@+
+	.chip	68000
+SDL_MintAudio_Dma8_nofpu2:
 
 	/* Set new buffer */
 
@@ -169,7 +210,7 @@ _SDL_MintAudio_Dma8Interrupt:
 	rorl	#8,d1
 	moveb	d1,a0@(0x0f)
 
-	moveml	sp@+,d0-d7/a0-a6
+	moveml	sp@+,d0-d1/a0-a1
 
 	clrw	_SDL_MintAudio_mutex
 SDL_MintAudio_Dma8End:
@@ -195,8 +236,28 @@ _SDL_MintAudio_StfaInterrupt:
 
 	moveml	d0-d7/a0-a6,sp@-
 
+	/* Save FPU if needed */
+	tstw	_SDL_MintAudio_hasfpu
+	beqs	SDL_MintAudio_Stfa_nofpu1
+	.chip	68060
+	fsave	sp@-
+	fmoveml fpcr/fpsr/fpiar,sp@-
+	fmovemx	fp0-fp7,sp@-
+	.chip	68000
+SDL_MintAudio_Stfa_nofpu1:
+
 	/* Callback */
 	jsr	_SDL_MintAudio_Callback
+
+	/* Restore FPU if needed */
+	tstw	_SDL_MintAudio_hasfpu
+	beqs	SDL_MintAudio_Stfa_nofpu2
+	.chip	68060
+	fmovemx	sp@+,fp0-fp7
+	fmoveml	sp@+,fpcr/fpsr/fpiar
+	frestore	sp@+
+	.chip	68000
+SDL_MintAudio_Stfa_nofpu2:
 
 	/* Set new buffer */
 
