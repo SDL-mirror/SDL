@@ -32,9 +32,6 @@
 
 #include "../SDL_sysvideo.h"
 
-/* Hidden "this" pointer for the video functions */
-#define _THIS	SDL_VideoDevice *this
-
 #define ATARIBIOS_MAXKEYS 128
 
 /* Special keys state */
@@ -50,10 +47,9 @@ enum {
 };
 #endif
 
-extern void (*Atari_ShutdownEvents) (void);
+extern void (*SDL_Atari_ShutdownEvents) (void);
 
-extern void Atari_InitOSKeymap(_THIS);
-extern void Atari_PumpEvents(_THIS);
+extern void SDL_Atari_PumpEvents(_THIS);
 
 extern void SDL_Atari_InitInternalKeymap(_THIS);
 

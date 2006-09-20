@@ -60,10 +60,10 @@ enum
 static SDLKey keymap[ATARIBIOS_MAXKEYS];
 static unsigned char *keytab_normal;
 
-void (*Atari_ShutdownEvents) (void);
+void (*SDL_Atari_ShutdownEvents) (void);
 
 static void
-Atari_InitializeEvents(_THIS)
+SDL_Atari_InitializeEvents(_THIS)
 {
     const char *envr;
     unsigned long cookie_mch;
@@ -81,14 +81,12 @@ Atari_InitializeEvents(_THIS)
     case MCH_TT:
     case MCH_F30:
     case MCH_ARANYM:
-        this->InitOSKeymap = AtariIkbd_InitOSKeymap;
-        this->PumpEvents = AtariIkbd_PumpEvents;
-        Atari_ShutdownEvents = AtariIkbd_ShutdownEvents;
+        _this->PumpEvents = AtariIkbd_PumpEvents;
+        SDL_Atari_ShutdownEvents = AtariIkbd_ShutdownEvents;
         break;
     default:
-        this->InitOSKeymap = AtariGemdos_InitOSKeymap;
-        this->PumpEvents = AtariGemdos_PumpEvents;
-        Atari_ShutdownEvents = AtariGemdos_ShutdownEvents;
+        _this->PumpEvents = AtariGemdos_PumpEvents;
+        SDL_Atari_ShutdownEvents = AtariGemdos_ShutdownEvents;
         break;
     }
 
@@ -99,42 +97,34 @@ Atari_InitializeEvents(_THIS)
     }
 
     if (SDL_strcmp(envr, "ikbd") == 0) {
-        this->InitOSKeymap = AtariIkbd_InitOSKeymap;
-        this->PumpEvents = AtariIkbd_PumpEvents;
-        Atari_ShutdownEvents = AtariIkbd_ShutdownEvents;
+        _this->PumpEvents = AtariIkbd_PumpEvents;
+        SDL_Atari_ShutdownEvents = AtariIkbd_ShutdownEvents;
     }
 
     if (SDL_strcmp(envr, "gemdos") == 0) {
-        this->InitOSKeymap = AtariGemdos_InitOSKeymap;
-        this->PumpEvents = AtariGemdos_PumpEvents;
-        Atari_ShutdownEvents = AtariGemdos_ShutdownEvents;
+        _this->PumpEvents = AtariGemdos_PumpEvents;
+        SDL_Atari_ShutdownEvents = AtariGemdos_ShutdownEvents;
     }
 
     if (SDL_strcmp(envr, "bios") == 0) {
-        this->InitOSKeymap = AtariBios_InitOSKeymap;
-        this->PumpEvents = AtariBios_PumpEvents;
-        Atari_ShutdownEvents = AtariBios_ShutdownEvents;
+        _this->PumpEvents = AtariBios_PumpEvents;
+        SDL_Atari_ShutdownEvents = AtariBios_ShutdownEvents;
     }
-}
 
-void
-Atari_InitOSKeymap(_THIS)
-{
-    Atari_InitializeEvents(this);
-
-    SDL_Atari_InitInternalKeymap(this);
-
-    /* Call choosen routine */
-    this->InitOSKeymap(this);
+    SDL_Atari_InitInternalKeymap(_this);
 }
 
 void
 Atari_PumpEvents(_THIS)
 {
-    Atari_InitializeEvents(this);
+    static int first_time = 1;
+    if (first_time) {
+        Atari_InitializeEvents(_this);
+        first_time = 0;
+    }
 
     /* Call choosen routine */
-    this->PumpEvents(this);
+    _this->PumpEvents(_this);
 }
 
 void
