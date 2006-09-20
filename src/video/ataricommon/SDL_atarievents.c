@@ -117,11 +117,7 @@ SDL_Atari_InitializeEvents(_THIS)
 void
 Atari_PumpEvents(_THIS)
 {
-    static int first_time = 1;
-    if (first_time) {
-        Atari_InitializeEvents(_this);
-        first_time = 0;
-    }
+    Atari_InitializeEvents(_this);
 
     /* Call choosen routine */
     _this->PumpEvents(_this);
