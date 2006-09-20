@@ -50,8 +50,6 @@
 #include "SDL_xbios_centscreen.h"
 #include "SDL_xbios_sb3.h"
 
-#define XBIOS_VID_DRIVER_NAME "xbios"
-
 /* Debug print info */
 #if 0
 #define DEBUG_PRINT(what) \
@@ -141,7 +139,7 @@ XBIOS_Available(void)
 static void
 XBIOS_DeleteDevice(SDL_VideoDevice * device)
 {
-    SDL_free(device->hidden);
+    SDL_free(device->driverdata);
     SDL_free(device);
 }
 
@@ -149,33 +147,29 @@ static SDL_VideoDevice *
 XBIOS_CreateDevice(int devindex)
 {
     SDL_VideoDevice *device;
+    SDL_VideoData *data;
 
     /* Initialize all variables that we clean on shutdown */
     device = (SDL_VideoDevice *) SDL_malloc(sizeof(SDL_VideoDevice));
     if (device) {
-        SDL_memset(device, 0, (sizeof *device));
-        device->hidden = (struct SDL_PrivateVideoData *)
-            SDL_malloc((sizeof *device->hidden));
-        device->gl_data = (struct SDL_PrivateGLData *)
-            SDL_malloc((sizeof *device->gl_data));
+        data = (struct SDL_VideoData *) SDL_calloc(1, sizeof(SDL_VideoData));
     }
-    if ((device == NULL) || (device->hidden == NULL)) {
+    if (!device || !data) {
         SDL_OutOfMemory();
         if (device) {
             SDL_free(device);
         }
-        return (0);
+        return NULL;
     }
-    SDL_memset(device->hidden, 0, (sizeof *device->hidden));
-    SDL_memset(device->gl_data, 0, sizeof(*device->gl_data));
+    device->driverdata = data;
 
     /* Video functions */
     device->VideoInit = XBIOS_VideoInit;
+    device->VideoQuit = XBIOS_VideoQuit;
     device->ListModes = XBIOS_ListModes;
     device->SetVideoMode = XBIOS_SetVideoMode;
     device->SetColors = XBIOS_SetColors;
     device->UpdateRects = NULL;
-    device->VideoQuit = XBIOS_VideoQuit;
     device->AllocHWSurface = XBIOS_AllocHWSurface;
     device->LockHWSurface = XBIOS_LockHWSurface;
     device->UnlockHWSurface = XBIOS_UnlockHWSurface;
@@ -192,7 +186,6 @@ XBIOS_CreateDevice(int devindex)
 #endif
 
     /* Events */
-    device->InitOSKeymap = Atari_InitOSKeymap;
     device->PumpEvents = Atari_PumpEvents;
 
     device->free = XBIOS_DeleteDevice;
@@ -201,7 +194,7 @@ XBIOS_CreateDevice(int devindex)
 }
 
 VideoBootStrap XBIOS_bootstrap = {
-    XBIOS_VID_DRIVER_NAME, "Atari Xbios driver",
+    "xbios", "Atari Xbios driver",
     XBIOS_Available, XBIOS_CreateDevice
 };
 

@@ -27,9 +27,6 @@
 #include "SDL_stdinc.h"
 #include "../SDL_sysvideo.h"
 
-/* Hidden "this" pointer for the video functions */
-#define _THIS	SDL_VideoDevice *this
-
 /* TT video modes:	2
    Falcon RVB:		16 (could be *2 by adding PAL/NTSC modes)
    Falcon VGA:		6
@@ -49,7 +46,7 @@ typedef struct
 /* Private display data */
 #define NUM_MODELISTS	2       /* 8 and 16 bits-per-pixel */
 
-struct SDL_PrivateVideoData
+struct SDL_VideoData
 {
     long cookie_vdo;
     int old_video_mode;         /* Old video mode before entering SDL */
@@ -71,7 +68,7 @@ struct SDL_PrivateVideoData
 
     SDL_Rect *SDL_modelist[NUM_MODELISTS][SDL_NUMMODES + 1];
     xbiosmode_t *videomodes[NUM_MODELISTS][SDL_NUMMODES + 1];
-};
+} SDL_VideoData;
 
 /* _VDO cookie values */
 enum
@@ -106,25 +103,25 @@ enum
 #define TT_HIGH	0x0600
 
 /* Hidden structure -> variables names */
-#define SDL_modelist		(this->hidden->SDL_modelist)
-#define XBIOS_mutex		    (this->hidden->mutex)
-#define XBIOS_cvdo		    (this->hidden->cookie_vdo)
-#define XBIOS_oldpalette	(this->hidden->old_palette)
-#define XBIOS_oldnumcol		(this->hidden->old_num_colors)
-#define XBIOS_oldvbase		(this->hidden->old_video_base)
-#define XBIOS_oldvmode		(this->hidden->old_video_mode)
-#define XBIOS_nummodes		(this->hidden->num_modes)
-#define XBIOS_modelist		(this->hidden->mode_list)
-#define XBIOS_screens		(this->hidden->screens)
-#define XBIOS_screensmem	(this->hidden->screensmem)
-#define XBIOS_shadowscreen	(this->hidden->shadowscreen)
-#define XBIOS_videomodes	(this->hidden->videomodes)
-#define XBIOS_doubleline	(this->hidden->doubleline)
-#define XBIOS_fbnum			(this->hidden->frame_number)
-#define XBIOS_pitch			(this->hidden->pitch)
-#define XBIOS_width			(this->hidden->width)
-#define XBIOS_height		(this->hidden->height)
-#define XBIOS_centscreen	(this->hidden->centscreen)
+#define SDL_modelist		(_this->driverdata->SDL_modelist)
+#define XBIOS_mutex		    (_this->driverdata->mutex)
+#define XBIOS_cvdo		    (_this->driverdata->cookie_vdo)
+#define XBIOS_oldpalette	(_this->driverdata->old_palette)
+#define XBIOS_oldnumcol		(_this->driverdata->old_num_colors)
+#define XBIOS_oldvbase		(_this->driverdata->old_video_base)
+#define XBIOS_oldvmode		(_this->driverdata->old_video_mode)
+#define XBIOS_nummodes		(_this->driverdata->num_modes)
+#define XBIOS_modelist		(_this->driverdata->mode_list)
+#define XBIOS_screens		(_this->driverdata->screens)
+#define XBIOS_screensmem	(_this->driverdata->screensmem)
+#define XBIOS_shadowscreen	(_this->driverdata->shadowscreen)
+#define XBIOS_videomodes	(_this->driverdata->videomodes)
+#define XBIOS_doubleline	(_this->driverdata->doubleline)
+#define XBIOS_fbnum			(_this->driverdata->frame_number)
+#define XBIOS_pitch			(_this->driverdata->pitch)
+#define XBIOS_width			(_this->driverdata->width)
+#define XBIOS_height		(_this->driverdata->height)
+#define XBIOS_centscreen	(_this->driverdata->centscreen)
 
 /*--- Functions prototypes ---*/
 
