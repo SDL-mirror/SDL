@@ -30,10 +30,13 @@
  */
 
 #include <mint/cookie.h>
+#include <mint/ostruct.h>
+#include <mint/osbind.h>
 
 #include "../../events/SDL_sysevents.h"
 #include "../../events/SDL_events_c.h"
 
+#include "SDL_atarikeys.h"
 #include "SDL_atarievents_c.h"
 #include "SDL_biosevents_c.h"
 #include "SDL_gemdosevents_c.h"
@@ -48,6 +51,14 @@ enum
     MCH_CLONE,
     MCH_ARANYM
 };
+
+#ifndef KT_NOCHANGE
+# define KT_NOCHANGE -1
+#endif
+
+/* The translation tables from a console scancode to a SDL keysym */
+static SDLKey keymap[ATARIBIOS_MAXKEYS];
+static unsigned char *keytab_normal;
 
 void (*Atari_ShutdownEvents) (void);
 
@@ -111,6 +122,8 @@ Atari_InitOSKeymap(_THIS)
 {
     Atari_InitializeEvents(this);
 
+    SDL_Atari_InitInternalKeymap(this);
+
     /* Call choosen routine */
     this->InitOSKeymap(this);
 }
@@ -122,6 +135,47 @@ Atari_PumpEvents(_THIS)
 
     /* Call choosen routine */
     this->PumpEvents(this);
+}
+
+void
+SDL_Atari_InitInternalKeymap(_THIS)
+{
+    int i;
+    _KEYTAB *key_tables;
+
+    /* Read system tables for scancode -> ascii translation */
+    key_tables = (_KEYTAB *) Keytbl(KT_NOCHANGE, KT_NOCHANGE, KT_NOCHANGE);
+    keytab_normal = key_tables->unshift;
+
+    /* Initialize keymap */
+    for ( i=0; i<ATARIBIOS_MAXKEYS; i++ )
+        keymap[i] = SDLK_UNKNOWN;
+
+    /* Functions keys */
+    for ( i = 0; i<10; i++ )
+        keymap[SCANCODE_F1 + i] = SDLK_F1+i;
+
+    /* Cursor keypad */
+    keymap[SCANCODE_HELP] = SDLK_HELP;
+    keymap[SCANCODE_UNDO] = SDLK_UNDO;
+    keymap[SCANCODE_INSERT] = SDLK_INSERT;
+    keymap[SCANCODE_CLRHOME] = SDLK_HOME;
+    keymap[SCANCODE_UP] = SDLK_UP;
+    keymap[SCANCODE_DOWN] = SDLK_DOWN;
+    keymap[SCANCODE_RIGHT] = SDLK_RIGHT;
+    keymap[SCANCODE_LEFT] = SDLK_LEFT;
+
+    /* Special keys */
+    keymap[SCANCODE_ESCAPE] = SDLK_ESCAPE;
+    keymap[SCANCODE_BACKSPACE] = SDLK_BACKSPACE;
+    keymap[SCANCODE_TAB] = SDLK_TAB;
+    keymap[SCANCODE_ENTER] = SDLK_RETURN;
+    keymap[SCANCODE_DELETE] = SDLK_DELETE;
+    keymap[SCANCODE_LEFTCONTROL] = SDLK_LCTRL;
+    keymap[SCANCODE_LEFTSHIFT] = SDLK_LSHIFT;
+    keymap[SCANCODE_RIGHTSHIFT] = SDLK_RSHIFT;
+    keymap[SCANCODE_LEFTALT] = SDLK_LALT;
+    keymap[SCANCODE_CAPSLOCK] = SDLK_CAPSLOCK;
 }
 
 /* Atari to Unicode charset translation table */
@@ -166,5 +220,28 @@ Uint16 SDL_AtariToUnicodeTable[256] = {
     0x2261, 0x00B1, 0x2265, 0x2264, 0x2320, 0x2321, 0x00F7, 0x2248,
     0x00B0, 0x2022, 0x00B7, 0x221A, 0x207F, 0x00B2, 0x00B3, 0x00AF
 };
+
+SDL_keysym *
+SDL_Atari_TranslateKey(int scancode, SDL_keysym *keysym,
+                       SDL_bool pressed)
+{
+    int asciicode = 0;
+
+    /* Set the keysym information */
+    keysym->scancode = scancode;
+    keysym->mod = KMOD_NONE;
+    keysym->sym = keymap[scancode];
+    keysym->unicode = 0;
+
+    if (keysym->sym == SDLK_UNKNOWN) {
+        keysym->sym = asciicode = keytab_normal[scancode];		
+    }
+
+    if (SDL_TranslateUNICODE && pressed) {
+        keysym->unicode = SDL_AtariToUnicodeTable[asciicode];
+    }
+
+    return(keysym);
+}
 
 /* vi: set ts=4 sw=4 expandtab: */
