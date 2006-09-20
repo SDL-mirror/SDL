@@ -32,10 +32,7 @@
 
 #include "../SDL_sysvideo.h"
 
-/* Hidden "this" pointer for the video functions */
-#define _THIS   SDL_VideoDevice *this
-
-struct SDL_PrivateGLData
+struct SDL_GLDriverData
 {
 
     int gl_active;              /* to stop switching drivers while we have a valid context */
@@ -87,20 +84,20 @@ struct SDL_PrivateGLData
 };
 
 /* Variable names */
-#define gl_active		(this->gl_data->gl_active)
-#define gl_ctx			(this->gl_data->ctx)
-#define gl_oldmesa		(this->gl_data->gl_oldmesa)
-#define gl_pixelsize	(this->gl_data->gl_pixelsize)
-#define gl_upsidedown	(this->gl_data->gl_upsidedown)
-#define gl_shadow		(this->gl_data->gl_shadow)
-#define gl_convert		(this->gl_data->ConvertSurface)
-#define gl_copyshadow	(this->gl_data->CopyShadow)
-#define gl_curformat	(this->gl_data->format)
-#define gl_curdepth		(this->gl_data->depth)
-#define gl_curstencil	(this->gl_data->stencil)
-#define gl_curaccum		(this->gl_data->accum)
-#define gl_curwidth		(this->gl_data->width)
-#define gl_curheight	(this->gl_data->height)
+#define gl_active		(_this->gl_data->gl_active)
+#define gl_ctx			(_this->gl_data->ctx)
+#define gl_oldmesa		(_this->gl_data->gl_oldmesa)
+#define gl_pixelsize	(_this->gl_data->gl_pixelsize)
+#define gl_upsidedown	(_this->gl_data->gl_upsidedown)
+#define gl_shadow		(_this->gl_data->gl_shadow)
+#define gl_convert		(_this->gl_data->ConvertSurface)
+#define gl_copyshadow	(_this->gl_data->CopyShadow)
+#define gl_curformat	(_this->gl_data->format)
+#define gl_curdepth		(_this->gl_data->depth)
+#define gl_curstencil	(_this->gl_data->stencil)
+#define gl_curaccum		(_this->gl_data->accum)
+#define gl_curwidth		(_this->gl_data->width)
+#define gl_curheight	(_this->gl_data->height)
 
 /* OpenGL functions */
 extern int SDL_AtariGL_Init(_THIS, SDL_Surface * current);

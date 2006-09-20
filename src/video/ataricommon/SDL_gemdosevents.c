@@ -106,9 +106,9 @@ AtariGemdos_PumpEvents(_THIS)
     }
 
     if (use_dev_mouse) {
-        SDL_AtariDevMouse_PostMouseEvents(this, SDL_TRUE);
+        SDL_AtariDevMouse_PostMouseEvents(_this, SDL_TRUE);
     } else {
-        SDL_AtariXbios_PostMouseEvents(this, SDL_TRUE);
+        SDL_AtariXbios_PostMouseEvents(_this, SDL_TRUE);
     }
 
     /* Will be previous table */
@@ -123,7 +123,6 @@ UpdateSpecialKeys(int special_keys_state)
 	{	\
 		if (special_keys_state & (1<<(numbit))) { \
 			gemdos_currentkeyboard[scancode]=0xFF; \
-			gemdos_currentascii[scancode]=0; \
 		}	\
 	}
 

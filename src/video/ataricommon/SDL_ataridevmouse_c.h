@@ -32,9 +32,6 @@
 
 #include "../SDL_sysvideo.h"
 
-/* Hidden "this" pointer for the video functions */
-#define _THIS	SDL_VideoDevice *this
-
 extern int SDL_AtariDevMouse_Open(void);
 extern void SDL_AtariDevMouse_Close(void);
 extern void SDL_AtariDevMouse_PostMouseEvents(_THIS, SDL_bool buttonEvents);

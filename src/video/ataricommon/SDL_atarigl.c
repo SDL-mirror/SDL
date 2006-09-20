@@ -80,9 +80,9 @@ SDL_AtariGL_Init(_THIS, SDL_Surface * current)
 {
 #if SDL_VIDEO_OPENGL
     if (gl_oldmesa) {
-        gl_active = InitOld(this, current);
+        gl_active = InitOld(_this, current);
     } else {
-        gl_active = InitNew(this, current);
+        gl_active = InitNew(_this, current);
     }
 #endif
 
@@ -95,8 +95,8 @@ SDL_AtariGL_Quit(_THIS, SDL_bool unload)
 #if SDL_VIDEO_OPENGL
     if (gl_oldmesa) {
         /* Old mesa implementations */
-        if (this->gl_data->OSMesaDestroyLDG) {
-            this->gl_data->OSMesaDestroyLDG();
+        if (_this->gl_data->OSMesaDestroyLDG) {
+            _this->gl_data->OSMesaDestroyLDG();
         }
         if (gl_shadow) {
             Mfree(gl_shadow);
@@ -105,15 +105,15 @@ SDL_AtariGL_Quit(_THIS, SDL_bool unload)
     } else {
         /* New mesa implementation */
         if (gl_ctx) {
-            if (this->gl_data->OSMesaDestroyContext) {
-                this->gl_data->OSMesaDestroyContext(gl_ctx);
+            if (_this->gl_data->OSMesaDestroyContext) {
+                _this->gl_data->OSMesaDestroyContext(gl_ctx);
             }
             gl_ctx = NULL;
         }
     }
 
     if (unload) {
-        SDL_AtariGL_UnloadLibrary(this);
+        SDL_AtariGL_UnloadLibrary(_this);
     }
 #endif /* SDL_VIDEO_OPENGL */
     gl_active = 0;
@@ -134,7 +134,7 @@ SDL_AtariGL_LoadLibrary(_THIS, const char *path)
     }
 
     /* Unload previous driver */
-    SDL_AtariGL_UnloadLibrary(this);
+    SDL_AtariGL_UnloadLibrary(_this);
 
     /* Load library given by path */
     handle = SDL_LoadObject(path);
@@ -167,17 +167,17 @@ SDL_AtariGL_LoadLibrary(_THIS, const char *path)
         return -1;
     }
 
-    this->gl_data->glGetIntegerv = SDL_LoadFunction(handle, "glGetIntegerv");
-    this->gl_data->glFinish = SDL_LoadFunction(handle, "glFinish");
-    this->gl_data->glFlush = SDL_LoadFunction(handle, "glFlush");
+    _this->gl_data->glGetIntegerv = SDL_LoadFunction(handle, "glGetIntegerv");
+    _this->gl_data->glFinish = SDL_LoadFunction(handle, "glFinish");
+    _this->gl_data->glFlush = SDL_LoadFunction(handle, "glFlush");
 
     cancel_load = SDL_FALSE;
-    if (this->gl_data->glGetIntegerv == NULL) {
+    if (_this->gl_data->glGetIntegerv == NULL) {
         cancel_load = SDL_TRUE;
     } else {
         /* We need either glFinish (OSMesa) or glFlush (TinyGL) */
-        if ((this->gl_data->glFinish == NULL) &&
-            (this->gl_data->glFlush == NULL)) {
+        if ((_this->gl_data->glFinish == NULL) &&
+            (_this->gl_data->glFlush == NULL)) {
             cancel_load = SDL_TRUE;
         }
     }
@@ -190,53 +190,53 @@ SDL_AtariGL_LoadLibrary(_THIS, const char *path)
     }
 
     /* Load functions pointers (osmesa.ldg) */
-    this->gl_data->OSMesaCreateContextExt =
+    _this->gl_data->OSMesaCreateContextExt =
         SDL_LoadFunction(handle, "OSMesaCreateContextExt");
-    this->gl_data->OSMesaDestroyContext =
+    _this->gl_data->OSMesaDestroyContext =
         SDL_LoadFunction(handle, "OSMesaDestroyContext");
-    this->gl_data->OSMesaMakeCurrent =
+    _this->gl_data->OSMesaMakeCurrent =
         SDL_LoadFunction(handle, "OSMesaMakeCurrent");
-    this->gl_data->OSMesaPixelStore =
+    _this->gl_data->OSMesaPixelStore =
         SDL_LoadFunction(handle, "OSMesaPixelStore");
-    this->gl_data->OSMesaGetProcAddress =
+    _this->gl_data->OSMesaGetProcAddress =
         SDL_LoadFunction(handle, "OSMesaGetProcAddress");
 
     /* Load old functions pointers (mesa_gl.ldg, tiny_gl.ldg) */
-    this->gl_data->OSMesaCreateLDG =
+    _this->gl_data->OSMesaCreateLDG =
         SDL_LoadFunction(handle, "OSMesaCreateLDG");
-    this->gl_data->OSMesaDestroyLDG =
+    _this->gl_data->OSMesaDestroyLDG =
         SDL_LoadFunction(handle, "OSMesaDestroyLDG");
 
     gl_oldmesa = 0;
 
-    if ((this->gl_data->OSMesaCreateContextExt == NULL) ||
-        (this->gl_data->OSMesaDestroyContext == NULL) ||
-        (this->gl_data->OSMesaMakeCurrent == NULL) ||
-        (this->gl_data->OSMesaPixelStore == NULL) ||
-        (this->gl_data->OSMesaGetProcAddress == NULL)) {
+    if ((_this->gl_data->OSMesaCreateContextExt == NULL) ||
+        (_this->gl_data->OSMesaDestroyContext == NULL) ||
+        (_this->gl_data->OSMesaMakeCurrent == NULL) ||
+        (_this->gl_data->OSMesaPixelStore == NULL) ||
+        (_this->gl_data->OSMesaGetProcAddress == NULL)) {
         /* Hum, maybe old library ? */
-        if ((this->gl_data->OSMesaCreateLDG == NULL) ||
-            (this->gl_data->OSMesaDestroyLDG == NULL)) {
+        if ((_this->gl_data->OSMesaCreateLDG == NULL) ||
+            (_this->gl_data->OSMesaDestroyLDG == NULL)) {
             SDL_SetError("Could not retrieve OSMesa functions");
             SDL_UnloadObject(handle);
             /* Restore pointers to static library */
-            SDL_AtariGL_InitPointers(this);
+            SDL_AtariGL_InitPointers(_this);
             return -1;
         } else {
             gl_oldmesa = 1;
         }
     }
 
-    this->gl_config.dll_handle = handle;
+    _this->gl_config.dll_handle = handle;
     if (path) {
-        SDL_strlcpy(this->gl_config.driver_path, path,
-                    SDL_arraysize(this->gl_config.driver_path));
+        SDL_strlcpy(_this->gl_config.driver_path, path,
+                    SDL_arraysize(_this->gl_config.driver_path));
     } else {
         *this->gl_config.driver_path = '\0';
     }
 
 #endif
-    this->gl_config.driver_loaded = 1;
+    _this->gl_config.driver_loaded = 1;
 
     return 0;
 #else
@@ -250,10 +250,10 @@ SDL_AtariGL_GetProcAddress(_THIS, const char *proc)
     void *func = NULL;
 #if SDL_VIDEO_OPENGL
 
-    if (this->gl_config.dll_handle) {
+    if (_this->gl_config.dll_handle) {
         func = SDL_LoadFunction(this->gl_config.dll_handle, (void *) proc);
-    } else if (this->gl_data->OSMesaGetProcAddress) {
-        func = this->gl_data->OSMesaGetProcAddress(proc);
+    } else if (_this->gl_data->OSMesaGetProcAddress) {
+        func = _this->gl_data->OSMesaGetProcAddress(proc);
     }
 #endif
     return func;
@@ -284,7 +284,7 @@ SDL_AtariGL_GetAttribute(_THIS, SDL_GLattr attrib, int *value)
         mesa_attrib = GL_ALPHA_BITS;
         break;
     case SDL_GL_DOUBLEBUFFER:
-        surface = this->screen;
+        surface = _this->screen;
         *value = ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF);
         return 0;
     case SDL_GL_DEPTH_SIZE:
@@ -309,7 +309,7 @@ SDL_AtariGL_GetAttribute(_THIS, SDL_GLattr attrib, int *value)
         return -1;
     }
 
-    this->gl_data->glGetIntegerv(mesa_attrib, value);
+    _this->gl_data->glGetIntegerv(mesa_attrib, value);
     return 0;
 #else
     return -1;
@@ -327,9 +327,9 @@ SDL_AtariGL_MakeCurrent(_THIS)
         return 0;
     }
 
-    if (this->gl_config.dll_handle) {
-        if ((this->gl_data->OSMesaMakeCurrent == NULL) ||
-            (this->gl_data->OSMesaPixelStore == NULL)) {
+    if (_this->gl_config.dll_handle) {
+        if ((_this->gl_data->OSMesaMakeCurrent == NULL) ||
+            (_this->gl_data->OSMesaPixelStore == NULL)) {
             return -1;
         }
     }
@@ -339,7 +339,7 @@ SDL_AtariGL_MakeCurrent(_THIS)
         return -1;
     }
 
-    surface = this->screen;
+    surface = _this->screen;
 
     if ((surface->format->BitsPerPixel == 15)
         || (surface->format->BitsPerPixel == 16)) {
@@ -349,7 +349,7 @@ SDL_AtariGL_MakeCurrent(_THIS)
     }
 
     if (!
-        (this->gl_data->
+        (_this->gl_data->
          OSMesaMakeCurrent(gl_ctx, surface->pixels, type, surface->w,
                            surface->h))) {
         SDL_SetError("Can not make OpenGL context current");
@@ -357,7 +357,7 @@ SDL_AtariGL_MakeCurrent(_THIS)
     }
 
     /* OSMesa draws upside down */
-    this->gl_data->OSMesaPixelStore(OSMESA_Y_UP, 0);
+    _this->gl_data->OSMesaPixelStore(OSMESA_Y_UP, 0);
 
     return 0;
 #else
@@ -370,17 +370,17 @@ SDL_AtariGL_SwapBuffers(_THIS)
 {
 #if SDL_VIDEO_OPENGL
     if (gl_active) {
-        if (this->gl_config.dll_handle) {
-            if (this->gl_data->glFinish) {
-                this->gl_data->glFinish();
-            } else if (this->gl_data->glFlush) {
-                this->gl_data->glFlush();
+        if (_this->gl_config.dll_handle) {
+            if (_this->gl_data->glFinish) {
+                _this->gl_data->glFinish();
+            } else if (_this->gl_data->glFlush) {
+                _this->gl_data->glFlush();
             }
         } else {
-            this->gl_data->glFinish();
+            _this->gl_data->glFinish();
         }
-        gl_copyshadow(this, this->screen);
-        gl_convert(this, this->screen);
+        gl_copyshadow(_this, _this->screen);
+        gl_convert(_this, _this->screen);
     }
 #endif
 }
@@ -389,18 +389,18 @@ void
 SDL_AtariGL_InitPointers(_THIS)
 {
 #if SDL_VIDEO_OPENGL
-    this->gl_data->OSMesaCreateContextExt = OSMesaCreateContextExt;
-    this->gl_data->OSMesaDestroyContext = OSMesaDestroyContext;
-    this->gl_data->OSMesaMakeCurrent = OSMesaMakeCurrent;
-    this->gl_data->OSMesaPixelStore = OSMesaPixelStore;
-    this->gl_data->OSMesaGetProcAddress = OSMesaGetProcAddress;
+    _this->gl_data->OSMesaCreateContextExt = OSMesaCreateContextExt;
+    _this->gl_data->OSMesaDestroyContext = OSMesaDestroyContext;
+    _this->gl_data->OSMesaMakeCurrent = OSMesaMakeCurrent;
+    _this->gl_data->OSMesaPixelStore = OSMesaPixelStore;
+    _this->gl_data->OSMesaGetProcAddress = OSMesaGetProcAddress;
 
-    this->gl_data->glGetIntegerv = glGetIntegerv;
-    this->gl_data->glFinish = glFinish;
-    this->gl_data->glFlush = glFlush;
+    _this->gl_data->glGetIntegerv = glGetIntegerv;
+    _this->gl_data->glFinish = glFinish;
+    _this->gl_data->glFlush = glFlush;
 
-    this->gl_data->OSMesaCreateLDG = NULL;
-    this->gl_data->OSMesaDestroyLDG = NULL;
+    _this->gl_data->OSMesaCreateLDG = NULL;
+    _this->gl_data->OSMesaDestroyLDG = NULL;
 #endif
 }
 
@@ -410,12 +410,12 @@ static void
 SDL_AtariGL_UnloadLibrary(_THIS)
 {
 #if SDL_VIDEO_OPENGL
-    if (this->gl_config.dll_handle) {
-        SDL_UnloadObject(this->gl_config.dll_handle);
-        this->gl_config.dll_handle = NULL;
+    if (_this->gl_config.dll_handle) {
+        SDL_UnloadObject(_this->gl_config.dll_handle);
+        _this->gl_config.dll_handle = NULL;
 
         /* Restore pointers to static library */
-        SDL_AtariGL_InitPointers(this);
+        SDL_AtariGL_InitPointers(_this);
     }
 #endif
 }
@@ -432,8 +432,8 @@ InitNew(_THIS, SDL_Surface * current)
     int recreatecontext;
     GLint newaccumsize;
 
-    if (this->gl_config.dll_handle) {
-        if (this->gl_data->OSMesaCreateContextExt == NULL) {
+    if (_this->gl_config.dll_handle) {
+        if (_this->gl_data->OSMesaCreateContextExt == NULL) {
             return 0;
         }
     }
@@ -496,14 +496,14 @@ InitNew(_THIS, SDL_Surface * current)
 
     /* Try to keep current context if possible */
     newaccumsize =
-        this->gl_config.accum_red_size +
-        this->gl_config.accum_green_size +
-        this->gl_config.accum_blue_size + this->gl_config.accum_alpha_size;
+        _this->gl_config.accum_red_size +
+        _this->gl_config.accum_green_size +
+        _this->gl_config.accum_blue_size + _this->gl_config.accum_alpha_size;
     recreatecontext = 1;
     if (gl_ctx &&
         (gl_curformat == osmesa_format) &&
-        (gl_curdepth == this->gl_config.depth_size) &&
-        (gl_curstencil == this->gl_config.stencil_size) &&
+        (gl_curdepth == _this->gl_config.depth_size) &&
+        (gl_curstencil == _this->gl_config.stencil_size) &&
         (gl_curaccum == newaccumsize)) {
         recreatecontext = 0;
     }
@@ -511,17 +511,17 @@ InitNew(_THIS, SDL_Surface * current)
         SDL_AtariGL_Quit(this, SDL_FALSE);
 
         gl_ctx =
-            this->gl_data->OSMesaCreateContextExt(osmesa_format,
-                                                  this->gl_config.
+            _this->gl_data->OSMesaCreateContextExt(osmesa_format,
+                                                  _this->gl_config.
                                                   depth_size,
-                                                  this->gl_config.
+                                                  _this->gl_config.
                                                   stencil_size,
                                                   newaccumsize, NULL);
 
         if (gl_ctx) {
             gl_curformat = osmesa_format;
-            gl_curdepth = this->gl_config.depth_size;
-            gl_curstencil = this->gl_config.stencil_size;
+            gl_curdepth = _this->gl_config.depth_size;
+            gl_curstencil = _this->gl_config.stencil_size;
             gl_curaccum = newaccumsize;
         } else {
             gl_curformat = 0;
@@ -543,16 +543,16 @@ InitOld(_THIS, SDL_Surface * current)
     Uint32 redmask;
     int recreatecontext, tinygl_present;
 
-    if (this->gl_config.dll_handle) {
-        if (this->gl_data->OSMesaCreateLDG == NULL) {
+    if (_this->gl_config.dll_handle) {
+        if (_this->gl_data->OSMesaCreateLDG == NULL) {
             return 0;
         }
     }
 
     /* TinyGL only supports VDI_RGB (OSMESA_RGB) */
     tinygl_present = 0;
-    if (this->gl_config.dll_handle) {
-        if (this->gl_data->glFinish == NULL) {
+    if (_this->gl_config.dll_handle) {
+        if (_this->gl_data->glFinish == NULL) {
             tinygl_present = 1;
         }
     }
@@ -658,7 +658,7 @@ InitOld(_THIS, SDL_Surface * current)
         break;
     default:
         if (tinygl_present) {
-            SDL_AtariGL_Quit(this, SDL_FALSE);
+            SDL_AtariGL_Quit(_this, SDL_FALSE);
             return 0;
         }
         gl_pixelsize = 1;
@@ -675,10 +675,10 @@ InitOld(_THIS, SDL_Surface * current)
         recreatecontext = 0;
     }
     if (recreatecontext) {
-        SDL_AtariGL_Quit(this, SDL_FALSE);
+        SDL_AtariGL_Quit(_this, SDL_FALSE);
 
         gl_shadow =
-            this->gl_data->OSMesaCreateLDG(osmesa_format, GL_UNSIGNED_BYTE,
+            _this->gl_data->OSMesaCreateLDG(osmesa_format, GL_UNSIGNED_BYTE,
                                            current->w, current->h);
 
         if (gl_shadow) {

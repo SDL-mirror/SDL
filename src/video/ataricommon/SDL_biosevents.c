@@ -99,9 +99,9 @@ AtariBios_PumpEvents(_THIS)
     }
 
     if (use_dev_mouse) {
-        SDL_AtariDevMouse_PostMouseEvents(this, SDL_TRUE);
+        SDL_AtariDevMouse_PostMouseEvents(_this, SDL_TRUE);
     } else {
-        SDL_AtariXbios_PostMouseEvents(this, SDL_TRUE);
+        SDL_AtariXbios_PostMouseEvents(_this, SDL_TRUE);
     }
 
     /* Will be previous table */
@@ -116,7 +116,6 @@ UpdateSpecialKeys(int special_keys_state)
 	{	\
 		if (special_keys_state & (1<<(numbit))) { \
 			bios_currentkeyboard[scancode]=0xFF; \
-			bios_currentascii[scancode]=0; \
 		}	\
 	}
 
