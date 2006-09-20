@@ -67,9 +67,10 @@ AtariGemdos_InitOSKeymap(_THIS)
     if (!use_dev_mouse) {
         vectors_mask |= ATARI_XBIOS_MOUSEEVENTS;        /* XBIOS mouse events */
     }
-    if (Getcookie(C_MiNT, &dummy) == C_FOUND) {
+    /*if (Getcookie(C_MiNT, &dummy) == C_FOUND) {
         vectors_mask = 0;
-    }
+    }*/
+
     SDL_AtariXbios_InstallVectors(vectors_mask);
 }
 
