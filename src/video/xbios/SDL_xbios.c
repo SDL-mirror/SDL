@@ -63,7 +63,10 @@
 #endif
 
 /* Initialization/Query functions */
-static int XBIOS_VideoInit(_THIS, SDL_PixelFormat * vformat);
+static int XBIOS_VideoInit(_THIS);
+static void XBIOS_VideoQuit(_THIS);
+
+#if 0
 static SDL_Rect **XBIOS_ListModes(_THIS, SDL_PixelFormat * format,
                                   Uint32 flags);
 static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface * current,
@@ -71,7 +74,6 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface * current,
                                        Uint32 flags);
 static int XBIOS_SetColors(_THIS, int firstcolor, int ncolors,
                            SDL_Color * colors);
-static void XBIOS_VideoQuit(_THIS);
 
 /* Hardware surface functions */
 static int XBIOS_AllocHWSurface(_THIS, SDL_Surface * surface);
@@ -90,6 +92,7 @@ static void XBIOS_GL_SwapBuffers(_THIS);
 
 static unsigned short TT_palette[256];
 static unsigned long F30_palette[256];
+#endif
 
 /* Xbios driver bootstrap functions */
 
@@ -150,7 +153,7 @@ XBIOS_CreateDevice(int devindex)
     SDL_VideoData *data;
 
     /* Initialize all variables that we clean on shutdown */
-    device = (SDL_VideoDevice *) SDL_malloc(sizeof(SDL_VideoDevice));
+    device = (SDL_VideoDevice *) SDL_calloc(1, sizeof(SDL_VideoDevice));
     if (device) {
         data = (struct SDL_VideoData *) SDL_calloc(1, sizeof(SDL_VideoData));
     }
@@ -166,27 +169,25 @@ XBIOS_CreateDevice(int devindex)
     /* Video functions */
     device->VideoInit = XBIOS_VideoInit;
     device->VideoQuit = XBIOS_VideoQuit;
-    device->ListModes = XBIOS_ListModes;
-    device->SetVideoMode = XBIOS_SetVideoMode;
-    device->SetColors = XBIOS_SetColors;
-    device->UpdateRects = NULL;
-    device->AllocHWSurface = XBIOS_AllocHWSurface;
-    device->LockHWSurface = XBIOS_LockHWSurface;
-    device->UnlockHWSurface = XBIOS_UnlockHWSurface;
-    device->FlipHWSurface = XBIOS_FlipHWSurface;
-    device->FreeHWSurface = XBIOS_FreeHWSurface;
+
+    /* Modes */
+    device->GetDisplayModes = NULL /*XBIOS_GetDisplayModes*/;
+    device->SetDisplayMode = NULL /*XBIOS_SetDisplayMode*/;
+
+    /* Events */
+    device->PumpEvents = SDL_Atari_PumpEvents;
 
 #if SDL_VIDEO_OPENGL
     /* OpenGL functions */
     device->GL_LoadLibrary = SDL_AtariGL_LoadLibrary;
     device->GL_GetProcAddress = SDL_AtariGL_GetProcAddress;
-    device->GL_GetAttribute = SDL_AtariGL_GetAttribute;
+    device->GL_CreateContext = NULL;
     device->GL_MakeCurrent = SDL_AtariGL_MakeCurrent;
-    device->GL_SwapBuffers = XBIOS_GL_SwapBuffers;
+    device->GL_SetSwapInterval = NULL;
+    device->GL_GetSwapInterval = NULL;
+    device->GL_SwapWindow = XBIOS_GL_SwapBuffers;
+    device->GL_DeleteContext = NULL;
 #endif
-
-    /* Events */
-    device->PumpEvents = Atari_PumpEvents;
 
     device->free = XBIOS_DeleteDevice;
 
@@ -198,6 +199,7 @@ VideoBootStrap XBIOS_bootstrap = {
     XBIOS_Available, XBIOS_CreateDevice
 };
 
+#if 0
 void
 SDL_XBIOS_AddMode(_THIS, Uint16 modecode, Uint16 width, Uint16 height,
                   Uint16 depth, SDL_bool flags)
@@ -252,10 +254,14 @@ SDL_XBIOS_AddMode(_THIS, Uint16 modecode, Uint16 width, Uint16 height,
     XBIOS_modelist[curpos].depth = depth;
     XBIOS_modelist[curpos].doubleline = flags;
 }
+#endif
 
 static int
-XBIOS_VideoInit(_THIS, SDL_PixelFormat * vformat)
+XBIOS_VideoInit(_THIS)
 {
+    XBIOS_InitModes(_this);
+
+#if 0
     int i, j8, j16;
     xbiosmode_t *current_mode;
     unsigned long cookie_blow, cookie_scpn, cookie_cnts;
@@ -480,10 +486,86 @@ XBIOS_VideoInit(_THIS, SDL_PixelFormat * vformat)
     SDL_AtariGL_InitPointers(this);
 #endif
 
-    /* We're done! */
+#endif
+
     return (0);
 }
 
+static void
+XBIOS_VideoQuit(_THIS)
+{
+/*    int i, j;*/
+
+    XBIOS_QuitModes(_this);
+    Atari_ShutdownEvents();
+
+#if 0
+    /* Restore video mode and palette */
+#ifndef DEBUG_VIDEO_XBIOS
+    switch (XBIOS_cvdo >> 16) {
+    case VDO_ST:
+    case VDO_STE:
+        Setscreen(-1, XBIOS_oldvbase, XBIOS_oldvmode);
+        if (XBIOS_oldnumcol) {
+            Setpalette(XBIOS_oldpalette);
+        }
+        break;
+    case VDO_TT:
+        Setscreen(-1, XBIOS_oldvbase, -1);
+        EsetShift(XBIOS_oldvmode);
+        if (XBIOS_oldnumcol) {
+            EsetPalette(0, XBIOS_oldnumcol, XBIOS_oldpalette);
+        }
+        break;
+    case VDO_F30:
+        Setscreen(-1, XBIOS_oldvbase, -1);
+        if (XBIOS_centscreen) {
+            SDL_XBIOS_CentscreenRestore(this, XBIOS_oldvmode);
+        } else {
+            VsetMode(XBIOS_oldvmode);
+        }
+        if (XBIOS_oldnumcol) {
+            VsetRGB(0, XBIOS_oldnumcol, XBIOS_oldpalette);
+        }
+        break;
+    }
+    Vsync();
+#endif
+
+
+#if SDL_VIDEO_OPENGL
+    if (gl_active) {
+        SDL_AtariGL_Quit(this, SDL_TRUE);
+    }
+#endif
+
+    if (XBIOS_oldpalette) {
+        SDL_free(XBIOS_oldpalette);
+        XBIOS_oldpalette = NULL;
+    }
+    XBIOS_FreeBuffers(this);
+
+    /* Free mode list */
+    for (j = 0; j < NUM_MODELISTS; j++) {
+        for (i = 0; i < SDL_NUMMODES; i++) {
+            if (SDL_modelist[j][i] != NULL) {
+                SDL_free(SDL_modelist[j][i]);
+                SDL_modelist[j][i] = NULL;
+            }
+        }
+    }
+
+    if (XBIOS_modelist) {
+        SDL_free(XBIOS_modelist);
+        XBIOS_nummodes = 0;
+        XBIOS_modelist = NULL;
+    }
+
+    this->screen->pixels = NULL;
+#endif
+}
+
+#if 0
 static SDL_Rect **
 XBIOS_ListModes(_THIS, SDL_PixelFormat * format, Uint32 flags)
 {
@@ -876,81 +958,13 @@ XBIOS_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color * colors)
 
     return (1);
 }
+#endif
 
 /* Note:  If we are terminated, this could be called in the middle of
    another SDL video routine -- notably UpdateRects.
 */
-static void
-XBIOS_VideoQuit(_THIS)
-{
-    int i, j;
 
-    Atari_ShutdownEvents();
-
-    /* Restore video mode and palette */
-#ifndef DEBUG_VIDEO_XBIOS
-    switch (XBIOS_cvdo >> 16) {
-    case VDO_ST:
-    case VDO_STE:
-        Setscreen(-1, XBIOS_oldvbase, XBIOS_oldvmode);
-        if (XBIOS_oldnumcol) {
-            Setpalette(XBIOS_oldpalette);
-        }
-        break;
-    case VDO_TT:
-        Setscreen(-1, XBIOS_oldvbase, -1);
-        EsetShift(XBIOS_oldvmode);
-        if (XBIOS_oldnumcol) {
-            EsetPalette(0, XBIOS_oldnumcol, XBIOS_oldpalette);
-        }
-        break;
-    case VDO_F30:
-        Setscreen(-1, XBIOS_oldvbase, -1);
-        if (XBIOS_centscreen) {
-            SDL_XBIOS_CentscreenRestore(this, XBIOS_oldvmode);
-        } else {
-            VsetMode(XBIOS_oldvmode);
-        }
-        if (XBIOS_oldnumcol) {
-            VsetRGB(0, XBIOS_oldnumcol, XBIOS_oldpalette);
-        }
-        break;
-    }
-    Vsync();
-#endif
-
-
-#if SDL_VIDEO_OPENGL
-    if (gl_active) {
-        SDL_AtariGL_Quit(this, SDL_TRUE);
-    }
-#endif
-
-    if (XBIOS_oldpalette) {
-        SDL_free(XBIOS_oldpalette);
-        XBIOS_oldpalette = NULL;
-    }
-    XBIOS_FreeBuffers(this);
-
-    /* Free mode list */
-    for (j = 0; j < NUM_MODELISTS; j++) {
-        for (i = 0; i < SDL_NUMMODES; i++) {
-            if (SDL_modelist[j][i] != NULL) {
-                SDL_free(SDL_modelist[j][i]);
-                SDL_modelist[j][i] = NULL;
-            }
-        }
-    }
-
-    if (XBIOS_modelist) {
-        SDL_free(XBIOS_modelist);
-        XBIOS_nummodes = 0;
-        XBIOS_modelist = NULL;
-    }
-
-    this->screen->pixels = NULL;
-}
-
+#if 0
 #if SDL_VIDEO_OPENGL
 
 static void
@@ -961,5 +975,6 @@ XBIOS_GL_SwapBuffers(_THIS)
     SDL_AtariGL_MakeCurrent(this);
 }
 
+#endif
 #endif
 /* vi: set ts=4 sw=4 expandtab: */

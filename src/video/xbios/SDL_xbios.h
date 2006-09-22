@@ -46,7 +46,7 @@ typedef struct
 /* Private display data */
 #define NUM_MODELISTS	2       /* 8 and 16 bits-per-pixel */
 
-struct SDL_VideoData
+typedef struct SDL_VideoData
 {
     long cookie_vdo;
     int old_video_mode;         /* Old video mode before entering SDL */

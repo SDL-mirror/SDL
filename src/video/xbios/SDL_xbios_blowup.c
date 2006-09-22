@@ -57,7 +57,7 @@ SDL_XBIOS_BlowupInit(_THIS, blow_cookie_t * cookie_blow)
                 || ((blow_mode->monitor == MONITOR_RGB)
                     && (cookie_blow->montype == MONITOR_TV))) {
                 /* we can use this extended mode */
-                SDL_XBIOS_AddMode(this,
+                SDL_XBIOS_AddMode(_this,
                                   num_mode == 3 ? BPS8 : BPS16,
                                   blow_mode->width + 1,
                                   blow_mode->height + 1,
