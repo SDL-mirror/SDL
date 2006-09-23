@@ -785,7 +785,12 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		bounds.top = SDL_windowY;
 		bounds.right = SDL_windowX+video->w;
 		bounds.bottom = SDL_windowY+video->h;
+#ifndef _WIN32_WCE
 		AdjustWindowRectEx(&bounds, GetWindowLong(SDL_Window, GWL_STYLE), (GetMenu(SDL_Window) != NULL), 0);
+#else
+		// The bMenu parameter must be FALSE; menu bars are not supported
+		AdjustWindowRectEx(&bounds, GetWindowLong(SDL_Window, GWL_STYLE), 0, 0);
+#endif
 		width = bounds.right-bounds.left;
 		height = bounds.bottom-bounds.top;
 		if ( (flags & SDL_FULLSCREEN) ) {

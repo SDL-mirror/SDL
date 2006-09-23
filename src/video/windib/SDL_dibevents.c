@@ -273,18 +273,35 @@ static HKL hLayoutUS = NULL;
 void DIB_InitOSKeymap(_THIS)
 {
 	int	i;
-	char	current_layout[256];
+#ifndef _WIN32_WCE
+	char	current_layout[KL_NAMELENGTH];
 
 	GetKeyboardLayoutName(current_layout);
 	//printf("Initial Keyboard Layout Name: '%s'\n", current_layout);
 
 	hLayoutUS = LoadKeyboardLayout("00000409", KLF_NOTELLSHELL);
+
 	if (!hLayoutUS) {
 		//printf("Failed to load US keyboard layout. Using current.\n");
 		hLayoutUS = GetKeyboardLayout(0);
 	}
 	LoadKeyboardLayout(current_layout, KLF_ACTIVATE);
+#else
+#if _WIN32_WCE >=420
+	TCHAR	current_layout[KL_NAMELENGTH];
 
+	GetKeyboardLayoutName(current_layout);
+	//printf("Initial Keyboard Layout Name: '%s'\n", current_layout);
+
+	hLayoutUS = LoadKeyboardLayout(L"00000409", 0);
+
+	if (!hLayoutUS) {
+		//printf("Failed to load US keyboard layout. Using current.\n");
+		hLayoutUS = GetKeyboardLayout(0);
+	}
+	LoadKeyboardLayout(current_layout, 0);
+#endif // _WIN32_WCE >=420
+#endif
 	/* Map the VK keysyms */
 	for ( i=0; i<SDL_arraysize(VK_keymap); ++i )
 		VK_keymap[i] = SDLK_UNKNOWN;
@@ -414,7 +431,11 @@ void DIB_InitOSKeymap(_THIS)
 
 static int SDL_MapVirtualKey(int scancode, int vkey)
 {
+#ifndef _WIN32_WCE
 	int	mvke  = MapVirtualKeyEx(scancode & 0xFF, 1, hLayoutUS);
+#else
+	int	mvke  = MapVirtualKey(scancode & 0xFF, 1);
+#endif
 
 	switch(vkey) {
 		/* These are always correct */

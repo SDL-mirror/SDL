@@ -505,9 +505,14 @@ fprintf(stderr, "Slept %d ticks\n", (SDL_GetTicks()-ticks));
 					}
 					break;
 				case SDL_KEYDOWN:
+#ifndef _WIN32_WCE
 					if ( event.key.keysym.sym == SDLK_ESCAPE ) {
 						done = 1;
 					}
+#else
+					// there is no ESC key at all
+					done = 1;
+#endif
 					break;
 				case SDL_QUIT:
 					done = 1;
