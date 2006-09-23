@@ -692,14 +692,17 @@ SDL_WM_SetCaption(const char *title, const char *icon)
 {
     if (wm_title) {
         SDL_free(wm_title);
-    } else {
+    }
+    if (title) {
         wm_title = SDL_strdup(title);
+    } else {
+        wm_title = NULL;
     }
     SDL_SetWindowTitle(SDL_VideoWindow, wm_title);
 }
 
 void
-SDL_WM_GetCaption(char **title, char **icon)
+SDL_WM_GetCaption(const char **title, const char **icon)
 {
     if (title) {
         *title = wm_title;

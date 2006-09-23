@@ -147,7 +147,7 @@ extern DECLSPEC SDL_Surface *SDLCALL SDL_DisplayFormatAlpha(SDL_Surface *
                                                             surface);
 extern DECLSPEC void SDLCALL SDL_WM_SetCaption(const char *title,
                                                const char *icon);
-extern DECLSPEC void SDLCALL SDL_WM_GetCaption(char **title, char **icon);
+extern DECLSPEC void SDLCALL SDL_WM_GetCaption(const char **title, const char **icon);
 extern DECLSPEC void SDLCALL SDL_WM_SetIcon(SDL_Surface * icon, Uint8 * mask);
 extern DECLSPEC int SDLCALL SDL_WM_IconifyWindow(void);
 extern DECLSPEC int SDLCALL SDL_WM_ToggleFullScreen(SDL_Surface * surface);
