@@ -1556,7 +1556,7 @@ static void BlitRGBtoRGBPixelAlpha(SDL_BlitInfo *info)
 
 #if GCC_ASMBLIT
 /* fast (as in MMX with prefetch) ARGB888->(A)RGB888 blending with pixel alpha */
-inline static void BlitRGBtoRGBPixelAlphaMMX3DNOW(SDL_BlitInfo *info)
+static void BlitRGBtoRGBPixelAlphaMMX3DNOW(SDL_BlitInfo *info)
 {
 	int width = info->d_width;
 	int height = info->d_height;
