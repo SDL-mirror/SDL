@@ -41,25 +41,6 @@
 /* The screen icon -- needs to be freed on SDL_VideoQuit() */
 HICON   screen_icn = NULL;
 
-#ifdef _WIN32_WCE
-
-BOOL (WINAPI *CoreCatchInput)(int flag) = NULL;
-int input_catched = 0;
-HINSTANCE coredll = NULL;
-
-// the same API call that gx.dll does to catch the input
-void LoadInputCatchFunc()
-{
-	coredll = SDL_LoadObject("coredll.dll");
-	if( coredll )
-	{
-		CoreCatchInput = (int (WINAPI *)(int)) GetProcAddress(coredll, (const unsigned short *) 1453);
-	}
-}
-
-#endif
-
-
 /* Win32 icon mask semantics are different from those of SDL:
      SDL applies the mask to the icon and copies result to desktop.
      Win32 applies the mask to the desktop and XORs the icon on.
@@ -263,13 +244,7 @@ SDL_GrabMode WIN_GrabInput(_THIS, SDL_GrabMode mode)
 			SetCursorPos(pt.x,pt.y);
 		}
 #ifdef _WIN32_WCE
-		if( input_catched )
-		{
-			if( !CoreCatchInput ) LoadInputCatchFunc();
-
-			if( CoreCatchInput )
-				CoreCatchInput(0);
-		}
+		AllKeys(0);
 #endif
 	} else {
 		ClipCursor(&SDL_bounds);
@@ -284,13 +259,7 @@ SDL_GrabMode WIN_GrabInput(_THIS, SDL_GrabMode mode)
 			SetCursorPos(pt.x, pt.y);
 		}
 #ifdef _WIN32_WCE
-		if( !input_catched )
-		{
-			if( !CoreCatchInput ) LoadInputCatchFunc();
-
-			if( CoreCatchInput )
-				CoreCatchInput(1);
-		}
+		AllKeys(1);
 #endif
 	}
 	return(mode);
