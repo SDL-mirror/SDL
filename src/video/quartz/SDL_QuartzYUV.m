@@ -274,6 +274,8 @@ SDL_Overlay* QZ_CreateYUVOverlay (_THIS, int width, int height,
             return NULL;
         }
 
+        /* Fix: jc.bertin@free.fr
+           PlanarPixmapInfoYUV420 is a big-endian struct */
         yuv_pixmap = (PlanarPixmapInfoYUV420*)
             SDL_malloc (sizeof(PlanarPixmapInfoYUV420) +
                     (width * height * 2));
@@ -291,20 +293,20 @@ SDL_Overlay* QZ_CreateYUVOverlay (_THIS, int width, int height,
         /* CHECK_ALIGN(pixels[0]); */
 
         pitches[0] = width;
-        yuv_pixmap->componentInfoY.offset = offset;
-        yuv_pixmap->componentInfoY.rowBytes = width;
+        yuv_pixmap->componentInfoY.offset = EndianS32_NtoB(offset);
+        yuv_pixmap->componentInfoY.rowBytes = EndianU32_NtoB(width);
 
         offset += width * height;
         pixels[plane2] = (Uint8*)yuv_pixmap + offset;
         pitches[plane2] = width / 2;
-        yuv_pixmap->componentInfoCb.offset = offset;
-        yuv_pixmap->componentInfoCb.rowBytes = width / 2;
+        yuv_pixmap->componentInfoCb.offset = EndianS32_NtoB(offset);
+        yuv_pixmap->componentInfoCb.rowBytes = EndianU32_NtoB(width / 2);
 
         offset += (width * height / 4);
         pixels[plane3] = (Uint8*)yuv_pixmap + offset;
         pitches[plane3] = width / 2;
-        yuv_pixmap->componentInfoCr.offset = offset;
-        yuv_pixmap->componentInfoCr.rowBytes = width / 2;
+        yuv_pixmap->componentInfoCr.offset = EndianS32_NtoB(offset);
+        yuv_pixmap->componentInfoCr.rowBytes = EndianU32_NtoB(width / 2);
 
         overlay->pixels = pixels;
         overlay->pitches = pitches;
