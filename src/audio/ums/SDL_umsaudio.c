@@ -136,7 +136,7 @@ static SDL_AudioDevice *Audio_CreateDevice(int devindex)
 }
 
 AudioBootStrap UMS_bootstrap = {
-	UMS_DRIVER_NAME, "AUX UMS audio",
+	UMS_DRIVER_NAME, "AIX UMS audio",
 	Audio_Available, Audio_CreateDevice
 };
 
