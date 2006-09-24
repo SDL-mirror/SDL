@@ -24,9 +24,9 @@
 #include "SDL_BWin.h"
 
 extern "C" {
-
 #include "SDL_syswm_c.h"
 #include "SDL_error.h"
+#include "../SDL_cursor_c.h"
 
 void BE_SetWMCaption(_THIS, const char *title, const char *icon)
 {
@@ -36,6 +36,42 @@ void BE_SetWMCaption(_THIS, const char *title, const char *icon)
 int BE_IconifyWindow(_THIS)
 {
 	SDL_Win->Minimize(true);
+}
+
+SDL_GrabMode BE_GrabInput(_THIS, SDL_GrabMode mode)
+{
+	if ( mode == SDL_GRAB_OFF ) {
+//		be_app->ShowCursor();
+		if ( !(SDL_cursorstate & CURSOR_VISIBLE) ) {
+		/*	BeSman: Jan 2, 2006
+			must be leaving relative mode, move mouse from
+			center of window to where it belongs ... */
+			BPoint pt;
+			int x, y;
+			SDL_GetMouseState(&x,&y);
+			pt.x = x;
+			pt.y = y;
+			SDL_Win->Lock();
+			SDL_Win->ConvertToScreen(&pt);
+			SDL_Win->Unlock();
+			set_mouse_position((int)pt.x, (int)pt.y);
+		}
+	} else {
+//		be_app->HideCursor();
+		if ( !(SDL_cursorstate & CURSOR_VISIBLE) ) {
+		/*	BeSman: Jan 2, 2006
+			must be entering relative mode, get ready by
+			moving mouse to	center of window ... */
+			BPoint pt;
+			pt.x = (SDL_VideoSurface->w/2);
+			pt.y = (SDL_VideoSurface->h/2);
+			SDL_Win->Lock();
+			SDL_Win->ConvertToScreen(&pt);
+			SDL_Win->Unlock();
+			set_mouse_position((int)pt.x, (int)pt.y);
+		}
+	}
+	return(mode);
 }
 
 int BE_GetWMInfo(_THIS, SDL_SysWMinfo *info)

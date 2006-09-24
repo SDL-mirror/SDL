@@ -27,7 +27,7 @@
 #include "SDL_BWin.h"
 
 extern "C" {
-
+#include "SDL_cursor_c.h"
 #include "SDL_sysmouse_c.h"
 
 /* Convert bits to padded bytes */
@@ -128,11 +128,26 @@ void BE_FreeWMCursor(_THIS, WMcursor *cursor)
 /* Implementation by Christian Bauer <cbauer@student.physik.uni-mainz.de> */
 void BE_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
 {
+	if (_this->screen && (_this->screen->flags & SDL_FULLSCREEN) ) {		
+		SDL_PrivateMouseMotion(0, 0, x, y);
+	} else {
 	BPoint pt(x, y);
 	SDL_Win->Lock();
 	SDL_Win->ConvertToScreen(&pt);
 	SDL_Win->Unlock();
 	set_mouse_position((int32)pt.x, (int32)pt.y);
+	}
+}
+/* Check to see if we need to enter or leave mouse relative mode */
+void BE_CheckMouseMode(_THIS)
+{
+        /* If the mouse is hidden and input is grabbed, we use relative mode */
+        if ( !(SDL_cursorstate & CURSOR_VISIBLE) &&
+             (_this->input_grab != SDL_GRAB_OFF) ) {
+                mouse_relative = 1;
+        } else {
+                mouse_relative = 0;
+        }
 }
 
 }; /* Extern C */

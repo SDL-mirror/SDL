@@ -135,7 +135,7 @@ static SDL_VideoDevice *BE_CreateDevice(int devindex)
 	device->SetCaption = BE_SetWMCaption;
 	device->SetIcon = NULL;
 	device->IconifyWindow = BE_IconifyWindow;
-	device->GrabInput = NULL;
+	device->GrabInput = BE_GrabInput;
 	device->GetWMInfo = BE_GetWMInfo;
 	/* Cursor manager functions */
 	device->FreeWMCursor = BE_FreeWMCursor;
@@ -143,7 +143,7 @@ static SDL_VideoDevice *BE_CreateDevice(int devindex)
 	device->ShowWMCursor = BE_ShowWMCursor;
 	device->WarpWMCursor = BE_WarpWMCursor;
 	device->MoveWMCursor = NULL;
-	device->CheckMouseMode = NULL;
+	device->CheckMouseMode = BE_CheckMouseMode;
 	/* Event manager functions */
 	device->InitOSKeymap = BE_InitOSKeymap;
 	device->PumpEvents = BE_PumpEvents;
@@ -365,8 +365,11 @@ static bool BE_FindClosestFSMode(_THIS, int width, int height, int bpp,
 	if ( ! modes[i] || (modes[i]->w < width) || (modes[i]->h < width) ) {
 		--i;	/* We went too far */
 	}
-	width = modes[i]->w;
-	height = modes[i]->h;      
+
+/*  BeSman::We dont want to use a Desktop resolution */
+//	width = modes[i]->w;
+//	height = modes[i]->h;      
+
 	bscreen.GetModeList(&dmodes, &nmodes);
 	for ( i = 0; i < nmodes; ++i ) {
 		if ( (bpp == ColorSpaceToBitsPerPixel(dmodes[i].space)) &&
@@ -433,7 +436,7 @@ static int BE_SetFullScreen(_THIS, SDL_Surface *screen, int fullscreen)
 	}
 
 	if ( SDL_Win->Lock() ) {
-		int xoff, yoff;
+		int cx, cy;
 		if ( SDL_Win->Shown() ) {
 			needs_unlock = 1;
 			SDL_Win->Hide();
@@ -449,19 +452,12 @@ static int BE_SetFullScreen(_THIS, SDL_Surface *screen, int fullscreen)
 		/* Calculate offsets - used either to center window
 		 * (windowed mode) or to set drawing offsets (fullscreen mode)
 		 */
-		xoff = (bounds.IntegerWidth() - width)/2;
-		yoff = (bounds.IntegerHeight() - height)/2;
-		if ( fullscreen ) {
-			/* Set offset for drawing */
-			SDL_Win->SetXYOffset(xoff, yoff);
-		} else {
-			/* Center window and reset the drawing offset */
-			SDL_Win->SetXYOffset(0, 0);
-		}
+		cx = (bounds.IntegerWidth() - width)/2;
+		cy = (bounds.IntegerHeight() - height)/2;
+
 		if ( ! needs_unlock || was_fullscreen ) {
 			/* Center the window the first time */
-			SDL_Win->MoveTo(xoff > 0 ? (float)xoff : 0.0f,
-					yoff > 0 ? (float)yoff : 0.0f);
+			SDL_Win->MoveTo(cx, cy);
 		}
 		SDL_Win->Show();
 		
