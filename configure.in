@@ -2452,10 +2452,10 @@ SDLMAIN_OBJECTS=`echo $SDLMAIN_OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects
 
 if test "x$enable_rpath" = "xyes"; then
   if test $ARCH = bsdi -o $ARCH = freebsd -o $ARCH = irix -o $ARCH = linux -o $ARCH = netbsd; then
-    SDL_RLD_FLAGS="-Wl,-rpath,\${exec_prefix}/lib"
+    SDL_RLD_FLAGS="-Wl,-rpath,\${libdir}"
   fi
   if test $ARCH = solaris; then
-    SDL_RLD_FLAGS="-R\${exec_prefix}/lib"
+    SDL_RLD_FLAGS="-R\${libdir}"
   fi
 else
   SDL_RLD_FLAGS=""
@@ -2464,7 +2464,7 @@ fi
 case "$ARCH" in
   macosx)
     # Evil hack to allow static linking on Mac OS X
-    SDL_STATIC_LIBS="\${exec_prefix}/lib/libSDL.a $EXTRA_LDFLAGS"
+    SDL_STATIC_LIBS="\${libdir}/libSDL.a $EXTRA_LDFLAGS"
     ;;
   *)
     SDL_STATIC_LIBS="$SDL_LIBS"
