@@ -54,7 +54,7 @@
 #include <Cocoa/Cocoa.h>
 #include <Carbon/Carbon.h>
 #include <QuickTime/QuickTime.h>
-#include <OpenGL/CGLTypes.h>	/* For CGLContextObj */
+#include <OpenGL/OpenGL.h>	/* For CGL functions and types */
 #include <IOKit/IOKitLib.h>	/* For powersave handling */
 #include <pthread.h>
 

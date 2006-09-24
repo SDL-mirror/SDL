@@ -43,21 +43,6 @@
 @end
 
 
-/* 
-    Structure for rez switch gamma fades
-    We can hide the monitor flicker by setting the gamma tables to 0
-*/
-#define QZ_GAMMA_TABLE_SIZE 256
-
-typedef struct {
-
-    CGGammaValue red[QZ_GAMMA_TABLE_SIZE];
-    CGGammaValue green[QZ_GAMMA_TABLE_SIZE];
-    CGGammaValue blue[QZ_GAMMA_TABLE_SIZE];
-
-} SDL_QuartzGammaTable;
-
-
 /* Bootstrap functions */
 static int              QZ_Available ();
 static SDL_VideoDevice* QZ_CreateDevice (int device_index);
@@ -385,10 +370,10 @@ static void QZ_UnsetVideoMode (_THIS, BOOL to_desktop) {
             CGLSetFullScreen (NULL);
         }
         if (to_desktop) {
+            ShowMenuBar ();
             /* Restore original screen resolution/bpp */
             CGDisplaySwitchToMode (display_id, save_mode);
             CGReleaseAllDisplays ();
-            ShowMenuBar ();
             /* 
                 Reset the main screen's rectangle
                 See comment in QZ_SetVideoFullscreen for why we do this
