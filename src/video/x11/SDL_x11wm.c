@@ -398,6 +398,8 @@ static void unlock_display(void)
 	XSync(SDL_Display, False);
 	SDL_Unlock_EventThread();
 }
+
+#include <stdio.h>
 int X11_GetWMInfo(_THIS, SDL_SysWMinfo *info)
 {
 	if ( info->version.major <= SDL_MAJOR_VERSION ) {
@@ -410,6 +412,14 @@ int X11_GetWMInfo(_THIS, SDL_SysWMinfo *info)
 			info->info.x11.fswindow = FSwindow;
 			info->info.x11.wmwindow = WMwindow;
 		}
+
+
+		if ( SDL_VERSIONNUM(info->version.major,
+		                    info->version.minor,
+		                    info->version.patch) >= 1212 ) {
+			info->info.x11.gfxdisplay = GFX_Display;
+		}
+
 		info->info.x11.lock_func = lock_display;
 		info->info.x11.unlock_func = unlock_display;
 		return(1);
