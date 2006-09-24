@@ -206,7 +206,8 @@ Mint_CheckAudio(_THIS, SDL_AudioSpec * spec)
 {
     int i;
 
-    DEBUG_PRINT((DEBUG_NAME "asked: %d bits, ", SDL_AUDIO_BITSIZE(spec->format)));
+    DEBUG_PRINT((DEBUG_NAME "asked: %d bits, ",
+                 SDL_AUDIO_BITSIZE(spec->format)));
     DEBUG_PRINT(("float=%d, ", SDL_AUDIO_ISFLOAT(spec->format)));
     DEBUG_PRINT(("signed=%d, ", SDL_AUDIO_ISSIGNED(spec->format)));
     DEBUG_PRINT(("big endian=%d, ", SDL_AUDIO_ISBIGENDIAN(spec->format)));
@@ -214,11 +215,11 @@ Mint_CheckAudio(_THIS, SDL_AudioSpec * spec)
     DEBUG_PRINT(("freq=%d\n", spec->freq));
 
     if (SDL_AUDIO_BITSIZE(spec->format) > 16) {
-        spec->format = AUDIO_S16SYS;  /* clamp out int32/float32 ... */
+        spec->format = AUDIO_S16SYS;    /* clamp out int32/float32 ... */
     }
 
     if (spec->channels > 2) {
-        spec->channels = 2;  /* no more than stereo! */
+        spec->channels = 2;     /* no more than stereo! */
     }
 
     /* Check formats available */
@@ -239,7 +240,8 @@ Mint_CheckAudio(_THIS, SDL_AudioSpec * spec)
     MINTAUDIO_numfreq = SDL_MintAudio_SearchFrequency(this, spec->freq);
     spec->freq = MINTAUDIO_frequencies[MINTAUDIO_numfreq].frequency;
 
-    DEBUG_PRINT((DEBUG_NAME "obtained: %d bits, ", SDL_AUDIO_BITSIZE(spec->format)));
+    DEBUG_PRINT((DEBUG_NAME "obtained: %d bits, ",
+                 SDL_AUDIO_BITSIZE(spec->format)));
     DEBUG_PRINT(("float=%d, ", SDL_AUDIO_ISFLOAT(spec->format)));
     DEBUG_PRINT(("signed=%d, ", SDL_AUDIO_ISSIGNED(spec->format)));
     DEBUG_PRINT(("big endian=%d, ", SDL_AUDIO_ISBIGENDIAN(spec->format)));

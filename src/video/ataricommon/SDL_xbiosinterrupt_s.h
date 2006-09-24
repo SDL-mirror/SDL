@@ -36,7 +36,7 @@
 
 /* Variables */
 
-extern volatile Uint16 SDL_AtariXbios_mouselock;   /* mouse lock position */
+extern volatile Uint16 SDL_AtariXbios_mouselock;        /* mouse lock position */
 extern volatile Uint16 SDL_AtariXbios_mouseb;   /* buttons */
 extern volatile Sint16 SDL_AtariXbios_mousex;   /* X relative motion */
 extern volatile Sint16 SDL_AtariXbios_mousey;   /* Y relative motion */

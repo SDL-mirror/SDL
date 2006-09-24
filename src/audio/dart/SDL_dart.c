@@ -108,34 +108,34 @@ DART_OpenAudio(_THIS, SDL_AudioSpec * spec)
 
     // Determine the audio parameters from the AudioSpec
     if (spec->channels > 2)
-        spec->channels = 2;  // !!! FIXME: more than stereo support in OS/2?
+        spec->channels = 2;     // !!! FIXME: more than stereo support in OS/2?
 
     while ((!valid_datatype) && (test_format)) {
         spec->format = test_format;
         valid_datatype = 1;
         switch (test_format) {
-            case AUDIO_U8:
-                // Unsigned 8 bit audio data
-                iSilence = 0x80;
-                iBits = 8;
-                break;
+        case AUDIO_U8:
+            // Unsigned 8 bit audio data
+            iSilence = 0x80;
+            iBits = 8;
+            break;
 
-            case AUDIO_S16LSB:
-                // Signed 16 bit audio data
-                iSilence = 0x00;
-                iBits = 16;
-                break;
+        case AUDIO_S16LSB:
+            // Signed 16 bit audio data
+            iSilence = 0x00;
+            iBits = 16;
+            break;
 
             // !!! FIXME: int32?
 
-            default:
-                valid_datatype = 0;
-                test_format = SDL_NextAudioFormat();
-                break;
+        default:
+            valid_datatype = 0;
+            test_format = SDL_NextAudioFormat();
+            break;
         }
     }
 
-    if (!valid_datatype) { // shouldn't happen, but just in case...
+    if (!valid_datatype) {      // shouldn't happen, but just in case...
         // Close DART, and exit with error code!
         mciSendCommand(iDeviceOrd, MCI_CLOSE, MCI_WAIT, &GenericParms, 0);
         SDL_SetError("Unsupported audio format");

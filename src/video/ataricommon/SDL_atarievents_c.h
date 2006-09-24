@@ -36,8 +36,9 @@
 
 /* Special keys state */
 #ifndef K_RSHIFT
-enum {
-    K_RSHIFT=0,
+enum
+{
+    K_RSHIFT = 0,
     K_LSHIFT,
     K_CTRL,
     K_ALT,
@@ -55,8 +56,8 @@ extern void SDL_Atari_InitInternalKeymap(_THIS);
 
 /* Atari to Unicode charset translation table */
 extern Uint16 SDL_AtariToUnicodeTable[256];
-SDL_keysym *SDL_Atari_TranslateKey(int scancode, SDL_keysym *keysym,
-    SDL_bool pressed);
+SDL_keysym *SDL_Atari_TranslateKey(int scancode, SDL_keysym * keysym,
+                                   SDL_bool pressed);
 
 #endif /* _SDL_ATARI_EVENTS_H_ */
 /* vi: set ts=4 sw=4 expandtab: */

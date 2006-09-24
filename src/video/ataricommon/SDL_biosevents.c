@@ -61,8 +61,8 @@ AtariBios_InitOSKeymap(_THIS)
         vectors_mask |= ATARI_XBIOS_MOUSEEVENTS;        /* XBIOS mouse events */
     }
     /*if (Getcookie(C_MiNT, &dummy) == C_FOUND) {
-        vectors_mask = 0;
-    }*/
+       vectors_mask = 0;
+       } */
 
     SDL_AtariXbios_InstallVectors(vectors_mask);
 }
@@ -78,8 +78,9 @@ AtariBios_PumpEvents(_THIS)
 
     while (Bconstat(_CON)) {
         unsigned long key_pressed;
-        key_pressed=Bconin(_CON);
-        bios_currentkeyboard[(key_pressed>>16)&(ATARIBIOS_MAXKEYS-1)]=0xFF;
+        key_pressed = Bconin(_CON);
+        bios_currentkeyboard[(key_pressed >> 16) & (ATARIBIOS_MAXKEYS - 1)] =
+            0xFF;
     }
 
     /* Read special keys */
@@ -95,7 +96,8 @@ AtariBios_PumpEvents(_THIS)
         /* Key unpressed ? */
         if (bios_previouskeyboard[i] && !bios_currentkeyboard[i])
             SDL_PrivateKeyboard(SDL_RELEASED,
-                                SDL_Atari_TranslateKey(i, &keysym, SDL_FALSE));
+                                SDL_Atari_TranslateKey(i, &keysym,
+                                                       SDL_FALSE));
     }
 
     if (use_dev_mouse) {

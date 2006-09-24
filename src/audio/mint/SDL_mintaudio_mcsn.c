@@ -225,7 +225,8 @@ Mint_CheckAudio(_THIS, SDL_AudioSpec * spec)
     int i;
     unsigned long masterclock, masterprediv;
 
-    DEBUG_PRINT((DEBUG_NAME "asked: %d bits, ", SDL_AUDIO_BITSIZE(spec->format)));
+    DEBUG_PRINT((DEBUG_NAME "asked: %d bits, ",
+                 SDL_AUDIO_BITSIZE(spec->format)));
     DEBUG_PRINT(("float=%d, ", SDL_AUDIO_ISFLOAT(spec->format)));
     DEBUG_PRINT(("signed=%d, ", SDL_AUDIO_ISSIGNED(spec->format)));
     DEBUG_PRINT(("big endian=%d, ", SDL_AUDIO_ISBIGENDIAN(spec->format)));
@@ -233,7 +234,7 @@ Mint_CheckAudio(_THIS, SDL_AudioSpec * spec)
     DEBUG_PRINT(("freq=%d\n", spec->freq));
 
     if (spec->channels > 2) {
-        spec->channels = 2;  /* no more than stereo! */
+        spec->channels = 2;     /* no more than stereo! */
     }
 
     /* Check formats available */
@@ -241,7 +242,7 @@ Mint_CheckAudio(_THIS, SDL_AudioSpec * spec)
     switch (cookie_mcsn->play) {
     case MCSN_ST:
         spec->channels = 1;
-        spec->format = AUDIO_S8;     /* FIXME: is it signed or unsigned ? */
+        spec->format = AUDIO_S8;        /* FIXME: is it signed or unsigned ? */
         SDL_MintAudio_AddFrequency(this, 12500, 0, 0, -1);
         break;
     case MCSN_TT:              /* Also STE, Mega STE */
@@ -279,9 +280,9 @@ Mint_CheckAudio(_THIS, SDL_AudioSpec * spec)
                                            (1 << i) - 1, -1);
             }
         }
-        spec->format |= SDL_AUDIO_MASK_SIGNED; /* Audio is always signed */
+        spec->format |= SDL_AUDIO_MASK_SIGNED;  /* Audio is always signed */
         if ((SDL_AUDIO_BITSIZE(spec->format)) == 16) {
-            spec->format |= SDL_AUDIO_MASK_ENDIAN;   /* Audio is always big endian */
+            spec->format |= SDL_AUDIO_MASK_ENDIAN;      /* Audio is always big endian */
             spec->channels = 2; /* 16 bits always stereo */
         }
         break;
@@ -299,7 +300,8 @@ Mint_CheckAudio(_THIS, SDL_AudioSpec * spec)
     MINTAUDIO_numfreq = SDL_MintAudio_SearchFrequency(this, spec->freq);
     spec->freq = MINTAUDIO_frequencies[MINTAUDIO_numfreq].frequency;
 
-    DEBUG_PRINT((DEBUG_NAME "obtained: %d bits, ", SDL_AUDIO_BITSIZE(spec->format)));
+    DEBUG_PRINT((DEBUG_NAME "obtained: %d bits, ",
+                 SDL_AUDIO_BITSIZE(spec->format)));
     DEBUG_PRINT(("float=%d, ", SDL_AUDIO_ISFLOAT(spec->format)));
     DEBUG_PRINT(("signed=%d, ", SDL_AUDIO_ISSIGNED(spec->format)));
     DEBUG_PRINT(("big endian=%d, ", SDL_AUDIO_ISBIGENDIAN(spec->format)));

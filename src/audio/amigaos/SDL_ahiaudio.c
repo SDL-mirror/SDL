@@ -235,50 +235,50 @@ AHI_OpenAudio(_THIS, SDL_AudioSpec * spec)
     while ((!valid_datatype) && (test_format)) {
         valid_datatype = 1;
         switch (test_format) {
-            case AUDIO_S8:
-                D(bug("AUDIO_S8...\n"));
-                spec->format = AUDIO_S8;
-                this->hidden->bytespersample = 1;
-                if (spec->channels < 2)
-                    this->hidden->type = AHIST_M8S;
-                else
-                    this->hidden->type = AHIST_S8S;
-                break;
+        case AUDIO_S8:
+            D(bug("AUDIO_S8...\n"));
+            spec->format = AUDIO_S8;
+            this->hidden->bytespersample = 1;
+            if (spec->channels < 2)
+                this->hidden->type = AHIST_M8S;
+            else
+                this->hidden->type = AHIST_S8S;
+            break;
 
-            case AUDIO_S16MSB:
-                D(bug("AUDIO_S16MSB...\n"));
-                spec->format = AUDIO_S16MSB;
-                this->hidden->bytespersample = 2;
-                if (spec->channels < 2)
-                    this->hidden->type = AHIST_M16S;
-                else
-                    this->hidden->type = AHIST_S16S;
-                break;
+        case AUDIO_S16MSB:
+            D(bug("AUDIO_S16MSB...\n"));
+            spec->format = AUDIO_S16MSB;
+            this->hidden->bytespersample = 2;
+            if (spec->channels < 2)
+                this->hidden->type = AHIST_M16S;
+            else
+                this->hidden->type = AHIST_S16S;
+            break;
 
-            case AUDIO_S32MSB:
-                D(bug("AUDIO_S32MSB...\n"));
-                spec->format = AUDIO_S32MSB;
-                this->hidden->bytespersample = 4;
-                if (spec->channels < 2)
-                    this->hidden->type = AHIST_M32S;
-                else
-                    this->hidden->type = AHIST_S32S;
-                break;
+        case AUDIO_S32MSB:
+            D(bug("AUDIO_S32MSB...\n"));
+            spec->format = AUDIO_S32MSB;
+            this->hidden->bytespersample = 4;
+            if (spec->channels < 2)
+                this->hidden->type = AHIST_M32S;
+            else
+                this->hidden->type = AHIST_S32S;
+            break;
 
-            default:
-                valid_datatype = 0;
-                test_format = SDL_NextAudioFormat();
-                break;
+        default:
+            valid_datatype = 0;
+            test_format = SDL_NextAudioFormat();
+            break;
         }
     }
 
-    if (!valid_datatype) { /* shouldn't happen, but just in case... */
+    if (!valid_datatype) {      /* shouldn't happen, but just in case... */
         SDL_SetError("Unsupported audio format");
         return (-1);
     }
 
     if (spec->channels > 2) {
-        spec->channels = 2;  /* will convert at higher level. */
+        spec->channels = 2;     /* will convert at higher level. */
     }
 
     D(bug("Before CalculateAudioSpec\n"));

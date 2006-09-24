@@ -512,11 +512,11 @@ InitNew(_THIS, SDL_Surface * current)
 
         gl_ctx =
             _this->gl_data->OSMesaCreateContextExt(osmesa_format,
-                                                  _this->gl_config.
-                                                  depth_size,
-                                                  _this->gl_config.
-                                                  stencil_size,
-                                                  newaccumsize, NULL);
+                                                   _this->gl_config.
+                                                   depth_size,
+                                                   _this->gl_config.
+                                                   stencil_size,
+                                                   newaccumsize, NULL);
 
         if (gl_ctx) {
             gl_curformat = osmesa_format;
@@ -679,7 +679,7 @@ InitOld(_THIS, SDL_Surface * current)
 
         gl_shadow =
             _this->gl_data->OSMesaCreateLDG(osmesa_format, GL_UNSIGNED_BYTE,
-                                           current->w, current->h);
+                                            current->w, current->h);
 
         if (gl_shadow) {
             gl_curformat = osmesa_format;

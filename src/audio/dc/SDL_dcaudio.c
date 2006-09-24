@@ -226,24 +226,24 @@ DCAUD_OpenAudio(_THIS, SDL_AudioSpec * spec)
         spec->format = test_format;
         switch (test_format) {
             /* only formats Dreamcast accepts... */
-            case AUDIO_S8:
-            case AUDIO_S16LSB:
-                valid_datatype = 1;
-                break;
+        case AUDIO_S8:
+        case AUDIO_S16LSB:
+            valid_datatype = 1;
+            break;
 
-            default:
-                test_format = SDL_NextAudioFormat();
-                break;
+        default:
+            test_format = SDL_NextAudioFormat();
+            break;
         }
     }
 
-    if (!valid_datatype) {  /* shouldn't happen, but just in case... */
+    if (!valid_datatype) {      /* shouldn't happen, but just in case... */
         SDL_SetError("Unsupported audio format");
         return (-1);
     }
 
     if (spec->channels > 2)
-        spec->channels = 2;  /* no more than stereo on the Dreamcast. */
+        spec->channels = 2;     /* no more than stereo on the Dreamcast. */
 
     /* Update the fragment size as size in bytes */
     SDL_CalculateAudioSpec(spec);

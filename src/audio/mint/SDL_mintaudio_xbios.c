@@ -83,7 +83,7 @@ Audio_Available(void)
     unsigned long dummy;
     const char *envr = SDL_getenv("SDL_AUDIODRIVER");
 
-    /*SDL_MintAudio_mint_present = (Getcookie(C_MiNT, &dummy) == C_FOUND);*/
+    /*SDL_MintAudio_mint_present = (Getcookie(C_MiNT, &dummy) == C_FOUND); */
     SDL_MintAudio_mint_present = SDL_FALSE;
 
     /* We can't use XBIOS in interrupt with Magic, don't know about thread */
@@ -360,21 +360,22 @@ Mint_CheckAudio(_THIS, SDL_AudioSpec * spec)
     int i;
     Uint32 extclock;
 
-    DEBUG_PRINT((DEBUG_NAME "asked: %d bits, ", SDL_AUDIO_BITSIZE(spec->format)));
+    DEBUG_PRINT((DEBUG_NAME "asked: %d bits, ",
+                 SDL_AUDIO_BITSIZE(spec->format)));
     DEBUG_PRINT(("float=%d, ", SDL_AUDIO_ISFLOAT(spec->format)));
     DEBUG_PRINT(("signed=%d, ", SDL_AUDIO_ISSIGNED(spec->format)));
     DEBUG_PRINT(("big endian=%d, ", SDL_AUDIO_ISBIGENDIAN(spec->format)));
     DEBUG_PRINT(("channels=%d, ", spec->channels));
     DEBUG_PRINT(("freq=%d\n", spec->freq));
 
-    spec->format |= SDL_AUDIO_MASK_SIGNED;     /* Audio is always signed */
+    spec->format |= SDL_AUDIO_MASK_SIGNED;      /* Audio is always signed */
 
     /* clamp out int32/float32 */
     if (SDL_AUDIO_BITSIZE(spec->format) >= 16) {
-        spec->format = AUDIO_S16MSB; /* Audio is always big endian */
+        spec->format = AUDIO_S16MSB;    /* Audio is always big endian */
         spec->channels = 2;     /* 16 bits always stereo */
     } else if (spec->channels > 2) {
-        spec->channels = 2;  /* no more than stereo! */
+        spec->channels = 2;     /* no more than stereo! */
     }
 
     MINTAUDIO_freqcount = 0;
@@ -406,7 +407,8 @@ Mint_CheckAudio(_THIS, SDL_AudioSpec * spec)
     MINTAUDIO_numfreq = SDL_MintAudio_SearchFrequency(this, spec->freq);
     spec->freq = MINTAUDIO_frequencies[MINTAUDIO_numfreq].frequency;
 
-    DEBUG_PRINT((DEBUG_NAME "obtained: %d bits, ", SDL_AUDIO_BITSIZE(spec->format)));
+    DEBUG_PRINT((DEBUG_NAME "obtained: %d bits, ",
+                 SDL_AUDIO_BITSIZE(spec->format)));
     DEBUG_PRINT(("float=%d, ", SDL_AUDIO_ISFLOAT(spec->format)));
     DEBUG_PRINT(("signed=%d, ", SDL_AUDIO_ISSIGNED(spec->format)));
     DEBUG_PRINT(("big endian=%d, ", SDL_AUDIO_ISBIGENDIAN(spec->format)));
@@ -468,7 +470,7 @@ Mint_InitAudio(_THIS, SDL_AudioSpec * spec)
     } else {
         /* Install interrupt */
         Jdisint(MFP_DMASOUND);
-        /*Xbtimer(XB_TIMERA, 8, 1, SDL_MintAudio_XbiosInterrupt);*/
+        /*Xbtimer(XB_TIMERA, 8, 1, SDL_MintAudio_XbiosInterrupt); */
         Xbtimer(XB_TIMERA, 8, 1, SDL_MintAudio_Dma8Interrupt);
         Jenabint(MFP_DMASOUND);
 

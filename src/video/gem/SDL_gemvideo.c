@@ -204,8 +204,8 @@ GEM_CreateDevice(int devindex)
         vectors_mask |= ATARI_XBIOS_MOUSEEVENTS;        /* XBIOS mouse events */
     }
     /*if (Getcookie(C_MiNT, &dummy) == C_FOUND) {
-        vectors_mask = 0;
-    }*/
+       vectors_mask = 0;
+       } */
 
     SDL_AtariXbios_InstallVectors(vectors_mask);
 

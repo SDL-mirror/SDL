@@ -45,9 +45,10 @@ static unsigned char gemdos_currentkeyboard[ATARIBIOS_MAXKEYS];
 static unsigned char gemdos_previouskeyboard[ATARIBIOS_MAXKEYS];
 static SDL_bool use_dev_mouse = SDL_FALSE;
 
-enum {
-	DEV_BUSY=0,
-	DEV_READY
+enum
+{
+    DEV_BUSY = 0,
+    DEV_READY
 };
 
 static void UpdateSpecialKeys(int special_keys_state);
@@ -68,8 +69,8 @@ AtariGemdos_InitOSKeymap(_THIS)
         vectors_mask |= ATARI_XBIOS_MOUSEEVENTS;        /* XBIOS mouse events */
     }
     /*if (Getcookie(C_MiNT, &dummy) == C_FOUND) {
-        vectors_mask = 0;
-    }*/
+       vectors_mask = 0;
+       } */
 
     SDL_AtariXbios_InstallVectors(vectors_mask);
 }
@@ -85,8 +86,9 @@ AtariGemdos_PumpEvents(_THIS)
 
     while (Cconis() != DEV_BUSY) {
         unsigned long key_pressed;
-        key_pressed=Cnecin();
-        gemdos_currentkeyboard[(key_pressed>>16)&(ATARIBIOS_MAXKEYS-1)]=0xFF;
+        key_pressed = Cnecin();
+        gemdos_currentkeyboard[(key_pressed >> 16) & (ATARIBIOS_MAXKEYS - 1)]
+            = 0xFF;
     }
 
     /* Read special keys */
@@ -102,7 +104,8 @@ AtariGemdos_PumpEvents(_THIS)
         /* Key unpressed ? */
         if (gemdos_previouskeyboard[i] && !gemdos_currentkeyboard[i])
             SDL_PrivateKeyboard(SDL_RELEASED,
-                                SDL_Atari_TranslateKey(i, &keysym, SDL_FALSE));
+                                SDL_Atari_TranslateKey(i, &keysym,
+                                                       SDL_FALSE));
     }
 
     if (use_dev_mouse) {

@@ -147,7 +147,8 @@ GEM_PumpEvents(_THIS)
         /* Key unpressed ? */
         if (gem_previouskeyboard[i] && !gem_currentkeyboard[i])
             SDL_PrivateKeyboard(SDL_RELEASED,
-                                SDL_Atari_TranslateKey(i, &keysym, SDL_FALSE));
+                                SDL_Atari_TranslateKey(i, &keysym,
+                                                       SDL_FALSE));
     }
 
     SDL_memcpy(gem_previouskeyboard, gem_currentkeyboard,
@@ -291,8 +292,8 @@ do_keyboard(short kc, short ks)
     int scancode, asciicode;
 
     if (kc) {
-        scancode=(kc>>8) & (ATARIBIOS_MAXKEYS-1);
-        gem_currentkeyboard[scancode]=0xFF;
+        scancode = (kc >> 8) & (ATARIBIOS_MAXKEYS - 1);
+        gem_currentkeyboard[scancode] = 0xFF;
     }
 
     /* Read special keys */

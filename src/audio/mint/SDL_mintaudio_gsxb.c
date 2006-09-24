@@ -223,49 +223,49 @@ Mint_CheckAudio(_THIS, SDL_AudioSpec * spec)
     DEBUG_PRINT(("freq=%d\n", spec->freq));
 
     if (spec->channels > 2) {
-        spec->channels = 2;  /* no more than stereo! */
+        spec->channels = 2;     /* no more than stereo! */
     }
 
     while ((!valid_datatype) && (test_format)) {
         spec->format = test_format;
         switch (test_format) {
-            case AUDIO_U8:
-            case AUDIO_S8:
-            case AUDIO_U16LSB:
-            case AUDIO_S16LSB:
-            case AUDIO_U16MSB:
-            case AUDIO_S16MSB:
-            case AUDIO_S32LSB:
-            case AUDIO_S32MSB:
+        case AUDIO_U8:
+        case AUDIO_S8:
+        case AUDIO_U16LSB:
+        case AUDIO_S16LSB:
+        case AUDIO_U16MSB:
+        case AUDIO_S16MSB:
+        case AUDIO_S32LSB:
+        case AUDIO_S32MSB:
             /* no float support... */
-                resolution = SDL_AUDIO_BITSIZE(spec->format);
-                format_signed = SDL_AUDIO_ISSIGNED(spec->format);
-                format_bigendian = SDL_AUDIO_ISBIGENDIAN(spec->format);
+            resolution = SDL_AUDIO_BITSIZE(spec->format);
+            format_signed = SDL_AUDIO_ISSIGNED(spec->format);
+            format_bigendian = SDL_AUDIO_ISBIGENDIAN(spec->format);
 
-                /* Check formats available */
-                snd_format = Sndstatus(SND_QUERYFORMATS);
-                switch (resolution) {
-                    case 8:
-                        if (snd_format & SND_FORMAT8) {
-                            valid_datatype = 1;
-                            snd_format = Sndstatus(SND_QUERY8BIT);
-                        }
-                        break;
-                    case 16:
-                        if (snd_format & SND_FORMAT16) {
-                            valid_datatype = 1;
-                            snd_format = Sndstatus(SND_QUERY16BIT);
-                        }
-                        break;
-                    case 32:
-                        if (snd_format & SND_FORMAT32) {
-                            valid_datatype = 1;
-                            snd_format = Sndstatus(SND_QUERY32BIT);
-                        }
-                        break;
+            /* Check formats available */
+            snd_format = Sndstatus(SND_QUERYFORMATS);
+            switch (resolution) {
+            case 8:
+                if (snd_format & SND_FORMAT8) {
+                    valid_datatype = 1;
+                    snd_format = Sndstatus(SND_QUERY8BIT);
                 }
-
                 break;
+            case 16:
+                if (snd_format & SND_FORMAT16) {
+                    valid_datatype = 1;
+                    snd_format = Sndstatus(SND_QUERY16BIT);
+                }
+                break;
+            case 32:
+                if (snd_format & SND_FORMAT32) {
+                    valid_datatype = 1;
+                    snd_format = Sndstatus(SND_QUERY32BIT);
+                }
+                break;
+            }
+
+            break;
         }
     }
 
@@ -328,7 +328,8 @@ Mint_CheckAudio(_THIS, SDL_AudioSpec * spec)
     MINTAUDIO_numfreq = SDL_MintAudio_SearchFrequency(this, spec->freq);
     spec->freq = MINTAUDIO_frequencies[MINTAUDIO_numfreq].frequency;
 
-    DEBUG_PRINT((DEBUG_NAME "obtained: %d bits, ", SDL_AUDIO_BITSIZE(spec->format)));
+    DEBUG_PRINT((DEBUG_NAME "obtained: %d bits, ",
+                 SDL_AUDIO_BITSIZE(spec->format)));
     DEBUG_PRINT(("float=%d, ", SDL_AUDIO_ISFLOAT(spec->format)));
     DEBUG_PRINT(("signed=%d, ", SDL_AUDIO_ISSIGNED(spec->format)));
     DEBUG_PRINT(("big endian=%d, ", SDL_AUDIO_ISBIGENDIAN(spec->format)));

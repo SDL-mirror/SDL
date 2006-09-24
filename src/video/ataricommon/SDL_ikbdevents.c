@@ -46,7 +46,8 @@ static Uint16 atari_prevmouseb; /* save state of mouse buttons */
 void
 AtariIkbd_InitOSKeymap(_THIS)
 {
-    SDL_memset(SDL_AtariIkbd_keyboard, KEY_UNDEFINED, sizeof(SDL_AtariIkbd_keyboard));
+    SDL_memset(SDL_AtariIkbd_keyboard, KEY_UNDEFINED,
+               sizeof(SDL_AtariIkbd_keyboard));
 
     /* Now install our handler */
     SDL_AtariIkbd_mouseb = SDL_AtariIkbd_mousex = SDL_AtariIkbd_mousey = 0;
@@ -90,7 +91,8 @@ AtariIkbd_PumpEvents(_THIS)
         /* Key released ? */
         if (SDL_AtariIkbd_keyboard[i] == KEY_RELEASED) {
             SDL_PrivateKeyboard(SDL_RELEASED,
-                                SDL_Atari_TranslateKey(i, &keysym, SDL_FALSE));
+                                SDL_Atari_TranslateKey(i, &keysym,
+                                                       SDL_FALSE));
             SDL_AtariIkbd_keyboard[i] = KEY_UNDEFINED;
         }
     }

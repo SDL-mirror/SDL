@@ -152,8 +152,10 @@ SDL_AtariXbios_PostMouseEvents(_THIS, SDL_bool buttonEvents)
     }
 }
 
-void SDL_AtariXbios_LockMousePosition(SDL_bool lockPosition)
+void
+SDL_AtariXbios_LockMousePosition(SDL_bool lockPosition)
 {
     SDL_AtariXbios_mouselock = lockPosition;
 }
+
 /* vi: set ts=4 sw=4 expandtab: */

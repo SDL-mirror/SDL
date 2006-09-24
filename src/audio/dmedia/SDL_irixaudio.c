@@ -176,27 +176,27 @@ AL_OpenAudio(_THIS, SDL_AudioSpec * spec)
         spec->format = test_format;
 
         switch (test_format) {
-            case AUDIO_S8:
-                width = AL_SAMPLE_8;
-                fmt = AL_SAMPFMT_TWOSCOMP;
-                break;
+        case AUDIO_S8:
+            width = AL_SAMPLE_8;
+            fmt = AL_SAMPFMT_TWOSCOMP;
+            break;
 
-            case AUDIO_S16SYS:
-                width = AL_SAMPLE_16;
-                fmt = AL_SAMPFMT_TWOSCOMP;
-                break;
+        case AUDIO_S16SYS:
+            width = AL_SAMPLE_16;
+            fmt = AL_SAMPFMT_TWOSCOMP;
+            break;
 
-            case AUDIO_F32SYS:
-                width = 0;  /* not used here... */
-                fmt = AL_SAMPFMT_FLOAT;
-                break;
+        case AUDIO_F32SYS:
+            width = 0;          /* not used here... */
+            fmt = AL_SAMPFMT_FLOAT;
+            break;
 
             /* Docs say there is int24, but not int32.... */
 
-            default:
-                valid = 0;
-                test_format = SDL_NextAudioFormat();
-                break;
+        default:
+            valid = 0;
+            test_format = SDL_NextAudioFormat();
+            break;
         }
 
         if (valid) {
@@ -204,8 +204,8 @@ AL_OpenAudio(_THIS, SDL_AudioSpec * spec)
             valid = 0;
             if (audio_config) {
                 if (alSetChannels(audio_config, spec->channels) < 0) {
-                    if (spec->channels > 2) {  /* can't handle > stereo? */
-                        spec->channels = 2;  /* try again below. */
+                    if (spec->channels > 2) {   /* can't handle > stereo? */
+                        spec->channels = 2;     /* try again below. */
                     }
                 }
 

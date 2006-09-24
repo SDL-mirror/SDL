@@ -171,8 +171,8 @@ XBIOS_CreateDevice(int devindex)
     device->VideoQuit = XBIOS_VideoQuit;
 
     /* Modes */
-    device->GetDisplayModes = NULL /*XBIOS_GetDisplayModes*/;
-    device->SetDisplayMode = NULL /*XBIOS_SetDisplayMode*/;
+    device->GetDisplayModes = NULL /*XBIOS_GetDisplayModes */ ;
+    device->SetDisplayMode = NULL /*XBIOS_SetDisplayMode */ ;
 
     /* Events */
     device->PumpEvents = SDL_Atari_PumpEvents;

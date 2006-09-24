@@ -146,23 +146,24 @@ SDL_MintAudio_SearchFrequency(_THIS, int desired_freq)
 }
 
 /* Check if FPU is present */
-void SDL_MintAudio_CheckFpu(void)
+void
+SDL_MintAudio_CheckFpu(void)
 {
-	unsigned long cookie_fpu;
+    unsigned long cookie_fpu;
 
-	SDL_MintAudio_hasfpu = 0;
-	if (Getcookie(C__FPU, &cookie_fpu) != C_FOUND) {
-		return;
-	}
-	switch ((cookie_fpu>>16)&0xfffe) {
-		case 2:
-		case 4:
-		case 6:
-		case 8:
-		case 16:
-			SDL_MintAudio_hasfpu = 1;
-			break;
-	}
+    SDL_MintAudio_hasfpu = 0;
+    if (Getcookie(C__FPU, &cookie_fpu) != C_FOUND) {
+        return;
+    }
+    switch ((cookie_fpu >> 16) & 0xfffe) {
+    case 2:
+    case 4:
+    case 6:
+    case 8:
+    case 16:
+        SDL_MintAudio_hasfpu = 1;
+        break;
+    }
 }
 
 /* The thread function, used under MiNT with xbios */

@@ -523,7 +523,7 @@ ALSA_OpenAudio(_THIS, SDL_AudioSpec * spec)
     status = -1;
     for (test_format = SDL_FirstAudioFormat(spec->format);
          test_format && (status < 0);) {
-        status = 0;  /* if we can't support a format, it'll become -1. */
+        status = 0;             /* if we can't support a format, it'll become -1. */
         switch (test_format) {
         case AUDIO_U8:
             format = SND_PCM_FORMAT_U8;

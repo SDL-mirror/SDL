@@ -160,7 +160,7 @@ extern "C"
         SDL_AudioFormat test_format = SDL_FirstAudioFormat(spec->format);
 
         /* Parse the audio format and fill the Be raw audio format */
-        memset(&format, '\0', sizeof (media_raw_audio_format));
+        memset(&format, '\0', sizeof(media_raw_audio_format));
         format.byte_order = B_MEDIA_LITTLE_ENDIAN;
         format.frame_rate = (float) spec->freq;
         format.channel_count = spec->channels;  /* !!! FIXME: support > 2? */
@@ -168,51 +168,51 @@ extern "C"
             valid_datatype = 1;
             spec->format = test_format;
             switch (test_format) {
-                case AUDIO_S8:
-                    format.format = media_raw_audio_format::B_AUDIO_CHAR;
-                    break;
+            case AUDIO_S8:
+                format.format = media_raw_audio_format::B_AUDIO_CHAR;
+                break;
 
-                case AUDIO_U8:
-                    format.format = media_raw_audio_format::B_AUDIO_UCHAR;
-                    break;
+            case AUDIO_U8:
+                format.format = media_raw_audio_format::B_AUDIO_UCHAR;
+                break;
 
-                case AUDIO_S16LSB:
-                    format.format = media_raw_audio_format::B_AUDIO_SHORT;
-                    break;
+            case AUDIO_S16LSB:
+                format.format = media_raw_audio_format::B_AUDIO_SHORT;
+                break;
 
-                case AUDIO_S16MSB:
-                    format.format = media_raw_audio_format::B_AUDIO_SHORT;
-                    format.byte_order = B_MEDIA_BIG_ENDIAN;
-                    break;
+            case AUDIO_S16MSB:
+                format.format = media_raw_audio_format::B_AUDIO_SHORT;
+                format.byte_order = B_MEDIA_BIG_ENDIAN;
+                break;
 
-                case AUDIO_S32LSB:
-                    format.format = media_raw_audio_format::B_AUDIO_INT;
-                    break;
+            case AUDIO_S32LSB:
+                format.format = media_raw_audio_format::B_AUDIO_INT;
+                break;
 
-                case AUDIO_S32MSB:
-                    format.format = media_raw_audio_format::B_AUDIO_INT;
-                    format.byte_order = B_MEDIA_BIG_ENDIAN;
-                    break;
+            case AUDIO_S32MSB:
+                format.format = media_raw_audio_format::B_AUDIO_INT;
+                format.byte_order = B_MEDIA_BIG_ENDIAN;
+                break;
 
-                case AUDIO_F32LSB:
-                    format.format = media_raw_audio_format::B_AUDIO_FLOAT;
-                    break;
+            case AUDIO_F32LSB:
+                format.format = media_raw_audio_format::B_AUDIO_FLOAT;
+                break;
 
-                case AUDIO_F32MSB:
-                    format.format = media_raw_audio_format::B_AUDIO_FLOAT;
-                    format.byte_order = B_MEDIA_BIG_ENDIAN;
-                    break;
+            case AUDIO_F32MSB:
+                format.format = media_raw_audio_format::B_AUDIO_FLOAT;
+                format.byte_order = B_MEDIA_BIG_ENDIAN;
+                break;
 
-                default:
-                    valid_datatype = 0;
-                    test_format = SDL_NextAudioFormat();
-                    break;
+            default:
+                valid_datatype = 0;
+                test_format = SDL_NextAudioFormat();
+                break;
             }
         }
 
         format.buffer_size = spec->samples;
 
-        if (!valid_datatype) { /* shouldn't happen, but just in case... */
+        if (!valid_datatype) {  /* shouldn't happen, but just in case... */
             SDL_SetError("Unsupported audio format");
             return (-1);
         }

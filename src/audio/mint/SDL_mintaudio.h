@@ -128,7 +128,7 @@ extern volatile unsigned short SDL_MintAudio_numbuf;    /* Buffer to play */
 extern volatile unsigned short SDL_MintAudio_mutex;
 extern cookie_stfa_t *SDL_MintAudio_stfa;
 extern volatile unsigned long SDL_MintAudio_clocktics;
-extern unsigned short SDL_MintAudio_hasfpu;	/* To preserve fpu registers if needed */
+extern unsigned short SDL_MintAudio_hasfpu;     /* To preserve fpu registers if needed */
 
 /* MiNT thread variables */
 extern SDL_bool SDL_MintAudio_mint_present;

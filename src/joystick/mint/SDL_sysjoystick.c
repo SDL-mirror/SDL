@@ -202,13 +202,13 @@ SDL_SYS_JoystickInit(void)
     }
     if ((cookie_mch == MCH_STE << 16) || (cookie_mch == MCH_F30 << 16)) {
         atarijoysticks[PORTA_PAD0].enabled =
-        atarijoysticks[PORTA_PAD1].enabled =
-        atarijoysticks[PORTA_PAD2].enabled =
-        atarijoysticks[PORTA_PAD3].enabled =
-        atarijoysticks[PORTB_PAD0].enabled =
-        atarijoysticks[PORTB_PAD1].enabled =
-        atarijoysticks[PORTB_PAD2].enabled =
-        atarijoysticks[PORTB_PAD3].enabled = SDL_TRUE;
+            atarijoysticks[PORTA_PAD1].enabled =
+            atarijoysticks[PORTA_PAD2].enabled =
+            atarijoysticks[PORTA_PAD3].enabled =
+            atarijoysticks[PORTB_PAD0].enabled =
+            atarijoysticks[PORTB_PAD1].enabled =
+            atarijoysticks[PORTB_PAD2].enabled =
+            atarijoysticks[PORTB_PAD3].enabled = SDL_TRUE;
     }
     if (!atarijoysticks[IKBD_JOY1].enabled) {
         atarijoysticks[XBIOS_JOY1].enabled = (SDL_AtariXbios_enabled != 0);
@@ -432,24 +432,32 @@ SDL_SYS_JoystickUpdate(SDL_Joystick * joystick)
             int numjoypad, i;
 
             numjoypad = 0;
-            switch(numjoystick) {
+            switch (numjoystick) {
             case PORTA_PAD0:
-                numjoypad = 0;    break;
+                numjoypad = 0;
+                break;
             case PORTA_PAD1:
-                numjoypad = 1;    break;
+                numjoypad = 1;
+                break;
             case PORTA_PAD2:
-                numjoypad = 2;    break;
+                numjoypad = 2;
+                break;
             case PORTA_PAD3:
-                numjoypad = 3;    break;
+                numjoypad = 3;
+                break;
             case PORTB_PAD0:
-                numjoypad = 4;    break;
+                numjoypad = 4;
+                break;
             case PORTB_PAD1:
-                numjoypad = 5;    break;
+                numjoypad = 5;
+                break;
             case PORTB_PAD2:
-                numjoypad = 6;    break;
+                numjoypad = 6;
+                break;
             case PORTB_PAD3:
-                numjoypad = 7;    break;
-            }				
+                numjoypad = 7;
+                break;
+            }
 
             curstate = jp_joypads[numjoypad];
             if (curstate != prevstate) {
@@ -647,7 +655,7 @@ struct JOYPAD_IO_S
 };
 #define JOYPAD_IO ((*(volatile struct JOYPAD_IO_S *)JOYPAD_IO_BASE))
 
-static const Uint16 joypad_masks[8*4]={
+static const Uint16 joypad_masks[8 * 4] = {
     0xfffe, 0xfffd, 0xfffb, 0xfff7,
     0xfff0, 0xfff1, 0xfff2, 0xfff3,
     0xfff4, 0xfff5, 0xfff6, 0xfff8,
@@ -685,35 +693,35 @@ UpdateJoypads(void)
     tmp = (JOYPAD_IO.paddles[3] & 255);
     jp_paddles[3] = (tmp << 8) | tmp;
 
-    /* Update joypads on teamtap port A */	
-    for (i=0; i<4; i++) {
+    /* Update joypads on teamtap port A */
+    for (i = 0; i < 4; i++) {
         jp_joypads[i] = 0;
-        for (j=0; j<4; j++) {
-            JOYPAD_IO.directions = joypad_masks[(i*4)+j];
+        for (j = 0; j < 4; j++) {
+            JOYPAD_IO.directions = joypad_masks[(i * 4) + j];
 
-            cur_fire = (~(JOYPAD_IO.fires) & 3)<<16;
-            cur_dir = (~(JOYPAD_IO.directions)>>8) & 15;
+            cur_fire = (~(JOYPAD_IO.fires) & 3) << 16;
+            cur_dir = (~(JOYPAD_IO.directions) >> 8) & 15;
 
-            jp_joypads[i] |= cur_fire<<(j*2);
-            jp_joypads[i] |= cur_dir<<(j*4);
+            jp_joypads[i] |= cur_fire << (j * 2);
+            jp_joypads[i] |= cur_dir << (j * 4);
         }
     }
 
-    /* Update joypads on teamtap port B */	
-    for (i=4; i<8; i++) {
+    /* Update joypads on teamtap port B */
+    for (i = 4; i < 8; i++) {
         jp_joypads[i] = 0;
-        for (j=0; j<4; j++) {
-            JOYPAD_IO.directions = joypad_masks[(i*4)+j];
+        for (j = 0; j < 4; j++) {
+            JOYPAD_IO.directions = joypad_masks[(i * 4) + j];
 
-            cur_fire = (~(JOYPAD_IO.fires) & 0xc)<<14;
-            cur_dir = (~(JOYPAD_IO.directions)>>12) & 15;
+            cur_fire = (~(JOYPAD_IO.fires) & 0xc) << 14;
+            cur_dir = (~(JOYPAD_IO.directions) >> 12) & 15;
 
-            jp_joypads[i] |= cur_fire<<(j*2);
-            jp_joypads[i] |= cur_dir<<(j*4);
+            jp_joypads[i] |= cur_fire << (j * 2);
+            jp_joypads[i] |= cur_dir << (j * 4);
         }
     }
 
-    JOYPAD_IO.directions=0xffff;
+    JOYPAD_IO.directions = 0xffff;
 }
 
 #endif /* SDL_JOYSTICK_MINT */
