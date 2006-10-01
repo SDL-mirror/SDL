@@ -19,17 +19,17 @@ CONFIG_PPC="--build=`uname -p`-apple-darwin --host=powerpc-apple-darwin \
 CC_PPC="gcc-3.3 -arch ppc"
 CXX_PPC="g++-3.3 -arch ppc"
 CFLAGS_PPC=""
-CPPFLAGS_PPC="-DMAC_OS_X_VERSION_MIN_REQUIRED=1020 \
+CPPFLAGS_PPC="-DMAC_OS_X_VERSION_MIN_REQUIRED=1030 \
 -nostdinc \
--F/Developer/SDKs/MacOSX10.2.8.sdk/System/Library/Frameworks \
--I/Developer/SDKs/MacOSX10.2.8.sdk/usr/include/gcc/darwin/3.3 \
--isystem /Developer/SDKs/MacOSX10.2.8.sdk/usr/include"
+-F/Developer/SDKs/MacOSX10.3.9.sdk/System/Library/Frameworks \
+-I/Developer/SDKs/MacOSX10.3.9.sdk/usr/include/gcc/darwin/3.3 \
+-isystem /Developer/SDKs/MacOSX10.3.9.sdk/usr/include"
 
 # PowerPC linker flags 
 LFLAGS_PPC="-arch ppc \
--L/Developer/SDKs/MacOSX10.2.8.sdk/usr/lib/gcc/darwin/3.3 \
--F/Developer/SDKs/MacOSX10.2.8.sdk/System/Library/Frameworks \
--Wl,-syslibroot,/Developer/SDKs/MacOSX10.2.8.sdk"
+-L/Developer/SDKs/MacOSX10.3.9.sdk/usr/lib/gcc/darwin/3.3 \
+-F/Developer/SDKs/MacOSX10.3.9.sdk/System/Library/Frameworks \
+-Wl,-syslibroot,/Developer/SDKs/MacOSX10.3.9.sdk"
 
 # Intel configure flags (10.4 runtime compatibility)
 # We dynamically load X11, so using the system X11 headers is fine.
