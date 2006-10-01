@@ -371,7 +371,7 @@ SDL_AudioInit(const char *driver_name)
            This probably isn't the place to do this, but... Shh! :)
          */
         for (i = 0; bootstrap[i]; ++i) {
-            if (SDL_strcmp(bootstrap[i]->name, "esd") == 0) {
+            if (SDL_strcasecmp(bootstrap[i]->name, "esd") == 0) {
 #ifdef HAVE_PUTENV
                 const char *esd_no_spawn;
 
@@ -397,8 +397,7 @@ SDL_AudioInit(const char *driver_name)
     if (audio == NULL) {
         if (driver_name != NULL) {
             for (i = 0; bootstrap[i]; ++i) {
-                if (SDL_strncmp(bootstrap[i]->name, driver_name,
-                                SDL_strlen(bootstrap[i]->name)) == 0) {
+                if (SDL_strcasecmp(bootstrap[i]->name, driver_name) == 0) {
                     if (bootstrap[i]->available()) {
                         audio = bootstrap[i]->create(idx);
                     }
