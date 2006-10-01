@@ -198,8 +198,7 @@ SDL_VideoInit(const char *driver_name, Uint32 flags)
     }
     if (driver_name != NULL) {
         for (i = 0; bootstrap[i]; ++i) {
-            if (SDL_strncmp(bootstrap[i]->name, driver_name,
-                            SDL_strlen(bootstrap[i]->name)) == 0) {
+            if (SDL_strcasecmp(bootstrap[i]->name, driver_name) == 0) {
                 if (bootstrap[i]->available()) {
                     video = bootstrap[i]->create(index);
                 }
