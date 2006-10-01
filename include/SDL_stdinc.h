@@ -133,8 +133,8 @@ typedef int64_t Sint64;
 typedef uint64_t Uint64;
 #else
 /* This is really just a hack to prevent the compiler from complaining */
-typdef Sint32 Sint64;
-typdef Uint32 Uint64;
+typedef Sint32 Sint64;
+typedef Uint32 Uint64;
 #endif
 
 /* Make sure the types really have the right sizes */
