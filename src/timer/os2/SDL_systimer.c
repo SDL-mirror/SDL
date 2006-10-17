@@ -65,24 +65,28 @@ SDL_GetTicks(void)
 */
     /* inline asm to avoid runtime inclusion */
     _asm {
-    push edx
-            push eax
-            mov eax, dword ptr hires_now
-            mov edx, dword ptr hires_now + 4
-            sub eax, dword ptr hires_start_ticks
-            sbb edx, dword ptr hires_start_ticks + 4
-            mov ebx, 1000
-            mov ecx, edx
-            mul ebx
-            push eax
-            push edx
-            mov eax, ecx
-            mul ebx
-            pop eax
-            add edx, eax
-            pop eax
-            mov ebx, dword ptr hires_ticks_per_second
-            div ebx mov dword ptr ticks, eax pop edx pop eax}
+        push edx
+        push eax
+        mov eax, dword ptr hires_now
+        mov edx, dword ptr hires_now + 4
+        sub eax, dword ptr hires_start_ticks
+        sbb edx, dword ptr hires_start_ticks + 4
+        mov ebx, 1000
+        mov ecx, edx
+        mul ebx
+        push eax
+        push edx
+        mov eax, ecx
+        mul ebx
+        pop eax
+        add edx, eax
+        pop eax
+        mov ebx, dword ptr hires_ticks_per_second
+        div ebx
+        mov dword ptr ticks, eax
+        pop edx
+        pop eax
+    }
 
     return ticks;
 
@@ -178,7 +182,7 @@ SDL_Delay(Uint32 ms)
 static int timer_alive = 0;
 static SDL_Thread *timer = NULL;
 
-static int
+static int SDLCALL
 RunTimer(void *unused)
 {
     DosSetPriority(PRTYS_THREAD, PRTYC_TIMECRITICAL, 0, 0);

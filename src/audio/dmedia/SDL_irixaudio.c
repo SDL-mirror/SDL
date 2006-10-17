@@ -45,73 +45,12 @@
 #define alSetWidth(x,y) ALsetwidth(x,y)
 #endif
 
-/* Audio driver functions */
-static int AL_OpenAudio(_THIS, SDL_AudioSpec * spec);
-static void AL_WaitAudio(_THIS);
-static void AL_PlayAudio(_THIS);
-static Uint8 *AL_GetAudioBuf(_THIS);
-static void AL_CloseAudio(_THIS);
-
-/* Audio driver bootstrap functions */
-
-static int
-Audio_Available(void)
-{
-    return 1;
-}
-
-static void
-Audio_DeleteDevice(SDL_AudioDevice * device)
-{
-    SDL_free(device->hidden);
-    SDL_free(device);
-}
-
-static SDL_AudioDevice *
-Audio_CreateDevice(int devindex)
-{
-    SDL_AudioDevice *this;
-
-    /* Initialize all variables that we clean on shutdown */
-    this = (SDL_AudioDevice *) SDL_malloc(sizeof(SDL_AudioDevice));
-    if (this) {
-        SDL_memset(this, 0, (sizeof *this));
-        this->hidden = (struct SDL_PrivateAudioData *)
-            SDL_malloc((sizeof *this->hidden));
-    }
-    if ((this == NULL) || (this->hidden == NULL)) {
-        SDL_OutOfMemory();
-        if (this) {
-            SDL_free(this);
-        }
-        return (0);
-    }
-    SDL_memset(this->hidden, 0, (sizeof *this->hidden));
-
-    /* Set the function pointers */
-    this->OpenAudio = AL_OpenAudio;
-    this->WaitAudio = AL_WaitAudio;
-    this->PlayAudio = AL_PlayAudio;
-    this->GetAudioBuf = AL_GetAudioBuf;
-    this->CloseAudio = AL_CloseAudio;
-
-    this->free = Audio_DeleteDevice;
-
-    return this;
-}
-
-AudioBootStrap DMEDIA_bootstrap = {
-    "AL", "IRIX DMedia audio",
-    Audio_Available, Audio_CreateDevice
-};
-
-
 void static
-AL_WaitAudio(_THIS)
+IRIXAUDIO_WaitDevice(_THIS)
 {
     Sint32 timeleft;
 
-    timeleft = this->spec.samples - alGetFillable(audio_port);
+    timeleft = this->spec.samples - alGetFillable(this->hidden->audio_port);
     if (timeleft > 0) {
         timeleft /= (this->spec.freq / 1000);
         SDL_Delay((Uint32) timeleft);
@@ -119,61 +58,78 @@ AL_WaitAudio(_THIS)
 }
 
 static void
-AL_PlayAudio(_THIS)
+IRIXAUDIO_PlayDevice(_THIS)
 {
     /* Write the audio data out */
-    if (alWriteFrames(audio_port, mixbuf, this->spec.samples) < 0) {
+    ALport port = this->hidden->audio_port;
+    Uint8 *mixbuf = this->hidden->mixbuf;
+    if (alWriteFrames(port, mixbuf, this->spec.samples) < 0) {
         /* Assume fatal error, for now */
         this->enabled = 0;
     }
 }
 
 static Uint8 *
-AL_GetAudioBuf(_THIS)
+IRIXAUDIO_GetDeviceBuf(_THIS)
 {
-    return (mixbuf);
+    return (this->hidden->mixbuf);
 }
 
 static void
-AL_CloseAudio(_THIS)
+IRIXAUDIO_CloseDevice(_THIS)
 {
-    if (mixbuf != NULL) {
-        SDL_FreeAudioMem(mixbuf);
-        mixbuf = NULL;
-    }
-    if (audio_port != NULL) {
-        alClosePort(audio_port);
-        audio_port = NULL;
+    if (this->hidden != NULL) {
+        if (this->hidden->mixbuf != NULL) {
+            SDL_FreeAudioMem(this->hidden->mixbuf);
+            this->hidden->mixbuf = NULL;
+        }
+        if (this->hidden->audio_port != NULL) {
+            alClosePort(this->hidden->audio_port);
+            this->hidden->audio_port = NULL;
+        }
+        SDL_free(this->hidden);
+        this->hidden = NULL;
     }
 }
 
 static int
-AL_OpenAudio(_THIS, SDL_AudioSpec * spec)
+IRIXAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
 {
-    SDL_AudioFormat test_format = SDL_FirstAudioFormat(spec->format);
+    SDL_AudioFormat test_format = SDL_FirstAudioFormat(this->spec.format);
     long width = 0;
     long fmt = 0;
     int valid = 0;
+
+    /* !!! FIXME: Handle multiple devices and capture? */
+
+    /* Initialize all variables that we clean on shutdown */
+    this->hidden = (struct SDL_PrivateAudioData *)
+                        SDL_malloc((sizeof *this->hidden));
+    if (this->hidden == NULL) {
+        SDL_OutOfMemory();
+        return 0;
+    }
+    SDL_memset(this->hidden, 0, (sizeof *this->hidden));
 
 #ifdef OLD_IRIX_AUDIO
     {
         long audio_param[2];
         audio_param[0] = AL_OUTPUT_RATE;
-        audio_param[1] = spec->freq;
+        audio_param[1] = this->spec.freq;
         valid = (ALsetparams(AL_DEFAULT_DEVICE, audio_param, 2) < 0);
     }
 #else
     {
         ALpv audio_param;
         audio_param.param = AL_RATE;
-        audio_param.value.i = spec->freq;
+        audio_param.value.i = this->spec.freq;
         valid = (alSetParams(AL_DEFAULT_OUTPUT, &audio_param, 1) < 0);
     }
 #endif
 
     while ((!valid) && (test_format)) {
         valid = 1;
-        spec->format = test_format;
+        this->spec.format = test_format;
 
         switch (test_format) {
         case AUDIO_S8:
@@ -203,30 +159,31 @@ AL_OpenAudio(_THIS, SDL_AudioSpec * spec)
             ALconfig audio_config = alNewConfig();
             valid = 0;
             if (audio_config) {
-                if (alSetChannels(audio_config, spec->channels) < 0) {
-                    if (spec->channels > 2) {   /* can't handle > stereo? */
-                        spec->channels = 2;     /* try again below. */
+                if (alSetChannels(audio_config, this->spec.channels) < 0) {
+                    if (this->spec.channels > 2) { /* can't handle > stereo? */
+                        this->spec.channels = 2;   /* try again below. */
                     }
                 }
 
                 if ((alSetSampFmt(audio_config, fmt) >= 0) &&
                     ((!width) || (alSetWidth(audio_config, width) >= 0)) &&
-                    (alSetQueueSize(audio_config, spec->samples * 2) >= 0) &&
-                    (alSetChannels(audio_config, spec->channels) >= 0)) {
+                    (alSetQueueSize(audio_config,this->spec.samples*2) >= 0) &&
+                    (alSetChannels(audio_config, this->spec.channels) >= 0)) {
 
-                    audio_port = alOpenPort("SDL audio", "w", audio_config);
-                    if (audio_port == NULL) {
+                    this->hidden->audio_port = alOpenPort("SDL audio", "w",
+                                                          audio_config);
+                    if (this->hidden->audio_port == NULL) {
                         /* docs say AL_BAD_CHANNELS happens here, too. */
                         int err = oserror();
                         if (err == AL_BAD_CHANNELS) {
-                            spec->channels = 2;
-                            alSetChannels(audio_config, spec->channels);
-                            audio_port = alOpenPort("SDL audio", "w",
-                                                    audio_config);
+                            this->spec.channels = 2;
+                            alSetChannels(audio_config, this->spec.channels);
+                            this->hidden->audio_port = alOpenPort("SDL audio", "w",
+                                                                 audio_config);
                         }
                     }
 
-                    if (audio_port != NULL) {
+                    if (this->hidden->audio_port != NULL) {
                         valid = 1;
                     }
                 }
@@ -237,23 +194,43 @@ AL_OpenAudio(_THIS, SDL_AudioSpec * spec)
     }
 
     if (!valid) {
+        IRIXAUDIO_CloseDevice(this);
         SDL_SetError("Unsupported audio format");
-        return (-1);
+        return 0;
     }
 
     /* Update the fragment size as size in bytes */
-    SDL_CalculateAudioSpec(spec);
+    SDL_CalculateAudioSpec(&this->spec);
 
     /* Allocate mixing buffer */
-    mixbuf = (Uint8 *) SDL_AllocAudioMem(spec->size);
-    if (mixbuf == NULL) {
+    this->hidden->mixbuf = (Uint8 *) SDL_AllocAudioMem(this->spec.size);
+    if (this->hidden->mixbuf == NULL) {
+        IRIXAUDIO_CloseDevice(this);
         SDL_OutOfMemory();
-        return (-1);
+        return 0;
     }
-    SDL_memset(mixbuf, spec->silence, spec->size);
+    SDL_memset(this->hidden->mixbuf, this->spec.silence, this->spec.size);
 
     /* We're ready to rock and roll. :-) */
-    return (0);
+    return 1;
 }
+
+static int
+IRIXAUDIO_Init(SDL_AudioDriverImpl *impl)
+{
+    /* Set the function pointers */
+    impl->OpenDevice = DSP_OpenDevice;
+    impl->PlayDevice = DSP_PlayDevice;
+    impl->WaitDevice = DSP_WaitDevice;
+    impl->GetDeviceBuf = DSP_GetDeviceBuf;
+    impl->CloseDevice = DSP_CloseDevice;
+    impl->OnlyHasDefaultOutputDevice = 1;  /* !!! FIXME: not true, I think. */
+
+    return 1;
+}
+
+AudioBootStrap IRIXAUDIO_bootstrap = {
+    "AL", "IRIX DMedia audio", IRIXAUDIO_Init, 0
+};
 
 /* vi: set ts=4 sw=4 expandtab: */

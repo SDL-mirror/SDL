@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+/* !!! FIXME: merge this driver with "dsp". */
+
 /* Allow access to a raw mixing buffer */
 
 #include <stdio.h>
@@ -57,89 +59,353 @@
 #define DMA_DRIVER_NAME         "dma"
 
 /* Open the audio device for playback, and don't block if busy */
-#define OPEN_FLAGS	(O_RDWR|O_NONBLOCK)
+#define OPEN_FLAGS_INPUT    (O_RDWR|O_NONBLOCK)
+#define OPEN_FLAGS_OUTPUT   (O_RDWR|O_NONBLOCK)
 
-/* Audio driver functions */
-static int DMA_OpenAudio(_THIS, SDL_AudioSpec * spec);
-static void DMA_WaitAudio(_THIS);
-static void DMA_PlayAudio(_THIS);
-static Uint8 *DMA_GetAudioBuf(_THIS);
-static void DMA_CloseAudio(_THIS);
-
-/* Audio driver bootstrap functions */
+static char **outputDevices = NULL;
+static int outputDeviceCount = 0;
+static char **inputDevices = NULL;
+static int inputDeviceCount = 0;
 
 static int
-Audio_Available(void)
+test_for_mmap(int fd)
 {
-    int available;
-    int fd;
-
-    available = 0;
-
-    fd = SDL_OpenAudioPath(NULL, 0, OPEN_FLAGS, 0);
-    if (fd >= 0) {
-        int caps;
-        struct audio_buf_info info;
-
-        if ((ioctl(fd, SNDCTL_DSP_GETCAPS, &caps) == 0) &&
-            (caps & DSP_CAP_TRIGGER) && (caps & DSP_CAP_MMAP) &&
-            (ioctl(fd, SNDCTL_DSP_GETOSPACE, &info) == 0)) {
-            available = 1;
+    int caps = 0;
+    struct audio_buf_info info;
+    if ((ioctl(fd, SNDCTL_DSP_GETCAPS, &caps) == 0) &&
+        (caps & DSP_CAP_TRIGGER) && (caps & DSP_CAP_MMAP) &&
+        (ioctl(fd, SNDCTL_DSP_GETOSPACE, &info) == 0))
+    {
+        size_t len = info.fragstotal * info.fragsize;
+        Uint8 *buf = (Uint8 *) mmap(NULL, len, PROT_WRITE, MAP_SHARED, fd, 0);
+        if (buf != MAP_FAILED) {
+            munmap(buf, len);
+            return 1;
         }
-        close(fd);
     }
-    return (available);
+    return 0;
 }
+
+
+static inline void
+free_device_list(char ***devs, int *count)
+{
+    SDL_FreeUnixAudioDevices(devs, count);
+}
+
+static inline void
+build_device_list(int iscapture, char ***devs, int *count)
+{
+    const int flags = ((iscapture) ? OPEN_FLAGS_INPUT : OPEN_FLAGS_OUTPUT);
+    free_device_list(devs, count);
+    SDL_EnumUnixAudioDevices(flags, 0, test_for_mmap, devs, count);
+}
+
+static inline void
+build_device_lists(void)
+{
+    build_device_list(0, &outputDevices, &outputDeviceCount);
+    build_device_list(1, &inputDevices, &inputDeviceCount);
+}
+
+
+static inline void
+free_device_lists(void)
+{
+    free_device_list(&outputDevices, &outputDeviceCount);
+    free_device_list(&inputDevices, &inputDeviceCount);
+}
+
+
+static void DMA_Deinitialize(void)
+{
+    free_device_lists();
+}
+
+static int
+DMA_DetectDevices(int iscapture)
+{
+    if (iscapture) {
+        build_device_list(1, &inputDevices, &inputDeviceCount);
+        return inputDeviceCount;
+    } else {
+        build_device_list(0, &outputDevices, &outputDeviceCount);
+        return outputDeviceCount;
+    }
+
+    return 0;  /* shouldn't ever hit this. */
+}
+
+
+static const char *
+DMA_GetDeviceName(int index, int iscapture)
+{
+    if ((iscapture) && (index < inputDeviceCount)) {
+        return inputDevices[index];
+    } else if ((!iscapture) && (index < outputDeviceCount)) {
+        return outputDevices[index];
+    }
+
+    SDL_SetError("No such device");
+    return NULL;
+}
+
+
+static int
+DMA_ReopenAudio(_THIS, const char *audiodev, int format, int stereo)
+{
+    int frag_spec;
+    int value;
+
+    /* Close and then reopen the audio device */
+    close(audio_fd);
+    audio_fd = open(audiodev, O_RDWR, 0);
+    if (audio_fd < 0) {
+        SDL_SetError("Couldn't open %s: %s", audiodev, strerror(errno));
+        return (-1);
+    }
+
+    /* Calculate the final parameters for this audio specification */
+    SDL_CalculateAudioSpec(&this->spec);
+
+    /* Determine the power of two of the fragment size */
+    for (frag_spec = 0; (0x01 << frag_spec) < this->spec.size; ++frag_spec);
+    if ((0x01 << frag_spec) != this->spec.size) {
+        SDL_SetError("Fragment size must be a power of two");
+        return (-1);
+    }
+
+    /* Set the audio buffering parameters */
+    if (ioctl(audio_fd, SNDCTL_DSP_SETFRAGMENT, &frag_spec) < 0) {
+        SDL_SetError("Couldn't set audio fragment spec");
+        return (-1);
+    }
+
+    /* Set the audio format */
+    value = format;
+    if ((ioctl(audio_fd, SNDCTL_DSP_SETFMT, &value) < 0) || (value != format)) {
+        SDL_SetError("Couldn't set audio format");
+        return (-1);
+    }
+
+    /* Set mono or stereo audio */
+    value = (this->spec.channels > 1);
+    if ((ioctl(audio_fd, SNDCTL_DSP_STEREO, &stereo) < 0) ||
+        (value != stereo)) {
+        SDL_SetError("Couldn't set audio channels");
+        return (-1);
+    }
+
+    /* Set the DSP frequency */
+    value = this->spec.freq;
+    if (ioctl(audio_fd, SNDCTL_DSP_SPEED, &value) < 0) {
+        SDL_SetError("Couldn't set audio frequency");
+        return (-1);
+    }
+    this->spec.freq = value;
+
+    /* We successfully re-opened the audio */
+    return (0);
+}
+
 
 static void
-Audio_DeleteDevice(SDL_AudioDevice * device)
+DMA_CloseDevice(_THIS)
 {
-    SDL_free(device->hidden);
-    SDL_free(device);
+    if (this->hidden != NULL) {
+        if (dma_buf != NULL) {
+            munmap(dma_buf, dma_len);
+            dma_buf = NULL;
+        }
+        if (audio_fd >= 0) {
+            close(audio_fd);
+            audio_fd = -1;
+        }
+        SDL_free(this->hidden);
+        this->hidden = NULL;
+    }
 }
 
-static SDL_AudioDevice *
-Audio_CreateDevice(int devindex)
+
+static int
+DMA_OpenDevice(_THIS, const char *devname, int iscapture)
 {
-    SDL_AudioDevice *this;
+    const int flags = ((iscapture) ? OPEN_FLAGS_INPUT : OPEN_FLAGS_OUTPUT);
+    int format;
+    int stereo;
+    int value;
+    SDL_AudioFormat test_format;
+    struct audio_buf_info info;
+
+    /* We don't care what the devname is...we'll try to open anything. */
+    /*  ...but default to first name in the list... */
+    if (devname == NULL) {
+        if ( ((iscapture) && (inputDeviceCount == 0)) ||
+             ((!iscapture) && (outputDeviceCount == 0)) ) {
+            SDL_SetError("No such audio device");
+            return 0;
+        }
+        devname = ((iscapture) ? inputDevices[0] : outputDevices[0]);
+    }
 
     /* Initialize all variables that we clean on shutdown */
-    this = (SDL_AudioDevice *) SDL_malloc(sizeof(SDL_AudioDevice));
-    if (this) {
-        SDL_memset(this, 0, (sizeof *this));
-        this->hidden = (struct SDL_PrivateAudioData *)
-            SDL_malloc((sizeof *this->hidden));
-    }
-    if ((this == NULL) || (this->hidden == NULL)) {
+    this->hidden = (struct SDL_PrivateAudioData *)
+                        SDL_malloc((sizeof *this->hidden));
+    if (this->hidden == NULL) {
         SDL_OutOfMemory();
-        if (this) {
-            SDL_free(this);
-        }
-        return (0);
+        return 0;
     }
     SDL_memset(this->hidden, 0, (sizeof *this->hidden));
-    audio_fd = -1;
 
-    /* Set the function pointers */
-    this->OpenAudio = DMA_OpenAudio;
-    this->WaitAudio = DMA_WaitAudio;
-    this->PlayAudio = DMA_PlayAudio;
-    this->GetAudioBuf = DMA_GetAudioBuf;
-    this->CloseAudio = DMA_CloseAudio;
+    /* Open the audio device */
+    audio_fd = open(devname, flags, 0);
+    if (audio_fd < 0) {
+        DMA_CloseDevice(this);
+        SDL_SetError("Couldn't open %s: %s", devname, strerror(errno));
+        return 0;
+    }
+    dma_buf = NULL;
+    ioctl(audio_fd, SNDCTL_DSP_RESET, 0);
 
-    this->free = Audio_DeleteDevice;
+    /* Get a list of supported hardware formats */
+    if (ioctl(audio_fd, SNDCTL_DSP_GETFMTS, &value) < 0) {
+        DMA_CloseDevice(this);
+        SDL_SetError("Couldn't get audio format list");
+        return 0;
+    }
 
-    return this;
+    /* Try for a closest match on audio format */
+    format = 0;
+    for (test_format = SDL_FirstAudioFormat(this->spec.format);
+         !format && test_format;) {
+#ifdef DEBUG_AUDIO
+        fprintf(stderr, "Trying format 0x%4.4x\n", test_format);
+#endif
+        switch (test_format) {
+        case AUDIO_U8:
+            if (value & AFMT_U8) {
+                format = AFMT_U8;
+            }
+            break;
+        case AUDIO_S8:
+            if (value & AFMT_S8) {
+                format = AFMT_S8;
+            }
+            break;
+        case AUDIO_S16LSB:
+            if (value & AFMT_S16_LE) {
+                format = AFMT_S16_LE;
+            }
+            break;
+        case AUDIO_S16MSB:
+            if (value & AFMT_S16_BE) {
+                format = AFMT_S16_BE;
+            }
+            break;
+        case AUDIO_U16LSB:
+            if (value & AFMT_U16_LE) {
+                format = AFMT_U16_LE;
+            }
+            break;
+        case AUDIO_U16MSB:
+            if (value & AFMT_U16_BE) {
+                format = AFMT_U16_BE;
+            }
+            break;
+        default:
+            format = 0;
+            break;
+        }
+        if (!format) {
+            test_format = SDL_NextAudioFormat();
+        }
+    }
+    if (format == 0) {
+        DMA_CloseDevice(this);
+        SDL_SetError("Couldn't find any hardware audio formats");
+        return 0;
+    }
+    this->spec.format = test_format;
+
+    /* Set the audio format */
+    value = format;
+    if ((ioctl(audio_fd, SNDCTL_DSP_SETFMT, &value) < 0) || (value != format)) {
+        DMA_CloseDevice(this);
+        SDL_SetError("Couldn't set audio format");
+        return 0;
+    }
+
+    /* Set mono or stereo audio (currently only two channels supported) */
+    stereo = (this->spec.channels > 1);
+    ioctl(audio_fd, SNDCTL_DSP_STEREO, &stereo);
+    if (stereo) {
+        this->spec.channels = 2;
+    } else {
+        this->spec.channels = 1;
+    }
+
+    /* Because some drivers don't allow setting the buffer size
+       after setting the format, we must re-open the audio device
+       once we know what format and channels are supported
+     */
+    if (DMA_ReopenAudio(this, devname, format, stereo) < 0) {
+        DMA_CloseDevice(this);
+        /* Error is set by DMA_ReopenAudio() */
+        return 0;
+    }
+
+    /* Memory map the audio buffer */
+    if (ioctl(audio_fd, SNDCTL_DSP_GETOSPACE, &info) < 0) {
+        DMA_CloseDevice(this);
+        SDL_SetError("Couldn't get OSPACE parameters");
+        return 0;
+    }
+    this->spec.size = info.fragsize;
+    this->spec.samples = this->spec.size / ((this->spec.format & 0xFF) / 8);
+    this->spec.samples /= this->spec.channels;
+    num_buffers = info.fragstotal;
+    dma_len = num_buffers * this->spec.size;
+    dma_buf = (Uint8 *) mmap(NULL, dma_len, PROT_WRITE, MAP_SHARED,
+                             audio_fd, 0);
+    if (dma_buf == MAP_FAILED) {
+        DMA_CloseDevice(this);
+        SDL_SetError("DMA memory map failed");
+        dma_buf = NULL;
+        return 0;
+    }
+    SDL_memset(dma_buf, this->spec.silence, dma_len);
+
+    /* Check to see if we need to use select() workaround */
+    {
+        char *workaround;
+        workaround = SDL_getenv("SDL_DSP_NOSELECT");
+        if (workaround) {
+            frame_ticks = (float) (this->spec.samples*1000) / this->spec.freq;
+            next_frame = SDL_GetTicks() + frame_ticks;
+        }
+    }
+
+    /* Trigger audio playback */
+    value = 0;
+    ioctl(audio_fd, SNDCTL_DSP_SETTRIGGER, &value);
+    value = PCM_ENABLE_OUTPUT;
+    if (ioctl(audio_fd, SNDCTL_DSP_SETTRIGGER, &value) < 0) {
+        DMA_CloseDevice(this);
+        SDL_SetError("Couldn't trigger audio output");
+        return 0;
+    }
+
+    /* Get the parent process id (we're the parent of the audio thread) */
+    parent = getpid();
+
+    /* We're ready to rock and roll. :-) */
+    return 1;
 }
 
-AudioBootStrap DMA_bootstrap = {
-    DMA_DRIVER_NAME, "OSS /dev/dsp DMA audio",
-    Audio_Available, Audio_CreateDevice
-};
 
 /* This function waits until it is possible to write a full sound buffer */
 static void
-DMA_WaitAudio(_THIS)
+DMA_WaitDevice(_THIS)
 {
     fd_set fdset;
 
@@ -189,8 +455,8 @@ DMA_WaitAudio(_THIS)
             fprintf(stderr, "SDL: %s\n", message);
 #ifdef AUDIO_OSPACE_HACK
             /* We may be able to use GET_OSPACE trick */
-            frame_ticks = (float) (this->spec->samples * 1000) /
-                this->spec->freq;
+            frame_ticks = (float) (this->spec.samples * 1000) /
+                this->spec.freq;
             next_frame = SDL_GetTicks() + frame_ticks;
 #else
             this->enabled = 0;
@@ -208,7 +474,7 @@ DMA_WaitAudio(_THIS)
 }
 
 static void
-DMA_PlayAudio(_THIS)
+DMA_PlayDevice(_THIS)
 {
     /* If timer synchronization is enabled, set the next write frame */
     if (frame_ticks) {
@@ -218,7 +484,7 @@ DMA_PlayAudio(_THIS)
 }
 
 static Uint8 *
-DMA_GetAudioBuf(_THIS)
+DMA_GetDeviceBuf(_THIS)
 {
     count_info info;
     int playing;
@@ -243,225 +509,26 @@ DMA_GetAudioBuf(_THIS)
     return (dma_buf + (filling * this->spec.size));
 }
 
-static void
-DMA_CloseAudio(_THIS)
-{
-    if (dma_buf != NULL) {
-        munmap(dma_buf, dma_len);
-        dma_buf = NULL;
-    }
-    if (audio_fd >= 0) {
-        close(audio_fd);
-        audio_fd = -1;
-    }
-}
 
 static int
-DMA_ReopenAudio(_THIS, const char *audiodev, int format, int stereo,
-                SDL_AudioSpec * spec)
+DMA_Init(SDL_AudioDriverImpl *impl)
 {
-    int frag_spec;
-    int value;
+    /* Set the function pointers */
+    impl->DetectDevices = DMA_DetectDevices;
+    impl->GetDeviceName = DMA_GetDeviceName;
+    impl->OpenDevice = DMA_OpenDevice;
+    impl->WaitDevice = DMA_WaitDevice;
+    impl->PlayDevice = DMA_PlayDevice;
+    impl->GetDeviceBuf = DMA_GetDeviceBuf;
+    impl->CloseDevice = DMA_CloseDevice;
+    impl->Deinitialize = DMA_Deinitialize;
 
-    /* Close and then reopen the audio device */
-    close(audio_fd);
-    audio_fd = open(audiodev, O_RDWR, 0);
-    if (audio_fd < 0) {
-        SDL_SetError("Couldn't open %s: %s", audiodev, strerror(errno));
-        return (-1);
-    }
-
-    /* Calculate the final parameters for this audio specification */
-    SDL_CalculateAudioSpec(spec);
-
-    /* Determine the power of two of the fragment size */
-    for (frag_spec = 0; (0x01 << frag_spec) < spec->size; ++frag_spec);
-    if ((0x01 << frag_spec) != spec->size) {
-        SDL_SetError("Fragment size must be a power of two");
-        return (-1);
-    }
-
-    /* Set the audio buffering parameters */
-    if (ioctl(audio_fd, SNDCTL_DSP_SETFRAGMENT, &frag_spec) < 0) {
-        SDL_SetError("Couldn't set audio fragment spec");
-        return (-1);
-    }
-
-    /* Set the audio format */
-    value = format;
-    if ((ioctl(audio_fd, SNDCTL_DSP_SETFMT, &value) < 0) || (value != format)) {
-        SDL_SetError("Couldn't set audio format");
-        return (-1);
-    }
-
-    /* Set mono or stereo audio */
-    value = (spec->channels > 1);
-    if ((ioctl(audio_fd, SNDCTL_DSP_STEREO, &stereo) < 0) ||
-        (value != stereo)) {
-        SDL_SetError("Couldn't set audio channels");
-        return (-1);
-    }
-
-    /* Set the DSP frequency */
-    value = spec->freq;
-    if (ioctl(audio_fd, SNDCTL_DSP_SPEED, &value) < 0) {
-        SDL_SetError("Couldn't set audio frequency");
-        return (-1);
-    }
-    spec->freq = value;
-
-    /* We successfully re-opened the audio */
-    return (0);
+    build_device_lists();
+    return 1;
 }
 
-static int
-DMA_OpenAudio(_THIS, SDL_AudioSpec * spec)
-{
-    char audiodev[1024];
-    int format;
-    int stereo;
-    int value;
-    SDL_AudioFormat test_format;
-    struct audio_buf_info info;
-
-    /* Reset the timer synchronization flag */
-    frame_ticks = 0.0;
-
-    /* Open the audio device */
-    audio_fd = SDL_OpenAudioPath(audiodev, sizeof(audiodev), OPEN_FLAGS, 0);
-    if (audio_fd < 0) {
-        SDL_SetError("Couldn't open %s: %s", audiodev, strerror(errno));
-        return (-1);
-    }
-    dma_buf = NULL;
-    ioctl(audio_fd, SNDCTL_DSP_RESET, 0);
-
-    /* Get a list of supported hardware formats */
-    if (ioctl(audio_fd, SNDCTL_DSP_GETFMTS, &value) < 0) {
-        SDL_SetError("Couldn't get audio format list");
-        return (-1);
-    }
-
-    /* Try for a closest match on audio format */
-    format = 0;
-    for (test_format = SDL_FirstAudioFormat(spec->format);
-         !format && test_format;) {
-#ifdef DEBUG_AUDIO
-        fprintf(stderr, "Trying format 0x%4.4x\n", test_format);
-#endif
-        switch (test_format) {
-        case AUDIO_U8:
-            if (value & AFMT_U8) {
-                format = AFMT_U8;
-            }
-            break;
-        case AUDIO_S8:
-            if (value & AFMT_S8) {
-                format = AFMT_S8;
-            }
-            break;
-        case AUDIO_S16LSB:
-            if (value & AFMT_S16_LE) {
-                format = AFMT_S16_LE;
-            }
-            break;
-        case AUDIO_S16MSB:
-            if (value & AFMT_S16_BE) {
-                format = AFMT_S16_BE;
-            }
-            break;
-        case AUDIO_U16LSB:
-            if (value & AFMT_U16_LE) {
-                format = AFMT_U16_LE;
-            }
-            break;
-        case AUDIO_U16MSB:
-            if (value & AFMT_U16_BE) {
-                format = AFMT_U16_BE;
-            }
-            break;
-        default:
-            format = 0;
-            break;
-        }
-        if (!format) {
-            test_format = SDL_NextAudioFormat();
-        }
-    }
-    if (format == 0) {
-        SDL_SetError("Couldn't find any hardware audio formats");
-        return (-1);
-    }
-    spec->format = test_format;
-
-    /* Set the audio format */
-    value = format;
-    if ((ioctl(audio_fd, SNDCTL_DSP_SETFMT, &value) < 0) || (value != format)) {
-        SDL_SetError("Couldn't set audio format");
-        return (-1);
-    }
-
-    /* Set mono or stereo audio (currently only two channels supported) */
-    stereo = (spec->channels > 1);
-    ioctl(audio_fd, SNDCTL_DSP_STEREO, &stereo);
-    if (stereo) {
-        spec->channels = 2;
-    } else {
-        spec->channels = 1;
-    }
-
-    /* Because some drivers don't allow setting the buffer size
-       after setting the format, we must re-open the audio device
-       once we know what format and channels are supported
-     */
-    if (DMA_ReopenAudio(this, audiodev, format, stereo, spec) < 0) {
-        /* Error is set by DMA_ReopenAudio() */
-        return (-1);
-    }
-
-    /* Memory map the audio buffer */
-    if (ioctl(audio_fd, SNDCTL_DSP_GETOSPACE, &info) < 0) {
-        SDL_SetError("Couldn't get OSPACE parameters");
-        return (-1);
-    }
-    spec->size = info.fragsize;
-    spec->samples = spec->size / ((spec->format & 0xFF) / 8);
-    spec->samples /= spec->channels;
-    num_buffers = info.fragstotal;
-    dma_len = num_buffers * spec->size;
-    dma_buf = (Uint8 *) mmap(NULL, dma_len, PROT_WRITE, MAP_SHARED,
-                             audio_fd, 0);
-    if (dma_buf == MAP_FAILED) {
-        SDL_SetError("DMA memory map failed");
-        dma_buf = NULL;
-        return (-1);
-    }
-    SDL_memset(dma_buf, spec->silence, dma_len);
-
-    /* Check to see if we need to use select() workaround */
-    {
-        char *workaround;
-        workaround = SDL_getenv("SDL_DSP_NOSELECT");
-        if (workaround) {
-            frame_ticks = (float) (spec->samples * 1000) / spec->freq;
-            next_frame = SDL_GetTicks() + frame_ticks;
-        }
-    }
-
-    /* Trigger audio playback */
-    value = 0;
-    ioctl(audio_fd, SNDCTL_DSP_SETTRIGGER, &value);
-    value = PCM_ENABLE_OUTPUT;
-    if (ioctl(audio_fd, SNDCTL_DSP_SETTRIGGER, &value) < 0) {
-        SDL_SetError("Couldn't trigger audio output");
-        return (-1);
-    }
-
-    /* Get the parent process id (we're the parent of the audio thread) */
-    parent = getpid();
-
-    /* We're ready to rock and roll. :-) */
-    return (0);
-}
+AudioBootStrap DMA_bootstrap = {
+    DMA_DRIVER_NAME, "OSS /dev/dsp DMA audio", DMA_Init, 0
+};
 
 /* vi: set ts=4 sw=4 expandtab: */

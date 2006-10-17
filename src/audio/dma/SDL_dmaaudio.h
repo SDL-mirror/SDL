@@ -21,12 +21,12 @@
 */
 #include "SDL_config.h"
 
-#ifndef _SDL_dspaudio_h
-#define _SDL_dspaudio_h
+#ifndef _SDL_dmaaudio_h
+#define _SDL_dmaaudio_h
 
 #include "../SDL_sysaudio.h"
 
-/* Hidden "this" pointer for the video functions */
+/* Hidden "this" pointer for the audio functions */
 #define _THIS	SDL_AudioDevice *this
 
 struct SDL_PrivateAudioData
@@ -49,6 +49,7 @@ struct SDL_PrivateAudioData
 #define FUDGE_TICKS	10      /* The scheduler overhead ticks per frame */
 
 /* Old variable names */
+/* !!! FIXME: remove these. */
 #define audio_fd		(this->hidden->audio_fd)
 #define parent			(this->hidden->parent)
 #define dma_buf			(this->hidden->dma_buf)
@@ -57,5 +58,6 @@ struct SDL_PrivateAudioData
 #define frame_ticks		(this->hidden->frame_ticks)
 #define next_frame		(this->hidden->next_frame)
 
-#endif /* _SDL_dspaudio_h */
+#endif /* _SDL_dmaaudio_h */
+
 /* vi: set ts=4 sw=4 expandtab: */

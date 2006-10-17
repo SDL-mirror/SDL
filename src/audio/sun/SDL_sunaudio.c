@@ -1,3 +1,8 @@
+/* I'm gambling no one uses this audio backend...we'll see who emails.  :)  */
+#error this code has not been updated for SDL 1.3.
+#error if no one emails icculus at icculus.org and tells him that this
+#error  code is needed, this audio backend will eventually be removed from SDL.
+
 /*
     SDL - Simple DirectMedia Layer
     Copyright (C) 1997-2006 Sam Lantinga
@@ -116,7 +121,7 @@ Audio_CreateDevice(int devindex)
 
 AudioBootStrap SUNAUDIO_bootstrap = {
     "audio", "UNIX /dev/audio interface",
-    Audio_Available, Audio_CreateDevice
+    Audio_Available, Audio_CreateDevice, 0
 };
 
 #ifdef DEBUG_AUDIO

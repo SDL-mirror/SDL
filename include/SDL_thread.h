@@ -91,7 +91,7 @@ typedef uintptr_t(__cdecl * pfnSDL_CurrentBeginThread) (void *, unsigned,
 typedef void (__cdecl * pfnSDL_CurrentEndThread) (unsigned code);
 #endif
 
-extern DECLSPEC SDL_Thread *SDLCALL SDL_CreateThread(int (*fn) (void *),
+extern DECLSPEC SDL_Thread *SDLCALL SDL_CreateThread(int (SDLCALL * f) (void *),
                                                      void *data,
                                                      pfnSDL_CurrentBeginThread
                                                      pfnBeginThread,

@@ -159,21 +159,19 @@ SDL_ConvertMono(SDL_AudioCVT * cvt, SDL_AudioFormat format)
             float *dst = (float *) cvt->buf;
             if (SDL_AUDIO_ISBIGENDIAN(format)) {
                 for (i = cvt->len_cvt / 8; i; --i, src += 2) {
-                    float src1, src2;
-                    src1 = SDL_SwapFloatBE(src[0]);
-                    src2 = SDL_SwapFloatBE(src[1]);
+                    const float src1 = SDL_SwapFloatBE(src[0]);
+                    const float src2 = SDL_SwapFloatBE(src[1]);
                     const double added = ((double) src1) + ((double) src2);
-                    src1 = (float) (added * 0.5);
-                    *(dst++) = SDL_SwapFloatBE(src1);
+                    const float halved = (float) (added * 0.5);
+                    *(dst++) = SDL_SwapFloatBE(halved);
                 }
             } else {
                 for (i = cvt->len_cvt / 8; i; --i, src += 2) {
-                    float src1, src2;
-                    src1 = SDL_SwapFloatLE(src[0]);
-                    src2 = SDL_SwapFloatLE(src[1]);
+                    const float src1 = SDL_SwapFloatLE(src[0]);
+                    const float src2 = SDL_SwapFloatLE(src[1]);
                     const double added = ((double) src1) + ((double) src2);
-                    src1 = (float) (added * 0.5);
-                    *(dst++) = SDL_SwapFloatLE(src1);
+                    const float halved = (float) (added * 0.5);
+                    *(dst++) = SDL_SwapFloatLE(halved);
                 }
             }
         }

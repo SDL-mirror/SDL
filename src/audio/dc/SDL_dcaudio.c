@@ -28,84 +28,10 @@
 #include "SDL_audio.h"
 #include "../SDL_audiomem.h"
 #include "../SDL_audio_c.h"
-#include "../SDL_audiodev_c.h"
 #include "SDL_dcaudio.h"
 
 #include "aica.h"
 #include <dc/spu.h>
-
-/* Audio driver functions */
-static int DCAUD_OpenAudio(_THIS, SDL_AudioSpec * spec);
-static void DCAUD_WaitAudio(_THIS);
-static void DCAUD_PlayAudio(_THIS);
-static Uint8 *DCAUD_GetAudioBuf(_THIS);
-static void DCAUD_CloseAudio(_THIS);
-
-/* Audio driver bootstrap functions */
-static int
-DCAUD_Available(void)
-{
-    return 1;
-}
-
-static void
-DCAUD_DeleteDevice(SDL_AudioDevice * device)
-{
-    SDL_free(device->hidden);
-    SDL_free(device);
-}
-
-static SDL_AudioDevice *
-DCAUD_CreateDevice(int devindex)
-{
-    SDL_AudioDevice *this;
-
-    /* Initialize all variables that we clean on shutdown */
-    this = (SDL_AudioDevice *) SDL_malloc(sizeof(SDL_AudioDevice));
-    if (this) {
-        SDL_memset(this, 0, (sizeof *this));
-        this->hidden = (struct SDL_PrivateAudioData *)
-            SDL_malloc((sizeof *this->hidden));
-    }
-    if ((this == NULL) || (this->hidden == NULL)) {
-        SDL_OutOfMemory();
-        if (this) {
-            SDL_free(this);
-        }
-        return (0);
-    }
-    SDL_memset(this->hidden, 0, (sizeof *this->hidden));
-
-    /* Set the function pointers */
-    this->OpenAudio = DCAUD_OpenAudio;
-    this->WaitAudio = DCAUD_WaitAudio;
-    this->PlayAudio = DCAUD_PlayAudio;
-    this->GetAudioBuf = DCAUD_GetAudioBuf;
-    this->CloseAudio = DCAUD_CloseAudio;
-
-    this->free = DCAUD_DeleteDevice;
-
-    spu_init();
-
-    return this;
-}
-
-AudioBootStrap DCAUD_bootstrap = {
-    "dcaudio", "Dreamcast AICA audio",
-    DCAUD_Available, DCAUD_CreateDevice
-};
-
-/* This function waits until it is possible to write a full sound buffer */
-static void
-DCAUD_WaitAudio(_THIS)
-{
-    if (this->hidden->playing) {
-        /* wait */
-        while (aica_get_pos(0) / this->spec.samples == this->hidden->nextbuf) {
-            thd_pass();
-        }
-    }
-}
 
 #define	SPU_RAM_BASE	0xa0800000
 
@@ -152,7 +78,7 @@ spu_memload_stereo16(int leftpos, int rightpos, void *src0, size_t size)
 }
 
 static void
-DCAUD_PlayAudio(_THIS)
+DCAUD_PlayDevice(_THIS)
 {
     SDL_AudioSpec *spec = &this->spec;
     unsigned int offset;
@@ -200,28 +126,59 @@ DCAUD_PlayAudio(_THIS)
 }
 
 static Uint8 *
-DCAUD_GetAudioBuf(_THIS)
+DCAUD_GetDeviceBuf(_THIS)
 {
     return (this->hidden->mixbuf);
 }
 
+/* This function waits until it is possible to write a full sound buffer */
 static void
-DCAUD_CloseAudio(_THIS)
+DCAUD_WaitDevice(_THIS)
 {
-    aica_stop(0);
-    if (this->spec.channels == 2)
-        aica_stop(1);
-    if (this->hidden->mixbuf != NULL) {
-        SDL_FreeAudioMem(this->hidden->mixbuf);
-        this->hidden->mixbuf = NULL;
+    if (this->hidden->playing) {
+        /* wait */
+        while (aica_get_pos(0) / this->spec.samples == this->hidden->nextbuf) {
+            thd_pass();
+        }
+    }
+}
+
+static void
+DCAUD_CloseDevice(_THIS)
+{
+    if (this->hidden != NULL) {
+        aica_stop(0);
+        if (this->spec.channels == 2) {
+            aica_stop(1);
+        }
+        if (this->hidden->mixbuf != NULL) {
+            SDL_FreeAudioMem(this->hidden->mixbuf);
+            this->hidden->mixbuf = NULL;
+        }
+        SDL_free(this->hidden);
+        this->hidden = NULL;
+
+        /* !!! FIXME: is there a reverse of spu_init()? */
     }
 }
 
 static int
-DCAUD_OpenAudio(_THIS, SDL_AudioSpec * spec)
+DCAUD_OpenDevice(_THIS, SDL_AudioSpec * spec)
 {
     SDL_AudioFormat test_format = SDL_FirstAudioFormat(spec->format);
     int valid_datatype = 0;
+
+    /* Initialize all variables that we clean on shutdown */
+    this->hidden = (struct SDL_PrivateAudioData *)
+                        SDL_malloc((sizeof *this->hidden));
+    if (this->hidden == NULL) {
+        SDL_OutOfMemory();
+        return 0;
+    }
+    SDL_memset(this->hidden, 0, (sizeof *this->hidden));
+
+    spu_init();
+
     while ((!valid_datatype) && (test_format)) {
         spec->format = test_format;
         switch (test_format) {
@@ -238,8 +195,9 @@ DCAUD_OpenAudio(_THIS, SDL_AudioSpec * spec)
     }
 
     if (!valid_datatype) {      /* shouldn't happen, but just in case... */
+        DCAUD_CloseDevice(this);
         SDL_SetError("Unsupported audio format");
-        return (-1);
+        return 0;
     }
 
     if (spec->channels > 2)
@@ -252,7 +210,9 @@ DCAUD_OpenAudio(_THIS, SDL_AudioSpec * spec)
     this->hidden->mixlen = spec->size;
     this->hidden->mixbuf = (Uint8 *) SDL_AllocAudioMem(this->hidden->mixlen);
     if (this->hidden->mixbuf == NULL) {
-        return (-1);
+        DCAUD_CloseDevice(this);
+        SDL_OutOfMemory();
+        return 0;
     }
     SDL_memset(this->hidden->mixbuf, spec->silence, spec->size);
     this->hidden->leftpos = 0x11000;
@@ -261,7 +221,25 @@ DCAUD_OpenAudio(_THIS, SDL_AudioSpec * spec)
     this->hidden->nextbuf = 0;
 
     /* We're ready to rock and roll. :-) */
-    return (0);
+    return 1;
 }
+
+static int
+DCAUD_Init(SDL_AudioDriverImpl *impl)
+{
+    /* Set the function pointers */
+    impl->OpenDevice = DCAUD_OpenDevice;
+    impl->PlayDevice = DCAUD_PlayDevice;
+    impl->WaitDevice = DCAUD_WaitDevice;
+    impl->GetDeviceBuf = DCAUD_GetDeviceBuf;
+    impl->CloseDevice = DCAUD_CloseDevice;
+    impl->OnlyHasDefaultOutputDevice = 1;
+
+    return 1;
+}
+
+AudioBootStrap DCAUD_bootstrap = {
+    "dcaudio", "Dreamcast AICA audio", DCAUD_Init, 0
+};
 
 /* vi: set ts=4 sw=4 expandtab: */

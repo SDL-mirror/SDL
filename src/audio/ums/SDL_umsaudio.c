@@ -1,3 +1,8 @@
+/* I'm gambling no one uses this audio backend...we'll see who emails.  :)  */
+#error this code has not been updated for SDL 1.3.
+#error if no one emails icculus at icculus.org and tells him that this
+#error  code is needed, this audio backend will eventually be removed from SDL.
+
 /*
     SDL - Simple DirectMedia Layer
     Copyright (C) 1997-2006 Sam Lantinga
@@ -36,7 +41,6 @@
 
 #include "SDL_audio.h"
 #include "../SDL_audio_c.h"
-#include "../SDL_audiodev_c.h"
 #include "SDL_umsaudio.h"
 
 /* The tag name used by UMS audio */
@@ -152,7 +156,7 @@ Audio_CreateDevice(int devindex)
 
 AudioBootStrap UMS_bootstrap = {
     UMS_DRIVER_NAME, "AIX UMS audio",
-    Audio_Available, Audio_CreateDevice
+    Audio_Available, Audio_CreateDevice, 0
 };
 
 static Uint8 *

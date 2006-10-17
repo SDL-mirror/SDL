@@ -30,16 +30,17 @@
 #include <fcntl.h>
 #include <sys/time.h>
 #include <sys/ioctl.h>
+#include <sys/types.h>
 #include <sys/stat.h>
 
 #include "SDL_timer.h"
 #include "SDL_audio.h"
+#include "SDL_stdinc.h"
 #include "../SDL_audiomem.h"
 #include "../SDL_audio_c.h"
-#include "../SDL_audiodev_c.h"
 #include "SDL_paudio.h"
 
-#define DEBUG_AUDIO 1
+#define DEBUG_AUDIO 0
 
 /* A conflict within AIX 4.3.3 <sys/> headers and probably others as well.
  * I guess nobody ever uses audio... Shame over AIX header files.  */
@@ -48,94 +49,95 @@
 #include <sys/audio.h>
 
 /* The tag name used by paud audio */
-#define Paud_DRIVER_NAME         "paud"
+#define PAUDIO_DRIVER_NAME         "paud"
 
 /* Open the audio device for playback, and don't block if busy */
 /* #define OPEN_FLAGS	(O_WRONLY|O_NONBLOCK) */
 #define OPEN_FLAGS	O_WRONLY
 
-/* Audio driver functions */
-static int Paud_OpenAudio(_THIS, SDL_AudioSpec * spec);
-static void Paud_WaitAudio(_THIS);
-static void Paud_PlayAudio(_THIS);
-static Uint8 *Paud_GetAudioBuf(_THIS);
-static void Paud_CloseAudio(_THIS);
+/* Get the name of the audio device we use for output */
 
-/* Audio driver bootstrap functions */
+#ifndef _PATH_DEV_DSP
+#define _PATH_DEV_DSP	"/dev/%caud%c/%c"
+#endif
+
+static char devsettings[][3] = {
+    {'p', '0', '1'}, {'p', '0', '2'}, {'p', '0', '3'}, {'p', '0', '4'},
+    {'p', '1', '1'}, {'p', '1', '2'}, {'p', '1', '3'}, {'p', '1', '4'},
+    {'p', '2', '1'}, {'p', '2', '2'}, {'p', '2', '3'}, {'p', '2', '4'},
+    {'p', '3', '1'}, {'p', '3', '2'}, {'p', '3', '3'}, {'p', '3', '4'},
+    {'b', '0', '1'}, {'b', '0', '2'}, {'b', '0', '3'}, {'b', '0', '4'},
+    {'b', '1', '1'}, {'b', '1', '2'}, {'b', '1', '3'}, {'b', '1', '4'},
+    {'b', '2', '1'}, {'b', '2', '2'}, {'b', '2', '3'}, {'b', '2', '4'},
+    {'b', '3', '1'}, {'b', '3', '2'}, {'b', '3', '3'}, {'b', '3', '4'},
+    {'\0', '\0', '\0'}
+};
 
 static int
-Audio_Available(void)
+OpenUserDefinedDevice(char *path, int maxlen, int flags)
 {
+    const char *audiodev;
     int fd;
-    int available;
 
-    available = 0;
-    fd = SDL_OpenAudioPath(NULL, 0, OPEN_FLAGS, 0);
-    if (fd >= 0) {
-        available = 1;
-        close(fd);
+    /* Figure out what our audio device is */
+    if ((audiodev = SDL_getenv("SDL_PATH_DSP")) == NULL) {
+        audiodev = SDL_getenv("AUDIODEV");
     }
-    return (available);
+    if (audiodev == NULL) {
+        return -1;
+    }
+    fd = open(audiodev, flags, 0);
+    if (path != NULL) {
+        SDL_strlcpy(path, audiodev, maxlen);
+        path[maxlen - 1] = '\0';
+    }
+    return fd;
 }
 
-static void
-Audio_DeleteDevice(SDL_AudioDevice * device)
+static int
+OpenAudioPath(char *path, int maxlen, int flags, int classic)
 {
-    SDL_free(device->hidden);
-    SDL_free(device);
-}
+    struct stat sb;
+    int cycle = 0;
+    int fd = OpenUserDefinedDevice(path, maxlen, flags);
 
-static SDL_AudioDevice *
-Audio_CreateDevice(int devindex)
-{
-    SDL_AudioDevice *this;
-
-    /* Initialize all variables that we clean on shutdown */
-    this = (SDL_AudioDevice *) SDL_malloc(sizeof(SDL_AudioDevice));
-    if (this) {
-        SDL_memset(this, 0, (sizeof *this));
-        this->hidden = (struct SDL_PrivateAudioData *)
-            SDL_malloc((sizeof *this->hidden));
+    if (fd != -1) {
+        return fd;
     }
-    if ((this == NULL) || (this->hidden == NULL)) {
-        SDL_OutOfMemory();
-        if (this) {
-            SDL_free(this);
+
+    /* !!! FIXME: do we really need a table here? */
+    while (devsettings[cycle][0] != '\0') {
+        char audiopath[1024];
+        SDL_snprintf(audiopath, SDL_arraysize(audiopath),
+                     _PATH_DEV_DSP,
+                     devsettings[cycle][0],
+                     devsettings[cycle][1], devsettings[cycle][2]);
+
+        if (stat(audiopath, &sb) == 0) {
+            fd = open(audiopath, flags, 0);
+            if (fd > 0) {
+                if (path != NULL) {
+                    SDL_strlcpy(path, audiopath, maxlen);
+                }
+                return fd;
+            }
         }
-        return (0);
     }
-    SDL_memset(this->hidden, 0, (sizeof *this->hidden));
-    audio_fd = -1;
-
-    /* Set the function pointers */
-    this->OpenAudio = Paud_OpenAudio;
-    this->WaitAudio = Paud_WaitAudio;
-    this->PlayAudio = Paud_PlayAudio;
-    this->GetAudioBuf = Paud_GetAudioBuf;
-    this->CloseAudio = Paud_CloseAudio;
-
-    this->free = Audio_DeleteDevice;
-
-    return this;
+    return -1;
 }
-
-AudioBootStrap Paud_bootstrap = {
-    Paud_DRIVER_NAME, "AIX Paudio",
-    Audio_Available, Audio_CreateDevice
-};
 
 /* This function waits until it is possible to write a full sound buffer */
 static void
-Paud_WaitAudio(_THIS)
+PAUDIO_WaitDevice(_THIS)
 {
     fd_set fdset;
 
     /* See if we need to use timed audio synchronization */
-    if (frame_ticks) {
+    if (this->hidden->frame_ticks) {
         /* Use timer for general audio synchronization */
         Sint32 ticks;
 
-        ticks = ((Sint32) (next_frame - SDL_GetTicks())) - FUDGE_TICKS;
+        ticks = ((Sint32)(this->hidden->next_frame-SDL_GetTicks()))-FUDGE_TICKS;
         if (ticks > 0) {
             SDL_Delay(ticks);
         }
@@ -145,9 +147,9 @@ Paud_WaitAudio(_THIS)
         /* Use select() for audio synchronization */
         struct timeval timeout;
         FD_ZERO(&fdset);
-        FD_SET(audio_fd, &fdset);
+        FD_SET(this->hidden->audio_fd, &fdset);
 
-        if (ioctl(audio_fd, AUDIO_BUFFER, &paud_bufinfo) < 0) {
+        if (ioctl(this->hidden->audio_fd, AUDIO_BUFFER, &paud_bufinfo) < 0) {
 #ifdef DEBUG_AUDIO
             fprintf(stderr, "Couldn't get audio buffer information\n");
 #endif
@@ -168,7 +170,7 @@ Paud_WaitAudio(_THIS)
 #ifdef DEBUG_AUDIO
         fprintf(stderr, "Waiting for audio to get ready\n");
 #endif
-        if (select(audio_fd + 1, NULL, &fdset, NULL, &timeout) <= 0) {
+        if (select(this->hidden->audio_fd+1,NULL,&fdset,NULL,&timeout) <= 0) {
             const char *message =
                 "Audio timeout - buggy audio driver? (disabled)";
             /*
@@ -179,7 +181,7 @@ Paud_WaitAudio(_THIS)
             fprintf(stderr, "SDL: %s - %s\n", strerror(errno), message);
             this->enabled = 0;
             /* Don't try to close - may hang */
-            audio_fd = -1;
+            this->hidden->audio_fd = -1;
 #ifdef DEBUG_AUDIO
             fprintf(stderr, "Done disabling audio\n");
 #endif
@@ -191,13 +193,15 @@ Paud_WaitAudio(_THIS)
 }
 
 static void
-Paud_PlayAudio(_THIS)
+PAUDIO_PlayDevice(_THIS)
 {
-    int written;
+    int written = 0;
+    const Uint8 *mixbuf = this->hidden->mixbuf;
+    const size_t mixlen = this->hidden->mixlen;
 
     /* Write the audio data, checking for EAGAIN on broken audio drivers */
     do {
-        written = write(audio_fd, mixbuf, mixlen);
+        written = write(this->hidden->audio_fd, mixbuf, mixlen);
         if ((written < 0) && ((errno == 0) || (errno == EAGAIN))) {
             SDL_Delay(1);       /* Let a little CPU time go by */
         }
@@ -206,8 +210,8 @@ Paud_PlayAudio(_THIS)
            ((errno == 0) || (errno == EAGAIN) || (errno == EINTR)));
 
     /* If timer synchronization is enabled, set the next write frame */
-    if (frame_ticks) {
-        next_frame += frame_ticks;
+    if (this->hidden->frame_ticks) {
+        this->hidden->next_frame += this->hidden->frame_ticks;
     }
 
     /* If we couldn't write, assume fatal error for now */
@@ -220,28 +224,34 @@ Paud_PlayAudio(_THIS)
 }
 
 static Uint8 *
-Paud_GetAudioBuf(_THIS)
+PAUDIO_GetDeviceBuf(_THIS)
 {
-    return mixbuf;
+    return this->hidden->mixbuf;
 }
 
 static void
-Paud_CloseAudio(_THIS)
+PAUDIO_CloseDevice(_THIS)
 {
-    if (mixbuf != NULL) {
-        SDL_FreeAudioMem(mixbuf);
-        mixbuf = NULL;
-    }
-    if (audio_fd >= 0) {
-        close(audio_fd);
-        audio_fd = -1;
+    if (this->hidden != NULL) {
+        if (this->hidden->mixbuf != NULL) {
+            SDL_FreeAudioMem(this->hidden->mixbuf);
+            this->hidden->mixbuf = NULL;
+        }
+        if (this->hidden->audio_fd >= 0) {
+            close(this->hidden->audio_fd);
+            this->hidden->audio_fd = -1;
+        }
+        SDL_free(this->hidden);
+        this->hidden = NULL;
     }
 }
 
 static int
-Paud_OpenAudio(_THIS, SDL_AudioSpec * spec)
+PAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
 {
+    const char *workaround = SDL_getenv("SDL_DSP_NOSELECT");
     char audiodev[1024];
+    const char *err = NULL;
     int format;
     int bytes_per_sample;
     SDL_AudioFormat test_format;
@@ -250,32 +260,40 @@ Paud_OpenAudio(_THIS, SDL_AudioSpec * spec)
     audio_status paud_status;
     audio_control paud_control;
     audio_change paud_change;
+    int fd = -1;
 
-    /* Reset the timer synchronization flag */
-    frame_ticks = 0.0;
+    /* Initialize all variables that we clean on shutdown */
+    this->hidden = (struct SDL_PrivateAudioData *)
+                        SDL_malloc((sizeof *this->hidden));
+    if (this->hidden == NULL) {
+        SDL_OutOfMemory();
+        return 0;
+    }
+    SDL_memset(this->hidden, 0, (sizeof *this->hidden));
 
     /* Open the audio device */
-    audio_fd = SDL_OpenAudioPath(audiodev, sizeof(audiodev), OPEN_FLAGS, 0);
-    if (audio_fd < 0) {
+    fd = OpenAudioPath(audiodev, sizeof(audiodev), OPEN_FLAGS, 0);
+    this->hidden->audio_fd = fd;
+    if (fd < 0) {
+        PAUDIO_CloseDevice(this);
         SDL_SetError("Couldn't open %s: %s", audiodev, strerror(errno));
-        return -1;
+        return 0;
     }
 
     /*
      * We can't set the buffer size - just ask the device for the maximum
      * that we can have.
      */
-    if (ioctl(audio_fd, AUDIO_BUFFER, &paud_bufinfo) < 0) {
+    if (ioctl(fd, AUDIO_BUFFER, &paud_bufinfo) < 0) {
+        PAUDIO_CloseDevice(this);
         SDL_SetError("Couldn't get audio buffer information");
-        return -1;
+        return 0;
     }
 
-    mixbuf = NULL;
-
-    if (spec->channels > 1)
-        spec->channels = 2;
+    if (this->spec.channels > 1)
+        this->spec.channels = 2;
     else
-        spec->channels = 1;
+        this->spec.channels = 1;
 
     /*
      * Fields in the audio_init structure:
@@ -322,14 +340,14 @@ Paud_OpenAudio(_THIS, SDL_AudioSpec * spec)
      * paud.position_resolution; * smallest increment for position
      */
 
-    paud_init.srate = spec->freq;
+    paud_init.srate = this->spec.freq;
     paud_init.mode = PCM;
     paud_init.operation = PLAY;
-    paud_init.channels = spec->channels;
+    paud_init.channels = this->spec.channels;
 
     /* Try for a closest match on audio format */
     format = 0;
-    for (test_format = SDL_FirstAudioFormat(spec->format);
+    for (test_format = SDL_FirstAudioFormat(this->spec.format);
          !format && test_format;) {
 #ifdef DEBUG_AUDIO
         fprintf(stderr, "Trying format 0x%4.4x\n", test_format);
@@ -382,31 +400,32 @@ Paud_OpenAudio(_THIS, SDL_AudioSpec * spec)
 #ifdef DEBUG_AUDIO
         fprintf(stderr, "Couldn't find any hardware audio formats\n");
 #endif
+        PAUDIO_CloseDevice(this);
         SDL_SetError("Couldn't find any hardware audio formats");
-        return -1;
+        return 0;
     }
-    spec->format = test_format;
+    this->spec.format = test_format;
 
     /*
      * We know the buffer size and the max number of subsequent writes
-     * that can be pending. If more than one can pend, allow the application
-     * to do something like double buffering between our write buffer and
-     * the device's own buffer that we are filling with write() anyway.
+     *  that can be pending. If more than one can pend, allow the application
+     *  to do something like double buffering between our write buffer and
+     *  the device's own buffer that we are filling with write() anyway.
      *
-     * We calculate spec->samples like this because SDL_CalculateAudioSpec()
-     * will give put paud_bufinfo.write_buf_cap (or paud_bufinfo.write_buf_cap/2)
-     * into spec->size in return.
+     * We calculate this->spec.samples like this because
+     *  SDL_CalculateAudioSpec() will give put paud_bufinfo.write_buf_cap
+     *  (or paud_bufinfo.write_buf_cap/2) into this->spec.size in return.
      */
     if (paud_bufinfo.request_buf_cap == 1) {
-        spec->samples = paud_bufinfo.write_buf_cap
-            / bytes_per_sample / spec->channels;
+        this->spec.samples = paud_bufinfo.write_buf_cap
+            / bytes_per_sample / this->spec.channels;
     } else {
-        spec->samples = paud_bufinfo.write_buf_cap
-            / bytes_per_sample / spec->channels / 2;
+        this->spec.samples = paud_bufinfo.write_buf_cap
+            / bytes_per_sample / this->spec.channels / 2;
     }
-    paud_init.bsize = bytes_per_sample * spec->channels;
+    paud_init.bsize = bytes_per_sample * this->spec.channels;
 
-    SDL_CalculateAudioSpec(spec);
+    SDL_CalculateAudioSpec(&this->spec);
 
     /*
      * The AIX paud device init can't modify the values of the audio_init
@@ -416,47 +435,44 @@ Paud_OpenAudio(_THIS, SDL_AudioSpec * spec)
      * /dev/paud supports all of the encoding formats, so we don't need
      * to do anything like reopening the device, either.
      */
-    if (ioctl(audio_fd, AUDIO_INIT, &paud_init) < 0) {
+    if (ioctl(fd, AUDIO_INIT, &paud_init) < 0) {
         switch (paud_init.rc) {
         case 1:
-            SDL_SetError
-                ("Couldn't set audio format: DSP can't do play requests");
-            return -1;
+            err = "Couldn't set audio format: DSP can't do play requests";
             break;
         case 2:
-            SDL_SetError
-                ("Couldn't set audio format: DSP can't do record requests");
-            return -1;
+            err = "Couldn't set audio format: DSP can't do record requests";
             break;
         case 4:
-            SDL_SetError("Couldn't set audio format: request was invalid");
-            return -1;
+            err = "Couldn't set audio format: request was invalid";
             break;
         case 5:
-            SDL_SetError
-                ("Couldn't set audio format: conflict with open's flags");
-            return -1;
+            err = "Couldn't set audio format: conflict with open's flags";
             break;
         case 6:
-            SDL_SetError
-                ("Couldn't set audio format: out of DSP MIPS or memory");
-            return -1;
+            err = "Couldn't set audio format: out of DSP MIPS or memory";
             break;
         default:
-            SDL_SetError
-                ("Couldn't set audio format: not documented in sys/audio.h");
-            return -1;
+            err = "Couldn't set audio format: not documented in sys/audio.h";
             break;
         }
     }
 
-    /* Allocate mixing buffer */
-    mixlen = spec->size;
-    mixbuf = (Uint8 *) SDL_AllocAudioMem(mixlen);
-    if (mixbuf == NULL) {
-        return -1;
+    if (err != NULL) {
+        PAUDIO_CloseDevice(this);
+        SDL_SetError("Paudio: %s", err);
+        return 0;
     }
-    SDL_memset(mixbuf, spec->silence, spec->size);
+
+    /* Allocate mixing buffer */
+    this->hidden->mixlen = this->spec.size;
+    this->hidden->mixbuf = (Uint8 *) SDL_AllocAudioMem(this->hidden->mixlen);
+    if (this->hidden->mixbuf == NULL) {
+        PAUDIO_CloseDevice(this);
+        SDL_OutOfMemory();
+        return 0;
+    }
+    SDL_memset(this->hidden->mixbuf, this->spec.silence, this->spec.size);
 
     /*
      * Set some paramters: full volume, first speaker that we can find.
@@ -475,7 +491,7 @@ Paud_OpenAudio(_THIS, SDL_AudioSpec * spec)
 
     paud_control.ioctl_request = AUDIO_CHANGE;
     paud_control.request_info = (char *) &paud_change;
-    if (ioctl(audio_fd, AUDIO_CONTROL, &paud_control) < 0) {
+    if (ioctl(fd, AUDIO_CONTROL, &paud_control) < 0) {
 #ifdef DEBUG_AUDIO
         fprintf(stderr, "Can't change audio display settings\n");
 #endif
@@ -487,29 +503,49 @@ Paud_OpenAudio(_THIS, SDL_AudioSpec * spec)
      */
     paud_control.ioctl_request = AUDIO_START;
     paud_control.position = 0;
-    if (ioctl(audio_fd, AUDIO_CONTROL, &paud_control) < 0) {
+    if (ioctl(fd, AUDIO_CONTROL, &paud_control) < 0) {
+        PAUDIO_CloseDevice(this);
 #ifdef DEBUG_AUDIO
         fprintf(stderr, "Can't start audio play\n");
 #endif
         SDL_SetError("Can't start audio play");
-        return -1;
+        return 0;
     }
 
     /* Check to see if we need to use select() workaround */
-    {
-        char *workaround;
-        workaround = SDL_getenv("SDL_DSP_NOSELECT");
-        if (workaround) {
-            frame_ticks = (float) (spec->samples * 1000) / spec->freq;
-            next_frame = SDL_GetTicks() + frame_ticks;
-        }
+    if (workaround != NULL) {
+        this->hidden->frame_ticks = (float) (this->spec.samples * 1000) /
+                                                this->spec.freq;
+        this->hidden->next_frame = SDL_GetTicks() + this->hidden->frame_ticks;
     }
 
-    /* Get the parent process id (we're the parent of the audio thread) */
-    parent = getpid();
-
     /* We're ready to rock and roll. :-) */
-    return 0;
+    return 1;
 }
+
+static int
+PAUDIO_Init(SDL_AudioDriverImpl *impl)
+{
+    int fd = OpenAudioPath(NULL, 0, OPEN_FLAGS, 0);
+    if (fd < 0) {
+        SDL_SetError("PAUDIO: Couldn't open audio device");
+        return 0;
+    }
+    close(fd);
+
+    /* Set the function pointers */
+    impl->OpenDevice = DSP_OpenDevice;
+    impl->PlayDevice = DSP_PlayDevice;
+    impl->PlayDevice = DSP_WaitDevice;
+    impl->GetDeviceBuf = DSP_GetDeviceBuf;
+    impl->CloseDevice = DSP_CloseDevice;
+    impl->OnlyHasDefaultOutputDevice = 1;  /* !!! FIXME: add device enum! */
+
+    return 1;
+}
+
+AudioBootStrap PAUDIO_bootstrap = {
+    PAUDIO_DRIVER_NAME, "AIX Paudio", PAUDIO_Init, 0
+};
 
 /* vi: set ts=4 sw=4 expandtab: */

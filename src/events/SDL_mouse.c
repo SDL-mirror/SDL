@@ -165,7 +165,7 @@ SDL_GetMouseFocusWindow()
     return mouse->focus;
 }
 
-static int
+static int SDLCALL
 FlushMouseMotion(void *param, SDL_Event * event)
 {
     if (event->type == SDL_MOUSEMOTION

@@ -31,70 +31,6 @@
 
 static BOOL inUse[NUM_BUFFERS];
 
-/* Audio driver functions */
-static int MME_OpenAudio(_THIS, SDL_AudioSpec * spec);
-static void MME_WaitAudio(_THIS);
-static Uint8 *MME_GetAudioBuf(_THIS);
-static void MME_PlayAudio(_THIS);
-static void MME_WaitDone(_THIS);
-static void MME_CloseAudio(_THIS);
-
-/* Audio driver bootstrap functions */
-static int
-Audio_Available(void)
-{
-    return (1);
-}
-
-static void
-Audio_DeleteDevice(SDL_AudioDevice * device)
-{
-    if (device) {
-        if (device->hidden) {
-            SDL_free(device->hidden);
-            device->hidden = NULL;
-        }
-        SDL_free(device);
-        device = NULL;
-    }
-}
-
-static SDL_AudioDevice *
-Audio_CreateDevice(int devindex)
-{
-    SDL_AudioDevice *this;
-
-/* Initialize all variables that we clean on shutdown */
-    this = SDL_malloc(sizeof(SDL_AudioDevice));
-    if (this) {
-        SDL_memset(this, 0, (sizeof *this));
-        this->hidden = SDL_malloc((sizeof *this->hidden));
-    }
-    if ((this == NULL) || (this->hidden == NULL)) {
-        SDL_OutOfMemory();
-        if (this) {
-            SDL_free(this);
-        }
-        return (0);
-    }
-    SDL_memset(this->hidden, 0, (sizeof *this->hidden));
-    /* Set the function pointers */
-    this->OpenAudio = MME_OpenAudio;
-    this->WaitAudio = MME_WaitAudio;
-    this->PlayAudio = MME_PlayAudio;
-    this->GetAudioBuf = MME_GetAudioBuf;
-    this->WaitDone = MME_WaitDone;
-    this->CloseAudio = MME_CloseAudio;
-    this->free = Audio_DeleteDevice;
-
-    return this;
-}
-
-AudioBootStrap MMEAUDIO_bootstrap = {
-    "waveout", "Tru64 MME WaveOut",
-    Audio_Available, Audio_CreateDevice
-};
-
 static void
 SetMMerror(char *function, MMRESULT code)
 {
@@ -108,7 +44,7 @@ SetMMerror(char *function, MMRESULT code)
 }
 
 static void CALLBACK
-MME_CALLBACK(HWAVEOUT hwo,
+MME_Callback(HWAVEOUT hwo,
              UINT uMsg, DWORD dwInstance, LPARAM dwParam1, LPARAM dwParam2)
 {
     WAVEHDR *wp = (WAVEHDR *) dwParam1;
@@ -118,116 +54,137 @@ MME_CALLBACK(HWAVEOUT hwo,
 }
 
 static int
-MME_OpenAudio(_THIS, SDL_AudioSpec * spec)
+MME_OpenDevice(_THIS, const char *devname, int iscapture)
 {
+    int valid_format = 0;
     MMRESULT result;
+    Uint8 *mixbuf = NULL;
     int i;
 
-    mixbuf = NULL;
+    /* Initialize all variables that we clean on shutdown */
+    this->hidden = (struct SDL_PrivateAudioData *)
+                        SDL_malloc((sizeof *this->hidden));
+    if (this->hidden == NULL) {
+        SDL_OutOfMemory();
+        return 0;
+    }
+    SDL_memset(this->hidden, 0, (sizeof *this->hidden));
 
     /* Set basic WAVE format parameters */
-    shm = mmeAllocMem(sizeof(*shm));
-    if (shm == NULL) {
-        SDL_SetError("Out of memory: shm");
-        return (-1);
+    this->hidden->shm = mmeAllocMem(sizeof(*this->hidden->shm));
+    if (this->hidden->shm == NULL) {
+        MME_CloseDevice(this);
+        SDL_OutOfMemory();
+        return 0;
     }
-    shm->sound = 0;
-    shm->wFmt.wf.wFormatTag = WAVE_FORMAT_PCM;
+
+    SDL_memset(this->hidden->shm, '\0', sizeof (*this->hidden->shm));
+    this->hidden->shm->sound = 0;
+    this->hidden->shm->wFmt.wf.wFormatTag = WAVE_FORMAT_PCM;
 
     /* Determine the audio parameters from the AudioSpec */
-    switch (SDL_AUDIO_BITSIZE(spec->format)) {
-    case 8:
-        /* Unsigned 8 bit audio data */
-        spec->format = AUDIO_U8;
-        shm->wFmt.wBitsPerSample = 8;
-        break;
-    case 16:
-        /* Signed 16 bit audio data */
-        spec->format = AUDIO_S16;
-        shm->wFmt.wBitsPerSample = 16;
-        break;
-    case 32:
-        /* Signed 32 bit audio data */
-        spec->format = AUDIO_S32;
-        shm->wFmt.wBitsPerSample = 32;
-        break;
-    default:
-        SDL_SetError("Unsupported audio format");
-        return (-1);
+    /* Try for a closest match on audio format */
+    for (test_format = SDL_FirstAudioFormat(this->spec.format);
+         !valid_format && test_format;) {
+        valid_format = 1;
+        switch (test_format) {
+            case AUDIO_U8:
+            case AUDIO_S16:
+            case AUDIO_S32:
+                break;
+            default:
+                valid_format = 0;
+                test_format = SDL_NextAudioFormat();
+        }
     }
 
+    if (!valid_format) {
+        MME_CloseDevice(this);
+        SDL_SetError("Unsupported audio format");
+        return 0;
+    }
+
+    this->spec.format = test_format;
+    this->hidden->shm->wFmt.wBitsPerSample = SDL_AUDIO_BITSIZE(test_format);
+
     /* !!! FIXME: Can this handle more than stereo? */
-    shm->wFmt.wf.nChannels = spec->channels;
-    shm->wFmt.wf.nSamplesPerSec = spec->freq;
-    shm->wFmt.wf.nBlockAlign =
-        shm->wFmt.wf.nChannels * shm->wFmt.wBitsPerSample / 8;
-    shm->wFmt.wf.nAvgBytesPerSec =
-        shm->wFmt.wf.nSamplesPerSec * shm->wFmt.wf.nBlockAlign;
+    this->hidden->shm->wFmt.wf.nChannels = this->spec.channels;
+    this->hidden->shm->wFmt.wf.nSamplesPerSec = this->spec.freq;
+    this->hidden->shm->wFmt.wf.nBlockAlign =
+                                this->hidden->shm->wFmt.wf.nChannels *
+                                this->hidden->shm->wFmt.wBitsPerSample / 8;
+    this->hidden->shm->wFmt.wf.nAvgBytesPerSec =
+                                this->hidden->shm->wFmt.wf.nSamplesPerSec *
+                                this->hidden->shm->wFmt.wf.nBlockAlign;
 
     /* Check the buffer size -- minimum of 1/4 second (word aligned) */
-    if (spec->samples < (spec->freq / 4))
-        spec->samples = ((spec->freq / 4) + 3) & ~3;
+    if (this->spec.samples < (this->spec.freq / 4))
+        this->spec.samples = ((this->spec.freq / 4) + 3) & ~3;
 
     /* Update the fragment size as size in bytes */
-    SDL_CalculateAudioSpec(spec);
+    SDL_CalculateAudioSpec(&this->spec);
 
     /* Open the audio device */
-    result = waveOutOpen(&(shm->sound),
+    result = waveOutOpen(&(this->hidden->shm->sound),
                          WAVE_MAPPER,
-                         &(shm->wFmt.wf),
-                         MME_CALLBACK,
+                         &(this->hidden->shm->wFmt.wf),
+                         MME_Callback,
                          NULL, (CALLBACK_FUNCTION | WAVE_OPEN_SHAREABLE));
     if (result != MMSYSERR_NOERROR) {
+        MME_CloseDevice(this);
         SetMMerror("waveOutOpen()", result);
-        return (-1);
+        return 0;
     }
 
     /* Create the sound buffers */
-    mixbuf = (Uint8 *) mmeAllocBuffer(NUM_BUFFERS * (spec->size));
+    mixbuf = (Uint8 *) mmeAllocBuffer(NUM_BUFFERS * (this->spec.size));
     if (mixbuf == NULL) {
-        SDL_SetError("Out of memory: mixbuf");
-        return (-1);
+        MME_CloseDevice(this);
+        SDL_OutOfMemory();
+        return 0;
     }
+    this->hidden->mixbuf = mixbuf;
 
     for (i = 0; i < NUM_BUFFERS; i++) {
-        shm->wHdr[i].lpData = &mixbuf[i * (spec->size)];
-        shm->wHdr[i].dwBufferLength = spec->size;
-        shm->wHdr[i].dwFlags = 0;
-        shm->wHdr[i].dwUser = i;
-        shm->wHdr[i].dwLoops = 0;       /* loop control counter */
-        shm->wHdr[i].lpNext = NULL;     /* reserved for driver */
-        shm->wHdr[i].reserved = 0;
+        this->hidden->shm->wHdr[i].lpData = &mixbuf[i * (this->spec.size)];
+        this->hidden->shm->wHdr[i].dwBufferLength = this->spec.size;
+        this->hidden->shm->wHdr[i].dwFlags = 0;
+        this->hidden->shm->wHdr[i].dwUser = i;
+        this->hidden->shm->wHdr[i].dwLoops = 0;    /* loop control counter */
+        this->hidden->shm->wHdr[i].lpNext = NULL;  /* reserved for driver */
+        this->hidden->shm->wHdr[i].reserved = 0;
         inUse[i] = FALSE;
     }
-    next_buffer = 0;
-    return 0;
+    this->hidden->next_buffer = 0;
+
+    return 1;
 }
 
 static void
-MME_WaitAudio(_THIS)
+MME_WaitDevice(_THIS)
 {
-    while (inUse[next_buffer]) {
+    while (inUse[this->hidden->next_buffer]) {
         mmeWaitForCallbacks();
         mmeProcessCallbacks();
     }
 }
 
 static Uint8 *
-MME_GetAudioBuf(_THIS)
+MME_GetDeviceBuf(_THIS)
 {
-    Uint8 *retval;
-
-    inUse[next_buffer] = TRUE;
-    retval = (Uint8 *) (shm->wHdr[next_buffer].lpData);
-    return retval;
+    void *retval = this->hidden->shm->wHdr[this->hidden->next_buffer].lpData;
+    inUse[this->hidden->next_buffer] = TRUE;
+    return (Uint8 *) retval;
 }
 
 static void
-MME_PlayAudio(_THIS)
+MME_PlayDevice(_THIS)
 {
     /* Queue it up */
-    waveOutWrite(shm->sound, &(shm->wHdr[next_buffer]), sizeof(WAVEHDR));
-    next_buffer = (next_buffer + 1) % NUM_BUFFERS;
+    waveOutWrite(this->hidden->shm->sound,
+                 &(this->hidden->shm->wHdr[this->hidden->next_buffer]),
+                 sizeof (WAVEHDR));
+    this->hidden->next_buffer = (this->hidden->next_buffer + 1) % NUM_BUFFERS;
 }
 
 static void
@@ -236,13 +193,13 @@ MME_WaitDone(_THIS)
     MMRESULT result;
     int i;
 
-    if (shm->sound) {
+    if (this->hidden->shm->sound) {
         for (i = 0; i < NUM_BUFFERS; i++)
             while (inUse[i]) {
                 mmeWaitForCallbacks();
                 mmeProcessCallbacks();
             }
-        result = waveOutReset(shm->sound);
+        result = waveOutReset(this->hidden->shm->sound);
         if (result != MMSYSERR_NOERROR)
             SetMMerror("waveOutReset()", result);
         mmeProcessCallbacks();
@@ -250,29 +207,54 @@ MME_WaitDone(_THIS)
 }
 
 static void
-MME_CloseAudio(_THIS)
+MME_CloseDevice(_THIS)
 {
-    MMRESULT result;
+    if (this->hidden != NULL) {
+        MMRESULT result;
 
-    if (mixbuf) {
-        result = mmeFreeBuffer(mixbuf);
-        if (result != MMSYSERR_NOERROR)
-            SetMMerror("mmeFreeBuffer", result);
-        mixbuf = NULL;
-    }
-
-    if (shm) {
-        if (shm->sound) {
-            result = waveOutClose(shm->sound);
+        if (this->hidden->mixbuf) {
+            result = mmeFreeBuffer(this->hidden->mixbuf);
             if (result != MMSYSERR_NOERROR)
-                SetMMerror("waveOutClose()", result);
-            mmeProcessCallbacks();
+                SetMMerror("mmeFreeBuffer", result);
+            this->hidden->mixbuf = NULL;
         }
-        result = mmeFreeMem(shm);
-        if (result != MMSYSERR_NOERROR)
-            SetMMerror("mmeFreeMem()", result);
-        shm = NULL;
+
+        if (this->hidden->shm) {
+            if (this->hidden->shm->sound) {
+                result = waveOutClose(this->hidden->shm->sound);
+                if (result != MMSYSERR_NOERROR)
+                    SetMMerror("waveOutClose()", result);
+                mmeProcessCallbacks();
+            }
+            result = mmeFreeMem(this->hidden->shm);
+            if (result != MMSYSERR_NOERROR)
+                SetMMerror("mmeFreeMem()", result);
+            this->hidden->shm = NULL;
+        }
+
+        SDL_free(this->hidden);
+        this->hidden = NULL;
     }
 }
+
+static int
+MME_Init(SDL_AudioDriverImpl *impl)
+{
+    /* Set the function pointers */
+    impl->OpenDevice = MME_OpenDevice;
+    impl->WaitDevice = MME_WaitDevice;
+    impl->WaitDone = MME_WaitDone;
+    impl->PlayDevice = MME_PlayDevice;
+    impl->GetDeviceBuf = MME_GetDeviceBuf;
+    impl->CloseDevice = MME_CloseDevice;
+    impl->OnlyHasDefaultOutputDevice = 1;
+
+    return 1;
+}
+
+/* !!! FIXME: Windows "windib" driver is called waveout, too */
+AudioBootStrap MMEAUDIO_bootstrap = {
+    "waveout", "Tru64 MME WaveOut", MME_Init, 0
+};
 
 /* vi: set ts=4 sw=4 expandtab: */

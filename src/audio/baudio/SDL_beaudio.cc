@@ -36,138 +36,81 @@ extern "C"
 #include "../../thread/beos/SDL_systhread_c.h"
 #include "SDL_beaudio.h"
 
+}
 
-/* Audio driver functions */
-    static int BE_OpenAudio(_THIS, SDL_AudioSpec * spec);
-    static void BE_WaitAudio(_THIS);
-    static void BE_PlayAudio(_THIS);
-    static Uint8 *BE_GetAudioBuf(_THIS);
-    static void BE_CloseAudio(_THIS);
 
-/* Audio driver bootstrap functions */
-
-    static int Audio_Available(void)
-    {
-        return (1);
-    }
-
-    static void Audio_DeleteDevice(SDL_AudioDevice * device)
-    {
-        SDL_free(device->hidden);
-        SDL_free(device);
-    }
-
-    static SDL_AudioDevice *Audio_CreateDevice(int devindex)
-    {
-        SDL_AudioDevice *device;
-
-        /* Initialize all variables that we clean on shutdown */
-        device = (SDL_AudioDevice *) SDL_malloc(sizeof(SDL_AudioDevice));
-        if (device) {
-            SDL_memset(device, 0, (sizeof *device));
-            device->hidden = (struct SDL_PrivateAudioData *)
-                SDL_malloc((sizeof *device->hidden));
-        }
-        if ((device == NULL) || (device->hidden == NULL)) {
-            SDL_OutOfMemory();
-            if (device) {
-                SDL_free(device);
-            }
-            return (0);
-        }
-        SDL_memset(device->hidden, 0, (sizeof *device->hidden));
-
-        /* Set the function pointers */
-        device->OpenAudio = BE_OpenAudio;
-        device->WaitAudio = BE_WaitAudio;
-        device->PlayAudio = BE_PlayAudio;
-        device->GetAudioBuf = BE_GetAudioBuf;
-        device->CloseAudio = BE_CloseAudio;
-
-        device->free = Audio_DeleteDevice;
-
-        return device;
-    }
-
-    AudioBootStrap BAUDIO_bootstrap = {
-        "baudio", "BeOS BSoundPlayer",
-        Audio_Available, Audio_CreateDevice
-    };
-
+/* !!! FIXME: have the callback call the higher level to avoid code dupe. */
 /* The BeOS callback for handling the audio buffer */
-    static void FillSound(void *device, void *stream, size_t len,
-                          const media_raw_audio_format & format)
-    {
-        SDL_AudioDevice *audio = (SDL_AudioDevice *) device;
+static void
+FillSound(void *device, void *stream, size_t len,
+          const media_raw_audio_format & format)
+{
+    SDL_AudioDevice *audio = (SDL_AudioDevice *) device;
 
-        /* Silence the buffer, since it's ours */
-        SDL_memset(stream, audio->spec.silence, len);
+    /* Silence the buffer, since it's ours */
+    SDL_memset(stream, audio->spec.silence, len);
 
-        /* Only do soemthing if audio is enabled */
-        if (!audio->enabled)
-            return;
+    /* Only do soemthing if audio is enabled */
+    if (!audio->enabled)
+        return;
 
-        if (!audio->paused) {
-            if (audio->convert.needed) {
-                SDL_mutexP(audio->mixer_lock);
-                (*audio->spec.callback) (audio->spec.userdata,
+    if (!audio->paused) {
+        if (audio->convert.needed) {
+            SDL_mutexP(audio->mixer_lock);
+            (*audio->spec.callback) (audio->spec.userdata,
                                          (Uint8 *) audio->convert.buf,
                                          audio->convert.len);
-                SDL_mutexV(audio->mixer_lock);
-                SDL_ConvertAudio(&audio->convert);
-                SDL_memcpy(stream, audio->convert.buf,
-                           audio->convert.len_cvt);
-            } else {
-                SDL_mutexP(audio->mixer_lock);
-                (*audio->spec.callback) (audio->spec.userdata,
-                                         (Uint8 *) stream, len);
-                SDL_mutexV(audio->mixer_lock);
-            }
+            SDL_mutexV(audio->mixer_lock);
+            SDL_ConvertAudio(&audio->convert);
+            SDL_memcpy(stream, audio->convert.buf, audio->convert.len_cvt);
+        } else {
+            SDL_mutexP(audio->mixer_lock);
+            (*audio->spec.callback) (audio->spec.userdata,
+                                        (Uint8 *) stream, len);
+            SDL_mutexV(audio->mixer_lock);
         }
-        return;
     }
+}
 
-/* Dummy functions -- we don't use thread-based audio */
-    void BE_WaitAudio(_THIS)
-    {
-        return;
-    }
-    void BE_PlayAudio(_THIS)
-    {
-        return;
-    }
-    Uint8 *BE_GetAudioBuf(_THIS)
-    {
-        return (NULL);
-    }
-
-    void BE_CloseAudio(_THIS)
-    {
-        if (audio_obj) {
-            audio_obj->Stop();
-            delete audio_obj;
-            audio_obj = NULL;
+static void
+BEOSAUDIO_CloseDevice(_THIS)
+{
+    if (_this->hidden != NULL) {
+        if (_this->hidden->audio_obj) {
+            _this->hidden->audio_obj->Stop();
+            delete _this->hidden->audio_obj;
+            _this->hidden->audio_obj = NULL;
         }
 
-        /* Quit the Be Application, if there's nothing left to do */
-        SDL_QuitBeApp();
+        delete _this->hidden;
+        _this->hidden = NULL;
     }
+}
 
-    int BE_OpenAudio(_THIS, SDL_AudioSpec * spec)
-    {
-        int valid_datatype = 0;
-        media_raw_audio_format format;
-        SDL_AudioFormat test_format = SDL_FirstAudioFormat(spec->format);
+static int
+BEOSAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
+{
+    int valid_datatype = 0;
+    media_raw_audio_format format;
+    SDL_AudioFormat test_format = SDL_FirstAudioFormat(_this->spec.format);
 
-        /* Parse the audio format and fill the Be raw audio format */
-        memset(&format, '\0', sizeof(media_raw_audio_format));
-        format.byte_order = B_MEDIA_LITTLE_ENDIAN;
-        format.frame_rate = (float) spec->freq;
-        format.channel_count = spec->channels;  /* !!! FIXME: support > 2? */
-        while ((!valid_datatype) && (test_format)) {
-            valid_datatype = 1;
-            spec->format = test_format;
-            switch (test_format) {
+    /* Initialize all variables that we clean on shutdown */
+    _this->hidden = new SDL_PrivateAudioData;
+    if (_this->hidden == NULL) {
+        SDL_OutOfMemory();
+        return 0;
+    }
+    SDL_memset(_this->hidden, 0, (sizeof *_this->hidden));
+
+    /* Parse the audio format and fill the Be raw audio format */
+    SDL_memset(&format, '\0', sizeof(media_raw_audio_format));
+    format.byte_order = B_MEDIA_LITTLE_ENDIAN;
+    format.frame_rate = (float) _this->spec.freq;
+    format.channel_count = _this->spec.channels;  /* !!! FIXME: support > 2? */
+    while ((!valid_datatype) && (test_format)) {
+        valid_datatype = 1;
+        _this->spec.format = test_format;
+        switch (test_format) {
             case AUDIO_S8:
                 format.format = media_raw_audio_format::B_AUDIO_CHAR;
                 break;
@@ -207,43 +150,67 @@ extern "C"
                 valid_datatype = 0;
                 test_format = SDL_NextAudioFormat();
                 break;
-            }
         }
-
-        format.buffer_size = spec->samples;
-
-        if (!valid_datatype) {  /* shouldn't happen, but just in case... */
-            SDL_SetError("Unsupported audio format");
-            return (-1);
-        }
-
-        /* Initialize the Be Application, if it's not already started */
-        if (SDL_InitBeApp() < 0) {
-            return (-1);
-        }
-
-        /* Calculate the final parameters for this audio specification */
-        SDL_CalculateAudioSpec(spec);
-
-        /* Subscribe to the audio stream (creates a new thread) */
-        {
-            sigset_t omask;
-            SDL_MaskSignals(&omask);
-            audio_obj = new BSoundPlayer(&format, "SDL Audio", FillSound,
-                                         NULL, _this);
-            SDL_UnmaskSignals(&omask);
-        }
-        if (audio_obj->Start() == B_NO_ERROR) {
-            audio_obj->SetHasData(true);
-        } else {
-            SDL_SetError("Unable to start Be audio");
-            return (-1);
-        }
-
-        /* We're running! */
-        return (1);
     }
 
-};                              /* Extern C */
+    format.buffer_size = _this->spec.samples;
+
+    if (!valid_datatype) {  /* shouldn't happen, but just in case... */
+        BEOSAUDIO_CloseDevice(_this);
+        SDL_SetError("Unsupported audio format");
+        return 0;
+    }
+
+    /* Calculate the final parameters for this audio specification */
+    SDL_CalculateAudioSpec(&_this->spec);
+
+    /* Subscribe to the audio stream (creates a new thread) */
+    sigset_t omask;
+    SDL_MaskSignals(&omask);
+    _this->hidden->audio_obj = new BSoundPlayer(&format, "SDL Audio",
+                                                FillSound, NULL, _this);
+    SDL_UnmaskSignals(&omask);
+
+    if (_this->hidden->audio_obj->Start() == B_NO_ERROR) {
+        _this->hidden->audio_obj->SetHasData(true);
+    } else {
+        BEOSAUDIO_CloseDevice(_this);
+        SDL_SetError("Unable to start Be audio");
+        return 0;
+    }
+
+    /* We're running! */
+    return 1;
+}
+
+static void
+BEOSAUDIO_Deinitialize(void)
+{
+    SDL_QuitBeApp();
+}
+
+static int
+BEOSAUDIO_Init(SDL_AudioDriverImpl *impl)
+{
+    /* Initialize the Be Application, if it's not already started */
+    if (SDL_InitBeApp() < 0) {
+        return 0;
+    }
+
+    /* Set the function pointers */
+    impl->OpenDevice = BEOSAUDIO_OpenDevice;
+    impl->CloseDevice = BEOSAUDIO_CloseDevice;
+    impl->Deinitialize = BEOSAUDIO_Deinitialize;
+    impl->ProvidesOwnCallbackThread = 1;
+    impl->OnlyHasDefaultOutputDevice = 1;
+
+    return 1;
+}
+
+extern "C" { extern AudioBootStrap BEOSAUDIO_bootstrap; }
+AudioBootStrap BEOSAUDIO_bootstrap = {
+    "baudio", "BeOS BSoundPlayer", BEOSAUDIO_Init, 0
+};
 
 /* vi: set ts=4 sw=4 expandtab: */
+

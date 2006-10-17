@@ -21,14 +21,14 @@
 */
 #include "SDL_config.h"
 
-#ifndef _SDL_lowaudio_h
-#define _SDL_lowaudio_h
+#ifndef _SDL_dx5audio_h
+#define _SDL_dx5audio_h
 
 #include "directx.h"
 
 #include "../SDL_sysaudio.h"
 
-/* Hidden "this" pointer for the video functions */
+/* Hidden "this" pointer for the audio functions */
 #define _THIS	SDL_AudioDevice *this
 
 /* The DirectSound objects */
@@ -36,23 +36,12 @@ struct SDL_PrivateAudioData
 {
     LPDIRECTSOUND sound;
     LPDIRECTSOUNDBUFFER mixbuf;
-    int NUM_BUFFERS;
-    int mixlen, silence;
+    int num_buffers;
+    int mixlen;
     DWORD lastchunk;
     Uint8 *locked_buf;
-    HANDLE audio_event;
 };
 
-/* Old variable names */
-#define sound			(this->hidden->sound)
-#define mixbuf			(this->hidden->mixbuf)
-#define NUM_BUFFERS		(this->hidden->NUM_BUFFERS)
-#define mixlen			(this->hidden->mixlen)
-#define silence			(this->hidden->silence)
-#define lastchunk		(this->hidden->lastchunk)
-#define locked_buf		(this->hidden->locked_buf)
-#define audio_event		(this->hidden->audio_event)
-
-#endif /* _SDL_lowaudio_h */
+#endif /* _SDL_dx5audio_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

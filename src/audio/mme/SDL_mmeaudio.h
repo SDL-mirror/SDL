@@ -23,12 +23,12 @@
 
 /* Allow access to a raw mixing buffer */
 
-#ifndef _SDL_lowaudio_h
-#define _SDL_lowaudio_h
+#ifndef _SDL_mmeaudio_h
+#define _SDL_mmeaudio_h
 
 #include "../SDL_sysaudio.h"
 
-/* Hidden "this" pointer for the video functions */
+/* Hidden "this" pointer for the audio functions */
 #define _THIS	SDL_AudioDevice *this
 #define NUM_BUFFERS 2
 
@@ -46,9 +46,6 @@ struct SDL_PrivateAudioData
     int next_buffer;
 };
 
-#define shm			(this->hidden->shm)
-#define mixbuf			(this->hidden->mixbuf)
-#define next_buffer		(this->hidden->next_buffer)
-/* Old variable names */
-#endif /* _SDL_lowaudio_h */
+#endif /* _SDL_mmeaudio_h */
+
 /* vi: set ts=4 sw=4 expandtab: */

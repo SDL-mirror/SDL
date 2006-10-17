@@ -37,7 +37,7 @@
 
 #include "../SDL_sysaudio.h"
 
-/* Hidden "this" pointer for the video functions */
+/* Hidden "this" pointer for the audio functions */
 #define _THIS	SDL_AudioDevice *this
 
 struct SDL_PrivateAudioData
@@ -45,9 +45,6 @@ struct SDL_PrivateAudioData
     AuServer *aud;
     AuFlowID flow;
     AuDeviceID dev;
-
-    /* The parent process id, to detect when application quits */
-    pid_t parent;
 
     /* Raw mixing buffer */
     Uint8 *mixbuf;
@@ -60,4 +57,5 @@ struct SDL_PrivateAudioData
     int buf_free;
 };
 #endif /* _SDL_nasaudio_h */
+
 /* vi: set ts=4 sw=4 expandtab: */

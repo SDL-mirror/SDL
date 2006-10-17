@@ -33,10 +33,10 @@
 #define SDL_RENDERCOPY_NEAREST          0x0100
 
 typedef struct {
-    void *src;
+    Uint8 *src;
     int src_w, src_h;
     int src_pitch;
-    void *dst;
+    Uint8 *dst;
     int dst_w, dst_h;
     int dst_pitch;
     void *aux_data;
@@ -44,7 +44,7 @@ typedef struct {
     Uint8 r, g, b, a;
 } SDL_RenderCopyData;
 
-typedef int (*SDL_RenderCopyFunc)(SDL_RenderCopyData *data);
+typedef int (SDLCALL * SDL_RenderCopyFunc)(SDL_RenderCopyData *data);
 
 extern SDL_RenderCopyFunc SDLCALL SDL_GetRenderCopyFunc(Uint32 src_format, Uint32 dst_format, int modMode, int blendMode, int scaleMode);
 

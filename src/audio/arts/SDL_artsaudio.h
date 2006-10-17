@@ -28,7 +28,7 @@
 
 #include "../SDL_sysaudio.h"
 
-/* Hidden "this" pointer for the video functions */
+/* Hidden "this" pointer for the audio functions */
 #define _THIS	SDL_AudioDevice *this
 
 struct SDL_PrivateAudioData
@@ -48,14 +48,6 @@ struct SDL_PrivateAudioData
     float next_frame;
 };
 #define FUDGE_TICKS	10      /* The scheduler overhead ticks per frame */
-
-/* Old variable names */
-#define stream			(this->hidden->stream)
-#define parent			(this->hidden->parent)
-#define mixbuf			(this->hidden->mixbuf)
-#define mixlen			(this->hidden->mixlen)
-#define frame_ticks		(this->hidden->frame_ticks)
-#define next_frame		(this->hidden->next_frame)
 
 #endif /* _SDL_artscaudio_h */
 /* vi: set ts=4 sw=4 expandtab: */

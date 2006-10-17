@@ -153,7 +153,7 @@ typedef struct SDL_AudioCVT
 
 /* Function prototypes */
 
-/* These functions return the list of built in video drivers, in the 
+/* These functions return the list of built in audio drivers, in the
  * order that they are normally initialized by default.
  */
 extern DECLSPEC int SDLCALL SDL_GetNumAudioDrivers(void);
@@ -212,7 +212,7 @@ extern DECLSPEC const char *SDLCALL SDL_GetCurrentAudioDriver(void);
  * may modify the requested size of the audio buffer, you should allocate
  * any local mixing buffers after you open the audio device.
  */
-extern DECLSPEC int SDLCALL SDL_OpenAudio(SDL_AudioSpec * desired,
+extern DECLSPEC int SDLCALL SDL_OpenAudio(const SDL_AudioSpec * desired,
                                           SDL_AudioSpec * obtained);
 
 /*
@@ -228,6 +228,13 @@ typedef Uint32 SDL_AudioDeviceID;
 /*
  * Get the number of available devices exposed by the current driver.
  *  Only valid after a successfully initializing the audio subsystem.
+ *  Returns -1 if an explicit list of devices can't be determined; this is
+ *  not an error. For example, if SDL is set up to talk to a remote audio
+ *  server, it can't list every one available on the Internet, but it will
+ *  still allow a specific host to be specified to SDL_OpenAudioDevice().
+ * In many common cases, when this function returns a value <= 0, it can still
+ *  successfully open the default device (NULL for first argument of
+ *  SDL_OpenAudioDevice()).
  */
 extern DECLSPEC int SDLCALL SDL_GetNumAudioDevices(int iscapture);
 
@@ -235,15 +242,28 @@ extern DECLSPEC int SDLCALL SDL_GetNumAudioDevices(int iscapture);
  * Get the human-readable name of a specific audio device.
  *  Must be a value between 0 and (number of audio devices-1).
  *  Only valid after a successfully initializing the audio subsystem.
+ *  The values returned by this function reflect the latest call to
+ *  SDL_GetNumAudioDevices(); recall that function to redetect available
+ *  hardware.
+ *
+ * The string returned by this function is UTF-8 encoded, read-only, and
+ *  managed internally. You are not to free it. If you need to keep the
+ *  string for any length of time, you should make your own copy of it, as it
+ *  will be invalid next time any of several other SDL functions is called.
  */
-extern DECLSPEC const char *SDLCALL SDL_GetAudioDevice(int index,
-                                                       int iscapture);
+extern DECLSPEC const char *SDLCALL SDL_GetAudioDeviceName(int index,
+                                                           int iscapture);
 
 
 /*
- * Open a specific audio device. Passing in a device name of NULL is
- *  equivalent to SDL_OpenAudio(). Returns 0 on error, a valid device ID
- *  on success.
+ * Open a specific audio device. Passing in a device name of NULL requests
+ *  the most reasonable default (and is equivalent to calling SDL_OpenAudio()).
+ * The device name is a UTF-8 string reported by SDL_GetAudioDevice(), but
+ *  some drivers allow arbitrary and driver-specific strings, such as a
+ *  hostname/IP address for a remote audio server, or a filename in the
+ *  diskaudio driver.
+ * Returns 0 on error, a valid device ID that is >= 2 on success.
+ *  SDL_OpenAudio(), unlike this function, always acts on device ID 1.
  */
 extern DECLSPEC SDL_AudioDeviceID SDLCALL SDL_OpenAudioDevice(const char
                                                               *device,

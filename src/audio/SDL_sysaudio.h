@@ -29,13 +29,33 @@
 
 /* The SDL audio driver */
 typedef struct SDL_AudioDevice SDL_AudioDevice;
-
-/* Define the SDL audio driver structure */
 #define _THIS	SDL_AudioDevice *_this
-#ifndef _STATUS
-#define _STATUS	SDL_status *status
-#endif
-struct SDL_AudioDevice
+
+typedef struct SDL_AudioDriverImpl
+{
+    int (*DetectDevices)(int iscapture);
+    const char *(*GetDeviceName)(int index, int iscapture);
+    int (*OpenDevice) (_THIS, const char *devname, int iscapture);
+    void (*ThreadInit) (_THIS); /* Called by audio thread at start */
+    void (*WaitDevice) (_THIS);
+    void (*PlayDevice) (_THIS);
+    Uint8 *(*GetDeviceBuf) (_THIS);
+    void (*WaitDone) (_THIS);
+    void (*CloseDevice) (_THIS);
+    void (*LockDevice) (_THIS);
+    void (*UnlockDevice) (_THIS);
+    void (*Deinitialize) (void);
+
+    /* Some flags to push duplicate code into the core and reduce #ifdefs. */
+    int ProvidesOwnCallbackThread:1;
+    int SkipMixerLock:1;
+    int HasCaptureSupport:1;
+    int OnlyHasDefaultOutputDevice:1;
+    int OnlyHasDefaultInputDevice:1;
+} SDL_AudioDriverImpl;
+
+
+typedef struct SDL_AudioDriver
 {
     /* * * */
     /* The name of this audio driver */
@@ -45,21 +65,13 @@ struct SDL_AudioDevice
     /* The description of this audio driver */
     const char *desc;
 
-    /* * * */
-    /* Public driver functions */
-    int (*OpenAudio) (_THIS, SDL_AudioSpec * spec);
-    void (*ThreadInit) (_THIS); /* Called by audio thread at start */
-    void (*WaitAudio) (_THIS);
-    void (*PlayAudio) (_THIS);
-    Uint8 *(*GetAudioBuf) (_THIS);
-    void (*WaitDone) (_THIS);
-    void (*CloseAudio) (_THIS);
+    SDL_AudioDriverImpl impl;
+} SDL_AudioDriver;
 
-    /* * * */
-    /* Lock / Unlock functions added for the Mac port */
-    void (*LockAudio) (_THIS);
-    void (*UnlockAudio) (_THIS);
 
+/* Define the SDL audio driver structure */
+struct SDL_AudioDevice
+{
     /* * * */
     /* Data common to all devices */
 
@@ -70,6 +82,7 @@ struct SDL_AudioDevice
     SDL_AudioCVT convert;
 
     /* Current state flags */
+    int iscapture;
     int enabled;
     int paused;
     int opened;
@@ -87,10 +100,6 @@ struct SDL_AudioDevice
     /* * * */
     /* Data private to this driver */
     struct SDL_PrivateAudioData *hidden;
-
-    /* * * */
-    /* The function used to dispose of this structure */
-    void (*free) (_THIS);
 };
 #undef _THIS
 
@@ -98,84 +107,10 @@ typedef struct AudioBootStrap
 {
     const char *name;
     const char *desc;
-    int (*available) (void);
-    SDL_AudioDevice *(*create) (int devindex);
+    int (*init) (SDL_AudioDriverImpl *impl);
+    int demand_only:1;  /* 1==request explicitly, or it won't be available. */
 } AudioBootStrap;
 
-#if SDL_AUDIO_DRIVER_BSD
-extern AudioBootStrap BSD_AUDIO_bootstrap;
-#endif
-#if SDL_AUDIO_DRIVER_OSS
-extern AudioBootStrap DSP_bootstrap;
-extern AudioBootStrap DMA_bootstrap;
-#endif
-#if SDL_AUDIO_DRIVER_ALSA
-extern AudioBootStrap ALSA_bootstrap;
-#endif
-#if SDL_AUDIO_DRIVER_QNXNTO
-extern AudioBootStrap QNXNTOAUDIO_bootstrap;
-#endif
-#if SDL_AUDIO_DRIVER_SUNAUDIO
-extern AudioBootStrap SUNAUDIO_bootstrap;
-#endif
-#if SDL_AUDIO_DRIVER_DMEDIA
-extern AudioBootStrap DMEDIA_bootstrap;
-#endif
-#if SDL_AUDIO_DRIVER_ARTS
-extern AudioBootStrap ARTS_bootstrap;
-#endif
-#if SDL_AUDIO_DRIVER_ESD
-extern AudioBootStrap ESD_bootstrap;
-#endif
-#if SDL_AUDIO_DRIVER_NAS
-extern AudioBootStrap NAS_bootstrap;
-#endif
-#if SDL_AUDIO_DRIVER_DSOUND
-extern AudioBootStrap DSOUND_bootstrap;
-#endif
-#if SDL_AUDIO_DRIVER_WAVEOUT
-extern AudioBootStrap WAVEOUT_bootstrap;
-#endif
-#if SDL_AUDIO_DRIVER_PAUD
-extern AudioBootStrap Paud_bootstrap;
-#endif
-#if SDL_AUDIO_DRIVER_BAUDIO
-extern AudioBootStrap BAUDIO_bootstrap;
-#endif
-#if SDL_AUDIO_DRIVER_COREAUDIO
-extern AudioBootStrap COREAUDIO_bootstrap;
-#endif
-#if SDL_AUDIO_DRIVER_SNDMGR
-extern AudioBootStrap SNDMGR_bootstrap;
-#endif
-#if SDL_AUDIO_DRIVER_AHI
-extern AudioBootStrap AHI_bootstrap;
-#endif
-#if SDL_AUDIO_DRIVER_MINT
-extern AudioBootStrap MINTAUDIO_GSXB_bootstrap;
-extern AudioBootStrap MINTAUDIO_MCSN_bootstrap;
-extern AudioBootStrap MINTAUDIO_STFA_bootstrap;
-extern AudioBootStrap MINTAUDIO_XBIOS_bootstrap;
-extern AudioBootStrap MINTAUDIO_DMA8_bootstrap;
-#endif
-#if SDL_AUDIO_DRIVER_DISK
-extern AudioBootStrap DISKAUD_bootstrap;
-#endif
-#if SDL_AUDIO_DRIVER_DUMMY
-extern AudioBootStrap DUMMYAUD_bootstrap;
-#endif
-#if SDL_AUDIO_DRIVER_DC
-extern AudioBootStrap DCAUD_bootstrap;
-#endif
-#if SDL_AUDIO_DRIVER_MMEAUDIO
-extern AudioBootStrap MMEAUDIO_bootstrap;
-#endif
-#if SDL_AUDIO_DRIVER_DART
-extern AudioBootStrap DART_bootstrap;
-#endif
-
-/* This is the current audio device */
-extern SDL_AudioDevice *current_audio;
-
 #endif /* _SDL_sysaudio_h */
+
 /* vi: set ts=4 sw=4 expandtab: */

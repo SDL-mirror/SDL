@@ -30,7 +30,7 @@
 
 #include "../SDL_sysaudio.h"
 
-/* Hidden "this" pointer for the video functions */
+/* Hidden "this" pointer for the audio functions */
 #define _THIS	SDL_AudioDevice *this
 
 struct SDL_PrivateAudioData
@@ -45,12 +45,6 @@ struct SDL_PrivateAudioData
     Uint8 *mixbuf;
     int mixlen;
 };
-
-/* Old variable names */
-#define pcm_handle		(this->hidden->pcm_handle)
-#define parent			(this->hidden->parent)
-#define mixbuf			(this->hidden->mixbuf)
-#define mixlen			(this->hidden->mixlen)
 
 #endif /* _ALSA_PCM_audio_h */
 /* vi: set ts=4 sw=4 expandtab: */

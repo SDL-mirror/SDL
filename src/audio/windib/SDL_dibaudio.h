@@ -21,12 +21,12 @@
 */
 #include "SDL_config.h"
 
-#ifndef _SDL_lowaudio_h
-#define _SDL_lowaudio_h
+#ifndef _SDL_dibaudio_h
+#define _SDL_dibaudio_h
 
 #include "../SDL_sysaudio.h"
 
-/* Hidden "this" pointer for the video functions */
+/* Hidden "this" pointer for the audio functions */
 #define _THIS	SDL_AudioDevice *this
 
 #define NUM_BUFFERS 2           /* -- Don't lower this! */
@@ -40,12 +40,6 @@ struct SDL_PrivateAudioData
     int next_buffer;
 };
 
-/* Old variable names */
-#define sound			(this->hidden->sound)
-#define audio_sem 		(this->hidden->audio_sem)
-#define mixbuf			(this->hidden->mixbuf)
-#define wavebuf			(this->hidden->wavebuf)
-#define next_buffer		(this->hidden->next_buffer)
+#endif /* _SDL_dibaudio_h */
 
-#endif /* _SDL_lowaudio_h */
 /* vi: set ts=4 sw=4 expandtab: */
