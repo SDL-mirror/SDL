@@ -485,7 +485,7 @@ DSOUND_Init(SDL_AudioDriverImpl *impl)
     SDL_memset(&ver, '\0', sizeof (OSVERSIONINFO));
     ver.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
     GetVersionEx(&ver);
-    if (ver.dwPlatformId == VER_PLATFORM_WIN32_NT)
+    if (ver.dwPlatformId == VER_PLATFORM_WIN32_NT) {
         if (ver.dwMajorVersion <= 4) {
             return 0;  /* NT4.0 or earlier. Disable dsound support. */
         }

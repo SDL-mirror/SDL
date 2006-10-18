@@ -205,7 +205,7 @@ WINWAVEOUT_OpenDevice(_THIS, const char *devname, int iscapture)
 
     while ((!valid_datatype) && (test_format)) {
         valid_datatype = 1;
-        _this->spec.format = test_format;
+        this->spec.format = test_format;
         switch (test_format) {
             case AUDIO_U8:
             case AUDIO_S16:
@@ -287,7 +287,7 @@ WINWAVEOUT_OpenDevice(_THIS, const char *devname, int iscapture)
 
     /* Create the sound buffers */
     this->hidden->mixbuf = (Uint8 *) SDL_malloc(NUM_BUFFERS * this->spec.size);
-    if (mixbuf == NULL) {
+    if (this->hidden->mixbuf == NULL) {
         WINWAVEOUT_CloseDevice(this);
         SDL_OutOfMemory();
         return 0;
