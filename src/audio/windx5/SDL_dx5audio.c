@@ -329,7 +329,7 @@ static int
 CreateSecondary(_THIS, HWND focus, WAVEFORMATEX *wavefmt)
 {
     LPDIRECTSOUND sndObj = this->hidden->sound;
-    LPDIRECTSOUNDBUFFER *sndbuf = this->hidden->mixbuf;
+    LPDIRECTSOUNDBUFFER *sndbuf = &this->hidden->mixbuf;
     Uint32 chunksize = this->spec.size;
     const int numchunks = 8;
     HRESULT result = DS_OK;
