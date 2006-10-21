@@ -33,6 +33,8 @@
 	.globl	_SDL_AtariVblInstall
 	.globl	_SDL_AtariVblUninstall
 
+	.globl	_SDL_MintAudio_hasfpu
+
 /*--- Vector installer ---*/
 
 _SDL_AtariVblInstall:
@@ -113,8 +115,30 @@ _my_vbl:
 	notw	vbl_mutex
 
 	moveml	d0-d7/a0-a6,sp@-
+
+	/* Save FPU if needed */
+	tstw	_SDL_MintAudio_hasfpu
+	beqs	SDL_AtariVbl_nofpu1
+	.chip	68060
+	fsave	sp@-
+	fmoveml fpcr/fpsr/fpiar,sp@-
+	fmovemx	fp0-fp7,sp@-
+	.chip	68000
+SDL_AtariVbl_nofpu1:
+
 	movel	my_vector,a0
 	jsr		a0@
+
+	/* Restore FPU if needed */
+	tstw	_SDL_MintAudio_hasfpu
+	beqs	SDL_AtariVbl_Xbios_nofpu2
+	.chip	68060
+	fmovemx	sp@+,fp0-fp7
+	fmoveml	sp@+,fpcr/fpsr/fpiar
+	frestore	sp@+
+	.chip	68000
+SDL_AtariVbl_Xbios_nofpu2:
+
 	moveml	sp@+,d0-d7/a0-a6
 
 	clrw	vbl_mutex

@@ -48,6 +48,9 @@
 
 #include "SDL_vbltimer_s.h"
 
+/* from audio/mint */
+void SDL_MintAudio_CheckFpu(void);
+
 /* The first ticks value of the application */
 static Uint32 start;
 static SDL_bool supervisor;
@@ -123,6 +126,8 @@ SDL_SYS_TimerInit(void)
     void *oldpile;
 
     supervisor = SDL_FALSE;
+
+    SDL_MintAudio_CheckFpu();
 
     /* Install RunTimer in vbl vector */
     oldpile = (void *) Super(0);
