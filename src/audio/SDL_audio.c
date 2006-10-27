@@ -590,7 +590,8 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 			return(-1);
 		}
 		if ( audio->convert.needed ) {
-			audio->convert.len = desired->size;
+			audio->convert.len = (int) ( ((double) desired->size) /
+                                          audio->convert.len_ratio );
 			audio->convert.buf =(Uint8 *)SDL_AllocAudioMem(
 			   audio->convert.len*audio->convert.len_mult);
 			if ( audio->convert.buf == NULL ) {
