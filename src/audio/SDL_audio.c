@@ -688,7 +688,9 @@ open_audio_device(const char *devname, int iscapture,
             return 0;
         }
         if (device->convert.needed) {
-            device->convert.len = desired.size;
+            device->convert.len = (int) ( ((double) desired.size) /
+                                          device->convert.len_ratio );
+
             device->convert.buf =
                 (Uint8 *) SDL_AllocAudioMem(device->convert.len *
                                             device->convert.len_mult);
