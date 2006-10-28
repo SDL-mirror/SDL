@@ -129,6 +129,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
 {
     int index;
 
+    /* We're going to get keyboard events, since we're key. */
     index = _data->videodata->keyboard;
     SDL_SetKeyboardFocus(index, _data->windowID);
 }
@@ -136,7 +137,16 @@ static __inline__ void ConvertNSRect(NSRect *r)
 - (void)windowDidResignKey:(NSNotification *)aNotification
 {
     int index;
+    SDL_Mouse *mouse;
 
+    /* Some other window will get mouse events, since we're not key. */
+    index = _data->videodata->mouse;
+    mouse = SDL_GetMouse(index);
+    if (mouse->focus == _data->windowID) {
+        SDL_SetMouseFocus(index, 0);
+    }
+
+    /* Some other window will get keyboard events, since we're not key. */
     index = _data->videodata->keyboard;
     SDL_SetKeyboardFocus(index, 0);
 }
@@ -227,14 +237,21 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
     index = _data->videodata->mouse;
     mouse = SDL_GetMouse(index);
-    if (mouse->focus != _data->windowID) {
-        SDL_SetMouseFocus(index, _data->windowID);
-    }
 
     point = [NSEvent mouseLocation];
     point.x = point.x - rect.origin.x;
     point.y = rect.size.height - (point.y - rect.origin.y);
-    SDL_SendMouseMotion(index, 0, (int)point.x, (int)point.y);
+    if ( point.x < 0 || point.x >= rect.size.width ||
+         point.y < 0 || point.y >= rect.size.height ) {
+        if (mouse->focus != 0) {
+            SDL_SetMouseFocus(index, 0);
+        }
+    } else {
+        if (mouse->focus != _data->windowID) {
+            SDL_SetMouseFocus(index, _data->windowID);
+        }
+        SDL_SendMouseMotion(index, 0, (int)point.x, (int)point.y);
+    }
 }
 
 - (void)mouseDragged:(NSEvent *)theEvent
