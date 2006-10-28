@@ -158,6 +158,26 @@ callBackProc(SndChannel * chan, SndCommand * cmd_passed)
     }
 }
 
+static void
+SNDMGR_CloseDevice(_THIS)
+{
+    running = 0;
+
+    if (this->hidden != NULL) {
+        if (this->hidden->channel) {
+            SndDisposeChannel(this->hidden->channel, true);
+            this->hidden->channel = NULL;
+        }
+
+        SDL_free(buffer[0]);
+        SDL_free(buffer[1]);
+        buffer[0] = buffer[1] = NULL;
+
+        SDL_free(this->hidden);
+        this->hidden = NULL;
+    }
+}
+
 static int
 SNDMGR_OpenDevice(_THIS, const char *devname, int iscapture)
 {
@@ -269,28 +289,6 @@ SNDMGR_OpenDevice(_THIS, const char *devname, int iscapture)
     }
 
     return 1;
-}
-
-static void
-SNDMGR_CloseDevice(_THIS)
-{
-    int i;
-
-    running = 0;
-
-    if (this->hidden->channel) {
-        SndDisposeChannel(this->hidden->channel, true);
-        this->hidden->channel = NULL;
-    }
-
-    for (i = 0; i < 2; ++i) {
-        if (buffer[i]) {
-            SDL_free(buffer[i]);
-            buffer[i] = NULL;
-        }
-    }
-    SDL_free(this->hidden);
-    this->hidden = NULL;
 }
 
 static int
