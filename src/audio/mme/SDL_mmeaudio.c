@@ -63,7 +63,7 @@ MME_OpenDevice(_THIS, const char *devname, int iscapture)
 
     /* Initialize all variables that we clean on shutdown */
     this->hidden = (struct SDL_PrivateAudioData *)
-                        SDL_malloc((sizeof *this->hidden));
+        SDL_malloc((sizeof *this->hidden));
     if (this->hidden == NULL) {
         SDL_OutOfMemory();
         return 0;
@@ -78,7 +78,7 @@ MME_OpenDevice(_THIS, const char *devname, int iscapture)
         return 0;
     }
 
-    SDL_memset(this->hidden->shm, '\0', sizeof (*this->hidden->shm));
+    SDL_memset(this->hidden->shm, '\0', sizeof(*this->hidden->shm));
     this->hidden->shm->sound = 0;
     this->hidden->shm->wFmt.wf.wFormatTag = WAVE_FORMAT_PCM;
 
@@ -88,13 +88,13 @@ MME_OpenDevice(_THIS, const char *devname, int iscapture)
          !valid_format && test_format;) {
         valid_format = 1;
         switch (test_format) {
-            case AUDIO_U8:
-            case AUDIO_S16:
-            case AUDIO_S32:
-                break;
-            default:
-                valid_format = 0;
-                test_format = SDL_NextAudioFormat();
+        case AUDIO_U8:
+        case AUDIO_S16:
+        case AUDIO_S32:
+            break;
+        default:
+            valid_format = 0;
+            test_format = SDL_NextAudioFormat();
         }
     }
 
@@ -111,11 +111,11 @@ MME_OpenDevice(_THIS, const char *devname, int iscapture)
     this->hidden->shm->wFmt.wf.nChannels = this->spec.channels;
     this->hidden->shm->wFmt.wf.nSamplesPerSec = this->spec.freq;
     this->hidden->shm->wFmt.wf.nBlockAlign =
-                                this->hidden->shm->wFmt.wf.nChannels *
-                                this->hidden->shm->wFmt.wBitsPerSample / 8;
+        this->hidden->shm->wFmt.wf.nChannels *
+        this->hidden->shm->wFmt.wBitsPerSample / 8;
     this->hidden->shm->wFmt.wf.nAvgBytesPerSec =
-                                this->hidden->shm->wFmt.wf.nSamplesPerSec *
-                                this->hidden->shm->wFmt.wf.nBlockAlign;
+        this->hidden->shm->wFmt.wf.nSamplesPerSec *
+        this->hidden->shm->wFmt.wf.nBlockAlign;
 
     /* Check the buffer size -- minimum of 1/4 second (word aligned) */
     if (this->spec.samples < (this->spec.freq / 4))
@@ -150,8 +150,8 @@ MME_OpenDevice(_THIS, const char *devname, int iscapture)
         this->hidden->shm->wHdr[i].dwBufferLength = this->spec.size;
         this->hidden->shm->wHdr[i].dwFlags = 0;
         this->hidden->shm->wHdr[i].dwUser = i;
-        this->hidden->shm->wHdr[i].dwLoops = 0;    /* loop control counter */
-        this->hidden->shm->wHdr[i].lpNext = NULL;  /* reserved for driver */
+        this->hidden->shm->wHdr[i].dwLoops = 0; /* loop control counter */
+        this->hidden->shm->wHdr[i].lpNext = NULL;       /* reserved for driver */
         this->hidden->shm->wHdr[i].reserved = 0;
         inUse[i] = FALSE;
     }
@@ -183,7 +183,7 @@ MME_PlayDevice(_THIS)
     /* Queue it up */
     waveOutWrite(this->hidden->shm->sound,
                  &(this->hidden->shm->wHdr[this->hidden->next_buffer]),
-                 sizeof (WAVEHDR));
+                 sizeof(WAVEHDR));
     this->hidden->next_buffer = (this->hidden->next_buffer + 1) % NUM_BUFFERS;
 }
 
@@ -238,7 +238,7 @@ MME_CloseDevice(_THIS)
 }
 
 static int
-MME_Init(SDL_AudioDriverImpl *impl)
+MME_Init(SDL_AudioDriverImpl * impl)
 {
     /* Set the function pointers */
     impl->OpenDevice = MME_OpenDevice;

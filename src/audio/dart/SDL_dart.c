@@ -90,7 +90,7 @@ DART_OpenDevice(_THIS, const char *devname, int iscapture)
 
     /* Initialize all variables that we clean on shutdown */
     _this->hidden = (struct SDL_PrivateAudioData *)
-                        SDL_malloc((sizeof *_this->hidden));
+        SDL_malloc((sizeof *_this->hidden));
     if (_this->hidden == NULL) {
         SDL_OutOfMemory();
         return 0;
@@ -108,12 +108,11 @@ DART_OpenDevice(_THIS, const char *devname, int iscapture)
         iOpenMode |= MCI_OPEN_SHAREABLE;
 
     rc = mciSendCommand(0, MCI_OPEN, iOpenMode, (PVOID) & AmpOpenParms, 0);
-    if (rc != MCIERR_SUCCESS) {  // No audio available??
+    if (rc != MCIERR_SUCCESS) { // No audio available??
         DART_CloseDevice(_this);
         SDL_SetError("DART: Couldn't open audio device.");
         return 0;
     }
-
     // Save the device ID we got from DART!
     // We will use this in the next calls!
     _this->hidden->iCurrDeviceOrd = iDeviceOrd = AmpOpenParms.usDeviceID;
@@ -361,7 +360,7 @@ DART_WaitDone(_THIS)
     APIRET rc = NO_ERROR;
 
     pBufDesc = (pMixBufferDesc)
-          _this->hidden->pMixBuffers[_this->hidden->iLastPlayedBuf].ulUserParm;
+        _this->hidden->pMixBuffers[_this->hidden->iLastPlayedBuf].ulUserParm;
 
     while ((pBufDesc->iBufferUsage != BUFFER_EMPTY) && (rc == NO_ERROR)) {
         DosResetEventSem(_this->hidden->hevAudioBufferPlayed, &ulPostCount);
@@ -388,13 +387,11 @@ DART_CloseDevice(_THIS)
             }
 #endif
         }
-
         // Close event semaphore
         if (_this->hidden->hevAudioBufferPlayed) {
             DosCloseEventSem(_this->hidden->hevAudioBufferPlayed);
             _this->hidden->hevAudioBufferPlayed = 0;
         }
-
         // Free memory of buffer descriptions
         for (i = 0; i < _this->hidden->iCurrNumBufs; i++) {
             SDL_free((void *) (_this->hidden->pMixBuffers[i].ulUserParm));
@@ -408,13 +405,11 @@ DART_CloseDevice(_THIS)
                                 MCI_WAIT | MCI_DEALLOCATE_MEMORY,
                                 &(_this->hidden->BufferParms), 0);
         }
-
         // Free bufferlist
         if (_this->hidden->pMixBuffers != NULL) {
             SDL_free(_this->hidden->pMixBuffers);
             _this->hidden->pMixBuffers = NULL;
         }
-
         // Close dart
         if (_this->hidden->iCurrDeviceOrd) {
             rc = mciSendCommand(_this->hidden->iCurrDeviceOrd, MCI_CLOSE,
@@ -429,7 +424,7 @@ DART_CloseDevice(_THIS)
 
 
 static int
-DART_Init(SDL_AudioDriverImpl *impl)
+DART_Init(SDL_AudioDriverImpl * impl)
 {
     /* Set the function pointers */
     impl->OpenDevice = DART_OpenDevice;
@@ -439,7 +434,7 @@ DART_Init(SDL_AudioDriverImpl *impl)
     impl->PlayDevice = DART_PlayDevice;
     impl->WaitDone = DART_WaitDone;
     impl->CloseDevice = DART_CloseDevice;
-    impl->OnlyHasDefaultOutputDevice = 1;  /* !!! FIXME: is this right? */
+    impl->OnlyHasDefaultOutputDevice = 1;       /* !!! FIXME: is this right? */
 
     return 1;
 }

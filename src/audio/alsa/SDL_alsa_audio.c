@@ -43,41 +43,43 @@
 #define DEFAULT_DEVICE	"default"
 
 static int (*ALSA_snd_pcm_open)
-                (snd_pcm_t **, const char *, snd_pcm_stream_t, int);
-static int (*ALSA_snd_pcm_close)(snd_pcm_t * pcm);
+  (snd_pcm_t **, const char *, snd_pcm_stream_t, int);
+static int (*ALSA_snd_pcm_close) (snd_pcm_t * pcm);
 static snd_pcm_sframes_t(*ALSA_snd_pcm_writei)
-                (snd_pcm_t *,const void *, snd_pcm_uframes_t);
-static int (*ALSA_snd_pcm_resume)(snd_pcm_t *);
-static int (*ALSA_snd_pcm_prepare)(snd_pcm_t *);
-static int (*ALSA_snd_pcm_drain)(snd_pcm_t *);
-static const char *(*ALSA_snd_strerror)(int);
-static size_t(*ALSA_snd_pcm_hw_params_sizeof)(void);
-static size_t(*ALSA_snd_pcm_sw_params_sizeof)(void);
-static int (*ALSA_snd_pcm_hw_params_any)(snd_pcm_t *, snd_pcm_hw_params_t *);
+  (snd_pcm_t *, const void *, snd_pcm_uframes_t);
+static int (*ALSA_snd_pcm_resume) (snd_pcm_t *);
+static int (*ALSA_snd_pcm_prepare) (snd_pcm_t *);
+static int (*ALSA_snd_pcm_drain) (snd_pcm_t *);
+static const char *(*ALSA_snd_strerror) (int);
+static size_t(*ALSA_snd_pcm_hw_params_sizeof) (void);
+static size_t(*ALSA_snd_pcm_sw_params_sizeof) (void);
+static int (*ALSA_snd_pcm_hw_params_any) (snd_pcm_t *, snd_pcm_hw_params_t *);
 static int (*ALSA_snd_pcm_hw_params_set_access)
-                (snd_pcm_t *, snd_pcm_hw_params_t *, snd_pcm_access_t);
+  (snd_pcm_t *, snd_pcm_hw_params_t *, snd_pcm_access_t);
 static int (*ALSA_snd_pcm_hw_params_set_format)
-                (snd_pcm_t *, snd_pcm_hw_params_t *, snd_pcm_format_t);
+  (snd_pcm_t *, snd_pcm_hw_params_t *, snd_pcm_format_t);
 static int (*ALSA_snd_pcm_hw_params_set_channels)
-                (snd_pcm_t *, snd_pcm_hw_params_t *, unsigned int);
-static int (*ALSA_snd_pcm_hw_params_get_channels)(const snd_pcm_hw_params_t *);
+  (snd_pcm_t *, snd_pcm_hw_params_t *, unsigned int);
+static int (*ALSA_snd_pcm_hw_params_get_channels) (const snd_pcm_hw_params_t
+                                                   *);
 static unsigned int (*ALSA_snd_pcm_hw_params_set_rate_near)
-                (snd_pcm_t *, snd_pcm_hw_params_t *, unsigned int, int *);
-static snd_pcm_uframes_t (*ALSA_snd_pcm_hw_params_set_period_size_near)
-                (snd_pcm_t *, snd_pcm_hw_params_t *, snd_pcm_uframes_t, int *);
-static snd_pcm_sframes_t (*ALSA_snd_pcm_hw_params_get_period_size)
-                (const snd_pcm_hw_params_t *);
+  (snd_pcm_t *, snd_pcm_hw_params_t *, unsigned int, int *);
+static snd_pcm_uframes_t(*ALSA_snd_pcm_hw_params_set_period_size_near)
+  (snd_pcm_t *, snd_pcm_hw_params_t *, snd_pcm_uframes_t, int *);
+static snd_pcm_sframes_t(*ALSA_snd_pcm_hw_params_get_period_size)
+  (const snd_pcm_hw_params_t *);
 static unsigned int (*ALSA_snd_pcm_hw_params_set_periods_near)
-                (snd_pcm_t *,snd_pcm_hw_params_t *, unsigned int, int *);
-static int (*ALSA_snd_pcm_hw_params_get_periods)(snd_pcm_hw_params_t *);
-static int (*ALSA_snd_pcm_hw_params)(snd_pcm_t *, snd_pcm_hw_params_t *);
-static int (*ALSA_snd_pcm_sw_params_current)(snd_pcm_t*, snd_pcm_sw_params_t*);
+  (snd_pcm_t *, snd_pcm_hw_params_t *, unsigned int, int *);
+static int (*ALSA_snd_pcm_hw_params_get_periods) (snd_pcm_hw_params_t *);
+static int (*ALSA_snd_pcm_hw_params) (snd_pcm_t *, snd_pcm_hw_params_t *);
+static int (*ALSA_snd_pcm_sw_params_current) (snd_pcm_t *,
+                                              snd_pcm_sw_params_t *);
 static int (*ALSA_snd_pcm_sw_params_set_start_threshold)
-                (snd_pcm_t *, snd_pcm_sw_params_t *, snd_pcm_uframes_t);
+  (snd_pcm_t *, snd_pcm_sw_params_t *, snd_pcm_uframes_t);
 static int (*ALSA_snd_pcm_sw_params_set_avail_min)
-                (snd_pcm_t *, snd_pcm_sw_params_t *, snd_pcm_uframes_t);
-static int (*ALSA_snd_pcm_sw_params)(snd_pcm_t *, snd_pcm_sw_params_t *);
-static int (*ALSA_snd_pcm_nonblock)(snd_pcm_t *, int);
+  (snd_pcm_t *, snd_pcm_sw_params_t *, snd_pcm_uframes_t);
+static int (*ALSA_snd_pcm_sw_params) (snd_pcm_t *, snd_pcm_sw_params_t *);
+static int (*ALSA_snd_pcm_nonblock) (snd_pcm_t *, int);
 #define snd_pcm_hw_params_sizeof ALSA_snd_pcm_hw_params_sizeof
 #define snd_pcm_sw_params_sizeof ALSA_snd_pcm_sw_params_sizeof
 
@@ -118,7 +120,8 @@ load_alsa_sym(const char *fn, void **addr)
 #define SDL_ALSA_SYM(x) ALSA_##x = x
 #endif
 
-static int load_alsa_syms(void)
+static int
+load_alsa_syms(void)
 {
     SDL_ALSA_SYM(snd_pcm_open);
     SDL_ALSA_SYM(snd_pcm_close);
@@ -147,6 +150,7 @@ static int load_alsa_syms(void)
     SDL_ALSA_SYM(snd_pcm_nonblock);
     return 0;
 }
+
 #undef SDL_ALSA_SYM
 
 #ifdef SDL_AUDIO_DRIVER_ALSA_DYNAMIC
@@ -169,7 +173,7 @@ LoadALSALibrary(void)
         if (alsa_handle == NULL) {
             retval = -1;
             SDL_SetError("ALSA: dlopen('%s') failed: %s\n",
-                          alsa_library, strerror(errno));
+                         alsa_library, strerror(errno));
         } else {
             retval = load_alsa_syms();
             if (retval < 0) {
@@ -376,7 +380,7 @@ ALSA_OpenDevice(_THIS, const char *devname, int iscapture)
 
     /* Initialize all variables that we clean on shutdown */
     this->hidden = (struct SDL_PrivateAudioData *)
-                        SDL_malloc((sizeof *this->hidden));
+        SDL_malloc((sizeof *this->hidden));
     if (this->hidden == NULL) {
         SDL_OutOfMemory();
         return 0;
@@ -422,7 +426,7 @@ ALSA_OpenDevice(_THIS, const char *devname, int iscapture)
     status = -1;
     for (test_format = SDL_FirstAudioFormat(this->spec.format);
          test_format && (status < 0);) {
-        status = 0;      /* if we can't support a format, it'll become -1. */
+        status = 0;             /* if we can't support a format, it'll become -1. */
         switch (test_format) {
         case AUDIO_U8:
             format = SND_PCM_FORMAT_U8;
@@ -512,15 +516,15 @@ ALSA_OpenDevice(_THIS, const char *devname, int iscapture)
                      ALSA_snd_strerror(status));
         return 0;
     }
-
 #if AUDIO_DEBUG
-{
-    snd_pcm_sframes_t bufsize;
-    int fragments;
-    bufsize = ALSA_snd_pcm_hw_params_get_period_size(hwparams);
-    fragments = ALSA_snd_pcm_hw_params_get_periods(hwparams);
-    fprintf(stderr,"ALSA: bufsize = %ld, fragments = %d\n",bufsize,fragments);
-}
+    {
+        snd_pcm_sframes_t bufsize;
+        int fragments;
+        bufsize = ALSA_snd_pcm_hw_params_get_period_size(hwparams);
+        fragments = ALSA_snd_pcm_hw_params_get_periods(hwparams);
+        fprintf(stderr, "ALSA: bufsize = %ld, fragments = %d\n", bufsize,
+                fragments);
+    }
 #endif
 
     /* Set the software parameters */
@@ -532,14 +536,16 @@ ALSA_OpenDevice(_THIS, const char *devname, int iscapture)
                      ALSA_snd_strerror(status));
         return 0;
     }
-    status = ALSA_snd_pcm_sw_params_set_start_threshold(pcm_handle,swparams,0);
+    status =
+        ALSA_snd_pcm_sw_params_set_start_threshold(pcm_handle, swparams, 0);
     if (status < 0) {
         ALSA_CloseDevice(this);
         SDL_SetError("ALSA: Couldn't set start threshold: %s",
                      ALSA_snd_strerror(status));
         return 0;
     }
-    status = ALSA_snd_pcm_sw_params_set_avail_min(pcm_handle, swparams, frames);
+    status =
+        ALSA_snd_pcm_sw_params_set_avail_min(pcm_handle, swparams, frames);
     if (status < 0) {
         ALSA_CloseDevice(this);
         SDL_SetError("Couldn't set avail min: %s", ALSA_snd_strerror(status));
@@ -583,7 +589,7 @@ ALSA_Deinitialize(void)
 }
 
 static int
-ALSA_Init(SDL_AudioDriverImpl *impl)
+ALSA_Init(SDL_AudioDriverImpl * impl)
 {
     if (LoadALSALibrary() < 0) {
         return 0;
@@ -596,7 +602,7 @@ ALSA_Init(SDL_AudioDriverImpl *impl)
     impl->PlayDevice = ALSA_PlayDevice;
     impl->CloseDevice = ALSA_CloseDevice;
     impl->Deinitialize = ALSA_Deinitialize;
-    impl->OnlyHasDefaultOutputDevice = 1;  /* !!! FIXME: Add device enum! */
+    impl->OnlyHasDefaultOutputDevice = 1;       /* !!! FIXME: Add device enum! */
 
     return 1;
 }

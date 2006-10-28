@@ -170,7 +170,7 @@ DCAUD_OpenDevice(_THIS, SDL_AudioSpec * spec)
 
     /* Initialize all variables that we clean on shutdown */
     this->hidden = (struct SDL_PrivateAudioData *)
-                        SDL_malloc((sizeof *this->hidden));
+        SDL_malloc((sizeof *this->hidden));
     if (this->hidden == NULL) {
         SDL_OutOfMemory();
         return 0;
@@ -225,7 +225,7 @@ DCAUD_OpenDevice(_THIS, SDL_AudioSpec * spec)
 }
 
 static int
-DCAUD_Init(SDL_AudioDriverImpl *impl)
+DCAUD_Init(SDL_AudioDriverImpl * impl)
 {
     /* Set the function pointers */
     impl->OpenDevice = DCAUD_OpenDevice;

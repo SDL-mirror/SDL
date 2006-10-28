@@ -61,10 +61,8 @@ static struct
     const char *name;
     void **func;
 } esd_functions[] = {
-    SDL_ESD_SYM(esd_open_sound),
-    SDL_ESD_SYM(esd_close),
-    SDL_ESD_SYM(esd_play_stream),
-};
+SDL_ESD_SYM(esd_open_sound),
+        SDL_ESD_SYM(esd_close), SDL_ESD_SYM(esd_play_stream),};
 #undef SDL_ESD_SYM
 
 static void
@@ -137,7 +135,8 @@ ESD_WaitDevice(_THIS)
     }
 
     /* Use timer for general audio synchronization */
-    ticks = ((Sint32) (this->hidden->next_frame-SDL_GetTicks())) - FUDGE_TICKS;
+    ticks =
+        ((Sint32) (this->hidden->next_frame - SDL_GetTicks())) - FUDGE_TICKS;
     if (ticks > 0) {
         SDL_Delay(ticks);
     }
@@ -151,8 +150,7 @@ ESD_PlayDevice(_THIS)
     /* Write the audio data, checking for EAGAIN on broken audio drivers */
     do {
         written = write(this->hidden->audio_fd,
-                        this->hidden->mixbuf,
-                        this->hidden->mixlen);
+                        this->hidden->mixbuf, this->hidden->mixlen);
         if ((written < 0) && ((errno == 0) || (errno == EAGAIN))) {
             SDL_Delay(1);       /* Let a little CPU time go by */
         }
@@ -229,7 +227,7 @@ ESD_OpenDevice(_THIS, const char *devname, int iscapture)
 
     /* Initialize all variables that we clean on shutdown */
     this->hidden = (struct SDL_PrivateAudioData *)
-                        SDL_malloc((sizeof *this->hidden));
+        SDL_malloc((sizeof *this->hidden));
     if (this->hidden == NULL) {
         SDL_OutOfMemory();
         return 0;
@@ -246,15 +244,15 @@ ESD_OpenDevice(_THIS, const char *devname, int iscapture)
 #endif
         found = 1;
         switch (test_format) {
-            case AUDIO_U8:
-                format |= ESD_BITS8;
-                break;
-            case AUDIO_S16SYS:
-                format |= ESD_BITS16;
-                break;
-            default:
-                found = 0;
-                break;
+        case AUDIO_U8:
+            format |= ESD_BITS8;
+            break;
+        case AUDIO_S16SYS:
+            format |= ESD_BITS16;
+            break;
+        default:
+            found = 0;
+            break;
         }
     }
 
@@ -270,12 +268,13 @@ ESD_OpenDevice(_THIS, const char *devname, int iscapture)
         format |= ESD_STEREO;
     }
 #if 0
-    this->spec.samples = ESD_BUF_SIZE;   /* Darn, no way to change this yet */
+    this->spec.samples = ESD_BUF_SIZE;  /* Darn, no way to change this yet */
 #endif
 
     /* Open a connection to the ESD audio server */
     this->hidden->audio_fd =
-        SDL_NAME(esd_play_stream)(format,this->spec.freq,NULL,get_progname());
+        SDL_NAME(esd_play_stream) (format, this->spec.freq, NULL,
+                                   get_progname());
 
     if (this->hidden->audio_fd < 0) {
         ESD_CloseDevice(this);
@@ -285,7 +284,8 @@ ESD_OpenDevice(_THIS, const char *devname, int iscapture)
 
     /* Calculate the final parameters for this audio specification */
     SDL_CalculateAudioSpec(&this->spec);
-    this->hidden->frame_ticks = (float) (this->spec.samples*1000) / this->spec.freq;
+    this->hidden->frame_ticks =
+        (float) (this->spec.samples * 1000) / this->spec.freq;
     this->hidden->next_frame = SDL_GetTicks() + this->hidden->frame_ticks;
 
     /* Allocate mixing buffer */
@@ -312,7 +312,7 @@ ESD_Deinitialize(void)
 }
 
 static int
-ESD_Init(SDL_AudioDriverImpl *impl)
+ESD_Init(SDL_AudioDriverImpl * impl)
 {
     if (LoadESDLibrary() < 0) {
         return 0;

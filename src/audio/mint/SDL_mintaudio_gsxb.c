@@ -94,7 +94,8 @@ MINTGSXB_CloseDevice(_THIS)
         }
 
         /* Wait if currently playing sound */
-        while (SDL_MintAudio_mutex != 0) {}
+        while (SDL_MintAudio_mutex != 0) {
+        }
 
         /* Clear buffers */
         if (SDL_MintAudio_audiobuf[0]) {
@@ -130,7 +131,7 @@ MINTGSXB_CheckAudio(_THIS)
     DEBUG_PRINT(("freq=%d\n", this->spec.freq));
 
     if (this->spec.channels > 2) {
-        this->spec.channels = 2;     /* no more than stereo! */
+        this->spec.channels = 2;        /* no more than stereo! */
     }
 
     while ((!valid_datatype) && (test_format)) {
@@ -141,37 +142,37 @@ MINTGSXB_CheckAudio(_THIS)
         format_signed = SDL_AUDIO_ISSIGNED(this->spec.format);
         format_bigendian = SDL_AUDIO_ISBIGENDIAN(this->spec.format);
         switch (test_format) {
-            case AUDIO_U8:
-            case AUDIO_S8:
-                if (snd_format & SND_FORMAT8) {
-                    valid_datatype = 1;
-                    snd_format = Sndstatus(SND_QUERY8BIT);
-                }
-                break;
+        case AUDIO_U8:
+        case AUDIO_S8:
+            if (snd_format & SND_FORMAT8) {
+                valid_datatype = 1;
+                snd_format = Sndstatus(SND_QUERY8BIT);
+            }
+            break;
 
-            case AUDIO_U16LSB:
-            case AUDIO_S16LSB:
-            case AUDIO_U16MSB:
-            case AUDIO_S16MSB:
-                if (snd_format & SND_FORMAT16) {
-                    valid_datatype = 1;
-                    snd_format = Sndstatus(SND_QUERY16BIT);
-                }
-                break;
+        case AUDIO_U16LSB:
+        case AUDIO_S16LSB:
+        case AUDIO_U16MSB:
+        case AUDIO_S16MSB:
+            if (snd_format & SND_FORMAT16) {
+                valid_datatype = 1;
+                snd_format = Sndstatus(SND_QUERY16BIT);
+            }
+            break;
 
-            case AUDIO_S32LSB:
-            case AUDIO_S32MSB:
-                if (snd_format & SND_FORMAT32) {
-                    valid_datatype = 1;
-                    snd_format = Sndstatus(SND_QUERY32BIT);
-                }
-                break;
+        case AUDIO_S32LSB:
+        case AUDIO_S32MSB:
+            if (snd_format & SND_FORMAT32) {
+                valid_datatype = 1;
+                snd_format = Sndstatus(SND_QUERY32BIT);
+            }
+            break;
 
             /* no float support... */
 
-            default:
-                test_format = SDL_NextAudioFormat();
-                break;
+        default:
+            test_format = SDL_NextAudioFormat();
+            break;
         }
     }
 
@@ -238,7 +239,8 @@ MINTGSXB_CheckAudio(_THIS)
                  SDL_AUDIO_BITSIZE(this->spec.format)));
     DEBUG_PRINT(("float=%d, ", SDL_AUDIO_ISFLOAT(this->spec.format)));
     DEBUG_PRINT(("signed=%d, ", SDL_AUDIO_ISSIGNED(this->spec.format)));
-    DEBUG_PRINT(("big endian=%d, ", SDL_AUDIO_ISBIGENDIAN(this->spec.format)));
+    DEBUG_PRINT(("big endian=%d, ",
+                 SDL_AUDIO_ISBIGENDIAN(this->spec.format)));
     DEBUG_PRINT(("channels=%d, ", this->spec.channels));
     DEBUG_PRINT(("freq=%d\n", this->spec.freq));
 
@@ -326,7 +328,7 @@ MINTGSXB_OpenDevice(_THIS, const char *devname, int iscapture)
 
     /* Initialize all variables that we clean on shutdown */
     this->hidden = (struct SDL_PrivateAudioData *)
-                        SDL_malloc((sizeof *this->hidden));
+        SDL_malloc((sizeof *this->hidden));
     if (this->hidden == NULL) {
         SDL_OutOfMemory();
         return 0;
@@ -338,7 +340,8 @@ MINTGSXB_OpenDevice(_THIS, const char *devname, int iscapture)
     /* Allocate memory for audio buffers in DMA-able RAM */
     DEBUG_PRINT((DEBUG_NAME "buffer size=%d\n", this->spec.size));
 
-    SDL_MintAudio_audiobuf[0] = Atari_SysMalloc(this->spec.size * 2, MX_STRAM);
+    SDL_MintAudio_audiobuf[0] =
+        Atari_SysMalloc(this->spec.size * 2, MX_STRAM);
     if (SDL_MintAudio_audiobuf[0] == NULL) {
         SDL_free(this->hidden);
         this->hidden = NULL;
@@ -347,7 +350,8 @@ MINTGSXB_OpenDevice(_THIS, const char *devname, int iscapture)
     }
     SDL_MintAudio_audiobuf[1] = SDL_MintAudio_audiobuf[0] + this->spec.size;
     SDL_MintAudio_numbuf = 0;
-    SDL_memset(SDL_MintAudio_audiobuf[0],this->spec.silence,this->spec.size*2);
+    SDL_memset(SDL_MintAudio_audiobuf[0], this->spec.silence,
+               this->spec.size * 2);
     SDL_MintAudio_audiosize = this->spec.size;
     SDL_MintAudio_mutex = 0;
 
@@ -361,7 +365,7 @@ MINTGSXB_OpenDevice(_THIS, const char *devname, int iscapture)
     /* Setup audio hardware */
     MINTGSXB_InitAudio(this);
 
-    return 1;  /* good to go. */
+    return 1;                   /* good to go. */
 }
 
 static void
@@ -388,7 +392,7 @@ MINTGSXB_GsxbNullInterrupt(void)
 }
 
 static int
-MINTGSXB_Init(SDL_AudioDriverImpl *impl)
+MINTGSXB_Init(SDL_AudioDriverImpl * impl)
 {
     /* Cookie _SND present ? if not, assume ST machine */
     if (Getcookie(C__SND, &cookie_snd) == C_NOTFOUND) {

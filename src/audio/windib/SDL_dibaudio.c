@@ -107,7 +107,8 @@ WINWAVEOUT_WaitDevice(_THIS)
 Uint8 *
 WINWAVEOUT_GetDeviceBuf(_THIS)
 {
-    return (Uint8 *) (this->hidden->wavebuf[this->hidden->next_buffer].lpData);
+    return (Uint8 *) (this->hidden->wavebuf[this->hidden->next_buffer].
+                      lpData);
 }
 
 void
@@ -116,7 +117,7 @@ WINWAVEOUT_PlayDevice(_THIS)
     /* Queue it up */
     waveOutWrite(this->hidden->sound,
                  &this->hidden->wavebuf[this->hidden->next_buffer],
-                 sizeof (this->hidden->wavebuf[0]));
+                 sizeof(this->hidden->wavebuf[0]));
     this->hidden->next_buffer = (this->hidden->next_buffer + 1) % NUM_BUFFERS;
 }
 
@@ -165,7 +166,7 @@ WINWAVEOUT_CloseDevice(_THIS)
             if (this->hidden->wavebuf[i].dwUser != 0xFFFF) {
                 waveOutUnprepareHeader(this->hidden->sound,
                                        &this->hidden->wavebuf[i],
-                                       sizeof (this->hidden->wavebuf[i]));
+                                       sizeof(this->hidden->wavebuf[i]));
                 this->hidden->wavebuf[i].dwUser = 0xFFFF;
             }
         }
@@ -192,7 +193,7 @@ WINWAVEOUT_OpenDevice(_THIS, const char *devname, int iscapture)
 
     /* Initialize all variables that we clean on shutdown */
     this->hidden = (struct SDL_PrivateAudioData *)
-                        SDL_malloc((sizeof *this->hidden));
+        SDL_malloc((sizeof *this->hidden));
     if (this->hidden == NULL) {
         SDL_OutOfMemory();
         return 0;
@@ -207,15 +208,15 @@ WINWAVEOUT_OpenDevice(_THIS, const char *devname, int iscapture)
         valid_datatype = 1;
         this->spec.format = test_format;
         switch (test_format) {
-            case AUDIO_U8:
-            case AUDIO_S16:
-            case AUDIO_S32:
-                break;  /* valid. */
+        case AUDIO_U8:
+        case AUDIO_S16:
+        case AUDIO_S32:
+            break;              /* valid. */
 
-            default:
-                valid_datatype = 0;
-                test_format = SDL_NextAudioFormat();
-                break;
+        default:
+            valid_datatype = 0;
+            test_format = SDL_NextAudioFormat();
+            break;
         }
     }
 
@@ -226,12 +227,12 @@ WINWAVEOUT_OpenDevice(_THIS, const char *devname, int iscapture)
     }
 
     /* Set basic WAVE format parameters */
-    SDL_memset(&waveformat, '\0', sizeof (waveformat));
+    SDL_memset(&waveformat, '\0', sizeof(waveformat));
     waveformat.wFormatTag = WAVE_FORMAT_PCM;
     waveformat.wBitsPerSample = SDL_AUDIO_BITSIZE(this->spec.format);
 
     if (this->spec.channels > 2)
-        this->spec.channels = 2;  /* !!! FIXME: is this right? */
+        this->spec.channels = 2;        /* !!! FIXME: is this right? */
 
     waveformat.nChannels = this->spec.channels;
     waveformat.nSamplesPerSec = this->spec.freq;
@@ -273,11 +274,11 @@ WINWAVEOUT_OpenDevice(_THIS, const char *devname, int iscapture)
 #endif
 
     /* Create the audio buffer semaphore */
-    this->hidden->audio_sem = 
+    this->hidden->audio_sem =
 #if defined(_WIN32_WCE) && (_WIN32_WCE < 300)
-            CreateSemaphoreCE(NULL, NUM_BUFFERS - 1, NUM_BUFFERS, NULL);
+        CreateSemaphoreCE(NULL, NUM_BUFFERS - 1, NUM_BUFFERS, NULL);
 #else
-            CreateSemaphore(NULL, NUM_BUFFERS - 1, NUM_BUFFERS, NULL);
+        CreateSemaphore(NULL, NUM_BUFFERS - 1, NUM_BUFFERS, NULL);
 #endif
     if (this->hidden->audio_sem == NULL) {
         WINWAVEOUT_CloseDevice(this);
@@ -286,7 +287,8 @@ WINWAVEOUT_OpenDevice(_THIS, const char *devname, int iscapture)
     }
 
     /* Create the sound buffers */
-    this->hidden->mixbuf = (Uint8 *) SDL_malloc(NUM_BUFFERS * this->spec.size);
+    this->hidden->mixbuf =
+        (Uint8 *) SDL_malloc(NUM_BUFFERS * this->spec.size);
     if (this->hidden->mixbuf == NULL) {
         WINWAVEOUT_CloseDevice(this);
         SDL_OutOfMemory();
@@ -294,14 +296,14 @@ WINWAVEOUT_OpenDevice(_THIS, const char *devname, int iscapture)
     }
     for (i = 0; i < NUM_BUFFERS; ++i) {
         SDL_memset(&this->hidden->wavebuf[i], '\0',
-                    sizeof (this->hidden->wavebuf[i]));
+                   sizeof(this->hidden->wavebuf[i]));
         this->hidden->wavebuf[i].dwBufferLength = this->spec.size;
         this->hidden->wavebuf[i].dwFlags = WHDR_DONE;
         this->hidden->wavebuf[i].lpData =
-                            (LPSTR) &this->hidden->mixbuf[i * this->spec.size];
+            (LPSTR) & this->hidden->mixbuf[i * this->spec.size];
         result = waveOutPrepareHeader(this->hidden->sound,
                                       &this->hidden->wavebuf[i],
-                                      sizeof (this->hidden->wavebuf[i]));
+                                      sizeof(this->hidden->wavebuf[i]));
         if (result != MMSYSERR_NOERROR) {
             WINWAVEOUT_CloseDevice(this);
             SetMMerror("waveOutPrepareHeader()", result);
@@ -309,12 +311,12 @@ WINWAVEOUT_OpenDevice(_THIS, const char *devname, int iscapture)
         }
     }
 
-    return 1;   /* Ready to go! */
+    return 1;                   /* Ready to go! */
 }
 
 
 static int
-WINWAVEOUT_Init(SDL_AudioDriverImpl *impl)
+WINWAVEOUT_Init(SDL_AudioDriverImpl * impl)
 {
     /* Set the function pointers */
     impl->OpenDevice = WINWAVEOUT_OpenDevice;
@@ -324,7 +326,7 @@ WINWAVEOUT_Init(SDL_AudioDriverImpl *impl)
     impl->WaitDone = WINWAVEOUT_WaitDone;
     impl->GetDeviceBuf = WINWAVEOUT_GetDeviceBuf;
     impl->CloseDevice = WINWAVEOUT_CloseDevice;
-    impl->OnlyHasDefaultOutputDevice = 1;  /* !!! FIXME: Is this true? */
+    impl->OnlyHasDefaultOutputDevice = 1;       /* !!! FIXME: Is this true? */
 
     return 1;
 }

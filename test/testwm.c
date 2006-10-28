@@ -276,7 +276,7 @@ int
 main(int argc, char *argv[])
 {
     SDL_Event event;
-    char *title;
+    const char *title;
     SDL_Surface *icon;
     Uint8 *icon_mask;
     int parsed;

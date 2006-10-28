@@ -1,8 +1,8 @@
 #include "SDL.h"
 
 static SDL_AudioSpec spec;
-static Uint8 *sound = NULL;            /* Pointer to wave data */
-static Uint32 soundlen = 0;            /* Length of wave data */
+static Uint8 *sound = NULL;     /* Pointer to wave data */
+static Uint32 soundlen = 0;     /* Length of wave data */
 
 typedef struct
 {
@@ -11,7 +11,8 @@ typedef struct
     volatile int done;
 } callback_data;
 
-void SDLCALL play_through_once(void *arg, Uint8 * stream, int len)
+void SDLCALL
+play_through_once(void *arg, Uint8 * stream, int len)
 {
     callback_data *cbd = (callback_data *) arg;
     Uint8 *waveptr = sound + cbd->soundpos;
@@ -30,14 +31,16 @@ void SDLCALL play_through_once(void *arg, Uint8 * stream, int len)
     }
 }
 
-static void test_multi_audio(int devcount)
+static void
+test_multi_audio(int devcount)
 {
     callback_data cbd[64];
     int keep_going = 1;
     int i;
 
     if (devcount > 64) {
-        fprintf(stderr, "Too many devices (%d), clamping to 64...\n", devcount);
+        fprintf(stderr, "Too many devices (%d), clamping to 64...\n",
+                devcount);
         devcount = 64;
     }
 
@@ -48,7 +51,7 @@ static void test_multi_audio(int devcount)
         printf("playing on device #%d: ('%s')...", i, devname);
         fflush(stdout);
 
-        memset(&cbd[0], '\0', sizeof (callback_data));
+        memset(&cbd[0], '\0', sizeof(callback_data));
         spec.userdata = &cbd[0];
         cbd[0].dev = SDL_OpenAudioDevice(devname, 0, &spec, NULL);
         if (cbd[0].dev == 0) {
@@ -63,7 +66,7 @@ static void test_multi_audio(int devcount)
         }
     }
 
-    memset(cbd, '\0', sizeof (cbd));
+    memset(cbd, '\0', sizeof(cbd));
 
     printf("playing on all devices...\n");
     for (i = 0; i < devcount; i++) {
@@ -102,7 +105,8 @@ static void test_multi_audio(int devcount)
 }
 
 
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
     int devcount = 0;
 
@@ -124,7 +128,8 @@ int main(int argc, char **argv)
 
         /* Load the wave file into memory */
         if (SDL_LoadWAV(argv[1], &spec, &sound, &soundlen) == NULL) {
-            fprintf(stderr, "Couldn't load %s: %s\n", argv[1], SDL_GetError());
+            fprintf(stderr, "Couldn't load %s: %s\n", argv[1],
+                    SDL_GetError());
         } else {
             test_multi_audio(devcount);
             SDL_FreeWAV(sound);

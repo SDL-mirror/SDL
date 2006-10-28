@@ -1,6 +1,7 @@
 #include "SDL.h"
 
-static void print_devices(int iscapture)
+static void
+print_devices(int iscapture)
 {
     const char *typestr = ((iscapture) ? "capture" : "output");
     int n = SDL_GetNumAudioDevices(iscapture);
@@ -11,8 +12,7 @@ static void print_devices(int iscapture)
         printf("  Driver can't detect specific devices.\n\n", typestr);
     else if (n == 0)
         printf("  No %s devices found.\n\n", typestr);
-    else
-    {
+    else {
         int i;
         for (i = 0; i < n; i++) {
             printf("  %s\n", SDL_GetAudioDeviceName(i, iscapture));
@@ -21,7 +21,8 @@ static void print_devices(int iscapture)
     }
 }
 
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
     /* Print available audio drivers */
     int n = SDL_GetNumAudioDrivers();
@@ -50,4 +51,3 @@ int main(int argc, char **argv)
     SDL_Quit();
     return 0;
 }
-

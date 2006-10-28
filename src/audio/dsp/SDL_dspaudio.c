@@ -111,7 +111,7 @@ DSP_DetectDevices(int iscapture)
         return outputDeviceCount;
     }
 
-    return 0;  /* shouldn't ever hit this. */
+    return 0;                   /* shouldn't ever hit this. */
 }
 
 static const char *
@@ -158,8 +158,8 @@ DSP_OpenDevice(_THIS, const char *devname, int iscapture)
     /* We don't care what the devname is...we'll try to open anything. */
     /*  ...but default to first name in the list... */
     if (devname == NULL) {
-        if ( ((iscapture) && (inputDeviceCount == 0)) ||
-             ((!iscapture) && (outputDeviceCount == 0)) ) {
+        if (((iscapture) && (inputDeviceCount == 0)) ||
+            ((!iscapture) && (outputDeviceCount == 0))) {
             SDL_SetError("No such audio device");
             return 0;
         }
@@ -168,7 +168,7 @@ DSP_OpenDevice(_THIS, const char *devname, int iscapture)
 
     /* Initialize all variables that we clean on shutdown */
     this->hidden = (struct SDL_PrivateAudioData *)
-                        SDL_malloc((sizeof *this->hidden));
+        SDL_malloc((sizeof *this->hidden));
     if (this->hidden == NULL) {
         SDL_OutOfMemory();
         return 0;
@@ -265,8 +265,8 @@ DSP_OpenDevice(_THIS, const char *devname, int iscapture)
 
     /* Set the audio format */
     value = format;
-    if ( (ioctl(this->hidden->audio_fd, SNDCTL_DSP_SETFMT, &value) < 0) ||
-         (value != format) ) {
+    if ((ioctl(this->hidden->audio_fd, SNDCTL_DSP_SETFMT, &value) < 0) ||
+        (value != format)) {
         perror("SNDCTL_DSP_SETFMT");
         DSP_CloseDevice(this);
         SDL_SetError("Couldn't set audio format");
@@ -360,7 +360,7 @@ DSP_GetDeviceBuf(_THIS)
 }
 
 static int
-DSP_Init(SDL_AudioDriverImpl *impl)
+DSP_Init(SDL_AudioDriverImpl * impl)
 {
     /* Set the function pointers */
     impl->DetectDevices = DSP_DetectDevices;

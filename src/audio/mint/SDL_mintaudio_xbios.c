@@ -90,7 +90,8 @@ MINTXBIOS_CloseDevice(_THIS)
         }
 
         /* Wait if currently playing sound */
-        while (SDL_MintAudio_mutex != 0) {}
+        while (SDL_MintAudio_mutex != 0) {
+        }
 
         /* Clear buffers */
         if (SDL_MintAudio_audiobuf[0]) {
@@ -267,18 +268,19 @@ MINTXBIOS_CheckAudio(_THIS)
                  SDL_AUDIO_BITSIZE(this->spec.format)));
     DEBUG_PRINT(("float=%d, ", SDL_AUDIO_ISFLOAT(this->spec.format)));
     DEBUG_PRINT(("signed=%d, ", SDL_AUDIO_ISSIGNED(this->spec.format)));
-    DEBUG_PRINT(("big endian=%d, ", SDL_AUDIO_ISBIGENDIAN(this->spec.format)));
+    DEBUG_PRINT(("big endian=%d, ",
+                 SDL_AUDIO_ISBIGENDIAN(this->spec.format)));
     DEBUG_PRINT(("channels=%d, ", this->spec.channels));
     DEBUG_PRINT(("freq=%d\n", this->spec.freq));
 
-    this->spec.format |= SDL_AUDIO_MASK_SIGNED;   /* Audio is always signed */
+    this->spec.format |= SDL_AUDIO_MASK_SIGNED; /* Audio is always signed */
 
     /* clamp out int32/float32 */
     if (SDL_AUDIO_BITSIZE(this->spec.format) >= 16) {
-        this->spec.format = AUDIO_S16MSB;    /* Audio is always big endian */
-        this->spec.channels = 2;     /* 16 bits always stereo */
+        this->spec.format = AUDIO_S16MSB;       /* Audio is always big endian */
+        this->spec.channels = 2;        /* 16 bits always stereo */
     } else if (this->spec.channels > 2) {
-        this->spec.channels = 2;     /* no more than stereo! */
+        this->spec.channels = 2;        /* no more than stereo! */
     }
 
     MINTAUDIO_freqcount = 0;
@@ -314,7 +316,8 @@ MINTXBIOS_CheckAudio(_THIS)
                  SDL_AUDIO_BITSIZE(this->spec.format)));
     DEBUG_PRINT(("float=%d, ", SDL_AUDIO_ISFLOAT(this->spec.format)));
     DEBUG_PRINT(("signed=%d, ", SDL_AUDIO_ISSIGNED(this->spec.format)));
-    DEBUG_PRINT(("big endian=%d, ", SDL_AUDIO_ISBIGENDIAN(this->spec.format)));
+    DEBUG_PRINT(("big endian=%d, ",
+                 SDL_AUDIO_ISBIGENDIAN(this->spec.format)));
     DEBUG_PRINT(("channels=%d, ", this->spec.channels));
     DEBUG_PRINT(("freq=%d\n", this->spec.freq));
 
@@ -405,7 +408,7 @@ MINTXBIOS_OpenDevice(_THIS, const char *devname, int iscapture)
 
     /* Initialize all variables that we clean on shutdown */
     this->hidden = (struct SDL_PrivateAudioData *)
-                        SDL_malloc((sizeof *this->hidden));
+        SDL_malloc((sizeof *this->hidden));
     if (this->hidden == NULL) {
         SDL_OutOfMemory();
         return 0;
@@ -417,7 +420,8 @@ MINTXBIOS_OpenDevice(_THIS, const char *devname, int iscapture)
     /* Allocate memory for audio buffers in DMA-able RAM */
     DEBUG_PRINT((DEBUG_NAME "buffer size=%d\n", this->spec.size));
 
-    SDL_MintAudio_audiobuf[0] = Atari_SysMalloc(this->spec.size * 2, MX_STRAM);
+    SDL_MintAudio_audiobuf[0] =
+        Atari_SysMalloc(this->spec.size * 2, MX_STRAM);
     if (SDL_MintAudio_audiobuf[0] == NULL) {
         SDL_free(this->hidden);
         this->hidden = NULL;
@@ -426,7 +430,8 @@ MINTXBIOS_OpenDevice(_THIS, const char *devname, int iscapture)
     }
     SDL_MintAudio_audiobuf[1] = SDL_MintAudio_audiobuf[0] + this->spec.size;
     SDL_MintAudio_numbuf = 0;
-    SDL_memset(SDL_MintAudio_audiobuf[0],this->spec.silence,this->spec.size*2);
+    SDL_memset(SDL_MintAudio_audiobuf[0], this->spec.silence,
+               this->spec.size * 2);
     SDL_MintAudio_audiosize = this->spec.size;
     SDL_MintAudio_mutex = 0;
 
@@ -440,11 +445,11 @@ MINTXBIOS_OpenDevice(_THIS, const char *devname, int iscapture)
     /* Setup audio hardware */
     MINTXBIOS_InitAudio(this);
 
-    return 1;  /* good to go. */
+    return 1;                   /* good to go. */
 }
 
 static int
-MINTXBIOS_Init(SDL_AudioDriverImpl *impl)
+MINTXBIOS_Init(SDL_AudioDriverImpl * impl)
 {
     unsigned long dummy = 0;
     /*SDL_MintAudio_mint_present = (Getcookie(C_MiNT, &dummy) == C_FOUND); */

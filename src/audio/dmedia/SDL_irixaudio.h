@@ -33,8 +33,8 @@
 
 struct SDL_PrivateAudioData
 {
-    ALport audio_port;    /* The handle for the audio device */
-    Uint8 *mixbuf;        /* The app mixing buffer */
+    ALport audio_port;          /* The handle for the audio device */
+    Uint8 *mixbuf;              /* The app mixing buffer */
 };
 
 #endif /* _SDL_irixaudio_h */

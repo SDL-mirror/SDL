@@ -112,12 +112,12 @@ DISKAUD_OpenDevice(_THIS, const char *devname, int iscapture)
     const char *fname = DISKAUD_GetOutputFilename(devname);
 
     this->hidden = (struct SDL_PrivateAudioData *)
-            SDL_malloc(sizeof (*this->hidden));
+        SDL_malloc(sizeof(*this->hidden));
     if (this->hidden == NULL) {
         SDL_OutOfMemory();
         return 0;
     }
-    SDL_memset(this->hidden, 0, sizeof (*this->hidden));
+    SDL_memset(this->hidden, 0, sizeof(*this->hidden));
 
     /* Open the audio device */
     this->hidden->output = SDL_RWFromFile(fname, "wb");
@@ -149,7 +149,7 @@ DISKAUD_OpenDevice(_THIS, const char *devname, int iscapture)
 }
 
 static int
-DISKAUD_Init(SDL_AudioDriverImpl *impl)
+DISKAUD_Init(SDL_AudioDriverImpl * impl)
 {
     /* Set the function pointers */
     impl->OpenDevice = DISKAUD_OpenDevice;

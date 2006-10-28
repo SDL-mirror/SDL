@@ -64,6 +64,7 @@ SDL_GetTicks(void)
         hires_now /= hires_ticks_per_second;
 */
     /* inline asm to avoid runtime inclusion */
+    /* *INDENT-OFF* */
     _asm {
         push edx
         push eax
@@ -87,6 +88,7 @@ SDL_GetTicks(void)
         pop edx
         pop eax
     }
+    /* *INDENT-ON* */
 
     return ticks;
 

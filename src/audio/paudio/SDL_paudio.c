@@ -137,7 +137,9 @@ PAUDIO_WaitDevice(_THIS)
         /* Use timer for general audio synchronization */
         Sint32 ticks;
 
-        ticks = ((Sint32)(this->hidden->next_frame-SDL_GetTicks()))-FUDGE_TICKS;
+        ticks =
+            ((Sint32) (this->hidden->next_frame - SDL_GetTicks())) -
+            FUDGE_TICKS;
         if (ticks > 0) {
             SDL_Delay(ticks);
         }
@@ -170,7 +172,8 @@ PAUDIO_WaitDevice(_THIS)
 #ifdef DEBUG_AUDIO
         fprintf(stderr, "Waiting for audio to get ready\n");
 #endif
-        if (select(this->hidden->audio_fd+1,NULL,&fdset,NULL,&timeout) <= 0) {
+        if (select(this->hidden->audio_fd + 1, NULL, &fdset, NULL, &timeout)
+            <= 0) {
             const char *message =
                 "Audio timeout - buggy audio driver? (disabled)";
             /*
@@ -264,7 +267,7 @@ PAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
 
     /* Initialize all variables that we clean on shutdown */
     this->hidden = (struct SDL_PrivateAudioData *)
-                        SDL_malloc((sizeof *this->hidden));
+        SDL_malloc((sizeof *this->hidden));
     if (this->hidden == NULL) {
         SDL_OutOfMemory();
         return 0;
@@ -515,7 +518,7 @@ PAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
     /* Check to see if we need to use select() workaround */
     if (workaround != NULL) {
         this->hidden->frame_ticks = (float) (this->spec.samples * 1000) /
-                                                this->spec.freq;
+            this->spec.freq;
         this->hidden->next_frame = SDL_GetTicks() + this->hidden->frame_ticks;
     }
 
@@ -524,7 +527,7 @@ PAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
 }
 
 static int
-PAUDIO_Init(SDL_AudioDriverImpl *impl)
+PAUDIO_Init(SDL_AudioDriverImpl * impl)
 {
     int fd = OpenAudioPath(NULL, 0, OPEN_FLAGS, 0);
     if (fd < 0) {
@@ -539,7 +542,7 @@ PAUDIO_Init(SDL_AudioDriverImpl *impl)
     impl->PlayDevice = DSP_WaitDevice;
     impl->GetDeviceBuf = DSP_GetDeviceBuf;
     impl->CloseDevice = DSP_CloseDevice;
-    impl->OnlyHasDefaultOutputDevice = 1;  /* !!! FIXME: add device enum! */
+    impl->OnlyHasDefaultOutputDevice = 1;       /* !!! FIXME: add device enum! */
 
     return 1;
 }

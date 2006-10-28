@@ -21,7 +21,7 @@
 */
 #include "SDL_config.h"
 
-void SDL_EnumUnixAudioDevices(int flags, int classic, int (*test)(int fd),
+void SDL_EnumUnixAudioDevices(int flags, int classic, int (*test) (int fd),
                               char ***devs, int *count);
 void SDL_FreeUnixAudioDevices(char ***devices, int *devCount);
 

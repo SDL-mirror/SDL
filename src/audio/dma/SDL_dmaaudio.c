@@ -74,8 +74,7 @@ test_for_mmap(int fd)
     struct audio_buf_info info;
     if ((ioctl(fd, SNDCTL_DSP_GETCAPS, &caps) == 0) &&
         (caps & DSP_CAP_TRIGGER) && (caps & DSP_CAP_MMAP) &&
-        (ioctl(fd, SNDCTL_DSP_GETOSPACE, &info) == 0))
-    {
+        (ioctl(fd, SNDCTL_DSP_GETOSPACE, &info) == 0)) {
         size_t len = info.fragstotal * info.fragsize;
         Uint8 *buf = (Uint8 *) mmap(NULL, len, PROT_WRITE, MAP_SHARED, fd, 0);
         if (buf != MAP_FAILED) {
@@ -117,7 +116,8 @@ free_device_lists(void)
 }
 
 
-static void DMA_Deinitialize(void)
+static void
+DMA_Deinitialize(void)
 {
     free_device_lists();
 }
@@ -133,7 +133,7 @@ DMA_DetectDevices(int iscapture)
         return outputDeviceCount;
     }
 
-    return 0;  /* shouldn't ever hit this. */
+    return 0;                   /* shouldn't ever hit this. */
 }
 
 
@@ -240,8 +240,8 @@ DMA_OpenDevice(_THIS, const char *devname, int iscapture)
     /* We don't care what the devname is...we'll try to open anything. */
     /*  ...but default to first name in the list... */
     if (devname == NULL) {
-        if ( ((iscapture) && (inputDeviceCount == 0)) ||
-             ((!iscapture) && (outputDeviceCount == 0)) ) {
+        if (((iscapture) && (inputDeviceCount == 0)) ||
+            ((!iscapture) && (outputDeviceCount == 0))) {
             SDL_SetError("No such audio device");
             return 0;
         }
@@ -250,7 +250,7 @@ DMA_OpenDevice(_THIS, const char *devname, int iscapture)
 
     /* Initialize all variables that we clean on shutdown */
     this->hidden = (struct SDL_PrivateAudioData *)
-                        SDL_malloc((sizeof *this->hidden));
+        SDL_malloc((sizeof *this->hidden));
     if (this->hidden == NULL) {
         SDL_OutOfMemory();
         return 0;
@@ -380,7 +380,8 @@ DMA_OpenDevice(_THIS, const char *devname, int iscapture)
         char *workaround;
         workaround = SDL_getenv("SDL_DSP_NOSELECT");
         if (workaround) {
-            frame_ticks = (float) (this->spec.samples*1000) / this->spec.freq;
+            frame_ticks =
+                (float) (this->spec.samples * 1000) / this->spec.freq;
             next_frame = SDL_GetTicks() + frame_ticks;
         }
     }
@@ -511,7 +512,7 @@ DMA_GetDeviceBuf(_THIS)
 
 
 static int
-DMA_Init(SDL_AudioDriverImpl *impl)
+DMA_Init(SDL_AudioDriverImpl * impl)
 {
     /* Set the function pointers */
     impl->DetectDevices = DMA_DetectDevices;

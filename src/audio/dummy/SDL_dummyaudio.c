@@ -32,11 +32,11 @@
 static int
 DUMMYAUD_OpenDevice(_THIS, const char *devname, int iscapture)
 {
-    return 1;   /* always succeeds. */
+    return 1;                   /* always succeeds. */
 }
 
 static int
-DUMMYAUD_Init(SDL_AudioDriverImpl *impl)
+DUMMYAUD_Init(SDL_AudioDriverImpl * impl)
 {
     /* Set the function pointers */
     impl->OpenDevice = DUMMYAUD_OpenDevice;

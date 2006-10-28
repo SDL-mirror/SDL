@@ -47,14 +47,15 @@
 #endif
 
 static inline void
-test_device(const char *fname, int flags, int (*test)(int fd),
+test_device(const char *fname, int flags, int (*test) (int fd),
             char ***devices, int *devCount)
 {
     struct stat sb;
-    if ( (stat(fname, &sb) == 0) && (S_ISCHR(sb.st_mode)) ) {
+    if ((stat(fname, &sb) == 0) && (S_ISCHR(sb.st_mode))) {
         int audio_fd = open(fname, flags, 0);
-        if ( (audio_fd >= 0) && (test(audio_fd)) ) {
-            void *p = SDL_realloc(*devices, ((*devCount)+1) * sizeof (char *));
+        if ((audio_fd >= 0) && (test(audio_fd))) {
+            void *p =
+                SDL_realloc(*devices, ((*devCount) + 1) * sizeof(char *));
             if (p != NULL) {
                 size_t len = strlen(fname) + 1;
                 char *str = (char *) SDL_malloc(len);
@@ -75,7 +76,7 @@ SDL_FreeUnixAudioDevices(char ***devices, int *devCount)
     int i = *devCount;
     if ((i > 0) && (*devices != NULL)) {
         while (i--) {
-            SDL_free( (*devices)[*devCount] );
+            SDL_free((*devices)[*devCount]);
         }
     }
 
@@ -94,7 +95,7 @@ test_stub(int fd)
 }
 
 void
-SDL_EnumUnixAudioDevices(int flags, int classic, int (*test)(int fd),
+SDL_EnumUnixAudioDevices(int flags, int classic, int (*test) (int fd),
                          char ***devices, int *devCount)
 {
     const char *audiodev;

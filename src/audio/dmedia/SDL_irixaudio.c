@@ -104,7 +104,7 @@ IRIXAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
 
     /* Initialize all variables that we clean on shutdown */
     this->hidden = (struct SDL_PrivateAudioData *)
-                        SDL_malloc((sizeof *this->hidden));
+        SDL_malloc((sizeof *this->hidden));
     if (this->hidden == NULL) {
         SDL_OutOfMemory();
         return 0;
@@ -160,15 +160,17 @@ IRIXAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
             valid = 0;
             if (audio_config) {
                 if (alSetChannels(audio_config, this->spec.channels) < 0) {
-                    if (this->spec.channels > 2) { /* can't handle > stereo? */
-                        this->spec.channels = 2;   /* try again below. */
+                    if (this->spec.channels > 2) {      /* can't handle > stereo? */
+                        this->spec.channels = 2;        /* try again below. */
                     }
                 }
 
                 if ((alSetSampFmt(audio_config, fmt) >= 0) &&
                     ((!width) || (alSetWidth(audio_config, width) >= 0)) &&
-                    (alSetQueueSize(audio_config,this->spec.samples*2) >= 0) &&
-                    (alSetChannels(audio_config, this->spec.channels) >= 0)) {
+                    (alSetQueueSize(audio_config, this->spec.samples * 2) >=
+                     0)
+                    && (alSetChannels(audio_config, this->spec.channels) >=
+                        0)) {
 
                     this->hidden->audio_port = alOpenPort("SDL audio", "w",
                                                           audio_config);
@@ -178,8 +180,8 @@ IRIXAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
                         if (err == AL_BAD_CHANNELS) {
                             this->spec.channels = 2;
                             alSetChannels(audio_config, this->spec.channels);
-                            this->hidden->audio_port = alOpenPort("SDL audio", "w",
-                                                                 audio_config);
+                            this->hidden->audio_port =
+                                alOpenPort("SDL audio", "w", audio_config);
                         }
                     }
 
@@ -216,7 +218,7 @@ IRIXAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
 }
 
 static int
-IRIXAUDIO_Init(SDL_AudioDriverImpl *impl)
+IRIXAUDIO_Init(SDL_AudioDriverImpl * impl)
 {
     /* Set the function pointers */
     impl->OpenDevice = DSP_OpenDevice;
@@ -224,7 +226,7 @@ IRIXAUDIO_Init(SDL_AudioDriverImpl *impl)
     impl->WaitDevice = DSP_WaitDevice;
     impl->GetDeviceBuf = DSP_GetDeviceBuf;
     impl->CloseDevice = DSP_CloseDevice;
-    impl->OnlyHasDefaultOutputDevice = 1;  /* !!! FIXME: not true, I think. */
+    impl->OnlyHasDefaultOutputDevice = 1;       /* !!! FIXME: not true, I think. */
 
     return 1;
 }

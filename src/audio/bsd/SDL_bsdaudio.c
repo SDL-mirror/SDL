@@ -122,7 +122,7 @@ BSDAUDIO_DetectDevices(int iscapture)
         return outputDeviceCount;
     }
 
-    return 0;  /* shouldn't ever hit this. */
+    return 0;                   /* shouldn't ever hit this. */
 }
 
 static const char *
@@ -149,7 +149,7 @@ BSDAUDIO_Status(_THIS)
         fprintf(stderr, "AUDIO_GETINFO failed.\n");
         return;
     }
-
+    /* *INDENT-OFF* */
     fprintf(stderr, "\n"
             "[play/record info]\n"
             "buffer size	:   %d bytes\n"
@@ -177,7 +177,9 @@ BSDAUDIO_Status(_THIS)
             info.play.error ? "yes" : "no",
             info.play.waiting ? "yes" : "no",
             info.play.active ? "yes" : "no");
+    /* *INDENT-ON* */
 
+    /* *INDENT-OFF* */
     fprintf(stderr, "\n"
             "[audio info]\n"
             "monitor_gain	:   %i\n"
@@ -192,6 +194,7 @@ BSDAUDIO_Status(_THIS)
             (info.mode == AUMODE_PLAY) ? "PLAY"
             : (info.mode = AUMODE_RECORD) ? "RECORD"
             : (info.mode == AUMODE_PLAY_ALL ? "PLAY_ALL" : "?"));
+    /* *INDENT-ON* */
 #endif /* DEBUG_AUDIO */
 }
 
@@ -206,7 +209,9 @@ BSDAUDIO_WaitDevice(_THIS)
         /* Use timer for general audio synchronization */
         Sint32 ticks;
 
-        ticks = ((Sint32)(this->hidden->next_frame-SDL_GetTicks()))-FUDGE_TICKS;
+        ticks =
+            ((Sint32) (this->hidden->next_frame - SDL_GetTicks())) -
+            FUDGE_TICKS;
         if (ticks > 0) {
             SDL_Delay(ticks);
         }
@@ -222,7 +227,8 @@ BSDAUDIO_WaitDevice(_THIS)
 #ifdef DEBUG_AUDIO
         fprintf(stderr, "Waiting for audio to get ready\n");
 #endif
-        if (select(this->hidden->audio_fd+1,NULL,&fdset,NULL,&timeout) <= 0) {
+        if (select(this->hidden->audio_fd + 1, NULL, &fdset, NULL, &timeout)
+            <= 0) {
             const char *message =
                 "Audio timeout - buggy audio driver? (disabled)";
             /* In general we should never print to the screen,
@@ -252,8 +258,7 @@ BSDAUDIO_PlayDevice(_THIS)
     /* Write the audio data, checking for EAGAIN on broken audio drivers */
     do {
         written = write(this->hidden->audio_fd,
-                        &this->hidden->mixbuf[p],
-                        this->hidden->mixlen - p);
+                        &this->hidden->mixbuf[p], this->hidden->mixlen - p);
 
         if (written > 0)
             p += written;
@@ -317,8 +322,8 @@ BSDAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
     /* We don't care what the devname is...we'll try to open anything. */
     /*  ...but default to first name in the list... */
     if (devname == NULL) {
-        if ( ((iscapture) && (inputDeviceCount == 0)) ||
-             ((!iscapture) && (outputDeviceCount == 0)) ) {
+        if (((iscapture) && (inputDeviceCount == 0)) ||
+            ((!iscapture) && (outputDeviceCount == 0))) {
             SDL_SetError("No such audio device");
             return 0;
         }
@@ -327,7 +332,7 @@ BSDAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
 
     /* Initialize all variables that we clean on shutdown */
     this->hidden = (struct SDL_PrivateAudioData *)
-                        SDL_malloc((sizeof *this->hidden));
+        SDL_malloc((sizeof *this->hidden));
     if (this->hidden == NULL) {
         SDL_OutOfMemory();
         return 0;
@@ -429,7 +434,7 @@ BSDAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
 }
 
 static int
-BSDAUDIO_Init(SDL_AudioDriverImpl *impl)
+BSDAUDIO_Init(SDL_AudioDriverImpl * impl)
 {
     /* Set the function pointers */
     impl->DetectDevices = BSDAUDIO_DetectDevices;

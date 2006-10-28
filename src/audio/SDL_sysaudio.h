@@ -33,8 +33,8 @@ typedef struct SDL_AudioDevice SDL_AudioDevice;
 
 typedef struct SDL_AudioDriverImpl
 {
-    int (*DetectDevices)(int iscapture);
-    const char *(*GetDeviceName)(int index, int iscapture);
+    int (*DetectDevices) (int iscapture);
+    const char *(*GetDeviceName) (int index, int iscapture);
     int (*OpenDevice) (_THIS, const char *devname, int iscapture);
     void (*ThreadInit) (_THIS); /* Called by audio thread at start */
     void (*WaitDevice) (_THIS);
@@ -107,8 +107,8 @@ typedef struct AudioBootStrap
 {
     const char *name;
     const char *desc;
-    int (*init) (SDL_AudioDriverImpl *impl);
-    int demand_only:1;  /* 1==request explicitly, or it won't be available. */
+    int (*init) (SDL_AudioDriverImpl * impl);
+    int demand_only:1;          /* 1==request explicitly, or it won't be available. */
 } AudioBootStrap;
 
 #endif /* _SDL_sysaudio_h */

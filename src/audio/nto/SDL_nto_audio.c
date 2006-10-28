@@ -141,7 +141,8 @@ NTO_WaitDevice(_THIS)
     FD_SET(this->hidden->audio_fd, &wfds);
 
     do {
-        selectret = select(this->hidden->audio_fd+1, NULL, &wfds, NULL, NULL);
+        selectret =
+            select(this->hidden->audio_fd + 1, NULL, &wfds, NULL, NULL);
         switch (selectret) {
         case -1:
         case 0:
@@ -185,7 +186,7 @@ NTO_PlayDevice(_THIS)
                 pcmbuffer += written * this->spec.channels;
                 continue;
             } else if ((errno == EINVAL) || (errno == EIO)) {
-                SDL_memset(&cstatus, 0, sizeof (cstatus));
+                SDL_memset(&cstatus, 0, sizeof(cstatus));
                 cstatus.channel = SND_PCM_CHANNEL_PLAYBACK;
                 rval = snd_pcm_plugin_status(this->hidden->audio_handle,
                                              &cstatus);
@@ -194,10 +195,10 @@ NTO_PlayDevice(_THIS)
                     return;
                 }
 
-                if ( (cstatus.status == SND_PCM_STATUS_UNDERRUN) ||
-                     (cstatus.status == SND_PCM_STATUS_READY)) {
+                if ((cstatus.status == SND_PCM_STATUS_UNDERRUN) ||
+                    (cstatus.status == SND_PCM_STATUS_READY)) {
                     rval = snd_pcm_plugin_prepare(this->hidden->audio_handle,
-                                                   SND_PCM_CHANNEL_PLAYBACK);
+                                                  SND_PCM_CHANNEL_PLAYBACK);
                     if (rval < 0) {
                         NTO_SetError("snd_pcm_plugin_prepare", rval);
                         return;
@@ -258,7 +259,7 @@ NTO_OpenDevice(_THIS, const char *devname, int iscapture)
 
     /* Initialize all variables that we clean on shutdown */
     this->hidden = (struct SDL_PrivateAudioData *)
-                        SDL_malloc((sizeof *this->hidden));
+        SDL_malloc((sizeof *this->hidden));
     if (this->hidden == NULL) {
         SDL_OutOfMemory();
         return 0;
@@ -374,7 +375,7 @@ NTO_OpenDevice(_THIS, const char *devname, int iscapture)
     }
 
     /* Make sure channel is setup right one last time */
-    SDL_memset(&csetup, '\0', sizeof (csetup));
+    SDL_memset(&csetup, '\0', sizeof(csetup));
     csetup.channel = SND_PCM_CHANNEL_PLAYBACK;
     if (snd_pcm_plugin_setup(this->hidden->audio_handle, &csetup) < 0) {
         NTO_CloseDevice(this);
@@ -398,17 +399,20 @@ NTO_OpenDevice(_THIS, const char *devname, int iscapture)
      *  (Note that buffer size must be a multiple of fragment size, so find
      *  closest multiple)
      */
-    this->hidden->pcm_buf = (Uint8 *) SDL_AllocAudioMem(this->hidden->pcm_len);
+    this->hidden->pcm_buf =
+        (Uint8 *) SDL_AllocAudioMem(this->hidden->pcm_len);
     if (this->hidden->pcm_buf == NULL) {
         NTO_CloseDevice(this);
         SDL_OutOfMemory();
         return 0;
     }
-    SDL_memset(this->hidden->pcm_buf,this->spec.silence,this->hidden->pcm_len);
+    SDL_memset(this->hidden->pcm_buf, this->spec.silence,
+               this->hidden->pcm_len);
 
     /* get the file descriptor */
-    this->hidden->audio_fd = snd_pcm_file_descriptor(this->hidden->audio_handle,
-                                                     SND_PCM_CHANNEL_PLAYBACK);
+    this->hidden->audio_fd =
+        snd_pcm_file_descriptor(this->hidden->audio_handle,
+                                SND_PCM_CHANNEL_PLAYBACK);
     if (this->hidden->audio_fd < 0) {
         NTO_CloseDevice(this);
         NTO_SetError("snd_pcm_file_descriptor", rval);
@@ -430,7 +434,7 @@ NTO_OpenDevice(_THIS, const char *devname, int iscapture)
 
 
 static int
-NTO_Init(SDL_AudioDriverImpl *impl)
+NTO_Init(SDL_AudioDriverImpl * impl)
 {
     /*  See if we can open a nonblocking channel. */
     snd_pcm_t *handle = NULL;
@@ -451,7 +455,7 @@ NTO_Init(SDL_AudioDriverImpl *impl)
     impl->PlayDevice = NTO_PlayDevice;
     impl->GetDeviceBuf = NTO_GetDeviceBuf;
     impl->CloseDevice = NTO_CloseDevice;
-    impl->OnlyHasDefaultOutputDevice = 1;  /* !!! FIXME: add device enum! */
+    impl->OnlyHasDefaultOutputDevice = 1;       /* !!! FIXME: add device enum! */
 
     return 1;
 }

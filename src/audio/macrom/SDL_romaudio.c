@@ -190,7 +190,7 @@ SNDMGR_OpenDevice(_THIS, const char *devname, int iscapture)
 
     /* Initialize all variables that we clean on shutdown */
     this->hidden = (struct SDL_PrivateAudioData *)
-                        SDL_malloc((sizeof *this->hidden));
+        SDL_malloc((sizeof *this->hidden));
     if (this->hidden == NULL) {
         SDL_OutOfMemory();
         return 0;
@@ -292,7 +292,7 @@ SNDMGR_OpenDevice(_THIS, const char *devname, int iscapture)
 }
 
 static int
-SNDMGR_Init(SDL_AudioDriverImpl *impl)
+SNDMGR_Init(SDL_AudioDriverImpl * impl)
 {
     /* Set the function pointers */
     impl->OpenDevice = SNDMGR_OpenDevice;

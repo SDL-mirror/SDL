@@ -39,7 +39,8 @@
 
 /* DirectX function pointers for audio */
 static HINSTANCE DSoundDLL = NULL;
-static HRESULT (WINAPI *DSoundCreate)(LPGUID,LPDIRECTSOUND*,LPUNKNOWN) = NULL;
+static HRESULT(WINAPI * DSoundCreate) (LPGUID, LPDIRECTSOUND *, LPUNKNOWN) =
+    NULL;
 
 static void
 DSOUND_Unload(void)
@@ -70,7 +71,7 @@ DSOUND_Load(void)
             SDL_SetError("DirectSound: System doesn't appear to have DX5.");
         } else {
             DSoundCreate = (void *) GetProcAddress(DSoundDLL,
-                                               TEXT("DirectSoundCreate"));
+                                                   TEXT("DirectSoundCreate"));
         }
 
         if (!DSoundCreate) {
@@ -271,14 +272,14 @@ DSOUND_GetDeviceBuf(_THIS)
     /* Lock the audio buffer */
     result = IDirectSoundBuffer_Lock(this->hidden->mixbuf, cursor,
                                      this->hidden->mixlen,
-                                     (LPVOID *) &this->hidden->locked_buf,
+                                     (LPVOID *) & this->hidden->locked_buf,
                                      &rawlen, NULL, &junk, 0);
     if (result == DSERR_BUFFERLOST) {
         IDirectSoundBuffer_Restore(this->hidden->mixbuf);
         result = IDirectSoundBuffer_Lock(this->hidden->mixbuf, cursor,
                                          this->hidden->mixlen,
-                                         (LPVOID *) &this->hidden->locked_buf,
-                                         &rawlen, NULL, &junk, 0);
+                                         (LPVOID *) & this->hidden->
+                                         locked_buf, &rawlen, NULL, &junk, 0);
     }
     if (result != DS_OK) {
         SetDSerror("DirectSound Lock", result);
@@ -326,7 +327,7 @@ DSOUND_CloseDevice(_THIS)
    number of audio chunks available in the created buffer.
 */
 static int
-CreateSecondary(_THIS, HWND focus, WAVEFORMATEX *wavefmt)
+CreateSecondary(_THIS, HWND focus, WAVEFORMATEX * wavefmt)
 {
     LPDIRECTSOUND sndObj = this->hidden->sound;
     LPDIRECTSOUNDBUFFER *sndbuf = &this->hidden->mixbuf;
@@ -405,7 +406,7 @@ DSOUND_OpenDevice(_THIS, const char *devname, int iscapture)
 
     /* Initialize all variables that we clean on shutdown */
     this->hidden = (struct SDL_PrivateAudioData *)
-                        SDL_malloc((sizeof *this->hidden));
+        SDL_malloc((sizeof *this->hidden));
     if (this->hidden == NULL) {
         SDL_OutOfMemory();
         return 0;
@@ -414,12 +415,12 @@ DSOUND_OpenDevice(_THIS, const char *devname, int iscapture)
 
     while ((!valid_format) && (test_format)) {
         switch (test_format) {
-            case AUDIO_U8:
-            case AUDIO_S16:
-            case AUDIO_S32:
-                this->spec.format = test_format;
-                valid_format = 1;
-                break;
+        case AUDIO_U8:
+        case AUDIO_S16:
+        case AUDIO_S32:
+            this->spec.format = test_format;
+            valid_format = 1;
+            break;
         }
         test_format = SDL_NextAudioFormat();
     }
@@ -461,7 +462,7 @@ DSOUND_OpenDevice(_THIS, const char *devname, int iscapture)
     /* The buffer will auto-start playing in DSOUND_WaitDevice() */
     this->hidden->mixlen = this->spec.size;
 
-    return 1;  /* good to go. */
+    return 1;                   /* good to go. */
 }
 
 
@@ -473,7 +474,7 @@ DSOUND_Deinitialize(void)
 
 
 static int
-DSOUND_Init(SDL_AudioDriverImpl *impl)
+DSOUND_Init(SDL_AudioDriverImpl * impl)
 {
     OSVERSIONINFO ver;
 
@@ -482,12 +483,12 @@ DSOUND_Init(SDL_AudioDriverImpl *impl)
      *  audio buffers used by many SDL applications, so there are gaps in the
      *  audio - it sounds terrible.  Punt for now.
      */
-    SDL_memset(&ver, '\0', sizeof (OSVERSIONINFO));
+    SDL_memset(&ver, '\0', sizeof(OSVERSIONINFO));
     ver.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
     GetVersionEx(&ver);
     if (ver.dwPlatformId == VER_PLATFORM_WIN32_NT) {
         if (ver.dwMajorVersion <= 4) {
-            return 0;  /* NT4.0 or earlier. Disable dsound support. */
+            return 0;           /* NT4.0 or earlier. Disable dsound support. */
         }
     }
 
@@ -504,7 +505,7 @@ DSOUND_Init(SDL_AudioDriverImpl *impl)
     impl->GetDeviceBuf = DSOUND_GetDeviceBuf;
     impl->CloseDevice = DSOUND_CloseDevice;
     impl->Deinitialize = DSOUND_Deinitialize;
-    impl->OnlyHasDefaultOutputDevice = 1;  /* !!! FIXME */
+    impl->OnlyHasDefaultOutputDevice = 1;       /* !!! FIXME */
 
     return 1;
 }
