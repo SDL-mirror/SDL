@@ -560,7 +560,7 @@ COREAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
         strdesc.mBytesPerFrame * strdesc.mFramesPerPacket;
 
     if (!prepare_audiounit(this, devname, iscapture, &strdesc)) {
-        COREAUDIO_CloseDevice(this); \
+        COREAUDIO_CloseDevice(this);
         return 0;  /* prepare_audiounit() will call SDL_SetError()... */
     }
 
