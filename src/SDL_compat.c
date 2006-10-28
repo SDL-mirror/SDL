@@ -212,7 +212,7 @@ SDL_CompatEventFilter(void *userdata, SDL_Event * event)
             break;
         case SDL_WINDOWEVENT_FOCUS_LOST:
             fake.type = SDL_ACTIVEEVENT;
-            fake.active.gain = 1;
+            fake.active.gain = 0;
             fake.active.state = SDL_APPINPUTFOCUS;
             SDL_PushEvent(&fake);
             break;
