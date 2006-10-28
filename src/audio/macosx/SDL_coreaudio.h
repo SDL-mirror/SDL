@@ -32,6 +32,7 @@
 struct SDL_PrivateAudioData
 {
     AudioUnit audioUnit;
+    int audioUnitInitialized;
     void *buffer;
     UInt32 bufferOffset;
     UInt32 bufferSize;

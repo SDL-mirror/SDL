@@ -315,26 +315,29 @@ static void
 COREAUDIO_CloseDevice(_THIS)
 {
     if (this->hidden != NULL) {
-        OSStatus result = noErr;
-        AURenderCallbackStruct callback;
-        const AudioUnitElement output_bus = 0;
-        const AudioUnitElement input_bus = 1;
-        const int iscapture = this->iscapture;
-        const AudioUnitElement bus = ((iscapture) ? input_bus : output_bus);
-        const AudioUnitScope scope = ((iscapture) ? kAudioUnitScope_Output :
-                                                    kAudioUnitScope_Input);
+        if (this->hidden->audioUnitOpened) {
+            OSStatus result = noErr;
+            AURenderCallbackStruct callback;
+            const AudioUnitElement output_bus = 0;
+            const AudioUnitElement input_bus = 1;
+            const int iscapture = this->iscapture;
+            const AudioUnitElement bus = ((iscapture) ? input_bus : output_bus);
+            const AudioUnitScope scope = ((iscapture) ? kAudioUnitScope_Output :
+                                                        kAudioUnitScope_Input);
 
-        /* stop processing the audio unit */
-        result = AudioOutputUnitStop(this->hidden->audioUnit);
+            /* stop processing the audio unit */
+            result = AudioOutputUnitStop(this->hidden->audioUnit);
 
-        /* Remove the input callback */
-        SDL_memset(&callback, '\0', sizeof (AURenderCallbackStruct));
-        result = AudioUnitSetProperty(this->hidden->audioUnit,
-                                      kAudioUnitProperty_SetRenderCallback,
-                                      scope, bus, &callback, sizeof (callback));
+            /* Remove the input callback */
+            SDL_memset(&callback, '\0', sizeof (AURenderCallbackStruct));
+            result = AudioUnitSetProperty(this->hidden->audioUnit,
+                                          kAudioUnitProperty_SetRenderCallback,
+                                          scope, bus, &callback,
+                                          sizeof (callback));
 
-        CloseComponent(this->hidden->audioUnit);
-
+            CloseComponent(this->hidden->audioUnit);
+            this->hidden->audioUnitOpened = 0;
+        }
         SDL_free(this->hidden->buffer);
         SDL_free(this->hidden);
         this->hidden = NULL;
@@ -434,6 +437,8 @@ prepare_audiounit(_THIS, const char *devname, int iscapture,
     /* Open & initialize the audio unit */
     result = OpenAComponent(comp, &this->hidden->audioUnit);
     CHECK_RESULT("OpenAComponent");
+
+    this->hidden->audioUnitOpened = 1;
 
     // !!! FIXME: this is wrong?
     enableIO = ((iscapture) ? 1 : 0);
@@ -544,6 +549,7 @@ COREAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
     }
 
     if (!valid_datatype) {      /* shouldn't happen, but just in case... */
+        COREAUDIO_CloseDevice(this);
         SDL_SetError("Unsupported audio format");
         return 0;
     }
@@ -554,6 +560,7 @@ COREAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
         strdesc.mBytesPerFrame * strdesc.mFramesPerPacket;
 
     if (!prepare_audiounit(this, devname, iscapture, &strdesc)) {
+        COREAUDIO_CloseDevice(this); \
         return 0;  /* prepare_audiounit() will call SDL_SetError()... */
     }
 
