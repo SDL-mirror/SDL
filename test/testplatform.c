@@ -154,8 +154,6 @@ int main(int argc, char *argv[])
 		printf("This system is running %s\n",
 #if __AIX__
 			"AIX"
-#elif __AMIGA__
-			"AmigaOS"
 #elif __BEOS__
 			"BeOS"
 #elif __BSDI__

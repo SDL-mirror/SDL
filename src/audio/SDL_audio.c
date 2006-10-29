@@ -82,9 +82,6 @@ static AudioBootStrap *bootstrap[] = {
 #if SDL_AUDIO_DRIVER_SNDMGR
 	&SNDMGR_bootstrap,
 #endif
-#if SDL_AUDIO_DRIVER_AHI
-	&AHI_bootstrap,
-#endif
 #if SDL_AUDIO_DRIVER_MINT
 	&MINTAUDIO_GSXB_bootstrap,
 	&MINTAUDIO_MCSN_bootstrap,
@@ -115,10 +112,6 @@ SDL_AudioDevice *current_audio = NULL;
 int SDL_AudioInit(const char *driver_name);
 void SDL_AudioQuit(void);
 
-#if SDL_AUDIO_DRIVER_AHI
-static int audio_configured = 0;
-#endif
-
 /* The general mixing thread function */
 int SDLCALL SDL_RunAudio(void *audiop)
 {
@@ -128,21 +121,6 @@ int SDLCALL SDL_RunAudio(void *audiop)
 	void  *udata;
 	void (SDLCALL *fill)(void *userdata,Uint8 *stream, int len);
 	int    silence;
-#if SDL_AUDIO_DRIVER_AHI
-	int started = 0;
-
-/* AmigaOS NEEDS that the audio driver is opened in the thread that uses it! */
-
-	D(bug("Task audio started audio struct:<%lx>...\n",audiop));
-
-	D(bug("Before Openaudio..."));
-	if(audio->OpenAudio(audio, &audio->spec)==-1)
-	{
-		D(bug("Open audio failed...\n"));
-		return(-1);
-	}
-	D(bug("OpenAudio...OK\n"));
-#endif
 
 	/* Perform any thread setup */
 	if ( audio->ThreadInit ) {
@@ -153,14 +131,6 @@ int SDLCALL SDL_RunAudio(void *audiop)
 	/* Set up the mixing function */
 	fill  = audio->spec.callback;
 	udata = audio->spec.userdata;
-
-#if SDL_AUDIO_DRIVER_AHI
-	audio_configured = 1;
-
-	D(bug("Audio configured... Checking for conversion\n"));
-	SDL_mutexP(audio->mixer_lock);
-	D(bug("Semaphore obtained...\n"));
-#endif
 
 	if ( audio->convert.needed ) {
 		if ( audio->convert.src_format == AUDIO_U8 ) {
@@ -173,11 +143,6 @@ int SDLCALL SDL_RunAudio(void *audiop)
 		silence = audio->spec.silence;
 		stream_len = audio->spec.size;
 	}
-
-#if SDL_AUDIO_DRIVER_AHI
-	SDL_mutexV(audio->mixer_lock);
-	D(bug("Entering audio loop...\n"));
-#endif
 
 #ifdef __OS2__
         /* Increase the priority of this thread to make sure that
@@ -253,14 +218,6 @@ int SDLCALL SDL_RunAudio(void *audiop)
 		audio->WaitDone(audio);
 	}
 
-#if SDL_AUDIO_DRIVER_AHI
-	D(bug("WaitAudio...Done\n"));
-
-	audio->CloseAudio(audio);
-
-	D(bug("CloseAudio..Done, subtask exiting...\n"));
-	audio_configured = 0;
-#endif
 #ifdef __OS2__
 #ifdef DEBUG_BUILD
         printf("[SDL_RunAudio] : Task exiting. (TID%d)\n", SDL_ThreadID());
@@ -532,33 +489,12 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 	audio->enabled = 1;
 	audio->paused  = 1;
 
-#if !SDL_AUDIO_DRIVER_AHI
-
-/* AmigaOS opens audio inside the main loop */
 	audio->opened = audio->OpenAudio(audio, &audio->spec)+1;
 
 	if ( ! audio->opened ) {
 		SDL_CloseAudio();
 		return(-1);
 	}
-#else
-	D(bug("Locking semaphore..."));
-	SDL_mutexP(audio->mixer_lock);
-
-
-	audio->thread = SDL_CreateThread(SDL_RunAudio, audio);
-	D(bug("Created thread...\n"));
-
-	if ( audio->thread == NULL ) {
-		SDL_mutexV(audio->mixer_lock);
-		SDL_CloseAudio();
-		SDL_SetError("Couldn't create audio thread");
-		return(-1);
-	}
-
-	while(!audio_configured)
-		SDL_Delay(100);
-#endif
 
 	/* If the audio driver changes the buffer size, accept it */
 	if ( audio->spec.samples != desired->samples ) {
@@ -602,7 +538,6 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 		}
 	}
 
-#if !SDL_AUDIO_DRIVER_AHI
 	/* Start the audio thread if necessary */
 	switch (audio->opened) {
 		case  1:
@@ -624,11 +559,6 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 			/* The audio is now playing */
 			break;
 	}
-#else
-	SDL_mutexV(audio->mixer_lock);
-	D(bug("SDL_OpenAudio USCITA...\n"));
-
-#endif
 
 	return(0);
 }
@@ -702,12 +632,10 @@ void SDL_AudioQuit(void)
 			SDL_FreeAudioMem(audio->convert.buf);
 
 		}
-#if !SDL_AUDIO_DRIVER_AHI
 		if ( audio->opened ) {
 			audio->CloseAudio(audio);
 			audio->opened = 0;
 		}
-#endif
 		/* Free the driver data */
 		audio->free(audio);
 		current_audio = NULL;

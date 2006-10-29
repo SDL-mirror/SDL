@@ -190,15 +190,3 @@ AIX:  -= NOT YET SUPPORTED =-
 	More information on this port is available at:
 	http://www.kom.e-technik.tu-darmstadt.de/~griff/SDL/
 
-AmigaOS:  -= NOT YET SUPPORTED =-
-	The OpenGL support isn't implemented yet.
-
-	SDL_WM_GrabInput() is not implemented.
-	Does anyone know how to do this?  SDL_WM_GrabInput() is designed
-	to prevent the user from switching input and mouse focus away from
-	the SDL application.
-
-	Continuous relative mouse motion is not implemented.
-
-	The AmigaOS port was done by Gabriele.Greco@galactica.it
-

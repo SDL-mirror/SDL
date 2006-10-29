@@ -195,7 +195,6 @@
 
 /* Enable various input drivers */
 #undef SDL_INPUT_TSLIB
-#undef SDL_JOYSTICK_AMIGA
 #undef SDL_JOYSTICK_BEOS
 #undef SDL_JOYSTICK_DC
 #undef SDL_JOYSTICK_DUMMY
@@ -221,7 +220,6 @@
 #undef SDL_LOADSO_WIN32
 
 /* Enable various threading systems */
-#undef SDL_THREAD_AMIGA
 #undef SDL_THREAD_BEOS
 #undef SDL_THREAD_DC
 #undef SDL_THREAD_EPOC
@@ -234,7 +232,6 @@
 #undef SDL_THREAD_WIN32
 
 /* Enable various timer systems */
-#undef SDL_TIMER_AMIGA
 #undef SDL_TIMER_BEOS
 #undef SDL_TIMER_DC
 #undef SDL_TIMER_DUMMY
