@@ -143,13 +143,13 @@ static void
 BSDAUDIO_Status(_THIS)
 {
 #ifdef DEBUG_AUDIO
+    /* *INDENT-OFF* */
     audio_info_t info;
 
     if (ioctl(this->hidden->audio_fd, AUDIO_GETINFO, &info) < 0) {
         fprintf(stderr, "AUDIO_GETINFO failed.\n");
         return;
     }
-    /* *INDENT-OFF* */
     fprintf(stderr, "\n"
             "[play/record info]\n"
             "buffer size	:   %d bytes\n"
