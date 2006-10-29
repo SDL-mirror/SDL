@@ -38,5 +38,9 @@ extern int XiGMiscQueryResolutions(Display * dpy, int screen, int view,
                                    XiGMiscResolutionInfo ** presolutions);
 extern void XiGMiscChangeResolution(Display * dpy, int screen, int view,
                                     int width, int height, int refresh);
+
+/* SDL addition from Ryan: free memory used by xme. */
+extern void XiGMiscDestroy(void);
+
 #endif /* _XME_H_INCLUDED */
 /* vi: set ts=4 sw=4 expandtab: */
