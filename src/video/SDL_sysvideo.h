@@ -374,9 +374,6 @@ extern VideoBootStrap TOOLBOX_bootstrap;
 #if SDL_VIDEO_DRIVER_DRAWSPROCKET
 extern VideoBootStrap DSp_bootstrap;
 #endif
-#if SDL_VIDEO_DRIVER_CYBERGRAPHICS
-extern VideoBootStrap CGX_bootstrap;
-#endif
 #if SDL_VIDEO_DRIVER_PHOTON
 extern VideoBootStrap ph_bootstrap;
 #endif

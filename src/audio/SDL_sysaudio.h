@@ -146,9 +146,6 @@ extern AudioBootStrap COREAUDIO_bootstrap;
 #if SDL_AUDIO_DRIVER_SNDMGR
 extern AudioBootStrap SNDMGR_bootstrap;
 #endif
-#if SDL_AUDIO_DRIVER_AHI
-extern AudioBootStrap AHI_bootstrap;
-#endif
 #if SDL_AUDIO_DRIVER_MINT
 extern AudioBootStrap MINTAUDIO_GSXB_bootstrap;
 extern AudioBootStrap MINTAUDIO_MCSN_bootstrap;
