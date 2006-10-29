@@ -1408,5 +1408,9 @@ void X11_VideoQuit(_THIS)
 		/* Direct screen access, no memory buffer */
 		this->screen->pixels = NULL;
 	}
+
+#if SDL_VIDEO_DRIVER_X11_XME
+    XiGMiscDestroy();
+#endif
 }
 

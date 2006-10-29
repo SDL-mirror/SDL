@@ -393,3 +393,13 @@ Bool XiGMiscFullScreen(Display *dpy, int screen, XID window, XID cmap)
   return (rep.success ? xTrue : xFalse);
 }
 
+
+/* SDL addition from Ryan: free memory used by xme. */
+void XiGMiscDestroy(void)
+{
+    if (xigmisc_info) {
+        XextDestroyExtension(xigmisc_info);
+        xigmisc_info = NULL;
+    }
+}
+
