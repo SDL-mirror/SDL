@@ -177,9 +177,7 @@ BSDAUDIO_Status(_THIS)
             info.play.error ? "yes" : "no",
             info.play.waiting ? "yes" : "no",
             info.play.active ? "yes" : "no");
-    /* *INDENT-ON* */
 
-    /* *INDENT-OFF* */
     fprintf(stderr, "\n"
             "[audio info]\n"
             "monitor_gain	:   %i\n"
