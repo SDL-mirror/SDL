@@ -162,7 +162,7 @@ SDL_SYS_JoystickInit(void)
 
         joyinfo.dwSize = sizeof(joyinfo);
         joyinfo.dwFlags = JOY_RETURNALL;
-        result = joyGetPosEx(SYS_JoystickID[i], &joyinfo);
+        result = joyGetPosEx(i, &joyinfo);
         if (result == JOYERR_NOERROR) {
             result = joyGetDevCaps(i, &joycaps, sizeof(joycaps));
             if (result == JOYERR_NOERROR) {
