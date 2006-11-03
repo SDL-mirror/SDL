@@ -2441,11 +2441,12 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
 esac
 
 # Verify that we have all the platform specific files we need
-if test x$have_joystick != xyes; then
-    if test x$enable_joystick = xyes; then
-        AC_DEFINE(SDL_JOYSTICK_DISABLED)
-    fi
+
+if test x$enable_joystick = xyes; then
+  if test x$have_joystick != xyes; then
+    # Wants joystick subsystem, but doesn't have a platform-specific backend...
     SOURCES="$SOURCES $srcdir/src/joystick/dummy/*.c"
+  fi
 fi
 if test x$have_cdrom != xyes; then
     if test x$enable_cdrom = xyes; then
