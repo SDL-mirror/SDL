@@ -19,8 +19,9 @@ int main(int argc, char *argv[])
 	fntype fn = NULL;
 
 	if (argc != 3) {
-		fprintf(stderr, "USAGE: %s <library> <functionname>\n");
-		fprintf(stderr, "       %s --hello <library with puts()>\n");
+		const char *app = argv[0];
+		fprintf(stderr, "USAGE: %s <library> <functionname>\n", app);
+		fprintf(stderr, "       %s --hello <lib with puts()>\n", app);
 		return 1;
 	}
 
@@ -51,7 +52,7 @@ int main(int argc, char *argv[])
 			        symname, SDL_GetError());
 			retval = 4;
 		} else {
-			printf("Found %s in %s at %p\n", symname, libname);
+			printf("Found %s in %s at %p\n", symname, libname, fn);
 			if (hello) {
 				printf("Calling function...\n");
 				fflush(stdout);
