@@ -31,46 +31,42 @@
 
 #include "SDL_loadso.h"
 
-void *SDL_LoadObject(const char *sofile)
+void *
+SDL_LoadObject(const char *sofile)
 {
-	void *handle = NULL;
-	const char *loaderror = "Unknown error";
-	image_id library_id = load_add_on(sofile);
-	if ( library_id == B_ERROR ) {
-		loaderror = "BeOS error";
-	} else {
-		handle = (void *)(library_id);
-	}
-
-	if ( handle == NULL ) {
-		SDL_SetError("Failed loading %s: %s", sofile, loaderror);
-	}
-	return(handle);
+    void *handle = NULL;
+    image_id library_id = load_add_on(sofile);
+    if (library_id < 0) {
+        SDL_SetError(strerror((int) library_id));
+    } else {
+        handle = (void *) (library_id);
+    }
+    return (handle);
 }
 
-void *SDL_LoadFunction(void *handle, const char *name)
+void *
+SDL_LoadFunction(void *handle, const char *name)
 {
-	void *symbol = NULL;
-	const char *loaderror = "Unknown error";
-	image_id library_id = (image_id)handle;
-	if ( get_image_symbol(library_id,
-		name, B_SYMBOL_TYPE_TEXT, &symbol) != B_NO_ERROR ) {
-		loaderror = "Symbol not found";
-	}
-
-	if ( symbol == NULL ) {
-		SDL_SetError("Failed loading %s: %s", name, loaderror);
-	}
-	return(symbol);
+    void *sym = NULL;
+    image_id library_id = (image_id) handle;
+    status_t rc = get_image_symbol(library_id, name, B_SYMBOL_TYPE_TEXT, &sym);
+    if (rc != B_NO_ERROR) {
+        SDL_SetError(strerror(rc));
+    }
+    return (sym);
 }
 
-void SDL_UnloadObject(void *handle)
+void
+SDL_UnloadObject(void *handle)
 {
-	image_id library_id;
-	if ( handle != NULL ) {
-		library_id = (image_id)handle;
-		unload_add_on(library_id);
-	}
+    image_id library_id;
+    if (handle != NULL) {
+        library_id = (image_id) handle;
+        unload_add_on(library_id);
+    }
 }
 
 #endif /* SDL_LOADSO_BEOS */
+
+/* vi: set ts=4 sw=4 expandtab: */
+
