@@ -2178,7 +2178,7 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         fi
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
-            AC_DEFINE(SDL_AUDIO_DRIVER_WAVEOUT)
+            AC_DEFINE(SDL_AUDIO_DRIVER_WINWAVEOUT)
             SOURCES="$SOURCES $srcdir/src/audio/windib/*.c"
             if test x$have_dsound = xyes; then
                 AC_DEFINE(SDL_AUDIO_DRIVER_DSOUND)

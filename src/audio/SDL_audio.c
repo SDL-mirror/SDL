@@ -54,7 +54,7 @@ extern AudioBootStrap ARTS_bootstrap;
 extern AudioBootStrap ESD_bootstrap;
 extern AudioBootStrap NAS_bootstrap;
 extern AudioBootStrap DSOUND_bootstrap;
-extern AudioBootStrap WAVEOUT_bootstrap;
+extern AudioBootStrap WINWAVEOUT_bootstrap;
 extern AudioBootStrap PAUDIO_bootstrap;
 extern AudioBootStrap BEOSAUDIO_bootstrap;
 extern AudioBootStrap COREAUDIO_bootstrap;
@@ -104,8 +104,8 @@ static AudioBootStrap *bootstrap[] = {
 #if SDL_AUDIO_DRIVER_DSOUND
     &DSOUND_bootstrap,
 #endif
-#if SDL_AUDIO_DRIVER_WAVEOUT
-    &WAVEOUT_bootstrap,
+#if SDL_AUDIO_DRIVER_WINWAVEOUT
+    &WINWAVEOUT_bootstrap,
 #endif
 #if SDL_AUDIO_DRIVER_PAUDIO
     &PAUDIO_bootstrap,
