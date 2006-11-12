@@ -168,6 +168,15 @@ static int DSP_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	int frag_spec;
 	Uint16 test_format;
 
+    /* Make sure fragment size stays a power of 2, or OSS fails. */
+    /* I don't know which of these are actually legal values, though... */
+    if (spec->channels > 8)
+        spec->channels = 8;
+    else if (spec->channels > 4)
+        spec->channels = 4;
+    else if (spec->channels > 2)
+        spec->channels = 2;
+
 	/* Open the audio device */
 	audio_fd = SDL_OpenAudioPath(audiodev, sizeof(audiodev), OPEN_FLAGS, 0);
 	if ( audio_fd < 0 ) {
