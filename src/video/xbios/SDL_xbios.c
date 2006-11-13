@@ -174,7 +174,7 @@ XBIOS_VideoInit(_THIS)
 {
     /* Save screensaver settings */
 
-    /* Init video mode list */
+    /* Init video mode list, save current video mode settings */
     SDL_XBIOS_InitModes(_this);
 
     return (0);
@@ -187,5 +187,6 @@ XBIOS_VideoQuit(_THIS)
 
     /* Restore screensaver settings */
 
+    /* Restore previous video mode settings */
     SDL_XBIOS_QuitModes(_this);
 }

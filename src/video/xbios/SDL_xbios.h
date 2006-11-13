@@ -29,7 +29,12 @@
 
 typedef struct SDL_VideoData
 {
-    long cookie_vdo;
+    long cookie_vdo;		/* _VDO cookie */
+
+    Uint16 old_modecode;	/* Current video mode */
+    void *old_vbase;		/* Current pointer to video RAM */
+    int old_numcol;		/* Number of colors in saved palette */
+    Uint32 old_palette[256];	/* Buffer to save current palette */
 
 #if 0
     int old_video_mode;         /* Old video mode before entering SDL */

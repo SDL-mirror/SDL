@@ -105,10 +105,145 @@ SDL_XBIOS_AddMode(_THIS, int width, int height, int bpp, Uint16 modecode,
     SDL_AddVideoDisplay(&display);
 }
 
+/* Current video mode save/restore */
+
+static void
+SDL_XBIOS_ModeSave(_THIS)
+{
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+
+    data->old_vbase = Physbase();
+
+    switch (data->cookie_vdo >> 16) {
+    case VDO_ST:
+    case VDO_STE:
+        data->old_modecode = Getrez();
+        break;
+    case VDO_TT:
+        data->old_modecode = EgetShift();
+        break;
+    case VDO_F30:
+        data->old_modecode = VsetMode(-1);
+        break;
+    }
+}
+
+static void
+SDL_XBIOS_ModeRestore(_THIS)
+{
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+
+    switch (data->cookie_vdo >> 16) {
+    case VDO_ST:
+    case VDO_STE:
+        Setscreen(-1, data->old_vbase, data->old_modecode);
+        break;
+    case VDO_TT:
+        Setscreen(-1, data->old_vbase, -1);
+	EsetShift(data->old_modecode);
+        break;
+    case VDO_F30:
+        Setscreen(-1, data->old_vbase, -1);
+        VsetMode(data->old_modecode);
+        break;
+    }
+}
+
+/* Current palette save/restore */
+
+static void
+SDL_XBIOS_PaletteSave(_THIS)
+{
+    int i;
+    Uint16 *palette;
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+
+    data->old_numcol = 0;
+
+    switch (data->cookie_vdo >> 16) {
+    case VDO_ST:
+    case VDO_STE:
+        switch (data->old_modecode << 8) {
+        case ST_LOW:
+            data->old_numcol = 16;
+            break;
+        case ST_MED:
+            data->old_numcol = 4;
+            break;
+        case ST_HIGH:
+            data->old_numcol = 2;
+            break;
+        }
+
+        palette = (Uint16 *) data->old_palette;
+        for (i = 0; i < data->old_numcol; i++) {
+            *palette++ = Setcolor(i, -1);
+        }
+        break;
+    case VDO_TT:
+        switch (data->old_modecode & ES_MODE) {
+        case TT_LOW:
+            data->old_numcol = 256;
+            break;
+        case ST_LOW:
+        case TT_MED:
+            data->old_numcol = 16;
+            break;
+        case ST_MED:
+            data->old_numcol = 4;
+            break;
+        case ST_HIGH:
+        case TT_HIGH:
+            data->old_numcol = 2;
+            break;
+        }
+        if (data->old_numcol) {
+            EgetPalette(0, data->old_numcol, data->old_palette);
+        }
+        break;
+    case VDO_F30:
+        data->old_numcol = 1 << (1 << (data->old_modecode & NUMCOLS));
+        if (data->old_numcol > 256) {
+	    data->old_numcol = 0;
+	} else {
+            VgetRGB(0, data->old_numcol, data->old_palette);
+        }
+        break;
+    }
+}
+
+static void
+SDL_XBIOS_PaletteRestore(_THIS)
+{
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+
+    if (data->old_numcol == 0) {
+        return;
+    }
+
+    switch (data->cookie_vdo >> 16) {
+    case VDO_ST:
+    case VDO_STE:
+        Setpalette(data->old_palette);
+        break;
+    case VDO_TT:
+        EsetPalette(0, data->old_numcol, data->old_palette);
+        break;
+    case VDO_F30:
+        VsetRGB(0, data->old_numcol, data->old_palette);
+        break;
+    }
+}
+
+/* Public functions for use by the driver */
+
 void
 SDL_XBIOS_InitModes(_THIS)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+
+    SDL_XBIOS_PaletteSave(_this);
+    SDL_XBIOS_ModeSave(_this);
 
     switch (data->cookie_vdo >> 16) {
     case VDO_ST:
@@ -126,7 +261,7 @@ SDL_XBIOS_InitModes(_THIS)
         break;
     case VDO_F30:
         {
-	    Uint16 modecodemask = VsetMode(-1) & (VGA | PAL);
+	    Uint16 modecodemask = data->old_modecode & (VGA | PAL);
             int i;
 
             switch (VgetMonitor()) {
@@ -172,6 +307,9 @@ SDL_XBIOS_SetDisplayMode(_THIS, SDL_DisplayMode * mode)
 void
 SDL_XBIOS_QuitModes(_THIS)
 {
+    SDL_XBIOS_ModeRestore(_this);
+    SDL_XBIOS_PaletteRestore(_this);
+    Vsync();
 }
 
 /* vi: set ts=4 sw=4 expandtab: */
