@@ -27,28 +27,11 @@
 #include "SDL_stdinc.h"
 #include "../SDL_sysvideo.h"
 
-/* TT video modes:	2
-   Falcon RVB:		16 (could be *2 by adding PAL/NTSC modes)
-   Falcon VGA:		6
-   ST low:		1
-*/
-#define SDL_NUMMODES 16
-
-typedef struct
-{
-    Uint16 number;              /* Video mode number */
-    Uint16 width;               /* Size */
-    Uint16 height;
-    Uint16 depth;               /* bits per plane */
-    SDL_bool doubleline;        /* Double the lines ? */
-} xbiosmode_t;
-
-/* Private display data */
-#define NUM_MODELISTS	2       /* 8 and 16 bits-per-pixel */
-
 typedef struct SDL_VideoData
 {
     long cookie_vdo;
+
+#if 0
     int old_video_mode;         /* Old video mode before entering SDL */
     void *old_video_base;       /* Old pointer to screen buffer */
     void *old_palette;          /* Old palette */
@@ -68,6 +51,7 @@ typedef struct SDL_VideoData
 
     SDL_Rect *SDL_modelist[NUM_MODELISTS][SDL_NUMMODES + 1];
     xbiosmode_t *videomodes[NUM_MODELISTS][SDL_NUMMODES + 1];
+#endif
 } SDL_VideoData;
 
 /* _VDO cookie values */
@@ -101,32 +85,6 @@ enum
 #define TT_LOW	0x0700
 #define TT_MED	0x0300
 #define TT_HIGH	0x0600
-
-/* Hidden structure -> variables names */
-#define SDL_modelist		(_this->driverdata->SDL_modelist)
-#define XBIOS_mutex		    (_this->driverdata->mutex)
-#define XBIOS_cvdo		    (_this->driverdata->cookie_vdo)
-#define XBIOS_oldpalette	(_this->driverdata->old_palette)
-#define XBIOS_oldnumcol		(_this->driverdata->old_num_colors)
-#define XBIOS_oldvbase		(_this->driverdata->old_video_base)
-#define XBIOS_oldvmode		(_this->driverdata->old_video_mode)
-#define XBIOS_nummodes		(_this->driverdata->num_modes)
-#define XBIOS_modelist		(_this->driverdata->mode_list)
-#define XBIOS_screens		(_this->driverdata->screens)
-#define XBIOS_screensmem	(_this->driverdata->screensmem)
-#define XBIOS_shadowscreen	(_this->driverdata->shadowscreen)
-#define XBIOS_videomodes	(_this->driverdata->videomodes)
-#define XBIOS_doubleline	(_this->driverdata->doubleline)
-#define XBIOS_fbnum			(_this->driverdata->frame_number)
-#define XBIOS_pitch			(_this->driverdata->pitch)
-#define XBIOS_width			(_this->driverdata->width)
-#define XBIOS_height		(_this->driverdata->height)
-#define XBIOS_centscreen	(_this->driverdata->centscreen)
-
-/*--- Functions prototypes ---*/
-
-void SDL_XBIOS_AddMode(_THIS, Uint16 modecode, Uint16 width, Uint16 height,
-                       Uint16 depth, SDL_bool flags);
 
 #endif /* _SDL_xbios_h */
 /* vi: set ts=4 sw=4 expandtab: */
