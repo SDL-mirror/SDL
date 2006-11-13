@@ -369,6 +369,8 @@ SDL_GrabMode X11_GrabInputNoLock(_THIS, SDL_GrabMode mode)
 
 		/* Make sure we register input focus */
 		SDL_PrivateAppActive(1, SDL_APPINPUTFOCUS);
+		/* Since we grabbed the pointer, we have mouse focus, too. */
+		SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS);
 	}
 	XSync(SDL_Display, False);
 
