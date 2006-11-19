@@ -188,7 +188,7 @@ void SDL_SetCursor (SDL_Cursor *cursor)
 			   it needs to hide the old cursor before (possibly)
 			   showing the new one.  (But don't erase NULL cursor)
 			 */
-			if ( SDL_cursor ) {
+			if ( SDL_cursor && video->ShowWMCursor ) {
 				video->ShowWMCursor(this, NULL);
 			}
 		}
@@ -198,8 +198,11 @@ void SDL_SetCursor (SDL_Cursor *cursor)
 	/* Draw the new mouse cursor */
 	if ( SDL_cursor && (SDL_cursorstate&CURSOR_VISIBLE) ) {
 		/* Use window manager cursor if possible */
-		if ( SDL_cursor->wm_cursor && 
-	             video->ShowWMCursor(this, SDL_cursor->wm_cursor) ) {
+		int show_wm_cursor = 0;
+		if ( SDL_cursor->wm_cursor && video->ShowWMCursor ) {
+			show_wm_cursor = video->ShowWMCursor(this, SDL_cursor->wm_cursor);
+		}
+		if ( show_wm_cursor ) {
 			SDL_cursorstate &= ~CURSOR_USINGSW;
 		} else {
 			SDL_cursorstate |= CURSOR_USINGSW;
@@ -219,7 +222,9 @@ void SDL_SetCursor (SDL_Cursor *cursor)
 			SDL_EraseCursor(SDL_VideoSurface);
 		} else {
 			if ( video ) {
-				video->ShowWMCursor(this, NULL);
+				if ( video->ShowWMCursor ) {
+					video->ShowWMCursor(this, NULL);
+				}
 			}
 		}
 	}
@@ -248,7 +253,9 @@ void SDL_FreeCursor (SDL_Cursor *cursor)
 				SDL_free(cursor->save[0]);
 			}
 			if ( video && cursor->wm_cursor ) {
-				video->FreeWMCursor(this, cursor->wm_cursor);
+				if ( video->FreeWMCursor ) {
+					video->FreeWMCursor(this, cursor->wm_cursor);
+				}
 			}
 			SDL_free(cursor);
 		}
