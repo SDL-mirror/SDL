@@ -1632,6 +1632,7 @@ BlitRGBtoRGBPixelAlphaMMX3DNOW(SDL_BlitInfo * info)
     int dstskip = info->d_skip >> 2;
     SDL_PixelFormat *sf = info->src;
     Uint32 amask = sf->Amask;
+    Uint32 ashift = sf->Ashift;
 
     __asm__(
                /* make mm6 all zeros. */
@@ -1649,7 +1650,7 @@ BlitRGBtoRGBPixelAlphaMMX3DNOW(SDL_BlitInfo * info)
                "pxor      %%mm4, %%mm3\n\t"     /* 0000F000 -> mm3 (~channel mask) */
                /* get alpha channel shift */
                "movd      %1, %%mm5\n\t"        /* Ashift -> mm5 */
-  : /* nothing */ :            "m"(sf->Amask), "m"(sf->Ashift));
+  : /* nothing */ :            "m"(amask), "m"(ashift));
 
     while (height--) {
 
