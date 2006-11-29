@@ -1785,7 +1785,7 @@ SDL_SetTextureColorMod(SDL_TextureID textureID, Uint8 r, Uint8 g, Uint8 b)
     if (!renderer->SetTextureColorMod) {
         return -1;
     }
-    if (r < 255 | g < 255 | b < 255) {
+    if (r < 255 || g < 255 || b < 255) {
         texture->modMode |= SDL_TEXTUREMODULATE_COLOR;
     } else {
         texture->modMode &= ~SDL_TEXTUREMODULATE_COLOR;
