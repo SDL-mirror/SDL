@@ -346,7 +346,7 @@ SDL_RunAudio(void *devicep)
 static SDL_AudioFormat
 SDL_ParseAudioFormat(const char *string)
 {
-#define CHECK_FMT_STRING(x) if (strcmp(string, #x) == 0) return AUDIO_##x
+#define CHECK_FMT_STRING(x) if (SDL_strcmp(string, #x) == 0) return AUDIO_##x
     CHECK_FMT_STRING(U8);
     CHECK_FMT_STRING(S8);
     CHECK_FMT_STRING(U16LSB);
