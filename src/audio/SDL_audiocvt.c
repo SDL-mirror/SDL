@@ -140,14 +140,14 @@ SDL_ConvertMono(SDL_AudioCVT * cvt, SDL_AudioFormat format)
                     const Sint64 added =
                         (((Sint64) (Sint32) SDL_SwapBE32(src[0])) +
                          ((Sint64) (Sint32) SDL_SwapBE32(src[1])));
-                    *(dst++) = SDL_SwapBE32((Uint32) ((Sint32) (added >> 1)));
+                    *(dst++) = SDL_SwapBE32((Uint32) ((Sint32) (added / 2)));
                 }
             } else {
                 for (i = cvt->len_cvt / 8; i; --i, src += 2) {
                     const Sint64 added =
                         (((Sint64) (Sint32) SDL_SwapLE32(src[0])) +
                          ((Sint64) (Sint32) SDL_SwapLE32(src[1])));
-                    *(dst++) = SDL_SwapLE32((Uint32) ((Sint32) (added >> 1)));
+                    *(dst++) = SDL_SwapLE32((Uint32) ((Sint32) (added / 2)));
                 }
             }
         }
