@@ -124,7 +124,14 @@ if test x$enable_libc = xyes; then
     fi
 
     dnl Checks for library functions.
-    AC_FUNC_ALLOCA
+    case "$host" in
+    *-*-cygwin* | *-*-mingw32*)
+        ;;
+    *)
+        AC_FUNC_ALLOCA
+        ;;
+    esac
+
     AC_FUNC_MEMCMP
     if test x$ac_cv_func_memcmp_working = xyes; then
         AC_DEFINE(HAVE_MEMCMP)
