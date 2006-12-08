@@ -370,12 +370,23 @@ extern "C"
             (current.timing.h_total * current.timing.v_total);
 
         modes = SDL_modelist[((bpp + 7) / 8) - 1];
-        for (i = 0; modes[i] && (modes[i]->w > width) &&
-             (modes[i]->h > height); ++i) {
-            /* still looking */
+
+        bool exactmatch = false;
+        for ( uint32 x = 0; modes[x]; x++ ) {
+            if (modes[x]->w == width && modes[x]->h == height) {
+                exactmatch = true;
+                i = x;
+                break;
+            }
         }
-        if (!modes[i] || (modes[i]->w < width) || (modes[i]->h < height)) {
-            --i;                /* We went too far */
+        if (!exactmatch) {
+            for (i = 0; modes[i] && (modes[i]->w > width) &&
+                 (modes[i]->h > height); ++i) {
+                /* still looking */
+            }
+            if (!modes[i] || (modes[i]->w < width) || (modes[i]->h < height)) {
+                --i;                /* We went too far */
+            }
         }
         width = modes[i]->w;
         height = modes[i]->h;
