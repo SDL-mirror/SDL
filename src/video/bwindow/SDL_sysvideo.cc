@@ -374,7 +374,7 @@ extern "C"
              (modes[i]->h > height); ++i) {
             /* still looking */
         }
-        if (!modes[i] || (modes[i]->w < width) || (modes[i]->h < width)) {
+        if (!modes[i] || (modes[i]->w < width) || (modes[i]->h < height)) {
             --i;                /* We went too far */
         }
         width = modes[i]->w;
