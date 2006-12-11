@@ -1178,7 +1178,7 @@ static void GAPI_WinPAINT(_THIS, HDC hdc)
 	// draw current offscreen buffer on hdc
 
 	int bpp = 16; // we always use either 8 or 16 bpp internally
-
+	HGDIOBJ prevObject;
 	unsigned short *bitmapData;
 	HBITMAP hb;
 	HDC srcDC;
@@ -1216,10 +1216,11 @@ static void GAPI_WinPAINT(_THIS, HDC hdc)
 	// FIXME: prevent misalignment, but I've never seen non aligned width of screen
 	memcpy(bitmapData, this->hidden->buffer, pHeader->biSizeImage);
 	srcDC = CreateCompatibleDC(hdc);
-	SelectObject(srcDC, hb);
+	prevObject = SelectObject(srcDC, hb);
 
 	BitBlt(hdc, 0, 0, this->hidden->w, this->hidden->h, srcDC, 0, 0, SRCCOPY);
 
+	SelectObject(srcDC, prevObject);
 	DeleteObject(hb);
 	DeleteDC(srcDC);
 }
