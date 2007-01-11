@@ -49,6 +49,7 @@
 #include "SDL_xbios_blowup.h"
 #include "SDL_xbios_centscreen.h"
 #include "SDL_xbios_sb3.h"
+#include "SDL_xbios_tveille.h"
 
 #define XBIOS_VID_DRIVER_NAME "xbios"
 
@@ -463,6 +464,11 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 #if SDL_VIDEO_OPENGL
 	SDL_AtariGL_InitPointers(this);
 #endif
+
+	/* Disable screensavers */
+	if (SDL_XBIOS_TveillePresent(this)) {
+		SDL_XBIOS_TveilleDisable(this);
+	}
 
 	/* We're done! */
 	return(0);
@@ -928,6 +934,11 @@ static void XBIOS_VideoQuit(_THIS)
 	}
 
 	this->screen->pixels = NULL;	
+
+	/* Restore screensavers */
+	if (SDL_XBIOS_TveillePresent(this)) {
+		SDL_XBIOS_TveilleRestore(this);
+	}
 }
 
 #if SDL_VIDEO_OPENGL
