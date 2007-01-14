@@ -479,7 +479,11 @@ int X11_GL_LoadLibrary(_THIS, const char* path)
 
 	handle = GL_LoadObject(path);
 	if ( handle == NULL ) {
+#if defined(OPENGL_REQUIRS_DLOPEN) && defined(SDL_LOADSO_DLOPEN)
+		SDL_SetError("Failed loading %s", path);
+#else
 		/* SDL_LoadObject() will call SDL_SetError() for us. */
+#endif
 		return -1;
 	}
 
