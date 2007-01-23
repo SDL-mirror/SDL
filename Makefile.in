@@ -169,7 +169,7 @@ rpm: $(distfile)
 
 # Create a SVN snapshot that people can run update on
 snapshot:
-	svn co svn://libsdl.org/branches/SDL-1.2
+	svn co http://svn.libsdl.org/branches/SDL-1.2
 	(cd SDL-1.2 && ./autogen.sh && rm -rf autom4te.cache)
 	cp SDL-1.2/include/SDL_config.h.default SDL-1.2/include/SDL_config.h
 	tar zcf $(HOME)/SDL-1.2.tar.gz SDL-1.2
