@@ -29,6 +29,9 @@
 
 #if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__)) && SDL_ASSEMBLY_ROUTINES
 #define MMX_ASMBLIT
+#if (__GNUC__ > 2)  /* SSE instructions aren't in GCC 2. */
+#define SSE_ASMBLIT
+#endif
 #endif
 
 #if defined(MMX_ASMBLIT)
@@ -122,6 +125,7 @@ static __inline__ void SDL_memcpyMMX(Uint8 *to, const Uint8 *from, int len)
 		SDL_memcpy(to, from, len&7);
 }
 
+#ifdef SSE_ASMBLIT
 static __inline__ void SDL_memcpySSE(Uint8 *to, const Uint8 *from, int len)
 {
 	int i;
@@ -146,6 +150,7 @@ static __inline__ void SDL_memcpySSE(Uint8 *to, const Uint8 *from, int len)
 		SDL_memcpy(to, from, len&7);
 }
 #endif
+#endif
 
 static void SDL_BlitCopy(SDL_BlitInfo *info)
 {
@@ -159,7 +164,8 @@ static void SDL_BlitCopy(SDL_BlitInfo *info)
 	dst = info->d_pixels;
 	srcskip = w+info->s_skip;
 	dstskip = w+info->d_skip;
-#ifdef MMX_ASMBLIT
+
+#ifdef SSE_ASMBLIT
 	if(SDL_HasSSE())
 	{
 		while ( h-- ) {
@@ -172,6 +178,8 @@ static void SDL_BlitCopy(SDL_BlitInfo *info)
 		::);
 	}
 	else
+#endif
+#ifdef MMX_ASMBLIT
 	if(SDL_HasMMX())
 	{
 		while ( h-- ) {
