@@ -1295,7 +1295,7 @@ CheckAtariBiosEvent()
 dnl Set up the Atari Xbios driver
 CheckAtariXbiosVideo()
 {
-    AC_ARG_ENABLE(xbios,
+    AC_ARG_ENABLE(video-xbios,
 AC_HELP_STRING([--enable-video-xbios], [use Atari Xbios video driver [[default=yes]]]),
                   , enable_video_xbios=yes)
     video_xbios=no
@@ -1310,7 +1310,7 @@ AC_HELP_STRING([--enable-video-xbios], [use Atari Xbios video driver [[default=y
 dnl Set up the Atari Gem driver
 CheckAtariGemVideo()
 {
-    AC_ARG_ENABLE(gem,
+    AC_ARG_ENABLE(video-gem,
 AC_HELP_STRING([--enable-video-gem], [use Atari Gem video driver [[default=yes]]]),
                   , enable_video_gem=yes)
     if test x$enable_video = xyes -a x$enable_video_gem = xyes; then
