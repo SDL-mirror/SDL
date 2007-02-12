@@ -1287,7 +1287,7 @@ static void Blit32to32SurfaceAlphaAltivec(SDL_BlitInfo *info)
         ONE_PIXEL_BLEND((UNALIGNED_PTR(dstp)) && (width), width);
         if (width > 0) {
             int extrawidth = (width % 4);
-            vector unsigned char valigner = vec_lvsl(0, srcp);
+            vector unsigned char valigner = VEC_ALIGNER(srcp);
             vector unsigned char vs = (vector unsigned char)vec_ld(0, srcp);
             width -= extrawidth;
             while (width) {
