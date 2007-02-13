@@ -48,7 +48,7 @@ CPPFLAGS_X86="-DMAC_OS_X_VERSION_MIN_REQUIRED=1040 \
 
 # Intel linker flags
 LFLAGS_X86="-arch i386 -mmacosx-version-min=10.4 \
--L/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin8/4.0.0 \
+-L/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin8/4.0.1 \
 -Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk"
 
 #
