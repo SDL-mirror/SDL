@@ -217,6 +217,7 @@ main(int argc, char *argv[])
 
     SDL_FreeCursor(cursor[0]);
     SDL_FreeCursor(cursor[1]);
+    SDL_FreeCursor(cursor[2]);
 
     SDL_Quit();
     return (0);
