@@ -36,9 +36,14 @@
 #define QZ_F10			0x6D
 #define QZ_F11			0x67
 #define QZ_F12			0x6F
+#define QZ_F13			0x69
+#define QZ_F14			0x6B
+#define QZ_F15			0x71
+/*
 #define QZ_PRINT		0x69
 #define QZ_SCROLLOCK    0x6B
 #define QZ_PAUSE		0x71
+*/
 #define QZ_POWER		0x7F
 #define QZ_BACKQUOTE	0x32
 #define QZ_1			0x12

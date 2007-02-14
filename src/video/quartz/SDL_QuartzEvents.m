@@ -87,9 +87,14 @@ void     QZ_InitOSKeymap (_THIS) {
     keymap[QZ_F10] = SDLK_F10;
     keymap[QZ_F11] = SDLK_F11;
     keymap[QZ_F12] = SDLK_F12;
+    keymap[QZ_F13] = SDLK_F13;
+    keymap[QZ_F14] = SDLK_F14;
+    keymap[QZ_F15] = SDLK_F15;
+/*
     keymap[QZ_PRINT] = SDLK_PRINT;
     keymap[QZ_SCROLLOCK] = SDLK_SCROLLOCK;
     keymap[QZ_PAUSE] = SDLK_PAUSE;
+*/
     keymap[QZ_POWER] = SDLK_POWER;
     keymap[QZ_BACKQUOTE] = SDLK_BACKQUOTE;
     keymap[QZ_1] = SDLK_1;
@@ -270,6 +275,7 @@ static void QZ_DoKey (_THIS, int state, NSEvent *event) {
     if (numChars == 0) {
       
         key.scancode = [ event keyCode ];
+printf("numChars == 0, scancode == %d\n", (int) key.scancode);
         key.sym      = keymap [ key.scancode ];
         key.unicode  = 0;
         key.mod      = KMOD_NONE;
@@ -279,6 +285,7 @@ static void QZ_DoKey (_THIS, int state, NSEvent *event) {
     else if (numChars == 1) {
 
         key.scancode = [ event keyCode ];
+printf("numChars == 1, scancode == %d\n", (int) key.scancode);
         key.sym      = keymap [ key.scancode ];
         key.unicode  = [ chars characterAtIndex:0 ];
         key.mod      = KMOD_NONE;
