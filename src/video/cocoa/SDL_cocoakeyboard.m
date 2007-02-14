@@ -77,9 +77,14 @@ InitKeymap (SDLKey *keymap)
     keymap[KEY_F10] = SDLK_F10;
     keymap[KEY_F11] = SDLK_F11;
     keymap[KEY_F12] = SDLK_F12;
+    keymap[KEY_F13] = SDLK_F13;
+    keymap[KEY_F14] = SDLK_F14;
+    keymap[KEY_F15] = SDLK_F15;
+/*
     keymap[KEY_PRINT] = SDLK_PRINT;
     keymap[KEY_SCROLLOCK] = SDLK_SCROLLOCK;
     keymap[KEY_PAUSE] = SDLK_PAUSE;
+*/
     keymap[KEY_POWER] = SDLK_POWER;
     keymap[KEY_BACKQUOTE] = SDLK_BACKQUOTE;
     keymap[KEY_1] = SDLK_1;

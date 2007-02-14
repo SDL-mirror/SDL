@@ -36,9 +36,14 @@
 #define KEY_F10			0x6D
 #define KEY_F11			0x67
 #define KEY_F12			0x6F
+#define KEY_F13			0x69
+#define KEY_F14			0x6B
+#define KEY_F15			0x71
+/*
 #define KEY_PRINT		0x69
 #define KEY_SCROLLOCK    0x6B
 #define KEY_PAUSE		0x71
+*/
 #define KEY_POWER		0x7F
 #define KEY_BACKQUOTE	0x32
 #define KEY_1			0x12
