@@ -177,6 +177,19 @@ static void FB_SavePalette(_THIS, struct fb_fix_screeninfo *finfo,
                            struct fb_var_screeninfo *vinfo);
 static void FB_RestorePalette(_THIS);
 
+static int SDL_getpagesize(void)
+{
+#ifdef HAVE_GETPAGESIZE
+    return getpagesize();
+#elif defined(PAGE_SIZE)
+    return PAGE_SIZE;
+#else
+#error Can not determine system page size.
+    return 4096;  /* this is what it USED to be in Linux... */
+#endif
+}
+
+
 /* Small wrapper for mmap() so we can play nicely with no-mmu hosts
  * (non-mmu hosts disallow the MAP_SHARED flag) */
 
@@ -508,6 +521,7 @@ FB_SortModes(_THIS)
 static int
 FB_VideoInit(_THIS, SDL_PixelFormat * vformat)
 {
+    const int pagesize = SDL_getpagesize();
     struct fb_fix_screeninfo finfo;
     struct fb_var_screeninfo vinfo;
     int i, j;
@@ -589,7 +603,7 @@ FB_VideoInit(_THIS, SDL_PixelFormat * vformat)
 
     /* Memory map the device, compensating for buggy PPC mmap() */
     mapped_offset = (((long) finfo.smem_start) -
-                     (((long) finfo.smem_start) & ~(PAGE_SIZE - 1)));
+                     (((long) finfo.smem_start) & ~(pagesize - 1)));
     mapped_memlen = finfo.smem_len + mapped_offset;
     mapped_mem = do_mmap(NULL, mapped_memlen,
                          PROT_READ | PROT_WRITE, MAP_SHARED, console_fd, 0);

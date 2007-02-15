@@ -1117,6 +1117,7 @@ AC_HELP_STRING([--enable-video-fbcon], [use framebuffer console video driver [[d
         ])
         AC_MSG_RESULT($video_fbcon)
         if test x$video_fbcon = xyes; then
+            AC_CHECK_FUNCS(getpagesize)
             AC_DEFINE(SDL_VIDEO_DRIVER_FBCON)
             SOURCES="$SOURCES $srcdir/src/video/fbcon/*.c"
             have_video=yes
