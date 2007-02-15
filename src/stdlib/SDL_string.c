@@ -45,7 +45,7 @@ static size_t SDL_ScanLong(const char *text, int radix, long *valuep)
     }
     for ( ; ; ) {
         int v;
-        if ( SDL_isdigit(*text) ) {
+        if ( SDL_isdigit((unsigned char) *text) ) {
             v = *text - '0';
         } else if ( radix == 16 && SDL_isupperhex(*text) ) {
             v = 10 + (*text - 'A');
@@ -80,7 +80,7 @@ static size_t SDL_ScanUnsignedLong(const char *text, int radix, unsigned long *v
     }
     for ( ; ; ) {
         int v;
-        if ( SDL_isdigit(*text) ) {
+        if ( SDL_isdigit((unsigned char) *text) ) {
             v = *text - '0';
         } else if ( radix == 16 && SDL_isupperhex(*text) ) {
             v = 10 + (*text - 'A');
@@ -111,7 +111,7 @@ static size_t SDL_ScanUintPtrT(const char *text, int radix, uintptr_t *valuep)
     }
     for ( ; ; ) {
         int v;
-        if ( SDL_isdigit(*text) ) {
+        if ( SDL_isdigit((unsigned char) *text) ) {
             v = *text - '0';
         } else if ( radix == 16 && SDL_isupperhex(*text) ) {
             v = 10 + (*text - 'A');
@@ -148,7 +148,7 @@ static size_t SDL_ScanLongLong(const char *text, int radix, Sint64 *valuep)
     }
     for ( ; ; ) {
         int v;
-        if ( SDL_isdigit(*text) ) {
+        if ( SDL_isdigit((unsigned char) *text) ) {
             v = *text - '0';
         } else if ( radix == 16 && SDL_isupperhex(*text) ) {
             v = 10 + (*text - 'A');
@@ -183,7 +183,7 @@ static size_t SDL_ScanUnsignedLongLong(const char *text, int radix, Uint64 *valu
     }
     for ( ; ; ) {
         int v;
-        if ( SDL_isdigit(*text) ) {
+        if ( SDL_isdigit((unsigned char) *text) ) {
             v = *text - '0';
         } else if ( radix == 16 && SDL_isupperhex(*text) ) {
             v = 10 + (*text - 'A');
@@ -221,7 +221,7 @@ static size_t SDL_ScanFloat(const char *text, double *valuep)
     if ( *text == '.' ) {
         int mult = 10;
         ++text;
-        while ( SDL_isdigit(*text) ) {
+        while ( SDL_isdigit((unsigned char) *text) ) {
             lvalue = *text - '0';
             value += (double)lvalue / mult;
             mult *= 10;
@@ -383,7 +383,7 @@ char *SDL_strupr(char *string)
 {
     char *bufp = string;
     while ( *bufp ) {
-        *bufp = SDL_toupper(*bufp);
+        *bufp = SDL_toupper((unsigned char) *bufp);
 	++bufp;
     }
     return string;
@@ -395,7 +395,7 @@ char *SDL_strlwr(char *string)
 {
     char *bufp = string;
     while ( *bufp ) {
-        *bufp = SDL_tolower(*bufp);
+        *bufp = SDL_tolower((unsigned char) *bufp);
 	++bufp;
     }
     return string;
@@ -699,8 +699,8 @@ int SDL_strcasecmp(const char *str1, const char *str2)
     char a = 0;
     char b = 0;
     while ( *str1 && *str2 ) {
-        a = SDL_tolower(*str1);
-        b = SDL_tolower(*str2);
+        a = SDL_tolower((unsigned char) *str1);
+        b = SDL_tolower((unsigned char) *str2);
         if ( a != b )
             break;
         ++str1;
@@ -716,8 +716,8 @@ int SDL_strncasecmp(const char *str1, const char *str2, size_t maxlen)
     char a = 0;
     char b = 0;
     while ( *str1 && *str2 && maxlen ) {
-        a = SDL_tolower(*str1);
-        b = SDL_tolower(*str2);
+        a = SDL_tolower((unsigned char) *str1);
+        b = SDL_tolower((unsigned char) *str2);
         if ( a != b )
             break;
         ++str1;
@@ -737,7 +737,7 @@ int SDL_sscanf(const char *text, const char *fmt, ...)
     va_start(ap, fmt);
     while ( *fmt ) {
         if ( *fmt == ' ' ) {
-            while ( SDL_isspace(*text) ) {
+            while ( SDL_isspace((unsigned char) *text) ) {
                 ++text;
             }
             ++fmt;
@@ -788,7 +788,7 @@ int SDL_sscanf(const char *text, const char *fmt, ...)
                 continue;
             }
 
-            while ( SDL_isspace(*text) ) {
+            while ( SDL_isspace((unsigned char) *text) ) {
                 ++text;
             }
 
@@ -821,7 +821,7 @@ int SDL_sscanf(const char *text, const char *fmt, ...)
                                 ++index;
                             }
                             if ( text[index] == '0' ) {
-                                if ( SDL_tolower(text[index+1]) == 'x' ) {
+                                if ( SDL_tolower((unsigned char) text[index+1]) == 'x' ) {
                                     radix = 16;
                                 } else {
                                     radix = 8;
@@ -950,7 +950,7 @@ int SDL_sscanf(const char *text, const char *fmt, ...)
                         break;
                     case 's':
                         if ( suppress ) {
-                            while ( !SDL_isspace(*text) ) {
+                            while ( !SDL_isspace((unsigned char) *text) ) {
                                 ++text;
                                 if ( count ) {
                                     if ( --count == 0 ) {
@@ -960,7 +960,7 @@ int SDL_sscanf(const char *text, const char *fmt, ...)
                             }
                         } else {
                             char *valuep = va_arg(ap, char*);
-                            while ( !SDL_isspace(*text) ) {
+                            while ( !SDL_isspace((unsigned char) *text) ) {
                                 *valuep++ = *text++;
                                 if ( count ) {
                                     if ( --count == 0 ) {
