@@ -149,11 +149,12 @@ SDL_iconv_t SDL_iconv_open(const char *tocode, const char *fromcode)
 }
 
 size_t SDL_iconv(SDL_iconv_t cd,
-                 char **inbuf, size_t *inbytesleft,
+                 const char **inbuf, size_t *inbytesleft,
                  char **outbuf, size_t *outbytesleft)
 {
 	/* For simplicity, we'll convert everything to and from UCS-4 */
-	char *src, *dst;
+	const char *src;
+	char *dst;
 	size_t srclen, dstlen;
 	Uint32 ch = 0;
 	size_t total;
@@ -755,7 +756,7 @@ int SDL_iconv_close(SDL_iconv_t cd)
 
 #endif /* !HAVE_ICONV */
 
-char *SDL_iconv_string(const char *tocode, const char *fromcode, char *inbuf, size_t inbytesleft)
+char *SDL_iconv_string(const char *tocode, const char *fromcode, const char *inbuf, size_t inbytesleft)
 {
 	SDL_iconv_t cd;
 	char *string;
