@@ -50,6 +50,7 @@ static struct {
 	{ "SideWinder Precision Pro", 4, 1, 0 },
 	{ "SideWinder 3D Pro", 4, 1, 0 },
 	{ "Microsoft SideWinder 3D Pro", 4, 1, 0 },
+	{ "Microsoft SideWinder Precision Pro", 4, 1, 0 },
 	{ "Microsoft SideWinder Dual Strike USB version 1.0", 2, 1, 0 },
 	{ "WingMan Interceptor", 3, 3, 0 },
 	{ "WingMan Extreme Digital 3D", 4, 1, 0 },
