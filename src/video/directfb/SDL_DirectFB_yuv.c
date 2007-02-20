@@ -116,6 +116,14 @@ CreateYUVSurface(_THIS, struct private_yuvhwdata *hwdata,
         break;
     }
 
+    /* Need to set coop level or newer DirectFB versions will fail here. */
+    ret = layer->SetCooperativeLevel(layer, DLSCL_ADMINISTRATIVE);
+    if (ret) {
+        SetDirectFBError("IDirectFBDisplayLayer::SetCooperativeLevel() failed", ret);
+        layer->Release(layer);
+        return ret;
+    }
+
     ret = layer->SetConfiguration(layer, &conf);
     if (ret) {
         SetDirectFBerror("IDirectFBDisplayLayer::SetConfiguration", ret);
