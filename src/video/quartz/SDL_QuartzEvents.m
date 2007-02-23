@@ -275,7 +275,6 @@ static void QZ_DoKey (_THIS, int state, NSEvent *event) {
     if (numChars == 0) {
       
         key.scancode = [ event keyCode ];
-printf("numChars == 0, scancode == %d\n", (int) key.scancode);
         key.sym      = keymap [ key.scancode ];
         key.unicode  = 0;
         key.mod      = KMOD_NONE;
@@ -285,7 +284,6 @@ printf("numChars == 0, scancode == %d\n", (int) key.scancode);
     else if (numChars == 1) {
 
         key.scancode = [ event keyCode ];
-printf("numChars == 1, scancode == %d\n", (int) key.scancode);
         key.sym      = keymap [ key.scancode ];
         key.unicode  = [ chars characterAtIndex:0 ];
         key.mod      = KMOD_NONE;
