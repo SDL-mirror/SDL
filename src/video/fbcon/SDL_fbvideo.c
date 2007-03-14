@@ -29,7 +29,11 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
+
+#ifndef HAVE_GETPAGESIZE
 #include <asm/page.h>           /* For definition of PAGE_SIZE */
+#endif
+
 #include <linux/vt.h>
 
 #include "SDL_video.h"
