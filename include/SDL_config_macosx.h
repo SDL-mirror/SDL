@@ -25,6 +25,9 @@
 
 #include "SDL_platform.h"
 
+/* This gets us MAC_OS_X_VERSION_MIN_REQUIRED... */
+#include <AvailabilityMacros.h>
+
 /* This is a set of defines to configure the SDL features */
 
 #define SDL_HAS_64BIT_TYPE	1
