@@ -2,7 +2,10 @@
 /* sanity tests on SDL_rwops.c (usefull for alternative implementations of stdio rwops) */
 
 #include <stdlib.h>
+
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 #include "SDL.h"
 #include "SDL_endian.h"
