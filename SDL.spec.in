@@ -54,7 +54,7 @@ make install prefix=$RPM_BUILD_ROOT%{prefix} \
              includedir=$RPM_BUILD_ROOT%{_includedir} \
              datadir=$RPM_BUILD_ROOT%{_datadir} \
              mandir=$RPM_BUILD_ROOT%{_mandir}
-ln -s libSDL-1.2.so.0 $RPM_BUILD_ROOT%{prefix}/lib/libSDL-1.1.so.0
+ln -s libSDL-1.2.so.0 $RPM_BUILD_ROOT%{_libdir}/libSDL-1.1.so.0
 %else
 %makeinstall
 %endif
