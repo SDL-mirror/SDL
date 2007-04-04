@@ -196,7 +196,6 @@ SOURCES="$SOURCES $srcdir/src/cdrom/*.c"
 SOURCES="$SOURCES $srcdir/src/cpuinfo/*.c"
 SOURCES="$SOURCES $srcdir/src/events/*.c"
 SOURCES="$SOURCES $srcdir/src/file/*.c"
-SOURCES="$SOURCES $srcdir/src/joystick/*.c"
 SOURCES="$SOURCES $srcdir/src/stdlib/*.c"
 SOURCES="$SOURCES $srcdir/src/thread/*.c"
 SOURCES="$SOURCES $srcdir/src/timer/*.c"
@@ -215,6 +214,8 @@ AC_HELP_STRING([--enable-video], [Enable the video subsystem [[default=yes]]]),
               , enable_video=yes)
 if test x$enable_video != xyes; then
     AC_DEFINE(SDL_VIDEO_DISABLED)
+else
+    SOURCES="$SOURCES $srcdir/src/joystick/*.c"
 fi
 AC_ARG_ENABLE(events,
 AC_HELP_STRING([--enable-events], [Enable the events subsystem [[default=yes]]]),
@@ -2576,6 +2577,7 @@ esac
 if test x$enable_joystick = xyes; then
   if test x$have_joystick != xyes; then
     # Wants joystick subsystem, but doesn't have a platform-specific backend...
+    AC_DEFINE(SDL_JOYSTICK_DUMMY)
     SOURCES="$SOURCES $srcdir/src/joystick/dummy/*.c"
   fi
 fi
