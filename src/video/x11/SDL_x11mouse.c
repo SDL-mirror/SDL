@@ -216,11 +216,11 @@ static void SetMouseAccel(_THIS, const char *accel_param)
 			mouse_param = NULL;
 		}
 	}
-	if ( mouse_param_buf ) {
+	if ( i == 3 ) {
 		XChangePointerControl(SDL_Display, True, True,
 			accel_value[0], accel_value[1], accel_value[2]);
-		SDL_free(mouse_param_buf);
 	}
+	SDL_stack_free(mouse_param_buf);
 }
 
 /* Check to see if we need to enter or leave mouse relative mode */
