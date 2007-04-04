@@ -2347,7 +2347,6 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         if test x$enable_joystick = xyes; then
             AC_DEFINE(SDL_JOYSTICK_IOKIT)
             SOURCES="$SOURCES $srcdir/src/joystick/darwin/*.c"
-            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,IOKit"
             have_joystick=yes
         fi
         # Set up files for the cdrom library
@@ -2366,6 +2365,7 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         EXTRA_CFLAGS="$EXTRA_CFLAGS -fpascal-strings"
         EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,Cocoa"
         EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,Carbon"
+        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,IOKit"
         # If either the audio or CD driver is used, add the AudioUnit framework
         if test x$enable_audio = xyes -o x$enable_cdrom = xyes; then
             EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,CoreAudio -framework,AudioToolbox -Wl,-framework,AudioUnit"
