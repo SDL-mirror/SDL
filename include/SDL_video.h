@@ -1300,15 +1300,16 @@ extern DECLSPEC void SDLCALL SDL_DestroyRenderer(SDL_WindowID windowID);
 /*
  * Maps an RGB triple to an opaque pixel value for a given pixel format
  */
-extern DECLSPEC Uint32 SDLCALL SDL_MapRGB
-    (SDL_PixelFormat * format, Uint8 r, Uint8 g, Uint8 b);
+extern DECLSPEC Uint32 SDLCALL SDL_MapRGB(const SDL_PixelFormat * const format,
+                                          const Uint8 r, const Uint8 g,
+                                          const Uint8 b);
 
 /*
  * Maps an RGBA quadruple to a pixel value for a given pixel format
  */
-extern DECLSPEC Uint32 SDLCALL SDL_MapRGBA(SDL_PixelFormat * format,
-                                           Uint8 r, Uint8 g, Uint8 b,
-                                           Uint8 a);
+extern DECLSPEC Uint32 SDLCALL SDL_MapRGBA(const SDL_PixelFormat * const fmt,
+                                           const Uint8 r, const Uint8 g,
+                                           const Uint8 b, const Uint8 a);
 
 /*
  * Maps a pixel value into the RGB components for a given pixel format
