@@ -214,8 +214,6 @@ AC_HELP_STRING([--enable-video], [Enable the video subsystem [[default=yes]]]),
               , enable_video=yes)
 if test x$enable_video != xyes; then
     AC_DEFINE(SDL_VIDEO_DISABLED)
-else
-    SOURCES="$SOURCES $srcdir/src/joystick/*.c"
 fi
 AC_ARG_ENABLE(events,
 AC_HELP_STRING([--enable-events], [Enable the events subsystem [[default=yes]]]),
@@ -228,6 +226,8 @@ AC_HELP_STRING([--enable-joystick], [Enable the joystick subsystem [[default=yes
               , enable_joystick=yes)
 if test x$enable_joystick != xyes; then
     AC_DEFINE(SDL_JOYSTICK_DISABLED)
+else
+    SOURCES="$SOURCES $srcdir/src/joystick/*.c"
 fi
 AC_ARG_ENABLE(cdrom,
 AC_HELP_STRING([--enable-cdrom], [Enable the cdrom subsystem [[default=yes]]]),
