@@ -1136,9 +1136,14 @@ void X11_SaveScreenSaver(Display *display, int *saved_timeout, BOOL *dpms)
 #endif /* SDL_VIDEO_DRIVER_X11_DPMS */
 }
 
-void X11_DisableScreenSaver(Display *display)
+void X11_DisableScreenSaver(_THIS, Display *display)
 {
 	int timeout, interval, prefer_blank, allow_exp;
+
+	if (this->hidden->allow_screensaver) {
+		return;
+	}
+
 	XGetScreenSaver(display, &timeout, &interval, &prefer_blank, &allow_exp);
 	timeout = 0;
 	XSetScreenSaver(display, timeout, interval, prefer_blank, allow_exp);
@@ -1153,9 +1158,14 @@ void X11_DisableScreenSaver(Display *display)
 #endif /* SDL_VIDEO_DRIVER_X11_DPMS */
 }
 
-void X11_RestoreScreenSaver(Display *display, int saved_timeout, BOOL dpms)
+void X11_RestoreScreenSaver(_THIS, Display *display, int saved_timeout, BOOL dpms)
 {
 	int timeout, interval, prefer_blank, allow_exp;
+
+	if (this->hidden->allow_screensaver) {
+		return;
+	}
+
 	XGetScreenSaver(display, &timeout, &interval, &prefer_blank, &allow_exp);
 	timeout = saved_timeout;
 	XSetScreenSaver(display, timeout, interval, prefer_blank, allow_exp);

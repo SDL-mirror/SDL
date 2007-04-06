@@ -139,6 +139,8 @@ struct SDL_PrivateVideoData {
     int use_xme;
     int currently_fullscreen;
 
+    int allow_screensaver;
+
     /* Automatic mode switching support (entering/leaving fullscreen) */
     Uint32 switch_waiting;
     Uint32 switch_time;

@@ -169,11 +169,16 @@ static void QZ_DeleteDevice (SDL_VideoDevice *device) {
 
 static int QZ_VideoInit (_THIS, SDL_PixelFormat *video_format) {
 
+    const char *env = NULL;
+
     /* Initialize the video settings; this data persists between mode switches */
     display_id = kCGDirectMainDisplay;
     save_mode  = CGDisplayCurrentMode    (display_id);
     mode_list  = CGDisplayAvailableModes (display_id);
     palette    = CGPaletteCreateDefaultColorPalette ();
+
+    env = SDL_getenv("SDL_VIDEO_ALLOW_SCREENSAVER");
+    allow_screensaver = ( env && SDL_atoi(env) ) ? YES : NO;
 
     /* Gather some information that is useful to know about the display */
     CFNumberGetValue (CFDictionaryGetValue (save_mode, kCGDisplayBitsPerPixel),

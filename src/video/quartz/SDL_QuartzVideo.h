@@ -80,6 +80,7 @@
 /* Main driver structure to store required state information */
 typedef struct SDL_PrivateVideoData {
 
+    BOOL               allow_screensaver;  /* 0 == disable screensaver */
     CGDirectDisplayID  display;            /* 0 == main display (only support single display) */
     CFDictionaryRef    mode;               /* current mode of the display */
     CFDictionaryRef    save_mode;          /* original mode of the display */
@@ -127,6 +128,7 @@ typedef struct SDL_PrivateVideoData {
 #define display_id (this->hidden->display)
 #define mode (this->hidden->mode)
 #define save_mode (this->hidden->save_mode)
+#define allow_screensaver (this->hidden->allow_screensaver)
 #define mode_list (this->hidden->mode_list)
 #define palette (this->hidden->palette)
 #define gl_context (this->hidden->gl_context)

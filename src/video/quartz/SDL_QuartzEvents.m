@@ -734,11 +734,13 @@ void QZ_PumpEvents (_THIS)
         return;  /* don't do anything if there's no screen surface. */
 
     /* Update activity every five seconds to prevent screensaver. --ryan. */
-    nowTicks = SDL_GetTicks();
-    if ((nowTicks - screensaverTicks) > 5000)
-    {
-        UpdateSystemActivity(UsrActivity);
-        screensaverTicks = nowTicks;
+    if (!allow_screensaver) {
+        nowTicks = SDL_GetTicks();
+        if ((nowTicks - screensaverTicks) > 5000)
+        {
+            UpdateSystemActivity(UsrActivity);
+            screensaverTicks = nowTicks;
+        }
     }
 
     pool = [ [ NSAutoreleasePool alloc ] init ];

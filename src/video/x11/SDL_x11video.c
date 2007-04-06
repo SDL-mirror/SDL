@@ -441,6 +441,7 @@ static void create_aux_windows(_THIS)
 
 static int X11_VideoInit(_THIS, SDL_PixelFormat *vformat)
 {
+	const char *env = NULL;
 	char *display;
 	int i;
 
@@ -546,7 +547,7 @@ static int X11_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 	/* Save DPMS and screensaver settings */
 	X11_SaveScreenSaver(SDL_Display, &screensaver_timeout, &dpms_enabled);
-	X11_DisableScreenSaver(SDL_Display);
+	X11_DisableScreenSaver(this, SDL_Display);
 
 	/* See if we have been passed a window to use */
 	SDL_windowid = SDL_getenv("SDL_WINDOWID");
@@ -561,6 +562,10 @@ static int X11_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 	/* Fill in some window manager capabilities */
 	this->info.wm_available = 1;
+
+	/* Allow environment override of screensaver disable. */
+	env = SDL_getenv("SDL_VIDEO_ALLOW_SCREENSAVER");
+	this->hidden->allow_screensaver = ( (env && SDL_atoi(env)) ? 1 : 0 );
 
 	/* We're done! */
 	XFlush(SDL_Display);
@@ -1375,7 +1380,7 @@ void X11_VideoQuit(_THIS)
 		}
 
 		/* Restore DPMS and screensaver settings */
-		X11_RestoreScreenSaver(SDL_Display, screensaver_timeout, dpms_enabled);
+		X11_RestoreScreenSaver(this, SDL_Display, screensaver_timeout, dpms_enabled);
 
 		/* Free that blank cursor */
 		if ( SDL_BlankCursor != NULL ) {
