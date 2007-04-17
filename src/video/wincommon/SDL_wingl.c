@@ -403,11 +403,19 @@ int WIN_GL_MakeCurrent(_THIS)
 	return(retval);
 }
 
-/* Get attribute data from glX. */
+/* Get attribute data from wgl. */
 int WIN_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
 {
 	int retval;
-	
+
+	if (attrib == SDL_GL_SWAP_CONTROL) {
+		if ( this->gl_data->wglGetSwapIntervalEXT ) {
+			*value = this->gl_data->wglGetSwapIntervalEXT();
+			return 0;
+		}
+		return -1;
+	}
+
 	if ( this->gl_data->WGL_ARB_pixel_format ) {
 		int wgl_attrib;
 
@@ -466,15 +474,6 @@ int WIN_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
 				*value = SDL_TRUE;
 			}
 			return 0;
-			break;
-		    case SDL_GL_SWAP_CONTROL:
-			if ( this->gl_data->wglGetSwapIntervalEXT ) {
-				*value = this->gl_data->wglGetSwapIntervalEXT();
-				return 0;
-			} else {
-				return -1;
-			}
-			break;
 		    default:
 			return(-1);
 		}
