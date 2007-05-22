@@ -269,7 +269,7 @@ int X11_GL_CreateContext(_THIS)
 	}
 	gl_active = 1;
 
-	if ( !glXExtensionSupported(this, "SGI_swap_control") ) {
+	if ( !glXExtensionSupported(this, "GLX_SGI_swap_control") ) {
 		this->gl_data->glXSwapIntervalSGI = NULL;
 	}
 	if ( !glXExtensionSupported(this, "GLX_MESA_swap_control") ) {
