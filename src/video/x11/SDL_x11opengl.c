@@ -224,7 +224,7 @@ X11_GL_InitExtensions(_THIS)
     }
 
     /* Check for SGI_swap_control */
-    if (HasExtension("SGI_swap_control", extensions)) {
+    if (HasExtension("GLX_SGI_swap_control", extensions)) {
         _this->gl_data->glXSwapIntervalSGI =
             (int (*)(int)) X11_GL_GetProcAddress(_this, "glXSwapIntervalSGI");
     }
