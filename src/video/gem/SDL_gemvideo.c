@@ -467,7 +467,7 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	SDL_AtariGL_InitPointers(this);
 #endif
 
-	video->info.wm_available = 1;
+	this->info.wm_available = 1;
 
 	/* We're done! */
 	return(0);
