@@ -639,28 +639,25 @@ SDL_Surface *
 GEM_SetVideoMode(_THIS, SDL_Surface * current,
                  int width, int height, int bpp, Uint32 flags)
 {
-    int maxwidth, maxheight;
     Uint32 modeflags, screensize;
     SDL_bool use_shadow1, use_shadow2;
-
-        /*--- Verify if asked mode can be used ---*/
-    if (flags & SDL_FULLSCREEN) {
-        maxwidth = VDI_w;
-        maxheight = VDI_h;
-    } else {
-        /* Windowed mode */
-        maxwidth = GEM_desk_w;
-        maxheight = GEM_desk_h;
-    }
 
     /* width must be multiple of 16, for vro_cpyfm() and c2p_convert() */
     if ((width & 15) != 0) {
         width = (width | 15) + 1;
     }
 
-    if ((maxwidth < width) || (maxheight < height) || (VDI_bpp != bpp)) {
-        SDL_SetError("Couldn't find requested mode in list");
-        return (NULL);
+        /*--- Verify if asked mode can be used ---*/
+    if (VDI_bpp != bpp) {
+        SDL_SetError("%d bpp mode not supported", bpp);
+        return(NULL);
+    }
+
+    if (flags & SDL_FULLSCREEN) {
+        if ((VDI_w < width) || (VDI_h < height)) {
+            SDL_SetError("%dx%d mode is too large", width, height);
+            return (NULL);
+        }
     }
 
         /*--- Allocate the new pixel format for the screen ---*/
@@ -775,8 +772,16 @@ GEM_SetVideoMode(_THIS, SDL_Surface * current,
             }
 
             /* Center window */
-            x2 = GEM_desk_x + ((GEM_desk_w - w2) >> 1);
-            y2 = GEM_desk_y + ((GEM_desk_h - h2) >> 1);
+            x2 = (GEM_desk_w - w2) >> 1;
+            y2 = (GEM_desk_h - h2) >> 1;
+            if (x2<0) {
+                x2 = 0;
+            }
+            if (y2<0) {
+                y2 = 0;
+            }
+            x2 += GEM_desk_x;
+            y2 += GEM_desk_y;
 
             /* Destroy existing window */
             if (GEM_handle >= 0) {
