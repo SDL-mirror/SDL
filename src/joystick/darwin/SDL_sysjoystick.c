@@ -241,12 +241,10 @@ static void HIDGetElementInfo (CFTypeRef refElement, recElement *pElement)
 		pElement->cookie = (IOHIDElementCookie) number;
 	refType = CFDictionaryGetValue (refElement, CFSTR(kIOHIDElementMinKey));
 	if (refType && CFNumberGetValue (refType, kCFNumberLongType, &number))
-		pElement->min = number;
-		pElement->maxReport = pElement->min;
+		pElement->minReport = pElement->min = number;
 	refType = CFDictionaryGetValue (refElement, CFSTR(kIOHIDElementMaxKey));
 	if (refType && CFNumberGetValue (refType, kCFNumberLongType, &number))
-		pElement->max = number;
-		pElement->minReport = pElement->max;
+		pElement->maxReport = pElement->max = number;
 /*
 	TODO: maybe should handle the following stuff somehow?
 
