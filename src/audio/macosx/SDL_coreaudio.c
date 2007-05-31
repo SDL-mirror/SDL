@@ -128,7 +128,7 @@ build_device_list(int iscapture, COREAUDIO_DeviceList ** devices,
 
         size = sizeof(CFStringRef);
         result = AudioDeviceGetProperty(dev, 0, iscapture,
-                                        kAudioObjectPropertyName,
+                                        kAudioDevicePropertyDeviceNameCFString,
                                         &size, &cfstr);
 
         if (result != kAudioHardwareNoError)
