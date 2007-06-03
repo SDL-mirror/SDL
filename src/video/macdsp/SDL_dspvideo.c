@@ -1378,8 +1378,8 @@ void DSp_VideoQuit(_THIS)
 	/* Free current video mode */
 	DSp_UnsetVideoMode(this, this->screen);
 
-   /* Free Palette and restore original */
-   DSp_DestroyPalette (this);
+	/* Free Palette and restore original */
+	DSp_DestroyPalette (this);
 
 	/* Free list of video modes */
 	if ( SDL_modelist != NULL ) {
@@ -1391,7 +1391,7 @@ void DSp_VideoQuit(_THIS)
 	}
 	
 	/* Unload DrawSprocket */
-   DSpShutdown ();
+	DSpShutdown ();
 }
 
 #if SDL_VIDEO_OPENGL
