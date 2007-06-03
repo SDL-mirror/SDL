@@ -163,7 +163,7 @@ static SDL_VideoDevice *ROM_CreateDevice(int devindex)
 	device->GL_SwapBuffers = Mac_GL_SwapBuffers;
 	device->GL_LoadLibrary = Mac_GL_LoadLibrary;
 	device->GL_GetProcAddress = Mac_GL_GetProcAddress;
-#endif	// Have OpenGL
+#endif	/* Have OpenGL */
 	device->SetCaption = Mac_SetCaption;
 	device->SetIcon = NULL;
 	device->IconifyWindow = NULL;
@@ -689,8 +689,11 @@ static int ROM_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 		(**cTab).ctTable[j].rgb.green = colors[i].g << 8 | colors[i].g;
 		(**cTab).ctTable[j].rgb.blue = colors[i].b << 8 | colors[i].b;
 	}
-//	if ( (this->screen->flags & SDL_FULLSCREEN) == SDL_FULLSCREEN ) 
-{
+
+#if 0
+	if ( (this->screen->flags & SDL_FULLSCREEN) == SDL_FULLSCREEN )
+#endif
+	{
 		GDevice **odisplay;
 		odisplay = GetGDevice();
 		SetGDevice(SDL_Display);
