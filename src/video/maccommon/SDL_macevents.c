@@ -159,6 +159,8 @@ static int Mac_HandleEvents(_THIS, int wait4it)
 	/* Check the current state of the keyboard */
 	if ( SDL_GetAppState() & SDL_APPINPUTFOCUS ) {
 		KeyMap keys;
+		const Uint8 *keysptr = (Uint8 *) &keys;
+		const Uint8 *last_keysptr = (Uint8 *) &last_keys;
 
 		/* Check for special non-event keys */
 		if ( event.modifiers != last_mods ) {
@@ -214,8 +216,10 @@ static int Mac_HandleEvents(_THIS, int wait4it)
 		   is immediately followed by a keyup event.
 		*/
 		GetKeys(keys);
-		if ( (keys[0] != last_keys[0]) || (keys[1] != last_keys[1]) ||
-		     (keys[2] != last_keys[2]) || (keys[3] != last_keys[3]) ) {
+		if ( (keysptr[0] != last_keysptr[0]) ||
+		     (keysptr[1] != last_keysptr[1]) ||
+		     (keysptr[2] != last_keysptr[2]) ||
+		     (keysptr[3] != last_keysptr[3]) ) {
 			SDL_keysym keysym;
 			int old_bit, new_bit;
 
@@ -730,7 +734,7 @@ static void Mac_DoAppleMenu(_THIS, long choice)
 
 #if !TARGET_API_MAC_CARBON
 /* Since we don't initialize QuickDraw, we need to get a pointer to qd */
-QDGlobals *theQD = NULL;
+struct QDGlobals *theQD = NULL;
 #endif
 
 /* Exported to the macmain code */
