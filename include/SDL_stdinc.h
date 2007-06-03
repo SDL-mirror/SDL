@@ -279,7 +279,10 @@ extern DECLSPEC void *SDLCALL SDL_memset(void *dst, int c, size_t len);
 #define SDL_zero(x)	SDL_memset(&(x), 0, sizeof((x)))
 #define SDL_zerop(x)	SDL_memset((x), 0, sizeof(*(x)))
 
-#if defined(__GNUC__) && defined(i386)
+/* We can count on memset existing on Mac OS X and being well-tuned. */
+#if defined(__MACH__) && defined(__APPLE__)
+#define SDL_memset4(dst, val, len) memset(dst, val, (len)*4)
+#elif defined(__GNUC__) && defined(i386)
 #define SDL_memset4(dst, val, len)				\
 do {								\
 	int u0, u1, u2;						\
@@ -308,7 +311,10 @@ do {						\
 } while(0)
 #endif
 
-#if defined(__GNUC__) && defined(i386)
+/* We can count on memcpy existing on Mac OS X and being well-tuned. */
+#if defined(__MACH__) && defined(__APPLE__)
+#define SDL_memcpy(dst, src, len) memcpy(dst, src, len)
+#elif defined(__GNUC__) && defined(i386)
 #define SDL_memcpy(dst, src, len)					  \
 do {									  \
 	int u0, u1, u2;						  	  \
@@ -338,7 +344,10 @@ extern DECLSPEC void *SDLCALL SDL_memcpy(void *dst, const void *src,
 #endif
 #endif
 
-#if defined(__GNUC__) && defined(i386)
+/* We can count on memcpy existing on Mac OS X and being well-tuned. */
+#if defined(__MACH__) && defined(__APPLE__)
+#define SDL_memcpy4(dst, src, len) memcpy(dst, src, (len)*4)
+#elif defined(__GNUC__) && defined(i386)
 #define SDL_memcpy4(dst, src, len)				\
 do {								\
 	int ecx, edi, esi;					\
