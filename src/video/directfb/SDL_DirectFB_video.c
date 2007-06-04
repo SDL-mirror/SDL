@@ -453,6 +453,8 @@ DirectFB_VideoInit(_THIS, SDL_PixelFormat * vformat)
     this->info.blit_hw_A = 1;
     this->info.blit_fill = 1;
     this->info.video_mem = caps.video_memory / 1024;
+    this->info.current_w = dlc.width;
+    this->info.current_h = dlc.height;
 
     HIDDEN->initialized = 1;
     HIDDEN->dfb = dfb;
