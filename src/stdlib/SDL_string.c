@@ -298,8 +298,8 @@ SDL_revcpy(void *dst, const void *src, size_t len)
 {
     char *srcp = (char *) src;
     char *dstp = (char *) dst;
-    srcp += len;
-    dstp += len;
+    srcp += len-1;
+    dstp += len-1;
     while (len--) {
         *dstp-- = *srcp--;
     }
