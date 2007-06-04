@@ -722,7 +722,6 @@ void QZ_PumpEvents (_THIS)
 {
     static Uint32 screensaverTicks = 0;
     Uint32 nowTicks;
-    int firstMouseEvent;
     CGMouseDelta dx, dy;
 
     NSDate *distantPast;
@@ -748,10 +747,7 @@ void QZ_PumpEvents (_THIS)
 
     winRect = NSMakeRect (0, 0, SDL_VideoSurface->w, SDL_VideoSurface->h);
     
-    /* send the first mouse event in absolute coordinates */
-    firstMouseEvent = 1;
-    
-    /* accumulate any additional mouse moved events into one SDL mouse event */
+    /* while grabbed, accumulate all mouse moved events into one SDL mouse event */
     dx = 0;
     dy = 0;
     
@@ -853,29 +849,22 @@ void QZ_PumpEvents (_THIS)
                         dx += dx1;
                         dy += dy1;
                     }
-                    else if (firstMouseEvent) {
+                    else {
                         
                         /*
-                            Get the first mouse event in a possible
-                            sequence of mouse moved events. Since we
-                            use absolute coordinates, this serves to
-                            compensate any inaccuracy in deltas, and
-                            provides the first known mouse position,
-                            since everything after this uses deltas
+                            Get the absolute mouse location. This is not the
+                            mouse location after the currently processed event,
+                            but the *current* mouse location, i.e. after all
+                            pending events. This means that if there are
+                            multiple mouse moved events in the queue, we make
+                            multiple identical calls to SDL_PrivateMouseMotion(),
+                            but that's no problem since the latter only
+                            generates SDL events for nonzero movements. In my
+                            experience on PBG4/10.4.8, this rarely happens anyway.
                         */
                         NSPoint p;
                         QZ_GetMouseLocation (this, &p);
                         SDL_PrivateMouseMotion (0, 0, p.x, p.y);
-                        firstMouseEvent = 0;
-                   }
-                    else {
-                    
-                        /*
-                            Get the amount moved since the last drag or move event,
-                            add it on for one big move event at the end.
-                        */
-                        dx += [ event deltaX ];
-                        dy += [ event deltaY ];
                     }
                     
                     /* 
