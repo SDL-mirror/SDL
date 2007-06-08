@@ -53,7 +53,7 @@ void SDL_MintAudio_CheckFpu(void);
 
 /* The first ticks value of the application */
 static Uint32 start;
-static SDL_bool supervisor;
+static volatile SDL_bool supervisor;
 static int mint_present; /* can we use Syield() ? */
 
 void SDL_StartTicks(void)
