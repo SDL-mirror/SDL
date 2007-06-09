@@ -27,6 +27,7 @@
  */
 
 #define _vbl_queue 0x456
+#define _hz_200    0x4ba
 
 	.text
 
@@ -42,6 +43,7 @@ _SDL_AtariVblInstall:
 	lea		_my_vbl,a0
 
 	clrw	vbl_mutex
+	movel	_hz_200.w, _SDL_Atari_hz200
 
 	/* Stop interrupts */
 
@@ -108,6 +110,9 @@ badvector:
 /*--- Our vbl ---*/
 
 _my_vbl:
+	/* Update _hz_200 */
+	movel	_hz_200.w, _SDL_Atari_hz200
+
 	/* Verify if this is not already running */
 
 	tstw	vbl_mutex
@@ -146,6 +151,8 @@ vbl_end:
 	rts
 
 	.data
+	.even
+	.comm	_SDL_Atari_hz200,4*1
 	.even
 	.comm	vbl_mutex,2*1
 	.even
