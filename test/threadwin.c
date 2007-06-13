@@ -184,8 +184,9 @@ HandleKeyboard(void *unused)
                 /* We want to toggle visibility on buttonpress */
             case SDL_KEYDOWN:
             case SDL_KEYUP:
-                printf("Key '%c' has been %s\n",
+                printf("Key '%c' (keysym==%d) has been %s\n",
                        events[i].key.keysym.unicode,
+                       (int) events[i].key.keysym.sym,
                        (events[i].key.state == SDL_PRESSED) ?
                        "pressed" : "released");
 
