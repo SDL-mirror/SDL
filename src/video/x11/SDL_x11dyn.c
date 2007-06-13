@@ -73,6 +73,11 @@ static void X11_GetSym(const char *fnname, int *rc, void **fn)
 		}
 	}
 
+	if (*fn != NULL)
+		SDL_ClearError();
+	else
+		SDL_SetError("Failed to load function %s from x11libs", fnname);
+
 	#if DEBUG_DYNAMIC_X11
 	if (*fn != NULL)
 		printf("X11: Found '%s' in %s (%p)\n", fnname, x11libs[i].libname, *fn);
