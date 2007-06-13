@@ -73,11 +73,6 @@ static void X11_GetSym(const char *fnname, int *rc, void **fn)
 		}
 	}
 
-	if (*fn != NULL)
-		SDL_ClearError();
-	else
-		SDL_SetError("Failed to load function %s from x11libs", fnname);
-
 	#if DEBUG_DYNAMIC_X11
 	if (*fn != NULL)
 		printf("X11: Found '%s' in %s (%p)\n", fnname, x11libs[i].libname, *fn);
@@ -170,7 +165,9 @@ int SDL_X11_LoadSymbols(void)
 		X11_GetSym("XCreateIC",&SDL_X11_HAVE_UTF8,(void **)&pXCreateIC);
 		#endif
 
-		if (!SDL_X11_HAVE_BASEXLIB) {  /* some required symbol didn't load. */
+		if (SDL_X11_HAVE_BASEXLIB) {  /* all required symbols loaded. */
+			SDL_ClearError();
+		} else {
 			SDL_X11_UnloadSymbols();  /* in case something got loaded... */
 			rc = 0;
 		}
