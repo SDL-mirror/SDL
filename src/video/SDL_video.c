@@ -1353,8 +1353,13 @@ SDL_DestroyWindow(SDL_WindowID windowID)
 void
 SDL_AddRenderDriver(int displayIndex, const SDL_RenderDriver * driver)
 {
-    SDL_VideoDisplay *display = &_this->displays[displayIndex];
+    SDL_VideoDisplay *display;
     SDL_RenderDriver *render_drivers;
+
+    if (displayIndex >= _this->num_displays) {
+        return;
+    }
+    display = &_this->displays[displayIndex];
 
     render_drivers =
         SDL_realloc(display->render_drivers,

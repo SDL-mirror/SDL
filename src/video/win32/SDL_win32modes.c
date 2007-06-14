@@ -110,6 +110,34 @@ WIN_GetDisplayMode(LPCTSTR deviceName, DWORD index, SDL_DisplayMode * mode)
     return SDL_TRUE;
 }
 
+static void
+WIN_AddDisplay(LPTSTR DeviceName)
+{
+    SDL_VideoDisplay display;
+    SDL_DisplayData *displaydata;
+    SDL_DisplayMode mode;
+
+#ifdef DEBUG_MODES
+    printf("Display: %s\n", WIN_StringToUTF8(DeviceName));
+#endif
+    if (!WIN_GetDisplayMode(DeviceName, ENUM_CURRENT_SETTINGS, &mode)) {
+        return;
+    }
+
+    displaydata = (SDL_DisplayData *) SDL_malloc(sizeof(*displaydata));
+    if (!displaydata) {
+        return;
+    }
+    SDL_memcpy(displaydata->DeviceName, DeviceName,
+               sizeof(displaydata->DeviceName));
+
+    SDL_zero(display);
+    display.desktop_mode = mode;
+    display.current_mode = mode;
+    display.driverdata = displaydata;
+    SDL_AddVideoDisplay(&display);
+}
+
 void
 WIN_InitModes(_THIS)
 {
@@ -132,36 +160,16 @@ WIN_InitModes(_THIS)
         printf("Device: %s\n", WIN_StringToUTF8(DeviceName));
 #endif
         for (j = 0;; ++j) {
-            SDL_VideoDisplay display;
-            SDL_DisplayData *displaydata;
-            SDL_DisplayMode mode;
-
             if (!EnumDisplayDevices(DeviceName, j, &device, 0)) {
                 break;
             }
             if (!(device.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP)) {
                 continue;
             }
-#ifdef DEBUG_MODES
-            printf("Monitor: %s\n", WIN_StringToUTF8(device.DeviceName));
-#endif
-            if (!WIN_GetDisplayMode(DeviceName, ENUM_CURRENT_SETTINGS, &mode)) {
-                break;
-            }
-
-            displaydata =
-                (SDL_DisplayData *) SDL_malloc(sizeof(*displaydata));
-            if (!displaydata) {
-                continue;
-            }
-            SDL_memcpy(displaydata->DeviceName, DeviceName,
-                       sizeof(DeviceName));
-
-            SDL_zero(display);
-            display.desktop_mode = mode;
-            display.current_mode = mode;
-            display.driverdata = displaydata;
-            SDL_AddVideoDisplay(&display);
+            WIN_AddDisplay(device.DeviceName);
+        }
+        if (j == 0) {
+            WIN_AddDisplay(DeviceName);
         }
     }
 }
