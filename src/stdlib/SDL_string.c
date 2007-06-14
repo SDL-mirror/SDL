@@ -298,8 +298,8 @@ SDL_revcpy(void *dst, const void *src, size_t len)
 {
     char *srcp = (char *) src;
     char *dstp = (char *) dst;
-    srcp += len-1;
-    dstp += len-1;
+    srcp += len - 1;
+    dstp += len - 1;
     while (len--) {
         *dstp-- = *srcp--;
     }
@@ -872,7 +872,8 @@ SDL_sscanf(const char *text, const char *fmt, ...)
                             ++index;
                         }
                         if (text[index] == '0') {
-                            if (SDL_tolower((unsigned char) text[index + 1]) == 'x') {
+                            if (SDL_tolower((unsigned char) text[index + 1])
+                                == 'x') {
                                 radix = 16;
                             } else {
                                 radix = 8;

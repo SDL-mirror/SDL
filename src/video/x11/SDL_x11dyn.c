@@ -167,10 +167,12 @@ SDL_X11_LoadSymbols(void)
         X11_GetSym("XCreateIC", &SDL_X11_HAVE_UTF8, (void **) &pXCreateIC);
 #endif
 
-        if (SDL_X11_HAVE_BASEXLIB) {  /* all required symbols loaded. */
+        if (SDL_X11_HAVE_BASEXLIB) {
+            /* all required symbols loaded. */
             SDL_ClearError();
         } else {
-            SDL_X11_UnloadSymbols();  /* in case something got loaded... */
+            /* in case something got loaded... */
+            SDL_X11_UnloadSymbols();
             rc = 0;
         }
     }

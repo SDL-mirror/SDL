@@ -181,7 +181,8 @@ static void FB_SavePalette(_THIS, struct fb_fix_screeninfo *finfo,
                            struct fb_var_screeninfo *vinfo);
 static void FB_RestorePalette(_THIS);
 
-static int SDL_getpagesize(void)
+static int
+SDL_getpagesize(void)
 {
 #ifdef HAVE_GETPAGESIZE
     return getpagesize();
@@ -189,7 +190,8 @@ static int SDL_getpagesize(void)
     return PAGE_SIZE;
 #else
 #error Can not determine system page size.
-    return 4096;  /* this is what it USED to be in Linux... */
+    /* this is what it USED to be in Linux... */
+    return 4096;
 #endif
 }
 

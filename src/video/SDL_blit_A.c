@@ -387,9 +387,11 @@ BlitRGBtoRGBPixelAlphaMMX(SDL_BlitInfo * info)
     packsswb_r2r(mm6, mm3);     /* 0000FFFF -> mm3 */
     pxor_r2r(mm0, mm3);         /* 0000F000 -> mm3 (~channel mask) */
     /* get alpha channel shift */
+    /* *INDENT-OFF* */
     __asm__ __volatile__ (
         "movd %0, %%mm5"
         : : "rm" ((Uint32) sf->Ashift) ); /* Ashift -> mm5 */
+    /* *INDENT-ON* */
 
     while (height--) {
 	    /* *INDENT-OFF* */

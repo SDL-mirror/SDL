@@ -650,7 +650,7 @@ GEM_SetVideoMode(_THIS, SDL_Surface * current,
         /*--- Verify if asked mode can be used ---*/
     if (VDI_bpp != bpp) {
         SDL_SetError("%d bpp mode not supported", bpp);
-        return(NULL);
+        return (NULL);
     }
 
     if (flags & SDL_FULLSCREEN) {
@@ -774,10 +774,10 @@ GEM_SetVideoMode(_THIS, SDL_Surface * current,
             /* Center window */
             x2 = (GEM_desk_w - w2) >> 1;
             y2 = (GEM_desk_h - h2) >> 1;
-            if (x2<0) {
+            if (x2 < 0) {
                 x2 = 0;
             }
-            if (y2<0) {
+            if (y2 < 0) {
                 y2 = 0;
             }
             x2 += GEM_desk_x;
@@ -811,9 +811,11 @@ GEM_SetVideoMode(_THIS, SDL_Surface * current,
             wind_open(GEM_handle, x2, y2, w2, h2);
         } else {
             /* Resize window to fit asked video mode */
-            wind_get (GEM_handle, WF_WORKXYWH, &x2,&y2,&w2,&h2);
-            if (wind_calc(WC_BORDER, GEM_win_type, x2,y2,width,height, &x2,&y2,&w2,&h2)) {
-                wind_set (GEM_handle, WF_CURRXYWH, x2,y2,w2,h2);
+            wind_get(GEM_handle, WF_WORKXYWH, &x2, &y2, &w2, &h2);
+            if (wind_calc
+                (WC_BORDER, GEM_win_type, x2, y2, width, height, &x2, &y2,
+                 &w2, &h2)) {
+                wind_set(GEM_handle, WF_CURRXYWH, x2, y2, w2, h2);
             }
         }
 

@@ -80,8 +80,8 @@ SDL_GetTicks(void)
     if (read_hz200_from_vbl) {
         now = SDL_Atari_hz200;
     } else {
-        void *old_stack = (void *)Super(0);
-        now = *((volatile long *)_hz_200);
+        void *old_stack = (void *) Super(0);
+        now = *((volatile long *) _hz_200);
         Super(old_stack);
     }
 

@@ -28,13 +28,14 @@
 #include "SDL_xbiosmodes.h"
 
 
-typedef struct {
-    int width,height,bpp;
+typedef struct
+{
+    int width, height, bpp;
     int modecode;
     int doubleline;
 } xbios_mode_t;
 
-static xbios_mode_t falcon_rgb_modes[]={
+static xbios_mode_t falcon_rgb_modes[] = {
     {768, 480, 16, BPS16 | COL80 | OVERSCAN | VERTFLAG},
     {768, 240, 16, BPS16 | COL80 | OVERSCAN},
     {640, 400, 16, BPS16 | COL80 | VERTFLAG},
@@ -52,19 +53,19 @@ static xbios_mode_t falcon_rgb_modes[]={
     {320, 400, 8, BPS8 | VERTFLAG},
     {320, 200, 8, BPS8}
 };
- 
-static xbios_mode_t falcon_vga_modes[]={
-    {320, 480, 16, BPS16 },
+
+static xbios_mode_t falcon_vga_modes[] = {
+    {320, 480, 16, BPS16},
     {320, 240, 16, BPS16 | VERTFLAG},
     {640, 480, 8, BPS8 | COL80},
     {640, 240, 8, BPS8 | COL80 | VERTFLAG},
-    {320, 480, 8, BPS8 },
+    {320, 480, 8, BPS8},
     {320, 240, 8, BPS8 | VERTFLAG}
 };
 
 static void
 SDL_XBIOS_AddMode(_THIS, int width, int height, int bpp, Uint16 modecode,
-    SDL_bool doubleline)
+                  SDL_bool doubleline)
 {
     SDL_VideoDisplay display;
     SDL_DisplayData *displaydata;
@@ -74,9 +75,9 @@ SDL_XBIOS_AddMode(_THIS, int width, int height, int bpp, Uint16 modecode,
 
     Rmask = Gmask = Bmask = Amask = 0;
     if (bpp == 16) {
-        Rmask = 31<<11;
-	Gmask = 63<<5;
-	Bmask = 31;
+        Rmask = 31 << 11;
+        Gmask = 63 << 5;
+        Bmask = 31;
     }
     /* Memorize for c2p4 operation */
     orig_bpp = bpp;
@@ -92,7 +93,7 @@ SDL_XBIOS_AddMode(_THIS, int width, int height, int bpp, Uint16 modecode,
 
     displaydata = (SDL_DisplayData *) SDL_malloc(sizeof(*displaydata));
     if (!displaydata) {
-       return;
+        return;
     }
     displaydata->modecode = modecode;
     displaydata->doubleline = doubleline;
@@ -140,7 +141,7 @@ SDL_XBIOS_ModeRestore(_THIS)
         break;
     case VDO_TT:
         Setscreen(-1, data->old_vbase, -1);
-	EsetShift(data->old_modecode);
+        EsetShift(data->old_modecode);
         break;
     case VDO_F30:
         Setscreen(-1, data->old_vbase, -1);
@@ -204,8 +205,8 @@ SDL_XBIOS_PaletteSave(_THIS)
     case VDO_F30:
         data->old_numcol = 1 << (1 << (data->old_modecode & NUMCOLS));
         if (data->old_numcol > 256) {
-	    data->old_numcol = 0;
-	} else {
+            data->old_numcol = 0;
+        } else {
             VgetRGB(0, data->old_numcol, data->old_palette);
         }
         break;
@@ -261,7 +262,7 @@ SDL_XBIOS_InitModes(_THIS)
         break;
     case VDO_F30:
         {
-	    Uint16 modecodemask = data->old_modecode & (VGA | PAL);
+            Uint16 modecodemask = data->old_modecode & (VGA | PAL);
             int i;
 
             switch (VgetMonitor()) {
@@ -270,19 +271,27 @@ SDL_XBIOS_InitModes(_THIS)
                 break;
             case MONITOR_RGB:
             case MONITOR_TV:
-               for (i=0; i<sizeof(falcon_rgb_modes)/sizeof(xbios_mode_t); i++) {
-                   SDL_XBIOS_AddMode(_this, falcon_rgb_modes[i].width,
-		       falcon_rgb_modes[i].height, falcon_rgb_modes[i].bpp,
-		       falcon_rgb_modes[i].modecode & modecodemask, SDL_FALSE);
-	       }
-               break;
+                for (i = 0;
+                     i < sizeof(falcon_rgb_modes) / sizeof(xbios_mode_t);
+                     i++) {
+                    SDL_XBIOS_AddMode(_this, falcon_rgb_modes[i].width,
+                                      falcon_rgb_modes[i].height,
+                                      falcon_rgb_modes[i].bpp,
+                                      falcon_rgb_modes[i].
+                                      modecode & modecodemask, SDL_FALSE);
+                }
+                break;
             case MONITOR_VGA:
-               for (i=0; i<sizeof(falcon_vga_modes)/sizeof(xbios_mode_t); i++) {
-                   SDL_XBIOS_AddMode(_this, falcon_vga_modes[i].width,
-		       falcon_vga_modes[i].height, falcon_vga_modes[i].bpp,
-		       falcon_vga_modes[i].modecode & modecodemask, SDL_FALSE);
-	       }
-               break;
+                for (i = 0;
+                     i < sizeof(falcon_vga_modes) / sizeof(xbios_mode_t);
+                     i++) {
+                    SDL_XBIOS_AddMode(_this, falcon_vga_modes[i].width,
+                                      falcon_vga_modes[i].height,
+                                      falcon_vga_modes[i].bpp,
+                                      falcon_vga_modes[i].
+                                      modecode & modecodemask, SDL_FALSE);
+                }
+                break;
             }
         }
         break;

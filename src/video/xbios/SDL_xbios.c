@@ -97,10 +97,10 @@ XBIOS_Available(void)
         if (VgetMonitor() == MONITOR_MONO)
             return 0;
         /*if (Getcookie(C_SCPN, &cookie_scpn) == C_FOUND) {
-            if (!SDL_XBIOS_SB3Usable((scpn_cookie_t *) cookie_scpn)) {
-                return 0;
-            }
-        }*/
+           if (!SDL_XBIOS_SB3Usable((scpn_cookie_t *) cookie_scpn)) {
+           return 0;
+           }
+           } */
         break;
     default:
         return 0;

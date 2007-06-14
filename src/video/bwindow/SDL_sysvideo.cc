@@ -372,7 +372,7 @@ extern "C"
         modes = SDL_modelist[((bpp + 7) / 8) - 1];
 
         bool exactmatch = false;
-        for ( uint32 x = 0; modes[x]; x++ ) {
+        for (uint32 x = 0; modes[x]; x++) {
             if (modes[x]->w == width && modes[x]->h == height) {
                 exactmatch = true;
                 i = x;
@@ -385,7 +385,8 @@ extern "C"
                 /* still looking */
             }
             if (!modes[i] || (modes[i]->w < width) || (modes[i]->h < height)) {
-                --i;                /* We went too far */
+                /* We went too far */
+                --i;
             }
         }
         width = modes[i]->w;

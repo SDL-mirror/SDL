@@ -551,8 +551,8 @@ SDL_MapRGB(const SDL_PixelFormat * const format, const Uint8 r, const Uint8 g,
 
 /* Find the pixel value corresponding to an RGBA quadruple */
 Uint32
-SDL_MapRGBA(const SDL_PixelFormat * const format, const Uint8 r, const Uint8 g,
-            const Uint8 b, const Uint8 a)
+SDL_MapRGBA(const SDL_PixelFormat * const format, const Uint8 r,
+            const Uint8 g, const Uint8 b, const Uint8 a)
 {
     if (format->palette == NULL) {
         return (r >> format->Rloss) << format->Rshift

@@ -49,7 +49,8 @@ SDL_LoadFunction(void *handle, const char *name)
 {
     void *sym = NULL;
     image_id library_id = (image_id) handle;
-    status_t rc = get_image_symbol(library_id, name, B_SYMBOL_TYPE_TEXT, &sym);
+    status_t rc =
+        get_image_symbol(library_id, name, B_SYMBOL_TYPE_TEXT, &sym);
     if (rc != B_NO_ERROR) {
         SDL_SetError(strerror(rc));
     }
@@ -69,4 +70,3 @@ SDL_UnloadObject(void *handle)
 #endif /* SDL_LOADSO_BEOS */
 
 /* vi: set ts=4 sw=4 expandtab: */
-
