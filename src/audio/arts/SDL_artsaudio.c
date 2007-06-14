@@ -57,7 +57,7 @@ static int (*SDL_NAME(arts_stream_get)) (arts_stream_t s,
 static int (*SDL_NAME(arts_write)) (arts_stream_t s, const void *buffer,
                                     int count);
 static void (*SDL_NAME(arts_close_stream)) (arts_stream_t s);
-static void (*SDL_NAME(arts_close_stream)) (arts_stream_t s);
+static int (*SDL_NAME(arts_suspended))(void);
 static const char *(*SDL_NAME(arts_error_text)) (int errorcode);
 
 #define SDL_ARTS_SYM(x) { #x, (void **) (char *) &SDL_NAME(x) }
@@ -72,7 +72,10 @@ SDL_ARTS_SYM(arts_init),
         SDL_ARTS_SYM(arts_stream_set),
         SDL_ARTS_SYM(arts_stream_get),
         SDL_ARTS_SYM(arts_write),
-        SDL_ARTS_SYM(arts_close_stream), SDL_ARTS_SYM(arts_error_text),};
+        SDL_ARTS_SYM(arts_close_stream),
+        SDL_ARTS_SYM(arts_suspended),
+        SDL_ARTS_SYM(arts_error_text),
+};
 #undef SDL_ARTS_SYM
 
 static void
@@ -259,10 +262,20 @@ ARTS_OpenDevice(_THIS, const char *devname, int iscapture)
                      SDL_NAME(arts_error_text) (rc));
         return 0;
     }
+
+    if ( ! SDL_NAME(arts_suspended)() ) {
+        ARTS_CloseDevice(this);
+        SDL_SetError("ARTS can not open audio device");
+        return 0;
+    }
+
     this->hidden->stream = SDL_NAME(arts_play_stream) (this->spec.freq,
                                                        bits,
                                                        this->spec.channels,
                                                        "SDL");
+
+    /* Play nothing so we have at least one write (server bug workaround). */
+    SDL_NAME(arts_write) (this->hidden->stream, "", 0);
 
     /* Calculate the final parameters for this audio specification */
     SDL_CalculateAudioSpec(&this->spec);
@@ -326,10 +339,13 @@ ARTS_Init(SDL_AudioDriverImpl * impl)
         }
 
         /* Play a stream so aRts doesn't crash */
-        arts_stream_t stream;
-        stream = SDL_NAME(arts_play_stream) (44100, 16, 2, "SDL");
-        SDL_NAME(arts_write) (stream, "", 0);
-        SDL_NAME(arts_close_stream) (stream);
+        if ( SDL_NAME(arts_suspended)() ) {
+            arts_stream_t stream;
+            stream = SDL_NAME(arts_play_stream) (44100, 16, 2, "SDL");
+            SDL_NAME(arts_write) (stream, "", 0);
+            SDL_NAME(arts_close_stream) (stream);
+        }
+
         SDL_NAME(arts_free) ();
     }
 
