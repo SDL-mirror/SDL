@@ -60,6 +60,8 @@ static int (*SDL_NAME(arts_stream_set))(arts_stream_t s, arts_parameter_t param,
 static int (*SDL_NAME(arts_stream_get))(arts_stream_t s, arts_parameter_t param);
 static int (*SDL_NAME(arts_write))(arts_stream_t s, const void *buffer, int count);
 static void (*SDL_NAME(arts_close_stream))(arts_stream_t s);
+static int (*SDL_NAME(arts_suspended))(void);
+static const char *(*SDL_NAME(arts_error_text))(int errorcode);
 
 static struct {
 	const char *name;
@@ -72,6 +74,8 @@ static struct {
 	{ "arts_stream_get",	(void **)&SDL_NAME(arts_stream_get)	},
 	{ "arts_write",		(void **)&SDL_NAME(arts_write)		},
 	{ "arts_close_stream",	(void **)&SDL_NAME(arts_close_stream)	},
+	{ "arts_suspended",	(void **)&SDL_NAME(arts_suspended)	},
+	{ "arts_error_text",	(void **)&SDL_NAME(arts_error_text)	},
 };
 
 static void UnloadARTSLibrary()
@@ -127,14 +131,14 @@ static int Audio_Available(void)
 		return available;
 	}
 	if ( SDL_NAME(arts_init)() == 0 ) {
-#define ARTS_CRASH_HACK	/* Play a stream so aRts doesn't crash */
-#ifdef ARTS_CRASH_HACK
-		arts_stream_t stream2;
-		stream2=SDL_NAME(arts_play_stream)(44100, 16, 2, "SDL");
-		SDL_NAME(arts_write)(stream2, "", 0);
-		SDL_NAME(arts_close_stream)(stream2);
-#endif
-		available = 1;
+		if ( SDL_NAME(arts_suspended)() ) {
+			/* Play a stream so aRts doesn't crash */
+			arts_stream_t stream2;
+			stream2=SDL_NAME(arts_play_stream)(44100, 16, 2, "SDL");
+			SDL_NAME(arts_write)(stream2, "", 0);
+			SDL_NAME(arts_close_stream)(stream2);
+			available = 1;
+		}
 		SDL_NAME(arts_free)();
 	}
 	UnloadARTSLibrary();
@@ -255,6 +259,7 @@ static int ARTS_OpenAudio(_THIS, SDL_AudioSpec *spec)
 {
 	int bits, frag_spec;
 	Uint16 test_format, format;
+	int error_code;
 
 	/* Reset the timer synchronization flag */
 	frame_ticks = 0.0;
@@ -292,8 +297,13 @@ static int ARTS_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	}
 	spec->format = test_format;
 
-	if ( SDL_NAME(arts_init)() != 0 ) {
-		SDL_SetError("Unable to initialize ARTS");
+	error_code = SDL_NAME(arts_init)();
+	if ( error_code != 0 ) {
+		SDL_SetError("Unable to initialize ARTS: %s", SDL_NAME(arts_error_text)(error_code));
+		return(-1);
+	}
+	if ( ! SDL_NAME(arts_suspended)() ) {
+		SDL_SetError("ARTS can not open audio device");
 		return(-1);
 	}
 	stream = SDL_NAME(arts_play_stream)(spec->freq, bits, spec->channels, "SDL");
