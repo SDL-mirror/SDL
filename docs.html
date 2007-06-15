@@ -14,6 +14,104 @@ The latest stable release may be found on the
 
 <H2> <A HREF="docs/index.html">API Documentation</A> </H2>
 
+<H2> SDL 1.2.12 Release Notes </H2>
+<P>
+SDL 1.2.12 is a minor bug fix release.
+</P>
+
+<H3> General Notes </H3>
+
+<BLOCKQUOTE>
+<P>
+	Added support for the PulseAudio sound server: http://www.pulseaudio.org/
+</P>
+<P>
+	Added SDL_VIDEO_ALLOW_SCREENSAVER to override SDL's disabling of the screensaver on Mac OS X and X11.
+</P>
+<P>
+	Fixed buffer overrun crash when resampling audio rates.
+</P>
+<P>
+	Fixed audio bug where converting to mono was doubling the volume.
+</P>
+<P>
+	Fixed off-by-one error in the C implementation of SDL_revcpy()
+</P>
+<P>
+	Support for AmigaOS has been removed from the main SDL code.
+</P>
+</BLOCKQUOTE>
+
+<H3> Unix Notes </H3>
+
+<BLOCKQUOTE>
+<P>
+	The GFX_Display has been added to the X11 window information in SDL_syswm.h.
+</P>
+<P>
+	Fixed PAGE_SIZE compile error in the fbcon video driver on newer Linux kernels.
+</P>
+<P>
+	Fixed hang or crash at startup if aRts can't access the hardware.
+</P>
+<P>
+	Fixed relative mouse mode when the cursor starts outside the X11 window.
+</P>
+<P>
+	Fixed accidental free of stack memory in X11 mouse acceleration code.
+</P>
+<P>
+	Closed minor memory leak in XME code.
+</P>
+</BLOCKQUOTE>
+
+<H3> Windows Notes </H3>
+
+<BLOCKQUOTE>
+<P>
+	Added support for UTF-8 window titles on Windows.
+</P>
+<P>
+	Fixed joystick detection on Windows.
+</P>
+<P>
+	Fixed HBITMAP leak in GAPI driver.
+</P>
+</BLOCKQUOTE>
+
+<H3> Mac OS X Notes </H3>
+
+<BLOCKQUOTE>
+<P>
+	Added support for multi-axis controllers like 3Dconnxion's SpaceNavigator on Mac OS X.
+</P>
+<P>
+	Fixed YUV overlay crash inside Quicktime on Intel Mac OS X.
+</P>
+<P>
+	Fixed blitting alignment in Altivec alpha blit functions.
+</P>
+<P>
+	Keys F13, F14, and F15 are now usable on Apple keyboards under Mac OS X.
+</P>
+<P>
+	Fixed joystick calibration code on Mac OS X.
+</P>
+<P>
+	Fixed mouse jitter when multiple motion events are queued up in Mac OS X.
+</P>
+</BLOCKQUOTE>
+
+<H3> BeOS Notes </H3>
+
+<BLOCKQUOTE>
+<P>
+	Implemented mouse grabbing and mouse relative mode on BeOS.
+</P>
+</BLOCKQUOTE>
+
+<IMG SRC="docs/images/rainbow.gif" ALT="[separator]" WIDTH="100%">
+
 <H2> SDL 1.2.11 Release Notes </H2>
 <P>
 SDL 1.2.11 is a minor bug fix release.

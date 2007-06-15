@@ -3,6 +3,10 @@ This is a list of API changes in SDL's version history.
 
 Version 1.0:
 
+1.2.12:
+	Added SDL_VIDEO_ALLOW_SCREENSAVER to override SDL's disabling
+	of the screensaver on Mac OS X and X11.
+
 1.2.10:
 	If SDL_OpenAudio() is passed zero for the desired format
 	fields, the following environment variables will be used
