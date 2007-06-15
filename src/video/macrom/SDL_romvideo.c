@@ -158,6 +158,10 @@ static SDL_VideoDevice *ROM_CreateDevice(int devindex)
 	device->UnlockHWSurface = ROM_UnlockHWSurface;
 	device->FlipHWSurface = NULL;
 	device->FreeHWSurface = ROM_FreeHWSurface;
+#if SDL_MACCLASSIC_GAMMA_SUPPORT
+	device->SetGammaRamp = Mac_SetGammaRamp;
+	device->GetGammaRamp = Mac_GetGammaRamp;
+#endif
 #if SDL_VIDEO_OPENGL
 	device->GL_MakeCurrent = Mac_GL_MakeCurrent;
 	device->GL_SwapBuffers = Mac_GL_SwapBuffers;
@@ -724,6 +728,10 @@ void ROM_VideoQuit(_THIS)
 		SDL_CPal = nil;
 	}
 	RestoreDeviceClut(GetMainDevice());
+
+#if SDL_MACCLASSIC_GAMMA_SUPPORT
+	Mac_QuitGamma(this);
+#endif
 
 	/* Free list of video modes */
 	if ( SDL_modelist != NULL ) {

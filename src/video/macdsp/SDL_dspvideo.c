@@ -297,6 +297,10 @@ static SDL_VideoDevice *DSp_CreateDevice(int devindex)
 	device->UnlockHWSurface = DSp_UnlockHWSurface;
 	device->FlipHWSurface   = DSp_FlipHWSurface;
 	device->FreeHWSurface   = DSp_FreeHWSurface;
+#if SDL_MACCLASSIC_GAMMA_SUPPORT
+	device->SetGammaRamp    = Mac_SetGammaRamp;
+	device->GetGammaRamp    = Mac_GetGammaRamp;
+#endif
 #if SDL_VIDEO_OPENGL
 	device->GL_MakeCurrent  = Mac_GL_MakeCurrent;
 	device->GL_SwapBuffers  = DSp_GL_SwapBuffers;
@@ -1380,6 +1384,10 @@ void DSp_VideoQuit(_THIS)
 
 	/* Free Palette and restore original */
 	DSp_DestroyPalette (this);
+
+#if SDL_MACCLASSIC_GAMMA_SUPPORT
+	Mac_QuitGamma(this);
+#endif
 
 	/* Free list of video modes */
 	if ( SDL_modelist != NULL ) {
