@@ -123,7 +123,9 @@
 #define SDL_INLINE_OKAY
 #else
 #if !defined(__MRC__) && !defined(_SGI_SOURCE)
+#ifndef __inline__
 #define __inline__ inline
+#endif
 #define SDL_INLINE_OKAY
 #endif /* Not a funky compiler */
 #endif /* Visual C++ */
