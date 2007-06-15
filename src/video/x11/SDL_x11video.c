@@ -408,7 +408,7 @@ static void create_aux_windows(_THIS)
 	}
     }
 
-    /* Setup the communication with the IM server */
+	/* Setup the communication with the IM server */
 	SDL_IM = NULL;
 	SDL_IC = NULL;
 
@@ -483,6 +483,8 @@ static int X11_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	 */
 	GFX_Display = XOpenDisplay(display);
 	if ( GFX_Display == NULL ) {
+		XCloseDisplay(SDL_Display);
+		SDL_Display = NULL;
 		SDL_SetError("Couldn't open X11 display");
 		return(-1);
 	}
@@ -508,8 +510,13 @@ static int X11_VideoInit(_THIS, SDL_PixelFormat *vformat)
 #endif /* NO_SHARED_MEMORY */
 
 	/* Get the available video modes */
-	if(X11_GetVideoModes(this) < 0)
+	if(X11_GetVideoModes(this) < 0) {
+		XCloseDisplay(GFX_Display);
+		GFX_Display = NULL;
+		XCloseDisplay(SDL_Display);
+		SDL_Display = NULL;
 	    return -1;
+	}
 
 	/* Determine the current screen size */
 	this->info.current_w = DisplayWidth(SDL_Display, SDL_Screen);
