@@ -39,16 +39,6 @@ struct SDL_Keyboard
     Uint16 modstate;
     Uint8 keystate[SDLK_LAST];
 
-    struct
-    {
-        int firsttime;          /* if we check against the delay or repeat value */
-        int delay;              /* the delay before we start repeating */
-        int interval;           /* the delay between key repeat events */
-        Uint32 timestamp;       /* the time the first keydown event occurred */
-
-        SDL_Event evt;          /* the event we are supposed to repeat */
-    } repeat;
-
     void *driverdata;
 };
 
@@ -84,9 +74,6 @@ extern int SDL_SendKeyboardKey(int index, Uint8 state, Uint8 scancode,
 
 /* Send keyboard text input for a keyboard at an index */
 extern int SDL_SendKeyboardText(int index, const char *text);
-
-/* Used by the event loop to queue pending keyboard repeat events */
-extern void SDL_CheckKeyRepeat(void);
 
 /* Shutdown the keyboard subsystem */
 extern void SDL_KeyboardQuit(void);

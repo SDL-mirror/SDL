@@ -93,32 +93,6 @@ extern DECLSPEC int SDLCALL SDL_SelectKeyboard(int index);
 extern DECLSPEC int SDLCALL SDL_EnableUNICODE(int enable);
 
 /**
- * \fn int SDL_EnableKeyRepeat(int delay, int interval)
- * 
- * \brief Enable keyboard repeat for the selected keyboard.
- *
- * \param delay The initial delay in milliseconds between the time when a
- *              key is pressed and keyboard repeat begins.  Setting a delay
- *              of 0 will disable keyboard repeat.
- * \param interval The time in milliseconds between keyboard repeat events.
- *
- * \return 0 on success, or -1 if there was an error.
- *
- * \note Keyboard repeat defaults to off.
- */
-#define SDL_DEFAULT_REPEAT_DELAY	500
-#define SDL_DEFAULT_REPEAT_INTERVAL	30
- /**/
-    extern DECLSPEC int SDLCALL SDL_EnableKeyRepeat(int delay, int interval);
-
-/**
- * \fn void SDL_GetKeyRepeat(int *delay, int *interval)
- *
- * \brief Get the current keyboard repeat setting for the selected keyboard.
- */
-extern DECLSPEC void SDLCALL SDL_GetKeyRepeat(int *delay, int *interval);
-
-/**
  * \fn Uint8 *SDL_GetKeyState(int *numkeys)
  *
  * \brief Get a snapshot of the current state of the selected keyboard.

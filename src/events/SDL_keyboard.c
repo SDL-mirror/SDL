@@ -349,7 +349,6 @@ SDL_ResetKeyboard(int index)
             SDL_SendKeyboardKey(index, SDL_RELEASED, 0, key);
         }
     }
-    keyboard->repeat.timestamp = 0;
 }
 
 void
@@ -515,7 +514,7 @@ int
 SDL_SendKeyboardKey(int index, Uint8 state, Uint8 scancode, SDLKey key)
 {
     SDL_Keyboard *keyboard = SDL_GetKeyboard(index);
-    int posted, repeatable;
+    int posted;
     Uint16 modstate;
     Uint8 type;
 
@@ -526,7 +525,6 @@ SDL_SendKeyboardKey(int index, Uint8 state, Uint8 scancode, SDLKey key)
     printf("The '%s' key has been %s\n", SDL_GetKeyName(key),
            state == SDL_PRESSED ? "pressed" : "released");
 #endif
-    repeatable = 0;
     if (state == SDL_PRESSED) {
         modstate = keyboard->modstate;
         switch (key) {
@@ -566,7 +564,6 @@ SDL_SendKeyboardKey(int index, Uint8 state, Uint8 scancode, SDLKey key)
             keyboard->modstate |= KMOD_MODE;
             break;
         default:
-            repeatable = 1;
             break;
         }
     } else {
@@ -616,13 +613,6 @@ SDL_SendKeyboardKey(int index, Uint8 state, Uint8 scancode, SDLKey key)
         break;
     case SDL_RELEASED:
         type = SDL_KEYUP;
-        /*
-         * jk 991215 - Added
-         */
-        if (keyboard->repeat.timestamp &&
-            keyboard->repeat.evt.key.keysym.sym == key) {
-            keyboard->repeat.timestamp = 0;
-        }
         break;
     default:
         /* Invalid state -- bail */
@@ -654,19 +644,6 @@ SDL_SendKeyboardKey(int index, Uint8 state, Uint8 scancode, SDLKey key)
         event.key.keysym.mod = modstate;
         event.key.keysym.unicode = 0;
         event.key.windowID = keyboard->focus;
-        /* FIXME: This doesn't make sense anymore... */
-        /*
-         * jk 991215 - Added
-         */
-        if (repeatable && (keyboard->repeat.delay != 0)) {
-            Uint32 timestamp = SDL_GetTicks();
-            if (!timestamp) {
-                timestamp = 1;
-            }
-            keyboard->repeat.evt = event;
-            keyboard->repeat.firsttime = 1;
-            keyboard->repeat.timestamp = 1;
-        }
         posted = (SDL_PushEvent(&event) > 0);
     }
     return (posted);
@@ -693,86 +670,6 @@ SDL_SendKeyboardText(int index, const char *text)
         posted = (SDL_PushEvent(&event) > 0);
     }
     return (posted);
-}
-
-/*
- * jk 991215 - Added
- */
-void
-SDL_CheckKeyRepeat(void)
-{
-    int i;
-
-    for (i = 0; i < SDL_num_keyboards; ++i) {
-        SDL_Keyboard *keyboard = SDL_keyboards[i];
-
-        if (!keyboard) {
-            continue;
-        }
-
-        if (keyboard->repeat.timestamp) {
-            Uint32 now, interval;
-
-            now = SDL_GetTicks();
-            interval = (now - keyboard->repeat.timestamp);
-            if (keyboard->repeat.firsttime) {
-                if (interval > (Uint32) keyboard->repeat.delay) {
-                    keyboard->repeat.timestamp = now;
-                    keyboard->repeat.firsttime = 0;
-                }
-            } else {
-                if (interval > (Uint32) keyboard->repeat.interval) {
-                    keyboard->repeat.timestamp = now;
-                    SDL_PushEvent(&keyboard->repeat.evt);
-                }
-            }
-        }
-    }
-}
-
-int
-SDL_EnableKeyRepeat(int delay, int interval)
-{
-    SDL_Keyboard *keyboard = SDL_GetKeyboard(SDL_current_keyboard);
-
-    if (!keyboard) {
-        SDL_SetError("No keyboard is currently selected");
-        return -1;
-    }
-
-    if ((delay < 0) || (interval < 0)) {
-        SDL_SetError("keyboard repeat value less than zero");
-        return -1;
-    }
-
-    keyboard->repeat.firsttime = 0;
-    keyboard->repeat.delay = delay;
-    keyboard->repeat.interval = interval;
-    keyboard->repeat.timestamp = 0;
-
-    return 0;
-}
-
-void
-SDL_GetKeyRepeat(int *delay, int *interval)
-{
-    SDL_Keyboard *keyboard = SDL_GetKeyboard(SDL_current_keyboard);
-
-    if (!keyboard) {
-        if (delay) {
-            *delay = 0;
-        }
-        if (interval) {
-            *interval = 0;
-        }
-        return;
-    }
-    if (delay) {
-        *delay = keyboard->repeat.delay;
-    }
-    if (interval) {
-        *interval = keyboard->repeat.interval;
-    }
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

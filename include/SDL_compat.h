@@ -64,6 +64,9 @@ extern "C" {
 #define SDL_BUTTON_WHEELUP	4
 #define SDL_BUTTON_WHEELDOWN	5
 
+#define SDL_DEFAULT_REPEAT_DELAY	500
+#define SDL_DEFAULT_REPEAT_INTERVAL	30
+
 typedef struct SDL_VideoInfo
 {
     Uint32 hw_available:1;
@@ -173,6 +176,8 @@ extern DECLSPEC int SDLCALL SDL_DisplayYUVOverlay(SDL_Overlay * overlay,
                                                   SDL_Rect * dstrect);
 extern DECLSPEC void SDLCALL SDL_FreeYUVOverlay(SDL_Overlay * overlay);
 extern DECLSPEC void SDLCALL SDL_GL_SwapBuffers(void);
+extern DECLSPEC int SDLCALL SDL_EnableKeyRepeat(int delay, int interval);
+extern DECLSPEC void SDLCALL SDL_GetKeyRepeat(int *delay, int *interval);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

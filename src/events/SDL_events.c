@@ -111,10 +111,6 @@ SDL_GobbleEvents(void *unused)
         if (_this) {
             _this->PumpEvents(_this);
         }
-
-        /* Queue pending key-repeat events */
-        SDL_CheckKeyRepeat();
-
 #if !SDL_JOYSTICK_DISABLED
         /* Check for joystick state change */
         if (SDL_numjoysticks && (SDL_eventstate & SDL_JOYEVENTMASK)) {
@@ -386,10 +382,6 @@ SDL_PumpEvents(void)
         if (_this) {
             _this->PumpEvents(_this);
         }
-
-        /* Queue pending key-repeat events */
-        SDL_CheckKeyRepeat();
-
 #if !SDL_JOYSTICK_DISABLED
         /* Check for joystick state change */
         if (SDL_numjoysticks && (SDL_eventstate & SDL_JOYEVENTMASK)) {

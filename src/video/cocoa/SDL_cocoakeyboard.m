@@ -532,14 +532,15 @@ Cocoa_HandleKeyEvent(_THIS, NSEvent *event)
 
     switch ([event type]) {
     case NSKeyDown:
-        if ([event isARepeat]) {
-            break;
+        if (![event isARepeat]) {
+            SDL_SendKeyboardKey(data->keyboard, SDL_PRESSED, (Uint8)scancode,
+                                data->keymap[scancode]);
         }
-        SDL_SendKeyboardKey(data->keyboard, SDL_PRESSED, (Uint8)scancode,
-                            data->keymap[scancode]);
-        text = [[event characters] UTF8String];
-        if(text && *text) {
-            SDL_SendKeyboardText(data->keyboard, text);
+        if (SDL_EventState(SDL_TEXTINPUT, SDL_QUERY)) {
+            text = [[event characters] UTF8String];
+            if(text && *text) {
+                SDL_SendKeyboardText(data->keyboard, text);
+            }
         }
         break;
     case NSKeyUp:

@@ -240,6 +240,12 @@ SDL_CompatEventFilter(void *userdata, SDL_Event * event)
             }
             break;
         }
+    case SDL_TEXTINPUT:
+        {
+            /* FIXME: Generate an old style key repeat event if needed */
+            printf("TEXTINPUT: '%s'\n", event->text.text);
+            break;
+        }
     case SDL_MOUSEWHEEL:
         {
             Uint8 button;
@@ -1445,6 +1451,24 @@ void
 SDL_GL_SwapBuffers(void)
 {
     SDL_GL_SwapWindow(SDL_VideoWindow);
+}
+
+
+int
+SDL_EnableKeyRepeat(int delay, int interval)
+{
+    return 0;
+}
+
+void
+SDL_GetKeyRepeat(int *delay, int *interval)
+{
+    if (delay) {
+        *delay = SDL_DEFAULT_REPEAT_DELAY;
+    }
+    if (interval) {
+        *interval = SDL_DEFAULT_REPEAT_INTERVAL;
+    }
 }
 
 /* vi: set ts=4 sw=4 expandtab: */
