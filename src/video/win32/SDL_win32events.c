@@ -36,6 +36,16 @@
 #define REPEATED_KEYMASK	(1<<30)
 #define EXTENDED_KEYMASK	(1<<24)
 
+/* Make sure XBUTTON stuff is defined that isn't in older Platform SDKs... */
+#ifndef WM_XBUTTONDOWN
+#define WM_XBUTTONDOWN 0x020B
+#endif
+#ifndef WM_XBUTTONUP
+#define WM_XBUTTONUP 0x020C
+#endif
+#ifndef GET_XBUTTON_WPARAM
+#define GET_XBUTTON_WPARAM(w) (HIWORD(w))
+#endif
 
 static SDLKey
 TranslateKey(WPARAM vkey)
@@ -534,7 +544,10 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_MBUTTONUP:
     case WM_RBUTTONDOWN:
     case WM_RBUTTONUP:
+    case WM_XBUTTONDOWN:
+    case WM_XBUTTONUP:
         {
+            int xbuttonval = 0;
             int index;
             SDL_Mouse *mouse;
             Uint8 button, state;
@@ -575,6 +588,16 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 button = SDL_BUTTON_RIGHT;
                 state = SDL_RELEASED;
                 break;
+            case WM_XBUTTONDOWN:
+                xbuttonval = GET_XBUTTON_WPARAM(wParam);
+                button = SDL_BUTTON_WHEELDOWN + xbuttonval;
+                state = SDL_PRESSED;
+                break;
+            case WM_XBUTTONUP:
+                xbuttonval = GET_XBUTTON_WPARAM(wParam);
+                button = SDL_BUTTON_WHEELDOWN + xbuttonval;
+                state = SDL_RELEASED;
+                break;
             default:
                 /* Eh? Unknown button? */
                 return (0);
@@ -599,6 +622,20 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 SDL_SendMouseMotion(index, 0, x, y);
             }
             SDL_SendMouseButton(index, state, button);
+
+            /*
+             * MSDN says:
+             *  "Unlike the WM_LBUTTONUP, WM_MBUTTONUP, and WM_RBUTTONUP
+             *   messages, an application should return TRUE from [an
+             *   XBUTTON message] if it processes it. Doing so will allow
+             *   software that simulates this message on Microsoft Windows
+             *   systems earlier than Windows 2000 to determine whether
+             *   the window procedure processed the message or called
+             *   DefWindowProc to process it.
+             */
+            if (xbuttonval > 0) {
+                return(TRUE);
+            }
         }
         return (0);
 
