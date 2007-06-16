@@ -24,6 +24,17 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
+/* Make sure XBUTTON stuff is defined that isn't in older Platform SDKs... */
+#ifndef WM_XBUTTONDOWN
+#define WM_XBUTTONDOWN 0x020B
+#endif
+#ifndef WM_XBUTTONUP
+#define WM_XBUTTONUP 0x020C
+#endif
+#ifndef GET_XBUTTON_WPARAM
+#define GET_XBUTTON_WPARAM(w) (HIWORD(w))
+#endif
+
 #include "SDL_events.h"
 #include "SDL_video.h"
 #include "SDL_syswm.h"
@@ -466,9 +477,12 @@ LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case WM_MBUTTONDOWN:
 		case WM_MBUTTONUP:
 		case WM_RBUTTONDOWN:
-		case WM_RBUTTONUP: {
+		case WM_RBUTTONUP:
+		case WM_XBUTTONDOWN:
+		case WM_XBUTTONUP: {
 			/* Mouse is handled by DirectInput when fullscreen */
 			if ( SDL_VideoSurface && ! DINPUT_FULLSCREEN() ) {
+				WORD xbuttonval = 0;
 				Sint16 x, y;
 				Uint8 button, state;
 
@@ -505,6 +519,16 @@ LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 						button = SDL_BUTTON_RIGHT;
 						state = SDL_RELEASED;
 						break;
+					case WM_XBUTTONDOWN:
+						xbuttonval = GET_XBUTTON_WPARAM(wParam);
+						button = SDL_BUTTON_WHEELDOWN + xbuttonval;
+						state = SDL_PRESSED;
+						break;
+					case WM_XBUTTONUP:
+						xbuttonval = GET_XBUTTON_WPARAM(wParam);
+						button = SDL_BUTTON_WHEELDOWN + xbuttonval;
+						state = SDL_RELEASED;
+						break;
 					default:
 						/* Eh? Unknown button? */
 						return(0);
@@ -535,6 +559,19 @@ LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				}
 				posted = SDL_PrivateMouseButton(
 							state, button, x, y);
+
+				/*
+				 * MSDN says:
+				 *  "Unlike the WM_LBUTTONUP, WM_MBUTTONUP, and WM_RBUTTONUP
+				 *   messages, an application should return TRUE from [an 
+				 *   XBUTTON message] if it processes it. Doing so will allow
+				 *   software that simulates this message on Microsoft Windows
+				 *   systems earlier than Windows 2000 to determine whether
+				 *   the window procedure processed the message or called
+				 *   DefWindowProc to process it.
+				 */
+				if (xbuttonval > 0)
+					return(TRUE);
 			}
 		}
 		return(0);
