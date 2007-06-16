@@ -706,7 +706,7 @@ AC_HELP_STRING([--enable-nasm], [use nasm assembly blitters on x86 [[default=yes
         if test "x$NASM" != x -a "x$NASM" != x'"$NASM"'; then
             AC_DEFINE(SDL_HERMES_BLITTERS)
             SOURCES="$SOURCES $srcdir/src/hermes/*.asm"
-            NASMFLAGS="$NASMFLAGS -i $srcdir/src/hermes/"
+            NASMFLAGS="$NASMFLAGS -I $srcdir/src/hermes/"
 
             dnl See if hidden visibility is supported
             echo "GLOBAL _bar:function hidden" > symbol-visibility
