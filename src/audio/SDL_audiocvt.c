@@ -1177,7 +1177,9 @@ SDL_RateSLOW(SDL_AudioCVT * cvt, SDL_AudioFormat format)
         case 32:
             {
                 /* !!! FIXME: need 32-bit converter here! */
+#ifdef DEBUG_CONVERT
                 fprintf(stderr, "FIXME: need 32-bit converter here!\n");
+#endif
             }
         }
     } else {
@@ -1214,7 +1216,9 @@ SDL_RateSLOW(SDL_AudioCVT * cvt, SDL_AudioFormat format)
         case 32:
             {
                 /* !!! FIXME: need 32-bit converter here! */
+#ifdef DEBUG_CONVERT
                 fprintf(stderr, "FIXME: need 32-bit converter here!\n");
+#endif
             }
         }
     }

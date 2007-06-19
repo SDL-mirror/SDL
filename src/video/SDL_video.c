@@ -939,7 +939,6 @@ void
 SDL_SetWindowTitle(SDL_WindowID windowID, const char *title)
 {
     SDL_Window *window = SDL_GetWindowFromID(windowID);
-    const char *last_title;
 
     if (!window || title == window->title) {
         return;
@@ -1852,7 +1851,6 @@ int
 SDL_GetTextureAlphaMod(SDL_TextureID textureID, Uint8 * alpha)
 {
     SDL_Texture *texture = SDL_GetTextureFromID(textureID);
-    SDL_Renderer *renderer;
 
     if (!texture) {
         return -1;
@@ -1886,7 +1884,6 @@ int
 SDL_GetTextureBlendMode(SDL_TextureID textureID, int *blendMode)
 {
     SDL_Texture *texture = SDL_GetTextureFromID(textureID);
-    SDL_Renderer *renderer;
 
     if (!texture) {
         return -1;
@@ -1920,7 +1917,6 @@ int
 SDL_GetTextureScaleMode(SDL_TextureID textureID, int *scaleMode)
 {
     SDL_Texture *texture = SDL_GetTextureFromID(textureID);
-    SDL_Renderer *renderer;
 
     if (!texture) {
         return -1;

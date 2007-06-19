@@ -347,7 +347,6 @@ SW_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     if (SDL_ISPIXELFORMAT_FOURCC(texture->format)) {
         texture->driverdata = SDL_SW_CreateYUVTexture(texture);
     } else {
-        SDL_Surface *surface;
         int bpp;
         Uint32 Rmask, Gmask, Bmask, Amask;
 

@@ -303,8 +303,8 @@ SDL_MixAudioFormat(Uint8 * dst, const Uint8 * src, SDL_AudioFormat format,
             float src1, src2;
             double dst_sample;
             /* !!! FIXME: are these right? */
-            const double max_audioval = 3.40282347e+38F;
-            const double min_audioval = -3.40282347e+38F;
+            const double max_audioval = 3.402823466e+38F;
+            const double min_audioval = -3.402823466e+38F;
 
             len /= 4;
             while (len--) {
@@ -332,8 +332,8 @@ SDL_MixAudioFormat(Uint8 * dst, const Uint8 * src, SDL_AudioFormat format,
             float src1, src2;
             double dst_sample;
             /* !!! FIXME: are these right? */
-            const double max_audioval = 3.40282347e+38F;
-            const double min_audioval = -3.40282347e+38F;
+            const double max_audioval = 3.402823466e+38F;
+            const double min_audioval = -3.402823466e+38F;
 
             len /= 4;
             while (len--) {

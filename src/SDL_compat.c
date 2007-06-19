@@ -243,7 +243,7 @@ SDL_CompatEventFilter(void *userdata, SDL_Event * event)
     case SDL_TEXTINPUT:
         {
             /* FIXME: Generate an old style key repeat event if needed */
-            printf("TEXTINPUT: '%s'\n", event->text.text);
+            //printf("TEXTINPUT: '%s'\n", event->text.text);
             break;
         }
     case SDL_MOUSEWHEEL:
