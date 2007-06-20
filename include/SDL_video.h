@@ -160,7 +160,7 @@ typedef enum
     SDL_WINDOWEVENT_LEAVE,              /**< The window has lost mouse focus */
     SDL_WINDOWEVENT_FOCUS_GAINED,       /**< The window has gained keyboard focus */
     SDL_WINDOWEVENT_FOCUS_LOST,         /**< The window has lost keyboard focus */
-    SDL_WINDOWEVENT_CLOSE,                              /**< The window manager requests that the window be closed */
+    SDL_WINDOWEVENT_CLOSE,              /**< The window manager requests that the window be closed */
 } SDL_WindowEventID;
 
 /**

@@ -278,10 +278,11 @@ typedef struct SDL_QuitEvent
  */
 typedef struct SDL_UserEvent
 {
-    Uint8 type;         /**< SDL_USEREVENT through SDL_NUMEVENTS-1 */
-    int code;           /**< User defined event code */
-    void *data1;        /**< User defined data pointer */
-    void *data2;        /**< User defined data pointer */
+    Uint8 type;             /**< SDL_USEREVENT through SDL_NUMEVENTS-1 */
+    int code;               /**< User defined event code */
+    void *data1;            /**< User defined data pointer */
+    void *data2;            /**< User defined data pointer */
+    SDL_WindowID windowID;  /**< The associated window if any*/
 } SDL_UserEvent;
 
 /**
