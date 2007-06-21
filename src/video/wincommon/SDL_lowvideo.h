@@ -39,6 +39,9 @@
 #ifndef GWLP_WNDPROC
 #define GWLP_WNDPROC	GWL_WNDPROC
 #endif
+#ifndef GWLP_HINSTANCE
+#define GWLP_HINSTANCE GWL_HINSTANCE
+#endif
 #ifndef GCLP_HICON
 #define GCLP_HICON GCL_HICON
 #endif

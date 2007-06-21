@@ -53,10 +53,6 @@ typedef unsigned int   uintptr_t;
 #if ((_MSC_VER <= 1200) && (!defined(LONG_PTR)))
 #define LONG_PTR LONG
 #endif
-#ifndef GWLP_HINSTANCE
-#define GWLP_HINSTANCE GWL_HINSTANCE
-#endif
-#endif
 #else	/* !__GNUC__ && !_MSC_VER */
 typedef signed char int8_t;
 typedef unsigned char uint8_t;
