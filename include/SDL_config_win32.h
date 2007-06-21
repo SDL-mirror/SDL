@@ -46,6 +46,17 @@ typedef unsigned int   uintptr_t;
 #endif
 #define _UINTPTR_T_DEFINED
 #endif
+/* Older Visual C++ headers don't have the Win64-compatible typedefs... */
+#if ((_MSC_VER <= 1200) && (!defined(DWORD_PTR)))
+#define DWORD_PTR DWORD
+#endif
+#if ((_MSC_VER <= 1200) && (!defined(LONG_PTR)))
+#define LONG_PTR LONG
+#endif
+#ifndef GWLP_HINSTANCE
+#define GWLP_HINSTANCE GWL_HINSTANCE
+#endif
+#endif
 #else	/* !__GNUC__ && !_MSC_VER */
 typedef signed char int8_t;
 typedef unsigned char uint8_t;

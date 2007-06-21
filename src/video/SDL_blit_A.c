@@ -24,14 +24,30 @@
 #include "SDL_video.h"
 #include "SDL_blit.h"
 
+/*
+  In Visual C, VC6 has mmintrin.h in the "Processor Pack" add-on.
+   Checking if _mm_free is #defined in malloc.h is is the only way to
+   determine if the Processor Pack is installed, as far as I can tell.
+*/
+
 #if SDL_ASSEMBLY_ROUTINES
-#if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
-#define MMX_ASMBLIT 1
-#define GCC_ASMBLIT 1
-#elif defined(_MSC_VER) && (_MSC_VER >= 1200) && defined(_M_IX86)
-#define MMX_ASMBLIT 1
-#define MSVC_ASMBLIT 1
-#endif
+#  if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
+#    define MMX_ASMBLIT 1
+#    define GCC_ASMBLIT 1
+#  elif defined(_MSC_VER) && defined(_M_IX86)
+#    if (_MSC_VER <= 1200)  
+#      include <malloc.h>   
+#      if defined(_mm_free)
+#          define HAVE_MMINTRIN_H 1
+#      endif
+#    else  /* Visual Studio > VC6 always has mmintrin.h */
+#      define HAVE_MMINTRIN_H 1
+#    endif
+#    if HAVE_MMINTRIN_H
+#      define MMX_ASMBLIT 1
+#      define MSVC_ASMBLIT 1
+#    endif
+#  endif
 #endif /* SDL_ASSEMBLY_ROUTINES */
 
 /* Function to check the CPU flags */
