@@ -1,0 +1,32 @@
+==============================================================================
+Using the Simple DirectMedia Layer with S60 3.x / Symbian 9.x
+==============================================================================
+
+These instuctions are for people developing for S60 3.x. S60 3.x
+uses Symbian OS so you need S60 SDK.
+
+extract "symbian.zip" into this folder.
+
+go to symbian folder
+
+bldmake bldfiles
+abld build
+
+That produces WINSCW and ARMV5 versions of sdl.dll runtime library 
+and sdl.lib for development. 
+
+Eaudiolib.lib and dll are generated as well, and must be delivered
+along SDL as it uses it for audio.
+
+There are certain problems with GCC compiler when building for
+target, it may compile or binaries are buggy - please use RVCT
+compiler as it works and produces far more effient code.
+
+Its likely that SDL application should be integrated into S60 
+work and behave well there. So there is CSDL class (sdlepocapi.h)
+to make this easy. If you do porting from other system, then 
+implement a S60 application and use CSDL class, they you may
+not need to modify original SDL code at all!
+
+
+

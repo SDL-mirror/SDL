@@ -107,6 +107,9 @@ static AudioBootStrap *bootstrap[] = {
 #if SDL_AUDIO_DRIVER_DART
 	&DART_bootstrap,
 #endif
+#if SDL_AUDIO_DRIVER_EPOCAUDIO
+	&EPOCAudio_bootstrap,
+#endif
 	NULL
 };
 SDL_AudioDevice *current_audio = NULL;
@@ -545,7 +548,7 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 	switch (audio->opened) {
 		case  1:
 			/* Start the audio thread */
-#if (defined(__WIN32__) && !defined(_WIN32_WCE)) && !defined(HAVE_LIBC)
+#if (defined(__WIN32__) && !defined(_WIN32_WCE)) && !defined(HAVE_LIBC) && !defined(__SYMBIAN32__)
 #undef SDL_CreateThread
 			audio->thread = SDL_CreateThread(SDL_RunAudio, audio, NULL, NULL);
 #else

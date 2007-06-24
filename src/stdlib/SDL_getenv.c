@@ -25,7 +25,7 @@
 
 #ifndef HAVE_GETENV
 
-#if defined(__WIN32__) && !defined(_WIN32_WCE)
+#if defined(__WIN32__) && !defined(_WIN32_WCE) && !defined(__SYMBIAN32__)
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>

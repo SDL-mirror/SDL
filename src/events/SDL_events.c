@@ -169,7 +169,7 @@ static int SDL_StartEventThread(Uint32 flags)
 
 		/* The event thread will handle timers too */
 		SDL_SetTimerThreaded(2);
-#if (defined(__WIN32__) && !defined(_WIN32_WCE)) && !defined(HAVE_LIBC)
+#if (defined(__WIN32__) && !defined(_WIN32_WCE)) && !defined(HAVE_LIBC) && !defined(__SYMBIAN32__)
 #undef SDL_CreateThread
 		SDL_EventThread = SDL_CreateThread(SDL_GobbleEvents, NULL, NULL, NULL);
 #else

@@ -29,7 +29,7 @@
 #include "SDL_rwops.h"
 
 
-#if defined(__WIN32__)
+#if defined(__WIN32__) && !defined(__SYMBIAN32__)
 
 /* Functions to read/write Win32 API file pointers */
 /* Will not use it on WinCE because stdio is buffered, it means
@@ -372,7 +372,7 @@ SDL_RWops *SDL_RWFromFile(const char *file, const char *mode)
 		return NULL;
 	}
 
-#if defined(__WIN32__)
+#if defined(__WIN32__) && !defined(__SYMBIAN32__)
 	rwops = SDL_AllocRW();
 	if (!rwops)
 		return NULL; /* SDL_SetError already setup by SDL_AllocRW() */

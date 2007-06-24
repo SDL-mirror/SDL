@@ -323,7 +323,7 @@ unsigned _System LibMain(unsigned hmod, unsigned termination)
 }
 #endif /* __WATCOMC__ */
 
-#elif defined(__WIN32__)
+#elif defined(__WIN32__)  && !defined(__SYMBIAN32__)
 
 #if !defined(HAVE_LIBC) || (defined(__WATCOMC__) && defined(BUILD_DLL))
 /* Need to include DllMain() on Watcom C for some reason.. */

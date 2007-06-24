@@ -91,7 +91,9 @@ typedef uint32_t	Uint32;
 
 #ifdef SDL_HAS_64BIT_TYPE
 typedef int64_t		Sint64;
+#ifndef SYMBIAN32_GCCE
 typedef uint64_t	Uint64;
+#endif
 #else
 /* This is really just a hack to prevent the compiler from complaining */
 typedef struct {

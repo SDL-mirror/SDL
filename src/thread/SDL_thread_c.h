@@ -31,8 +31,6 @@
 #include "beos/SDL_systhread_c.h"
 #elif SDL_THREAD_DC
 #include "dc/SDL_systhread_c.h"
-#elif SDL_THREAD_EPOC
-#include "epoc/SDL_systhread_c.h"
 #elif SDL_THREAD_OS2
 #include "os2/SDL_systhread_c.h"
 #elif SDL_THREAD_PTH
@@ -43,6 +41,8 @@
 #include "irix/SDL_systhread_c.h"
 #elif SDL_THREAD_WIN32
 #include "win32/SDL_systhread_c.h"
+#elif SDL_THREAD_SYMBIAN
+#include "symbian/SDL_systhread_c.h"
 #else
 #error Need thread implementation for this platform
 #include "generic/SDL_systhread_c.h"
