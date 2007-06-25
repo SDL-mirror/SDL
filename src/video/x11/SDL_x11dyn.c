@@ -98,6 +98,7 @@ static void X11_GetSym(const char *fnname, int *rc, void **fn)
 /* Annoying varargs entry point... */
 #ifdef X_HAVE_UTF8_STRING
 XIC (*pXCreateIC)(XIM,...) = NULL;
+char *(*pXGetICValues)(XIC, ...) = NULL;
 #endif
 
 /* These SDL_X11_HAVE_* flags are here whether you have dynamic X11 or not. */
@@ -127,6 +128,7 @@ void SDL_X11_UnloadSymbols(void)
 
 			#ifdef X_HAVE_UTF8_STRING
 			pXCreateIC = NULL;
+			pXGetICValues = NULL;
 			#endif
 
 			for (i = 0; i < SDL_TABLESIZE(x11libs); i++) {
@@ -163,6 +165,7 @@ int SDL_X11_LoadSymbols(void)
 
 		#ifdef X_HAVE_UTF8_STRING
 		X11_GetSym("XCreateIC",&SDL_X11_HAVE_UTF8,(void **)&pXCreateIC);
+		X11_GetSym("XGetICValues",&SDL_X11_HAVE_UTF8,(void **)&pXGetICValues);
 		#endif
 
 		if (SDL_X11_HAVE_BASEXLIB) {  /* all required symbols loaded. */
@@ -178,6 +181,7 @@ int SDL_X11_LoadSymbols(void)
 		#endif
 		#ifdef X_HAVE_UTF8_STRING
 		pXCreateIC = XCreateIC;
+		pXGetICValues = XGetICValues;
 		#endif
 	#endif
 

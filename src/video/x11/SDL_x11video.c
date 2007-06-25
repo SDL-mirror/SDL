@@ -54,6 +54,10 @@
 #include "SDL_x11gamma_c.h"
 #include "../blank_cursor.h"
 
+#ifdef X_HAVE_UTF8_STRING
+#include <locale.h>
+#endif
+
 /* Initialization/Query functions */
 static int X11_VideoInit(_THIS, SDL_PixelFormat *vformat);
 static SDL_Surface *X11_SetVideoMode(_THIS, SDL_Surface *current, int width, int height, int bpp, Uint32 flags);
@@ -105,8 +109,10 @@ static SDL_VideoDevice *X11_CreateDevice(int devindex)
 			SDL_memset(device, 0, (sizeof *device));
 			device->hidden = (struct SDL_PrivateVideoData *)
 					SDL_malloc((sizeof *device->hidden));
+			SDL_memset(device->hidden, 0, (sizeof *device->hidden));
 			device->gl_data = (struct SDL_PrivateGLData *)
 					SDL_malloc((sizeof *device->gl_data));
+			SDL_memset(device->gl_data, 0, (sizeof *device->gl_data));
 		}
 		if ( (device == NULL) || (device->hidden == NULL) ||
 		                         (device->gl_data == NULL) ) {
@@ -314,6 +320,7 @@ static void create_aux_windows(_THIS)
     char classname[1024];
     XSetWindowAttributes xattr;
     XWMHints *hints;
+    unsigned long app_event_mask;
     int def_vis = (SDL_Visual == DefaultVisual(SDL_Display, SDL_Screen));
 
     /* Look up some useful Atoms */
@@ -391,9 +398,9 @@ static void create_aux_windows(_THIS)
     XFree(hints);
     X11_SetCaptionNoLock(this, this->wm_title, this->wm_icon);
 
-    XSelectInput(SDL_Display, WMwindow,
-		 FocusChangeMask | KeyPressMask | KeyReleaseMask
-		 | PropertyChangeMask | StructureNotifyMask | KeymapStateMask);
+    app_event_mask = FocusChangeMask | KeyPressMask | KeyReleaseMask
+	| PropertyChangeMask | StructureNotifyMask | KeymapStateMask;
+    XSelectInput(SDL_Display, WMwindow, app_event_mask);
 
     /* Set the class hints so we can get an icon (AfterStep) */
     get_classname(classname, sizeof(classname));
@@ -409,19 +416,111 @@ static void create_aux_windows(_THIS)
     }
 
 	/* Setup the communication with the IM server */
-	SDL_IM = NULL;
-	SDL_IC = NULL;
+	/* create_aux_windows may be called several times against the same
+	   Display.  We should reuse the SDL_IM if one has been opened for
+	   the Display, so we should not simply reset SDL_IM here.  */
 
 	#ifdef X_HAVE_UTF8_STRING
 	if (SDL_X11_HAVE_UTF8) {
+		/* Discard obsolete resources if any.  */
+		if (SDL_IM != NULL && SDL_Display != XDisplayOfIM(SDL_IM)) {
+			/* Just a double check. I don't think this
+		           code is ever executed. */
+			SDL_SetError("display has changed while an IM is kept");
+			if (SDL_IC) {
+				XUnsetICFocus(SDL_IC);
+				XDestroyIC(SDL_IC);
+				SDL_IC = NULL;
+			}
+			XCloseIM(SDL_IM);
+			SDL_IM = NULL;
+		}
+
+		/* Open an input method.  */
+		if (SDL_IM == NULL) {
+			char *old_locale, *old_modifiers;
+			/* I'm not comfortable to do locale setup
+			   here.  However, we need C library locale
+			   (and xlib modifiers) to be set based on the
+			   user's preference to use XIM, and many
+			   existing game programs doesn't take care of
+			   users' locale preferences, so someone other
+			   than the game program should do it.
+			   Moreover, ones say that some game programs
+			   heavily rely on the C locale behaviour,
+			   e.g., strcol()'s, and we can't change the C
+			   library locale.  Given the situation, I
+			   couldn't find better place to do the
+			   job... */
+
+			/* Save the current (application program's)
+			   locale settings.  */
+			old_locale = setlocale(LC_ALL, NULL);
+			old_modifiers = XSetLocaleModifiers(NULL);
+			if (old_locale == NULL || old_modifiers == NULL) {
+				/* The specs guarantee that the query
+				   calls to above functions never
+				   fail, so we should never come
+				   here.  */
+				SDL_SetError("failed to retreive current locale settings");
+				old_locale = NULL;
+				old_modifiers = NULL;
+			} else {
+				/* Save retreived values in our own
+				   storage, since they may be
+				   overwritten by the successive calls
+				   to
+				   setlocale/XSetLocaleModifiers.  */
+				char const *p;
+				p = old_locale;
+				old_locale = SDL_malloc(strlen(p) + 1);
+				strcpy(old_locale, p);
+				p = old_modifiers;
+				old_modifiers = SDL_malloc(strlen(p) + 1);
+				strcpy(old_modifiers, p);
+			}
+
+			/* Fetch the user's preferences and open the
+			   input method with them.  */
+			setlocale(LC_ALL, "");
+			XSetLocaleModifiers("");
+			SDL_IM = XOpenIM(SDL_Display, NULL, classname, classname);
+
+			/* Restore the application's locale settings
+			   so that we don't break the application's
+			   expected behaviour.  */
+			if (old_locale != NULL && old_modifiers != NULL) {
+				/* We need to restore the C library
+				   locale first, since the
+				   interpretation of the X modifier
+				   may depend on it.  */
+				setlocale(LC_ALL, old_locale);
+				SDL_free(old_locale);
+				XSetLocaleModifiers(old_modifiers);
+				SDL_free(old_modifiers);
+			}
+		}
+
+		/* Create a new input context for the new window just created.  */
 		SDL_IM = XOpenIM(SDL_Display, NULL, classname, classname);
 		if (SDL_IM == NULL) {
 			SDL_SetError("no input method could be opened");
 		} else {
+			if (SDL_IC != NULL) {
+				/* Discard the old IC before creating new one.  */
+			    XUnsetICFocus(SDL_IC);
+			    XDestroyIC(SDL_IC);
+			}
+			/* Theoretically we should check the current IM supports
+			   PreeditNothing+StatusNothing style (i.e., root window method)
+			   before creating the IC.  However, it is the bottom line method,
+			   and we supports any other options.  If the IM didn't support
+			   root window method, the following call fails, and SDL falls
+			   back to pre-XIM keyboard handling.  */
 			SDL_IC = pXCreateIC(SDL_IM,
 					XNClientWindow, WMwindow,
 					XNFocusWindow, WMwindow,
-					XNInputStyle, XIMPreeditNothing  | XIMStatusNothing,
+					XNInputStyle, XIMPreeditNothing | XIMStatusNothing,
 					XNResourceName, classname,
 					XNResourceClass, classname,
 					NULL);
@@ -430,6 +529,19 @@ static void create_aux_windows(_THIS)
 				SDL_SetError("no input context could be created");
 				XCloseIM(SDL_IM);
 				SDL_IM = NULL;
+			} else {
+				/* We need to receive X events that an IM wants and to pass
+				   them to the IM through XFilterEvent. The set of events may
+				   vary depending on the IM implementation and the options
+				   specified through various routes. Although unlikely, the
+				   xlib specification allows IM to change the event requirement
+				   with its own circumstances, it is safe to call SelectInput
+				   whenever we re-create an IC.  */
+				unsigned long mask = 0;
+				char *ret = pXGetICValues(SDL_IC, XNFilterEvents, &mask, NULL);
+				                          &ic_event_mask, NULL);
+				XSelectInput(SDL_Display, WMwindow, app_event_mask | mask);
+				XSetICFocus(SDL_IC);
 			}
 		}
 	}
@@ -1350,6 +1462,7 @@ void X11_VideoQuit(_THIS)
 		/* Close the connection with the IM server */
 		#ifdef X_HAVE_UTF8_STRING
 		if (SDL_IC != NULL) {
+			XUnsetICFocus(SDL_IC);
 			XDestroyIC(SDL_IC);
 			SDL_IC = NULL;
 		}
