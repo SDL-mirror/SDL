@@ -331,7 +331,7 @@ SDL_Surface *NDS_SetVideoMode(_THIS, SDL_Surface *current,
 	if(bpp==8)
 		current->pitch =1024;
 	else
-		current->pitch =1024*2;
+		current->pitch =512*2;
 
 	/* We're done */
 	return(current);
