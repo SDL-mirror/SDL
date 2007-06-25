@@ -12,10 +12,11 @@ This is the Simple DirectMedia Layer, a general API that provides low
 level access to audio, keyboard, mouse, joystick, 3D hardware via OpenGL,
 and 2D framebuffer across multiple platforms.
 
-The current version supports Linux, Windows, Windows CE, BeOS, MacOS,
-Mac OS X, FreeBSD, NetBSD, OpenBSD, BSD/OS, Solaris, IRIX, and QNX.
-The code contains support for Dreamcast, Atari, AIX, OSF/Tru64,
-RISC OS, SymbianOS, and OS/2, but these are not officially supported.
+The current version supports Linux, Windows CE/95/98/ME/XP/Vista, BeOS,
+MacOS Classic, Mac OS X, FreeBSD, NetBSD, OpenBSD, BSD/OS, Solaris, IRIX,
+and QNX.  The code contains support for Dreamcast, Atari, AIX, OSF/Tru64,
+RISC OS, SymbianOS, Nintendo DS, and OS/2, but these are not officially
+supported.
 
 SDL is written in C, but works with C++ natively, and has bindings to
 several other languages, including Ada, C#, Eiffel, Erlang, Euphoria,

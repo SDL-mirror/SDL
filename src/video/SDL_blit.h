@@ -166,12 +166,21 @@ do {									   \
 } while(0)
 
 /* Assemble R-G-B values into a specified pixel format and store them */
+#ifdef __NDS__ // FIXME
+#define PIXEL_FROM_RGB(Pixel, fmt, r, g, b)				\
+{									\
+	Pixel = ((r>>fmt->Rloss)<<fmt->Rshift)|				\
+		((g>>fmt->Gloss)<<fmt->Gshift)|				\
+		((b>>fmt->Bloss)<<fmt->Bshift) | (1<<15);				\
+}
+#else
 #define PIXEL_FROM_RGB(Pixel, fmt, r, g, b)				\
 {									\
 	Pixel = ((r>>fmt->Rloss)<<fmt->Rshift)|				\
 		((g>>fmt->Gloss)<<fmt->Gshift)|				\
 		((b>>fmt->Bloss)<<fmt->Bshift);				\
 }
+#endif // __NDS__ FIXME
 #define RGB565_FROM_RGB(Pixel, r, g, b)					\
 {									\
 	Pixel = ((r>>3)<<11)|((g>>2)<<5)|(b>>3);			\
@@ -321,6 +330,15 @@ do {									   \
 } while(0)
 
 /* FIXME: this isn't correct, especially for Alpha (maximum != 255) */
+#ifdef __NDS__ // FIXME
+#define PIXEL_FROM_RGBA(Pixel, fmt, r, g, b, a)				\
+{									\
+	Pixel = ((r>>fmt->Rloss)<<fmt->Rshift)|				\
+		((g>>fmt->Gloss)<<fmt->Gshift)|				\
+		((b>>fmt->Bloss)<<fmt->Bshift)|				\
+		((a>>fmt->Aloss)<<fmt->Ashift) | (1<<15);				\
+}
+#else
 #define PIXEL_FROM_RGBA(Pixel, fmt, r, g, b, a)				\
 {									\
 	Pixel = ((r>>fmt->Rloss)<<fmt->Rshift)|				\
@@ -328,6 +346,7 @@ do {									   \
 		((b>>fmt->Bloss)<<fmt->Bshift)|				\
 		((a>>fmt->Aloss)<<fmt->Ashift);				\
 }
+#endif // __NDS__ FIXME
 #define ASSEMBLE_RGBA(buf, bpp, fmt, r, g, b, a)			\
 {									\
 	switch (bpp) {							\

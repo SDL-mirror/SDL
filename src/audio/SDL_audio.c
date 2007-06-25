@@ -101,6 +101,9 @@ static AudioBootStrap *bootstrap[] = {
 #if SDL_AUDIO_DRIVER_DC
 	&DCAUD_bootstrap,
 #endif
+#if SDL_AUDIO_DRIVER_NDS
+	&NDSAUD_bootstrap,
+#endif
 #if SDL_AUDIO_DRIVER_MMEAUDIO
 	&MMEAUDIO_bootstrap,
 #endif
@@ -470,10 +473,7 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 		return(-1);
 	}
 
-#if defined(__MACOS__) || (defined(__RISCOS__) && SDL_THREADS_DISABLED)
-	/* FIXME: Need to implement PPC interrupt asm for SDL_LockAudio() */
-#else
-#if defined(__MINT__) && SDL_THREADS_DISABLED
+#if SDL_THREADS_DISABLED
 	/* Uses interrupt driven audio, without thread */
 #else
 	/* Create a semaphore for locking the sound buffers */
@@ -483,8 +483,7 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 		SDL_CloseAudio();
 		return(-1);
 	}
-#endif /* __MINT__ */
-#endif /* __MACOS__ */
+#endif /* SDL_THREADS_DISABLED */
 
 	/* Calculate the silence and size of the audio specification */
 	SDL_CalculateAudioSpec(desired);

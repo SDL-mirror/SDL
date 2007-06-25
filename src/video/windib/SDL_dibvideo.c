@@ -751,6 +751,11 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 
 		/* Set video surface flags */
 		if ( bpp <= 8 ) {
+			if ( (video->flags & SDL_FULLSCREEN) == SDL_FULLSCREEN ) {
+				hdc = GetDC(SDL_Window);
+				SetSystemPaletteUse(hdc, SYSPAL_NOSTATIC);
+				ReleaseDC(SDL_Window, hdc);
+			}
 			/* BitBlt() maps colors for us */
 			video->flags |= SDL_HWPALETTE;
 		}
