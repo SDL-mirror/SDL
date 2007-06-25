@@ -539,7 +539,6 @@ static void create_aux_windows(_THIS)
 				   whenever we re-create an IC.  */
 				unsigned long mask = 0;
 				char *ret = pXGetICValues(SDL_IC, XNFilterEvents, &mask, NULL);
-				                          &ic_event_mask, NULL);
 				XSelectInput(SDL_Display, WMwindow, app_event_mask | mask);
 				XSetICFocus(SDL_IC);
 			}
