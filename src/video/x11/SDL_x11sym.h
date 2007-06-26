@@ -147,6 +147,8 @@ SDL_X11_SYM(void,XUnsetICFocus,(XIC a),(a),)
 SDL_X11_SYM(XIM,XOpenIM,(Display* a,struct _XrmHashBucketRec* b,char* c,char* d),(a,b,c,d),return)
 SDL_X11_SYM(Status,XCloseIM,(XIM a),(a),return)
 SDL_X11_SYM(char*,XSetLocaleModifiers,(_Xconst char* a),(a),return)
+SDL_X11_SYM(int,XRefreshKeyboardMapping,(XMappingEvent* a),(a),return)
+SDL_X11_SYM(Display*,XDisplayOfIM,(XIM a),(a),return)
 #endif
 
 #ifndef NO_SHARED_MEMORY
