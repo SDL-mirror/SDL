@@ -225,9 +225,14 @@ LRESULT DIB_HandleMessage(_THIS, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 
 #if defined(SC_SCREENSAVE) && defined(SC_MONITORPOWER)
 		case WM_SYSCOMMAND: {
-			if ((wParam&0xFFF0)==SC_SCREENSAVE ||
-				(wParam&0xFFF0)==SC_MONITORPOWER)
+			const DWORD val = (DWORD) (wParam & 0xFFF0);
+			if ((val == SC_SCREENSAVE) || (val == SC_MONITORPOWER)) {
+				if (!this->hidden->allow_screensaver) {
+					/* Note that this doesn't stop anything on Vista
+					   if the screensaver has a password. */
 					return(0);
+				}
+			}
 		}
 		/* Fall through to default processing */
 #endif /* SC_SCREENSAVE && SC_MONITORPOWER */

@@ -41,6 +41,8 @@ struct SDL_PrivateVideoData {
     HBITMAP screen_bmp;
     HPALETTE screen_pal;
 
+    int allow_screensaver;
+
 #define NUM_MODELISTS	4		/* 8, 16, 24, and 32 bits-per-pixel */
     int SDL_nummodes[NUM_MODELISTS];
     SDL_Rect **SDL_modelist[NUM_MODELISTS];

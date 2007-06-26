@@ -282,6 +282,7 @@ static HPALETTE DIB_CreatePalette(int bpp)
 
 int DIB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 {
+	const char *env = NULL;
 #ifndef NO_CHANGEDISPLAYSETTINGS
 	int i;
 	DEVMODE settings;
@@ -379,6 +380,10 @@ int DIB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 #ifdef _WIN32_WCE
 	this->hidden->origRotation = -1;
 #endif
+
+	/* Allow environment override of screensaver disable. */
+	env = SDL_getenv("SDL_VIDEO_ALLOW_SCREENSAVER");
+	this->hidden->allow_screensaver = ( (env && SDL_atoi(env)) ? 1 : 0 );
 
 	/* We're done! */
 	return(0);
