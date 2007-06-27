@@ -28,8 +28,6 @@ SDL_FUNC _ConvertMMXpII32_16BGR565
 SDL_FUNC _ConvertMMXpII32_16RGB555
 SDL_FUNC _ConvertMMXpII32_16BGR555
 
-EXTERN _mmxreturn
- 
 ;; Macros for conversion routines
 
 %macro _push_immq_mask 1
@@ -121,7 +119,7 @@ _ConvertMMXpII32_24RGB888:
         dec ecx
         jnz .L3
 .L4:
-        jmp _mmxreturn
+        return
 
 
 
@@ -190,7 +188,7 @@ _ConvertMMXpII32_16RGB565:
         jnz .L3
 
 .L4:
-	jmp _mmxreturn
+	retn
 
 	
 _ConvertMMXpII32_16BGR565:
@@ -260,7 +258,7 @@ _ConvertMMXpII32_16BGR565:
         jnz .L3
 
 .L4:
-        jmp _mmxreturn
+        retn
 
 _ConvertMMXpII32_16BGR555:
 
@@ -400,7 +398,7 @@ _convert_bgr555_cheat:
 	jnz .L3	
 
 .L4:		
-	jmp _mmxreturn
+	retn
 
 %ifidn __OUTPUT_FORMAT__,elf
 section .note.GNU-stack noalloc noexec nowrite progbits

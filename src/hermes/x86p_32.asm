@@ -24,8 +24,6 @@ SDL_FUNC _ConvertX86p32_16RGB555
 SDL_FUNC _ConvertX86p32_16BGR555
 SDL_FUNC _ConvertX86p32_8RGB332
 
-EXTERN _x86return
-	
 SECTION .text
 
 ;; _Convert_*
@@ -53,7 +51,7 @@ _ConvertX86p32_32BGR888:
     dec ecx
     jnz .L1
 .L2
-    jmp _x86return
+    retn
 
 .L3 ; save ebp
     push ebp
@@ -113,7 +111,7 @@ _ConvertX86p32_32BGR888:
     jnz .L5
 
 .L6 pop ebp
-    jmp _x86return
+    retn
 	
 
 	
@@ -133,7 +131,7 @@ _ConvertX86p32_32RGBA888:
     dec ecx
     jnz .L1
 .L2
-    jmp _x86return
+    retn
 
 .L3 ; save ebp
     push ebp
@@ -184,7 +182,7 @@ _ConvertX86p32_32RGBA888:
     jnz .L5
 
 .L6 pop ebp
-    jmp _x86return
+    retn
 
 	
 
@@ -204,7 +202,7 @@ _ConvertX86p32_32BGRA888:
     dec ecx
     jnz .L1
 .L2
-    jmp _x86return
+    retn
 
 .L3 ; save ebp
     push ebp
@@ -257,7 +255,7 @@ _ConvertX86p32_32BGRA888:
     jnz .L5
 
 .L6 pop ebp
-    jmp _x86return
+    retn
 
 
 	
@@ -282,7 +280,7 @@ _ConvertX86p32_24RGB888:
 	dec ecx
 	jnz .L1
 .L2 
-	jmp _x86return
+	retn
 
 .L3	;	 head
 	mov edx,edi
@@ -354,7 +352,7 @@ _ConvertX86p32_24RGB888:
 	jnz .L6
 
 .L7	pop ebp
-	jmp _x86return
+	retn
 
 
 
@@ -380,7 +378,7 @@ _ConvertX86p32_24BGR888:
 	dec ecx
 	jnz .L1
 .L2
-	jmp _x86return
+	retn
 
 .L3 ; head
 	mov edx,edi
@@ -455,7 +453,7 @@ _ConvertX86p32_24BGR888:
 
 .L7 
 	pop ebp
-	jmp _x86return
+	retn
  
 
 	
@@ -484,7 +482,7 @@ _ConvertX86p32_16RGB565:
 	jnz .L1
 
 .L2:				; End of short loop
-	jmp _x86return
+	retn
 
 	
 .L3	; head
@@ -570,7 +568,7 @@ _ConvertX86p32_16RGB565:
 	add edi,BYTE 2
 
 .L7:	
-	jmp _x86return
+	retn
 
 
 
@@ -599,7 +597,7 @@ _ConvertX86p32_16BGR565:
 	dec ecx
 	jnz .L1
 .L2
-	jmp _x86return
+	retn
 
 .L3	; head
 	mov ebx,edi
@@ -684,7 +682,7 @@ _ConvertX86p32_16BGR565:
 	add edi,BYTE 2
 
 .L7 
-	jmp _x86return
+	retn
 
 
 	
@@ -713,7 +711,7 @@ _ConvertX86p32_16RGB555:
 	dec ecx
 	jnz .L1
 .L2
-	jmp _x86return
+	retn
 
 .L3	; head
 	mov ebx,edi
@@ -795,7 +793,7 @@ _ConvertX86p32_16RGB555:
 	add edi,BYTE 2
 
 .L7
-	jmp _x86return
+	retn
 
 
 
@@ -825,7 +823,7 @@ _ConvertX86p32_16BGR555:
 	dec ecx
 	jnz .L1
 .L2 
-	jmp _x86return
+	retn
 
 .L3	; head
 	mov ebx,edi
@@ -910,7 +908,7 @@ _ConvertX86p32_16BGR555:
 	add edi,BYTE 2
 
 .L7
-	jmp _x86return
+	retn
 
 
 
@@ -1040,7 +1038,7 @@ _ConvertX86p32_8RGB332:
 	jnz .L3
 	
 .L4:	
-	jmp _x86return
+	retn
 
 %ifidn __OUTPUT_FORMAT__,elf
 section .note.GNU-stack noalloc noexec nowrite progbits

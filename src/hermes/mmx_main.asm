@@ -12,7 +12,6 @@ BITS 32
 %include "common.inc"
 
 SDL_FUNC _ConvertMMX
-SDL_FUNC _mmxreturn
 
 SECTION .text
 		
@@ -51,9 +50,8 @@ _ConvertMMX:
 y_loop:	
 	mov ecx,[ebp+4]
 
-	jmp [ebp+32]
+	call [ebp+32]
 
-_mmxreturn:	
 	add esi,[ebp+12]
 	add edi,[ebp+28]
 	
