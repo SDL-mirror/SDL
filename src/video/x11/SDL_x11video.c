@@ -502,7 +502,6 @@ static void create_aux_windows(_THIS)
 		}
 
 		/* Create a new input context for the new window just created.  */
-		SDL_IM = XOpenIM(SDL_Display, NULL, classname, classname);
 		if (SDL_IM == NULL) {
 			SDL_SetError("no input method could be opened");
 		} else {
