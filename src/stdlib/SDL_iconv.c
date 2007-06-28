@@ -34,7 +34,20 @@ size_t SDL_iconv(SDL_iconv_t cd,
                  const char **inbuf, size_t *inbytesleft,
                  char **outbuf, size_t *outbytesleft)
 {
-	size_t retCode = iconv(cd, inbuf, inbytesleft, outbuf, outbytesleft);
+	size_t retCode;
+#ifdef ICONV_REALLY_MODIFIES_INBUF
+	if ( inbuf && *inbuf && inbytesleft ) {
+		char *tmp = SDL_stack_alloc(char, *inbytesleft);
+		char *ptr = tmp;
+		retCode = iconv(cd, &ptr, inbytesleft, outbuf, outbytesleft);
+		inbuf += (ptr - tmp);
+		SDL_stack_free(tmp);
+	} else {
+		retCode = iconv(cd, NULL, inbytesleft, outbuf, outbytesleft);
+	}
+#else
+	retCode = iconv(cd, (char **)inbuf, inbytesleft, outbuf, outbytesleft);
+#endif
 	if ( retCode == (size_t)-1 ) {
 		switch(errno) {
 		    case E2BIG:
