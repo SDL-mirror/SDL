@@ -31,7 +31,7 @@
 #include <errno.h>
 
 size_t SDL_iconv(SDL_iconv_t cd,
-                 char **inbuf, size_t *inbytesleft,
+                 const char **inbuf, size_t *inbytesleft,
                  char **outbuf, size_t *outbytesleft)
 {
 	size_t retCode = iconv(cd, inbuf, inbytesleft, outbuf, outbytesleft);
