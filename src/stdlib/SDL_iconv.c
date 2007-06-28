@@ -39,6 +39,7 @@ size_t SDL_iconv(SDL_iconv_t cd,
 	if ( inbuf && *inbuf && inbytesleft ) {
 		char *tmp = SDL_stack_alloc(char, *inbytesleft);
 		char *ptr = tmp;
+		SDL_memcpy(tmp, inbuf, *inbytesleft);
 		retCode = iconv(cd, &ptr, inbytesleft, outbuf, outbytesleft);
 		inbuf += (ptr - tmp);
 		SDL_stack_free(tmp);
