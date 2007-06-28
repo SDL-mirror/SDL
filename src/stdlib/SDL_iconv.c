@@ -32,10 +32,24 @@
 
 size_t
 SDL_iconv(SDL_iconv_t cd,
-          char **inbuf, size_t * inbytesleft,
+          const char **inbuf, size_t * inbytesleft,
           char **outbuf, size_t * outbytesleft)
 {
-    size_t retCode = iconv(cd, inbuf, inbytesleft, outbuf, outbytesleft);
+    size_t retCode;
+#ifdef ICONV_REALLY_MODIFIES_INBUF
+    if (inbuf && *inbuf && inbytesleft) {
+        char *tmp = SDL_stack_alloc(char, *inbytesleft);
+        char *ptr = tmp;
+        SDL_memcpy(tmp, inbuf, *inbytesleft);
+        retCode = iconv(cd, &ptr, inbytesleft, outbuf, outbytesleft);
+        inbuf += (ptr - tmp);
+        SDL_stack_free(tmp);
+    } else {
+        retCode = iconv(cd, NULL, inbytesleft, outbuf, outbytesleft);
+    }
+#else
+    retCode = iconv(cd, (char **) inbuf, inbytesleft, outbuf, outbytesleft);
+#endif
     if (retCode == (size_t) - 1) {
         switch (errno) {
         case E2BIG:
@@ -154,13 +168,14 @@ SDL_iconv_open(const char *tocode, const char *fromcode)
 
 size_t
 SDL_iconv(SDL_iconv_t cd,
-          char **inbuf, size_t * inbytesleft,
+          const char **inbuf, size_t * inbytesleft,
           char **outbuf, size_t * outbytesleft)
 {
     /* For simplicity, we'll convert everything to and from UCS-4 */
-    char *src, *dst;
+    const char *src;
+    char *dst;
     size_t srclen, dstlen;
-    Uint32 ch;
+    Uint32 ch = 0;
     size_t total;
 
     if (!inbuf || !*inbuf) {
@@ -755,7 +770,7 @@ SDL_iconv_close(SDL_iconv_t cd)
 #endif /* !HAVE_ICONV */
 
 char *
-SDL_iconv_string(const char *tocode, const char *fromcode, char *inbuf,
+SDL_iconv_string(const char *tocode, const char *fromcode, const char *inbuf,
                  size_t inbytesleft)
 {
     SDL_iconv_t cd;
