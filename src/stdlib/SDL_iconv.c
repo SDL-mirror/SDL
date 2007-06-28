@@ -28,6 +28,15 @@
 
 #ifdef HAVE_ICONV
 
+/* Depending on which standard the iconv() was implemented with,
+   iconv() may or may not use const char ** for the inbuf param.
+   If we get this wrong, it's just a warning, so no big deal.
+*/
+#if defined(_XGP6) || \
+    defined(__GLIBC__) && ((__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 2))
+#define ICONV_INBUF_NONCONST
+#endif
+
 #include <errno.h>
 
 size_t SDL_iconv(SDL_iconv_t cd,
@@ -35,19 +44,10 @@ size_t SDL_iconv(SDL_iconv_t cd,
                  char **outbuf, size_t *outbytesleft)
 {
 	size_t retCode;
-#ifdef ICONV_REALLY_MODIFIES_INBUF
-	if ( inbuf && *inbuf && inbytesleft ) {
-		char *tmp = SDL_stack_alloc(char, *inbytesleft);
-		char *ptr = tmp;
-		SDL_memcpy(tmp, inbuf, *inbytesleft);
-		retCode = iconv(cd, &ptr, inbytesleft, outbuf, outbytesleft);
-		inbuf += (ptr - tmp);
-		SDL_stack_free(tmp);
-	} else {
-		retCode = iconv(cd, NULL, inbytesleft, outbuf, outbytesleft);
-	}
-#else
+#ifdef ICONV_INBUF_NONCONST
 	retCode = iconv(cd, (char **)inbuf, inbytesleft, outbuf, outbytesleft);
+#else
+	retCode = iconv(cd, inbuf, inbytesleft, outbuf, outbytesleft);
 #endif
 	if ( retCode == (size_t)-1 ) {
 		switch(errno) {
