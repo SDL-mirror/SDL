@@ -52,7 +52,7 @@ static int SetHWColorKey(_THIS, SDL_Surface *surface, Uint32 key)
 static int FillHWRect(_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color)
 {
 	int bpp;
-	char *dst_base;
+	Uint32 dst_base;
 	Uint32 format;
 	int dstX, dstY;
 
@@ -65,7 +65,7 @@ static int FillHWRect(_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color)
 	}
 
 	/* Set the destination pixel format */
-	dst_base = (char *)((char *)dst->pixels - mapped_mem);
+	dst_base = ((char *)dst->pixels - mapped_mem);
 	bpp = dst->format->BitsPerPixel;
 	format = dst->pitch | ((bpp+((bpp==8) ? 0 : 8)) << 13);
 
@@ -75,7 +75,7 @@ static int FillHWRect(_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color)
 
 	/* Execute the fill command */
 	tdfx_wait(6);
-	tdfx_out32(DSTBASE, (Uint32)dst_base);
+	tdfx_out32(DSTBASE, dst_base);
 	tdfx_out32(DSTFORMAT, format);
 	tdfx_out32(COLORFORE, color);
 	tdfx_out32(COMMAND_2D, COMMAND_2D_FILLRECT);
@@ -97,8 +97,8 @@ static int HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,
 	int bpp;
 	Uint32 src_format;
 	Uint32 dst_format;
-	char *src_base;
-	char *dst_base;
+	Uint32 src_base;
+	Uint32 dst_base;
 	int srcX, srcY;
 	int dstX, dstY;
 	Uint32 blitop;
@@ -113,10 +113,10 @@ static int HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,
 	}
 
 	/* Set the source and destination pixel format */
-	src_base = (char *)((char *)src->pixels - mapped_mem);
+	src_base = ((char *)src->pixels - mapped_mem);
 	bpp = src->format->BitsPerPixel;
 	src_format = src->pitch | ((bpp+((bpp==8) ? 0 : 8)) << 13);
-	dst_base = (char *)((char *)dst->pixels - mapped_mem);
+	dst_base = ((char *)dst->pixels - mapped_mem);
 	bpp = dst->format->BitsPerPixel;
 	dst_format = dst->pitch | ((bpp+((bpp==8) ? 0 : 8)) << 13);
 
