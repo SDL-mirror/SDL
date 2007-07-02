@@ -2331,10 +2331,7 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         CheckDiskAudio
         CheckDummyAudio
         CheckDLOPEN
-
-        # Temporarily disabled:
-        # ld: mmxp2_32.o has external relocation entries in non-writable section (__TEXT,__text) for symbols: _mmxreturn
-        #CheckNASM
+        CheckNASM
 
         # Set up files for the shared object loading library
         # (this needs to be done before the dynamic X11 check)
