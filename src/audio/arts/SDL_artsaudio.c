@@ -57,7 +57,7 @@ static int (*SDL_NAME(arts_stream_get)) (arts_stream_t s,
 static int (*SDL_NAME(arts_write)) (arts_stream_t s, const void *buffer,
                                     int count);
 static void (*SDL_NAME(arts_close_stream)) (arts_stream_t s);
-static int (*SDL_NAME(arts_suspended))(void);
+static int (*SDL_NAME(arts_suspended)) (void);
 static const char *(*SDL_NAME(arts_error_text)) (int errorcode);
 
 #define SDL_ARTS_SYM(x) { #x, (void **) (char *) &SDL_NAME(x) }
@@ -66,16 +66,19 @@ static struct
     const char *name;
     void **func;
 } arts_functions[] = {
-SDL_ARTS_SYM(arts_init),
-        SDL_ARTS_SYM(arts_free),
-        SDL_ARTS_SYM(arts_play_stream),
-        SDL_ARTS_SYM(arts_stream_set),
-        SDL_ARTS_SYM(arts_stream_get),
-        SDL_ARTS_SYM(arts_write),
-        SDL_ARTS_SYM(arts_close_stream),
-        SDL_ARTS_SYM(arts_suspended),
-        SDL_ARTS_SYM(arts_error_text),
+/* *INDENT-OFF* */
+    SDL_ARTS_SYM(arts_init),
+    SDL_ARTS_SYM(arts_free),
+    SDL_ARTS_SYM(arts_play_stream),
+    SDL_ARTS_SYM(arts_stream_set),
+    SDL_ARTS_SYM(arts_stream_get),
+    SDL_ARTS_SYM(arts_write),
+    SDL_ARTS_SYM(arts_close_stream),
+    SDL_ARTS_SYM(arts_suspended),
+    SDL_ARTS_SYM(arts_error_text),
+/* *INDENT-ON* */
 };
+
 #undef SDL_ARTS_SYM
 
 static void
@@ -263,7 +266,7 @@ ARTS_OpenDevice(_THIS, const char *devname, int iscapture)
         return 0;
     }
 
-    if ( ! SDL_NAME(arts_suspended)() ) {
+    if (!SDL_NAME(arts_suspended) ()) {
         ARTS_CloseDevice(this);
         SDL_SetError("ARTS can not open audio device");
         return 0;
@@ -339,7 +342,7 @@ ARTS_Init(SDL_AudioDriverImpl * impl)
         }
 
         /* Play a stream so aRts doesn't crash */
-        if ( SDL_NAME(arts_suspended)() ) {
+        if (SDL_NAME(arts_suspended) ()) {
             arts_stream_t stream;
             stream = SDL_NAME(arts_play_stream) (44100, 16, 2, "SDL");
             SDL_NAME(arts_write) (stream, "", 0);

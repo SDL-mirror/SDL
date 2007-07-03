@@ -634,7 +634,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
              *   DefWindowProc to process it.
              */
             if (xbuttonval > 0) {
-                return(TRUE);
+                return (TRUE);
             }
         }
         return (0);

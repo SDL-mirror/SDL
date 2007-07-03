@@ -555,7 +555,7 @@ prepare_audiospec(const SDL_AudioSpec * orig, SDL_AudioSpec * prepared)
     switch (orig->channels) {
     case 0:{
             const char *env = SDL_getenv("SDL_AUDIO_CHANNELS");
-            if ((!env) || ((prepared->channels = (Uint8)SDL_atoi(env)) == 0)) {
+            if ((!env) || ((prepared->channels = (Uint8) SDL_atoi(env)) == 0)) {
                 prepared->channels = 2; /* a reasonable default */
             }
             break;

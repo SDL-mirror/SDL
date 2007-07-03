@@ -35,12 +35,12 @@
 #    define MMX_ASMBLIT 1
 #    define GCC_ASMBLIT 1
 #  elif defined(_MSC_VER) && defined(_M_IX86)
-#    if (_MSC_VER <= 1200)  
-#      include <malloc.h>   
+#    if (_MSC_VER <= 1200)
+#      include <malloc.h>
 #      if defined(_mm_free)
 #          define HAVE_MMINTRIN_H 1
 #      endif
-#    else  /* Visual Studio > VC6 always has mmintrin.h */
+#    else /* Visual Studio > VC6 always has mmintrin.h */
 #      define HAVE_MMINTRIN_H 1
 #    endif
 #    if HAVE_MMINTRIN_H
