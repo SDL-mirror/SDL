@@ -427,6 +427,7 @@ static int DX5_AllocDDSurface(_THIS, SDL_Surface *surface,
 				LPDIRECTDRAWSURFACE3 requested, Uint32 flag);
 
 /* Windows message handling functions */
+static void DX5_Activate(_THIS, BOOL active, BOOL minimized);
 static void DX5_RealizePalette(_THIS);
 static void DX5_PaletteChanged(_THIS, HWND window);
 static void DX5_WinPAINT(_THIS, HDC hdc);
@@ -620,6 +621,7 @@ static SDL_VideoDevice *DX5_CreateDevice(int devindex)
 	device->PumpEvents = DX5_PumpEvents;
 
 	/* Set up the windows message handling functions */
+	WIN_Activate = DX5_Activate;
 	WIN_RealizePalette = DX5_RealizePalette;
 	WIN_PaletteChanged = DX5_PaletteChanged;
 	WIN_WinPAINT = DX5_WinPAINT;
@@ -2421,6 +2423,9 @@ void DX5_VideoQuit(_THIS)
 }
 
 /* Exported for the windows message loop only */
+void DX5_Activate(_THIS, BOOL active, BOOL minimized)
+{
+}
 void DX5_RealizePalette(_THIS)
 {
 	if ( SDL_palette ) {

@@ -84,6 +84,7 @@ WORD *gamma_saved = NULL;
 
 /* Functions called by the message processing function */
 LONG (*HandleMessage)(_THIS, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)=NULL;
+void (*WIN_Activate)(_THIS, BOOL active, BOOL iconic);
 void (*WIN_RealizePalette)(_THIS);
 void (*WIN_PaletteChanged)(_THIS, HWND window);
 void (*WIN_WinPAINT)(_THIS, HDC hdc);
@@ -348,11 +349,12 @@ LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 		case WM_ACTIVATE: {
 			SDL_VideoDevice *this = current_video;
-			BOOL minimized;
+			BOOL active, minimized;
 			Uint8 appstate;
 
 			minimized = HIWORD(wParam);
-			if ( !minimized && (LOWORD(wParam) != WA_INACTIVE) ) {
+			active = (LOWORD(wParam) != WA_INACTIVE) && !minimized;
+			if ( active ) {
 				/* Gain the following states */
 				appstate = SDL_APPACTIVE|SDL_APPINPUTFOCUS;
 				if ( this->input_grab != SDL_GRAB_OFF ) {
@@ -367,17 +369,14 @@ LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					}
 				}
 #if defined(_WIN32_WCE)
-			if ( WINDIB_FULLSCREEN() )
-			{
-						LoadAygshell();
-						if( SHFullScreen )
-							SHFullScreen(SDL_Window, SHFS_HIDESTARTICON|SHFS_HIDETASKBAR|SHFS_HIDESIPBUTTON);
-						else
-							ShowWindow(FindWindow(TEXT("HHTaskBar"),NULL),SW_HIDE);
-
-			}
+				if ( WINDIB_FULLSCREEN() ) {
+					LoadAygshell();
+					if( SHFullScreen )
+						SHFullScreen(SDL_Window, SHFS_HIDESTARTICON|SHFS_HIDETASKBAR|SHFS_HIDESIPBUTTON);
+					else
+						ShowWindow(FindWindow(TEXT("HHTaskBar"),NULL),SW_HIDE);
+				}
 #endif
-
 				posted = SDL_PrivateAppActive(1, appstate);
 				WIN_GetKeyboardState();
 			} else {
@@ -401,12 +400,12 @@ LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 							SHFullScreen(SDL_Window, SHFS_SHOWSTARTICON|SHFS_SHOWTASKBAR|SHFS_SHOWSIPBUTTON);
 						else
 							ShowWindow(FindWindow(TEXT("HHTaskBar"),NULL),SW_SHOW);
-
 #endif
 					}
 				}
 				posted = SDL_PrivateAppActive(0, appstate);
 			}
+			WIN_Activate(this, active, minimized);
 			return(0);
 		}
 		break;

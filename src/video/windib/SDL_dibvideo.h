@@ -40,6 +40,7 @@ typedef enum
 struct SDL_PrivateVideoData {
     HBITMAP screen_bmp;
     HPALETTE screen_pal;
+    LOGPALETTE *screen_logpal;
 
     int allow_screensaver;
 
@@ -58,6 +59,7 @@ struct SDL_PrivateVideoData {
 /* Old variable names */
 #define screen_bmp		(this->hidden->screen_bmp)
 #define screen_pal		(this->hidden->screen_pal)
+#define screen_logpal		(this->hidden->screen_logpal)
 #define SDL_nummodes		(this->hidden->SDL_nummodes)
 #define SDL_modelist		(this->hidden->SDL_modelist)
 

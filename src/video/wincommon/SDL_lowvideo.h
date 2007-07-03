@@ -84,6 +84,9 @@ extern BOOL SDL_windowid;
 */
 extern void WIN_FlushMessageQueue();
 
+/* Called by windows message loop when application is activated */
+extern void (*WIN_Activate)(_THIS, BOOL active, BOOL minimized);
+
 /* Called by windows message loop when system palette is available */
 extern void (*WIN_RealizePalette)(_THIS);
 
