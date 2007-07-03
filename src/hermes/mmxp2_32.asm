@@ -283,7 +283,7 @@ _convert_bgr555_cheat:
         
 	mov edx,ecx		           ; Save ecx 
 
-        and ecx,BYTE 0fffffff8h            ; clear lower three bits
+        and ecx,DWORD 0fffffff8h            ; clear lower three bits
 	jnz .L_OK
         jmp near .L2 
 
