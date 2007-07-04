@@ -61,10 +61,10 @@ main(int argc, char *argv[])
                 fprintf(stderr, "FAIL: %s\n", formats[i]);
                 ++errors;
             }
-            if(test[0]) {
+            if (test[0]) {
                 SDL_free(test[0]);
             }
-            if(test[1]) {
+            if (test[1]) {
                 SDL_free(test[1]);
             }
         }
