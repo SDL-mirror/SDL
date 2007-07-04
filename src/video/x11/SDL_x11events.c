@@ -722,6 +722,10 @@ printf("KeyPress (X11 keycode = 0x%X)\n", xevent.xkey.keycode);
 			static XComposeStatus state;
 			char keybuf[32];
 
+			keysym.scancode = keycode;
+			keysym.sym = X11_TranslateKeycode(SDL_Display, keycode);
+			keysym.mod = KMOD_NONE;
+			keysym.unicode = 0;
 			if ( XLookupString(&xevent.xkey,
 			                    keybuf, sizeof(keybuf),
 			                    NULL, &state) ) {
