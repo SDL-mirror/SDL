@@ -656,8 +656,8 @@ extern DECLSPEC char *SDLCALL SDL_iconv_string(const char *tocode,
                                                const char *fromcode,
                                                const char *inbuf,
                                                size_t inbytesleft);
-#define SDL_iconv_utf8_ascii(S)		SDL_iconv_string("ASCII", "UTF-8", S, SDL_strlen(S)+1)
-#define SDL_iconv_utf8_latin1(S)	SDL_iconv_string("LATIN1", "UTF-8", S, SDL_strlen(S)+1)
+#define SDL_iconv_utf8_ascii(S)		SDL_iconv_string("646", "UTF-8", S, SDL_strlen(S)+1)
+#define SDL_iconv_utf8_latin1(S)	SDL_iconv_string("8859-1", "UTF-8", S, SDL_strlen(S)+1)
 #define SDL_iconv_utf8_ucs2(S)		(Uint16 *)SDL_iconv_string("UCS-2", "UTF-8", S, SDL_strlen(S)+1)
 #define SDL_iconv_utf8_ucs4(S)		(Uint32 *)SDL_iconv_string("UCS-4", "UTF-8", S, SDL_strlen(S)+1)
 

@@ -110,29 +110,33 @@ static struct
     const char *name;
     int format;
 } encodings[] = {
-    {
-    "ASCII", ENCODING_ASCII}, {
-    "US-ASCII", ENCODING_ASCII}, {
-    "LATIN1", ENCODING_LATIN1}, {
-    "ISO-8859-1", ENCODING_LATIN1}, {
-    "UTF8", ENCODING_UTF8}, {
-    "UTF-8", ENCODING_UTF8}, {
-    "UTF16", ENCODING_UTF16}, {
-    "UTF-16", ENCODING_UTF16}, {
-    "UTF16BE", ENCODING_UTF16BE}, {
-    "UTF-16BE", ENCODING_UTF16BE}, {
-    "UTF16LE", ENCODING_UTF16LE}, {
-    "UTF-16LE", ENCODING_UTF16LE}, {
-    "UTF32", ENCODING_UTF32}, {
-    "UTF-32", ENCODING_UTF32}, {
-    "UTF32BE", ENCODING_UTF32BE}, {
-    "UTF-32BE", ENCODING_UTF32BE}, {
-    "UTF32LE", ENCODING_UTF32LE}, {
-    "UTF-32LE", ENCODING_UTF32LE}, {
-    "UCS2", ENCODING_UCS2}, {
-    "UCS-2", ENCODING_UCS2}, {
-    "UCS4", ENCODING_UCS4}, {
-"UCS-4", ENCODING_UCS4},};
+/* *INDENT-OFF* */
+    { "646", ENCODING_ASCII },
+    { "ASCII", ENCODING_ASCII },
+    { "US-ASCII", ENCODING_ASCII },
+    { "LATIN1", ENCODING_LATIN1 },
+    { "8859-1", ENCODING_LATIN1 },
+    { "ISO-8859-1", ENCODING_LATIN1 },
+    { "UTF8", ENCODING_UTF8 },
+    { "UTF-8", ENCODING_UTF8 },
+    { "UTF16", ENCODING_UTF16 },
+    { "UTF-16", ENCODING_UTF16 },
+    { "UTF16BE", ENCODING_UTF16BE },
+    { "UTF-16BE", ENCODING_UTF16BE },
+    { "UTF16LE", ENCODING_UTF16LE },
+    { "UTF-16LE", ENCODING_UTF16LE },
+    { "UTF32", ENCODING_UTF32 },
+    { "UTF-32", ENCODING_UTF32 },
+    { "UTF32BE", ENCODING_UTF32BE },
+    { "UTF-32BE", ENCODING_UTF32BE },
+    { "UTF32LE", ENCODING_UTF32LE },
+    { "UTF-32LE", ENCODING_UTF32LE },
+    { "UCS2", ENCODING_UCS2 },
+    { "UCS-2", ENCODING_UCS2 },
+    { "UCS4", ENCODING_UCS4 },
+    { "UCS-4", ENCODING_UCS4 },
+/* *INDENT-ON* */
+};
 
 SDL_iconv_t
 SDL_iconv_open(const char *tocode, const char *fromcode)
