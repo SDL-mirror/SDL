@@ -107,9 +107,11 @@ static struct {
 	const char *name;
 	int format;
 } encodings[] = {
+	{ "646",	ENCODING_ASCII },
 	{ "ASCII",	ENCODING_ASCII },
 	{ "US-ASCII",	ENCODING_ASCII },
 	{ "LATIN1",	ENCODING_LATIN1 },
+	{ "8859-1",	ENCODING_LATIN1 },
 	{ "ISO-8859-1",	ENCODING_LATIN1 },
 	{ "UTF8",	ENCODING_UTF8 },
 	{ "UTF-8",	ENCODING_UTF8 },

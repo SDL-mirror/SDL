@@ -53,12 +53,16 @@ int main(int argc, char *argv[])
 		for ( i = 0; i < SDL_arraysize(formats); ++i ) {
 			test[0] = SDL_iconv_string(formats[i], "UCS-4", ucs4, len);
 			test[1] = SDL_iconv_string("UCS-4", formats[i], test[0], len);
-			if ( SDL_memcmp(test[1], ucs4, len) != 0 ) {
+			if ( !test[1] || SDL_memcmp(test[1], ucs4, len) != 0 ) {
 				fprintf(stderr, "FAIL: %s\n", formats[i]);
 				++errors;
 			}
-			SDL_free(test[0]);
-			SDL_free(test[1]);
+			if ( test[0] ) {
+				SDL_free(test[0]);
+			}
+			if ( test[1] ) {
+				SDL_free(test[1]);
+			}
 		}
 		test[0] = SDL_iconv_string("UTF-8", "UCS-4", ucs4, len);
 		SDL_free(ucs4);
