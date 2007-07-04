@@ -772,6 +772,26 @@ int SDL_iconv_close(SDL_iconv_t cd)
 
 #endif /* !HAVE_ICONV */
 
+static const char *getlocale()
+{
+	const char *lang;
+
+	lang = SDL_getenv("LC_ALL");
+	if ( !lang ) {
+		lang = SDL_getenv("LC_CTYPE");
+	}
+	if ( !lang ) {
+		lang = SDL_getenv("LC_MESSAGES");
+	}
+	if ( !lang ) {
+		lang = SDL_getenv("LANG");
+	}
+	if ( !lang || SDL_strcmp(lang, "C") == 0 ) {
+		lang = "ASCII";
+	}
+	return lang;
+}
+
 char *SDL_iconv_string(const char *tocode, const char *fromcode, const char *inbuf, size_t inbytesleft)
 {
 	SDL_iconv_t cd;
@@ -781,6 +801,12 @@ char *SDL_iconv_string(const char *tocode, const char *fromcode, const char *inb
 	size_t outbytesleft;
 	size_t retCode = 0;
 
+	if ( !fromcode || !*fromcode ) {
+		fromcode = getlocale();
+	}
+	if ( !tocode || !*tocode ) {
+		tocode = getlocale();
+	}
 	cd = SDL_iconv_open(tocode, fromcode);
 	if ( cd == (SDL_iconv_t)-1 ) {
 		return NULL;

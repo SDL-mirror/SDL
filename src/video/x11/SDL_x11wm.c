@@ -257,13 +257,13 @@ void X11_SetCaptionNoLock(_THIS, const char *title, const char *icon)
 #endif
 
 	if ( title != NULL ) {
-		char *title_latin1 = SDL_iconv_utf8_latin1((char *)title);
-		if ( !title_latin1 ) {
+		char *title_locale = SDL_iconv_utf8_locale(title);
+		if ( !title_locale ) {
 			SDL_OutOfMemory();
 			return;
 		}
-		status = XStringListToTextProperty(&title_latin1, 1, &titleprop);
-		SDL_free(title_latin1);
+		status = XStringListToTextProperty(&title_locale, 1, &titleprop);
+		SDL_free(title_locale);
 		if ( status ) {
 			XSetTextProperty(SDL_Display, WMwindow, &titleprop, XA_WM_NAME);
 			XFree(titleprop.value);
@@ -280,13 +280,13 @@ void X11_SetCaptionNoLock(_THIS, const char *title, const char *icon)
 #endif
 	}
 	if ( icon != NULL ) {
-		char *icon_latin1 = SDL_iconv_utf8_latin1((char *)icon);
-		if ( !icon_latin1 ) {
+		char *icon_locale = SDL_iconv_utf8_locale(icon);
+		if ( !icon_locale ) {
 			SDL_OutOfMemory();
 			return;
 		}
-		status = XStringListToTextProperty(&icon_latin1, 1, &iconprop);
-		SDL_free(icon_latin1);
+		status = XStringListToTextProperty(&icon_locale, 1, &iconprop);
+		SDL_free(icon_locale);
 		if ( status ) {
 			XSetTextProperty(SDL_Display, WMwindow, &iconprop, XA_WM_ICON_NAME);
 			XFree(iconprop.value);
