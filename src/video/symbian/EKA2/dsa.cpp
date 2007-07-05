@@ -12,7 +12,7 @@ LOCAL_C TInt BytesPerPixel(TDisplayMode aMode)
 
 
 template<class T>
-class CBitmapSurface : public T
+NONSHARABLE_CLASS(CBitmapSurface) : public T
 	{
 public:
 	CBitmapSurface(RWsSession& aSession);
@@ -830,8 +830,9 @@ TInt CDsa::SetPalette(TInt aFirst, TInt aCount, TUint32* aPalette)
 
     
 CDsa::CDsa(RWsSession& aSession) : 
- 	iSession(aSession),
-  	iStateFlags(0)
+ 	iStateFlags(0),
+ 	iSession(aSession)
+  
 	{
 //	CActiveScheduler::Add(this);
 	iCFTable[0] = CopyMem;
