@@ -40,6 +40,8 @@ Thanks to everyone who made this possible, including:
 
 * Hannu Viitala for the EPOC port
 
+* Marcus Mertama for the S60 port.
+
 * Peter Valchev for nagging me about the OpenBSD port until I got it right. :)
 
 * Kent B Mein, for a place to do the IRIX port
