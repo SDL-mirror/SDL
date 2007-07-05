@@ -815,7 +815,7 @@ int SDL_RegisterApp(char *name, Uint32 style, void *hInst)
 		/* WinCE uses the UNICODE version */
 		SDL_Appname = SDL_iconv_utf8_ucs2(name);
 #else
-		SDL_Appname = SDL_iconv_utf8_latin1(name);
+		SDL_Appname = SDL_iconv_utf8_locale(name);
 #endif /* _WIN32_WCE */
 		SDL_Appstyle = style;
 		SDL_Instance = hInst ? hInst : SDL_GetModuleHandle();
