@@ -46,14 +46,14 @@ fillerup(void *unused, Uint8 * stream, int len)
 
     /* Go! */
     while (waveleft <= len) {
-        SDL_MixAudio(stream, waveptr, waveleft, SDL_MIX_MAXVOLUME);
+        SDL_memcpy(stream, waveptr, waveleft);
         stream += waveleft;
         len -= waveleft;
         waveptr = wave.sound;
         waveleft = wave.soundlen;
         wave.soundpos = 0;
     }
-    SDL_MixAudio(stream, waveptr, len, SDL_MIX_MAXVOLUME);
+    SDL_memcpy(stream, waveptr, len);
     wave.soundpos += len;
 }
 
