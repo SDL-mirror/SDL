@@ -117,6 +117,13 @@ static AudioBootStrap *bootstrap[] = {
 };
 SDL_AudioDevice *current_audio = NULL;
 
+/*
+ * If non-zero, use legacy behaviour (memset the callback buffer before call).
+ * Changed to NOT initializing the buffer before the callback in 1.2.12.
+ * Set environment SDL_AUDIO_MUST_INIT_BUFFERS=1 to get old behaviour.
+ */
+static int must_init_callback_buffer = 0;
+
 /* Various local functions */
 int SDL_AudioInit(const char *driver_name);
 void SDL_AudioQuit(void);
@@ -190,7 +197,10 @@ int SDLCALL SDL_RunAudio(void *audiop)
 				stream = audio->fake_stream;
 			}
 		}
-		SDL_memset(stream, silence, stream_len);
+
+		if ( must_init_callback_buffer ) {
+			SDL_memset(stream, silence, stream_len);
+		}
 
 		if ( ! audio->paused ) {
 			SDL_mutexP(audio->mixer_lock);
@@ -300,6 +310,9 @@ int SDL_AudioInit(const char *driver_name)
 {
 	SDL_AudioDevice *audio;
 	int i = 0, idx;
+	const char *envr = SDL_getenv("SDL_AUDIO_MUST_INIT_BUFFERS");
+
+	must_init_callback_buffer = ((envr != NULL) && (SDL_atoi(envr)));
 
 	/* Check to make sure we don't overwrite 'current_audio' */
 	if ( current_audio != NULL ) {
