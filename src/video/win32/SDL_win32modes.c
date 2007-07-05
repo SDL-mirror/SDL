@@ -110,7 +110,7 @@ WIN_GetDisplayMode(LPCTSTR deviceName, DWORD index, SDL_DisplayMode * mode)
     return SDL_TRUE;
 }
 
-static void
+static SDL_bool
 WIN_AddDisplay(LPTSTR DeviceName)
 {
     SDL_VideoDisplay display;
@@ -121,12 +121,12 @@ WIN_AddDisplay(LPTSTR DeviceName)
     printf("Display: %s\n", WIN_StringToUTF8(DeviceName));
 #endif
     if (!WIN_GetDisplayMode(DeviceName, ENUM_CURRENT_SETTINGS, &mode)) {
-        return;
+        return SDL_FALSE;
     }
 
     displaydata = (SDL_DisplayData *) SDL_malloc(sizeof(*displaydata));
     if (!displaydata) {
-        return;
+        return SDL_FALSE;
     }
     SDL_memcpy(displaydata->DeviceName, DeviceName,
                sizeof(displaydata->DeviceName));
@@ -136,13 +136,14 @@ WIN_AddDisplay(LPTSTR DeviceName)
     display.current_mode = mode;
     display.driverdata = displaydata;
     SDL_AddVideoDisplay(&display);
+    return SDL_TRUE;
 }
 
 void
 WIN_InitModes(_THIS)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
-    DWORD i, j;
+    DWORD i, j, count;
     DISPLAY_DEVICE device;
 
     device.cb = sizeof(device);
@@ -159,6 +160,7 @@ WIN_InitModes(_THIS)
 #ifdef DEBUG_MODES
         printf("Device: %s\n", WIN_StringToUTF8(DeviceName));
 #endif
+        count = 0;
         for (j = 0;; ++j) {
             if (!EnumDisplayDevices(DeviceName, j, &device, 0)) {
                 break;
@@ -166,9 +168,9 @@ WIN_InitModes(_THIS)
             if (!(device.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP)) {
                 continue;
             }
-            WIN_AddDisplay(device.DeviceName);
+            count += WIN_AddDisplay(device.DeviceName);
         }
-        if (j == 0) {
+        if (count == 0) {
             WIN_AddDisplay(DeviceName);
         }
     }
