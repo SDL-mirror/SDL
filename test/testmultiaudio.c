@@ -21,12 +21,12 @@ play_through_once(void *arg, Uint8 * stream, int len)
     if (cpy > waveleft)
         cpy = waveleft;
 
-    memcpy(stream, waveptr, cpy);
+    SDL_memcpy(stream, waveptr, cpy);
     len -= cpy;
     cbd->soundpos += cpy;
     if (len > 0) {
         stream += cpy;
-        memset(stream, spec.silence, len);
+        SDL_memset(stream, spec.silence, len);
         cbd->done++;
     }
 }
@@ -51,7 +51,7 @@ test_multi_audio(int devcount)
         printf("playing on device #%d: ('%s')...", i, devname);
         fflush(stdout);
 
-        memset(&cbd[0], '\0', sizeof(callback_data));
+        SDL_memset(&cbd[0], '\0', sizeof(callback_data));
         spec.userdata = &cbd[0];
         cbd[0].dev = SDL_OpenAudioDevice(devname, 0, &spec, NULL);
         if (cbd[0].dev == 0) {
@@ -66,7 +66,7 @@ test_multi_audio(int devcount)
         }
     }
 
-    memset(cbd, '\0', sizeof(cbd));
+    SDL_memset(cbd, '\0', sizeof(cbd));
 
     printf("playing on all devices...\n");
     for (i = 0; i < devcount; i++) {
