@@ -1078,33 +1078,6 @@ static int X11_CreateWindow(_THIS, SDL_Surface *screen,
 		}
 	}
 
-	/* Update the internal keyboard state */
-	X11_SetKeyboardState(SDL_Display, NULL);
-
-	/* When the window is first mapped, ignore non-modifier keys */
-	{
-		Uint8 *keys = SDL_GetKeyState(NULL);
-		for ( i = 0; i < SDLK_LAST; ++i ) {
-			switch (i) {
-			    case SDLK_NUMLOCK:
-			    case SDLK_CAPSLOCK:
-			    case SDLK_LCTRL:
-			    case SDLK_RCTRL:
-			    case SDLK_LSHIFT:
-			    case SDLK_RSHIFT:
-			    case SDLK_LALT:
-			    case SDLK_RALT:
-			    case SDLK_LMETA:
-			    case SDLK_RMETA:
-			    case SDLK_MODE:
-				break;
-			    default:
-				keys[i] = SDL_RELEASED;
-				break;
-			}
-		}
-	}
-
 	/* Map them both and go fullscreen, if requested */
 	if ( ! SDL_windowid ) {
 		XMapWindow(SDL_Display, SDL_Window);
@@ -1182,6 +1155,34 @@ SDL_Surface *X11_SetVideoMode(_THIS, SDL_Surface *current,
 		if (X11_CreateWindow(this,current,width,height,bpp,flags) < 0) {
 			current = NULL;
 			goto done;
+		}
+	}
+
+	/* Update the internal keyboard state */
+	X11_SetKeyboardState(SDL_Display, NULL);
+
+	/* When the window is first mapped, ignore non-modifier keys */
+	if ( !current->w && !current->h ) {
+		Uint8 *keys = SDL_GetKeyState(NULL);
+		int i;
+		for ( i = 0; i < SDLK_LAST; ++i ) {
+			switch (i) {
+			    case SDLK_NUMLOCK:
+			    case SDLK_CAPSLOCK:
+			    case SDLK_LCTRL:
+			    case SDLK_RCTRL:
+			    case SDLK_LSHIFT:
+			    case SDLK_RSHIFT:
+			    case SDLK_LALT:
+			    case SDLK_RALT:
+			    case SDLK_LMETA:
+			    case SDLK_RMETA:
+			    case SDLK_MODE:
+				break;
+			    default:
+				keys[i] = SDL_RELEASED;
+				break;
+			}
 		}
 	}
 
