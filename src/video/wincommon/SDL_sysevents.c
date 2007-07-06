@@ -520,12 +520,12 @@ LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 						break;
 					case WM_XBUTTONDOWN:
 						xbuttonval = GET_XBUTTON_WPARAM(wParam);
-						button = SDL_BUTTON_WHEELRIGHT + xbuttonval;
+						button = SDL_BUTTON_WHEELDOWN + xbuttonval;
 						state = SDL_PRESSED;
 						break;
 					case WM_XBUTTONUP:
 						xbuttonval = GET_XBUTTON_WPARAM(wParam);
-						button = SDL_BUTTON_WHEELRIGHT + xbuttonval;
+						button = SDL_BUTTON_WHEELDOWN + xbuttonval;
 						state = SDL_RELEASED;
 						break;
 					default:

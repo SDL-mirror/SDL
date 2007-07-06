@@ -294,23 +294,12 @@ SDL_WarpMouse((int)center.x*2-1,(int)center.y*2-1);
 			float x, y;
 			x = y = 0;
 			if (msg->FindFloat("be:wheel_delta_x", &x) == B_OK && msg->FindFloat("be:wheel_delta_y", &y) == B_OK) {
-				if ( y ) {
-					if (y < 0) {
-						SDL_PrivateMouseButton(SDL_PRESSED, SDL_BUTTON_WHEELDOWN, 0, 0);
-						SDL_PrivateMouseButton(SDL_RELEASED, SDL_BUTTON_WHEELDOWN, 0, 0);
-					} else {
-						SDL_PrivateMouseButton(SDL_PRESSED, SDL_BUTTON_WHEELUP, 0, 0);
-						SDL_PrivateMouseButton(SDL_RELEASED, SDL_BUTTON_WHEELUP, 0, 0);
-					}
-				}
-				if ( x ) {
-					if (x < 0) {
-						SDL_PrivateMouseButton(SDL_PRESSED, SDL_BUTTON_WHEELRIGHT, 0, 0);
-						SDL_PrivateMouseButton(SDL_RELEASED, SDL_BUTTON_WHEELRIGHT, 0, 0);
-					} else {
-						SDL_PrivateMouseButton(SDL_PRESSED, SDL_BUTTON_WHEELLEFT, 0, 0);
-						SDL_PrivateMouseButton(SDL_RELEASED, SDL_BUTTON_WHEELLEFT, 0, 0);
-					}
+				if (x < 0 || y < 0) {
+					SDL_PrivateMouseButton(SDL_PRESSED, SDL_BUTTON_WHEELDOWN, 0, 0);
+					SDL_PrivateMouseButton(SDL_RELEASED, SDL_BUTTON_WHEELDOWN, 0, 0);
+				} else if (x > 0 || y > 0) {
+					SDL_PrivateMouseButton(SDL_PRESSED, SDL_BUTTON_WHEELUP, 0, 0);
+					SDL_PrivateMouseButton(SDL_RELEASED, SDL_BUTTON_WHEELUP, 0, 0);
 				}
 			}
 			break;
