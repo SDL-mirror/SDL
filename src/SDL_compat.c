@@ -252,46 +252,33 @@ SDL_CompatEventFilter(void *userdata, SDL_Event * event)
             int selected;
             int x, y;
 
+            if (event->wheel.y == 0) {
+                break;
+            }
+
             selected = SDL_SelectMouse(event->wheel.which);
             SDL_GetMouseState(&x, &y);
             SDL_SelectMouse(selected);
 
+            if (event->wheel.y > 0) {
+                button = SDL_BUTTON_WHEELUP;
+            } else {
+                button = SDL_BUTTON_WHEELDOWN;
+            }
+
             fake.button.which = event->wheel.windowID;
+            fake.button.button = button;
             fake.button.x = x;
             fake.button.y = y;
             fake.button.windowID = event->wheel.windowID;
 
-            if (event->wheel.y) {
-                if (event->wheel.y > 0) {
-                    fake.button.button = SDL_BUTTON_WHEELUP;
-                } else {
-                    fake.button.button = SDL_BUTTON_WHEELDOWN;
-                }
+            fake.type = SDL_MOUSEBUTTONDOWN;
+            fake.button.state = SDL_PRESSED;
+            SDL_PushEvent(&fake);
 
-                fake.type = SDL_MOUSEBUTTONDOWN;
-                fake.button.state = SDL_PRESSED;
-                SDL_PushEvent(&fake);
-
-                fake.type = SDL_MOUSEBUTTONUP;
-                fake.button.state = SDL_RELEASED;
-                SDL_PushEvent(&fake);
-            }
-            if (event->wheel.x) {
-                if (event->wheel.y > 0) {
-                    fake.button.button = SDL_BUTTON_WHEELLEFT;
-                } else {
-                    fake.button.button = SDL_BUTTON_WHEELRIGHT;
-                }
-
-                fake.type = SDL_MOUSEBUTTONDOWN;
-                fake.button.state = SDL_PRESSED;
-                SDL_PushEvent(&fake);
-
-                fake.type = SDL_MOUSEBUTTONUP;
-                fake.button.state = SDL_RELEASED;
-                SDL_PushEvent(&fake);
-            }
-
+            fake.type = SDL_MOUSEBUTTONUP;
+            fake.button.state = SDL_RELEASED;
+            SDL_PushEvent(&fake);
             break;
         }
 
