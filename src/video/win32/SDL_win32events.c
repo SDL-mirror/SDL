@@ -645,7 +645,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             int motion = (short) HIWORD(wParam);
 
             index = data->videodata->mouse;
-            SDL_SendMouseWheel(index, motion);
+            SDL_SendMouseWheel(index, 0, motion);
         }
         return (0);
 

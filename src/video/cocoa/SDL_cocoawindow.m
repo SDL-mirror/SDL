@@ -274,7 +274,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
     int index;
 
     index = _data->videodata->mouse;
-    SDL_SendMouseWheel(index, (int)([theEvent deltaY]+0.9f));
+    SDL_SendMouseWheel(index, (int)([theEvent deltaX]+0.9f), (int)([theEvent deltaY]+0.9f));
 }
 
 @end

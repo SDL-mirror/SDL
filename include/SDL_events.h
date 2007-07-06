@@ -199,7 +199,8 @@ typedef struct SDL_MouseWheelEvent
 {
     Uint8 type;             /**< SDL_MOUSEWHEEL */
     Uint8 which;            /**< The mouse device index */
-    int motion;             /**< The direction and distance scrolled */
+    int x;                  /**< The amount scrolled horizontally */
+    int y;                  /**< The amount scrolled vertically */
     SDL_WindowID windowID;  /**< The window with mouse focus, if any */
 } SDL_MouseWheelEvent;
 
