@@ -932,13 +932,24 @@ void QZ_PumpEvents (_THIS)
                         Uint8 button;
                         dy = [ event deltaY ];
                         dx = [ event deltaX ];
-                        if ( dy > 0.0 || dx > 0.0 ) /* Scroll up */
-                            button = SDL_BUTTON_WHEELUP;
-                        else /* Scroll down */
-                            button = SDL_BUTTON_WHEELDOWN;
-                        /* For now, wheel is sent as a quick down+up */
-                        SDL_PrivateMouseButton (SDL_PRESSED, button, 0, 0);
-                        SDL_PrivateMouseButton (SDL_RELEASED, button, 0, 0);
+			if ( dy ) {
+				if ( dy > 0.0 ) /* Scroll up */
+				    button = SDL_BUTTON_WHEELUP;
+				else /* Scroll down */
+				    button = SDL_BUTTON_WHEELDOWN;
+				/* For now, wheel is sent as a quick down+up */
+				SDL_PrivateMouseButton (SDL_PRESSED, button, 0, 0);
+				SDL_PrivateMouseButton (SDL_RELEASED, button, 0, 0);
+			}
+			if ( dx ) {
+				if ( dx > 0.0 ) /* Scroll left */
+				    button = SDL_BUTTON_WHEELLEFT;
+				else /* Scroll right */
+				    button = SDL_BUTTON_WHEELRIGHT;
+				/* For now, wheel is sent as a quick down+up */
+				SDL_PrivateMouseButton (SDL_PRESSED, button, 0, 0);
+				SDL_PrivateMouseButton (SDL_RELEASED, button, 0, 0);
+			}
                     }
                     break;
                 case NSKeyUp:
