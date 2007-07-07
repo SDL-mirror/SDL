@@ -113,6 +113,7 @@ public:
 				SDL_GLView = new BGLView(Bounds(), "SDL GLView",
 					 	B_FOLLOW_ALL_SIDES, (B_WILL_DRAW|B_FRAME_EVENTS),
 					 	gl_flags);
+				SDL_GLView->EnableDirectMode(true);
 			}
 			if ( the_view != SDL_GLView ) {
 				if ( the_view ) {
