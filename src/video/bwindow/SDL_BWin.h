@@ -149,6 +149,34 @@ public:
 	virtual void SetBitmap(BBitmap *bitmap) {
 		SDL_View->SetBitmap(bitmap);
 	}
+	virtual void SetXYOffset(int x, int y) {
+#if SDL_VIDEO_OPENGL
+		if ( the_view == SDL_GLView ) {
+			return;
+		}
+#endif
+		SDL_View->SetXYOffset(x, y);
+	}
+	virtual void GetXYOffset(int &x, int &y) {
+#if SDL_VIDEO_OPENGL
+		if ( the_view == SDL_GLView ) {
+			x = 0;
+			y = 0;
+			return;
+		}
+#endif
+		SDL_View->GetXYOffset(x, y);
+	}
+	virtual void GetXYOffset(float &x, float &y) {
+#if SDL_VIDEO_OPENGL
+		if ( the_view == SDL_GLView ) {
+			x = 0.0f;
+			y = 0.0f;
+			return;
+		}
+#endif
+		SDL_View->GetXYOffset(x, y);
+	}
 	virtual bool BeginDraw(void) {
 		return(Lock());
 	}

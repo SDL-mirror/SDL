@@ -274,7 +274,13 @@ int BE_DisplayYUVOverlay(_THIS, SDL_Overlay* overlay, SDL_Rect* src, SDL_Rect *d
         return 0;
     }
     BView * bview = overlay->hwdata->bview;
-    bview->MoveTo(dst->x,dst->y);
+    if (SDL_Win->IsFullScreen()) {
+    	int left,top;
+    	SDL_Win->GetXYOffset(left,top);
+	    bview->MoveTo(left+dst->x,top+dst->y);
+    } else {
+	    bview->MoveTo(dst->x,dst->y);
+    }
     bview->ResizeTo(dst->w,dst->h);
     bview->Flush();
 	if (overlay->hwdata->first_display) {

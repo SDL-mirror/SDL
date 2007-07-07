@@ -128,15 +128,14 @@ void BE_FreeWMCursor(_THIS, WMcursor *cursor)
 /* Implementation by Christian Bauer <cbauer@student.physik.uni-mainz.de> */
 void BE_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
 {
-	if (_this->screen && (_this->screen->flags & SDL_FULLSCREEN)) {
-		SDL_PrivateMouseMotion(0, 0, x, y);
-	} else {
-		BPoint pt(x, y);
-		SDL_Win->Lock();
-		SDL_Win->ConvertToScreen(&pt);
-		SDL_Win->Unlock();
-		set_mouse_position((int32)pt.x, (int32)pt.y);
-	}
+	BPoint pt;
+	SDL_Win->GetXYOffset(pt.x, pt.y);
+	pt.x += x;
+	pt.y += y;
+	SDL_Win->Lock();
+	SDL_Win->ConvertToScreen(&pt);
+	SDL_Win->Unlock();
+	set_mouse_position((int32)pt.x, (int32)pt.y);
 }
 
 /* Check to see if we need to enter or leave mouse relative mode */

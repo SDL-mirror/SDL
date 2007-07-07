@@ -166,62 +166,61 @@ void SDL_BWin::DispatchMessage(BMessage *msg, BHandler *target)
 			BPoint where;
 			int32 transit;
 			if (msg->FindPoint("where", &where) == B_OK && msg->FindInt32("be:transit", &transit) == B_OK) {
+				int x, y;
 
-//BeSman: I need another method for cursor catching !!!
-if(view->input_grab != SDL_GRAB_OFF)
-{			
-			BPoint center;
-			center.x = (SDL_VideoSurface->w/2);
-			center.y = (SDL_VideoSurface->h/2);
-			BPoint delta = where - center;
-if(delta.x > center.x)
-SDL_WarpMouse((int)center.x*2,(int)where.y);
+				GetXYOffset(x, y);
+				x = (int)where.x - x;
+				y = (int)where.y - y;
 
-if(delta.x < -center.x)
-SDL_WarpMouse(0,(int)where.y);
-
-if(delta.y > center.y)
-SDL_WarpMouse((int)where.x,(int)center.y*2);
-
-if(delta.y < -center.y)
-SDL_WarpMouse((int)where.x,0);
-
-
-if((delta.x-1 < -center.x)&&(delta.y-1 < -center.y))
-SDL_WarpMouse(1,1);
-
-if((delta.x-1 < -center.x)&&(delta.y+1 > center.y))
-SDL_WarpMouse(1,(int)center.y*2-1);
-
-if((delta.x+1 > center.x)&&(delta.y-1 < -center.y))
-SDL_WarpMouse((int)center.x*2-1,1);
-
-if((delta.x+1 > center.x)&&(delta.y+1 > center.y))
-SDL_WarpMouse((int)center.x*2-1,(int)center.y*2-1);				
-
-}
+				//BeSman: I need another method for cursor catching !!!
+				if (view->input_grab != SDL_GRAB_OFF)
+				{
+					bool clipped = false;
+					if ( x < 0 ) {
+						x = 0;
+						clipped = true;
+					} else if ( x >= SDL_VideoSurface->w ) {
+						x = (SDL_VideoSurface->w-1);
+						clipped = true;
+					}
+					if ( y < 0 ) {
+						y = 0;
+						clipped = true;
+					} else if ( y >= SDL_VideoSurface->h ) {
+						y = (SDL_VideoSurface->h-1);
+						clipped = true;
+					}
+					if ( clipped ) {
+						BPoint edge;
+						GetXYOffset(edge.x, edge.y);
+						edge.x += x;
+						edge.y += y;
+						ConvertToScreen(&edge);
+						set_mouse_position((int)edge.x, (int)edge.y);
+					}
+					transit = B_INSIDE_VIEW;
+				}
 				if (transit == B_EXITED_VIEW) {
 					if ( SDL_GetAppState() & SDL_APPMOUSEFOCUS ) {
 						SDL_PrivateAppActive(0, SDL_APPMOUSEFOCUS);
-				//		be_app->SetCursor(B_HAND_CURSOR);
+						be_app->SetCursor(B_HAND_CURSOR);
 					}
 				} else {
-		
-					int x, y;
-					if ( ! (SDL_GetAppState() & SDL_APPMOUSEFOCUS) ) {
+					if ( !(SDL_GetAppState() & SDL_APPMOUSEFOCUS) ) {
 						SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS);
 						SDL_SetCursor(NULL);
 					}
-					x = (int)where.x;
-					y = (int)where.y;
 
 					if ( mouse_relative ) {
-						BPoint center;
-						center.x = (SDL_VideoSurface->w/2);
-						center.y = (SDL_VideoSurface->h/2);
-						x -= (int)center.x;
-						y -= (int)center.y;
+						int half_w = (SDL_VideoSurface->w/2);
+						int half_h = (SDL_VideoSurface->h/2);
+						x -= half_w;
+						y -= half_h;
 						if ( x || y ) {
+							BPoint center;
+							GetXYOffset(center.x, center.y);
+							center.x += half_w;
+							center.y += half_h;
 							ConvertToScreen(&center);
 							set_mouse_position((int)center.x, (int)center.y);
 							SDL_PrivateMouseMotion(0, 1, x, y);

@@ -366,9 +366,8 @@ static bool BE_FindClosestFSMode(_THIS, int width, int height, int bpp,
 		--i;	/* We went too far */
 	}
 
-/*  BeSman::We dont want to use a Desktop resolution */
-//	width = modes[i]->w;
-//	height = modes[i]->h;      
+	width = modes[i]->w;
+	height = modes[i]->h;      
 
 	bscreen.GetModeList(&dmodes, &nmodes);
 	for ( i = 0; i < nmodes; ++i ) {
@@ -455,6 +454,12 @@ static int BE_SetFullScreen(_THIS, SDL_Surface *screen, int fullscreen)
 		cx = (bounds.IntegerWidth() - width)/2;
 		cy = (bounds.IntegerHeight() - height)/2;
 
+		if ( fullscreen ) {
+			/* Set offset for drawing */
+			SDL_Win->SetXYOffset(cx, cy);
+		} else {
+			SDL_Win->SetXYOffset(0, 0);
+		}
 		if ( ! needs_unlock || was_fullscreen ) {
 			/* Center the window the first time */
 			SDL_Win->MoveTo(cx, cy);
