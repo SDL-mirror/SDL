@@ -380,6 +380,9 @@ SDL_Surface * NX_SetVideoMode (_THIS, SDL_Surface * current,
         current -> pitch = SDL_CalculatePitch (current) ;
         NX_ResizeImage (this, current, flags) ;
     }
+
+    /* Clear these flags and set them only if they are in the new set. */
+    current -> flags &= ~(SDL_RESIZABLE|SDL_NOFRAME);
     current -> flags |= (flags & (SDL_RESIZABLE | SDL_NOFRAME)) ;
 
   done:
