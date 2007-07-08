@@ -238,10 +238,7 @@ extern DECLSPEC void SDLCALL SDL_qsort(void *base, size_t nmemb, size_t size,
 extern DECLSPEC void * SDLCALL SDL_memset(void *dst, int c, size_t len);
 #endif
 
-/* We can count on memset existing on Mac OS X and being well-tuned. */
-#if defined(__MACH__) && defined(__APPLE__)
-#define SDL_memset4(dst, val, len) memset(dst, val, (len)*4)
-#elif defined(__GNUC__) && defined(i386)
+#if defined(__GNUC__) && defined(i386)
 #define SDL_memset4(dst, val, len)				\
 do {								\
 	int u0, u1, u2;						\
