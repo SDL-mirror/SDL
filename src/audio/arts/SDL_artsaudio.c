@@ -23,6 +23,11 @@
 
 /* Allow access to a raw mixing buffer */
 
+#ifdef HAVE_SIGNAL_H
+#include <signal.h>
+#endif
+#include <unistd.h>
+
 #include "SDL_timer.h"
 #include "SDL_audio.h"
 #include "../SDL_audiomem.h"
