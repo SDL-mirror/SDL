@@ -33,6 +33,8 @@
 #define DEFAULT_OPENGL	"/usr/X11R6/lib/libGL.1.dylib"
 #elif defined(__QNXNTO__)
 #define DEFAULT_OPENGL	"libGL.so.3"
+#elif defined(__OpenBSD__)
+#define DEFAULT_OPENGL	"libGL.so.4.0"
 #else
 #define DEFAULT_OPENGL	"libGL.so.1"
 #endif
