@@ -122,7 +122,7 @@ static DFBResult CreateYUVSurface(_THIS, struct private_yuvhwdata *hwdata,
   ret = layer->SetCooperativeLevel (layer, DLSCL_ADMINISTRATIVE);
   if (ret)
     {
-      SetDirectFBError("IDirectFBDisplayLayer::SetCooperativeLevel() failed", ret);
+      SetDirectFBerror("IDirectFBDisplayLayer::SetCooperativeLevel() failed", ret);
       layer->Release (layer);
       return ret;
     }
