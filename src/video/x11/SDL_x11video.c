@@ -538,8 +538,17 @@ static void create_aux_windows(_THIS)
 				   whenever we re-create an IC.  */
 				unsigned long mask = 0;
 				char *ret = pXGetICValues(SDL_IC, XNFilterEvents, &mask, NULL);
-				XSelectInput(SDL_Display, WMwindow, app_event_mask | mask);
-				XSetICFocus(SDL_IC);
+				if (ret != NULL) {
+					XUnsetICFocus(SDL_IC);
+					XDestroyIC(SDL_IC);
+					SDL_IC = NULL;
+					SDL_SetError("no input context could be created");
+					XCloseIM(SDL_IM);
+					SDL_IM = NULL;
+				} else {
+					XSelectInput(SDL_Display, WMwindow, app_event_mask | mask);
+					XSetICFocus(SDL_IC);
+				}
 			}
 		}
 	}
