@@ -129,9 +129,6 @@ printf("KeyRelease (X11 keycode = 0x%X)\n", xkey.keycode);
 		posted = SDL_PrivateKeyboard(SDL_RELEASED, &keysym);
 	    }
 	    break;
-
-	    break;
-
 	}
 	return(posted);
 }
