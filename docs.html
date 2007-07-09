@@ -52,10 +52,6 @@ SDL 1.2.12 is a minor bug fix release.
 <P>
 	Unofficial support for the Nintendo DS platform has been added.
 </P>
-<P>
-	Audio callbacks must now initialize the entire stream: applications must write silence to the stream if they can't supply data, and not mix against the buffer, as it may be random data.
-	Users may set SDL_AUDIO_MUST_INIT_BUFFERS to retain the old behaviour, but apps should not depend on this environment variable: just add a memset() at the start of your audio callback instead if you need it.
-</P>
 </BLOCKQUOTE>
 
 <H3> Unix Notes </H3>
