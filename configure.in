@@ -578,10 +578,10 @@ AC_HELP_STRING([--enable-nas], [support the NAS audio API [[default=yes]]]),
     if test x$enable_audio = xyes -a x$enable_nas = xyes; then
         AC_MSG_CHECKING(for NAS audio support)
         have_nas=no
-        if test -r /usr/X11R6/include/audio/audiolib.h; then
+        if true; then
             have_nas=yes
-            NAS_CFLAGS="-I/usr/X11R6/include/"
-            NAS_LIBS="-L/usr/X11R6/lib -laudio -lXt"
+            NAS_CFLAGS=""
+            NAS_LIBS="-laudio -lXt"
 
         dnl On IRIX, the NAS includes are in a different directory,
         dnl and libnas must be explicitly linked in
@@ -1761,7 +1761,7 @@ AC_HELP_STRING([--enable-pthread-sem], [use pthread semaphores [[default=yes]]])
             ;;
         *-*-netbsd*)
             pthread_cflags="-D_REENTRANT -D_THREAD_SAFE"
-            pthread_lib="-L/usr/lib -lpthread"
+            pthread_lib="-lpthread"
             ;;
         *-*-openbsd*)
             pthread_cflags="-D_REENTRANT"
@@ -2104,8 +2104,13 @@ CheckUSBHID()
               #if defined(HAVE_USB_H)
               #include <usb.h>
               #endif
+	      #ifdef __DragonFly__
+              #include <bus/usb/usb.h>
+              #include <bus/usb/usbhid.h>
+	      #else
               #include <dev/usb/usb.h>
               #include <dev/usb/usbhid.h>
+	      #endif
               #if defined(HAVE_USBHID_H)
               #include <usbhid.h>
               #elif defined(HAVE_LIBUSB_H)
