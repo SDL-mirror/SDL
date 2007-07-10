@@ -76,6 +76,12 @@ typedef struct SDL_RWops
         {
             int append;
             void *h;
+            struct
+            {
+                void *data;
+                int size;
+                int left;
+            } buffer;
         } win32io;
 #endif
 #ifdef HAVE_STDIO_H
