@@ -74,8 +74,8 @@ BUILD_CFLAGS="$CFLAGS $CPPFLAGS"
 EXTRA_CFLAGS="$INCLUDE $BASE_CFLAGS"
 BUILD_LDFLAGS="$LDFLAGS"
 EXTRA_LDFLAGS="$BASE_LDFLAGS"
-# I can't remember why I added this.  I'm sure it'll come to me...
-#for path in /usr/local; do
+## These are common directories to find software packages
+#for path in /usr/freeware /usr/pkg /usr/X11R6 /usr/local; do
 #    if test -d $path/include; then
 #        EXTRA_CFLAGS="$EXTRA_CFLAGS -I$path/include"
 #    fi
@@ -566,7 +566,7 @@ AC_HELP_STRING([--enable-nas-shared], [dynamically load NAS audio support [[defa
                 AC_MSG_WARN([You must have SDL_LoadObject() support for dynamic NAS loading])
             fi
             if test x$have_loadso = xyes && \
-               test x$enable_nas_shared = xyes && test x$alsa_lib != x; then
+               test x$enable_nas_shared = xyes && test x$nas_lib != x; then
                 AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_NAS_DYNAMIC, "$nas_lib")
             else
                 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $NAS_LIBS"
