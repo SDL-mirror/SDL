@@ -24,6 +24,8 @@
 /* Handle the event stream, converting DGA events into SDL events */
 
 #include <stdio.h>
+#define NEED_EVENTS
+#define NEED_REPLIES
 #include <X11/Xlib.h>
 #include "../Xext/extensions/xf86dga.h"
 
