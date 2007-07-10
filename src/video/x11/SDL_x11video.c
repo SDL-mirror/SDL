@@ -168,8 +168,8 @@ X11_CreateDevice(int devindex)
     device->VideoQuit = X11_VideoQuit;
     device->GetDisplayModes = X11_GetDisplayModes;
     device->SetDisplayMode = X11_SetDisplayMode;
-//    device->SetDisplayGammaRamp = X11_SetDisplayGammaRamp;
-//    device->GetDisplayGammaRamp = X11_GetDisplayGammaRamp;
+    device->SetDisplayGammaRamp = X11_SetDisplayGammaRamp;
+    device->GetDisplayGammaRamp = X11_GetDisplayGammaRamp;
     device->PumpEvents = X11_PumpEvents;
 
     device->CreateWindow = X11_CreateWindow;
