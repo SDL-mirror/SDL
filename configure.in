@@ -576,12 +576,20 @@ CheckNAS()
 AC_HELP_STRING([--enable-nas], [support the NAS audio API [[default=yes]]]),
                   , enable_nas=yes)
     if test x$enable_audio = xyes -a x$enable_nas = xyes; then
+        AC_CHECK_HEADER(audio/audiolib.h, have_nas_hdr=yes)
+        AC_CHECK_LIB(audio, AuOpenServer, have_nas_lib=yes)
+
         AC_MSG_CHECKING(for NAS audio support)
         have_nas=no
-        if true; then
+
+        if test x$have_nas_hdr = xyes -a x$have_nas_lib = xyes; then
             have_nas=yes
-            NAS_CFLAGS=""
-            NAS_LIBS="-laudio -lXt"
+            NAS_LIBS="-laudio"
+
+        elif test -r /usr/X11R6/include/audio/audiolib.h; then
+            have_nas=yes
+            NAS_CFLAGS="-I/usr/X11R6/include/"
+            NAS_LIBS="-L/usr/X11R6/lib -laudio -lXt"
 
         dnl On IRIX, the NAS includes are in a different directory,
         dnl and libnas must be explicitly linked in
@@ -590,7 +598,9 @@ AC_HELP_STRING([--enable-nas], [support the NAS audio API [[default=yes]]]),
             have_nas=yes
             NAS_LIBS="-lnas -lXt"
         fi
+
         AC_MSG_RESULT($have_nas)
+
         if test x$have_nas = xyes; then
             AC_DEFINE(SDL_AUDIO_DRIVER_NAS)
             SOURCES="$SOURCES $srcdir/src/audio/nas/*.c"
