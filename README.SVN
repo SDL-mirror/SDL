@@ -7,7 +7,7 @@ at the Subversion website ( http://subversion.tigris.org/ ) for more
 information on using svn, where you can also download software for
 MacOS, Windows, and Unix systems.
 
-  svn checkout svn://libsdl.org/trunk/SDL
+  svn checkout http://svn.libsdl.org/trunk/SDL
 
 If you are building SDL with an IDE, you will need to copy the file
 include/SDL_config.h.default to include/SDL_config.h before building.
