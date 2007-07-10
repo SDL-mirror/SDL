@@ -91,10 +91,10 @@ static int SDLCALL win32_file_open(SDL_RWops *context, const char *filename, con
 		wchar_t *filenameW = SDL_stack_alloc(wchar_t, size);
 
 		if ( MultiByteToWideChar(CP_UTF8, 0, filename, -1, filenameW, size) == 0 ) {
-			SDL_SetError("Unable to convert filename to Unicode");
 			SDL_stack_free(filenameW);
 			SDL_free(context->hidden.win32io.buffer.data);
 			context->hidden.win32io.buffer.data = NULL;
+			SDL_SetError("Unable to convert filename to Unicode");
 			return -1;
 		}
 		h = CreateFile(filenameW, (w_right|r_right), (w_right)? 0 : FILE_SHARE_READ, 
@@ -113,9 +113,9 @@ static int SDLCALL win32_file_open(SDL_RWops *context, const char *filename, con
 #endif /* _WIN32_WCE */
 
 	if (h==INVALID_HANDLE_VALUE) {
-		SDL_SetError("Couldn't open %s",filename);
 		SDL_free(context->hidden.win32io.buffer.data);
 		context->hidden.win32io.buffer.data = NULL;
+		SDL_SetError("Couldn't open %s",filename);
 		return -2; /* failed (CreateFile) */
 	}
 	context->hidden.win32io.h = h;
