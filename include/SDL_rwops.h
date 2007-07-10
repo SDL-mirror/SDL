@@ -46,26 +46,29 @@ extern "C" {
 typedef struct SDL_RWops
 {
     /* Seek to 'offset' relative to whence, one of stdio's whence values:
-       SEEK_SET, SEEK_CUR, SEEK_END
+       RW_SEEK_SET, RW_SEEK_CUR, RW_SEEK_END
        Returns the final offset in the data source.
      */
-    int (SDLCALL * seek) (struct SDL_RWops * context, int offset, int whence);
+    long (SDLCALL * seek) (struct SDL_RWops * context, long offset,
+                           int whence);
 
     /* Read up to 'num' objects each of size 'objsize' from the data
        source to the area pointed at by 'ptr'.
-       Returns the number of objects read, or -1 if the read failed.
+       Returns the number of objects read, or 0 at error or end of file.
      */
-    int (SDLCALL * read) (struct SDL_RWops * context, void *ptr, int size,
-                          int maxnum);
+      size_t(SDLCALL * read) (struct SDL_RWops * context, void *ptr,
+                              size_t size, size_t maxnum);
 
     /* Write exactly 'num' objects each of size 'objsize' from the area
        pointed at by 'ptr' to data source.
-       Returns 'num', or -1 if the write failed.
+       Returns the number of objects written, or 0 at error or end of file.
      */
-    int (SDLCALL * write) (struct SDL_RWops * context, const void *ptr,
-                           int size, int num);
+      size_t(SDLCALL * write) (struct SDL_RWops * context, const void *ptr,
+                               size_t size, size_t num);
 
-    /* Close and free an allocated SDL_FSops structure */
+    /* Close and free an allocated SDL_RWops structure.
+       Returns 0 if successful or -1 on write error when flushing data.
+     */
     int (SDLCALL * close) (struct SDL_RWops * context);
 
     Uint32 type;
@@ -74,7 +77,7 @@ typedef struct SDL_RWops
 #ifdef __WIN32__
         struct
         {
-            int append;
+            SDL_bool append;
             void *h;
             struct
             {
@@ -87,7 +90,7 @@ typedef struct SDL_RWops
 #ifdef HAVE_STDIO_H
         struct
         {
-            int autoclose;
+            SDL_bool autoclose;
             FILE *fp;
         } stdio;
 #endif
