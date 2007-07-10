@@ -74,8 +74,8 @@ BUILD_CFLAGS="$CFLAGS $CPPFLAGS"
 EXTRA_CFLAGS="$INCLUDE $BASE_CFLAGS"
 BUILD_LDFLAGS="$LDFLAGS"
 EXTRA_LDFLAGS="$BASE_LDFLAGS"
-# I can't remember why I added this.  I'm sure it'll come to me...
-#for path in /usr/local; do
+## These are common directories to find software packages
+#for path in /usr/freeware /usr/pkg /usr/X11R6 /usr/local; do
 #    if test -d $path/include; then
 #        EXTRA_CFLAGS="$EXTRA_CFLAGS -I$path/include"
 #    fi
@@ -576,29 +576,23 @@ CheckNAS()
 AC_HELP_STRING([--enable-nas], [support the NAS audio API [[default=yes]]]),
                   , enable_nas=yes)
     if test x$enable_audio = xyes -a x$enable_nas = xyes; then
-        AC_CHECK_HEADER(audio/audiolib.h, have_nas_hdr=yes)
-        AC_CHECK_LIB(audio, AuOpenServer, have_nas_lib=yes)
+        save_LDFLAGS="$LDFLAGS"
+        LDFLAGS="$LDFLAGS -lXt -lm"
+        AC_CHECK_HEADER(audio/audiolib.h, have_audio_hdr=yes)
+        AC_CHECK_LIB(audio, AuOpenServer, have_audio_lib=yes)
+        AC_CHECK_HEADER(nas/audiolib.h, have_nas_hdr=yes)
+        AC_CHECK_LIB(nas, AuOpenServer, have_nas_lib=yes)
+        LDFLAGS="$save_LDFLAGS"
 
         AC_MSG_CHECKING(for NAS audio support)
         have_nas=no
-
-        if test x$have_nas_hdr = xyes -a x$have_nas_lib = xyes; then
+        if test x$have_audio_hdr = xyes -a x$have_audio_lib = xyes; then
             have_nas=yes
-            NAS_LIBS="-laudio"
-
-        elif test -r /usr/X11R6/include/audio/audiolib.h; then
-            have_nas=yes
-            NAS_CFLAGS="-I/usr/X11R6/include/"
-            NAS_LIBS="-L/usr/X11R6/lib -laudio -lXt"
-
-        dnl On IRIX, the NAS includes are in a different directory,
-        dnl and libnas must be explicitly linked in
-
-        elif test -r /usr/freeware/include/nas/audiolib.h; then
+            NAS_LIBS="-laudio -lXt"
+        elif test x$have_nas_hdr = xyes -a x$have_nas_lib = xyes; then
             have_nas=yes
             NAS_LIBS="-lnas -lXt"
-        fi
-
+	fi
         AC_MSG_RESULT($have_nas)
 
         if test x$have_nas = xyes; then
@@ -2114,13 +2108,13 @@ CheckUSBHID()
               #if defined(HAVE_USB_H)
               #include <usb.h>
               #endif
-	      #ifdef __DragonFly__
+              #ifdef __DragonFly__
               #include <bus/usb/usb.h>
               #include <bus/usb/usbhid.h>
-	      #else
+              #else
               #include <dev/usb/usb.h>
               #include <dev/usb/usbhid.h>
-	      #endif
+              #endif
               #if defined(HAVE_USBHID_H)
               #include <usbhid.h>
               #elif defined(HAVE_LIBUSB_H)
