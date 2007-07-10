@@ -57,18 +57,7 @@ win32_file_open(SDL_RWops * context, const char *filename, const char *mode)
     int a_mode;
 
     if (!context)
-        return -1;
-
-    context->hidden.win32io.h = INVALID_HANDLE_VALUE;   /* mark this as unusable */
-
-    context->hidden.win32io.buffer.data =
-        (char *) SDL_malloc(READAHEAD_BUFFER_SIZE);
-    if (!context->hidden.win32io.buffer.data) {
-        SDL_OutOfMemory();
-        return -1;
-    }
-    context->hidden.win32io.buffer.size = 0;
-    context->hidden.win32io.buffer.left = 0;
+        return -1;              /* failed (invalid call) */
 
     /* "r" = reading, file must exist */
     /* "w" = writing, truncate existing, file may not exist */
@@ -125,6 +114,16 @@ win32_file_open(SDL_RWops * context, const char *filename, const char *mode)
     }
     context->hidden.win32io.h = h;
     context->hidden.win32io.append = a_mode ? SDL_TRUE : SDL_FALSE;
+
+    context->hidden.win32io.buffer.data =
+        (char *) SDL_malloc(READAHEAD_BUFFER_SIZE);
+    if (!context->hidden.win32io.buffer.data) {
+        SDL_OutOfMemory();
+        CloseHandle(context->hidden.win32io.h);
+        return -1;
+    }
+    context->hidden.win32io.buffer.size = 0;
+    context->hidden.win32io.buffer.left = 0;
 
     return 0;                   /* ok */
 }
@@ -428,8 +427,7 @@ SDL_RWFromFile(const char *file, const char *mode)
     rwops = SDL_AllocRW();
     if (!rwops)
         return NULL;            /* SDL_SetError already setup by SDL_AllocRW() */
-    rwops->hidden.win32io.h = INVALID_HANDLE_VALUE;
-    if (win32_file_open(rwops, file, mode)) {
+    if (win32_file_open(rwops, file, mode) < 0) {
         SDL_FreeRW(rwops);
         return NULL;
     }
