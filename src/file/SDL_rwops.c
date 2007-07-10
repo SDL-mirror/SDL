@@ -124,7 +124,7 @@ win32_file_open(SDL_RWops * context, const char *filename, const char *mode)
         return -2;              /* failed (CreateFile) */
     }
     context->hidden.win32io.h = h;
-    context->hidden.win32io.append = a_mode;
+    context->hidden.win32io.append = a_mode ? SDL_TRUE : SDL_FALSE;
 
     return 0;                   /* ok */
 }
@@ -455,7 +455,7 @@ SDL_RWFromFile(const char *file, const char *mode)
 
 #ifdef HAVE_STDIO_H
 SDL_RWops *
-SDL_RWFromFP(FILE * fp, int autoclose)
+SDL_RWFromFP(FILE * fp, SDL_bool autoclose)
 {
     SDL_RWops *rwops = NULL;
 
