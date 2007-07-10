@@ -56,12 +56,7 @@ static int SDLCALL win32_file_open(SDL_RWops *context, const char *filename, con
 	int		a_mode;
 
 	if (!context)
-		return -1;
-		
-	context->hidden.win32io.h = INVALID_HANDLE_VALUE; /* mark this as unusable */
-	context->hidden.win32io.buffer.data = NULL;
-	context->hidden.win32io.buffer.size = 0;
-	context->hidden.win32io.buffer.left = 0;
+		return -1; /* failed (invalid call) */
 
 	/* "r" = reading, file must exist */
 	/* "w" = writing, truncate existing, file may not exist */
@@ -77,13 +72,7 @@ static int SDLCALL win32_file_open(SDL_RWops *context, const char *filename, con
 	w_right    = ( a_mode || SDL_strchr(mode,'+') || truncate ) ? GENERIC_WRITE : 0;
 
 	if (!r_right && !w_right) /* inconsistent mode */
-		return -1; /* failed (invalid call)*/
-
-	context->hidden.win32io.buffer.data = (char *)SDL_malloc(READAHEAD_BUFFER_SIZE);
-	if (!context->hidden.win32io.buffer.data) {
-		SDL_OutOfMemory();
-		return -1;
-	}
+		return -1; /* failed (invalid call) */
 
 #ifdef _WIN32_WCE
 	{
@@ -93,8 +82,6 @@ static int SDLCALL win32_file_open(SDL_RWops *context, const char *filename, con
 		if ( MultiByteToWideChar(CP_UTF8, 0, filename, -1, filenameW, size) == 0 ) {
 			SDL_SetError("Unable to convert filename to Unicode");
 			SDL_stack_free(filenameW);
-			SDL_free(context->hidden.win32io.buffer.data);
-			context->hidden.win32io.buffer.data = NULL;
 			return -1;
 		}
 		h = CreateFile(filenameW, (w_right|r_right), (w_right)? 0 : FILE_SHARE_READ, 
@@ -114,12 +101,19 @@ static int SDLCALL win32_file_open(SDL_RWops *context, const char *filename, con
 
 	if (h==INVALID_HANDLE_VALUE) {
 		SDL_SetError("Couldn't open %s",filename);
-		SDL_free(context->hidden.win32io.buffer.data);
-		context->hidden.win32io.buffer.data = NULL;
 		return -2; /* failed (CreateFile) */
 	}
 	context->hidden.win32io.h = h;
 	context->hidden.win32io.append = a_mode;
+
+	context->hidden.win32io.buffer.data = (char *)SDL_malloc(READAHEAD_BUFFER_SIZE);
+	if (!context->hidden.win32io.buffer.data) {
+		SDL_OutOfMemory();
+		CloseHandle(context->hidden.win32io.h);
+		return -1;
+	}
+	context->hidden.win32io.buffer.size = 0;
+	context->hidden.win32io.buffer.left = 0;
 
 	return 0; /* ok */
 }
@@ -435,8 +429,7 @@ SDL_RWops *SDL_RWFromFile(const char *file, const char *mode)
 	rwops = SDL_AllocRW();
 	if (!rwops)
 		return NULL; /* SDL_SetError already setup by SDL_AllocRW() */
-	rwops->hidden.win32io.h = INVALID_HANDLE_VALUE;
-	if (win32_file_open(rwops,file,mode)) {
+	if (win32_file_open(rwops,file,mode) < 0) {
 		SDL_FreeRW(rwops);
 		return NULL;
 	}	
