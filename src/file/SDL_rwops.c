@@ -59,12 +59,7 @@ static int SDLCALL win32_file_open(SDL_RWops *context, const char *filename, con
 		return -1;
 		
 	context->hidden.win32io.h = INVALID_HANDLE_VALUE; /* mark this as unusable */
-
-	context->hidden.win32io.buffer.data = (char *)SDL_malloc(READAHEAD_BUFFER_SIZE);
-	if (!context->hidden.win32io.buffer.data) {
-		SDL_OutOfMemory();
-		return -1;
-	}
+	context->hidden.win32io.buffer.data = NULL;
 	context->hidden.win32io.buffer.size = 0;
 	context->hidden.win32io.buffer.left = 0;
 
@@ -84,6 +79,12 @@ static int SDLCALL win32_file_open(SDL_RWops *context, const char *filename, con
 	if (!r_right && !w_right) /* inconsistent mode */
 		return -1; /* failed (invalid call)*/
 
+	context->hidden.win32io.buffer.data = (char *)SDL_malloc(READAHEAD_BUFFER_SIZE);
+	if (!context->hidden.win32io.buffer.data) {
+		SDL_OutOfMemory();
+		return -1;
+	}
+
 #ifdef _WIN32_WCE
 	{
 		size_t size = SDL_strlen(filename)+1;
@@ -92,6 +93,8 @@ static int SDLCALL win32_file_open(SDL_RWops *context, const char *filename, con
 		if ( MultiByteToWideChar(CP_UTF8, 0, filename, -1, filenameW, size) == 0 ) {
 			SDL_SetError("Unable to convert filename to Unicode");
 			SDL_stack_free(filenameW);
+			SDL_free(context->hidden.win32io.buffer.data);
+			context->hidden.win32io.buffer.data = NULL;
 			return -1;
 		}
 		h = CreateFile(filenameW, (w_right|r_right), (w_right)? 0 : FILE_SHARE_READ, 
@@ -111,11 +114,13 @@ static int SDLCALL win32_file_open(SDL_RWops *context, const char *filename, con
 
 	if (h==INVALID_HANDLE_VALUE) {
 		SDL_SetError("Couldn't open %s",filename);
+		SDL_free(context->hidden.win32io.buffer.data);
+		context->hidden.win32io.buffer.data = NULL;
 		return -2; /* failed (CreateFile) */
 	}
 	context->hidden.win32io.h = h;
 	context->hidden.win32io.append = a_mode;
-	
+
 	return 0; /* ok */
 }
 static int SDLCALL win32_file_seek(SDL_RWops *context, int offset, int whence)
