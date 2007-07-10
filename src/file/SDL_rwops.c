@@ -187,7 +187,7 @@ static int SDLCALL win32_file_read(SDL_RWops *context, void *ptr, int size, int 
             SDL_Error(SDL_EFREAD);
             return 0;
         }
-        read_ahead = SDL_min(total_need, byte_read);
+        read_ahead = SDL_min(total_need, (int)byte_read);
         SDL_memcpy(ptr, context->hidden.win32io.buffer.data, read_ahead);
         context->hidden.win32io.buffer.size = byte_read;
         context->hidden.win32io.buffer.left = byte_read-read_ahead;
