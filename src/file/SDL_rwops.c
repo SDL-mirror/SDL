@@ -59,7 +59,7 @@ win32_file_open(SDL_RWops * context, const char *filename, const char *mode)
     if (!context)
         return -1;              /* failed (invalid call) */
 
-    context->hidden.win32io.h = INVALID_HANDLE_VALUE; /* mark this as unusable */
+    context->hidden.win32io.h = INVALID_HANDLE_VALUE;   /* mark this as unusable */
     context->hidden.win32io.buffer.data = NULL;
     context->hidden.win32io.buffer.size = 0;
     context->hidden.win32io.buffer.left = 0;
@@ -82,12 +82,12 @@ win32_file_open(SDL_RWops * context, const char *filename, const char *mode)
     if (!r_right && !w_right)   /* inconsistent mode */
         return -1;              /* failed (invalid call) */
 
-    context->hidden.win32io.buffer.data = (char *)SDL_malloc(READAHEAD_BUFFER_SIZE);
+    context->hidden.win32io.buffer.data =
+        (char *) SDL_malloc(READAHEAD_BUFFER_SIZE);
     if (!context->hidden.win32io.buffer.data) {
         SDL_OutOfMemory();
         return -1;
     }
-
 #ifdef _WIN32_WCE
     {
         size_t size = SDL_strlen(filename) + 1;

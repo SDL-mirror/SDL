@@ -435,4 +435,3 @@ void Color565DitherYV12MMX1X( int *colortab, Uint32 *rgb_2_pix,
 #endif /* GCC3 i386 inline assembly */
 
 /* vi: set ts=4 sw=4 expandtab: */
-
