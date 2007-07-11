@@ -21,36 +21,35 @@
 */
 #include "SDL_config.h"
 
-#if 0 /* FIXME: This code needs to be rewritten to reference the static data using relocatable addresses (e.g. http://www.gentoo.org/proj/en/hardened/pic-fix-guide.xml or http://nasm.sourceforge.net/doc/html/nasmdoc8.html#section-8.2) This code currently breaks on systems with readonly text segments (hardened Linux / Intel Mac) */
-#if defined(__GNUC__) && defined(__i386__) && SDL_ASSEMBLY_ROUTINES
+#if (__GNUC__ > 2) && defined(__i386__) && SDL_ASSEMBLY_ROUTINES
 
 #include "SDL_stdinc.h"
 
-#define ASM_ARRAY(x) x[] __asm__("_" #x) __attribute__((used))
- 
-static unsigned int  ASM_ARRAY(MMX_0080w)    = {0x00800080, 0x00800080};
-static unsigned int  ASM_ARRAY(MMX_00FFw)    = {0x00ff00ff, 0x00ff00ff};
-static unsigned int  ASM_ARRAY(MMX_FF00w)    = {0xff00ff00, 0xff00ff00};
+#include "mmx.h"
 
-static unsigned short ASM_ARRAY(MMX_Ycoeff)  = {0x004a, 0x004a, 0x004a, 0x004a};
+static mmx_t MMX_0080w    = { .ud = {0x00800080, 0x00800080} };
+static mmx_t MMX_00FFw    = { .ud = {0x00ff00ff, 0x00ff00ff} };
+static mmx_t MMX_FF00w    = { .ud = {0xff00ff00, 0xff00ff00} };
 
-static unsigned short ASM_ARRAY(MMX_UbluRGB) = {0x0072, 0x0072, 0x0072, 0x0072};
-static unsigned short ASM_ARRAY(MMX_VredRGB) = {0x0059, 0x0059, 0x0059, 0x0059};
-static unsigned short ASM_ARRAY(MMX_UgrnRGB) = {0xffea, 0xffea, 0xffea, 0xffea};
-static unsigned short ASM_ARRAY(MMX_VgrnRGB) = {0xffd2, 0xffd2, 0xffd2, 0xffd2};
+static mmx_t MMX_Ycoeff   = { .uw = {0x004a, 0x004a, 0x004a, 0x004a} };
 
-static unsigned short ASM_ARRAY(MMX_Ublu5x5) = {0x0081, 0x0081, 0x0081, 0x0081};
-static unsigned short ASM_ARRAY(MMX_Vred5x5) = {0x0066, 0x0066, 0x0066, 0x0066};
-static unsigned short ASM_ARRAY(MMX_Ugrn555) = {0xffe7, 0xffe7, 0xffe7, 0xffe7};
-static unsigned short ASM_ARRAY(MMX_Vgrn555) = {0xffcc, 0xffcc, 0xffcc, 0xffcc};
-static unsigned short ASM_ARRAY(MMX_Ugrn565) = {0xffe8, 0xffe8, 0xffe8, 0xffe8};
-static unsigned short ASM_ARRAY(MMX_Vgrn565) = {0xffcd, 0xffcd, 0xffcd, 0xffcd};
+static mmx_t MMX_UbluRGB  = { .uw = {0x0072, 0x0072, 0x0072, 0x0072} };
+static mmx_t MMX_VredRGB  = { .uw = {0x0059, 0x0059, 0x0059, 0x0059} };
+static mmx_t MMX_UgrnRGB  = { .uw = {0xffea, 0xffea, 0xffea, 0xffea} };
+static mmx_t MMX_VgrnRGB  = { .uw = {0xffd2, 0xffd2, 0xffd2, 0xffd2} };
 
-static unsigned short ASM_ARRAY(MMX_red555)  = {0x7c00, 0x7c00, 0x7c00, 0x7c00};
-static unsigned short ASM_ARRAY(MMX_red565)  = {0xf800, 0xf800, 0xf800, 0xf800};
-static unsigned short ASM_ARRAY(MMX_grn555)  = {0x03e0, 0x03e0, 0x03e0, 0x03e0};
-static unsigned short ASM_ARRAY(MMX_grn565)  = {0x07e0, 0x07e0, 0x07e0, 0x07e0};
-static unsigned short ASM_ARRAY(MMX_blu5x5)  = {0x001f, 0x001f, 0x001f, 0x001f};
+static mmx_t MMX_Ublu5x5  = { .uw = {0x0081, 0x0081, 0x0081, 0x0081} };
+static mmx_t MMX_Vred5x5  = { .uw = {0x0066, 0x0066, 0x0066, 0x0066} };
+static mmx_t MMX_Ugrn555  = { .uw = {0xffe7, 0xffe7, 0xffe7, 0xffe7} };
+static mmx_t MMX_Vgrn555  = { .uw = {0xffcc, 0xffcc, 0xffcc, 0xffcc} };
+static mmx_t MMX_Ugrn565  = { .uw = {0xffe8, 0xffe8, 0xffe8, 0xffe8} };
+static mmx_t MMX_Vgrn565  = { .uw = {0xffcd, 0xffcd, 0xffcd, 0xffcd} };
+
+static mmx_t MMX_red555   = { .uw = {0x7c00, 0x7c00, 0x7c00, 0x7c00} };
+static mmx_t MMX_red565   = { .uw = {0xf800, 0xf800, 0xf800, 0xf800} };
+static mmx_t MMX_grn555   = { .uw = {0x03e0, 0x03e0, 0x03e0, 0x03e0} };
+static mmx_t MMX_grn565   = { .uw = {0x07e0, 0x07e0, 0x07e0, 0x07e0} };
+static mmx_t MMX_blu5x5   = { .uw = {0x001f, 0x001f, 0x001f, 0x001f} };
 
 /**
    This MMX assembler is my first assembler/MMX program ever.
@@ -86,38 +85,42 @@ void ColorRGBDitherYV12MMX1X( int *colortab, Uint32 *rgb_2_pix,
                               unsigned char *cb, unsigned char *out,
                               int rows, int cols, int mod )
 {
-    Uint32 *row1;
-    Uint32 *row2;
+	Uint32 *row1;
+	Uint32 *row2;
 
-    unsigned char* y = lum +cols*rows;    // Pointer to the end
-    int x=0;
-    row1 = (Uint32 *)out;                 // 32 bit target
-    row2 = (Uint32 *)out+cols+mod;        // start of second row 
-    mod = (mod+cols+mod)*4;               // increment for row1 in byte
+	unsigned char* y = lum +cols*rows;    // Pointer to the end
+	int x = 0;
+	row1 = (Uint32 *)out;                 // 32 bit target
+	row2 = (Uint32 *)out+cols+mod;        // start of second row
+	mod = (mod+cols+mod)*4;               // increment for row1 in byte
 
-    __asm__ __volatile__ (
-/* We don't really care about PIC - the code should be rewritten to use
-   relative addressing for the static tables, so right now we take the
-   COW hit on the pages this code resides. Big deal.
-   This spill is just to reduce register pressure in the PIC case. */
-		 "pushl %%ebx\n"
-		 "movl %0, %%ebx\n"
+	__asm__ __volatile__ (
+		 // tap dance to workaround the inability to use %%ebx at will...
+		 //  move one thing to the stack...
+		 "pushl $0\n"  // save a slot on the stack.
+		 "pushl %%ebx\n"  // save %%ebx.
+		 "movl %0, %%ebx\n"  // put the thing in ebx.
+		 "movl %%ebx, 4(%%esp)\n"  // put the thing in the stack slot.
+		 "popl %%ebx\n"  // get back %%ebx (the PIC register).
 
-	         ".align 8\n"
+		 ".align 8\n"
 		 "1:\n"
 		
 		 // create Cr (result in mm1)
+		 "pushl %%ebx\n"
+		 "movl 4(%%esp), %%ebx\n"
 		 "movd (%%ebx), %%mm1\n"   //         0  0  0  0  v3 v2 v1 v0
+		 "popl %%ebx\n"
 		 "pxor %%mm7,%%mm7\n"      //         00 00 00 00 00 00 00 00
 		 "movd (%2), %%mm2\n"           //    0  0  0  0 l3 l2 l1 l0
 		 "punpcklbw %%mm7,%%mm1\n" //         0  v3 0  v2 00 v1 00 v0
 		 "punpckldq %%mm1,%%mm1\n" //         00 v1 00 v0 00 v1 00 v0
-		 "psubw _MMX_0080w,%%mm1\n"  // mm1-128:r1 r1 r0 r0 r1 r1 r0 r0 
+		 "psubw %9,%%mm1\n"        // mm1-128:r1 r1 r0 r0 r1 r1 r0 r0 
 
 		 // create Cr_g (result in mm0)
 		 "movq %%mm1,%%mm0\n"           // r1 r1 r0 r0 r1 r1 r0 r0
-		 "pmullw _MMX_VgrnRGB,%%mm0\n"// red*-46dec=0.7136*64
-		 "pmullw _MMX_VredRGB,%%mm1\n"// red*89dec=1.4013*64
+		 "pmullw %10,%%mm0\n"           // red*-46dec=0.7136*64
+		 "pmullw %11,%%mm1\n"           // red*89dec=1.4013*64
 		 "psraw  $6, %%mm0\n"           // red=red/64
 		 "psraw  $6, %%mm1\n"           // red=red/64
 		 
@@ -126,8 +129,8 @@ void ColorRGBDitherYV12MMX1X( int *colortab, Uint32 *rgb_2_pix,
 		 "movq (%2,%4),%%mm3\n"         //    0  0  0  0 L3 L2 L1 L0
 		 "punpckldq %%mm3,%%mm2\n"      //   L3 L2 L1 L0 l3 l2 l1 l0
 		 "movq %%mm2,%%mm4\n"           //   L3 L2 L1 L0 l3 l2 l1 l0
-		 "pand _MMX_FF00w,%%mm2\n"      //   L3 0  L1  0 l3  0 l1  0
-		 "pand _MMX_00FFw,%%mm4\n"      //   0  L2  0 L0  0 l2  0 l0
+		 "pand %12,%%mm2\n"             //   L3 0  L1  0 l3  0 l1  0
+		 "pand %13,%%mm4\n"             //   0  L2  0 L0  0 l2  0 l0
 		 "psrlw $8,%%mm2\n"             //   0  L3  0 L1  0 l3  0 l1
 
 		 // create R (result in mm6)
@@ -144,11 +147,11 @@ void ColorRGBDitherYV12MMX1X( int *colortab, Uint32 *rgb_2_pix,
 		 "movd (%1), %%mm1\n"      //         0  0  0  0  u3 u2 u1 u0
 		 "punpcklbw %%mm7,%%mm1\n" //         0  u3 0  u2 00 u1 00 u0
 		 "punpckldq %%mm1,%%mm1\n" //         00 u1 00 u0 00 u1 00 u0
-		 "psubw _MMX_0080w,%%mm1\n"  // mm1-128:u1 u1 u0 u0 u1 u1 u0 u0 
+		 "psubw %9,%%mm1\n"        // mm1-128:u1 u1 u0 u0 u1 u1 u0 u0 
 		 // create Cb_g (result in mm5)
 		 "movq %%mm1,%%mm5\n"            // u1 u1 u0 u0 u1 u1 u0 u0
-		 "pmullw _MMX_UgrnRGB,%%mm5\n"    // blue*-109dec=1.7129*64
-		 "pmullw _MMX_UbluRGB,%%mm1\n"    // blue*114dec=1.78125*64
+		 "pmullw %14,%%mm5\n"            // blue*-109dec=1.7129*64
+		 "pmullw %15,%%mm1\n"            // blue*114dec=1.78125*64
 		 "psraw  $6, %%mm5\n"            // blue=red/64
 		 "psraw  $6, %%mm1\n"            // blue=blue/64
 
@@ -213,7 +216,7 @@ void ColorRGBDitherYV12MMX1X( int *colortab, Uint32 *rgb_2_pix,
 		 "addl  $4,%2\n"            // lum+4
 		 "leal  16(%3),%3\n"        // row1+16
 		 "leal  16(%5),%5\n"        // row2+16
-		 "addl  $2, %%ebx\n"        // cr+2
+		 "addl  $2, (%%esp)\n"        // cr+2
 		 "addl  $2, %1\n"           // cb+2
 
 		 "addl  $4,%6\n"            // x+4
@@ -226,11 +229,16 @@ void ColorRGBDitherYV12MMX1X( int *colortab, Uint32 *rgb_2_pix,
 		 "movl           $0,     %6\n" // x=0
 		 "cmpl           %7,     %2\n"
 		 "jl             1b\n"
-		 "emms\n"
-		 "popl %%ebx\n"
+
+		 "addl $4, %%esp\n"  // get rid of the stack slot we reserved.
+		 "emms\n"  // reset MMX registers.
 		 :
 		 : "m" (cr), "r"(cb),"r"(lum),
-		 "r"(row1),"r"(cols),"r"(row2),"m"(x),"m"(y),"m"(mod));
+		   "r"(row1),"r"(cols),"r"(row2),"m"(x),"m"(y),"m"(mod),
+		   "m"(MMX_0080w),"m"(MMX_VgrnRGB),"m"(MMX_VredRGB),
+		   "m"(MMX_FF00w),"m"(MMX_00FFw),"m"(MMX_UgrnRGB),
+		   "m"(MMX_UbluRGB)
+	);
 }
 
 void Color565DitherYV12MMX1X( int *colortab, Uint32 *rgb_2_pix,
@@ -249,31 +257,40 @@ void Color565DitherYV12MMX1X( int *colortab, Uint32 *rgb_2_pix,
 
 
       __asm__ __volatile__(
-         "pushl %%ebx\n"
-	 "movl %0, %%ebx\n"
+         // tap dance to workaround the inability to use %%ebx at will...
+         //  move one thing to the stack...
+         "pushl $0\n"  // save a slot on the stack.
+         "pushl %%ebx\n"  // save %%ebx.
+         "movl %0, %%ebx\n"  // put the thing in ebx.
+         "movl %%ebx, 4(%%esp)\n"  // put the thing in the stack slot.
+         "popl %%ebx\n"  // get back %%ebx (the PIC register).
 
          ".align 8\n"
          "1:\n"
          "movd           (%1),                   %%mm0\n" // 4 Cb         0  0  0  0 u3 u2 u1 u0
          "pxor           %%mm7,                  %%mm7\n"
-         "movd           (%%ebx),                %%mm1\n" // 4 Cr                0  0  0  0 v3 v2 v1 v0
+         "pushl %%ebx\n"
+         "movl 4(%%esp), %%ebx\n"
+         "movd (%%ebx), %%mm1\n"   // 4 Cr                0  0  0  0 v3 v2 v1 v0
+         "popl %%ebx\n"
+
          "punpcklbw      %%mm7,                  %%mm0\n" // 4 W cb   0 u3  0 u2  0 u1  0 u0
          "punpcklbw      %%mm7,                  %%mm1\n" // 4 W cr   0 v3  0 v2  0 v1  0 v0
-         "psubw          _MMX_0080w,             %%mm0\n"
-         "psubw          _MMX_0080w,             %%mm1\n"
+         "psubw          %9,                     %%mm0\n"
+         "psubw          %9,                     %%mm1\n"
          "movq           %%mm0,                  %%mm2\n" // Cb                   0 u3  0 u2  0 u1  0 u0
          "movq           %%mm1,                  %%mm3\n" // Cr
-         "pmullw         _MMX_Ugrn565,           %%mm2\n" // Cb2green 0 R3  0 R2  0 R1  0 R0
+         "pmullw         %10,                    %%mm2\n" // Cb2green 0 R3  0 R2  0 R1  0 R0
          "movq           (%2),                   %%mm6\n" // L1      l7 L6 L5 L4 L3 L2 L1 L0
-         "pmullw         _MMX_Ublu5x5,           %%mm0\n" // Cb2blue
-         "pand           _MMX_00FFw,             %%mm6\n" // L1      00 L6 00 L4 00 L2 00 L0
-         "pmullw         _MMX_Vgrn565,           %%mm3\n" // Cr2green
+         "pmullw         %11,                    %%mm0\n" // Cb2blue
+         "pand           %12,                    %%mm6\n" // L1      00 L6 00 L4 00 L2 00 L0
+         "pmullw         %13,                    %%mm3\n" // Cr2green
          "movq           (%2),                   %%mm7\n" // L2
-         "pmullw         _MMX_Vred5x5,           %%mm1\n" // Cr2red
+         "pmullw         %14,                    %%mm1\n" // Cr2red
          "psrlw          $8,                     %%mm7\n"        // L2           00 L7 00 L5 00 L3 00 L1
-         "pmullw         _MMX_Ycoeff,            %%mm6\n" // lum1
+         "pmullw         %15,                    %%mm6\n" // lum1
          "paddw          %%mm3,                  %%mm2\n" // Cb2green + Cr2green == green
-         "pmullw         _MMX_Ycoeff,            %%mm7\n" // lum2
+         "pmullw         %15,                    %%mm7\n" // lum2
 
          "movq           %%mm6,                  %%mm4\n" // lum1
          "paddw          %%mm0,                  %%mm6\n" // lum1 +blue 00 B6 00 B4 00 B2 00 B0
@@ -291,11 +308,11 @@ void Color565DitherYV12MMX1X( int *colortab, Uint32 *rgb_2_pix,
          "punpcklbw      %%mm4,                  %%mm4\n"
          "punpcklbw      %%mm5,                  %%mm5\n"
 
-         "pand           _MMX_red565,            %%mm4\n"
+         "pand           %16,                    %%mm4\n"
          "psllw          $3,                     %%mm5\n" // GREEN       1
          "punpcklbw      %%mm6,                  %%mm6\n"
-         "pand           _MMX_grn565,            %%mm5\n"
-         "pand           _MMX_red565,            %%mm6\n"
+         "pand           %17,                    %%mm5\n"
+         "pand           %16,                    %%mm6\n"
          "por            %%mm5,                  %%mm4\n" //
          "psrlw          $11,                    %%mm6\n" // BLUE        1
          "movq           %%mm3,                  %%mm5\n" // lum2
@@ -309,23 +326,23 @@ void Color565DitherYV12MMX1X( int *colortab, Uint32 *rgb_2_pix,
          "packuswb       %%mm3,                  %%mm3\n"
          "packuswb       %%mm5,                  %%mm5\n"
          "packuswb       %%mm7,                  %%mm7\n"
-         "pand           _MMX_00FFw,             %%mm6\n" // L3
+         "pand           %12,                    %%mm6\n" // L3
          "punpcklbw      %%mm3,                  %%mm3\n"
          "punpcklbw      %%mm5,                  %%mm5\n"
-         "pmullw         _MMX_Ycoeff,            %%mm6\n" // lum3
+         "pmullw         %15,                    %%mm6\n" // lum3
          "punpcklbw      %%mm7,                  %%mm7\n"
          "psllw          $3,                     %%mm5\n" // GREEN 2
-         "pand           _MMX_red565,            %%mm7\n"
-         "pand           _MMX_red565,            %%mm3\n"
+         "pand           %16,                    %%mm7\n"
+         "pand           %16,                    %%mm3\n"
          "psrlw          $11,                    %%mm7\n" // BLUE  2
-         "pand           _MMX_grn565,            %%mm5\n"
+         "pand           %17,                    %%mm5\n"
          "por            %%mm7,                  %%mm3\n"
          "movq           (%2,%4),                %%mm7\n" // L4 load lum2
          "por            %%mm5,                  %%mm3\n" //
          "psrlw          $8,                     %%mm7\n" // L4
          "movq           %%mm4,                  %%mm5\n"
          "punpcklwd      %%mm3,                  %%mm4\n"
-         "pmullw         _MMX_Ycoeff,            %%mm7\n" // lum4
+         "pmullw         %15,                    %%mm7\n" // lum4
          "punpckhwd      %%mm3,                  %%mm5\n"
 
          "movq           %%mm4,                  (%3)\n"  // write row1
@@ -352,11 +369,11 @@ void Color565DitherYV12MMX1X( int *colortab, Uint32 *rgb_2_pix,
          "punpcklbw      %%mm5,                  %%mm5\n"
          "punpcklbw      %%mm6,                  %%mm6\n"
          "psllw          $3,                     %%mm5\n" // GREEN 3
-         "pand           _MMX_red565,            %%mm4\n"
+         "pand           %16,                    %%mm4\n"
          "psraw          $6,                     %%mm3\n" // psr 6
          "psraw          $6,                     %%mm0\n"
-         "pand           _MMX_red565,            %%mm6\n" // BLUE
-         "pand           _MMX_grn565,            %%mm5\n"
+         "pand           %16,                    %%mm6\n" // BLUE
+         "pand           %17,                    %%mm5\n"
          "psrlw          $11,                    %%mm6\n" // BLUE  3
          "por            %%mm5,                  %%mm4\n"
          "psraw          $6,                     %%mm7\n"
@@ -367,11 +384,11 @@ void Color565DitherYV12MMX1X( int *colortab, Uint32 *rgb_2_pix,
          "punpcklbw      %%mm3,                  %%mm3\n"
          "punpcklbw      %%mm0,                  %%mm0\n"
          "punpcklbw      %%mm7,                  %%mm7\n"
-         "pand           _MMX_red565,            %%mm3\n"
-         "pand           _MMX_red565,            %%mm7\n" // BLUE
+         "pand           %16,                    %%mm3\n"
+         "pand           %16,                    %%mm7\n" // BLUE
          "psllw          $3,                     %%mm0\n" // GREEN 4
          "psrlw          $11,                    %%mm7\n"
-         "pand           _MMX_grn565,            %%mm0\n"
+         "pand           %17,                    %%mm0\n"
          "por            %%mm7,                  %%mm3\n"
          "por            %%mm0,                  %%mm3\n"
 
@@ -381,30 +398,33 @@ void Color565DitherYV12MMX1X( int *colortab, Uint32 *rgb_2_pix,
          "punpckhwd      %%mm3,                  %%mm5\n"
 
          "movq           %%mm4,                  (%5)\n"
-	 "movq           %%mm5,                  8(%5)\n"
+         "movq           %%mm5,                  8(%5)\n"
 
          "addl           $8,                     %6\n"
          "addl           $8,                     %2\n"
-         "addl           $4,                     %%ebx\n"
+         "addl           $4,                     (%%esp)\n"
          "addl           $4,                     %1\n"
          "cmpl           %4,                     %6\n"
          "leal           16(%3),                 %3\n"
-	 "leal           16(%5),%5\n" // row2+16
+         "leal           16(%5),%5\n" // row2+16
 
 
          "jl             1b\n"
-	 "addl           %4,     %2\n" // lum += cols 
-	 "addl           %8,     %3\n" // row1+= mod
-	 "addl           %8,     %5\n" // row2+= mod
-	 "movl           $0,     %6\n" // x=0
-	 "cmpl           %7,     %2\n"
-	 "jl             1b\n"
+         "addl           %4,     %2\n" // lum += cols
+         "addl           %8,     %3\n" // row1+= mod
+         "addl           %8,     %5\n" // row2+= mod
+         "movl           $0,     %6\n" // x=0
+         "cmpl           %7,     %2\n"
+         "jl             1b\n"
+         "addl $4, %%esp\n"  // get rid of the stack slot we reserved.
          "emms\n"
-	 "popl %%ebx\n"
          :
-         :"m" (cr), "r"(cb),"r"(lum),
-	 "r"(row1),"r"(cols),"r"(row2),"m"(x),"m"(y),"m"(mod));
+         : "m" (cr), "r"(cb),"r"(lum),
+           "r"(row1),"r"(cols),"r"(row2),"m"(x),"m"(y),"m"(mod),
+           "m"(MMX_0080w),"m"(MMX_Ugrn565),"m"(MMX_Ublu5x5),
+           "m"(MMX_00FFw),"m"(MMX_Vgrn565),"m"(MMX_Vred5x5),
+           "m"(MMX_Ycoeff),"m"(MMX_red565),"m"(MMX_grn565));
 }
 
-#endif /* GCC i386 inline assembly */
-#endif /* 0 */
+#endif /* GCC3 i386 inline assembly */
+
