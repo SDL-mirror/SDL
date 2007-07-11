@@ -169,6 +169,7 @@ static void QZ_DeleteDevice (SDL_VideoDevice *device) {
 
 static int QZ_VideoInit (_THIS, SDL_PixelFormat *video_format) {
 
+    NSRect r = NSMakeRect(0.0, 0.0, 0.0, 0.0);
     const char *env = NULL;
 
     /* Initialize the video settings; this data persists between mode switches */
@@ -202,6 +203,7 @@ static int QZ_VideoInit (_THIS, SDL_PixelFormat *video_format) {
     cursor_should_be_visible    = YES;
     cursor_visible              = YES;
     current_mods = 0;
+    field_edit =  [[NSTextView alloc] initWithFrame:r];
     
     if ( Gestalt(gestaltSystemVersion, &system_version) != noErr )
         system_version = 0;
@@ -1456,6 +1458,11 @@ static void QZ_VideoQuit (_THIS) {
         opengl_library = NULL;
     }
     this->gl_config.driver_loaded = 0;
+
+    if (field_edit) {
+        [field_edit release];
+        field_edit = NULL;
+    }
 }
 
 #if 0 /* Not used (apparently, it's really slow) */

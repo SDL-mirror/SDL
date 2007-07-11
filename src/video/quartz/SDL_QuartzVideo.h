@@ -99,6 +99,7 @@ typedef struct SDL_PrivateVideoData {
     SDL_Rect           **client_mode_list; /* resolution list to pass back to client */
     SDLKey             keymap[256];        /* Mac OS X to SDL key mapping */
     Uint32             current_mods;       /* current keyboard modifiers, to track modifier state */
+    NSText             *field_edit;        /* a field editor for keyboard composition processing */
     Uint32             last_virtual_button;/* last virtual mouse button pressed */
     io_connect_t       power_connection;   /* used with IOKit to detect wake from sleep */
     Uint8              expect_mouse_up;    /* used to determine when to send mouse up events */
@@ -146,6 +147,7 @@ typedef struct SDL_PrivateVideoData {
 #define client_mode_list (this->hidden->client_mode_list)
 #define keymap (this->hidden->keymap)
 #define current_mods (this->hidden->current_mods)
+#define field_edit (this->hidden->field_edit)
 #define last_virtual_button (this->hidden->last_virtual_button)
 #define power_connection (this->hidden->power_connection)
 #define expect_mouse_up (this->hidden->expect_mouse_up)

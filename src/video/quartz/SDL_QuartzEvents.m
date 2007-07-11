@@ -254,7 +254,7 @@ void     QZ_InitOSKeymap (_THIS) {
 static void QZ_DoKey (_THIS, int state, NSEvent *event) {
 
     NSString *chars;
-    unsigned int numChars;
+    unsigned int i, numChars;
     SDL_keysym key;
     
     /* 
@@ -265,7 +265,8 @@ static void QZ_DoKey (_THIS, int state, NSEvent *event) {
         contains multiple characters, we'll use 0 as
         the scancode/keysym.
     */
-    if (SDL_TranslateUNICODE) {
+    if (SDL_TranslateUNICODE && state == SDL_PRESSED) {
+        [field_edit interpretKeyEvents:[NSArray arrayWithObject:event]];
         chars = [ event characters ];
         numChars = [ chars length ];
     } else {
@@ -281,7 +282,7 @@ static void QZ_DoKey (_THIS, int state, NSEvent *event) {
 
         SDL_PrivateKeyboard (state, &key);
     }
-    else if (numChars == 1) {
+    else if (numChars >= 1) {
 
         key.scancode = [ event keyCode ];
         key.sym      = keymap [ key.scancode ];
@@ -289,11 +290,8 @@ static void QZ_DoKey (_THIS, int state, NSEvent *event) {
         key.mod      = KMOD_NONE;
 
         SDL_PrivateKeyboard (state, &key);
-    }
-    else /* (numChars > 1) */ {
       
-        int i;
-        for (i = 0; i < numChars; i++) {
+        for (i = 1; i < numChars; i++) {
 
             key.scancode = 0;
             key.sym      = 0;
