@@ -27,6 +27,8 @@
 
 #include "mmx.h"
 
+/* *INDENT-OFF* */
+
 static mmx_t MMX_0080w    = { .ud = {0x00800080, 0x00800080} };
 static mmx_t MMX_00FFw    = { .ud = {0x00ff00ff, 0x00ff00ff} };
 static mmx_t MMX_FF00w    = { .ud = {0xff00ff00, 0xff00ff00} };
@@ -424,6 +426,8 @@ void Color565DitherYV12MMX1X( int *colortab, Uint32 *rgb_2_pix,
 		  "m"(MMX_Ycoeff),"m"(MMX_red565),"m"(MMX_grn565)
 	);
 }
+
+/* *INDENT-ON* */
 
 #endif /* GCC3 i386 inline assembly */
 
