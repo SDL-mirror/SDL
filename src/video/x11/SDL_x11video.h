@@ -49,7 +49,7 @@
 #include "SDL_x11dyn.h"
 
 #include "SDL_x11events.h"
-//#include "SDL_x11gamma.h"
+#include "SDL_x11gamma.h"
 #include "SDL_x11keyboard.h"
 #include "SDL_x11modes.h"
 #include "SDL_x11mouse.h"
