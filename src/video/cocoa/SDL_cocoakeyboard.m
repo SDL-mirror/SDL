@@ -514,6 +514,8 @@ Cocoa_InitKeyboard(_THIS)
 
     InitKeymap(data->keymap);
 
+    data->fieldEdit = [[NSTextView alloc] initWithFrame:NSMakeRect(0.0, 0.0, 0.0, 0.0)];
+    
     SDL_zero(keyboard);
     data->keyboard = SDL_AddKeyboard(&keyboard, -1);
 }
@@ -537,6 +539,7 @@ Cocoa_HandleKeyEvent(_THIS, NSEvent *event)
                                 data->keymap[scancode]);
         }
         if (SDL_EventState(SDL_TEXTINPUT, SDL_QUERY)) {
+            [data->fieldEdit interpretKeyEvents:[NSArray arrayWithObject:event]];
             text = [[event characters] UTF8String];
             if(text && *text) {
                 SDL_SendKeyboardText(data->keyboard, text);
@@ -559,6 +562,8 @@ Cocoa_QuitKeyboard(_THIS)
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
     SDL_DelKeyboard(data->keyboard);
+
+    [data->fieldEdit release];
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

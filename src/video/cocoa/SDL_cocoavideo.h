@@ -46,6 +46,7 @@ typedef struct SDL_VideoData
     unsigned int modifierFlags;
     int mouse;
     int keyboard;
+    NSText *fieldEdit;
 } SDL_VideoData;
 
 #endif /* _SDL_cocoavideo_h */
