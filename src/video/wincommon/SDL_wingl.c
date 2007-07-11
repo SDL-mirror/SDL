@@ -172,7 +172,6 @@ int WIN_GL_SetupWindow(_THIS)
 	int retval;
 #if SDL_VIDEO_OPENGL
 	int i;
-	unsigned int matching;
 	int iAttribs[64];
 	int *iAttr;
 	float fAttribs[1] = { 0 };
