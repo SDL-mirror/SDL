@@ -511,10 +511,13 @@ Cocoa_InitKeyboard(_THIS)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     SDL_Keyboard keyboard;
+    NSAutoreleasePool *pool;
 
     InitKeymap(data->keymap);
 
+    pool = [[NSAutoreleasePool alloc] init];
     data->fieldEdit = [[NSTextView alloc] initWithFrame:NSMakeRect(0.0, 0.0, 0.0, 0.0)];
+    [pool release];
     
     SDL_zero(keyboard);
     data->keyboard = SDL_AddKeyboard(&keyboard, -1);
