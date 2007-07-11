@@ -437,7 +437,7 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 	if ( desired->channels == 0 ) {
 		env = SDL_getenv("SDL_AUDIO_CHANNELS");
 		if ( env ) {
-			desired->channels = SDL_atoi(env);
+			desired->channels = (Uint8)SDL_atoi(env);
 		}
 	}
 	if ( desired->channels == 0 ) {
@@ -457,7 +457,7 @@ int SDL_OpenAudio(SDL_AudioSpec *desired, SDL_AudioSpec *obtained)
 	if ( desired->samples == 0 ) {
 		env = SDL_getenv("SDL_AUDIO_SAMPLES");
 		if ( env ) {
-			desired->samples = SDL_atoi(env);
+			desired->samples = (Uint16)SDL_atoi(env);
 		}
 	}
 	if ( desired->samples == 0 ) {
