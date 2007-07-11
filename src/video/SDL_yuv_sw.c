@@ -981,7 +981,8 @@ SDL_SW_SetupYUVDisplay(SDL_SW_YUVTexture * swdata, Uint32 target_format)
 #if (__GNUC__ > 2) && defined(__i386__) && SDL_ASSEMBLY_ROUTINES
             /* inline assembly functions */
             if (SDL_HasMMX() && (Rmask == 0xF800) &&
-                (Gmask == 0x07E0) && (Bmask == 0x001F) && (width & 15) == 0) {
+                (Gmask == 0x07E0) && (Bmask == 0x001F)
+                && (swdata->texture->w & 15) == 0) {
 /*printf("Using MMX 16-bit 565 dither\n");*/
                 swdata->Display1X = Color565DitherYV12MMX1X;
             } else {
@@ -1002,7 +1003,7 @@ SDL_SW_SetupYUVDisplay(SDL_SW_YUVTexture * swdata, Uint32 target_format)
             /* inline assembly functions */
             if (SDL_HasMMX() && (Rmask == 0x00FF0000) &&
                 (Gmask == 0x0000FF00) &&
-                (Bmask == 0x000000FF) && (width & 15) == 0) {
+                (Bmask == 0x000000FF) && (swdata->texture->w & 15) == 0) {
 /*printf("Using MMX 32-bit dither\n");*/
                 swdata->Display1X = ColorRGBDitherYV12MMX1X;
             } else {
