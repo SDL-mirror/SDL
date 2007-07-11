@@ -44,10 +44,6 @@ struct SDL_PrivateGLData {
 
     BOOL (WINAPI *wglMakeCurrent)(HDC hdc, HGLRC hglrc);
    
-    BOOL (WINAPI *wglChoosePixelFormatARB)(HDC hdc, const int *piAttribIList,
-                                           const FLOAT *pfAttribFList,
-                                           UINT nMaxFormats, int *piFormats,
-                                           UINT *nNumFormats);
     BOOL (WINAPI *wglGetPixelFormatAttribivARB)(HDC hdc, int iPixelFormat,
                                                 int iLayerPlane,
                                                 UINT nAttributes, 
