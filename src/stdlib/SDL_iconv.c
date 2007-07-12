@@ -107,10 +107,8 @@ static struct {
 	const char *name;
 	int format;
 } encodings[] = {
-	{ "646",	ENCODING_ASCII },
 	{ "ASCII",	ENCODING_ASCII },
 	{ "US-ASCII",	ENCODING_ASCII },
-	{ "LATIN1",	ENCODING_LATIN1 },
 	{ "8859-1",	ENCODING_LATIN1 },
 	{ "ISO-8859-1",	ENCODING_LATIN1 },
 	{ "UTF8",	ENCODING_UTF8 },
@@ -133,12 +131,38 @@ static struct {
 	{ "UCS-4",	ENCODING_UCS4 },
 };
 
+static const char *getlocale()
+{
+	const char *lang;
+
+	lang = SDL_getenv("LC_ALL");
+	if ( !lang ) {
+		lang = SDL_getenv("LC_CTYPE");
+	}
+	if ( !lang ) {
+		lang = SDL_getenv("LC_MESSAGES");
+	}
+	if ( !lang ) {
+		lang = SDL_getenv("LANG");
+	}
+	if ( !lang || !*lang || SDL_strcmp(lang, "C") == 0 ) {
+		lang = "ASCII";
+	}
+	return lang;
+}
+
 SDL_iconv_t SDL_iconv_open(const char *tocode, const char *fromcode)
 {
 	int src_fmt = ENCODING_UNKNOWN;
 	int dst_fmt = ENCODING_UNKNOWN;
 	int i;
 
+	if ( !fromcode || !*fromcode ) {
+		fromcode = getlocale();
+	}
+	if ( !tocode || !*tocode ) {
+		fromcode = getlocale();
+	}
 	for ( i = 0; i < SDL_arraysize(encodings); ++i ) {
 		if ( SDL_strcasecmp(fromcode, encodings[i].name) == 0 ) {
 			src_fmt = encodings[i].format;
@@ -772,26 +796,6 @@ int SDL_iconv_close(SDL_iconv_t cd)
 
 #endif /* !HAVE_ICONV */
 
-static const char *getlocale()
-{
-	const char *lang;
-
-	lang = SDL_getenv("LC_ALL");
-	if ( !lang ) {
-		lang = SDL_getenv("LC_CTYPE");
-	}
-	if ( !lang ) {
-		lang = SDL_getenv("LC_MESSAGES");
-	}
-	if ( !lang ) {
-		lang = SDL_getenv("LANG");
-	}
-	if ( !lang || SDL_strcmp(lang, "C") == 0 ) {
-		lang = "ASCII";
-	}
-	return lang;
-}
-
 char *SDL_iconv_string(const char *tocode, const char *fromcode, const char *inbuf, size_t inbytesleft)
 {
 	SDL_iconv_t cd;
@@ -801,12 +805,6 @@ char *SDL_iconv_string(const char *tocode, const char *fromcode, const char *inb
 	size_t outbytesleft;
 	size_t retCode = 0;
 
-	if ( !fromcode || !*fromcode ) {
-		fromcode = getlocale();
-	}
-	if ( !tocode || !*tocode ) {
-		tocode = getlocale();
-	}
 	cd = SDL_iconv_open(tocode, fromcode);
 	if ( cd == (SDL_iconv_t)-1 ) {
 		return NULL;
