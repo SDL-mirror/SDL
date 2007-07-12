@@ -131,9 +131,10 @@ static struct {
 	{ "UCS-4",	ENCODING_UCS4 },
 };
 
-static const char *getlocale()
+static const char *getlocale(char *buffer, size_t bufsize)
 {
 	const char *lang;
+	char *ptr;
 
 	lang = SDL_getenv("LC_ALL");
 	if ( !lang ) {
@@ -148,7 +149,20 @@ static const char *getlocale()
 	if ( !lang || !*lang || SDL_strcmp(lang, "C") == 0 ) {
 		lang = "ASCII";
 	}
-	return lang;
+
+	/* We need to trim down strings like "en_US.UTF-8@blah" to "UTF-8" */
+	ptr = SDL_strchr(lang, '.');
+	if (ptr != NULL) {
+		lang = ptr + 1;
+	}
+
+	SDL_strlcpy(buffer, lang, bufsize);
+	ptr = SDL_strchr(buffer, '@');
+	if (ptr != NULL) {
+		*ptr = '\0';  /* chop end of string. */
+	}
+
+	return buffer;
 }
 
 SDL_iconv_t SDL_iconv_open(const char *tocode, const char *fromcode)
@@ -156,12 +170,14 @@ SDL_iconv_t SDL_iconv_open(const char *tocode, const char *fromcode)
 	int src_fmt = ENCODING_UNKNOWN;
 	int dst_fmt = ENCODING_UNKNOWN;
 	int i;
+	char fromcode_buffer[64];
+	char tocode_buffer[64];
 
 	if ( !fromcode || !*fromcode ) {
-		fromcode = getlocale();
+		fromcode = getlocale(fromcode_buffer, sizeof(fromcode_buffer));
 	}
 	if ( !tocode || !*tocode ) {
-		fromcode = getlocale();
+		tocode = getlocale(tocode_buffer, sizeof(tocode_buffer));
 	}
 	for ( i = 0; i < SDL_arraysize(encodings); ++i ) {
 		if ( SDL_strcasecmp(fromcode, encodings[i].name) == 0 ) {
