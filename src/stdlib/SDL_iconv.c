@@ -807,6 +807,16 @@ char *SDL_iconv_string(const char *tocode, const char *fromcode, const char *inb
 
 	cd = SDL_iconv_open(tocode, fromcode);
 	if ( cd == (SDL_iconv_t)-1 ) {
+		/* See if we can recover here (fixes iconv on Solaris 11) */
+		if ( !tocode || !*tocode ) {
+			tocode = "UTF-8";
+		}
+		if ( !fromcode || !*fromcode ) {
+			tocode = "UTF-8";
+		}
+		cd = SDL_iconv_open(tocode, fromcode);
+	}
+	if ( cd == (SDL_iconv_t)-1 ) {
 		return NULL;
 	}
 
