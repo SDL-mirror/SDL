@@ -25,6 +25,7 @@
 #define _SDL_dgavideo_h
 
 #include <X11/Xlib.h>
+#include <X11/Xlibint.h>
 #include <X11/Xproto.h>
 
 #include "SDL_mouse.h"
