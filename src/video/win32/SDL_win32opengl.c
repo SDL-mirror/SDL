@@ -340,6 +340,7 @@ WIN_GL_ChoosePixelFormatARB(_THIS, int *iAttribs, float *fAttribs)
 {
     HWND hwnd;
     HDC hdc;
+    PIXELFORMATDESCRIPTOR pfd;
     HGLRC hglrc;
     int pixel_format = 0;
     unsigned int matching;
@@ -350,6 +351,10 @@ WIN_GL_ChoosePixelFormatARB(_THIS, int *iAttribs, float *fAttribs)
     WIN_PumpEvents(_this);
 
     hdc = GetDC(hwnd);
+
+    WIN_GL_SetupPixelFormat(_this, &pfd);
+
+    SetPixelFormat(hdc, ChoosePixelFormat(hdc, &pfd), &pfd);
 
     hglrc = _this->gl_data->wglCreateContext(hdc);
     if (hglrc) {
