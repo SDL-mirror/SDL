@@ -49,13 +49,13 @@ void GEM_wind_redraw(_THIS, int winhandle, short *inside);
 
 struct SDL_PrivateVideoData {
 	Uint16	buf2scr_ops;		/* Operations to get buffer to screen */
-    void *buffer1;				/* Our shadow buffers */
+	void *buffer1;				/* Our shadow buffers */
 	void *buffer2;
 
 	/* VDI infos */
 	short vdi_handle;			/* VDI handle */
 	short full_w, full_h;		/* Fullscreen size */
-    short bpp;					/* Colour depth */
+	short bpp;					/* Colour depth */
 	short pixelsize;			/* Bytes per pixel */
 	short old_numcolors;		/* Number of colors in saved palette */
 	Uint16 pitch;				/* Line length */
