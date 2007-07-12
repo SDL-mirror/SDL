@@ -945,6 +945,7 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [[default=ma
 
             AC_DEFINE(SDL_VIDEO_DRIVER_X11)
             SOURCES="$SOURCES $srcdir/src/video/x11/*.c"
+            SOURCES="$SOURCES $srcdir/src/video/Xext/XmuStdCmap/*.c"
             EXTRA_CFLAGS="$EXTRA_CFLAGS $X_CFLAGS"
 
             if test x$enable_x11_shared = xmaybe; then

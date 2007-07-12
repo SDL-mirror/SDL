@@ -175,7 +175,7 @@ HotKey_Quit(void)
     SDL_PushEvent(&event);
 }
 
-static int (SDLCALL *old_filterfunc) (void *, SDL_Event *);
+static int (SDLCALL * old_filterfunc) (void *, SDL_Event *);
 static void *old_filterdata;
 
 int SDLCALL

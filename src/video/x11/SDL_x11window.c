@@ -26,7 +26,7 @@
 #include "../../events/SDL_keyboard_c.h"
 
 #include "SDL_x11video.h"
-
+#include "../Xext/extensions/StdCmap.h"
 
 static int
 SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
@@ -181,11 +181,40 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     }
     xattr.background_pixel = 0;
     xattr.border_pixel = 0;
-    if (visual->class == PseudoColor || visual->class == DirectColor) {
-        xattr.colormap =
-            XCreateColormap(data->display,
-                            RootWindow(data->display, displaydata->screen),
-                            visual, AllocAll);
+    if (visual->class == DirectColor || visual->class == TrueColor) {
+        int nmaps;
+        XStandardColormap *stdmaps;
+        int i;
+        Bool found = False;
+
+        if (0 != XGetRGBColormaps(data->display,
+                                  RootWindow(data->display,
+                                             displaydata->screen), &stdmaps,
+                                  &nmaps, XA_RGB_BEST_MAP)) {
+            for (i = 0; i < nmaps; i++) {
+                if (stdmaps[i].visualid == visual->visualid) {
+                    xattr.colormap = stdmaps[i].colormap;
+                    found = True;
+                    break;
+                }
+            }
+            XFree(stdmaps);
+        }
+        if (!found) {
+            int max = visual->map_entries - 1;
+            XStandardColormap *cmap =
+                XmuStandardColormap(data->display, displaydata->screen,
+                                    visual->visualid, depth,
+                                    XA_RGB_BEST_MAP, None,
+                                    max, max, max);
+            if (cmap->visualid = visual->visualid) {
+                xattr.colormap = cmap->colormap;
+            } else {
+                SDL_SetError
+                    ("Couldn't create window:XA_RGB_BEST_MAP not found");
+                return -1;
+            }
+        }
     } else {
         xattr.colormap =
             XCreateColormap(data->display,

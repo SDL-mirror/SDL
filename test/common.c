@@ -245,7 +245,7 @@ CommonArg(CommonState * state, int index)
         if (!argv[index]) {
             return -1;
         }
-        state->audiospec.channels = (Uint8)SDL_atoi(argv[index]);
+        state->audiospec.channels = (Uint8) SDL_atoi(argv[index]);
         return 2;
     }
     if (SDL_strcasecmp(argv[index], "--samples") == 0) {
@@ -253,7 +253,7 @@ CommonArg(CommonState * state, int index)
         if (!argv[index]) {
             return -1;
         }
-        state->audiospec.samples = (Uint16)SDL_atoi(argv[index]);
+        state->audiospec.samples = (Uint16) SDL_atoi(argv[index]);
         return 2;
     }
     if ((SDL_strcasecmp(argv[index], "-h") == 0)
@@ -498,7 +498,7 @@ PrintRenderer(SDL_RendererInfo * info)
     fprintf(stderr, ")\n");
 
     fprintf(stderr, "    Texture formats (%d): ", info->num_texture_formats);
-    for (i = 0; i < (int)info->num_texture_formats; ++i) {
+    for (i = 0; i < (int) info->num_texture_formats; ++i) {
         if (i > 0) {
             fprintf(stderr, ", ");
         }

@@ -191,7 +191,8 @@ win32_file_read(SDL_RWops * context, void *ptr, size_t size, size_t maxnum)
         void *data = (char *) context->hidden.win32io.buffer.data +
             context->hidden.win32io.buffer.size -
             context->hidden.win32io.buffer.left;
-        read_ahead = SDL_min(total_need, (size_t)context->hidden.win32io.buffer.left);
+        read_ahead =
+            SDL_min(total_need, (size_t) context->hidden.win32io.buffer.left);
         SDL_memcpy(ptr, data, read_ahead);
         context->hidden.win32io.buffer.left -= read_ahead;
 
