@@ -426,8 +426,15 @@ X11_GL_CreateContext(_THIS, SDL_Window * window)
 
     if (!context) {
         SDL_SetError("Could not create GL context");
+        return NULL;
     }
-    return (SDL_GLContext) context;
+
+    if (X11_GL_MakeCurrent(_this, window, context) < 0) {
+        X11_GL_DeleteContext(_this, context);
+        return NULL;
+    }
+
+    return context;
 }
 
 int

@@ -225,10 +225,6 @@ main(int argc, char *argv[])
         fprintf(stderr, "SDL_GL_CreateContext(): %s\n", SDL_GetError());
         quit(2);
     }
-    if (SDL_GL_MakeCurrent(state->windows[0], context) < 0) {
-        fprintf(stderr, "SDL_GL_MakeCurrent(): %s\n", SDL_GetError());
-        quit(2);
-    }
 
     if (state->render_flags & SDL_RENDERER_PRESENTVSYNC) {
         SDL_GL_SetSwapInterval(1);

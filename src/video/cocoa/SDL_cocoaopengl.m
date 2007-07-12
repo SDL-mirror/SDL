@@ -150,7 +150,7 @@ Cocoa_GL_CreateContext(_THIS, SDL_Window * window)
     SDL_DisplayData *displaydata = (SDL_DisplayData *)display->driverdata;
     NSOpenGLPixelFormatAttribute attr[32];
     NSOpenGLPixelFormat *fmt;
-    NSOpenGLContext *nscontext;
+    NSOpenGLContext *context;
     int i = 0;
 
     pool = [[NSAutoreleasePool alloc] init];
@@ -212,11 +212,11 @@ Cocoa_GL_CreateContext(_THIS, SDL_Window * window)
         return NULL;
     }
 
-    nscontext = [[NSOpenGLContext alloc] initWithFormat:fmt shareContext:nil];
+    context = [[NSOpenGLContext alloc] initWithFormat:fmt shareContext:nil];
 
     [fmt release];
 
-    if (nscontext == nil) {
+    if (context == nil) {
         SDL_SetError ("Failed creating OpenGL context");
         [pool release];
         return NULL;
@@ -240,7 +240,7 @@ Cocoa_GL_CreateContext(_THIS, SDL_Window * window)
 
     {
         long cache_max = 64;
-        CGLContextObj ctx = [nscontext CGLContextObj];
+        CGLContextObj ctx = [context CGLContextObj];
         CGLSetParameter (ctx, GLI_SUBMIT_FUNC_CACHE_MAX, &cache_max);
         CGLSetParameter (ctx, GLI_ARRAY_FUNC_CACHE_MAX, &cache_max);
     }
@@ -248,7 +248,13 @@ Cocoa_GL_CreateContext(_THIS, SDL_Window * window)
     /* End Wisdom from Apple Engineer section. --ryan. */
 
     [pool release];
-    return nscontext;
+
+    if ( Cocoa_GL_MakeCurrent(_this, window, context) < 0 ) {
+        Cocoa_GL_DeleteContext(_this, context);
+        return NULL;
+    }
+
+    return context;
 }
 
 int

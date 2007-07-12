@@ -292,31 +292,10 @@ HasExtension(const char *extension, const char *extensions)
 }
 
 static void
-WIN_GL_InitExtensions(_THIS)
+WIN_GL_InitExtensions(_THIS, HDC hdc)
 {
-    HWND hwnd;
-    HDC hdc;
-    PIXELFORMATDESCRIPTOR pfd;
-    int pixel_format;
-    HGLRC hglrc;
     const char *(WINAPI * wglGetExtensionsStringARB) (HDC) = 0;
     const char *extensions;
-
-    hwnd =
-        CreateWindow(SDL_Appname, SDL_Appname, (WS_POPUP | WS_DISABLED), 0, 0,
-                     10, 10, NULL, NULL, SDL_Instance, NULL);
-    WIN_PumpEvents(_this);
-
-    hdc = GetDC(hwnd);
-
-    WIN_GL_SetupPixelFormat(_this, &pfd);
-    pixel_format = ChoosePixelFormat(hdc, &pfd);
-    SetPixelFormat(hdc, pixel_format, &pfd);
-
-    hglrc = _this->gl_data->wglCreateContext(hdc);
-    if (hglrc) {
-        _this->gl_data->wglMakeCurrent(hdc, hglrc);
-    }
 
     wglGetExtensionsStringARB = (const char *(WINAPI *) (HDC))
         _this->gl_data->wglGetProcAddress("wglGetExtensionsStringARB");
@@ -350,15 +329,48 @@ WIN_GL_InitExtensions(_THIS)
             WIN_GL_GetProcAddress(_this, "wglSwapIntervalEXT");
         _this->gl_data->wglGetSwapIntervalEXT =
             WIN_GL_GetProcAddress(_this, "wglGetSwapIntervalEXT");
+    } else {
+        _this->gl_data->wglSwapIntervalEXT = NULL;
+        _this->gl_data->wglGetSwapIntervalEXT = NULL;
     }
+}
 
+static int
+WIN_GL_ChoosePixelFormatARB(_THIS, int *iAttribs, float *fAttribs)
+{
+    HWND hwnd;
+    HDC hdc;
+    HGLRC hglrc;
+    int pixel_format = 0;
+    unsigned int matching;
+
+    hwnd =
+        CreateWindow(SDL_Appname, SDL_Appname, (WS_POPUP | WS_DISABLED), 0, 0,
+                     10, 10, NULL, NULL, SDL_Instance, NULL);
+    WIN_PumpEvents(_this);
+
+    hdc = GetDC(hwnd);
+
+    hglrc = _this->gl_data->wglCreateContext(hdc);
     if (hglrc) {
+        _this->gl_data->wglMakeCurrent(hdc, hglrc);
+
+        WIN_GL_InitExtensions(_this, hdc);
+
+        if (_this->gl_data->WGL_ARB_pixel_format) {
+            _this->gl_data->wglChoosePixelFormatARB(hdc, iAttribs, fAttribs,
+                                                    1, &pixel_format,
+                                                    &matching);
+        }
+
         _this->gl_data->wglMakeCurrent(NULL, NULL);
         _this->gl_data->wglDeleteContext(hglrc);
     }
     ReleaseDC(hwnd, hdc);
     DestroyWindow(hwnd);
     WIN_PumpEvents(_this);
+
+    return pixel_format;
 }
 
 static int
@@ -383,9 +395,6 @@ WIN_GL_Initialize(_THIS)
         return -1;
     }
 
-    /* Initialize extensions */
-    WIN_GL_InitExtensions(_this);
-
     return 0;
 }
 
@@ -408,7 +417,6 @@ WIN_GL_SetupWindow(_THIS, SDL_Window * window)
     HDC hdc = ((SDL_WindowData *) window->driverdata)->hdc;
     PIXELFORMATDESCRIPTOR pfd;
     int pixel_format;
-    unsigned int matching;
     int iAttribs[64];
     int *iAttr;
     float fAttribs[1] = { 0 };
@@ -495,10 +503,8 @@ WIN_GL_SetupWindow(_THIS, SDL_Window * window)
     *iAttr = 0;
 
     /* Choose and set the closest available pixel format */
-    if (!_this->gl_data->WGL_ARB_pixel_format
-        || !_this->gl_data->wglChoosePixelFormatARB(hdc, iAttribs, fAttribs,
-                                                    1, &pixel_format,
-                                                    &matching) || !matching) {
+    pixel_format = WIN_GL_ChoosePixelFormatARB(_this, iAttribs, fAttribs);
+    if (!pixel_format) {
         pixel_format = WIN_GL_ChoosePixelFormat(hdc, &pfd);
     }
     if (!pixel_format) {
@@ -522,8 +528,22 @@ SDL_GLContext
 WIN_GL_CreateContext(_THIS, SDL_Window * window)
 {
     HDC hdc = ((SDL_WindowData *) window->driverdata)->hdc;
+    HGLRC context;
 
-    return _this->gl_data->wglCreateContext(hdc);
+    context = _this->gl_data->wglCreateContext(hdc);
+    if (!context) {
+        SDL_SetError("Could not create GL context");
+        return NULL;
+    }
+
+    if (WIN_GL_MakeCurrent(_this, window, context) < 0) {
+        WIN_GL_DeleteContext(_this, context);
+        return NULL;
+    }
+
+    WIN_GL_InitExtensions(_this, hdc);
+
+    return context;
 }
 
 int
