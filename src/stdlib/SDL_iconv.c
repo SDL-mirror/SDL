@@ -798,27 +798,6 @@ SDL_iconv_close(SDL_iconv_t cd)
 
 #endif /* !HAVE_ICONV */
 
-static const char *
-getlocale()
-{
-    const char *lang;
-
-    lang = SDL_getenv("LC_ALL");
-    if (!lang) {
-        lang = SDL_getenv("LC_CTYPE");
-    }
-    if (!lang) {
-        lang = SDL_getenv("LC_MESSAGES");
-    }
-    if (!lang) {
-        lang = SDL_getenv("LANG");
-    }
-    if (!lang || SDL_strcmp(lang, "C") == 0) {
-        lang = "ASCII";
-    }
-    return lang;
-}
-
 char *
 SDL_iconv_string(const char *tocode, const char *fromcode, const char *inbuf,
                  size_t inbytesleft)
