@@ -67,8 +67,6 @@ poked(int sig)
 int
 main(int argc, char *argv[])
 {
-    int i, n;
-
     /* Load the SDL library */
     if (SDL_Init(SDL_INIT_AUDIO) < 0) {
         fprintf(stderr, "Couldn't initialize SDL: %s\n", SDL_GetError());
