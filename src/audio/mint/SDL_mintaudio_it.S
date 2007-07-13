@@ -78,7 +78,7 @@ _SDL_MintAudio_XbiosInterrupt:
 
 	/* Check if we are not already running */
 	tstw	_SDL_MintAudio_mutex
-	bnes	SDL_MintAudio_XbiosEnd
+	bne	SDL_MintAudio_XbiosEnd
 	notw	_SDL_MintAudio_mutex
 	
 	/* Swap buffers */
@@ -152,7 +152,7 @@ _SDL_MintAudio_Dma8Interrupt:
 
 	/* Check if we are not already running */
 	tstw	_SDL_MintAudio_mutex
-	bnes	SDL_MintAudio_Dma8End
+	bne	SDL_MintAudio_Dma8End
 	notw	_SDL_MintAudio_mutex
 	
 	/* Swap buffers */

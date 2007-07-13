@@ -427,8 +427,8 @@ MINTGSXB_Init(SDL_AudioDriverImpl * impl)
     /* Set the function pointers */
     impl->OpenDevice = MINTGSXB_OpenDevice;
     impl->CloseDevice = MINTGSXB_CloseDevice;
-    impl->LockAudio = MINTGSXB_LockAudio;
-    impl->UnlockAudio = MINTGSXB_UnlockAudio;
+    impl->LockDevice = MINTGSXB_LockDevice;
+    impl->UnlockDevice = MINTGSXB_UnlockDevice;
     impl->OnlyHasDefaultOutputDevice = 1;
     impl->ProvidesOwnCallbackThread = 1;
     impl->SkipMixerLock = 1;

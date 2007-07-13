@@ -384,8 +384,8 @@ MINTMCSN_Init(SDL_AudioDriverImpl * impl)
     /* Set the function pointers */
     impl->OpenDevice = MINTMCSN_OpenDevice;
     impl->CloseDevice = MINTMCSN_CloseDevice;
-    impl->LockAudio = MINTMCSN_LockAudio;
-    impl->UnlockAudio = MINTMCSN_UnlockAudio;
+    impl->LockDevice = MINTMCSN_LockDevice;
+    impl->UnlockDevice = MINTMCSN_UnlockDevice;
     impl->OnlyHasDefaultOutputDevice = 1;
     impl->ProvidesOwnCallbackThread = 1;
     impl->SkipMixerLock = 1;

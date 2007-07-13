@@ -113,8 +113,8 @@ MINTDMA8_CloseDevice(_THIS)
         }
 
         DEBUG_PRINT((DEBUG_NAME "closeaudio: buffers freed\n"));
-        SDL_free(this->buffer);
-        this->buffer = NULL;
+        SDL_free(this->hidden);
+        this->hidden = NULL;
     }
 }
 
@@ -332,8 +332,8 @@ MINTDMA8_Init(SDL_AudioDriverImpl * impl)
     /* Set the function pointers */
     impl->OpenDevice = MINTDMA8_OpenDevice;
     impl->CloseDevice = MINTDMA8_CloseDevice;
-    impl->LockAudio = MINTDMA8_LockAudio;
-    impl->UnlockAudio = MINTDMA8_UnlockAudio;
+    impl->LockDevice = MINTDMA8_LockDevice;
+    impl->UnlockDevice = MINTDMA8_UnlockDevice;
     impl->OnlyHasDefaultOutputDevice = 1;
     impl->ProvidesOwnCallbackThread = 1;
     impl->SkipMixerLock = 1;

@@ -239,8 +239,8 @@ MINTSTFA_OpenDevice(_THIS, const char *devname, int iscapture)
     SDL_MintAudio_audiobuf[0] =
         Atari_SysMalloc(this->spec.size * 2, MX_STRAM);
     if (SDL_MintAudio_audiobuf[0] == NULL) {
-        SDL_OutOfMemory()
-            SDL_free(this->hidden);
+        SDL_OutOfMemory();
+        SDL_free(this->hidden);
         this->hidden = NULL;
         return 0;
     }
@@ -291,8 +291,8 @@ MINTSTFA_Init(SDL_AudioDriverImpl * impl)
     /* Set the function pointers */
     impl->OpenDevice = MINTSTFA_OpenDevice;
     impl->CloseDevice = MINTSTFA_CloseDevice;
-    impl->LockAudio = MINTSTFA_LockAudio;
-    impl->UnlockAudio = MINTSTFA_UnlockAudio;
+    impl->LockDevice = MINTSTFA_LockDevice;
+    impl->UnlockDevice = MINTSTFA_UnlockDevice;
     impl->OnlyHasDefaultOutputDevice = 1;
     impl->ProvidesOwnCallbackThread = 1;
     impl->SkipMixerLock = 1;

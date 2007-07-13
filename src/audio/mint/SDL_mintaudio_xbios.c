@@ -484,8 +484,8 @@ MINTXBIOS_Init(SDL_AudioDriverImpl * impl)
     /* Set the function pointers */
     impl->OpenDevice = MINTXBIOS_OpenDevice;
     impl->CloseDevice = MINTXBIOS_CloseDevice;
-    impl->LockAudio = MINTXBIOS_LockAudio;
-    impl->UnlockAudio = MINTXBIOS_UnlockAudio;
+    impl->LockDevice = MINTXBIOS_LockDevice;
+    impl->UnlockDevice = MINTXBIOS_UnlockDevice;
     impl->OnlyHasDefaultOutputDevice = 1;
     impl->ProvidesOwnCallbackThread = 1;
     impl->SkipMixerLock = 1;
