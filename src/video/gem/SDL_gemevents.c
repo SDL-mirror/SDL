@@ -32,10 +32,9 @@
 
 #include <gem.h>
 
-#include "../../events/SDL_sysevents.h"
-#include "../../events/SDL_events_c.h"
 #include "SDL_gemvideo.h"
-#include "SDL_gemevents_c.h"
+#include "SDL_gemevents.h"
+#include "../../events/SDL_events_c.h"
 #include "../ataricommon/SDL_atarikeys.h"       /* for keyboard scancodes */
 #include "../ataricommon/SDL_atarievents_c.h"
 #include "../ataricommon/SDL_xbiosevents_c.h"
@@ -55,20 +54,9 @@ static void do_mouse(_THIS, short mx, short my, short mb, short ks);
 /* Functions */
 
 void
-GEM_InitOSKeymap(_THIS)
-{
-    SDL_memset(gem_currentkeyboard, 0, sizeof(gem_currentkeyboard));
-    SDL_memset(gem_previouskeyboard, 0, sizeof(gem_previouskeyboard));
-
-    /* Mouse init */
-    GEM_mouse_relative = SDL_FALSE;
-
-    SDL_Atari_InitInternalKeymap(this);
-}
-
-void
 GEM_PumpEvents(_THIS)
 {
+#if 0
     short mousex, mousey, mouseb, dummy;
     short kstate, prevkc, prevks;
     int i;
@@ -88,11 +76,8 @@ GEM_PumpEvents(_THIS)
         if (!GEM_fullscreen && (GEM_handle >= 0)) {
             wind_get(GEM_handle, WF_WORKXYWH, &x2, &y2, &w2, &h2);
             event_mask |= MU_M1;
-            if ((SDL_GetAppState() & SDL_APPMOUSEFOCUS)) {
-                mouse_event = MO_LEAVE;
-            } else {
-                mouse_event = MO_ENTER;
-            }
+            mouse_event = ((SDL_GetAppState() & SDL_APPMOUSEFOCUS) ==
+                SDL_APPMOUSEFOCUS) ? MO_LEAVE : MO_ENTER;
         }
 
         resultat = evnt_multi(event_mask,
@@ -120,12 +105,11 @@ GEM_PumpEvents(_THIS)
         /* Mouse entering/leaving window */
         if (resultat & MU_M1) {
             if (this->input_grab == SDL_GRAB_OFF) {
-                if (SDL_GetAppState() & SDL_APPMOUSEFOCUS) {
-                    SDL_PrivateAppActive(0, SDL_APPMOUSEFOCUS);
-                } else {
-                    SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS);
-                }
+                /* Switch mouse focus state */
+                SDL_PrivateAppActive((mouse_event == MO_ENTER),
+                    SDL_APPMOUSEFOCUS);
             }
+            GEM_CheckMouseMode(this);
         }
 
         /* Timer event ? */
@@ -165,15 +149,17 @@ GEM_PumpEvents(_THIS)
         }
         GEM_refresh_name = SDL_FALSE;
     }
+#endif
 }
 
 static int
 do_messages(_THIS, short *message)
 {
-    int quit, posted;
+#if 0
+    int quit, posted, check_mouse_mode;
     short x2, y2, w2, h2;
 
-    quit = 0;
+    quit = check_mouse_mode = 0;
     switch (message[0]) {
     case WM_CLOSED:
     case AP_TERM:
@@ -192,6 +178,7 @@ do_messages(_THIS, short *message)
         if (VDI_setpalette) {
             VDI_setpalette(this, VDI_curpalette);
         }
+        check_mouse_mode = 1;
         break;
     case WM_REDRAW:
         if (!GEM_lock_redraw) {
@@ -215,6 +202,7 @@ do_messages(_THIS, short *message)
                      0, 0);
             GEM_refresh_name = SDL_FALSE;
         }
+        check_mouse_mode = 1;
         break;
     case WM_UNICONIFY:
         wind_set(message[3], WF_UNICONIFY, message[4], message[5],
@@ -231,6 +219,7 @@ do_messages(_THIS, short *message)
                      0, 0);
             GEM_refresh_name = SDL_FALSE;
         }
+        check_mouse_mode = 1;
         break;
     case WM_SIZED:
         wind_set(message[3], WF_CURRXYWH, message[4], message[5],
@@ -268,15 +257,24 @@ do_messages(_THIS, short *message)
         if (VDI_setpalette) {
             VDI_setpalette(this, VDI_oldpalette);
         }
+        check_mouse_mode = 1;
         break;
     }
 
+    if (check_mouse_mode) {
+        GEM_CheckMouseMode(this);
+    }
+
     return quit;
+#else
+    return 0;
+#endif
 }
 
 static void
 do_keyboard(short kc, short ks)
 {
+#if 0
     int scancode, asciicode;
 
     if (kc) {
@@ -293,11 +291,13 @@ do_keyboard(short kc, short ks)
         gem_currentkeyboard[SCANCODE_LEFTCONTROL] = 0xFF;
     if (ks & K_ALT)
         gem_currentkeyboard[SCANCODE_LEFTALT] = 0xFF;
+#endif
 }
 
 static void
 do_mouse(_THIS, short mx, short my, short mb, short ks)
 {
+#if 0
     static short prevmousex = 0, prevmousey = 0, prevmouseb = 0;
     short x2, y2, w2, h2;
 
@@ -377,6 +377,7 @@ do_mouse(_THIS, short mx, short my, short mb, short ks)
         gem_currentkeyboard[SCANCODE_LEFTCONTROL] = 0xFF;
     if (ks & K_ALT)
         gem_currentkeyboard[SCANCODE_LEFTALT] = 0xFF;
+#endif
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

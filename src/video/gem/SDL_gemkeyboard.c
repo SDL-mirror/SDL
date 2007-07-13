@@ -21,31 +21,26 @@
 */
 #include "SDL_config.h"
 
-#ifndef _SDL_gemvideo_h
-#define _SDL_gemvideo_h
+#include "SDL_gemvideo.h"
 
-#include "../SDL_sysvideo.h"
+#include "../../events/SDL_keyboard_c.h"
 
-#include "SDL_gemevents.h"
-#include "SDL_gemkeyboard.h"
-#include "SDL_gemmodes.h"
-#include "SDL_gemmouse.h"
-#include "SDL_gemwindow.h"
-
-/* Private display data */
-
-typedef struct
+void
+GEM_InitKeyboard(_THIS)
 {
-    int mouse;
-    int keyboard;
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+    SDL_Keyboard keyboard;
 
-    /* VDI infos */
-    short vdi_handle;           /* workstation handle */
+    SDL_zero(keyboard);
+    data->keyboard = SDL_AddKeyboard(&keyboard, -1);
+}
 
-    /* AES infos */
-    int wfeatures;              /* window features */
-} SDL_VideoData;
+void
+GEM_QuitKeyboard(_THIS)
+{
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
-#endif /* _SDL_gemvideo_h */
+    SDL_DelKeyboard(data->keyboard);
+}
 
 /* vi: set ts=4 sw=4 expandtab: */

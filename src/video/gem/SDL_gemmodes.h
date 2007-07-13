@@ -21,31 +21,21 @@
 */
 #include "SDL_config.h"
 
-#ifndef _SDL_gemvideo_h
-#define _SDL_gemvideo_h
-
-#include "../SDL_sysvideo.h"
-
-#include "SDL_gemevents.h"
-#include "SDL_gemkeyboard.h"
-#include "SDL_gemmodes.h"
-#include "SDL_gemmouse.h"
-#include "SDL_gemwindow.h"
-
-/* Private display data */
+#ifndef _SDL_gemmodes_h
+#define _SDL_gemmodes_h
 
 typedef struct
 {
-    int mouse;
-    int keyboard;
+    int width;
+    int height;
+    int depth;
+} SDL_DisplayData;
 
-    /* VDI infos */
-    short vdi_handle;           /* workstation handle */
+extern void GEM_InitModes(_THIS);
+extern void GEM_GetDisplayModes(_THIS);
+extern int GEM_SetDisplayMode(_THIS, SDL_DisplayMode * mode);
+extern void GEM_QuitModes(_THIS);
 
-    /* AES infos */
-    int wfeatures;              /* window features */
-} SDL_VideoData;
-
-#endif /* _SDL_gemvideo_h */
+#endif /* _SDL_gemmodes_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

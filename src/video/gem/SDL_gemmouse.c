@@ -21,161 +21,26 @@
 */
 #include "SDL_config.h"
 
-/*
- *	GEM Mouse manager
- *
- *	Patrice Mandin
- */
+#include "SDL_gemvideo.h"
 
-#include <gem.h>
-
-#include "SDL_mouse.h"
-#include "../../events/SDL_events_c.h"
-#include "../SDL_cursor_c.h"
-#include "SDL_gemmouse_c.h"
-
-/* Defines */
-
-/*#define DEBUG_VIDEO_GEM 1*/
-
-#define MAXCURWIDTH 16
-#define MAXCURHEIGHT 16
-
-/* The implementation dependent data for the window manager cursor */
-struct WMcursor
-{
-    MFORM *mform_p;
-};
-
+#include "../../events/SDL_mouse_c.h"
 
 void
-GEM_FreeWMCursor(_THIS, WMcursor * cursor)
+GEM_InitMouse(_THIS)
 {
-    if (cursor == NULL)
-        return;
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+    SDL_Mouse mouse;
 
-    graf_mouse(ARROW, NULL);
-
-    if (cursor->mform_p != NULL)
-        SDL_free(cursor->mform_p);
-
-    SDL_free(cursor);
+    SDL_zero(mouse);
+    data->mouse = SDL_AddMouse(&mouse, -1);
 }
-
-WMcursor *
-GEM_CreateWMCursor(_THIS,
-                   Uint8 * data, Uint8 * mask, int w, int h, int hot_x,
-                   int hot_y)
-{
-    WMcursor *cursor;
-    MFORM *new_mform;
-    int i;
-
-    /* Check the size */
-    if ((w > MAXCURWIDTH) || (h > MAXCURHEIGHT)) {
-        SDL_SetError("Only cursors of dimension (%dx%d) are allowed",
-                     MAXCURWIDTH, MAXCURHEIGHT);
-        return (NULL);
-    }
-
-    /* Allocate the cursor memory */
-    cursor = (WMcursor *) SDL_malloc(sizeof(WMcursor));
-    if (cursor == NULL) {
-        SDL_OutOfMemory();
-        return (NULL);
-    }
-
-    /* Allocate mform */
-    new_mform = (MFORM *) SDL_malloc(sizeof(MFORM));
-    if (new_mform == NULL) {
-        SDL_free(cursor);
-        SDL_OutOfMemory();
-        return (NULL);
-    }
-
-    cursor->mform_p = new_mform;
-
-    new_mform->mf_xhot = hot_x;
-    new_mform->mf_yhot = hot_y;
-    new_mform->mf_nplanes = 1;
-    new_mform->mf_fg = 0;
-    new_mform->mf_bg = 1;
-
-    for (i = 0; i < MAXCURHEIGHT; i++) {
-        new_mform->mf_mask[i] = 0;
-        new_mform->mf_data[i] = 0;
-    }
-
-    if (w <= 8) {
-        for (i = 0; i < h; i++) {
-            new_mform->mf_mask[i] = mask[i] << 8;
-            new_mform->mf_data[i] = data[i] << 8;
-        }
-    } else {
-        for (i = 0; i < h; i++) {
-            new_mform->mf_mask[i] = mask[i << 1] << 8 | mask[(i << 1) + 1];
-            new_mform->mf_data[i] = data[i << 1] << 8 | data[(i << 1) + 1];
-        }
-    }
-
-#ifdef DEBUG_VIDEO_GEM
-    for (i = 0; i < h; i++) {
-        printf("sdl:video:gem: cursor, line %d = 0x%04x\n", i,
-               new_mform->mf_mask[i]);
-    }
-
-    printf("sdl:video:gem: CreateWMCursor(): done\n");
-#endif
-
-    return cursor;
-}
-
-int
-GEM_ShowWMCursor(_THIS, WMcursor * cursor)
-{
-/*
-	if (cursor == NULL) {
-		graf_mouse(M_OFF, NULL);
-	} else if (cursor->mform_p) {
-		graf_mouse(USER_DEF, cursor->mform_p);
-	}
-*/
-#ifdef DEBUG_VIDEO_GEM
-    printf("sdl:video:gem: ShowWMCursor(0x%08x)\n", (long) cursor);
-#endif
-
-    return 1;
-}
-
-#if 0
-void
-GEM_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
-{
-    /* This seems to work only on AES 3.4 (Falcon) */
-
-    EVNTREC warpevent;
-
-    warpevent.ap_event = APPEVNT_MOUSE;
-    warpevent.ap_value = (x << 16) | y;
-
-    appl_tplay(&warpevent, 1, 1000);
-}
-#endif
 
 void
-GEM_CheckMouseMode(_THIS)
+GEM_QuitMouse(_THIS)
 {
-    /* If the mouse is hidden and input is grabbed, we use relative mode */
-    if ((!(SDL_cursorstate & CURSOR_VISIBLE)) &&
-        (this->input_grab != SDL_GRAB_OFF) &&
-        (SDL_GetAppState() & SDL_APPACTIVE)) {
-        SDL_AtariXbios_LockMousePosition(SDL_TRUE);
-        GEM_mouse_relative = SDL_TRUE;
-    } else {
-        SDL_AtariXbios_LockMousePosition(SDL_FALSE);
-        GEM_mouse_relative = SDL_FALSE;
-        graf_mouse(M_ON, NULL);
-    }
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+
+    SDL_DelMouse(data->mouse);
 }
 
 /* vi: set ts=4 sw=4 expandtab: */
