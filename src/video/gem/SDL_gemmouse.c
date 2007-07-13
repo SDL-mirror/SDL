@@ -140,12 +140,8 @@ WMcursor *GEM_CreateWMCursor(_THIS,
 int GEM_ShowWMCursor(_THIS, WMcursor *cursor)
 {
 	GEM_cursor = cursor;
-	if (cursor == NULL) {
-		graf_mouse(M_OFF, NULL);
-		GEM_cursor = (void *) -1;
-	} else if (cursor->mform_p) {
-		graf_mouse(USER_DEF, cursor->mform_p);
-	}
+
+	GEM_CheckMouseMode(this);
 
 #ifdef DEBUG_VIDEO_GEM
 	printf("sdl:video:gem: ShowWMCursor(0x%08x)\n", (long) cursor);
@@ -170,19 +166,39 @@ void GEM_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
 
 void GEM_CheckMouseMode(_THIS)
 {
+	const Uint8 full_focus = (SDL_APPACTIVE|SDL_APPINPUTFOCUS|SDL_APPMOUSEFOCUS);
+	int set_system_cursor = 1, show_system_cursor = 1;
+
 #ifdef DEBUG_VIDEO_GEM
 	printf("sdl:video:gem: check mouse mode\n");
 #endif
 
 	/* If the mouse is hidden and input is grabbed, we use relative mode */
-	if ( (!(SDL_cursorstate & CURSOR_VISIBLE)) &&
-		(this->input_grab != SDL_GRAB_OFF) &&
-             (SDL_GetAppState() & SDL_APPACTIVE) ) {
-		SDL_AtariXbios_LockMousePosition(SDL_TRUE);
-		GEM_mouse_relative = SDL_TRUE;
+	GEM_mouse_relative = (!(SDL_cursorstate & CURSOR_VISIBLE))
+		&& (this->input_grab != SDL_GRAB_OFF)
+		&& (SDL_GetAppState() & SDL_APPACTIVE);
+	SDL_AtariXbios_LockMousePosition(GEM_mouse_relative);
+
+	if (SDL_cursorstate & CURSOR_VISIBLE) {
+		/* Application defined cursor only over the application window */
+		if ((SDL_GetAppState() & full_focus) == full_focus) {
+			if (GEM_cursor) {
+				graf_mouse(USER_DEF, GEM_cursor->mform_p);
+				set_system_cursor = 0;
+			} else {
+				show_system_cursor = 0;
+			}
+		}
 	} else {
-		SDL_AtariXbios_LockMousePosition(SDL_FALSE);
-		GEM_mouse_relative = SDL_FALSE;
-		graf_mouse(M_ON, NULL);
+		/* Mouse cursor hidden only over the application window */
+		if ((SDL_GetAppState() & full_focus) == full_focus) {
+			set_system_cursor = 0;
+			show_system_cursor = 0;
+		}
+	}
+
+	graf_mouse(show_system_cursor ? M_ON : M_OFF, NULL);
+	if (set_system_cursor) {
+		graf_mouse(ARROW, NULL);
 	}
 }

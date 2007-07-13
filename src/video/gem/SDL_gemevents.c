@@ -89,11 +89,8 @@ void GEM_PumpEvents(_THIS)
 		if (!GEM_fullscreen && (GEM_handle>=0)) {
 			wind_get (GEM_handle, WF_WORKXYWH, &x2, &y2, &w2, &h2);
 			event_mask |= MU_M1;
-			if ( (SDL_GetAppState() & SDL_APPMOUSEFOCUS) ) {
-				mouse_event = MO_LEAVE;				
-			} else {
-				mouse_event = MO_ENTER;				
-			}
+			mouse_event = ( (SDL_GetAppState() & SDL_APPMOUSEFOCUS)
+				== SDL_APPMOUSEFOCUS) ? MO_LEAVE : MO_ENTER;
 		}
 
 		resultat = evnt_multi(
@@ -123,22 +120,11 @@ void GEM_PumpEvents(_THIS)
 		/* Mouse entering/leaving window */
 		if (resultat & MU_M1) {
 			if (this->input_grab == SDL_GRAB_OFF) {
-				if (SDL_GetAppState() & SDL_APPMOUSEFOCUS) {
-					SDL_PrivateAppActive(0, SDL_APPMOUSEFOCUS);
-					if (SDL_GetAppState() & SDL_APPINPUTFOCUS) {
-						graf_mouse(ARROW, NULL);
-					}
-				} else {
-					SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS);
-					if (SDL_GetAppState() & SDL_APPINPUTFOCUS) {
-						if (GEM_cursor == (void *) -1) {
-							graf_mouse(M_OFF, NULL);
-						} else if (GEM_cursor) {
-							graf_mouse(USER_DEF, GEM_cursor->mform_p);
-						}
-					}
-				}
+				/* Switch mouse focus state */
+				SDL_PrivateAppActive((mouse_event == MO_ENTER),
+					SDL_APPMOUSEFOCUS);
 			}
+			GEM_CheckMouseMode(this);
 		}
 
 		/* Timer event ? */
@@ -182,10 +168,10 @@ void GEM_PumpEvents(_THIS)
 
 static int do_messages(_THIS, short *message)
 {
-	int quit, posted;
+	int quit, posted, check_mouse_mode;
 	short x2,y2,w2,h2;
 
-	quit=0;
+	quit = check_mouse_mode = 0;
 	switch (message[0]) {
 		case WM_CLOSED:
 		case AP_TERM:    
@@ -203,6 +189,7 @@ static int do_messages(_THIS, short *message)
 			if (VDI_setpalette) {
 				VDI_setpalette(this, VDI_curpalette);
 			}
+			check_mouse_mode = 1;
 			break;
 		case WM_REDRAW:
 			if (!GEM_lock_redraw) {
@@ -222,6 +209,7 @@ static int do_messages(_THIS, short *message)
 				wind_set(GEM_handle,WF_NAME,(short)(((unsigned long)GEM_icon_name)>>16),(short)(((unsigned long)GEM_icon_name) & 0xffff),0,0);
 				GEM_refresh_name = SDL_FALSE;
 			}
+			check_mouse_mode = 1;
 			break;
 		case WM_UNICONIFY:
 			wind_set(message[3],WF_UNICONIFY,message[4],message[5],message[6],message[7]);
@@ -234,6 +222,7 @@ static int do_messages(_THIS, short *message)
 				wind_set(GEM_handle,WF_NAME,(short)(((unsigned long)GEM_title_name)>>16),(short)(((unsigned long)GEM_title_name) & 0xffff),0,0);
 				GEM_refresh_name = SDL_FALSE;
 			}
+			check_mouse_mode = 1;
 			break;
 		case WM_SIZED:
 			wind_set (message[3], WF_CURRXYWH, message[4], message[5], message[6], message[7]);
@@ -270,7 +259,12 @@ static int do_messages(_THIS, short *message)
 			if (VDI_setpalette) {
 				VDI_setpalette(this, VDI_oldpalette);
 			}
+			check_mouse_mode = 1;
 			break;
+	}
+
+	if (check_mouse_mode) {
+		GEM_CheckMouseMode(this);
 	}
 	
 	return quit;
