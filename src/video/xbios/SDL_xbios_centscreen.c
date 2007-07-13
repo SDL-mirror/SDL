@@ -35,6 +35,7 @@
 int
 SDL_XBIOS_CentscreenInit(_THIS)
 {
+#if 0
     centscreen_mode_t curmode, listedmode;
     unsigned long result;
     int cur_handle;             /* Current Centscreen mode handle */
@@ -75,11 +76,15 @@ SDL_XBIOS_CentscreenInit(_THIS)
     }
 
     return cur_handle;
+#else
+    return -1;
+#endif
 }
 
 void
 SDL_XBIOS_CentscreenSetmode(_THIS, int width, int height, int planes)
 {
+#if 0
     centscreen_mode_t newmode, curmode;
 
     newmode.handle = newmode.mode = newmode.logx = newmode.logy = -1;
@@ -92,11 +97,13 @@ SDL_XBIOS_CentscreenSetmode(_THIS, int width, int height, int planes)
     Vread(&newmode);
     newmode.mode &= ~(CSCREEN_SAVER | CSCREEN_ENERGYSTAR);
     Vwrite(0, &newmode, &curmode);
+#endif
 }
 
 void
 SDL_XBIOS_CentscreenRestore(_THIS, int prev_handle)
 {
+#if 0
     centscreen_mode_t newmode, curmode;
 
     /* Restore old video mode */
@@ -104,6 +111,7 @@ SDL_XBIOS_CentscreenRestore(_THIS, int prev_handle)
     newmode.mode = newmode.physx = newmode.physy = newmode.plan =
         newmode.logx = newmode.logy = -1;
     Vwrite(0, &newmode, &curmode);
+#endif
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

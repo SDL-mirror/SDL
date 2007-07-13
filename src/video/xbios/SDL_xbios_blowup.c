@@ -35,6 +35,7 @@
 void
 SDL_XBIOS_BlowupInit(_THIS, blow_cookie_t * cookie_blow)
 {
+#if 0
     int i, num_mode, bank;
     blow_mode_t *blow_mode;
 
@@ -65,6 +66,7 @@ SDL_XBIOS_BlowupInit(_THIS, blow_cookie_t * cookie_blow)
             }
         }
     }
+#endif
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

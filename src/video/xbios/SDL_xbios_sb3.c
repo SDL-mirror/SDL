@@ -50,6 +50,7 @@ const int SDL_XBIOS_scpn_planes_device[] = {
 int
 SDL_XBIOS_SB3Usable(scpn_cookie_t * cookie_scpn)
 {
+#if 0
     scpn_screeninfo_t *scrinfo;
     int bpp;
 
@@ -60,6 +61,7 @@ SDL_XBIOS_SB3Usable(scpn_cookie_t * cookie_scpn)
     if ((bpp == 8) || (bpp == 16)) {
         return 1;
     }
+#endif
 
     return 0;
 }
@@ -67,6 +69,7 @@ SDL_XBIOS_SB3Usable(scpn_cookie_t * cookie_scpn)
 void
 SDL_XBIOS_SB3Init(_THIS, scpn_cookie_t * cookie_scpn)
 {
+#if 0
     scpn_screeninfo_t *scrinfo;
 
     /* SB3 prevent changing video modes, we can only use current one */
@@ -84,6 +87,7 @@ SDL_XBIOS_SB3Init(_THIS, scpn_cookie_t * cookie_scpn)
                       scrinfo->virtual_width, scrinfo->virtual_height,
                       1 << (SDL_XBIOS_scpn_planes_device[scrinfo->device]),
                       SDL_FALSE);
+#endif
 }
 
 /* vi: set ts=4 sw=4 expandtab: */
