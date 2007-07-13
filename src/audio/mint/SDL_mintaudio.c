@@ -32,6 +32,7 @@
 #include <mint/osbind.h>
 #include <mint/falcon.h>
 #include <mint/mintbind.h>
+#include <mint/cookie.h>
 
 #include "SDL_audio.h"
 #include "SDL_mintaudio.h"
