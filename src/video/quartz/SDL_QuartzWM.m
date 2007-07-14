@@ -105,7 +105,7 @@ void QZ_HideMouse (_THIS) {
 }
 
 BOOL QZ_IsMouseInWindow (_THIS) {
-    if (qz_window == nil) return YES; /*fullscreen*/
+    if (qz_window == nil || (mode_flags & SDL_FULLSCREEN)) return YES; /*fullscreen*/
     else {
         NSPoint p = [ qz_window mouseLocationOutsideOfEventStream ];
         p.y -= 1.0f; /* Apparently y goes from 1 to h, not from 0 to h-1 (i.e. the "location of the mouse" seems to be defined as "the location of the top left corner of the mouse pointer's hot pixel" */

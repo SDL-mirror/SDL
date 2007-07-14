@@ -367,6 +367,13 @@ static void QZ_UnsetVideoMode (_THIS, BOOL to_desktop) {
             SDL_free (sw_buffers[0]);
         }
         
+        /* If we still have a valid window, close it. */
+        if ( qz_window ) {
+            [ qz_window close ];
+            [ qz_window release ];
+            qz_window = nil;
+            window_view = nil;
+        }
         /* 
             Release the OpenGL context
             Do this first to avoid trash on the display before fade
@@ -411,6 +418,8 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
     boolean_t exact_match = 0;
     NSRect screen_rect;
     CGError error;
+    NSRect contentRect;
+    BOOL isCustom = NO;
     CGDisplayFadeReservationToken fade_token = kCGDisplayFadeReservationInvalidToken;
     
     /* Fade to black to hide resolution-switching flicker (and garbage
@@ -503,6 +512,59 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
     if ( CGDisplayCanSetPalette (display_id) )
         current->flags |= SDL_HWPALETTE;
 
+    /* The code below checks for any valid custom windows and views.  If none are
+       available, then we create new ones.  Window/View code was added in FULLSCREEN
+       so that special events like the changing of the cursor image would be handled
+       ( only the front-most and active application can change the cursor appearance
+       and with no valid window/view in FULLSCREEN, SDL wouldn't update its cursor. )
+    */
+	/* Check for user-specified window and view */
+    {
+        char *windowPtrString = getenv ("SDL_NSWindowPointer");
+        char *viewPtrString = getenv ("SDL_NSQuickDrawViewPointer");
+    
+        contentRect = NSMakeRect (0, 0, width, height);
+	
+        if (windowPtrString && viewPtrString) {
+            /* Release any previous window */
+            if ( qz_window ) {
+                [ qz_window release ];
+                qz_window = nil;
+            }
+            
+            qz_window = (NSWindow*)atoi(windowPtrString);
+            window_view = (NSQuickDrawView*)atoi(viewPtrString);
+            isCustom = YES;
+            /* 
+                Retain reference to window because we
+                might release it in QZ_UnsetVideoMode
+            */
+            [ qz_window retain ];
+        }
+    }
+    /* Check if we should recreate the window */
+    if (qz_window == nil) {
+        /* Manually create a window, avoids having a nib file resource */
+        qz_window = [ [ SDL_QuartzWindow alloc ] 
+            initWithContentRect:contentRect
+                styleMask:nil 
+                    backing:NSBackingStoreBuffered
+                        defer:NO ];
+
+        if (qz_window != nil) {
+            [ qz_window setAcceptsMouseMovedEvents:YES ];
+            [ qz_window setViewsNeedDisplay:NO ];
+        }
+    }
+    /* We already have a window, just change its size */
+    else {
+        if (!isCustom) {
+            [ qz_window setContentSize:contentRect.size ];
+            current->flags |= (SDL_NOFRAME|SDL_RESIZABLE) & mode_flags;
+            [ window_view setFrameSize:contentRect.size ];
+        }
+    }
+
     /* Setup OpenGL for a fullscreen context */
     if (flags & SDL_OPENGL) {
 
@@ -512,6 +574,12 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
         if ( ! QZ_SetupOpenGL (this, bpp, flags) ) {
             goto ERR_NO_GL;
         }
+
+        /* Initialize the NSView and add it to our window.  The presence of a valid window and
+           view allow the cursor to be changed whilst in fullscreen.*/
+        window_view = [ [ NSView alloc ] initWithFrame:contentRect ];
+        [ [ qz_window contentView ] addSubview:window_view ];	
+        [ window_view release ];
 
         ctx = [ gl_context cglContext ];
         err = CGLSetFullScreen (ctx);
