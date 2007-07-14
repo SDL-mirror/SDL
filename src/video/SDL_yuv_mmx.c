@@ -21,7 +21,7 @@
 */
 #include "SDL_config.h"
 
-#if (__GNUC__ > 2) && defined(__i386__) && SDL_ASSEMBLY_ROUTINES
+#if (__GNUC__ > 2) && defined(__i386__) && __OPTIMIZE__ && SDL_ASSEMBLY_ROUTINES
 
 #include "SDL_stdinc.h"
 
