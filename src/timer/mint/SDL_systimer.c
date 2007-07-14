@@ -131,7 +131,7 @@ SDL_SYS_TimerQuit(void)
     if (timer_installed) {
         /* Uninstall RunTimer vbl vector */
         void *old_stack = (void *) Super(0);
-        SDL_AtariVblUninstall(RunTimer);
+        SDL_AtariVblUninstall(SDL_ThreadedTimerCheck);
         Super(old_stack);
         timer_installed = SDL_FALSE;
     }
