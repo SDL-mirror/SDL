@@ -669,7 +669,8 @@ static const Uint16 joypad_masks[8 * 4] = {
 static void
 UpdateJoypads(void)
 {
-    Uint16 tmp;
+    Uint16 tmp, i, j;
+    Uint32 cur_fire, cur_dir;
 
         /*--- This function is called in supervisor mode ---*/
 
