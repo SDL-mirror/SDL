@@ -623,11 +623,22 @@ static void QZ_GetMouseLocation (_THIS, NSPoint *p) {
 
 void QZ_DoActivate (_THIS) {
 
-    SDL_PrivateAppActive (1, SDL_APPINPUTFOCUS | (QZ_IsMouseInWindow (this) ? SDL_APPMOUSEFOCUS : 0));
-    
-    /* Hide the cursor if it was hidden by SDL_ShowCursor() */
-    if (!cursor_should_be_visible)
-        QZ_HideMouse (this);
+    BOOL isInGameWin = QZ_IsMouseInWindow (this);
+
+    SDL_PrivateAppActive (1, SDL_APPINPUTFOCUS | (isInGameWin ? SDL_APPMOUSEFOCUS : 0));
+
+    /* Reset the cursor state */
+    /* FIXME: This doesn't currently work...
+       Apparently you can't set the cursor inside windowDidBecomeKey
+     */
+    if ( isInGameWin ) {
+        if (cursor_should_be_visible)
+            SDL_SetCursor (NULL);
+        else
+            QZ_HideMouse (this);
+    } else {
+        QZ_ShowMouse (this, [NSCursor arrowCursor]);
+    }
 
     /* Regrab input, only if it was previously grabbed */
     if ( current_grab_mode == SDL_GRAB_ON ) {
@@ -656,7 +667,7 @@ void QZ_DoDeactivate (_THIS) {
 
     /* Show the cursor if it was hidden by SDL_ShowCursor() */
     if (!cursor_should_be_visible)
-        QZ_ShowMouse (this);
+        QZ_ShowMouse (this, [NSCursor arrowCursor]);
 }
 
 void QZ_SleepNotificationHandler (void * refcon,
@@ -870,8 +881,7 @@ void QZ_PumpEvents (_THIS)
                         into the game window. This still generates a mouse moved event,
                         but not as a result of the warp (so it's in the right direction).
                     */
-                    if ( grab_state == QZ_VISIBLE_GRAB &&
-                         !isInGameWin ) {
+                    if ( grab_state == QZ_VISIBLE_GRAB && !isInGameWin ) {
                        
                         NSPoint p;
                         QZ_GetMouseLocation (this, &p);
@@ -909,15 +919,20 @@ void QZ_PumpEvents (_THIS)
                               cursor enters the window again, making it obvious
                               to the user that the grab is broken.*/
                             CGAssociateMouseAndMouseCursorPosition (1);
-                        if (!cursor_should_be_visible)
-                            QZ_ShowMouse (this);
+
+                        QZ_ShowMouse (this, [NSCursor arrowCursor]);
                     }
                     else
                     if ( isInGameWin && (SDL_GetAppState() & (SDL_APPMOUSEFOCUS | SDL_APPINPUTFOCUS)) == SDL_APPINPUTFOCUS ) {
                     
                         SDL_PrivateAppActive (1, SDL_APPMOUSEFOCUS);
-                        if (!cursor_should_be_visible)
+
+                        if (cursor_should_be_visible) {
+                            SDL_SetCursor (NULL);
+                        } else {
                             QZ_HideMouse (this);
+                        }
+
                         if (grab_state == QZ_INVISIBLE_GRAB) { /*see comment above*/
                             QZ_PrivateWarpCursor (this, SDL_VideoSurface->w / 2, SDL_VideoSurface->h / 2);
                             CGAssociateMouseAndMouseCursorPosition (0);

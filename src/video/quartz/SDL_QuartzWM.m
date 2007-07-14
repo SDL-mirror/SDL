@@ -90,11 +90,12 @@ outOfMemory:
     return(NULL);
 }
 
-void QZ_ShowMouse (_THIS) {
+void QZ_ShowMouse (_THIS, NSCursor *cursor) {
     if (!cursor_visible) {
         [ NSCursor unhide ];
         cursor_visible = YES;
     }
+    [ cursor set ];
 }
 
 void QZ_HideMouse (_THIS) {
@@ -116,16 +117,15 @@ BOOL QZ_IsMouseInWindow (_THIS) {
 int QZ_ShowWMCursor (_THIS, WMcursor *cursor) { 
 
     if ( cursor == NULL) {
+        QZ_HideMouse (this);
         if ( cursor_should_be_visible ) {
-            QZ_HideMouse (this);
             cursor_should_be_visible = NO;
             QZ_ChangeGrabState (this, QZ_HIDECURSOR);
         }
     }
     else {
-        [ cursor->nscursor set ];
+        QZ_ShowMouse (this, cursor->nscursor);
         if ( ! cursor_should_be_visible ) {
-            QZ_ShowMouse (this);
             cursor_should_be_visible = YES;
             QZ_ChangeGrabState (this, QZ_SHOWCURSOR);
         }
