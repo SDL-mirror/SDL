@@ -610,6 +610,7 @@ DEFAULT_MMAP_THRESHOLD       default: 256K
 #endif  /* MALLINFO_FIELD_TYPE */
 
 #define memset	SDL_memset
+#define memcpy	SDL_memcpy
 #define malloc	SDL_malloc
 #define calloc	SDL_calloc
 #define realloc	SDL_realloc
@@ -3838,7 +3839,7 @@ static void* internal_realloc(mstate m, void* oldmem, size_t bytes) {
       void* newmem = internal_malloc(m, bytes);
       if (newmem != 0) {
         size_t oc = oldsize - overhead_for(oldp);
-        SDL_memcpy(newmem, oldmem, (oc < bytes)? oc : bytes);
+        memcpy(newmem, oldmem, (oc < bytes)? oc : bytes);
         internal_free(m, oldmem);
       }
       return newmem;
