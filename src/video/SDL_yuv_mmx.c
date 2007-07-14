@@ -42,16 +42,11 @@ static mmx_t MMX_VgrnRGB  = { .uw = {0xffd2, 0xffd2, 0xffd2, 0xffd2} };
 
 static mmx_t MMX_Ublu5x5  = { .uw = {0x0081, 0x0081, 0x0081, 0x0081} };
 static mmx_t MMX_Vred5x5  = { .uw = {0x0066, 0x0066, 0x0066, 0x0066} };
-static mmx_t MMX_Ugrn555  = { .uw = {0xffe7, 0xffe7, 0xffe7, 0xffe7} };
-static mmx_t MMX_Vgrn555  = { .uw = {0xffcc, 0xffcc, 0xffcc, 0xffcc} };
 static mmx_t MMX_Ugrn565  = { .uw = {0xffe8, 0xffe8, 0xffe8, 0xffe8} };
 static mmx_t MMX_Vgrn565  = { .uw = {0xffcd, 0xffcd, 0xffcd, 0xffcd} };
 
-static mmx_t MMX_red555   = { .uw = {0x7c00, 0x7c00, 0x7c00, 0x7c00} };
 static mmx_t MMX_red565   = { .uw = {0xf800, 0xf800, 0xf800, 0xf800} };
-static mmx_t MMX_grn555   = { .uw = {0x03e0, 0x03e0, 0x03e0, 0x03e0} };
 static mmx_t MMX_grn565   = { .uw = {0x07e0, 0x07e0, 0x07e0, 0x07e0} };
-static mmx_t MMX_blu5x5   = { .uw = {0x001f, 0x001f, 0x001f, 0x001f} };
 
 /**
    This MMX assembler is my first assembler/MMX program ever.
