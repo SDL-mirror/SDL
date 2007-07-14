@@ -438,7 +438,9 @@ static void create_aux_windows(_THIS)
 
 		/* Open an input method.  */
 		if (SDL_IM == NULL) {
-			char *old_locale, *old_modifiers;
+			char *old_locale = NULL, *old_modifiers = NULL;
+			const char *p;
+			size_t n;
 			/* I'm not comfortable to do locale setup
 			   here.  However, we need C library locale
 			   (and xlib modifiers) to be set based on the
@@ -455,29 +457,21 @@ static void create_aux_windows(_THIS)
 
 			/* Save the current (application program's)
 			   locale settings.  */
-			old_locale = setlocale(LC_ALL, NULL);
-			old_modifiers = XSetLocaleModifiers(NULL);
-			if (old_locale == NULL || old_modifiers == NULL) {
-				/* The specs guarantee that the query
-				   calls to above functions never
-				   fail, so we should never come
-				   here.  */
-				SDL_SetError("failed to retreive current locale settings");
-				old_locale = NULL;
-				old_modifiers = NULL;
-			} else {
-				/* Save retreived values in our own
-				   storage, since they may be
-				   overwritten by the successive calls
-				   to
-				   setlocale/XSetLocaleModifiers.  */
-				char const *p;
-				p = old_locale;
-				old_locale = SDL_malloc(strlen(p) + 1);
-				strcpy(old_locale, p);
-				p = old_modifiers;
-				old_modifiers = SDL_malloc(strlen(p) + 1);
-				strcpy(old_modifiers, p);
+			p = setlocale(LC_ALL, NULL);
+			if ( p ) {
+				n = SDL_strlen(p)+1;
+				old_locale = SDL_stack_alloc(char, n);
+				if ( old_locale ) {
+					SDL_strlcpy(old_locale, p, n);
+				}
+			}
+			p = XSetLocaleModifiers(NULL);
+			if ( p ) {
+				n = SDL_strlen(p)+1;
+				old_modifiers = SDL_stack_alloc(char, n);
+				if ( old_modifiers ) {
+					SDL_strlcpy(old_modifiers, p, n);
+				}
 			}
 
 			/* Fetch the user's preferences and open the
@@ -489,15 +483,17 @@ static void create_aux_windows(_THIS)
 			/* Restore the application's locale settings
 			   so that we don't break the application's
 			   expected behaviour.  */
-			if (old_locale != NULL && old_modifiers != NULL) {
+			if ( old_locale ) {
 				/* We need to restore the C library
 				   locale first, since the
 				   interpretation of the X modifier
 				   may depend on it.  */
 				setlocale(LC_ALL, old_locale);
-				SDL_free(old_locale);
+				SDL_stack_free(old_locale);
+			}
+			if ( old_modifiers ) {
 				XSetLocaleModifiers(old_modifiers);
-				SDL_free(old_modifiers);
+				SDL_stack_free(old_modifiers);
 			}
 		}
 
