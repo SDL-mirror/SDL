@@ -1399,6 +1399,11 @@ SDL_LockYUVOverlay(SDL_Overlay * overlay)
 {
     void *pixels;
     int pitch;
+
+    if (!overlay) {
+        SDL_SetError("Passed a NULL overlay");
+        return -1;
+    }
     if (SDL_LockTexture(overlay->hwdata->textureID, NULL, 1, &pixels, &pitch)
         < 0) {
         return -1;
@@ -1424,12 +1429,19 @@ SDL_LockYUVOverlay(SDL_Overlay * overlay)
 void
 SDL_UnlockYUVOverlay(SDL_Overlay * overlay)
 {
+    if (!overlay) {
+        return;
+    }
     SDL_UnlockTexture(overlay->hwdata->textureID);
 }
 
 int
 SDL_DisplayYUVOverlay(SDL_Overlay * overlay, SDL_Rect * dstrect)
 {
+    if (!overlay || !dstrect) {
+        SDL_SetError("Passed a NULL overlay or dstrect");
+        return -1;
+    }
     if (SDL_RenderCopy(overlay->hwdata->textureID, NULL, dstrect) < 0) {
         return -1;
     }
@@ -1440,15 +1452,16 @@ SDL_DisplayYUVOverlay(SDL_Overlay * overlay, SDL_Rect * dstrect)
 void
 SDL_FreeYUVOverlay(SDL_Overlay * overlay)
 {
-    if (overlay) {
-        if (overlay->hwdata) {
-            if (overlay->hwdata->textureID) {
-                SDL_DestroyTexture(overlay->hwdata->textureID);
-            }
-            SDL_free(overlay->hwdata);
-        }
-        SDL_free(overlay);
+    if (!overlay) {
+        return;
     }
+    if (overlay->hwdata) {
+        if (overlay->hwdata->textureID) {
+            SDL_DestroyTexture(overlay->hwdata->textureID);
+        }
+        SDL_free(overlay->hwdata);
+    }
+    SDL_free(overlay);
 }
 
 void
