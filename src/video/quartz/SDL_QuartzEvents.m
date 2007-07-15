@@ -945,7 +945,16 @@ void QZ_PumpEvents (_THIS)
                     break;
                 case NSFlagsChanged:
                     break;
-                    /* case NSAppKitDefined: break; */
+                case NSAppKitDefined:
+                    [ NSApp sendEvent:event ];
+                    if ([ event subtype ] == NSApplicationActivatedEventType && (mode_flags & SDL_FULLSCREEN)) {
+                        /* the default handling of this event seems to reset any cursor set by [NSCursor set] (used by SDL_SetCursor() in fullscreen mode) to the default system arrow cursor */
+                        SDL_Cursor *sdlc = SDL_GetCursor();
+                        if (sdlc != NULL && sdlc->wm_cursor != NULL) {
+                            [ sdlc->wm_cursor->nscursor set ];
+                        }
+                    }
+                    break;
                     /* case NSApplicationDefined: break; */
                     /* case NSPeriodic: break; */
                     /* case NSCursorUpdate: break; */
