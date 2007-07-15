@@ -77,7 +77,7 @@ GEM_PumpEvents(_THIS)
             wind_get(GEM_handle, WF_WORKXYWH, &x2, &y2, &w2, &h2);
             event_mask |= MU_M1;
             mouse_event = ((SDL_GetAppState() & SDL_APPMOUSEFOCUS) ==
-                SDL_APPMOUSEFOCUS) ? MO_LEAVE : MO_ENTER;
+                           SDL_APPMOUSEFOCUS) ? MO_LEAVE : MO_ENTER;
         }
 
         resultat = evnt_multi(event_mask,
@@ -107,7 +107,7 @@ GEM_PumpEvents(_THIS)
             if (this->input_grab == SDL_GRAB_OFF) {
                 /* Switch mouse focus state */
                 SDL_PrivateAppActive((mouse_event == MO_ENTER),
-                    SDL_APPMOUSEFOCUS);
+                                     SDL_APPMOUSEFOCUS);
             }
             GEM_CheckMouseMode(this);
         }

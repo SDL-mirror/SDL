@@ -36,10 +36,9 @@ GEM_InitModes(_THIS)
 
     /* read vdi bpp, rmask, gmask, bmask, amask */
 
-    mode.format =
-        SDL_MasksToPixelFormatEnum(bpp, Rmask, Gmask, Bmask, Amask);
-    mode.w = 0 /* vdi width */;
-    mode.h = 0 /* vdi height */;
+    mode.format = SDL_MasksToPixelFormatEnum(bpp, Rmask, Gmask, Bmask, Amask);
+    mode.w = 0 /* vdi width */ ;
+    mode.h = 0 /* vdi height */ ;
     mode.refresh_rate = 0;
     mode.driverdata = NULL;
 

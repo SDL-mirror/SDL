@@ -151,7 +151,7 @@ GEM_VideoInit(_THIS)
 
         data->wfeatures = 0;
         if (appl_getinfo(AES_WINDOW, &ap_gout[0], &ap_gout[1], &ap_gout[2],
-	    &ap_gout[3]) == 0) {
+                         &ap_gout[3]) == 0) {
             data->wfeatures = ap_gout[0];
         }
     }
