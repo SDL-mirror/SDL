@@ -159,8 +159,8 @@ static int Mac_HandleEvents(_THIS, int wait4it)
 	/* Check the current state of the keyboard */
 	if ( SDL_GetAppState() & SDL_APPINPUTFOCUS ) {
 		KeyMap keys;
-		const Uint8 *keysptr = (Uint8 *) keys;
-		const Uint8 *last_keysptr = (Uint8 *) last_keys;
+		const Uint32 *keysptr = (Uint32 *) &keys;
+		const Uint32 *last_keysptr = (Uint32 *) &last_keys;
 
 		/* Check for special non-event keys */
 		if ( event.modifiers != last_mods ) {
