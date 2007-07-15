@@ -22,11 +22,8 @@
 #include "SDL_config.h"
 
 #include "SDL_QuartzVideo.h"
+#include "SDL_QuartzWM.h"
 
-
-struct WMcursor {
-    NSCursor *nscursor;
-};
 
 void QZ_FreeWMCursor     (_THIS, WMcursor *cursor) { 
 
@@ -90,18 +87,21 @@ outOfMemory:
     return(NULL);
 }
 
-void QZ_ShowMouse (_THIS, NSCursor *cursor) {
-    if (!cursor_visible) {
-        [ NSCursor unhide ];
-        cursor_visible = YES;
-    }
-    [ cursor set ];
-}
+void QZ_UpdateCursor (_THIS) {
+    BOOL state;
 
-void QZ_HideMouse (_THIS) {
-    if ((SDL_GetAppState() & SDL_APPMOUSEFOCUS) && cursor_visible) {
-        [ NSCursor hide ];
-        cursor_visible = NO;
+    if (cursor_should_be_visible || !(SDL_GetAppState() & SDL_APPMOUSEFOCUS)) {
+        state = YES;
+    } else {
+        state = NO;
+    }
+    if (state != cursor_visible) {
+        if (state) {
+            [ NSCursor unhide ];
+        } else {
+            [ NSCursor hide ];
+        }
+        cursor_visible = state;
     }
 }
 
@@ -117,18 +117,24 @@ BOOL QZ_IsMouseInWindow (_THIS) {
 int QZ_ShowWMCursor (_THIS, WMcursor *cursor) { 
 
     if ( cursor == NULL) {
-        QZ_HideMouse (this);
         if ( cursor_should_be_visible ) {
             cursor_should_be_visible = NO;
             QZ_ChangeGrabState (this, QZ_HIDECURSOR);
         }
+        QZ_UpdateCursor(this);
     }
     else {
-        QZ_ShowMouse (this, cursor->nscursor);
+        if (qz_window ==nil || (mode_flags & SDL_FULLSCREEN)) {
+            [ cursor->nscursor set ];
+        }
+        else {
+            [ qz_window invalidateCursorRectsForView: [ qz_window contentView ] ];
+        }
         if ( ! cursor_should_be_visible ) {
             cursor_should_be_visible = YES;
             QZ_ChangeGrabState (this, QZ_SHOWCURSOR);
         }
+        QZ_UpdateCursor(this);
     }
 
     return 1;

@@ -756,6 +756,7 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
         }
         [ qz_window setDelegate:
             [ [ [ SDL_QuartzWindowDelegate alloc ] init ] autorelease ] ];
+        [ qz_window setContentView: [ [ [ SDL_QuartzView alloc ] init ] autorelease ] ];
     }
     /* We already have a window, just change its size */
     else {

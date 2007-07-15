@@ -224,8 +224,6 @@ SDL_Overlay* QZ_CreateYUVOverlay (_THIS, int width, int height,
 void         QZ_PrivateWarpCursor (_THIS, int x, int y);
 void         QZ_ChangeGrabState (_THIS, int action);
 void         QZ_RegisterForSleepNotifications (_THIS);
-void         QZ_ShowMouse (_THIS, NSCursor *cursor);
-void         QZ_HideMouse (_THIS);
 void         QZ_PrivateGlobalToLocal (_THIS, NSPoint *p);
 void         QZ_PrivateCocoaToSDL (_THIS, NSPoint *p);
 BOOL         QZ_IsMouseInWindow (_THIS);

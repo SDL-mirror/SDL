@@ -22,6 +22,7 @@
 #include "SDL_config.h"
 
 #include "SDL_QuartzVideo.h"
+#include "SDL_QuartzWM.h"
 #include "SDL_QuartzWindow.h"
 
 /*
@@ -214,6 +215,18 @@ static void QZ_SetPortAlphaOpaque () {
 - (void)windowDidResignKey:(NSNotification *)aNotification
 {
     QZ_DoDeactivate (current_video);
+}
+
+@end
+
+@implementation SDL_QuartzView
+
+- (void)resetCursorRects
+{
+    SDL_Cursor *sdlc = SDL_GetCursor();
+    if (sdlc != NULL && sdlc->wm_cursor != NULL) {
+        [self addCursorRect: [self visibleRect] cursor: sdlc->wm_cursor->nscursor];
+    }
 }
 
 @end
