@@ -65,11 +65,18 @@ SDL_Overlay *SDL_CreateYUVOverlay(int w, int h, Uint32 format,
 
 int SDL_LockYUVOverlay(SDL_Overlay *overlay)
 {
+	if ( overlay == NULL ) {
+		SDL_SetError("Passed NULL overlay");
+		return -1;
+	}
 	return overlay->hwfuncs->Lock(current_video, overlay);
 }
 
 void SDL_UnlockYUVOverlay(SDL_Overlay *overlay)
 {
+	if ( overlay == NULL ) {
+		return;
+	}
 	overlay->hwfuncs->Unlock(current_video, overlay);
 }
 
@@ -78,6 +85,11 @@ int SDL_DisplayYUVOverlay(SDL_Overlay *overlay, SDL_Rect *dstrect)
 	SDL_Rect src, dst;
 	int srcx, srcy, srcw, srch;
 	int dstx, dsty, dstw, dsth;
+
+	if ( overlay == NULL || dstrect == NULL ) {
+		SDL_SetError("Passed NULL overlay or dstrect");
+		return -1;
+	}
 
 	/* Clip the rectangle to the screen area */
 	srcx = 0;
@@ -128,10 +140,11 @@ int SDL_DisplayYUVOverlay(SDL_Overlay *overlay, SDL_Rect *dstrect)
 
 void SDL_FreeYUVOverlay(SDL_Overlay *overlay)
 {
-	if ( overlay ) {
-		if ( overlay->hwfuncs ) {
-			overlay->hwfuncs->FreeHW(current_video, overlay);
-		}
-		SDL_free(overlay);
+	if ( overlay == NULL ) {
+		return;
 	}
+	if ( overlay->hwfuncs ) {
+		overlay->hwfuncs->FreeHW(current_video, overlay);
+	}
+	SDL_free(overlay);
 }
