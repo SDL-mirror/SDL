@@ -939,6 +939,7 @@ int DIB_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 			entry->peBlue  = colors[i].b;
 			entry->peFlags = PC_NOCOLLAPSE;
 		}
+#ifdef SYSPAL_NOSTATIC
 		/* Check to make sure black and white are in position */
 		if ( GetSystemPaletteUse(hdc) != SYSPAL_NOSTATIC256 ) {
 			moved_entries += CheckPaletteEntry(screen_logpal, 0, 0x00, 0x00, 0x00);
@@ -950,9 +951,12 @@ int DIB_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 		   in the desired palette, set those entries (10-245) and
 		   then map everything into the new system palette.
 		 */
+#endif
 
+#ifndef _WIN32_WCE
 		/* Copy the entries into the system palette */
 		UnrealizeObject(screen_pal);
+#endif
 		SetPaletteEntries(screen_pal, 0, screen_logpal->palNumEntries, screen_logpal->palPalEntry);
 		SelectPalette(hdc, screen_pal, FALSE);
 		RealizePalette(hdc);
@@ -1156,6 +1160,7 @@ void DIB_VideoQuit(_THIS)
 /* Exported for the windows message loop only */
 static void DIB_GrabStaticColors(HWND window)
 {
+#ifdef SYSPAL_NOSTATIC
 	HDC hdc;
 
 	hdc = GetDC(window);
@@ -1164,14 +1169,17 @@ static void DIB_GrabStaticColors(HWND window)
 		SetSystemPaletteUse(hdc, SYSPAL_NOSTATIC);
 	}
 	ReleaseDC(window, hdc);
+#endif
 }
 static void DIB_ReleaseStaticColors(HWND window)
 {
+#ifdef SYSPAL_NOSTATIC
 	HDC hdc;
 
 	hdc = GetDC(window);
 	SetSystemPaletteUse(hdc, SYSPAL_STATIC);
 	ReleaseDC(window, hdc);
+#endif
 }
 static void DIB_Activate(_THIS, BOOL active, BOOL minimized)
 {
@@ -1191,7 +1199,9 @@ static void DIB_RealizePalette(_THIS)
 		HDC hdc;
 
 		hdc = GetDC(SDL_Window);
+#ifndef _WIN32_WCE
 		UnrealizeObject(screen_pal);
+#endif
 		SelectPalette(hdc, screen_pal, FALSE);
 		if ( RealizePalette(hdc) ) {
 			InvalidateRect(SDL_Window, NULL, FALSE);
