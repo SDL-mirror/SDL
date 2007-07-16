@@ -3408,7 +3408,7 @@ static void* sys_alloc(mstate m, size_t nb) {
     if (ss == 0) {  /* First time through or recovery */
       char* base = (char*)CALL_MORECORE(0);
       if (base != CMFAIL) {
-        asize = granularity_align(nb + TOP_FOOT_SIZE + SIZE_T_ONE);
+        asize = granularity_align(nb + TOP_FOOT_SIZE + MALLOC_ALIGNMENT + SIZE_T_ONE);
         /* Adjust to end on a page boundary */
         if (!is_page_aligned(base))
           asize += (page_align((size_t)base) - (size_t)base);
@@ -3422,7 +3422,7 @@ static void* sys_alloc(mstate m, size_t nb) {
     }
     else {
       /* Subtract out existing available top space from MORECORE request. */
-      asize = granularity_align(nb - m->topsize + TOP_FOOT_SIZE + SIZE_T_ONE);
+      asize = granularity_align(nb - m->topsize + TOP_FOOT_SIZE + MALLOC_ALIGNMENT + SIZE_T_ONE);
       /* Use mem here only if it did continuously extend old space */
       if (asize < HALF_MAX_SIZE_T &&
           (br = (char*)(CALL_MORECORE(asize))) == ss->base+ss->size) {
@@ -3435,7 +3435,7 @@ static void* sys_alloc(mstate m, size_t nb) {
       if (br != CMFAIL) {    /* Try to use/extend the space we did get */
         if (asize < HALF_MAX_SIZE_T &&
             asize < nb + TOP_FOOT_SIZE + SIZE_T_ONE) {
-          size_t esize = granularity_align(nb + TOP_FOOT_SIZE + SIZE_T_ONE - asize);
+          size_t esize = granularity_align(nb + TOP_FOOT_SIZE + MALLOC_ALIGNMENT + SIZE_T_ONE - asize);
           if (esize < HALF_MAX_SIZE_T) {
             char* end = (char*)CALL_MORECORE(esize);
             if (end != CMFAIL)
@@ -3459,7 +3459,7 @@ static void* sys_alloc(mstate m, size_t nb) {
   }
 
   if (HAVE_MMAP && tbase == CMFAIL) {  /* Try MMAP */
-    size_t req = nb + TOP_FOOT_SIZE + SIZE_T_ONE;
+    size_t req = nb + TOP_FOOT_SIZE + MALLOC_ALIGNMENT + SIZE_T_ONE;
     size_t rsize = granularity_align(req);
     if (rsize > nb) { /* Fail if wraps around zero */
       char* mp = (char*)(CALL_MMAP(rsize));
@@ -3472,7 +3472,7 @@ static void* sys_alloc(mstate m, size_t nb) {
   }
 
   if (HAVE_MORECORE && tbase == CMFAIL) { /* Try noncontiguous MORECORE */
-    size_t asize = granularity_align(nb + TOP_FOOT_SIZE + SIZE_T_ONE);
+    size_t asize = granularity_align(nb + TOP_FOOT_SIZE + MALLOC_ALIGNMENT + SIZE_T_ONE);
     if (asize < HALF_MAX_SIZE_T) {
       char* br = CMFAIL;
       char* end = CMFAIL;
