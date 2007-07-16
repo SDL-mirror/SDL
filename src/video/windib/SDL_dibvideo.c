@@ -637,10 +637,11 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 #endif /* !NO_CHANGEDISPLAYSETTINGS */
 
 	/* Reset the palette and create a new one if necessary */
+	if ( grab_palette ) {
+		DIB_ReleaseStaticColors(SDL_Window);
+		grab_palette = FALSE;
+	}
 	if ( screen_pal != NULL ) {
-		if ( video->flags & SDL_HWPALETTE ) {
-			DIB_ReleaseStaticColors(SDL_Window);
-		}
 	/*	RJR: March 28, 2000
 		delete identity palette if switching from a palettized mode */
 		DeleteObject(screen_pal);
@@ -650,6 +651,7 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		SDL_free(screen_logpal);
 		screen_logpal = NULL;
 	}
+
 	if ( bpp <= 8 )
 	{
 	/*	RJR: March 28, 2000
@@ -755,10 +757,11 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		this->UpdateRects = DIB_NormalUpdate;
 
 		/* Set video surface flags */
-		if ( (flags & (SDL_FULLSCREEN|SDL_HWPALETTE)) != 0 ) {
-			/* BitBlt() maps colors for us */
-			video->flags |= SDL_HWPALETTE;
+		if ( screen_pal && (flags & (SDL_FULLSCREEN|SDL_HWPALETTE)) ) {
+			grab_palette = TRUE;
 		}
+		/* BitBlt() maps colors for us */
+		video->flags |= SDL_HWPALETTE;
 	}
 #ifndef _WIN32_WCE
 	/* Resize the window */
@@ -976,7 +979,7 @@ int DIB_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 	mdc = CreateCompatibleDC(hdc);
 	SelectObject(mdc, screen_bmp);
 	SetDIBColorTable(mdc, firstcolor, ncolors, pal);
-	if ( moved_entries || !(this->screen->flags & SDL_HWPALETTE) ) {
+	if ( moved_entries || !grab_palette ) {
 		BitBlt(hdc, 0, 0, this->screen->w, this->screen->h,
 		       mdc, 0, 0, SRCCOPY);
 	}
@@ -1098,7 +1101,7 @@ void DIB_VideoQuit(_THIS)
 	if ( SDL_Window ) {
 		/* Delete the screen bitmap (also frees screen->pixels) */
 		if ( this->screen ) {
-			if ( this->screen->flags & SDL_HWPALETTE ) {
+			if ( grab_palette ) {
 				DIB_ReleaseStaticColors(SDL_Window);
 			}
 #ifndef NO_CHANGEDISPLAYSETTINGS
@@ -1183,7 +1186,7 @@ static void DIB_ReleaseStaticColors(HWND window)
 }
 static void DIB_Activate(_THIS, BOOL active, BOOL minimized)
 {
-	if ( screen_pal && (this->screen->flags & SDL_HWPALETTE) ) {
+	if ( grab_palette ) {
 		if ( !active ) {
 			DIB_ReleaseStaticColors(SDL_Window);
 			DIB_RealizePalette(this);

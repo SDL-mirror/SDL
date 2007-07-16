@@ -41,6 +41,7 @@ struct SDL_PrivateVideoData {
     HBITMAP screen_bmp;
     HPALETTE screen_pal;
     LOGPALETTE *screen_logpal;
+    BOOL grab_palette;
 
     int allow_screensaver;
 
@@ -60,6 +61,7 @@ struct SDL_PrivateVideoData {
 #define screen_bmp		(this->hidden->screen_bmp)
 #define screen_pal		(this->hidden->screen_pal)
 #define screen_logpal		(this->hidden->screen_logpal)
+#define grab_palette		(this->hidden->grab_palette)
 #define SDL_nummodes		(this->hidden->SDL_nummodes)
 #define SDL_modelist		(this->hidden->SDL_modelist)
 
