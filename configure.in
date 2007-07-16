@@ -96,6 +96,7 @@ AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
+AC_CHECK_PROGS(WINDRES, windres i386-mingw32-windres)
 
 dnl Check for compiler characteristics
 AC_C_CONST
@@ -2261,6 +2262,7 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         # Set up the system libraries we need
         EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lunicows -luser32 -lgdi32 -lmsimg32 -lwinmm"
         # The Win32 platform requires special setup
+        SOURCES="$SOURCES $srcdir/src/main/win32/*.rc"
         SDLMAIN_SOURCES="$srcdir/src/main/win32/*.c"
         SDL_CFLAGS="$SDL_CFLAGS -Dmain=SDL_main"
         SDL_LIBS="-lmingw32 -lSDLmain $SDL_LIBS -mwindows"
@@ -2512,6 +2514,7 @@ OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.cc,$(objects)/\1.lo,g'`
 OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.m,$(objects)/\1.lo,g'`
 OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects)/\1.lo,g'`
 OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.S,$(objects)/\1.lo,g'`
+OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.rc,$(objects)/\1.o,g'`
 
 SDLMAIN_OBJECTS=`echo $SDLMAIN_SOURCES | sed 's,[[^ ]]*/\([[^ ]]*\)\.cc,$(objects)/\1.o,g'`
 SDLMAIN_OBJECTS=`echo $SDLMAIN_OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects)/\1.o,g'`
@@ -2574,6 +2577,7 @@ AC_SUBST(BUILD_CFLAGS)
 AC_SUBST(EXTRA_CFLAGS)
 AC_SUBST(BUILD_LDFLAGS)
 AC_SUBST(EXTRA_LDFLAGS)
+AC_SUBST(WINDRES)
 
 AC_OUTPUT([
     Makefile sdl-config SDL.spec SDL.qpg sdl.pc
