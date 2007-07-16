@@ -2727,8 +2727,7 @@ do_check_tree(mstate m, tchunkptr t)
             }
         }
         u = u->fd;
-    }
-    while (u != t);
+    } while (u != t);
     assert(head != 0);
 }
 
@@ -2784,8 +2783,7 @@ bin_find(mstate m, mchunkptr x)
             do {
                 if (p == x)
                     return 1;
-            }
-            while ((p = p->fd) != b);
+            } while ((p = p->fd) != b);
         }
     } else {
         bindex_t tidx;
@@ -2802,8 +2800,7 @@ bin_find(mstate m, mchunkptr x)
                 do {
                     if (u == (tchunkptr) x)
                         return 1;
-                }
-                while ((u = u->fd) != t);
+                } while ((u = u->fd) != t);
             }
         }
     }
@@ -3476,7 +3473,9 @@ sys_alloc(mstate m, size_t nb)
         if (ss == 0) {          /* First time through or recovery */
             char *base = (char *) CALL_MORECORE(0);
             if (base != CMFAIL) {
-                asize = granularity_align(nb + TOP_FOOT_SIZE + SIZE_T_ONE);
+                asize =
+                    granularity_align(nb + TOP_FOOT_SIZE + MALLOC_ALIGNMENT +
+                                      SIZE_T_ONE);
                 /* Adjust to end on a page boundary */
                 if (!is_page_aligned(base))
                     asize += (page_align((size_t) base) - (size_t) base);
@@ -3491,7 +3490,7 @@ sys_alloc(mstate m, size_t nb)
             /* Subtract out existing available top space from MORECORE request. */
             asize =
                 granularity_align(nb - m->topsize + TOP_FOOT_SIZE +
-                                  SIZE_T_ONE);
+                                  MALLOC_ALIGNMENT + SIZE_T_ONE);
             /* Use mem here only if it did continuously extend old space */
             if (asize < HALF_MAX_SIZE_T &&
                 (br =
@@ -3507,7 +3506,8 @@ sys_alloc(mstate m, size_t nb)
                     asize < nb + TOP_FOOT_SIZE + SIZE_T_ONE) {
                     size_t esize =
                         granularity_align(nb + TOP_FOOT_SIZE +
-                                          SIZE_T_ONE - asize);
+                                          MALLOC_ALIGNMENT + SIZE_T_ONE -
+                                          asize);
                     if (esize < HALF_MAX_SIZE_T) {
                         char *end = (char *) CALL_MORECORE(esize);
                         if (end != CMFAIL)
@@ -3530,7 +3530,7 @@ sys_alloc(mstate m, size_t nb)
     }
 
     if (HAVE_MMAP && tbase == CMFAIL) { /* Try MMAP */
-        size_t req = nb + TOP_FOOT_SIZE + SIZE_T_ONE;
+        size_t req = nb + TOP_FOOT_SIZE + MALLOC_ALIGNMENT + SIZE_T_ONE;
         size_t rsize = granularity_align(req);
         if (rsize > nb) {       /* Fail if wraps around zero */
             char *mp = (char *) (CALL_MMAP(rsize));
@@ -3543,7 +3543,9 @@ sys_alloc(mstate m, size_t nb)
     }
 
     if (HAVE_MORECORE && tbase == CMFAIL) {     /* Try noncontiguous MORECORE */
-        size_t asize = granularity_align(nb + TOP_FOOT_SIZE + SIZE_T_ONE);
+        size_t asize =
+            granularity_align(nb + TOP_FOOT_SIZE + MALLOC_ALIGNMENT +
+                              SIZE_T_ONE);
         if (asize < HALF_MAX_SIZE_T) {
             char *br = CMFAIL;
             char *end = CMFAIL;
@@ -3679,9 +3681,8 @@ sys_trim(mstate m, size_t pad)
         if (m->topsize > pad) {
             /* Shrink top space in granularity-size units, keeping at least one */
             size_t unit = mparams.granularity;
-            size_t extra =
-                ((m->topsize - pad + (unit - SIZE_T_ONE)) / unit -
-                 SIZE_T_ONE) * unit;
+            size_t extra = ((m->topsize - pad + (unit - SIZE_T_ONE)) / unit -
+                            SIZE_T_ONE) * unit;
             msegmentptr sp = segment_holding(m, (char *) m->top);
 
             if (!is_extern_segment(sp)) {
@@ -3689,10 +3690,10 @@ sys_trim(mstate m, size_t pad)
                     if (HAVE_MMAP && sp->size >= extra && !has_segment_link(m, sp)) {   /* can't shrink if pinned */
                         size_t newsize = sp->size - extra;
                         /* Prefer mremap, fall back to munmap */
-                        if ((CALL_MREMAP
-                             (sp->base, sp->size, newsize, 0) != MFAIL)
-                            || (CALL_MUNMAP(sp->base + newsize, extra)
-                                == 0)) {
+                        if ((CALL_MREMAP(sp->base, sp->size, newsize, 0) !=
+                             MFAIL)
+                            || (CALL_MUNMAP(sp->base + newsize, extra) ==
+                                0)) {
                             released = extra;
                         }
                     }
@@ -3962,11 +3963,10 @@ internal_memalign(mstate m, size_t alignment, size_t bytes)
                    We've allocated enough total room so that this is always
                    possible.
                  */
-                char *br = (char *)
-                    mem2chunk((size_t)
-                              (((size_t)
-                                (mem + alignment -
-                                 SIZE_T_ONE)) & -alignment));
+                char *br = (char *) mem2chunk((size_t) (((size_t) (mem +
+                                                                   alignment -
+                                                                   SIZE_T_ONE))
+                                                        & -alignment));
                 char *pos =
                     ((size_t) (br - (char *) (p)) >=
                      MIN_CHUNK_SIZE) ? br : br + alignment;
@@ -5234,4 +5234,5 @@ History:
 */
 
 #endif /* !HAVE_MALLOC */
+
 /* vi: set ts=4 sw=4 expandtab: */
