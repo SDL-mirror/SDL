@@ -96,7 +96,12 @@ AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
-AC_CHECK_PROGS(WINDRES, windres i386-mingw32-windres)
+if test -z "$host_alias"; then
+    hostaliaswindres=
+else
+    hostaliaswindres="$host_alias-windres"
+fi
+AC_CHECK_PROGS(WINDRES, [windres $hostaliaswindres $host_os-windres])
 
 dnl Check for compiler characteristics
 AC_C_CONST
