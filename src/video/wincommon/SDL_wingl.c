@@ -50,13 +50,15 @@ static int WIN_GL_ResetWindow(_THIS)
 		DestroyWindow(SDL_Window);
 		WIN_FlushMessageQueue();
 
+		SDL_resizing = 1;
 		SDL_Window = CreateWindow(SDL_Appname, SDL_Appname,
 		                          style,
 		                          rect.left, rect.top,
 		                          (rect.right-rect.left)+1,
-		                          (rect.top-rect.bottom)+1,
+		                          (rect.bottom-rect.top)+1,
 		                          NULL, NULL, SDL_Instance, NULL);
 		WIN_FlushMessageQueue();
+		SDL_resizing = 0;
 
 		if ( SDL_Window ) {
 			this->SetCaption(this, this->wm_title, this->wm_icon);
