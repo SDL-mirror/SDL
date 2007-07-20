@@ -1018,6 +1018,7 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 				int width, int height, int bpp, Uint32 flags)
 {
 	SDL_Surface *video;
+	int prev_w, prev_h;
 	HRESULT result;
 	DWORD sharemode;
 	DWORD style;
@@ -1103,6 +1104,8 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 		}
 
 		/* Fill in part of the video surface */
+		prev_w = video->w;
+		prev_h = video->h;
 		video->flags = 0;	/* Clear flags */
 		video->w = width;
 		video->h = height;
@@ -1178,7 +1181,7 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 			const char *window = NULL;
 			const char *center = NULL;
 
-			if ( !SDL_windowX && !SDL_windowY ) {
+			if ( video->w != prev_w || video->h != prev_h ) {
 				window = SDL_getenv("SDL_VIDEO_WINDOW_POS");
 				center = SDL_getenv("SDL_VIDEO_CENTERED");
 				if ( window ) {
@@ -1454,6 +1457,8 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 			SDL_OutOfMemory();
 			return(NULL);
 		}
+		prev_w = video->w;
+		prev_h = video->h;
 		video->w = width;
 		video->h = height;
 		video->pitch = 0;
@@ -1581,7 +1586,7 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 			const char *window = NULL;
 			const char *center = NULL;
 
-			if ( !SDL_windowX && !SDL_windowY ) {
+			if ( video->w != prev_w || video->h != prev_h ) {
 				window = SDL_getenv("SDL_VIDEO_WINDOW_POS");
 				center = SDL_getenv("SDL_VIDEO_CENTERED");
 				if ( window ) {
