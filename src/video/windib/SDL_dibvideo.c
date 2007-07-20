@@ -468,6 +468,7 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 				int width, int height, int bpp, Uint32 flags)
 {
 	SDL_Surface *video;
+	int prev_w, prev_h;
 	Uint32 prev_flags;
 	DWORD style;
 	const DWORD directstyle =
@@ -531,6 +532,8 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 
 	/* Fill in part of the video surface */
 	prev_flags = video->flags;
+	prev_w = video->w;
+	prev_h = video->h;
 	video->flags = 0;	/* Clear flags */
 	video->w = width;
 	video->h = height;
@@ -774,7 +777,7 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		const char *window = NULL;
 		const char *center = NULL;
 
-		if ( !SDL_windowX && !SDL_windowY ) {
+		if ( video->w != prev_w || video->h != prev_h ) {
 			window = SDL_getenv("SDL_VIDEO_WINDOW_POS");
 			center = SDL_getenv("SDL_VIDEO_CENTERED");
 			if ( window ) {
