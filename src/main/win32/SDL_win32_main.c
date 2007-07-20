@@ -234,12 +234,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 	char **argv;
 	int argc;
 	char *cmdline;
-	DWORD pathlen;
-#ifdef _WIN32_WCE
-	wchar_t path[MAX_PATH];
-#else
-	char path[MAX_PATH];
-#endif
 #ifdef _WIN32_WCE
 	wchar_t *bufp;
 	int nLen;
@@ -248,6 +242,12 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 	size_t nLen;
 #endif
 #ifndef NO_STDIO_REDIRECT
+	DWORD pathlen;
+#ifdef _WIN32_WCE
+	wchar_t path[MAX_PATH];
+#else
+	char path[MAX_PATH];
+#endif
 	FILE *newfp;
 #endif
 
