@@ -937,7 +937,7 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [[default=ma
                     x11ext_lib='libXext.so'
                     ;;
                 *)
-                    x11_lib_spec=[`echo $X_LIBS | sed 's/.*-L\([^ ]*\).*/\1/'`]
+                    x11_lib_path=[`echo $X_LIBS | sed 's/.*-L\([^ ]*\).*/\1/'`]
                     for path in $x11_lib_path /usr/lib /usr/X11/lib /usr/X11R6/lib; do
                         if test "x$x11_lib" = "x"; then
                             x11_lib=[`ls -- $path/libX11.so.[0-9] 2>/dev/null | sort -r | sed 's/.*\/\(.*\)/\1/; q'`]
