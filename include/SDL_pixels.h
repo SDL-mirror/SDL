@@ -50,14 +50,14 @@ enum
     SDL_PIXELTYPE_ARRAYU16,
     SDL_PIXELTYPE_ARRAYU32,
     SDL_PIXELTYPE_ARRAYF16,
-    SDL_PIXELTYPE_ARRAYF32,
+    SDL_PIXELTYPE_ARRAYF32
 };
 
 enum
 {                               /* bitmap pixel order, high bit -> low bit */
     SDL_BITMAPORDER_NONE,
     SDL_BITMAPORDER_4321,
-    SDL_BITMAPORDER_1234,
+    SDL_BITMAPORDER_1234
 };
 enum
 {                               /* packed component order, high bit -> low bit */
@@ -69,7 +69,7 @@ enum
     SDL_PACKEDORDER_XBGR,
     SDL_PACKEDORDER_BGRX,
     SDL_PACKEDORDER_ABGR,
-    SDL_PACKEDORDER_BGRA,
+    SDL_PACKEDORDER_BGRA
 };
 enum
 {                               /* array component order, low byte -> high byte */
@@ -79,7 +79,7 @@ enum
     SDL_ARRAYORDER_ARGB,
     SDL_ARRAYORDER_BGR,
     SDL_ARRAYORDER_BGRA,
-    SDL_ARRAYORDER_ABGR,
+    SDL_ARRAYORDER_ABGR
 };
 
 enum
@@ -92,7 +92,7 @@ enum
     SDL_PACKEDLAYOUT_565,
     SDL_PACKEDLAYOUT_8888,
     SDL_PACKEDLAYOUT_2101010,
-    SDL_PACKEDLAYOUT_1010102,
+    SDL_PACKEDLAYOUT_1010102
 };
 
 #define SDL_DEFINE_PIXELFOURCC(A, B, C, D) \
@@ -188,7 +188,7 @@ enum
     SDL_PIXELFORMAT_UYVY =      /* Packed mode: U0+Y0+V0+Y1 (1 plane) */
         SDL_DEFINE_PIXELFOURCC('U', 'Y', 'V', 'Y'),
     SDL_PIXELFORMAT_YVYU =      /* Packed mode: Y0+V0+Y1+U0 (1 plane) */
-        SDL_DEFINE_PIXELFOURCC('Y', 'V', 'Y', 'U'),
+        SDL_DEFINE_PIXELFOURCC('Y', 'V', 'Y', 'U')
 };
 
 typedef struct SDL_Color
