@@ -217,36 +217,12 @@ void WIN_SetWMCaption(_THIS, const char *title, const char *icon)
 	SetWindowText(SDL_Window, lpszW);
 	SDL_free(lpszW);
 #else
-	/*
-	 * Try loading SetWindowTextW from kernel32.dll first, and if it exists,
-	 *  pass the UCS-2 string to it. If it doesn't, use
-	 *  WideCharToMultiByte(CP_ACP) and hope that the codepage can support the
-	 *  string data in question. This lets us keep binary compatibility with
-	 *  Win95/98/ME but still use saner Unicode on NT-based Windows.
-	 */
-	static int tried_loading = 0;
-	static PtrSetWindowTextW swtw = NULL;
 	Uint16 *lpsz = SDL_iconv_utf8_ucs2(title);
-	if (!tried_loading) {
-		HMODULE dll = LoadLibrary("user32.dll");
-		if (dll != NULL) {
-			swtw = (PtrSetWindowTextW) GetProcAddress(dll, "SetWindowTextW");
-			if (swtw == NULL) {
-				FreeLibrary(dll);
-			}
-		}
-		tried_loading = 1;
-	}
-
-	if (swtw != NULL) {
-		swtw(SDL_Window, lpsz);
-	} else {
-		size_t len = WideCharToMultiByte(CP_ACP, 0, lpsz, -1, NULL, 0, NULL, NULL);
-		char *cvt = SDL_malloc(len + 1);
-		WideCharToMultiByte(CP_ACP, 0, lpsz, -1, cvt, len, NULL, NULL);
-		SetWindowText(SDL_Window, cvt);
-		SDL_free(cvt);
-	}
+	size_t len = WideCharToMultiByte(CP_ACP, 0, lpsz, -1, NULL, 0, NULL, NULL);
+	char *cvt = SDL_stack_alloc(char, len + 1);
+	WideCharToMultiByte(CP_ACP, 0, lpsz, -1, cvt, len, NULL, NULL);
+	SetWindowText(SDL_Window, cvt);
+	SDL_stack_free(cvt);
 	SDL_free(lpsz);
 #endif
 }
