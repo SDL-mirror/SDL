@@ -161,6 +161,14 @@ CommonArg(CommonState * state, int index)
         state->window_h = SDL_atoi(h);
         return 2;
     }
+    if (SDL_strcasecmp(argv[index], "--depth") == 0) {
+        ++index;
+        if (!argv[index]) {
+            return -1;
+        }
+        state->depth = SDL_atoi(argv[index]);
+        return 2;
+    }
     if (SDL_strcasecmp(argv[index], "--refresh") == 0) {
         ++index;
         if (!argv[index]) {
