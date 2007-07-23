@@ -3692,8 +3692,7 @@ sys_trim(mstate m, size_t pad)
                         /* Prefer mremap, fall back to munmap */
                         if ((CALL_MREMAP(sp->base, sp->size, newsize, 0) !=
                              MFAIL)
-                            || (CALL_MUNMAP(sp->base + newsize, extra) ==
-                                0)) {
+                            || (CALL_MUNMAP(sp->base + newsize, extra) == 0)) {
                             released = extra;
                         }
                     }
