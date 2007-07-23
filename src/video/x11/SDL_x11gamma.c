@@ -23,11 +23,10 @@
 #include "../SDL_sysvideo.h"
 #include "SDL_x11video.h"
 
-
 int
 X11_SetDisplayGammaRamp(_THIS, Uint16 * ramp)
 {
-    return (-1);
+    return -1;
 }
 
 int

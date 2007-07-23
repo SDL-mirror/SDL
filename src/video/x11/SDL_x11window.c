@@ -181,7 +181,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     }
     xattr.background_pixel = 0;
     xattr.border_pixel = 0;
-    if (visual->class == DirectColor || visual->class == TrueColor) {
+    if (visual->class == DirectColor || visual->class == PseudoColor) {
         int nmaps;
         XStandardColormap *stdmaps;
         int i;
