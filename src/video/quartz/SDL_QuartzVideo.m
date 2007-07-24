@@ -369,8 +369,8 @@ static void QZ_UnsetVideoMode (_THIS, BOOL to_desktop) {
         
         /* If we still have a valid window, close it. */
         if ( qz_window ) {
-            [ qz_window close ];
-            [ qz_window release ];
+            NSCAssert([ qz_window delegate ] == nil, @"full screen window shouldn't have a delegate"); /* if that should ever change, we'd have to release it here */
+            [ qz_window close ]; /* includes release because [qz_window isReleasedWhenClosed] */
             qz_window = nil;
             window_view = nil;
         }
@@ -398,9 +398,9 @@ static void QZ_UnsetVideoMode (_THIS, BOOL to_desktop) {
     }
     /* Release window mode resources */
     else {
-        
-        [ qz_window close ];
-        [ qz_window release ];
+        id delegate = [ qz_window delegate ];
+        [ qz_window close ]; /* includes release because [qz_window isReleasedWhenClosed] */
+        if (delegate != nil) [ delegate release ];
         qz_window = nil;
         window_view = nil;
 
@@ -747,7 +747,7 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
             return NULL;
         }
     
-        /*[ qz_window setReleasedWhenClosed:YES ];*/
+        /*[ qz_window setReleasedWhenClosed:YES ];*/ /* no need to set this as it's the default for NSWindows */
         QZ_SetCaption(this, this->wm_title, this->wm_icon);
         [ qz_window setAcceptsMouseMovedEvents:YES ];
         [ qz_window setViewsNeedDisplay:NO ];
@@ -755,7 +755,7 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
             [ qz_window center ];
         }
         [ qz_window setDelegate:
-            [ [ [ SDL_QuartzWindowDelegate alloc ] init ] autorelease ] ];
+            [ [ SDL_QuartzWindowDelegate alloc ] init ] ];
         [ qz_window setContentView: [ [ [ SDL_QuartzView alloc ] init ] autorelease ] ];
     }
     /* We already have a window, just change its size */
