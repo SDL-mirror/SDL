@@ -24,6 +24,9 @@
 #ifndef _SDL_x11gamma_h
 #define _SDL_x11gamma_h
 
+extern void X11_TrackColormap(Display * display, int scrNum,
+                              XStandardColormap * cmap, Visual * visual);
+
 extern int X11_SetDisplayGammaRamp(_THIS, Uint16 * ramp);
 extern int X11_GetDisplayGammaRamp(_THIS, Uint16 * ramp);
 

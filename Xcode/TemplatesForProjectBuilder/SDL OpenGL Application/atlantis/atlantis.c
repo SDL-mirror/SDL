@@ -54,46 +54,49 @@ GLboolean Timing = GL_TRUE;
 
 int w_win = 640;
 int h_win = 480;
-GLint count  = 0;
+GLint count = 0;
 GLenum StrMode = GL_VENDOR;
 
 GLboolean moving;
 
-static double mtime(void)
+static double
+mtime(void)
 {
-   struct timeval tk_time;
-   struct timezone tz;
-   
-   gettimeofday(&tk_time, &tz);
-   
-   return 4294.967296 * tk_time.tv_sec + 0.000001 * tk_time.tv_usec;
+    struct timeval tk_time;
+    struct timezone tz;
+
+    gettimeofday(&tk_time, &tz);
+
+    return 4294.967296 * tk_time.tv_sec + 0.000001 * tk_time.tv_usec;
 }
 
-static double filter(double in, double *save)
+static double
+filter(double in, double *save)
 {
-	static double k1 = 0.9;
-	static double k2 = 0.05;
+    static double k1 = 0.9;
+    static double k2 = 0.05;
 
-	save[3] = in;
-	save[1] = save[0]*k1 + k2*(save[3] + save[2]);
+    save[3] = in;
+    save[1] = save[0] * k1 + k2 * (save[3] + save[2]);
 
-	save[0]=save[1];
-	save[2]=save[3];
+    save[0] = save[1];
+    save[2] = save[3];
 
-	return(save[1]);
+    return (save[1]);
 }
 
-void DrawStr(const char *str)
+void
+DrawStr(const char *str)
 {
-	GLint i = 0;
-	
-	if(!str) return;
-        
-	while(str[i])
-	{
-		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, str[i]);
-		i++;
-	}
+    GLint i = 0;
+
+    if (!str)
+        return;
+
+    while (str[i]) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, str[i]);
+        i++;
+    }
 }
 
 void
@@ -134,18 +137,18 @@ InitFishs(void)
 void
 Atlantis_Init(void)
 {
-    static float ambient[] = {0.2, 0.2, 0.2, 1.0};
-    static float diffuse[] = {1.0, 1.0, 1.0, 1.0};
-    static float position[] = {0.0, 1.0, 0.0, 0.0};
-    static float mat_shininess[] = {90.0};
-    static float mat_specular[] = {0.8, 0.8, 0.8, 1.0};
-    static float mat_diffuse[] = {0.46, 0.66, 0.795, 1.0};
-    static float mat_ambient[] = {0.3, 0.4, 0.5, 1.0};
-    static float lmodel_ambient[] = {0.4, 0.4, 0.4, 1.0};
-    static float lmodel_localviewer[] = {0.0};
+    static float ambient[] = { 0.2, 0.2, 0.2, 1.0 };
+    static float diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
+    static float position[] = { 0.0, 1.0, 0.0, 0.0 };
+    static float mat_shininess[] = { 90.0 };
+    static float mat_specular[] = { 0.8, 0.8, 0.8, 1.0 };
+    static float mat_diffuse[] = { 0.46, 0.66, 0.795, 1.0 };
+    static float mat_ambient[] = { 0.3, 0.4, 0.5, 1.0 };
+    static float lmodel_ambient[] = { 0.4, 0.4, 0.4, 1.0 };
+    static float lmodel_localviewer[] = { 0.0 };
     //GLfloat map1[4] = {0.0, 0.0, 0.0, 0.0};
     //GLfloat map2[4] = {0.0, 0.0, 0.0, 0.0};
-    static float fog_color[] = {0.0, 0.5, 0.9, 1.0};
+    static float fog_color[] = { 0.0, 0.5, 0.9, 1.0 };
 
     glFrontFace(GL_CCW);
 
@@ -168,9 +171,9 @@ Atlantis_Init(void)
     InitFishs();
 
     glEnable(GL_FOG);
-	glFogi(GL_FOG_MODE, GL_EXP);
-	glFogf(GL_FOG_DENSITY, 0.0000025);
-	glFogfv(GL_FOG_COLOR, fog_color);
+    glFogi(GL_FOG_MODE, GL_EXP);
+    glFogf(GL_FOG_DENSITY, 0.0000025);
+    glFogfv(GL_FOG_COLOR, fog_color);
 
     glClearColor(0.0, 0.5, 0.9, 1.0);
 }
@@ -178,14 +181,15 @@ Atlantis_Init(void)
 void
 Atlantis_Reshape(int width, int height)
 {
-	w_win = width;
-	h_win = height;
-	
+    w_win = width;
+    h_win = height;
+
     glViewport(0, 0, width, height);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(60.0, (GLfloat) width / (GLfloat) height, 20000.0, 300000.0);
+    gluPerspective(60.0, (GLfloat) width / (GLfloat) height, 20000.0,
+                   300000.0);
     glMatrixMode(GL_MODELVIEW);
 }
 
@@ -212,42 +216,42 @@ Atlantis_Key(unsigned char key, int x, int y)
 {
     switch (key) {
     case 't':
-    	Timing = !Timing;
-    break;
+        Timing = !Timing;
+        break;
     case ' ':
-    	switch(StrMode)
-    	{
-		    case GL_EXTENSIONS:
-    			StrMode = GL_VENDOR;
-		    break;
-		    case GL_VENDOR:
-		    	StrMode = GL_RENDERER;
-		    break;
-		    case GL_RENDERER:
-		    	StrMode = GL_VERSION;
-		    break;
-		    case GL_VERSION:
-		    	StrMode = GL_EXTENSIONS;
-		    break;
-		}
-	break;
-    case 27:           /* Esc will quit */
+        switch (StrMode) {
+        case GL_EXTENSIONS:
+            StrMode = GL_VENDOR;
+            break;
+        case GL_VENDOR:
+            StrMode = GL_RENDERER;
+            break;
+        case GL_RENDERER:
+            StrMode = GL_VERSION;
+            break;
+        case GL_VERSION:
+            StrMode = GL_EXTENSIONS;
+            break;
+        }
+        break;
+    case 27:                   /* Esc will quit */
         exit(1);
-    break;
-    case 's':             		/* "s" start animation */
+        break;
+    case 's':                  /* "s" start animation */
         moving = GL_TRUE;
         //glutIdleFunc(Animate);
-    break;
-    case 'a':          			/* "a" stop animation */
+        break;
+    case 'a':                  /* "a" stop animation */
         moving = GL_FALSE;
         //glutIdleFunc(NULL);
-    break;
-    case '.':          			/* "." will advance frame */
+        break;
+    case '.':                  /* "." will advance frame */
         if (!moving) {
             Atlantis_Animate();
         }
     }
 }
+
 /*
 void Display(void)
 {
@@ -273,10 +277,10 @@ void
 Atlantis_Display(void)
 {
     int i;
-    static double th[4] = {0.0, 0.0, 0.0, 0.0};
-	static double t1 = 0.0, t2 = 0.0, t;
-	char num_str[128];
-    
+    static double th[4] = { 0.0, 0.0, 0.0, 0.0 };
+    static double t1 = 0.0, t2 = 0.0, t;
+    char num_str[128];
+
     t1 = t2;
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -303,56 +307,59 @@ Atlantis_Display(void)
     glScalef(0.45, 0.45, 0.3);
     DrawWhale(&babyWhale);
     glPopMatrix();
-    
-    if(Timing)
-    {
-		t2 = mtime();
-		t = t2 - t1;
-		if(t > 0.0001) t = 1.0 / t;
-		
-		glDisable(GL_LIGHTING);
-		//glDisable(GL_DEPTH_TEST);
-		
-		glColor3f(1.0, 0.0, 0.0);
-		
-		glMatrixMode (GL_PROJECTION);
-		glPushMatrix();
-		glLoadIdentity();
-		glOrtho(0, w_win, 0, h_win, -10.0, 10.0);
-		
-		glRasterPos2f(5.0, 5.0);
-		
-		switch(StrMode)
-		{
-			case GL_VENDOR:
-				sprintf(num_str, "%0.2f Hz, %dx%d, VENDOR: ", filter(t, th), w_win, h_win);
-				DrawStr(num_str);
-				DrawStr(glGetString(GL_VENDOR));
-			break;
-			case GL_RENDERER:
-				sprintf(num_str, "%0.2f Hz, %dx%d, RENDERER: ", filter(t, th), w_win, h_win);
-				DrawStr(num_str);
-				DrawStr(glGetString(GL_RENDERER));
-			break;
-			case GL_VERSION:
-				sprintf(num_str, "%0.2f Hz, %dx%d, VERSION: ", filter(t, th), w_win, h_win);
-				DrawStr(num_str);
-				DrawStr(glGetString(GL_VERSION));
-			break;
-			case GL_EXTENSIONS:
-				sprintf(num_str, "%0.2f Hz, %dx%d, EXTENSIONS: ", filter(t, th), w_win, h_win);
-				DrawStr(num_str);
-				DrawStr(glGetString(GL_EXTENSIONS));
-			break;
-		}
-		
-		glPopMatrix();
-		glMatrixMode(GL_MODELVIEW);
-		
-		glEnable(GL_LIGHTING);
-		//glEnable(GL_DEPTH_TEST);
-	}
-	
+
+    if (Timing) {
+        t2 = mtime();
+        t = t2 - t1;
+        if (t > 0.0001)
+            t = 1.0 / t;
+
+        glDisable(GL_LIGHTING);
+        //glDisable(GL_DEPTH_TEST);
+
+        glColor3f(1.0, 0.0, 0.0);
+
+        glMatrixMode(GL_PROJECTION);
+        glPushMatrix();
+        glLoadIdentity();
+        glOrtho(0, w_win, 0, h_win, -10.0, 10.0);
+
+        glRasterPos2f(5.0, 5.0);
+
+        switch (StrMode) {
+        case GL_VENDOR:
+            sprintf(num_str, "%0.2f Hz, %dx%d, VENDOR: ", filter(t, th),
+                    w_win, h_win);
+            DrawStr(num_str);
+            DrawStr(glGetString(GL_VENDOR));
+            break;
+        case GL_RENDERER:
+            sprintf(num_str, "%0.2f Hz, %dx%d, RENDERER: ", filter(t, th),
+                    w_win, h_win);
+            DrawStr(num_str);
+            DrawStr(glGetString(GL_RENDERER));
+            break;
+        case GL_VERSION:
+            sprintf(num_str, "%0.2f Hz, %dx%d, VERSION: ", filter(t, th),
+                    w_win, h_win);
+            DrawStr(num_str);
+            DrawStr(glGetString(GL_VERSION));
+            break;
+        case GL_EXTENSIONS:
+            sprintf(num_str, "%0.2f Hz, %dx%d, EXTENSIONS: ", filter(t, th),
+                    w_win, h_win);
+            DrawStr(num_str);
+            DrawStr(glGetString(GL_EXTENSIONS));
+            break;
+        }
+
+        glPopMatrix();
+        glMatrixMode(GL_MODELVIEW);
+
+        glEnable(GL_LIGHTING);
+        //glEnable(GL_DEPTH_TEST);
+    }
+
     count++;
 
     glutSwapBuffers();

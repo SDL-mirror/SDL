@@ -184,22 +184,27 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     if (visual->class == DirectColor || visual->class == PseudoColor) {
         int nmaps;
         XStandardColormap *stdmaps;
-        int i;
         Bool found = False;
 
+        /* check to see if the colormap we need already exists */
         if (0 != XGetRGBColormaps(data->display,
                                   RootWindow(data->display,
                                              displaydata->screen), &stdmaps,
                                   &nmaps, XA_RGB_BEST_MAP)) {
+            int i;
             for (i = 0; i < nmaps; i++) {
                 if (stdmaps[i].visualid == visual->visualid) {
                     xattr.colormap = stdmaps[i].colormap;
+                    X11_TrackColormap(data->display, displaydata->screen,
+                                      &stdmaps[i], visual);
                     found = True;
                     break;
                 }
             }
             XFree(stdmaps);
         }
+
+        /* it doesn't exist, so create it */
         if (!found) {
             int max = visual->map_entries - 1;
             XStandardColormap *cmap =
@@ -207,8 +212,10 @@ X11_CreateWindow(_THIS, SDL_Window * window)
                                     visual->visualid, depth,
                                     XA_RGB_BEST_MAP, None,
                                     max, max, max);
-            if (cmap->visualid = visual->visualid) {
+            if (NULL != cmap && cmap->visualid == visual->visualid) {
                 xattr.colormap = cmap->colormap;
+                X11_TrackColormap(data->display, displaydata->screen, cmap,
+                                  visual);
             } else {
                 SDL_SetError
                     ("Couldn't create window:XA_RGB_BEST_MAP not found");
