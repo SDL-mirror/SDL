@@ -12,7 +12,8 @@
 extern id gController;          // instance of this class from nib
 
 // Declare SDL_QuartzWindowDelegate (defined in SDL.framework)
-@interface SDL_QuartzWindowDelegate: NSObject @ end @ interface MyController:NSObject {
+@interface SDL_QuartzWindowDelegate: NSObject @ end @ interface MyController:NSObject
+{
     // Interface Builder Outlets
     IBOutlet id _framesPerSecond;
     IBOutlet id _numSprites;
