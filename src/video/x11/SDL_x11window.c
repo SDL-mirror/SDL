@@ -181,46 +181,92 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     }
     xattr.background_pixel = 0;
     xattr.border_pixel = 0;
+
     if (visual->class == DirectColor || visual->class == PseudoColor) {
         int nmaps;
+        XStandardColormap cmap;
         XStandardColormap *stdmaps;
+        XColor *colorcells;
+        Colormap colormap;
         Bool found = False;
+        int i;
+        int ncolors;
+        int rmax, gmax, bmax;
+        int rmul, gmul, bmul;
 
-        /* check to see if the colormap we need already exists */
-        if (0 != XGetRGBColormaps(data->display,
-                                  RootWindow(data->display,
-                                             displaydata->screen), &stdmaps,
-                                  &nmaps, XA_RGB_BEST_MAP)) {
-            int i;
-            for (i = 0; i < nmaps; i++) {
-                if (stdmaps[i].visualid == visual->visualid) {
-                    xattr.colormap = stdmaps[i].colormap;
-                    X11_TrackColormap(data->display, displaydata->screen,
-                                      &stdmaps[i], visual);
-                    found = True;
-                    break;
+        if (colormap =
+            X11_LookupColormap(data->display, displaydata->screen,
+                               visual->visualid)) {
+            xattr.colormap = colormap;
+        } else {
+            /* check to see if the colormap we need already exists */
+            if (0 != XGetRGBColormaps(data->display,
+                                      RootWindow(data->display,
+                                                 displaydata->screen),
+                                      &stdmaps, &nmaps, XA_RGB_BEST_MAP)) {
+                for (i = 0; i < nmaps; i++) {
+                    if (stdmaps[i].visualid == visual->visualid) {
+                        SDL_memcpy(&cmap, &stdmaps[i],
+                                   sizeof(XStandardColormap));
+                        found = True;
+                        break;
+                    }
                 }
+                XFree(stdmaps);
             }
-            XFree(stdmaps);
-        }
 
-        /* it doesn't exist, so create it */
-        if (!found) {
-            int max = visual->map_entries - 1;
-            XStandardColormap *cmap =
-                XmuStandardColormap(data->display, displaydata->screen,
-                                    visual->visualid, depth,
-                                    XA_RGB_BEST_MAP, None,
-                                    max, max, max);
-            if (NULL != cmap && cmap->visualid == visual->visualid) {
-                xattr.colormap = cmap->colormap;
-                X11_TrackColormap(data->display, displaydata->screen, cmap,
-                                  visual);
-            } else {
-                SDL_SetError
-                    ("Couldn't create window:XA_RGB_BEST_MAP not found");
+            /* it doesn't exist, so create it */
+            if (!found) {
+                int max = visual->map_entries - 1;
+                stdmaps =
+                    XmuStandardColormap(data->display, displaydata->screen,
+                                        visual->visualid, depth,
+                                        XA_RGB_BEST_MAP, None, max, max, max);
+                if (NULL == stdmaps || stdmaps->visualid != visual->visualid) {
+                    SDL_SetError
+                        ("Couldn't create window:XA_RGB_BEST_MAP not found and could not be created");
+                    return -1;
+                }
+                SDL_memcpy(&cmap, stdmaps, sizeof(XStandardColormap));
+            }
+
+            /* OK, we have the best color map, now copy it for use by the
+               program */
+
+            colorcells = SDL_malloc(visual->map_entries * sizeof(XColor));
+            if (NULL == colorcells) {
+                SDL_SetError("out of memory in X11_CreateWindow");
                 return -1;
             }
+            ncolors = visual->map_entries;
+            rmax = cmap.red_max + 1;
+            gmax = cmap.blue_max + 1;
+            bmax = cmap.green_max + 1;
+
+            rmul = cmap.red_mult;
+            gmul = cmap.blue_mult;
+            bmul = cmap.green_mult;
+
+            /* build the color table pixel values */
+            for (i = 0; i < ncolors; i++) {
+                Uint32 red = (rmax * i) / ncolors;
+                Uint32 green = (gmax * i) / ncolors;
+                Uint32 blue = (bmax * i) / ncolors;
+
+                colorcells[i].pixel =
+                    (red * rmul) | (green * gmul) | (blue * bmul);
+            }
+            XQueryColors(data->display, cmap.colormap, colorcells, ncolors);
+            colormap = XCreateColormap(data->display,
+                                       RootWindow(data->display,
+                                                  displaydata->screen),
+                                       visual, AllocAll);
+            XStoreColors(data->display, colormap, colorcells, ncolors);
+            SDL_free(colorcells);
+
+            xattr.colormap = colormap;
+            X11_TrackColormap(data->display, displaydata->screen, colormap,
+                              &cmap, visual);
         }
     } else {
         xattr.colormap =
