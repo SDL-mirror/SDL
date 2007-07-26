@@ -63,7 +63,6 @@ X11_TrackColormap(Display * display, int scrNum, Colormap colormap,
                   XStandardColormap * cmap, Visual * visual)
 {
     int i;
-    cmapTableEntry *newTable = NULL;
 
     /* search the table to find out if we already have this one. We
        only want one entry for each display, screen number, visualid,
@@ -79,17 +78,11 @@ X11_TrackColormap(Display * display, int scrNum, Colormap colormap,
 
     /* increase the table by one entry. If the table is NULL create the
        first entrty */
-    newTable = SDL_malloc((numCmaps + 1) * sizeof(cmapTableEntry));
-    if (NULL == newTable) {
+    cmapTable = SDL_realloc(cmapTable, (numCmaps + 1) * sizeof(cmapTableEntry));
+    if (NULL == cmapTable) {
         SDL_SetError("Out of memory in X11_TrackColormap()");
         return;
     }
-
-    if (NULL != cmapTable) {
-        SDL_memcpy(newTable, cmapTable, numCmaps * sizeof(cmapTableEntry));
-        SDL_free(cmapTable);
-    }
-    cmapTable = newTable;
 
     cmapTable[numCmaps].display = display;
     cmapTable[numCmaps].scrNum = scrNum;
