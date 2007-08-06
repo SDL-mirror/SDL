@@ -338,7 +338,8 @@ int X11_GL_MakeCurrent(_THIS)
 /* Get attribute data from glX. */
 int X11_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
 {
-	int retval;
+	int retval = -1;
+	int unsupported = 0;
 	int glx_attrib = None;
 
 	switch( attrib ) {
@@ -398,7 +399,7 @@ int X11_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
 			}
 			return retval;
 		} else {
-			return(-1);
+			unsupported = 1;
 		}
 		break;
 	    case SDL_GL_SWAP_CONTROL:
@@ -406,15 +407,19 @@ int X11_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
 			*value = this->gl_data->glXGetSwapIntervalMESA();
 			return(0);
 		} else {
-			return(-1);
+			unsupported = 1;
 		}
 		break;
 	    default:
-		return(-1);
+			unsupported = 1;
+			break;
 	}
 
-	retval = this->gl_data->glXGetConfig(GFX_Display, glx_visualinfo, glx_attrib, value);
-
+	if (unsupported) {
+		SDL_SetError("OpenGL attribute is unsupported on this system");
+	} else {
+		retval = this->gl_data->glXGetConfig(GFX_Display, glx_visualinfo, glx_attrib, value);
+	}
 	return retval;
 }
 
