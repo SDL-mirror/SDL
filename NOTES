@@ -1,0 +1,14 @@
+
+Sam - Mon Aug  6 23:02:37 PDT 2007
+------
+Add color modulation to blitting
+Blit convert format X -> format Y (needed for texture upload)
+Blit copy / blend / modulate format X -> format X (needed for software renderer)
+
+Create full software renderer for framebuffer interfaces.
+
+Create texture for surface, keep surface around as pixel source, allow
+copying / blending / modulating from surface to display (automatically
+generate texture?)
+
+At that point, should anyone be using anything besides textures for display?
