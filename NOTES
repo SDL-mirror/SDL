@@ -150,3 +150,13 @@ IRC - Mon Aug  6 23:50:44 PDT 2007
 [12:01am] slouken: If it were software only I could just say, write your own and register it here, but you'd have to maintain parity with the OpenGL and Direct3D renderers as well.
 [12:01am] slouken: At that point you might as well be working in surfaces and uploading to texture. 
 [12:02am] icculus: yeah
+
+TODO
+----
+Change textures to static/streaming.  Static textures are not lockable,
+streaming textures are lockable and may have system memory pixels available.
+SDL_compat will use a streaming video texture, and will never be HWSURFACE,
+but may be PREALLOC, if system memory pixels are available.
+
+The software renderer will be abstracted so the surface management can be
+used by any renderer that provides functions to copy surfaces to the window.
