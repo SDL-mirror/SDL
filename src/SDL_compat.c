@@ -328,6 +328,38 @@ GetEnvironmentWindowPosition(int w, int h, int *x, int *y)
     }
 }
 
+static SDL_Surface *
+CreateVideoSurface(SDL_TextureID textureID)
+{
+    SDL_Surface *surface;
+    Uint32 format;
+    int w, h;
+    int bpp;
+    Uint32 Rmask, Gmask, Bmask, Amask;
+    void *pixels;
+    int pitch;
+
+    if (SDL_QueryTexture(textureID, &format, NULL, &w, &h) < 0) {
+        return NULL;
+    }
+
+    if (!SDL_PixelFormatEnumToMasks
+        (format, &bpp, &Rmask, &Gmask, &Bmask, &Amask)) {
+        SDL_SetError("Unknown texture format");
+        return NULL;
+    }
+
+    if (SDL_QueryTexturePixels(textureID, &pixels, &pitch) == 0) {
+        surface =
+            SDL_CreateRGBSurfaceFrom(pixels, w, h, bpp, pitch, Rmask, Gmask,
+                                     Bmask, Amask);
+    } else {
+        surface =
+            SDL_CreateRGBSurface(0, w, h, bpp, Rmask, Gmask, Bmask, Amask);
+    }
+    return surface;
+}
+
 SDL_Surface *
 SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
 {
@@ -483,23 +515,23 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
          SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTDISCARD) < 0) {
         return NULL;
     }
-    SDL_GetRenderDriverInfo(-1, &SDL_VideoRendererInfo);
+    SDL_GetRendererInfo(&SDL_VideoRendererInfo);
 
     /* Create a texture for the screen surface */
     SDL_VideoTexture =
-        SDL_CreateTexture(desired_format, SDL_TEXTUREACCESS_LOCAL, width,
+        SDL_CreateTexture(desired_format, SDL_TEXTUREACCESS_STREAMING, width,
                           height);
     if (!SDL_VideoTexture) {
         SDL_VideoTexture =
-            SDL_CreateTexture(SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_LOCAL,
-                              width, height);
+            SDL_CreateTexture(SDL_PIXELFORMAT_RGB888,
+                              SDL_TEXTUREACCESS_STREAMING, width, height);
     }
     if (!SDL_VideoTexture) {
         return NULL;
     }
 
     /* Create the screen surface */
-    SDL_VideoSurface = SDL_CreateRGBSurfaceFromTexture(SDL_VideoTexture);
+    SDL_VideoSurface = CreateVideoSurface(SDL_VideoTexture);
     if (!SDL_VideoSurface) {
         return NULL;
     }
@@ -518,23 +550,10 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
     }
 
     /* Create a shadow surface if necessary */
-    if (((bpp != SDL_VideoSurface->format->BitsPerPixel)
-         && !(flags & SDL_ANYFORMAT))
-        || ((SDL_VideoSurface->flags & SDL_HWSURFACE)
-            && !(flags & SDL_HWSURFACE))) {
-        if ((bpp == SDL_VideoSurface->format->BitsPerPixel)
-            || (flags & SDL_ANYFORMAT)) {
-            SDL_ShadowSurface =
-                SDL_CreateRGBSurface(0, width, height,
-                                     SDL_VideoSurface->format->BitsPerPixel,
-                                     SDL_VideoSurface->format->Rmask,
-                                     SDL_VideoSurface->format->Gmask,
-                                     SDL_VideoSurface->format->Bmask,
-                                     SDL_VideoSurface->format->Amask);
-        } else {
-            SDL_ShadowSurface =
-                SDL_CreateRGBSurface(0, width, height, bpp, 0, 0, 0, 0);
-        }
+    if ((bpp != SDL_VideoSurface->format->BitsPerPixel)
+        && !(flags & SDL_ANYFORMAT)) {
+        SDL_ShadowSurface =
+            SDL_CreateRGBSurface(0, width, height, bpp, 0, 0, 0, 0);
         if (!SDL_ShadowSurface) {
             return NULL;
         }
@@ -638,8 +657,7 @@ SDL_DisplayFormatAlpha(SDL_Surface * surface)
         break;
     }
     format = SDL_AllocFormat(32, rmask, gmask, bmask, amask);
-    flags = SDL_PublicSurface->flags & SDL_HWSURFACE;
-    flags |= surface->flags & (SDL_SRCALPHA | SDL_RLEACCELOK);
+    flags = surface->flags & (SDL_SRCALPHA | SDL_RLEACCELOK);
     converted = SDL_ConvertSurface(surface, format, flags);
     SDL_FreeFormat(format);
     return converted;
@@ -681,6 +699,22 @@ SDL_UpdateRects(SDL_Surface * screen, int numrects, SDL_Rect * rects)
         screen = SDL_VideoSurface;
     }
     if (screen == SDL_VideoSurface) {
+        if (screen->flags & SDL_PREALLOC) {
+            /* The surface memory is maintained by the renderer */
+            SDL_DirtyTexture(SDL_VideoTexture, numrects, rects);
+        } else {
+            /* The surface memory needs to be copied to texture */
+            void *pixels;
+            int pitch = screen->pitch;
+            int psize = screen->format->BytesPerPixel;
+            for (i = 0; i < numrects; ++i) {
+                const SDL_Rect *rect = &rects[i];
+                void *pixels =
+                    (Uint8 *) screen->pixels + rect->y * pitch +
+                    rect->x * psize;
+                SDL_UpdateTexture(SDL_VideoTexture, rect, pixels, pitch);
+            }
+        }
         if (SDL_VideoRendererInfo.flags & SDL_RENDERER_PRESENTCOPY) {
             for (i = 0; i < numrects; ++i) {
                 SDL_RenderCopy(SDL_VideoTexture, &rects[i], &rects[i]);
@@ -1174,8 +1208,7 @@ SDL_DrawCursor(SDL_Surface * screen)
     if (SDL_MUSTLOCK(screen)) {
         SDL_UnlockSurface(screen);
     }
-    if ((screen->flags & SDL_SCREEN_SURFACE) &&
-        !(screen->flags & SDL_HWSURFACE)) {
+    if (screen->flags & SDL_SCREEN_SURFACE) {
         SDL_VideoDevice *_this = SDL_GetVideoDevice();
         SDL_Window *window;
         SDL_Rect area;
@@ -1263,8 +1296,7 @@ SDL_EraseCursor(SDL_Surface * screen)
     if (SDL_MUSTLOCK(screen)) {
         SDL_UnlockSurface(screen);
     }
-    if ((screen->flags & SDL_SCREEN_SURFACE) &&
-        !(screen->flags & SDL_HWSURFACE)) {
+    if (screen->flags & SDL_SCREEN_SURFACE) {
         SDL_VideoDevice *_this = SDL_GetVideoDevice();
         SDL_Window *window;
         SDL_Rect area;
@@ -1385,7 +1417,7 @@ SDL_CreateYUVOverlay(int w, int h, Uint32 format, SDL_Surface * display)
     }
 
     overlay->hwdata->textureID =
-        SDL_CreateTexture(texture_format, SDL_TEXTUREACCESS_LOCAL, w, h);
+        SDL_CreateTexture(texture_format, SDL_TEXTUREACCESS_STREAMING, w, h);
     if (!overlay->hwdata->textureID) {
         SDL_FreeYUVOverlay(overlay);
         return NULL;

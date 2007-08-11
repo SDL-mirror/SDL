@@ -38,6 +38,9 @@ static SDL_Renderer *GL_CreateRenderer(SDL_Window * window, Uint32 flags);
 static int GL_ActivateRenderer(SDL_Renderer * renderer);
 static int GL_DisplayModeChanged(SDL_Renderer * renderer);
 static int GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture);
+static int GL_QueryTexturePixels(SDL_Renderer * renderer,
+                                 SDL_Texture * texture, void **pixels,
+                                 int *pitch);
 static int GL_SetTexturePalette(SDL_Renderer * renderer,
                                 SDL_Texture * texture,
                                 const SDL_Color * colors, int firstcolor,
@@ -245,6 +248,7 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->ActivateRenderer = GL_ActivateRenderer;
     renderer->DisplayModeChanged = GL_DisplayModeChanged;
     renderer->CreateTexture = GL_CreateTexture;
+    renderer->QueryTexturePixels = GL_QueryTexturePixels;
     renderer->SetTexturePalette = GL_SetTexturePalette;
     renderer->GetTexturePalette = GL_GetTexturePalette;
     renderer->SetTextureColorMod = GL_SetTextureColorMod;
@@ -492,6 +496,16 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         SDL_memset(data->palette, 0xFF, 3 * 256 * sizeof(Uint8));
     }
 
+    if (texture->access == SDL_TEXTUREACCESS_STREAMING) {
+        data->pitch = texture->w * SDL_BYTESPERPIXEL(texture->format);
+        data->pixels = SDL_malloc(texture->h * data->pitch);
+        if (!data->pixels) {
+            SDL_OutOfMemory();
+            SDL_free(data);
+            return -1;
+        }
+    }
+
     texture->driverdata = data;
 
     renderdata->glGetError();
@@ -519,6 +533,17 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         GL_SetError("glTexImage2D()", result);
         return -1;
     }
+    return 0;
+}
+
+static int
+GL_QueryTexturePixels(SDL_Renderer * renderer, SDL_Texture * texture,
+                      void **pixels, int *pitch)
+{
+    GL_TextureData *data = (GL_TextureData *) texture->driverdata;
+
+    *pixels = data->pixels;
+    *pitch = data->pitch;
     return 0;
 }
 
@@ -660,15 +685,6 @@ GL_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                int *pitch)
 {
     GL_TextureData *data = (GL_TextureData *) texture->driverdata;
-
-    if (!data->pixels) {
-        data->pitch = texture->w * SDL_BYTESPERPIXEL(texture->format);
-        data->pixels = SDL_malloc(texture->h * data->pitch);
-        if (!data->pixels) {
-            SDL_OutOfMemory();
-            return -1;
-        }
-    }
 
     if (markDirty) {
         SDL_AddDirtyRect(&data->dirty, rect);

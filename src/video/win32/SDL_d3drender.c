@@ -459,7 +459,6 @@ D3D_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
     SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
     D3D_TextureData *data;
-    D3DPOOL pool;
     HRESULT result;
 
     data = (D3D_TextureData *) SDL_calloc(1, sizeof(*data));
@@ -470,22 +469,11 @@ D3D_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     texture->driverdata = data;
 
-#if 1
-    /* FIXME: Do we want non-managed textures?
-       They need to be freed on device reset and then reloaded by the app...
-     */
-    texture->access = SDL_TEXTUREACCESS_LOCAL;
-#endif
-    if (texture->access == SDL_TEXTUREACCESS_LOCAL) {
-        pool = D3DPOOL_MANAGED;
-    } else {
-        pool = D3DPOOL_DEFAULT;
-    }
     result =
         IDirect3DDevice9_CreateTexture(renderdata->device, texture->w,
                                        texture->h, 1, 0,
                                        PixelFormatToD3DFMT(texture->format),
-                                       pool, &data->texture, NULL);
+                                       D3DPOOL_MANAGED, &data->texture, NULL);
     if (FAILED(result)) {
         D3D_SetError("CreateTexture()", result);
         return -1;
@@ -627,11 +615,6 @@ D3D_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
     RECT d3drect;
     D3DLOCKED_RECT locked;
     HRESULT result;
-
-    if (texture->access != SDL_TEXTUREACCESS_LOCAL) {
-        SDL_SetError("Can't lock remote video memory");
-        return -1;
-    }
 
     d3drect.left = rect->x;
     d3drect.right = rect->x + rect->w;

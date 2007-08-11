@@ -204,8 +204,8 @@ typedef struct SDL_RendererInfo
  */
 typedef enum
 {
-    SDL_TEXTUREACCESS_LOCAL,    /**< Lockable system memory */
-    SDL_TEXTUREACCESS_REMOTE    /**< Unlockable video memory */
+    SDL_TEXTUREACCESS_STATIC,    /**< Changes rarely, not lockable */
+    SDL_TEXTUREACCESS_STREAMING  /**< Changes frequently, lockable */
 } SDL_TextureAccess;
 
 /**
@@ -264,15 +264,14 @@ typedef void *SDL_GLContext;
 
 /* These are the currently supported flags for the SDL_surface */
 /* Used internally (read-only) */
-#define SDL_HWSURFACE       0x00000001  /* Surface represents a texture */
-#define SDL_PREALLOC        0x00000002  /* Surface uses preallocated memory */
+#define SDL_PREALLOC        0x00000001  /* Surface uses preallocated memory */
 #define SDL_SRCALPHA        0x00000004  /* Blit uses source alpha blending */
 #define SDL_SRCCOLORKEY     0x00000008  /* Blit uses a source color key */
 #define SDL_RLEACCELOK      0x00000010  /* Private flag */
 #define SDL_RLEACCEL        0x00000020  /* Surface is RLE encoded */
 
 /* Evaluates to true if the surface needs to be locked before access */
-#define SDL_MUSTLOCK(S)	(((S)->flags & (SDL_HWSURFACE|SDL_RLEACCEL)) != 0)
+#define SDL_MUSTLOCK(S)	(((S)->flags & SDL_RLEACCEL) != 0)
 
 /* This structure should be treated as read-only, except for 'pixels',
    which, if not NULL, contains the raw pixel data for the surface.
@@ -287,9 +286,6 @@ typedef struct SDL_Surface
 
     /* Application data associated with the surfade */
     void *userdata;             /* Read-write */
-
-    /* texture associated with the surface, if any */
-    SDL_TextureID textureID;    /* Read-only */
 
     /* information needed for surfaces requiring locks */
     int locked;                 /* Read-only */
@@ -927,12 +923,11 @@ extern DECLSPEC SDL_TextureID SDLCALL SDL_CreateTexture(Uint32 format,
                                                         int h);
 
 /**
- * \fn SDL_TextureID SDL_CreateTextureFromSurface(Uint32 format, int access, SDL_Surface *surface)
+ * \fn SDL_TextureID SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface *surface)
  *
  * \brief Create a texture from an existing surface.
  *
  * \param format The format of the texture, or 0 to pick an appropriate format
- * \param access One of the enumerated values in SDL_TextureAccess
  * \param surface The surface containing pixel data used to fill the texture
  *
  * \return The created texture is returned, or 0 if no rendering context was active,  the format was unsupported, or the surface width or height were out of range.
@@ -944,7 +939,6 @@ extern DECLSPEC SDL_TextureID SDLCALL SDL_CreateTexture(Uint32 format,
  */
 extern DECLSPEC SDL_TextureID SDLCALL SDL_CreateTextureFromSurface(Uint32
                                                                    format,
-                                                                   int access,
                                                                    SDL_Surface
                                                                    * surface);
 
@@ -970,7 +964,7 @@ extern DECLSPEC int SDLCALL SDL_QueryTexture(SDL_TextureID textureID,
  *
  * \brief Query the pixels of a texture, if the texture does not need to be locked for pixel access.
  *
- * \param texture A texture to be queried, which was created with SDL_TEXTUREACCESS_LOCAL
+ * \param texture A texture to be queried, which was created with SDL_TEXTUREACCESS_STREAMING
  * \param pixels A pointer filled with a pointer to the pixels for the texture 
  * \param pitch A pointer filled in with the pitch of the pixel data
  *
@@ -1155,7 +1149,7 @@ extern DECLSPEC int SDLCALL SDL_GetTextureScaleMode(SDL_TextureID textureID,
  *
  * \return 0 on success, or -1 if the texture is not valid
  *
- * \note This is a very slow function for textures not created with SDL_TEXTUREACCESS_LOCAL.
+ * \note This is a fairly slow function.
  */
 extern DECLSPEC int SDLCALL SDL_UpdateTexture(SDL_TextureID textureID,
                                               const SDL_Rect * rect,
@@ -1166,13 +1160,13 @@ extern DECLSPEC int SDLCALL SDL_UpdateTexture(SDL_TextureID textureID,
  *
  * \brief Lock a portion of the texture for pixel access.
  *
- * \param texture The texture to lock for access, which must have been created with SDL_TEXTUREACCESS_LOCAL.
+ * \param textureID The texture to lock for access, which was created with SDL_TEXTUREACCESS_STREAMING.
  * \param rect A pointer to the rectangle to lock for access. If the rect is NULL, the entire texture will be locked.
  * \param markDirty If this is nonzero, the locked area will be marked dirty when the texture is unlocked.
  * \param pixels This is filled in with a pointer to the locked pixels, appropriately offset by the locked area.
  * \param pitch This is filled in with the pitch of the locked pixels.
  *
- * \return 0 on success, or -1 if the texture is not valid or was created with SDL_TEXTUREACCESS_REMOTe
+ * \return 0 on success, or -1 if the texture is not valid or was created with SDL_TEXTUREACCESS_STATIC
  *
  * \sa SDL_DirtyTexture()
  * \sa SDL_UnlockTexture()
@@ -1197,7 +1191,9 @@ extern DECLSPEC void SDLCALL SDL_UnlockTexture(SDL_TextureID textureID);
  *
  * \brief Mark the specified rectangles of the texture as dirty.
  *
- * \note The texture must have been created with SDL_TEXTUREACCESS_LOCAL.
+ * \param textureID The texture to mark dirty, which was created with SDL_TEXTUREACCESS_STREAMING.
+ * \param numrects The number of rectangles pointed to by rects.
+ * \param rects The pointer to an array of dirty rectangles.
  *
  * \sa SDL_LockTexture()
  * \sa SDL_UnlockTexture()
@@ -1347,8 +1343,6 @@ extern DECLSPEC SDL_Surface *SDLCALL SDL_CreateRGBSurfaceFrom(void *pixels,
                                                               Uint32 Gmask,
                                                               Uint32 Bmask,
                                                               Uint32 Amask);
-extern DECLSPEC SDL_Surface *SDLCALL
-SDL_CreateRGBSurfaceFromTexture(SDL_TextureID textureID);
 extern DECLSPEC void SDLCALL SDL_FreeSurface(SDL_Surface * surface);
 
 /**

@@ -63,8 +63,7 @@ LoadSprite(char *file)
     /* Create textures from the image */
     for (i = 0; i < state->num_windows; ++i) {
         SDL_SelectRenderer(state->windows[i]);
-        sprites[i] =
-            SDL_CreateTextureFromSurface(0, SDL_TEXTUREACCESS_REMOTE, temp);
+        sprites[i] = SDL_CreateTextureFromSurface(0, temp);
         if (!sprites[i]) {
             fprintf(stderr, "Couldn't create texture: %s\n", SDL_GetError());
             SDL_FreeSurface(temp);

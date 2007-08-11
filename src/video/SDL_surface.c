@@ -170,62 +170,11 @@ SDL_CreateRGBSurfaceFrom(void *pixels,
     return surface;
 }
 
-SDL_Surface *
-SDL_CreateRGBSurfaceFromTexture(SDL_TextureID textureID)
-{
-    SDL_Surface *surface;
-    Uint32 format;
-    int w, h;
-    int bpp;
-    Uint32 Rmask, Gmask, Bmask, Amask;
-    void *pixels;
-    int pitch;
-
-    if (SDL_QueryTexture(textureID, &format, NULL, &w, &h) < 0) {
-        return NULL;
-    }
-
-    if (!SDL_PixelFormatEnumToMasks
-        (format, &bpp, &Rmask, &Gmask, &Bmask, &Amask)) {
-        SDL_SetError("Unknown texture format");
-        return NULL;
-    }
-
-    if (SDL_QueryTexturePixels(textureID, &pixels, &pitch) == 0) {
-        surface =
-            SDL_CreateRGBSurfaceFrom(pixels, w, h, bpp, pitch, Rmask, Gmask,
-                                     Bmask, Amask);
-    } else {
-        surface =
-            SDL_CreateRGBSurface(0, 0, 0, bpp, Rmask, Gmask, Bmask, Amask);
-        if (surface) {
-            surface->flags |= SDL_HWSURFACE;
-            surface->w = w;
-            surface->h = h;
-            surface->pitch = SDL_CalculatePitch(surface);
-            SDL_SetClipRect(surface, NULL);
-        }
-    }
-    if (surface) {
-        surface->textureID = textureID;
-    }
-
-    return surface;
-}
-
 static int
 SDL_SurfacePaletteChanged(void *userdata, SDL_Palette * palette)
 {
     SDL_Surface *surface = (SDL_Surface *) userdata;
 
-    if (surface->textureID) {
-        if (SDL_SetTexturePalette
-            (surface->textureID, palette->colors, 0, palette->ncolors) < 0) {
-            SDL_GetTexturePalette(surface->textureID, palette->colors, 0,
-                                  palette->ncolors);
-            return -1;
-        }
-    }
     SDL_FormatChanged(surface);
 
     return 0;
@@ -627,74 +576,9 @@ SDL_FillRect(SDL_Surface * dst, SDL_Rect * dstrect, Uint32 color)
                 row += dst->pitch;
             }
         } else {
-#ifdef __powerpc__
-            /*
-             * SDL_memset() on PPC (both glibc and codewarrior) uses
-             * the dcbz (Data Cache Block Zero) instruction, which
-             * causes an alignment exception if the destination is
-             * uncachable, so only use it on software surfaces
-             */
-            if (dst->flags & SDL_HWSURFACE) {
-                if (dstrect->w >= 8) {
-                    /*
-                     * 64-bit stores are probably most
-                     * efficient to uncached video memory
-                     */
-                    double fill;
-                    SDL_memset(&fill, color, (sizeof fill));
-                    for (y = dstrect->h; y; y--) {
-                        Uint8 *d = row;
-                        unsigned n = x;
-                        unsigned nn;
-                        Uint8 c = color;
-                        double f = fill;
-                        while ((unsigned long) d & (sizeof(double) - 1)) {
-                            *d++ = c;
-                            n--;
-                        }
-                        nn = n / (sizeof(double) * 4);
-                        while (nn) {
-                            ((double *) d)[0] = f;
-                            ((double *) d)[1] = f;
-                            ((double *) d)[2] = f;
-                            ((double *) d)[3] = f;
-                            d += 4 * sizeof(double);
-                            nn--;
-                        }
-                        n &= ~(sizeof(double) * 4 - 1);
-                        nn = n / sizeof(double);
-                        while (nn) {
-                            *(double *) d = f;
-                            d += sizeof(double);
-                            nn--;
-                        }
-                        n &= ~(sizeof(double) - 1);
-                        while (n) {
-                            *d++ = c;
-                            n--;
-                        }
-                        row += dst->pitch;
-                    }
-                } else {
-                    /* narrow boxes */
-                    for (y = dstrect->h; y; y--) {
-                        Uint8 *d = row;
-                        Uint8 c = color;
-                        int n = x;
-                        while (n) {
-                            *d++ = c;
-                            n--;
-                        }
-                        row += dst->pitch;
-                    }
-                }
-            } else
-#endif /* __powerpc__ */
-            {
-                for (y = dstrect->h; y; y--) {
-                    SDL_memset(row, color, x);
-                    row += dst->pitch;
-                }
+            for (y = dstrect->h; y; y--) {
+                SDL_memset(row, color, x);
+                row += dst->pitch;
             }
         }
     } else {
@@ -753,13 +637,6 @@ SDL_LockSurface(SDL_Surface * surface)
 {
     if (!surface->locked) {
         /* Perform the lock */
-        if (surface->flags & SDL_HWSURFACE) {
-            if (SDL_LockTexture
-                (surface->textureID, NULL, 1, &surface->pixels,
-                 &surface->pitch) < 0) {
-                return (-1);
-            }
-        }
         if (surface->flags & SDL_RLEACCEL) {
             SDL_UnRLESurface(surface, 1);
             surface->flags |= SDL_RLEACCEL;     /* save accel'd state */
@@ -782,11 +659,6 @@ SDL_UnlockSurface(SDL_Surface * surface)
     /* Only perform an unlock if we are locked */
     if (!surface->locked || (--surface->locked > 0)) {
         return;
-    }
-
-    /* Unlock hardware or accelerated surfaces */
-    if (surface->flags & SDL_HWSURFACE) {
-        SDL_UnlockTexture(surface->textureID);
     }
 
     /* Update RLE encoded surface with new data */
@@ -928,11 +800,6 @@ SDL_FreeSurface(SDL_Surface * surface)
         SDL_FreeBlitMap(surface->map);
         surface->map = NULL;
     }
-    /* Should we destroy the texture too?
-       if (surface->textureID) {
-       SDL_DestroyTexture(surface->textureID);
-       }
-     */
     if (surface->pixels && ((surface->flags & SDL_PREALLOC) != SDL_PREALLOC)) {
         SDL_free(surface->pixels);
     }

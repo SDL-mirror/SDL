@@ -36,7 +36,7 @@ extern "C" {
 /* *INDENT-ON* */
 #endif
 
-#define SDL_SWSURFACE       0x00000000
+#define SDL_SWSURFACE       0x00000000  /* Not used */
 #define SDL_ANYFORMAT       0x00100000
 #define SDL_HWPALETTE       0x00200000
 #define SDL_DOUBLEBUF       0x00400000
@@ -44,6 +44,7 @@ extern "C" {
 #define SDL_RESIZABLE       0x01000000
 #define SDL_NOFRAME         0x02000000
 #define SDL_OPENGL          0x04000000
+#define SDL_HWSURFACE       0x08000001  /* Not used */
 #define SDL_ASYNCBLIT       0x08000000  /* Not used */
 #define SDL_HWACCEL         0x08000000  /* Not used */
 

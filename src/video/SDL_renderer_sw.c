@@ -125,7 +125,7 @@ CreateTexture(SDL_Renderer * renderer, Uint32 format, int w, int h)
     }
 
     texture->format = format;
-    texture->access = SDL_TEXTUREACCESS_LOCAL;
+    texture->access = SDL_TEXTUREACCESS_STREAMING;
     texture->w = w;
     texture->h = h;
     texture->renderer = renderer;

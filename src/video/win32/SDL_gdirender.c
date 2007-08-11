@@ -304,7 +304,7 @@ GDI_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     }
     data->pitch = (texture->w * SDL_BYTESPERPIXEL(data->format));
 
-    if (data->yuv || texture->access == SDL_TEXTUREACCESS_LOCAL
+    if (data->yuv || texture->access == SDL_TEXTUREACCESS_STREAMING
         || texture->format != display->current_mode.format) {
         int bmi_size;
         LPBITMAPINFO bmi;
