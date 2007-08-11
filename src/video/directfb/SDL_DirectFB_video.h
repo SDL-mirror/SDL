@@ -25,39 +25,155 @@
 #define _SDL_DirectFB_video_h
 
 #include <directfb.h>
+#include <directfb_version.h>
+
+#define LOG_CHANNEL 	stdout
+
+#if (DIRECTFB_MAJOR_VERSION == 0) && (DIRECTFB_MINOR_VERSION == 9) && (DIRECTFB_MICRO_VERSION < 23)
+#error "SDL_DIRECTFB: Please compile against libdirectfb version >=0.9.24"
+#endif
+
+#if (DIRECTFB_MAJOR_VERSION >= 1) && (DIRECTFB_MINOR_VERSION >= 0) && (DIRECTFB_MICRO_VERSION >= 0 )
+#define SDL_DIRECTFB_OPENGL 1
+#include <directfbgl.h>
+#endif
+
+#if SDL_DIRECTFB_OPENGL
+#include "SDL_loadso.h"
+#endif
 
 #include "SDL_mouse.h"
 #include "../SDL_sysvideo.h"
 
-#define _THIS SDL_VideoDevice *this
+#define DEBUG 1
+
+#define SDL_DFB_RELEASE(x) do { if ( x ) { x->Release(x); x = NULL; } } while (0)
+#define SDL_DFB_FREE(x) do { if ( x ) { SDL_free(x); x = NULL; } } while (0)
+#define SDL_DFB_UNLOCK(x) do { if ( x ) { x->Unlock(x); } } while (0)
+
+#if DEBUG
+#define SDL_DFB_DEBUG(x...) do { fprintf(LOG_CHANNEL, "%s:", __FUNCTION__); fprintf(LOG_CHANNEL, x); } while (0)
+#define SDL_DFB_DEBUGC(x...) do { fprintf(LOG_CHANNEL, x); } while (0)
+#else
+#define SDL_DFB_DEBUG(x...) do { } while (0)
+#define SDL_DFB_DEBUGC(x...) do { } while (0)
+#endif
+
+#define SDL_DFB_CONTEXT "SDL_DirectFB"
+
+#define SDL_DFB_ERR(x...) 							\
+	do {											\
+		fprintf(LOG_CHANNEL, "%s: %s <%d>:\n\t",			\
+			SDL_DFB_CONTEXT, __FILE__, __LINE__ );	\
+		fprintf(LOG_CHANNEL, x );						\
+	} while (0)
+
+#define SDL_DFB_CHECK(x...) \
+     do {                                                                \
+          ret = x;                                                    \
+          if (ret != DFB_OK) {                                        \
+               fprintf(LOG_CHANNEL, "%s <%d>:\n\t", __FILE__, __LINE__ ); 	      \
+               SDL_SetError( #x, DirectFBErrorString (ret) );         \
+          }                                                           \
+     } while (0)
+
+#define SDL_DFB_CHECKERR(x...) \
+     do {                                                                \
+          ret = x;                                                    \
+          if (ret != DFB_OK) {                                        \
+               fprintf(LOG_CHANNEL, "%s <%d>:\n", __FILE__, __LINE__ ); \
+               fprintf(LOG_CHANNEL, "\t%s\n", #x ); \
+               fprintf(LOG_CHANNEL, "\t%s\n", DirectFBErrorString (ret) ); \
+               SDL_SetError( #x, DirectFBErrorString (ret) );         \
+               goto error; 					      \
+          }                                                           \
+     } while (0)
+
+#define SDL_DFB_CALLOC(r, n, s) \
+     do {                                                                \
+          r = SDL_calloc (n, s);                                      \
+          if (!(r)) {                                                 \
+               fprintf( LOG_CHANNEL, "%s <%d>:\n\t", __FILE__, __LINE__ ); \
+               SDL_OutOfMemory();                                     \
+               goto error; 					      \
+          }                                                           \
+     } while (0)
 
 /* Private display data */
 
-struct SDL_PrivateVideoData
+#define SDL_DFB_DEVICEDATA(dev)  DFB_DeviceData *devdata = (DFB_DeviceData *) ((dev)->driverdata)
+#define SDL_DFB_WINDOWDATA(win)  DFB_WindowData *windata = ((win) ? (DFB_WindowData *) ((win)->driverdata) : NULL)
+#define SDL_DFB_DISPLAYDATA(dev, win)  DFB_DisplayData *dispdata = ((win && dev) ? (DFB_DisplayData *) (dev)->displays[(win)->display].driverdata : NULL)
+
+typedef struct _DFB_DisplayData DFB_DisplayData;
+
+#define DFB_MAX_SCREENS 10
+#define DFB_MAX_MODES 50
+
+struct _DFB_DisplayData
+{
+    IDirectFBDisplayLayer *layer;
+    DFBSurfacePixelFormat pixelformat;
+    DFBDisplayLayerID vidID;
+
+    int cw;
+    int ch;
+
+    int nummodes;
+    SDL_DisplayMode *modelist;
+
+#if 0
+    WMcursor *last_cursor;
+    WMcursor *blank_cursor;
+    WMcursor *default_cursor;
+#endif
+};
+
+
+typedef struct _DFB_WindowData DFB_WindowData;
+struct _DFB_WindowData
+{
+    IDirectFBSurface *surface;
+    IDirectFBPalette *palette;
+    IDirectFBWindow *window;
+    IDirectFBGL *gl_context;
+    IDirectFBEventBuffer *eventbuffer;
+    DFBWindowID windowID;
+    int id;                     // SDL window id
+    DFB_WindowData *next;
+    u8 opacity;
+};
+
+typedef struct _DFB_DeviceData DFB_DeviceData;
+struct _DFB_DeviceData
 {
     int initialized;
 
     IDirectFB *dfb;
-    IDirectFBDisplayLayer *layer;
-    IDirectFBEventBuffer *eventbuffer;
+    int mouse;
+    int keyboard;
+    DFB_WindowData *firstwin;
 
-    int nummodes;
-    SDL_Rect **modelist;
+    int numscreens;
+    DFBScreenID screenid[DFB_MAX_SCREENS];
+    DFBDisplayLayerID gralayer[DFB_MAX_SCREENS];
+    DFBDisplayLayerID vidlayer[DFB_MAX_SCREENS];
 
-    /* MGA CRTC2 support */
-    int enable_mga_crtc2;
-    int mga_crtc2_stretch;
-    float mga_crtc2_stretch_overscan;
-    IDirectFBDisplayLayer *c2layer;
-    IDirectFBSurface *c2frame;
-    DFBRectangle c2ssize;       /* Real screen size */
-    DFBRectangle c2dsize;       /* Stretched screen size */
-    DFBRectangle c2framesize;   /* CRTC2 screen size */
+    // auxiliary integer for callbacks
+    int aux;
+
+    // OpenGL
+    void (*glFinish) (void);
+    void (*glFlush) (void);
 };
 
-#define HIDDEN (this->hidden)
+struct SDL_GLDriverData
+{
+    int gl_active;              /* to stop switching drivers while we have a valid context */
 
-void SetDirectFBerror(const char *function, DFBResult code);
+#if SDL_DIRECTFB_OPENGL
+    IDirectFBGL *gl_context;
+#endif                          /* SDL_DIRECTFB_OPENGL */
+};
 
 #endif /* _SDL_DirectFB_video_h */
-/* vi: set ts=4 sw=4 expandtab: */

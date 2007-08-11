@@ -21,8 +21,10 @@
 */
 #include "SDL_config.h"
 
-#include "SDL_DirectFB_video.h"
+/* SDL surface based renderer implementation */
 
-/* Functions to be exported */
-extern void DirectFB_InitOSKeymap(_THIS);
-extern void DirectFB_PumpEventsWindow(_THIS);
+#define SDL_DFB_RENDERERDATA(rend) DirectFB_RenderData *renddata = ((rend) ? (DirectFB_RenderData *) (rend)->driverdata : NULL)
+
+extern void DirectFB_AddRenderDriver(_THIS);
+
+/* vi: set ts=4 sw=4 expandtab: */

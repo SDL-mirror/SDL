@@ -21,21 +21,23 @@
 */
 #include "SDL_config.h"
 
-/* This is the DirectFB implementation of YUV video overlays */
+#ifndef _SDL_DirectFB_mouse_h
+#define _SDL_DirectFB_mouse_h
 
-#include "SDL_video.h"
-#include "SDL_DirectFB_video.h"
+typedef struct _DFB_CursorData DFB_CursorData;
 
-extern SDL_Overlay *DirectFB_CreateYUVOverlay(_THIS, int width, int height,
-                                              Uint32 format,
-                                              SDL_Surface * display);
+struct _DFB_CursorData
+{
+    IDirectFBSurface *surf;
+    int hotx;
+    int hoty;
+};
 
-extern int DirectFB_LockYUVOverlay(_THIS, SDL_Overlay * overlay);
+#define SDL_DFB_CURSORDATA(curs)  DFB_CursorData *curdata = (DFB_CursorData *) ((curs)->driverdata)
 
-extern void DirectFB_UnlockYUVOverlay(_THIS, SDL_Overlay * overlay);
+extern void DirectFB_InitMouse(_THIS);
+extern void DirectFB_QuitMouse(_THIS);
 
-extern int DirectFB_DisplayYUVOverlay(_THIS, SDL_Overlay * overlay,
-                                      SDL_Rect * src, SDL_Rect * dst);
+#endif /* _SDL_DirectFB_mouse_h */
 
-extern void DirectFB_FreeYUVOverlay(_THIS, SDL_Overlay * overlay);
 /* vi: set ts=4 sw=4 expandtab: */

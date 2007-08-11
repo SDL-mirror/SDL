@@ -1,0 +1,45 @@
+SDL on DirectFB
+
+Supports:
+
+- Hardware YUV overlays
+- OpenGL - software only
+- 2D/3D accelerations (depends on directfb driver)
+
+What you need:
+
+DirectFB 1.0.0 - required
+Kernel-Framebuffer support: required: vesafb, radeonfb .... 
+Mesa 7.0.x	   - optional for OpenGL
+
+As of this writing 20070810 you need to pull Mesa from git and do the following:
+
+------------------------
+cd mesa 
+make linux-directfb
+make
+
+echo Installing - pleaser enter sudo pw.
+
+sudo make install INSTALL_DIR=/usr/local/dfb_GL
+cd src/mesa/drivers/directfb
+make
+sudo make install INSTALL_DIR=/usr/local/dfb_GL
+------------------------
+
+To run the SDL - testprograms:
+
+export SDL_VIDEODRIVER=directfb
+export LD_LIBRARY_PATH=/usr/local/dfb_GL/lib
+export LD_PRELOAD=/usr/local/dfb_GL/libGL.so.7
+
+./testgl
+
+To use hardware accelerated YUV-overlays for YUV-textures, use:
+
+export SDL_DIRECTFB_YUV_DIRECT=1
+
+This is disabled by default. It will only support one concurrent 
+overlay and may behave strange if not used with SDL_CreateYUvOverlay
+from SDLcompat.c. 
+ 

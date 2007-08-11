@@ -1440,19 +1440,21 @@ SDL_LockYUVOverlay(SDL_Overlay * overlay)
         < 0) {
         return -1;
     }
+    overlay->pixels[0] = (Uint8 *) pixels;
+    overlay->pitches[0] = pitch;
     switch (overlay->format) {
     case SDL_YV12_OVERLAY:
     case SDL_IYUV_OVERLAY:
-        overlay->pixels[0] = (Uint8 *) pixels;
+        overlay->pitches[1] = pitch / 2;
+        overlay->pitches[2] = pitch / 2;
         overlay->pixels[1] =
             overlay->pixels[0] + overlay->pitches[0] * overlay->h;
         overlay->pixels[2] =
-            overlay->pixels[1] + overlay->pitches[1] * overlay->h;
+            overlay->pixels[1] + overlay->pitches[1] * overlay->h / 2;
         break;
     case SDL_YUY2_OVERLAY:
     case SDL_UYVY_OVERLAY:
     case SDL_YVYU_OVERLAY:
-        overlay->pixels[0] = (Uint8 *) pixels;
         break;
     }
     return 0;

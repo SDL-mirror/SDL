@@ -19,10 +19,16 @@
     Sam Lantinga
     slouken@libsdl.org
 
-	MGA CRTC2 support by Thomas Jarosch - tomj@simonv.com
-	CRTC2 support is inspired by mplayer's dfbmga driver
-	written by Ville Syrj��<syrjala@sci.fi>
+    SDL1.3 implementation by couriersud@arcor.de
+	
 */
+
+/* TODO: Various
+ * Add Mouse support from 1.2 directfb driver
+ * - Interface is defined in SDL_Mouse.c.h
+ * - Default Cursor automatically created
+ */
+
 #include "SDL_config.h"
 
 /* DirectFB video driver implementation.
@@ -42,44 +48,6 @@
 #include "../../events/SDL_events_c.h"
 #include "SDL_DirectFB_video.h"
 #include "SDL_DirectFB_events.h"
-#include "SDL_DirectFB_yuv.h"
-
-/* The implementation dependent data for the window manager cursor */
-struct WMcursor
-{
-    int unused;
-};
-
-
-/* Initialization/Query functions */
-static int DirectFB_VideoInit(_THIS, SDL_PixelFormat * vformat);
-static SDL_Rect **DirectFB_ListModes(_THIS, SDL_PixelFormat * format,
-                                     Uint32 flags);
-static SDL_Surface *DirectFB_SetVideoMode(_THIS, SDL_Surface * current,
-                                          int width, int height, int bpp,
-                                          Uint32 flags);
-static int DirectFB_SetColors(_THIS, int firstcolor, int ncolors,
-                              SDL_Color * colors);
-static void DirectFB_VideoQuit(_THIS);
-
-/* Hardware surface functions */
-static int DirectFB_AllocHWSurface(_THIS, SDL_Surface * surface);
-static int DirectFB_FillHWRect(_THIS, SDL_Surface * dst, SDL_Rect * dstrect,
-                               Uint32 color);
-static int DirectFB_LockHWSurface(_THIS, SDL_Surface * surface);
-static void DirectFB_UnlockHWSurface(_THIS, SDL_Surface * surface);
-static void DirectFB_FreeHWSurface(_THIS, SDL_Surface * surface);
-static int DirectFB_CheckHWBlit(_THIS, SDL_Surface * src, SDL_Surface * dst);
-static int DirectFB_HWAccelBlit(SDL_Surface * src, SDL_Rect * srcrect,
-                                SDL_Surface * dst, SDL_Rect * dstrect);
-static int DirectFB_SetHWColorKey(_THIS, SDL_Surface * surface, Uint32 key);
-static int DirectFB_SetHWAlpha(_THIS, SDL_Surface * surface, Uint8 alpha);
-static int DirectFB_FlipHWSurface(_THIS, SDL_Surface * surface);
-static int DirectFB_ShowWMCursor(_THIS, WMcursor * cursor);
-
-/* Various screen update functions available */
-static void DirectFB_DirectUpdate(_THIS, int numrects, SDL_Rect * rects);
-static void DirectFB_WindowedUpdate(_THIS, int numrects, SDL_Rect * rects);
 
 /* This is the rect EnumModes2 uses */
 struct DirectFBEnumRect
@@ -88,8 +56,51 @@ struct DirectFBEnumRect
     struct DirectFBEnumRect *next;
 };
 
-static struct DirectFBEnumRect *enumlist = NULL;
+struct DirectFB_GLContext
+{
+    IDirectFBGL *context;
+};
 
+/* Initialization/Query functions */
+static int DirectFB_VideoInit(_THIS);
+static void DirectFB_VideoQuit(_THIS);
+
+static int DirectFB_CreateWindow(_THIS, SDL_Window * window);
+static int DirectFB_CreateWindowFrom(_THIS, SDL_Window * window,
+                                     const void *data);
+static void DirectFB_SetWindowTitle(_THIS, SDL_Window * window);
+static void DirectFB_SetWindowPosition(_THIS, SDL_Window * window);
+static void DirectFB_SetWindowSize(_THIS, SDL_Window * window);
+static void DirectFB_ShowWindow(_THIS, SDL_Window * window);
+static void DirectFB_HideWindow(_THIS, SDL_Window * window);
+static void DirectFB_RaiseWindow(_THIS, SDL_Window * window);
+static void DirectFB_MaximizeWindow(_THIS, SDL_Window * window);
+static void DirectFB_MinimizeWindow(_THIS, SDL_Window * window);
+static void DirectFB_RestoreWindow(_THIS, SDL_Window * window);
+static void DirectFB_SetWindowGrab(_THIS, SDL_Window * window);
+static void DirectFB_DestroyWindow(_THIS, SDL_Window * window);
+static SDL_bool DirectFB_GetWindowWMInfo(_THIS, SDL_Window * window,
+                                         struct SDL_SysWMinfo *info);
+
+static void DirectFB_GetDisplayModes(_THIS);
+static int DirectFB_SetDisplayMode(_THIS, SDL_DisplayMode * mode);
+
+static int DirectFB_SetDisplayGammaRamp(_THIS, Uint16 * ramp);
+static int DirectFB_GetDisplayGammaRamp(_THIS, Uint16 * ramp);
+
+#if SDL_DIRECTFB_OPENGL
+static int DirectFB_GL_LoadLibrary(_THIS, const char *path);
+static void DirectFB_GL_UnloadLibrary(_THIS);
+static void *DirectFB_GL_GetProcAddress(_THIS, const char *proc);
+static SDL_GLContext DirectFB_GL_CreateContext(_THIS, SDL_Window * window);
+static int DirectFB_GL_MakeCurrent(_THIS, SDL_Window * window,
+                                   SDL_GLContext context);
+static int DirectFB_GL_SetSwapInterval(_THIS, int interval);
+static int DirectFB_GL_GetSwapInterval(_THIS);
+static void DirectFB_GL_SwapWindow(_THIS, SDL_Window * window);
+static void DirectFB_GL_DeleteContext(_THIS, SDL_GLContext context);
+
+#endif
 
 /* DirectFB driver bootstrap functions */
 
@@ -102,7 +113,7 @@ DirectFB_Available(void)
 static void
 DirectFB_DeleteDevice(SDL_VideoDevice * device)
 {
-    SDL_free(device->hidden);
+    SDL_free(device->driverdata);
     SDL_free(device);
 }
 
@@ -112,50 +123,60 @@ DirectFB_CreateDevice(int devindex)
     SDL_VideoDevice *device;
 
     /* Initialize all variables that we clean on shutdown */
-    device = (SDL_VideoDevice *) SDL_malloc(sizeof(SDL_VideoDevice));
-    if (device) {
-        SDL_memset(device, 0, (sizeof *device));
-        device->hidden = (struct SDL_PrivateVideoData *)
-            malloc(sizeof(*device->hidden));
-    }
-    if (device == NULL || device->hidden == NULL) {
-        SDL_OutOfMemory();
-        if (device) {
-            free(device);
-        }
-        return (0);
-    }
-    SDL_memset(device->hidden, 0, sizeof(*device->hidden));
+    SDL_DFB_CALLOC(device, 1, sizeof(SDL_VideoDevice));
+    SDL_DFB_CALLOC(device->gl_data, 1, sizeof(*device->gl_data));
+
+    /* Set the function pointers */
 
     /* Set the function pointers */
     device->VideoInit = DirectFB_VideoInit;
-    device->ListModes = DirectFB_ListModes;
-    device->SetVideoMode = DirectFB_SetVideoMode;
-    device->SetColors = DirectFB_SetColors;
-    device->UpdateRects = NULL;
-    device->CreateYUVOverlay = DirectFB_CreateYUVOverlay;
     device->VideoQuit = DirectFB_VideoQuit;
-    device->AllocHWSurface = DirectFB_AllocHWSurface;
-    device->CheckHWBlit = DirectFB_CheckHWBlit;
-    device->FillHWRect = DirectFB_FillHWRect;
-    device->SetHWColorKey = DirectFB_SetHWColorKey;
-    device->SetHWAlpha = DirectFB_SetHWAlpha;
-    device->LockHWSurface = DirectFB_LockHWSurface;
-    device->UnlockHWSurface = DirectFB_UnlockHWSurface;
-    device->FlipHWSurface = DirectFB_FlipHWSurface;
-    device->FreeHWSurface = DirectFB_FreeHWSurface;
-    device->ShowWMCursor = DirectFB_ShowWMCursor;
-    device->SetCaption = NULL;
-    device->SetIcon = NULL;
-    device->IconifyWindow = NULL;
-    device->GrabInput = NULL;
-    device->GetWMInfo = NULL;
-    device->InitOSKeymap = DirectFB_InitOSKeymap;
-    device->PumpEvents = DirectFB_PumpEvents;
+    device->GetDisplayModes = DirectFB_GetDisplayModes;
+    device->SetDisplayMode = DirectFB_SetDisplayMode;
+#if 0
+    device->SetDisplayGammaRamp = DirectFB_SetDisplayGammaRamp;
+    device->GetDisplayGammaRamp = DirectFB_GetDisplayGammaRamp;
+#else
+    device->SetDisplayGammaRamp = NULL;
+    device->GetDisplayGammaRamp = NULL;
+#endif
+    device->PumpEvents = DirectFB_PumpEventsWindow;
+
+    device->CreateWindow = DirectFB_CreateWindow;
+    device->CreateWindowFrom = DirectFB_CreateWindowFrom;
+    device->SetWindowTitle = DirectFB_SetWindowTitle;
+    device->SetWindowPosition = DirectFB_SetWindowPosition;
+    device->SetWindowSize = DirectFB_SetWindowSize;
+    device->ShowWindow = DirectFB_ShowWindow;
+    device->HideWindow = DirectFB_HideWindow;
+    device->RaiseWindow = DirectFB_RaiseWindow;
+    device->MaximizeWindow = DirectFB_MaximizeWindow;
+    device->MinimizeWindow = DirectFB_MinimizeWindow;
+    device->RestoreWindow = DirectFB_RestoreWindow;
+    device->SetWindowGrab = DirectFB_SetWindowGrab;
+    device->DestroyWindow = DirectFB_DestroyWindow;
+    device->GetWindowWMInfo = DirectFB_GetWindowWMInfo;
+
+#if SDL_DIRECTFB_OPENGL
+    device->GL_LoadLibrary = DirectFB_GL_LoadLibrary;
+    device->GL_GetProcAddress = DirectFB_GL_GetProcAddress;
+    device->GL_MakeCurrent = DirectFB_GL_MakeCurrent;
+
+    device->GL_CreateContext = DirectFB_GL_CreateContext;
+    device->GL_SetSwapInterval = DirectFB_GL_SetSwapInterval;
+    device->GL_GetSwapInterval = DirectFB_GL_GetSwapInterval;
+    device->GL_SwapWindow = DirectFB_GL_SwapWindow;
+    device->GL_DeleteContext = DirectFB_GL_DeleteContext;
+
+#endif
 
     device->free = DirectFB_DeleteDevice;
 
     return device;
+  error:
+    if (device)
+        free(device);
+    return (0);
 }
 
 VideoBootStrap DirectFB_bootstrap = {
@@ -163,214 +184,107 @@ VideoBootStrap DirectFB_bootstrap = {
     DirectFB_Available, DirectFB_CreateDevice
 };
 
-static DFBSurfacePixelFormat
-GetFormatForBpp(int bpp, IDirectFBDisplayLayer * layer)
-{
-    DFBDisplayLayerConfig dlc;
-    int bytes = (bpp + 7) / 8;
-
-    layer->GetConfiguration(layer, &dlc);
-
-    if (bytes == DFB_BYTES_PER_PIXEL(dlc.pixelformat) && bytes > 1)
-        return dlc.pixelformat;
-
-    switch (bytes) {
-    case 1:
-        return DSPF_LUT8;
-    case 2:
-        return DSPF_RGB16;
-    case 3:
-        return DSPF_RGB24;
-    case 4:
-        return DSPF_RGB32;
-    }
-
-    return DSPF_UNKNOWN;
-}
-
 static DFBEnumerationResult
 EnumModesCallback(int width, int height, int bpp, void *data)
 {
-    SDL_VideoDevice *this = (SDL_VideoDevice *) data;
-    struct DirectFBEnumRect *enumrect;
+    SDL_VideoDisplay *this = (SDL_VideoDisplay *) data;
+    DFB_DisplayData *dispdata = (DFB_DisplayData *) this->driverdata;
+    SDL_DisplayMode mode;
 
-    HIDDEN->nummodes++;
+    mode.w = width;
+    mode.h = height;
+    mode.refresh_rate = 0;
+    mode.driverdata = NULL;
+    mode.format = 0;
 
-    if (enumlist && enumlist->r.w == width && enumlist->r.h == height)
-        return DFENUM_OK;
-
-    enumrect = SDL_calloc(1, sizeof(struct DirectFBEnumRect));
-    if (!enumrect) {
-        SDL_OutOfMemory();
-        return DFENUM_CANCEL;
+    if (dispdata->nummodes < DFB_MAX_MODES) {
+        dispdata->modelist[dispdata->nummodes++] = mode;
     }
 
-    enumrect->r.w = (Uint16) width;
-    enumrect->r.h = (Uint16) height;
-    enumrect->next = enumlist;
-
-    enumlist = enumrect;
-
+    SDL_DFB_DEBUG("w %d h %d bpp %d\n", width, height, bpp);
     return DFENUM_OK;
 }
 
-struct private_hwdata
-{
-    IDirectFBSurface *surface;
-    IDirectFBPalette *palette;
-};
-
-void
-SetDirectFBerror(const char *function, DFBResult code)
-{
-    const char *error = DirectFBErrorString(code);
-
-    if (error)
-        SDL_SetError("%s: %s", function, error);
-    else
-        SDL_SetError("Unknown error code from %s", function);
-}
-
-static DFBSurfacePixelFormat
-SDLToDFBPixelFormat(SDL_PixelFormat * format)
-{
-    if (format->Rmask && format->Gmask && format->Bmask) {
-        switch (format->BitsPerPixel) {
-        case 8:
-            return DSPF_LUT8;
-
-        case 16:
-            if (format->Rmask == 0xF800 &&
-                format->Gmask == 0x07E0 && format->Bmask == 0x001F)
-                return DSPF_RGB16;
-            /* fall through */
-
-        case 15:
-            if (format->Rmask == 0x7C00 &&
-                format->Gmask == 0x03E0 && format->Bmask == 0x001F)
-                return DSPF_ARGB1555;
-            break;
-
-        case 24:
-            if (format->Rmask == 0xFF0000 &&
-                format->Gmask == 0x00FF00 && format->Bmask == 0x0000FF)
-                return DSPF_RGB24;
-            break;
-
-        case 32:
-            if (format->Rmask == 0xFF0000 &&
-                format->Gmask == 0x00FF00 && format->Bmask == 0x0000FF) {
-                if (format->Amask == 0xFF000000)
-                    return DSPF_ARGB;
-                else
-                    return DSPF_RGB32;
-            }
-            break;
-        }
-    } else {
-        switch (format->BitsPerPixel) {
-        case 8:
-            return DSPF_LUT8;
-        case 15:
-            return DSPF_ARGB1555;
-        case 16:
-            return DSPF_RGB16;
-        case 24:
-            return DSPF_RGB24;
-        case 32:
-            return DSPF_RGB32;
-        }
-    }
-
-    return DSPF_UNKNOWN;
-}
-
-static SDL_Palette *
-AllocatePalette(int size)
-{
-    SDL_Palette *palette;
-    SDL_Color *colors;
-
-    palette = SDL_calloc(1, sizeof(SDL_Palette));
-    if (!palette) {
-        SDL_OutOfMemory();
-        return NULL;
-    }
-
-    colors = SDL_calloc(size, sizeof(SDL_Color));
-    if (!colors) {
-        SDL_OutOfMemory();
-        return NULL;
-    }
-
-    palette->ncolors = size;
-    palette->colors = colors;
-
-    return palette;
-}
-
 static int
-DFBToSDLPixelFormat(DFBSurfacePixelFormat pixelformat,
-                    SDL_PixelFormat * format)
+DFBToSDLPixelFormat(DFBSurfacePixelFormat pixelformat, Uint32 * fmt)
 {
-    format->Amask = format->Rmask = format->Gmask = format->Bmask = 0;
-    format->BitsPerPixel = format->BytesPerPixel = 0;
-
     switch (pixelformat) {
-    case DSPF_A8:
-        format->Amask = 0x000000FF;
+    case DSPF_ALUT44:
+        *fmt = SDL_PIXELFORMAT_INDEX4LSB;
         break;
-
-    case DSPF_ARGB1555:
-        format->Rmask = 0x00007C00;
-        format->Gmask = 0x000003E0;
-        format->Bmask = 0x0000001F;
-        break;
-
-    case DSPF_RGB16:
-        format->Rmask = 0x0000F800;
-        format->Gmask = 0x000007E0;
-        format->Bmask = 0x0000001F;
-        break;
-
-    case DSPF_ARGB:
-        format->Amask = 0;      /* apps don't seem to like that:  0xFF000000; */
-        /* fall through */
-    case DSPF_RGB24:
-    case DSPF_RGB32:
-        format->Rmask = 0x00FF0000;
-        format->Gmask = 0x0000FF00;
-        format->Bmask = 0x000000FF;
-        break;
-
     case DSPF_LUT8:
-        format->Rmask = 0x000000FF;
-        format->Gmask = 0x000000FF;
-        format->Bmask = 0x000000FF;
-
-        if (!format->palette)
-            format->palette = AllocatePalette(256);
+        *fmt = SDL_PIXELFORMAT_INDEX8;
         break;
-
+    case DSPF_RGB332:
+        *fmt = SDL_PIXELFORMAT_RGB332;
+        break;
+    case DSPF_ARGB4444:
+        *fmt = SDL_PIXELFORMAT_ARGB4444;
+        break;
+    case SDL_PIXELFORMAT_ARGB1555:
+        *fmt = SDL_PIXELFORMAT_ARGB1555;
+        break;
+    case DSPF_RGB16:
+        *fmt = SDL_PIXELFORMAT_RGB565;
+        break;
+    case DSPF_RGB24:
+        *fmt = SDL_PIXELFORMAT_RGB24;
+        break;
+    case DSPF_RGB32:
+        *fmt = SDL_PIXELFORMAT_RGB888;
+        break;
+    case DSPF_ARGB:
+        *fmt = SDL_PIXELFORMAT_ARGB8888;
+        break;
+    case DSPF_YV12:
+        *fmt = SDL_PIXELFORMAT_YV12;
+        break;                  /* Planar mode: Y + V + U  (3 planes) */
+    case DSPF_I420:
+        *fmt = SDL_PIXELFORMAT_IYUV;
+        break;                  /* Planar mode: Y + U + V  (3 planes) */
+    case DSPF_YUY2:
+        *fmt = SDL_PIXELFORMAT_YUY2;
+        break;                  /* Packed mode: Y0+U0+Y1+V0 (1 plane) */
+    case DSPF_UYVY:
+        *fmt = SDL_PIXELFORMAT_UYVY;
+        break;                  /* Packed mode: U0+Y0+V0+Y1 (1 plane) */
     default:
-        fprintf(stderr,
-                "SDL_DirectFB: Unsupported pixelformat (0x%08x)!\n",
-                pixelformat);
         return -1;
     }
-
-    format->BitsPerPixel = DFB_BYTES_PER_PIXEL(pixelformat) * 8;
-    format->BytesPerPixel = DFB_BYTES_PER_PIXEL(pixelformat);
-
     return 0;
 }
 
-
-int
-DirectFB_VideoInit(_THIS, SDL_PixelFormat * vformat)
+static DFBEnumerationResult
+cbScreens(DFBScreenID screen_id, DFBScreenDescription desc,
+          void *callbackdata)
 {
-    int i;
-    DFBResult ret;
+    DFB_DeviceData *devdata = (DFB_DeviceData *) callbackdata;
+
+    devdata->screenid[devdata->numscreens++] = screen_id;
+    return DFENUM_OK;
+}
+
+DFBEnumerationResult
+cbLayers(DFBDisplayLayerID layer_id, DFBDisplayLayerDescription desc,
+         void *callbackdata)
+{
+    DFB_DeviceData *devdata = (DFB_DeviceData *) callbackdata;
+
+    if (desc.caps & DLCAPS_SURFACE) {
+        if ((desc.type & DLTF_GRAPHICS) && (desc.type & DLTF_VIDEO)) {
+            if (devdata->vidlayer[devdata->aux] == -1)
+                devdata->vidlayer[devdata->aux] = layer_id;
+        } else if (desc.type & DLTF_GRAPHICS) {
+            if (devdata->gralayer[devdata->aux] == -1)
+                devdata->gralayer[devdata->aux] = layer_id;
+        }
+    }
+    return DFENUM_OK;
+}
+
+static int
+DirectFB_VideoInit(_THIS)
+{
 #if (DIRECTFB_MAJOR_VERSION == 0) && (DIRECTFB_MINOR_VERSION == 9) && (DIRECTFB_MICRO_VERSION < 23)
     DFBCardCapabilities caps;
 #else
@@ -380,801 +294,816 @@ DirectFB_VideoInit(_THIS, SDL_PixelFormat * vformat)
     struct DirectFBEnumRect *rect;
     IDirectFB *dfb = NULL;
     IDirectFBDisplayLayer *layer = NULL;
-    IDirectFBEventBuffer *events = NULL;
 
-    HIDDEN->c2layer = NULL, HIDDEN->c2frame = NULL;
-    HIDDEN->enable_mga_crtc2 = 0;
-    HIDDEN->mga_crtc2_stretch_overscan = 1;
+    SDL_VideoDisplay display;
+    DFB_DisplayData *dispdata;
+    DFB_DeviceData *devdata;
+    SDL_DisplayMode mode;
+    SDL_Keyboard keyboard;
+    int i;
+    DFBResult ret;
+    int tcw[DFB_MAX_SCREENS];
+    int tch[DFB_MAX_SCREENS];
 
-    ret = DirectFBInit(NULL, NULL);
-    if (ret) {
-        SetDirectFBerror("DirectFBInit", ret);
-        goto error;
+    SDL_zero(keyboard);
+
+    SDL_DFB_CHECKERR(DirectFBInit(NULL, NULL));
+    SDL_DFB_CHECKERR(DirectFBCreate(&dfb));
+
+    SDL_DFB_CALLOC(devdata, 1, sizeof(*devdata));
+    devdata->numscreens = 0;
+    for (i = 0; i < DFB_MAX_SCREENS; i++) {
+        devdata->gralayer[i] = -1;
+        devdata->vidlayer[i] = -1;
+    }
+    SDL_DFB_CHECKERR(dfb->EnumScreens(dfb, &cbScreens, devdata));
+    for (i = 0; i < devdata->numscreens; i++) {
+        IDirectFBScreen *screen;
+
+        SDL_DFB_CHECKERR(dfb->GetScreen(dfb, devdata->screenid[i], &screen));
+
+        devdata->aux = i;
+        SDL_DFB_CHECKERR(screen->
+                         EnumDisplayLayers(screen, &cbLayers, devdata));
+        screen->GetSize(screen, &tcw[i], &tch[i]);
+        screen->Release(screen);
     }
 
-    ret = DirectFBCreate(&dfb);
-    if (ret) {
-        SetDirectFBerror("DirectFBCreate", ret);
-        goto error;
-    }
+    /* Query card capabilities */
 
-    ret = dfb->GetDisplayLayer(dfb, DLID_PRIMARY, &layer);
-    if (ret) {
-        SetDirectFBerror("dfb->GetDisplayLayer", ret);
-        goto error;
-    }
-
-    ret = dfb->CreateInputEventBuffer(dfb, DICAPS_ALL, DFB_FALSE, &events);
-    if (ret) {
-        SetDirectFBerror("dfb->CreateEventBuffer", ret);
-        goto error;
-    }
-
-    layer->EnableCursor(layer, 1);
-
-    /* Query layer configuration to determine the current mode and pixelformat */
-    layer->GetConfiguration(layer, &dlc);
-
-    /* If current format is not supported use LUT8 as the default */
-    if (DFBToSDLPixelFormat(dlc.pixelformat, vformat))
-        DFBToSDLPixelFormat(DSPF_LUT8, vformat);
-
-    /* Enumerate the available fullscreen modes */
-    ret = dfb->EnumVideoModes(dfb, EnumModesCallback, this);
-    if (ret) {
-        SetDirectFBerror("dfb->EnumVideoModes", ret);
-        goto error;
-    }
-
-    HIDDEN->modelist = SDL_calloc(HIDDEN->nummodes + 1, sizeof(SDL_Rect *));
-    if (!HIDDEN->modelist) {
-        SDL_OutOfMemory();
-        goto error;
-    }
-
-    for (i = 0, rect = enumlist; rect; ++i, rect = rect->next) {
-        HIDDEN->modelist[i] = &rect->r;
-    }
-
-    HIDDEN->modelist[i] = NULL;
-
-
-    /* Query card capabilities to get the video memory size */
-#if (DIRECTFB_MAJOR_VERSION == 0) && (DIRECTFB_MINOR_VERSION == 9) && (DIRECTFB_MICRO_VERSION < 23)
-    dfb->GetCardCapabilities(dfb, &caps);
-#else
     dfb->GetDeviceDescription(dfb, &caps);
-#endif
 
-    this->info.wm_available = 1;
-    this->info.hw_available = 1;
-    this->info.blit_hw = 1;
-    this->info.blit_hw_CC = 1;
-    this->info.blit_hw_A = 1;
-    this->info.blit_fill = 1;
-    this->info.video_mem = caps.video_memory / 1024;
-    this->info.current_w = dlc.width;
-    this->info.current_h = dlc.height;
+    SDL_DFB_DEBUG("SDL directfb video driver - %s %s\n", __DATE__, __TIME__);
+    SDL_DFB_DEBUG("Using %s (%s) driver.\n", caps.name, caps.vendor);
+    SDL_DFB_DEBUG("Found %d screens\n", devdata->numscreens);
 
-    HIDDEN->initialized = 1;
-    HIDDEN->dfb = dfb;
-    HIDDEN->layer = layer;
-    HIDDEN->eventbuffer = events;
+    for (i = 0; i < devdata->numscreens; i++) {
+        //SDL_DFB_CHECKERR( dfb->GetDisplayLayer (dfb, DLID_PRIMARY, &layer) );
+        SDL_DFB_CHECKERR(dfb->
+                         GetDisplayLayer(dfb, devdata->gralayer[i], &layer));
+        //SDL_DFB_CHECKERR( dfb->CreateInputEventBuffer (dfb, DICAPS_ALL, DFB_FALSE, &events) );
 
-    if (SDL_getenv("SDL_DIRECTFB_MGA_CRTC2") != NULL)
-        HIDDEN->enable_mga_crtc2 = 1;
+        SDL_DFB_CHECKERR(layer->
+                         SetCooperativeLevel(layer, DLSCL_ADMINISTRATIVE));
+        layer->EnableCursor(layer, 1);
+        SDL_DFB_CHECKERR(layer->SetCursorOpacity(layer, 0xC0));
+        SDL_DFB_CHECKERR(layer->SetCooperativeLevel(layer, DLSCL_SHARED));
 
-    if (HIDDEN->enable_mga_crtc2) {
-        DFBDisplayLayerConfig dlc;
-        DFBDisplayLayerConfigFlags failed;
+        /* Query layer configuration to determine the current mode and pixelformat */
+        layer->GetConfiguration(layer, &dlc);
 
-        ret = dfb->GetDisplayLayer(dfb, 2, &HIDDEN->c2layer);
-        if (ret) {
-            SetDirectFBerror("dfb->GetDisplayLayer(CRTC2)", ret);
-            goto error;
-        }
+        DFBToSDLPixelFormat(dlc.pixelformat, &mode.format);
 
-        ret =
-            HIDDEN->layer->SetCooperativeLevel(HIDDEN->layer,
-                                               DLSCL_EXCLUSIVE);
-        if (ret) {
-            SetDirectFBerror
-                ("layer->SetCooperativeLevel(CRTC2, EXCLUSIVE)", ret);
-            goto error;
-        }
+        mode.w = dlc.width;
+        mode.h = dlc.height;
+        mode.refresh_rate = 0;
+        mode.driverdata = NULL;
 
-        ret =
-            HIDDEN->c2layer->SetCooperativeLevel(HIDDEN->c2layer,
-                                                 DLSCL_EXCLUSIVE);
-        if (ret) {
-            SetDirectFBerror
-                ("c2layer->SetCooperativeLevel(CRTC2, EXCLUSIVE)", ret);
-            goto error;
-        }
+        SDL_DFB_CALLOC(dispdata, 1, sizeof(*dispdata));
 
-        HIDDEN->c2layer->SetOpacity(HIDDEN->c2layer, 0x0);
+        dispdata->layer = layer;
+        dispdata->pixelformat = dlc.pixelformat;
+        dispdata->cw = tcw[i];
+        dispdata->ch = tch[i];
 
-        /* Init the surface here as it got a fixed size */
-        dlc.flags = DLCONF_PIXELFORMAT | DLCONF_BUFFERMODE;
-        dlc.buffermode = DLBM_BACKVIDEO;
-        dlc.pixelformat = DSPF_RGB32;
+        /* YUV - Video layer */
 
-        ret =
-            HIDDEN->c2layer->TestConfiguration(HIDDEN->c2layer, &dlc,
-                                               &failed);
-        if (ret) {
-            SetDirectFBerror("c2layer->TestConfiguration", ret);
-            goto error;
-        }
+        dispdata->vidID = devdata->vidlayer[i];
 
-        ret = HIDDEN->c2layer->SetConfiguration(HIDDEN->c2layer, &dlc);
-        if (ret) {
-            SetDirectFBerror("c2layer->SetConfiguration", ret);
-            goto error;
-        }
+        SDL_zero(display);
 
-        ret = HIDDEN->c2layer->GetSurface(HIDDEN->c2layer, &HIDDEN->c2frame);
-        if (ret) {
-            SetDirectFBerror("c2layer->GetSurface", ret);
-            goto error;
-        }
+        display.desktop_mode = mode;
+        display.current_mode = mode;
+        display.driverdata = dispdata;
 
-        HIDDEN->c2framesize.x = 0;
-        HIDDEN->c2framesize.y = 0;
-        HIDDEN->c2frame->GetSize(HIDDEN->c2frame, &HIDDEN->c2framesize.w,
-                                 &HIDDEN->c2framesize.h);
+        /* Enumerate the available fullscreen modes */
+        SDL_DFB_CALLOC(dispdata->modelist, DFB_MAX_MODES,
+                       sizeof(SDL_DisplayMode));
+        SDL_DFB_CHECKERR(dfb->
+                         EnumVideoModes(dfb, EnumModesCallback, &display));
 
-        HIDDEN->c2frame->SetBlittingFlags(HIDDEN->c2frame, DSBLIT_NOFX);
-        HIDDEN->c2frame->SetColor(HIDDEN->c2frame, 0, 0, 0, 0xff);
-
-        /* Clear CRTC2 */
-        HIDDEN->c2frame->Clear(HIDDEN->c2frame, 0, 0, 0, 0xff);
-        HIDDEN->c2frame->Flip(HIDDEN->c2frame, NULL, 0);
-        HIDDEN->c2frame->Clear(HIDDEN->c2frame, 0, 0, 0, 0xff);
-        HIDDEN->c2frame->Flip(HIDDEN->c2frame, NULL, 0);
-        HIDDEN->c2frame->Clear(HIDDEN->c2frame, 0, 0, 0, 0xff);
-
-        HIDDEN->c2layer->SetOpacity(HIDDEN->c2layer, 0xFF);
-
-        /* Check if overscan is possibly set */
-        if (SDL_getenv("SDL_DIRECTFB_MGA_OVERSCAN") != NULL) {
-            float overscan = 0;
-            if (SDL_sscanf
-                (SDL_getenv("SDL_DIRECTFB_MGA_OVERSCAN"), "%f",
-                 &overscan) == 1)
-                if (overscan > 0 && overscan < 2)
-                    HIDDEN->mga_crtc2_stretch_overscan = overscan;
-        }
-#ifdef DIRECTFB_CRTC2_DEBUG
-        printf("CRTC2 overscan: %f\n", HIDDEN->mga_crtc2_stretch_overscan);
-#endif
+        SDL_AddVideoDisplay(&display);
     }
+
+    devdata->initialized = 1;
+    devdata->dfb = dfb;
+    devdata->firstwin = NULL;
+
+    _this->driverdata = devdata;
+
+
+#if SDL_DIRECTFB_OPENGL
+    /* Opengl */
+    _this->gl_data->gl_active = 0;
+    _this->gl_data->gl_context = NULL;
+#endif
+
+    DirectFB_AddRenderDriver(_this);
+    DirectFB_InitMouse(_this);
+    //devdata->mouse = SDL_AddMouse(&mouse, -1);
+    devdata->keyboard = SDL_AddKeyboard(&keyboard, -1);
+    DirectFB_InitOSKeymap(_this);
 
     return 0;
 
+
   error:
-    if (events)
-        events->Release(events);
-
-    if (HIDDEN->c2frame)
-        HIDDEN->c2frame->Release(HIDDEN->c2frame);
-
-    if (HIDDEN->c2layer)
-        HIDDEN->c2layer->Release(HIDDEN->c2layer);
-
-    if (layer)
-        layer->Release(layer);
-
-    if (dfb)
-        dfb->Release(dfb);
-
+    //FIXME: Cleanup not complete, Free existing displays
+    SDL_DFB_FREE(dispdata);
+    SDL_DFB_FREE(dispdata->modelist);
+    SDL_DFB_RELEASE(layer);
+    SDL_DFB_RELEASE(dfb);
     return -1;
 }
 
-static SDL_Rect **
-DirectFB_ListModes(_THIS, SDL_PixelFormat * format, Uint32 flags)
+static void
+DirectFB_VideoQuit(_THIS)
 {
-    if (flags & SDL_FULLSCREEN)
-        return HIDDEN->modelist;
-    else if (SDLToDFBPixelFormat(format) != DSPF_UNKNOWN)
-        return (SDL_Rect **) - 1;
+    DFB_DeviceData *devdata = (DFB_DeviceData *) _this->driverdata;
+    SDL_DisplayMode tmode;
+    DFBResult ret;
+    int i;
 
-    return NULL;
+    tmode = _this->displays[0].desktop_mode;
+    tmode.format = SDL_PIXELFORMAT_UNKNOWN;
+    DirectFB_SetDisplayMode(_this, &tmode);
+    tmode = _this->displays[0].desktop_mode;
+    DirectFB_SetDisplayMode(_this, &tmode);
+
+    for (i = 0; i < devdata->numscreens; i++) {
+        DFB_DisplayData *dispdata =
+            (DFB_DisplayData *) _this->displays[i].driverdata;
+        if (dispdata->layer) {
+            SDL_DFB_CHECK(dispdata->layer->
+                          SetCooperativeLevel(dispdata->layer,
+                                              DLSCL_ADMINISTRATIVE));
+            SDL_DFB_CHECK(dispdata->layer->
+                          SetCursorOpacity(dispdata->layer, 0x00));
+            SDL_DFB_CHECK(dispdata->layer->
+                          SetCooperativeLevel(dispdata->layer, DLSCL_SHARED));
+        }
+        SDL_DFB_RELEASE(dispdata->layer);
+
+        /* Free video mode list */
+        if (dispdata->modelist) {
+            SDL_free(dispdata->modelist);
+            dispdata->modelist = NULL;
+        }
+        // Done by core
+        //SDL_free(dispdata);
+    }
+
+    //SDL_DFB_RELEASE(devdata->eventbuffer);
+
+    SDL_DFB_RELEASE(devdata->dfb);
+
+    SDL_DelMouse(devdata->mouse);
+    SDL_DelKeyboard(devdata->keyboard);
+
+#if SDL_DIRECTFB_OPENGL
+    DirectFB_GL_UnloadLibrary(_this);
+#endif
+
+    devdata->initialized = 0;
 }
 
-static SDL_Surface *
-DirectFB_SetVideoMode(_THIS, SDL_Surface * current, int width, int height,
-                      int bpp, Uint32 flags)
+
+static DFBSurfacePixelFormat
+SDLToDFBPixelFormat(Uint32 format)
 {
+    switch (format) {
+    case SDL_PIXELFORMAT_INDEX4LSB:
+        return DSPF_ALUT44;
+    case SDL_PIXELFORMAT_INDEX8:
+        return DSPF_LUT8;
+    case SDL_PIXELFORMAT_RGB332:
+        return DSPF_RGB332;
+    case SDL_PIXELFORMAT_RGB555:
+        return DSPF_ARGB1555;
+    case SDL_PIXELFORMAT_ARGB4444:
+        return DSPF_ARGB4444;
+    case SDL_PIXELFORMAT_ARGB1555:
+        return DSPF_ARGB1555;
+    case SDL_PIXELFORMAT_RGB565:
+        return DSPF_RGB16;
+    case SDL_PIXELFORMAT_RGB24:
+        return DSPF_RGB24;
+    case SDL_PIXELFORMAT_RGB888:
+        return DSPF_RGB32;
+    case SDL_PIXELFORMAT_ARGB8888:
+        return DSPF_ARGB;
+    case SDL_PIXELFORMAT_YV12:
+        return DSPF_YV12;       /* Planar mode: Y + V + U  (3 planes) */
+    case SDL_PIXELFORMAT_IYUV:
+        return DSPF_I420;       /* Planar mode: Y + U + V  (3 planes) */
+    case SDL_PIXELFORMAT_YUY2:
+        return DSPF_YUY2;       /* Packed mode: Y0+U0+Y1+V0 (1 plane) */
+    case SDL_PIXELFORMAT_UYVY:
+        return DSPF_UYVY;       /* Packed mode: U0+Y0+V0+Y1 (1 plane) */
+    case SDL_PIXELFORMAT_YVYU:
+        return DSPF_UNKNOWN;    /* Packed mode: Y0+V0+Y1+U0 (1 plane) */
+    case SDL_PIXELFORMAT_INDEX1LSB:
+        return DSPF_UNKNOWN;
+    case SDL_PIXELFORMAT_INDEX1MSB:
+        return DSPF_UNKNOWN;
+    case SDL_PIXELFORMAT_INDEX4MSB:
+        return DSPF_UNKNOWN;
+    case SDL_PIXELFORMAT_RGB444:
+        return DSPF_UNKNOWN;
+    case SDL_PIXELFORMAT_BGR24:
+        return DSPF_UNKNOWN;
+    case SDL_PIXELFORMAT_BGR888:
+        return DSPF_UNKNOWN;
+    case SDL_PIXELFORMAT_RGBA8888:
+        return DSPF_UNKNOWN;
+    case SDL_PIXELFORMAT_ABGR8888:
+        return DSPF_UNKNOWN;
+    case SDL_PIXELFORMAT_BGRA8888:
+        return DSPF_UNKNOWN;
+    case SDL_PIXELFORMAT_ARGB2101010:
+        return DSPF_UNKNOWN;
+    default:
+        return DSPF_UNKNOWN;
+    }
+}
+
+static void
+CheckSetDisplayMode(_THIS, DFB_DisplayData * data, SDL_DisplayMode * mode)
+{
+    DFBDisplayLayerConfig config;
+    DFBDisplayLayerConfigFlags failed;
+
+    config.width = mode->w;
+    config.height = mode->h;
+    config.pixelformat = SDLToDFBPixelFormat(mode->format);
+    config.flags = DLCONF_WIDTH | DLCONF_HEIGHT | DLCONF_PIXELFORMAT;
+    failed = 0;
+    data->layer->TestConfiguration(data->layer, &config, &failed);
+    if (failed == 0)
+        SDL_AddDisplayMode(_this->current_display, mode);
+
+}
+
+static void
+DirectFB_GetDisplayModes(_THIS)
+{
+    //SDL_DisplayData *data = (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
+    //SDL_DisplayMode mode;
+    //SDL_AddDisplayMode(_this->current_display, &mode);
+
+    SDL_DFB_DEVICEDATA(_this);
+    DFB_DisplayData *data = (DFB_DisplayData *) SDL_CurrentDisplay.driverdata;
+    int i;
+    SDL_DisplayMode mode;
+
+    for (i = 0; i < data->nummodes; ++i) {
+        mode = data->modelist[i];
+        //mode.format = SDL_PIXELFORMAT_UNKNOWN;
+
+        mode.format = SDL_PIXELFORMAT_INDEX8;
+        CheckSetDisplayMode(_this, data, &mode);
+        mode.format = SDL_PIXELFORMAT_RGB565;
+        CheckSetDisplayMode(_this, data, &mode);
+        mode.format = SDL_PIXELFORMAT_RGB24;
+        CheckSetDisplayMode(_this, data, &mode);
+        mode.format = SDL_PIXELFORMAT_RGB888;
+        CheckSetDisplayMode(_this, data, &mode);
+    }
+}
+
+int
+DirectFB_SetDisplayMode(_THIS, SDL_DisplayMode * mode)
+{
+    SDL_DFB_DEVICEDATA(_this);
+    DFB_DisplayData *data = (DFB_DisplayData *) SDL_CurrentDisplay.driverdata;
+    DFBDisplayLayerConfig config, rconfig;
+    DFBDisplayLayerConfigFlags fail = 0;
     DFBResult ret;
-    DFBSurfaceDescription dsc;
-    DFBSurfacePixelFormat pixelformat;
-    IDirectFBSurface *surface;
 
-    fprintf(stderr, "SDL DirectFB_SetVideoMode: %dx%d@%d, flags: 0x%08x\n",
-            width, height, bpp, flags);
+    SDL_DFB_CHECKERR(data->layer->
+                     SetCooperativeLevel(data->layer, DLSCL_ADMINISTRATIVE));
 
-    flags |= SDL_FULLSCREEN;
+    SDL_DFB_CHECKERR(data->layer->GetConfiguration(data->layer, &config));
+    config.flags = DLCONF_WIDTH | DLCONF_HEIGHT | DLCONF_BUFFERMODE;
+    if (mode->format != SDL_PIXELFORMAT_UNKNOWN) {
+        config.flags |= DLCONF_PIXELFORMAT;
+        config.pixelformat = SDLToDFBPixelFormat(mode->format);
+        data->pixelformat = config.pixelformat;
+    }
+    config.width = mode->w;
+    config.height = mode->h;
 
-    /* Release previous primary surface */
-    if (current->hwdata && current->hwdata->surface) {
-        current->hwdata->surface->Release(current->hwdata->surface);
-        current->hwdata->surface = NULL;
+    config.buffermode = DLBM_BACKVIDEO;
 
-        /* And its palette if present */
-        if (current->hwdata->palette) {
-            current->hwdata->palette->Release(current->hwdata->palette);
-            current->hwdata->palette = NULL;
+    //config.pixelformat = GetFormatForBpp (bpp, HIDDEN->layer);
+
+    data->layer->TestConfiguration(data->layer, &config, &fail);
+    if (fail & (DLCONF_WIDTH | DLCONF_HEIGHT | DLCONF_PIXELFORMAT)) {
+        SDL_DFB_DEBUG("Error setting mode %dx%d-%x\n", mode->w, mode->h,
+                      mode->format);
+        return -1;
+    }
+    SDL_DFB_DEBUG("Trace\n");
+    config.flags &= ~fail;
+    SDL_DFB_CHECKERR(data->layer->SetConfiguration(data->layer, &config));
+    SDL_DFB_CHECKERR(data->layer->
+                     SetCooperativeLevel(data->layer, DLSCL_ADMINISTRATIVE));
+
+    /* Double check */
+    SDL_DFB_CHECKERR(data->layer->GetConfiguration(data->layer, &rconfig));
+
+    if ((config.width != rconfig.width) ||
+        (config.height != rconfig.height) ||
+        (config.pixelformat != rconfig.pixelformat)) {
+        SDL_DFB_DEBUG("Error setting mode %dx%d-%x\n", mode->w, mode->h,
+                      mode->format);
+        return -1;
+    }
+
+    return 0;
+  error:
+    return -1;
+}
+
+static int
+DirectFB_SetDisplayGammaRamp(_THIS, Uint16 * ramp)
+{
+    return -1;
+}
+
+static int
+DirectFB_GetDisplayGammaRamp(_THIS, Uint16 * ramp)
+{
+    return -1;
+}
+
+static int
+DirectFB_CreateWindow(_THIS, SDL_Window * window)
+{
+    SDL_DFB_DEVICEDATA(_this);
+    SDL_DFB_DISPLAYDATA(_this, window);
+    DFB_WindowData *windata;
+    DFBWindowOptions wopts;
+    DFBWindowDescription desc;
+    int ret, x, y;
+
+    SDL_DFB_DEBUG("Trace x %d y %d w %d h %d\n", window->x, window->y,
+                  window->w, window->h);
+    window->driverdata = NULL;
+    SDL_DFB_CALLOC(window->driverdata, 1, sizeof(DFB_WindowData));
+    windata = (DFB_WindowData *) window->driverdata;
+
+    SDL_DFB_CHECKERR(devdata->dfb->
+                     SetCooperativeLevel(devdata->dfb, DFSCL_NORMAL));
+    SDL_DFB_CHECKERR(dispdata->layer->
+                     SetCooperativeLevel(dispdata->layer,
+                                         DLSCL_ADMINISTRATIVE));
+
+    /* Fill the window description. */
+    if (window->x == SDL_WINDOWPOS_CENTERED) {
+        x = (dispdata->cw - window->w) / 2;
+    } else if (window->x == SDL_WINDOWPOS_UNDEFINED) {
+        x = 0;
+    } else {
+        x = window->x;
+    }
+    if (window->y == SDL_WINDOWPOS_CENTERED) {
+        y = (dispdata->ch - window->h) / 2;
+    } else if (window->y == SDL_WINDOWPOS_UNDEFINED) {
+        y = 0;
+    } else {
+        y = window->y;
+    }
+
+    desc.flags =
+        DWDESC_WIDTH | DWDESC_HEIGHT | DWDESC_CAPS | DWDESC_PIXELFORMAT;
+    desc.flags |= DWDESC_POSX | DWDESC_POSY | DWDESC_SURFACE_CAPS;
+    desc.posx = x;
+    desc.posy = y;
+    desc.width = window->w;
+    desc.height = window->h;
+
+    desc.pixelformat = dispdata->pixelformat;
+
+    desc.caps = 0;              //DWCAPS_DOUBLEBUFFER;
+    desc.surface_caps = DSCAPS_DOUBLE | DSCAPS_TRIPLE;  //| DSCAPS_PREMULTIPLIED;
+
+    /* Create the window. */
+    SDL_DFB_CHECKERR(dispdata->layer->
+                     CreateWindow(dispdata->layer, &desc, &windata->window));
+
+    windata->window->GetOptions(windata->window, &wopts);
+#if (DIRECTFB_MAJOR_VERSION == 1) && (DIRECTFB_MINOR_VERSION >= 0)
+
+    if (window->flags & SDL_WINDOW_RESIZABLE)
+        wopts |= DWOP_SCALE;
+    else
+        wopts |= DWOP_KEEP_SIZE;
+#else
+    wopts |= DWOP_KEEP_SIZE;    // if not we will crash ...
+#endif
+
+    if (window->flags & SDL_WINDOW_FULLSCREEN)
+        wopts |= DWOP_KEEP_POSITION | DWOP_KEEP_STACKING | DWOP_KEEP_SIZE;
+
+    windata->window->SetOptions(windata->window, wopts);
+    /* Get the window's surface. */
+    SDL_DFB_CHECKERR(windata->window->
+                     GetSurface(windata->window, &windata->surface));
+    windata->window->SetOpacity(windata->window, 0xFF);
+    SDL_DFB_CHECKERR(windata->window->
+                     CreateEventBuffer(windata->window,
+                                       &(windata->eventbuffer)));
+    SDL_DFB_CHECKERR(windata->window->
+                     EnableEvents(windata->window,
+                                  DWET_POSITION | DWET_SIZE | DWET_CLOSE |
+                                  DWET_ALL));
+
+    if (window->flags & SDL_WINDOW_FULLSCREEN)
+        windata->window->SetStackingClass(windata->window, DWSC_UPPER);
+    /* Make it the top most window. */
+    windata->window->RaiseToTop(windata->window);
+
+    windata->window->GetID(windata->window, &windata->windowID);
+    windata->id = window->id;
+
+#if SDL_DIRECTFB_OPENGL
+    if (window->flags & SDL_WINDOW_OPENGL) {
+        if (!_this->gl_config.driver_loaded) {
+            /* no driver has been loaded, use default (ourselves) */
+            if (DirectFB_GL_LoadLibrary(_this, NULL) < 0) {
+                goto error;
+            }
         }
-    } else if (!current->hwdata) {
-        /* Allocate the hardware acceleration data */
-        current->hwdata =
-            (struct private_hwdata *) SDL_calloc(1, sizeof(*current->hwdata));
-        if (!current->hwdata) {
-            SDL_OutOfMemory();
-            return NULL;
+        _this->gl_data->gl_active = 1;
+    }
+#endif
+
+    /* Add to list ... */
+
+    windata->next = devdata->firstwin;
+    windata->opacity = 0xFF;
+    devdata->firstwin = windata;
+
+    //SDL_DFB_CHECKERR( windata->surface->GetPalette(windata->surface, &windata->palette) );
+
+    return 0;
+  error:
+    SDL_DFB_RELEASE(windata->window);
+    SDL_DFB_RELEASE(windata->surface);
+    return -1;
+}
+
+static int
+DirectFB_CreateWindowFrom(_THIS, SDL_Window * window, const void *data)
+{
+    SDL_DFB_DEVICEDATA(_this);
+    SDL_DFB_WINDOWDATA(window);
+    SDL_DFB_DISPLAYDATA(_this, window);
+
+    SDL_Unsupported();
+    return -1;
+}
+
+static void
+DirectFB_SetWindowTitle(_THIS, SDL_Window * window)
+{
+    SDL_DFB_DEVICEDATA(_this);
+    SDL_DFB_WINDOWDATA(window);
+    SDL_DFB_DISPLAYDATA(_this, window);
+
+    SDL_Unsupported();
+    //return -1;
+
+}
+static void
+DirectFB_SetWindowPosition(_THIS, SDL_Window * window)
+{
+    SDL_DFB_DEVICEDATA(_this);
+    SDL_DFB_WINDOWDATA(window);
+    SDL_DFB_DISPLAYDATA(_this, window);
+
+    windata->window->MoveTo(windata->window, window->x, window->y);
+}
+
+static void
+DirectFB_SetWindowSize(_THIS, SDL_Window * window)
+{
+    SDL_DFB_DEVICEDATA(_this);
+    SDL_DFB_WINDOWDATA(window);
+    SDL_DFB_DISPLAYDATA(_this, window);
+
+    windata->window->Resize(windata->window, window->w, window->h);
+
+}
+static void
+DirectFB_ShowWindow(_THIS, SDL_Window * window)
+{
+    SDL_DFB_DEVICEDATA(_this);
+    SDL_DFB_WINDOWDATA(window);
+    SDL_DFB_DISPLAYDATA(_this, window);
+
+    windata->window->SetOpacity(windata->window, windata->opacity);
+
+}
+
+static void
+DirectFB_HideWindow(_THIS, SDL_Window * window)
+{
+    SDL_DFB_DEVICEDATA(_this);
+    SDL_DFB_WINDOWDATA(window);
+    SDL_DFB_DISPLAYDATA(_this, window);
+
+    windata->window->GetOpacity(windata->window, &windata->opacity);
+    windata->window->SetOpacity(windata->window, 0);
+
+}
+static void
+DirectFB_RaiseWindow(_THIS, SDL_Window * window)
+{
+    SDL_DFB_DEVICEDATA(_this);
+    SDL_DFB_WINDOWDATA(window);
+    SDL_DFB_DISPLAYDATA(_this, window);
+
+    windata->window->Raise(windata->window);
+
+}
+
+static void
+DirectFB_MaximizeWindow(_THIS, SDL_Window * window)
+{
+    SDL_DFB_DEVICEDATA(_this);
+    SDL_DFB_WINDOWDATA(window);
+    SDL_DFB_DISPLAYDATA(_this, window);
+
+    SDL_Unsupported();
+
+}
+static void
+DirectFB_MinimizeWindow(_THIS, SDL_Window * window)
+{
+    SDL_DFB_DEVICEDATA(_this);
+    SDL_DFB_WINDOWDATA(window);
+    SDL_DFB_DISPLAYDATA(_this, window);
+
+    SDL_Unsupported();
+
+}
+
+static void
+DirectFB_RestoreWindow(_THIS, SDL_Window * window)
+{
+    SDL_DFB_DEVICEDATA(_this);
+    SDL_DFB_WINDOWDATA(window);
+    SDL_DFB_DISPLAYDATA(_this, window);
+
+    SDL_Unsupported();
+
+}
+static void
+DirectFB_SetWindowGrab(_THIS, SDL_Window * window)
+{
+    SDL_DFB_DEVICEDATA(_this);
+    SDL_DFB_WINDOWDATA(window);
+    SDL_DFB_DISPLAYDATA(_this, window);
+
+    SDL_Unsupported();
+
+}
+
+static void
+DirectFB_DestroyWindow(_THIS, SDL_Window * window)
+{
+    SDL_DFB_DEVICEDATA(_this);
+    SDL_DFB_WINDOWDATA(window);
+    SDL_DFB_DISPLAYDATA(_this, window);
+    DFB_WindowData *p;
+
+    SDL_DFB_DEBUG("Trace\n");
+
+    SDL_DFB_RELEASE(windata->palette);
+    SDL_DFB_RELEASE(windata->eventbuffer);
+    SDL_DFB_RELEASE(windata->surface);
+    SDL_DFB_RELEASE(windata->window);
+
+    /* Remove from list ... */
+
+    p = devdata->firstwin;
+    while (p && p->next != windata)
+        p = p->next;
+    if (p)
+        p->next = windata->next;
+    else
+        devdata->firstwin = windata->next;
+    SDL_free(windata);
+}
+static SDL_bool
+DirectFB_GetWindowWMInfo(_THIS, SDL_Window * window,
+                         struct SDL_SysWMinfo *info)
+{
+    SDL_DFB_DEVICEDATA(_this);
+    SDL_DFB_WINDOWDATA(window);
+    SDL_DFB_DISPLAYDATA(_this, window);
+
+    SDL_Unsupported();
+    return SDL_FALSE;
+}
+
+#if SDL_DIRECTFB_OPENGL
+
+#define OPENGL_REQUIRS_DLOPEN
+#if defined(OPENGL_REQUIRS_DLOPEN) && defined(SDL_LOADSO_DLOPEN)
+#include <dlfcn.h>
+#define GL_LoadObject(X)	dlopen(X, (RTLD_NOW|RTLD_GLOBAL))
+#define GL_LoadFunction		dlsym
+#define GL_UnloadObject		dlclose
+#else
+#define GL_LoadObject	SDL_LoadObject
+#define GL_LoadFunction	SDL_LoadFunction
+#define GL_UnloadObject	SDL_UnloadObject
+#endif
+
+static int
+DirectFB_GL_LoadLibrary(_THIS, const char *path)
+{
+    SDL_DFB_DEVICEDATA(_this);
+#
+    void *handle = NULL;
+
+    SDL_DFB_DEBUG("Loadlibrary : %s\n", path);
+
+    if (_this->gl_data->gl_active) {
+        SDL_SetError("OpenGL context already created");
+        return -1;
+    }
+
+
+    if (path == NULL) {
+        path = SDL_getenv("SDL_VIDEO_GL_DRIVER");
+        if (path == NULL) {
+            path = "libGL.so";
         }
     }
 
-    /* Set cooperative level depending on flag SDL_FULLSCREEN */
-    if (flags & SDL_FULLSCREEN) {
-        ret = HIDDEN->dfb->SetCooperativeLevel(HIDDEN->dfb, DFSCL_FULLSCREEN);
-        if (ret && !HIDDEN->enable_mga_crtc2) {
-            DirectFBError("dfb->SetCooperativeLevel", ret);
-            flags &= ~SDL_FULLSCREEN;
-        }
-    } else
-        HIDDEN->dfb->SetCooperativeLevel(HIDDEN->dfb, DFSCL_NORMAL);
-
-    /* Set video mode */
-    ret = HIDDEN->dfb->SetVideoMode(HIDDEN->dfb, width, height, bpp);
-    if (ret) {
-        if (flags & SDL_FULLSCREEN) {
-            flags &= ~SDL_FULLSCREEN;
-            HIDDEN->dfb->SetCooperativeLevel(HIDDEN->dfb, DFSCL_NORMAL);
-            ret = HIDDEN->dfb->SetVideoMode(HIDDEN->dfb, width, height, bpp);
-        }
-
-        if (ret) {
-            SetDirectFBerror("dfb->SetVideoMode", ret);
-            return NULL;
-        }
+    handle = GL_LoadObject(path);
+    if (handle == NULL) {
+        SDL_DFB_ERR("Library not found: %s\n", path);
+        /* SDL_LoadObject() will call SDL_SetError() for us. */
+        return -1;
     }
 
-    /* Create primary surface */
-    dsc.flags = DSDESC_CAPS | DSDESC_PIXELFORMAT;
-    dsc.caps =
-        DSCAPS_PRIMARY | ((flags & SDL_DOUBLEBUF) ? DSCAPS_FLIPPING : 0);
-    dsc.pixelformat = GetFormatForBpp(bpp, HIDDEN->layer);
+    SDL_DFB_DEBUG("Loaded library: %s\n", path);
 
-    ret = HIDDEN->dfb->CreateSurface(HIDDEN->dfb, &dsc, &surface);
-    if (ret && (flags & SDL_DOUBLEBUF)) {
-        /* Try without double buffering */
-        dsc.caps &= ~DSCAPS_FLIPPING;
-        ret = HIDDEN->dfb->CreateSurface(HIDDEN->dfb, &dsc, &surface);
+    /* Unload the old driver and reset the pointers */
+    DirectFB_GL_UnloadLibrary(_this);
+
+    _this->gl_config.dll_handle = handle;
+    _this->gl_config.driver_loaded = 1;
+    if (path) {
+        SDL_strlcpy(_this->gl_config.driver_path, path,
+                    SDL_arraysize(_this->gl_config.driver_path));
+    } else {
+        *_this->gl_config.driver_path = '\0';
     }
-    if (ret) {
-        SetDirectFBerror("dfb->CreateSurface", ret);
+
+    devdata->glFinish = DirectFB_GL_GetProcAddress(_this, "glFinish");
+    devdata->glFlush = DirectFB_GL_GetProcAddress(_this, "glFlush");
+    return 0;
+}
+
+static void
+DirectFB_GL_UnloadLibrary(_THIS)
+{
+    SDL_DFB_DEVICEDATA(_this);
+
+    int ret;
+
+    if (_this->gl_config.driver_loaded) {
+
+        ret = GL_UnloadObject(_this->gl_config.dll_handle);
+        if (ret)
+            SDL_DFB_ERR("Error #%d trying to unload library.\n", ret);
+        _this->gl_config.dll_handle = NULL;
+        _this->gl_config.driver_loaded = 0;
+    }
+}
+
+static void *
+DirectFB_GL_GetProcAddress(_THIS, const char *proc)
+{
+    SDL_DFB_DEVICEDATA(_this);
+    int ret;
+    void *handle;
+
+    SDL_DFB_DEBUG("Trace %s\n", proc);
+    handle = _this->gl_config.dll_handle;
+    return GL_LoadFunction(handle, proc);
+}
+
+static SDL_GLContext
+DirectFB_GL_CreateContext(_THIS, SDL_Window * window)
+{
+    SDL_DFB_DEVICEDATA(_this);
+    SDL_DFB_WINDOWDATA(window);
+    SDL_DFB_DISPLAYDATA(_this, window);
+    int ret;
+    IDirectFBGL *context = NULL;
+
+    SDL_DFB_DEBUG("Trace\n");
+    SDL_DFB_CHECKERR(windata->surface->GetGL(windata->surface, &context));
+    SDL_DFB_CHECKERR(context->Unlock(context));
+
+    if (DirectFB_GL_MakeCurrent(_this, window, context) < 0) {
+        DirectFB_GL_DeleteContext(_this, context);
         return NULL;
     }
 
-    current->w = width;
-    current->h = height;
-    current->flags = SDL_HWSURFACE | SDL_PREALLOC;
+    return context;
 
-    if (flags & SDL_FULLSCREEN) {
-        current->flags |= SDL_FULLSCREEN;
-        this->UpdateRects = DirectFB_DirectUpdate;
-    } else
-        this->UpdateRects = DirectFB_WindowedUpdate;
-
-    if (dsc.caps & DSCAPS_FLIPPING)
-        current->flags |= SDL_DOUBLEBUF;
-
-    surface->GetPixelFormat(surface, &pixelformat);
-
-    DFBToSDLPixelFormat(pixelformat, current->format);
-
-    /* Get the surface palette (if supported) */
-    if (DFB_PIXELFORMAT_IS_INDEXED(pixelformat)) {
-        surface->GetPalette(surface, &current->hwdata->palette);
-
-        current->flags |= SDL_HWPALETTE;
-    }
-
-    current->hwdata->surface = surface;
-
-    /* MGA CRTC2 stuff */
-    if (HIDDEN->enable_mga_crtc2) {
-        /* no stretching if c2ssize == c2framesize */
-        HIDDEN->c2ssize.x = 0, HIDDEN->c2ssize.y = 0;
-        HIDDEN->c2ssize.w = width;
-        HIDDEN->c2ssize.h = height;
-
-        HIDDEN->c2dsize.x = 0, HIDDEN->c2dsize.y = 0;
-        HIDDEN->c2dsize.w = width;
-        HIDDEN->c2dsize.h = height;
-
-        HIDDEN->mga_crtc2_stretch = 0;
-
-        if (SDL_getenv("SDL_DIRECTFB_MGA_STRETCH") != NULL) {
-            /* Normally assume a picture aspect ratio of 4:3 */
-            int zoom_aspect_x = 4, zoom_aspect_y = 3, i, j;
-
-            for (i = 1; i < 20; i++) {
-                for (j = 1; j < 10; j++) {
-                    if ((float) width / (float) i * (float) j == height) {
-                        zoom_aspect_x = i;
-                        zoom_aspect_y = j;
-
-                        /* break the loop */
-                        i = 21;
-                        break;
-                    }
-                }
-            }
-
-#ifdef DIRECTFB_CRTC2_DEBUG
-            printf
-                ("Source resolution: X: %d, Y: %d, Aspect ratio: %d:%d\n",
-                 width, height, zoom_aspect_x, zoom_aspect_y);
-            printf("CRTC2 resolution: X: %d, Y: %d\n",
-                   HIDDEN->c2framesize.w, HIDDEN->c2framesize.h);
-#endif
-
-            /* don't stretch only slightly smaller/larger images */
-            if ((float) width < (float) HIDDEN->c2framesize.w * 0.95
-                || (float) height < (float) HIDDEN->c2framesize.h * 0.95) {
-                while ((float) HIDDEN->c2dsize.w <
-                       (float) HIDDEN->c2framesize.w *
-                       HIDDEN->mga_crtc2_stretch_overscan
-                       && (float) HIDDEN->c2dsize.h <
-                       (float) HIDDEN->c2framesize.h *
-                       HIDDEN->mga_crtc2_stretch_overscan) {
-                    HIDDEN->c2dsize.w += zoom_aspect_x;
-                    HIDDEN->c2dsize.h += zoom_aspect_y;
-                }
-
-                /* one step down */
-                HIDDEN->c2dsize.w -= zoom_aspect_x;
-                HIDDEN->c2dsize.h -= zoom_aspect_y;
-
-#ifdef DIRECTFB_CRTC2_DEBUG
-                printf("Stretched resolution: X: %d, Y: %d\n",
-                       HIDDEN->c2dsize.w, HIDDEN->c2dsize.h);
-#endif
-
-                HIDDEN->mga_crtc2_stretch = 1;
-            } else if ((float) width > (float) HIDDEN->c2framesize.w * 0.95
-                       || (float) height >
-                       (float) HIDDEN->c2framesize.h * 0.95) {
-                while ((float) HIDDEN->c2dsize.w >
-                       (float) HIDDEN->c2framesize.w *
-                       HIDDEN->mga_crtc2_stretch_overscan
-                       || (float) HIDDEN->c2dsize.h >
-                       (float) HIDDEN->c2framesize.h *
-                       HIDDEN->mga_crtc2_stretch_overscan) {
-                    HIDDEN->c2dsize.w -= zoom_aspect_x;
-                    HIDDEN->c2dsize.h -= zoom_aspect_y;
-                }
-
-#ifdef DIRECTFB_CRTC2_DEBUG
-                printf("Down-Stretched resolution: X: %d, Y: %d\n",
-                       HIDDEN->c2dsize.w, HIDDEN->c2dsize.h);
-#endif
-
-                HIDDEN->mga_crtc2_stretch = 1;
-            } else {
-#ifdef DIRECTFB_CRTC2_DEBUG
-                printf("Not stretching image\n");
-#endif
-            }
-
-            /* Panning */
-            if (HIDDEN->c2framesize.w > HIDDEN->c2dsize.w)
-                HIDDEN->c2dsize.x =
-                    (HIDDEN->c2framesize.w - HIDDEN->c2dsize.w) / 2;
-            else
-                HIDDEN->c2dsize.x =
-                    (HIDDEN->c2dsize.w - HIDDEN->c2framesize.w) / 2;
-
-            if (HIDDEN->c2framesize.h > HIDDEN->c2dsize.h)
-                HIDDEN->c2dsize.y =
-                    (HIDDEN->c2framesize.h - HIDDEN->c2dsize.h) / 2;
-            else
-                HIDDEN->c2dsize.y =
-                    (HIDDEN->c2dsize.h - HIDDEN->c2framesize.h) / 2;
-
-#ifdef DIRECTFB_CRTC2_DEBUG
-            printf("CRTC2 position X: %d, Y: %d\n", HIDDEN->c2dsize.x,
-                   HIDDEN->c2dsize.y);
-#endif
-        }
-    }
-
-    return current;
+  error:
+    return NULL;
 }
 
 static int
-DirectFB_AllocHWSurface(_THIS, SDL_Surface * surface)
+DirectFB_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
 {
-    DFBResult ret;
-    DFBSurfaceDescription dsc;
+    SDL_DFB_DEVICEDATA(_this);
+    SDL_DFB_WINDOWDATA(window);
+    SDL_DFB_DISPLAYDATA(_this, window);
+    IDirectFBGL *dfb_context = (IDirectFBGL *) context;
+    int ret;
 
-    /*  fprintf(stderr, "SDL: DirectFB_AllocHWSurface (%dx%d@%d, flags: 0x%08x)\n",
-       surface->w, surface->h, surface->format->BitsPerPixel, surface->flags); */
-
-    if (surface->w < 8 || surface->h < 8)
-        return -1;
-
-    /* fill surface description */
-    dsc.flags =
-        DSDESC_WIDTH | DSDESC_HEIGHT | DSDESC_PIXELFORMAT | DSDESC_CAPS;
-    dsc.width = surface->w;
-    dsc.height = surface->h;
-    dsc.caps = (surface->flags & SDL_DOUBLEBUF) ? DSCAPS_FLIPPING : 0;
-
-    /* find the right pixelformat */
-    dsc.pixelformat = SDLToDFBPixelFormat(surface->format);
-    if (dsc.pixelformat == DSPF_UNKNOWN)
-        return -1;
-
-    /* Allocate the hardware acceleration data */
-    surface->hwdata =
-        (struct private_hwdata *) SDL_calloc(1, sizeof(*surface->hwdata));
-    if (surface->hwdata == NULL) {
-        SDL_OutOfMemory();
-        return -1;
+    if (dfb_context) {
+        dfb_context->Unlock(dfb_context);
+        SDL_DFB_CHECKERR(dfb_context->Lock(dfb_context));
     }
-
-    /* Create the surface */
-    ret =
-        HIDDEN->dfb->CreateSurface(HIDDEN->dfb, &dsc,
-                                   &surface->hwdata->surface);
-    if (ret) {
-        SetDirectFBerror("dfb->CreateSurface", ret);
-        free(surface->hwdata);
-        surface->hwdata = NULL;
-        return -1;
-    }
-
-    surface->flags |= SDL_HWSURFACE | SDL_PREALLOC;
+    if (windata)
+        windata->gl_context = dfb_context;
 
     return 0;
+  error:
+    return -1;
+}
+
+static int
+DirectFB_GL_SetSwapInterval(_THIS, int interval)
+{
+    SDL_DFB_DEVICEDATA(_this);
+
+    SDL_Unsupported();
+    return -1;
+
+}
+
+static int
+DirectFB_GL_GetSwapInterval(_THIS)
+{
+    SDL_DFB_DEVICEDATA(_this);
+
+    SDL_Unsupported();
+    return -1;
+
 }
 
 static void
-DirectFB_FreeHWSurface(_THIS, SDL_Surface * surface)
+DirectFB_GL_SwapWindow(_THIS, SDL_Window * window)
 {
-    if (surface->hwdata && HIDDEN->initialized) {
-        surface->hwdata->surface->Release(surface->hwdata->surface);
-        free(surface->hwdata);
-        surface->hwdata = NULL;
-    }
-}
-
-static int
-DirectFB_CheckHWBlit(_THIS, SDL_Surface * src, SDL_Surface * dst)
-{
-    /*  fprintf(stderr, "SDL: DirectFB_CheckHWBlit (src->hwdata: %p, dst->hwdata: %p)\n",
-       src->hwdata, dst->hwdata); */
-
-    if (!src->hwdata || !dst->hwdata)
-        return 0;
-
-    src->flags |= SDL_HWACCEL;
-    src->map->hw_blit = DirectFB_HWAccelBlit;
-
-    return 1;
-}
-
-static int
-DirectFB_HWAccelBlit(SDL_Surface * src, SDL_Rect * srcrect,
-                     SDL_Surface * dst, SDL_Rect * dstrect)
-{
-    DFBSurfaceBlittingFlags flags = DSBLIT_NOFX;
-
-    DFBRectangle sr = { srcrect->x, srcrect->y, srcrect->w, srcrect->h };
-    DFBRectangle dr = { dstrect->x, dstrect->y, dstrect->w, dstrect->h };
-
-    IDirectFBSurface *surface = dst->hwdata->surface;
-
-    if (src->flags & SDL_SRCCOLORKEY) {
-        flags |= DSBLIT_SRC_COLORKEY;
-        DirectFB_SetHWColorKey(NULL, src, src->format->colorkey);
-    }
-
-    if (src->flags & SDL_SRCALPHA) {
-        flags |= DSBLIT_BLEND_COLORALPHA;
-        surface->SetColor(surface, 0xff, 0xff, 0xff, src->format->alpha);
-    }
-
-    surface->SetBlittingFlags(surface, flags);
-
-    if (sr.w == dr.w && sr.h == dr.h)
-        surface->Blit(surface, src->hwdata->surface, &sr, dr.x, dr.y);
-    else
-        surface->StretchBlit(surface, src->hwdata->surface, &sr, &dr);
-
-    return 0;
-}
-
-static int
-DirectFB_FillHWRect(_THIS, SDL_Surface * dst, SDL_Rect * dstrect,
-                    Uint32 color)
-{
-    SDL_PixelFormat *fmt = dst->format;
-    IDirectFBSurface *surface = dst->hwdata->surface;
-
-    /* ugly */
-    surface->SetColor(surface,
-                      (color & fmt->Rmask) >> (fmt->Rshift - fmt->Rloss),
-                      (color & fmt->Gmask) >> (fmt->Gshift - fmt->Gloss),
-                      (color & fmt->Bmask) << (fmt->Bloss - fmt->Bshift),
-                      0xFF);
-    surface->FillRectangle(surface, dstrect->x, dstrect->y, dstrect->w,
-                           dstrect->h);
-
-    return 0;
-}
-
-static int
-DirectFB_SetHWColorKey(_THIS, SDL_Surface * src, Uint32 key)
-{
-    SDL_PixelFormat *fmt = src->format;
-    IDirectFBSurface *surface = src->hwdata->surface;
-
-    if (fmt->BitsPerPixel == 8)
-        surface->SetSrcColorKeyIndex(surface, key);
-    else
-        /* ugly */
-        surface->SetSrcColorKey(surface,
-                                (key & fmt->Rmask) >> (fmt->Rshift -
-                                                       fmt->Rloss),
-                                (key & fmt->Gmask) >> (fmt->Gshift -
-                                                       fmt->Gloss),
-                                (key & fmt->Bmask) << (fmt->Bloss -
-                                                       fmt->Bshift));
-
-    return 0;
-}
-
-static int
-DirectFB_SetHWAlpha(_THIS, SDL_Surface * surface, Uint8 alpha)
-{
-    return 0;
-}
-
-static int
-DirectFB_FlipHWSurface(_THIS, SDL_Surface * surface)
-{
-    if (HIDDEN->enable_mga_crtc2) {
-        int rtn =
-            surface->hwdata->surface->Flip(surface->hwdata->surface, NULL,
-                                           0);
-        if (HIDDEN->mga_crtc2_stretch)
-            HIDDEN->c2frame->StretchBlit(HIDDEN->c2frame,
-                                         surface->hwdata->surface,
-                                         &HIDDEN->c2ssize, &HIDDEN->c2dsize);
-        else
-            HIDDEN->c2frame->Blit(HIDDEN->c2frame,
-                                  surface->hwdata->surface, NULL,
-                                  HIDDEN->c2dsize.x, HIDDEN->c2dsize.y);
-
-        HIDDEN->c2frame->Flip(HIDDEN->c2frame, NULL, DSFLIP_WAITFORSYNC);
-        return rtn;
-    } else
-        return surface->hwdata->surface->Flip(surface->hwdata->surface, NULL,
-                                              DSFLIP_WAITFORSYNC);
-}
-
-static int
-DirectFB_LockHWSurface(_THIS, SDL_Surface * surface)
-{
-    DFBResult ret;
-    void *data;
+    SDL_DFB_DEVICEDATA(_this);
+    SDL_DFB_WINDOWDATA(window);
+    SDL_DFB_DISPLAYDATA(_this, window);
+    int ret;
+    void *p;
     int pitch;
-
-    ret = surface->hwdata->surface->Lock(surface->hwdata->surface,
-                                         DSLF_WRITE, &data, &pitch);
-    if (ret) {
-        SetDirectFBerror("surface->Lock", ret);
-        return -1;
-    }
-
-    surface->pixels = data;
-    surface->pitch = pitch;
-
-    return 0;
-}
-
-static void
-DirectFB_UnlockHWSurface(_THIS, SDL_Surface * surface)
-{
-    surface->hwdata->surface->Unlock(surface->hwdata->surface);
-    surface->pixels = NULL;
-}
-
-static void
-DirectFB_DirectUpdate(_THIS, int numrects, SDL_Rect * rects)
-{
-    if (HIDDEN->enable_mga_crtc2) {
-        if (HIDDEN->mga_crtc2_stretch)
-            HIDDEN->c2frame->StretchBlit(HIDDEN->c2frame,
-                                         this->screen->hwdata->surface,
-                                         &HIDDEN->c2ssize, &HIDDEN->c2dsize);
-        else
-            HIDDEN->c2frame->Blit(HIDDEN->c2frame,
-                                  this->screen->hwdata->surface, NULL,
-                                  HIDDEN->c2dsize.x, HIDDEN->c2dsize.y);
-
-        HIDDEN->c2frame->Flip(HIDDEN->c2frame, NULL, DSFLIP_WAITFORSYNC);
-    }
-}
-
-static void
-DirectFB_WindowedUpdate(_THIS, int numrects, SDL_Rect * rects)
-{
     DFBRegion region;
-    int i;
-    int region_valid = 0;
-    IDirectFBSurface *surface = this->screen->hwdata->surface;
 
-    for (i = 0; i < numrects; ++i) {
-        int x2, y2;
+    region.x1 = 0;
+    region.y1 = 0;
+    region.x2 = window->w;
+    region.y2 = window->h;
 
-        if (!rects[i].w)        /* Clipped? */
-            continue;
+    if (devdata->glFinish)
+        devdata->glFinish();
+    else if (devdata->glFlush)
+        devdata->glFlush();
 
-        x2 = rects[i].x + rects[i].w - 1;
-        y2 = rects[i].y + rects[i].h - 1;
+    SDL_DFB_CHECKERR(windata->gl_context->Unlock(windata->gl_context));
+    SDL_DFB_CHECKERR(windata->surface->
+                     Flip(windata->surface, &region, DSFLIP_ONSYNC));
+    SDL_DFB_CHECKERR(windata->gl_context->Lock(windata->gl_context));
 
-        if (region_valid) {
-            if (rects[i].x < region.x1)
-                region.x1 = rects[i].x;
-
-            if (rects[i].y < region.y1)
-                region.y1 = rects[i].y;
-
-            if (x2 > region.x2)
-                region.x2 = x2;
-
-            if (y2 > region.y2)
-                region.y2 = y2;
-        } else {
-            region.x1 = rects[i].x;
-            region.y1 = rects[i].y;
-            region.x2 = x2;
-            region.y2 = y2;
-
-            region_valid = 1;
-        }
-    }
-
-    if (region_valid) {
-        if (HIDDEN->enable_mga_crtc2) {
-            if (HIDDEN->mga_crtc2_stretch)
-                HIDDEN->c2frame->StretchBlit(HIDDEN->c2frame, surface,
-                                             &HIDDEN->c2ssize,
-                                             &HIDDEN->c2dsize);
-            else
-                HIDDEN->c2frame->Blit(HIDDEN->c2frame, surface, NULL,
-                                      HIDDEN->c2dsize.x, HIDDEN->c2dsize.y);
-
-            HIDDEN->c2frame->Flip(HIDDEN->c2frame, NULL, DSFLIP_WAITFORSYNC);
-        } else
-            surface->Flip(surface, &region, DSFLIP_WAITFORSYNC);
-    }
+    return;
+  error:
+    return;
 }
 
-int
-DirectFB_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color * colors)
+static void
+DirectFB_GL_DeleteContext(_THIS, SDL_GLContext context)
 {
-    IDirectFBPalette *palette = this->screen->hwdata->palette;
+    IDirectFBGL *dfb_context = (IDirectFBGL *) context;
+    SDL_DFB_DEVICEDATA(_this);
 
-    if (!palette)
-        return 0;
-
-    if (firstcolor > 255)
-        return 0;
-
-    if (firstcolor + ncolors > 256)
-        ncolors = 256 - firstcolor;
-
-    if (ncolors > 0) {
-        int i;
-        DFBColor entries[ncolors];
-
-        for (i = 0; i < ncolors; i++) {
-            entries[i].a = 0xff;
-            entries[i].r = colors[i].r;
-            entries[i].g = colors[i].g;
-            entries[i].b = colors[i].b;
-        }
-
-        palette->SetEntries(palette, entries, ncolors, firstcolor);
-    }
-
-    return 1;
+    dfb_context->Unlock(dfb_context);
+    dfb_context->Release(dfb_context);
 }
 
-void
-DirectFB_VideoQuit(_THIS)
-{
-    struct DirectFBEnumRect *rect = enumlist;
-
-    if (this->screen && this->screen->hwdata) {
-        IDirectFBSurface *surface = this->screen->hwdata->surface;
-        IDirectFBPalette *palette = this->screen->hwdata->palette;
-
-        if (palette)
-            palette->Release(palette);
-
-        if (surface)
-            surface->Release(surface);
-
-        this->screen->hwdata->surface = NULL;
-        this->screen->hwdata->palette = NULL;
-    }
-
-    if (HIDDEN->c2frame) {
-        HIDDEN->c2frame->Release(HIDDEN->c2frame);
-        HIDDEN->c2frame = NULL;
-    }
-
-    if (HIDDEN->eventbuffer) {
-        HIDDEN->eventbuffer->Release(HIDDEN->eventbuffer);
-        HIDDEN->eventbuffer = NULL;
-    }
-
-    if (HIDDEN->c2layer) {
-        HIDDEN->c2layer->Release(HIDDEN->c2layer);
-        HIDDEN->c2layer = NULL;
-    }
-
-    if (HIDDEN->layer) {
-        HIDDEN->layer->Release(HIDDEN->layer);
-        HIDDEN->layer = NULL;
-    }
-
-    if (HIDDEN->dfb) {
-        HIDDEN->dfb->Release(HIDDEN->dfb);
-        HIDDEN->dfb = NULL;
-    }
-
-    /* Free video mode list */
-    if (HIDDEN->modelist) {
-        free(HIDDEN->modelist);
-        HIDDEN->modelist = NULL;
-    }
-
-    /* Free mode enumeration list */
-    while (rect) {
-        struct DirectFBEnumRect *next = rect->next;
-        free(rect);
-        rect = next;
-    }
-    enumlist = NULL;
-
-    HIDDEN->initialized = 0;
-}
-
-
-int
-DirectFB_ShowWMCursor(_THIS, WMcursor * cursor)
-{
-    /* We can only hide or show the default cursor */
-    if (cursor == NULL) {
-        HIDDEN->layer->SetCursorOpacity(HIDDEN->layer, 0x00);
-    } else {
-        HIDDEN->layer->SetCursorOpacity(HIDDEN->layer, 0xFF);
-    }
-    return 1;
-}
-
-void
-DirectFB_FinalQuit(void)
-{
-}
-
-/* vi: set ts=4 sw=4 expandtab: */
+#endif
