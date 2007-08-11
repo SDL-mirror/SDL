@@ -25,4 +25,7 @@
 
 extern SDL_RenderDriver SW_RenderDriver;
 
+/* Set up SDL_Surface texture functions for a renderer */
+void Setup_SoftwareRenderer(SDL_Renderer * renderer);
+
 /* vi: set ts=4 sw=4 expandtab: */

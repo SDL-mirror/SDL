@@ -161,6 +161,36 @@ DisplayPaletteChanged(void *userdata, SDL_Palette * palette)
     return 0;
 }
 
+void
+Setup_SoftwareRenderer(SDL_Renderer * renderer)
+{
+    renderer->CreateTexture = SW_CreateTexture;
+    renderer->QueryTexturePixels = SW_QueryTexturePixels;
+    renderer->SetTexturePalette = SW_SetTexturePalette;
+    renderer->GetTexturePalette = SW_GetTexturePalette;
+    renderer->SetTextureColorMod = SW_SetTextureColorMod;
+    renderer->SetTextureAlphaMod = SW_SetTextureAlphaMod;
+    renderer->SetTextureBlendMode = SW_SetTextureBlendMode;
+    renderer->SetTextureScaleMode = SW_SetTextureScaleMode;
+    renderer->UpdateTexture = SW_UpdateTexture;
+    renderer->LockTexture = SW_LockTexture;
+    renderer->UnlockTexture = SW_UnlockTexture;
+    renderer->DirtyTexture = SW_DirtyTexture;
+    renderer->DestroyTexture = SW_DestroyTexture;
+
+    renderer->info.mod_modes = SW_RenderDriver.info.mod_modes;
+    renderer->info.blend_modes = SW_RenderDriver.info.blend_modes;
+    renderer->info.scale_modes = SW_RenderDriver.info.scale_modes;
+    renderer->info.num_texture_formats =
+        SW_RenderDriver.info.num_texture_formats;
+    SDL_memcpy(renderer->info.texture_formats,
+               SW_RenderDriver.info.texture_formats,
+               sizeof(renderer->info.texture_formats));;
+    renderer->info.max_texture_width = SW_RenderDriver.info.max_texture_width;
+    renderer->info.max_texture_height =
+        SW_RenderDriver.info.max_texture_height;
+}
+
 SDL_Renderer *
 SW_CreateRenderer(SDL_Window * window, Uint32 flags)
 {
@@ -194,28 +224,15 @@ SW_CreateRenderer(SDL_Window * window, Uint32 flags)
     }
     renderer->ActivateRenderer = SW_ActivateRenderer;
     renderer->DisplayModeChanged = SW_DisplayModeChanged;
-    renderer->CreateTexture = SW_CreateTexture;
-    renderer->QueryTexturePixels = SW_QueryTexturePixels;
-    renderer->SetTexturePalette = SW_SetTexturePalette;
-    renderer->GetTexturePalette = SW_GetTexturePalette;
-    renderer->SetTextureColorMod = SW_SetTextureColorMod;
-    renderer->SetTextureAlphaMod = SW_SetTextureAlphaMod;
-    renderer->SetTextureBlendMode = SW_SetTextureBlendMode;
-    renderer->SetTextureScaleMode = SW_SetTextureScaleMode;
-    renderer->UpdateTexture = SW_UpdateTexture;
-    renderer->LockTexture = SW_LockTexture;
-    renderer->UnlockTexture = SW_UnlockTexture;
-    renderer->DirtyTexture = SW_DirtyTexture;
     renderer->RenderFill = SW_RenderFill;
     renderer->RenderCopy = SW_RenderCopy;
     renderer->RenderPresent = SW_RenderPresent;
-    renderer->DestroyTexture = SW_DestroyTexture;
     renderer->DestroyRenderer = SW_DestroyRenderer;
-    renderer->info = SW_RenderDriver.info;
+    renderer->info.name = SW_RenderDriver.info.name;
+    renderer->info.flags = 0;
     renderer->window = window->id;
     renderer->driverdata = data;
-
-    renderer->info.flags = 0;
+    Setup_SoftwareRenderer(renderer);
 
     if (flags & SDL_RENDERER_PRESENTFLIP2) {
         renderer->info.flags |= SDL_RENDERER_PRESENTFLIP2;
@@ -417,7 +434,9 @@ SW_GetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
 static void
 SW_UpdateRenderCopyFunc(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-    SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
+    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_DisplayMode *displayMode = &display->current_mode;
     SDL_Surface *surface = (SDL_Surface *) texture->driverdata;
 
     /* We only need a special copy function for advanced features */
@@ -426,7 +445,7 @@ SW_UpdateRenderCopyFunc(SDL_Renderer * renderer, SDL_Texture * texture)
             blendMode & (SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD))
         || texture->scaleMode) {
         surface->userdata =
-            SDL_GetRenderCopyFunc(texture->format, data->format,
+            SDL_GetRenderCopyFunc(texture->format, displayMode->format,
                                   texture->modMode, texture->blendMode,
                                   texture->scaleMode);
     } else {

@@ -897,6 +897,7 @@ DirectFB_DestroyWindow(_THIS, SDL_Window * window)
         devdata->firstwin = windata->next;
     SDL_free(windata);
 }
+
 static SDL_bool
 DirectFB_GetWindowWMInfo(_THIS, SDL_Window * window,
                          struct SDL_SysWMinfo *info)
