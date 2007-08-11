@@ -78,7 +78,8 @@ X11_TrackColormap(Display * display, int scrNum, Colormap colormap,
 
     /* increase the table by one entry. If the table is NULL create the
        first entrty */
-    cmapTable = SDL_realloc(cmapTable, (numCmaps + 1) * sizeof(cmapTableEntry));
+    cmapTable =
+        SDL_realloc(cmapTable, (numCmaps + 1) * sizeof(cmapTableEntry));
     if (NULL == cmapTable) {
         SDL_SetError("Out of memory in X11_TrackColormap()");
         return;
