@@ -149,7 +149,20 @@ SDL_AddDirtyRect(SDL_DirtyRectList * list, const SDL_Rect * rect)
 void
 SDL_ClearDirtyRects(SDL_DirtyRectList * list)
 {
-    list->free = list->list;
+    SDL_DirtyRect *prev, *curr;
+
+    /* Skip to the end of the free list */
+    prev = NULL;
+    for (curr = list->free; curr; curr = curr->next) {
+        prev = curr;
+    }
+
+    /* Add the list entries to the end */
+    if (prev) {
+        prev->next = list->list;
+    } else {
+        list->free = list->list;
+    }
     list->list = NULL;
     list->count = 0;
 }
