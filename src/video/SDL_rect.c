@@ -122,7 +122,14 @@ void
 SDL_AddDirtyRect(SDL_DirtyRectList * list, const SDL_Rect * rect)
 {
     SDL_DirtyRect *dirty;
-    SDL_DirtyRect *check, *prev, *next;
+
+    /* FIXME: At what point is this optimization too expensive? */
+    for (dirty = list->list; dirty; dirty = dirty->next) {
+        if (SDL_HasIntersection(&dirty->rect, rect)) {
+            SDL_UnionRect(&dirty->rect, rect, &dirty->rect);
+            return;
+        }
+    }
 
     if (list->free) {
         dirty = list->free;
@@ -134,26 +141,6 @@ SDL_AddDirtyRect(SDL_DirtyRectList * list, const SDL_Rect * rect)
         }
     }
     dirty->rect = *rect;
-
-    /* FIXME: At what point is this optimization too expensive? */
-    for (prev = NULL, check = list->list; check; check = next) {
-        next = check->next;
-
-        if (SDL_HasIntersection(&dirty->rect, &check->rect)) {
-            SDL_UnionRect(&dirty->rect, &check->rect, &dirty->rect);
-            if (prev) {
-                prev->next = next;
-            } else {
-                list->list = next;
-            }
-            check->next = list->free;
-            list->free = check;
-            --list->count;
-        } else {
-            prev = check;
-        }
-    }
-
     dirty->next = list->list;
     list->list = dirty;
     ++list->count;
@@ -162,12 +149,8 @@ SDL_AddDirtyRect(SDL_DirtyRectList * list, const SDL_Rect * rect)
 void
 SDL_ClearDirtyRects(SDL_DirtyRectList * list)
 {
-    while (list->list) {
-        SDL_DirtyRect *elem = list->list;
-        list->list = elem->next;
-        elem->next = list->free;
-        list->free = elem;
-    }
+    list->free = list->list;
+    list->list = NULL;
     list->count = 0;
 }
 
