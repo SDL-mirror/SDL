@@ -177,7 +177,7 @@ indent:
 	    -name '*.h' -o \
 	    -name '*.c' -o \
 	    -name '*.cc' \) \
-	    -print | \
+	    -print | fgrep -v ./Xcode | \
 	while read file; do \
 	    indent "$$file" -o "$$file.indent"; \
 	    if cmp "$$file" "$$file.indent" >/dev/null; then \

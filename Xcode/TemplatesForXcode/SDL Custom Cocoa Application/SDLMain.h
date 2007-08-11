@@ -7,8 +7,8 @@
 
 #import <Cocoa/Cocoa.h>
 
-@ interface SDLMain:NSObject {
+@interface SDLMain : NSObject
+{
     IBOutlet id _controller;
 }
-
 @end

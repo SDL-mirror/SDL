@@ -9,7 +9,8 @@
 #import <AppKit/AppKit.h>
 
 
-@ interface MyCustomView:NSQuickDrawView {
+@interface MyCustomView : NSQuickDrawView
+{
 }
 
 @end

@@ -35,7 +35,7 @@
  * OpenGL(TM) is a trademark of Silicon Graphics, Inc.
  */
 #include <math.h>
-#include <stdlib.h>             /* For rand(). */
+#include <stdlib.h>  /* For rand(). */
 #include <GLUT/glut.h>
 #include "atlantis.h"
 
@@ -57,10 +57,8 @@ WhalePilot(fishRec * fish)
     fish->theta = 0.0;
     fish->psi -= 0.5;
 
-    fish->x +=
-        WHALESPEED * fish->v * cos(fish->psi / RAD) * cos(fish->theta / RAD);
-    fish->y +=
-        WHALESPEED * fish->v * sin(fish->psi / RAD) * cos(fish->theta / RAD);
+    fish->x += WHALESPEED * fish->v * cos(fish->psi / RAD) * cos(fish->theta / RAD);
+    fish->y += WHALESPEED * fish->v * sin(fish->psi / RAD) * cos(fish->theta / RAD);
     fish->z += WHALESPEED * fish->v * sin(fish->theta / RAD);
 }
 
@@ -154,10 +152,8 @@ SharkPilot(fishRec * fish)
         }
     }
 
-    fish->x +=
-        SHARKSPEED * fish->v * cos(fish->psi / RAD) * cos(fish->theta / RAD);
-    fish->y +=
-        SHARKSPEED * fish->v * sin(fish->psi / RAD) * cos(fish->theta / RAD);
+    fish->x += SHARKSPEED * fish->v * cos(fish->psi / RAD) * cos(fish->theta / RAD);
+    fish->y += SHARKSPEED * fish->v * sin(fish->psi / RAD) * cos(fish->theta / RAD);
     fish->z += SHARKSPEED * fish->v * sin(fish->theta / RAD);
 }
 
