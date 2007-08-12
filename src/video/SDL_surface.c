@@ -568,7 +568,7 @@ SDL_FillRect(SDL_Surface * dst, SDL_Rect * dstrect, Uint32 color)
         dstrect->x * dst->format->BytesPerPixel;
     if (dst->format->palette || (color == 0)) {
         x = dstrect->w * dst->format->BytesPerPixel;
-#ifndef __MACOSX__  /* memset() is optimized on Mac OS X */
+#ifndef __MACOSX__              /* memset() is optimized on Mac OS X */
         if (!color && !((uintptr_t) row & 3) && !(x & 3)
             && !(dst->pitch & 3)) {
             int n = x >> 2;
