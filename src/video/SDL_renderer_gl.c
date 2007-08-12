@@ -810,7 +810,9 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         if (texture->format == SDL_PIXELFORMAT_RGB888) {
             int i;
             Uint8 *p = (Uint8 *) texturedata->pixels;
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
             p += 3;
+#endif
             for (i = texture->h * pitch / 4; i--;) {
                 *p = 0xff;
                 p += 4;
