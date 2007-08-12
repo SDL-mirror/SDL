@@ -2837,7 +2837,7 @@ SDL_CalculateAlphaBlit(SDL_Surface * surface, int blit_index)
                 return BlitNto1SurfaceAlphaKey;
             else
 #if SDL_ALTIVEC_BLITTERS
-                if (sf->BytesPerPixel == 4 && df->BytesPerPixel == 4 &&
+            if (sf->BytesPerPixel == 4 && df->BytesPerPixel == 4 &&
                     SDL_HasAltiVec())
                 return Blit32to32SurfaceAlphaKeyAltivec;
             else

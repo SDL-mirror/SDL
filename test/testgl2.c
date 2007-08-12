@@ -300,7 +300,7 @@ main(int argc, char *argv[])
                ((double) frames * 1000) / (now - then));
     }
     quit(0);
-	return 0;
+    return 0;
 }
 
 #else /* HAVE_OPENGL */
