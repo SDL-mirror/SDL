@@ -704,7 +704,6 @@ SDL_UpdateRects(SDL_Surface * screen, int numrects, SDL_Rect * rects)
             SDL_DirtyTexture(SDL_VideoTexture, numrects, rects);
         } else {
             /* The surface memory needs to be copied to texture */
-            void *pixels;
             int pitch = screen->pitch;
             int psize = screen->format->BytesPerPixel;
             for (i = 0; i < numrects; ++i) {

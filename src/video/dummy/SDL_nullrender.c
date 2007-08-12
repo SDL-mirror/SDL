@@ -24,6 +24,7 @@
 #include "SDL_video.h"
 #include "../SDL_sysvideo.h"
 #include "../SDL_yuv_sw_c.h"
+#include "../SDL_renderer_sw.h"
 #include "../SDL_rendercopy.h"
 
 
