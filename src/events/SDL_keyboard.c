@@ -448,9 +448,11 @@ SDL_GetKeyName(SDLKey key)
             char *cvt;
             temp[0] = (char) key;
             temp[1] = '\0';
-            cvt = SDL_iconv_string("UTF-8", "LATIN1", temp, 1);
-            SDL_strlcpy(temp, cvt, SDL_arraysize(temp));
-            SDL_free(cvt);
+            cvt = SDL_iconv_string("UTF-8", "ISO-8859-1", temp, 1);
+            if (cvt) {
+                SDL_strlcpy(temp, cvt, SDL_arraysize(temp));
+                SDL_free(cvt);
+            }
             keyname = temp;
         } else {
             keyname = "unknown key";
