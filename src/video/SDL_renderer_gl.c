@@ -32,6 +32,10 @@
 
 /* OpenGL renderer implementation */
 
+/* Details on optimizing the texture path on Mac OS X:
+   http://developer.apple.com/documentation/GraphicsImaging/Conceptual/OpenGL-MacProgGuide/opengl_texturedata/chapter_10_section_2.html
+*/
+
 static const float inv255f = 1.0f / 255.0f;
 
 static SDL_Renderer *GL_CreateRenderer(SDL_Window * window, Uint32 flags);
@@ -461,9 +465,15 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         type = GL_UNSIGNED_BYTE;
         break;
     case SDL_PIXELFORMAT_ARGB8888:
+#ifdef __MACOSX__
+        internalFormat = GL_RGBA;
+        format = GL_BGRA;
+        type = GL_UNSIGNED_INT_8_8_8_8_REV;
+#else
         internalFormat = GL_RGBA8;
         format = GL_BGRA;
         type = GL_UNSIGNED_BYTE;
+#endif
         break;
     case SDL_PIXELFORMAT_ABGR8888:
         internalFormat = GL_RGBA8;
@@ -526,8 +536,42 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     data->format = format;
     data->formattype = type;
     renderdata->glBindTexture(data->type, data->texture);
-    renderdata->glTexImage2D(data->type, 0, internalFormat, texture_w,
-                             texture_h, 0, format, type, NULL);
+    renderdata->glTexParameteri(data->type, GL_TEXTURE_MIN_FILTER,
+                                GL_NEAREST);
+    renderdata->glTexParameteri(data->type, GL_TEXTURE_MAG_FILTER,
+                                GL_NEAREST);
+    renderdata->glTexParameteri(data->type, GL_TEXTURE_WRAP_S,
+                                GL_CLAMP_TO_EDGE);
+    renderdata->glTexParameteri(data->type, GL_TEXTURE_WRAP_T,
+                                GL_CLAMP_TO_EDGE);
+#ifdef __MACOSX__
+#ifndef GL_TEXTURE_STORAGE_HINT_APPLE
+#define GL_TEXTURE_STORAGE_HINT_APPLE       0x85BC
+#endif
+#ifndef STORAGE_CACHED_APPLE
+#define STORAGE_CACHED_APPLE                0x85BE
+#endif
+#ifndef STORAGE_SHARED_APPLE
+#define STORAGE_SHARED_APPLE                0x85BF
+#endif
+    if (texture->access == SDL_TEXTUREACCESS_STREAMING) {
+        renderdata->glTexParameteri(data->type, GL_TEXTURE_STORAGE_HINT_APPLE,
+                                    GL_STORAGE_SHARED_APPLE);
+    } else {
+        renderdata->glTexParameteri(data->type, GL_TEXTURE_STORAGE_HINT_APPLE,
+                                    GL_STORAGE_CACHED_APPLE);
+    }
+    if (data->pixels && internalFormat == GL_RGBA && format == GL_BGRA
+        && type == GL_UNSIGNED_INT_8_8_8_8_REV && data->pixels) {
+        renderdata->glPixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, GL_TRUE);
+        renderdata->glTexImage2D(data->type, 0, internalFormat, texture_w,
+                                 texture_h, 0, format, type, data->pixels);
+    } else
+#endif
+    {
+        renderdata->glTexImage2D(data->type, 0, internalFormat, texture_w,
+                                 texture_h, 0, format, type, NULL);
+    }
     result = renderdata->glGetError();
     if (result != GL_NO_ERROR) {
         GL_SetError("glTexImage2D()", result);
