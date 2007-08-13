@@ -587,20 +587,22 @@ SDL_FillRect(SDL_Surface * dst, SDL_Rect * dstrect, Uint32 color)
     } else {
         switch (dst->format->BytesPerPixel) {
         case 2:
-            for (y = dstrect->h; y; --y) {
-                Uint16 *pixels = (Uint16 *) row;
+            {
                 Uint16 c = (Uint16) color;
                 Uint32 cc = (Uint32) c << 16 | c;
-                int n = dstrect->w;
-                if ((uintptr_t) pixels & 3) {
-                    *pixels++ = c;
-                    n--;
+                for (y = dstrect->h; y; --y) {
+                    Uint16 *pixels = (Uint16 *) row;
+                    int n = dstrect->w;
+                    if ((uintptr_t) pixels & 3) {
+                        *pixels++ = c;
+                        n--;
+                    }
+                    if (n >> 1)
+                        SDL_memset4(pixels, cc, n >> 1);
+                    if (n & 1)
+                        pixels[n - 1] = c;
+                    row += dst->pitch;
                 }
-                if (n >> 1)
-                    SDL_memset4(pixels, cc, n >> 1);
-                if (n & 1)
-                    pixels[n - 1] = c;
-                row += dst->pitch;
             }
             break;
 
@@ -619,6 +621,33 @@ SDL_FillRect(SDL_Surface * dst, SDL_Rect * dstrect, Uint32 color)
             break;
 
         case 4:
+#if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__)) && SDL_ASSEMBLY_ROUTINES
+            if (SDL_HasSSE() && !((uintptr_t) row & 15) && !(dstrect->w & 3)) {
+                Uint32 cccc[4] __attribute__ ((aligned(16))) = {
+                color, color, color, color};
+                int i, n = dstrect->w / 4;
+                __asm__ __volatile__("	movdqa (%0), %%xmm0\n"::
+                                     "r"(cccc):"memory");
+                for (y = dstrect->h; y; --y) {
+                    Uint8 *pixels = row;
+                    for (i = n / 2; i--;) {
+                        /* *INDENT-OFF* */
+                        __asm__ __volatile__("	prefetchnta 256(%0)\n"
+                                             "	movdqa %%xmm0, (%0)\n"
+                                             "	movdqa %%xmm0, 16(%0)\n"::"r"(pixels):"memory");
+                        /* *INDENT-ON* */
+                        pixels += 32;
+                    }
+                    if (n & 1) {
+                        __asm__ __volatile__("	movdqa %%xmm0, (%0)\n"::
+                                             "r"(pixels):"memory");
+                    }
+                    row += dst->pitch;
+                }
+                __asm__ __volatile__("	emms\n"::);
+                break;
+            }
+#endif
             for (y = dstrect->h; y; --y) {
                 SDL_memset4(row, color, dstrect->w);
                 row += dst->pitch;
