@@ -457,15 +457,9 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         type = GL_UNSIGNED_BYTE;
         break;
     case SDL_PIXELFORMAT_RGB888:
-#ifdef __MACOSX__
-        internalFormat = GL_RGBA;
-        format = GL_BGRA;
-        type = GL_UNSIGNED_INT_8_8_8_8_REV;
-#else
         internalFormat = GL_RGB8;
         format = GL_BGRA;
         type = GL_UNSIGNED_BYTE;
-#endif
         break;
     case SDL_PIXELFORMAT_BGR24:
         internalFormat = GL_RGB8;
@@ -574,13 +568,14 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         renderdata->glTexParameteri(data->type, GL_TEXTURE_STORAGE_HINT_APPLE,
                                     GL_STORAGE_CACHED_APPLE);
     }
-    if (data->pixels && internalFormat == GL_RGBA && format == GL_BGRA
-        && type == GL_UNSIGNED_INT_8_8_8_8_REV && data->pixels) {
+    if (texture->access == SDL_TEXTUREACCESS_STREAMING && texture->format == SDL_PIXELFORMAT_ARGB8888 ) {
+        /*
         if (renderdata->glTextureRangeAPPLE) {
             renderdata->glTextureRangeAPPLE(data->type,
                                             texture->h * data->pitch,
                                             data->pixels);
         }
+        */
         renderdata->glPixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, GL_TRUE);
         renderdata->glTexImage2D(data->type, 0, internalFormat, texture_w,
                                  texture_h, 0, format, type, data->pixels);
@@ -806,19 +801,6 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         int bpp = SDL_BYTESPERPIXEL(texture->format);
         int pitch = texturedata->pitch;
 
-#ifdef __MACOSX__
-        if (texture->format == SDL_PIXELFORMAT_RGB888) {
-            int i;
-            Uint8 *p = (Uint8 *) texturedata->pixels;
-#if SDL_BYTEORDER == SDL_LIL_ENDIAN
-            p += 3;
-#endif
-            for (i = texture->h * pitch / 4; i--;) {
-                *p = 0xff;
-                p += 4;
-            }
-        }
-#endif
         SetupTextureUpdate(data, texture, pitch);
         data->glBindTexture(texturedata->type, texturedata->texture);
         for (dirty = texturedata->dirty.list; dirty; dirty = dirty->next) {

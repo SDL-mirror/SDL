@@ -118,10 +118,10 @@ GetDisplayMode(CFDictionaryRef moderef, SDL_DisplayMode *mode)
         mode->format = SDL_PIXELFORMAT_INDEX8;
         break;
     case 16:
-        mode->format = SDL_PIXELFORMAT_RGB555;
+        mode->format = SDL_PIXELFORMAT_ARGB1555;
         break;
     case 32:
-        mode->format = SDL_PIXELFORMAT_RGB888;
+        mode->format = SDL_PIXELFORMAT_ARGB8888;
         break;
     }
     mode->w = width;
