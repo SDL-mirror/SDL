@@ -507,7 +507,7 @@ DirectFB_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
         (DirectFB_RenderData *) renderer->driverdata;
     DFBResult ret;
     Uint8 *dpixels;
-    int   dpitch;
+    int dpitch;
     Uint8 *src, *dst;
     int row;
     size_t length;
@@ -525,10 +525,10 @@ DirectFB_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
         src += pitch;
         dst += dpitch;
     }
-    SDL_DFB_CHECKERR(data->surface->Unlock(data->surface) );
+    SDL_DFB_CHECKERR(data->surface->Unlock(data->surface));
     return 0;
-error:
-	return 1;
+  error:
+    return 1;
 
 }
 
