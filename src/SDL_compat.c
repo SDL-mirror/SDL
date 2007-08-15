@@ -457,6 +457,7 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
             } else {
                 desired_format = SDL_PIXELFORMAT_RGB888;
             }
+            bpp = SDL_BITSPERPIXEL(desired_format);
             break;
         case 8:
             desired_format = SDL_PIXELFORMAT_INDEX8;
