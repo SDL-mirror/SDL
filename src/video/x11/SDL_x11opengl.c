@@ -90,6 +90,9 @@ X11_GL_LoadLibrary(_THIS, const char *path)
         return -1;
     }
 
+    // LoadLibrary may be called before WindowCreate!
+    X11_GL_Initialize(_this);
+    
     /* Load new function pointers */
     _this->gl_data->glXGetProcAddress =
         (void *(*)(const GLubyte *)) GL_LoadFunction(handle,
