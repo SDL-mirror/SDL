@@ -30,6 +30,10 @@
 #include "SDL_rect_c.h"
 #include "SDL_yuv_sw_c.h"
 
+#ifdef __MACOSX__
+#include <OpenGL/OpenGL.h>
+#endif
+
 /* OpenGL renderer implementation */
 
 /* Details on optimizing the texture path on Mac OS X:
@@ -291,6 +295,13 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
         GL_DestroyRenderer(renderer);
         return NULL;
     }
+
+#ifdef __MACOSX__
+    /* Enable multi-threaded rendering */
+    /* Disabled until Ryan finishes his VBO/PBO code...
+    CGLEnable(CGLGetCurrentContext(), kCGLCEMPEngine);
+    */
+#endif
 
     if (flags & SDL_RENDERER_PRESENTVSYNC) {
         SDL_GL_SetSwapInterval(1);
