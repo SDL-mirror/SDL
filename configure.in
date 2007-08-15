@@ -276,6 +276,127 @@ AC_HELP_STRING([--enable-assembly], [Enable assembly routines [[default=yes]]]),
               , enable_assembly=yes)
 if test x$enable_assembly = xyes; then
     AC_DEFINE(SDL_ASSEMBLY_ROUTINES)
+
+    dnl Check for various instruction support
+    AC_ARG_ENABLE(mmx,
+AC_HELP_STRING([--enable-mmx], [use MMX assembly routines [[default=yes]]]),
+                  , enable_mmx=yes)
+    if test x$enable_mmx = xyes; then
+        save_CFLAGS="$CFLAGS"
+        have_gcc_mmx=no
+        AC_MSG_CHECKING(for GCC -mmmx option)
+        mmx_CFLAGS="-mmmx"
+        CFLAGS="$save_CFLAGS $mmx_CFLAGS"
+
+        AC_TRY_COMPILE([
+        #include <mmintrin.h>
+        ],[
+        ],[
+        have_gcc_mmx=yes
+        ])
+        AC_MSG_RESULT($have_gcc_mmx)
+
+        if test x$have_gcc_mmx = xyes; then
+            EXTRA_CFLAGS="$EXTRA_CFLAGS $mmx_CFLAGS"
+        fi
+    fi
+
+    AC_ARG_ENABLE(sse,
+AC_HELP_STRING([--enable-sse], [use SSE assembly routines [[default=yes]]]),
+                  , enable_sse=yes)
+    if test x$enable_sse = xyes; then
+        save_CFLAGS="$CFLAGS"
+        have_gcc_sse=no
+        AC_MSG_CHECKING(for GCC -msse option)
+        sse_CFLAGS="-msse"
+        CFLAGS="$save_CFLAGS $sse_CFLAGS"
+
+        AC_TRY_COMPILE([
+        #include <xmmintrin.h>
+        ],[
+        ],[
+        have_gcc_sse=yes
+        ])
+        AC_MSG_RESULT($have_gcc_sse)
+
+        if test x$have_gcc_sse = xyes; then
+            EXTRA_CFLAGS="$EXTRA_CFLAGS $sse_CFLAGS"
+        fi
+    fi
+
+    AC_ARG_ENABLE(altivec,
+AC_HELP_STRING([--enable-altivec], [use Altivec assembly routines [[default=yes]]]),
+                  , enable_altivec=yes)
+    if test x$enable_altivec = xyes; then
+        have_altivec_h_hdr=no
+        AC_CHECK_HEADER(altivec.h, have_altivec_h_hdr=yes)
+
+        save_CFLAGS="$CFLAGS"
+        have_gcc_altivec=no
+        AC_MSG_CHECKING(for Altivec with GCC -maltivec option)
+        altivec_CFLAGS="-maltivec"
+        CFLAGS="$save_CFLAGS $altivec_CFLAGS"
+
+        if test x$have_altivec_h_hdr = xyes; then
+          AC_TRY_COMPILE([
+          #include <altivec.h>
+          vector unsigned int vzero() {
+              return vec_splat_u32(0);
+          }
+          ],[
+          ],[
+          have_gcc_altivec=yes
+          ])
+          AC_MSG_RESULT($have_gcc_altivec)
+        else
+          AC_TRY_COMPILE([
+          vector unsigned int vzero() {
+              return vec_splat_u32(0);
+          }
+          ],[
+          ],[
+          have_gcc_altivec=yes
+          ])
+          AC_MSG_RESULT($have_gcc_altivec)
+        fi
+
+        if test x$have_gcc_altivec = xno; then
+            AC_MSG_CHECKING(for Altivec with GCC -faltivec option)
+            altivec_CFLAGS="-faltivec"
+            CFLAGS="$save_CFLAGS $altivec_CFLAGS"
+            if test x$have_altivec_h_hdr = xyes; then
+              AC_TRY_COMPILE([
+              #include <altivec.h>
+              vector unsigned int vzero() {
+                  return vec_splat_u32(0);
+              }
+              ],[
+              ],[
+              have_gcc_altivec=yes
+              ])
+              AC_MSG_RESULT($have_gcc_altivec)
+            else
+              AC_TRY_COMPILE([
+              vector unsigned int vzero() {
+                  return vec_splat_u32(0);
+              }
+              ],[
+              ],[
+              have_gcc_altivec=yes
+              ])
+              AC_MSG_RESULT($have_gcc_altivec)
+            fi
+        fi
+        CFLAGS="$save_CFLAGS"
+
+        if test x$have_gcc_altivec = xyes; then
+            AC_DEFINE(SDL_ALTIVEC_BLITTERS)
+            if test x$have_altivec_h_hdr = xyes; then
+              AC_DEFINE(HAVE_ALTIVEC_H)
+            fi
+            EXTRA_CFLAGS="$EXTRA_CFLAGS $altivec_CFLAGS"
+        fi
+    fi
 fi
 
 dnl See if the OSS audio interface is supported
@@ -625,167 +746,6 @@ AC_HELP_STRING([--enable-mintaudio], [support Atari audio driver [[default=yes]]
             SOURCES="$SOURCES $srcdir/src/audio/mint/*.c"
             SOURCES="$SOURCES $srcdir/src/audio/mint/*.S"
             have_audio=yes
-        fi
-    fi
-}
-
-dnl See if we can use x86 assembly blitters
-# NASM is available from: http://nasm.sourceforge.net
-CheckNASM()
-{
-    dnl Make sure we are running on an x86 platform
-    case $host in
-        i?86*)
-            ;;
-        *)
-        # Nope, bail early.
-            return
-            ;;
-    esac
-    dnl Check for NASM (for assembly blit routines)
-    AC_ARG_ENABLE(nasm,
-AC_HELP_STRING([--enable-nasm], [use nasm assembly blitters on x86 [[default=yes]]]),
-                  , enable_nasm=yes)
-    if test x$enable_video = xyes -a x$enable_assembly = xyes -a x$enable_nasm = xyes; then
-        CompileNASM()
-        {
-            # Usage: CompileNASM <filename>
-            AC_MSG_CHECKING(to see if $NASM supports $1)
-            if $NASM $NASMFLAGS $1 -o $1.o >&AS_MESSAGE_LOG_FD 2>&1; then
-                CompileNASM_ret="yes"
-            else
-                CompileNASM_ret="no"
-            fi
-            rm -f $1 $1.o
-            AC_MSG_RESULT($CompileNASM_ret)
-            test "$CompileNASM_ret" = "yes"
-        }
-
-        if test x"$NASMFLAGS" = x; then
-            case $ARCH in
-              win32)
-                  NASMFLAGS="-f win32"
-                  ;;
-              openbsd)
-                  NASMFLAGS="-f aoutb"
-                  ;;
-              macosx)
-                  NASMFLAGS="-f macho"
-                  ;;
-              *)
-                  NASMFLAGS="-f elf"
-                  ;;
-            esac
-        fi
-
-        AC_PATH_PROG(NASM, yasm)
-        echo "%ifidn __OUTPUT_FORMAT__,elf" > unquoted-sections
-        echo "section .note.GNU-stack noalloc noexec nowrite progbits" >> unquoted-sections
-        echo "%endif" >> unquoted-sections
-        CompileNASM unquoted-sections || NASM=""
-
-        if test "x$NASM" = x -o "x$NASM" = x'"$NASM"'; then
-            $as_unset ac_cv_path_NASM
-            AC_PATH_PROG(NASM, nasm)
-        fi
-        if test "x$NASM" != x -a "x$NASM" != x'"$NASM"'; then
-            AC_DEFINE(SDL_HERMES_BLITTERS)
-            SOURCES="$SOURCES $srcdir/src/hermes/*.asm"
-            NASMFLAGS="$NASMFLAGS -I $srcdir/src/hermes/"
-
-            dnl See if hidden visibility is supported
-            echo "GLOBAL _bar:function hidden" > symbol-visibility
-            echo "_bar:" >> symbol-visibility
-            CompileNASM symbol-visibility && NASMFLAGS="$NASMFLAGS -DHIDDEN_VISIBILITY"
-
-            AC_SUBST(NASM)
-            AC_SUBST(NASMFLAGS)
-
-            case "$host" in
-                # this line is needed for QNX, because it's not defined the __ELF__
-                *-*-qnx*)
-                     EXTRA_CFLAGS="$EXTRA_CFLAGS -D__ELF__";;
-                *-*-solaris*)
-                     EXTRA_CFLAGS="$EXTRA_CFLAGS -D__ELF__";;
-            esac
-        fi
-    fi
-}
-
-dnl Check for altivec instruction support using gas syntax
-CheckAltivec()
-{
-    AC_ARG_ENABLE(altivec,
-AC_HELP_STRING([--enable-altivec], [use altivec assembly blitters on PPC [[default=yes]]]),
-                  , enable_altivec=yes)
-    if test x$enable_video = xyes -a x$enable_assembly = xyes -a x$enable_altivec = xyes; then
-        have_altivec_h_hdr=no
-        AC_CHECK_HEADER(altivec.h, have_altivec_h_hdr=yes)
-
-        save_CFLAGS="$CFLAGS"
-        have_gcc_altivec=no
-        AC_MSG_CHECKING(for Altivec with GCC -maltivec option)
-        altivec_CFLAGS="-maltivec"
-        CFLAGS="$save_CFLAGS $altivec_CFLAGS"
-
-        if test x$have_altivec_h_hdr = xyes; then
-          AC_TRY_COMPILE([
-          #include <altivec.h>
-          vector unsigned int vzero() {
-              return vec_splat_u32(0);
-          }
-          ],[
-          ],[
-          have_gcc_altivec=yes
-          ])
-          AC_MSG_RESULT($have_gcc_altivec)
-        else
-          AC_TRY_COMPILE([
-          vector unsigned int vzero() {
-              return vec_splat_u32(0);
-          }
-          ],[
-          ],[
-          have_gcc_altivec=yes
-          ])
-          AC_MSG_RESULT($have_gcc_altivec)
-        fi
-
-        if test x$have_gcc_altivec = xno; then
-            AC_MSG_CHECKING(for Altivec with GCC -faltivec option)
-            altivec_CFLAGS="-faltivec"
-            CFLAGS="$save_CFLAGS $altivec_CFLAGS"
-            if test x$have_altivec_h_hdr = xyes; then
-              AC_TRY_COMPILE([
-              #include <altivec.h>
-              vector unsigned int vzero() {
-                  return vec_splat_u32(0);
-              }
-              ],[
-              ],[
-              have_gcc_altivec=yes
-              ])
-              AC_MSG_RESULT($have_gcc_altivec)
-            else
-              AC_TRY_COMPILE([
-              vector unsigned int vzero() {
-                  return vec_splat_u32(0);
-              }
-              ],[
-              ],[
-              have_gcc_altivec=yes
-              ])
-              AC_MSG_RESULT($have_gcc_altivec)
-            fi
-        fi
-        CFLAGS="$save_CFLAGS"
-
-        if test x$have_gcc_altivec = xyes; then
-            AC_DEFINE(SDL_ALTIVEC_BLITTERS)
-            if test x$have_altivec_h_hdr = xyes; then
-              AC_DEFINE(HAVE_ALTIVEC_H)
-            fi
-            EXTRA_CFLAGS="$EXTRA_CFLAGS $altivec_CFLAGS"
         fi
     fi
 }
@@ -2043,8 +2003,6 @@ case "$host" in
         CheckDiskAudio
         CheckDummyAudio
         CheckDLOPEN
-        CheckNASM
-        CheckAltivec
         CheckOSS
         CheckDMEDIA
         CheckMME
@@ -2153,7 +2111,6 @@ case "$host" in
         CheckDummyVideo
         CheckDiskAudio
         CheckDummyAudio
-        # CheckNASM
         CheckDLOPEN
         CheckNAS
         CheckPHOTON
@@ -2197,7 +2154,6 @@ case "$host" in
         CheckWIN32
         CheckWIN32GL
         CheckDIRECTX
-        CheckNASM
         # Set up files for the video library
         if test x$enable_video = xyes; then
             AC_DEFINE(SDL_VIDEO_DRIVER_WIN32)
@@ -2278,7 +2234,6 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         CheckDummyVideo
         CheckDiskAudio
         CheckDummyAudio
-        CheckNASM
         CheckBWINDOW
         CheckBeGL
         # Set up files for the audio library
@@ -2344,7 +2299,6 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         CheckDiskAudio
         CheckDummyAudio
         CheckDLOPEN
-        CheckNASM
 
         # Set up files for the shared object loading library
         # (this needs to be done before the dynamic X11 check)
@@ -2359,7 +2313,6 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         CheckMacGL
         CheckOpenGLX11
         CheckPTHREAD
-        CheckAltivec
 
         # Good optimization on Mac OS X, yes...
         EXTRA_CFLAGS="$EXTRA_CFLAGS -falign-loops=16"

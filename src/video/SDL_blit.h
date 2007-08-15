@@ -67,6 +67,17 @@ typedef struct SDL_BlitMap
     unsigned int format_version;
 } SDL_BlitMap;
 
+#define SDL_BLIT_ANY                0x00000000
+#define SDL_BLIT_MMX                0x00000001
+#define SDL_BLIT_SSE                0x00000002
+#define SDL_BLIT_ALTIVEC_PREFETCH   0x00000004
+#define SDL_BLIT_ALTIVEC_NOPREFETCH 0x00000008
+
+typedef struct SDL_BlitEntry
+{
+    Uint32 features;
+    SDL_loblit blit;
+} SDL_BlitEntry;
 
 /* Functions found in SDL_blit.c */
 extern int SDL_CalculateBlit(SDL_Surface * surface);

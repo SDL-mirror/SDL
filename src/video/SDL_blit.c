@@ -24,6 +24,7 @@
 #include "SDL_video.h"
 #include "SDL_sysvideo.h"
 #include "SDL_blit.h"
+#include "SDL_blit_copy.h"
 #include "SDL_RLEaccel_c.h"
 #include "SDL_pixels_c.h"
 
@@ -106,111 +107,64 @@ SDL_SoftBlit(SDL_Surface * src, SDL_Rect * srcrect,
     return (okay ? 0 : -1);
 }
 
-#ifdef MMX_ASMBLIT
-static __inline__ void
-SDL_memcpyMMX(Uint8 * to, const Uint8 * from, int len)
+#ifdef __MACOSX__
+#include <sys/sysctl.h>
+
+static SDL_bool SDL_UseAltivecPrefetch()
 {
-    int i;
+    const char key[] = "hw.l3cachesize";
+    u_int64_t result = 0;
+    size_t typeSize = sizeof(result);
 
-    for (i = 0; i < len / 8; i++) {
-        __asm__ __volatile__("	movq (%0), %%mm0\n"
-                             "	movq %%mm0, (%1)\n"::"r"(from),
-                             "r"(to):"memory");
-        from += 8;
-        to += 8;
-    }
-    if (len & 7)
-        SDL_memcpy(to, from, len & 7);
-}
-
-static __inline__ void
-SDL_memcpySSE(Uint8 * to, const Uint8 * from, int len)
-{
-    int i;
-
-    __asm__ __volatile__("	prefetchnta (%0)\n"
-                         "	prefetchnta 64(%0)\n"
-                         "	prefetchnta 128(%0)\n"
-                         "	prefetchnta 192(%0)\n"::"r"(from));
-
-    for (i = 0; i < len / 8; i++) {
-        __asm__ __volatile__("	prefetchnta 256(%0)\n"
-                             "	movq (%0), %%mm0\n"
-                             "	movntq %%mm0, (%1)\n"::"r"(from),
-                             "r"(to):"memory");
-        from += 8;
-        to += 8;
-    }
-    if (len & 7)
-        SDL_memcpy(to, from, len & 7);
-}
-#endif
-
-static void
-SDL_BlitCopy(SDL_BlitInfo * info)
-{
-    Uint8 *src, *dst;
-    int w, h;
-    int srcskip, dstskip;
-
-    w = info->d_width * info->dst->BytesPerPixel;
-    h = info->d_height;
-    src = info->s_pixels;
-    dst = info->d_pixels;
-    srcskip = w + info->s_skip;
-    dstskip = w + info->d_skip;
-#ifdef MMX_ASMBLIT
-    if (SDL_HasSSE()) {
-        while (h--) {
-            SDL_memcpySSE(dst, src, w);
-            src += srcskip;
-            dst += dstskip;
-        }
-        __asm__ __volatile__("	emms\n"::);
-    } else if (SDL_HasMMX()) {
-        while (h--) {
-            SDL_memcpyMMX(dst, src, w);
-            src += srcskip;
-            dst += dstskip;
-        }
-        __asm__ __volatile__("	emms\n"::);
-    } else
-#endif
-        while (h--) {
-            SDL_memcpy(dst, src, w);
-            src += srcskip;
-            dst += dstskip;
-        }
-}
-
-static void
-SDL_BlitCopyOverlap(SDL_BlitInfo * info)
-{
-    Uint8 *src, *dst;
-    int w, h;
-    int srcskip, dstskip;
-
-    w = info->d_width * info->dst->BytesPerPixel;
-    h = info->d_height;
-    src = info->s_pixels;
-    dst = info->d_pixels;
-    srcskip = w + info->s_skip;
-    dstskip = w + info->d_skip;
-    if (dst < src) {
-        while (h--) {
-            SDL_memcpy(dst, src, w);
-            src += srcskip;
-            dst += dstskip;
-        }
+    if (sysctlbyname(key, &result, &typeSize, NULL, 0) == 0 && result > 0) {
+        return SDL_TRUE;
     } else {
-        src += ((h - 1) * srcskip);
-        dst += ((h - 1) * dstskip);
-        while (h--) {
-            SDL_revcpy(dst, src, w);
-            src -= srcskip;
-            dst -= dstskip;
+        return SDL_FALSE;
+    }
+}
+#else
+static SDL_bool SDL_UseAltivecPrefetch()
+{
+    /* Just guess G4 */
+    return SDL_TRUE;
+}
+#endif /* __MACOSX__ */
+
+static SDL_loblit SDL_ChooseBlitFunc(SDL_BlitEntry *entries, int count)
+{
+    int i;
+    static Uint32 features = 0xffffffff;
+
+    if (features == 0xffffffff) {
+        features = SDL_BLIT_ANY;
+
+        /* Provide an override for testing .. */
+        const char *override = SDL_getenv("SDL_BLIT_FEATURES");
+        if (override) {
+            SDL_sscanf(override, "%u", &features);
+        } else {
+            if (SDL_HasMMX()) {
+                features |= SDL_BLIT_MMX;
+            }
+            if (SDL_HasSSE()) {
+                features |= SDL_BLIT_SSE;
+            }
+            if (SDL_HasAltivec()) {
+                if (SDL_UseAltivecPrefetch()) {
+                    features |= SDL_BLIT_ALTIVEC_PREFETCH;
+                } else {
+                    features |= SDL_BLIT_ALTIVEC_NOPREFETCH;
+                }
+            }
         }
     }
+
+    for (i = count; i > 0; --i) {
+        if (features & entries[i].features) {
+            return entries[i].blit;
+        }
+    }
+    return entries[0].blit;
 }
 
 /* Figure out which of many blit routines to set up on a surface */
@@ -237,11 +191,11 @@ SDL_CalculateBlit(SDL_Surface * surface)
 
     /* Check for special "identity" case -- copy blit */
     if (surface->map->identity && blit_index == 0) {
-        surface->map->sw_data->blit = SDL_BlitCopy;
-
         /* Handle overlapping blits on the same surface */
         if (surface == surface->map->dst) {
             surface->map->sw_data->blit = SDL_BlitCopyOverlap;
+        } else {
+            surface->map->sw_data->blit = SDL_BlitCopy;
         }
     } else {
         if (surface->format->BitsPerPixel < 8) {

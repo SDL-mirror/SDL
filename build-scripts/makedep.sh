@@ -67,12 +67,6 @@ __EOF__
 
 __EOF__
         ;;
-        asm) cat >>${output}.new <<__EOF__
-
-	\$(LIBTOOL) --tag=CC --mode=compile \$(auxdir)/strip_fPIC.sh \$(NASM) $src -o \$@
-
-__EOF__
-        ;;
         S) cat >>${output}.new <<__EOF__
 
 	\$(LIBTOOL)  --mode=compile \$(CC) \$(CFLAGS) \$(EXTRA_CFLAGS) -c $src  -o \$@

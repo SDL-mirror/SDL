@@ -879,19 +879,6 @@ GetBlitFeatures(void)
 #define LO	1
 #endif
 
-#if SDL_HERMES_BLITTERS
-
-/* Heheheh, we coerce Hermes into using SDL blit information */
-#define X86_ASSEMBLER
-#define HermesConverterInterface	SDL_BlitInfo
-#define HermesClearInterface		void
-#define STACKCALL
-
-#include "../hermes/HeadMMX.h"
-#include "../hermes/HeadX86.h"
-
-#else
-
 /* Special optimized blit for RGB 8-8-8 --> RGB 3-3-2 */
 #define RGB888_RGB332(dst, src) { \
 	dst = (Uint8)((((src)&0x00E00000)>>16)| \
@@ -1249,8 +1236,6 @@ Blit_RGB888_RGB565(SDL_BlitInfo * info)
     }
 #endif /* USE_DUFFS_LOOP */
 }
-
-#endif /* SDL_HERMES_BLITTERS */
 
 
 /* Special optimized blit for RGB 5-6-5 --> 32-bit RGB surfaces */
@@ -2357,17 +2342,7 @@ static const struct blit_table normal_blit_1[] = {
     {0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL},
 };
 static const struct blit_table normal_blit_2[] = {
-#if SDL_HERMES_BLITTERS
-    {0x0000F800, 0x000007E0, 0x0000001F, 2, 0x0000001F, 0x000007E0,
-     0x0000F800,
-     0, ConvertX86p16_16BGR565, ConvertX86, NO_ALPHA},
-    {0x0000F800, 0x000007E0, 0x0000001F, 2, 0x00007C00, 0x000003E0,
-     0x0000001F,
-     0, ConvertX86p16_16RGB555, ConvertX86, NO_ALPHA},
-    {0x0000F800, 0x000007E0, 0x0000001F, 2, 0x0000001F, 0x000003E0,
-     0x00007C00,
-     0, ConvertX86p16_16BGR555, ConvertX86, NO_ALPHA},
-#elif SDL_ALTIVEC_BLITTERS
+#if SDL_ALTIVEC_BLITTERS
     /* has-altivec */
     {0x0000F800, 0x000007E0, 0x0000001F, 4, 0x00000000, 0x00000000,
      0x00000000,
@@ -2397,47 +2372,6 @@ static const struct blit_table normal_blit_3[] = {
     {0, 0, 0, 0, 0, 0, 0, 0, NULL, BlitNtoN, 0}
 };
 static const struct blit_table normal_blit_4[] = {
-#if SDL_HERMES_BLITTERS
-    {0x00FF0000, 0x0000FF00, 0x000000FF, 2, 0x0000F800, 0x000007E0,
-     0x0000001F,
-     1, ConvertMMXpII32_16RGB565, ConvertMMX, NO_ALPHA},
-    {0x00FF0000, 0x0000FF00, 0x000000FF, 2, 0x0000F800, 0x000007E0,
-     0x0000001F,
-     0, ConvertX86p32_16RGB565, ConvertX86, NO_ALPHA},
-    {0x00FF0000, 0x0000FF00, 0x000000FF, 2, 0x0000001F, 0x000007E0,
-     0x0000F800,
-     1, ConvertMMXpII32_16BGR565, ConvertMMX, NO_ALPHA},
-    {0x00FF0000, 0x0000FF00, 0x000000FF, 2, 0x0000001F, 0x000007E0,
-     0x0000F800,
-     0, ConvertX86p32_16BGR565, ConvertX86, NO_ALPHA},
-    {0x00FF0000, 0x0000FF00, 0x000000FF, 2, 0x00007C00, 0x000003E0,
-     0x0000001F,
-     1, ConvertMMXpII32_16RGB555, ConvertMMX, NO_ALPHA},
-    {0x00FF0000, 0x0000FF00, 0x000000FF, 2, 0x00007C00, 0x000003E0,
-     0x0000001F,
-     0, ConvertX86p32_16RGB555, ConvertX86, NO_ALPHA},
-    {0x00FF0000, 0x0000FF00, 0x000000FF, 2, 0x0000001F, 0x000003E0,
-     0x00007C00,
-     1, ConvertMMXpII32_16BGR555, ConvertMMX, NO_ALPHA},
-    {0x00FF0000, 0x0000FF00, 0x000000FF, 2, 0x0000001F, 0x000003E0,
-     0x00007C00,
-     0, ConvertX86p32_16BGR555, ConvertX86, NO_ALPHA},
-    {0x00FF0000, 0x0000FF00, 0x000000FF, 3, 0x00FF0000, 0x0000FF00,
-     0x000000FF,
-     0, ConvertX86p32_24RGB888, ConvertX86, NO_ALPHA},
-    {0x00FF0000, 0x0000FF00, 0x000000FF, 3, 0x000000FF, 0x0000FF00,
-     0x00FF0000,
-     0, ConvertX86p32_24BGR888, ConvertX86, NO_ALPHA},
-    {0x00FF0000, 0x0000FF00, 0x000000FF, 4, 0x000000FF, 0x0000FF00,
-     0x00FF0000,
-     0, ConvertX86p32_32BGR888, ConvertX86, NO_ALPHA},
-    {0x00FF0000, 0x0000FF00, 0x000000FF, 4, 0xFF000000, 0x00FF0000,
-     0x0000FF00,
-     0, ConvertX86p32_32RGBA888, ConvertX86, NO_ALPHA},
-    {0x00FF0000, 0x0000FF00, 0x000000FF, 4, 0x0000FF00, 0x00FF0000,
-     0xFF000000,
-     0, ConvertX86p32_32BGRA888, ConvertX86, NO_ALPHA},
-#else
 #if SDL_ALTIVEC_BLITTERS
     /* has-altivec | dont-use-prefetch */
     {0x00000000, 0x00000000, 0x00000000, 4, 0x00000000, 0x00000000,
@@ -2460,7 +2394,6 @@ static const struct blit_table normal_blit_4[] = {
     {0x00FF0000, 0x0000FF00, 0x000000FF, 2, 0x00007C00, 0x000003E0,
      0x0000001F,
      0, NULL, Blit_RGB888_RGB555, NO_ALPHA},
-#endif
     /* Default for 32-bit RGB source, used if no other blitter matches */
     {0, 0, 0, 0, 0, 0, 0, 0, NULL, BlitNtoN, 0}
 };
@@ -2529,12 +2462,7 @@ SDL_CalculateBlitN(SDL_Surface * surface, int blit_index)
             if (surface->map->table) {
                 blitfun = Blit_RGB888_index8_map;
             } else {
-#if SDL_HERMES_BLITTERS
-                sdata->aux_data = ConvertX86p32_8RGB332;
-                blitfun = ConvertX86;
-#else
                 blitfun = Blit_RGB888_index8;
-#endif
             }
         } else {
             blitfun = BlitNto1;
@@ -2575,13 +2503,6 @@ SDL_CalculateBlitN(SDL_Surface * surface, int blit_index)
     }
 
 #ifdef DEBUG_ASM
-#if SDL_HERMES_BLITTERS
-    if (blitfun == ConvertMMX)
-        fprintf(stderr, "Using mmx blit\n");
-    else if (blitfun == ConvertX86)
-        fprintf(stderr, "Using asm blit\n");
-    else
-#endif
     if ((blitfun == BlitNtoN) || (blitfun == BlitNto1))
         fprintf(stderr, "Using C blit\n");
     else
