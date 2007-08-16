@@ -23,10 +23,38 @@
 
 #include "SDL_video.h"
 #include "SDL_blit.h"
-#include "SDL_blit_copy.h"
+#include "SDL_copy.h"
 
+
+#ifdef __SSE__
+/* This assumes 16-byte aligned src and dst */
+static __inline__ void
+SDL_memcpySSE(Uint8 * dst, const Uint8 * src, int len)
+{
+    int i;
+
+    __m128 values[4];
+    for (i = len / 64; i--;) {
+        _mm_prefetch(src, _MM_HINT_NTA);
+        values[0] = *(__m128 *) (src + 0);
+        values[1] = *(__m128 *) (src + 16);
+        values[2] = *(__m128 *) (src + 32);
+        values[3] = *(__m128 *) (src + 48);
+        _mm_stream_ps((float *) (dst + 0), values[0]);
+        _mm_stream_ps((float *) (dst + 16), values[1]);
+        _mm_stream_ps((float *) (dst + 32), values[2]);
+        _mm_stream_ps((float *) (dst + 48), values[3]);
+        src += 64;
+        dst += 64;
+    }
+
+    if (len & 63)
+        SDL_memcpy(dst, src, len & 63);
+}
+#endif /* __SSE__ */
 
 #ifdef __MMX__
+/* This assumes 8-byte aligned src and dst */
 static __inline__ void
 SDL_memcpyMMX(Uint8 * dst, const Uint8 * src, int len)
 {
@@ -59,32 +87,6 @@ SDL_memcpyMMX(Uint8 * dst, const Uint8 * src, int len)
         SDL_memcpy(dst, src, len & 63);
 }
 #endif /* __MMX__ */
-
-#ifdef __SSE__
-static __inline__ void
-SDL_memcpySSE(Uint8 * dst, const Uint8 * src, int len)
-{
-    int i;
-
-    __m128 values[4];
-    for (i = len / 64; i--;) {
-        _mm_prefetch(src, _MM_HINT_NTA);
-        values[0] = *(__m128 *) (src + 0);
-        values[1] = *(__m128 *) (src + 16);
-        values[2] = *(__m128 *) (src + 32);
-        values[3] = *(__m128 *) (src + 48);
-        _mm_stream_ps((float *) (dst + 0), values[0]);
-        _mm_stream_ps((float *) (dst + 16), values[1]);
-        _mm_stream_ps((float *) (dst + 32), values[2]);
-        _mm_stream_ps((float *) (dst + 48), values[3]);
-        src += 64;
-        dst += 64;
-    }
-
-    if (len & 63)
-        SDL_memcpy(dst, src, len & 63);
-}
-#endif /* __SSE__ */
 
 void
 SDL_BlitCopy(SDL_BlitInfo * info)

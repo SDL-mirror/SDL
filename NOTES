@@ -157,6 +157,16 @@ Change textures to static/streaming.  Static textures are not lockable,
 streaming textures are lockable and may have system memory pixels available.
 SDL_compat will use a streaming video texture, and will never be HWSURFACE,
 but may be PREALLOC, if system memory pixels are available.
+*** DONE Thu Aug 16 14:18:42 PDT 2007
 
 The software renderer will be abstracted so the surface management can be
 used by any renderer that provides functions to copy surfaces to the window.
+
+Blitters...
+----
+Copy blit and fill rect are optimized with MMX and SSE now.
+
+Here are the pieces we still need:
+- Merging SDL texture capabilities into the SDL surface system
+- Generic fallback blitter architecture
+- Custom fast path blitters
