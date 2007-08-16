@@ -28,15 +28,6 @@
 #include "SDL_RLEaccel_c.h"
 #include "SDL_pixels_c.h"
 
-#if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__)) && SDL_ASSEMBLY_ROUTINES
-#define MMX_ASMBLIT
-#endif
-
-#if defined(MMX_ASMBLIT)
-#include "SDL_cpuinfo.h"
-#include "mmx.h"
-#endif
-
 /* The general purpose software blit routine */
 static int
 SDL_SoftBlit(SDL_Surface * src, SDL_Rect * srcrect,
