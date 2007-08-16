@@ -103,7 +103,7 @@ extern SDL_loblit SDL_CalculateAlphaBlit(SDL_Surface * surface, int complex);
 #if defined(__GNUC__)
 #define DECLARE_ALIGNED(t,v,a)  t __attribute__((aligned(a))) v
 #elif defined(_MSC_VER)
-#define DECLARE_ALIGNED(t,v,a)  t __declspec(align(a)) v
+#define DECLARE_ALIGNED(t,v,a)  __declspec(align(a)) t v
 #else
 #define DECLARE_ALIGNED(t,v,a)  t v
 #endif

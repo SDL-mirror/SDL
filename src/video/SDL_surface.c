@@ -512,6 +512,14 @@ SDL_UpperBlit(SDL_Surface * src, SDL_Rect * srcrect,
 #ifdef __SSE__
 /* *INDENT-OFF* */
 
+#ifdef _MSC_VER
+#define SSE_BEGIN \
+    __m128 c128; \
+	c128.m128_u32[0] = color; \
+	c128.m128_u32[1] = color; \
+	c128.m128_u32[2] = color; \
+	c128.m128_u32[3] = color;
+#else
 #define SSE_BEGIN \
     DECLARE_ALIGNED(Uint32, cccc[4], 16); \
     cccc[0] = color; \
@@ -519,6 +527,7 @@ SDL_UpperBlit(SDL_Surface * src, SDL_Rect * srcrect,
     cccc[2] = color; \
     cccc[3] = color; \
     __m128 c128 = *(__m128 *)cccc;
+#endif
 
 #define SSE_WORK \
     for (i = n / 64; i--;) { \
