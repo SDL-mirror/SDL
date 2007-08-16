@@ -24,43 +24,42 @@
 #include "SDL_video.h"
 #include "SDL_blit.h"
 
-/* The MMX/SSE intrinsics don't give access to specific registers for
-   the most memory parallelism, so we'll use GCC inline assembly here...
-*/
-#ifndef __GNUC__
-#undef __MMX__
-#undef __SSE__
+#ifdef __MMX__
+#include <mmintrin.h>
+#endif
+#ifdef __SSE__
+#include <xmmintrin.h>
 #endif
 
 #ifdef __MMX__
 static __inline__ void
-SDL_memcpyMMX(Uint8 *dst, const Uint8 *src, int len)
+SDL_memcpyMMX(Uint8 * dst, const Uint8 * src, int len)
 {
     int i;
 
+    __m64 values[8];
     for (i = len / 64; i--;) {
-        __asm__ __volatile__ (
-        "prefetchnta (%0)\n"
-        "movq (%0), %%mm0\n"
-        "movq 8(%0), %%mm1\n"
-        "movq 16(%0), %%mm2\n"
-        "movq 24(%0), %%mm3\n"
-        "movq 32(%0), %%mm4\n"
-        "movq 40(%0), %%mm5\n"
-        "movq 48(%0), %%mm6\n"
-        "movq 56(%0), %%mm7\n"
-        "movntq %%mm0, (%1)\n"
-        "movntq %%mm1, 8(%1)\n"
-        "movntq %%mm2, 16(%1)\n"
-        "movntq %%mm3, 24(%1)\n"
-        "movntq %%mm4, 32(%1)\n"
-        "movntq %%mm5, 40(%1)\n"
-        "movntq %%mm6, 48(%1)\n"
-        "movntq %%mm7, 56(%1)\n"
-        :: "r" (src), "r" (dst) : "memory");
+        _mm_prefetch(src, _MM_HINT_NTA);
+        values[0] = *(__m64 *) (src + 0);
+        values[1] = *(__m64 *) (src + 8);
+        values[2] = *(__m64 *) (src + 16);
+        values[3] = *(__m64 *) (src + 24);
+        values[4] = *(__m64 *) (src + 32);
+        values[5] = *(__m64 *) (src + 40);
+        values[6] = *(__m64 *) (src + 48);
+        values[7] = *(__m64 *) (src + 56);
+        _mm_stream_pi((__m64 *) (dst + 0), values[0]);
+        _mm_stream_pi((__m64 *) (dst + 8), values[1]);
+        _mm_stream_pi((__m64 *) (dst + 16), values[2]);
+        _mm_stream_pi((__m64 *) (dst + 24), values[3]);
+        _mm_stream_pi((__m64 *) (dst + 32), values[4]);
+        _mm_stream_pi((__m64 *) (dst + 40), values[5]);
+        _mm_stream_pi((__m64 *) (dst + 48), values[6]);
+        _mm_stream_pi((__m64 *) (dst + 56), values[7]);
         src += 64;
         dst += 64;
     }
+
     if (len & 63)
         SDL_memcpy(dst, src, len & 63);
 }
@@ -68,25 +67,25 @@ SDL_memcpyMMX(Uint8 *dst, const Uint8 *src, int len)
 
 #ifdef __SSE__
 static __inline__ void
-SDL_memcpySSE(Uint8 *dst, const Uint8 *src, int len)
+SDL_memcpySSE(Uint8 * dst, const Uint8 * src, int len)
 {
     int i;
 
+    __m128 values[4];
     for (i = len / 64; i--;) {
-        __asm__ __volatile__ (
-        "prefetchnta (%0)\n"
-        "movaps (%0), %%xmm0\n"
-        "movaps 16(%0), %%xmm1\n"
-        "movaps 32(%0), %%xmm2\n"
-        "movaps 48(%0), %%xmm3\n"
-        "movntps %%xmm0, (%1)\n"
-        "movntps %%xmm1, 16(%1)\n"
-        "movntps %%xmm2, 32(%1)\n"
-        "movntps %%xmm3, 48(%1)\n"
-        :: "r" (src), "r" (dst) : "memory");
+        _mm_prefetch(src, _MM_HINT_NTA);
+        values[0] = *(__m128 *) (src + 0);
+        values[1] = *(__m128 *) (src + 16);
+        values[2] = *(__m128 *) (src + 32);
+        values[3] = *(__m128 *) (src + 48);
+        _mm_stream_ps((float *) (dst + 0), values[0]);
+        _mm_stream_ps((float *) (dst + 16), values[1]);
+        _mm_stream_ps((float *) (dst + 32), values[2]);
+        _mm_stream_ps((float *) (dst + 48), values[3]);
         src += 64;
         dst += 64;
     }
+
     if (len & 63)
         SDL_memcpy(dst, src, len & 63);
 }
@@ -107,7 +106,7 @@ SDL_BlitCopy(SDL_BlitInfo * info)
     dstskip = w + info->d_skip;
 
 #ifdef __SSE__
-    if (SDL_HasSSE() && !((uintptr_t)src & 15) && !((uintptr_t)dst & 15)) {
+    if (SDL_HasSSE() && !((uintptr_t) src & 15) && !((uintptr_t) dst & 15)) {
         while (h--) {
             SDL_memcpySSE(dst, src, w);
             src += srcskip;
@@ -118,13 +117,13 @@ SDL_BlitCopy(SDL_BlitInfo * info)
 #endif
 
 #ifdef __MMX__
-    if (SDL_HasMMX() && !((uintptr_t)src & 7) && !((uintptr_t)dst & 7)) {
+    if (SDL_HasMMX() && !((uintptr_t) src & 7) && !((uintptr_t) dst & 7)) {
         while (h--) {
             SDL_memcpyMMX(dst, src, w);
             src += srcskip;
             dst += dstskip;
         }
-        __asm__ __volatile__("	emms\n"::);
+        _mm_empty();
         return;
     }
 #endif
@@ -148,7 +147,7 @@ SDL_BlitCopyOverlap(SDL_BlitInfo * info)
     src = info->s_pixels;
     dst = info->d_pixels;
     skip = w + info->s_skip;
-    if ((dst < src) || (dst >= (src + h*skip))) {
+    if ((dst < src) || (dst >= (src + h * skip))) {
         SDL_BlitCopy(info);
     } else {
         src += ((h - 1) * skip);
