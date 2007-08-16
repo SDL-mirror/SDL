@@ -31,6 +31,7 @@
 #include <xmmintrin.h>
 #endif
 
+#include "SDL_cpuinfo.h"
 #include "SDL_endian.h"
 
 /* The structure passed to the low level blit functions */

@@ -139,10 +139,11 @@ SDL_ChooseBlitFunc(SDL_BlitEntry * entries, int count)
     static Uint32 features = 0xffffffff;
 
     if (features == 0xffffffff) {
+        const char *override = SDL_getenv("SDL_BLIT_FEATURES");
+
         features = SDL_BLIT_ANY;
 
-        /* Provide an override for testing .. */
-        const char *override = SDL_getenv("SDL_BLIT_FEATURES");
+        /* Allow an override for testing .. */
         if (override) {
             SDL_sscanf(override, "%u", &features);
         } else {
@@ -152,7 +153,7 @@ SDL_ChooseBlitFunc(SDL_BlitEntry * entries, int count)
             if (SDL_HasSSE()) {
                 features |= SDL_BLIT_SSE;
             }
-            if (SDL_HasAltivec()) {
+            if (SDL_HasAltiVec()) {
                 if (SDL_UseAltivecPrefetch()) {
                     features |= SDL_BLIT_ALTIVEC_PREFETCH;
                 } else {

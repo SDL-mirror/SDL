@@ -417,6 +417,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\video\SDL_blit_copy.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\video\SDL_blit_copy.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\video\SDL_blit_N.c"
 			>
 		</File>
