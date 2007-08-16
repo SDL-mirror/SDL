@@ -24,6 +24,13 @@
 #ifndef _SDL_blit_h
 #define _SDL_blit_h
 
+#ifdef __MMX__
+#include <mmintrin.h>
+#endif
+#ifdef __SSE__
+#include <xmmintrin.h>
+#endif
+
 #include "SDL_endian.h"
 
 /* The structure passed to the low level blit functions */
@@ -91,6 +98,14 @@ extern SDL_loblit SDL_CalculateAlphaBlit(SDL_Surface * surface, int complex);
 /*
  * Useful macros for blitting routines
  */
+
+#if defined(__GNUC__)
+#define DECLARE_ALIGNED(t,v,a)  t __attribute__((aligned(a))) v
+#elif defined(_MSC_VER)
+#define DECLARE_ALIGNED(t,v,a)  t __declspec(align(a)) v
+#else
+#define DECLARE_ALIGNED(t,v,a)  t v
+#endif
 
 #define FORMAT_EQUAL(A, B)						\
     ((A)->BitsPerPixel == (B)->BitsPerPixel				\

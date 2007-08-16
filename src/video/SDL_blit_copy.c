@@ -23,13 +23,8 @@
 
 #include "SDL_video.h"
 #include "SDL_blit.h"
+#include "SDL_blit_copy.h"
 
-#ifdef __MMX__
-#include <mmintrin.h>
-#endif
-#ifdef __SSE__
-#include <xmmintrin.h>
-#endif
 
 #ifdef __MMX__
 static __inline__ void

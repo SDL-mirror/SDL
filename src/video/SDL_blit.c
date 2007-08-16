@@ -110,7 +110,8 @@ SDL_SoftBlit(SDL_Surface * src, SDL_Rect * srcrect,
 #ifdef __MACOSX__
 #include <sys/sysctl.h>
 
-static SDL_bool SDL_UseAltivecPrefetch()
+static SDL_bool
+SDL_UseAltivecPrefetch()
 {
     const char key[] = "hw.l3cachesize";
     u_int64_t result = 0;
@@ -123,14 +124,16 @@ static SDL_bool SDL_UseAltivecPrefetch()
     }
 }
 #else
-static SDL_bool SDL_UseAltivecPrefetch()
+static SDL_bool
+SDL_UseAltivecPrefetch()
 {
     /* Just guess G4 */
     return SDL_TRUE;
 }
 #endif /* __MACOSX__ */
 
-static SDL_loblit SDL_ChooseBlitFunc(SDL_BlitEntry *entries, int count)
+static SDL_loblit
+SDL_ChooseBlitFunc(SDL_BlitEntry * entries, int count)
 {
     int i;
     static Uint32 features = 0xffffffff;
