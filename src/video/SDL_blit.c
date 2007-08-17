@@ -121,7 +121,7 @@ SDL_UseAltivecPrefetch()
 static SDL_BlitFunc
 SDL_ChooseBlitFunc(Uint32 src_format, Uint32 dst_format, int flags, SDL_BlitFuncEntry * entries)
 {
-    int i;
+    int i, flagcheck;
     static Uint32 features = 0xffffffff;
 
     /* Get the available CPU features */
@@ -157,18 +157,45 @@ SDL_ChooseBlitFunc(Uint32 src_format, Uint32 dst_format, int flags, SDL_BlitFunc
     }
 
     for (i = 0; entries[i].func; ++i) {
+        /* Check for matching pixel formats */
         if (src_format != entries[i].src_format) {
             continue;
         }
         if (dst_format != entries[i].dst_format) {
             continue;
         }
-        if ((flags & entries[i].flags) != flags) {
+
+        /* Check modulation flags */
+        flagcheck = (flags & (SDL_COPY_MODULATE_COLOR|SDL_COPY_MODULATE_COLOR));
+        if ((flagcheck & entries[i].flags) != flagcheck) {
             continue;
         }
-        if (!(features & entries[i].cpu)) {
+
+        /* Check blend flags */
+        flagcheck = (flags & (SDL_COPY_MASK|SDL_COPY_BLEND|SDL_COPY_ADD|SDL_COPY_MOD));
+        if ((flagcheck & entries[i].flags) != flagcheck) {
             continue;
         }
+
+        /* Check colorkey flag */
+        flagcheck = (flags & SDL_COPY_COLORKEY);
+        if ((flagcheck & entries[i].flags) != flagcheck) {
+            continue;
+        }
+
+        /* Check scaling flags */
+        flagcheck = (flags & SDL_COPY_NEAREST);
+        if ((flagcheck & entries[i].flags) != flagcheck) {
+            continue;
+        }
+
+        /* Check CPU features */
+        flagcheck = entries[i].cpu;
+        if ((flagcheck & features) != flagcheck) {
+            continue;
+        }
+
+        /* We found the best one! */
         return entries[i].func;
     }
     return NULL;
@@ -232,8 +259,8 @@ SDL_CalculateBlit(SDL_Surface * surface)
     }
 
     /* Choose software blitting function */
-    if (surface->flags & SDL_RLEACCELOK) {
-        if (surface->map->identity
+    if ((surface->flags & SDL_RLEACCELOK) && !(surface->map->flags & () {
+        if (surface->map->identity && (surface->map->flags & SDL_COPY_COLORKEY)
             && (blit_index == 1
                 || (blit_index == 3 && !surface->format->Amask))) {
             if (SDL_RLESurface(surface) == 0)
