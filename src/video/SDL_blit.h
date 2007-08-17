@@ -62,8 +62,8 @@ typedef struct SDL_BlitMap
     Uint8 *table;
     SDL_blit blit;
     void *data;
-    Uint32 ckey;    /* colorkey */
-    Uint32 cmod;    /* ARGB modulation */
+    Uint32 ckey;                /* colorkey */
+    Uint32 cmod;                /* ARGB modulation */
 
     /* the version count matches the destination; mismatch indicates
        an invalid mapping */

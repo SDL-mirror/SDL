@@ -286,7 +286,7 @@ SDL_SetAlpha(SDL_Surface * surface, Uint32 flag, Uint8 value)
     if (flag) {
         surface->flags |= SDL_SRCALPHA;
         surface->map->cmod &= 0x00FFFFFF;
-        surface->map->cmod |= ((Uint32)value << 24);
+        surface->map->cmod |= ((Uint32) value << 24);
         if (flag & SDL_RLEACCELOK) {
             surface->flags |= SDL_RLEACCELOK;
         } else {
@@ -611,7 +611,7 @@ SDL_ConvertSurface(SDL_Surface * surface,
         if (format->Amask) {
             surface->flags &= ~SDL_SRCALPHA;
         } else {
-            alpha = (Uint8)(surface->map->cmod >> 24);
+            alpha = (Uint8) (surface->map->cmod >> 24);
             SDL_SetAlpha(surface, 0, 0);
         }
     }

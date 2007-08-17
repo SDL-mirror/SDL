@@ -371,7 +371,7 @@ BlitRGBtoRGBPixelAlphaMMX(SDL_BlitInfo * info)
     __m64 src1, dst1, mm_alpha, mm_zero, dmask;
 
     mm_zero = _mm_setzero_si64();       /* 0 -> mm_zero */
-	multmask = 0xFFFF;
+    multmask = 0xFFFF;
     multmask <<= (ashift * 2);
     multmask = ~multmask;
     dmask = *(__m64 *) & multmask;      /* dst alpha mask -> dmask */
@@ -1389,7 +1389,7 @@ BlitRGBtoRGBPixelAlphaMMX3DNOW(SDL_BlitInfo * info)
     __m64 src1, dst1, mm_alpha, mm_zero, dmask;
 
     mm_zero = _mm_setzero_si64();       /* 0 -> mm_zero */
-	multmask = 0xFFFF;
+    multmask = 0xFFFF;
     multmask <<= (ashift * 2);
     multmask = ~multmask;
     dmask = *(__m64 *) & multmask;      /* dst alpha mask -> dmask */
@@ -1874,7 +1874,7 @@ Blit565to565SurfaceAlpha(SDL_BlitInfo * info)
 static void
 Blit555to555SurfaceAlpha(SDL_BlitInfo * info)
 {
-    unsigned alpha = (info->cmod >> 24);  /* downscale alpha to 5 bits */
+    unsigned alpha = (info->cmod >> 24);        /* downscale alpha to 5 bits */
     if (alpha == 128) {
         Blit16to16SurfaceAlpha128(info, 0xfbde);
     } else {

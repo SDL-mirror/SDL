@@ -673,7 +673,7 @@ Map1toN(SDL_PixelFormat * src, Uint32 cmod, SDL_PixelFormat * dst)
     Uint8 *map;
     int i;
     int bpp;
-    unsigned Amod, Rmod, Gmod, Bmod; 
+    unsigned Amod, Rmod, Gmod, Bmod;
     SDL_Palette *pal = src->palette;
 
     bpp = ((dst->BytesPerPixel == 3) ? 4 : dst->BytesPerPixel);

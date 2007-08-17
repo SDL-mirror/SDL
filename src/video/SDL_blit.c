@@ -82,7 +82,7 @@ SDL_SoftBlit(SDL_Surface * src, SDL_Rect * srcrect,
         info.dst = dst->format;
         info.ckey = src->map->ckey;
         info.cmod = src->map->cmod;
-        RunBlit = (SDL_loblit)src->map->data;
+        RunBlit = (SDL_loblit) src->map->data;
 
         /* Run the actual software blit */
         RunBlit(&info);
