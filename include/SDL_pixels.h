@@ -237,11 +237,6 @@ typedef struct SDL_PixelFormat
     Uint32 Gmask;
     Uint32 Bmask;
     Uint32 Amask;
-
-    /* RGB color key information */
-    Uint32 colorkey;
-    /* Alpha value information (per-surface alpha) */
-    Uint8 alpha;
 } SDL_PixelFormat;
 
 /**

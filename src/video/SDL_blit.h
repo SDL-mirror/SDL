@@ -45,21 +45,14 @@ typedef struct
     int d_width;
     int d_height;
     int d_skip;
-    void *aux_data;
     SDL_PixelFormat *src;
     Uint8 *table;
     SDL_PixelFormat *dst;
+    Uint32 ckey, cmod;
 } SDL_BlitInfo;
 
 /* The type definition for the low level blit functions */
 typedef void (*SDL_loblit) (SDL_BlitInfo * info);
-
-/* This is the private info structure for software accelerated blits */
-struct private_swaccel
-{
-    SDL_loblit blit;
-    void *aux_data;
-};
 
 /* Blit mapping definition */
 typedef struct SDL_BlitMap
@@ -67,8 +60,10 @@ typedef struct SDL_BlitMap
     SDL_Surface *dst;
     int identity;
     Uint8 *table;
-    SDL_blit sw_blit;
-    struct private_swaccel *sw_data;
+    SDL_blit blit;
+    void *data;
+    Uint32 ckey;    /* colorkey */
+    Uint32 cmod;    /* ARGB modulation */
 
     /* the version count matches the destination; mismatch indicates
        an invalid mapping */

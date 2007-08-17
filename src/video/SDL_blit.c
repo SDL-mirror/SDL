@@ -77,11 +77,12 @@ SDL_SoftBlit(SDL_Surface * src, SDL_Rect * srcrect,
         info.d_width = dstrect->w;
         info.d_height = dstrect->h;
         info.d_skip = dst->pitch - info.d_width * dst->format->BytesPerPixel;
-        info.aux_data = src->map->sw_data->aux_data;
         info.src = src->format;
         info.table = src->map->table;
         info.dst = dst->format;
-        RunBlit = src->map->sw_data->blit;
+        info.ckey = src->map->ckey;
+        info.cmod = src->map->cmod;
+        RunBlit = (SDL_loblit)src->map->data;
 
         /* Run the actual software blit */
         RunBlit(&info);
@@ -166,20 +167,21 @@ SDL_ChooseBlitFunc(SDL_BlitEntry * entries, int count)
 int
 SDL_CalculateBlit(SDL_Surface * surface)
 {
+    SDL_loblit blit = NULL;
     int blit_index;
 
     /* Clean everything out to start */
     if ((surface->flags & SDL_RLEACCEL) == SDL_RLEACCEL) {
         SDL_UnRLESurface(surface, 1);
     }
-    surface->map->sw_blit = NULL;
+    surface->map->blit = NULL;
 
     /* Get the blit function index, based on surface mode */
     /* { 0 = nothing, 1 = colorkey, 2 = alpha, 3 = colorkey+alpha } */
     blit_index = 0;
     blit_index |= (!!(surface->flags & SDL_SRCCOLORKEY)) << 0;
     if (surface->flags & SDL_SRCALPHA
-        && (surface->format->alpha != SDL_ALPHA_OPAQUE
+        && ((surface->map->cmod >> 24) != SDL_ALPHA_OPAQUE
             || surface->format->Amask)) {
         blit_index |= 2;
     }
@@ -188,34 +190,28 @@ SDL_CalculateBlit(SDL_Surface * surface)
     if (surface->map->identity && blit_index == 0) {
         /* Handle overlapping blits on the same surface */
         if (surface == surface->map->dst) {
-            surface->map->sw_data->blit = SDL_BlitCopyOverlap;
+            blit = SDL_BlitCopyOverlap;
         } else {
-            surface->map->sw_data->blit = SDL_BlitCopy;
+            blit = SDL_BlitCopy;
         }
     } else {
         if (surface->format->BitsPerPixel < 8) {
-            surface->map->sw_data->blit =
-                SDL_CalculateBlit0(surface, blit_index);
+            blit = SDL_CalculateBlit0(surface, blit_index);
         } else {
             switch (surface->format->BytesPerPixel) {
             case 1:
-                surface->map->sw_data->blit =
-                    SDL_CalculateBlit1(surface, blit_index);
+                blit = SDL_CalculateBlit1(surface, blit_index);
                 break;
             case 2:
             case 3:
             case 4:
-                surface->map->sw_data->blit =
-                    SDL_CalculateBlitN(surface, blit_index);
-                break;
-            default:
-                surface->map->sw_data->blit = NULL;
+                blit = SDL_CalculateBlitN(surface, blit_index);
                 break;
             }
         }
     }
     /* Make sure we have a blit function */
-    if (surface->map->sw_data->blit == NULL) {
+    if (blit == NULL) {
         SDL_InvalidateMap(surface->map);
         SDL_SetError("Blit combination not supported");
         return (-1);
@@ -227,15 +223,16 @@ SDL_CalculateBlit(SDL_Surface * surface)
             && (blit_index == 1
                 || (blit_index == 3 && !surface->format->Amask))) {
             if (SDL_RLESurface(surface) == 0)
-                surface->map->sw_blit = SDL_RLEBlit;
+                surface->map->blit = SDL_RLEBlit;
         } else if (blit_index == 2 && surface->format->Amask) {
             if (SDL_RLESurface(surface) == 0)
-                surface->map->sw_blit = SDL_RLEAlphaBlit;
+                surface->map->blit = SDL_RLEAlphaBlit;
         }
     }
 
-    if (surface->map->sw_blit == NULL) {
-        surface->map->sw_blit = SDL_SoftBlit;
+    if (surface->map->blit == NULL) {
+        surface->map->blit = SDL_SoftBlit;
+        surface->map->data = blit;
     }
     return (0);
 }

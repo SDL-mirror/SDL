@@ -351,7 +351,6 @@ SDL_AllocFormat(int bpp,
         SDL_OutOfMemory();
         return (NULL);
     }
-    format->alpha = SDL_ALPHA_OPAQUE;
 
     /* Set up the format */
     format->BitsPerPixel = bpp;
@@ -669,12 +668,12 @@ Map1to1(SDL_Palette * src, SDL_Palette * dst, int *identical)
 
 /* Map from Palette to BitField */
 static Uint8 *
-Map1toN(SDL_PixelFormat * src, SDL_PixelFormat * dst)
+Map1toN(SDL_PixelFormat * src, Uint32 cmod, SDL_PixelFormat * dst)
 {
     Uint8 *map;
     int i;
     int bpp;
-    unsigned alpha;
+    unsigned Amod, Rmod, Gmod, Bmod; 
     SDL_Palette *pal = src->palette;
 
     bpp = ((dst->BytesPerPixel == 3) ? 4 : dst->BytesPerPixel);
@@ -684,12 +683,18 @@ Map1toN(SDL_PixelFormat * src, SDL_PixelFormat * dst)
         return (NULL);
     }
 
-    alpha = dst->Amask ? src->alpha : 0;
+    Amod = (cmod >> 24) & 0xFF;
+    Rmod = (cmod >> 16) & 0xFF;
+    Gmod = (cmod >> 8) & 0xFF;
+    Bmod = (cmod >> 0) & 0xFF;
+
     /* We memory copy to the pixel map so the endianness is preserved */
     for (i = 0; i < pal->ncolors; ++i) {
-        ASSEMBLE_RGBA(&map[i * bpp], dst->BytesPerPixel, dst,
-                      pal->colors[i].r, pal->colors[i].g,
-                      pal->colors[i].b, alpha);
+        Uint8 A = Amod;
+        Uint8 R = (pal->colors[i].r * Rmod) / 255;
+        Uint8 G = (pal->colors[i].g * Gmod) / 255;
+        Uint8 B = (pal->colors[i].b * Bmod) / 255;
+        ASSEMBLE_RGBA(&map[i * bpp], dst->BytesPerPixel, dst, R, G, B, A);
     }
     return (map);
 }
@@ -720,15 +725,7 @@ SDL_AllocBlitMap(void)
         SDL_OutOfMemory();
         return (NULL);
     }
-
-    /* Allocate the software blit data */
-    map->sw_data =
-        (struct private_swaccel *) SDL_calloc(1, sizeof(*map->sw_data));
-    if (map->sw_data == NULL) {
-        SDL_FreeBlitMap(map);
-        SDL_OutOfMemory();
-        return (NULL);
-    }
+    map->cmod = 0xFFFFFFFF;
 
     /* It's ready to go */
     return (map);
@@ -783,7 +780,7 @@ SDL_MapSurface(SDL_Surface * src, SDL_Surface * dst)
 
         default:
             /* Palette --> BitField */
-            map->table = Map1toN(srcfmt, dstfmt);
+            map->table = Map1toN(srcfmt, src->map->cmod, dstfmt);
             if (map->table == NULL) {
                 return (-1);
             }
@@ -823,9 +820,6 @@ SDL_FreeBlitMap(SDL_BlitMap * map)
 {
     if (map) {
         SDL_InvalidateMap(map);
-        if (map->sw_data != NULL) {
-            SDL_free(map->sw_data);
-        }
         SDL_free(map);
     }
 }

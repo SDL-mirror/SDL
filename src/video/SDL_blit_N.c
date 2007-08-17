@@ -322,8 +322,8 @@ Blit_RGB565_32Altivec(SDL_BlitInfo * info)
     vf800 = (vector unsigned short) vec_splat_u8(-7);
     vf800 = vec_sl(vf800, vec_splat_u16(8));
 
-    if (dstfmt->Amask && srcfmt->alpha) {
-        ((unsigned char *) &valpha)[0] = alpha = srcfmt->alpha;
+    if (dstfmt->Amask && (info->cmod >> 24)) {
+        ((unsigned char *) &valpha)[0] = alpha = (info->cmod >> 24);
         valpha = vec_splat(valpha, 0);
     } else {
         alpha = 0;
@@ -470,8 +470,8 @@ Blit_RGB555_32Altivec(SDL_BlitInfo * info)
     vf800 = (vector unsigned short) vec_splat_u8(-7);
     vf800 = vec_sl(vf800, vec_splat_u16(8));
 
-    if (dstfmt->Amask && srcfmt->alpha) {
-        ((unsigned char *) &valpha)[0] = alpha = srcfmt->alpha;
+    if (dstfmt->Amask && (info->cmod >> 24)) {
+        ((unsigned char *) &valpha)[0] = alpha = (info->cmod >> 24);
         valpha = vec_splat(valpha, 0);
     } else {
         alpha = 0;
@@ -569,9 +569,9 @@ Blit32to32KeyAltivec(SDL_BlitInfo * info)
     SDL_PixelFormat *dstfmt = info->dst;
     int dstbpp = dstfmt->BytesPerPixel;
     int copy_alpha = (srcfmt->Amask && dstfmt->Amask);
-    unsigned alpha = dstfmt->Amask ? srcfmt->alpha : 0;
+    unsigned alpha = dstfmt->Amask ? (info->cmod >> 24) : 0;
     Uint32 rgbmask = srcfmt->Rmask | srcfmt->Gmask | srcfmt->Bmask;
-    Uint32 ckey = info->src->colorkey;
+    Uint32 ckey = info->ckey;
     vector unsigned int valpha;
     vector unsigned char vpermute;
     vector unsigned char vzero;
@@ -687,9 +687,9 @@ ConvertAltivec32to32_noprefetch(SDL_BlitInfo * info)
     vector unsigned int vzero = vec_splat_u32(0);
     vector unsigned char vpermute = calc_swizzle32(srcfmt, dstfmt);
     if (dstfmt->Amask && !srcfmt->Amask) {
-        if (srcfmt->alpha) {
+        if ((info->cmod >> 24)) {
             vector unsigned char valpha;
-            ((unsigned char *) &valpha)[0] = srcfmt->alpha;
+            ((unsigned char *) &valpha)[0] = (info->cmod >> 24);
             vzero = (vector unsigned int) vec_splat(valpha, 0);
         }
     }
@@ -766,9 +766,9 @@ ConvertAltivec32to32_prefetch(SDL_BlitInfo * info)
     vector unsigned int vzero = vec_splat_u32(0);
     vector unsigned char vpermute = calc_swizzle32(srcfmt, dstfmt);
     if (dstfmt->Amask && !srcfmt->Amask) {
-        if (srcfmt->alpha) {
+        if ((info->cmod >> 24)) {
             vector unsigned char valpha;
-            ((unsigned char *) &valpha)[0] = srcfmt->alpha;
+            ((unsigned char *) &valpha)[0] = (info->cmod >> 24);
             vzero = (vector unsigned int) vec_splat(valpha, 0);
         }
     }
@@ -2039,7 +2039,7 @@ Blit4to4MaskAlpha(SDL_BlitInfo * info)
 
     if (dstfmt->Amask) {
         /* RGB->RGBA, SET_ALPHA */
-        Uint32 mask = (srcfmt->alpha >> dstfmt->Aloss) << dstfmt->Ashift;
+        Uint32 mask = ((info->cmod >> 24) >> dstfmt->Aloss) << dstfmt->Ashift;
 
         while (height--) {
 			/* *INDENT-OFF* */
@@ -2087,7 +2087,7 @@ BlitNtoN(SDL_BlitInfo * info)
     int srcbpp = srcfmt->BytesPerPixel;
     SDL_PixelFormat *dstfmt = info->dst;
     int dstbpp = dstfmt->BytesPerPixel;
-    unsigned alpha = dstfmt->Amask ? srcfmt->alpha : 0;
+    unsigned alpha = dstfmt->Amask ? (info->cmod >> 24) : 0;
 
     while (height--) {
 		/* *INDENT-OFF* */
@@ -2150,7 +2150,7 @@ BlitNto1Key(SDL_BlitInfo * info)
     int dstskip = info->d_skip;
     SDL_PixelFormat *srcfmt = info->src;
     const Uint8 *palmap = info->table;
-    Uint32 ckey = srcfmt->colorkey;
+    Uint32 ckey = info->ckey;
     Uint32 rgbmask = ~srcfmt->Amask;
     int srcbpp;
     Uint32 Pixel;
@@ -2214,7 +2214,7 @@ Blit2to2Key(SDL_BlitInfo * info)
     int srcskip = info->s_skip;
     Uint16 *dstp = (Uint16 *) info->d_pixels;
     int dstskip = info->d_skip;
-    Uint32 ckey = info->src->colorkey;
+    Uint32 ckey = info->ckey;
     Uint32 rgbmask = ~info->src->Amask;
 
     /* Set up some basic variables */
@@ -2248,12 +2248,12 @@ BlitNtoNKey(SDL_BlitInfo * info)
     int srcskip = info->s_skip;
     Uint8 *dst = info->d_pixels;
     int dstskip = info->d_skip;
-    Uint32 ckey = info->src->colorkey;
+    Uint32 ckey = info->ckey;
     SDL_PixelFormat *srcfmt = info->src;
     SDL_PixelFormat *dstfmt = info->dst;
     int srcbpp = srcfmt->BytesPerPixel;
     int dstbpp = dstfmt->BytesPerPixel;
-    unsigned alpha = dstfmt->Amask ? srcfmt->alpha : 0;
+    unsigned alpha = dstfmt->Amask ? (info->cmod >> 24) : 0;
     Uint32 rgbmask = ~srcfmt->Amask;
 
     /* Set up some basic variables */
@@ -2291,7 +2291,7 @@ BlitNtoNKeyCopyAlpha(SDL_BlitInfo * info)
     int srcskip = info->s_skip;
     Uint8 *dst = info->d_pixels;
     int dstskip = info->d_skip;
-    Uint32 ckey = info->src->colorkey;
+    Uint32 ckey = info->ckey;
     SDL_PixelFormat *srcfmt = info->src;
     SDL_PixelFormat *dstfmt = info->dst;
     Uint32 rgbmask = ~srcfmt->Amask;
@@ -2332,70 +2332,69 @@ struct blit_table
     int dstbpp;
     Uint32 dstR, dstG, dstB;
     Uint32 blit_features;
-    void *aux_data;
     SDL_loblit blitfunc;
     enum
     { NO_ALPHA = 1, SET_ALPHA = 2, COPY_ALPHA = 4 } alpha;
 };
 static const struct blit_table normal_blit_1[] = {
     /* Default for 8-bit RGB source, an invalid combination */
-    {0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL},
+    {0, 0, 0, 0, 0, 0, 0, 0, NULL},
 };
 static const struct blit_table normal_blit_2[] = {
 #if SDL_ALTIVEC_BLITTERS
     /* has-altivec */
     {0x0000F800, 0x000007E0, 0x0000001F, 4, 0x00000000, 0x00000000,
      0x00000000,
-     2, NULL, Blit_RGB565_32Altivec, NO_ALPHA | COPY_ALPHA | SET_ALPHA},
+     2, Blit_RGB565_32Altivec, NO_ALPHA | COPY_ALPHA | SET_ALPHA},
     {0x00007C00, 0x000003E0, 0x0000001F, 4, 0x00000000, 0x00000000,
      0x00000000,
-     2, NULL, Blit_RGB555_32Altivec, NO_ALPHA | COPY_ALPHA | SET_ALPHA},
+     2, Blit_RGB555_32Altivec, NO_ALPHA | COPY_ALPHA | SET_ALPHA},
 #endif
     {0x0000F800, 0x000007E0, 0x0000001F, 4, 0x00FF0000, 0x0000FF00,
      0x000000FF,
-     0, NULL, Blit_RGB565_ARGB8888, SET_ALPHA},
+     0, Blit_RGB565_ARGB8888, SET_ALPHA},
     {0x0000F800, 0x000007E0, 0x0000001F, 4, 0x000000FF, 0x0000FF00,
      0x00FF0000,
-     0, NULL, Blit_RGB565_ABGR8888, SET_ALPHA},
+     0, Blit_RGB565_ABGR8888, SET_ALPHA},
     {0x0000F800, 0x000007E0, 0x0000001F, 4, 0xFF000000, 0x00FF0000,
      0x0000FF00,
-     0, NULL, Blit_RGB565_RGBA8888, SET_ALPHA},
+     0, Blit_RGB565_RGBA8888, SET_ALPHA},
     {0x0000F800, 0x000007E0, 0x0000001F, 4, 0x0000FF00, 0x00FF0000,
      0xFF000000,
-     0, NULL, Blit_RGB565_BGRA8888, SET_ALPHA},
+     0, Blit_RGB565_BGRA8888, SET_ALPHA},
 
     /* Default for 16-bit RGB source, used if no other blitter matches */
-    {0, 0, 0, 0, 0, 0, 0, 0, NULL, BlitNtoN, 0}
+    {0, 0, 0, 0, 0, 0, 0, 0, BlitNtoN, 0}
 };
 static const struct blit_table normal_blit_3[] = {
     /* Default for 24-bit RGB source, never optimized */
-    {0, 0, 0, 0, 0, 0, 0, 0, NULL, BlitNtoN, 0}
+    {0, 0, 0, 0, 0, 0, 0, 0, BlitNtoN, 0}
 };
 static const struct blit_table normal_blit_4[] = {
 #if SDL_ALTIVEC_BLITTERS
     /* has-altivec | dont-use-prefetch */
     {0x00000000, 0x00000000, 0x00000000, 4, 0x00000000, 0x00000000,
      0x00000000,
-     6, NULL, ConvertAltivec32to32_noprefetch,
+     6, ConvertAltivec32to32_noprefetch,
      NO_ALPHA | COPY_ALPHA | SET_ALPHA},
     /* has-altivec */
     {0x00000000, 0x00000000, 0x00000000, 4, 0x00000000, 0x00000000,
      0x00000000,
-     2, NULL, ConvertAltivec32to32_prefetch,
+     2, ConvertAltivec32to32_prefetch,
      NO_ALPHA | COPY_ALPHA | SET_ALPHA},
     /* has-altivec */
     {0x00000000, 0x00000000, 0x00000000, 2, 0x0000F800, 0x000007E0,
      0x0000001F,
-     2, NULL, Blit_RGB888_RGB565Altivec, NO_ALPHA},
+     2, Blit_RGB888_RGB565Altivec, NO_ALPHA},
 #endif
     {0x00FF0000, 0x0000FF00, 0x000000FF, 2, 0x0000F800, 0x000007E0,
      0x0000001F,
-     0, NULL, Blit_RGB888_RGB565, NO_ALPHA},
+     0, Blit_RGB888_RGB565, NO_ALPHA},
     {0x00FF0000, 0x0000FF00, 0x000000FF, 2, 0x00007C00, 0x000003E0,
      0x0000001F,
-     0, NULL, Blit_RGB888_RGB555, NO_ALPHA},
+     0, Blit_RGB888_RGB555, NO_ALPHA},
     /* Default for 32-bit RGB source, used if no other blitter matches */
-    {0, 0, 0, 0, 0, 0, 0, 0, NULL, BlitNtoN, 0}
+    {0, 0, 0, 0, 0, 0, 0, 0, BlitNtoN, 0}
 };
 static const struct blit_table *normal_blit[] = {
     normal_blit_1, normal_blit_2, normal_blit_3, normal_blit_4
@@ -2407,7 +2406,6 @@ static const struct blit_table *normal_blit[] = {
 SDL_loblit
 SDL_CalculateBlitN(SDL_Surface * surface, int blit_index)
 {
-    struct private_swaccel *sdata;
     SDL_PixelFormat *srcfmt;
     SDL_PixelFormat *dstfmt;
     const struct blit_table *table;
@@ -2415,7 +2413,6 @@ SDL_CalculateBlitN(SDL_Surface * surface, int blit_index)
     SDL_loblit blitfun;
 
     /* Set up data for choosing the blit */
-    sdata = surface->map->sw_data;
     srcfmt = surface->format;
     dstfmt = surface->map->dst->format;
 
@@ -2486,7 +2483,6 @@ SDL_CalculateBlitN(SDL_Surface * surface, int blit_index)
                  table[which].blit_features))
                 break;
         }
-        sdata->aux_data = table[which].aux_data;
         blitfun = table[which].blitfunc;
 
         if (blitfun == BlitNtoN) {      /* default C fallback catch-all. Slow! */

@@ -290,7 +290,7 @@ Blit1to1Key(SDL_BlitInfo * info)
     Uint8 *dst = info->d_pixels;
     int dstskip = info->d_skip;
     Uint8 *palmap = info->table;
-    Uint32 ckey = info->src->colorkey;
+    Uint32 ckey = info->ckey;
 
     if (palmap) {
         while (height--) {
@@ -337,7 +337,7 @@ Blit1to2Key(SDL_BlitInfo * info)
     Uint16 *dstp = (Uint16 *) info->d_pixels;
     int dstskip = info->d_skip;
     Uint16 *palmap = (Uint16 *) info->table;
-    Uint32 ckey = info->src->colorkey;
+    Uint32 ckey = info->ckey;
 
     /* Set up some basic variables */
     dstskip /= 2;
@@ -369,7 +369,7 @@ Blit1to3Key(SDL_BlitInfo * info)
     Uint8 *dst = info->d_pixels;
     int dstskip = info->d_skip;
     Uint8 *palmap = info->table;
-    Uint32 ckey = info->src->colorkey;
+    Uint32 ckey = info->ckey;
     int o;
 
     while (height--) {
@@ -402,7 +402,7 @@ Blit1to4Key(SDL_BlitInfo * info)
     Uint32 *dstp = (Uint32 *) info->d_pixels;
     int dstskip = info->d_skip;
     Uint32 *palmap = (Uint32 *) info->table;
-    Uint32 ckey = info->src->colorkey;
+    Uint32 ckey = info->ckey;
 
     /* Set up some basic variables */
     dstskip /= 4;
@@ -436,7 +436,7 @@ Blit1toNAlpha(SDL_BlitInfo * info)
     SDL_PixelFormat *dstfmt = info->dst;
     const SDL_Color *srcpal = info->src->palette->colors;
     int dstbpp;
-    const int A = info->src->alpha;
+    const int A = (info->cmod >> 24);
 
     /* Set up some basic variables */
     dstbpp = dstfmt->BytesPerPixel;
@@ -477,9 +477,9 @@ Blit1toNAlphaKey(SDL_BlitInfo * info)
     SDL_PixelFormat *srcfmt = info->src;
     SDL_PixelFormat *dstfmt = info->dst;
     const SDL_Color *srcpal = info->src->palette->colors;
-    Uint32 ckey = srcfmt->colorkey;
+    Uint32 ckey = info->ckey;
     int dstbpp;
-    const int A = srcfmt->alpha;
+    const int A = (info->cmod >> 24);
 
     /* Set up some basic variables */
     dstbpp = dstfmt->BytesPerPixel;

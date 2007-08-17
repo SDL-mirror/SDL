@@ -859,7 +859,7 @@ SDL_RLEBlit(SDL_Surface * src, SDL_Rect * srcrect,
     y = dstrect->y;
     dstbuf = (Uint8 *) dst->pixels
         + y * dst->pitch + x * src->format->BytesPerPixel;
-    srcbuf = (Uint8 *) src->map->sw_data->aux_data;
+    srcbuf = (Uint8 *) src->map->data;
 
     {
         /* skip lines at the top if neccessary */
@@ -906,7 +906,7 @@ SDL_RLEBlit(SDL_Surface * src, SDL_Rect * srcrect,
     }
 
     alpha = (src->flags & SDL_SRCALPHA) == SDL_SRCALPHA
-        ? src->format->alpha : 255;
+        ? (src->map->cmod >> 24) : 255;
     /* if left or right edge clipping needed, call clip blit */
     if (srcrect->x || srcrect->w != src->w) {
         RLEClipBlit(w, srcbuf, dst, dstbuf, srcrect, alpha);
@@ -1133,7 +1133,7 @@ SDL_RLEAlphaBlit(SDL_Surface * src, SDL_Rect * srcrect,
     x = dstrect->x;
     y = dstrect->y;
     dstbuf = (Uint8 *) dst->pixels + y * dst->pitch + x * df->BytesPerPixel;
-    srcbuf = (Uint8 *) src->map->sw_data->aux_data + sizeof(RLEDestFormat);
+    srcbuf = (Uint8 *) src->map->data + sizeof(RLEDestFormat);
 
     {
         /* skip lines at the top if necessary */
@@ -1628,7 +1628,7 @@ RLEAlphaSurface(SDL_Surface * surface)
         Uint8 *p = SDL_realloc(rlebuf, dst - rlebuf);
         if (!p)
             p = rlebuf;
-        surface->map->sw_data->aux_data = p;
+        surface->map->data = p;
     }
 
     return 0;
@@ -1715,7 +1715,7 @@ RLEColorkeySurface(SDL_Surface * surface)
     skip = run = 0;
     dst = rlebuf;
     rgbmask = ~surface->format->Amask;
-    ckey = surface->format->colorkey & rgbmask;
+    ckey = surface->map->ckey & rgbmask;
     lastline = dst;
     getpix = getpixes[bpp - 1];
     w = surface->w;
@@ -1794,7 +1794,7 @@ RLEColorkeySurface(SDL_Surface * surface)
         Uint8 *p = SDL_realloc(rlebuf, dst - rlebuf);
         if (!p)
             p = rlebuf;
-        surface->map->sw_data->aux_data = p;
+        surface->map->data = p;
     }
 
     return (0);
@@ -1859,7 +1859,7 @@ UnRLEAlpha(SDL_Surface * surface)
     Uint8 *srcbuf;
     Uint32 *dst;
     SDL_PixelFormat *sf = surface->format;
-    RLEDestFormat *df = surface->map->sw_data->aux_data;
+    RLEDestFormat *df = surface->map->data;
     int (*uncopy_opaque) (Uint32 *, void *, int,
                           RLEDestFormat *, SDL_PixelFormat *);
     int (*uncopy_transl) (Uint32 *, void *, int,
@@ -1948,7 +1948,7 @@ SDL_UnRLESurface(SDL_Surface * surface, int recode)
                 }
 
                 /* fill it with the background colour */
-                SDL_FillRect(surface, NULL, surface->format->colorkey);
+                SDL_FillRect(surface, NULL, surface->map->ckey);
 
                 /* now render the encoded surface */
                 full.x = full.y = 0;
@@ -1967,9 +1967,9 @@ SDL_UnRLESurface(SDL_Surface * surface, int recode)
             }
         }
 
-        if (surface->map && surface->map->sw_data->aux_data) {
-            SDL_free(surface->map->sw_data->aux_data);
-            surface->map->sw_data->aux_data = NULL;
+        if (surface->map && surface->map->data) {
+            SDL_free(surface->map->data);
+            surface->map->data = NULL;
         }
     }
 }

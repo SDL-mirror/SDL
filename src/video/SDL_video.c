@@ -1595,7 +1595,7 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
                               surface->pitch);
         }
     } else {
-        Uint8 alpha;
+        Uint32 cmod;
         SDL_Rect bounds;
         SDL_Surface dst;
 
@@ -1648,6 +1648,7 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
         }
 
         /* Copy over the alpha channel */
+        cmod = surface->map->cmod;
         if (surface_flags & SDL_SRCALPHA) {
             if (fmt->Amask) {
                 surface->flags &= ~SDL_SRCALPHA;
@@ -1655,7 +1656,6 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
                 /* FIXME: Need to make sure the texture has an alpha channel
                  *        and copy 'alpha' into the texture alpha channel.
                  */
-                alpha = surface->format->alpha;
                 SDL_SetAlpha(surface, 0, 0);
             }
         }
@@ -1673,7 +1673,7 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
             if (fmt->Amask) {
                 surface->flags |= SDL_SRCALPHA;
             } else {
-                SDL_SetAlpha(surface, aflags, alpha);
+                SDL_SetAlpha(surface, aflags, (cmod >> 24));
             }
         }
 

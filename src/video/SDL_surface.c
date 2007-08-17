@@ -231,7 +231,7 @@ SDL_SetColorKey(SDL_Surface * surface, Uint32 flag, Uint32 key)
 
     /* Optimize away operations that don't change anything */
     if ((flag == (surface->flags & (SDL_SRCCOLORKEY | SDL_RLEACCELOK))) &&
-        (key == surface->format->colorkey)) {
+        (key == surface->map->ckey)) {
         return (0);
     }
 
@@ -242,7 +242,7 @@ SDL_SetColorKey(SDL_Surface * surface, Uint32 flag, Uint32 key)
 
     if (flag) {
         surface->flags |= SDL_SRCCOLORKEY;
-        surface->format->colorkey = key;
+        surface->map->ckey = key;
         if (flag & SDL_RLEACCELOK) {
             surface->flags |= SDL_RLEACCELOK;
         } else {
@@ -250,7 +250,7 @@ SDL_SetColorKey(SDL_Surface * surface, Uint32 flag, Uint32 key)
         }
     } else {
         surface->flags &= ~(SDL_SRCCOLORKEY | SDL_RLEACCELOK);
-        surface->format->colorkey = 0;
+        surface->map->ckey = 0;
     }
     SDL_InvalidateMap(surface->map);
     return (0);
@@ -261,7 +261,7 @@ int
 SDL_SetAlpha(SDL_Surface * surface, Uint32 flag, Uint8 value)
 {
     Uint32 oldflags = surface->flags;
-    Uint32 oldalpha = surface->format->alpha;
+    Uint32 oldalpha = (surface->map->cmod >> 24);
 
     /* Sanity check the flag as it gets passed in */
     if (flag & SDL_SRCALPHA) {
@@ -285,7 +285,8 @@ SDL_SetAlpha(SDL_Surface * surface, Uint32 flag, Uint8 value)
 
     if (flag) {
         surface->flags |= SDL_SRCALPHA;
-        surface->format->alpha = value;
+        surface->map->cmod &= 0x00FFFFFF;
+        surface->map->cmod |= ((Uint32)value << 24);
         if (flag & SDL_RLEACCELOK) {
             surface->flags |= SDL_RLEACCELOK;
         } else {
@@ -293,7 +294,7 @@ SDL_SetAlpha(SDL_Surface * surface, Uint32 flag, Uint8 value)
         }
     } else {
         surface->flags &= ~SDL_SRCALPHA;
-        surface->format->alpha = SDL_ALPHA_OPAQUE;
+        surface->map->cmod |= 0xFF000000;
     }
     /*
      * The representation for software surfaces is independent of
@@ -412,7 +413,7 @@ SDL_LowerBlit(SDL_Surface * src, SDL_Rect * srcrect,
             return (-1);
         }
     }
-    return (src->map->sw_blit(src, srcrect, dst, dstrect));
+    return (src->map->blit(src, srcrect, dst, dstrect));
 }
 
 
@@ -601,7 +602,7 @@ SDL_ConvertSurface(SDL_Surface * surface,
         if ((flags & SDL_SRCCOLORKEY) != SDL_SRCCOLORKEY && format->Amask) {
             surface_flags &= ~SDL_SRCCOLORKEY;
         } else {
-            colorkey = surface->format->colorkey;
+            colorkey = surface->map->ckey;
             SDL_SetColorKey(surface, 0, 0);
         }
     }
@@ -610,7 +611,7 @@ SDL_ConvertSurface(SDL_Surface * surface,
         if (format->Amask) {
             surface->flags &= ~SDL_SRCALPHA;
         } else {
-            alpha = surface->format->alpha;
+            alpha = (Uint8)(surface->map->cmod >> 24);
             SDL_SetAlpha(surface, 0, 0);
         }
     }
