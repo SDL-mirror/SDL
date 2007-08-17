@@ -906,7 +906,7 @@ SDL_RLEBlit(SDL_Surface * src, SDL_Rect * srcrect,
     }
 
     alpha = (src->flags & SDL_SRCALPHA) == SDL_SRCALPHA
-        ? (src->map->cmod >> 24) : 255;
+        ? src->map->info.a : 255;
     /* if left or right edge clipping needed, call clip blit */
     if (srcrect->x || srcrect->w != src->w) {
         RLEClipBlit(w, srcbuf, dst, dstbuf, srcrect, alpha);
@@ -1715,7 +1715,7 @@ RLEColorkeySurface(SDL_Surface * surface)
     skip = run = 0;
     dst = rlebuf;
     rgbmask = ~surface->format->Amask;
-    ckey = surface->map->ckey & rgbmask;
+    ckey = surface->map->info.colorkey & rgbmask;
     lastline = dst;
     getpix = getpixes[bpp - 1];
     w = surface->w;
@@ -1948,7 +1948,7 @@ SDL_UnRLESurface(SDL_Surface * surface, int recode)
                 }
 
                 /* fill it with the background colour */
-                SDL_FillRect(surface, NULL, surface->map->ckey);
+                SDL_FillRect(surface, NULL, surface->map->info.colorkey);
 
                 /* now render the encoded surface */
                 full.x = full.y = 0;

@@ -30,12 +30,12 @@
 static void
 BlitNto1SurfaceAlpha(SDL_BlitInfo * info)
 {
-    int width = info->d_width;
-    int height = info->d_height;
-    Uint8 *src = info->s_pixels;
+    int width = info->dst_w;
+    int height = info->dst_h;
+    Uint8 *src = info->src;
     int srcskip = info->s_skip;
-    Uint8 *dst = info->d_pixels;
-    int dstskip = info->d_skip;
+    Uint8 *dst = info->dst;
+    int dstskip = info->dst_pitch;
     Uint8 *palmap = info->table;
     SDL_PixelFormat *srcfmt = info->src;
     SDL_PixelFormat *dstfmt = info->dst;
@@ -86,12 +86,12 @@ BlitNto1SurfaceAlpha(SDL_BlitInfo * info)
 static void
 BlitNto1PixelAlpha(SDL_BlitInfo * info)
 {
-    int width = info->d_width;
-    int height = info->d_height;
-    Uint8 *src = info->s_pixels;
+    int width = info->dst_w;
+    int height = info->dst_h;
+    Uint8 *src = info->src;
     int srcskip = info->s_skip;
-    Uint8 *dst = info->d_pixels;
-    int dstskip = info->d_skip;
+    Uint8 *dst = info->dst;
+    int dstskip = info->dst_pitch;
     Uint8 *palmap = info->table;
     SDL_PixelFormat *srcfmt = info->src;
     SDL_PixelFormat *dstfmt = info->dst;
@@ -142,12 +142,12 @@ BlitNto1PixelAlpha(SDL_BlitInfo * info)
 static void
 BlitNto1SurfaceAlphaKey(SDL_BlitInfo * info)
 {
-    int width = info->d_width;
-    int height = info->d_height;
-    Uint8 *src = info->s_pixels;
+    int width = info->dst_w;
+    int height = info->dst_h;
+    Uint8 *src = info->src;
     int srcskip = info->s_skip;
-    Uint8 *dst = info->d_pixels;
-    int dstskip = info->d_skip;
+    Uint8 *dst = info->dst;
+    int dstskip = info->dst_pitch;
     Uint8 *palmap = info->table;
     SDL_PixelFormat *srcfmt = info->src;
     SDL_PixelFormat *dstfmt = info->dst;
@@ -203,12 +203,12 @@ BlitNto1SurfaceAlphaKey(SDL_BlitInfo * info)
 static void
 BlitRGBtoRGBSurfaceAlpha128MMX(SDL_BlitInfo * info)
 {
-    int width = info->d_width;
-    int height = info->d_height;
-    Uint32 *srcp = (Uint32 *) info->s_pixels;
+    int width = info->dst_w;
+    int height = info->dst_h;
+    Uint32 *srcp = (Uint32 *) info->src;
     int srcskip = info->s_skip >> 2;
-    Uint32 *dstp = (Uint32 *) info->d_pixels;
-    int dstskip = info->d_skip >> 2;
+    Uint32 *dstp = (Uint32 *) info->dst;
+    int dstskip = info->dst_pitch >> 2;
     Uint32 dalpha = info->dst->Amask;
 
     __m64 src1, src2, dst1, dst2, lmask, hmask, dsta;
@@ -267,12 +267,12 @@ BlitRGBtoRGBSurfaceAlphaMMX(SDL_BlitInfo * info)
         /* only call a128 version when R,G,B occupy lower bits */
         BlitRGBtoRGBSurfaceAlpha128MMX(info);
     } else {
-        int width = info->d_width;
-        int height = info->d_height;
-        Uint32 *srcp = (Uint32 *) info->s_pixels;
+        int width = info->dst_w;
+        int height = info->dst_h;
+        Uint32 *srcp = (Uint32 *) info->src;
         int srcskip = info->s_skip >> 2;
-        Uint32 *dstp = (Uint32 *) info->d_pixels;
-        int dstskip = info->d_skip >> 2;
+        Uint32 *dstp = (Uint32 *) info->dst;
+        int dstskip = info->dst_pitch >> 2;
         Uint32 dalpha = df->Amask;
         Uint32 amult;
 
@@ -356,12 +356,12 @@ BlitRGBtoRGBSurfaceAlphaMMX(SDL_BlitInfo * info)
 static void
 BlitRGBtoRGBPixelAlphaMMX(SDL_BlitInfo * info)
 {
-    int width = info->d_width;
-    int height = info->d_height;
-    Uint32 *srcp = (Uint32 *) info->s_pixels;
+    int width = info->dst_w;
+    int height = info->dst_h;
+    Uint32 *srcp = (Uint32 *) info->src;
     int srcskip = info->s_skip >> 2;
-    Uint32 *dstp = (Uint32 *) info->d_pixels;
-    int dstskip = info->d_skip >> 2;
+    Uint32 *dstp = (Uint32 *) info->dst;
+    int dstskip = info->dst_pitch >> 2;
     SDL_PixelFormat *sf = info->src;
     Uint32 chanmask = sf->Rmask | sf->Gmask | sf->Bmask;
     Uint32 amask = sf->Amask;
@@ -542,11 +542,11 @@ calc_swizzle32(const SDL_PixelFormat * srcfmt, const SDL_PixelFormat * dstfmt)
 static void
 Blit32to565PixelAlphaAltivec(SDL_BlitInfo * info)
 {
-    int height = info->d_height;
-    Uint8 *src = (Uint8 *) info->s_pixels;
+    int height = info->dst_h;
+    Uint8 *src = (Uint8 *) info->src;
     int srcskip = info->s_skip;
-    Uint8 *dst = (Uint8 *) info->d_pixels;
-    int dstskip = info->d_skip;
+    Uint8 *dst = (Uint8 *) info->dst;
+    int dstskip = info->dst_pitch;
     SDL_PixelFormat *srcfmt = info->src;
 
     vector unsigned char v0 = vec_splat_u8(0);
@@ -617,7 +617,7 @@ Blit32to565PixelAlphaAltivec(SDL_BlitInfo * info)
         vector unsigned char valigner;
         vector unsigned char vsrc;
         vector unsigned char voverflow;
-        int width = info->d_width;
+        int width = info->dst_w;
 
 #define ONE_PIXEL_BLEND(condition, widthvar) \
         while (condition) { \
@@ -718,11 +718,11 @@ Blit32to565PixelAlphaAltivec(SDL_BlitInfo * info)
 static void
 Blit32to32SurfaceAlphaKeyAltivec(SDL_BlitInfo * info)
 {
-    int height = info->d_height;
-    Uint32 *srcp = (Uint32 *) info->s_pixels;
+    int height = info->dst_h;
+    Uint32 *srcp = (Uint32 *) info->src;
     int srcskip = info->s_skip >> 2;
-    Uint32 *dstp = (Uint32 *) info->d_pixels;
-    int dstskip = info->d_skip >> 2;
+    Uint32 *dstp = (Uint32 *) info->dst;
+    int dstskip = info->dst_pitch >> 2;
     SDL_PixelFormat *srcfmt = info->src;
     SDL_PixelFormat *dstfmt = info->dst;
     unsigned sA = (info->cmod >> 24);
@@ -766,7 +766,7 @@ Blit32to32SurfaceAlphaKeyAltivec(SDL_BlitInfo * info)
     vrgbmask = vec_splat(vrgbmask, 0);
 
     while (height--) {
-        int width = info->d_width;
+        int width = info->dst_w;
 #define ONE_PIXEL_BLEND(condition, widthvar) \
         while (condition) { \
             Uint32 Pixel; \
@@ -844,12 +844,12 @@ Blit32to32SurfaceAlphaKeyAltivec(SDL_BlitInfo * info)
 static void
 Blit32to32PixelAlphaAltivec(SDL_BlitInfo * info)
 {
-    int width = info->d_width;
-    int height = info->d_height;
-    Uint32 *srcp = (Uint32 *) info->s_pixels;
+    int width = info->dst_w;
+    int height = info->dst_h;
+    Uint32 *srcp = (Uint32 *) info->src;
     int srcskip = info->s_skip >> 2;
-    Uint32 *dstp = (Uint32 *) info->d_pixels;
-    int dstskip = info->d_skip >> 2;
+    Uint32 *dstp = (Uint32 *) info->dst;
+    int dstskip = info->dst_pitch >> 2;
     SDL_PixelFormat *srcfmt = info->src;
     SDL_PixelFormat *dstfmt = info->dst;
     vector unsigned char mergePermute;
@@ -875,7 +875,7 @@ Blit32to32PixelAlphaAltivec(SDL_BlitInfo * info)
     vsdstPermute = calc_swizzle32(dstfmt, NULL);
 
     while (height--) {
-        width = info->d_width;
+        width = info->dst_w;
 #define ONE_PIXEL_BLEND(condition, widthvar) while ((condition)) { \
             Uint32 Pixel; \
             unsigned sR, sG, sB, dR, dG, dB, sA, dA; \
@@ -942,12 +942,12 @@ Blit32to32PixelAlphaAltivec(SDL_BlitInfo * info)
 static void
 BlitRGBtoRGBPixelAlphaAltivec(SDL_BlitInfo * info)
 {
-    int width = info->d_width;
-    int height = info->d_height;
-    Uint32 *srcp = (Uint32 *) info->s_pixels;
+    int width = info->dst_w;
+    int height = info->dst_h;
+    Uint32 *srcp = (Uint32 *) info->src;
     int srcskip = info->s_skip >> 2;
-    Uint32 *dstp = (Uint32 *) info->d_pixels;
-    int dstskip = info->d_skip >> 2;
+    Uint32 *dstp = (Uint32 *) info->dst;
+    int dstskip = info->dst_pitch >> 2;
     vector unsigned char mergePermute;
     vector unsigned char valphaPermute;
     vector unsigned char valphamask;
@@ -965,7 +965,7 @@ BlitRGBtoRGBPixelAlphaAltivec(SDL_BlitInfo * info)
 
     vpixelmask = vec_nor(valphamask, v0);
     while (height--) {
-        width = info->d_width;
+        width = info->dst_w;
 #define ONE_PIXEL_BLEND(condition, widthvar) \
         while ((condition)) { \
             Uint32 dalpha; \
@@ -1040,11 +1040,11 @@ static void
 Blit32to32SurfaceAlphaAltivec(SDL_BlitInfo * info)
 {
     /* XXX : 6 */
-    int height = info->d_height;
-    Uint32 *srcp = (Uint32 *) info->s_pixels;
+    int height = info->dst_h;
+    Uint32 *srcp = (Uint32 *) info->src;
     int srcskip = info->s_skip >> 2;
-    Uint32 *dstp = (Uint32 *) info->d_pixels;
-    int dstskip = info->d_skip >> 2;
+    Uint32 *dstp = (Uint32 *) info->dst;
+    int dstskip = info->dst_pitch >> 2;
     SDL_PixelFormat *srcfmt = info->src;
     SDL_PixelFormat *dstfmt = info->dst;
     unsigned sA = (info->cmod >> 24);
@@ -1076,7 +1076,7 @@ Blit32to32SurfaceAlphaAltivec(SDL_BlitInfo * info)
     vbits = (vector unsigned char) vec_splat_s8(-1);
 
     while (height--) {
-        int width = info->d_width;
+        int width = info->dst_w;
 #define ONE_PIXEL_BLEND(condition, widthvar) while ((condition)) { \
             Uint32 Pixel; \
             unsigned sR, sG, sB, dR, dG, dB; \
@@ -1137,11 +1137,11 @@ static void
 BlitRGBtoRGBSurfaceAlphaAltivec(SDL_BlitInfo * info)
 {
     unsigned alpha = (info->cmod >> 24);
-    int height = info->d_height;
-    Uint32 *srcp = (Uint32 *) info->s_pixels;
+    int height = info->dst_h;
+    Uint32 *srcp = (Uint32 *) info->src;
     int srcskip = info->s_skip >> 2;
-    Uint32 *dstp = (Uint32 *) info->d_pixels;
-    int dstskip = info->d_skip >> 2;
+    Uint32 *dstp = (Uint32 *) info->dst;
+    int dstskip = info->dst_pitch >> 2;
     vector unsigned char mergePermute;
     vector unsigned char valpha;
     vector unsigned char valphamask;
@@ -1160,7 +1160,7 @@ BlitRGBtoRGBSurfaceAlphaAltivec(SDL_BlitInfo * info)
     valpha = vec_splat(valpha, 0);
 
     while (height--) {
-        int width = info->d_width;
+        int width = info->dst_w;
 #define ONE_PIXEL_BLEND(condition, widthvar) while ((condition)) { \
             Uint32 s = *srcp; \
             Uint32 d = *dstp; \
@@ -1224,12 +1224,12 @@ BlitRGBtoRGBSurfaceAlphaAltivec(SDL_BlitInfo * info)
 static void
 BlitRGBtoRGBSurfaceAlpha128(SDL_BlitInfo * info)
 {
-    int width = info->d_width;
-    int height = info->d_height;
-    Uint32 *srcp = (Uint32 *) info->s_pixels;
+    int width = info->dst_w;
+    int height = info->dst_h;
+    Uint32 *srcp = (Uint32 *) info->src;
     int srcskip = info->s_skip >> 2;
-    Uint32 *dstp = (Uint32 *) info->d_pixels;
-    int dstskip = info->d_skip >> 2;
+    Uint32 *dstp = (Uint32 *) info->dst;
+    int dstskip = info->dst_pitch >> 2;
 
     while (height--) {
 	    /* *INDENT-OFF* */
@@ -1253,12 +1253,12 @@ BlitRGBtoRGBSurfaceAlpha(SDL_BlitInfo * info)
     if (alpha == 128) {
         BlitRGBtoRGBSurfaceAlpha128(info);
     } else {
-        int width = info->d_width;
-        int height = info->d_height;
-        Uint32 *srcp = (Uint32 *) info->s_pixels;
+        int width = info->dst_w;
+        int height = info->dst_h;
+        Uint32 *srcp = (Uint32 *) info->src;
         int srcskip = info->s_skip >> 2;
-        Uint32 *dstp = (Uint32 *) info->d_pixels;
-        int dstskip = info->d_skip >> 2;
+        Uint32 *dstp = (Uint32 *) info->dst;
+        int dstskip = info->dst_pitch >> 2;
         Uint32 s;
         Uint32 d;
         Uint32 s1;
@@ -1321,12 +1321,12 @@ BlitRGBtoRGBSurfaceAlpha(SDL_BlitInfo * info)
 static void
 BlitRGBtoRGBPixelAlpha(SDL_BlitInfo * info)
 {
-    int width = info->d_width;
-    int height = info->d_height;
-    Uint32 *srcp = (Uint32 *) info->s_pixels;
+    int width = info->dst_w;
+    int height = info->dst_h;
+    Uint32 *srcp = (Uint32 *) info->src;
     int srcskip = info->s_skip >> 2;
-    Uint32 *dstp = (Uint32 *) info->d_pixels;
-    int dstskip = info->d_skip >> 2;
+    Uint32 *dstp = (Uint32 *) info->dst;
+    int dstskip = info->dst_pitch >> 2;
 
     while (height--) {
 	    /* *INDENT-OFF* */
@@ -1374,12 +1374,12 @@ BlitRGBtoRGBPixelAlpha(SDL_BlitInfo * info)
 static void
 BlitRGBtoRGBPixelAlphaMMX3DNOW(SDL_BlitInfo * info)
 {
-    int width = info->d_width;
-    int height = info->d_height;
-    Uint32 *srcp = (Uint32 *) info->s_pixels;
+    int width = info->dst_w;
+    int height = info->dst_h;
+    Uint32 *srcp = (Uint32 *) info->src;
     int srcskip = info->s_skip >> 2;
-    Uint32 *dstp = (Uint32 *) info->d_pixels;
-    int dstskip = info->d_skip >> 2;
+    Uint32 *dstp = (Uint32 *) info->dst;
+    int dstskip = info->dst_pitch >> 2;
     SDL_PixelFormat *sf = info->src;
     Uint32 chanmask = sf->Rmask | sf->Gmask | sf->Bmask;
     Uint32 amask = sf->Amask;
@@ -1456,12 +1456,12 @@ BlitRGBtoRGBPixelAlphaMMX3DNOW(SDL_BlitInfo * info)
 static void
 Blit16to16SurfaceAlpha128(SDL_BlitInfo * info, Uint16 mask)
 {
-    int width = info->d_width;
-    int height = info->d_height;
-    Uint16 *srcp = (Uint16 *) info->s_pixels;
+    int width = info->dst_w;
+    int height = info->dst_h;
+    Uint16 *srcp = (Uint16 *) info->src;
     int srcskip = info->s_skip >> 1;
-    Uint16 *dstp = (Uint16 *) info->d_pixels;
-    int dstskip = info->d_skip >> 1;
+    Uint16 *dstp = (Uint16 *) info->dst;
+    int dstskip = info->dst_pitch >> 1;
 
     while (height--) {
         if (((uintptr_t) srcp ^ (uintptr_t) dstp) & 2) {
@@ -1562,12 +1562,12 @@ Blit565to565SurfaceAlphaMMX(SDL_BlitInfo * info)
     if (alpha == 128) {
         Blit16to16SurfaceAlpha128(info, 0xf7de);
     } else {
-        int width = info->d_width;
-        int height = info->d_height;
-        Uint16 *srcp = (Uint16 *) info->s_pixels;
+        int width = info->dst_w;
+        int height = info->dst_h;
+        Uint16 *srcp = (Uint16 *) info->src;
         int srcskip = info->s_skip >> 1;
-        Uint16 *dstp = (Uint16 *) info->d_pixels;
-        int dstskip = info->d_skip >> 1;
+        Uint16 *dstp = (Uint16 *) info->dst;
+        int dstskip = info->dst_pitch >> 1;
         Uint32 s, d;
 
         __m64 src1, dst1, src2, dst2, gmask, bmask, mm_res, mm_alpha;
@@ -1699,12 +1699,12 @@ Blit555to555SurfaceAlphaMMX(SDL_BlitInfo * info)
     if (alpha == 128) {
         Blit16to16SurfaceAlpha128(info, 0xfbde);
     } else {
-        int width = info->d_width;
-        int height = info->d_height;
-        Uint16 *srcp = (Uint16 *) info->s_pixels;
+        int width = info->dst_w;
+        int height = info->dst_h;
+        Uint16 *srcp = (Uint16 *) info->src;
         int srcskip = info->s_skip >> 1;
-        Uint16 *dstp = (Uint16 *) info->d_pixels;
-        int dstskip = info->d_skip >> 1;
+        Uint16 *dstp = (Uint16 *) info->dst;
+        int dstskip = info->dst_pitch >> 1;
         Uint32 s, d;
 
         __m64 src1, dst1, src2, dst2, rmask, gmask, bmask, mm_res, mm_alpha;
@@ -1839,12 +1839,12 @@ Blit565to565SurfaceAlpha(SDL_BlitInfo * info)
     if (alpha == 128) {
         Blit16to16SurfaceAlpha128(info, 0xf7de);
     } else {
-        int width = info->d_width;
-        int height = info->d_height;
-        Uint16 *srcp = (Uint16 *) info->s_pixels;
+        int width = info->dst_w;
+        int height = info->dst_h;
+        Uint16 *srcp = (Uint16 *) info->src;
         int srcskip = info->s_skip >> 1;
-        Uint16 *dstp = (Uint16 *) info->d_pixels;
-        int dstskip = info->d_skip >> 1;
+        Uint16 *dstp = (Uint16 *) info->dst;
+        int dstskip = info->dst_pitch >> 1;
         alpha >>= 3;            /* downscale alpha to 5 bits */
 
         while (height--) {
@@ -1878,12 +1878,12 @@ Blit555to555SurfaceAlpha(SDL_BlitInfo * info)
     if (alpha == 128) {
         Blit16to16SurfaceAlpha128(info, 0xfbde);
     } else {
-        int width = info->d_width;
-        int height = info->d_height;
-        Uint16 *srcp = (Uint16 *) info->s_pixels;
+        int width = info->dst_w;
+        int height = info->dst_h;
+        Uint16 *srcp = (Uint16 *) info->src;
         int srcskip = info->s_skip >> 1;
-        Uint16 *dstp = (Uint16 *) info->d_pixels;
-        int dstskip = info->d_skip >> 1;
+        Uint16 *dstp = (Uint16 *) info->dst;
+        int dstskip = info->dst_pitch >> 1;
         alpha >>= 3;            /* downscale alpha to 5 bits */
 
         while (height--) {
@@ -1913,12 +1913,12 @@ Blit555to555SurfaceAlpha(SDL_BlitInfo * info)
 static void
 BlitARGBto565PixelAlpha(SDL_BlitInfo * info)
 {
-    int width = info->d_width;
-    int height = info->d_height;
-    Uint32 *srcp = (Uint32 *) info->s_pixels;
+    int width = info->dst_w;
+    int height = info->dst_h;
+    Uint32 *srcp = (Uint32 *) info->src;
     int srcskip = info->s_skip >> 2;
-    Uint16 *dstp = (Uint16 *) info->d_pixels;
-    int dstskip = info->d_skip >> 1;
+    Uint16 *dstp = (Uint16 *) info->dst;
+    int dstskip = info->dst_pitch >> 1;
 
     while (height--) {
 	    /* *INDENT-OFF* */
@@ -1959,12 +1959,12 @@ BlitARGBto565PixelAlpha(SDL_BlitInfo * info)
 static void
 BlitARGBto555PixelAlpha(SDL_BlitInfo * info)
 {
-    int width = info->d_width;
-    int height = info->d_height;
-    Uint32 *srcp = (Uint32 *) info->s_pixels;
+    int width = info->dst_w;
+    int height = info->dst_h;
+    Uint32 *srcp = (Uint32 *) info->src;
     int srcskip = info->s_skip >> 2;
-    Uint16 *dstp = (Uint16 *) info->d_pixels;
-    int dstskip = info->d_skip >> 1;
+    Uint16 *dstp = (Uint16 *) info->dst;
+    int dstskip = info->dst_pitch >> 1;
 
     while (height--) {
 	    /* *INDENT-OFF* */
@@ -2006,12 +2006,12 @@ BlitARGBto555PixelAlpha(SDL_BlitInfo * info)
 static void
 BlitNtoNSurfaceAlpha(SDL_BlitInfo * info)
 {
-    int width = info->d_width;
-    int height = info->d_height;
-    Uint8 *src = info->s_pixels;
+    int width = info->dst_w;
+    int height = info->dst_h;
+    Uint8 *src = info->src;
     int srcskip = info->s_skip;
-    Uint8 *dst = info->d_pixels;
-    int dstskip = info->d_skip;
+    Uint8 *dst = info->dst;
+    int dstskip = info->dst_pitch;
     SDL_PixelFormat *srcfmt = info->src;
     SDL_PixelFormat *dstfmt = info->dst;
     int srcbpp = srcfmt->BytesPerPixel;
@@ -2050,12 +2050,12 @@ BlitNtoNSurfaceAlpha(SDL_BlitInfo * info)
 static void
 BlitNtoNSurfaceAlphaKey(SDL_BlitInfo * info)
 {
-    int width = info->d_width;
-    int height = info->d_height;
-    Uint8 *src = info->s_pixels;
+    int width = info->dst_w;
+    int height = info->dst_h;
+    Uint8 *src = info->src;
     int srcskip = info->s_skip;
-    Uint8 *dst = info->d_pixels;
-    int dstskip = info->d_skip;
+    Uint8 *dst = info->dst;
+    int dstskip = info->dst_pitch;
     SDL_PixelFormat *srcfmt = info->src;
     SDL_PixelFormat *dstfmt = info->dst;
     Uint32 ckey = info->ckey;
@@ -2096,12 +2096,12 @@ BlitNtoNSurfaceAlphaKey(SDL_BlitInfo * info)
 static void
 BlitNtoNPixelAlpha(SDL_BlitInfo * info)
 {
-    int width = info->d_width;
-    int height = info->d_height;
-    Uint8 *src = info->s_pixels;
+    int width = info->dst_w;
+    int height = info->dst_h;
+    Uint8 *src = info->src;
     int srcskip = info->s_skip;
-    Uint8 *dst = info->d_pixels;
-    int dstskip = info->d_skip;
+    Uint8 *dst = info->dst;
+    int dstskip = info->dst_pitch;
     SDL_PixelFormat *srcfmt = info->src;
     SDL_PixelFormat *dstfmt = info->dst;
 

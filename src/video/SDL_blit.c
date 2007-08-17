@@ -61,31 +61,23 @@ SDL_SoftBlit(SDL_Surface * src, SDL_Rect * srcrect,
 
     /* Set up source and destination buffer pointers, and BLIT! */
     if (okay && srcrect->w && srcrect->h) {
-        SDL_BlitInfo info;
-        SDL_loblit RunBlit;
+        SDL_BlitInfo *info = &src->map->info;
 
         /* Set up the blit information */
-        info.s_pixels = (Uint8 *) src->pixels +
+        info->src = (Uint8 *) src->pixels +
             (Uint16) srcrect->y * src->pitch +
-            (Uint16) srcrect->x * src->format->BytesPerPixel;
-        info.s_width = srcrect->w;
-        info.s_height = srcrect->h;
-        info.s_skip = src->pitch - info.s_width * src->format->BytesPerPixel;
-        info.d_pixels = (Uint8 *) dst->pixels +
+            (Uint16) srcrect->x * info->src_fmt->BytesPerPixel;
+        info.src_w = srcrect->w;
+        info.src_h = srcrect->h;
+        info.dst = (Uint8 *) dst->pixels +
             (Uint16) dstrect->y * dst->pitch +
-            (Uint16) dstrect->x * dst->format->BytesPerPixel;
-        info.d_width = dstrect->w;
-        info.d_height = dstrect->h;
-        info.d_skip = dst->pitch - info.d_width * dst->format->BytesPerPixel;
-        info.src = src->format;
-        info.table = src->map->table;
-        info.dst = dst->format;
-        info.ckey = src->map->ckey;
-        info.cmod = src->map->cmod;
-        RunBlit = (SDL_loblit) src->map->data;
+            (Uint16) dstrect->x * info->dst_fmt->BytesPerPixel;
+        info.dst_w = dstrect->w;
+        info.dst_h = dstrect->h;
+        RunBlit = (SDL_BlitFunc) src->map->data;
 
         /* Run the actual software blit */
-        RunBlit(&info);
+        RunBlit(info);
     }
 
     /* We need to unlock the surfaces if they're locked */
@@ -124,50 +116,67 @@ SDL_UseAltivecPrefetch()
 }
 #endif /* __MACOSX__ */
 
-static SDL_loblit
-SDL_ChooseBlitFunc(SDL_BlitEntry * entries, int count)
+static SDL_BlitFunc
+SDL_ChooseBlitFunc(Uint32 src_format, Uint32 dst_format, int flags, SDL_BlitEntry * entries)
 {
     int i;
     static Uint32 features = 0xffffffff;
 
+    /* Get the available CPU features */
     if (features == 0xffffffff) {
-        const char *override = SDL_getenv("SDL_BLIT_FEATURES");
+        const char *override = SDL_getenv("SDL_BLIT_CPU_FEATURES");
 
-        features = SDL_BLIT_ANY;
+        features = SDL_CPU_ANY;
 
         /* Allow an override for testing .. */
         if (override) {
             SDL_sscanf(override, "%u", &features);
         } else {
             if (SDL_HasMMX()) {
-                features |= SDL_BLIT_MMX;
+                features |= SDL_CPU_MMX;
+            }
+            if (SDL_Has3DNow()) {
+                features |= SDL_CPU_3DNOW;
             }
             if (SDL_HasSSE()) {
-                features |= SDL_BLIT_SSE;
+                features |= SDL_CPU_SSE;
+            }
+            if (SDL_HasSSE2()) {
+                features |= SDL_CPU_SSE2;
             }
             if (SDL_HasAltiVec()) {
                 if (SDL_UseAltivecPrefetch()) {
-                    features |= SDL_BLIT_ALTIVEC_PREFETCH;
+                    features |= SDL_CPU_ALTIVEC_PREFETCH;
                 } else {
-                    features |= SDL_BLIT_ALTIVEC_NOPREFETCH;
+                    features |= SDL_CPU_ALTIVEC_NOPREFETCH;
                 }
             }
         }
     }
 
-    for (i = count; i > 0; --i) {
-        if (features & entries[i].features) {
-            return entries[i].blit;
+    for (i = 0; entries[i].blit; ++i) {
+        if (src_format != entries[i].src_format) {
+            continue;
         }
+        if (dst_format != entries[i].dst_format) {
+            continue;
+        }
+        if ((flags & entries[i].flags) != flags) {
+            continue;
+        }
+        if (!(features & entries[i].cpu)) {
+            continue;
+        }
+        return entries[i].func;
     }
-    return entries[0].blit;
+    return NULL;
 }
 
 /* Figure out which of many blit routines to set up on a surface */
 int
 SDL_CalculateBlit(SDL_Surface * surface)
 {
-    SDL_loblit blit = NULL;
+    SDL_BlitFunc blit = NULL;
     int blit_index;
 
     /* Clean everything out to start */
@@ -210,6 +219,10 @@ SDL_CalculateBlit(SDL_Surface * surface)
             }
         }
     }
+    if (blit == NULL) {
+        blit = SDL_ChooseBlitFunc(src_format, dst_format, surface->map->info.flags, SDL_GeneratedBlitFuncTable);
+    }
+
     /* Make sure we have a blit function */
     if (blit == NULL) {
         SDL_InvalidateMap(surface->map);

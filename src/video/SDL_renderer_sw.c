@@ -667,7 +667,8 @@ SW_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
             if (texture->scaleMode) {
                 copydata.flags |= SDL_RENDERCOPY_NEAREST;
             }
-            status = copyfunc(&copydata);
+            copyfunc(&copydata);
+            status = 0;
         } else {
             SDL_Rect real_srcrect = *srcrect;
             SDL_Rect real_dstrect;

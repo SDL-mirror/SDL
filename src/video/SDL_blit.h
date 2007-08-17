@@ -33,66 +33,73 @@
 #ifdef __SSE__
 #include <xmmintrin.h>
 #endif
+#ifdef __SSE2__
+#include <emmintrin.h>
+#endif
 
 #include "SDL_cpuinfo.h"
 #include "SDL_endian.h"
 
-/* The structure passed to the low level blit functions */
-typedef struct
-{
-    Uint8 *s_pixels;
-    int s_width;
-    int s_height;
-    int s_skip;
-    Uint8 *d_pixels;
-    int d_width;
-    int d_height;
-    int d_skip;
-    SDL_PixelFormat *src;
+/* SDL blit copy flags */
+#define SDL_COPY_MODULATE_COLOR     0x0001
+#define SDL_COPY_MODULATE_ALPHA     0x0002
+#define SDL_COPY_MASK               0x0010
+#define SDL_COPY_BLEND              0x0020
+#define SDL_COPY_ADD                0x0040
+#define SDL_COPY_MOD                0x0080
+#define SDL_COPY_COLORKEY           0x0100
+#define SDL_COPY_NEAREST            0x0200
+
+/* SDL blit CPU flags */
+#define SDL_CPU_ANY                 0x0000
+#define SDL_CPU_MMX                 0x0001
+#define SDL_CPU_3DNOW               0x0002
+#define SDL_CPU_SSE                 0x0004
+#define SDL_CPU_SSE2                0x0008
+#define SDL_CPU_ALTIVEC_PREFETCH    0x0010
+#define SDL_CPU_ALTIVEC_NOPREFETCH  0x0020
+
+typedef struct {
+    Uint8 *src;
+    int src_w, src_h;
+    int src_pitch;
+    Uint8 *dst;
+    int dst_w, dst_h;
+    int dst_pitch;
+    SDL_PixelFormat *src_fmt;
+    SDL_PixelFormat *dst_fmt;
     Uint8 *table;
-    SDL_PixelFormat *dst;
-    Uint32 ckey, cmod;
+    int flags;
+    Uint32 colorkey;
+    Uint8 r, g, b, a;
 } SDL_BlitInfo;
 
-/* The type definition for the low level blit functions */
-typedef void (*SDL_loblit) (SDL_BlitInfo * info);
+typedef void (SDLCALL * SDL_BlitFunc)(SDL_BlitInfo *info);
+
+typedef struct {
+    Uint32 src_format;
+    Uint32 dst_format;
+    int flags;
+    int cpu;
+    SDL_BlitFunc func;
+} SDL_BlitFuncEntry;
 
 /* Blit mapping definition */
 typedef struct SDL_BlitMap
 {
     SDL_Surface *dst;
     int identity;
-    Uint8 *table;
     SDL_blit blit;
     void *data;
-    Uint32 ckey;                /* colorkey */
-    Uint32 cmod;                /* ARGB modulation */
+    SDL_BlitInfo info;
 
     /* the version count matches the destination; mismatch indicates
        an invalid mapping */
     unsigned int format_version;
 } SDL_BlitMap;
 
-#define SDL_BLIT_ANY                0x00000000
-#define SDL_BLIT_MMX                0x00000001
-#define SDL_BLIT_SSE                0x00000002
-#define SDL_BLIT_ALTIVEC_PREFETCH   0x00000004
-#define SDL_BLIT_ALTIVEC_NOPREFETCH 0x00000008
-
-typedef struct SDL_BlitEntry
-{
-    Uint32 features;
-    SDL_loblit blit;
-} SDL_BlitEntry;
-
 /* Functions found in SDL_blit.c */
 extern int SDL_CalculateBlit(SDL_Surface * surface);
-
-/* Functions found in SDL_blit_{0,1,N,A}.c */
-extern SDL_loblit SDL_CalculateBlit0(SDL_Surface * surface, int complex);
-extern SDL_loblit SDL_CalculateBlit1(SDL_Surface * surface, int complex);
-extern SDL_loblit SDL_CalculateBlitN(SDL_Surface * surface, int complex);
-extern SDL_loblit SDL_CalculateAlphaBlit(SDL_Surface * surface, int complex);
 
 /*
  * Useful macros for blitting routines

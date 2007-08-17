@@ -123,30 +123,7 @@ __EOF__
 sub output_copydefs
 {
     print FILE <<__EOF__;
-#define SDL_RENDERCOPY_MODULATE_COLOR   0x0001
-#define SDL_RENDERCOPY_MODULATE_ALPHA   0x0002
-#define SDL_RENDERCOPY_MASK             0x0010
-#define SDL_RENDERCOPY_BLEND            0x0020
-#define SDL_RENDERCOPY_ADD              0x0040
-#define SDL_RENDERCOPY_MOD              0x0080
-#define SDL_RENDERCOPY_NEAREST          0x0100
-
-typedef struct {
-    void *src;
-    int src_w, src_h;
-    int src_pitch;
-    void *dst;
-    int dst_w, dst_h;
-    int dst_pitch;
-    void *aux_data;
-    int flags;
-    Uint8 r, g, b, a;
-} SDL_RenderCopyData;
-
-typedef int (*SDL_RenderCopyFunc)(SDL_RenderCopyData *data);
-
-extern SDL_RenderCopyFunc SDLCALL SDL_GetRenderCopyFunc(Uint32 src_format, Uint32 dst_format, int modMode, int blendMode, int scaleMode);
-
+extern SDL_BlitFuncEntry *SDL_GeneratedBlitFuncTable;
 __EOF__
 }
 
@@ -161,7 +138,7 @@ sub output_copyfuncname
     my $args = shift;
     my $suffix = shift;
 
-    print FILE "$prefix SDL_RenderCopy_${src}_${dst}";
+    print FILE "$prefix SDL_Blit_${src}_${dst}";
     if ( $modulate ) {
         print FILE "_Modulate";
     }
@@ -172,7 +149,7 @@ sub output_copyfuncname
         print FILE "_Scale";
     }
     if ( $args ) {
-        print FILE "(SDL_RenderCopyData *data)";
+        print FILE "(SDL_BlitInfo *info)";
     }
     print FILE "$suffix";
 }
@@ -225,7 +202,7 @@ sub output_copycore
 __EOF__
         return;
     }
-        
+
     if ( $blend ) {
         get_rgba("src", $src);
         get_rgba("dst", $dst);
@@ -237,19 +214,19 @@ __EOF__
 
     if ( $modulate ) {
         print FILE <<__EOF__;
-            if (flags & SDL_RENDERCOPY_MODULATE_COLOR) {
+            if (flags & SDL_COPY_MODULATE_COLOR) {
                 ${s}R = (${s}R * modulateR) / 255;
                 ${s}G = (${s}G * modulateG) / 255;
                 ${s}B = (${s}B * modulateB) / 255;
             }
-            if (flags & SDL_RENDERCOPY_MODULATE_ALPHA) {
+            if (flags & SDL_COPY_MODULATE_ALPHA) {
                 ${s}A = (${s}A * modulateA) / 255;
             }
 __EOF__
     }
     if ( $blend ) {
         print FILE <<__EOF__;
-            if (flags & (SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD)) {
+            if (flags & (SDL_COPY_BLEND|SDL_COPY_ADD)) {
                 /* This goes away if we ever use premultiplied alpha */
                 if (${s}A < 255) {
                     ${s}R = (${s}R * ${s}A) / 255;
@@ -257,25 +234,25 @@ __EOF__
                     ${s}B = (${s}B * ${s}A) / 255;
                 }
             }
-            switch (flags & (SDL_RENDERCOPY_MASK|SDL_RENDERCOPY_BLEND|SDL_RENDERCOPY_ADD|SDL_RENDERCOPY_MOD)) {
-            case SDL_RENDERCOPY_MASK:
+            switch (flags & (SDL_COPY_MASK|SDL_COPY_BLEND|SDL_COPY_ADD|SDL_COPY_MOD)) {
+            case SDL_COPY_MASK:
                 if (${s}A) {
                     ${d}R = ${s}R;
                     ${d}G = ${s}G;
                     ${d}B = ${s}B;
                 }
                 break;
-            case SDL_RENDERCOPY_BLEND:
+            case SDL_COPY_BLEND:
                 ${d}R = ${s}R + ((255 - ${s}A) * ${d}R) / 255;
                 ${d}G = ${s}G + ((255 - ${s}A) * ${d}G) / 255;
                 ${d}B = ${s}B + ((255 - ${s}A) * ${d}B) / 255;
                 break;
-            case SDL_RENDERCOPY_ADD:
+            case SDL_COPY_ADD:
                 ${d}R = ${s}R + ${d}R; if (${d}R > 255) ${d}R = 255;
                 ${d}G = ${s}G + ${d}G; if (${d}G > 255) ${d}G = 255;
                 ${d}B = ${s}B + ${d}B; if (${d}B > 255) ${d}B = 255;
                 break;
-            case SDL_RENDERCOPY_MOD:
+            case SDL_COPY_MOD:
                 ${d}R = (${s}R * ${d}R) / 255;
                 ${d}G = (${s}G * ${d}G) / 255;
                 ${d}B = (${s}B * ${d}B) / 255;
@@ -298,17 +275,17 @@ sub output_copyfunc
     my $blend = shift;
     my $scale = shift;
 
-    output_copyfuncname("int", $src, $dst, $modulate, $blend, $scale, 1, "\n");
+    output_copyfuncname("void", $src, $dst, $modulate, $blend, $scale, 1, "\n");
     print FILE <<__EOF__;
 {
-    const int flags = data->flags;
+    const int flags = info->flags;
 __EOF__
     if ( $modulate ) {
         print FILE <<__EOF__;
-    const Uint32 modulateR = data->r;
-    const Uint32 modulateG = data->g;
-    const Uint32 modulateB = data->b;
-    const Uint32 modulateA = data->a;
+    const Uint32 modulateR = info->r;
+    const Uint32 modulateG = info->g;
+    const Uint32 modulateB = info->b;
+    const Uint32 modulateA = info->a;
 __EOF__
     }
     if ( $blend ) {
@@ -332,13 +309,13 @@ __EOF__
 
     srcy = 0;
     posy = 0;
-    incy = (data->src_h << 16) / data->dst_h;
-    incx = (data->src_w << 16) / data->dst_w;
+    incy = (info->src_h << 16) / info->dst_h;
+    incx = (info->src_w << 16) / info->dst_w;
 
-    while (data->dst_h--) {
+    while (info->dst_h--) {
         $format_type{$src} *src;
-        $format_type{$dst} *dst = ($format_type{$dst} *)data->dst;
-        int n = data->dst_w;
+        $format_type{$dst} *dst = ($format_type{$dst} *)info->dst;
+        int n = info->dst_w;
         srcx = -1;
         posx = 0x10000L;
         while (posy >= 0x10000L) {
@@ -351,7 +328,7 @@ __EOF__
                     ++srcx;
                     posx -= 0x10000L;
                 }
-                src = ($format_type{$src} *)(data->src + (srcy * data->src_pitch) + (srcx * $format_size{$src}));
+                src = ($format_type{$src} *)(info->src + (srcy * info->src_pitch) + (srcx * $format_size{$src}));
 __EOF__
         print FILE <<__EOF__;
             }
@@ -362,16 +339,16 @@ __EOF__
             ++dst;
         }
         posy += incy;
-        data->dst += data->dst_pitch;
+        info->dst += info->dst_pitch;
     }
 __EOF__
     } else {
         print FILE <<__EOF__;
 
-    while (data->dst_h--) {
-        $format_type{$src} *src = ($format_type{$src} *)data->src;
-        $format_type{$dst} *dst = ($format_type{$dst} *)data->dst;
-        int n = data->dst_w;
+    while (info->dst_h--) {
+        $format_type{$src} *src = ($format_type{$src} *)info->src;
+        $format_type{$dst} *dst = ($format_type{$dst} *)info->dst;
+        int n = info->dst_w;
         while (n--) {
 __EOF__
         output_copycore($src, $dst, $modulate, $blend);
@@ -379,13 +356,12 @@ __EOF__
             ++src;
             ++dst;
         }
-        data->src += data->src_pitch;
-        data->dst += data->dst_pitch;
+        info->src += info->src_pitch;
+        info->dst += info->dst_pitch;
     }
 __EOF__
     }
     print FILE <<__EOF__;
-    return 0;
 }
 
 __EOF__
@@ -393,24 +369,14 @@ __EOF__
 
 sub output_copyfunc_h
 {
-    my $src = shift;
-    my $dst = shift;
-    for (my $modulate = 0; $modulate <= 1; ++$modulate) {
-        for (my $blend = 0; $blend <= 1; ++$blend) {
-            for (my $scale = 0; $scale <= 1; ++$scale) {
-                if ( $modulate || $blend || $scale ) {
-                    output_copyfuncname("extern int SDLCALL", $src, $dst, $modulate, $blend, $scale, 1, ";\n");
-                }
-            }
-        }
-    }
 }
 
 sub output_copyinc
 {
     print FILE <<__EOF__;
 #include "SDL_video.h"
-#include "SDL_rendercopy.h"
+#include "SDL_blit.h"
+#include "SDL_blit_auto.h"
 
 __EOF__
 }
@@ -418,14 +384,7 @@ __EOF__
 sub output_copyfunctable
 {
     print FILE <<__EOF__;
-static struct {
-    Uint32 src_format;
-    Uint32 dst_format;
-    int modMode;
-    int blendMode;
-    int scaleMode;
-    SDL_RenderCopyFunc func;
-} SDL_RenderCopyFuncTable[] = {
+static SDL_BlitFuncEntry _SDL_GeneratedBlitFuncTable[] = {
 __EOF__
     for (my $i = 0; $i <= $#src_formats; ++$i) {
         my $src = $src_formats[$i];
@@ -436,21 +395,36 @@ __EOF__
                     for (my $scale = 0; $scale <= 1; ++$scale) {
                         if ( $modulate || $blend || $scale ) {
                             print FILE "    { SDL_PIXELFORMAT_$src, SDL_PIXELFORMAT_$dst, ";
+                            my $flags = "";
+                            my $flag = "";
                             if ( $modulate ) {
-                                print FILE "(SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA), ";
-                            } else {
-                                print FILE "0, ";
+                                $flag = "SDL_COPY_MODULATE_COLOR | SDL_COPY_MODULATE_ALPHA";
+                                if ( $flags eq "" ) {
+                                    $flags = $flag;
+                                } else {
+                                    $flags = "$flags | $flag";
+                                }
                             }
                             if ( $blend ) {
-                                print FILE "(SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD), ";
-                            } else {
-                                print FILE "0, ";
+                                $flag = "SDL_COPY_MASK | SDL_COPY_BLEND | SDL_COPY_ADD | SDL_COPY_MOD";
+                                if ( $flags eq "" ) {
+                                    $flags = $flag;
+                                } else {
+                                    $flags = "$flags | $flag";
+                                }
                             }
                             if ( $scale ) {
-                                print FILE "SDL_TEXTURESCALEMODE_FAST, ";
-                            } else {
-                                print FILE "0, ";
+                                $flag = "SDL_COPY_NEAREST";
+                                if ( $flags eq "" ) {
+                                    $flags = $flag;
+                                } else {
+                                    $flags = "$flags | $flag";
+                                }
                             }
+                            if ( $flags eq "" ) {
+                                $flags = "0";
+                            }
+                            print FILE "($flags), SDL_CPU_ANY,";
                             output_copyfuncname("", $src_formats[$i], $dst_formats[$j], $modulate, $blend, $scale, 0, " },\n");
                         }
                     }
@@ -459,32 +433,10 @@ __EOF__
         }
     }
     print FILE <<__EOF__;
+    { 0, 0, 0, 0, NULL }
 };
 
-SDL_RenderCopyFunc SDL_GetRenderCopyFunc(Uint32 src_format, Uint32 dst_format, int modMode, int blendMode, int scaleMode)
-{
-    int i;
-
-    for (i = 0; i < SDL_arraysize(SDL_RenderCopyFuncTable); ++i) {
-        if (src_format != SDL_RenderCopyFuncTable[i].src_format) {
-            continue;
-        }
-        if (dst_format != SDL_RenderCopyFuncTable[i].dst_format) {
-            continue;
-        }
-        if ((modMode & SDL_RenderCopyFuncTable[i].modMode) != modMode) {
-            continue;
-        }
-        if ((blendMode & SDL_RenderCopyFuncTable[i].blendMode) != blendMode) {
-            continue;
-        }
-        if ((scaleMode & SDL_RenderCopyFuncTable[i].scaleMode) != scaleMode) {
-            continue;
-        }
-        return SDL_RenderCopyFuncTable[i].func;
-    }
-    return NULL;
-}
+SDL_BlitFuncEntry *SDL_GeneratedBlitFuncTable = _SDL_GeneratedBlitFuncTable;
 
 __EOF__
 }
@@ -505,7 +457,7 @@ sub output_copyfunc_c
     }
 }
 
-open_file("SDL_rendercopy.h");
+open_file("SDL_blit_auto.h");
 output_copydefs();
 for (my $i = 0; $i <= $#src_formats; ++$i) {
     for (my $j = 0; $j <= $#dst_formats; ++$j) {
@@ -513,9 +465,9 @@ for (my $i = 0; $i <= $#src_formats; ++$i) {
     }
 }
 print FILE "\n";
-close_file("SDL_rendercopy.h");
+close_file("SDL_blit_auto.h");
 
-open_file("SDL_rendercopy.c");
+open_file("SDL_blit_auto.c");
 output_copyinc();
 output_copyfunctable();
 for (my $i = 0; $i <= $#src_formats; ++$i) {
@@ -523,4 +475,4 @@ for (my $i = 0; $i <= $#src_formats; ++$i) {
         output_copyfunc_c($src_formats[$i], $dst_formats[$j]);
     }
 }
-close_file("SDL_rendercopy.c");
+close_file("SDL_blit_auto.c");
