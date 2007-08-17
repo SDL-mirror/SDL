@@ -1369,7 +1369,7 @@ BlitRGBtoRGBPixelAlpha(SDL_BlitInfo * info)
     }
 }
 
-#ifdef __MMX__
+#ifdef __3dNOW__
 /* fast (as in MMX with prefetch) ARGB888->(A)RGB888 blending with pixel alpha */
 static void
 BlitRGBtoRGBPixelAlphaMMX3DNOW(SDL_BlitInfo * info)
@@ -2250,17 +2250,21 @@ SDL_CalculateAlphaBlit(SDL_Surface * surface, int blit_index)
             if (sf->Rmask == df->Rmask
                 && sf->Gmask == df->Gmask
                 && sf->Bmask == df->Bmask && sf->BytesPerPixel == 4) {
-#ifdef __MMX__
+#if defined(__MMX__) || defined(__3dNOW__)
                 if (sf->Rshift % 8 == 0
                     && sf->Gshift % 8 == 0
                     && sf->Bshift % 8 == 0
                     && sf->Ashift % 8 == 0 && sf->Aloss == 0) {
+#ifdef __3dNOW__
                     if (SDL_Has3DNow())
                         return BlitRGBtoRGBPixelAlphaMMX3DNOW;
+#endif
+#ifdef __MMX__
                     if (SDL_HasMMX())
                         return BlitRGBtoRGBPixelAlphaMMX;
-                }
 #endif
+                }
+#endif /* __MMX__ || __3dNOW__ */
                 if (sf->Amask == 0xff000000) {
 #if SDL_ALTIVEC_BLITTERS
                     if (SDL_HasAltiVec())

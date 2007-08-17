@@ -27,6 +27,9 @@
 #ifdef __MMX__
 #include <mmintrin.h>
 #endif
+#ifdef __3dNOW__
+#include <mm3dnow.h>
+#endif
 #ifdef __SSE__
 #include <xmmintrin.h>
 #endif

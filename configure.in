@@ -290,6 +290,9 @@ AC_HELP_STRING([--enable-mmx], [use MMX assembly routines [[default=yes]]]),
 
         AC_TRY_COMPILE([
         #include <mmintrin.h>
+        #ifndef __MMX__
+        #error Assembler CPP flag not enabled
+        #endif
         ],[
         ],[
         have_gcc_mmx=yes
@@ -298,6 +301,32 @@ AC_HELP_STRING([--enable-mmx], [use MMX assembly routines [[default=yes]]]),
 
         if test x$have_gcc_mmx = xyes; then
             EXTRA_CFLAGS="$EXTRA_CFLAGS $mmx_CFLAGS"
+        fi
+    fi
+
+    AC_ARG_ENABLE(3dnow,
+AC_HELP_STRING([--enable-3dnow], [use MMX assembly routines [[default=yes]]]),
+                  , enable_3dnow=yes)
+    if test x$enable_3dnow = xyes; then
+        save_CFLAGS="$CFLAGS"
+        have_gcc_3dnow=no
+        AC_MSG_CHECKING(for GCC -m3dnow option)
+        amd3dnow_CFLAGS="-m3dnow"
+        CFLAGS="$save_CFLAGS $amd3dnow_CFLAGS"
+
+        AC_TRY_COMPILE([
+        #include <mm3dnow.h>
+        #ifndef __3dNOW__
+        #error Assembler CPP flag not enabled
+        #endif
+        ],[
+        ],[
+        have_gcc_3dnow=yes
+        ])
+        AC_MSG_RESULT($have_gcc_3dnow)
+
+        if test x$have_gcc_3dnow = xyes; then
+            EXTRA_CFLAGS="$EXTRA_CFLAGS $amd3dnow_CFLAGS"
         fi
     fi
 
@@ -313,6 +342,9 @@ AC_HELP_STRING([--enable-sse], [use SSE assembly routines [[default=yes]]]),
 
         AC_TRY_COMPILE([
         #include <xmmintrin.h>
+        #ifndef __SSE__
+        #error Assembler CPP flag not enabled
+        #endif
         ],[
         ],[
         have_gcc_sse=yes
