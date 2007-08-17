@@ -674,17 +674,25 @@ DirectFB_CreateWindow(_THIS, SDL_Window * window)
     } else {
         y = window->y;
     }
+    if (window->flags & SDL_WINDOW_FULLSCREEN) {
+        x = 0;
+        y = 0;
+    }
 
     desc.flags =
-        DWDESC_WIDTH | DWDESC_HEIGHT | DWDESC_CAPS | DWDESC_PIXELFORMAT;
-    desc.flags |= DWDESC_POSX | DWDESC_POSY | DWDESC_SURFACE_CAPS;
-    desc.posx = x;
-    desc.posy = y;
+        DWDESC_WIDTH | DWDESC_HEIGHT | DWDESC_CAPS | DWDESC_PIXELFORMAT |
+        DWDESC_SURFACE_CAPS;
+    if (!(window->flags & SDL_WINDOW_FULLSCREEN)
+        && window->x != SDL_WINDOWPOS_UNDEFINED
+        && window->y != SDL_WINDOWPOS_UNDEFINED) {
+        desc.flags |= DWDESC_POSX | DWDESC_POSY;
+        desc.posx = x;
+        desc.posy = y;
+    }
+
     desc.width = window->w;
     desc.height = window->h;
-
     desc.pixelformat = dispdata->pixelformat;
-
     desc.caps = 0;              //DWCAPS_DOUBLEBUFFER;
     desc.surface_caps = DSCAPS_DOUBLE | DSCAPS_TRIPLE;  //| DSCAPS_PREMULTIPLIED;
 
@@ -783,7 +791,8 @@ DirectFB_SetWindowPosition(_THIS, SDL_Window * window)
     SDL_DFB_WINDOWDATA(window);
     SDL_DFB_DISPLAYDATA(_this, window);
 
-    windata->window->MoveTo(windata->window, window->x, window->y);
+    if (!(window->flags & SDL_WINDOW_FULLSCREEN))
+        windata->window->MoveTo(windata->window, window->x, window->y);
 }
 
 static void
@@ -793,8 +802,8 @@ DirectFB_SetWindowSize(_THIS, SDL_Window * window)
     SDL_DFB_WINDOWDATA(window);
     SDL_DFB_DISPLAYDATA(_this, window);
 
-    windata->window->Resize(windata->window, window->w, window->h);
-
+    if (!(window->flags & SDL_WINDOW_FULLSCREEN))
+        windata->window->Resize(windata->window, window->w, window->h);
 }
 static void
 DirectFB_ShowWindow(_THIS, SDL_Window * window)

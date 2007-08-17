@@ -64,7 +64,7 @@ DirectFB_PumpEventsWindow(_THIS)
                                         DirectFB_TranslateButton(evt.button));
                     break;
                 case DWET_MOTION:
-                    SDL_SendMouseMotion(devdata->mouse, 0, evt.x, evt.y);
+                    SDL_SendMouseMotion(devdata->mouse, 0, evt.cx, evt.cy);
                     break;
                 case DWET_KEYDOWN:
                     DirectFB_TranslateKey(evt.key_id, evt.key_symbol,
@@ -79,14 +79,14 @@ DirectFB_PumpEventsWindow(_THIS)
                                         keysym.scancode, keysym.sym);
                     break;
                 case DWET_POSITION_SIZE:
-                    SDL_SendWindowEvent(p->id, SDL_WINDOWEVENT_MOVED, evt.cx,
-                                        evt.cy);
+                    SDL_SendWindowEvent(p->id, SDL_WINDOWEVENT_MOVED, evt.x,
+                                        evt.y);
                     SDL_SendWindowEvent(p->id, SDL_WINDOWEVENT_RESIZED, evt.w,
                                         evt.h);
                     break;
                 case DWET_POSITION:
-                    SDL_SendWindowEvent(p->id, SDL_WINDOWEVENT_MOVED, evt.cx,
-                                        evt.cy);
+                    SDL_SendWindowEvent(p->id, SDL_WINDOWEVENT_MOVED, evt.x,
+                                        evt.y);
                     break;
                 case DWET_SIZE:
                     SDL_SendWindowEvent(p->id, SDL_WINDOWEVENT_RESIZED, evt.w,

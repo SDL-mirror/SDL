@@ -112,6 +112,7 @@ DirectFB_CreateCursor(SDL_Surface * surface, int hot_x, int hot_y)
 static int
 DirectFB_ShowCursor(SDL_Cursor * cursor)
 {
+    //FIXME check for null cursor here
     SDL_DFB_CURSORDATA(cursor);
     SDL_VideoDevice *dev = SDL_GetVideoDevice();
     SDL_DFB_DEVICEDATA(dev);
@@ -130,32 +131,22 @@ DirectFB_ShowCursor(SDL_Cursor * cursor)
         SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
         DFB_DisplayData *dispdata = (DFB_DisplayData *) display->driverdata;
         DFB_WindowData *windata = (DFB_WindowData *) window->driverdata;
-        SDL_DFB_CHECKERR(windata->window->
-                         SetCursorShape(windata->window, curdata->surf,
-                                        curdata->hotx, curdata->hoty));
+
+        if (cursor)
+            SDL_DFB_CHECKERR(windata->window->
+                             SetCursorShape(windata->window, curdata->surf,
+                                            curdata->hotx, curdata->hoty));
         //FIXME: This is somehow a directfb issue
+        //TODO: Check administrative 
         SDL_DFB_CHECKERR(dispdata->layer->
                          SetCooperativeLevel(dispdata->layer,
                                              DLSCL_ADMINISTRATIVE));
         SDL_DFB_CHECKERR(dispdata->layer->
-                         SetCursorOpacity(dispdata->layer, 0xC0));
+                         SetCursorOpacity(dispdata->layer,
+                                          cursor ? 0xC0 : 0x00));
         SDL_DFB_CHECKERR(dispdata->layer->
                          SetCooperativeLevel(dispdata->layer, DLSCL_SHARED));
     }
-#if 0
-    //TODO: Check administrative 
-    SDL_DFB_CHECKERR(dispdata->layer->
-                     SetCooperativeLevel(dispdata->layer,
-                                         DLSCL_ADMINISTRATIVE));
-    SDL_DFB_CHECKERR(dispdata->layer->
-                     SetCursorShape(dispdata->layer, curdata->surf,
-                                    curdata->hotx, curdata->hoty));
-    SDL_DFB_CHECKERR(dispdata->layer->
-                     SetCursorOpacity(dispdata->layer, 0xC0));
-    SDL_DFB_CHECKERR(dispdata->layer->
-                     SetCooperativeLevel(dispdata->layer, DLSCL_SHARED));
-
-#endif
 
     return 0;
   error:
