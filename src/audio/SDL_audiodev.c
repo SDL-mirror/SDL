@@ -76,7 +76,7 @@ SDL_FreeUnixAudioDevices(char ***devices, int *devCount)
     int i = *devCount;
     if ((i > 0) && (*devices != NULL)) {
         while (i--) {
-            SDL_free((*devices)[*devCount]);
+            SDL_free((*devices)[i]);
         }
     }
 
