@@ -123,7 +123,7 @@ __EOF__
 sub output_copydefs
 {
     print FILE <<__EOF__;
-extern SDL_BlitFuncEntry *SDL_GeneratedBlitFuncTable;
+extern SDL_BlitFuncEntry SDL_GeneratedBlitFuncTable[];
 __EOF__
 }
 
@@ -275,7 +275,7 @@ sub output_copyfunc
     my $blend = shift;
     my $scale = shift;
 
-    output_copyfuncname("void", $src, $dst, $modulate, $blend, $scale, 1, "\n");
+    output_copyfuncname("static void", $src, $dst, $modulate, $blend, $scale, 1, "\n");
     print FILE <<__EOF__;
 {
     const int flags = info->flags;
@@ -384,7 +384,7 @@ __EOF__
 sub output_copyfunctable
 {
     print FILE <<__EOF__;
-static SDL_BlitFuncEntry _SDL_GeneratedBlitFuncTable[] = {
+static SDL_BlitFuncEntry SDL_GeneratedBlitFuncTable[] = {
 __EOF__
     for (my $i = 0; $i <= $#src_formats; ++$i) {
         my $src = $src_formats[$i];
@@ -436,8 +436,6 @@ __EOF__
     { 0, 0, 0, 0, NULL }
 };
 
-SDL_BlitFuncEntry *SDL_GeneratedBlitFuncTable = _SDL_GeneratedBlitFuncTable;
-
 __EOF__
 }
 
@@ -469,10 +467,10 @@ close_file("SDL_blit_auto.h");
 
 open_file("SDL_blit_auto.c");
 output_copyinc();
-output_copyfunctable();
 for (my $i = 0; $i <= $#src_formats; ++$i) {
     for (my $j = 0; $j <= $#dst_formats; ++$j) {
         output_copyfunc_c($src_formats[$i], $dst_formats[$j]);
     }
 }
+output_copyfunctable();
 close_file("SDL_blit_auto.c");

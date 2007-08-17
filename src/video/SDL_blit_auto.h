@@ -24,7 +24,7 @@
 
 /* *INDENT-OFF* */
 
-extern SDL_BlitFuncEntry *SDL_GeneratedBlitFuncTable;
+extern SDL_BlitFuncEntry SDL_GeneratedBlitFuncTable[];
 
 /* *INDENT-ON* */
 

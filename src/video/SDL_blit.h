@@ -101,6 +101,11 @@ typedef struct SDL_BlitMap
 /* Functions found in SDL_blit.c */
 extern int SDL_CalculateBlit(SDL_Surface * surface);
 
+/* Blit function tables in SDL_blit_*.c */
+extern SDL_BlitFuncEntry SDL_BlitFuncTable0[];
+extern SDL_BlitFuncEntry SDL_BlitFuncTable1[];
+extern SDL_BlitFuncEntry SDL_BlitFuncTableN[];
+
 /*
  * Useful macros for blitting routines
  */
