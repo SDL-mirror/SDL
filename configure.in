@@ -356,6 +356,32 @@ AC_HELP_STRING([--enable-sse], [use SSE assembly routines [[default=yes]]]),
         fi
     fi
 
+    AC_ARG_ENABLE(sse2,
+AC_HELP_STRING([--enable-sse2], [use SSE2 assembly routines [[default=yes]]]),
+                  , enable_sse2=yes)
+    if test x$enable_sse2 = xyes; then
+        save_CFLAGS="$CFLAGS"
+        have_gcc_sse2=no
+        AC_MSG_CHECKING(for GCC -msse2 option)
+        sse2_CFLAGS="-msse2"
+        CFLAGS="$save_CFLAGS $sse2_CFLAGS"
+
+        AC_TRY_COMPILE([
+        #include <emmintrin.h>
+        #ifndef __SSE2__
+        #error Assembler CPP flag not enabled
+        #endif
+        ],[
+        ],[
+        have_gcc_sse2=yes
+        ])
+        AC_MSG_RESULT($have_gcc_sse2)
+
+        if test x$have_gcc_sse2 = xyes; then
+            EXTRA_CFLAGS="$EXTRA_CFLAGS $sse2_CFLAGS"
+        fi
+    fi
+
     AC_ARG_ENABLE(altivec,
 AC_HELP_STRING([--enable-altivec], [use Altivec assembly routines [[default=yes]]]),
                   , enable_altivec=yes)
