@@ -41,23 +41,26 @@
 #include "SDL_endian.h"
 
 /* SDL blit copy flags */
-#define SDL_COPY_MODULATE_COLOR     0x0001
-#define SDL_COPY_MODULATE_ALPHA     0x0002
-#define SDL_COPY_MASK               0x0010
-#define SDL_COPY_BLEND              0x0020
-#define SDL_COPY_ADD                0x0040
-#define SDL_COPY_MOD                0x0080
-#define SDL_COPY_COLORKEY           0x0100
-#define SDL_COPY_NEAREST            0x0200
+#define SDL_COPY_MODULATE_COLOR     0x00000001
+#define SDL_COPY_MODULATE_ALPHA     0x00000002
+#define SDL_COPY_MASK               0x00000010
+#define SDL_COPY_BLEND              0x00000020
+#define SDL_COPY_ADD                0x00000040
+#define SDL_COPY_MOD                0x00000080
+#define SDL_COPY_COLORKEY           0x00000100
+#define SDL_COPY_NEAREST            0x00000200
+#define SDL_COPY_RLE_DESIRED        0x00001000
+#define SDL_COPY_RLE_COLORKEY       0x00002000
+#define SDL_COPY_RLE_ALPHAKEY       0x00004000
 
 /* SDL blit CPU flags */
-#define SDL_CPU_ANY                 0x0000
-#define SDL_CPU_MMX                 0x0001
-#define SDL_CPU_3DNOW               0x0002
-#define SDL_CPU_SSE                 0x0004
-#define SDL_CPU_SSE2                0x0008
-#define SDL_CPU_ALTIVEC_PREFETCH    0x0010
-#define SDL_CPU_ALTIVEC_NOPREFETCH  0x0020
+#define SDL_CPU_ANY                 0x00000000
+#define SDL_CPU_MMX                 0x00000001
+#define SDL_CPU_3DNOW               0x00000002
+#define SDL_CPU_SSE                 0x00000004
+#define SDL_CPU_SSE2                0x00000008
+#define SDL_CPU_ALTIVEC_PREFETCH    0x00000010
+#define SDL_CPU_ALTIVEC_NOPREFETCH  0x00000020
 
 typedef struct {
     Uint8 *src;

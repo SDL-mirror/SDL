@@ -265,10 +265,7 @@ typedef void *SDL_GLContext;
 /* These are the currently supported flags for the SDL_surface */
 /* Used internally (read-only) */
 #define SDL_PREALLOC        0x00000001  /* Surface uses preallocated memory */
-#define SDL_SRCALPHA        0x00000004  /* Blit uses source alpha blending */
-#define SDL_SRCCOLORKEY     0x00000008  /* Blit uses a source color key */
-#define SDL_RLEACCELOK      0x00000010  /* Private flag */
-#define SDL_RLEACCEL        0x00000020  /* Surface is RLE encoded */
+#define SDL_RLEACCEL        0x00000001  /* Surface is RLE encoded */
 
 /* Evaluates to true if the surface needs to be locked before access */
 #define SDL_MUSTLOCK(S)	(((S)->flags & SDL_RLEACCEL) != 0)
@@ -1401,34 +1398,157 @@ extern DECLSPEC int SDLCALL SDL_SaveBMP_RW
 		SDL_SaveBMP_RW(surface, SDL_RWFromFile(file, "wb"), 1)
 
 /*
- * Sets the color key (transparent pixel) in a blittable surface.
- * If 'flag' is SDL_SRCCOLORKEY (optionally OR'd with SDL_RLEACCEL), 
- * 'key' will be the transparent pixel in the source image of a blit.
- * SDL_RLEACCEL requests RLE acceleration for the surface if present,
- * and removes RLE acceleration if absent.
- * If 'flag' is 0, this function clears any current color key.
- * This function returns 0, or -1 if there was an error.
+ * \fn int SDL_SetSurfaceRLE(SDL_Surface *surface, int flag)
+ *
+ * \brief Sets the RLE acceleration hint for a surface.
+ *
+ * \return 0 on success, or -1 if the surface is not valid
+ *
+ * \note If RLE is enabled, colorkey and alpha blending blits are much faster,
+ *       but the surface must be locked before directly accessing the pixels.
  */
-extern DECLSPEC int SDLCALL SDL_SetColorKey
-    (SDL_Surface * surface, Uint32 flag, Uint32 key);
+extern DECLSPEC int SDLCALL SDL_SetSurfaceRLE(SDL_Surface *surface, int flag);
 
 /*
- * This function sets the alpha value for the entire surface, as opposed to
- * using the alpha component of each pixel. This value measures the range
- * of transparency of the surface, 0 being completely transparent to 255
- * being completely opaque. An 'alpha' value of 255 causes blits to be
- * opaque, the source pixels copied to the destination (the default). Note
- * that per-surface alpha can be combined with colorkey transparency.
+ * \fn int SDL_SetColorKey(SDL_Surface *surface, Uint32 flag, Uint32 key)
  *
- * If 'flag' is 0, alpha blending is disabled for the surface.
- * If 'flag' is SDL_SRCALPHA, alpha blending is enabled for the surface.
- * OR:ing the flag with SDL_RLEACCEL requests RLE acceleration for the
- * surface; if SDL_RLEACCEL is not specified, the RLE accel will be removed.
+ * \brief Sets the color key (transparent pixel) in a blittable surface.
  *
- * The 'alpha' parameter is ignored for surfaces that have an alpha channel.
+ * \param surface The surface to update
+ * \param flag Non-zero to enable colorkey and 0 to disable colorkey 
+ * \param key The transparent pixel in the native surface format
+ *
+ * \return 0 on success, or -1 if the surface is not valid
  */
-extern DECLSPEC int SDLCALL SDL_SetAlpha(SDL_Surface * surface, Uint32 flag,
-                                         Uint8 alpha);
+extern DECLSPEC int SDLCALL SDL_SetColorKey(SDL_Surface *surface, Uint32 flag, Uint32 key);
+
+/**
+ * \fn int SDL_SetSurfaceColorMod(SDL_Surface *surface, Uint8 r, Uint8 g, Uint8 b)
+ *
+ * \brief Set an additional color value used in blit operations
+ *
+ * \param surface The surface to update
+ * \param r The red source color value multiplied into blit operations
+ * \param g The green source color value multiplied into blit operations
+ * \param b The blue source color value multiplied into blit operations
+ *
+ * \return 0 on success, or -1 if the surface is not valid
+ *
+ * \sa SDL_GetSurfaceColorMod()
+ */
+extern DECLSPEC int SDLCALL SDL_SetSurfaceColorMod(SDL_Surface *surface,
+                                                   Uint8 r, Uint8 g, Uint8 b);
+
+
+/**
+ * \fn int SDL_GetSurfaceColorMod(SDL_Surface *surface, Uint8 *r, Uint8 *g, Uint8 *b)
+ *
+ * \brief Get the additional color value used in blit operations
+ *
+ * \param surface The surface to query
+ * \param r A pointer filled in with the source red color value
+ * \param g A pointer filled in with the source green color value
+ * \param b A pointer filled in with the source blue color value
+ *
+ * \return 0 on success, or -1 if the surface is not valid
+ *
+ * \sa SDL_SetSurfaceColorMod()
+ */
+extern DECLSPEC int SDLCALL SDL_GetSurfaceColorMod(SDL_Surface *surface,
+                                                   Uint8 * r, Uint8 * g,
+                                                   Uint8 * b);
+
+/**
+ * \fn int SDL_SetSurfaceAlphaMod(SDL_Surface *surface, Uint8 alpha)
+ *
+ * \brief Set an additional alpha value used in blit operations
+ *
+ * \param surface The surface to update
+ * \param alpha The source alpha value multiplied into blit operations.
+ *
+ * \return 0 on success, or -1 if the surface is not valid
+ *
+ * \sa SDL_GetSurfaceAlphaMod()
+ */
+extern DECLSPEC int SDLCALL SDL_SetSurfaceAlphaMod(SDL_Surface *surface,
+                                                   Uint8 alpha);
+
+/**
+ * \fn int SDL_GetSurfaceAlphaMod(SDL_Surface *surface, Uint8 *alpha)
+ *
+ * \brief Get the additional alpha value used in blit operations
+ *
+ * \param surface The surface to query
+ * \param alpha A pointer filled in with the source alpha value
+ *
+ * \return 0 on success, or -1 if the surface is not valid
+ *
+ * \sa SDL_SetSurfaceAlphaMod()
+ */
+extern DECLSPEC int SDLCALL SDL_GetSurfaceAlphaMod(SDL_Surface *surface,
+                                                   Uint8 * alpha);
+
+/**
+ * \fn int SDL_SetSurfaceBlendMode(SDL_Surface *surface, int blendMode)
+ *
+ * \brief Set the blend mode used for blit operations
+ *
+ * \param surface The surface to update
+ * \param blendMode SDL_TextureBlendMode to use for blit blending
+ *
+ * \return 0 on success, or -1 if the parameters are not valid
+ *
+ * \sa SDL_GetSurfaceBlendMode()
+ */
+extern DECLSPEC int SDLCALL SDL_SetSurfaceBlendMode(SDL_Surface *surface,
+                                                    int blendMode);
+
+/**
+ * \fn int SDL_GetSurfaceBlendMode(SDL_Surface *surface, int *blendMode)
+ *
+ * \brief Get the blend mode used for blit operations
+ *
+ * \param surface The surface to query
+ * \param blendMode A pointer filled in with the current blend mode
+ *
+ * \return 0 on success, or -1 if the surface is not valid
+ *
+ * \sa SDL_SetSurfaceBlendMode()
+ */
+extern DECLSPEC int SDLCALL SDL_GetSurfaceBlendMode(SDL_Surface *surface,
+                                                    int *blendMode);
+
+/**
+ * \fn int SDL_SetSurfaceScaleMode(SDL_Surface *surface, int scaleMode)
+ *
+ * \brief Set the scale mode used for blit operations
+ *
+ * \param surface The surface to update
+ * \param scaleMode SDL_TextureScaleMode to use for blit scaling
+ *
+ * \return 0 on success, or -1 if the surface is not valid or the scale mode is not supported
+ *
+ * \note If the scale mode is not supported, the closest supported mode is chosen.  Currently only SDL_TEXTURESCALEMODE_FAST is supported on surfaces.
+ *
+ * \sa SDL_GetSurfaceScaleMode()
+ */
+extern DECLSPEC int SDLCALL SDL_SetSurfaceScaleMode(SDL_Surface *surface,
+                                                    int scaleMode);
+
+/**
+ * \fn int SDL_GetSurfaceScaleMode(SDL_Surface *surface, int *scaleMode)
+ *
+ * \brief Get the scale mode used for blit operations
+ *
+ * \param surface The surface to query
+ * \param scaleMode A pointer filled in with the current scale mode
+ *
+ * \return 0 on success, or -1 if the surface is not valid
+ *
+ * \sa SDL_SetSurfaceScaleMode()
+ */
+extern DECLSPEC int SDLCALL SDL_GetSurfaceScaleMode(SDL_Surface *surface,
+                                                    int *scaleMode);
 
 /*
  * Sets the clipping rectangle for the destination surface in a blit.

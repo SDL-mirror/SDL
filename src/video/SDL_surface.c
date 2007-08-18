@@ -212,153 +212,251 @@ SDL_SetSurfacePalette(SDL_Surface * surface, SDL_Palette * palette)
     return 0;
 }
 
-/*
- * Set the color key in a blittable surface
- */
-int
-SDL_SetColorKey(SDL_Surface * surface, Uint32 flag, Uint32 key)
+int SDL_SetSurfaceRLE(SDL_Surface *surface, int flag)
 {
-    /* Sanity check the flag as it gets passed in */
-    if (flag & SDL_SRCCOLORKEY) {
-        if (flag & (SDL_RLEACCEL | SDL_RLEACCELOK)) {
-            flag = (SDL_SRCCOLORKEY | SDL_RLEACCELOK);
-        } else {
-            flag = SDL_SRCCOLORKEY;
-        }
-    } else {
-        flag = 0;
-    }
+    Uint32 flags;
 
-    /* Optimize away operations that don't change anything */
-    if ((flag == (surface->flags & (SDL_SRCCOLORKEY | SDL_RLEACCELOK))) &&
-        (key == surface->map->ckey)) {
-        return (0);
-    }
-
-    /* UnRLE surfaces before we change the colorkey */
-    if (surface->flags & SDL_RLEACCEL) {
-        SDL_UnRLESurface(surface, 1);
-    }
-
-    if (flag) {
-        surface->flags |= SDL_SRCCOLORKEY;
-        surface->map->ckey = key;
-        if (flag & SDL_RLEACCELOK) {
-            surface->flags |= SDL_RLEACCELOK;
-        } else {
-            surface->flags &= ~SDL_RLEACCELOK;
-        }
-    } else {
-        surface->flags &= ~(SDL_SRCCOLORKEY | SDL_RLEACCELOK);
-        surface->map->ckey = 0;
-    }
-    SDL_InvalidateMap(surface->map);
-    return (0);
-}
-
-/* This function sets the alpha channel of a surface */
-int
-SDL_SetAlpha(SDL_Surface * surface, Uint32 flag, Uint8 value)
-{
-    Uint32 oldflags = surface->flags;
-    Uint32 oldalpha = (surface->map->cmod >> 24);
-
-    /* Sanity check the flag as it gets passed in */
-    if (flag & SDL_SRCALPHA) {
-        if (flag & (SDL_RLEACCEL | SDL_RLEACCELOK)) {
-            flag = (SDL_SRCALPHA | SDL_RLEACCELOK);
-        } else {
-            flag = SDL_SRCALPHA;
-        }
-    } else {
-        flag = 0;
-    }
-
-    /* Optimize away operations that don't change anything */
-    if ((flag == (surface->flags & (SDL_SRCALPHA | SDL_RLEACCELOK))) &&
-        (!flag || value == oldalpha)) {
-        return (0);
-    }
-
-    if (!(flag & SDL_RLEACCELOK) && (surface->flags & SDL_RLEACCEL))
-        SDL_UnRLESurface(surface, 1);
-
-    if (flag) {
-        surface->flags |= SDL_SRCALPHA;
-        surface->map->cmod &= 0x00FFFFFF;
-        surface->map->cmod |= ((Uint32) value << 24);
-        if (flag & SDL_RLEACCELOK) {
-            surface->flags |= SDL_RLEACCELOK;
-        } else {
-            surface->flags &= ~SDL_RLEACCELOK;
-        }
-    } else {
-        surface->flags &= ~SDL_SRCALPHA;
-        surface->map->cmod |= 0xFF000000;
-    }
-    /*
-     * The representation for software surfaces is independent of
-     * per-surface alpha, so no need to invalidate the blit mapping
-     * if just the alpha value was changed. (If either is 255, we still
-     * need to invalidate.)
-     */
-    if (oldflags != surface->flags
-        || (((oldalpha + 1) ^ (value + 1)) & 0x100)) {
-        SDL_InvalidateMap(surface->map);
-    }
-    return (0);
-}
-
-int
-SDL_SetAlphaChannel(SDL_Surface * surface, Uint8 value)
-{
-    int row, col;
-    int offset;
-    Uint8 *buf;
-
-    if ((surface->format->Amask != 0xFF000000) &&
-        (surface->format->Amask != 0x000000FF)) {
-        SDL_SetError("Unsupported surface alpha mask format");
+    if (!surface) {
         return -1;
     }
-#if SDL_BYTEORDER == SDL_LIL_ENDIAN
-    if (surface->format->Amask == 0xFF000000) {
-        offset = 3;
-    } else {
-        offset = 0;
-    }
-#else
-    if (surface->format->Amask == 0xFF000000) {
-        offset = 0;
-    } else {
-        offset = 3;
-    }
-#endif /* Byte ordering */
 
-    /* Quickly set the alpha channel of an RGBA or ARGB surface */
-    if (SDL_MUSTLOCK(surface)) {
-        if (SDL_LockSurface(surface) < 0) {
-            return -1;
-        }
+    if (flag) {
+        surface->flags |= SDL_RLEACCELOK;
+    } else {
+        surface->flags &= ~SDL_RLEACCELOK;
     }
-    row = surface->h;
-    while (row--) {
-        col = surface->w;
-        buf = (Uint8 *) surface->pixels + row * surface->pitch + offset;
-        while (col--) {
-            *buf = value;
-            buf += 4;
-        }
-    }
-    if (SDL_MUSTLOCK(surface)) {
-        SDL_UnlockSurface(surface);
+    if (surface->flags != flags) {
+        SDL_InvalidateMap(surface->map);
     }
     return 0;
 }
 
-/*
- * Set the clipping rectangle for a blittable surface
- */
+int SDL_SetColorKey(SDL_Surface *surface, Uint32 flag, Uint32 key)
+{
+    int flags;
+
+    if (!surface) {
+        return -1;
+    }
+
+    if (flag & SDL_RLEACCEL) {
+        SDL_SetSurfaceRLE(surface, 1);
+    }
+
+    flags = surface->map->info.flags;
+    if (flag) {
+        surface->map->info.flags |= SDL_COPY_COLORKEY;
+        surface->map->info.colorkey = key;
+    } else {
+        surface->map->info.flags &= ~SDL_COPY_COLORKEY;
+    }
+    if (surface->map->info.flags != flags) {
+        SDL_InvalidateMap(surface->map);
+    }
+    return 0;
+}
+
+int SDL_SetSurfaceColorMod(SDL_Surface *surface, Uint8 r, Uint8 g, Uint8 b)
+{
+    int flags;
+
+    if (!surface) {
+        return -1;
+    }
+
+    surface->map->info.r = r;
+    surface->map->info.g = g;
+    surface->map->info.b = b;
+
+    flags = surface->map->info.flags;
+    if (r != 0xFF || g != 0xFF || b != 0xFF) {
+        surface->map->info.flags |= SDL_COPY_MODULATE_COLOR;
+    } else {
+        surface->map->info.flags &= ~SDL_COPY_MODULATE_COLOR;
+    }
+    if (surface->map->info.flags != flags) {
+        SDL_InvalidateMap(surface->map);
+    }
+    return 0;
+}
+
+
+int SDL_GetSurfaceColorMod(SDL_Surface *surface, Uint8 * r, Uint8 * g, Uint8 * b)
+{
+    if (!surface) {
+        return -1;
+    }
+
+    if (r) {
+        *r = surface->map->info.r;
+    }
+    if (g) {
+        *g = surface->map->info.g;
+    }
+    if (b) {
+        *b = surface->map->info.b;
+    }
+    return 0;
+}
+
+int SDL_SetSurfaceAlphaMod(SDL_Surface *surface, Uint8 alpha)
+{
+    int flags;
+
+    if (!surface) {
+        return -1;
+    }
+
+    surface->map->info.a = alpha;
+
+    flags = surface->map->info.flags;
+    if (alpha != 0xFF) {
+        surface->map->info.flags |= SDL_COPY_MODULATE_ALPHA;
+    } else {
+        surface->map->info.flags &= ~SDL_COPY_MODULATE_ALPHA;
+    }
+    if (surface->map->info.flags != flags) {
+        SDL_InvalidateMap(surface->map);
+    }
+    return 0;
+}
+
+int SDL_GetSurfaceAlphaMod(SDL_Surface *surface, Uint8 * alpha)
+{
+    if (!surface) {
+        return -1;
+    }
+
+    if (alpha) {
+        *alpha = surface->map->info.a;
+    }
+    return 0;
+}
+
+int SDL_SetSurfaceBlendMode(SDL_Surface *surface, int blendMode)
+{
+    int flags, status;
+
+    if (!surface) {
+        return -1;
+    }
+
+    status = 0;
+    flags = surface->map->info.flags;
+    surface->map->info.flags &= ~(SDL_COPY_MASK|SDL_COPY_BLEND|SDL_COPY_ADD|SDL_COPY_MOD);
+    switch (blendMode) {
+    case SDL_TEXTUREBLENDMODE_NONE:
+        break;
+    case SDL_TEXTUREBLENDMODE_MASK:
+        surface->map->info.flags |= SDL_COPY_MASK;
+        break;
+    case SDL_TEXTUREBLENDMODE_BLEND:
+        surface->map->info.flags |= SDL_COPY_BLEND;
+        break;
+    case SDL_TEXTUREBLENDMODE_ADD:
+        surface->map->info.flags |= SDL_COPY_ADD;
+        break;
+    case SDL_TEXTUREBLENDMODE_MOD:
+        surface->map->info.flags |= SDL_COPY_MOD;
+        break;
+    default:
+        SDL_Unsupported();
+        status = -1;
+        break;
+    }
+
+    if (surface->map->info.flags != flags) {
+        SDL_InvalidateMap(surface->map);
+    }
+    return status;
+}
+
+int SDL_GetSurfaceBlendMode(SDL_Surface *surface, int *blendMode)
+{
+    if (!surface) {
+        return -1;
+    }
+
+    if (!blendMode) {
+        return 0;
+    }
+
+    switch(surface->map->info.flags & (SDL_COPY_MASK|SDL_COPY_BLEND|SDL_COPY_ADD|SDL_COPY_MOD)) {
+    case SDL_COPY_MASK:
+        *blendMode = SDL_TEXTUREBLENDMODE_MASK:
+        break;
+    case SDL_COPY_BLEND:
+        *blendMode = SDL_TEXTUREBLENDMODE_BLEND:
+        break;
+    case SDL_COPY_ADD:
+        *blendMode = SDL_TEXTUREBLENDMODE_ADD:
+        break;
+    case SDL_COPY_MOD:
+        *blendMode = SDL_TEXTUREBLENDMODE_MOD:
+        break;
+    default:
+        *blendMode = SDL_TEXTUREBLENDMODE_NONE:
+        break;
+    }
+    return 0;
+}
+
+int SDL_SetSurfaceScaleMode(SDL_Surface *surface, int scaleMode)
+{
+    int flags, status;
+
+    if (!surface) {
+        return -1;
+    }
+
+    status = 0;
+    flags = surface->map->info.flags;
+    surface->map->info.flags &= ~(SDL_COPY_NEAREST);
+    switch (scaleMode) {
+    case SDL_TEXTURESCALEMODE_NONE:
+        break;
+    case SDL_TEXTURESCALEMODE_FAST:
+        surface->map->info.flags |= SDL_COPY_NEAREST;
+        break;
+    case SDL_TEXTURESCALEMODE_SLOW:
+    case SDL_TEXTURESCALEMODE_BEST:
+        SDL_Unsupported();
+        surface->map->info.flags |= SDL_COPY_NEAREST;
+        status = -1;
+        break;
+    default:
+        SDL_Unsupported();
+        status = -1;
+        break;
+    }
+
+    if (surface->map->info.flags != flags) {
+        SDL_InvalidateMap(surface->map);
+    }
+    return status;
+}
+
+int SDL_GetSurfaceScaleMode(SDL_Surface *surface, int *scaleMode)
+{
+    if (!surface) {
+        return -1;
+    }
+
+    if (!scaleMode) {
+        return 0;
+    }
+
+    switch(surface->map->info.flags & (SDL_COPY_LINEAR)) {
+    case SDL_COPY_LINEAR:
+        *scaleMode = SDL_TEXTURESCALEMODE_FAST:
+        break;
+    default:
+        *scaleMode = SDL_TEXTURESCALEMODE_NONE:
+        break;
+    }
+    return 0;
+}
+
 SDL_bool
 SDL_SetClipRect(SDL_Surface * surface, const SDL_Rect * rect)
 {
@@ -557,9 +655,7 @@ SDL_ConvertSurface(SDL_Surface * surface,
                    SDL_PixelFormat * format, Uint32 flags)
 {
     SDL_Surface *convert;
-    Uint32 colorkey = 0;
-    Uint8 alpha = 0;
-    Uint32 surface_flags;
+    Uint32 copy_flags;
     SDL_Rect bounds;
 
     /* Check for empty destination palette! (results in empty image) */
@@ -578,8 +674,7 @@ SDL_ConvertSurface(SDL_Surface * surface,
     }
 
     /* Create a new surface with the desired format */
-    convert = SDL_CreateRGBSurface(flags,
-                                   surface->w, surface->h,
+    convert = SDL_CreateRGBSurface(0, surface->w, surface->h,
                                    format->BitsPerPixel, format->Rmask,
                                    format->Gmask, format->Bmask,
                                    format->Amask);
@@ -595,26 +690,9 @@ SDL_ConvertSurface(SDL_Surface * surface,
         convert->format->palette->ncolors = format->palette->ncolors;
     }
 
-    /* Save the original surface color key and alpha */
-    surface_flags = surface->flags;
-    if ((surface_flags & SDL_SRCCOLORKEY) == SDL_SRCCOLORKEY) {
-        /* Convert colourkeyed surfaces to RGBA if requested */
-        if ((flags & SDL_SRCCOLORKEY) != SDL_SRCCOLORKEY && format->Amask) {
-            surface_flags &= ~SDL_SRCCOLORKEY;
-        } else {
-            colorkey = surface->map->ckey;
-            SDL_SetColorKey(surface, 0, 0);
-        }
-    }
-    if ((surface_flags & SDL_SRCALPHA) == SDL_SRCALPHA) {
-        /* Copy over the alpha channel to RGBA if requested */
-        if (format->Amask) {
-            surface->flags &= ~SDL_SRCALPHA;
-        } else {
-            alpha = (Uint8) (surface->map->cmod >> 24);
-            SDL_SetAlpha(surface, 0, 0);
-        }
-    }
+    /* Save the original copy flags */
+    copy_flags = surface->map->info.flags;
+    surface->map->info.flags = 0;
 
     /* Copy over the image data */
     bounds.x = 0;
@@ -624,30 +702,25 @@ SDL_ConvertSurface(SDL_Surface * surface,
     SDL_LowerBlit(surface, &bounds, convert, &bounds);
 
     /* Clean up the original surface, and update converted surface */
-    if (convert != NULL) {
-        SDL_SetClipRect(convert, &surface->clip_rect);
-    }
-    if ((surface_flags & SDL_SRCCOLORKEY) == SDL_SRCCOLORKEY) {
-        Uint32 cflags = surface_flags & (SDL_SRCCOLORKEY | SDL_RLEACCELOK);
-        if (convert != NULL) {
-            Uint8 keyR, keyG, keyB;
+    SDL_SetClipRect(convert, &surface->clip_rect);
+    if (copy_flags & SDL_COPY_COLORKEY) {
+        Uint8 keyR, keyG, keyB, keyA;
 
-            SDL_GetRGB(colorkey, surface->format, &keyR, &keyG, &keyB);
-            SDL_SetColorKey(convert, cflags | (flags & SDL_RLEACCELOK),
-                            SDL_MapRGB(convert->format, keyR, keyG, keyB));
-        }
-        SDL_SetColorKey(surface, cflags, colorkey);
+        SDL_GetRGBA(colorkey, surface->format, &keyR, &keyG, &keyB, &keyA);
+        SDL_SetColorKey(convert, 1,
+                        SDL_MapRGBA(convert->format, keyR, keyG, keyB, keyA));
     }
-    if ((surface_flags & SDL_SRCALPHA) == SDL_SRCALPHA) {
-        Uint32 aflags = surface_flags & (SDL_SRCALPHA | SDL_RLEACCELOK);
-        if (convert != NULL) {
-            SDL_SetAlpha(convert, aflags | (flags & SDL_RLEACCELOK), alpha);
-        }
-        if (format->Amask) {
-            surface->flags |= SDL_SRCALPHA;
-        } else {
-            SDL_SetAlpha(surface, aflags, alpha);
-        }
+    convert->map->info.r = surface->map->info.r;
+    convert->map->info.g = surface->map->info.g;
+    convert->map->info.b = surface->map->info.b;
+    convert->map->info.a = surface->map->info.a;
+    convert->map->info.flags = copy_flags;
+    surface->map->info.flags = copy_flags;
+
+    /* Enable alpha blending by default if the new surface has an
+     * alpha channel or alpha modulation */
+    if (format->Amask || (copy_flags & SDL_COPY_MODULATE_ALPHA)) {
+        SDL_SetSurfaceBlendMode(convert, SDL_TEXTUREBLENDMODE_BLEND);
     }
 
     /* We're ready to go! */

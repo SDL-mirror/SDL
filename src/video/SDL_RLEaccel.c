@@ -905,8 +905,7 @@ SDL_RLEBlit(SDL_Surface * src, SDL_Rect * srcrect,
         }
     }
 
-    alpha = (src->flags & SDL_SRCALPHA) == SDL_SRCALPHA
-        ? src->map->info.a : 255;
+    alpha = src->map->info.a;
     /* if left or right edge clipping needed, call clip blit */
     if (srcrect->x || srcrect->w != src->w) {
         RLEClipBlit(w, srcbuf, dst, dstbuf, srcrect, alpha);
@@ -1803,7 +1802,7 @@ RLEColorkeySurface(SDL_Surface * surface)
 int
 SDL_RLESurface(SDL_Surface * surface)
 {
-    int retcode;
+    int flags;
 
     /* Clear any previous RLE conversion */
     if ((surface->flags & SDL_RLEACCEL) == SDL_RLEACCEL) {
@@ -1812,34 +1811,44 @@ SDL_RLESurface(SDL_Surface * surface)
 
     /* We don't support RLE encoding of bitmaps */
     if (surface->format->BitsPerPixel < 8) {
-        return (-1);
-    }
-
-    /* Lock the surface if it's in hardware */
-    if (SDL_MUSTLOCK(surface)) {
-        if (SDL_LockSurface(surface) < 0) {
-            return (-1);
-        }
-    }
-
-    /* Encode */
-    if ((surface->flags & SDL_SRCCOLORKEY) == SDL_SRCCOLORKEY) {
-        retcode = RLEColorkeySurface(surface);
-    } else {
-        if ((surface->flags & SDL_SRCALPHA) == SDL_SRCALPHA
-            && surface->format->Amask != 0)
-            retcode = RLEAlphaSurface(surface);
-        else
-            retcode = -1;       /* no RLE for per-surface alpha sans ckey */
-    }
-
-    /* Unlock the surface if it's in hardware */
-    if (SDL_MUSTLOCK(surface)) {
-        SDL_UnlockSurface(surface);
-    }
-
-    if (retcode < 0)
         return -1;
+    }
+
+    /* Make sure the pixels are available */
+    if (!surface->pixels) {
+        return -1;
+    }
+
+    /* If we don't have colorkey or blending, nothing to do... */
+    flags = surface->map->info.flags;
+    if(!(flags & (SDL_COPY_COLORKEY|SDL_COPY_BLEND))) {
+        return -1;
+    }
+
+    /* Pass on combinations not supported */
+    if ((flags & SDL_COPY_MODULATE_COLOR) ||
+        (flags & (SDL_COPY_ADD|SDL_COPY_MOD)) ||
+        (flags & SDL_COPY_NEAREST)) {
+        return -1;
+    }
+
+    /* Encode and set up the blit */
+    if (!surface->format->Amask || !(flags & SDL_COPY_BLEND)) {
+        if (!surface->map->identity) {
+            return -1;
+        }
+        if (RLEColorkeySurface(surface) < 0) {
+            return -1;
+        }
+        surface->map->blit = SDL_RLEBlit;
+        surface->map->info.flags |= SDL_COPY_RLE_COLORKEY;
+    } else {
+        if (RLEAlphaSurface(surface) < 0) {
+            return -1;
+        }
+        surface->map->blit = SDL_RLEAlphaBlit;
+        surface->map->info.flags |= SDL_COPY_RLE_ALPHAKEY;
+    }
 
     /* The surface is now accelerated */
     surface->flags |= SDL_RLEACCEL;
@@ -1931,13 +1940,12 @@ UnRLEAlpha(SDL_Surface * surface)
 void
 SDL_UnRLESurface(SDL_Surface * surface, int recode)
 {
-    if ((surface->flags & SDL_RLEACCEL) == SDL_RLEACCEL) {
+    if (surface->flags & SDL_RLEACCEL) {
         surface->flags &= ~SDL_RLEACCEL;
 
         if (recode && !(surface->flags & SDL_PREALLOC)) {
-            if ((surface->flags & SDL_SRCCOLORKEY) == SDL_SRCCOLORKEY) {
+            if (surface->map->info.flags & SDL_COPY_RLE_COLORKEY) {
                 SDL_Rect full;
-                unsigned alpha_flag;
 
                 /* re-create the original surface */
                 surface->pixels = SDL_malloc(surface->h * surface->pitch);
@@ -1954,10 +1962,7 @@ SDL_UnRLESurface(SDL_Surface * surface, int recode)
                 full.x = full.y = 0;
                 full.w = surface->w;
                 full.h = surface->h;
-                alpha_flag = surface->flags & SDL_SRCALPHA;
-                surface->flags &= ~SDL_SRCALPHA;        /* opaque blit */
                 SDL_RLEBlit(surface, &full, surface, &full);
-                surface->flags |= alpha_flag;
             } else {
                 if (!UnRLEAlpha(surface)) {
                     /* Oh crap... */
@@ -1966,8 +1971,9 @@ SDL_UnRLESurface(SDL_Surface * surface, int recode)
                 }
             }
         }
+        surface->map->info.flags &= (SDL_COPY_RLE_COLORKEY|SDL_COPY_RLE_ALPHAKEY);
 
-        if (surface->map && surface->map->data) {
+        if (surface->map->data) {
             SDL_free(surface->map->data);
             surface->map->data = NULL;
         }

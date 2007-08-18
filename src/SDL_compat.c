@@ -589,6 +589,22 @@ SDL_GetVideoSurface(void)
     return SDL_PublicSurface;
 }
 
+int
+SDL_SetAlpha(SDL_Surface * surface, Uint32 flag, Uint8 value)
+{
+    if (flag & SDL_RLEACCEL) {
+        SDL_SetSurfaceRLE(surface, 1);
+    }
+    if (flag) {
+        SDL_SetSurfaceAlphaMod(surface, value);
+        SDL_SetSurfaceBlendMode(surface, SDL_TEXTUREBLENDMODE_BLEND);
+    } else {
+        SDL_SetSurfaceAlphaMod(surface, 0xFF);
+        SDL_SetSurfaceBlendMode(surface, SDL_TEXTUREBLENDMODE_NONE);
+    }
+    return 0;
+}
+
 SDL_Surface *
 SDL_DisplayFormat(SDL_Surface * surface)
 {
@@ -600,15 +616,7 @@ SDL_DisplayFormat(SDL_Surface * surface)
     }
 
     /* Set the flags appropriate for copying to display surface */
-    flags = SDL_SWSURFACE;
-#ifdef AUTORLE_DISPLAYFORMAT
-    flags |= (surface->flags & (SDL_SRCCOLORKEY | SDL_SRCALPHA));
-    flags |= SDL_RLEACCELOK;
-#else
-    flags |=
-        surface->flags & (SDL_SRCCOLORKEY | SDL_SRCALPHA | SDL_RLEACCELOK);
-#endif
-    return SDL_ConvertSurface(surface, SDL_PublicSurface->format, flags);
+    return SDL_ConvertSurface(surface, SDL_PublicSurface->format, SDL_RLEACCELOK);
 }
 
 SDL_Surface *
@@ -658,8 +666,7 @@ SDL_DisplayFormatAlpha(SDL_Surface * surface)
         break;
     }
     format = SDL_AllocFormat(32, rmask, gmask, bmask, amask);
-    flags = surface->flags & (SDL_SRCALPHA | SDL_RLEACCELOK);
-    converted = SDL_ConvertSurface(surface, format, flags);
+    converted = SDL_ConvertSurface(surface, format, SDL_RLEACCELOK);
     SDL_FreeFormat(format);
     return converted;
 }

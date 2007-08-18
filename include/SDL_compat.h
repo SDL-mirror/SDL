@@ -37,6 +37,8 @@ extern "C" {
 #endif
 
 #define SDL_SWSURFACE       0x00000000  /* Not used */
+//#define SDL_SRCALPHA        0x00010000
+//#define SDL_SRCCOLORKEY     0x00020000
 #define SDL_ANYFORMAT       0x00100000
 #define SDL_HWPALETTE       0x00200000
 #define SDL_DOUBLEBUF       0x00400000
@@ -146,6 +148,8 @@ extern DECLSPEC void SDLCALL SDL_UpdateRects(SDL_Surface * screen,
 extern DECLSPEC void SDLCALL SDL_UpdateRect(SDL_Surface * screen, Sint32 x,
                                             Sint32 y, Uint32 w, Uint32 h);
 extern DECLSPEC int SDLCALL SDL_Flip(SDL_Surface * screen);
+extern DECLSPEC int SDLCALL SDL_SetAlpha(SDL_Surface * surface, Uint32 flag,
+                                         Uint8 alpha);
 extern DECLSPEC SDL_Surface *SDLCALL SDL_DisplayFormat(SDL_Surface * surface);
 extern DECLSPEC SDL_Surface *SDLCALL SDL_DisplayFormatAlpha(SDL_Surface *
                                                             surface);

@@ -1535,8 +1535,7 @@ SDL_TextureID
 SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
 {
     SDL_TextureID textureID;
-    Uint32 surface_flags = surface->flags;
-    SDL_PixelFormat *fmt = surface->format;
+    SDL_PixelFormat *fmt;
     int bpp;
     Uint32 Rmask, Gmask, Bmask, Amask;
 
@@ -1544,6 +1543,7 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
         SDL_SetError("SDL_CreateTextureFromSurface() passed NULL surface");
         return 0;
     }
+    fmt = surface->format;
 
     if (format) {
         if (!SDL_PixelFormatEnumToMasks
@@ -1552,7 +1552,7 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
             return 0;
         }
     } else {
-        if (fmt->Amask || !(surface_flags & (SDL_SRCCOLORKEY | SDL_SRCALPHA))) {
+        if (surface->format->Amask || !(flags & (SDL_COPY_COLORKEY|SDL_COPY_MASK|SDL_COPY_BLEND))) {
             bpp = fmt->BitsPerPixel;
             Rmask = fmt->Rmask;
             Gmask = fmt->Gmask;
@@ -1595,92 +1595,38 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
                               surface->pitch);
         }
     } else {
-        Uint32 cmod;
-        SDL_Rect bounds;
-        SDL_Surface dst;
+        SDL_PixelFormat *dst_fmt;
+        SDL_Surface *dst = NULL;
 
         /* Set up a destination surface for the texture update */
-        SDL_zero(dst);
-        dst.format = SDL_AllocFormat(bpp, Rmask, Gmask, Bmask, Amask);
-        if (!dst.format) {
-            SDL_DestroyTexture(textureID);
-            return 0;
-        }
-        dst.w = surface->w;
-        dst.h = surface->h;
-        dst.pitch = SDL_CalculatePitch(&dst);
-        dst.pixels = SDL_malloc(dst.h * dst.pitch);
-        if (!dst.pixels) {
-            SDL_DestroyTexture(textureID);
-            SDL_FreeFormat(dst.format);
-            SDL_OutOfMemory();
-            return 0;
-        }
-
-        /* Copy the palette if any */
-        if (SDL_ISPIXELFORMAT_INDEXED(format)) {
-            if (fmt->palette) {
-                SDL_SetTexturePalette(textureID, fmt->palette->colors, 0,
-                                      fmt->palette->ncolors);
-                SDL_SetSurfacePalette(&dst, fmt->palette);
-            } else {
-                dst.format->palette =
-                    SDL_AllocPalette((1 << SDL_BITSPERPIXEL(format)));
-                if (!dst.format->palette) {
-                    SDL_DestroyTexture(textureID);
-                    SDL_FreeFormat(dst.format);
-                    return 0;
+        dst_fmt = SDL_AllocFormat(bpp, Rmask, Gmask, Bmask, Amask);
+        if (dst_fmt) {
+            if (SDL_ISPIXELFORMAT_INDEXED(format)) {
+                dst_fmt->palette = SDL_AllocPalette((1 << SDL_BITSPERPIXEL(format)));
+                if (dst_fmt->palette) {
+                    if (fmt->palette) {
+fixme
+                    } else {
+                        SDL_DitherColors(dst_fmt->palette->colors, SDL_BITSPERPIXEL(format));
+                    }
                 }
-                SDL_DitherColors(dst.format->palette->colors,
-                                 SDL_BITSPERPIXEL(format));
+                if (fmt->palette) {
+                    dst_fmt->palette = fmt->palette;
+                } else {
+                }
             }
-        }
 
-        /* Make the texture transparent if the surface has colorkey */
-        if (surface_flags & SDL_SRCCOLORKEY) {
-            int row;
-            int length = dst.w * dst.format->BytesPerPixel;
-            Uint8 *p = (Uint8 *) dst.pixels;
-            for (row = 0; row < dst.h; ++row) {
-                SDL_memset(p, 0, length);
-                p += dst.pitch;
+            cvt = SDL_ConvertSurface(surface, fmt, 0);
+            if (cvt) {
+                SDL_UpdateTexture(textureID, NULL, cvt->pixels, cvt->pitch);
+                SDL_FreeSurface(cvt);
             }
+            SDL_FreeFormat(fmt);
         }
+    }
 
-        /* Copy over the alpha channel */
-        cmod = surface->map->cmod;
-        if (surface_flags & SDL_SRCALPHA) {
-            if (fmt->Amask) {
-                surface->flags &= ~SDL_SRCALPHA;
-            } else {
-                /* FIXME: Need to make sure the texture has an alpha channel
-                 *        and copy 'alpha' into the texture alpha channel.
-                 */
-                SDL_SetAlpha(surface, 0, 0);
-            }
-        }
-
-        /* Copy over the image data */
-        bounds.x = 0;
-        bounds.y = 0;
-        bounds.w = surface->w;
-        bounds.h = surface->h;
-        SDL_LowerBlit(surface, &bounds, &dst, &bounds);
-
-        /* Clean up the original surface */
-        if ((surface_flags & SDL_SRCALPHA) == SDL_SRCALPHA) {
-            Uint32 aflags = surface_flags & (SDL_SRCALPHA | SDL_RLEACCELOK);
-            if (fmt->Amask) {
-                surface->flags |= SDL_SRCALPHA;
-            } else {
-                SDL_SetAlpha(surface, aflags, (cmod >> 24));
-            }
-        }
-
-        /* Update the texture */
-        SDL_UpdateTexture(textureID, NULL, dst.pixels, dst.pitch);
-        SDL_free(dst.pixels);
-        SDL_FreeFormat(dst.format);
+    if (SDL_ISPIXELFORMAT_INDEXED(format) && fmt->palette) {
+        SDL_SetTexturePalette(textureID, fmt->palette->colors, 0, fmt->palette->ncolors);
     }
 
     return textureID;
