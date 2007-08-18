@@ -71,11 +71,15 @@ SDL_SoftBlit(SDL_Surface * src, SDL_Rect * srcrect,
             (Uint16) srcrect->x * info->src_fmt->BytesPerPixel;
         info->src_w = srcrect->w;
         info->src_h = srcrect->h;
-        info->dst = (Uint8 *) dst->pixels +
-            (Uint16) dstrect->y * dst->pitch +
+        info->src_skip =
+            info->src_pitch - info->src_w * info->src_fmt->BytesPerPixel;
+        info->dst =
+            (Uint8 *) dst->pixels + (Uint16) dstrect->y * dst->pitch +
             (Uint16) dstrect->x * info->dst_fmt->BytesPerPixel;
         info->dst_w = dstrect->w;
         info->dst_h = dstrect->h;
+        info->dst_skip =
+            info->dst_pitch - info->dst_w * info->dst_fmt->BytesPerPixel;
         RunBlit = (SDL_BlitFunc) src->map->data;
 
         /* Run the actual software blit */
@@ -119,7 +123,8 @@ SDL_UseAltivecPrefetch()
 #endif /* __MACOSX__ */
 
 static SDL_BlitFunc
-SDL_ChooseBlitFunc(Uint32 src_format, Uint32 dst_format, int flags, SDL_BlitFuncEntry * entries)
+SDL_ChooseBlitFunc(Uint32 src_format, Uint32 dst_format, int flags,
+                   SDL_BlitFuncEntry * entries)
 {
     int i, flagcheck;
     static Uint32 features = 0xffffffff;
@@ -166,13 +171,16 @@ SDL_ChooseBlitFunc(Uint32 src_format, Uint32 dst_format, int flags, SDL_BlitFunc
         }
 
         /* Check modulation flags */
-        flagcheck = (flags & (SDL_COPY_MODULATE_COLOR|SDL_COPY_MODULATE_COLOR));
+        flagcheck =
+            (flags & (SDL_COPY_MODULATE_COLOR | SDL_COPY_MODULATE_COLOR));
         if ((flagcheck & entries[i].flags) != flagcheck) {
             continue;
         }
 
         /* Check blend flags */
-        flagcheck = (flags & (SDL_COPY_MASK|SDL_COPY_BLEND|SDL_COPY_ADD|SDL_COPY_MOD));
+        flagcheck =
+            (flags &
+             (SDL_COPY_MASK | SDL_COPY_BLEND | SDL_COPY_ADD | SDL_COPY_MOD));
         if ((flagcheck & entries[i].flags) != flagcheck) {
             continue;
         }
@@ -208,8 +216,6 @@ SDL_CalculateBlit(SDL_Surface * surface)
     SDL_BlitFunc blit = NULL;
     SDL_BlitMap *map = surface->map;
     SDL_Surface *dst = map->dst;
-    Uint32 src_format;
-    Uint32 dst_format;
 
     /* Clean everything out to start */
     if ((surface->flags & SDL_RLEACCEL) == SDL_RLEACCEL) {
@@ -222,16 +228,13 @@ SDL_CalculateBlit(SDL_Surface * surface)
     map->info.dst_pitch = dst->pitch;
 
     /* See if we can do RLE acceleration */
-    if (surface->flags & SDL_RLEACCELOK) {
+    if (surface->map->info.flags & SDL_COPY_RLE_DESIRED) {
         if (SDL_RLESurface(surface) == 0) {
             return 0;
         }
     }
 
     /* Choose a standard blit function */
-    src_format = SDL_MasksToPixelFormatEnum(surface->format->BitsPerPixel, surface->format->Rmask, surface->format->Gmask, surface->format->Bmask, surface->format->Amask);
-    dst_format = SDL_MasksToPixelFormatEnum(dst->format->BitsPerPixel, dst->format->Rmask, dst->format->Gmask, dst->format->Bmask, dst->format->Amask);
-
     if (map->identity && !map->info.flags) {
         /* Handle overlapping blits on the same surface */
         if (surface == dst) {
@@ -240,15 +243,32 @@ SDL_CalculateBlit(SDL_Surface * surface)
             blit = SDL_BlitCopy;
         }
     } else if (surface->format->BitsPerPixel < 8) {
-        blit = SDL_ChooseBlitFunc(src_format, dst_format, map->info.flags, SDL_BlitFuncTable0);
+        blit = SDL_CalculateBlit0(surface);
     } else if (surface->format->BytesPerPixel == 1) {
-        blit = SDL_ChooseBlitFunc(src_format, dst_format, map->info.flags, SDL_BlitFuncTable1);
+        blit = SDL_CalculateBlit1(surface);
+    } else if (map->info.flags & SDL_COPY_BLEND) {
+        blit = SDL_CalculateBlitA(surface);
     } else {
-        blit = SDL_ChooseBlitFunc(src_format, dst_format, map->info.flags, SDL_BlitFuncTableN);
+        blit = SDL_CalculateBlitN(surface);
     }
     if (blit == NULL) {
-        blit = SDL_ChooseBlitFunc(src_format, dst_format, map->info.flags, SDL_GeneratedBlitFuncTable);
+        Uint32 src_format =
+            SDL_MasksToPixelFormatEnum(surface->format->BitsPerPixel,
+                                       surface->format->Rmask,
+                                       surface->format->Gmask,
+                                       surface->format->Bmask,
+                                       surface->format->Amask);
+        Uint32 dst_format =
+            SDL_MasksToPixelFormatEnum(dst->format->BitsPerPixel,
+                                       dst->format->Rmask, dst->format->Gmask,
+                                       dst->format->Bmask,
+                                       dst->format->Amask);
+
+        blit =
+            SDL_ChooseBlitFunc(src_format, dst_format, map->info.flags,
+                               SDL_GeneratedBlitFuncTable);
     }
+    map->data = blit;
 
     /* Make sure we have a blit function */
     if (blit == NULL) {

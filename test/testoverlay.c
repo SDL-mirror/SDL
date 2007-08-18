@@ -487,8 +487,6 @@ main(int argc, char **argv)
         format.Gloss = 0;
         format.Bloss = 0;
         format.Aloss = 8;
-        format.colorkey = 0;
-        format.alpha = 0;
 
         newsurf = SDL_ConvertSurface(pic, &format, SDL_SWSURFACE);
         if (!newsurf) {

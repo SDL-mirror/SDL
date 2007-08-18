@@ -1552,7 +1552,9 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
             return 0;
         }
     } else {
-        if (surface->format->Amask || !(flags & (SDL_COPY_COLORKEY|SDL_COPY_MASK|SDL_COPY_BLEND))) {
+        if (surface->format->Amask
+            || !(surface->map->info.flags &
+                 (SDL_COPY_COLORKEY | SDL_COPY_MASK | SDL_COPY_BLEND))) {
             bpp = fmt->BitsPerPixel;
             Rmask = fmt->Rmask;
             Gmask = fmt->Gmask;
@@ -1602,31 +1604,34 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
         dst_fmt = SDL_AllocFormat(bpp, Rmask, Gmask, Bmask, Amask);
         if (dst_fmt) {
             if (SDL_ISPIXELFORMAT_INDEXED(format)) {
-                dst_fmt->palette = SDL_AllocPalette((1 << SDL_BITSPERPIXEL(format)));
+                dst_fmt->palette =
+                    SDL_AllocPalette((1 << SDL_BITSPERPIXEL(format)));
                 if (dst_fmt->palette) {
-                    if (fmt->palette) {
-fixme
-                    } else {
-                        SDL_DitherColors(dst_fmt->palette->colors, SDL_BITSPERPIXEL(format));
-                    }
-                }
-                if (fmt->palette) {
-                    dst_fmt->palette = fmt->palette;
-                } else {
+                    /* FIXME: Should we try to copy fmt->palette? */
+                    SDL_DitherColors(dst_fmt->palette->colors,
+                                     SDL_BITSPERPIXEL(format));
                 }
             }
 
-            cvt = SDL_ConvertSurface(surface, fmt, 0);
-            if (cvt) {
-                SDL_UpdateTexture(textureID, NULL, cvt->pixels, cvt->pitch);
-                SDL_FreeSurface(cvt);
+            dst = SDL_ConvertSurface(surface, dst_fmt, 0);
+            if (dst) {
+                SDL_UpdateTexture(textureID, NULL, dst->pixels, dst->pitch);
+                SDL_FreeSurface(dst);
             }
-            SDL_FreeFormat(fmt);
+            if (dst_fmt->palette) {
+                SDL_FreePalette(dst_fmt->palette);
+            }
+            SDL_FreeFormat(dst_fmt);
+        }
+        if (!dst) {
+            SDL_DestroyTexture(textureID);
+            return 0;
         }
     }
 
     if (SDL_ISPIXELFORMAT_INDEXED(format) && fmt->palette) {
-        SDL_SetTexturePalette(textureID, fmt->palette->colors, 0, fmt->palette->ncolors);
+        SDL_SetTexturePalette(textureID, fmt->palette->colors, 0,
+                              fmt->palette->ncolors);
     }
 
     return textureID;

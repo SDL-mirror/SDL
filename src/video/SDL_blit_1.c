@@ -42,9 +42,9 @@ Blit1to1(SDL_BlitInfo * info)
     width = info->dst_w;
     height = info->dst_h;
     src = info->src;
-    srcskip = info->s_skip;
+    srcskip = info->src_skip;
     dst = info->dst;
-    dstskip = info->dst_pitch;
+    dstskip = info->dst_skip;
     map = info->table;
 
     while (height--) {
@@ -93,9 +93,9 @@ Blit1to2(SDL_BlitInfo * info)
     width = info->dst_w;
     height = info->dst_h;
     src = info->src;
-    srcskip = info->s_skip;
+    srcskip = info->src_skip;
     dst = info->dst;
-    dstskip = info->dst_pitch;
+    dstskip = info->dst_skip;
     map = (Uint16 *) info->table;
 
 #ifdef USE_DUFFS_LOOP
@@ -199,9 +199,9 @@ Blit1to3(SDL_BlitInfo * info)
     width = info->dst_w;
     height = info->dst_h;
     src = info->src;
-    srcskip = info->s_skip;
+    srcskip = info->src_skip;
     dst = info->dst;
-    dstskip = info->dst_pitch;
+    dstskip = info->dst_skip;
     map = info->table;
 
     while (height--) {
@@ -247,9 +247,9 @@ Blit1to4(SDL_BlitInfo * info)
     width = info->dst_w;
     height = info->dst_h;
     src = info->src;
-    srcskip = info->s_skip;
+    srcskip = info->src_skip;
     dst = (Uint32 *) info->dst;
-    dstskip = info->dst_pitch / 4;
+    dstskip = info->dst_skip / 4;
     map = (Uint32 *) info->table;
 
     while (height--) {
@@ -286,11 +286,11 @@ Blit1to1Key(SDL_BlitInfo * info)
     int width = info->dst_w;
     int height = info->dst_h;
     Uint8 *src = info->src;
-    int srcskip = info->s_skip;
+    int srcskip = info->src_skip;
     Uint8 *dst = info->dst;
-    int dstskip = info->dst_pitch;
+    int dstskip = info->dst_skip;
     Uint8 *palmap = info->table;
-    Uint32 ckey = info->ckey;
+    Uint32 ckey = info->colorkey;
 
     if (palmap) {
         while (height--) {
@@ -333,11 +333,11 @@ Blit1to2Key(SDL_BlitInfo * info)
     int width = info->dst_w;
     int height = info->dst_h;
     Uint8 *src = info->src;
-    int srcskip = info->s_skip;
+    int srcskip = info->src_skip;
     Uint16 *dstp = (Uint16 *) info->dst;
-    int dstskip = info->dst_pitch;
+    int dstskip = info->dst_skip;
     Uint16 *palmap = (Uint16 *) info->table;
-    Uint32 ckey = info->ckey;
+    Uint32 ckey = info->colorkey;
 
     /* Set up some basic variables */
     dstskip /= 2;
@@ -365,11 +365,11 @@ Blit1to3Key(SDL_BlitInfo * info)
     int width = info->dst_w;
     int height = info->dst_h;
     Uint8 *src = info->src;
-    int srcskip = info->s_skip;
+    int srcskip = info->src_skip;
     Uint8 *dst = info->dst;
-    int dstskip = info->dst_pitch;
+    int dstskip = info->dst_skip;
     Uint8 *palmap = info->table;
-    Uint32 ckey = info->ckey;
+    Uint32 ckey = info->colorkey;
     int o;
 
     while (height--) {
@@ -398,11 +398,11 @@ Blit1to4Key(SDL_BlitInfo * info)
     int width = info->dst_w;
     int height = info->dst_h;
     Uint8 *src = info->src;
-    int srcskip = info->s_skip;
+    int srcskip = info->src_skip;
     Uint32 *dstp = (Uint32 *) info->dst;
-    int dstskip = info->dst_pitch;
+    int dstskip = info->dst_skip;
     Uint32 *palmap = (Uint32 *) info->table;
-    Uint32 ckey = info->ckey;
+    Uint32 ckey = info->colorkey;
 
     /* Set up some basic variables */
     dstskip /= 4;
@@ -430,13 +430,13 @@ Blit1toNAlpha(SDL_BlitInfo * info)
     int width = info->dst_w;
     int height = info->dst_h;
     Uint8 *src = info->src;
-    int srcskip = info->s_skip;
+    int srcskip = info->src_skip;
     Uint8 *dst = info->dst;
-    int dstskip = info->dst_pitch;
-    SDL_PixelFormat *dstfmt = info->dst;
-    const SDL_Color *srcpal = info->src->palette->colors;
+    int dstskip = info->dst_skip;
+    SDL_PixelFormat *dstfmt = info->dst_fmt;
+    const SDL_Color *srcpal = info->src_fmt->palette->colors;
     int dstbpp;
-    const int A = (info->cmod >> 24);
+    const int A = info->a;
 
     /* Set up some basic variables */
     dstbpp = dstfmt->BytesPerPixel;
@@ -471,15 +471,15 @@ Blit1toNAlphaKey(SDL_BlitInfo * info)
     int width = info->dst_w;
     int height = info->dst_h;
     Uint8 *src = info->src;
-    int srcskip = info->s_skip;
+    int srcskip = info->src_skip;
     Uint8 *dst = info->dst;
-    int dstskip = info->dst_pitch;
-    SDL_PixelFormat *srcfmt = info->src;
-    SDL_PixelFormat *dstfmt = info->dst;
-    const SDL_Color *srcpal = info->src->palette->colors;
-    Uint32 ckey = info->ckey;
+    int dstskip = info->dst_skip;
+    SDL_PixelFormat *srcfmt = info->src_fmt;
+    SDL_PixelFormat *dstfmt = info->dst_fmt;
+    const SDL_Color *srcpal = info->src_fmt->palette->colors;
+    Uint32 ckey = info->colorkey;
     int dstbpp;
-    const int A = (info->cmod >> 24);
+    const int A = info->a;
 
     /* Set up some basic variables */
     dstbpp = dstfmt->BytesPerPixel;
@@ -510,16 +510,16 @@ Blit1toNAlphaKey(SDL_BlitInfo * info)
     }
 }
 
-static SDL_loblit one_blit[] = {
+static SDL_BlitFunc one_blit[] = {
     NULL, Blit1to1, Blit1to2, Blit1to3, Blit1to4
 };
 
-static SDL_loblit one_blitkey[] = {
+static SDL_BlitFunc one_blitkey[] = {
     NULL, Blit1to1Key, Blit1to2Key, Blit1to3Key, Blit1to4Key
 };
 
-SDL_loblit
-SDL_CalculateBlit1(SDL_Surface * surface, int blit_index)
+SDL_BlitFunc
+SDL_CalculateBlit1(SDL_Surface * surface)
 {
     int which;
     SDL_PixelFormat *dstfmt;
@@ -530,22 +530,21 @@ SDL_CalculateBlit1(SDL_Surface * surface, int blit_index)
     } else {
         which = dstfmt->BytesPerPixel;
     }
-    switch (blit_index) {
-    case 0:                    /* copy */
+    switch (surface->map->info.flags) {
+    case 0:
         return one_blit[which];
 
-    case 1:                    /* colorkey */
+    case SDL_COPY_COLORKEY:
         return one_blitkey[which];
 
-    case 2:                    /* alpha */
+    case SDL_COPY_MODULATE_ALPHA | SDL_COPY_BLEND:
         /* Supporting 8bpp->8bpp alpha is doable but requires lots of
            tables which consume space and takes time to precompute,
            so is better left to the user */
         return which >= 2 ? Blit1toNAlpha : NULL;
 
-    case 3:                    /* alpha + colorkey */
+    case SDL_COPY_COLORKEY | SDL_COPY_MODULATE_ALPHA | SDL_COPY_BLEND:
         return which >= 2 ? Blit1toNAlphaKey : NULL;
-
     }
     return NULL;
 }

@@ -62,13 +62,16 @@
 #define SDL_CPU_ALTIVEC_PREFETCH    0x00000010
 #define SDL_CPU_ALTIVEC_NOPREFETCH  0x00000020
 
-typedef struct {
+typedef struct
+{
     Uint8 *src;
     int src_w, src_h;
     int src_pitch;
+    int src_skip;
     Uint8 *dst;
     int dst_w, dst_h;
     int dst_pitch;
+    int dst_skip;
     SDL_PixelFormat *src_fmt;
     SDL_PixelFormat *dst_fmt;
     Uint8 *table;
@@ -77,9 +80,10 @@ typedef struct {
     Uint8 r, g, b, a;
 } SDL_BlitInfo;
 
-typedef void (SDLCALL * SDL_BlitFunc)(SDL_BlitInfo *info);
+typedef void (SDLCALL * SDL_BlitFunc) (SDL_BlitInfo * info);
 
-typedef struct {
+typedef struct
+{
     Uint32 src_format;
     Uint32 dst_format;
     int flags;
@@ -104,10 +108,11 @@ typedef struct SDL_BlitMap
 /* Functions found in SDL_blit.c */
 extern int SDL_CalculateBlit(SDL_Surface * surface);
 
-/* Blit function tables in SDL_blit_*.c */
-extern SDL_BlitFuncEntry SDL_BlitFuncTable0[];
-extern SDL_BlitFuncEntry SDL_BlitFuncTable1[];
-extern SDL_BlitFuncEntry SDL_BlitFuncTableN[];
+/* Functions found in SDL_blit_*.c */
+extern SDL_BlitFunc SDL_CalculateBlit0(SDL_Surface * surface);
+extern SDL_BlitFunc SDL_CalculateBlit1(SDL_Surface * surface);
+extern SDL_BlitFunc SDL_CalculateBlitN(SDL_Surface * surface);
+extern SDL_BlitFunc SDL_CalculateBlitA(SDL_Surface * surface);
 
 /*
  * Useful macros for blitting routines

@@ -95,12 +95,12 @@ SDL_BlitCopy(SDL_BlitInfo * info)
     int w, h;
     int srcskip, dstskip;
 
-    w = info->dst_w * info->dst->BytesPerPixel;
+    w = info->dst_w * info->dst_fmt->BytesPerPixel;
     h = info->dst_h;
     src = info->src;
     dst = info->dst;
-    srcskip = w + info->s_skip;
-    dstskip = w + info->dst_pitch;
+    srcskip = info->src_pitch;
+    dstskip = info->dst_pitch;
 
 #ifdef __SSE__
     if (SDL_HasSSE() && !((uintptr_t) src & 15) && !((uintptr_t) dst & 15)) {
@@ -139,11 +139,11 @@ SDL_BlitCopyOverlap(SDL_BlitInfo * info)
     int w, h;
     int skip;
 
-    w = info->dst_w * info->dst->BytesPerPixel;
+    w = info->dst_w * info->dst_fmt->BytesPerPixel;
     h = info->dst_h;
     src = info->src;
     dst = info->dst;
-    skip = w + info->s_skip;
+    skip = info->src_pitch;
     if ((dst < src) || (dst >= (src + h * skip))) {
         SDL_BlitCopy(info);
     } else {

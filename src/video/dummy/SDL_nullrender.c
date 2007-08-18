@@ -25,7 +25,6 @@
 #include "../SDL_sysvideo.h"
 #include "../SDL_yuv_sw_c.h"
 #include "../SDL_renderer_sw.h"
-#include "../SDL_rendercopy.h"
 
 
 /* SDL surface based renderer implementation */
@@ -160,55 +159,10 @@ SDL_DUMMY_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     } else {
         SDL_Surface *surface = (SDL_Surface *) texture->driverdata;
         SDL_Surface *target = data->screens[data->current_screen];
-        SDL_RenderCopyFunc copyfunc = (SDL_RenderCopyFunc) surface->userdata;
+        SDL_Rect real_srcrect = *srcrect;
+        SDL_Rect real_dstrect = *dstrect;
 
-        if (copyfunc) {
-            SDL_RenderCopyData copydata;
-
-            copydata.src =
-                (Uint8 *) surface->pixels + srcrect->y * surface->pitch +
-                srcrect->x * surface->format->BytesPerPixel;
-            copydata.src_w = srcrect->w;
-            copydata.src_h = srcrect->h;
-            copydata.src_pitch = surface->pitch;
-            copydata.dst =
-                (Uint8 *) target->pixels + dstrect->y * target->pitch +
-                dstrect->x * target->format->BytesPerPixel;
-            copydata.dst_w = dstrect->w;
-            copydata.dst_h = dstrect->h;
-            copydata.dst_pitch = target->pitch;
-            copydata.flags = 0;
-            if (texture->modMode & SDL_TEXTUREMODULATE_COLOR) {
-                copydata.flags |= SDL_RENDERCOPY_MODULATE_COLOR;
-                copydata.r = texture->r;
-                copydata.g = texture->g;
-                copydata.b = texture->b;
-            }
-            if (texture->modMode & SDL_TEXTUREMODULATE_ALPHA) {
-                copydata.flags |= SDL_RENDERCOPY_MODULATE_ALPHA;
-                copydata.a = texture->a;
-            }
-            if (texture->blendMode & SDL_TEXTUREBLENDMODE_MASK) {
-                copydata.flags |= SDL_RENDERCOPY_MASK;
-            } else if (texture->blendMode & SDL_TEXTUREBLENDMODE_BLEND) {
-                copydata.flags |= SDL_RENDERCOPY_BLEND;
-            } else if (texture->blendMode & SDL_TEXTUREBLENDMODE_ADD) {
-                copydata.flags |= SDL_RENDERCOPY_ADD;
-            } else if (texture->blendMode & SDL_TEXTUREBLENDMODE_MOD) {
-                copydata.flags |= SDL_RENDERCOPY_MOD;
-            }
-            if (texture->scaleMode) {
-                copydata.flags |= SDL_RENDERCOPY_NEAREST;
-            }
-            copyfunc(&copydata);
-            return 0;
-        } else {
-            SDL_Rect real_srcrect = *srcrect;
-            SDL_Rect real_dstrect = *dstrect;
-
-            return SDL_LowerBlit(surface, &real_srcrect, target,
-                                 &real_dstrect);
-        }
+        return SDL_LowerBlit(surface, &real_srcrect, target, &real_dstrect);
     }
 }
 

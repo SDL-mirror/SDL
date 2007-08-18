@@ -53,9 +53,6 @@ SDL_CreateRGBSurface(Uint32 flags,
         SDL_FreeSurface(surface);
         return NULL;
     }
-    if (Amask) {
-        surface->flags |= SDL_SRCALPHA;
-    }
     surface->w = width;
     surface->h = height;
     surface->pitch = SDL_CalculatePitch(surface);
@@ -138,6 +135,11 @@ SDL_CreateRGBSurface(Uint32 flags,
     }
     SDL_FormatChanged(surface);
 
+    /* By default surface with an alpha mask are set up for blending */
+    if (Amask) {
+        SDL_SetSurfaceBlendMode(surface, SDL_TEXTUREBLENDMODE_BLEND);
+    }
+
     /* The surface is ready to go */
     surface->refcount = 1;
 #ifdef CHECK_LEAKS
@@ -212,26 +214,29 @@ SDL_SetSurfacePalette(SDL_Surface * surface, SDL_Palette * palette)
     return 0;
 }
 
-int SDL_SetSurfaceRLE(SDL_Surface *surface, int flag)
+int
+SDL_SetSurfaceRLE(SDL_Surface * surface, int flag)
 {
-    Uint32 flags;
+    int flags;
 
     if (!surface) {
         return -1;
     }
 
+    flags = surface->map->info.flags;
     if (flag) {
-        surface->flags |= SDL_RLEACCELOK;
+        surface->map->info.flags |= SDL_COPY_RLE_DESIRED;
     } else {
-        surface->flags &= ~SDL_RLEACCELOK;
+        surface->map->info.flags &= ~SDL_COPY_RLE_DESIRED;
     }
-    if (surface->flags != flags) {
+    if (surface->map->info.flags != flags) {
         SDL_InvalidateMap(surface->map);
     }
     return 0;
 }
 
-int SDL_SetColorKey(SDL_Surface *surface, Uint32 flag, Uint32 key)
+int
+SDL_SetColorKey(SDL_Surface * surface, Uint32 flag, Uint32 key)
 {
     int flags;
 
@@ -253,10 +258,19 @@ int SDL_SetColorKey(SDL_Surface *surface, Uint32 flag, Uint32 key)
     if (surface->map->info.flags != flags) {
         SDL_InvalidateMap(surface->map);
     }
+
+    /* Compatibility mode */
+    if (surface->map->info.flags & SDL_COPY_COLORKEY) {
+        surface->flags |= SDL_SRCCOLORKEY;
+    } else {
+        surface->flags &= ~SDL_SRCCOLORKEY;
+    }
+
     return 0;
 }
 
-int SDL_SetSurfaceColorMod(SDL_Surface *surface, Uint8 r, Uint8 g, Uint8 b)
+int
+SDL_SetSurfaceColorMod(SDL_Surface * surface, Uint8 r, Uint8 g, Uint8 b)
 {
     int flags;
 
@@ -281,7 +295,8 @@ int SDL_SetSurfaceColorMod(SDL_Surface *surface, Uint8 r, Uint8 g, Uint8 b)
 }
 
 
-int SDL_GetSurfaceColorMod(SDL_Surface *surface, Uint8 * r, Uint8 * g, Uint8 * b)
+int
+SDL_GetSurfaceColorMod(SDL_Surface * surface, Uint8 * r, Uint8 * g, Uint8 * b)
 {
     if (!surface) {
         return -1;
@@ -299,7 +314,8 @@ int SDL_GetSurfaceColorMod(SDL_Surface *surface, Uint8 * r, Uint8 * g, Uint8 * b
     return 0;
 }
 
-int SDL_SetSurfaceAlphaMod(SDL_Surface *surface, Uint8 alpha)
+int
+SDL_SetSurfaceAlphaMod(SDL_Surface * surface, Uint8 alpha)
 {
     int flags;
 
@@ -321,7 +337,8 @@ int SDL_SetSurfaceAlphaMod(SDL_Surface *surface, Uint8 alpha)
     return 0;
 }
 
-int SDL_GetSurfaceAlphaMod(SDL_Surface *surface, Uint8 * alpha)
+int
+SDL_GetSurfaceAlphaMod(SDL_Surface * surface, Uint8 * alpha)
 {
     if (!surface) {
         return -1;
@@ -333,7 +350,8 @@ int SDL_GetSurfaceAlphaMod(SDL_Surface *surface, Uint8 * alpha)
     return 0;
 }
 
-int SDL_SetSurfaceBlendMode(SDL_Surface *surface, int blendMode)
+int
+SDL_SetSurfaceBlendMode(SDL_Surface * surface, int blendMode)
 {
     int flags, status;
 
@@ -343,7 +361,8 @@ int SDL_SetSurfaceBlendMode(SDL_Surface *surface, int blendMode)
 
     status = 0;
     flags = surface->map->info.flags;
-    surface->map->info.flags &= ~(SDL_COPY_MASK|SDL_COPY_BLEND|SDL_COPY_ADD|SDL_COPY_MOD);
+    surface->map->info.flags &=
+        ~(SDL_COPY_MASK | SDL_COPY_BLEND | SDL_COPY_ADD | SDL_COPY_MOD);
     switch (blendMode) {
     case SDL_TEXTUREBLENDMODE_NONE:
         break;
@@ -368,10 +387,19 @@ int SDL_SetSurfaceBlendMode(SDL_Surface *surface, int blendMode)
     if (surface->map->info.flags != flags) {
         SDL_InvalidateMap(surface->map);
     }
+
+    /* Compatibility mode */
+    if (surface->map->info.flags & SDL_COPY_BLEND) {
+        surface->flags |= SDL_SRCALPHA;
+    } else {
+        surface->flags &= ~SDL_SRCALPHA;
+    }
+
     return status;
 }
 
-int SDL_GetSurfaceBlendMode(SDL_Surface *surface, int *blendMode)
+int
+SDL_GetSurfaceBlendMode(SDL_Surface * surface, int *blendMode)
 {
     if (!surface) {
         return -1;
@@ -381,27 +409,30 @@ int SDL_GetSurfaceBlendMode(SDL_Surface *surface, int *blendMode)
         return 0;
     }
 
-    switch(surface->map->info.flags & (SDL_COPY_MASK|SDL_COPY_BLEND|SDL_COPY_ADD|SDL_COPY_MOD)) {
+    switch (surface->map->info.
+            flags & (SDL_COPY_MASK | SDL_COPY_BLEND | SDL_COPY_ADD |
+                     SDL_COPY_MOD)) {
     case SDL_COPY_MASK:
-        *blendMode = SDL_TEXTUREBLENDMODE_MASK:
+        *blendMode = SDL_TEXTUREBLENDMODE_MASK;
         break;
     case SDL_COPY_BLEND:
-        *blendMode = SDL_TEXTUREBLENDMODE_BLEND:
+        *blendMode = SDL_TEXTUREBLENDMODE_BLEND;
         break;
     case SDL_COPY_ADD:
-        *blendMode = SDL_TEXTUREBLENDMODE_ADD:
+        *blendMode = SDL_TEXTUREBLENDMODE_ADD;
         break;
     case SDL_COPY_MOD:
-        *blendMode = SDL_TEXTUREBLENDMODE_MOD:
+        *blendMode = SDL_TEXTUREBLENDMODE_MOD;
         break;
     default:
-        *blendMode = SDL_TEXTUREBLENDMODE_NONE:
+        *blendMode = SDL_TEXTUREBLENDMODE_NONE;
         break;
     }
     return 0;
 }
 
-int SDL_SetSurfaceScaleMode(SDL_Surface *surface, int scaleMode)
+int
+SDL_SetSurfaceScaleMode(SDL_Surface * surface, int scaleMode)
 {
     int flags, status;
 
@@ -436,7 +467,8 @@ int SDL_SetSurfaceScaleMode(SDL_Surface *surface, int scaleMode)
     return status;
 }
 
-int SDL_GetSurfaceScaleMode(SDL_Surface *surface, int *scaleMode)
+int
+SDL_GetSurfaceScaleMode(SDL_Surface * surface, int *scaleMode)
 {
     if (!surface) {
         return -1;
@@ -446,12 +478,12 @@ int SDL_GetSurfaceScaleMode(SDL_Surface *surface, int *scaleMode)
         return 0;
     }
 
-    switch(surface->map->info.flags & (SDL_COPY_LINEAR)) {
-    case SDL_COPY_LINEAR:
-        *scaleMode = SDL_TEXTURESCALEMODE_FAST:
+    switch (surface->map->info.flags & (SDL_COPY_NEAREST)) {
+    case SDL_COPY_NEAREST:
+        *scaleMode = SDL_TEXTURESCALEMODE_FAST;
         break;
     default:
-        *scaleMode = SDL_TEXTURESCALEMODE_NONE:
+        *scaleMode = SDL_TEXTURESCALEMODE_NONE;
         break;
     }
     return 0;
@@ -706,7 +738,8 @@ SDL_ConvertSurface(SDL_Surface * surface,
     if (copy_flags & SDL_COPY_COLORKEY) {
         Uint8 keyR, keyG, keyB, keyA;
 
-        SDL_GetRGBA(colorkey, surface->format, &keyR, &keyG, &keyB, &keyA);
+        SDL_GetRGBA(surface->map->info.colorkey, surface->format, &keyR,
+                    &keyG, &keyB, &keyA);
         SDL_SetColorKey(convert, 1,
                         SDL_MapRGBA(convert->format, keyR, keyG, keyB, keyA));
     }

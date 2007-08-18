@@ -33,15 +33,15 @@ BlitNto1SurfaceAlpha(SDL_BlitInfo * info)
     int width = info->dst_w;
     int height = info->dst_h;
     Uint8 *src = info->src;
-    int srcskip = info->s_skip;
+    int srcskip = info->src_skip;
     Uint8 *dst = info->dst;
-    int dstskip = info->dst_pitch;
+    int dstskip = info->dst_skip;
     Uint8 *palmap = info->table;
-    SDL_PixelFormat *srcfmt = info->src;
-    SDL_PixelFormat *dstfmt = info->dst;
+    SDL_PixelFormat *srcfmt = info->src_fmt;
+    SDL_PixelFormat *dstfmt = info->dst_fmt;
     int srcbpp = srcfmt->BytesPerPixel;
 
-    const unsigned A = (info->cmod >> 24);
+    const unsigned A = info->a;
 
     while (height--) {
 	    /* *INDENT-OFF* */
@@ -89,12 +89,12 @@ BlitNto1PixelAlpha(SDL_BlitInfo * info)
     int width = info->dst_w;
     int height = info->dst_h;
     Uint8 *src = info->src;
-    int srcskip = info->s_skip;
+    int srcskip = info->src_skip;
     Uint8 *dst = info->dst;
-    int dstskip = info->dst_pitch;
+    int dstskip = info->dst_skip;
     Uint8 *palmap = info->table;
-    SDL_PixelFormat *srcfmt = info->src;
-    SDL_PixelFormat *dstfmt = info->dst;
+    SDL_PixelFormat *srcfmt = info->src_fmt;
+    SDL_PixelFormat *dstfmt = info->dst_fmt;
     int srcbpp = srcfmt->BytesPerPixel;
 
     /* FIXME: fix alpha bit field expansion here too? */
@@ -145,16 +145,16 @@ BlitNto1SurfaceAlphaKey(SDL_BlitInfo * info)
     int width = info->dst_w;
     int height = info->dst_h;
     Uint8 *src = info->src;
-    int srcskip = info->s_skip;
+    int srcskip = info->src_skip;
     Uint8 *dst = info->dst;
-    int dstskip = info->dst_pitch;
+    int dstskip = info->dst_skip;
     Uint8 *palmap = info->table;
-    SDL_PixelFormat *srcfmt = info->src;
-    SDL_PixelFormat *dstfmt = info->dst;
+    SDL_PixelFormat *srcfmt = info->src_fmt;
+    SDL_PixelFormat *dstfmt = info->dst_fmt;
     int srcbpp = srcfmt->BytesPerPixel;
-    Uint32 ckey = info->ckey;
+    Uint32 ckey = info->colorkey;
 
-    const int A = (info->cmod >> 24);
+    const int A = info->a;
 
     while (height--) {
 	    /* *INDENT-OFF* */
@@ -206,10 +206,10 @@ BlitRGBtoRGBSurfaceAlpha128MMX(SDL_BlitInfo * info)
     int width = info->dst_w;
     int height = info->dst_h;
     Uint32 *srcp = (Uint32 *) info->src;
-    int srcskip = info->s_skip >> 2;
+    int srcskip = info->src_skip >> 2;
     Uint32 *dstp = (Uint32 *) info->dst;
-    int dstskip = info->dst_pitch >> 2;
-    Uint32 dalpha = info->dst->Amask;
+    int dstskip = info->dst_skip >> 2;
+    Uint32 dalpha = info->dst_fmt->Amask;
 
     __m64 src1, src2, dst1, dst2, lmask, hmask, dsta;
 
@@ -259,9 +259,9 @@ BlitRGBtoRGBSurfaceAlpha128MMX(SDL_BlitInfo * info)
 static void
 BlitRGBtoRGBSurfaceAlphaMMX(SDL_BlitInfo * info)
 {
-    SDL_PixelFormat *df = info->dst;
+    SDL_PixelFormat *df = info->dst_fmt;
     Uint32 chanmask = df->Rmask | df->Gmask | df->Bmask;
-    unsigned alpha = (info->cmod >> 24);
+    unsigned alpha = info->a;
 
     if (alpha == 128 && (df->Rmask | df->Gmask | df->Bmask) == 0x00FFFFFF) {
         /* only call a128 version when R,G,B occupy lower bits */
@@ -270,9 +270,9 @@ BlitRGBtoRGBSurfaceAlphaMMX(SDL_BlitInfo * info)
         int width = info->dst_w;
         int height = info->dst_h;
         Uint32 *srcp = (Uint32 *) info->src;
-        int srcskip = info->s_skip >> 2;
+        int srcskip = info->src_skip >> 2;
         Uint32 *dstp = (Uint32 *) info->dst;
-        int dstskip = info->dst_pitch >> 2;
+        int dstskip = info->dst_skip >> 2;
         Uint32 dalpha = df->Amask;
         Uint32 amult;
 
@@ -359,10 +359,10 @@ BlitRGBtoRGBPixelAlphaMMX(SDL_BlitInfo * info)
     int width = info->dst_w;
     int height = info->dst_h;
     Uint32 *srcp = (Uint32 *) info->src;
-    int srcskip = info->s_skip >> 2;
+    int srcskip = info->src_skip >> 2;
     Uint32 *dstp = (Uint32 *) info->dst;
-    int dstskip = info->dst_pitch >> 2;
-    SDL_PixelFormat *sf = info->src;
+    int dstskip = info->dst_skip >> 2;
+    SDL_PixelFormat *sf = info->src_fmt;
     Uint32 chanmask = sf->Rmask | sf->Gmask | sf->Bmask;
     Uint32 amask = sf->Amask;
     Uint32 ashift = sf->Ashift;
@@ -544,10 +544,10 @@ Blit32to565PixelAlphaAltivec(SDL_BlitInfo * info)
 {
     int height = info->dst_h;
     Uint8 *src = (Uint8 *) info->src;
-    int srcskip = info->s_skip;
+    int srcskip = info->src_skip;
     Uint8 *dst = (Uint8 *) info->dst;
-    int dstskip = info->dst_pitch;
-    SDL_PixelFormat *srcfmt = info->src;
+    int dstskip = info->dst_skip;
+    SDL_PixelFormat *srcfmt = info->src_fmt;
 
     vector unsigned char v0 = vec_splat_u8(0);
     vector unsigned short v8_16 = vec_splat_u16(8);
@@ -720,15 +720,15 @@ Blit32to32SurfaceAlphaKeyAltivec(SDL_BlitInfo * info)
 {
     int height = info->dst_h;
     Uint32 *srcp = (Uint32 *) info->src;
-    int srcskip = info->s_skip >> 2;
+    int srcskip = info->src_skip >> 2;
     Uint32 *dstp = (Uint32 *) info->dst;
-    int dstskip = info->dst_pitch >> 2;
-    SDL_PixelFormat *srcfmt = info->src;
-    SDL_PixelFormat *dstfmt = info->dst;
-    unsigned sA = (info->cmod >> 24);
+    int dstskip = info->dst_skip >> 2;
+    SDL_PixelFormat *srcfmt = info->src_fmt;
+    SDL_PixelFormat *dstfmt = info->dst_fmt;
+    unsigned sA = info->a;
     unsigned dA = dstfmt->Amask ? SDL_ALPHA_OPAQUE : 0;
     Uint32 rgbmask = srcfmt->Rmask | srcfmt->Gmask | srcfmt->Bmask;
-    Uint32 ckey = info->ckey;
+    Uint32 ckey = info->colorkey;
     vector unsigned char mergePermute;
     vector unsigned char vsrcPermute;
     vector unsigned char vdstPermute;
@@ -847,11 +847,11 @@ Blit32to32PixelAlphaAltivec(SDL_BlitInfo * info)
     int width = info->dst_w;
     int height = info->dst_h;
     Uint32 *srcp = (Uint32 *) info->src;
-    int srcskip = info->s_skip >> 2;
+    int srcskip = info->src_skip >> 2;
     Uint32 *dstp = (Uint32 *) info->dst;
-    int dstskip = info->dst_pitch >> 2;
-    SDL_PixelFormat *srcfmt = info->src;
-    SDL_PixelFormat *dstfmt = info->dst;
+    int dstskip = info->dst_skip >> 2;
+    SDL_PixelFormat *srcfmt = info->src_fmt;
+    SDL_PixelFormat *dstfmt = info->dst_fmt;
     vector unsigned char mergePermute;
     vector unsigned char valphaPermute;
     vector unsigned char vsrcPermute;
@@ -945,9 +945,9 @@ BlitRGBtoRGBPixelAlphaAltivec(SDL_BlitInfo * info)
     int width = info->dst_w;
     int height = info->dst_h;
     Uint32 *srcp = (Uint32 *) info->src;
-    int srcskip = info->s_skip >> 2;
+    int srcskip = info->src_skip >> 2;
     Uint32 *dstp = (Uint32 *) info->dst;
-    int dstskip = info->dst_pitch >> 2;
+    int dstskip = info->dst_skip >> 2;
     vector unsigned char mergePermute;
     vector unsigned char valphaPermute;
     vector unsigned char valphamask;
@@ -1042,12 +1042,12 @@ Blit32to32SurfaceAlphaAltivec(SDL_BlitInfo * info)
     /* XXX : 6 */
     int height = info->dst_h;
     Uint32 *srcp = (Uint32 *) info->src;
-    int srcskip = info->s_skip >> 2;
+    int srcskip = info->src_skip >> 2;
     Uint32 *dstp = (Uint32 *) info->dst;
-    int dstskip = info->dst_pitch >> 2;
-    SDL_PixelFormat *srcfmt = info->src;
-    SDL_PixelFormat *dstfmt = info->dst;
-    unsigned sA = (info->cmod >> 24);
+    int dstskip = info->dst_skip >> 2;
+    SDL_PixelFormat *srcfmt = info->src_fmt;
+    SDL_PixelFormat *dstfmt = info->dst_fmt;
+    unsigned sA = info->a;
     unsigned dA = dstfmt->Amask ? SDL_ALPHA_OPAQUE : 0;
     vector unsigned char mergePermute;
     vector unsigned char vsrcPermute;
@@ -1136,12 +1136,12 @@ Blit32to32SurfaceAlphaAltivec(SDL_BlitInfo * info)
 static void
 BlitRGBtoRGBSurfaceAlphaAltivec(SDL_BlitInfo * info)
 {
-    unsigned alpha = (info->cmod >> 24);
+    unsigned alpha = info->a;
     int height = info->dst_h;
     Uint32 *srcp = (Uint32 *) info->src;
-    int srcskip = info->s_skip >> 2;
+    int srcskip = info->src_skip >> 2;
     Uint32 *dstp = (Uint32 *) info->dst;
-    int dstskip = info->dst_pitch >> 2;
+    int dstskip = info->dst_skip >> 2;
     vector unsigned char mergePermute;
     vector unsigned char valpha;
     vector unsigned char valphamask;
@@ -1227,9 +1227,9 @@ BlitRGBtoRGBSurfaceAlpha128(SDL_BlitInfo * info)
     int width = info->dst_w;
     int height = info->dst_h;
     Uint32 *srcp = (Uint32 *) info->src;
-    int srcskip = info->s_skip >> 2;
+    int srcskip = info->src_skip >> 2;
     Uint32 *dstp = (Uint32 *) info->dst;
-    int dstskip = info->dst_pitch >> 2;
+    int dstskip = info->dst_skip >> 2;
 
     while (height--) {
 	    /* *INDENT-OFF* */
@@ -1249,16 +1249,16 @@ BlitRGBtoRGBSurfaceAlpha128(SDL_BlitInfo * info)
 static void
 BlitRGBtoRGBSurfaceAlpha(SDL_BlitInfo * info)
 {
-    unsigned alpha = (info->cmod >> 24);
+    unsigned alpha = info->a;
     if (alpha == 128) {
         BlitRGBtoRGBSurfaceAlpha128(info);
     } else {
         int width = info->dst_w;
         int height = info->dst_h;
         Uint32 *srcp = (Uint32 *) info->src;
-        int srcskip = info->s_skip >> 2;
+        int srcskip = info->src_skip >> 2;
         Uint32 *dstp = (Uint32 *) info->dst;
-        int dstskip = info->dst_pitch >> 2;
+        int dstskip = info->dst_skip >> 2;
         Uint32 s;
         Uint32 d;
         Uint32 s1;
@@ -1324,9 +1324,9 @@ BlitRGBtoRGBPixelAlpha(SDL_BlitInfo * info)
     int width = info->dst_w;
     int height = info->dst_h;
     Uint32 *srcp = (Uint32 *) info->src;
-    int srcskip = info->s_skip >> 2;
+    int srcskip = info->src_skip >> 2;
     Uint32 *dstp = (Uint32 *) info->dst;
-    int dstskip = info->dst_pitch >> 2;
+    int dstskip = info->dst_skip >> 2;
 
     while (height--) {
 	    /* *INDENT-OFF* */
@@ -1377,10 +1377,10 @@ BlitRGBtoRGBPixelAlphaMMX3DNOW(SDL_BlitInfo * info)
     int width = info->dst_w;
     int height = info->dst_h;
     Uint32 *srcp = (Uint32 *) info->src;
-    int srcskip = info->s_skip >> 2;
+    int srcskip = info->src_skip >> 2;
     Uint32 *dstp = (Uint32 *) info->dst;
-    int dstskip = info->dst_pitch >> 2;
-    SDL_PixelFormat *sf = info->src;
+    int dstskip = info->dst_skip >> 2;
+    SDL_PixelFormat *sf = info->src_fmt;
     Uint32 chanmask = sf->Rmask | sf->Gmask | sf->Bmask;
     Uint32 amask = sf->Amask;
     Uint32 ashift = sf->Ashift;
@@ -1459,9 +1459,9 @@ Blit16to16SurfaceAlpha128(SDL_BlitInfo * info, Uint16 mask)
     int width = info->dst_w;
     int height = info->dst_h;
     Uint16 *srcp = (Uint16 *) info->src;
-    int srcskip = info->s_skip >> 1;
+    int srcskip = info->src_skip >> 1;
     Uint16 *dstp = (Uint16 *) info->dst;
-    int dstskip = info->dst_pitch >> 1;
+    int dstskip = info->dst_skip >> 1;
 
     while (height--) {
         if (((uintptr_t) srcp ^ (uintptr_t) dstp) & 2) {
@@ -1558,16 +1558,16 @@ Blit16to16SurfaceAlpha128(SDL_BlitInfo * info, Uint16 mask)
 static void
 Blit565to565SurfaceAlphaMMX(SDL_BlitInfo * info)
 {
-    unsigned alpha = (info->cmod >> 24);
+    unsigned alpha = info->a;
     if (alpha == 128) {
         Blit16to16SurfaceAlpha128(info, 0xf7de);
     } else {
         int width = info->dst_w;
         int height = info->dst_h;
         Uint16 *srcp = (Uint16 *) info->src;
-        int srcskip = info->s_skip >> 1;
+        int srcskip = info->src_skip >> 1;
         Uint16 *dstp = (Uint16 *) info->dst;
-        int dstskip = info->dst_pitch >> 1;
+        int dstskip = info->dst_skip >> 1;
         Uint32 s, d;
 
         __m64 src1, dst1, src2, dst2, gmask, bmask, mm_res, mm_alpha;
@@ -1695,16 +1695,16 @@ Blit565to565SurfaceAlphaMMX(SDL_BlitInfo * info)
 static void
 Blit555to555SurfaceAlphaMMX(SDL_BlitInfo * info)
 {
-    unsigned alpha = (info->cmod >> 24);
+    unsigned alpha = info->a;
     if (alpha == 128) {
         Blit16to16SurfaceAlpha128(info, 0xfbde);
     } else {
         int width = info->dst_w;
         int height = info->dst_h;
         Uint16 *srcp = (Uint16 *) info->src;
-        int srcskip = info->s_skip >> 1;
+        int srcskip = info->src_skip >> 1;
         Uint16 *dstp = (Uint16 *) info->dst;
-        int dstskip = info->dst_pitch >> 1;
+        int dstskip = info->dst_skip >> 1;
         Uint32 s, d;
 
         __m64 src1, dst1, src2, dst2, rmask, gmask, bmask, mm_res, mm_alpha;
@@ -1835,16 +1835,16 @@ Blit555to555SurfaceAlphaMMX(SDL_BlitInfo * info)
 static void
 Blit565to565SurfaceAlpha(SDL_BlitInfo * info)
 {
-    unsigned alpha = (info->cmod >> 24);
+    unsigned alpha = info->a;
     if (alpha == 128) {
         Blit16to16SurfaceAlpha128(info, 0xf7de);
     } else {
         int width = info->dst_w;
         int height = info->dst_h;
         Uint16 *srcp = (Uint16 *) info->src;
-        int srcskip = info->s_skip >> 1;
+        int srcskip = info->src_skip >> 1;
         Uint16 *dstp = (Uint16 *) info->dst;
-        int dstskip = info->dst_pitch >> 1;
+        int dstskip = info->dst_skip >> 1;
         alpha >>= 3;            /* downscale alpha to 5 bits */
 
         while (height--) {
@@ -1874,16 +1874,16 @@ Blit565to565SurfaceAlpha(SDL_BlitInfo * info)
 static void
 Blit555to555SurfaceAlpha(SDL_BlitInfo * info)
 {
-    unsigned alpha = (info->cmod >> 24);        /* downscale alpha to 5 bits */
+    unsigned alpha = info->a;   /* downscale alpha to 5 bits */
     if (alpha == 128) {
         Blit16to16SurfaceAlpha128(info, 0xfbde);
     } else {
         int width = info->dst_w;
         int height = info->dst_h;
         Uint16 *srcp = (Uint16 *) info->src;
-        int srcskip = info->s_skip >> 1;
+        int srcskip = info->src_skip >> 1;
         Uint16 *dstp = (Uint16 *) info->dst;
-        int dstskip = info->dst_pitch >> 1;
+        int dstskip = info->dst_skip >> 1;
         alpha >>= 3;            /* downscale alpha to 5 bits */
 
         while (height--) {
@@ -1916,9 +1916,9 @@ BlitARGBto565PixelAlpha(SDL_BlitInfo * info)
     int width = info->dst_w;
     int height = info->dst_h;
     Uint32 *srcp = (Uint32 *) info->src;
-    int srcskip = info->s_skip >> 2;
+    int srcskip = info->src_skip >> 2;
     Uint16 *dstp = (Uint16 *) info->dst;
-    int dstskip = info->dst_pitch >> 1;
+    int dstskip = info->dst_skip >> 1;
 
     while (height--) {
 	    /* *INDENT-OFF* */
@@ -1962,9 +1962,9 @@ BlitARGBto555PixelAlpha(SDL_BlitInfo * info)
     int width = info->dst_w;
     int height = info->dst_h;
     Uint32 *srcp = (Uint32 *) info->src;
-    int srcskip = info->s_skip >> 2;
+    int srcskip = info->src_skip >> 2;
     Uint16 *dstp = (Uint16 *) info->dst;
-    int dstskip = info->dst_pitch >> 1;
+    int dstskip = info->dst_skip >> 1;
 
     while (height--) {
 	    /* *INDENT-OFF* */
@@ -2009,14 +2009,14 @@ BlitNtoNSurfaceAlpha(SDL_BlitInfo * info)
     int width = info->dst_w;
     int height = info->dst_h;
     Uint8 *src = info->src;
-    int srcskip = info->s_skip;
+    int srcskip = info->src_skip;
     Uint8 *dst = info->dst;
-    int dstskip = info->dst_pitch;
-    SDL_PixelFormat *srcfmt = info->src;
-    SDL_PixelFormat *dstfmt = info->dst;
+    int dstskip = info->dst_skip;
+    SDL_PixelFormat *srcfmt = info->src_fmt;
+    SDL_PixelFormat *dstfmt = info->dst_fmt;
     int srcbpp = srcfmt->BytesPerPixel;
     int dstbpp = dstfmt->BytesPerPixel;
-    unsigned sA = (info->cmod >> 24);
+    unsigned sA = info->a;
     unsigned dA = dstfmt->Amask ? SDL_ALPHA_OPAQUE : 0;
 
     if (sA) {
@@ -2053,15 +2053,15 @@ BlitNtoNSurfaceAlphaKey(SDL_BlitInfo * info)
     int width = info->dst_w;
     int height = info->dst_h;
     Uint8 *src = info->src;
-    int srcskip = info->s_skip;
+    int srcskip = info->src_skip;
     Uint8 *dst = info->dst;
-    int dstskip = info->dst_pitch;
-    SDL_PixelFormat *srcfmt = info->src;
-    SDL_PixelFormat *dstfmt = info->dst;
-    Uint32 ckey = info->ckey;
+    int dstskip = info->dst_skip;
+    SDL_PixelFormat *srcfmt = info->src_fmt;
+    SDL_PixelFormat *dstfmt = info->dst_fmt;
+    Uint32 ckey = info->colorkey;
     int srcbpp = srcfmt->BytesPerPixel;
     int dstbpp = dstfmt->BytesPerPixel;
-    unsigned sA = (info->cmod >> 24);
+    unsigned sA = info->a;
     unsigned dA = dstfmt->Amask ? SDL_ALPHA_OPAQUE : 0;
 
     while (height--) {
@@ -2099,11 +2099,11 @@ BlitNtoNPixelAlpha(SDL_BlitInfo * info)
     int width = info->dst_w;
     int height = info->dst_h;
     Uint8 *src = info->src;
-    int srcskip = info->s_skip;
+    int srcskip = info->src_skip;
     Uint8 *dst = info->dst;
-    int dstskip = info->dst_pitch;
-    SDL_PixelFormat *srcfmt = info->src;
-    SDL_PixelFormat *dstfmt = info->dst;
+    int dstskip = info->dst_skip;
+    SDL_PixelFormat *srcfmt = info->src_fmt;
+    SDL_PixelFormat *dstfmt = info->dst_fmt;
 
     int srcbpp;
     int dstbpp;
@@ -2147,81 +2147,14 @@ BlitNtoNPixelAlpha(SDL_BlitInfo * info)
 }
 
 
-SDL_loblit
-SDL_CalculateAlphaBlit(SDL_Surface * surface, int blit_index)
+SDL_BlitFunc
+SDL_CalculateBlitA(SDL_Surface * surface)
 {
     SDL_PixelFormat *sf = surface->format;
     SDL_PixelFormat *df = surface->map->dst->format;
 
-    if (sf->Amask == 0) {
-        if ((surface->flags & SDL_SRCCOLORKEY) == SDL_SRCCOLORKEY) {
-            if (df->BytesPerPixel == 1)
-                return BlitNto1SurfaceAlphaKey;
-            else
-#if SDL_ALTIVEC_BLITTERS
-            if (sf->BytesPerPixel == 4 && df->BytesPerPixel == 4 &&
-                    SDL_HasAltiVec())
-                return Blit32to32SurfaceAlphaKeyAltivec;
-            else
-#endif
-                return BlitNtoNSurfaceAlphaKey;
-        } else {
-            /* Per-surface alpha blits */
-            switch (df->BytesPerPixel) {
-            case 1:
-                return BlitNto1SurfaceAlpha;
-
-            case 2:
-                if (surface->map->identity) {
-                    if (df->Gmask == 0x7e0) {
-#ifdef __MMX__
-                        if (SDL_HasMMX())
-                            return Blit565to565SurfaceAlphaMMX;
-                        else
-#endif
-                            return Blit565to565SurfaceAlpha;
-                    } else if (df->Gmask == 0x3e0) {
-#ifdef __MMX__
-                        if (SDL_HasMMX())
-                            return Blit555to555SurfaceAlphaMMX;
-                        else
-#endif
-                            return Blit555to555SurfaceAlpha;
-                    }
-                }
-                return BlitNtoNSurfaceAlpha;
-
-            case 4:
-                if (sf->Rmask == df->Rmask
-                    && sf->Gmask == df->Gmask
-                    && sf->Bmask == df->Bmask && sf->BytesPerPixel == 4) {
-#ifdef __MMX__
-                    if (sf->Rshift % 8 == 0
-                        && sf->Gshift % 8 == 0
-                        && sf->Bshift % 8 == 0 && SDL_HasMMX())
-                        return BlitRGBtoRGBSurfaceAlphaMMX;
-#endif
-                    if ((sf->Rmask | sf->Gmask | sf->Bmask) == 0xffffff) {
-#if SDL_ALTIVEC_BLITTERS
-                        if (SDL_HasAltiVec())
-                            return BlitRGBtoRGBSurfaceAlphaAltivec;
-#endif
-                        return BlitRGBtoRGBSurfaceAlpha;
-                    }
-                }
-#if SDL_ALTIVEC_BLITTERS
-                if ((sf->BytesPerPixel == 4) && SDL_HasAltiVec())
-                    return Blit32to32SurfaceAlphaAltivec;
-                else
-#endif
-                    return BlitNtoNSurfaceAlpha;
-
-            case 3:
-            default:
-                return BlitNtoNSurfaceAlpha;
-            }
-        }
-    } else {
+    switch (surface->map->info.flags) {
+    case SDL_COPY_BLEND:
         /* Per-pixel alpha blits */
         switch (df->BytesPerPixel) {
         case 1:
@@ -2284,7 +2217,84 @@ SDL_CalculateAlphaBlit(SDL_Surface * surface, int blit_index)
         default:
             return BlitNtoNPixelAlpha;
         }
+        break;
+
+    case SDL_COPY_MODULATE_ALPHA | SDL_COPY_BLEND:
+        if (sf->Amask == 0) {
+            /* Per-surface alpha blits */
+            switch (df->BytesPerPixel) {
+            case 1:
+                return BlitNto1SurfaceAlpha;
+
+            case 2:
+                if (surface->map->identity) {
+                    if (df->Gmask == 0x7e0) {
+#ifdef __MMX__
+                        if (SDL_HasMMX())
+                            return Blit565to565SurfaceAlphaMMX;
+                        else
+#endif
+                            return Blit565to565SurfaceAlpha;
+                    } else if (df->Gmask == 0x3e0) {
+#ifdef __MMX__
+                        if (SDL_HasMMX())
+                            return Blit555to555SurfaceAlphaMMX;
+                        else
+#endif
+                            return Blit555to555SurfaceAlpha;
+                    }
+                }
+                return BlitNtoNSurfaceAlpha;
+
+            case 4:
+                if (sf->Rmask == df->Rmask
+                    && sf->Gmask == df->Gmask
+                    && sf->Bmask == df->Bmask && sf->BytesPerPixel == 4) {
+#ifdef __MMX__
+                    if (sf->Rshift % 8 == 0
+                        && sf->Gshift % 8 == 0
+                        && sf->Bshift % 8 == 0 && SDL_HasMMX())
+                        return BlitRGBtoRGBSurfaceAlphaMMX;
+#endif
+                    if ((sf->Rmask | sf->Gmask | sf->Bmask) == 0xffffff) {
+#if SDL_ALTIVEC_BLITTERS
+                        if (SDL_HasAltiVec())
+                            return BlitRGBtoRGBSurfaceAlphaAltivec;
+#endif
+                        return BlitRGBtoRGBSurfaceAlpha;
+                    }
+                }
+#if SDL_ALTIVEC_BLITTERS
+                if ((sf->BytesPerPixel == 4) && SDL_HasAltiVec())
+                    return Blit32to32SurfaceAlphaAltivec;
+                else
+#endif
+                    return BlitNtoNSurfaceAlpha;
+
+            case 3:
+            default:
+                return BlitNtoNSurfaceAlpha;
+            }
+        }
+        break;
+
+    case SDL_COPY_COLORKEY | SDL_COPY_MODULATE_ALPHA | SDL_COPY_BLEND:
+        if (sf->Amask == 0) {
+            if (df->BytesPerPixel == 1)
+                return BlitNto1SurfaceAlphaKey;
+            else
+#if SDL_ALTIVEC_BLITTERS
+            if (sf->BytesPerPixel == 4 && df->BytesPerPixel == 4 &&
+                    SDL_HasAltiVec())
+                return Blit32to32SurfaceAlphaKeyAltivec;
+            else
+#endif
+                return BlitNtoNSurfaceAlphaKey;
+        }
+        break;
     }
+
+    return NULL;
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

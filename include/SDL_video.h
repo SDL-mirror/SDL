@@ -265,7 +265,7 @@ typedef void *SDL_GLContext;
 /* These are the currently supported flags for the SDL_surface */
 /* Used internally (read-only) */
 #define SDL_PREALLOC        0x00000001  /* Surface uses preallocated memory */
-#define SDL_RLEACCEL        0x00000001  /* Surface is RLE encoded */
+#define SDL_RLEACCEL        0x00000002  /* Surface is RLE encoded */
 
 /* Evaluates to true if the surface needs to be locked before access */
 #define SDL_MUSTLOCK(S)	(((S)->flags & SDL_RLEACCEL) != 0)
@@ -1407,7 +1407,8 @@ extern DECLSPEC int SDLCALL SDL_SaveBMP_RW
  * \note If RLE is enabled, colorkey and alpha blending blits are much faster,
  *       but the surface must be locked before directly accessing the pixels.
  */
-extern DECLSPEC int SDLCALL SDL_SetSurfaceRLE(SDL_Surface *surface, int flag);
+extern DECLSPEC int SDLCALL SDL_SetSurfaceRLE(SDL_Surface * surface,
+                                              int flag);
 
 /*
  * \fn int SDL_SetColorKey(SDL_Surface *surface, Uint32 flag, Uint32 key)
@@ -1420,7 +1421,8 @@ extern DECLSPEC int SDLCALL SDL_SetSurfaceRLE(SDL_Surface *surface, int flag);
  *
  * \return 0 on success, or -1 if the surface is not valid
  */
-extern DECLSPEC int SDLCALL SDL_SetColorKey(SDL_Surface *surface, Uint32 flag, Uint32 key);
+extern DECLSPEC int SDLCALL SDL_SetColorKey(SDL_Surface * surface,
+                                            Uint32 flag, Uint32 key);
 
 /**
  * \fn int SDL_SetSurfaceColorMod(SDL_Surface *surface, Uint8 r, Uint8 g, Uint8 b)
@@ -1436,7 +1438,7 @@ extern DECLSPEC int SDLCALL SDL_SetColorKey(SDL_Surface *surface, Uint32 flag, U
  *
  * \sa SDL_GetSurfaceColorMod()
  */
-extern DECLSPEC int SDLCALL SDL_SetSurfaceColorMod(SDL_Surface *surface,
+extern DECLSPEC int SDLCALL SDL_SetSurfaceColorMod(SDL_Surface * surface,
                                                    Uint8 r, Uint8 g, Uint8 b);
 
 
@@ -1454,7 +1456,7 @@ extern DECLSPEC int SDLCALL SDL_SetSurfaceColorMod(SDL_Surface *surface,
  *
  * \sa SDL_SetSurfaceColorMod()
  */
-extern DECLSPEC int SDLCALL SDL_GetSurfaceColorMod(SDL_Surface *surface,
+extern DECLSPEC int SDLCALL SDL_GetSurfaceColorMod(SDL_Surface * surface,
                                                    Uint8 * r, Uint8 * g,
                                                    Uint8 * b);
 
@@ -1470,7 +1472,7 @@ extern DECLSPEC int SDLCALL SDL_GetSurfaceColorMod(SDL_Surface *surface,
  *
  * \sa SDL_GetSurfaceAlphaMod()
  */
-extern DECLSPEC int SDLCALL SDL_SetSurfaceAlphaMod(SDL_Surface *surface,
+extern DECLSPEC int SDLCALL SDL_SetSurfaceAlphaMod(SDL_Surface * surface,
                                                    Uint8 alpha);
 
 /**
@@ -1485,7 +1487,7 @@ extern DECLSPEC int SDLCALL SDL_SetSurfaceAlphaMod(SDL_Surface *surface,
  *
  * \sa SDL_SetSurfaceAlphaMod()
  */
-extern DECLSPEC int SDLCALL SDL_GetSurfaceAlphaMod(SDL_Surface *surface,
+extern DECLSPEC int SDLCALL SDL_GetSurfaceAlphaMod(SDL_Surface * surface,
                                                    Uint8 * alpha);
 
 /**
@@ -1500,7 +1502,7 @@ extern DECLSPEC int SDLCALL SDL_GetSurfaceAlphaMod(SDL_Surface *surface,
  *
  * \sa SDL_GetSurfaceBlendMode()
  */
-extern DECLSPEC int SDLCALL SDL_SetSurfaceBlendMode(SDL_Surface *surface,
+extern DECLSPEC int SDLCALL SDL_SetSurfaceBlendMode(SDL_Surface * surface,
                                                     int blendMode);
 
 /**
@@ -1515,7 +1517,7 @@ extern DECLSPEC int SDLCALL SDL_SetSurfaceBlendMode(SDL_Surface *surface,
  *
  * \sa SDL_SetSurfaceBlendMode()
  */
-extern DECLSPEC int SDLCALL SDL_GetSurfaceBlendMode(SDL_Surface *surface,
+extern DECLSPEC int SDLCALL SDL_GetSurfaceBlendMode(SDL_Surface * surface,
                                                     int *blendMode);
 
 /**
@@ -1532,7 +1534,7 @@ extern DECLSPEC int SDLCALL SDL_GetSurfaceBlendMode(SDL_Surface *surface,
  *
  * \sa SDL_GetSurfaceScaleMode()
  */
-extern DECLSPEC int SDLCALL SDL_SetSurfaceScaleMode(SDL_Surface *surface,
+extern DECLSPEC int SDLCALL SDL_SetSurfaceScaleMode(SDL_Surface * surface,
                                                     int scaleMode);
 
 /**
@@ -1547,7 +1549,7 @@ extern DECLSPEC int SDLCALL SDL_SetSurfaceScaleMode(SDL_Surface *surface,
  *
  * \sa SDL_SetSurfaceScaleMode()
  */
-extern DECLSPEC int SDLCALL SDL_GetSurfaceScaleMode(SDL_Surface *surface,
+extern DECLSPEC int SDLCALL SDL_GetSurfaceScaleMode(SDL_Surface * surface,
                                                     int *scaleMode);
 
 /*

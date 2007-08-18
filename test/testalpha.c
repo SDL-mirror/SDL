@@ -253,7 +253,7 @@ void
 MoveSprite(SDL_Surface * screen, SDL_Surface * light)
 {
     SDL_Rect updates[2];
-    int alpha;
+    Uint8 alpha;
 
     /* Erase the sprite if it was visible */
     if (sprite_visible) {
@@ -290,10 +290,10 @@ MoveSprite(SDL_Surface * screen, SDL_Surface * light)
     }
 
     /* Update transparency (fade in and out) */
-    alpha = sprite->format->alpha;
-    if ((alpha + alpha_vel) < 0) {
+    SDL_GetSurfaceAlphaMod(sprite, &alpha);
+    if (((int) alpha + alpha_vel) < 0) {
         alpha_vel = -alpha_vel;
-    } else if ((alpha + alpha_vel) > 255) {
+    } else if (((int) alpha + alpha_vel) > 255) {
         alpha_vel = -alpha_vel;
     }
     SDL_SetAlpha(sprite, SDL_SRCALPHA, (Uint8) (alpha + alpha_vel));

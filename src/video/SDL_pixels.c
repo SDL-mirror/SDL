@@ -668,12 +668,12 @@ Map1to1(SDL_Palette * src, SDL_Palette * dst, int *identical)
 
 /* Map from Palette to BitField */
 static Uint8 *
-Map1toN(SDL_PixelFormat * src, Uint32 cmod, SDL_PixelFormat * dst)
+Map1toN(SDL_PixelFormat * src, Uint8 Rmod, Uint8 Gmod, Uint8 Bmod, Uint8 Amod,
+        SDL_PixelFormat * dst)
 {
     Uint8 *map;
     int i;
     int bpp;
-    unsigned Amod, Rmod, Gmod, Bmod;
     SDL_Palette *pal = src->palette;
 
     bpp = ((dst->BytesPerPixel == 3) ? 4 : dst->BytesPerPixel);
@@ -683,17 +683,12 @@ Map1toN(SDL_PixelFormat * src, Uint32 cmod, SDL_PixelFormat * dst)
         return (NULL);
     }
 
-    Amod = (cmod >> 24) & 0xFF;
-    Rmod = (cmod >> 16) & 0xFF;
-    Gmod = (cmod >> 8) & 0xFF;
-    Bmod = (cmod >> 0) & 0xFF;
-
     /* We memory copy to the pixel map so the endianness is preserved */
     for (i = 0; i < pal->ncolors; ++i) {
         Uint8 A = Amod;
-        Uint8 R = (pal->colors[i].r * Rmod) / 255;
-        Uint8 G = (pal->colors[i].g * Gmod) / 255;
-        Uint8 B = (pal->colors[i].b * Bmod) / 255;
+        Uint8 R = (Uint8) ((pal->colors[i].r * Rmod) / 255);
+        Uint8 G = (Uint8) ((pal->colors[i].g * Gmod) / 255);
+        Uint8 B = (Uint8) ((pal->colors[i].b * Bmod) / 255);
         ASSEMBLE_RGBA(&map[i * bpp], dst->BytesPerPixel, dst, R, G, B, A);
     }
     return (map);
@@ -725,7 +720,10 @@ SDL_AllocBlitMap(void)
         SDL_OutOfMemory();
         return (NULL);
     }
-    map->cmod = 0xFFFFFFFF;
+    map->info.r = 0xFF;
+    map->info.g = 0xFF;
+    map->info.b = 0xFF;
+    map->info.a = 0xFF;
 
     /* It's ready to go */
     return (map);
@@ -739,9 +737,9 @@ SDL_InvalidateMap(SDL_BlitMap * map)
     }
     map->dst = NULL;
     map->format_version = (unsigned int) -1;
-    if (map->table) {
-        SDL_free(map->table);
-        map->table = NULL;
+    if (map->info.table) {
+        SDL_free(map->info.table);
+        map->info.table = NULL;
     }
 }
 int
@@ -767,10 +765,10 @@ SDL_MapSurface(SDL_Surface * src, SDL_Surface * dst)
         switch (dstfmt->BytesPerPixel) {
         case 1:
             /* Palette --> Palette */
-            map->table =
+            map->info.table =
                 Map1to1(srcfmt->palette, dstfmt->palette, &map->identity);
             if (!map->identity) {
-                if (map->table == NULL) {
+                if (map->info.table == NULL) {
                     return (-1);
                 }
             }
@@ -780,8 +778,10 @@ SDL_MapSurface(SDL_Surface * src, SDL_Surface * dst)
 
         default:
             /* Palette --> BitField */
-            map->table = Map1toN(srcfmt, src->map->cmod, dstfmt);
-            if (map->table == NULL) {
+            map->info.table =
+                Map1toN(srcfmt, src->map->info.r, src->map->info.g,
+                        src->map->info.b, src->map->info.a, dstfmt);
+            if (map->info.table == NULL) {
                 return (-1);
             }
             break;
@@ -791,9 +791,9 @@ SDL_MapSurface(SDL_Surface * src, SDL_Surface * dst)
         switch (dstfmt->BytesPerPixel) {
         case 1:
             /* BitField --> Palette */
-            map->table = MapNto1(srcfmt, dstfmt, &map->identity);
+            map->info.table = MapNto1(srcfmt, dstfmt, &map->identity);
             if (!map->identity) {
-                if (map->table == NULL) {
+                if (map->info.table == NULL) {
                     return (-1);
                 }
             }

@@ -384,7 +384,7 @@ __EOF__
 sub output_copyfunctable
 {
     print FILE <<__EOF__;
-static SDL_BlitFuncEntry SDL_GeneratedBlitFuncTable[] = {
+SDL_BlitFuncEntry SDL_GeneratedBlitFuncTable[] = {
 __EOF__
     for (my $i = 0; $i <= $#src_formats; ++$i) {
         my $src = $src_formats[$i];

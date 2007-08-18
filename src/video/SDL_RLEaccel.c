@@ -1821,13 +1821,13 @@ SDL_RLESurface(SDL_Surface * surface)
 
     /* If we don't have colorkey or blending, nothing to do... */
     flags = surface->map->info.flags;
-    if(!(flags & (SDL_COPY_COLORKEY|SDL_COPY_BLEND))) {
+    if (!(flags & (SDL_COPY_COLORKEY | SDL_COPY_BLEND))) {
         return -1;
     }
 
     /* Pass on combinations not supported */
     if ((flags & SDL_COPY_MODULATE_COLOR) ||
-        (flags & (SDL_COPY_ADD|SDL_COPY_MOD)) ||
+        (flags & (SDL_COPY_ADD | SDL_COPY_MOD)) ||
         (flags & SDL_COPY_NEAREST)) {
         return -1;
     }
@@ -1971,7 +1971,8 @@ SDL_UnRLESurface(SDL_Surface * surface, int recode)
                 }
             }
         }
-        surface->map->info.flags &= (SDL_COPY_RLE_COLORKEY|SDL_COPY_RLE_ALPHAKEY);
+        surface->map->info.flags &=
+            (SDL_COPY_RLE_COLORKEY | SDL_COPY_RLE_ALPHAKEY);
 
         if (surface->map->data) {
             SDL_free(surface->map->data);

@@ -26,7 +26,6 @@
 #include "SDL_pixels_c.h"
 #include "SDL_rect_c.h"
 #include "SDL_yuv_sw_c.h"
-#include "SDL_rendercopy.h"
 
 
 /* SDL surface based renderer implementation */
@@ -431,81 +430,33 @@ SW_GetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
     }
 }
 
-static void
-SW_UpdateRenderCopyFunc(SDL_Renderer * renderer, SDL_Texture * texture)
-{
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
-    SDL_DisplayMode *displayMode = &display->current_mode;
-    SDL_Surface *surface = (SDL_Surface *) texture->driverdata;
-
-    /* We only need a special copy function for advanced features */
-    if (texture->modMode
-        || (texture->
-            blendMode & (SDL_TEXTUREBLENDMODE_ADD | SDL_TEXTUREBLENDMODE_MOD))
-        || texture->scaleMode) {
-        surface->userdata =
-            SDL_GetRenderCopyFunc(texture->format, displayMode->format,
-                                  texture->modMode, texture->blendMode,
-                                  texture->scaleMode);
-    } else {
-        surface->userdata = NULL;
-    }
-}
-
 static int
 SW_SetTextureColorMod(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-    SW_UpdateRenderCopyFunc(renderer, texture);
-    return 0;
+    SDL_Surface *surface = (SDL_Surface *) texture->driverdata;
+    return SDL_SetSurfaceColorMod(surface, texture->r, texture->g,
+                                  texture->b);
 }
 
 static int
 SW_SetTextureAlphaMod(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-    SW_UpdateRenderCopyFunc(renderer, texture);
-    return 0;
+    SDL_Surface *surface = (SDL_Surface *) texture->driverdata;
+    return SDL_SetSurfaceAlphaMod(surface, texture->a);
 }
 
 static int
 SW_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-    switch (texture->blendMode) {
-    case SDL_TEXTUREBLENDMODE_NONE:
-    case SDL_TEXTUREBLENDMODE_MASK:
-    case SDL_TEXTUREBLENDMODE_BLEND:
-    case SDL_TEXTUREBLENDMODE_ADD:
-    case SDL_TEXTUREBLENDMODE_MOD:
-        SW_UpdateRenderCopyFunc(renderer, texture);
-        return 0;
-    default:
-        SDL_Unsupported();
-        texture->blendMode = SDL_TEXTUREBLENDMODE_NONE;
-        SW_UpdateRenderCopyFunc(renderer, texture);
-        return -1;
-    }
+    SDL_Surface *surface = (SDL_Surface *) texture->driverdata;
+    return SDL_SetSurfaceBlendMode(surface, texture->blendMode);
 }
 
 static int
 SW_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-    switch (texture->scaleMode) {
-    case SDL_TEXTURESCALEMODE_NONE:
-    case SDL_TEXTURESCALEMODE_FAST:
-        SW_UpdateRenderCopyFunc(renderer, texture);
-        return 0;
-    case SDL_TEXTURESCALEMODE_SLOW:
-    case SDL_TEXTURESCALEMODE_BEST:
-        SDL_Unsupported();
-        texture->scaleMode = SDL_TEXTURESCALEMODE_FAST;
-        SW_UpdateRenderCopyFunc(renderer, texture);
-        return -1;
-    default:
-        SDL_Unsupported();
-        texture->scaleMode = SDL_TEXTURESCALEMODE_NONE;
-        SW_UpdateRenderCopyFunc(renderer, texture);
-        return -1;
-    }
+    SDL_Surface *surface = (SDL_Surface *) texture->driverdata;
+    return SDL_SetSurfaceBlendMode(surface, texture->scaleMode);
 }
 
 static int
@@ -629,60 +580,18 @@ SW_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                                 data->surface.pixels, data->surface.pitch);
     } else {
         SDL_Surface *surface = (SDL_Surface *) texture->driverdata;
-        SDL_RenderCopyFunc copyfunc = (SDL_RenderCopyFunc) surface->userdata;
+        SDL_Rect real_srcrect = *srcrect;
+        SDL_Rect real_dstrect;
 
-        if (copyfunc) {
-            SDL_RenderCopyData copydata;
+        data->surface.w = dstrect->w;
+        data->surface.h = dstrect->h;
+        data->surface.clip_rect.w = dstrect->w;
+        data->surface.clip_rect.h = dstrect->h;
+        real_dstrect = data->surface.clip_rect;
 
-            copydata.src =
-                (Uint8 *) surface->pixels + srcrect->y * surface->pitch +
-                srcrect->x * surface->format->BytesPerPixel;
-            copydata.src_w = srcrect->w;
-            copydata.src_h = srcrect->h;
-            copydata.src_pitch = surface->pitch;
-            copydata.dst = (Uint8 *) data->surface.pixels;
-            copydata.dst_w = dstrect->w;
-            copydata.dst_h = dstrect->h;
-            copydata.dst_pitch = data->surface.pitch;
-            copydata.flags = 0;
-            if (texture->modMode & SDL_TEXTUREMODULATE_COLOR) {
-                copydata.flags |= SDL_RENDERCOPY_MODULATE_COLOR;
-                copydata.r = texture->r;
-                copydata.g = texture->g;
-                copydata.b = texture->b;
-            }
-            if (texture->modMode & SDL_TEXTUREMODULATE_ALPHA) {
-                copydata.flags |= SDL_RENDERCOPY_MODULATE_ALPHA;
-                copydata.a = texture->a;
-            }
-            if (texture->blendMode & SDL_TEXTUREBLENDMODE_MASK) {
-                copydata.flags |= SDL_RENDERCOPY_MASK;
-            } else if (texture->blendMode & SDL_TEXTUREBLENDMODE_BLEND) {
-                copydata.flags |= SDL_RENDERCOPY_BLEND;
-            } else if (texture->blendMode & SDL_TEXTUREBLENDMODE_ADD) {
-                copydata.flags |= SDL_RENDERCOPY_ADD;
-            } else if (texture->blendMode & SDL_TEXTUREBLENDMODE_MOD) {
-                copydata.flags |= SDL_RENDERCOPY_MOD;
-            }
-            if (texture->scaleMode) {
-                copydata.flags |= SDL_RENDERCOPY_NEAREST;
-            }
-            copyfunc(&copydata);
-            status = 0;
-        } else {
-            SDL_Rect real_srcrect = *srcrect;
-            SDL_Rect real_dstrect;
-
-            data->surface.w = dstrect->w;
-            data->surface.h = dstrect->h;
-            data->surface.clip_rect.w = dstrect->w;
-            data->surface.clip_rect.h = dstrect->h;
-            real_dstrect = data->surface.clip_rect;
-
-            status =
-                SDL_LowerBlit(surface, &real_srcrect, &data->surface,
-                              &real_dstrect);
-        }
+        status =
+            SDL_LowerBlit(surface, &real_srcrect, &data->surface,
+                          &real_dstrect);
     }
     data->renderer->UnlockTexture(data->renderer,
                                   data->texture[data->current_texture]);

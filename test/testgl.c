@@ -201,7 +201,7 @@ SDL_GL_LoadTexture(SDL_Surface * surface, GLfloat * texcoord)
 
     /* Save the alpha blending attributes */
     saved_flags = surface->flags & (SDL_SRCALPHA | SDL_RLEACCELOK);
-    saved_alpha = surface->format->alpha;
+    SDL_GetSurfaceAlphaMod(surface, &saved_alpha);
     if ((saved_flags & SDL_SRCALPHA) == SDL_SRCALPHA) {
         SDL_SetAlpha(surface, 0, 0);
     }

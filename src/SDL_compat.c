@@ -608,7 +608,7 @@ SDL_SetAlpha(SDL_Surface * surface, Uint32 flag, Uint8 value)
 SDL_Surface *
 SDL_DisplayFormat(SDL_Surface * surface)
 {
-    Uint32 flags;
+    SDL_Surface *converted;
 
     if (!SDL_PublicSurface) {
         SDL_SetError("No video mode has been set");
@@ -616,7 +616,9 @@ SDL_DisplayFormat(SDL_Surface * surface)
     }
 
     /* Set the flags appropriate for copying to display surface */
-    return SDL_ConvertSurface(surface, SDL_PublicSurface->format, SDL_RLEACCELOK);
+    converted = SDL_ConvertSurface(surface, SDL_PublicSurface->format, 0);
+    SDL_SetSurfaceRLE(converted, 1);
+    return converted;
 }
 
 SDL_Surface *
@@ -625,7 +627,6 @@ SDL_DisplayFormatAlpha(SDL_Surface * surface)
     SDL_PixelFormat *vf;
     SDL_PixelFormat *format;
     SDL_Surface *converted;
-    Uint32 flags;
     /* default to ARGB8888 */
     Uint32 amask = 0xff000000;
     Uint32 rmask = 0x00ff0000;
@@ -666,7 +667,8 @@ SDL_DisplayFormatAlpha(SDL_Surface * surface)
         break;
     }
     format = SDL_AllocFormat(32, rmask, gmask, bmask, amask);
-    converted = SDL_ConvertSurface(surface, format, SDL_RLEACCELOK);
+    converted = SDL_ConvertSurface(surface, format, 0);
+    SDL_SetSurfaceRLE(converted, 1);
     SDL_FreeFormat(format);
     return converted;
 }
