@@ -50,7 +50,7 @@ typedef struct SDL_keysym
 {
     Uint8 scancode;             /**< keyboard specific scancode */
     Uint8 padding[3];           /**< alignment padding */
-    Uint16 sym;                 /**< SDL virtual keysym */
+    SDLKey sym;                 /**< SDL virtual key code - see ::SDLKey for details */
     Uint16 mod;                 /**< current key modifiers */
     Uint32 unicode;             /**< OBSOLETE, use SDL_TextInputEvent instead */
 } SDL_keysym;
@@ -97,11 +97,13 @@ extern DECLSPEC int SDLCALL SDL_EnableUNICODE(int enable);
  *
  * \brief Get a snapshot of the current state of the selected keyboard.
  *
- * \return An array of keystates, indexed by the SDLK_* syms.
+ * \param numkeys if non-NULL, receives the length of the returned array.
+ *
+ * \return An array of key states. Indexes into this array are obtained by using the SDLK_INDEX() macro on the \link ::SDLPhysicalKey SDLK_* \endlink syms.
  *
  * Example:
  * 	Uint8 *keystate = SDL_GetKeyState(NULL);
- *	if ( keystate[SDLK_RETURN] ) ... <RETURN> is pressed.
+ *	if ( keystate[SDLK_INDEX(SDLK_RETURN)] ) ... <RETURN> is pressed.
  */
 extern DECLSPEC Uint8 *SDLCALL SDL_GetKeyState(int *numkeys);
 
@@ -122,11 +124,32 @@ extern DECLSPEC SDLMod SDLCALL SDL_GetModState(void);
 extern DECLSPEC void SDLCALL SDL_SetModState(SDLMod modstate);
 
 /**
- * \fn const char *SDL_GetKeyName(SDLKey key)
+ * \fn SDLKey SDL_GetLayoutKey(SDLKey physicalKey)
  * 
- * \brief Get the name of an SDL virtual keysym
+ * \brief Get the layout key code corresponding to the given physical key code according to the current keyboard layout.
+ *
+ * See ::SDLKey for details.
+ *
+ * If \a physicalKey is not a physical key code, it is returned unchanged.
+ *
+ * \sa SDL_GetKeyName()
  */
-extern DECLSPEC const char *SDLCALL SDL_GetKeyName(SDLKey key);
+extern DECLSPEC SDLKey SDLCALL SDL_GetLayoutKey(SDLKey physicalKey);
+
+/**
+ * \fn const char *SDL_GetKeyName(SDLKey layoutKey)
+ * 
+ * \brief Get a human-readable name for a key.
+ *
+ * \param layoutKey An SDL layout key code.
+ *
+ * If what you have is a physical key code, e.g. from the \link SDL_keysym::sym key.keysym.sym \endlink field of the SDL_Event structure, convert it to a layout key code using SDL_GetLayoutKey() first. Doing this ensures that the returned name matches what users see on their keyboards. Calling this function directly on a physical key code (that is not also a layout key code) is possible, but is not recommended except for debugging purposes. The name returned in that case is the name of the \link ::SDLPhysicalKey SDLK_* \endlink constant and is not suitable for display to users.
+ *
+ * \return A pointer to a UTF-8 string that stays valid at least until the next call to this function. If you need it around any longer, you must copy it. Always non-NULL.
+ *
+ * \sa SDLKey
+ */
+extern DECLSPEC const char *SDLCALL SDL_GetKeyName(SDLKey layoutKey);
 
 
 /* Ends C function definitions when using C++ */

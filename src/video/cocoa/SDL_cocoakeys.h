@@ -19,128 +19,142 @@
     Sam Lantinga
     slouken@libsdl.org
 */
-#include "SDL_config.h"
 
-/* These are the Macintosh key scancode constants -- from Inside Macintosh */
-
-#define KEY_ESCAPE		0x35
-#define KEY_F1			0x7A
-#define KEY_F2			0x78
-#define KEY_F3			0x63
-#define KEY_F4			0x76
-#define KEY_F5			0x60
-#define KEY_F6			0x61
-#define KEY_F7			0x62
-#define KEY_F8			0x64
-#define KEY_F9			0x65
-#define KEY_F10			0x6D
-#define KEY_F11			0x67
-#define KEY_F12			0x6F
-#define KEY_F13			0x69
-#define KEY_F14			0x6B
-#define KEY_F15			0x71
-/*
-#define KEY_PRINT		0x69
-#define KEY_SCROLLOCK    0x6B
-#define KEY_PAUSE		0x71
+/* Mac virtual key code to SDLKey mapping table
+   Sources:
+   - Inside Macintosh: Text <http://developer.apple.com/documentation/mac/Text/Text-571.html>
+   - Apple USB keyboard driver source <http://darwinsource.opendarwin.org/10.4.6.ppc/IOHIDFamily-172.8/IOHIDFamily/Cosmo_USB2ADB.c>
+   - experimentation on various ADB and USB ISO keyboards and one ADB ANSI keyboard
 */
-#define KEY_POWER		0x7F
-#define KEY_BACKQUOTE	0x32
-#define KEY_1			0x12
-#define KEY_2			0x13
-#define KEY_3			0x14
-#define KEY_4			0x15
-#define KEY_5			0x17
-#define KEY_6			0x16
-#define KEY_7			0x1A
-#define KEY_8			0x1C
-#define KEY_9			0x19
-#define KEY_0			0x1D
-#define KEY_MINUS		0x1B
-#define KEY_EQUALS		0x18
-#define KEY_BACKSPACE	0x33
-#define KEY_INSERT		0x72
-#define KEY_HOME			0x73
-#define KEY_PAGEUP		0x74
-#define KEY_NUMLOCK		0x47
-#define KEY_KP_EQUALS	0x51
-#define KEY_KP_DIVIDE	0x4B
-#define KEY_KP_MULTIPLY	0x43
-#define KEY_TAB			0x30
-#define KEY_q			0x0C
-#define KEY_w			0x0D
-#define KEY_e			0x0E
-#define KEY_r			0x0F
-#define KEY_t			0x11
-#define KEY_y			0x10
-#define KEY_u			0x20
-#define KEY_i			0x22
-#define KEY_o			0x1F
-#define KEY_p			0x23
-#define KEY_LEFTBRACKET	0x21
-#define KEY_RIGHTBRACKET	0x1E
-#define KEY_BACKSLASH	0x2A
-#define KEY_DELETE		0x75
-#define KEY_END			0x77
-#define KEY_PAGEDOWN		0x79
-#define KEY_KP7			0x59
-#define KEY_KP8			0x5B
-#define KEY_KP9			0x5C
-#define KEY_KP_MINUS		0x4E
-#define KEY_CAPSLOCK		0x39
-#define KEY_a			0x00
-#define KEY_s			0x01
-#define KEY_d			0x02
-#define KEY_f			0x03
-#define KEY_g			0x05
-#define KEY_h			0x04
-#define KEY_j			0x26
-#define KEY_k			0x28
-#define KEY_l			0x25
-#define KEY_SEMICOLON	0x29
-#define KEY_QUOTE		0x27
-#define KEY_RETURN		0x24
-#define KEY_KP4			0x56
-#define KEY_KP5			0x57
-#define KEY_KP6			0x58
-#define KEY_KP_PLUS		0x45
-#define KEY_LSHIFT		0x38
-#define KEY_z			0x06
-#define KEY_x			0x07
-#define KEY_c			0x08
-#define KEY_v			0x09
-#define KEY_b			0x0B
-#define KEY_n			0x2D
-#define KEY_m			0x2E
-#define KEY_COMMA		0x2B
-#define KEY_PERIOD		0x2F
-#define KEY_SLASH		0x2C
-#if 1                           /* Panther now defines right side keys */
-#define KEY_RSHIFT		0x3C
-#endif
-#define KEY_UP			0x7E
-#define KEY_KP1			0x53
-#define KEY_KP2			0x54
-#define KEY_KP3			0x55
-#define KEY_KP_ENTER		0x4C
-#define KEY_LCTRL		0x3B
-#define KEY_LALT			0x3A
-#define KEY_LMETA		0x37
-#define KEY_SPACE		0x31
-#if 1                           /* Panther now defines right side keys */
-#define KEY_RMETA		0x36
-#define KEY_RALT			0x3D
-#define KEY_RCTRL		0x3E
-#endif
-#define KEY_LEFT			0x7B
-#define KEY_DOWN			0x7D
-#define KEY_RIGHT		0x7C
-#define KEY_KP0			0x52
-#define KEY_KP_PERIOD	0x41
-
-/* Wierd, these keys are on my iBook under Mac OS X */
-#define KEY_IBOOK_ENTER		0x34
-#define KEY_IBOOK_LEFT		0x3B
-#define KEY_IBOOK_RIGHT		0x3C
-#define KEY_IBOOK_DOWN		0x3D
-#define KEY_IBOOK_UP			0x3E
+/* *INDENT-OFF* */
+static SDLKey macToSDLKey[128] = {
+    /*   0 */   SDLK_A,
+    /*   1 */   SDLK_S,
+    /*   2 */   SDLK_D,
+    /*   3 */   SDLK_F,
+    /*   4 */   SDLK_H,
+    /*   5 */   SDLK_G,
+    /*   6 */   SDLK_Z,
+    /*   7 */   SDLK_X,
+    /*   8 */   SDLK_C,
+    /*   9 */   SDLK_V,
+    /*  10 */   SDLK_NONUSBACKSLASH, /* SDLK_NONUSBACKSLASH on ANSI and JIS keyboards (if this key would exist there), SDLK_GRAVE on ISO. (The USB keyboard driver actually translates these usage codes to different virtual key codes depending on whether the keyboard is ISO/ANSI/JIS. That's why you have to help it identify the keyboard type when you plug in a PC USB keyboard. It's a historical thing - ADB keyboards are wired this way.) */
+    /*  11 */   SDLK_B,
+    /*  12 */   SDLK_Q,
+    /*  13 */   SDLK_W,
+    /*  14 */   SDLK_E,
+    /*  15 */   SDLK_R,
+    /*  16 */   SDLK_Y,
+    /*  17 */   SDLK_T,
+    /*  18 */   SDLK_1,
+    /*  19 */   SDLK_2,
+    /*  20 */   SDLK_3,
+    /*  21 */   SDLK_4,
+    /*  22 */   SDLK_6,
+    /*  23 */   SDLK_5,
+    /*  24 */   SDLK_EQUALS,
+    /*  25 */   SDLK_9,
+    /*  26 */   SDLK_7,
+    /*  27 */   SDLK_HYPHENMINUS,
+    /*  28 */   SDLK_8,
+    /*  29 */   SDLK_0,
+    /*  30 */   SDLK_RIGHTBRACKET,
+    /*  31 */   SDLK_O,
+    /*  32 */   SDLK_U,
+    /*  33 */   SDLK_LEFTBRACKET,
+    /*  34 */   SDLK_I,
+    /*  35 */   SDLK_P,
+    /*  36 */   SDLK_RETURN,
+    /*  37 */   SDLK_L,
+    /*  38 */   SDLK_J,
+    /*  39 */   SDLK_APOSTROPHE,
+    /*  40 */   SDLK_K,
+    /*  41 */   SDLK_SEMICOLON,
+    /*  42 */   SDLK_BACKSLASH,
+    /*  43 */   SDLK_COMMA,
+    /*  44 */   SDLK_SLASH,
+    /*  45 */   SDLK_N,
+    /*  46 */   SDLK_M,
+    /*  47 */   SDLK_PERIOD,
+    /*  48 */   SDLK_TAB,
+    /*  49 */   SDLK_SPACE,
+    /*  50 */   SDLK_GRAVE, /* SDLK_GRAVE on ANSI and JIS keyboards, SDLK_NONUSBACKSLASH on ISO (see comment about virtual key code 10 above) */
+    /*  51 */   SDLK_BACKSPACE,
+    /*  52 */   SDLK_KP_ENTER, /* keyboard enter on portables */
+    /*  53 */   SDLK_ESCAPE,
+    /*  54 */   SDLK_RMETA,
+    /*  55 */   SDLK_LMETA,
+    /*  56 */   SDLK_LSHIFT,
+    /*  57 */   SDLK_CAPSLOCK,
+    /*  58 */   SDLK_LALT,
+    /*  59 */   SDLK_LCTRL,
+    /*  60 */   SDLK_RSHIFT,
+    /*  61 */   SDLK_RALT,
+    /*  62 */   SDLK_RCTRL,
+    /*  63 */   SDLK_NONE, /* fn on portables, acts as a hardware-level modifier already, so we don't generate events for it */
+    /*  64 */   SDLK_UNKNOWN, /* unknown (unused?) */
+    /*  65 */   SDLK_KP_PERIOD,
+    /*  66 */   SDLK_UNKNOWN, /* unknown (unused?) */
+    /*  67 */   SDLK_KP_MULTIPLY,
+    /*  68 */   SDLK_UNKNOWN, /* unknown (unused?) */
+    /*  69 */   SDLK_KP_PLUS,
+    /*  70 */   SDLK_UNKNOWN, /* unknown (unused?) */
+    /*  71 */   SDLK_KP_NUMLOCKCLEAR,
+    /*  72 */   SDLK_VOLUMEUP,
+    /*  73 */   SDLK_VOLUMEDOWN,
+    /*  74 */   SDLK_MUTE,
+    /*  75 */   SDLK_KP_DIVIDE,
+    /*  76 */   SDLK_KP_ENTER, /* keypad enter on external keyboards, fn-return on portables */
+    /*  77 */   SDLK_UNKNOWN, /* unknown (unused?) */
+    /*  78 */   SDLK_KP_MINUS,
+    /*  79 */   SDLK_UNKNOWN, /* unknown (unused?) */
+    /*  80 */   SDLK_UNKNOWN, /* unknown (unused?) */
+    /*  81 */   SDLK_KP_EQUALS,
+    /*  82 */   SDLK_KP_0,
+    /*  83 */   SDLK_KP_1,
+    /*  84 */   SDLK_KP_2,
+    /*  85 */   SDLK_KP_3,
+    /*  86 */   SDLK_KP_4,
+    /*  87 */   SDLK_KP_5,
+    /*  88 */   SDLK_KP_6,
+    /*  89 */   SDLK_KP_7,
+    /*  90 */   SDLK_UNKNOWN, /* unknown (unused?) */
+    /*  91 */   SDLK_KP_8,
+    /*  92 */   SDLK_KP_9,
+    /*  93 */   SDLK_INTERNATIONAL3, /* Cosmo_USB2ADB.c says "Yen (JIS)" */
+    /*  94 */   SDLK_INTERNATIONAL1, /* Cosmo_USB2ADB.c says "Ro (JIS)" */
+    /*  95 */   SDLK_KP_COMMA, /* Cosmo_USB2ADB.c says ", JIS only" */
+    /*  96 */   SDLK_F5,
+    /*  97 */   SDLK_F6,
+    /*  98 */   SDLK_F7,
+    /*  99 */   SDLK_F3,
+    /* 100 */   SDLK_F8,
+    /* 101 */   SDLK_F9,
+    /* 102 */   SDLK_LANG2, /* Cosmo_USB2ADB.c says "Eisu" */
+    /* 103 */   SDLK_F11,
+    /* 104 */   SDLK_LANG1, /* Cosmo_USB2ADB.c says "Kana" */
+    /* 105 */   SDLK_PRINTSCREEN, /* On ADB keyboards, this key is labeled "F13/print screen". Problem: USB has different usage codes for these two functions. On Apple USB keyboards, the key is labeled "F13" and sends the F13 usage code (SDLK_F13). I decided to use SDLK_PRINTSCREEN here nevertheless since SDL applications are more likely to assume the presence of a print screen key than an F13 key. */
+    /* 106 */   SDLK_F16,
+    /* 107 */   SDLK_SCROLLLOCK, /* F14/scroll lock, see comment about F13/print screen above */
+    /* 108 */   SDLK_UNKNOWN, /* unknown (unused?) */
+    /* 109 */   SDLK_F10,
+    /* 110 */   SDLK_APPLICATION, /* windows contextual menu key, fn-enter on portables */
+    /* 111 */   SDLK_F12,
+    /* 112 */   SDLK_UNKNOWN, /* unknown (unused?) */
+    /* 113 */   SDLK_PAUSE, /* F15/pause, see comment about F13/print screen above */
+    /* 114 */   SDLK_INSERT, /* the key is actually labeled "help" on Apple keyboards, and works as such in Mac OS, but it sends the "insert" usage code even on Apple USB keyboards */
+    /* 115 */   SDLK_HOME,
+    /* 116 */   SDLK_PAGEUP,
+    /* 117 */   SDLK_DELETE,
+    /* 118 */   SDLK_F4,
+    /* 119 */   SDLK_END,
+    /* 120 */   SDLK_F2,
+    /* 121 */   SDLK_PAGEDOWN,
+    /* 122 */   SDLK_F1,
+    /* 123 */   SDLK_LEFT,
+    /* 124 */   SDLK_RIGHT,
+    /* 125 */   SDLK_DOWN,
+    /* 126 */   SDLK_UP,
+    /* 127 */   SDLK_POWER
+};
+/* *INDENT-ON* */

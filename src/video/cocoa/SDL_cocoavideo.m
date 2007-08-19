@@ -75,6 +75,7 @@ Cocoa_CreateDevice(int devindex)
     device->GetDisplayModes = Cocoa_GetDisplayModes;
     device->SetDisplayMode = Cocoa_SetDisplayMode;
     device->PumpEvents = Cocoa_PumpEvents;
+    device->GetLayoutKey = Cocoa_GetLayoutKey;
 
     device->CreateWindow = Cocoa_CreateWindow;
     device->CreateWindowFrom = Cocoa_CreateWindowFrom;

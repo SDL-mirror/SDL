@@ -27,6 +27,7 @@
 #include "SDL_events.h"
 #include "SDL_events_c.h"
 #include "SDL_sysevents.h"
+#include "SDL_keynames.h"
 
 
 /* Global keyboard information */
@@ -35,246 +36,13 @@ static int SDL_num_keyboards;
 static int SDL_current_keyboard;
 static SDL_Keyboard **SDL_keyboards;
 
-static const char *SDL_keynames[SDLK_LAST];     /* Array of keycode names */
-
 /* Public functions */
 int
 SDL_KeyboardInit(void)
 {
-    int i;
-
     /* Set default mode of UNICODE translation */
     SDL_EnableUNICODE(DEFAULT_UNICODE_TRANSLATION);
 
-    /* Initialize the tables */
-    for (i = 0; i < SDL_arraysize(SDL_keynames); ++i) {
-        switch (i) {
-        case SDLK_BACKSPACE:
-            SDL_keynames[i] = "backspace";
-            break;
-        case SDLK_TAB:
-            SDL_keynames[i] = "tab";
-            break;
-        case SDLK_CLEAR:
-            SDL_keynames[i] = "clear";
-            break;
-        case SDLK_RETURN:
-            SDL_keynames[i] = "return";
-            break;
-        case SDLK_PAUSE:
-            SDL_keynames[i] = "pause";
-            break;
-        case SDLK_ESCAPE:
-            SDL_keynames[i] = "escape";
-            break;
-        case SDLK_SPACE:
-            SDL_keynames[i] = "space";
-            break;
-
-        case SDLK_KP0:
-            SDL_keynames[i] = "[0]";
-            break;
-        case SDLK_KP1:
-            SDL_keynames[i] = "[1]";
-            break;
-        case SDLK_KP2:
-            SDL_keynames[i] = "[2]";
-            break;
-        case SDLK_KP3:
-            SDL_keynames[i] = "[3]";
-            break;
-        case SDLK_KP4:
-            SDL_keynames[i] = "[4]";
-            break;
-        case SDLK_KP5:
-            SDL_keynames[i] = "[5]";
-            break;
-        case SDLK_KP6:
-            SDL_keynames[i] = "[6]";
-            break;
-        case SDLK_KP7:
-            SDL_keynames[i] = "[7]";
-            break;
-        case SDLK_KP8:
-            SDL_keynames[i] = "[8]";
-            break;
-        case SDLK_KP9:
-            SDL_keynames[i] = "[9]";
-            break;
-        case SDLK_KP_PERIOD:
-            SDL_keynames[i] = "[.]";
-            break;
-        case SDLK_KP_DIVIDE:
-            SDL_keynames[i] = "[/]";
-            break;
-        case SDLK_KP_MULTIPLY:
-            SDL_keynames[i] = "[*]";
-            break;
-        case SDLK_KP_MINUS:
-            SDL_keynames[i] = "[-]";
-            break;
-        case SDLK_KP_PLUS:
-            SDL_keynames[i] = "[+]";
-            break;
-        case SDLK_KP_ENTER:
-            SDL_keynames[i] = "enter";
-            break;
-        case SDLK_KP_EQUALS:
-            SDL_keynames[i] = "equals";
-            break;
-
-        case SDLK_UP:
-            SDL_keynames[i] = "up";
-            break;
-        case SDLK_DOWN:
-            SDL_keynames[i] = "down";
-            break;
-        case SDLK_RIGHT:
-            SDL_keynames[i] = "right";
-            break;
-        case SDLK_LEFT:
-            SDL_keynames[i] = "left";
-            break;
-        case SDLK_INSERT:
-            SDL_keynames[i] = "insert";
-            break;
-        case SDLK_HOME:
-            SDL_keynames[i] = "home";
-            break;
-        case SDLK_END:
-            SDL_keynames[i] = "end";
-            break;
-        case SDLK_PAGEUP:
-            SDL_keynames[i] = "page up";
-            break;
-        case SDLK_PAGEDOWN:
-            SDL_keynames[i] = "page down";
-            break;
-
-        case SDLK_F1:
-            SDL_keynames[i] = "f1";
-            break;
-        case SDLK_F2:
-            SDL_keynames[i] = "f2";
-            break;
-        case SDLK_F3:
-            SDL_keynames[i] = "f3";
-            break;
-        case SDLK_F4:
-            SDL_keynames[i] = "f4";
-            break;
-        case SDLK_F5:
-            SDL_keynames[i] = "f5";
-            break;
-        case SDLK_F6:
-            SDL_keynames[i] = "f6";
-            break;
-        case SDLK_F7:
-            SDL_keynames[i] = "f7";
-            break;
-        case SDLK_F8:
-            SDL_keynames[i] = "f8";
-            break;
-        case SDLK_F9:
-            SDL_keynames[i] = "f9";
-            break;
-        case SDLK_F10:
-            SDL_keynames[i] = "f10";
-            break;
-        case SDLK_F11:
-            SDL_keynames[i] = "f11";
-            break;
-        case SDLK_F12:
-            SDL_keynames[i] = "f12";
-            break;
-        case SDLK_F13:
-            SDL_keynames[i] = "f13";
-            break;
-        case SDLK_F14:
-            SDL_keynames[i] = "f14";
-            break;
-        case SDLK_F15:
-            SDL_keynames[i] = "f15";
-            break;
-
-        case SDLK_NUMLOCK:
-            SDL_keynames[i] = "numlock";
-            break;
-        case SDLK_CAPSLOCK:
-            SDL_keynames[i] = "caps lock";
-            break;
-        case SDLK_SCROLLOCK:
-            SDL_keynames[i] = "scroll lock";
-            break;
-        case SDLK_RSHIFT:
-            SDL_keynames[i] = "right shift";
-            break;
-        case SDLK_LSHIFT:
-            SDL_keynames[i] = "left shift";
-            break;
-        case SDLK_RCTRL:
-            SDL_keynames[i] = "right ctrl";
-            break;
-        case SDLK_LCTRL:
-            SDL_keynames[i] = "left ctrl";
-            break;
-        case SDLK_RALT:
-            SDL_keynames[i] = "right alt";
-            break;
-        case SDLK_LALT:
-            SDL_keynames[i] = "left alt";
-            break;
-        case SDLK_RMETA:
-            SDL_keynames[i] = "right meta";
-            break;
-        case SDLK_LMETA:
-            SDL_keynames[i] = "left meta";
-            break;
-        case SDLK_LSUPER:
-            SDL_keynames[i] = "left super";     /* "Windows" keys */
-            break;
-        case SDLK_RSUPER:
-            SDL_keynames[i] = "right super";
-            break;
-        case SDLK_MODE:
-            SDL_keynames[i] = "alt gr";
-            break;
-        case SDLK_COMPOSE:
-            SDL_keynames[i] = "compose";
-            break;
-
-        case SDLK_HELP:
-            SDL_keynames[i] = "help";
-            break;
-        case SDLK_PRINT:
-            SDL_keynames[i] = "print screen";
-            break;
-        case SDLK_SYSREQ:
-            SDL_keynames[i] = "sys req";
-            break;
-        case SDLK_BREAK:
-            SDL_keynames[i] = "break";
-            break;
-        case SDLK_MENU:
-            SDL_keynames[i] = "menu";
-            break;
-        case SDLK_POWER:
-            SDL_keynames[i] = "power";
-            break;
-        case SDLK_EURO:
-            SDL_keynames[i] = "euro";
-            break;
-        case SDLK_UNDO:
-            SDL_keynames[i] = "undo";
-            break;
-
-        default:
-            SDL_keynames[i] = NULL;
-            break;
-        }
-    }
-
-    /* Done.  Whew. */
     return (0);
 }
 
@@ -338,7 +106,7 @@ void
 SDL_ResetKeyboard(int index)
 {
     SDL_Keyboard *keyboard = SDL_GetKeyboard(index);
-    SDLKey key;
+    int key;
 
     if (!keyboard) {
         return;
@@ -346,7 +114,8 @@ SDL_ResetKeyboard(int index)
 
     for (key = SDLK_FIRST; key < SDLK_LAST; ++key) {
         if (keyboard->keystate[key] == SDL_PRESSED) {
-            SDL_SendKeyboardKey(index, SDL_RELEASED, 0, key);
+            SDL_SendKeyboardKey(index, SDL_RELEASED, 0,
+                                key | SDL_KEY_CAN_BE_PHYSICAL_BIT);
         }
     }
 }
@@ -432,33 +201,78 @@ SDL_SetModState(SDLMod modstate)
     keyboard->modstate = modstate;
 }
 
-const char *
-SDL_GetKeyName(SDLKey key)
+SDLKey
+SDL_GetLayoutKey(SDLKey physicalKey)
 {
-    const char *keyname;
-
-    if (key < SDL_arraysize(SDL_keynames)) {
-        keyname = SDL_keynames[key];
+    SDL_VideoDevice *_this = SDL_GetVideoDevice();
+    if (_this && _this->GetLayoutKey) {
+        return _this->GetLayoutKey(_this, physicalKey)
+            | (physicalKey & SDL_KEY_KEYPAD_BIT);
     } else {
-        keyname = NULL;
+        return physicalKey;
     }
-    if (keyname == NULL) {
-        if (key < 256) {
-            static char temp[4];
-            char *cvt;
-            temp[0] = (char) key;
-            temp[1] = '\0';
-            cvt = SDL_iconv_string("UTF-8", "ISO-8859-1", temp, 1);
-            if (cvt) {
-                SDL_strlcpy(temp, cvt, SDL_arraysize(temp));
-                SDL_free(cvt);
-            }
-            keyname = temp;
+}
+
+const char *
+SDL_GetKeyName(SDLKey layoutKey)
+{
+    const char *keyname = NULL;
+
+    if ((layoutKey & SDL_KEY_LAYOUT_SPECIAL_BIT) != 0) {
+        SDL_VideoDevice *_this = SDL_GetVideoDevice();
+        if (_this && _this->GetSpecialKeyName) {
+            keyname = _this->GetSpecialKeyName(_this, layoutKey);
+        }
+    } else if ((layoutKey & SDL_KEY_CAN_BE_PHYSICAL_BIT) == 0) {
+        /* SDLK_INDEX(layoutKey) is the unicode code point of the character generated by the key */
+        static char buffer[9];  /* 6 (maximal UTF-8 char length) + 2 ([] for keypad) + 1 (null teminator) */
+        char *bufferPtr = &buffer[1];
+        SDL_iconv_t cd;
+        size_t inbytesleft = 4, outbytesleft = 8;
+        Uint32 codepoint = SDLK_INDEX(layoutKey);
+        const char *codepointPtr = (const char *) &codepoint;
+
+        /* Unaccented letter keys on latin keyboards are normally labeled in upper case (and probably on others like Greek or Cyrillic too, so if you happen to know for sure, please adapt this). */
+        if (codepoint >= 'a' && codepoint <= 'z') {
+            codepoint -= 32;
+        }
+
+        cd = SDL_iconv_open("UTF-8", "UCS-4");
+        if (cd == (SDL_iconv_t) (-1))
+            return "";
+        SDL_iconv(cd, &codepointPtr, &inbytesleft, &bufferPtr, &outbytesleft);
+        SDL_iconv_close(cd);
+        *bufferPtr = '\0';
+
+        if ((layoutKey & SDL_KEY_KEYPAD_BIT) != 0) {
+            buffer[0] = '[';
+            *bufferPtr++ = ']';
+            *bufferPtr = '\0';
+            keyname = buffer;
         } else {
-            keyname = "unknown key";
+            keyname = &buffer[1];
+        }
+    } else {
+        /* SDLK_INDEX(layoutKey) is a physical key number */
+        if (SDLK_INDEX(layoutKey) < SDL_arraysize(SDL_keynames)) {
+            keyname = SDL_keynames[SDLK_INDEX(layoutKey)];
         }
     }
+
+    if (keyname == NULL) {
+        keyname = SDL_keynames[SDLK_INDEX(SDLK_UNKNOWN)];
+    }
+
     return keyname;
+}
+
+void
+SDL_SetKeyName(SDLKey physicalKey, const char *name)
+{
+    physicalKey = SDLK_INDEX(physicalKey);
+    if (physicalKey < SDL_arraysize(SDL_keynames)) {
+        SDL_keynames[physicalKey] = name;
+    }
 }
 
 void
@@ -513,26 +327,27 @@ SDL_SetKeyboardFocus(int index, SDL_WindowID windowID)
 }
 
 int
-SDL_SendKeyboardKey(int index, Uint8 state, Uint8 scancode, SDLKey key)
+SDL_SendKeyboardKey(int index, Uint8 state, Uint8 scancode,
+                    SDLKey physicalKey)
 {
     SDL_Keyboard *keyboard = SDL_GetKeyboard(index);
     int posted;
     Uint16 modstate;
     Uint8 type;
 
-    if (!keyboard) {
+    if (!keyboard || physicalKey == SDLK_NONE) {
         return 0;
     }
 #if 0
-    printf("The '%s' key has been %s\n", SDL_GetKeyName(key),
+    printf("The '%s' key has been %s\n", SDL_GetKeyName(physicalKey),
            state == SDL_PRESSED ? "pressed" : "released");
 #endif
     if (state == SDL_PRESSED) {
         modstate = keyboard->modstate;
-        switch (key) {
+        switch (physicalKey) {
         case SDLK_UNKNOWN:
             break;
-        case SDLK_NUMLOCK:
+        case SDLK_KP_NUMLOCKCLEAR:
             keyboard->modstate ^= KMOD_NUM;
             break;
         case SDLK_CAPSLOCK:
@@ -569,10 +384,10 @@ SDL_SendKeyboardKey(int index, Uint8 state, Uint8 scancode, SDLKey key)
             break;
         }
     } else {
-        switch (key) {
+        switch (physicalKey) {
         case SDLK_UNKNOWN:
             break;
-        case SDLK_NUMLOCK:
+        case SDLK_KP_NUMLOCKCLEAR:
         case SDLK_CAPSLOCK:
             break;
         case SDLK_LCTRL:
@@ -621,9 +436,9 @@ SDL_SendKeyboardKey(int index, Uint8 state, Uint8 scancode, SDLKey key)
         return 0;
     }
 
-    if (key != SDLK_UNKNOWN) {
+    if (physicalKey != SDLK_UNKNOWN) {
         /* Drop events that don't change state */
-        if (keyboard->keystate[key] == state) {
+        if (keyboard->keystate[SDLK_INDEX(physicalKey)] == state) {
 #if 0
             printf("Keyboard event didn't change state - dropped!\n");
 #endif
@@ -631,7 +446,7 @@ SDL_SendKeyboardKey(int index, Uint8 state, Uint8 scancode, SDLKey key)
         }
 
         /* Update internal keyboard state */
-        keyboard->keystate[key] = state;
+        keyboard->keystate[SDLK_INDEX(physicalKey)] = state;
     }
 
     /* Post the event, if desired */
@@ -642,7 +457,7 @@ SDL_SendKeyboardKey(int index, Uint8 state, Uint8 scancode, SDLKey key)
         event.key.which = (Uint8) index;
         event.key.state = state;
         event.key.keysym.scancode = scancode;
-        event.key.keysym.sym = (Uint16) key;
+        event.key.keysym.sym = physicalKey;
         event.key.keysym.mod = modstate;
         event.key.keysym.unicode = 0;
         event.key.windowID = keyboard->focus;

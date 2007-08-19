@@ -42,7 +42,6 @@
 typedef struct SDL_VideoData
 {
     SInt32 osversion;
-    SDLKey keymap[256];
     unsigned int modifierFlags;
     int mouse;
     int keyboard;

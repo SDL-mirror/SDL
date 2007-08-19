@@ -65,6 +65,12 @@ extern void SDL_DelKeyboard(int index);
 /* Clear the state of a keyboard at an index */
 extern void SDL_ResetKeyboard(int index);
 
+/* Set a platform-dependent key name, overriding the default platform-agnostic
+   name. Encoded as UTF-8. The string is not copied, thus the pointer given to
+   this function must stay valid forever (or at least until the call to
+   VideoQuit()). */
+extern void SDL_SetKeyName(SDLKey physicalKey, const char *name);
+
 /* Set the keyboard focus window */
 extern void SDL_SetKeyboardFocus(int index, SDL_WindowID windowID);
 

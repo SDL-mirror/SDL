@@ -25,6 +25,7 @@
 #define _SDL_sysvideo_h
 
 #include "SDL_mouse.h"
+#include "SDL_keysym.h"
 
 /* The SDL video driver */
 
@@ -255,6 +256,45 @@ struct SDL_VideoDevice
     /* Event manager functions
      */
     void (*PumpEvents) (_THIS);
+
+    /* Get the layout key code corresponding to the given physical key code
+     * according to the OS' current keyboard layout.
+     *
+     * - For character keys, this should return the Unicode code point of the
+     * character that is generated when the key is pressed without shift or
+     * any other modifiers.
+     * - For non-character keys, this should return one of the SDLK_* constants
+     * (usually the argument itself since these keys are typically layout-
+     * independent). Make sure that all of these values returned by this
+     * function have a suitable name defined, either the default from
+     * SDL_keynames.h, or one set using SDL_SetKeyName() in VideoInit(). In
+     * particular, if this function can return any of the codes whose default
+     * names start with "SDLK_" (usually, it shouldn't, since these are layout-
+     * dependent character keys), these names should be replaced by proper
+     * user-readable names.
+     * - If there are keys that cannot be adequately described by either a
+     * single Unicode character or an SDLK_* constant, this function may return
+     * a code with SDL_KEY_LAYOUT_SPECIAL_BIT set in the most significant byte
+     * and an arbitrary value in the less significant 3 bytes. The
+     * GetSpecialKeyName() function must then be implemented to take this code
+     * and return a human-readable key name for it.
+     * If the argument is not a physical key code or if translation of the key
+     * code by the OS' keyboard layout fails for any reason, the argument must
+     * be returned unchanged.
+     *
+     * On platforms that don't have the notion of a user-configurable keyboard
+     * layout, this may be left unimplemented. The default implementation of
+     * SDL_GetLayoutKey() then acts as the identity. The note about defining
+     * key names above particularly applies in this case.
+     */
+      SDLKey(*GetLayoutKey) (_THIS, SDLKey physicalKey);
+
+    /* Get a human-readable name for a special layout key code.
+     * This only needs to be implemented if this driver's implementation of
+     * GetLayoutKey() generates such codes (with SDL_KEY_LAYOUT_SPECIAL_BIT
+     * set) - see above.
+     */
+    const char *(*GetSpecialKeyName) (_THIS, SDLKey layoutKey);
 
     /* * * */
     /* Data common to all drivers */

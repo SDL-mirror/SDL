@@ -26,6 +26,8 @@
 
 #include "../../events/SDL_keyboard_c.h"
 
+#include <Carbon/Carbon.h>
+
 
 #ifndef NX_DEVICERCTLKEYMASK
     #define NX_DEVICELCTLKEYMASK    0x00000001
@@ -51,192 +53,6 @@
 #ifndef NX_DEVICERCTLKEYMASK
     #define NX_DEVICERCTLKEYMASK    0x00002000
 #endif
-
-static void
-InitKeymap (SDLKey *keymap)
-{
-    const void *KCHRPtr;
-    UInt32 state;
-    UInt32 value;
-    int i;
-
-    for ( i=0; i<256; ++i )
-        keymap[i] = SDLK_UNKNOWN;
-
-    /* This keymap is almost exactly the same as the OS 9 one */
-    keymap[KEY_ESCAPE] = SDLK_ESCAPE;
-    keymap[KEY_F1] = SDLK_F1;
-    keymap[KEY_F2] = SDLK_F2;
-    keymap[KEY_F3] = SDLK_F3;
-    keymap[KEY_F4] = SDLK_F4;
-    keymap[KEY_F5] = SDLK_F5;
-    keymap[KEY_F6] = SDLK_F6;
-    keymap[KEY_F7] = SDLK_F7;
-    keymap[KEY_F8] = SDLK_F8;
-    keymap[KEY_F9] = SDLK_F9;
-    keymap[KEY_F10] = SDLK_F10;
-    keymap[KEY_F11] = SDLK_F11;
-    keymap[KEY_F12] = SDLK_F12;
-    keymap[KEY_F13] = SDLK_F13;
-    keymap[KEY_F14] = SDLK_F14;
-    keymap[KEY_F15] = SDLK_F15;
-/*
-    keymap[KEY_PRINT] = SDLK_PRINT;
-    keymap[KEY_SCROLLOCK] = SDLK_SCROLLOCK;
-    keymap[KEY_PAUSE] = SDLK_PAUSE;
-*/
-    keymap[KEY_POWER] = SDLK_POWER;
-    keymap[KEY_BACKQUOTE] = SDLK_BACKQUOTE;
-    keymap[KEY_1] = SDLK_1;
-    keymap[KEY_2] = SDLK_2;
-    keymap[KEY_3] = SDLK_3;
-    keymap[KEY_4] = SDLK_4;
-    keymap[KEY_5] = SDLK_5;
-    keymap[KEY_6] = SDLK_6;
-    keymap[KEY_7] = SDLK_7;
-    keymap[KEY_8] = SDLK_8;
-    keymap[KEY_9] = SDLK_9;
-    keymap[KEY_0] = SDLK_0;
-    keymap[KEY_MINUS] = SDLK_MINUS;
-    keymap[KEY_EQUALS] = SDLK_EQUALS;
-    keymap[KEY_BACKSPACE] = SDLK_BACKSPACE;
-    keymap[KEY_INSERT] = SDLK_INSERT;
-    keymap[KEY_HOME] = SDLK_HOME;
-    keymap[KEY_PAGEUP] = SDLK_PAGEUP;
-    keymap[KEY_NUMLOCK] = SDLK_NUMLOCK;
-    keymap[KEY_KP_EQUALS] = SDLK_KP_EQUALS;
-    keymap[KEY_KP_DIVIDE] = SDLK_KP_DIVIDE;
-    keymap[KEY_KP_MULTIPLY] = SDLK_KP_MULTIPLY;
-    keymap[KEY_TAB] = SDLK_TAB;
-    keymap[KEY_q] = SDLK_q;
-    keymap[KEY_w] = SDLK_w;
-    keymap[KEY_e] = SDLK_e;
-    keymap[KEY_r] = SDLK_r;
-    keymap[KEY_t] = SDLK_t;
-    keymap[KEY_y] = SDLK_y;
-    keymap[KEY_u] = SDLK_u;
-    keymap[KEY_i] = SDLK_i;
-    keymap[KEY_o] = SDLK_o;
-    keymap[KEY_p] = SDLK_p;
-    keymap[KEY_LEFTBRACKET] = SDLK_LEFTBRACKET;
-    keymap[KEY_RIGHTBRACKET] = SDLK_RIGHTBRACKET;
-    keymap[KEY_BACKSLASH] = SDLK_BACKSLASH;
-    keymap[KEY_DELETE] = SDLK_DELETE;
-    keymap[KEY_END] = SDLK_END;
-    keymap[KEY_PAGEDOWN] = SDLK_PAGEDOWN;
-    keymap[KEY_KP7] = SDLK_KP7;
-    keymap[KEY_KP8] = SDLK_KP8;
-    keymap[KEY_KP9] = SDLK_KP9;
-    keymap[KEY_KP_MINUS] = SDLK_KP_MINUS;
-    keymap[KEY_CAPSLOCK] = SDLK_CAPSLOCK;
-    keymap[KEY_a] = SDLK_a;
-    keymap[KEY_s] = SDLK_s;
-    keymap[KEY_d] = SDLK_d;
-    keymap[KEY_f] = SDLK_f;
-    keymap[KEY_g] = SDLK_g;
-    keymap[KEY_h] = SDLK_h;
-    keymap[KEY_j] = SDLK_j;
-    keymap[KEY_k] = SDLK_k;
-    keymap[KEY_l] = SDLK_l;
-    keymap[KEY_SEMICOLON] = SDLK_SEMICOLON;
-    keymap[KEY_QUOTE] = SDLK_QUOTE;
-    keymap[KEY_RETURN] = SDLK_RETURN;
-    keymap[KEY_KP4] = SDLK_KP4;
-    keymap[KEY_KP5] = SDLK_KP5;
-    keymap[KEY_KP6] = SDLK_KP6;
-    keymap[KEY_KP_PLUS] = SDLK_KP_PLUS;
-    keymap[KEY_LSHIFT] = SDLK_LSHIFT;
-    keymap[KEY_RSHIFT] = SDLK_RSHIFT;
-    keymap[KEY_z] = SDLK_z;
-    keymap[KEY_x] = SDLK_x;
-    keymap[KEY_c] = SDLK_c;
-    keymap[KEY_v] = SDLK_v;
-    keymap[KEY_b] = SDLK_b;
-    keymap[KEY_n] = SDLK_n;
-    keymap[KEY_m] = SDLK_m;
-    keymap[KEY_COMMA] = SDLK_COMMA;
-    keymap[KEY_PERIOD] = SDLK_PERIOD;
-    keymap[KEY_SLASH] = SDLK_SLASH;
-    keymap[KEY_UP] = SDLK_UP;
-    keymap[KEY_KP1] = SDLK_KP1;
-    keymap[KEY_KP2] = SDLK_KP2;
-    keymap[KEY_KP3] = SDLK_KP3;
-    keymap[KEY_KP_ENTER] = SDLK_KP_ENTER;
-    keymap[KEY_LCTRL] = SDLK_LCTRL;
-    keymap[KEY_LALT] = SDLK_LALT;
-    keymap[KEY_LMETA] = SDLK_LMETA;
-    keymap[KEY_RCTRL] = SDLK_RCTRL;
-    keymap[KEY_RALT] = SDLK_RALT;
-    keymap[KEY_RMETA] = SDLK_RMETA;
-    keymap[KEY_SPACE] = SDLK_SPACE;
-    keymap[KEY_LEFT] = SDLK_LEFT;
-    keymap[KEY_DOWN] = SDLK_DOWN;
-    keymap[KEY_RIGHT] = SDLK_RIGHT;
-    keymap[KEY_KP0] = SDLK_KP0;
-    keymap[KEY_KP_PERIOD] = SDLK_KP_PERIOD;
-    keymap[KEY_IBOOK_ENTER] = SDLK_KP_ENTER;
-    keymap[KEY_IBOOK_RIGHT] = SDLK_RIGHT;
-    keymap[KEY_IBOOK_DOWN] = SDLK_DOWN;
-    keymap[KEY_IBOOK_UP]      = SDLK_UP;
-    keymap[KEY_IBOOK_LEFT] = SDLK_LEFT;
-
-    /* 
-        Up there we setup a static scancode->keysym map. However, it will not
-        work very well on international keyboard. Hence we now query Mac OS X
-        for its own keymap to adjust our own mapping table. However, this is
-        basically only useful for ascii char keys. This is also the reason
-        why we keep the static table, too.
-     */
-
-    /* Get a pointer to the systems cached KCHR */
-    KCHRPtr = (void *)GetScriptManagerVariable(smKCHRCache);
-    if (KCHRPtr) {
-        /* Loop over all 127 possible scan codes */
-        for (i = 0; i < 0x7F; i++) {
-            /* We pretend a clean start to begin with (i.e. no dead keys active */
-            state = 0;
-
-            /* Now translate the key code to a key value */
-            value = KeyTranslate(KCHRPtr, i, &state) & 0xff;
-
-            /* If the state become 0, it was a dead key. We need to translate again,
-                passing in the new state, to get the actual key value */
-            if (state != 0)
-                value = KeyTranslate(KCHRPtr, i, &state) & 0xff;
-
-            /* Now we should have a latin1 value, which are SDL keysyms */
-            if (value >= 32 && value <= 255) {
-                keymap[i] = value;
-            }
-        }
-    }
-
-    /* 
-        The keypad codes are re-setup here, because the loop above cannot
-        distinguish between a key on the keypad and a regular key. We maybe
-        could get around this problem in another fashion: NSEvent's flags
-        include a "NSNumericPadKeyMask" bit; we could check that and modify
-        the symbol we return on the fly. However, this flag seems to exhibit
-        some weird behaviour related to the num lock key
-    */
-    keymap[KEY_KP0] = SDLK_KP0;
-    keymap[KEY_KP1] = SDLK_KP1;
-    keymap[KEY_KP2] = SDLK_KP2;
-    keymap[KEY_KP3] = SDLK_KP3;
-    keymap[KEY_KP4] = SDLK_KP4;
-    keymap[KEY_KP5] = SDLK_KP5;
-    keymap[KEY_KP6] = SDLK_KP6;
-    keymap[KEY_KP7] = SDLK_KP7;
-    keymap[KEY_KP8] = SDLK_KP8;
-    keymap[KEY_KP9] = SDLK_KP9;
-    keymap[KEY_KP_MINUS] = SDLK_KP_MINUS;
-    keymap[KEY_KP_PLUS] = SDLK_KP_PLUS;
-    keymap[KEY_KP_PERIOD] = SDLK_KP_PERIOD;
-    keymap[KEY_KP_EQUALS] = SDLK_KP_EQUALS;
-    keymap[KEY_KP_DIVIDE] = SDLK_KP_DIVIDE;
-    keymap[KEY_KP_MULTIPLY] = SDLK_KP_MULTIPLY;
-    keymap[KEY_KP_ENTER] = SDLK_KP_ENTER;
-}
 
 /* This is the original behavior, before support was added for 
  * differentiating between left and right versions of the keys.
@@ -433,8 +249,8 @@ HandleCapsLock(int keyboard, unsigned short scancode,
     newMask = newMods & NSNumericPadKeyMask;
 
     if (oldMask != newMask) {
-        SDL_SendKeyboardKey(keyboard, SDL_PRESSED, (Uint8)scancode, SDLK_NUMLOCK);
-        SDL_SendKeyboardKey(keyboard, SDL_RELEASED, (Uint8)scancode, SDLK_NUMLOCK);
+        SDL_SendKeyboardKey(keyboard, SDL_PRESSED, (Uint8)scancode, SDLK_KP_NUMLOCKCLEAR);
+        SDL_SendKeyboardKey(keyboard, SDL_RELEASED, (Uint8)scancode, SDLK_KP_NUMLOCKCLEAR);
     }
 }
 
@@ -513,14 +329,19 @@ Cocoa_InitKeyboard(_THIS)
     SDL_Keyboard keyboard;
     NSAutoreleasePool *pool;
 
-    InitKeymap(data->keymap);
-
     pool = [[NSAutoreleasePool alloc] init];
     data->fieldEdit = [[NSTextView alloc] initWithFrame:NSMakeRect(0.0, 0.0, 0.0, 0.0)];
     [pool release];
     
     SDL_zero(keyboard);
     data->keyboard = SDL_AddKeyboard(&keyboard, -1);
+    
+    /* Set our own names for the platform-dependent but layout-independent keys */
+    SDL_SetKeyName(SDLK_KP_NUMLOCKCLEAR, "clear");
+    SDL_SetKeyName(SDLK_LALT, "left option");
+    SDL_SetKeyName(SDLK_LMETA, "left command");
+    SDL_SetKeyName(SDLK_RALT, "right option");
+    SDL_SetKeyName(SDLK_RMETA, "right command");
 }
 
 void
@@ -528,20 +349,33 @@ Cocoa_HandleKeyEvent(_THIS, NSEvent *event)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     unsigned short scancode = [event keyCode];
+    SDLKey physicalKey;
     const char *text;
 
-    if (scancode >= 256) {
+    if ((scancode == 10 || scancode == 50) && KBGetLayoutType(LMGetKbdType()) == kKeyboardISO) {
+        /* see comments in SDL_cocoakeys.h */
+        scancode = 60 - scancode;
+    }
+    if (scancode < SDL_arraysize(macToSDLKey)) {
+        physicalKey = macToSDLKey[scancode];
+    }
+    else {
         /* Hmm, does this ever happen?  If so, need to extend the keymap... */
-        return;
+        physicalKey = SDLK_UNKNOWN;
     }
 
     switch ([event type]) {
     case NSKeyDown:
         if (![event isARepeat]) {
-            SDL_SendKeyboardKey(data->keyboard, SDL_PRESSED, (Uint8)scancode,
-                                data->keymap[scancode]);
+            SDL_SendKeyboardKey(data->keyboard, SDL_PRESSED, (Uint8)scancode, physicalKey);
+#if 1
+            if (physicalKey == SDLK_UNKNOWN) {
+                fprintf(stderr, "The key you just pressed is not recognized by SDL. To help get this fixed, report this to the SDL mailing list <sdl@libsdl.org> or to Christian Walther <cwalther@gmx.ch>. Mac virtual key code is %d.\n", scancode);
+            }
+#endif
         }
         if (SDL_EventState(SDL_TEXTINPUT, SDL_QUERY)) {
+            /* FIXME CW 2007-08-16: only send those events to the field editor for which we actually want text events, not e.g. esc or function keys. Arrow keys in particular seem to produce crashes sometimes. */
             [data->fieldEdit interpretKeyEvents:[NSArray arrayWithObject:event]];
             text = [[event characters] UTF8String];
             if(text && *text) {
@@ -550,12 +384,136 @@ Cocoa_HandleKeyEvent(_THIS, NSEvent *event)
         }
         break;
     case NSKeyUp:
-        SDL_SendKeyboardKey(data->keyboard, SDL_RELEASED, (Uint8)scancode,
-                            data->keymap[scancode]);
+        SDL_SendKeyboardKey(data->keyboard, SDL_RELEASED, (Uint8)scancode, physicalKey);
         break;
     case NSFlagsChanged:
+        /* FIXME CW 2007-08-14: check if this whole mess that takes up half of this file is really necessary */
         HandleModifiers(_this, scancode, [event modifierFlags]);
         break;
+    default: /* just to avoid compiler warnings */
+        break;
+    }
+}
+
+SDLKey
+Cocoa_GetLayoutKey(_THIS, SDLKey physicalKey)
+{
+    switch (physicalKey) {
+        /* Many of these keys would generate a character in the translation by keyboard layout, but an inappropriate one, so we catch them before. */
+        case SDLK_UNKNOWN:
+        case SDLK_RETURN:
+        case SDLK_ESCAPE:
+        case SDLK_BACKSPACE:
+        case SDLK_TAB:
+        case SDLK_SPACE:
+        case SDLK_CAPSLOCK:
+        case SDLK_F1:
+        case SDLK_F2:
+        case SDLK_F3:
+        case SDLK_F4:
+        case SDLK_F5:
+        case SDLK_F6:
+        case SDLK_F7:
+        case SDLK_F8:
+        case SDLK_F9:
+        case SDLK_F10:
+        case SDLK_F11:
+        case SDLK_F12:
+        case SDLK_PRINTSCREEN:
+        case SDLK_SCROLLLOCK:
+        case SDLK_PAUSE:
+        case SDLK_INSERT:
+        case SDLK_HOME:
+        case SDLK_PAGEUP:
+        case SDLK_DELETE:
+        case SDLK_END:
+        case SDLK_PAGEDOWN:
+        case SDLK_RIGHT:
+        case SDLK_LEFT:
+        case SDLK_DOWN:
+        case SDLK_UP:
+        case SDLK_KP_NUMLOCKCLEAR:
+        case SDLK_KP_ENTER:
+        case SDLK_APPLICATION:
+        case SDLK_POWER:
+        case SDLK_F13:
+        case SDLK_F14:
+        case SDLK_F15:
+        case SDLK_F16:
+        case SDLK_LCTRL:
+        case SDLK_LSHIFT:
+        case SDLK_LALT:
+        case SDLK_LMETA:
+        case SDLK_RCTRL:
+        case SDLK_RSHIFT:
+        case SDLK_RALT:
+        case SDLK_RMETA:
+            return physicalKey;
+        
+        /* For the rest, we try the translation first. */
+        default: {
+            UInt16 vkey = 0;
+            KeyboardLayoutRef layout;
+            KeyboardLayoutKind kind;
+            UInt32 keyboardType = LMGetKbdType();
+            
+            /* Look up pkey to get a Mac virtual key code - linear search isn't terribly efficient, this might have to be optimized. */
+            while (vkey < 128 && physicalKey != macToSDLKey[vkey]) vkey++;
+            if (vkey == 128) return physicalKey;
+            if ((vkey == 10 || vkey == 50) && KBGetLayoutType(keyboardType) == kKeyboardISO) vkey = 60 - vkey; /* see comments in SDL_cocoakeys.h */
+            
+            if (KLGetCurrentKeyboardLayout(&layout) != noErr) return physicalKey;
+            if (KLGetKeyboardLayoutProperty(layout, kKLKind, (const void **)&kind) != noErr) return physicalKey;
+            if (kind == kKLKCHRuchrKind || kind == kKLuchrKind) {
+                UniChar utf16String[4];
+                UInt32 deadKeyState = 0;
+                UniCharCount actualStringLength;
+                const UCKeyboardLayout *uchrData;
+                
+                if (KLGetKeyboardLayoutProperty(layout, kKLuchrData, (const void **)&uchrData) != noErr) return physicalKey;
+                if (UCKeyTranslate(uchrData, vkey, kUCKeyActionDisplay, 0, keyboardType, 0, &deadKeyState, 4, &actualStringLength, utf16String) != noErr) return physicalKey;
+                /* kUCKeyActionDisplay (instead of kUCKeyActionDown) seems to take care of dead keys, so no need to check for that case and simulate a second key press */
+                
+                if (actualStringLength == 0) return physicalKey;
+                
+                /* Decode the first character from UTF-16. I'm not sure if this is appropriate for keyboard layouts that generate more than 1 character, or if we would have to use SDL_KEY_LAYOUT_SPECIAL_BIT in that case. */
+                if (utf16String[0] < 0xD800 || utf16String[0] > 0xDFFF) {
+                    return utf16String[0];
+                }
+                else if (utf16String[0] > 0xDBFF || utf16String[1] < 0xDC00 || utf16String[1] > 0xDFFF) {
+                    /* invalid UTF-16 */
+                    return physicalKey;
+                }
+                else {
+                    return (((utf16String[0] & 0x3FF) << 10) | (utf16String[1] & 0x3FF)) + 0x10000;
+                }
+            }
+            else { /* kind == kKLKCHRKind */
+                const void *kchrData;
+                UInt32 state = 0;
+                UInt8 charCode;
+                SInt32 scriptCode;
+                TextEncoding keyboardEncoding;
+                CFStringRef conversionString;
+                UniChar codepoint;
+                
+                if (KLGetKeyboardLayoutProperty(layout, kKLKCHRData, &kchrData) != noErr) return physicalKey;
+                charCode = KeyTranslate(kchrData, vkey, &state) & 0xFF; /* Actually returns a UInt32 containing two character codes (and two 'reserved' bytes), but we're only interested in the second (or only) one */
+                if (charCode == 0) {
+                    /* It's a dead key, so simulate a second key press */
+                    charCode = KeyTranslate(kchrData, vkey, &state) & 0xFF;
+                    /* Still zero? Give up. */
+                    if (charCode == 0) return physicalKey;
+                }
+                if (KLGetKeyboardLayoutProperty(layout, kKLGroupIdentifier, (const void **)&scriptCode) != noErr) return physicalKey; /* That the group identifier is actually a script code is not documented, but confirmed here: <http://lists.apple.com/archives/carbon-dev/2005/Jan/msg00533.html> */
+                if (UpgradeScriptInfoToTextEncoding(scriptCode, kTextLanguageDontCare, kTextRegionDontCare, NULL, &keyboardEncoding) != noErr) return physicalKey;
+                
+                conversionString = CFStringCreateWithBytes(kCFAllocatorDefault, &charCode, 1, keyboardEncoding, FALSE);
+                codepoint = CFStringGetCharacterAtIndex(conversionString, 0);
+                CFRelease(conversionString);
+                return codepoint;
+            }
+        }
     }
 }
 
