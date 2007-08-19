@@ -521,10 +521,13 @@ void
 Cocoa_QuitKeyboard(_THIS)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+    NSAutoreleasePool *pool;
 
     SDL_DelKeyboard(data->keyboard);
 
+    pool = [[NSAutoreleasePool alloc] init];
     [data->fieldEdit release];
+    [pool release];
 }
 
 /* vi: set ts=4 sw=4 expandtab: */
