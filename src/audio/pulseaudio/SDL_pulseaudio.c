@@ -85,6 +85,7 @@ static pa_channel_map* (*SDL_NAME(pa_channel_map_init_auto))(
     unsigned channels,
     pa_channel_map_def_t def
 );
+static const char* (*SDL_NAME(pa_strerror))(int error);
 
 
 #define SDL_PULSEAUDIO_SYM(x) { #x, (void **) (char *) &SDL_NAME(x) }
@@ -98,6 +99,7 @@ static struct {
     SDL_PULSEAUDIO_SYM(pa_simple_drain),
     SDL_PULSEAUDIO_SYM(pa_simple_write),
     SDL_PULSEAUDIO_SYM(pa_channel_map_init_auto),
+    SDL_PULSEAUDIO_SYM(pa_strerror),
 /* *INDENT-ON* */
 };
 #undef SDL_PULSEAUDIO_SYM
@@ -253,10 +255,11 @@ static char *get_progname(void)
 static int
 PULSEAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
 {
-    Uint16          test_format;
-    pa_sample_spec  paspec;
-    pa_buffer_attr  paattr;
-    pa_channel_map  pacmap;
+    Uint16 test_format = 0;
+    pa_sample_spec paspec;
+    pa_buffer_attr paattr;
+    pa_channel_map pacmap;
+    int err = 0;
 
     /* Initialize all variables that we clean on shutdown */
     this->hidden = (struct SDL_PrivateAudioData *)
@@ -338,12 +341,14 @@ PULSEAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
         &paspec,                     /* sample format spec */
         &pacmap,                     /* channel map */
         &paattr,                     /* buffering attributes */
-        NULL                         /* error code */
+        &err                         /* error code */
     );
+
     if ( this->hidden->stream == NULL ) {
         PULSEAUDIO_CloseDevice(this);
-        SDL_SetError("Could not connect to PulseAudio");
-        return(-1);
+        SDL_SetError("Could not connect to PulseAudio: %s",
+                     SDL_NAME(pa_strerror(err)));
+        return 0;
     }
 
     /* Get the parent process id (we're the parent of the audio thread) */
