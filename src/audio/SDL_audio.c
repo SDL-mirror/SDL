@@ -47,6 +47,7 @@ extern AudioBootStrap BSD_AUDIO_bootstrap;
 extern AudioBootStrap DSP_bootstrap;
 extern AudioBootStrap DMA_bootstrap;
 extern AudioBootStrap ALSA_bootstrap;
+extern AudioBootStrap PULSEAUDIO_bootstrap;
 extern AudioBootStrap QNXNTOAUDIO_bootstrap;
 extern AudioBootStrap SUNAUDIO_bootstrap;
 extern AudioBootStrap DMEDIA_bootstrap;
@@ -82,6 +83,9 @@ static AudioBootStrap *bootstrap[] = {
 #endif
 #if SDL_AUDIO_DRIVER_ALSA
     &ALSA_bootstrap,
+#endif
+#if SDL_AUDIO_DRIVER_PULSEAUDIO
+	&PULSEAUDIO_bootstrap,
 #endif
 #if SDL_AUDIO_DRIVER_QNXNTO
     &QNXNTOAUDIO_bootstrap,

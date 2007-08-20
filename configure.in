@@ -644,6 +644,63 @@ AC_HELP_STRING([--enable-esd-shared], [dynamically load ESD audio support [[defa
     fi
 }
 
+dnl Find PulseAudio
+CheckPulseAudio()
+{
+    AC_ARG_ENABLE(pulseaudio,
+AC_HELP_STRING([--enable-pulseaudio], [use PulseAudio [[default=yes]]]),
+                  , enable_pulseaudio=yes)
+    if test x$enable_audio = xyes -a x$enable_pulseaudio = xyes; then
+        audio_pulseaudio=no
+
+        PULSEAUDIO_REQUIRED_VERSION=0.9
+
+        AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
+        AC_MSG_CHECKING(for PulseAudio $PULSEAUDIO_REQUIRED_VERSION support)
+        if test x$PKG_CONFIG != xno; then
+        if $PKG_CONFIG --atleast-pkgconfig-version 0.7 && $PKG_CONFIG --atleast-version $PULSEAUDIO_REQUIRED_VERSION libpulse-simple; then
+                PULSEAUDIO_CFLAGS=`$PKG_CONFIG --cflags libpulse-simple`
+                PULSEAUDIO_LIBS=`$PKG_CONFIG --libs libpulse-simple`
+                audio_pulseaudio=yes
+        fi
+        fi
+        AC_MSG_RESULT($audio_pulseaudio)
+
+        if test x$audio_pulseaudio = xyes; then
+            AC_ARG_ENABLE(pulseaudio-shared,
+AC_HELP_STRING([--enable-pulseaudio-shared], [dynamically load PulseAudio support [[default=yes]]]),
+                          , enable_pulseaudio_shared=yes)
+            if test "x`echo $PULSEAUDIO_LIBS | grep -- -L`" = "x"; then
+                if test "x`ls /lib/libpulse-simple.so.* 2> /dev/null`" != "x"; then
+                    PULSEAUDIO_LIBS="-L/lib $PULSEAUDIO_LIBS"
+                elif test "x`ls /usr/lib/libpulse-simple.so.* 2> /dev/null`" != "x"; then
+                    PULSEAUDIO_LIBS="-L/usr/lib $PULSEAUDIO_LIBS"
+                elif test "x`ls /usr/local/lib/libpulse-simple.so.* 2> /dev/null`" != "x"; then
+                    PULSEAUDIO_LIBS="-L/usr/local/lib $PULSEAUDIO_LIBS"
+                fi
+            fi
+            pulseaudio_lib_spec=`echo $PULSEAUDIO_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libpulse-simple.so.*/'`
+            pulseaudio_lib=`ls -- $pulseaudio_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
+            echo "-- $pulseaudio_lib_spec -> $pulseaudio_lib"
+
+            AC_DEFINE(SDL_AUDIO_DRIVER_PULSEAUDIO)
+            SOURCES="$SOURCES $srcdir/src/audio/pulseaudio/*.c"
+            EXTRA_CFLAGS="$EXTRA_CFLAGS $PULSEAUDIO_CFLAGS"
+            if test x$have_loadso != xyes && \
+               test x$enable_pulseaudio_shared = xyes; then
+                AC_MSG_WARN([You must have SDL_LoadObject() support for dynamic PulseAudio loading])
+            fi
+            if test x$have_loadso = xyes && \
+               test x$enable_pulseaudio_shared = xyes && test x$pulseaudio_lib != x; then
+                AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_PULSEAUDIO_DYNAMIC, "$pulseaudio_lib")
+            else
+                EXTRA_LDFLAGS="$EXTRA_LDFLAGS $PULSEAUDIO_LIBS"
+            fi
+            have_audio=yes
+        fi
+    fi
+}
+
 CheckARTSC()
 {
     AC_ARG_ENABLE(arts,
@@ -2065,6 +2122,7 @@ case "$host" in
         CheckDMEDIA
         CheckMME
         CheckALSA
+        CheckPulseAudio
         CheckARTSC
         CheckESD
         CheckNAS
