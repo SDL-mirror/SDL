@@ -380,6 +380,7 @@ Cocoa_HandleKeyEvent(_THIS, NSEvent *event)
             text = [[event characters] UTF8String];
             if(text && *text) {
                 SDL_SendKeyboardText(data->keyboard, text);
+                [data->fieldEdit setString:@""];
             }
         }
         break;
