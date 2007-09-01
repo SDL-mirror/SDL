@@ -235,11 +235,11 @@ static int Utf8ToUtf16(const Uint8 *utf8, const int utf8_length, Uint16 *utf16, 
     Uint8 const *const end_of_input = utf8 + utf8_length - 1;
 
     while (utf8 <= end_of_input) {
+	Uint8 const c = *utf8;
 	if (p >= max_ptr) {
 	    /* No more output space.  */
 	    return -1;
 	}
-	Uint8 const c = *utf8;
 	if (c < 0x80) {
 	    /* One byte ASCII.  */
 	    *p++ = c;
