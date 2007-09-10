@@ -29,7 +29,6 @@ typedef struct SDL_DirtyRect
 
 typedef struct SDL_DirtyRectList
 {
-    int count;
     SDL_DirtyRect *list;
     SDL_DirtyRect *free;
 } SDL_DirtyRectList;

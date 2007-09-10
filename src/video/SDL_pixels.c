@@ -536,8 +536,7 @@ SDL_FindColor(SDL_Palette * pal, Uint8 r, Uint8 g, Uint8 b)
 
 /* Find the opaque pixel value corresponding to an RGB triple */
 Uint32
-SDL_MapRGB(const SDL_PixelFormat * const format, const Uint8 r, const Uint8 g,
-           const Uint8 b)
+SDL_MapRGB(const SDL_PixelFormat * format, Uint8 r, Uint8 g, Uint8 b)
 {
     if (format->palette == NULL) {
         return (r >> format->Rloss) << format->Rshift
@@ -550,8 +549,8 @@ SDL_MapRGB(const SDL_PixelFormat * const format, const Uint8 r, const Uint8 g,
 
 /* Find the pixel value corresponding to an RGBA quadruple */
 Uint32
-SDL_MapRGBA(const SDL_PixelFormat * const format, const Uint8 r,
-            const Uint8 g, const Uint8 b, const Uint8 a)
+SDL_MapRGBA(const SDL_PixelFormat * format, Uint8 r, Uint8 g, Uint8 b,
+            Uint8 a)
 {
     if (format->palette == NULL) {
         return (r >> format->Rloss) << format->Rshift
@@ -564,10 +563,37 @@ SDL_MapRGBA(const SDL_PixelFormat * const format, const Uint8 r,
 }
 
 void
-SDL_GetRGBA(Uint32 pixel, SDL_PixelFormat * fmt,
+SDL_GetRGB(Uint32 pixel, const SDL_PixelFormat * format, Uint8 * r, Uint8 * g,
+           Uint8 * b)
+{
+    if (format->palette == NULL) {
+        /*
+         * This makes sure that the result is mapped to the
+         * interval [0..255], and the maximum value for each
+         * component is 255. This is important to make sure
+         * that white is indeed reported as (255, 255, 255).
+         * This only works for RGB bit fields at least 4 bit
+         * wide, which is almost always the case.
+         */
+        unsigned v;
+        v = (pixel & format->Rmask) >> format->Rshift;
+        *r = (v << format->Rloss) + (v >> (8 - (format->Rloss << 1)));
+        v = (pixel & format->Gmask) >> format->Gshift;
+        *g = (v << format->Gloss) + (v >> (8 - (format->Gloss << 1)));
+        v = (pixel & format->Bmask) >> format->Bshift;
+        *b = (v << format->Bloss) + (v >> (8 - (format->Bloss << 1)));
+    } else {
+        *r = format->palette->colors[pixel].r;
+        *g = format->palette->colors[pixel].g;
+        *b = format->palette->colors[pixel].b;
+    }
+}
+
+void
+SDL_GetRGBA(Uint32 pixel, const SDL_PixelFormat * format,
             Uint8 * r, Uint8 * g, Uint8 * b, Uint8 * a)
 {
-    if (fmt->palette == NULL) {
+    if (format->palette == NULL) {
         /*
          * This makes sure that the result is mapped to the
          * interval [0..255], and the maximum value for each
@@ -578,43 +604,23 @@ SDL_GetRGBA(Uint32 pixel, SDL_PixelFormat * fmt,
          * wide, which is almost always the case.
          */
         unsigned v;
-        v = (pixel & fmt->Rmask) >> fmt->Rshift;
-        *r = (v << fmt->Rloss) + (v >> (8 - (fmt->Rloss << 1)));
-        v = (pixel & fmt->Gmask) >> fmt->Gshift;
-        *g = (v << fmt->Gloss) + (v >> (8 - (fmt->Gloss << 1)));
-        v = (pixel & fmt->Bmask) >> fmt->Bshift;
-        *b = (v << fmt->Bloss) + (v >> (8 - (fmt->Bloss << 1)));
-        if (fmt->Amask) {
-            v = (pixel & fmt->Amask) >> fmt->Ashift;
-            *a = (v << fmt->Aloss) + (v >> (8 - (fmt->Aloss << 1)));
+        v = (pixel & format->Rmask) >> format->Rshift;
+        *r = (v << format->Rloss) + (v >> (8 - (format->Rloss << 1)));
+        v = (pixel & format->Gmask) >> format->Gshift;
+        *g = (v << format->Gloss) + (v >> (8 - (format->Gloss << 1)));
+        v = (pixel & format->Bmask) >> format->Bshift;
+        *b = (v << format->Bloss) + (v >> (8 - (format->Bloss << 1)));
+        if (format->Amask) {
+            v = (pixel & format->Amask) >> format->Ashift;
+            *a = (v << format->Aloss) + (v >> (8 - (format->Aloss << 1)));
         } else {
             *a = SDL_ALPHA_OPAQUE;
         }
     } else {
-        *r = fmt->palette->colors[pixel].r;
-        *g = fmt->palette->colors[pixel].g;
-        *b = fmt->palette->colors[pixel].b;
+        *r = format->palette->colors[pixel].r;
+        *g = format->palette->colors[pixel].g;
+        *b = format->palette->colors[pixel].b;
         *a = SDL_ALPHA_OPAQUE;
-    }
-}
-
-void
-SDL_GetRGB(Uint32 pixel, SDL_PixelFormat * fmt, Uint8 * r, Uint8 * g,
-           Uint8 * b)
-{
-    if (fmt->palette == NULL) {
-        /* the note for SDL_GetRGBA above applies here too */
-        unsigned v;
-        v = (pixel & fmt->Rmask) >> fmt->Rshift;
-        *r = (v << fmt->Rloss) + (v >> (8 - (fmt->Rloss << 1)));
-        v = (pixel & fmt->Gmask) >> fmt->Gshift;
-        *g = (v << fmt->Gloss) + (v >> (8 - (fmt->Gloss << 1)));
-        v = (pixel & fmt->Bmask) >> fmt->Bshift;
-        *b = (v << fmt->Bloss) + (v >> (8 - (fmt->Bloss << 1)));
-    } else {
-        *r = fmt->palette->colors[pixel].r;
-        *g = fmt->palette->colors[pixel].g;
-        *b = fmt->palette->colors[pixel].b;
     }
 }
 

@@ -806,7 +806,7 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     int minx, miny, maxx, maxy;
     GLfloat minu, maxu, minv, maxv;
 
-    if (texturedata->dirty.count > 0) {
+    if (texturedata->dirty.list) {
         SDL_DirtyRect *dirty;
         void *pixels;
         int bpp = SDL_BYTESPERPIXEL(texture->format);

@@ -143,7 +143,6 @@ SDL_AddDirtyRect(SDL_DirtyRectList * list, const SDL_Rect * rect)
     dirty->rect = *rect;
     dirty->next = list->list;
     list->list = dirty;
-    ++list->count;
 }
 
 void
@@ -164,7 +163,6 @@ SDL_ClearDirtyRects(SDL_DirtyRectList * list)
         list->free = list->list;
     }
     list->list = NULL;
-    list->count = 0;
 }
 
 void

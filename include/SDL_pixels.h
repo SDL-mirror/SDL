@@ -37,6 +37,10 @@ extern "C" {
 /* *INDENT-ON* */
 #endif
 
+/* Transparency definitions: These define alpha as the opacity of a surface */
+#define SDL_ALPHA_OPAQUE 255
+#define SDL_ALPHA_TRANSPARENT 0
+
 enum
 {                               /* Pixel type */
     SDL_PIXELTYPE_UNKNOWN,
@@ -329,6 +333,54 @@ extern DECLSPEC int SDLCALL SDL_SetPaletteColors(SDL_Palette * palette,
  * \sa SDL_AllocPalette()
  */
 extern DECLSPEC void SDLCALL SDL_FreePalette(SDL_Palette * palette);
+
+/**
+ * \fn Uint32 SDL_MapRGB(const SDL_PixelFormat *format,
+ *                       Uint8 r, Uint8 g, Uint8 b)
+ *
+ * \brief Maps an RGB triple to an opaque pixel value for a given pixel format
+ *
+ * \sa SDL_MapRGBA
+ */
+extern DECLSPEC Uint32 SDLCALL SDL_MapRGB(const SDL_PixelFormat * format,
+                                          Uint8 r, Uint8 g, Uint8 b);
+
+/**
+ * \fn Uint32 SDL_MapRGBA(const SDL_PixelFormat *fmt,
+ *                        Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+ *
+ * \brief Maps an RGBA quadruple to a pixel value for a given pixel format
+ *
+ * \sa SDL_MapRGB
+ */
+extern DECLSPEC Uint32 SDLCALL SDL_MapRGBA(const SDL_PixelFormat * format,
+                                           Uint8 r, Uint8 g, Uint8 b,
+                                           Uint8 a);
+
+/**
+ * \fn void SDL_GetRGB(Uint32 pixel, const SDL_PixelFormat * format,
+ *                     Uint8 * r, Uint8 * g, Uint8 * b)
+ *
+ * \brief Maps a pixel value into the RGB components for a given pixel format
+ *
+ * \sa SDL_GetRGBA
+ */
+extern DECLSPEC void SDLCALL SDL_GetRGB(Uint32 pixel,
+                                        const SDL_PixelFormat * format,
+                                        Uint8 * r, Uint8 * g, Uint8 * b);
+
+/**
+ * \fn void SDL_GetRGBA(Uint32 pixel, const SDL_PixelFormat * format,
+ *                      Uint8 * r, Uint8 * g, Uint8 * b, Uint8 * a)
+ *
+ * \brief Maps a pixel value into the RGBA components for a given pixel format
+ *
+ * \sa SDL_GetRGB
+ */
+extern DECLSPEC void SDLCALL SDL_GetRGBA(Uint32 pixel,
+                                         const SDL_PixelFormat * format,
+                                         Uint8 * r, Uint8 * g, Uint8 * b,
+                                         Uint8 * a);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
