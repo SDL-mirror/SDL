@@ -33,8 +33,8 @@
 
 struct SDL_PrivateAudioData
 {
-	/* The audio stream handle */
-	pa_simple *stream;
+    /* The audio stream handle */
+    pa_simple *stream;
 
     /* The parent process id, to detect when application quits */
     pid_t parent;

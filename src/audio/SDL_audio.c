@@ -85,7 +85,7 @@ static AudioBootStrap *bootstrap[] = {
     &ALSA_bootstrap,
 #endif
 #if SDL_AUDIO_DRIVER_PULSEAUDIO
-	&PULSEAUDIO_bootstrap,
+    &PULSEAUDIO_bootstrap,
 #endif
 #if SDL_AUDIO_DRIVER_QNXNTO
     &QNXNTOAUDIO_bootstrap,

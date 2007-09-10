@@ -61,35 +61,32 @@ static const char *pulse_library = SDL_AUDIO_DRIVER_PULSEAUDIO_DYNAMIC;
 static void *pulse_handle = NULL;
 
 /* !!! FIXME: I hate this SDL_NAME clutter...it makes everything so messy! */
-static pa_simple* (*SDL_NAME(pa_simple_new))(
-    const char *server,
-    const char *name,
-    pa_stream_direction_t dir,
-    const char *dev,
-    const char *stream_name,
-    const pa_sample_spec *ss,
-    const pa_channel_map *map,
-    const pa_buffer_attr *attr,
-    int *error
-);
-static void (*SDL_NAME(pa_simple_free))(pa_simple *s);
-static int (*SDL_NAME(pa_simple_drain))(pa_simple *s, int *error);
-static int (*SDL_NAME(pa_simple_write))(
-    pa_simple *s,
-    const void *data,
-    size_t length,
-    int *error
-);
-static pa_channel_map* (*SDL_NAME(pa_channel_map_init_auto))(
-    pa_channel_map *m,
-    unsigned channels,
-    pa_channel_map_def_t def
-);
-static const char* (*SDL_NAME(pa_strerror))(int error);
+static pa_simple *(*SDL_NAME(pa_simple_new)) (const char *server,
+                                              const char *name,
+                                              pa_stream_direction_t dir,
+                                              const char *dev,
+                                              const char *stream_name,
+                                              const pa_sample_spec * ss,
+                                              const pa_channel_map * map,
+                                              const pa_buffer_attr * attr,
+                                              int *error);
+static void (*SDL_NAME(pa_simple_free)) (pa_simple * s);
+static int (*SDL_NAME(pa_simple_drain)) (pa_simple * s, int *error);
+static int (*SDL_NAME(pa_simple_write)) (pa_simple * s,
+                                         const void *data,
+                                         size_t length, int *error);
+static pa_channel_map *(*SDL_NAME(pa_channel_map_init_auto)) (pa_channel_map *
+                                                              m,
+                                                              unsigned
+                                                              channels,
+                                                              pa_channel_map_def_t
+                                                              def);
+static const char *(*SDL_NAME(pa_strerror)) (int error);
 
 
 #define SDL_PULSEAUDIO_SYM(x) { #x, (void **) (char *) &SDL_NAME(x) }
-static struct {
+static struct
+{
     const char *name;
     void **func;
 } pulse_functions[] = {
@@ -102,6 +99,7 @@ static struct {
     SDL_PULSEAUDIO_SYM(pa_strerror),
 /* *INDENT-ON* */
 };
+
 #undef SDL_PULSEAUDIO_SYM
 
 static void
@@ -185,9 +183,8 @@ static void
 PULSEAUDIO_PlayDevice(_THIS)
 {
     /* Write the audio data */
-    if ( SDL_NAME(pa_simple_write)(this->hidden->stream, this->hidden->mixbuf,
-                                   this->hidden->mixlen, NULL) != 0 )
-    {
+    if (SDL_NAME(pa_simple_write) (this->hidden->stream, this->hidden->mixbuf,
+                                   this->hidden->mixlen, NULL) != 0) {
         this->enabled = 0;
     }
 }
@@ -195,7 +192,7 @@ PULSEAUDIO_PlayDevice(_THIS)
 static void
 PULSEAUDIO_WaitDone(_THIS)
 {
-    SDL_NAME(pa_simple_drain)(this->hidden->stream, NULL);
+    SDL_NAME(pa_simple_drain) (this->hidden->stream, NULL);
 }
 
 
@@ -215,8 +212,8 @@ PULSEAUDIO_CloseDevice(_THIS)
             this->hidden->mixbuf = NULL;
         }
         if (this->hidden->stream) {
-            SDL_NAME(pa_simple_drain)(this->hidden->stream, NULL);
-            SDL_NAME(pa_simple_free)(this->hidden->stream);
+            SDL_NAME(pa_simple_drain) (this->hidden->stream, NULL);
+            SDL_NAME(pa_simple_free) (this->hidden->stream);
             this->hidden->stream = NULL;
         }
         SDL_free(this->hidden);
@@ -227,7 +224,8 @@ PULSEAUDIO_CloseDevice(_THIS)
 
 /* !!! FIXME: this could probably be expanded. */
 /* Try to get the name of the program */
-static char *get_progname(void)
+static char *
+get_progname(void)
 {
     char *progname = NULL;
 #ifdef __LINUX__
@@ -236,19 +234,19 @@ static char *get_progname(void)
 
     SDL_snprintf(temp, SDL_arraysize(temp), "/proc/%d/cmdline", getpid());
     fp = fopen(temp, "r");
-    if ( fp != NULL ) {
-        if ( fgets(temp, sizeof(temp)-1, fp) ) {
+    if (fp != NULL) {
+        if (fgets(temp, sizeof(temp) - 1, fp)) {
             progname = SDL_strrchr(temp, '/');
-            if ( progname == NULL ) {
+            if (progname == NULL) {
                 progname = temp;
             } else {
-                progname = progname+1;
+                progname = progname + 1;
             }
         }
         fclose(fp);
     }
 #endif
-    return(progname);
+    return (progname);
 }
 
 
@@ -278,19 +276,19 @@ PULSEAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
 #ifdef DEBUG_AUDIO
         fprintf(stderr, "Trying format 0x%4.4x\n", test_format);
 #endif
-        switch ( test_format ) {
-            case AUDIO_U8:
-                paspec.format = PA_SAMPLE_U8;
-                break;
-            case AUDIO_S16LSB:
-                paspec.format = PA_SAMPLE_S16LE;
-                break;
-            case AUDIO_S16MSB:
-                paspec.format = PA_SAMPLE_S16BE;
-                break;
-            default:
-                paspec.format = PA_SAMPLE_INVALID;
-                break;
+        switch (test_format) {
+        case AUDIO_U8:
+            paspec.format = PA_SAMPLE_U8;
+            break;
+        case AUDIO_S16LSB:
+            paspec.format = PA_SAMPLE_S16LE;
+            break;
+        case AUDIO_S16MSB:
+            paspec.format = PA_SAMPLE_S16BE;
+            break;
+        default:
+            paspec.format = PA_SAMPLE_INVALID;
+            break;
         }
         if (paspec.format == PA_SAMPLE_INVALID) {
             test_format = SDL_NextAudioFormat();
@@ -328,23 +326,22 @@ PULSEAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
 
     /* The SDL ALSA output hints us that we use Windows' channel mapping */
     /* http://bugzilla.libsdl.org/show_bug.cgi?id=110 */
-    SDL_NAME(pa_channel_map_init_auto)(
-        &pacmap, this->spec.channels, PA_CHANNEL_MAP_WAVEEX);
+    SDL_NAME(pa_channel_map_init_auto) (&pacmap, this->spec.channels,
+                                        PA_CHANNEL_MAP_WAVEEX);
 
     /* Connect to the PulseAudio server */
-    this->hidden->stream = SDL_NAME(pa_simple_new)(
-        SDL_getenv("PASERVER"),      /* server */
-        get_progname(),              /* application name */
-        PA_STREAM_PLAYBACK,          /* playback mode */
-        SDL_getenv("PADEVICE"),      /* device on the server */
-        "Simple DirectMedia Layer",  /* stream description */
-        &paspec,                     /* sample format spec */
-        &pacmap,                     /* channel map */
-        &paattr,                     /* buffering attributes */
-        &err                         /* error code */
-    );
+    this->hidden->stream = SDL_NAME(pa_simple_new) (SDL_getenv("PASERVER"),     /* server */
+                                                    get_progname(),     /* application name */
+                                                    PA_STREAM_PLAYBACK, /* playback mode */
+                                                    SDL_getenv("PADEVICE"),     /* device on the server */
+                                                    "Simple DirectMedia Layer", /* stream description */
+                                                    &paspec,    /* sample format spec */
+                                                    &pacmap,    /* channel map */
+                                                    &paattr,    /* buffering attributes */
+                                                    &err        /* error code */
+        );
 
-    if ( this->hidden->stream == NULL ) {
+    if (this->hidden->stream == NULL) {
         PULSEAUDIO_CloseDevice(this);
         SDL_SetError("Could not connect to PulseAudio: %s",
                      SDL_NAME(pa_strerror(err)));
