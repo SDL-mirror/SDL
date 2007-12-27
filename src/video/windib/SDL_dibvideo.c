@@ -213,7 +213,7 @@ static int DIB_AddMode(_THIS, int bpp, int w, int h)
 	int next_mode;
 
 	/* Check to see if we already have this mode */
-	if ( bpp < 8 ) {  /* Not supported */
+	if ( bpp < 8 || bpp > 32 ) {  /* Not supported */
 		return(0);
 	}
 	index = ((bpp+7)/8)-1;
