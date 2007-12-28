@@ -114,7 +114,7 @@ typedef unsigned long long uint64_t;
 #define HAVE_CALLOC 1
 #define HAVE_REALLOC 1
 #define HAVE_FREE 1
-//#define HAVE_ALLOCA 1
+/*#define HAVE_ALLOCA 1*/
 #define HAVE_QSORT 1
 #define HAVE_ABS 1
 #define HAVE_MEMSET 1
@@ -135,7 +135,7 @@ typedef unsigned long long uint64_t;
 #define HAVE_ATOF 1
 #define HAVE_STRCMP 1
 #define HAVE_STRNCMP 1
-//#define HAVE__STRICMP 1
+/*#define HAVE__STRICMP 1*/
 #define HAVE__STRNICMP 1
 #define HAVE_SSCANF 1
 #define HAVE_STDARG_H	1
