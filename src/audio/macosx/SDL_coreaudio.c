@@ -22,6 +22,9 @@
 #include "SDL_config.h"
 
 #include <AudioUnit/AudioUnit.h>
+#ifdef AVAILABLE_MAC_OS_X_VERSION_10_5_AND_LATER
+#include <AudioUnit/AUNTComponent.h>
+#endif
 
 #include "SDL_audio.h"
 #include "../SDL_audio_c.h"
