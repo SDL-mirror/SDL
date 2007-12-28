@@ -106,7 +106,7 @@ mixloopS16:
 		dec		ebx				//%%ebx\n"
 		jnz mixloopS16
 
-ends16:
+endS16:
 		emms
 		
 		pop		ebx
