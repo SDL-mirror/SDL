@@ -10,26 +10,26 @@ NJOB=$NCPU
 # Generic, cross-platform CFLAGS you always want go here.
 CFLAGS="-O3 -g -pipe"
 
-# PowerPC configure flags (10.2 runtime compatibility)
+# PowerPC configure flags (10.3 runtime compatibility)
 # We dynamically load X11, so using the system X11 headers is fine.
 CONFIG_PPC="--build=`uname -p`-apple-darwin --host=powerpc-apple-darwin \
 --x-includes=/usr/X11R6/include --x-libraries=/usr/X11R6/lib"
 
 # PowerPC compiler flags
-CC_PPC="gcc-3.3 -arch ppc"
-CXX_PPC="g++-3.3 -arch ppc"
+CC_PPC="gcc-4.0 -arch ppc"
+CXX_PPC="g++-4.0 -arch ppc"
 CFLAGS_PPC=""
-CPPFLAGS_PPC="-DMAC_OS_X_VERSION_MIN_REQUIRED=1020 \
+CPPFLAGS_PPC="-DMAC_OS_X_VERSION_MIN_REQUIRED=1030 \
 -nostdinc \
--F/Developer/SDKs/MacOSX10.2.8.sdk/System/Library/Frameworks \
--I/Developer/SDKs/MacOSX10.2.8.sdk/usr/include/gcc/darwin/3.3 \
--isystem /Developer/SDKs/MacOSX10.2.8.sdk/usr/include"
+-F/Developer/SDKs/MacOSX10.3.9.sdk/System/Library/Frameworks \
+-I/Developer/SDKs/MacOSX10.3.9.sdk/usr/lib/gcc/powerpc-apple-darwin9/4.0.1/include \
+-isystem /Developer/SDKs/MacOSX10.3.9.sdk/usr/include"
 
-# PowerPC linker flags 
-LFLAGS_PPC="-arch ppc \
--L/Developer/SDKs/MacOSX10.2.8.sdk/usr/lib/gcc/darwin/3.3 \
--F/Developer/SDKs/MacOSX10.2.8.sdk/System/Library/Frameworks \
--Wl,-syslibroot,/Developer/SDKs/MacOSX10.2.8.sdk"
+# PowerPC linker flags
+LFLAGS_PPC="-arch ppc -mmacosx-version-min=10.3 \
+-L/Developer/SDKs/MacOSX10.3.9.sdk/usr/lib/gcc/powerpc-apple-darwin9/4.0.1 \
+-F/Developer/SDKs/MacOSX10.3.9.sdk/System/Library/Frameworks \
+-Wl,-syslibroot,/Developer/SDKs/MacOSX10.3.9.sdk"
 
 # Intel configure flags (10.4 runtime compatibility)
 # We dynamically load X11, so using the system X11 headers is fine.
@@ -43,12 +43,12 @@ CFLAGS_X86="-mmacosx-version-min=10.4"
 CPPFLAGS_X86="-DMAC_OS_X_VERSION_MIN_REQUIRED=1040 \
 -nostdinc \
 -F/Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks \
--I/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin8/4.0.1/include \
+-I/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin9/4.0.1/include \
 -isystem /Developer/SDKs/MacOSX10.4u.sdk/usr/include"
 
 # Intel linker flags
 LFLAGS_X86="-arch i386 -mmacosx-version-min=10.4 \
--L/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin8/4.0.1 \
+-L/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin9/4.0.1 \
 -Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk"
 
 #
