@@ -484,6 +484,8 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 	int x, y;
 	Uint32 Rmask, Gmask, Bmask;
 
+	prev_flags = current->flags;
+
 	/* Clean up any GL context that may be hanging around */
 	if ( current->flags & SDL_OPENGL ) {
 		WIN_GL_ShutDown(this);
@@ -531,7 +533,6 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 	}
 
 	/* Fill in part of the video surface */
-	prev_flags = video->flags;
 	prev_w = video->w;
 	prev_h = video->h;
 	video->flags = 0;	/* Clear flags */
