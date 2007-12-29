@@ -54,6 +54,16 @@
     #define NX_DEVICERCTLKEYMASK    0x00002000
 #endif
 
+@interface SDLTranslatorResponder : NSTextView
+{
+}
+- (void) doCommandBySelector:(SEL)myselector;
+@end
+
+@implementation SDLTranslatorResponder
+- (void) doCommandBySelector:(SEL) myselector {}
+@end
+
 /* This is the original behavior, before support was added for 
  * differentiating between left and right versions of the keys.
  */
@@ -330,7 +340,7 @@ Cocoa_InitKeyboard(_THIS)
     NSAutoreleasePool *pool;
 
     pool = [[NSAutoreleasePool alloc] init];
-    data->fieldEdit = [[NSTextView alloc] initWithFrame:NSMakeRect(0.0, 0.0, 0.0, 0.0)];
+    data->fieldEdit = [[SDLTranslatorResponder alloc] initWithFrame:NSMakeRect(0.0, 0.0, 0.0, 0.0)];
     [pool release];
     
     SDL_zero(keyboard);
