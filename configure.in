@@ -298,6 +298,7 @@ AC_HELP_STRING([--enable-mmx], [use MMX assembly routines [[default=yes]]]),
         have_gcc_mmx=yes
         ])
         AC_MSG_RESULT($have_gcc_mmx)
+        CFLAGS="$save_CFLAGS"
 
         if test x$have_gcc_mmx = xyes; then
             EXTRA_CFLAGS="$EXTRA_CFLAGS $mmx_CFLAGS"
@@ -324,6 +325,7 @@ AC_HELP_STRING([--enable-3dnow], [use MMX assembly routines [[default=yes]]]),
         have_gcc_3dnow=yes
         ])
         AC_MSG_RESULT($have_gcc_3dnow)
+        CFLAGS="$save_CFLAGS"
 
         if test x$have_gcc_3dnow = xyes; then
             EXTRA_CFLAGS="$EXTRA_CFLAGS $amd3dnow_CFLAGS"
@@ -350,6 +352,7 @@ AC_HELP_STRING([--enable-sse], [use SSE assembly routines [[default=yes]]]),
         have_gcc_sse=yes
         ])
         AC_MSG_RESULT($have_gcc_sse)
+        CFLAGS="$save_CFLAGS"
 
         if test x$have_gcc_sse = xyes; then
             EXTRA_CFLAGS="$EXTRA_CFLAGS $sse_CFLAGS"
@@ -376,6 +379,7 @@ AC_HELP_STRING([--enable-sse2], [use SSE2 assembly routines [[default=yes]]]),
         have_gcc_sse2=yes
         ])
         AC_MSG_RESULT($have_gcc_sse2)
+        CFLAGS="$save_CFLAGS"
 
         if test x$have_gcc_sse2 = xyes; then
             EXTRA_CFLAGS="$EXTRA_CFLAGS $sse2_CFLAGS"
