@@ -42,13 +42,14 @@
 
 #ifdef USE_ASM_STRETCH
 
-/* OpenBSD has non-executable memory by default, so use mprotect() */
-#ifdef __OpenBSD__
-#define USE_MPROTECT
-#endif
-#ifdef USE_MPROTECT
+#ifdef HAVE_MPROTECT
 #include <sys/types.h>
 #include <sys/mman.h>
+#endif
+#ifdef __GNUC__
+#define PAGE_ALIGNED __attribute__((__aligned__(4096)))
+#else
+#define PAGE_ALIGNED
 #endif
 
 #if defined(_M_IX86) || defined(i386)
@@ -62,7 +63,7 @@
 #error Need assembly opcodes for this architecture
 #endif
 
-static unsigned char copy_row[4096];
+static unsigned char copy_row[4096] PAGE_ALIGNED;
 
 static int generate_rowbytes(int src_w, int dst_w, int bpp)
 {
@@ -70,6 +71,7 @@ static int generate_rowbytes(int src_w, int dst_w, int bpp)
 		int bpp;
 		int src_w;
 		int dst_w;
+		int status;
 	} last;
 
 	int i;
@@ -80,11 +82,12 @@ static int generate_rowbytes(int src_w, int dst_w, int bpp)
 	/* See if we need to regenerate the copy buffer */
 	if ( (src_w == last.src_w) &&
 	     (dst_w == last.dst_w) && (bpp == last.bpp) ) {
-		return(0);
+		return(last.status);
 	}
 	last.bpp = bpp;
 	last.src_w = src_w;
 	last.dst_w = dst_w;
+	last.status = -1;
 
 	switch (bpp) {
 	    case 1:
@@ -100,9 +103,6 @@ static int generate_rowbytes(int src_w, int dst_w, int bpp)
 		SDL_SetError("ASM stretch of %d bytes isn't supported\n", bpp);
 		return(-1);
 	}
-#ifdef USE_MPROTECT
-	mprotect(copy_row, sizeof(copy_row), PROT_READ|PROT_WRITE|PROT_EXEC);
-#endif
 	pos = 0x10000;
 	inc = (src_w << 16) / dst_w;
 	eip = copy_row;
@@ -122,15 +122,23 @@ static int generate_rowbytes(int src_w, int dst_w, int bpp)
 	}
 	*eip++ = RETURN;
 
-	/* Verify that we didn't overflow (too late) */
+	/* Verify that we didn't overflow (too late!!!) */
 	if ( eip > (copy_row+sizeof(copy_row)) ) {
 		SDL_SetError("Copy buffer overflow");
 		return(-1);
 	}
+#ifdef HAVE_MPROTECT
+	/* Make the code executable */
+	if ( mprotect(copy_row, sizeof(copy_row), PROT_READ|PROT_WRITE|PROT_EXEC) < 0 ) {
+		SDL_SetError("Couldn't make copy buffer executable");
+		return(-1);
+	}
+#endif
+	last.status = 0;
 	return(0);
 }
 
-#else
+#endif /* USE_ASM_STRETCH */
 
 #define DEFINE_COPY_ROW(name, type)			\
 void name(type *src, int src_w, type *dst, int dst_w)	\
@@ -153,8 +161,6 @@ void name(type *src, int src_w, type *dst, int dst_w)	\
 DEFINE_COPY_ROW(copy_row1, Uint8)
 DEFINE_COPY_ROW(copy_row2, Uint16)
 DEFINE_COPY_ROW(copy_row4, Uint32)
-
-#endif /* USE_ASM_STRETCH */
 
 /* The ASM code doesn't handle 24-bpp stretch blits */
 void copy_row3(Uint8 *src, int src_w, Uint8 *dst, int dst_w)
@@ -195,9 +201,12 @@ int SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect,
 	Uint8 *dstp;
 	SDL_Rect full_src;
 	SDL_Rect full_dst;
-#if defined(USE_ASM_STRETCH) && defined(__GNUC__)
+#ifdef USE_ASM_STRETCH
+	SDL_bool use_asm = SDL_TRUE;
+#ifdef __GNUC__
 	int u1, u2;
 #endif
+#endif /* USE_ASM_STRETCH */
 	const int bpp = dst->format->BytesPerPixel;
 
 	if ( src->format->BitsPerPixel != dst->format->BitsPerPixel ) {
@@ -266,9 +275,9 @@ int SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect,
 
 #ifdef USE_ASM_STRETCH
 	/* Write the opcodes for this stretch */
-	if ( (bpp != 3) &&
+	if ( (bpp == 3) ||
 	     (generate_rowbytes(srcrect->w, dstrect->w, bpp) < 0) ) {
-		return(-1);
+		use_asm = SDL_FALSE;
 	}
 #endif
 
@@ -283,11 +292,7 @@ int SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect,
 			pos -= 0x10000L;
 		}
 #ifdef USE_ASM_STRETCH
-		switch (bpp) {
-		    case 3:
-			copy_row3(srcp, srcrect->w, dstp, dstrect->w);
-			break;
-		    default:
+		if (use_asm) {
 #ifdef __GNUC__
 			__asm__ __volatile__ (
 			"call *%4"
@@ -311,9 +316,8 @@ int SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect,
 #else
 #error Need inline assembly for this compiler
 #endif
-			break;
-		}
-#else
+		} else
+#endif
 		switch (bpp) {
 		    case 1:
 			copy_row1(srcp, srcrect->w, dstp, dstrect->w);
@@ -330,7 +334,6 @@ int SDL_SoftStretch(SDL_Surface *src, SDL_Rect *srcrect,
 			          (Uint32 *)dstp, dstrect->w);
 			break;
 		}
-#endif
 		pos += inc;
 	}
 
