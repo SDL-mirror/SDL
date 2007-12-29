@@ -667,6 +667,10 @@ static int X11_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	}
 	X11_SaveVidModeGamma(this);
 
+	/* Allow environment override of screensaver disable. */
+	env = SDL_getenv("SDL_VIDEO_ALLOW_SCREENSAVER");
+	this->hidden->allow_screensaver = ( (env && SDL_atoi(env)) ? 1 : 0 );
+
 	/* Save DPMS and screensaver settings */
 	X11_SaveScreenSaver(SDL_Display, &screensaver_timeout, &dpms_enabled);
 	X11_DisableScreenSaver(this, SDL_Display);
@@ -684,10 +688,6 @@ static int X11_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 	/* Fill in some window manager capabilities */
 	this->info.wm_available = 1;
-
-	/* Allow environment override of screensaver disable. */
-	env = SDL_getenv("SDL_VIDEO_ALLOW_SCREENSAVER");
-	this->hidden->allow_screensaver = ( (env && SDL_atoi(env)) ? 1 : 0 );
 
 	/* We're done! */
 	XFlush(SDL_Display);
