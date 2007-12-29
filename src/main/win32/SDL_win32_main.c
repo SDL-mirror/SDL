@@ -53,13 +53,35 @@
 #define isspace(a) (((CHAR)a == ' ') || ((CHAR)a == '\t'))
 #endif /* _WIN32_WCE < 300 */
 
+static void UnEscapeQuotes( char *arg )
+{
+	char *last = NULL;
+
+	while( *arg ) {
+		if( *arg == '"' && *last == '\\' ) {
+			char *c_curr = arg;
+			char *c_last = last;
+
+			while( *c_curr ) {
+				*c_last = *c_curr;
+				c_last = c_curr;
+				c_curr++;
+			}
+			*c_last = '\0';
+		}
+		last = arg;
+		arg++;
+	}
+}
+
 /* Parse a command line buffer into arguments */
 static int ParseCommandLine(char *cmdline, char **argv)
 {
 	char *bufp;
-	int argc;
+	char *lastp = NULL;
+	int argc, last_argc;
 
-	argc = 0;
+	argc = last_argc = 0;
 	for ( bufp = cmdline; *bufp; ) {
 		/* Skip leading whitespace */
 		while ( isspace(*bufp) ) {
@@ -75,7 +97,8 @@ static int ParseCommandLine(char *cmdline, char **argv)
 				++argc;
 			}
 			/* Skip over word */
-			while ( *bufp && (*bufp != '"') ) {
+			while ( *bufp && ( *bufp != '"' || *lastp == '\\' ) ) {
+				lastp = bufp;
 				++bufp;
 			}
 		} else {
@@ -96,6 +119,12 @@ static int ParseCommandLine(char *cmdline, char **argv)
 			}
 			++bufp;
 		}
+
+		/* Strip out \ from \" sequences */
+		if( argv && last_argc != argc ) {
+			UnEscapeQuotes( argv[last_argc] );	
+		}
+		last_argc = argc;	
 	}
 	if ( argv ) {
 		argv[argc] = NULL;
