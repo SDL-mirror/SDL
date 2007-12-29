@@ -755,7 +755,7 @@ Blit32to32SurfaceAlphaKeyAltivec(SDL_BlitInfo * info)
     vsdstPermute = calc_swizzle32(dstfmt, NULL);
 
     /* set a vector full of alpha and 255-alpha */
-    ((unsigned char *) &valpha)[0] = alpha;
+    ((unsigned char *) &valpha)[0] = sA;
     valpha = vec_splat(valpha, 0);
     vbits = (vector unsigned char) vec_splat_s8(-1);
 
@@ -1071,7 +1071,7 @@ Blit32to32SurfaceAlphaAltivec(SDL_BlitInfo * info)
     vsdstPermute = calc_swizzle32(dstfmt, NULL);
 
     /* set a vector full of alpha and 255-alpha */
-    ((unsigned char *) &valpha)[0] = alpha;
+    ((unsigned char *) &valpha)[0] = sA;
     valpha = vec_splat(valpha, 0);
     vbits = (vector unsigned char) vec_splat_s8(-1);
 
