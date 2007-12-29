@@ -42,6 +42,15 @@
 
 #ifdef USE_ASM_STRETCH
 
+/* OpenBSD has non-executable memory by default, so use mprotect() */
+#ifdef __OpenBSD__
+#define USE_MPROTECT
+#endif
+#ifdef USE_MPROTECT
+#include <sys/types.h>
+#include <sys/mman.h>
+#endif
+
 #if defined(_M_IX86) || defined(i386)
 #define PREFIX16	0x66
 #define STORE_BYTE	0xAA
@@ -91,6 +100,9 @@ static int generate_rowbytes(int src_w, int dst_w, int bpp)
 		SDL_SetError("ASM stretch of %d bytes isn't supported\n", bpp);
 		return(-1);
 	}
+#ifdef USE_MPROTECT
+	mprotect(copy_row, sizeof(copy_row), PROT_READ|PROT_WRITE|PROT_EXEC);
+#endif
 	pos = 0x10000;
 	inc = (src_w << 16) / dst_w;
 	eip = copy_row;
