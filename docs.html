@@ -14,6 +14,69 @@ The latest stable release may be found on the
 
 <H2> <A HREF="docs/index.html">API Documentation</A> </H2>
 
+<H2> SDL 1.2.13 Release Notes </H2>
+<P>
+SDL 1.2.13 is a minor bug fix release.
+</P>
+
+<H3> General Notes </H3>
+
+<BLOCKQUOTE>
+<P>
+	Fixed link error when building with Intel Compiler 10.
+</P>
+<P>
+	Removed stray C++ comment from public headers.
+</P>
+</BLOCKQUOTE>
+
+<H3> Unix Notes </H3>
+
+<BLOCKQUOTE>
+<P>
+	Fixed crash in SDL_SoftStretch() on secure operating systems.
+</P>
+<P>
+	Worked around BadAlloc error when using XVideo on the XFree86 Intel Integrated Graphics driver.
+</P>
+<P>
+	Scan for all joysticks on Linux instead of stopping at one that was removed.
+</P>
+</BLOCKQUOTE>
+
+<H3> Windows Notes </H3>
+
+<BLOCKQUOTE>
+<P>
+	Fixed crash when a video driver reports higher than 32 bpp video modes.
+</P>
+<P>
+	Fixed restoring the desktop after setting a 24-bit OpenGL video mode.
+</P>
+<P>
+	Fixed window titles on Windows 95/98/ME.
+</P>
+<P>
+	Added SDL_BUTTON_X1 and SDL_BUTTON_X2 constants for extended mouse buttons.
+</P>
+</BLOCKQUOTE>
+
+<H3> Mac OS X Notes </H3>
+
+<BLOCKQUOTE>
+<P>
+	SDL now builds on Mac OS X 10.5 (Leopard).
+</P>
+<P>
+	Fixed high frequency crash involving text input.
+</P>
+<P>
+	Improved trackpad scrolling support.
+</P>
+</BLOCKQUOTE>
+
+<IMG SRC="docs/images/rainbow.gif" ALT="[separator]" WIDTH="100%">
+
 <H2> SDL 1.2.12 Release Notes </H2>
 <P>
 SDL 1.2.12 is a minor bug fix release.
