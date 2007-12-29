@@ -473,8 +473,7 @@ int SDL_SYS_JoystickInit(void)
 					dev_nums[numjoysticks] = sb.st_rdev;
 					++numjoysticks;
 				}
-			} else
-				break;
+			}
 		}
 
 #if SDL_INPUT_LINUXEV
