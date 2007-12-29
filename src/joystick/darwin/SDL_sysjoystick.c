@@ -727,7 +727,7 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 {
 	recDevice *device = joystick->hwdata;
 	recElement *element;
-	SInt32 value;
+	SInt32 value, range;
 	int i;
 
 	if (device->removed)  /* device was unplugged; ignore it. */
@@ -780,10 +780,11 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 	{
 		Uint8 pos = 0;
 
-		value = HIDGetElementValue(device, element);
-		if (element->max == 3) /* 4 position hatswitch - scale up value */
+		range = (element->max - element->min + 1);
+		value = HIDGetElementValue(device, element) - element->min;
+		if (range == 4) /* 4 position hatswitch - scale up value */
 			value *= 2;
-		else if (element->max != 7) /* Neither a 4 nor 8 positions - fall back to default position (centered) */
+		else if (range != 8) /* Neither a 4 nor 8 positions - fall back to default position (centered) */
 			value = -1;
 		switch(value)
 		{
