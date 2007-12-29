@@ -355,6 +355,10 @@ int  QZ_IconifyWindow (_THIS) {
 
     if ( ! [ qz_window isMiniaturized ] ) {
         [ qz_window miniaturize:nil ];
+        if ( ! [ qz_window isMiniaturized ] ) {
+            SDL_SetError ("window iconification failed");
+            return 0;
+        }
         return 1;
     }
     else {

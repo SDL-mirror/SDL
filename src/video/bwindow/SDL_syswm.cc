@@ -36,6 +36,7 @@ void BE_SetWMCaption(_THIS, const char *title, const char *icon)
 int BE_IconifyWindow(_THIS)
 {
 	SDL_Win->Minimize(true);
+	return 1;
 }
 
 SDL_GrabMode BE_GrabInput(_THIS, SDL_GrabMode mode)
