@@ -494,12 +494,14 @@ printf("FocusOut!\n");
 	    }
 	    break;
 
+#ifdef X_HAVE_UTF8_STRING
 	    /* Some IM requires MappingNotify to be passed to
 	       XRefreshKeyboardMapping by the app.  */
 	    case MappingNotify: {
 		XRefreshKeyboardMapping(&xevent.xmapping);
 	    }
 	    break;
+#endif /* X_HAVE_UTF8_STRING */
 
 	    /* Generated upon EnterWindow and FocusIn */
 	    case KeymapNotify: {
