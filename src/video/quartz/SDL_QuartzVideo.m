@@ -42,6 +42,16 @@
 }
 @end
 
+@interface SDLTranslatorResponder : NSTextView
+{
+}
+- (void) doCommandBySelector:(SEL)myselector;
+@end
+
+@implementation SDLTranslatorResponder
+- (void) doCommandBySelector:(SEL) myselector {}
+@end
+
 
 /* Bootstrap functions */
 static int              QZ_Available ();
@@ -203,7 +213,7 @@ static int QZ_VideoInit (_THIS, SDL_PixelFormat *video_format) {
     cursor_should_be_visible    = YES;
     cursor_visible              = YES;
     current_mods = 0;
-    field_edit =  [[NSTextView alloc] initWithFrame:r];
+    field_edit =  [[SDLTranslatorResponder alloc] initWithFrame:r];
     
     if ( Gestalt(gestaltSystemVersion, &system_version) != noErr )
         system_version = 0;
