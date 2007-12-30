@@ -833,7 +833,7 @@ CheckVisibilityHidden()
 
     visibility_CFLAGS="-fvisibility=hidden"
     save_CFLAGS="$CFLAGS"
-    CFLAGS="$save_CFLAGS $visibility_CFLAGS"
+    CFLAGS="$save_CFLAGS $visibility_CFLAGS -Werror"
     AC_TRY_COMPILE([
     #if !defined(__GNUC__) || __GNUC__ < 4
     #error SDL only uses visibility attributes in GCC 4 or newer
