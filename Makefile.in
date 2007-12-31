@@ -138,6 +138,7 @@ distclean: clean
 	rm -f SDL.qpg
 	rm -f config.status config.cache config.log libtool $(depend)
 	rm -rf $(srcdir)/autom4te*
+	rm -rf $(srcdir)/test/autom4te*
 	find $(srcdir) \( \
 	    -name '*~' -o \
 	    -name '*.bak' -o \
@@ -154,6 +155,7 @@ dist $(distfile):
 	tar cf - $(DIST) | (cd $(distdir); tar xf -)
 	cp $(distdir)/include/SDL_config.h.default $(distdir)/include/SDL_config.h
 	rm -rf `find $(distdir) -name .svn`
+	rm -rf $(distdir)/test/autom4te*
 	find $(distdir) \( \
 	    -name '*~' -o \
 	    -name '*.bak' -o \
