@@ -64,25 +64,3 @@ resource 'hfdr' (kHMHelpID) {
 	
 };
 
-resource 'BNDL' (128) {
-	'SDL!',
-	0,
-	{	'ICN#',
-		{	0, 128
-		},
-		'FREF',
-		{	0, 128
-		}
-	}
-};
-
-resource 'FREF' (128) {
-	'shlb',
-	0,
-	""
-};
-
-	/* Owner resource */
-data 'SDL!' (0) {
-	$"00"                                                 
-};
