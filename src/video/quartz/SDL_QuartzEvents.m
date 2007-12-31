@@ -254,7 +254,7 @@ void     QZ_InitOSKeymap (_THIS) {
 
 static void QZ_DoKey (_THIS, int state, NSEvent *event) {
 
-    NSString *chars;
+    NSString *chars = NULL;
     unsigned int i, numChars;
     SDL_keysym key;
     
