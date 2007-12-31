@@ -4,30 +4,54 @@
 #
 # Usage: ./configure CC="sh gcc-fat.sh" && make && rm -rf ppc x86
 
-# PowerPC compiler flags (10.2 runtime compatibility)
-GCC_COMPILE_PPC="gcc-3.3 -arch ppc \
+# Locate Xcode SDK path
+SDK_PATH=/Developer/SDKs
+if [ ! -d $SDK_PATH ]; then
+    echo "Couldn't find SDK path"
+    exit 1
+fi
+
+if [ -d "$SDK_PATH/MacOSX10.2.8.sdk" ]; then
+    # PowerPC compiler flags (10.2 runtime compatibility)
+    GCC_COMPILE_PPC="gcc-3.3 -arch ppc \
 -DMAC_OS_X_VERSION_MIN_REQUIRED=1020 \
 -nostdinc \
--F/Developer/SDKs/MacOSX10.2.8.sdk/System/Library/Frameworks \
--I/Developer/SDKs/MacOSX10.2.8.sdk/usr/include/gcc/darwin/3.3 \
--isystem /Developer/SDKs/MacOSX10.2.8.sdk/usr/include"
+-F$SDK_PATH/MacOSX10.2.8.sdk/System/Library/Frameworks \
+-I$SDK_PATH/MacOSX10.2.8.sdk/usr/include/gcc/darwin/3.3 \
+-isystem $SDK_PATH/MacOSX10.2.8.sdk/usr/include"
 
-GCC_LINK_PPC="\
--L/Developer/SDKs/MacOSX10.2.8.sdk/usr/lib/gcc/darwin/3.3 \
--F/Developer/SDKs/MacOSX10.2.8.sdk/System/Library/Frameworks \
--Wl,-syslibroot,/Developer/SDKs/MacOSX10.2.8.sdk"
+    GCC_LINK_PPC="\
+-L$SDK_PATH/MacOSX10.2.8.sdk/usr/lib/gcc/darwin/3.3 \
+-F$SDK_PATH/MacOSX10.2.8.sdk/System/Library/Frameworks \
+-Wl,-syslibroot,$SDK_PATH/MacOSX10.2.8.sdk"
+
+else # 10.2 or 10.3 SDK
+    # PowerPC compiler flags (10.3 runtime compatibility)
+    GCC_COMPILE_PPC="gcc-4.0 -arch ppc -mmacosx-version-min=10.3 \
+-DMAC_OS_X_VERSION_MIN_REQUIRED=1030 \
+-nostdinc \
+-F$SDK_PATH/MacOSX10.3.9.sdk/System/Library/Frameworks \
+-I$SDK_PATH/MacOSX10.3.9.sdk/usr/lib/gcc/powerpc-apple-darwin9/4.0.1/include \
+-isystem $SDK_PATH/MacOSX10.3.9.sdk/usr/include"
+
+    GCC_LINK_PPC="\
+-L$SDK_PATH/MacOSX10.3.9.sdk/usr/lib/gcc/powerpc-apple-darwin9/4.0.1 \
+-F$SDK_PATH/MacOSX10.3.9.sdk/System/Library/Frameworks \
+-Wl,-syslibroot,$SDK_PATH/MacOSX10.3.9.sdk"
+
+fi # 10.2 or 10.3 SDK
 
 # Intel compiler flags (10.4 runtime compatibility)
 GCC_COMPILE_X86="gcc-4.0 -arch i386 -mmacosx-version-min=10.4 \
 -DMAC_OS_X_VERSION_MIN_REQUIRED=1040 \
 -nostdinc \
--F/Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks \
--I/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin8/4.0.1/include \
--isystem /Developer/SDKs/MacOSX10.4u.sdk/usr/include"
+-F$SDK_PATH/MacOSX10.4u.sdk/System/Library/Frameworks \
+-I$SDK_PATH/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin9/4.0.1/include \
+-isystem $SDK_PATH/MacOSX10.4u.sdk/usr/include"
 
 GCC_LINK_X86="\
--L/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin8/4.0.0 \
--Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk"
+-L$SDK_PATH/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin9/4.0.1 \
+-Wl,-syslibroot,$SDK_PATH/MacOSX10.4u.sdk"
 
 # Output both PowerPC and Intel object files
 args="$*"
