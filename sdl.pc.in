@@ -11,4 +11,5 @@ Version: @SDL_VERSION@
 Requires:
 Conflicts:
 Libs: -L${libdir} @SDL_RLD_FLAGS@ @SDL_LIBS@
+Libs.private: @SDL_STATIC_LIBS@
 Cflags: -I${includedir}/SDL @SDL_CFLAGS@
