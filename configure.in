@@ -2749,7 +2749,7 @@ case "$ARCH" in
     SDL_STATIC_LIBS="\${libdir}/libSDLmain.a \${libdir}/libSDL.a $EXTRA_LDFLAGS"
     ;;
   *)
-    SDL_STATIC_LIBS="$SDL_LIBS"
+    SDL_STATIC_LIBS="$SDL_LIBS $EXTRA_LDFLAGS"
     ;;
 esac
 
