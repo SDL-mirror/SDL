@@ -71,6 +71,14 @@ Inspired by http://arisme.free.fr/ports/SDL.php
 #pragma message("Warning: Using GapiEmu in release build. I assume you'd like to set USE_GAPI_EMU to zero.")
 #endif
 
+#ifndef _T
+#define _T(x) L##x
+#endif
+
+#ifndef ASSERT
+#define ASSERT(x)
+#endif
+
 // defined and used in SDL_sysevents.c
 extern HINSTANCE aygshell;
 extern void SDL_UnregisterApp();

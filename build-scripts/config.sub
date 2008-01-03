@@ -1296,6 +1296,9 @@ case $os in
         -os400*)
 		os=-os400
 		;;
+	-cegcc*)
+		os=-cegcc
+		;;
 	-wince*)
 		os=-wince
 		;;

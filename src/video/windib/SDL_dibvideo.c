@@ -41,6 +41,26 @@
 #include "../wincommon/SDL_wingl_c.h"
 
 #ifdef _WIN32_WCE
+
+#ifndef DM_DISPLAYORIENTATION
+#define DM_DISPLAYORIENTATION 0x00800000L
+#endif
+#ifndef DM_DISPLAYQUERYORIENTATION 
+#define DM_DISPLAYQUERYORIENTATION 0x01000000L
+#endif
+#ifndef DMDO_0
+#define DMDO_0      0
+#endif
+#ifndef DMDO_90
+#define DMDO_90     1
+#endif
+#ifndef DMDO_180
+#define DMDO_180    2
+#endif
+#ifndef DMDO_270
+#define DMDO_270    4
+#endif
+
 #define NO_GETDIBITS
 #define NO_GAMMA_SUPPORT
   #if _WIN32_WCE < 420

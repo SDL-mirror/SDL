@@ -132,13 +132,13 @@ struct SDL_PrivateVideoData {
 #define NUM_MODELISTS	4		/* 8, 16, 24, and 32 bits-per-pixel */
     int SDL_nummodes[NUM_MODELISTS];
     SDL_Rect **SDL_modelist[NUM_MODELISTS];
-	enum SDL_ScreenOrientation userOrientation;
+	SDL_ScreenOrientation userOrientation;
 	int invert;
 	char hiresFix; // using hires mode without defining hires resource
 // --------------
 	int useGXOpenDisplay; /* use GXOpenDispplay */
     int w, h;
-	enum SDL_ScreenOrientation gapiOrientation;
+	SDL_ScreenOrientation gapiOrientation;
 
     void *buffer; // may be 8, 16, 24, 32 bpp
 	PIXEL *videoMem;
@@ -146,7 +146,7 @@ struct SDL_PrivateVideoData {
 	struct GXKeyList keyList;
 	struct GapiFunc gxFunc;
 	struct GXDisplayProperties gxProperties;
-	enum GAPIVideoMode videoMode;
+	GAPIVideoMode videoMode;
 	int colorscale;
 	int dstLineStep;  // in bytes
 	int dstPixelStep; // in bytes
