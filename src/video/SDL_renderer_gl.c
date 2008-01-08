@@ -295,12 +295,11 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
         GL_DestroyRenderer(renderer);
         return NULL;
     }
-
 #ifdef __MACOSX__
     /* Enable multi-threaded rendering */
     /* Disabled until Ryan finishes his VBO/PBO code...
-    CGLEnable(CGLGetCurrentContext(), kCGLCEMPEngine);
-    */
+       CGLEnable(CGLGetCurrentContext(), kCGLCEMPEngine);
+     */
 #endif
 
     if (flags & SDL_RENDERER_PRESENTVSYNC) {
@@ -579,14 +578,15 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         renderdata->glTexParameteri(data->type, GL_TEXTURE_STORAGE_HINT_APPLE,
                                     GL_STORAGE_CACHED_APPLE);
     }
-    if (texture->access == SDL_TEXTUREACCESS_STREAMING && texture->format == SDL_PIXELFORMAT_ARGB8888 ) {
+    if (texture->access == SDL_TEXTUREACCESS_STREAMING
+        && texture->format == SDL_PIXELFORMAT_ARGB8888) {
         /*
-        if (renderdata->glTextureRangeAPPLE) {
-            renderdata->glTextureRangeAPPLE(data->type,
-                                            texture->h * data->pitch,
-                                            data->pixels);
-        }
-        */
+           if (renderdata->glTextureRangeAPPLE) {
+           renderdata->glTextureRangeAPPLE(data->type,
+           texture->h * data->pitch,
+           data->pixels);
+           }
+         */
         renderdata->glPixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, GL_TRUE);
         renderdata->glTexImage2D(data->type, 0, internalFormat, texture_w,
                                  texture_h, 0, format, type, data->pixels);

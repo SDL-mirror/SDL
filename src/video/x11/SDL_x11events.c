@@ -30,6 +30,28 @@
 #include "../../events/SDL_events_c.h"
 
 
+/* Check to see if this is a repeated key.
+   (idea shamelessly lifted from GII -- thanks guys! :)
+ */
+static int
+X11_KeyRepeat(Display * display, XEvent * event)
+{
+    XEvent peekevent;
+    int repeated;
+
+    repeated = 0;
+    if (XPending(display)) {
+        XPeekEvent(display, &peekevent);
+        if ((peekevent.type == KeyPress) &&
+            (peekevent.xkey.keycode == event->xkey.keycode) &&
+            ((peekevent.xkey.time - event->xkey.time) < 2)) {
+            repeated = 1;
+            XNextEvent(display, &peekevent);
+        }
+    }
+    return (repeated);
+}
+
 static void
 X11_DispatchEvent(_THIS)
 {
@@ -167,95 +189,44 @@ X11_DispatchEvent(_THIS)
 
         /* Key press? */
     case KeyPress:{
-#if 0                           /* FIXME */
-            static SDL_keysym saved_keysym;
-            SDL_keysym keysym;
             KeyCode keycode = xevent.xkey.keycode;
 
 #ifdef DEBUG_XEVENTS
             printf("KeyPress (X11 keycode = 0x%X)\n", xevent.xkey.keycode);
 #endif
-            /* Get the translated SDL virtual keysym */
-            if (keycode) {
-                keysym.scancode = keycode;
-                keysym.sym = X11_TranslateKeycode(SDL_Display, keycode);
-                keysym.mod = KMOD_NONE;
-                keysym.unicode = 0;
-            } else {
-                keysym = saved_keysym;
-            }
-
-            /* If we're not doing translation, we're done! */
-            if (!SDL_TranslateUNICODE) {
-                posted = SDL_PrivateKeyboard(SDL_PRESSED, &keysym);
-                break;
-            }
-
-            if (XFilterEvent(&xevent, None)) {
-                if (xevent.xkey.keycode) {
-                    posted = SDL_PrivateKeyboard(SDL_PRESSED, &keysym);
-                } else {
-                    /* Save event to be associated with IM text
-                       In 1.3 we'll have a text event instead.. */
-                    saved_keysym = keysym;
+            if (!X11_KeyRepeat(videodata->display, &xevent)) {
+                SDLKey physicalKey = videodata->keyCodeToSDLKTable[keycode];
+                SDL_SendKeyboardKey(videodata->keyboard, SDL_PRESSED,
+                                    (Uint8) keycode, physicalKey);
+#if 1
+                if (physicalKey == SDLK_UNKNOWN) {
+                    fprintf(stderr,
+                            "The key you just pressed is not recognized by SDL. To help get this fixed, report this to the SDL mailing list <sdl@libsdl.org> or to Christian Walther <cwalther@gmx.ch>. X11 KeyCode is %d, X11 KeySym 0x%X.\n",
+                            (int) keycode,
+                            (unsigned int) XKeycodeToKeysym(videodata->
+                                                            display, keycode,
+                                                            0));
                 }
-                break;
-            }
-
-            /* Look up the translated value for the key event */
-#ifdef X_HAVE_UTF8_STRING
-            if (data->ic != NULL) {
-                static Status state;
-                /* A UTF-8 character can be at most 6 bytes */
-                char keybuf[6];
-                if (Xutf8LookupString(data->ic, &xevent.xkey,
-                                      keybuf, sizeof(keybuf), NULL, &state)) {
-                    keysym.unicode = Utf8ToUcs4((Uint8 *) keybuf);
-                }
-            } else
 #endif
-            {
-                static XComposeStatus state;
-                char keybuf[32];
-
-                if (XLookupString(&xevent.xkey,
-                                  keybuf, sizeof(keybuf), NULL, &state)) {
-                    /*
-                     * FIXME: XLookupString() may yield more than one
-                     * character, so we need a mechanism to allow for
-                     * this (perhaps null keypress events with a
-                     * unicode value)
-                     */
-                    keysym.unicode = (Uint8) keybuf[0];
-                }
             }
-            posted = SDL_PrivateKeyboard(SDL_PRESSED, &keysym);
-#endif // 0
         }
         break;
 
         /* Key release? */
     case KeyRelease:{
-#if 0                           /* FIXME */
-            SDL_keysym keysym;
             KeyCode keycode = xevent.xkey.keycode;
 
 #ifdef DEBUG_XEVENTS
             printf("KeyRelease (X11 keycode = 0x%X)\n", xevent.xkey.keycode);
 #endif
             /* Check to see if this is a repeated key */
-            if (X11_KeyRepeat(SDL_Display, &xevent)) {
+            if (X11_KeyRepeat(videodata->display, &xevent)) {
                 break;
             }
 
-            /* Get the translated SDL virtual keysym */
-            keysym.scancode = keycode;
-            keysym.sym = X11_TranslateKeycode(SDL_Display, keycode);
-            keysym.mod = KMOD_NONE;
-            keysym.unicode = 0;
-
-            posted = SDL_PrivateKeyboard(SDL_RELEASED, &keysym);
-#endif // 0
+            SDL_SendKeyboardKey(videodata->keyboard, SDL_RELEASED,
+                                (Uint8) keycode,
+                                videodata->keyCodeToSDLKTable[keycode]);
         }
         break;
 

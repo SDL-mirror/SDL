@@ -185,7 +185,10 @@ struct SDL_SysWMinfo;
 #define SDLK_SCROLLOCK SDLK_SCROLLLOCK
 #define SDLK_PRINT SDLK_PRINTSCREEN
 
-/* These key constants are obsoleted the new keyboard handling, their definitions here correspond to how they appear on a US keyboard. */
+/* These key constants are obsoleted by the new keyboard handling,
+   their definitions here correspond to how they appear on a US
+   keyboard. */
+
 #define SDLK_EXCLAIM SDLK_1
 #define SDLK_QUOTEDBL SDLK_APOSTROPHE
 #define SDLK_HASH SDLK_3

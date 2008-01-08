@@ -820,9 +820,9 @@ SDL_SYS_JoystickUpdate(SDL_Joystick * joystick)
 
         range = (element->max - element->min + 1);
         value = HIDGetElementValue(device, element) - element->min;
-        if (range == 4)  /* 4 position hatswitch - scale up value */
+        if (range == 4)         /* 4 position hatswitch - scale up value */
             value *= 2;
-        else if (range != 8)     /* Neither a 4 nor 8 positions - fall back to default position (centered) */
+        else if (range != 8)    /* Neither a 4 nor 8 positions - fall back to default position (centered) */
             value = -1;
         switch (value) {
         case 0:

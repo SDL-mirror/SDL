@@ -24,7 +24,8 @@
 #ifndef _SDL_x11keyboard_h
 #define _SDL_x11keyboard_h
 
-extern void X11_InitKeyboard(_THIS);
+extern int X11_InitKeyboard(_THIS);
+extern SDLKey X11_GetLayoutKey(_THIS, SDLKey physicalKey);
 extern void X11_QuitKeyboard(_THIS);
 
 #endif /* _SDL_x11keyboard_h */

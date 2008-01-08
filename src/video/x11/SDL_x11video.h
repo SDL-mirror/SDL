@@ -70,6 +70,7 @@ typedef struct SDL_VideoData
     int mouse;
     int keyboard;
     Atom WM_DELETE_WINDOW;
+    SDLKey *keyCodeToSDLKTable;
 } SDL_VideoData;
 
 #endif /* _SDL_x11video_h */

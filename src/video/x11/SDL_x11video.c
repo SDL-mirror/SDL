@@ -171,6 +171,7 @@ X11_CreateDevice(int devindex)
     device->SetDisplayGammaRamp = X11_SetDisplayGammaRamp;
     device->GetDisplayGammaRamp = X11_GetDisplayGammaRamp;
     device->PumpEvents = X11_PumpEvents;
+    device->GetLayoutKey = X11_GetLayoutKey;
 
     device->CreateWindow = X11_CreateWindow;
     device->CreateWindowFrom = X11_CreateWindowFrom;
@@ -235,14 +236,9 @@ X11_VideoInit(_THIS)
 
     X11_InitModes(_this);
 
-//#if SDL_VIDEO_RENDER_D3D
-//    D3D_AddRenderDriver(_this);
-//#endif
-//#if SDL_VIDEO_RENDER_GDI
-//    GDI_AddRenderDriver(_this);
-//#endif
-
-    X11_InitKeyboard(_this);
+    if (X11_InitKeyboard(_this) != 0) {
+        return -1;
+    }
     X11_InitMouse(_this);
 
     return 0;
