@@ -29,21 +29,9 @@
 
 #include "imKStoUCS.h"
 
-/* Used for two purposes: - by X11_GetLayoutKey(), with physical =
-    false, to convert a KeySym to the corresponding layout key code
-    (SDLK_ ones and some character ones - most character KeySyms are
-    handled by X11_KeySymToUcs4() after this function returns
-    SDLK_UNKNOWN for them).  - by X11_InitKeyboard(), with physical =
-    true, to build a makeshift translation table based on the KeySyms
-    when none of the predefined KeyCode- to-SDLKey tables fits. This
-    is *not* correct anywhere but on a US layout, since the
-    translation table deals with physical key codes, while the X11
-    KeySym corresponds to our concept of a layout key code, but it's
-    better than nothing.
-*/
-
-/* KeyCode-to-SDLKey translation tables for various X servers. Which one to use
-   is decided in X11_InitKeyboard().
+/* 
+   KeyCode-to-SDLKey translation tables for various X servers. Which
+   one to use is decided in X11_InitKeyboard().
 */
 
 static SDLKey macKeyCodeToSDLK[];
@@ -62,7 +50,10 @@ static SDLKey *keyCodeToSDLKeyTables[] = {
    Mac OS X 10.4. May also work on older Linux distributions on Mac
    hardware.
 */
-static SDLKey macKeyCodeToSDLK[] = {
+
+#define KeyCodeTableSize (258)
+static SDLKey macKeyCodeToSDLK[KeyCodeTableSize] = 
+{
     /*   0 */   SDLK_UNKNOWN,
     /*   1 */   SDLK_UNKNOWN,
     /*   2 */   SDLK_UNKNOWN,
@@ -325,7 +316,8 @@ static SDLKey macKeyCodeToSDLK[] = {
    Ubuntu Dapper) on PC and PPC Mac hardware, some parts (especially about
    the "multimedia"/"internet" keys) from various sources on the web.
 */
-static SDLKey xorgLinuxKeyCodeToSDLK[] = {
+static SDLKey xorgLinuxKeyCodeToSDLK[KeyCodeTableSize] = 
+{
     /*   0 */   SDLK_UNKNOWN,
     /*   1 */   SDLK_UNKNOWN,
     /*   2 */   SDLK_UNKNOWN,
@@ -584,8 +576,6 @@ static SDLKey xorgLinuxKeyCodeToSDLK[] = {
     /* 255 */   SDLK_UNKNOWN
 };
 
-/* *INDENT-ON* */
-
 /*---------------------------------------------------------------------------*/
 
 /* Used by X11_KeySymToSDLKey(). This is a hybrid of a KeySym-to-layout-key
@@ -609,189 +599,207 @@ static struct
 {
     KeySym sym;
     SDLKey key;
-} keySymToSDLKey[] = {
+} keySymToSDLKey[KeyCodeTableSize] = 
+{
     /* 0x00xx */
-    {
-    XK_space, SDLK_SPACE}, {
-    XK_apostrophe, SDLK_APOSTROPHE | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_comma, SDLK_COMMA | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_minus, SDLK_HYPHENMINUS | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_period, SDLK_PERIOD | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_slash, SDLK_SLASH | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_0, SDLK_0 | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_1, SDLK_1 | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_2, SDLK_2 | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_3, SDLK_3 | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_4, SDLK_4 | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_5, SDLK_5 | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_6, SDLK_6 | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_7, SDLK_7 | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_8, SDLK_8 | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_9, SDLK_9 | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_semicolon, SDLK_SEMICOLON | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_less, SDLK_NONUSBACKSLASH | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_equal, SDLK_EQUALS | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_bracketleft, SDLK_LEFTBRACKET | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_backslash, SDLK_BACKSLASH | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_bracketright, SDLK_RIGHTBRACKET | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_grave, SDLK_GRAVE | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_a, SDLK_A | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_b, SDLK_B | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_c, SDLK_C | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_d, SDLK_D | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_e, SDLK_E | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_f, SDLK_F | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_g, SDLK_G | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_h, SDLK_H | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_i, SDLK_I | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_j, SDLK_J | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_k, SDLK_K | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_l, SDLK_L | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_m, SDLK_M | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_n, SDLK_N | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_o, SDLK_O | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_p, SDLK_P | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_q, SDLK_Q | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_r, SDLK_R | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_s, SDLK_S | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_t, SDLK_T | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_u, SDLK_U | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_v, SDLK_V | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_w, SDLK_W | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_x, SDLK_X | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_y, SDLK_Y | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_z, SDLK_Z | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_section, SDLK_NONUSBACKSLASH | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_space, SDLK_SPACE},
+    {XK_apostrophe, SDLK_APOSTROPHE | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_comma, SDLK_COMMA | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_minus, SDLK_HYPHENMINUS | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_period, SDLK_PERIOD | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_slash, SDLK_SLASH | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_0, SDLK_0 | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_1, SDLK_1 | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_2, SDLK_2 | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_3, SDLK_3 | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_4, SDLK_4 | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_5, SDLK_5 | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_6, SDLK_6 | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_7, SDLK_7 | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_8, SDLK_8 | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_9, SDLK_9 | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_semicolon, SDLK_SEMICOLON | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_less, SDLK_NONUSBACKSLASH | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_equal, SDLK_EQUALS | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_bracketleft, SDLK_LEFTBRACKET | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_backslash, SDLK_BACKSLASH | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_bracketright, SDLK_RIGHTBRACKET | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_grave, SDLK_GRAVE | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_a, SDLK_A | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_b, SDLK_B | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_c, SDLK_C | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_d, SDLK_D | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_e, SDLK_E | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_f, SDLK_F | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_g, SDLK_G | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_h, SDLK_H | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_i, SDLK_I | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_j, SDLK_J | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_k, SDLK_K | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_l, SDLK_L | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_m, SDLK_M | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_n, SDLK_N | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_o, SDLK_O | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_p, SDLK_P | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_q, SDLK_Q | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_r, SDLK_R | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_s, SDLK_S | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_t, SDLK_T | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_u, SDLK_U | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_v, SDLK_V | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_w, SDLK_W | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_x, SDLK_X | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_y, SDLK_Y | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_z, SDLK_Z | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_section, SDLK_NONUSBACKSLASH | X11_KEY_PHYSICAL_ONLY_BIT},
         /* 0xFExx */
-    {
-    XK_ISO_Level3_Shift, SDLK_RALT}, {
-    XK_dead_grave, '`'}, {
-    XK_dead_acute, 0xB4}, {
-    XK_dead_circumflex, '^'}, {
-    XK_dead_tilde, '~'}, {
-    XK_dead_macron, 0xAF}, {
-    XK_dead_breve, 0x2D8}, {
-    XK_dead_abovedot, 0x2D9}, {
-    XK_dead_diaeresis, 0xA8}, {
-    XK_dead_abovering, 0x2DA}, {
-    XK_dead_doubleacute, 0x2DD}, {
-    XK_dead_caron, 0x2C7}, {
-    XK_dead_cedilla, 0xB8}, {
-    XK_dead_ogonek, 0x2DB}, {
-    XK_dead_iota, 0x3B9}, {
-    XK_dead_voiced_sound, 0x309B}, {
-    XK_dead_semivoiced_sound, 0x309C}, {
-    XK_dead_belowdot, 0xB7},    /* that's actually MIDDLE DOT, but I haven't found a non-combining DOT BELOW */
-        /* XK_dead_hook, XK_dead_horn: I haven't found non-combining HOOK and HORN characters */
-        /* 0xFFxx */
-    {
-    XK_BackSpace, SDLK_BACKSPACE}, {
-    XK_Tab, SDLK_TAB}, {
-    XK_Return, SDLK_RETURN}, {
-    XK_Pause, SDLK_PAUSE}, {
-    XK_Scroll_Lock, SDLK_SCROLLLOCK}, {
-    XK_Escape, SDLK_ESCAPE}, {
-    XK_Home, SDLK_HOME}, {
-    XK_Left, SDLK_LEFT}, {
-    XK_Up, SDLK_UP}, {
-    XK_Right, SDLK_RIGHT}, {
-    XK_Down, SDLK_DOWN}, {
-    XK_Page_Up, SDLK_PAGEUP}, {
-    XK_Page_Down, SDLK_PAGEDOWN}, {
-    XK_End, SDLK_END}, {
-    XK_Print, SDLK_PRINTSCREEN}, {
-    XK_Insert, SDLK_INSERT}, {
-    XK_Menu, SDLK_APPLICATION}, {
-    XK_Break, SDLK_PAUSE}, {
-    XK_Mode_switch, SDLK_MODE}, {
-    XK_Num_Lock, SDLK_KP_NUMLOCKCLEAR}, {
-    XK_KP_Enter, SDLK_KP_ENTER}, {
-    XK_KP_Home, SDLK_KP_7 | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_KP_Left, SDLK_KP_4 | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_KP_Up, SDLK_KP_8 | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_KP_Right, SDLK_KP_6 | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_KP_Down, SDLK_KP_2 | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_KP_Page_Up, SDLK_KP_9 | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_KP_Page_Down, SDLK_KP_3 | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_KP_End, SDLK_KP_1 | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_KP_Begin, SDLK_KP_5 | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_KP_Insert, SDLK_KP_0 | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_KP_Delete, SDLK_KP_PERIOD | X11_KEY_PHYSICAL_ONLY_BIT}, {
-    XK_KP_Multiply, '*'}, {
-    XK_KP_Multiply, SDLK_KP_MULTIPLY}, {
-    XK_KP_Add, '+'}, {
-    XK_KP_Add, SDLK_KP_PLUS}, {
-    XK_KP_Separator, '.'}, {
-    XK_KP_Separator, SDLK_KP_PERIOD}, {
-    XK_KP_Subtract, '-'}, {
-    XK_KP_Subtract, SDLK_KP_MINUS}, {
-    XK_KP_Decimal, '.'}, {
-    XK_KP_Decimal, SDLK_KP_PERIOD}, {
-    XK_KP_Divide, '/'}, {
-    XK_KP_Divide, SDLK_KP_DIVIDE}, {
-    XK_KP_0, '0'}, {
-    XK_KP_0, SDLK_KP_0}, {
-    XK_KP_1, '1'}, {
-    XK_KP_1, SDLK_KP_1}, {
-    XK_KP_2, '2'}, {
-    XK_KP_2, SDLK_KP_2}, {
-    XK_KP_3, '3'}, {
-    XK_KP_3, SDLK_KP_3}, {
-    XK_KP_4, '4'}, {
-    XK_KP_4, SDLK_KP_4}, {
-    XK_KP_5, '5'}, {
-    XK_KP_5, SDLK_KP_5}, {
-    XK_KP_6, '6'}, {
-    XK_KP_6, SDLK_KP_6}, {
-    XK_KP_7, '7'}, {
-    XK_KP_7, SDLK_KP_7}, {
-    XK_KP_8, '8'}, {
-    XK_KP_8, SDLK_KP_8}, {
-    XK_KP_9, '9'}, {
-    XK_KP_9, SDLK_KP_9}, {
-    XK_KP_Equal, '='}, {
-    XK_KP_Equal, SDLK_KP_EQUALS}, {
-    XK_F1, SDLK_F1}, {
-    XK_F2, SDLK_F2}, {
-    XK_F3, SDLK_F3}, {
-    XK_F4, SDLK_F4}, {
-    XK_F5, SDLK_F5}, {
-    XK_F6, SDLK_F6}, {
-    XK_F7, SDLK_F7}, {
-    XK_F8, SDLK_F8}, {
-    XK_F9, SDLK_F9}, {
-    XK_F10, SDLK_F10}, {
-    XK_F11, SDLK_F11}, {
-    XK_F12, SDLK_F12}, {
-    XK_F13, SDLK_F13}, {
-    XK_F14, SDLK_F14}, {
-    XK_F15, SDLK_F15}, {
-    XK_F16, SDLK_F16}, {
-    XK_F17, SDLK_F17}, {
-    XK_F18, SDLK_F18}, {
-    XK_F19, SDLK_F19}, {
-    XK_F20, SDLK_F20}, {
-    XK_F21, SDLK_F21}, {
-    XK_F22, SDLK_F22}, {
-    XK_F23, SDLK_F23}, {
-    XK_F24, SDLK_F24}, {
-    XK_Shift_L, SDLK_LSHIFT}, {
-    XK_Shift_R, SDLK_RSHIFT}, {
-    XK_Control_L, SDLK_LCTRL}, {
-    XK_Control_R, SDLK_RCTRL}, {
-    XK_Caps_Lock, SDLK_CAPSLOCK}, {
-    XK_Shift_Lock, SDLK_CAPSLOCK}, {
-    XK_Meta_L, SDLK_LMETA}, {
-    XK_Meta_R, SDLK_RMETA}, {
-    XK_Alt_L, SDLK_LALT}, {
-    XK_Alt_R, SDLK_RALT}, {
-    XK_Super_L, SDLK_LMETA}, {
-    XK_Super_R, SDLK_RMETA}, {
-    XK_Hyper_L, SDLK_LMETA}, {
-    XK_Hyper_R, SDLK_RMETA}, {
-    XK_Delete, SDLK_DELETE}, {
-    0x1000003, SDLK_KP_ENTER}   /* keyboard enter on Mac OS X */
+    {XK_ISO_Level3_Shift, SDLK_RALT},
+    {XK_dead_grave, '`'},
+    {XK_dead_acute, 0xB4},
+    {XK_dead_circumflex, '^'},
+    {XK_dead_tilde, '~'},
+    {XK_dead_macron, 0xAF},
+    {XK_dead_breve, 0x2D8},
+    {XK_dead_abovedot, 0x2D9},
+    {XK_dead_diaeresis, 0xA8},
+    {XK_dead_abovering, 0x2DA},
+    {XK_dead_doubleacute, 0x2DD},
+    {XK_dead_caron, 0x2C7},
+    {XK_dead_cedilla, 0xB8},
+    {XK_dead_ogonek, 0x2DB},
+    {XK_dead_iota, 0x3B9},
+    {XK_dead_voiced_sound, 0x309B},
+    {XK_dead_semivoiced_sound, 0x309C},
+    {XK_dead_belowdot, 0xB7},        /* that's actually MIDDLE DOT,
+                                        but I haven't found a
+                                        non-combining DOT BELOW
+                                        XK_dead_hook, XK_dead_horn: I
+                                        haven't found non-combining
+                                        HOOK and HORN characters */
+    /* 0xFFxx */
+    {XK_BackSpace, SDLK_BACKSPACE},
+    {XK_Tab, SDLK_TAB},
+    {XK_Return, SDLK_RETURN},
+    {XK_Pause, SDLK_PAUSE},
+    {XK_Scroll_Lock, SDLK_SCROLLLOCK},
+    {XK_Escape, SDLK_ESCAPE},
+    {XK_Home, SDLK_HOME},
+    {XK_Left, SDLK_LEFT},
+    {XK_Up, SDLK_UP},
+    {XK_Right, SDLK_RIGHT},
+    {XK_Down, SDLK_DOWN},
+    {XK_Page_Up, SDLK_PAGEUP},
+    {XK_Page_Down, SDLK_PAGEDOWN},
+    {XK_End, SDLK_END},
+    {XK_Print, SDLK_PRINTSCREEN},
+    {XK_Insert, SDLK_INSERT},
+    {XK_Menu, SDLK_APPLICATION},
+    {XK_Break, SDLK_PAUSE},
+    {XK_Mode_switch, SDLK_MODE},
+    {XK_Num_Lock, SDLK_KP_NUMLOCKCLEAR},
+    {XK_KP_Enter, SDLK_KP_ENTER},
+    {XK_KP_Home, SDLK_KP_7 | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_KP_Left, SDLK_KP_4 | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_KP_Up, SDLK_KP_8 | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_KP_Right, SDLK_KP_6 | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_KP_Down, SDLK_KP_2 | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_KP_Page_Up, SDLK_KP_9 | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_KP_Page_Down, SDLK_KP_3 | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_KP_End, SDLK_KP_1 | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_KP_Begin, SDLK_KP_5 | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_KP_Insert, SDLK_KP_0 | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_KP_Delete, SDLK_KP_PERIOD | X11_KEY_PHYSICAL_ONLY_BIT},
+    {XK_KP_Multiply, '*'},
+    {XK_KP_Multiply, SDLK_KP_MULTIPLY},
+    {XK_KP_Add, '+'},
+    {XK_KP_Add, SDLK_KP_PLUS},
+    {XK_KP_Separator, '.'},
+    {XK_KP_Separator, SDLK_KP_PERIOD},
+    {XK_KP_Subtract, '-'},
+    {XK_KP_Subtract, SDLK_KP_MINUS},
+    {XK_KP_Decimal, '.'},
+    {XK_KP_Decimal, SDLK_KP_PERIOD},
+    {XK_KP_Divide, '/'},
+    {XK_KP_Divide, SDLK_KP_DIVIDE},
+    {XK_KP_0, '0'},
+    {XK_KP_0, SDLK_KP_0},
+    {XK_KP_1, '1'},
+    {XK_KP_1, SDLK_KP_1},
+    {XK_KP_2, '2'},
+    {XK_KP_2, SDLK_KP_2},
+    {XK_KP_3, '3'},
+    {XK_KP_3, SDLK_KP_3},
+    {XK_KP_4, '4'},
+    {XK_KP_4, SDLK_KP_4},
+    {XK_KP_5, '5'},
+    {XK_KP_5, SDLK_KP_5},
+    {XK_KP_6, '6'},
+    {XK_KP_6, SDLK_KP_6},
+    {XK_KP_7, '7'},
+    {XK_KP_7, SDLK_KP_7},
+    {XK_KP_8, '8'},
+    {XK_KP_8, SDLK_KP_8},
+    {XK_KP_9, '9'},
+    {XK_KP_9, SDLK_KP_9},
+    {XK_KP_Equal, '='},
+    {XK_KP_Equal, SDLK_KP_EQUALS},
+    {XK_F1, SDLK_F1},
+    {XK_F2, SDLK_F2},
+    {XK_F3, SDLK_F3},
+    {XK_F4, SDLK_F4},
+    {XK_F5, SDLK_F5},
+    {XK_F6, SDLK_F6},
+    {XK_F7, SDLK_F7},
+    {XK_F8, SDLK_F8},
+    {XK_F9, SDLK_F9},
+    {XK_F10, SDLK_F10},
+    {XK_F11, SDLK_F11},
+    {XK_F12, SDLK_F12},
+    {XK_F13, SDLK_F13},
+    {XK_F14, SDLK_F14},
+    {XK_F15, SDLK_F15},
+    {XK_F16, SDLK_F16},
+    {XK_F17, SDLK_F17},
+    {XK_F18, SDLK_F18},
+    {XK_F19, SDLK_F19},
+    {XK_F20, SDLK_F20},
+    {XK_F21, SDLK_F21},
+    {XK_F22, SDLK_F22},
+    {XK_F23, SDLK_F23},
+    {XK_F24, SDLK_F24},
+    {XK_Shift_L, SDLK_LSHIFT},
+    {XK_Shift_R, SDLK_RSHIFT},
+    {XK_Control_L, SDLK_LCTRL},
+    {XK_Control_R, SDLK_RCTRL},
+    {XK_Caps_Lock, SDLK_CAPSLOCK},
+    {XK_Shift_Lock, SDLK_CAPSLOCK},
+    {XK_Meta_L, SDLK_LMETA},
+    {XK_Meta_R, SDLK_RMETA},
+    {XK_Alt_L, SDLK_LALT},
+    {XK_Alt_R, SDLK_RALT},
+    {XK_Super_L, SDLK_LMETA},
+    {XK_Super_R, SDLK_RMETA},
+    {XK_Hyper_L, SDLK_LMETA},
+    {XK_Hyper_R, SDLK_RMETA},
+    {XK_Delete, SDLK_DELETE},
+    {0x1000003, SDLK_KP_ENTER}   /* keyboard enter on Mac OS X */
 };
+
+/* *INDENT-ON* */
+
+/* 
+   Used for two purposes: - by X11_GetLayoutKey(), with physical =
+   false, to convert a KeySym to the corresponding layout key code
+   (SDLK_ ones and some character ones - most character KeySyms are
+   handled by X11_KeySymToUcs4() after this function returns
+   SDLK_UNKNOWN for them).  - by X11_InitKeyboard(), with physical =
+   true, to build a makeshift translation table based on the KeySyms
+   when none of the predefined KeyCode- to-SDLKey tables fits. This
+   is *not* correct anywhere but on a US layout, since the
+   translation table deals with physical key codes, while the X11
+   KeySym corresponds to our concept of a layout key code, but it's
+   better than nothing.
+*/
 
 static SDLKey
 X11_KeySymToSDLKey(KeySym sym, SDL_bool physical)
@@ -850,6 +858,8 @@ X11_InitKeyboard(_THIS)
        mapping which is then matched against all our predefined
        KeyCodeToSDLK tables to find the right one (if any).
      */
+
+/* *INDENT-ON* */
     struct
     {
         KeySym sym;
@@ -861,6 +871,7 @@ X11_InitKeyboard(_THIS)
         XK_Escape, SDLK_ESCAPE}, {
         XK_space, SDLK_SPACE}
     };
+/* *INDENT-OFF* */
 
     SDL_zero(keyboard);
     data->keyboard = SDL_AddKeyboard(&keyboard, -1);
@@ -975,8 +986,8 @@ X11_GetLayoutKey(_THIS, SDLKey physicalKey)
 
     /* Look up physicalKey to get an X11 KeyCode - linear search isn't
        terribly efficient, this might have to be optimized. */
-    while ((code < SDL_arraysize(xorgLinuxKeyCodeToSDLK) && physicalKey)
-           != data->keyCodeToSDLKTable[code]) {
+    while ((code < SDL_arraysize(xorgLinuxKeyCodeToSDLK)) &&
+           (physicalKey != data->keyCodeToSDLKTable[code])) {
         code++;
     }
 
