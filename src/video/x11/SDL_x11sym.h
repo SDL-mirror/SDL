@@ -29,6 +29,8 @@ SDL_X11_SYM(Status,XAllocColorCells,(Display *a,Colormap b,Bool c,unsigned long 
 SDL_X11_SYM(XSizeHints*,XAllocSizeHints,(void),(),return)
 SDL_X11_SYM(XStandardColormap *,XAllocStandardColormap,(void),(),return)
 SDL_X11_SYM(XWMHints*,XAllocWMHints,(void),(),return)
+SDL_X11_SYM(int,XAutoRepeatOn,(Display* a),(a),return)
+SDL_X11_SYM(int,XAutoRepeatOff,(Display* a),(a),return)
 SDL_X11_SYM(int,XChangePointerControl,(Display* a,Bool b,Bool c,int d,int e,int f),(a,b,c,d,e,f),return)
 SDL_X11_SYM(int,XChangeProperty,(Display* a,Window b,Atom c,Atom d,int e,int f,_Xconst unsigned char* g,int h),(a,b,c,d,e,f,g,h),return)
 SDL_X11_SYM(int,XChangeWindowAttributes,(Display* a,Window b,unsigned long c,XSetWindowAttributes* d),(a,b,c,d),return)

@@ -29,29 +29,6 @@
 #include "SDL_x11video.h"
 #include "../../events/SDL_events_c.h"
 
-
-/* Check to see if this is a repeated key.
-   (idea shamelessly lifted from GII -- thanks guys! :)
- */
-static int
-X11_KeyRepeat(Display * display, XEvent * event)
-{
-    XEvent peekevent;
-    int repeated;
-
-    repeated = 0;
-    if (XPending(display)) {
-        XPeekEvent(display, &peekevent);
-        if ((peekevent.type == KeyPress) &&
-            (peekevent.xkey.keycode == event->xkey.keycode) &&
-            ((peekevent.xkey.time - event->xkey.time) < 2)) {
-            repeated = 1;
-            XNextEvent(display, &peekevent);
-        }
-    }
-    return (repeated);
-}
-
 static void
 X11_DispatchEvent(_THIS)
 {
@@ -194,21 +171,18 @@ X11_DispatchEvent(_THIS)
 #ifdef DEBUG_XEVENTS
             printf("KeyPress (X11 keycode = 0x%X)\n", xevent.xkey.keycode);
 #endif
-            if (!X11_KeyRepeat(videodata->display, &xevent)) {
-                SDLKey physicalKey = videodata->keyCodeToSDLKTable[keycode];
-                SDL_SendKeyboardKey(videodata->keyboard, SDL_PRESSED,
-                                    (Uint8) keycode, physicalKey);
+            SDLKey physicalKey = videodata->keyCodeToSDLKTable[keycode];
+            SDL_SendKeyboardKey(videodata->keyboard, SDL_PRESSED,
+                                (Uint8) keycode, physicalKey);
 #if 1
-                if (physicalKey == SDLK_UNKNOWN) {
-                    fprintf(stderr,
-                            "The key you just pressed is not recognized by SDL. To help get this fixed, report this to the SDL mailing list <sdl@libsdl.org> or to Christian Walther <cwalther@gmx.ch>. X11 KeyCode is %d, X11 KeySym 0x%X.\n",
-                            (int) keycode,
-                            (unsigned int) XKeycodeToKeysym(videodata->
-                                                            display, keycode,
-                                                            0));
-                }
-#endif
+            if (physicalKey == SDLK_UNKNOWN) {
+                fprintf(stderr,
+                        "The key you just pressed is not recognized by SDL. To help get this fixed, report this to the SDL mailing list <sdl@libsdl.org> or to Christian Walther <cwalther@gmx.ch>. X11 KeyCode is %d, X11 KeySym 0x%X.\n",
+                        (int) keycode,
+                        (unsigned int) XKeycodeToKeysym(videodata->display,
+                                                        keycode, 0));
             }
+#endif
         }
         break;
 
@@ -219,11 +193,6 @@ X11_DispatchEvent(_THIS)
 #ifdef DEBUG_XEVENTS
             printf("KeyRelease (X11 keycode = 0x%X)\n", xevent.xkey.keycode);
 #endif
-            /* Check to see if this is a repeated key */
-            if (X11_KeyRepeat(videodata->display, &xevent)) {
-                break;
-            }
-
             SDL_SendKeyboardKey(videodata->keyboard, SDL_RELEASED,
                                 (Uint8) keycode,
                                 videodata->keyCodeToSDLKTable[keycode]);

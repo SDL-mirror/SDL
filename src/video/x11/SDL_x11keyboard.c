@@ -851,6 +851,8 @@ X11_InitKeyboard(_THIS)
     int code;
     SDLKey sdlkey;
 
+    XAutoRepeatOn(data->display);
+
     /* A random collection of KeySym/SDLKey pairs that should be valid
        in any keyboard layout (if this isn't the case on yours,
        please adjust). Using XKeysymToKeycode on these KeySyms
@@ -904,7 +906,7 @@ X11_InitKeyboard(_THIS)
                 "The key codes of your X server are unknown to SDL. Keys may not be recognized properly. To help get this fixed, report this to the SDL mailing list <sdl@libsdl.org> or to Christian Walther <cwalther@gmx.ch>.\n");
 #endif
         data->keyCodeToSDLKTable =
-        SDL_malloc(KeyCodeTableSize * sizeof(SDLKey));
+            SDL_malloc(KeyCodeTableSize * sizeof(SDLKey));
         if (data->keyCodeToSDLKTable == NULL) {
             SDL_OutOfMemory();
             return -1;
