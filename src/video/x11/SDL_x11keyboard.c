@@ -859,19 +859,19 @@ X11_InitKeyboard(_THIS)
        KeyCodeToSDLK tables to find the right one (if any).
      */
 
-/* *INDENT-ON* */
+/* *INDENT-OFF* */
     struct
     {
         KeySym sym;
         SDLKey key;
-    } fingerprint[] = {
-        {
-        XK_Tab, SDLK_TAB}, {
-        XK_Return, SDLK_RETURN}, {
-        XK_Escape, SDLK_ESCAPE}, {
-        XK_space, SDLK_SPACE}
+    } fingerprint[] = 
+      {
+        {XK_Tab, SDLK_TAB}, 
+        {XK_Return, SDLK_RETURN}, 
+        {XK_Escape, SDLK_ESCAPE}, 
+        {XK_space, SDLK_SPACE}
     };
-/* *INDENT-OFF* */
+/* *INDENT-ON* */
 
     SDL_zero(keyboard);
     data->keyboard = SDL_AddKeyboard(&keyboard, -1);
