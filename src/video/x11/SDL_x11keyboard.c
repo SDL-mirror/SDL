@@ -51,7 +51,7 @@ static SDLKey *keyCodeToSDLKeyTables[] = {
    hardware.
 */
 
-#define KeyCodeTableSize (258)
+#define KeyCodeTableSize (256)
 static SDLKey macKeyCodeToSDLK[KeyCodeTableSize] = 
 {
     /*   0 */   SDLK_UNKNOWN,
@@ -904,12 +904,12 @@ X11_InitKeyboard(_THIS)
                 "The key codes of your X server are unknown to SDL. Keys may not be recognized properly. To help get this fixed, report this to the SDL mailing list <sdl@libsdl.org> or to Christian Walther <cwalther@gmx.ch>.\n");
 #endif
         data->keyCodeToSDLKTable =
-            SDL_malloc(SDL_arraysize(xorgLinuxKeyCodeToSDLK));
+        SDL_malloc(KeyCodeTableSize * sizeof(SDLKey));
         if (data->keyCodeToSDLKTable == NULL) {
             SDL_OutOfMemory();
             return -1;
         }
-        for (code = SDL_arraysize(xorgLinuxKeyCodeToSDLK); code >= 0; code--) {
+        for (code = KeyCodeTableSize; code >= 0; code--) {
             data->keyCodeToSDLKTable[code] =
                 X11_KeySymToSDLKey(XKeycodeToKeysym(data->display, code, 0),
                                    SDL_TRUE);
@@ -918,7 +918,7 @@ X11_InitKeyboard(_THIS)
 
     /* Set some non-default key names */
 
-    for (code = 0; code < SDL_arraysize(xorgLinuxKeyCodeToSDLK); code++) {
+    for (code = 0; code < KeyCodeTableSize; code++) {
         sdlkey = data->keyCodeToSDLKTable[code];
         switch (sdlkey) {
             /* The SDLK_*META keys are used as XK_Meta_* by some X
@@ -986,12 +986,12 @@ X11_GetLayoutKey(_THIS, SDLKey physicalKey)
 
     /* Look up physicalKey to get an X11 KeyCode - linear search isn't
        terribly efficient, this might have to be optimized. */
-    while ((code < SDL_arraysize(xorgLinuxKeyCodeToSDLK)) &&
+    while ((code < KeyCodeTableSize) &&
            (physicalKey != data->keyCodeToSDLKTable[code])) {
         code++;
     }
 
-    if (code == SDL_arraysize(xorgLinuxKeyCodeToSDLK)) {
+    if (code == KeyCodeTableSize) {
         return physicalKey;
     }
     /* Get the corresponding KeySym - this is where the keyboard
