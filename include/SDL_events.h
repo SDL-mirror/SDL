@@ -149,12 +149,13 @@ typedef struct SDL_KeyboardEvent
  *
  * \brief Keyboard text input event structure (event.text.*)
  */
+#define SDL_TEXTINPUTEVENT_TEXT_SIZE (32)
 typedef struct SDL_TextInputEvent
 {
-    Uint8 type;             /**< SDL_TEXTINPUT */
-    Uint8 which;            /**< The keyboard device index */
-    char text[32];          /**< The input text */
-    SDL_WindowID windowID;  /**< The window with keyboard focus, if any */
+    Uint8 type;                               /**< SDL_TEXTINPUT */
+    Uint8 which;                              /**< The keyboard device index */
+    char text[SDL_TEXTINPUTEVENT_TEXT_SIZE];  /**< The input text */
+    SDL_WindowID windowID;                    /**< The window with keyboard focus, if any */
 } SDL_TextInputEvent;
 
 /**
@@ -325,10 +326,10 @@ typedef union SDL_Event
     Uint8 type;                     /**< Event type, shared with all events */
     SDL_WindowEvent window;         /**< Window event data */
     SDL_KeyboardEvent key;          /**< Keyboard event data */
-    SDL_TextInputEvent text;                    /**< Text input event data */
+    SDL_TextInputEvent text;        /**< Text input event data */
     SDL_MouseMotionEvent motion;    /**< Mouse motion event data */
     SDL_MouseButtonEvent button;    /**< Mouse button event data */
-    SDL_MouseWheelEvent wheel;                  /**< Mouse wheel event data */
+    SDL_MouseWheelEvent wheel;      /**< Mouse wheel event data */
     SDL_JoyAxisEvent jaxis;         /**< Joystick axis event data */
     SDL_JoyBallEvent jball;         /**< Joystick ball event data */
     SDL_JoyHatEvent jhat;           /**< Joystick hat event data */

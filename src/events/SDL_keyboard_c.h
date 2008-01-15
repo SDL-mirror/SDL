@@ -48,6 +48,9 @@ struct SDL_Keyboard
 #endif
 extern int SDL_TranslateUNICODE;
 
+/* convert UCS4 to utf8 */
+extern char *SDL_Ucs4ToUtf8(Uint32 ch, char *dst);
+
 /* Initialize the keyboard subsystem */
 extern int SDL_KeyboardInit(void);
 

@@ -167,6 +167,9 @@ X11_DispatchEvent(_THIS)
         /* Key press? */
     case KeyPress:{
             KeyCode keycode = xevent.xkey.keycode;
+            KeySym keysym = NoSymbol;
+            char text[sizeof(SDL_TEXTINPUTEVENT_TEXT_SIZE)];
+            Uint32 ucs4 = 0;
 
 #ifdef DEBUG_XEVENTS
             printf("KeyPress (X11 keycode = 0x%X)\n", xevent.xkey.keycode);
@@ -183,6 +186,13 @@ X11_DispatchEvent(_THIS)
                                                         keycode, 0));
             }
 #endif
+            /* works for Latin-1 */
+            SDL_memset(&text[0], 0, SDL_TEXTINPUTEVENT_TEXT_SIZE);
+            /* Xutf8LookupString() */
+            XLookupString(&xevent, text, sizeof(text), &keysym, NULL);
+            if (0 != SDL_strlen(text)) {
+                SDL_SendKeyboardText(videodata->keyboard, text);
+            }
         }
         break;
 

@@ -89,6 +89,11 @@ PrintKey(SDL_keysym * sym, int pressed)
     printf("\n");
 }
 
+static void
+PrintText(char *text)
+{
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -138,6 +143,9 @@ main(int argc, char *argv[])
             break;
         case SDL_KEYUP:
             PrintKey(&event.key.keysym, 0);
+            break;
+        case SDL_TEXTINPUT:
+            PrintText(event.text.text);
             break;
         case SDL_MOUSEBUTTONDOWN:
             /* Any button press quits the app... */
