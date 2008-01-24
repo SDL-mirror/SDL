@@ -32,10 +32,12 @@ AC_ARG_ENABLE(sdltest, [  --disable-sdltest       Do not try to compile and run 
     fi
   fi
 
+  as_save_PATH="$PATH"
   if test "x$prefix" != xNONE; then
     PATH="$prefix/bin:$prefix/usr/bin:$PATH"
   fi
   AC_PATH_PROG(SDL_CONFIG, sdl-config, no, [$PATH])
+  PATH="$as_save_PATH"
   min_sdl_version=ifelse([$1], ,0.11.0,$1)
   AC_MSG_CHECKING(for SDL - version >= $min_sdl_version)
   no_sdl=""
