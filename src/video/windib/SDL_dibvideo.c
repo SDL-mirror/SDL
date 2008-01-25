@@ -784,8 +784,10 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 		if ( screen_pal && (flags & (SDL_FULLSCREEN|SDL_HWPALETTE)) ) {
 			grab_palette = TRUE;
 		}
-		/* BitBlt() maps colors for us */
-		video->flags |= SDL_HWPALETTE;
+		if ( screen_pal ) {
+			/* BitBlt() maps colors for us */
+			video->flags |= SDL_HWPALETTE;
+		}
 	}
 #ifndef _WIN32_WCE
 	/* Resize the window */
