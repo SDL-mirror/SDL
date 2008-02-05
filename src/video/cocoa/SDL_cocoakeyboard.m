@@ -413,13 +413,13 @@ UpdateKeymap(SDL_VideoData *data)
                 continue;
             }
 
-            c = KeyTranslate (chr_data, i, &state);
+            c = KeyTranslate (chr_data, i, &state) & 255;
             if (state) {
                 /* Dead key, process key up */
-                c = KeyTranslate (chr_data, i | 128, &state);
+                c = KeyTranslate (chr_data, i | 128, &state) & 255;
             }
 
-            if (c != 0 && c != 0x10 && c < 256) {
+            if (c != 0 && c != 0x10) {
                 /* MacRoman to Unicode table, taken from X.org sources */
                 static const unsigned short macroman_table[128] = {
                     0xc4, 0xc5, 0xc7, 0xc9, 0xd1, 0xd6, 0xdc, 0xe1,
