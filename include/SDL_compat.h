@@ -130,47 +130,54 @@ typedef enum
 
 struct SDL_SysWMinfo;
 
-/* Key codes
-   Note that the correspondences defined here are approximate at best because
-   the meaning of the event structure field that carries these values has
-   changed: in SDL 1.2, it referred to the key's label in the current keyboard
-   layout, whereas now it refers to a specific physical key on the keyboard,
-   regardless of the keyboard layout setting.
-   To get comparable behavior to SDL 1.2, code that uses any of the codes below
-   in ways like "if (somekey == SDLK_EXCLAIM)" should be changed to the
-   equivalent of "if (SDL_GetLayoutKey(somekey) == '!')".
- */
+/* Obsolete or renamed key codes */
 
-/* These key constants were renamed for clarity or consistence. */
-#define SDLK_QUOTE SDLK_APOSTROPHE
-#define SDLK_MINUS SDLK_HYPHENMINUS
-#define SDLK_BACKQUOTE SDLK_GRAVE
-#define SDLK_a SDLK_A
-#define SDLK_b SDLK_B
-#define SDLK_c SDLK_C
-#define SDLK_d SDLK_D
-#define SDLK_e SDLK_E
-#define SDLK_f SDLK_F
-#define SDLK_g SDLK_G
-#define SDLK_h SDLK_H
-#define SDLK_i SDLK_I
-#define SDLK_j SDLK_J
-#define SDLK_k SDLK_K
-#define SDLK_l SDLK_L
-#define SDLK_m SDLK_M
-#define SDLK_n SDLK_N
-#define SDLK_o SDLK_O
-#define SDLK_p SDLK_P
-#define SDLK_q SDLK_Q
-#define SDLK_r SDLK_R
-#define SDLK_s SDLK_S
-#define SDLK_t SDLK_T
-#define SDLK_u SDLK_U
-#define SDLK_v SDLK_V
-#define SDLK_w SDLK_W
-#define SDLK_x SDLK_X
-#define SDLK_y SDLK_Y
-#define SDLK_z SDLK_Z
+/* These key constants were renamed for clarity or consistency. */
+#define SDLK_a  'a'
+#define SDLK_b  'b'
+#define SDLK_c  'c'
+#define SDLK_d  'd'
+#define SDLK_e  'e'
+#define SDLK_f  'f'
+#define SDLK_g  'g'
+#define SDLK_h  'h'
+#define SDLK_i  'i'
+#define SDLK_j  'j'
+#define SDLK_k  'k'
+#define SDLK_l  'l'
+#define SDLK_m  'm'
+#define SDLK_n  'n'
+#define SDLK_o  'o'
+#define SDLK_p  'p'
+#define SDLK_q  'q'
+#define SDLK_r  'r'
+#define SDLK_s  's'
+#define SDLK_t  't'
+#define SDLK_u  'u'
+#define SDLK_v  'v'
+#define SDLK_w  'w'
+#define SDLK_x  'x'
+#define SDLK_y  'y'
+#define SDLK_z  'z'
+#define SDLK_QUOTE      '\''
+#define SDLK_MINUS      '-'
+#define SDLK_BACKQUOTE  '`'
+#define SDLK_EXCLAIM    '!'
+#define SDLK_QUOTEDBL   '"'
+#define SDLK_HASH       '#'
+#define SDLK_DOLLAR     '$'
+#define SDLK_AMPERSAND  '&'
+#define SDLK_LEFTPAREN  '('
+#define SDLK_RIGHTPAREN ')'
+#define SDLK_ASTERISK   '*'
+#define SDLK_PLUS       '+'
+#define SDLK_COLON      ':'
+#define SDLK_LESS       '<'
+#define SDLK_GREATER    '>'
+#define SDLK_QUESTION   '?'
+#define SDLK_AT         '@'
+#define SDLK_CARET      '^'
+#define SDLK_UNDERSCORE '_'
 #define SDLK_KP0 SDLK_KP_0
 #define SDLK_KP1 SDLK_KP_1
 #define SDLK_KP2 SDLK_KP_2
@@ -181,30 +188,14 @@ struct SDL_SysWMinfo;
 #define SDLK_KP7 SDLK_KP_7
 #define SDLK_KP8 SDLK_KP_8
 #define SDLK_KP9 SDLK_KP_9
-#define SDLK_NUMLOCK SDLK_KP_NUMLOCKCLEAR
+#define SDLK_NUMLOCK SDLK_NUMLOCKCLEAR
 #define SDLK_SCROLLOCK SDLK_SCROLLLOCK
 #define SDLK_PRINT SDLK_PRINTSCREEN
 
-/* These key constants are obsoleted by the new keyboard handling,
-   their definitions here correspond to how they appear on a US
-   keyboard. */
-
-#define SDLK_EXCLAIM SDLK_1
-#define SDLK_QUOTEDBL SDLK_APOSTROPHE
-#define SDLK_HASH SDLK_3
-#define SDLK_DOLLAR SDLK_4
-#define SDLK_AMPERSAND SDLK_7
-#define SDLK_LEFTPAREN SDLK_9
-#define SDLK_RIGHTPAREN SDLK_0
-#define SDLK_ASTERISK SDLK_8
-#define SDLK_PLUS SDLK_EQUALS
-#define SDLK_COLON SDLK_SEMICOLON
-#define SDLK_LESS SDLK_COMMA
-#define SDLK_GREATER SDLK_PERIOD
-#define SDLK_QUESTION SDLK_SLASH
-#define SDLK_AT SDLK_2
-#define SDLK_CARET SDLK_6
-#define SDLK_UNDERSCORE SDLK_HYPHENMINUS
+/* The META modifier is equivalent to the GUI modifier from the USB standard */
+#define KMOD_LMETA KMOD_LGUI
+#define KMOD_RMETA KMOD_RGUI
+#define KMOD_META KMOD_GUI
 
 /* These keys don't appear in the USB specification (or at least not under those names). I'm unsure if the following assignments make sense or if these codes should be defined as actual additional SDLK_ constants. */
 #define SDLK_LSUPER SDLK_LMETA
@@ -268,6 +259,7 @@ extern DECLSPEC void SDLCALL SDL_FreeYUVOverlay(SDL_Overlay * overlay);
 extern DECLSPEC void SDLCALL SDL_GL_SwapBuffers(void);
 extern DECLSPEC int SDLCALL SDL_EnableKeyRepeat(int delay, int interval);
 extern DECLSPEC void SDLCALL SDL_GetKeyRepeat(int *delay, int *interval);
+extern DECLSPEC int SDLCALL SDL_EnableUNICODE(int enable);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

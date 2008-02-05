@@ -1531,4 +1531,10 @@ SDL_GetKeyRepeat(int *delay, int *interval)
     }
 }
 
+int
+SDL_EnableUNICODE(int enable)
+{
+    return SDL_EventState(SDL_TEXTINPUT, enable);
+}
+
 /* vi: set ts=4 sw=4 expandtab: */

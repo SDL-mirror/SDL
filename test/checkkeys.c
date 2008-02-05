@@ -40,10 +40,10 @@ print_modifiers(void)
         printf(" LALT");
     if (mod & KMOD_RALT)
         printf(" RALT");
-    if (mod & KMOD_LMETA)
-        printf(" LMETA");
-    if (mod & KMOD_RMETA)
-        printf(" RMETA");
+    if (mod & KMOD_LGUI)
+        printf(" LGUI");
+    if (mod & KMOD_RGUI)
+        printf(" RGUI");
     if (mod & KMOD_NUM)
         printf(" NUM");
     if (mod & KMOD_CAPS)
@@ -57,14 +57,13 @@ PrintKey(SDL_keysym * sym, int pressed)
 {
     /* Print the keycode, name and state */
     if (sym->sym) {
-        printf("Key %s:  physical 0x%08X = %s, layout 0x%08X = %s ",
+        printf("Key %s:  scancode 0x%04X = %s, keycode 0x%08X = %s ",
                pressed ? "pressed " : "released",
-               sym->sym,
-               SDL_GetKeyName(sym->sym),
-               SDL_GetLayoutKey(sym->sym),
-               SDL_GetKeyName(SDL_GetLayoutKey(sym->sym)));
+               sym->scancode,
+               SDL_GetScancodeName(sym->scancode),
+               sym->sym, SDL_GetKeyName(sym->sym));
     } else {
-        printf("Unknown Key (scancode = 0x%08X) %s ",
+        printf("Unknown Key (scancode = 0x%04X) %s ",
                sym->scancode, pressed ? "pressed" : "released");
     }
 

@@ -71,7 +71,13 @@ static void
 DoUnsidedModifiers(int keyboard, unsigned short scancode,
                    unsigned int oldMods, unsigned int newMods)
 {
-    const int mapping[] = { SDLK_CAPSLOCK, SDLK_LSHIFT, SDLK_LCTRL, SDLK_LALT, SDLK_LMETA };
+    const int mapping[] = {
+        SDL_SCANCODE_CAPSLOCK,
+        SDL_SCANCODE_LSHIFT,
+        SDL_SCANCODE_LCTRL,
+        SDL_SCANCODE_LALT,
+        SDL_SCANCODE_LGUI
+    };
     unsigned int i, bit;
 
     /* Iterate through the bits, testing each against the current modifiers */
@@ -84,14 +90,14 @@ DoUnsidedModifiers(int keyboard, unsigned short scancode,
         if (oldMask && oldMask != newMask) {        /* modifier up event */
             /* If this was Caps Lock, we need some additional voodoo to make SDL happy */
             if (bit == NSAlphaShiftKeyMask) {
-                SDL_SendKeyboardKey(keyboard, SDL_PRESSED, (Uint8)scancode, mapping[i]);
+                SDL_SendKeyboardKey(keyboard, SDL_PRESSED, mapping[i]);
             }
-            SDL_SendKeyboardKey(keyboard, SDL_RELEASED, (Uint8)scancode, mapping[i]);
+            SDL_SendKeyboardKey(keyboard, SDL_RELEASED, mapping[i]);
         } else if (newMask && oldMask != newMask) { /* modifier down event */
-            SDL_SendKeyboardKey(keyboard, SDL_PRESSED, (Uint8)scancode, mapping[i]);
+            SDL_SendKeyboardKey(keyboard, SDL_PRESSED, mapping[i]);
             /* If this was Caps Lock, we need some additional voodoo to make SDL happy */
             if (bit == NSAlphaShiftKeyMask) {
-                SDL_SendKeyboardKey(keyboard, SDL_RELEASED, (Uint8)scancode, mapping[i]);
+                SDL_SendKeyboardKey(keyboard, SDL_RELEASED, mapping[i]);
             }
         }
     }
@@ -102,11 +108,11 @@ DoUnsidedModifiers(int keyboard, unsigned short scancode,
  * sides was made.
  */
 static void
-HandleNonDeviceModifier(int keyboard, unsigned short scancode,
+HandleNonDeviceModifier(int keyboard,
                         unsigned int device_independent_mask,
                         unsigned int oldMods,
                         unsigned int newMods,
-                        SDLKey key_sym)
+                        SDL_scancode scancode)
 {
     unsigned int oldMask, newMask;
     
@@ -117,9 +123,9 @@ HandleNonDeviceModifier(int keyboard, unsigned short scancode,
     newMask = newMods & device_independent_mask;
     
     if (oldMask && oldMask != newMask) {
-        SDL_SendKeyboardKey(keyboard, SDL_RELEASED, (Uint8)scancode, key_sym);
+        SDL_SendKeyboardKey(keyboard, SDL_RELEASED, scancode);
     } else if (newMask && oldMask != newMask) {
-        SDL_SendKeyboardKey(keyboard, SDL_PRESSED, (Uint8)scancode, key_sym);
+        SDL_SendKeyboardKey(keyboard, SDL_PRESSED, scancode);
     }
 }
 
@@ -127,9 +133,9 @@ HandleNonDeviceModifier(int keyboard, unsigned short scancode,
  * This function sets the actual SDL_PrivateKeyboard event.
  */
 static void
-HandleModifierOneSide(int keyboard, unsigned short scancode,
+HandleModifierOneSide(int keyboard,
                       unsigned int oldMods, unsigned int newMods,
-                      SDLKey key_sym, 
+                      SDL_scancode scancode, 
                       unsigned int sided_device_dependent_mask)
 {
     unsigned int old_dep_mask, new_dep_mask;
@@ -145,9 +151,9 @@ HandleModifierOneSide(int keyboard, unsigned short scancode,
      * find out which it is.
      */
     if (new_dep_mask && old_dep_mask != new_dep_mask) {
-        SDL_SendKeyboardKey(keyboard, SDL_PRESSED, (Uint8)scancode, key_sym);
+        SDL_SendKeyboardKey(keyboard, SDL_PRESSED, scancode);
     } else {
-        SDL_SendKeyboardKey(keyboard, SDL_RELEASED, (Uint8)scancode, key_sym);
+        SDL_SendKeyboardKey(keyboard, SDL_RELEASED, scancode);
     }
 }
 
@@ -156,11 +162,11 @@ HandleModifierOneSide(int keyboard, unsigned short scancode,
  * e.g. left-shift vs right-shift. 
  */
 static void
-HandleModifierSide(int keyboard, unsigned short scancode,
+HandleModifierSide(int keyboard,
                    int device_independent_mask, 
                    unsigned int oldMods, unsigned int newMods, 
-                   SDLKey left_key_sym, 
-                   SDLKey right_key_sym,
+                   SDL_scancode left_scancode, 
+                   SDL_scancode right_scancode,
                    unsigned int left_device_dependent_mask, 
                    unsigned int right_device_dependent_mask)
 {
@@ -174,7 +180,7 @@ HandleModifierSide(int keyboard, unsigned short scancode,
      */
     if ((device_dependent_mask & newMods) == 0) {
         /* Revert to the old behavior */
-        HandleNonDeviceModifier(keyboard, scancode, device_independent_mask, oldMods, newMods, left_key_sym);
+        HandleNonDeviceModifier(keyboard, device_independent_mask, oldMods, newMods, left_scancode);
         return;
     }
 
@@ -187,10 +193,10 @@ HandleModifierSide(int keyboard, unsigned short scancode,
          * change or if the bits don't both exist.
          */
         if (left_device_dependent_mask & diff_mod) {
-            HandleModifierOneSide(keyboard, scancode, oldMods, newMods, left_key_sym, left_device_dependent_mask);
+            HandleModifierOneSide(keyboard, oldMods, newMods, left_scancode, left_device_dependent_mask);
         }
         if (right_device_dependent_mask & diff_mod) {
-            HandleModifierOneSide(keyboard, scancode, oldMods, newMods, right_key_sym, right_device_dependent_mask);
+            HandleModifierOneSide(keyboard, oldMods, newMods, right_scancode, right_device_dependent_mask);
         }
     }
 }
@@ -201,11 +207,11 @@ HandleModifierSide(int keyboard, unsigned short scancode,
  * can't still be down).
  */
 static void
-ReleaseModifierSide(int keyboard, unsigned short scancode,
+ReleaseModifierSide(int keyboard,
                     unsigned int device_independent_mask, 
                     unsigned int oldMods, unsigned int newMods,
-                    SDLKey left_key_sym, 
-                    SDLKey right_key_sym,
+                    SDL_scancode left_scancode, 
+                    SDL_scancode right_scancode,
                     unsigned int left_device_dependent_mask, 
                     unsigned int right_device_dependent_mask)
 {
@@ -220,7 +226,7 @@ ReleaseModifierSide(int keyboard, unsigned short scancode,
         /* In this case, we can't detect the keyboard, so use the left side 
          * to represent both, and release it. 
          */
-        SDL_SendKeyboardKey(keyboard, SDL_RELEASED, (Uint8)scancode, left_key_sym);
+        SDL_SendKeyboardKey(keyboard, SDL_RELEASED, left_scancode);
         return;
     }
 
@@ -231,10 +237,10 @@ ReleaseModifierSide(int keyboard, unsigned short scancode,
      * so I hope this doesn't cause other problems.
      */
     if ( left_device_dependent_mask & oldMods ) {
-        SDL_SendKeyboardKey(keyboard, SDL_RELEASED, (Uint8)scancode, left_key_sym);
+        SDL_SendKeyboardKey(keyboard, SDL_RELEASED, left_scancode);
     }
     if ( right_device_dependent_mask & oldMods ) {
-        SDL_SendKeyboardKey(keyboard, SDL_RELEASED, (Uint8)scancode, right_key_sym);
+        SDL_SendKeyboardKey(keyboard, SDL_RELEASED, right_scancode);
     }
 }
 
@@ -251,16 +257,16 @@ HandleCapsLock(int keyboard, unsigned short scancode,
     newMask = newMods & NSAlphaShiftKeyMask;
 
     if (oldMask != newMask) {
-        SDL_SendKeyboardKey(keyboard, SDL_PRESSED, (Uint8)scancode, SDLK_CAPSLOCK);
-        SDL_SendKeyboardKey(keyboard, SDL_RELEASED, (Uint8)scancode, SDLK_CAPSLOCK);
+        SDL_SendKeyboardKey(keyboard, SDL_PRESSED, SDL_SCANCODE_CAPSLOCK);
+        SDL_SendKeyboardKey(keyboard, SDL_RELEASED, SDL_SCANCODE_CAPSLOCK);
     }
 
     oldMask = oldMods & NSNumericPadKeyMask;
     newMask = newMods & NSNumericPadKeyMask;
 
     if (oldMask != newMask) {
-        SDL_SendKeyboardKey(keyboard, SDL_PRESSED, (Uint8)scancode, SDLK_KP_NUMLOCKCLEAR);
-        SDL_SendKeyboardKey(keyboard, SDL_RELEASED, (Uint8)scancode, SDLK_KP_NUMLOCKCLEAR);
+        SDL_SendKeyboardKey(keyboard, SDL_PRESSED, SDL_SCANCODE_NUMLOCKCLEAR);
+        SDL_SendKeyboardKey(keyboard, SDL_RELEASED, SDL_SCANCODE_NUMLOCKCLEAR);
     }
 }
 
@@ -272,8 +278,18 @@ DoSidedModifiers(int keyboard, unsigned short scancode,
                  unsigned int oldMods, unsigned int newMods)
 {
 	/* Set up arrays for the key syms for the left and right side. */
-    const SDLKey left_mapping[]  = { SDLK_LSHIFT, SDLK_LCTRL, SDLK_LALT, SDLK_LMETA };
-    const SDLKey right_mapping[] = { SDLK_RSHIFT, SDLK_RCTRL, SDLK_RALT, SDLK_RMETA };
+    const SDL_scancode left_mapping[]  = {
+        SDL_SCANCODE_LSHIFT,
+        SDL_SCANCODE_LCTRL,
+        SDL_SCANCODE_LALT,
+        SDL_SCANCODE_LGUI
+    };
+    const SDL_scancode right_mapping[] = {
+        SDL_SCANCODE_RSHIFT,
+        SDL_SCANCODE_RCTRL,
+        SDL_SCANCODE_RALT,
+        SDL_SCANCODE_RGUI
+    };
 	/* Set up arrays for the device dependent masks with indices that 
      * correspond to the _mapping arrays 
      */
@@ -296,7 +312,7 @@ DoSidedModifiers(int keyboard, unsigned short scancode,
          * and right side keys may alternate or both may be pressed.
          */
         if (newMask) {
-            HandleModifierSide(keyboard, scancode, bit, oldMods, newMods,
+            HandleModifierSide(keyboard, bit, oldMods, newMods,
                                left_mapping[i], right_mapping[i],
                                left_device_mapping[i], right_device_mapping[i]);
         }
@@ -304,7 +320,7 @@ DoSidedModifiers(int keyboard, unsigned short scancode,
             * the device dependent bits to release the correct keys.
             */
         else if (oldMask && oldMask != newMask) {
-            ReleaseModifierSide(keyboard, scancode, bit, oldMods, newMods,
+            ReleaseModifierSide(keyboard, bit, oldMods, newMods,
                               left_mapping[i], right_mapping[i],
                               left_device_mapping[i], right_device_mapping[i]);
         }
@@ -332,6 +348,109 @@ HandleModifiers(_THIS, unsigned short scancode, unsigned int modifierFlags)
     data->modifierFlags = modifierFlags;
 }
 
+static void
+UpdateKeymap(SDL_VideoData *data)
+{
+    KeyboardLayoutRef key_layout;
+    const void *chr_data;
+    int i;
+    SDL_scancode scancode;
+    SDLKey keymap[SDL_NUM_SCANCODES];
+
+    /* See if the keymap needs to be updated */
+    KLGetCurrentKeyboardLayout(&key_layout);
+    if (key_layout == data->key_layout) {
+        return;
+    }
+    data->key_layout = key_layout;
+
+    SDL_GetDefaultKeymap(keymap);
+
+    /* Try Unicode data first (preferred as of Mac OS X 10.5) */
+    KLGetKeyboardLayoutProperty(key_layout, kKLuchrData, &chr_data);
+    if (chr_data) {
+        UInt32 keyboard_type = LMGetKbdType();
+        OSStatus err;
+
+        for (i = 0; i < SDL_arraysize(scancode_table); i++) {
+            UniChar s[8];
+            UniCharCount len;
+            UInt32 dead_key_state;
+
+            /* Make sure this scancode is a valid character scancode */
+            scancode = scancode_table[i];
+            if (scancode == SDL_SCANCODE_UNKNOWN ||
+                (keymap[scancode] & SDLK_SCANCODE_MASK)) {
+                continue;
+            }
+
+            dead_key_state = 0;
+            err = UCKeyTranslate (chr_data, i, kUCKeyActionDown,
+                                  0, keyboard_type,
+                                  kUCKeyTranslateNoDeadKeysMask,
+                                  &dead_key_state, 8, &len, s);
+            if (err != noErr)
+                continue;
+
+            if (len > 0 && s[0] != 0x10) {
+                keymap[scancode] = s[0];
+            }
+        }
+        SDL_SetKeymap(data->keyboard, 0, keymap, SDL_NUM_SCANCODES);
+        return;
+    }
+
+    /* Fall back to older style key map data */
+    KLGetKeyboardLayoutProperty(key_layout, kKLKCHRData, &chr_data);
+    if (chr_data) {
+        for (i = 0; i < 128; i++) {
+            UInt32 c, state = 0;
+
+            /* Make sure this scancode is a valid character scancode */
+            scancode = scancode_table[i];
+            if (scancode == SDL_SCANCODE_UNKNOWN ||
+                (keymap[scancode] & SDLK_SCANCODE_MASK)) {
+                continue;
+            }
+
+            c = KeyTranslate (chr_data, i, &state);
+            if (state) {
+                /* Dead key, process key up */
+                c = KeyTranslate (chr_data, i | 128, &state);
+            }
+
+            if (c != 0 && c != 0x10 && c < 256) {
+                /* MacRoman to Unicode table, taken from X.org sources */
+                static const unsigned short macroman_table[128] = {
+                    0xc4, 0xc5, 0xc7, 0xc9, 0xd1, 0xd6, 0xdc, 0xe1,
+                    0xe0, 0xe2, 0xe4, 0xe3, 0xe5, 0xe7, 0xe9, 0xe8,
+                    0xea, 0xeb, 0xed, 0xec, 0xee, 0xef, 0xf1, 0xf3,
+                    0xf2, 0xf4, 0xf6, 0xf5, 0xfa, 0xf9, 0xfb, 0xfc,
+                    0x2020, 0xb0, 0xa2, 0xa3, 0xa7, 0x2022, 0xb6, 0xdf,
+                    0xae, 0xa9, 0x2122, 0xb4, 0xa8, 0x2260, 0xc6, 0xd8,
+                    0x221e, 0xb1, 0x2264, 0x2265, 0xa5, 0xb5, 0x2202, 0x2211,
+                    0x220f, 0x3c0, 0x222b, 0xaa, 0xba, 0x3a9, 0xe6, 0xf8,
+                    0xbf, 0xa1, 0xac, 0x221a, 0x192, 0x2248, 0x2206, 0xab,
+                    0xbb, 0x2026, 0xa0, 0xc0, 0xc3, 0xd5, 0x152, 0x153,
+                    0x2013, 0x2014, 0x201c, 0x201d, 0x2018, 0x2019, 0xf7, 0x25ca,
+                    0xff, 0x178, 0x2044, 0x20ac, 0x2039, 0x203a, 0xfb01, 0xfb02,
+                    0x2021, 0xb7, 0x201a, 0x201e, 0x2030, 0xc2, 0xca, 0xc1,
+                    0xcb, 0xc8, 0xcd, 0xce, 0xcf, 0xcc, 0xd3, 0xd4,
+                    0xf8ff, 0xd2, 0xda, 0xdb, 0xd9, 0x131, 0x2c6, 0x2dc,
+                    0xaf, 0x2d8, 0x2d9, 0x2da, 0xb8, 0x2dd, 0x2db, 0x2c7,
+                };
+
+                if (c >= 128) {
+                    c = macroman_table[c - 128];
+                }
+                keymap[scancode] = c;
+            }
+        }
+        SDL_SetKeymap(data->keyboard, 0, keymap, SDL_NUM_SCANCODES);
+        return;
+    }
+}
+
 void
 Cocoa_InitKeyboard(_THIS)
 {
@@ -345,13 +464,15 @@ Cocoa_InitKeyboard(_THIS)
     
     SDL_zero(keyboard);
     data->keyboard = SDL_AddKeyboard(&keyboard, -1);
+    UpdateKeymap(data);
     
     /* Set our own names for the platform-dependent but layout-independent keys */
-    SDL_SetKeyName(SDLK_KP_NUMLOCKCLEAR, "clear");
-    SDL_SetKeyName(SDLK_LALT, "left option");
-    SDL_SetKeyName(SDLK_LMETA, "left command");
-    SDL_SetKeyName(SDLK_RALT, "right option");
-    SDL_SetKeyName(SDLK_RMETA, "right command");
+    /* This key is NumLock on the MacBook keyboard. :) */
+    /*SDL_SetScancodeName(SDL_SCANCODE_NUMLOCKCLEAR, "Clear");*/
+    SDL_SetScancodeName(SDL_SCANCODE_LALT, "Left Option");
+    SDL_SetScancodeName(SDL_SCANCODE_LGUI, "Left Command");
+    SDL_SetScancodeName(SDL_SCANCODE_RALT, "Right Option");
+    SDL_SetScancodeName(SDL_SCANCODE_RGUI, "Right Command");
 }
 
 void
@@ -359,27 +480,30 @@ Cocoa_HandleKeyEvent(_THIS, NSEvent *event)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     unsigned short scancode = [event keyCode];
-    SDLKey physicalKey;
+    SDL_scancode code;
     const char *text;
 
     if ((scancode == 10 || scancode == 50) && KBGetLayoutType(LMGetKbdType()) == kKeyboardISO) {
         /* see comments in SDL_cocoakeys.h */
         scancode = 60 - scancode;
     }
-    if (scancode < SDL_arraysize(macToSDLKey)) {
-        physicalKey = macToSDLKey[scancode];
+    if (scancode < SDL_arraysize(scancode_table)) {
+        code = scancode_table[scancode];
     }
     else {
         /* Hmm, does this ever happen?  If so, need to extend the keymap... */
-        physicalKey = SDLK_UNKNOWN;
+        code = SDL_SCANCODE_UNKNOWN;
     }
 
     switch ([event type]) {
     case NSKeyDown:
         if (![event isARepeat]) {
-            SDL_SendKeyboardKey(data->keyboard, SDL_PRESSED, (Uint8)scancode, physicalKey);
+            /* See if we need to rebuild the keyboard layout */
+            UpdateKeymap(data);
+
+            SDL_SendKeyboardKey(data->keyboard, SDL_PRESSED, code);
 #if 1
-            if (physicalKey == SDLK_UNKNOWN) {
+            if (code == SDL_SCANCODE_UNKNOWN) {
                 fprintf(stderr, "The key you just pressed is not recognized by SDL. To help get this fixed, report this to the SDL mailing list <sdl@libsdl.org> or to Christian Walther <cwalther@gmx.ch>. Mac virtual key code is %d.\n", scancode);
             }
 #endif
@@ -395,7 +519,7 @@ Cocoa_HandleKeyEvent(_THIS, NSEvent *event)
         }
         break;
     case NSKeyUp:
-        SDL_SendKeyboardKey(data->keyboard, SDL_RELEASED, (Uint8)scancode, physicalKey);
+        SDL_SendKeyboardKey(data->keyboard, SDL_RELEASED, code);
         break;
     case NSFlagsChanged:
         /* FIXME CW 2007-08-14: check if this whole mess that takes up half of this file is really necessary */
@@ -403,128 +527,6 @@ Cocoa_HandleKeyEvent(_THIS, NSEvent *event)
         break;
     default: /* just to avoid compiler warnings */
         break;
-    }
-}
-
-SDLKey
-Cocoa_GetLayoutKey(_THIS, SDLKey physicalKey)
-{
-    switch (physicalKey) {
-        /* Many of these keys would generate a character in the translation by keyboard layout, but an inappropriate one, so we catch them before. */
-        case SDLK_UNKNOWN:
-        case SDLK_RETURN:
-        case SDLK_ESCAPE:
-        case SDLK_BACKSPACE:
-        case SDLK_TAB:
-        case SDLK_SPACE:
-        case SDLK_CAPSLOCK:
-        case SDLK_F1:
-        case SDLK_F2:
-        case SDLK_F3:
-        case SDLK_F4:
-        case SDLK_F5:
-        case SDLK_F6:
-        case SDLK_F7:
-        case SDLK_F8:
-        case SDLK_F9:
-        case SDLK_F10:
-        case SDLK_F11:
-        case SDLK_F12:
-        case SDLK_PRINTSCREEN:
-        case SDLK_SCROLLLOCK:
-        case SDLK_PAUSE:
-        case SDLK_INSERT:
-        case SDLK_HOME:
-        case SDLK_PAGEUP:
-        case SDLK_DELETE:
-        case SDLK_END:
-        case SDLK_PAGEDOWN:
-        case SDLK_RIGHT:
-        case SDLK_LEFT:
-        case SDLK_DOWN:
-        case SDLK_UP:
-        case SDLK_KP_NUMLOCKCLEAR:
-        case SDLK_KP_ENTER:
-        case SDLK_APPLICATION:
-        case SDLK_POWER:
-        case SDLK_F13:
-        case SDLK_F14:
-        case SDLK_F15:
-        case SDLK_F16:
-        case SDLK_LCTRL:
-        case SDLK_LSHIFT:
-        case SDLK_LALT:
-        case SDLK_LMETA:
-        case SDLK_RCTRL:
-        case SDLK_RSHIFT:
-        case SDLK_RALT:
-        case SDLK_RMETA:
-            return physicalKey;
-        
-        /* For the rest, we try the translation first. */
-        default: {
-            UInt16 vkey = 0;
-            KeyboardLayoutRef layout;
-            KeyboardLayoutKind kind;
-            UInt32 keyboardType = LMGetKbdType();
-            
-            /* Look up pkey to get a Mac virtual key code - linear search isn't terribly efficient, this might have to be optimized. */
-            while (vkey < 128 && physicalKey != macToSDLKey[vkey]) vkey++;
-            if (vkey == 128) return physicalKey;
-            if ((vkey == 10 || vkey == 50) && KBGetLayoutType(keyboardType) == kKeyboardISO) vkey = 60 - vkey; /* see comments in SDL_cocoakeys.h */
-            
-            if (KLGetCurrentKeyboardLayout(&layout) != noErr) return physicalKey;
-            if (KLGetKeyboardLayoutProperty(layout, kKLKind, (const void **)&kind) != noErr) return physicalKey;
-            if (kind == kKLKCHRuchrKind || kind == kKLuchrKind) {
-                UniChar utf16String[4];
-                UInt32 deadKeyState = 0;
-                UniCharCount actualStringLength;
-                const UCKeyboardLayout *uchrData;
-                
-                if (KLGetKeyboardLayoutProperty(layout, kKLuchrData, (const void **)&uchrData) != noErr) return physicalKey;
-                if (UCKeyTranslate(uchrData, vkey, kUCKeyActionDisplay, 0, keyboardType, 0, &deadKeyState, 4, &actualStringLength, utf16String) != noErr) return physicalKey;
-                /* kUCKeyActionDisplay (instead of kUCKeyActionDown) seems to take care of dead keys, so no need to check for that case and simulate a second key press */
-                
-                if (actualStringLength == 0) return physicalKey;
-                
-                /* Decode the first character from UTF-16. I'm not sure if this is appropriate for keyboard layouts that generate more than 1 character, or if we would have to use SDL_KEY_LAYOUT_SPECIAL_BIT in that case. */
-                if (utf16String[0] < 0xD800 || utf16String[0] > 0xDFFF) {
-                    return utf16String[0];
-                }
-                else if (utf16String[0] > 0xDBFF || utf16String[1] < 0xDC00 || utf16String[1] > 0xDFFF) {
-                    /* invalid UTF-16 */
-                    return physicalKey;
-                }
-                else {
-                    return (((utf16String[0] & 0x3FF) << 10) | (utf16String[1] & 0x3FF)) + 0x10000;
-                }
-            }
-            else { /* kind == kKLKCHRKind */
-                const void *kchrData;
-                UInt32 state = 0;
-                UInt8 charCode;
-                SInt32 scriptCode;
-                TextEncoding keyboardEncoding;
-                CFStringRef conversionString;
-                UniChar codepoint;
-                
-                if (KLGetKeyboardLayoutProperty(layout, kKLKCHRData, &kchrData) != noErr) return physicalKey;
-                charCode = KeyTranslate(kchrData, vkey, &state) & 0xFF; /* Actually returns a UInt32 containing two character codes (and two 'reserved' bytes), but we're only interested in the second (or only) one */
-                if (charCode == 0) {
-                    /* It's a dead key, so simulate a second key press */
-                    charCode = KeyTranslate(kchrData, vkey, &state) & 0xFF;
-                    /* Still zero? Give up. */
-                    if (charCode == 0) return physicalKey;
-                }
-                if (KLGetKeyboardLayoutProperty(layout, kKLGroupIdentifier, (const void **)&scriptCode) != noErr) return physicalKey; /* That the group identifier is actually a script code is not documented, but confirmed here: <http://lists.apple.com/archives/carbon-dev/2005/Jan/msg00533.html> */
-                if (UpgradeScriptInfoToTextEncoding(scriptCode, kTextLanguageDontCare, kTextRegionDontCare, NULL, &keyboardEncoding) != noErr) return physicalKey;
-                
-                conversionString = CFStringCreateWithBytes(kCFAllocatorDefault, &charCode, 1, keyboardEncoding, FALSE);
-                codepoint = CFStringGetCharacterAtIndex(conversionString, 0);
-                CFRelease(conversionString);
-                return codepoint;
-            }
-        }
     }
 }
 

@@ -37,19 +37,11 @@ struct SDL_Keyboard
     /* Data common to all keyboards */
     SDL_WindowID focus;
     Uint16 modstate;
-    Uint8 keystate[SDLK_LAST];
+    Uint8 keystate[(SDL_NUM_SCANCODES + 7) / 8];
+    SDLKey keymap[SDL_NUM_SCANCODES];
 
     void *driverdata;
 };
-
-/* Used by the OS keyboard code to detect whether or not to do UNICODE */
-#ifndef DEFAULT_UNICODE_TRANSLATION
-#define DEFAULT_UNICODE_TRANSLATION 0   /* Default off because of overhead */
-#endif
-extern int SDL_TranslateUNICODE;
-
-/* convert UCS4 to utf8 */
-extern char *SDL_Ucs4ToUtf8(Uint32 ch, char *dst);
 
 /* Initialize the keyboard subsystem */
 extern int SDL_KeyboardInit(void);
@@ -68,18 +60,23 @@ extern void SDL_DelKeyboard(int index);
 /* Clear the state of a keyboard at an index */
 extern void SDL_ResetKeyboard(int index);
 
+/* Get the default keymap */
+extern void SDL_GetDefaultKeymap(SDLKey * keymap);
+
+/* Set the mapping of scancode to key codes for this keyboard */
+extern void SDL_SetKeymap(int index, int start, SDLKey * keys, int length);
+
 /* Set a platform-dependent key name, overriding the default platform-agnostic
    name. Encoded as UTF-8. The string is not copied, thus the pointer given to
    this function must stay valid forever (or at least until the call to
    VideoQuit()). */
-extern void SDL_SetKeyName(SDLKey physicalKey, const char *name);
+extern void SDL_SetScancodeName(SDL_scancode scancode, const char *name);
 
 /* Set the keyboard focus window */
 extern void SDL_SetKeyboardFocus(int index, SDL_WindowID windowID);
 
 /* Send a keyboard event for a keyboard at an index */
-extern int SDL_SendKeyboardKey(int index, Uint8 state, Uint8 scancode,
-                               SDLKey key);
+extern int SDL_SendKeyboardKey(int index, Uint8 state, SDL_scancode scancode);
 
 /* Send keyboard text input for a keyboard at an index */
 extern int SDL_SendKeyboardText(int index, const char *text);
