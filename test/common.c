@@ -804,19 +804,19 @@ PrintEvent(SDL_Event * event)
         break;
     case SDL_KEYDOWN:
         fprintf(stderr,
-                "Keyboard %d: key pressed  in window %d: physical 0x%08X = %s, layout 0x%08X = %s",
-                event->key.which, event->key.windowID, event->key.keysym.sym,
-                SDL_GetKeyName(event->key.keysym.sym),
-                SDL_GetLayoutKey(event->key.keysym.sym),
-                SDL_GetKeyName(SDL_GetLayoutKey(event->key.keysym.sym)));
+                "Keyboard %d: key pressed  in window %d: scancode 0x%08X = %s, keycode 0x%08X = %s",
+                event->key.which, event->key.windowID,
+                event->key.keysym.scancode,
+                SDL_GetScancodeName(event->key.keysym.scancode),
+                event->key.keysym.sym, SDL_GetKeyName(event->key.keysym.sym));
         break;
     case SDL_KEYUP:
         fprintf(stderr,
-                "Keyboard %d: key released in window %d: physical 0x%08X = %s, layout 0x%08X = %s",
-                event->key.which, event->key.windowID, event->key.keysym.sym,
-                SDL_GetKeyName(event->key.keysym.sym),
-                SDL_GetLayoutKey(event->key.keysym.sym),
-                SDL_GetKeyName(SDL_GetLayoutKey(event->key.keysym.sym)));
+                "Keyboard %d: key released in window %d: scancode 0x%08X = %s, keycode 0x%08X = %s",
+                event->key.which, event->key.windowID,
+                event->key.keysym.scancode,
+                SDL_GetScancodeName(event->key.keysym.scancode),
+                event->key.keysym.sym, SDL_GetKeyName(event->key.keysym.sym));
         break;
     case SDL_TEXTINPUT:
         fprintf(stderr, "Keyboard %d: text input \"%s\" in window %d",

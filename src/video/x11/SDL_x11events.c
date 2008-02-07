@@ -145,7 +145,7 @@ X11_DispatchEvent(_THIS)
 #ifdef DEBUG_XEVENTS
             printf("MappingNotify!\n");
 #endif
-            X11_UpdateKeymap(this);
+            X11_UpdateKeymap(_this);
         }
         break;
 
@@ -177,7 +177,7 @@ X11_DispatchEvent(_THIS)
     case KeyPress:{
             KeyCode keycode = xevent.xkey.keycode;
             KeySym keysym = NoSymbol;
-            char text[sizeof(SDL_TEXTINPUTEVENT_TEXT_SIZE)];
+            char text[SDL_TEXTINPUTEVENT_TEXT_SIZE];
             Uint32 ucs4 = 0;
 
 #ifdef DEBUG_XEVENTS
@@ -199,7 +199,7 @@ X11_DispatchEvent(_THIS)
 #endif
             /* Xutf8LookupString(), works for Latin-1 */
             SDL_zero(text);
-            XLookupString(&xevent, text, sizeof(text), &keysym, NULL);
+            XLookupString(&xevent.xkey, text, sizeof(text), &keysym, NULL);
             if (*text) {
                 printf("Sending text event %s\n", text);
                 SDL_SendKeyboardText(videodata->keyboard, text);

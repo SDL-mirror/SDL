@@ -1,5 +1,5 @@
 
-/* Print out all the keysyms we have, just to verify them */
+/* Print out all the scancodes we have, just to verify them */
 
 #include <stdio.h>
 #include <ctype.h>
@@ -11,14 +11,15 @@
 int
 main(int argc, char *argv[])
 {
-    SDLKey key;
+    SDL_scancode scancode;
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         fprintf(stderr, "Couldn't initialize SDL: %s\n", SDL_GetError());
         exit(1);
     }
-    for (key = SDLK_FIRST; key < SDLK_LAST; ++key) {
-        printf("Key #%d, \"%s\"\n", key, SDL_GetKeyName(key));
+    for (scancode = 0; scancode < SDL_NUM_SCANCODES; ++scancode) {
+        printf("Scancode #%d, \"%s\"\n", scancode,
+               SDL_GetScancodeName(scancode));
     }
     SDL_Quit();
     return (0);

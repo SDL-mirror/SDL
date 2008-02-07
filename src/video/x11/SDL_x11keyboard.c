@@ -364,7 +364,7 @@ X11_InitKeyboard(_THIS)
 
     SDL_zero(keyboard);
     data->keyboard = SDL_AddKeyboard(&keyboard, -1);
-    X11_UpdateKeymap(this);
+    X11_UpdateKeymap(_this);
 
     SDL_SetScancodeName(SDL_SCANCODE_APPLICATION, "Menu");
 
