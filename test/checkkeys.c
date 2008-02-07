@@ -91,6 +91,7 @@ PrintKey(SDL_keysym * sym, int pressed)
 static void
 PrintText(char *text)
 {
+    printf("Text: %s\n", text);
 }
 
 int
@@ -123,13 +124,6 @@ main(int argc, char *argv[])
                 SDL_GetError());
         quit(2);
     }
-
-    /* Enable UNICODE translation for keyboard input */
-    SDL_EnableUNICODE(1);
-
-    /* Enable auto repeat for keyboard input */
-    SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY,
-                        SDL_DEFAULT_REPEAT_INTERVAL);
 
     /* Watch keystrokes */
     done = 0;

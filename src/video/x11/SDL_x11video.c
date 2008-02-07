@@ -171,7 +171,6 @@ X11_CreateDevice(int devindex)
     device->SetDisplayGammaRamp = X11_SetDisplayGammaRamp;
     device->GetDisplayGammaRamp = X11_GetDisplayGammaRamp;
     device->PumpEvents = X11_PumpEvents;
-    device->GetLayoutKey = X11_GetLayoutKey;
 
     device->CreateWindow = X11_CreateWindow;
     device->CreateWindowFrom = X11_CreateWindowFrom;

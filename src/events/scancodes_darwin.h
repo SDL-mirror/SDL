@@ -27,7 +27,7 @@
    - experimentation on various ADB and USB ISO keyboards and one ADB ANSI keyboard
 */
 /* *INDENT-OFF* */
-static SDL_scancode scancode_table[128] = {
+static SDL_scancode darwin_scancode_table[] = {
     /*   0 */   SDL_SCANCODE_A,
     /*   1 */   SDL_SCANCODE_S,
     /*   2 */   SDL_SCANCODE_D,
@@ -55,7 +55,7 @@ static SDL_scancode scancode_table[128] = {
     /*  24 */   SDL_SCANCODE_EQUALS,
     /*  25 */   SDL_SCANCODE_9,
     /*  26 */   SDL_SCANCODE_7,
-    /*  27 */   SDL_SCANCODE_HYPHENMINUS,
+    /*  27 */   SDL_SCANCODE_MINUS,
     /*  28 */   SDL_SCANCODE_8,
     /*  29 */   SDL_SCANCODE_0,
     /*  30 */   SDL_SCANCODE_RIGHTBRACKET,
@@ -91,7 +91,7 @@ static SDL_scancode scancode_table[128] = {
     /*  60 */   SDL_SCANCODE_RSHIFT,
     /*  61 */   SDL_SCANCODE_RALT,
     /*  62 */   SDL_SCANCODE_RCTRL,
-    /*  63 */   SDL_SCANCODE_UNKNOWN, /* fn on portables, acts as a hardware-level modifier already, so we don't generate events for it */
+    /*  63 */   SDL_SCANCODE_RGUI, /* fn on portables, acts as a hardware-level modifier already, so we don't generate events for it, also XK_Meta_R */
     /*  64 */   SDL_SCANCODE_UNKNOWN, /* unknown (unused?) */
     /*  65 */   SDL_SCANCODE_KP_PERIOD,
     /*  66 */   SDL_SCANCODE_UNKNOWN, /* unknown (unused?) */

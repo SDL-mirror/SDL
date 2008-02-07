@@ -140,6 +140,15 @@ X11_DispatchEvent(_THIS)
         }
         break;
 
+        /* Has the keyboard layout changed? */
+    case MappingNotify:{
+#ifdef DEBUG_XEVENTS
+            printf("MappingNotify!\n");
+#endif
+            X11_UpdateKeymap(this);
+        }
+        break;
+
         /* Mouse motion? */
     case MotionNotify:{
 #ifdef DEBUG_MOTION
@@ -174,23 +183,25 @@ X11_DispatchEvent(_THIS)
 #ifdef DEBUG_XEVENTS
             printf("KeyPress (X11 keycode = 0x%X)\n", xevent.xkey.keycode);
 #endif
-            SDLKey physicalKey = videodata->keyCodeToSDLKTable[keycode];
             SDL_SendKeyboardKey(videodata->keyboard, SDL_PRESSED,
-                                (Uint8) keycode, physicalKey);
+                                videodata->key_layout[keycode]);
 #if 1
-            if (physicalKey == SDLK_UNKNOWN) {
+            if (videodata->key_layout[keycode] == SDLK_UNKNOWN) {
+                int min_keycode, max_keycode;
+                XDisplayKeycodes(videodata->display, &min_keycode,
+                                 &max_keycode);
+                keysym = XKeycodeToKeysym(videodata->display, keycode, 0);
                 fprintf(stderr,
-                        "The key you just pressed is not recognized by SDL. To help get this fixed, report this to the SDL mailing list <sdl@libsdl.org> or to Christian Walther <cwalther@gmx.ch>. X11 KeyCode is %d, X11 KeySym 0x%X.\n",
-                        (int) keycode,
-                        (unsigned int) XKeycodeToKeysym(videodata->display,
-                                                        keycode, 0));
+                        "The key you just pressed is not recognized by SDL. To help get this fixed, please report this to the SDL mailing list <sdl@libsdl.org> X11 KeyCode %d (%d), X11 KeySym 0x%X (%s).\n",
+                        keycode, keycode - min_keycode, keysym,
+                        XKeysymToString(keysym));
             }
 #endif
-            /* works for Latin-1 */
-            SDL_memset(&text[0], 0, SDL_TEXTINPUTEVENT_TEXT_SIZE);
-            /* Xutf8LookupString() */
+            /* Xutf8LookupString(), works for Latin-1 */
+            SDL_zero(text);
             XLookupString(&xevent, text, sizeof(text), &keysym, NULL);
-            if (0 != SDL_strlen(text)) {
+            if (*text) {
+                printf("Sending text event %s\n", text);
                 SDL_SendKeyboardText(videodata->keyboard, text);
             }
         }
@@ -204,8 +215,7 @@ X11_DispatchEvent(_THIS)
             printf("KeyRelease (X11 keycode = 0x%X)\n", xevent.xkey.keycode);
 #endif
             SDL_SendKeyboardKey(videodata->keyboard, SDL_RELEASED,
-                                (Uint8) keycode,
-                                videodata->keyCodeToSDLKTable[keycode]);
+                                videodata->key_layout[keycode]);
         }
         break;
 

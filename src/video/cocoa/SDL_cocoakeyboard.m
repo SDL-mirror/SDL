@@ -22,9 +22,9 @@
 #include "SDL_config.h"
 
 #include "SDL_cocoavideo.h"
-#include "SDL_cocoakeys.h"
 
 #include "../../events/SDL_keyboard_c.h"
+#include "../../events/scancodes_darwin.h"
 
 #include <Carbon/Carbon.h>
 
@@ -372,13 +372,13 @@ UpdateKeymap(SDL_VideoData *data)
         UInt32 keyboard_type = LMGetKbdType();
         OSStatus err;
 
-        for (i = 0; i < SDL_arraysize(scancode_table); i++) {
+        for (i = 0; i < SDL_arraysize(darwin_scancode_table); i++) {
             UniChar s[8];
             UniCharCount len;
             UInt32 dead_key_state;
 
             /* Make sure this scancode is a valid character scancode */
-            scancode = scancode_table[i];
+            scancode = darwin_scancode_table[i];
             if (scancode == SDL_SCANCODE_UNKNOWN ||
                 (keymap[scancode] & SDLK_SCANCODE_MASK)) {
                 continue;
@@ -407,7 +407,7 @@ UpdateKeymap(SDL_VideoData *data)
             UInt32 c, state = 0;
 
             /* Make sure this scancode is a valid character scancode */
-            scancode = scancode_table[i];
+            scancode = darwin_scancode_table[i];
             if (scancode == SDL_SCANCODE_UNKNOWN ||
                 (keymap[scancode] & SDLK_SCANCODE_MASK)) {
                 continue;
@@ -487,8 +487,8 @@ Cocoa_HandleKeyEvent(_THIS, NSEvent *event)
         /* see comments in SDL_cocoakeys.h */
         scancode = 60 - scancode;
     }
-    if (scancode < SDL_arraysize(scancode_table)) {
-        code = scancode_table[scancode];
+    if (scancode < SDL_arraysize(darwin_scancode_table)) {
+        code = darwin_scancode_table[scancode];
     }
     else {
         /* Hmm, does this ever happen?  If so, need to extend the keymap... */
