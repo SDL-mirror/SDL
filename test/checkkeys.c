@@ -63,8 +63,10 @@ PrintKey(SDL_keysym * sym, int pressed)
                SDL_GetScancodeName(sym->scancode),
                sym->sym, SDL_GetKeyName(sym->sym));
     } else {
-        printf("Unknown Key (scancode = 0x%04X) %s ",
-               sym->scancode, pressed ? "pressed" : "released");
+        printf("Unknown Key (scancode = 0x%04X = %s) %s ",
+               sym->scancode,
+               SDL_GetScancodeName(sym->scancode),
+               pressed ? "pressed" : "released");
     }
 
     /* Print the translated character, if one exists */

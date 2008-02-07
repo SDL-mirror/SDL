@@ -37,7 +37,7 @@ struct SDL_Keyboard
     /* Data common to all keyboards */
     SDL_WindowID focus;
     Uint16 modstate;
-    Uint8 keystate[(SDL_NUM_SCANCODES + 7) / 8];
+    Uint8 keystate[SDL_NUM_SCANCODES];
     SDLKey keymap[SDL_NUM_SCANCODES];
 
     void *driverdata;
