@@ -277,14 +277,16 @@ static KeySym XKeySymTable[SDL_NUM_SCANCODES] = {
     0,                          /* SDL_SCANCODE_SLEEP ? */
 };
 
+/* *INDENT-OFF* */
 static struct
 {
     SDL_scancode *table;
     int table_size;
 } scancode_set[] = {
-    {
-    darwin_scancode_table, SDL_arraysize(darwin_scancode_table)}, {
-xfree86_scancode_table, SDL_arraysize(xfree86_scancode_table)},};
+    { darwin_scancode_table, SDL_arraysize(darwin_scancode_table) },
+    { xfree86_scancode_table, SDL_arraysize(xfree86_scancode_table) },
+};
+/* *INDENT-OFF* */
 
 int
 X11_InitKeyboard(_THIS)

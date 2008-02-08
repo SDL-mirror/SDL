@@ -47,356 +47,6 @@
 #define GET_XBUTTON_WPARAM(w) (HIWORD(w))
 #endif
 
-static SDLKey
-TranslateKey(WPARAM vkey)
-{
-    SDLKey key;
-
-    /* FIXME: Assign vkey directly to key if in ASCII range */
-    switch (vkey) {
-    case VK_BACK:
-        key = SDLK_BACKSPACE;
-        break;
-    case VK_TAB:
-        key = SDLK_TAB;
-        break;
-    case VK_CLEAR:
-        key = SDLK_CLEAR;
-        break;
-    case VK_RETURN:
-        key = SDLK_RETURN;
-        break;
-    case VK_PAUSE:
-        key = SDLK_PAUSE;
-        break;
-    case VK_ESCAPE:
-        key = SDLK_ESCAPE;
-        break;
-    case VK_SPACE:
-        key = SDLK_SPACE;
-        break;
-    case VK_APOSTROPHE:
-        key = SDLK_QUOTE;
-        break;
-    case VK_COMMA:
-        key = SDLK_COMMA;
-        break;
-    case VK_MINUS:
-        key = SDLK_MINUS;
-        break;
-    case VK_PERIOD:
-        key = SDLK_PERIOD;
-        break;
-    case VK_SLASH:
-        key = SDLK_SLASH;
-        break;
-    case VK_0:
-        key = SDLK_0;
-        break;
-    case VK_1:
-        key = SDLK_1;
-        break;
-    case VK_2:
-        key = SDLK_2;
-        break;
-    case VK_3:
-        key = SDLK_3;
-        break;
-    case VK_4:
-        key = SDLK_4;
-        break;
-    case VK_5:
-        key = SDLK_5;
-        break;
-    case VK_6:
-        key = SDLK_6;
-        break;
-    case VK_7:
-        key = SDLK_7;
-        break;
-    case VK_8:
-        key = SDLK_8;
-        break;
-    case VK_9:
-        key = SDLK_9;
-        break;
-    case VK_SEMICOLON:
-        key = SDLK_SEMICOLON;
-        break;
-    case VK_EQUALS:
-        key = SDLK_EQUALS;
-        break;
-    case VK_LBRACKET:
-        key = SDLK_LEFTBRACKET;
-        break;
-    case VK_BACKSLASH:
-        key = SDLK_BACKSLASH;
-        break;
-    case VK_OEM_102:
-        key = SDLK_LESS;
-        break;
-    case VK_RBRACKET:
-        key = SDLK_RIGHTBRACKET;
-        break;
-    case VK_GRAVE:
-        key = SDLK_BACKQUOTE;
-        break;
-    case VK_BACKTICK:
-        key = SDLK_BACKQUOTE;
-        break;
-    case VK_A:
-        key = SDLK_a;
-        break;
-    case VK_B:
-        key = SDLK_b;
-        break;
-    case VK_C:
-        key = SDLK_c;
-        break;
-    case VK_D:
-        key = SDLK_d;
-        break;
-    case VK_E:
-        key = SDLK_e;
-        break;
-    case VK_F:
-        key = SDLK_f;
-        break;
-    case VK_G:
-        key = SDLK_g;
-        break;
-    case VK_H:
-        key = SDLK_h;
-        break;
-    case VK_I:
-        key = SDLK_i;
-        break;
-    case VK_J:
-        key = SDLK_j;
-        break;
-    case VK_K:
-        key = SDLK_k;
-        break;
-    case VK_L:
-        key = SDLK_l;
-        break;
-    case VK_M:
-        key = SDLK_m;
-        break;
-    case VK_N:
-        key = SDLK_n;
-        break;
-    case VK_O:
-        key = SDLK_o;
-        break;
-    case VK_P:
-        key = SDLK_p;
-        break;
-    case VK_Q:
-        key = SDLK_q;
-        break;
-    case VK_R:
-        key = SDLK_r;
-        break;
-    case VK_S:
-        key = SDLK_s;
-        break;
-    case VK_T:
-        key = SDLK_t;
-        break;
-    case VK_U:
-        key = SDLK_u;
-        break;
-    case VK_V:
-        key = SDLK_v;
-        break;
-    case VK_W:
-        key = SDLK_w;
-        break;
-    case VK_X:
-        key = SDLK_x;
-        break;
-    case VK_Y:
-        key = SDLK_y;
-        break;
-    case VK_Z:
-        key = SDLK_z;
-        break;
-    case VK_DELETE:
-        key = SDLK_DELETE;
-        break;
-    case VK_NUMPAD0:
-        key = SDLK_KP0;
-        break;
-    case VK_NUMPAD1:
-        key = SDLK_KP1;
-        break;
-    case VK_NUMPAD2:
-        key = SDLK_KP2;
-        break;
-    case VK_NUMPAD3:
-        key = SDLK_KP3;
-        break;
-    case VK_NUMPAD4:
-        key = SDLK_KP4;
-        break;
-    case VK_NUMPAD5:
-        key = SDLK_KP5;
-        break;
-    case VK_NUMPAD6:
-        key = SDLK_KP6;
-        break;
-    case VK_NUMPAD7:
-        key = SDLK_KP7;
-        break;
-    case VK_NUMPAD8:
-        key = SDLK_KP8;
-        break;
-    case VK_NUMPAD9:
-        key = SDLK_KP9;
-        break;
-    case VK_DECIMAL:
-        key = SDLK_KP_PERIOD;
-        break;
-    case VK_DIVIDE:
-        key = SDLK_KP_DIVIDE;
-        break;
-    case VK_MULTIPLY:
-        key = SDLK_KP_MULTIPLY;
-        break;
-    case VK_SUBTRACT:
-        key = SDLK_KP_MINUS;
-        break;
-    case VK_ADD:
-        key = SDLK_KP_PLUS;
-        break;
-    case VK_UP:
-        key = SDLK_UP;
-        break;
-    case VK_DOWN:
-        key = SDLK_DOWN;
-        break;
-    case VK_RIGHT:
-        key = SDLK_RIGHT;
-        break;
-    case VK_LEFT:
-        key = SDLK_LEFT;
-        break;
-    case VK_INSERT:
-        key = SDLK_INSERT;
-        break;
-    case VK_HOME:
-        key = SDLK_HOME;
-        break;
-    case VK_END:
-        key = SDLK_END;
-        break;
-    case VK_PRIOR:
-        key = SDLK_PAGEUP;
-        break;
-    case VK_NEXT:
-        key = SDLK_PAGEDOWN;
-        break;
-    case VK_F1:
-        key = SDLK_F1;
-        break;
-    case VK_F2:
-        key = SDLK_F2;
-        break;
-    case VK_F3:
-        key = SDLK_F3;
-        break;
-    case VK_F4:
-        key = SDLK_F4;
-        break;
-    case VK_F5:
-        key = SDLK_F5;
-        break;
-    case VK_F6:
-        key = SDLK_F6;
-        break;
-    case VK_F7:
-        key = SDLK_F7;
-        break;
-    case VK_F8:
-        key = SDLK_F8;
-        break;
-    case VK_F9:
-        key = SDLK_F9;
-        break;
-    case VK_F10:
-        key = SDLK_F10;
-        break;
-    case VK_F11:
-        key = SDLK_F11;
-        break;
-    case VK_F12:
-        key = SDLK_F12;
-        break;
-    case VK_F13:
-        key = SDLK_F13;
-        break;
-    case VK_F14:
-        key = SDLK_F14;
-        break;
-    case VK_F15:
-        key = SDLK_F15;
-        break;
-    case VK_NUMLOCK:
-        key = SDLK_NUMLOCK;
-        break;
-    case VK_CAPITAL:
-        key = SDLK_CAPSLOCK;
-        break;
-    case VK_SCROLL:
-        key = SDLK_SCROLLOCK;
-        break;
-    case VK_RSHIFT:
-        key = SDLK_RSHIFT;
-        break;
-    case VK_LSHIFT:
-        key = SDLK_LSHIFT;
-        break;
-    case VK_RCONTROL:
-        key = SDLK_RCTRL;
-        break;
-    case VK_LCONTROL:
-        key = SDLK_LCTRL;
-        break;
-    case VK_RMENU:
-        key = SDLK_RALT;
-        break;
-    case VK_LMENU:
-        key = SDLK_LALT;
-        break;
-    case VK_RWIN:
-        key = SDLK_RSUPER;
-        break;
-    case VK_LWIN:
-        key = SDLK_LSUPER;
-        break;
-    case VK_HELP:
-        key = SDLK_HELP;
-        break;
-    case VK_PRINT:
-        key = SDLK_PRINT;
-        break;
-    case VK_SNAPSHOT:
-        key = SDLK_PRINT;
-        break;
-    case VK_CANCEL:
-        key = SDLK_BREAK;
-        break;
-    case VK_APPS:
-        key = SDLK_MENU;
-        break;
-    default:
-        key = SDLK_UNKNOWN;
-        break;
-    }
-    return key;
-}
-
 LRESULT CALLBACK
 WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -670,11 +320,11 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             case VK_SHIFT:
                 /* EXTENDED trick doesn't work here */
                 {
-                    Uint8 *state = SDL_GetKeyState(NULL);
-                    if (state[SDLK_LSHIFT] == SDL_RELEASED
+                    Uint8 *state = SDL_GetKeyboardState(NULL);
+                    if (state[SDL_SCANCODE_LSHIFT] == SDL_RELEASED
                         && (GetKeyState(VK_LSHIFT) & 0x8000)) {
                         wParam = VK_LSHIFT;
-                    } else if (state[SDLK_RSHIFT] == SDL_RELEASED
+                    } else if (state[SDL_SCANCODE_RSHIFT] == SDL_RELEASED
                                && (GetKeyState(VK_RSHIFT) & 0x8000)) {
                         wParam = VK_RSHIFT;
                     } else {
@@ -690,8 +340,10 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                     wParam = VK_LMENU;
                 break;
             }
-            SDL_SendKeyboardKey(index, SDL_PRESSED, (Uint8) HIWORD(lParam),
-                                TranslateKey(wParam));
+            if (wParam < 256) {
+                SDL_SendKeyboardKey(index, SDL_PRESSED,
+                                    data->videodata->key_layout[wParam]);
+            }
         }
         return (0);
 
@@ -711,11 +363,11 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             case VK_SHIFT:
                 /* EXTENDED trick doesn't work here */
                 {
-                    Uint8 *state = SDL_GetKeyState(NULL);
-                    if (state[SDLK_LSHIFT] == SDL_PRESSED
+                    Uint8 *state = SDL_GetKeyboardState(NULL);
+                    if (state[SDL_SCANCODE_LSHIFT] == SDL_PRESSED
                         && !(GetKeyState(VK_LSHIFT) & 0x8000)) {
                         wParam = VK_LSHIFT;
-                    } else if (state[SDLK_RSHIFT] == SDL_PRESSED
+                    } else if (state[SDL_SCANCODE_RSHIFT] == SDL_PRESSED
                                && !(GetKeyState(VK_RSHIFT) & 0x8000)) {
                         wParam = VK_RSHIFT;
                     } else {
@@ -733,13 +385,15 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             }
             /* Windows only reports keyup for print screen */
             if (wParam == VK_SNAPSHOT
-                && SDL_GetKeyState(NULL)[SDLK_PRINT] == SDL_RELEASED) {
+                && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_PRINTSCREEN] ==
+                SDL_RELEASED) {
                 SDL_SendKeyboardKey(index, SDL_PRESSED,
-                                    (Uint8) HIWORD(lParam),
-                                    TranslateKey(wParam));
+                                    data->videodata->key_layout[wParam]);
             }
-            SDL_SendKeyboardKey(index, SDL_RELEASED, (Uint8) HIWORD(lParam),
-                                TranslateKey(wParam));
+            if (wParam < 256) {
+                SDL_SendKeyboardKey(index, SDL_RELEASED,
+                                    data->videodata->key_layout[wParam]);
+            }
         }
         return (0);
 

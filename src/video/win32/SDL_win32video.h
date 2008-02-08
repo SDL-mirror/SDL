@@ -63,6 +63,7 @@ typedef struct SDL_VideoData
 #endif
     int mouse;
     int keyboard;
+    SDL_scancode *key_layout;
 } SDL_VideoData;
 
 #endif /* _SDL_win32video_h */

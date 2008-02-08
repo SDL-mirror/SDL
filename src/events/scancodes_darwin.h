@@ -20,7 +20,7 @@
     slouken@libsdl.org
 */
 
-/* Mac virtual key code to SDLKey mapping table
+/* Mac virtual key code to SDL scancode mapping table
    Sources:
    - Inside Macintosh: Text <http://developer.apple.com/documentation/mac/Text/Text-571.html>
    - Apple USB keyboard driver source <http://darwinsource.opendarwin.org/10.4.6.ppc/IOHIDFamily-172.8/IOHIDFamily/Cosmo_USB2ADB.c>
