@@ -47,6 +47,33 @@
 #define GET_XBUTTON_WPARAM(w) (HIWORD(w))
 #endif
 
+static WPARAM
+RemapVKEY(WPARAM wParam, LPARAM lParam)
+{
+    /* Windows remaps alphabetic keys based on current layout.
+       We try to provide USB scancodes, so undo this mapping.
+     */
+    if (wParam >= 'A' && wParam <= 'Z') {
+        /* Alphabetic scancodes for PC keyboards */
+        static BYTE scancodes[26] = {
+            30, 48, 46, 32, 18, 33, 34, 35, 23, 36, 37, 38, 50, 49, 24,
+            25, 16, 19, 31, 20, 22, 47, 17, 45, 21, 44
+        };
+        BYTE scancode = (lParam >> 16) & 0xFF;
+        int i;
+
+        if (scancode != scancodes[wParam - 'A']) {
+            for (i = 0; i < SDL_arraysize(scancodes); ++i) {
+                if (scancode == scancodes[i]) {
+                    wParam = 'A' + i;
+                    break;
+                }
+            }
+        }
+    }
+    return wParam;
+}
+
 LRESULT CALLBACK
 WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -310,6 +337,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             }
 
             index = data->videodata->keyboard;
+            wParam = RemapVKEY(wParam, lParam);
             switch (wParam) {
             case VK_CONTROL:
                 if (lParam & EXTENDED_KEYMASK)
@@ -353,6 +381,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             int index;
 
             index = data->videodata->keyboard;
+            wParam = RemapVKEY(wParam, lParam);
             switch (wParam) {
             case VK_CONTROL:
                 if (lParam & EXTENDED_KEYMASK)
