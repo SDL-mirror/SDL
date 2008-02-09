@@ -26,17 +26,43 @@
 #include "../../events/SDL_keyboard_c.h"
 #include "../../events/scancodes_win32.h"
 
+#ifndef MAPVK_VK_TO_VSC
+#define MAPVK_VK_TO_VSC     0
+#endif
+#ifndef MAPVK_VSC_TO_VK
+#define MAPVK_VSC_TO_VK     1
+#endif
+#ifndef MAPVK_VK_TO_CHAR
+#define MAPVK_VK_TO_CHAR    2
+#endif
+
+/* Alphabetic scancodes for PC keyboards */
+BYTE alpha_scancodes[26] = {
+    30, 48, 46, 32, 18, 33, 34, 35, 23, 36, 37, 38, 50, 49, 24,
+    25, 16, 19, 31, 20, 22, 47, 17, 45, 21, 44
+};
+
 void
 WIN_InitKeyboard(_THIS)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     SDL_Keyboard keyboard;
+    int i;
+
+    /* Make sure the alpha scancodes are correct.  T isn't usually remapped */
+    if (MapVirtualKey('T', MAPVK_VK_TO_VSC) != alpha_scancodes['T'-'A']) {
+printf("Fixing alpha scancode map, assuming US QWERTY layout!\nPlease send the following 26 lines of output to the SDL mailing list <sdl@libsdl.org>, including a description of your keyboard hardware.\n");
+        for (i = 0; i < SDL_arraysize(alpha_scancodes); ++i) {
+            alpha_scancodes[i] = MapVirtualKey('A'+i, MAPVK_VK_TO_VSC);
+printf("%d = %d\n", i, alpha_scancodes[i]);
+        }
+    }
 
     data->key_layout = win32_scancode_table;
 
     SDL_zero(keyboard);
     data->keyboard = SDL_AddKeyboard(&keyboard, -1);
-    WIN_UpdateKeymap(_this);
+    WIN_UpdateKeymap(data->keyboard);
 
     SDL_SetScancodeName(SDL_SCANCODE_APPLICATION, "Menu");
     SDL_SetScancodeName(SDL_SCANCODE_LGUI, "Left Windows");
@@ -44,9 +70,8 @@ WIN_InitKeyboard(_THIS)
 }
 
 void
-WIN_UpdateKeymap(_THIS)
+WIN_UpdateKeymap(int keyboard)
 {
-    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     int i;
     SDL_scancode scancode;
     SDLKey keymap[SDL_NUM_SCANCODES];
@@ -61,12 +86,16 @@ WIN_UpdateKeymap(_THIS)
             (keymap[scancode] & SDLK_SCANCODE_MASK)) {
             continue;
         }
-#ifndef MAPVK_VK_TO_CHAR
-#define MAPVK_VK_TO_CHAR    2
-#endif
-        keymap[scancode] = (MapVirtualKey(i, MAPVK_VK_TO_CHAR) & 0x7FFF);
+
+        /* Alphabetic keys are handled specially, since Windows remaps them */
+        if (i >= 'A' && i <= 'Z') {
+            BYTE vsc = alpha_scancodes[i-'A'];
+            keymap[scancode] = MapVirtualKey(vsc, MAPVK_VSC_TO_VK) + 0x20;
+        } else {
+            keymap[scancode] = (MapVirtualKey(i, MAPVK_VK_TO_CHAR) & 0x7FFF);
+        }
     }
-    SDL_SetKeymap(data->keyboard, 0, keymap, SDL_NUM_SCANCODES);
+    SDL_SetKeymap(keyboard, 0, keymap, SDL_NUM_SCANCODES);
 }
 
 void

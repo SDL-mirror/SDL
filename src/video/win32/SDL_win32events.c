@@ -54,17 +54,12 @@ RemapVKEY(WPARAM wParam, LPARAM lParam)
        We try to provide USB scancodes, so undo this mapping.
      */
     if (wParam >= 'A' && wParam <= 'Z') {
-        /* Alphabetic scancodes for PC keyboards */
-        static BYTE scancodes[26] = {
-            30, 48, 46, 32, 18, 33, 34, 35, 23, 36, 37, 38, 50, 49, 24,
-            25, 16, 19, 31, 20, 22, 47, 17, 45, 21, 44
-        };
         BYTE scancode = (lParam >> 16) & 0xFF;
         int i;
 
-        if (scancode != scancodes[wParam - 'A']) {
-            for (i = 0; i < SDL_arraysize(scancodes); ++i) {
-                if (scancode == scancodes[i]) {
+        if (scancode != alpha_scancodes[wParam - 'A']) {
+            for (i = 0; i < SDL_arraysize(alpha_scancodes); ++i) {
+                if (scancode == alpha_scancodes[i]) {
                     wParam = 'A' + i;
                     break;
                 }
@@ -447,6 +442,12 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             SDL_SendKeyboardText(data->videodata->keyboard, text);
         }
         return (0);
+
+    case WM_INPUTLANGCHANGE:
+        {
+            WIN_UpdateKeymap(data->videodata->keyboard);
+        }
+        return (1);
 
     case WM_GETMINMAXINFO:
         {
