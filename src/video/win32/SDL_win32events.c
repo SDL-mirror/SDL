@@ -397,6 +397,28 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         }
         return (0);
 
+    case WM_CHAR:
+        {
+            char text[4];
+
+            /* Convert to UTF-8 and send it on... */
+            if (wParam <= 0x7F) {
+                text[0] = (char) wParam;
+                text[1] = '\0';
+            } else if (wParam <= 0x7FF) {
+                text[0] = 0xC0 | (char) ((wParam >> 6) & 0x1F);
+                text[1] = 0x80 | (char) (wParam & 0x3F);
+                text[2] = '\0';
+            } else {
+                text[0] = 0xE0 | (char) ((wParam >> 12) & 0x0F);
+                text[1] = 0x80 | (char) ((wParam >> 6) & 0x3F);
+                text[2] = 0x80 | (char) (wParam & 0x3F);
+                text[3] = '\0';
+            }
+            SDL_SendKeyboardText(data->videodata->keyboard, text);
+        }
+        return (0);
+
     case WM_GETMINMAXINFO:
         {
             MINMAXINFO *info;
