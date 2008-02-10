@@ -57,13 +57,13 @@ PrintKey(SDL_keysym * sym, int pressed)
 {
     /* Print the keycode, name and state */
     if (sym->sym) {
-        printf("Key %s:  scancode 0x%04X = %s, keycode 0x%08X = %s ",
+        printf("Key %s:  scancode %d = %s, keycode 0x%08X = %s ",
                pressed ? "pressed " : "released",
                sym->scancode,
                SDL_GetScancodeName(sym->scancode),
                sym->sym, SDL_GetKeyName(sym->sym));
     } else {
-        printf("Unknown Key (scancode = 0x%04X = %s) %s ",
+        printf("Unknown Key (scancode %d = %s) %s ",
                sym->scancode,
                SDL_GetScancodeName(sym->scancode),
                pressed ? "pressed" : "released");
