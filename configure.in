@@ -1234,8 +1234,8 @@ dnl Find DirectFB
 CheckDirectFB()
 {
     AC_ARG_ENABLE(video-directfb,
-AC_HELP_STRING([--enable-video-directfb], [use DirectFB video driver [[default=yes]]]),
-                  , enable_video_directfb=yes)
+AC_HELP_STRING([--enable-video-directfb], [use DirectFB video driver [[default=no]]]),
+                  , enable_video_directfb=no)
     if test x$enable_video = xyes -a x$enable_video_directfb = xyes; then
         video_directfb=no
 
