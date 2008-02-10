@@ -36,6 +36,8 @@
 #define REPEATED_KEYMASK	(1<<30)
 #define EXTENDED_KEYMASK	(1<<24)
 
+#define VK_ENTER    10  /* Keypad Enter ... no VKEY defined? */
+
 /* Make sure XBUTTON stuff is defined that isn't in older Platform SDKs... */
 #ifndef WM_XBUTTONDOWN
 #define WM_XBUTTONDOWN 0x020B
@@ -362,6 +364,10 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 else
                     wParam = VK_LMENU;
                 break;
+            case VK_RETURN:
+                if (lParam & EXTENDED_KEYMASK)
+                    wParam = VK_ENTER;
+                break;
             }
             if (wParam < 256) {
                 SDL_SendKeyboardKey(index, SDL_PRESSED,
@@ -405,6 +411,10 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                     wParam = VK_RMENU;
                 else
                     wParam = VK_LMENU;
+                break;
+            case VK_RETURN:
+                if (lParam & EXTENDED_KEYMASK)
+                    wParam = VK_ENTER;
                 break;
             }
             /* Windows only reports keyup for print screen */

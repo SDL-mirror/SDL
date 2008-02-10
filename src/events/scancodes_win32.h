@@ -37,7 +37,7 @@ static SDL_scancode win32_scancode_table[] = {
     /*  7, 0x07 */      SDL_SCANCODE_UNKNOWN,
     /*  8, 0x08 */      SDL_SCANCODE_BACKSPACE,
     /*  9, 0x09 */      SDL_SCANCODE_TAB,
-    /*  10, 0x0a */     SDL_SCANCODE_UNKNOWN,
+    /*  10, 0x0a */     SDL_SCANCODE_KP_ENTER, /* Not a VKEY, SDL specific */
     /*  11, 0x0b */     SDL_SCANCODE_UNKNOWN,
     /*  12, 0x0c */     SDL_SCANCODE_CLEAR,
     /*  13, 0x0d */     SDL_SCANCODE_RETURN,
