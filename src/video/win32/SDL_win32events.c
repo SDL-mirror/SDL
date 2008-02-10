@@ -54,7 +54,7 @@ RemapVKEY(WPARAM wParam, LPARAM lParam)
        We try to provide USB scancodes, so undo this mapping.
      */
     if (wParam >= 'A' && wParam <= 'Z') {
-        BYTE scancode = (lParam >> 16) & 0xFF;
+        BYTE scancode = (BYTE)((lParam >> 16) & 0xFF);
         int i;
 
         if (scancode != alpha_scancodes[wParam - 'A']) {

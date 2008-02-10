@@ -26,6 +26,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testfile", "testfile\testfi
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testgl2", "testgl2\testgl2.vcproj", "{8B5CFB38-CCBA-40A8-AD7A-89C57B070884}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "checkkeys", "checkkeys\checkkeys.vcproj", "{26828762-C95D-4637-9CB1-7F0979523813}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -84,6 +86,10 @@ Global
 		{8B5CFB38-CCBA-40A8-AD7A-89C57B070884}.Debug|Win32.Build.0 = Debug|Win32
 		{8B5CFB38-CCBA-40A8-AD7A-89C57B070884}.Release|Win32.ActiveCfg = Release|Win32
 		{8B5CFB38-CCBA-40A8-AD7A-89C57B070884}.Release|Win32.Build.0 = Release|Win32
+		{26828762-C95D-4637-9CB1-7F0979523813}.Debug|Win32.ActiveCfg = Debug|Win32
+		{26828762-C95D-4637-9CB1-7F0979523813}.Debug|Win32.Build.0 = Debug|Win32
+		{26828762-C95D-4637-9CB1-7F0979523813}.Release|Win32.ActiveCfg = Release|Win32
+		{26828762-C95D-4637-9CB1-7F0979523813}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

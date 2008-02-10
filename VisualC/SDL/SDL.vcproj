@@ -417,6 +417,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\video\SDL_blit_auto.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\video\SDL_blit_auto.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\video\SDL_blit_copy.c"
 			>
 		</File>
@@ -426,6 +434,10 @@
 		</File>
 		<File
 			RelativePath="..\..\src\video\SDL_blit_N.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\video\SDL_blit_slow.c"
 			>
 		</File>
 		<File
@@ -510,6 +522,10 @@
 		</File>
 		<File
 			RelativePath="..\..\src\SDL_fatal.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\video\SDL_fill.c"
 			>
 		</File>
 		<File
@@ -646,14 +662,6 @@
 		</File>
 		<File
 			RelativePath="..\..\src\video\SDL_rect_c.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\video\SDL_rendercopy.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\video\SDL_rendercopy.h"
 			>
 		</File>
 		<File
