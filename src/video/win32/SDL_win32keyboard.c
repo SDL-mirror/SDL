@@ -41,6 +41,9 @@ BYTE alpha_scancodes[26] = {
     30, 48, 46, 32, 18, 33, 34, 35, 23, 36, 37, 38, 50, 49, 24,
     25, 16, 19, 31, 20, 22, 47, 17, 45, 21, 44
 };
+BYTE keypad_scancodes[10] = {
+    82, 79, 80, 81, 75, 76, 77, 71, 72, 73
+};
 
 void
 WIN_InitKeyboard(_THIS)
@@ -55,6 +58,13 @@ printf("Fixing alpha scancode map, assuming US QWERTY layout!\nPlease send the f
         for (i = 0; i < SDL_arraysize(alpha_scancodes); ++i) {
             alpha_scancodes[i] = MapVirtualKey('A'+i, MAPVK_VK_TO_VSC);
 printf("%d = %d\n", i, alpha_scancodes[i]);
+        }
+    }
+    if (MapVirtualKey(VK_NUMPAD0, MAPVK_VK_TO_VSC) != keypad_scancodes[0]) {
+printf("Fixing keypad scancode map!\nPlease send the following 10 lines of output to the SDL mailing list <sdl@libsdl.org>, including a description of your keyboard hardware.\n");
+        for (i = 0; i < SDL_arraysize(keypad_scancodes); ++i) {
+            keypad_scancodes[i] = MapVirtualKey(VK_NUMPAD0+i, MAPVK_VK_TO_VSC);
+printf("%d = %d\n", i, keypad_scancodes[i]);
         }
     }
 

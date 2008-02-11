@@ -25,6 +25,7 @@
 #define _SDL_win32keyboard_h
 
 extern BYTE alpha_scancodes[26];
+extern BYTE keypad_scancodes[10];
 
 extern void WIN_InitKeyboard(_THIS);
 extern void WIN_UpdateKeymap(int keyboard);
