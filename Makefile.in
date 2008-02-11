@@ -194,8 +194,7 @@ commit: indent
 
 # Create a SVN snapshot that people can run update on
 snapshot:
-	svn co http://svn.libsdl.org/trunk/SDL
-	mv SDL SDL-1.3
+	svn co http://svn.libsdl.org/trunk/SDL SDL-1.3
 	(cd SDL-1.3 && ./autogen.sh && rm -rf autom4te.cache)
 	cp SDL-1.3/include/SDL_config.h.default SDL-1.3/include/SDL_config.h
 	tar zcf $(HOME)/SDL-1.3.tar.gz SDL-1.3
