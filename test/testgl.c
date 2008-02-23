@@ -666,8 +666,8 @@ RunGLTest(int argc, char *argv[],
         }
 
         /* Check if there's a pending event. */
-        while (!done && SDL_PollEvent(&event)) {
-            done = HandleEvent(&event);
+        while (SDL_PollEvent(&event)) {
+            done |= HandleEvent(&event);
         }
         ++frames;
     }
