@@ -48,9 +48,16 @@ struct {
 	SDL_Event evt;    /* the event we are supposed to repeat */
 } SDL_KeyRepeat;
 
+/* Global no-lock-keys support */
+static Uint8 SDL_NoLockKeys;
+
+#define SDL_NLK_CAPS 0x01
+#define SDL_NLK_NUM  0x02
+
 /* Public functions */
 int SDL_KeyboardInit(void)
 {
+	const char* env;
 	SDL_VideoDevice *video = current_video;
 	SDL_VideoDevice *this  = current_video;
 
@@ -64,6 +71,25 @@ int SDL_KeyboardInit(void)
 	video->InitOSKeymap(this);
 
 	SDL_EnableKeyRepeat(0, 0);
+
+	/* Allow environment override to disable special lock-key behavior */
+	env = getenv("SDL_NO_LOCK_KEYS");
+	SDL_NoLockKeys = 0;
+	if (env) {
+		switch (SDL_atoi(env)) {
+			case 1:
+				SDL_NoLockKeys = SDL_NLK_CAPS | SDL_NLK_NUM;
+				break;
+			case 2:
+				SDL_NoLockKeys = SDL_NLK_CAPS;
+				break;
+			case 3:
+				SDL_NoLockKeys = SDL_NLK_NUM;
+				break;
+			default:
+				break;
+		}
+	}
 
 	/* Fill in the blanks in keynames */
 	keynames[SDLK_BACKSPACE] = "backspace";
@@ -394,12 +420,16 @@ printf("The '%s' key has been %s\n", SDL_GetKeyName(keysym->sym),
 				break;
 			case SDLK_NUMLOCK:
 				modstate ^= KMOD_NUM;
+				if ( SDL_NoLockKeys & SDL_NLK_NUM )
+					break;
 				if ( ! (modstate&KMOD_NUM) )
 					state = SDL_RELEASED;
 				keysym->mod = (SDLMod)modstate;
 				break;
 			case SDLK_CAPSLOCK:
 				modstate ^= KMOD_CAPS;
+				if ( SDL_NoLockKeys & SDL_NLK_CAPS )
+					break;
 				if ( ! (modstate&KMOD_CAPS) )
 					state = SDL_RELEASED;
 				keysym->mod = (SDLMod)modstate;
@@ -440,7 +470,13 @@ printf("The '%s' key has been %s\n", SDL_GetKeyName(keysym->sym),
 			case SDLK_UNKNOWN:
 				break;
 			case SDLK_NUMLOCK:
+				if ( SDL_NoLockKeys & SDL_NLK_NUM )
+					break;
+				/* Only send keydown events */
+				return(0);
 			case SDLK_CAPSLOCK:
+				if ( SDL_NoLockKeys & SDL_NLK_CAPS )
+					break;
 				/* Only send keydown events */
 				return(0);
 			case SDLK_LCTRL:
