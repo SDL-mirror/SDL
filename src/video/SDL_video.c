@@ -503,7 +503,6 @@ static void SDL_ClearSurface(SDL_Surface *surface)
 		SDL_Flip(surface);
 		SDL_FillRect(surface, NULL, black);
 	}
-	SDL_Flip(surface);
 }
 
 /*
