@@ -396,7 +396,15 @@ int DIB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 	/* Allow environment override of screensaver disable. */
 	env = SDL_getenv("SDL_VIDEO_ALLOW_SCREENSAVER");
-	this->hidden->allow_screensaver = ( (env && SDL_atoi(env)) ? 1 : 0 );
+	if ( env ) {
+		allow_screensaver = SDL_atoi(env);
+	} else {
+#ifdef SDL_VIDEO_DISABLE_SCREENSAVER
+		allow_screensaver = 0;
+#else
+		allow_screensaver = 1;
+#endif
+	}
 
 	/* We're done! */
 	return(0);

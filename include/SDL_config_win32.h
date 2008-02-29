@@ -172,6 +172,9 @@ typedef unsigned int uintptr_t;
 #define SDL_VIDEO_OPENGL_WGL	1
 #endif
 
+/* Disable screensaver */
+#define SDL_VIDEO_DISABLE_SCREENSAVER	1
+
 /* Enable assembly routines (Win64 doesn't have inline asm) */
 #ifndef _WIN64
 #define SDL_ASSEMBLY_ROUTINES	1

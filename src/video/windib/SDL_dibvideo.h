@@ -43,8 +43,6 @@ struct SDL_PrivateVideoData {
     LOGPALETTE *screen_logpal;
     BOOL grab_palette;
 
-    int allow_screensaver;
-
 #define NUM_MODELISTS	4		/* 8, 16, 24, and 32 bits-per-pixel */
     int SDL_nummodes[NUM_MODELISTS];
     SDL_Rect **SDL_modelist[NUM_MODELISTS];
@@ -56,6 +54,9 @@ struct SDL_PrivateVideoData {
 	int supportRotation; /* for Pocket PC devices */
 	DWORD origRotation; /* for Pocket PC devices */
 #endif
+
+    /* Screensaver settings */
+    int allow_screensaver;
 };
 /* Old variable names */
 #define screen_bmp		(this->hidden->screen_bmp)
@@ -64,5 +65,6 @@ struct SDL_PrivateVideoData {
 #define grab_palette		(this->hidden->grab_palette)
 #define SDL_nummodes		(this->hidden->SDL_nummodes)
 #define SDL_modelist		(this->hidden->SDL_modelist)
+#define allow_screensaver	(this->hidden->allow_screensaver)
 
 #endif /* _SDL_dibvideo_h */

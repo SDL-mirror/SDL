@@ -137,9 +137,21 @@ void DGA_PumpEvents(_THIS)
 {
 	/* Keep processing pending events */
 	LOCK_DISPLAY();
+
+	/* Update activity every five seconds to prevent screensaver. --ryan. */
+	if (!allow_screensaver) {
+		static Uint32 screensaverTicks;
+		Uint32 nowTicks = SDL_GetTicks();
+		if ((nowTicks - screensaverTicks) > 5000) {
+			XResetScreenSaver(DGA_Display);
+			screensaverTicks = nowTicks;
+		}
+	}
+
 	while ( X11_Pending(DGA_Display) ) {
 		DGA_DispatchEvent(this);
 	}
+
 	UNLOCK_DISPLAY();
 }
 

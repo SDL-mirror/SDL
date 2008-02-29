@@ -46,9 +46,6 @@
 #if SDL_VIDEO_DRIVER_X11_XME
 #include "../Xext/extensions/xme.h"
 #endif
-#if SDL_VIDEO_DRIVER_X11_DPMS
-#include <X11/extensions/dpms.h>
-#endif
 
 #include "SDL_x11dyn.h"
 
@@ -139,8 +136,6 @@ struct SDL_PrivateVideoData {
     int use_xme;
     int currently_fullscreen;
 
-    int allow_screensaver;
-
     /* Automatic mode switching support (entering/leaving fullscreen) */
     Uint32 switch_waiting;
     Uint32 switch_time;
@@ -158,8 +153,7 @@ struct SDL_PrivateVideoData {
     short *iconcolors;		/* List of colors used by the icon */
 
     /* Screensaver settings */
-    int screensaver_timeout;
-    BOOL dpms_enabled;
+    int allow_screensaver;
 };
 
 /* Old variable names */
@@ -210,8 +204,8 @@ struct SDL_PrivateVideoData {
 #define gamma_saved		(this->hidden->gamma_saved)
 #define gamma_changed		(this->hidden->gamma_changed)
 #define SDL_iconcolors		(this->hidden->iconcolors)
-#define screensaver_timeout	(this->hidden->screensaver_timeout)
-#define dpms_enabled		(this->hidden->dpms_enabled)
+#define allow_screensaver	(this->hidden->allow_screensaver)
+
 /* Some versions of XFree86 have bugs - detect if this is one of them */
 #define BUGGY_XFREE86(condition, buggy_version) \
 ((SDL_strcmp(ServerVendor(SDL_Display), "The XFree86 Project, Inc") == 0) && \

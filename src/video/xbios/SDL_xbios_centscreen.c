@@ -85,10 +85,12 @@ void SDL_XBIOS_CentscreenSetmode(_THIS, int width, int height, int planes)
 	newmode.plan = planes;
 	Vwrite(0, &newmode, &curmode);
 
+#ifdef SDL_VIDEO_DISABLE_SCREENSAVER
 	/* Disable screensaver */
 	Vread(&newmode);
 	newmode.mode &= ~(CSCREEN_SAVER|CSCREEN_ENERGYSTAR);
 	Vwrite(0, &newmode, &curmode);
+#endif /* SDL_VIDEO_DISABLE_SCREENSAVER */
 }
 
 void SDL_XBIOS_CentscreenRestore(_THIS, int prev_handle)

@@ -556,7 +556,7 @@ static void create_aux_windows(_THIS)
 
 static int X11_VideoInit(_THIS, SDL_PixelFormat *vformat)
 {
-	const char *env = NULL;
+	const char *env;
 	char *display;
 	int i;
 
@@ -669,11 +669,15 @@ static int X11_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 	/* Allow environment override of screensaver disable. */
 	env = SDL_getenv("SDL_VIDEO_ALLOW_SCREENSAVER");
-	this->hidden->allow_screensaver = ( (env && SDL_atoi(env)) ? 1 : 0 );
-
-	/* Save DPMS and screensaver settings */
-	X11_SaveScreenSaver(SDL_Display, &screensaver_timeout, &dpms_enabled);
-	X11_DisableScreenSaver(this, SDL_Display);
+	if ( env ) {
+		allow_screensaver = SDL_atoi(env);
+	} else {
+#ifdef SDL_VIDEO_DISABLE_SCREENSAVER
+		allow_screensaver = 0;
+#else
+		allow_screensaver = 1;
+#endif
+	}
 
 	/* See if we have been passed a window to use */
 	SDL_windowid = SDL_getenv("SDL_WINDOWID");
@@ -1505,9 +1509,6 @@ void X11_VideoQuit(_THIS)
 		if ( SDL_GetAppState() & SDL_APPACTIVE ) {
 			X11_SwapVidModeGamma(this);
 		}
-
-		/* Restore DPMS and screensaver settings */
-		X11_RestoreScreenSaver(this, SDL_Display, screensaver_timeout, dpms_enabled);
 
 		/* Free that blank cursor */
 		if ( SDL_BlankCursor != NULL ) {

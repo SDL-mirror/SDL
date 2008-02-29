@@ -1090,19 +1090,6 @@ AC_HELP_STRING([--enable-video-x11-xrandr], [enable X11 Xrandr extension for ful
             if test x$definitely_enable_video_x11_xrandr = xyes; then
                 AC_DEFINE(SDL_VIDEO_DRIVER_X11_XRANDR)
             fi
-            AC_ARG_ENABLE(video-x11-dpms,
-AC_HELP_STRING([--enable-video-x11-dpms], [enable X11 DPMS extension [[default=yes]]]),
-                            , enable_video_x11_dpms=yes)
-            if test x$enable_video_x11_dpms = xyes; then
-                AC_CHECK_HEADER(X11/extensions/dpms.h,
-                                have_dpms_h_hdr=yes,
-                                have_dpms_h_hdr=no,
-                                [#include <X11/Xlib.h>
-                                ])
-                if test x$have_dpms_h_hdr = xyes; then
-                    AC_DEFINE(SDL_VIDEO_DRIVER_X11_DPMS)
-                fi
-            fi
         fi
     fi
 }
@@ -1672,6 +1659,13 @@ AC_HELP_STRING([--enable-osmesa-shared], [dynamically load OSMesa OpenGL support
         fi
     fi
 }
+
+AC_ARG_ENABLE(screensaver,
+AC_HELP_STRING([--enable-screensaver], [enable screensaver by default while any SDL application is running [[default=no]]]),
+              , enable_screensaver=no)
+if test x$enable_screensaver = xno; then
+    AC_DEFINE(SDL_VIDEO_DISABLE_SCREENSAVER)
+fi
 
 dnl See if we can use the new unified event interface in Linux 2.4
 CheckInputEvents()

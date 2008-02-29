@@ -188,8 +188,17 @@ static int QZ_VideoInit (_THIS, SDL_PixelFormat *video_format) {
     mode_list  = CGDisplayAvailableModes (display_id);
     palette    = CGPaletteCreateDefaultColorPalette ();
 
+    /* Allow environment override of screensaver disable. */
     env = SDL_getenv("SDL_VIDEO_ALLOW_SCREENSAVER");
-    allow_screensaver = ( env && SDL_atoi(env) ) ? YES : NO;
+    if ( env ) {
+        allow_screensaver = SDL_atoi(env);
+    } else {
+#ifdef SDL_VIDEO_DISABLE_SCREENSAVER
+        allow_screensaver = 0;
+#else
+        allow_screensaver = 1;
+#endif
+    }
 
     /* Gather some information that is useful to know about the display */
     CFNumberGetValue (CFDictionaryGetValue (save_mode, kCGDisplayBitsPerPixel),

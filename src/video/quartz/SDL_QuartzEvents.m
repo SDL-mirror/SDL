@@ -717,8 +717,6 @@ static int QZ_OtherMouseButtonToSDL(int button)
 
 void QZ_PumpEvents (_THIS)
 {
-    static Uint32 screensaverTicks = 0;
-    Uint32 nowTicks;
     CGMouseDelta dx, dy;
 
     NSDate *distantPast;
@@ -731,7 +729,8 @@ void QZ_PumpEvents (_THIS)
 
     /* Update activity every five seconds to prevent screensaver. --ryan. */
     if (!allow_screensaver) {
-        nowTicks = SDL_GetTicks();
+        static Uint32 screensaverTicks;
+        Uint32 nowTicks = SDL_GetTicks();
         if ((nowTicks - screensaverTicks) > 5000)
         {
             UpdateSystemActivity(UsrActivity);

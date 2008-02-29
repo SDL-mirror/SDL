@@ -43,11 +43,6 @@
 
 /*#define DGA_DEBUG*/
 
-/* Heheh we're using X11 event code */
-extern void X11_SaveScreenSaver(Display *display, int *saved_timeout, BOOL *dpms);
-extern void X11_DisableScreenSaver(Display *display);
-extern void X11_RestoreScreenSaver(Display *display, int saved_timeout, BOOL dpms);
-
 /* Initialization/Query functions */
 static int DGA_VideoInit(_THIS, SDL_PixelFormat *vformat);
 static SDL_Rect **DGA_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags);
@@ -333,6 +328,7 @@ static void UpdateHWInfo(_THIS, SDL_NAME(XDGAMode) *mode)
 
 static int DGA_VideoInit(_THIS, SDL_PixelFormat *vformat)
 {
+	const char *env;
 	const char *display;
 	int event_base, error_base;
 	int major_version, minor_version;
@@ -401,9 +397,17 @@ static int DGA_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		return(-1);
 	}
 
-	/* Save DPMS and screensaver settings */
-	X11_SaveScreenSaver(DGA_Display, &screensaver_timeout, &dpms_enabled);
-	X11_DisableScreenSaver(DGA_Display);
+	/* Allow environment override of screensaver disable. */
+	env = SDL_getenv("SDL_VIDEO_ALLOW_SCREENSAVER");
+	if ( env ) {
+		allow_screensaver = SDL_atoi(env);
+	} else {
+#ifdef SDL_VIDEO_DISABLE_SCREENSAVER
+		allow_screensaver = 0;
+#else
+		allow_screensaver = 1;
+#endif
+	}
 
 	/* Query for the list of available video modes */
 	modes = SDL_NAME(XDGAQueryModes)(DGA_Display, DGA_Screen, &num_modes);
@@ -1090,9 +1094,6 @@ void DGA_VideoQuit(_THIS)
 
 		/* Clean up the memory bucket list */
 		DGA_FreeHWSurfaces(this);
-
-		/* Restore DPMS and screensaver settings */
-		X11_RestoreScreenSaver(DGA_Display, screensaver_timeout, dpms_enabled);
 
 		/* Close up the display */
 		XCloseDisplay(DGA_Display);

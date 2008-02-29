@@ -920,6 +920,16 @@ void X11_PumpEvents(_THIS)
 {
 	int pending;
 
+	/* Update activity every five seconds to prevent screensaver. --ryan. */
+	if (!allow_screensaver) {
+		static Uint32 screensaverTicks;
+		Uint32 nowTicks = SDL_GetTicks();
+		if ((nowTicks - screensaverTicks) > 5000) {
+			XResetScreenSaver(SDL_Display);
+			screensaverTicks = nowTicks;
+		}
+	}
+
 	/* Keep processing pending events */
 	pending = 0;
 	while ( X11_Pending(SDL_Display) ) {
@@ -1389,67 +1399,3 @@ void X11_InitOSKeymap(_THIS)
 	X11_InitKeymap();
 }
 
-void X11_SaveScreenSaver(Display *display, int *saved_timeout, BOOL *dpms)
-{
-	int timeout, interval, prefer_blank, allow_exp;
-	XGetScreenSaver(display, &timeout, &interval, &prefer_blank, &allow_exp);
-	*saved_timeout = timeout;
-
-#if SDL_VIDEO_DRIVER_X11_DPMS
-	if ( SDL_X11_HAVE_DPMS ) {
-		int dummy;
-	  	if ( DPMSQueryExtension(display, &dummy, &dummy) ) {
-			CARD16 state;
-			DPMSInfo(display, &state, dpms);
-		}
-	}
-#else
-	*dpms = 0;
-#endif /* SDL_VIDEO_DRIVER_X11_DPMS */
-}
-
-void X11_DisableScreenSaver(_THIS, Display *display)
-{
-	int timeout, interval, prefer_blank, allow_exp;
-
-	if (this->hidden->allow_screensaver) {
-		return;
-	}
-
-	XGetScreenSaver(display, &timeout, &interval, &prefer_blank, &allow_exp);
-	timeout = 0;
-	XSetScreenSaver(display, timeout, interval, prefer_blank, allow_exp);
-
-#if SDL_VIDEO_DRIVER_X11_DPMS
-	if ( SDL_X11_HAVE_DPMS ) {
-		int dummy;
-	  	if ( DPMSQueryExtension(display, &dummy, &dummy) ) {
-			DPMSDisable(display);
-		}
-	}
-#endif /* SDL_VIDEO_DRIVER_X11_DPMS */
-}
-
-void X11_RestoreScreenSaver(_THIS, Display *display, int saved_timeout, BOOL dpms)
-{
-	int timeout, interval, prefer_blank, allow_exp;
-
-	if (this->hidden->allow_screensaver) {
-		return;
-	}
-
-	XGetScreenSaver(display, &timeout, &interval, &prefer_blank, &allow_exp);
-	timeout = saved_timeout;
-	XSetScreenSaver(display, timeout, interval, prefer_blank, allow_exp);
-
-#if SDL_VIDEO_DRIVER_X11_DPMS
-	if ( SDL_X11_HAVE_DPMS ) {
-		int dummy;
-	  	if ( DPMSQueryExtension(display, &dummy, &dummy) ) {
-			if ( dpms ) {
-				DPMSEnable(display);
-			}
-		}
-	}
-#endif /* SDL_VIDEO_DRIVER_X11_DPMS */
-}

@@ -126,6 +126,9 @@
 /* Enable OpenGL support */
 #define SDL_VIDEO_OPENGL	1
 
+/* Disable screensaver */
+#define SDL_VIDEO_DISABLE_SCREENSAVER	1
+
 /* Enable assembly routines */
 #define SDL_ASSEMBLY_ROUTINES	1
 #ifdef __ppc__
