@@ -251,7 +251,7 @@ X11_GL_InitExtensions(_THIS)
         _this->gl_data->glXDestroyContext(display, context);
     }
     XDestroyWindow(display, w);
-    X11_PumpEvents(_this);
+    /*     X11_PumpEvents(_this); */ /* can't do that because the windowlist may be inconsitent at this point */
 }
 
 int
