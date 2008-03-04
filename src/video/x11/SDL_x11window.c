@@ -477,7 +477,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
 }
 
 int
-X11_CreateWindowFrom(_THIS, SDL_Window * window, const void *data)
+X11_CreateWindowFrom(_THIS, SDL_Window *window, const void *data)
 {
     Window w = (Window) data;
 
