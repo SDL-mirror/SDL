@@ -35,9 +35,11 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
     SDL_WindowData *data;
     int numwindows = videodata->numwindows;
     SDL_WindowData **windowlist = videodata->windowlist;
+    int i;
+    int index;
 
     /* Allocate the window data */
-    data = (SDL_WindowData *) SDL_malloc(sizeof(*data));
+    data = (SDL_WindowData *) SDL_calloc(1, sizeof(*data));
     if (!data) {
         SDL_OutOfMemory();
         return -1;
@@ -55,6 +57,33 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
 #endif
     data->created = created;
     data->videodata = videodata;
+
+    /* Associate the data with the window */
+    index = -1;
+    if (windowlist) {
+      for (i = 0; i < numwindows; ++i) {
+        if (windowlist[i] == NULL) {
+          index = i;
+          break;
+        }
+      }
+    }
+
+    if (index >= 0) {
+      windowlist[index] = data;
+    } else {
+      windowlist =
+      (SDL_WindowData **) SDL_realloc(windowlist,
+                                      (numwindows + 1) * sizeof(*windowlist));
+      if (!windowlist) {
+        SDL_OutOfMemory();
+        SDL_free(data);
+        return -1;
+      }
+      windowlist[numwindows++] = data;
+      videodata->numwindows = numwindows;
+      videodata->windowlist = windowlist;
+    }
 
     /* Fill in the SDL window with the window data */
     {
@@ -458,6 +487,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         }
 #endif
         XDestroyWindow(data->display, w);
+        X11_PumpEvents(_this);
         return -1;
     }
     return 0;
@@ -625,9 +655,24 @@ void
 X11_DestroyWindow(_THIS, SDL_Window * window)
 {
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+    window->driverdata = NULL;
 
     if (data) {
-        Display *display = data->videodata->display;
+        SDL_VideoData *videodata = (SDL_VideoData *) data->videodata;
+        Display *display = videodata->display;
+        int numwindows = videodata->numwindows;
+        SDL_WindowData **windowlist = videodata->windowlist;
+        int i;
+
+        if (windowlist) {
+          for (i = 0; i < numwindows; ++i) {
+            if (windowlist[i] && 
+                (windowlist[i]->windowID == window->id)) {
+              windowlist[i] = NULL;
+              break;
+            }
+          }
+        }
 #ifdef SDL_VIDEO_OPENGL_GLX
         if (window->flags & SDL_WINDOW_OPENGL) {
             X11_GL_Shutdown(_this);
@@ -640,9 +685,9 @@ X11_DestroyWindow(_THIS, SDL_Window * window)
 #endif
         if (data->created) {
             XDestroyWindow(display, data->window);
+            X11_PumpEvents(_this);
         }
         SDL_free(data);
-        window->driverdata = NULL;
     }
 }
 

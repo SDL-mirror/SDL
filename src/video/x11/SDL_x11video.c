@@ -120,14 +120,14 @@ X11_CreateDevice(int devindex)
 
     /* Initialize all variables that we clean on shutdown */
     device = (SDL_VideoDevice *) SDL_calloc(1, sizeof(SDL_VideoDevice));
-    if (device) {
-        data = (struct SDL_VideoData *) SDL_calloc(1, sizeof(SDL_VideoData));
-    }
-    if (!device || !data) {
+    if (!device) {
         SDL_OutOfMemory();
-        if (device) {
-            SDL_free(device);
-        }
+        return NULL;
+    }
+    data = (struct SDL_VideoData *) SDL_calloc(1, sizeof(SDL_VideoData));
+    if (!data) {
+        SDL_OutOfMemory();
+        SDL_free(device);
         return NULL;
     }
     device->driverdata = data;

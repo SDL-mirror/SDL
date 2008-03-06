@@ -330,7 +330,7 @@ X11_InitKeyboard(_THIS)
             }
         }
         if (j == SDL_arraysize(fingerprint)) {
-            printf("Using scancode set %d\n", i);
+            /* printf("Using scancode set %d\n", i); */
             SDL_memcpy(&data->key_layout[min_keycode], scancode_set[i].table,
                        sizeof(SDL_scancode) * scancode_set[i].table_size);
             fingerprint_detected = SDL_TRUE;
