@@ -56,20 +56,6 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
     data->created = created;
     data->videodata = videodata;
 
-    /* Associate the data with the window */
-    windowlist =
-        (SDL_WindowData **) SDL_realloc(windowlist,
-                                        (numwindows +
-                                         1) * sizeof(*windowlist));
-    if (!windowlist) {
-        SDL_OutOfMemory();
-        SDL_free(data);
-        return -1;
-    }
-    windowlist[numwindows++] = data;
-    videodata->numwindows = numwindows;
-    videodata->windowlist = windowlist;
-
     /* Fill in the SDL window with the window data */
     {
         XWindowAttributes attrib;
@@ -228,6 +214,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
                     return -1;
                 }
                 SDL_memcpy(&cmap, stdmaps, sizeof(XStandardColormap));
+                XFree(stdmaps);
             }
 
             /* OK, we have the best color map, now copy it for use by the
@@ -655,6 +642,7 @@ X11_DestroyWindow(_THIS, SDL_Window * window)
             XDestroyWindow(display, data->window);
         }
         SDL_free(data);
+        window->driverdata = NULL;
     }
 }
 

@@ -65,6 +65,8 @@
 #define GL_UnloadObject	SDL_UnloadObject
 #endif
 
+static int X11_GL_InitializeMemory(_THIS);
+
 int
 X11_GL_LoadLibrary(_THIS, const char *path)
 {
@@ -90,7 +92,8 @@ X11_GL_LoadLibrary(_THIS, const char *path)
         return -1;
     }
     // LoadLibrary may be called before WindowCreate!
-    X11_GL_Initialize(_this);
+    // Must create the memory used by GL
+    X11_GL_InitializeMemory(_this);
 
     /* Load new function pointers */
     _this->gl_data->glXGetProcAddress =
@@ -254,11 +257,10 @@ X11_GL_InitExtensions(_THIS)
     /*     X11_PumpEvents(_this); */ /* can't do that because the windowlist may be inconsitent at this point */
 }
 
-int
-X11_GL_Initialize(_THIS)
+static int
+X11_GL_InitializeMemory(_THIS)
 {
     if (_this->gl_data) {
-        ++_this->gl_data->initialized;
         return 0;
     }
 
@@ -270,16 +272,28 @@ X11_GL_Initialize(_THIS)
         SDL_OutOfMemory();
         return -1;
     }
-    _this->gl_data->initialized = 1;
-
-    if (X11_GL_LoadLibrary(_this, NULL) < 0) {
-        return -1;
-    }
-
-    /* Initialize extensions */
-    X11_GL_InitExtensions(_this);
+    _this->gl_data->initialized = 0;
 
     return 0;
+}
+
+int
+X11_GL_Initialize(_THIS)
+{
+
+  if (X11_GL_InitializeMemory(_this) < 0) {
+     return -1;
+  }
+  ++_this->gl_data->initialized;
+
+  if (X11_GL_LoadLibrary(_this, NULL) < 0) {
+    return -1;
+  }
+
+  /* Initialize extensions */
+  X11_GL_InitExtensions(_this);
+
+  return 0;
 }
 
 void

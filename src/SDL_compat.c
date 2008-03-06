@@ -397,8 +397,8 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
     }
     if (SDL_VideoWindow) {
         SDL_GetWindowPosition(SDL_VideoWindow, &window_x, &window_y);
+        SDL_DestroyWindow(SDL_VideoWindow);
     }
-    SDL_DestroyWindow(SDL_VideoWindow);
 
     /* Set up the event filter */
     if (!SDL_GetEventFilter(NULL, NULL)) {
