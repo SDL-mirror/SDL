@@ -2190,6 +2190,11 @@ SDL_VideoQuit(void)
             display->windows = NULL;
         }
         display->num_windows = 0;
+        if (display->render_drivers) {
+            SDL_free(display->render_drivers);
+            display->render_drivers = NULL;
+        }
+        display->num_render_drivers = 0;
     }
     _this->VideoQuit(_this);
 

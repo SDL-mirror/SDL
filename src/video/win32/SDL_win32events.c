@@ -36,7 +36,7 @@
 #define REPEATED_KEYMASK    (1<<30)
 #define EXTENDED_KEYMASK    (1<<24)
 
-#define VK_ENTER    10  /* Keypad Enter ... no VKEY defined? */
+#define VK_ENTER    10          /* Keypad Enter ... no VKEY defined? */
 
 /* Make sure XBUTTON stuff is defined that isn't in older Platform SDKs... */
 #ifndef WM_XBUTTONDOWN
@@ -53,7 +53,7 @@ static WPARAM
 RemapVKEY(WPARAM wParam, LPARAM lParam)
 {
     int i;
-    BYTE scancode = (BYTE)((lParam >> 16) & 0xFF);
+    BYTE scancode = (BYTE) ((lParam >> 16) & 0xFF);
 
     /* Windows remaps alphabetic keys based on current layout.
        We try to provide USB scancodes, so undo this mapping.
@@ -72,7 +72,7 @@ RemapVKEY(WPARAM wParam, LPARAM lParam)
     /* Keypad keys are a little trickier, we always scan for them. */
     for (i = 0; i < SDL_arraysize(keypad_scancodes); ++i) {
         if (scancode == keypad_scancodes[i]) {
-            wParam = VK_NUMPAD0+i;
+            wParam = VK_NUMPAD0 + i;
             break;
         }
     }

@@ -51,15 +51,14 @@ X11_DispatchEvent(_THIS)
     }
 
     data = NULL;
-    if (videodata && 
-        videodata->windowlist) {
-      for (i = 0; i < videodata->numwindows; ++i) {
-        if ((videodata->windowlist[i] != NULL) &&
-            (videodata->windowlist[i]->window == xevent.xany.window)) {
-          data = videodata->windowlist[i];
-          break;
+    if (videodata && videodata->windowlist) {
+        for (i = 0; i < videodata->numwindows; ++i) {
+            if ((videodata->windowlist[i] != NULL) &&
+                (videodata->windowlist[i]->window == xevent.xany.window)) {
+                data = videodata->windowlist[i];
+                break;
+            }
         }
-      }
     }
     if (!data) {
         return;

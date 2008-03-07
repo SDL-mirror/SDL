@@ -67,6 +67,7 @@ typedef struct SDL_VideoData
     BOOL dpms_enabled;
     int numwindows;
     SDL_WindowData **windowlist;
+    int windowlistlength;
     int mouse;
     int keyboard;
     Atom WM_DELETE_WINDOW;

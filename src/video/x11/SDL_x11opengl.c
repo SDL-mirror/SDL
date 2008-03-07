@@ -281,19 +281,19 @@ int
 X11_GL_Initialize(_THIS)
 {
 
-  if (X11_GL_InitializeMemory(_this) < 0) {
-     return -1;
-  }
-  ++_this->gl_data->initialized;
+    if (X11_GL_InitializeMemory(_this) < 0) {
+        return -1;
+    }
+    ++_this->gl_data->initialized;
 
-  if (X11_GL_LoadLibrary(_this, NULL) < 0) {
-    return -1;
-  }
+    if (X11_GL_LoadLibrary(_this, NULL) < 0) {
+        return -1;
+    }
 
-  /* Initialize extensions */
-  X11_GL_InitExtensions(_this);
+    /* Initialize extensions */
+    X11_GL_InitExtensions(_this);
 
-  return 0;
+    return 0;
 }
 
 void
@@ -523,6 +523,7 @@ X11_GL_DeleteContext(_THIS, SDL_GLContext context)
     GLXContext glx_context = (GLXContext) context;
 
     _this->gl_data->glXDestroyContext(display, glx_context);
+    XSync(display, False);
 }
 
 #endif /* SDL_VIDEO_OPENGL_GLX */

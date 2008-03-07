@@ -34,8 +34,8 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
     SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
     SDL_WindowData *data;
     int numwindows = videodata->numwindows;
+    int windowlistlength = videodata->windowlistlength;
     SDL_WindowData **windowlist = videodata->windowlist;
-    int i;
     int index;
 
     /* Allocate the window data */
@@ -59,30 +59,24 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
     data->videodata = videodata;
 
     /* Associate the data with the window */
-    index = -1;
-    if (windowlist) {
-      for (i = 0; i < numwindows; ++i) {
-        if (windowlist[i] == NULL) {
-          index = i;
-          break;
-        }
-      }
-    }
 
-    if (index >= 0) {
-      windowlist[index] = data;
+    if (numwindows < windowlistlength) {
+        windowlist[numwindows] = data;
+        videodata->numwindows++;
     } else {
-      windowlist =
-      (SDL_WindowData **) SDL_realloc(windowlist,
-                                      (numwindows + 1) * sizeof(*windowlist));
-      if (!windowlist) {
-        SDL_OutOfMemory();
-        SDL_free(data);
-        return -1;
-      }
-      windowlist[numwindows++] = data;
-      videodata->numwindows = numwindows;
-      videodata->windowlist = windowlist;
+        windowlist =
+            (SDL_WindowData **) SDL_realloc(windowlist,
+                                            (numwindows +
+                                             1) * sizeof(*windowlist));
+        if (!windowlist) {
+            SDL_OutOfMemory();
+            SDL_free(data);
+            return -1;
+        }
+        windowlist[numwindows] = data;
+        videodata->numwindows++;
+        videodata->windowlistlength++;
+        videodata->windowlist = windowlist;
     }
 
     /* Fill in the SDL window with the window data */
@@ -494,7 +488,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
 }
 
 int
-X11_CreateWindowFrom(_THIS, SDL_Window *window, const void *data)
+X11_CreateWindowFrom(_THIS, SDL_Window * window, const void *data)
 {
     Window w = (Window) data;
 
@@ -665,13 +659,14 @@ X11_DestroyWindow(_THIS, SDL_Window * window)
         int i;
 
         if (windowlist) {
-          for (i = 0; i < numwindows; ++i) {
-            if (windowlist[i] && 
-                (windowlist[i]->windowID == window->id)) {
-              windowlist[i] = NULL;
-              break;
+            for (i = 0; i < numwindows; ++i) {
+                if (windowlist[i] && (windowlist[i]->windowID == window->id)) {
+                    windowlist[i] = windowlist[numwindows - 1];
+                    windowlist[numwindows - 1] = NULL;
+                    videodata->numwindows--;
+                    break;
+                }
             }
-          }
         }
 #ifdef SDL_VIDEO_OPENGL_GLX
         if (window->flags & SDL_WINDOW_OPENGL) {

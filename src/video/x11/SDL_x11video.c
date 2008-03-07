@@ -101,6 +101,7 @@ X11_DeleteDevice(SDL_VideoDevice * device)
     if (data->display) {
         XCloseDisplay(data->display);
     }
+    SDL_free(data->windowlist);
     SDL_free(device->driverdata);
     SDL_free(device);
 
