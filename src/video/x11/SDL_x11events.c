@@ -1,3 +1,4 @@
+#define DEBUG_XEVENTS
 /*
     SDL - Simple DirectMedia Layer
     Copyright (C) 1997-2006 Sam Lantinga
@@ -39,6 +40,15 @@ X11_DispatchEvent(_THIS)
 
     SDL_zero(xevent);           /* valgrind fix. --ryan. */
     XNextEvent(videodata->display, &xevent);
+
+    /* filter events catchs XIM events and sends them to the correct
+       handler */
+    if (XFilterEvent(&xevent, None) == True) {
+#ifdef DEBUG_XEVENTS
+        printf("Filtered event of type = 0x%X\n", xevent.type);
+#endif
+        return;
+    }
 
     /* Send a SDL_SYSWMEVENT if the application wants them */
     if (SDL_ProcessEvents[SDL_SYSWMEVENT] == SDL_ENABLE) {
@@ -182,14 +192,14 @@ X11_DispatchEvent(_THIS)
             KeyCode keycode = xevent.xkey.keycode;
             KeySym keysym = NoSymbol;
             char text[SDL_TEXTINPUTEVENT_TEXT_SIZE];
-            Uint32 ucs4 = 0;
+            Status status = 0;
 
 #ifdef DEBUG_XEVENTS
             printf("KeyPress (X11 keycode = 0x%X)\n", xevent.xkey.keycode);
 #endif
             SDL_SendKeyboardKey(videodata->keyboard, SDL_PRESSED,
                                 videodata->key_layout[keycode]);
-#if 1
+#if 0
             if (videodata->key_layout[keycode] == SDLK_UNKNOWN) {
                 int min_keycode, max_keycode;
                 XDisplayKeycodes(videodata->display, &min_keycode,
@@ -201,9 +211,16 @@ X11_DispatchEvent(_THIS)
                         XKeysymToString(keysym));
             }
 #endif
-            /* Xutf8LookupString(), works for Latin-1 */
+            /* */
             SDL_zero(text);
+#ifdef X_HAVE_UTF8_STRING
+            if (data->ic) {
+                Xutf8LookupString(data->ic, &xevent.xkey, text, sizeof(text),
+                                  &keysym, status);
+            }
+#else
             XLookupString(&xevent.xkey, text, sizeof(text), &keysym, NULL);
+#endif
             if (*text) {
                 printf("Sending text event %s\n", text);
                 SDL_SendKeyboardText(videodata->keyboard, text);

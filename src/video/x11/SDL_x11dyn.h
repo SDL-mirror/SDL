@@ -68,9 +68,10 @@ extern "C"
     int SDL_X11_LoadSymbols(void);
     void SDL_X11_UnloadSymbols(void);
 
-/* That's really annoying...make this a function pointer no matter what. */
+/* That's really annoying...make these function pointers no matter what. */
 #ifdef X_HAVE_UTF8_STRING
     extern XIC(*pXCreateIC) (XIM, ...);
+    extern char *(*pXGetICValues) (XIC, ...);
 #endif
 
 /* These SDL_X11_HAVE_* flags are here whether you have dynamic X11 or not. */

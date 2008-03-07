@@ -455,13 +455,6 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         XFree(wmhints);
     }
 
-    XSelectInput(data->display, w,
-                 (FocusChangeMask | EnterWindowMask | LeaveWindowMask |
-                  ExposureMask | ButtonPressMask | ButtonReleaseMask |
-                  PointerMotionMask | KeyPressMask | KeyReleaseMask |
-                  PropertyChangeMask | StructureNotifyMask |
-                  KeymapStateMask));
-
     /* Set the class hints so we can get an icon (AfterStep) */
     classhints = XAllocClassHint();
     if (classhints != NULL) {
@@ -481,9 +474,29 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         }
 #endif
         XDestroyWindow(data->display, w);
-        X11_PumpEvents(_this);
         return -1;
     }
+#ifdef X_HAVE_UTF8_STRING
+    {
+        Uint32 fevent = 0;
+        pXGetICValues(((SDL_WindowData *) window->driverdata)->ic,
+                      XNFilterEvents, &fevent, NULL);
+        XSelectInput(data->display, w,
+                     (FocusChangeMask | EnterWindowMask | LeaveWindowMask |
+                      ExposureMask | ButtonPressMask | ButtonReleaseMask |
+                      PointerMotionMask | KeyPressMask | KeyReleaseMask |
+                      PropertyChangeMask | StructureNotifyMask |
+                      KeymapStateMask | fevent));
+    }
+#else
+    XSelectInput(data->display, w,
+                 (FocusChangeMask | EnterWindowMask | LeaveWindowMask |
+                  ExposureMask | ButtonPressMask | ButtonReleaseMask |
+                  PointerMotionMask | KeyPressMask | KeyReleaseMask |
+                  PropertyChangeMask | StructureNotifyMask |
+                  KeymapStateMask));
+#endif
+
     return 0;
 }
 
@@ -680,7 +693,6 @@ X11_DestroyWindow(_THIS, SDL_Window * window)
 #endif
         if (data->created) {
             XDestroyWindow(display, data->window);
-            X11_PumpEvents(_this);
         }
         SDL_free(data);
     }
