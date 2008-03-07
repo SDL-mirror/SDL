@@ -472,6 +472,16 @@ X11_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
     return (status);
 }
 
+/* 
+   0 is a valid argument to glxSwapIntervalMESA and setting it to 0
+   with the MESA version of the extension will undo the effect of a
+   previous call with a value that is greater than zero (or at least
+   that is what the FM says. OTOH, 0 is an invalid argument to
+   glxSwapIntervalSGI and it returns an error if you call it with 0 as
+   an argument.
+*/
+
+static int swapinterval = -1;
 int
 X11_GL_SetSwapInterval(_THIS, int interval)
 {
@@ -482,12 +492,16 @@ X11_GL_SetSwapInterval(_THIS, int interval)
         if (status != 0) {
             SDL_SetError("glxSwapIntervalMESA failed");
             status = -1;
+        } else {
+            swapinterval = interval;
         }
     } else if (_this->gl_data->glXSwapIntervalSGI) {
         status = _this->gl_data->glXSwapIntervalSGI(interval);
         if (status != 0) {
             SDL_SetError("glxSwapIntervalSGI failed");
             status = -1;
+        } else {
+            swapinterval = interval;
         }
     } else {
         SDL_Unsupported();
@@ -502,8 +516,7 @@ X11_GL_GetSwapInterval(_THIS)
     if (_this->gl_data->glXGetSwapIntervalMESA) {
         return _this->gl_data->glXGetSwapIntervalMESA();
     } else {
-        SDL_Unsupported();
-        return -1;
+        return swapinterval;
     }
 }
 

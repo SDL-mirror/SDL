@@ -180,7 +180,7 @@ main(int argc, char *argv[])
         SDL_GL_SwapBuffers();
 
         while (SDL_PollEvent(&event)) {
-            if (event.type & SDL_KEYDOWN)
+            if (event.type == SDL_KEYDOWN)
                 done = 1;
         }
 

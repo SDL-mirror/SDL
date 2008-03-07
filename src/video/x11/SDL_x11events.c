@@ -43,8 +43,9 @@ X11_DispatchEvent(_THIS)
     /* filter events catchs XIM events and sends them to the correct
        handler */
     if (XFilterEvent(&xevent, None) == True) {
-#ifdef DEBUG_XEVENTS
-        printf("Filtered event of type = 0x%X\n", xevent.type);
+#if 0
+      printf("Filtered event type = %d display = %d window = %d\n", 
+             xevent.type, xevent.xany.display, xevent.xany.window);
 #endif
         return;
     }
@@ -73,6 +74,10 @@ X11_DispatchEvent(_THIS)
         return;
     }
 
+#if 0
+      printf("type = %d display = %d window = %d\n", 
+             xevent.type, xevent.xany.display, xevent.xany.window);
+#endif
     switch (xevent.type) {
 
         /* Gaining mouse coverage? */
