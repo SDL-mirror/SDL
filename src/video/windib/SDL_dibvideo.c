@@ -512,6 +512,36 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 	int x, y;
 	Uint32 Rmask, Gmask, Bmask;
 
+	/*
+	 * Special case for OpenGL windows...since the app needs to call
+	 *  SDL_SetVideoMode() in response to resize events to continue to
+	 *  function, but WGL handles the GL context details behind the scenes,
+	 *  there's no sense in tearing the context down just to rebuild it
+	 *  to what it already was...tearing it down sacrifices your GL state
+	 *  and uploaded textures. So if we're requesting the same video mode
+	 *  attributes and the width/height matches the physical window, just
+	 *  return immediately.
+	 */
+	if ( (SDL_Window != NULL) &&
+	     (current != NULL) &&
+	     (current->flags == flags) &&
+	     (current->format->BitsPerPixel == bpp) &&
+	     ((flags & SDL_FULLSCREEN) == 0) ) {  /* probably not safe for fs */
+		int curwidth, curheight;
+		RECT size;
+
+		/* Get the current position of our window */
+		GetClientRect(SDL_Window, &size);
+
+		curwidth = (size.right - size.left);
+		curheight = (size.bottom - size.top);
+		if ((width == curwidth) && (height == curheight)) {
+			current->w = width;
+			current->h = height;
+			return current;  /* we're already good to go. */
+		}
+	}
+
 	prev_flags = current->flags;
 
 	/* Clean up any GL context that may be hanging around */
