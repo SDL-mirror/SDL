@@ -209,58 +209,47 @@ struct SDL_SysWMinfo;
 #define SDL_AllocSurface    SDL_CreateRGBSurface
 
 extern DECLSPEC const SDL_version *SDLCALL SDL_Linked_Version(void);
-extern DECLSPEC char *SDLCALL SDL_AudioDriverName(char *namebuf,
-                                                  int maxlen);
-extern DECLSPEC char *SDLCALL SDL_VideoDriverName(char *namebuf,
-                                                  int maxlen);
+extern DECLSPEC char *SDLCALL SDL_AudioDriverName(char *namebuf, int maxlen);
+extern DECLSPEC char *SDLCALL SDL_VideoDriverName(char *namebuf, int maxlen);
 extern DECLSPEC const SDL_VideoInfo *SDLCALL SDL_GetVideoInfo(void);
 extern DECLSPEC int SDLCALL SDL_VideoModeOK(int width,
                                             int height,
-                                            int bpp,
-                                            Uint32 flags);
+                                            int bpp, Uint32 flags);
 extern DECLSPEC SDL_Rect **SDLCALL SDL_ListModes(SDL_PixelFormat * format,
                                                  Uint32 flags);
 extern DECLSPEC SDL_Surface *SDLCALL SDL_SetVideoMode(int width,
                                                       int height,
-                                                      int bpp,
-                                                      Uint32 flags);
+                                                      int bpp, Uint32 flags);
 extern DECLSPEC SDL_Surface *SDLCALL SDL_GetVideoSurface(void);
 extern DECLSPEC void SDLCALL SDL_UpdateRects(SDL_Surface * screen,
-                                             int numrects,
-                                             SDL_Rect * rects);
+                                             int numrects, SDL_Rect * rects);
 extern DECLSPEC void SDLCALL SDL_UpdateRect(SDL_Surface * screen,
                                             Sint32 x,
-                                            Sint32 y,
-                                            Uint32 w,
-                                            Uint32 h);
+                                            Sint32 y, Uint32 w, Uint32 h);
 extern DECLSPEC int SDLCALL SDL_Flip(SDL_Surface * screen);
 extern DECLSPEC int SDLCALL SDL_SetAlpha(SDL_Surface * surface,
-                                         Uint32 flag,
-                                         Uint8 alpha);
+                                         Uint32 flag, Uint8 alpha);
 extern DECLSPEC SDL_Surface *SDLCALL SDL_DisplayFormat(SDL_Surface * surface);
-extern DECLSPEC SDL_Surface *SDLCALL SDL_DisplayFormatAlpha(SDL_Surface * surface);
+extern DECLSPEC SDL_Surface *SDLCALL SDL_DisplayFormatAlpha(SDL_Surface *
+                                                            surface);
 extern DECLSPEC void SDLCALL SDL_WM_SetCaption(const char *title,
                                                const char *icon);
 extern DECLSPEC void SDLCALL SDL_WM_GetCaption(const char **title,
                                                const char **icon);
-extern DECLSPEC void SDLCALL SDL_WM_SetIcon(SDL_Surface * icon,
-                                            Uint8 * mask);
+extern DECLSPEC void SDLCALL SDL_WM_SetIcon(SDL_Surface * icon, Uint8 * mask);
 extern DECLSPEC int SDLCALL SDL_WM_IconifyWindow(void);
 extern DECLSPEC int SDLCALL SDL_WM_ToggleFullScreen(SDL_Surface * surface);
 extern DECLSPEC SDL_GrabMode SDLCALL SDL_WM_GrabInput(SDL_GrabMode mode);
 extern DECLSPEC int SDLCALL SDL_SetPalette(SDL_Surface * surface,
                                            int flags,
                                            const SDL_Color * colors,
-                                           int firstcolor,
-                                           int ncolors);
+                                           int firstcolor, int ncolors);
 extern DECLSPEC int SDLCALL SDL_SetColors(SDL_Surface * surface,
                                           const SDL_Color * colors,
-                                          int firstcolor,
-                                          int ncolors);
+                                          int firstcolor, int ncolors);
 extern DECLSPEC int SDLCALL SDL_GetWMInfo(struct SDL_SysWMinfo *info);
 extern DECLSPEC Uint8 SDLCALL SDL_GetAppState(void);
-extern DECLSPEC void SDLCALL SDL_WarpMouse(Uint16 x,
-                                           Uint16 y);
+extern DECLSPEC void SDLCALL SDL_WarpMouse(Uint16 x, Uint16 y);
 extern DECLSPEC SDL_Overlay *SDLCALL SDL_CreateYUVOverlay(int width,
                                                           int height,
                                                           Uint32 format,
@@ -272,10 +261,8 @@ extern DECLSPEC int SDLCALL SDL_DisplayYUVOverlay(SDL_Overlay * overlay,
                                                   SDL_Rect * dstrect);
 extern DECLSPEC void SDLCALL SDL_FreeYUVOverlay(SDL_Overlay * overlay);
 extern DECLSPEC void SDLCALL SDL_GL_SwapBuffers(void);
-extern DECLSPEC int SDLCALL SDL_EnableKeyRepeat(int delay,
-int interval);
-extern DECLSPEC void SDLCALL SDL_GetKeyRepeat(int *delay,
-                                              int *interval);
+extern DECLSPEC int SDLCALL SDL_EnableKeyRepeat(int delay, int interval);
+extern DECLSPEC void SDLCALL SDL_GetKeyRepeat(int *delay, int *interval);
 extern DECLSPEC int SDLCALL SDL_EnableUNICODE(int enable);
 
 /* Ends C function definitions when using C++ */

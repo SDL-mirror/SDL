@@ -230,6 +230,7 @@ SDL_CalculateBlit(SDL_Surface * surface)
     /* See if we can do RLE acceleration */
     if (surface->map->info.flags & SDL_COPY_RLE_DESIRED) {
         if (SDL_RLESurface(surface) == 0) {
+            surface->map->info.flags &= ~SDL_COPY_RLE_DESIRED;
             return 0;
         }
     }
@@ -260,7 +261,7 @@ SDL_CalculateBlit(SDL_Surface * surface)
                                        surface->format->Amask);
         Uint32 dst_format =
             SDL_MasksToPixelFormatEnum(dst->format->BitsPerPixel,
-                                       dst->format->Rmask, 
+                                       dst->format->Rmask,
                                        dst->format->Gmask,
                                        dst->format->Bmask,
                                        dst->format->Amask);
