@@ -947,7 +947,7 @@ GL_DestroyRenderer(SDL_Renderer * renderer)
 
     if (data) {
         if (data->context) {
-            SDL_GL_MakeCurrent(0, NULL);
+            /* SDL_GL_MakeCurrent(0, NULL); *//* doesn't do anything */
             SDL_GL_DeleteContext(data->context);
         }
         SDL_free(data);

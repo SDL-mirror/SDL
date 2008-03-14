@@ -29,15 +29,14 @@
 #include "video/SDL_sysvideo.h"
 #include "video/SDL_pixels_c.h"
 
-
-static SDL_WindowID SDL_VideoWindow;
+static SDL_WindowID SDL_VideoWindow = 0;
 static SDL_RendererInfo SDL_VideoRendererInfo;
-static SDL_TextureID SDL_VideoTexture;
-static SDL_Surface *SDL_VideoSurface;
-static SDL_Surface *SDL_ShadowSurface;
-static SDL_Surface *SDL_PublicSurface;
-static SDL_GLContext *SDL_VideoContext;
-static char *wm_title;
+static SDL_TextureID SDL_VideoTexture = 0;
+static SDL_Surface *SDL_VideoSurface = NULL;
+static SDL_Surface *SDL_ShadowSurface = NULL;
+static SDL_Surface *SDL_PublicSurface = NULL;
+static SDL_GLContext *SDL_VideoContext = NULL;
+static char *wm_title = NULL;
 
 char *
 SDL_AudioDriverName(char *namebuf, int maxlen)
@@ -391,7 +390,7 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
         SDL_VideoSurface = NULL;
     }
     if (SDL_VideoContext) {
-        SDL_GL_MakeCurrent(0, NULL);
+        /* SDL_GL_MakeCurrent(0, NULL); *//* Doesn't do anything */
         SDL_GL_DeleteContext(SDL_VideoContext);
         SDL_VideoContext = NULL;
     }

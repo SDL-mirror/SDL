@@ -1329,14 +1329,16 @@ SDL_DestroyWindow(SDL_WindowID windowID)
             if (window->id != windowID) {
                 continue;
             }
+            if (window->title) {
+                SDL_free(window->title);
+                window->title = NULL;
+            }
             if (window->renderer) {
                 SDL_DestroyRenderer(window->id);
+                window->renderer = NULL;
             }
             if (_this->DestroyWindow) {
                 _this->DestroyWindow(_this, window);
-            }
-            if (window->title) {
-                SDL_free(window->title);
             }
             if (j != display->num_windows - 1) {
                 SDL_memcpy(&display->windows[i],
@@ -1439,9 +1441,8 @@ SDL_CreateRenderer(SDL_WindowID windowID, int index, Uint32 flags)
     SDL_DestroyRenderer(windowID);
 
     /* Create a new renderer instance */
-    window->renderer =
-        SDL_CurrentDisplay.render_drivers[index].CreateRenderer(window,
-                                                                flags);
+    window->renderer = SDL_CurrentDisplay.render_drivers[index]
+        .CreateRenderer(window, flags);
     SDL_SelectRenderer(window->id);
 
     return 0;
@@ -2220,9 +2221,11 @@ SDL_VideoQuit(void)
         }
         if (display->gamma) {
             SDL_free(display->gamma);
+            display->gamma = NULL;
         }
         if (display->driverdata) {
             SDL_free(display->driverdata);
+            display->driverdata = NULL;
         }
     }
     if (_this->displays) {

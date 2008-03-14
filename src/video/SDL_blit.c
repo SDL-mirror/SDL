@@ -260,7 +260,8 @@ SDL_CalculateBlit(SDL_Surface * surface)
                                        surface->format->Amask);
         Uint32 dst_format =
             SDL_MasksToPixelFormatEnum(dst->format->BitsPerPixel,
-                                       dst->format->Rmask, dst->format->Gmask,
+                                       dst->format->Rmask, 
+                                       dst->format->Gmask,
                                        dst->format->Bmask,
                                        dst->format->Amask);
 

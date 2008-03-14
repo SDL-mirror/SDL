@@ -44,8 +44,8 @@ X11_DispatchEvent(_THIS)
        handler */
     if (XFilterEvent(&xevent, None) == True) {
 #if 0
-      printf("Filtered event type = %d display = %d window = %d\n", 
-             xevent.type, xevent.xany.display, xevent.xany.window);
+        printf("Filtered event type = %d display = %d window = %d\n",
+               xevent.type, xevent.xany.display, xevent.xany.window);
 #endif
         return;
     }
@@ -73,10 +73,9 @@ X11_DispatchEvent(_THIS)
     if (!data) {
         return;
     }
-
 #if 0
-      printf("type = %d display = %d window = %d\n", 
-             xevent.type, xevent.xany.display, xevent.xany.window);
+    printf("type = %d display = %d window = %d\n",
+           xevent.type, xevent.xany.display, xevent.xany.window);
 #endif
     switch (xevent.type) {
 
