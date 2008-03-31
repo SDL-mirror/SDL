@@ -28,7 +28,12 @@ Equipment Corporation.
 #define NEED_EVENTS
 #define NEED_REPLIES
 
+/* Apparently some X11 systems can't include this multiple times... */
+#ifndef SDL_INCLUDED_XLIBINT_H
+#define SDL_INCLUDED_XLIBINT_H 1
 #include <X11/Xlibint.h>
+#endif
+
 #include <X11/Xutil.h>
 #include "../extensions/Xext.h"
 #include "../extensions/extutil.h"			/* in ../include */

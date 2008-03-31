@@ -37,12 +37,15 @@ from Kaleb S. KEITHLEY.
 #define NEED_REPLIES
 
 #ifndef XBUILD_IN_CLIENT
+/* Apparently some X11 systems can't include this multiple times... */
+#ifndef SDL_INCLUDED_XLIBINT_H
+#define SDL_INCLUDED_XLIBINT_H 1
 #include <X11/Xlibint.h>
+#endif
 #include "../extensions/xf86vmstr.h"
 #include "../extensions/Xext.h"
 #include "../extensions/extutil.h"
 #else
-#include "lib/X11/Xlibint.h"
 #include "include/extensions/xf86vmstr.h"
 #include "include/extensions/Xext.h"
 #include "include/extensions/extutil.h"

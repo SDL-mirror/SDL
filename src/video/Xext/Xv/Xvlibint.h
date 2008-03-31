@@ -43,7 +43,12 @@ SOFTWARE.
 
 #define NEED_REPLIES
 
+/* Apparently some X11 systems can't include this multiple times... */
+#ifndef SDL_INCLUDED_XLIBINT_H
+#define SDL_INCLUDED_XLIBINT_H 1
 #include <X11/Xlibint.h>
+#endif
+
 #include "../extensions/Xvproto.h"
 #include "../extensions/Xvlib.h"
 
