@@ -122,6 +122,7 @@
 /* Enable OpenGL support */
 #define SDL_VIDEO_OPENGL	1
 #define SDL_VIDEO_OPENGL_CGL	1
+#define SDL_VIDEO_RENDER_OGL	1
 
 /* Enable assembly routines */
 #define SDL_ASSEMBLY_ROUTINES	1
