@@ -127,7 +127,6 @@ struct SDL_Window
 
     int display;
     SDL_Renderer *renderer;
-    SDL_GLContext context;
 
     void *userdata;
     void *driverdata;

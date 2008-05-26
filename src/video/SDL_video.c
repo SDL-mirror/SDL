@@ -2525,12 +2525,6 @@ SDL_GL_MakeCurrent(SDL_WindowID windowID, SDL_GLContext context)
     if (!context) {
         window = NULL;
     }
-    if (window) {
-        if (window->context == context) {
-            return 0;
-        }
-        window->context = context;
-    }
     return _this->GL_MakeCurrent(_this, window, context);
 }
 
