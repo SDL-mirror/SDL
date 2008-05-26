@@ -288,7 +288,7 @@ Cocoa_GL_SetSwapInterval(_THIS, int interval)
 {
     NSAutoreleasePool *pool;
     NSOpenGLContext *nscontext;
-    long value;
+    GLint value;
     int status;
 
     pool = [[NSAutoreleasePool alloc] init];
@@ -312,7 +312,7 @@ Cocoa_GL_GetSwapInterval(_THIS)
 {
     NSAutoreleasePool *pool;
     NSOpenGLContext *nscontext;
-    long value;
+    GLint value;
     int status;
 
     pool = [[NSAutoreleasePool alloc] init];
