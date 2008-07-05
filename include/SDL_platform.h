@@ -57,19 +57,13 @@
 #undef __LINUX__
 #define __LINUX__	1
 #endif
-
 #if defined(__APPLE__)
-#include "targetconditionals.h"
-#if TARGET_OS_IPHONE
-#undef __IPHONEOS__
-#define __IPHONEOS__ 1
-#undef __MACOSX__
-#else
 #undef __MACOSX__
 #define __MACOSX__	1
+#elif defined(macintosh)
+#undef __MACOS__
+#define __MACOS__	1
 #endif
-#endif
-
 #if defined(__NetBSD__)
 #undef __NETBSD__
 #define __NETBSD__	1

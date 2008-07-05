@@ -147,10 +147,8 @@ SDL_COMPILE_TIME_ASSERT(uint16, sizeof(Uint16) == 2);
 SDL_COMPILE_TIME_ASSERT(sint16, sizeof(Sint16) == 2);
 SDL_COMPILE_TIME_ASSERT(uint32, sizeof(Uint32) == 4);
 SDL_COMPILE_TIME_ASSERT(sint32, sizeof(Sint32) == 4);
-
-// SDL_COMPILE_TIME_ASSERT(uint64, sizeof(Uint64) == 8);
-// SDL_COMPILE_TIME_ASSERT(sint64, sizeof(Sint64) == 8);
-
+SDL_COMPILE_TIME_ASSERT(uint64, sizeof(Uint64) == 8);
+SDL_COMPILE_TIME_ASSERT(sint64, sizeof(Sint64) == 8);
 #endif /* DOXYGEN_SHOULD_IGNORE_THIS */
 
 /* Check to make sure enums are the size of ints, for structure packing.
@@ -391,7 +389,6 @@ do {							\
 	}						\
 } while(0)
 #endif
-	
 #ifndef SDL_revcpy
 extern DECLSPEC void *SDLCALL SDL_revcpy(void *dst, const void *src,
                                          size_t len);
