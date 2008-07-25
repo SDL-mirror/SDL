@@ -35,7 +35,7 @@ if [ -d "$SDK_PATH/MacOSX10.2.8.sdk" ]; then
 -isystem $SDK_PATH/MacOSX10.2.8.sdk/usr/include"
 
     # PowerPC linker flags 
-    LFLAGS_PPC="-arch ppc \
+    LFLAGS_PPC="-Wl,-headerpad_max_install_names -arch ppc \
 -L$SDK_PATH/MacOSX10.2.8.sdk/usr/lib/gcc/darwin/3.3 \
 -F$SDK_PATH/MacOSX10.2.8.sdk/System/Library/Frameworks \
 -Wl,-syslibroot,$SDK_PATH/MacOSX10.2.8.sdk"
@@ -58,7 +58,7 @@ else # 10.2 or 10.3 SDK
 -isystem $SDK_PATH/MacOSX10.3.9.sdk/usr/include"
 
     # PowerPC linker flags
-    LFLAGS_PPC="-arch ppc -mmacosx-version-min=10.3 \
+    LFLAGS_PPC="-Wl,-headerpad_max_install_names -arch ppc -mmacosx-version-min=10.3 \
 -L$SDK_PATH/MacOSX10.3.9.sdk/usr/lib/gcc/powerpc-apple-darwin9/4.0.1 \
 -F$SDK_PATH/MacOSX10.3.9.sdk/System/Library/Frameworks \
 -Wl,-syslibroot,$SDK_PATH/MacOSX10.3.9.sdk"
@@ -81,7 +81,7 @@ CPPFLAGS_X86="-DMAC_OS_X_VERSION_MIN_REQUIRED=1040 \
 -isystem $SDK_PATH/MacOSX10.4u.sdk/usr/include"
 
 # Intel linker flags
-LFLAGS_X86="-arch i386 -mmacosx-version-min=10.4 \
+LFLAGS_X86="-Wl,-headerpad_max_install_names -arch i386 -mmacosx-version-min=10.4 \
 -L$SDK_PATH/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin9/4.0.1 \
 -Wl,-syslibroot,$SDK_PATH/MacOSX10.4u.sdk"
 
