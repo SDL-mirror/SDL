@@ -33,10 +33,12 @@
 /*--- Defines ---*/
 
 /* Mxalloc parameters */
+#ifndef MX_STRAM
 #define MX_STRAM 0
 #define MX_TTRAM 1
 #define MX_PREFSTRAM 2
 #define MX_PREFTTRAM 3
+#endif
 
 /*--- Functions ---*/
 

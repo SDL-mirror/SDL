@@ -89,18 +89,17 @@ enum {
 };
 
 /* EgetShift masks */
-#define ES_BANK		0x000f
 #define ES_MODE		0x0700
-#define ES_GRAY		0x1000
-#define ES_SMEAR	0x8000
 
 /* TT shifter modes */
+#ifndef ST_LOW
 #define ST_LOW	0x0000
 #define ST_MED	0x0100
 #define ST_HIGH	0x0200
 #define TT_LOW	0x0700
 #define TT_MED	0x0300
 #define TT_HIGH	0x0600
+#endif
 
 /* Hidden structure -> variables names */
 #define SDL_modelist		(this->hidden->SDL_modelist)
