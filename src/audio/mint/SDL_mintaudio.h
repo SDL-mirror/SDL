@@ -84,6 +84,7 @@ enum {
 #define MASTERPREDIV_MILAN	256
 
 /* MFP 68901 interrupt sources */
+#ifndef MFP_PARALLEL
 enum {
 	MFP_PARALLEL=0,
 	MFP_DCD,
@@ -106,14 +107,17 @@ enum {
 	MFP_RING,
 	MFP_MONODETECT
 };
+#endif
 
 /* Xbtimer() timers */
+#ifndef XB_TIMERA
 enum {
 	XB_TIMERA=0,
 	XB_TIMERB,
 	XB_TIMERC,
 	XB_TIMERD
 };
+#endif
 
 /* Variables */
 extern SDL_AudioDevice *SDL_MintAudio_device;
