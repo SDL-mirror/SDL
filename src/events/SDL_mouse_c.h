@@ -88,14 +88,14 @@ struct SDL_Mouse
 /* Initialize the mouse subsystem */
 extern int SDL_MouseInit(void);
 
-/* Get the mouse at an index */
-extern SDL_Mouse *SDL_GetMouse(int index);
-
 /* Assign an id to a mouse at an index */
 extern int SDL_SetMouseIndexId(int id, int index);
 
-/* Get the mouse by id */
-extern SDL_Mouse *SDL_GetMouseByID(int id);
+/* Get the index of a mouse specified by id */
+extern int SDL_GetMouseIndexId(int id);
+
+/* Get the mouse at an index */
+extern SDL_Mouse *SDL_GetMouse(int index);
 
 /* Add a mouse, possibly reattaching at a particular index (or -1),
    returning the index of the mouse, or -1 if there was an error.

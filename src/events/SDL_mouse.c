@@ -76,13 +76,13 @@ SDL_SetMouseIndexId(int id, int index)
     return 1;
 }
 
-SDL_Mouse *
-SDL_GetMouseByID(int id)
+int
+SDL_GetMouseIndexId(int id)
 {
     if (id < 0 || id > SDL_highestId) {
-        return NULL;
+        return -1;
     }
-    return SDL_GetMouse(SDL_IdIndex[id]);
+    return SDL_IdIndex[id];
 }
 
 int
@@ -321,15 +321,14 @@ SDL_GetRelativeMouseState(int index, int *x, int *y)
 void
 SDL_SetMouseFocus(int id, SDL_WindowID windowID)
 {
-    SDL_Mouse *mouse = SDL_GetMouseByID(id);
-    int i, index;
+    int index = SDL_GetMouseIndexId(id);
+    SDL_Mouse *mouse = SDL_GetMouse(index);
+    int i;
     SDL_bool focus;
 
     if (!mouse || (mouse->focus == windowID)) {
         return;
     }
-
-    index = SDL_IdIndex[id];
 
     /* See if the current window has lost focus */
     if (mouse->focus) {
@@ -372,7 +371,8 @@ SDL_SetMouseFocus(int id, SDL_WindowID windowID)
 int
 SDL_SendProximity(int id, int x, int y, int type)
 {
-    SDL_Mouse *mouse = SDL_GetMouseByID(id);
+    int index = SDL_GetMouseIndexId(id);
+    SDL_Mouse *mouse = SDL_GetMouse(index);
     int posted = 0;
     last_x = x;
     last_y = y;
@@ -396,7 +396,8 @@ SDL_SendProximity(int id, int x, int y, int type)
 int
 SDL_SendMouseMotion(int id, int relative, int x, int y, int pressure)
 {
-    SDL_Mouse *mouse = SDL_GetMouseByID(id);
+    int index = SDL_GetMouseIndexId(id);
+    SDL_Mouse *mouse = SDL_GetMouse(index);
     int posted;
     int xrel;
     int yrel;
@@ -491,7 +492,8 @@ SDL_SendMouseMotion(int id, int relative, int x, int y, int pressure)
 int
 SDL_SendMouseButton(int id, Uint8 state, Uint8 button)
 {
-    SDL_Mouse *mouse = SDL_GetMouseByID(id);
+    int index = SDL_GetMouseIndexId(id);
+    SDL_Mouse *mouse = SDL_GetMouse(index);
     int posted;
     Uint8 type;
 
@@ -777,7 +779,8 @@ SDL_UpdateCoordinates(int x, int y)
 void
 SDL_ChangeEnd(int id, int end)
 {
-    SDL_Mouse *mouse = SDL_GetMouseByID(id);
+    int index = SDL_GetMouseIndexId(id);
+    SDL_Mouse *mouse = SDL_GetMouse(index);
 
     if (mouse) {
         mouse->current_end = end;
