@@ -133,6 +133,16 @@ struct SDL_SysWMinfo;
 /* Obsolete or renamed key codes */
 
 /* These key constants were renamed for clarity or consistency. */
+#define SDLK_0	'0'
+#define SDLK_1	'1'
+#define SDLK_2	'2'
+#define SDLK_3	'3'
+#define SDLK_4	'4'
+#define SDLK_5	'5'
+#define SDLK_6	'6'
+#define SDLK_7	'7'
+#define SDLK_8	'8'
+#define SDLK_9	'9'
 #define SDLK_a  'a'
 #define SDLK_b  'b'
 #define SDLK_c  'c'
