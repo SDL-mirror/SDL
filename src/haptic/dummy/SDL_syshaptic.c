@@ -30,7 +30,8 @@
 static int
 SDL_SYS_LogicError(void)
 {
-    SDL_SetError("Logic error: No haptic devices available.");;
+    SDL_SetError("Logic error: No haptic devices available.");
+    return 0;
 }
 
 
