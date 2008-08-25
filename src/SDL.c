@@ -38,6 +38,10 @@
 extern int SDL_JoystickInit(void);
 extern void SDL_JoystickQuit(void);
 #endif
+#if !SDL_HAPTIC_DISABLED
+extern int SDL_HapticInit(void);
+extern int SDL_HapticQuit(void);
+#endif
 #if !SDL_CDROM_DISABLED
 extern int SDL_CDROMInit(void);
 extern void SDL_CDROMQuit(void);
@@ -46,6 +50,10 @@ extern void SDL_CDROMQuit(void);
 extern void SDL_StartTicks(void);
 extern int SDL_TimerInit(void);
 extern void SDL_TimerQuit(void);
+#endif
+#if defined(__WIN32__)
+extern int SDL_HelperWindowCreate(void);
+extern int SDL_HelperWindowDestroy(void);
 #endif
 
 /* The initialized subsystems */
@@ -123,6 +131,22 @@ SDL_InitSubSystem(Uint32 flags)
     }
 #endif
 
+#if !SDL_HAPTIC_DISABLED
+    /* Initialize the haptic subsystem */
+    if ((flags & SDL_INIT_HAPTIC) && !(SDL_initialized & SDL_INIT_HAPTIC)) {
+        if (SDL_HapticInit() < 0) {
+            return (-1);
+        }
+        SDL_initialized |= SDL_INIT_HAPTIC;
+    }
+#else
+    if (flags & SDL_INIT_HAPTIC) {
+        SDL_SetError("SDL not built with haptic (force feedback) support");
+        return (-1);
+    }
+#endif
+
+
 #if !SDL_CDROM_DISABLED
     /* Initialize the CD-ROM subsystem */
     if ((flags & SDL_INIT_CDROM) && !(SDL_initialized & SDL_INIT_CDROM)) {
@@ -152,6 +176,12 @@ SDL_Init(Uint32 flags)
     /* Clear the error message */
     SDL_ClearError();
 
+#if defined(__WIN32__)
+    if (SDL_HelperWindowCreate() < 0) {
+        return -1;
+    }
+#endif
+
     /* Initialize the desired subsystems */
     if (SDL_InitSubSystem(flags) < 0) {
         return (-1);
@@ -178,6 +208,12 @@ SDL_QuitSubSystem(Uint32 flags)
     if ((flags & SDL_initialized & SDL_INIT_JOYSTICK)) {
         SDL_JoystickQuit();
         SDL_initialized &= ~SDL_INIT_JOYSTICK;
+    }
+#endif
+#if !SDL_HAPTIC_DISABLED
+    if ((flags & SDL_initialized & SDL_INIT_HAPTIC)) {
+        SDL_HapticQuit();
+        SDL_initialized &= ~SDL_INIT_HAPTIC;
     }
 #endif
 #if !SDL_TIMERS_DISABLED
@@ -216,6 +252,10 @@ SDL_Quit(void)
 #ifdef DEBUG_BUILD
     printf("[SDL_Quit] : Enter! Calling QuitSubSystem()\n");
     fflush(stdout);
+#endif
+
+#if defined(__WIN32__)
+    SDL_HelperWindowDestroy();
 #endif
     SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
 

@@ -89,6 +89,7 @@ typedef unsigned long uintptr_t;
 
 /* Enable various input drivers */
 #define SDL_JOYSTICK_DC	1
+#define SDL_HAPTIC_DUMMY	1
 
 /* Enable various shared object loading systems */
 #define SDL_LOADSO_DUMMY	1

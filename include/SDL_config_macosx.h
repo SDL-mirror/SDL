@@ -99,6 +99,7 @@
 
 /* Enable various input drivers */
 #define SDL_JOYSTICK_IOKIT	1
+#define SDL_HAPTIC_IOKIT	1
 
 /* Enable various shared object loading systems */
 #ifdef __ppc__

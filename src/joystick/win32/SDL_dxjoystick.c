@@ -38,20 +38,7 @@
 #include "SDL_joystick.h"
 #include "../SDL_sysjoystick.h"
 #include "../SDL_joystick_c.h"
-
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-
-#define DIRECTINPUT_VERSION 0x0500
-#include <dinput.h>
-#ifdef _MSC_VER
-    /* Used for the c_dfDIJoystick2 symbol (no imports are used) */
-#   pragma comment (lib, "dinput.lib")
-#endif
-#include <dxerr9.h>             /* From DirectX SDK 9c */
-#ifdef _MSC_VER
-#   pragma comment (lib, "dxerr9.lib")
-#endif
+#include "SDL_dxjoystick_c.h"
 
 /* an ISO hack for VisualC++ */
 #ifdef _MSC_VER
@@ -60,14 +47,12 @@
 
 #define INPUT_QSIZE	32      /* Buffer up to 32 input messages */
 #define MAX_JOYSTICKS	8
-#define MAX_INPUTS	256     /* each joystick can have up to 256 inputs */
 #define AXIS_MIN	-32768  /* minimum value for axis coordinate */
 #define AXIS_MAX	32767   /* maximum value for axis coordinate */
 #define JOY_AXIS_THRESHOLD	(((AXIS_MAX)-(AXIS_MIN))/100)   /* 1% motion */
 
 /* external variables referenced. */
-extern HINSTANCE SDL_Instance;
-extern HWND SDL_Window;
+extern HWND SDL_HelperWindow;
 
 
 /* local variables */
@@ -95,39 +80,12 @@ static int SDL_PrivateJoystickButton_Int(SDL_Joystick * joystick,
                                          Uint8 button, Uint8 state);
 
 
-/* local types */
-typedef enum Type
-{ BUTTON, AXIS, HAT } Type;
-
-typedef struct input_t
-{
-    /* DirectInput offset for this input type: */
-    DWORD ofs;
-
-    /* Button, axis or hat: */
-    Type type;
-
-    /* SDL input offset: */
-    Uint8 num;
-} input_t;
-
-/* The private structure used to keep track of a joystick */
-struct joystick_hwdata
-{
-    LPDIRECTINPUTDEVICE2 InputDevice;
-    DIDEVCAPS Capabilities;
-    int buffered;
-
-    input_t Inputs[MAX_INPUTS];
-    int NumInputs;
-};
-
 /* Convert a DirectInput return code to a text message */
 static void
 SetDIerror(const char *function, HRESULT code)
 {
     SDL_SetError("%s() [%s]: %s", function,
-                 DXGetErrorString9(code), DXGetErrorDescription9(code));
+                 DXGetErrorString(code), DXGetErrorDescription(code));
 }
 
 
@@ -140,6 +98,7 @@ int
 SDL_SYS_JoystickInit(void)
 {
     HRESULT result;
+    HINSTANCE instance;
 
     SYS_NumJoysticks = 0;
 
@@ -158,8 +117,13 @@ SDL_SYS_JoystickInit(void)
     }
 
     /* Because we used CoCreateInstance, we need to Initialize it, first. */
-    result =
-        IDirectInput_Initialize(dinput, SDL_Instance, DIRECTINPUT_VERSION);
+    instance = GetModuleHandle(NULL);
+    if (instance == NULL) {
+        SDL_SetError("GetModuleHandle() failed with error code %d.",
+                     GetLastError());
+        return (-1);
+    }
+    result = IDirectInput_Initialize(dinput, instance, DIRECTINPUT_VERSION);
 
     if (FAILED(result)) {
         SetDIerror("IDirectInput::Initialize", result);
@@ -178,8 +142,8 @@ SDL_SYS_JoystickInit(void)
 static BOOL CALLBACK
 EnumJoysticksCallback(const DIDEVICEINSTANCE * pdidInstance, VOID * pContext)
 {
-    memcpy(&SYS_Joystick[SYS_NumJoysticks], pdidInstance,
-           sizeof(DIDEVICEINSTANCE));
+    SDL_memcpy(&SYS_Joystick[SYS_NumJoysticks], pdidInstance,
+               sizeof(DIDEVICEINSTANCE));
     SYS_NumJoysticks++;
 
     if (SYS_NumJoysticks >= MAX_JOYSTICKS)
@@ -208,19 +172,19 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick)
     LPDIRECTINPUTDEVICE device;
     DIPROPDWORD dipdw;
 
-    ZeroMemory(&dipdw, sizeof(DIPROPDWORD));
+    SDL_memset(&dipdw, 0, sizeof(DIPROPDWORD));
     dipdw.diph.dwSize = sizeof(DIPROPDWORD);
     dipdw.diph.dwHeaderSize = sizeof(DIPROPHEADER);
 
 
     /* allocate memory for system specific hardware data */
     joystick->hwdata =
-        (struct joystick_hwdata *) malloc(sizeof(struct joystick_hwdata));
+        (struct joystick_hwdata *) SDL_malloc(sizeof(struct joystick_hwdata));
     if (joystick->hwdata == NULL) {
         SDL_OutOfMemory();
         return (-1);
     }
-    ZeroMemory(joystick->hwdata, sizeof(struct joystick_hwdata));
+    SDL_memset(joystick->hwdata, 0, sizeof(struct joystick_hwdata));
     joystick->hwdata->buffered = 1;
     joystick->hwdata->Capabilities.dwSize = sizeof(DIDEVCAPS);
 
@@ -250,7 +214,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick)
      * though. */
     result =
         IDirectInputDevice2_SetCooperativeLevel(joystick->hwdata->
-                                                InputDevice, SDL_Window,
+                                                InputDevice, SDL_HelperWindow,
                                                 DISCL_EXCLUSIVE |
                                                 DISCL_BACKGROUND);
     if (FAILED(result)) {
@@ -635,7 +599,7 @@ SDL_SYS_JoystickClose(SDL_Joystick * joystick)
 
     if (joystick->hwdata != NULL) {
         /* free system specific hardware data */
-        free(joystick->hwdata);
+        SDL_free(joystick->hwdata);
     }
 }
 

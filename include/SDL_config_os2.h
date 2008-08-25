@@ -118,6 +118,7 @@ typedef unsigned long long uint64_t;
 
 /* Enable various input drivers */
 #define SDL_JOYSTICK_OS2	1
+#define SDL_HAPTIC_DUMMY	1
 
 /* Enable various shared object loading systems */
 #define SDL_LOADSO_OS2	1

@@ -15,6 +15,7 @@ SOURCES = \
 	src/events/*.c \
 	src/file/*.c \
 	src/joystick/*.c \
+	src/haptic/*.c \
 	src/stdlib/*.c \
 	src/thread/*.c \
 	src/timer/*.c \
@@ -22,6 +23,7 @@ SOURCES = \
 	src/audio/dummy/*.c \
 	src/video/dummy/*.c \
 	src/joystick/dummy/*.c \
+	src/haptic/dummy/*.c \
 	src/cdrom/dummy/*.c \
 	src/thread/generic/*.c \
 	src/timer/dummy/*.c \

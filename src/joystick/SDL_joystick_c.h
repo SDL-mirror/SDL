@@ -36,4 +36,8 @@ extern int SDL_PrivateJoystickHat(SDL_Joystick * joystick,
                                   Uint8 hat, Uint8 value);
 extern int SDL_PrivateJoystickButton(SDL_Joystick * joystick,
                                      Uint8 button, Uint8 state);
+
+/* Internal sanity checking functions */
+extern int SDL_PrivateJoystickValid(SDL_Joystick ** joystick);
+
 /* vi: set ts=4 sw=4 expandtab: */

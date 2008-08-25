@@ -139,8 +139,10 @@ typedef unsigned int uintptr_t;
 /* Enable various input drivers */
 #ifdef _WIN32_WCE
 #define SDL_JOYSTICK_DISABLED   1
+#define SDL_HAPTIC_DUMMY	1
 #else
-#define SDL_JOYSTICK_WINMM	1
+#define SDL_JOYSTICK_DINPUT   1
+#define SDL_HAPTIC_DINPUT	1
 #endif
 
 /* Enable various shared object loading systems */

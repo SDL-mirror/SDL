@@ -47,6 +47,12 @@
 extern HCTX *g_hCtx;            /* the table of tablet event contexts, each windows has to have it's own tablet context */
 int highestId = 0;              /* the highest id of the tablet context */
 
+/* Fake window to help with DirectInput events. */
+HWND SDL_HelperWindow = NULL;
+static const char *SDL_HelperWindowClassName = "SDLHelperWindowInputCatcher";
+static const char *SDL_HelperWindowName = "SDLHelperWindowInputMsgWindow";
+static ATOM SDL_HelperWindowClass = 0;
+
 static int
 SetupWindowData(_THIS, SDL_Window * window, HWND hwnd, SDL_bool created)
 {
@@ -469,5 +475,67 @@ WIN_GetWindowWMInfo(_THIS, SDL_Window * window, SDL_SysWMinfo * info)
         return SDL_FALSE;
     }
 }
+
+
+/*
+ * Creates a HelperWindow used for DirectInput events.
+ */
+int
+SDL_HelperWindowCreate(void)
+{
+    HINSTANCE hInstance = GetModuleHandleA(NULL);
+    WNDCLASSEX wce;
+
+    /* Create the class. */
+    SDL_memset(&wce, 0, sizeof(wce));
+    wce.cbSize = sizeof(WNDCLASSEX);
+    wce.lpfnWndProc = DefWindowProcA;
+    wce.lpszClassName = (LPCWSTR) SDL_HelperWindowClassName;
+    wce.hInstance = hInstance;
+
+    /* Register the class. */
+    SDL_HelperWindowClass = RegisterClassExA(&wce);
+    if (SDL_HelperWindowClass == 0) {
+        SDL_SetError("Unable to create Helper Window Class: error %d.",
+                     GetLastError());
+        return -1;
+    }
+
+    /* Create the window. */
+    SDL_HelperWindow = CreateWindowExA(0, SDL_HelperWindowClassName,
+                                       SDL_HelperWindowName,
+                                       WS_OVERLAPPEDWINDOW, CW_USEDEFAULT,
+                                       CW_USEDEFAULT, CW_USEDEFAULT,
+                                       CW_USEDEFAULT, HWND_MESSAGE, NULL,
+                                       hInstance, NULL);
+    if (SDL_HelperWindow == NULL) {
+        SDL_SetError("Unable to create Helper Window: error %d.",
+                     GetLastError());
+        return -1;
+    }
+
+    return 0;
+}
+
+
+/*
+ * Destroys the HelperWindow previously created with SDL_HelperWindowCreate.
+ */
+void
+SDL_HelperWindowDestroy(void)
+{
+    /* Destroy the window. */
+    if (SDL_HelperWindow) {
+        DestroyWindow(SDL_HelperWindow);
+        SDL_HelperWindow = NULL;
+    }
+
+    /* Unregister the class. */
+    if (SDL_HelperWindowClass) {
+        UnregisterClassA(SDL_HelperWindowClassName, GetModuleHandleA(NULL));
+        SDL_HelperWindowClass = 0;
+    }
+}
+
 
 /* vi: set ts=4 sw=4 expandtab: */
