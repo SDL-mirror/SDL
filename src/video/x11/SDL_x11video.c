@@ -27,8 +27,14 @@
 #include "../SDL_pixels_c.h"
 
 #include "SDL_x11video.h"
-//#include "SDL_d3drender.h"
-//#include "SDL_gdirender.h"
+
+XDevice **SDL_XDevices;
+int SDL_NumOfXDevices;
+XEventClass SDL_XEvents[256];
+int SDL_NumOfXEvents;
+
+int motion, button_pressed, button_released;    /* the definitions of the mice events */
+int proximity_in, proximity_out;
 
 /* Initialization/Query functions */
 static int X11_VideoInit(_THIS);
@@ -97,7 +103,6 @@ static void
 X11_DeleteDevice(SDL_VideoDevice * device)
 {
     SDL_VideoData *data = (SDL_VideoData *) device->driverdata;
-
     if (data->display) {
         XCloseDisplay(data->display);
     }
@@ -212,6 +217,8 @@ VideoBootStrap X11_bootstrap = {
 int
 X11_VideoInit(_THIS)
 {
+    int i, index = 0, event_code;
+    XEventClass xEvent;
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
     /* Get the window class name, usually the name of the application */
@@ -241,6 +248,42 @@ X11_VideoInit(_THIS)
     }
     X11_InitMouse(_this);
 
+    /* we're generating the table of events that should be recognized */
+    for (i = 0; i < SDL_NumOfXDevices; ++i) {
+        /* button events */
+        DeviceButtonPress(SDL_XDevices[i], event_code, xEvent);
+        if (xEvent) {
+            SDL_XEvents[index++] = xEvent;
+            button_pressed = event_code;
+        }
+        DeviceButtonRelease(SDL_XDevices[i], event_code, xEvent);
+        if (xEvent) {
+            SDL_XEvents[index++] = xEvent;
+            button_released = event_code;
+        }
+
+        /* proximity events */
+        ProximityIn(SDL_XDevices[i], event_code, xEvent);
+        if (xEvent) {
+            SDL_XEvents[index++] = xEvent;
+            proximity_in = event_code;
+        }
+        ProximityOut(SDL_XDevices[i], event_code, xEvent);
+        if (xEvent) {
+            SDL_XEvents[index++] = xEvent;
+            proximity_out = event_code;
+        }
+
+        /* motion events */
+        DeviceMotionNotify(SDL_XDevices[i], event_code, xEvent);
+        if (xEvent) {
+            SDL_XEvents[index++] = xEvent;
+            motion = event_code;
+        }
+
+    }
+    SDL_NumOfXEvents = index;
+
     return 0;
 }
 
@@ -263,6 +306,7 @@ X11_VideoQuit(_THIS)
     X11_QuitModes(_this);
     X11_QuitKeyboard(_this);
     X11_QuitMouse(_this);
+    free(SDL_XDevices);
 }
 
 /* vim: set ts=4 sw=4 expandtab: */

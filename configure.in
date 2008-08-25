@@ -1033,6 +1033,9 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [[default=ma
             SOURCES="$SOURCES $srcdir/src/video/Xext/XmuStdCmap/*.c"
             EXTRA_CFLAGS="$EXTRA_CFLAGS $X_CFLAGS"
 
+echo "FIXME: Need to get dynamic loading of XInput working"
+	    enable_x11_shared=no
+
             if test x$enable_x11_shared = xmaybe; then
                 enable_x11_shared=$x11_symbols_private
             fi
@@ -1055,7 +1058,7 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [[default=ma
                 AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT, "$x11ext_lib")
             else
                 enable_x11_shared=no
-                EXTRA_LDFLAGS="$EXTRA_LDFLAGS $X_LIBS -lX11 -lXext"
+                EXTRA_LDFLAGS="$EXTRA_LDFLAGS $X_LIBS -lX11 -lXext -lXi"
             fi
             have_video=yes
 

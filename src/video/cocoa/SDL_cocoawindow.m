@@ -250,7 +250,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
         if (mouse->focus != _data->windowID) {
             SDL_SetMouseFocus(index, _data->windowID);
         }
-        SDL_SendMouseMotion(index, 0, (int)point.x, (int)point.y);
+        SDL_SendMouseMotion(index, 0, (int)point.x, (int)point.y, 0);
     }
 }
 

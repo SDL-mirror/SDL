@@ -144,6 +144,11 @@ SDL_X11_SYM(SDL_X11_XESetWireToEventRetType,XESetWireToEvent,(Display* a,int b,S
 SDL_X11_SYM(SDL_X11_XESetEventToWireRetType,XESetEventToWire,(Display* a,int b,SDL_X11_XESetEventToWireRetType c),(a,b,c),return)
 SDL_X11_SYM(XExtensionErrorHandler,XSetExtensionErrorHandler,(XExtensionErrorHandler a),(a),return)
 
+/*SDL_X11_SYM(XDeviceInfo* , XListInputDevices, (Display* a, int* b), (a,b),return)
+SDL_X11_SYM(void, XFreeDeviceList, (XDeviceInfo* a), (a),)
+SDL_X11_SYM(int, XSelectExtensionEvent,(Display* a, Window b, XEventClass* c, int d),(a,b,c,d),return)
+SDL_X11_SYM(XDevice* ,XOpenDevice,(Display* a, XID b), (a,b),return)*/
+
 #if NeedWidePrototypes
 SDL_X11_SYM(KeySym,XKeycodeToKeysym,(Display* a,unsigned int b,int c),(a,b,c),return)
 #else

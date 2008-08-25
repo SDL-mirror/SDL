@@ -72,9 +72,11 @@ typedef enum
     SDL_JOYBUTTONUP,            /**< Joystick button released */
     SDL_QUIT,                   /**< User-requested quit */
     SDL_SYSWMEVENT,             /**< System specific event */
+    SDL_PROXIMITYIN,            /**< Proximity In event */
+    SDL_PROXIMITYOUT,           /**< Proximity Out event */
     SDL_EVENT_RESERVED1,        /**< Reserved for future use... */
-    SDL_EVENT_RESERVED2,        /**< Reserved for future use... */
-    SDL_EVENT_RESERVED3,        /**< Reserved for future use... */
+    SDL_EVENT_RESERVED2,
+    SDL_EVENT_RESERVED3,
     /* Events SDL_USEREVENT through SDL_MAXEVENTS-1 are for your use */
     SDL_USEREVENT = 24,
     /* This last event is only for bounding internal arrays
@@ -112,7 +114,9 @@ typedef enum
         SDL_EVENTMASK(SDL_JOYHATMOTION) |
         SDL_EVENTMASK(SDL_JOYBUTTONDOWN) | SDL_EVENTMASK(SDL_JOYBUTTONUP),
     SDL_QUITMASK = SDL_EVENTMASK(SDL_QUIT),
-    SDL_SYSWMEVENTMASK = SDL_EVENTMASK(SDL_SYSWMEVENT)
+    SDL_SYSWMEVENTMASK = SDL_EVENTMASK(SDL_SYSWMEVENT),
+    SDL_PROXIMITYINMASK = SDL_EVENTMASK(SDL_PROXIMITYIN),
+    SDL_PROXIMITYOUTMASK = SDL_EVENTMASK(SDL_PROXIMITYOUT)
 } SDL_EventMask;
 #define SDL_ALLEVENTS		0xFFFFFFFF
 
@@ -170,6 +174,13 @@ typedef struct SDL_MouseMotionEvent
     Uint8 state;            /**< The current button state */
     int x;                  /**< X coordinate, relative to window */
     int y;                  /**< Y coordinate, relative to window */
+    int z;                  /**< Z coordinate, for future use */
+    int pressure;           /**< Pressure reported by tablets */
+    int pressure_max;       /**< Maximum value of the pressure reported by the device */
+    int pressure_min;       /**< Minimum value of the pressure reported by the device */
+    int rotation;           /**< For future use */
+    int tilt;               /**< For future use */
+    int cursor;             /**< The cursor being used in the event */
     int xrel;               /**< The relative motion in the X direction */
     int yrel;               /**< The relative motion in the Y direction */
     SDL_WindowID windowID;  /**< The window with mouse focus, if any */
@@ -316,6 +327,15 @@ typedef struct SDL_ResizeEvent
     int h;
 } SDL_ResizeEvent;
 
+typedef struct SDL_ProximityEvent
+{
+    Uint8 type;
+    Uint8 which;
+    int cursor;
+    int x;
+    int y;
+} SDL_ProximityEvent;
+
 /**
  * \union SDL_Event
  *
@@ -337,6 +357,7 @@ typedef union SDL_Event
     SDL_QuitEvent quit;             /**< Quit request event data */
     SDL_UserEvent user;             /**< Custom event data */
     SDL_SysWMEvent syswm;           /**< System dependent window event data */
+    SDL_ProximityEvent proximity;   /**< Proximity In or Out event */
 
     /* Temporarily here for backwards compatibility */
     SDL_ActiveEvent active;

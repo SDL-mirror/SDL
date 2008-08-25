@@ -153,6 +153,8 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     XSizeHints *sizehints;
     XWMHints *wmhints;
     XClassHint *classhints;
+    extern XEventClass SDL_XEvents[];
+    extern int SDL_NumOfXEvents;
 
 #if SDL_VIDEO_DRIVER_X11_XINERAMA
 /* FIXME
@@ -481,6 +483,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         Uint32 fevent = 0;
         pXGetICValues(((SDL_WindowData *) window->driverdata)->ic,
                       XNFilterEvents, &fevent, NULL);
+        XMapWindow(data->display, w);
         XSelectInput(data->display, w,
                      (FocusChangeMask | EnterWindowMask | LeaveWindowMask |
                       ExposureMask | ButtonPressMask | ButtonReleaseMask |
@@ -489,6 +492,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
                       KeymapStateMask | fevent));
     }
 #else
+    XMapWindow(data->display, w);
     XSelectInput(data->display, w,
                  (FocusChangeMask | EnterWindowMask | LeaveWindowMask |
                   ExposureMask | ButtonPressMask | ButtonReleaseMask |
@@ -496,6 +500,9 @@ X11_CreateWindow(_THIS, SDL_Window * window)
                   PropertyChangeMask | StructureNotifyMask |
                   KeymapStateMask));
 #endif
+
+    /* we're informing the display what extension events we want to receive from it */
+    XSelectExtensionEvent(data->display, w, SDL_XEvents, SDL_NumOfXEvents);
 
     return 0;
 }

@@ -19,20 +19,179 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+
+/* we need to define it, so that raw input is included*/
+
+#if (_WIN32_WINNT < 0x0501)
+#undef _WIN32_WINNT
+#define _WIN32_WINNT 0x0501
+#endif
+
 #include "SDL_config.h"
 
 #include "SDL_win32video.h"
 
 #include "../../events/SDL_mouse_c.h"
 
+#include <wintab.h>
+
+#define PACKETDATA ( PK_X | PK_Y | PK_BUTTONS | PK_NORMAL_PRESSURE | PK_CURSOR)
+#define PACKETMODE 0
+#include <pktdef.h>
+extern HANDLE *mice;
+extern int total_mice;
+extern int tablet;
+
 void
 WIN_InitMouse(_THIS)
 {
+    int index = 0;
+    RAWINPUTDEVICELIST *deviceList = NULL;
+    int devCount = 0;
+    int i;
+    int tmp = 0;
+    char *buffer = NULL;
+    char *tab = "wacom";        /* since windows does't give us handles to tablets, we have to detect a tablet by it's name */
+    const char *rdp = "rdp_mou";
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
-    SDL_Mouse mouse;
 
-    SDL_zero(mouse);
-    data->mouse = SDL_AddMouse(&mouse, -1);
+    /* we're checking for the number of rawinput devices */
+    if (GetRawInputDeviceList(NULL, &devCount, sizeof(RAWINPUTDEVICELIST))) {
+        return;
+    }
+
+    deviceList = SDL_malloc(sizeof(RAWINPUTDEVICELIST) * devCount);
+
+    /* we're getting the raw input device list */
+    GetRawInputDeviceList(deviceList, &devCount, sizeof(RAWINPUTDEVICELIST));
+    mice = SDL_malloc(devCount * sizeof(HANDLE));
+
+    /* we're getting the details of the devices */
+    for (i = 0; i < devCount; ++i) {
+        int is_rdp = 0;
+        int j;
+        int k;
+        char *default_device_name = "Pointing device xx";
+        const char *reg_key_root = "System\\CurrentControlSet\\Enum\\";
+        char *device_name = SDL_malloc(256 * sizeof(char));
+        char *key_name = NULL;
+        char *tmp_name = NULL;
+        LONG rc = 0;
+        HKEY hkey;
+        DWORD regtype = REG_SZ;
+        DWORD out = 256 * sizeof(char);
+        SDL_Mouse mouse;
+        int l;
+        if (deviceList[i].dwType != RIM_TYPEMOUSE) {    /* if a device isn't a mouse type we don't want it */
+            continue;
+        }
+        if (GetRawInputDeviceInfoA
+            (deviceList[i].hDevice, RIDI_DEVICENAME, NULL, &tmp) < 0) {
+            continue;
+        }
+        buffer = SDL_malloc((tmp + 1) * sizeof(char));
+        key_name = SDL_malloc(tmp + sizeof(reg_key_root) * sizeof(char));
+
+        /* we're getting the device registry path and polishing it to get it's name,
+           surely there must be an easier way, but we haven't found it yet */
+        if (GetRawInputDeviceInfoA
+            (deviceList[i].hDevice, RIDI_DEVICENAME, buffer, &tmp) < 0) {
+            continue;
+        }
+        buffer += 4;
+        tmp -= 4;
+        tmp_name = buffer;
+        for (j = 0; j < tmp; ++j) {
+            if (*tmp_name == '#') {
+                *tmp_name = '\\';
+            }
+
+            else if (*tmp_name == '{') {
+                break;
+            }
+            ++tmp_name;
+        }
+        *tmp_name = '\0';
+        SDL_memcpy(key_name, reg_key_root, SDL_strlen(reg_key_root));
+        SDL_memcpy(key_name + (SDL_strlen(reg_key_root)), buffer, j + 1);
+        l = SDL_strlen(key_name);
+        is_rdp = 0;
+        if (l >= 7) {
+            for (j = 0; j < l - 7; ++j) {
+                for (k = 0; k < 7; ++k) {
+                    if (rdp[k] !=
+                        SDL_tolower((unsigned char) key_name[j + k])) {
+                        break;
+                    }
+                }
+                if (k == 7) {
+                    is_rdp = 1;
+                    break;
+                }
+            }
+        }
+        if (is_rdp == 1) {
+            SDL_free(buffer);
+            SDL_free(key_name);
+            SDL_free(device_name);
+            is_rdp = 0;
+            continue;
+        }
+
+        /* we're opening the registry key to get the mouse name */
+        rc = RegOpenKeyExA(HKEY_LOCAL_MACHINE, key_name, 0, KEY_READ, &hkey);
+        if (rc != ERROR_SUCCESS) {
+            SDL_memcpy(device_name, default_device_name,
+                       SDL_strlen(default_device_name));
+        }
+        rc = RegQueryValueExA(hkey, "DeviceDesc", NULL, &regtype, device_name,
+                              &out);
+        RegCloseKey(hkey);
+        if (rc != ERROR_SUCCESS) {
+            SDL_memcpy(device_name, default_device_name,
+                       SDL_strlen(default_device_name));
+        }
+
+        /* we're saving the handle to the device */
+        mice[index] = deviceList[i].hDevice;
+        SDL_zero(mouse);
+        SDL_SetMouseIndexId(index, index);
+        l = SDL_strlen(device_name);
+
+        /* we're checking if the device isn't by any chance a tablet */
+        if (tablet == -1) {
+            for (j = 0; j < l - 5; ++j) {
+                for (k = 0; k < 5; ++k) {
+                    if (tab[k] !=
+                        SDL_tolower((unsigned char) device_name[j + k])) {
+                        break;
+                    }
+                }
+                if (k == 5) {
+                    tablet = index;
+                    break;
+                }
+            }
+        }
+
+        /* if it's a tablet, let's read it's maximum and minimum pressure */
+        if (tablet == index) {
+            AXIS pressure;
+            int cursors;
+            WTInfo(WTI_DEVICES, DVC_NPRESSURE, &pressure);
+            WTInfo(WTI_DEVICES, DVC_NCSRTYPES, &cursors);
+            data->mouse =
+                SDL_AddMouse(&mouse, index, device_name, pressure.axMax,
+                             pressure.axMin, cursors);
+        } else {
+            data->mouse = SDL_AddMouse(&mouse, index, device_name, 0, 0, 1);
+        }
+        ++index;
+        SDL_free(buffer);
+        SDL_free(key_name);
+    }
+    total_mice = index;
+    SDL_free(deviceList);
 }
 
 void
@@ -40,7 +199,8 @@ WIN_QuitMouse(_THIS)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
-    SDL_DelMouse(data->mouse);
+    /* let's delete all of the mice */
+    SDL_MouseQuit();
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

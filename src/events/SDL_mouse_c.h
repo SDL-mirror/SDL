@@ -29,9 +29,7 @@ typedef struct SDL_Mouse SDL_Mouse;
 struct SDL_Cursor
 {
     SDL_Mouse *mouse;
-
     SDL_Cursor *next;
-
     void *driverdata;
 };
 
@@ -56,14 +54,27 @@ struct SDL_Mouse
     /* Free the mouse when it's time */
     void (*FreeMouse) (SDL_Mouse * mouse);
 
+    /* data common for tablets */
+    int pressure;
+    int pressure_max;
+    int pressure_min;
+    int tilt;                   /* for future use */
+    int rotation;               /* for future use */
+    int total_ends;
+    int current_end;
+
     /* Data common to all mice */
     SDL_WindowID focus;
+    int which;
     int x;
     int y;
+    int z;                      /* for future use */
     int xdelta;
     int ydelta;
+    char *name;
     Uint8 buttonstate;
     SDL_bool relative_mode;
+    SDL_bool proximity;
     SDL_bool flush_motion;
 
     SDL_Cursor *cursors;
@@ -74,17 +85,23 @@ struct SDL_Mouse
     void *driverdata;
 };
 
-
 /* Initialize the mouse subsystem */
 extern int SDL_MouseInit(void);
 
 /* Get the mouse at an index */
 extern SDL_Mouse *SDL_GetMouse(int index);
 
+/* Assign an id to a mouse at an index */
+extern int SDL_SetMouseIndexId(int id, int index);
+
+/* Get the mouse by id */
+extern SDL_Mouse *SDL_GetMouseByID(int id);
+
 /* Add a mouse, possibly reattaching at a particular index (or -1),
    returning the index of the mouse, or -1 if there was an error.
  */
-extern int SDL_AddMouse(const SDL_Mouse * mouse, int index);
+extern int SDL_AddMouse(const SDL_Mouse * mouse, int index, char *name,
+                        int pressure_max, int pressure_min, int ends);
 
 /* Remove a mouse at an index, clearing the slot for later */
 extern void SDL_DelMouse(int index);
@@ -93,19 +110,23 @@ extern void SDL_DelMouse(int index);
 extern void SDL_ResetMouse(int index);
 
 /* Set the mouse focus window */
-extern void SDL_SetMouseFocus(int index, SDL_WindowID windowID);
+extern void SDL_SetMouseFocus(int id, SDL_WindowID windowID);
 
 /* Send a mouse motion event for a mouse at an index */
-extern int SDL_SendMouseMotion(int index, int relative, int x, int y);
+extern int SDL_SendMouseMotion(int id, int relative, int x, int y, int z);
 
 /* Send a mouse button event for a mouse at an index */
-extern int SDL_SendMouseButton(int index, Uint8 state, Uint8 button);
+extern int SDL_SendMouseButton(int id, Uint8 state, Uint8 button);
 
 /* Send a mouse wheel event for a mouse at an index */
-extern int SDL_SendMouseWheel(int index, int x, int y);
+extern int SDL_SendMouseWheel(int id, int x, int y);
 
 /* Shutdown the mouse subsystem */
 extern void SDL_MouseQuit(void);
+
+/* FIXME: Where do these functions go in this header? */
+extern void SDL_UpdateCoordinates(int x, int y);
+extern void SDL_ChangeEnd(int id, int end);
 
 #endif /* _SDL_mouse_c_h */
 

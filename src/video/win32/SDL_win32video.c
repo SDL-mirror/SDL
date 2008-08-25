@@ -31,9 +31,16 @@
 #include "SDL_d3drender.h"
 #include "SDL_gdirender.h"
 
+#include <wintab.h>
+
 /* Initialization/Query functions */
 static int WIN_VideoInit(_THIS);
 static void WIN_VideoQuit(_THIS);
+
+int total_mice = 0;             /* total mouse count */
+HANDLE *mice = NULL;            /* the handles to the detected mice */
+HCTX *g_hCtx = NULL;            /* handles to tablet contexts */
+int tablet = -1;                /* we're assuming that there is no tablet */
 
 /* WIN32 driver bootstrap functions */
 
@@ -140,8 +147,7 @@ WIN_CreateDevice(int devindex)
 }
 
 VideoBootStrap WIN32_bootstrap = {
-    "win32", "SDL Win32/64 video driver",
-    WIN_Available, WIN_CreateDevice
+    "win32", "SDL Win32/64 video driver", WIN_Available, WIN_CreateDevice
 };
 
 
@@ -157,6 +163,7 @@ WIN_VideoInit(_THIS)
     GDI_AddRenderDriver(_this);
 #endif
 
+    g_hCtx = SDL_malloc(sizeof(HCTX));
     WIN_InitKeyboard(_this);
     WIN_InitMouse(_this);
 
@@ -169,6 +176,7 @@ WIN_VideoQuit(_THIS)
     WIN_QuitModes(_this);
     WIN_QuitKeyboard(_this);
     WIN_QuitMouse(_this);
+    SDL_free(g_hCtx);
 }
 
 /* vim: set ts=4 sw=4 expandtab: */

@@ -273,7 +273,7 @@ MoveSprite(SDL_Surface * screen, SDL_Surface * light)
     if (light != NULL) {
         int x, y;
 
-        SDL_GetMouseState(&x, &y);
+        SDL_GetMouseState(0, &x, &y);
         FlashLight(screen, light, x, y);
     }
 

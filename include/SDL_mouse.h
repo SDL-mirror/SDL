@@ -72,7 +72,7 @@ extern DECLSPEC int SDLCALL SDL_SelectMouse(int index);
  *
  * \brief Get the window which currently has focus for the currently selected mouse.
  */
-extern DECLSPEC SDL_WindowID SDLCALL SDL_GetMouseFocusWindow(void);
+extern DECLSPEC SDL_WindowID SDLCALL SDL_GetMouseFocusWindow(int index);
 
 /**
  * \fn int SDL_SetRelativeMouseMode(SDL_bool enabled)
@@ -92,7 +92,8 @@ extern DECLSPEC SDL_WindowID SDLCALL SDL_GetMouseFocusWindow(void);
  *
  * \sa SDL_GetRelativeMouseMode()
  */
-extern DECLSPEC int SDLCALL SDL_SetRelativeMouseMode(SDL_bool enabled);
+extern DECLSPEC int SDLCALL SDL_SetRelativeMouseMode(int index,
+                                                     SDL_bool enabled);
 
 /**
  * \fn SDL_bool SDL_GetRelativeMouseMode()
@@ -101,7 +102,7 @@ extern DECLSPEC int SDLCALL SDL_SetRelativeMouseMode(SDL_bool enabled);
  *
  * \sa SDL_SetRelativeMouseMode()
  */
-extern DECLSPEC SDL_bool SDLCALL SDL_GetRelativeMouseMode(void);
+extern DECLSPEC SDL_bool SDLCALL SDL_GetRelativeMouseMode(int index);
 
 /**
  * \fn Uint8 SDL_GetMouseState(int *x, int *y)
@@ -113,7 +114,7 @@ extern DECLSPEC SDL_bool SDLCALL SDL_GetRelativeMouseMode(void);
  * mouse cursor position relative to the focus window for the currently
  * selected mouse.  You can pass NULL for either x or y.
  */
-extern DECLSPEC Uint8 SDLCALL SDL_GetMouseState(int *x, int *y);
+extern DECLSPEC Uint8 SDLCALL SDL_GetMouseState(int index, int *x, int *y);
 
 /**
  * \fn Uint8 SDL_GetRelativeMouseState(int *x, int *y)
@@ -124,7 +125,8 @@ extern DECLSPEC Uint8 SDLCALL SDL_GetMouseState(int *x, int *y);
  * be tested using the SDL_BUTTON(X) macros, and x and y are set to the
  * mouse deltas since the last call to SDL_GetRelativeMouseState().
  */
-extern DECLSPEC Uint8 SDLCALL SDL_GetRelativeMouseState(int *x, int *y);
+extern DECLSPEC Uint8 SDLCALL SDL_GetRelativeMouseState(int index, int *x,
+                                                        int *y);
 
 /**
  * \fn void SDL_WarpMouseInWindow(SDL_WindowID windowID, int x, int y)
@@ -203,6 +205,16 @@ extern DECLSPEC int SDLCALL SDL_ShowCursor(int toggle);
    Button 2:	Middle mouse button
    Button 3:	Right mouse button
  */
+
+/* FIXME: Where do these functions go in this header?
+          Also, add doxygen documentation for these...
+*/
+extern DECLSPEC char *SDLCALL SDL_GetMouseName(int index);
+
+extern DECLSPEC int SDLCALL SDL_GetCursorsNumber(int index);
+
+extern DECLSPEC int SDLCALL SDL_GetCurrentCursor(int index);
+
 #define SDL_BUTTON(X)		(1 << ((X)-1))
 #define SDL_BUTTON_LEFT		1
 #define SDL_BUTTON_MIDDLE	2

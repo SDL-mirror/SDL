@@ -29,6 +29,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
+#include <X11/extensions/XInput.h>
 
 #if SDL_VIDEO_DRIVER_X11_XINERAMA
 #include "../Xext/extensions/Xinerama.h"
@@ -68,7 +69,7 @@ typedef struct SDL_VideoData
     int numwindows;
     SDL_WindowData **windowlist;
     int windowlistlength;
-    int mouse;
+    int *mouse;
     int keyboard;
     Atom WM_DELETE_WINDOW;
     SDL_scancode key_layout[256];

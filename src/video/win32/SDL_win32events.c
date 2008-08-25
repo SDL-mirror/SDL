@@ -19,12 +19,23 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+
+#if (_WIN32_WINNT < 0x0501)
+#undef _WIN32_WINNT
+#define _WIN32_WINNT 0x0501
+#endif
+
 #include "SDL_config.h"
 
 #include "SDL_win32video.h"
 #include "SDL_syswm.h"
 #include "SDL_vkeys.h"
 #include "../../events/SDL_events_c.h"
+
+#include <wintab.h>
+#define PACKETDATA ( PK_X | PK_Y | PK_BUTTONS | PK_NORMAL_PRESSURE | PK_CURSOR)
+#define PACKETMODE 0
+#include <pktdef.h>
 
 /*#define WMMSG_DEBUG*/
 #ifdef WMMSG_DEBUG
@@ -48,6 +59,12 @@
 #ifndef GET_XBUTTON_WPARAM
 #define GET_XBUTTON_WPARAM(w) (HIWORD(w))
 #endif
+
+extern HCTX *g_hCtx;
+extern HANDLE *mice;
+extern int total_mice;
+extern int tablet;
+int pressure = 0;               /* the pressure reported by the tablet */
 
 static WPARAM
 RemapVKEY(WPARAM wParam, LPARAM lParam)
@@ -84,6 +101,8 @@ LRESULT CALLBACK
 WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     SDL_WindowData *data;
+    RAWINPUT *raw;
+    PACKET packet;
 
     /* Send a SDL_SYSWMEVENT if the application wants them */
     if (SDL_ProcessEvents[SDL_SYSWMEVENT] == SDL_ENABLE) {
@@ -114,9 +133,39 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         fprintf(log, " -- 0x%X, 0x%X\n", wParam, lParam);
         fclose(log);
     }
+
 #endif
 
     switch (msg) {
+
+    case WT_PACKET:
+        {
+            /* if we receive such data we need to update the pressure */
+            if (WTPacket((HCTX) lParam, wParam, &packet)) {
+                SDL_ChangeEnd(tablet, (int) packet.pkCursor);
+                pressure = (int) packet.pkNormalPressure;
+            }
+        }
+        break;
+
+    case WT_PROXIMITY:
+        {
+            /* checking where the proximity message showed up */
+            int h_context = LOWORD(lParam);
+            LPPOINT point;
+            GetCursorPos(&point);
+            ScreenToClient(hwnd, &point);
+
+            /* are we in proximity or out of proximity */
+            if (h_context == 0) {
+                SDL_SendProximity(tablet, (int) (&point->x),
+                                  (int) (&point->y), SDL_PROXIMITYOUT);
+            } else {
+                SDL_SendProximity(tablet, (int) (&point->x),
+                                  (int) (&point->y), SDL_PROXIMITYIN);
+            }
+        }
+        break;
 
     case WM_SHOWWINDOW:
         {
@@ -161,48 +210,72 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                                         SDL_WINDOWEVENT_MINIMIZED, 0, 0);
                 }
             }
-            return (0);
         }
-        break;
+        return (0);
 
-    case WM_MOUSEMOVE:
+    case WM_INPUT:             /* mouse events */
         {
+            LPBYTE lpb;
+            int w, h;
+            const RAWINPUTHEADER *header;
             int index;
-            SDL_Mouse *mouse;
-            int x, y;
+            int i;
+            int size = 0;
+            const RAWMOUSE *raw_mouse = NULL;
+            LPPOINT point;
+            USHORT flags;
 
-            index = data->videodata->mouse;
-            mouse = SDL_GetMouse(index);
+            /* we're collecting data from the mouse */
+            GetRawInputData((HRAWINPUT) lParam, RID_INPUT, NULL, &size,
+                            sizeof(RAWINPUTHEADER));
+            lpb = SDL_malloc(size * sizeof(LPBYTE));
+            GetRawInputData((HRAWINPUT) lParam, RID_INPUT, lpb, &size,
+                            sizeof(RAWINPUTHEADER));
+            raw = (RAWINPUT *) lpb;
+            header = &raw->header;
+            flags = raw->data.mouse.usButtonFlags;
 
-            if (mouse->focus != data->windowID) {
-                TRACKMOUSEEVENT tme;
-
-                tme.cbSize = sizeof(tme);
-                tme.dwFlags = TME_LEAVE;
-                tme.hwndTrack = hwnd;
-                TrackMouseEvent(&tme);
-
-                SDL_SetMouseFocus(index, data->windowID);
-            }
-
-            /* mouse has moved within the window */
-            x = LOWORD(lParam);
-            y = HIWORD(lParam);
-            if (mouse->relative_mode) {
-                int w, h;
-                POINT center;
-                SDL_GetWindowSize(data->windowID, &w, &h);
-                center.x = (w / 2);
-                center.y = (h / 2);
-                x -= center.x;
-                y -= center.y;
-                if (x || y) {
-                    ClientToScreen(hwnd, &center);
-                    SetCursorPos(center.x, center.y);
-                    SDL_SendMouseMotion(index, 1, x, y);
+            /* we're checking which mouse generated the event */
+            for (i = 0; i < total_mice; ++i) {
+                if (mice[i] == header->hDevice) {
+                    index = i;
+                    break;
                 }
+            }
+            GetCursorPos(&point);
+            ScreenToClient(hwnd, &point);
+            SDL_GetWindowSize(data->windowID, &w, &h);
+            SDL_UpdateCoordinates(w, h);        /* we're updating the current window size */
+
+            /* if the message was sent by a tablet we have to send also pressure */
+            if (i == tablet) {
+                SDL_SendMouseMotion(index, 0, (int) (&point->x),
+                                    (int) (&point->y), pressure);
             } else {
-                SDL_SendMouseMotion(index, 0, x, y);
+                SDL_SendMouseMotion(index, 0, (int) (&point->x),
+                                    (int) (&point->y), 0);
+            }
+            /* we're sending mouse buttons messages to check up if sth changed */
+            if (flags & RI_MOUSE_BUTTON_1_DOWN) {
+                SDL_SendMouseButton(index, SDL_PRESSED, SDL_BUTTON_LEFT);
+            } else if (flags & RI_MOUSE_BUTTON_1_UP) {
+                SDL_SendMouseButton(index, SDL_RELEASED, SDL_BUTTON_LEFT);
+            }
+            if (flags & RI_MOUSE_BUTTON_2_DOWN) {
+                SDL_SendMouseButton(index, SDL_PRESSED, SDL_BUTTON_MIDDLE);
+            } else if (flags & RI_MOUSE_BUTTON_2_UP) {
+                SDL_SendMouseButton(index, SDL_RELEASED, SDL_BUTTON_MIDDLE);
+            }
+            if (flags & RI_MOUSE_BUTTON_3_DOWN) {
+                SDL_SendMouseButton(index, SDL_PRESSED, SDL_BUTTON_RIGHT);
+            } else if (flags & RI_MOUSE_BUTTON_3_UP) {
+                SDL_SendMouseButton(index, SDL_RELEASED, SDL_BUTTON_RIGHT);
+            }
+            if (flags & RI_MOUSE_WHEEL) {
+                if (raw->data.mouse.usButtonData != 0) {
+                    SDL_SendMouseWheel(index, 0,
+                                       raw->data.mouse.usButtonData);
+                }
             }
         }
         return (0);
@@ -218,117 +291,6 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             if (mouse->focus == data->windowID) {
                 SDL_SetMouseFocus(index, 0);
             }
-        }
-        return (0);
-
-    case WM_LBUTTONDOWN:
-    case WM_LBUTTONUP:
-    case WM_MBUTTONDOWN:
-    case WM_MBUTTONUP:
-    case WM_RBUTTONDOWN:
-    case WM_RBUTTONUP:
-    case WM_XBUTTONDOWN:
-    case WM_XBUTTONUP:
-        {
-            int xbuttonval = 0;
-            int index;
-            SDL_Mouse *mouse;
-            Uint8 button, state;
-
-            /* DJM:
-               We want the SDL window to take focus so that
-               it acts like a normal windows "component"
-               (e.g. gains keyboard focus on a mouse click).
-             */
-            SetFocus(hwnd);
-
-            index = data->videodata->mouse;
-            mouse = SDL_GetMouse(index);
-
-            /* Figure out which button to use */
-            switch (msg) {
-            case WM_LBUTTONDOWN:
-                button = SDL_BUTTON_LEFT;
-                state = SDL_PRESSED;
-                break;
-            case WM_LBUTTONUP:
-                button = SDL_BUTTON_LEFT;
-                state = SDL_RELEASED;
-                break;
-            case WM_MBUTTONDOWN:
-                button = SDL_BUTTON_MIDDLE;
-                state = SDL_PRESSED;
-                break;
-            case WM_MBUTTONUP:
-                button = SDL_BUTTON_MIDDLE;
-                state = SDL_RELEASED;
-                break;
-            case WM_RBUTTONDOWN:
-                button = SDL_BUTTON_RIGHT;
-                state = SDL_PRESSED;
-                break;
-            case WM_RBUTTONUP:
-                button = SDL_BUTTON_RIGHT;
-                state = SDL_RELEASED;
-                break;
-            case WM_XBUTTONDOWN:
-                xbuttonval = GET_XBUTTON_WPARAM(wParam);
-                button = SDL_BUTTON_X1 + xbuttonval - 1;
-                state = SDL_PRESSED;
-                break;
-            case WM_XBUTTONUP:
-                xbuttonval = GET_XBUTTON_WPARAM(wParam);
-                button = SDL_BUTTON_X1 + xbuttonval - 1;
-                state = SDL_RELEASED;
-                break;
-            default:
-                /* Eh? Unknown button? */
-                return (0);
-            }
-            if (state == SDL_PRESSED) {
-                /* Grab mouse so we get up events */
-                if (++data->mouse_pressed > 0) {
-                    SetCapture(hwnd);
-                }
-            } else {
-                /* Release mouse after all up events */
-                if (--data->mouse_pressed <= 0) {
-                    ReleaseCapture();
-                    data->mouse_pressed = 0;
-                }
-            }
-
-            if (!mouse->relative_mode) {
-                int x, y;
-                x = LOWORD(lParam);
-                y = HIWORD(lParam);
-                SDL_SendMouseMotion(index, 0, x, y);
-            }
-            SDL_SendMouseButton(index, state, button);
-
-            /*
-             * MSDN says:
-             *  "Unlike the WM_LBUTTONUP, WM_MBUTTONUP, and WM_RBUTTONUP
-             *   messages, an application should return TRUE from [an
-             *   XBUTTON message] if it processes it. Doing so will allow
-             *   software that simulates this message on Microsoft Windows
-             *   systems earlier than Windows 2000 to determine whether
-             *   the window procedure processed the message or called
-             *   DefWindowProc to process it.
-             */
-            if (xbuttonval > 0) {
-                return (TRUE);
-            }
-        }
-        return (0);
-
-    case WM_MOUSEWHEEL:
-        {
-            int index;
-            int motion = (short) HIWORD(wParam);
-
-            index = data->videodata->mouse;
-            SDL_SendMouseWheel(index, 0, motion);
         }
         return (0);
 
@@ -426,6 +388,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                     wParam = VK_ENTER;
                 break;
             }
+
             /* Windows only reports keyup for print screen */
             if (wParam == VK_SNAPSHOT
                 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_PRINTSCREEN] ==
@@ -499,11 +462,9 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                inside their function, so I have to do it here.
              */
             style = GetWindowLong(hwnd, GWL_STYLE);
-            AdjustWindowRect(&size,
-                             style,
-                             style & WS_CHILDWINDOW ? FALSE : GetMenu(hwnd) !=
-                             NULL);
-
+            AdjustWindowRect(&size, style,
+                             style & WS_CHILDWINDOW ? FALSE : GetMenu(hwnd)
+                             != NULL);
             w = size.right - size.left;
             h = size.bottom - size.top;
 
@@ -661,8 +622,9 @@ SDL_RegisterApp(char *name, Uint32 style, void *hInst)
 
     /* Register the application class */
     class.hCursor = NULL;
-    class.hIcon = LoadImage(SDL_Instance, SDL_Appname,
-                            IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
+    class.hIcon =
+        LoadImage(SDL_Instance, SDL_Appname, IMAGE_ICON, 0, 0,
+                  LR_DEFAULTCOLOR);
     class.lpszMenuName = NULL;
     class.lpszClassName = SDL_Appname;
     class.hbrBackground = NULL;
@@ -707,11 +669,8 @@ WIN_SetError(const char *prefix)
 {
     TCHAR buffer[1024];
     char *message;
-
-    FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,
-                  NULL,
-                  GetLastError(), 0, buffer, SDL_arraysize(buffer), NULL);
-
+    FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(), 0,
+                  buffer, SDL_arraysize(buffer), NULL);
     message = WIN_StringToUTF8(buffer);
     SDL_SetError("%s%s%s", prefix ? prefix : "", prefix ? ":" : "", message);
     SDL_free(message);
