@@ -42,9 +42,9 @@
     /* Used for the c_dfDIJoystick2 symbol (no imports are used) */
 #   pragma comment (lib, "dinput.lib")
 #endif
-#include <dxerr.h>
+#include <dxerr8.h>
 #ifdef _MSC_VER
-#   pragma comment (lib, "dxerr.lib")
+#   pragma comment (lib, "dxerr8.lib")
 #endif
 
 

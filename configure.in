@@ -2330,6 +2330,7 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
             if test x$have_dinput = xyes; then
                 AC_DEFINE(SDL_JOYSTICK_DINPUT)
                 SOURCES="$SOURCES $srcdir/src/joystick/win32/SDL_dxjoystick.c"
+                EXTRA_LDFLAGS="$EXTRA_LDFLAGS -ldinput8 -ldxguid -ldxerr8 -lole32"
             else
                 AC_DEFINE(SDL_JOYSTICK_WINMM)
                 SOURCES="$SOURCES $srcdir/src/joystick/win32/SDL_mmjoystick.c"

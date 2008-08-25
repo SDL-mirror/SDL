@@ -85,7 +85,7 @@ static void
 SetDIerror(const char *function, HRESULT code)
 {
     SDL_SetError("%s() [%s]: %s", function,
-                 DXGetErrorString(code), DXGetErrorDescription(code));
+                 DXGetErrorString8A(code), DXGetErrorDescription8A(code));
 }
 
 
