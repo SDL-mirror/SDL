@@ -1374,7 +1374,7 @@ SDL_SYS_HapticUnpause(SDL_Haptic * haptic)
  * Stops all the playing effects on the device.
  */
 int
-SDL_SYS_HapticUnpause(SDL_Haptic * haptic)
+SDL_SYS_HapticStopAll(SDL_Haptic * haptic)
 {
     HRESULT ret;
 
