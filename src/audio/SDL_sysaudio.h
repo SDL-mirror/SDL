@@ -69,6 +69,15 @@ typedef struct SDL_AudioDriver
 } SDL_AudioDriver;
 
 
+/* Streamer */
+typedef struct
+{
+    Uint8 *buffer;
+    int max_len;                /* the maximum length in bytes */
+    int read_pos, write_pos;    /* the position of the write and read heads in bytes */
+} SDL_AudioStreamer;
+
+
 /* Define the SDL audio driver structure */
 struct SDL_AudioDevice
 {
@@ -80,6 +89,10 @@ struct SDL_AudioDevice
 
     /* An audio conversion block for audio format emulation */
     SDL_AudioCVT convert;
+
+    /* The streamer, if sample rate conversion necessitates it */
+    int use_streamer;
+    SDL_AudioStreamer streamer;
 
     /* Current state flags */
     int iscapture;
