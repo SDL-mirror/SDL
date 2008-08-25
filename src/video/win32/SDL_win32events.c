@@ -271,6 +271,16 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             } else if (flags & RI_MOUSE_BUTTON_3_UP) {
                 SDL_SendMouseButton(index, SDL_RELEASED, SDL_BUTTON_RIGHT);
             }
+            if (flags & RI_MOUSE_BUTTON_4_DOWN) {
+                SDL_SendMouseButton(index, SDL_PRESSED, SDL_BUTTON_X1);
+            } else if (flags & RI_MOUSE_BUTTON_4_UP) {
+                SDL_SendMouseButton(index, SDL_RELEASED, SDL_BUTTON_X1);
+            }
+            if (flags & RI_MOUSE_BUTTON_5_DOWN) {
+                SDL_SendMouseButton(index, SDL_PRESSED, SDL_BUTTON_X2);
+            } else if (flags & RI_MOUSE_BUTTON_5_UP) {
+                SDL_SendMouseButton(index, SDL_RELEASED, SDL_BUTTON_X2);
+            }
             if (flags & RI_MOUSE_WHEEL) {
                 if (raw->data.mouse.usButtonData != 0) {
                     SDL_SendMouseWheel(index, 0,
