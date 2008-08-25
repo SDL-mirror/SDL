@@ -1869,7 +1869,7 @@ AC_HELP_STRING([--enable-directx], [use DirectX for Win32 audio/video [[default=
     if test x$enable_directx = xyes; then
         AC_CHECK_HEADER(d3d9.h, have_d3d=yes)
         AC_CHECK_HEADER(dsound.h, have_dsound=yes)
-        AC_CHECK_HEADER(dinput.h, use_dinput=yes)
+        AC_CHECK_HEADER(dinput.h, have_dinput=yes)
     fi
 }
 
