@@ -55,6 +55,17 @@ typedef struct SDL_Cursor SDL_Cursor;   /* Implementation dependent */
 extern DECLSPEC int SDLCALL SDL_GetNumMice(void);
 
 /**
+ * \fn char* SDL_GetMouseName(int index)
+ *
+ * \brief Gets the name of a mouse with the given index.
+ *
+ * \param index is the index of the mouse, which name is to be returned.
+ *
+ * \return the name of the mouse with the specified index
+ */
+extern DECLSPEC char *SDLCALL SDL_GetMouseName(int index);
+
+/**
  * \fn int SDL_SelectMouse(int index)
  *
  * \brief Set the index of the currently selected mouse.
@@ -206,13 +217,35 @@ extern DECLSPEC int SDLCALL SDL_ShowCursor(int toggle);
    Button 3:	Right mouse button
  */
 
-/* FIXME: Where do these functions go in this header?
-          Also, add doxygen documentation for these...
-*/
-extern DECLSPEC char *SDLCALL SDL_GetMouseName(int index);
-
+/**
+ * \fn int SDL_GetCursorsNumber(int index)
+ *
+ * \brief Gets the number of cursors a pointing device supports.
+ * Useful for tablet users. Useful only under Windows.
+ *
+ * \param index is the index of the pointing device, which number of cursors we
+ * want to receive.
+ *
+ * \return the number of cursors supported by the pointing device. On Windows
+ * if a device is a tablet it returns a number >=1. Normal mice always return 1.
+ * On Linux every device reports one cursor.
+ */
 extern DECLSPEC int SDLCALL SDL_GetCursorsNumber(int index);
 
+/**
+ * \fn int SDL_GetCurrentCursor(int index)
+ *
+ * \brief Returns the index of the current cursor used by a specific pointing
+ * device. Useful only under Windows.
+ *
+ * \param index is the index of the pointing device, which cursor index we want
+ * to receive.
+ *
+ * \return the index of the cursor currently used by a specific pointing device.
+ * Always 0 under Linux. On Windows if the device isn't a tablet it returns 0.
+ * If the device is the tablet it returns the cursor index.
+ * 0 - stylus, 1 - eraser, 2 - cursor.
+ */
 extern DECLSPEC int SDLCALL SDL_GetCurrentCursor(int index);
 
 #define SDL_BUTTON(X)		(1 << ((X)-1))
