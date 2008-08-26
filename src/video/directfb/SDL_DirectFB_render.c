@@ -87,7 +87,8 @@ SDL_RenderDriver DirectFB_RenderDriver = {
      (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_COLOR |
       SDL_TEXTUREMODULATE_ALPHA),
      (SDL_TEXTUREBLENDMODE_NONE | SDL_TEXTUREBLENDMODE_MASK |
-      SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_MOD),
+      SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD |
+      SDL_TEXTUREBLENDMODE_MOD),
      (SDL_TEXTURESCALEMODE_NONE | SDL_TEXTURESCALEMODE_FAST),
      14,
      {
@@ -124,15 +125,8 @@ typedef struct
     void *pixels;
     int pitch;
     IDirectFBPalette *palette;
+    DFB_DisplayData *display;
 } DirectFB_TextureData;
-
-static void
-UpdateYUVTextureData(SDL_Texture * texture)
-{
-    /*
-     * Not needed - directfb supports yuv surfaces
-     */
-}
 
 void
 DirectFB_AddRenderDriver(_THIS)
@@ -178,7 +172,7 @@ DirectFB_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->DestroyTexture = DirectFB_DestroyTexture;
     renderer->DestroyRenderer = DirectFB_DestroyRenderer;
     renderer->info = DirectFB_RenderDriver.info;
-    renderer->window = window->id;      // SDL window id
+    renderer->window = window->id;      /* SDL window id */
     renderer->driverdata = data;
 
     renderer->info.flags =
@@ -200,7 +194,7 @@ DirectFB_CreateRenderer(SDL_Window * window, Uint32 flags)
     else
         renderer->info.flags |= SDL_RENDERER_SINGLEBUFFER;
 
-    data->isyuvdirect = 0;
+    data->isyuvdirect = 1;      /* default is on! */
     p = getenv("SDL_DIRECTFB_YUV_DIRECT");
     if (p)
         data->isyuvdirect = atoi(p);
@@ -293,6 +287,55 @@ DirectFB_DisplayModeChanged(SDL_Renderer * renderer)
 }
 
 static int
+DirectFB_AcquireVidLayer(SDL_Renderer * renderer, SDL_Texture * texture)
+{
+    SDL_DFB_RENDERERDATA(renderer);
+    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_DFB_DEVICEDATA(display->device);
+    DFB_DisplayData *dispdata = (DFB_DisplayData *) display->driverdata;
+    DirectFB_TextureData *data = texture->driverdata;
+    DFBDisplayLayerConfig layconf;
+    int ret;
+
+    if (renddata->isyuvdirect && (dispdata->vidID >= 0)
+        && (!dispdata->vidIDinuse)
+        && SDL_ISPIXELFORMAT_FOURCC(data->format)) {
+        layconf.flags = DLCONF_WIDTH | DLCONF_HEIGHT | DLCONF_PIXELFORMAT;
+        layconf.width = texture->w;
+        layconf.height = texture->h;
+        layconf.pixelformat = SDLToDFBPixelFormat(data->format);
+
+        SDL_DFB_CHECKERR(devdata->dfb->
+                         GetDisplayLayer(devdata->dfb, dispdata->vidID,
+                                         &data->vidlayer));
+        SDL_DFB_CHECKERR(data->vidlayer->
+                         SetCooperativeLevel(data->vidlayer,
+                                             DLSCL_EXCLUSIVE));
+        SDL_DFB_CHECKERR(data->vidlayer->
+                         SetConfiguration(data->vidlayer, &layconf));
+        SDL_DFB_CHECKERR(data->vidlayer->
+                         GetSurface(data->vidlayer, &data->surface));
+        //SDL_DFB_CHECKERR(data->vidlayer->GetDescription(data->vidlayer, laydsc));
+        dispdata->vidIDinuse = 1;
+        data->display = dispdata;
+        SDL_DFB_DEBUG("Created HW YUV surface\n");
+
+        return 0;
+    }
+    return 1;
+  error:
+    if (data->vidlayer) {
+        SDL_DFB_RELEASE(data->surface);
+        SDL_DFB_CHECKERR(data->vidlayer->
+                         SetCooperativeLevel(data->vidlayer,
+                                             DLSCL_ADMINISTRATIVE));
+        SDL_DFB_RELEASE(data->vidlayer);
+    }
+    return 1;
+}
+
+static int
 DirectFB_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     SDL_DFB_RENDERERDATA(renderer);
@@ -300,7 +343,6 @@ DirectFB_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     SDL_DFB_WINDOWDATA(window);
     SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
     SDL_DFB_DEVICEDATA(display->device);
-    DFB_DisplayData *dispdata = (DFB_DisplayData *) display->driverdata;
     DirectFB_TextureData *data;
     DFBResult ret;
     DFBSurfaceDescription dsc;
@@ -313,37 +355,23 @@ DirectFB_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     data->format = texture->format;
     data->pitch = (texture->w * SDL_BYTESPERPIXEL(data->format));
     data->vidlayer = NULL;
-    if (renddata->isyuvdirect && (dispdata->vidID >= 0)
-        && SDL_ISPIXELFORMAT_FOURCC(data->format)) {
-        SDL_DFB_CHECKERR(devdata->dfb->
-                         GetDisplayLayer(devdata->dfb, dispdata->vidID,
-                                         &data->vidlayer));
-        layconf.flags = DLCONF_WIDTH | DLCONF_HEIGHT | DLCONF_PIXELFORMAT;
-        layconf.width = texture->w;
-        layconf.height = texture->h;
-        layconf.pixelformat = SDLToDFBPixelFormat(data->format);
 
-        SDL_DFB_CHECKERR(data->vidlayer->
-                         SetCooperativeLevel(data->vidlayer,
-                                             DLSCL_EXCLUSIVE));
-        SDL_DFB_CHECKERR(data->vidlayer->
-                         SetConfiguration(data->vidlayer, &layconf));
-        SDL_DFB_CHECKERR(data->vidlayer->
-                         GetSurface(data->vidlayer, &data->surface));
-        SDL_DFB_CHECKERR(data->vidlayer->
-                         GetDescription(data->vidlayer, &laydsc));
-        SDL_DFB_DEBUG("Created HW YUV surface\n");
-    }
-    if (!data->vidlayer) {
+    if (DirectFB_AcquireVidLayer(renderer, texture) != 0) {
         /* fill surface description */
         dsc.flags =
             DSDESC_WIDTH | DSDESC_HEIGHT | DSDESC_PIXELFORMAT | DSDESC_CAPS;
         dsc.width = texture->w;
         dsc.height = texture->h;
-        /* Never use DSCAPS_VIDEOONLY here. It kills performance
+        /* <1.2 Never use DSCAPS_VIDEOONLY here. It kills performance
          * No DSCAPS_SYSTEMONLY either - let dfb decide
+         * 1.2: DSCAPS_SYSTEMONLY boosts performance by factor ~8
          */
-        dsc.caps = 0;           //DSCAPS_PREMULTIPLIED;
+        dsc.caps = DSCAPS_PREMULTIPLIED;
+
+        if (texture->access == SDL_TEXTUREACCESS_STREAMING)
+            dsc.caps |= DSCAPS_SYSTEMONLY;
+        else
+            dsc.caps |= DSCAPS_VIDEOONLY;
 
         /* find the right pixelformat */
 
@@ -469,6 +497,7 @@ DirectFB_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
     case SDL_TEXTUREBLENDMODE_NONE:
     case SDL_TEXTUREBLENDMODE_MASK:
     case SDL_TEXTUREBLENDMODE_BLEND:
+    case SDL_TEXTUREBLENDMODE_ADD:
     case SDL_TEXTUREBLENDMODE_MOD:
         return 0;
     default:
@@ -513,8 +542,8 @@ DirectFB_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
     size_t length;
 
     SDL_DFB_CHECKERR(data->surface->Lock(data->surface,
-                                         DSLF_WRITE | DSLF_READ, &dpixels,
-                                         &dpitch));
+                                         DSLF_WRITE | DSLF_READ,
+                                         ((void **) &dpixels), &dpitch));
     src = (Uint8 *) pixels;
     dst =
         (Uint8 *) dpixels + rect->y * dpitch +
@@ -648,27 +677,52 @@ DirectFB_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         if (texture->
             modMode & (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA))
         {
-            u8 alpha = 0xFF;
-            if (texture->modMode & SDL_TEXTUREMODULATE_ALPHA)
+            Uint8 alpha = 0xFF;
+            if (texture->modMode & SDL_TEXTUREMODULATE_ALPHA) {
                 alpha = texture->a;
-            if (texture->modMode & SDL_TEXTUREMODULATE_COLOR)
+                flags |= DSBLIT_SRC_PREMULTCOLOR;
+                SDL_DFB_CHECKERR(data->surface->SetColor(data->surface, 0xFF,
+                                                         0xFF, 0xFF, alpha));
+            }
+            if (texture->modMode & SDL_TEXTUREMODULATE_COLOR) {
                 SDL_DFB_CHECKERR(data->surface->
                                  SetColor(data->surface, texture->r,
                                           texture->g, texture->b, alpha));
-            else
-                SDL_DFB_CHECKERR(data->surface->SetColor(data->surface, 0xFF,
-                                                         0xFF, 0xFF, alpha));
-            // Only works together ....
-            flags |= DSBLIT_COLORIZE | DSBLIT_SRC_PREMULTCOLOR;
+                /* Only works together .... */
+                flags |= DSBLIT_COLORIZE | DSBLIT_SRC_PREMULTCOLOR;
+            }
         }
 
-        if (texture->
-            blendMode & (SDL_TEXTUREBLENDMODE_MASK |
-                         SDL_TEXTUREBLENDMODE_BLEND)) {
-            flags |= DSBLIT_BLEND_ALPHACHANNEL;
-        } else {
+        switch (texture->blendMode) {
+        case SDL_TEXTUREBLENDMODE_NONE: /**< No blending */
             flags |= DSBLIT_NOFX;
+            data->surface->SetSrcBlendFunction(data->surface, DSBF_ONE);
+            data->surface->SetDstBlendFunction(data->surface, DSBF_ZERO);
+            break;
+        case SDL_TEXTUREBLENDMODE_MASK: /**< dst = A ? src : dst (alpha is mask) */
+            flags |= DSBLIT_BLEND_ALPHACHANNEL;
+            data->surface->SetSrcBlendFunction(data->surface, DSBF_SRCALPHA);
+            data->surface->SetDstBlendFunction(data->surface,
+                                               DSBF_INVSRCALPHA);
+            break;
+        case SDL_TEXTUREBLENDMODE_BLEND:/**< dst = (src * A) + (dst * (1-A)) */
+            flags |= DSBLIT_BLEND_ALPHACHANNEL;
+            data->surface->SetSrcBlendFunction(data->surface, DSBF_SRCALPHA);
+            data->surface->SetDstBlendFunction(data->surface,
+                                               DSBF_INVSRCALPHA);
+            break;
+        case SDL_TEXTUREBLENDMODE_ADD:  /**< dst = (src * A) + dst */
+            flags |= DSBLIT_BLEND_ALPHACHANNEL;
+            data->surface->SetSrcBlendFunction(data->surface, DSBF_SRCALPHA);
+            data->surface->SetDstBlendFunction(data->surface, DSBF_ONE);
+            break;
+        case SDL_TEXTUREBLENDMODE_MOD:  /**< dst = src * dst */
+            flags |= DSBLIT_BLEND_ALPHACHANNEL;
+            data->surface->SetSrcBlendFunction(data->surface, DSBF_DESTCOLOR);
+            data->surface->SetDstBlendFunction(data->surface, DSBF_ZERO);
+            break;
         }
+
         SDL_DFB_CHECKERR(data->surface->
                          SetBlittingFlags(data->surface, flags));
         if (srcrect->w == dstrect->w && srcrect->h == dstrect->h) {
@@ -720,6 +774,11 @@ DirectFB_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     }
     SDL_DFB_RELEASE(data->palette);
     SDL_DFB_RELEASE(data->surface);
+    if (data->display) {
+        data->display->vidIDinuse = 0;
+        data->vidlayer->SetCooperativeLevel(data->vidlayer,
+                                            DLSCL_ADMINISTRATIVE);
+    }
     SDL_DFB_RELEASE(data->vidlayer);
     SDL_free(data);
     texture->driverdata = NULL;

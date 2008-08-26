@@ -114,7 +114,10 @@ struct _DFB_DisplayData
 {
     IDirectFBDisplayLayer *layer;
     DFBSurfacePixelFormat pixelformat;
+    //FIXME: support for multiple layer ...
     DFBDisplayLayerID vidID;
+
+    int vidIDinuse;
 
     int cw;
     int ch;
@@ -139,9 +142,9 @@ struct _DFB_WindowData
     IDirectFBGL *gl_context;
     IDirectFBEventBuffer *eventbuffer;
     DFBWindowID windowID;
-    int id;                     // SDL window id
+    int id;                     /* SDL window id */
     DFB_WindowData *next;
-    u8 opacity;
+    Uint8 opacity;
 };
 
 typedef struct _DFB_DeviceData DFB_DeviceData;
@@ -152,6 +155,7 @@ struct _DFB_DeviceData
     IDirectFB *dfb;
     int mouse;
     int keyboard;
+    int kbdgeneric;
     DFB_WindowData *firstwin;
 
     int numscreens;
@@ -159,10 +163,9 @@ struct _DFB_DeviceData
     DFBDisplayLayerID gralayer[DFB_MAX_SCREENS];
     DFBDisplayLayerID vidlayer[DFB_MAX_SCREENS];
 
-    // auxiliary integer for callbacks
-    int aux;
+    int aux;                    /* auxiliary integer for callbacks */
 
-    // OpenGL
+    /* OpenGL */
     void (*glFinish) (void);
     void (*glFlush) (void);
 };

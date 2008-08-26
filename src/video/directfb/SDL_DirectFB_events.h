@@ -24,5 +24,6 @@
 #include "SDL_DirectFB_video.h"
 
 /* Functions to be exported */
-extern void DirectFB_InitOSKeymap(_THIS);
+extern void DirectFB_InitKeyboard(_THIS);
 extern void DirectFB_PumpEventsWindow(_THIS);
+extern SDLKey DirectFB_GetLayoutKey(_THIS, SDLKey physicalKey);

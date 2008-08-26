@@ -23,11 +23,6 @@
 	
 */
 
-/* TODO: Various
- * Add Mouse support from 1.2 directfb driver
- * - Interface is defined in SDL_Mouse.c.h
- * - Default Cursor automatically created
- */
 
 #include "SDL_config.h"
 
@@ -141,7 +136,6 @@ DirectFB_CreateDevice(int devindex)
     device->GetDisplayGammaRamp = NULL;
 #endif
     device->PumpEvents = DirectFB_PumpEventsWindow;
-
     device->CreateWindow = DirectFB_CreateWindow;
     device->CreateWindowFrom = DirectFB_CreateWindowFrom;
     device->SetWindowTitle = DirectFB_SetWindowTitle;
@@ -299,13 +293,10 @@ DirectFB_VideoInit(_THIS)
     DFB_DisplayData *dispdata;
     DFB_DeviceData *devdata;
     SDL_DisplayMode mode;
-    SDL_Keyboard keyboard;
     int i;
     DFBResult ret;
     int tcw[DFB_MAX_SCREENS];
     int tch[DFB_MAX_SCREENS];
-
-    SDL_zero(keyboard);
 
     SDL_DFB_CHECKERR(DirectFBInit(NULL, NULL));
     SDL_DFB_CHECKERR(DirectFBCreate(&dfb));
@@ -325,7 +316,15 @@ DirectFB_VideoInit(_THIS)
         devdata->aux = i;
         SDL_DFB_CHECKERR(screen->
                          EnumDisplayLayers(screen, &cbLayers, devdata));
+#if (DIRECTFB_MAJOR_VERSION >= 1)
         screen->GetSize(screen, &tcw[i], &tch[i]);
+#else
+        /* FIXME: this is only used to center windows
+         *        Should be done otherwise, e.g. get surface from layer
+         */
+        tcw[i] = 800;
+        tch[i] = 600;
+#endif
         screen->Release(screen);
     }
 
@@ -369,6 +368,7 @@ DirectFB_VideoInit(_THIS)
         /* YUV - Video layer */
 
         dispdata->vidID = devdata->vidlayer[i];
+        dispdata->vidIDinuse = 0;
 
         SDL_zero(display);
 
@@ -400,9 +400,8 @@ DirectFB_VideoInit(_THIS)
 
     DirectFB_AddRenderDriver(_this);
     DirectFB_InitMouse(_this);
+    DirectFB_InitKeyboard(_this);
     //devdata->mouse = SDL_AddMouse(&mouse, -1);
-    devdata->keyboard = SDL_AddKeyboard(&keyboard, -1);
-    DirectFB_InitOSKeymap(_this);
 
     return 0;
 
@@ -452,8 +451,6 @@ DirectFB_VideoQuit(_THIS)
         // Done by core
         //SDL_free(dispdata);
     }
-
-    //SDL_DFB_RELEASE(devdata->eventbuffer);
 
     SDL_DFB_RELEASE(devdata->dfb);
 
@@ -579,12 +576,13 @@ DirectFB_SetDisplayMode(_THIS, SDL_DisplayMode * mode)
     DFBDisplayLayerConfig config, rconfig;
     DFBDisplayLayerConfigFlags fail = 0;
     DFBResult ret;
+    DFB_WindowData *win;
 
     SDL_DFB_CHECKERR(data->layer->
                      SetCooperativeLevel(data->layer, DLSCL_ADMINISTRATIVE));
 
     SDL_DFB_CHECKERR(data->layer->GetConfiguration(data->layer, &config));
-    config.flags = DLCONF_WIDTH | DLCONF_HEIGHT | DLCONF_BUFFERMODE;
+    config.flags = DLCONF_WIDTH | DLCONF_HEIGHT;        // | DLCONF_BUFFERMODE;
     if (mode->format != SDL_PIXELFORMAT_UNKNOWN) {
         config.flags |= DLCONF_PIXELFORMAT;
         config.pixelformat = SDLToDFBPixelFormat(mode->format);
@@ -593,7 +591,7 @@ DirectFB_SetDisplayMode(_THIS, SDL_DisplayMode * mode)
     config.width = mode->w;
     config.height = mode->h;
 
-    config.buffermode = DLBM_BACKVIDEO;
+    //config.buffermode = DLBM_BACKVIDEO;
 
     //config.pixelformat = GetFormatForBpp (bpp, HIDDEN->layer);
 
@@ -614,11 +612,34 @@ DirectFB_SetDisplayMode(_THIS, SDL_DisplayMode * mode)
 
     if ((config.width != rconfig.width) ||
         (config.height != rconfig.height) ||
-        (config.pixelformat != rconfig.pixelformat)) {
+        ((mode->format != SDL_PIXELFORMAT_UNKNOWN)
+         && (config.pixelformat != rconfig.pixelformat))) {
         SDL_DFB_DEBUG("Error setting mode %dx%d-%x\n", mode->w, mode->h,
                       mode->format);
         return -1;
     }
+
+    data->pixelformat = rconfig.pixelformat;
+    data->cw = config.width;
+    data->ch = config.height;
+    SDL_CurrentDisplay.current_mode = *mode;
+
+    /*
+     * FIXME: video mode switch is currently broken
+     * 
+     * DirectFB 1.2.0-rc1 even has a broken cursor after a switch
+     * The following code needs to be revisited whether it is still 
+     * needed once the switch works again.
+     */
+
+    win = devdata->firstwin;
+
+    while (win) {
+        SDL_DFB_RELEASE(win->surface);
+        SDL_DFB_CHECKERR(win->window->GetSurface(win->window, &win->surface));
+        win = win->next;
+    }
+
 
     return 0;
   error:
@@ -680,8 +701,16 @@ DirectFB_CreateWindow(_THIS, SDL_Window * window)
     }
 
     desc.flags =
-        DWDESC_WIDTH | DWDESC_HEIGHT | DWDESC_CAPS | DWDESC_PIXELFORMAT |
+        DWDESC_WIDTH | DWDESC_HEIGHT /*| DWDESC_CAPS */  | DWDESC_PIXELFORMAT
+        |
         DWDESC_SURFACE_CAPS;
+
+#if (DIRECTFB_MAJOR_VERSION == 1) && (DIRECTFB_MINOR_VERSION >= 0)
+    /* Needed for 1.2 */
+    desc.flags |= DWDESC_POSX | DWDESC_POSY;
+    desc.posx = x;
+    desc.posy = y;
+#else
     if (!(window->flags & SDL_WINDOW_FULLSCREEN)
         && window->x != SDL_WINDOWPOS_UNDEFINED
         && window->y != SDL_WINDOWPOS_UNDEFINED) {
@@ -689,12 +718,13 @@ DirectFB_CreateWindow(_THIS, SDL_Window * window)
         desc.posx = x;
         desc.posy = y;
     }
+#endif
 
     desc.width = window->w;
     desc.height = window->h;
     desc.pixelformat = dispdata->pixelformat;
-    desc.caps = 0;              //DWCAPS_DOUBLEBUFFER;
-    desc.surface_caps = DSCAPS_DOUBLE | DSCAPS_TRIPLE;  //| DSCAPS_PREMULTIPLIED;
+    desc.caps = 0;              // DWCAPS_DOUBLEBUFFER;
+    desc.surface_caps = DSCAPS_DOUBLE | DSCAPS_TRIPLE / DSCAPS_PREMULTIPLIED;
 
     /* Create the window. */
     SDL_DFB_CHECKERR(dispdata->layer->
@@ -790,21 +820,52 @@ DirectFB_SetWindowPosition(_THIS, SDL_Window * window)
     SDL_DFB_DEVICEDATA(_this);
     SDL_DFB_WINDOWDATA(window);
     SDL_DFB_DISPLAYDATA(_this, window);
+    int x, y;
 
-    if (!(window->flags & SDL_WINDOW_FULLSCREEN))
-        windata->window->MoveTo(windata->window, window->x, window->y);
+    if (window->y == SDL_WINDOWPOS_UNDEFINED)
+        y = 0;
+    else
+        y = window->y;
+
+    if (window->x == SDL_WINDOWPOS_UNDEFINED)
+        x = 0;
+    else
+        x = window->x;
+
+    if (window->flags & SDL_WINDOW_FULLSCREEN) {
+        x = 0;
+        y = 0;
+    }
+    //if (!(window->flags & SDL_WINDOW_FULLSCREEN))
+    windata->window->MoveTo(windata->window, x, y);
 }
 
 static void
 DirectFB_SetWindowSize(_THIS, SDL_Window * window)
 {
+    int ret;
     SDL_DFB_DEVICEDATA(_this);
     SDL_DFB_WINDOWDATA(window);
     SDL_DFB_DISPLAYDATA(_this, window);
 
-    if (!(window->flags & SDL_WINDOW_FULLSCREEN))
-        windata->window->Resize(windata->window, window->w, window->h);
+    if (!(window->flags & SDL_WINDOW_FULLSCREEN)) {
+        int ch, cw;
+
+        //      SDL_DFB_DEBUG("Resize %d %d %d %d\n", cw, ch, window->w, window->h);
+#if (DIRECTFB_MAJOR_VERSION == 1) && (DIRECTFB_MINOR_VERSION >= 0)
+        SDL_DFB_CHECKERR(windata->window->
+                         ResizeSurface(windata->window, window->w,
+                                       window->h));
+#else
+        SDL_DFB_CHECKERR(windata->window->
+                         Resize(windata->window, window->w, window->h));
+#endif
+        SDL_DFB_CHECKERR(windata->window->GetSize(windata->window, &window->w, &window->h));    /* if a window manager should have decided otherwise */
+    }
+  error:
+    return;
 }
+
 static void
 DirectFB_ShowWindow(_THIS, SDL_Window * window)
 {

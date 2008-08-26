@@ -80,7 +80,7 @@ DirectFB_CreateCursor(SDL_Surface * surface, int hot_x, int hot_y)
 
     dsc.flags =
         DSDESC_WIDTH | DSDESC_HEIGHT | DSDESC_PIXELFORMAT | DSDESC_CAPS;
-    dsc.caps = DSCAPS_NONE;     //DSCAPS_SYSTEMONLY;
+    dsc.caps = DSCAPS_VIDEOONLY;
     dsc.width = surface->w;
     dsc.height = surface->h;
     dsc.pixelformat = DSPF_ARGB;
@@ -101,7 +101,6 @@ DirectFB_CreateCursor(SDL_Surface * surface, int hot_x, int hot_y)
             dest[i] = 0x00000000;
         else
             dest[i] = p[i];
-    //memcpy(dest, surface->pixels, surface->w * surface->h * 4);
     curdata->surf->Unlock(curdata->surf);
     return cursor;
   error:
@@ -112,7 +111,6 @@ DirectFB_CreateCursor(SDL_Surface * surface, int hot_x, int hot_y)
 static int
 DirectFB_ShowCursor(SDL_Cursor * cursor)
 {
-    //FIXME check for null cursor here
     SDL_DFB_CURSORDATA(cursor);
     SDL_VideoDevice *dev = SDL_GetVideoDevice();
     SDL_DFB_DEVICEDATA(dev);
@@ -136,7 +134,6 @@ DirectFB_ShowCursor(SDL_Cursor * cursor)
             SDL_DFB_CHECKERR(windata->window->
                              SetCursorShape(windata->window, curdata->surf,
                                             curdata->hotx, curdata->hoty));
-        //FIXME: This is somehow a directfb issue
         //TODO: Check administrative 
         SDL_DFB_CHECKERR(dispdata->layer->
                          SetCooperativeLevel(dispdata->layer,
@@ -176,7 +173,6 @@ DirectFB_FreeCursor(SDL_Cursor * cursor)
 static void
 DirectFB_WarpMouse(SDL_Mouse * mouse, SDL_WindowID windowID, int x, int y)
 {
-//      SDL_DFB_CURSORDATA(cursor);     
     SDL_Window *window = SDL_GetWindowFromID(windowID);
     SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
     DFB_DisplayData *dispdata = (DFB_DisplayData *) display->driverdata;
