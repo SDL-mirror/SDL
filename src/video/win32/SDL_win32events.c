@@ -32,11 +32,6 @@
 #include "SDL_vkeys.h"
 #include "../../events/SDL_events_c.h"
 
-#include <wintab.h>
-#define PACKETDATA ( PK_X | PK_Y | PK_BUTTONS | PK_NORMAL_PRESSURE | PK_CURSOR)
-#define PACKETMODE 0
-#include <pktdef.h>
-
 /*#define WMMSG_DEBUG*/
 #ifdef WMMSG_DEBUG
 #include <stdio.h>
@@ -152,17 +147,15 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         {
             /* checking where the proximity message showed up */
             int h_context = LOWORD(lParam);
-            LPPOINT point;
+            POINT point;
             GetCursorPos(&point);
             ScreenToClient(hwnd, &point);
 
             /* are we in proximity or out of proximity */
             if (h_context == 0) {
-                SDL_SendProximity(tablet, (int) (&point->x),
-                                  (int) (&point->y), SDL_PROXIMITYOUT);
+                SDL_SendProximity(tablet, point.x, point.y, SDL_PROXIMITYOUT);
             } else {
-                SDL_SendProximity(tablet, (int) (&point->x),
-                                  (int) (&point->y), SDL_PROXIMITYIN);
+                SDL_SendProximity(tablet, point.x, point.y, SDL_PROXIMITYIN);
             }
         }
         break;
@@ -222,7 +215,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             int i;
             int size = 0;
             const RAWMOUSE *raw_mouse = NULL;
-            LPPOINT point;
+            POINT point;
             USHORT flags;
 
             /* we're collecting data from the mouse */
@@ -249,11 +242,9 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
             /* if the message was sent by a tablet we have to send also pressure */
             if (i == tablet) {
-                SDL_SendMouseMotion(index, 0, (int) (&point->x),
-                                    (int) (&point->y), pressure);
+                SDL_SendMouseMotion(index, 0, point.x, point.y, pressure);
             } else {
-                SDL_SendMouseMotion(index, 0, (int) (&point->x),
-                                    (int) (&point->y), 0);
+                SDL_SendMouseMotion(index, 0, point.x, point.y, 0);
             }
             /* we're sending mouse buttons messages to check up if sth changed */
             if (flags & RI_MOUSE_BUTTON_1_DOWN) {

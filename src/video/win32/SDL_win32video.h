@@ -37,6 +37,11 @@
 #include "d3d9.h"
 #endif
 
+#include "wactab/wintab.h"
+#define PACKETDATA ( PK_X | PK_Y | PK_BUTTONS | PK_NORMAL_PRESSURE | PK_CURSOR)
+#define PACKETMODE 0
+#include "wactab/pktdef.h"
+
 #include "SDL_win32events.h"
 #include "SDL_win32gamma.h"
 #include "SDL_win32keyboard.h"

@@ -37,13 +37,6 @@
 /* This is included after SDL_win32video.h, which includes windows.h */
 #include "SDL_syswm.h"
 
-#include <wintab.h>
-
-/* we're telling wintab that we want to receive movement, button events and pressure information in packets */
-#define PACKETDATA ( PK_X | PK_Y | PK_BUTTONS | PK_NORMAL_PRESSURE | PK_CURSOR)
-#define PACKETMODE 0
-#include <pktdef.h>
-
 extern HCTX *g_hCtx;            /* the table of tablet event contexts, each windows has to have it's own tablet context */
 int highestId = 0;              /* the highest id of the tablet context */
 

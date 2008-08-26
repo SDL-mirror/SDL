@@ -31,8 +31,6 @@
 #include "SDL_d3drender.h"
 #include "SDL_gdirender.h"
 
-#include <wintab.h>
-
 /* Initialization/Query functions */
 static int WIN_VideoInit(_THIS);
 static void WIN_VideoQuit(_THIS);

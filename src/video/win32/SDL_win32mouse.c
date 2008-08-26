@@ -33,11 +33,6 @@
 
 #include "../../events/SDL_mouse_c.h"
 
-#include <wintab.h>
-
-#define PACKETDATA ( PK_X | PK_Y | PK_BUTTONS | PK_NORMAL_PRESSURE | PK_CURSOR)
-#define PACKETMODE 0
-#include <pktdef.h>
 extern HANDLE *mice;
 extern int total_mice;
 extern int tablet;
