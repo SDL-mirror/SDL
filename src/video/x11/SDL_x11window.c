@@ -493,11 +493,11 @@ X11_CreateWindow(_THIS, SDL_Window * window)
 #else
     {
         XSelectInput(data->display, w,
-                 (FocusChangeMask | EnterWindowMask | LeaveWindowMask |
-                  ExposureMask | ButtonPressMask | ButtonReleaseMask |
-                  PointerMotionMask | KeyPressMask | KeyReleaseMask |
-                  PropertyChangeMask | StructureNotifyMask |
-                  KeymapStateMask));
+                     (FocusChangeMask | EnterWindowMask | LeaveWindowMask |
+                      ExposureMask | ButtonPressMask | ButtonReleaseMask |
+                      PointerMotionMask | KeyPressMask | KeyReleaseMask |
+                      PropertyChangeMask | StructureNotifyMask |
+                      KeymapStateMask));
     }
 #endif
 

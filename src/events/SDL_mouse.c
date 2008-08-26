@@ -117,7 +117,7 @@ SDL_AddMouse(const SDL_Mouse * mouse, int index, char *name, int pressure_max,
     length = 0;
     length = SDL_strlen(name);
     SDL_mice[index]->name = SDL_malloc((length + 2) * sizeof(char));
-    SDL_strlcpy(SDL_mice[index]->name, name, length+1);
+    SDL_strlcpy(SDL_mice[index]->name, name, length + 1);
     SDL_mice[index]->pressure_max = pressure_max;
     SDL_mice[index]->pressure_min = pressure_min;
     SDL_mice[index]->cursor_shown = SDL_TRUE;
@@ -512,7 +512,7 @@ SDL_SendMouseButton(int id, Uint8 state, Uint8 button)
         mouse->buttonstate |= SDL_BUTTON(button);
         break;
     case SDL_RELEASED:
-        if(!(mouse->buttonstate & SDL_BUTTON(button))) {
+        if (!(mouse->buttonstate & SDL_BUTTON(button))) {
             /* Ignore this event, no state change */
             return 0;
         }
