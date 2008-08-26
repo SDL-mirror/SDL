@@ -31,6 +31,7 @@
 
 #include <IOKit/IOKitLib.h>
 #include <IOKit/hid/IOHIDKeys.h>
+#include <IOKit/hid/IOHIDUsageTables.h>
 #include <ForceFeedback/ForceFeedback.h>
 #include <ForceFeedback/ForceFeedbackConstants.h>
 
