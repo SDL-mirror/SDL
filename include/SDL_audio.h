@@ -142,10 +142,15 @@ typedef struct SDL_AudioCVT
     SDL_AudioFormat dst_format; /* Target audio format */
     double rate_incr;           /* Rate conversion increment */
     Uint8 *buf;                 /* Buffer to hold entire audio data */
+    Uint8 *coeff;               /* Filter coefficients: either big windowed sinc filter, or 6 IIR lowpass coefficients */
+    Uint8 *state_buf;           /* Sample history for either the FIR or IIR filter. For IIR filter, first two elements are X, second two are Y, and state_pos toggles the order */
+    int state_pos;              /* Position in the state */
+    int len_sinc;               /* Length of windowed sinc filter, in appropriate units (not necessarily bytes) */
     int len;                    /* Length of original audio buffer */
     int len_cvt;                /* Length of converted audio buffer */
     int len_mult;               /* buffer must be len*len_mult big */
-    double len_ratio;           /* Given len, final size is len*len_ratio */
+    int len_div;                /* destination length = len_mult / len_div * src length */
+    double len_ratio;           /* Given len, final size is len*len_ratio ( len_ratio = len_mult / len_div ) */
     SDL_AudioFilter filters[10];        /* Filter list */
     int filter_index;           /* Current audio conversion function */
 } SDL_AudioCVT;
