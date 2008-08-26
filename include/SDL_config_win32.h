@@ -71,7 +71,7 @@ typedef unsigned int uintptr_t;
 #define SDL_HAS_64BIT_TYPE	1
 
 /* Enabled for SDL 1.2 (binary compatibility) */
-//#define HAVE_LIBC     1
+//#define HAVE_LIBC	1
 #ifdef HAVE_LIBC
 /* Useful headers */
 #define HAVE_STDIO_H 1
@@ -131,17 +131,17 @@ typedef unsigned int uintptr_t;
 
 /* Enable various cdrom drivers */
 #ifdef _WIN32_WCE
-#define SDL_CDROM_DISABLED      1
+#define SDL_CDROM_DISABLED	1
 #else
 #define SDL_CDROM_WIN32		1
 #endif
 
 /* Enable various input drivers */
 #ifdef _WIN32_WCE
-#define SDL_JOYSTICK_DISABLED   1
+#define SDL_JOYSTICK_DISABLED	1
 #define SDL_HAPTIC_DUMMY	1
 #else
-#define SDL_JOYSTICK_DINPUT   1
+#define SDL_JOYSTICK_DINPUT	1
 #define SDL_HAPTIC_DINPUT	1
 #endif
 
