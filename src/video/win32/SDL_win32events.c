@@ -54,6 +54,9 @@
 #ifndef GET_XBUTTON_WPARAM
 #define GET_XBUTTON_WPARAM(w) (HIWORD(w))
 #endif
+#ifndef WM_INPUT
+#define WM_INPUT 0x00ff
+#endif
 
 extern HCTX *g_hCtx;
 extern HANDLE *mice;
