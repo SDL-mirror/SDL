@@ -148,6 +148,7 @@ SetupWindowData(_THIS, SDL_Window * window, HWND hwnd, SDL_bool created)
 int
 WIN_CreateWindow(_THIS, SDL_Window * window)
 {
+    SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
     RAWINPUTDEVICE Rid;
     AXIS TabX, TabY;
     LOGCONTEXT lc;
@@ -205,15 +206,15 @@ WIN_CreateWindow(_THIS, SDL_Window * window)
     }
 
     /* we're configuring the tablet data. See Wintab reference for more info */
-    if (WTInfo(WTI_DEFSYSCTX, 0, &lc) != 0) {
+    if (videodata->wintabDLL && videodata->WTInfo(WTI_DEFSYSCTX, 0, &lc) != 0) {
         lc.lcPktData = PACKETDATA;
         lc.lcPktMode = PACKETMODE;
         lc.lcOptions |= CXO_MESSAGES;
         lc.lcOptions |= CXO_SYSTEM;
         lc.lcMoveMask = PACKETDATA;
         lc.lcBtnDnMask = lc.lcBtnUpMask = PACKETDATA;
-        WTInfo(WTI_DEVICES, DVC_X, &TabX);
-        WTInfo(WTI_DEVICES, DVC_Y, &TabY);
+        videodata->WTInfo(WTI_DEVICES, DVC_X, &TabX);
+        videodata->WTInfo(WTI_DEVICES, DVC_Y, &TabY);
         lc.lcInOrgX = 0;
         lc.lcInOrgY = 0;
         lc.lcInExtX = TabX.axMax;
@@ -234,7 +235,7 @@ WIN_CreateWindow(_THIS, SDL_Window * window)
             }
             g_hCtx = tmp_hctx;
         }
-        g_hCtx[window->id] = WTOpen(hwnd, &lc, TRUE);
+        g_hCtx[window->id] = videodata->WTOpen(hwnd, &lc, TRUE);
     }
 
     /* we're telling the window, we want it to report raw input events from mice */
@@ -438,6 +439,7 @@ WIN_SetWindowGrab(_THIS, SDL_Window * window)
 void
 WIN_DestroyWindow(_THIS, SDL_Window * window)
 {
+    SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
 
     if (data) {
@@ -448,7 +450,9 @@ WIN_DestroyWindow(_THIS, SDL_Window * window)
 #endif
         ReleaseDC(data->hwnd, data->hdc);
         if (data->created) {
-            WTClose(g_hCtx[window->id]);
+            if (videodata->wintabDLL) {
+                videodata->WTClose(g_hCtx[window->id]);
+            }
             DestroyWindow(data->hwnd);
         }
         SDL_free(data);

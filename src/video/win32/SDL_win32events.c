@@ -136,7 +136,9 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WT_PACKET:
         {
             /* if we receive such data we need to update the pressure */
-            if (WTPacket((HCTX) lParam, wParam, &packet)) {
+            SDL_VideoData *videodata = data->videodata;
+            if (videodata->wintabDLL
+                && videodata->WTPacket((HCTX) lParam, wParam, &packet)) {
                 SDL_ChangeEnd(tablet, (int) packet.pkCursor);
                 pressure = (int) packet.pkNormalPressure;
             }

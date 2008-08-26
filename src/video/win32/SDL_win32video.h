@@ -66,6 +66,15 @@ typedef struct SDL_VideoData
     HANDLE d3dDLL;
     IDirect3D9 *d3d;
 #endif
+/* *INDENT-OFF* */
+    /* Function pointers for the Wacom API */
+    HANDLE wintabDLL;
+    UINT (*WTInfo) (UINT, UINT, LPVOID);
+    HCTX (*WTOpen) (HWND, LPLOGCONTEXT, BOOL);
+    int (*WTPacket) (HCTX, UINT, LPVOID);
+    BOOL (*WTClose) (HCTX);
+/* *INDENT-ON* */
+
     int mouse;
     int keyboard;
     SDL_scancode *key_layout;

@@ -154,7 +154,7 @@ WIN_InitMouse(_THIS)
         l = SDL_strlen(device_name);
 
         /* we're checking if the device isn't by any chance a tablet */
-        if (tablet == -1) {
+        if (data->wintabDLL && tablet == -1) {
             for (j = 0; j < l - 5; ++j) {
                 for (k = 0; k < 5; ++k) {
                     if (tab[k] !=
@@ -173,8 +173,8 @@ WIN_InitMouse(_THIS)
         if (tablet == index) {
             AXIS pressure;
             int cursors;
-            WTInfo(WTI_DEVICES, DVC_NPRESSURE, &pressure);
-            WTInfo(WTI_DEVICES, DVC_NCSRTYPES, &cursors);
+            data->WTInfo(WTI_DEVICES, DVC_NPRESSURE, &pressure);
+            data->WTInfo(WTI_DEVICES, DVC_NCSRTYPES, &cursors);
             data->mouse =
                 SDL_AddMouse(&mouse, index, device_name, pressure.axMax,
                              pressure.axMin, cursors);

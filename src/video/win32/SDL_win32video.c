@@ -60,6 +60,9 @@ WIN_DeleteDevice(SDL_VideoDevice * device)
         FreeLibrary(data->d3dDLL);
     }
 #endif
+    if (data->wintabDLL) {
+        FreeLibrary(data->wintabDLL);
+    }
     SDL_free(device->driverdata);
     SDL_free(device);
 }
@@ -103,6 +106,32 @@ WIN_CreateDevice(int devindex)
         }
     }
 #endif /* SDL_VIDEO_RENDER_D3D */
+
+    data->wintabDLL = LoadLibrary(TEXT("WINTAB32.DLL"));
+    if (data->wintabDLL) {
+#define PROCNAME(X) #X
+        data->WTInfo =
+            (UINT(*)(UINT, UINT, LPVOID)) GetProcAddress(data->wintabDLL,
+                                                         PROCNAME(WTInfo));
+        data->WTOpen =
+            (HCTX(*)(HWND, LPLOGCONTEXT, BOOL)) GetProcAddress(data->
+                                                               wintabDLL,
+                                                               PROCNAME
+                                                               (WTOpen));
+        data->WTPacket =
+            (int (*)(HCTX, UINT, LPVOID)) GetProcAddress(data->wintabDLL,
+                                                         PROCNAME(WTPacket));
+        data->WTClose =
+            (BOOL(*)(HCTX)) GetProcAddress(data->wintabDLL,
+                                           PROCNAME(WTClose));
+#undef PROCNAME
+
+        if (!data->WTInfo || !data->WTOpen || !data->WTPacket
+            || !data->WTClose) {
+            FreeLibrary(data->wintabDLL);
+            data->wintabDLL = NULL;
+        }
+    }
 
     /* Set the function pointers */
     device->VideoInit = WIN_VideoInit;
