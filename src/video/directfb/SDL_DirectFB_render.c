@@ -694,29 +694,29 @@ DirectFB_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         }
 
         switch (texture->blendMode) {
-        case SDL_TEXTUREBLENDMODE_NONE: /**< No blending */
+        case SDL_TEXTUREBLENDMODE_NONE:
             flags |= DSBLIT_NOFX;
             data->surface->SetSrcBlendFunction(data->surface, DSBF_ONE);
             data->surface->SetDstBlendFunction(data->surface, DSBF_ZERO);
             break;
-        case SDL_TEXTUREBLENDMODE_MASK: /**< dst = A ? src : dst (alpha is mask) */
+        case SDL_TEXTUREBLENDMODE_MASK:
             flags |= DSBLIT_BLEND_ALPHACHANNEL;
             data->surface->SetSrcBlendFunction(data->surface, DSBF_SRCALPHA);
             data->surface->SetDstBlendFunction(data->surface,
                                                DSBF_INVSRCALPHA);
             break;
-        case SDL_TEXTUREBLENDMODE_BLEND:/**< dst = (src * A) + (dst * (1-A)) */
+        case SDL_TEXTUREBLENDMODE_BLEND:
             flags |= DSBLIT_BLEND_ALPHACHANNEL;
             data->surface->SetSrcBlendFunction(data->surface, DSBF_SRCALPHA);
             data->surface->SetDstBlendFunction(data->surface,
                                                DSBF_INVSRCALPHA);
             break;
-        case SDL_TEXTUREBLENDMODE_ADD:  /**< dst = (src * A) + dst */
+        case SDL_TEXTUREBLENDMODE_ADD:
             flags |= DSBLIT_BLEND_ALPHACHANNEL;
             data->surface->SetSrcBlendFunction(data->surface, DSBF_SRCALPHA);
             data->surface->SetDstBlendFunction(data->surface, DSBF_ONE);
             break;
-        case SDL_TEXTUREBLENDMODE_MOD:  /**< dst = src * dst */
+        case SDL_TEXTUREBLENDMODE_MOD:
             flags |= DSBLIT_BLEND_ALPHACHANNEL;
             data->surface->SetSrcBlendFunction(data->surface, DSBF_DESTCOLOR);
             data->surface->SetDstBlendFunction(data->surface, DSBF_ZERO);

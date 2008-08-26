@@ -700,10 +700,8 @@ DirectFB_CreateWindow(_THIS, SDL_Window * window)
         y = 0;
     }
 
-    desc.flags =
-        DWDESC_WIDTH | DWDESC_HEIGHT /*| DWDESC_CAPS */  | DWDESC_PIXELFORMAT
-        |
-        DWDESC_SURFACE_CAPS;
+    desc.flags = DWDESC_WIDTH | DWDESC_HEIGHT /*| DWDESC_CAPS */  | DWDESC_PIXELFORMAT
+        | DWDESC_SURFACE_CAPS;
 
 #if (DIRECTFB_MAJOR_VERSION == 1) && (DIRECTFB_MINOR_VERSION >= 0)
     /* Needed for 1.2 */
