@@ -73,26 +73,26 @@ X11_GL_LoadLibrary(_THIS, const char *path)
     void *handle;
 
     if (_this->gl_config.driver_loaded) {
+        /* do not return without reinitializing the function hooks */
         if (path) {
             SDL_SetError("OpenGL library already loaded");
-            return -1;
-        } else {
-            ++_this->gl_config.driver_loaded;
-            return 0;
         }
+        handle = _this->gl_config.dll_handle;
+    } else {
+        if (path == NULL) {
+            path = SDL_getenv("SDL_OPENGL_LIBRARY");
+        }
+        if (path == NULL) {
+            path = DEFAULT_OPENGL;
+        }
+        handle = GL_LoadObject(path);
+        if (!handle) {
+            return -1;
+        }
+        _this->gl_config.dll_handle = handle;
+        SDL_strlcpy(_this->gl_config.driver_path, path,
+                    SDL_arraysize(_this->gl_config.driver_path));
     }
-    if (path == NULL) {
-        path = SDL_getenv("SDL_OPENGL_LIBRARY");
-    }
-    if (path == NULL) {
-        path = DEFAULT_OPENGL;
-    }
-    handle = GL_LoadObject(path);
-    if (!handle) {
-        return -1;
-    }
-    // LoadLibrary may be called before WindowCreate!
-    // Must create the memory used by GL
     X11_GL_InitializeMemory(_this);
 
     /* Load new function pointers */
@@ -123,10 +123,7 @@ X11_GL_LoadLibrary(_THIS, const char *path)
         return -1;
     }
 
-    _this->gl_config.dll_handle = handle;
-    SDL_strlcpy(_this->gl_config.driver_path, path,
-                SDL_arraysize(_this->gl_config.driver_path));
-    _this->gl_config.driver_loaded = 1;
+    ++_this->gl_config.driver_loaded;
     return 0;
 }
 
