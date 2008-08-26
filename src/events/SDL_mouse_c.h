@@ -112,14 +112,17 @@ extern void SDL_ResetMouse(int index);
 /* Set the mouse focus window */
 extern void SDL_SetMouseFocus(int id, SDL_WindowID windowID);
 
-/* Send a mouse motion event for a mouse at an index */
+/* Send a mouse motion event for a mouse */
 extern int SDL_SendMouseMotion(int id, int relative, int x, int y, int z);
 
-/* Send a mouse button event for a mouse at an index */
+/* Send a mouse button event for a mouse */
 extern int SDL_SendMouseButton(int id, Uint8 state, Uint8 button);
 
-/* Send a mouse wheel event for a mouse at an index */
+/* Send a mouse wheel event for a mouse */
 extern int SDL_SendMouseWheel(int id, int x, int y);
+
+/* Send a proximity event for a mouse */
+extern int SDL_SendProximity(int id, int x, int y, int type);
 
 /* Shutdown the mouse subsystem */
 extern void SDL_MouseQuit(void);

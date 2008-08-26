@@ -374,6 +374,11 @@ SDL_SendProximity(int id, int x, int y, int type)
     int index = SDL_GetMouseIndexId(id);
     SDL_Mouse *mouse = SDL_GetMouse(index);
     int posted = 0;
+
+    if (!mouse) {
+        return 0;
+    }
+
     last_x = x;
     last_y = y;
     if (SDL_ProcessEvents[type] == SDL_ENABLE) {
