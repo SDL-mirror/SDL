@@ -69,8 +69,8 @@ typedef struct SDL_VideoData
 /* *INDENT-OFF* */
     /* Function pointers for the Wacom API */
     HANDLE wintabDLL;
-    UINT (*WTInfo) (UINT, UINT, LPVOID);
-    HCTX (*WTOpen) (HWND, LPLOGCONTEXT, BOOL);
+    UINT (*WTInfoA) (UINT, UINT, LPVOID);
+    HCTX (*WTOpenA) (HWND, LPLOGCONTEXTA, BOOL);
     int (*WTPacket) (HCTX, UINT, LPVOID);
     BOOL (*WTClose) (HCTX);
 /* *INDENT-ON* */

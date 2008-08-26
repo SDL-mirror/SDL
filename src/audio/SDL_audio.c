@@ -291,10 +291,8 @@ SDL_StreamLength(SDL_AudioStreamer * stream)
 int
 SDL_StreamInit(SDL_AudioStreamer * stream, int max_len, Uint8 silence)
 {
-    int i;
-
     /* First try to allocate the buffer */
-    stream->buffer = (Uint8 *) malloc(max_len);
+    stream->buffer = (Uint8 *) SDL_malloc(max_len);
     if (stream->buffer == NULL) {
         return -1;
     }
@@ -304,9 +302,9 @@ SDL_StreamInit(SDL_AudioStreamer * stream, int max_len, Uint8 silence)
     stream->write_pos = 0;
 
     /* Zero out the buffer */
-    for (i = 0; i < max_len; ++i) {
-        stream->buffer[i] = silence;
-    }
+    SDL_memset(stream->buffer, silence, max_len);
+
+    return 0;
 }
 
 /* Deinitialize the stream simply by freeing the buffer */
@@ -314,7 +312,7 @@ void
 SDL_StreamDeinit(SDL_AudioStreamer * stream)
 {
     if (stream->buffer != NULL) {
-        free(stream->buffer);
+        SDL_free(stream->buffer);
     }
 }
 

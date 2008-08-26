@@ -20,6 +20,8 @@
     slouken@libsdl.org
 */
 #include "SDL_config.h"
+
+#define _USE_MATH_DEFINES
 #include <math.h>
 
 /* Functions for audio drivers to perform runtime conversion of audio format */
@@ -27,7 +29,7 @@
 #include "SDL_audio.h"
 #include "SDL_audio_c.h"
 
-#define DEBUG_CONVERT
+//#define DEBUG_CONVERT
 
 /* These are fractional multiplication routines. That is, their inputs
    are two numbers in the range [-1, 1) and the result falls in that
@@ -1369,7 +1371,7 @@ SDL_BuildIIRLowpass(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 
     w0 = 2.0f * M_PI * fc;
     cosw0 = cosf(w0);
-    alpha = sin(w0) / (2.0f * Q);
+    alpha = sinf(w0) / (2.0f * Q);
 
     /* Compute coefficients, normalizing by a0 */
     scale = 1.0f / (1.0f + alpha);
@@ -1438,7 +1440,7 @@ SDL_BuildIIRLowpass(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 #endif
 
     /* Initialize the state buffer to all zeroes, and set initial position */
-    memset(cvt->state_buf, 0, 4 * SDL_AUDIO_BITSIZE(format) / 4);
+    SDL_memset(cvt->state_buf, 0, 4 * SDL_AUDIO_BITSIZE(format) / 4);
     cvt->state_pos = 0;
 #undef convert_fixed
 }
@@ -1636,7 +1638,7 @@ SDL_BuildWindowedSinc(SDL_AudioCVT * cvt, SDL_AudioFormat format,
     cvt->len_sinc = m + 1;
 
     /* Allocate the floating point windowed sinc. */
-    fSinc = (float *) malloc((m + 1) * sizeof(float));
+    fSinc = SDL_stack_alloc(float, (m + 1));
     if (fSinc == NULL) {
         return -1;
     }
@@ -1699,16 +1701,17 @@ SDL_BuildWindowedSinc(SDL_AudioCVT * cvt, SDL_AudioFormat format,
     }
 
     /* Initialize the state buffer to all zeroes, and set initial position */
-    memset(cvt->state_buf, 0, cvt->len_sinc * SDL_AUDIO_BITSIZE(format) / 4);
+    SDL_memset(cvt->state_buf, 0,
+               cvt->len_sinc * SDL_AUDIO_BITSIZE(format) / 4);
     cvt->state_pos = 0;
 
     /* Clean up */
 #undef convert_fixed
-    free(fSinc);
+    SDL_stack_free(fSinc);
 }
 
 /* This is used to reduce the resampling ratio */
-inline int
+static __inline__ int
 SDL_GCD(int a, int b)
 {
     int temp;

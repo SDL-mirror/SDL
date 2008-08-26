@@ -151,7 +151,7 @@ WIN_CreateWindow(_THIS, SDL_Window * window)
     SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
     RAWINPUTDEVICE Rid;
     AXIS TabX, TabY;
-    LOGCONTEXT lc;
+    LOGCONTEXTA lc;
     HWND hwnd;
     HWND top;
     RECT rect;
@@ -206,15 +206,16 @@ WIN_CreateWindow(_THIS, SDL_Window * window)
     }
 
     /* we're configuring the tablet data. See Wintab reference for more info */
-    if (videodata->wintabDLL && videodata->WTInfo(WTI_DEFSYSCTX, 0, &lc) != 0) {
+    if (videodata->wintabDLL
+        && videodata->WTInfoA(WTI_DEFSYSCTX, 0, &lc) != 0) {
         lc.lcPktData = PACKETDATA;
         lc.lcPktMode = PACKETMODE;
         lc.lcOptions |= CXO_MESSAGES;
         lc.lcOptions |= CXO_SYSTEM;
         lc.lcMoveMask = PACKETDATA;
         lc.lcBtnDnMask = lc.lcBtnUpMask = PACKETDATA;
-        videodata->WTInfo(WTI_DEVICES, DVC_X, &TabX);
-        videodata->WTInfo(WTI_DEVICES, DVC_Y, &TabY);
+        videodata->WTInfoA(WTI_DEVICES, DVC_X, &TabX);
+        videodata->WTInfoA(WTI_DEVICES, DVC_Y, &TabY);
         lc.lcInOrgX = 0;
         lc.lcInOrgY = 0;
         lc.lcInExtX = TabX.axMax;
@@ -235,7 +236,7 @@ WIN_CreateWindow(_THIS, SDL_Window * window)
             }
             g_hCtx = tmp_hctx;
         }
-        g_hCtx[window->id] = videodata->WTOpen(hwnd, &lc, TRUE);
+        g_hCtx[window->id] = videodata->WTOpenA(hwnd, &lc, TRUE);
     }
 
     /* we're telling the window, we want it to report raw input events from mice */

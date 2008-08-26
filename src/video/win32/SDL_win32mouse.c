@@ -173,8 +173,8 @@ WIN_InitMouse(_THIS)
         if (tablet == index) {
             AXIS pressure;
             int cursors;
-            data->WTInfo(WTI_DEVICES, DVC_NPRESSURE, &pressure);
-            data->WTInfo(WTI_DEVICES, DVC_NCSRTYPES, &cursors);
+            data->WTInfoA(WTI_DEVICES, DVC_NPRESSURE, &pressure);
+            data->WTInfoA(WTI_DEVICES, DVC_NCSRTYPES, &cursors);
             data->mouse =
                 SDL_AddMouse(&mouse, index, device_name, pressure.axMax,
                              pressure.axMin, cursors);

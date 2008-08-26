@@ -110,14 +110,14 @@ WIN_CreateDevice(int devindex)
     data->wintabDLL = LoadLibrary(TEXT("WINTAB32.DLL"));
     if (data->wintabDLL) {
 #define PROCNAME(X) #X
-        data->WTInfo =
+        data->WTInfoA =
             (UINT(*)(UINT, UINT, LPVOID)) GetProcAddress(data->wintabDLL,
-                                                         PROCNAME(WTInfo));
-        data->WTOpen =
-            (HCTX(*)(HWND, LPLOGCONTEXT, BOOL)) GetProcAddress(data->
-                                                               wintabDLL,
-                                                               PROCNAME
-                                                               (WTOpen));
+                                                         PROCNAME(WTInfoA));
+        data->WTOpenA =
+            (HCTX(*)(HWND, LPLOGCONTEXTA, BOOL)) GetProcAddress(data->
+                                                                wintabDLL,
+                                                                PROCNAME
+                                                                (WTOpenA));
         data->WTPacket =
             (int (*)(HCTX, UINT, LPVOID)) GetProcAddress(data->wintabDLL,
                                                          PROCNAME(WTPacket));
@@ -126,7 +126,7 @@ WIN_CreateDevice(int devindex)
                                            PROCNAME(WTClose));
 #undef PROCNAME
 
-        if (!data->WTInfo || !data->WTOpen || !data->WTPacket
+        if (!data->WTInfoA || !data->WTOpenA || !data->WTPacket
             || !data->WTClose) {
             FreeLibrary(data->wintabDLL);
             data->wintabDLL = NULL;
