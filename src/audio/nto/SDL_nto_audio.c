@@ -154,8 +154,7 @@ NTO_WaitDevice(_THIS)
             }
             break;
         }
-    }
-    while (1);
+    } while (1);
 }
 
 static void
@@ -213,8 +212,7 @@ NTO_PlayDevice(_THIS)
             towrite -= written;
             pcmbuffer += written * this->spec.channels;
         }
-    }
-    while ((towrite > 0) && (this->enabled));
+    } while ((towrite > 0) && (this->enabled));
 
     /* If we couldn't write, assume fatal error for now */
     if (towrite != 0) {

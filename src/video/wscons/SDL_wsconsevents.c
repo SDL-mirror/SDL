@@ -145,8 +145,7 @@ WSCONS_PumpEvents(_THIS)
         posted = 0;
         updateMouse();
         updateKeyboard(this);
-    }
-    while (posted);
+    } while (posted);
 }
 
 void

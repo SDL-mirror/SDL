@@ -1154,8 +1154,7 @@ SDL_RLEAlphaBlit(SDL_Surface * src, SDL_Rect * srcrect,
                             ofs += run;
                         } else if (!ofs)
                             goto done;
-                    }
-                    while (ofs < w);
+                    } while (ofs < w);
 
                     /* skip padding */
                     srcbuf += (uintptr_t) srcbuf & 2;
@@ -1168,10 +1167,8 @@ SDL_RLEAlphaBlit(SDL_Surface * src, SDL_Rect * srcrect,
                         run = ((Uint16 *) srcbuf)[1];
                         srcbuf += 4 * (run + 1);
                         ofs += run;
-                    }
-                    while (ofs < w);
-                }
-                while (--vskip);
+                    } while (ofs < w);
+                } while (--vskip);
             } else {
                 /* the 32/32 interleaved format */
                 vskip <<= 1;    /* opaque and translucent have same format */
@@ -1187,10 +1184,8 @@ SDL_RLEAlphaBlit(SDL_Surface * src, SDL_Rect * srcrect,
                             ofs += run;
                         } else if (!ofs)
                             goto done;
-                    }
-                    while (ofs < w);
-                }
-                while (--vskip);
+                    } while (ofs < w);
+                } while (--vskip);
             }
         }
     }
@@ -1567,8 +1562,7 @@ RLEAlphaSurface(SDL_Surface * surface)
                     runstart += len;
                     run -= len;
                 }
-            }
-            while (x < w);
+            } while (x < w);
 
             /* Make sure the next output address is 32-bit aligned */
             dst += (uintptr_t) dst & 2;
@@ -1604,8 +1598,7 @@ RLEAlphaSurface(SDL_Surface * surface)
                 }
                 if (!blankline)
                     lastline = dst;
-            }
-            while (x < w);
+            } while (x < w);
 
             src += surface->pitch >> 2;
         }
@@ -1771,8 +1764,7 @@ RLEColorkeySurface(SDL_Surface * surface)
             }
             if (!blankline)
                 lastline = dst;
-        }
-        while (x < w);
+        } while (x < w);
 
         srcbuf += surface->pitch;
     }
@@ -1911,8 +1903,7 @@ UnRLEAlpha(SDL_Surface * surface)
                 ofs += run;
             } else if (!ofs)
                 return (SDL_TRUE);
-        }
-        while (ofs < w);
+        } while (ofs < w);
 
         /* skip padding if needed */
         if (bpp == 2)
@@ -1929,8 +1920,7 @@ UnRLEAlpha(SDL_Surface * surface)
                 srcbuf += uncopy_transl(dst + ofs, srcbuf, run, df, sf);
                 ofs += run;
             }
-        }
-        while (ofs < w);
+        } while (ofs < w);
         dst += surface->pitch >> 2;
     }
     /* Make the compiler happy */

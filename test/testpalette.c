@@ -338,8 +338,7 @@ main(int argc, char **argv)
         /* update changed areas of the screen */
         SDL_UpdateRects(screen, NBOATS, updates);
         frames++;
-    }
-    while (fade_level > 0);
+    } while (fade_level > 0);
 
     printf("%d frames, %.2f fps\n",
            frames, 1000.0 * frames / (SDL_GetTicks() - start));

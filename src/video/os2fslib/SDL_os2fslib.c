@@ -440,8 +440,8 @@ WndProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                     if ((!pVideo->hidden->pSDLSurface) ||
                         ((pVideo->hidden->pSDLSurface)
                          &&
-                         ((pVideo->hidden->pSDLSurface->
-                           flags & SDL_RESIZABLE) == 0)))
+                         ((pVideo->hidden->
+                           pSDLSurface->flags & SDL_RESIZABLE) == 0)))
                         FSLib_ToggleFSMode(hwnd, !FSLib_QueryFSMode(hwnd));
 #ifdef DEBUG_BUILD
                     else
@@ -552,11 +552,11 @@ WndProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                     {
 
                         iXScaleError =
-                            (pVideo->hidden->SrcBufferDesc.
-                             uiXResolution - 1) / swp.cx;
+                            (pVideo->hidden->SrcBufferDesc.uiXResolution -
+                             1) / swp.cx;
                         iYScaleError =
-                            (pVideo->hidden->SrcBufferDesc.
-                             uiYResolution - 1) / swp.cy;
+                            (pVideo->hidden->SrcBufferDesc.uiYResolution -
+                             1) / swp.cy;
                         if (iXScaleError < 0)
                             iXScaleError = 0;
                         if (iYScaleError < 0)
@@ -577,24 +577,22 @@ WndProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                         iTop =
                             (swp.cy -
                              rcl.yTop) *
-                            pVideo->hidden->SrcBufferDesc.
-                            uiYResolution / swp.cy - iYScaleError;
+                            pVideo->hidden->SrcBufferDesc.uiYResolution /
+                            swp.cy - iYScaleError;
                         iLeft =
                             rcl.xLeft *
-                            pVideo->hidden->SrcBufferDesc.
-                            uiXResolution / swp.cx - iXScaleError;
+                            pVideo->hidden->SrcBufferDesc.uiXResolution /
+                            swp.cx - iXScaleError;
                         iWidth =
                             ((rcl.xRight -
                               rcl.xLeft) *
-                             pVideo->hidden->SrcBufferDesc.
-                             uiXResolution + swp.cx - 1) / swp.cx +
-                            2 * iXScaleError;
+                             pVideo->hidden->SrcBufferDesc.uiXResolution +
+                             swp.cx - 1) / swp.cx + 2 * iXScaleError;
                         iHeight =
                             ((rcl.yTop -
                               rcl.yBottom) *
-                             pVideo->hidden->SrcBufferDesc.
-                             uiYResolution + swp.cy - 1) / swp.cy +
-                            2 * iYScaleError;
+                             pVideo->hidden->SrcBufferDesc.uiYResolution +
+                             swp.cy - 1) / swp.cy + 2 * iYScaleError;
 
                         iWidth += iXScaleError2;
                         iHeight += iYScaleError2;
@@ -606,20 +604,19 @@ WndProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                         if (iTop + iHeight >
                             pVideo->hidden->SrcBufferDesc.uiYResolution)
                             iHeight =
-                                pVideo->hidden->SrcBufferDesc.
-                                uiYResolution - iTop;
+                                pVideo->hidden->SrcBufferDesc.uiYResolution -
+                                iTop;
                         if (iLeft + iWidth >
                             pVideo->hidden->SrcBufferDesc.uiXResolution)
                             iWidth =
-                                pVideo->hidden->SrcBufferDesc.
-                                uiXResolution - iLeft;
+                                pVideo->hidden->SrcBufferDesc.uiXResolution -
+                                iLeft;
 
 #ifdef DEBUG_BUILD
                         printf
                             ("WM_PAINT : BitBlt: %d %d -> %d %d (Buf %d x %d)\n",
                              iTop, iLeft, iWidth, iHeight,
-                             pVideo->hidden->SrcBufferDesc.
-                             uiXResolution,
+                             pVideo->hidden->SrcBufferDesc.uiXResolution,
                              pVideo->hidden->SrcBufferDesc.uiYResolution);
                         fflush(stdout);
 #endif
@@ -693,15 +690,15 @@ WndProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                             WinQueryWindowPos(hwnd, &swp);
                             if ((!pVideo->hidden->pSDLSurface) ||
                                 ((pVideo->hidden->pSDLSurface) &&
-                                 (pVideo->hidden->pSDLSurface->
-                                  flags & SDL_RESIZABLE)
+                                 (pVideo->hidden->
+                                  pSDLSurface->flags & SDL_RESIZABLE)
                                  &&
                                  ((swp.cx !=
-                                   pVideo->hidden->SrcBufferDesc.
-                                   uiXResolution)
+                                   pVideo->hidden->
+                                   SrcBufferDesc.uiXResolution)
                                   || (swp.cy !=
-                                      pVideo->hidden->
-                                      SrcBufferDesc.uiYResolution))
+                                      pVideo->hidden->SrcBufferDesc.
+                                      uiYResolution))
                                  && (!FSLib_QueryFSMode(hwnd)))) {
                                 // Resizable surface and in resizing!
                                 // So, don't blit now!
@@ -718,14 +715,12 @@ WndProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                                 fflush(stdout);
 #endif
                                 FSLIB_BITBLT(hwnd,
-                                             pVideo->hidden->
-                                             pchSrcBuffer, 0,
+                                             pVideo->hidden->pchSrcBuffer, 0,
                                              0,
                                              pVideo->hidden->
-                                             SrcBufferDesc.
-                                             uiXResolution,
-                                             pVideo->hidden->
-                                             SrcBufferDesc.uiYResolution);
+                                             SrcBufferDesc.uiXResolution,
+                                             pVideo->hidden->SrcBufferDesc.
+                                             uiYResolution);
                             }
                         }
 #ifdef DEBUG_BUILD
@@ -773,8 +768,8 @@ WndProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                                           &swpClient);
                         ptl.x = 0;
                         ptl.y = 0;
-                        WinMapWindowPoints(pVideo->hidden->
-                                           hwndClient, HWND_DESKTOP, &ptl, 1);
+                        WinMapWindowPoints(pVideo->hidden->hwndClient,
+                                           HWND_DESKTOP, &ptl, 1);
                         pVideo->hidden->iSkipWMMOUSEMOVE++;     /* Don't take next WM_MOUSEMOVE into account!  */
                         WinSetPointerPos(HWND_DESKTOP,
                                          ptl.x + swpClient.cx / 2,
@@ -825,8 +820,8 @@ WndProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                                           &swpClient);
                         ptl.x = 0;
                         ptl.y = 0;
-                        WinMapWindowPoints(pVideo->hidden->
-                                           hwndClient, HWND_DESKTOP, &ptl, 1);
+                        WinMapWindowPoints(pVideo->hidden->hwndClient,
+                                           HWND_DESKTOP, &ptl, 1);
                         pVideo->hidden->iSkipWMMOUSEMOVE++;     /* Don't take next WM_MOUSEMOVE into account!  */
                         WinSetPointerPos(HWND_DESKTOP,
                                          ptl.x + swpClient.cx / 2,
@@ -867,8 +862,8 @@ WndProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                                           &swpClient);
                         ptl.x = 0;
                         ptl.y = 0;
-                        WinMapWindowPoints(pVideo->hidden->
-                                           hwndClient, HWND_DESKTOP, &ptl, 1);
+                        WinMapWindowPoints(pVideo->hidden->hwndClient,
+                                           HWND_DESKTOP, &ptl, 1);
                         pVideo->hidden->iSkipWMMOUSEMOVE++;     /* Don't take next WM_MOUSEMOVE into account!  */
                         WinSetPointerPos(HWND_DESKTOP,
                                          ptl.x + swpClient.cx / 2,
@@ -910,8 +905,8 @@ WndProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                                           &swpClient);
                         ptl.x = 0;
                         ptl.y = 0;
-                        WinMapWindowPoints(pVideo->hidden->
-                                           hwndClient, HWND_DESKTOP, &ptl, 1);
+                        WinMapWindowPoints(pVideo->hidden->hwndClient,
+                                           HWND_DESKTOP, &ptl, 1);
                         pVideo->hidden->iSkipWMMOUSEMOVE++;     /* Don't take next WM_MOUSEMOVE into account!  */
                         WinSetPointerPos(HWND_DESKTOP,
                                          ptl.x + swpClient.cx / 2,
@@ -1378,6 +1373,7 @@ memnot(Uint8 * dst, Uint8 * src, int len)
     while (len-- > 0)
         *dst++ = ~*src++;
 }
+
 static void
 memxor(Uint8 * dst, Uint8 * src1, Uint8 * src2, int len)
 {
@@ -1635,6 +1631,7 @@ os2fslib_AllocHWSurface(_THIS, SDL_Surface * surface)
 {
     return (-1);
 }
+
 static void
 os2fslib_FreeHWSurface(_THIS, SDL_Surface * surface)
 {
@@ -2505,23 +2502,27 @@ os2fslib_SetVideoMode(_THIS, SDL_Surface * current,
         pResult = SDL_CreateRGBSurface(SDL_SWSURFACE,
                                        pModeInfoFound->uiXResolution,
                                        pModeInfoFound->uiYResolution,
-                                       pModeInfoFound->uiBPP,
-                                       ((unsigned int) pModeInfoFound->
-                                        PixelFormat.
-                                        ucRedMask) << pModeInfoFound->
-                                       PixelFormat.ucRedPosition,
-                                       ((unsigned int) pModeInfoFound->
-                                        PixelFormat.
-                                        ucGreenMask) << pModeInfoFound->
-                                       PixelFormat.ucGreenPosition,
-                                       ((unsigned int) pModeInfoFound->
-                                        PixelFormat.
-                                        ucBlueMask) << pModeInfoFound->
-                                       PixelFormat.ucBluePosition,
-                                       ((unsigned int) pModeInfoFound->
-                                        PixelFormat.
-                                        ucAlphaMask) << pModeInfoFound->
-                                       PixelFormat.ucAlphaPosition);
+                                       pModeInfoFound->uiBPP, ((unsigned int)
+                                                               pModeInfoFound->
+                                                               PixelFormat.
+                                                               ucRedMask)
+                                       << pModeInfoFound->PixelFormat.
+                                       ucRedPosition, ((unsigned int)
+                                                       pModeInfoFound->
+                                                       PixelFormat.
+                                                       ucGreenMask)
+                                       << pModeInfoFound->PixelFormat.
+                                       ucGreenPosition, ((unsigned int)
+                                                         pModeInfoFound->
+                                                         PixelFormat.
+                                                         ucBlueMask)
+                                       << pModeInfoFound->PixelFormat.
+                                       ucBluePosition, ((unsigned int)
+                                                        pModeInfoFound->
+                                                        PixelFormat.
+                                                        ucAlphaMask)
+                                       << pModeInfoFound->PixelFormat.
+                                       ucAlphaPosition);
 
         if (pResult == NULL) {
             DosReleaseMutexSem(_this->hidden->hmtxUseSrcBuffer);
@@ -2535,23 +2536,27 @@ os2fslib_SetVideoMode(_THIS, SDL_Surface * current,
 
         // Adjust pixel format mask!
         pResult->format->Rmask =
-            ((unsigned int) pModeInfoFound->PixelFormat.
-             ucRedMask) << pModeInfoFound->PixelFormat.ucRedPosition;
+            ((unsigned int) pModeInfoFound->
+             PixelFormat.ucRedMask) << pModeInfoFound->PixelFormat.
+            ucRedPosition;
         pResult->format->Rshift = pModeInfoFound->PixelFormat.ucRedPosition;
         pResult->format->Rloss = pModeInfoFound->PixelFormat.ucRedAdjust;
         pResult->format->Gmask =
-            ((unsigned int) pModeInfoFound->PixelFormat.
-             ucGreenMask) << pModeInfoFound->PixelFormat.ucGreenPosition;
+            ((unsigned int) pModeInfoFound->
+             PixelFormat.ucGreenMask) << pModeInfoFound->PixelFormat.
+            ucGreenPosition;
         pResult->format->Gshift = pModeInfoFound->PixelFormat.ucGreenPosition;
         pResult->format->Gloss = pModeInfoFound->PixelFormat.ucGreenAdjust;
         pResult->format->Bmask =
-            ((unsigned int) pModeInfoFound->PixelFormat.
-             ucBlueMask) << pModeInfoFound->PixelFormat.ucBluePosition;
+            ((unsigned int) pModeInfoFound->
+             PixelFormat.ucBlueMask) << pModeInfoFound->PixelFormat.
+            ucBluePosition;
         pResult->format->Bshift = pModeInfoFound->PixelFormat.ucBluePosition;
         pResult->format->Bloss = pModeInfoFound->PixelFormat.ucBlueAdjust;
         pResult->format->Amask =
-            ((unsigned int) pModeInfoFound->PixelFormat.
-             ucAlphaMask) << pModeInfoFound->PixelFormat.ucAlphaPosition;
+            ((unsigned int) pModeInfoFound->
+             PixelFormat.ucAlphaMask) << pModeInfoFound->PixelFormat.
+            ucAlphaPosition;
         pResult->format->Ashift = pModeInfoFound->PixelFormat.ucAlphaPosition;
         pResult->format->Aloss = pModeInfoFound->PixelFormat.ucAlphaAdjust;
 
@@ -2738,10 +2743,8 @@ os2fslib_ListModes(_THIS, SDL_PixelFormat * format, Uint32 flags)
                         for (i = 0; _this->hidden->pListModesResult[i]; i++) {
                             iNumOfSlots++;
                             if (iPlace == -1) {
-                                if ((_this->hidden->
-                                     pListModesResult[i]->w *
-                                     _this->hidden->
-                                     pListModesResult[i]->h) <
+                                if ((_this->hidden->pListModesResult[i]->w *
+                                     _this->hidden->pListModesResult[i]->h) <
                                     (pRect->w * pRect->h)) {
                                     iPlace = i;
                                 }
@@ -2754,14 +2757,10 @@ os2fslib_ListModes(_THIS, SDL_PixelFormat * format, Uint32 flags)
 //            printf("!!! From %d slots, it will be at %d\n", iNumOfSlots, iPlace);
 #endif
 
-                        pNewList =
-                            (SDL_Rect **) SDL_realloc(_this->
-                                                      hidden->
-                                                      pListModesResult,
-                                                      (iNumOfSlots
-                                                       +
-                                                       1) *
-                                                      sizeof(SDL_Rect *));
+                        pNewList = (SDL_Rect **)
+                            SDL_realloc(_this->hidden->pListModesResult,
+                                        (iNumOfSlots +
+                                         1) * sizeof(SDL_Rect *));
                         if (pNewList) {
                             for (i = iNumOfSlots; i > iPlace; i--)
                                 pNewList[i] = pNewList[i - 1];
@@ -2816,23 +2815,25 @@ os2fslib_VideoInit(_THIS, SDL_PixelFormat * vformat)
     vformat->BytesPerPixel = (vformat->BitsPerPixel + 7) / 8;
 
     vformat->Rmask =
-        ((unsigned int) pDesktopMode->PixelFormat.ucRedMask) << pDesktopMode->
-        PixelFormat.ucRedPosition;
+        ((unsigned int) pDesktopMode->PixelFormat.
+         ucRedMask) << pDesktopMode->PixelFormat.ucRedPosition;
     vformat->Rshift = pDesktopMode->PixelFormat.ucRedPosition;
     vformat->Rloss = pDesktopMode->PixelFormat.ucRedAdjust;
     vformat->Gmask =
-        ((unsigned int) pDesktopMode->PixelFormat.
-         ucGreenMask) << pDesktopMode->PixelFormat.ucGreenPosition;
+        ((unsigned int) pDesktopMode->
+         PixelFormat.ucGreenMask) << pDesktopMode->PixelFormat.
+        ucGreenPosition;
     vformat->Gshift = pDesktopMode->PixelFormat.ucGreenPosition;
     vformat->Gloss = pDesktopMode->PixelFormat.ucGreenAdjust;
     vformat->Bmask =
-        ((unsigned int) pDesktopMode->PixelFormat.
-         ucBlueMask) << pDesktopMode->PixelFormat.ucBluePosition;
+        ((unsigned int) pDesktopMode->
+         PixelFormat.ucBlueMask) << pDesktopMode->PixelFormat.ucBluePosition;
     vformat->Bshift = pDesktopMode->PixelFormat.ucBluePosition;
     vformat->Bloss = pDesktopMode->PixelFormat.ucBlueAdjust;
     vformat->Amask =
-        ((unsigned int) pDesktopMode->PixelFormat.
-         ucAlphaMask) << pDesktopMode->PixelFormat.ucAlphaPosition;
+        ((unsigned int) pDesktopMode->
+         PixelFormat.ucAlphaMask) << pDesktopMode->PixelFormat.
+        ucAlphaPosition;
     vformat->Ashift = pDesktopMode->PixelFormat.ucAlphaPosition;
     vformat->Aloss = pDesktopMode->PixelFormat.ucAlphaAdjust;
 
@@ -2937,10 +2938,10 @@ os2fslib_VideoInit(_THIS, SDL_PixelFormat * vformat)
                sizeof(_this->hidden->SrcBufferDesc));
     // Allocate new video buffer!
     _this->hidden->pchSrcBuffer =
-        (char *) SDL_malloc(_this->hidden->pAvailableFSLibVideoModes->
-                            uiScanLineSize *
-                            _this->hidden->pAvailableFSLibVideoModes->
-                            uiYResolution);
+        (char *) SDL_malloc(_this->hidden->
+                            pAvailableFSLibVideoModes->uiScanLineSize *
+                            _this->hidden->
+                            pAvailableFSLibVideoModes->uiYResolution);
     if (!_this->hidden->pchSrcBuffer) {
 #ifdef DEBUG_BUILD
         printf

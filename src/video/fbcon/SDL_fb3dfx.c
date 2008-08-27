@@ -37,6 +37,7 @@ WaitVBL(_THIS)
     /* wait until we're past the start */
     while ((tdfx_in32(TDFX_STATUS) & STATUS_RETRACE) == 0);
 }
+
 static void
 WaitIdle(_THIS)
 {

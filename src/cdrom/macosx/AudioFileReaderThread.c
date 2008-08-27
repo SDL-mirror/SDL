@@ -335,9 +335,8 @@ FileReaderThread_ReadNextChunk(FileReaderThread * frt)
         }
         /* construct pointer */
         char *writePtr = (char *) (theItem->GetFileBuffer(theItem) +
-                                   (theItem->
-                                    mWriteToFirstBuffer ? 0 : theItem->
-                                    mChunkSize));
+                                   (theItem->mWriteToFirstBuffer ? 0 :
+                                    theItem->mChunkSize));
 
         /* read data */
         result = theItem->Read(theItem, writePtr, &dataChunkSize);
@@ -486,8 +485,7 @@ AudioFileManager_GetFileData(AudioFileManager * afm, void **inOutData,
     } else {
         *inOutDataSize = afm->mChunkSize;
         *inOutData =
-            afm->mReadFromFirstBuffer ? afm->mFileBuffer : (afm->
-                                                            mFileBuffer +
+            afm->mReadFromFirstBuffer ? afm->mFileBuffer : (afm->mFileBuffer +
                                                             afm->mChunkSize);
     }
 

@@ -232,6 +232,7 @@ static unsigned long long tex_tags[] __attribute__ ((aligned(16))) = {
         0x0e,                   /* A+D */
         0,                      /* 2 */
 PS2_GS_TEX0_1, (1 << 5) + (1 << 6), PS2_GS_TEX1_1, 0, PS2_GS_TEXFLUSH};
+
 static unsigned long long scale_tags[] __attribute__ ((aligned(16))) = {
     5 | (1LL << 60),            /* GIFtag */
         0x0e,                   /* A+D */
@@ -573,11 +574,13 @@ GS_AllocHWSurface(_THIS, SDL_Surface * surface)
 {
     return (-1);
 }
+
 static void
 GS_FreeHWSurface(_THIS, SDL_Surface * surface)
 {
     return;
 }
+
 static int
 GS_LockHWSurface(_THIS, SDL_Surface * surface)
 {
@@ -606,6 +609,7 @@ GS_LockHWSurface(_THIS, SDL_Surface * surface)
     }
     return (0);
 }
+
 static void
 GS_UnlockHWSurface(_THIS, SDL_Surface * surface)
 {

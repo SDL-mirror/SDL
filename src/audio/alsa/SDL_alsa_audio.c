@@ -259,16 +259,19 @@ swizzle_alsa_channels_6_64bit(_THIS)
 {
     SWIZ6(Uint64);
 }
+
 static __inline__ void
 swizzle_alsa_channels_6_32bit(_THIS)
 {
     SWIZ6(Uint32);
 }
+
 static __inline__ void
 swizzle_alsa_channels_6_16bit(_THIS)
 {
     SWIZ6(Uint16);
 }
+
 static __inline__ void
 swizzle_alsa_channels_6_8bit(_THIS)
 {

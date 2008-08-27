@@ -41,6 +41,7 @@ WaitVBL(_THIS)
     count = mga_in32(0x1E20) + 2;
     while (mga_in32(0x1E20) < count);
 }
+
 static void
 WaitIdle(_THIS)
 {

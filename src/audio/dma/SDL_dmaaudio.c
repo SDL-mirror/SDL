@@ -498,8 +498,7 @@ DMA_GetDeviceBuf(_THIS)
             this->enabled = 0;
             return (NULL);
         }
-    }
-    while (frame_ticks && (info.blocks < 1));
+    } while (frame_ticks && (info.blocks < 1));
 #ifdef DEBUG_AUDIO
     if (info.blocks > 1) {
         printf("Warning: audio underflow (%d frags)\n", info.blocks - 1);

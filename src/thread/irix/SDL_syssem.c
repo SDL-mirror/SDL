@@ -55,9 +55,11 @@ union semun {
 static struct sembuf op_trywait[2] = {
     {0, -1, (IPC_NOWAIT | SEM_UNDO)}    /* Decrement semaphore, no block */
 };
+
 static struct sembuf op_wait[2] = {
     {0, -1, SEM_UNDO}           /* Decrement semaphore */
 };
+
 static struct sembuf op_post[1] = {
     {0, 1, (IPC_NOWAIT | SEM_UNDO)}     /* Increment semaphore */
 };
@@ -170,8 +172,7 @@ SDL_SemWaitTimeout(SDL_sem * sem, Uint32 timeout)
             break;
         }
         SDL_Delay(1);
-    }
-    while (SDL_GetTicks() < timeout);
+    } while (SDL_GetTicks() < timeout);
 
     return retval;
 }

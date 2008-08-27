@@ -467,6 +467,7 @@ SVGA_AllocHWSurface(_THIS, SDL_Surface * surface)
 {
     return (-1);
 }
+
 static void
 SVGA_FreeHWSurface(_THIS, SDL_Surface * surface)
 {
@@ -480,6 +481,7 @@ SVGA_LockHWSurface(_THIS, SDL_Surface * surface)
     /* The waiting is done in SVGA_FlipHWSurface() */
     return (0);
 }
+
 static void
 SVGA_UnlockHWSurface(_THIS, SDL_Surface * surface)
 {

@@ -80,6 +80,7 @@ BlitBto1(SDL_BlitInfo * info)
         }
     }
 }
+
 static void
 BlitBto2(SDL_BlitInfo * info)
 {
@@ -116,6 +117,7 @@ BlitBto2(SDL_BlitInfo * info)
         dst += dstskip;
     }
 }
+
 static void
 BlitBto3(SDL_BlitInfo * info)
 {
@@ -154,6 +156,7 @@ BlitBto3(SDL_BlitInfo * info)
         dst += dstskip;
     }
 }
+
 static void
 BlitBto4(SDL_BlitInfo * info)
 {

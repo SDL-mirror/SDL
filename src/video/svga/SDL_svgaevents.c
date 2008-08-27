@@ -207,8 +207,7 @@ SVGA_PumpEvents(_THIS)
         posted = 0;
         mouse_update();
         keyboard_update();
-    }
-    while (posted);
+    } while (posted);
 }
 
 void

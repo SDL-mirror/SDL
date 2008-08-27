@@ -135,8 +135,7 @@ keyboard_update(void)
     for (i = 0; i < sizeof(sdl_shift); i++) {
         if ((shiftkeys >> i) & 1) {
             keysym.sym = sdl_shift[i];
-            SDL_PrivateKeyboard(((state->
-                                  shift_keys >> i) & 1) ? SDL_PRESSED :
+            SDL_PrivateKeyboard(((state->shift_keys >> i) & 1) ? SDL_PRESSED :
                                 SDL_RELEASED, &keysym);
         }
     }
@@ -146,8 +145,7 @@ keyboard_update(void)
             int key = sdl_key[i];
             if (key) {
                 keysym.sym = key;
-                SDL_PrivateKeyboard(state->
-                                    matrix[i] ? SDL_PRESSED :
+                SDL_PrivateKeyboard(state->matrix[i] ? SDL_PRESSED :
                                     SDL_RELEASED, &keysym);
             }
         }

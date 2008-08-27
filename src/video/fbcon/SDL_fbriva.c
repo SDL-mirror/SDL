@@ -40,6 +40,7 @@ WaitVBL(_THIS)
     while ((*port & 0x08));
     while (!(*port & 0x08));
 }
+
 static void
 NV3WaitIdle(_THIS)
 {
@@ -47,6 +48,7 @@ NV3WaitIdle(_THIS)
     while ((Rop->FifoFree < FifoEmptyCount) ||
            (*(mapped_io + PGRAPH_OFFSET + 0x000006B0) & 0x01));
 }
+
 static void
 NV4WaitIdle(_THIS)
 {

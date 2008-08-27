@@ -158,6 +158,7 @@ DC_VideoInit(_THIS, SDL_PixelFormat * vformat)
 const static SDL_Rect RECT_800x600 = { 0, 0, 800, 600 }, RECT_640x480 = {
 0, 0, 640, 480}, RECT_320x240 = {
 0, 0, 320, 240};
+
 const static SDL_Rect *vid_modes[] = {
     &RECT_800x600,
     &RECT_640x480,
@@ -296,6 +297,7 @@ DC_AllocHWSurface(_THIS, SDL_Surface * surface)
 {
     return (-1);
 }
+
 static void
 DC_FreeHWSurface(_THIS, SDL_Surface * surface)
 {

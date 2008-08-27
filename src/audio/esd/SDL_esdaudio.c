@@ -154,9 +154,8 @@ ESD_PlayDevice(_THIS)
         if ((written < 0) && ((errno == 0) || (errno == EAGAIN))) {
             SDL_Delay(1);       /* Let a little CPU time go by */
         }
-    }
-    while ((written < 0) &&
-           ((errno == 0) || (errno == EAGAIN) || (errno == EINTR)));
+    } while ((written < 0) &&
+             ((errno == 0) || (errno == EAGAIN) || (errno == EINTR)));
 
     /* Set the next write frame */
     this->hidden->next_frame += this->hidden->frame_ticks;

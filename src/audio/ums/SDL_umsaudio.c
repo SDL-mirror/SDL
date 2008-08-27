@@ -218,8 +218,7 @@ UMS_PlayAudio(_THIS)
 #endif
             return;
         }
-    }
-    while (samplesToWrite > 0);
+    } while (samplesToWrite > 0);
 
     SDL_LockAudio();
     SDL_memcpy(&swpbuf, &this->hidden->playbuf, sizeof(UMSAudioTypes_Buffer));
@@ -326,8 +325,7 @@ UMS_OpenAudio(_THIS, SDL_AudioSpec * spec)
         if (!success) {
             test_format = SDL_NextAudioFormat();
         }
-    }
-    while (!success && test_format);
+    } while (!success && test_format);
 
     if (success == 0) {
         SDL_SetError("Couldn't find any hardware audio formats");

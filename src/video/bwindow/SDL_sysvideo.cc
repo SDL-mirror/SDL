@@ -670,8 +670,8 @@ extern "C"
                         _this->gl_config.driver_loaded = 1;
                         SDL_strlcpy(_this->gl_config.driver_path,
                                     "libGL.so",
-                                    SDL_arraysize(_this->gl_config.
-                                                  driver_path));
+                                    SDL_arraysize(_this->
+                                                  gl_config.driver_path));
                     }
                 }
             }

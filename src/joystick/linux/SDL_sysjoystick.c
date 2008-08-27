@@ -89,6 +89,7 @@ struct joystick_logical_mapping
 static struct joystick_logical_mapping mp88xx_1_logical_axismap[] = {
     {0, 0}, {0, 1}, {0, 2}, {0, 3}, {0, 4}, {0, 5}
 };
+
 static struct joystick_logical_mapping mp88xx_1_logical_buttonmap[] = {
     {0, 0}, {0, 1}, {0, 2}, {0, 3}, {0, 4}, {0, 5}, {0, 6}, {0, 7}, {0, 8},
     {0, 9}, {0, 10}, {0, 11}
@@ -98,6 +99,7 @@ static struct joystick_logical_mapping mp88xx_2_logical_axismap[] = {
     {0, 0}, {0, 1}, {0, 2}, {1, 0}, {1, 1}, {0, 3},
     {1, 2}, {1, 3}, {0, 4}, {0, 5}, {1, 4}, {1, 5}
 };
+
 static struct joystick_logical_mapping mp88xx_2_logical_buttonmap[] = {
     {0, 0}, {0, 1}, {0, 2}, {0, 3}, {0, 4}, {0, 5}, {0, 6}, {0, 7}, {0, 8},
     {0, 9}, {0, 10}, {0, 11},
@@ -110,6 +112,7 @@ static struct joystick_logical_mapping mp88xx_3_logical_axismap[] = {
     {1, 2}, {1, 3}, {2, 0}, {2, 1}, {2, 2}, {2, 3},
     {0, 4}, {0, 5}, {1, 4}, {1, 5}, {2, 4}, {2, 5}
 };
+
 static struct joystick_logical_mapping mp88xx_3_logical_buttonmap[] = {
     {0, 0}, {0, 1}, {0, 2}, {0, 3}, {0, 4}, {0, 5}, {0, 6}, {0, 7}, {0, 8},
     {0, 9}, {0, 10}, {0, 11},
@@ -125,6 +128,7 @@ static struct joystick_logical_mapping mp88xx_4_logical_axismap[] = {
     {3, 0}, {3, 1}, {3, 2}, {3, 3}, {0, 4}, {0, 5},
     {1, 4}, {1, 5}, {2, 4}, {2, 5}, {3, 4}, {3, 5}
 };
+
 static struct joystick_logical_mapping mp88xx_4_logical_buttonmap[] = {
     {0, 0}, {0, 1}, {0, 2}, {0, 3}, {0, 4}, {0, 5}, {0, 6}, {0, 7}, {0, 8},
     {0, 9}, {0, 10}, {0, 11},
@@ -147,15 +151,18 @@ struct joystick_logical_layout
 static struct joystick_logical_layout mp88xx_1_logical_layout[] = {
     {6, 0, 0, 12}
 };
+
 static struct joystick_logical_layout mp88xx_2_logical_layout[] = {
     {6, 0, 0, 12},
     {6, 0, 0, 12}
 };
+
 static struct joystick_logical_layout mp88xx_3_logical_layout[] = {
     {6, 0, 0, 12},
     {6, 0, 0, 12},
     {6, 0, 0, 12}
 };
+
 static struct joystick_logical_layout mp88xx_4_logical_layout[] = {
     {6, 0, 0, 12},
     {6, 0, 0, 12},
@@ -953,8 +960,8 @@ HandleHat(SDL_Joystick * stick, Uint8 hat, int axis, int value)
 #endif /* USE_LOGICAL_JOYSTICKS */
 
         SDL_PrivateJoystickHat(stick, hat,
-                               position_map[the_hat->axis[1]][the_hat->
-                                                              axis[0]]);
+                               position_map[the_hat->
+                                            axis[1]][the_hat->axis[0]]);
     }
 }
 
@@ -1085,13 +1092,13 @@ EV_HandleEvents(SDL_Joystick * joystick)
                     code -= BTN_MISC;
 #ifndef NO_LOGICAL_JOYSTICKS
                     if (!LogicalJoystickButton(joystick,
-                                               joystick->hwdata->
-                                               key_map[code],
+                                               joystick->
+                                               hwdata->key_map[code],
                                                events[i].value))
 #endif
                         SDL_PrivateJoystickButton(joystick,
-                                                  joystick->hwdata->
-                                                  key_map[code],
+                                                  joystick->
+                                                  hwdata->key_map[code],
                                                   events[i].value);
                 }
                 break;
@@ -1113,12 +1120,12 @@ EV_HandleEvents(SDL_Joystick * joystick)
                         EV_AxisCorrect(joystick, code, events[i].value);
 #ifndef NO_LOGICAL_JOYSTICKS
                     if (!LogicalJoystickAxis(joystick,
-                                             joystick->hwdata->
-                                             abs_map[code], events[i].value))
+                                             joystick->hwdata->abs_map[code],
+                                             events[i].value))
 #endif
                         SDL_PrivateJoystickAxis(joystick,
-                                                joystick->hwdata->
-                                                abs_map[code],
+                                                joystick->
+                                                hwdata->abs_map[code],
                                                 events[i].value);
                     break;
                 }

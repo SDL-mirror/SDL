@@ -340,8 +340,7 @@ GAPI_CreateDevice(int devindex)
                                                             gx.GXSuspend,
                                                             "?GXSuspend@@YAHXZ")
         LINK(GXResume, gx.GXResume, "?GXResume@@YAHXZ") LINK(GXSetViewport,
-                                                             gx.
-                                                             GXSetViewport,
+                                                             gx.GXSetViewport,
                                                              "?GXSetViewport@@YAHKKKK@Z")
         LINK(GXIsDisplayDRAMBuffer, gx.GXIsDisplayDRAMBuffer,
              "?GXIsDisplayDRAMBuffer@@YAHXZ")
@@ -807,6 +806,7 @@ GAPI_AllocHWSurface(_THIS, SDL_Surface * surface)
 {
     return (-1);
 }
+
 static void
 GAPI_FreeHWSurface(_THIS, SDL_Surface * surface)
 {

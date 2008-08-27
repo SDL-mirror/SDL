@@ -409,6 +409,7 @@ VGL_AllocHWSurface(_THIS, SDL_Surface * surface)
 {
     return -1;
 }
+
 static void
 VGL_FreeHWSurface(_THIS, SDL_Surface * surface)
 {
@@ -424,6 +425,7 @@ VGL_LockHWSurface(_THIS, SDL_Surface * surface)
     }
     return 0;
 }
+
 static void
 VGL_UnlockHWSurface(_THIS, SDL_Surface * surface)
 {

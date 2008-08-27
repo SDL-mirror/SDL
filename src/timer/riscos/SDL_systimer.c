@@ -130,8 +130,7 @@ SDL_Delay(Uint32 ms)
             pthread_yield();
 #endif
 
-    }
-    while (1);
+    } while (1);
 }
 
 #if SDL_THREADS_DISABLED

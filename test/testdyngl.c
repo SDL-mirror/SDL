@@ -185,8 +185,7 @@ main(int argc, char *argv[])
         }
 
         SDL_Delay(20);
-    }
-    while (!done);
+    } while (!done);
 
     SDL_Quit();
     return 0;

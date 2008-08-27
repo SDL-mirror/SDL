@@ -73,6 +73,7 @@ SDL_Lock_EventThread(void)
         }
     }
 }
+
 void
 SDL_Unlock_EventThread(void)
 {

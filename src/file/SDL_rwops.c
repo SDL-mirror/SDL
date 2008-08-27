@@ -28,6 +28,10 @@
 #include "SDL_endian.h"
 #include "SDL_rwops.h"
 
+#ifdef __NDS__
+/* include libfat headers for fatInitDefault(). */
+#include <fat.h>
+#endif /* __NDS__ */
 
 #ifdef __WIN32__
 
@@ -132,6 +136,7 @@ win32_file_open(SDL_RWops * context, const char *filename, const char *mode)
 
     return 0;                   /* ok */
 }
+
 static long SDLCALL
 win32_file_seek(SDL_RWops * context, long offset, int whence)
 {
@@ -173,6 +178,7 @@ win32_file_seek(SDL_RWops * context, long offset, int whence)
     SDL_Error(SDL_EFSEEK);
     return -1;                  /* error */
 }
+
 static size_t SDLCALL
 win32_file_read(SDL_RWops * context, void *ptr, size_t size, size_t maxnum)
 {
@@ -226,6 +232,7 @@ win32_file_read(SDL_RWops * context, void *ptr, size_t size, size_t maxnum)
     }
     return (total_read / size);
 }
+
 static size_t SDLCALL
 win32_file_write(SDL_RWops * context, const void *ptr, size_t size,
                  size_t num)
@@ -265,6 +272,7 @@ win32_file_write(SDL_RWops * context, const void *ptr, size_t size,
     nwritten = byte_written / size;
     return nwritten;
 }
+
 static int SDLCALL
 win32_file_close(SDL_RWops * context)
 {
@@ -298,6 +306,7 @@ stdio_seek(SDL_RWops * context, long offset, int whence)
         return (-1);
     }
 }
+
 static size_t SDLCALL
 stdio_read(SDL_RWops * context, void *ptr, size_t size, size_t maxnum)
 {
@@ -309,6 +318,7 @@ stdio_read(SDL_RWops * context, void *ptr, size_t size, size_t maxnum)
     }
     return (nread);
 }
+
 static size_t SDLCALL
 stdio_write(SDL_RWops * context, const void *ptr, size_t size, size_t num)
 {
@@ -320,6 +330,7 @@ stdio_write(SDL_RWops * context, const void *ptr, size_t size, size_t num)
     }
     return (nwrote);
 }
+
 static int SDLCALL
 stdio_close(SDL_RWops * context)
 {
@@ -368,6 +379,7 @@ mem_seek(SDL_RWops * context, long offset, int whence)
     context->hidden.mem.here = newpos;
     return (context->hidden.mem.here - context->hidden.mem.base);
 }
+
 static size_t SDLCALL
 mem_read(SDL_RWops * context, void *ptr, size_t size, size_t maxnum)
 {
@@ -390,6 +402,7 @@ mem_read(SDL_RWops * context, void *ptr, size_t size, size_t maxnum)
 
     return (total_bytes / size);
 }
+
 static size_t SDLCALL
 mem_write(SDL_RWops * context, const void *ptr, size_t size, size_t num)
 {
@@ -400,12 +413,14 @@ mem_write(SDL_RWops * context, const void *ptr, size_t size, size_t num)
     context->hidden.mem.here += num * size;
     return (num);
 }
+
 static size_t SDLCALL
 mem_writeconst(SDL_RWops * context, const void *ptr, size_t size, size_t num)
 {
     SDL_SetError("Can't write to read-only memory");
     return (-1);
 }
+
 static int SDLCALL
 mem_close(SDL_RWops * context)
 {
@@ -462,6 +477,13 @@ SDL_RWops *
 SDL_RWFromFP(FILE * fp, SDL_bool autoclose)
 {
     SDL_RWops *rwops = NULL;
+
+#if 0
+/*#ifdef __NDS__*/
+    /* set it up so we can use stdio file function */
+    fatInitDefault();
+    printf("called fatInitDefault()");
+#endif /* __NDS__ */
 
     rwops = SDL_AllocRW();
     if (rwops != NULL) {

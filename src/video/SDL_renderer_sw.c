@@ -388,8 +388,9 @@ SW_QueryTexturePixels(SDL_Renderer * renderer, SDL_Texture * texture,
                       void **pixels, int *pitch)
 {
     if (SDL_ISPIXELFORMAT_FOURCC(texture->format)) {
-        return SDL_SW_QueryYUVTexturePixels((SDL_SW_YUVTexture *) texture->
-                                            driverdata, pixels, pitch);
+        return SDL_SW_QueryYUVTexturePixels((SDL_SW_YUVTexture *)
+                                            texture->driverdata, pixels,
+                                            pitch);
     } else {
         SDL_Surface *surface = (SDL_Surface *) texture->driverdata;
 
@@ -464,8 +465,9 @@ SW_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                  const SDL_Rect * rect, const void *pixels, int pitch)
 {
     if (SDL_ISPIXELFORMAT_FOURCC(texture->format)) {
-        return SDL_SW_UpdateYUVTexture((SDL_SW_YUVTexture *) texture->
-                                       driverdata, rect, pixels, pitch);
+        return SDL_SW_UpdateYUVTexture((SDL_SW_YUVTexture *)
+                                       texture->driverdata, rect, pixels,
+                                       pitch);
     } else {
         SDL_Surface *surface = (SDL_Surface *) texture->driverdata;
         Uint8 *src, *dst;
@@ -492,9 +494,9 @@ SW_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                int *pitch)
 {
     if (SDL_ISPIXELFORMAT_FOURCC(texture->format)) {
-        return SDL_SW_LockYUVTexture((SDL_SW_YUVTexture *) texture->
-                                     driverdata, rect, markDirty, pixels,
-                                     pitch);
+        return SDL_SW_LockYUVTexture((SDL_SW_YUVTexture *)
+                                     texture->driverdata, rect, markDirty,
+                                     pixels, pitch);
     } else {
         SDL_Surface *surface = (SDL_Surface *) texture->driverdata;
 
@@ -535,10 +537,10 @@ SW_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b, Uint8 a,
 
     color = SDL_MapRGBA(data->surface.format, r, g, b, a);
 
-    if (data->renderer->
-        LockTexture(data->renderer, data->texture[data->current_texture],
-                    rect, 1, &data->surface.pixels,
-                    &data->surface.pitch) < 0) {
+    if (data->renderer->LockTexture(data->renderer,
+                                    data->texture[data->current_texture],
+                                    rect, 1, &data->surface.pixels,
+                                    &data->surface.pitch) < 0) {
         return -1;
     }
     data->surface.w = rect->w;
@@ -566,10 +568,10 @@ SW_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         SDL_AddDirtyRect(&data->dirty, dstrect);
     }
 
-    if (data->renderer->
-        LockTexture(data->renderer, data->texture[data->current_texture],
-                    dstrect, 1, &data->surface.pixels,
-                    &data->surface.pitch) < 0) {
+    if (data->renderer->LockTexture(data->renderer,
+                                    data->texture[data->current_texture],
+                                    dstrect, 1, &data->surface.pixels,
+                                    &data->surface.pitch) < 0) {
         return -1;
     }
 

@@ -97,4 +97,9 @@
 #define __WIN32__	1
 #endif
 
+#if defined(__NDS__)
+#undef __NINTENDODS__
+#define __NINTENDODS__	1
+#endif
+
 #endif /* _SDL_platform_h */

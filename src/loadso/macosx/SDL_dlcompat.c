@@ -616,8 +616,8 @@ search_linked_libs(const struct mach_header *mh, const char *symbol)
                 || (LC_LOAD_WEAK_DYLIB == lc->cmd)) {
                 if ((wh = (struct mach_header *)
                      my_find_image((char
-                                    *) (((struct dylib_command *) lc)->
-                                        dylib.name.offset + (char *) lc)))) {
+                                    *) (((struct dylib_command *) lc)->dylib.
+                                        name.offset + (char *) lc)))) {
                     if (dyld_NSIsSymbolNameDefinedInImage(wh, symbol)) {
                         nssym = dyld_NSLookupSymbolInImage(wh,
                                                            symbol,
@@ -1067,6 +1067,7 @@ dlsym_auto_underscore(void *handle, const char *symbol)
     return answer;
 
 }
+
 static void *
 dlsym_auto_underscore_intern(void *handle, const char *symbol)
 {

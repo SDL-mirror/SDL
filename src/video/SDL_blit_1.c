@@ -184,6 +184,7 @@ Blit1to2(SDL_BlitInfo * info)
     }
 #endif /* USE_DUFFS_LOOP */
 }
+
 static void
 Blit1to3(SDL_BlitInfo * info)
 {
@@ -232,6 +233,7 @@ Blit1to3(SDL_BlitInfo * info)
         dst += dstskip;
     }
 }
+
 static void
 Blit1to4(SDL_BlitInfo * info)
 {

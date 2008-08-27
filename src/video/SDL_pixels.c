@@ -168,12 +168,16 @@ SDL_MasksToPixelFormatEnum(int bpp, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask,
         break;
     case 15:
         switch (Rmask) {
+        case 0x001F:
+            return SDL_PIXELFORMAT_BGR555;
         case 0x7C00:
             return SDL_PIXELFORMAT_RGB555;
         }
         break;
     case 16:
         switch (Rmask) {
+        case 0x001F:
+            return SDL_PIXELFORMAT_ABGR1555;
         case 0x0F00:
             return SDL_PIXELFORMAT_ARGB4444;
         case 0x7C00:
@@ -748,6 +752,7 @@ SDL_InvalidateMap(SDL_BlitMap * map)
         map->info.table = NULL;
     }
 }
+
 int
 SDL_MapSurface(SDL_Surface * src, SDL_Surface * dst)
 {

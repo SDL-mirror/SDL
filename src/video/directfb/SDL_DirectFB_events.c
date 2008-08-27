@@ -383,33 +383,25 @@ DirectFB_PumpEvents(_THIS)
             switch (evt.type) {
             case DIET_BUTTONPRESS:
                 posted += SDL_PrivateMouseButton(SDL_PRESSED,
-                                                 DirectFB_TranslateButton(evt.
-                                                                          button),
-                                                 0, 0);
+                                                 DirectFB_TranslateButton
+                                                 (evt.button), 0, 0);
                 break;
             case DIET_BUTTONRELEASE:
                 posted += SDL_PrivateMouseButton(SDL_RELEASED,
-                                                 DirectFB_TranslateButton(evt.
-                                                                          button),
-                                                 0, 0);
+                                                 DirectFB_TranslateButton
+                                                 (evt.button), 0, 0);
                 break;
             case DIET_KEYPRESS:
                 posted += SDL_PrivateKeyboard(SDL_PRESSED,
-                                              DirectFB_TranslateKey(evt.
-                                                                    key_id,
-                                                                    evt.
-                                                                    key_symbol,
-                                                                    mod,
-                                                                    &keysym));
+                                              DirectFB_TranslateKey
+                                              (evt.key_id, evt.key_symbol,
+                                               mod, &keysym));
                 break;
             case DIET_KEYRELEASE:
                 posted += SDL_PrivateKeyboard(SDL_RELEASED,
-                                              DirectFB_TranslateKey(evt.
-                                                                    key_id,
-                                                                    evt.
-                                                                    key_symbol,
-                                                                    mod,
-                                                                    &keysym));
+                                              DirectFB_TranslateKey
+                                              (evt.key_id, evt.key_symbol,
+                                               mod, &keysym));
                 break;
             case DIET_AXISMOTION:
                 if (evt.flags & DIEF_AXISREL) {

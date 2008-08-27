@@ -107,8 +107,8 @@ WINWAVEOUT_WaitDevice(_THIS)
 Uint8 *
 WINWAVEOUT_GetDeviceBuf(_THIS)
 {
-    return (Uint8 *) (this->hidden->wavebuf[this->hidden->next_buffer].
-                      lpData);
+    return (Uint8 *) (this->hidden->
+                      wavebuf[this->hidden->next_buffer].lpData);
 }
 
 void
@@ -136,8 +136,7 @@ WINWAVEOUT_WaitDone(_THIS)
         if (left > 0) {
             SDL_Delay(100);
         }
-    }
-    while (left > 0);
+    } while (left > 0);
 }
 
 void

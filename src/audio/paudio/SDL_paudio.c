@@ -208,9 +208,8 @@ PAUDIO_PlayDevice(_THIS)
         if ((written < 0) && ((errno == 0) || (errno == EAGAIN))) {
             SDL_Delay(1);       /* Let a little CPU time go by */
         }
-    }
-    while ((written < 0) &&
-           ((errno == 0) || (errno == EAGAIN) || (errno == EINTR)));
+    } while ((written < 0) &&
+             ((errno == 0) || (errno == EAGAIN) || (errno == EINTR)));
 
     /* If timer synchronization is enabled, set the next write frame */
     if (this->hidden->frame_ticks) {

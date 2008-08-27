@@ -135,6 +135,7 @@ _allmul()
     }
     /* *INDENT-ON* */
 }
+
 void
 __declspec(naked)
 _alldiv()
@@ -222,6 +223,7 @@ L8:
     }
     /* *INDENT-ON* */
 }
+
 void
 __declspec(naked)
 _aulldiv()
@@ -279,6 +281,7 @@ L2:
     }
     /* *INDENT-ON* */
 }
+
 void
 __declspec(naked)
 _allrem()
@@ -365,6 +368,7 @@ L8:
     }
     /* *INDENT-ON* */
 }
+
 void
 __declspec(naked)
 _aullrem()
@@ -423,6 +427,7 @@ L2:
     }
     /* *INDENT-ON* */
 }
+
 void
 __declspec(naked)
 _alldvrm()
@@ -532,6 +537,7 @@ L8:
     }
     /* *INDENT-ON* */
 }
+
 void
 __declspec(naked)
 _aulldvrm()
@@ -604,6 +610,7 @@ L2:
     }
     /* *INDENT-ON* */
 }
+
 void
 __declspec(naked)
 _allshl()
@@ -630,6 +637,7 @@ RETZERO:
     }
     /* *INDENT-ON* */
 }
+
 void
 __declspec(naked)
 _aullshr()

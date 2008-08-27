@@ -181,8 +181,7 @@ CheckMounts()
 #endif
             return;
         }
-    }
-    while (ret == 0);
+    } while (ret == 0);
 
 #ifdef DEBUG_CDROM
     fprintf(stderr, "Read %d vmount structures\n", ret);
@@ -211,8 +210,7 @@ CheckMounts()
         }
         ptr = (struct vmount *) ((char *) ptr + ptr->vmt_length);
         ret--;
-    }
-    while (ret > 0);
+    } while (ret > 0);
 
     free(buffer);
 }
@@ -247,8 +245,7 @@ CheckNonmounts()
                 }
             }
         }
-    }
-    while (ret == 0);
+    } while (ret == 0);
     ret = endfsent_r(&fsFile);
     if (ret != 0)
         return -1;
@@ -275,8 +272,7 @@ CheckNonmounts()
                 }
             }
         }
-    }
-    while (entry != NULL);
+    } while (entry != NULL);
     endfsent();
 #endif
 }
@@ -326,8 +322,7 @@ SDL_SYS_CDInit(void)
                 } else {
                     SDLcdrom = NULL;
                 }
-            }
-            while (SDLcdrom);
+            } while (SDLcdrom);
             SDL_stack_free(cdpath);
         }
 

@@ -400,8 +400,7 @@ ListTrackFiles(FSVolumeRefNum theVolume, FSRef * trackFiles, int numTracks)
                 }
                 CFRelease(name);
             }
-        }
-        while (noErr == result);
+        } while (noErr == result);
         FSCloseIterator(iterator);
     }
 

@@ -51,6 +51,7 @@ static unsigned char default_cdata[] = {
     0x03, 0x00,
     0x00, 0x00
 };
+
 static unsigned char default_cmask[] = {
     0xC0, 0x00,
     0xE0, 0x00,
@@ -90,6 +91,7 @@ static unsigned char default_cdata[] = {
     0x03, 0x00,
     0x00, 0x00
 };
+
 static unsigned char default_cmask[] = {
     0x40, 0x00,
     0xE0, 0x00,

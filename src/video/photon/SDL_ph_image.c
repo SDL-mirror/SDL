@@ -244,9 +244,8 @@ ph_SetupFullScreenImage(_THIS, SDL_Surface * screen)
     }
 
     if ((screen->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
-        OCImage.FrameData1 =
-            (unsigned char *) PdGetOffscreenContextPtr(OCImage.
-                                                       offscreen_backcontext);
+        OCImage.FrameData1 = (unsigned char *)
+            PdGetOffscreenContextPtr(OCImage.offscreen_backcontext);
         if (OCImage.FrameData1 == NULL) {
             SDL_SetError
                 ("ph_SetupFullScreenImage(back): PdGetOffscreenContextPtr() function failed !\n");

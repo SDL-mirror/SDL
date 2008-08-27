@@ -311,8 +311,7 @@ AudioFilePlayer_OpenFile(AudioFilePlayer * afp, const FSRef * inRef,
 
         /* Skip the chunk data */
         offset = chunk.ckSize;
-    }
-    while (chunk.ckID != 'SSND');
+    } while (chunk.ckID != 'SSND');
 
     /* Read the header of the SSND chunk. After this, we are positioned right
        at the start of the audio data. */

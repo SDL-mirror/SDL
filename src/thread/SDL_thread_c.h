@@ -43,6 +43,8 @@
 #include "irix/SDL_systhread_c.h"
 #elif SDL_THREAD_WIN32
 #include "win32/SDL_systhread_c.h"
+#elif SDL_THREAD_NDS
+#include "nds/SDL_systhread_c.h"
 #else
 #error Need thread implementation for this platform
 #include "generic/SDL_systhread_c.h"

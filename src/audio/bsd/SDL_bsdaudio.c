@@ -270,8 +270,7 @@ BSDAUDIO_PlayDevice(_THIS)
             || ((written < 0) && ((errno == 0) || (errno == EAGAIN)))) {
             SDL_Delay(1);       /* Let a little CPU time go by */
         }
-    }
-    while (p < written);
+    } while (p < written);
 
     /* If timer synchronization is enabled, set the next write frame */
     if (this->hidden->frame_ticks) {

@@ -399,6 +399,7 @@ WSCONS_AllocHWSurface(_THIS, SDL_Surface * surface)
 {
     return -1;
 }
+
 static void
 WSCONS_FreeHWSurface(_THIS, SDL_Surface * surface)
 {

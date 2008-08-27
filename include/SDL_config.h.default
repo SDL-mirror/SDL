@@ -26,7 +26,9 @@
 #include "SDL_platform.h"
 
 /* Add any platform that doesn't build using the configure system */
-#if defined(__DREAMCAST__)
+#if defined(__NINTENDODS__)
+#include "SDL_config_nintendods.h"
+#elif defined(__DREAMCAST__)
 #include "SDL_config_dreamcast.h"
 #elif defined(__MACOSX__)
 #include "SDL_config_macosx.h"

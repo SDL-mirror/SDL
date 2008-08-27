@@ -268,8 +268,7 @@ eloWaitReply(unsigned char type, unsigned char *reply, int fd)
         if (result == 0) {
             i--;
         }
-    }
-    while (!ok && (i > 0));
+    } while (!ok && (i > 0));
 
     return ok;
 }

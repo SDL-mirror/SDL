@@ -176,8 +176,7 @@ SDL_SYS_CDInit(void)
                 } else {
                     SDLcdrom = NULL;
                 }
-            }
-            while (SDLcdrom);
+            } while (SDLcdrom);
             SDL_stack_free(cdpath);
         }
 

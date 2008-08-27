@@ -141,8 +141,8 @@ calc_swizzle32(const SDL_PixelFormat * srcfmt, const SDL_PixelFormat * dstfmt)
     /* Use zero for alpha if either surface doesn't have alpha */
     if (dstfmt->Amask) {
         amask =
-            ((srcfmt->Amask) ? RESHIFT(srcfmt->Ashift) : 0x10) << (dstfmt->
-                                                                   Ashift);
+            ((srcfmt->Amask) ? RESHIFT(srcfmt->
+                                       Ashift) : 0x10) << (dstfmt->Ashift);
     } else {
         amask =
             0x10101010 & ((dstfmt->Rmask | dstfmt->Gmask | dstfmt->Bmask) ^
@@ -1435,6 +1435,7 @@ static const Uint32 RGB565_ARGB8888_LUT[512] = {
     0x00001ce6, 0xffff8100, 0x00001cee, 0xffffa100,
     0x00001cf6, 0xffffc200, 0x00001cff, 0xffffe200
 };
+
 static void
 Blit_RGB565_ARGB8888(SDL_BlitInfo * info)
 {
@@ -1572,6 +1573,7 @@ static const Uint32 RGB565_ABGR8888_LUT[512] = {
     0xffe61c00, 0x000081ff, 0xffee1c00, 0x0000a1ff,
     0xfff61c00, 0x0000c2ff, 0xffff1c00, 0x0000e2ff
 };
+
 static void
 Blit_RGB565_ABGR8888(SDL_BlitInfo * info)
 {
@@ -1709,6 +1711,7 @@ static const Uint32 RGB565_RGBA8888_LUT[512] = {
     0x001ce6ff, 0xff810000, 0x001ceeff, 0xffa10000,
     0x001cf6ff, 0xffc20000, 0x001cffff, 0xffe20000,
 };
+
 static void
 Blit_RGB565_RGBA8888(SDL_BlitInfo * info)
 {
@@ -1846,6 +1849,7 @@ static const Uint32 RGB565_BGRA8888_LUT[512] = {
     0xe61c0000, 0x0081ffff, 0xee1c0000, 0x00a1ffff,
     0xf61c0000, 0x00c2ffff, 0xff1c0000, 0x00e2ffff
 };
+
 static void
 Blit_RGB565_BGRA8888(SDL_BlitInfo * info)
 {
@@ -1930,6 +1934,7 @@ Blit_RGB888_index8_map(SDL_BlitInfo * info)
     }
 #endif /* USE_DUFFS_LOOP */
 }
+
 static void
 BlitNto1(SDL_BlitInfo * info)
 {
@@ -2340,6 +2345,7 @@ static const struct blit_table normal_blit_1[] = {
     /* Default for 8-bit RGB source, an invalid combination */
     {0, 0, 0, 0, 0, 0, 0, 0, NULL},
 };
+
 static const struct blit_table normal_blit_2[] = {
 #if SDL_ALTIVEC_BLITTERS
     /* has-altivec */
@@ -2366,10 +2372,12 @@ static const struct blit_table normal_blit_2[] = {
     /* Default for 16-bit RGB source, used if no other blitter matches */
     {0, 0, 0, 0, 0, 0, 0, 0, BlitNtoN, 0}
 };
+
 static const struct blit_table normal_blit_3[] = {
     /* Default for 24-bit RGB source, never optimized */
     {0, 0, 0, 0, 0, 0, 0, 0, BlitNtoN, 0}
 };
+
 static const struct blit_table normal_blit_4[] = {
 #if SDL_ALTIVEC_BLITTERS
     /* has-altivec | dont-use-prefetch */
@@ -2396,6 +2404,7 @@ static const struct blit_table normal_blit_4[] = {
     /* Default for 32-bit RGB source, used if no other blitter matches */
     {0, 0, 0, 0, 0, 0, 0, 0, BlitNtoN, 0}
 };
+
 static const struct blit_table *normal_blit[] = {
     normal_blit_1, normal_blit_2, normal_blit_3, normal_blit_4
 };

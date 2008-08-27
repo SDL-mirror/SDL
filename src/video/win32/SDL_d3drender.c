@@ -596,8 +596,8 @@ D3D_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
     result =
         IDirect3DDevice9_UpdateTexture(renderdata->device,
                                        (IDirect3DBaseTexture9 *) temp,
-                                       (IDirect3DBaseTexture9 *) data->
-                                       texture);
+                                       (IDirect3DBaseTexture9 *)
+                                       data->texture);
     IDirect3DTexture9_Release(temp);
     if (FAILED(result)) {
         D3D_SetError("UpdateTexture()", result);
@@ -805,9 +805,8 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     }
 
     result =
-        IDirect3DDevice9_SetTexture(data->device, 0,
-                                    (IDirect3DBaseTexture9 *) texturedata->
-                                    texture);
+        IDirect3DDevice9_SetTexture(data->device, 0, (IDirect3DBaseTexture9 *)
+                                    texturedata->texture);
     if (FAILED(result)) {
         D3D_SetError("SetTexture()", result);
         return -1;

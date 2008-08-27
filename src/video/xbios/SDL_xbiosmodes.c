@@ -277,8 +277,8 @@ SDL_XBIOS_InitModes(_THIS)
                     SDL_XBIOS_AddMode(_this, falcon_rgb_modes[i].width,
                                       falcon_rgb_modes[i].height,
                                       falcon_rgb_modes[i].bpp,
-                                      falcon_rgb_modes[i].
-                                      modecode & modecodemask, SDL_FALSE);
+                                      falcon_rgb_modes[i].modecode &
+                                      modecodemask, SDL_FALSE);
                 }
                 break;
             case MONITOR_VGA:
@@ -288,8 +288,8 @@ SDL_XBIOS_InitModes(_THIS)
                     SDL_XBIOS_AddMode(_this, falcon_vga_modes[i].width,
                                       falcon_vga_modes[i].height,
                                       falcon_vga_modes[i].bpp,
-                                      falcon_vga_modes[i].
-                                      modecode & modecodemask, SDL_FALSE);
+                                      falcon_vga_modes[i].modecode &
+                                      modecodemask, SDL_FALSE);
                 }
                 break;
             }

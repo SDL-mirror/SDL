@@ -526,8 +526,7 @@ iPod_PumpEvents(_THIS)
         }
         if (dbgout)
             fprintf(dbgout, "\n");
-    }
-    while (posted);
+    } while (posted);
 }
 
 // enough space for 160x128x2
@@ -570,8 +569,7 @@ M_lcd_wait_write(void)
         do {
             if ((inl(lcd_base) & (unsigned int) 0x8000) == 0)
                 break;
-        }
-        while (M_timer_check(start, 1000) == 0);
+        } while (M_timer_check(start, 1000) == 0);
     }
 }
 
@@ -681,10 +679,10 @@ C_lcd_wait_write(void)
         do {
             if ((inl(0x70008A0C) & 0x80000000) == 0)
                 break;
-        }
-        while (C_timer_check(start, 1000) == 0);
+        } while (C_timer_check(start, 1000) == 0);
     }
 }
+
 static void
 C_lcd_cmd_data(int cmd, int data)
 {
@@ -780,10 +778,12 @@ iPod_UpdateRects(_THIS, int nrects, SDL_Rect * rects)
                     ipod_scr[y * (lcd_width / 4) + x / 4] |=
                         (((Uint8 *) (SDL_VideoSurface->pixels))[y *
                                                                 SDL_VideoSurface->
-                                                                pitch
-                                                                +
-                                                                x] &
-                         3) << (2 * (x % 4));
+                                                                pitch +
+                                                                x] & 3) << (2
+                                                                            *
+                                                                            (x
+                                                                             %
+                                                                             4));
                 }
             }
         }

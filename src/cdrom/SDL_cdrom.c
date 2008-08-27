@@ -44,6 +44,7 @@ struct CDcaps SDL_CDcaps = {
     NULL,                       /* Eject */
     NULL,                       /* Close */
 };
+
 int SDL_numcds;
 
 int

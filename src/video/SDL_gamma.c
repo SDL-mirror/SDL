@@ -70,6 +70,7 @@ CalculateGammaRamp(float gamma, Uint16 * ramp)
         }
     }
 }
+
 static void
 CalculateGammaFromRamp(float *gamma, Uint16 * ramp)
 {

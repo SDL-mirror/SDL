@@ -369,6 +369,9 @@ extern VideoBootStrap OS2FSLib_bootstrap;
 #if SDL_VIDEO_DRIVER_DUMMY
 extern VideoBootStrap DUMMY_bootstrap;
 #endif
+#if SDL_VIDEO_DRIVER_NDS
+extern VideoBootStrap NDS_bootstrap;
+#endif
 
 #define SDL_CurrentDisplay	(_this->displays[_this->current_display])
 

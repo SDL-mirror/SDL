@@ -184,8 +184,7 @@ SDL_SYS_CDInit(void)
                 } else {
                     SDLcdrom = NULL;
                 }
-            }
-            while (SDLcdrom);
+            } while (SDLcdrom);
             SDL_stack_free(cdpath);
         }
 
@@ -357,8 +356,7 @@ SDL_SYS_CDStatus(SDL_CD * cdrom, int *position)
             devctlret = ENXIO;
             break;
         }
-    }
-    while ((devctlret == EAGAIN) || (devctlret == ESTALE));
+    } while ((devctlret == EAGAIN) || (devctlret == ESTALE));
 
     if (devctlret != 0) {
         if (devctlret == ENXIO) {

@@ -125,8 +125,7 @@ SDL_SemWaitTimeout(SDL_sem * sem, Uint32 timeout)
             break;
         }
         SDL_Delay(1);
-    }
-    while (SDL_GetTicks() < timeout);
+    } while (SDL_GetTicks() < timeout);
 
     return retval;
 }

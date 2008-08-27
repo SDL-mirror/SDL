@@ -137,8 +137,7 @@ SDL_Delay(Uint32 ms)
 
         was_error = select(0, NULL, NULL, NULL, &tv);
 #endif /* HAVE_NANOSLEEP */
-    }
-    while (was_error && (errno == EINTR));
+    } while (was_error && (errno == EINTR));
 #endif /* SDL_THREAD_PTH */
 }
 

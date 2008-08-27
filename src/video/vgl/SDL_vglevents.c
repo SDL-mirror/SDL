@@ -141,8 +141,7 @@ VGL_PumpEvents(_THIS)
         posted = 0;
         handle_keyboard(this);
         handle_mouse(this);
-    }
-    while (posted != 0);
+    } while (posted != 0);
 }
 
 void

@@ -397,8 +397,7 @@ test_blit_speed(void)
         }
 
         now = SDL_GetTicks();
-    }
-    while (now < end);
+    } while (now < end);
 
     printf("Non-blitting crap accounted for %d percent of this run.\n",
            percent(testms - elasped, testms));

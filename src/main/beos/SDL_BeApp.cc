@@ -78,8 +78,7 @@ SDL_InitBeApp(void)
 
         do {
             SDL_Delay(10);
-        }
-        while ((be_app == NULL) || be_app->IsLaunching());
+        } while ((be_app == NULL) || be_app->IsLaunching());
 
         /* Mark the application active */
         SDL_BeAppActive = 0;

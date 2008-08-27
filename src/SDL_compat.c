@@ -693,6 +693,7 @@ SDL_UpdateRect(SDL_Surface * screen, Sint32 x, Sint32 y, Uint32 w, Uint32 h)
         SDL_UpdateRects(screen, 1, &rect);
     }
 }
+
 void
 SDL_UpdateRects(SDL_Surface * screen, int numrects, SDL_Rect * rects)
 {
