@@ -21,10 +21,37 @@
 */
 #include "SDL_config.h"
 
+#ifndef _SDL_directfb_modes_h
+#define _SDL_directfb_modes_h
+
 #include "SDL_DirectFB_video.h"
 
-/* Functions to be exported */
-extern void DirectFB_InitKeyboard(_THIS);
-extern void DirectFB_QuitKeyboard(_THIS);
-extern void DirectFB_PumpEventsWindow(_THIS);
-extern SDLKey DirectFB_GetLayoutKey(_THIS, SDLKey physicalKey);
+#define SDL_DFB_DISPLAYDATA(dev, win)  DFB_DisplayData *dispdata = ((win && dev) ? (DFB_DisplayData *) (dev)->displays[(win)->display].driverdata : NULL)
+
+typedef struct _DFB_DisplayData DFB_DisplayData;
+struct _DFB_DisplayData
+{
+    IDirectFBDisplayLayer *layer;
+    DFBSurfacePixelFormat pixelformat;
+    /* FIXME: support for multiple video layer. 
+     * However, I do not know any card supporting 
+     * more than one
+     */
+    DFBDisplayLayerID vidID;
+    IDirectFBDisplayLayer *vidlayer;
+
+    int vidIDinuse;
+
+    int cw;
+    int ch;
+};
+
+
+extern void DirectFB_InitModes(_THIS);
+extern void DirectFB_GetDisplayModes(_THIS);
+extern int DirectFB_SetDisplayMode(_THIS, SDL_DisplayMode * mode);
+extern void DirectFB_QuitModes(_THIS);
+
+#endif /* _SDL_directfb_modes_h */
+
+/* vi: set ts=4 sw=4 expandtab: */

@@ -47,22 +47,20 @@ DirectFB_SetContext(_THIS, SDL_WindowID id)
 #if (DIRECTFB_MAJOR_VERSION >= 1)
     /* FIXME: does not work on 1.0/1.2 with radeon driver
      *        the approach did work with the matrox driver
-     *        Perhaps make this depending on env var, e.g. SDLDIRECTFB_SWITCHCONTEXT_SUPPORTED
+     *        This has simply no effect.
      */
 
-    if (getenv("SDLDIRECTFB_SWITCHCONTEXT_SUPPORTED") != NULL) {
-        SDL_DFB_DEVICEDATA(_this);
-        SDL_Window *window = SDL_GetWindowFromID(id);
-        SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
-        DFB_DisplayData *dispdata = (DFB_DisplayData *) display->driverdata;
-        if (dispdata->vidID >= 0 && dispdata->vidIDinuse) {
-            IDirectFBDisplayLayer *lay = NULL;
-            devdata->dfb->GetDisplayLayer(devdata->dfb, dispdata->vidID,
-                                          &lay);
-            if (lay)
-                lay->SwitchContext(lay, DFB_TRUE);
-        }
-    }
+    SDL_Window *window = SDL_GetWindowFromID(id);
+    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    DFB_DisplayData *dispdata = (DFB_DisplayData *) display->driverdata;
+    int ret;
+
+    if (dispdata->vidIDinuse)
+        SDL_DFB_CHECKERR(dispdata->vidlayer->
+                         SwitchContext(dispdata->vidlayer, DFB_TRUE));
+
+  error:
+    return;
 #endif
 
 }
@@ -73,14 +71,24 @@ DirectFB_PumpEventsWindow(_THIS)
     SDL_DFB_DEVICEDATA(_this);
     DFB_WindowData *p;
     DFBWindowEvent evt;
+    DFBInputEvent ievt;
+    SDL_WindowID grabbed_window;
     char text[5];
 
+    grabbed_window = -1;
+
     for (p = devdata->firstwin; p != NULL; p = p->next) {
+        SDL_Window *w = SDL_GetWindowFromID(p->id);
+
+        if (w->flags & SDL_WINDOW_INPUT_GRABBED) {
+            grabbed_window = p->id;
+        }
+
         while (p->eventbuffer->GetEvent(p->eventbuffer,
                                         DFB_EVENT(&evt)) == DFB_OK) {
             SDL_keysym keysym;
 
-            if (evt.clazz = DFEC_WINDOW) {
+            if (evt.clazz == DFEC_WINDOW) {
                 switch (evt.type) {
                 case DWET_BUTTONDOWN:
                     SDL_SendMouseButton(devdata->mouse, SDL_PRESSED,
@@ -91,7 +99,9 @@ DirectFB_PumpEventsWindow(_THIS)
                                         DirectFB_TranslateButton(evt.button));
                     break;
                 case DWET_MOTION:
-                    SDL_SendMouseMotion(devdata->mouse, 0, evt.cx, evt.cy);
+                    if (!(w->flags & SDL_WINDOW_INPUT_GRABBED))
+                        SDL_SendMouseMotion(devdata->mouse, 0, evt.cx, evt.cy,
+                                            0);
                     break;
                 case DWET_KEYDOWN:
                     DirectFB_TranslateKey(_this, &evt, &keysym);
@@ -111,18 +121,22 @@ DirectFB_PumpEventsWindow(_THIS)
                                         keysym.scancode);
                     break;
                 case DWET_POSITION_SIZE:
-                    SDL_SendWindowEvent(p->id, SDL_WINDOWEVENT_MOVED, evt.x,
-                                        evt.y);
-                    SDL_SendWindowEvent(p->id, SDL_WINDOWEVENT_RESIZED, evt.w,
-                                        evt.h);
+                    if (evt.x != w->x || evt.y != w->y)
+                        SDL_SendWindowEvent(p->id, SDL_WINDOWEVENT_MOVED,
+                                            evt.x, evt.y);
+                    if (evt.w != w->w || evt.h != w->h)
+                        SDL_SendWindowEvent(p->id, SDL_WINDOWEVENT_RESIZED,
+                                            evt.w, evt.h);
                     break;
                 case DWET_POSITION:
-                    SDL_SendWindowEvent(p->id, SDL_WINDOWEVENT_MOVED, evt.x,
-                                        evt.y);
+                    if (evt.x != w->x || evt.y != w->y)
+                        SDL_SendWindowEvent(p->id, SDL_WINDOWEVENT_MOVED,
+                                            evt.x, evt.y);
                     break;
                 case DWET_SIZE:
-                    SDL_SendWindowEvent(p->id, SDL_WINDOWEVENT_RESIZED, evt.w,
-                                        evt.h);
+                    if (evt.w != w->w || evt.h != w->h)
+                        SDL_SendWindowEvent(p->id, SDL_WINDOWEVENT_RESIZED,
+                                            evt.w, evt.h);
                     break;
                 case DWET_CLOSE:
                     SDL_SendWindowEvent(p->id, SDL_WINDOWEVENT_CLOSE, 0, 0);
@@ -139,18 +153,41 @@ DirectFB_PumpEventsWindow(_THIS)
                     SDL_SetKeyboardFocus(devdata->keyboard, 0);
                     break;
                 case DWET_ENTER:
-                    //SDL_DirectFB_ReshowCursor(_this, 0);
+                    /* SDL_DirectFB_ReshowCursor(_this, 0); */
                     SDL_SetMouseFocus(devdata->mouse, p->id);
                     SDL_SendWindowEvent(p->id, SDL_WINDOWEVENT_ENTER, 0, 0);
                     break;
                 case DWET_LEAVE:
                     SDL_SendWindowEvent(p->id, SDL_WINDOWEVENT_LEAVE, 0, 0);
                     SDL_SetMouseFocus(devdata->mouse, 0);
-                    //SDL_DirectFB_ReshowCursor(_this, 1);
+                    /* SDL_DirectFB_ReshowCursor(_this, 1); */
                     break;
                 default:
                     ;
                 }
+            } else
+                printf("Event Clazz %d\n", evt.clazz);
+
+        }
+    }
+
+    /* Now get relative events in case we need them */
+    while (devdata->events->GetEvent(devdata->events,
+                                     DFB_EVENT(&ievt)) == DFB_OK) {
+        if (grabbed_window >= 0) {
+            switch (ievt.type) {
+            case DIET_AXISMOTION:
+                if (ievt.flags & DIEF_AXISREL) {
+                    if (ievt.axis == DIAI_X)
+                        SDL_SendMouseMotion(devdata->mouse, 1, ievt.axisrel,
+                                            0, 0);
+                    else if (ievt.axis == DIAI_Y)
+                        SDL_SendMouseMotion(devdata->mouse, 1, 0,
+                                            ievt.axisrel, 0);
+                }
+                break;
+            default:
+                ;
             }
         }
     }
@@ -231,9 +268,10 @@ DirectFB_InitOSKeymap(_THIS)
     keymap[DIKI_META_R - DIKI_UNKNOWN] = SDL_SCANCODE_RGUI;
     keymap[DIKI_SUPER_L - DIKI_UNKNOWN] = SDL_SCANCODE_APPLICATION;
     keymap[DIKI_SUPER_R - DIKI_UNKNOWN] = SDL_SCANCODE_APPLICATION;
-    //FIXME:Do we read hyper keys ?
-    //keymap[DIKI_HYPER_L - DIKI_UNKNOWN] = SDL_SCANCODE_APPLICATION;
-    //keymap[DIKI_HYPER_R - DIKI_UNKNOWN] = SDL_SCANCODE_APPLICATION;
+    /* FIXME:Do we read hyper keys ?
+     * keymap[DIKI_HYPER_L - DIKI_UNKNOWN] = SDL_SCANCODE_APPLICATION;
+     * keymap[DIKI_HYPER_R - DIKI_UNKNOWN] = SDL_SCANCODE_APPLICATION;
+     */
     keymap[DIKI_TAB - DIKI_UNKNOWN] = SDL_SCANCODE_TAB;
     keymap[DIKI_ENTER - DIKI_UNKNOWN] = SDL_SCANCODE_RETURN;
     keymap[DIKI_SPACE - DIKI_UNKNOWN] = SDL_SCANCODE_SPACE;
@@ -290,7 +328,7 @@ DirectFB_TranslateKey(_THIS, DFBWindowEvent * evt, SDL_keysym * keysym)
 
     if (evt->key_code >= 0
         && evt->key_code < SDL_arraysize(linux_scancode_table))
-        keysym->scancode = linux_scancode_table[evt->key_code]; // key_id;
+        keysym->scancode = linux_scancode_table[evt->key_code];
     else
         keysym->scancode = SDL_SCANCODE_UNKNOWN;
 
@@ -331,7 +369,6 @@ input_device_cb(DFBInputDeviceID device_id, DFBInputDeviceDescription desc,
 {
     DFB_DeviceData *devdata = callbackdata;
     SDL_Keyboard keyboard;
-    SDL_scancode scancode;
     SDLKey keymap[SDL_NUM_SCANCODES];
 
     if ((desc.caps & DIDTF_KEYBOARD) && device_id == DIDID_KEYBOARD) {
@@ -360,6 +397,16 @@ DirectFB_InitKeyboard(_THIS)
                   EnumInputDevices(devdata->dfb, input_device_cb, devdata));
 }
 
+void
+DirectFB_QuitKeyboard(_THIS)
+{
+    SDL_DFB_DEVICEDATA(_this);
+    int ret;
+
+    SDL_DelKeyboard(devdata->keyboard);
+
+}
+
 #if 0
 /* FIXME: Remove once determined this is not needed in fullscreen mode */
 void
@@ -383,25 +430,33 @@ DirectFB_PumpEvents(_THIS)
             switch (evt.type) {
             case DIET_BUTTONPRESS:
                 posted += SDL_PrivateMouseButton(SDL_PRESSED,
-                                                 DirectFB_TranslateButton
-                                                 (evt.button), 0, 0);
+                                                 DirectFB_TranslateButton(evt.
+                                                                          button),
+                                                 0, 0);
                 break;
             case DIET_BUTTONRELEASE:
                 posted += SDL_PrivateMouseButton(SDL_RELEASED,
-                                                 DirectFB_TranslateButton
-                                                 (evt.button), 0, 0);
+                                                 DirectFB_TranslateButton(evt.
+                                                                          button),
+                                                 0, 0);
                 break;
             case DIET_KEYPRESS:
                 posted += SDL_PrivateKeyboard(SDL_PRESSED,
-                                              DirectFB_TranslateKey
-                                              (evt.key_id, evt.key_symbol,
-                                               mod, &keysym));
+                                              DirectFB_TranslateKey(evt.
+                                                                    key_id,
+                                                                    evt.
+                                                                    key_symbol,
+                                                                    mod,
+                                                                    &keysym));
                 break;
             case DIET_KEYRELEASE:
                 posted += SDL_PrivateKeyboard(SDL_RELEASED,
-                                              DirectFB_TranslateKey
-                                              (evt.key_id, evt.key_symbol,
-                                               mod, &keysym));
+                                              DirectFB_TranslateKey(evt.
+                                                                    key_id,
+                                                                    evt.
+                                                                    key_symbol,
+                                                                    mod,
+                                                                    &keysym));
                 break;
             case DIET_AXISMOTION:
                 if (evt.flags & DIEF_AXISREL) {

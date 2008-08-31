@@ -24,9 +24,14 @@
 #ifndef _SDL_DirectFB_video_h
 #define _SDL_DirectFB_video_h
 
+#include "../SDL_sysvideo.h"
+
 #include <directfb.h>
 #include <directfb_version.h>
 
+#include "SDL_mouse.h"
+
+#define DEBUG 0
 #define LOG_CHANNEL 	stdout
 
 #if (DIRECTFB_MAJOR_VERSION == 0) && (DIRECTFB_MINOR_VERSION == 9) && (DIRECTFB_MICRO_VERSION < 23)
@@ -42,10 +47,18 @@
 #include "SDL_loadso.h"
 #endif
 
-#include "SDL_mouse.h"
-#include "../SDL_sysvideo.h"
+#include "SDL_DirectFB_events.h"
+/*
+ * #include "SDL_DirectFB_gamma.h"
+ * #include "SDL_DirectFB_keyboard.h"
+ */
+#include "SDL_DirectFB_modes.h"
+#include "SDL_DirectFB_mouse.h"
+#include "SDL_DirectFB_opengl.h"
+#include "SDL_DirectFB_window.h"
 
-#define DEBUG 1
+#define DFBENV_USE_YUV_UNDERLAY "SDL_DIRECTFB_YUV_UNDERLAY"
+#define DFBENV_USE_YUV_DIRECT   "SDL_DIRECTFB_YUV_DIRECT"
 
 #define SDL_DFB_RELEASE(x) do { if ( x ) { x->Release(x); x = NULL; } } while (0)
 #define SDL_DFB_FREE(x) do { if ( x ) { SDL_free(x); x = NULL; } } while (0)
@@ -102,50 +115,8 @@
 /* Private display data */
 
 #define SDL_DFB_DEVICEDATA(dev)  DFB_DeviceData *devdata = (DFB_DeviceData *) ((dev)->driverdata)
-#define SDL_DFB_WINDOWDATA(win)  DFB_WindowData *windata = ((win) ? (DFB_WindowData *) ((win)->driverdata) : NULL)
-#define SDL_DFB_DISPLAYDATA(dev, win)  DFB_DisplayData *dispdata = ((win && dev) ? (DFB_DisplayData *) (dev)->displays[(win)->display].driverdata : NULL)
-
-typedef struct _DFB_DisplayData DFB_DisplayData;
 
 #define DFB_MAX_SCREENS 10
-#define DFB_MAX_MODES 50
-
-struct _DFB_DisplayData
-{
-    IDirectFBDisplayLayer *layer;
-    DFBSurfacePixelFormat pixelformat;
-    //FIXME: support for multiple layer ...
-    DFBDisplayLayerID vidID;
-
-    int vidIDinuse;
-
-    int cw;
-    int ch;
-
-    int nummodes;
-    SDL_DisplayMode *modelist;
-
-#if 0
-    WMcursor *last_cursor;
-    WMcursor *blank_cursor;
-    WMcursor *default_cursor;
-#endif
-};
-
-
-typedef struct _DFB_WindowData DFB_WindowData;
-struct _DFB_WindowData
-{
-    IDirectFBSurface *surface;
-    IDirectFBPalette *palette;
-    IDirectFBWindow *window;
-    IDirectFBGL *gl_context;
-    IDirectFBEventBuffer *eventbuffer;
-    DFBWindowID windowID;
-    int id;                     /* SDL window id */
-    DFB_WindowData *next;
-    Uint8 opacity;
-};
 
 typedef struct _DFB_DeviceData DFB_DeviceData;
 struct _DFB_DeviceData
@@ -158,25 +129,14 @@ struct _DFB_DeviceData
     int kbdgeneric;
     DFB_WindowData *firstwin;
 
-    int numscreens;
-    DFBScreenID screenid[DFB_MAX_SCREENS];
-    DFBDisplayLayerID gralayer[DFB_MAX_SCREENS];
-    DFBDisplayLayerID vidlayer[DFB_MAX_SCREENS];
-
-    int aux;                    /* auxiliary integer for callbacks */
+    int use_yuv_underlays;
 
     /* OpenGL */
     void (*glFinish) (void);
     void (*glFlush) (void);
-};
 
-struct SDL_GLDriverData
-{
-    int gl_active;              /* to stop switching drivers while we have a valid context */
-
-#if SDL_DIRECTFB_OPENGL
-    IDirectFBGL *gl_context;
-#endif                          /* SDL_DIRECTFB_OPENGL */
+    /* global events */
+    IDirectFBEventBuffer *events;
 };
 
 #endif /* _SDL_DirectFB_video_h */

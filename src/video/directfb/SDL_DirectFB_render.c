@@ -29,11 +29,15 @@
 #include "../SDL_rect_c.h"
 #include "../SDL_yuv_sw_c.h"
 
+/* the following is not yet tested ... */
+#define USE_DISPLAY_PALETTE			(0)
+
 /* GDI renderer implementation */
 
 static SDL_Renderer *DirectFB_CreateRenderer(SDL_Window * window,
                                              Uint32 flags);
 static int DirectFB_DisplayModeChanged(SDL_Renderer * renderer);
+static int DirectFB_ActivateRenderer(SDL_Renderer * renderer);
 static int DirectFB_CreateTexture(SDL_Renderer * renderer,
                                   SDL_Texture * texture);
 static int DirectFB_QueryTexturePixels(SDL_Renderer * renderer,
@@ -89,11 +93,12 @@ SDL_RenderDriver DirectFB_RenderDriver = {
      (SDL_TEXTUREBLENDMODE_NONE | SDL_TEXTUREBLENDMODE_MASK |
       SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD |
       SDL_TEXTUREBLENDMODE_MOD),
-     (SDL_TEXTURESCALEMODE_NONE | SDL_TEXTURESCALEMODE_FAST),
+     (SDL_TEXTURESCALEMODE_NONE | SDL_TEXTURESCALEMODE_FAST |
+      SDL_TEXTURESCALEMODE_SLOW | SDL_TEXTURESCALEMODE_BEST),
      14,
      {
-      SDL_PIXELFORMAT_INDEX8,
       SDL_PIXELFORMAT_INDEX4LSB,
+      SDL_PIXELFORMAT_INDEX8,
       SDL_PIXELFORMAT_RGB332,
       SDL_PIXELFORMAT_RGB555,
       SDL_PIXELFORMAT_RGB565,
@@ -115,18 +120,31 @@ typedef struct
     IDirectFBSurface *surface;
     DFBSurfaceFlipFlags flipflags;
     int isyuvdirect;
+    int size_changed;
 } DirectFB_RenderData;
 
 typedef struct
 {
-    IDirectFBDisplayLayer *vidlayer;
     IDirectFBSurface *surface;
     Uint32 format;
     void *pixels;
     int pitch;
     IDirectFBPalette *palette;
-    DFB_DisplayData *display;
+    SDL_VideoDisplay *display;
+    SDL_DirtyRectList dirty;
+#if (DIRECTFB_MAJOR_VERSION == 1) && (DIRECTFB_MINOR_VERSION >= 2)
+    DFBSurfaceRenderOptions render_options;
+#endif
 } DirectFB_TextureData;
+
+static __inline__ void
+SDLtoDFBRect(const SDL_Rect * sr, DFBRectangle * dr)
+{
+    dr->x = sr->x;
+    dr->y = sr->y;
+    dr->h = sr->h;
+    dr->w = sr->w;
+}
 
 void
 DirectFB_AddRenderDriver(_THIS)
@@ -136,24 +154,53 @@ DirectFB_AddRenderDriver(_THIS)
         SDL_AddRenderDriver(i, &DirectFB_RenderDriver);
 }
 
+static int
+DisplayPaletteChanged(void *userdata, SDL_Palette * palette)
+{
+#if USE_DISPLAY_PALETTE
+    DirectFB_RenderData *data = (DirectFB_RenderData *) userdata;
+    IDirectFBPalette *surfpal;
+
+    int ret;
+    int i;
+    int ncolors;
+    DFBColor entries[256];
+
+    SDL_DFB_CHECKERR(data->surface->GetPalette(data->surface, &surfpal));
+
+    /* FIXME: number of colors */
+    ncolors = (palette->ncolors < 256 ? palette->ncolors : 256);
+
+    for (i = 0; i < ncolors; ++i) {
+        entries[i].r = palette->colors[i].r;
+        entries[i].g = palette->colors[i].g;
+        entries[i].b = palette->colors[i].b;
+        entries[i].a = palette->colors[i].unused;
+    }
+    SDL_DFB_CHECKERR(surfpal->SetEntries(surfpal, entries, ncolors, 0));
+    return 0;
+  error:
+#endif
+    return -1;
+}
+
+
 SDL_Renderer *
 DirectFB_CreateRenderer(SDL_Window * window, Uint32 flags)
 {
     SDL_DFB_WINDOWDATA(window);
     SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
-    SDL_DFB_DEVICEDATA(display->device);
     SDL_Renderer *renderer = NULL;
     DirectFB_RenderData *data = NULL;
     DFBResult ret;
-    DFBSurfaceDescription dsc;
     DFBSurfaceCapabilities scaps;
     char *p;
-    int i, n;
 
     SDL_DFB_CALLOC(renderer, 1, sizeof(*renderer));
     SDL_DFB_CALLOC(data, 1, sizeof(*data));
 
     renderer->DisplayModeChanged = DirectFB_DisplayModeChanged;
+    renderer->ActivateRenderer = DirectFB_ActivateRenderer;
     renderer->CreateTexture = DirectFB_CreateTexture;
     renderer->QueryTexturePixels = DirectFB_QueryTexturePixels;
     renderer->SetTexturePalette = DirectFB_SetTexturePalette;
@@ -179,14 +226,16 @@ DirectFB_CreateRenderer(SDL_Window * window, Uint32 flags)
         SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTDISCARD;
 
     data->surface = windata->surface;
-    data->flipflags = 0;
+    data->surface->AddRef(data->surface);
+
+    data->flipflags = DSFLIP_PIPELINE | DSFLIP_BLIT;
 
     if (flags & SDL_RENDERER_PRESENTVSYNC) {
         data->flipflags = DSFLIP_ONSYNC;
         renderer->info.flags |= SDL_RENDERER_PRESENTVSYNC;
     }
 
-    data->surface->GetCapabilities(data->surface, &scaps);
+    SDL_DFB_CHECKERR(data->surface->GetCapabilities(data->surface, &scaps));
     if (scaps & DSCAPS_DOUBLE)
         renderer->info.flags |= SDL_RENDERER_PRESENTFLIP2;
     else if (scaps & DSCAPS_TRIPLE)
@@ -194,10 +243,15 @@ DirectFB_CreateRenderer(SDL_Window * window, Uint32 flags)
     else
         renderer->info.flags |= SDL_RENDERER_SINGLEBUFFER;
 
-    data->isyuvdirect = 1;      /* default is on! */
-    p = getenv("SDL_DIRECTFB_YUV_DIRECT");
+    data->isyuvdirect = 0;      /* default is off! */
+    p = getenv(DFBENV_USE_YUV_DIRECT);
     if (p)
         data->isyuvdirect = atoi(p);
+
+    /* Set up a palette watch on the display palette */
+    if (display->palette) {
+        SDL_AddPaletteWatch(display->palette, DisplayPaletteChanged, data);
+    }
 
     return renderer;
 
@@ -267,23 +321,35 @@ SDLToDFBPixelFormat(Uint32 format)
 }
 
 static int
-DirectFB_DisplayModeChanged(SDL_Renderer * renderer)
+DirectFB_ActivateRenderer(SDL_Renderer * renderer)
 {
     SDL_DFB_RENDERERDATA(renderer);
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
     SDL_DFB_WINDOWDATA(window);
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
-    SDL_DFB_DEVICEDATA(display->device);
-    DFBResult ret;
-    DFBSurfaceDescription dsc;
-    int i, n;
 
-    /*
-     * Nothing to do here
-     */
+    if (renddata->size_changed) {
+        int cw, ch;
+        int ret;
+
+        SDL_DFB_CHECKERR(windata->surface->
+                         GetSize(windata->surface, &cw, &ch));
+        if (cw != window->w || ch != window->h)
+            SDL_DFB_CHECKERR(windata->window->
+                             ResizeSurface(windata->window, window->w,
+                                           window->h));
+    }
     return 0;
   error:
     return -1;
+}
+
+static int
+DirectFB_DisplayModeChanged(SDL_Renderer * renderer)
+{
+    SDL_DFB_RENDERERDATA(renderer);
+
+    renddata->size_changed = SDL_TRUE;
+    return 0;
 }
 
 static int
@@ -301,36 +367,42 @@ DirectFB_AcquireVidLayer(SDL_Renderer * renderer, SDL_Texture * texture)
     if (renddata->isyuvdirect && (dispdata->vidID >= 0)
         && (!dispdata->vidIDinuse)
         && SDL_ISPIXELFORMAT_FOURCC(data->format)) {
-        layconf.flags = DLCONF_WIDTH | DLCONF_HEIGHT | DLCONF_PIXELFORMAT;
+        layconf.flags =
+            DLCONF_WIDTH | DLCONF_HEIGHT | DLCONF_PIXELFORMAT |
+            DLCONF_SURFACE_CAPS;
         layconf.width = texture->w;
         layconf.height = texture->h;
         layconf.pixelformat = SDLToDFBPixelFormat(data->format);
+        layconf.surface_caps = DSCAPS_VIDEOONLY | DSCAPS_DOUBLE;
 
         SDL_DFB_CHECKERR(devdata->dfb->
                          GetDisplayLayer(devdata->dfb, dispdata->vidID,
-                                         &data->vidlayer));
-        SDL_DFB_CHECKERR(data->vidlayer->
-                         SetCooperativeLevel(data->vidlayer,
+                                         &dispdata->vidlayer));
+        SDL_DFB_CHECKERR(dispdata->vidlayer->
+                         SetCooperativeLevel(dispdata->vidlayer,
                                              DLSCL_EXCLUSIVE));
-        SDL_DFB_CHECKERR(data->vidlayer->
-                         SetConfiguration(data->vidlayer, &layconf));
-        SDL_DFB_CHECKERR(data->vidlayer->
-                         GetSurface(data->vidlayer, &data->surface));
-        //SDL_DFB_CHECKERR(data->vidlayer->GetDescription(data->vidlayer, laydsc));
-        dispdata->vidIDinuse = 1;
-        data->display = dispdata;
-        SDL_DFB_DEBUG("Created HW YUV surface\n");
 
+        if (devdata->use_yuv_underlays) {
+            ret = dispdata->vidlayer->SetLevel(dispdata->vidlayer, -1);
+            if (ret != DFB_OK)
+                SDL_DFB_DEBUG("Underlay Setlevel not supported\n");
+        }
+        SDL_DFB_CHECKERR(dispdata->vidlayer->
+                         SetConfiguration(dispdata->vidlayer, &layconf));
+        SDL_DFB_CHECKERR(dispdata->vidlayer->
+                         GetSurface(dispdata->vidlayer, &data->surface));
+        dispdata->vidIDinuse = 1;
+        data->display = display;
         return 0;
     }
     return 1;
   error:
-    if (data->vidlayer) {
+    if (dispdata->vidlayer) {
         SDL_DFB_RELEASE(data->surface);
-        SDL_DFB_CHECKERR(data->vidlayer->
-                         SetCooperativeLevel(data->vidlayer,
+        SDL_DFB_CHECKERR(dispdata->vidlayer->
+                         SetCooperativeLevel(dispdata->vidlayer,
                                              DLSCL_ADMINISTRATIVE));
-        SDL_DFB_RELEASE(data->vidlayer);
+        SDL_DFB_RELEASE(dispdata->vidlayer);
     }
     return 1;
 }
@@ -338,23 +410,18 @@ DirectFB_AcquireVidLayer(SDL_Renderer * renderer, SDL_Texture * texture)
 static int
 DirectFB_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-    SDL_DFB_RENDERERDATA(renderer);
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    SDL_DFB_WINDOWDATA(window);
     SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
     SDL_DFB_DEVICEDATA(display->device);
     DirectFB_TextureData *data;
     DFBResult ret;
     DFBSurfaceDescription dsc;
-    DFBDisplayLayerDescription laydsc;
-    DFBDisplayLayerConfig layconf;
 
     SDL_DFB_CALLOC(data, 1, sizeof(*data));
     texture->driverdata = data;
 
     data->format = texture->format;
     data->pitch = (texture->w * SDL_BYTESPERPIXEL(data->format));
-    data->vidlayer = NULL;
 
     if (DirectFB_AcquireVidLayer(renderer, texture) != 0) {
         /* fill surface description */
@@ -365,13 +432,15 @@ DirectFB_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         /* <1.2 Never use DSCAPS_VIDEOONLY here. It kills performance
          * No DSCAPS_SYSTEMONLY either - let dfb decide
          * 1.2: DSCAPS_SYSTEMONLY boosts performance by factor ~8
+         * Depends on other settings as well. Let dfb decide.
          */
         dsc.caps = DSCAPS_PREMULTIPLIED;
-
+#if 0
         if (texture->access == SDL_TEXTUREACCESS_STREAMING)
             dsc.caps |= DSCAPS_SYSTEMONLY;
         else
             dsc.caps |= DSCAPS_VIDEOONLY;
+#endif
 
         /* find the right pixelformat */
 
@@ -393,6 +462,15 @@ DirectFB_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         }
 
     }
+#if (DIRECTFB_MAJOR_VERSION == 1) && (DIRECTFB_MINOR_VERSION >= 2)
+    data->render_options = DSRO_NONE;
+#endif
+
+    if (texture->access == SDL_TEXTUREACCESS_STREAMING) {
+        data->pitch = texture->w * SDL_BYTESPERPIXEL(texture->format);
+        SDL_DFB_CALLOC(data->pixels, 1, texture->h * data->pitch);
+    }
+
     return 0;
 
   error:
@@ -406,13 +484,16 @@ static int
 DirectFB_QueryTexturePixels(SDL_Renderer * renderer, SDL_Texture * texture,
                             void **pixels, int *pitch)
 {
-    DirectFB_TextureData *data = (DirectFB_TextureData *) texture->driverdata;
+    DirectFB_TextureData *texturedata =
+        (DirectFB_TextureData *) texture->driverdata;
 
-    /*
-     * Always fail here so in compat mode SDL_HWSURFACE is set !
-     */
-
-    return -1;
+    if (texturedata->display) {
+        return -1;
+    } else {
+        *pixels = texturedata->pixels;
+        *pitch = texturedata->pitch;
+    }
+    return 0;
 }
 
 static int
@@ -420,8 +501,6 @@ DirectFB_SetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
                            const SDL_Color * colors, int firstcolor,
                            int ncolors)
 {
-    DirectFB_RenderData *renderdata =
-        (DirectFB_RenderData *) renderer->driverdata;
     DirectFB_TextureData *data = (DirectFB_TextureData *) texture->driverdata;
     DFBResult ret;
 
@@ -468,6 +547,7 @@ DirectFB_GetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
             colors[i].r = entries[i].r;
             colors[i].g = entries[i].g;
             colors[i].b = entries[i].b;
+            colors->unused = SDL_ALPHA_OPAQUE;
         }
         return 0;
     } else {
@@ -510,20 +590,29 @@ DirectFB_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
 static int
 DirectFB_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture)
 {
+#if (DIRECTFB_MAJOR_VERSION == 1) && (DIRECTFB_MINOR_VERSION >= 2)
+
+    DirectFB_TextureData *data = (DirectFB_TextureData *) texture->driverdata;
+
     switch (texture->scaleMode) {
     case SDL_TEXTURESCALEMODE_NONE:
     case SDL_TEXTURESCALEMODE_FAST:
-        return 0;
+        data->render_options = DSRO_NONE;
+        break;
     case SDL_TEXTURESCALEMODE_SLOW:
+        data->render_options = DSRO_SMOOTH_UPSCALE | DSRO_SMOOTH_DOWNSCALE;
+        break;
     case SDL_TEXTURESCALEMODE_BEST:
-        SDL_Unsupported();
-        texture->scaleMode = SDL_TEXTURESCALEMODE_FAST;
-        return -1;
+        data->render_options =
+            DSRO_SMOOTH_UPSCALE | DSRO_SMOOTH_DOWNSCALE | DSRO_ANTIALIAS;
+        break;
     default:
         SDL_Unsupported();
+        data->render_options = DSRO_NONE;
         texture->scaleMode = SDL_TEXTURESCALEMODE_NONE;
         return -1;
     }
+#endif
     return 0;
 }
 
@@ -532,8 +621,6 @@ DirectFB_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                        const SDL_Rect * rect, const void *pixels, int pitch)
 {
     DirectFB_TextureData *data = (DirectFB_TextureData *) texture->driverdata;
-    DirectFB_RenderData *renderdata =
-        (DirectFB_RenderData *) renderer->driverdata;
     DFBResult ret;
     Uint8 *dpixels;
     int dpitch;
@@ -566,37 +653,32 @@ DirectFB_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                      const SDL_Rect * rect, int markDirty, void **pixels,
                      int *pitch)
 {
-    DirectFB_TextureData *data = (DirectFB_TextureData *) texture->driverdata;
+    DirectFB_TextureData *texturedata =
+        (DirectFB_TextureData *) texture->driverdata;
     DFBResult ret;
-    void *fdata;
-    int fpitch;
 
-    SDL_DFB_CHECKERR(data->surface->Lock(data->surface,
-                                         DSLF_WRITE | DSLF_READ, &fdata,
-                                         &fpitch));
-    data->pixels = fdata;
-    data->pitch = fpitch;
-
-    switch (texture->format) {
-    case SDL_PIXELFORMAT_YV12:
-    case SDL_PIXELFORMAT_IYUV:
-        if (rect
-            && (rect->x != 0 || rect->y != 0 || rect->w != texture->w
-                || rect->h != texture->h)) {
-            SDL_SetError
-                ("YV12 and IYUV textures only support full surface locks");
-            return -1;
-        }
-        break;
-    default:
-        /* Only one plane, no worries */
-        break;
+    if (markDirty) {
+        SDL_AddDirtyRect(&texturedata->dirty, rect);
     }
 
-    *pitch = data->pitch;
-    *pixels = data->pixels;
+    if (texturedata->display) {
+        void *fdata;
+        int fpitch;
 
+        SDL_DFB_CHECKERR(texturedata->surface->Lock(texturedata->surface,
+                                                    DSLF_WRITE | DSLF_READ,
+                                                    &fdata, &fpitch));
+        *pitch = fpitch;
+        *pixels = fdata;
+    } else {
+        *pixels =
+            (void *) ((Uint8 *) texturedata->pixels +
+                      rect->y * texturedata->pitch +
+                      rect->x * SDL_BYTESPERPIXEL(texture->format));
+        *pitch = texturedata->pitch;
+    }
     return 0;
+
   error:
     return -1;
 }
@@ -604,17 +686,25 @@ DirectFB_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static void
 DirectFB_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-    DirectFB_TextureData *data = (DirectFB_TextureData *) texture->driverdata;
+    DirectFB_TextureData *texturedata =
+        (DirectFB_TextureData *) texture->driverdata;
 
-    data->surface->Unlock(data->surface);
-    data->pixels = NULL;
+    if (texturedata->display) {
+        texturedata->surface->Unlock(texturedata->surface);
+        texturedata->pixels = NULL;
+    }
 }
 
 static void
 DirectFB_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                       int numrects, const SDL_Rect * rects)
 {
-    //TODO: DirtyTexture
+    DirectFB_TextureData *data = (DirectFB_TextureData *) texture->driverdata;
+    int i;
+
+    for (i = 0; i < numrects; ++i) {
+        SDL_AddDirtyRect(&data->dirty, &rects[i]);
+    }
 }
 
 static int
@@ -643,36 +733,51 @@ DirectFB_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         (DirectFB_TextureData *) texture->driverdata;
     DFBResult ret;
 
-    if (texturedata->vidlayer) {
+    if (texturedata->display) {
         int px, py;
         SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-        SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
-        SDL_DFB_DEVICEDATA(display->device);
-        DFB_DisplayData *dispdata = (DFB_DisplayData *) display->driverdata;
         SDL_DFB_WINDOWDATA(window);
+        SDL_VideoDisplay *display = texturedata->display;
+        DFB_DisplayData *dispdata = (DFB_DisplayData *) display->driverdata;
 
-        SDL_DFB_CHECKERR(texturedata->vidlayer->
-                         SetSourceRectangle(texturedata->vidlayer, srcrect->x,
+        SDL_DFB_CHECKERR(dispdata->vidlayer->
+                         SetSourceRectangle(dispdata->vidlayer, srcrect->x,
                                             srcrect->y, srcrect->w,
                                             srcrect->h));
         windata->window->GetPosition(windata->window, &px, &py);
-        SDL_DFB_CHECKERR(texturedata->vidlayer->
-                         SetScreenRectangle(texturedata->vidlayer,
+        SDL_DFB_CHECKERR(dispdata->vidlayer->
+                         SetScreenRectangle(dispdata->vidlayer,
                                             px + dstrect->x, py + dstrect->y,
                                             dstrect->w, dstrect->h));
     } else {
         DFBRectangle sr, dr;
         DFBSurfaceBlittingFlags flags = 0;
 
-        sr.x = srcrect->x;
-        sr.y = srcrect->y;
-        sr.w = srcrect->w;
-        sr.h = srcrect->h;
+        if (texturedata->dirty.list) {
+            SDL_DirtyRect *dirty;
+            void *pixels;
+            int bpp = SDL_BYTESPERPIXEL(texture->format);
+            int pitch = texturedata->pitch;
 
-        dr.x = dstrect->x;
-        dr.y = dstrect->y;
-        dr.w = dstrect->w;
-        dr.h = dstrect->h;
+            for (dirty = texturedata->dirty.list; dirty; dirty = dirty->next) {
+                SDL_Rect *rect = &dirty->rect;
+                pixels =
+                    (void *) ((Uint8 *) texturedata->pixels +
+                              rect->y * pitch + rect->x * bpp);
+                DirectFB_UpdateTexture(renderer, texture, rect,
+                                       texturedata->pixels,
+                                       texturedata->pitch);
+            }
+            SDL_ClearDirtyRects(&texturedata->dirty);
+        }
+#if (DIRECTFB_MAJOR_VERSION == 1) && (DIRECTFB_MINOR_VERSION >= 2)
+        SDL_DFB_CHECKERR(data->surface->SetRenderOptions(data->surface,
+                                                         texturedata->
+                                                         render_options));
+#endif
+
+        SDLtoDFBRect(srcrect, &sr);
+        SDLtoDFBRect(dstrect, &dr);
 
         if (texture->
             modMode & (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA))
@@ -695,6 +800,7 @@ DirectFB_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
         switch (texture->blendMode) {
         case SDL_TEXTUREBLENDMODE_NONE:
+                                       /**< No blending */
             flags |= DSBLIT_NOFX;
             data->surface->SetSrcBlendFunction(data->surface, DSBF_ONE);
             data->surface->SetDstBlendFunction(data->surface, DSBF_ZERO);
@@ -725,10 +831,11 @@ DirectFB_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
         SDL_DFB_CHECKERR(data->surface->
                          SetBlittingFlags(data->surface, flags));
+
         if (srcrect->w == dstrect->w && srcrect->h == dstrect->h) {
             SDL_DFB_CHECKERR(data->surface->
-                             Blit(data->surface, texturedata->surface, &sr,
-                                  dr.x, dr.y));
+                             Blit(data->surface, texturedata->surface,
+                                  &sr, dr.x, dr.y));
         } else {
             SDL_DFB_CHECKERR(data->surface->
                              StretchBlit(data->surface, texturedata->surface,
@@ -746,7 +853,6 @@ DirectFB_RenderPresent(SDL_Renderer * renderer)
     DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
 
-    SDL_DirtyRect *dirty;
     DFBRectangle sr;
     DFBResult ret;
 
@@ -757,7 +863,7 @@ DirectFB_RenderPresent(SDL_Renderer * renderer)
 
     /* Send the data to the display */
     SDL_DFB_CHECKERR(data->surface->
-                     Flip(data->surface, NULL, data->flipflags));
+                     Flip(data->surface, NULL, 0 * data->flipflags));
 
     return;
   error:
@@ -775,11 +881,15 @@ DirectFB_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     SDL_DFB_RELEASE(data->palette);
     SDL_DFB_RELEASE(data->surface);
     if (data->display) {
-        data->display->vidIDinuse = 0;
-        data->vidlayer->SetCooperativeLevel(data->vidlayer,
-                                            DLSCL_ADMINISTRATIVE);
+        DFB_DisplayData *dispdata =
+            (DFB_DisplayData *) data->display->driverdata;
+        dispdata->vidIDinuse = 0;
+        dispdata->vidlayer->SetCooperativeLevel(dispdata->vidlayer,
+                                                DLSCL_ADMINISTRATIVE);
+        SDL_DFB_RELEASE(dispdata->vidlayer);
     }
-    SDL_DFB_RELEASE(data->vidlayer);
+    SDL_FreeDirtyRects(&data->dirty);
+    SDL_DFB_FREE(data->pixels);
     SDL_free(data);
     texture->driverdata = NULL;
 }
@@ -788,10 +898,9 @@ static void
 DirectFB_DestroyRenderer(SDL_Renderer * renderer)
 {
     DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
-    int i;
 
     if (data) {
-        data->surface = NULL;
+        SDL_DFB_RELEASE(data->surface);
         SDL_free(data);
     }
     SDL_free(renderer);
