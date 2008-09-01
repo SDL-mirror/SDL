@@ -27,6 +27,7 @@
 
 #if SDL_VIDEO_OPENGL_CGL
 #include <OpenGL/CGLTypes.h>
+#include <OpenGL/OpenGL.h>
 
 #include "SDL_loadso.h"
 #include "SDL_opengl.h"

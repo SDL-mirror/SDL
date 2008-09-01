@@ -89,6 +89,7 @@ mix_buffer(SDL_AudioDevice * audio, UInt8 * buffer)
     DecrementAtomic((SInt32 *) & need_to_mix);
 }
 
+#ifndef __MACOSX__
 static void
 SNDMGR_LockDevice(_THIS)
 {
@@ -114,6 +115,7 @@ SNDMGR_UnlockDevice(_THIS)
         mix_buffer(this, buffer[fill_me]);
     }
 }
+#endif // __MACOSX__
 
 static void
 callBackProc(SndChannel * chan, SndCommand * cmd_passed)

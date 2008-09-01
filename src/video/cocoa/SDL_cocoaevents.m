@@ -22,6 +22,7 @@
 #include "SDL_config.h"
 
 #include "SDL_cocoavideo.h"
+#include "../../events/SDL_events_c.h"
 
 /* setAppleMenu disappeared from the headers in 10.4 */
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_4

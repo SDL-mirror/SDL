@@ -1622,7 +1622,6 @@ int
 SDL_BuildWindowedSinc(SDL_AudioCVT * cvt, SDL_AudioFormat format,
                       unsigned int m)
 {
-    float fScale;               /* scale factor for fixed point */
     float *fSinc;               /* floating point sinc buffer, to be converted to fixed point */
     float fc;                   /* cutoff frequency */
     float two_pi_fc, two_pi_over_m, four_pi_over_m, m_over_two;
@@ -1708,6 +1707,8 @@ SDL_BuildWindowedSinc(SDL_AudioCVT * cvt, SDL_AudioFormat format,
     /* Clean up */
 #undef convert_fixed
     SDL_stack_free(fSinc);
+
+    return 0;
 }
 
 /* This is used to reduce the resampling ratio */

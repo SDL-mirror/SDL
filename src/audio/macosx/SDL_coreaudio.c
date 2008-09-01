@@ -418,7 +418,6 @@ prepare_audiounit(_THIS, const char *devname, int iscapture,
     AURenderCallbackStruct callback;
     ComponentDescription desc;
     Component comp = NULL;
-    int use_system_device = 0;
     UInt32 enableIO = 0;
     const AudioUnitElement output_bus = 0;
     const AudioUnitElement input_bus = 1;

@@ -201,7 +201,7 @@ X11_DispatchEvent(_THIS)
 #ifdef X_HAVE_UTF8_STRING
             if (data->ic) {
                 Xutf8LookupString(data->ic, &xevent.xkey, text, sizeof(text),
-                                  &keysym, status);
+                                  &keysym, &status);
             }
 #else
             XLookupString(&xevent.xkey, text, sizeof(text), &keysym, NULL);
