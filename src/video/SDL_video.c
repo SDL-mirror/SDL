@@ -27,10 +27,18 @@
 #include "SDL_sysvideo.h"
 #include "SDL_blit.h"
 #include "SDL_pixels_c.h"
+
+
 #include "SDL_renderer_gl.h"
+#include "SDL_renderer_gles.h"
+
 #include "SDL_renderer_sw.h"
 #include "../events/SDL_sysevents.h"
 #include "../events/SDL_events_c.h"
+
+#if SDL_VIDEO_OPENGL_ES
+#include "SDL_opengles.h"
+#endif /* SDL_VIDEO_OPENGL_ES */
 
 #if SDL_VIDEO_OPENGL
 #include "SDL_opengl.h"
@@ -103,8 +111,8 @@ static VideoBootStrap *bootstrap[] = {
 #if SDL_VIDEO_DRIVER_OS2FS
     &OS2FSLib_bootstrap,
 #endif
-#if SDL_VIDEO_DRIVER_NDS
-    &NDS_bootstrap,
+#if SDL_VIDEO_DRIVER_UIKIT
+	&UIKIT_bootstrap,
 #endif
 #if SDL_VIDEO_DRIVER_DUMMY
     &DUMMY_bootstrap,
@@ -246,6 +254,7 @@ SDL_VideoInit(const char *driver_name, Uint32 flags)
     _this->gl_config.stereo = 0;
     _this->gl_config.multisamplebuffers = 0;
     _this->gl_config.multisamplesamples = 0;
+	_this->gl_config.retained_backing = 1; /* most systems have retained backing on the color buffers */
     _this->gl_config.accelerated = -1;  /* not known, don't set */
 
     /* Initialize the video subsystem */
@@ -265,6 +274,10 @@ SDL_VideoInit(const char *driver_name, Uint32 flags)
     for (i = 0; i < _this->num_displays; ++i) {
 #if SDL_VIDEO_RENDER_OGL
         SDL_AddRenderDriver(i, &GL_RenderDriver);
+#endif
+		
+#if SDL_VIDEO_RENDER_OGL_ES
+		SDL_AddRenderDriver(i, &GL_ES_RenderDriver);
 #endif
         if (_this->displays[i].num_render_drivers > 0) {
             SDL_AddRenderDriver(i, &SW_RenderDriver);
@@ -1413,7 +1426,9 @@ SDL_CreateRenderer(SDL_WindowID windowID, int index, Uint32 flags)
 
     if (index < 0) {
         const char *override = SDL_getenv("SDL_VIDEO_RENDERER");
-        int n = SDL_GetNumRenderDrivers();
+        		
+		int n = SDL_GetNumRenderDrivers();
+				
         for (index = 0; index < n; ++index) {
             SDL_RenderDriver *driver =
                 &SDL_CurrentDisplay.render_drivers[index];
@@ -1446,6 +1461,7 @@ SDL_CreateRenderer(SDL_WindowID windowID, int index, Uint32 flags)
     /* Create a new renderer instance */
     window->renderer = SDL_CurrentDisplay.render_drivers[index]
         .CreateRenderer(window, flags);
+	
     SDL_SelectRenderer(window->id);
 
     return 0;
@@ -1549,7 +1565,7 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
     }
     fmt = surface->format;
 
-    if (format) {
+    if (format) { /* if we were passed in a format */
         if (!SDL_PixelFormatEnumToMasks
             (format, &bpp, &Rmask, &Gmask, &Bmask, &Amask)) {
             SDL_SetError("Unknown pixel format");
@@ -1559,7 +1575,7 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
         if (surface->format->Amask
             || !(surface->map->info.flags &
                  (SDL_COPY_COLORKEY | SDL_COPY_MASK | SDL_COPY_BLEND))) {
-            bpp = fmt->BitsPerPixel;
+			bpp = fmt->BitsPerPixel;
             Rmask = fmt->Rmask;
             Gmask = fmt->Gmask;
             Bmask = fmt->Bmask;
@@ -1579,8 +1595,7 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
         }
     }
 
-    textureID =
-        SDL_CreateTexture(format, SDL_TEXTUREACCESS_STATIC, surface->w,
+    textureID = SDL_CreateTexture(format, SDL_TEXTUREACCESS_STATIC, surface->w,
                           surface->h);
     if (!textureID) {
         return 0;
@@ -1615,9 +1630,8 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
                     SDL_DitherColors(dst_fmt->palette->colors,
                                      SDL_BITSPERPIXEL(format));
                 }
-            }
-
-            dst = SDL_ConvertSurface(surface, dst_fmt, 0);
+            }			
+			dst = SDL_ConvertSurface(surface, dst_fmt, 0);
             if (dst) {
                 SDL_UpdateTexture(textureID, NULL, dst->pixels, dst->pitch);
                 SDL_FreeSurface(dst);
@@ -1631,7 +1645,7 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
             SDL_DestroyTexture(textureID);
             return 0;
         }
-    }
+	}
 
     if (SDL_ISPIXELFORMAT_INDEXED(format) && fmt->palette) {
         SDL_SetTexturePalette(textureID, fmt->palette->colors, 0,
@@ -1999,6 +2013,7 @@ SDL_DirtyTexture(SDL_TextureID textureID, int numrects,
 int
 SDL_RenderFill(Uint8 r, Uint8 g, Uint8 b, Uint8 a, const SDL_Rect * rect)
 {
+		
     SDL_Renderer *renderer;
     SDL_Window *window;
     SDL_Rect real_rect;
@@ -2284,8 +2299,9 @@ SDL_GL_GetProcAddress(const char *proc)
 SDL_bool
 SDL_GL_ExtensionSupported(const char *extension)
 {
-#if SDL_VIDEO_OPENGL
-    const GLubyte *(APIENTRY * glGetStringFunc) (GLenum);
+#if SDL_VIDEO_OPENGL || SDL_VIDEO_OPENGL_ES
+	
+	const GLubyte *(APIENTRY * glGetStringFunc) (GLenum);
     const char *extensions;
     const char *start;
     const char *where, *terminator;
@@ -2340,7 +2356,7 @@ SDL_GL_ExtensionSupported(const char *extension)
 int
 SDL_GL_SetAttribute(SDL_GLattr attr, int value)
 {
-#if SDL_VIDEO_OPENGL
+#if SDL_VIDEO_OPENGL || SDL_VIDEO_OPENGL_ES
     int retval;
 
     if (!_this) {
@@ -2398,6 +2414,9 @@ SDL_GL_SetAttribute(SDL_GLattr attr, int value)
     case SDL_GL_ACCELERATED_VISUAL:
         _this->gl_config.accelerated = value;
         break;
+	case SDL_GL_RETAINED_BACKING:
+		_this->gl_config.retained_backing = value;
+		break;
     default:
         SDL_SetError("Unknown OpenGL attribute");
         retval = -1;
@@ -2413,7 +2432,7 @@ SDL_GL_SetAttribute(SDL_GLattr attr, int value)
 int
 SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
 {
-#if SDL_VIDEO_OPENGL
+#if SDL_VIDEO_OPENGL || SDL_VIDEO_OPENGL_ES
     void (APIENTRY * glGetIntegervFunc) (GLenum pname, GLint * params);
     GLenum attrib = 0;
 
@@ -2422,6 +2441,9 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
         return -1;
     }
     switch (attr) {
+	case SDL_GL_RETAINED_BACKING:
+		*value = _this->gl_config.retained_backing;
+		return 0;
     case SDL_GL_RED_SIZE:
         attrib = GL_RED_BITS;
         break;
@@ -2435,14 +2457,22 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
         attrib = GL_ALPHA_BITS;
         break;
     case SDL_GL_DOUBLEBUFFER:
+	#ifndef SDL_VIDEO_OPENGL_ES
         attrib = GL_DOUBLEBUFFER;
         break;
+	#else
+		/* I believe double buffering is the only option in OpenGL ES
+		   -- in any case, GL_DOUBLEBUFFER doesn't exist */
+		*value = 1;
+		return 0;
+	#endif
     case SDL_GL_DEPTH_SIZE:
         attrib = GL_DEPTH_BITS;
         break;
     case SDL_GL_STENCIL_SIZE:
         attrib = GL_STENCIL_BITS;
         break;
+#ifndef SDL_VIDEO_OPENGL_ES
     case SDL_GL_ACCUM_RED_SIZE:
         attrib = GL_ACCUM_RED_BITS;
         break;
@@ -2455,15 +2485,33 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
     case SDL_GL_ACCUM_ALPHA_SIZE:
         attrib = GL_ACCUM_ALPHA_BITS;
         break;
-    case SDL_GL_STEREO:
-        attrib = GL_STEREO;
-        break;
-    case SDL_GL_MULTISAMPLEBUFFERS:
-        attrib = GL_SAMPLE_BUFFERS_ARB;
-        break;
-    case SDL_GL_MULTISAMPLESAMPLES:
-        attrib = GL_SAMPLES_ARB;
-        break;
+	case SDL_GL_STEREO:
+		attrib = GL_STEREO;
+		break;
+#else
+	    case SDL_GL_ACCUM_RED_SIZE:
+		case SDL_GL_ACCUM_GREEN_SIZE:
+		case SDL_GL_ACCUM_BLUE_SIZE:
+		case SDL_GL_ACCUM_ALPHA_SIZE:
+		case SDL_GL_STEREO:
+			/* none of these are supported in OpenGL ES */
+			*value = 0;
+			return 0;
+#endif
+		case SDL_GL_MULTISAMPLEBUFFERS:
+		#ifndef SDL_VIDEO_OPENGL_ES
+			attrib = GL_SAMPLE_BUFFERS_ARB;
+		#else
+			attrib = GL_SAMPLE_BUFFERS;
+		#endif
+			break;
+		case SDL_GL_MULTISAMPLESAMPLES:
+		#ifndef SDL_VIDEO_OPENGL_ES
+			attrib = GL_SAMPLES_ARB;
+		#else
+			attrib = GL_SAMPLES;
+		#endif
+			break;
     case SDL_GL_BUFFER_SIZE:
         {
             GLint bits = 0;
@@ -2510,7 +2558,6 @@ SDL_GL_CreateContext(SDL_WindowID windowID)
         return NULL;
     }
     if (!(window->flags & SDL_WINDOW_OPENGL)) {
-        SDL_SetError("The specified window isn't an OpenGL window");
         return NULL;
     }
     return _this->GL_CreateContext(_this, window);
@@ -2569,6 +2616,7 @@ SDL_GL_SwapWindow(SDL_WindowID windowID)
     SDL_Window *window = SDL_GetWindowFromID(windowID);
 
     if (!window) {
+		SDL_SetError("The specified window doesn't exist");
         return;
     }
     if (!(window->flags & SDL_WINDOW_OPENGL)) {
