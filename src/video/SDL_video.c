@@ -28,9 +28,14 @@
 #include "SDL_blit.h"
 #include "SDL_pixels_c.h"
 #include "SDL_renderer_gl.h"
+#include "SDL_renderer_gles.h"
 #include "SDL_renderer_sw.h"
 #include "../events/SDL_sysevents.h"
 #include "../events/SDL_events_c.h"
+
+#if SDL_VIDEO_OPENGL_ES
+#include "SDL_opengles.h"
+#endif				/* SDL_VIDEO_OPENGL_ES */
 
 #if SDL_VIDEO_OPENGL
 #include "SDL_opengl.h"
@@ -105,6 +110,9 @@ static VideoBootStrap *bootstrap[] = {
 #endif
 #if SDL_VIDEO_DRIVER_NDS
 	&NDS_bootstrap,
+#endif
+#if SDL_VIDEO_DRIVER_UIKIT
+	&UIKIT_bootstrap,
 #endif
 #if SDL_VIDEO_DRIVER_DUMMY
 	&DUMMY_bootstrap,
@@ -244,6 +252,7 @@ SDL_VideoInit(const char *driver_name, Uint32 flags)
 	_this->gl_config.stereo = 0;
 	_this->gl_config.multisamplebuffers = 0;
 	_this->gl_config.multisamplesamples = 0;
+	_this->gl_config.retained_backing = 1;
 	_this->gl_config.accelerated = -1;	/* not known, don't set */
 
 	/* Initialize the video subsystem */
@@ -261,6 +270,10 @@ SDL_VideoInit(const char *driver_name, Uint32 flags)
 	for (i = 0; i < _this->num_displays; ++i) {
 #if SDL_VIDEO_RENDER_OGL
 		SDL_AddRenderDriver(i, &GL_RenderDriver);
+#endif
+
+#if SDL_VIDEO_RENDER_OGL_ES
+		SDL_AddRenderDriver(i, &GL_ES_RenderDriver);
 #endif
 		if (_this->displays[i].num_render_drivers > 0) {
 			SDL_AddRenderDriver(i, &SW_RenderDriver);
@@ -2202,7 +2215,7 @@ SDL_GL_GetProcAddress(const char *proc)
 SDL_bool
 SDL_GL_ExtensionSupported(const char *extension)
 {
-#if SDL_VIDEO_OPENGL
+#if SDL_VIDEO_OPENGL || SDL_VIDEO_OPENGL_ES
 	const GLubyte  *(APIENTRY * glGetStringFunc) (GLenum);
 	const char     *extensions;
 	const char     *start;
@@ -2256,7 +2269,7 @@ SDL_GL_ExtensionSupported(const char *extension)
 int
 SDL_GL_SetAttribute(SDL_GLattr attr, int value)
 {
-#if SDL_VIDEO_OPENGL
+#if SDL_VIDEO_OPENGL || SDL_VIDEO_OPENGL_ES
 	int             retval;
 
 	if (!_this) {
@@ -2313,6 +2326,9 @@ SDL_GL_SetAttribute(SDL_GLattr attr, int value)
 	case SDL_GL_ACCELERATED_VISUAL:
 		_this->gl_config.accelerated = value;
 		break;
+	case SDL_GL_RETAINED_BACKING:
+		_this->gl_config.retained_backing = value;
+		break;
 	default:
 		SDL_SetError("Unknown OpenGL attribute");
 		retval = -1;
@@ -2328,7 +2344,7 @@ SDL_GL_SetAttribute(SDL_GLattr attr, int value)
 int
 SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
 {
-#if SDL_VIDEO_OPENGL
+#if SDL_VIDEO_OPENGL || SDL_VIDEO_OPENGL_ES
 	void            (APIENTRY * glGetIntegervFunc) (GLenum pname, GLint * params);
 	GLenum          attrib = 0;
 
@@ -2337,6 +2353,9 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
 		return -1;
 	}
 	switch (attr) {
+	case SDL_GL_RETAINED_BACKING:
+		*value = _this->gl_config.retained_backing;
+		return 0;
 	case SDL_GL_RED_SIZE:
 		attrib = GL_RED_BITS;
 		break;
@@ -2350,14 +2369,24 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
 		attrib = GL_ALPHA_BITS;
 		break;
 	case SDL_GL_DOUBLEBUFFER:
+#ifndef SDL_VIDEO_OPENGL_ES
 		attrib = GL_DOUBLEBUFFER;
 		break;
+#else
+		/*
+		 * I believe double buffering is the only option in OpenGL ES
+		 * -- in any case, GL_DOUBLEBUFFER doesn't exist
+		 */
+		*value = 1;
+		return 0;
+#endif
 	case SDL_GL_DEPTH_SIZE:
 		attrib = GL_DEPTH_BITS;
 		break;
 	case SDL_GL_STENCIL_SIZE:
 		attrib = GL_STENCIL_BITS;
 		break;
+#ifndef SDL_VIDEO_OPENGL_ES
 	case SDL_GL_ACCUM_RED_SIZE:
 		attrib = GL_ACCUM_RED_BITS;
 		break;
@@ -2373,11 +2402,29 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
 	case SDL_GL_STEREO:
 		attrib = GL_STEREO;
 		break;
+#else
+	case SDL_GL_ACCUM_RED_SIZE:
+	case SDL_GL_ACCUM_GREEN_SIZE:
+	case SDL_GL_ACCUM_BLUE_SIZE:
+	case SDL_GL_ACCUM_ALPHA_SIZE:
+	case SDL_GL_STEREO:
+		/* none of these are supported in OpenGL ES */
+		*value = 0;
+		return 0;
+#endif
 	case SDL_GL_MULTISAMPLEBUFFERS:
+#ifndef SDL_VIDEO_OPENGL_ES
 		attrib = GL_SAMPLE_BUFFERS_ARB;
+#else
+		attrib = GL_SAMPLE_BUFFERS;
+#endif
 		break;
 	case SDL_GL_MULTISAMPLESAMPLES:
+#ifndef SDL_VIDEO_OPENGL_ES
 		attrib = GL_SAMPLES_ARB;
+#else
+		attrib = GL_SAMPLES;
+#endif
 		break;
 	case SDL_GL_BUFFER_SIZE:
 		{
