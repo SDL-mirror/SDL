@@ -19,7 +19,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #include <stdio.h>              /* printf */
 #include <string.h>             /* strstr */
-
+#include <ctype.h>              /* isdigit */
 
 
 static SDL_Haptic *haptic;
@@ -42,19 +42,28 @@ main(int argc, char **argv)
 {
     int i;
     char *name;
+    int index;
     SDL_HapticEffect efx[5];
     int id[5];
     int nefx;
     unsigned int supported;
 
     name = NULL;
+    index = -1;
     if (argc > 1) {
         name = argv[1];
         if ((strcmp(name, "--help") == 0) || (strcmp(name, "-h") == 0)) {
-            printf("USAGE: %s [device name]\n"
-                   "If device name is specified, it will try to find a device whose name\n"
-                   "contains device name for testing.\n", argv[0]);
+            printf("USAGE: %s [device]\n"
+                   "If device is a two-digit number it'll use it as an index, otherwise\n"
+                   "it'll use it as if it were part of the device's name.\n",
+                   argv[0]);
             return 0;
+        }
+
+        i = strlen(name);
+        if ((i < 3) && isdigit(name[0]) && ((i == 1) || isdigit(name[1]))) {
+            index = atoi(name);
+            name = NULL;
         }
     }
 
@@ -63,9 +72,9 @@ main(int argc, char **argv)
              SDL_INIT_HAPTIC);
     printf("%d Haptic devices detected.\n", SDL_NumHaptics());
     if (SDL_NumHaptics() > 0) {
-        /* We'll just use the first force feedback device found */
+        /* We'll just use index or the first force feedback device found */
         if (name == NULL) {
-            i = 0;
+            i = (index != -1) ? index : 0;
         }
         /* Try to find matching device */
         else {
@@ -83,7 +92,8 @@ main(int argc, char **argv)
 
         haptic = SDL_HapticOpen(i);
         if (haptic == NULL) {
-            perror("Unable to create the haptic device");
+            printf("Unable to create the haptic device: %s\n",
+                   SDL_GetError());
             return 1;
         }
         printf("Device: %s\n", SDL_HapticName(i));
