@@ -43,36 +43,35 @@ typedef struct
 } NDS_HapticData;
 
 
-
-void NDS_EZF_OpenNorWrite()
+void
+NDS_EZF_OpenNorWrite() 
 {
-    GBA_BUS[0x0FF0000] = 0xD200;
-    GBA_BUS[0x0000000] = 0x1500;
-    GBA_BUS[0x0010000] = 0xD200;
-    GBA_BUS[0x0020000] = 0x1500;
-    GBA_BUS[0x0E20000] = 0x1500;
-    GBA_BUS[0x0FE0000] = 0x1500;
-}
+    GBA_BUS[0x0FF0000] = 0xD200;
+    GBA_BUS[0x0000000] = 0x1500;
+    GBA_BUS[0x0010000] = 0xD200;
+    GBA_BUS[0x0020000] = 0x1500;
+    GBA_BUS[0x0E20000] = 0x1500;
+    GBA_BUS[0x0FE0000] = 0x1500;
+} void
 
+NDS_EZF_CloseNorWrite() 
+{
+    GBA_BUS[0x0FF0000] = 0xD200;
+    GBA_BUS[0x0000000] = 0x1500;
+    GBA_BUS[0x0010000] = 0xD200;
+    GBA_BUS[0x0020000] = 0x1500;
+    GBA_BUS[0x0E20000] = 0xD200;
+    GBA_BUS[0x0FE0000] = 0x1500;
+}
 
-void NDS_EZF_CloseNorWrite()
+void
+NDS_EZF_ChipReset()
 {
-    GBA_BUS[0x0FF0000] = 0xD200;
-    GBA_BUS[0x0000000] = 0x1500;
-    GBA_BUS[0x0010000] = 0xD200;
-    GBA_BUS[0x0020000] = 0x1500;
-    GBA_BUS[0x0E20000] = 0xD200;
-    GBA_BUS[0x0FE0000] = 0x1500;
-}
-
-void NDS_EZF_ChipReset()
+    GBA_BUS[0x0000] = 0x00F0;
+    GBA_BUS[0x1000] = 0x00F0;
+} uint32 NDS_EZF_IsPresent() 
 {
-    GBA_BUS[0x0000] = 0x00F0 ;
-    GBA_BUS[0x1000] = 0x00F0 ;
-}
-uint32 NDS_EZF_IsPresent()
-{
-    vuint16 id1,id2;
+    vuint16 id1, id2;
 
     NDS_EZF_OpenNorWrite();
 
@@ -82,41 +81,35 @@ uint32 NDS_EZF_IsPresent()
     GBA_BUS[0x1555] = 0x00AA;
     GBA_BUS[0x12AA] = 0x0055;
     GBA_BUS[0x1555] = 0x0090;
-
-    id1 = GBA_BUS[0x0001];
-    id2 = GBA_BUS[0x1001];
-
-    if((id1!=0x227E)|| (id2!=0x227E)) {
+    id1 = GBA_BUS[0x0001];
+    id2 = GBA_BUS[0x1001];
+    if ((id1 != 0x227E) || (id2 != 0x227E)) {
         NDS_EZF_CloseNorWrite();
-        return 0;
+        return 0;
     }
-
-    id1 = GBA_BUS[0x000E];
-    id2 = GBA_BUS[0x100E];
+    id1 = GBA_BUS[0x000E];
+    id2 = GBA_BUS[0x100E];
 
     NDS_EZF_CloseNorWrite();
-
-    if(id1==0x2218 && id2==0x2218) {
-        return 1;
+    if (id1 == 0x2218 && id2 == 0x2218) {
+        return 1;
     }
-
-    return 0;
-}
-
-void NDS_EZF_SetShake(u8 pos)
+    return 0;
+}
+void
+NDS_EZF_SetShake(u8 pos) 
 {
-    u16 data = ((pos%3)|0x00F0);
+    u16 data = ((pos % 3) | 0x00F0);
+    GBA_BUS[0x0FF0000] = 0xD200;
+    GBA_BUS[0x0000000] = 0x1500;
+    GBA_BUS[0x0010000] = 0xD200;
+    GBA_BUS[0x0020000] = 0x1500;
+    GBA_BUS[0x0F10000] = data;
+    GBA_BUS[0x0FE0000] = 0x1500;
 
-    GBA_BUS[0x0FF0000] = 0xD200;
-    GBA_BUS[0x0000000] = 0x1500;
-    GBA_BUS[0x0010000] = 0xD200;
-    GBA_BUS[0x0020000] = 0x1500;
-    GBA_BUS[0x0F10000] = data;
-    GBA_BUS[0x0FE0000] = 0x1500;
-
-    GBA_BUS[0] = 0x0000; /* write any value for vibration. */
+    GBA_BUS[0] = 0x0000;        /* write any value for vibration. */
     GBA_BUS[0] = 0x0002;
-}
+}
 
 static int
 SDL_SYS_LogicError(void)
@@ -130,11 +123,11 @@ int
 SDL_SYS_HapticInit(void)
 {
     int ret = 0;
-    if(isRumbleInserted()) {
+    if (isRumbleInserted()) {
         /* official rumble pak is present. */
         ret = 1;
         printf("debug: haptic present: nintendo\n");
-    } else if(NDS_EZF_IsPresent()) {
+    } else if (NDS_EZF_IsPresent()) {
         /* ezflash 3-in-1 pak is present. */
         ret = 1;
         printf("debug: haptic present: ezf3in1\n");
@@ -150,11 +143,14 @@ SDL_SYS_HapticInit(void)
 const char *
 SDL_SYS_HapticName(int index)
 {
-    if(nds_haptic) {
-        switch(nds_haptic->hwdata->type) {
-            case OFFICIAL: return "Nintendo DS Rumble Pak";
-            case EZF3IN1: return "EZFlash 3-in-1 Rumble";
-            default: return NULL;
+    if (nds_haptic) {
+        switch (nds_haptic->hwdata->type) {
+        case OFFICIAL:
+            return "Nintendo DS Rumble Pak";
+        case EZF3IN1:
+            return "EZFlash 3-in-1 Rumble";
+        default:
+            return NULL;
         }
     }
     return NULL;
@@ -164,12 +160,12 @@ SDL_SYS_HapticName(int index)
 int
 SDL_SYS_HapticOpen(SDL_Haptic * haptic)
 {
-    if(!haptic) {
+    if (!haptic) {
         return -1;
     }
 
     haptic->hwdata = SDL_malloc(sizeof(NDS_HapticData));
-    if(!haptic->hwdata) {
+    if (!haptic->hwdata) {
         SDL_OutOfMemory();
         return -1;
     }
@@ -179,10 +175,10 @@ SDL_SYS_HapticOpen(SDL_Haptic * haptic)
 
     /* determine what is here, if anything */
     haptic->hwdata->type = NONE;
-    if(isRumbleInserted()) {
+    if (isRumbleInserted()) {
         /* official rumble pak is present. */
         haptic->hwdata->type = OFFICIAL;
-    } else if(NDS_EZF_IsPresent()) {
+    } else if (NDS_EZF_IsPresent()) {
         /* ezflash 3-in-1 pak is present. */
         haptic->hwdata->type = EZF3IN1;
         NDS_EZF_ChipReset();
@@ -213,7 +209,7 @@ SDL_SYS_JoystickIsHaptic(SDL_Joystick * joystick)
 int
 SDL_SYS_HapticOpenFromJoystick(SDL_Haptic * haptic, SDL_Joystick * joystick)
 {
-    /*SDL_SYS_LogicError();*/
+    /*SDL_SYS_LogicError(); */
     return -1;
 }
 

@@ -7,8 +7,6 @@
 #include <fat.h>
 #include "common.h"
 
-#include "icon_bmp_bin.h"
-
 #define NUM_SPRITES	10
 #define MAX_SPEED 	1
 
@@ -184,66 +182,7 @@ main(int argc, char *argv[])
     if (!state) {
         return 1;
     }
-    for (i = 1; i < argc;) {
-        int consumed;
 
-        consumed = CommonArg(state, i);
-        if (consumed == 0) {
-            consumed = -1;
-            if (SDL_strcasecmp(argv[i], "--blend") == 0) {
-                if (argv[i + 1]) {
-                    if (SDL_strcasecmp(argv[i + 1], "none") == 0) {
-                        blendMode = SDL_TEXTUREBLENDMODE_NONE;
-                        consumed = 2;
-                    } else if (SDL_strcasecmp(argv[i + 1], "mask") == 0) {
-                        blendMode = SDL_TEXTUREBLENDMODE_MASK;
-                        consumed = 2;
-                    } else if (SDL_strcasecmp(argv[i + 1], "blend") == 0) {
-                        blendMode = SDL_TEXTUREBLENDMODE_BLEND;
-                        consumed = 2;
-                    } else if (SDL_strcasecmp(argv[i + 1], "add") == 0) {
-                        blendMode = SDL_TEXTUREBLENDMODE_ADD;
-                        consumed = 2;
-                    } else if (SDL_strcasecmp(argv[i + 1], "mod") == 0) {
-                        blendMode = SDL_TEXTUREBLENDMODE_MOD;
-                        consumed = 2;
-                    }
-                }
-            } else if (SDL_strcasecmp(argv[i], "--scale") == 0) {
-                if (argv[i + 1]) {
-                    if (SDL_strcasecmp(argv[i + 1], "none") == 0) {
-                        scaleMode = SDL_TEXTURESCALEMODE_NONE;
-                        consumed = 2;
-                    } else if (SDL_strcasecmp(argv[i + 1], "fast") == 0) {
-                        scaleMode = SDL_TEXTURESCALEMODE_FAST;
-                        consumed = 2;
-                    } else if (SDL_strcasecmp(argv[i + 1], "slow") == 0) {
-                        scaleMode = SDL_TEXTURESCALEMODE_SLOW;
-                        consumed = 2;
-                    } else if (SDL_strcasecmp(argv[i + 1], "best") == 0) {
-                        scaleMode = SDL_TEXTURESCALEMODE_BEST;
-                        consumed = 2;
-                    }
-                }
-            } else if (SDL_strcasecmp(argv[i], "--cyclecolor") == 0) {
-                cycle_color = SDL_TRUE;
-                consumed = 1;
-            } else if (SDL_strcasecmp(argv[i], "--cyclealpha") == 0) {
-                cycle_alpha = SDL_TRUE;
-                consumed = 1;
-            } else if (SDL_isdigit(*argv[i])) {
-                num_sprites = SDL_atoi(argv[i]);
-                consumed = 1;
-            }
-        }
-        if (consumed < 0) {
-            fprintf(stderr,
-                    "Usage: %s %s [--blend none|mask|blend|add|mod] [--scale none|fast|slow|best] [--cyclecolor] [--cyclealpha]\n",
-                    argv[0], CommonUsage(state));
-            quit(1);
-        }
-        i += consumed;
-    }
     if (!CommonInit(state)) {
         quit(2);
     }
@@ -259,8 +198,9 @@ main(int argc, char *argv[])
         SDL_SelectRenderer(state->windows[i]);
         SDL_RenderFill(0xA0, 0xA0, 0xA0, 0xFF, NULL);
     }
-    if (LoadSprite2(icon_bmp_bin, icon_bmp_bin_size) < 0) {
-        printf("errored.\n");
+    if (LoadSprite("icon.bmp") < 0) {
+        printf("\nerrored.\n");
+        while (1);
         quit(2);
     }
 

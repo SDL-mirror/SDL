@@ -47,8 +47,8 @@ NDS_PumpEvents(_THIS)
     }
     if (keysHeld() & KEY_TOUCH) {
         touchPosition t = touchReadXY();
-        SDL_SendMouseMotion(0, 0, t.px, t.py, 1); /* last arg is pressure,
-                                                     hardcoded 1 for now */
+        SDL_SendMouseMotion(0, 0, t.px, t.py, 1);       /* last arg is pressure,
+                                                           hardcoded 1 for now */
     }
 }
 
