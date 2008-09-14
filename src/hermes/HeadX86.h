@@ -74,7 +74,7 @@ extern int ConvertX86p16_32BGRA888_LUT_X86[512];
 
 /* Now fix up the ELF underscore problem */
 
-#if defined(__ELF__) && defined(__GNUC__)
+#if (defined(__ELF__) && defined(__GNUC__)) || defined(__SUNPRO_C)
   #ifdef __cplusplus
   extern "C" {
   #endif

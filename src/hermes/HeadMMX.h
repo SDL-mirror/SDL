@@ -46,7 +46,7 @@ void ConvertMMXp32_16RGB555();
 
 /* Fix the underscore business with ELF compilers */
 
-#if defined(__ELF__) && defined(__GNUC__)
+#if (defined(__ELF__) && defined(__GNUC__)) || defined(__SUNPRO_C)
   #ifdef __cplusplus 
   extern "C" {   
   #endif
