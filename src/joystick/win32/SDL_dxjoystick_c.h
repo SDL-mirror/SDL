@@ -37,15 +37,8 @@
 #include <windows.h>
 
 #define DIRECTINPUT_VERSION 0x0700      /* Need version 7 for force feedback. */
+#define INITGUID
 #include <dinput.h>
-#ifdef _MSC_VER
-    /* Used for the c_dfDIJoystick2 symbol (no imports are used) */
-#   pragma comment (lib, "dinput.lib")
-#endif
-#include <dxerr8.h>
-#ifdef _MSC_VER
-#   pragma comment (lib, "dxerr8.lib")
-#endif
 
 
 #define MAX_INPUTS	256     /* each joystick can have up to 256 inputs */

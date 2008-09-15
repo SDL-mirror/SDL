@@ -25,6 +25,8 @@
 #include <math.h>
 #else
 
+/* Math routines from uClibc: http://www.uclibc.org */
+
 extern double __ieee754_log(double x);
 extern double __ieee754_pow(double x, double y);
 extern double __ieee754_sqrt(double x);

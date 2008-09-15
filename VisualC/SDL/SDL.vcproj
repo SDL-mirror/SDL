@@ -345,23 +345,67 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\e_log.h"
+			RelativePath="..\..\src\libm\e_log.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\e_pow.h"
+			RelativePath="..\..\src\libm\e_pow.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\e_sqrt.h"
+			RelativePath="..\..\src\libm\e_rem_pio2.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\math_private.h"
+			RelativePath="..\..\src\libm\e_sqrt.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\libm\k_cos.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\libm\k_rem_pio2.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\libm\k_sin.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\libm\math.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\libm\math_private.h"
 			>
 		</File>
 		<File
 			RelativePath="..\..\src\video\mmx.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\libm\s_copysign.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\libm\s_cos.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\libm\s_fabs.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\libm\s_floor.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\libm\s_scalbn.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\libm\s_sin.c"
 			>
 		</File>
 		<File
@@ -549,6 +593,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\haptic\SDL_haptic.c"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\stdlib\SDL_iconv.c"
 			>
 		</File>
@@ -726,6 +774,14 @@
 		</File>
 		<File
 			RelativePath="..\..\src\events\SDL_sysevents.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\haptic\win32\SDL_syshaptic.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\haptic\SDL_syshaptic.h"
 			>
 		</File>
 		<File

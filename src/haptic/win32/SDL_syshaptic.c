@@ -29,23 +29,6 @@
 #include "../../joystick/SDL_sysjoystick.h"     /* For the real SDL_Joystick */
 #include "../../joystick/win32/SDL_dxjoystick_c.h"      /* For joystick hwdata */
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-
-#define DIRECTINPUT_VERSION 0x0700      /* Need at least DirectX 7 for dwStartDelay */
-#include <dinput.h>
-#include <dxerr8.h>
-#ifdef _MSC_VER
-#  pragma comment (lib, "dinput8.lib")
-#  pragma comment (lib, "dxguid.lib")
-#  pragma comment (lib, "dxerr8.lib")
-#endif /* _MSC_VER */
-
-    /* an ISO hack for VisualC++ */
-#ifdef _MSC_VER
-#define   snprintf   _snprintf
-#endif /* _MSC_VER */
-
 
 #define MAX_HAPTICS  32
 
@@ -122,8 +105,11 @@ static BOOL CALLBACK DI_EffectCallback(LPCDIEFFECTINFO pei, LPVOID pv);
 static void
 DI_SetError(const char *str, HRESULT err)
 {
+	/*
     SDL_SetError("Haptic: %s - %s: %s", str,
                  DXGetErrorString8A(err), DXGetErrorDescription8A(err));
+	 */
+	SDL_SetError("Haptic error %s", str);
 }
 
 

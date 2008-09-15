@@ -29,6 +29,8 @@
 #include "SDL_audio.h"
 #include "SDL_audio_c.h"
 
+#include "../libm/math.h"
+
 //#define DEBUG_CONVERT
 
 /* These are fractional multiplication routines. That is, their inputs
@@ -1352,6 +1354,7 @@ SDL_BuildAudioTypeCVT(SDL_AudioCVT * cvt,
    For now, use RBJ's cookbook coefficients. It might be more
    optimal to create a Butterworth filter, but this is more difficult.
 */
+#if 0
 int
 SDL_BuildIIRLowpass(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
@@ -1443,7 +1446,10 @@ SDL_BuildIIRLowpass(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     SDL_memset(cvt->state_buf, 0, 4 * SDL_AUDIO_BITSIZE(format) / 4);
     cvt->state_pos = 0;
 #undef convert_fixed
+
+	return 0;
 }
+#endif
 
 /* Apply the lowpass IIR filter to the given SDL_AudioCVT struct */
 /* This was implemented because it would be much faster than the fir filter, 
@@ -1667,7 +1673,7 @@ SDL_BuildWindowedSinc(SDL_AudioCVT * cvt, SDL_AudioFormat format,
                 0.42f - 0.5f * cosf(two_pi_over_m * (float) i) +
                 0.08f * cosf(four_pi_over_m * (float) i);
         }
-        norm_sum += fabs(fSinc[i]);
+        norm_sum += fSinc[i] < 0 ? -fSinc[i] : fSinc[i]; /* fabs(fSinc[i]); */
     }
 
     norm_fact = 1.0f / norm_sum;
