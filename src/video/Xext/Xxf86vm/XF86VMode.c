@@ -214,12 +214,6 @@ SDL_NAME(XF86VidModeGetGamma)(Display *dpy, int screen, SDL_NAME(XF86VidModeGamm
     return True;
 }
 
-/* this is to prevent an unaligned memory write on CPUs that need that. */
-static void zap_ptr(char *ptr, size_t size)
-{
-    memset(ptr, '\0', size);
-}
-
 Bool
 SDL_NAME(XF86VidModeGetModeLine)(dpy, screen, dotclock, modeline)
     Display* dpy;
@@ -290,7 +284,7 @@ SDL_NAME(XF86VidModeGetModeLine)(dpy, screen, dotclock, modeline)
 	}
 	_XRead(dpy, (char*)modeline->private, modeline->privsize * sizeof(INT32));
     } else {
-	zap_ptr((char *)&modeline->private, sizeof(modeline->private));
+	modeline->private = NULL;
     }
     UnlockDisplay(dpy);
     SyncHandle();
