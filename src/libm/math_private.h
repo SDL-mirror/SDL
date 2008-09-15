@@ -11,17 +11,18 @@
 
 /*
  * from: @(#)fdlibm.h 5.1 93/09/24
- * $Id$
+ * $Id: math_private.h,v 1.3 2004/02/09 07:10:38 andersen Exp $
  */
 
 #ifndef _MATH_PRIVATE_H_
 #define _MATH_PRIVATE_H_
 
-#include "SDL_name.h"
-#include "SDL_endian.h"
+/*#include <endian.h>*/
+#include <sys/types.h>
 
-#define huge		really_big      /* huge is a reserved keyword in VC++ 6.0 */
-#define u_int32_t	uint32_t
+#define attribute_hidden
+#define libm_hidden_proto(x)
+#define libm_hidden_def(x)
 
 /* The original fdlibm code used statements like:
 	n0 = ((*(int*)&one)>>29)^1;		* index of high word *
@@ -43,7 +44,7 @@
  * For VFP, floats words follow the memory system mode.
  */
 
-#if (SDL_BYTEORDER == SDL_BIG_ENDIAN) || \
+#if (__BYTE_ORDER == __BIG_ENDIAN) || \
     (!defined(__VFP_FP__) && (defined(__arm__) || defined(__thumb__)))
 
 typedef union
@@ -155,17 +156,49 @@ do {								\
   (d) = sf_u.value;						\
 } while (0)
 
-
-#ifdef __STDC__
-static const double
+/* ieee style elementary functions */
+extern double
+__ieee754_sqrt(double)
+    attribute_hidden;
+     extern double __ieee754_acos(double) attribute_hidden;
+     extern double __ieee754_acosh(double) attribute_hidden;
+     extern double __ieee754_log(double) attribute_hidden;
+     extern double __ieee754_atanh(double) attribute_hidden;
+     extern double __ieee754_asin(double) attribute_hidden;
+     extern double __ieee754_atan2(double, double) attribute_hidden;
+     extern double __ieee754_exp(double) attribute_hidden;
+     extern double __ieee754_cosh(double) attribute_hidden;
+     extern double __ieee754_fmod(double, double) attribute_hidden;
+     extern double __ieee754_pow(double, double) attribute_hidden;
+     extern double __ieee754_lgamma_r(double, int *) attribute_hidden;
+     extern double __ieee754_gamma_r(double, int *) attribute_hidden;
+     extern double __ieee754_lgamma(double) attribute_hidden;
+     extern double __ieee754_gamma(double) attribute_hidden;
+     extern double __ieee754_log10(double) attribute_hidden;
+     extern double __ieee754_sinh(double) attribute_hidden;
+     extern double __ieee754_hypot(double, double) attribute_hidden;
+     extern double __ieee754_j0(double) attribute_hidden;
+     extern double __ieee754_j1(double) attribute_hidden;
+     extern double __ieee754_y0(double) attribute_hidden;
+     extern double __ieee754_y1(double) attribute_hidden;
+     extern double __ieee754_jn(int, double) attribute_hidden;
+     extern double __ieee754_yn(int, double) attribute_hidden;
+     extern double __ieee754_remainder(double, double) attribute_hidden;
+     extern int __ieee754_rem_pio2(double, double *) attribute_hidden;
+#if defined(_SCALB_INT)
+     extern double __ieee754_scalb(double, int) attribute_hidden;
 #else
-static double
+     extern double __ieee754_scalb(double, double) attribute_hidden;
 #endif
-  zero = 0.0, one = 1.0, two = 2.0, two53 = 9007199254740992.0, /* 0x43400000, 0x00000000 */
-    two54 = 1.80143985094819840000e+16, /* 0x43500000, 0x00000000 */
-    twom54 = 5.55111512312578270212e-17,        /* 0x3C900000, 0x00000000 */
-    huge = 1.0e+300, tiny = 1.0e-300;
+
+/* fdlibm kernel function */
+#ifndef _IEEE_LIBM
+     extern double __kernel_standard(double, double, int) attribute_hidden;
+#endif
+     extern double __kernel_sin(double, double, int) attribute_hidden;
+     extern double __kernel_cos(double, double) attribute_hidden;
+     extern double __kernel_tan(double, double, int) attribute_hidden;
+     extern int __kernel_rem_pio2(double *, double *, int, int, int,
+                                  const int *) attribute_hidden;
 
 #endif /* _MATH_PRIVATE_H_ */
-
-/* vi: set ts=4 sw=4 expandtab: */
