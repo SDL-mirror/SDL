@@ -36,6 +36,7 @@ extern double __ieee754_sqrt(double x);
 extern double copysign(double x, double y);
 extern double cos(double x);
 extern double fabs(double x);
+extern double floor(double x);
 extern double scalbn(double x, int n);
 extern double sin(double x);
 
