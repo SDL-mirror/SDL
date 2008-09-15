@@ -292,7 +292,7 @@ SDL_NAME(XF86VidModeModeLine) * modeline;
         _XRead(dpy, (char *) modeline->private,
                modeline->privsize * sizeof(INT32));
     } else {
-        zap_ptr((char *)&modeline->private, sizeof(modeline->private))
+        zap_ptr((char *) &modeline->private, sizeof(modeline->private))
     }
     UnlockDisplay(dpy);
     SyncHandle();
