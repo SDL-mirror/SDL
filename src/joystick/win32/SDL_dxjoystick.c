@@ -41,6 +41,11 @@
 #include "SDL_dxjoystick_c.h"
 
 
+#ifndef DIDFT_OPTIONAL
+#define DIDFT_OPTIONAL		0x80000000
+#endif
+
+
 #define INPUT_QSIZE	32      /* Buffer up to 32 input messages */
 #define MAX_JOYSTICKS	8
 #define AXIS_MIN	-32768  /* minimum value for axis coordinate */
@@ -285,7 +290,7 @@ SDL_SYS_JoystickInit(void)
     }
 
     result = CoCreateInstance(&CLSID_DirectInput, NULL, CLSCTX_INPROC_SERVER,
-                              &IID_IDirectInput, &dinput);
+                              &IID_IDirectInput, (LPVOID)&dinput);
 
     if (FAILED(result)) {
         SetDIerror("CoCreateInstance", result);
