@@ -167,4 +167,5 @@ static double
     huge = 1.0e+300, tiny = 1.0e-300;
 
 #endif /* _MATH_PRIVATE_H_ */
+
 /* vi: set ts=4 sw=4 expandtab: */
