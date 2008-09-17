@@ -29,12 +29,6 @@
 #include "SDL_x11video.h"
 #include "../../events/SDL_events_c.h"
 
-extern int motion;              /* the motion event id defined by an XInput function */
-extern int button_pressed;      /* the button_pressed event id defined by an XInput function */
-extern int button_released;     /* the button_released event id defined by an XInput function */
-extern int proximity_in;        /* the proximity in event defined by an XInput function */
-extern int proximity_out;       /* the proximity out event defined by an XInput function */
-
 static void
 X11_DispatchEvent(_THIS)
 {

@@ -29,7 +29,6 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
-#include <X11/extensions/XInput.h>
 
 #if SDL_VIDEO_DRIVER_X11_XINERAMA
 #include "../Xext/extensions/Xinerama.h"
@@ -46,6 +45,9 @@
 #if SDL_VIDEO_DRIVER_X11_DPMS
 #include <X11/extensions/dpms.h>
 #endif
+#if SDL_VIDEO_DRIVER_X11_XINPUT
+#include <X11/extensions/XInput.h>
+#endif
 
 #include "SDL_x11dyn.h"
 
@@ -58,6 +60,22 @@
 #include "SDL_x11window.h"
 
 /* Private display data */
+
+#if SDL_VIDEO_DRIVER_X11_XINPUT
+/* !!! FIXME: should be in SDL_VideoData, not globals. */
+extern XDevice **SDL_XDevices;
+extern int SDL_NumOfXDevices;
+extern XEventClass SDL_XEvents[256];
+extern int SDL_NumOfXEvents;
+#endif
+
+/* !!! FIXME: should be in SDL_VideoData, not globals. */
+/* !!! FIXME: change these names, too. */
+extern int motion;              /* the motion event id defined by an XInput function */
+extern int button_pressed;      /* the button_pressed event id defined by an XInput function */
+extern int button_released;     /* the button_released event id defined by an XInput function */
+extern int proximity_in;        /* the proximity in event defined by an XInput function */
+extern int proximity_out;       /* the proximity out event defined by an XInput function */
 
 typedef struct SDL_VideoData
 {

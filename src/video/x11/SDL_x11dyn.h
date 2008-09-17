@@ -29,7 +29,6 @@
 #include <X11/Xatom.h>
 #include <X11/Xlibint.h>
 #include <X11/Xproto.h>
-//#include <X11/extensions/XInput.h>
 #include "../Xext/extensions/Xext.h"
 #include "../Xext/extensions/extutil.h"
 
@@ -41,6 +40,10 @@
 
 #if SDL_VIDEO_DRIVER_X11_XRANDR
 #include <X11/extensions/Xrandr.h>
+#endif
+
+#if SDL_VIDEO_DRIVER_X11_XINPUT
+#include <X11/extensions/XInput.h>
 #endif
 
 /*

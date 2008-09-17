@@ -144,11 +144,6 @@ SDL_X11_SYM(SDL_X11_XESetWireToEventRetType,XESetWireToEvent,(Display* a,int b,S
 SDL_X11_SYM(SDL_X11_XESetEventToWireRetType,XESetEventToWire,(Display* a,int b,SDL_X11_XESetEventToWireRetType c),(a,b,c),return)
 SDL_X11_SYM(XExtensionErrorHandler,XSetExtensionErrorHandler,(XExtensionErrorHandler a),(a),return)
 
-/*SDL_X11_SYM(XDeviceInfo* , XListInputDevices, (Display* a, int* b), (a,b),return)
-SDL_X11_SYM(void, XFreeDeviceList, (XDeviceInfo* a), (a),)
-SDL_X11_SYM(int, XSelectExtensionEvent,(Display* a, Window b, XEventClass* c, int d),(a,b,c,d),return)
-SDL_X11_SYM(XDevice* ,XOpenDevice,(Display* a, XID b), (a,b),return)*/
-
 #if NeedWidePrototypes
 SDL_X11_SYM(KeySym,XKeycodeToKeysym,(Display* a,unsigned int b,int c),(a,b,c),return)
 #else
@@ -216,6 +211,15 @@ SDL_X11_SYM(Status,DPMSQueryExtension,(Display *dpy,int *major_versionp,int *min
 SDL_X11_SYM(Status,DPMSInfo,(Display *dpy,CARD16 *state,BOOL *onoff),(dpy,state,onoff),return)
 SDL_X11_SYM(Status,DPMSEnable,(Display *dpy),(dpy),return)
 SDL_X11_SYM(Status,DPMSDisable,(Display *dpy),(dpy),return)
+#endif
+
+/* XInput support for multiple mice, tablets, etc. */
+#if SDL_VIDEO_DRIVER_X11_XINPUT
+SDL_X11_MODULE(XINPUT)
+SDL_X11_SYM(XDeviceInfo*,XListInputDevices,(Display *a,int *b),(a,b),return)
+SDL_X11_SYM(void,XFreeDeviceList,(XDeviceInfo *a),(a),)
+SDL_X11_SYM(int,XSelectExtensionEvent,(Display *a,Window b,XEventClass *c,int d),(a,b,c,d),return)
+SDL_X11_SYM(XDevice*,XOpenDevice,(Display *a,XID b),(a,b),return)
 #endif
 
 /* *INDENT-ON* */

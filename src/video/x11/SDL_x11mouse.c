@@ -20,21 +20,24 @@
     slouken@libsdl.org
 */
 #include "SDL_config.h"
-
 #include "SDL_x11video.h"
-
 #include "../../events/SDL_mouse_c.h"
 
 void
 X11_InitMouse(_THIS)
 {
-    extern XDevice **SDL_XDevices;
+#if SDL_VIDEO_DRIVER_X11_XINPUT
     XDevice **newDevices;
     int i, j, index = 0, numOfDevices;
-    extern int SDL_NumOfXDevices;
     XDeviceInfo *DevList;
     XAnyClassPtr deviceClass;
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+
+    SDL_XDevices = NULL;
+    SDL_NumOfXDevices = 0;
+
+    if (!SDL_X11_HAVE_XINPUT)
+        return;  /* should have dynamically loaded, but wasn't available. */
 
     /* we're getting the list of input devices */
     DevList = XListInputDevices(data->display, &numOfDevices);
@@ -92,12 +95,15 @@ X11_InitMouse(_THIS)
     XFreeDeviceList(DevList);
 
     SDL_NumOfXDevices = index;
+#endif
 }
 
 void
 X11_QuitMouse(_THIS)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+
+    /* !!! FIXME: use XCloseDevice()? Or maybe handle under SDL_MouseQuit()? */
 
     /* let's delete all of the mice */
     SDL_MouseQuit();
