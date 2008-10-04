@@ -7,8 +7,13 @@
 
 #include "SDL.h"
 
+#ifdef __IPHONEOS__
+#define SCREEN_WIDTH	320
+#define SCREEN_HEIGHT	480
+#else
 #define SCREEN_WIDTH	640
 #define SCREEN_HEIGHT	480
+#endif
 
 void
 WatchJoystick(SDL_Joystick * joystick)
@@ -129,6 +134,7 @@ WatchJoystick(SDL_Joystick * joystick)
             } else if (y > (SCREEN_HEIGHT - 16)) {
                 y = SCREEN_HEIGHT - 16;
             }
+
             axis_area[i][draw].x = (Sint16) x;
             axis_area[i][draw].y = (Sint16) y;
             axis_area[i][draw].w = 16;

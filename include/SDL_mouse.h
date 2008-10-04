@@ -79,14 +79,14 @@ extern DECLSPEC char *SDLCALL SDL_GetMouseName(int index);
 extern DECLSPEC int SDLCALL SDL_SelectMouse(int index);
 
 /**
- * \fn SDL_WindowID SDL_GetMouseFocusWindow(void)
+ * \fn SDL_WindowID SDL_GetMouseFocusWindow(int index)
  *
  * \brief Get the window which currently has focus for the currently selected mouse.
  */
 extern DECLSPEC SDL_WindowID SDLCALL SDL_GetMouseFocusWindow(int index);
 
 /**
- * \fn int SDL_SetRelativeMouseMode(SDL_bool enabled)
+ * \fn int SDL_SetRelativeMouseMode(int index, SDL_bool enabled)
  *
  * \brief Set relative mouse mode for the currently selected mouse.
  *
@@ -107,7 +107,7 @@ extern DECLSPEC int SDLCALL SDL_SetRelativeMouseMode(int index,
                                                      SDL_bool enabled);
 
 /**
- * \fn SDL_bool SDL_GetRelativeMouseMode()
+ * \fn SDL_bool SDL_GetRelativeMouseMode(int index)
  *
  * \brief Query whether relative mouse mode is enabled for the currently selected mouse.
  *
@@ -116,7 +116,7 @@ extern DECLSPEC int SDLCALL SDL_SetRelativeMouseMode(int index,
 extern DECLSPEC SDL_bool SDLCALL SDL_GetRelativeMouseMode(int index);
 
 /**
- * \fn Uint8 SDL_GetMouseState(int *x, int *y)
+ * \fn Uint8 SDL_GetMouseState(int index, int *x, int *y)
  *
  * \brief Retrieve the current state of the currently selected mouse.
  *
@@ -128,7 +128,7 @@ extern DECLSPEC SDL_bool SDLCALL SDL_GetRelativeMouseMode(int index);
 extern DECLSPEC Uint8 SDLCALL SDL_GetMouseState(int index, int *x, int *y);
 
 /**
- * \fn Uint8 SDL_GetRelativeMouseState(int *x, int *y)
+ * \fn Uint8 SDL_GetRelativeMouseState(int index, int *x, int *y)
  *
  * \brief Retrieve the state of the currently selected mouse.
  *

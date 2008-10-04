@@ -68,6 +68,7 @@ main(int argc, char *argv[])
     Uint8 gradient;
     SDL_Color palette[256];
 
+    int video_w, video_h;
 
     /* Initialize SDL */
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -96,10 +97,19 @@ main(int argc, char *argv[])
         }
     }
 
+#ifdef __IPHONEOS__
+    video_w = 320;
+    video_h = 480;
+#else
+    video_w = 640;
+    video_h = 480;
+#endif
+
     /* Set 640x480 video mode */
-    if ((screen = SDL_SetVideoMode(640, 480, video_bpp, videoflags)) == NULL) {
-        fprintf(stderr, "Couldn't set 640x480x%d video mode: %s\n",
-                video_bpp, SDL_GetError());
+    if ((screen =
+         SDL_SetVideoMode(video_w, video_h, video_bpp, videoflags)) == NULL) {
+        fprintf(stderr, "Couldn't set %%d%d video mode: %s\n", video_w,
+                video_h, video_bpp, SDL_GetError());
         quit(2);
     }
 

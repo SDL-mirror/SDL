@@ -184,7 +184,7 @@ SDL_MouseQuit(void)
         SDL_DelMouse(i);
     }
     SDL_num_mice = 0;
-    SDL_current_mouse = 0;
+    SDL_current_mouse = -1;
 
     if (SDL_mice) {
         SDL_free(SDL_mice);

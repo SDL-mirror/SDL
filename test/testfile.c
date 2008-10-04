@@ -14,9 +14,14 @@
 #include <stdio.h>
 
 /* WARNING ! those 2 files will be destroyed by this test program */
-#define FBASENAME1	"sdldata1"      /* this file will be created during tests */
-#define FBASENAME2	"sdldata2"      /* this file should not exists before starting test */
 
+#ifdef __IPHONEOS__
+#define FBASENAME1	"../Documents/sdldata1" /* this file will be created during tests */
+#define FBASENAME2  "../Documents/sdldata2"     /* this file should not exist before starting test */
+#else
+#define FBASENAME1	"sdldata1"      /* this file will be created during tests */
+#define FBASENAME2	"sdldata2"      /* this file should not exist before starting test */
+#endif
 
 #ifndef NULL
 #define NULL ((void *)0)

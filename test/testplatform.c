@@ -200,6 +200,8 @@ main(int argc, char *argv[])
 #else
                "Windows"
 #endif
+#elif __IPHONEOS__
+               "iPhone OS"
 #else
                "an unknown operating system! (see SDL_platform.h)"
 #endif

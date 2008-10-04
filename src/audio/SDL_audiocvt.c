@@ -1447,7 +1447,7 @@ SDL_BuildIIRLowpass(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     cvt->state_pos = 0;
 #undef convert_fixed
 
-	return 0;
+    return 0;
 }
 #endif
 
@@ -1673,7 +1673,7 @@ SDL_BuildWindowedSinc(SDL_AudioCVT * cvt, SDL_AudioFormat format,
                 0.42f - 0.5f * cosf(two_pi_over_m * (float) i) +
                 0.08f * cosf(four_pi_over_m * (float) i);
         }
-        norm_sum += fSinc[i] < 0 ? -fSinc[i] : fSinc[i]; /* fabs(fSinc[i]); */
+        norm_sum += fSinc[i] < 0 ? -fSinc[i] : fSinc[i];        /* fabs(fSinc[i]); */
     }
 
     norm_fact = 1.0f / norm_sum;

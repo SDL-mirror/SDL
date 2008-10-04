@@ -81,7 +81,7 @@ libm_hidden_proto(floor)
                     i0 += 1;
                 else {
                     j = i1 + (1 << (52 - j0));
-                    if (j < (u_int32_t)i1)
+                    if (j < (u_int32_t) i1)
                         i0 += 1;        /* got a carry */
                     i1 = j;
                 }

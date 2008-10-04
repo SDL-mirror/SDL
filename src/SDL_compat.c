@@ -521,14 +521,18 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
     SDL_VideoTexture =
         SDL_CreateTexture(desired_format, SDL_TEXTUREACCESS_STREAMING, width,
                           height);
+
     if (!SDL_VideoTexture) {
         SDL_VideoTexture =
-            SDL_CreateTexture(SDL_PIXELFORMAT_RGB888,
+            SDL_CreateTexture(SDL_PIXELFORMAT_ABGR8888,
                               SDL_TEXTUREACCESS_STREAMING, width, height);
     }
     if (!SDL_VideoTexture) {
         return NULL;
     }
+
+    SDL_SetTextureBlendMode(SDL_VideoTexture, SDL_TEXTUREBLENDMODE_NONE);
+
 
     /* Create the screen surface */
     SDL_VideoSurface = CreateVideoSurface(SDL_VideoTexture);

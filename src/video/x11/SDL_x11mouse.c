@@ -36,8 +36,10 @@ X11_InitMouse(_THIS)
     SDL_XDevices = NULL;
     SDL_NumOfXDevices = 0;
 
-    if (!SDL_X11_HAVE_XINPUT)
-        return;  /* should have dynamically loaded, but wasn't available. */
+    if (!SDL_X11_HAVE_XINPUT) {
+        /* should have dynamically loaded, but wasn't available. */
+        return;
+    }
 
     /* we're getting the list of input devices */
     DevList = XListInputDevices(data->display, &numOfDevices);

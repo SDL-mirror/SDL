@@ -29,7 +29,7 @@
 
 /* Wrapper around POSIX 1003.1b semaphores */
 
-#ifdef __MACOSX__
+#if defined(__MACOSX__) || defined(__IPHONEOS__)
 /* Mac OS X doesn't support sem_getvalue() as of version 10.4 */
 #include "../generic/SDL_syssem.c"
 #else

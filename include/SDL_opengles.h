@@ -36,6 +36,9 @@ extern "C"
 {
 #endif
 
+#ifdef __IPHONEOS__
+#include <OpenGLES/ES1/gl.h>    /* Header File For The OpenGL ES Library */
+#endif
 
 #ifndef APIENTRY
 #define APIENTRY
