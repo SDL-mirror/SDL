@@ -226,7 +226,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             /* we're collecting data from the mouse */
             GetRawInputData((HRAWINPUT) lParam, RID_INPUT, NULL, &size,
                             sizeof(RAWINPUTHEADER));
-            lpb = SDL_malloc(size * sizeof(LPBYTE));
+            lpb = SDL_stack_alloc(BYTE, size);
             GetRawInputData((HRAWINPUT) lParam, RID_INPUT, lpb, &size,
                             sizeof(RAWINPUTHEADER));
             raw = (RAWINPUT *) lpb;
@@ -252,19 +252,19 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 SDL_SendMouseMotion(index, 0, point.x, point.y, 0);
             }
             /* we're sending mouse buttons messages to check up if sth changed */
-            if (flags & RI_MOUSE_BUTTON_1_DOWN) {
+            if (flags & RI_MOUSE_LEFT_BUTTON_DOWN) {
                 SDL_SendMouseButton(index, SDL_PRESSED, SDL_BUTTON_LEFT);
-            } else if (flags & RI_MOUSE_BUTTON_1_UP) {
+            } else if (flags & RI_MOUSE_LEFT_BUTTON_UP) {
                 SDL_SendMouseButton(index, SDL_RELEASED, SDL_BUTTON_LEFT);
             }
-            if (flags & RI_MOUSE_BUTTON_2_DOWN) {
+            if (flags & RI_MOUSE_MIDDLE_BUTTON_DOWN) {
                 SDL_SendMouseButton(index, SDL_PRESSED, SDL_BUTTON_MIDDLE);
-            } else if (flags & RI_MOUSE_BUTTON_2_UP) {
+            } else if (flags & RI_MOUSE_MIDDLE_BUTTON_UP) {
                 SDL_SendMouseButton(index, SDL_RELEASED, SDL_BUTTON_MIDDLE);
             }
-            if (flags & RI_MOUSE_BUTTON_3_DOWN) {
+            if (flags & RI_MOUSE_RIGHT_BUTTON_DOWN) {
                 SDL_SendMouseButton(index, SDL_PRESSED, SDL_BUTTON_RIGHT);
-            } else if (flags & RI_MOUSE_BUTTON_3_UP) {
+            } else if (flags & RI_MOUSE_RIGHT_BUTTON_UP) {
                 SDL_SendMouseButton(index, SDL_RELEASED, SDL_BUTTON_RIGHT);
             }
             if (flags & RI_MOUSE_BUTTON_4_DOWN) {
@@ -283,6 +283,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                                        raw->data.mouse.usButtonData);
                 }
             }
+            SDL_stack_free(lpb);
         }
         return (0);
 
