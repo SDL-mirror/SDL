@@ -28,6 +28,8 @@
 
 /* Math routines from uClibc: http://www.uclibc.org */
 
+#define M_PI    3.14159265358979323846264338327950288   /* pi */
+
 extern double __ieee754_log(double x);
 extern double __ieee754_pow(double x, double y);
 extern double __ieee754_sqrt(double x);
@@ -42,6 +44,9 @@ extern double fabs(double x);
 extern double floor(double x);
 extern double scalbn(double x, int n);
 extern double sin(double x);
+
+#define sinf(x) (float)sin((double)x)
+#define cosf(x) (float)cos((double)x)
 
 #endif /* HAVE_MATH_H */
 
