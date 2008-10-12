@@ -38,7 +38,7 @@
 #include "SDL_syswm.h"
 
 extern HCTX *g_hCtx;            /* the table of tablet event contexts, each windows has to have it's own tablet context */
-int highestId = 0;              /* the highest id of the tablet context */
+static Uint32 highestId = 0;    /* the highest id of the tablet context */
 
 /* Fake window to help with DirectInput events. */
 HWND SDL_HelperWindow = NULL;
