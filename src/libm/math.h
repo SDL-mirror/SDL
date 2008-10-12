@@ -22,6 +22,7 @@
 #include "SDL_config.h"
 
 #ifdef HAVE_MATH_H
+#define _USE_MATH_DEFINES
 #include <math.h>
 #else
 

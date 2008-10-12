@@ -720,6 +720,7 @@
 					"\"$(SRCROOT)/../SDLiPod/build/Release-iphoneos\"",
 					"\"$(SRCROOT)\"",
 					"\"$(SRCROOT)/../SDLiPod/build/Debug-iphonesimulator\"",
+					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
 				);
 				PRODUCT_NAME = Rectangles;
 			};
@@ -738,6 +739,7 @@
 					"\"$(SRCROOT)/../SDLiPod/build/Release-iphoneos\"",
 					"\"$(SRCROOT)\"",
 					"\"$(SRCROOT)/../SDLiPod/build/Debug-iphonesimulator\"",
+					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
 				);
 				PRODUCT_NAME = Rectangles;
 			};
@@ -791,6 +793,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
+				);
 				OTHER_LDFLAGS = (
 					"-framework",
 					Foundation,
@@ -814,6 +820,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
+				);
 				OTHER_LDFLAGS = (
 					"-framework",
 					Foundation,
@@ -839,6 +849,10 @@
 				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
+				);
 				OTHER_LDFLAGS = (
 					"-framework",
 					Foundation,
@@ -863,6 +877,10 @@
 				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
+				);
 				OTHER_LDFLAGS = (
 					"-framework",
 					Foundation,
@@ -891,6 +909,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\\\\\\\"$(SRCROOT)\\\\\\\"",
+					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
 				);
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -919,6 +938,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\\\\\\\"$(SRCROOT)\\\\\\\"",
+					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
 				);
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -945,6 +965,10 @@
 				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
+				);
 				OTHER_LDFLAGS = (
 					"-framework",
 					Foundation,
@@ -969,6 +993,10 @@
 				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
+				);
 				OTHER_LDFLAGS = (
 					"-framework",
 					Foundation,
@@ -997,6 +1025,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\\\"$(SRCROOT)\\\"",
+					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
 				);
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -1025,6 +1054,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\\\"$(SRCROOT)\\\"",
+					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
 				);
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -1054,6 +1084,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
+					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
 				);
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -1082,6 +1113,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
+					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
 				);
 				OTHER_LDFLAGS = (
 					"-framework",

@@ -21,9 +21,6 @@
 */
 #include "SDL_config.h"
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-
 /* Functions for audio drivers to perform runtime conversion of audio format */
 
 #include "SDL_audio.h"
