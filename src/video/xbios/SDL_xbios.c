@@ -53,6 +53,10 @@
 
 #define XBIOS_VID_DRIVER_NAME "xbios"
 
+#ifndef C_fVDI
+#define C_fVDI 0x66564449L
+#endif
+
 /* Debug print info */
 #if 0
 #define DEBUG_PRINT(what) \
@@ -95,11 +99,24 @@ static unsigned long	F30_palette[256];
 static int XBIOS_Available(void)
 {
 	unsigned long cookie_vdo, cookie_mil, cookie_hade, cookie_scpn;
+	unsigned long cookie_fvdi;
+	const char *envr = SDL_getenv("SDL_VIDEODRIVER");
 
 	/* Milan/Hades Atari clones do not have an Atari video chip */
 	if ( (Getcookie(C__MIL, &cookie_mil) == C_FOUND) ||
 		(Getcookie(C_hade, &cookie_hade) == C_FOUND) ) {
 		return 0;
+	}
+
+	/* fVDI means graphic card, so no Xbios with it */
+	if (Getcookie(C_fVDI, &cookie_fvdi) == C_FOUND) {
+		if (!envr) {
+			return 0;
+		}
+		if (SDL_strcmp(envr, XBIOS_VID_DRIVER_NAME)!=0) {
+			return 0;
+		}
+		/* Except if we force Xbios usage, through env var */
 	}
 
 	/* Cookie _VDO present ? if not, assume ST machine */
