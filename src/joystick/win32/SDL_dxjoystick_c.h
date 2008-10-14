@@ -37,7 +37,6 @@
 #include <windows.h>
 
 #define DIRECTINPUT_VERSION 0x0700      /* Need version 7 for force feedback. */
-#define INITGUID
 #include <dinput.h>
 
 
