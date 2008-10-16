@@ -23,6 +23,14 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		04461DEE0EA76BA3006C462D /* SDL_haptic.h in Headers */ = {isa = PBXBuildFile; fileRef = 04461DED0EA76BA3006C462D /* SDL_haptic.h */; };
+		04461DEF0EA76BA3006C462D /* SDL_haptic.h in Headers */ = {isa = PBXBuildFile; fileRef = 04461DED0EA76BA3006C462D /* SDL_haptic.h */; };
+		047677BB0EA76A31008ABAF1 /* SDL_syshaptic.c in Sources */ = {isa = PBXBuildFile; fileRef = 047677B80EA76A31008ABAF1 /* SDL_syshaptic.c */; };
+		047677BC0EA76A31008ABAF1 /* SDL_haptic.c in Sources */ = {isa = PBXBuildFile; fileRef = 047677B90EA76A31008ABAF1 /* SDL_haptic.c */; };
+		047677BD0EA76A31008ABAF1 /* SDL_syshaptic.h in Headers */ = {isa = PBXBuildFile; fileRef = 047677BA0EA76A31008ABAF1 /* SDL_syshaptic.h */; };
+		047677BE0EA76A31008ABAF1 /* SDL_syshaptic.c in Sources */ = {isa = PBXBuildFile; fileRef = 047677B80EA76A31008ABAF1 /* SDL_syshaptic.c */; };
+		047677BF0EA76A31008ABAF1 /* SDL_haptic.c in Sources */ = {isa = PBXBuildFile; fileRef = 047677B90EA76A31008ABAF1 /* SDL_haptic.c */; };
+		047677C00EA76A31008ABAF1 /* SDL_syshaptic.h in Headers */ = {isa = PBXBuildFile; fileRef = 047677BA0EA76A31008ABAF1 /* SDL_syshaptic.h */; };
 		0495E68A0E97408800152DFE /* SDL_glesfuncs.h in Headers */ = {isa = PBXBuildFile; fileRef = 0495E6840E97408800152DFE /* SDL_glesfuncs.h */; };
 		0495E68B0E97408800152DFE /* SDL_glfuncs.h in Headers */ = {isa = PBXBuildFile; fileRef = 0495E6850E97408800152DFE /* SDL_glfuncs.h */; };
 		0495E68C0E97408800152DFE /* SDL_renderer_gl.c in Sources */ = {isa = PBXBuildFile; fileRef = 0495E6860E97408800152DFE /* SDL_renderer_gl.c */; };
@@ -339,6 +347,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		04461DED0EA76BA3006C462D /* SDL_haptic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_haptic.h; path = ../../include/SDL_haptic.h; sourceTree = SOURCE_ROOT; };
+		047677B80EA76A31008ABAF1 /* SDL_syshaptic.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_syshaptic.c; sourceTree = "<group>"; };
+		047677B90EA76A31008ABAF1 /* SDL_haptic.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SDL_haptic.c; path = ../../src/haptic/SDL_haptic.c; sourceTree = SOURCE_ROOT; };
+		047677BA0EA76A31008ABAF1 /* SDL_syshaptic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_syshaptic.h; path = ../../src/haptic/SDL_syshaptic.h; sourceTree = SOURCE_ROOT; };
 		0495E6840E97408800152DFE /* SDL_glesfuncs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_glesfuncs.h; sourceTree = "<group>"; };
 		0495E6850E97408800152DFE /* SDL_glfuncs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_glfuncs.h; sourceTree = "<group>"; };
 		0495E6860E97408800152DFE /* SDL_renderer_gl.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_renderer_gl.c; sourceTree = "<group>"; };
@@ -531,6 +543,25 @@
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
+		047677B60EA769DF008ABAF1 /* haptic */ = {
+			isa = PBXGroup;
+			children = (
+				047677B70EA76A31008ABAF1 /* dummy */,
+				047677B90EA76A31008ABAF1 /* SDL_haptic.c */,
+				047677BA0EA76A31008ABAF1 /* SDL_syshaptic.h */,
+			);
+			name = haptic;
+			sourceTree = "<group>";
+		};
+		047677B70EA76A31008ABAF1 /* dummy */ = {
+			isa = PBXGroup;
+			children = (
+				047677B80EA76A31008ABAF1 /* SDL_syshaptic.c */,
+			);
+			name = dummy;
+			path = ../../src/haptic/dummy;
+			sourceTree = SOURCE_ROOT;
+		};
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -683,6 +714,7 @@
 				FD99B8DB0DD52EB400FB1D6B /* SDL_cpuinfo.h */,
 				FD99B8DC0DD52EB400FB1D6B /* SDL_error.h */,
 				FD99B8DD0DD52EB400FB1D6B /* SDL_events.h */,
+				04461DED0EA76BA3006C462D /* SDL_haptic.h */,
 				FD99B8DE0DD52EB400FB1D6B /* SDL_joystick.h */,
 				FD99B8DF0DD52EB400FB1D6B /* SDL_keyboard.h */,
 				FD99B8E00DD52EB400FB1D6B /* SDL_keysym.h */,
@@ -716,23 +748,24 @@
 		FD99B8BD0DD52E6D00FB1D6B /* Library Source */ = {
 			isa = PBXGroup;
 			children = (
-				FD8BD8150E27E25900B52CD5 /* loadso */,
-				FDAAC4A10E2D4EC7001DB1D8 /* cdrom */,
-				FD5F9D080E0E08B3008E885B /* joystick */,
-				FDA682420DF2374D00F98A1A /* video */,
-				FD3F4A6F0DEA620800C5B771 /* stdlib */,
-				FD99B8FB0DD52EDC00FB1D6B /* audio */,
-				FD99B98A0DD52EDC00FB1D6B /* cpuinfo */,
-				FD99B98C0DD52EDC00FB1D6B /* events */,
-				FD99B99D0DD52EDC00FB1D6B /* file */,
 				FD99B9D30DD52EDC00FB1D6B /* SDL_compat.c */,
 				FD99B9D40DD52EDC00FB1D6B /* SDL_error_c.h */,
 				FD99B9D50DD52EDC00FB1D6B /* SDL_error.c */,
 				FD99B9D60DD52EDC00FB1D6B /* SDL_fatal.c */,
 				FD99B9D70DD52EDC00FB1D6B /* SDL_fatal.h */,
 				FD99B9D80DD52EDC00FB1D6B /* SDL.c */,
+				FD99B8FB0DD52EDC00FB1D6B /* audio */,
+				FDAAC4A10E2D4EC7001DB1D8 /* cdrom */,
+				FD99B98A0DD52EDC00FB1D6B /* cpuinfo */,
+				FD99B98C0DD52EDC00FB1D6B /* events */,
+				FD99B99D0DD52EDC00FB1D6B /* file */,
+				047677B60EA769DF008ABAF1 /* haptic */,
+				FD5F9D080E0E08B3008E885B /* joystick */,
+				FD8BD8150E27E25900B52CD5 /* loadso */,
+				FD3F4A6F0DEA620800C5B771 /* stdlib */,
 				FD99B9E00DD52EDC00FB1D6B /* thread */,
 				FD99BA1E0DD52EDC00FB1D6B /* timer */,
+				FDA682420DF2374D00F98A1A /* video */,
 			);
 			name = "Library Source";
 			sourceTree = "<group>";
@@ -1016,6 +1049,8 @@
 				0495E68B0E97408800152DFE /* SDL_glfuncs.h in Headers */,
 				0495E68D0E97408800152DFE /* SDL_renderer_gl.h in Headers */,
 				0495E68F0E97408800152DFE /* SDL_renderer_gles.h in Headers */,
+				047677BD0EA76A31008ABAF1 /* SDL_syshaptic.h in Headers */,
+				04461DEE0EA76BA3006C462D /* SDL_haptic.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1094,6 +1129,8 @@
 				0495E6910E97408800152DFE /* SDL_glfuncs.h in Headers */,
 				0495E6930E97408800152DFE /* SDL_renderer_gl.h in Headers */,
 				0495E6950E97408800152DFE /* SDL_renderer_gles.h in Headers */,
+				047677C00EA76A31008ABAF1 /* SDL_syshaptic.h in Headers */,
+				04461DEF0EA76BA3006C462D /* SDL_haptic.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1279,6 +1316,8 @@
 				FDC656480E560DF800311C8E /* jumphack.c in Sources */,
 				0495E68C0E97408800152DFE /* SDL_renderer_gl.c in Sources */,
 				0495E68E0E97408800152DFE /* SDL_renderer_gles.c in Sources */,
+				047677BB0EA76A31008ABAF1 /* SDL_syshaptic.c in Sources */,
+				047677BC0EA76A31008ABAF1 /* SDL_haptic.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1363,6 +1402,8 @@
 				FDC656460E560DF800311C8E /* jumphack.c in Sources */,
 				0495E6920E97408800152DFE /* SDL_renderer_gl.c in Sources */,
 				0495E6940E97408800152DFE /* SDL_renderer_gles.c in Sources */,
+				047677BE0EA76A31008ABAF1 /* SDL_syshaptic.c in Sources */,
+				047677BF0EA76A31008ABAF1 /* SDL_haptic.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
