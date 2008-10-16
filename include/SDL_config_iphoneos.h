@@ -32,47 +32,7 @@ typedef unsigned short uint16_t;
 typedef signed int int32_t;
 typedef unsigned int uint32_t;
 typedef unsigned long uintptr_t;
-
-/* enable iPhone keyboard support */
-#define SDL_IPHONE_KEYBOARD 1
-
-/* enable OpenGL ES */
-#define SDL_VIDEO_OPENGL_ES	1
-#define SDL_VIDEO_RENDER_OGL_ES	1
-
 #define SDL_HAS_64BIT_TYPE	1
-
-/* Enable various timer systems */
-#define SDL_TIMER_UNIX	1
-
-/* enable iPhone version of Core Audio driver */
-#define SDL_AUDIO_DRIVER_COREAUDIOIPHONE 1
-/* Enable the dummy audio driver (src/audio/dummy/\*.c) */
-#define SDL_AUDIO_DRIVER_DUMMY	1
-
-/* Enable Unix style SO loading */
-#define SDL_LOADSO_DLOPEN 1
-
-/* Enable the stub cdrom driver (src/cdrom/dummy/\*.c) */
-#define SDL_CDROM_DISABLED	1
-
-/* 
-	Set max recognized G-force from acceleromter
-	See src/joystick/uikit/SDLUIAccelerationDelegate.m for notes on why this is needed
- */
-#define SDL_IPHONE_MAX_GFORCE 5.0
-/* Enable emulation of multiple mice through multi-touch */
-#define SDL_IPHONE_MULTIPLE_MICE 1
-/* Enable the stub shared object loader (src/loadso/dummy/\*.c) */
-#define SDL_LOADSO_DISABLED	1
-
-/* Supported video drivers */
-#define SDL_VIDEO_DRIVER_UIKIT	1
-#define SDL_VIDEO_DRIVER_DUMMY	1
-
-/* Enable various threading systems */
-#define SDL_THREAD_PTHREAD	1
-#define SDL_THREAD_PTHREAD_RECURSIVE_MUTEX	1
 
 #define HAVE_ALLOCA_H		1
 #define HAVE_SYS_TYPES_H	1
@@ -125,5 +85,52 @@ typedef unsigned long uintptr_t;
 #define HAVE_SIGACTION	1
 #define HAVE_SETJMP	1
 #define HAVE_NANOSLEEP	1
+
+/* enable iPhone version of Core Audio driver */
+#define SDL_AUDIO_DRIVER_COREAUDIOIPHONE 1
+/* Enable the dummy audio driver (src/audio/dummy/\*.c) */
+#define SDL_AUDIO_DRIVER_DUMMY	1
+
+/* Enable the stub cdrom driver (src/cdrom/dummy/\*.c) */
+#define SDL_CDROM_DISABLED	1
+
+/* Enable the stub joystick driver (src/joystick/dummy/\*.c) */
+#define SDL_JOYSTICK_DISABLED	1
+
+/* Enable the stub haptic driver (src/haptic/dummy/\*.c) */
+#define SDL_HAPTIC_DISABLED	1
+
+/* Enable Unix style SO loading */
+/* Technically this works, but it violates the iPhone developer agreement */
+/* #define SDL_LOADSO_DLOPEN 1 */
+
+/* Enable the stub shared object loader (src/loadso/dummy/\*.c) */
+#define SDL_LOADSO_DISABLED	1
+
+/* Enable various threading systems */
+#define SDL_THREAD_PTHREAD	1
+#define SDL_THREAD_PTHREAD_RECURSIVE_MUTEX	1
+
+/* Enable various timer systems */
+#define SDL_TIMER_UNIX	1
+
+/* Supported video drivers */
+#define SDL_VIDEO_DRIVER_UIKIT	1
+#define SDL_VIDEO_DRIVER_DUMMY	1
+
+/* enable OpenGL ES */
+#define SDL_VIDEO_OPENGL_ES	1
+#define SDL_VIDEO_RENDER_OGL_ES	1
+
+/* enable iPhone keyboard support */
+#define SDL_IPHONE_KEYBOARD 1
+
+/* Enable emulation of multiple mice through multi-touch */
+#define SDL_IPHONE_MULTIPLE_MICE 1
+
+/* Set max recognized G-force from acceleromter
+   See src/joystick/uikit/SDLUIAccelerationDelegate.m for notes on why this is needed
+ */
+#define SDL_IPHONE_MAX_GFORCE 5.0
 
 #endif /* _SDL_config_iphoneos_h */

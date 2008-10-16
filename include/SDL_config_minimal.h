@@ -48,7 +48,7 @@ typedef unsigned long uintptr_t;
 #define SDL_JOYSTICK_DISABLED	1
 
 /* Enable the stub haptic driver (src/haptic/dummy/\*.c) */
-#define SDL_HAPTIC_DUMMY	1
+#define SDL_HAPTIC_DISABLED	1
 
 /* Enable the stub shared object loader (src/loadso/dummy/\*.c) */
 #define SDL_LOADSO_DISABLED	1
