@@ -31,6 +31,8 @@
 		047677BE0EA76A31008ABAF1 /* SDL_syshaptic.c in Sources */ = {isa = PBXBuildFile; fileRef = 047677B80EA76A31008ABAF1 /* SDL_syshaptic.c */; };
 		047677BF0EA76A31008ABAF1 /* SDL_haptic.c in Sources */ = {isa = PBXBuildFile; fileRef = 047677B90EA76A31008ABAF1 /* SDL_haptic.c */; };
 		047677C00EA76A31008ABAF1 /* SDL_syshaptic.h in Headers */ = {isa = PBXBuildFile; fileRef = 047677BA0EA76A31008ABAF1 /* SDL_syshaptic.h */; };
+		047AF1B30EA98D6C00811173 /* SDL_sysloadso.c in Sources */ = {isa = PBXBuildFile; fileRef = 047AF1B20EA98D6C00811173 /* SDL_sysloadso.c */; };
+		047AF1B40EA98D6C00811173 /* SDL_sysloadso.c in Sources */ = {isa = PBXBuildFile; fileRef = 047AF1B20EA98D6C00811173 /* SDL_sysloadso.c */; };
 		0495E68A0E97408800152DFE /* SDL_glesfuncs.h in Headers */ = {isa = PBXBuildFile; fileRef = 0495E6840E97408800152DFE /* SDL_glesfuncs.h */; };
 		0495E68B0E97408800152DFE /* SDL_glfuncs.h in Headers */ = {isa = PBXBuildFile; fileRef = 0495E6850E97408800152DFE /* SDL_glfuncs.h */; };
 		0495E68C0E97408800152DFE /* SDL_renderer_gl.c in Sources */ = {isa = PBXBuildFile; fileRef = 0495E6860E97408800152DFE /* SDL_renderer_gl.c */; };
@@ -351,6 +353,7 @@
 		047677B80EA76A31008ABAF1 /* SDL_syshaptic.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_syshaptic.c; sourceTree = "<group>"; };
 		047677B90EA76A31008ABAF1 /* SDL_haptic.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SDL_haptic.c; path = ../../src/haptic/SDL_haptic.c; sourceTree = SOURCE_ROOT; };
 		047677BA0EA76A31008ABAF1 /* SDL_syshaptic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_syshaptic.h; path = ../../src/haptic/SDL_syshaptic.h; sourceTree = SOURCE_ROOT; };
+		047AF1B20EA98D6C00811173 /* SDL_sysloadso.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_sysloadso.c; sourceTree = "<group>"; };
 		0495E6840E97408800152DFE /* SDL_glesfuncs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_glesfuncs.h; sourceTree = "<group>"; };
 		0495E6850E97408800152DFE /* SDL_glfuncs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_glfuncs.h; sourceTree = "<group>"; };
 		0495E6860E97408800152DFE /* SDL_renderer_gl.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_renderer_gl.c; sourceTree = "<group>"; };
@@ -562,6 +565,14 @@
 			path = ../../src/haptic/dummy;
 			sourceTree = SOURCE_ROOT;
 		};
+		047AF1B10EA98D6C00811173 /* dummy */ = {
+			isa = PBXGroup;
+			children = (
+				047AF1B20EA98D6C00811173 /* SDL_sysloadso.c */,
+			);
+			path = dummy;
+			sourceTree = "<group>";
+		};
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -682,6 +693,7 @@
 		FD8BD8150E27E25900B52CD5 /* loadso */ = {
 			isa = PBXGroup;
 			children = (
+				047AF1B10EA98D6C00811173 /* dummy */,
 				FD8BD8180E27E25900B52CD5 /* dlopen */,
 			);
 			name = loadso;
@@ -1318,6 +1330,7 @@
 				0495E68E0E97408800152DFE /* SDL_renderer_gles.c in Sources */,
 				047677BB0EA76A31008ABAF1 /* SDL_syshaptic.c in Sources */,
 				047677BC0EA76A31008ABAF1 /* SDL_haptic.c in Sources */,
+				047AF1B30EA98D6C00811173 /* SDL_sysloadso.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1404,6 +1417,7 @@
 				0495E6940E97408800152DFE /* SDL_renderer_gles.c in Sources */,
 				047677BE0EA76A31008ABAF1 /* SDL_syshaptic.c in Sources */,
 				047677BF0EA76A31008ABAF1 /* SDL_haptic.c in Sources */,
+				047AF1B40EA98D6C00811173 /* SDL_sysloadso.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
