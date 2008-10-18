@@ -73,4 +73,5 @@ SDL_UnloadObject(void *handle)
 }
 
 #endif /* SDL_LOADSO_OS2 */
+
 /* vi: set ts=4 sw=4 expandtab: */

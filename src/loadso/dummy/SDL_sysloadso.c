@@ -51,4 +51,5 @@ SDL_UnloadObject(void *handle)
 }
 
 #endif /* SDL_LOADSO_DUMMY || SDL_LOADSO_DISABLED */
+
 /* vi: set ts=4 sw=4 expandtab: */

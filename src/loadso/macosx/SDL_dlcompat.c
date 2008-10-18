@@ -1387,4 +1387,5 @@ SDL_UnloadObject(void *handle)
 }
 
 #endif /* SDL_LOADSO_DLCOMPAT */
+
 /* vi: set ts=4 sw=4 expandtab: */
