@@ -2139,7 +2139,7 @@ case "$host" in
             have_timers=yes
         fi
         ;;
-    *-*-linux*|*-*-uclinux*|*-*-gnu*|*-*-k*bsd*-gnu|*-*-bsdi*|*-*-freebsd*|*-*-dragonfly*|*-*-netbsd*|*-*-openbsd*|*-*-sysv5*|*-*-solaris*|*-*-hpux*|*-*-irix*|*-*-aix*|*-*-osf*)
+    *-*-linux*|*-*-uclinux*|*-*-gnu*|*-*-k*bsd*-gnu|*-*-bsdi*|*-*-freebsd*|*-*-dragonfly*|*-*-netbsd*|*-*-openbsd*|*-*-sysv5*|*-*-solaris*|*-*-hpux*|*-*-irix*|*-*-aix*|*-*-osf*|*-*-minix*)
         case "$host" in
             *-*-linux*)         ARCH=linux ;;
             *-*-uclinux*)       ARCH=linux ;;
@@ -2158,6 +2158,7 @@ case "$host" in
             *-*-irix*)          ARCH=irix ;;
             *-*-aix*)           ARCH=aix ;;
             *-*-osf*)           ARCH=osf ;;
+            *-*-minix*)         ARCH=minix ;;
         esac
         CheckVisibilityHidden
         CheckDummyVideo
