@@ -219,8 +219,9 @@ int SDL_SYS_JoystickInit(void)
 				TEST_JOY_ENABLED(envr, "ikbd-joy1", IKBD_JOY1);
 			}
 		}
-		/* Joypads ports only on STE and Falcon */
-		if ((cookie_mch == MCH_STE<<16) || (cookie_mch == MCH_F30<<16)) {
+		/* Joypads ports on STE, Falcon and maybe others */
+		if ((cookie_mch == MCH_STE<<16) || (cookie_mch == MCH_F30<<16) ||
+			(cookie_mch == MCH_ARANYM<<16)) {
 			TEST_JOY_ENABLED(envr, "porta-pad", PORTA_PAD0);
 			if (!atarijoysticks[PORTA_PAD0].enabled) {
 				TEST_JOY_ENABLED(envr, "porta-joy0", PORTA_JOY0);
@@ -437,7 +438,7 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 						numjoypad = 7;	break;
 				}				
 				
-				curstate=jp_joypads[numjoypad];
+				curstate=jp_joypads[numjoypad] & 0xabffff;
 				if (curstate!=prevstate) {
 					hatstate = SDL_HAT_CENTERED;
 					if (curstate & (1<<JP_LEFT)) {
