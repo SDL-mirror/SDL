@@ -651,6 +651,7 @@ SDL_Surface *GAPI_SetVideoMode(_THIS, SDL_Surface *current,
 	}
 
 	gapi->userOrientation = SDL_ORIENTATION_UP;
+       gapi->systemOrientation = SDL_ORIENTATION_UP;
 	video->flags = SDL_FULLSCREEN;	/* Clear flags, GAPI supports fullscreen only */
 
 	/* GAPI or VGA? */
@@ -669,18 +670,21 @@ SDL_Surface *GAPI_SetVideoMode(_THIS, SDL_Surface *current,
 	}
 
 	/* detect user landscape mode */
-	if( (width > height) && (GetSystemMetrics(SM_CXSCREEN) < GetSystemMetrics(SM_CYSCREEN))) 
+       if( (width > height) && (gapi->gxProperties.cxWidth < gapi->gxProperties.cyHeight))
 		gapi->userOrientation = SDL_ORIENTATION_RIGHT;
+
+       if(GetSystemMetrics(SM_CYSCREEN) < GetSystemMetrics(SM_CXSCREEN))
+               gapi->systemOrientation = SDL_ORIENTATION_RIGHT;
 
 	/* shall we apply hires fix? for example when we do not use hires resource */
 	gapi->hiresFix = 0;
-	if( gapi->userOrientation == SDL_ORIENTATION_RIGHT )
+       if( gapi->systemOrientation == gapi->userOrientation )
 	{
-		if( (width > GetSystemMetrics(SM_CYSCREEN)) || (height > GetSystemMetrics(SM_CXSCREEN)))
+               if( (width > GetSystemMetrics(SM_CXSCREEN)) || (height > GetSystemMetrics(SM_CYSCREEN)))
 			gapi->hiresFix = 1;
 	} else
-		if( (width > GetSystemMetrics(SM_CXSCREEN)) || (height > GetSystemMetrics(SM_CYSCREEN)))
-			if( !((width == GetSystemMetrics(SM_CYSCREEN)) && (height == GetSystemMetrics(SM_CXSCREEN)))) // user portrait, device landscape
+               if( (width > GetSystemMetrics(SM_CYSCREEN)) || (height > GetSystemMetrics(SM_CXSCREEN)))
+//                     if( !((width == gapi->gxProperties.cyHeight) && (height == gapi->gxProperties.cxWidth))) // user portrait, device landscape
 				gapi->hiresFix = 1;
 
 	switch( gapi->userOrientation )
@@ -750,21 +754,30 @@ SDL_Surface *GAPI_SetVideoMode(_THIS, SDL_Surface *current,
 	WIN_FlushMessageQueue();
 
 	/* Open GAPI display */
-	if( !gapi->useVga && this->hidden->useGXOpenDisplay )
+       if( !gapi->useVga && this->hidden->useGXOpenDisplay && !this->hidden->alreadyGXOpened )
+       {
+               this->hidden->alreadyGXOpened = 1;
 		if( !gapi->gxFunc.GXOpenDisplay(SDL_Window, GX_FULLSCREEN) )
 		{
 			SDL_SetError("Couldn't initialize GAPI");
 			return(NULL);
 		}
+       }
 
 #if REPORT_VIDEO_INFO
 	printf("Video properties:\n");
 	printf("display bpp: %d\n", gapi->gxProperties.cBPP);
 	printf("display width: %d\n", gapi->gxProperties.cxWidth);
 	printf("display height: %d\n", gapi->gxProperties.cyHeight);
+       printf("system display width: %d\n", GetSystemMetrics(SM_CXSCREEN));
+       printf("system display height: %d\n", GetSystemMetrics(SM_CYSCREEN));
 	printf("x pitch: %d\n", gapi->gxProperties.cbxPitch);
 	printf("y pitch: %d\n", gapi->gxProperties.cbyPitch);
 	printf("gapi flags: 0x%x\n", gapi->gxProperties.ffFormat);
+       printf("user orientation: %d\n", gapi->userOrientation);
+       printf("system orientation: %d\n", gapi->userOrientation);
+       printf("gapi orientation: %d\n", gapi->gapiOrientation);
+
 
 	if( !gapi->useVga && this->hidden->useGXOpenDisplay && gapi->needUpdate)
 	{

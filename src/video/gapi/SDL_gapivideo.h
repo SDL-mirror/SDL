@@ -126,21 +126,26 @@ typedef unsigned short PIXEL;
    begin with DIB private structure to allow DIB events code sharing
 */
 struct SDL_PrivateVideoData {
-    HBITMAP screen_bmp;
-    HPALETTE screen_pal;
+	HBITMAP screen_bmp;
+	HPALETTE screen_pal;
 
 #define NUM_MODELISTS	4		/* 8, 16, 24, and 32 bits-per-pixel */
-    int SDL_nummodes[NUM_MODELISTS];
-    SDL_Rect **SDL_modelist[NUM_MODELISTS];
+	int SDL_nummodes[NUM_MODELISTS];
+	SDL_Rect **SDL_modelist[NUM_MODELISTS];
+	// The orientation of the video mode user wants to get
+	// Probably restricted to UP and RIGHT
 	SDL_ScreenOrientation userOrientation;
 	int invert;
 	char hiresFix; // using hires mode without defining hires resource
 // --------------
 	int useGXOpenDisplay; /* use GXOpenDispplay */
-    int w, h;
+	int alreadyGXOpened;
+	int w, h;
+	// The orientation of GAPI framebuffer.
+	// Never changes on the same device.
 	SDL_ScreenOrientation gapiOrientation;
 
-    void *buffer; // may be 8, 16, 24, 32 bpp
+	void *buffer; // may be 8, 16, 24, 32 bpp
 	PIXEL *videoMem;
 	BOOL needUpdate;
 	struct GXKeyList keyList;
@@ -153,6 +158,10 @@ struct SDL_PrivateVideoData {
 	int startOffset; // in bytes
 	int useVga;
 	int suspended; // do not pu anything into video memory
+	// The orientation of the system, as defined by SM_CXSCREEN and SM_CYSCREEN
+	// User can change it by using 'screen layout' in system options
+	// Restricted to UP or RIGHT
+	enum SDL_ScreenOrientation systemOrientation;
 };
 
 

@@ -160,10 +160,22 @@ static void GapiTransform(SDL_ScreenOrientation rotate, char hires, Sint16 *x, S
 #endif */
 			}
 			break;
+               // FIXME: Older version used just SDL_VideoSurface->(w, h)
+               // w and h are "clipped" while x and y are "raw", which caused
+               // x in former and y in latter case to be clipped in a wrong direction,
+               // thus offsetting the coordinate on 2 x clip pixels
+               //     (like, 128 for 640 -> 512 clipping).
+               // We will now try to extract and use raw values.
+               // The way to do that RIGHT is do (orientation-dependent) clipping before
+               // doing this transform, but it's hardly possible.
+
+               // SEE SDL_mouse.c /ClipOffset to understand these calculations.
 		case SDL_ORIENTATION_RIGHT:
 			if (!SDL_VideoSurface)
 				break;
-			rotatedX = SDL_VideoSurface->w - *y;
+                       rotatedX = (2 * ((SDL_VideoSurface->offset%SDL_VideoSurface->pitch)/
+                               SDL_VideoSurface->format->BytesPerPixel))
+                               + SDL_VideoSurface->w - *y;
 			rotatedY = *x;
 			*x = rotatedX;
 			*y = rotatedY;
@@ -172,7 +184,8 @@ static void GapiTransform(SDL_ScreenOrientation rotate, char hires, Sint16 *x, S
 			if (!SDL_VideoSurface)
 				break;
 			rotatedX = *y;
-			rotatedY = SDL_VideoSurface->h - *x;
+                       rotatedY = (2 * (SDL_VideoSurface->offset/SDL_VideoSurface->pitch))
+                               + SDL_VideoSurface->h - *x;
 			*x = rotatedX;
 			*y = rotatedY;
 			break;
