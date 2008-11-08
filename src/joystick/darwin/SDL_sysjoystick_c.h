@@ -35,6 +35,7 @@
 struct recElement
 {
     IOHIDElementCookie cookie;  /* unique value which identifies element, will NOT change */
+    long usagePage, usage;      /* HID usage */
     long min;                   /* reported min value possible */
     long max;                   /* reported max value possible */
 #if 0

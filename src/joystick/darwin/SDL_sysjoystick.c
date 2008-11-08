@@ -331,20 +331,22 @@ HIDAddElement(CFTypeRef refElement, recDevice * pDevice)
     }
 
     if (element && headElement) {       /* add to list */
-        pDevice->elements++;
-        if (NULL == *headElement)
-            *headElement = element;
-        else {
-            recElement *elementPrevious, *elementCurrent;
-            elementCurrent = *headElement;
-            while (elementCurrent) {
-                elementPrevious = elementCurrent;
-                elementCurrent = elementPrevious->pNext;
-            }
-            elementPrevious->pNext = element;
+        recElement *elementPrevious = NULL;
+        recElement *elementCurrent = *headElement;
+        while (elementCurrent && usage >= elementCurrent->usage) {
+            elementPrevious = elementCurrent;
+            elementCurrent = elementCurrent->pNext;
         }
-        element->pNext = NULL;
+        if (elementPrevious) {
+            elementPrevious->pNext = element;
+        } else {
+            *headElement = element;
+        }
+        element->usagePage = usagePage;
+        element->usage = usage;
+        element->pNext = elementCurrent;
         HIDGetElementInfo(refElement, element);
+        pDevice->elements++;
     }
 }
 
