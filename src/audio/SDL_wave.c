@@ -440,6 +440,7 @@ SDL_AudioSpec * SDL_LoadWAV_RW (SDL_RWops *src, int freesrc,
 	do {
 		if ( chunk.data != NULL ) {
 			SDL_free(chunk.data);
+			chunk.data = NULL;
 		}
 		lenread = ReadChunk(src, &chunk);
 		if ( lenread < 0 ) {
@@ -522,6 +523,7 @@ SDL_AudioSpec * SDL_LoadWAV_RW (SDL_RWops *src, int freesrc,
 	do {
 		if ( *audio_buf != NULL ) {
 			SDL_free(*audio_buf);
+			*audio_buf = NULL;
 		}
 		lenread = ReadChunk(src, &chunk);
 		if ( lenread < 0 ) {
@@ -591,6 +593,7 @@ static int ReadChunk(SDL_RWops *src, Chunk *chunk)
 	if ( SDL_RWread(src, chunk->data, chunk->length, 1) != 1 ) {
 		SDL_Error(SDL_EFREAD);
 		SDL_free(chunk->data);
+		chunk->data = NULL;
 		return(-1);
 	}
 	return(chunk->length);

@@ -377,6 +377,7 @@ void SDL_SYS_CDQuit(void)
 	if ( SDL_numcds > 0 ) {
 		for ( i=0; i<SDL_numcds; ++i ) {
 			SDL_free(SDL_cdlist[i]);
+			SDL_cdlist[i] = NULL;
 		}
 		SDL_numcds = 0;
 	}

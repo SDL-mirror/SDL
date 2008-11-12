@@ -1294,5 +1294,6 @@ void SDL_FreeYUV_SW(_THIS, SDL_Overlay *overlay)
 			SDL_free(swdata->rgb_2_pix);
 		}
 		SDL_free(swdata);
+		overlay->hwdata = NULL;
 	}
 }

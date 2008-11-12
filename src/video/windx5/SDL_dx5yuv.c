@@ -290,6 +290,7 @@ void DX5_FreeYUVOverlay(_THIS, SDL_Overlay *overlay)
 			IDirectDrawSurface_Release(hwdata->surface);
 		}
 		SDL_free(hwdata);
+		overlay->hwdata = NULL;
 	}
 }
 
