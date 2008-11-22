@@ -34,6 +34,7 @@
 #include <OpenGL/OpenGL.h>
 #endif
 
+
 /* OpenGL renderer implementation */
 
 /* Details on optimizing the texture path on Mac OS X:
@@ -112,7 +113,8 @@ SDL_RenderDriver GL_RenderDriver = {
       SDL_PIXELFORMAT_BGR888,
       SDL_PIXELFORMAT_ARGB8888,
       SDL_PIXELFORMAT_ABGR8888,
-      SDL_PIXELFORMAT_ARGB2101010},
+      SDL_PIXELFORMAT_ARGB2101010,
+      SDL_PIXELFORMAT_UYVY},
      0,
      0}
 };
@@ -501,6 +503,20 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         internalFormat = GL_RGB10_A2;
         format = GL_BGRA;
         type = GL_UNSIGNED_INT_2_10_10_10_REV;
+        break;
+    case SDL_PIXELFORMAT_UYVY:
+//        if (renderdata->GL_MESA_ycbcr_texture) {
+//            internalFormat = 3;
+//            format = GL_YCBCR_MESA;
+//            type = GL_UNSIGNED_SHORT_8_8_MESA;
+//        } else if (renderdata->GL_APPLE_ycbcr_422) {
+            internalFormat = GL_RGB8;
+            format = GL_YCBCR_422_APPLE;
+            type = GL_UNSIGNED_SHORT_8_8_APPLE;
+//        } else {
+//            SDL_SetError("Unsupported texture format");
+//            return -1;
+//        }
         break;
     default:
         SDL_SetError("Unsupported texture format");
