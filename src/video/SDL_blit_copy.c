@@ -54,6 +54,9 @@ SDL_memcpySSE(Uint8 * dst, const Uint8 * src, int len)
 #endif /* __SSE__ */
 
 #ifdef __MMX__
+#ifdef _MSC_VER
+#pragma warning(disable:4799)
+#endif
 /* This assumes 8-byte aligned src and dst */
 static __inline__ void
 SDL_memcpyMMX(Uint8 * dst, const Uint8 * src, int len)
