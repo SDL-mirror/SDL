@@ -32,6 +32,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testoverlay", "testoverlay\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testoverlay2", "testoverlay2\testoverlay2.vcproj", "{B51E0D74-F0A2-45A2-BD2A-8B7D95B8204A}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testsprite", "testsprite\testsprite.vcproj", "{5D0930C0-7C91-4ECE-9014-7B7DDE9502E5}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testsprite2", "testsprite2\testsprite2.vcproj", "{40FB7794-D3C3-4CFE-BCF4-A80C96635682}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -102,6 +106,14 @@ Global
 		{B51E0D74-F0A2-45A2-BD2A-8B7D95B8204A}.Debug|Win32.Build.0 = Debug|Win32
 		{B51E0D74-F0A2-45A2-BD2A-8B7D95B8204A}.Release|Win32.ActiveCfg = Release|Win32
 		{B51E0D74-F0A2-45A2-BD2A-8B7D95B8204A}.Release|Win32.Build.0 = Release|Win32
+		{5D0930C0-7C91-4ECE-9014-7B7DDE9502E5}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5D0930C0-7C91-4ECE-9014-7B7DDE9502E5}.Debug|Win32.Build.0 = Debug|Win32
+		{5D0930C0-7C91-4ECE-9014-7B7DDE9502E5}.Release|Win32.ActiveCfg = Release|Win32
+		{5D0930C0-7C91-4ECE-9014-7B7DDE9502E5}.Release|Win32.Build.0 = Release|Win32
+		{40FB7794-D3C3-4CFE-BCF4-A80C96635682}.Debug|Win32.ActiveCfg = Debug|Win32
+		{40FB7794-D3C3-4CFE-BCF4-A80C96635682}.Debug|Win32.Build.0 = Debug|Win32
+		{40FB7794-D3C3-4CFE-BCF4-A80C96635682}.Release|Win32.ActiveCfg = Release|Win32
+		{40FB7794-D3C3-4CFE-BCF4-A80C96635682}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

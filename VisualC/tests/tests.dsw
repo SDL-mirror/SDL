@@ -147,6 +147,30 @@ Package=<4>
 
 ###############################################################################
 
+Project: "testsprite"=".\sprite\sprite.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "testsprite2"=".\testsprite2\testsprite2.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "testvidinfo"=".\testvidinfo\testvidinfo.dsp" - Package Owner=<4>
 
 Package=<5>
