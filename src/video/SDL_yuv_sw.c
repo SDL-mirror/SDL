@@ -91,9 +91,9 @@
 
 struct SDL_SW_YUVTexture
 {
-    SDL_Texture *texture;
-
+	Uint32 format;
     Uint32 target_format;
+	int w, h;
     Uint8 *pixels;
     int *colortab;
     Uint32 *rgb_2_pix;
@@ -974,7 +974,7 @@ SDL_SW_SetupYUVDisplay(SDL_SW_YUVTexture * swdata, Uint32 target_format)
     }
 
     /* You have chosen wisely... */
-    switch (swdata->texture->format) {
+    switch (swdata->format) {
     case SDL_PIXELFORMAT_YV12:
     case SDL_PIXELFORMAT_IYUV:
         if (SDL_BYTESPERPIXEL(target_format) == 2) {
@@ -982,7 +982,7 @@ SDL_SW_SetupYUVDisplay(SDL_SW_YUVTexture * swdata, Uint32 target_format)
             /* inline assembly functions */
             if (SDL_HasMMX() && (Rmask == 0xF800) &&
                 (Gmask == 0x07E0) && (Bmask == 0x001F)
-                && (swdata->texture->w & 15) == 0) {
+                && (swdata->w & 15) == 0) {
 /*printf("Using MMX 16-bit 565 dither\n");*/
                 swdata->Display1X = Color565DitherYV12MMX1X;
             } else {
@@ -1003,7 +1003,7 @@ SDL_SW_SetupYUVDisplay(SDL_SW_YUVTexture * swdata, Uint32 target_format)
             /* inline assembly functions */
             if (SDL_HasMMX() && (Rmask == 0x00FF0000) &&
                 (Gmask == 0x0000FF00) &&
-                (Bmask == 0x000000FF) && (swdata->texture->w & 15) == 0) {
+                (Bmask == 0x000000FF) && (swdata->w & 15) == 0) {
 /*printf("Using MMX 32-bit dither\n");*/
                 swdata->Display1X = ColorRGBDitherYV12MMX1X;
             } else {
@@ -1045,7 +1045,7 @@ SDL_SW_SetupYUVDisplay(SDL_SW_YUVTexture * swdata, Uint32 target_format)
 }
 
 SDL_SW_YUVTexture *
-SDL_SW_CreateYUVTexture(SDL_Texture * texture)
+SDL_SW_CreateYUVTexture(Uint32 format, int w, int h)
 {
     SDL_SW_YUVTexture *swdata;
     int *Cr_r_tab;
@@ -1061,7 +1061,7 @@ SDL_SW_CreateYUVTexture(SDL_Texture * texture)
         return NULL;
     }
 
-    switch (texture->format) {
+    switch (format) {
     case SDL_PIXELFORMAT_YV12:
     case SDL_PIXELFORMAT_IYUV:
     case SDL_PIXELFORMAT_YUY2:
@@ -1073,9 +1073,11 @@ SDL_SW_CreateYUVTexture(SDL_Texture * texture)
         return NULL;
     }
 
-    swdata->texture = texture;
+    swdata->format = format;
     swdata->target_format = SDL_PIXELFORMAT_UNKNOWN;
-    swdata->pixels = (Uint8 *) SDL_malloc(texture->w * texture->h * 2);
+	swdata->w = w;
+	swdata->h = h;
+    swdata->pixels = (Uint8 *) SDL_malloc(w * h * 2);
     swdata->colortab = (int *) SDL_malloc(4 * 256 * sizeof(int));
     swdata->rgb_2_pix = (Uint32 *) SDL_malloc(3 * 768 * sizeof(Uint32));
     if (!swdata->pixels || !swdata->colortab || !swdata->rgb_2_pix) {
@@ -1101,22 +1103,22 @@ SDL_SW_CreateYUVTexture(SDL_Texture * texture)
     }
 
     /* Find the pitch and offset values for the overlay */
-    switch (texture->format) {
+    switch (format) {
     case SDL_PIXELFORMAT_YV12:
     case SDL_PIXELFORMAT_IYUV:
-        swdata->pitches[0] = texture->w;
+        swdata->pitches[0] = w;
         swdata->pitches[1] = swdata->pitches[0] / 2;
         swdata->pitches[2] = swdata->pitches[0] / 2;
         swdata->planes[0] = swdata->pixels;
         swdata->planes[1] =
-            swdata->planes[0] + swdata->pitches[0] * texture->h;
+            swdata->planes[0] + swdata->pitches[0] * h;
         swdata->planes[2] =
-            swdata->planes[1] + swdata->pitches[1] * texture->h / 2;
+            swdata->planes[1] + swdata->pitches[1] * h / 2;
         break;
     case SDL_PIXELFORMAT_YUY2:
     case SDL_PIXELFORMAT_UYVY:
     case SDL_PIXELFORMAT_YVYU:
-        swdata->pitches[0] = texture->w * 2;
+        swdata->pitches[0] = w * 2;
         swdata->planes[0] = swdata->pixels;
         break;
     default:
@@ -1141,19 +1143,17 @@ int
 SDL_SW_UpdateYUVTexture(SDL_SW_YUVTexture * swdata, const SDL_Rect * rect,
                         const void *pixels, int pitch)
 {
-    SDL_Texture *texture = swdata->texture;
-
-    switch (texture->format) {
+    switch (swdata->format) {
     case SDL_PIXELFORMAT_YV12:
     case SDL_PIXELFORMAT_IYUV:
         if (rect
-            && (rect->x != 0 || rect->y != 0 || rect->w != texture->w
-                || rect->h != texture->h)) {
+            && (rect->x != 0 || rect->y != 0 || rect->w != swdata->w
+                || rect->h != swdata->h)) {
             SDL_SetError
                 ("YV12 and IYUV textures only support full surface updates");
             return -1;
         }
-        SDL_memcpy(swdata->pixels, pixels, texture->h * texture->w * 2);
+        SDL_memcpy(swdata->pixels, pixels, swdata->h * swdata->w * 2);
         break;
     case SDL_PIXELFORMAT_YUY2:
     case SDL_PIXELFORMAT_UYVY:
@@ -1183,14 +1183,12 @@ int
 SDL_SW_LockYUVTexture(SDL_SW_YUVTexture * swdata, const SDL_Rect * rect,
                       int markDirty, void **pixels, int *pitch)
 {
-    SDL_Texture *texture = swdata->texture;
-
-    switch (texture->format) {
+    switch (swdata->format) {
     case SDL_PIXELFORMAT_YV12:
     case SDL_PIXELFORMAT_IYUV:
         if (rect
-            && (rect->x != 0 || rect->y != 0 || rect->w != texture->w
-                || rect->h != texture->h)) {
+            && (rect->x != 0 || rect->y != 0 || rect->w != swdata->w
+                || rect->h != swdata->h)) {
             SDL_SetError
                 ("YV12 and IYUV textures only support full surface locks");
             return -1;
@@ -1213,7 +1211,6 @@ SDL_SW_CopyYUVToRGB(SDL_SW_YUVTexture * swdata, const SDL_Rect * srcrect,
                     Uint32 target_format, int w, int h, void *pixels,
                     int pitch)
 {
-    SDL_Texture *texture = swdata->texture;
     int stretch;
     int scale_2x;
     Uint8 *lum, *Cr, *Cb;
@@ -1228,8 +1225,8 @@ SDL_SW_CopyYUVToRGB(SDL_SW_YUVTexture * swdata, const SDL_Rect * srcrect,
 
     stretch = 0;
     scale_2x = 0;
-    if (srcrect->x || srcrect->y || srcrect->w < texture->w
-        || srcrect->h < texture->h) {
+    if (srcrect->x || srcrect->y || srcrect->w < swdata->w
+        || srcrect->h < swdata->h) {
         /* The source rectangle has been clipped.
            Using a scratch surface is easier than adding clipped
            source support to all the blitters, plus that would
@@ -1268,7 +1265,7 @@ SDL_SW_CopyYUVToRGB(SDL_SW_YUVTexture * swdata, const SDL_Rect * srcrect,
             SDL_PixelFormatEnumToMasks(target_format, &bpp, &Rmask, &Gmask,
                                        &Bmask, &Amask);
             swdata->stretch =
-                SDL_CreateRGBSurface(0, texture->w, texture->h, bpp, Rmask,
+                SDL_CreateRGBSurface(0, swdata->w, swdata->h, bpp, Rmask,
                                      Gmask, Bmask, Amask);
             if (!swdata->stretch) {
                 return (-1);
@@ -1277,7 +1274,7 @@ SDL_SW_CopyYUVToRGB(SDL_SW_YUVTexture * swdata, const SDL_Rect * srcrect,
         pixels = swdata->stretch->pixels;
         pitch = swdata->stretch->pitch;
     }
-    switch (texture->format) {
+    switch (swdata->format) {
     case SDL_PIXELFORMAT_YV12:
         lum = swdata->planes[0];
         Cr = swdata->planes[1];
@@ -1310,13 +1307,13 @@ SDL_SW_CopyYUVToRGB(SDL_SW_YUVTexture * swdata, const SDL_Rect * srcrect,
     mod = (pitch / SDL_BYTESPERPIXEL(target_format));
 
     if (scale_2x) {
-        mod -= (texture->w * 2);
+        mod -= (swdata->w * 2);
         swdata->Display2X(swdata->colortab, swdata->rgb_2_pix,
-                          lum, Cr, Cb, pixels, texture->h, texture->w, mod);
+                          lum, Cr, Cb, pixels, swdata->h, swdata->w, mod);
     } else {
-        mod -= texture->w;
+        mod -= swdata->w;
         swdata->Display1X(swdata->colortab, swdata->rgb_2_pix,
-                          lum, Cr, Cb, pixels, texture->h, texture->w, mod);
+                          lum, Cr, Cb, pixels, swdata->h, swdata->w, mod);
     }
     if (stretch) {
         SDL_Rect rect = *srcrect;

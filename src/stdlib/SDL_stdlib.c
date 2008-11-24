@@ -90,7 +90,6 @@ localexit:
 }
 
 void
-__declspec(naked)
 _ftol2_sse()
 {
     _ftol();

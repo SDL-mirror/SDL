@@ -28,6 +28,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testgl2", "testgl2\testgl2.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "checkkeys", "checkkeys\checkkeys.vcproj", "{26828762-C95D-4637-9CB1-7F0979523813}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testoverlay", "testoverlay\testoverlay.vcproj", "{9E320A14-B443-4DD7-8725-B7020DCFF730}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testoverlay2", "testoverlay2\testoverlay2.vcproj", "{B51E0D74-F0A2-45A2-BD2A-8B7D95B8204A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -90,6 +94,14 @@ Global
 		{26828762-C95D-4637-9CB1-7F0979523813}.Debug|Win32.Build.0 = Debug|Win32
 		{26828762-C95D-4637-9CB1-7F0979523813}.Release|Win32.ActiveCfg = Release|Win32
 		{26828762-C95D-4637-9CB1-7F0979523813}.Release|Win32.Build.0 = Release|Win32
+		{9E320A14-B443-4DD7-8725-B7020DCFF730}.Debug|Win32.ActiveCfg = Debug|Win32
+		{9E320A14-B443-4DD7-8725-B7020DCFF730}.Debug|Win32.Build.0 = Debug|Win32
+		{9E320A14-B443-4DD7-8725-B7020DCFF730}.Release|Win32.ActiveCfg = Release|Win32
+		{9E320A14-B443-4DD7-8725-B7020DCFF730}.Release|Win32.Build.0 = Release|Win32
+		{B51E0D74-F0A2-45A2-BD2A-8B7D95B8204A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B51E0D74-F0A2-45A2-BD2A-8B7D95B8204A}.Debug|Win32.Build.0 = Debug|Win32
+		{B51E0D74-F0A2-45A2-BD2A-8B7D95B8204A}.Release|Win32.ActiveCfg = Release|Win32
+		{B51E0D74-F0A2-45A2-BD2A-8B7D95B8204A}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

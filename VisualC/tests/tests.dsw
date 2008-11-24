@@ -99,6 +99,30 @@ Package=<4>
 
 ###############################################################################
 
+Project: "testoverlay"=".\testoverlay\testoverlay.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "testoverlay2"=".\testoverlay2\testoverlay2.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "testpalette"=".\testpalette\testpalette.dsp" - Package Owner=<4>
 
 Package=<5>
