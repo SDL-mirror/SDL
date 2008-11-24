@@ -81,11 +81,4 @@ SDL_WaitThread(SDL_Thread * thread, int *status)
     }
 }
 
-/* WARNING:  This may not work for systems with 64-bit pid_t */
-void
-SDL_KillThread(SDL_Thread * thread)
-{
-    kill(thread->handle, SIGKILL);
-}
-
 /* vi: set ts=4 sw=4 expandtab: */

@@ -102,14 +102,4 @@ SDL_SYS_WaitThread(SDL_Thread * thread)
     DosWaitThread(&tid, DCWW_WAIT);
 }
 
-/* WARNING: This function is really a last resort.
- * Threads should be signaled and then exit by themselves.
- * TerminateThread() doesn't perform stack and DLL cleanup.
- */
-void
-SDL_SYS_KillThread(SDL_Thread * thread)
-{
-    DosKillThread(thread->handle);
-}
-
 /* vi: set ts=4 sw=4 expandtab: */

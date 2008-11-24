@@ -63,18 +63,8 @@ main(int argc, char *argv[])
     SDL_WaitThread(thread, NULL);
 
     alive = 1;
-    thread = SDL_CreateThread(ThreadFunc, "#2");
-    if (thread == NULL) {
-        fprintf(stderr, "Couldn't create thread: %s\n", SDL_GetError());
-        quit(1);
-    }
-    SDL_Delay(5 * 1000);
-    printf("Killing thread #2\n");
-    SDL_KillThread(thread);
-
-    alive = 1;
     signal(SIGTERM, killed);
-    thread = SDL_CreateThread(ThreadFunc, "#3");
+    thread = SDL_CreateThread(ThreadFunc, "#2");
     if (thread == NULL) {
         fprintf(stderr, "Couldn't create thread: %s\n", SDL_GetError());
         quit(1);

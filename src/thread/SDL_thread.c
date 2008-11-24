@@ -306,10 +306,7 @@ SDL_GetThreadID(SDL_Thread * thread)
 void
 SDL_KillThread(SDL_Thread * thread)
 {
-    if (thread) {
-        SDL_SYS_KillThread(thread);
-        SDL_WaitThread(thread, NULL);
-    }
+    /* This is a no-op in SDL 1.3 and later. */
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

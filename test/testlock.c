@@ -44,8 +44,9 @@ closemutex(int sig)
     Uint32 id = SDL_ThreadID();
     int i;
     printf("Process %u:  Cleaning up...\n", id == mainthread ? 0 : id);
+    doterminate = 1;
     for (i = 0; i < 6; ++i)
-        SDL_KillThread(threads[i]);
+        SDL_WaitThread(threads[i], NULL);
     SDL_DestroyMutex(mutex);
     exit(sig);
 }
@@ -55,7 +56,7 @@ Run(void *data)
 {
     if (SDL_ThreadID() == mainthread)
         signal(SIGTERM, closemutex);
-    while (1) {
+    while (!doterminate) {
         printf("Process %u ready to work\n", SDL_ThreadID());
         if (SDL_mutexP(mutex) < 0) {
             fprintf(stderr, "Couldn't lock mutex: %s", SDL_GetError());
@@ -70,10 +71,10 @@ Run(void *data)
         }
         /* If this sleep isn't done, then threads may starve */
         SDL_Delay(10);
-        if (SDL_ThreadID() == mainthread && doterminate) {
-            printf("Process %u:  raising SIGTERM\n", SDL_ThreadID());
-            raise(SIGTERM);
-        }
+    }
+    if (SDL_ThreadID() == mainthread && doterminate) {
+        printf("Process %u:  raising SIGTERM\n", SDL_ThreadID());
+        raise(SIGTERM);
     }
     return (0);
 }

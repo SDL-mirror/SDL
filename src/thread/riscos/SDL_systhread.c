@@ -54,12 +54,6 @@ SDL_SYS_WaitThread(SDL_Thread * thread)
     return;
 }
 
-void
-SDL_SYS_KillThread(SDL_Thread * thread)
-{
-    return;
-}
-
 #else
 
 #include <signal.h>
@@ -141,16 +135,6 @@ void
 SDL_SYS_WaitThread(SDL_Thread * thread)
 {
     pthread_join(thread->handle, 0);
-}
-
-void
-SDL_SYS_KillThread(SDL_Thread * thread)
-{
-#ifdef PTHREAD_CANCEL_ASYNCHRONOUS
-    pthread_cancel(thread->handle);
-#else
-    pthread_kill(thread->handle, SIGKILL);
-#endif
 }
 
 #endif

@@ -122,7 +122,12 @@ extern DECLSPEC Uint32 SDLCALL SDL_GetThreadID(SDL_Thread * thread);
  */
 extern DECLSPEC void SDLCALL SDL_WaitThread(SDL_Thread * thread, int *status);
 
-/* Forcefully kill a thread without worrying about its state */
+/* This function is here for binary compatibility with legacy apps, but
+   in SDL 1.3 and later, it's a no-op. You cannot forcibly kill a thread
+   in a safe manner on many platforms. You should instead find a way to
+   alert your thread that it is time to terminate, and then have it gracefully
+   exit on its own. Do not ever call this function!
+ */
 extern DECLSPEC void SDLCALL SDL_KillThread(SDL_Thread * thread);
 
 

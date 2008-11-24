@@ -98,10 +98,4 @@ SDL_SYS_WaitThread(SDL_Thread * thread)
     wait_for_thread(thread->handle, &the_status);
 }
 
-void
-SDL_SYS_KillThread(SDL_Thread * thread)
-{
-    kill_thread(thread->handle);
-}
-
 /* vi: set ts=4 sw=4 expandtab: */

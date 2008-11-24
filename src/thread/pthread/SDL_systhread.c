@@ -112,17 +112,4 @@ SDL_SYS_WaitThread(SDL_Thread * thread)
     pthread_join(thread->handle, 0);
 }
 
-void
-SDL_SYS_KillThread(SDL_Thread * thread)
-{
-#ifdef PTHREAD_CANCEL_ASYNCHRONOUS
-    pthread_cancel(thread->handle);
-#else
-#ifdef __FREEBSD__
-#warning For some reason, this doesnt actually kill a thread - FreeBSD 3.2
-#endif
-    pthread_kill(thread->handle, SIGKILL);
-#endif
-}
-
 /* vi: set ts=4 sw=4 expandtab: */

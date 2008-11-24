@@ -101,11 +101,4 @@ SDL_SYS_WaitThread(SDL_Thread * thread)
     pth_join(thread->handle, NULL);
 }
 
-void
-SDL_SYS_KillThread(SDL_Thread * thread)
-{
-    pth_cancel(thread->handle);
-    pth_join(thread->handle, NULL);
-}
-
 /* vi: set ts=4 sw=4 expandtab: */
