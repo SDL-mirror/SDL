@@ -46,6 +46,9 @@
 #endif
 #endif /* SDL_VIDEO_OPENGL */
 
+/* From SDL_surface.c */
+extern void SDL_ConvertColorkeyToAlpha(SDL_Surface *surface);
+
 /* Available video drivers */
 static VideoBootStrap *bootstrap[] = {
 #if SDL_VIDEO_DRIVER_COCOA
@@ -1585,6 +1588,7 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
             }
             dst = SDL_ConvertSurface(surface, dst_fmt, 0);
             if (dst) {
+				SDL_ConvertColorkeyToAlpha(dst);
                 SDL_UpdateTexture(textureID, NULL, dst->pixels, dst->pitch);
                 SDL_FreeSurface(dst);
             }
