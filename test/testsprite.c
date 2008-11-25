@@ -311,8 +311,8 @@ main(int argc, char *argv[])
     /* Print out some timing information */
     now = SDL_GetTicks();
     if (now > then) {
-        printf("%2.2f frames per second\n",
-               ((double) frames * 1000) / (now - then));
+		double fps = ((double) frames * 1000) / (now - then);
+        printf("%2.2f frames per second\n", fps);
     }
     SDL_Quit();
     return (0);
