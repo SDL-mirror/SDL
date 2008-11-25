@@ -488,10 +488,19 @@ SDL_GetClosestDisplayMode(const SDL_DisplayMode * mode,
     for (i = 0; i < SDL_GetNumDisplayModes(); ++i) {
         current = &SDL_CurrentDisplay.display_modes[i];
 
-        if ((current->w && current->h) &&
-            (current->w < mode->w || current->h < mode->h)) {
+        if (current->w && (current->w < mode->w)) {
             /* Out of sorted modes large enough here */
             break;
+        }
+        if (current->h && (current->h < mode->h)) {
+            if (current->w && (current->w == mode->w)) {
+                /* Out of sorted modes large enough here */
+                break;
+            }
+            /* Wider, but not tall enough, due to a different
+               aspect ratio. This mode must be skipped, but closer
+               modes may still follow. */
+            continue;
         }
         if (!match || current->w < match->w || current->h < match->h) {
             match = current;
