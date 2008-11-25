@@ -27,6 +27,14 @@
 
 /* Direct3D renderer implementation */
 
+#if 1 /* This takes more memory but you won't lose your texture data */
+#define D3DPOOL_SDL	D3DPOOL_MANAGED
+#define SDL_MEMORY_POOL_MANAGED
+#else
+#define D3DPOOL_SDL	D3DPOOL_DEFAULT
+#define SDL_MEMORY_POOL_DEFAULT
+#endif
+
 static SDL_Renderer *D3D_CreateRenderer(SDL_Window * window, Uint32 flags);
 static int D3D_DisplayModeChanged(SDL_Renderer * renderer);
 static int D3D_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture);
@@ -473,7 +481,7 @@ D3D_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         IDirect3DDevice9_CreateTexture(renderdata->device, texture->w,
                                        texture->h, 1, 0,
                                        PixelFormatToD3DFMT(texture->format),
-                                       D3DPOOL_MANAGED, &data->texture, NULL);
+                                       D3DPOOL_SDL, &data->texture, NULL);
     if (FAILED(result)) {
         D3D_SetError("CreateTexture()", result);
         return -1;
@@ -547,6 +555,7 @@ D3D_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture)
     return 0;
 }
 
+#ifdef SDL_MEMORY_POOL_DEFAULT
 static int
 D3D_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                   const SDL_Rect * rect, const void *pixels, int pitch)
@@ -605,6 +614,43 @@ D3D_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
     }
     return 0;
 }
+#else
+static int
+D3D_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
+                  const SDL_Rect * rect, const void *pixels, int pitch)
+{
+    D3D_TextureData *data = (D3D_TextureData *) texture->driverdata;
+    D3D_RenderData *renderdata = (D3D_RenderData *) renderer->driverdata;
+    RECT d3drect;
+    D3DLOCKED_RECT locked;
+    const Uint8 *src;
+    Uint8 *dst;
+    int row, length;
+    HRESULT result;
+
+    d3drect.left = rect->x;
+    d3drect.right = rect->x + rect->w;
+    d3drect.top = rect->y;
+    d3drect.bottom = rect->y + rect->h;
+
+    result = IDirect3DTexture9_LockRect(data->texture, 0, &locked, &d3drect, 0);
+    if (FAILED(result)) {
+        D3D_SetError("LockRect()", result);
+        return -1;
+    }
+
+    src = pixels;
+    dst = locked.pBits;
+    length = rect->w * SDL_BYTESPERPIXEL(texture->format);
+    for (row = 0; row < rect->h; ++row) {
+        SDL_memcpy(dst, src, length);
+        src += pitch;
+        dst += locked.Pitch;
+    }
+    IDirect3DTexture9_UnlockRect(data->texture, 0);
+    return 0;
+}
+#endif // SDL_MEMORY_POOL_DEFAULT
 
 static int
 D3D_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,

@@ -83,7 +83,7 @@ MoveSprites(SDL_WindowID window, SDL_TextureID sprite)
 {
     int i, n;
     int window_w, window_h;
-    SDL_Rect area, *position, *velocity;
+    SDL_Rect *position, *velocity;
 
     SDL_SelectRenderer(window);
 
@@ -291,8 +291,8 @@ main(int argc, char *argv[])
     /* Print out some timing information */
     now = SDL_GetTicks();
     if (now > then) {
-        printf("%2.2f frames per second\n",
-               ((double) frames * 1000) / (now - then));
+		double fps = ((double) frames * 1000) / (now - then);
+        printf("%2.2f frames per second\n", fps);
     }
     quit(0);
 }
