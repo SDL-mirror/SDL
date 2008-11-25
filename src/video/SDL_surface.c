@@ -270,7 +270,7 @@ SDL_SetColorKey(SDL_Surface * surface, Uint32 flag, Uint32 key)
 }
 
 /* This is a fairly slow function to switch from colorkey to alpha */
-void
+static void
 SDL_ConvertColorkeyToAlpha(SDL_Surface * surface)
 {
     int x, y;
@@ -813,6 +813,7 @@ SDL_ConvertSurface(SDL_Surface * surface,
                     &keyG, &keyB, &keyA);
         SDL_SetColorKey(convert, 1,
                         SDL_MapRGBA(convert->format, keyR, keyG, keyB, keyA));
+        SDL_ConvertColorkeyToAlpha(convert);
     }
     convert->map->info.r = surface->map->info.r;
     convert->map->info.g = surface->map->info.g;
