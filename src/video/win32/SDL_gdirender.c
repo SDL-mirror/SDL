@@ -294,7 +294,8 @@ GDI_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     texture->driverdata = data;
 
     if (SDL_ISPIXELFORMAT_FOURCC(texture->format)) {
-        data->yuv = SDL_SW_CreateYUVTexture(texture->format, texture->w, texture->h);
+        data->yuv =
+            SDL_SW_CreateYUVTexture(texture->format, texture->w, texture->h);
         if (!data->yuv) {
             return -1;
         }

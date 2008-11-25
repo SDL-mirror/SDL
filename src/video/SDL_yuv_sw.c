@@ -91,9 +91,9 @@
 
 struct SDL_SW_YUVTexture
 {
-	Uint32 format;
+    Uint32 format;
     Uint32 target_format;
-	int w, h;
+    int w, h;
     Uint8 *pixels;
     int *colortab;
     Uint32 *rgb_2_pix;
@@ -1075,8 +1075,8 @@ SDL_SW_CreateYUVTexture(Uint32 format, int w, int h)
 
     swdata->format = format;
     swdata->target_format = SDL_PIXELFORMAT_UNKNOWN;
-	swdata->w = w;
-	swdata->h = h;
+    swdata->w = w;
+    swdata->h = h;
     swdata->pixels = (Uint8 *) SDL_malloc(w * h * 2);
     swdata->colortab = (int *) SDL_malloc(4 * 256 * sizeof(int));
     swdata->rgb_2_pix = (Uint32 *) SDL_malloc(3 * 768 * sizeof(Uint32));
@@ -1110,10 +1110,8 @@ SDL_SW_CreateYUVTexture(Uint32 format, int w, int h)
         swdata->pitches[1] = swdata->pitches[0] / 2;
         swdata->pitches[2] = swdata->pitches[0] / 2;
         swdata->planes[0] = swdata->pixels;
-        swdata->planes[1] =
-            swdata->planes[0] + swdata->pitches[0] * h;
-        swdata->planes[2] =
-            swdata->planes[1] + swdata->pitches[1] * h / 2;
+        swdata->planes[1] = swdata->planes[0] + swdata->pitches[0] * h;
+        swdata->planes[2] = swdata->planes[1] + swdata->pitches[1] * h / 2;
         break;
     case SDL_PIXELFORMAT_YUY2:
     case SDL_PIXELFORMAT_UYVY:

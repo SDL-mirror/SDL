@@ -271,68 +271,68 @@ SDL_SetColorKey(SDL_Surface * surface, Uint32 flag, Uint32 key)
 
 /* This is a fairly slow function to switch from colorkey to alpha */
 void
-SDL_ConvertColorkeyToAlpha(SDL_Surface *surface)
+SDL_ConvertColorkeyToAlpha(SDL_Surface * surface)
 {
-	int x, y;
+    int x, y;
 
-	if (!surface) {
-		return;
-	}
+    if (!surface) {
+        return;
+    }
 
-	if (!(surface->map->info.flags & SDL_COPY_COLORKEY) ||
-	    !surface->format->Amask) {
-		return;
-	}
+    if (!(surface->map->info.flags & SDL_COPY_COLORKEY) ||
+        !surface->format->Amask) {
+        return;
+    }
 
-	SDL_LockSurface(surface);
+    SDL_LockSurface(surface);
 
-	switch (surface->format->BytesPerPixel) {
-	case 2:
-		{
-			Uint16 *row, *spot;
-			Uint16 ckey = (Uint16)surface->map->info.colorkey;
-			Uint16 mask = (Uint16)(~surface->format->Amask);
+    switch (surface->format->BytesPerPixel) {
+    case 2:
+        {
+            Uint16 *row, *spot;
+            Uint16 ckey = (Uint16) surface->map->info.colorkey;
+            Uint16 mask = (Uint16) (~surface->format->Amask);
 
-			row = (Uint16 *)surface->pixels;
-			for (y = surface->h; y--; ) {
-				spot = row;
-				for (x = surface->w; x--; ) {
-					if (*spot == ckey) {
-						*spot &= mask;
-					}
-					++spot;
-				}
-				row += surface->pitch / 2;
-			}
-		}
-		break;
-	case 3:
-		/* FIXME */
-		break;
-	case 4:
-		{
-			Uint32 *row, *spot;
-			Uint32 ckey = surface->map->info.colorkey;
-			Uint32 mask = ~surface->format->Amask;
+            row = (Uint16 *) surface->pixels;
+            for (y = surface->h; y--;) {
+                spot = row;
+                for (x = surface->w; x--;) {
+                    if (*spot == ckey) {
+                        *spot &= mask;
+                    }
+                    ++spot;
+                }
+                row += surface->pitch / 2;
+            }
+        }
+        break;
+    case 3:
+        /* FIXME */
+        break;
+    case 4:
+        {
+            Uint32 *row, *spot;
+            Uint32 ckey = surface->map->info.colorkey;
+            Uint32 mask = ~surface->format->Amask;
 
-			row = (Uint32 *)surface->pixels;
-			for (y = surface->h; y--; ) {
-				spot = row;
-				for (x = surface->w; x--; ) {
-					if (*spot == ckey) {
-						*spot &= mask;
-					}
-					++spot;
-				}
-				row += surface->pitch / 4;
-			}
-		}
-		break;
-	}
+            row = (Uint32 *) surface->pixels;
+            for (y = surface->h; y--;) {
+                spot = row;
+                for (x = surface->w; x--;) {
+                    if (*spot == ckey) {
+                        *spot &= mask;
+                    }
+                    ++spot;
+                }
+                row += surface->pitch / 4;
+            }
+        }
+        break;
+    }
 
-	SDL_UnlockSurface(surface);
+    SDL_UnlockSurface(surface);
 
-	SDL_SetColorKey(surface, 0, 0);
+    SDL_SetColorKey(surface, 0, 0);
 }
 
 int

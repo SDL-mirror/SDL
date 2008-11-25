@@ -105,11 +105,11 @@ static BOOL CALLBACK DI_EffectCallback(LPCDIEFFECTINFO pei, LPVOID pv);
 static void
 DI_SetError(const char *str, HRESULT err)
 {
-	/*
-    SDL_SetError("Haptic: %s - %s: %s", str,
-                 DXGetErrorString8A(err), DXGetErrorDescription8A(err));
-	 */
-	SDL_SetError("Haptic error %s", str);
+    /*
+       SDL_SetError("Haptic: %s - %s: %s", str,
+       DXGetErrorString8A(err), DXGetErrorDescription8A(err));
+     */
+    SDL_SetError("Haptic error %s", str);
 }
 
 
@@ -154,7 +154,7 @@ SDL_SYS_HapticInit(void)
     }
 
     ret = CoCreateInstance(&CLSID_DirectInput, NULL, CLSCTX_INPROC_SERVER,
-                           &IID_IDirectInput, (LPVOID)&dinput);
+                           &IID_IDirectInput, (LPVOID) & dinput);
     if (FAILED(ret)) {
         DI_SetError("CoCreateInstance", ret);
         return -1;

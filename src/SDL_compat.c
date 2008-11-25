@@ -1350,7 +1350,7 @@ struct private_yuvhwdata
     Uint16 pitches[3];
     Uint8 *planes[3];
 
-	SDL_SW_YUVTexture *sw;
+    SDL_SW_YUVTexture *sw;
 
     SDL_TextureID textureID;
 };
@@ -1435,19 +1435,20 @@ SDL_CreateYUVOverlay(int w, int h, Uint32 format, SDL_Surface * display)
     overlay->hwdata->textureID =
         SDL_CreateTexture(texture_format, SDL_TEXTUREACCESS_STREAMING, w, h);
     if (overlay->hwdata->textureID) {
-		overlay->hwdata->sw = NULL;
-	} else {
-		overlay->hwdata->sw = SDL_SW_CreateYUVTexture(texture_format, w, h);
-		if (!overlay->hwdata->sw) {
-			SDL_FreeYUVOverlay(overlay);
-			return NULL;
-		}
+        overlay->hwdata->sw = NULL;
+    } else {
+        overlay->hwdata->sw = SDL_SW_CreateYUVTexture(texture_format, w, h);
+        if (!overlay->hwdata->sw) {
+            SDL_FreeYUVOverlay(overlay);
+            return NULL;
+        }
 
-		/* Create a supported RGB format texture for display */
-		overlay->hwdata->textureID =
-			SDL_CreateTexture(SDL_PIXELFORMAT_RGB888, SDL_TEXTUREACCESS_STREAMING, w, h);
-	}
-	if (!overlay->hwdata->textureID) {
+        /* Create a supported RGB format texture for display */
+        overlay->hwdata->textureID =
+            SDL_CreateTexture(SDL_PIXELFORMAT_RGB888,
+                              SDL_TEXTUREACCESS_STREAMING, w, h);
+    }
+    if (!overlay->hwdata->textureID) {
         SDL_FreeYUVOverlay(overlay);
         return NULL;
     }
@@ -1465,16 +1466,18 @@ SDL_LockYUVOverlay(SDL_Overlay * overlay)
         SDL_SetError("Passed a NULL overlay");
         return -1;
     }
-	if (overlay->hwdata->sw) {
-		if (SDL_SW_QueryYUVTexturePixels(overlay->hwdata->sw, &pixels, &pitch) < 0) {
-			return -1;
-		}
-	} else {
-		if (SDL_LockTexture(overlay->hwdata->textureID, NULL, 1, &pixels, &pitch)
-			< 0) {
-			return -1;
-		}
-	}
+    if (overlay->hwdata->sw) {
+        if (SDL_SW_QueryYUVTexturePixels(overlay->hwdata->sw, &pixels, &pitch)
+            < 0) {
+            return -1;
+        }
+    } else {
+        if (SDL_LockTexture
+            (overlay->hwdata->textureID, NULL, 1, &pixels, &pitch)
+            < 0) {
+            return -1;
+        }
+    }
     overlay->pixels[0] = (Uint8 *) pixels;
     overlay->pitches[0] = pitch;
     switch (overlay->format) {
@@ -1501,22 +1504,25 @@ SDL_UnlockYUVOverlay(SDL_Overlay * overlay)
     if (!overlay) {
         return;
     }
-	if (overlay->hwdata->sw) {
-		void *pixels;
-		int pitch;
-		if (SDL_LockTexture(overlay->hwdata->textureID, NULL, 1, &pixels, &pitch) == 0) {
-			SDL_Rect srcrect;
+    if (overlay->hwdata->sw) {
+        void *pixels;
+        int pitch;
+        if (SDL_LockTexture
+            (overlay->hwdata->textureID, NULL, 1, &pixels, &pitch) == 0) {
+            SDL_Rect srcrect;
 
-			srcrect.x = 0;
-			srcrect.y = 0;
-			srcrect.w = overlay->w;
-			srcrect.h = overlay->h;
-			SDL_SW_CopyYUVToRGB(overlay->hwdata->sw, &srcrect, SDL_PIXELFORMAT_RGB888, overlay->w, overlay->h, pixels, pitch);
-			SDL_UnlockTexture(overlay->hwdata->textureID);
-		}
-	} else {
-		SDL_UnlockTexture(overlay->hwdata->textureID);
-	}
+            srcrect.x = 0;
+            srcrect.y = 0;
+            srcrect.w = overlay->w;
+            srcrect.h = overlay->h;
+            SDL_SW_CopyYUVToRGB(overlay->hwdata->sw, &srcrect,
+                                SDL_PIXELFORMAT_RGB888, overlay->w,
+                                overlay->h, pixels, pitch);
+            SDL_UnlockTexture(overlay->hwdata->textureID);
+        }
+    } else {
+        SDL_UnlockTexture(overlay->hwdata->textureID);
+    }
 }
 
 int

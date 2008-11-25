@@ -27,7 +27,7 @@
 
 /* Direct3D renderer implementation */
 
-#if 1 /* This takes more memory but you won't lose your texture data */
+#if 1                           /* This takes more memory but you won't lose your texture data */
 #define D3DPOOL_SDL	D3DPOOL_MANAGED
 #define SDL_MEMORY_POOL_MANAGED
 #else
@@ -633,7 +633,8 @@ D3D_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
     d3drect.top = rect->y;
     d3drect.bottom = rect->y + rect->h;
 
-    result = IDirect3DTexture9_LockRect(data->texture, 0, &locked, &d3drect, 0);
+    result =
+        IDirect3DTexture9_LockRect(data->texture, 0, &locked, &d3drect, 0);
     if (FAILED(result)) {
         D3D_SetError("LockRect()", result);
         return -1;
