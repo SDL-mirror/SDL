@@ -247,7 +247,7 @@ main(int argc, char *argv[])
             velocities[i].y = (rand() % (MAX_SPEED * 2 + 1)) - MAX_SPEED;
         }
     }
-    background = SDL_MapRGB(screen->format, 0x00, 0x00, 0x00);
+    background = SDL_MapRGB(screen->format, 0xA0, 0xA0, 0xA0);
 
     /* Print out information about our surfaces */
     printf("Screen is at %d bits per pixel\n", screen->format->BitsPerPixel);
