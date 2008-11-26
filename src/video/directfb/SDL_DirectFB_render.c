@@ -87,7 +87,8 @@ SDL_RenderDriver DirectFB_RenderDriver = {
      "directfb",
      (SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTCOPY |
       SDL_RENDERER_PRESENTFLIP2 | SDL_RENDERER_PRESENTFLIP3 |
-      SDL_RENDERER_PRESENTDISCARD | SDL_RENDERER_ACCELERATED),
+      SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_PRESENTDISCARD |
+      SDL_RENDERER_ACCELERATED),
      (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_COLOR |
       SDL_TEXTUREMODULATE_ALPHA),
      (SDL_TEXTUREBLENDMODE_NONE | SDL_TEXTUREBLENDMODE_MASK |
@@ -231,9 +232,10 @@ DirectFB_CreateRenderer(SDL_Window * window, Uint32 flags)
     data->flipflags = DSFLIP_PIPELINE | DSFLIP_BLIT;
 
     if (flags & SDL_RENDERER_PRESENTVSYNC) {
-        data->flipflags = DSFLIP_ONSYNC;
+        data->flipflags |= DSFLIP_WAITFORSYNC;
         renderer->info.flags |= SDL_RENDERER_PRESENTVSYNC;
-    }
+    } else
+        data->flipflags |= DSFLIP_ONSYNC;
 
     SDL_DFB_CHECKERR(data->surface->GetCapabilities(data->surface, &scaps));
     if (scaps & DSCAPS_DOUBLE)
@@ -863,7 +865,7 @@ DirectFB_RenderPresent(SDL_Renderer * renderer)
 
     /* Send the data to the display */
     SDL_DFB_CHECKERR(data->surface->
-                     Flip(data->surface, NULL, 0 * data->flipflags));
+                     Flip(data->surface, NULL, data->flipflags));
 
     return;
   error:

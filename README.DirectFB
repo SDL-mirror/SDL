@@ -27,6 +27,15 @@ make
 sudo make install INSTALL_DIR=/usr/local/dfb_GL
 ------------------------
 
+/etc/directfbrc
+
+This file should contain the following two lines to make
+your joystick work:
+------------------------
+disable-module=joystick
+disable-module=linux_input
+------------------------
+
 To run the SDL - testprograms:
 
 export SDL_VIDEODRIVER=directfb
@@ -39,7 +48,14 @@ To use hardware accelerated YUV-overlays for YUV-textures, use:
 
 export SDL_DIRECTFB_YUV_DIRECT=1
 
-This is disabled by default. It will only support one concurrent 
-overlay and may behave strange if not used with SDL_CreateYUvOverlay
-from SDLcompat.c. 
- 
+This is disabled by default. It will only support one 
+YUV texture, namely the first. Every other YUV texture will be
+rendered in software.
+
+In addition, you may use 
+
+export SDL_DIRECTFB_YUV_UNDERLAY=1
+
+to make the YUV texture an underlay. This will make the cursor to
+be shown.
+
