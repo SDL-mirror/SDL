@@ -278,16 +278,10 @@ X11_DispatchEvent(_THIS)
 
     default:{
             if (xevent.type == motion) {        /* MotionNotify */
-#ifdef DEBUG_MOTION
-                printf("X11 motion: %d,%d\n", xevent.xmotion.x,
-                       xevent.xmotion.y);
-#endif
-                XWindowAttributes attrib;
-                XGetWindowAttributes(videodata->display,
-                                     ((XAnyEvent *) & xevent)->window,
-                                     &attrib);
-                SDL_UpdateCoordinates(attrib.width, attrib.height);
                 XDeviceMotionEvent *move = (XDeviceMotionEvent *) & xevent;
+#ifdef DEBUG_MOTION
+                printf("X11 motion: %d,%d\n", move->x, move->y);
+#endif
                 SDL_SendMouseMotion(move->deviceid, 0, move->x,
                                     move->y, move->axis_data[2]);
             } else if (xevent.type == button_pressed) { /* ButtonPress */

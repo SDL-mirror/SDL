@@ -240,13 +240,11 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                     break;
                 }
             }
+/* FIXME: Doesn't this defeat the point of using raw input? */
             GetCursorPos(&point);
-            ScreenToClient(hwnd, &point);
-            SDL_GetWindowSize(data->windowID, &w, &h);
-            SDL_UpdateCoordinates(w, h);        /* we're updating the current window size */
 
             /* if the message was sent by a tablet we have to send also pressure */
-            if (i == tablet) {
+            if (index == tablet) {
                 SDL_SendMouseMotion(index, 0, point.x, point.y, pressure);
             } else {
                 SDL_SendMouseMotion(index, 0, point.x, point.y, 0);

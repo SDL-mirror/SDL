@@ -34,7 +34,6 @@ static SDL_Mouse **SDL_mice = NULL;
 static int *SDL_IdIndex = NULL;
 static int SDL_highestId = -1;
 static int last_x, last_y;      /* the last reported x and y coordinates by the system cursor */
-int x_max, y_max;               /* current window width and height */
 
 
 /* Public functions */
@@ -365,6 +364,21 @@ SDL_SetMouseFocus(int id, SDL_WindowID windowID)
         if (!focus) {
             SDL_SendWindowEvent(mouse->focus, SDL_WINDOWEVENT_ENTER, 0, 0);
         }
+        SDL_GetWindowSize(windowID, &mouse->x_max, &mouse->y_max);
+    }
+}
+
+void
+SDL_SetMouseFocusSize(SDL_WindowID windowID, int w, int h)
+{
+    int i;
+
+    for (i = 0; i < SDL_num_mice; ++i) {
+        SDL_Mouse *mouse = SDL_GetMouse(i);
+        if (mouse && mouse->focus == windowID) {
+            mouse->x_max = w;
+            mouse->y_max = h;
+        }
     }
 }
 
@@ -407,15 +421,6 @@ SDL_SendMouseMotion(int id, int relative, int x, int y, int pressure)
     int xrel;
     int yrel;
 
-    /* while using the relative mode and many windows, we have to be sure,
-       that the pointers find themselves inside the windows */
-    if (x > x_max) {
-        x = x_max;
-    }
-    if (y > y_max) {
-        y = y_max;
-    }
-
     if (!mouse || mouse->flush_motion) {
         return 0;
     }
@@ -445,15 +450,17 @@ SDL_SendMouseMotion(int id, int relative, int x, int y, int pressure)
         mouse->x = x;
         mouse->y = y;
     } else {
-        if (mouse->x + xrel > x_max) {
-            mouse->x = x_max;
+        /* while using the relative mode and many windows, we have to be
+           sure that the pointers find themselves inside the windows */
+        if (mouse->x + xrel > mouse->x_max) {
+            mouse->x = mouse->x_max;
         } else if (mouse->x + xrel < 0) {
             mouse->x = 0;
         } else {
             mouse->x += xrel;
         }
-        if (mouse->y + yrel > y_max) {
-            mouse->y = y_max;
+        if (mouse->y + yrel > mouse->y_max) {
+            mouse->y = mouse->y_max;
         } else if (mouse->y + yrel < 0) {
             mouse->y = 0;
         } else {
@@ -776,13 +783,6 @@ SDL_GetMouseName(int index)
         return NULL;
     }
     return mouse->name;
-}
-
-void
-SDL_UpdateCoordinates(int x, int y)
-{
-    x_max = x;
-    y_max = y;
 }
 
 void

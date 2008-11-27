@@ -25,6 +25,7 @@
 
 #include "SDL_events.h"
 #include "SDL_events_c.h"
+#include "SDL_mouse_c.h"
 #include "../video/SDL_sysvideo.h"
 
 int
@@ -73,6 +74,7 @@ SDL_SendWindowEvent(SDL_WindowID windowID, Uint8 windowevent, int data1,
         window->w = data1;
         window->h = data2;
         SDL_OnWindowResized(window);
+        SDL_SetMouseFocusSize(windowID, window->w, window->h);
         break;
     case SDL_WINDOWEVENT_MINIMIZED:
         if (window->flags & SDL_WINDOW_MINIMIZED) {

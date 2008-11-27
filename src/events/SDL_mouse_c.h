@@ -66,8 +66,8 @@ struct SDL_Mouse
     /* Data common to all mice */
     SDL_WindowID focus;
     int which;
-    int x;
-    int y;
+    int x, x_max;
+    int y, y_max;
     int z;                      /* for future use */
     int xdelta;
     int ydelta;
@@ -112,6 +112,9 @@ extern void SDL_ResetMouse(int index);
 /* Set the mouse focus window */
 extern void SDL_SetMouseFocus(int id, SDL_WindowID windowID);
 
+/* Set the size of the mouse focus window */
+extern void SDL_SetMouseFocusSize(SDL_WindowID windowID, int w, int h);
+
 /* Send a mouse motion event for a mouse */
 extern int SDL_SendMouseMotion(int id, int relative, int x, int y, int z);
 
@@ -128,7 +131,6 @@ extern int SDL_SendProximity(int id, int x, int y, int type);
 extern void SDL_MouseQuit(void);
 
 /* FIXME: Where do these functions go in this header? */
-extern void SDL_UpdateCoordinates(int x, int y);
 extern void SDL_ChangeEnd(int id, int end);
 
 #endif /* _SDL_mouse_c_h */
