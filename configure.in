@@ -1323,8 +1323,8 @@ dnl See if we're running on PlayStation 2 hardware
 CheckPS2GS()
 {
     AC_ARG_ENABLE(video-ps2gs,
-AC_HELP_STRING([--enable-video-ps2gs], [use PlayStation 2 GS video driver [[default=yes]]]),
-                  , enable_video_ps2gs=yes)
+AC_HELP_STRING([--enable-video-ps2gs], [use PlayStation 2 GS video driver [[default=no]]]),
+                  , enable_video_ps2gs=no)
     if test x$enable_video = xyes -a x$enable_video_ps2gs = xyes; then
         AC_MSG_CHECKING(for PlayStation 2 GS support)
         video_ps2gs=no
@@ -1348,8 +1348,8 @@ dnl Find the SVGAlib includes and libraries
 CheckSVGA()
 {
     AC_ARG_ENABLE(video-svga,
-AC_HELP_STRING([--enable-video-svga], [use SVGAlib video driver [[default=yes]]]),
-                  , enable_video_svga=yes)
+AC_HELP_STRING([--enable-video-svga], [use SVGAlib video driver [[default=no]]]),
+                  , enable_video_svga=no)
     if test x$enable_video = xyes -a x$enable_video_svga = xyes; then
         AC_MSG_CHECKING(for SVGAlib (1.4.0+) support)
         video_svga=no
@@ -1378,8 +1378,8 @@ dnl Find the VGL includes and libraries
 CheckVGL()
 {
     AC_ARG_ENABLE(video-vgl,
-AC_HELP_STRING([--enable-video-vgl], [use VGL video driver [[default=yes]]]),
-                  , enable_video_vgl=yes)
+AC_HELP_STRING([--enable-video-vgl], [use VGL video driver [[default=no]]]),
+                  , enable_video_vgl=no)
     if test x$enable_video = xyes -a x$enable_video_vgl = xyes; then
         AC_MSG_CHECKING(for libVGL support)
         video_vgl=no
@@ -1410,8 +1410,8 @@ dnl Set up the wscons video driver if enabled
 CheckWscons()
 {
     AC_ARG_ENABLE(video-wscons,
-AC_HELP_STRING([--enable-video-wscons], [use wscons video driver [[default=yes]]]),
-                  , enable_video_wscons=yes)
+AC_HELP_STRING([--enable-video-wscons], [use wscons video driver [[default=no]]]),
+                  , enable_video_wscons=no)
     if test x$enable_video = xyes -a x$enable_video_wscons = xyes; then
         AC_MSG_CHECKING(for wscons support)
         video_wscons=no
