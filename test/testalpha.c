@@ -25,8 +25,6 @@ static void
 FillBackground(SDL_Surface * screen)
 {
     Uint8 *buffer;
-    Uint16 *buffer16;
-    Uint16 color;
     Uint8 gradient;
     int i, k;
 
@@ -37,24 +35,45 @@ FillBackground(SDL_Surface * screen)
         quit(2);
     }
     buffer = (Uint8 *) screen->pixels;
-    if (screen->format->BytesPerPixel != 2) {
-        for (i = 0; i < screen->h; ++i) {
-            memset(buffer, (i * 255) / screen->h,
-                   screen->w * screen->format->BytesPerPixel);
-            buffer += screen->pitch;
-        }
-    } else {
-        for (i = 0; i < screen->h; ++i) {
-            gradient = ((i * 255) / screen->h);
-            color =
-                (Uint16) SDL_MapRGB(screen->format, gradient, gradient,
-                                    gradient);
-            buffer16 = (Uint16 *) buffer;
-            for (k = 0; k < screen->w; k++) {
-                *(buffer16 + k) = color;
+    switch (screen->format->BytesPerPixel) {
+        case 1:
+        case 3:
+            for (i = 0; i < screen->h; ++i) {
+                memset(buffer, (i * 255) / screen->h,
+                       screen->w * screen->format->BytesPerPixel);
+                buffer += screen->pitch;
             }
-            buffer += screen->pitch;
-        }
+            break;
+        case 2:
+            for (i = 0; i < screen->h; ++i) {
+                Uint16 *buffer16;
+                Uint16 color;
+
+                gradient = ((i * 255) / screen->h);
+                color = (Uint16) SDL_MapRGB(screen->format,
+                                            gradient, gradient, gradient);
+                buffer16 = (Uint16 *) buffer;
+                for (k = 0; k < screen->w; k++) {
+                    *buffer16++ = color;
+                }
+                buffer += screen->pitch;
+            }
+            break;
+        case 4:
+            for (i = 0; i < screen->h; ++i) {
+                Uint32 *buffer32;
+                Uint32 color;
+
+                gradient = ((i * 255) / screen->h);
+                color = SDL_MapRGB(screen->format,
+                                   gradient, gradient, gradient);
+                buffer32 = (Uint32 *) buffer;
+                for (k = 0; k < screen->w; k++) {
+                    *buffer32++ = color;
+                }
+                buffer += screen->pitch;
+            }
+            break;
     }
 
     SDL_UnlockSurface(screen);
