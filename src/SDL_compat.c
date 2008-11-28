@@ -371,6 +371,7 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
     Uint32 desktop_format;
     Uint32 desired_format;
     Uint32 surface_flags;
+    Uint32 black;
 
     if (!SDL_GetVideoDevice()) {
         if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE) < 0) {
@@ -580,7 +581,8 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
         (SDL_ShadowSurface ? SDL_ShadowSurface : SDL_VideoSurface);
 
     /* Clear the surface for display */
-    SDL_FillRect(SDL_PublicSurface, NULL, 0);
+    black = SDL_MapRGB(SDL_PublicSurface->format, 0, 0, 0);
+    SDL_FillRect(SDL_PublicSurface, NULL, black);
     SDL_UpdateRect(SDL_PublicSurface, 0, 0, 0, 0);
 
     /* We're finally done! */
@@ -1437,6 +1439,8 @@ SDL_CreateYUVOverlay(int w, int h, Uint32 format, SDL_Surface * display)
     if (overlay->hwdata->textureID) {
         overlay->hwdata->sw = NULL;
     } else {
+        SDL_DisplayMode current_mode;
+
         overlay->hwdata->sw = SDL_SW_CreateYUVTexture(texture_format, w, h);
         if (!overlay->hwdata->sw) {
             SDL_FreeYUVOverlay(overlay);
@@ -1444,8 +1448,9 @@ SDL_CreateYUVOverlay(int w, int h, Uint32 format, SDL_Surface * display)
         }
 
         /* Create a supported RGB format texture for display */
+        SDL_GetCurrentDisplayMode(&current_mode);
         overlay->hwdata->textureID =
-            SDL_CreateTexture(SDL_PIXELFORMAT_RGB888,
+            SDL_CreateTexture(current_mode.format,
                               SDL_TEXTUREACCESS_STREAMING, w, h);
     }
     if (!overlay->hwdata->textureID) {
