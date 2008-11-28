@@ -504,7 +504,7 @@ main(int argc, char *argv[])
                     area.y = event.button.y - 16;
                     area.w = 32;
                     area.h = 32;
-                    SDL_FillRect(screen, &area, 0);
+                    SDL_FillRect(screen, &area, SDL_MapRGB(screen->format, 0, 0, 0));
                     SDL_UpdateRects(screen, 1, &area);
                 }
                 break;
