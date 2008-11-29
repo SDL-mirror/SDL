@@ -689,8 +689,6 @@ SetupTextureUpdate(GL_RenderData * renderdata, SDL_Texture * texture,
         renderdata->glPixelStorei(GL_UNPACK_LSB_FIRST, 0);
     }
     renderdata->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    renderdata->glPixelStorei(GL_UNPACK_ROW_LENGTH,
-                              pitch / SDL_BYTESPERPIXEL(texture->format));
 }
 
 static int
