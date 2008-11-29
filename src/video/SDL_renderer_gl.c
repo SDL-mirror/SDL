@@ -594,6 +594,8 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         renderdata->glTexParameteri(data->type, GL_TEXTURE_STORAGE_HINT_APPLE,
                                     GL_STORAGE_CACHED_APPLE);
     }
+/* This causes a crash in testoverlay for some reason.  Apple bug? */
+#if 0
     if (texture->access == SDL_TEXTUREACCESS_STREAMING
         && texture->format == SDL_PIXELFORMAT_ARGB8888) {
         /*
@@ -607,6 +609,7 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         renderdata->glTexImage2D(data->type, 0, internalFormat, texture_w,
                                  texture_h, 0, format, type, data->pixels);
     } else
+#endif
 #endif
     {
         renderdata->glTexImage2D(data->type, 0, internalFormat, texture_w,
