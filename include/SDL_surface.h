@@ -101,9 +101,7 @@ typedef int (*SDL_blit) (struct SDL_Surface * src, SDL_Rect * srcrect,
  * flags '[RGB]mask'.
  * If the function runs out of memory, it will return NULL.
  *
- * The 'flags' tell what kind of surface to create.
- * SDL_SRCCOLORKEY indicates that the surface will be used for colorkey blits.
- * SDL_SRCALPHA means that the surface will be used for alpha blits.
+ * The 'flags' are obsolete and should be set to 0.
  */
 extern DECLSPEC SDL_Surface *SDLCALL SDL_CreateRGBSurface
     (Uint32 flags, int width, int height, int depth,

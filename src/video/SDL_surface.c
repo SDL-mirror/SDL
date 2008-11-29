@@ -41,6 +41,9 @@ SDL_CreateRGBSurface(Uint32 flags,
 {
     SDL_Surface *surface;
 
+    /* The flags are no longer used, make the compiler happy */
+    flags;
+
     /* Allocate the surface */
     surface = (SDL_Surface *) SDL_calloc(1, sizeof(*surface));
     if (surface == NULL) {
@@ -754,8 +757,8 @@ SDL_UnlockSurface(SDL_Surface * surface)
  * Convert a surface into the specified pixel format.
  */
 SDL_Surface *
-SDL_ConvertSurface(SDL_Surface * surface,
-                   SDL_PixelFormat * format, Uint32 flags)
+SDL_ConvertSurface(SDL_Surface * surface, SDL_PixelFormat * format,
+                   Uint32 flags)
 {
     SDL_Surface *convert;
     Uint32 copy_flags;
@@ -777,7 +780,7 @@ SDL_ConvertSurface(SDL_Surface * surface,
     }
 
     /* Create a new surface with the desired format */
-    convert = SDL_CreateRGBSurface(0, surface->w, surface->h,
+    convert = SDL_CreateRGBSurface(flags, surface->w, surface->h,
                                    format->BitsPerPixel, format->Rmask,
                                    format->Gmask, format->Bmask,
                                    format->Amask);
@@ -827,6 +830,7 @@ SDL_ConvertSurface(SDL_Surface * surface,
     if (format->Amask || (copy_flags & SDL_COPY_MODULATE_ALPHA)) {
         SDL_SetSurfaceBlendMode(convert, SDL_TEXTUREBLENDMODE_BLEND);
     }
+    SDL_SetSurfaceRLE(convert, (flags & SDL_RLEACCEL));
 
     /* We're ready to go! */
     return (convert);

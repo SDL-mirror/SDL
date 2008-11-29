@@ -382,26 +382,22 @@ SDL_SaveBMP_RW(SDL_Surface * saveme, SDL_RWops * dst, int freedst)
             ) {
             surface = saveme;
         } else {
-            SDL_Rect bounds;
+            SDL_PixelFormat *format;
 
             /* Convert to 24 bits per pixel */
-            surface = SDL_CreateRGBSurface(0, saveme->w, saveme->h, 24,
+            format = SDL_AllocFormat(24,
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN
-                                           0x00FF0000, 0x0000FF00, 0x000000FF,
+                                     0x00FF0000, 0x0000FF00, 0x000000FF,
 #else
-                                           0x000000FF, 0x0000FF00, 0x00FF0000,
+                                     0x000000FF, 0x0000FF00, 0x00FF0000,
 #endif
-                                           0);
-            if (surface != NULL) {
-                bounds.x = 0;
-                bounds.y = 0;
-                bounds.w = saveme->w;
-                bounds.h = saveme->h;
-                if (SDL_LowerBlit(saveme, &bounds, surface, &bounds) < 0) {
-                    SDL_FreeSurface(surface);
+                                     0);
+            if (format != NULL) {
+                surface = SDL_ConvertSurface(saveme, format, 0);
+                if (!surface) {
                     SDL_SetError("Couldn't convert image to 24 bpp");
-                    surface = NULL;
                 }
+                SDL_FreeFormat(format);
             }
         }
     }
