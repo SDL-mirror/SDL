@@ -376,6 +376,9 @@ SW_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         texture->driverdata =
             SDL_CreateRGBSurface(0, texture->w, texture->h, bpp, Rmask, Gmask,
                                  Bmask, Amask);
+        if (texture->access == SDL_TEXTUREACCESS_STATIC) {
+            SDL_SetSurfaceRLE(texture->driverdata, 1);
+        }
     }
 
     if (!texture->driverdata) {
@@ -458,7 +461,7 @@ static int
 SW_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     SDL_Surface *surface = (SDL_Surface *) texture->driverdata;
-    return SDL_SetSurfaceBlendMode(surface, texture->scaleMode);
+    return SDL_SetSurfaceScaleMode(surface, texture->scaleMode);
 }
 
 static int
