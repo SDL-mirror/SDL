@@ -1355,6 +1355,7 @@ struct private_yuvhwdata
     SDL_SW_YUVTexture *sw;
 
     SDL_TextureID textureID;
+    Uint32 texture_format;
 };
 
 SDL_Overlay *
@@ -1449,14 +1450,16 @@ SDL_CreateYUVOverlay(int w, int h, Uint32 format, SDL_Surface * display)
 
         /* Create a supported RGB format texture for display */
         SDL_GetCurrentDisplayMode(&current_mode);
+        texture_format = current_mode.format;
         overlay->hwdata->textureID =
-            SDL_CreateTexture(current_mode.format,
+            SDL_CreateTexture(texture_format,
                               SDL_TEXTUREACCESS_STREAMING, w, h);
     }
     if (!overlay->hwdata->textureID) {
         SDL_FreeYUVOverlay(overlay);
         return NULL;
     }
+    overlay->hwdata->texture_format = texture_format;
 
     return overlay;
 }
@@ -1521,8 +1524,8 @@ SDL_UnlockYUVOverlay(SDL_Overlay * overlay)
             srcrect.w = overlay->w;
             srcrect.h = overlay->h;
             SDL_SW_CopyYUVToRGB(overlay->hwdata->sw, &srcrect,
-                                SDL_PIXELFORMAT_RGB888, overlay->w,
-                                overlay->h, pixels, pitch);
+                                overlay->hwdata->texture_format,
+                                overlay->w, overlay->h, pixels, pitch);
             SDL_UnlockTexture(overlay->hwdata->textureID);
         }
     } else {
