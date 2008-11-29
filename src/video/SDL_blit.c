@@ -228,9 +228,8 @@ SDL_CalculateBlit(SDL_Surface * surface)
     map->info.dst_pitch = dst->pitch;
 
     /* See if we can do RLE acceleration */
-    if (surface->map->info.flags & SDL_COPY_RLE_DESIRED) {
+    if (map->info.flags & SDL_COPY_RLE_DESIRED) {
         if (SDL_RLESurface(surface) == 0) {
-            surface->map->info.flags &= ~SDL_COPY_RLE_DESIRED;
             return 0;
         }
     }
