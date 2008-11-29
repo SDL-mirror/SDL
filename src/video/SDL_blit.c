@@ -236,7 +236,7 @@ SDL_CalculateBlit(SDL_Surface * surface)
     }
 
     /* Choose a standard blit function */
-    if (map->identity && !map->info.flags) {
+    if (map->identity && !(map->info.flags & ~SDL_COPY_RLE_DESIRED)) {
         /* Handle overlapping blits on the same surface */
         if (surface == dst) {
             blit = SDL_BlitCopyOverlap;
