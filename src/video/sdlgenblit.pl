@@ -38,6 +38,7 @@ my @src_formats = (
 my @dst_formats = (
     "RGB888",
     "BGR888",
+    "ARGB8888",
 );
 
 my %format_size = (
@@ -60,8 +61,7 @@ my %format_type = (
 
 my %get_rgba_string = (
     "RGB888" => "_R = (Uint8)(_pixel >> 16); _G = (Uint8)(_pixel >> 8); _B = (Uint8)_pixel; _A = 0xFF;",
-    "BGR888" => "_B = (Uint8)(_pixel >> 16); _G = (Uint8)(_pixel >> 8); _R = (Uint8)_pixel; _A = 0xFF;",
-    "ARGB8888" => "_A = (Uint8)(_pixel >> 24); _R = (Uint8)(_pixel >> 16); _G = (Uint8)(_pixel >> 8); _B = (Uint8)_pixel;",
+    "BGR888" => "_B = (Uint8)(_pixel >> 16); _G = (Uint8)(_pixel >> 8); _R = (Uint8)_pixel; _A = 0xFF;", "ARGB8888" => "_A = (Uint8)(_pixel >> 24); _R = (Uint8)(_pixel >> 16); _G = (Uint8)(_pixel >> 8); _B = (Uint8)_pixel;",
     "RGBA8888" => "_R = (Uint8)(_pixel >> 24); _G = (Uint8)(_pixel >> 16); _B = (Uint8)(_pixel >> 8); _A = (Uint8)_pixel;",
     "ABGR8888" => "_A = (Uint8)(_pixel >> 24); _B = (Uint8)(_pixel >> 16); _G = (Uint8)(_pixel >> 8); _R = (Uint8)_pixel;",
     "BGRA8888" => "_B = (Uint8)(_pixel >> 24); _G = (Uint8)(_pixel >> 16); _R = (Uint8)(_pixel >> 8); _A = (Uint8)_pixel;",
@@ -70,6 +70,10 @@ my %get_rgba_string = (
 my %set_rgba_string = (
     "RGB888" => "_pixel = ((Uint32)_R << 16) | ((Uint32)_G << 8) | _B;",
     "BGR888" => "_pixel = ((Uint32)_B << 16) | ((Uint32)_G << 8) | _R;",
+    "ARGB8888" => "_pixel = ((Uint32)_A << 24) | ((Uint32)_R << 16) | ((Uint32)_G << 8) | _B;",
+    "RGBA8888" => "_pixel = ((Uint32)_R << 24) | ((Uint32)_G << 16) | ((Uint32)_B << 8) | _A;",
+    "ABGR8888" => "_pixel = ((Uint32)_A << 24) | ((Uint32)_B << 16) | ((Uint32)_G << 8) | _R;",
+    "BGRA8888" => "_pixel = ((Uint32)_B << 24) | ((Uint32)_G << 16) | ((Uint32)_R << 8) | _A;",
 );
 
 sub open_file {
