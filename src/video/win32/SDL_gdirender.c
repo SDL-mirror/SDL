@@ -55,8 +55,6 @@ static int GDI_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                            const SDL_Rect * rect, int markDirty,
                            void **pixels, int *pitch);
 static void GDI_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
-static void GDI_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
-                             int numrects, const SDL_Rect * rects);
 static int GDI_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b,
                           Uint8 a, const SDL_Rect * rect);
 static int GDI_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
@@ -78,7 +76,7 @@ SDL_RenderDriver GDI_RenderDriver = {
      (SDL_TEXTUREBLENDMODE_NONE | SDL_TEXTUREBLENDMODE_MASK |
       SDL_TEXTUREBLENDMODE_BLEND),
      (SDL_TEXTURESCALEMODE_NONE | SDL_TEXTURESCALEMODE_FAST),
-     11,
+     12,
      {
       SDL_PIXELFORMAT_INDEX8,
       SDL_PIXELFORMAT_RGB555,
@@ -90,7 +88,8 @@ SDL_RenderDriver GDI_RenderDriver = {
       SDL_PIXELFORMAT_ABGR8888,
       SDL_PIXELFORMAT_BGRA8888,
       SDL_PIXELFORMAT_YUY2,
-      SDL_PIXELFORMAT_UYVY},
+      SDL_PIXELFORMAT_UYVY,
+      SDL_PIXELFORMAT_YVYU},
      0,
      0}
 };
@@ -173,7 +172,6 @@ GDI_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->UpdateTexture = GDI_UpdateTexture;
     renderer->LockTexture = GDI_LockTexture;
     renderer->UnlockTexture = GDI_UnlockTexture;
-    renderer->DirtyTexture = GDI_DirtyTexture;
     renderer->RenderFill = GDI_RenderFill;
     renderer->RenderCopy = GDI_RenderCopy;
     renderer->RenderPresent = GDI_RenderPresent;
@@ -274,6 +272,8 @@ GDI_DisplayModeChanged(SDL_Renderer * renderer)
     if (n > 0) {
         SelectObject(data->render_hdc, data->hbm[0]);
     }
+    data->current_hbm = 0;
+
     return 0;
 }
 
@@ -566,12 +566,6 @@ GDI_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         SDL_SW_UnlockYUVTexture(data->yuv);
         UpdateYUVTextureData(texture);
     }
-}
-
-static void
-GDI_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture, int numrects,
-                 const SDL_Rect * rects)
-{
 }
 
 static int

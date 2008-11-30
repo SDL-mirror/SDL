@@ -59,9 +59,6 @@ static int SW_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * rect, int markDirty, void **pixels,
                           int *pitch);
 static void SW_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
-static void SW_DirtyTexture(SDL_Renderer * renderer,
-                            SDL_Texture * texture, int numrects,
-                            const SDL_Rect * rects);
 static int SW_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b,
                          Uint8 a, const SDL_Rect * rect);
 static int SW_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
@@ -84,7 +81,7 @@ SDL_RenderDriver SW_RenderDriver = {
       SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD |
       SDL_TEXTUREBLENDMODE_MOD),
      (SDL_TEXTURESCALEMODE_NONE | SDL_TEXTURESCALEMODE_FAST),
-     11,
+     12,
      {
       SDL_PIXELFORMAT_INDEX8,
       SDL_PIXELFORMAT_RGB555,
@@ -96,7 +93,8 @@ SDL_RenderDriver SW_RenderDriver = {
       SDL_PIXELFORMAT_ABGR8888,
       SDL_PIXELFORMAT_BGRA8888,
       SDL_PIXELFORMAT_YUY2,
-      SDL_PIXELFORMAT_UYVY},
+      SDL_PIXELFORMAT_UYVY,
+      SDL_PIXELFORMAT_YVYU},
      0,
      0}
 };
@@ -174,7 +172,6 @@ Setup_SoftwareRenderer(SDL_Renderer * renderer)
     renderer->UpdateTexture = SW_UpdateTexture;
     renderer->LockTexture = SW_LockTexture;
     renderer->UnlockTexture = SW_UnlockTexture;
-    renderer->DirtyTexture = SW_DirtyTexture;
     renderer->DestroyTexture = SW_DestroyTexture;
 
     renderer->info.mod_modes = SW_RenderDriver.info.mod_modes;
@@ -518,12 +515,6 @@ SW_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     if (SDL_ISPIXELFORMAT_FOURCC(texture->format)) {
         SDL_SW_UnlockYUVTexture((SDL_SW_YUVTexture *) texture->driverdata);
     }
-}
-
-static void
-SW_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
-                int numrects, const SDL_Rect * rects)
-{
 }
 
 static int

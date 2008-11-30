@@ -294,6 +294,7 @@
 #undef SDL_VIDEO_RENDER_D3D
 #undef SDL_VIDEO_RENDER_GDI
 #undef SDL_VIDEO_RENDER_OGL
+#undef SDL_VIDEO_RENDER_X11
 
 /* Enable OpenGL support */
 #undef SDL_VIDEO_OPENGL

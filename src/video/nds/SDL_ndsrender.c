@@ -124,9 +124,6 @@ static int NDS_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                            const SDL_Rect * rect, int markDirty,
                            void **pixels, int *pitch);
 static void NDS_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
-static void NDS_DirtyTexture(SDL_Renderer * renderer,
-                             SDL_Texture * texture, int numrects,
-                             const SDL_Rect * rects);
 static int NDS_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g,
                           Uint8 b, Uint8 a, const SDL_Rect * rect);
 static int NDS_RenderCopy(SDL_Renderer * renderer,
@@ -246,7 +243,6 @@ NDS_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->UpdateTexture = NDS_UpdateTexture;
     renderer->LockTexture = NDS_LockTexture;
     renderer->UnlockTexture = NDS_UnlockTexture;
-    renderer->DirtyTexture = NDS_DirtyTexture;
     renderer->DestroyTexture = NDS_DestroyTexture;
 
     renderer->info.mod_modes = NDS_RenderDriver.info.mod_modes;
@@ -495,13 +491,6 @@ NDS_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 
 static void
 NDS_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
-{
-    /* stub! */
-}
-
-static void
-NDS_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
-                 int numrects, const SDL_Rect * rects)
 {
     /* stub! */
 }

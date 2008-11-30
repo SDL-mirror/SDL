@@ -1476,7 +1476,11 @@ SDL_CreateTexture(Uint32 format, int access, int w, int h)
         return 0;
     }
     renderer = SDL_CurrentDisplay.current_renderer;
-    if (!renderer || !renderer->CreateTexture) {
+    if (!renderer) {
+        return 0;
+    }
+    if (!renderer->CreateTexture) {
+        SDL_Unsupported();
         return 0;
     }
     texture = (SDL_Texture *) SDL_calloc(1, sizeof(*texture));
@@ -1669,6 +1673,7 @@ SDL_QueryTexturePixels(SDL_TextureID textureID, void **pixels, int *pitch)
     }
     renderer = texture->renderer;
     if (!renderer->QueryTexturePixels) {
+        SDL_Unsupported();
         return -1;
     }
     return renderer->QueryTexturePixels(renderer, texture, pixels, pitch);
@@ -1686,6 +1691,7 @@ SDL_SetTexturePalette(SDL_TextureID textureID, const SDL_Color * colors,
     }
     renderer = texture->renderer;
     if (!renderer->SetTexturePalette) {
+        SDL_Unsupported();
         return -1;
     }
     return renderer->SetTexturePalette(renderer, texture, colors, firstcolor,
@@ -1704,6 +1710,7 @@ SDL_GetTexturePalette(SDL_TextureID textureID, SDL_Color * colors,
     }
     renderer = texture->renderer;
     if (!renderer->GetTexturePalette) {
+        SDL_Unsupported();
         return -1;
     }
     return renderer->GetTexturePalette(renderer, texture, colors, firstcolor,
@@ -1721,6 +1728,7 @@ SDL_SetTextureColorMod(SDL_TextureID textureID, Uint8 r, Uint8 g, Uint8 b)
     }
     renderer = texture->renderer;
     if (!renderer->SetTextureColorMod) {
+        SDL_Unsupported();
         return -1;
     }
     if (r < 255 || g < 255 || b < 255) {
@@ -1768,6 +1776,7 @@ SDL_SetTextureAlphaMod(SDL_TextureID textureID, Uint8 alpha)
     }
     renderer = texture->renderer;
     if (!renderer->SetTextureAlphaMod) {
+        SDL_Unsupported();
         return -1;
     }
     if (alpha < 255) {
@@ -1804,6 +1813,7 @@ SDL_SetTextureBlendMode(SDL_TextureID textureID, int blendMode)
     }
     renderer = texture->renderer;
     if (!renderer->SetTextureBlendMode) {
+        SDL_Unsupported();
         return -1;
     }
     texture->blendMode = blendMode;
@@ -1835,6 +1845,7 @@ SDL_SetTextureScaleMode(SDL_TextureID textureID, int scaleMode)
     }
     renderer = texture->renderer;
     if (!renderer->SetTextureScaleMode) {
+        SDL_Unsupported();
         return -1;
     }
     texture->scaleMode = scaleMode;
@@ -1868,6 +1879,7 @@ SDL_UpdateTexture(SDL_TextureID textureID, const SDL_Rect * rect,
     }
     renderer = texture->renderer;
     if (!renderer->UpdateTexture) {
+        SDL_Unsupported();
         return -1;
     }
     if (!rect) {
@@ -1897,6 +1909,7 @@ SDL_LockTexture(SDL_TextureID textureID, const SDL_Rect * rect, int markDirty,
     }
     renderer = texture->renderer;
     if (!renderer->LockTexture) {
+        SDL_Unsupported();
         return -1;
     }
     if (!rect) {
@@ -1961,7 +1974,11 @@ SDL_RenderFill(Uint8 r, Uint8 g, Uint8 b, Uint8 a, const SDL_Rect * rect)
         return -1;
     }
     renderer = SDL_CurrentDisplay.current_renderer;
-    if (!renderer || !renderer->RenderFill) {
+    if (!renderer) {
+        return -1;
+    }
+    if(!renderer->RenderFill) {
+        SDL_Unsupported();
         return -1;
     }
     window = SDL_GetWindowFromID(renderer->window);
@@ -1991,7 +2008,11 @@ SDL_RenderCopy(SDL_TextureID textureID, const SDL_Rect * srcrect,
         return -1;
     }
     renderer = SDL_CurrentDisplay.current_renderer;
-    if (!renderer || !renderer->RenderCopy) {
+    if (!renderer) {
+        return -1;
+    }
+    if (!renderer->RenderCopy) {
+        SDL_Unsupported();
         return -1;
     }
     window = SDL_GetWindowFromID(renderer->window);
