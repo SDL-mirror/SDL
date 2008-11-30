@@ -192,6 +192,8 @@ X11_AddRenderDriver(_THIS)
         if (info->num_texture_formats == 0) {
             return;
         }
+        info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_YV12;
+        info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_IYUV;
         info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_YUY2;
         info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_UYVY;
         info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_YVYU;
