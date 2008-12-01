@@ -96,7 +96,7 @@ SDL_RenderDriver GL_RenderDriver = {
       SDL_TEXTUREBLENDMODE_MOD),
      (SDL_TEXTURESCALEMODE_NONE | SDL_TEXTURESCALEMODE_FAST |
       SDL_TEXTURESCALEMODE_SLOW),
-     16,
+     15,
      {
       SDL_PIXELFORMAT_INDEX1LSB,
       SDL_PIXELFORMAT_INDEX1MSB,
@@ -113,8 +113,7 @@ SDL_RenderDriver GL_RenderDriver = {
       SDL_PIXELFORMAT_BGR888,
       SDL_PIXELFORMAT_ARGB8888,
       SDL_PIXELFORMAT_ABGR8888,
-      SDL_PIXELFORMAT_ARGB2101010,
-      SDL_PIXELFORMAT_UYVY},
+      SDL_PIXELFORMAT_ARGB2101010},
      0,
      0}
 };
@@ -503,24 +502,6 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         internalFormat = GL_RGB10_A2;
         format = GL_BGRA;
         type = GL_UNSIGNED_INT_2_10_10_10_REV;
-        break;
-    case SDL_PIXELFORMAT_UYVY:
-//        if (renderdata->GL_MESA_ycbcr_texture) {
-//            internalFormat = 3;
-//            format = GL_YCBCR_MESA;
-//            type = GL_UNSIGNED_SHORT_8_8_MESA;
-//        } else if (renderdata->GL_APPLE_ycbcr_422) {
-            internalFormat = GL_RGB;
-            format = GL_YCBCR_422_APPLE;
-#if SDL_BYTEORDER == SDL_LIL_ENDIAN
-            type = GL_UNSIGNED_SHORT_8_8_APPLE;
-#else
-            type = GL_UNSIGNED_SHORT_8_8_REV_APPLE;
-#endif
-//        } else {
-//            SDL_SetError("Unsupported texture format");
-//            return -1;
-//        }
         break;
     default:
         SDL_SetError("Unsupported texture format");
