@@ -104,15 +104,16 @@ typedef struct
 #ifndef NO_SHARED_MEMORY
 /* Shared memory error handler routine */
 static int shm_error;
-static int (*X_handler)(Display *, XErrorEvent *) = NULL;
-static int shm_errhandler(Display *d, XErrorEvent *e)
+static int (*X_handler) (Display *, XErrorEvent *) = NULL;
+static int
+shm_errhandler(Display * d, XErrorEvent * e)
 {
-        if (e->error_code == BadAccess) {
-            shm_error = True;
-            return(0);
-        } else {
-            return(X_handler(d,e));
-        }
+    if (e->error_code == BadAccess) {
+        shm_error = True;
+        return (0);
+    } else {
+        return (X_handler(d, e));
+    }
 }
 #endif /* ! NO_SHARED_MEMORY */
 
@@ -131,7 +132,7 @@ UpdateYUVTextureData(SDL_Texture * texture)
 }
 
 static Uint32
-X11_GetPixelFormatFromDepth(Display *display, int screen, int depth, int bpp)
+X11_GetPixelFormatFromDepth(Display * display, int screen, int depth, int bpp)
 {
     XVisualInfo vinfo;
 
@@ -152,12 +153,12 @@ X11_GetPixelFormatFromDepth(Display *display, int screen, int depth, int bpp)
 
     /* No matching visual, try to pick a safe default */
     switch (depth) {
-        case 15:
-            return SDL_PIXELFORMAT_RGB555;
-        case 16:
-            return SDL_PIXELFORMAT_RGB565;
-        default:
-            break;
+    case 15:
+        return SDL_PIXELFORMAT_RGB555;
+    case 16:
+        return SDL_PIXELFORMAT_RGB565;
+    default:
+        break;
     }
     return SDL_PIXELFORMAT_UNKNOWN;
 }
@@ -182,7 +183,10 @@ X11_AddRenderDriver(_THIS)
             } else {
                 bpp = pixmapFormats[i].depth;
             }
-            format = X11_GetPixelFormatFromDepth(data->display, DefaultScreen(data->display), pixmapFormats[i].depth, bpp);
+            format =
+                X11_GetPixelFormatFromDepth(data->display,
+                                            DefaultScreen(data->display),
+                                            pixmapFormats[i].depth, bpp);
             if (format != SDL_PIXELFORMAT_UNKNOWN) {
                 info->texture_formats[info->num_texture_formats++] = format;
             }
@@ -192,11 +196,16 @@ X11_AddRenderDriver(_THIS)
         if (info->num_texture_formats == 0) {
             return;
         }
-        info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_YV12;
-        info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_IYUV;
-        info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_YUY2;
-        info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_UYVY;
-        info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_YVYU;
+        info->texture_formats[info->num_texture_formats++] =
+            SDL_PIXELFORMAT_YV12;
+        info->texture_formats[info->num_texture_formats++] =
+            SDL_PIXELFORMAT_IYUV;
+        info->texture_formats[info->num_texture_formats++] =
+            SDL_PIXELFORMAT_YUY2;
+        info->texture_formats[info->num_texture_formats++] =
+            SDL_PIXELFORMAT_UYVY;
+        info->texture_formats[info->num_texture_formats++] =
+            SDL_PIXELFORMAT_YVYU;
     }
 
     SDL_AddRenderDriver(0, &X11_RenderDriver);
@@ -268,7 +277,9 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
     }
     XGetWindowAttributes(data->display, data->window, &attributes);
     for (i = 0; i < n; ++i) {
-        data->pixmaps[i] = XCreatePixmap(data->display, data->window, window->w, window->h, attributes.depth);
+        data->pixmaps[i] =
+            XCreatePixmap(data->display, data->window, window->w, window->h,
+                          attributes.depth);
         if (data->pixmaps[i] == None) {
             X11_DestroyRenderer(renderer);
             SDL_SetError("XCreatePixmap() failed");
@@ -314,7 +325,8 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
 
     /* Create the drawing context */
     gcv.graphics_exposures = False;
-    data->gc = XCreateGC(data->display, data->window, GCGraphicsExposures, &gcv);
+    data->gc =
+        XCreateGC(data->display, data->window, GCGraphicsExposures, &gcv);
     if (!data->gc) {
         X11_DestroyRenderer(renderer);
         SDL_SetError("XCreateGC() failed");
@@ -349,7 +361,9 @@ X11_DisplayModeChanged(SDL_Renderer * renderer)
     }
     XGetWindowAttributes(data->display, data->window, &attributes);
     for (i = 0; i < n; ++i) {
-        data->pixmaps[i] = XCreatePixmap(data->display, data->window, window->w, window->h, attributes.depth);
+        data->pixmaps[i] =
+            XCreatePixmap(data->display, data->window, window->w, window->h,
+                          attributes.depth);
         if (data->pixmaps[i] == None) {
             SDL_SetError("XCreatePixmap() failed");
             return -1;
@@ -391,12 +405,15 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     } else {
         data->format = texture->format;
     }
-    data->pitch = texture->w*SDL_BYTESPERPIXEL(data->format);
+    data->pitch = texture->w * SDL_BYTESPERPIXEL(data->format);
 
-    XGetWindowAttributes(renderdata->display, renderdata->window, &attributes);
+    XGetWindowAttributes(renderdata->display, renderdata->window,
+                         &attributes);
     depth = SDL_BITSPERPIXEL(data->format);
     order = SDL_PIXELORDER(data->format);
-    if (depth == 32 && (order == SDL_PACKEDORDER_XRGB || order == SDL_PACKEDORDER_RGBX || SDL_PACKEDORDER_XBGR || order == SDL_PACKEDORDER_BGRX)) {
+    if (depth == 32
+        && (order == SDL_PACKEDORDER_XRGB || order == SDL_PACKEDORDER_RGBX
+            || SDL_PACKEDORDER_XBGR || order == SDL_PACKEDORDER_BGRX)) {
         depth = 24;
     }
 
@@ -407,11 +424,13 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         shm_error = True;
 
         if (SDL_X11_HAVE_SHM) {
-            shminfo->shmid = shmget(IPC_PRIVATE, texture->h*data->pitch, IPC_CREAT | 0777);
+            shminfo->shmid =
+                shmget(IPC_PRIVATE, texture->h * data->pitch,
+                       IPC_CREAT | 0777);
             if (shminfo->shmid >= 0) {
-                shminfo->shmaddr = (char *)shmat(shminfo->shmid, 0, 0);
+                shminfo->shmaddr = (char *) shmat(shminfo->shmid, 0, 0);
                 shminfo->readOnly = False;
-                if (shminfo->shmaddr != (char *)-1) {
+                if (shminfo->shmaddr != (char *) -1) {
                     shm_error = False;
                     X_handler = XSetErrorHandler(shm_errhandler);
                     XShmAttach(renderdata->display, shminfo);
@@ -427,8 +446,11 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         if (!shm_error) {
             data->pixels = shminfo->shmaddr;
 
-            data->image = XShmCreateImage(renderdata->display, attributes.visual, depth, ZPixmap, shminfo->shmaddr, shminfo, texture->w, texture->h);
-            if(!data->image) {
+            data->image =
+                XShmCreateImage(renderdata->display, attributes.visual, depth,
+                                ZPixmap, shminfo->shmaddr, shminfo,
+                                texture->w, texture->h);
+            if (!data->image) {
                 XShmDetach(renderdata->display, shminfo);
                 XSync(renderdata->display, False);
                 shmdt(shminfo->shmaddr);
@@ -447,20 +469,29 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
                 return -1;
             }
 
-            data->image = XCreateImage(renderdata->display, attributes.visual, depth, ZPixmap, 0, data->pixels, texture->w, texture->h, SDL_BYTESPERPIXEL(data->format)*8, data->pitch);
+            data->image =
+                XCreateImage(renderdata->display, attributes.visual, depth,
+                             ZPixmap, 0, data->pixels, texture->w, texture->h,
+                             SDL_BYTESPERPIXEL(data->format) * 8,
+                             data->pitch);
             if (!data->image) {
                 SDL_SetError("XCreateImage() failed");
                 return -1;
             }
         }
     } else {
-        data->pixmap = XCreatePixmap(renderdata->display, renderdata->window, texture->w, texture->h, depth);
+        data->pixmap =
+            XCreatePixmap(renderdata->display, renderdata->window, texture->w,
+                          texture->h, depth);
         if (data->pixmap == None) {
             SDL_SetError("XCteatePixmap() failed");
             return -1;
         }
 
-        data->image = XCreateImage(renderdata->display, attributes.visual, depth, ZPixmap, 0, NULL, texture->w, texture->h, SDL_BYTESPERPIXEL(data->format)*8, data->pitch);
+        data->image =
+            XCreateImage(renderdata->display, attributes.visual, depth,
+                         ZPixmap, 0, NULL, texture->w, texture->h,
+                         SDL_BYTESPERPIXEL(data->format) * 8, data->pitch);
         if (!data->image) {
             SDL_SetError("XCreateImage() failed");
             return -1;
@@ -545,9 +576,10 @@ X11_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
         } else {
             data->image->width = rect->w;
             data->image->height = rect->h;
-            data->image->data = (char *)pixels;
+            data->image->data = (char *) pixels;
             data->image->bytes_per_line = pitch;
-            XPutImage(renderdata->display, data->pixmap, renderdata->gc, data->image, 0, 0, rect->x, rect->y, rect->w, rect->h);
+            XPutImage(renderdata->display, data->pixmap, renderdata->gc,
+                      data->image, 0, 0, rect->x, rect->y, rect->w, rect->h);
         }
         return 0;
     }
@@ -599,7 +631,8 @@ X11_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b, Uint8 a,
 
     foreground = SDL_MapRGBA(data->format, r, g, b, a);
     XSetForeground(data->display, data->gc, foreground);
-    XDrawRectangle(data->display, data->drawable, data->gc, rect->x, rect->y, rect->w, rect->h);
+    XDrawRectangle(data->display, data->drawable, data->gc, rect->x, rect->y,
+                   rect->w, rect->h);
     return 0;
 }
 
@@ -617,16 +650,20 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     if (srcrect->w == dstrect->w && srcrect->h == dstrect->h) {
 #ifndef NO_SHARED_MEMORY
         if (texturedata->shminfo.shmaddr) {
-            XShmPutImage(data->display, data->drawable, data->gc, texturedata->image, srcrect->x, srcrect->y, dstrect->x, dstrect->y, dstrect->w, dstrect->h, False);
-        }
-        else
+            XShmPutImage(data->display, data->drawable, data->gc,
+                         texturedata->image, srcrect->x, srcrect->y,
+                         dstrect->x, dstrect->y, dstrect->w, dstrect->h,
+                         False);
+        } else
 #endif
         if (texturedata->pixels) {
-            XPutImage(data->display, data->drawable, data->gc, texturedata->image, srcrect->x, srcrect->y, dstrect->x, dstrect->y, dstrect->w, dstrect->h);
+            XPutImage(data->display, data->drawable, data->gc,
+                      texturedata->image, srcrect->x, srcrect->y, dstrect->x,
+                      dstrect->y, dstrect->w, dstrect->h);
         } else {
             XCopyArea(data->display, texturedata->pixmap, data->drawable,
-                      data->gc, srcrect->x, srcrect->y, dstrect->w, dstrect->h,
-                      dstrect->x, dstrect->y);
+                      data->gc, srcrect->x, srcrect->y, dstrect->w,
+                      dstrect->h, dstrect->x, dstrect->y);
         }
     } else {
         SDL_SetError("Scaling not supported in the X11 renderer");

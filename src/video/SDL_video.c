@@ -1977,7 +1977,7 @@ SDL_RenderFill(Uint8 r, Uint8 g, Uint8 b, Uint8 a, const SDL_Rect * rect)
     if (!renderer) {
         return -1;
     }
-    if(!renderer->RenderFill) {
+    if (!renderer->RenderFill) {
         SDL_Unsupported();
         return -1;
     }
