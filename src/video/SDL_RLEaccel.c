@@ -971,7 +971,7 @@ SDL_RLEBlit(SDL_Surface * src, SDL_Rect * srcrect,
 	s &= 0xff00;						\
 	d &= 0xff00;						\
 	d = (d + ((s - d) * alpha >> 8)) & 0xff00;		\
-	dst = d1 | d;						\
+	dst = d1 | d | 0xff000000;				\
     } while(0)
 
 /*
