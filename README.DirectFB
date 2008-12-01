@@ -5,44 +5,26 @@ Supports:
 - Hardware YUV overlays
 - OpenGL - software only
 - 2D/3D accelerations (depends on directfb driver)
+- multiple displays
+- windows
 
 What you need:
 
-DirectFB 1.0.0 - required
+DirectFB 1.0.1, 1.2.x, 1.3.0
 Kernel-Framebuffer support: required: vesafb, radeonfb .... 
 Mesa 7.0.x	   - optional for OpenGL
 
-As of this writing 20070810 you need to pull Mesa from git and do the following:
-
-------------------------
-cd mesa 
-make linux-directfb
-make
-
-echo Installing - pleaser enter sudo pw.
-
-sudo make install INSTALL_DIR=/usr/local/dfb_GL
-cd src/mesa/drivers/directfb
-make
-sudo make install INSTALL_DIR=/usr/local/dfb_GL
-------------------------
-
 /etc/directfbrc
 
-This file should contain the following two lines to make
-your joystick work:
+This file should contain the following lines to make
+your joystick work and avoid crashes:
 ------------------------
 disable-module=joystick
 disable-module=linux_input
+disable-module=cle266
+disable-module=cyber5k
+disable-module=x11input
 ------------------------
-
-To run the SDL - testprograms:
-
-export SDL_VIDEODRIVER=directfb
-export LD_LIBRARY_PATH=/usr/local/dfb_GL/lib
-export LD_PRELOAD=/usr/local/dfb_GL/libGL.so.7
-
-./testgl
 
 To use hardware accelerated YUV-overlays for YUV-textures, use:
 
@@ -52,10 +34,35 @@ This is disabled by default. It will only support one
 YUV texture, namely the first. Every other YUV texture will be
 rendered in software.
 
-In addition, you may use 
+In addition, you may use (directfb-1.2.x)
 
 export SDL_DIRECTFB_YUV_UNDERLAY=1
 
 to make the YUV texture an underlay. This will make the cursor to
 be shown.
 
+OPENGL Support
+==============
+
+As of this writing 20070810 you need to pull Mesa from git and do the following:
+
+------------------------
+cd mesa 
+make linux-directfb
+make
+
+echo Installing - please enter sudo pw.
+
+sudo make install INSTALL_DIR=/usr/local/dfb_GL
+cd src/mesa/drivers/directfb
+make
+sudo make install INSTALL_DIR=/usr/local/dfb_GL
+------------------------
+
+To run the SDL - testprograms:
+
+export SDL_VIDEODRIVER=directfb
+export LD_LIBRARY_PATH=/usr/local/dfb_GL/lib
+export LD_PRELOAD=/usr/local/dfb_GL/libGL.so.7
+
+./testgl

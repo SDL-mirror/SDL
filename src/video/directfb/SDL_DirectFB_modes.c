@@ -290,7 +290,7 @@ DirectFB_InitModes(_THIS)
 
     SDL_DFB_DEBUG("SDL directfb video driver - %s %s\n", __DATE__, __TIME__);
     SDL_DFB_DEBUG("Using %s (%s) driver.\n", caps.name, caps.vendor);
-    SDL_DFB_DEBUG("Found %d screens\n", devdata->numscreens);
+    SDL_DFB_DEBUG("Found %d screens\n", screencbdata->numscreens);
 
     for (i = 0; i < screencbdata->numscreens; i++) {
         SDL_DFB_CHECKERR(devdata->dfb->
@@ -315,9 +315,8 @@ DirectFB_InitModes(_THIS)
             }
         }
 
-        SDL_DFB_CHECKERR(layer->SetCooperativeLevel(layer, DLSCL_SHARED));
-
         /* Query layer configuration to determine the current mode and pixelformat */
+        dlc.flags = DLCONF_ALL;
         layer->GetConfiguration(layer, &dlc);
 
         if (DFBToSDLPixelFormat(dlc.pixelformat, &mode.format) != 0) {
@@ -347,6 +346,13 @@ DirectFB_InitModes(_THIS)
         display.desktop_mode = mode;
         display.current_mode = mode;
         display.driverdata = dispdata;
+
+#if (DIRECTFB_MAJOR_VERSION == 1) && (DIRECTFB_MINOR_VERSION >= 2)
+       	dlc.flags = DLCONF_WIDTH | DLCONF_HEIGHT | DLCONF_PIXELFORMAT | DLCONF_OPTIONS;
+       	ret = layer->SetConfiguration(layer, &dlc);
+ #endif
+
+        SDL_DFB_CHECKERR(layer->SetCooperativeLevel(layer, DLSCL_SHARED));
 
         SDL_AddVideoDisplay(&display);
     }
@@ -442,6 +448,11 @@ DirectFB_SetDisplayMode(_THIS, SDL_DisplayMode * mode)
     SDL_DFB_DEBUG("Trace\n");
     config.flags &= ~fail;
     SDL_DFB_CHECKERR(data->layer->SetConfiguration(data->layer, &config));
+#if (DIRECTFB_MAJOR_VERSION == 1) && (DIRECTFB_MINOR_VERSION >= 2)
+    /* Need to call this twice ! */
+    SDL_DFB_CHECKERR(data->layer->SetConfiguration(data->layer, &config));
+    //SDL_DFB_CHECKERR(data->layer->SetSourceRectangle(data->layer, 0, 0, config.width, config.height));
+#endif
 
     /* Double check */
     SDL_DFB_CHECKERR(data->layer->GetConfiguration(data->layer, &rconfig));
@@ -456,7 +467,7 @@ DirectFB_SetDisplayMode(_THIS, SDL_DisplayMode * mode)
                     mode->format);
         return -1;
     }
-
+    
     data->pixelformat = rconfig.pixelformat;
     data->cw = config.width;
     data->ch = config.height;
