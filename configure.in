@@ -394,6 +394,30 @@ AC_HELP_STRING([--enable-sse2], [use SSE2 assembly routines [[default=yes]]]),
         fi
     fi
 
+    # Make sure that we don't generate floating point code that would
+    # cause illegal instruction exceptions on older processors
+    case "$host" in
+        *-*-darwin*)
+            # Don't need to worry about Apple hardware, it's all SSE capable
+            default_ssemath=yes
+            ;;
+        *64-*-*)
+            # x86 64-bit architectures all have SSE instructions
+            default_ssemath=yes
+            ;;
+	*)
+            default_ssemath=no
+            ;;
+    esac
+    AC_ARG_ENABLE(ssemath,
+AC_HELP_STRING([--enable-ssemath], [Allow GCC to use SSE floating point math [[default=no]]]),
+                  , enable_ssemath=$default_ssemath)
+    if test x$enable_ssemath = xno; then
+        if test x$have_gcc_sse = xyes -o x$have_gcc_sse2 = xyes; then
+            EXTRA_CFLAGS="$EXTRA_CFLAGS -mfpmath=387"
+        fi
+    fi
+
     AC_ARG_ENABLE(altivec,
 AC_HELP_STRING([--enable-altivec], [use Altivec assembly routines [[default=yes]]]),
                   , enable_altivec=yes)
