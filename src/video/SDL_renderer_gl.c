@@ -510,9 +510,13 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 //            format = GL_YCBCR_MESA;
 //            type = GL_UNSIGNED_SHORT_8_8_MESA;
 //        } else if (renderdata->GL_APPLE_ycbcr_422) {
-            internalFormat = GL_RGB8;
+            internalFormat = GL_RGB;
             format = GL_YCBCR_422_APPLE;
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
             type = GL_UNSIGNED_SHORT_8_8_APPLE;
+#else
+            type = GL_UNSIGNED_SHORT_8_8_REV_APPLE;
+#endif
 //        } else {
 //            SDL_SetError("Unsupported texture format");
 //            return -1;
