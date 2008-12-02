@@ -328,23 +328,6 @@ MoveSprite(SDL_Surface * screen, SDL_Surface * light)
     SDL_UpdateRects(screen, 2, updates);
 }
 
-void
-WarpSprite(SDL_Surface * screen, int x, int y)
-{
-    SDL_Rect updates[2];
-
-    /* Erase, move, Draw, update */
-    updates[0] = position;
-    SDL_BlitSurface(backing, NULL, screen, &updates[0]);
-    position.x = x - sprite->w / 2;     /* Center about X */
-    position.y = y - sprite->h / 2;     /* Center about Y */
-    updates[1] = position;
-    SDL_BlitSurface(screen, &updates[1], backing, NULL);
-    updates[1] = position;
-    SDL_BlitSurface(sprite, NULL, screen, &updates[1]);
-    SDL_UpdateRects(screen, 2, updates);
-}
-
 int
 main(int argc, char *argv[])
 {
