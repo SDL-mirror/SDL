@@ -35,6 +35,7 @@
 
 #include "SDL_video.h"
 #include "SDL_endian.h"
+#include "SDL_pixels_c.h"
 
 /* Compression encodings for BMP files */
 #ifndef BI_RGB
