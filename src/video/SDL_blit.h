@@ -165,7 +165,7 @@ do {									   \
 									   \
 		case 3: {						   \
 		        Uint8 *B = (Uint8 *)(buf);			   \
-			if(SDL_BYTEORDER == SDL_LIL_ENDIAN) {		   \
+			if (SDL_BYTEORDER == SDL_LIL_ENDIAN) {		   \
 			        Pixel = B[0] + (B[1] << 8) + (B[2] << 16); \
 			} else {					   \
 			        Pixel = (B[0] << 16) + (B[1] << 8) + B[2]; \
@@ -178,38 +178,42 @@ do {									   \
 		break;							   \
 									   \
 		default:						   \
-			Pixel = 0; /* appease gcc */			   \
+		        Pixel; /* stop gcc complaints */		   \
 		break;							   \
 	}								   \
-} while(0)
+} while (0)
 
 #define DISEMBLE_RGB(buf, bpp, fmt, Pixel, r, g, b)			   \
 do {									   \
 	switch (bpp) {							   \
 		case 2:							   \
 			Pixel = *((Uint16 *)(buf));			   \
+			RGB_FROM_PIXEL(Pixel, fmt, r, g, b);		   \
 		break;							   \
 									   \
-		case 3: {						   \
-		        Uint8 *B = (Uint8 *)buf;			   \
-			if(SDL_BYTEORDER == SDL_LIL_ENDIAN) {		   \
-			        Pixel = B[0] + (B[1] << 8) + (B[2] << 16); \
+		case 3:	{						   \
+                        if (SDL_BYTEORDER == SDL_LIL_ENDIAN) {		   \
+			        r = *((buf)+fmt->Rshift/8);		   \
+				g = *((buf)+fmt->Gshift/8);		   \
+				b = *((buf)+fmt->Bshift/8);		   \
 			} else {					   \
-			        Pixel = (B[0] << 16) + (B[1] << 8) + B[2]; \
+			        r = *((buf)+2-fmt->Rshift/8);		   \
+				g = *((buf)+2-fmt->Gshift/8);		   \
+				b = *((buf)+2-fmt->Bshift/8);		   \
 			}						   \
 		}							   \
 		break;							   \
 									   \
 		case 4:							   \
 			Pixel = *((Uint32 *)(buf));			   \
+			RGB_FROM_PIXEL(Pixel, fmt, r, g, b);		   \
 		break;							   \
 									   \
-	        default:						   \
-		        Pixel = 0;	/* prevent gcc from complaining */ \
+		default:						   \
+		        Pixel; /* stop gcc complaints */		   \
 		break;							   \
 	}								   \
-	RGB_FROM_PIXEL(Pixel, fmt, r, g, b);				   \
-} while(0)
+} while (0)
 
 /* Assemble R-G-B values into a specified pixel format and store them */
 #define PIXEL_FROM_RGB(Pixel, fmt, r, g, b)				\
@@ -242,7 +246,7 @@ do {									   \
 		break;							\
 									\
 		case 3: {						\
-                        if(SDL_BYTEORDER == SDL_LIL_ENDIAN) {		\
+                        if (SDL_BYTEORDER == SDL_LIL_ENDIAN) {		\
 			        *((buf)+fmt->Rshift/8) = r;		\
 				*((buf)+fmt->Gshift/8) = g;		\
 				*((buf)+fmt->Bshift/8) = b;		\
@@ -277,7 +281,7 @@ do {									   \
 		break;							\
 									\
 		case 3: {						\
-                        if(SDL_BYTEORDER == SDL_LIL_ENDIAN) {		\
+                        if (SDL_BYTEORDER == SDL_LIL_ENDIAN) {		\
 			        *((buf)+fmt->Rshift/8) = r;		\
 				*((buf)+fmt->Gshift/8) = g;		\
 				*((buf)+fmt->Bshift/8) = b;		\
@@ -342,29 +346,33 @@ do {									   \
 	switch (bpp) {							   \
 		case 2:							   \
 			Pixel = *((Uint16 *)(buf));			   \
+			RGBA_FROM_PIXEL(Pixel, fmt, r, g, b, a);	   \
 		break;							   \
 									   \
-		case 3:	{/* FIXME: broken code (no alpha) */		   \
-		        Uint8 *b = (Uint8 *)buf;			   \
-			if(SDL_BYTEORDER == SDL_LIL_ENDIAN) {		   \
-			        Pixel = b[0] + (b[1] << 8) + (b[2] << 16); \
+		case 3:	{						   \
+                        if (SDL_BYTEORDER == SDL_LIL_ENDIAN) {		   \
+			        r = *((buf)+fmt->Rshift/8);		   \
+				g = *((buf)+fmt->Gshift/8);		   \
+				b = *((buf)+fmt->Bshift/8);		   \
 			} else {					   \
-			        Pixel = (b[0] << 16) + (b[1] << 8) + b[2]; \
+			        r = *((buf)+2-fmt->Rshift/8);		   \
+				g = *((buf)+2-fmt->Gshift/8);		   \
+				b = *((buf)+2-fmt->Bshift/8);		   \
 			}						   \
+			a = 0xFF;					   \
 		}							   \
 		break;							   \
 									   \
 		case 4:							   \
 			Pixel = *((Uint32 *)(buf));			   \
+			RGBA_FROM_PIXEL(Pixel, fmt, r, g, b, a);	   \
 		break;							   \
 									   \
 		default:						   \
-		        Pixel = 0; /* stop gcc complaints */		   \
+		        Pixel; /* stop gcc complaints */		   \
 		break;							   \
 	}								   \
-	RGBA_FROM_PIXEL(Pixel, fmt, r, g, b, a);			   \
-	Pixel &= ~fmt->Amask;						   \
-} while(0)
+} while (0)
 
 /* FIXME: this isn't correct, especially for Alpha (maximum != 255) */
 #define PIXEL_FROM_RGBA(Pixel, fmt, r, g, b, a)				\
@@ -385,8 +393,8 @@ do {									   \
 		}							\
 		break;							\
 									\
-		case 3: { /* FIXME: broken code (no alpha) */		\
-                        if(SDL_BYTEORDER == SDL_LIL_ENDIAN) {		\
+		case 3: {						\
+                        if (SDL_BYTEORDER == SDL_LIL_ENDIAN) {		\
 			        *((buf)+fmt->Rshift/8) = r;		\
 				*((buf)+fmt->Gshift/8) = g;		\
 				*((buf)+fmt->Bshift/8) = b;		\

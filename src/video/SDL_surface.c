@@ -336,6 +336,7 @@ SDL_ConvertColorkeyToAlpha(SDL_Surface * surface)
     SDL_UnlockSurface(surface);
 
     SDL_SetColorKey(surface, 0, 0);
+    SDL_SetSurfaceBlendMode(surface, SDL_TEXTUREBLENDMODE_BLEND);
 }
 
 int
@@ -808,7 +809,16 @@ SDL_ConvertSurface(SDL_Surface * surface, SDL_PixelFormat * format,
     SDL_LowerBlit(surface, &bounds, convert, &bounds);
 
     /* Clean up the original surface, and update converted surface */
-    SDL_SetClipRect(convert, &surface->clip_rect);
+    convert->map->info.r = surface->map->info.r;
+    convert->map->info.g = surface->map->info.g;
+    convert->map->info.b = surface->map->info.b;
+    convert->map->info.a = surface->map->info.a;
+    convert->map->info.flags =
+        (copy_flags &
+         ~(SDL_COPY_COLORKEY | SDL_COPY_BLEND
+           | SDL_COPY_RLE_DESIRED | SDL_COPY_RLE_COLORKEY |
+           SDL_COPY_RLE_ALPHAKEY));
+    surface->map->info.flags = copy_flags;
     if (copy_flags & SDL_COPY_COLORKEY) {
         Uint8 keyR, keyG, keyB, keyA;
 
@@ -816,21 +826,20 @@ SDL_ConvertSurface(SDL_Surface * surface, SDL_PixelFormat * format,
                     &keyG, &keyB, &keyA);
         SDL_SetColorKey(convert, 1,
                         SDL_MapRGBA(convert->format, keyR, keyG, keyB, keyA));
+        /* This is needed when converting for 3D texture upload */
         SDL_ConvertColorkeyToAlpha(convert);
     }
-    convert->map->info.r = surface->map->info.r;
-    convert->map->info.g = surface->map->info.g;
-    convert->map->info.b = surface->map->info.b;
-    convert->map->info.a = surface->map->info.a;
-    convert->map->info.flags = copy_flags;
-    surface->map->info.flags = copy_flags;
+    SDL_SetClipRect(convert, &surface->clip_rect);
 
     /* Enable alpha blending by default if the new surface has an
      * alpha channel or alpha modulation */
-    if (format->Amask || (copy_flags & SDL_COPY_MODULATE_ALPHA)) {
+    if ((surface->format->Amask && format->Amask) ||
+        (copy_flags & SDL_COPY_MODULATE_ALPHA)) {
         SDL_SetSurfaceBlendMode(convert, SDL_TEXTUREBLENDMODE_BLEND);
     }
-    SDL_SetSurfaceRLE(convert, (flags & SDL_RLEACCEL));
+    if ((copy_flags & SDL_COPY_RLE_DESIRED) || (flags & SDL_RLEACCEL)) {
+        SDL_SetSurfaceRLE(convert, SDL_RLEACCEL);
+    }
 
     /* We're ready to go! */
     return (convert);

@@ -26,6 +26,7 @@
 #include "SDL_blit.h"
 #include "SDL_blit_auto.h"
 #include "SDL_blit_copy.h"
+#include "SDL_blit_slow.h"
 #include "SDL_RLEaccel_c.h"
 #include "SDL_pixels_c.h"
 
@@ -268,6 +269,15 @@ SDL_CalculateBlit(SDL_Surface * surface)
         blit =
             SDL_ChooseBlitFunc(src_format, dst_format, map->info.flags,
                                SDL_GeneratedBlitFuncTable);
+    }
+#ifndef TEST_SLOW_BLIT
+    if (blit == NULL)
+#endif
+    {
+        if (surface->format->BytesPerPixel > 1
+            && dst->format->BytesPerPixel > 1) {
+            blit = SDL_Blit_Slow;
+        }
     }
     map->data = blit;
 
