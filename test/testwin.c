@@ -75,21 +75,6 @@ DrawPict(SDL_Surface * screen, char *bmpfile,
                 "         (colormap fading will suffer - try the -warp option)\n");
     }
 
-    /* Set the screen to black (not really necessary) */
-    if (SDL_LockSurface(screen) == 0) {
-        Uint32 black;
-        Uint8 *pixels;
-
-        black = SDL_MapRGB(screen->format, 0, 0, 0);
-        pixels = (Uint8 *) screen->pixels;
-        for (i = 0; i < screen->h; ++i) {
-            memset(pixels, black, screen->w * screen->format->BytesPerPixel);
-            pixels += screen->pitch;
-        }
-        SDL_UnlockSurface(screen);
-        SDL_UpdateRect(screen, 0, 0, 0, 0);
-    }
-
     /* Display the picture */
     if (speedy) {
         SDL_Surface *displayfmt;
