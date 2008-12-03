@@ -106,7 +106,9 @@ SDL_BlitCopy(SDL_BlitInfo * info)
     dstskip = info->dst_pitch;
 
 #ifdef __SSE__
-    if (SDL_HasSSE() && !((uintptr_t) src & 15) && !((uintptr_t) dst & 15)) {
+    if (SDL_HasSSE() &&
+        !((uintptr_t) src & 15) && !(srcskip & 15) &&
+        !((uintptr_t) dst & 15) && !(dstskip & 15)) {
         while (h--) {
             SDL_memcpySSE(dst, src, w);
             src += srcskip;
@@ -117,7 +119,9 @@ SDL_BlitCopy(SDL_BlitInfo * info)
 #endif
 
 #ifdef __MMX__
-    if (SDL_HasMMX() && !((uintptr_t) src & 7) && !((uintptr_t) dst & 7)) {
+    if (SDL_HasMMX() &&
+        !((uintptr_t) src & 7) && !(srcskip & 7) &&
+        !((uintptr_t) dst & 7) && !(dstskip & 7)) {
         while (h--) {
             SDL_memcpyMMX(dst, src, w);
             src += srcskip;
