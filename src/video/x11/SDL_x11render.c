@@ -646,28 +646,21 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     if (data->makedirty) {
         SDL_AddDirtyRect(&data->dirty, dstrect);
     }
-
-    if (srcrect->w == dstrect->w && srcrect->h == dstrect->h) {
 #ifndef NO_SHARED_MEMORY
-        if (texturedata->shminfo.shmaddr) {
-            XShmPutImage(data->display, data->drawable, data->gc,
-                         texturedata->image, srcrect->x, srcrect->y,
-                         dstrect->x, dstrect->y, dstrect->w, dstrect->h,
-                         False);
-        } else
+    if (texturedata->shminfo.shmaddr) {
+        XShmPutImage(data->display, data->drawable, data->gc,
+                     texturedata->image, srcrect->x, srcrect->y, dstrect->x,
+                     dstrect->y, srcrect->w, srcrect->h, False);
+    } else
 #endif
-        if (texturedata->pixels) {
-            XPutImage(data->display, data->drawable, data->gc,
-                      texturedata->image, srcrect->x, srcrect->y, dstrect->x,
-                      dstrect->y, dstrect->w, dstrect->h);
-        } else {
-            XCopyArea(data->display, texturedata->pixmap, data->drawable,
-                      data->gc, srcrect->x, srcrect->y, dstrect->w,
-                      dstrect->h, dstrect->x, dstrect->y);
-        }
+    if (texturedata->pixels) {
+        XPutImage(data->display, data->drawable, data->gc, texturedata->image,
+                  srcrect->x, srcrect->y, dstrect->x, dstrect->y, srcrect->w,
+                  srcrect->h);
     } else {
-        SDL_SetError("Scaling not supported in the X11 renderer");
-        return -1;
+        XCopyArea(data->display, texturedata->pixmap, data->drawable,
+                  data->gc, srcrect->x, srcrect->y, dstrect->w, dstrect->h,
+                  srcrect->x, srcrect->y);
     }
     return 0;
 }
