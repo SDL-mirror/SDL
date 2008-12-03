@@ -285,6 +285,7 @@ static struct
 } scancode_set[] = {
     { darwin_scancode_table, SDL_arraysize(darwin_scancode_table) },
     { xfree86_scancode_table, SDL_arraysize(xfree86_scancode_table) },
+    { xfree86_scancode_table2, SDL_arraysize(xfree86_scancode_table2) },
 };
 /* *INDENT-OFF* */
 
