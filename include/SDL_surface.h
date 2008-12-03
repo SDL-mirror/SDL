@@ -462,16 +462,16 @@ extern DECLSPEC int SDLCALL SDL_LowerBlit
      SDL_Surface * dst, SDL_Rect * dstrect);
 
 /**
- * \fn int SDL_SoftStretch(SDL_Surface * src, SDL_Rect * srcrect, SDL_Surface * dst, SDL_Rect * dstrect)
+ * \fn int SDL_SoftStretch(SDL_Surface * src, const SDL_Rect * srcrect, SDL_Surface * dst, const SDL_Rect * dstrect)
  *
  * \brief Perform a fast, low quality, stretch blit between two surfaces of the same pixel format.
  *
  * \note This function uses a static buffer, and is not thread-safe.
  */
 extern DECLSPEC int SDLCALL SDL_SoftStretch(SDL_Surface * src,
-                                            SDL_Rect * srcrect,
+                                            const SDL_Rect * srcrect,
                                             SDL_Surface * dst,
-                                            SDL_Rect * dstrect);
+                                            const SDL_Rect * dstrect);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

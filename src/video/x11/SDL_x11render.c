@@ -97,6 +97,7 @@ typedef struct
     /* MIT shared memory extension information */
     XShmSegmentInfo shminfo;
 #endif
+    XImage *scaling_image;
     void *pixels;
     int pitch;
 } X11_TextureData;
@@ -129,6 +130,21 @@ UpdateYUVTextureData(SDL_Texture * texture)
     rect.h = texture->h;
     SDL_SW_CopyYUVToRGB(data->yuv, &rect, data->format, texture->w,
                         texture->h, data->pixels, data->pitch);
+}
+
+static int
+X11_GetDepthFromPixelFormat(Uint32 format)
+{
+    int depth, order;
+
+    depth = SDL_BITSPERPIXEL(format);
+    order = SDL_PIXELORDER(format);
+    if (depth == 32
+        && (order == SDL_PACKEDORDER_XRGB || order == SDL_PACKEDORDER_RGBX
+            || SDL_PACKEDORDER_XBGR || order == SDL_PACKEDORDER_BGRX)) {
+        depth = 24;
+    }
+    return depth;
 }
 
 static Uint32
@@ -385,7 +401,7 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
     X11_TextureData *data;
     XWindowAttributes attributes;
-    int depth, order;
+    int depth;
 
     data = (X11_TextureData *) SDL_calloc(1, sizeof(*data));
     if (!data) {
@@ -409,13 +425,7 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     XGetWindowAttributes(renderdata->display, renderdata->window,
                          &attributes);
-    depth = SDL_BITSPERPIXEL(data->format);
-    order = SDL_PIXELORDER(data->format);
-    if (depth == 32
-        && (order == SDL_PACKEDORDER_XRGB || order == SDL_PACKEDORDER_RGBX
-            || SDL_PACKEDORDER_XBGR || order == SDL_PACKEDORDER_BGRX)) {
-        depth = 24;
-    }
+    depth = X11_GetDepthFromPixelFormat(data->format);
 
     if (data->yuv || texture->access == SDL_TEXTUREACCESS_STREAMING) {
 #ifndef NO_SHARED_MEMORY
@@ -532,9 +542,17 @@ X11_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
 static int
 X11_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture)
 {
+    X11_TextureData *data = (X11_TextureData *) texture->driverdata;
+
     switch (texture->scaleMode) {
     case SDL_TEXTURESCALEMODE_NONE:
         return 0;
+    case SDL_TEXTURESCALEMODE_FAST:
+        /* We can sort of fake it for streaming textures */
+        if (data->yuv || texture->access == SDL_TEXTUREACCESS_STREAMING) {
+            return 0;
+        }
+        /* Fall through to unsupported case */
     default:
         SDL_Unsupported();
         texture->scaleMode = SDL_TEXTURESCALEMODE_NONE;
@@ -646,17 +664,102 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     if (data->makedirty) {
         SDL_AddDirtyRect(&data->dirty, dstrect);
     }
+    if (srcrect->w == dstrect->w && srcrect->h == dstrect->h) {
 #ifndef NO_SHARED_MEMORY
-    if (texturedata->shminfo.shmaddr) {
-        XShmPutImage(data->display, data->drawable, data->gc,
-                     texturedata->image, srcrect->x, srcrect->y, dstrect->x,
-                     dstrect->y, srcrect->w, srcrect->h, False);
-    } else
+        if (texturedata->shminfo.shmaddr) {
+            XShmPutImage(data->display, data->drawable, data->gc,
+                         texturedata->image, srcrect->x, srcrect->y,
+                         dstrect->x, dstrect->y, srcrect->w, srcrect->h,
+                         False);
+        } else
 #endif
-    if (texturedata->pixels) {
-        XPutImage(data->display, data->drawable, data->gc, texturedata->image,
-                  srcrect->x, srcrect->y, dstrect->x, dstrect->y, srcrect->w,
-                  srcrect->h);
+        if (texturedata->pixels) {
+            XPutImage(data->display, data->drawable, data->gc,
+                      texturedata->image, srcrect->x, srcrect->y, dstrect->x,
+                      dstrect->y, srcrect->w, srcrect->h);
+        } else {
+            XCopyArea(data->display, texturedata->pixmap, data->drawable,
+                      data->gc, srcrect->x, srcrect->y, dstrect->w,
+                      dstrect->h, srcrect->x, srcrect->y);
+        }
+    } else if (texturedata->yuv
+               || texture->access == SDL_TEXTUREACCESS_STREAMING) {
+        SDL_Surface src, dst;
+        SDL_PixelFormat fmt;
+        SDL_Rect rect;
+        XImage *image = texturedata->scaling_image;
+
+        if (!image) {
+            XWindowAttributes attributes;
+            int depth;
+            void *pixels;
+            int pitch;
+
+            XGetWindowAttributes(data->display, data->window, &attributes);
+
+            pitch = dstrect->w * SDL_BYTESPERPIXEL(texturedata->format);
+            pixels = SDL_malloc(dstrect->h * pitch);
+            if (!pixels) {
+                SDL_OutOfMemory();
+                return -1;
+            }
+
+            depth = X11_GetDepthFromPixelFormat(texturedata->format);
+            image =
+                XCreateImage(data->display, attributes.visual, depth, ZPixmap,
+                             0, pixels, dstrect->w, dstrect->h,
+                             SDL_BYTESPERPIXEL(texturedata->format) * 8,
+                             pitch);
+            if (!image) {
+                SDL_SetError("XCreateImage() failed");
+                return -1;
+            }
+            texturedata->scaling_image = image;
+
+        } else if (image->width != dstrect->w || image->height != dstrect->h
+                   || !image->data) {
+            image->width = dstrect->w;
+            image->height = dstrect->h;
+            image->bytes_per_line =
+                image->width * SDL_BYTESPERPIXEL(texturedata->format);
+            image->data =
+                (char *) SDL_realloc(image->data,
+                                     image->height * image->bytes_per_line);
+            if (!image->data) {
+                SDL_OutOfMemory();
+                return -1;
+            }
+        }
+
+        /* Set up fake surfaces for SDL_SoftStretch() */
+        src.format = &fmt;
+        src.w = texture->w;
+        src.h = texture->h;
+#ifndef NO_SHARED_MEMORY
+        if (texturedata->shminfo.shmaddr) {
+            src.pixels = texturedata->shminfo.shmaddr;
+        } else
+#endif
+            src.pixels = texturedata->pixels;
+        src.pitch = texturedata->pitch;
+
+        dst.format = &fmt;
+        dst.w = image->width;
+        dst.h = image->height;
+        dst.pixels = image->data;
+        dst.pitch = image->bytes_per_line;
+
+        fmt.BytesPerPixel = SDL_BYTESPERPIXEL(texturedata->format);
+
+        rect.x = 0;
+        rect.y = 0;
+        rect.w = dstrect->w;
+        rect.h = dstrect->h;
+        if (SDL_SoftStretch(&src, srcrect, &dst, &rect) < 0) {
+            return -1;
+        }
+        XPutImage(data->display, data->drawable, data->gc, image, 0, 0,
+                  dstrect->x, dstrect->y, dstrect->w, dstrect->h);
     } else {
         XCopyArea(data->display, texturedata->pixmap, data->drawable,
                   data->gc, srcrect->x, srcrect->y, dstrect->w, dstrect->h,
@@ -720,6 +823,11 @@ X11_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         data->pixels = NULL;
     }
 #endif
+    if (data->scaling_image) {
+        SDL_free(data->scaling_image->data);
+        data->scaling_image->data = NULL;
+        XDestroyImage(data->scaling_image);
+    }
     if (data->pixels) {
         SDL_free(data->pixels);
     }

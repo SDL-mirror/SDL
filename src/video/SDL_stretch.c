@@ -173,8 +173,8 @@ copy_row3(Uint8 * src, int src_w, Uint8 * dst, int dst_w)
    NOTE:  This function is not safe to call from multiple threads!
 */
 int
-SDL_SoftStretch(SDL_Surface * src, SDL_Rect * srcrect,
-                SDL_Surface * dst, SDL_Rect * dstrect)
+SDL_SoftStretch(SDL_Surface * src, const SDL_Rect * srcrect,
+                SDL_Surface * dst, const SDL_Rect * dstrect)
 {
     int src_locked;
     int dst_locked;

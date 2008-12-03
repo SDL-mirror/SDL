@@ -85,7 +85,6 @@
 
 #include "SDL_video.h"
 #include "SDL_cpuinfo.h"
-#include "SDL_stretch_c.h"
 #include "SDL_yuv_sw_c.h"
 
 
