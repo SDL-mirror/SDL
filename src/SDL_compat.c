@@ -37,6 +37,8 @@ static SDL_Surface *SDL_VideoSurface = NULL;
 static SDL_Surface *SDL_ShadowSurface = NULL;
 static SDL_Surface *SDL_PublicSurface = NULL;
 static SDL_GLContext *SDL_VideoContext = NULL;
+static Uint32 SDL_VideoFlags = 0;
+static int SDL_VideoBPP = 0;
 static char *wm_title = NULL;
 
 char *
@@ -175,6 +177,7 @@ SDL_CompatEventFilter(void *userdata, SDL_Event * event)
             }
             break;
         case SDL_WINDOWEVENT_RESIZED:
+            SDL_PeepEvents(&fake, 1, SDL_GETEVENT, SDL_VIDEORESIZEMASK);
             fake.type = SDL_VIDEORESIZE;
             fake.resize.w = event->window.data1;
             fake.resize.h = event->window.data2;
@@ -360,6 +363,90 @@ CreateVideoSurface(SDL_TextureID textureID)
     return surface;
 }
 
+static void
+ClearVideoSurface()
+{
+    Uint32 black;
+
+    /* Clear the surface for display */
+    black = SDL_MapRGB(SDL_PublicSurface->format, 0, 0, 0);
+    SDL_FillRect(SDL_PublicSurface, NULL, black);
+    SDL_UpdateRect(SDL_PublicSurface, 0, 0, 0, 0);
+}
+
+int
+SDL_ResizeVideoMode(int width, int height, int bpp, Uint32 flags)
+{
+    int w, h;
+    Uint32 format;
+    int access;
+    void *pixels;
+    int pitch;
+
+    /* We can't resize something we don't have... */
+    if (!SDL_VideoWindow) {
+        return -1;
+    }
+
+    /* We probably have to recreate the window in fullscreen mode */
+    if (flags & SDL_FULLSCREEN) {
+        return -1;
+    }
+
+    /* I don't think there's any change we can gracefully make in flags */
+    if (flags != SDL_VideoFlags) {
+        return -1;
+    }
+
+    /* Resize the window */
+    SDL_GetWindowSize(SDL_VideoWindow, &w, &h);
+    if (w != width || h != height) {
+        SDL_SetWindowSize(SDL_VideoWindow, width, height);
+    }
+
+    /* If we're in OpenGL mode, just resize the stub surface and we're done! */
+    if (flags & SDL_OPENGL) {
+        SDL_VideoSurface->w = width;
+        SDL_VideoSurface->h = height;
+        return 0;
+    }
+
+    /* Destroy the screen texture and recreate it */
+    SDL_QueryTexture(SDL_VideoTexture, &format, &access, &w, &h);
+    SDL_DestroyTexture(SDL_VideoTexture);
+    SDL_VideoTexture = SDL_CreateTexture(format, access, width, height);
+    if (!SDL_VideoTexture) {
+        return -1;
+    }
+
+    SDL_VideoSurface->w = width;
+    SDL_VideoSurface->h = height;
+    if (SDL_QueryTexturePixels(SDL_VideoTexture, &pixels, &pitch) == 0) {
+        SDL_VideoSurface->pixels = pixels;
+        SDL_VideoSurface->pitch = pitch;
+    } else {
+        SDL_CalculatePitch(SDL_VideoSurface);
+        SDL_VideoSurface->pixels =
+            SDL_realloc(SDL_VideoSurface->pixels,
+                        SDL_VideoSurface->h * SDL_VideoSurface->pitch);
+    }
+    SDL_SetClipRect(SDL_VideoSurface, NULL);
+
+    if (SDL_ShadowSurface) {
+        SDL_ShadowSurface->w = width;
+        SDL_ShadowSurface->h = height;
+        SDL_CalculatePitch(SDL_ShadowSurface);
+        SDL_ShadowSurface->pixels =
+            SDL_realloc(SDL_ShadowSurface->pixels,
+                        SDL_ShadowSurface->h * SDL_ShadowSurface->pitch);
+        SDL_SetClipRect(SDL_ShadowSurface, NULL);
+    }
+
+    ClearVideoSurface();
+
+    return 0;
+}
+
 SDL_Surface *
 SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
 {
@@ -371,12 +458,16 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
     Uint32 desktop_format;
     Uint32 desired_format;
     Uint32 surface_flags;
-    Uint32 black;
 
     if (!SDL_GetVideoDevice()) {
         if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE) < 0) {
             return NULL;
         }
+    }
+
+    /* See if we can simply resize the existing window and surface */
+    if (SDL_ResizeVideoMode(width, height, bpp, flags) == 0) {
+        return SDL_PublicSurface;
     }
 
     /* Destroy existing window */
@@ -533,9 +624,6 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
         return NULL;
     }
 
-    SDL_SetTextureBlendMode(SDL_VideoTexture, SDL_TEXTUREBLENDMODE_NONE);
-
-
     /* Create the screen surface */
     SDL_VideoSurface = CreateVideoSurface(SDL_VideoTexture);
     if (!SDL_VideoSurface) {
@@ -580,10 +668,9 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
     SDL_PublicSurface =
         (SDL_ShadowSurface ? SDL_ShadowSurface : SDL_VideoSurface);
 
-    /* Clear the surface for display */
-    black = SDL_MapRGB(SDL_PublicSurface->format, 0, 0, 0);
-    SDL_FillRect(SDL_PublicSurface, NULL, black);
-    SDL_UpdateRect(SDL_PublicSurface, 0, 0, 0, 0);
+    SDL_VideoFlags = flags;
+
+    ClearVideoSurface();
 
     /* We're finally done! */
     return SDL_PublicSurface;
