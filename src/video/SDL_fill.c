@@ -31,10 +31,10 @@
 #ifdef _MSC_VER
 #define SSE_BEGIN \
     __m128 c128; \
-	c128.m128_u32[0] = color; \
-	c128.m128_u32[1] = color; \
-	c128.m128_u32[2] = color; \
-	c128.m128_u32[3] = color;
+    c128.m128_u32[0] = color; \
+    c128.m128_u32[1] = color; \
+    c128.m128_u32[2] = color; \
+    c128.m128_u32[3] = color;
 #else
 #define SSE_BEGIN \
     DECLARE_ALIGNED(Uint32, cccc[4], 16); \
@@ -71,7 +71,7 @@ SDL_FillRect##bpp##SSE(Uint8 *pixels, int pitch, Uint32 color, int w, int h) \
             if (adjust < 16) { \
                 n -= adjust; \
                 adjust /= bpp; \
-                while(adjust--) { \
+                while (adjust--) { \
                     *((type *)p) = (type)color; \
                     p += bpp; \
                 } \
@@ -81,7 +81,7 @@ SDL_FillRect##bpp##SSE(Uint8 *pixels, int pitch, Uint32 color, int w, int h) \
         if (n & 63) { \
             int remainder = (n & 63); \
             remainder /= bpp; \
-            while(remainder--) { \
+            while (remainder--) { \
                 *((type *)p) = (type)color; \
                 p += bpp; \
             } \
@@ -136,7 +136,7 @@ SDL_FillRect##bpp##MMX(Uint8 *pixels, int pitch, Uint32 color, int w, int h) \
             if (adjust < 8) { \
                 n -= adjust; \
                 adjust /= bpp; \
-                while(adjust--) { \
+                while (adjust--) { \
                     *((type *)p) = (type)color; \
                     p += bpp; \
                 } \
@@ -146,7 +146,7 @@ SDL_FillRect##bpp##MMX(Uint8 *pixels, int pitch, Uint32 color, int w, int h) \
         if (n & 63) { \
             int remainder = (n & 63); \
             remainder /= bpp; \
-            while(remainder--) { \
+            while (remainder--) { \
                 *((type *)p) = (type)color; \
                 p += bpp; \
             } \
