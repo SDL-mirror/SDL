@@ -129,7 +129,7 @@ MoveSprites(SDL_WindowID window, SDL_TextureID sprite)
             position->x += velocity->x;
         }
         position->y += velocity->y;
-        if ((position->y < 0) || (position->y >= (window_h - sprite_w))) {
+        if ((position->y < 0) || (position->y >= (window_h - sprite_h))) {
             velocity->y = -velocity->y;
             position->y += velocity->y;
         }
