@@ -38,7 +38,6 @@ static SDL_Surface *SDL_ShadowSurface = NULL;
 static SDL_Surface *SDL_PublicSurface = NULL;
 static SDL_GLContext *SDL_VideoContext = NULL;
 static Uint32 SDL_VideoFlags = 0;
-static int SDL_VideoBPP = 0;
 static char *wm_title = NULL;
 
 char *
@@ -431,15 +430,17 @@ SDL_ResizeVideoMode(int width, int height, int bpp, Uint32 flags)
                         SDL_VideoSurface->h * SDL_VideoSurface->pitch);
     }
     SDL_SetClipRect(SDL_VideoSurface, NULL);
+    SDL_InvalidateMap(SDL_VideoSurface->map);
 
     if (SDL_ShadowSurface) {
         SDL_ShadowSurface->w = width;
         SDL_ShadowSurface->h = height;
-        SDL_CalculatePitch(SDL_ShadowSurface);
+        SDL_ShadowSurface->pitch = SDL_CalculatePitch(SDL_ShadowSurface);
         SDL_ShadowSurface->pixels =
             SDL_realloc(SDL_ShadowSurface->pixels,
                         SDL_ShadowSurface->h * SDL_ShadowSurface->pitch);
         SDL_SetClipRect(SDL_ShadowSurface, NULL);
+        SDL_InvalidateMap(SDL_ShadowSurface->map);
     }
 
     ClearVideoSurface();
