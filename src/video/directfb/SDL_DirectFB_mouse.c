@@ -49,7 +49,8 @@ DirectFB_InitMouse(_THIS)
     mouse.WarpMouse = DirectFB_WarpMouse;
     mouse.FreeMouse = DirectFB_FreeMouse;
     mouse.cursor_shown = 1;
-    devdata->mouse = SDL_AddMouse(&mouse, -1, "Mouse", 0, 0, 1);
+    SDL_SetMouseIndexId(0, 0);  /* ID == Index ! */
+    devdata->mouse = SDL_AddMouse(&mouse, 0, "Mouse", 0, 0, 1);
 }
 
 void

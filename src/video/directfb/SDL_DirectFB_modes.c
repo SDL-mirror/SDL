@@ -348,9 +348,11 @@ DirectFB_InitModes(_THIS)
         display.driverdata = dispdata;
 
 #if (DIRECTFB_MAJOR_VERSION == 1) && (DIRECTFB_MINOR_VERSION >= 2)
-       	dlc.flags = DLCONF_WIDTH | DLCONF_HEIGHT | DLCONF_PIXELFORMAT | DLCONF_OPTIONS;
-       	ret = layer->SetConfiguration(layer, &dlc);
- #endif
+        dlc.flags =
+            DLCONF_WIDTH | DLCONF_HEIGHT | DLCONF_PIXELFORMAT |
+            DLCONF_OPTIONS;
+        ret = layer->SetConfiguration(layer, &dlc);
+#endif
 
         SDL_DFB_CHECKERR(layer->SetCooperativeLevel(layer, DLSCL_SHARED));
 
@@ -467,7 +469,7 @@ DirectFB_SetDisplayMode(_THIS, SDL_DisplayMode * mode)
                     mode->format);
         return -1;
     }
-    
+
     data->pixelformat = rconfig.pixelformat;
     data->cw = config.width;
     data->ch = config.height;
