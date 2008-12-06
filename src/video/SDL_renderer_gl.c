@@ -184,6 +184,7 @@ typedef struct
     void *pixels;
     int pitch;
     SDL_DirtyRectList dirty;
+int HACK_RYAN_FIXME;
 } GL_TextureData;
 
 
@@ -732,8 +733,11 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     /* YUV formats use RGBA but are really two bytes per pixel */
     if (internalFormat == GL_RGBA && bytes_per_pixel(texture->format) < 4) {
-        texture_w = (texture_w * bytes_per_pixel(texture->format)) / 4;
+data->HACK_RYAN_FIXME = 2;
+    } else {
+data->HACK_RYAN_FIXME = 1;
     }
+    texture_w /= data->HACK_RYAN_FIXME;
 
     data->format = format;
     data->formattype = type;
@@ -863,7 +867,7 @@ SetupTextureUpdate(GL_RenderData * renderdata, SDL_Texture * texture,
     }
     renderdata->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     renderdata->glPixelStorei(GL_UNPACK_ROW_LENGTH,
-                              pitch / bytes_per_pixel(texture->format));
+                              (pitch / bytes_per_pixel(texture->format) / ((GL_TextureData *)texture->driverdata)->HACK_RYAN_FIXME));
 }
 
 static int
@@ -1011,7 +1015,7 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                           rect->x * bpp);
 printf("texsubimage2d(%d,%d,%d,%d)\n", (int) rect->x, (int) rect->y, (int) rect->w, (int) rect->h);
             data->glTexSubImage2D(texturedata->type, 0, rect->x, rect->y,
-                                  rect->w, rect->h, texturedata->format,
+                                  rect->w / texturedata->HACK_RYAN_FIXME, rect->h, texturedata->format,
                                   texturedata->formattype, pixels);
         }
         SDL_ClearDirtyRects(&texturedata->dirty);
