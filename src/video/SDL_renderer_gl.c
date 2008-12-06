@@ -423,7 +423,13 @@ GL_ActivateRenderer(SDL_Renderer * renderer)
         return -1;
     }
     if (data->updateSize) {
-        GL_DisplayModeChanged(renderer);
+        data->glMatrixMode(GL_PROJECTION);
+        data->glLoadIdentity();
+        data->glMatrixMode(GL_MODELVIEW);
+        data->glLoadIdentity();
+        data->glViewport(0, 0, window->w, window->h);
+        data->glOrtho(0.0, (GLdouble) window->w, (GLdouble) window->h, 0.0,
+                      0.0, 1.0);
         data->updateSize = SDL_FALSE;
     }
     return 0;
@@ -433,16 +439,10 @@ static int
 GL_DisplayModeChanged(SDL_Renderer * renderer)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
 
-    data->glMatrixMode(GL_PROJECTION);
-    data->glLoadIdentity();
-    data->glMatrixMode(GL_MODELVIEW);
-    data->glLoadIdentity();
-    data->glViewport(0, 0, window->w, window->h);
-    data->glOrtho(0.0, (GLdouble) window->w, (GLdouble) window->h, 0.0, 0.0,
-                  1.0);
-    return 0;
+    /* Rebind the context to the window area and update matrices */
+    data->updateSize = SDL_TRUE;
+    return GL_ActivateRenderer(renderer);
 }
 
 static __inline__ int
