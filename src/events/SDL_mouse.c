@@ -433,9 +433,15 @@ SDL_SendMouseMotion(int id, int relative, int x, int y, int pressure)
     }
 
     /* the relative motion is calculated regarding the system cursor last position */
-
-    xrel = x - last_x;
-    yrel = y - last_y;
+    if (relative) {
+        xrel = x;
+        yrel = y;
+        x = (last_x + x);
+        y = (last_y + y);
+    } else {
+        xrel = x - last_x;
+        yrel = y - last_y;
+    }
 
     /* Drop events that don't change state */
     if (!xrel && !yrel) {
