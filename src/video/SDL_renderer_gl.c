@@ -45,14 +45,21 @@
 static __inline__ int
 bytes_per_pixel(const Uint32 format)
 {
+    if (!SDL_ISPIXELFORMAT_FOURCC(format)) {
+        return SDL_BYTESPERPIXEL(format);
+    }
+
+    /* FOURCC format */
     switch (format) {
+        case SDL_PIXELFORMAT_YV12:
+        case SDL_PIXELFORMAT_IYUV:
+        case SDL_PIXELFORMAT_YUY2:
         case SDL_PIXELFORMAT_UYVY:
-        /* !!! FIXME: other YUV formats here... */
+        case SDL_PIXELFORMAT_YVYU:
             return 2;
         default:
-            return SDL_BYTESPERPIXEL(format);
+            return 1;  /* shouldn't ever hit this. */
     }
-    return -1;  /* shouldn't ever hit this. */
 }
 
 
@@ -721,6 +728,11 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         texture_h = power_of_2(texture->h);
         data->texw = (GLfloat) (texture->w) / texture_w;
         data->texh = (GLfloat) texture->h / texture_h;
+    }
+
+    /* YUV formats use RGBA but are really two bytes per pixel */
+    if (internalFormat == GL_RGBA && bytes_per_pixel(texture->format) < 4) {
+        texture_w = (texture_w * bytes_per_pixel(texture->format)) / 4;
     }
 
     data->format = format;
