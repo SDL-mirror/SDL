@@ -153,7 +153,7 @@ SDL_PROC_UNUSED(void, glGetPixelMapuiv, (GLenum map, GLuint * values))
 SDL_PROC_UNUSED(void, glGetPixelMapusv, (GLenum map, GLushort * values))
 SDL_PROC_UNUSED(void, glGetPointerv, (GLenum pname, GLvoid * *params))
 SDL_PROC_UNUSED(void, glGetPolygonStipple, (GLubyte * mask))
-SDL_PROC_UNUSED(const GLubyte *, glGetString, (GLenum name))
+SDL_PROC(const GLubyte *, glGetString, (GLenum name))
 SDL_PROC_UNUSED(void, glGetTexEnvfv,
                 (GLenum target, GLenum pname, GLfloat * params))
 SDL_PROC_UNUSED(void, glGetTexEnviv,

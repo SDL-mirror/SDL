@@ -41,6 +41,21 @@
    http://developer.apple.com/documentation/GraphicsImaging/Conceptual/OpenGL-MacProgGuide/opengl_texturedata/chapter_10_section_2.html
 */
 
+/* !!! FIXME: this should go in a higher level than the GL renderer. */
+static __inline__ int
+bytes_per_pixel(const Uint32 format)
+{
+    switch (format) {
+        case SDL_PIXELFORMAT_UYVY:
+        /* !!! FIXME: other YUV formats here... */
+            return 2;
+        default:
+            return SDL_BYTESPERPIXEL(format);
+    }
+    return -1;  /* shouldn't ever hit this. */
+}
+
+
 static const float inv255f = 1.0f / 255.0f;
 
 static SDL_Renderer *GL_CreateRenderer(SDL_Window * window, Uint32 flags);
@@ -124,6 +139,7 @@ typedef struct
     SDL_bool updateSize;
     SDL_bool GL_ARB_texture_rectangle_supported;
     SDL_bool GL_EXT_paletted_texture_supported;
+    SDL_bool GL_ARB_fragment_program_supported;
     int blendMode;
     int scaleMode;
 
@@ -135,11 +151,23 @@ typedef struct
     PFNGLCOLORTABLEEXTPROC glColorTableEXT;
     void (*glTextureRangeAPPLE) (GLenum target, GLsizei length,
                                  const GLvoid * pointer);
+
+    PFNGLGETPROGRAMIVARBPROC glGetProgramivARB;
+    PFNGLGETPROGRAMSTRINGARBPROC glGetProgramStringARB;
+    PFNGLPROGRAMLOCALPARAMETER4FVARBPROC glProgramLocalParameter4fvARB;
+    PFNGLDELETEPROGRAMSARBPROC glDeleteProgramsARB;
+    PFNGLGENPROGRAMSARBPROC glGenProgramsARB;
+    PFNGLBINDPROGRAMARBPROC glBindProgramARB;
+    PFNGLPROGRAMSTRINGARBPROC glProgramStringARB;
+
+    /* (optional) fragment programs */
+    GLuint fragment_program_UYVY;
 } GL_RenderData;
 
 typedef struct
 {
     GLuint texture;
+    GLuint shader;
     GLenum type;
     GLfloat texw;
     GLfloat texh;
@@ -348,6 +376,28 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
             SDL_GL_GetProcAddress("glTextureRangeAPPLE");
     }
 
+    /* we might use fragment programs for YUV data, etc. */
+    if (SDL_GL_ExtensionSupported("GL_ARB_fragment_program")) {
+        /* !!! FIXME: this doesn't check for errors. */
+        /* !!! FIXME: this should really reuse the glfuncs.h stuff. */
+        data->glGetProgramivARB = (PFNGLGETPROGRAMIVARBPROC)
+            SDL_GL_GetProcAddress("glGetProgramivARB");
+        data->glGetProgramStringARB = (PFNGLGETPROGRAMSTRINGARBPROC)
+            SDL_GL_GetProcAddress("glGetProgramStringARB");
+        data->glProgramLocalParameter4fvARB =
+            (PFNGLPROGRAMLOCALPARAMETER4FVARBPROC)
+            SDL_GL_GetProcAddress("glProgramLocalParameter4fvARB");
+        data->glDeleteProgramsARB = (PFNGLDELETEPROGRAMSARBPROC)
+            SDL_GL_GetProcAddress("glDeleteProgramsARB");
+        data->glGenProgramsARB = (PFNGLGENPROGRAMSARBPROC)
+            SDL_GL_GetProcAddress("glGenProgramsARB");
+        data->glBindProgramARB = (PFNGLBINDPROGRAMARBPROC)
+            SDL_GL_GetProcAddress("glBindProgramARB");
+        data->glProgramStringARB = (PFNGLPROGRAMSTRINGARBPROC)
+            SDL_GL_GetProcAddress("glProgramStringARB");
+        data->GL_ARB_fragment_program_supported = SDL_TRUE;
+    }
+
     /* Set up parameters for rendering */
     data->blendMode = -1;
     data->scaleMode = -1;
@@ -406,6 +456,103 @@ power_of_2(int input)
     return value;
 }
 
+
+#define DEBUG_PROGRAM_COMPILE 1
+
+static GLuint
+compile_shader(GL_RenderData *data, GLenum shader_type, const char *source)
+{
+#if DEBUG_PROGRAM_COMPILE
+    printf("compiling shader:\n%s\n\n", source);
+#endif
+
+    GLuint program = 0;
+
+    data->glGetError();  /* flush any existing error state. */
+    data->glGenProgramsARB(1, &program);
+    data->glBindProgramARB(shader_type, program);
+    data->glProgramStringARB(shader_type, GL_PROGRAM_FORMAT_ASCII_ARB,
+                             SDL_strlen(source), source);
+
+    if (data->glGetError() == GL_INVALID_OPERATION)
+    { 
+#if DEBUG_PROGRAM_COMPILE
+        GLint pos = 0;
+        const GLubyte *errstr;
+        data->glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &pos);
+        errstr = data->glGetString(GL_PROGRAM_ERROR_STRING_ARB);
+        printf("program compile error at position %d: %s\n\n",
+                  (int) pos, (const char *) errstr);
+#endif
+        data->glBindProgramARB(shader_type, 0);
+        data->glDeleteProgramsARB(1, &program);
+        return 0;
+    } // if
+
+    return program;
+}
+
+// UYVY to RGB equasion...
+//  R = 1.164(Y-16) + 1.596(Cr-128)
+//  G = 1.164(Y-16) - 0.813(Cr-128) - 0.391(Cb-128)
+//  B = 1.164(Y-16) + 2.018(Cb-128)
+// Byte layout is Cb, Y1, Cr, Y2.
+// 4 bytes == 2 pixels: Y1/Cb/Cr, Y2/Cb/Cr
+// !!! FIXME: this ignores blendmodes, etc.
+// !!! FIXME: this could be more efficient...use a dot product for green, not convert to 255.0 range, etc.
+static const char *fragment_program_UYVY_source_code =
+    "!!ARBfp1.0\n"
+
+    // outputs...
+    "OUTPUT outcolor = result.color;\n"
+
+    // scratch registers...
+    "TEMP uyvy;\n"
+    "TEMP luminance;\n"
+    "TEMP work;\n"
+
+    // We need 32 bits to store the data, but each pixel is 16 bits in itself.
+    //  halve the coordinates to grab the correct 32 bits for the fragment.
+    "MUL work, fragment.texcoord, { 0.5, 1.0, 1.0, 1.0 };\n"
+
+    // Sample the YUV texture. Cb, Y1, Cr, Y2, are stored in r,g,b,a.
+    // !!! FIXME: "RECT" needs to be "2D" if we're not using texture_rectangle extension.  :/
+    "TEX uyvy, work, texture[0], RECT;\n"
+
+    // Scale from 0.0/1.0 to 0.0/255.0 and do subtractions.  (!!! FIXME: optimize!)
+    "MUL uyvy, uyvy, { 255.0, 255.0, 255.0, 255.0 };\n"
+    "SUB uyvy, uyvy, { 128.0, 16.0, 128.0, 16.0 };\n"
+
+    // Choose the luminance component by texcoord.
+    // !!! FIXME: laziness wins out for now... just average Y1 and Y2.
+    "ADD luminance, uyvy.yyyy, uyvy.wwww;\n"
+    "MUL luminance, luminance, { 0.5, 0.5, 0.5, 0.5 };\n"
+
+    // Multiply luminance by its magic value.
+    "MUL luminance, luminance, { 1.164, 1.164, 1.164, 1.164 };\n"
+
+    // uyvy.xyzw becomes Cr/Cr/Cb/Cb, with multiplications.
+    "MUL uyvy, uyvy.zzxx, { 1.596, -0.813, 2.018, -0.391 };\n"
+
+    // Add luminance Cr and Cb, store to RGB channels.
+    "ADD work.rgb, luminance, uyvy;\n"
+
+    // Do final addition for Green channel.  (!!! FIXME: this should be a DPH?)
+    "ADD work.g, work.g, uyvy.w;\n"
+
+    // Scale back to 0.0/1.0. (this number is 1.0/255.0).
+    "MUL work, work, { 0.0039215686274509803, 0.0039215686274509803, 0.0039215686274509803, 0.0039215686274509803 };\n"
+
+    // Make sure alpha channel is fully opaque.  (!!! FIXME: blend modes!)
+    "MOV work.a, { 1.0 };\n"
+
+    // Store out the final fragment color.
+    "MOV outcolor, work;\n"
+
+    // ...and we're done.
+    "END\n";
+
+
 static int
 GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
@@ -415,6 +562,7 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     GLint internalFormat;
     GLenum format, type;
     int texture_w, texture_h;
+    GLuint shader = 0;
     GLenum result;
 
     switch (texture->format) {
@@ -504,6 +652,26 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         format = GL_BGRA;
         type = GL_UNSIGNED_INT_2_10_10_10_REV;
         break;
+    case SDL_PIXELFORMAT_UYVY:
+        if (renderdata->GL_ARB_fragment_program_supported) {
+            if (renderdata->fragment_program_UYVY == 0) {
+                renderdata->fragment_program_UYVY =
+                    compile_shader(renderdata, GL_FRAGMENT_PROGRAM_ARB,
+                                   fragment_program_UYVY_source_code);
+                if (renderdata->fragment_program_UYVY == 0) {
+                    SDL_SetError("Fragment program compile error");
+                    return -1;
+                }
+            }
+            shader = renderdata->fragment_program_UYVY;
+            internalFormat = GL_RGBA;
+            format = GL_RGBA;
+            type = GL_UNSIGNED_BYTE;
+        } else {
+            SDL_SetError("Unsupported texture format");
+            return -1;
+        }
+        break;
     default:
         SDL_SetError("Unsupported texture format");
         return -1;
@@ -514,6 +682,8 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         SDL_OutOfMemory();
         return -1;
     }
+
+    data->shader = shader;
 
     if (texture->format == SDL_PIXELFORMAT_INDEX8) {
         data->palette = (Uint8 *) SDL_malloc(3 * 256 * sizeof(Uint8));
@@ -526,7 +696,7 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     }
 
     if (texture->access == SDL_TEXTUREACCESS_STREAMING) {
-        data->pitch = texture->w * SDL_BYTESPERPIXEL(texture->format);
+        data->pitch = texture->w * bytes_per_pixel(texture->format);
         data->pixels = SDL_malloc(texture->h * data->pitch);
         if (!data->pixels) {
             SDL_OutOfMemory();
@@ -543,15 +713,16 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         data->type = GL_TEXTURE_RECTANGLE_ARB;
         texture_w = texture->w;
         texture_h = texture->h;
-        data->texw = (GLfloat) texture->w;
-        data->texh = (GLfloat) texture->h;
+        data->texw = (GLfloat) texture_w;
+        data->texh = (GLfloat) texture_h;
     } else {
         data->type = GL_TEXTURE_2D;
         texture_w = power_of_2(texture->w);
         texture_h = power_of_2(texture->h);
-        data->texw = (GLfloat) texture->w / texture_w;
+        data->texw = (GLfloat) (texture->w) / texture_w;
         data->texh = (GLfloat) texture->h / texture_h;
     }
+
     data->format = format;
     data->formattype = type;
     renderdata->glBindTexture(data->type, data->texture);
@@ -563,7 +734,7 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
                                 GL_CLAMP_TO_EDGE);
     renderdata->glTexParameteri(data->type, GL_TEXTURE_WRAP_T,
                                 GL_CLAMP_TO_EDGE);
-#ifdef __MACOSX__
+#if 0 //def __MACOSX__
 #ifndef GL_TEXTURE_STORAGE_HINT_APPLE
 #define GL_TEXTURE_STORAGE_HINT_APPLE       0x85BC
 #endif
@@ -598,6 +769,7 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 #endif
 #endif
     {
+printf("teximage2d(%d,%d,%d,%d)\n", (int) texture_w, (int) texture_h);
         renderdata->glTexImage2D(data->type, 0, internalFormat, texture_w,
                                  texture_h, 0, format, type, NULL);
     }
@@ -679,7 +851,7 @@ SetupTextureUpdate(GL_RenderData * renderdata, SDL_Texture * texture,
     }
     renderdata->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     renderdata->glPixelStorei(GL_UNPACK_ROW_LENGTH,
-                              pitch / SDL_BYTESPERPIXEL(texture->format));
+                              pitch / bytes_per_pixel(texture->format));
 }
 
 static int
@@ -741,6 +913,7 @@ GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
     renderdata->glGetError();
     SetupTextureUpdate(renderdata, texture, pitch);
     renderdata->glBindTexture(data->type, data->texture);
+printf("texsubimage2d(%d,%d,%d,%d)\n", (int) rect->x, (int) rect->y, (int) rect->w, (int) rect->h);
     renderdata->glTexSubImage2D(data->type, 0, rect->x, rect->y, rect->w,
                                 rect->h, data->format, data->formattype,
                                 pixels);
@@ -765,7 +938,7 @@ GL_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 
     *pixels =
         (void *) ((Uint8 *) data->pixels + rect->y * data->pitch +
-                  rect->x * SDL_BYTESPERPIXEL(texture->format));
+                  rect->x * bytes_per_pixel(texture->format));
     *pitch = data->pitch;
     return 0;
 }
@@ -814,7 +987,7 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     if (texturedata->dirty.list) {
         SDL_DirtyRect *dirty;
         void *pixels;
-        int bpp = SDL_BYTESPERPIXEL(texture->format);
+        int bpp = bytes_per_pixel(texture->format);
         int pitch = texturedata->pitch;
 
         SetupTextureUpdate(data, texture, pitch);
@@ -824,6 +997,7 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
             pixels =
                 (void *) ((Uint8 *) texturedata->pixels + rect->y * pitch +
                           rect->x * bpp);
+printf("texsubimage2d(%d,%d,%d,%d)\n", (int) rect->x, (int) rect->y, (int) rect->w, (int) rect->h);
             data->glTexSubImage2D(texturedata->type, 0, rect->x, rect->y,
                                   rect->w, rect->h, texturedata->format,
                                   texturedata->formattype, pixels);
@@ -902,6 +1076,11 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         data->scaleMode = texture->scaleMode;
     }
 
+    if (texturedata->shader != 0) {
+        data->glEnable(GL_FRAGMENT_PROGRAM_ARB);
+        data->glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, texturedata->shader);
+    }
+
     data->glBegin(GL_TRIANGLE_STRIP);
     data->glTexCoord2f(minu, minv);
     data->glVertex2i(minx, miny);
@@ -913,6 +1092,9 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     data->glVertex2i(maxx, maxy);
     data->glEnd();
 
+    if (texturedata->shader != 0) {
+        data->glDisable(GL_FRAGMENT_PROGRAM_ARB);
+    }
     return 0;
 }
 
@@ -952,6 +1134,14 @@ GL_DestroyRenderer(SDL_Renderer * renderer)
 
     if (data) {
         if (data->context) {
+            if (data->GL_ARB_fragment_program_supported) {
+                data->glDisable(GL_FRAGMENT_PROGRAM_ARB);
+                data->glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, 0);
+                if (data->fragment_program_UYVY != 0) {
+                    data->glDeleteProgramsARB(1, &data->fragment_program_UYVY);
+                }
+            }
+
             /* SDL_GL_MakeCurrent(0, NULL); *//* doesn't do anything */
             SDL_GL_DeleteContext(data->context);
         }
