@@ -660,6 +660,26 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         format = GL_BGRA;
         type = GL_UNSIGNED_INT_2_10_10_10_REV;
         break;
+#if 0 /* Ryan's pixel shader code should be better, once it works. :) */
+    case SDL_PIXELFORMAT_UYVY: 	 
+//        if (renderdata->GL_MESA_ycbcr_texture) { 	 
+//            internalFormat = 3; 	 
+//            format = GL_YCBCR_MESA; 	 
+//            type = GL_UNSIGNED_SHORT_8_8_MESA; 	 
+//        } else if (renderdata->GL_APPLE_ycbcr_422) { 	 
+            internalFormat = GL_RGB; 	 
+            format = GL_YCBCR_422_APPLE; 	 
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN 	 
+            type = GL_UNSIGNED_SHORT_8_8_APPLE; 	 
+#else 	 
+            type = GL_UNSIGNED_SHORT_8_8_REV_APPLE; 	 
+#endif 	 
+//        } else { 	 
+//            SDL_SetError("Unsupported texture format"); 	 
+//            return -1; 	 
+//        } 	 
+        break;
+#else
     case SDL_PIXELFORMAT_UYVY:
         if (renderdata->GL_ARB_fragment_program_supported) {
             if (renderdata->fragment_program_UYVY == 0) {
@@ -680,6 +700,7 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
             return -1;
         }
         break;
+#endif
     default:
         SDL_SetError("Unsupported texture format");
         return -1;
@@ -867,7 +888,7 @@ SetupTextureUpdate(GL_RenderData * renderdata, SDL_Texture * texture,
     }
     renderdata->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     renderdata->glPixelStorei(GL_UNPACK_ROW_LENGTH,
-                              (pitch / bytes_per_pixel(texture->format) / ((GL_TextureData *)texture->driverdata)->HACK_RYAN_FIXME));
+                              (pitch / bytes_per_pixel(texture->format)) / ((GL_TextureData *)texture->driverdata)->HACK_RYAN_FIXME);
 }
 
 static int
