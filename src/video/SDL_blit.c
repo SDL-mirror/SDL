@@ -173,7 +173,7 @@ SDL_ChooseBlitFunc(Uint32 src_format, Uint32 dst_format, int flags,
 
         /* Check modulation flags */
         flagcheck =
-            (flags & (SDL_COPY_MODULATE_COLOR | SDL_COPY_MODULATE_COLOR));
+            (flags & (SDL_COPY_MODULATE_COLOR | SDL_COPY_MODULATE_ALPHA));
         if ((flagcheck & entries[i].flags) != flagcheck) {
             continue;
         }
