@@ -746,7 +746,7 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
                                 GL_CLAMP_TO_EDGE);
     renderdata->glTexParameteri(data->type, GL_TEXTURE_WRAP_T,
                                 GL_CLAMP_TO_EDGE);
-#if 0 //def __MACOSX__
+#ifdef __MACOSX__
 #ifndef GL_TEXTURE_STORAGE_HINT_APPLE
 #define GL_TEXTURE_STORAGE_HINT_APPLE       0x85BC
 #endif
@@ -781,7 +781,7 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 #endif
 #endif
     {
-printf("teximage2d(%d,%d,%d,%d)\n", (int) texture_w, (int) texture_h);
+printf("teximage2d(%d,%d)\n", (int) texture_w, (int) texture_h);
         renderdata->glTexImage2D(data->type, 0, internalFormat, texture_w,
                                  texture_h, 0, format, type, NULL);
     }
