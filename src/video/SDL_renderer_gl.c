@@ -478,19 +478,42 @@ power_of_2(int input)
 #define DEBUG_PROGRAM_COMPILE 1
 
 static GLuint
-compile_shader(GL_RenderData *data, GLenum shader_type, const char *source)
+compile_shader(GL_RenderData *data, GLenum shader_type, const char *_code)
 {
-#if DEBUG_PROGRAM_COMPILE
-    printf("compiling shader:\n%s\n\n", source);
-#endif
-
+    const int have_texture_rects = data->GL_ARB_texture_rectangle_supported;
+    const char *replacement = have_texture_rects ? "RECT" : "2D";
+    const size_t replacementlen = strlen(replacement);
+    const char *token = "%TEXTURETARGET%";
+    const size_t tokenlen = strlen(token);
+    char *code = NULL;
+    char *ptr = NULL;
     GLuint program = 0;
+
+    /*
+     * The TEX instruction needs a different target depending on what we use.
+     *  To handle this, we use "%TEXTURETARGET%" and replace the string before
+     *  compiling the shader.
+     */
+    code = SDL_strdup(_code);
+    if (code == NULL)
+        return 0;
+
+    for (ptr = SDL_strstr(code, token); ptr; ptr = SDL_strstr(ptr+1, token)) {
+        memcpy(ptr, replacement, replacementlen);
+        memmove(ptr+replacementlen, ptr+tokenlen, strlen(ptr+tokenlen)+1);
+    }
+
+#if DEBUG_PROGRAM_COMPILE
+    printf("compiling shader:\n%s\n\n", code);
+#endif
 
     data->glGetError();  /* flush any existing error state. */
     data->glGenProgramsARB(1, &program);
     data->glBindProgramARB(shader_type, program);
     data->glProgramStringARB(shader_type, GL_PROGRAM_FORMAT_ASCII_ARB,
-                             SDL_strlen(source), source);
+                             SDL_strlen(code), code);
+
+    SDL_free(code);
 
     if (data->glGetError() == GL_INVALID_OPERATION)
     {
@@ -534,8 +557,7 @@ static const char *fragment_program_UYVY_source_code =
     "MUL work, fragment.texcoord, { 0.5, 1.0, 1.0, 1.0 };\n"
 
     // Sample the YUV texture. Cb, Y1, Cr, Y2, are stored x,y,z,w
-    // !!! FIXME: "RECT" needs to be "2D" if we're not using texture_rectangle extension.  :/
-    "TEX uyvy, work, texture[0], RECT;\n"
+    "TEX uyvy, work, texture[0], %TEXTURETARGET%;\n"
 
     // Do subtractions (128/255, 16/255, 128/255, 16/255)
     "SUB uyvy, uyvy, { 0.501960784313726, 0.06274509803922, 0.501960784313726, 0.06274509803922 };\n"
