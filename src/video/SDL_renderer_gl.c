@@ -380,12 +380,14 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
         }
         --info->num_texture_formats;
     }
+/*
     if (SDL_GL_ExtensionSupported("GL_APPLE_ycbcr_422")) {
         data->GL_APPLE_ycbcr_422_supported = SDL_TRUE;
     }
     if (SDL_GL_ExtensionSupported("GL_MESA_ycbcr_texture")) {
         data->GL_MESA_ycbcr_texture_supported = SDL_TRUE;
     }
+*/
     if (SDL_GL_ExtensionSupported("GL_APPLE_texture_range")) {
         data->glTextureRangeAPPLE =
             (void (*)(GLenum, GLsizei, const GLvoid *))
@@ -515,7 +517,7 @@ compile_shader(GL_RenderData *data, GLenum shader_type, const char *source)
 // Byte layout is Cb, Y1, Cr, Y2.
 // 4 bytes == 2 pixels: Y1/Cb/Cr, Y2/Cb/Cr
 // !!! FIXME: this ignores blendmodes, etc.
-// !!! FIXME: this could be more efficient...use a dot product for green, not convert to 255.0 range, etc.
+// !!! FIXME: this could be more efficient...use a dot product for green, etc.
 static const char *fragment_program_UYVY_source_code =
     "!!ARBfp1.0\n"
 
@@ -531,13 +533,12 @@ static const char *fragment_program_UYVY_source_code =
     //  halve the coordinates to grab the correct 32 bits for the fragment.
     "MUL work, fragment.texcoord, { 0.5, 1.0, 1.0, 1.0 };\n"
 
-    // Sample the YUV texture. Cb, Y1, Cr, Y2, are stored in r,g,b,a.
+    // Sample the YUV texture. Cb, Y1, Cr, Y2, are stored x,y,z,w
     // !!! FIXME: "RECT" needs to be "2D" if we're not using texture_rectangle extension.  :/
     "TEX uyvy, work, texture[0], RECT;\n"
 
-    // Scale from 0.0/1.0 to 0.0/255.0 and do subtractions.  (!!! FIXME: optimize!)
-    "MUL uyvy, uyvy, { 255.0, 255.0, 255.0, 255.0 };\n"
-    "SUB uyvy, uyvy, { 128.0, 16.0, 128.0, 16.0 };\n"
+    // Do subtractions (128/255, 16/255, 128/255, 16/255)
+    "SUB uyvy, uyvy, { 0.501960784313726, 0.06274509803922, 0.501960784313726, 0.06274509803922 };\n"
 
     // Choose the luminance component by texcoord.
     // !!! FIXME: laziness wins out for now... just average Y1 and Y2.
@@ -555,9 +556,6 @@ static const char *fragment_program_UYVY_source_code =
 
     // Do final addition for Green channel.  (!!! FIXME: this should be a DPH?)
     "ADD work.g, work.g, uyvy.w;\n"
-
-    // Scale back to 0.0/1.0. (this number is 1.0/255.0).
-    "MUL work, work, { 0.0039215686274509803, 0.0039215686274509803, 0.0039215686274509803, 0.0039215686274509803 };\n"
 
     // Make sure alpha channel is fully opaque.  (!!! FIXME: blend modes!)
     "MOV work.a, { 1.0 };\n"
