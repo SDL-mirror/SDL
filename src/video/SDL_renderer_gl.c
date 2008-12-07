@@ -146,6 +146,8 @@ typedef struct
     SDL_bool updateSize;
     SDL_bool GL_ARB_texture_rectangle_supported;
     SDL_bool GL_EXT_paletted_texture_supported;
+    SDL_bool GL_APPLE_ycbcr_422_supported;
+    SDL_bool GL_MESA_ycbcr_texture_supported;
     SDL_bool GL_ARB_fragment_program_supported;
     int blendMode;
     int scaleMode;
@@ -378,6 +380,12 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
         }
         --info->num_texture_formats;
     }
+    if (SDL_GL_ExtensionSupported("GL_APPLE_ycbcr_422")) {
+        data->GL_APPLE_ycbcr_422_supported = SDL_TRUE;
+    }
+    if (SDL_GL_ExtensionSupported("GL_MESA_ycbcr_texture")) {
+        data->GL_MESA_ycbcr_texture_supported = SDL_TRUE;
+    }
     if (SDL_GL_ExtensionSupported("GL_APPLE_texture_range")) {
         data->glTextureRangeAPPLE =
             (void (*)(GLenum, GLsizei, const GLvoid *))
@@ -483,7 +491,7 @@ compile_shader(GL_RenderData *data, GLenum shader_type, const char *source)
                              SDL_strlen(source), source);
 
     if (data->glGetError() == GL_INVALID_OPERATION)
-    { 
+    {
 #if DEBUG_PROGRAM_COMPILE
         GLint pos = 0;
         const GLubyte *errstr;
@@ -660,28 +668,24 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         format = GL_BGRA;
         type = GL_UNSIGNED_INT_2_10_10_10_REV;
         break;
-#if 0 /* Ryan's pixel shader code should be better, once it works. :) */
-    case SDL_PIXELFORMAT_UYVY: 	 
-//        if (renderdata->GL_MESA_ycbcr_texture) { 	 
-//            internalFormat = 3; 	 
-//            format = GL_YCBCR_MESA; 	 
-//            type = GL_UNSIGNED_SHORT_8_8_MESA; 	 
-//        } else if (renderdata->GL_APPLE_ycbcr_422) { 	 
-            internalFormat = GL_RGB; 	 
-            format = GL_YCBCR_422_APPLE; 	 
-#if SDL_BYTEORDER == SDL_LIL_ENDIAN 	 
-            type = GL_UNSIGNED_SHORT_8_8_APPLE; 	 
-#else 	 
-            type = GL_UNSIGNED_SHORT_8_8_REV_APPLE; 	 
-#endif 	 
-//        } else { 	 
-//            SDL_SetError("Unsupported texture format"); 	 
-//            return -1; 	 
-//        } 	 
-        break;
-#else
     case SDL_PIXELFORMAT_UYVY:
-        if (renderdata->GL_ARB_fragment_program_supported) {
+        if (renderdata->GL_APPLE_ycbcr_422_supported) {
+            internalFormat = GL_RGB;
+            format = GL_YCBCR_422_APPLE;
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
+            type = GL_UNSIGNED_SHORT_8_8_APPLE;
+#else
+            type = GL_UNSIGNED_SHORT_8_8_REV_APPLE;
+#endif
+        } else if (renderdata->GL_MESA_ycbcr_texture_supported) {
+            internalFormat = GL_RGB;
+            format = GL_YCBCR_MESA;
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
+            type = GL_UNSIGNED_SHORT_8_8_MESA;
+#else
+            type = GL_UNSIGNED_SHORT_8_8_REV_MESA;
+#endif
+        } else if (renderdata->GL_ARB_fragment_program_supported) {
             if (renderdata->fragment_program_UYVY == 0) {
                 renderdata->fragment_program_UYVY =
                     compile_shader(renderdata, GL_FRAGMENT_PROGRAM_ARB,
@@ -700,7 +704,28 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
             return -1;
         }
         break;
+    case SDL_PIXELFORMAT_YUY2:
+        if (renderdata->GL_APPLE_ycbcr_422_supported) {
+            internalFormat = GL_RGB;
+            format = GL_YCBCR_422_APPLE;
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
+            type = GL_UNSIGNED_SHORT_8_8_REV_APPLE;
+#else
+            type = GL_UNSIGNED_SHORT_8_8_APPLE;
 #endif
+        } else if (renderdata->GL_MESA_ycbcr_texture_supported) {
+            internalFormat = GL_RGB;
+            format = GL_YCBCR_MESA;
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
+            type = GL_UNSIGNED_SHORT_8_8_REV_MESA;
+#else
+            type = GL_UNSIGNED_SHORT_8_8_MESA;
+#endif
+        } else {
+            SDL_SetError("Unsupported texture format");
+            return -1;
+        }
+        break;
     default:
         SDL_SetError("Unsupported texture format");
         return -1;
