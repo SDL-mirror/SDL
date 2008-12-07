@@ -189,6 +189,8 @@ main(int argc, char **argv)
     SDL_SetColorKey(boat[0], SDL_SRCCOLORKEY | SDL_RLEACCEL,
                     SDL_MapRGB(boat[0]->format, 0xff, 0x00, 0xff));
     boatcols = boat[0]->format->palette->ncolors;
+    if (boatcols >= 256)
+        sdlerr("too many colors in sail.bmp");
     boat[1] = hflip(boat[0]);
     SDL_SetColorKey(boat[1], SDL_SRCCOLORKEY | SDL_RLEACCEL,
                     SDL_MapRGB(boat[1]->format, 0xff, 0x00, 0xff));
