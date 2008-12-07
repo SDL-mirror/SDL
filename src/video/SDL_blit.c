@@ -72,6 +72,7 @@ SDL_SoftBlit(SDL_Surface * src, SDL_Rect * srcrect,
             (Uint16) srcrect->x * info->src_fmt->BytesPerPixel;
         info->src_w = srcrect->w;
         info->src_h = srcrect->h;
+        info->src_pitch = src->pitch;
         info->src_skip =
             info->src_pitch - info->src_w * info->src_fmt->BytesPerPixel;
         info->dst =
@@ -79,6 +80,7 @@ SDL_SoftBlit(SDL_Surface * src, SDL_Rect * srcrect,
             (Uint16) dstrect->x * info->dst_fmt->BytesPerPixel;
         info->dst_w = dstrect->w;
         info->dst_h = dstrect->h;
+        info->dst_pitch = dst->pitch;
         info->dst_skip =
             info->dst_pitch - info->dst_w * info->dst_fmt->BytesPerPixel;
         RunBlit = (SDL_BlitFunc) src->map->data;
