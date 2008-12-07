@@ -82,7 +82,7 @@ make_bg(SDL_Surface * screen, int startcol)
 
     /* set the palette to the logical screen palette so that blits
        won't be translated */
-    SDL_SetColors(bg, screen->format->palette->colors, 0, 256);
+    SDL_SetSurfacePalette(bg, screen->format->palette);
 
     /* Make a wavy background pattern using colours 0-63 */
     if (SDL_LockSurface(bg) < 0)
