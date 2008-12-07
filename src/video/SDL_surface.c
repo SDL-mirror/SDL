@@ -548,7 +548,7 @@ SDL_GetSurfaceScaleMode(SDL_Surface * surface, int *scaleMode)
         return 0;
     }
 
-    switch (surface->map->info.flags & (SDL_COPY_NEAREST)) {
+    switch (surface->map->info.flags & SDL_COPY_NEAREST) {
     case SDL_COPY_NEAREST:
         *scaleMode = SDL_TEXTURESCALEMODE_FAST;
         break;

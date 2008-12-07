@@ -2153,7 +2153,7 @@ SDL_CalculateBlitA(SDL_Surface * surface)
     SDL_PixelFormat *sf = surface->format;
     SDL_PixelFormat *df = surface->map->dst->format;
 
-    switch (surface->map->info.flags) {
+    switch (surface->map->info.flags & ~SDL_COPY_RLE_MASK) {
     case SDL_COPY_BLEND:
         /* Per-pixel alpha blits */
         switch (df->BytesPerPixel) {

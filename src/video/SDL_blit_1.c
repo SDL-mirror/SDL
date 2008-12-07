@@ -532,7 +532,7 @@ SDL_CalculateBlit1(SDL_Surface * surface)
     } else {
         which = dstfmt->BytesPerPixel;
     }
-    switch (surface->map->info.flags) {
+    switch (surface->map->info.flags & ~SDL_COPY_RLE_MASK) {
     case 0:
         return one_blit[which];
 

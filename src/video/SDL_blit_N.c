@@ -2430,7 +2430,7 @@ SDL_CalculateBlitN(SDL_Surface * surface)
         return (NULL);
     }
 
-    switch (surface->map->info.flags) {
+    switch (surface->map->info.flags & ~SDL_COPY_RLE_MASK) {
     case 0:
         blitfun = NULL;
         if (dstfmt->BitsPerPixel == 8) {
