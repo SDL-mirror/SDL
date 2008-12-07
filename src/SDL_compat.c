@@ -638,7 +638,7 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
         SDL_DitherColors(SDL_VideoSurface->format->palette->colors,
                          SDL_VideoSurface->format->BitsPerPixel);
         SDL_AddPaletteWatch(SDL_VideoSurface->format->palette,
-                            SDL_VideoPaletteChanged, NULL);
+                            SDL_VideoPaletteChanged, SDL_VideoSurface);
         SDL_SetPaletteColors(SDL_VideoSurface->format->palette,
                              SDL_VideoSurface->format->palette->colors, 0,
                              SDL_VideoSurface->format->palette->ncolors);
@@ -664,6 +664,8 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
                 SDL_DitherColors(SDL_ShadowSurface->format->palette->colors,
                                  SDL_ShadowSurface->format->BitsPerPixel);
             }
+            SDL_AddPaletteWatch(SDL_ShadowSurface->format->palette,
+                                SDL_VideoPaletteChanged, SDL_ShadowSurface);
         }
     }
     SDL_PublicSurface =
