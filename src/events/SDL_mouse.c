@@ -364,21 +364,6 @@ SDL_SetMouseFocus(int id, SDL_WindowID windowID)
         if (!focus) {
             SDL_SendWindowEvent(mouse->focus, SDL_WINDOWEVENT_ENTER, 0, 0);
         }
-        SDL_GetWindowSize(windowID, &mouse->x_max, &mouse->y_max);
-    }
-}
-
-void
-SDL_SetMouseFocusSize(SDL_WindowID windowID, int w, int h)
-{
-    int i;
-
-    for (i = 0; i < SDL_num_mice; ++i) {
-        SDL_Mouse *mouse = SDL_GetMouse(i);
-        if (mouse && mouse->focus == windowID) {
-            mouse->x_max = w;
-            mouse->y_max = h;
-        }
     }
 }
 
@@ -458,15 +443,19 @@ SDL_SendMouseMotion(int id, int relative, int x, int y, int pressure)
     } else {
         /* while using the relative mode and many windows, we have to be
            sure that the pointers find themselves inside the windows */
-        if (mouse->x + xrel > mouse->x_max) {
-            mouse->x = mouse->x_max;
+        int x_max, y_max;
+
+        SDL_GetWindowSize(mouse->focus, &x_max, &y_max);
+
+        if (mouse->x + xrel > x_max) {
+            mouse->x = x_max;
         } else if (mouse->x + xrel < 0) {
             mouse->x = 0;
         } else {
             mouse->x += xrel;
         }
-        if (mouse->y + yrel > mouse->y_max) {
-            mouse->y = mouse->y_max;
+        if (mouse->y + yrel > y_max) {
+            mouse->y = y_max;
         } else if (mouse->y + yrel < 0) {
             mouse->y = 0;
         } else {

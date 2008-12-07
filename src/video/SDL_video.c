@@ -1046,6 +1046,7 @@ SDL_SetWindowSize(SDL_WindowID windowID, int w, int h)
     if (_this->SetWindowSize) {
         _this->SetWindowSize(_this, window);
     }
+    SDL_OnWindowResized(window);
 }
 
 void
@@ -1054,13 +1055,19 @@ SDL_GetWindowSize(SDL_WindowID windowID, int *w, int *h)
     SDL_Window *window = SDL_GetWindowFromID(windowID);
 
     if (!window) {
-        return;
-    }
-    if (w) {
-        *w = window->w;
-    }
-    if (h) {
-        *h = window->h;
+        if (w) {
+            *w = window->w;
+        }
+        if (h) {
+            *h = window->h;
+        }
+    } else {
+        if (w) {
+            *w = 0;
+        }
+        if (h) {
+            *h = 0;
+        }
     }
 }
 
