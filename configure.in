@@ -1060,7 +1060,6 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [[default=ma
                     ;;
             esac
 
-            X_CFLAGS="$X_CFLAGS -DXTHREADS"
             if test x$ac_cv_func_shmat != xyes; then
                 X_CFLAGS="$X_CFLAGS -DNO_SHARED_MEMORY"
             fi
