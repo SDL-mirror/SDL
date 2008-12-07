@@ -285,6 +285,30 @@ AC_HELP_STRING([--enable-assembly], [Enable assembly routines [[default=yes]]]),
 if test x$enable_assembly = xyes; then
     AC_DEFINE(SDL_ASSEMBLY_ROUTINES)
 
+    # Make sure that we don't generate floating point code that would
+    # cause illegal instruction exceptions on older processors
+    case "$host" in
+        *-*-darwin*)
+            # Don't need to worry about Apple hardware, it's all SSE capable
+            default_ssemath=yes
+            ;;
+        *64-*-*)
+            # x86 64-bit architectures all have SSE instructions
+            default_ssemath=yes
+            ;;
+	*)
+            default_ssemath=no
+            ;;
+    esac
+    AC_ARG_ENABLE(ssemath,
+AC_HELP_STRING([--enable-ssemath], [Allow GCC to use SSE floating point math [[default=no]]]),
+                  , enable_ssemath=$default_ssemath)
+    if test x$enable_ssemath = xno; then
+        if test x$have_gcc_sse = xyes -o x$have_gcc_sse2 = xyes; then
+            EXTRA_CFLAGS="$EXTRA_CFLAGS -mfpmath=387"
+        fi
+    fi
+
     dnl Check for various instruction support
     AC_ARG_ENABLE(mmx,
 AC_HELP_STRING([--enable-mmx], [use MMX assembly routines [[default=yes]]]),
@@ -368,8 +392,8 @@ AC_HELP_STRING([--enable-sse], [use SSE assembly routines [[default=yes]]]),
     fi
 
     AC_ARG_ENABLE(sse2,
-AC_HELP_STRING([--enable-sse2], [use SSE2 assembly routines [[default=yes]]]),
-                  , enable_sse2=yes)
+AC_HELP_STRING([--enable-sse2], [use SSE2 assembly routines [[default=no]]]),
+                  , enable_sse2=$default_ssemath)
     if test x$enable_sse2 = xyes; then
         save_CFLAGS="$CFLAGS"
         have_gcc_sse2=no
@@ -391,30 +415,6 @@ AC_HELP_STRING([--enable-sse2], [use SSE2 assembly routines [[default=yes]]]),
 
         if test x$have_gcc_sse2 = xyes; then
             EXTRA_CFLAGS="$EXTRA_CFLAGS $sse2_CFLAGS"
-        fi
-    fi
-
-    # Make sure that we don't generate floating point code that would
-    # cause illegal instruction exceptions on older processors
-    case "$host" in
-        *-*-darwin*)
-            # Don't need to worry about Apple hardware, it's all SSE capable
-            default_ssemath=yes
-            ;;
-        *64-*-*)
-            # x86 64-bit architectures all have SSE instructions
-            default_ssemath=yes
-            ;;
-	*)
-            default_ssemath=no
-            ;;
-    esac
-    AC_ARG_ENABLE(ssemath,
-AC_HELP_STRING([--enable-ssemath], [Allow GCC to use SSE floating point math [[default=no]]]),
-                  , enable_ssemath=$default_ssemath)
-    if test x$enable_ssemath = xno; then
-        if test x$have_gcc_sse = xyes -o x$have_gcc_sse2 = xyes; then
-            EXTRA_CFLAGS="$EXTRA_CFLAGS -mfpmath=387"
         fi
     fi
 
