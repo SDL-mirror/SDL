@@ -528,64 +528,68 @@ compile_shader(GL_RenderData *data, GLenum shader_type, const char *_code)
         data->glBindProgramARB(shader_type, 0);
         data->glDeleteProgramsARB(1, &program);
         return 0;
-    } // if
+    }
 
     return program;
 }
 
-// UYVY to RGB equasion...
-//  R = 1.164(Y-16) + 1.596(Cr-128)
-//  G = 1.164(Y-16) - 0.813(Cr-128) - 0.391(Cb-128)
-//  B = 1.164(Y-16) + 2.018(Cb-128)
-// Byte layout is Cb, Y1, Cr, Y2.
-// 4 bytes == 2 pixels: Y1/Cb/Cr, Y2/Cb/Cr
-// !!! FIXME: this ignores blendmodes, etc.
-// !!! FIXME: this could be more efficient...use a dot product for green, etc.
+
+/*
+ * Fragment program that renders from UYVY textures.
+ * The UYVY to RGB equasion is:
+ *   R = 1.164(Y-16) + 1.596(Cr-128)
+ *   G = 1.164(Y-16) - 0.813(Cr-128) - 0.391(Cb-128)
+ *   B = 1.164(Y-16) + 2.018(Cb-128)
+ * Byte layout is Cb, Y1, Cr, Y2, stored in the R, G, B, A channels.
+ * 4 bytes == 2 pixels: Y1/Cb/Cr, Y2/Cb/Cr
+ *
+ * !!! FIXME: this ignores blendmodes, etc.
+ * !!! FIXME: this could be more efficient...use a dot product for green, etc.
+ */
 static const char *fragment_program_UYVY_source_code =
     "!!ARBfp1.0\n"
 
-    // outputs...
+    /* outputs... */
     "OUTPUT outcolor = result.color;\n"
 
-    // scratch registers...
+    /* scratch registers... */
     "TEMP uyvy;\n"
     "TEMP luminance;\n"
     "TEMP work;\n"
 
-    // We need 32 bits to store the data, but each pixel is 16 bits in itself.
-    //  halve the coordinates to grab the correct 32 bits for the fragment.
+    /* Halve the coordinates to grab the correct 32 bits for the fragment. */
     "MUL work, fragment.texcoord, { 0.5, 1.0, 1.0, 1.0 };\n"
 
-    // Sample the YUV texture. Cb, Y1, Cr, Y2, are stored x,y,z,w
+    /* Sample the YUV texture. Cb, Y1, Cr, Y2, are stored in x, y, z, w. */
     "TEX uyvy, work, texture[0], %TEXTURETARGET%;\n"
 
-    // Do subtractions (128/255, 16/255, 128/255, 16/255)
+    /* Do subtractions (128/255, 16/255, 128/255, 16/255) */
     "SUB uyvy, uyvy, { 0.501960784313726, 0.06274509803922, 0.501960784313726, 0.06274509803922 };\n"
 
-    // Choose the luminance component by texcoord.
-    // !!! FIXME: laziness wins out for now... just average Y1 and Y2.
+    /* Choose the luminance component by texcoord. */
+    /* !!! FIXME: laziness wins out for now... just average Y1 and Y2. */
     "ADD luminance, uyvy.yyyy, uyvy.wwww;\n"
     "MUL luminance, luminance, { 0.5, 0.5, 0.5, 0.5 };\n"
 
-    // Multiply luminance by its magic value.
+    /* Multiply luminance by its magic value. */
     "MUL luminance, luminance, { 1.164, 1.164, 1.164, 1.164 };\n"
 
-    // uyvy.xyzw becomes Cr/Cr/Cb/Cb, with multiplications.
+    /* uyvy.xyzw becomes Cr/Cr/Cb/Cb, with multiplications. */
     "MUL uyvy, uyvy.zzxx, { 1.596, -0.813, 2.018, -0.391 };\n"
 
-    // Add luminance Cr and Cb, store to RGB channels.
+    /* Add luminance to Cr and Cb, store to RGB channels. */
     "ADD work.rgb, luminance, uyvy;\n"
 
-    // Do final addition for Green channel.  (!!! FIXME: this should be a DPH?)
+    /* Do final addition for Green channel.  (!!! FIXME: this should be a DPH?) */
     "ADD work.g, work.g, uyvy.w;\n"
 
-    // Make sure alpha channel is fully opaque.  (!!! FIXME: blend modes!)
+    /* Make sure alpha channel is fully opaque.  (!!! FIXME: blend modes!) */
     "MOV work.a, { 1.0 };\n"
 
-    // Store out the final fragment color.
+    /* Store out the final fragment color... */
     "MOV outcolor, work;\n"
 
-    // ...and we're done.
+    /* ...and we're done! */
     "END\n";
 
 
