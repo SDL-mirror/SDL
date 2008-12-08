@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2006 Sam Lantinga
+    Copyright (C) 1997-2009 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -380,14 +380,12 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
         }
         --info->num_texture_formats;
     }
-/*
     if (SDL_GL_ExtensionSupported("GL_APPLE_ycbcr_422")) {
         data->GL_APPLE_ycbcr_422_supported = SDL_TRUE;
     }
     if (SDL_GL_ExtensionSupported("GL_MESA_ycbcr_texture")) {
         data->GL_MESA_ycbcr_texture_supported = SDL_TRUE;
     }
-*/
     if (SDL_GL_ExtensionSupported("GL_APPLE_texture_range")) {
         data->glTextureRangeAPPLE =
             (void (*)(GLenum, GLsizei, const GLvoid *))
@@ -475,7 +473,7 @@ power_of_2(int input)
 }
 
 
-#define DEBUG_PROGRAM_COMPILE 1
+//#define DEBUG_PROGRAM_COMPILE 1
 
 static GLuint
 compile_shader(GL_RenderData *data, GLenum shader_type, const char *_code)
@@ -855,7 +853,6 @@ data->HACK_RYAN_FIXME = 1;
 #endif
 #endif
     {
-printf("teximage2d(%d,%d)\n", (int) texture_w, (int) texture_h);
         renderdata->glTexImage2D(data->type, 0, internalFormat, texture_w,
                                  texture_h, 0, format, type, NULL);
     }
@@ -999,7 +996,6 @@ GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
     renderdata->glGetError();
     SetupTextureUpdate(renderdata, texture, pitch);
     renderdata->glBindTexture(data->type, data->texture);
-printf("texsubimage2d(%d,%d,%d,%d)\n", (int) rect->x, (int) rect->y, (int) rect->w, (int) rect->h);
     renderdata->glTexSubImage2D(data->type, 0, rect->x, rect->y, rect->w,
                                 rect->h, data->format, data->formattype,
                                 pixels);
@@ -1083,7 +1079,6 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
             pixels =
                 (void *) ((Uint8 *) texturedata->pixels + rect->y * pitch +
                           rect->x * bpp);
-printf("texsubimage2d(%d,%d,%d,%d)\n", (int) rect->x, (int) rect->y, (int) rect->w, (int) rect->h);
             data->glTexSubImage2D(texturedata->type, 0, rect->x, rect->y,
                                   rect->w / texturedata->HACK_RYAN_FIXME, rect->h, texturedata->format,
                                   texturedata->formattype, pixels);
