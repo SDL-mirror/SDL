@@ -1054,7 +1054,7 @@ SDL_GetWindowSize(SDL_WindowID windowID, int *w, int *h)
 {
     SDL_Window *window = SDL_GetWindowFromID(windowID);
 
-    if (!window) {
+    if (window) {
         if (w) {
             *w = window->w;
         }

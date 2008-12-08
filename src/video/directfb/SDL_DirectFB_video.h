@@ -31,6 +31,8 @@
 
 #include "SDL_mouse.h"
 
+#define LINUX_INPUT_SUPPORT	1
+
 #define DEBUG 0
 #define LOG_CHANNEL 	stdout
 
@@ -124,9 +126,14 @@ struct _DFB_DeviceData
     int initialized;
 
     IDirectFB *dfb;
-    int mouse;
-    int keyboard;
-    int kbdgeneric;
+    int num_mice;
+    int mouse_id[0x100];
+    int num_keyboard;
+    struct
+    {
+        int is_generic;
+        int id;
+    } keyboard[10];
     DFB_WindowData *firstwin;
 
     int use_yuv_underlays;

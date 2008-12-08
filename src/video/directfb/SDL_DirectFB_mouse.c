@@ -35,22 +35,67 @@ static void DirectFB_WarpMouse(SDL_Mouse * mouse, SDL_WindowID windowID,
                                int x, int y);
 static void DirectFB_FreeMouse(SDL_Mouse * mouse);
 
+static int id_mask;
+
+static DFBEnumerationResult
+EnumMice(DFBInputDeviceID device_id,
+         DFBInputDeviceDescription desc, void *callbackdata)
+{
+    DFB_DeviceData *devdata = callbackdata;
+
+    if ((desc.type & DIDTF_MOUSE) && (device_id & id_mask)) {
+        SDL_Mouse mouse;
+
+        SDL_zero(mouse);
+        mouse.CreateCursor = DirectFB_CreateCursor;
+        mouse.ShowCursor = DirectFB_ShowCursor;
+        mouse.MoveCursor = DirectFB_MoveCursor;
+        mouse.FreeCursor = DirectFB_FreeCursor;
+        mouse.WarpMouse = DirectFB_WarpMouse;
+        mouse.FreeMouse = DirectFB_FreeMouse;
+        mouse.cursor_shown = 1;
+
+        SDL_SetMouseIndexId(device_id, devdata->num_mice);
+        SDL_AddMouse(&mouse, devdata->num_mice, desc.name, 0, 0, 1);
+        devdata->mouse_id[devdata->num_mice] = device_id;
+        devdata->num_mice++;
+    }
+    return DFENUM_OK;
+}
+
 void
 DirectFB_InitMouse(_THIS)
 {
     SDL_DFB_DEVICEDATA(_this);
-    SDL_Mouse mouse;
 
-    SDL_zero(mouse);
-    mouse.CreateCursor = DirectFB_CreateCursor;
-    mouse.ShowCursor = DirectFB_ShowCursor;
-    mouse.MoveCursor = DirectFB_MoveCursor;
-    mouse.FreeCursor = DirectFB_FreeCursor;
-    mouse.WarpMouse = DirectFB_WarpMouse;
-    mouse.FreeMouse = DirectFB_FreeMouse;
-    mouse.cursor_shown = 1;
-    SDL_SetMouseIndexId(0, 0);  /* ID == Index ! */
-    devdata->mouse = SDL_AddMouse(&mouse, 0, "Mouse", 0, 0, 1);
+    devdata->num_mice = 0;
+    if (LINUX_INPUT_SUPPORT) {
+        /* try non-core devices first */
+        id_mask = 0xF0;
+        devdata->dfb->EnumInputDevices(devdata->dfb, EnumMice, devdata);
+        if (devdata->num_mice == 0) {
+            /* try core devices */
+            id_mask = 0x0F;
+            devdata->dfb->EnumInputDevices(devdata->dfb, EnumMice, devdata);
+        }
+    }
+    if (devdata->num_mice == 0) {
+        SDL_Mouse mouse;
+
+        SDL_zero(mouse);
+        mouse.CreateCursor = DirectFB_CreateCursor;
+        mouse.ShowCursor = DirectFB_ShowCursor;
+        mouse.MoveCursor = DirectFB_MoveCursor;
+        mouse.FreeCursor = DirectFB_FreeCursor;
+        mouse.WarpMouse = DirectFB_WarpMouse;
+        mouse.FreeMouse = DirectFB_FreeMouse;
+        mouse.cursor_shown = 1;
+
+        SDL_SetMouseIndexId(0, 0);      /* ID == Index ! */
+        devdata->mouse_id[0] = 0;
+        SDL_AddMouse(&mouse, 0, "Mouse", 0, 0, 1);
+        devdata->num_mice = 1;
+    }
 }
 
 void
@@ -58,7 +103,11 @@ DirectFB_QuitMouse(_THIS)
 {
     SDL_DFB_DEVICEDATA(_this);
 
-    SDL_DelMouse(devdata->mouse);
+    if (LINUX_INPUT_SUPPORT) {
+        SDL_MouseQuit();
+    } else {
+        SDL_DelMouse(0);
+    }
 }
 
 /* Create a cursor from a surface */

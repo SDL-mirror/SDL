@@ -71,6 +71,7 @@ struct SDL_Mouse
     int z;                      /* for future use */
     int xdelta;
     int ydelta;
+    int last_x, last_y;         /* the last reported x and y coordinates */
     char *name;
     Uint8 buttonstate;
     SDL_bool relative_mode;

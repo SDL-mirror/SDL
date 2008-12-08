@@ -33,7 +33,6 @@ static int SDL_current_mouse = -1;
 static SDL_Mouse **SDL_mice = NULL;
 static int *SDL_IdIndex = NULL;
 static int SDL_highestId = -1;
-static int last_x, last_y;      /* the last reported x and y coordinates by the system cursor */
 
 
 /* Public functions */
@@ -61,12 +60,15 @@ SDL_SetMouseIndexId(int id, int index)
     }
     if (id > SDL_highestId) {
         int *indexes;
+        int i;
         indexes = (int *) SDL_realloc(SDL_IdIndex, (id + 1) * sizeof(int));
         if (!indexes) {
             SDL_OutOfMemory();
             return -1;
         }
         SDL_IdIndex = indexes;
+        for (i = SDL_highestId + 1; i <= id; i++)
+            SDL_IdIndex[i] = -1;
         SDL_IdIndex[id] = index;
         SDL_highestId = id;
     } else {
@@ -378,8 +380,8 @@ SDL_SendProximity(int id, int x, int y, int type)
         return 0;
     }
 
-    last_x = x;
-    last_y = y;
+    mouse->last_x = x;
+    mouse->last_y = y;
     if (SDL_ProcessEvents[type] == SDL_ENABLE) {
         SDL_Event event;
         event.proximity.which = (Uint8) index;
@@ -405,6 +407,7 @@ SDL_SendMouseMotion(int id, int relative, int x, int y, int pressure)
     int posted;
     int xrel;
     int yrel;
+    int x_max = 0, y_max = 0;
 
     if (!mouse || mouse->flush_motion) {
         return 0;
@@ -412,8 +415,8 @@ SDL_SendMouseMotion(int id, int relative, int x, int y, int pressure)
 
     /* if the mouse is out of proximity we don't to want to have any motion from it */
     if (mouse->proximity == SDL_FALSE) {
-        last_x = x;
-        last_y = y;
+        mouse->last_x = x;
+        mouse->last_y = y;
         return 0;
     }
 
@@ -421,11 +424,11 @@ SDL_SendMouseMotion(int id, int relative, int x, int y, int pressure)
     if (relative) {
         xrel = x;
         yrel = y;
-        x = (last_x + x);
-        y = (last_y + y);
+        x = (mouse->last_x + x);
+        y = (mouse->last_y + y);
     } else {
-        xrel = x - last_x;
-        yrel = y - last_y;
+        xrel = x - mouse->last_x;
+        yrel = y - mouse->last_y;
     }
 
     /* Drop events that don't change state */
@@ -441,27 +444,26 @@ SDL_SendMouseMotion(int id, int relative, int x, int y, int pressure)
         mouse->x = x;
         mouse->y = y;
     } else {
-        /* while using the relative mode and many windows, we have to be
-           sure that the pointers find themselves inside the windows */
-        int x_max, y_max;
-
-        SDL_GetWindowSize(mouse->focus, &x_max, &y_max);
-
-        if (mouse->x + xrel > x_max) {
-            mouse->x = x_max;
-        } else if (mouse->x + xrel < 0) {
-            mouse->x = 0;
-        } else {
-            mouse->x += xrel;
-        }
-        if (mouse->y + yrel > y_max) {
-            mouse->y = y_max;
-        } else if (mouse->y + yrel < 0) {
-            mouse->y = 0;
-        } else {
-            mouse->y += yrel;
-        }
+        mouse->x += xrel;
+        mouse->y += yrel;
     }
+
+    SDL_GetWindowSize(mouse->focus, &x_max, &y_max);
+
+    /* make sure that the pointers find themselves inside the windows */
+    /* only check if mouse->xmax is set ! */
+    if (x_max && mouse->x > x_max) {
+        mouse->x = x_max;
+    } else if (mouse->x < 0) {
+        mouse->x = 0;
+    }
+
+    if (y_max && mouse->y > y_max) {
+        mouse->y = y_max;
+    } else if (mouse->y < 0) {
+        mouse->y = 0;
+    }
+
     mouse->xdelta += xrel;
     mouse->ydelta += yrel;
     mouse->pressure = pressure;
@@ -491,8 +493,8 @@ SDL_SendMouseMotion(int id, int relative, int x, int y, int pressure)
         event.motion.cursor = mouse->current_end;
         posted = (SDL_PushEvent(&event) > 0);
     }
-    last_x = x;
-    last_y = y;
+    mouse->last_x = x;
+    mouse->last_y = y;
     return posted;
 }
 

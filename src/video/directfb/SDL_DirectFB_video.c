@@ -155,9 +155,16 @@ DirectFB_VideoInit(_THIS)
         devdata->use_yuv_underlays = atoi(stemp);
 
     /* Create global Eventbuffer for axis events */
-    SDL_DFB_CHECKERR(dfb->
-                     CreateInputEventBuffer(dfb, DICAPS_AXES /*DICAPS_ALL */ ,
-                                            DFB_TRUE, &devdata->events));
+    if (LINUX_INPUT_SUPPORT) {
+        SDL_DFB_CHECKERR(dfb->
+                         CreateInputEventBuffer(dfb, DICAPS_ALL,
+                                                DFB_TRUE, &devdata->events));
+    } else {
+        SDL_DFB_CHECKERR(dfb->
+                         CreateInputEventBuffer(dfb,
+                                                DICAPS_AXES /*DICAPS_ALL */ ,
+                                                DFB_TRUE, &devdata->events));
+    }
 
     devdata->initialized = 1;
     devdata->dfb = dfb;
