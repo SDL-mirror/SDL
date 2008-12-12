@@ -76,6 +76,8 @@ SDL_GetVideoInfo(void)
         SDL_PixelFormatEnumToMasks(mode.format, &bpp, &Rmask, &Gmask, &Bmask,
                                    &Amask);
         info.vfmt = SDL_AllocFormat(bpp, Rmask, Gmask, Bmask, Amask);
+        info.current_w = mode.w;
+        info.current_h = mode.h;
     }
     return &info;
 }

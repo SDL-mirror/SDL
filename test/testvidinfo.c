@@ -520,6 +520,7 @@ main(int argc, char *argv[])
     if (info->blit_fill) {
         printf("Color fills on hardware surfaces are accelerated\n");
     }
+    printf("Current resolution: %dx%d\n", info->current_w, info->current_h);
 #if 0
     if (argv[1] && (strcmp(argv[1], "-benchmark") == 0)) {
         RunVideoTests();

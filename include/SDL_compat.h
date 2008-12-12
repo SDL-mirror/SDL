@@ -88,6 +88,9 @@ typedef struct SDL_VideoInfo
     Uint32 video_mem;
 
     SDL_PixelFormat *vfmt;
+
+    int current_w;
+    int current_h;
 } SDL_VideoInfo;
 
 /* The most common video overlay formats.
