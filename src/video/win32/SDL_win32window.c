@@ -522,15 +522,25 @@ SDL_HelperWindowCreate(void)
 void
 SDL_HelperWindowDestroy(void)
 {
+    HINSTANCE hInstance = GetModuleHandleA(NULL);
+
     /* Destroy the window. */
-    if (SDL_HelperWindow) {
-        DestroyWindow(SDL_HelperWindow);
+    if (SDL_HelperWindow != NULL) {
+        if (DestroyWindow(SDL_HelperWindow) == 0) {
+           SDL_SetError("Unable to destroy Helper Window: error %d.",
+                        GetLastError());
+           return;
+        }
         SDL_HelperWindow = NULL;
     }
 
     /* Unregister the class. */
-    if (SDL_HelperWindowClass) {
-        UnregisterClass(SDL_HelperWindowClassName, GetModuleHandleA(NULL));
+    if (SDL_HelperWindowClass != 0) {
+        if ((UnregisterClass(SDL_HelperWindowClassName, hInstance)) == 0) {
+           SDL_SetError("Unable to destroy Helper Window Class: error %d.",
+                        GetLastError());
+           return;
+        }
         SDL_HelperWindowClass = 0;
     }
 }
