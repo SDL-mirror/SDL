@@ -53,7 +53,7 @@ test_multi_audio(int devcount)
 
         SDL_memset(&cbd[0], '\0', sizeof(callback_data));
         spec.userdata = &cbd[0];
-        cbd[0].dev = SDL_OpenAudioDevice(devname, 0, &spec, NULL);
+        cbd[0].dev = SDL_OpenAudioDevice(devname, 0, &spec, NULL, 0);
         if (cbd[0].dev == 0) {
             printf("Open device failed: %s\n", SDL_GetError());
         } else {
@@ -72,7 +72,7 @@ test_multi_audio(int devcount)
     for (i = 0; i < devcount; i++) {
         const char *devname = SDL_GetAudioDeviceName(i, 0);
         spec.userdata = &cbd[i];
-        cbd[i].dev = SDL_OpenAudioDevice(devname, 0, &spec, NULL);
+        cbd[i].dev = SDL_OpenAudioDevice(devname, 0, &spec, NULL, 0);
         if (cbd[i].dev == 0) {
             printf("Open device %d failed: %s\n", i, SDL_GetError());
         }
