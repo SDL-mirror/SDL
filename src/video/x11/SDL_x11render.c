@@ -427,6 +427,15 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
                          &attributes);
     depth = X11_GetDepthFromPixelFormat(data->format);
 
+    /* The image/pixmap depth must be the same as the window or you
+       get a BadMatch error when trying to putimage or copyarea.
+    */
+    if (depth != attributes.depth) {
+        X11_DestroyTexture(renderer, texture);
+        SDL_SetError("Texture format doesn't match window format");
+        return -1;
+    }
+
     if (data->yuv || texture->access == SDL_TEXTUREACCESS_STREAMING) {
 #ifndef NO_SHARED_MEMORY
         XShmSegmentInfo *shminfo = &data->shminfo;
@@ -475,6 +484,7 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         {
             data->pixels = SDL_malloc(texture->h * data->pitch);
             if (!data->pixels) {
+                X11_DestroyTexture(renderer, texture);
                 SDL_OutOfMemory();
                 return -1;
             }
@@ -485,6 +495,7 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
                              SDL_BYTESPERPIXEL(data->format) * 8,
                              data->pitch);
             if (!data->image) {
+                X11_DestroyTexture(renderer, texture);
                 SDL_SetError("XCreateImage() failed");
                 return -1;
             }
@@ -494,6 +505,7 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
             XCreatePixmap(renderdata->display, renderdata->window, texture->w,
                           texture->h, depth);
         if (data->pixmap == None) {
+            X11_DestroyTexture(renderer, texture);
             SDL_SetError("XCteatePixmap() failed");
             return -1;
         }
@@ -503,6 +515,7 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
                          ZPixmap, 0, NULL, texture->w, texture->h,
                          SDL_BYTESPERPIXEL(data->format) * 8, data->pitch);
         if (!data->image) {
+            X11_DestroyTexture(renderer, texture);
             SDL_SetError("XCreateImage() failed");
             return -1;
         }
