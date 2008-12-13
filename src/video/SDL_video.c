@@ -658,7 +658,10 @@ SDL_SetFullscreenDisplayMode(const SDL_DisplayMode * mode)
     if (!mode) {
         mode = &display->desktop_mode;
     }
-    SDL_GetClosestDisplayMode(mode, &fullscreen_mode);
+    if (!SDL_GetClosestDisplayMode(mode, &fullscreen_mode)) {
+        SDL_SetError("Couldn't find display mode match");
+        return -1;
+    }
     if (SDL_memcmp
         (&fullscreen_mode, &display->fullscreen_mode,
          sizeof(fullscreen_mode)) == 0) {
