@@ -1,7 +1,6 @@
 
 1.3 release checklist:
- * Fill in current_w and current_h with desktop display mode
-	([SDL] SDL_VideoInfo in 1.3 missing elements)
+ * Add higher precision timers for profiling
  * Implement YUV texture support
    - in progress, software support is done, Ryan is working on OpenGL shaders
  * Implement desktop video mode change notification?
