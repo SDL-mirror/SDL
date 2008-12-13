@@ -527,9 +527,9 @@ SDL_HelperWindowDestroy(void)
     /* Destroy the window. */
     if (SDL_HelperWindow != NULL) {
         if (DestroyWindow(SDL_HelperWindow) == 0) {
-           SDL_SetError("Unable to destroy Helper Window: error %d.",
-                        GetLastError());
-           return;
+            SDL_SetError("Unable to destroy Helper Window: error %d.",
+                         GetLastError());
+            return;
         }
         SDL_HelperWindow = NULL;
     }
@@ -537,9 +537,9 @@ SDL_HelperWindowDestroy(void)
     /* Unregister the class. */
     if (SDL_HelperWindowClass != 0) {
         if ((UnregisterClass(SDL_HelperWindowClassName, hInstance)) == 0) {
-           SDL_SetError("Unable to destroy Helper Window Class: error %d.",
-                        GetLastError());
-           return;
+            SDL_SetError("Unable to destroy Helper Window Class: error %d.",
+                         GetLastError());
+            return;
         }
         SDL_HelperWindowClass = 0;
     }
