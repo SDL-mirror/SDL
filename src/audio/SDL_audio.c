@@ -792,12 +792,13 @@ prepare_audiospec(const SDL_AudioSpec * orig, SDL_AudioSpec * prepared)
 
 static SDL_AudioDeviceID
 open_audio_device(const char *devname, int iscapture,
-                  const SDL_AudioSpec * _desired, SDL_AudioSpec * obtained,
-                  int min_id)
+                  const SDL_AudioSpec * desired, SDL_AudioSpec * obtained,
+                  int allowed_changes, int min_id)
 {
     SDL_AudioDeviceID id = 0;
-    SDL_AudioSpec desired;
+    SDL_AudioSpec _obtained;
     SDL_AudioDevice *device;
+    SDL_bool build_cvt;
     int i = 0;
 
     if (!SDL_WasInit(SDL_INIT_AUDIO)) {
@@ -810,7 +811,10 @@ open_audio_device(const char *devname, int iscapture,
         return 0;
     }
 
-    if (!prepare_audiospec(_desired, &desired)) {
+    if (!obtained) {
+        obtained = &_obtained;
+    }
+    if (!prepare_audiospec(desired, obtained)) {
         return 0;
     }
 
@@ -865,7 +869,7 @@ open_audio_device(const char *devname, int iscapture,
         return 0;
     }
     SDL_memset(device, '\0', sizeof(SDL_AudioDevice));
-    SDL_memcpy(&device->spec, &desired, sizeof(SDL_AudioSpec));
+    device->spec = *obtained;
     device->enabled = 1;
     device->paused = 1;
     device->iscapture = iscapture;
@@ -886,12 +890,6 @@ open_audio_device(const char *devname, int iscapture,
     }
     device->opened = 1;
 
-    /* If the audio driver changes the buffer size, accept it */
-    if (device->spec.samples != desired.samples) {
-        desired.samples = device->spec.samples;
-        SDL_CalculateAudioSpec(&device->spec);
-    }
-
     /* Allocate a fake audio memory buffer */
     device->fake_stream = SDL_AllocAudioMem(device->spec.size);
     if (device->fake_stream == NULL) {
@@ -900,23 +898,47 @@ open_audio_device(const char *devname, int iscapture,
         return 0;
     }
 
+    /* If the audio driver changes the buffer size, accept it */
+    if (device->spec.samples != obtained->samples) {
+        obtained->samples = device->spec.samples;
+        SDL_CalculateAudioSpec(obtained);
+    }
+
     /* See if we need to do any conversion */
-    if (obtained != NULL) {
-        SDL_memcpy(obtained, &device->spec, sizeof(SDL_AudioSpec));
-    } else if (desired.freq != device->spec.freq ||
-               desired.format != device->spec.format ||
-               desired.channels != device->spec.channels) {
+    build_cvt = SDL_FALSE;
+    if (obtained->freq != device->spec.freq) {
+        if (allowed_changes & SDL_AUDIO_ALLOW_FREQUENCY_CHANGE) {
+            obtained->freq = device->spec.freq;
+        } else {
+            build_cvt = SDL_TRUE;
+        }
+    }
+    if (obtained->format != device->spec.format) {
+        if (allowed_changes & SDL_AUDIO_ALLOW_FORMAT_CHANGE) {
+            obtained->format = device->spec.format;
+        } else {
+            build_cvt = SDL_TRUE;
+        }
+    }
+    if (obtained->channels != device->spec.channels) {
+        if (allowed_changes & SDL_AUDIO_ALLOW_CHANNELS_CHANGE) {
+            obtained->channels = device->spec.channels;
+        } else {
+            build_cvt = SDL_TRUE;
+        }
+    }
+    if (build_cvt) {
         /* Build an audio conversion block */
         if (SDL_BuildAudioCVT(&device->convert,
-                              desired.format, desired.channels,
-                              desired.freq,
+                              obtained->format, obtained->channels,
+                              obtained->freq,
                               device->spec.format, device->spec.channels,
                               device->spec.freq) < 0) {
             close_audio_device(device);
             return 0;
         }
         if (device->convert.needed) {
-            device->convert.len = (int) (((double) desired.size) /
+            device->convert.len = (int) (((double) obtained->size) /
                                          device->convert.len_ratio);
 
             device->convert.buf =
@@ -966,7 +988,7 @@ open_audio_device(const char *devname, int iscapture,
 
 
 int
-SDL_OpenAudio(const SDL_AudioSpec * desired, SDL_AudioSpec * obtained)
+SDL_OpenAudio(SDL_AudioSpec * desired, SDL_AudioSpec * obtained)
 {
     SDL_AudioDeviceID id = 0;
 
@@ -983,7 +1005,12 @@ SDL_OpenAudio(const SDL_AudioSpec * desired, SDL_AudioSpec * obtained)
         return (-1);
     }
 
-    id = open_audio_device(NULL, 0, desired, obtained, 1);
+    if (obtained) {
+        id = open_audio_device(NULL, 0, desired, obtained,
+                               SDL_AUDIO_ALLOW_ANY_CHANGE, 1);
+    } else {
+        id = open_audio_device(NULL, 0, desired, desired, 0, 1);
+    }
     if (id > 1) {               /* this should never happen in theory... */
         SDL_CloseAudioDevice(id);
         SDL_SetError("Internal error"); /* MUST be Device ID #1! */
@@ -995,9 +1022,11 @@ SDL_OpenAudio(const SDL_AudioSpec * desired, SDL_AudioSpec * obtained)
 
 SDL_AudioDeviceID
 SDL_OpenAudioDevice(const char *device, int iscapture,
-                    const SDL_AudioSpec * desired, SDL_AudioSpec * obtained)
+                    const SDL_AudioSpec * desired, SDL_AudioSpec * obtained,
+                    int allowed_changes)
 {
-    return open_audio_device(device, iscapture, desired, obtained, 2);
+    return open_audio_device(device, iscapture, desired, obtained,
+                             allowed_changes, 2);
 }
 
 SDL_audiostatus

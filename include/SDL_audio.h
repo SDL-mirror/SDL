@@ -129,6 +129,11 @@ typedef struct SDL_AudioSpec
 #define AUDIO_F32SYS	AUDIO_F32MSB
 #endif
 
+/* Which audio format changes are allowed when opening a device */
+#define SDL_AUDIO_ALLOW_FREQUENCY_CHANGE    0x00000001
+#define SDL_AUDIO_ALLOW_FORMAT_CHANGE       0x00000002
+#define SDL_AUDIO_ALLOW_CHANNELS_CHANGE     0x00000004
+#define SDL_AUDIO_ALLOW_ANY_CHANGE          (SDL_AUDIO_ALLOW_FREQUENCY_CHANGE|SDL_AUDIO_ALLOW_FORMAT_CHANGE|SDL_AUDIO_ALLOW_CHANNELS_CHANGE)
 
 /* A structure to hold a set of audio conversion filters and buffers */
 struct SDL_AudioCVT;
@@ -217,7 +222,7 @@ extern DECLSPEC const char *SDLCALL SDL_GetCurrentAudioDriver(void);
  * may modify the requested size of the audio buffer, you should allocate
  * any local mixing buffers after you open the audio device.
  */
-extern DECLSPEC int SDLCALL SDL_OpenAudio(const SDL_AudioSpec * desired,
+extern DECLSPEC int SDLCALL SDL_OpenAudio(SDL_AudioSpec * desired,
                                           SDL_AudioSpec * obtained);
 
 /*
@@ -277,7 +282,9 @@ extern DECLSPEC SDL_AudioDeviceID SDLCALL SDL_OpenAudioDevice(const char
                                                               SDL_AudioSpec *
                                                               desired,
                                                               SDL_AudioSpec *
-                                                              obtained);
+                                                              obtained,
+                                                              int
+                                                              allowed_changes);
 
 
 
