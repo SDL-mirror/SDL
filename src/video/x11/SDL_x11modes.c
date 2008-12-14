@@ -57,19 +57,72 @@ get_visualinfo(Display * display, int screen, XVisualInfo * vinfo)
     return -1;
 }
 
+static Uint32
+X11_GetPixelFormatFromVisualInfo(Display *display, XVisualInfo *vinfo)
+{
+    if (vinfo->class == DirectColor || vinfo->class == TrueColor) {
+        int bpp;
+        Uint32 Rmask, Gmask, Bmask, Amask;
+
+        Rmask = vinfo->visual->red_mask;
+        Gmask = vinfo->visual->green_mask;
+        Bmask = vinfo->visual->blue_mask;
+        if (vinfo->depth == 32) {
+            Amask = (0xFFFFFFFF & ~(Rmask | Gmask | Bmask));
+        } else {
+            Amask = 0;
+        }
+
+        bpp = vinfo->depth;
+        if (bpp == 24) {
+            int i, n;
+            XPixmapFormatValues *p = XListPixmapFormats(display, &n);
+            if (p) {
+                for (i = 0; i < n; ++i) {
+                    if (p[i].depth == 24) {
+                        bpp = p[i].bits_per_pixel;
+                        break;
+                    }
+                }
+                XFree(p);
+            }
+        }
+
+        return SDL_MasksToPixelFormatEnum(bpp, Rmask, Gmask, Bmask, Amask);
+    }
+
+    if (vinfo->class == PseudoColor || vinfo->class == StaticColor) {
+        switch (vinfo->depth) {
+        case 8:
+            return SDL_PIXELTYPE_INDEX8;
+        case 4:
+            if (BitmapBitOrder(display) == LSBFirst) {
+                return SDL_PIXELFORMAT_INDEX4LSB;
+            } else {
+                return SDL_PIXELFORMAT_INDEX4MSB;
+            }
+            break;
+        case 1:
+            if (BitmapBitOrder(display) == LSBFirst) {
+                return SDL_PIXELFORMAT_INDEX1LSB;
+            } else {
+                return SDL_PIXELFORMAT_INDEX1MSB;
+            }
+            break;
+        }
+    }
+
+    return SDL_PIXELFORMAT_UNKNOWN;
+}
+
 void
 X11_InitModes(_THIS)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     int screen;
-    int n;
-    XPixmapFormatValues *p;
 
-    p = XListPixmapFormats(data->display, &n);
     for (screen = 0; screen < ScreenCount(data->display); ++screen) {
         XVisualInfo vinfo;
-        int i, bpp;
-        Uint32 Rmask, Gmask, Bmask, Amask;
         SDL_VideoDisplay display;
         SDL_DisplayData *displaydata;
         SDL_DisplayMode mode;
@@ -78,23 +131,7 @@ X11_InitModes(_THIS)
             continue;
         }
 
-        bpp = vinfo.depth;
-        for (i = 0; i < n; ++i) {
-            if (p[i].depth == vinfo.depth) {
-                bpp = p[i].bits_per_pixel;
-                break;
-            }
-        }
-        Rmask = vinfo.visual->red_mask;
-        Gmask = vinfo.visual->green_mask;
-        Bmask = vinfo.visual->blue_mask;
-        if (vinfo.depth == 32) {
-            Amask = (0xFFFFFFFF & ~(Rmask | Gmask | Bmask));
-        } else {
-            Amask = 0;
-        }
-        mode.format =
-            SDL_MasksToPixelFormatEnum(bpp, Rmask, Gmask, Bmask, Amask);
+        mode.format = X11_GetPixelFormatFromVisualInfo(data->display, &vinfo);
         mode.w = DisplayWidth(data->display, screen);
         mode.h = DisplayHeight(data->display, screen);
         mode.refresh_rate = 0;
@@ -114,15 +151,15 @@ X11_InitModes(_THIS)
         display.driverdata = displaydata;
         SDL_AddVideoDisplay(&display);
     }
-    XFree(p);
 }
 
 void
 X11_GetDisplayModes(_THIS)
 {
+    Display *display = ((SDL_VideoData *) _this->driverdata)->display;
     SDL_DisplayData *data = (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
     SDL_DisplayMode mode;
-    //SDL_AddDisplayMode(_this->current_display, &mode);
+
 }
 
 int

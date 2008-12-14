@@ -77,6 +77,8 @@ typedef struct
 {
     Display *display;
     int screen;
+    Visual *visual;
+    int depth;
     Window window;
     Pixmap pixmaps[3];
     int current_pixmap;
@@ -132,97 +134,19 @@ UpdateYUVTextureData(SDL_Texture * texture)
                         texture->h, data->pixels, data->pitch);
 }
 
-static int
-X11_GetDepthFromPixelFormat(Uint32 format)
-{
-    int depth, order;
-
-    depth = SDL_BITSPERPIXEL(format);
-    order = SDL_PIXELORDER(format);
-    if (depth == 32
-        && (order == SDL_PACKEDORDER_XRGB || order == SDL_PACKEDORDER_RGBX
-            || SDL_PACKEDORDER_XBGR || order == SDL_PACKEDORDER_BGRX)) {
-        depth = 24;
-    }
-    return depth;
-}
-
-static Uint32
-X11_GetPixelFormatFromDepth(Display * display, int screen, int depth, int bpp)
-{
-    XVisualInfo vinfo;
-
-    if (XMatchVisualInfo(display, screen, depth, DirectColor, &vinfo) ||
-        XMatchVisualInfo(display, screen, depth, TrueColor, &vinfo)) {
-        Uint32 Rmask, Gmask, Bmask, Amask;
-
-        Rmask = vinfo.visual->red_mask;
-        Gmask = vinfo.visual->green_mask;
-        Bmask = vinfo.visual->blue_mask;
-        if (vinfo.depth == 32) {
-            Amask = (0xFFFFFFFF & ~(Rmask | Gmask | Bmask));
-        } else {
-            Amask = 0;
-        }
-        return SDL_MasksToPixelFormatEnum(bpp, Rmask, Gmask, Bmask, Amask);
-    }
-
-    /* No matching visual, try to pick a safe default */
-    switch (depth) {
-    case 15:
-        return SDL_PIXELFORMAT_RGB555;
-    case 16:
-        return SDL_PIXELFORMAT_RGB565;
-    default:
-        break;
-    }
-    return SDL_PIXELFORMAT_UNKNOWN;
-}
-
 void
 X11_AddRenderDriver(_THIS)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     SDL_RendererInfo *info = &X11_RenderDriver.info;
-    XPixmapFormatValues *pixmapFormats;
-    int i, n, bpp;
+    SDL_DisplayMode *mode = &SDL_CurrentDisplay.desktop_mode;
 
-    /* Query the available texture formats */
-    pixmapFormats = XListPixmapFormats(data->display, &n);
-    if (pixmapFormats) {
-        info->num_texture_formats = 0;
-        for (i = 0; i < n; ++i) {
-            Uint32 format;
-
-            if (pixmapFormats[i].depth == 24) {
-                bpp = pixmapFormats[i].bits_per_pixel;
-            } else {
-                bpp = pixmapFormats[i].depth;
-            }
-            format =
-                X11_GetPixelFormatFromDepth(data->display,
-                                            DefaultScreen(data->display),
-                                            pixmapFormats[i].depth, bpp);
-            if (format != SDL_PIXELFORMAT_UNKNOWN) {
-                info->texture_formats[info->num_texture_formats++] = format;
-            }
-        }
-        XFree(pixmapFormats);
-
-        if (info->num_texture_formats == 0) {
-            return;
-        }
-        info->texture_formats[info->num_texture_formats++] =
-            SDL_PIXELFORMAT_YV12;
-        info->texture_formats[info->num_texture_formats++] =
-            SDL_PIXELFORMAT_IYUV;
-        info->texture_formats[info->num_texture_formats++] =
-            SDL_PIXELFORMAT_YUY2;
-        info->texture_formats[info->num_texture_formats++] =
-            SDL_PIXELFORMAT_UYVY;
-        info->texture_formats[info->num_texture_formats++] =
-            SDL_PIXELFORMAT_YVYU;
-    }
+    info->texture_formats[info->num_texture_formats++] = mode->format;
+    info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_YV12;
+    info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_IYUV;
+    info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_YUY2;
+    info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_UYVY;
+    info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_YVYU;
 
     SDL_AddRenderDriver(0, &X11_RenderDriver);
 }
@@ -230,13 +154,12 @@ X11_AddRenderDriver(_THIS)
 SDL_Renderer *
 X11_CreateRenderer(SDL_Window * window, Uint32 flags)
 {
-    SDL_DisplayData *displaydata =
-        (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
+    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_DisplayData *displaydata = (SDL_DisplayData *) display->driverdata;
     SDL_WindowData *windowdata = (SDL_WindowData *) window->driverdata;
     SDL_Renderer *renderer;
     SDL_RendererInfo *info;
     X11_RenderData *data;
-    XWindowAttributes attributes;
     XGCValues gcv;
     int i, n;
     int bpp;
@@ -256,6 +179,8 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
     }
     data->display = windowdata->videodata->display;
     data->screen = displaydata->screen;
+    data->visual = displaydata->visual;
+    data->depth = displaydata->depth;
     data->window = windowdata->window;
 
     renderer->DisplayModeChanged = X11_DisplayModeChanged;
@@ -291,11 +216,10 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
         renderer->info.flags |= SDL_RENDERER_PRESENTCOPY;
         n = 1;
     }
-    XGetWindowAttributes(data->display, data->window, &attributes);
     for (i = 0; i < n; ++i) {
         data->pixmaps[i] =
             XCreatePixmap(data->display, data->window, window->w, window->h,
-                          attributes.depth);
+                          displaydata->depth);
         if (data->pixmaps[i] == None) {
             X11_DestroyRenderer(renderer);
             SDL_SetError("XCreatePixmap() failed");
@@ -312,26 +236,10 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
     data->current_pixmap = 0;
 
     /* Get the format of the window */
-    bpp = attributes.depth;
-    if (bpp == 24) {
-        XPixmapFormatValues *p = XListPixmapFormats(data->display, &n);
-        if (p) {
-            for (i = 0; i < n; ++i) {
-                if (p[i].depth == 24) {
-                    bpp = p[i].bits_per_pixel;
-                    break;
-                }
-            }
-            XFree(p);
-        }
-    }
-    Rmask = attributes.visual->red_mask;
-    Gmask = attributes.visual->green_mask;
-    Bmask = attributes.visual->blue_mask;
-    if (attributes.depth == 32) {
-        Amask = (0xFFFFFFFF & ~(Rmask | Gmask | Bmask));
-    } else {
-        Amask = 0;
+    if (!SDL_PixelFormatEnumToMasks(display->current_mode.format, &bpp, &Rmask, &Gmask, &Bmask, &Amask)) {
+        SDL_SetError("Unknown display format");
+        X11_DestroyRenderer(renderer);
+        return NULL;
     }
     data->format = SDL_AllocFormat(bpp, Rmask, Gmask, Bmask, Amask);
     if (!data->format) {
@@ -357,7 +265,6 @@ X11_DisplayModeChanged(SDL_Renderer * renderer)
 {
     X11_RenderData *data = (X11_RenderData *) renderer->driverdata;
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    XWindowAttributes attributes;
     int i, n;
 
     if (renderer->info.flags & SDL_RENDERER_SINGLEBUFFER) {
@@ -375,11 +282,10 @@ X11_DisplayModeChanged(SDL_Renderer * renderer)
             data->pixmaps[i] = None;
         }
     }
-    XGetWindowAttributes(data->display, data->window, &attributes);
     for (i = 0; i < n; ++i) {
         data->pixmaps[i] =
             XCreatePixmap(data->display, data->window, window->w, window->h,
-                          attributes.depth);
+                          data->depth);
         if (data->pixmaps[i] == None) {
             SDL_SetError("XCreatePixmap() failed");
             return -1;
@@ -400,8 +306,6 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
     SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
     X11_TextureData *data;
-    XWindowAttributes attributes;
-    int depth;
 
     data = (X11_TextureData *) SDL_calloc(1, sizeof(*data));
     if (!data) {
@@ -419,22 +323,16 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         }
         data->format = display->current_mode.format;
     } else {
+        /* The image/pixmap depth must be the same as the window or you
+           get a BadMatch error when trying to putimage or copyarea.
+        */
+        if (texture->format != display->current_mode.format) {
+            SDL_SetError("Texture format doesn't match window format");
+            return -1;
+        }
         data->format = texture->format;
     }
     data->pitch = texture->w * SDL_BYTESPERPIXEL(data->format);
-
-    XGetWindowAttributes(renderdata->display, renderdata->window,
-                         &attributes);
-    depth = X11_GetDepthFromPixelFormat(data->format);
-
-    /* The image/pixmap depth must be the same as the window or you
-       get a BadMatch error when trying to putimage or copyarea.
-    */
-    if (depth != attributes.depth) {
-        X11_DestroyTexture(renderer, texture);
-        SDL_SetError("Texture format doesn't match window format");
-        return -1;
-    }
 
     if (data->yuv || texture->access == SDL_TEXTUREACCESS_STREAMING) {
 #ifndef NO_SHARED_MEMORY
@@ -466,9 +364,7 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
             data->pixels = shminfo->shmaddr;
 
             data->image =
-                XShmCreateImage(renderdata->display, attributes.visual, depth,
-                                ZPixmap, shminfo->shmaddr, shminfo,
-                                texture->w, texture->h);
+                XShmCreateImage(renderdata->display, renderdata->visual, renderdata->depth, ZPixmap, shminfo->shmaddr, shminfo, texture->w, texture->h);
             if (!data->image) {
                 XShmDetach(renderdata->display, shminfo);
                 XSync(renderdata->display, False);
@@ -490,10 +386,7 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
             }
 
             data->image =
-                XCreateImage(renderdata->display, attributes.visual, depth,
-                             ZPixmap, 0, data->pixels, texture->w, texture->h,
-                             SDL_BYTESPERPIXEL(data->format) * 8,
-                             data->pitch);
+                XCreateImage(renderdata->display, renderdata->visual, renderdata->depth, ZPixmap, 0, data->pixels, texture->w, texture->h, SDL_BYTESPERPIXEL(data->format) * 8, data->pitch);
             if (!data->image) {
                 X11_DestroyTexture(renderer, texture);
                 SDL_SetError("XCreateImage() failed");
@@ -503,7 +396,7 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     } else {
         data->pixmap =
             XCreatePixmap(renderdata->display, renderdata->window, texture->w,
-                          texture->h, depth);
+                          texture->h, renderdata->depth);
         if (data->pixmap == None) {
             X11_DestroyTexture(renderer, texture);
             SDL_SetError("XCteatePixmap() failed");
@@ -511,9 +404,7 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         }
 
         data->image =
-            XCreateImage(renderdata->display, attributes.visual, depth,
-                         ZPixmap, 0, NULL, texture->w, texture->h,
-                         SDL_BYTESPERPIXEL(data->format) * 8, data->pitch);
+            XCreateImage(renderdata->display, renderdata->visual, renderdata->depth, ZPixmap, 0, NULL, texture->w, texture->h, SDL_BYTESPERPIXEL(data->format) * 8, data->pitch);
         if (!data->image) {
             X11_DestroyTexture(renderer, texture);
             SDL_SetError("XCreateImage() failed");
@@ -703,12 +594,9 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         XImage *image = texturedata->scaling_image;
 
         if (!image) {
-            XWindowAttributes attributes;
             int depth;
             void *pixels;
             int pitch;
-
-            XGetWindowAttributes(data->display, data->window, &attributes);
 
             pitch = dstrect->w * SDL_BYTESPERPIXEL(texturedata->format);
             pixels = SDL_malloc(dstrect->h * pitch);
@@ -717,9 +605,8 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                 return -1;
             }
 
-            depth = X11_GetDepthFromPixelFormat(texturedata->format);
             image =
-                XCreateImage(data->display, attributes.visual, depth, ZPixmap,
+                XCreateImage(data->display, data->visual, data->depth, ZPixmap,
                              0, pixels, dstrect->w, dstrect->h,
                              SDL_BYTESPERPIXEL(texturedata->format) * 8,
                              pitch);

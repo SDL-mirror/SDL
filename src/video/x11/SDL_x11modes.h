@@ -31,12 +31,6 @@ typedef struct
     int depth;
 } SDL_DisplayData;
 
-//typedef struct
-//{
-//    TCHAR DeviceName[32];
-//    DEVMODE DeviceMode;
-//} SDL_DisplayModeData;
-
 extern void X11_InitModes(_THIS);
 extern void X11_GetDisplayModes(_THIS);
 extern int X11_SetDisplayMode(_THIS, SDL_DisplayMode * mode);
