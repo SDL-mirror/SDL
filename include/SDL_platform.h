@@ -62,7 +62,7 @@
 /* lets us know what version of Mac OS X we're compiling on */
 #include "AvailabilityMacros.h"
 #ifdef MAC_OS_X_VERSION_10_3
-#include "targetconditionals.h" /* this header is in 10.3 or later */
+#include "TargetConditionals.h" /* this header is in 10.3 or later */
 #if TARGET_OS_IPHONE
 /* if compiling for iPhone */
 #undef __IPHONEOS__
