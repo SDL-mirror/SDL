@@ -236,7 +236,9 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
     data->current_pixmap = 0;
 
     /* Get the format of the window */
-    if (!SDL_PixelFormatEnumToMasks(display->current_mode.format, &bpp, &Rmask, &Gmask, &Bmask, &Amask)) {
+    if (!SDL_PixelFormatEnumToMasks
+        (display->current_mode.format, &bpp, &Rmask, &Gmask, &Bmask,
+         &Amask)) {
         SDL_SetError("Unknown display format");
         X11_DestroyRenderer(renderer);
         return NULL;
@@ -325,7 +327,7 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     } else {
         /* The image/pixmap depth must be the same as the window or you
            get a BadMatch error when trying to putimage or copyarea.
-        */
+         */
         if (texture->format != display->current_mode.format) {
             SDL_SetError("Texture format doesn't match window format");
             return -1;
@@ -364,7 +366,9 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
             data->pixels = shminfo->shmaddr;
 
             data->image =
-                XShmCreateImage(renderdata->display, renderdata->visual, renderdata->depth, ZPixmap, shminfo->shmaddr, shminfo, texture->w, texture->h);
+                XShmCreateImage(renderdata->display, renderdata->visual,
+                                renderdata->depth, ZPixmap, shminfo->shmaddr,
+                                shminfo, texture->w, texture->h);
             if (!data->image) {
                 XShmDetach(renderdata->display, shminfo);
                 XSync(renderdata->display, False);
@@ -386,7 +390,11 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
             }
 
             data->image =
-                XCreateImage(renderdata->display, renderdata->visual, renderdata->depth, ZPixmap, 0, data->pixels, texture->w, texture->h, SDL_BYTESPERPIXEL(data->format) * 8, data->pitch);
+                XCreateImage(renderdata->display, renderdata->visual,
+                             renderdata->depth, ZPixmap, 0, data->pixels,
+                             texture->w, texture->h,
+                             SDL_BYTESPERPIXEL(data->format) * 8,
+                             data->pitch);
             if (!data->image) {
                 X11_DestroyTexture(renderer, texture);
                 SDL_SetError("XCreateImage() failed");
@@ -404,7 +412,10 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         }
 
         data->image =
-            XCreateImage(renderdata->display, renderdata->visual, renderdata->depth, ZPixmap, 0, NULL, texture->w, texture->h, SDL_BYTESPERPIXEL(data->format) * 8, data->pitch);
+            XCreateImage(renderdata->display, renderdata->visual,
+                         renderdata->depth, ZPixmap, 0, NULL, texture->w,
+                         texture->h, SDL_BYTESPERPIXEL(data->format) * 8,
+                         data->pitch);
         if (!data->image) {
             X11_DestroyTexture(renderer, texture);
             SDL_SetError("XCreateImage() failed");
@@ -606,8 +617,8 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
             }
 
             image =
-                XCreateImage(data->display, data->visual, data->depth, ZPixmap,
-                             0, pixels, dstrect->w, dstrect->h,
+                XCreateImage(data->display, data->visual, data->depth,
+                             ZPixmap, 0, pixels, dstrect->w, dstrect->h,
                              SDL_BYTESPERPIXEL(texturedata->format) * 8,
                              pitch);
             if (!image) {
