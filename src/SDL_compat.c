@@ -620,7 +620,7 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
 
     if (!SDL_VideoTexture) {
         SDL_VideoTexture =
-            SDL_CreateTexture(SDL_PIXELFORMAT_ARGB8888,
+            SDL_CreateTexture(desktop_format,
                               SDL_TEXTUREACCESS_STREAMING, width, height);
     }
     if (!SDL_VideoTexture) {
