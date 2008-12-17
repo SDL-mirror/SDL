@@ -123,7 +123,7 @@ static VideoBootStrap *bootstrap[] = {
 static SDL_VideoDevice *_this = NULL;
 
 /* Various local functions */
-static void SDL_UpdateWindowGrab(SDL_Window *window);
+static void SDL_UpdateWindowGrab(SDL_Window * window);
 
 static int
 cmpmodes(const void *A, const void *B)
@@ -1210,7 +1210,7 @@ SDL_SetWindowGrab(SDL_WindowID windowID, int mode)
 }
 
 static void
-SDL_UpdateWindowGrab(SDL_Window *window)
+SDL_UpdateWindowGrab(SDL_Window * window)
 {
     if ((window->flags & SDL_WINDOW_INPUT_FOCUS) && _this->SetWindowGrab) {
         _this->SetWindowGrab(_this, window);
@@ -1265,7 +1265,8 @@ SDL_OnWindowFocusGained(SDL_Window * window)
     if (display->gamma && _this->SetDisplayGammaRamp) {
         _this->SetDisplayGammaRamp(_this, display->gamma);
     }
-    if ((window->flags & (SDL_WINDOW_INPUT_GRABBED|SDL_WINDOW_FULLSCREEN)) && _this->SetWindowGrab) {
+    if ((window->flags & (SDL_WINDOW_INPUT_GRABBED | SDL_WINDOW_FULLSCREEN))
+        && _this->SetWindowGrab) {
         _this->SetWindowGrab(_this, window);
     }
 }
@@ -1282,7 +1283,8 @@ SDL_OnWindowFocusLost(SDL_Window * window)
     if (display->gamma && _this->SetDisplayGammaRamp) {
         _this->SetDisplayGammaRamp(_this, display->saved_gamma);
     }
-    if ((window->flags & (SDL_WINDOW_INPUT_GRABBED|SDL_WINDOW_FULLSCREEN)) && _this->SetWindowGrab) {
+    if ((window->flags & (SDL_WINDOW_INPUT_GRABBED | SDL_WINDOW_FULLSCREEN))
+        && _this->SetWindowGrab) {
         _this->SetWindowGrab(_this, window);
     }
 }
