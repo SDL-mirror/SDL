@@ -58,6 +58,12 @@ SDL_SendWindowEvent(SDL_WindowID windowID, Uint8 windowevent, int data1,
         if (window->flags & SDL_WINDOW_FULLSCREEN) {
             return 0;
         }
+        if (data1 == SDL_WINDOWPOS_UNDEFINED) {
+            data1 = window->x;
+        }
+        if (data2 == SDL_WINDOWPOS_UNDEFINED) {
+            data2 = window->y;
+        }
         if (data1 == window->x && data2 == window->y) {
             return 0;
         }

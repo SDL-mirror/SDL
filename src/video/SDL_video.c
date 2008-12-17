@@ -123,8 +123,7 @@ static VideoBootStrap *bootstrap[] = {
 static SDL_VideoDevice *_this = NULL;
 
 /* Various local functions */
-int SDL_VideoInit(const char *driver_name, Uint32 flags);
-void SDL_VideoQuit(void);
+static void SDL_UpdateWindowGrab(SDL_Window *window);
 
 static int
 cmpmodes(const void *A, const void *B)
@@ -635,8 +634,7 @@ SDL_SetDisplayMode(const SDL_DisplayMode * mode)
     for (i = 0; i < display->num_windows; ++i) {
         SDL_Window *window = &display->windows[i];
         if (FULLSCREEN_VISIBLE(window)) {
-            SDL_SetWindowPosition(window->id, SDL_WINDOWPOS_CENTERED,
-                                  SDL_WINDOWPOS_CENTERED);
+            SDL_SetWindowPosition(window->id, window->x, window->y);
         }
     }
 
@@ -752,7 +750,8 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
     const Uint32 allowed_flags = (SDL_WINDOW_FULLSCREEN |
                                   SDL_WINDOW_OPENGL |
                                   SDL_WINDOW_BORDERLESS |
-                                  SDL_WINDOW_RESIZABLE);
+                                  SDL_WINDOW_RESIZABLE |
+                                  SDL_WINDOW_INPUT_GRABBED);
     SDL_VideoDisplay *display;
     SDL_Window window;
     int num_windows;
@@ -765,11 +764,6 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
     if ((flags & SDL_WINDOW_OPENGL) && !_this->GL_CreateContext) {
         SDL_SetError("No OpenGL support in video driver");
         return 0;
-    }
-    /* Fullscreen windows don't have any window decorations */
-    if (flags & SDL_WINDOW_FULLSCREEN) {
-        flags |= SDL_WINDOW_BORDERLESS;
-        flags &= ~SDL_WINDOW_RESIZABLE;
     }
     SDL_zero(window);
     window.id = _this->next_object_id++;
@@ -809,9 +803,8 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
     if (flags & SDL_WINDOW_SHOWN) {
         SDL_ShowWindow(window.id);
     }
-    if (flags & SDL_WINDOW_INPUT_GRABBED) {
-        SDL_SetWindowGrab(window.id, 1);
-    }
+    SDL_UpdateWindowGrab(&window);
+
     return window.id;
 }
 
@@ -889,9 +882,8 @@ SDL_RecreateWindow(SDL_Window * window, Uint32 flags)
     if (flags & SDL_WINDOW_SHOWN) {
         SDL_ShowWindow(window->id);
     }
-    if (flags & SDL_WINDOW_INPUT_GRABBED) {
-        SDL_SetWindowGrab(window->id, 1);
-    }
+    SDL_UpdateWindowGrab(window);
+
     return 0;
 }
 
@@ -1004,19 +996,16 @@ SDL_SetWindowPosition(SDL_WindowID windowID, int x, int y)
     if (!window) {
         return;
     }
-    if (x == SDL_WINDOWPOS_CENTERED) {
-        window->x = (display->current_mode.w - window->w) / 2;
-    } else if (x != SDL_WINDOWPOS_UNDEFINED) {
+    if (x != SDL_WINDOWPOS_UNDEFINED) {
         window->x = x;
     }
-    if (y == SDL_WINDOWPOS_CENTERED) {
-        window->y = (display->current_mode.h - window->h) / 2;
-    } else if (y != SDL_WINDOWPOS_UNDEFINED) {
+    if (y != SDL_WINDOWPOS_UNDEFINED) {
         window->y = y;
     }
     if (_this->SetWindowPosition) {
         _this->SetWindowPosition(_this, window);
     }
+    SDL_SendWindowEvent(window->id, SDL_WINDOWEVENT_MOVED, x, y);
 }
 
 void
@@ -1082,11 +1071,11 @@ SDL_ShowWindow(SDL_WindowID windowID)
     if (!window || (window->flags & SDL_WINDOW_SHOWN)) {
         return;
     }
-    SDL_SendWindowEvent(window->id, SDL_WINDOWEVENT_SHOWN, 0, 0);
 
     if (_this->ShowWindow) {
         _this->ShowWindow(_this, window);
     }
+    SDL_SendWindowEvent(window->id, SDL_WINDOWEVENT_SHOWN, 0, 0);
 }
 
 void
@@ -1097,11 +1086,11 @@ SDL_HideWindow(SDL_WindowID windowID)
     if (!window || !(window->flags & SDL_WINDOW_SHOWN)) {
         return;
     }
-    SDL_SendWindowEvent(window->id, SDL_WINDOWEVENT_HIDDEN, 0, 0);
 
     if (_this->HideWindow) {
         _this->HideWindow(_this, window);
     }
+    SDL_SendWindowEvent(window->id, SDL_WINDOWEVENT_HIDDEN, 0, 0);
 }
 
 void
@@ -1125,11 +1114,11 @@ SDL_MaximizeWindow(SDL_WindowID windowID)
     if (!window || (window->flags & SDL_WINDOW_MAXIMIZED)) {
         return;
     }
-    SDL_SendWindowEvent(window->id, SDL_WINDOWEVENT_MAXIMIZED, 0, 0);
 
     if (_this->MaximizeWindow) {
         _this->MaximizeWindow(_this, window);
     }
+    SDL_SendWindowEvent(window->id, SDL_WINDOWEVENT_MAXIMIZED, 0, 0);
 }
 
 void
@@ -1140,11 +1129,11 @@ SDL_MinimizeWindow(SDL_WindowID windowID)
     if (!window || (window->flags & SDL_WINDOW_MINIMIZED)) {
         return;
     }
-    SDL_SendWindowEvent(window->id, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
 
     if (_this->MinimizeWindow) {
         _this->MinimizeWindow(_this, window);
     }
+    SDL_SendWindowEvent(window->id, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
 }
 
 void
@@ -1156,11 +1145,11 @@ SDL_RestoreWindow(SDL_WindowID windowID)
         || (window->flags & (SDL_WINDOW_MAXIMIZED | SDL_WINDOW_MINIMIZED))) {
         return;
     }
-    SDL_SendWindowEvent(window->id, SDL_WINDOWEVENT_RESTORED, 0, 0);
 
     if (_this->RestoreWindow) {
         _this->RestoreWindow(_this, window);
     }
+    SDL_SendWindowEvent(window->id, SDL_WINDOWEVENT_RESTORED, 0, 0);
 }
 
 int
@@ -1217,7 +1206,12 @@ SDL_SetWindowGrab(SDL_WindowID windowID, int mode)
     } else {
         window->flags &= ~SDL_WINDOW_INPUT_GRABBED;
     }
+    SDL_UpdateWindowGrab(window);
+}
 
+static void
+SDL_UpdateWindowGrab(SDL_Window *window)
+{
     if ((window->flags & SDL_WINDOW_INPUT_FOCUS) && _this->SetWindowGrab) {
         _this->SetWindowGrab(_this, window);
     }
@@ -1237,11 +1231,17 @@ SDL_GetWindowGrab(SDL_WindowID windowID)
 void
 SDL_OnWindowShown(SDL_Window * window)
 {
+    if (window->flags & SDL_WINDOW_FULLSCREEN) {
+        SDL_SendWindowEvent(window->id, SDL_WINDOWEVENT_FOCUS_GAINED, 0, 0);
+    }
 }
 
 void
 SDL_OnWindowHidden(SDL_Window * window)
 {
+    if (window->flags & SDL_WINDOW_FULLSCREEN) {
+        SDL_SendWindowEvent(window->id, SDL_WINDOWEVENT_FOCUS_LOST, 0, 0);
+    }
 }
 
 void
@@ -1265,7 +1265,7 @@ SDL_OnWindowFocusGained(SDL_Window * window)
     if (display->gamma && _this->SetDisplayGammaRamp) {
         _this->SetDisplayGammaRamp(_this, display->gamma);
     }
-    if ((window->flags & SDL_WINDOW_INPUT_GRABBED) && _this->SetWindowGrab) {
+    if ((window->flags & (SDL_WINDOW_INPUT_GRABBED|SDL_WINDOW_FULLSCREEN)) && _this->SetWindowGrab) {
         _this->SetWindowGrab(_this, window);
     }
 }
@@ -1282,7 +1282,7 @@ SDL_OnWindowFocusLost(SDL_Window * window)
     if (display->gamma && _this->SetDisplayGammaRamp) {
         _this->SetDisplayGammaRamp(_this, display->saved_gamma);
     }
-    if ((window->flags & SDL_WINDOW_INPUT_GRABBED) && _this->SetWindowGrab) {
+    if ((window->flags & (SDL_WINDOW_INPUT_GRABBED|SDL_WINDOW_FULLSCREEN)) && _this->SetWindowGrab) {
         _this->SetWindowGrab(_this, window);
     }
 }

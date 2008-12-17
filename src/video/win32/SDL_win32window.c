@@ -159,12 +159,12 @@ WIN_CreateWindow(_THIS, SDL_Window * window)
     int x, y;
     int w, h;
 
-    if (window->flags & SDL_WINDOW_BORDERLESS) {
+    if (window->flags & (SDL_WINDOW_BORDERLESS|SDL_WINDOW_FULLSCREEN)) {
         style |= WS_POPUP;
     } else {
         style |= (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX);
     }
-    if (window->flags & SDL_WINDOW_RESIZABLE) {
+    if ((window->flags & SDL_WINDOW_RESIZABLE) && !(window->flags & SDL_WINDOW_FULLSCREEN)) {
         style |= (WS_THICKFRAME | WS_MAXIMIZEBOX);
     }
 
@@ -182,14 +182,14 @@ WIN_CreateWindow(_THIS, SDL_Window * window)
     w = (rect.right - rect.left);
     h = (rect.bottom - rect.top);
 
-    if (window->x == SDL_WINDOWPOS_CENTERED) {
+    if ((window->flags & SDL_WINDOW_FULLSCREEN) || window->x == SDL_WINDOWPOS_CENTERED) {
         x = (GetSystemMetrics(SM_CXSCREEN) - w) / 2;
     } else if (window->x == SDL_WINDOWPOS_UNDEFINED) {
         x = CW_USEDEFAULT;
     } else {
         x = window->x + rect.left;
     }
-    if (window->y == SDL_WINDOWPOS_CENTERED) {
+    if ((window->flags & SDL_WINDOW_FULLSCREEN) || window->y == SDL_WINDOWPOS_CENTERED) {
         y = (GetSystemMetrics(SM_CYSCREEN) - h) / 2;
     } else if (window->y == SDL_WINDOWPOS_UNDEFINED) {
         y = CW_USEDEFAULT;
@@ -331,8 +331,17 @@ WIN_SetWindowPosition(_THIS, SDL_Window * window)
     AdjustWindowRectEx(&rect, style,
                        (style & WS_CHILDWINDOW) ? FALSE : (GetMenu(hwnd) !=
                                                            NULL), 0);
-    x = window->x + rect.left;
-    y = window->y + rect.top;
+
+    if ((window->flags & SDL_WINDOW_FULLSCREEN) || window->x == SDL_WINDOWPOS_CENTERED) {
+        x = (GetSystemMetrics(SM_CXSCREEN) - window->w) / 2;
+    } else {
+        x = window->x + rect.left;
+    }
+    if ((window->flags & SDL_WINDOW_FULLSCREEN) || window->y == SDL_WINDOWPOS_CENTERED) {
+        y = (GetSystemMetrics(SM_CYSCREEN) - window->h) / 2;
+    } else {
+        y = window->y + rect.top;
+    }
 
     SetWindowPos(hwnd, top, x, y, 0, 0, (SWP_NOCOPYBITS | SWP_NOSIZE));
 }
@@ -425,7 +434,7 @@ WIN_SetWindowGrab(_THIS, SDL_Window * window)
 {
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
 
-    if ((window->flags & SDL_WINDOW_INPUT_GRABBED) &&
+    if ((window->flags & (SDL_WINDOW_INPUT_GRABBED|SDL_WINDOW_FULLSCREEN)) &&
         (window->flags & SDL_WINDOW_INPUT_FOCUS)) {
         RECT rect;
         GetClientRect(hwnd, &rect);

@@ -287,7 +287,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
                             visual, AllocNone);
     }
 
-    if (window->x == SDL_WINDOWPOS_CENTERED) {
+    if ((window->flags & SDL_WINDOW_FULLSCREEN) || window->x == SDL_WINDOWPOS_CENTERED) {
         x = (DisplayWidth(data->display, displaydata->screen) -
              window->w) / 2;
     } else if (window->x == SDL_WINDOWPOS_UNDEFINED) {
@@ -295,7 +295,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     } else {
         x = window->x;
     }
-    if (window->y == SDL_WINDOWPOS_CENTERED) {
+    if ((window->flags & SDL_WINDOW_FULLSCREEN) || window->y == SDL_WINDOWPOS_CENTERED) {
         y = (DisplayHeight(data->display, displaydata->screen) -
              window->h) / 2;
     } else if (window->y == SDL_WINDOWPOS_UNDEFINED) {
@@ -321,7 +321,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
 
     sizehints = XAllocSizeHints();
     if (sizehints) {
-        if (window->flags & SDL_WINDOW_RESIZABLE) {
+        if ((window->flags & SDL_WINDOW_RESIZABLE) && !(window->flags & SDL_WINDOW_FULLSCREEN)) {
             sizehints->min_width = 32;
             sizehints->min_height = 32;
             sizehints->max_height = 4096;
@@ -342,7 +342,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         XFree(sizehints);
     }
 
-    if (window->flags & SDL_WINDOW_BORDERLESS) {
+    if (window->flags & (SDL_WINDOW_BORDERLESS|SDL_WINDOW_FULLSCREEN)) {
         SDL_bool set;
         Atom WM_HINTS;
 
@@ -601,8 +601,19 @@ X11_SetWindowPosition(_THIS, SDL_Window * window)
     SDL_DisplayData *displaydata =
         (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
     Display *display = data->videodata->display;
+    int x, y;
 
-    XMoveWindow(display, data->window, window->x, window->y);
+    if ((window->flags & SDL_WINDOW_FULLSCREEN) || window->x == SDL_WINDOWPOS_CENTERED) {
+        x = (DisplayWidth(display, displaydata->screen) - window->w) / 2;
+    } else {
+        x = window->x;
+    }
+    if ((window->flags & SDL_WINDOW_FULLSCREEN) || window->y == SDL_WINDOWPOS_CENTERED) {
+        y = (DisplayHeight(display, displaydata->screen) - window->h) / 2;
+    } else {
+        y = window->y;
+    }
+    XMoveWindow(display, data->window, x, y);
 }
 
 void
@@ -662,7 +673,29 @@ X11_RestoreWindow(_THIS, SDL_Window * window)
 void
 X11_SetWindowGrab(_THIS, SDL_Window * window)
 {
-    /* FIXME */
+    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+    Display *display = data->videodata->display;
+
+    if ((window->flags & (SDL_WINDOW_INPUT_GRABBED|SDL_WINDOW_FULLSCREEN)) &&
+        (window->flags & SDL_WINDOW_INPUT_FOCUS)) {
+        /* Try to grab the mouse */
+        for ( ; ; ) {
+            int result = XGrabPointer(display, data->window, True, 0, GrabModeAsync, GrabModeAsync, data->window, None, CurrentTime);
+            if ( result == GrabSuccess ) {
+                break;
+            }
+            SDL_Delay(100);
+        }
+
+        /* Raise the window if we grab the mouse */
+        XRaiseWindow(display, data->window);
+
+        /* Now grab the keyboard */
+        XGrabKeyboard(display, data->window, True, GrabModeAsync, GrabModeAsync, CurrentTime);
+    } else {
+        XUngrabPointer(display, CurrentTime);
+        XUngrabKeyboard(display, CurrentTime);
+    }
 }
 
 void
