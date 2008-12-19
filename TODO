@@ -4,6 +4,7 @@
  * Implement YUV texture support
    - in progress, software support is done, Ryan is working on OpenGL shaders
  * Implement desktop video mode change notification?
+ * Implement icon support (with translucency?)
  * Verify mouse grab support
  * Properly handle mouse grab with Vista DPI scaling
  * Make sure the mouse is where it's supposed to be when un-grabbed
