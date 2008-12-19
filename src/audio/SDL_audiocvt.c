@@ -1682,6 +1682,12 @@ SDL_BuildWindowedSinc(SDL_AudioCVT * cvt, SDL_AudioFormat format,
         } \
     }
 
+    /* !!! FIXME: this memory leaks. */
+    cvt->coeff = (Uint8 *) SDL_malloc((SDL_AUDIO_BITSIZE(format) / 8) * m);
+    if (cvt->coeff == NULL) {
+        return -1;
+    }
+
     /* If we're using floating point, we only need to normalize */
     if (SDL_AUDIO_ISFLOAT(format) && SDL_AUDIO_BITSIZE(format) == 32) {
         float *fDest = (float *) cvt->coeff;
