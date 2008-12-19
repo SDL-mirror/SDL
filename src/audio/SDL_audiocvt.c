@@ -1836,7 +1836,7 @@ SDL_BuildAudioCVT(SDL_AudioCVT * cvt,
 #endif
 
     /* Start off with no conversion necessary */
-
+    SDL_memset(cvt, '\0', sizeof (SDL_AudioCVT));
     cvt->src_format = src_fmt;
     cvt->dst_format = dst_fmt;
     cvt->needed = 0;
