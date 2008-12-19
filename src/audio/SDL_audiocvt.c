@@ -1549,7 +1549,8 @@ SDL_FilterIIR(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void
 SDL_FilterFIR(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-    int n = 8 * cvt->len_cvt / SDL_AUDIO_BITSIZE(format);
+    /* !!! FIXME: (n) is incorrect, or my allocation of state_buf is wrong. */
+    const int n = 8 * cvt->len_cvt / SDL_AUDIO_BITSIZE(format);
     int m = cvt->len_sinc;
     int i, j;
 
@@ -1631,11 +1632,6 @@ SDL_BuildWindowedSinc(SDL_AudioCVT * cvt, SDL_AudioFormat format,
     float norm_sum, norm_fact;
     unsigned int i;
 
-    /* Check that the buffer is allocated */
-    if (cvt->coeff == NULL) {
-        return -1;
-    }
-
     /* Set the length */
     cvt->len_sinc = m + 1;
 
@@ -1683,7 +1679,7 @@ SDL_BuildWindowedSinc(SDL_AudioCVT * cvt, SDL_AudioFormat format,
     }
 
     /* !!! FIXME: this memory leaks. */
-    cvt->coeff = (Uint8 *) SDL_malloc((SDL_AUDIO_BITSIZE(format) / 8) * m);
+    cvt->coeff = (Uint8 *) SDL_malloc((SDL_AUDIO_BITSIZE(format) / 8) * (m+1));
     if (cvt->coeff == NULL) {
         return -1;
     }
@@ -1709,6 +1705,11 @@ SDL_BuildWindowedSinc(SDL_AudioCVT * cvt, SDL_AudioFormat format,
     }
 
     /* Initialize the state buffer to all zeroes, and set initial position */
+    /* !!! FIXME: this memory leaks. */
+    cvt->state_buf = (Uint8 *) SDL_malloc(cvt->len_sinc * SDL_AUDIO_BITSIZE(format) / 4);
+    if (cvt->state_buf == NULL) {
+        return -1;
+    }
     SDL_memset(cvt->state_buf, 0,
                cvt->len_sinc * SDL_AUDIO_BITSIZE(format) / 4);
     cvt->state_pos = 0;
@@ -1744,9 +1745,9 @@ SDL_Resample(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 #endif
 
 #define zerostuff_mono(type) { \
-        const type *src = (const type *) (cvt->buf + cvt->len_cvt); \
-        type *dst = (type *) (cvt->buf + (cvt->len_cvt * cvt->len_mult)); \
-        for (i = cvt->len_cvt / sizeof (type); i; --i) { \
+        const type *src = (const type *) (cvt->buf + cvt->len); \
+        type *dst = (type *) (cvt->buf + (cvt->len * cvt->len_mult)); \
+        for (i = cvt->len / sizeof (type); i; --i) { \
             src--; \
             dst[-1] = src[0]; \
             for( j = -cvt->len_mult; j < -1; ++j ) { \
@@ -1914,6 +1915,7 @@ SDL_BuildAudioCVT(SDL_AudioCVT * cvt,
         cvt->len_div = src_rate / rate_gcd;
         cvt->len_ratio = (double) cvt->len_mult / (double) cvt->len_div;
         cvt->filters[cvt->filter_index++] = SDL_Resample;
+        /* !!! FIXME: check return value. */
         SDL_BuildWindowedSinc(cvt, dst_fmt, 768);
     }
 
