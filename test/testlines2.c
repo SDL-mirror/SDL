@@ -66,8 +66,8 @@ DrawLines(SDL_WindowID window)
         if (i == 0) {
             SDL_RenderLine(0, 0, window_w, window_h);
             SDL_RenderLine(0, window_h, window_w, 0);
-            SDL_RenderLine(0, window_h/2, window_w, window_h/2);
-            SDL_RenderLine(window_w/2, 0, window_w/2, window_h);
+            SDL_RenderLine(0, window_h / 2, window_w, window_h / 2);
+            SDL_RenderLine(window_w / 2, 0, window_w / 2, window_h);
         } else {
             x1 = rand() % window_w;
             x2 = rand() % window_w;
