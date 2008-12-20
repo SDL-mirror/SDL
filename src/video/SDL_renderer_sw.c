@@ -565,7 +565,8 @@ SW_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
 
     if (data->renderer->LockTexture(data->renderer,
                                     data->texture[data->current_texture],
-                                    &data->surface.clip_rect, 1, &data->surface.pixels,
+                                    &data->surface.clip_rect, 1,
+                                    &data->surface.pixels,
                                     &data->surface.pitch) < 0) {
         return -1;
     }
