@@ -1171,7 +1171,7 @@ extern DECLSPEC int SDL_GetRenderDrawColor(Uint8 * r, Uint8 * g, Uint8 * b,
 /**
  * \fn int SDL_SetRenderDrawBlendMode(int blendMode)
  *
- * \brief Set the blend mode used for drawing operations
+ * \brief Set the blend mode used for drawing operations (Fill and Line).
  *
  * \param blendMode SDL_BlendMode to use for blending
  *
@@ -1197,7 +1197,7 @@ extern DECLSPEC int SDLCALL SDL_SetRenderDrawBlendMode(int blendMode);
 extern DECLSPEC int SDLCALL SDL_GetRenderDrawBlendMode(int *blendMode);
 
 /**
- * \fn void SDL_RenderLine(int x1, int y1, int x2, int y2)
+ * \fn int SDL_RenderLine(int x1, int y1, int x2, int y2)
  *
  * \brief Draw a line on the current rendering target.
  *
