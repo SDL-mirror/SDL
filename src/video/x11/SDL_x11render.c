@@ -597,6 +597,7 @@ X11_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
 {
     X11_RenderData *data = (X11_RenderData *) renderer->driverdata;
     unsigned long foreground;
+
     if (data->makedirty) {
         SDL_Rect rect;
 
