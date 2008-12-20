@@ -643,6 +643,7 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         }
 
         /* Set up fake surfaces for SDL_SoftStretch() */
+        SDL_zero(src);
         src.format = &fmt;
         src.w = texture->w;
         src.h = texture->h;
@@ -654,6 +655,7 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
             src.pixels = texturedata->pixels;
         src.pitch = texturedata->pitch;
 
+        SDL_zero(dst);
         dst.format = &fmt;
         dst.w = image->width;
         dst.h = image->height;
