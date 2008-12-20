@@ -31,8 +31,9 @@
 
 static SDL_Renderer *SDL_DUMMY_CreateRenderer(SDL_Window * window,
                                               Uint32 flags);
-static int SDL_DUMMY_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g,
-                                Uint8 b, Uint8 a, const SDL_Rect * rect);
+static int SDL_DUMMY_SetDrawColor(SDL_Renderer * renderer);
+static int SDL_DUMMY_RenderFill(SDL_Renderer * renderer,
+                                const SDL_Rect * rect);
 static int SDL_DUMMY_RenderCopy(SDL_Renderer * renderer,
                                 SDL_Texture * texture,
                                 const SDL_Rect * srcrect,
@@ -88,6 +89,7 @@ SDL_DUMMY_CreateRenderer(SDL_Window * window, Uint32 flags)
     }
     SDL_zerop(data);
 
+    renderer->SetDrawColor = SDL_DUMMY_SetDrawColor;
     renderer->RenderFill = SDL_DUMMY_RenderFill;
     renderer->RenderCopy = SDL_DUMMY_RenderCopy;
     renderer->RenderPresent = SDL_DUMMY_RenderPresent;
@@ -124,8 +126,13 @@ SDL_DUMMY_CreateRenderer(SDL_Window * window, Uint32 flags)
 }
 
 static int
-SDL_DUMMY_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b,
-                     Uint8 a, const SDL_Rect * rect)
+SDL_DUMMY_SetDrawColor(SDL_Renderer * renderer)
+{
+    return 0;
+}
+
+static int
+SDL_DUMMY_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
 {
     SDL_DUMMY_RenderData *data =
         (SDL_DUMMY_RenderData *) renderer->driverdata;
@@ -133,7 +140,8 @@ SDL_DUMMY_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b,
     Uint32 color;
     SDL_Rect real_rect = *rect;
 
-    color = SDL_MapRGBA(target->format, r, g, b, a);
+    color = SDL_MapRGBA(target->format,
+                        renderer->r, renderer->g, renderer->b, renderer->a);
 
     return SDL_FillRect(target, &real_rect, color);
 }

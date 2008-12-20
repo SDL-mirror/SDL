@@ -322,19 +322,19 @@ static void
 PrintBlendMode(Uint32 flag)
 {
     switch (flag) {
-    case SDL_TEXTUREBLENDMODE_NONE:
+    case SDL_BLENDMODE_NONE:
         fprintf(stderr, "None");
         break;
-    case SDL_TEXTUREBLENDMODE_MASK:
+    case SDL_BLENDMODE_MASK:
         fprintf(stderr, "Mask");
         break;
-    case SDL_TEXTUREBLENDMODE_BLEND:
+    case SDL_BLENDMODE_BLEND:
         fprintf(stderr, "Blend");
         break;
-    case SDL_TEXTUREBLENDMODE_ADD:
+    case SDL_BLENDMODE_ADD:
         fprintf(stderr, "Add");
         break;
-    case SDL_TEXTUREBLENDMODE_MOD:
+    case SDL_BLENDMODE_MOD:
         fprintf(stderr, "Mod");
         break;
     default:

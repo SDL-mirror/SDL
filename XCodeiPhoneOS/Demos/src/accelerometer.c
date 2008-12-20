@@ -145,7 +145,7 @@ initializeTextures()
     if (shipID == 0) {
         fatalError("could not create ship texture");
     }
-    SDL_SetTextureBlendMode(shipID, SDL_TEXTUREBLENDMODE_BLEND);
+    SDL_SetTextureBlendMode(shipID, SDL_BLENDMODE_BLEND);
 
     /* set the width and height of the ship from the surface dimensions */
     ship.rect.w = bmp_surface->w;

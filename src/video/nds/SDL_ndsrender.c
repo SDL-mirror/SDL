@@ -140,7 +140,7 @@ SDL_RenderDriver NDS_RenderDriver = {
     {"nds",                     /* char* name */
      (SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTDISCARD | SDL_RENDERER_PRESENTVSYNC),  /* u32 flags */
      (SDL_TEXTUREMODULATE_NONE),        /* u32 mod_modes */
-     (SDL_TEXTUREBLENDMODE_MASK),       /* u32 blend_modes */
+     (SDL_BLENDMODE_MASK),      /* u32 blend_modes */
      (SDL_TEXTURESCALEMODE_FAST),       /* u32 scale_modes */
      3,                         /* u32 num_texture_formats */
      {

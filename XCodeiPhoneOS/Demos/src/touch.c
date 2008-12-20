@@ -65,7 +65,7 @@ initializeTexture()
         fatalError("could not create brush texture");
     }
     /* additive blending -- laying strokes on top of eachother makes them brighter */
-    SDL_SetTextureBlendMode(brushID, SDL_TEXTUREBLENDMODE_ADD);
+    SDL_SetTextureBlendMode(brushID, SDL_BLENDMODE_ADD);
     /* set brush color (red) */
     SDL_SetTextureColorMod(brushID, 255, 100, 100);
 }

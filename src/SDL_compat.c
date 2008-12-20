@@ -696,10 +696,10 @@ SDL_SetAlpha(SDL_Surface * surface, Uint32 flag, Uint8 value)
             value = 0xFF;
         }
         SDL_SetSurfaceAlphaMod(surface, value);
-        SDL_SetSurfaceBlendMode(surface, SDL_TEXTUREBLENDMODE_BLEND);
+        SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_BLEND);
     } else {
         SDL_SetSurfaceAlphaMod(surface, 0xFF);
-        SDL_SetSurfaceBlendMode(surface, SDL_TEXTUREBLENDMODE_NONE);
+        SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_NONE);
     }
     SDL_SetSurfaceRLE(surface, (flag & SDL_RLEACCEL));
 

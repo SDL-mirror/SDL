@@ -59,8 +59,8 @@ static int SW_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * rect, int markDirty, void **pixels,
                           int *pitch);
 static void SW_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
-static int SW_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b,
-                         Uint8 a, const SDL_Rect * rect);
+static int SW_SetDrawColor(SDL_Renderer * renderer);
+static int SW_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect);
 static int SW_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                          const SDL_Rect * srcrect, const SDL_Rect * dstrect);
 static void SW_RenderPresent(SDL_Renderer * renderer);
@@ -77,9 +77,8 @@ SDL_RenderDriver SW_RenderDriver = {
       SDL_RENDERER_PRESENTDISCARD | SDL_RENDERER_PRESENTVSYNC),
      (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_COLOR |
       SDL_TEXTUREMODULATE_ALPHA),
-     (SDL_TEXTUREBLENDMODE_NONE | SDL_TEXTUREBLENDMODE_MASK |
-      SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD |
-      SDL_TEXTUREBLENDMODE_MOD),
+     (SDL_BLENDMODE_NONE | SDL_BLENDMODE_MASK |
+      SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD | SDL_BLENDMODE_MOD),
      (SDL_TEXTURESCALEMODE_NONE | SDL_TEXTURESCALEMODE_FAST),
      14,
      {
@@ -222,6 +221,13 @@ SW_CreateRenderer(SDL_Window * window, Uint32 flags)
     }
     renderer->ActivateRenderer = SW_ActivateRenderer;
     renderer->DisplayModeChanged = SW_DisplayModeChanged;
+
+    renderer->SetDrawColor = SW_SetDrawColor;
+    /* FIXME : Implement
+       renderer->SetDrawBlendMode = GL_SetDrawBlendMode;
+       renderer->RenderLine = GL_RenderLine;
+     */
+
     renderer->RenderFill = SW_RenderFill;
     renderer->RenderCopy = SW_RenderCopy;
     renderer->RenderPresent = SW_RenderPresent;
@@ -520,8 +526,13 @@ SW_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 }
 
 static int
-SW_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b, Uint8 a,
-              const SDL_Rect * rect)
+SW_SetDrawColor(SDL_Renderer * renderer)
+{
+    return 0;
+}
+
+static int
+SW_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
     Uint32 color;
@@ -532,7 +543,8 @@ SW_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b, Uint8 a,
         SDL_AddDirtyRect(&data->dirty, rect);
     }
 
-    color = SDL_MapRGBA(data->surface.format, r, g, b, a);
+    color = SDL_MapRGBA(data->surface.format,
+                        renderer->r, renderer->g, renderer->b, renderer->a);
 
     if (data->renderer->LockTexture(data->renderer,
                                     data->texture[data->current_texture],

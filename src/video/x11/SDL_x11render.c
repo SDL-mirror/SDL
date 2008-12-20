@@ -47,8 +47,11 @@ static int X11_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                            const SDL_Rect * rect, int markDirty,
                            void **pixels, int *pitch);
 static void X11_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
-static int X11_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b,
-                          Uint8 a, const SDL_Rect * rect);
+static int X11_SetDrawColor(SDL_Renderer * renderer);
+static int X11_SetDrawBlendMode(SDL_Renderer * renderer);
+static int X11_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2,
+                          int y2);
+static int X11_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect);
 static int X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * srcrect, const SDL_Rect * dstrect);
 static void X11_RenderPresent(SDL_Renderer * renderer);
@@ -65,7 +68,7 @@ SDL_RenderDriver X11_RenderDriver = {
       SDL_RENDERER_PRESENTFLIP2 | SDL_RENDERER_PRESENTFLIP3 |
       SDL_RENDERER_PRESENTDISCARD | SDL_RENDERER_ACCELERATED),
      SDL_TEXTUREMODULATE_NONE,
-     SDL_TEXTUREBLENDMODE_NONE,
+     SDL_BLENDMODE_NONE,
      SDL_TEXTURESCALEMODE_NONE,
      0,
      {0},
@@ -191,6 +194,9 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->UpdateTexture = X11_UpdateTexture;
     renderer->LockTexture = X11_LockTexture;
     renderer->UnlockTexture = X11_UnlockTexture;
+    renderer->SetDrawColor = X11_SetDrawColor;
+    renderer->SetDrawBlendMode = X11_SetDrawBlendMode;
+    renderer->RenderLine = X11_RenderLine;
     renderer->RenderFill = X11_RenderFill;
     renderer->RenderCopy = X11_RenderCopy;
     renderer->RenderPresent = X11_RenderPresent;
@@ -445,11 +451,11 @@ static int
 X11_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     switch (texture->blendMode) {
-    case SDL_TEXTUREBLENDMODE_NONE:
+    case SDL_BLENDMODE_NONE:
         return 0;
     default:
         SDL_Unsupported();
-        texture->blendMode = SDL_TEXTUREBLENDMODE_NONE;
+        texture->blendMode = SDL_BLENDMODE_NONE;
         return -1;
     }
 }
@@ -552,8 +558,73 @@ X11_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 }
 
 static int
-X11_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b, Uint8 a,
-               const SDL_Rect * rect)
+X11_SetDrawColor(SDL_Renderer * renderer)
+{
+    return 0;
+}
+
+static int
+X11_SetDrawBlendMode(SDL_Renderer * renderer)
+{
+    switch (renderer->blendMode) {
+    case SDL_BLENDMODE_NONE:
+        return 0;
+    default:
+        SDL_Unsupported();
+        renderer->blendMode = SDL_BLENDMODE_NONE;
+        return -1;
+    }
+}
+
+static Uint32
+renderdrawcolor(SDL_Renderer * renderer, int premult)
+{
+    X11_RenderData *data = (X11_RenderData *) renderer->driverdata;
+    Uint8 r = renderer->r;
+    Uint8 g = renderer->g;
+    Uint8 b = renderer->b;
+    Uint8 a = renderer->a;
+    if (premult)
+        return SDL_MapRGBA(data->format, ((int) r * (int) a) / 255,
+                           ((int) g * (int) a) / 255,
+                           ((int) b * (int) a) / 255, 255);
+    else
+        return SDL_MapRGBA(data->format, r, g, b, a);
+}
+
+static int
+X11_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
+{
+    X11_RenderData *data = (X11_RenderData *) renderer->driverdata;
+    unsigned long foreground;
+    if (data->makedirty) {
+        SDL_Rect rect;
+
+        if (x1 < x2) {
+            rect.x = x1;
+            rect.w = (x2 - x1) + 1;
+        } else {
+            rect.x = x2;
+            rect.w = (x1 - x2) + 1;
+        }
+        if (y1 < y2) {
+            rect.y = y1;
+            rect.h = (y2 - y1) + 1;
+        } else {
+            rect.y = y2;
+            rect.h = (y1 - y2) + 1;
+        }
+        SDL_AddDirtyRect(&data->dirty, &rect);
+    }
+
+    foreground = renderdrawcolor(renderer, 1);
+    XSetForeground(data->display, data->gc, foreground);
+    XDrawLine(data->display, data->drawable, data->gc, x1, y1, x2, y2);
+
+}
+
+static int
+X11_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
 {
     X11_RenderData *data = (X11_RenderData *) renderer->driverdata;
     unsigned long foreground;
@@ -562,9 +633,9 @@ X11_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b, Uint8 a,
         SDL_AddDirtyRect(&data->dirty, rect);
     }
 
-    foreground = SDL_MapRGBA(data->format, r, g, b, a);
+    foreground = renderdrawcolor(renderer, 1);
     XSetForeground(data->display, data->gc, foreground);
-    XDrawRectangle(data->display, data->drawable, data->gc, rect->x, rect->y,
+    XFillRectangle(data->display, data->drawable, data->gc, rect->x, rect->y,
                    rect->w, rect->h);
     return 0;
 }

@@ -82,9 +82,8 @@ SDL_RenderDriver D3D_RenderDriver = {
       SDL_RENDERER_ACCELERATED),
      (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_COLOR |
       SDL_TEXTUREMODULATE_ALPHA),
-     (SDL_TEXTUREBLENDMODE_NONE | SDL_TEXTUREBLENDMODE_MASK |
-      SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD |
-      SDL_TEXTUREBLENDMODE_MOD),
+     (SDL_BLENDMODE_NONE | SDL_BLENDMODE_MASK |
+      SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD | SDL_BLENDMODE_MOD),
      (SDL_TEXTURESCALEMODE_NONE | SDL_TEXTURESCALEMODE_FAST |
       SDL_TEXTURESCALEMODE_SLOW | SDL_TEXTURESCALEMODE_BEST),
      12,
@@ -525,15 +524,15 @@ static int
 D3D_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     switch (texture->blendMode) {
-    case SDL_TEXTUREBLENDMODE_NONE:
-    case SDL_TEXTUREBLENDMODE_MASK:
-    case SDL_TEXTUREBLENDMODE_BLEND:
-    case SDL_TEXTUREBLENDMODE_ADD:
-    case SDL_TEXTUREBLENDMODE_MOD:
+    case SDL_BLENDMODE_NONE:
+    case SDL_BLENDMODE_MASK:
+    case SDL_BLENDMODE_BLEND:
+    case SDL_BLENDMODE_ADD:
+    case SDL_BLENDMODE_MOD:
         return 0;
     default:
         SDL_Unsupported();
-        texture->blendMode = SDL_TEXTUREBLENDMODE_NONE;
+        texture->blendMode = SDL_BLENDMODE_NONE;
         return -1;
     }
 }
@@ -798,12 +797,12 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     vertices[3].v = maxv;
 
     switch (texture->blendMode) {
-    case SDL_TEXTUREBLENDMODE_NONE:
+    case SDL_BLENDMODE_NONE:
         IDirect3DDevice9_SetRenderState(data->device, D3DRS_ALPHABLENDENABLE,
                                         FALSE);
         break;
-    case SDL_TEXTUREBLENDMODE_MASK:
-    case SDL_TEXTUREBLENDMODE_BLEND:
+    case SDL_BLENDMODE_MASK:
+    case SDL_BLENDMODE_BLEND:
         IDirect3DDevice9_SetRenderState(data->device, D3DRS_ALPHABLENDENABLE,
                                         TRUE);
         IDirect3DDevice9_SetRenderState(data->device, D3DRS_SRCBLEND,
@@ -811,7 +810,7 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         IDirect3DDevice9_SetRenderState(data->device, D3DRS_DESTBLEND,
                                         D3DBLEND_INVSRCALPHA);
         break;
-    case SDL_TEXTUREBLENDMODE_ADD:
+    case SDL_BLENDMODE_ADD:
         IDirect3DDevice9_SetRenderState(data->device, D3DRS_ALPHABLENDENABLE,
                                         TRUE);
         IDirect3DDevice9_SetRenderState(data->device, D3DRS_SRCBLEND,
@@ -819,7 +818,7 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         IDirect3DDevice9_SetRenderState(data->device, D3DRS_DESTBLEND,
                                         D3DBLEND_ONE);
         break;
-    case SDL_TEXTUREBLENDMODE_MOD:
+    case SDL_BLENDMODE_MOD:
         IDirect3DDevice9_SetRenderState(data->device, D3DRS_ALPHABLENDENABLE,
                                         TRUE);
         IDirect3DDevice9_SetRenderState(data->device, D3DRS_SRCBLEND,

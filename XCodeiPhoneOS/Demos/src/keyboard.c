@@ -223,7 +223,7 @@ loadFont(void)
             printf("texture creation failed: %s\n", SDL_GetError());
         } else {
             /* set blend mode for our texture */
-            SDL_SetTextureBlendMode(textureID, SDL_TEXTUREBLENDMODE_BLEND);
+            SDL_SetTextureBlendMode(textureID, SDL_BLENDMODE_BLEND);
         }
         SDL_FreeSurface(surface);
         SDL_FreeSurface(converted);

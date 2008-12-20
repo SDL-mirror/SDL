@@ -20,7 +20,7 @@ static int current_color = 0;
 static SDL_Rect *positions;
 static SDL_Rect *velocities;
 static int sprite_w, sprite_h;
-static SDL_TextureBlendMode blendMode = SDL_TEXTUREBLENDMODE_MASK;
+static SDL_BlendMode blendMode = SDL_BLENDMODE_MASK;
 static SDL_TextureScaleMode scaleMode = SDL_TEXTURESCALEMODE_NONE;
 
 /* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
@@ -119,7 +119,8 @@ MoveSprites(SDL_WindowID window, SDL_TextureID sprite)
 
     /* Move the sprite, bounce at the wall, and draw */
     n = 0;
-    SDL_RenderFill(0xA0, 0xA0, 0xA0, 0xFF, NULL);
+    SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
+    SDL_RenderFill(NULL);
     for (i = 0; i < num_sprites; ++i) {
         position = &positions[i];
         velocity = &velocities[i];
@@ -166,19 +167,19 @@ main(int argc, char *argv[])
             if (SDL_strcasecmp(argv[i], "--blend") == 0) {
                 if (argv[i + 1]) {
                     if (SDL_strcasecmp(argv[i + 1], "none") == 0) {
-                        blendMode = SDL_TEXTUREBLENDMODE_NONE;
+                        blendMode = SDL_BLENDMODE_NONE;
                         consumed = 2;
                     } else if (SDL_strcasecmp(argv[i + 1], "mask") == 0) {
-                        blendMode = SDL_TEXTUREBLENDMODE_MASK;
+                        blendMode = SDL_BLENDMODE_MASK;
                         consumed = 2;
                     } else if (SDL_strcasecmp(argv[i + 1], "blend") == 0) {
-                        blendMode = SDL_TEXTUREBLENDMODE_BLEND;
+                        blendMode = SDL_BLENDMODE_BLEND;
                         consumed = 2;
                     } else if (SDL_strcasecmp(argv[i + 1], "add") == 0) {
-                        blendMode = SDL_TEXTUREBLENDMODE_ADD;
+                        blendMode = SDL_BLENDMODE_ADD;
                         consumed = 2;
                     } else if (SDL_strcasecmp(argv[i + 1], "mod") == 0) {
-                        blendMode = SDL_TEXTUREBLENDMODE_MOD;
+                        blendMode = SDL_BLENDMODE_MOD;
                         consumed = 2;
                     }
                 }
@@ -230,7 +231,8 @@ main(int argc, char *argv[])
     }
     for (i = 0; i < state->num_windows; ++i) {
         SDL_SelectRenderer(state->windows[i]);
-        SDL_RenderFill(0xA0, 0xA0, 0xA0, 0xFF, NULL);
+        SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
+        SDL_RenderFill(NULL);
     }
     if (LoadSprite("icon.bmp") < 0) {
         quit(2);
@@ -275,7 +277,8 @@ main(int argc, char *argv[])
                 switch (event.window.event) {
                 case SDL_WINDOWEVENT_EXPOSED:
                     SDL_SelectRenderer(event.window.windowID);
-                    SDL_RenderFill(0xA0, 0xA0, 0xA0, 0xFF, NULL);
+                    SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
+                    SDL_RenderFill(NULL);
                     break;
                 }
                 break;

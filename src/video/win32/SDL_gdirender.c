@@ -73,8 +73,7 @@ SDL_RenderDriver GDI_RenderDriver = {
       SDL_RENDERER_PRESENTFLIP2 | SDL_RENDERER_PRESENTFLIP3 |
       SDL_RENDERER_PRESENTDISCARD | SDL_RENDERER_ACCELERATED),
      (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_ALPHA),
-     (SDL_TEXTUREBLENDMODE_NONE | SDL_TEXTUREBLENDMODE_MASK |
-      SDL_TEXTUREBLENDMODE_BLEND),
+     (SDL_BLENDMODE_NONE | SDL_BLENDMODE_MASK | SDL_BLENDMODE_BLEND),
      (SDL_TEXTURESCALEMODE_NONE | SDL_TEXTURESCALEMODE_FAST),
      14,
      {
@@ -459,13 +458,13 @@ static int
 GDI_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     switch (texture->blendMode) {
-    case SDL_TEXTUREBLENDMODE_NONE:
-    case SDL_TEXTUREBLENDMODE_MASK:
-    case SDL_TEXTUREBLENDMODE_BLEND:
+    case SDL_BLENDMODE_NONE:
+    case SDL_BLENDMODE_MASK:
+    case SDL_BLENDMODE_BLEND:
         return 0;
     default:
         SDL_Unsupported();
-        texture->blendMode = SDL_TEXTUREBLENDMODE_NONE;
+        texture->blendMode = SDL_BLENDMODE_NONE;
         return -1;
     }
 }
@@ -617,8 +616,7 @@ GDI_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         SelectPalette(data->memory_hdc, texturedata->hpal, TRUE);
         RealizePalette(data->memory_hdc);
     }
-    if (texture->blendMode &
-        (SDL_TEXTUREBLENDMODE_MASK | SDL_TEXTUREBLENDMODE_BLEND)) {
+    if (texture->blendMode & (SDL_BLENDMODE_MASK | SDL_BLENDMODE_BLEND)) {
         BLENDFUNCTION blendFunc = {
             AC_SRC_OVER,
             0,

@@ -85,9 +85,8 @@ SDL_RenderDriver GL_ES_RenderDriver = {
       SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED),
      (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_COLOR |
       SDL_TEXTUREMODULATE_ALPHA),
-     (SDL_TEXTUREBLENDMODE_NONE | SDL_TEXTUREBLENDMODE_MASK |
-      SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD |
-      SDL_TEXTUREBLENDMODE_MOD),
+     (SDL_BLENDMODE_NONE | SDL_BLENDMODE_MASK |
+      SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD | SDL_BLENDMODE_MOD),
      (SDL_TEXTURESCALEMODE_NONE | SDL_TEXTURESCALEMODE_FAST |
       SDL_TEXTURESCALEMODE_SLOW), 2,
      {
@@ -499,15 +498,15 @@ static int
 GLES_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     switch (texture->blendMode) {
-    case SDL_TEXTUREBLENDMODE_NONE:
-    case SDL_TEXTUREBLENDMODE_MASK:
-    case SDL_TEXTUREBLENDMODE_BLEND:
-    case SDL_TEXTUREBLENDMODE_ADD:
-    case SDL_TEXTUREBLENDMODE_MOD:
+    case SDL_BLENDMODE_NONE:
+    case SDL_BLENDMODE_MASK:
+    case SDL_BLENDMODE_BLEND:
+    case SDL_BLENDMODE_ADD:
+    case SDL_BLENDMODE_MOD:
         return 0;
     default:
         SDL_Unsupported();
-        texture->blendMode = SDL_TEXTUREBLENDMODE_NONE;
+        texture->blendMode = SDL_BLENDMODE_NONE;
         return -1;
     }
 }
@@ -680,22 +679,22 @@ GLES_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
     if (texture->blendMode != data->blendMode) {
         switch (texture->blendMode) {
-        case SDL_TEXTUREBLENDMODE_NONE:
+        case SDL_BLENDMODE_NONE:
             data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
             data->glDisable(GL_BLEND);
             break;
-        case SDL_TEXTUREBLENDMODE_MASK:
-        case SDL_TEXTUREBLENDMODE_BLEND:
+        case SDL_BLENDMODE_MASK:
+        case SDL_BLENDMODE_BLEND:
             data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
             data->glEnable(GL_BLEND);
             data->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             break;
-        case SDL_TEXTUREBLENDMODE_ADD:
+        case SDL_BLENDMODE_ADD:
             data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
             data->glEnable(GL_BLEND);
             data->glBlendFunc(GL_SRC_ALPHA, GL_ONE);
             break;
-        case SDL_TEXTUREBLENDMODE_MOD:
+        case SDL_BLENDMODE_MOD:
             data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
             data->glEnable(GL_BLEND);
             data->glBlendFunc(GL_ZERO, GL_SRC_COLOR);

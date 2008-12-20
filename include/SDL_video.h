@@ -206,18 +206,18 @@ typedef enum
 } SDL_TextureModulate;
 
 /**
- * \enum SDL_TextureBlendMode
+ * \enum SDL_BlendMode
  *
- * \brief The texture blend mode used in SDL_RenderCopy()
+ * \brief The blend mode used in SDL_RenderCopy() and drawing operations
  */
 typedef enum
 {
-    SDL_TEXTUREBLENDMODE_NONE = 0x00000000,     /**< No blending */
-    SDL_TEXTUREBLENDMODE_MASK = 0x00000001,     /**< dst = A ? src : dst (alpha is mask) */
-    SDL_TEXTUREBLENDMODE_BLEND = 0x00000002,    /**< dst = (src * A) + (dst * (1-A)) */
-    SDL_TEXTUREBLENDMODE_ADD = 0x00000004,      /**< dst = (src * A) + dst */
-    SDL_TEXTUREBLENDMODE_MOD = 0x00000008       /**< dst = src * dst */
-} SDL_TextureBlendMode;
+    SDL_BLENDMODE_NONE = 0x00000000,     /**< No blending */
+    SDL_BLENDMODE_MASK = 0x00000001,     /**< dst = A ? src : dst (alpha is mask) */
+    SDL_BLENDMODE_BLEND = 0x00000002,    /**< dst = (src * A) + (dst * (1-A)) */
+    SDL_BLENDMODE_ADD = 0x00000004,      /**< dst = (src * A) + dst */
+    SDL_BLENDMODE_MOD = 0x00000008       /**< dst = src * dst */
+} SDL_BlendMode;
 
 /**
  * \enum SDL_TextureScaleMode
@@ -1141,9 +1141,80 @@ extern DECLSPEC void SDLCALL SDL_DirtyTexture(SDL_TextureID textureID,
                                               const SDL_Rect * rects);
 
 /**
- * \fn void SDL_RenderFill(Uint8 r, Uint8 g, Uint8 b, Uint8 a, const SDL_Rect *rect)
+ * \fn void SDL_SetRenderDrawColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a)
  *
- * \brief Fill the current rendering target with the specified color.
+ * \brief Set the color used for drawing operations (Fill and Line).
+ *
+ * \param r The red value used to draw on the rendering target
+ * \param g The green value used to draw on the rendering target
+ * \param b The blue value used to draw on the rendering target
+ * \param a The alpha value used to draw on the rendering target, usually SDL_ALPHA_OPAQUE (255)
+ * \return 0 on success, or -1 if there is no rendering context current
+ */
+extern DECLSPEC int SDL_SetRenderDrawColor(Uint8 r, Uint8 g, Uint8 b,
+                                           Uint8 a);
+
+/**
+ * \fn void SDL_GetRenderDrawColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+ *
+ * \brief Get the color used for drawing operations (Fill and Line).
+ *
+ * \param r A pointer to the red value used to draw on the rendering target
+ * \param g A pointer to the green value used to draw on the rendering target
+ * \param b A pointer to the blue value used to draw on the rendering target
+ * \param a A pointer to the alpha value used to draw on the rendering target, usually SDL_ALPHA_OPAQUE (255)
+ * \return 0 on success, or -1 if there is no rendering context current
+ */
+extern DECLSPEC int SDL_GetRenderDrawColor(Uint8 * r, Uint8 * g, Uint8 * b,
+                                           Uint8 * a);
+
+/**
+ * \fn int SDL_SetRenderDrawBlendMode(int blendMode)
+ *
+ * \brief Set the blend mode used for drawing operations
+ *
+ * \param blendMode SDL_BlendMode to use for blending
+ *
+ * \return 0 on success, or -1 if there is no rendering context current
+ *
+ * \note If the blend mode is not supported, the closest supported mode is chosen.
+ *
+ * \sa SDL_SetRenderDrawBlendMode()
+ */
+extern DECLSPEC int SDLCALL SDL_SetRenderDrawBlendMode(int blendMode);
+
+/**
+ * \fn int SDL_GetRenderDrawBlendMode(int *blendMode)
+ *
+ * \brief Get the blend mode used for drawing operations
+ *
+ * \param blendMode A pointer filled in with the current blend mode
+ *
+ * \return 0 on success, or -1 if there is no rendering context current
+ *
+ * \sa SDL_SetRenderDrawBlendMode()
+ */
+extern DECLSPEC int SDLCALL SDL_GetRenderDrawBlendMode(int *blendMode);
+
+/**
+ * \fn void SDL_RenderLine(int x1, int y1, int x2, int y2)
+ *
+ * \brief Draw a line on the current rendering target.
+ *
+ * \param x1 The x coordinate of the start point
+ * \param y1 The y coordinate of the start point
+ * \param x2 The x coordinate of the end point
+ * \param y2 The y coordinate of the end point
+ *
+ * \return 0 on success, or -1 if there is no rendering context current
+ */
+
+extern DECLSPEC int SDLCALL SDL_RenderLine(int x1, int y1, int x2, int y2);
+
+/**
+ * \fn void SDL_RenderFill(const SDL_Rect *rect)
+ *
+ * \brief Fill the current rendering target with the drawing color.
  *
  * \param r The red value used to fill the rendering target
  * \param g The green value used to fill the rendering target
@@ -1153,8 +1224,7 @@ extern DECLSPEC void SDLCALL SDL_DirtyTexture(SDL_TextureID textureID,
  *
  * \return 0 on success, or -1 if there is no rendering context current
  */
-extern DECLSPEC int SDLCALL SDL_RenderFill(Uint8 r, Uint8 g, Uint8 b, Uint8 a,
-                                           const SDL_Rect * rect);
+extern DECLSPEC int SDLCALL SDL_RenderFill(const SDL_Rect * rect);
 
 /**
  * \fn int SDL_RenderCopy(SDL_TextureID textureID, const SDL_Rect *srcrect, const SDL_Rect *dstrect)

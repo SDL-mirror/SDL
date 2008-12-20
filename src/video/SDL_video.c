@@ -1975,7 +1975,104 @@ SDL_DirtyTexture(SDL_TextureID textureID, int numrects,
 }
 
 int
-SDL_RenderFill(Uint8 r, Uint8 g, Uint8 b, Uint8 a, const SDL_Rect * rect)
+SDL_SetRenderDrawColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+{
+    SDL_Renderer *renderer;
+
+    if (!_this) {
+        SDL_UninitializedVideo();
+        return -1;
+    }
+    renderer = SDL_CurrentDisplay.current_renderer;
+    if (!renderer) {
+        return -1;
+    }
+    if (!renderer->SetDrawColor) {
+        SDL_Unsupported();
+        return -1;
+    }
+    renderer->r = r;
+    renderer->g = g;
+    renderer->b = b;
+    renderer->a = a;
+    renderer->SetDrawColor(renderer);
+    return 0;
+}
+
+int
+SDL_GetRenderDrawColor(Uint8 *r, Uint8 *g, Uint8 *b, Uint8 *a)
+{
+    SDL_Renderer *renderer;
+
+    if (!_this) {
+        SDL_UninitializedVideo();
+        return -1;
+    }
+    renderer = SDL_CurrentDisplay.current_renderer;
+    if (!renderer) {
+        return -1;
+    }
+    if (!renderer->SetDrawColor) {
+        SDL_Unsupported();
+        return -1;
+    }
+    if (r) {
+        *r = renderer->r;
+    }
+    if (g) {
+        *g = renderer->g;
+    }
+    if (b) {
+        *b = renderer->b;
+    }
+    if (a) {
+        *a = renderer->a;
+    }
+    return 0;
+}
+
+int
+SDL_SetRenderDrawBlendMode(int blendMode)
+{
+    SDL_Renderer *renderer;
+
+    if (!_this) {
+        SDL_UninitializedVideo();
+        return -1;
+    }
+    renderer = SDL_CurrentDisplay.current_renderer;
+    if (!renderer) {
+        return -1;
+    }
+    if (!renderer->SetDrawBlendMode) {
+        SDL_Unsupported();
+        return -1;
+    }
+    renderer->blendMode = blendMode;
+    renderer->SetDrawBlendMode(renderer);
+    return 0;
+}
+
+int
+SDL_GetRenderDrawBlendMode(int *blendMode)
+{
+    SDL_Renderer *renderer;
+
+    if (!_this) {
+        SDL_UninitializedVideo();
+        return -1;
+    }
+    renderer = SDL_CurrentDisplay.current_renderer;
+    if (!renderer) {
+        return -1;
+    }
+    *blendMode = renderer->blendMode;
+    return 0;
+}
+
+
+int
+SDL_RenderFill(const SDL_Rect * rect)
 {
     SDL_Renderer *renderer;
     SDL_Window *window;
@@ -2003,7 +2100,42 @@ SDL_RenderFill(Uint8 r, Uint8 g, Uint8 b, Uint8 a, const SDL_Rect * rect)
             return 0;
         }
     }
-    return renderer->RenderFill(renderer, r, g, b, a, &real_rect);
+    return renderer->RenderFill(renderer, &real_rect);
+}
+
+int
+SDL_RenderLine(int x1, int y1, int x2, int y2)
+{
+    SDL_Renderer *renderer;
+    SDL_Window *window;
+    SDL_Rect real_rect;
+
+    if (!_this) {
+        SDL_UninitializedVideo();
+        return -1;
+    }
+    renderer = SDL_CurrentDisplay.current_renderer;
+    if (!renderer) {
+        return -1;
+    }
+    if (!renderer->RenderLine) {
+        SDL_Unsupported();
+        return -1;
+    }
+#if 0
+    //FIXME: Need line intersect routine
+    window = SDL_GetWindowFromID(renderer->window);
+    real_rect.x = 0;
+    real_rect.y = 0;
+    real_rect.w = window->w;
+    real_rect.h = window->h;
+    if (rect) {
+        if (!SDL_IntersectRect(rect, &real_rect, &real_rect)) {
+            return 0;
+        }
+    }
+#endif
+    return renderer->RenderLine(renderer, x1, y1, x2, y2);
 }
 
 int

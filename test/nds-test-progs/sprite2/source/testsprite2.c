@@ -21,7 +21,7 @@ static int current_color = 0;
 static SDL_Rect *positions;
 static SDL_Rect *velocities;
 static int sprite_w, sprite_h;
-static SDL_TextureBlendMode blendMode = SDL_TEXTUREBLENDMODE_MASK;
+static SDL_BlendMode blendMode = SDL_BLENDMODE_MASK;
 static SDL_TextureScaleMode scaleMode = SDL_TEXTURESCALEMODE_NONE;
 
 /* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */

@@ -140,7 +140,7 @@ SDL_CreateRGBSurface(Uint32 flags,
 
     /* By default surface with an alpha mask are set up for blending */
     if (Amask) {
-        SDL_SetSurfaceBlendMode(surface, SDL_TEXTUREBLENDMODE_BLEND);
+        SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_BLEND);
     }
 
     /* The surface is ready to go */
@@ -336,7 +336,7 @@ SDL_ConvertColorkeyToAlpha(SDL_Surface * surface)
     SDL_UnlockSurface(surface);
 
     SDL_SetColorKey(surface, 0, 0);
-    SDL_SetSurfaceBlendMode(surface, SDL_TEXTUREBLENDMODE_BLEND);
+    SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_BLEND);
 }
 
 int
@@ -434,18 +434,18 @@ SDL_SetSurfaceBlendMode(SDL_Surface * surface, int blendMode)
     surface->map->info.flags &=
         ~(SDL_COPY_MASK | SDL_COPY_BLEND | SDL_COPY_ADD | SDL_COPY_MOD);
     switch (blendMode) {
-    case SDL_TEXTUREBLENDMODE_NONE:
+    case SDL_BLENDMODE_NONE:
         break;
-    case SDL_TEXTUREBLENDMODE_MASK:
+    case SDL_BLENDMODE_MASK:
         surface->map->info.flags |= SDL_COPY_MASK;
         break;
-    case SDL_TEXTUREBLENDMODE_BLEND:
+    case SDL_BLENDMODE_BLEND:
         surface->map->info.flags |= SDL_COPY_BLEND;
         break;
-    case SDL_TEXTUREBLENDMODE_ADD:
+    case SDL_BLENDMODE_ADD:
         surface->map->info.flags |= SDL_COPY_ADD;
         break;
-    case SDL_TEXTUREBLENDMODE_MOD:
+    case SDL_BLENDMODE_MOD:
         surface->map->info.flags |= SDL_COPY_MOD;
         break;
     default:
@@ -483,19 +483,19 @@ SDL_GetSurfaceBlendMode(SDL_Surface * surface, int *blendMode)
             info.flags & (SDL_COPY_MASK | SDL_COPY_BLEND | SDL_COPY_ADD |
                           SDL_COPY_MOD)) {
     case SDL_COPY_MASK:
-        *blendMode = SDL_TEXTUREBLENDMODE_MASK;
+        *blendMode = SDL_BLENDMODE_MASK;
         break;
     case SDL_COPY_BLEND:
-        *blendMode = SDL_TEXTUREBLENDMODE_BLEND;
+        *blendMode = SDL_BLENDMODE_BLEND;
         break;
     case SDL_COPY_ADD:
-        *blendMode = SDL_TEXTUREBLENDMODE_ADD;
+        *blendMode = SDL_BLENDMODE_ADD;
         break;
     case SDL_COPY_MOD:
-        *blendMode = SDL_TEXTUREBLENDMODE_MOD;
+        *blendMode = SDL_BLENDMODE_MOD;
         break;
     default:
-        *blendMode = SDL_TEXTUREBLENDMODE_NONE;
+        *blendMode = SDL_BLENDMODE_NONE;
         break;
     }
     return 0;
@@ -835,7 +835,7 @@ SDL_ConvertSurface(SDL_Surface * surface, SDL_PixelFormat * format,
      * alpha channel or alpha modulation */
     if ((surface->format->Amask && format->Amask) ||
         (copy_flags & SDL_COPY_MODULATE_ALPHA)) {
-        SDL_SetSurfaceBlendMode(convert, SDL_TEXTUREBLENDMODE_BLEND);
+        SDL_SetSurfaceBlendMode(convert, SDL_BLENDMODE_BLEND);
     }
     if ((copy_flags & SDL_COPY_RLE_DESIRED) || (flags & SDL_RLEACCEL)) {
         SDL_SetSurfaceRLE(convert, SDL_RLEACCEL);

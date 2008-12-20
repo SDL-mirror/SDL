@@ -71,8 +71,12 @@ static void DirectFB_UnlockTexture(SDL_Renderer * renderer,
 static void DirectFB_DirtyTexture(SDL_Renderer * renderer,
                                   SDL_Texture * texture, int numrects,
                                   const SDL_Rect * rects);
-static int DirectFB_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g,
-                               Uint8 b, Uint8 a, const SDL_Rect * rect);
+static int DirectFB_SetDrawColor(SDL_Renderer * renderer);
+static int DirectFB_SetDrawBlendMode(SDL_Renderer * renderer);
+static int DirectFB_RenderLine(SDL_Renderer * renderer, int x1, int y1,
+                               int x2, int y2);
+static int DirectFB_RenderFill(SDL_Renderer * renderer,
+                               const SDL_Rect * rect);
 static int DirectFB_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                                const SDL_Rect * srcrect,
                                const SDL_Rect * dstrect);
@@ -91,9 +95,8 @@ SDL_RenderDriver DirectFB_RenderDriver = {
       SDL_RENDERER_ACCELERATED),
      (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_COLOR |
       SDL_TEXTUREMODULATE_ALPHA),
-     (SDL_TEXTUREBLENDMODE_NONE | SDL_TEXTUREBLENDMODE_MASK |
-      SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD |
-      SDL_TEXTUREBLENDMODE_MOD),
+     (SDL_BLENDMODE_NONE | SDL_BLENDMODE_MASK |
+      SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD | SDL_BLENDMODE_MOD),
      (SDL_TEXTURESCALEMODE_NONE | SDL_TEXTURESCALEMODE_FAST |
       SDL_TEXTURESCALEMODE_SLOW | SDL_TEXTURESCALEMODE_BEST),
      14,
@@ -122,6 +125,9 @@ typedef struct
     DFBSurfaceFlipFlags flipflags;
     int isyuvdirect;
     int size_changed;
+    int lastBlendMode;
+    DFBSurfaceBlittingFlags blitFlags;
+    DFBSurfaceDrawingFlags drawFlags;
 } DirectFB_RenderData;
 
 typedef struct
@@ -145,6 +151,79 @@ SDLtoDFBRect(const SDL_Rect * sr, DFBRectangle * dr)
     dr->y = sr->y;
     dr->h = sr->h;
     dr->w = sr->w;
+}
+
+
+static int
+TextureHasAlpha(DirectFB_TextureData * data)
+{
+    /* Drawing primitive ? */
+    if (!data)
+        return 0;
+    switch (data->format) {
+    case SDL_PIXELFORMAT_INDEX4LSB:
+    case SDL_PIXELFORMAT_ARGB4444:
+    case SDL_PIXELFORMAT_ARGB1555:
+    case SDL_PIXELFORMAT_ARGB8888:
+    case SDL_PIXELFORMAT_RGBA8888:
+    case SDL_PIXELFORMAT_ABGR8888:
+    case SDL_PIXELFORMAT_BGRA8888:
+    case SDL_PIXELFORMAT_ARGB2101010:
+        return 1;
+    default:
+        return 0;
+    }
+}
+
+static void
+SetBlendMode(DirectFB_RenderData * data, int blendMode,
+             DirectFB_TextureData * source)
+{
+    //FIXME: check for format change
+    if (1 || data->lastBlendMode != blendMode) {
+        switch (blendMode) {
+        case SDL_BLENDMODE_NONE:
+                                           /**< No blending */
+            data->blitFlags = DSBLIT_NOFX;
+            data->drawFlags = DSDRAW_NOFX;
+            data->surface->SetSrcBlendFunction(data->surface, DSBF_ONE);
+            data->surface->SetDstBlendFunction(data->surface, DSBF_ZERO);
+            break;
+        case SDL_BLENDMODE_MASK:
+            data->blitFlags = DSBLIT_BLEND_ALPHACHANNEL;
+            data->drawFlags = DSDRAW_BLEND;
+            data->surface->SetSrcBlendFunction(data->surface, DSBF_SRCALPHA);
+            data->surface->SetDstBlendFunction(data->surface,
+                                               DSBF_INVSRCALPHA);
+            break;
+        case SDL_BLENDMODE_BLEND:
+            data->blitFlags = DSBLIT_BLEND_ALPHACHANNEL;
+            data->drawFlags = DSDRAW_BLEND;
+            data->surface->SetSrcBlendFunction(data->surface, DSBF_SRCALPHA);
+            data->surface->SetDstBlendFunction(data->surface,
+                                               DSBF_INVSRCALPHA);
+            break;
+        case SDL_BLENDMODE_ADD:
+            data->blitFlags = DSBLIT_BLEND_ALPHACHANNEL;
+            data->drawFlags = DSDRAW_BLEND;
+            //FIXME: SRCALPHA kills performance on radeon ...
+            //Eventually use a premultiplied texture
+            if (0 && TextureHasAlpha(source))
+                data->surface->SetSrcBlendFunction(data->surface,
+                                                   DSBF_SRCALPHA);
+            else
+                data->surface->SetSrcBlendFunction(data->surface, DSBF_ONE);
+            data->surface->SetDstBlendFunction(data->surface, DSBF_ONE);
+            break;
+        case SDL_BLENDMODE_MOD:
+            data->blitFlags = DSBLIT_BLEND_ALPHACHANNEL;
+            data->drawFlags = DSDRAW_BLEND;
+            data->surface->SetSrcBlendFunction(data->surface, DSBF_DESTCOLOR);
+            data->surface->SetDstBlendFunction(data->surface, DSBF_ZERO);
+            break;
+        }
+        data->lastBlendMode = blendMode;
+    }
 }
 
 void
@@ -214,6 +293,9 @@ DirectFB_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->LockTexture = DirectFB_LockTexture;
     renderer->UnlockTexture = DirectFB_UnlockTexture;
     renderer->DirtyTexture = DirectFB_DirtyTexture;
+    renderer->SetDrawColor = DirectFB_SetDrawColor;
+    renderer->SetDrawBlendMode = DirectFB_SetDrawBlendMode;
+    renderer->RenderLine = DirectFB_RenderLine;
     renderer->RenderFill = DirectFB_RenderFill;
     renderer->RenderCopy = DirectFB_RenderCopy;
     renderer->RenderPresent = DirectFB_RenderPresent;
@@ -304,7 +386,11 @@ SDLToDFBPixelFormat(Uint32 format)
     case SDL_PIXELFORMAT_INDEX4MSB:
         return DSPF_UNKNOWN;
     case SDL_PIXELFORMAT_RGB444:
+#if (DIRECTFB_MAJOR_VERSION == 1) && (DIRECTFB_MINOR_VERSION >= 2)
+        return DSPF_RGB444;
+#else
         return DSPF_UNKNOWN;
+#endif
     case SDL_PIXELFORMAT_BGR24:
         return DSPF_UNKNOWN;
     case SDL_PIXELFORMAT_BGR888:
@@ -576,15 +662,15 @@ static int
 DirectFB_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     switch (texture->blendMode) {
-    case SDL_TEXTUREBLENDMODE_NONE:
-    case SDL_TEXTUREBLENDMODE_MASK:
-    case SDL_TEXTUREBLENDMODE_BLEND:
-    case SDL_TEXTUREBLENDMODE_ADD:
-    case SDL_TEXTUREBLENDMODE_MOD:
+    case SDL_BLENDMODE_NONE:
+    case SDL_BLENDMODE_MASK:
+    case SDL_BLENDMODE_BLEND:
+    case SDL_BLENDMODE_ADD:
+    case SDL_BLENDMODE_MOD:
         return 0;
     default:
         SDL_Unsupported();
-        texture->blendMode = SDL_TEXTUREBLENDMODE_NONE;
+        texture->blendMode = SDL_BLENDMODE_NONE;
         return -1;
     }
 }
@@ -710,13 +796,73 @@ DirectFB_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 }
 
 static int
-DirectFB_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b,
-                    Uint8 a, const SDL_Rect * rect)
+DirectFB_SetDrawColor(SDL_Renderer * renderer)
+{
+    return 0;
+}
+
+static int
+DirectFB_SetDrawBlendMode(SDL_Renderer * renderer)
+{
+    return 0;
+}
+
+static int
+PrepareDraw(SDL_Renderer * renderer)
+{
+    DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
+    DFBResult ret;
+    Uint8 r, g, b, a;
+
+    r = renderer->r;
+    g = renderer->g;
+    b = renderer->b;
+    a = renderer->a;
+
+    SetBlendMode(data, renderer->blendMode, NULL);
+    SDL_DFB_CHECKERR(data->surface->
+                     SetDrawingFlags(data->surface, data->drawFlags));
+
+    switch (renderer->blendMode) {
+    case SDL_BLENDMODE_NONE:
+    case SDL_BLENDMODE_MASK:
+    case SDL_BLENDMODE_BLEND:
+        break;
+    case SDL_BLENDMODE_ADD:
+    case SDL_BLENDMODE_MOD:
+        r = ((int) r * (int) a) / 255;
+        g = ((int) g * (int) a) / 255;
+        b = ((int) b * (int) a) / 255;
+        a = 255;
+        break;
+    }
+
+    SDL_DFB_CHECKERR(data->surface->SetColor(data->surface, r, g, b, a));
+    return 0;
+  error:
+    return -1;
+}
+
+static int
+DirectFB_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
 {
     DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
     DFBResult ret;
 
-    SDL_DFB_CHECKERR(data->surface->SetColor(data->surface, r, g, b, a));
+    PrepareDraw(renderer);
+    SDL_DFB_CHECKERR(data->surface->DrawLine(data->surface, x1, y1, x2, y2));
+    return 0;
+  error:
+    return -1;
+}
+
+static int
+DirectFB_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
+{
+    DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
+    DFBResult ret;
+
+    PrepareDraw(renderer);
     SDL_DFB_CHECKERR(data->surface->
                      FillRectangle(data->surface, rect->x, rect->y, rect->w,
                                    rect->h));
@@ -733,6 +879,7 @@ DirectFB_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
     DirectFB_TextureData *texturedata =
         (DirectFB_TextureData *) texture->driverdata;
+    Uint8 alpha = 0xFF;
     DFBResult ret;
 
     if (texturedata->display) {
@@ -772,67 +919,44 @@ DirectFB_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
             }
             SDL_ClearDirtyRects(&texturedata->dirty);
         }
+
+        SDLtoDFBRect(srcrect, &sr);
+        SDLtoDFBRect(dstrect, &dr);
+
+        SDL_DFB_CHECKERR(data->surface->SetColor(data->surface, 0xFF,
+                                                 0xFF, 0xFF, 0xFF));
+        if (texture->
+            modMode & (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA))
+        {
+            if (texture->modMode & SDL_TEXTUREMODULATE_ALPHA) {
+                alpha = texture->a;
+                SDL_DFB_CHECKERR(data->surface->SetColor(data->surface, 0xFF,
+                                                         0xFF, 0xFF, alpha));
+            }
+            if (texture->modMode & SDL_TEXTUREMODULATE_COLOR) {
+
+                SDL_DFB_CHECKERR(data->surface->
+                                 SetColor(data->surface, texture->r,
+                                          texture->g, texture->b, alpha));
+                flags |= DSBLIT_COLORIZE;
+            }
+            if (alpha < 0xFF)
+                flags |= DSBLIT_SRC_PREMULTCOLOR;
+        } else
+            SDL_DFB_CHECKERR(data->surface->SetColor(data->surface, 0xFF,
+                                                     0xFF, 0xFF, 0xFF));
+
+        SetBlendMode(data, texture->blendMode, texturedata);
+
+        SDL_DFB_CHECKERR(data->surface->
+                         SetBlittingFlags(data->surface,
+                                          data->blitFlags | flags));
+
 #if (DIRECTFB_MAJOR_VERSION == 1) && (DIRECTFB_MINOR_VERSION >= 2)
         SDL_DFB_CHECKERR(data->surface->SetRenderOptions(data->surface,
                                                          texturedata->
                                                          render_options));
 #endif
-
-        SDLtoDFBRect(srcrect, &sr);
-        SDLtoDFBRect(dstrect, &dr);
-
-        if (texture->
-            modMode & (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA))
-        {
-            Uint8 alpha = 0xFF;
-            if (texture->modMode & SDL_TEXTUREMODULATE_ALPHA) {
-                alpha = texture->a;
-                flags |= DSBLIT_SRC_PREMULTCOLOR;
-                SDL_DFB_CHECKERR(data->surface->SetColor(data->surface, 0xFF,
-                                                         0xFF, 0xFF, alpha));
-            }
-            if (texture->modMode & SDL_TEXTUREMODULATE_COLOR) {
-                SDL_DFB_CHECKERR(data->surface->
-                                 SetColor(data->surface, texture->r,
-                                          texture->g, texture->b, alpha));
-                /* Only works together .... */
-                flags |= DSBLIT_COLORIZE | DSBLIT_SRC_PREMULTCOLOR;
-            }
-        }
-
-        switch (texture->blendMode) {
-        case SDL_TEXTUREBLENDMODE_NONE:
-                                       /**< No blending */
-            flags |= DSBLIT_NOFX;
-            data->surface->SetSrcBlendFunction(data->surface, DSBF_ONE);
-            data->surface->SetDstBlendFunction(data->surface, DSBF_ZERO);
-            break;
-        case SDL_TEXTUREBLENDMODE_MASK:
-            flags |= DSBLIT_BLEND_ALPHACHANNEL;
-            data->surface->SetSrcBlendFunction(data->surface, DSBF_SRCALPHA);
-            data->surface->SetDstBlendFunction(data->surface,
-                                               DSBF_INVSRCALPHA);
-            break;
-        case SDL_TEXTUREBLENDMODE_BLEND:
-            flags |= DSBLIT_BLEND_ALPHACHANNEL;
-            data->surface->SetSrcBlendFunction(data->surface, DSBF_SRCALPHA);
-            data->surface->SetDstBlendFunction(data->surface,
-                                               DSBF_INVSRCALPHA);
-            break;
-        case SDL_TEXTUREBLENDMODE_ADD:
-            flags |= DSBLIT_BLEND_ALPHACHANNEL;
-            data->surface->SetSrcBlendFunction(data->surface, DSBF_SRCALPHA);
-            data->surface->SetDstBlendFunction(data->surface, DSBF_ONE);
-            break;
-        case SDL_TEXTUREBLENDMODE_MOD:
-            flags |= DSBLIT_BLEND_ALPHACHANNEL;
-            data->surface->SetSrcBlendFunction(data->surface, DSBF_DESTCOLOR);
-            data->surface->SetDstBlendFunction(data->surface, DSBF_ZERO);
-            break;
-        }
-
-        SDL_DFB_CHECKERR(data->surface->
-                         SetBlittingFlags(data->surface, flags));
 
         if (srcrect->w == dstrect->w && srcrect->h == dstrect->h) {
             SDL_DFB_CHECKERR(data->surface->

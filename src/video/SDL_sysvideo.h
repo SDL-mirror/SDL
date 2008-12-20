@@ -88,8 +88,11 @@ struct SDL_Renderer
     void (*UnlockTexture) (SDL_Renderer * renderer, SDL_Texture * texture);
     void (*DirtyTexture) (SDL_Renderer * renderer, SDL_Texture * texture,
                           int numrects, const SDL_Rect * rects);
-    int (*RenderFill) (SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b,
-                       Uint8 a, const SDL_Rect * rect);
+    int (*SetDrawColor) (SDL_Renderer * renderer);
+    int (*SetDrawBlendMode) (SDL_Renderer * renderer);
+    int (*RenderLine) (SDL_Renderer * renderer, int x1, int y1, int x2,
+                       int y2);
+    int (*RenderFill) (SDL_Renderer * renderer, const SDL_Rect * rect);
     int (*RenderCopy) (SDL_Renderer * renderer, SDL_Texture * texture,
                        const SDL_Rect * srcrect, const SDL_Rect * dstrect);
     void (*RenderPresent) (SDL_Renderer * renderer);
@@ -102,6 +105,9 @@ struct SDL_Renderer
 
     /* The window associated with the renderer */
     SDL_WindowID window;
+
+    Uint8 r, g, b, a;                   /**< Color for drawing operations values */
+    int blendMode;                      /**< The drawing blend mode */
 
     void *driverdata;
 };

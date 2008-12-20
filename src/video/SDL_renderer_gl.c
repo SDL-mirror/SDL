@@ -51,14 +51,14 @@ bytes_per_pixel(const Uint32 format)
 
     /* FOURCC format */
     switch (format) {
-        case SDL_PIXELFORMAT_YV12:
-        case SDL_PIXELFORMAT_IYUV:
-        case SDL_PIXELFORMAT_YUY2:
-        case SDL_PIXELFORMAT_UYVY:
-        case SDL_PIXELFORMAT_YVYU:
-            return 2;
-        default:
-            return 1;  /* shouldn't ever hit this. */
+    case SDL_PIXELFORMAT_YV12:
+    case SDL_PIXELFORMAT_IYUV:
+    case SDL_PIXELFORMAT_YUY2:
+    case SDL_PIXELFORMAT_UYVY:
+    case SDL_PIXELFORMAT_YVYU:
+        return 2;
+    default:
+        return 1;               /* shouldn't ever hit this. */
     }
 }
 
@@ -96,10 +96,14 @@ static int GL_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static void GL_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static void GL_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                             int numrects, const SDL_Rect * rects);
-static int GL_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b,
-                         Uint8 a, const SDL_Rect * rect);
+static int GL_SetDrawColor(SDL_Renderer * renderer);
+static int GL_SetDrawBlendMode(SDL_Renderer * renderer);
+static int GL_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2,
+                         int y2);
+static int GL_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect);
 static int GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                          const SDL_Rect * srcrect, const SDL_Rect * dstrect);
+
 static void GL_RenderPresent(SDL_Renderer * renderer);
 static void GL_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static void GL_DestroyRenderer(SDL_Renderer * renderer);
@@ -113,9 +117,8 @@ SDL_RenderDriver GL_RenderDriver = {
       SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED),
      (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_COLOR |
       SDL_TEXTUREMODULATE_ALPHA),
-     (SDL_TEXTUREBLENDMODE_NONE | SDL_TEXTUREBLENDMODE_MASK |
-      SDL_TEXTUREBLENDMODE_BLEND | SDL_TEXTUREBLENDMODE_ADD |
-      SDL_TEXTUREBLENDMODE_MOD),
+     (SDL_BLENDMODE_NONE | SDL_BLENDMODE_MASK |
+      SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD | SDL_BLENDMODE_MOD),
      (SDL_TEXTURESCALEMODE_NONE | SDL_TEXTURESCALEMODE_FAST |
       SDL_TEXTURESCALEMODE_SLOW),
      15,
@@ -186,7 +189,7 @@ typedef struct
     void *pixels;
     int pitch;
     SDL_DirtyRectList dirty;
-int HACK_RYAN_FIXME;
+    int HACK_RYAN_FIXME;
 } GL_TextureData;
 
 
@@ -308,6 +311,9 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->LockTexture = GL_LockTexture;
     renderer->UnlockTexture = GL_UnlockTexture;
     renderer->DirtyTexture = GL_DirtyTexture;
+    renderer->SetDrawColor = GL_SetDrawColor;
+    renderer->SetDrawBlendMode = GL_SetDrawBlendMode;
+    renderer->RenderLine = GL_RenderLine;
     renderer->RenderFill = GL_RenderFill;
     renderer->RenderCopy = GL_RenderCopy;
     renderer->RenderPresent = GL_RenderPresent;
@@ -429,6 +435,36 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     return renderer;
 }
 
+static void
+SetBlendMode(GL_RenderData * data, int blendMode)
+{
+    if (blendMode != data->blendMode) {
+        switch (blendMode) {
+        case SDL_BLENDMODE_NONE:
+            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+            data->glDisable(GL_BLEND);
+            break;
+        case SDL_BLENDMODE_MASK:
+        case SDL_BLENDMODE_BLEND:
+            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+            data->glEnable(GL_BLEND);
+            data->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            break;
+        case SDL_BLENDMODE_ADD:
+            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+            data->glEnable(GL_BLEND);
+            data->glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            break;
+        case SDL_BLENDMODE_MOD:
+            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+            data->glEnable(GL_BLEND);
+            data->glBlendFunc(GL_ZERO, GL_SRC_COLOR);
+            break;
+        }
+        data->blendMode = blendMode;
+    }
+}
+
 static int
 GL_ActivateRenderer(SDL_Renderer * renderer)
 {
@@ -476,7 +512,7 @@ power_of_2(int input)
 //#define DEBUG_PROGRAM_COMPILE 1
 
 static GLuint
-compile_shader(GL_RenderData *data, GLenum shader_type, const char *_code)
+compile_shader(GL_RenderData * data, GLenum shader_type, const char *_code)
 {
     const int have_texture_rects = data->GL_ARB_texture_rectangle_supported;
     const char *replacement = have_texture_rects ? "RECT" : "2D";
@@ -496,16 +532,17 @@ compile_shader(GL_RenderData *data, GLenum shader_type, const char *_code)
     if (code == NULL)
         return 0;
 
-    for (ptr = SDL_strstr(code, token); ptr; ptr = SDL_strstr(ptr+1, token)) {
+    for (ptr = SDL_strstr(code, token); ptr; ptr = SDL_strstr(ptr + 1, token)) {
         memcpy(ptr, replacement, replacementlen);
-        memmove(ptr+replacementlen, ptr+tokenlen, strlen(ptr+tokenlen)+1);
+        memmove(ptr + replacementlen, ptr + tokenlen,
+                strlen(ptr + tokenlen) + 1);
     }
 
 #if DEBUG_PROGRAM_COMPILE
     printf("compiling shader:\n%s\n\n", code);
 #endif
 
-    data->glGetError();  /* flush any existing error state. */
+    data->glGetError();         /* flush any existing error state. */
     data->glGenProgramsARB(1, &program);
     data->glBindProgramARB(shader_type, program);
     data->glProgramStringARB(shader_type, GL_PROGRAM_FORMAT_ASCII_ARB,
@@ -513,15 +550,14 @@ compile_shader(GL_RenderData *data, GLenum shader_type, const char *_code)
 
     SDL_free(code);
 
-    if (data->glGetError() == GL_INVALID_OPERATION)
-    {
+    if (data->glGetError() == GL_INVALID_OPERATION) {
 #if DEBUG_PROGRAM_COMPILE
         GLint pos = 0;
         const GLubyte *errstr;
         data->glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &pos);
         errstr = data->glGetString(GL_PROGRAM_ERROR_STRING_ARB);
         printf("program compile error at position %d: %s\n\n",
-                  (int) pos, (const char *) errstr);
+               (int) pos, (const char *) errstr);
 #endif
         data->glBindProgramARB(shader_type, 0);
         data->glDeleteProgramsARB(1, &program);
@@ -544,49 +580,33 @@ compile_shader(GL_RenderData *data, GLenum shader_type, const char *_code)
  * !!! FIXME: this ignores blendmodes, etc.
  * !!! FIXME: this could be more efficient...use a dot product for green, etc.
  */
-static const char *fragment_program_UYVY_source_code =
-    "!!ARBfp1.0\n"
-
+static const char *fragment_program_UYVY_source_code = "!!ARBfp1.0\n"
     /* outputs... */
     "OUTPUT outcolor = result.color;\n"
-
     /* scratch registers... */
-    "TEMP uyvy;\n"
-    "TEMP luminance;\n"
-    "TEMP work;\n"
-
+    "TEMP uyvy;\n" "TEMP luminance;\n" "TEMP work;\n"
     /* Halve the coordinates to grab the correct 32 bits for the fragment. */
     "MUL work, fragment.texcoord, { 0.5, 1.0, 1.0, 1.0 };\n"
-
     /* Sample the YUV texture. Cb, Y1, Cr, Y2, are stored in x, y, z, w. */
     "TEX uyvy, work, texture[0], %TEXTURETARGET%;\n"
-
     /* Do subtractions (128/255, 16/255, 128/255, 16/255) */
     "SUB uyvy, uyvy, { 0.501960784313726, 0.06274509803922, 0.501960784313726, 0.06274509803922 };\n"
-
     /* Choose the luminance component by texcoord. */
     /* !!! FIXME: laziness wins out for now... just average Y1 and Y2. */
     "ADD luminance, uyvy.yyyy, uyvy.wwww;\n"
     "MUL luminance, luminance, { 0.5, 0.5, 0.5, 0.5 };\n"
-
     /* Multiply luminance by its magic value. */
     "MUL luminance, luminance, { 1.164, 1.164, 1.164, 1.164 };\n"
-
     /* uyvy.xyzw becomes Cr/Cr/Cb/Cb, with multiplications. */
     "MUL uyvy, uyvy.zzxx, { 1.596, -0.813, 2.018, -0.391 };\n"
-
     /* Add luminance to Cr and Cb, store to RGB channels. */
     "ADD work.rgb, luminance, uyvy;\n"
-
     /* Do final addition for Green channel.  (!!! FIXME: this should be a DPH?) */
     "ADD work.g, work.g, uyvy.w;\n"
-
     /* Make sure alpha channel is fully opaque.  (!!! FIXME: blend modes!) */
     "MOV work.a, { 1.0 };\n"
-
     /* Store out the final fragment color... */
     "MOV outcolor, work;\n"
-
     /* ...and we're done! */
     "END\n";
 
@@ -801,14 +821,15 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     /* YUV formats use RGBA but are really two bytes per pixel */
     if (internalFormat == GL_RGBA && bytes_per_pixel(texture->format) < 4) {
-data->HACK_RYAN_FIXME = 2;
+        data->HACK_RYAN_FIXME = 2;
     } else {
-data->HACK_RYAN_FIXME = 1;
+        data->HACK_RYAN_FIXME = 1;
     }
     texture_w /= data->HACK_RYAN_FIXME;
 
     data->format = format;
     data->formattype = type;
+    renderdata->glEnable(data->type);
     renderdata->glBindTexture(data->type, data->texture);
     renderdata->glTexParameteri(data->type, GL_TEXTURE_MIN_FILTER,
                                 GL_NEAREST);
@@ -894,6 +915,7 @@ GL_SetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
         *palette++ = colors->b;
         ++colors;
     }
+    renderdata->glEnable(data->type);
     renderdata->glBindTexture(data->type, data->texture);
     renderdata->glColorTableEXT(data->type, GL_RGB8, 256, GL_RGB,
                                 GL_UNSIGNED_BYTE, data->palette);
@@ -934,7 +956,9 @@ SetupTextureUpdate(GL_RenderData * renderdata, SDL_Texture * texture,
     }
     renderdata->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     renderdata->glPixelStorei(GL_UNPACK_ROW_LENGTH,
-                              (pitch / bytes_per_pixel(texture->format)) / ((GL_TextureData *)texture->driverdata)->HACK_RYAN_FIXME);
+                              (pitch / bytes_per_pixel(texture->format)) /
+                              ((GL_TextureData *) texture->driverdata)->
+                              HACK_RYAN_FIXME);
 }
 
 static int
@@ -953,15 +977,15 @@ static int
 GL_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     switch (texture->blendMode) {
-    case SDL_TEXTUREBLENDMODE_NONE:
-    case SDL_TEXTUREBLENDMODE_MASK:
-    case SDL_TEXTUREBLENDMODE_BLEND:
-    case SDL_TEXTUREBLENDMODE_ADD:
-    case SDL_TEXTUREBLENDMODE_MOD:
+    case SDL_BLENDMODE_NONE:
+    case SDL_BLENDMODE_MASK:
+    case SDL_BLENDMODE_BLEND:
+    case SDL_BLENDMODE_ADD:
+    case SDL_BLENDMODE_MOD:
         return 0;
     default:
         SDL_Unsupported();
-        texture->blendMode = SDL_TEXTUREBLENDMODE_NONE;
+        texture->blendMode = SDL_BLENDMODE_NONE;
         return -1;
     }
 }
@@ -995,6 +1019,7 @@ GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 
     renderdata->glGetError();
     SetupTextureUpdate(renderdata, texture, pitch);
+    renderdata->glEnable(data->type);
     renderdata->glBindTexture(data->type, data->texture);
     renderdata->glTexSubImage2D(data->type, 0, rect->x, rect->y, rect->w,
                                 rect->h, data->format, data->formattype,
@@ -1043,17 +1068,57 @@ GL_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture, int numrects,
 }
 
 static int
-GL_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b, Uint8 a,
-              const SDL_Rect * rect)
+GL_SetDrawColor(SDL_Renderer * renderer)
+{
+    return 0;
+}
+
+static int
+GL_SetDrawBlendMode(SDL_Renderer * renderer)
+{
+    return 0;
+}
+
+static int
+GL_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
 
-    data->glClearColor((GLclampf) r * inv255f, (GLclampf) g * inv255f,
-                       (GLclampf) b * inv255f, (GLclampf) a * inv255f);
-    data->glViewport(rect->x, window->h - rect->y, rect->w, rect->h);
-    data->glClear(GL_COLOR_BUFFER_BIT);
-    data->glViewport(0, 0, window->w, window->h);
+    data->glColor4f((GLfloat) renderer->r * inv255f,
+                    (GLfloat) renderer->g * inv255f,
+                    (GLfloat) renderer->b * inv255f,
+                    (GLfloat) renderer->a * inv255f);
+    SetBlendMode(data, renderer->blendMode);
+    data->glRecti(rect->x, rect->y, rect->x + rect->w, rect->y + rect->h);
+
+    return 0;
+}
+
+static int
+GL_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
+{
+    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
+    //data->glLineWidth(1.0);
+    //data->glPointSize(1.0);
+
+    SetBlendMode(data, renderer->blendMode);
+
+    data->glColor4f((GLfloat) renderer->r * inv255f,
+                    (GLfloat) renderer->g * inv255f,
+                    (GLfloat) renderer->b * inv255f,
+                    (GLfloat) renderer->a * inv255f);
+
+    if ((x1 == x2) && (y1 == y2)) {
+        data->glBegin(GL_POINTS);
+        data->glVertex2i(x1, y1);
+        data->glEnd();
+    } else {
+        data->glBegin(GL_LINES);
+        data->glVertex2i(x1, y1);
+        data->glVertex2i(x2, y2);
+        data->glEnd();
+    }
     return 0;
 }
 
@@ -1073,6 +1138,7 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         int pitch = texturedata->pitch;
 
         SetupTextureUpdate(data, texture, pitch);
+        data->glEnable(texturedata->type);
         data->glBindTexture(texturedata->type, texturedata->texture);
         for (dirty = texturedata->dirty.list; dirty; dirty = dirty->next) {
             SDL_Rect *rect = &dirty->rect;
@@ -1080,7 +1146,8 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                 (void *) ((Uint8 *) texturedata->pixels + rect->y * pitch +
                           rect->x * bpp);
             data->glTexSubImage2D(texturedata->type, 0, rect->x, rect->y,
-                                  rect->w / texturedata->HACK_RYAN_FIXME, rect->h, texturedata->format,
+                                  rect->w / texturedata->HACK_RYAN_FIXME,
+                                  rect->h, texturedata->format,
                                   texturedata->formattype, pixels);
         }
         SDL_ClearDirtyRects(&texturedata->dirty);
@@ -1100,6 +1167,7 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     maxv = (GLfloat) (srcrect->y + srcrect->h) / texture->h;
     maxv *= texturedata->texh;
 
+    data->glEnable(texturedata->type);
     data->glBindTexture(texturedata->type, texturedata->texture);
 
     if (texture->modMode) {
@@ -1111,31 +1179,7 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         data->glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
-    if (texture->blendMode != data->blendMode) {
-        switch (texture->blendMode) {
-        case SDL_TEXTUREBLENDMODE_NONE:
-            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-            data->glDisable(GL_BLEND);
-            break;
-        case SDL_TEXTUREBLENDMODE_MASK:
-        case SDL_TEXTUREBLENDMODE_BLEND:
-            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-            data->glEnable(GL_BLEND);
-            data->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            break;
-        case SDL_TEXTUREBLENDMODE_ADD:
-            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-            data->glEnable(GL_BLEND);
-            data->glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-            break;
-        case SDL_TEXTUREBLENDMODE_MOD:
-            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-            data->glEnable(GL_BLEND);
-            data->glBlendFunc(GL_ZERO, GL_SRC_COLOR);
-            break;
-        }
-        data->blendMode = texture->blendMode;
-    }
+    SetBlendMode(data, texture->blendMode);
 
     if (texture->scaleMode != data->scaleMode) {
         switch (texture->scaleMode) {
@@ -1176,6 +1220,9 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     if (texturedata->shader != 0) {
         data->glDisable(GL_FRAGMENT_PROGRAM_ARB);
     }
+
+    data->glDisable(texturedata->type);
+
     return 0;
 }
 
@@ -1219,7 +1266,8 @@ GL_DestroyRenderer(SDL_Renderer * renderer)
                 data->glDisable(GL_FRAGMENT_PROGRAM_ARB);
                 data->glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, 0);
                 if (data->fragment_program_UYVY != 0) {
-                    data->glDeleteProgramsARB(1, &data->fragment_program_UYVY);
+                    data->glDeleteProgramsARB(1,
+                                              &data->fragment_program_UYVY);
                 }
             }
 

@@ -127,7 +127,7 @@ initializeTexture()
     if (texture_id == 0) {
         fatalError("could not create texture");
     }
-    SDL_SetTextureBlendMode(texture_id, SDL_TEXTUREBLENDMODE_BLEND);
+    SDL_SetTextureBlendMode(texture_id, SDL_BLENDMODE_BLEND);
 
     /* free up allocated memory */
     SDL_FreeSurface(bmp_surface_rgba);
