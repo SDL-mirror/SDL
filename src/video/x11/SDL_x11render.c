@@ -621,7 +621,7 @@ X11_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
     foreground = renderdrawcolor(renderer, 1);
     XSetForeground(data->display, data->gc, foreground);
     XDrawLine(data->display, data->drawable, data->gc, x1, y1, x2, y2);
-
+    return 0;
 }
 
 static int
