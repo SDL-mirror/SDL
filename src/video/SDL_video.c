@@ -2000,7 +2000,7 @@ SDL_SetRenderDrawColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 }
 
 int
-SDL_GetRenderDrawColor(Uint8 *r, Uint8 *g, Uint8 *b, Uint8 *a)
+SDL_GetRenderDrawColor(Uint8 * r, Uint8 * g, Uint8 * b, Uint8 * a)
 {
     SDL_Renderer *renderer;
 
