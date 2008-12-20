@@ -1679,7 +1679,8 @@ SDL_BuildWindowedSinc(SDL_AudioCVT * cvt, SDL_AudioFormat format,
     }
 
     /* !!! FIXME: this memory leaks. */
-    cvt->coeff = (Uint8 *) SDL_malloc((SDL_AUDIO_BITSIZE(format) / 8) * (m+1));
+    cvt->coeff =
+        (Uint8 *) SDL_malloc((SDL_AUDIO_BITSIZE(format) / 8) * (m + 1));
     if (cvt->coeff == NULL) {
         return -1;
     }
@@ -1706,7 +1707,8 @@ SDL_BuildWindowedSinc(SDL_AudioCVT * cvt, SDL_AudioFormat format,
 
     /* Initialize the state buffer to all zeroes, and set initial position */
     /* !!! FIXME: this memory leaks. */
-    cvt->state_buf = (Uint8 *) SDL_malloc(cvt->len_sinc * SDL_AUDIO_BITSIZE(format) / 4);
+    cvt->state_buf =
+        (Uint8 *) SDL_malloc(cvt->len_sinc * SDL_AUDIO_BITSIZE(format) / 4);
     if (cvt->state_buf == NULL) {
         return -1;
     }
