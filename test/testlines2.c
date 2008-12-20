@@ -63,11 +63,18 @@ DrawLines(SDL_WindowID window)
         SDL_SetRenderDrawColor(255, (Uint8) current_color,
                                (Uint8) current_color, (Uint8) current_alpha);
 
-        x1 = rand() % window_w;
-        x2 = rand() % window_w;
-        y1 = rand() % window_h;
-        y2 = rand() % window_h;
-        SDL_RenderLine(x1, y1, x2, y2);
+        if (i == 0) {
+            SDL_RenderLine(0, 0, window_w, window_h);
+            SDL_RenderLine(0, window_h, window_w, 0);
+            SDL_RenderLine(0, window_h/2, window_w, window_h/2);
+            SDL_RenderLine(window_w/2, 0, window_w/2, window_h);
+        } else {
+            x1 = rand() % window_w;
+            x2 = rand() % window_w;
+            y1 = rand() % window_h;
+            y2 = rand() % window_h;
+            SDL_RenderLine(x1, y1, x2, y2);
+        }
     }
     SDL_SetRenderDrawBlendMode(SDL_BLENDMODE_NONE);
 
