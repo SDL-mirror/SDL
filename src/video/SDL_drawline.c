@@ -24,8 +24,62 @@
 #include "SDL_video.h"
 #include "SDL_blit.h"
 
+#define ABS(x) (x < 0 ? -x : x)
 
-int
+#define SWAP(x, y) (x ^= y ^= x ^= y)
+
+#define BRESENHAM(x0, y0, x1, y1, op, color) \
+{ \
+    int deltax, deltay, steep, error, xstep, ystep, x, y; \
+ \
+    deltax = ABS(x1 - x0); \
+    deltay = ABS(y1 - y0); \
+    steep = deltay > deltax; \
+    error = deltax / 2; \
+    if (steep) { \
+        SWAP(x0, y0); \
+        SWAP(x1, y1); \
+    } \
+    y = y0; \
+    if (x0 > x1) { \
+        xstep = -1; \
+        deltax = -deltax; \
+    } else { \
+        xstep = 1; \
+    } \
+    if (y0 < y1) { \
+        ystep = 1; \
+    } else { \
+        ystep = -1; \
+    } \
+    if (!steep) { \
+        for (x = x0; x != x1; x += xstep) { \
+            op(x, y, color); \
+            error -= deltay; \
+            if (error < 0) { \
+                y = y + ystep; \
+                error += deltax; \
+            } \
+        } \
+    } else { \
+        for (x = x0; x != x1; x += xstep) { \
+            op(y, x, color); \
+            error -= deltay; \
+            if (error < 0) { \
+                y = y + ystep; \
+                error += deltax; \
+            } \
+        } \
+    } \
+}
+
+#define SETPIXEL(x, y, type, bpp, color) \
+    *(type *)(dst->pixels + y * dst->pitch + x * bpp) = (type) color
+
+#define SETPIXEL1(x, y, color) SETPIXEL(x, y, Uint8, 1, color);
+#define SETPIXEL2(x, y, color) SETPIXEL(x, y, Uint16, 2, color);
+#define SETPIXEL4(x, y, color) SETPIXEL(x, y, Uint32, 4, color);
+
 SDL_DrawLine(SDL_Surface * dst, int x1, int y1, int x2, int y2, Uint32 color)
 {
     /* This function doesn't work on surfaces < 8 bpp */
@@ -41,8 +95,21 @@ SDL_DrawLine(SDL_Surface * dst, int x1, int y1, int x2, int y2, Uint32 color)
        }
      */
 
-    SDL_Unsupported();
-    return -1;
+    switch (dst->format->BytesPerPixel) {
+    case 1:
+        BRESENHAM(x1, y1, x2, y2, SETPIXEL1, color);
+        break;
+    case 2:
+        BRESENHAM(x1, y1, x2, y2, SETPIXEL2, color);
+        break;
+    case 3:
+        SDL_Unsupported();
+        return -1;
+    case 4:
+        BRESENHAM(x1, y1, x2, y2, SETPIXEL4, color);
+        break;
+    }
+    return 0;
 }
 
 /* vi: set ts=4 sw=4 expandtab: */
