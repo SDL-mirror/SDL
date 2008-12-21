@@ -73,6 +73,7 @@ static void DirectFB_DirtyTexture(SDL_Renderer * renderer,
                                   const SDL_Rect * rects);
 static int DirectFB_SetDrawColor(SDL_Renderer * renderer);
 static int DirectFB_SetDrawBlendMode(SDL_Renderer * renderer);
+static int DirectFB_RenderPoint(SDL_Renderer * renderer, int x, int y);
 static int DirectFB_RenderLine(SDL_Renderer * renderer, int x1, int y1,
                                int x2, int y2);
 static int DirectFB_RenderFill(SDL_Renderer * renderer,
@@ -295,6 +296,7 @@ DirectFB_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->DirtyTexture = DirectFB_DirtyTexture;
     renderer->SetDrawColor = DirectFB_SetDrawColor;
     renderer->SetDrawBlendMode = DirectFB_SetDrawBlendMode;
+    renderer->RenderPoint = DirectFB_RenderPoint;
     renderer->RenderLine = DirectFB_RenderLine;
     renderer->RenderFill = DirectFB_RenderFill;
     renderer->RenderCopy = DirectFB_RenderCopy;
@@ -838,6 +840,19 @@ PrepareDraw(SDL_Renderer * renderer)
     }
 
     SDL_DFB_CHECKERR(data->surface->SetColor(data->surface, r, g, b, a));
+    return 0;
+  error:
+    return -1;
+}
+
+static int
+DirectFB_RenderPoint(SDL_Renderer * renderer, int x, int y)
+{
+    DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
+    DFBResult ret;
+
+    PrepareDraw(renderer);
+    SDL_DFB_CHECKERR(data->surface->DrawPoint(data->surface, x, y));
     return 0;
   error:
     return -1;

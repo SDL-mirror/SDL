@@ -1197,6 +1197,18 @@ extern DECLSPEC int SDLCALL SDL_SetRenderDrawBlendMode(int blendMode);
 extern DECLSPEC int SDLCALL SDL_GetRenderDrawBlendMode(int *blendMode);
 
 /**
+ * \fn int SDL_RenderPoint(int x, int y)
+ *
+ * \brief Draw a point on the current rendering target.
+ *
+ * \param x The x coordinate of the point
+ * \param y The y coordinate of the point
+ *
+ * \return 0 on success, or -1 if there is no rendering context current
+ */
+extern DECLSPEC int SDLCALL SDL_RenderPoint(int x, int y);
+
+/**
  * \fn int SDL_RenderLine(int x1, int y1, int x2, int y2)
  *
  * \brief Draw a line on the current rendering target.
@@ -1208,7 +1220,6 @@ extern DECLSPEC int SDLCALL SDL_GetRenderDrawBlendMode(int *blendMode);
  *
  * \return 0 on success, or -1 if there is no rendering context current
  */
-
 extern DECLSPEC int SDLCALL SDL_RenderLine(int x1, int y1, int x2, int y2);
 
 /**

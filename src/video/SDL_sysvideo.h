@@ -90,6 +90,7 @@ struct SDL_Renderer
                           int numrects, const SDL_Rect * rects);
     int (*SetDrawColor) (SDL_Renderer * renderer);
     int (*SetDrawBlendMode) (SDL_Renderer * renderer);
+    int (*RenderPoint) (SDL_Renderer * renderer, int x, int y);
     int (*RenderLine) (SDL_Renderer * renderer, int x1, int y1, int x2,
                        int y2);
     int (*RenderFill) (SDL_Renderer * renderer, const SDL_Rect * rect);

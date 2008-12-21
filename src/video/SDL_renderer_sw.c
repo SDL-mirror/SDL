@@ -61,6 +61,7 @@ static int SW_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static void SW_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static int SW_SetDrawColor(SDL_Renderer * renderer);
 static int SW_SetDrawBlendMode(SDL_Renderer * renderer);
+static int SW_RenderPoint(SDL_Renderer * renderer, int x, int y);
 static int SW_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2,
                          int y2);
 static int SW_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect);
@@ -227,6 +228,7 @@ SW_CreateRenderer(SDL_Window * window, Uint32 flags)
 
     renderer->SetDrawColor = SW_SetDrawColor;
     renderer->SetDrawBlendMode = SW_SetDrawBlendMode;
+    renderer->RenderPoint = SW_RenderPoint;
     renderer->RenderLine = SW_RenderLine;
     renderer->RenderFill = SW_RenderFill;
     renderer->RenderCopy = SW_RenderCopy;
@@ -538,6 +540,49 @@ SW_SetDrawBlendMode(SDL_Renderer * renderer)
 }
 
 static int
+SW_RenderPoint(SDL_Renderer * renderer, int x, int y)
+{
+    SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
+    int status;
+
+    if (data->renderer->info.flags & SDL_RENDERER_PRESENTCOPY) {
+        SDL_Rect rect;
+
+        rect.x = x;
+        rect.y = y;
+        rect.w = 1;
+        rect.h = 1;
+        SDL_AddDirtyRect(&data->dirty, &rect);
+    }
+
+    if (data->renderer->LockTexture(data->renderer,
+                                    data->texture[data->current_texture],
+                                    &data->surface.clip_rect, 1,
+                                    &data->surface.pixels,
+                                    &data->surface.pitch) < 0) {
+        return -1;
+    }
+
+    if (renderer->blendMode == SDL_BLENDMODE_NONE ||
+        renderer->blendMode == SDL_BLENDMODE_MASK) {
+        Uint32 color =
+            SDL_MapRGBA(data->surface.format, renderer->r, renderer->g,
+                        renderer->b, renderer->a);
+
+        status = SDL_DrawPoint(&data->surface, x, y, color);
+    } else {
+        status =
+            SDL_BlendPoint(&data->surface, x, y, renderer->blendMode,
+                           renderer->r, renderer->g, renderer->b,
+                           renderer->a);
+    }
+
+    data->renderer->UnlockTexture(data->renderer,
+                                  data->texture[data->current_texture]);
+    return status;
+}
+
+static int
 SW_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
@@ -571,7 +616,8 @@ SW_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
         return -1;
     }
 
-    if (renderer->blendMode == SDL_BLENDMODE_NONE) {
+    if (renderer->blendMode == SDL_BLENDMODE_NONE ||
+        renderer->blendMode == SDL_BLENDMODE_MASK) {
         Uint32 color =
             SDL_MapRGBA(data->surface.format, renderer->r, renderer->g,
                         renderer->b, renderer->a);

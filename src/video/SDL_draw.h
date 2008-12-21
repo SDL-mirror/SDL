@@ -29,6 +29,13 @@
 
 #define DRAW_MUL(_a, _b) (((unsigned)(_a)*(_b))/255)
 
+#define DRAW_FASTSETPIXEL(x, y, type, bpp, color) \
+    *(type *)(dst->pixels + y * dst->pitch + x * bpp) = (type) color
+
+#define DRAW_FASTSETPIXEL1(x, y) DRAW_FASTSETPIXEL(x, y, Uint8, 1, color);
+#define DRAW_FASTSETPIXEL2(x, y) DRAW_FASTSETPIXEL(x, y, Uint16, 2, color);
+#define DRAW_FASTSETPIXEL4(x, y) DRAW_FASTSETPIXEL(x, y, Uint32, 4, color);
+
 #define DRAW_SETPIXEL(setpixel) \
 do { \
     unsigned sr = r, sg = g, sb = b, sa = a; \

@@ -33,6 +33,7 @@ static SDL_Renderer *SDL_DUMMY_CreateRenderer(SDL_Window * window,
                                               Uint32 flags);
 static int SDL_DUMMY_SetDrawColor(SDL_Renderer * renderer);
 static int SDL_DUMMY_SetDrawBlendMode(SDL_Renderer * renderer);
+static int SDL_DUMMY_RenderPoint(SDL_Renderer * renderer, int x, int y);
 static int SDL_DUMMY_RenderLine(SDL_Renderer * renderer, int x1, int y1,
                                 int x2, int y2);
 static int SDL_DUMMY_RenderFill(SDL_Renderer * renderer,
@@ -94,6 +95,7 @@ SDL_DUMMY_CreateRenderer(SDL_Window * window, Uint32 flags)
 
     renderer->SetDrawColor = SDL_DUMMY_SetDrawColor;
     renderer->SetDrawBlendMode = SDL_DUMMY_SetDrawBlendMode;
+    renderer->RenderPoint = SDL_DUMMY_RenderPoint;
     renderer->RenderLine = SDL_DUMMY_RenderLine;
     renderer->RenderFill = SDL_DUMMY_RenderFill;
     renderer->RenderCopy = SDL_DUMMY_RenderCopy;
@@ -143,6 +145,29 @@ SDL_DUMMY_SetDrawBlendMode(SDL_Renderer * renderer)
 }
 
 static int
+SDL_DUMMY_RenderPoint(SDL_Renderer * renderer, int x, int y)
+{
+    SDL_DUMMY_RenderData *data =
+        (SDL_DUMMY_RenderData *) renderer->driverdata;
+    SDL_Surface *target = data->screens[data->current_screen];
+    int status;
+
+    if (renderer->blendMode == SDL_BLENDMODE_NONE ||
+        renderer->blendMode == SDL_BLENDMODE_MASK) {
+        Uint32 color =
+            SDL_MapRGBA(target->format, renderer->r, renderer->g, renderer->b,
+                        renderer->a);
+
+        status = SDL_DrawPoint(target, x, y, color);
+    } else {
+        status =
+            SDL_BlendPoint(target, x, y, renderer->blendMode, renderer->r,
+                           renderer->g, renderer->b, renderer->a);
+    }
+    return status;
+}
+
+static int
 SDL_DUMMY_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
 {
     SDL_DUMMY_RenderData *data =
@@ -150,7 +175,8 @@ SDL_DUMMY_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
     SDL_Surface *target = data->screens[data->current_screen];
     int status;
 
-    if (renderer->blendMode == SDL_BLENDMODE_NONE) {
+    if (renderer->blendMode == SDL_BLENDMODE_NONE ||
+        renderer->blendMode == SDL_BLENDMODE_MASK) {
         Uint32 color =
             SDL_MapRGBA(target->format, renderer->r, renderer->g, renderer->b,
                         renderer->a);

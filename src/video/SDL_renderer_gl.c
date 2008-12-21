@@ -98,6 +98,7 @@ static void GL_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                             int numrects, const SDL_Rect * rects);
 static int GL_SetDrawColor(SDL_Renderer * renderer);
 static int GL_SetDrawBlendMode(SDL_Renderer * renderer);
+static int GL_RenderPoint(SDL_Renderer * renderer, int x, int y);
 static int GL_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2,
                          int y2);
 static int GL_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect);
@@ -313,6 +314,7 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->DirtyTexture = GL_DirtyTexture;
     renderer->SetDrawColor = GL_SetDrawColor;
     renderer->SetDrawBlendMode = GL_SetDrawBlendMode;
+    renderer->RenderPoint = GL_RenderPoint;
     renderer->RenderLine = GL_RenderLine;
     renderer->RenderFill = GL_RenderFill;
     renderer->RenderCopy = GL_RenderCopy;
@@ -1097,11 +1099,9 @@ GL_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
 }
 
 static int
-GL_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
+GL_RenderPoint(SDL_Renderer * renderer, int x, int y)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
-    //data->glLineWidth(1.0);
-    //data->glPointSize(1.0);
 
     SetBlendMode(data, renderer->blendMode);
 
@@ -1110,16 +1110,30 @@ GL_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
                     (GLfloat) renderer->b * inv255f,
                     (GLfloat) renderer->a * inv255f);
 
-    if ((x1 == x2) && (y1 == y2)) {
-        data->glBegin(GL_POINTS);
-        data->glVertex2i(x1, y1);
-        data->glEnd();
-    } else {
-        data->glBegin(GL_LINES);
-        data->glVertex2i(x1, y1);
-        data->glVertex2i(x2, y2);
-        data->glEnd();
-    }
+    data->glBegin(GL_POINTS);
+    data->glVertex2i(x, y);
+    data->glEnd();
+
+    return 0;
+}
+
+static int
+GL_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
+{
+    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
+
+    SetBlendMode(data, renderer->blendMode);
+
+    data->glColor4f((GLfloat) renderer->r * inv255f,
+                    (GLfloat) renderer->g * inv255f,
+                    (GLfloat) renderer->b * inv255f,
+                    (GLfloat) renderer->a * inv255f);
+
+    data->glBegin(GL_LINES);
+    data->glVertex2i(x1, y1);
+    data->glVertex2i(x2, y2);
+    data->glEnd();
+
     return 0;
 }
 

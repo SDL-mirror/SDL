@@ -25,7 +25,7 @@
 
 
 int
-SDL_DrawLine(SDL_Surface * dst, int x1, int y1, int x2, int y2, Uint32 color)
+SDL_DrawPoint(SDL_Surface * dst, int x, int y, Uint32 color)
 {
     /* This function doesn't work on surfaces < 8 bpp */
     if (dst->format->BitsPerPixel < 8) {
@@ -34,24 +34,24 @@ SDL_DrawLine(SDL_Surface * dst, int x1, int y1, int x2, int y2, Uint32 color)
     }
 
     /* Perform clipping */
-    /* FIXME
-       if (!SDL_IntersectRect(dstrect, &dst->clip_rect, dstrect)) {
-       return (0);
-       }
-     */
+    if (x < dst->clip_rect.x || y < dst->clip_rect.y ||
+        x >= (dst->clip_rect.x + dst->clip_rect.w) ||
+        y >= (dst->clip_rect.y + dst->clip_rect.h)) {
+        return 0;
+    }
 
     switch (dst->format->BytesPerPixel) {
     case 1:
-        DRAWLINE(x1, y1, x2, y2, DRAW_FASTSETPIXEL1);
+        DRAW_FASTSETPIXEL1(x, y);
         break;
     case 2:
-        DRAWLINE(x1, y1, x2, y2, DRAW_FASTSETPIXEL2);
+        DRAW_FASTSETPIXEL2(x, y);
         break;
     case 3:
         SDL_Unsupported();
         return -1;
     case 4:
-        DRAWLINE(x1, y1, x2, y2, DRAW_FASTSETPIXEL4);
+        DRAW_FASTSETPIXEL4(x, y);
         break;
     }
     return 0;

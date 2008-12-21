@@ -1,5 +1,5 @@
 
-/* Simple program:  draw as many random rectangles on the screen as possible */
+/* Simple program:  draw as many random objects on the screen as possible */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -7,10 +7,10 @@
 
 #include "common.h"
 
-#define NUM_RECTS	100
+#define NUM_OBJECTS	100
 
 static CommonState *state;
-static int num_rects;
+static int num_objects;
 static SDL_bool cycle_color;
 static SDL_bool cycle_alpha;
 static int cycle_direction = 1;
@@ -19,24 +19,116 @@ static int current_color = 255;
 static SDL_BlendMode blendMode = SDL_BLENDMODE_NONE;
 
 void
-DrawRects(SDL_WindowID window)
+DrawPoints(SDL_WindowID window)
 {
-    int i, n;
-    SDL_Rect rect;
+    int i;
+    int x, y;
     int window_w, window_h;
-
-    SDL_SelectRenderer(window);
 
     /* Query the sizes */
     SDL_GetWindowSize(window, &window_w, &window_h);
 
-    /* Move the sprite, bounce at the wall, and draw */
-    n = 0;
-    SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
-    SDL_RenderFill(NULL);
+    SDL_SetRenderDrawBlendMode(blendMode);
+    for (i = 0; i < num_objects; ++i) {
+        /* Cycle the color and alpha, if desired */
+        if (cycle_color) {
+            current_color += cycle_direction;
+            if (current_color < 0) {
+                current_color = 0;
+                cycle_direction = -cycle_direction;
+            }
+            if (current_color > 255) {
+                current_color = 255;
+                cycle_direction = -cycle_direction;
+            }
+        }
+        if (cycle_alpha) {
+            current_alpha += cycle_direction;
+            if (current_alpha < 0) {
+                current_alpha = 0;
+                cycle_direction = -cycle_direction;
+            }
+            if (current_alpha > 255) {
+                current_alpha = 255;
+                cycle_direction = -cycle_direction;
+            }
+        }
+        SDL_SetRenderDrawColor(255, (Uint8) current_color,
+                               (Uint8) current_color, (Uint8) current_alpha);
+
+        x = rand() % window_w;
+        y = rand() % window_h;
+        SDL_RenderPoint(x, y);
+    }
+    SDL_SetRenderDrawBlendMode(SDL_BLENDMODE_NONE);
+}
+
+void
+DrawLines(SDL_WindowID window)
+{
+    int i;
+    int x1, y1, x2, y2;
+    int window_w, window_h;
+
+    /* Query the sizes */
+    SDL_GetWindowSize(window, &window_w, &window_h);
 
     SDL_SetRenderDrawBlendMode(blendMode);
-    for (i = 0; i < num_rects; ++i) {
+    for (i = 0; i < num_objects; ++i) {
+        /* Cycle the color and alpha, if desired */
+        if (cycle_color) {
+            current_color += cycle_direction;
+            if (current_color < 0) {
+                current_color = 0;
+                cycle_direction = -cycle_direction;
+            }
+            if (current_color > 255) {
+                current_color = 255;
+                cycle_direction = -cycle_direction;
+            }
+        }
+        if (cycle_alpha) {
+            current_alpha += cycle_direction;
+            if (current_alpha < 0) {
+                current_alpha = 0;
+                cycle_direction = -cycle_direction;
+            }
+            if (current_alpha > 255) {
+                current_alpha = 255;
+                cycle_direction = -cycle_direction;
+            }
+        }
+        SDL_SetRenderDrawColor(255, (Uint8) current_color,
+                               (Uint8) current_color, (Uint8) current_alpha);
+
+        if (i == 0) {
+            SDL_RenderLine(0, 0, window_w, window_h);
+            SDL_RenderLine(0, window_h, window_w, 0);
+            SDL_RenderLine(0, window_h / 2, window_w, window_h / 2);
+            SDL_RenderLine(window_w / 2, 0, window_w / 2, window_h);
+        } else {
+            x1 = rand() % window_w;
+            x2 = rand() % window_w;
+            y1 = rand() % window_h;
+            y2 = rand() % window_h;
+            SDL_RenderLine(x1, y1, x2, y2);
+        }
+    }
+    SDL_SetRenderDrawBlendMode(SDL_BLENDMODE_NONE);
+}
+
+void
+DrawRects(SDL_WindowID window)
+{
+    int i;
+    SDL_Rect rect;
+    int window_w, window_h;
+
+    /* Query the sizes */
+    SDL_GetWindowSize(window, &window_w, &window_h);
+
+    SDL_SetRenderDrawBlendMode(blendMode);
+    for (i = 0; i < num_objects/4; ++i) {
         /* Cycle the color and alpha, if desired */
         if (cycle_color) {
             current_color += cycle_direction;
@@ -70,9 +162,6 @@ DrawRects(SDL_WindowID window)
         SDL_RenderFill(&rect);
     }
     SDL_SetRenderDrawBlendMode(SDL_BLENDMODE_NONE);
-
-    /* Update the screen! */
-    SDL_RenderPresent();
 }
 
 int
@@ -83,7 +172,7 @@ main(int argc, char *argv[])
     Uint32 then, now, frames;
 
     /* Initialize parameters */
-    num_rects = NUM_RECTS;
+    num_objects = NUM_OBJECTS;
 
     /* Initialize test framework */
     state = CommonCreateState(argv, SDL_INIT_VIDEO);
@@ -122,7 +211,7 @@ main(int argc, char *argv[])
                 cycle_alpha = SDL_TRUE;
                 consumed = 1;
             } else if (SDL_isdigit(*argv[i])) {
-                num_rects = SDL_atoi(argv[i]);
+                num_objects = SDL_atoi(argv[i]);
                 consumed = 1;
             }
         }
@@ -171,7 +260,15 @@ main(int argc, char *argv[])
             }
         }
         for (i = 0; i < state->num_windows; ++i) {
+            SDL_SelectRenderer(state->windows[i]);
+            SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
+            SDL_RenderFill(NULL);
+
             DrawRects(state->windows[i]);
+            DrawLines(state->windows[i]);
+            DrawPoints(state->windows[i]);
+
+            SDL_RenderPresent();
         }
     }
 
