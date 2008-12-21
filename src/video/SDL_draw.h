@@ -283,49 +283,58 @@ do { \
 
 #define ABS(_x) ((_x) < 0 ? -(_x) : (_x))
 
-#define SWAP(_x, _y) do { int tmp; tmp = _x; _x = _y; _y = tmp; } while (0)
-
-#define BRESENHAM(x0, y0, x1, y1, op) \
+#define BRESENHAM(x1, y1, x2, y2, op) \
 { \
-    int deltax, deltay, steep, error, xstep, ystep, x, y; \
+    int i, deltax, deltay, numpixels; \
+    int d, dinc1, dinc2; \
+    int x, xinc1, xinc2; \
+    int y, yinc1, yinc2; \
  \
-    deltax = ABS(x1 - x0); \
-    deltay = ABS(y1 - y0); \
-    steep = (deltay > deltax); \
-    if (steep) { \
-        SWAP(x0, y0); \
-        SWAP(x1, y1); \
-        SWAP(deltax, deltay); \
-    } \
-    error = (x1 - x0) / 2; \
-    y = y0; \
-    if (x0 > x1) { \
-        xstep = -1; \
+    deltax = ABS(x2 - x1); \
+    deltay = ABS(y2 - y1); \
+ \
+    if (deltax >= deltay) { \
+        numpixels = deltax + 1; \
+        d = (2 * deltay) - deltax; \
+        dinc1 = deltay * 2; \
+        dinc2 = (deltay - deltax) * 2; \
+        xinc1 = 1; \
+        xinc2 = 1; \
+        yinc1 = 0; \
+        yinc2 = 1; \
     } else { \
-        xstep = 1; \
+        numpixels = deltay + 1; \
+        d = (2 * deltax) - deltay; \
+        dinc1 = deltax * 2; \
+        dinc2 = (deltax - deltay) * 2; \
+        xinc1 = 0; \
+        xinc2 = 1; \
+        yinc1 = 1; \
+        yinc2 = 1; \
     } \
-    if (y0 < y1) { \
-        ystep = 1; \
-    } else { \
-        ystep = -1; \
+ \
+    if (x1 > x2) { \
+        xinc1 = -xinc1; \
+        xinc2 = -xinc2; \
     } \
-    if (!steep) { \
-        for (x = x0; x != x1; x += xstep) { \
-            op(x, y); \
-            error -= deltay; \
-            if (error < 0) { \
-                y += ystep; \
-                error += deltax; \
-            } \
-        } \
-    } else { \
-        for (x = x0; x != x1; x += xstep) { \
-            op(y, x); \
-            error -= deltay; \
-            if (error < 0) { \
-                y += ystep; \
-                error += deltax; \
-            } \
+    if (y1 > y2) { \
+        yinc1 = -yinc1; \
+        yinc2 = -yinc2; \
+    } \
+ \
+    x = x1; \
+    y = y1; \
+ \
+    for (i = 1; i < numpixels; ++i) { \
+        op(x, y); \
+        if (d < 0) { \
+            d += dinc1; \
+            x += xinc1; \
+            y += yinc1; \
+        } else { \
+            d += dinc2; \
+            x += xinc2; \
+            y += yinc2; \
         } \
     } \
 }
