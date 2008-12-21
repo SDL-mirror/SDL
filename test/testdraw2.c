@@ -29,7 +29,7 @@ DrawPoints(SDL_WindowID window)
     SDL_GetWindowSize(window, &window_w, &window_h);
 
     SDL_SetRenderDrawBlendMode(blendMode);
-    for (i = 0; i < num_objects; ++i) {
+    for (i = 0; i < num_objects * 4; ++i) {
         /* Cycle the color and alpha, if desired */
         if (cycle_color) {
             current_color += cycle_direction;
@@ -102,10 +102,10 @@ DrawLines(SDL_WindowID window)
                                (Uint8) current_color, (Uint8) current_alpha);
 
         if (i == 0) {
-            SDL_RenderLine(0, 0, window_w, window_h);
-            SDL_RenderLine(0, window_h, window_w, 0);
-            SDL_RenderLine(0, window_h / 2, window_w, window_h / 2);
-            SDL_RenderLine(window_w / 2, 0, window_w / 2, window_h);
+            SDL_RenderLine(0, 0, window_w - 1, window_h - 1);
+            SDL_RenderLine(0, window_h - 1, window_w - 1, 0);
+            SDL_RenderLine(0, window_h / 2, window_w - 1, window_h / 2);
+            SDL_RenderLine(window_w / 2, 0, window_w / 2, window_h - 1);
         } else {
             x1 = rand() % window_w;
             x2 = rand() % window_w;
@@ -128,7 +128,7 @@ DrawRects(SDL_WindowID window)
     SDL_GetWindowSize(window, &window_w, &window_h);
 
     SDL_SetRenderDrawBlendMode(blendMode);
-    for (i = 0; i < num_objects/4; ++i) {
+    for (i = 0; i < num_objects / 4; ++i) {
         /* Cycle the color and alpha, if desired */
         if (cycle_color) {
             current_color += cycle_direction;
