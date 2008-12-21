@@ -93,6 +93,29 @@ SDL_BlendLine_RGB888(SDL_Surface * dst, int x1, int y1, int x2, int y2,
 }
 
 static int
+SDL_BlendLine_ARGB8888(SDL_Surface * dst, int x1, int y1, int x2, int y2,
+                       int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+{
+    unsigned inva = 0xff - a;
+
+    switch (blendMode) {
+    case SDL_BLENDMODE_BLEND:
+        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_BLEND_ARGB8888);
+        break;
+    case SDL_BLENDMODE_ADD:
+        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_ADD_ARGB8888);
+        break;
+    case SDL_BLENDMODE_MOD:
+        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_MOD_ARGB8888);
+        break;
+    default:
+        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_ARGB8888);
+        break;
+    }
+    return 0;
+}
+
+static int
 SDL_BlendLine_RGB(SDL_Surface * dst, int x1, int y1, int x2, int y2,
                   int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
@@ -215,6 +238,9 @@ SDL_BlendLine(SDL_Surface * dst, int x1, int y1, int x2, int y2,
             if (!fmt->Amask) {
                 return SDL_BlendLine_RGB888(dst, x1, y1, x2, y2, blendMode, r,
                                             g, b, a);
+            } else {
+                return SDL_BlendLine_ARGB8888(dst, x1, y1, x2, y2, blendMode,
+                                              r, g, b, a);
             }
             break;
         }

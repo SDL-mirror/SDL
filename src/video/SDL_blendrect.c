@@ -94,6 +94,29 @@ SDL_BlendRect_RGB888(SDL_Surface * dst, SDL_Rect * dstrect, int blendMode,
 }
 
 static int
+SDL_BlendRect_ARGB8888(SDL_Surface * dst, SDL_Rect * dstrect, int blendMode,
+                       Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+{
+    unsigned inva = 0xff - a;
+
+    switch (blendMode) {
+    case SDL_BLENDMODE_BLEND:
+        BLENDRECT(Uint32, DRAW_SETPIXEL_BLEND_ARGB8888);
+        break;
+    case SDL_BLENDMODE_ADD:
+        BLENDRECT(Uint32, DRAW_SETPIXEL_ADD_ARGB8888);
+        break;
+    case SDL_BLENDMODE_MOD:
+        BLENDRECT(Uint32, DRAW_SETPIXEL_MOD_ARGB8888);
+        break;
+    default:
+        BLENDRECT(Uint32, DRAW_SETPIXEL_ARGB8888);
+        break;
+    }
+    return 0;
+}
+
+static int
 SDL_BlendRect_RGB(SDL_Surface * dst, SDL_Rect * dstrect, int blendMode,
                   Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
@@ -217,6 +240,9 @@ SDL_BlendRect(SDL_Surface * dst, SDL_Rect * dstrect, int blendMode, Uint8 r,
             if (!fmt->Amask) {
                 return SDL_BlendRect_RGB888(dst, dstrect, blendMode, r, g, b,
                                             a);
+            } else {
+                return SDL_BlendRect_ARGB8888(dst, dstrect, blendMode, r, g,
+                                              b, a);
             }
             break;
         }

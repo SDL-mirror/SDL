@@ -165,6 +165,37 @@ do { \
     DRAW_SETPIXELXY(x, y, Uint32, 4, DRAW_SETPIXEL_MOD_RGB888)
 
 /*
+ * Define draw operators for ARGB8888
+ */
+
+#define DRAW_SETPIXEL_ARGB8888 \
+    DRAW_SETPIXEL(ARGB8888_FROM_RGBA(*pixel, sr, sg, sb, sa))
+
+#define DRAW_SETPIXEL_BLEND_ARGB8888 \
+    DRAW_SETPIXEL_BLEND(RGBA_FROM_ARGB8888(*pixel, sr, sg, sb, sa), \
+                        ARGB8888_FROM_RGBA(*pixel, sr, sg, sb, sa))
+
+#define DRAW_SETPIXEL_ADD_ARGB8888 \
+    DRAW_SETPIXEL_ADD(RGBA_FROM_ARGB8888(*pixel, sr, sg, sb, sa), \
+                      ARGB8888_FROM_RGBA(*pixel, sr, sg, sb, sa))
+
+#define DRAW_SETPIXEL_MOD_ARGB8888 \
+    DRAW_SETPIXEL_MOD(RGBA_FROM_ARGB8888(*pixel, sr, sg, sb, sa), \
+                      ARGB8888_FROM_RGBA(*pixel, sr, sg, sb, sa))
+
+#define DRAW_SETPIXELXY_ARGB8888(x, y) \
+    DRAW_SETPIXELXY(x, y, Uint32, 4, DRAW_SETPIXEL_ARGB8888)
+
+#define DRAW_SETPIXELXY_BLEND_ARGB8888(x, y) \
+    DRAW_SETPIXELXY(x, y, Uint32, 4, DRAW_SETPIXEL_BLEND_ARGB8888)
+
+#define DRAW_SETPIXELXY_ADD_ARGB8888(x, y) \
+    DRAW_SETPIXELXY(x, y, Uint32, 4, DRAW_SETPIXEL_ADD_ARGB8888)
+
+#define DRAW_SETPIXELXY_MOD_ARGB8888(x, y) \
+    DRAW_SETPIXELXY(x, y, Uint32, 4, DRAW_SETPIXEL_MOD_ARGB8888)
+
+/*
  * Define draw operators for general RGB
  */
 

@@ -236,6 +236,10 @@ do {									   \
 {									\
 	Pixel = (r<<16)|(g<<8)|b;					\
 }
+#define ARGB8888_FROM_RGBA(Pixel, r, g, b, a)				\
+{									\
+	Pixel = (a<<24)|(r<<16)|(g<<8)|b;				\
+}
 #define ASSEMBLE_RGB(buf, bpp, fmt, r, g, b) 				\
 {									\
 	switch (bpp) {							\
