@@ -543,25 +543,30 @@ static int
 SW_RenderPoint(SDL_Renderer * renderer, int x, int y)
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
+    SDL_Rect rect;
     int status;
 
-    if (data->renderer->info.flags & SDL_RENDERER_PRESENTCOPY) {
-        SDL_Rect rect;
+    rect.x = x;
+    rect.y = y;
+    rect.w = 1;
+    rect.h = 1;
 
-        rect.x = x;
-        rect.y = y;
-        rect.w = 1;
-        rect.h = 1;
+    if (data->renderer->info.flags & SDL_RENDERER_PRESENTCOPY) {
         SDL_AddDirtyRect(&data->dirty, &rect);
     }
 
     if (data->renderer->LockTexture(data->renderer,
                                     data->texture[data->current_texture],
-                                    &data->surface.clip_rect, 1,
+                                    &rect, 1,
                                     &data->surface.pixels,
                                     &data->surface.pitch) < 0) {
         return -1;
     }
+
+    data->surface.w = 1;
+    data->surface.h = 1;
+    data->surface.clip_rect.w = 1;
+    data->surface.clip_rect.h = 1;
 
     if (renderer->blendMode == SDL_BLENDMODE_NONE ||
         renderer->blendMode == SDL_BLENDMODE_MASK) {
@@ -569,10 +574,10 @@ SW_RenderPoint(SDL_Renderer * renderer, int x, int y)
             SDL_MapRGBA(data->surface.format, renderer->r, renderer->g,
                         renderer->b, renderer->a);
 
-        status = SDL_DrawPoint(&data->surface, x, y, color);
+        status = SDL_DrawPoint(&data->surface, 0, 0, color);
     } else {
         status =
-            SDL_BlendPoint(&data->surface, x, y, renderer->blendMode,
+            SDL_BlendPoint(&data->surface, 0, 0, renderer->blendMode,
                            renderer->r, renderer->g, renderer->b,
                            renderer->a);
     }
@@ -586,35 +591,48 @@ static int
 SW_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
+    SDL_Rect rect;
     int status;
 
-    if (data->renderer->info.flags & SDL_RENDERER_PRESENTCOPY) {
-        SDL_Rect rect;
+    if (x1 < x2) {
+        rect.x = x1;
+        rect.w = (x2 - x1) + 1;
+        x2 -= x1;
+        x1 = 0;
+    } else {
+        rect.x = x2;
+        rect.w = (x1 - x2) + 1;
+        x1 -= x2;
+        x2 = 0;
+    }
+    if (y1 < y2) {
+        rect.y = y1;
+        rect.h = (y2 - y1) + 1;
+        y2 -= y1;
+        y1 = 0;
+    } else {
+        rect.y = y2;
+        rect.h = (y1 - y2) + 1;
+        y1 -= y2;
+        y2 = 0;
+    }
 
-        if (x1 < x2) {
-            rect.x = x1;
-            rect.w = (x2 - x1) + 1;
-        } else {
-            rect.x = x2;
-            rect.w = (x1 - x2) + 1;
-        }
-        if (y1 < y2) {
-            rect.y = y1;
-            rect.h = (y2 - y1) + 1;
-        } else {
-            rect.y = y2;
-            rect.h = (y1 - y2) + 1;
-        }
+    if (data->renderer->info.flags & SDL_RENDERER_PRESENTCOPY) {
         SDL_AddDirtyRect(&data->dirty, &rect);
     }
 
     if (data->renderer->LockTexture(data->renderer,
                                     data->texture[data->current_texture],
-                                    &data->surface.clip_rect, 1,
+                                    &rect, 1,
                                     &data->surface.pixels,
                                     &data->surface.pitch) < 0) {
         return -1;
     }
+
+    data->surface.w = rect.w;
+    data->surface.h = rect.h;
+    data->surface.clip_rect.w = rect.w;
+    data->surface.clip_rect.h = rect.h;
 
     if (renderer->blendMode == SDL_BLENDMODE_NONE ||
         renderer->blendMode == SDL_BLENDMODE_MASK) {
