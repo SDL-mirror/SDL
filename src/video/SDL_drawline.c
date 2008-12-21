@@ -47,16 +47,16 @@ SDL_DrawLine(SDL_Surface * dst, int x1, int y1, int x2, int y2, Uint32 color)
 
     switch (dst->format->BytesPerPixel) {
     case 1:
-        BRESENHAM(x1, y1, x2, y2, SETPIXEL1);
+        DRAWLINE(x1, y1, x2, y2, SETPIXEL1);
         break;
     case 2:
-        BRESENHAM(x1, y1, x2, y2, SETPIXEL2);
+        DRAWLINE(x1, y1, x2, y2, SETPIXEL2);
         break;
     case 3:
         SDL_Unsupported();
         return -1;
     case 4:
-        BRESENHAM(x1, y1, x2, y2, SETPIXEL4);
+        DRAWLINE(x1, y1, x2, y2, SETPIXEL4);
         break;
     }
     return 0;

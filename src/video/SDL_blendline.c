@@ -31,16 +31,16 @@ SDL_BlendLine_RGB555(SDL_Surface * dst, int x1, int y1, int x2, int y2,
 
     switch (blendMode) {
     case SDL_BLENDMODE_BLEND:
-        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_BLEND_RGB555);
+        DRAWLINE(x1, y1, x2, y2, DRAW_SETPIXELXY_BLEND_RGB555);
         break;
     case SDL_BLENDMODE_ADD:
-        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_ADD_RGB555);
+        DRAWLINE(x1, y1, x2, y2, DRAW_SETPIXELXY_ADD_RGB555);
         break;
     case SDL_BLENDMODE_MOD:
-        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_MOD_RGB555);
+        DRAWLINE(x1, y1, x2, y2, DRAW_SETPIXELXY_MOD_RGB555);
         break;
     default:
-        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_RGB555);
+        DRAWLINE(x1, y1, x2, y2, DRAW_SETPIXELXY_RGB555);
         break;
     }
     return 0;
@@ -54,16 +54,16 @@ SDL_BlendLine_RGB565(SDL_Surface * dst, int x1, int y1, int x2, int y2,
 
     switch (blendMode) {
     case SDL_BLENDMODE_BLEND:
-        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_BLEND_RGB565);
+        DRAWLINE(x1, y1, x2, y2, DRAW_SETPIXELXY_BLEND_RGB565);
         break;
     case SDL_BLENDMODE_ADD:
-        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_ADD_RGB565);
+        DRAWLINE(x1, y1, x2, y2, DRAW_SETPIXELXY_ADD_RGB565);
         break;
     case SDL_BLENDMODE_MOD:
-        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_MOD_RGB565);
+        DRAWLINE(x1, y1, x2, y2, DRAW_SETPIXELXY_MOD_RGB565);
         break;
     default:
-        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_RGB565);
+        DRAWLINE(x1, y1, x2, y2, DRAW_SETPIXELXY_RGB565);
         break;
     }
     return 0;
@@ -77,16 +77,16 @@ SDL_BlendLine_RGB888(SDL_Surface * dst, int x1, int y1, int x2, int y2,
 
     switch (blendMode) {
     case SDL_BLENDMODE_BLEND:
-        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_BLEND_RGB888);
+        DRAWLINE(x1, y1, x2, y2, DRAW_SETPIXELXY_BLEND_RGB888);
         break;
     case SDL_BLENDMODE_ADD:
-        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_ADD_RGB888);
+        DRAWLINE(x1, y1, x2, y2, DRAW_SETPIXELXY_ADD_RGB888);
         break;
     case SDL_BLENDMODE_MOD:
-        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_MOD_RGB888);
+        DRAWLINE(x1, y1, x2, y2, DRAW_SETPIXELXY_MOD_RGB888);
         break;
     default:
-        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_RGB888);
+        DRAWLINE(x1, y1, x2, y2, DRAW_SETPIXELXY_RGB888);
         break;
     }
     return 0;
@@ -100,16 +100,16 @@ SDL_BlendLine_ARGB8888(SDL_Surface * dst, int x1, int y1, int x2, int y2,
 
     switch (blendMode) {
     case SDL_BLENDMODE_BLEND:
-        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_BLEND_ARGB8888);
+        DRAWLINE(x1, y1, x2, y2, DRAW_SETPIXELXY_BLEND_ARGB8888);
         break;
     case SDL_BLENDMODE_ADD:
-        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_ADD_ARGB8888);
+        DRAWLINE(x1, y1, x2, y2, DRAW_SETPIXELXY_ADD_ARGB8888);
         break;
     case SDL_BLENDMODE_MOD:
-        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_MOD_ARGB8888);
+        DRAWLINE(x1, y1, x2, y2, DRAW_SETPIXELXY_MOD_ARGB8888);
         break;
     default:
-        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_ARGB8888);
+        DRAWLINE(x1, y1, x2, y2, DRAW_SETPIXELXY_ARGB8888);
         break;
     }
     return 0;
@@ -126,32 +126,32 @@ SDL_BlendLine_RGB(SDL_Surface * dst, int x1, int y1, int x2, int y2,
     case 2:
         switch (blendMode) {
         case SDL_BLENDMODE_BLEND:
-            BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY2_BLEND_RGB);
+            DRAWLINE(x1, y1, x2, y2, DRAW_SETPIXELXY2_BLEND_RGB);
             break;
         case SDL_BLENDMODE_ADD:
-            BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY2_ADD_RGB);
+            DRAWLINE(x1, y1, x2, y2, DRAW_SETPIXELXY2_ADD_RGB);
             break;
         case SDL_BLENDMODE_MOD:
-            BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY2_MOD_RGB);
+            DRAWLINE(x1, y1, x2, y2, DRAW_SETPIXELXY2_MOD_RGB);
             break;
         default:
-            BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY2_RGB);
+            DRAWLINE(x1, y1, x2, y2, DRAW_SETPIXELXY2_RGB);
             break;
         }
         return 0;
     case 4:
         switch (blendMode) {
         case SDL_BLENDMODE_BLEND:
-            BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY4_BLEND_RGB);
+            DRAWLINE(x1, y1, x2, y2, DRAW_SETPIXELXY4_BLEND_RGB);
             break;
         case SDL_BLENDMODE_ADD:
-            BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY4_ADD_RGB);
+            DRAWLINE(x1, y1, x2, y2, DRAW_SETPIXELXY4_ADD_RGB);
             break;
         case SDL_BLENDMODE_MOD:
-            BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY4_MOD_RGB);
+            DRAWLINE(x1, y1, x2, y2, DRAW_SETPIXELXY4_MOD_RGB);
             break;
         default:
-            BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY4_RGB);
+            DRAWLINE(x1, y1, x2, y2, DRAW_SETPIXELXY4_RGB);
             break;
         }
         return 0;
@@ -172,16 +172,16 @@ SDL_BlendLine_RGBA(SDL_Surface * dst, int x1, int y1, int x2, int y2,
     case 4:
         switch (blendMode) {
         case SDL_BLENDMODE_BLEND:
-            BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY4_BLEND_RGBA);
+            DRAWLINE(x1, y1, x2, y2, DRAW_SETPIXELXY4_BLEND_RGBA);
             break;
         case SDL_BLENDMODE_ADD:
-            BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY4_ADD_RGBA);
+            DRAWLINE(x1, y1, x2, y2, DRAW_SETPIXELXY4_ADD_RGBA);
             break;
         case SDL_BLENDMODE_MOD:
-            BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY4_MOD_RGBA);
+            DRAWLINE(x1, y1, x2, y2, DRAW_SETPIXELXY4_MOD_RGBA);
             break;
         default:
-            BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY4_RGBA);
+            DRAWLINE(x1, y1, x2, y2, DRAW_SETPIXELXY4_RGBA);
             break;
         }
         return 0;

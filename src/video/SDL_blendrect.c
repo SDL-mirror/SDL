@@ -32,16 +32,16 @@ SDL_BlendRect_RGB555(SDL_Surface * dst, SDL_Rect * dstrect, int blendMode,
 
     switch (blendMode) {
     case SDL_BLENDMODE_BLEND:
-        BLENDRECT(Uint16, DRAW_SETPIXEL_BLEND_RGB555);
+        FILLRECT(Uint16, DRAW_SETPIXEL_BLEND_RGB555);
         break;
     case SDL_BLENDMODE_ADD:
-        BLENDRECT(Uint16, DRAW_SETPIXEL_ADD_RGB555);
+        FILLRECT(Uint16, DRAW_SETPIXEL_ADD_RGB555);
         break;
     case SDL_BLENDMODE_MOD:
-        BLENDRECT(Uint16, DRAW_SETPIXEL_MOD_RGB555);
+        FILLRECT(Uint16, DRAW_SETPIXEL_MOD_RGB555);
         break;
     default:
-        BLENDRECT(Uint16, DRAW_SETPIXEL_RGB555);
+        FILLRECT(Uint16, DRAW_SETPIXEL_RGB555);
         break;
     }
     return 0;
@@ -55,16 +55,16 @@ SDL_BlendRect_RGB565(SDL_Surface * dst, SDL_Rect * dstrect, int blendMode,
 
     switch (blendMode) {
     case SDL_BLENDMODE_BLEND:
-        BLENDRECT(Uint16, DRAW_SETPIXEL_BLEND_RGB565);
+        FILLRECT(Uint16, DRAW_SETPIXEL_BLEND_RGB565);
         break;
     case SDL_BLENDMODE_ADD:
-        BLENDRECT(Uint16, DRAW_SETPIXEL_ADD_RGB565);
+        FILLRECT(Uint16, DRAW_SETPIXEL_ADD_RGB565);
         break;
     case SDL_BLENDMODE_MOD:
-        BLENDRECT(Uint16, DRAW_SETPIXEL_MOD_RGB565);
+        FILLRECT(Uint16, DRAW_SETPIXEL_MOD_RGB565);
         break;
     default:
-        BLENDRECT(Uint16, DRAW_SETPIXEL_RGB565);
+        FILLRECT(Uint16, DRAW_SETPIXEL_RGB565);
         break;
     }
     return 0;
@@ -78,16 +78,16 @@ SDL_BlendRect_RGB888(SDL_Surface * dst, SDL_Rect * dstrect, int blendMode,
 
     switch (blendMode) {
     case SDL_BLENDMODE_BLEND:
-        BLENDRECT(Uint32, DRAW_SETPIXEL_BLEND_RGB888);
+        FILLRECT(Uint32, DRAW_SETPIXEL_BLEND_RGB888);
         break;
     case SDL_BLENDMODE_ADD:
-        BLENDRECT(Uint32, DRAW_SETPIXEL_ADD_RGB888);
+        FILLRECT(Uint32, DRAW_SETPIXEL_ADD_RGB888);
         break;
     case SDL_BLENDMODE_MOD:
-        BLENDRECT(Uint32, DRAW_SETPIXEL_MOD_RGB888);
+        FILLRECT(Uint32, DRAW_SETPIXEL_MOD_RGB888);
         break;
     default:
-        BLENDRECT(Uint32, DRAW_SETPIXEL_RGB888);
+        FILLRECT(Uint32, DRAW_SETPIXEL_RGB888);
         break;
     }
     return 0;
@@ -101,16 +101,16 @@ SDL_BlendRect_ARGB8888(SDL_Surface * dst, SDL_Rect * dstrect, int blendMode,
 
     switch (blendMode) {
     case SDL_BLENDMODE_BLEND:
-        BLENDRECT(Uint32, DRAW_SETPIXEL_BLEND_ARGB8888);
+        FILLRECT(Uint32, DRAW_SETPIXEL_BLEND_ARGB8888);
         break;
     case SDL_BLENDMODE_ADD:
-        BLENDRECT(Uint32, DRAW_SETPIXEL_ADD_ARGB8888);
+        FILLRECT(Uint32, DRAW_SETPIXEL_ADD_ARGB8888);
         break;
     case SDL_BLENDMODE_MOD:
-        BLENDRECT(Uint32, DRAW_SETPIXEL_MOD_ARGB8888);
+        FILLRECT(Uint32, DRAW_SETPIXEL_MOD_ARGB8888);
         break;
     default:
-        BLENDRECT(Uint32, DRAW_SETPIXEL_ARGB8888);
+        FILLRECT(Uint32, DRAW_SETPIXEL_ARGB8888);
         break;
     }
     return 0;
@@ -127,32 +127,32 @@ SDL_BlendRect_RGB(SDL_Surface * dst, SDL_Rect * dstrect, int blendMode,
     case 2:
         switch (blendMode) {
         case SDL_BLENDMODE_BLEND:
-            BLENDRECT(Uint16, DRAW_SETPIXEL_BLEND_RGB);
+            FILLRECT(Uint16, DRAW_SETPIXEL_BLEND_RGB);
             break;
         case SDL_BLENDMODE_ADD:
-            BLENDRECT(Uint16, DRAW_SETPIXEL_ADD_RGB);
+            FILLRECT(Uint16, DRAW_SETPIXEL_ADD_RGB);
             break;
         case SDL_BLENDMODE_MOD:
-            BLENDRECT(Uint16, DRAW_SETPIXEL_MOD_RGB);
+            FILLRECT(Uint16, DRAW_SETPIXEL_MOD_RGB);
             break;
         default:
-            BLENDRECT(Uint16, DRAW_SETPIXEL_RGB);
+            FILLRECT(Uint16, DRAW_SETPIXEL_RGB);
             break;
         }
         return 0;
     case 4:
         switch (blendMode) {
         case SDL_BLENDMODE_BLEND:
-            BLENDRECT(Uint32, DRAW_SETPIXEL_BLEND_RGB);
+            FILLRECT(Uint32, DRAW_SETPIXEL_BLEND_RGB);
             break;
         case SDL_BLENDMODE_ADD:
-            BLENDRECT(Uint32, DRAW_SETPIXEL_ADD_RGB);
+            FILLRECT(Uint32, DRAW_SETPIXEL_ADD_RGB);
             break;
         case SDL_BLENDMODE_MOD:
-            BLENDRECT(Uint32, DRAW_SETPIXEL_MOD_RGB);
+            FILLRECT(Uint32, DRAW_SETPIXEL_MOD_RGB);
             break;
         default:
-            BLENDRECT(Uint32, DRAW_SETPIXEL_RGB);
+            FILLRECT(Uint32, DRAW_SETPIXEL_RGB);
             break;
         }
         return 0;
@@ -173,16 +173,16 @@ SDL_BlendRect_RGBA(SDL_Surface * dst, SDL_Rect * dstrect, int blendMode,
     case 4:
         switch (blendMode) {
         case SDL_BLENDMODE_BLEND:
-            BLENDRECT(Uint32, DRAW_SETPIXEL_BLEND_RGBA);
+            FILLRECT(Uint32, DRAW_SETPIXEL_BLEND_RGBA);
             break;
         case SDL_BLENDMODE_ADD:
-            BLENDRECT(Uint32, DRAW_SETPIXEL_ADD_RGBA);
+            FILLRECT(Uint32, DRAW_SETPIXEL_ADD_RGBA);
             break;
         case SDL_BLENDMODE_MOD:
-            BLENDRECT(Uint32, DRAW_SETPIXEL_MOD_RGBA);
+            FILLRECT(Uint32, DRAW_SETPIXEL_MOD_RGBA);
             break;
         default:
-            BLENDRECT(Uint32, DRAW_SETPIXEL_RGBA);
+            FILLRECT(Uint32, DRAW_SETPIXEL_RGBA);
             break;
         }
         return 0;

@@ -322,12 +322,13 @@ do { \
         } \
     } \
 }
+#define DRAWLINE(x0, y0, x1, y1, op)	BRESENHAM(x0, y0, x1, y1, op)
 
 /*
  * Define blend fill macro
  */
 
-#define BLENDRECT(type, op) \
+#define FILLRECT(type, op) \
 do { \
     int w; \
     int width = dstrect->w; \
