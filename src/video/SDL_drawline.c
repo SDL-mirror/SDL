@@ -21,64 +21,14 @@
 */
 #include "SDL_config.h"
 
-#include "SDL_video.h"
-#include "SDL_blit.h"
-
-#define ABS(_x) ((_x) < 0 ? -(_x) : (_x))
-
-#define SWAP(_x, _y) do { int tmp; tmp = _x; _x = _y; _y = tmp; } while (0)
-
-#define BRESENHAM(x0, y0, x1, y1, op, color) \
-{ \
-    int deltax, deltay, steep, error, xstep, ystep, x, y; \
- \
-    deltax = ABS(x1 - x0); \
-    deltay = ABS(y1 - y0); \
-    steep = (deltay > deltax); \
-    if (steep) { \
-        SWAP(x0, y0); \
-        SWAP(x1, y1); \
-        SWAP(deltax, deltay); \
-    } \
-    error = (x1 - x0) / 2; \
-    y = y0; \
-    if (x0 > x1) { \
-        xstep = -1; \
-    } else { \
-        xstep = 1; \
-    } \
-    if (y0 < y1) { \
-        ystep = 1; \
-    } else { \
-        ystep = -1; \
-    } \
-    if (!steep) { \
-        for (x = x0; x != x1; x += xstep) { \
-            op(x, y, color); \
-            error -= deltay; \
-            if (error < 0) { \
-                y += ystep; \
-                error += deltax; \
-            } \
-        } \
-    } else { \
-        for (x = x0; x != x1; x += xstep) { \
-            op(y, x, color); \
-            error -= deltay; \
-            if (error < 0) { \
-                y += ystep; \
-                error += deltax; \
-            } \
-        } \
-    } \
-}
+#include "SDL_draw.h"
 
 #define SETPIXEL(x, y, type, bpp, color) \
     *(type *)(dst->pixels + y * dst->pitch + x * bpp) = (type) color
 
-#define SETPIXEL1(x, y, color) SETPIXEL(x, y, Uint8, 1, color);
-#define SETPIXEL2(x, y, color) SETPIXEL(x, y, Uint16, 2, color);
-#define SETPIXEL4(x, y, color) SETPIXEL(x, y, Uint32, 4, color);
+#define SETPIXEL1(x, y) SETPIXEL(x, y, Uint8, 1, color);
+#define SETPIXEL2(x, y) SETPIXEL(x, y, Uint16, 2, color);
+#define SETPIXEL4(x, y) SETPIXEL(x, y, Uint32, 4, color);
 
 SDL_DrawLine(SDL_Surface * dst, int x1, int y1, int x2, int y2, Uint32 color)
 {
@@ -97,16 +47,16 @@ SDL_DrawLine(SDL_Surface * dst, int x1, int y1, int x2, int y2, Uint32 color)
 
     switch (dst->format->BytesPerPixel) {
     case 1:
-        BRESENHAM(x1, y1, x2, y2, SETPIXEL1, color);
+        BRESENHAM(x1, y1, x2, y2, SETPIXEL1);
         break;
     case 2:
-        BRESENHAM(x1, y1, x2, y2, SETPIXEL2, color);
+        BRESENHAM(x1, y1, x2, y2, SETPIXEL2);
         break;
     case 3:
         SDL_Unsupported();
         return -1;
     case 4:
-        BRESENHAM(x1, y1, x2, y2, SETPIXEL4, color);
+        BRESENHAM(x1, y1, x2, y2, SETPIXEL4);
         break;
     }
     return 0;

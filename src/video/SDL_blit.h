@@ -39,6 +39,7 @@
 
 #include "SDL_cpuinfo.h"
 #include "SDL_endian.h"
+#include "SDL_video.h"
 
 /* SDL blit copy flags */
 #define SDL_COPY_MODULATE_COLOR     0x00000001
@@ -575,4 +576,5 @@ do {						\
 #endif
 
 #endif /* _SDL_blit_h */
+
 /* vi: set ts=4 sw=4 expandtab: */

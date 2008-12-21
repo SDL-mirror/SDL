@@ -22,83 +22,161 @@
 #include "SDL_config.h"
 
 #include "SDL_video.h"
-#include "SDL_blit.h"
+#include "SDL_draw.h"
 
-#define MUL(_a, _b) (((Uint16)(_a)*(Uint16)(_b))/255)
-#define SHIFTAND(_v, _s, _a) (((_v)>>(_s)) & (_a))
+static int
+SDL_BlendRect_RGB555(SDL_Surface * dst, SDL_Rect * dstrect, int blendMode,
+                     Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+{
+    unsigned inva = 0xff - a;
 
-#define SETPIXEL_MASK(p, type, bpp, rshift, gshift, bshift, rmask, gmask, bmask) \
-do { \
-	if (a) { \
-		p = (r<<rshift) | (g<<gshift) | (b<<bshift); \
-	} \
-} while (0)
+    switch (blendMode) {
+    case SDL_BLENDMODE_BLEND:
+        BLENDRECT(Uint16, DRAW_SETPIXEL_BLEND_RGB555);
+        break;
+    case SDL_BLENDMODE_ADD:
+        BLENDRECT(Uint16, DRAW_SETPIXEL_ADD_RGB555);
+        break;
+    case SDL_BLENDMODE_MOD:
+        BLENDRECT(Uint16, DRAW_SETPIXEL_MOD_RGB555);
+        break;
+    default:
+        BLENDRECT(Uint16, DRAW_SETPIXEL_RGB555);
+        break;
+    }
+    return 0;
+}
 
-#define SETPIXEL_BLEND(p, type, bpp, rshift, gshift, bshift, rmask, gmask, bmask) \
-do { \
-	Uint8 sr = MUL(inva, SHIFTAND(p, rshift, rmask)) + (Uint16) r; \
-	Uint8 sg = MUL(inva, SHIFTAND(p, gshift, gmask)) + (Uint16) g; \
-	Uint8 sb = MUL(inva, SHIFTAND(p, bshift, bmask)) + (Uint16) b; \
-	p = (sr<<rshift) | (sg<<gshift) | (sb<<bshift);  \
-} while (0)
+static int
+SDL_BlendRect_RGB565(SDL_Surface * dst, SDL_Rect * dstrect, int blendMode,
+                     Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+{
+    unsigned inva = 0xff - a;
 
-#define SETPIXEL_ADD(p, type, bpp, rshift, gshift, bshift, rmask, gmask, bmask) \
-do { \
-	Uint16 sr = SHIFTAND(p, rshift, rmask) + (Uint16) r; \
-	Uint16 sg = SHIFTAND(p, gshift, gmask) + (Uint16) g; \
-	Uint16 sb = SHIFTAND(p, bshift, bmask) + (Uint16) b; \
-	if (sr>rmask) sr = rmask;  \
-	if (sg>gmask) sg = gmask;  \
-	if (sb>bmask) sb = bmask;  \
-	p = (sr<<rshift) | (sg<<gshift) | (sb<<bshift);  \
-} while (0)
+    switch (blendMode) {
+    case SDL_BLENDMODE_BLEND:
+        BLENDRECT(Uint16, DRAW_SETPIXEL_BLEND_RGB565);
+        break;
+    case SDL_BLENDMODE_ADD:
+        BLENDRECT(Uint16, DRAW_SETPIXEL_ADD_RGB565);
+        break;
+    case SDL_BLENDMODE_MOD:
+        BLENDRECT(Uint16, DRAW_SETPIXEL_MOD_RGB565);
+        break;
+    default:
+        BLENDRECT(Uint16, DRAW_SETPIXEL_RGB565);
+        break;
+    }
+    return 0;
+}
 
-#define SETPIXEL_MOD(p, type, bpp, rshift, gshift, bshift, rmask, gmask, bmask) \
-do { \
-	Uint8 sr = MUL(SHIFTAND(p, rshift, rmask), r); \
-	Uint8 sg = MUL(SHIFTAND(p, gshift, gmask), g); \
-	Uint8 sb = MUL(SHIFTAND(p, bshift, bmask), b); \
-	p = (sr<<rshift) | (sg<<gshift) | (sb<<bshift);  \
-} while (0)
+static int
+SDL_BlendRect_RGB888(SDL_Surface * dst, SDL_Rect * dstrect, int blendMode,
+                     Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+{
+    unsigned inva = 0xff - a;
 
+    switch (blendMode) {
+    case SDL_BLENDMODE_BLEND:
+        BLENDRECT(Uint32, DRAW_SETPIXEL_BLEND_RGB888);
+        break;
+    case SDL_BLENDMODE_ADD:
+        BLENDRECT(Uint32, DRAW_SETPIXEL_ADD_RGB888);
+        break;
+    case SDL_BLENDMODE_MOD:
+        BLENDRECT(Uint32, DRAW_SETPIXEL_MOD_RGB888);
+        break;
+    default:
+        BLENDRECT(Uint32, DRAW_SETPIXEL_RGB888);
+        break;
+    }
+    return 0;
+}
 
-#define SETPIXEL15_MASK(p) SETPIXEL_MASK(p, Uint16, 2, 10, 5, 0, 0x1f, 0x1f, 0x1f);
-#define SETPIXEL15_BLEND(p) SETPIXEL_BLEND(p, Uint16, 2, 10, 5, 0, 0x1f, 0x1f, 0x1f);
-#define SETPIXEL15_ADD(p) SETPIXEL_ADD(p, Uint16, 2, 10, 5, 0, 0x1f, 0x1f, 0x1f);
-#define SETPIXEL15_MOD(p) SETPIXEL_MOD(p, Uint16, 2, 10, 5, 0, 0x1f, 0x1f, 0x1f);
+static int
+SDL_BlendRect_RGB(SDL_Surface * dst, SDL_Rect * dstrect, int blendMode,
+                  Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+{
+    SDL_PixelFormat *fmt = dst->format;
+    unsigned inva = 0xff - a;
 
-#define SETPIXEL16_MASK(p) SETPIXEL_MASK(p, Uint16, 2, 11, 5, 0, 0x1f, 0x3f, 0x1f);
-#define SETPIXEL16_BLEND(p) SETPIXEL_BLEND(p, Uint16, 2, 11, 5, 0, 0x1f, 0x3f, 0x1f);
-#define SETPIXEL16_ADD(p) SETPIXEL_ADD(p, Uint16, 2, 11, 5, 0, 0x1f, 0x3f, 0x1f);
-#define SETPIXEL16_MOD(p) SETPIXEL_MOD(p, Uint16, 2, 11, 5, 0, 0x1f, 0x3f, 0x1f);
+    switch (fmt->BytesPerPixel) {
+    case 2:
+        switch (blendMode) {
+        case SDL_BLENDMODE_BLEND:
+            BLENDRECT(Uint16, DRAW_SETPIXEL_BLEND_RGB);
+            break;
+        case SDL_BLENDMODE_ADD:
+            BLENDRECT(Uint16, DRAW_SETPIXEL_ADD_RGB);
+            break;
+        case SDL_BLENDMODE_MOD:
+            BLENDRECT(Uint16, DRAW_SETPIXEL_MOD_RGB);
+            break;
+        default:
+            BLENDRECT(Uint16, DRAW_SETPIXEL_RGB);
+            break;
+        }
+        return 0;
+    case 4:
+        switch (blendMode) {
+        case SDL_BLENDMODE_BLEND:
+            BLENDRECT(Uint32, DRAW_SETPIXEL_BLEND_RGB);
+            break;
+        case SDL_BLENDMODE_ADD:
+            BLENDRECT(Uint32, DRAW_SETPIXEL_ADD_RGB);
+            break;
+        case SDL_BLENDMODE_MOD:
+            BLENDRECT(Uint32, DRAW_SETPIXEL_MOD_RGB);
+            break;
+        default:
+            BLENDRECT(Uint32, DRAW_SETPIXEL_RGB);
+            break;
+        }
+        return 0;
+    default:
+        SDL_Unsupported();
+        return -1;
+    }
+}
 
-#define SETPIXEL32_MASK(p) SETPIXEL_MASK(p, Uint32, 4, 16, 8, 0, 0xff, 0xff, 0xff);
-#define SETPIXEL32_BLEND(p) SETPIXEL_BLEND(p, Uint32, 4, 16, 8, 0, 0xff, 0xff, 0xff);
-#define SETPIXEL32_ADD(p) SETPIXEL_ADD(p, Uint32, 4, 16, 8, 0, 0xff, 0xff, 0xff);
-#define SETPIXEL32_MOD(p) SETPIXEL_MOD(p, Uint32, 4, 16, 8, 0, 0xff, 0xff, 0xff);
+static int
+SDL_BlendRect_RGBA(SDL_Surface * dst, SDL_Rect * dstrect, int blendMode,
+                   Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+{
+    SDL_PixelFormat *fmt = dst->format;
+    unsigned inva = 0xff - a;
 
-#define BLENDRECT(type, op) \
-do { \
-	int y = dstrect->y; \
-    int h = dstrect->h; \
-    while (h--) { \
-        type *pixel = (type *)(dst->pixels + y * dst->pitch + dstrect->x * dst->format->BytesPerPixel); \
-    	int w = dstrect->w; \
-    	while (w--) { \
-    		op(*pixel); \
-    		pixel++; \
-    	} \
-    	y++; \
-    } \
-} while (0)
+    switch (fmt->BytesPerPixel) {
+    case 4:
+        switch (blendMode) {
+        case SDL_BLENDMODE_BLEND:
+            BLENDRECT(Uint32, DRAW_SETPIXEL_BLEND_RGBA);
+            break;
+        case SDL_BLENDMODE_ADD:
+            BLENDRECT(Uint32, DRAW_SETPIXEL_ADD_RGBA);
+            break;
+        case SDL_BLENDMODE_MOD:
+            BLENDRECT(Uint32, DRAW_SETPIXEL_MOD_RGBA);
+            break;
+        default:
+            BLENDRECT(Uint32, DRAW_SETPIXEL_RGBA);
+            break;
+        }
+        return 0;
+    default:
+        SDL_Unsupported();
+        return -1;
+    }
+}
 
 int
 SDL_BlendRect(SDL_Surface * dst, SDL_Rect * dstrect, int blendMode, Uint8 r,
               Uint8 g, Uint8 b, Uint8 a)
 {
-    Uint16 inva = 0xff - a;
+    SDL_PixelFormat *fmt = dst->format;
+
     /* This function doesn't work on surfaces < 8 bpp */
-    if (dst->format->BitsPerPixel < 8) {
+    if (fmt->BitsPerPixel < 8) {
         SDL_SetError("SDL_BlendRect(): Unsupported surface format");
         return (-1);
     }
@@ -115,70 +193,42 @@ SDL_BlendRect(SDL_Surface * dst, SDL_Rect * dstrect, int blendMode, Uint8 r,
 
     if ((blendMode == SDL_BLENDMODE_BLEND)
         || (blendMode == SDL_BLENDMODE_ADD)) {
-        r = MUL(r, a);
-        g = MUL(g, a);
-        b = MUL(b, a);
+        r = DRAW_MUL(r, a);
+        g = DRAW_MUL(g, a);
+        b = DRAW_MUL(b, a);
     }
-    switch (dst->format->BitsPerPixel) {
+
+    switch (fmt->BitsPerPixel) {
     case 15:
-        switch (blendMode) {
-        case SDL_BLENDMODE_MASK:
-            BLENDRECT(Uint16, SETPIXEL15_MASK);
-            break;
-        case SDL_BLENDMODE_BLEND:
-            BLENDRECT(Uint16, SETPIXEL15_BLEND);
-            break;
-        case SDL_BLENDMODE_ADD:
-            BLENDRECT(Uint16, SETPIXEL15_ADD);
-            break;
-        case SDL_BLENDMODE_MOD:
-            BLENDRECT(Uint16, SETPIXEL15_MOD);
-            break;
+        switch (fmt->Rmask) {
+        case 0x7C00:
+            return SDL_BlendRect_RGB555(dst, dstrect, blendMode, r, g, b, a);
         }
         break;
     case 16:
-        switch (blendMode) {
-        case SDL_BLENDMODE_MASK:
-            BLENDRECT(Uint16, SETPIXEL16_MASK);
-            break;
-        case SDL_BLENDMODE_BLEND:
-            BLENDRECT(Uint16, SETPIXEL16_BLEND);
-            break;
-        case SDL_BLENDMODE_ADD:
-            BLENDRECT(Uint16, SETPIXEL16_ADD);
-            break;
-        case SDL_BLENDMODE_MOD:
-            BLENDRECT(Uint16, SETPIXEL16_MOD);
-            break;
+        switch (fmt->Rmask) {
+        case 0xF800:
+            return SDL_BlendRect_RGB565(dst, dstrect, blendMode, r, g, b, a);
         }
         break;
-    case 24:
     case 32:
-        if (dst->format->BytesPerPixel != 4) {
-            SDL_Unsupported();
-            return -1;
-        }
-        switch (blendMode) {
-        case SDL_BLENDMODE_MASK:
-            BLENDRECT(Uint32, SETPIXEL32_MASK);
-            break;
-        case SDL_BLENDMODE_BLEND:
-            BLENDRECT(Uint32, SETPIXEL32_BLEND);
-            break;
-        case SDL_BLENDMODE_ADD:
-            BLENDRECT(Uint32, SETPIXEL32_ADD);
-            break;
-        case SDL_BLENDMODE_MOD:
-            BLENDRECT(Uint32, SETPIXEL32_MOD);
+        switch (fmt->Rmask) {
+        case 0x00FF0000:
+            if (!fmt->Amask) {
+                return SDL_BlendRect_RGB888(dst, dstrect, blendMode, r, g, b,
+                                            a);
+            }
             break;
         }
-        break;
     default:
-        SDL_Unsupported();
-        return -1;
+        break;
     }
-    return 0;
-    return -1;
+
+    if (!fmt->Amask) {
+        return SDL_BlendRect_RGB(dst, dstrect, blendMode, r, g, b, a);
+    } else {
+        return SDL_BlendRect_RGBA(dst, dstrect, blendMode, r, g, b, a);
+    }
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

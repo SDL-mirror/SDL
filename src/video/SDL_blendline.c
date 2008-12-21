@@ -21,120 +21,159 @@
 */
 #include "SDL_config.h"
 
-#include "SDL_video.h"
-#include "SDL_blit.h"
+#include "SDL_draw.h"
 
-#define ABS(_x) ((_x) < 0 ? -(_x) : (_x))
+static int
+SDL_BlendLine_RGB555(SDL_Surface * dst, int x1, int y1, int x2, int y2,
+                     int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+{
+    unsigned inva = 0xff - a;
 
-#define SWAP(_x, _y) do { int tmp; tmp = _x; _x = _y; _y = tmp; } while (0)
-
-#define BRESENHAM(x0, y0, x1, y1, op) \
-{ \
-    int deltax, deltay, steep, error, xstep, ystep, x, y; \
- \
-    deltax = ABS(x1 - x0); \
-    deltay = ABS(y1 - y0); \
-    steep = (deltay > deltax); \
-    if (steep) { \
-        SWAP(x0, y0); \
-        SWAP(x1, y1); \
-        SWAP(deltax, deltay); \
-    } \
-    error = (x1 - x0) / 2; \
-    y = y0; \
-    if (x0 > x1) { \
-        xstep = -1; \
-    } else { \
-        xstep = 1; \
-    } \
-    if (y0 < y1) { \
-        ystep = 1; \
-    } else { \
-        ystep = -1; \
-    } \
-    if (!steep) { \
-        for (x = x0; x != x1; x += xstep) { \
-            op(x, y); \
-            error -= deltay; \
-            if (error < 0) { \
-                y += ystep; \
-                error += deltax; \
-            } \
-        } \
-    } else { \
-        for (x = x0; x != x1; x += xstep) { \
-            op(y, x); \
-            error -= deltay; \
-            if (error < 0) { \
-                y += ystep; \
-                error += deltax; \
-            } \
-        } \
-    } \
+    switch (blendMode) {
+    case SDL_BLENDMODE_BLEND:
+        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_BLEND_RGB555);
+        break;
+    case SDL_BLENDMODE_ADD:
+        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_ADD_RGB555);
+        break;
+    case SDL_BLENDMODE_MOD:
+        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_MOD_RGB555);
+        break;
+    default:
+        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_RGB555);
+        break;
+    }
+    return 0;
 }
 
-#define MUL(_a, _b) (((Uint16)(_a)*(Uint16)(_b))/255)
-#define SHIFTAND(_v, _s, _a) (((_v)>>(_s)) & _a)
+static int
+SDL_BlendLine_RGB565(SDL_Surface * dst, int x1, int y1, int x2, int y2,
+                     int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+{
+    unsigned inva = 0xff - a;
 
-#define SETPIXEL_MASK(x, y, type, bpp, rshift, gshift, bshift, rmask, gmask, bmask) \
-do { \
-	type *pixel = (type *)(dst->pixels + y * dst->pitch + x * bpp); \
-	if (a) { \
-		*pixel = (r<<rshift) | (g<<gshift) | (b<<bshift); \
-	} \
-} while (0)
+    switch (blendMode) {
+    case SDL_BLENDMODE_BLEND:
+        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_BLEND_RGB565);
+        break;
+    case SDL_BLENDMODE_ADD:
+        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_ADD_RGB565);
+        break;
+    case SDL_BLENDMODE_MOD:
+        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_MOD_RGB565);
+        break;
+    default:
+        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_RGB565);
+        break;
+    }
+    return 0;
+}
 
-#define SETPIXEL_BLEND(x, y, type, bpp, rshift, gshift, bshift, rmask, gmask, bmask) \
-do { \
-	type *pixel = (type *)(dst->pixels + y * dst->pitch + x * bpp); \
-	Uint8 sr = MUL(inva, SHIFTAND(*pixel, rshift, rmask)) + (Uint16) r; \
-	Uint8 sg = MUL(inva, SHIFTAND(*pixel, gshift, gmask)) + (Uint16) g; \
-	Uint8 sb = MUL(inva, SHIFTAND(*pixel, bshift, bmask)) + (Uint16) b; \
-	*pixel = (sr<<rshift) | (sg<<gshift) | (sb<<bshift);  \
-} while (0)
+static int
+SDL_BlendLine_RGB888(SDL_Surface * dst, int x1, int y1, int x2, int y2,
+                     int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+{
+    unsigned inva = 0xff - a;
 
-#define SETPIXEL_ADD(x, y, type, bpp, rshift, gshift, bshift, rmask, gmask, bmask) \
-do { \
-	type *pixel = (type *)(dst->pixels + y * dst->pitch + x * bpp); \
-	Uint16 sr = SHIFTAND(*pixel, rshift, rmask) + (Uint16) r; \
-	Uint16 sg = SHIFTAND(*pixel, gshift, gmask) + (Uint16) g; \
-	Uint16 sb = SHIFTAND(*pixel, bshift, bmask) + (Uint16) b; \
-	if (sr>rmask) sr = rmask;  \
-	if (sg>gmask) sg = gmask;  \
-	if (sb>bmask) sb = bmask;  \
-	*pixel = (sr<<rshift) | (sg<<gshift) | (sb<<bshift);  \
-} while (0)
+    switch (blendMode) {
+    case SDL_BLENDMODE_BLEND:
+        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_BLEND_RGB888);
+        break;
+    case SDL_BLENDMODE_ADD:
+        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_ADD_RGB888);
+        break;
+    case SDL_BLENDMODE_MOD:
+        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_MOD_RGB888);
+        break;
+    default:
+        BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY_RGB888);
+        break;
+    }
+    return 0;
+}
 
-#define SETPIXEL_MOD(x, y, type, bpp, rshift, gshift, bshift, rmask, gmask, bmask) \
-do { \
-	type *pixel = (type *)(dst->pixels + y * dst->pitch + x * bpp); \
-	Uint8 sr = MUL(SHIFTAND(*pixel, rshift, rmask), r); \
-	Uint8 sg = MUL(SHIFTAND(*pixel, gshift, gmask), g); \
-	Uint8 sb = MUL(SHIFTAND(*pixel, bshift, bmask), b); \
-	*pixel = (sr<<rshift) | (sg<<gshift) | (sb<<bshift);  \
-} while (0)
+static int
+SDL_BlendLine_RGB(SDL_Surface * dst, int x1, int y1, int x2, int y2,
+                  int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+{
+    SDL_PixelFormat *fmt = dst->format;
+    unsigned inva = 0xff - a;
 
+    switch (fmt->BytesPerPixel) {
+    case 2:
+        switch (blendMode) {
+        case SDL_BLENDMODE_BLEND:
+            BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY2_BLEND_RGB);
+            break;
+        case SDL_BLENDMODE_ADD:
+            BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY2_ADD_RGB);
+            break;
+        case SDL_BLENDMODE_MOD:
+            BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY2_MOD_RGB);
+            break;
+        default:
+            BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY2_RGB);
+            break;
+        }
+        return 0;
+    case 4:
+        switch (blendMode) {
+        case SDL_BLENDMODE_BLEND:
+            BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY4_BLEND_RGB);
+            break;
+        case SDL_BLENDMODE_ADD:
+            BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY4_ADD_RGB);
+            break;
+        case SDL_BLENDMODE_MOD:
+            BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY4_MOD_RGB);
+            break;
+        default:
+            BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY4_RGB);
+            break;
+        }
+        return 0;
+    default:
+        SDL_Unsupported();
+        return -1;
+    }
+}
 
-#define SETPIXEL15_MASK(x, y) SETPIXEL_MASK(x, y, Uint16, 2, 10, 5, 0, 0x1f, 0x1f, 0x1f);
-#define SETPIXEL15_BLEND(x, y) SETPIXEL_BLEND(x, y, Uint16, 2, 10, 5, 0, 0x1f, 0x1f, 0x1f);
-#define SETPIXEL15_ADD(x, y) SETPIXEL_ADD(x, y, Uint16, 2, 10, 5, 0, 0x1f, 0x1f, 0x1f);
-#define SETPIXEL15_MOD(x, y) SETPIXEL_MOD(x, y, Uint16, 2, 10, 5, 0, 0x1f, 0x1f, 0x1f);
+static int
+SDL_BlendLine_RGBA(SDL_Surface * dst, int x1, int y1, int x2, int y2,
+                   int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+{
+    SDL_PixelFormat *fmt = dst->format;
+    unsigned inva = 0xff - a;
 
-#define SETPIXEL16_MASK(x, y) SETPIXEL_MASK(x, y, Uint16, 2, 11, 5, 0, 0x1f, 0x3f, 0x1f);
-#define SETPIXEL16_BLEND(x, y) SETPIXEL_BLEND(x, y, Uint16, 2, 11, 5, 0, 0x1f, 0x3f, 0x1f);
-#define SETPIXEL16_ADD(x, y) SETPIXEL_ADD(x, y, Uint16, 2, 11, 5, 0, 0x1f, 0x3f, 0x1f);
-#define SETPIXEL16_MOD(x, y) SETPIXEL_MOD(x, y, Uint16, 2, 11, 5, 0, 0x1f, 0x3f, 0x1f);
-
-#define SETPIXEL32_MASK(x, y) SETPIXEL_MASK(x, y, Uint32, 4, 16, 8, 0, 0xff, 0xff, 0xff);
-#define SETPIXEL32_BLEND(x, y) SETPIXEL_BLEND(x, y, Uint32, 4, 16, 8, 0, 0xff, 0xff, 0xff);
-#define SETPIXEL32_ADD(x, y) SETPIXEL_ADD(x, y, Uint32, 4, 16, 8, 0, 0xff, 0xff, 0xff);
-#define SETPIXEL32_MOD(x, y) SETPIXEL_MOD(x, y, Uint32, 4, 16, 8, 0, 0xff, 0xff, 0xff);
+    switch (fmt->BytesPerPixel) {
+    case 4:
+        switch (blendMode) {
+        case SDL_BLENDMODE_BLEND:
+            BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY4_BLEND_RGBA);
+            break;
+        case SDL_BLENDMODE_ADD:
+            BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY4_ADD_RGBA);
+            break;
+        case SDL_BLENDMODE_MOD:
+            BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY4_MOD_RGBA);
+            break;
+        default:
+            BRESENHAM(x1, y1, x2, y2, DRAW_SETPIXELXY4_RGBA);
+            break;
+        }
+        return 0;
+    default:
+        SDL_Unsupported();
+        return -1;
+    }
+}
 
 int
 SDL_BlendLine(SDL_Surface * dst, int x1, int y1, int x2, int y2,
               int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
-    Uint8 inva = 0xff - a;
+    SDL_PixelFormat *fmt = dst->format;
+
     /* This function doesn't work on surfaces < 8 bpp */
     if (dst->format->BitsPerPixel < 8) {
         SDL_SetError("SDL_BlendLine(): Unsupported surface format");
@@ -150,69 +189,44 @@ SDL_BlendLine(SDL_Surface * dst, int x1, int y1, int x2, int y2,
 
     if ((blendMode == SDL_BLENDMODE_BLEND)
         || (blendMode == SDL_BLENDMODE_ADD)) {
-        r = MUL(r, a);
-        g = MUL(g, a);
-        b = MUL(b, a);
+        r = DRAW_MUL(r, a);
+        g = DRAW_MUL(g, a);
+        b = DRAW_MUL(b, a);
     }
-    switch (dst->format->BitsPerPixel) {
+
+    switch (fmt->BitsPerPixel) {
     case 15:
-        switch (blendMode) {
-        case SDL_BLENDMODE_MASK:
-            BRESENHAM(x1, y1, x2, y2, SETPIXEL15_MASK);
-            break;
-        case SDL_BLENDMODE_BLEND:
-            BRESENHAM(x1, y1, x2, y2, SETPIXEL15_BLEND);
-            break;
-        case SDL_BLENDMODE_ADD:
-            BRESENHAM(x1, y1, x2, y2, SETPIXEL15_ADD);
-            break;
-        case SDL_BLENDMODE_MOD:
-            BRESENHAM(x1, y1, x2, y2, SETPIXEL15_MOD);
-            break;
+        switch (fmt->Rmask) {
+        case 0x7C00:
+            return SDL_BlendLine_RGB555(dst, x1, y1, x2, y2, blendMode, r, g,
+                                        b, a);
         }
         break;
     case 16:
-        switch (blendMode) {
-        case SDL_BLENDMODE_MASK:
-            BRESENHAM(x1, y1, x2, y2, SETPIXEL16_MASK);
-            break;
-        case SDL_BLENDMODE_BLEND:
-            BRESENHAM(x1, y1, x2, y2, SETPIXEL16_BLEND);
-            break;
-        case SDL_BLENDMODE_ADD:
-            BRESENHAM(x1, y1, x2, y2, SETPIXEL16_ADD);
-            break;
-        case SDL_BLENDMODE_MOD:
-            BRESENHAM(x1, y1, x2, y2, SETPIXEL16_MOD);
-            break;
+        switch (fmt->Rmask) {
+        case 0xF800:
+            return SDL_BlendLine_RGB565(dst, x1, y1, x2, y2, blendMode, r, g,
+                                        b, a);
         }
         break;
-    case 24:
     case 32:
-        if (dst->format->BytesPerPixel != 4) {
-            SDL_Unsupported();
-            return -1;
-        }
-        switch (blendMode) {
-        case SDL_BLENDMODE_MASK:
-            BRESENHAM(x1, y1, x2, y2, SETPIXEL32_MASK);
-            break;
-        case SDL_BLENDMODE_BLEND:
-            BRESENHAM(x1, y1, x2, y2, SETPIXEL32_BLEND);
-            break;
-        case SDL_BLENDMODE_ADD:
-            BRESENHAM(x1, y1, x2, y2, SETPIXEL32_ADD);
-            break;
-        case SDL_BLENDMODE_MOD:
-            BRESENHAM(x1, y1, x2, y2, SETPIXEL32_MOD);
+        switch (fmt->Rmask) {
+        case 0x00FF0000:
+            if (!fmt->Amask) {
+                return SDL_BlendLine_RGB888(dst, x1, y1, x2, y2, blendMode, r,
+                                            g, b, a);
+            }
             break;
         }
-        break;
     default:
-        SDL_Unsupported();
-        return -1;
+        break;
     }
-    return 0;
+
+    if (!fmt->Amask) {
+        return SDL_BlendLine_RGB(dst, x1, y1, x2, y2, blendMode, r, g, b, a);
+    } else {
+        return SDL_BlendLine_RGBA(dst, x1, y1, x2, y2, blendMode, r, g, b, a);
+    }
 }
 
 /* vi: set ts=4 sw=4 expandtab: */
