@@ -660,7 +660,7 @@ extern DECLSPEC void SDLCALL SDL_SetWindowSize(SDL_WindowID windowID, int w,
                                                int h);
 
 /**
- * \fn void SDL_GetWindowSize(SDL_WindowID windowID, int *w, int *w)
+ * \fn void SDL_GetWindowSize(SDL_WindowID windowID, int *w, int *h)
  *
  * \brief Get the size of the window's client area.
  *
