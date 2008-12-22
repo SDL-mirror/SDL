@@ -360,8 +360,9 @@ SW_DisplayModeChanged(SDL_Renderer * renderer)
             return -1;
         }
     }
+    /* Rebind the context to the window area */
     data->updateSize = SDL_TRUE;
-    return 0;
+    return SW_ActivateRenderer(renderer);
 }
 
 static int
