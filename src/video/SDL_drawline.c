@@ -34,11 +34,9 @@ SDL_DrawLine(SDL_Surface * dst, int x1, int y1, int x2, int y2, Uint32 color)
     }
 
     /* Perform clipping */
-    /* FIXME
-       if (!SDL_IntersectRect(dstrect, &dst->clip_rect, dstrect)) {
-       return (0);
-       }
-     */
+    if (!SDL_IntersectRectAndLine(&dst->clip_rect, &x1, &x2, &y1, &y2)) {
+        return (0);
+    }
 
     switch (dst->format->BytesPerPixel) {
     case 1:

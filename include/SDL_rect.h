@@ -104,6 +104,18 @@ extern DECLSPEC void SDLCALL SDL_UnionRect(const SDL_Rect * A,
                                            const SDL_Rect * B,
                                            SDL_Rect * result);
 
+/**
+ * \fn SDL_bool SDL_IntersectRectAndLine(const SDL_Rect *rect, int *X1, int *Y1, int *X2, int *Y2)
+ *
+ * \brief Calculate the intersection of a rectangle and line segment.
+ *
+ * \return SDL_TRUE if there is an intersection, SDL_FALSE otherwise.
+ */
+extern DECLSPEC SDL_bool SDLCALL SDL_IntersectRectAndLine(const SDL_Rect *
+                                                          rect, int *X1,
+                                                          int *Y1, int *X2,
+                                                          int *Y2);
+
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
 /* *INDENT-OFF* */
