@@ -2155,6 +2155,7 @@ SDL_RenderFill(const SDL_Rect * rect)
         return -1;
     }
     window = SDL_GetWindowFromID(renderer->window);
+
     real_rect.x = 0;
     real_rect.y = 0;
     real_rect.w = window->w;
@@ -2189,21 +2190,25 @@ SDL_RenderCopy(SDL_TextureID textureID, const SDL_Rect * srcrect,
         return -1;
     }
     window = SDL_GetWindowFromID(renderer->window);
+
+    real_srcrect.x = 0;
+    real_srcrect.y = 0;
+    real_srcrect.w = texture->w;
+    real_srcrect.h = texture->h;
     if (srcrect) {
-        real_srcrect = *srcrect;
-    } else {
-        real_srcrect.x = 0;
-        real_srcrect.y = 0;
-        real_srcrect.w = texture->w;
-        real_srcrect.h = texture->h;
+        if (!SDL_IntersectRect(srcrect, &real_srcrect, &real_srcrect)) {
+            return 0;
+        }
     }
+
+    real_dstrect.x = 0;
+    real_dstrect.y = 0;
+    real_dstrect.w = window->w;
+    real_dstrect.h = window->h;
     if (dstrect) {
-        real_dstrect = *dstrect;
-    } else {
-        real_dstrect.x = 0;
-        real_dstrect.y = 0;
-        real_dstrect.w = window->w;
-        real_dstrect.h = window->h;
+        if (!SDL_IntersectRect(dstrect, &real_dstrect, &real_dstrect)) {
+            return 0;
+        }
     }
 
     return renderer->RenderCopy(renderer, texture, &real_srcrect,
