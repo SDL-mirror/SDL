@@ -2205,6 +2205,19 @@ SDL_RenderCopy(SDL_TextureID textureID, const SDL_Rect * srcrect,
         if (!SDL_IntersectRect(dstrect, &real_dstrect, &real_dstrect)) {
             return 0;
         }
+        /* Clip srcrect by the same amount as dstrect was clipped */
+        if (dstrect->w != real_dstrect.w) {
+            int deltax = (real_dstrect.x - dstrect->x);
+            int deltaw = (real_dstrect.w - dstrect->w);
+            real_srcrect.x += (deltax * dstrect->w) / real_srcrect.w;
+            real_srcrect.w += (deltaw * dstrect->w) / real_srcrect.w;
+        }
+        if (dstrect->h != real_dstrect.h) {
+            int deltay = (real_dstrect.y - dstrect->y);
+            int deltah = (real_dstrect.h - dstrect->h);
+            real_srcrect.y += (deltay * dstrect->h) / real_srcrect.h;
+            real_srcrect.h += (deltah * dstrect->h) / real_srcrect.h;
+        }
     }
 
     return renderer->RenderCopy(renderer, texture, &real_srcrect,
