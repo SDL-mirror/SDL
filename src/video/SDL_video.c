@@ -2125,7 +2125,7 @@ SDL_RenderLine(int x1, int y1, int x2, int y2)
     real_rect.y = 0;
     real_rect.w = window->w;
     real_rect.h = window->h;
-    if (!SDL_IntersectRectAndLine(&real_rect, &x1, &x2, &y1, &y2)) {
+    if (!SDL_IntersectRectAndLine(&real_rect, &x1, &y1, &x2, &y2)) {
         return (0);
     }
     return renderer->RenderLine(renderer, x1, y1, x2, y2);

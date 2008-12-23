@@ -34,7 +34,7 @@ SDL_DrawLine(SDL_Surface * dst, int x1, int y1, int x2, int y2, Uint32 color)
     }
 
     /* Perform clipping */
-    if (!SDL_IntersectRectAndLine(&dst->clip_rect, &x1, &x2, &y1, &y2)) {
+    if (!SDL_IntersectRectAndLine(&dst->clip_rect, &x1, &y1, &x2, &y2)) {
         return (0);
     }
 
