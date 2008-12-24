@@ -7,7 +7,7 @@ EXE	= @EXE@
 CFLAGS  = @CFLAGS@
 LIBS	= @LIBS@
 
-TARGETS = checkkeys$(EXE) graywin$(EXE) loopwave$(EXE) testaudioinfo$(EXE) testmultiaudio$(EXE) testalpha$(EXE) testbitmap$(EXE) testblitspeed$(EXE) testcdrom$(EXE) testcursor$(EXE) testdyngl$(EXE) testerror$(EXE) testfile$(EXE) testfill2$(EXE) testgamma$(EXE) testgl$(EXE) testgl2$(EXE) testhread$(EXE) testiconv$(EXE) testjoystick$(EXE) testkeys$(EXE) testlines2$(EXE) testlock$(EXE) testoverlay2$(EXE) testoverlay$(EXE) testpalette$(EXE) testplatform$(EXE) testsem$(EXE) testsprite$(EXE) testsprite2$(EXE) testtimer$(EXE) testver$(EXE) testvidinfo$(EXE) testwin$(EXE) testwm$(EXE) testwm2$(EXE) threadwin$(EXE) torturethread$(EXE) testloadso$(EXE) testhaptic$(EXE) testmmousetablet$(EXE) 
+TARGETS = checkkeys$(EXE) graywin$(EXE) loopwave$(EXE) testaudioinfo$(EXE) testmultiaudio$(EXE) testalpha$(EXE) testbitmap$(EXE) testblitspeed$(EXE) testcdrom$(EXE) testcursor$(EXE) testdraw2$(EXE) testdyngl$(EXE) testerror$(EXE) testfile$(EXE) testgamma$(EXE) testgl$(EXE) testgl2$(EXE) testhread$(EXE) testiconv$(EXE) testjoystick$(EXE) testkeys$(EXE) testlock$(EXE) testoverlay2$(EXE) testoverlay$(EXE) testpalette$(EXE) testplatform$(EXE) testsem$(EXE) testsprite$(EXE) testsprite2$(EXE) testtimer$(EXE) testver$(EXE) testvidinfo$(EXE) testwin$(EXE) testwm$(EXE) testwm2$(EXE) threadwin$(EXE) torturethread$(EXE) testloadso$(EXE) testhaptic$(EXE) testmmousetablet$(EXE) 
 
 all: Makefile $(TARGETS)
 
@@ -44,6 +44,9 @@ testcdrom$(EXE): $(srcdir)/testcdrom.c
 testcursor$(EXE): $(srcdir)/testcursor.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
 
+testdraw2$(EXE): $(srcdir)/testdraw2.c $(srcdir)/common.c
+	$(CC) -o $@ $(srcdir)/testdraw2.c $(srcdir)/common.c $(CFLAGS) $(LIBS)
+
 testdyngl$(EXE): $(srcdir)/testdyngl.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
 
@@ -52,9 +55,6 @@ testerror$(EXE): $(srcdir)/testerror.c
 
 testfile$(EXE): $(srcdir)/testfile.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
-
-testfill2$(EXE): $(srcdir)/testfill2.c $(srcdir)/common.c
-	$(CC) -o $@ $(srcdir)/testfill2.c $(srcdir)/common.c $(CFLAGS) $(LIBS)
 
 testgamma$(EXE): $(srcdir)/testgamma.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS) @MATHLIB@
@@ -76,9 +76,6 @@ testjoystick$(EXE): $(srcdir)/testjoystick.c
 
 testkeys$(EXE): $(srcdir)/testkeys.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
-
-testlines2$(EXE): $(srcdir)/testlines2.c $(srcdir)/common.c
-	$(CC) -o $@ $(srcdir)/testlines2.c $(srcdir)/common.c $(CFLAGS) $(LIBS)
 
 testlock$(EXE): $(srcdir)/testlock.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
