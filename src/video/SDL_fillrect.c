@@ -356,8 +356,6 @@ SDL_FillRect(SDL_Surface * dst, SDL_Rect * dstrect, Uint32 color)
         }
     }
 
-    SDL_UnlockSurface(dst);
-
     /* We're done! */
     return (0);
 }
