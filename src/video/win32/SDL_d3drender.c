@@ -62,8 +62,7 @@ static int D3D_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static void D3D_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static void D3D_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                              int numrects, const SDL_Rect * rects);
-static int D3D_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b,
-                          Uint8 a, const SDL_Rect * rect);
+static int D3D_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect);
 static int D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * srcrect, const SDL_Rect * dstrect);
 static void D3D_RenderPresent(SDL_Renderer * renderer);
@@ -708,8 +707,7 @@ D3D_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture, int numrects,
 }
 
 static int
-D3D_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b, Uint8 a,
-               const SDL_Rect * rect)
+D3D_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
 {
     D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
     D3DRECT d3drect;
@@ -727,7 +725,10 @@ D3D_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b, Uint8 a,
 
     result =
         IDirect3DDevice9_Clear(data->device, 1, &d3drect, D3DCLEAR_TARGET,
-                               D3DCOLOR_ARGB(a, r, g, b), 1.0f, 0);
+                               D3DCOLOR_ARGB(renderer->a,
+							                 renderer->r,
+											 renderer->g,
+											 renderer->b), 1.0f, 0);
     if (FAILED(result)) {
         D3D_SetError("Clear()", result);
         return -1;

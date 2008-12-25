@@ -55,8 +55,7 @@ static int GDI_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                            const SDL_Rect * rect, int markDirty,
                            void **pixels, int *pitch);
 static void GDI_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
-static int GDI_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b,
-                          Uint8 a, const SDL_Rect * rect);
+static int GDI_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect);
 static int GDI_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * srcrect, const SDL_Rect * dstrect);
 static void GDI_RenderPresent(SDL_Renderer * renderer);
@@ -570,8 +569,7 @@ GDI_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 }
 
 static int
-GDI_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b, Uint8 a,
-               const SDL_Rect * rect)
+GDI_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
 {
     GDI_RenderData *data = (GDI_RenderData *) renderer->driverdata;
     RECT rc;
@@ -588,7 +586,7 @@ GDI_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b, Uint8 a,
     rc.bottom = rect->y + rect->h + 1;
 
     /* Should we cache the brushes? .. it looks like GDI does for us. :) */
-    brush = CreateSolidBrush(RGB(r, g, b));
+    brush = CreateSolidBrush(RGB(renderer->r, renderer->g, renderer->b));
     SelectObject(data->current_hdc, brush);
     status = FillRect(data->current_hdc, &rc, brush);
     DeleteObject(brush);
