@@ -119,7 +119,8 @@ SDL_UnionRect(const SDL_Rect * A, const SDL_Rect * B, SDL_Rect * result)
 }
 
 SDL_bool
-SDL_IntersectRectAndLine(const SDL_Rect *rect, int *X1, int *Y1, int *X2, int *Y2)
+SDL_IntersectRectAndLine(const SDL_Rect * rect, int *X1, int *Y1, int *X2,
+                         int *Y2)
 {
     int x1, y1;
     int x2, y2;

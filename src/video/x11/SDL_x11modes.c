@@ -157,7 +157,7 @@ X11_InitModes(_THIS)
         displaydata->visual = vinfo.visual;
         displaydata->depth = vinfo.depth;
 
-        displaydata->scanline_pad = SDL_BYTESPERPIXEL(mode.format)*8;
+        displaydata->scanline_pad = SDL_BYTESPERPIXEL(mode.format) * 8;
         pixmapFormats = XListPixmapFormats(data->display, &n);
         if (pixmapFormats) {
             for (i = 0; i < n; ++i) {

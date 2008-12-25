@@ -726,9 +726,9 @@ D3D_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
     result =
         IDirect3DDevice9_Clear(data->device, 1, &d3drect, D3DCLEAR_TARGET,
                                D3DCOLOR_ARGB(renderer->a,
-							                 renderer->r,
-											 renderer->g,
-											 renderer->b), 1.0f, 0);
+                                             renderer->r,
+                                             renderer->g,
+                                             renderer->b), 1.0f, 0);
     if (FAILED(result)) {
         D3D_SetError("Clear()", result);
         return -1;
