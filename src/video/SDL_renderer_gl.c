@@ -519,9 +519,9 @@ compile_shader(GL_RenderData * data, GLenum shader_type, const char *_code)
 {
     const int have_texture_rects = data->GL_ARB_texture_rectangle_supported;
     const char *replacement = have_texture_rects ? "RECT" : "2D";
-    const size_t replacementlen = strlen(replacement);
+    const size_t replacementlen = SDL_strlen(replacement);
     const char *token = "%TEXTURETARGET%";
-    const size_t tokenlen = strlen(token);
+    const size_t tokenlen = SDL_strlen(token);
     char *code = NULL;
     char *ptr = NULL;
     GLuint program = 0;
@@ -536,9 +536,9 @@ compile_shader(GL_RenderData * data, GLenum shader_type, const char *_code)
         return 0;
 
     for (ptr = SDL_strstr(code, token); ptr; ptr = SDL_strstr(ptr + 1, token)) {
-        memcpy(ptr, replacement, replacementlen);
-        memmove(ptr + replacementlen, ptr + tokenlen,
-                strlen(ptr + tokenlen) + 1);
+        SDL_memcpy(ptr, replacement, replacementlen);
+        SDL_memmove(ptr + replacementlen, ptr + tokenlen,
+                    SDL_strlen(ptr + tokenlen) + 1);
     }
 
 #if DEBUG_PROGRAM_COMPILE

@@ -214,7 +214,6 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_INPUT:             /* mouse events */
         {
             LPBYTE lpb;
-            int w, h;
             const RAWINPUTHEADER *header;
             int index;
             int i;

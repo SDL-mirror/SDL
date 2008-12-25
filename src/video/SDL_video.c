@@ -2075,7 +2075,6 @@ SDL_RenderPoint(int x, int y)
 {
     SDL_Renderer *renderer;
     SDL_Window *window;
-    SDL_Rect real_rect;
 
     if (!_this) {
         SDL_UninitializedVideo();

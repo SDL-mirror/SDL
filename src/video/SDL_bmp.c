@@ -218,7 +218,7 @@ SDL_LoadBMP_RW(SDL_RWops * src, int freesrc)
         if (biClrUsed == 0) {
             biClrUsed = 1 << biBitCount;
         }
-        if (biClrUsed > palette->ncolors) {
+        if ((int)biClrUsed > palette->ncolors) {
             palette->ncolors = biClrUsed;
             palette->colors =
                 (SDL_Color *) SDL_realloc(palette->colors,
@@ -229,7 +229,7 @@ SDL_LoadBMP_RW(SDL_RWops * src, int freesrc)
                 was_error = 1;
                 goto done;
             }
-        } else if (biClrUsed < palette->ncolors) {
+        } else if ((int)biClrUsed < palette->ncolors) {
             palette->ncolors = biClrUsed;
         }
         if (biSize == 12) {

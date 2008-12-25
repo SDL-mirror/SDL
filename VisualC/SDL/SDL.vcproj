@@ -441,6 +441,18 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\video\SDL_blendline.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\video\SDL_blendpoint.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\video\SDL_blendrect.c"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\video\SDL_blit.c"
 			>
 		</File>
@@ -485,6 +497,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\video\SDL_blit_slow.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\video\SDL_bmp.c"
 			>
 		</File>
@@ -522,6 +538,18 @@
 		</File>
 		<File
 			RelativePath="..\..\src\audio\disk\SDL_diskaudio.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\video\SDL_draw.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\video\SDL_drawline.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\video\SDL_drawpoint.c"
 			>
 		</File>
 		<File
@@ -569,7 +597,7 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\SDL_fill.c"
+			RelativePath="..\..\src\video\SDL_fillrect.c"
 			>
 		</File>
 		<File

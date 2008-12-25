@@ -30,7 +30,7 @@
 #define DRAW_MUL(_a, _b) (((unsigned)(_a)*(_b))/255)
 
 #define DRAW_FASTSETPIXEL(x, y, type, bpp, color) \
-    *(type *)(dst->pixels + y * dst->pitch + x * bpp) = (type) color
+    *(type *)((Uint8 *)dst->pixels + y * dst->pitch + x * bpp) = (type) color
 
 #define DRAW_FASTSETPIXEL1(x, y) DRAW_FASTSETPIXEL(x, y, Uint8, 1, color);
 #define DRAW_FASTSETPIXEL2(x, y) DRAW_FASTSETPIXEL(x, y, Uint16, 2, color);
@@ -74,7 +74,7 @@ do { \
 
 #define DRAW_SETPIXELXY(x, y, type, bpp, op) \
 do { \
-    type *pixel = (type *)(dst->pixels + y * dst->pitch + x * bpp); \
+    type *pixel = (type *)((Uint8 *)dst->pixels + y * dst->pitch + x * bpp); \
     op; \
 } while (0)
 
@@ -346,7 +346,6 @@ do { \
 
 #define FILLRECT(type, op) \
 do { \
-    int w; \
     int width = dstrect->w; \
     int height = dstrect->h; \
     int pitch = (dst->pitch / dst->format->BytesPerPixel); \
