@@ -83,6 +83,7 @@ typedef struct
     int screen;
     Visual *visual;
     int depth;
+    int scanline_pad;
     Window window;
     Pixmap pixmaps[3];
     int current_pixmap;
@@ -185,6 +186,7 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
     data->screen = displaydata->screen;
     data->visual = displaydata->visual;
     data->depth = displaydata->depth;
+    data->scanline_pad = displaydata->scanline_pad;
     data->window = windowdata->window;
 
     renderer->DisplayModeChanged = X11_DisplayModeChanged;
@@ -316,6 +318,7 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
     SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
     X11_TextureData *data;
+    int pitch_alignmask = ((renderdata->scanline_pad / 8) - 1);
 
     data = (X11_TextureData *) SDL_calloc(1, sizeof(*data));
     if (!data) {
@@ -343,6 +346,7 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         data->format = texture->format;
     }
     data->pitch = texture->w * SDL_BYTESPERPIXEL(data->format);
+    data->pitch = (data->pitch + pitch_alignmask) & ~pitch_alignmask;
 
     if (data->yuv || texture->access == SDL_TEXTUREACCESS_STREAMING) {
 #ifndef NO_SHARED_MEMORY

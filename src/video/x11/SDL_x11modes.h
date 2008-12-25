@@ -29,6 +29,7 @@ typedef struct
     int screen;
     Visual *visual;
     int depth;
+    int scanline_pad;
 
     int use_xinerama;
     int use_xrandr;

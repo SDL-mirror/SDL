@@ -136,6 +136,8 @@ X11_InitModes(_THIS)
         SDL_VideoDisplay display;
         SDL_DisplayData *displaydata;
         SDL_DisplayMode mode;
+        XPixmapFormatValues *pixmapFormats;
+        int i, n;
 
         if (get_visualinfo(data->display, screen, &vinfo) < 0) {
             continue;
@@ -154,6 +156,18 @@ X11_InitModes(_THIS)
         displaydata->screen = screen;
         displaydata->visual = vinfo.visual;
         displaydata->depth = vinfo.depth;
+
+        displaydata->scanline_pad = SDL_BYTESPERPIXEL(mode.format)*8;
+        pixmapFormats = XListPixmapFormats(data->display, &n);
+        if (pixmapFormats) {
+            for (i = 0; i < n; ++i) {
+                if (pixmapFormats[i].depth == displaydata->depth) {
+                    displaydata->scanline_pad = pixmapFormats[i].scanline_pad;
+                    break;
+                }
+            }
+            XFree(pixmapFormats);
+        }
 
         SDL_zero(display);
         display.desktop_mode = mode;
