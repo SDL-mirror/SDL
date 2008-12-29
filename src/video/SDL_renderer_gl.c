@@ -444,7 +444,7 @@ SetBlendMode(GL_RenderData * data, int blendMode)
     if (blendMode != data->blendMode) {
         switch (blendMode) {
         case SDL_BLENDMODE_NONE:
-            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
             data->glDisable(GL_BLEND);
             break;
         case SDL_BLENDMODE_MASK:
