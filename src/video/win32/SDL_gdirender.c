@@ -55,6 +55,9 @@ static int GDI_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                            const SDL_Rect * rect, int markDirty,
                            void **pixels, int *pitch);
 static void GDI_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
+static int GDI_RenderPoint(SDL_Renderer * renderer, int x, int y);
+static int GDI_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2,
+                          int y2);
 static int GDI_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect);
 static int GDI_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * srcrect, const SDL_Rect * dstrect);
@@ -72,7 +75,7 @@ SDL_RenderDriver GDI_RenderDriver = {
       SDL_RENDERER_PRESENTFLIP2 | SDL_RENDERER_PRESENTFLIP3 |
       SDL_RENDERER_PRESENTDISCARD | SDL_RENDERER_ACCELERATED),
      (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_ALPHA),
-     (SDL_BLENDMODE_NONE | SDL_BLENDMODE_MASK | SDL_BLENDMODE_BLEND),
+     (SDL_BLENDMODE_NONE | SDL_BLENDMODE_MASK),
      (SDL_TEXTURESCALEMODE_NONE | SDL_TEXTURESCALEMODE_FAST),
      14,
      {
@@ -172,6 +175,8 @@ GDI_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->UpdateTexture = GDI_UpdateTexture;
     renderer->LockTexture = GDI_LockTexture;
     renderer->UnlockTexture = GDI_UnlockTexture;
+    renderer->RenderPoint = GDI_RenderPoint;
+    renderer->RenderLine = GDI_RenderLine;
     renderer->RenderFill = GDI_RenderFill;
     renderer->RenderCopy = GDI_RenderCopy;
     renderer->RenderPresent = GDI_RenderPresent;
@@ -569,6 +574,71 @@ GDI_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 }
 
 static int
+GDI_RenderPoint(SDL_Renderer * renderer, int x, int y)
+{
+    GDI_RenderData *data = (GDI_RenderData *) renderer->driverdata;
+
+    if (data->makedirty) {
+        SDL_Rect rect;
+
+        rect.x = x;
+        rect.y = y;
+        rect.w = 1;
+        rect.h = 1;
+
+        SDL_AddDirtyRect(&data->dirty, &rect);
+    }
+
+    SetPixel(data->current_hdc, x, y, RGB(renderer->r, renderer->g, renderer->b));
+    return 0;
+}
+
+static int
+GDI_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
+{
+    GDI_RenderData *data = (GDI_RenderData *) renderer->driverdata;
+    POINT points[2];
+    HBRUSH brush;
+    BOOL status;
+
+    if (data->makedirty) {
+        SDL_Rect rect;
+
+        if (x1 < x2) {
+            rect.x = x1;
+            rect.w = (x2 - x1) + 1;
+        } else {
+            rect.x = x2;
+            rect.w = (x1 - x2) + 1;
+        }
+        if (y1 < y2) {
+            rect.y = y1;
+            rect.h = (y2 - y1) + 1;
+        } else {
+            rect.y = y2;
+            rect.h = (y1 - y2) + 1;
+        }
+        SDL_AddDirtyRect(&data->dirty, &rect);
+    }
+
+    /* Should we cache the brushes? .. it looks like GDI does for us. :) */
+    brush = CreateSolidBrush(RGB(renderer->r, renderer->g, renderer->b));
+    SelectObject(data->current_hdc, brush);
+    points[0].x = x1;
+    points[0].y = y1;
+    points[1].x = x2;
+    points[1].y = y2;
+    status = Polyline(data->current_hdc, points, 2);
+    DeleteObject(brush);
+
+    if (!status) {
+        WIN_SetError("FillRect()");
+        return -1;
+    }
+    return 0;
+}
+
+static int
 GDI_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
 {
     GDI_RenderData *data = (GDI_RenderData *) renderer->driverdata;
@@ -614,14 +684,16 @@ GDI_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         SelectPalette(data->memory_hdc, texturedata->hpal, TRUE);
         RealizePalette(data->memory_hdc);
     }
-    if (texture->blendMode & (SDL_BLENDMODE_MASK | SDL_BLENDMODE_BLEND)) {
+    if (texture->blendMode & SDL_BLENDMODE_MASK) {
         BLENDFUNCTION blendFunc = {
             AC_SRC_OVER,
             0,
             texture->a,
             AC_SRC_ALPHA
         };
-        /* FIXME: GDI uses premultiplied alpha! */
+        /* FIXME: GDI uses premultiplied alpha!
+         *        Once we solve this and somehow support blended drawing we can enable SDL_BLENDMODE_BLEND
+         */
         if (!AlphaBlend
             (data->current_hdc, dstrect->x, dstrect->y, dstrect->w,
              dstrect->h, data->memory_hdc, srcrect->x, srcrect->y, srcrect->w,
