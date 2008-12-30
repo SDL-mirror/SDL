@@ -28,6 +28,25 @@
 #include "SDL_x11video.h"
 #include "../Xext/extensions/StdCmap.h"
 
+static void
+X11_GetDisplaySize(_THIS, SDL_Window * window, int *w, int *h)
+{
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+    SDL_DisplayData *displaydata =
+        (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
+    XWindowAttributes attr;
+
+    XGetWindowAttributes(data->display, RootWindow(data->display,
+                                                   displaydata->screen),
+                         &attr);
+    if (w) {
+        *w = attr.width;
+    }
+    if (h) {
+        *h = attr.height;
+    }
+}
+
 static int
 SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
 {
@@ -289,8 +308,8 @@ X11_CreateWindow(_THIS, SDL_Window * window)
 
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
         || window->x == SDL_WINDOWPOS_CENTERED) {
-        x = (DisplayWidth(data->display, displaydata->screen) -
-             window->w) / 2;
+        X11_GetDisplaySize(_this, window, &x, NULL);
+        x = (x - window->w) / 2;
     } else if (window->x == SDL_WINDOWPOS_UNDEFINED) {
         x = 0;
     } else {
@@ -298,8 +317,8 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     }
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
         || window->y == SDL_WINDOWPOS_CENTERED) {
-        y = (DisplayHeight(data->display, displaydata->screen) -
-             window->h) / 2;
+        X11_GetDisplaySize(_this, window, NULL, &y);
+        y = (y - window->h) / 2;
     } else if (window->y == SDL_WINDOWPOS_UNDEFINED) {
         y = 0;
     } else {
@@ -608,13 +627,15 @@ X11_SetWindowPosition(_THIS, SDL_Window * window)
 
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
         || window->x == SDL_WINDOWPOS_CENTERED) {
-        x = (DisplayWidth(display, displaydata->screen) - window->w) / 2;
+        X11_GetDisplaySize(_this, window, &x, NULL);
+        x = (x - window->w) / 2;
     } else {
         x = window->x;
     }
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
         || window->y == SDL_WINDOWPOS_CENTERED) {
-        y = (DisplayHeight(display, displaydata->screen) - window->h) / 2;
+        X11_GetDisplaySize(_this, window, NULL, &y);
+        y = (y - window->h) / 2;
     } else {
         y = window->y;
     }
@@ -627,7 +648,7 @@ X11_SetWindowSize(_THIS, SDL_Window * window)
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     Display *display = data->videodata->display;
 
-    XMoveWindow(display, data->window, window->w, window->h);
+    XResizeWindow(display, data->window, window->w, window->h);
 }
 
 void
