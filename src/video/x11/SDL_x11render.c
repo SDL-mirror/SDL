@@ -47,7 +47,6 @@ static int X11_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                            const SDL_Rect * rect, int markDirty,
                            void **pixels, int *pitch);
 static void X11_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
-static int X11_SetDrawColor(SDL_Renderer * renderer);
 static int X11_SetDrawBlendMode(SDL_Renderer * renderer);
 static int X11_RenderPoint(SDL_Renderer * renderer, int x, int y);
 static int X11_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2,
@@ -197,7 +196,6 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->UpdateTexture = X11_UpdateTexture;
     renderer->LockTexture = X11_LockTexture;
     renderer->UnlockTexture = X11_UnlockTexture;
-    renderer->SetDrawColor = X11_SetDrawColor;
     renderer->SetDrawBlendMode = X11_SetDrawBlendMode;
     renderer->RenderPoint = X11_RenderPoint;
     renderer->RenderLine = X11_RenderLine;
@@ -561,12 +559,6 @@ X11_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         SDL_SW_UnlockYUVTexture(data->yuv);
         UpdateYUVTextureData(texture);
     }
-}
-
-static int
-X11_SetDrawColor(SDL_Renderer * renderer)
-{
-    return 0;
 }
 
 static int

@@ -59,8 +59,6 @@ static int SW_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * rect, int markDirty, void **pixels,
                           int *pitch);
 static void SW_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
-static int SW_SetDrawColor(SDL_Renderer * renderer);
-static int SW_SetDrawBlendMode(SDL_Renderer * renderer);
 static int SW_RenderPoint(SDL_Renderer * renderer, int x, int y);
 static int SW_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2,
                          int y2);
@@ -226,8 +224,6 @@ SW_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->ActivateRenderer = SW_ActivateRenderer;
     renderer->DisplayModeChanged = SW_DisplayModeChanged;
 
-    renderer->SetDrawColor = SW_SetDrawColor;
-    renderer->SetDrawBlendMode = SW_SetDrawBlendMode;
     renderer->RenderPoint = SW_RenderPoint;
     renderer->RenderLine = SW_RenderLine;
     renderer->RenderFill = SW_RenderFill;
@@ -526,18 +522,6 @@ SW_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     if (SDL_ISPIXELFORMAT_FOURCC(texture->format)) {
         SDL_SW_UnlockYUVTexture((SDL_SW_YUVTexture *) texture->driverdata);
     }
-}
-
-static int
-SW_SetDrawColor(SDL_Renderer * renderer)
-{
-    return 0;
-}
-
-static int
-SW_SetDrawBlendMode(SDL_Renderer * renderer)
-{
-    return 0;
 }
 
 static int

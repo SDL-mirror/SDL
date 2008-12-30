@@ -31,8 +31,6 @@
 
 static SDL_Renderer *SDL_DUMMY_CreateRenderer(SDL_Window * window,
                                               Uint32 flags);
-static int SDL_DUMMY_SetDrawColor(SDL_Renderer * renderer);
-static int SDL_DUMMY_SetDrawBlendMode(SDL_Renderer * renderer);
 static int SDL_DUMMY_RenderPoint(SDL_Renderer * renderer, int x, int y);
 static int SDL_DUMMY_RenderLine(SDL_Renderer * renderer, int x1, int y1,
                                 int x2, int y2);
@@ -93,8 +91,6 @@ SDL_DUMMY_CreateRenderer(SDL_Window * window, Uint32 flags)
     }
     SDL_zerop(data);
 
-    renderer->SetDrawColor = SDL_DUMMY_SetDrawColor;
-    renderer->SetDrawBlendMode = SDL_DUMMY_SetDrawBlendMode;
     renderer->RenderPoint = SDL_DUMMY_RenderPoint;
     renderer->RenderLine = SDL_DUMMY_RenderLine;
     renderer->RenderFill = SDL_DUMMY_RenderFill;
@@ -130,18 +126,6 @@ SDL_DUMMY_CreateRenderer(SDL_Window * window, Uint32 flags)
     data->current_screen = 0;
 
     return renderer;
-}
-
-static int
-SDL_DUMMY_SetDrawColor(SDL_Renderer * renderer)
-{
-    return 0;
-}
-
-static int
-SDL_DUMMY_SetDrawBlendMode(SDL_Renderer * renderer)
-{
-    return 0;
 }
 
 static int

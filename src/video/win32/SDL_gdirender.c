@@ -55,6 +55,7 @@ static int GDI_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                            const SDL_Rect * rect, int markDirty,
                            void **pixels, int *pitch);
 static void GDI_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
+static int GDI_SetDrawBlendMode(SDL_Renderer * renderer);
 static int GDI_RenderPoint(SDL_Renderer * renderer, int x, int y);
 static int GDI_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2,
                           int y2);
@@ -175,6 +176,7 @@ GDI_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->UpdateTexture = GDI_UpdateTexture;
     renderer->LockTexture = GDI_LockTexture;
     renderer->UnlockTexture = GDI_UnlockTexture;
+    renderer->SetDrawBlendMode = GDI_SetDrawBlendMode;
     renderer->RenderPoint = GDI_RenderPoint;
     renderer->RenderLine = GDI_RenderLine;
     renderer->RenderFill = GDI_RenderFill;
@@ -570,6 +572,19 @@ GDI_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     if (data->yuv) {
         SDL_SW_UnlockYUVTexture(data->yuv);
         UpdateYUVTextureData(texture);
+    }
+}
+
+static int
+GDI_SetDrawBlendMode(SDL_Renderer * renderer)
+{
+    switch (renderer->blendMode) {
+    case SDL_BLENDMODE_NONE:
+        return 0;
+    default:
+        SDL_Unsupported();
+        renderer->blendMode = SDL_BLENDMODE_NONE;
+        return -1;
     }
 }
 

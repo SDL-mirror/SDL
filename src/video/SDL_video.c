@@ -1987,16 +1987,15 @@ SDL_SetRenderDrawColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a)
     if (!renderer) {
         return -1;
     }
-    if (!renderer->SetDrawColor) {
-        SDL_Unsupported();
-        return -1;
-    }
     renderer->r = r;
     renderer->g = g;
     renderer->b = b;
     renderer->a = a;
-    renderer->SetDrawColor(renderer);
-    return 0;
+    if (renderer->SetDrawColor) {
+        return renderer->SetDrawColor(renderer);
+    } else {
+        return 0;
+    }
 }
 
 int
@@ -2012,10 +2011,6 @@ SDL_GetRenderDrawColor(Uint8 * r, Uint8 * g, Uint8 * b, Uint8 * a)
     if (!renderer) {
         return -1;
     }
-    if (!renderer->SetDrawColor) {
-        SDL_Unsupported();
-        return -1;
-    }
     if (r) {
         *r = renderer->r;
     }
@@ -2028,7 +2023,6 @@ SDL_GetRenderDrawColor(Uint8 * r, Uint8 * g, Uint8 * b, Uint8 * a)
     if (a) {
         *a = renderer->a;
     }
-    return 0;
 }
 
 int
@@ -2044,13 +2038,12 @@ SDL_SetRenderDrawBlendMode(int blendMode)
     if (!renderer) {
         return -1;
     }
-    if (!renderer->SetDrawBlendMode) {
-        SDL_Unsupported();
-        return -1;
-    }
     renderer->blendMode = blendMode;
-    renderer->SetDrawBlendMode(renderer);
-    return 0;
+    if (renderer->SetDrawBlendMode) {
+        return renderer->SetDrawBlendMode(renderer);
+    } else {
+        return 0;
+    }
 }
 
 int

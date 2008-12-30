@@ -96,8 +96,6 @@ static int GL_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static void GL_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static void GL_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                             int numrects, const SDL_Rect * rects);
-static int GL_SetDrawColor(SDL_Renderer * renderer);
-static int GL_SetDrawBlendMode(SDL_Renderer * renderer);
 static int GL_RenderPoint(SDL_Renderer * renderer, int x, int y);
 static int GL_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2,
                          int y2);
@@ -312,8 +310,6 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->LockTexture = GL_LockTexture;
     renderer->UnlockTexture = GL_UnlockTexture;
     renderer->DirtyTexture = GL_DirtyTexture;
-    renderer->SetDrawColor = GL_SetDrawColor;
-    renderer->SetDrawBlendMode = GL_SetDrawBlendMode;
     renderer->RenderPoint = GL_RenderPoint;
     renderer->RenderLine = GL_RenderLine;
     renderer->RenderFill = GL_RenderFill;
@@ -1068,18 +1064,6 @@ GL_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture, int numrects,
     for (i = 0; i < numrects; ++i) {
         SDL_AddDirtyRect(&data->dirty, &rects[i]);
     }
-}
-
-static int
-GL_SetDrawColor(SDL_Renderer * renderer)
-{
-    return 0;
-}
-
-static int
-GL_SetDrawBlendMode(SDL_Renderer * renderer)
-{
-    return 0;
 }
 
 static int

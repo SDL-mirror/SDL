@@ -71,8 +71,6 @@ static void DirectFB_UnlockTexture(SDL_Renderer * renderer,
 static void DirectFB_DirtyTexture(SDL_Renderer * renderer,
                                   SDL_Texture * texture, int numrects,
                                   const SDL_Rect * rects);
-static int DirectFB_SetDrawColor(SDL_Renderer * renderer);
-static int DirectFB_SetDrawBlendMode(SDL_Renderer * renderer);
 static int DirectFB_RenderPoint(SDL_Renderer * renderer, int x, int y);
 static int DirectFB_RenderLine(SDL_Renderer * renderer, int x1, int y1,
                                int x2, int y2);
@@ -294,8 +292,6 @@ DirectFB_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->LockTexture = DirectFB_LockTexture;
     renderer->UnlockTexture = DirectFB_UnlockTexture;
     renderer->DirtyTexture = DirectFB_DirtyTexture;
-    renderer->SetDrawColor = DirectFB_SetDrawColor;
-    renderer->SetDrawBlendMode = DirectFB_SetDrawBlendMode;
     renderer->RenderPoint = DirectFB_RenderPoint;
     renderer->RenderLine = DirectFB_RenderLine;
     renderer->RenderFill = DirectFB_RenderFill;
@@ -795,18 +791,6 @@ DirectFB_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
     for (i = 0; i < numrects; ++i) {
         SDL_AddDirtyRect(&data->dirty, &rects[i]);
     }
-}
-
-static int
-DirectFB_SetDrawColor(SDL_Renderer * renderer)
-{
-    return 0;
-}
-
-static int
-DirectFB_SetDrawBlendMode(SDL_Renderer * renderer)
-{
-    return 0;
 }
 
 static int
