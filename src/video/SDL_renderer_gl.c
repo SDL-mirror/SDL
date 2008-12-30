@@ -1083,22 +1083,6 @@ GL_SetDrawBlendMode(SDL_Renderer * renderer)
 }
 
 static int
-GL_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
-{
-    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-
-    data->glColor4f((GLfloat) renderer->r * inv255f,
-                    (GLfloat) renderer->g * inv255f,
-                    (GLfloat) renderer->b * inv255f,
-                    (GLfloat) renderer->a * inv255f);
-    SetBlendMode(data, renderer->blendMode);
-    data->glRecti(rect->x, rect->y, rect->x + rect->w, rect->y + rect->h);
-
-    return 0;
-}
-
-static int
 GL_RenderPoint(SDL_Renderer * renderer, int x, int y)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
@@ -1133,6 +1117,22 @@ GL_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
     data->glVertex2i(x1, y1);
     data->glVertex2i(x2, y2);
     data->glEnd();
+
+    return 0;
+}
+
+static int
+GL_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
+{
+    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
+    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+
+    data->glColor4f((GLfloat) renderer->r * inv255f,
+                    (GLfloat) renderer->g * inv255f,
+                    (GLfloat) renderer->b * inv255f,
+                    (GLfloat) renderer->a * inv255f);
+    SetBlendMode(data, renderer->blendMode);
+    data->glRecti(rect->x, rect->y, rect->x + rect->w, rect->y + rect->h);
 
     return 0;
 }
