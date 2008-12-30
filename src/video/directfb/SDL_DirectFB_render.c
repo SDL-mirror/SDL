@@ -205,9 +205,10 @@ SetBlendMode(DirectFB_RenderData * data, int blendMode,
         case SDL_BLENDMODE_ADD:
             data->blitFlags = DSBLIT_BLEND_ALPHACHANNEL;
             data->drawFlags = DSDRAW_BLEND;
-            //FIXME: SRCALPHA kills performance on radeon ...
-            //Eventually use a premultiplied texture
-            if (0 && TextureHasAlpha(source))
+            // FIXME: SRCALPHA kills performance on radeon ...
+            // It will be cheaper to copy the surface to
+            // a temporay surface and premultiply 
+            if (source && TextureHasAlpha(source))
                 data->surface->SetSrcBlendFunction(data->surface,
                                                    DSBF_SRCALPHA);
             else
@@ -713,15 +714,15 @@ DirectFB_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
     Uint8 *src, *dst;
     int row;
     size_t length;
+    int bpp = DFB_BYTES_PER_PIXEL(SDLToDFBPixelFormat(texture->format));
+    // FIXME: SDL_BYTESPERPIXEL(texture->format) broken for yuv yv12 3 planes
 
     SDL_DFB_CHECKERR(data->surface->Lock(data->surface,
                                          DSLF_WRITE | DSLF_READ,
                                          ((void **) &dpixels), &dpitch));
     src = (Uint8 *) pixels;
-    dst =
-        (Uint8 *) dpixels + rect->y * dpitch +
-        rect->x * SDL_BYTESPERPIXEL(texture->format);
-    length = rect->w * SDL_BYTESPERPIXEL(texture->format);
+    dst = (Uint8 *) dpixels + rect->y * dpitch + rect->x * bpp;
+    length = rect->w * bpp;
     for (row = 0; row < rect->h; ++row) {
         SDL_memcpy(dst, src, length);
         src += pitch;
@@ -836,7 +837,7 @@ DirectFB_RenderPoint(SDL_Renderer * renderer, int x, int y)
     DFBResult ret;
 
     PrepareDraw(renderer);
-    SDL_DFB_CHECKERR(data->surface->DrawPoint(data->surface, x, y));
+    SDL_DFB_CHECKERR(data->surface->DrawLine(data->surface, x, y, x, y));
     return 0;
   error:
     return -1;
@@ -849,6 +850,11 @@ DirectFB_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
     DFBResult ret;
 
     PrepareDraw(renderer);
+    /* Use antialiasing when available */
+#if (DIRECTFB_MAJOR_VERSION == 1) && (DIRECTFB_MINOR_VERSION >= 2)
+    SDL_DFB_CHECKERR(data->surface->SetRenderOptions(data->surface,
+                                                     DSRO_ANTIALIAS));
+#endif
     SDL_DFB_CHECKERR(data->surface->DrawLine(data->surface, x1, y1, x2, y2));
     return 0;
   error:
