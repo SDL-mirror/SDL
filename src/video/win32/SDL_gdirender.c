@@ -604,7 +604,8 @@ GDI_RenderPoint(SDL_Renderer * renderer, int x, int y)
         SDL_AddDirtyRect(&data->dirty, &rect);
     }
 
-    SetPixel(data->current_hdc, x, y, RGB(renderer->r, renderer->g, renderer->b));
+    SetPixel(data->current_hdc, x, y,
+             RGB(renderer->r, renderer->g, renderer->b));
     return 0;
 }
 
