@@ -2023,6 +2023,7 @@ SDL_GetRenderDrawColor(Uint8 * r, Uint8 * g, Uint8 * b, Uint8 * a)
     if (a) {
         *a = renderer->a;
     }
+    return 0;
 }
 
 int
