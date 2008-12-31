@@ -66,8 +66,10 @@ static void GLES_UnlockTexture(SDL_Renderer * renderer,
                                SDL_Texture * texture);
 static void GLES_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                               int numrects, const SDL_Rect * rects);
-static int GLES_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b,
-                           Uint8 a, const SDL_Rect * rect);
+static int GLES_RenderPoint(SDL_Renderer * renderer, int x, int y);
+static int GLES_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2,
+                           int y2);
+static int GLES_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect);
 static int GLES_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                            const SDL_Rect * srcrect,
                            const SDL_Rect * dstrect);
@@ -226,6 +228,8 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->LockTexture = GLES_LockTexture;
     renderer->UnlockTexture = GLES_UnlockTexture;
     renderer->DirtyTexture = GLES_DirtyTexture;
+    renderer->RenderPoint = GLES_RenderPoint;
+    renderer->RenderLine = GLES_RenderLine;
     renderer->RenderFill = GLES_RenderFill;
     renderer->RenderCopy = GLES_RenderCopy;
     renderer->RenderPresent = GLES_RenderPresent;
@@ -586,31 +590,93 @@ GLES_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
     }
 }
 
-static int
-GLES_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b, Uint8 a,
-                const SDL_Rect * rect)
+static void
+GLES_SetBlendMode(GLES_RenderData * data, int blendMode)
 {
+    if (blendMode != data->blendMode) {
+        switch (blendMode) {
+        case SDL_BLENDMODE_NONE:
+            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+            data->glDisable(GL_BLEND);
+            break;
+        case SDL_BLENDMODE_MASK:
+        case SDL_BLENDMODE_BLEND:
+            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+            data->glEnable(GL_BLEND);
+            data->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            break;
+        case SDL_BLENDMODE_ADD:
+            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+            data->glEnable(GL_BLEND);
+            data->glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            break;
+        case SDL_BLENDMODE_MOD:
+            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+            data->glEnable(GL_BLEND);
+            data->glBlendFunc(GL_ZERO, GL_SRC_COLOR);
+            break;
+        }
+        data->blendMode = blendMode;
+    }
+}
 
+static int
+GLES_RenderPoint(SDL_Renderer * renderer, int x, int y)
+{
+    GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
+
+    GLES_SetBlendMode(data, renderer->blendMode);
+
+    data->glColor4f((GLfloat) renderer->r * inv255f,
+                    (GLfloat) renderer->g * inv255f,
+                    (GLfloat) renderer->b * inv255f,
+                    (GLfloat) renderer->a * inv255f);
+
+/* FIXME:
+    data->glBegin(GL_POINTS);
+    data->glVertex2i(x, y);
+    data->glEnd();
+*/
+    return 0;
+}
+
+static int
+GLES_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
+{
+    GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
+
+    GLES_SetBlendMode(data, renderer->blendMode);
+
+    data->glColor4f((GLfloat) renderer->r * inv255f,
+                    (GLfloat) renderer->g * inv255f,
+                    (GLfloat) renderer->b * inv255f,
+                    (GLfloat) renderer->a * inv255f);
+
+/* FIXME:
+    data->glBegin(GL_LINES);
+    data->glVertex2i(x1, y1);
+    data->glVertex2i(x2, y2);
+    data->glEnd();
+*/
+    return 0;
+}
+
+static int
+GLES_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
+{
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
 
-    /* set proper drawing color */
-    GLfloat oldClearColor[4];
+    GLES_SetBlendMode(data, renderer->blendMode);
 
-    data->glGetFloatv(GL_COLOR_CLEAR_VALUE, oldClearColor);
+    data->glColor4f((GLfloat) renderer->r * inv255f,
+                    (GLfloat) renderer->g * inv255f,
+                    (GLfloat) renderer->b * inv255f,
+                    (GLfloat) renderer->a * inv255f);
 
-    data->glClearColor((GLclampf) r * inv255f, (GLclampf) g * inv255f,
-                       (GLclampf) b * inv255f, (GLclampf) a * inv255f);
-
-    data->glScissor(rect->x, window->h - rect->y - rect->h, rect->w, rect->h);
-    data->glEnable(GL_SCISSOR_TEST);
-    data->glClear(GL_COLOR_BUFFER_BIT);
-    data->glDisable(GL_SCISSOR_TEST);
-
-    /* reset clear color */
-    data->glClearColor(oldClearColor[0], oldClearColor[1], oldClearColor[2],
-                       oldClearColor[2]);
-
+/* FIXME:
+    data->glRecti(rect->x, rect->y, rect->x + rect->w, rect->y + rect->h);
+*/
     return 0;
 }
 
@@ -677,31 +743,7 @@ GLES_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         data->glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
-    if (texture->blendMode != data->blendMode) {
-        switch (texture->blendMode) {
-        case SDL_BLENDMODE_NONE:
-            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
-            data->glDisable(GL_BLEND);
-            break;
-        case SDL_BLENDMODE_MASK:
-        case SDL_BLENDMODE_BLEND:
-            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-            data->glEnable(GL_BLEND);
-            data->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            break;
-        case SDL_BLENDMODE_ADD:
-            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-            data->glEnable(GL_BLEND);
-            data->glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-            break;
-        case SDL_BLENDMODE_MOD:
-            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-            data->glEnable(GL_BLEND);
-            data->glBlendFunc(GL_ZERO, GL_SRC_COLOR);
-            break;
-        }
-        data->blendMode = texture->blendMode;
-    }
+    GLES_SetBlendMode(data, texture->blendMode);
 
     switch (texture->scaleMode) {
     case SDL_TEXTURESCALEMODE_NONE:

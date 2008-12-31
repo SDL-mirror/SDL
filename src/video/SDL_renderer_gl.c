@@ -434,36 +434,6 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     return renderer;
 }
 
-static void
-SetBlendMode(GL_RenderData * data, int blendMode)
-{
-    if (blendMode != data->blendMode) {
-        switch (blendMode) {
-        case SDL_BLENDMODE_NONE:
-            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-            data->glDisable(GL_BLEND);
-            break;
-        case SDL_BLENDMODE_MASK:
-        case SDL_BLENDMODE_BLEND:
-            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-            data->glEnable(GL_BLEND);
-            data->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            break;
-        case SDL_BLENDMODE_ADD:
-            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-            data->glEnable(GL_BLEND);
-            data->glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-            break;
-        case SDL_BLENDMODE_MOD:
-            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-            data->glEnable(GL_BLEND);
-            data->glBlendFunc(GL_ZERO, GL_SRC_COLOR);
-            break;
-        }
-        data->blendMode = blendMode;
-    }
-}
-
 static int
 GL_ActivateRenderer(SDL_Renderer * renderer)
 {
@@ -1066,12 +1036,42 @@ GL_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture, int numrects,
     }
 }
 
+static void
+GL_SetBlendMode(GL_RenderData * data, int blendMode)
+{
+    if (blendMode != data->blendMode) {
+        switch (blendMode) {
+        case SDL_BLENDMODE_NONE:
+            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+            data->glDisable(GL_BLEND);
+            break;
+        case SDL_BLENDMODE_MASK:
+        case SDL_BLENDMODE_BLEND:
+            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+            data->glEnable(GL_BLEND);
+            data->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            break;
+        case SDL_BLENDMODE_ADD:
+            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+            data->glEnable(GL_BLEND);
+            data->glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            break;
+        case SDL_BLENDMODE_MOD:
+            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+            data->glEnable(GL_BLEND);
+            data->glBlendFunc(GL_ZERO, GL_SRC_COLOR);
+            break;
+        }
+        data->blendMode = blendMode;
+    }
+}
+
 static int
 GL_RenderPoint(SDL_Renderer * renderer, int x, int y)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
 
-    SetBlendMode(data, renderer->blendMode);
+    GL_SetBlendMode(data, renderer->blendMode);
 
     data->glColor4f((GLfloat) renderer->r * inv255f,
                     (GLfloat) renderer->g * inv255f,
@@ -1090,7 +1090,7 @@ GL_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
 
-    SetBlendMode(data, renderer->blendMode);
+    GL_SetBlendMode(data, renderer->blendMode);
 
     data->glColor4f((GLfloat) renderer->r * inv255f,
                     (GLfloat) renderer->g * inv255f,
@@ -1111,11 +1111,13 @@ GL_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
 
+    GL_SetBlendMode(data, renderer->blendMode);
+
     data->glColor4f((GLfloat) renderer->r * inv255f,
                     (GLfloat) renderer->g * inv255f,
                     (GLfloat) renderer->b * inv255f,
                     (GLfloat) renderer->a * inv255f);
-    SetBlendMode(data, renderer->blendMode);
+
     data->glRecti(rect->x, rect->y, rect->x + rect->w, rect->y + rect->h);
 
     return 0;
@@ -1178,7 +1180,7 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         data->glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
-    SetBlendMode(data, texture->blendMode);
+    GL_SetBlendMode(data, texture->blendMode);
 
     if (texture->scaleMode != data->scaleMode) {
         switch (texture->scaleMode) {

@@ -25,6 +25,22 @@
 /* Begin PBXBuildFile section */
 		04461DEE0EA76BA3006C462D /* SDL_haptic.h in Headers */ = {isa = PBXBuildFile; fileRef = 04461DED0EA76BA3006C462D /* SDL_haptic.h */; };
 		04461DEF0EA76BA3006C462D /* SDL_haptic.h in Headers */ = {isa = PBXBuildFile; fileRef = 04461DED0EA76BA3006C462D /* SDL_haptic.h */; };
+		0463873F0F0B5B7D0041FD65 /* SDL_blendline.c in Sources */ = {isa = PBXBuildFile; fileRef = 046387370F0B5B7D0041FD65 /* SDL_blendline.c */; };
+		046387400F0B5B7D0041FD65 /* SDL_blendpoint.c in Sources */ = {isa = PBXBuildFile; fileRef = 046387380F0B5B7D0041FD65 /* SDL_blendpoint.c */; };
+		046387410F0B5B7D0041FD65 /* SDL_blendrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 046387390F0B5B7D0041FD65 /* SDL_blendrect.c */; };
+		046387420F0B5B7D0041FD65 /* SDL_blit_slow.h in Headers */ = {isa = PBXBuildFile; fileRef = 0463873A0F0B5B7D0041FD65 /* SDL_blit_slow.h */; };
+		046387430F0B5B7D0041FD65 /* SDL_draw.h in Headers */ = {isa = PBXBuildFile; fileRef = 0463873B0F0B5B7D0041FD65 /* SDL_draw.h */; };
+		046387440F0B5B7D0041FD65 /* SDL_drawline.c in Sources */ = {isa = PBXBuildFile; fileRef = 0463873C0F0B5B7D0041FD65 /* SDL_drawline.c */; };
+		046387450F0B5B7D0041FD65 /* SDL_drawpoint.c in Sources */ = {isa = PBXBuildFile; fileRef = 0463873D0F0B5B7D0041FD65 /* SDL_drawpoint.c */; };
+		046387460F0B5B7D0041FD65 /* SDL_fillrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 0463873E0F0B5B7D0041FD65 /* SDL_fillrect.c */; };
+		046387470F0B5B7D0041FD65 /* SDL_blendline.c in Sources */ = {isa = PBXBuildFile; fileRef = 046387370F0B5B7D0041FD65 /* SDL_blendline.c */; };
+		046387480F0B5B7D0041FD65 /* SDL_blendpoint.c in Sources */ = {isa = PBXBuildFile; fileRef = 046387380F0B5B7D0041FD65 /* SDL_blendpoint.c */; };
+		046387490F0B5B7D0041FD65 /* SDL_blendrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 046387390F0B5B7D0041FD65 /* SDL_blendrect.c */; };
+		0463874A0F0B5B7D0041FD65 /* SDL_blit_slow.h in Headers */ = {isa = PBXBuildFile; fileRef = 0463873A0F0B5B7D0041FD65 /* SDL_blit_slow.h */; };
+		0463874B0F0B5B7D0041FD65 /* SDL_draw.h in Headers */ = {isa = PBXBuildFile; fileRef = 0463873B0F0B5B7D0041FD65 /* SDL_draw.h */; };
+		0463874C0F0B5B7D0041FD65 /* SDL_drawline.c in Sources */ = {isa = PBXBuildFile; fileRef = 0463873C0F0B5B7D0041FD65 /* SDL_drawline.c */; };
+		0463874D0F0B5B7D0041FD65 /* SDL_drawpoint.c in Sources */ = {isa = PBXBuildFile; fileRef = 0463873D0F0B5B7D0041FD65 /* SDL_drawpoint.c */; };
+		0463874E0F0B5B7D0041FD65 /* SDL_fillrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 0463873E0F0B5B7D0041FD65 /* SDL_fillrect.c */; };
 		047677BB0EA76A31008ABAF1 /* SDL_syshaptic.c in Sources */ = {isa = PBXBuildFile; fileRef = 047677B80EA76A31008ABAF1 /* SDL_syshaptic.c */; };
 		047677BC0EA76A31008ABAF1 /* SDL_haptic.c in Sources */ = {isa = PBXBuildFile; fileRef = 047677B90EA76A31008ABAF1 /* SDL_haptic.c */; };
 		047677BD0EA76A31008ABAF1 /* SDL_syshaptic.h in Headers */ = {isa = PBXBuildFile; fileRef = 047677BA0EA76A31008ABAF1 /* SDL_syshaptic.h */; };
@@ -179,7 +195,6 @@
 		FDA684560DF2374E00F98A1A /* SDL_blit_N.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA683090DF2374E00F98A1A /* SDL_blit_N.c */; };
 		FDA684570DF2374E00F98A1A /* SDL_blit_slow.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA6830A0DF2374E00F98A1A /* SDL_blit_slow.c */; };
 		FDA684580DF2374E00F98A1A /* SDL_bmp.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA6830B0DF2374E00F98A1A /* SDL_bmp.c */; };
-		FDA684590DF2374E00F98A1A /* SDL_fill.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA6830C0DF2374E00F98A1A /* SDL_fill.c */; };
 		FDA6845A0DF2374E00F98A1A /* SDL_gamma.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA6830D0DF2374E00F98A1A /* SDL_gamma.c */; };
 		FDA6845B0DF2374E00F98A1A /* SDL_leaks.h in Headers */ = {isa = PBXBuildFile; fileRef = FDA6830E0DF2374E00F98A1A /* SDL_leaks.h */; };
 		FDA6845C0DF2374E00F98A1A /* SDL_pixels.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA6830F0DF2374E00F98A1A /* SDL_pixels.c */; };
@@ -191,7 +206,6 @@
 		FDA684620DF2374E00F98A1A /* SDL_RLEaccel.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA683150DF2374E00F98A1A /* SDL_RLEaccel.c */; };
 		FDA684630DF2374E00F98A1A /* SDL_RLEaccel_c.h in Headers */ = {isa = PBXBuildFile; fileRef = FDA683160DF2374E00F98A1A /* SDL_RLEaccel_c.h */; };
 		FDA684640DF2374E00F98A1A /* SDL_stretch.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA683170DF2374E00F98A1A /* SDL_stretch.c */; };
-		FDA684650DF2374E00F98A1A /* SDL_stretch_c.h in Headers */ = {isa = PBXBuildFile; fileRef = FDA683180DF2374E00F98A1A /* SDL_stretch_c.h */; };
 		FDA684660DF2374E00F98A1A /* SDL_surface.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA683190DF2374E00F98A1A /* SDL_surface.c */; };
 		FDA684670DF2374E00F98A1A /* SDL_sysvideo.h in Headers */ = {isa = PBXBuildFile; fileRef = FDA6831A0DF2374E00F98A1A /* SDL_sysvideo.h */; };
 		FDA684680DF2374E00F98A1A /* SDL_video.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA6831B0DF2374E00F98A1A /* SDL_video.c */; };
@@ -256,7 +270,6 @@
 		FDBB64B60E159B23003B3114 /* SDL_rect_c.h in Headers */ = {isa = PBXBuildFile; fileRef = FDA683120DF2374E00F98A1A /* SDL_rect_c.h */; };
 		FDBB64B70E159B23003B3114 /* SDL_renderer_sw.h in Headers */ = {isa = PBXBuildFile; fileRef = FDA683140DF2374E00F98A1A /* SDL_renderer_sw.h */; };
 		FDBB64B80E159B23003B3114 /* SDL_RLEaccel_c.h in Headers */ = {isa = PBXBuildFile; fileRef = FDA683160DF2374E00F98A1A /* SDL_RLEaccel_c.h */; };
-		FDBB64B90E159B23003B3114 /* SDL_stretch_c.h in Headers */ = {isa = PBXBuildFile; fileRef = FDA683180DF2374E00F98A1A /* SDL_stretch_c.h */; };
 		FDBB64BA0E159B23003B3114 /* SDL_sysvideo.h in Headers */ = {isa = PBXBuildFile; fileRef = FDA6831A0DF2374E00F98A1A /* SDL_sysvideo.h */; };
 		FDBB64BB0E159B23003B3114 /* SDL_yuv_sw_c.h in Headers */ = {isa = PBXBuildFile; fileRef = FDA6831E0DF2374E00F98A1A /* SDL_yuv_sw_c.h */; };
 		FDBB64C40E159B23003B3114 /* SDL_nullevents_c.h in Headers */ = {isa = PBXBuildFile; fileRef = FDA685F60DF244C800F98A1A /* SDL_nullevents_c.h */; };
@@ -310,7 +323,6 @@
 		FDBB64F80E159B23003B3114 /* SDL_blit_N.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA683090DF2374E00F98A1A /* SDL_blit_N.c */; };
 		FDBB64F90E159B23003B3114 /* SDL_blit_slow.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA6830A0DF2374E00F98A1A /* SDL_blit_slow.c */; };
 		FDBB64FA0E159B23003B3114 /* SDL_bmp.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA6830B0DF2374E00F98A1A /* SDL_bmp.c */; };
-		FDBB64FB0E159B23003B3114 /* SDL_fill.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA6830C0DF2374E00F98A1A /* SDL_fill.c */; };
 		FDBB64FC0E159B23003B3114 /* SDL_gamma.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA6830D0DF2374E00F98A1A /* SDL_gamma.c */; };
 		FDBB64FD0E159B23003B3114 /* SDL_pixels.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA6830F0DF2374E00F98A1A /* SDL_pixels.c */; };
 		FDBB64FE0E159B23003B3114 /* SDL_rect.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA683110DF2374E00F98A1A /* SDL_rect.c */; };
@@ -350,6 +362,14 @@
 
 /* Begin PBXFileReference section */
 		04461DED0EA76BA3006C462D /* SDL_haptic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_haptic.h; path = ../../include/SDL_haptic.h; sourceTree = SOURCE_ROOT; };
+		046387370F0B5B7D0041FD65 /* SDL_blendline.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_blendline.c; sourceTree = "<group>"; };
+		046387380F0B5B7D0041FD65 /* SDL_blendpoint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_blendpoint.c; sourceTree = "<group>"; };
+		046387390F0B5B7D0041FD65 /* SDL_blendrect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_blendrect.c; sourceTree = "<group>"; };
+		0463873A0F0B5B7D0041FD65 /* SDL_blit_slow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_blit_slow.h; sourceTree = "<group>"; };
+		0463873B0F0B5B7D0041FD65 /* SDL_draw.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_draw.h; sourceTree = "<group>"; };
+		0463873C0F0B5B7D0041FD65 /* SDL_drawline.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_drawline.c; sourceTree = "<group>"; };
+		0463873D0F0B5B7D0041FD65 /* SDL_drawpoint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_drawpoint.c; sourceTree = "<group>"; };
+		0463873E0F0B5B7D0041FD65 /* SDL_fillrect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_fillrect.c; sourceTree = "<group>"; };
 		047677B80EA76A31008ABAF1 /* SDL_syshaptic.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_syshaptic.c; sourceTree = "<group>"; };
 		047677B90EA76A31008ABAF1 /* SDL_haptic.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SDL_haptic.c; path = ../../src/haptic/SDL_haptic.c; sourceTree = SOURCE_ROOT; };
 		047677BA0EA76A31008ABAF1 /* SDL_syshaptic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_syshaptic.h; path = ../../src/haptic/SDL_syshaptic.h; sourceTree = SOURCE_ROOT; };
@@ -508,7 +528,6 @@
 		FDA683090DF2374E00F98A1A /* SDL_blit_N.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_blit_N.c; sourceTree = "<group>"; };
 		FDA6830A0DF2374E00F98A1A /* SDL_blit_slow.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_blit_slow.c; sourceTree = "<group>"; };
 		FDA6830B0DF2374E00F98A1A /* SDL_bmp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_bmp.c; sourceTree = "<group>"; };
-		FDA6830C0DF2374E00F98A1A /* SDL_fill.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_fill.c; sourceTree = "<group>"; };
 		FDA6830D0DF2374E00F98A1A /* SDL_gamma.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_gamma.c; sourceTree = "<group>"; };
 		FDA6830E0DF2374E00F98A1A /* SDL_leaks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_leaks.h; sourceTree = "<group>"; };
 		FDA6830F0DF2374E00F98A1A /* SDL_pixels.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_pixels.c; sourceTree = "<group>"; };
@@ -520,7 +539,6 @@
 		FDA683150DF2374E00F98A1A /* SDL_RLEaccel.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_RLEaccel.c; sourceTree = "<group>"; };
 		FDA683160DF2374E00F98A1A /* SDL_RLEaccel_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_RLEaccel_c.h; sourceTree = "<group>"; };
 		FDA683170DF2374E00F98A1A /* SDL_stretch.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_stretch.c; sourceTree = "<group>"; };
-		FDA683180DF2374E00F98A1A /* SDL_stretch_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_stretch_c.h; sourceTree = "<group>"; };
 		FDA683190DF2374E00F98A1A /* SDL_surface.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_surface.c; sourceTree = "<group>"; };
 		FDA6831A0DF2374E00F98A1A /* SDL_sysvideo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_sysvideo.h; sourceTree = "<group>"; };
 		FDA6831B0DF2374E00F98A1A /* SDL_video.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_video.c; sourceTree = "<group>"; };
@@ -915,6 +933,9 @@
 				0495E6870E97408800152DFE /* SDL_renderer_gl.h */,
 				0495E6880E97408800152DFE /* SDL_renderer_gles.c */,
 				0495E6890E97408800152DFE /* SDL_renderer_gles.h */,
+				046387370F0B5B7D0041FD65 /* SDL_blendline.c */,
+				046387380F0B5B7D0041FD65 /* SDL_blendpoint.c */,
+				046387390F0B5B7D0041FD65 /* SDL_blendrect.c */,
 				FDA683000DF2374E00F98A1A /* SDL_blit.c */,
 				FDA683010DF2374E00F98A1A /* SDL_blit.h */,
 				FDA683020DF2374E00F98A1A /* SDL_blit_0.c */,
@@ -926,8 +947,12 @@
 				FDA683080DF2374E00F98A1A /* SDL_blit_copy.h */,
 				FDA683090DF2374E00F98A1A /* SDL_blit_N.c */,
 				FDA6830A0DF2374E00F98A1A /* SDL_blit_slow.c */,
+				0463873A0F0B5B7D0041FD65 /* SDL_blit_slow.h */,
 				FDA6830B0DF2374E00F98A1A /* SDL_bmp.c */,
-				FDA6830C0DF2374E00F98A1A /* SDL_fill.c */,
+				0463873B0F0B5B7D0041FD65 /* SDL_draw.h */,
+				0463873C0F0B5B7D0041FD65 /* SDL_drawline.c */,
+				0463873D0F0B5B7D0041FD65 /* SDL_drawpoint.c */,
+				0463873E0F0B5B7D0041FD65 /* SDL_fillrect.c */,
 				FDA6830D0DF2374E00F98A1A /* SDL_gamma.c */,
 				FDA6830E0DF2374E00F98A1A /* SDL_leaks.h */,
 				FDA6830F0DF2374E00F98A1A /* SDL_pixels.c */,
@@ -939,7 +964,6 @@
 				FDA683150DF2374E00F98A1A /* SDL_RLEaccel.c */,
 				FDA683160DF2374E00F98A1A /* SDL_RLEaccel_c.h */,
 				FDA683170DF2374E00F98A1A /* SDL_stretch.c */,
-				FDA683180DF2374E00F98A1A /* SDL_stretch_c.h */,
 				FDA683190DF2374E00F98A1A /* SDL_surface.c */,
 				FDA6831A0DF2374E00F98A1A /* SDL_sysvideo.h */,
 				FDA6831B0DF2374E00F98A1A /* SDL_video.c */,
@@ -1038,7 +1062,6 @@
 				FDA6845F0DF2374E00F98A1A /* SDL_rect_c.h in Headers */,
 				FDA684610DF2374E00F98A1A /* SDL_renderer_sw.h in Headers */,
 				FDA684630DF2374E00F98A1A /* SDL_RLEaccel_c.h in Headers */,
-				FDA684650DF2374E00F98A1A /* SDL_stretch_c.h in Headers */,
 				FDA684670DF2374E00F98A1A /* SDL_sysvideo.h in Headers */,
 				FDA6846B0DF2374E00F98A1A /* SDL_yuv_sw_c.h in Headers */,
 				FDA685FC0DF244C800F98A1A /* SDL_nullevents_c.h in Headers */,
@@ -1063,6 +1086,8 @@
 				0495E68F0E97408800152DFE /* SDL_renderer_gles.h in Headers */,
 				047677BD0EA76A31008ABAF1 /* SDL_syshaptic.h in Headers */,
 				04461DEE0EA76BA3006C462D /* SDL_haptic.h in Headers */,
+				046387420F0B5B7D0041FD65 /* SDL_blit_slow.h in Headers */,
+				046387430F0B5B7D0041FD65 /* SDL_draw.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1118,7 +1143,6 @@
 				FDBB64B60E159B23003B3114 /* SDL_rect_c.h in Headers */,
 				FDBB64B70E159B23003B3114 /* SDL_renderer_sw.h in Headers */,
 				FDBB64B80E159B23003B3114 /* SDL_RLEaccel_c.h in Headers */,
-				FDBB64B90E159B23003B3114 /* SDL_stretch_c.h in Headers */,
 				FDBB64BA0E159B23003B3114 /* SDL_sysvideo.h in Headers */,
 				FDBB64BB0E159B23003B3114 /* SDL_yuv_sw_c.h in Headers */,
 				FDBB64C40E159B23003B3114 /* SDL_nullevents_c.h in Headers */,
@@ -1143,6 +1167,8 @@
 				0495E6950E97408800152DFE /* SDL_renderer_gles.h in Headers */,
 				047677C00EA76A31008ABAF1 /* SDL_syshaptic.h in Headers */,
 				04461DEF0EA76BA3006C462D /* SDL_haptic.h in Headers */,
+				0463874A0F0B5B7D0041FD65 /* SDL_blit_slow.h in Headers */,
+				0463874B0F0B5B7D0041FD65 /* SDL_draw.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1297,7 +1323,6 @@
 				FDA684560DF2374E00F98A1A /* SDL_blit_N.c in Sources */,
 				FDA684570DF2374E00F98A1A /* SDL_blit_slow.c in Sources */,
 				FDA684580DF2374E00F98A1A /* SDL_bmp.c in Sources */,
-				FDA684590DF2374E00F98A1A /* SDL_fill.c in Sources */,
 				FDA6845A0DF2374E00F98A1A /* SDL_gamma.c in Sources */,
 				FDA6845C0DF2374E00F98A1A /* SDL_pixels.c in Sources */,
 				FDA6845E0DF2374E00F98A1A /* SDL_rect.c in Sources */,
@@ -1331,6 +1356,12 @@
 				047677BB0EA76A31008ABAF1 /* SDL_syshaptic.c in Sources */,
 				047677BC0EA76A31008ABAF1 /* SDL_haptic.c in Sources */,
 				047AF1B30EA98D6C00811173 /* SDL_sysloadso.c in Sources */,
+				0463873F0F0B5B7D0041FD65 /* SDL_blendline.c in Sources */,
+				046387400F0B5B7D0041FD65 /* SDL_blendpoint.c in Sources */,
+				046387410F0B5B7D0041FD65 /* SDL_blendrect.c in Sources */,
+				046387440F0B5B7D0041FD65 /* SDL_drawline.c in Sources */,
+				046387450F0B5B7D0041FD65 /* SDL_drawpoint.c in Sources */,
+				046387460F0B5B7D0041FD65 /* SDL_fillrect.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1386,7 +1417,6 @@
 				FDBB64F80E159B23003B3114 /* SDL_blit_N.c in Sources */,
 				FDBB64F90E159B23003B3114 /* SDL_blit_slow.c in Sources */,
 				FDBB64FA0E159B23003B3114 /* SDL_bmp.c in Sources */,
-				FDBB64FB0E159B23003B3114 /* SDL_fill.c in Sources */,
 				FDBB64FC0E159B23003B3114 /* SDL_gamma.c in Sources */,
 				FDBB64FD0E159B23003B3114 /* SDL_pixels.c in Sources */,
 				FDBB64FE0E159B23003B3114 /* SDL_rect.c in Sources */,
@@ -1418,6 +1448,12 @@
 				047677BE0EA76A31008ABAF1 /* SDL_syshaptic.c in Sources */,
 				047677BF0EA76A31008ABAF1 /* SDL_haptic.c in Sources */,
 				047AF1B40EA98D6C00811173 /* SDL_sysloadso.c in Sources */,
+				046387470F0B5B7D0041FD65 /* SDL_blendline.c in Sources */,
+				046387480F0B5B7D0041FD65 /* SDL_blendpoint.c in Sources */,
+				046387490F0B5B7D0041FD65 /* SDL_blendrect.c in Sources */,
+				0463874C0F0B5B7D0041FD65 /* SDL_drawline.c in Sources */,
+				0463874D0F0B5B7D0041FD65 /* SDL_drawpoint.c in Sources */,
+				0463874E0F0B5B7D0041FD65 /* SDL_fillrect.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
