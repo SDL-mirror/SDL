@@ -712,7 +712,7 @@ D3D_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture, int numrects,
 }
 
 static void
-D3D_SetBlendMode(D3D_RenderData *data, int blendMode)
+D3D_SetBlendMode(D3D_RenderData * data, int blendMode)
 {
     switch (blendMode) {
     case SDL_BLENDMODE_NONE:
@@ -772,7 +772,9 @@ D3D_RenderPoint(SDL_Renderer * renderer, int x, int y)
 
     D3D_SetBlendMode(data, renderer->blendMode);
 
-    result = IDirect3DDevice9_SetTexture(data->device, 0, (IDirect3DBaseTexture9 *)0);
+    result =
+        IDirect3DDevice9_SetTexture(data->device, 0,
+                                    (IDirect3DBaseTexture9 *) 0);
     if (FAILED(result)) {
         D3D_SetError("SetTexture()", result);
         return -1;
@@ -820,7 +822,9 @@ D3D_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
 
     D3D_SetBlendMode(data, renderer->blendMode);
 
-    result = IDirect3DDevice9_SetTexture(data->device, 0, (IDirect3DBaseTexture9 *)0);
+    result =
+        IDirect3DDevice9_SetTexture(data->device, 0,
+                                    (IDirect3DBaseTexture9 *) 0);
     if (FAILED(result)) {
         D3D_SetError("SetTexture()", result);
         return -1;
@@ -890,7 +894,9 @@ D3D_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
 
     D3D_SetBlendMode(data, renderer->blendMode);
 
-    result = IDirect3DDevice9_SetTexture(data->device, 0, (IDirect3DBaseTexture9 *)0);
+    result =
+        IDirect3DDevice9_SetTexture(data->device, 0,
+                                    (IDirect3DBaseTexture9 *) 0);
     if (FAILED(result)) {
         D3D_SetError("SetTexture()", result);
         return -1;
