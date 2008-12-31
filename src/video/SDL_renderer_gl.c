@@ -1109,7 +1109,6 @@ static int
 GL_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
 
     GL_SetBlendMode(data, renderer->blendMode);
 

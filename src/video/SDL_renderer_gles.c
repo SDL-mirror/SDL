@@ -665,7 +665,6 @@ static int
 GLES_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
 {
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
 
     GLES_SetBlendMode(data, renderer->blendMode);
 
