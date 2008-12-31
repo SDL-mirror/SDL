@@ -1142,7 +1142,7 @@ SDL_RestoreWindow(SDL_WindowID windowID)
     SDL_Window *window = SDL_GetWindowFromID(windowID);
 
     if (!window
-        || (window->flags & (SDL_WINDOW_MAXIMIZED | SDL_WINDOW_MINIMIZED))) {
+        || !(window->flags & (SDL_WINDOW_MAXIMIZED | SDL_WINDOW_MINIMIZED))) {
         return;
     }
 
