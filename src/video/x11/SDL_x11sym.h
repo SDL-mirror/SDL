@@ -36,7 +36,6 @@ SDL_X11_SYM(int,XChangeProperty,(Display* a,Window b,Atom c,Atom d,int e,int f,_
 SDL_X11_SYM(int,XChangeWindowAttributes,(Display* a,Window b,unsigned long c,XSetWindowAttributes* d),(a,b,c,d),return)
 SDL_X11_SYM(Bool,XCheckWindowEvent,(Display* a,Window b,long c,XEvent* d),(a,b,c,d),return)
 SDL_X11_SYM(int,XClearWindow,(Display* a,Window b),(a,b),return)
-SDL_X11_SYM(int,XCloseDevice,(Display* a,XDevice* b),(a,b),return)
 SDL_X11_SYM(int,XCloseDisplay,(Display* a),(a),return)
 SDL_X11_SYM(int,XCopyArea,(Display* a,Drawable b,Drawable c,GC d,int e,int f,unsigned int g,unsigned int h,int i,int j),(a,b,c,d,e,f,g,h,i,j),return)
 SDL_X11_SYM(Colormap,XCreateColormap,(Display* a,Window b,Visual* c,int d),(a,b,c,d),return)
@@ -229,6 +228,7 @@ SDL_X11_SYM(XDeviceInfo*,XListInputDevices,(Display *a,int *b),(a,b),return)
 SDL_X11_SYM(void,XFreeDeviceList,(XDeviceInfo *a),(a),)
 SDL_X11_SYM(int,XSelectExtensionEvent,(Display *a,Window b,XEventClass *c,int d),(a,b,c,d),return)
 SDL_X11_SYM(XDevice*,XOpenDevice,(Display *a,XID b),(a,b),return)
+SDL_X11_SYM(int,XCloseDevice,(Display* a,XDevice* b),(a,b),return)
 #endif
 
 /* *INDENT-ON* */
