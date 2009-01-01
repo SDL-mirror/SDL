@@ -72,6 +72,7 @@ extern AudioBootStrap DCAUD_bootstrap;
 extern AudioBootStrap MMEAUDIO_bootstrap;
 extern AudioBootStrap DART_bootstrap;
 extern AudioBootStrap NDSAUD_bootstrap;
+extern AudioBootStrap FUSIONSOUND_bootstrap;
 
 
 /* Available audio drivers */
@@ -152,6 +153,9 @@ static AudioBootStrap *bootstrap[] = {
 #endif
 #if SDL_AUDIO_DRIVER_NDS
     &NDSAUD_bootstrap,
+#endif
+#if SDL_AUDIO_DRIVER_FUSIONSOUND
+    &FUSIONSOUND_bootstrap,
 #endif
     NULL
 };
