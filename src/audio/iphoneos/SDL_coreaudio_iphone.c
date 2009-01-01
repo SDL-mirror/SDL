@@ -329,7 +329,7 @@ COREAUDIO_Init(SDL_AudioDriverImpl * impl)
     impl->OnlyHasDefaultOutputDevice = 1;
     impl->HasCaptureSupport = 0;        /* still needs to be written */
 
-    return 2;  /* defitely have an audio device. */
+    return 2;                   /* defitely have an audio device. */
 }
 
 AudioBootStrap COREAUDIOIPHONE_bootstrap = {

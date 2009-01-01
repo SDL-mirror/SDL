@@ -398,7 +398,7 @@ NAS_Init(SDL_AudioDriverImpl * impl)
     impl->Deinitialize = NAS_Deinitialize;
     impl->OnlyHasDefaultOutputDevice = 1;       /* !!! FIXME: is this true? */
 
-    return 2;  /* 2 == definitely has an audio device. */
+    return 2;                   /* 2 == definitely has an audio device. */
 }
 
 AudioBootStrap NAS_bootstrap = {

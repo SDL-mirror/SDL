@@ -26,9 +26,9 @@
 
 #if SDL_VIDEO_DRIVER_X11_XINPUT
 static void
-X11_FreeMouse(SDL_Mouse *mouse)
+X11_FreeMouse(SDL_Mouse * mouse)
 {
-    X11_MouseData *data = (X11_MouseData *)mouse->driverdata;
+    X11_MouseData *data = (X11_MouseData *) mouse->driverdata;
 
     if (data) {
         XCloseDevice(data->display, mouse->id);
@@ -73,7 +73,7 @@ X11_InitMouse(_THIS)
                 if (deviceClass->class == ValuatorClass) {      /* bingo ;) */
                     XValuatorInfo *valInfo;
 
-                    data = (X11_MouseData *)SDL_calloc(1, sizeof(*data));
+                    data = (X11_MouseData *) SDL_calloc(1, sizeof(*data));
                     if (!data) {
                         continue;
                     }
@@ -120,11 +120,11 @@ X11_InitMouse(_THIS)
                     valInfo = (XValuatorInfo *) deviceClass;
                     /* if the device reports pressure, lets check it parameteres */
                     if (valInfo->num_axes > 2) {
-                            SDL_AddMouse(&mouse, DevList[i].name,
-                                         valInfo->axes[2].max_value,
-                                         valInfo->axes[2].min_value, 1);
+                        SDL_AddMouse(&mouse, DevList[i].name,
+                                     valInfo->axes[2].max_value,
+                                     valInfo->axes[2].min_value, 1);
                     } else {
-                            SDL_AddMouse(&mouse, DevList[i].name, 0, 0, 1);
+                        SDL_AddMouse(&mouse, DevList[i].name, 0, 0, 1);
                     }
                     break;
                 }

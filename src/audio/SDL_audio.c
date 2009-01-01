@@ -617,10 +617,10 @@ SDL_AudioInit(const char *driver_name)
         current_audio.name = backend->name;
         current_audio.desc = backend->desc;
         rc = backend->init(&current_audio.impl);
-        if (rc == 2) {  /* init'd, and devices available. Take it! */
+        if (rc == 2) {          /* init'd, and devices available. Take it! */
             initialized = 1;
             best_choice = i;
-        } else if (rc == 1) { /* init'd, but can't see any devices. */
+        } else if (rc == 1) {   /* init'd, but can't see any devices. */
             current_audio.impl.Deinitialize();
             if (best_choice == -1) {
                 best_choice = i;

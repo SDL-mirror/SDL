@@ -341,7 +341,7 @@ ESD_Init(SDL_AudioDriverImpl * impl)
     impl->Deinitialize = ESD_Deinitialize;
     impl->OnlyHasDefaultOutputDevice = 1;
 
-    return 2;  /* return 2 (definitely have a "device"). */
+    return 2;                   /* return 2 (definitely have a "device"). */
 }
 
 

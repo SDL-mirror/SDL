@@ -297,49 +297,55 @@ X11_DispatchEvent(_THIS)
 
     default:{
 #if SDL_VIDEO_DRIVER_X11_XINPUT
-        for (i = 0; i < SDL_GetNumMice(); ++i) {
-            SDL_Mouse *mouse;
-            X11_MouseData *data;
+            for (i = 0; i < SDL_GetNumMice(); ++i) {
+                SDL_Mouse *mouse;
+                X11_MouseData *data;
 
-            mouse = SDL_GetMouse(i);
-            data = (X11_MouseData *)mouse->driverdata;
-            if (!data) {
-                continue;
-            }
-                    
-            if (xevent.type == data->motion) {          /* MotionNotify */
-                XDeviceMotionEvent *move = (XDeviceMotionEvent *) & xevent;
+                mouse = SDL_GetMouse(i);
+                data = (X11_MouseData *) mouse->driverdata;
+                if (!data) {
+                    continue;
+                }
+
+                if (xevent.type == data->motion) {      /* MotionNotify */
+                    XDeviceMotionEvent *move =
+                        (XDeviceMotionEvent *) & xevent;
 #ifdef DEBUG_MOTION
-                printf("X11 motion: %d,%d\n", move->x, move->y);
+                    printf("X11 motion: %d,%d\n", move->x, move->y);
 #endif
-                SDL_SendMouseMotion(move->deviceid, 0, move->x, move->y, move->axis_data[2]);
-                return;
+                    SDL_SendMouseMotion(move->deviceid, 0, move->x, move->y,
+                                        move->axis_data[2]);
+                    return;
+                }
+                if (xevent.type == data->button_pressed) {      /* ButtonPress */
+                    XDeviceButtonPressedEvent *pressed =
+                        (XDeviceButtonPressedEvent *) & xevent;
+                    SDL_SendMouseButton(pressed->deviceid, SDL_PRESSED,
+                                        pressed->button);
+                    return;
+                }
+                if (xevent.type == data->button_released) {     /* ButtonRelease */
+                    XDeviceButtonReleasedEvent *released =
+                        (XDeviceButtonReleasedEvent *) & xevent;
+                    SDL_SendMouseButton(released->deviceid, SDL_RELEASED,
+                                        released->button);
+                    return;
+                }
+                if (xevent.type == data->proximity_in) {
+                    XProximityNotifyEvent *proximity =
+                        (XProximityNotifyEvent *) & xevent;
+                    SDL_SendProximity(proximity->deviceid, proximity->x,
+                                      proximity->y, SDL_PROXIMITYIN);
+                    return;
+                }
+                if (xevent.type == data->proximity_out) {
+                    XProximityNotifyEvent *proximity =
+                        (XProximityNotifyEvent *) & xevent;
+                    SDL_SendProximity(proximity->deviceid, proximity->x,
+                                      proximity->y, SDL_PROXIMITYOUT);
+                    return;
+                }
             }
-            if (xevent.type == data->button_pressed) {  /* ButtonPress */
-                XDeviceButtonPressedEvent *pressed =
-                    (XDeviceButtonPressedEvent *) & xevent;
-                SDL_SendMouseButton(pressed->deviceid, SDL_PRESSED, pressed->button);
-                return;
-            }
-            if (xevent.type == data->button_released) { /* ButtonRelease */
-                XDeviceButtonReleasedEvent *released =
-                    (XDeviceButtonReleasedEvent *) & xevent;
-                SDL_SendMouseButton(released->deviceid, SDL_RELEASED, released->button);
-                return;
-            }
-            if (xevent.type == data->proximity_in) {
-                XProximityNotifyEvent *proximity =
-                    (XProximityNotifyEvent *) & xevent;
-                SDL_SendProximity(proximity->deviceid, proximity->x, proximity->y, SDL_PROXIMITYIN);
-                return;
-            }
-            if (xevent.type == data->proximity_out) {
-                XProximityNotifyEvent *proximity =
-                    (XProximityNotifyEvent *) & xevent;
-                SDL_SendProximity(proximity->deviceid, proximity->x, proximity->y, SDL_PROXIMITYOUT);
-                return;
-            }
-        }
 #endif
 #ifdef DEBUG_XEVENTS
             printf("Unhandled event %d\n", xevent.type);

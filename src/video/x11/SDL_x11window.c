@@ -534,7 +534,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
             X11_MouseData *data;
 
             mouse = SDL_GetMouse(i);
-            data = (X11_MouseData *)mouse->driverdata;
+            data = (X11_MouseData *) mouse->driverdata;
             if (!data) {
                 continue;
             }
