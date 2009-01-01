@@ -524,7 +524,7 @@ DMA_Init(SDL_AudioDriverImpl * impl)
     impl->Deinitialize = DMA_Deinitialize;
 
     build_device_lists();
-    return 1;
+    return (outputDeviceCount > 0) ? 2 : 1;
 }
 
 AudioBootStrap DMA_bootstrap = {

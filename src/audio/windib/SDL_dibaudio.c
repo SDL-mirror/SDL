@@ -327,6 +327,7 @@ WINWAVEOUT_Init(SDL_AudioDriverImpl * impl)
     impl->CloseDevice = WINWAVEOUT_CloseDevice;
     impl->OnlyHasDefaultOutputDevice = 1;       /* !!! FIXME: Is this true? */
 
+    /* !!! FIXME: not right for device enum? */
     return 1;
 }
 

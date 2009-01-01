@@ -434,6 +434,7 @@ NTO_OpenDevice(_THIS, const char *devname, int iscapture)
 static int
 NTO_Init(SDL_AudioDriverImpl * impl)
 {
+    /* !!! FIXME: not right for device enum? */
     /*  See if we can open a nonblocking channel. */
     snd_pcm_t *handle = NULL;
     int rval = snd_pcm_open_preferred(&handle, NULL, NULL, OPEN_FLAGS);
@@ -455,7 +456,8 @@ NTO_Init(SDL_AudioDriverImpl * impl)
     impl->CloseDevice = NTO_CloseDevice;
     impl->OnlyHasDefaultOutputDevice = 1;       /* !!! FIXME: add device enum! */
 
-    return 1;
+    /* !!! FIXME: device enum might make this 1. */
+    return 2;  /* 2 == definitely has an audio device. */
 }
 
 AudioBootStrap QNXNTOAUDIO_bootstrap = {

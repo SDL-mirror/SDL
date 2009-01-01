@@ -528,6 +528,7 @@ PAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
 static int
 PAUDIO_Init(SDL_AudioDriverImpl * impl)
 {
+    /* !!! FIXME: not right for device enum? */
     int fd = OpenAudioPath(NULL, 0, OPEN_FLAGS, 0);
     if (fd < 0) {
         SDL_SetError("PAUDIO: Couldn't open audio device");
@@ -543,7 +544,8 @@ PAUDIO_Init(SDL_AudioDriverImpl * impl)
     impl->CloseDevice = DSP_CloseDevice;
     impl->OnlyHasDefaultOutputDevice = 1;       /* !!! FIXME: add device enum! */
 
-    return 1;
+    /* !!! FIXME: device enum might make this 1. */
+    return 2;  /* 2 == definitely has an audio device. */
 }
 
 AudioBootStrap PAUDIO_bootstrap = {

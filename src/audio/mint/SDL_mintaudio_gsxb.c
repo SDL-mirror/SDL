@@ -433,7 +433,7 @@ MINTGSXB_Init(SDL_AudioDriverImpl * impl)
     impl->ProvidesOwnCallbackThread = 1;
     impl->SkipMixerLock = 1;
 
-    return 1;
+    return 2;  /* 2 == definitely has an audio device. */
 }
 
 AudioBootStrap MINTAUDIO_GSXB_bootstrap = {
