@@ -212,7 +212,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     xattr.background_pixel = 0;
     xattr.border_pixel = 0;
 
-    if (visual->class == DirectColor || visual->class == PseudoColor) {
+    if (visual->class == PseudoColor) {
         int nmaps;
         XStandardColormap cmap;
         XStandardColormap *stdmaps;
@@ -299,6 +299,12 @@ X11_CreateWindow(_THIS, SDL_Window * window)
             X11_TrackColormap(data->display, displaydata->screen, colormap,
                               &cmap, visual);
         }
+    } else if (visual->class == DirectColor) {
+        /* FIXME: Allocate a read-write colormap for gamma fading someday */
+        xattr.colormap =
+            XCreateColormap(data->display,
+                            RootWindow(data->display, displaydata->screen),
+                            visual, AllocNone);
     } else {
         xattr.colormap =
             XCreateColormap(data->display,

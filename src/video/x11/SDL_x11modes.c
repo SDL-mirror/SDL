@@ -32,13 +32,9 @@ static int
 get_visualinfo(Display * display, int screen, XVisualInfo * vinfo)
 {
     const char *visual_id = SDL_getenv("SDL_VIDEO_X11_VISUALID");
-    /* FIXME FIXME FIXME
-     * Window creation fails in the colormap code on DirectColor visuals:
-     *      XA_RGB_BEST_MAP not found and could not be created
-     * I'm disabling this for now until Bob can look at it.  We don't need
-     * it until we implement the gamma fading using DirectColor RGB ramps
-     */
-    int use_directcolor = 0;
+    /* We really don't need DirectColor visuals until we implement
+     * gamma ramps, but we'll leave it on for now to catch bugs */
+    int use_directcolor = 1;
     int depth;
 
     /* Look for an exact visual, if requested */
