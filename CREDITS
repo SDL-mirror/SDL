@@ -10,6 +10,9 @@ Thanks to everyone who made this possible, including:
   Hans-Peter Gygax, the Eternal Lands Development Team, Lars Brubaker,
   and Phoenix Kokido for financial contributions
 
+* Marty Leisner for helping find SDL 1.3 bugs in the great SDL Bug Hunt
+  of January 2009!
+
 * Gaëtan de Menten for writing the PHP and SQL behind the SDL website
 
 * Tim Jones for the new look of the SDL website
@@ -23,8 +26,6 @@ Thanks to everyone who made this possible, including:
 * Couriersud for the DirectFB driver
 
 * Patrice Mandin, for the Atari port
-
-* Chris Nentwich, for the Hermes assembly blitters
 
 * Jon Atkins for SDL_image, SDL_mixer and SDL_net documentation
 
