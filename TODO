@@ -5,7 +5,6 @@
    - in progress, software support is done, Ryan is working on OpenGL shaders
  * Implement desktop video mode change notification?
  * Implement icon support (with translucency?)
- * Add draw blend mode and line drawing support for win32
  * Add diagonal line clipping to SDL_IntersectRectAndLine()
  * Add OpenGL 3.0 context support
  * Have Bob look at why DirectColor visuals fail with XA_RGB_BEST_MAP error
