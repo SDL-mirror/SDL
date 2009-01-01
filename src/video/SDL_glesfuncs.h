@@ -86,7 +86,7 @@ SDL_PROC_UNUSED(void, glColor4x,
 SDL_PROC_UNUSED(void, glColorMask,
                 (GLboolean red, GLboolean green, GLboolean blue,
                  GLboolean alpha))
-SDL_PROC_UNUSED(void, glColorPointer,
+SDL_PROC(void, glColorPointer,
                 (GLint size, GLenum type, GLsizei stride,
                  const GLvoid * pointer))
 SDL_PROC_UNUSED(void, glCompressedTexImage2D,
@@ -110,7 +110,7 @@ SDL_PROC_UNUSED(void, glDepthFunc, (GLenum func))
 SDL_PROC_UNUSED(void, glDepthMask, (GLboolean flag))
 SDL_PROC_UNUSED(void, glDepthRangex, (GLclampx zNear, GLclampx zFar))
 SDL_PROC(void, glDisable, (GLenum cap))
-SDL_PROC_UNUSED(void, glDisableClientState, (GLenum array))
+SDL_PROC(void, glDisableClientState, (GLenum array))
 SDL_PROC(void, glDrawArrays, (GLenum mode, GLint first, GLsizei count))
 SDL_PROC_UNUSED(void, glDrawElements,
                 (GLenum mode, GLsizei count, GLenum type,
