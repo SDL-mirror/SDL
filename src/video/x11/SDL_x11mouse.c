@@ -21,32 +21,50 @@
 */
 #include "SDL_config.h"
 #include "SDL_x11video.h"
+#include "SDL_x11mouse.h"
 #include "../../events/SDL_mouse_c.h"
+
+#if SDL_VIDEO_DRIVER_X11_XINPUT
+static void
+X11_FreeMouse(SDL_Mouse *mouse)
+{
+    X11_MouseData *data = (X11_MouseData *)mouse->driverdata;
+
+    if (data) {
+        XCloseDevice(data->display, mouse->id);
+        SDL_free(data);
+    }
+}
+#endif
 
 void
 X11_InitMouse(_THIS)
 {
+    SDL_Mouse mouse;
 #if SDL_VIDEO_DRIVER_X11_XINPUT
-    XDevice **newDevices;
-    int i, j, index = 0, numOfDevices;
+    Display *display = ((SDL_VideoData *) _this->driverdata)->display;
+    X11_MouseData *data;
+    int i, j, n;
     XDeviceInfo *DevList;
     XAnyClassPtr deviceClass;
-    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+    int event_code;
+    XEventClass xEvent;
+#endif
 
-    SDL_XDevices = NULL;
-    SDL_NumOfXDevices = 0;
+    SDL_zero(mouse);
+    SDL_AddMouse(&mouse, "CorePointer", 0, 0, 1);
 
+#if SDL_VIDEO_DRIVER_X11_XINPUT
     if (!SDL_X11_HAVE_XINPUT) {
         /* should have dynamically loaded, but wasn't available. */
         return;
     }
 
     /* we're getting the list of input devices */
-    DevList = XListInputDevices(data->display, &numOfDevices);
-    SDL_XDevices = (XDevice **) SDL_malloc(sizeof(XDevice));
+    DevList = XListInputDevices(display, &n);
 
-    /* we're aquiring valuators:mices, tablets, etc. */
-    for (i = 0; i < numOfDevices; ++i) {
+    /* we're aquiring valuators: mice, tablets, etc. */
+    for (i = 0; i < n; ++i) {
         /* if it's the core pointer or core keyborard we don't want it */
         if ((DevList[i].use != IsXPointer && DevList[i].use != IsXKeyboard)) {
             /* we have to check all of the device classes */
@@ -54,36 +72,59 @@ X11_InitMouse(_THIS)
             for (j = 0; j < DevList[i].num_classes; ++j) {
                 if (deviceClass->class == ValuatorClass) {      /* bingo ;) */
                     XValuatorInfo *valInfo;
-                    SDL_Mouse mouse;
 
-                    newDevices =
-                        (XDevice **) SDL_realloc(SDL_XDevices,
-                                                 (index +
-                                                  1) * sizeof(*newDevices));
-                    if (!newDevices) {
-                        SDL_OutOfMemory();
-                        return;
+                    data = (X11_MouseData *)SDL_calloc(1, sizeof(*data));
+                    if (!data) {
+                        continue;
                     }
-                    SDL_XDevices = newDevices;
-                    SDL_XDevices[index] =
-                        XOpenDevice(data->display, DevList[i].id);
-                    SDL_zero(mouse);
+                    data->display = display;
+                    data->device = XOpenDevice(display, DevList[i].id);
 
-                    /* the id of the device differs from its index
-                     * so we're assigning the index of a device to it's id */
-                    SDL_SetMouseIndexId(DevList[i].id, index);
+                    /* motion events */
+                    DeviceMotionNotify(data->device, event_code, xEvent);
+                    if (xEvent) {
+                        data->xevents[data->num_xevents++] = xEvent;
+                        data->motion = event_code;
+                    }
+
+                    /* button events */
+                    DeviceButtonPress(data->device, event_code, xEvent);
+                    if (xEvent) {
+                        data->xevents[data->num_xevents++] = xEvent;
+                        data->button_pressed = event_code;
+                    }
+                    DeviceButtonRelease(data->device, event_code, xEvent);
+                    if (xEvent) {
+                        data->xevents[data->num_xevents++] = xEvent;
+                        data->button_released = event_code;
+                    }
+
+                    /* proximity events */
+                    ProximityIn(data->device, event_code, xEvent);
+                    if (xEvent) {
+                        data->xevents[data->num_xevents++] = xEvent;
+                        data->proximity_in = event_code;
+                    }
+                    ProximityOut(data->device, event_code, xEvent);
+                    if (xEvent) {
+                        data->xevents[data->num_xevents++] = xEvent;
+                        data->proximity_out = event_code;
+                    }
+
+                    SDL_zero(mouse);
+                    mouse.id = DevList[i].id;
+                    mouse.FreeMouse = X11_FreeMouse;
+                    mouse.driverdata = data;
+
                     /* lets get the device parameters */
                     valInfo = (XValuatorInfo *) deviceClass;
                     /* if the device reports pressure, lets check it parameteres */
                     if (valInfo->num_axes > 2) {
-                        data->mouse =
-                            SDL_AddMouse(&mouse, index++, DevList[i].name,
+                            SDL_AddMouse(&mouse, DevList[i].name,
                                          valInfo->axes[2].max_value,
                                          valInfo->axes[2].min_value, 1);
                     } else {
-                        data->mouse =
-                            SDL_AddMouse(&mouse, index++, DevList[i].name, 0,
-                                         0, 1);
+                            SDL_AddMouse(&mouse, DevList[i].name, 0, 0, 1);
                     }
                     break;
                 }
@@ -95,8 +136,6 @@ X11_InitMouse(_THIS)
         }
     }
     XFreeDeviceList(DevList);
-
-    SDL_NumOfXDevices = index;
 #endif
 }
 

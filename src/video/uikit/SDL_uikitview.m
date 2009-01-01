@@ -49,8 +49,9 @@
 
 	int i;
 	for (i=0; i<MAX_SIMULTANEOUS_TOUCHES; i++) {
+        mice[i].id = i;
 		mice[i].driverdata = NULL;
-		SDL_AddMouse(&mice[i], i, "Mouse", 0, 0, 1);
+		SDL_AddMouse(&mice[i], "Mouse", 0, 0, 1);
 	}
 	self.multipleTouchEnabled = YES;
 			

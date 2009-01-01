@@ -24,8 +24,10 @@
 #include "SDL_syswm.h"
 #include "../SDL_sysvideo.h"
 #include "../../events/SDL_keyboard_c.h"
+#include "../../events/SDL_mouse_c.h"
 
 #include "SDL_x11video.h"
+#include "SDL_x11mouse.h"
 #include "../Xext/extensions/StdCmap.h"
 
 static void
@@ -172,8 +174,6 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     XSizeHints *sizehints;
     XWMHints *wmhints;
     XClassHint *classhints;
-    extern XEventClass SDL_XEvents[];
-    extern int SDL_NumOfXEvents;
 
 #if SDL_VIDEO_DRIVER_X11_XINERAMA
 /* FIXME
@@ -523,8 +523,31 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     }
 #endif
 
+#if SDL_VIDEO_DRIVER_X11_XINPUT
     /* we're informing the display what extension events we want to receive from it */
-    XSelectExtensionEvent(data->display, w, SDL_XEvents, SDL_NumOfXEvents);
+    {
+        int i, j, n = 0;
+        XEventClass xevents[256];
+
+        for (i = 0; i < SDL_GetNumMice(); ++i) {
+            SDL_Mouse *mouse;
+            X11_MouseData *data;
+
+            mouse = SDL_GetMouse(i);
+            data = (X11_MouseData *)mouse->driverdata;
+            if (!data) {
+                continue;
+            }
+
+            for (j = 0; j < data->num_xevents; ++j) {
+                xevents[n++] = data->xevents[j];
+            }
+        }
+        if (n > 0) {
+            XSelectExtensionEvent(data->display, w, xevents, n);
+        }
+    }
+#endif
 
     return 0;
 }

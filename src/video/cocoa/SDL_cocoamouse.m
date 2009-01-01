@@ -32,8 +32,7 @@ Cocoa_InitMouse(_THIS)
     SDL_Mouse mouse;
 
     SDL_zero(mouse);
-    data->mouse = SDL_AddMouse(&mouse, -1, "Mouse", 0, 0, 1);
-    SDL_SetMouseIndexId(data->mouse, data->mouse);
+    data->mouse = SDL_AddMouse(&mouse, "Mouse", 0, 0, 1);
 }
 
 void

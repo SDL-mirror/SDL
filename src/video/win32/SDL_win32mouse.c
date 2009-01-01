@@ -150,7 +150,7 @@ WIN_InitMouse(_THIS)
         /* we're saving the handle to the device */
         mice[index] = deviceList[i].hDevice;
         SDL_zero(mouse);
-        SDL_SetMouseIndexId(index, index);
+        mouse.id = index;
         l = SDL_strlen(device_name);
 
         /* we're checking if the device isn't by any chance a tablet */
@@ -176,10 +176,10 @@ WIN_InitMouse(_THIS)
             data->WTInfoA(WTI_DEVICES, DVC_NPRESSURE, &pressure);
             data->WTInfoA(WTI_DEVICES, DVC_NCSRTYPES, &cursors);
             data->mouse =
-                SDL_AddMouse(&mouse, index, device_name, pressure.axMax,
+                SDL_AddMouse(&mouse, device_name, pressure.axMax,
                              pressure.axMin, cursors);
         } else {
-            data->mouse = SDL_AddMouse(&mouse, index, device_name, 0, 0, 1);
+            data->mouse = SDL_AddMouse(&mouse, device_name, 0, 0, 1);
         }
         ++index;
         SDL_free(buffer);

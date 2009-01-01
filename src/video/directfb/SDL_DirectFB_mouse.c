@@ -47,6 +47,7 @@ EnumMice(DFBInputDeviceID device_id,
         SDL_Mouse mouse;
 
         SDL_zero(mouse);
+        mouse.id = device_id;
         mouse.CreateCursor = DirectFB_CreateCursor;
         mouse.ShowCursor = DirectFB_ShowCursor;
         mouse.MoveCursor = DirectFB_MoveCursor;
@@ -55,10 +56,8 @@ EnumMice(DFBInputDeviceID device_id,
         mouse.FreeMouse = DirectFB_FreeMouse;
         mouse.cursor_shown = 1;
 
-        SDL_SetMouseIndexId(device_id, devdata->num_mice);
-        SDL_AddMouse(&mouse, devdata->num_mice, desc.name, 0, 0, 1);
-        devdata->mouse_id[devdata->num_mice] = device_id;
-        devdata->num_mice++;
+        SDL_AddMouse(&mouse, desc.name, 0, 0, 1);
+        devdata->mouse_id[devdata->num_mice++] = device_id;
     }
     return DFENUM_OK;
 }
@@ -91,9 +90,7 @@ DirectFB_InitMouse(_THIS)
         mouse.FreeMouse = DirectFB_FreeMouse;
         mouse.cursor_shown = 1;
 
-        SDL_SetMouseIndexId(0, 0);      /* ID == Index ! */
-        devdata->mouse_id[0] = 0;
-        SDL_AddMouse(&mouse, 0, "Mouse", 0, 0, 1);
+        SDL_AddMouse(&mouse, "Mouse", 0, 0, 1);
         devdata->num_mice = 1;
     }
 }

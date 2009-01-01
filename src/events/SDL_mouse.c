@@ -31,8 +31,6 @@
 static int SDL_num_mice = 0;
 static int SDL_current_mouse = -1;
 static SDL_Mouse **SDL_mice = NULL;
-static int *SDL_IdIndex = NULL;
-static int SDL_highestId = -1;
 
 
 /* Public functions */
@@ -51,62 +49,44 @@ SDL_GetMouse(int index)
     return SDL_mice[index];
 }
 
-int
-SDL_SetMouseIndexId(int id, int index)
-{
-    if (id < 0) {
-        SDL_SetError("Invalid Mouse ID");
-        return -1;
-    }
-    if (id > SDL_highestId) {
-        int *indexes;
-        int i;
-        indexes = (int *) SDL_realloc(SDL_IdIndex, (id + 1) * sizeof(int));
-        if (!indexes) {
-            SDL_OutOfMemory();
-            return -1;
-        }
-        SDL_IdIndex = indexes;
-        for (i = SDL_highestId + 1; i <= id; i++)
-            SDL_IdIndex[i] = -1;
-        SDL_IdIndex[id] = index;
-        SDL_highestId = id;
-    } else {
-        SDL_IdIndex[id] = index;
-    }
-    return 1;
-}
-
-int
+static int
 SDL_GetMouseIndexId(int id)
 {
-    if (id < 0 || id > SDL_highestId) {
-        return -1;
+    int index;
+    SDL_Mouse *mouse;
+
+    for (index = 0; index < SDL_num_mice; ++index) {
+        mouse = SDL_GetMouse(index);
+        if (mouse->id == id) {
+            return index;
+        }
     }
-    return SDL_IdIndex[id];
+    return -1;
 }
 
 int
-SDL_AddMouse(const SDL_Mouse * mouse, int index, char *name, int pressure_max,
+SDL_AddMouse(const SDL_Mouse * mouse, char *name, int pressure_max,
              int pressure_min, int ends)
 {
     SDL_Mouse **mice;
     int selected_mouse;
-    int length;
+    int index, length;
+
+    if (SDL_GetMouseIndexId(mouse->id) != -1) {
+        SDL_SetError("Mouse ID already in use");
+    }
 
     /* Add the mouse to the list of mice */
-    if (index < 0 || index >= SDL_num_mice || SDL_mice[index]) {
-        mice =
-            (SDL_Mouse **) SDL_realloc(SDL_mice,
-                                       (SDL_num_mice + 1) * sizeof(*mice));
-        if (!mice) {
-            SDL_OutOfMemory();
-            return -1;
-        }
-
-        SDL_mice = mice;
-        index = SDL_num_mice++;
+    mice = (SDL_Mouse **) SDL_realloc(SDL_mice,
+                                      (SDL_num_mice + 1) * sizeof(*mice));
+    if (!mice) {
+        SDL_OutOfMemory();
+        return -1;
     }
+
+    SDL_mice = mice;
+    index = SDL_num_mice++;
+
     SDL_mice[index] = (SDL_Mouse *) SDL_malloc(sizeof(*SDL_mice[index]));
     if (!SDL_mice[index]) {
         SDL_OutOfMemory();

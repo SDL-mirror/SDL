@@ -61,22 +61,6 @@
 
 /* Private display data */
 
-#if SDL_VIDEO_DRIVER_X11_XINPUT
-/* !!! FIXME: should be in SDL_VideoData, not globals. */
-extern XDevice **SDL_XDevices;
-extern int SDL_NumOfXDevices;
-extern XEventClass SDL_XEvents[256];
-extern int SDL_NumOfXEvents;
-#endif
-
-/* !!! FIXME: should be in SDL_VideoData, not globals. */
-/* !!! FIXME: change these names, too. */
-extern int motion;              /* the motion event id defined by an XInput function */
-extern int button_pressed;      /* the button_pressed event id defined by an XInput function */
-extern int button_released;     /* the button_released event id defined by an XInput function */
-extern int proximity_in;        /* the proximity in event defined by an XInput function */
-extern int proximity_out;       /* the proximity out event defined by an XInput function */
-
 typedef struct SDL_VideoData
 {
     Display *display;
@@ -87,7 +71,6 @@ typedef struct SDL_VideoData
     int numwindows;
     SDL_WindowData **windowlist;
     int windowlistlength;
-    int mouse;
     int keyboard;
     Atom WM_DELETE_WINDOW;
     SDL_scancode key_layout[256];

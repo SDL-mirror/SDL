@@ -64,6 +64,7 @@ struct SDL_Mouse
     int current_end;
 
     /* Data common to all mice */
+    int id;
     SDL_WindowID focus;
     int which;
     int x;
@@ -89,19 +90,13 @@ struct SDL_Mouse
 /* Initialize the mouse subsystem */
 extern int SDL_MouseInit(void);
 
-/* Assign an id to a mouse at an index */
-extern int SDL_SetMouseIndexId(int id, int index);
-
-/* Get the index of a mouse specified by id */
-extern int SDL_GetMouseIndexId(int id);
-
 /* Get the mouse at an index */
 extern SDL_Mouse *SDL_GetMouse(int index);
 
 /* Add a mouse, possibly reattaching at a particular index (or -1),
    returning the index of the mouse, or -1 if there was an error.
  */
-extern int SDL_AddMouse(const SDL_Mouse * mouse, int index, char *name,
+extern int SDL_AddMouse(const SDL_Mouse * mouse, char *name,
                         int pressure_max, int pressure_min, int ends);
 
 /* Remove a mouse at an index, clearing the slot for later */
