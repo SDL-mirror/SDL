@@ -252,9 +252,8 @@ EOF
         }
 
         print <<EOF;
-    format = AUDIO_$to;
     if (cvt->filters[++cvt->filter_index]) {
-        cvt->filters[cvt->filter_index] (cvt, format);
+        cvt->filters[cvt->filter_index] (cvt, AUDIO_$to);
     }
 }
 
