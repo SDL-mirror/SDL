@@ -632,15 +632,15 @@ GLES_RenderPoint(SDL_Renderer * renderer, int x, int y)
                     (GLfloat) renderer->b * inv255f,
                     (GLfloat) renderer->a * inv255f);
 
-	GLshort vertices[2];
-	vertices[0] = x;
-	vertices[1] = y;
-	
-	data->glVertexPointer(2, GL_SHORT, 0, vertices);
-	data->glEnableClientState(GL_VERTEX_ARRAY);
-	data->glDrawArrays(GL_POINTS, 0, 1);
-	data->glDisableClientState(GL_VERTEX_ARRAY);
-	
+    GLshort vertices[2];
+    vertices[0] = x;
+    vertices[1] = y;
+
+    data->glVertexPointer(2, GL_SHORT, 0, vertices);
+    data->glEnableClientState(GL_VERTEX_ARRAY);
+    data->glDrawArrays(GL_POINTS, 0, 1);
+    data->glDisableClientState(GL_VERTEX_ARRAY);
+
     return 0;
 }
 
@@ -656,16 +656,16 @@ GLES_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
                     (GLfloat) renderer->b * inv255f,
                     (GLfloat) renderer->a * inv255f);
 
-	GLshort vertices[4];
-	vertices[0] = x1;
-	vertices[1] = y1;
-	vertices[2] = x2;
-	vertices[3] = y2;
+    GLshort vertices[4];
+    vertices[0] = x1;
+    vertices[1] = y1;
+    vertices[2] = x2;
+    vertices[3] = y2;
 
-	data->glVertexPointer(2, GL_SHORT, 0, vertices);
-	data->glEnableClientState(GL_VERTEX_ARRAY);
-	data->glDrawArrays(GL_LINES, 0, 2);
-	data->glDisableClientState(GL_VERTEX_ARRAY);
+    data->glVertexPointer(2, GL_SHORT, 0, vertices);
+    data->glEnableClientState(GL_VERTEX_ARRAY);
+    data->glDrawArrays(GL_LINES, 0, 2);
+    data->glDisableClientState(GL_VERTEX_ARRAY);
 
     return 0;
 }
@@ -682,25 +682,25 @@ GLES_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
                     (GLfloat) renderer->b * inv255f,
                     (GLfloat) renderer->a * inv255f);
 
-	GLshort minx = rect->x;
-	GLshort maxx = rect->x + rect->w;
-	GLshort miny = rect->y;
-	GLshort maxy = rect->y + rect->h;
-	
-	GLshort vertices[8];
-	vertices[0] = minx;
-	vertices[1] = miny;
-	vertices[2] = maxx;
-	vertices[3] = miny;
-	vertices[4] = minx;
-	vertices[5] = maxy;
-	vertices[6] = maxx;
-	vertices[7] = maxy;
-	
-	data->glVertexPointer(2, GL_SHORT, 0, vertices);
-	data->glEnableClientState(GL_VERTEX_ARRAY);
-	data->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	data->glDisableClientState(GL_VERTEX_ARRAY);
+    GLshort minx = rect->x;
+    GLshort maxx = rect->x + rect->w;
+    GLshort miny = rect->y;
+    GLshort maxy = rect->y + rect->h;
+
+    GLshort vertices[8];
+    vertices[0] = minx;
+    vertices[1] = miny;
+    vertices[2] = maxx;
+    vertices[3] = miny;
+    vertices[4] = minx;
+    vertices[5] = maxy;
+    vertices[6] = maxx;
+    vertices[7] = maxy;
+
+    data->glVertexPointer(2, GL_SHORT, 0, vertices);
+    data->glEnableClientState(GL_VERTEX_ARRAY);
+    data->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    data->glDisableClientState(GL_VERTEX_ARRAY);
 
     return 0;
 }

@@ -87,8 +87,7 @@ SDL_PROC_UNUSED(void, glColorMask,
                 (GLboolean red, GLboolean green, GLboolean blue,
                  GLboolean alpha))
 SDL_PROC(void, glColorPointer,
-                (GLint size, GLenum type, GLsizei stride,
-                 const GLvoid * pointer))
+         (GLint size, GLenum type, GLsizei stride, const GLvoid * pointer))
 SDL_PROC_UNUSED(void, glCompressedTexImage2D,
                 (GLenum target, GLint level, GLenum internalformat,
                  GLsizei width, GLsizei height, GLint border,
