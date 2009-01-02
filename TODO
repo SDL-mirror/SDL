@@ -5,7 +5,6 @@
    - in progress, software support is done, Ryan is working on OpenGL shaders
  * Implement desktop video mode change notification?
  * Implement icon support (with translucency?)
- * Remove <= 8-bit palettized display support
  * Add diagonal line clipping to SDL_IntersectRectAndLine()
  * Add OpenGL 3.0 context support
  * Verify mouse grab support
