@@ -267,4 +267,13 @@ X11_VideoQuit(_THIS)
     X11_QuitMouse(_this);
 }
 
+SDL_bool
+X11_UseDirectColorVisuals()
+{
+    /* Once we implement DirectColor colormaps and gamma ramp support...
+       return SDL_getenv("SDL_VIDEO_X11_NODIRECTCOLOR") ? SDL_FALSE : SDL_TRUE;
+     */
+    return SDL_FALSE;
+}
+
 /* vim: set ts=4 sw=4 expandtab: */

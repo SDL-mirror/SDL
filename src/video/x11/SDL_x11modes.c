@@ -32,9 +32,6 @@ static int
 get_visualinfo(Display * display, int screen, XVisualInfo * vinfo)
 {
     const char *visual_id = SDL_getenv("SDL_VIDEO_X11_VISUALID");
-    /* We really don't need DirectColor visuals until we implement
-     * gamma ramps, but we'll leave it on for now to catch bugs */
-    int use_directcolor = 0;
     int depth;
 
     /* Look for an exact visual, if requested */
@@ -53,7 +50,7 @@ get_visualinfo(Display * display, int screen, XVisualInfo * vinfo)
     }
 
     depth = DefaultDepth(display, screen);
-    if ((use_directcolor &&
+    if ((X11_UseDirectColorVisuals() &&
          XMatchVisualInfo(display, screen, depth, DirectColor, vinfo)) ||
         XMatchVisualInfo(display, screen, depth, TrueColor, vinfo) ||
         XMatchVisualInfo(display, screen, depth, PseudoColor, vinfo) ||

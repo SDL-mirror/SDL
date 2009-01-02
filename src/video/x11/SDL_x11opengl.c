@@ -391,7 +391,7 @@ X11_GL_GetVisual(_THIS, Display * display, int screen)
         attribs[i++] = GLX_NONE_EXT;
     }
 #ifdef GLX_DIRECT_COLOR         /* Try for a DirectColor visual for gamma support */
-    if (!SDL_getenv("SDL_VIDEO_X11_NODIRECTCOLOR")) {
+    if (X11_UseDirectColorVisuals()) {
         attribs[i++] = GLX_X_VISUAL_TYPE;
         attribs[i++] = GLX_DIRECT_COLOR;
     }
@@ -400,7 +400,7 @@ X11_GL_GetVisual(_THIS, Display * display, int screen)
 
     vinfo = _this->gl_data->glXChooseVisual(display, screen, attribs);
 #ifdef GLX_DIRECT_COLOR
-    if (!vinfo && !SDL_getenv("SDL_VIDEO_X11_NODIRECTCOLOR")) { /* No DirectColor visual?  Try again.. */
+    if (!vinfo && X11_UseDirectColorVisuals()) {        /* No DirectColor visual?  Try again.. */
         attribs[i - 3] = None;
         vinfo = _this->gl_data->glXChooseVisual(display, screen, attribs);
     }
