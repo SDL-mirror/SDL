@@ -596,8 +596,6 @@ extern DECLSPEC const char *SDLCALL SDL_GetWindowTitle(SDL_WindowID windowID);
  * \brief Set the icon of the window.
  *
  * \param icon The icon for the window
- *
- * FIXME: The icon needs to be set before the window is first shown.  Should some icon representation be part of the window creation data?
  */
 extern DECLSPEC void SDLCALL SDL_SetWindowIcon(SDL_Surface * icon);
 
