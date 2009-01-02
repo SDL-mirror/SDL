@@ -36,6 +36,7 @@ typedef struct
 extern int X11_CreateWindow(_THIS, SDL_Window * window);
 extern int X11_CreateWindowFrom(_THIS, SDL_Window * window, const void *data);
 extern void X11_SetWindowTitle(_THIS, SDL_Window * window);
+extern void X11_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon);
 extern void X11_SetWindowPosition(_THIS, SDL_Window * window);
 extern void X11_SetWindowSize(_THIS, SDL_Window * window);
 extern void X11_ShowWindow(_THIS, SDL_Window * window);

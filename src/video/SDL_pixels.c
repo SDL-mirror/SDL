@@ -347,16 +347,25 @@ SDL_AllocFormat(int bpp,
                 Uint32 Rmask, Uint32 Gmask, Uint32 Bmask, Uint32 Amask)
 {
     SDL_PixelFormat *format;
-    Uint32 mask;
 
     /* Allocate an empty pixel format structure */
-    format = SDL_calloc(1, sizeof(*format));
+    format = SDL_malloc(sizeof(*format));
     if (format == NULL) {
         SDL_OutOfMemory();
         return (NULL);
     }
 
     /* Set up the format */
+    return SDL_InitFormat(format, bpp, Rmask, Gmask, Bmask, Amask);
+}
+
+SDL_PixelFormat *
+SDL_InitFormat(SDL_PixelFormat *format, int bpp, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask, Uint32 Amask)
+{
+    Uint32 mask;
+
+    /* Set up the format */
+    SDL_zerop(format);
     format->BitsPerPixel = bpp;
     format->BytesPerPixel = (bpp + 7) / 8;
     if (Rmask || Bmask || Gmask) {      /* Packed pixels with custom mask */
@@ -426,7 +435,7 @@ SDL_AllocFormat(int bpp,
     }
     format->palette = NULL;
 
-    return (format);
+    return format;
 }
 
 /*

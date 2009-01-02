@@ -39,6 +39,7 @@ static SDL_Surface *SDL_PublicSurface = NULL;
 static SDL_GLContext *SDL_VideoContext = NULL;
 static Uint32 SDL_VideoFlags = 0;
 static char *wm_title = NULL;
+static SDL_Surface *SDL_VideoIcon;
 
 char *
 SDL_AudioDriverName(char *namebuf, int maxlen)
@@ -522,6 +523,7 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
     if (!SDL_VideoWindow) {
         return NULL;
     }
+    SDL_SetWindowIcon(SDL_VideoWindow, SDL_VideoIcon);
 
     window_flags = SDL_GetWindowFlags(SDL_VideoWindow);
     surface_flags = 0;
@@ -868,7 +870,7 @@ SDL_WM_GetCaption(const char **title, const char **icon)
 void
 SDL_WM_SetIcon(SDL_Surface * icon, Uint8 * mask)
 {
-    /* FIXME */
+    SDL_VideoIcon = icon;
 }
 
 int

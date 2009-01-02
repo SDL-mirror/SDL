@@ -646,6 +646,43 @@ X11_SetWindowTitle(_THIS, SDL_Window * window)
 }
 
 void
+X11_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
+{
+    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+    Display *display = data->videodata->display;
+    Atom _NET_WM_ICON = XInternAtom(display, "_NET_WM_ICON", False);
+
+    if (icon) {
+        SDL_PixelFormat format;
+        SDL_Surface *surface;
+        int propsize;
+        Uint32 *propdata;
+
+        /* Convert the icon to ARGB for modern window managers */
+        SDL_InitFormat(&format, 32, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
+        surface = SDL_ConvertSurface(icon, &format, 0);
+        if (!surface) {
+            return;
+        }
+
+        /* Set the _NET_WM_ICON property */
+        propsize = 2+(icon->w*icon->h);
+        propdata = SDL_malloc(propsize * sizeof(Uint32));
+        if (propdata) {
+            propdata[0] = icon->w;
+            propdata[1] = icon->h;
+            SDL_memcpy(&propdata[2], surface->pixels, surface->h*surface->pitch);
+            XChangeProperty(display, data->window, _NET_WM_ICON, 
+                            XA_CARDINAL, 32, PropModeReplace,
+                            (unsigned char *) propdata, propsize);
+        }
+        SDL_FreeSurface(surface);
+    } else {
+        XDeleteProperty(display, data->window, _NET_WM_ICON);
+    }
+}
+
+void
 X11_SetWindowPosition(_THIS, SDL_Window * window)
 {
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;

@@ -591,13 +591,13 @@ extern DECLSPEC void SDLCALL SDL_SetWindowTitle(SDL_WindowID windowID,
 extern DECLSPEC const char *SDLCALL SDL_GetWindowTitle(SDL_WindowID windowID);
 
 /**
- * \fn void SDL_SetWindowIcon(SDL_Surface *icon)
+ * \fn void SDL_SetWindowIcon(SDL_WindowID windowID, SDL_Surface *icon)
  *
  * \brief Set the icon of the window.
  *
  * \param icon The icon for the window
  */
-extern DECLSPEC void SDLCALL SDL_SetWindowIcon(SDL_Surface * icon);
+extern DECLSPEC void SDLCALL SDL_SetWindowIcon(SDL_WindowID windowID, SDL_Surface * icon);
 
 /**
  * \fn void SDL_SetWindowData(SDL_WindowID windowID, void *userdata)

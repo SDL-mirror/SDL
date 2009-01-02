@@ -87,7 +87,7 @@ typedef struct
     Pixmap pixmaps[3];
     int current_pixmap;
     Drawable drawable;
-    SDL_PixelFormat *format;
+    SDL_PixelFormat format;
     GC gc;
     SDL_DirtyRectList dirty;
     SDL_bool makedirty;
@@ -251,11 +251,7 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
         X11_DestroyRenderer(renderer);
         return NULL;
     }
-    data->format = SDL_AllocFormat(bpp, Rmask, Gmask, Bmask, Amask);
-    if (!data->format) {
-        X11_DestroyRenderer(renderer);
-        return NULL;
-    }
+    SDL_InitFormat(&data->format, bpp, Rmask, Gmask, Bmask, Amask);
 
     /* Create the drawing context */
     gcv.graphics_exposures = False;
@@ -583,11 +579,11 @@ renderdrawcolor(SDL_Renderer * renderer, int premult)
     Uint8 b = renderer->b;
     Uint8 a = renderer->a;
     if (premult)
-        return SDL_MapRGBA(data->format, ((int) r * (int) a) / 255,
+        return SDL_MapRGBA(&data->format, ((int) r * (int) a) / 255,
                            ((int) g * (int) a) / 255,
                            ((int) b * (int) a) / 255, 255);
     else
-        return SDL_MapRGBA(data->format, r, g, b, a);
+        return SDL_MapRGBA(&data->format, r, g, b, a);
 }
 
 static int
@@ -851,9 +847,6 @@ X11_DestroyRenderer(SDL_Renderer * renderer)
             if (data->pixmaps[i] != None) {
                 XFreePixmap(data->display, data->pixmaps[i]);
             }
-        }
-        if (data->format) {
-            SDL_FreeFormat(data->format);
         }
         if (data->gc) {
             XFreeGC(data->display, data->gc);

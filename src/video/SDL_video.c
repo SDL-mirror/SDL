@@ -966,6 +966,19 @@ SDL_GetWindowTitle(SDL_WindowID windowID)
 }
 
 void
+SDL_SetWindowIcon(SDL_WindowID windowID, SDL_Surface * icon)
+{
+    SDL_Window *window = SDL_GetWindowFromID(windowID);
+
+    if (!window) {
+        return;
+    }
+    if (_this->SetWindowIcon) {
+        _this->SetWindowIcon(_this, window, icon);
+    }
+}
+
+void
 SDL_SetWindowData(SDL_WindowID windowID, void *userdata)
 {
     SDL_Window *window = SDL_GetWindowFromID(windowID);
@@ -1590,33 +1603,30 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
                               surface->pitch);
         }
     } else {
-        SDL_PixelFormat *dst_fmt;
+        SDL_PixelFormat dst_fmt;
         SDL_Surface *dst = NULL;
 
         /* Set up a destination surface for the texture update */
-        dst_fmt = SDL_AllocFormat(bpp, Rmask, Gmask, Bmask, Amask);
-        if (dst_fmt) {
-            if (SDL_ISPIXELFORMAT_INDEXED(format)) {
-                dst_fmt->palette =
-                    SDL_AllocPalette((1 << SDL_BITSPERPIXEL(format)));
-                if (dst_fmt->palette) {
-                    /*
-                     * FIXME: Should we try to copy
-                     * fmt->palette?
-                     */
-                    SDL_DitherColors(dst_fmt->palette->colors,
-                                     SDL_BITSPERPIXEL(format));
-                }
+        SDL_InitFormat(&dst_fmt, bpp, Rmask, Gmask, Bmask, Amask);
+        if (SDL_ISPIXELFORMAT_INDEXED(format)) {
+            dst_fmt.palette =
+                SDL_AllocPalette((1 << SDL_BITSPERPIXEL(format)));
+            if (dst_fmt.palette) {
+                /*
+                 * FIXME: Should we try to copy
+                 * fmt->palette?
+                 */
+                SDL_DitherColors(dst_fmt.palette->colors,
+                                 SDL_BITSPERPIXEL(format));
             }
-            dst = SDL_ConvertSurface(surface, dst_fmt, 0);
-            if (dst) {
-                SDL_UpdateTexture(textureID, NULL, dst->pixels, dst->pitch);
-                SDL_FreeSurface(dst);
-            }
-            if (dst_fmt->palette) {
-                SDL_FreePalette(dst_fmt->palette);
-            }
-            SDL_FreeFormat(dst_fmt);
+        }
+        dst = SDL_ConvertSurface(surface, &dst_fmt, 0);
+        if (dst) {
+            SDL_UpdateTexture(textureID, NULL, dst->pixels, dst->pitch);
+            SDL_FreeSurface(dst);
+        }
+        if (dst_fmt.palette) {
+            SDL_FreePalette(dst_fmt.palette);
         }
         if (!dst) {
             SDL_DestroyTexture(textureID);

@@ -174,6 +174,7 @@ X11_CreateDevice(int devindex)
     device->CreateWindow = X11_CreateWindow;
     device->CreateWindowFrom = X11_CreateWindowFrom;
     device->SetWindowTitle = X11_SetWindowTitle;
+    device->SetWindowIcon = X11_SetWindowIcon;
     device->SetWindowPosition = X11_SetWindowPosition;
     device->SetWindowSize = X11_SetWindowSize;
     device->ShowWindow = X11_ShowWindow;
