@@ -377,7 +377,7 @@ WIN_SetWindowSize(_THIS, SDL_Window * window)
     w = (rect.right - rect.left);
     h = (rect.bottom - rect.top);
 
-    SetWindowPos(hwnd, top, 0, 0, h, w, (SWP_NOCOPYBITS | SWP_NOMOVE));
+    SetWindowPos(hwnd, top, 0, 0, w, h, (SWP_NOCOPYBITS | SWP_NOMOVE));
 }
 
 void
