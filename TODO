@@ -6,7 +6,6 @@
  * Implement desktop video mode change notification?
  * Implement icon support (with translucency?)
  * Remove <= 8-bit palettized display support
- * See if we can add real alpha to the palette entries
  * Add diagonal line clipping to SDL_IntersectRectAndLine()
  * Add OpenGL 3.0 context support
  * Verify mouse grab support
