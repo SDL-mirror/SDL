@@ -188,8 +188,8 @@ EOF
         if ($fsize < $tsize) {
             my $mult = $tsize / $fsize;
             print <<EOF;
-    src = (const $srctype *) (cvt->buf + cvt->len_cvt);
-    dst = ($tctype *) (cvt->buf + cvt->len_cvt * $mult);
+    src = ((const $srctype *) (cvt->buf + cvt->len_cvt)) - 1;
+    dst = (($tctype *) (cvt->buf + cvt->len_cvt * $mult)) - 1;
     for (i = cvt->len_cvt / sizeof ($srctype); i; --i, --src, --dst) {
 EOF
         } else {
