@@ -31,7 +31,7 @@ X11_FreeMouse(SDL_Mouse * mouse)
     X11_MouseData *data = (X11_MouseData *) mouse->driverdata;
 
     if (data) {
-        XCloseDevice(data->display, mouse->id);
+        XCloseDevice(data->display, data->device);
         SDL_free(data);
     }
 }
