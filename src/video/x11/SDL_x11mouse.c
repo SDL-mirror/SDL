@@ -61,6 +61,7 @@ X11_InitMouse(_THIS)
     }
 
     /* we're getting the list of input devices */
+    n = 0;
     DevList = XListInputDevices(display, &n);
 
     /* we're aquiring valuators: mice, tablets, etc. */
