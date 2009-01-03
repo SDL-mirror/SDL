@@ -8,6 +8,10 @@
  * Add OpenGL 3.0 context support
  * Finish multiple display support
  * Open windows on display that is selected when creating a window
+ * Create testing plan - becoming more and more important...
+   - unit tests for each feature and combination with expected output
+     and actual output comparison.
+ * Public license for SDL_compat.c, tests, and SDL_main*
  * Verify mouse grab support
  * Properly handle mouse grab with Vista DPI scaling
  * Make sure the mouse is where it's supposed to be when un-grabbed
