@@ -366,8 +366,11 @@ WIN_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
         SDL_stack_free(icon_bmp);
     }
 
-    /* Set the icon */
+    /* Set the icon for the window */
     SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hicon);
+
+    /* Set the icon in the task manager (should we do this?) */
+    SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hicon);
 }
 
 void
