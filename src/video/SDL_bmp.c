@@ -377,7 +377,16 @@ SDL_SaveBMP_RW(SDL_Surface * saveme, SDL_RWops * dst, int freedst)
     /* Make sure we have somewhere to save */
     surface = NULL;
     if (dst) {
-        if (saveme->format->palette) {
+        SDL_bool save32bit = SDL_FALSE;
+#ifdef SAVE_32BIT_BMP
+        /* We can save alpha information in a 32-bit BMP */
+        if (saveme->map->info.flags & SDL_COPY_COLORKEY ||
+            saveme->format->Amask) {
+            save32bit = SDL_TRUE;
+        }
+#endif /* SAVE_32BIT_BMP */
+
+        if (saveme->format->palette && !save32bit) {
             if (saveme->format->BitsPerPixel == 8) {
                 surface = saveme;
             } else {
@@ -399,17 +408,23 @@ SDL_SaveBMP_RW(SDL_Surface * saveme, SDL_RWops * dst, int freedst)
         } else {
             SDL_PixelFormat format;
 
-            /* Convert to 24 bits per pixel */
-            SDL_InitFormat(&format, 24,
+            /* If the surface has a colorkey or alpha channel we'll save a
+               32-bit BMP with alpha channel, otherwise save a 24-bit BMP. */
+            if (save32bit) {
+                SDL_InitFormat(&format, 32,
+                               0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
+            } else {
+                SDL_InitFormat(&format, 24,
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN
-                           0x00FF0000, 0x0000FF00, 0x000000FF,
+                               0x00FF0000, 0x0000FF00, 0x000000FF,
 #else
-                           0x000000FF, 0x0000FF00, 0x00FF0000,
+                               0x000000FF, 0x0000FF00, 0x00FF0000,
 #endif
-                           0);
+                               0);
+            }
             surface = SDL_ConvertSurface(saveme, &format, 0);
             if (!surface) {
-                SDL_SetError("Couldn't convert image to 24 bpp");
+                SDL_SetError("Couldn't convert image to %d bpp", format.BitsPerPixel);
             }
         }
     }
