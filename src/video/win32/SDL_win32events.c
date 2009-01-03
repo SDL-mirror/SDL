@@ -286,10 +286,8 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 SDL_SendMouseButton(index, SDL_RELEASED, SDL_BUTTON_X2);
             }
             if (flags & RI_MOUSE_WHEEL) {
-                if (raw->data.mouse.usButtonData != 0) {
-                    SDL_SendMouseWheel(index, 0,
-                                       raw->data.mouse.usButtonData);
-                }
+                SDL_SendMouseWheel(index, 0,
+                                   (short)raw->data.mouse.usButtonData);
             }
             SDL_stack_free(lpb);
         }
