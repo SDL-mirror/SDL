@@ -221,6 +221,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             const RAWMOUSE *raw_mouse = NULL;
             POINT point;
             USHORT flags;
+            int w, h;
 
             /* we're collecting data from the mouse */
             GetRawInputData((HRAWINPUT) lParam, RID_INPUT, NULL, &size,
@@ -241,6 +242,16 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             }
 /* FIXME: Doesn't this defeat the point of using raw input? */
             GetCursorPos(&point);
+            ScreenToClient(hwnd, &point);
+
+            SDL_GetWindowSize(data->windowID, &w, &h);
+            if (point.x >= 0 && point.y >= 0 && point.x < w && point.y < h) {
+                SDL_SetMouseFocus(index, data->windowID);
+            } else {
+                SDL_SetMouseFocus(index, 0);
+                /* FIXME: Should we be doing anything else here? */
+                break;
+            }
 
             /* if the message was sent by a tablet we have to send also pressure */
             if (index == tablet) {
@@ -286,14 +297,14 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
     case WM_MOUSELEAVE:
         {
-            int index;
-            SDL_Mouse *mouse;
+            int i;
 
-            index = data->videodata->mouse;
-            mouse = SDL_GetMouse(index);
+            for (i = 0; i < SDL_GetNumMice(); ++i) {
+                SDL_Mouse *mouse = SDL_GetMouse(i);
 
-            if (mouse->focus == data->windowID) {
-                SDL_SetMouseFocus(index, 0);
+                if (mouse->focus == data->windowID) {
+                    SDL_SetMouseFocus(i, 0);
+                }
             }
         }
         return (0);

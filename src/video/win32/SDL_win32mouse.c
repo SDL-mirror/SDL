@@ -175,11 +175,9 @@ WIN_InitMouse(_THIS)
             int cursors;
             data->WTInfoA(WTI_DEVICES, DVC_NPRESSURE, &pressure);
             data->WTInfoA(WTI_DEVICES, DVC_NCSRTYPES, &cursors);
-            data->mouse =
-                SDL_AddMouse(&mouse, device_name, pressure.axMax,
-                             pressure.axMin, cursors);
+            SDL_AddMouse(&mouse, device_name, pressure.axMax, pressure.axMin, cursors);
         } else {
-            data->mouse = SDL_AddMouse(&mouse, device_name, 0, 0, 1);
+            SDL_AddMouse(&mouse, device_name, 0, 0, 1);
         }
         ++index;
         SDL_free(buffer);

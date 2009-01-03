@@ -75,7 +75,6 @@ typedef struct SDL_VideoData
     BOOL (*WTClose) (HCTX);
 /* *INDENT-ON* */
 
-    int mouse;
     int keyboard;
     SDL_scancode *key_layout;
 } SDL_VideoData;
