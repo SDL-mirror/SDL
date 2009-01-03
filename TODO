@@ -3,6 +3,8 @@
  * Add higher precision timers for profiling
  * Implement YUV texture support
    - in progress, software support is done, Ryan is working on OpenGL shaders
+ * Put subversion revision in SDL_version.h
+ * Tag snapshots with subversion revision
  * Implement desktop video mode change notification?
  * Add diagonal line clipping to SDL_IntersectRectAndLine()
  * Add OpenGL 3.0 context support
