@@ -88,20 +88,8 @@ SDL_RenderDriver D3D_RenderDriver = {
       SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD | SDL_BLENDMODE_MOD),
      (SDL_TEXTURESCALEMODE_NONE | SDL_TEXTURESCALEMODE_FAST |
       SDL_TEXTURESCALEMODE_SLOW | SDL_TEXTURESCALEMODE_BEST),
-     12,
-     {
-      SDL_PIXELFORMAT_INDEX8,
-      SDL_PIXELFORMAT_RGB332,
-      SDL_PIXELFORMAT_RGB444,
-      SDL_PIXELFORMAT_RGB555,
-      SDL_PIXELFORMAT_ARGB4444,
-      SDL_PIXELFORMAT_ARGB1555,
-      SDL_PIXELFORMAT_RGB565,
-      SDL_PIXELFORMAT_RGB888,
-      SDL_PIXELFORMAT_ARGB8888,
-      SDL_PIXELFORMAT_ARGB2101010,
-      SDL_PIXELFORMAT_YUY2,
-      SDL_PIXELFORMAT_UYVY},
+     0,
+     {0},
      0,
      0}
 };
@@ -242,8 +230,40 @@ void
 D3D_AddRenderDriver(_THIS)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+    SDL_RendererInfo *info = &D3D_RenderDriver.info;
+    SDL_DisplayMode *mode = &SDL_CurrentDisplay.desktop_mode;
 
     if (data->d3d) {
+        int i;
+        int formats[] = {
+          SDL_PIXELFORMAT_INDEX8,
+          SDL_PIXELFORMAT_RGB332,
+          SDL_PIXELFORMAT_RGB444,
+          SDL_PIXELFORMAT_RGB555,
+          SDL_PIXELFORMAT_ARGB4444,
+          SDL_PIXELFORMAT_ARGB1555,
+          SDL_PIXELFORMAT_RGB565,
+          SDL_PIXELFORMAT_RGB888,
+          SDL_PIXELFORMAT_ARGB8888,
+          SDL_PIXELFORMAT_ARGB2101010,
+          SDL_PIXELFORMAT_YUY2,
+          SDL_PIXELFORMAT_UYVY,
+        };
+        HRESULT result;
+
+        for (i = 0; i < SDL_arraysize(formats); ++i) {
+            result = IDirect3D9_CheckDeviceFormat(data->d3d,
+                                                  D3DADAPTER_DEFAULT,        /* FIXME */
+                                                  D3DDEVTYPE_HAL,
+                                                  PixelFormatToD3DFMT(mode->format),
+                                                  0,
+                                                  D3DRTYPE_TEXTURE,
+                                                  PixelFormatToD3DFMT(formats[i]));
+            if (!FAILED(result)) {
+                info->texture_formats[info->num_texture_formats++] = formats[i];
+            }
+        }
+
         SDL_AddRenderDriver(0, &D3D_RenderDriver);
     }
 }
