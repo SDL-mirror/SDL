@@ -30,6 +30,7 @@
 #include "SDL_config.h"
 
 #include "../SDL_sysvideo.h"
+#include "../SDL_pixels_c.h"
 #include "../../events/SDL_keyboard_c.h"
 
 #include "SDL_win32video.h"
@@ -309,6 +310,64 @@ WIN_SetWindowTitle(_THIS, SDL_Window * window)
     if (title) {
         SDL_free(title);
     }
+}
+
+void
+WIN_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
+{
+    HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
+    HICON hicon = NULL;
+
+    if(icon) {
+        BYTE *icon_bmp;
+        int icon_len;
+        SDL_RWops *dst;
+        SDL_PixelFormat format;
+        SDL_Surface *surface;
+
+        /* Create temporary bitmap buffer */
+        icon_len = 40 + icon->h * icon->w * 4;
+        icon_bmp = SDL_stack_alloc(BYTE, icon_len);
+        dst = SDL_RWFromMem(icon_bmp, icon_len);
+        if (!dst) {
+            SDL_stack_free(icon_bmp);
+            return;
+        }
+
+        /* Write the BITMAPINFO header */
+        SDL_WriteLE32(dst, 40);
+        SDL_WriteLE32(dst, icon->w);
+        SDL_WriteLE32(dst, icon->h*2);
+        SDL_WriteLE16(dst, 1);
+        SDL_WriteLE16(dst, 32);
+        SDL_WriteLE32(dst, BI_RGB);
+        SDL_WriteLE32(dst, icon->h * icon->w * 4);
+        SDL_WriteLE32(dst, 0);
+        SDL_WriteLE32(dst, 0);
+        SDL_WriteLE32(dst, 0);
+        SDL_WriteLE32(dst, 0);
+
+        /* Convert the icon to a 32-bit surface with alpha channel */
+        SDL_InitFormat(&format, 32,
+                       0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
+        surface = SDL_ConvertSurface(icon, &format, 0);
+        if (surface) {
+            /* Write the pixels upside down into the bitmap buffer */
+            int y = surface->h;
+            while (y--) {
+                Uint8 *src = (Uint8 *)surface->pixels + y * surface->pitch;
+                SDL_RWwrite(dst, src, surface->pitch, 1);
+            }
+            SDL_FreeSurface(surface);
+
+            hicon = CreateIconFromResource(icon_bmp, icon_len, TRUE, 0x00030000);
+        }
+        SDL_RWclose(dst);
+        SDL_stack_free(icon_bmp);
+    }
+
+    /* Set the icon */
+    SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hicon);
 }
 
 void
