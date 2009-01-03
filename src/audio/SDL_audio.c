@@ -28,7 +28,7 @@
 #include "SDL_audiomem.h"
 #include "SDL_sysaudio.h"
 
-#define _THIS	SDL_AudioDevice *this
+#define _THIS    SDL_AudioDevice *this
 
 static SDL_AudioDriver current_audio;
 static SDL_AudioDevice *open_devices[16];
@@ -625,7 +625,9 @@ SDL_AudioInit(const char *driver_name)
             initialized = 1;
             best_choice = i;
         } else if (rc == 1) {   /* init'd, but can't see any devices. */
-            current_audio.impl.Deinitialize();
+            if (current_audio.impl.Deinitialize) {
+                current_audio.impl.Deinitialize();
+            }
             if (best_choice == -1) {
                 best_choice = i;
             }
