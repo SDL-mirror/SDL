@@ -184,23 +184,22 @@ SDL_IntersectRectAndLine(const SDL_Rect * rect, int *X1, int *Y1, int *X2,
         return SDL_TRUE;
     }
 
-    else
-    {
-    /* The task of clipping a line with finite slope ratios in a fixed-
-     * precision coordinate space is not as immediately simple as it is
-     * with coordinates of arbitrary precision. If the ratio of slopes
-     * between the input line segment and the result line segment is not
-     * a whole number, you have in fact *moved* the line segment a bit,
-     * and there can be no avoiding it without more precision
-     */
-        int *x_result_[] = {X1, X2, NULL}, **x_result = x_result_;
-        int *y_result_[] = {Y1, Y2, NULL}, **y_result = y_result_;
+    else {
+        /* The task of clipping a line with finite slope ratios in a fixed-
+         * precision coordinate space is not as immediately simple as it is
+         * with coordinates of arbitrary precision. If the ratio of slopes
+         * between the input line segment and the result line segment is not
+         * a whole number, you have in fact *moved* the line segment a bit,
+         * and there can be no avoiding it without more precision
+         */
+        int *x_result_[] = { X1, X2, NULL }, **x_result = x_result_;
+        int *y_result_[] = { Y1, Y2, NULL }, **y_result = y_result_;
         SDL_bool intersection = SDL_FALSE;
         double b, m, left, right, bottom, top;
         int xl, xh, yl, yh;
 
         /* solve mx+b line formula */
-        m = (double)(y1-y2) / (double)(x1-x2);
+        m = (double) (y1 - y2) / (double) (x1 - x2);
         b = y2 - m * (double) x2;
 
         /* find some linear intersections */
@@ -232,8 +231,8 @@ SDL_IntersectRectAndLine(const SDL_Rect * rect, int *X1, int *Y1, int *X2,
             x_result++;
             y_result++;
             intersection = SDL_TRUE;
-        } else /* it was determined earlier that *both* end-points are not contained */
-
+        } else
+            /* it was determined earlier that *both* end-points are not contained */
         if (RISING(rectx1, x2, rectx2) && RISING(recty1, y2, recty2)) {
             **(x_result++) = x2;
             **(y_result++) = y2;
@@ -246,21 +245,24 @@ SDL_IntersectRectAndLine(const SDL_Rect * rect, int *X1, int *Y1, int *X2,
             intersection = SDL_TRUE;
         }
 
-        if (*x_result == NULL) return intersection;
+        if (*x_result == NULL)
+            return intersection;
         if (RISING(recty1, right, recty2) && RISING(xl, rectx2, xh)) {
             **(x_result++) = rectx2;
             **(y_result++) = (int) right;
             intersection = SDL_TRUE;
         }
 
-        if (*x_result == NULL) return intersection;
+        if (*x_result == NULL)
+            return intersection;
         if (RISING(rectx1, top, rectx2) && RISING(yl, recty1, yh)) {
             **(x_result++) = (int) top;
             **(y_result++) = recty1;
             intersection = SDL_TRUE;
         }
 
-        if (*x_result == NULL) return intersection;
+        if (*x_result == NULL)
+            return intersection;
         if (RISING(rectx1, bottom, rectx2) && RISING(yl, recty2, yh)) {
             **(x_result++) = (int) bottom;
             **(y_result++) = recty2;

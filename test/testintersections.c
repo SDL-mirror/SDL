@@ -67,9 +67,13 @@ DrawPoints(SDL_WindowID window)
 #define MAX_LINES 16
 int num_lines = 0;
 SDL_Rect lines[MAX_LINES];
-static int add_line(int x1, int y1, int x2, int y2) {
-    if (num_lines >= MAX_LINES) return 0;
-    if ((x1 == x2) && (y1 == y2)) return 0;
+static int
+add_line(int x1, int y1, int x2, int y2)
+{
+    if (num_lines >= MAX_LINES)
+        return 0;
+    if ((x1 == x2) && (y1 == y2))
+        return 0;
 
     printf("adding line (%d, %d), (%d, %d)\n", x1, y1, x2, y2);
     lines[num_lines].x = x1;
@@ -110,14 +114,21 @@ DrawLines(SDL_WindowID window)
 #define MAX_RECTS 16
 int num_rects = 0;
 SDL_Rect rects[MAX_RECTS];
-static int add_rect(int x1, int y1, int x2, int y2) {
-    if (num_rects >= MAX_RECTS) return 0;
-    if ((x1 == x2) || (y1 == y2)) return 0;
+static int
+add_rect(int x1, int y1, int x2, int y2)
+{
+    if (num_rects >= MAX_RECTS)
+        return 0;
+    if ((x1 == x2) || (y1 == y2))
+        return 0;
 
-    if (x1 > x2) SWAP(int, x1, x2);
-    if (y1 > y2) SWAP(int, y1, y2);
+    if (x1 > x2)
+        SWAP(int, x1, x2);
+    if (y1 > y2)
+        SWAP(int, y1, y2);
 
-    printf("adding rect (%d, %d), (%d, %d) [%dx%d]\n", x1, y1, x2, y2, x2-x1, y2-y1);
+    printf("adding rect (%d, %d), (%d, %d) [%dx%d]\n", x1, y1, x2, y2,
+           x2 - x1, y2 - y1);
 
     rects[num_rects].x = x1;
     rects[num_rects].y = y1;
@@ -155,21 +166,21 @@ DrawRectLineIntersections(SDL_WindowID window)
     SDL_SetRenderDrawBlendMode(SDL_BLENDMODE_NONE);
 
     for (i = 0; i < num_rects; i++)
-    for (j = 0; j < num_lines; j++) {
-        int x1, y1, x2, y2;
-        SDL_Rect r;
-        
-        r = rects[i];
-        x1 = lines[j].x;
-        y1 = lines[j].y;
-        x2 = lines[j].w;
-        y2 = lines[j].h;
+        for (j = 0; j < num_lines; j++) {
+            int x1, y1, x2, y2;
+            SDL_Rect r;
 
-        if (SDL_IntersectRectAndLine(&r, &x1, &y1, &x2, &y2)) {
-            SDL_SetRenderDrawColor(0, 255, 55, 255);
-            SDL_RenderLine(x1, y1, x2, y2);
+            r = rects[i];
+            x1 = lines[j].x;
+            y1 = lines[j].y;
+            x2 = lines[j].w;
+            y2 = lines[j].h;
+
+            if (SDL_IntersectRectAndLine(&r, &x1, &y1, &x2, &y2)) {
+                SDL_SetRenderDrawColor(0, 255, 55, 255);
+                SDL_RenderLine(x1, y1, x2, y2);
+            }
         }
-    }
 
     SDL_SetRenderDrawBlendMode(SDL_BLENDMODE_NONE);
 }
@@ -182,13 +193,13 @@ DrawRectRectIntersections(SDL_WindowID window)
     SDL_SetRenderDrawBlendMode(SDL_BLENDMODE_NONE);
 
     for (i = 0; i < num_rects; i++)
-    for (j = i+1; j < num_rects; j++) {
-        SDL_Rect r;
-        if (SDL_IntersectRect(&rects[i], &rects[j], &r)) {
-            SDL_SetRenderDrawColor(255, 200, 0, 255);
-            SDL_RenderFill(&r);
+        for (j = i + 1; j < num_rects; j++) {
+            SDL_Rect r;
+            if (SDL_IntersectRect(&rects[i], &rects[j], &r)) {
+                SDL_SetRenderDrawColor(255, 200, 0, 255);
+                SDL_RenderFill(&r);
+            }
         }
-    }
 
     SDL_SetRenderDrawBlendMode(SDL_BLENDMODE_NONE);
 }
@@ -285,21 +296,29 @@ main(int argc, char *argv[])
             case SDL_MOUSEBUTTONUP:
                 if (event.button.which == 0) {
                     if (event.button.button == 3)
-                        add_line(mouse_begin_x, mouse_begin_y, event.button.x, event.button.y);
+                        add_line(mouse_begin_x, mouse_begin_y, event.button.x,
+                                 event.button.y);
                     if (event.button.button == 1)
-                        add_rect(mouse_begin_x, mouse_begin_y, event.button.x, event.button.y);
+                        add_rect(mouse_begin_x, mouse_begin_y, event.button.x,
+                                 event.button.y);
                 }
                 break;
             case SDL_KEYDOWN:
                 switch (event.key.keysym.sym) {
-                    case 'l':
-                        if (event.key.keysym.mod & KMOD_SHIFT) num_lines = 0;
-                        else add_line(rand()%640, rand()%480, rand()%640, rand()%480);
-                        break;
-                    case 'r':
-                        if (event.key.keysym.mod & KMOD_SHIFT) num_rects = 0;
-                        else add_rect(rand()%640, rand()%480, rand()%640, rand()%480);
-                        break;
+                case 'l':
+                    if (event.key.keysym.mod & KMOD_SHIFT)
+                        num_lines = 0;
+                    else
+                        add_line(rand() % 640, rand() % 480, rand() % 640,
+                                 rand() % 480);
+                    break;
+                case 'r':
+                    if (event.key.keysym.mod & KMOD_SHIFT)
+                        num_rects = 0;
+                    else
+                        add_rect(rand() % 640, rand() % 480, rand() % 640,
+                                 rand() % 480);
+                    break;
                 }
                 break;
             case SDL_WINDOWEVENT:
