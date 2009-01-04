@@ -39,7 +39,9 @@
 static SDL_Renderer *D3D_CreateRenderer(SDL_Window * window, Uint32 flags);
 static int D3D_DisplayModeChanged(SDL_Renderer * renderer);
 static int D3D_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture);
-static int D3D_QueryTexturePixels(SDL_Renderer * renderer, SDL_Texture * texture, void **pixels, int *pitch);
+static int D3D_QueryTexturePixels(SDL_Renderer * renderer,
+                                  SDL_Texture * texture, void **pixels,
+                                  int *pitch);
 static int D3D_SetTexturePalette(SDL_Renderer * renderer,
                                  SDL_Texture * texture,
                                  const SDL_Color * colors, int firstcolor,
@@ -232,17 +234,18 @@ PixelFormatToD3DFMT(Uint32 format)
 }
 
 static SDL_bool
-D3D_IsTextureFormatAvailable(IDirect3D9 *d3d, Uint32 display_format, Uint32 texture_format)
+D3D_IsTextureFormatAvailable(IDirect3D9 * d3d, Uint32 display_format,
+                             Uint32 texture_format)
 {
     HRESULT result;
 
-    result = IDirect3D9_CheckDeviceFormat(d3d,
-                                          D3DADAPTER_DEFAULT,        /* FIXME */
+    result = IDirect3D9_CheckDeviceFormat(d3d, D3DADAPTER_DEFAULT,      /* FIXME */
                                           D3DDEVTYPE_HAL,
                                           PixelFormatToD3DFMT(display_format),
                                           0,
                                           D3DRTYPE_TEXTURE,
-                                          PixelFormatToD3DFMT(texture_format));
+                                          PixelFormatToD3DFMT
+                                          (texture_format));
     return FAILED(result) ? SDL_FALSE : SDL_TRUE;
 }
 
@@ -260,7 +263,8 @@ UpdateYUVTextureData(SDL_Texture * texture)
     d3drect.top = 0;
     d3drect.bottom = texture->h;
 
-    result = IDirect3DTexture9_LockRect(data->texture, 0, &locked, &d3drect, 0);
+    result =
+        IDirect3DTexture9_LockRect(data->texture, 0, &locked, &d3drect, 0);
     if (FAILED(result)) {
         return;
     }
@@ -285,28 +289,35 @@ D3D_AddRenderDriver(_THIS)
     if (data->d3d) {
         int i;
         int formats[] = {
-          SDL_PIXELFORMAT_INDEX8,
-          SDL_PIXELFORMAT_RGB332,
-          SDL_PIXELFORMAT_RGB444,
-          SDL_PIXELFORMAT_RGB555,
-          SDL_PIXELFORMAT_ARGB4444,
-          SDL_PIXELFORMAT_ARGB1555,
-          SDL_PIXELFORMAT_RGB565,
-          SDL_PIXELFORMAT_RGB888,
-          SDL_PIXELFORMAT_ARGB8888,
-          SDL_PIXELFORMAT_ARGB2101010,
+            SDL_PIXELFORMAT_INDEX8,
+            SDL_PIXELFORMAT_RGB332,
+            SDL_PIXELFORMAT_RGB444,
+            SDL_PIXELFORMAT_RGB555,
+            SDL_PIXELFORMAT_ARGB4444,
+            SDL_PIXELFORMAT_ARGB1555,
+            SDL_PIXELFORMAT_RGB565,
+            SDL_PIXELFORMAT_RGB888,
+            SDL_PIXELFORMAT_ARGB8888,
+            SDL_PIXELFORMAT_ARGB2101010,
         };
 
         for (i = 0; i < SDL_arraysize(formats); ++i) {
-            if (D3D_IsTextureFormatAvailable(data->d3d, mode->format, formats[i])) {
-                info->texture_formats[info->num_texture_formats++] = formats[i];
+            if (D3D_IsTextureFormatAvailable
+                (data->d3d, mode->format, formats[i])) {
+                info->texture_formats[info->num_texture_formats++] =
+                    formats[i];
             }
         }
-        info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_YV12;
-        info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_IYUV;
-        info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_YUY2;
-        info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_UYVY;
-        info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_YVYU;
+        info->texture_formats[info->num_texture_formats++] =
+            SDL_PIXELFORMAT_YV12;
+        info->texture_formats[info->num_texture_formats++] =
+            SDL_PIXELFORMAT_IYUV;
+        info->texture_formats[info->num_texture_formats++] =
+            SDL_PIXELFORMAT_YUY2;
+        info->texture_formats[info->num_texture_formats++] =
+            SDL_PIXELFORMAT_UYVY;
+        info->texture_formats[info->num_texture_formats++] =
+            SDL_PIXELFORMAT_YVYU;
 
         SDL_AddRenderDriver(0, &D3D_RenderDriver);
     }
@@ -549,9 +560,11 @@ D3D_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     if (SDL_ISPIXELFORMAT_FOURCC(texture->format) &&
         (texture->format != SDL_PIXELFORMAT_YUY2 ||
-         !D3D_IsTextureFormatAvailable(renderdata->d3d, display_format, texture->format)) &&
-        (texture->format != SDL_PIXELFORMAT_YVYU ||
-         !D3D_IsTextureFormatAvailable(renderdata->d3d, display_format, texture->format))) {
+         !D3D_IsTextureFormatAvailable(renderdata->d3d, display_format,
+                                       texture->format))
+        && (texture->format != SDL_PIXELFORMAT_YVYU
+            || !D3D_IsTextureFormatAvailable(renderdata->d3d, display_format,
+                                             texture->format))) {
         data->yuv =
             SDL_SW_CreateYUVTexture(texture->format, texture->w, texture->h);
         if (!data->yuv) {
@@ -680,7 +693,8 @@ D3D_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
         result =
             IDirect3DDevice9_CreateTexture(renderdata->device, texture->w,
                                            texture->h, 1, 0,
-                                           PixelFormatToD3DFMT(texture->format),
+                                           PixelFormatToD3DFMT(texture->
+                                                               format),
                                            D3DPOOL_SYSTEMMEM, &temp, NULL);
         if (FAILED(result)) {
             D3D_SetError("CreateTexture()", result);
@@ -733,7 +747,8 @@ D3D_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
         d3drect.bottom = rect->y + rect->h;
 
         result =
-            IDirect3DTexture9_LockRect(data->texture, 0, &locked, &d3drect, 0);
+            IDirect3DTexture9_LockRect(data->texture, 0, &locked, &d3drect,
+                                       0);
         if (FAILED(result)) {
             D3D_SetError("LockRect()", result);
             return -1;
@@ -776,7 +791,8 @@ D3D_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 
         result =
             IDirect3DTexture9_LockRect(data->texture, 0, &locked, &d3drect,
-                                       markDirty ? 0 : D3DLOCK_NO_DIRTY_UPDATE);
+                                       markDirty ? 0 :
+                                       D3DLOCK_NO_DIRTY_UPDATE);
         if (FAILED(result)) {
             D3D_SetError("LockRect()", result);
             return -1;

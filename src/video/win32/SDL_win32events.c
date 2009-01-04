@@ -287,7 +287,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             }
             if (flags & RI_MOUSE_WHEEL) {
                 SDL_SendMouseWheel(index, 0,
-                                   (short)raw->data.mouse.usButtonData);
+                                   (short) raw->data.mouse.usButtonData);
             }
             SDL_stack_free(lpb);
         }

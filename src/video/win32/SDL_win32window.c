@@ -318,7 +318,7 @@ WIN_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
     HICON hicon = NULL;
 
-    if(icon) {
+    if (icon) {
         BYTE *icon_bmp;
         int icon_len;
         SDL_RWops *dst;
@@ -337,7 +337,7 @@ WIN_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
         /* Write the BITMAPINFO header */
         SDL_WriteLE32(dst, 40);
         SDL_WriteLE32(dst, icon->w);
-        SDL_WriteLE32(dst, icon->h*2);
+        SDL_WriteLE32(dst, icon->h * 2);
         SDL_WriteLE16(dst, 1);
         SDL_WriteLE16(dst, 32);
         SDL_WriteLE32(dst, BI_RGB);
@@ -355,22 +355,23 @@ WIN_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
             /* Write the pixels upside down into the bitmap buffer */
             int y = surface->h;
             while (y--) {
-                Uint8 *src = (Uint8 *)surface->pixels + y * surface->pitch;
+                Uint8 *src = (Uint8 *) surface->pixels + y * surface->pitch;
                 SDL_RWwrite(dst, src, surface->pitch, 1);
             }
             SDL_FreeSurface(surface);
 
-            hicon = CreateIconFromResource(icon_bmp, icon_len, TRUE, 0x00030000);
+            hicon =
+                CreateIconFromResource(icon_bmp, icon_len, TRUE, 0x00030000);
         }
         SDL_RWclose(dst);
         SDL_stack_free(icon_bmp);
     }
 
     /* Set the icon for the window */
-    SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hicon);
+    SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM) hicon);
 
     /* Set the icon in the task manager (should we do this?) */
-    SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hicon);
+    SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM) hicon);
 }
 
 void

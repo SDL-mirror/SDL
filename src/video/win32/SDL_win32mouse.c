@@ -85,7 +85,8 @@ WIN_InitMouse(_THIS)
             continue;
         }
         buffer = SDL_malloc((tmp + 1) * sizeof(char));
-        key_name = SDL_malloc((tmp + SDL_strlen(reg_key_root) + 1) * sizeof(char));
+        key_name =
+            SDL_malloc((tmp + SDL_strlen(reg_key_root) + 1) * sizeof(char));
 
         /* we're getting the device registry path and polishing it to get it's name,
            surely there must be an easier way, but we haven't found it yet */
@@ -126,7 +127,7 @@ WIN_InitMouse(_THIS)
             }
         }
 
-		buffer -= 4;
+        buffer -= 4;
 
         if (is_rdp == 1) {
             SDL_free(buffer);
@@ -178,7 +179,8 @@ WIN_InitMouse(_THIS)
             int cursors;
             data->WTInfoA(WTI_DEVICES, DVC_NPRESSURE, &pressure);
             data->WTInfoA(WTI_DEVICES, DVC_NCSRTYPES, &cursors);
-            SDL_AddMouse(&mouse, device_name, pressure.axMax, pressure.axMin, cursors);
+            SDL_AddMouse(&mouse, device_name, pressure.axMax, pressure.axMin,
+                         cursors);
         } else {
             SDL_AddMouse(&mouse, device_name, 0, 0, 1);
         }
