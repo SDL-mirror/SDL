@@ -133,10 +133,10 @@ typedef struct SDL_version
 extern DECLSPEC void SDLCALL SDL_GetVersion(SDL_version * ver);
 
 /**
- * \fn int SDL_GetRevision()
+ * \fn int SDL_GetRevision(void)
  * \brief Get the code revision of SDL that is linked against your program.
  */
-extern DECLSPEC int SDLCALL SDL_GetRevision();
+extern DECLSPEC int SDLCALL SDL_GetRevision(void);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

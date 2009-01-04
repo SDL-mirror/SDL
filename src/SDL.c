@@ -298,7 +298,7 @@ SDL_GetVersion(SDL_version * ver)
 
 /* Get the library source revision */
 int
-SDL_GetRevision()
+SDL_GetRevision(void)
 {
     return SDL_REVISION;
 }
