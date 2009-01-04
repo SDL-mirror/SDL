@@ -42,7 +42,7 @@ SDLMAIN_OBJECTS = @SDLMAIN_OBJECTS@
 
 DIST = acinclude.m4 autogen.sh Borland.html Borland.zip BUGS build-scripts configure configure.in COPYING CREDITS docs docs.html include INSTALL Makefile.dc Makefile.minimal Makefile.in README* sdl-config.in sdl.m4 sdl.pc.in SDL.qpg.in SDL.spec SDL.spec.in src test TODO VisualC.html VisualC VisualCE Watcom-OS2.zip Watcom-Win32.zip WhatsNew Xcode
 
-HDRS = SDL.h SDL_audio.h SDL_cdrom.h SDL_compat.h SDL_cpuinfo.h SDL_endian.h SDL_error.h SDL_events.h SDL_haptic.h SDL_joystick.h SDL_keyboard.h SDL_keysym.h SDL_loadso.h SDL_main.h SDL_mouse.h SDL_mutex.h SDL_name.h SDL_opengl.h SDL_pixels.h SDL_platform.h SDL_quit.h SDL_rect.h SDL_rwops.h SDL_scancode.h SDL_stdinc.h SDL_surface.h SDL_syswm.h SDL_thread.h SDL_timer.h SDL_types.h SDL_version.h SDL_video.h begin_code.h close_code.h
+HDRS = SDL.h SDL_audio.h SDL_cdrom.h SDL_compat.h SDL_cpuinfo.h SDL_endian.h SDL_error.h SDL_events.h SDL_haptic.h SDL_joystick.h SDL_keyboard.h SDL_keysym.h SDL_loadso.h SDL_main.h SDL_mouse.h SDL_mutex.h SDL_name.h SDL_opengl.h SDL_pixels.h SDL_platform.h SDL_quit.h SDL_rect.h SDL_revision.h SDL_rwops.h SDL_scancode.h SDL_stdinc.h SDL_surface.h SDL_syswm.h SDL_thread.h SDL_timer.h SDL_types.h SDL_version.h SDL_video.h begin_code.h close_code.h
 
 LT_AGE      = @LT_AGE@
 LT_CURRENT  = @LT_CURRENT@
@@ -63,7 +63,10 @@ Makefile: $(srcdir)/Makefile.in
 $(objects):
 	$(SHELL) $(auxdir)/mkinstalldirs $@
 
-.PHONY: all depend install install-bin install-hdrs install-lib install-data install-man uninstall uninstall-bin uninstall-hdrs uninstall-lib uninstall-data uninstall-man clean distclean dist
+update-revision:
+	$(SHELL) $(auxdir)/updaterev.sh
+
+.PHONY: all update-revision depend install install-bin install-hdrs install-lib install-data install-man uninstall uninstall-bin uninstall-hdrs uninstall-lib uninstall-data uninstall-man clean distclean dist
 depend:
 	@SOURCES="$(SOURCES)" INCLUDE="$(INCLUDE)" output="$(depend)" \
 	$(SHELL) $(auxdir)/makedep.sh
@@ -75,7 +78,7 @@ depend:
 
 include $(depend)
 
-$(objects)/$(TARGET): $(OBJECTS)
+$(objects)/$(TARGET): update-revision $(OBJECTS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJECTS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(LT_LDFLAGS)
 
 $(objects)/$(SDLMAIN_TARGET): $(SDLMAIN_OBJECTS)
@@ -153,6 +156,7 @@ dist $(distfile):
 	$(SHELL) $(auxdir)/mkinstalldirs $(distdir)
 	tar cf - $(DIST) | (cd $(distdir); tar xf -)
 	cp $(distdir)/include/SDL_config.h.default $(distdir)/include/SDL_config.h
+	$(SHELL) $(distdir)/build-scripts/updaterev.sh
 	rm -rf `find $(distdir) -name .svn`
 	find $(distdir) \( \
 	    -name '*~' -o \
@@ -194,10 +198,4 @@ commit: indent
 
 # Create a SVN snapshot that people can run update on
 snapshot:
-	svn co http://svn.libsdl.org/trunk/SDL SDL-1.3
-	(cd SDL-1.3 && ./autogen.sh && rm -rf autom4te.cache)
-	cp SDL-1.3/include/SDL_config.h.default SDL-1.3/include/SDL_config.h
-	tar zcf $(HOME)/SDL-1.3.tar.gz SDL-1.3
-	rm -f $(HOME)/SDL-1.3.zip
-	zip -r $(HOME)/SDL-1.3.zip SDL-1.3
-	rm -rf SDL-1.3
+	$(SHELL) $(aux_dir)/snapshot.sh

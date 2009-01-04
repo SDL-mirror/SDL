@@ -296,6 +296,13 @@ SDL_GetVersion(SDL_version * ver)
     SDL_VERSION(ver);
 }
 
+/* Get the library source revision */
+int
+SDL_GetRevision()
+{
+    SDL_REVISION;
+}
+
 #if defined(__OS2__)
 /* Building for OS/2 */
 #ifdef __WATCOMC__

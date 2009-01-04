@@ -30,6 +30,7 @@
 #define _SDL_version_h
 
 #include "SDL_stdinc.h"
+#include "SDL_revision.h"
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
@@ -130,6 +131,12 @@ typedef struct SDL_version
  * \sa SDL_VERSION
  */
 extern DECLSPEC void SDLCALL SDL_GetVersion(SDL_version * ver);
+
+/**
+ * \fn int SDL_GetRevision()
+ * \brief Get the code revision of SDL that is linked against your program.
+ */
+extern DECLSPEC int SDLCALL SDL_GetRevision();
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
