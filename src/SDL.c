@@ -300,7 +300,7 @@ SDL_GetVersion(SDL_version * ver)
 int
 SDL_GetRevision()
 {
-    SDL_REVISION;
+    return SDL_REVISION;
 }
 
 #if defined(__OS2__)
