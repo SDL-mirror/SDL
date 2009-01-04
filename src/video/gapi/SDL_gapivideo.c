@@ -41,7 +41,6 @@ Inspired by http://arisme.free.fr/ports/SDL.php
 //       wince goes to portrait mode, but does not update video memory
 
 
-#include "SDL.h"
 #include "SDL_error.h"
 #include "SDL_video.h"
 #include "SDL_mouse.h"

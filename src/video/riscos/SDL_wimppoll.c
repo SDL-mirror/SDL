@@ -28,7 +28,6 @@
      Implements Pumping of events and WIMP polling
 */
 
-#include "SDL.h"
 #include "SDL_syswm.h"
 #include "../../events/SDL_sysevents.h"
 #include "../../events/SDL_events_c.h"

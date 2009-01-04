@@ -22,7 +22,6 @@
 #include "SDL_config.h"
 
 #include <dlfcn.h>
-#include "SDL.h"
 #include "SDL_ph_gl.h"
 
 #if SDL_VIDEO_OPENGL

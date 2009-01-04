@@ -21,7 +21,6 @@
 */
 #include "SDL_config.h"
 
-#include "SDL.h"
 #include "../../events/SDL_sysevents.h"
 #include "../../events/SDL_events_c.h"
 #include "SDL_dcvideo.h"

@@ -30,7 +30,6 @@
 #include <Ph.h>
 #include <photon/PkKeyDef.h>
 
-#include "SDL.h"
 #include "SDL_syswm.h"
 #include "../SDL_sysvideo.h"
 #include "../../events/SDL_sysevents.h"

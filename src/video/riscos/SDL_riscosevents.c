@@ -29,7 +29,6 @@
 */
 
 
-#include "SDL.h"
 #include "../../timer/SDL_timer_c.h"
 #include "../../events/SDL_sysevents.h"
 #include "../../events/SDL_events_c.h"

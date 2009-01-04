@@ -30,7 +30,6 @@
 #include <errno.h>
 #include <string.h>
 
-#include "SDL.h"
 #include "../../events/SDL_sysevents.h"
 #include "../../events/SDL_events_c.h"
 #include "SDL_wsconsvideo.h"

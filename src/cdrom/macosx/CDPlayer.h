@@ -30,7 +30,7 @@
 #include <CoreFoundation/CoreFoundation.h>
 #include <AudioUnit/AudioUnit.h>
 
-#include "SDL.h"
+#include "SDL_cdrom.h"
 #include "SDL_thread.h"
 #include "SDL_mutex.h"
 

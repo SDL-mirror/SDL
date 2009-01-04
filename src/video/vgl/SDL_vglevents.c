@@ -30,7 +30,6 @@
 #include <sys/kbio.h>
 #include <vgl.h>
 
-#include "SDL.h"
 #include "SDL_thread.h"
 #include "../../events/SDL_sysevents.h"
 #include "../../events/SDL_events_c.h"
