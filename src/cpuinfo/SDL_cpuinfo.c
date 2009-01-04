@@ -23,7 +23,6 @@
 
 /* CPU feature detection for SDL */
 
-#include "SDL.h"
 #include "SDL_cpuinfo.h"
 
 #if defined(__MACOSX__) && defined(__ppc__)

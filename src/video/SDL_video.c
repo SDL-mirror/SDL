@@ -23,7 +23,7 @@
 
 /* The high-level video driver subsystem */
 
-#include "SDL.h"
+#include "SDL_video.h"
 #include "SDL_sysvideo.h"
 #include "SDL_blit.h"
 #include "SDL_pixels_c.h"

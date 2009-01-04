@@ -35,7 +35,6 @@ WINDRES	= @WINDRES@
 TARGET  = libSDL.la
 SOURCES = @SOURCES@
 OBJECTS = @OBJECTS@
-REVISION = $(srcdir)/include/SDL_revision.h
 
 SDLMAIN_TARGET = libSDLmain.a
 SDLMAIN_SOURCES = @SDLMAIN_SOURCES@
@@ -51,7 +50,7 @@ LT_RELEASE  = @LT_RELEASE@
 LT_REVISION = @LT_REVISION@
 LT_LDFLAGS  = -no-undefined -rpath $(DESTDIR)$(libdir) -release $(LT_RELEASE) -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
 
-all: $(srcdir)/configure Makefile $(objects) $(objects)/$(TARGET) $(objects)/$(SDLMAIN_TARGET)
+all: $(srcdir)/configure Makefile $(objects) update-revision $(objects)/$(TARGET) $(objects)/$(SDLMAIN_TARGET)
 
 $(srcdir)/configure: $(srcdir)/configure.in
 	@echo "Warning, configure.in is out of date"
@@ -67,8 +66,6 @@ $(objects):
 update-revision:
 	$(SHELL) $(auxdir)/updaterev.sh
 
-$(REVISION): update-revision
-
 .PHONY: all update-revision depend install install-bin install-hdrs install-lib install-data install-man uninstall uninstall-bin uninstall-hdrs uninstall-lib uninstall-data uninstall-man clean distclean dist
 depend:
 	@SOURCES="$(SOURCES)" INCLUDE="$(INCLUDE)" output="$(depend)" \
@@ -81,7 +78,7 @@ depend:
 
 include $(depend)
 
-$(objects)/$(TARGET): $(REVISION) $(OBJECTS)
+$(objects)/$(TARGET): $(OBJECTS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJECTS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(LT_LDFLAGS)
 
 $(objects)/$(SDLMAIN_TARGET): $(SDLMAIN_OBJECTS)

@@ -24,7 +24,9 @@
 /* General event handling code for SDL */
 
 #include "SDL.h"
+#include "SDL_events.h"
 #include "SDL_syswm.h"
+#include "SDL_thread.h"
 #include "SDL_sysevents.h"
 #include "SDL_events_c.h"
 #include "../timer/SDL_timer_c.h"
