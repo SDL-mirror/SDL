@@ -148,13 +148,13 @@ SDL_IntersectRectAndLine(const SDL_Rect * rect, int *X1, int *Y1, int *X2,
         return SDL_TRUE;
     }
 
-    /* Check to see if entire line is outside rect */
+    /* Check to see if entire line is to one side of rect */
     if ((x1 < rectx1 && x2 < rectx1) || (x1 > rectx2 && x2 > rectx2) ||
         (y1 < recty1 && y2 < recty2) || (y1 > recty2 && y2 > recty2)) {
         return SDL_FALSE;
     }
 
-    if (y1 = y2) {
+    if (y1 == y2) {
         /* Horizontal line, easy to clip */
         if (x1 < rectx1) {
             *X1 = rectx1;
@@ -184,7 +184,92 @@ SDL_IntersectRectAndLine(const SDL_Rect * rect, int *X1, int *Y1, int *X2,
         return SDL_TRUE;
     }
 
-    /* FIXME: need code to clip diagonal line to rect */
+    else
+    {
+    /* The task of clipping a line with finite slope ratios in a fixed-
+     * precision coordinate space is not as immediately simple as it is
+     * with coordinates of arbitrary precision. If the ratio of slopes
+     * between the input line segment and the result line segment is not
+     * a whole number, you have in fact *moved* the line segment a bit,
+     * and there can be no avoiding it without more precision
+     */
+        int *x_result_[] = {X1, X2, NULL}, **x_result = x_result_;
+        int *y_result_[] = {Y1, Y2, NULL}, **y_result = y_result_;
+        SDL_bool intersection = SDL_FALSE;
+        double b, m, left, right, bottom, top;
+        int xl, xh, yl, yh;
+
+        /* solve mx+b line formula */
+        m = (double)(y1-y2) / (double)(x1-x2);
+        b = y2 - m * (double) x2;
+
+        /* find some linear intersections */
+        left = (m * (double) rectx1) + b;
+        right = (m * (double) rectx2) + b;
+        top = (recty1 - b) / m;
+        bottom = (recty2 - b) / m;
+
+        /* sort end-points' x and y components individually */
+        if (x1 < x2) {
+            xl = x1;
+            xh = x2;
+        } else {
+            xl = x2;
+            xh = x1;
+        }
+        if (y1 < y2) {
+            yl = y1;
+            yh = y2;
+        } else {
+            yl = y2;
+            yh = y1;
+        }
+
+#define RISING(a, b, c) (((a)<=(b))&&((b)<=(c)))
+
+        /* check for a point that's entirely inside the rect */
+        if (RISING(rectx1, x1, rectx2) && RISING(recty1, y1, recty2)) {
+            x_result++;
+            y_result++;
+            intersection = SDL_TRUE;
+        } else /* it was determined earlier that *both* end-points are not contained */
+
+        if (RISING(rectx1, x2, rectx2) && RISING(recty1, y2, recty2)) {
+            **(x_result++) = x2;
+            **(y_result++) = y2;
+            intersection = SDL_TRUE;
+        }
+
+        if (RISING(recty1, left, recty2) && RISING(xl, rectx1, xh)) {
+            **(x_result++) = rectx1;
+            **(y_result++) = (int) left;
+            intersection = SDL_TRUE;
+        }
+
+        if (*x_result == NULL) return intersection;
+        if (RISING(recty1, right, recty2) && RISING(xl, rectx2, xh)) {
+            **(x_result++) = rectx2;
+            **(y_result++) = (int) right;
+            intersection = SDL_TRUE;
+        }
+
+        if (*x_result == NULL) return intersection;
+        if (RISING(rectx1, top, rectx2) && RISING(yl, recty1, yh)) {
+            **(x_result++) = (int) top;
+            **(y_result++) = recty1;
+            intersection = SDL_TRUE;
+        }
+
+        if (*x_result == NULL) return intersection;
+        if (RISING(rectx1, bottom, rectx2) && RISING(yl, recty2, yh)) {
+            **(x_result++) = (int) bottom;
+            **(y_result++) = recty2;
+            intersection = SDL_TRUE;
+        }
+
+        return intersection;
+    }
+
     return SDL_FALSE;
 }
 
