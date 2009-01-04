@@ -68,7 +68,7 @@ DirectFB_InitMouse(_THIS)
     SDL_DFB_DEVICEDATA(_this);
 
     devdata->num_mice = 0;
-    if (LINUX_INPUT_SUPPORT) {
+    if (devdata->use_linux_input) {
         /* try non-core devices first */
         id_mask = 0xF0;
         devdata->dfb->EnumInputDevices(devdata->dfb, EnumMice, devdata);
@@ -100,7 +100,7 @@ DirectFB_QuitMouse(_THIS)
 {
     SDL_DFB_DEVICEDATA(_this);
 
-    if (LINUX_INPUT_SUPPORT) {
+    if (devdata->use_linux_input) {
         SDL_MouseQuit();
     } else {
         SDL_DelMouse(0);

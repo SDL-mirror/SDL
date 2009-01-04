@@ -31,8 +31,6 @@
 
 #include "SDL_mouse.h"
 
-#define LINUX_INPUT_SUPPORT	1
-
 #define DEBUG 0
 #define LOG_CHANNEL 	stdout
 
@@ -59,8 +57,10 @@
 #include "SDL_DirectFB_opengl.h"
 #include "SDL_DirectFB_window.h"
 
-#define DFBENV_USE_YUV_UNDERLAY "SDL_DIRECTFB_YUV_UNDERLAY"
-#define DFBENV_USE_YUV_DIRECT   "SDL_DIRECTFB_YUV_DIRECT"
+#define DFBENV_USE_YUV_UNDERLAY 	"SDL_DIRECTFB_YUV_UNDERLAY"     /* Default: off */
+#define DFBENV_USE_YUV_DIRECT   	"SDL_DIRECTFB_YUV_DIRECT"       /* Default: off */
+#define DFBENV_USE_X11_CHECK		"SDL_DIRECTFB_X11_CHECK"        /* Default: on  */
+#define DFBENV_USE_LINUX_INPUT		"SDL_DIRECTFB_LINUX_INPUT"      /* Default: on  */
 
 #define SDL_DFB_RELEASE(x) do { if ( x ) { x->Release(x); x = NULL; } } while (0)
 #define SDL_DFB_FREE(x) do { if ( x ) { SDL_free(x); x = NULL; } } while (0)
@@ -137,6 +137,7 @@ struct _DFB_DeviceData
     DFB_WindowData *firstwin;
 
     int use_yuv_underlays;
+    int use_linux_input;
 
     /* OpenGL */
     void (*glFinish) (void);

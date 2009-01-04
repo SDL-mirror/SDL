@@ -175,6 +175,10 @@ DirectFB_GL_CreateContext(_THIS, SDL_Window * window)
 
     SDL_DFB_CHECKERR(windata->surface->
                      GetGL(windata->surface, &context->context));
+
+    if (!context->context)
+        return NULL;
+
     SDL_DFB_CHECKERR(context->context->Unlock(context->context));
 
     context->next = _this->gl_data->firstgl;

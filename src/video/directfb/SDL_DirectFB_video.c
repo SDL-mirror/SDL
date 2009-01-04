@@ -46,6 +46,8 @@
 #include "SDL_DirectFB_render.h"
 #include "SDL_DirectFB_mouse.h"
 
+#include "SDL_DirectFB_dyn.h"
+
 /* Initialization/Query functions */
 static int DirectFB_VideoInit(_THIS);
 static void DirectFB_VideoQuit(_THIS);
@@ -66,20 +68,27 @@ VideoBootStrap DirectFB_bootstrap = {
 static int
 DirectFB_Available(void)
 {
+    if (!SDL_DirectFB_LoadLibrary())
+        return 0;
+    SDL_DirectFB_UnLoadLibrary();
     return 1;
 }
 
 static void
 DirectFB_DeleteDevice(SDL_VideoDevice * device)
 {
-    SDL_free(device->driverdata);
-    SDL_free(device);
+    SDL_DirectFB_UnLoadLibrary();
+    SDL_DFB_FREE(device->driverdata);
+    SDL_DFB_FREE(device);
 }
 
 static SDL_VideoDevice *
 DirectFB_CreateDevice(int devindex)
 {
     SDL_VideoDevice *device;
+
+    if (!SDL_DirectFB_LoadLibrary())
+        return NULL;
 
     /* Initialize all variables that we clean on shutdown */
     SDL_DFB_CALLOC(device, 1, sizeof(SDL_VideoDevice));
@@ -140,22 +149,47 @@ static int
 DirectFB_VideoInit(_THIS)
 {
     IDirectFB *dfb = NULL;
-    DFB_DeviceData *devdata;
+    DFB_DeviceData *devdata = NULL;
     char *stemp;
     DFBResult ret;
 
-    SDL_DFB_CHECKERR(DirectFBInit(NULL, NULL));
-    SDL_DFB_CHECKERR(DirectFBCreate(&dfb));
-
     SDL_DFB_CALLOC(devdata, 1, sizeof(*devdata));
+
+    SDL_DFB_CHECKERR(DirectFBInit(NULL, NULL));
+
+    /* avoid switching to the framebuffer when we
+     * are running X11 */
+    stemp = getenv(DFBENV_USE_X11_CHECK);
+    if (stemp)
+        ret = atoi(stemp);
+    else
+        ret = 1;
+
+    if (ret) {
+        if (getenv("DISPLAY"))
+            DirectFBSetOption("system", "x11");
+        else
+            DirectFBSetOption("disable-module", "x11input");
+    }
+
+    devdata->use_linux_input = 1;       /* default: on */
+    stemp = getenv(DFBENV_USE_LINUX_INPUT);
+    if (stemp)
+        devdata->use_linux_input = atoi(stemp);
+
+    if (!devdata->use_linux_input)
+        DirectFBSetOption("disable-module", "linux_input");
+
+    SDL_DFB_CHECKERR(DirectFBCreate(&dfb));
 
     devdata->use_yuv_underlays = 0;     /* default: off */
     stemp = getenv(DFBENV_USE_YUV_UNDERLAY);
     if (stemp)
         devdata->use_yuv_underlays = atoi(stemp);
 
+
     /* Create global Eventbuffer for axis events */
-    if (LINUX_INPUT_SUPPORT) {
+    if (devdata->use_linux_input) {
         SDL_DFB_CHECKERR(dfb->
                          CreateInputEventBuffer(dfb, DICAPS_ALL,
                                                 DFB_TRUE, &devdata->events));
@@ -187,6 +221,7 @@ DirectFB_VideoInit(_THIS)
 
 
   error:
+    SDL_DFB_FREE(devdata);
     SDL_DFB_RELEASE(dfb);
     return -1;
 }
@@ -202,7 +237,6 @@ DirectFB_VideoQuit(_THIS)
 
     SDL_DFB_RELEASE(devdata->events);
     SDL_DFB_RELEASE(devdata->dfb);
-    SDL_DFB_FREE(_this->driverdata);
 
 #if SDL_DIRECTFB_OPENGL
     DirectFB_GL_Shutdown(_this);
