@@ -50,19 +50,14 @@ X11_InitMouse(_THIS)
     int event_code;
     XEventClass xEvent;
 #endif
-
-    SDL_zero(mouse);
-    SDL_AddMouse(&mouse, "CorePointer", 0, 0, 1);
+    int num_mice = 0;
 
 #if SDL_VIDEO_DRIVER_X11_XINPUT
-    if (!SDL_X11_HAVE_XINPUT) {
-        /* should have dynamically loaded, but wasn't available. */
-        return;
-    }
-
     /* we're getting the list of input devices */
     n = 0;
-    DevList = XListInputDevices(display, &n);
+    if (SDL_X11_HAVE_XINPUT) {
+        DevList = XListInputDevices(display, &n);
+    }
 
     /* we're aquiring valuators: mice, tablets, etc. */
     for (i = 0; i < n; ++i) {
@@ -127,6 +122,9 @@ X11_InitMouse(_THIS)
                     } else {
                         SDL_AddMouse(&mouse, DevList[i].name, 0, 0, 1);
                     }
+                    if (DevList[i].use == IsXExtensionPointer) {
+                        ++num_mice;
+                    }
                     break;
                 }
                 /* if it's not class we're interested in, lets go further */
@@ -138,6 +136,11 @@ X11_InitMouse(_THIS)
     }
     XFreeDeviceList(DevList);
 #endif
+
+    if (num_mice == 0) {
+        SDL_zero(mouse);
+        SDL_AddMouse(&mouse, "CorePointer", 0, 0, 1);
+    }
 }
 
 void

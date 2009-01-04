@@ -280,21 +280,6 @@ X11_DispatchEvent(_THIS)
         }
         break;
 
-    case MotionNotify:
-#ifdef DEBUG_MOTION
-        printf("X11 motion: %d,%d\n", xevent.xmotion.x, xevent.xmotion.y);
-#endif
-        SDL_SendMouseMotion(0, 0, xevent.xmotion.x, xevent.xmotion.y, 0);
-        break;
-
-    case ButtonPress:
-        SDL_SendMouseButton(0, SDL_PRESSED, xevent.xbutton.button);
-        break;
-
-    case ButtonRelease:
-        SDL_SendMouseButton(0, SDL_RELEASED, xevent.xbutton.button);
-        break;
-
     default:{
 #if SDL_VIDEO_DRIVER_X11_XINPUT
             for (i = 0; i < SDL_GetNumMice(); ++i) {
@@ -304,6 +289,22 @@ X11_DispatchEvent(_THIS)
                 mouse = SDL_GetMouse(i);
                 data = (X11_MouseData *) mouse->driverdata;
                 if (!data) {
+                    switch (xevent.type) {
+                    case MotionNotify:
+#ifdef DEBUG_MOTION
+                        printf("X11 motion: %d,%d\n", xevent.xmotion.x, xevent.xmotion.y);
+#endif
+                        SDL_SendMouseMotion(0, 0, xevent.xmotion.x, xevent.xmotion.y, 0);
+                        break;
+
+                    case ButtonPress:
+                        SDL_SendMouseButton(0, SDL_PRESSED, xevent.xbutton.button);
+                        break;
+
+                    case ButtonRelease:
+                        SDL_SendMouseButton(0, SDL_RELEASED, xevent.xbutton.button);
+                        break;
+                    }
                     continue;
                 }
 
