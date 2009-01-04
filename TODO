@@ -22,6 +22,7 @@
  * Implement NET_WM_PING and NET_WM_PID/WM_CLIENT_MACHINE (?)
    - http://standards.freedesktop.org/wm-spec/wm-spec-1.3.html#KILLINGWINDOWS
  * Add a timeout parameter for SDL_WaitEvent() (?)
+ * Implement key repeat at the driver level
 
 Wish list for the 1.3 development branch:
 http://bugzilla.libsdl.org/
