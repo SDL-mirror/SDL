@@ -2,7 +2,8 @@
 #
 # Generate a current snapshot from source control
 
-svn co http://svn.libsdl.org/trunk/SDL
+echo "Checking out source"
+svn co -q http://svn.libsdl.org/trunk/SDL
 (cd SDL && ./autogen.sh && rm -rf autom4te.cache)
 sh SDL/build-scripts/updaterev.sh
 cp SDL/include/SDL_config.h.default SDL/include/SDL_config.h
@@ -18,7 +19,15 @@ rev=`fgrep "#define SDL_REVISION" SDL/include/SDL_revision.h | \
 path="SDL-$major.$minor.$patch-$rev"
 
 mv SDL $path
+echo $path.tar.gz
 tar zcf $path.tar.gz $path
+echo $path.zip
 rm -f $path.zip
-zip -r $path.zip $path
+zip -rq $path.zip $path
 rm -rf $path
+
+#ln -sf $path.tar.gz SDL-1.3.tar.gz
+#ln -sf $path.zip SDL-1.3.zip
+#date=`date +"%a %b %e"`
+#sed -e "s/<-- SDL 1.3 DATE -->.*/<-- SDL 1.3 DATE --> $date/" <../svn.php >../svn.php.new
+#mv ../svn.php.new ../svn.php
