@@ -973,17 +973,32 @@ SDL_GetKeyName(SDLKey key)
             SDL_GetScancodeName((SDL_scancode) (key & ~SDLK_SCANCODE_MASK));
     }
 
-    /* Unaccented letter keys on latin keyboards are normally
-       labeled in upper case (and probably on others like Greek or
-       Cyrillic too, so if you happen to know for sure, please
-       adapt this). */
-    if (key >= 'a' && key <= 'z') {
-        key -= 32;
-    }
+    switch (key) {
+    case SDLK_RETURN:
+            return SDL_GetScancodeName(SDL_SCANCODE_RETURN);
+    case SDLK_ESCAPE:
+            return SDL_GetScancodeName(SDL_SCANCODE_ESCAPE);
+    case SDLK_BACKSPACE:
+            return SDL_GetScancodeName(SDL_SCANCODE_BACKSPACE);
+    case SDLK_TAB:
+            return SDL_GetScancodeName(SDL_SCANCODE_TAB);
+    case SDLK_SPACE:
+            return SDL_GetScancodeName(SDL_SCANCODE_SPACE);
+    case SDLK_DELETE:
+            return SDL_GetScancodeName(SDL_SCANCODE_DELETE);
+    default:
+        /* Unaccented letter keys on latin keyboards are normally
+           labeled in upper case (and probably on others like Greek or
+           Cyrillic too, so if you happen to know for sure, please
+           adapt this). */
+        if (key >= 'a' && key <= 'z') {
+            key -= 32;
+        }
 
-    end = SDL_UCS4ToUTF8((Uint32) key, name);
-    *end = '\0';
-    return name;
+        end = SDL_UCS4ToUTF8((Uint32) key, name);
+        *end = '\0';
+        return name;
+    }
 }
 
 /* vi: set ts=4 sw=4 expandtab: */
