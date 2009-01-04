@@ -294,15 +294,15 @@ X11_DispatchEvent(_THIS)
 #ifdef DEBUG_MOTION
                         printf("X11 motion: %d,%d\n", xevent.xmotion.x, xevent.xmotion.y);
 #endif
-                        SDL_SendMouseMotion(0, 0, xevent.xmotion.x, xevent.xmotion.y, 0);
+                        SDL_SendMouseMotion(mouse->id, 0, xevent.xmotion.x, xevent.xmotion.y, 0);
                         break;
 
                     case ButtonPress:
-                        SDL_SendMouseButton(0, SDL_PRESSED, xevent.xbutton.button);
+                        SDL_SendMouseButton(mouse->id, SDL_PRESSED, xevent.xbutton.button);
                         break;
 
                     case ButtonRelease:
-                        SDL_SendMouseButton(0, SDL_RELEASED, xevent.xbutton.button);
+                        SDL_SendMouseButton(mouse->id, SDL_RELEASED, xevent.xbutton.button);
                         break;
                     }
                     continue;
