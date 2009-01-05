@@ -281,14 +281,14 @@ X11_DispatchEvent(_THIS)
         break;
 
     default:{
-#if SDL_VIDEO_DRIVER_X11_XINPUT
             for (i = 0; i < SDL_GetNumMice(); ++i) {
                 SDL_Mouse *mouse;
+#if SDL_VIDEO_DRIVER_X11_XINPUT
                 X11_MouseData *data;
+#endif
 
                 mouse = SDL_GetMouse(i);
-                data = (X11_MouseData *) mouse->driverdata;
-                if (!data) {
+                if (!mouse->driverdata) {
                     switch (xevent.type) {
                     case MotionNotify:
 #ifdef DEBUG_MOTION
@@ -312,7 +312,9 @@ X11_DispatchEvent(_THIS)
                     continue;
                 }
 
-                if (xevent.type == data->motion) {      /* MotionNotify */
+#if SDL_VIDEO_DRIVER_X11_XINPUT
+                data = (X11_MouseData *) mouse->driverdata;
+                if (xevent.type == data->motion) {
                     XDeviceMotionEvent *move =
                         (XDeviceMotionEvent *) & xevent;
 #ifdef DEBUG_MOTION
@@ -322,14 +324,14 @@ X11_DispatchEvent(_THIS)
                                         move->axis_data[2]);
                     return;
                 }
-                if (xevent.type == data->button_pressed) {      /* ButtonPress */
+                if (xevent.type == data->button_pressed) {
                     XDeviceButtonPressedEvent *pressed =
                         (XDeviceButtonPressedEvent *) & xevent;
                     SDL_SendMouseButton(pressed->deviceid, SDL_PRESSED,
                                         pressed->button);
                     return;
                 }
-                if (xevent.type == data->button_released) {     /* ButtonRelease */
+                if (xevent.type == data->button_released) {
                     XDeviceButtonReleasedEvent *released =
                         (XDeviceButtonReleasedEvent *) & xevent;
                     SDL_SendMouseButton(released->deviceid, SDL_RELEASED,
@@ -350,8 +352,8 @@ X11_DispatchEvent(_THIS)
                                       proximity->y, SDL_PROXIMITYOUT);
                     return;
                 }
-            }
 #endif
+            }
 #ifdef DEBUG_XEVENTS
             printf("Unhandled event %d\n", xevent.type);
 #endif
