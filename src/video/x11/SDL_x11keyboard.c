@@ -31,253 +31,107 @@
 
 #include "imKStoUCS.h"
 
-static KeySym XKeySymTable[SDL_NUM_SCANCODES] = {
-    0, 0, 0, 0,
-    XK_a,
-    XK_b,
-    XK_c,
-    XK_d,
-    XK_e,
-    XK_f,
-    XK_g,
-    XK_h,
-    XK_i,
-    XK_j,
-    XK_k,
-    XK_l,
-    XK_m,
-    XK_n,
-    XK_o,
-    XK_p,
-    XK_q,
-    XK_r,
-    XK_s,
-    XK_t,
-    XK_u,
-    XK_v,
-    XK_w,
-    XK_x,
-    XK_y,
-    XK_z,
-    XK_1,
-    XK_2,
-    XK_3,
-    XK_4,
-    XK_5,
-    XK_6,
-    XK_7,
-    XK_8,
-    XK_9,
-    XK_0,
-    XK_Return,
-    XK_Escape,
-    XK_BackSpace,
-    XK_Tab,
-    XK_space,
-    XK_minus,
-    XK_equal,
-    XK_bracketleft,
-    XK_bracketright,
-    XK_backslash,
-    0,                          /* SDL_SCANCODE_NONUSHASH ? */
-    XK_semicolon,
-    XK_apostrophe,
-    XK_grave,
-    XK_comma,
-    XK_period,
-    XK_slash,
-    XK_Caps_Lock,
-    XK_F1,
-    XK_F2,
-    XK_F3,
-    XK_F4,
-    XK_F5,
-    XK_F6,
-    XK_F7,
-    XK_F8,
-    XK_F9,
-    XK_F10,
-    XK_F11,
-    XK_F12,
-    XK_Print,
-    XK_Scroll_Lock,
-    XK_Pause,
-    XK_Insert,
-    XK_Home,
-    XK_Prior,
-    XK_Delete,
-    XK_End,
-    XK_Next,
-    XK_Right,
-    XK_Left,
-    XK_Down,
-    XK_Up,
-    XK_Num_Lock,
-    XK_KP_Divide,
-    XK_KP_Multiply,
-    XK_KP_Subtract,
-    XK_KP_Add,
-    XK_KP_Enter,
-    XK_KP_1,
-    XK_KP_2,
-    XK_KP_3,
-    XK_KP_4,
-    XK_KP_5,
-    XK_KP_6,
-    XK_KP_7,
-    XK_KP_8,
-    XK_KP_9,
-    XK_KP_0,
-    XK_KP_Decimal,
-    0,                          /* SDL_SCANCODE_NONUSBACKSLASH ? */
-    XK_Hyper_R,
-    0,                          /* SDL_SCANCODE_POWER ? */
-    XK_KP_Equal,
-    XK_F13,
-    XK_F14,
-    XK_F15,
-    XK_F16,
-    XK_F17,
-    XK_F18,
-    XK_F19,
-    XK_F20,
-    XK_F21,
-    XK_F22,
-    XK_F23,
-    XK_F24,
-    XK_Execute,
-    XK_Help,
-    XK_Menu,
-    XK_Select,
-    XK_Cancel,
-    XK_Redo,
-    XK_Undo,
-    0,                          /* SDL_SCANCODE_CUT ? */
-    0,                          /* SDL_SCANCODE_COPY ? */
-    0,                          /* SDL_SCANCODE_PASTE ? */
-    XK_Find,
-    0,                          /* SDL_SCANCODE_MUTE ? */
-    0,                          /* SDL_SCANCODE_VOLUMEUP ? */
-    0,                          /* SDL_SCANCODE_VOLUMEDOWN ? */
-    0, 0, 0,
-    XK_KP_Separator,
-    0,                          /* SDL_SCANCODE_KP_EQUALSAS400 ? */
-    0,                          /* SDL_SCANCODE_INTERNATIONAL1 ? */
-    0,                          /* SDL_SCANCODE_INTERNATIONAL2 ? */
-    0,                          /* SDL_SCANCODE_INTERNATIONAL3 ? */
-    0,                          /* SDL_SCANCODE_INTERNATIONAL4 ? */
-    0,                          /* SDL_SCANCODE_INTERNATIONAL5 ? */
-    0,                          /* SDL_SCANCODE_INTERNATIONAL6 ? */
-    0,                          /* SDL_SCANCODE_INTERNATIONAL7 ? */
-    0,                          /* SDL_SCANCODE_INTERNATIONAL8 ? */
-    0,                          /* SDL_SCANCODE_INTERNATIONAL9 ? */
-    0,                          /* SDL_SCANCODE_LANG1 ? */
-    0,                          /* SDL_SCANCODE_LANG2 ? */
-    0,                          /* SDL_SCANCODE_LANG3 ? */
-    0,                          /* SDL_SCANCODE_LANG4 ? */
-    0,                          /* SDL_SCANCODE_LANG5 ? */
-    0,                          /* SDL_SCANCODE_LANG6 ? */
-    0,                          /* SDL_SCANCODE_LANG7 ? */
-    0,                          /* SDL_SCANCODE_LANG8 ? */
-    0,                          /* SDL_SCANCODE_LANG9 ? */
-    0,                          /* SDL_SCANCODE_ALTERASE ? */
-    XK_Sys_Req,
-    0,                          /* SDL_SCANCODE_CANCEL ? - XK_Cancel was used above... */
-    0,                          /* SDL_SCANCODE_CLEAR ? */
-    0,                          /* SDL_SCANCODE_PRIOR ? - XK_Prior was used above... */
-    0,                          /* SDL_SCANCODE_RETURN2 ? */
-    0,                          /* SDL_SCANCODE_SEPARATOR ? */
-    0,                          /* SDL_SCANCODE_OUT ? */
-    0,                          /* SDL_SCANCODE_OPER ? */
-    0,                          /* SDL_SCANCODE_CLEARAGAIN ? */
-    0,                          /* SDL_SCANCODE_CRSEL ? */
-    0,                          /* SDL_SCANCODE_EXSEL ? */
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0,                          /* SDL_SCANCODE_KP_00 ? */
-    0,                          /* SDL_SCANCODE_KP_000 ? */
-    0,                          /* SDL_SCANCODE_THOUSANDSSEPARATOR ? */
-    0,                          /* SDL_SCANCODE_DECIMALSEPARATOR ? */
-    0,                          /* SDL_SCANCODE_CURRENCYUNIT ? */
-    0,                          /* SDL_SCANCODE_CURRENCYSUBUNIT ? */
-    0,                          /* SDL_SCANCODE_KP_LEFTPAREN ? */
-    0,                          /* SDL_SCANCODE_KP_RIGHTPAREN ? */
-    0,                          /* SDL_SCANCODE_KP_LEFTBRACE ? */
-    0,                          /* SDL_SCANCODE_KP_RIGHTBRACE ? */
-    0,                          /* SDL_SCANCODE_KP_TAB ? */
-    0,                          /* SDL_SCANCODE_KP_BACKSPACE ? */
-    0,                          /* SDL_SCANCODE_KP_A ? */
-    0,                          /* SDL_SCANCODE_KP_B ? */
-    0,                          /* SDL_SCANCODE_KP_C ? */
-    0,                          /* SDL_SCANCODE_KP_D ? */
-    0,                          /* SDL_SCANCODE_KP_E ? */
-    0,                          /* SDL_SCANCODE_KP_F ? */
-    0,                          /* SDL_SCANCODE_KP_XOR ? */
-    0,                          /* SDL_SCANCODE_KP_POWER ? */
-    0,                          /* SDL_SCANCODE_KP_PERCENT ? */
-    0,                          /* SDL_SCANCODE_KP_LESS ? */
-    0,                          /* SDL_SCANCODE_KP_GREATER ? */
-    0,                          /* SDL_SCANCODE_KP_AMPERSAND ? */
-    0,                          /* SDL_SCANCODE_KP_DBLAMPERSAND ? */
-    0,                          /* SDL_SCANCODE_KP_VERTICALBAR ? */
-    0,                          /* SDL_SCANCODE_KP_DBLVERTICALBAR ? */
-    0,                          /* SDL_SCANCODE_KP_COLON ? */
-    0,                          /* SDL_SCANCODE_KP_HASH ? */
-    0,                          /* SDL_SCANCODE_KP_SPACE ? */
-    0,                          /* SDL_SCANCODE_KP_AT ? */
-    0,                          /* SDL_SCANCODE_KP_EXCLAM ? */
-    0,                          /* SDL_SCANCODE_KP_MEMSTORE ? */
-    0,                          /* SDL_SCANCODE_KP_MEMRECALL ? */
-    0,                          /* SDL_SCANCODE_KP_MEMCLEAR ? */
-    0,                          /* SDL_SCANCODE_KP_MEMADD ? */
-    0,                          /* SDL_SCANCODE_KP_MEMSUBTRACT ? */
-    0,                          /* SDL_SCANCODE_KP_MEMMULTIPLY ? */
-    0,                          /* SDL_SCANCODE_KP_MEMDIVIDE ? */
-    0,                          /* SDL_SCANCODE_KP_PLUSMINUS ? */
-    0,                          /* SDL_SCANCODE_KP_CLEAR ? */
-    0,                          /* SDL_SCANCODE_KP_CLEARENTRY ? */
-    0,                          /* SDL_SCANCODE_KP_BINARY ? */
-    0,                          /* SDL_SCANCODE_KP_OCTAL ? */
-    0,                          /* SDL_SCANCODE_KP_DECIMAL ? */
-    0,                          /* SDL_SCANCODE_KP_HEXADECIMAL ? */
-    0, 0,
-    XK_Control_L,
-    XK_Shift_L,
-    XK_Alt_L,
-    XK_Meta_L,
-    XK_Control_R,
-    XK_Shift_R,
-    XK_Alt_R,
-    XK_Meta_R,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    XK_Mode_switch /*XK_ISO_Level3_Shift */ ,
-    0,                          /* SDL_SCANCODE_AUDIONEXT ? */
-    0,                          /* SDL_SCANCODE_AUDIOPREV ? */
-    0,                          /* SDL_SCANCODE_AUDIOSTOP ? */
-    0,                          /* SDL_SCANCODE_AUDIOPLAY ? */
-    0,                          /* SDL_SCANCODE_AUDIOMUTE ? */
-    0,                          /* SDL_SCANCODE_MEDIASELECT ? */
-    0,                          /* SDL_SCANCODE_WWW ? */
-    0,                          /* SDL_SCANCODE_MAIL ? */
-    0,                          /* SDL_SCANCODE_CALCULATOR ? */
-    0,                          /* SDL_SCANCODE_COMPUTER ? */
-    0,                          /* SDL_SCANCODE_AC_SEARCH ? */
-    0,                          /* SDL_SCANCODE_AC_HOME ? */
-    0,                          /* SDL_SCANCODE_AC_BACK ? */
-    0,                          /* SDL_SCANCODE_AC_FORWARD ? */
-    0,                          /* SDL_SCANCODE_AC_STOP ? */
-    0,                          /* SDL_SCANCODE_AC_REFRESH ? */
-    0,                          /* SDL_SCANCODE_AC_BOOKMARKS ? */
-    0,                          /* SDL_SCANCODE_BRIGHTNESSDOWN ? */
-    0,                          /* SDL_SCANCODE_BRIGHTNESSUP ? */
-    0,                          /* SDL_SCANCODE_DISPLAYSWITCH ? */
-    0,                          /* SDL_SCANCODE_KBDILLUMTOGGLE ? */
-    0,                          /* SDL_SCANCODE_KBDILLUMDOWN ? */
-    0,                          /* SDL_SCANCODE_KBDILLUMUP ? */
-    0,                          /* SDL_SCANCODE_EJECT ? */
-    0,                          /* SDL_SCANCODE_SLEEP ? */
+/* *INDENT-OFF* */
+static struct {
+    KeySym keysym;
+    SDLKey sdlkey;
+} KeySymToSDLKey[] = {
+    { XK_Return, SDLK_RETURN },
+    { XK_Escape, SDLK_ESCAPE },
+    { XK_BackSpace, SDLK_BACKSPACE },
+    { XK_Tab, SDLK_TAB },
+    { XK_Caps_Lock, SDLK_CAPSLOCK },
+    { XK_F1, SDLK_F1 },
+    { XK_F2, SDLK_F2 },
+    { XK_F3, SDLK_F3 },
+    { XK_F4, SDLK_F4 },
+    { XK_F5, SDLK_F5 },
+    { XK_F6, SDLK_F6 },
+    { XK_F7, SDLK_F7 },
+    { XK_F8, SDLK_F8 },
+    { XK_F9, SDLK_F9 },
+    { XK_F10, SDLK_F10 },
+    { XK_F11, SDLK_F11 },
+    { XK_F12, SDLK_F12 },
+    { XK_Print, SDLK_PRINTSCREEN },
+    { XK_Scroll_Lock, SDLK_SCROLLLOCK },
+    { XK_Pause, SDLK_PAUSE },
+    { XK_Insert, SDLK_INSERT },
+    { XK_Home, SDLK_HOME },
+    { XK_Prior, SDLK_PAGEUP },
+    { XK_Delete, SDLK_DELETE },
+    { XK_End, SDLK_END },
+    { XK_Next, SDLK_PAGEDOWN },
+    { XK_Right, SDLK_RIGHT },
+    { XK_Left, SDLK_LEFT },
+    { XK_Down, SDLK_DOWN },
+    { XK_Up, SDLK_UP },
+    { XK_Num_Lock, SDLK_NUMLOCKCLEAR },
+    { XK_KP_Divide, SDLK_KP_DIVIDE },
+    { XK_KP_Multiply, SDLK_KP_MULTIPLY },
+    { XK_KP_Subtract, SDLK_KP_MINUS },
+    { XK_KP_Add, SDLK_KP_PLUS },
+    { XK_KP_Enter, SDLK_KP_ENTER },
+    { XK_KP_Delete, SDLK_KP_PERIOD },
+    { XK_KP_End, SDLK_KP_1 },
+    { XK_KP_Down, SDLK_KP_2 },
+    { XK_KP_Next, SDLK_KP_3 },
+    { XK_KP_Left, SDLK_KP_4 },
+    { XK_KP_Begin, SDLK_KP_5 },
+    { XK_KP_Right, SDLK_KP_6 },
+    { XK_KP_Home, SDLK_KP_7 },
+    { XK_KP_Up, SDLK_KP_8 },
+    { XK_KP_Prior, SDLK_KP_9 },
+    { XK_KP_Insert, SDLK_KP_0 },
+    { XK_KP_Decimal, SDLK_KP_PERIOD },
+    { XK_KP_1, SDLK_KP_1 },
+    { XK_KP_2, SDLK_KP_2 },
+    { XK_KP_3, SDLK_KP_3 },
+    { XK_KP_4, SDLK_KP_4 },
+    { XK_KP_5, SDLK_KP_5 },
+    { XK_KP_6, SDLK_KP_6 },
+    { XK_KP_7, SDLK_KP_7 },
+    { XK_KP_8, SDLK_KP_8 },
+    { XK_KP_9, SDLK_KP_9 },
+    { XK_KP_0, SDLK_KP_0 },
+    { XK_KP_Decimal, SDLK_KP_PERIOD },
+    { XK_Hyper_R, SDLK_APPLICATION },
+    { XK_KP_Equal, SDLK_KP_EQUALS },
+    { XK_F13, SDLK_F13 },
+    { XK_F14, SDLK_F14 },
+    { XK_F15, SDLK_F15 },
+    { XK_F16, SDLK_F16 },
+    { XK_F17, SDLK_F17 },
+    { XK_F18, SDLK_F18 },
+    { XK_F19, SDLK_F19 },
+    { XK_F20, SDLK_F20 },
+    { XK_F21, SDLK_F21 },
+    { XK_F22, SDLK_F22 },
+    { XK_F23, SDLK_F23 },
+    { XK_F24, SDLK_F24 },
+    { XK_Execute, SDLK_EXECUTE },
+    { XK_Help, SDLK_HELP },
+    { XK_Menu, SDLK_MENU },
+    { XK_Select, SDLK_SELECT },
+    { XK_Cancel, SDLK_STOP },
+    { XK_Redo, SDLK_AGAIN },
+    { XK_Undo, SDLK_UNDO },
+    { XK_Find, SDLK_FIND },
+    { XK_KP_Separator, SDLK_KP_COMMA },
+    { XK_Sys_Req, SDLK_SYSREQ },
+    { XK_Control_L, SDLK_LCTRL },
+    { XK_Shift_L, SDLK_LSHIFT },
+    { XK_Alt_L, SDLK_LALT },
+    { XK_Meta_L, SDLK_LGUI },
+    { XK_Super_L, SDLK_LGUI },
+    { XK_Control_R, SDLK_RCTRL },
+    { XK_Shift_R, SDLK_RSHIFT },
+    { XK_Alt_R, SDLK_RALT },
+    { XK_Meta_R, SDLK_RGUI },
+    { XK_Super_R, SDLK_RGUI },
+    { XK_Mode_switch, SDLK_MODE },
 };
 
-/* *INDENT-OFF* */
 static struct
 {
     SDL_scancode *table;
@@ -289,6 +143,31 @@ static struct
 };
 /* *INDENT-OFF* */
 
+static SDLKey
+X11_KeyCodeToSDLKey(Display *display, KeyCode keycode)
+{
+    KeySym keysym;
+    unsigned int ucs4;
+    int i;
+
+    keysym = XKeycodeToKeysym(display, keycode, 0);
+    if (keysym == NoSymbol) {
+        return SDLK_UNKNOWN;
+    }
+
+    ucs4 = X11_KeySymToUcs4(keysym);
+    if (ucs4) {
+        return (SDLKey) ucs4;
+    }
+
+    for (i = 0; i < SDL_arraysize(KeySymToSDLKey); ++i) {
+        if (keysym == KeySymToSDLKey[i].keysym) {
+            return KeySymToSDLKey[i].sdlkey;
+        }
+    }
+    return SDLK_UNKNOWN;
+}
+
 int
 X11_InitKeyboard(_THIS)
 {
@@ -296,12 +175,15 @@ X11_InitKeyboard(_THIS)
     SDL_Keyboard keyboard;
     int i, j;
     int min_keycode, max_keycode;
-    SDL_scancode fingerprint_scancodes[] = {
-        SDL_SCANCODE_HOME,
-        SDL_SCANCODE_PAGEUP,
-        SDL_SCANCODE_PAGEDOWN
+    struct {
+        SDL_scancode scancode;
+        KeySym keysym;
+        int value;
+    } fingerprint[] = {
+        { SDL_SCANCODE_HOME, XK_Home, 0 },
+        { SDL_SCANCODE_PAGEUP, XK_Prior, 0 },
+        { SDL_SCANCODE_PAGEDOWN, XK_Next, 0 },
     };
-    int fingerprint[3];
     SDL_bool fingerprint_detected;
 
     XAutoRepeatOn(data->display);
@@ -309,10 +191,9 @@ X11_InitKeyboard(_THIS)
     /* Try to determine which scancodes are being used based on fingerprint */
     fingerprint_detected = SDL_FALSE;
     XDisplayKeycodes(data->display, &min_keycode, &max_keycode);
-    for (i = 0; i < SDL_arraysize(fingerprint_scancodes); ++i) {
-        fingerprint[i] =
-            XKeysymToKeycode(data->display,
-                             XKeySymTable[fingerprint_scancodes[i]]) -
+    for (i = 0; i < SDL_arraysize(fingerprint); ++i) {
+        fingerprint[i].value =
+            XKeysymToKeycode(data->display, fingerprint[i].keysym) -
             min_keycode;
     }
     for (i = 0; i < SDL_arraysize(scancode_set); ++i) {
@@ -321,12 +202,12 @@ X11_InitKeyboard(_THIS)
             continue;
         }
         for (j = 0; j < SDL_arraysize(fingerprint); ++j) {
-            if (fingerprint[j] < 0
-                || fingerprint[j] >= scancode_set[i].table_size) {
+            if (fingerprint[j].value < 0
+                || fingerprint[j].value >= scancode_set[i].table_size) {
                 break;
             }
-            if (scancode_set[i].table[fingerprint[j]] !=
-                fingerprint_scancodes[j]) {
+            if (scancode_set[i].table[fingerprint[j].value] !=
+                fingerprint[j].scancode) {
                 break;
             }
         }
@@ -340,23 +221,28 @@ X11_InitKeyboard(_THIS)
     }
 
     if (!fingerprint_detected) {
+        SDLKey keymap[SDL_NUM_SCANCODES];
+
         printf
             ("Keyboard layout unknown, please send the following to the SDL mailing list (sdl@libsdl.org):\n");
 
         /* Determine key_layout - only works on US QWERTY layout */
+        SDL_GetDefaultKeymap(keymap);
         for (i = min_keycode; i <= max_keycode; ++i) {
             KeySym sym;
             sym = XKeycodeToKeysym(data->display, i, 0);
-            if (sym) {
+            if (sym != NoSymbol) {
+                SDLKey key;
                 printf("code = %d, sym = 0x%X (%s) ", i - min_keycode, sym,
                        XKeysymToString(sym));
-                for (j = 0; j < SDL_arraysize(XKeySymTable); ++j) {
-                    if (XKeySymTable[j] == sym) {
+                key = X11_KeyCodeToSDLKey(data->display, i);
+                for (j = 0; j < SDL_arraysize(keymap); ++j) {
+                    if (keymap[j] == key) {
                         data->key_layout[i] = (SDL_scancode) j;
                         break;
                     }
                 }
-                if (j == SDL_arraysize(XKeySymTable)) {
+                if (j == SDL_arraysize(keymap)) {
                     printf("scancode not found\n");
                 } else {
                     printf("scancode = %d (%s)\n", j, SDL_GetScancodeName(j));
@@ -382,19 +268,17 @@ X11_UpdateKeymap(_THIS)
     SDL_scancode scancode;
     SDLKey keymap[SDL_NUM_SCANCODES];
 
-    SDL_GetDefaultKeymap(keymap);
+    SDL_zero(keymap);
 
     for (i = 0; i < SDL_arraysize(data->key_layout); i++) {
 
-        /* Make sure this scancode is a valid character scancode */
+        /* Make sure this is a valid scancode */
         scancode = data->key_layout[i];
-        if (scancode == SDL_SCANCODE_UNKNOWN ||
-            (keymap[scancode] & SDLK_SCANCODE_MASK)) {
+        if (scancode == SDL_SCANCODE_UNKNOWN) {
             continue;
         }
 
-        keymap[scancode] =
-            (SDLKey) X11_KeySymToUcs4(XKeycodeToKeysym(data->display, i, 0));
+        keymap[scancode] = X11_KeyCodeToSDLKey(data->display, (KeyCode)i);
     }
     SDL_SetKeymap(data->keyboard, 0, keymap, SDL_NUM_SCANCODES);
 }
