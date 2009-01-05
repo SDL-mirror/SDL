@@ -150,7 +150,7 @@ SDL_IntersectRectAndLine(const SDL_Rect * rect, int *X1, int *Y1, int *X2,
 
     /* Check to see if entire line is to one side of rect */
     if ((x1 < rectx1 && x2 < rectx1) || (x1 > rectx2 && x2 > rectx2) ||
-        (y1 < recty1 && y2 < recty2) || (y1 > recty2 && y2 > recty2)) {
+        (y1 < recty1 && y2 < recty1) || (y1 > recty2 && y2 > recty2)) {
         return SDL_FALSE;
     }
 
