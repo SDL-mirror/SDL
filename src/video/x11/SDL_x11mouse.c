@@ -122,6 +122,9 @@ X11_InitMouse(_THIS)
                     } else {
                         SDL_AddMouse(&mouse, DevList[i].name, 0, 0, 1);
                     }
+#ifndef IsXExtensionPointer
+#define IsXExtensionPointer 4
+#endif
                     if (DevList[i].use == IsXExtensionPointer) {
                         ++num_mice;
                     }
