@@ -4,7 +4,6 @@
  * Implement YUV texture support
    - in progress, software support is done, Ryan is working on OpenGL shaders
  * Implement desktop video mode change notification?
- * Add diagonal line clipping to SDL_IntersectRectAndLine()
  * Add OpenGL 3.0 context support
  * Finish multiple display support
  * Open windows on display that is selected when creating a window
