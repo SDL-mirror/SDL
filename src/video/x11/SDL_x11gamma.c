@@ -30,8 +30,8 @@ typedef struct
     Display *display;
     int scrNum;
     Colormap colormap;
-    XStandardColormap cmap;
     Visual visual;
+    Uint16 *ramp;
 } cmapTableEntry;
 
 cmapTableEntry *cmapTable = NULL;
@@ -49,8 +49,8 @@ X11_LookupColormap(Display * display, int scrNum, VisualID vid)
     for (i = 0; i < numCmaps; i++) {
         if (cmapTable[i].display == display &&
             cmapTable[i].scrNum == scrNum &&
-            cmapTable[i].cmap.visualid == vid) {
-            return cmapTable[i].cmap.colormap;
+            cmapTable[i].visual.visualid == vid) {
+            return cmapTable[i].colormap;
         }
     }
 
@@ -60,9 +60,11 @@ X11_LookupColormap(Display * display, int scrNum, VisualID vid)
 
 void
 X11_TrackColormap(Display * display, int scrNum, Colormap colormap,
-                  XStandardColormap * cmap, Visual * visual)
+                  Visual * visual, XColor * ramp)
 {
     int i;
+    Uint16 *newramp;
+    int ncolors;
 
     /* search the table to find out if we already have this one. We
        only want one entry for each display, screen number, visualid,
@@ -70,8 +72,8 @@ X11_TrackColormap(Display * display, int scrNum, Colormap colormap,
     for (i = 0; i < numCmaps; i++) {
         if (cmapTable[i].display == display &&
             cmapTable[i].scrNum == scrNum &&
-            cmapTable[i].cmap.visualid == cmap->visualid &&
-            cmapTable[i].cmap.colormap == colormap) {
+            cmapTable[i].visual.visualid == visual->visualid &&
+            cmapTable[i].colormap == colormap) {
             return;
         }
     }
@@ -88,8 +90,24 @@ X11_TrackColormap(Display * display, int scrNum, Colormap colormap,
     cmapTable[numCmaps].display = display;
     cmapTable[numCmaps].scrNum = scrNum;
     cmapTable[numCmaps].colormap = colormap;
-    SDL_memcpy(&cmapTable[numCmaps].cmap, cmap, sizeof(XStandardColormap));
     SDL_memcpy(&cmapTable[numCmaps].visual, visual, sizeof(Visual));
+    cmapTable[numCmaps].ramp = NULL;
+
+    newramp = SDL_malloc(3 * 256 * sizeof(Uint16));     /* The size of *all* SDL gamma ramps */
+    if (NULL == newramp) {
+        SDL_SetError("Out of memory in X11_TrackColormap()");
+        return;
+    }
+    SDL_memset(newramp, 0, sizeof(*newramp));
+    cmapTable[numCmaps].ramp = newramp;
+
+    ncolors = cmapTable[numCmaps].visual.map_entries;
+
+    for (i = 0; i < ncolors; i++) {
+        newramp[(0 * 256) + i] = ramp[i].red;
+        newramp[(1 * 256) + i] = ramp[i].green;
+        newramp[(2 * 256) + i] = ramp[i].blue;
+    }
 
     numCmaps++;
 }
@@ -103,44 +121,69 @@ X11_TrackColormap(Display * display, int scrNum, Colormap colormap,
 int
 X11_SetDisplayGammaRamp(_THIS, Uint16 * ramp)
 {
+    Visual *visual;
     Display *display;
     Colormap colormap;
     XColor *colorcells;
     int ncolors;
+    int rmask, gmask, bmask;
+    int rshift, gshift, bshift;
     int i;
     int j;
-
-    int rmax, gmax, bmax;
-    int rmul, gmul, bmul;
 
     for (j = 0; j < numCmaps; j++) {
         if (cmapTable[j].visual.class == DirectColor) {
             display = cmapTable[j].display;
             colormap = cmapTable[j].colormap;
             ncolors = cmapTable[j].visual.map_entries;
+            visual = &cmapTable[j].visual;
 
             colorcells = SDL_malloc(ncolors * sizeof(XColor));
             if (NULL == colorcells) {
                 SDL_SetError("out of memory in X11_SetDisplayGammaRamp");
                 return -1;
             }
+            /* remember the new ramp */
+            SDL_memcpy(cmapTable[j].ramp, ramp, sizeof(*cmapTable[j].ramp));
 
-            rmax = cmapTable[j].cmap.red_max + 1;
-            gmax = cmapTable[j].cmap.blue_max + 1;
-            bmax = cmapTable[j].cmap.green_max + 1;
+            rshift = 0;
+            rmask = visual->red_mask;
+            while (0 == (rmask & 1)) {
+                rshift++;
+                rmask >>= 1;
+            }
 
-            rmul = cmapTable[j].cmap.red_mult;
-            gmul = cmapTable[j].cmap.blue_mult;
-            bmul = cmapTable[j].cmap.green_mult;
+/*             printf("rmask = %4x rshift = %4d\n", rmask, rshift); */
+
+            gshift = 0;
+            gmask = visual->green_mask;
+            while (0 == (gmask & 1)) {
+                gshift++;
+                gmask >>= 1;
+            }
+
+/*             printf("gmask = %4x gshift = %4d\n", gmask, gshift); */
+
+            bshift = 0;
+            bmask = visual->blue_mask;
+            while (0 == (bmask & 1)) {
+                bshift++;
+                bmask >>= 1;
+            }
+
+/*             printf("bmask = %4x bshift = %4d\n", bmask, bshift); */
 
             /* build the color table pixel values */
             for (i = 0; i < ncolors; i++) {
-                Uint32 red = (rmax * i) / ncolors;
-                Uint32 green = (gmax * i) / ncolors;
-                Uint32 blue = (bmax * i) / ncolors;
+                Uint32 rbits = (rmask * i) / (ncolors - 1);
+                Uint32 gbits = (gmask * i) / (ncolors - 1);
+                Uint32 bbits = (bmask * i) / (ncolors - 1);
 
-                colorcells[i].pixel =
-                    (red * rmul) | (green * gmul) | (blue * bmul);
+                Uint32 pix =
+                    (rbits << rshift) | (gbits << gshift) | (bbits << bshift);
+
+                colorcells[i].pixel = pix;
+
                 colorcells[i].flags = DoRed | DoGreen | DoBlue;
 
                 colorcells[i].red = ramp[(0 * 256) + i];
@@ -160,73 +203,17 @@ X11_SetDisplayGammaRamp(_THIS, Uint16 * ramp)
 int
 X11_GetDisplayGammaRamp(_THIS, Uint16 * ramp)
 {
-    Display *display;
-    Colormap colormap;
-    XColor *colorcells;
-    int ncolors;
-    int dc;
     int i;
-
-    int rmax, gmax, bmax;
-    int rmul, gmul, bmul;
 
     /* find the first DirectColor colormap and use it to get the gamma
        ramp */
 
-    dc = -1;
     for (i = 0; i < numCmaps; i++) {
         if (cmapTable[i].visual.class == DirectColor) {
-            dc = i;
-            break;
+            SDL_memcpy(ramp, cmapTable[i].ramp, sizeof(*cmapTable[i].ramp));
+            return 0;
         }
     }
 
-    if (dc < 0) {
-        return -1;
-    }
-
-    /* there is at least one DirectColor colormap in the cmapTable,
-       let's just get the entries from that colormap */
-
-    display = cmapTable[dc].display;
-    colormap = cmapTable[dc].colormap;
-    ncolors = cmapTable[dc].visual.map_entries;
-    colorcells = SDL_malloc(ncolors * sizeof(XColor));
-    if (NULL == colorcells) {
-        SDL_SetError("out of memory in X11_GetDisplayGammaRamp");
-        return -1;
-    }
-
-    rmax = cmapTable[dc].cmap.red_max + 1;
-    gmax = cmapTable[dc].cmap.blue_max + 1;
-    bmax = cmapTable[dc].cmap.green_max + 1;
-
-    rmul = cmapTable[dc].cmap.red_mult;
-    gmul = cmapTable[dc].cmap.blue_mult;
-    bmul = cmapTable[dc].cmap.green_mult;
-
-    /* build the color table pixel values */
-    for (i = 0; i < ncolors; i++) {
-        Uint32 red = (rmax * i) / ncolors;
-        Uint32 green = (gmax * i) / ncolors;
-        Uint32 blue = (bmax * i) / ncolors;
-
-        colorcells[i].pixel = (red * rmul) | (green * gmul) | (blue * bmul);
-    }
-
-    XQueryColors(display, colormap, colorcells, ncolors);
-
-    /* prepare the values to be returned. Note that SDL assumes that
-       gamma ramps are always 3 * 256 entries long with the red entries
-       in the first 256 elements, the green in the second 256 elements
-       and the blue in the last 256 elements */
-
-    for (i = 0; i < ncolors; i++) {
-        ramp[(0 * 256) + i] = colorcells[i].red;
-        ramp[(1 * 256) + i] = colorcells[i].green;
-        ramp[(2 * 256) + i] = colorcells[i].blue;
-    }
-
-    SDL_free(colorcells);
-    return 0;
+    return -1;
 }
