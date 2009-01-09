@@ -926,8 +926,8 @@ SetupTextureUpdate(GL_RenderData * renderdata, SDL_Texture * texture,
     renderdata->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     renderdata->glPixelStorei(GL_UNPACK_ROW_LENGTH,
                               (pitch / bytes_per_pixel(texture->format)) /
-                              ((GL_TextureData *) texture->driverdata)->
-                              HACK_RYAN_FIXME);
+                              ((GL_TextureData *) texture->
+                               driverdata)->HACK_RYAN_FIXME);
 }
 
 static int

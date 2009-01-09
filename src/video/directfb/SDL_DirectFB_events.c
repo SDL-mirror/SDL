@@ -60,8 +60,9 @@ DirectFB_SetContext(_THIS, SDL_WindowID id)
     int ret;
 
     if (dispdata->vidIDinuse)
-        SDL_DFB_CHECKERR(dispdata->vidlayer->
-                         SwitchContext(dispdata->vidlayer, DFB_TRUE));
+        SDL_DFB_CHECKERR(dispdata->
+                         vidlayer->SwitchContext(dispdata->vidlayer,
+                                                 DFB_TRUE));
 
   error:
     return;
@@ -148,8 +149,8 @@ DirectFB_PumpEventsWindow(_THIS)
                         SDL_SendMouseMotion(devdata->mouse_id[0], 0, evt.cx,
                                             evt.cy, 0);
                         SDL_SendMouseButton(devdata->mouse_id[0], SDL_PRESSED,
-                                            DirectFB_TranslateButton(evt.
-                                                                     button));
+                                            DirectFB_TranslateButton
+                                            (evt.button));
                     } else {
                         MotionAllMice(_this, evt.x, evt.y);
                     }
@@ -160,8 +161,8 @@ DirectFB_PumpEventsWindow(_THIS)
                                             evt.cy, 0);
                         SDL_SendMouseButton(devdata->mouse_id[0],
                                             SDL_RELEASED,
-                                            DirectFB_TranslateButton(evt.
-                                                                     button));
+                                            DirectFB_TranslateButton
+                                            (evt.button));
                     } else {
                         MotionAllMice(_this, evt.x, evt.y);
                     }
@@ -521,6 +522,7 @@ DirectFB_TranslateKeyInputEvent(_THIS, int index, DFBInputEvent * evt,
 
     return keysym;
 }
+
 static int
 DirectFB_TranslateButton(DFBInputDeviceButtonIdentifier button)
 {
@@ -602,18 +604,19 @@ DirectFB_InitKeyboard(_THIS)
     devdata->num_keyboard = 0;
     if (devdata->use_linux_input) {
         sys_ids = 0;
-        SDL_DFB_CHECK(devdata->dfb->
-                      EnumInputDevices(devdata->dfb, EnumKeyboards, devdata));
+        SDL_DFB_CHECK(devdata->
+                      dfb->EnumInputDevices(devdata->dfb, EnumKeyboards,
+                                            devdata));
         if (devdata->num_keyboard == 0) {
             sys_ids = 1;
-            SDL_DFB_CHECK(devdata->dfb->
-                          EnumInputDevices(devdata->dfb, EnumKeyboards,
-                                           devdata));
+            SDL_DFB_CHECK(devdata->
+                          dfb->EnumInputDevices(devdata->dfb, EnumKeyboards,
+                                                devdata));
         }
     } else {
-        SDL_DFB_CHECK(devdata->dfb->
-                      EnumInputDevices(devdata->dfb, input_device_cb,
-                                       devdata));
+        SDL_DFB_CHECK(devdata->
+                      dfb->EnumInputDevices(devdata->dfb, input_device_cb,
+                                            devdata));
     }
 }
 
@@ -650,33 +653,25 @@ DirectFB_PumpEvents(_THIS)
             switch (evt.type) {
             case DIET_BUTTONPRESS:
                 posted += SDL_PrivateMouseButton(SDL_PRESSED,
-                                                 DirectFB_TranslateButton(evt.
-                                                                          button),
-                                                 0, 0);
+                                                 DirectFB_TranslateButton
+                                                 (evt.button), 0, 0);
                 break;
             case DIET_BUTTONRELEASE:
                 posted += SDL_PrivateMouseButton(SDL_RELEASED,
-                                                 DirectFB_TranslateButton(evt.
-                                                                          button),
-                                                 0, 0);
+                                                 DirectFB_TranslateButton
+                                                 (evt.button), 0, 0);
                 break;
             case DIET_KEYPRESS:
                 posted += SDL_PrivateKeyboard(SDL_PRESSED,
-                                              DirectFB_TranslateKey(evt.
-                                                                    key_id,
-                                                                    evt.
-                                                                    key_symbol,
-                                                                    mod,
-                                                                    &keysym));
+                                              DirectFB_TranslateKey
+                                              (evt.key_id, evt.key_symbol,
+                                               mod, &keysym));
                 break;
             case DIET_KEYRELEASE:
                 posted += SDL_PrivateKeyboard(SDL_RELEASED,
-                                              DirectFB_TranslateKey(evt.
-                                                                    key_id,
-                                                                    evt.
-                                                                    key_symbol,
-                                                                    mod,
-                                                                    &keysym));
+                                              DirectFB_TranslateKey
+                                              (evt.key_id, evt.key_symbol,
+                                               mod, &keysym));
                 break;
             case DIET_AXISMOTION:
                 if (evt.flags & DIEF_AXISREL) {

@@ -132,14 +132,15 @@ DirectFB_CreateCursor(SDL_Surface * surface, int hot_x, int hot_y)
     dsc.height = surface->h;
     dsc.pixelformat = DSPF_ARGB;
 
-    SDL_DFB_CHECKERR(devdata->dfb->
-                     CreateSurface(devdata->dfb, &dsc, &curdata->surf));
+    SDL_DFB_CHECKERR(devdata->
+                     dfb->CreateSurface(devdata->dfb, &dsc, &curdata->surf));
     curdata->hotx = hot_x;
     curdata->hoty = hot_y;
     cursor->driverdata = curdata;
 
-    SDL_DFB_CHECKERR(curdata->surf->
-                     Lock(curdata->surf, DSLF_WRITE, (void *) &dest, &pitch));
+    SDL_DFB_CHECKERR(curdata->
+                     surf->Lock(curdata->surf, DSLF_WRITE, (void *) &dest,
+                                &pitch));
 
     /* Relies on the fact that this is only called with ARGB surface. */
     p = surface->pixels;
@@ -174,21 +175,22 @@ DirectFB_ShowCursor(SDL_Cursor * cursor)
             DFB_WindowData *windata = (DFB_WindowData *) window->driverdata;
 
             if (cursor)
-                SDL_DFB_CHECKERR(windata->window->
-                                 SetCursorShape(windata->window,
-                                                curdata->surf, curdata->hotx,
-                                                curdata->hoty));
+                SDL_DFB_CHECKERR(windata->
+                                 window->SetCursorShape(windata->window,
+                                                        curdata->surf,
+                                                        curdata->hotx,
+                                                        curdata->hoty));
 
             /* fprintf(stdout, "Cursor is %s\n", cursor ? "on" : "off"); */
-            SDL_DFB_CHECKERR(dispdata->layer->
-                             SetCooperativeLevel(dispdata->layer,
-                                                 DLSCL_ADMINISTRATIVE));
-            SDL_DFB_CHECKERR(dispdata->layer->
-                             SetCursorOpacity(dispdata->layer,
-                                              cursor ? 0xC0 : 0x00));
-            SDL_DFB_CHECKERR(dispdata->layer->
-                             SetCooperativeLevel(dispdata->layer,
-                                                 DLSCL_SHARED));
+            SDL_DFB_CHECKERR(dispdata->
+                             layer->SetCooperativeLevel(dispdata->layer,
+                                                        DLSCL_ADMINISTRATIVE));
+            SDL_DFB_CHECKERR(dispdata->
+                             layer->SetCursorOpacity(dispdata->layer,
+                                                     cursor ? 0xC0 : 0x00));
+            SDL_DFB_CHECKERR(dispdata->
+                             layer->SetCooperativeLevel(dispdata->layer,
+                                                        DLSCL_SHARED));
         }
     }
 
@@ -227,8 +229,8 @@ DirectFB_WarpMouse(SDL_Mouse * mouse, SDL_WindowID windowID, int x, int y)
     int cx, cy;
 
     SDL_DFB_CHECKERR(windata->window->GetPosition(windata->window, &cx, &cy));
-    SDL_DFB_CHECKERR(dispdata->layer->
-                     WarpCursor(dispdata->layer, cx + x, cy + y));
+    SDL_DFB_CHECKERR(dispdata->
+                     layer->WarpCursor(dispdata->layer, cx + x, cy + y));
 
   error:
     return;

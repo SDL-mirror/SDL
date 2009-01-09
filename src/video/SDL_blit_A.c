@@ -283,8 +283,8 @@ BlitRGBtoRGBSurfaceAlphaMMX(SDL_BlitInfo * info)
         amult = alpha | (alpha << 8);
         amult = amult | (amult << 16);
         chanmask =
-            (0xff << df->Rshift) | (0xff << df->
-                                    Gshift) | (0xff << df->Bshift);
+            (0xff << df->Rshift) | (0xff << df->Gshift) | (0xff << df->
+                                                           Bshift);
         mm_alpha = _mm_set_pi32(0, amult & chanmask);   /* 0000AAAA -> mm_alpha, minus 1 chan */
         mm_alpha = _mm_unpacklo_pi8(mm_alpha, mm_zero); /* 0A0A0A0A -> mm_alpha, minus 1 chan */
         /* at this point mm_alpha can be 000A0A0A or 0A0A0A00 or another combo */
@@ -526,8 +526,8 @@ calc_swizzle32(const SDL_PixelFormat * srcfmt, const SDL_PixelFormat * dstfmt)
     /* Use zero for alpha if either surface doesn't have alpha */
     if (dstfmt->Amask) {
         amask =
-            ((srcfmt->Amask) ? RESHIFT(srcfmt->
-                                       Ashift) : 0x10) << (dstfmt->Ashift);
+            ((srcfmt->Amask) ? RESHIFT(srcfmt->Ashift) : 0x10) << (dstfmt->
+                                                                   Ashift);
     } else {
         amask =
             0x10101010 & ((dstfmt->Rmask | dstfmt->Gmask | dstfmt->Bmask) ^

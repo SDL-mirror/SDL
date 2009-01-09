@@ -96,6 +96,7 @@ NDS_EZF_ChipReset()
     }
     return 0;
 }
+
 void
 NDS_EZF_SetShake(u8 pos) 
 {

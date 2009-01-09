@@ -440,8 +440,8 @@ WndProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                     if ((!pVideo->hidden->pSDLSurface) ||
                         ((pVideo->hidden->pSDLSurface)
                          &&
-                         ((pVideo->hidden->
-                           pSDLSurface->flags & SDL_RESIZABLE) == 0)))
+                         ((pVideo->hidden->pSDLSurface->
+                           flags & SDL_RESIZABLE) == 0)))
                         FSLib_ToggleFSMode(hwnd, !FSLib_QueryFSMode(hwnd));
 #ifdef DEBUG_BUILD
                     else
@@ -690,15 +690,15 @@ WndProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                             WinQueryWindowPos(hwnd, &swp);
                             if ((!pVideo->hidden->pSDLSurface) ||
                                 ((pVideo->hidden->pSDLSurface) &&
-                                 (pVideo->hidden->
-                                  pSDLSurface->flags & SDL_RESIZABLE)
+                                 (pVideo->hidden->pSDLSurface->
+                                  flags & SDL_RESIZABLE)
                                  &&
                                  ((swp.cx !=
-                                   pVideo->hidden->
-                                   SrcBufferDesc.uiXResolution)
+                                   pVideo->hidden->SrcBufferDesc.
+                                   uiXResolution)
                                   || (swp.cy !=
-                                      pVideo->hidden->SrcBufferDesc.
-                                      uiYResolution))
+                                      pVideo->hidden->
+                                      SrcBufferDesc.uiYResolution))
                                  && (!FSLib_QueryFSMode(hwnd)))) {
                                 // Resizable surface and in resizing!
                                 // So, don't blit now!
@@ -717,10 +717,10 @@ WndProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                                 FSLIB_BITBLT(hwnd,
                                              pVideo->hidden->pchSrcBuffer, 0,
                                              0,
-                                             pVideo->hidden->
-                                             SrcBufferDesc.uiXResolution,
                                              pVideo->hidden->SrcBufferDesc.
-                                             uiYResolution);
+                                             uiXResolution,
+                                             pVideo->hidden->
+                                             SrcBufferDesc.uiYResolution);
                             }
                         }
 #ifdef DEBUG_BUILD
@@ -2503,26 +2503,21 @@ os2fslib_SetVideoMode(_THIS, SDL_Surface * current,
                                        pModeInfoFound->uiXResolution,
                                        pModeInfoFound->uiYResolution,
                                        pModeInfoFound->uiBPP, ((unsigned int)
-                                                               pModeInfoFound->
-                                                               PixelFormat.
-                                                               ucRedMask)
-                                       << pModeInfoFound->PixelFormat.
-                                       ucRedPosition, ((unsigned int)
-                                                       pModeInfoFound->
-                                                       PixelFormat.
-                                                       ucGreenMask)
-                                       << pModeInfoFound->PixelFormat.
-                                       ucGreenPosition, ((unsigned int)
-                                                         pModeInfoFound->
-                                                         PixelFormat.
-                                                         ucBlueMask)
-                                       << pModeInfoFound->PixelFormat.
-                                       ucBluePosition, ((unsigned int)
-                                                        pModeInfoFound->
-                                                        PixelFormat.
-                                                        ucAlphaMask)
-                                       << pModeInfoFound->PixelFormat.
-                                       ucAlphaPosition);
+                                                               pModeInfoFound->PixelFormat.ucRedMask)
+                                       << pModeInfoFound->
+                                       PixelFormat.ucRedPosition,
+                                       ((unsigned int)
+                                        pModeInfoFound->PixelFormat.ucGreenMask)
+                                       << pModeInfoFound->
+                                       PixelFormat.ucGreenPosition,
+                                       ((unsigned int)
+                                        pModeInfoFound->PixelFormat.ucBlueMask)
+                                       << pModeInfoFound->
+                                       PixelFormat.ucBluePosition,
+                                       ((unsigned int)
+                                        pModeInfoFound->PixelFormat.ucAlphaMask)
+                                       << pModeInfoFound->
+                                       PixelFormat.ucAlphaPosition);
 
         if (pResult == NULL) {
             DosReleaseMutexSem(_this->hidden->hmtxUseSrcBuffer);
@@ -2536,27 +2531,23 @@ os2fslib_SetVideoMode(_THIS, SDL_Surface * current,
 
         // Adjust pixel format mask!
         pResult->format->Rmask =
-            ((unsigned int) pModeInfoFound->
-             PixelFormat.ucRedMask) << pModeInfoFound->PixelFormat.
-            ucRedPosition;
+            ((unsigned int) pModeInfoFound->PixelFormat.
+             ucRedMask) << pModeInfoFound->PixelFormat.ucRedPosition;
         pResult->format->Rshift = pModeInfoFound->PixelFormat.ucRedPosition;
         pResult->format->Rloss = pModeInfoFound->PixelFormat.ucRedAdjust;
         pResult->format->Gmask =
-            ((unsigned int) pModeInfoFound->
-             PixelFormat.ucGreenMask) << pModeInfoFound->PixelFormat.
-            ucGreenPosition;
+            ((unsigned int) pModeInfoFound->PixelFormat.
+             ucGreenMask) << pModeInfoFound->PixelFormat.ucGreenPosition;
         pResult->format->Gshift = pModeInfoFound->PixelFormat.ucGreenPosition;
         pResult->format->Gloss = pModeInfoFound->PixelFormat.ucGreenAdjust;
         pResult->format->Bmask =
-            ((unsigned int) pModeInfoFound->
-             PixelFormat.ucBlueMask) << pModeInfoFound->PixelFormat.
-            ucBluePosition;
+            ((unsigned int) pModeInfoFound->PixelFormat.
+             ucBlueMask) << pModeInfoFound->PixelFormat.ucBluePosition;
         pResult->format->Bshift = pModeInfoFound->PixelFormat.ucBluePosition;
         pResult->format->Bloss = pModeInfoFound->PixelFormat.ucBlueAdjust;
         pResult->format->Amask =
-            ((unsigned int) pModeInfoFound->
-             PixelFormat.ucAlphaMask) << pModeInfoFound->PixelFormat.
-            ucAlphaPosition;
+            ((unsigned int) pModeInfoFound->PixelFormat.
+             ucAlphaMask) << pModeInfoFound->PixelFormat.ucAlphaPosition;
         pResult->format->Ashift = pModeInfoFound->PixelFormat.ucAlphaPosition;
         pResult->format->Aloss = pModeInfoFound->PixelFormat.ucAlphaAdjust;
 
@@ -2815,25 +2806,23 @@ os2fslib_VideoInit(_THIS, SDL_PixelFormat * vformat)
     vformat->BytesPerPixel = (vformat->BitsPerPixel + 7) / 8;
 
     vformat->Rmask =
-        ((unsigned int) pDesktopMode->PixelFormat.
-         ucRedMask) << pDesktopMode->PixelFormat.ucRedPosition;
+        ((unsigned int) pDesktopMode->PixelFormat.ucRedMask) << pDesktopMode->
+        PixelFormat.ucRedPosition;
     vformat->Rshift = pDesktopMode->PixelFormat.ucRedPosition;
     vformat->Rloss = pDesktopMode->PixelFormat.ucRedAdjust;
     vformat->Gmask =
-        ((unsigned int) pDesktopMode->
-         PixelFormat.ucGreenMask) << pDesktopMode->PixelFormat.
-        ucGreenPosition;
+        ((unsigned int) pDesktopMode->PixelFormat.
+         ucGreenMask) << pDesktopMode->PixelFormat.ucGreenPosition;
     vformat->Gshift = pDesktopMode->PixelFormat.ucGreenPosition;
     vformat->Gloss = pDesktopMode->PixelFormat.ucGreenAdjust;
     vformat->Bmask =
-        ((unsigned int) pDesktopMode->
-         PixelFormat.ucBlueMask) << pDesktopMode->PixelFormat.ucBluePosition;
+        ((unsigned int) pDesktopMode->PixelFormat.
+         ucBlueMask) << pDesktopMode->PixelFormat.ucBluePosition;
     vformat->Bshift = pDesktopMode->PixelFormat.ucBluePosition;
     vformat->Bloss = pDesktopMode->PixelFormat.ucBlueAdjust;
     vformat->Amask =
-        ((unsigned int) pDesktopMode->
-         PixelFormat.ucAlphaMask) << pDesktopMode->PixelFormat.
-        ucAlphaPosition;
+        ((unsigned int) pDesktopMode->PixelFormat.
+         ucAlphaMask) << pDesktopMode->PixelFormat.ucAlphaPosition;
     vformat->Ashift = pDesktopMode->PixelFormat.ucAlphaPosition;
     vformat->Aloss = pDesktopMode->PixelFormat.ucAlphaAdjust;
 
@@ -2938,10 +2927,10 @@ os2fslib_VideoInit(_THIS, SDL_PixelFormat * vformat)
                sizeof(_this->hidden->SrcBufferDesc));
     // Allocate new video buffer!
     _this->hidden->pchSrcBuffer =
-        (char *) SDL_malloc(_this->hidden->
-                            pAvailableFSLibVideoModes->uiScanLineSize *
-                            _this->hidden->
-                            pAvailableFSLibVideoModes->uiYResolution);
+        (char *) SDL_malloc(_this->hidden->pAvailableFSLibVideoModes->
+                            uiScanLineSize *
+                            _this->hidden->pAvailableFSLibVideoModes->
+                            uiYResolution);
     if (!_this->hidden->pchSrcBuffer) {
 #ifdef DEBUG_BUILD
         printf

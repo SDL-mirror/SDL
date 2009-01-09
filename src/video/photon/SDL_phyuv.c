@@ -149,8 +149,8 @@ ph_CreateYUVOverlay(_THIS, int width, int height, Uint32 format,
                                     &overlay->hwdata->caps);
         if (rtncode == 0) {
             if (overlay->hwdata->caps.format == format) {
-                if ((overlay->hwdata->
-                     caps.flags & Pg_SCALER_CAP_DST_CHROMA_KEY) ==
+                if ((overlay->hwdata->caps.
+                     flags & Pg_SCALER_CAP_DST_CHROMA_KEY) ==
                     Pg_SCALER_CAP_DST_CHROMA_KEY) {
                     overlay->hwdata->ischromakey = 1;
                 }

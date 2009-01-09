@@ -278,9 +278,8 @@ DSOUND_GetDeviceBuf(_THIS)
         IDirectSoundBuffer_Restore(this->hidden->mixbuf);
         result = IDirectSoundBuffer_Lock(this->hidden->mixbuf, cursor,
                                          this->hidden->mixlen,
-                                         (LPVOID *) & this->
-                                         hidden->locked_buf, &rawlen, NULL,
-                                         &junk, 0);
+                                         (LPVOID *) & this->hidden->
+                                         locked_buf, &rawlen, NULL, &junk, 0);
     }
     if (result != DS_OK) {
         SetDSerror("DirectSound Lock", result);

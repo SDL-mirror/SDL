@@ -156,8 +156,8 @@ SDL_Swap64(Uint64 x)
     } v;
     v.u = x;
   __asm__("bswapl %0 ; bswapl %1 ; xchgl %0,%1": "=r"(v.s.a), "=r"(v.s.b):"0"(v.s.a),
-            "1"(v.s.
-                b));
+            "1"(v.
+                s.b));
     return v.u;
 }
 #elif defined(__GNUC__) && defined(__x86_64__)

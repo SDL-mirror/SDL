@@ -418,12 +418,12 @@ DirectFB_ActivateRenderer(SDL_Renderer * renderer)
         int cw, ch;
         int ret;
 
-        SDL_DFB_CHECKERR(windata->surface->
-                         GetSize(windata->surface, &cw, &ch));
+        SDL_DFB_CHECKERR(windata->
+                         surface->GetSize(windata->surface, &cw, &ch));
         if (cw != window->w || ch != window->h)
-            SDL_DFB_CHECKERR(windata->window->
-                             ResizeSurface(windata->window, window->w,
-                                           window->h));
+            SDL_DFB_CHECKERR(windata->
+                             window->ResizeSurface(windata->window, window->w,
+                                                   window->h));
     }
     return 0;
   error:
@@ -462,22 +462,24 @@ DirectFB_AcquireVidLayer(SDL_Renderer * renderer, SDL_Texture * texture)
         layconf.pixelformat = SDLToDFBPixelFormat(data->format);
         layconf.surface_caps = DSCAPS_VIDEOONLY | DSCAPS_DOUBLE;
 
-        SDL_DFB_CHECKERR(devdata->dfb->
-                         GetDisplayLayer(devdata->dfb, dispdata->vidID,
-                                         &dispdata->vidlayer));
-        SDL_DFB_CHECKERR(dispdata->vidlayer->
-                         SetCooperativeLevel(dispdata->vidlayer,
-                                             DLSCL_EXCLUSIVE));
+        SDL_DFB_CHECKERR(devdata->
+                         dfb->GetDisplayLayer(devdata->dfb, dispdata->vidID,
+                                              &dispdata->vidlayer));
+        SDL_DFB_CHECKERR(dispdata->
+                         vidlayer->SetCooperativeLevel(dispdata->vidlayer,
+                                                       DLSCL_EXCLUSIVE));
 
         if (devdata->use_yuv_underlays) {
             ret = dispdata->vidlayer->SetLevel(dispdata->vidlayer, -1);
             if (ret != DFB_OK)
                 SDL_DFB_DEBUG("Underlay Setlevel not supported\n");
         }
-        SDL_DFB_CHECKERR(dispdata->vidlayer->
-                         SetConfiguration(dispdata->vidlayer, &layconf));
-        SDL_DFB_CHECKERR(dispdata->vidlayer->
-                         GetSurface(dispdata->vidlayer, &data->surface));
+        SDL_DFB_CHECKERR(dispdata->
+                         vidlayer->SetConfiguration(dispdata->vidlayer,
+                                                    &layconf));
+        SDL_DFB_CHECKERR(dispdata->
+                         vidlayer->GetSurface(dispdata->vidlayer,
+                                              &data->surface));
         dispdata->vidIDinuse = 1;
         data->display = display;
         return 0;
@@ -486,9 +488,9 @@ DirectFB_AcquireVidLayer(SDL_Renderer * renderer, SDL_Texture * texture)
   error:
     if (dispdata->vidlayer) {
         SDL_DFB_RELEASE(data->surface);
-        SDL_DFB_CHECKERR(dispdata->vidlayer->
-                         SetCooperativeLevel(dispdata->vidlayer,
-                                             DLSCL_ADMINISTRATIVE));
+        SDL_DFB_CHECKERR(dispdata->
+                         vidlayer->SetCooperativeLevel(dispdata->vidlayer,
+                                                       DLSCL_ADMINISTRATIVE));
         SDL_DFB_RELEASE(dispdata->vidlayer);
     }
     return 1;
@@ -540,12 +542,14 @@ DirectFB_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         data->pixels = NULL;
 
         /* Create the surface */
-        SDL_DFB_CHECKERR(devdata->dfb->
-                         CreateSurface(devdata->dfb, &dsc, &data->surface));
+        SDL_DFB_CHECKERR(devdata->
+                         dfb->CreateSurface(devdata->dfb, &dsc,
+                                            &data->surface));
         if (SDL_ISPIXELFORMAT_INDEXED(data->format)
             && !SDL_ISPIXELFORMAT_FOURCC(data->format)) {
-            SDL_DFB_CHECKERR(data->surface->
-                             GetPalette(data->surface, &data->palette));
+            SDL_DFB_CHECKERR(data->
+                             surface->GetPalette(data->surface,
+                                                 &data->palette));
         }
 
     }
@@ -602,9 +606,9 @@ DirectFB_SetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
             entries[i].b = colors[i].b;
             entries[i].a = 0xFF;
         }
-        SDL_DFB_CHECKERR(data->palette->
-                         SetEntries(data->palette, entries, ncolors,
-                                    firstcolor));
+        SDL_DFB_CHECKERR(data->
+                         palette->SetEntries(data->palette, entries, ncolors,
+                                             firstcolor));
         return 0;
     } else {
         SDL_SetError("YUV textures don't have a palette");
@@ -626,9 +630,9 @@ DirectFB_GetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
         DFBColor entries[256];
         int i;
 
-        SDL_DFB_CHECKERR(data->palette->
-                         GetEntries(data->palette, entries, ncolors,
-                                    firstcolor));
+        SDL_DFB_CHECKERR(data->
+                         palette->GetEntries(data->palette, entries, ncolors,
+                                             firstcolor));
 
         for (i = 0; i < ncolors; ++i) {
             colors[i].r = entries[i].r;
@@ -807,8 +811,9 @@ PrepareDraw(SDL_Renderer * renderer)
     a = renderer->a;
 
     SetBlendMode(data, renderer->blendMode, NULL);
-    SDL_DFB_CHECKERR(data->surface->
-                     SetDrawingFlags(data->surface, data->drawFlags));
+    SDL_DFB_CHECKERR(data->
+                     surface->SetDrawingFlags(data->surface,
+                                              data->drawFlags));
 
     switch (renderer->blendMode) {
     case SDL_BLENDMODE_NONE:
@@ -868,9 +873,9 @@ DirectFB_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
     DFBResult ret;
 
     PrepareDraw(renderer);
-    SDL_DFB_CHECKERR(data->surface->
-                     FillRectangle(data->surface, rect->x, rect->y, rect->w,
-                                   rect->h));
+    SDL_DFB_CHECKERR(data->
+                     surface->FillRectangle(data->surface, rect->x, rect->y,
+                                            rect->w, rect->h));
 
     return 0;
   error:
@@ -894,15 +899,18 @@ DirectFB_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         SDL_VideoDisplay *display = texturedata->display;
         DFB_DisplayData *dispdata = (DFB_DisplayData *) display->driverdata;
 
-        SDL_DFB_CHECKERR(dispdata->vidlayer->
-                         SetSourceRectangle(dispdata->vidlayer, srcrect->x,
-                                            srcrect->y, srcrect->w,
-                                            srcrect->h));
+        SDL_DFB_CHECKERR(dispdata->
+                         vidlayer->SetSourceRectangle(dispdata->vidlayer,
+                                                      srcrect->x, srcrect->y,
+                                                      srcrect->w,
+                                                      srcrect->h));
         windata->window->GetPosition(windata->window, &px, &py);
-        SDL_DFB_CHECKERR(dispdata->vidlayer->
-                         SetScreenRectangle(dispdata->vidlayer,
-                                            px + dstrect->x, py + dstrect->y,
-                                            dstrect->w, dstrect->h));
+        SDL_DFB_CHECKERR(dispdata->
+                         vidlayer->SetScreenRectangle(dispdata->vidlayer,
+                                                      px + dstrect->x,
+                                                      py + dstrect->y,
+                                                      dstrect->w,
+                                                      dstrect->h));
     } else {
         DFBRectangle sr, dr;
         DFBSurfaceBlittingFlags flags = 0;
@@ -930,9 +938,8 @@ DirectFB_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
         SDL_DFB_CHECKERR(data->surface->SetColor(data->surface, 0xFF,
                                                  0xFF, 0xFF, 0xFF));
-        if (texture->
-            modMode & (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA))
-        {
+        if (texture->modMode &
+            (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA)) {
             if (texture->modMode & SDL_TEXTUREMODULATE_ALPHA) {
                 alpha = texture->a;
                 SDL_DFB_CHECKERR(data->surface->SetColor(data->surface, 0xFF,
@@ -940,9 +947,10 @@ DirectFB_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
             }
             if (texture->modMode & SDL_TEXTUREMODULATE_COLOR) {
 
-                SDL_DFB_CHECKERR(data->surface->
-                                 SetColor(data->surface, texture->r,
-                                          texture->g, texture->b, alpha));
+                SDL_DFB_CHECKERR(data->
+                                 surface->SetColor(data->surface, texture->r,
+                                                   texture->g, texture->b,
+                                                   alpha));
                 flags |= DSBLIT_COLORIZE;
             }
             if (alpha < 0xFF)
@@ -953,24 +961,25 @@ DirectFB_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
         SetBlendMode(data, texture->blendMode, texturedata);
 
-        SDL_DFB_CHECKERR(data->surface->
-                         SetBlittingFlags(data->surface,
-                                          data->blitFlags | flags));
+        SDL_DFB_CHECKERR(data->surface->SetBlittingFlags(data->surface,
+                                                         data->
+                                                         blitFlags | flags));
 
 #if (DIRECTFB_MAJOR_VERSION == 1) && (DIRECTFB_MINOR_VERSION >= 2)
         SDL_DFB_CHECKERR(data->surface->SetRenderOptions(data->surface,
-                                                         texturedata->
-                                                         render_options));
+                                                         texturedata->render_options));
 #endif
 
         if (srcrect->w == dstrect->w && srcrect->h == dstrect->h) {
-            SDL_DFB_CHECKERR(data->surface->
-                             Blit(data->surface, texturedata->surface,
-                                  &sr, dr.x, dr.y));
+            SDL_DFB_CHECKERR(data->
+                             surface->Blit(data->surface,
+                                           texturedata->surface, &sr, dr.x,
+                                           dr.y));
         } else {
-            SDL_DFB_CHECKERR(data->surface->
-                             StretchBlit(data->surface, texturedata->surface,
-                                         &sr, &dr));
+            SDL_DFB_CHECKERR(data->
+                             surface->StretchBlit(data->surface,
+                                                  texturedata->surface, &sr,
+                                                  &dr));
         }
     }
     return 0;
@@ -993,8 +1002,8 @@ DirectFB_RenderPresent(SDL_Renderer * renderer)
     sr.h = window->h;
 
     /* Send the data to the display */
-    SDL_DFB_CHECKERR(data->surface->
-                     Flip(data->surface, NULL, data->flipflags));
+    SDL_DFB_CHECKERR(data->
+                     surface->Flip(data->surface, NULL, data->flipflags));
 
     return;
   error:

@@ -311,7 +311,6 @@ X11_DispatchEvent(_THIS)
                     }
                     continue;
                 }
-
 #if SDL_VIDEO_DRIVER_X11_XINPUT
                 data = (X11_MouseData *) mouse->driverdata;
                 if (xevent.type == data->motion) {

@@ -960,8 +960,8 @@ HandleHat(SDL_Joystick * stick, Uint8 hat, int axis, int value)
 #endif /* USE_LOGICAL_JOYSTICKS */
 
         SDL_PrivateJoystickHat(stick, hat,
-                               position_map[the_hat->
-                                            axis[1]][the_hat->axis[0]]);
+                               position_map[the_hat->axis[1]][the_hat->
+                                                              axis[0]]);
     }
 }
 
@@ -1092,13 +1092,13 @@ EV_HandleEvents(SDL_Joystick * joystick)
                     code -= BTN_MISC;
 #ifndef NO_LOGICAL_JOYSTICKS
                     if (!LogicalJoystickButton(joystick,
-                                               joystick->
-                                               hwdata->key_map[code],
+                                               joystick->hwdata->
+                                               key_map[code],
                                                events[i].value))
 #endif
                         SDL_PrivateJoystickButton(joystick,
-                                                  joystick->
-                                                  hwdata->key_map[code],
+                                                  joystick->hwdata->
+                                                  key_map[code],
                                                   events[i].value);
                 }
                 break;
@@ -1124,8 +1124,8 @@ EV_HandleEvents(SDL_Joystick * joystick)
                                              events[i].value))
 #endif
                         SDL_PrivateJoystickAxis(joystick,
-                                                joystick->
-                                                hwdata->abs_map[code],
+                                                joystick->hwdata->
+                                                abs_map[code],
                                                 events[i].value);
                     break;
                 }

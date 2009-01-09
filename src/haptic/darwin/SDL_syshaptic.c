@@ -199,8 +199,8 @@ SDL_SYS_HapticInit(void)
                                          CFSTR(kIOHIDPrimaryUsagePageKey));
                 if (refCF) {
                     if (!CFNumberGetValue(refCF, kCFNumberLongType,
-                                          &SDL_hapticlist[numhaptics].
-                                          usagePage))
+                                          &SDL_hapticlist
+                                          [numhaptics].usagePage))
                         SDL_SetError
                             ("Haptic: Recieving device's usage page.");
                     refCF =
@@ -208,8 +208,8 @@ SDL_SYS_HapticInit(void)
                                              CFSTR(kIOHIDPrimaryUsageKey));
                     if (refCF) {
                         if (!CFNumberGetValue(refCF, kCFNumberLongType,
-                                              &SDL_hapticlist[numhaptics].
-                                              usage))
+                                              &SDL_hapticlist
+                                              [numhaptics].usage))
                             SDL_SetError("Haptic: Recieving device's usage.");
                     }
                 }

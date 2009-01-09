@@ -180,8 +180,8 @@ SDL_GetErrorMsg(char *errstr, unsigned int maxlen)
                 case 's':
                     len =
                         SDL_snprintf(msg, maxlen, tmp,
-                                     SDL_LookupString(error->args[argi++].
-                                                      buf));
+                                     SDL_LookupString(error->
+                                                      args[argi++].buf));
                     msg += len;
                     maxlen -= len;
                     break;

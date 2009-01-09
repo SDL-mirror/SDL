@@ -107,8 +107,8 @@ WINWAVEOUT_WaitDevice(_THIS)
 Uint8 *
 WINWAVEOUT_GetDeviceBuf(_THIS)
 {
-    return (Uint8 *) (this->hidden->
-                      wavebuf[this->hidden->next_buffer].lpData);
+    return (Uint8 *) (this->hidden->wavebuf[this->hidden->next_buffer].
+                      lpData);
 }
 
 void

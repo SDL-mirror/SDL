@@ -62,8 +62,8 @@ DARTEventFunc(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags)
                 pBufDesc->iBufferUsage = BUFFER_EMPTY;
                 // And notify DART feeder thread that it will have to work a bit.
                 if (pSDLAudioDevice)
-                    DosPostEventSem(pSDLAudioDevice->
-                                    hidden->hevAudioBufferPlayed);
+                    DosPostEventSem(pSDLAudioDevice->hidden->
+                                    hevAudioBufferPlayed);
             }
         }
     }
@@ -312,11 +312,10 @@ DART_PlayDevice(_THIS)
         (pMixBufferDesc) _this->hidden->pMixBuffers[iFreeBuf].ulUserParm;
     pBufDesc->iBufferUsage = BUFFER_USED;
     // Send it to DART to be queued
-    _this->hidden->MixSetupParms.pmixWrite(_this->hidden->
-                                           MixSetupParms.ulMixHandle,
-                                           &(_this->
-                                             hidden->pMixBuffers[iFreeBuf]),
-                                           1);
+    _this->hidden->MixSetupParms.pmixWrite(_this->hidden->MixSetupParms.
+                                           ulMixHandle,
+                                           &(_this->hidden->
+                                             pMixBuffers[iFreeBuf]), 1);
 
     _this->hidden->iLastPlayedBuf = iFreeBuf;
     iFreeBuf = (iFreeBuf + 1) % _this->hidden->iCurrNumBufs;
@@ -334,8 +333,8 @@ DART_GetDeviceBuf(_THIS)
         if (_this->hidden) {
             iFreeBuf = _this->hidden->iNextFreeBuffer;
             pBufDesc =
-                (pMixBufferDesc) _this->hidden->
-                pMixBuffers[iFreeBuf].ulUserParm;
+                (pMixBufferDesc) _this->hidden->pMixBuffers[iFreeBuf].
+                ulUserParm;
 
             if (pBufDesc) {
                 if (pBufDesc->iBufferUsage == BUFFER_EMPTY) {
