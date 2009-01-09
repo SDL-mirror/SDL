@@ -16,9 +16,21 @@ my @audiotypes = qw(
     F32MSB
 );
 
+my @channels = ( 1, 2, 4, 6, 8 );
 my %funcs;
-
 my $custom_converters = 0;
+
+
+sub getTypeConvertHashId {
+    my ($from, $to) = @_;
+    return "TYPECONVERTER $from/$to";
+}
+
+
+sub getResamplerHashId {
+    my ($from, $channels, $upsample, $multiple) = @_;
+    return "RESAMPLER $from/$channels/$upsample/$multiple";
+}
 
 
 sub outputHeader {
@@ -66,6 +78,8 @@ EOF
 
 sub outputFooter {
     print <<EOF;
+/* $custom_converters converters generated. */
+
 /* *INDENT-ON* */
 
 /* vi: set ts=4 sw=4 expandtab: */
@@ -162,7 +176,7 @@ sub buildCvtFunc {
 
     return if ($diffs == 0);
 
-    my $hashid = "$from/$to";
+    my $hashid = getTypeConvertHashId($from, $to);
     if (1) { # !!! FIXME: if ($diffs > 1) {
         my $sym = "SDL_Convert_${from}_to_${to}";
         $funcs{$hashid} = $sym;
@@ -274,39 +288,407 @@ EOF
     }
 }
 
-outputHeader();
 
-foreach (@audiotypes) {
-    my $from = $_;
+sub buildTypeConverters {
     foreach (@audiotypes) {
-        my $to = $_;
-        buildCvtFunc($from, $to);
-    }
-}
-
-print <<EOF;
-const SDL_AudioTypeFilters sdl_audio_type_filters[] =
-{
-EOF
-
-foreach (@audiotypes) {
-    my $from = $_;
-    foreach (@audiotypes) {
-        my $to = $_;
-        if ($from ne $to) {
-            my $hashid = "$from/$to";
-            my $sym = $funcs{$hashid};
-            print("    { AUDIO_$from, AUDIO_$to, $sym },\n");
+        my $from = $_;
+        foreach (@audiotypes) {
+            my $to = $_;
+            buildCvtFunc($from, $to);
         }
     }
+
+    print "const SDL_AudioTypeFilters sdl_audio_type_filters[] =\n{\n";
+    foreach (@audiotypes) {
+        my $from = $_;
+        foreach (@audiotypes) {
+            my $to = $_;
+            if ($from ne $to) {
+                my $hashid = getTypeConvertHashId($from, $to);
+                my $sym = $funcs{$hashid};
+                print("    { AUDIO_$from, AUDIO_$to, $sym },\n");
+            }
+        }
+    }
+
+    print "};\n\n\n";
 }
 
-print <<EOF;
-};
+sub getBiggerCtype {
+    my ($isfloat, $size) = @_;
 
+    if ($isfloat) {
+        if ($size == 32) {
+            return 'double';
+        }
+        die("bug in script.\n");
+    }
+
+    if ($size == 8) {
+        return 'Sint16';
+    } elsif ($size == 16) {
+        return 'Sint32'
+    } elsif ($size == 32) {
+        return 'Sint64'
+    }
+
+    die("bug in script.\n");
+}
+
+
+# These handle arbitrary resamples...44100Hz to 48000Hz, for example.
+# Man, this code is skanky.
+sub buildArbitraryResampleFunc {
+    # !!! FIXME: we do a lot of unnecessary and ugly casting in here, due to getSwapFunc().
+    my ($from, $channels, $upsample) = @_;
+    my ($fsigned, $ffloat, $fsize, $fendian, $fctype) = splittype($from);
+
+    my $bigger = getBiggerCtype($ffloat, $fsize);
+    my $interp = ($ffloat) ? '* 0.5' : '>> 1';
+
+    my $resample = ($upsample) ? 'Upsample' : 'Downsample';
+    my $hashid = getResamplerHashId($from, $channels, $upsample, 0);
+    my $sym = "SDL_${resample}_${from}_${channels}c";
+    $funcs{$hashid} = $sym;
+    $custom_converters++;
+
+    my $fudge = $fsize * $channels * 2;  # !!! FIXME
+    my $eps_adjust = ($upsample) ? 'dstsize' : 'srcsize';
+    my $incr = '';
+    my $incr2 = '';
+
+
+    # !!! FIXME: DEBUG_CONVERT should report frequencies.
+    print <<EOF;
+static void SDLCALL
+${sym}(SDL_AudioCVT * cvt, SDL_AudioFormat format)
+{
+#ifdef DEBUG_CONVERT
+    fprintf(stderr, "$resample arbitrary (x%f) AUDIO_${from}, ${channels} channels.\\n", cvt->rate_incr);
+#endif
+
+    const int srcsize = cvt->len_cvt - $fudge;
+    const int dstsize = (int) (((double)cvt->len_cvt) * cvt->rate_incr);
+    register int eps = 0;
+EOF
+
+    # Upsampling (growing the buffer) needs to work backwards, since we
+    #  overwrite the buffer as we go.
+    if ($upsample) {
+        print <<EOF;
+    $fctype *dst = (($fctype *) (cvt->buf + dstsize)) - $channels;
+    const $fctype *src = (($fctype *) (cvt->buf + cvt->len_cvt)) - $channels;
+    const $fctype *target = ((const $fctype *) cvt->buf) - $channels;
+EOF
+    } else {
+        print <<EOF;
+    $fctype *dst = ($fctype *) cvt->buf;
+    const $fctype *src = ($fctype *) cvt->buf;
+    const $fctype *target = (const $fctype *) (cvt->buf + dstsize);
+EOF
+    }
+
+    for (my $i = 0; $i < $channels; $i++) {
+        my $idx = ($upsample) ? (($channels - $i) - 1) : $i;
+        my $val = getSwapFunc($fsize, $fsigned, $ffloat, $fendian, "src[$idx]");
+        print <<EOF;
+    $fctype sample${idx} = $val;
+EOF
+    }
+
+    for (my $i = 0; $i < $channels; $i++) {
+        my $idx = ($upsample) ? (($channels - $i) - 1) : $i;
+        print <<EOF;
+    $fctype last_sample${idx} = sample${idx};
+EOF
+    }
+
+    print <<EOF;
+    while (dst != target) {
+EOF
+
+    if ($upsample) {
+        for (my $i = 0; $i < $channels; $i++) {
+            # !!! FIXME: don't do this swap every write, just when the samples change.
+            my $idx = (($channels - $i) - 1);
+            my $val = getSwapFunc($fsize, $fsigned, $ffloat, $fendian, "sample${idx}");
+            print <<EOF;
+        dst[$idx] = $val;
+EOF
+        }
+
+        $incr = ($channels == 1) ? 'dst--' : "dst -= $channels";
+        $incr2 = ($channels == 1) ? 'src--' : "src -= $channels";
+
+        print <<EOF;
+        $incr;
+        eps += srcsize;
+        if ((eps << 1) >= dstsize) {
+            $incr2;
+EOF
+    } else {  # downsample.
+        $incr = ($channels == 1) ? 'src++' : "src += $channels";
+        print <<EOF;
+        $incr;
+        eps += dstsize;
+        if ((eps << 1) >= srcsize) {
+EOF
+        for (my $i = 0; $i < $channels; $i++) {
+            my $val = getSwapFunc($fsize, $fsigned, $ffloat, $fendian, "sample${i}");
+            print <<EOF;
+            dst[$i] = $val;
+EOF
+        }
+
+        $incr = ($channels == 1) ? 'dst++' : "dst += $channels";
+        print <<EOF;
+            $incr;
+EOF
+    }
+
+    for (my $i = 0; $i < $channels; $i++) {
+        my $idx = ($upsample) ? (($channels - $i) - 1) : $i;
+        my $swapped = getSwapFunc($fsize, $fsigned, $ffloat, $fendian, "src[$idx]");
+        print <<EOF;
+            sample${idx} = ($fctype) (((($bigger) $swapped) + (($bigger) last_sample${idx})) $interp);
+EOF
+    }
+
+    for (my $i = 0; $i < $channels; $i++) {
+        my $idx = ($upsample) ? (($channels - $i) - 1) : $i;
+        print <<EOF;
+            last_sample${idx} = sample${idx};
+EOF
+    }
+
+    print <<EOF;
+            eps -= $eps_adjust;
+        }
+    }
+EOF
+
+        print <<EOF;
+    cvt->len_cvt = dstsize;
+    if (cvt->filters[++cvt->filter_index]) {
+        cvt->filters[cvt->filter_index] (cvt, format);
+    }
+}
 
 EOF
 
+}
+
+# These handle clean resamples...doubling and quadrupling the sample rate, etc.
+sub buildMultipleResampleFunc {
+    # !!! FIXME: we do a lot of unnecessary and ugly casting in here, due to getSwapFunc().
+    my ($from, $channels, $upsample, $multiple) = @_;
+    my ($fsigned, $ffloat, $fsize, $fendian, $fctype) = splittype($from);
+
+    my $bigger = getBiggerCtype($ffloat, $fsize);
+    my $interp = ($ffloat) ? '* 0.5' : '>> 1';
+    my $interp2 = ($ffloat) ? '* 0.25' : '>> 2';
+    my $mult3 = ($ffloat) ? '3.0' : '3';
+    my $lencvtop = ($upsample) ? '*' : '/';
+
+    my $resample = ($upsample) ? 'Upsample' : 'Downsample';
+    my $hashid = getResamplerHashId($from, $channels, $upsample, $multiple);
+    my $sym = "SDL_${resample}_${from}_${channels}c_x${multiple}";
+    $funcs{$hashid} = $sym;
+    $custom_converters++;
+
+    # !!! FIXME: DEBUG_CONVERT should report frequencies.
+    print <<EOF;
+static void SDLCALL
+${sym}(SDL_AudioCVT * cvt, SDL_AudioFormat format)
+{
+#ifdef DEBUG_CONVERT
+    fprintf(stderr, "$resample (x${multiple}) AUDIO_${from}, ${channels} channels.\\n");
+#endif
+
+    const int srcsize = cvt->len_cvt;
+    const int dstsize = cvt->len_cvt $lencvtop $multiple;
+EOF
+
+    # Upsampling (growing the buffer) needs to work backwards, since we
+    #  overwrite the buffer as we go.
+    if ($upsample) {
+        print <<EOF;
+    $fctype *dst = (($fctype *) (cvt->buf + dstsize)) - $channels;
+    const $fctype *src = (($fctype *) (cvt->buf + cvt->len_cvt)) - $channels;
+    const $fctype *target = ((const $fctype *) cvt->buf) - $channels;
+EOF
+    } else {
+        print <<EOF;
+    $fctype *dst = ($fctype *) cvt->buf;
+    const $fctype *src = ($fctype *) cvt->buf;
+    const $fctype *target = (const $fctype *) (cvt->buf + dstsize);
+EOF
+    }
+
+    for (my $i = 0; $i < $channels; $i++) {
+        my $idx = ($upsample) ? (($channels - $i) - 1) : $i;
+        my $val = getSwapFunc($fsize, $fsigned, $ffloat, $fendian, "src[$idx]");
+        print <<EOF;
+    $bigger last_sample${idx} = ($bigger) $val;
+EOF
+    }
+
+    print <<EOF;
+    while (dst != target) {
+EOF
+
+    for (my $i = 0; $i < $channels; $i++) {
+        my $idx = ($upsample) ? (($channels - $i) - 1) : $i;
+        my $val = getSwapFunc($fsize, $fsigned, $ffloat, $fendian, "src[$idx]");
+        print <<EOF;
+        const $bigger sample${idx} = ($bigger) $val;
+EOF
+    }
+
+    my $incr = '';
+    if ($upsample) {
+        $incr = ($channels == 1) ? 'src--' : "src -= $channels";
+    } else {
+        my $amount = $channels * $multiple;
+        $incr = "src += $amount";  # can't ever be 1, so no "++" version.
+    }
+
+
+    print <<EOF;
+        $incr;
+EOF
+
+    # !!! FIXME: This really begs for some Altivec or SSE, etc.
+    if ($upsample) {
+        if ($multiple == 2) {
+            for (my $i = $channels-1; $i >= 0; $i--) {
+                my $dsti = $i + $channels;
+                print <<EOF;
+        dst[$dsti] = ($fctype) ((sample${i} + last_sample${i}) $interp);
+EOF
+            }
+            for (my $i = $channels-1; $i >= 0; $i--) {
+                my $dsti = $i;
+                print <<EOF;
+        dst[$dsti] = ($fctype) sample${i};
+EOF
+            }
+        } elsif ($multiple == 4) {
+            for (my $i = $channels-1; $i >= 0; $i--) {
+                my $dsti = $i + ($channels * 3);
+                print <<EOF;
+        dst[$dsti] = ($fctype) sample${i};
+EOF
+            }
+
+            for (my $i = $channels-1; $i >= 0; $i--) {
+                my $dsti = $i + ($channels * 2);
+                print <<EOF;
+        dst[$dsti] = ($fctype) ((($mult3 * sample${i}) + last_sample${i}) $interp2);
+EOF
+            }
+
+            for (my $i = $channels-1; $i >= 0; $i--) {
+                my $dsti = $i + ($channels * 1);
+                print <<EOF;
+        dst[$dsti] = ($fctype) ((sample${i} + last_sample${i}) $interp);
+EOF
+            }
+
+            for (my $i = $channels-1; $i >= 0; $i--) {
+                my $dsti = $i + ($channels * 0);
+                print <<EOF;
+        dst[$dsti] = ($fctype) ((sample${i} + ($mult3 * last_sample${i})) $interp2);
+EOF
+            }
+        } else {
+            die('bug in program.');  # we only handle x2 and x4.
+        }
+    } else {  # downsample.
+        if ($multiple == 2) {
+            for (my $i = 0; $i < $channels; $i++) {
+                print <<EOF;
+        dst[$i] = ($fctype) ((sample${i} + last_sample${i}) $interp);
+EOF
+            }
+        } elsif ($multiple == 4) {
+            # !!! FIXME: interpolate all 4 samples?
+            for (my $i = 0; $i < $channels; $i++) {
+                print <<EOF;
+        dst[$i] = ($fctype) ((sample${i} + last_sample${i}) $interp);
+EOF
+            }
+        } else {
+            die('bug in program.');  # we only handle x2 and x4.
+        }
+    }
+
+    for (my $i = 0; $i < $channels; $i++) {
+        my $idx = ($upsample) ? (($channels - $i) - 1) : $i;
+        print <<EOF;
+        last_sample${idx} = sample${idx};
+EOF
+    }
+
+    if ($upsample) {
+        my $amount = $channels * $multiple;
+        $incr = "dst -= $amount";  # can't ever be 1, so no "--" version.
+    } else {
+        $incr = ($channels == 1) ? 'dst++' : "dst += $channels";
+    }
+
+    print <<EOF;
+        $incr;
+    }
+
+    cvt->len_cvt = dstsize;
+    if (cvt->filters[++cvt->filter_index]) {
+        cvt->filters[cvt->filter_index] (cvt, format);
+    }
+}
+
+EOF
+
+}
+
+sub buildResamplers {
+    foreach (@audiotypes) {
+        my $from = $_;
+        foreach (@channels) {
+            my $channel = $_;
+            for (my $multiple = 2; $multiple <= 4; $multiple += 2) {
+                buildMultipleResampleFunc($from, $channel, 1, $multiple);
+                buildMultipleResampleFunc($from, $channel, 0, $multiple);
+            }
+            buildArbitraryResampleFunc($from, $channel, 1);
+            buildArbitraryResampleFunc($from, $channel, 0);
+        }
+    }
+
+    print "const SDL_AudioRateFilters sdl_audio_rate_filters[] =\n{\n";
+    foreach (@audiotypes) {
+        my $from = $_;
+        foreach (@channels) {
+            my $channel = $_;
+            for (my $multiple = 0; $multiple <= 4; $multiple += 2) {
+                for (my $upsample = 0; $upsample <= 1; $upsample++) {
+                    my $hashid = getResamplerHashId($from, $channel, $upsample, $multiple);
+                    my $sym = $funcs{$hashid};
+                    print("    { AUDIO_$from, $channel, $upsample, $multiple, $sym },\n");
+                }
+            }
+        }
+    }
+
+    print "};\n\n";
+}
+
+
+# mainline ...
+
+outputHeader();
+buildTypeConverters();
+buildResamplers();
 outputFooter();
 
 exit 0;
