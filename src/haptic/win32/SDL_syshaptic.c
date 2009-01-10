@@ -212,8 +212,8 @@ EnumHapticsCallback(const DIDEVICEINSTANCE * pdidInstance, VOID * pContext)
     /* Get capabilities. */
     SDL_hapticlist[SDL_numhaptics].capabilities.dwSize = sizeof(DIDEVCAPS);
     ret = IDirectInputDevice_GetCapabilities(device,
-                                             &SDL_hapticlist
-                                             [SDL_numhaptics].capabilities);
+                                             &SDL_hapticlist[SDL_numhaptics].
+                                             capabilities);
     if (FAILED(ret)) {
         /* DI_SetError("Getting device capabilities",ret); */
         IDirectInputDevice_Release(device);
@@ -332,8 +332,8 @@ SDL_SYS_HapticOpenFromInstance(SDL_Haptic * haptic, DIDEVICEINSTANCE instance)
     /* Now get the IDirectInputDevice2 interface, instead. */
     ret = IDirectInputDevice_QueryInterface(device,
                                             &IID_IDirectInputDevice2,
-                                            (LPVOID *) & haptic->
-                                            hwdata->device);
+                                            (LPVOID *) & haptic->hwdata->
+                                            device);
     /* Done with the temporary one now. */
     IDirectInputDevice_Release(device);
     if (FAILED(ret)) {
@@ -500,8 +500,8 @@ int
 SDL_SYS_HapticOpen(SDL_Haptic * haptic)
 {
     return SDL_SYS_HapticOpenFromInstance(haptic,
-                                          SDL_hapticlist[haptic->
-                                                         index].instance);
+                                          SDL_hapticlist[haptic->index].
+                                          instance);
 }
 
 

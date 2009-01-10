@@ -43,11 +43,11 @@ DirectFB_CreateWindow(_THIS, SDL_Window * window)
     SDL_DFB_CALLOC(window->driverdata, 1, sizeof(DFB_WindowData));
     windata = (DFB_WindowData *) window->driverdata;
 
-    SDL_DFB_CHECKERR(devdata->
-                     dfb->SetCooperativeLevel(devdata->dfb, DFSCL_NORMAL));
-    SDL_DFB_CHECKERR(dispdata->
-                     layer->SetCooperativeLevel(dispdata->layer,
-                                                DLSCL_ADMINISTRATIVE));
+    SDL_DFB_CHECKERR(devdata->dfb->
+                     SetCooperativeLevel(devdata->dfb, DFSCL_NORMAL));
+    SDL_DFB_CHECKERR(dispdata->layer->
+                     SetCooperativeLevel(dispdata->layer,
+                                         DLSCL_ADMINISTRATIVE));
 
     /* Fill the window description. */
     if (window->x == SDL_WINDOWPOS_CENTERED) {
@@ -100,9 +100,8 @@ DirectFB_CreateWindow(_THIS, SDL_Window * window)
     /* DSCAPS_VIDEOONLY has negative impact on performance */
 
     /* Create the window. */
-    SDL_DFB_CHECKERR(dispdata->
-                     layer->CreateWindow(dispdata->layer, &desc,
-                                         &windata->window));
+    SDL_DFB_CHECKERR(dispdata->layer->
+                     CreateWindow(dispdata->layer, &desc, &windata->window));
 
     windata->window->GetOptions(windata->window, &wopts);
 #if (DIRECTFB_MAJOR_VERSION == 1) && (DIRECTFB_MINOR_VERSION >= 0)
@@ -120,14 +119,14 @@ DirectFB_CreateWindow(_THIS, SDL_Window * window)
 
     windata->window->SetOptions(windata->window, wopts);
     /* Get the window's surface. */
-    SDL_DFB_CHECKERR(windata->
-                     window->GetSurface(windata->window, &windata->surface));
+    SDL_DFB_CHECKERR(windata->window->
+                     GetSurface(windata->window, &windata->surface));
     windata->window->SetOpacity(windata->window, 0xFF);
-    SDL_DFB_CHECKERR(windata->window->CreateEventBuffer(windata->window,
-                                                        &(windata->
-                                                          eventbuffer)));
-    SDL_DFB_CHECKERR(windata->
-                     window->EnableEvents(windata->window, DWET_ALL));
+    SDL_DFB_CHECKERR(windata->window->
+                     CreateEventBuffer(windata->window,
+                                       &(windata->eventbuffer)));
+    SDL_DFB_CHECKERR(windata->window->
+                     EnableEvents(windata->window, DWET_ALL));
 
     if (window->flags & SDL_WINDOW_FULLSCREEN)
         windata->window->SetStackingClass(windata->window, DWSC_UPPER);
@@ -203,21 +202,19 @@ DirectFB_SetWindowSize(_THIS, SDL_Window * window)
         int ch;
 
         /* Make sure all events are disabled for this operation ! */
-        SDL_DFB_CHECKERR(windata->
-                         window->DisableEvents(windata->window, DWET_ALL));
+        SDL_DFB_CHECKERR(windata->window->
+                         DisableEvents(windata->window, DWET_ALL));
 
         SDL_DFB_CHECKERR(windata->window->GetSize(windata->window, &cw, &ch));
         if (cw != window->w || ch != window->h)
-            SDL_DFB_CHECKERR(windata->
-                             window->Resize(windata->window, window->w,
-                                            window->h));
-        SDL_DFB_CHECKERR(windata->
-                         window->EnableEvents(windata->window, DWET_ALL));
+            SDL_DFB_CHECKERR(windata->window->
+                             Resize(windata->window, window->w, window->h));
+        SDL_DFB_CHECKERR(windata->window->
+                         EnableEvents(windata->window, DWET_ALL));
 
 #else
-        SDL_DFB_CHECKERR(windata->
-                         window->Resize(windata->window, window->w,
-                                        window->h));
+        SDL_DFB_CHECKERR(windata->window->
+                         Resize(windata->window, window->w, window->h));
 #endif
         SDL_DFB_CHECKERR(windata->window->GetSize(windata->window, &window->w, &window->h));    /* if a window manager should have decided otherwise */
 

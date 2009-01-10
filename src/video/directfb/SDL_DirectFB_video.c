@@ -190,15 +190,14 @@ DirectFB_VideoInit(_THIS)
 
     /* Create global Eventbuffer for axis events */
     if (devdata->use_linux_input) {
-        SDL_DFB_CHECKERR(dfb->CreateInputEventBuffer(dfb, DICAPS_ALL,
-                                                     DFB_TRUE,
-                                                     &devdata->events));
+        SDL_DFB_CHECKERR(dfb->
+                         CreateInputEventBuffer(dfb, DICAPS_ALL,
+                                                DFB_TRUE, &devdata->events));
     } else {
-        SDL_DFB_CHECKERR(dfb->CreateInputEventBuffer(dfb,
-                                                     DICAPS_AXES
-                                                     /*DICAPS_ALL */ ,
-                                                     DFB_TRUE,
-                                                     &devdata->events));
+        SDL_DFB_CHECKERR(dfb->
+                         CreateInputEventBuffer(dfb,
+                                                DICAPS_AXES /*DICAPS_ALL */ ,
+                                                DFB_TRUE, &devdata->events));
     }
 
     devdata->initialized = 1;

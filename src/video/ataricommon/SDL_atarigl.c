@@ -349,9 +349,9 @@ SDL_AtariGL_MakeCurrent(_THIS)
     }
 
     if (!
-        (_this->gl_data->
-         OSMesaMakeCurrent(gl_ctx, surface->pixels, type, surface->w,
-                           surface->h))) {
+        (_this->
+         gl_data->OSMesaMakeCurrent(gl_ctx, surface->pixels, type, surface->w,
+                                    surface->h))) {
         SDL_SetError("Can not make OpenGL context current");
         return -1;
     }
@@ -512,11 +512,11 @@ InitNew(_THIS, SDL_Surface * current)
 
         gl_ctx =
             _this->gl_data->OSMesaCreateContextExt(osmesa_format,
-                                                   _this->gl_config.
-                                                   depth_size,
-                                                   _this->gl_config.
-                                                   stencil_size, newaccumsize,
-                                                   NULL);
+                                                   _this->
+                                                   gl_config.depth_size,
+                                                   _this->
+                                                   gl_config.stencil_size,
+                                                   newaccumsize, NULL);
 
         if (gl_ctx) {
             gl_curformat = osmesa_format;

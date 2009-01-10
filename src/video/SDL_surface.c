@@ -479,9 +479,9 @@ SDL_GetSurfaceBlendMode(SDL_Surface * surface, int *blendMode)
         return 0;
     }
 
-    switch (surface->map->info.
-            flags & (SDL_COPY_MASK | SDL_COPY_BLEND | SDL_COPY_ADD |
-                     SDL_COPY_MOD)) {
+    switch (surface->map->
+            info.flags & (SDL_COPY_MASK | SDL_COPY_BLEND | SDL_COPY_ADD |
+                          SDL_COPY_MOD)) {
     case SDL_COPY_MASK:
         *blendMode = SDL_BLENDMODE_MASK;
         break;

@@ -693,8 +693,8 @@ D3D_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
         result =
             IDirect3DDevice9_CreateTexture(renderdata->device, texture->w,
                                            texture->h, 1, 0,
-                                           PixelFormatToD3DFMT
-                                           (texture->format),
+                                           PixelFormatToD3DFMT(texture->
+                                                               format),
                                            D3DPOOL_SYSTEMMEM, &temp, NULL);
         if (FAILED(result)) {
             D3D_SetError("CreateTexture()", result);

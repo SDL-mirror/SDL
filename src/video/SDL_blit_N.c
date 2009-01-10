@@ -141,8 +141,8 @@ calc_swizzle32(const SDL_PixelFormat * srcfmt, const SDL_PixelFormat * dstfmt)
     /* Use zero for alpha if either surface doesn't have alpha */
     if (dstfmt->Amask) {
         amask =
-            ((srcfmt->Amask) ? RESHIFT(srcfmt->Ashift) : 0x10) << (dstfmt->
-                                                                   Ashift);
+            ((srcfmt->Amask) ? RESHIFT(srcfmt->
+                                       Ashift) : 0x10) << (dstfmt->Ashift);
     } else {
         amask =
             0x10101010 & ((dstfmt->Rmask | dstfmt->Gmask | dstfmt->Bmask) ^

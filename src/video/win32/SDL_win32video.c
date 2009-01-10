@@ -114,8 +114,10 @@ WIN_CreateDevice(int devindex)
             (UINT(*)(UINT, UINT, LPVOID)) GetProcAddress(data->wintabDLL,
                                                          PROCNAME(WTInfoA));
         data->WTOpenA =
-            (HCTX(*)(HWND, LPLOGCONTEXTA, BOOL))
-            GetProcAddress(data->wintabDLL, PROCNAME(WTOpenA));
+            (HCTX(*)(HWND, LPLOGCONTEXTA, BOOL)) GetProcAddress(data->
+                                                                wintabDLL,
+                                                                PROCNAME
+                                                                (WTOpenA));
         data->WTPacket =
             (int (*)(HCTX, UINT, LPVOID)) GetProcAddress(data->wintabDLL,
                                                          PROCNAME(WTPacket));

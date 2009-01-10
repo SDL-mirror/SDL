@@ -417,8 +417,8 @@ X11_GL_CreateContext(_THIS, SDL_Window * window)
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     Display *display = data->videodata->display;
     int screen =
-        ((SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata)->
-        screen;
+        ((SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->
+         driverdata)->screen;
     XWindowAttributes xattr;
     XVisualInfo v, *vinfo;
     int n;

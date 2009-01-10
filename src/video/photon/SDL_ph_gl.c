@@ -314,14 +314,17 @@ ph_SetupOpenGLContext(_THIS, int width, int height, int bpp, Uint32 flags)
         && (this->gl_config.accum_blue_size != 0)
         && (this->gl_config.accum_green_size != 0)) {
         qnxgl_attribs_slide = qnxgl_attrib_set_accum(qnxgl_attribs_slide,
-                                                     this->gl_config.
-                                                     accum_red_size +
-                                                     this->gl_config.
-                                                     accum_blue_size +
-                                                     this->gl_config.accum_green_size
+                                                     this->
+                                                     gl_config.accum_red_size
                                                      +
                                                      this->
-                                                     gl_config.accum_alpha_size);
+                                                     gl_config.accum_blue_size
+                                                     +
+                                                     this->
+                                                     gl_config.
+                                                     accum_green_size +
+                                                     this->gl_config.
+                                                     accum_alpha_size);
     }
 
     /* Stereo mode */

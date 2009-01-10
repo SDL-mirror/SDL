@@ -204,9 +204,8 @@ CheckSetDisplayMode(_THIS, DFB_DisplayData * data, SDL_DisplayMode * mode)
     DFBDisplayLayerConfigFlags failed;
     int ret;
 
-    SDL_DFB_CHECKERR(data->
-                     layer->SetCooperativeLevel(data->layer,
-                                                DLSCL_ADMINISTRATIVE));
+    SDL_DFB_CHECKERR(data->layer->
+                     SetCooperativeLevel(data->layer, DLSCL_ADMINISTRATIVE));
     config.width = mode->w;
     config.height = mode->h;
     config.pixelformat = SDLToDFBPixelFormat(mode->format);
@@ -217,8 +216,8 @@ CheckSetDisplayMode(_THIS, DFB_DisplayData * data, SDL_DisplayMode * mode)
     }
     failed = 0;
     data->layer->TestConfiguration(data->layer, &config, &failed);
-    SDL_DFB_CHECKERR(data->
-                     layer->SetCooperativeLevel(data->layer, DLSCL_SHARED));
+    SDL_DFB_CHECKERR(data->layer->
+                     SetCooperativeLevel(data->layer, DLSCL_SHARED));
     if (failed == 0)
         SDL_AddDisplayMode(_this->current_display, mode);
     else
@@ -260,20 +259,19 @@ DirectFB_InitModes(_THIS)
         screencbdata->vidlayer[i] = -1;
     }
 
-    SDL_DFB_CHECKERR(devdata->
-                     dfb->EnumScreens(devdata->dfb, &cbScreens,
-                                      screencbdata));
+    SDL_DFB_CHECKERR(devdata->dfb->
+                     EnumScreens(devdata->dfb, &cbScreens, screencbdata));
 
     for (i = 0; i < screencbdata->numscreens; i++) {
         IDirectFBScreen *screen;
 
-        SDL_DFB_CHECKERR(devdata->
-                         dfb->GetScreen(devdata->dfb,
-                                        screencbdata->screenid[i], &screen));
+        SDL_DFB_CHECKERR(devdata->dfb->
+                         GetScreen(devdata->dfb, screencbdata->screenid[i],
+                                   &screen));
 
         screencbdata->aux = i;
-        SDL_DFB_CHECKERR(screen->EnumDisplayLayers
-                         (screen, &cbLayers, screencbdata));
+        SDL_DFB_CHECKERR(screen->
+                         EnumDisplayLayers(screen, &cbLayers, screencbdata));
 #if (DIRECTFB_MAJOR_VERSION >= 1)
         screen->GetSize(screen, &tcw[i], &tch[i]);
 #else
@@ -295,12 +293,12 @@ DirectFB_InitModes(_THIS)
     SDL_DFB_DEBUG("Found %d screens\n", screencbdata->numscreens);
 
     for (i = 0; i < screencbdata->numscreens; i++) {
-        SDL_DFB_CHECKERR(devdata->dfb->GetDisplayLayer(devdata->dfb,
-                                                       screencbdata->
-                                                       gralayer[i], &layer));
+        SDL_DFB_CHECKERR(devdata->dfb->
+                         GetDisplayLayer(devdata->dfb,
+                                         screencbdata->gralayer[i], &layer));
 
-        SDL_DFB_CHECKERR(layer->SetCooperativeLevel
-                         (layer, DLSCL_ADMINISTRATIVE));
+        SDL_DFB_CHECKERR(layer->
+                         SetCooperativeLevel(layer, DLSCL_ADMINISTRATIVE));
         layer->EnableCursor(layer, 1);
         SDL_DFB_CHECKERR(layer->SetCursorOpacity(layer, 0xC0));
 
@@ -383,9 +381,8 @@ DirectFB_GetDisplayModes(_THIS)
     data.nummodes = 0;
     /* Enumerate the available fullscreen modes */
     SDL_DFB_CALLOC(data.modelist, DFB_MAX_MODES, sizeof(SDL_DisplayMode));
-    SDL_DFB_CHECKERR(devdata->
-                     dfb->EnumVideoModes(devdata->dfb, EnumModesCallback,
-                                         &data));
+    SDL_DFB_CHECKERR(devdata->dfb->
+                     EnumVideoModes(devdata->dfb, EnumModesCallback, &data));
 
     for (i = 0; i < data.nummodes; ++i) {
         mode = data.modelist[i];
@@ -422,9 +419,8 @@ DirectFB_SetDisplayMode(_THIS, SDL_DisplayMode * mode)
     DFBDisplayLayerConfigFlags fail = 0;
     DFBResult ret;
 
-    SDL_DFB_CHECKERR(data->
-                     layer->SetCooperativeLevel(data->layer,
-                                                DLSCL_ADMINISTRATIVE));
+    SDL_DFB_CHECKERR(data->layer->
+                     SetCooperativeLevel(data->layer, DLSCL_ADMINISTRATIVE));
 
     SDL_DFB_CHECKERR(data->layer->GetConfiguration(data->layer, &config));
     config.flags = DLCONF_WIDTH | DLCONF_HEIGHT;
@@ -462,8 +458,8 @@ DirectFB_SetDisplayMode(_THIS, SDL_DisplayMode * mode)
 
     /* Double check */
     SDL_DFB_CHECKERR(data->layer->GetConfiguration(data->layer, &rconfig));
-    SDL_DFB_CHECKERR(data->
-                     layer->SetCooperativeLevel(data->layer, DLSCL_SHARED));
+    SDL_DFB_CHECKERR(data->layer->
+                     SetCooperativeLevel(data->layer, DLSCL_SHARED));
 
     if ((config.width != rconfig.width) ||
         (config.height != rconfig.height) ||
@@ -506,14 +502,13 @@ DirectFB_QuitModes(_THIS)
             (DFB_DisplayData *) _this->displays[i].driverdata;
 
         if (dispdata->layer) {
-            SDL_DFB_CHECK(dispdata->
-                          layer->SetCooperativeLevel(dispdata->layer,
-                                                     DLSCL_ADMINISTRATIVE));
-            SDL_DFB_CHECK(dispdata->
-                          layer->SetCursorOpacity(dispdata->layer, 0x00));
-            SDL_DFB_CHECK(dispdata->
-                          layer->SetCooperativeLevel(dispdata->layer,
-                                                     DLSCL_SHARED));
+            SDL_DFB_CHECK(dispdata->layer->
+                          SetCooperativeLevel(dispdata->layer,
+                                              DLSCL_ADMINISTRATIVE));
+            SDL_DFB_CHECK(dispdata->layer->
+                          SetCursorOpacity(dispdata->layer, 0x00));
+            SDL_DFB_CHECK(dispdata->layer->
+                          SetCooperativeLevel(dispdata->layer, DLSCL_SHARED));
         }
 
         SDL_DFB_RELEASE(dispdata->layer);
