@@ -205,7 +205,6 @@ X11_DispatchEvent(_THIS)
             XLookupString(&xevent.xkey, text, sizeof(text), &keysym, NULL);
 #endif
             if (*text) {
-                printf("Sending text event %s\n", text);
                 SDL_SendKeyboardText(videodata->keyboard, text);
             }
         }
