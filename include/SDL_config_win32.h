@@ -116,6 +116,18 @@ typedef unsigned int uintptr_t;
 #define HAVE__STRICMP 1
 #define HAVE__STRNICMP 1
 #define HAVE_SSCANF 1
+#define HAVE_M_PI 1
+#define HAVE_COPYSIGN 1
+#define HAVE_COS 1
+#define HAVE_COSF 1
+#define HAVE_FABS 1
+#define HAVE_FLOOR 1
+#define HAVE_LOG 1
+#define HAVE_POW 1
+#define HAVE_SCALBN 1
+#define HAVE_SIN 1
+#define HAVE_SINF 1
+#define HAVE_SQRT 1
 #else
 #define HAVE_STDARG_H	1
 #define HAVE_STDDEF_H	1

@@ -26,8 +26,6 @@
 #include "SDL_audio.h"
 #include "SDL_audio_c.h"
 
-#include "../libm/math.h"
-
 //#define DEBUG_CONVERT
 
 /* These are fractional multiplication routines. That is, their inputs
@@ -1658,13 +1656,9 @@ SDL_BuildWindowedSinc(SDL_AudioCVT * cvt, SDL_AudioFormat format,
         if (i == m / 2) {
             fSinc[i] = two_pi_fc;
         } else {
-            fSinc[i] =
-                sinf(two_pi_fc * ((float) i - m_over_two)) / ((float) i -
-                                                              m_over_two);
+            fSinc[i] = SDL_sinf(two_pi_fc * ((float) i - m_over_two)) / ((float) i - m_over_two);
             /* Apply blackman window */
-            fSinc[i] *=
-                0.42f - 0.5f * cosf(two_pi_over_m * (float) i) +
-                0.08f * cosf(four_pi_over_m * (float) i);
+            fSinc[i] *= 0.42f - 0.5f * SDL_cosf(two_pi_over_m * (float) i) + 0.08f * SDL_cosf(four_pi_over_m * (float) i);
         }
         norm_sum += fSinc[i] < 0 ? -fSinc[i] : fSinc[i];        /* fabs(fSinc[i]); */
     }
@@ -1740,7 +1734,7 @@ SDL_GCD(int a, int b)
 static void SDLCALL
 SDL_Resample(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-    int i, j;
+    int i;
 
 #ifdef DEBUG_CONVERT
     printf("Converting audio rate via proper resampling (mono)\n");
@@ -1752,8 +1746,8 @@ SDL_Resample(SDL_AudioCVT * cvt, SDL_AudioFormat format)
         for (i = cvt->len / sizeof (type); i; --i) { \
             src--; \
             dst[-1] = src[0]; \
-            for( j = -cvt->len_mult; j < -1; ++j ) { \
-                dst[j] = 0; \
+            if (cvt->len_mult > 1) { \
+                SDL_memset(dst-cvt->len_mult, 0, cvt->len_mult-1); \
             } \
             dst -= cvt->len_mult; \
         } \

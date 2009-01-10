@@ -20,34 +20,56 @@
     slouken@libsdl.org
 */
 #include "SDL_config.h"
-
-#ifdef HAVE_MATH_H
-#define _USE_MATH_DEFINES
-#include <math.h>
-#else
+#include "SDL_stdinc.h"
 
 /* Math routines from uClibc: http://www.uclibc.org */
 
-#define M_PI    3.14159265358979323846264338327950288   /* pi */
+#ifdef HAVE_COPYSIGN
+#define copysign        SDL_uclibc_copysign
+#else
+#define copysign        SDL_copysign
+#endif
 
-extern double __ieee754_log(double x);
-extern double __ieee754_pow(double x, double y);
-extern double __ieee754_sqrt(double x);
+#ifdef HAVE_COS
+#define cos             SDL_uclibc_cos
+#else
+#define cos             SDL_cos
+#endif
 
-#define log(x)      __ieee754_log(x)
-#define pow(x, y)   __ieee754_pow(x, y)
-#define sqrt(x)     __ieee754_sqrt(x)
+#ifdef HAVE_FABS
+#define fabs            SDL_uclibc_fabs
+#else
+#define fabs            SDL_fabs
+#endif
 
-extern double copysign(double x, double y);
-extern double cos(double x);
-extern double fabs(double x);
-extern double floor(double x);
-extern double scalbn(double x, int n);
-extern double sin(double x);
+#ifdef HAVE_FLOOR
+#define floor           SDL_uclibc_floor
+#else
+#define floor           SDL_floor
+#endif
 
-#define sinf(x) (float)sin((double)x)
-#define cosf(x) (float)cos((double)x)
+#ifndef HAVE_LOG
+#define __ieee754_log   SDL_log
+#endif
 
-#endif /* HAVE_MATH_H */
+#ifndef HAVE_POW
+#define __ieee754_pow   SDL_pow
+#endif
+
+#ifdef HAVE_SCALBN
+#define scalbn          SDL_uclibc_scalbn
+#else
+#define scalbn          SDL_scalbn
+#endif
+
+#ifdef HAVE_SIN
+#define sin             SDL_uclibc_sin
+#else
+#define sin             SDL_sin
+#endif
+
+#ifndef HAVE_SQRT
+#define __ieee754_sqrt  SDL_sqrt
+#endif
 
 /* vi: set ts=4 sw=4 expandtab: */

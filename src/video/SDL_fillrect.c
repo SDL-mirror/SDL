@@ -66,7 +66,7 @@ SDL_FillRect##bpp##SSE(Uint8 *pixels, int pitch, Uint32 color, int w, int h) \
         int i, n = w * bpp; \
         Uint8 *p = pixels; \
  \
-        if (n > 15) { \
+        if (n > 63) { \
             int adjust = 16 - ((uintptr_t)p & 15); \
             if (adjust < 16) { \
                 n -= adjust; \
@@ -92,7 +92,35 @@ SDL_FillRect##bpp##SSE(Uint8 *pixels, int pitch, Uint32 color, int w, int h) \
     SSE_END; \
 }
 
-DEFINE_SSE_FILLRECT(1, Uint8)
+static void
+SDL_FillRect1SSE(Uint8 *pixels, int pitch, Uint32 color, int w, int h)
+{
+    SSE_BEGIN;
+
+    while (h--) {
+        int i, n = w;
+        Uint8 *p = pixels;
+
+        if (n > 63) {
+            int adjust = 16 - ((uintptr_t)p & 15);
+            if (adjust) {
+                n -= adjust;
+                SDL_memset(p, color, adjust);
+                p += adjust;
+            }
+            SSE_WORK;
+        }
+        if (n & 63) {
+            int remainder = (n & 63);
+            SDL_memset(p, color, remainder);
+            p += remainder;
+        }
+        pixels += pitch;
+    }
+
+    SSE_END;
+}
+/*DEFINE_SSE_FILLRECT(1, Uint8)*/
 DEFINE_SSE_FILLRECT(2, Uint16)
 DEFINE_SSE_FILLRECT(4, Uint32)
 
@@ -131,7 +159,7 @@ SDL_FillRect##bpp##MMX(Uint8 *pixels, int pitch, Uint32 color, int w, int h) \
         int i, n = w * bpp; \
         Uint8 *p = pixels; \
  \
-        if (n > 7) { \
+        if (n > 63) { \
             int adjust = 8 - ((uintptr_t)p & 7); \
             if (adjust < 8) { \
                 n -= adjust; \
@@ -157,7 +185,35 @@ SDL_FillRect##bpp##MMX(Uint8 *pixels, int pitch, Uint32 color, int w, int h) \
     MMX_END; \
 }
 
-DEFINE_MMX_FILLRECT(1, Uint8)
+static void
+SDL_FillRect1MMX(Uint8 *pixels, int pitch, Uint32 color, int w, int h)
+{
+    MMX_BEGIN;
+
+    while (h--) {
+        int i, n = w;
+        Uint8 *p = pixels;
+
+        if (n > 63) {
+            int adjust = 8 - ((uintptr_t)p & 7);
+            if (adjust) {
+                n -= adjust;
+                SDL_memset(p, color, adjust);
+                p += adjust;
+            }
+            MMX_WORK;
+        }
+        if (n & 63) {
+            int remainder = (n & 63);
+            SDL_memset(p, color, remainder);
+            p += remainder;
+        }
+        pixels += pitch;
+    }
+
+    MMX_END;
+}
+/*DEFINE_MMX_FILLRECT(1, Uint8)*/
 DEFINE_MMX_FILLRECT(2, Uint16)
 DEFINE_MMX_FILLRECT(4, Uint32)
 

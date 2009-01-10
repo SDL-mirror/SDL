@@ -72,6 +72,9 @@
 #ifdef HAVE_CTYPE_H
 # include <ctype.h>
 #endif
+#ifdef HAVE_MATH_H
+# include <math.h>
+#endif
 #ifdef HAVE_ICONV_H
 # include <iconv.h>
 #endif
@@ -637,6 +640,76 @@ extern DECLSPEC int SDLCALL SDL_snprintf(char *text, size_t maxlen,
 #else
 extern DECLSPEC int SDLCALL SDL_vsnprintf(char *text, size_t maxlen,
                                           const char *fmt, va_list ap);
+#endif
+
+#ifndef HAVE_M_PI
+#define M_PI    3.14159265358979323846264338327950288   /* pi */
+#endif
+
+#ifdef HAVE_COPYSIGN
+#define SDL_copysign    copysign
+#else
+extern DECLSPEC double SDLCALL SDL_copysign(double x, double y);
+#endif
+
+#ifdef HAVE_COS
+#define SDL_cos         cos
+#else
+extern DECLSPEC double SDLCALL SDL_cos(double x);
+#endif
+
+#ifdef HAVE_COSF
+#define SDL_cosf        cosf
+#else
+#define SDL_cosf(x) (float)SDL_cos((double)x)
+#endif
+
+#ifdef HAVE_FABS
+#define SDL_fabs        fabs
+#else
+extern DECLSPEC double SDLCALL SDL_fabs(double x);
+#endif
+
+#ifdef HAVE_FLOOR
+#define SDL_floor       floor
+#else
+extern DECLSPEC double SDLCALL SDL_floor(double x);
+#endif
+
+#ifdef HAVE_LOG
+#define SDL_log         log
+#else
+extern DECLSPEC double SDLCALL SDL_log(double x);
+#endif
+
+#ifdef HAVE_POW
+#define SDL_pow         pow
+#else
+extern DECLSPEC double SDLCALL SDL_pow(double x, double y);
+#endif
+
+#ifdef HAVE_SCALBN
+#define SDL_scalbn      scalbn
+#else
+extern DECLSPEC double SDLCALL SDL_scalbn(double x, int n);
+#endif
+
+#ifdef HAVE_SIN
+#define SDL_sin         sin
+#else
+extern DECLSPEC double SDLCALL SDL_sin(double x);
+#endif
+
+#ifdef HAVE_SINF
+#define SDL_sinf        sinf
+#else
+#define SDL_sinf(x) (float)SDL_sin((double)x)
+#endif
+
+#ifdef HAVE_SQRT
+#define SDL_sqrt        sqrt
+#else
+extern DECLSPEC double SDLCALL SDL_sqrt(double x);
 #endif
 
 /* The SDL implementation of iconv() returns these error codes */
