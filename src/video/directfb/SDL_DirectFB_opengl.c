@@ -173,8 +173,8 @@ DirectFB_GL_CreateContext(_THIS, SDL_Window * window)
 
     SDL_DFB_CALLOC(context, 1, sizeof(*context));
 
-    SDL_DFB_CHECKERR(windata->surface->
-                     GetGL(windata->surface, &context->context));
+    SDL_DFB_CHECKERR(windata->surface->GetGL(windata->surface,
+                                             &context->context));
 
     if (!context->context)
         return NULL;
@@ -208,16 +208,9 @@ DirectFB_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
         p->context->Unlock(p->context);
 
     if (windata) {
-        int cw, ch;
-
         windata->gl_context = NULL;
         /* Everything is unlocked, check for a resize */
-        SDL_DFB_CHECKERR(windata->surface->
-                         GetSize(windata->surface, &cw, &ch));
-        if (cw != window->w || ch != window->h)
-            SDL_DFB_CHECKERR(windata->window->
-                             ResizeSurface(windata->window, window->w,
-                                           window->h));
+        DirectFB_AdjustWindowSurface(window);
     }
 
     if (ctx != NULL) {
@@ -266,8 +259,8 @@ DirectFB_GL_SwapWindow(_THIS, SDL_Window * window)
 
     if (1 || windata->gl_context) {
         /* SDL_DFB_CHECKERR(windata->gl_context->context->Unlock(windata->gl_context->context)); */
-        SDL_DFB_CHECKERR(windata->surface->
-                         Flip(windata->surface, &region, DSFLIP_ONSYNC));
+        SDL_DFB_CHECKERR(windata->surface->Flip(windata->surface, &region,
+                                                DSFLIP_ONSYNC));
         /* SDL_DFB_CHECKERR(windata->gl_context->context->Lock(windata->gl_context->context)); */
 
     }

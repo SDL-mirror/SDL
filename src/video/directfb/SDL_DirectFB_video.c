@@ -35,6 +35,7 @@
 
 #include <directfb.h>
 #include <directfb_version.h>
+#include <directfb_strings.h>
 
 #include "SDL_video.h"
 #include "SDL_mouse.h"
@@ -55,8 +56,10 @@ static void DirectFB_VideoQuit(_THIS);
 static int DirectFB_Available(void);
 static SDL_VideoDevice *DirectFB_CreateDevice(int devindex);
 
+#if 0
 static int DirectFB_SetDisplayGammaRamp(_THIS, Uint16 * ramp);
 static int DirectFB_GetDisplayGammaRamp(_THIS, Uint16 * ramp);
+#endif
 
 VideoBootStrap DirectFB_bootstrap = {
     "directfb", "DirectFB",
@@ -111,6 +114,7 @@ DirectFB_CreateDevice(int devindex)
     device->CreateWindow = DirectFB_CreateWindow;
     device->CreateWindowFrom = DirectFB_CreateWindowFrom;
     device->SetWindowTitle = DirectFB_SetWindowTitle;
+    device->SetWindowIcon = DirectFB_SetWindowIcon;
     device->SetWindowPosition = DirectFB_SetWindowPosition;
     device->SetWindowSize = DirectFB_SetWindowSize;
     device->ShowWindow = DirectFB_ShowWindow;
@@ -145,6 +149,50 @@ DirectFB_CreateDevice(int devindex)
     return (0);
 }
 
+static const DirectFBSurfaceDrawingFlagsNames(drawing_flags);
+static const DirectFBSurfaceBlittingFlagsNames(blitting_flags);
+static const DirectFBAccelerationMaskNames(acceleration_mask);
+
+static void
+DirectFB_DeviceInformation(IDirectFB * dfb)
+{
+    DFBGraphicsDeviceDescription desc;
+    int n;
+
+    dfb->GetDeviceDescription(dfb, &desc);
+
+    fprintf(LOG_CHANNEL, "DirectFB Device Information\n");
+    fprintf(LOG_CHANNEL, "===========================\n");
+    fprintf(LOG_CHANNEL, "Name:           %s\n", desc.name);
+    fprintf(LOG_CHANNEL, "Vendor:         %s\n", desc.vendor);
+    fprintf(LOG_CHANNEL, "Driver Name:    %s\n", desc.driver.name);
+    fprintf(LOG_CHANNEL, "Driver Vendor:  %s\n", desc.driver.vendor);
+    fprintf(LOG_CHANNEL, "Driver Version: %d.%d\n", desc.driver.major,
+            desc.driver.minor);
+
+    fprintf(LOG_CHANNEL, "\nVideo memoory:  %d\n", desc.video_memory);
+
+    fprintf(LOG_CHANNEL, "\nBlitting flags:\n");
+    for (n = 0; blitting_flags[n].flag; n++) {
+        if (desc.blitting_flags & blitting_flags[n].flag)
+            printf("    %s\n", blitting_flags[n].name);
+    }
+
+    fprintf(LOG_CHANNEL, "\nDrawing flags:\n");
+    for (n = 0; drawing_flags[n].flag; n++) {
+        if (desc.drawing_flags & drawing_flags[n].flag)
+            printf("    %s\n", drawing_flags[n].name);
+    }
+
+    fprintf(LOG_CHANNEL, "\nAcceleration flags:\n");
+    for (n = 0; acceleration_mask[n].mask; n++) {
+        if (desc.acceleration_mask & acceleration_mask[n].mask)
+            printf("    %s\n", acceleration_mask[n].name);
+    }
+
+
+}
+
 static int
 DirectFB_VideoInit(_THIS)
 {
@@ -159,21 +207,21 @@ DirectFB_VideoInit(_THIS)
 
     /* avoid switching to the framebuffer when we
      * are running X11 */
-    stemp = getenv(DFBENV_USE_X11_CHECK);
+    stemp = SDL_getenv(DFBENV_USE_X11_CHECK);
     if (stemp)
         ret = atoi(stemp);
     else
         ret = 1;
 
     if (ret) {
-        if (getenv("DISPLAY"))
+        if (SDL_getenv("DISPLAY"))
             DirectFBSetOption("system", "x11");
         else
             DirectFBSetOption("disable-module", "x11input");
     }
 
     devdata->use_linux_input = 1;       /* default: on */
-    stemp = getenv(DFBENV_USE_LINUX_INPUT);
+    stemp = SDL_getenv(DFBENV_USE_LINUX_INPUT);
     if (stemp)
         devdata->use_linux_input = atoi(stemp);
 
@@ -182,25 +230,34 @@ DirectFB_VideoInit(_THIS)
 
     SDL_DFB_CHECKERR(DirectFBCreate(&dfb));
 
+    DirectFB_DeviceInformation(dfb);
     devdata->use_yuv_underlays = 0;     /* default: off */
-    stemp = getenv(DFBENV_USE_YUV_UNDERLAY);
+    stemp = SDL_getenv(DFBENV_USE_YUV_UNDERLAY);
     if (stemp)
         devdata->use_yuv_underlays = atoi(stemp);
 
 
     /* Create global Eventbuffer for axis events */
     if (devdata->use_linux_input) {
-        SDL_DFB_CHECKERR(dfb->
-                         CreateInputEventBuffer(dfb, DICAPS_ALL,
-                                                DFB_TRUE, &devdata->events));
+        SDL_DFB_CHECKERR(dfb->CreateInputEventBuffer(dfb, DICAPS_ALL,
+                                                     DFB_TRUE,
+                                                     &devdata->events));
     } else {
-        SDL_DFB_CHECKERR(dfb->
-                         CreateInputEventBuffer(dfb,
-                                                DICAPS_AXES /*DICAPS_ALL */ ,
-                                                DFB_TRUE, &devdata->events));
+        SDL_DFB_CHECKERR(dfb->CreateInputEventBuffer(dfb, DICAPS_AXES
+                                                     /*DICAPS_ALL */ ,
+                                                     DFB_TRUE,
+                                                     &devdata->events));
     }
 
     devdata->initialized = 1;
+
+    /* simple window manager support */
+    stemp = SDL_getenv(DFBENV_USE_WM);
+    if (stemp)
+    	devdata->has_own_wm = atoi(stemp);
+    else
+    	devdata->has_own_wm = 0;
+
     devdata->dfb = dfb;
     devdata->firstwin = NULL;
 
@@ -215,7 +272,6 @@ DirectFB_VideoInit(_THIS)
     DirectFB_AddRenderDriver(_this);
     DirectFB_InitMouse(_this);
     DirectFB_InitKeyboard(_this);
-
 
     return 0;
 
@@ -245,6 +301,7 @@ DirectFB_VideoQuit(_THIS)
     devdata->initialized = 0;
 }
 
+#if 0
 static int
 DirectFB_SetDisplayGammaRamp(_THIS, Uint16 * ramp)
 {
@@ -256,3 +313,4 @@ DirectFB_GetDisplayGammaRamp(_THIS, Uint16 * ramp)
 {
     return -1;
 }
+#endif

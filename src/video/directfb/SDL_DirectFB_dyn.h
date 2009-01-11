@@ -30,8 +30,9 @@
 	DFB_SYM(const char *, DirectFBUsageString, ( void ), (), return) \
 	DFB_SYM(DFBResult, DirectFBInit, (int *argc, char *(*argv[]) ), (argc, argv), return) \
 	DFB_SYM(DFBResult, DirectFBSetOption, (const char *name, const char *value), (name, value), return) \
-	DFB_SYM(DFBResult, DirectFBCreate, (IDirectFB **interface), (interface), return)
-
+	DFB_SYM(DFBResult, DirectFBCreate, (IDirectFB **interface), (interface), return) \
+	DFB_SYM(const char *, DirectFBCheckVersion, (unsigned int required_major, unsigned int required_minor, unsigned int required_micro), \
+				(required_major, required_minor, required_micro), return)
 // #define SDL_VIDEO_DRIVER_DIRECTFB_DYNAMIC "/usr/lib/libdirectfb-1.2.so.0"
 
 int SDL_DirectFB_LoadLibrary(void);

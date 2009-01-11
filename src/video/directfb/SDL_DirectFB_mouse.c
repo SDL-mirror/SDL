@@ -26,8 +26,8 @@
 #include "../SDL_sysvideo.h"
 #include "../../events/SDL_mouse_c.h"
 
-static SDL_Cursor *DirectFB_CreateCursor(SDL_Surface * surface, int hot_x,
-                                         int hot_y);
+static SDL_Cursor *DirectFB_CreateCursor(SDL_Surface * surface,
+                                         int hot_x, int hot_y);
 static int DirectFB_ShowCursor(SDL_Cursor * cursor);
 static void DirectFB_MoveCursor(SDL_Cursor * cursor);
 static void DirectFB_FreeCursor(SDL_Cursor * cursor);
@@ -38,8 +38,8 @@ static void DirectFB_FreeMouse(SDL_Mouse * mouse);
 static int id_mask;
 
 static DFBEnumerationResult
-EnumMice(DFBInputDeviceID device_id,
-         DFBInputDeviceDescription desc, void *callbackdata)
+EnumMice(DFBInputDeviceID device_id, DFBInputDeviceDescription desc,
+         void *callbackdata)
 {
     DFB_DeviceData *devdata = callbackdata;
 
@@ -132,20 +132,20 @@ DirectFB_CreateCursor(SDL_Surface * surface, int hot_x, int hot_y)
     dsc.height = surface->h;
     dsc.pixelformat = DSPF_ARGB;
 
-    SDL_DFB_CHECKERR(devdata->dfb->
-                     CreateSurface(devdata->dfb, &dsc, &curdata->surf));
+    SDL_DFB_CHECKERR(devdata->dfb->CreateSurface(devdata->dfb, &dsc,
+                                                 &curdata->surf));
     curdata->hotx = hot_x;
     curdata->hoty = hot_y;
     cursor->driverdata = curdata;
 
-    SDL_DFB_CHECKERR(curdata->surf->
-                     Lock(curdata->surf, DSLF_WRITE, (void *) &dest, &pitch));
+    SDL_DFB_CHECKERR(curdata->surf->Lock(curdata->surf, DSLF_WRITE,
+                                         (void *) &dest, &pitch));
 
     /* Relies on the fact that this is only called with ARGB surface. */
     p = surface->pixels;
     for (i = 0; i < surface->h; i++)
-        memcpy((char *) dest + i * pitch, (char *) p + i * surface->pitch,
-               4 * surface->w);
+        memcpy((char *) dest + i * pitch,
+               (char *) p + i * surface->pitch, 4 * surface->w);
 
     curdata->surf->Unlock(curdata->surf);
     return cursor;
@@ -162,7 +162,7 @@ DirectFB_ShowCursor(SDL_Cursor * cursor)
     SDL_WindowID wid;
 
     wid = SDL_GetFocusWindow();
-    if (wid < 0)
+    if (wid <= 0)
         return -1;
     else {
         SDL_Window *window = SDL_GetWindowFromID(wid);
@@ -179,7 +179,6 @@ DirectFB_ShowCursor(SDL_Cursor * cursor)
                                                 curdata->surf, curdata->hotx,
                                                 curdata->hoty));
 
-            /* fprintf(stdout, "Cursor is %s\n", cursor ? "on" : "off"); */
             SDL_DFB_CHECKERR(dispdata->layer->
                              SetCooperativeLevel(dispdata->layer,
                                                  DLSCL_ADMINISTRATIVE));
@@ -227,8 +226,9 @@ DirectFB_WarpMouse(SDL_Mouse * mouse, SDL_WindowID windowID, int x, int y)
     int cx, cy;
 
     SDL_DFB_CHECKERR(windata->window->GetPosition(windata->window, &cx, &cy));
-    SDL_DFB_CHECKERR(dispdata->layer->
-                     WarpCursor(dispdata->layer, cx + x, cy + y));
+    SDL_DFB_CHECKERR(dispdata->layer->WarpCursor(dispdata->layer,
+                                                 cx + x + windata->client.x,
+                                                 cy + y + windata->client.y));
 
   error:
     return;

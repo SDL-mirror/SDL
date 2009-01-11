@@ -34,8 +34,8 @@
 #define DEBUG 0
 #define LOG_CHANNEL 	stdout
 
-#if (DIRECTFB_MAJOR_VERSION == 0) && (DIRECTFB_MINOR_VERSION == 9) && (DIRECTFB_MICRO_VERSION < 23)
-#error "SDL_DIRECTFB: Please compile against libdirectfb version >=0.9.24"
+#if (DIRECTFB_MAJOR_VERSION < 1)
+#error "SDL_DIRECTFB: Please compile against libdirectfb version >= 1.0.0"
 #endif
 
 #if (DIRECTFB_MAJOR_VERSION >= 1) && (DIRECTFB_MINOR_VERSION >= 0) && (DIRECTFB_MICRO_VERSION >= 0 )
@@ -56,11 +56,13 @@
 #include "SDL_DirectFB_mouse.h"
 #include "SDL_DirectFB_opengl.h"
 #include "SDL_DirectFB_window.h"
+#include "SDL_DirectFB_WM.h"
 
 #define DFBENV_USE_YUV_UNDERLAY 	"SDL_DIRECTFB_YUV_UNDERLAY"     /* Default: off */
 #define DFBENV_USE_YUV_DIRECT   	"SDL_DIRECTFB_YUV_DIRECT"       /* Default: off */
 #define DFBENV_USE_X11_CHECK		"SDL_DIRECTFB_X11_CHECK"        /* Default: on  */
 #define DFBENV_USE_LINUX_INPUT		"SDL_DIRECTFB_LINUX_INPUT"      /* Default: on  */
+#define DFBENV_USE_WM				"SDL_DIRECTFB_WM"		      	/* Default: off  */
 
 #define SDL_DFB_RELEASE(x) do { if ( x ) { x->Release(x); x = NULL; } } while (0)
 #define SDL_DFB_FREE(x) do { if ( x ) { SDL_free(x); x = NULL; } } while (0)
@@ -88,6 +90,8 @@
           ret = x;                                                    \
           if (ret != DFB_OK) {                                        \
                fprintf(LOG_CHANNEL, "%s <%d>:\n\t", __FILE__, __LINE__ ); 	      \
+               fprintf(LOG_CHANNEL, "\t%s\n", #x ); \
+               fprintf(LOG_CHANNEL, "\t%s\n", DirectFBErrorString (ret) ); \
                SDL_SetError( #x, DirectFBErrorString (ret) );         \
           }                                                           \
      } while (0)
@@ -116,7 +120,7 @@
 
 /* Private display data */
 
-#define SDL_DFB_DEVICEDATA(dev)  DFB_DeviceData *devdata = (DFB_DeviceData *) ((dev)->driverdata)
+#define SDL_DFB_DEVICEDATA(dev)  DFB_DeviceData *devdata = (dev ? (DFB_DeviceData *) ((dev)->driverdata) : NULL)
 
 #define DFB_MAX_SCREENS 10
 
@@ -138,6 +142,7 @@ struct _DFB_DeviceData
 
     int use_yuv_underlays;
     int use_linux_input;
+    int has_own_wm;
 
     /* OpenGL */
     void (*glFinish) (void);

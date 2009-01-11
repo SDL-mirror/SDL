@@ -21,8 +21,8 @@
 */
 #include "SDL_config.h"
 
-#include "SDL_DirectFB_dyn.h"
 #include "SDL_DirectFB_video.h"
+#include "SDL_DirectFB_dyn.h"
 
 #ifdef SDL_VIDEO_DRIVER_DIRECTFB_DYNAMIC
 #include "SDL_name.h"
@@ -69,11 +69,11 @@ SDL_DirectFB_LoadLibrary(void)
         }
     }
     if (retval) {
+        const char *stemp = DirectFBCheckVersion(DIRECTFB_MAJOR_VERSION,
+                                                 DIRECTFB_MINOR_VERSION,
+                                                 DIRECTFB_MICRO_VERSION);
         /* Version Check */
-        if ((*SDL_DirectFB_Symbols.directfb_major_version !=
-             DIRECTFB_MAJOR_VERSION)
-            || (*SDL_DirectFB_Symbols.directfb_minor_version !=
-                DIRECTFB_MINOR_VERSION)) {
+        if (stemp != NULL) {
             fprintf(stderr,
                     "DirectFB Lib: Version mismatch. Compiled: %d.%d.%d Library %d.%d.%d\n",
                     DIRECTFB_MAJOR_VERSION, DIRECTFB_MINOR_VERSION,
