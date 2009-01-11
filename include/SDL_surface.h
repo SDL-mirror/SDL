@@ -157,6 +157,12 @@ extern DECLSPEC void SDLCALL SDL_UnlockSurface(SDL_Surface * surface);
 extern DECLSPEC SDL_Surface *SDLCALL SDL_LoadBMP_RW(SDL_RWops * src,
                                                     int freesrc);
 
+/* 
+ * Load Icon best quality icon from ICO file and return as RGBA surface 
+ */
+extern DECLSPEC SDL_Surface *SDLCALL SDL_LoadICO_RW(SDL_RWops * src,
+                                                    int freesrc);
+
 /* Convenience macro -- load a surface from a file */
 #define SDL_LoadBMP(file)	SDL_LoadBMP_RW(SDL_RWFromFile(file, "rb"), 1)
 
