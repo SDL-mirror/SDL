@@ -338,6 +338,7 @@ sub buildTypeConverters {
     }
     print "#endif  /* !NO_CONVERTERS */\n";
 
+    print("    { 0, 0, NULL }\n");
     print "};\n\n\n";
 }
 
@@ -735,6 +736,7 @@ sub buildResamplers {
 
     print "#endif  /* !LESS_RESAMPLERS */\n";
     print "#endif  /* !NO_RESAMPLERS */\n";
+    print("    { 0, 0, 0, 0, NULL }\n");
     print "};\n\n";
 }
 
