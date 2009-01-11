@@ -90,8 +90,8 @@ int main(int argc, char **argv)
     SDL_WriteLE16(io, blockalign);  /* block align */
     SDL_WriteLE16(io, bitsize);  /* significant bits per sample */
     SDL_WriteLE32(io, 0x61746164);  /* data */
-    SDL_WriteLE32(io, len * cvt.len_mult);  /* size */
-    SDL_RWwrite(io, cvt.buf, len * cvt.len_mult, 1);
+    SDL_WriteLE32(io, cvt.len_cvt);  /* size */
+    SDL_RWwrite(io, cvt.buf, cvt.len_cvt, 1);
 
     if (SDL_RWclose(io) == -1)
     {
