@@ -371,6 +371,7 @@ SDL_RunAudio(void *devicep)
             silence = 0;
         }
 
+#if 0  /* !!! FIXME: I took len_div out of the structure. Use rate_incr instead? */
         /* If the result of the conversion alters the length, i.e. resampling is being used, use the streamer */
         if (device->convert.len_mult != 1 || device->convert.len_div != 1) {
             /* The streamer's maximum length should be twice whichever is larger: spec.size or len_cvt */
@@ -391,6 +392,7 @@ SDL_RunAudio(void *devicep)
                 device->spec.size * device->convert.len_div /
                 device->convert.len_mult;
         }
+#endif
 
         /* stream_len = device->convert.len; */
         stream_len = device->spec.size;
