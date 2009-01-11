@@ -62,6 +62,29 @@ sub outputHeader {
 #include "SDL_audio.h"
 #include "SDL_audio_c.h"
 
+#ifndef DEBUG_CONVERT
+#define DEBUG_CONVERT 0
+#endif
+
+
+/* If you can guarantee your data and need space, you can eliminate code... */
+
+/* Just build the arbitrary resamplers if you're saving code space. */
+#ifndef LESS_RESAMPLERS
+#define LESS_RESAMPLERS 0
+#endif
+
+/* Don't build any resamplers if you're REALLY saving code space. */
+#ifndef NO_RESAMPLERS
+#define NO_RESAMPLERS 0
+#endif
+
+/* Don't build any type converters if you're saving code space. */
+#ifndef NO_CONVERTERS
+#define NO_CONVERTERS 0
+#endif
+
+
 /* *INDENT-OFF* */
 
 EOF
@@ -290,6 +313,7 @@ EOF
 
 
 sub buildTypeConverters {
+    print "#if !NO_CONVERTERS\n\n";
     foreach (@audiotypes) {
         my $from = $_;
         foreach (@audiotypes) {
@@ -297,8 +321,10 @@ sub buildTypeConverters {
             buildCvtFunc($from, $to);
         }
     }
+    print "#endif  /* !NO_CONVERTERS */\n\n\n";
 
     print "const SDL_AudioTypeFilters sdl_audio_type_filters[] =\n{\n";
+    print "#if !NO_CONVERTERS\n";
     foreach (@audiotypes) {
         my $from = $_;
         foreach (@audiotypes) {
@@ -310,6 +336,7 @@ sub buildTypeConverters {
             }
         }
     }
+    print "#endif  /* !NO_CONVERTERS */\n";
 
     print "};\n\n\n";
 }
@@ -652,6 +679,17 @@ EOF
 }
 
 sub buildResamplers {
+    print "#if !NO_RESAMPLERS\n\n";
+    foreach (@audiotypes) {
+        my $from = $_;
+        foreach (@channels) {
+            my $channel = $_;
+            buildArbitraryResampleFunc($from, $channel, 1);
+            buildArbitraryResampleFunc($from, $channel, 0);
+        }
+    }
+
+    print "\n#if !LESS_RESAMPLERS\n\n";
     foreach (@audiotypes) {
         my $from = $_;
         foreach (@channels) {
@@ -660,17 +698,32 @@ sub buildResamplers {
                 buildMultipleResampleFunc($from, $channel, 1, $multiple);
                 buildMultipleResampleFunc($from, $channel, 0, $multiple);
             }
-            buildArbitraryResampleFunc($from, $channel, 1);
-            buildArbitraryResampleFunc($from, $channel, 0);
         }
     }
 
+    print "#endif  /* !LESS_RESAMPLERS */\n";
+    print "#endif  /* !NO_RESAMPLERS */\n\n\n";
+
     print "const SDL_AudioRateFilters sdl_audio_rate_filters[] =\n{\n";
+    print "#if !NO_RESAMPLERS\n";
     foreach (@audiotypes) {
         my $from = $_;
         foreach (@channels) {
             my $channel = $_;
-            for (my $multiple = 0; $multiple <= 4; $multiple += 2) {
+            for (my $upsample = 0; $upsample <= 1; $upsample++) {
+                my $hashid = getResamplerHashId($from, $channel, $upsample, 0);
+                my $sym = $funcs{$hashid};
+                print("    { AUDIO_$from, $channel, $upsample, 0, $sym },\n");
+            }
+        }
+    }
+
+    print "#if !LESS_RESAMPLERS\n";
+    foreach (@audiotypes) {
+        my $from = $_;
+        foreach (@channels) {
+            my $channel = $_;
+            for (my $multiple = 2; $multiple <= 4; $multiple += 2) {
                 for (my $upsample = 0; $upsample <= 1; $upsample++) {
                     my $hashid = getResamplerHashId($from, $channel, $upsample, $multiple);
                     my $sym = $funcs{$hashid};
@@ -680,6 +733,8 @@ sub buildResamplers {
         }
     }
 
+    print "#endif  /* !LESS_RESAMPLERS */\n";
+    print "#endif  /* !NO_RESAMPLERS */\n";
     print "};\n\n";
 }
 
