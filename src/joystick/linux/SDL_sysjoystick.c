@@ -363,7 +363,7 @@ LogicalSuffix(int logicalno, char *namebuf, int len)
 
 #if SDL_INPUT_LINUXEV
 #define test_bit(nr, addr) \
-	(((1UL << ((nr) & 31)) & (((const unsigned int *) addr)[(nr) >> 5])) != 0)
+	(((1UL << ((nr) & 31)) & (((const unsigned long *) addr)[(nr) >> 5])) != 0)
 
 static int
 EV_IsJoystick(int fd)
