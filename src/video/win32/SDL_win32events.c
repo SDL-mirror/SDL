@@ -578,8 +578,8 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             /* Don't start the screensaver or blank the monitor in fullscreen apps */
             if ((wParam & 0xFFF0) == SC_SCREENSAVE ||
                 (wParam & 0xFFF0) == SC_MONITORPOWER) {
-                if (SDL_GetWindowFlags(data->windowID) &
-                    SDL_WINDOW_FULLSCREEN) {
+                SDL_VideoData *videodata = data->videodata;
+                if (videodata->suspend_screensaver) {
                     return (0);
                 }
             }

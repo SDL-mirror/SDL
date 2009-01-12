@@ -67,7 +67,6 @@ SDL_X11_SYM(int,XGetErrorDatabaseText,(Display* a,_Xconst char* b,_Xconst char* 
 SDL_X11_SYM(XModifierKeymap*,XGetModifierMapping,(Display* a),(a),return)
 SDL_X11_SYM(int,XGetPointerControl,(Display* a,int* b,int* c,int* d),(a,b,c,d),return)
 SDL_X11_SYM(int,XGetRGBColormaps,(Display* a,Window b,XStandardColormap **c,int *d,Atom e),(a,b,c,d,e),return)
-SDL_X11_SYM(int,XGetScreenSaver,(Display* a,int* b,int* c,int* d,int* e),(a,b,c,d,e),return)
 SDL_X11_SYM(XVisualInfo*,XGetVisualInfo,(Display* a,long b,XVisualInfo* c,int* d),(a,b,c,d),return)
 SDL_X11_SYM(XWMHints*,XGetWMHints,(Display* a,Window b),(a,b),return)
 SDL_X11_SYM(Status,XGetWindowAttributes,(Display* a,Window b,XWindowAttributes* c),(a,b,c),return)
@@ -102,6 +101,7 @@ SDL_X11_SYM(int,XQueryKeymap,(Display* a,char *b),(a,b),return)
 SDL_X11_SYM(Bool,XQueryPointer,(Display* a,Window b,Window* c,Window* d,int* e,int* f,int* g,int* h,unsigned int* i),(a,b,c,d,e,f,g,h,i),return)
 SDL_X11_SYM(int,XRaiseWindow,(Display* a,Window b),(a,b),return)
 SDL_X11_SYM(int,XReparentWindow,(Display* a,Window b,Window c,int d,int e),(a,b,c,d,e),return)
+SDL_X11_SYM(int,XResetScreenSaver,(Display* a),(a),return)
 SDL_X11_SYM(int,XResizeWindow,(Display* a,Window b,unsigned int c,unsigned int d),(a,b,c,d),return)
 SDL_X11_SYM(int,XSelectInput,(Display* a,Window b,long c),(a,b,c),return)
 SDL_X11_SYM(Status,XSendEvent,(Display* a,Window b,Bool c,long d,XEvent* e),(a,b,c,d,e),return)
@@ -111,7 +111,6 @@ SDL_X11_SYM(int,XSetForeground,(Display* a,GC b,unsigned long c),(a,b,c),return)
 SDL_X11_SYM(XErrorHandler,XSetErrorHandler,(XErrorHandler a),(a),return)
 SDL_X11_SYM(XIOErrorHandler,XSetIOErrorHandler,(XIOErrorHandler a),(a),return)
 SDL_X11_SYM(void,XSetRGBColormaps,( Display *a,Window b,XStandardColormap *c,int d,Atom e),(a,b,c,d,e),return)
-SDL_X11_SYM(int,XSetScreenSaver,(Display* a,int b,int c,int d,int e),(a,b,c,d,e),return)
 SDL_X11_SYM(int,XSetTransientForHint,(Display* a,Window b,Window c),(a,b,c),return)
 SDL_X11_SYM(int,XSetWMHints,(Display* a,Window b,XWMHints* c),(a,b,c),return)
 SDL_X11_SYM(void,XSetTextProperty,(Display* a,Window b,XTextProperty* c,Atom d),(a,b,c,d),)
@@ -212,15 +211,6 @@ SDL_X11_SYM(Status,XRRSetScreenConfigAndRate,(Display *dpy,XRRScreenConfiguratio
 SDL_X11_SYM(void,XRRFreeScreenConfigInfo,(XRRScreenConfiguration *config),(config),)
 #endif
 
-/* DPMS support */
-#if SDL_VIDEO_DRIVER_X11_DPMS
-SDL_X11_MODULE(DPMS)
-SDL_X11_SYM(Status,DPMSQueryExtension,(Display *dpy,int *major_versionp,int *minor_versionp),(dpy,major_versionp,minor_versionp),return)
-SDL_X11_SYM(Status,DPMSInfo,(Display *dpy,CARD16 *state,BOOL *onoff),(dpy,state,onoff),return)
-SDL_X11_SYM(Status,DPMSEnable,(Display *dpy),(dpy),return)
-SDL_X11_SYM(Status,DPMSDisable,(Display *dpy),(dpy),return)
-#endif
-
 /* XInput support for multiple mice, tablets, etc. */
 #if SDL_VIDEO_DRIVER_X11_XINPUT
 SDL_X11_MODULE(XINPUT)
@@ -229,6 +219,14 @@ SDL_X11_SYM(void,XFreeDeviceList,(XDeviceInfo *a),(a),)
 SDL_X11_SYM(int,XSelectExtensionEvent,(Display *a,Window b,XEventClass *c,int d),(a,b,c,d),return)
 SDL_X11_SYM(XDevice*,XOpenDevice,(Display *a,XID b),(a,b),return)
 SDL_X11_SYM(int,XCloseDevice,(Display* a,XDevice* b),(a,b),return)
+#endif
+
+/* MIT-SCREEN-SAVER support */
+#if SDL_VIDEO_DRIVER_X11_SCRNSAVER
+SDL_X11_MODULE(XSS)
+SDL_X11_SYM(Bool,XScreenSaverQueryExtension,(Display *dpy,int *event_base,int *error_base),(dpy,event_base,error_base),return)
+SDL_X11_SYM(Status,XScreenSaverQueryVersion,(Display *dpy,int *major_versionp,int *minor_versionp),(dpy,major_versionp,minor_versionp),return)
+SDL_X11_SYM(void,XScreenSaverSuspend,(Display *dpy,Bool suspend),(dpy,suspend),return)
 #endif
 
 /* *INDENT-ON* */

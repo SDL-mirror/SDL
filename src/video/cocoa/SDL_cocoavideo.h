@@ -49,6 +49,7 @@ typedef struct SDL_VideoData
     int keyboard;
     void *key_layout;
     NSText *fieldEdit;
+    Uint32 screensaver_activity;
 } SDL_VideoData;
 
 #endif /* _SDL_cocoavideo_h */

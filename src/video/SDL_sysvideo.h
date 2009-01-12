@@ -273,8 +273,12 @@ struct SDL_VideoDevice
      */
     void (*PumpEvents) (_THIS);
 
+    /* Suspend the screensaver */
+    void (*SuspendScreenSaver) (_THIS);
+
     /* * * */
     /* Data common to all drivers */
+    SDL_bool suspend_screensaver;
     int num_displays;
     SDL_VideoDisplay *displays;
     int current_display;

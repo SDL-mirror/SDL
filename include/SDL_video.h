@@ -1311,6 +1311,36 @@ extern DECLSPEC void SDLCALL SDL_DestroyTexture(SDL_TextureID textureID);
  */
 extern DECLSPEC void SDLCALL SDL_DestroyRenderer(SDL_WindowID windowID);
 
+/**
+ * \fn SDL_bool SDL_IsScreenSaverEnabled();
+ *
+ * \brief Returns whether the screensaver is currently enabled (default off).
+ *
+ * \sa SDL_EnableScreenSaver()
+ * \sa SDL_DisableScreenSaver()
+ */
+extern DECLSPEC SDL_bool SDLCALL SDL_IsScreenSaverEnabled();
+
+/**
+ * \fn void SDL_EnableScreenSaver();
+ *
+ * \brief Allow the screen to be blanked by a screensaver
+ *
+ * \sa SDL_IsScreenSaverEnabled()
+ * \sa SDL_DisableScreenSaver()
+ */
+extern DECLSPEC void SDLCALL SDL_EnableScreenSaver();
+
+/**
+ * \fn void SDL_DisableScreenSaver();
+ *
+ * \brief Prevent the screen from being blanked by a screensaver
+ *
+ * \sa SDL_IsScreenSaverEnabled()
+ * \sa SDL_EnableScreenSaver()
+ */
+extern DECLSPEC void SDLCALL SDL_DisableScreenSaver();
+
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* OpenGL support functions.                                                 */

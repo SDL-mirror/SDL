@@ -169,6 +169,7 @@ X11_CreateDevice(int devindex)
     device->SetDisplayMode = X11_SetDisplayMode;
     device->SetDisplayGammaRamp = X11_SetDisplayGammaRamp;
     device->GetDisplayGammaRamp = X11_GetDisplayGammaRamp;
+    device->SuspendScreenSaver = X11_SuspendScreenSaver;
     device->PumpEvents = X11_PumpEvents;
 
     device->CreateWindow = X11_CreateWindow;
@@ -224,11 +225,6 @@ X11_VideoInit(_THIS)
     }
 #endif
 
-    /* Save DPMS and screensaver settings */
-    X11_SaveScreenSaver(data->display, &data->screensaver_timeout,
-                        &data->dpms_enabled);
-    X11_DisableScreenSaver(data->display);
-
     /* Look up some useful Atoms */
     data->WM_DELETE_WINDOW =
         XInternAtom(data->display, "WM_DELETE_WINDOW", False);
@@ -260,8 +256,6 @@ X11_VideoQuit(_THIS)
         XCloseIM(data->im);
     }
 #endif
-    X11_RestoreScreenSaver(data->display, data->screensaver_timeout,
-                           data->dpms_enabled);
 
     X11_QuitModes(_this);
     X11_QuitKeyboard(_this);

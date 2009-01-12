@@ -394,6 +394,16 @@ X11_PumpEvents(_THIS)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
+    /* Update activity every 30 seconds to prevent screensaver */
+    if (_this->suspend_screensaver) {
+        Uint32 now = SDL_GetTicks();
+        if (!data->screensaver_activity ||
+            (int)(now-data->screensaver_activity) >= 30000) {
+            XResetScreenSaver(data->display);
+            data->screensaver_activity = now;
+        }
+    }
+
     /* Keep processing pending events */
     while (X11_Pending(data->display)) {
         X11_DispatchEvent(_this);
@@ -401,61 +411,28 @@ X11_PumpEvents(_THIS)
 }
 
 void
-X11_SaveScreenSaver(Display * display, int *saved_timeout, BOOL * dpms)
+X11_SuspendScreenSaver(_THIS)
 {
-    int timeout, interval, prefer_blank, allow_exp;
-    XGetScreenSaver(display, &timeout, &interval, &prefer_blank, &allow_exp);
-    *saved_timeout = timeout;
+#if SDL_VIDEO_DRIVER_X11_SCRNSAVER
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+    int dummy;
+    int major_version, minor_version;
 
-#if SDL_VIDEO_DRIVER_X11_DPMS
-    if (SDL_X11_HAVE_DPMS) {
-        int dummy;
-        if (DPMSQueryExtension(display, &dummy, &dummy)) {
-            CARD16 state;
-            DPMSInfo(display, &state, dpms);
-        }
+    if (!SDL_X11_HAVE_XSS) {
+        return;
     }
-#else
-    *dpms = 0;
-#endif /* SDL_VIDEO_DRIVER_X11_DPMS */
-}
 
-void
-X11_DisableScreenSaver(Display * display)
-{
-    int timeout, interval, prefer_blank, allow_exp;
-    XGetScreenSaver(display, &timeout, &interval, &prefer_blank, &allow_exp);
-    timeout = 0;
-    XSetScreenSaver(display, timeout, interval, prefer_blank, allow_exp);
-
-#if SDL_VIDEO_DRIVER_X11_DPMS
-    if (SDL_X11_HAVE_DPMS) {
-        int dummy;
-        if (DPMSQueryExtension(display, &dummy, &dummy)) {
-            DPMSDisable(display);
-        }
+    /* XScreenSaverSuspend was introduced in MIT-SCREEN-SAVER 1.1 */
+    if (!XScreenSaverQueryExtension(data->display, &dummy, &dummy) ||
+        !XScreenSaverQueryVersion(data->display,
+                                  &major_version, &minor_version) ||
+        major_version < 1 || (major_version == 1 && minor_version < 1)) {
+        return;
     }
-#endif /* SDL_VIDEO_DRIVER_X11_DPMS */
-}
 
-void
-X11_RestoreScreenSaver(Display * display, int saved_timeout, BOOL dpms)
-{
-    int timeout, interval, prefer_blank, allow_exp;
-    XGetScreenSaver(display, &timeout, &interval, &prefer_blank, &allow_exp);
-    timeout = saved_timeout;
-    XSetScreenSaver(display, timeout, interval, prefer_blank, allow_exp);
-
-#if SDL_VIDEO_DRIVER_X11_DPMS
-    if (SDL_X11_HAVE_DPMS) {
-        int dummy;
-        if (DPMSQueryExtension(display, &dummy, &dummy)) {
-            if (dpms) {
-                DPMSEnable(display);
-            }
-        }
-    }
-#endif /* SDL_VIDEO_DRIVER_X11_DPMS */
+    XScreenSaverSuspend(data->display, _this->suspend_screensaver);
+    XResetScreenSaver(data->display);
+#endif
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

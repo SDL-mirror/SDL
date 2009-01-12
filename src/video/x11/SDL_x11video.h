@@ -39,14 +39,11 @@
 #if SDL_VIDEO_DRIVER_X11_VIDMODE
 #include "../Xext/extensions/xf86vmode.h"
 #endif
-#if SDL_VIDEO_DRIVER_X11_XME
-#include "../Xext/extensions/xme.h"
-#endif
-#if SDL_VIDEO_DRIVER_X11_DPMS
-#include <X11/extensions/dpms.h>
-#endif
 #if SDL_VIDEO_DRIVER_X11_XINPUT
 #include <X11/extensions/XInput.h>
+#endif
+#if SDL_VIDEO_DRIVER_X11_SCRNSAVER
+#include <X11/extensions/scrnsaver.h>
 #endif
 
 #include "SDL_x11dyn.h"
@@ -66,8 +63,7 @@ typedef struct SDL_VideoData
     Display *display;
     char *classname;
     XIM im;
-    int screensaver_timeout;
-    BOOL dpms_enabled;
+    Uint32 screensaver_activity;
     int numwindows;
     SDL_WindowData **windowlist;
     int windowlistlength;

@@ -2326,6 +2326,45 @@ SDL_DestroyRenderer(SDL_WindowID windowID)
     }
 }
 
+SDL_bool
+SDL_IsScreenSaverEnabled()
+{
+    if (!_this) {
+        return SDL_TRUE;
+    }
+    return _this->suspend_screensaver ? SDL_FALSE : SDL_TRUE;
+}
+
+void
+SDL_EnableScreenSaver()
+{
+    if (!_this) {
+        return;
+    }
+    if (!_this->suspend_screensaver) {
+        return;
+    }
+    _this->suspend_screensaver = SDL_FALSE;
+    if (_this->SuspendScreenSaver) {
+        _this->SuspendScreenSaver(_this);
+    }
+}
+
+void
+SDL_DisableScreenSaver()
+{
+    if (!_this) {
+        return;
+    }
+    if (_this->suspend_screensaver) {
+        return;
+    }
+    _this->suspend_screensaver = SDL_TRUE;
+    if (_this->SuspendScreenSaver) {
+        _this->SuspendScreenSaver(_this);
+    }
+}
+
 void
 SDL_VideoQuit(void)
 {
