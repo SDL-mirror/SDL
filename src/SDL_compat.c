@@ -377,18 +377,20 @@ ClearVideoSurface()
 }
 
 static void
-SetupScreenSaver()
+SetupScreenSaver(int flags)
 {
     const char *env;
     SDL_bool allow_screensaver;
 
-	/* Allow environment override of screensaver disable */
-	env = SDL_getenv("SDL_VIDEO_ALLOW_SCREENSAVER");
-	if (env) {
-		allow_screensaver = SDL_atoi(env) ? SDL_TRUE : SDL_FALSE;
-	} else {
-		allow_screensaver = SDL_FALSE;
-	}
+    /* Allow environment override of screensaver disable */
+    env = SDL_getenv("SDL_VIDEO_ALLOW_SCREENSAVER");
+    if (env) {
+        allow_screensaver = SDL_atoi(env) ? SDL_TRUE : SDL_FALSE;
+    } else if (flags & SDL_FULLSCREEN) {
+        allow_screensaver = SDL_FALSE;
+    } else {
+        allow_screensaver = SDL_TRUE;
+    }
     if (allow_screensaver) {
         SDL_EnableScreenSaver();
     } else {
@@ -700,7 +702,7 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
 
     ClearVideoSurface();
 
-    SetupScreenSaver();
+    SetupScreenSaver(flags);
 
     /* We're finally done! */
     return SDL_PublicSurface;
