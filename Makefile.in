@@ -198,4 +198,4 @@ commit: indent
 
 # Create a SVN snapshot that people can run update on
 snapshot:
-	$(SHELL) $(aux_dir)/snapshot.sh
+	$(SHELL) $(auxdir)/snapshot.sh
