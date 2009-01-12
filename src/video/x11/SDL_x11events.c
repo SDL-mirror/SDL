@@ -410,6 +410,33 @@ X11_PumpEvents(_THIS)
     }
 }
 
+/* This is so wrong it hurts */
+#define GNOME_SCREENSAVER_HACK
+#ifdef GNOME_SCREENSAVER_HACK
+#include <unistd.h>
+static pid_t screensaver_inhibit_pid;
+static void gnome_screensaver_disable()
+{
+    screensaver_inhibit_pid = fork();
+    if (screensaver_inhibit_pid == 0) {
+        //close(0);
+        //close(1);
+        //close(2);
+        execl("/usr/bin/gnome-screensaver-command",
+              "gnome-screensaver-command",
+              "--inhibit",
+              "--reason",
+              "GNOME screensaver doesn't respect MIT-SCREEN-SAVER",
+              NULL);
+        exit(2);
+    }
+}
+static void gnome_screensaver_enable()
+{
+    kill(screensaver_inhibit_pid, 15);
+}
+#endif
+
 void
 X11_SuspendScreenSaver(_THIS)
 {
@@ -418,20 +445,26 @@ X11_SuspendScreenSaver(_THIS)
     int dummy;
     int major_version, minor_version;
 
-    if (!SDL_X11_HAVE_XSS) {
-        return;
-    }
+    if (SDL_X11_HAVE_XSS) {
+        /* XScreenSaverSuspend was introduced in MIT-SCREEN-SAVER 1.1 */
+        if (!XScreenSaverQueryExtension(data->display, &dummy, &dummy) ||
+            !XScreenSaverQueryVersion(data->display,
+                                      &major_version, &minor_version) ||
+            major_version < 1 || (major_version == 1 && minor_version < 1)) {
+            return;
+        }
 
-    /* XScreenSaverSuspend was introduced in MIT-SCREEN-SAVER 1.1 */
-    if (!XScreenSaverQueryExtension(data->display, &dummy, &dummy) ||
-        !XScreenSaverQueryVersion(data->display,
-                                  &major_version, &minor_version) ||
-        major_version < 1 || (major_version == 1 && minor_version < 1)) {
-        return;
+        XScreenSaverSuspend(data->display, _this->suspend_screensaver);
+        XResetScreenSaver(data->display);
     }
+#endif
 
-    XScreenSaverSuspend(data->display, _this->suspend_screensaver);
-    XResetScreenSaver(data->display);
+#ifdef GNOME_SCREENSAVER_HACK
+    if (_this->suspend_screensaver) {
+        gnome_screensaver_disable();
+    } else {
+        gnome_screensaver_enable();
+    }
 #endif
 }
 
