@@ -419,9 +419,9 @@ static void gnome_screensaver_disable()
 {
     screensaver_inhibit_pid = fork();
     if (screensaver_inhibit_pid == 0) {
-        //close(0);
-        //close(1);
-        //close(2);
+        close(0);
+        close(1);
+        close(2);
         execl("/usr/bin/gnome-screensaver-command",
               "gnome-screensaver-command",
               "--inhibit",
