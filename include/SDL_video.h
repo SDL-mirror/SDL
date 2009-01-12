@@ -1319,7 +1319,7 @@ extern DECLSPEC void SDLCALL SDL_DestroyRenderer(SDL_WindowID windowID);
  * \sa SDL_EnableScreenSaver()
  * \sa SDL_DisableScreenSaver()
  */
-extern DECLSPEC SDL_bool SDLCALL SDL_IsScreenSaverEnabled();
+extern DECLSPEC SDL_bool SDLCALL SDL_IsScreenSaverEnabled(void);
 
 /**
  * \fn void SDL_EnableScreenSaver();
@@ -1329,7 +1329,7 @@ extern DECLSPEC SDL_bool SDLCALL SDL_IsScreenSaverEnabled();
  * \sa SDL_IsScreenSaverEnabled()
  * \sa SDL_DisableScreenSaver()
  */
-extern DECLSPEC void SDLCALL SDL_EnableScreenSaver();
+extern DECLSPEC void SDLCALL SDL_EnableScreenSaver(void);
 
 /**
  * \fn void SDL_DisableScreenSaver();
@@ -1339,7 +1339,7 @@ extern DECLSPEC void SDLCALL SDL_EnableScreenSaver();
  * \sa SDL_IsScreenSaverEnabled()
  * \sa SDL_EnableScreenSaver()
  */
-extern DECLSPEC void SDLCALL SDL_DisableScreenSaver();
+extern DECLSPEC void SDLCALL SDL_DisableScreenSaver(void);
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
