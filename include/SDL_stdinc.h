@@ -646,6 +646,12 @@ extern DECLSPEC int SDLCALL SDL_vsnprintf(char *text, size_t maxlen,
 #define M_PI    3.14159265358979323846264338327950288   /* pi */
 #endif
 
+#ifdef HAVE_CEIL
+#define SDL_ceil        ceil
+#else
+#define SDL_ceil(x)     ((double)(int)((x)+0.5))
+#endif
+
 #ifdef HAVE_COPYSIGN
 #define SDL_copysign    copysign
 #else

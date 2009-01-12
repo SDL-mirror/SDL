@@ -63,7 +63,7 @@ SDL_Convert_U8_to_S8(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint8 *src;
     Sint8 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_U8 to AUDIO_S8.\n");
 #endif
 
@@ -86,7 +86,7 @@ SDL_Convert_U8_to_U16LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint8 *src;
     Uint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_U8 to AUDIO_U16LSB.\n");
 #endif
 
@@ -110,7 +110,7 @@ SDL_Convert_U8_to_S16LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint8 *src;
     Sint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_U8 to AUDIO_S16LSB.\n");
 #endif
 
@@ -134,7 +134,7 @@ SDL_Convert_U8_to_U16MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint8 *src;
     Uint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_U8 to AUDIO_U16MSB.\n");
 #endif
 
@@ -158,7 +158,7 @@ SDL_Convert_U8_to_S16MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint8 *src;
     Sint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_U8 to AUDIO_S16MSB.\n");
 #endif
 
@@ -182,7 +182,7 @@ SDL_Convert_U8_to_S32LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint8 *src;
     Sint32 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_U8 to AUDIO_S32LSB.\n");
 #endif
 
@@ -206,7 +206,7 @@ SDL_Convert_U8_to_S32MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint8 *src;
     Sint32 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_U8 to AUDIO_S32MSB.\n");
 #endif
 
@@ -230,7 +230,7 @@ SDL_Convert_U8_to_F32LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint8 *src;
     float *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_U8 to AUDIO_F32LSB.\n");
 #endif
 
@@ -254,7 +254,7 @@ SDL_Convert_U8_to_F32MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint8 *src;
     float *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_U8 to AUDIO_F32MSB.\n");
 #endif
 
@@ -278,7 +278,7 @@ SDL_Convert_S8_to_U8(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint8 *src;
     Uint8 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S8 to AUDIO_U8.\n");
 #endif
 
@@ -301,7 +301,7 @@ SDL_Convert_S8_to_U16LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint8 *src;
     Uint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S8 to AUDIO_U16LSB.\n");
 #endif
 
@@ -325,7 +325,7 @@ SDL_Convert_S8_to_S16LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint8 *src;
     Sint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S8 to AUDIO_S16LSB.\n");
 #endif
 
@@ -349,7 +349,7 @@ SDL_Convert_S8_to_U16MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint8 *src;
     Uint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S8 to AUDIO_U16MSB.\n");
 #endif
 
@@ -373,7 +373,7 @@ SDL_Convert_S8_to_S16MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint8 *src;
     Sint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S8 to AUDIO_S16MSB.\n");
 #endif
 
@@ -397,7 +397,7 @@ SDL_Convert_S8_to_S32LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint8 *src;
     Sint32 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S8 to AUDIO_S32LSB.\n");
 #endif
 
@@ -421,7 +421,7 @@ SDL_Convert_S8_to_S32MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint8 *src;
     Sint32 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S8 to AUDIO_S32MSB.\n");
 #endif
 
@@ -445,7 +445,7 @@ SDL_Convert_S8_to_F32LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint8 *src;
     float *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S8 to AUDIO_F32LSB.\n");
 #endif
 
@@ -469,7 +469,7 @@ SDL_Convert_S8_to_F32MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint8 *src;
     float *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S8 to AUDIO_F32MSB.\n");
 #endif
 
@@ -493,7 +493,7 @@ SDL_Convert_U16LSB_to_U8(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     Uint8 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_U16LSB to AUDIO_U8.\n");
 #endif
 
@@ -517,7 +517,7 @@ SDL_Convert_U16LSB_to_S8(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     Sint8 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_U16LSB to AUDIO_S8.\n");
 #endif
 
@@ -541,7 +541,7 @@ SDL_Convert_U16LSB_to_S16LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     Sint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_U16LSB to AUDIO_S16LSB.\n");
 #endif
 
@@ -564,7 +564,7 @@ SDL_Convert_U16LSB_to_U16MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     Uint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_U16LSB to AUDIO_U16MSB.\n");
 #endif
 
@@ -587,7 +587,7 @@ SDL_Convert_U16LSB_to_S16MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     Sint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_U16LSB to AUDIO_S16MSB.\n");
 #endif
 
@@ -610,7 +610,7 @@ SDL_Convert_U16LSB_to_S32LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     Sint32 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_U16LSB to AUDIO_S32LSB.\n");
 #endif
 
@@ -634,7 +634,7 @@ SDL_Convert_U16LSB_to_S32MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     Sint32 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_U16LSB to AUDIO_S32MSB.\n");
 #endif
 
@@ -658,7 +658,7 @@ SDL_Convert_U16LSB_to_F32LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     float *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_U16LSB to AUDIO_F32LSB.\n");
 #endif
 
@@ -682,7 +682,7 @@ SDL_Convert_U16LSB_to_F32MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     float *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_U16LSB to AUDIO_F32MSB.\n");
 #endif
 
@@ -706,7 +706,7 @@ SDL_Convert_S16LSB_to_U8(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     Uint8 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S16LSB to AUDIO_U8.\n");
 #endif
 
@@ -730,7 +730,7 @@ SDL_Convert_S16LSB_to_S8(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     Sint8 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S16LSB to AUDIO_S8.\n");
 #endif
 
@@ -754,7 +754,7 @@ SDL_Convert_S16LSB_to_U16LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     Uint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S16LSB to AUDIO_U16LSB.\n");
 #endif
 
@@ -777,7 +777,7 @@ SDL_Convert_S16LSB_to_U16MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     Uint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S16LSB to AUDIO_U16MSB.\n");
 #endif
 
@@ -800,7 +800,7 @@ SDL_Convert_S16LSB_to_S16MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     Sint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S16LSB to AUDIO_S16MSB.\n");
 #endif
 
@@ -823,7 +823,7 @@ SDL_Convert_S16LSB_to_S32LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     Sint32 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S16LSB to AUDIO_S32LSB.\n");
 #endif
 
@@ -847,7 +847,7 @@ SDL_Convert_S16LSB_to_S32MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     Sint32 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S16LSB to AUDIO_S32MSB.\n");
 #endif
 
@@ -871,7 +871,7 @@ SDL_Convert_S16LSB_to_F32LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     float *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S16LSB to AUDIO_F32LSB.\n");
 #endif
 
@@ -895,7 +895,7 @@ SDL_Convert_S16LSB_to_F32MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     float *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S16LSB to AUDIO_F32MSB.\n");
 #endif
 
@@ -919,7 +919,7 @@ SDL_Convert_U16MSB_to_U8(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     Uint8 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_U16MSB to AUDIO_U8.\n");
 #endif
 
@@ -943,7 +943,7 @@ SDL_Convert_U16MSB_to_S8(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     Sint8 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_U16MSB to AUDIO_S8.\n");
 #endif
 
@@ -967,7 +967,7 @@ SDL_Convert_U16MSB_to_U16LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     Uint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_U16MSB to AUDIO_U16LSB.\n");
 #endif
 
@@ -990,7 +990,7 @@ SDL_Convert_U16MSB_to_S16LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     Sint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_U16MSB to AUDIO_S16LSB.\n");
 #endif
 
@@ -1013,7 +1013,7 @@ SDL_Convert_U16MSB_to_S16MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     Sint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_U16MSB to AUDIO_S16MSB.\n");
 #endif
 
@@ -1036,7 +1036,7 @@ SDL_Convert_U16MSB_to_S32LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     Sint32 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_U16MSB to AUDIO_S32LSB.\n");
 #endif
 
@@ -1060,7 +1060,7 @@ SDL_Convert_U16MSB_to_S32MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     Sint32 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_U16MSB to AUDIO_S32MSB.\n");
 #endif
 
@@ -1084,7 +1084,7 @@ SDL_Convert_U16MSB_to_F32LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     float *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_U16MSB to AUDIO_F32LSB.\n");
 #endif
 
@@ -1108,7 +1108,7 @@ SDL_Convert_U16MSB_to_F32MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     float *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_U16MSB to AUDIO_F32MSB.\n");
 #endif
 
@@ -1132,7 +1132,7 @@ SDL_Convert_S16MSB_to_U8(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     Uint8 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S16MSB to AUDIO_U8.\n");
 #endif
 
@@ -1156,7 +1156,7 @@ SDL_Convert_S16MSB_to_S8(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     Sint8 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S16MSB to AUDIO_S8.\n");
 #endif
 
@@ -1180,7 +1180,7 @@ SDL_Convert_S16MSB_to_U16LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     Uint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S16MSB to AUDIO_U16LSB.\n");
 #endif
 
@@ -1203,7 +1203,7 @@ SDL_Convert_S16MSB_to_S16LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     Sint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S16MSB to AUDIO_S16LSB.\n");
 #endif
 
@@ -1226,7 +1226,7 @@ SDL_Convert_S16MSB_to_U16MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     Uint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S16MSB to AUDIO_U16MSB.\n");
 #endif
 
@@ -1249,7 +1249,7 @@ SDL_Convert_S16MSB_to_S32LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     Sint32 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S16MSB to AUDIO_S32LSB.\n");
 #endif
 
@@ -1273,7 +1273,7 @@ SDL_Convert_S16MSB_to_S32MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     Sint32 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S16MSB to AUDIO_S32MSB.\n");
 #endif
 
@@ -1297,7 +1297,7 @@ SDL_Convert_S16MSB_to_F32LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     float *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S16MSB to AUDIO_F32LSB.\n");
 #endif
 
@@ -1321,7 +1321,7 @@ SDL_Convert_S16MSB_to_F32MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint16 *src;
     float *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S16MSB to AUDIO_F32MSB.\n");
 #endif
 
@@ -1345,7 +1345,7 @@ SDL_Convert_S32LSB_to_U8(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint32 *src;
     Uint8 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S32LSB to AUDIO_U8.\n");
 #endif
 
@@ -1369,7 +1369,7 @@ SDL_Convert_S32LSB_to_S8(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint32 *src;
     Sint8 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S32LSB to AUDIO_S8.\n");
 #endif
 
@@ -1393,7 +1393,7 @@ SDL_Convert_S32LSB_to_U16LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint32 *src;
     Uint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S32LSB to AUDIO_U16LSB.\n");
 #endif
 
@@ -1417,7 +1417,7 @@ SDL_Convert_S32LSB_to_S16LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint32 *src;
     Sint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S32LSB to AUDIO_S16LSB.\n");
 #endif
 
@@ -1441,7 +1441,7 @@ SDL_Convert_S32LSB_to_U16MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint32 *src;
     Uint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S32LSB to AUDIO_U16MSB.\n");
 #endif
 
@@ -1465,7 +1465,7 @@ SDL_Convert_S32LSB_to_S16MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint32 *src;
     Sint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S32LSB to AUDIO_S16MSB.\n");
 #endif
 
@@ -1489,7 +1489,7 @@ SDL_Convert_S32LSB_to_S32MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint32 *src;
     Sint32 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S32LSB to AUDIO_S32MSB.\n");
 #endif
 
@@ -1512,7 +1512,7 @@ SDL_Convert_S32LSB_to_F32LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint32 *src;
     float *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S32LSB to AUDIO_F32LSB.\n");
 #endif
 
@@ -1535,7 +1535,7 @@ SDL_Convert_S32LSB_to_F32MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint32 *src;
     float *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S32LSB to AUDIO_F32MSB.\n");
 #endif
 
@@ -1558,7 +1558,7 @@ SDL_Convert_S32MSB_to_U8(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint32 *src;
     Uint8 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S32MSB to AUDIO_U8.\n");
 #endif
 
@@ -1582,7 +1582,7 @@ SDL_Convert_S32MSB_to_S8(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint32 *src;
     Sint8 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S32MSB to AUDIO_S8.\n");
 #endif
 
@@ -1606,7 +1606,7 @@ SDL_Convert_S32MSB_to_U16LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint32 *src;
     Uint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S32MSB to AUDIO_U16LSB.\n");
 #endif
 
@@ -1630,7 +1630,7 @@ SDL_Convert_S32MSB_to_S16LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint32 *src;
     Sint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S32MSB to AUDIO_S16LSB.\n");
 #endif
 
@@ -1654,7 +1654,7 @@ SDL_Convert_S32MSB_to_U16MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint32 *src;
     Uint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S32MSB to AUDIO_U16MSB.\n");
 #endif
 
@@ -1678,7 +1678,7 @@ SDL_Convert_S32MSB_to_S16MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint32 *src;
     Sint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S32MSB to AUDIO_S16MSB.\n");
 #endif
 
@@ -1702,7 +1702,7 @@ SDL_Convert_S32MSB_to_S32LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint32 *src;
     Sint32 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S32MSB to AUDIO_S32LSB.\n");
 #endif
 
@@ -1725,7 +1725,7 @@ SDL_Convert_S32MSB_to_F32LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint32 *src;
     float *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S32MSB to AUDIO_F32LSB.\n");
 #endif
 
@@ -1748,7 +1748,7 @@ SDL_Convert_S32MSB_to_F32MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const Uint32 *src;
     float *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_S32MSB to AUDIO_F32MSB.\n");
 #endif
 
@@ -1771,7 +1771,7 @@ SDL_Convert_F32LSB_to_U8(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const float *src;
     Uint8 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_F32LSB to AUDIO_U8.\n");
 #endif
 
@@ -1795,7 +1795,7 @@ SDL_Convert_F32LSB_to_S8(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const float *src;
     Sint8 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_F32LSB to AUDIO_S8.\n");
 #endif
 
@@ -1819,7 +1819,7 @@ SDL_Convert_F32LSB_to_U16LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const float *src;
     Uint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_F32LSB to AUDIO_U16LSB.\n");
 #endif
 
@@ -1843,7 +1843,7 @@ SDL_Convert_F32LSB_to_S16LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const float *src;
     Sint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_F32LSB to AUDIO_S16LSB.\n");
 #endif
 
@@ -1867,7 +1867,7 @@ SDL_Convert_F32LSB_to_U16MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const float *src;
     Uint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_F32LSB to AUDIO_U16MSB.\n");
 #endif
 
@@ -1891,7 +1891,7 @@ SDL_Convert_F32LSB_to_S16MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const float *src;
     Sint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_F32LSB to AUDIO_S16MSB.\n");
 #endif
 
@@ -1915,7 +1915,7 @@ SDL_Convert_F32LSB_to_S32LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const float *src;
     Sint32 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_F32LSB to AUDIO_S32LSB.\n");
 #endif
 
@@ -1938,7 +1938,7 @@ SDL_Convert_F32LSB_to_S32MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const float *src;
     Sint32 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_F32LSB to AUDIO_S32MSB.\n");
 #endif
 
@@ -1961,7 +1961,7 @@ SDL_Convert_F32LSB_to_F32MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const float *src;
     float *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_F32LSB to AUDIO_F32MSB.\n");
 #endif
 
@@ -1984,7 +1984,7 @@ SDL_Convert_F32MSB_to_U8(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const float *src;
     Uint8 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_F32MSB to AUDIO_U8.\n");
 #endif
 
@@ -2008,7 +2008,7 @@ SDL_Convert_F32MSB_to_S8(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const float *src;
     Sint8 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_F32MSB to AUDIO_S8.\n");
 #endif
 
@@ -2032,7 +2032,7 @@ SDL_Convert_F32MSB_to_U16LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const float *src;
     Uint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_F32MSB to AUDIO_U16LSB.\n");
 #endif
 
@@ -2056,7 +2056,7 @@ SDL_Convert_F32MSB_to_S16LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const float *src;
     Sint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_F32MSB to AUDIO_S16LSB.\n");
 #endif
 
@@ -2080,7 +2080,7 @@ SDL_Convert_F32MSB_to_U16MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const float *src;
     Uint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_F32MSB to AUDIO_U16MSB.\n");
 #endif
 
@@ -2104,7 +2104,7 @@ SDL_Convert_F32MSB_to_S16MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const float *src;
     Sint16 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_F32MSB to AUDIO_S16MSB.\n");
 #endif
 
@@ -2128,7 +2128,7 @@ SDL_Convert_F32MSB_to_S32LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const float *src;
     Sint32 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_F32MSB to AUDIO_S32LSB.\n");
 #endif
 
@@ -2151,7 +2151,7 @@ SDL_Convert_F32MSB_to_S32MSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const float *src;
     Sint32 *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_F32MSB to AUDIO_S32MSB.\n");
 #endif
 
@@ -2174,7 +2174,7 @@ SDL_Convert_F32MSB_to_F32LSB(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const float *src;
     float *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_F32MSB to AUDIO_F32LSB.\n");
 #endif
 
@@ -2296,7 +2296,7 @@ const SDL_AudioTypeFilters sdl_audio_type_filters[] =
 static void SDLCALL
 SDL_Upsample_U8_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_U8, 1 channels.\n", cvt->rate_incr);
 #endif
 
@@ -2328,7 +2328,7 @@ SDL_Upsample_U8_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U8_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_U8, 1 channels.\n", cvt->rate_incr);
 #endif
 
@@ -2360,7 +2360,7 @@ SDL_Downsample_U8_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U8_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_U8, 2 channels.\n", cvt->rate_incr);
 #endif
 
@@ -2397,7 +2397,7 @@ SDL_Upsample_U8_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U8_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_U8, 2 channels.\n", cvt->rate_incr);
 #endif
 
@@ -2434,7 +2434,7 @@ SDL_Downsample_U8_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U8_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_U8, 4 channels.\n", cvt->rate_incr);
 #endif
 
@@ -2481,7 +2481,7 @@ SDL_Upsample_U8_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U8_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_U8, 4 channels.\n", cvt->rate_incr);
 #endif
 
@@ -2528,7 +2528,7 @@ SDL_Downsample_U8_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U8_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_U8, 6 channels.\n", cvt->rate_incr);
 #endif
 
@@ -2585,7 +2585,7 @@ SDL_Upsample_U8_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U8_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_U8, 6 channels.\n", cvt->rate_incr);
 #endif
 
@@ -2642,7 +2642,7 @@ SDL_Downsample_U8_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U8_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_U8, 8 channels.\n", cvt->rate_incr);
 #endif
 
@@ -2709,7 +2709,7 @@ SDL_Upsample_U8_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U8_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_U8, 8 channels.\n", cvt->rate_incr);
 #endif
 
@@ -2776,7 +2776,7 @@ SDL_Downsample_U8_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S8_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_S8, 1 channels.\n", cvt->rate_incr);
 #endif
 
@@ -2808,7 +2808,7 @@ SDL_Upsample_S8_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S8_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_S8, 1 channels.\n", cvt->rate_incr);
 #endif
 
@@ -2840,7 +2840,7 @@ SDL_Downsample_S8_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S8_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_S8, 2 channels.\n", cvt->rate_incr);
 #endif
 
@@ -2877,7 +2877,7 @@ SDL_Upsample_S8_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S8_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_S8, 2 channels.\n", cvt->rate_incr);
 #endif
 
@@ -2914,7 +2914,7 @@ SDL_Downsample_S8_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S8_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_S8, 4 channels.\n", cvt->rate_incr);
 #endif
 
@@ -2961,7 +2961,7 @@ SDL_Upsample_S8_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S8_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_S8, 4 channels.\n", cvt->rate_incr);
 #endif
 
@@ -3008,7 +3008,7 @@ SDL_Downsample_S8_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S8_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_S8, 6 channels.\n", cvt->rate_incr);
 #endif
 
@@ -3065,7 +3065,7 @@ SDL_Upsample_S8_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S8_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_S8, 6 channels.\n", cvt->rate_incr);
 #endif
 
@@ -3122,7 +3122,7 @@ SDL_Downsample_S8_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S8_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_S8, 8 channels.\n", cvt->rate_incr);
 #endif
 
@@ -3189,7 +3189,7 @@ SDL_Upsample_S8_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S8_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_S8, 8 channels.\n", cvt->rate_incr);
 #endif
 
@@ -3256,7 +3256,7 @@ SDL_Downsample_S8_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16LSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_U16LSB, 1 channels.\n", cvt->rate_incr);
 #endif
 
@@ -3288,7 +3288,7 @@ SDL_Upsample_U16LSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16LSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_U16LSB, 1 channels.\n", cvt->rate_incr);
 #endif
 
@@ -3320,7 +3320,7 @@ SDL_Downsample_U16LSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16LSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_U16LSB, 2 channels.\n", cvt->rate_incr);
 #endif
 
@@ -3357,7 +3357,7 @@ SDL_Upsample_U16LSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16LSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_U16LSB, 2 channels.\n", cvt->rate_incr);
 #endif
 
@@ -3394,7 +3394,7 @@ SDL_Downsample_U16LSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16LSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_U16LSB, 4 channels.\n", cvt->rate_incr);
 #endif
 
@@ -3441,7 +3441,7 @@ SDL_Upsample_U16LSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16LSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_U16LSB, 4 channels.\n", cvt->rate_incr);
 #endif
 
@@ -3488,7 +3488,7 @@ SDL_Downsample_U16LSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16LSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_U16LSB, 6 channels.\n", cvt->rate_incr);
 #endif
 
@@ -3545,7 +3545,7 @@ SDL_Upsample_U16LSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16LSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_U16LSB, 6 channels.\n", cvt->rate_incr);
 #endif
 
@@ -3602,7 +3602,7 @@ SDL_Downsample_U16LSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16LSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_U16LSB, 8 channels.\n", cvt->rate_incr);
 #endif
 
@@ -3669,7 +3669,7 @@ SDL_Upsample_U16LSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16LSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_U16LSB, 8 channels.\n", cvt->rate_incr);
 #endif
 
@@ -3736,7 +3736,7 @@ SDL_Downsample_U16LSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16LSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_S16LSB, 1 channels.\n", cvt->rate_incr);
 #endif
 
@@ -3768,7 +3768,7 @@ SDL_Upsample_S16LSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16LSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_S16LSB, 1 channels.\n", cvt->rate_incr);
 #endif
 
@@ -3800,7 +3800,7 @@ SDL_Downsample_S16LSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16LSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_S16LSB, 2 channels.\n", cvt->rate_incr);
 #endif
 
@@ -3837,7 +3837,7 @@ SDL_Upsample_S16LSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16LSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_S16LSB, 2 channels.\n", cvt->rate_incr);
 #endif
 
@@ -3874,7 +3874,7 @@ SDL_Downsample_S16LSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16LSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_S16LSB, 4 channels.\n", cvt->rate_incr);
 #endif
 
@@ -3921,7 +3921,7 @@ SDL_Upsample_S16LSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16LSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_S16LSB, 4 channels.\n", cvt->rate_incr);
 #endif
 
@@ -3968,7 +3968,7 @@ SDL_Downsample_S16LSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16LSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_S16LSB, 6 channels.\n", cvt->rate_incr);
 #endif
 
@@ -4025,7 +4025,7 @@ SDL_Upsample_S16LSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16LSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_S16LSB, 6 channels.\n", cvt->rate_incr);
 #endif
 
@@ -4082,7 +4082,7 @@ SDL_Downsample_S16LSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16LSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_S16LSB, 8 channels.\n", cvt->rate_incr);
 #endif
 
@@ -4149,7 +4149,7 @@ SDL_Upsample_S16LSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16LSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_S16LSB, 8 channels.\n", cvt->rate_incr);
 #endif
 
@@ -4216,7 +4216,7 @@ SDL_Downsample_S16LSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16MSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_U16MSB, 1 channels.\n", cvt->rate_incr);
 #endif
 
@@ -4248,7 +4248,7 @@ SDL_Upsample_U16MSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16MSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_U16MSB, 1 channels.\n", cvt->rate_incr);
 #endif
 
@@ -4280,7 +4280,7 @@ SDL_Downsample_U16MSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16MSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_U16MSB, 2 channels.\n", cvt->rate_incr);
 #endif
 
@@ -4317,7 +4317,7 @@ SDL_Upsample_U16MSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16MSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_U16MSB, 2 channels.\n", cvt->rate_incr);
 #endif
 
@@ -4354,7 +4354,7 @@ SDL_Downsample_U16MSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16MSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_U16MSB, 4 channels.\n", cvt->rate_incr);
 #endif
 
@@ -4401,7 +4401,7 @@ SDL_Upsample_U16MSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16MSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_U16MSB, 4 channels.\n", cvt->rate_incr);
 #endif
 
@@ -4448,7 +4448,7 @@ SDL_Downsample_U16MSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16MSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_U16MSB, 6 channels.\n", cvt->rate_incr);
 #endif
 
@@ -4505,7 +4505,7 @@ SDL_Upsample_U16MSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16MSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_U16MSB, 6 channels.\n", cvt->rate_incr);
 #endif
 
@@ -4562,7 +4562,7 @@ SDL_Downsample_U16MSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16MSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_U16MSB, 8 channels.\n", cvt->rate_incr);
 #endif
 
@@ -4629,7 +4629,7 @@ SDL_Upsample_U16MSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16MSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_U16MSB, 8 channels.\n", cvt->rate_incr);
 #endif
 
@@ -4696,7 +4696,7 @@ SDL_Downsample_U16MSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16MSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_S16MSB, 1 channels.\n", cvt->rate_incr);
 #endif
 
@@ -4728,7 +4728,7 @@ SDL_Upsample_S16MSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16MSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_S16MSB, 1 channels.\n", cvt->rate_incr);
 #endif
 
@@ -4760,7 +4760,7 @@ SDL_Downsample_S16MSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16MSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_S16MSB, 2 channels.\n", cvt->rate_incr);
 #endif
 
@@ -4797,7 +4797,7 @@ SDL_Upsample_S16MSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16MSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_S16MSB, 2 channels.\n", cvt->rate_incr);
 #endif
 
@@ -4834,7 +4834,7 @@ SDL_Downsample_S16MSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16MSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_S16MSB, 4 channels.\n", cvt->rate_incr);
 #endif
 
@@ -4881,7 +4881,7 @@ SDL_Upsample_S16MSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16MSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_S16MSB, 4 channels.\n", cvt->rate_incr);
 #endif
 
@@ -4928,7 +4928,7 @@ SDL_Downsample_S16MSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16MSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_S16MSB, 6 channels.\n", cvt->rate_incr);
 #endif
 
@@ -4985,7 +4985,7 @@ SDL_Upsample_S16MSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16MSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_S16MSB, 6 channels.\n", cvt->rate_incr);
 #endif
 
@@ -5042,7 +5042,7 @@ SDL_Downsample_S16MSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16MSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_S16MSB, 8 channels.\n", cvt->rate_incr);
 #endif
 
@@ -5109,7 +5109,7 @@ SDL_Upsample_S16MSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16MSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_S16MSB, 8 channels.\n", cvt->rate_incr);
 #endif
 
@@ -5176,7 +5176,7 @@ SDL_Downsample_S16MSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32LSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_S32LSB, 1 channels.\n", cvt->rate_incr);
 #endif
 
@@ -5208,7 +5208,7 @@ SDL_Upsample_S32LSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32LSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_S32LSB, 1 channels.\n", cvt->rate_incr);
 #endif
 
@@ -5240,7 +5240,7 @@ SDL_Downsample_S32LSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32LSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_S32LSB, 2 channels.\n", cvt->rate_incr);
 #endif
 
@@ -5277,7 +5277,7 @@ SDL_Upsample_S32LSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32LSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_S32LSB, 2 channels.\n", cvt->rate_incr);
 #endif
 
@@ -5314,7 +5314,7 @@ SDL_Downsample_S32LSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32LSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_S32LSB, 4 channels.\n", cvt->rate_incr);
 #endif
 
@@ -5361,7 +5361,7 @@ SDL_Upsample_S32LSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32LSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_S32LSB, 4 channels.\n", cvt->rate_incr);
 #endif
 
@@ -5408,7 +5408,7 @@ SDL_Downsample_S32LSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32LSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_S32LSB, 6 channels.\n", cvt->rate_incr);
 #endif
 
@@ -5465,7 +5465,7 @@ SDL_Upsample_S32LSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32LSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_S32LSB, 6 channels.\n", cvt->rate_incr);
 #endif
 
@@ -5522,7 +5522,7 @@ SDL_Downsample_S32LSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32LSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_S32LSB, 8 channels.\n", cvt->rate_incr);
 #endif
 
@@ -5589,7 +5589,7 @@ SDL_Upsample_S32LSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32LSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_S32LSB, 8 channels.\n", cvt->rate_incr);
 #endif
 
@@ -5656,7 +5656,7 @@ SDL_Downsample_S32LSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32MSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_S32MSB, 1 channels.\n", cvt->rate_incr);
 #endif
 
@@ -5688,7 +5688,7 @@ SDL_Upsample_S32MSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32MSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_S32MSB, 1 channels.\n", cvt->rate_incr);
 #endif
 
@@ -5720,7 +5720,7 @@ SDL_Downsample_S32MSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32MSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_S32MSB, 2 channels.\n", cvt->rate_incr);
 #endif
 
@@ -5757,7 +5757,7 @@ SDL_Upsample_S32MSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32MSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_S32MSB, 2 channels.\n", cvt->rate_incr);
 #endif
 
@@ -5794,7 +5794,7 @@ SDL_Downsample_S32MSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32MSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_S32MSB, 4 channels.\n", cvt->rate_incr);
 #endif
 
@@ -5841,7 +5841,7 @@ SDL_Upsample_S32MSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32MSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_S32MSB, 4 channels.\n", cvt->rate_incr);
 #endif
 
@@ -5888,7 +5888,7 @@ SDL_Downsample_S32MSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32MSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_S32MSB, 6 channels.\n", cvt->rate_incr);
 #endif
 
@@ -5945,7 +5945,7 @@ SDL_Upsample_S32MSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32MSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_S32MSB, 6 channels.\n", cvt->rate_incr);
 #endif
 
@@ -6002,7 +6002,7 @@ SDL_Downsample_S32MSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32MSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_S32MSB, 8 channels.\n", cvt->rate_incr);
 #endif
 
@@ -6069,7 +6069,7 @@ SDL_Upsample_S32MSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32MSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_S32MSB, 8 channels.\n", cvt->rate_incr);
 #endif
 
@@ -6136,7 +6136,7 @@ SDL_Downsample_S32MSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32LSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_F32LSB, 1 channels.\n", cvt->rate_incr);
 #endif
 
@@ -6168,7 +6168,7 @@ SDL_Upsample_F32LSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32LSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_F32LSB, 1 channels.\n", cvt->rate_incr);
 #endif
 
@@ -6200,7 +6200,7 @@ SDL_Downsample_F32LSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32LSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_F32LSB, 2 channels.\n", cvt->rate_incr);
 #endif
 
@@ -6237,7 +6237,7 @@ SDL_Upsample_F32LSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32LSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_F32LSB, 2 channels.\n", cvt->rate_incr);
 #endif
 
@@ -6274,7 +6274,7 @@ SDL_Downsample_F32LSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32LSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_F32LSB, 4 channels.\n", cvt->rate_incr);
 #endif
 
@@ -6321,7 +6321,7 @@ SDL_Upsample_F32LSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32LSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_F32LSB, 4 channels.\n", cvt->rate_incr);
 #endif
 
@@ -6368,7 +6368,7 @@ SDL_Downsample_F32LSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32LSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_F32LSB, 6 channels.\n", cvt->rate_incr);
 #endif
 
@@ -6425,7 +6425,7 @@ SDL_Upsample_F32LSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32LSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_F32LSB, 6 channels.\n", cvt->rate_incr);
 #endif
 
@@ -6482,7 +6482,7 @@ SDL_Downsample_F32LSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32LSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_F32LSB, 8 channels.\n", cvt->rate_incr);
 #endif
 
@@ -6549,7 +6549,7 @@ SDL_Upsample_F32LSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32LSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_F32LSB, 8 channels.\n", cvt->rate_incr);
 #endif
 
@@ -6616,7 +6616,7 @@ SDL_Downsample_F32LSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32MSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_F32MSB, 1 channels.\n", cvt->rate_incr);
 #endif
 
@@ -6648,7 +6648,7 @@ SDL_Upsample_F32MSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32MSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_F32MSB, 1 channels.\n", cvt->rate_incr);
 #endif
 
@@ -6680,7 +6680,7 @@ SDL_Downsample_F32MSB_1c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32MSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_F32MSB, 2 channels.\n", cvt->rate_incr);
 #endif
 
@@ -6717,7 +6717,7 @@ SDL_Upsample_F32MSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32MSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_F32MSB, 2 channels.\n", cvt->rate_incr);
 #endif
 
@@ -6754,7 +6754,7 @@ SDL_Downsample_F32MSB_2c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32MSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_F32MSB, 4 channels.\n", cvt->rate_incr);
 #endif
 
@@ -6801,7 +6801,7 @@ SDL_Upsample_F32MSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32MSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_F32MSB, 4 channels.\n", cvt->rate_incr);
 #endif
 
@@ -6848,7 +6848,7 @@ SDL_Downsample_F32MSB_4c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32MSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_F32MSB, 6 channels.\n", cvt->rate_incr);
 #endif
 
@@ -6905,7 +6905,7 @@ SDL_Upsample_F32MSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32MSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_F32MSB, 6 channels.\n", cvt->rate_incr);
 #endif
 
@@ -6962,7 +6962,7 @@ SDL_Downsample_F32MSB_6c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32MSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample arbitrary (x%f) AUDIO_F32MSB, 8 channels.\n", cvt->rate_incr);
 #endif
 
@@ -7029,7 +7029,7 @@ SDL_Upsample_F32MSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32MSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample arbitrary (x%f) AUDIO_F32MSB, 8 channels.\n", cvt->rate_incr);
 #endif
 
@@ -7099,7 +7099,7 @@ SDL_Downsample_F32MSB_8c(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U8_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_U8, 1 channels.\n");
 #endif
 
@@ -7127,7 +7127,7 @@ SDL_Upsample_U8_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U8_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_U8, 1 channels.\n");
 #endif
 
@@ -7154,7 +7154,7 @@ SDL_Downsample_U8_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U8_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_U8, 1 channels.\n");
 #endif
 
@@ -7184,7 +7184,7 @@ SDL_Upsample_U8_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U8_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_U8, 1 channels.\n");
 #endif
 
@@ -7211,7 +7211,7 @@ SDL_Downsample_U8_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U8_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_U8, 2 channels.\n");
 #endif
 
@@ -7244,7 +7244,7 @@ SDL_Upsample_U8_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U8_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_U8, 2 channels.\n");
 #endif
 
@@ -7275,7 +7275,7 @@ SDL_Downsample_U8_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U8_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_U8, 2 channels.\n");
 #endif
 
@@ -7312,7 +7312,7 @@ SDL_Upsample_U8_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U8_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_U8, 2 channels.\n");
 #endif
 
@@ -7343,7 +7343,7 @@ SDL_Downsample_U8_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U8_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_U8, 4 channels.\n");
 #endif
 
@@ -7386,7 +7386,7 @@ SDL_Upsample_U8_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U8_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_U8, 4 channels.\n");
 #endif
 
@@ -7425,7 +7425,7 @@ SDL_Downsample_U8_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U8_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_U8, 4 channels.\n");
 #endif
 
@@ -7476,7 +7476,7 @@ SDL_Upsample_U8_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U8_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_U8, 4 channels.\n");
 #endif
 
@@ -7515,7 +7515,7 @@ SDL_Downsample_U8_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U8_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_U8, 6 channels.\n");
 #endif
 
@@ -7568,7 +7568,7 @@ SDL_Upsample_U8_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U8_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_U8, 6 channels.\n");
 #endif
 
@@ -7615,7 +7615,7 @@ SDL_Downsample_U8_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U8_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_U8, 6 channels.\n");
 #endif
 
@@ -7680,7 +7680,7 @@ SDL_Upsample_U8_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U8_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_U8, 6 channels.\n");
 #endif
 
@@ -7727,7 +7727,7 @@ SDL_Downsample_U8_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U8_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_U8, 8 channels.\n");
 #endif
 
@@ -7790,7 +7790,7 @@ SDL_Upsample_U8_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U8_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_U8, 8 channels.\n");
 #endif
 
@@ -7845,7 +7845,7 @@ SDL_Downsample_U8_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U8_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_U8, 8 channels.\n");
 #endif
 
@@ -7924,7 +7924,7 @@ SDL_Upsample_U8_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U8_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_U8, 8 channels.\n");
 #endif
 
@@ -7979,7 +7979,7 @@ SDL_Downsample_U8_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S8_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_S8, 1 channels.\n");
 #endif
 
@@ -8007,7 +8007,7 @@ SDL_Upsample_S8_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S8_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_S8, 1 channels.\n");
 #endif
 
@@ -8034,7 +8034,7 @@ SDL_Downsample_S8_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S8_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_S8, 1 channels.\n");
 #endif
 
@@ -8064,7 +8064,7 @@ SDL_Upsample_S8_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S8_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_S8, 1 channels.\n");
 #endif
 
@@ -8091,7 +8091,7 @@ SDL_Downsample_S8_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S8_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_S8, 2 channels.\n");
 #endif
 
@@ -8124,7 +8124,7 @@ SDL_Upsample_S8_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S8_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_S8, 2 channels.\n");
 #endif
 
@@ -8155,7 +8155,7 @@ SDL_Downsample_S8_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S8_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_S8, 2 channels.\n");
 #endif
 
@@ -8192,7 +8192,7 @@ SDL_Upsample_S8_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S8_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_S8, 2 channels.\n");
 #endif
 
@@ -8223,7 +8223,7 @@ SDL_Downsample_S8_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S8_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_S8, 4 channels.\n");
 #endif
 
@@ -8266,7 +8266,7 @@ SDL_Upsample_S8_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S8_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_S8, 4 channels.\n");
 #endif
 
@@ -8305,7 +8305,7 @@ SDL_Downsample_S8_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S8_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_S8, 4 channels.\n");
 #endif
 
@@ -8356,7 +8356,7 @@ SDL_Upsample_S8_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S8_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_S8, 4 channels.\n");
 #endif
 
@@ -8395,7 +8395,7 @@ SDL_Downsample_S8_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S8_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_S8, 6 channels.\n");
 #endif
 
@@ -8448,7 +8448,7 @@ SDL_Upsample_S8_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S8_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_S8, 6 channels.\n");
 #endif
 
@@ -8495,7 +8495,7 @@ SDL_Downsample_S8_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S8_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_S8, 6 channels.\n");
 #endif
 
@@ -8560,7 +8560,7 @@ SDL_Upsample_S8_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S8_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_S8, 6 channels.\n");
 #endif
 
@@ -8607,7 +8607,7 @@ SDL_Downsample_S8_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S8_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_S8, 8 channels.\n");
 #endif
 
@@ -8670,7 +8670,7 @@ SDL_Upsample_S8_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S8_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_S8, 8 channels.\n");
 #endif
 
@@ -8725,7 +8725,7 @@ SDL_Downsample_S8_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S8_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_S8, 8 channels.\n");
 #endif
 
@@ -8804,7 +8804,7 @@ SDL_Upsample_S8_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S8_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_S8, 8 channels.\n");
 #endif
 
@@ -8859,7 +8859,7 @@ SDL_Downsample_S8_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16LSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_U16LSB, 1 channels.\n");
 #endif
 
@@ -8887,7 +8887,7 @@ SDL_Upsample_U16LSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16LSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_U16LSB, 1 channels.\n");
 #endif
 
@@ -8914,7 +8914,7 @@ SDL_Downsample_U16LSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16LSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_U16LSB, 1 channels.\n");
 #endif
 
@@ -8944,7 +8944,7 @@ SDL_Upsample_U16LSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16LSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_U16LSB, 1 channels.\n");
 #endif
 
@@ -8971,7 +8971,7 @@ SDL_Downsample_U16LSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16LSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_U16LSB, 2 channels.\n");
 #endif
 
@@ -9004,7 +9004,7 @@ SDL_Upsample_U16LSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16LSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_U16LSB, 2 channels.\n");
 #endif
 
@@ -9035,7 +9035,7 @@ SDL_Downsample_U16LSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16LSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_U16LSB, 2 channels.\n");
 #endif
 
@@ -9072,7 +9072,7 @@ SDL_Upsample_U16LSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16LSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_U16LSB, 2 channels.\n");
 #endif
 
@@ -9103,7 +9103,7 @@ SDL_Downsample_U16LSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16LSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_U16LSB, 4 channels.\n");
 #endif
 
@@ -9146,7 +9146,7 @@ SDL_Upsample_U16LSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16LSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_U16LSB, 4 channels.\n");
 #endif
 
@@ -9185,7 +9185,7 @@ SDL_Downsample_U16LSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16LSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_U16LSB, 4 channels.\n");
 #endif
 
@@ -9236,7 +9236,7 @@ SDL_Upsample_U16LSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16LSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_U16LSB, 4 channels.\n");
 #endif
 
@@ -9275,7 +9275,7 @@ SDL_Downsample_U16LSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16LSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_U16LSB, 6 channels.\n");
 #endif
 
@@ -9328,7 +9328,7 @@ SDL_Upsample_U16LSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16LSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_U16LSB, 6 channels.\n");
 #endif
 
@@ -9375,7 +9375,7 @@ SDL_Downsample_U16LSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16LSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_U16LSB, 6 channels.\n");
 #endif
 
@@ -9440,7 +9440,7 @@ SDL_Upsample_U16LSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16LSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_U16LSB, 6 channels.\n");
 #endif
 
@@ -9487,7 +9487,7 @@ SDL_Downsample_U16LSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16LSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_U16LSB, 8 channels.\n");
 #endif
 
@@ -9550,7 +9550,7 @@ SDL_Upsample_U16LSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16LSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_U16LSB, 8 channels.\n");
 #endif
 
@@ -9605,7 +9605,7 @@ SDL_Downsample_U16LSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16LSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_U16LSB, 8 channels.\n");
 #endif
 
@@ -9684,7 +9684,7 @@ SDL_Upsample_U16LSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16LSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_U16LSB, 8 channels.\n");
 #endif
 
@@ -9739,7 +9739,7 @@ SDL_Downsample_U16LSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16LSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_S16LSB, 1 channels.\n");
 #endif
 
@@ -9767,7 +9767,7 @@ SDL_Upsample_S16LSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16LSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_S16LSB, 1 channels.\n");
 #endif
 
@@ -9794,7 +9794,7 @@ SDL_Downsample_S16LSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16LSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_S16LSB, 1 channels.\n");
 #endif
 
@@ -9824,7 +9824,7 @@ SDL_Upsample_S16LSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16LSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_S16LSB, 1 channels.\n");
 #endif
 
@@ -9851,7 +9851,7 @@ SDL_Downsample_S16LSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16LSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_S16LSB, 2 channels.\n");
 #endif
 
@@ -9884,7 +9884,7 @@ SDL_Upsample_S16LSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16LSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_S16LSB, 2 channels.\n");
 #endif
 
@@ -9915,7 +9915,7 @@ SDL_Downsample_S16LSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16LSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_S16LSB, 2 channels.\n");
 #endif
 
@@ -9952,7 +9952,7 @@ SDL_Upsample_S16LSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16LSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_S16LSB, 2 channels.\n");
 #endif
 
@@ -9983,7 +9983,7 @@ SDL_Downsample_S16LSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16LSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_S16LSB, 4 channels.\n");
 #endif
 
@@ -10026,7 +10026,7 @@ SDL_Upsample_S16LSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16LSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_S16LSB, 4 channels.\n");
 #endif
 
@@ -10065,7 +10065,7 @@ SDL_Downsample_S16LSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16LSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_S16LSB, 4 channels.\n");
 #endif
 
@@ -10116,7 +10116,7 @@ SDL_Upsample_S16LSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16LSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_S16LSB, 4 channels.\n");
 #endif
 
@@ -10155,7 +10155,7 @@ SDL_Downsample_S16LSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16LSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_S16LSB, 6 channels.\n");
 #endif
 
@@ -10208,7 +10208,7 @@ SDL_Upsample_S16LSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16LSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_S16LSB, 6 channels.\n");
 #endif
 
@@ -10255,7 +10255,7 @@ SDL_Downsample_S16LSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16LSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_S16LSB, 6 channels.\n");
 #endif
 
@@ -10320,7 +10320,7 @@ SDL_Upsample_S16LSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16LSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_S16LSB, 6 channels.\n");
 #endif
 
@@ -10367,7 +10367,7 @@ SDL_Downsample_S16LSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16LSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_S16LSB, 8 channels.\n");
 #endif
 
@@ -10430,7 +10430,7 @@ SDL_Upsample_S16LSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16LSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_S16LSB, 8 channels.\n");
 #endif
 
@@ -10485,7 +10485,7 @@ SDL_Downsample_S16LSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16LSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_S16LSB, 8 channels.\n");
 #endif
 
@@ -10564,7 +10564,7 @@ SDL_Upsample_S16LSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16LSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_S16LSB, 8 channels.\n");
 #endif
 
@@ -10619,7 +10619,7 @@ SDL_Downsample_S16LSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16MSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_U16MSB, 1 channels.\n");
 #endif
 
@@ -10647,7 +10647,7 @@ SDL_Upsample_U16MSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16MSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_U16MSB, 1 channels.\n");
 #endif
 
@@ -10674,7 +10674,7 @@ SDL_Downsample_U16MSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16MSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_U16MSB, 1 channels.\n");
 #endif
 
@@ -10704,7 +10704,7 @@ SDL_Upsample_U16MSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16MSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_U16MSB, 1 channels.\n");
 #endif
 
@@ -10731,7 +10731,7 @@ SDL_Downsample_U16MSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16MSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_U16MSB, 2 channels.\n");
 #endif
 
@@ -10764,7 +10764,7 @@ SDL_Upsample_U16MSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16MSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_U16MSB, 2 channels.\n");
 #endif
 
@@ -10795,7 +10795,7 @@ SDL_Downsample_U16MSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16MSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_U16MSB, 2 channels.\n");
 #endif
 
@@ -10832,7 +10832,7 @@ SDL_Upsample_U16MSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16MSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_U16MSB, 2 channels.\n");
 #endif
 
@@ -10863,7 +10863,7 @@ SDL_Downsample_U16MSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16MSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_U16MSB, 4 channels.\n");
 #endif
 
@@ -10906,7 +10906,7 @@ SDL_Upsample_U16MSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16MSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_U16MSB, 4 channels.\n");
 #endif
 
@@ -10945,7 +10945,7 @@ SDL_Downsample_U16MSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16MSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_U16MSB, 4 channels.\n");
 #endif
 
@@ -10996,7 +10996,7 @@ SDL_Upsample_U16MSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16MSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_U16MSB, 4 channels.\n");
 #endif
 
@@ -11035,7 +11035,7 @@ SDL_Downsample_U16MSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16MSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_U16MSB, 6 channels.\n");
 #endif
 
@@ -11088,7 +11088,7 @@ SDL_Upsample_U16MSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16MSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_U16MSB, 6 channels.\n");
 #endif
 
@@ -11135,7 +11135,7 @@ SDL_Downsample_U16MSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16MSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_U16MSB, 6 channels.\n");
 #endif
 
@@ -11200,7 +11200,7 @@ SDL_Upsample_U16MSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16MSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_U16MSB, 6 channels.\n");
 #endif
 
@@ -11247,7 +11247,7 @@ SDL_Downsample_U16MSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16MSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_U16MSB, 8 channels.\n");
 #endif
 
@@ -11310,7 +11310,7 @@ SDL_Upsample_U16MSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16MSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_U16MSB, 8 channels.\n");
 #endif
 
@@ -11365,7 +11365,7 @@ SDL_Downsample_U16MSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_U16MSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_U16MSB, 8 channels.\n");
 #endif
 
@@ -11444,7 +11444,7 @@ SDL_Upsample_U16MSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_U16MSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_U16MSB, 8 channels.\n");
 #endif
 
@@ -11499,7 +11499,7 @@ SDL_Downsample_U16MSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16MSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_S16MSB, 1 channels.\n");
 #endif
 
@@ -11527,7 +11527,7 @@ SDL_Upsample_S16MSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16MSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_S16MSB, 1 channels.\n");
 #endif
 
@@ -11554,7 +11554,7 @@ SDL_Downsample_S16MSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16MSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_S16MSB, 1 channels.\n");
 #endif
 
@@ -11584,7 +11584,7 @@ SDL_Upsample_S16MSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16MSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_S16MSB, 1 channels.\n");
 #endif
 
@@ -11611,7 +11611,7 @@ SDL_Downsample_S16MSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16MSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_S16MSB, 2 channels.\n");
 #endif
 
@@ -11644,7 +11644,7 @@ SDL_Upsample_S16MSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16MSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_S16MSB, 2 channels.\n");
 #endif
 
@@ -11675,7 +11675,7 @@ SDL_Downsample_S16MSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16MSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_S16MSB, 2 channels.\n");
 #endif
 
@@ -11712,7 +11712,7 @@ SDL_Upsample_S16MSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16MSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_S16MSB, 2 channels.\n");
 #endif
 
@@ -11743,7 +11743,7 @@ SDL_Downsample_S16MSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16MSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_S16MSB, 4 channels.\n");
 #endif
 
@@ -11786,7 +11786,7 @@ SDL_Upsample_S16MSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16MSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_S16MSB, 4 channels.\n");
 #endif
 
@@ -11825,7 +11825,7 @@ SDL_Downsample_S16MSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16MSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_S16MSB, 4 channels.\n");
 #endif
 
@@ -11876,7 +11876,7 @@ SDL_Upsample_S16MSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16MSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_S16MSB, 4 channels.\n");
 #endif
 
@@ -11915,7 +11915,7 @@ SDL_Downsample_S16MSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16MSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_S16MSB, 6 channels.\n");
 #endif
 
@@ -11968,7 +11968,7 @@ SDL_Upsample_S16MSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16MSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_S16MSB, 6 channels.\n");
 #endif
 
@@ -12015,7 +12015,7 @@ SDL_Downsample_S16MSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16MSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_S16MSB, 6 channels.\n");
 #endif
 
@@ -12080,7 +12080,7 @@ SDL_Upsample_S16MSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16MSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_S16MSB, 6 channels.\n");
 #endif
 
@@ -12127,7 +12127,7 @@ SDL_Downsample_S16MSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16MSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_S16MSB, 8 channels.\n");
 #endif
 
@@ -12190,7 +12190,7 @@ SDL_Upsample_S16MSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16MSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_S16MSB, 8 channels.\n");
 #endif
 
@@ -12245,7 +12245,7 @@ SDL_Downsample_S16MSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S16MSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_S16MSB, 8 channels.\n");
 #endif
 
@@ -12324,7 +12324,7 @@ SDL_Upsample_S16MSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S16MSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_S16MSB, 8 channels.\n");
 #endif
 
@@ -12379,7 +12379,7 @@ SDL_Downsample_S16MSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32LSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_S32LSB, 1 channels.\n");
 #endif
 
@@ -12407,7 +12407,7 @@ SDL_Upsample_S32LSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32LSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_S32LSB, 1 channels.\n");
 #endif
 
@@ -12434,7 +12434,7 @@ SDL_Downsample_S32LSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32LSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_S32LSB, 1 channels.\n");
 #endif
 
@@ -12464,7 +12464,7 @@ SDL_Upsample_S32LSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32LSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_S32LSB, 1 channels.\n");
 #endif
 
@@ -12491,7 +12491,7 @@ SDL_Downsample_S32LSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32LSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_S32LSB, 2 channels.\n");
 #endif
 
@@ -12524,7 +12524,7 @@ SDL_Upsample_S32LSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32LSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_S32LSB, 2 channels.\n");
 #endif
 
@@ -12555,7 +12555,7 @@ SDL_Downsample_S32LSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32LSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_S32LSB, 2 channels.\n");
 #endif
 
@@ -12592,7 +12592,7 @@ SDL_Upsample_S32LSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32LSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_S32LSB, 2 channels.\n");
 #endif
 
@@ -12623,7 +12623,7 @@ SDL_Downsample_S32LSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32LSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_S32LSB, 4 channels.\n");
 #endif
 
@@ -12666,7 +12666,7 @@ SDL_Upsample_S32LSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32LSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_S32LSB, 4 channels.\n");
 #endif
 
@@ -12705,7 +12705,7 @@ SDL_Downsample_S32LSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32LSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_S32LSB, 4 channels.\n");
 #endif
 
@@ -12756,7 +12756,7 @@ SDL_Upsample_S32LSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32LSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_S32LSB, 4 channels.\n");
 #endif
 
@@ -12795,7 +12795,7 @@ SDL_Downsample_S32LSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32LSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_S32LSB, 6 channels.\n");
 #endif
 
@@ -12848,7 +12848,7 @@ SDL_Upsample_S32LSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32LSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_S32LSB, 6 channels.\n");
 #endif
 
@@ -12895,7 +12895,7 @@ SDL_Downsample_S32LSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32LSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_S32LSB, 6 channels.\n");
 #endif
 
@@ -12960,7 +12960,7 @@ SDL_Upsample_S32LSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32LSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_S32LSB, 6 channels.\n");
 #endif
 
@@ -13007,7 +13007,7 @@ SDL_Downsample_S32LSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32LSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_S32LSB, 8 channels.\n");
 #endif
 
@@ -13070,7 +13070,7 @@ SDL_Upsample_S32LSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32LSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_S32LSB, 8 channels.\n");
 #endif
 
@@ -13125,7 +13125,7 @@ SDL_Downsample_S32LSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32LSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_S32LSB, 8 channels.\n");
 #endif
 
@@ -13204,7 +13204,7 @@ SDL_Upsample_S32LSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32LSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_S32LSB, 8 channels.\n");
 #endif
 
@@ -13259,7 +13259,7 @@ SDL_Downsample_S32LSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32MSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_S32MSB, 1 channels.\n");
 #endif
 
@@ -13287,7 +13287,7 @@ SDL_Upsample_S32MSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32MSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_S32MSB, 1 channels.\n");
 #endif
 
@@ -13314,7 +13314,7 @@ SDL_Downsample_S32MSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32MSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_S32MSB, 1 channels.\n");
 #endif
 
@@ -13344,7 +13344,7 @@ SDL_Upsample_S32MSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32MSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_S32MSB, 1 channels.\n");
 #endif
 
@@ -13371,7 +13371,7 @@ SDL_Downsample_S32MSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32MSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_S32MSB, 2 channels.\n");
 #endif
 
@@ -13404,7 +13404,7 @@ SDL_Upsample_S32MSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32MSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_S32MSB, 2 channels.\n");
 #endif
 
@@ -13435,7 +13435,7 @@ SDL_Downsample_S32MSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32MSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_S32MSB, 2 channels.\n");
 #endif
 
@@ -13472,7 +13472,7 @@ SDL_Upsample_S32MSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32MSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_S32MSB, 2 channels.\n");
 #endif
 
@@ -13503,7 +13503,7 @@ SDL_Downsample_S32MSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32MSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_S32MSB, 4 channels.\n");
 #endif
 
@@ -13546,7 +13546,7 @@ SDL_Upsample_S32MSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32MSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_S32MSB, 4 channels.\n");
 #endif
 
@@ -13585,7 +13585,7 @@ SDL_Downsample_S32MSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32MSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_S32MSB, 4 channels.\n");
 #endif
 
@@ -13636,7 +13636,7 @@ SDL_Upsample_S32MSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32MSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_S32MSB, 4 channels.\n");
 #endif
 
@@ -13675,7 +13675,7 @@ SDL_Downsample_S32MSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32MSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_S32MSB, 6 channels.\n");
 #endif
 
@@ -13728,7 +13728,7 @@ SDL_Upsample_S32MSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32MSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_S32MSB, 6 channels.\n");
 #endif
 
@@ -13775,7 +13775,7 @@ SDL_Downsample_S32MSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32MSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_S32MSB, 6 channels.\n");
 #endif
 
@@ -13840,7 +13840,7 @@ SDL_Upsample_S32MSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32MSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_S32MSB, 6 channels.\n");
 #endif
 
@@ -13887,7 +13887,7 @@ SDL_Downsample_S32MSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32MSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_S32MSB, 8 channels.\n");
 #endif
 
@@ -13950,7 +13950,7 @@ SDL_Upsample_S32MSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32MSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_S32MSB, 8 channels.\n");
 #endif
 
@@ -14005,7 +14005,7 @@ SDL_Downsample_S32MSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_S32MSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_S32MSB, 8 channels.\n");
 #endif
 
@@ -14084,7 +14084,7 @@ SDL_Upsample_S32MSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_S32MSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_S32MSB, 8 channels.\n");
 #endif
 
@@ -14139,7 +14139,7 @@ SDL_Downsample_S32MSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32LSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_F32LSB, 1 channels.\n");
 #endif
 
@@ -14167,7 +14167,7 @@ SDL_Upsample_F32LSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32LSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_F32LSB, 1 channels.\n");
 #endif
 
@@ -14194,7 +14194,7 @@ SDL_Downsample_F32LSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32LSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_F32LSB, 1 channels.\n");
 #endif
 
@@ -14224,7 +14224,7 @@ SDL_Upsample_F32LSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32LSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_F32LSB, 1 channels.\n");
 #endif
 
@@ -14251,7 +14251,7 @@ SDL_Downsample_F32LSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32LSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_F32LSB, 2 channels.\n");
 #endif
 
@@ -14284,7 +14284,7 @@ SDL_Upsample_F32LSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32LSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_F32LSB, 2 channels.\n");
 #endif
 
@@ -14315,7 +14315,7 @@ SDL_Downsample_F32LSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32LSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_F32LSB, 2 channels.\n");
 #endif
 
@@ -14352,7 +14352,7 @@ SDL_Upsample_F32LSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32LSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_F32LSB, 2 channels.\n");
 #endif
 
@@ -14383,7 +14383,7 @@ SDL_Downsample_F32LSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32LSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_F32LSB, 4 channels.\n");
 #endif
 
@@ -14426,7 +14426,7 @@ SDL_Upsample_F32LSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32LSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_F32LSB, 4 channels.\n");
 #endif
 
@@ -14465,7 +14465,7 @@ SDL_Downsample_F32LSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32LSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_F32LSB, 4 channels.\n");
 #endif
 
@@ -14516,7 +14516,7 @@ SDL_Upsample_F32LSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32LSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_F32LSB, 4 channels.\n");
 #endif
 
@@ -14555,7 +14555,7 @@ SDL_Downsample_F32LSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32LSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_F32LSB, 6 channels.\n");
 #endif
 
@@ -14608,7 +14608,7 @@ SDL_Upsample_F32LSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32LSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_F32LSB, 6 channels.\n");
 #endif
 
@@ -14655,7 +14655,7 @@ SDL_Downsample_F32LSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32LSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_F32LSB, 6 channels.\n");
 #endif
 
@@ -14720,7 +14720,7 @@ SDL_Upsample_F32LSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32LSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_F32LSB, 6 channels.\n");
 #endif
 
@@ -14767,7 +14767,7 @@ SDL_Downsample_F32LSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32LSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_F32LSB, 8 channels.\n");
 #endif
 
@@ -14830,7 +14830,7 @@ SDL_Upsample_F32LSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32LSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_F32LSB, 8 channels.\n");
 #endif
 
@@ -14885,7 +14885,7 @@ SDL_Downsample_F32LSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32LSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_F32LSB, 8 channels.\n");
 #endif
 
@@ -14964,7 +14964,7 @@ SDL_Upsample_F32LSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32LSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_F32LSB, 8 channels.\n");
 #endif
 
@@ -15019,7 +15019,7 @@ SDL_Downsample_F32LSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32MSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_F32MSB, 1 channels.\n");
 #endif
 
@@ -15047,7 +15047,7 @@ SDL_Upsample_F32MSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32MSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_F32MSB, 1 channels.\n");
 #endif
 
@@ -15074,7 +15074,7 @@ SDL_Downsample_F32MSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32MSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_F32MSB, 1 channels.\n");
 #endif
 
@@ -15104,7 +15104,7 @@ SDL_Upsample_F32MSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32MSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_F32MSB, 1 channels.\n");
 #endif
 
@@ -15131,7 +15131,7 @@ SDL_Downsample_F32MSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32MSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_F32MSB, 2 channels.\n");
 #endif
 
@@ -15164,7 +15164,7 @@ SDL_Upsample_F32MSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32MSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_F32MSB, 2 channels.\n");
 #endif
 
@@ -15195,7 +15195,7 @@ SDL_Downsample_F32MSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32MSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_F32MSB, 2 channels.\n");
 #endif
 
@@ -15232,7 +15232,7 @@ SDL_Upsample_F32MSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32MSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_F32MSB, 2 channels.\n");
 #endif
 
@@ -15263,7 +15263,7 @@ SDL_Downsample_F32MSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32MSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_F32MSB, 4 channels.\n");
 #endif
 
@@ -15306,7 +15306,7 @@ SDL_Upsample_F32MSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32MSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_F32MSB, 4 channels.\n");
 #endif
 
@@ -15345,7 +15345,7 @@ SDL_Downsample_F32MSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32MSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_F32MSB, 4 channels.\n");
 #endif
 
@@ -15396,7 +15396,7 @@ SDL_Upsample_F32MSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32MSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_F32MSB, 4 channels.\n");
 #endif
 
@@ -15435,7 +15435,7 @@ SDL_Downsample_F32MSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32MSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_F32MSB, 6 channels.\n");
 #endif
 
@@ -15488,7 +15488,7 @@ SDL_Upsample_F32MSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32MSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_F32MSB, 6 channels.\n");
 #endif
 
@@ -15535,7 +15535,7 @@ SDL_Downsample_F32MSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32MSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_F32MSB, 6 channels.\n");
 #endif
 
@@ -15600,7 +15600,7 @@ SDL_Upsample_F32MSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32MSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_F32MSB, 6 channels.\n");
 #endif
 
@@ -15647,7 +15647,7 @@ SDL_Downsample_F32MSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32MSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x2) AUDIO_F32MSB, 8 channels.\n");
 #endif
 
@@ -15710,7 +15710,7 @@ SDL_Upsample_F32MSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32MSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x2) AUDIO_F32MSB, 8 channels.\n");
 #endif
 
@@ -15765,7 +15765,7 @@ SDL_Downsample_F32MSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Upsample_F32MSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Upsample (x4) AUDIO_F32MSB, 8 channels.\n");
 #endif
 
@@ -15844,7 +15844,7 @@ SDL_Upsample_F32MSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 static void SDLCALL
 SDL_Downsample_F32MSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Downsample (x4) AUDIO_F32MSB, 8 channels.\n");
 #endif
 

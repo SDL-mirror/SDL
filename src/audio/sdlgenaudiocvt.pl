@@ -216,7 +216,7 @@ ${sym}(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const $srctype *src;
     $tctype *dst;
 
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "Converting AUDIO_${from} to AUDIO_${to}.\\n");
 #endif
 
@@ -391,7 +391,7 @@ sub buildArbitraryResampleFunc {
 static void SDLCALL
 ${sym}(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "$resample arbitrary (x%f) AUDIO_${from}, ${channels} channels.\\n", cvt->rate_incr);
 #endif
 
@@ -529,7 +529,7 @@ sub buildMultipleResampleFunc {
 static void SDLCALL
 ${sym}(SDL_AudioCVT * cvt, SDL_AudioFormat format)
 {
-#ifdef DEBUG_CONVERT
+#if DEBUG_CONVERT
     fprintf(stderr, "$resample (x${multiple}) AUDIO_${from}, ${channels} channels.\\n");
 #endif
 

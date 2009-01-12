@@ -347,7 +347,6 @@ SDL_RunAudio(void *devicep)
     void *udata;
     void (SDLCALL * fill) (void *userdata, Uint8 * stream, int len);
     int silence;
-    int stream_max_len;
 
     /* For streaming when the buffer sizes don't match up */
     Uint8 *istream;

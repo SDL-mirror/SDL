@@ -478,7 +478,6 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
 {
     SDL_DisplayMode desktop_mode;
     SDL_DisplayMode mode;
-    const char *env;
     int window_x = SDL_WINDOWPOS_UNDEFINED;
     int window_y = SDL_WINDOWPOS_UNDEFINED;
     Uint32 window_flags;

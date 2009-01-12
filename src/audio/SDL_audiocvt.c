@@ -937,7 +937,7 @@ SDL_BuildAudioResampleCVT(SDL_AudioCVT * cvt, int dst_channels,
         cvt->filters[cvt->filter_index++] = filter;
         if (src_rate < dst_rate) {
             const double mult = ((double) dst_rate) / ((double) src_rate);
-            cvt->len_mult *= (int) ceil(mult);  /* !!! FIXME: C runtime dependency. */
+            cvt->len_mult *= (int) SDL_ceil(mult);
             cvt->len_ratio *= mult;
         } else {
             cvt->len_ratio /= ((double) src_rate) / ((double) dst_rate);
