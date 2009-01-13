@@ -1266,8 +1266,7 @@ BlitRGBtoRGBSurfaceAlpha(SDL_BlitInfo * info)
 
         while (height--) {
 			/* *INDENT-OFF* */
-			DUFFS_LOOP_DOUBLE2({
-				/* One Pixel Blend */
+			DUFFS_LOOP4({
 				s = *srcp;
 				d = *dstp;
 				s1 = s & 0xff00ff;
@@ -1278,35 +1277,6 @@ BlitRGBtoRGBSurfaceAlpha(SDL_BlitInfo * info)
 				d &= 0xff00;
 				d = (d + ((s - d) * alpha >> 8)) & 0xff00;
 				*dstp = d1 | d | 0xff000000;
-				++srcp;
-				++dstp;
-			},{
-			        /* Two Pixels Blend */
-				s = *srcp;
-				d = *dstp;
-				s1 = s & 0xff00ff;
-				d1 = d & 0xff00ff;
-				d1 += (s1 - d1) * alpha >> 8;
-				d1 &= 0xff00ff;
-				     
-				s = ((s & 0xff00) >> 8) | 
-					((srcp[1] & 0xff00) << 8);
-				d = ((d & 0xff00) >> 8) |
-					((dstp[1] & 0xff00) << 8);
-				d += (s - d) * alpha >> 8;
-				d &= 0x00ff00ff;
-				
-				*dstp++ = d1 | ((d << 8) & 0xff00) | 0xff000000;
-				++srcp;
-				
-			        s1 = *srcp;
-				d1 = *dstp;
-				s1 &= 0xff00ff;
-				d1 &= 0xff00ff;
-				d1 += (s1 - d1) * alpha >> 8;
-				d1 &= 0xff00ff;
-				
-				*dstp = d1 | ((d >> 8) & 0xff00) | 0xff000000;
 				++srcp;
 				++dstp;
 			}, width);
@@ -1588,7 +1558,7 @@ Blit565to565SurfaceAlphaMMX(SDL_BlitInfo * info)
 
         while (height--) {
 			/* *INDENT-OFF* */
-			DUFFS_LOOP_QUATRO2(
+			DUFFS_LOOP_124(
 			{
 				s = *srcp++;
 				d = *dstp;
@@ -1726,7 +1696,7 @@ Blit555to555SurfaceAlphaMMX(SDL_BlitInfo * info)
 
         while (height--) {
 			/* *INDENT-OFF* */
-			DUFFS_LOOP_QUATRO2(
+			DUFFS_LOOP_124(
 			{
 				s = *srcp++;
 				d = *dstp;
