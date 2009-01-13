@@ -429,11 +429,16 @@ DirectFB_AdjustWindowSurface(SDL_Window * window)
                                                           window_surface,
                                                           &windata->client));
 #else
+ 	   DFBWindowOptions opts;
+
+	   SDL_DFB_CHECKERR(windata->window->GetOptions(windata->window, &opts));
        /* recreate subsurface */
        SDL_DFB_RELEASE(windata->surface);
-       SDL_DFB_CHECKERR(windata->window->ResizeSurface(windata->window,
-                                                       windata->size.w,
-                                                       windata->size.h));
+       
+       if (opts & DWOP_SCALE)
+          SDL_DFB_CHECKERR(windata->window->ResizeSurface(windata->window,
+                                                          windata->size.w,
+                                                          windata->size.h));
        SDL_DFB_CHECKERR(windata->window_surface->
                       GetSubSurface(windata->window_surface, &windata->client,
                                   &windata->surface));
