@@ -140,7 +140,7 @@ typedef struct
     IDirectFBPalette *palette;
     SDL_VideoDisplay *display;
     SDL_DirtyRectList dirty;
-#if (DIRECTFB_MAJOR_VERSION == 1) && (DIRECTFB_MINOR_VERSION >= 2)
+#if (DFB_VERSION_ATLEAST(1,2,0))
     DFBSurfaceRenderOptions render_options;
 #endif
 } DirectFB_TextureData;
@@ -387,7 +387,7 @@ SDLToDFBPixelFormat(Uint32 format)
     case SDL_PIXELFORMAT_INDEX4MSB:
         return DSPF_UNKNOWN;
     case SDL_PIXELFORMAT_RGB444:
-#if (DIRECTFB_MAJOR_VERSION == 1) && (DIRECTFB_MINOR_VERSION >= 2)
+#if (DFB_VERSION_ATLEAST(1,2,0))
         return DSPF_RGB444;
 #else
         return DSPF_UNKNOWN;
@@ -543,7 +543,7 @@ DirectFB_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         }
 
     }
-#if (DIRECTFB_MAJOR_VERSION == 1) && (DIRECTFB_MINOR_VERSION >= 2)
+#if (DFB_VERSION_ATLEAST(1,2,0))
     data->render_options = DSRO_NONE;
 #endif
 
@@ -673,7 +673,7 @@ DirectFB_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
 static int
 DirectFB_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-#if (DIRECTFB_MAJOR_VERSION == 1) && (DIRECTFB_MINOR_VERSION >= 2)
+#if (DFB_VERSION_ATLEAST(1,2,0))
 
     DirectFB_TextureData *data = (DirectFB_TextureData *) texture->driverdata;
 
@@ -847,7 +847,7 @@ DirectFB_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
 
     PrepareDraw(renderer);
     /* Use antialiasing when available */
-#if (DIRECTFB_MAJOR_VERSION == 1) && (DIRECTFB_MINOR_VERSION >= 2)
+#if (DFB_VERSION_ATLEAST(1,2,0))
     SDL_DFB_CHECKERR(data->surface->SetRenderOptions(data->surface,
                                                      DSRO_ANTIALIAS));
 #endif
@@ -961,7 +961,7 @@ DirectFB_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                                                          data->blitFlags
                                                          | flags));
 
-#if (DIRECTFB_MAJOR_VERSION == 1) && (DIRECTFB_MINOR_VERSION >= 2)
+#if (DFB_VERSION_ATLEAST(1,2,0))
         SDL_DFB_CHECKERR(data->surface->SetRenderOptions(data->surface,
                                                          texturedata->
                                                          render_options));

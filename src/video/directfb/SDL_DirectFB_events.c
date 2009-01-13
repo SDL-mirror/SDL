@@ -48,7 +48,7 @@ static int DirectFB_TranslateButton(DFBInputDeviceButtonIdentifier button);
 static void
 DirectFB_SetContext(_THIS, SDL_WindowID id)
 {
-#if (DIRECTFB_MAJOR_VERSION >= 1)
+#if (DFB_VERSION_ATLEAST(1,0,0))
     /* FIXME: does not work on 1.0/1.2 with radeon driver
      *        the approach did work with the matrox driver
      *        This has simply no effect.

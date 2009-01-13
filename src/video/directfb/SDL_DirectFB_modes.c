@@ -335,7 +335,7 @@ DirectFB_InitModes(_THIS)
         display.current_mode = mode;
         display.driverdata = dispdata;
 
-#if (DIRECTFB_MAJOR_VERSION == 1) && (DIRECTFB_MINOR_VERSION >= 2)
+#if (DFB_VERSION_ATLEAST(1,2,0))
         dlc.flags =
             DLCONF_WIDTH | DLCONF_HEIGHT | DLCONF_PIXELFORMAT |
             DLCONF_OPTIONS;
@@ -438,7 +438,7 @@ DirectFB_SetDisplayMode(_THIS, SDL_DisplayMode * mode)
     SDL_DFB_DEBUG("Trace\n");
     config.flags &= ~fail;
     SDL_DFB_CHECKERR(data->layer->SetConfiguration(data->layer, &config));
-#if (DIRECTFB_MAJOR_VERSION == 1) && (DIRECTFB_MINOR_VERSION >= 2)
+#if (DFB_VERSION_ATLEAST(1,2,0))
     /* Need to call this twice ! */
     SDL_DFB_CHECKERR(data->layer->SetConfiguration(data->layer, &config));
 #endif

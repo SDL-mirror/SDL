@@ -34,13 +34,20 @@
 #define DEBUG 0
 #define LOG_CHANNEL 	stdout
 
-#if (DIRECTFB_MAJOR_VERSION < 1)
-#error "SDL_DIRECTFB: Please compile against libdirectfb version >= 1.0.0"
-#endif
+#define DFB_VERSIONNUM(X, Y, Z)						\
+	((X)*1000 + (Y)*100 + (Z))
 
-#if (DIRECTFB_MAJOR_VERSION >= 1) && (DIRECTFB_MINOR_VERSION >= 0) && (DIRECTFB_MICRO_VERSION >= 0 )
-#define SDL_DIRECTFB_OPENGL 1
-#include <directfbgl.h>
+#define DFB_COMPILEDVERSION \
+	DFB_VERSIONNUM(DIRECTFB_MAJOR_VERSION, DIRECTFB_MINOR_VERSION, DIRECTFB_MICRO_VERSION)
+
+#define DFB_VERSION_ATLEAST(X, Y, Z) \
+	(DFB_COMPILEDVERSION >= DFB_VERSIONNUM(X, Y, Z))
+
+#if (DFB_VERSION_ATLEAST(1,0,0))
+	#define SDL_DIRECTFB_OPENGL 1
+	#include <directfbgl.h>
+#else
+	#error "SDL_DIRECTFB: Please compile against libdirectfb version >= 1.0.0"
 #endif
 
 #if SDL_DIRECTFB_OPENGL

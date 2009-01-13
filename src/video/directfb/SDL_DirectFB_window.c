@@ -420,14 +420,28 @@ DirectFB_AdjustWindowSurface(SDL_Window * window)
     }
 
     if (adjust) {
-        SDL_DFB_CHECKERR(windata->window->ResizeSurface(windata->window,
+#if DFB_VERSION_ATLEAST(1,2,0)
+       SDL_DFB_CHECKERR(windata->window->ResizeSurface(windata->window,
                                                         windata->size.w,
                                                         windata->size.h));
-        SDL_DFB_CHECKERR(windata->surface->MakeSubSurface(windata->surface,
+       SDL_DFB_CHECKERR(windata->surface->MakeSubSurface(windata->surface,
                                                           windata->
                                                           window_surface,
                                                           &windata->client));
-        DirectFB_WM_RedrawLayout(window);
+#else
+       /* recreate subsurface */
+       windata->surface->ReleaseSource(windata->surface);
+       windata->window_surface->ReleaseSource(windata->window_surface);
+       SDL_DFB_RELEASE(windata->surface);
+       windata->surface = NULL;
+       SDL_DFB_CHECKERR(windata->window->ResizeSurface(windata->window,
+                                                       windata->size.w,
+                                                       windata->size.h));
+       SDL_DFB_CHECKERR(windata->window_surface->
+                        GetSubSurface(windata->window_surface, &windata->client,
+                                      &windata->surface));
+#endif
+       DirectFB_WM_RedrawLayout(window);
     }
   error:
     return;
