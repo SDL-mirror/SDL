@@ -71,9 +71,9 @@
 #define DFBENV_USE_LINUX_INPUT		"SDL_DIRECTFB_LINUX_INPUT"      /* Default: on  */
 #define DFBENV_USE_WM				"SDL_DIRECTFB_WM"		      	/* Default: off  */
 
-#define SDL_DFB_RELEASE(x) do { if ( x ) { x->Release(x); x = NULL; } } while (0)
-#define SDL_DFB_FREE(x) do { if ( x ) { SDL_free(x); x = NULL; } } while (0)
-#define SDL_DFB_UNLOCK(x) do { if ( x ) { x->Unlock(x); } } while (0)
+#define SDL_DFB_RELEASE(x) do { if ( (x) != NULL ) { x->Release(x); x = NULL; } } while (0)
+#define SDL_DFB_FREE(x) do { if ( (x) != NULL ) { SDL_free(x); x = NULL; } } while (0)
+#define SDL_DFB_UNLOCK(x) do { if ( (x) != NULL ) { x->Unlock(x); } } while (0)
 
 #if DEBUG
 #define SDL_DFB_DEBUG(x...) do { fprintf(LOG_CHANNEL, "%s:", __FUNCTION__); fprintf(LOG_CHANNEL, x); } while (0)

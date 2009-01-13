@@ -86,6 +86,8 @@ static void DirectFB_DestroyTexture(SDL_Renderer * renderer,
                                     SDL_Texture * texture);
 static void DirectFB_DestroyRenderer(SDL_Renderer * renderer);
 
+#define SDL_DFB_WINDOWSURFACE(win)  IDirectFBSurface *destsurf = ((DFB_WindowData *) ((win)->driverdata))->surface;
+
 SDL_RenderDriver DirectFB_RenderDriver = {
     DirectFB_CreateRenderer,
     {
@@ -122,7 +124,7 @@ SDL_RenderDriver DirectFB_RenderDriver = {
 
 typedef struct
 {
-    IDirectFBSurface *surface;
+    SDL_Window *window;
     DFBSurfaceFlipFlags flipflags;
     int isyuvdirect;
     int size_changed;
@@ -180,28 +182,30 @@ static void
 SetBlendMode(DirectFB_RenderData * data, int blendMode,
              DirectFB_TextureData * source)
 {
-    //FIXME: check for format change
+	SDL_DFB_WINDOWSURFACE(data->window);
+	
+	//FIXME: check for format change
     if (1 || data->lastBlendMode != blendMode) {
         switch (blendMode) {
         case SDL_BLENDMODE_NONE:
                                            /**< No blending */
             data->blitFlags = DSBLIT_NOFX;
             data->drawFlags = DSDRAW_NOFX;
-            data->surface->SetSrcBlendFunction(data->surface, DSBF_ONE);
-            data->surface->SetDstBlendFunction(data->surface, DSBF_ZERO);
+            destsurf->SetSrcBlendFunction(destsurf, DSBF_ONE);
+            destsurf->SetDstBlendFunction(destsurf, DSBF_ZERO);
             break;
         case SDL_BLENDMODE_MASK:
             data->blitFlags = DSBLIT_BLEND_ALPHACHANNEL;
             data->drawFlags = DSDRAW_BLEND;
-            data->surface->SetSrcBlendFunction(data->surface, DSBF_SRCALPHA);
-            data->surface->SetDstBlendFunction(data->surface,
+            destsurf->SetSrcBlendFunction(destsurf, DSBF_SRCALPHA);
+            destsurf->SetDstBlendFunction(destsurf,
                                                DSBF_INVSRCALPHA);
             break;
         case SDL_BLENDMODE_BLEND:
             data->blitFlags = DSBLIT_BLEND_ALPHACHANNEL;
             data->drawFlags = DSDRAW_BLEND;
-            data->surface->SetSrcBlendFunction(data->surface, DSBF_SRCALPHA);
-            data->surface->SetDstBlendFunction(data->surface,
+            destsurf->SetSrcBlendFunction(destsurf, DSBF_SRCALPHA);
+            destsurf->SetDstBlendFunction(destsurf,
                                                DSBF_INVSRCALPHA);
             break;
         case SDL_BLENDMODE_ADD:
@@ -211,17 +215,17 @@ SetBlendMode(DirectFB_RenderData * data, int blendMode,
             // It will be cheaper to copy the surface to
             // a temporay surface and premultiply 
             if (source && TextureHasAlpha(source))
-                data->surface->SetSrcBlendFunction(data->surface,
+                destsurf->SetSrcBlendFunction(destsurf,
                                                    DSBF_SRCALPHA);
             else
-                data->surface->SetSrcBlendFunction(data->surface, DSBF_ONE);
-            data->surface->SetDstBlendFunction(data->surface, DSBF_ONE);
+                destsurf->SetSrcBlendFunction(destsurf, DSBF_ONE);
+            destsurf->SetDstBlendFunction(destsurf, DSBF_ONE);
             break;
         case SDL_BLENDMODE_MOD:
             data->blitFlags = DSBLIT_BLEND_ALPHACHANNEL;
             data->drawFlags = DSDRAW_BLEND;
-            data->surface->SetSrcBlendFunction(data->surface, DSBF_DESTCOLOR);
-            data->surface->SetDstBlendFunction(data->surface, DSBF_ZERO);
+            destsurf->SetSrcBlendFunction(destsurf, DSBF_DESTCOLOR);
+            destsurf->SetDstBlendFunction(destsurf, DSBF_ZERO);
             break;
         }
         data->lastBlendMode = blendMode;
@@ -241,6 +245,7 @@ DisplayPaletteChanged(void *userdata, SDL_Palette * palette)
 {
 #if USE_DISPLAY_PALETTE
     DirectFB_RenderData *data = (DirectFB_RenderData *) userdata;
+    SDL_DFB_WINDOWSURFACE(data->window);
     IDirectFBPalette *surfpal;
 
     int ret;
@@ -248,7 +253,7 @@ DisplayPaletteChanged(void *userdata, SDL_Palette * palette)
     int ncolors;
     DFBColor entries[256];
 
-    SDL_DFB_CHECKERR(data->surface->GetPalette(data->surface, &surfpal));
+    SDL_DFB_CHECKERR(destsurf->GetPalette(destsurf, &surfpal));
 
     /* FIXME: number of colors */
     ncolors = (palette->ncolors < 256 ? palette->ncolors : 256);
@@ -309,8 +314,7 @@ DirectFB_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->info.flags =
         SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTDISCARD;
 
-    data->surface = windata->surface;
-    data->surface->AddRef(data->surface);
+    data->window = window;
 
     data->flipflags = DSFLIP_PIPELINE | DSFLIP_BLIT;
 
@@ -320,7 +324,7 @@ DirectFB_CreateRenderer(SDL_Window * window, Uint32 flags)
     } else
         data->flipflags |= DSFLIP_ONSYNC;
 
-    SDL_DFB_CHECKERR(data->surface->GetCapabilities(data->surface, &scaps));
+    SDL_DFB_CHECKERR(windata->surface->GetCapabilities(windata->surface, &scaps));
     if (scaps & DSCAPS_DOUBLE)
         renderer->info.flags |= SDL_RENDERER_PRESENTFLIP2;
     else if (scaps & DSCAPS_TRIPLE)
@@ -794,6 +798,8 @@ static int
 PrepareDraw(SDL_Renderer * renderer)
 {
     DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
+    SDL_DFB_WINDOWSURFACE(data->window);
+    
     DFBResult ret;
     Uint8 r, g, b, a;
 
@@ -803,7 +809,7 @@ PrepareDraw(SDL_Renderer * renderer)
     a = renderer->a;
 
     SetBlendMode(data, renderer->blendMode, NULL);
-    SDL_DFB_CHECKERR(data->surface->SetDrawingFlags(data->surface,
+    SDL_DFB_CHECKERR(destsurf->SetDrawingFlags(destsurf,
                                                     data->drawFlags));
 
     switch (renderer->blendMode) {
@@ -820,7 +826,7 @@ PrepareDraw(SDL_Renderer * renderer)
         break;
     }
 
-    SDL_DFB_CHECKERR(data->surface->SetColor(data->surface, r, g, b, a));
+    SDL_DFB_CHECKERR(destsurf->SetColor(destsurf, r, g, b, a));
     return 0;
   error:
     return -1;
@@ -830,10 +836,11 @@ static int
 DirectFB_RenderPoint(SDL_Renderer * renderer, int x, int y)
 {
     DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
+    SDL_DFB_WINDOWSURFACE(data->window);
     DFBResult ret;
 
     PrepareDraw(renderer);
-    SDL_DFB_CHECKERR(data->surface->DrawLine(data->surface, x, y, x, y));
+    SDL_DFB_CHECKERR(destsurf->DrawLine(destsurf, x, y, x, y));
     return 0;
   error:
     return -1;
@@ -843,15 +850,16 @@ static int
 DirectFB_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
 {
     DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
+    SDL_DFB_WINDOWSURFACE(data->window);
     DFBResult ret;
 
     PrepareDraw(renderer);
     /* Use antialiasing when available */
 #if (DFB_VERSION_ATLEAST(1,2,0))
-    SDL_DFB_CHECKERR(data->surface->SetRenderOptions(data->surface,
+    SDL_DFB_CHECKERR(destsurf->SetRenderOptions(destsurf,
                                                      DSRO_ANTIALIAS));
 #endif
-    SDL_DFB_CHECKERR(data->surface->DrawLine(data->surface, x1, y1, x2, y2));
+    SDL_DFB_CHECKERR(destsurf->DrawLine(destsurf, x1, y1, x2, y2));
     return 0;
   error:
     return -1;
@@ -861,11 +869,11 @@ static int
 DirectFB_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
 {
     DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
+    SDL_DFB_WINDOWSURFACE(data->window);
     DFBResult ret;
 
     PrepareDraw(renderer);
-    SDL_DFB_CHECKERR(data->
-                     surface->FillRectangle(data->surface, rect->x, rect->y,
+    SDL_DFB_CHECKERR(destsurf->FillRectangle(destsurf, rect->x, rect->y,
                                             rect->w, rect->h));
 
     return 0;
@@ -878,6 +886,7 @@ DirectFB_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                     const SDL_Rect * srcrect, const SDL_Rect * dstrect)
 {
     DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
+    SDL_DFB_WINDOWSURFACE(data->window);
     DirectFB_TextureData *texturedata =
         (DirectFB_TextureData *) texture->driverdata;
     Uint8 alpha = 0xFF;
@@ -929,20 +938,17 @@ DirectFB_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         SDLtoDFBRect(srcrect, &sr);
         SDLtoDFBRect(dstrect, &dr);
 
-        SDL_DFB_CHECKERR(data->
-                         surface->SetColor(data->surface, 0xFF, 0xFF, 0xFF,
-                                           0xFF));
+        SDL_DFB_CHECKERR(destsurf->SetColor(destsurf, 0xFF, 0xFF, 0xFF, 0xFF));
         if (texture->modMode &
             (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA)) {
             if (texture->modMode & SDL_TEXTUREMODULATE_ALPHA) {
                 alpha = texture->a;
-                SDL_DFB_CHECKERR(data->
-                                 surface->SetColor(data->surface, 0xFF, 0xFF,
+                SDL_DFB_CHECKERR(destsurf->SetColor(destsurf, 0xFF, 0xFF,
                                                    0xFF, alpha));
             }
             if (texture->modMode & SDL_TEXTUREMODULATE_COLOR) {
 
-                SDL_DFB_CHECKERR(data->surface->SetColor(data->surface,
+                SDL_DFB_CHECKERR(destsurf->SetColor(destsurf,
                                                          texture->r,
                                                          texture->g,
                                                          texture->b, alpha));
@@ -951,28 +957,27 @@ DirectFB_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
             if (alpha < 0xFF)
                 flags |= DSBLIT_SRC_PREMULTCOLOR;
         } else
-            SDL_DFB_CHECKERR(data->
-                             surface->SetColor(data->surface, 0xFF, 0xFF,
+            SDL_DFB_CHECKERR(destsurf->SetColor(destsurf, 0xFF, 0xFF,
                                                0xFF, 0xFF));
 
         SetBlendMode(data, texture->blendMode, texturedata);
 
-        SDL_DFB_CHECKERR(data->surface->SetBlittingFlags(data->surface,
+        SDL_DFB_CHECKERR(destsurf->SetBlittingFlags(destsurf,
                                                          data->blitFlags
                                                          | flags));
 
 #if (DFB_VERSION_ATLEAST(1,2,0))
-        SDL_DFB_CHECKERR(data->surface->SetRenderOptions(data->surface,
+        SDL_DFB_CHECKERR(destsurf->SetRenderOptions(destsurf,
                                                          texturedata->
                                                          render_options));
 #endif
 
         if (srcrect->w == dstrect->w && srcrect->h == dstrect->h) {
-            SDL_DFB_CHECKERR(data->surface->Blit(data->surface,
+            SDL_DFB_CHECKERR(destsurf->Blit(destsurf,
                                                  texturedata->surface,
                                                  &sr, dr.x, dr.y));
         } else {
-            SDL_DFB_CHECKERR(data->surface->StretchBlit(data->surface,
+            SDL_DFB_CHECKERR(destsurf->StretchBlit(destsurf,
                                                         texturedata->surface,
                                                         &sr, &dr));
         }
@@ -1030,9 +1035,8 @@ static void
 DirectFB_DestroyRenderer(SDL_Renderer * renderer)
 {
     DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
-
+    
     if (data) {
-        SDL_DFB_RELEASE(data->surface);
         SDL_free(data);
     }
     SDL_free(renderer);
