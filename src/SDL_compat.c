@@ -114,7 +114,7 @@ SDL_VideoModeOK(int width, int height, int bpp, Uint32 flags)
 }
 
 SDL_Rect **
-SDL_ListModes(SDL_PixelFormat * format, Uint32 flags)
+SDL_ListModes(const SDL_PixelFormat * format, Uint32 flags)
 {
     int i, nmodes;
     SDL_Rect **modes;
@@ -125,6 +125,10 @@ SDL_ListModes(SDL_PixelFormat * format, Uint32 flags)
 
     if (!(flags & SDL_FULLSCREEN)) {
         return (SDL_Rect **) (-1);
+    }
+
+    if (!format) {
+        format = SDL_GetVideoInfo()->vfmt;
     }
 
     /* Memory leak, but this is a compatibility function, who cares? */
