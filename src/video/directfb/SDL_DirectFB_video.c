@@ -254,9 +254,9 @@ DirectFB_VideoInit(_THIS)
     /* simple window manager support */
     stemp = SDL_getenv(DFBENV_USE_WM);
     if (stemp)
-    	devdata->has_own_wm = atoi(stemp);
+        devdata->has_own_wm = atoi(stemp);
     else
-    	devdata->has_own_wm = 0;
+        devdata->has_own_wm = 0;
 
     devdata->dfb = dfb;
     devdata->firstwin = NULL;

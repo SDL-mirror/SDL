@@ -228,9 +228,9 @@ extern DECLSPEC const SDL_VideoInfo *SDLCALL SDL_GetVideoInfo(void);
 extern DECLSPEC int SDLCALL SDL_VideoModeOK(int width,
                                             int height,
                                             int bpp, Uint32 flags);
-extern DECLSPEC SDL_Rect **SDLCALL SDL_ListModes(const SDL_PixelFormat * format, Uint32 flags);
-extern DECLSPEC SDL_Surface *SDLCALL SDL_SetVideoMode(int width,
-                                                      int height,
+extern DECLSPEC SDL_Rect **SDLCALL SDL_ListModes(const SDL_PixelFormat *
+                                                 format, Uint32 flags);
+extern DECLSPEC SDL_Surface *SDLCALL SDL_SetVideoMode(int width, int height,
                                                       int bpp, Uint32 flags);
 extern DECLSPEC SDL_Surface *SDLCALL SDL_GetVideoSurface(void);
 extern DECLSPEC void SDLCALL SDL_UpdateRects(SDL_Surface * screen,

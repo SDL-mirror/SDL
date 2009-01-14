@@ -44,10 +44,10 @@
 	(DFB_COMPILEDVERSION >= DFB_VERSIONNUM(X, Y, Z))
 
 #if (DFB_VERSION_ATLEAST(1,0,0))
-	#define SDL_DIRECTFB_OPENGL 1
-	#include <directfbgl.h>
+#define SDL_DIRECTFB_OPENGL 1
+#include <directfbgl.h>
 #else
-	#error "SDL_DIRECTFB: Please compile against libdirectfb version >= 1.0.0"
+#error "SDL_DIRECTFB: Please compile against libdirectfb version >= 1.0.0"
 #endif
 
 #if SDL_DIRECTFB_OPENGL
@@ -69,7 +69,7 @@
 #define DFBENV_USE_YUV_DIRECT   	"SDL_DIRECTFB_YUV_DIRECT"       /* Default: off */
 #define DFBENV_USE_X11_CHECK		"SDL_DIRECTFB_X11_CHECK"        /* Default: on  */
 #define DFBENV_USE_LINUX_INPUT		"SDL_DIRECTFB_LINUX_INPUT"      /* Default: on  */
-#define DFBENV_USE_WM				"SDL_DIRECTFB_WM"		      	/* Default: off  */
+#define DFBENV_USE_WM				"SDL_DIRECTFB_WM"       /* Default: off  */
 
 #define SDL_DFB_RELEASE(x) do { if ( (x) != NULL ) { x->Release(x); x = NULL; } } while (0)
 #define SDL_DFB_FREE(x) do { if ( (x) != NULL ) { SDL_free(x); x = NULL; } } while (0)

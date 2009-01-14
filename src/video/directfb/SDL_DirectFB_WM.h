@@ -46,9 +46,11 @@ extern void DirectFB_WM_MaximizeWindow(_THIS, SDL_Window * window);
 extern void DirectFB_WM_RestoreWindow(_THIS, SDL_Window * window);
 extern void DirectFB_WM_RedrawLayout(SDL_Window * window);
 
-extern int DirectFB_WM_ProcessEvent(_THIS, SDL_Window *window, DFBWindowEvent * evt);
+extern int DirectFB_WM_ProcessEvent(_THIS, SDL_Window * window,
+                                    DFBWindowEvent * evt);
 
-extern DFBResult DirectFB_WM_GetClientSize(_THIS, SDL_Window * window, int *cw, int *ch);
+extern DFBResult DirectFB_WM_GetClientSize(_THIS, SDL_Window * window,
+                                           int *cw, int *ch);
 
 
 #endif /* _SDL_directfb_wm_h */

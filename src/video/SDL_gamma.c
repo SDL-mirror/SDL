@@ -50,7 +50,8 @@ CalculateGammaRamp(float gamma, Uint16 * ramp)
         int value;
         gamma = 1.0f / gamma;
         for (i = 0; i < 256; ++i) {
-            value = (int) (SDL_pow((double) i / 256.0, gamma) * 65535.0 + 0.5);
+            value =
+                (int) (SDL_pow((double) i / 256.0, gamma) * 65535.0 + 0.5);
             if (value > 65535) {
                 value = 65535;
             }
@@ -73,7 +74,7 @@ CalculateGammaFromRamp(float *gamma, Uint16 * ramp)
         if ((ramp[i] != 0) && (ramp[i] != 65535)) {
             double B = (double) i / 256.0;
             double A = ramp[i] / 65535.0;
-			sum += (float) (SDL_log(A) / SDL_log(B));
+            sum += (float) (SDL_log(A) / SDL_log(B));
             count++;
         }
     }

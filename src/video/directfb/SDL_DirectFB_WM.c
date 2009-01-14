@@ -199,10 +199,9 @@ DirectFB_WM_MaximizeWindow(_THIS, SDL_Window * window)
     SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
 
     windata->window->GetPosition(windata->window,
-                                     &windata->restore.x,
-                                     &windata->restore.y);
+                                 &windata->restore.x, &windata->restore.y);
     windata->window->GetSize(windata->window, &windata->restore.w,
-                                 &windata->restore.h);
+                             &windata->restore.h);
 
     /* Do this already here */
     window->flags |= SDL_WINDOW_MAXIMIZED;
@@ -210,8 +209,7 @@ DirectFB_WM_MaximizeWindow(_THIS, SDL_Window * window)
 
     windata->window->MoveTo(windata->window, 0, 0);
     windata->window->Resize(windata->window,
-                            display->current_mode.w,
-                            display->current_mode.h);
+                            display->current_mode.w, display->current_mode.h);
     SDL_SendWindowEvent(windata->sdl_id, SDL_WINDOWEVENT_MAXIMIZED, 0, 0);
 }
 
@@ -291,7 +289,7 @@ static int wm_lastx;
 static int wm_lasty;
 
 int
-DirectFB_WM_ProcessEvent(_THIS, SDL_Window *window, DFBWindowEvent * evt)
+DirectFB_WM_ProcessEvent(_THIS, SDL_Window * window, DFBWindowEvent * evt)
 {
     SDL_DFB_WINDOWDATA(window);
 
@@ -306,13 +304,14 @@ DirectFB_WM_ProcessEvent(_THIS, SDL_Window *window, DFBWindowEvent * evt)
             case WM_POS_NONE:
                 return 0;
             case WM_POS_CLOSE:
-                SDL_SendWindowEvent(windata->sdl_id, SDL_WINDOWEVENT_CLOSE, 0, 0);
+                SDL_SendWindowEvent(windata->sdl_id, SDL_WINDOWEVENT_CLOSE, 0,
+                                    0);
                 return 1;
             case WM_POS_MAX:
                 if (window->flags & SDL_WINDOW_MAXIMIZED) {
                     DirectFB_WM_RestoreWindow(_this, window);
                 } else {
-                	DirectFB_WM_MaximizeWindow(_this, window);
+                    DirectFB_WM_MaximizeWindow(_this, window);
                 }
                 return 1;
             default:

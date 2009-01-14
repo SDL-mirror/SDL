@@ -177,7 +177,7 @@ ProcessWindowEvent(_THIS, DFB_WindowData * p, Uint32 flags,
             break;
         case DWET_MOTION:
             if (ClientXY(p, &evt->x, &evt->y)) {
-            	SDL_Window *window = SDL_GetWindowFromID(p->sdl_id);
+                SDL_Window *window = SDL_GetWindowFromID(p->sdl_id);
                 if (!devdata->use_linux_input) {
                     if (!(flags & SDL_WINDOW_INPUT_GRABBED))
                         SDL_SendMouseMotion(devdata->mouse_id[0], 0,
@@ -193,7 +193,8 @@ ProcessWindowEvent(_THIS, DFB_WindowData * p, Uint32 flags,
                     }
                 }
                 if (!(window->flags & SDL_WINDOW_MOUSE_FOCUS))
-                    SDL_SendWindowEvent(p->sdl_id, SDL_WINDOWEVENT_ENTER, 0, 0);
+                    SDL_SendWindowEvent(p->sdl_id, SDL_WINDOWEVENT_ENTER, 0,
+                                        0);
             }
             break;
         case DWET_KEYDOWN:

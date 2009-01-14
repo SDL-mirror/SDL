@@ -310,7 +310,6 @@ X11_DispatchEvent(_THIS)
                     }
                     continue;
                 }
-
 #if SDL_VIDEO_DRIVER_X11_XINPUT
                 data = (X11_MouseData *) mouse->driverdata;
                 if (xevent.type == data->motion) {
@@ -398,7 +397,7 @@ X11_PumpEvents(_THIS)
     if (_this->suspend_screensaver) {
         Uint32 now = SDL_GetTicks();
         if (!data->screensaver_activity ||
-            (int)(now-data->screensaver_activity) >= 30000) {
+            (int) (now - data->screensaver_activity) >= 30000) {
             XResetScreenSaver(data->display);
             data->screensaver_activity = now;
         }
@@ -415,7 +414,8 @@ X11_PumpEvents(_THIS)
 #ifdef GNOME_SCREENSAVER_HACK
 #include <unistd.h>
 static pid_t screensaver_inhibit_pid;
-static void gnome_screensaver_disable()
+static void
+gnome_screensaver_disable()
 {
     screensaver_inhibit_pid = fork();
     if (screensaver_inhibit_pid == 0) {
@@ -426,12 +426,12 @@ static void gnome_screensaver_disable()
               "gnome-screensaver-command",
               "--inhibit",
               "--reason",
-              "GNOME screensaver doesn't respect MIT-SCREEN-SAVER",
-              NULL);
+              "GNOME screensaver doesn't respect MIT-SCREEN-SAVER", NULL);
         exit(2);
     }
 }
-static void gnome_screensaver_enable()
+static void
+gnome_screensaver_enable()
 {
     kill(screensaver_inhibit_pid, 15);
 }

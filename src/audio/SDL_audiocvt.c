@@ -894,7 +894,7 @@ SDL_FindFrequencyMultiple(const int src_rate, const int dst_rate)
 
     /* zero means "not a supported multiple" ... we only do 2x and 4x. */
     if ((hi % lo) != 0)
-        return 0;   /* not a multiple. */
+        return 0;               /* not a multiple. */
 
     div = hi / lo;
     retval = ((div == 2) || (div == 4)) ? div : 0;
@@ -915,7 +915,8 @@ SDL_BuildAudioResampleCVT(SDL_AudioCVT * cvt, int dst_channels,
         if (filter == NULL) {
             int i;
             const int upsample = (src_rate < dst_rate) ? 1 : 0;
-            const int multiple = SDL_FindFrequencyMultiple(src_rate, dst_rate);
+            const int multiple =
+                SDL_FindFrequencyMultiple(src_rate, dst_rate);
 
             for (i = 0; sdl_audio_rate_filters[i].filter != NULL; i++) {
                 const SDL_AudioRateFilters *filt = &sdl_audio_rate_filters[i];
@@ -980,7 +981,6 @@ SDL_BuildAudioCVT(SDL_AudioCVT * cvt,
     if ((src_rate == 0) || (dst_rate == 0)) {
         return -1;
     }
-
 #ifdef DEBUG_CONVERT
     printf("Build format %04x->%04x, channels %u->%u, rate %d->%d\n",
            src_fmt, dst_fmt, src_channels, dst_channels, src_rate, dst_rate);
@@ -1054,7 +1054,8 @@ SDL_BuildAudioCVT(SDL_AudioCVT * cvt,
     }
 
     /* Do rate conversion, if necessary. Updates (cvt). */
-    if (SDL_BuildAudioResampleCVT(cvt, dst_channels, src_rate, dst_rate) == -1) {
+    if (SDL_BuildAudioResampleCVT(cvt, dst_channels, src_rate, dst_rate) ==
+        -1) {
         return -1;              /* shouldn't happen, but just in case... */
     }
 

@@ -101,7 +101,8 @@ DirectFB_CreateWindow(_THIS, SDL_Window * window)
     windata->window->SetOptions(windata->window, wopts);
 
     /* See what we got */
-    SDL_DFB_CHECKERR(DirectFB_WM_GetClientSize(_this, window, &window->w, &window->h));
+    SDL_DFB_CHECKERR(DirectFB_WM_GetClientSize
+                     (_this, window, &window->w, &window->h));
 
     /* Get the window's surface. */
     SDL_DFB_CHECKERR(windata->window->GetSurface(windata->window,
@@ -115,9 +116,10 @@ DirectFB_CreateWindow(_THIS, SDL_Window * window)
 
     /* Create Eventbuffer */
     SDL_DFB_CHECKERR(windata->window->CreateEventBuffer(windata->window,
-                                                        &windata->eventbuffer));
-    SDL_DFB_CHECKERR(windata->
-                     window->EnableEvents(windata->window, DWET_ALL));
+                                                        &windata->
+                                                        eventbuffer));
+    SDL_DFB_CHECKERR(windata->window->
+                     EnableEvents(windata->window, DWET_ALL));
 
     /* Create a font */
     /* FIXME: once during Video_Init */
@@ -279,7 +281,8 @@ DirectFB_SetWindowSize(_THIS, SDL_Window * window)
         SDL_DFB_CHECKERR(windata->window->EnableEvents(windata->window,
                                                        DWET_ALL));
 
-        SDL_DFB_CHECKERR(DirectFB_WM_GetClientSize(_this, window, &window->w, &window->h));
+        SDL_DFB_CHECKERR(DirectFB_WM_GetClientSize
+                         (_this, window, &window->w, &window->h));
 
         SDL_OnWindowResized(window);
     }
@@ -322,7 +325,7 @@ DirectFB_MaximizeWindow(_THIS, SDL_Window * window)
     SDL_DFB_WINDOWDATA(window);
 
     if (windata->is_managed) {
-    	DirectFB_WM_MaximizeWindow(_this, window);
+        DirectFB_WM_MaximizeWindow(_this, window);
     } else
         SDL_Unsupported();
 }
@@ -341,7 +344,7 @@ DirectFB_RestoreWindow(_THIS, SDL_Window * window)
     SDL_DFB_WINDOWDATA(window);
 
     if (windata->is_managed) {
-    	DirectFB_WM_RestoreWindow(_this, window);
+        DirectFB_WM_RestoreWindow(_this, window);
     } else
         SDL_Unsupported();
 }
@@ -421,31 +424,30 @@ DirectFB_AdjustWindowSurface(SDL_Window * window)
 
     if (adjust) {
 #if DFB_VERSION_ATLEAST(1,2,1)
-       SDL_DFB_CHECKERR(windata->window->ResizeSurface(windata->window,
+        SDL_DFB_CHECKERR(windata->window->ResizeSurface(windata->window,
                                                         windata->size.w,
                                                         windata->size.h));
-       SDL_DFB_CHECKERR(windata->surface->MakeSubSurface(windata->surface,
+        SDL_DFB_CHECKERR(windata->surface->MakeSubSurface(windata->surface,
                                                           windata->
                                                           window_surface,
                                                           &windata->client));
 #else
- 	   DFBWindowOptions opts;
+        DFBWindowOptions opts;
 
-	   SDL_DFB_CHECKERR(windata->window->GetOptions(windata->window, &opts));
-       /* recreate subsurface */
-       SDL_DFB_RELEASE(windata->surface);
-       
-       if (opts & DWOP_SCALE)
-          SDL_DFB_CHECKERR(windata->window->ResizeSurface(windata->window,
-                                                          windata->size.w,
-                                                          windata->size.h));
-       SDL_DFB_CHECKERR(windata->window_surface->
-                      GetSubSurface(windata->window_surface, &windata->client,
-                                  &windata->surface));
+        SDL_DFB_CHECKERR(windata->window->GetOptions(windata->window, &opts));
+        /* recreate subsurface */
+        SDL_DFB_RELEASE(windata->surface);
+
+        if (opts & DWOP_SCALE)
+            SDL_DFB_CHECKERR(windata->window->ResizeSurface(windata->window,
+                                                            windata->size.w,
+                                                            windata->size.h));
+        SDL_DFB_CHECKERR(windata->window_surface->
+                         GetSubSurface(windata->window_surface,
+                                       &windata->client, &windata->surface));
 #endif
-       DirectFB_WM_RedrawLayout(window);
+        DirectFB_WM_RedrawLayout(window);
     }
   error:
     return;
 }
-
