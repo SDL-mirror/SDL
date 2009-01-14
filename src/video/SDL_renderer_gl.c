@@ -846,6 +846,7 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         renderdata->glTexImage2D(data->type, 0, internalFormat, texture_w,
                                  texture_h, 0, format, type, NULL);
     }
+    renderdata->glDisable(data->type);
     result = renderdata->glGetError();
     if (result != GL_NO_ERROR) {
         GL_SetError("glTexImage2D()", result);
@@ -993,6 +994,7 @@ GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
     renderdata->glTexSubImage2D(data->type, 0, rect->x, rect->y, rect->w,
                                 rect->h, data->format, data->formattype,
                                 pixels);
+    renderdata->glDisable(data->type);
     result = renderdata->glGetError();
     if (result != GL_NO_ERROR) {
         GL_SetError("glTexSubImage2D()", result);
