@@ -244,5 +244,5 @@ Audio drivers:
 		http://www.uni-ulm.de/~s_thuth/atari/xsound_e.html
 
 -- 
-Patrice Mandin <pmandin@caramail.com>
+Patrice Mandin <patmandin@gmail.com>
 http://pmandin.atari.org/
