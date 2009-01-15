@@ -413,7 +413,7 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
                           texture->h, renderdata->depth);
         if (data->pixmap == None) {
             X11_DestroyTexture(renderer, texture);
-            SDL_SetError("XCteatePixmap() failed");
+            SDL_SetError("XCreatePixmap() failed");
             return -1;
         }
 

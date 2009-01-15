@@ -23,6 +23,9 @@
 #include "../SDL_sysvideo.h"
 #include "SDL_x11video.h"
 
+    /* The size of *all* SDL gamma ramps */
+#define SDL_GammaRampSize (3 * 256 * sizeof(Uint16))
+
 static int numCmaps = 0;
 
 typedef struct
@@ -93,20 +96,22 @@ X11_TrackColormap(Display * display, int scrNum, Colormap colormap,
     SDL_memcpy(&cmapTable[numCmaps].visual, visual, sizeof(Visual));
     cmapTable[numCmaps].ramp = NULL;
 
-    newramp = SDL_malloc(3 * 256 * sizeof(Uint16));     /* The size of *all* SDL gamma ramps */
-    if (NULL == newramp) {
+    if (ramp != NULL) {
+      newramp = SDL_malloc(SDL_GammaRampSize);
+      if (NULL == newramp) {
         SDL_SetError("Out of memory in X11_TrackColormap()");
         return;
-    }
-    SDL_memset(newramp, 0, sizeof(*newramp));
-    cmapTable[numCmaps].ramp = newramp;
+      }
+      SDL_memset(newramp, 0, SDL_GammaRampSize);
+      cmapTable[numCmaps].ramp = newramp;
 
-    ncolors = cmapTable[numCmaps].visual.map_entries;
+      ncolors = cmapTable[numCmaps].visual.map_entries;
 
-    for (i = 0; i < ncolors; i++) {
+      for (i = 0; i < ncolors; i++) {
         newramp[(0 * 256) + i] = ramp[i].red;
         newramp[(1 * 256) + i] = ramp[i].green;
         newramp[(2 * 256) + i] = ramp[i].blue;
+      }
     }
 
     numCmaps++;
@@ -144,7 +149,15 @@ X11_SetDisplayGammaRamp(_THIS, Uint16 * ramp)
                 return -1;
             }
             /* remember the new ramp */
-            SDL_memcpy(cmapTable[j].ramp, ramp, sizeof(*cmapTable[j].ramp));
+	    if (cmapTable[j].ramp == NULL) {
+	      Uint16 * newramp = SDL_malloc(SDL_GammaRampSize);
+	      if (NULL == newramp) {
+		SDL_SetError("Out of memory in X11_TrackColormap()");
+		return -1;
+	      }
+	      cmapTable[j].ramp = newramp;
+	    }
+            SDL_memcpy(cmapTable[j].ramp, ramp, SDL_GammaRampSize);
 
             rshift = 0;
             rmask = visual->red_mask;
@@ -210,7 +223,7 @@ X11_GetDisplayGammaRamp(_THIS, Uint16 * ramp)
 
     for (i = 0; i < numCmaps; i++) {
         if (cmapTable[i].visual.class == DirectColor) {
-            SDL_memcpy(ramp, cmapTable[i].ramp, sizeof(*cmapTable[i].ramp));
+            SDL_memcpy(ramp, cmapTable[i].ramp, SDL_GammaRampSize);
             return 0;
         }
     }

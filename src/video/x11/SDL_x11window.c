@@ -214,91 +214,115 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     xattr.border_pixel = 0;
 
     if (visual->class == PseudoColor) {
-/*         printf("asking for PseudoColor\n"); */
-        int nmaps;
+        printf("asking for PseudoColor\n");
+
+        Status status;
         XStandardColormap cmap;
-        XStandardColormap *stdmaps;
         XColor *colorcells;
         Colormap colormap;
-        Bool found = False;
-        int i;
-        int ncolors;
-        int rmax, gmax, bmax;
-        int rmul, gmul, bmul;
+	Sint32 pix;
+        Sint32 ncolors;
+        Sint32 nbits;
+        Sint32 rmax, gmax, bmax;
+	Sint32 rwidth, gwidth, bwidth;
+        Sint32 rmask, gmask, bmask;
+        Sint32 rshift, gshift, bshift;
+	Sint32 r, g, b;
 
+        /* Is the colormap we need already registered in SDL? */
         if (colormap =
-            X11_LookupColormap(data->display, displaydata->screen,
-                               visual->visualid)) {
+            X11_LookupColormap(data->display,
+                               displaydata->screen, visual->visualid)) {
             xattr.colormap = colormap;
+/*             printf("found existing colormap\n"); */
         } else {
-            /* check to see if the colormap we need already exists */
-            if (0 != XGetRGBColormaps(data->display,
-                                      RootWindow(data->display,
-                                                 displaydata->screen),
-                                      &stdmaps, &nmaps, XA_RGB_BEST_MAP)) {
-                for (i = 0; i < nmaps; i++) {
-                    if (stdmaps[i].visualid == visual->visualid) {
-                        SDL_memcpy(&cmap, &stdmaps[i],
-                                   sizeof(XStandardColormap));
-                        found = True;
-                        break;
-                    }
-                }
-                XFree(stdmaps);
+            /* The colormap is not known to SDL so we will create it */
+            colormap = XCreateColormap(data->display,
+                                       RootWindow(data->display,
+                                                  displaydata->screen),
+                                       visual, AllocAll);
+/*             printf("colormap = %x\n", colormap); */
+
+            /* If we can't create a colormap, then we must die */
+            if (!colormap) {
+                SDL_SetError
+                    ("Couldn't create window: Could not create writable colormap");
+                return -1;
             }
 
-            /* it doesn't exist, so create it */
-            if (!found) {
-                int max = visual->map_entries - 1;
-                stdmaps =
-                    XmuStandardColormap(data->display, displaydata->screen,
-                                        visual->visualid, depth,
-                                        XA_RGB_BEST_MAP, None, max, max, max);
-                if (NULL == stdmaps || stdmaps->visualid != visual->visualid) {
-                    SDL_SetError
-                        ("Couldn't create window:XA_RGB_BEST_MAP not found and could not be created");
-                    return -1;
-                }
-                SDL_memcpy(&cmap, stdmaps, sizeof(XStandardColormap));
-                XFree(stdmaps);
-            }
-
-            /* OK, we have the best color map, now copy it for use by the
-               program */
+            /* OK, we got a colormap, now fill it in as best as we can */
 
             colorcells = SDL_malloc(visual->map_entries * sizeof(XColor));
             if (NULL == colorcells) {
                 SDL_SetError("out of memory in X11_CreateWindow");
                 return -1;
             }
-            ncolors = visual->map_entries;
-            rmax = cmap.red_max + 1;
-            gmax = cmap.blue_max + 1;
-            bmax = cmap.green_max + 1;
 
-            rmul = cmap.red_mult;
-            gmul = cmap.blue_mult;
-            bmul = cmap.green_mult;
+            ncolors = visual->map_entries;
+	    nbits = visual->bits_per_rgb;
+
+/* 	    printf("ncolors = %d nbits = %d\n", ncolors, nbits); */
+
+	    /* what if ncolors != (1 << nbits)? That can happen on a
+	       true PseudoColor display.  I'm assuming that we will
+	       always have ncolors == (1 << nbits)*/
+
+	    /* I'm making a lot of assumptions here. */
+	    
+	    /* Compute the width of each field. If there is one extra
+	       bit, give it to green. If there are two extra bits give
+	       them to red and greed.  We can get extra bits when the
+	       number of bits per pixel is not a multiple of 3. For
+	       example when we have 16 bits per pixel and need a 5/6/5
+	       layout for the RGB fields */
+
+	    rwidth = (nbits / 3) + (((nbits % 3) == 2) ? 1 : 0);
+	    gwidth = (nbits / 3) + (((nbits % 3) >= 1) ? 1 : 0);
+	    bwidth = (nbits / 3);
+
+            rshift = gwidth + bwidth;
+            gshift = bwidth;
+            bshift = 0;
+
+            rmax = 1 << rwidth;
+            gmax = 1 << gwidth;
+            bmax = 1 << bwidth;
+
+            rmask = rmax - 1;
+            gmask = gmax - 1;
+            bmask = bmax - 1;
+
+/*             printf("red   mask = %4x shift = %4d width = %d\n", rmask, rshift, rwidth); */
+/*             printf("green mask = %4x shift = %4d width = %d\n", gmask, gshift, gwidth); */
+/*             printf("blue  mask = %4x shift = %4d width = %d\n", bmask, bshift, bwidth); */
 
             /* build the color table pixel values */
-            for (i = 0; i < ncolors; i++) {
-                Uint32 red = (rmax * i) / ncolors;
-                Uint32 green = (gmax * i) / ncolors;
-                Uint32 blue = (bmax * i) / ncolors;
+	    pix = 0;
+	    for (r = 0; r < rmax; r++) {
+	      for (g = 0; g < gmax; g++) {
+		for (b = 0; b < bmax; b++) {
+		  colorcells[pix].pixel = (r << rshift) | (g << gshift) | (b << bshift);
+		  colorcells[pix].red   = (0xffff * r) / rmask;
+		  colorcells[pix].green = (0xffff * g) / gmask;
+		  colorcells[pix].blue  = (0xffff * b) / bmask;
+/* 		  printf("%4x:%4x [%4x %4x %4x]\n",  */
+/* 			 pix,  */
+/* 			 colorcells[pix].pixel, */
+/* 			 colorcells[pix].red, */
+/* 			 colorcells[pix].green, */
+/* 			 colorcells[pix].blue); */
+		  pix++;
+		}
+	      }
+	    }
 
-                colorcells[i].pixel =
-                    (red * rmul) | (green * gmul) | (blue * bmul);
-            }
-            XQueryColors(data->display, cmap.colormap, colorcells, ncolors);
-            colormap = XCreateColormap(data->display,
-                                       RootWindow(data->display,
-                                                  displaydata->screen),
-                                       visual, AllocAll);
-            XStoreColors(data->display, colormap, colorcells, ncolors);
+/*             status = */
+/*                 XStoreColors(data->display, colormap, colorcells, ncolors); */
 
             xattr.colormap = colormap;
-            X11_TrackColormap(data->display, displaydata->screen, colormap,
-                              visual, colorcells);
+            X11_TrackColormap(data->display, displaydata->screen,
+                              colormap, visual, NULL);
+
             SDL_free(colorcells);
         }
     } else if (visual->class == DirectColor) {
@@ -329,7 +353,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
             /* If we can't create a colormap, then we must die */
             if (!colormap) {
                 SDL_SetError
-                    ("Couldn't create window: Could not create wriatable colormap");
+                    ("Couldn't create window: Could not create writable colormap");
                 return -1;
             }
 
@@ -393,7 +417,6 @@ X11_CreateWindow(_THIS, SDL_Window * window)
 
                 colorcells[i].flags = DoRed | DoGreen | DoBlue;
 /* 		printf("%2d:%4x [%4x %4x %4x]\n", i, pix, red, green, blue); */
-
             }
 
             status =
