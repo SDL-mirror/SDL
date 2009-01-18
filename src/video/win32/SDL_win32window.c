@@ -561,6 +561,11 @@ SDL_HelperWindowCreate(void)
     HINSTANCE hInstance = GetModuleHandleA(NULL);
     WNDCLASSEX wce;
 
+    /* Make sure window isn't created twice. */
+    if (SDL_HelperWindow != NULL) {
+        return 0;
+    }
+
     /* Create the class. */
     SDL_zero(wce);
     wce.cbSize = sizeof(WNDCLASSEX);
@@ -584,6 +589,7 @@ SDL_HelperWindowCreate(void)
                                       CW_USEDEFAULT, HWND_MESSAGE, NULL,
                                       hInstance, NULL);
     if (SDL_HelperWindow == NULL) {
+        UnregisterClass(SDL_HelperWindowClassName, hInstance);
         SDL_SetError("Unable to create Helper Window: error %d.",
                      GetLastError());
         return -1;
