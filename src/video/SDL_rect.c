@@ -130,7 +130,7 @@ SDL_IntersectRectAndLine(const SDL_Rect * rect, int *X1, int *Y1, int *X2,
     int recty2;
 
     if (!rect || !X1 || !Y1 || !X2 || !Y2) {
-        SDL_FALSE;
+        return SDL_FALSE;
     }
 
     x1 = *X1;
