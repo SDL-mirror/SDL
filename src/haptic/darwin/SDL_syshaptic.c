@@ -35,6 +35,9 @@
 #include <ForceFeedback/ForceFeedback.h>
 #include <ForceFeedback/ForceFeedbackConstants.h>
 
+#ifndef IO_OBJECT_NULL
+#define IO_OBJECT_NULL	((io_service_t)0)
+#endif
 
 #define MAX_HAPTICS  32
 
