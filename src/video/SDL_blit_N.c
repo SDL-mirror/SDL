@@ -114,11 +114,10 @@ calc_swizzle32(const SDL_PixelFormat * srcfmt, const SDL_PixelFormat * dstfmt)
      */
     /* ARGB */
     const static struct SDL_PixelFormat default_pixel_format = {
-        NULL, 0, 0,
+        NULL, 32, 4,
         0, 0, 0, 0,
         16, 8, 0, 24,
-        0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000,
-        0, 0
+        0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000
     };
     if (!srcfmt) {
         srcfmt = &default_pixel_format;
@@ -163,7 +162,7 @@ Blit_RGB888_RGB565Altivec(SDL_BlitInfo * info)
     int srcskip = info->src_skip;
     Uint8 *dst = (Uint8 *) info->dst;
     int dstskip = info->dst_skip;
-    SDL_PixelFormat *srcfmt = info->src;
+    SDL_PixelFormat *srcfmt = info->src_fmt;
     vector unsigned char valpha = vec_splat_u8(0);
     vector unsigned char vpermute = calc_swizzle32(srcfmt, NULL);
     vector unsigned char vgmerge = VECUINT8_LITERAL(0x00, 0x02, 0x00, 0x06,
@@ -267,8 +266,8 @@ Blit_RGB565_32Altivec(SDL_BlitInfo * info)
     int srcskip = info->src_skip;
     Uint8 *dst = (Uint8 *) info->dst;
     int dstskip = info->dst_skip;
-    SDL_PixelFormat *srcfmt = info->src;
-    SDL_PixelFormat *dstfmt = info->dst;
+    SDL_PixelFormat *srcfmt = info->src_fmt;
+    SDL_PixelFormat *dstfmt = info->dst_fmt;
     unsigned alpha;
     vector unsigned char valpha;
     vector unsigned char vpermute;
@@ -415,8 +414,8 @@ Blit_RGB555_32Altivec(SDL_BlitInfo * info)
     int srcskip = info->src_skip;
     Uint8 *dst = (Uint8 *) info->dst;
     int dstskip = info->dst_skip;
-    SDL_PixelFormat *srcfmt = info->src;
-    SDL_PixelFormat *dstfmt = info->dst;
+    SDL_PixelFormat *srcfmt = info->src_fmt;
+    SDL_PixelFormat *dstfmt = info->dst_fmt;
     unsigned alpha;
     vector unsigned char valpha;
     vector unsigned char vpermute;
@@ -561,12 +560,12 @@ Blit32to32KeyAltivec(SDL_BlitInfo * info)
 {
     int height = info->dst_h;
     Uint32 *srcp = (Uint32 *) info->src;
-    int srcskip = info->src_skip;
+    int srcskip = info->src_skip / 4;
     Uint32 *dstp = (Uint32 *) info->dst;
-    int dstskip = info->dst_skip;
-    SDL_PixelFormat *srcfmt = info->src;
+    int dstskip = info->dst_skip / 4;
+    SDL_PixelFormat *srcfmt = info->src_fmt;
     int srcbpp = srcfmt->BytesPerPixel;
-    SDL_PixelFormat *dstfmt = info->dst;
+    SDL_PixelFormat *dstfmt = info->dst_fmt;
     int dstbpp = dstfmt->BytesPerPixel;
     int copy_alpha = (srcfmt->Amask && dstfmt->Amask);
     unsigned alpha = dstfmt->Amask ? info->a : 0;
@@ -666,8 +665,8 @@ Blit32to32KeyAltivec(SDL_BlitInfo * info)
             }
             ONE_PIXEL_BLEND((extrawidth), extrawidth);
 #undef ONE_PIXEL_BLEND
-            srcp += srcskip >> 2;
-            dstp += dstskip >> 2;
+            srcp += srcskip;
+            dstp += dstskip;
         }
     }
 }
@@ -679,11 +678,11 @@ ConvertAltivec32to32_noprefetch(SDL_BlitInfo * info)
 {
     int height = info->dst_h;
     Uint32 *src = (Uint32 *) info->src;
-    int srcskip = info->src_skip;
+    int srcskip = info->src_skip / 4;
     Uint32 *dst = (Uint32 *) info->dst;
-    int dstskip = info->dst_skip;
-    SDL_PixelFormat *srcfmt = info->src;
-    SDL_PixelFormat *dstfmt = info->dst;
+    int dstskip = info->dst_skip / 4;
+    SDL_PixelFormat *srcfmt = info->src_fmt;
+    SDL_PixelFormat *dstfmt = info->dst_fmt;
     vector unsigned int vzero = vec_splat_u32(0);
     vector unsigned char vpermute = calc_swizzle32(srcfmt, dstfmt);
     if (dstfmt->Amask && !srcfmt->Amask) {
@@ -742,8 +741,8 @@ ConvertAltivec32to32_noprefetch(SDL_BlitInfo * info)
             extrawidth--;
         }
 
-        src += srcskip >> 2;    /* move to next row, accounting for pitch. */
-        dst += dstskip >> 2;
+        src += srcskip;
+        dst += dstskip;
     }
 
 }
@@ -758,11 +757,11 @@ ConvertAltivec32to32_prefetch(SDL_BlitInfo * info)
 
     int height = info->dst_h;
     Uint32 *src = (Uint32 *) info->src;
-    int srcskip = info->src_skip;
+    int srcskip = info->src_skip / 4;
     Uint32 *dst = (Uint32 *) info->dst;
-    int dstskip = info->dst_skip;
-    SDL_PixelFormat *srcfmt = info->src;
-    SDL_PixelFormat *dstfmt = info->dst;
+    int dstskip = info->dst_skip / 4;
+    SDL_PixelFormat *srcfmt = info->src_fmt;
+    SDL_PixelFormat *dstfmt = info->dst_fmt;
     vector unsigned int vzero = vec_splat_u32(0);
     vector unsigned char vpermute = calc_swizzle32(srcfmt, dstfmt);
     if (dstfmt->Amask && !srcfmt->Amask) {
@@ -829,8 +828,8 @@ ConvertAltivec32to32_prefetch(SDL_BlitInfo * info)
             extrawidth--;
         }
 
-        src += srcskip >> 2;    /* move to next row, accounting for pitch. */
-        dst += dstskip >> 2;
+        src += srcskip;
+        dst += dstskip;
     }
 
     vec_dss(DST_CHAN_SRC);
