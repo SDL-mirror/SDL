@@ -220,14 +220,14 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         XStandardColormap cmap;
         XColor *colorcells;
         Colormap colormap;
-	Sint32 pix;
+        Sint32 pix;
         Sint32 ncolors;
         Sint32 nbits;
         Sint32 rmax, gmax, bmax;
-	Sint32 rwidth, gwidth, bwidth;
+        Sint32 rwidth, gwidth, bwidth;
         Sint32 rmask, gmask, bmask;
         Sint32 rshift, gshift, bshift;
-	Sint32 r, g, b;
+        Sint32 r, g, b;
 
         /* Is the colormap we need already registered in SDL? */
         if (colormap =
@@ -259,26 +259,26 @@ X11_CreateWindow(_THIS, SDL_Window * window)
             }
 
             ncolors = visual->map_entries;
-	    nbits = visual->bits_per_rgb;
+            nbits = visual->bits_per_rgb;
 
 /* 	    printf("ncolors = %d nbits = %d\n", ncolors, nbits); */
 
-	    /* what if ncolors != (1 << nbits)? That can happen on a
-	       true PseudoColor display.  I'm assuming that we will
-	       always have ncolors == (1 << nbits)*/
+            /* what if ncolors != (1 << nbits)? That can happen on a
+               true PseudoColor display.  I'm assuming that we will
+               always have ncolors == (1 << nbits) */
 
-	    /* I'm making a lot of assumptions here. */
-	    
-	    /* Compute the width of each field. If there is one extra
-	       bit, give it to green. If there are two extra bits give
-	       them to red and greed.  We can get extra bits when the
-	       number of bits per pixel is not a multiple of 3. For
-	       example when we have 16 bits per pixel and need a 5/6/5
-	       layout for the RGB fields */
+            /* I'm making a lot of assumptions here. */
 
-	    rwidth = (nbits / 3) + (((nbits % 3) == 2) ? 1 : 0);
-	    gwidth = (nbits / 3) + (((nbits % 3) >= 1) ? 1 : 0);
-	    bwidth = (nbits / 3);
+            /* Compute the width of each field. If there is one extra
+               bit, give it to green. If there are two extra bits give
+               them to red and greed.  We can get extra bits when the
+               number of bits per pixel is not a multiple of 3. For
+               example when we have 16 bits per pixel and need a 5/6/5
+               layout for the RGB fields */
+
+            rwidth = (nbits / 3) + (((nbits % 3) == 2) ? 1 : 0);
+            gwidth = (nbits / 3) + (((nbits % 3) >= 1) ? 1 : 0);
+            bwidth = (nbits / 3);
 
             rshift = gwidth + bwidth;
             gshift = bwidth;
@@ -297,24 +297,25 @@ X11_CreateWindow(_THIS, SDL_Window * window)
 /*             printf("blue  mask = %4x shift = %4d width = %d\n", bmask, bshift, bwidth); */
 
             /* build the color table pixel values */
-	    pix = 0;
-	    for (r = 0; r < rmax; r++) {
-	      for (g = 0; g < gmax; g++) {
-		for (b = 0; b < bmax; b++) {
-		  colorcells[pix].pixel = (r << rshift) | (g << gshift) | (b << bshift);
-		  colorcells[pix].red   = (0xffff * r) / rmask;
-		  colorcells[pix].green = (0xffff * g) / gmask;
-		  colorcells[pix].blue  = (0xffff * b) / bmask;
+            pix = 0;
+            for (r = 0; r < rmax; r++) {
+                for (g = 0; g < gmax; g++) {
+                    for (b = 0; b < bmax; b++) {
+                        colorcells[pix].pixel =
+                            (r << rshift) | (g << gshift) | (b << bshift);
+                        colorcells[pix].red = (0xffff * r) / rmask;
+                        colorcells[pix].green = (0xffff * g) / gmask;
+                        colorcells[pix].blue = (0xffff * b) / bmask;
 /* 		  printf("%4x:%4x [%4x %4x %4x]\n",  */
 /* 			 pix,  */
 /* 			 colorcells[pix].pixel, */
 /* 			 colorcells[pix].red, */
 /* 			 colorcells[pix].green, */
 /* 			 colorcells[pix].blue); */
-		  pix++;
-		}
-	      }
-	    }
+                        pix++;
+                    }
+                }
+            }
 
 /*             status = */
 /*                 XStoreColors(data->display, colormap, colorcells, ncolors); */

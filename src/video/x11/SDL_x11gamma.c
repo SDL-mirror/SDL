@@ -97,21 +97,21 @@ X11_TrackColormap(Display * display, int scrNum, Colormap colormap,
     cmapTable[numCmaps].ramp = NULL;
 
     if (ramp != NULL) {
-      newramp = SDL_malloc(SDL_GammaRampSize);
-      if (NULL == newramp) {
-        SDL_SetError("Out of memory in X11_TrackColormap()");
-        return;
-      }
-      SDL_memset(newramp, 0, SDL_GammaRampSize);
-      cmapTable[numCmaps].ramp = newramp;
+        newramp = SDL_malloc(SDL_GammaRampSize);
+        if (NULL == newramp) {
+            SDL_SetError("Out of memory in X11_TrackColormap()");
+            return;
+        }
+        SDL_memset(newramp, 0, SDL_GammaRampSize);
+        cmapTable[numCmaps].ramp = newramp;
 
-      ncolors = cmapTable[numCmaps].visual.map_entries;
+        ncolors = cmapTable[numCmaps].visual.map_entries;
 
-      for (i = 0; i < ncolors; i++) {
-        newramp[(0 * 256) + i] = ramp[i].red;
-        newramp[(1 * 256) + i] = ramp[i].green;
-        newramp[(2 * 256) + i] = ramp[i].blue;
-      }
+        for (i = 0; i < ncolors; i++) {
+            newramp[(0 * 256) + i] = ramp[i].red;
+            newramp[(1 * 256) + i] = ramp[i].green;
+            newramp[(2 * 256) + i] = ramp[i].blue;
+        }
     }
 
     numCmaps++;
@@ -149,14 +149,14 @@ X11_SetDisplayGammaRamp(_THIS, Uint16 * ramp)
                 return -1;
             }
             /* remember the new ramp */
-	    if (cmapTable[j].ramp == NULL) {
-	      Uint16 * newramp = SDL_malloc(SDL_GammaRampSize);
-	      if (NULL == newramp) {
-		SDL_SetError("Out of memory in X11_TrackColormap()");
-		return -1;
-	      }
-	      cmapTable[j].ramp = newramp;
-	    }
+            if (cmapTable[j].ramp == NULL) {
+                Uint16 *newramp = SDL_malloc(SDL_GammaRampSize);
+                if (NULL == newramp) {
+                    SDL_SetError("Out of memory in X11_TrackColormap()");
+                    return -1;
+                }
+                cmapTable[j].ramp = newramp;
+            }
             SDL_memcpy(cmapTable[j].ramp, ramp, SDL_GammaRampSize);
 
             rshift = 0;
