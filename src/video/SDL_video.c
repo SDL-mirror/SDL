@@ -1635,6 +1635,24 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
         }
     }
 
+    {
+        Uint8 r, g, b, a;
+        int blendMode;
+        int scaleMode;
+
+        SDL_GetSurfaceColorMod(surface, &r, &g, &b);
+        SDL_SetTextureColorMod(textureID, r, g, b);
+
+        SDL_GetSurfaceAlphaMod(surface, &a);
+        SDL_SetTextureAlphaMod(textureID, a);
+
+        SDL_GetSurfaceBlendMode(surface, &blendMode);
+        SDL_SetTextureBlendMode(textureID, blendMode);
+
+        SDL_GetSurfaceScaleMode(surface, &scaleMode);
+        SDL_SetTextureScaleMode(textureID, scaleMode);
+    }
+
     if (SDL_ISPIXELFORMAT_INDEXED(format) && fmt->palette) {
         SDL_SetTexturePalette(textureID, fmt->palette->colors, 0,
                               fmt->palette->ncolors);
