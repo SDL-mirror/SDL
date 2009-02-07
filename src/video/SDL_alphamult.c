@@ -50,9 +50,11 @@ SDL_PreMultiplyAlpha##fmt(int w, int h, Uint32 *pixels, int pitch) \
     } \
 }
 
+/* *INDENT-OFF* */
 DEFINE_PREMULTIPLY_FUNC(ARGB8888)
 DEFINE_PREMULTIPLY_FUNC(RGBA8888)
 DEFINE_PREMULTIPLY_FUNC(ABGR8888)
 DEFINE_PREMULTIPLY_FUNC(BGRA8888)
+/* *INDENT-ON* */
 
 /* vi: set ts=4 sw=4 expandtab: */

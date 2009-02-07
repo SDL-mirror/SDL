@@ -478,19 +478,27 @@ GDI_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
         if (!data->premultiplied && data->pixels) {
             switch (texture->format) {
             case SDL_PIXELFORMAT_ARGB8888:
-                SDL_PreMultiplyAlphaARGB8888(texture->w, texture->h, (Uint32 *)data->pixels, data->pitch);
+                SDL_PreMultiplyAlphaARGB8888(texture->w, texture->h,
+                                             (Uint32 *) data->pixels,
+                                             data->pitch);
                 data->premultiplied = SDL_TRUE;
                 break;
             case SDL_PIXELFORMAT_RGBA8888:
-                SDL_PreMultiplyAlphaRGBA8888(texture->w, texture->h, (Uint32 *)data->pixels, data->pitch);
+                SDL_PreMultiplyAlphaRGBA8888(texture->w, texture->h,
+                                             (Uint32 *) data->pixels,
+                                             data->pitch);
                 data->premultiplied = SDL_TRUE;
                 break;
             case SDL_PIXELFORMAT_ABGR8888:
-                SDL_PreMultiplyAlphaABGR8888(texture->w, texture->h, (Uint32 *)data->pixels, data->pitch);
+                SDL_PreMultiplyAlphaABGR8888(texture->w, texture->h,
+                                             (Uint32 *) data->pixels,
+                                             data->pitch);
                 data->premultiplied = SDL_TRUE;
                 break;
             case SDL_PIXELFORMAT_BGRA8888:
-                SDL_PreMultiplyAlphaBGRA8888(texture->w, texture->h, (Uint32 *)data->pixels, data->pitch);
+                SDL_PreMultiplyAlphaBGRA8888(texture->w, texture->h,
+                                             (Uint32 *) data->pixels,
+                                             data->pitch);
                 data->premultiplied = SDL_TRUE;
                 break;
             }
@@ -554,19 +562,25 @@ GDI_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                 dst += data->pitch;
             }
             if (data->premultiplied) {
-                Uint32 *pixels = (Uint32 *) data->pixels + rect->y * (data->pitch / 4) + rect->x;
+                Uint32 *pixels =
+                    (Uint32 *) data->pixels + rect->y * (data->pitch / 4) +
+                    rect->x;
                 switch (texture->format) {
                 case SDL_PIXELFORMAT_ARGB8888:
-                    SDL_PreMultiplyAlphaARGB8888(rect->w, rect->h, pixels, data->pitch);
+                    SDL_PreMultiplyAlphaARGB8888(rect->w, rect->h, pixels,
+                                                 data->pitch);
                     break;
                 case SDL_PIXELFORMAT_RGBA8888:
-                    SDL_PreMultiplyAlphaRGBA8888(rect->w, rect->h, pixels, data->pitch);
+                    SDL_PreMultiplyAlphaRGBA8888(rect->w, rect->h, pixels,
+                                                 data->pitch);
                     break;
                 case SDL_PIXELFORMAT_ABGR8888:
-                    SDL_PreMultiplyAlphaABGR8888(rect->w, rect->h, pixels, data->pitch);
+                    SDL_PreMultiplyAlphaABGR8888(rect->w, rect->h, pixels,
+                                                 data->pitch);
                     break;
                 case SDL_PIXELFORMAT_BGRA8888:
-                    SDL_PreMultiplyAlphaBGRA8888(rect->w, rect->h, pixels, data->pitch);
+                    SDL_PreMultiplyAlphaBGRA8888(rect->w, rect->h, pixels,
+                                                 data->pitch);
                     break;
                 }
             }
@@ -745,7 +759,7 @@ GDI_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         SelectPalette(data->memory_hdc, texturedata->hpal, TRUE);
         RealizePalette(data->memory_hdc);
     }
-    if (texture->blendMode & (SDL_BLENDMODE_MASK|SDL_BLENDMODE_BLEND)) {
+    if (texture->blendMode & (SDL_BLENDMODE_MASK | SDL_BLENDMODE_BLEND)) {
         BLENDFUNCTION blendFunc = {
             AC_SRC_OVER,
             0,
