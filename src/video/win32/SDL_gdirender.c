@@ -26,6 +26,7 @@
 #include "SDL_win32video.h"
 #include "../SDL_rect_c.h"
 #include "../SDL_yuv_sw_c.h"
+#include "../SDL_alphamult.h"
 
 /* GDI renderer implementation */
 
@@ -120,6 +121,7 @@ typedef struct
     HBITMAP hbm;
     void *pixels;
     int pitch;
+    SDL_bool premultiplied;
 } GDI_TextureData;
 
 static void
@@ -463,10 +465,36 @@ GDI_SetTextureAlphaMod(SDL_Renderer * renderer, SDL_Texture * texture)
 static int
 GDI_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
 {
+    GDI_TextureData *data = (GDI_TextureData *) texture->driverdata;
+
     switch (texture->blendMode) {
     case SDL_BLENDMODE_NONE:
+        if (data->premultiplied) {
+            /* Crap, we've lost the original pixel data... *sigh* */
+        }
+        return 0;
     case SDL_BLENDMODE_MASK:
     case SDL_BLENDMODE_BLEND:
+        if (!data->premultiplied && data->pixels) {
+            switch (texture->format) {
+            case SDL_PIXELFORMAT_ARGB8888:
+                SDL_PreMultiplyAlphaARGB8888(texture->w, texture->h, (Uint32 *)data->pixels, data->pitch);
+                data->premultiplied = SDL_TRUE;
+                break;
+            case SDL_PIXELFORMAT_RGBA8888:
+                SDL_PreMultiplyAlphaRGBA8888(texture->w, texture->h, (Uint32 *)data->pixels, data->pitch);
+                data->premultiplied = SDL_TRUE;
+                break;
+            case SDL_PIXELFORMAT_ABGR8888:
+                SDL_PreMultiplyAlphaABGR8888(texture->w, texture->h, (Uint32 *)data->pixels, data->pitch);
+                data->premultiplied = SDL_TRUE;
+                break;
+            case SDL_PIXELFORMAT_BGRA8888:
+                SDL_PreMultiplyAlphaBGRA8888(texture->w, texture->h, (Uint32 *)data->pixels, data->pitch);
+                data->premultiplied = SDL_TRUE;
+                break;
+            }
+        }
         return 0;
     default:
         SDL_Unsupported();
@@ -524,6 +552,23 @@ GDI_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                 SDL_memcpy(dst, src, length);
                 src += pitch;
                 dst += data->pitch;
+            }
+            if (data->premultiplied) {
+                Uint32 *pixels = (Uint32 *) data->pixels + rect->y * (data->pitch / 4) + rect->x;
+                switch (texture->format) {
+                case SDL_PIXELFORMAT_ARGB8888:
+                    SDL_PreMultiplyAlphaARGB8888(rect->w, rect->h, pixels, data->pitch);
+                    break;
+                case SDL_PIXELFORMAT_RGBA8888:
+                    SDL_PreMultiplyAlphaRGBA8888(rect->w, rect->h, pixels, data->pitch);
+                    break;
+                case SDL_PIXELFORMAT_ABGR8888:
+                    SDL_PreMultiplyAlphaABGR8888(rect->w, rect->h, pixels, data->pitch);
+                    break;
+                case SDL_PIXELFORMAT_BGRA8888:
+                    SDL_PreMultiplyAlphaBGRA8888(rect->w, rect->h, pixels, data->pitch);
+                    break;
+                }
             }
         } else if (rect->w == texture->w && pitch == data->pitch) {
             if (!SetDIBits
@@ -700,16 +745,13 @@ GDI_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         SelectPalette(data->memory_hdc, texturedata->hpal, TRUE);
         RealizePalette(data->memory_hdc);
     }
-    if (texture->blendMode & SDL_BLENDMODE_MASK) {
+    if (texture->blendMode & (SDL_BLENDMODE_MASK|SDL_BLENDMODE_BLEND)) {
         BLENDFUNCTION blendFunc = {
             AC_SRC_OVER,
             0,
             texture->a,
             AC_SRC_ALPHA
         };
-        /* FIXME: GDI uses premultiplied alpha!
-         *        Once we solve this and somehow support blended drawing we can enable SDL_BLENDMODE_BLEND
-         */
         if (!AlphaBlend
             (data->current_hdc, dstrect->x, dstrect->y, dstrect->w,
              dstrect->h, data->memory_hdc, srcrect->x, srcrect->y, srcrect->w,

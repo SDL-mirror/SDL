@@ -240,6 +240,18 @@ do {									   \
 {									\
 	Pixel = (a<<24)|(r<<16)|(g<<8)|b;				\
 }
+#define RGBA8888_FROM_RGBA(Pixel, r, g, b, a)				\
+{									\
+	Pixel = (r<<24)|(g<<16)|(b<<8)|a;				\
+}
+#define ABGR8888_FROM_RGBA(Pixel, r, g, b, a)				\
+{									\
+	Pixel = (a<<24)|(b<<16)|(g<<8)|r;				\
+}
+#define BGRA8888_FROM_RGBA(Pixel, r, g, b, a)				\
+{									\
+	Pixel = (b<<24)|(g<<16)|(r<<8)|a;				\
+}
 #define ASSEMBLE_RGB(buf, bpp, fmt, r, g, b) 				\
 {									\
 	switch (bpp) {							\
@@ -346,6 +358,13 @@ do {									   \
 	g = ((Pixel>>8)&0xFF);						\
 	b = ((Pixel>>16)&0xFF);						\
 	a = (Pixel>>24);						\
+}
+#define RGBA_FROM_BGRA8888(Pixel, r, g, b, a)				\
+{									\
+	r = ((Pixel>>8)&0xFF);						\
+	g = ((Pixel>>16)&0xFF);						\
+	b = (Pixel>>24);						\
+	a = (Pixel&0xFF);						\
 }
 #define DISEMBLE_RGBA(buf, bpp, fmt, Pixel, r, g, b, a)			   \
 do {									   \

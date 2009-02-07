@@ -117,6 +117,12 @@ enum
      (SDL_PIXELTYPE(format) == SDL_PIXELTYPE_INDEX4) || \
      (SDL_PIXELTYPE(format) == SDL_PIXELTYPE_INDEX8))
 
+#define SDL_ISPIXELFORMAT_ALPHA(format)   \
+    ((SDL_PIXELORDER(format) == SDL_PACKEDORDER_ARGB) || \
+     (SDL_PIXELORDER(format) == SDL_PACKEDORDER_RGBA) || \
+     (SDL_PIXELORDER(format) == SDL_PACKEDORDER_ABGR) || \
+     (SDL_PIXELORDER(format) == SDL_PACKEDORDER_BGRA))
+
 #define SDL_ISPIXELFORMAT_FOURCC(format)    \
     ((format) && !((format) & 0x80000000))
 
