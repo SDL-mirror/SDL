@@ -673,7 +673,7 @@ GDI_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
 {
     GDI_RenderData *data = (GDI_RenderData *) renderer->driverdata;
     POINT points[2];
-    HBRUSH brush;
+    HPEN pen;
     BOOL status;
 
     if (data->makedirty) {
@@ -696,15 +696,15 @@ GDI_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
         SDL_AddDirtyRect(&data->dirty, &rect);
     }
 
-    /* Should we cache the brushes? .. it looks like GDI does for us. :) */
-    brush = CreateSolidBrush(RGB(renderer->r, renderer->g, renderer->b));
-    SelectObject(data->current_hdc, brush);
+    /* Should we cache the pen? .. it looks like GDI does for us. :) */
+    pen = CreatePen(PS_SOLID, 1, RGB(renderer->r, renderer->g, renderer->b));
+    SelectObject(data->current_hdc, pen);
     points[0].x = x1;
     points[0].y = y1;
     points[1].x = x2;
     points[1].y = y2;
     status = Polyline(data->current_hdc, points, 2);
-    DeleteObject(brush);
+    DeleteObject(pen);
 
     if (!status) {
         WIN_SetError("FillRect()");
