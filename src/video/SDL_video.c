@@ -1598,6 +1598,7 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
             return 0;
         }
     } else {
+        /* FIXME: Get the best supported texture format */
         if (surface->format->Amask
             || !(surface->map->info.flags &
                  (SDL_COPY_COLORKEY | SDL_COPY_MASK | SDL_COPY_BLEND))) {
