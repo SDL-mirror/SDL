@@ -111,7 +111,8 @@ typedef enum
     SDL_WINDOW_MAXIMIZED = 0x00000040,          /**< maximized */
     SDL_WINDOW_INPUT_GRABBED = 0x00000100,      /**< window has grabbed input focus */
     SDL_WINDOW_INPUT_FOCUS = 0x00000200,        /**< window has input focus */
-    SDL_WINDOW_MOUSE_FOCUS = 0x00000400         /**< window has mouse focus */
+    SDL_WINDOW_MOUSE_FOCUS = 0x00000400,        /**< window has mouse focus */
+    SDL_WINDOW_FOREIGN = 0x00000800             /**< window not created by SDL */
 } SDL_WindowFlags;
 
 /**
@@ -1363,6 +1364,7 @@ extern DECLSPEC void SDLCALL SDL_DisableScreenSaver(void);
  *       your program from the dynamic library using SDL_GL_GetProcAddress().
  *
  * \sa SDL_GL_GetProcAddress()
+ * \sa SDL_GL_UnloadLibrary()
  */
 extern DECLSPEC int SDLCALL SDL_GL_LoadLibrary(const char *path);
 
@@ -1372,6 +1374,15 @@ extern DECLSPEC int SDLCALL SDL_GL_LoadLibrary(const char *path);
  * \brief Get the address of an OpenGL function.
  */
 extern DECLSPEC void *SDLCALL SDL_GL_GetProcAddress(const char *proc);
+
+/**
+ * \fn void SDL_GL_UnloadLibrary(void)
+ *
+ * \brief Unload the OpenGL library previously loaded by SDL_GL_LoadLibrary()
+ *
+ * \sa SDL_GL_LoadLibrary()
+ */
+extern DECLSPEC void SDLCALL SDL_GL_UnloadLibrary(void);
 
 /**
  * \fn SDL_bool SDL_GL_ExtensionSupported(const char *extension)

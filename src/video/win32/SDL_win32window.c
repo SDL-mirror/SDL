@@ -521,11 +521,6 @@ WIN_DestroyWindow(_THIS, SDL_Window * window)
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
 
     if (data) {
-#ifdef SDL_VIDEO_OPENGL_WGL
-        if (window->flags & SDL_WINDOW_OPENGL) {
-            WIN_GL_CleanupWindow(_this, window);
-        }
-#endif
         ReleaseDC(data->hwnd, data->hdc);
         if (data->created) {
             if (videodata->wintabDLL) {

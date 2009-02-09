@@ -37,15 +37,6 @@ WIN_GL_LoadLibrary(_THIS, const char *path)
     LPTSTR wpath;
     HANDLE handle;
 
-    if (_this->gl_config.driver_loaded) {
-        if (path) {
-            SDL_SetError("OpenGL library already loaded");
-            return -1;
-        } else {
-            ++_this->gl_config.driver_loaded;
-            return 0;
-        }
-    }
     if (path == NULL) {
         path = SDL_getenv("SDL_OPENGL_LIBRARY");
     }
@@ -53,17 +44,30 @@ WIN_GL_LoadLibrary(_THIS, const char *path)
         path = DEFAULT_OPENGL;
     }
     wpath = WIN_UTF8ToString(path);
-    handle = LoadLibrary(wpath);
+    _this->gl_config.dll_handle = LoadLibrary(wpath);
     SDL_free(wpath);
-    if (!handle) {
+    if (!_this->gl_config.dll_handle) {
         char message[1024];
         SDL_snprintf(message, SDL_arraysize(message), "LoadLibrary(\"%s\")",
                      path);
         WIN_SetError(message);
         return -1;
     }
+    SDL_strlcpy(_this->gl_config.driver_path, path,
+                SDL_arraysize(_this->gl_config.driver_path));
+
+    /* Allocate OpenGL memory */
+    _this->gl_data =
+        (struct SDL_GLDriverData *) SDL_calloc(1,
+                                               sizeof(struct
+                                                      SDL_GLDriverData));
+    if (!_this->gl_data) {
+        SDL_OutOfMemory();
+        return -1;
+    }
 
     /* Load function pointers */
+    handle = _this->gl_config.dll_handle;
     _this->gl_data->wglGetProcAddress = (void *(WINAPI *) (const char *))
         GetProcAddress(handle, "wglGetProcAddress");
     _this->gl_data->wglCreateContext = (HGLRC(WINAPI *) (HDC))
@@ -86,10 +90,6 @@ WIN_GL_LoadLibrary(_THIS, const char *path)
         return -1;
     }
 
-    _this->gl_config.dll_handle = handle;
-    SDL_strlcpy(_this->gl_config.driver_path, path,
-                SDL_arraysize(_this->gl_config.driver_path));
-    _this->gl_config.driver_loaded = 1;
     return 0;
 }
 
@@ -107,16 +107,15 @@ WIN_GL_GetProcAddress(_THIS, const char *proc)
     return func;
 }
 
-static void
+void
 WIN_GL_UnloadLibrary(_THIS)
 {
-    if (_this->gl_config.driver_loaded > 0) {
-        if (--_this->gl_config.driver_loaded > 0) {
-            return;
-        }
-        FreeLibrary((HMODULE) _this->gl_config.dll_handle);
-        _this->gl_config.dll_handle = NULL;
-    }
+    FreeLibrary((HMODULE) _this->gl_config.dll_handle);
+    _this->gl_config.dll_handle = NULL;
+
+    /* Free OpenGL memory */
+    SDL_free(_this->gl_data);
+    _this->gl_data = NULL;
 }
 
 static void
@@ -378,44 +377,6 @@ WIN_GL_ChoosePixelFormatARB(_THIS, int *iAttribs, float *fAttribs)
     return pixel_format;
 }
 
-static int
-WIN_GL_Initialize(_THIS)
-{
-    if (_this->gl_data) {
-        ++_this->gl_data->initialized;
-        return 0;
-    }
-
-    _this->gl_data =
-        (struct SDL_GLDriverData *) SDL_calloc(1,
-                                               sizeof(struct
-                                                      SDL_GLDriverData));
-    if (!_this->gl_data) {
-        SDL_OutOfMemory();
-        return -1;
-    }
-    _this->gl_data->initialized = 1;
-
-    if (WIN_GL_LoadLibrary(_this, NULL) < 0) {
-        return -1;
-    }
-
-    return 0;
-}
-
-static void
-WIN_GL_Shutdown(_THIS)
-{
-    if (!_this->gl_data || (--_this->gl_data->initialized > 0)) {
-        return;
-    }
-
-    WIN_GL_UnloadLibrary(_this);
-
-    SDL_free(_this->gl_data);
-    _this->gl_data = NULL;
-}
-
 int
 WIN_GL_SetupWindow(_THIS, SDL_Window * window)
 {
@@ -425,10 +386,6 @@ WIN_GL_SetupWindow(_THIS, SDL_Window * window)
     int iAttribs[64];
     int *iAttr;
     float fAttribs[1] = { 0 };
-
-    if (WIN_GL_Initialize(_this) < 0) {
-        return -1;
-    }
 
     WIN_GL_SetupPixelFormat(_this, &pfd);
 
@@ -520,12 +477,6 @@ WIN_GL_SetupWindow(_THIS, SDL_Window * window)
         return (-1);
     }
     return 0;
-}
-
-void
-WIN_GL_CleanupWindow(_THIS, SDL_Window * window)
-{
-    WIN_GL_Shutdown(_this);
 }
 
 SDL_GLContext

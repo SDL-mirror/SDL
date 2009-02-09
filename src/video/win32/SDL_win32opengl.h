@@ -28,7 +28,6 @@
 
 struct SDL_GLDriverData
 {
-    int initialized;
     int WGL_ARB_pixel_format;
 
     void *(WINAPI * wglGetProcAddress) (const char *proc);
@@ -53,8 +52,8 @@ struct SDL_GLDriverData
 /* OpenGL functions */
 extern int WIN_GL_LoadLibrary(_THIS, const char *path);
 extern void *WIN_GL_GetProcAddress(_THIS, const char *proc);
+extern void WIN_GL_UnloadLibrary(_THIS);
 extern int WIN_GL_SetupWindow(_THIS, SDL_Window * window);
-extern void WIN_GL_CleanupWindow(_THIS, SDL_Window * window);
 extern SDL_GLContext WIN_GL_CreateContext(_THIS, SDL_Window * window);
 extern int WIN_GL_MakeCurrent(_THIS, SDL_Window * window,
                               SDL_GLContext context);

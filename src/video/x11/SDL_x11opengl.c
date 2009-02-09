@@ -65,37 +65,39 @@
 #define GL_UnloadObject	SDL_UnloadObject
 #endif
 
-static int X11_GL_InitializeMemory(_THIS);
+static void X11_GL_InitExtensions(_THIS);
 
 int
 X11_GL_LoadLibrary(_THIS, const char *path)
 {
     void *handle;
 
-    if (_this->gl_config.driver_loaded) {
-        /* do not return without reinitializing the function hooks */
-        if (path) {
-            SDL_SetError("OpenGL library already loaded");
-        }
-        handle = _this->gl_config.dll_handle;
-    } else {
-        if (path == NULL) {
-            path = SDL_getenv("SDL_OPENGL_LIBRARY");
-        }
-        if (path == NULL) {
-            path = DEFAULT_OPENGL;
-        }
-        handle = GL_LoadObject(path);
-        if (!handle) {
-            return -1;
-        }
-        _this->gl_config.dll_handle = handle;
-        SDL_strlcpy(_this->gl_config.driver_path, path,
-                    SDL_arraysize(_this->gl_config.driver_path));
+    /* Load the OpenGL library */
+    if (path == NULL) {
+        path = SDL_getenv("SDL_OPENGL_LIBRARY");
     }
-    X11_GL_InitializeMemory(_this);
+    if (path == NULL) {
+        path = DEFAULT_OPENGL;
+    }
+    _this->gl_config.dll_handle = SDL_LoadObject(path);
+    if (!_this->gl_config.dll_handle) {
+        return -1;
+    }
+    SDL_strlcpy(_this->gl_config.driver_path, path,
+                SDL_arraysize(_this->gl_config.driver_path));
 
-    /* Load new function pointers */
+    /* Allocate OpenGL memory */
+    _this->gl_data =
+        (struct SDL_GLDriverData *) SDL_calloc(1,
+                                               sizeof(struct
+                                                      SDL_GLDriverData));
+    if (!_this->gl_data) {
+        SDL_OutOfMemory();
+        return -1;
+    }
+
+    /* Load function pointers */
+    handle = _this->gl_config.dll_handle;
     _this->gl_data->glXGetProcAddress =
         (void *(*)(const GLubyte *)) GL_LoadFunction(handle,
                                                      "glXGetProcAddressARB");
@@ -123,7 +125,9 @@ X11_GL_LoadLibrary(_THIS, const char *path)
         return -1;
     }
 
-    ++_this->gl_config.driver_loaded;
+    /* Initialize extensions */
+    X11_GL_InitExtensions(_this);
+
     return 0;
 }
 
@@ -139,16 +143,21 @@ X11_GL_GetProcAddress(_THIS, const char *proc)
     return GL_LoadFunction(handle, proc);
 }
 
-static void
+void
 X11_GL_UnloadLibrary(_THIS)
 {
-    if (_this->gl_config.driver_loaded > 0) {
-        if (--_this->gl_config.driver_loaded > 0) {
-            return;
-        }
-        GL_UnloadObject(_this->gl_config.dll_handle);
-        _this->gl_config.dll_handle = NULL;
-    }
+    /* Don't actually unload the library, since it may have registered
+     * X11 shutdown hooks, per the notes at:
+     * http://dri.sourceforge.net/doc/DRIuserguide.html
+     */
+#if 0
+    GL_UnloadObject(_this->gl_config.dll_handle);
+    _this->gl_config.dll_handle = NULL;
+#endif
+
+    /* Free OpenGL memory */
+    SDL_free(_this->gl_data);
+    _this->gl_data = NULL;
 }
 
 static SDL_bool
@@ -252,62 +261,6 @@ X11_GL_InitExtensions(_THIS)
     }
     XDestroyWindow(display, w);
     X11_PumpEvents(_this);
-}
-
-static int
-X11_GL_InitializeMemory(_THIS)
-{
-    if (_this->gl_data) {
-        return 0;
-    }
-
-    _this->gl_data =
-        (struct SDL_GLDriverData *) SDL_calloc(1,
-                                               sizeof(struct
-                                                      SDL_GLDriverData));
-    if (!_this->gl_data) {
-        SDL_OutOfMemory();
-        return -1;
-    }
-    _this->gl_data->initialized = 0;
-
-    return 0;
-}
-
-int
-X11_GL_Initialize(_THIS)
-{
-
-    if (X11_GL_InitializeMemory(_this) < 0) {
-        return -1;
-    }
-    ++_this->gl_data->initialized;
-
-    if (X11_GL_LoadLibrary(_this, NULL) < 0) {
-        return -1;
-    }
-
-    /* Initialize extensions */
-    X11_GL_InitExtensions(_this);
-
-    return 0;
-}
-
-void
-X11_GL_Shutdown(_THIS)
-{
-    if (!_this->gl_data || (--_this->gl_data->initialized > 0)) {
-        return;
-    }
-
-    /* Don't actually unload the library, since it may have registered
-     * X11 shutdown hooks, per the notes at:
-     * http://dri.sourceforge.net/doc/DRIuserguide.html
-     * //X11_GL_UnloadLibrary(_this);
-     */
-
-    SDL_free(_this->gl_data);
-    _this->gl_data = NULL;
 }
 
 XVisualInfo *

@@ -762,9 +762,12 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
         SDL_UninitializedVideo();
         return 0;
     }
-    if ((flags & SDL_WINDOW_OPENGL) && !_this->GL_CreateContext) {
-        SDL_SetError("No OpenGL support in video driver");
-        return 0;
+    if (flags & SDL_WINDOW_OPENGL) {
+        if (!_this->GL_CreateContext) {
+            SDL_SetError("No OpenGL support in video driver");
+            return 0;
+        }
+        SDL_GL_LoadLibrary(NULL);
     }
     SDL_zero(window);
     window.id = _this->next_object_id++;
@@ -776,6 +779,9 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
     window.display = _this->current_display;
 
     if (_this->CreateWindow && _this->CreateWindow(_this, &window) < 0) {
+        if (flags & SDL_WINDOW_OPENGL) {
+            SDL_GL_UnloadLibrary();
+        }
         return 0;
     }
     display = &SDL_CurrentDisplay;
@@ -785,6 +791,9 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
     if (!windows) {
         if (_this->DestroyWindow) {
             _this->DestroyWindow(_this, &window);
+        }
+        if (flags & SDL_WINDOW_OPENGL) {
+            SDL_GL_UnloadLibrary();
         }
         return 0;
     }
@@ -824,6 +833,7 @@ SDL_CreateWindowFrom(const void *data)
     SDL_zero(window);
     window.id = _this->next_object_id++;
     window.display = _this->current_display;
+    window.flags = SDL_WINDOW_FOREIGN;
 
     if (!_this->CreateWindowFrom ||
         _this->CreateWindowFrom(_this, &window, data) < 0) {
@@ -852,24 +862,48 @@ SDL_CreateWindowFrom(const void *data)
 int
 SDL_RecreateWindow(SDL_Window * window, Uint32 flags)
 {
+    const Uint32 allowed_flags = (SDL_WINDOW_FULLSCREEN |
+                                  SDL_WINDOW_OPENGL |
+                                  SDL_WINDOW_BORDERLESS |
+                                  SDL_WINDOW_RESIZABLE |
+                                  SDL_WINDOW_INPUT_GRABBED);
     char *title = window->title;
 
     if ((flags & SDL_WINDOW_OPENGL) && !_this->GL_CreateContext) {
         SDL_SetError("No OpenGL support in video driver");
         return -1;
     }
-    if (_this->DestroyWindow) {
+    if ((window->flags & SDL_WINDOW_OPENGL) != (flags & SDL_WINDOW_OPENGL)) {
+        if (flags & SDL_WINDOW_OPENGL) {
+            SDL_GL_LoadLibrary(NULL);
+        } else {
+            SDL_GL_UnloadLibrary();
+        }
+    }
+
+    if (window->flags & SDL_WINDOW_FOREIGN) {
+        /* Can't destroy and re-create foreign windows, hrm */
+        flags |= SDL_WINDOW_FOREIGN;
+    } else {
+        flags &= ~SDL_WINDOW_FOREIGN;
+    }
+
+    if (_this->DestroyWindow && !(flags & SDL_WINDOW_FOREIGN)) {
         _this->DestroyWindow(_this, window);
     }
-    window->title = NULL;
-    window->flags =
-        (flags &
-         ~(SDL_WINDOW_MAXIMIZED | SDL_WINDOW_MINIMIZED | SDL_WINDOW_SHOWN |
-           SDL_WINDOW_INPUT_GRABBED));
 
-    if (_this->CreateWindow && _this->CreateWindow(_this, window) < 0) {
-        return -1;
+    window->title = NULL;
+    window->flags = (flags & allowed_flags);
+
+    if (_this->CreateWindow && !(flags & SDL_WINDOW_FOREIGN)) {
+        if (_this->CreateWindow(_this, window) < 0) {
+            if (flags & SDL_WINDOW_OPENGL) {
+                SDL_GL_UnloadLibrary();
+            }
+            return -1;
+        }
     }
+
     if (title) {
         SDL_SetWindowTitle(window->id, title);
         SDL_free(title);
@@ -1352,6 +1386,9 @@ SDL_DestroyWindow(SDL_WindowID windowID)
             if (_this->DestroyWindow) {
                 _this->DestroyWindow(_this, window);
             }
+            if (window->flags & SDL_WINDOW_OPENGL) {
+                SDL_GL_UnloadLibrary();
+            }
             if (j != display->num_windows - 1) {
                 SDL_memcpy(&display->windows[i],
                            &display->windows[i + 1],
@@ -1543,6 +1580,7 @@ SDL_TextureID
 SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
 {
     SDL_TextureID textureID;
+    Uint32 requested_format = format;
     SDL_PixelFormat *fmt;
     int bpp;
     Uint32 Rmask, Gmask, Bmask, Amask;
@@ -1586,6 +1624,14 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
     textureID =
         SDL_CreateTexture(format, SDL_TEXTUREACCESS_STATIC, surface->w,
                           surface->h);
+    if (!textureID && !requested_format) {
+        SDL_DisplayMode desktop_mode;
+        SDL_GetDesktopDisplayMode(&desktop_mode);
+        format = desktop_mode.format;
+        textureID =
+            SDL_CreateTexture(format, SDL_TEXTUREACCESS_STATIC, surface->w,
+                              surface->h);
+    }
     if (!textureID) {
         return 0;
     }
@@ -2460,11 +2506,21 @@ SDL_GL_LoadLibrary(const char *path)
         SDL_UninitializedVideo();
         return -1;
     }
-    if (_this->GL_LoadLibrary) {
-        retval = _this->GL_LoadLibrary(_this, path);
+    if (_this->gl_config.driver_loaded) {
+        if (path && SDL_strcmp(path, _this->gl_config.driver_path) != 0) {
+            SDL_SetError("OpenGL library already loaded");
+            return -1;
+        }
+        retval = 0;
     } else {
-        SDL_SetError("No dynamic GL support in video driver");
-        retval = -1;
+        if (!_this->GL_LoadLibrary) {
+            SDL_SetError("No dynamic GL support in video driver");
+            return -1;
+        }
+        retval = _this->GL_LoadLibrary(_this, path);
+    }
+    if (retval == 0) {
+        ++_this->gl_config.driver_loaded;
     }
     return (retval);
 }
@@ -2489,6 +2545,23 @@ SDL_GL_GetProcAddress(const char *proc)
         SDL_SetError("No dynamic GL support in video driver");
     }
     return func;
+}
+
+void
+SDL_GL_UnloadLibrary(void)
+{
+    if (!_this) {
+        SDL_UninitializedVideo();
+        return;
+    }
+    if (_this->gl_config.driver_loaded > 0) {
+        if (--_this->gl_config.driver_loaded > 0) {
+            return;
+        }
+        if (_this->GL_UnloadLibrary) {
+            _this->GL_UnloadLibrary(_this);
+        }
+    }
 }
 
 SDL_bool

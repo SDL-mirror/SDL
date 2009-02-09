@@ -190,6 +190,7 @@ X11_CreateDevice(int devindex)
 #ifdef SDL_VIDEO_OPENGL_GLX
     device->GL_LoadLibrary = X11_GL_LoadLibrary;
     device->GL_GetProcAddress = X11_GL_GetProcAddress;
+    device->GL_UnloadLibrary = X11_GL_UnloadLibrary;
     device->GL_CreateContext = X11_GL_CreateContext;
     device->GL_MakeCurrent = X11_GL_MakeCurrent;
     device->GL_SetSwapInterval = X11_GL_SetSwapInterval;

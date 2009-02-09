@@ -188,9 +188,6 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     if (window->flags & SDL_WINDOW_OPENGL) {
         XVisualInfo *vinfo;
 
-        if (X11_GL_Initialize(_this) < 0) {
-            return -1;
-        }
         vinfo = X11_GL_GetVisual(_this, data->display, displaydata->screen);
         if (!vinfo) {
             return -1;
@@ -461,11 +458,6 @@ X11_CreateWindow(_THIS, SDL_Window * window)
                       (CWOverrideRedirect | CWBackPixel | CWBorderPixel |
                        CWColormap), &xattr);
     if (!w) {
-#ifdef SDL_VIDEO_OPENGL_GLX
-        if (window->flags & SDL_WINDOW_OPENGL) {
-            X11_GL_Shutdown(_this);
-        }
-#endif
         SDL_SetError("Couldn't create window");
         return -1;
     }
@@ -622,11 +614,6 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     XSetWMProtocols(data->display, w, &data->WM_DELETE_WINDOW, 1);
 
     if (SetupWindowData(_this, window, w, SDL_TRUE) < 0) {
-#ifdef SDL_VIDEO_OPENGL_GLX
-        if (window->flags & SDL_WINDOW_OPENGL) {
-            X11_GL_Shutdown(_this);
-        }
-#endif
         XDestroyWindow(data->display, w);
         return -1;
     }
@@ -942,11 +929,6 @@ X11_DestroyWindow(_THIS, SDL_Window * window)
                 }
             }
         }
-#ifdef SDL_VIDEO_OPENGL_GLX
-        if (window->flags & SDL_WINDOW_OPENGL) {
-            X11_GL_Shutdown(_this);
-        }
-#endif
 #ifdef X_HAVE_UTF8_STRING
         if (data->ic) {
             XDestroyIC(data->ic);

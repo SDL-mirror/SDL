@@ -93,6 +93,7 @@ Cocoa_CreateDevice(int devindex)
 #ifdef SDL_VIDEO_OPENGL_CGL
     device->GL_LoadLibrary = Cocoa_GL_LoadLibrary;
     device->GL_GetProcAddress = Cocoa_GL_GetProcAddress;
+    device->GL_UnloadLibrary = Cocoa_GL_UnloadLibrary;
     device->GL_CreateContext = Cocoa_GL_CreateContext;
     device->GL_MakeCurrent = Cocoa_GL_MakeCurrent;
     device->GL_SetSwapInterval = Cocoa_GL_SetSwapInterval;

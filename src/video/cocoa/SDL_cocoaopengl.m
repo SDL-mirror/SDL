@@ -48,15 +48,7 @@
 int
 Cocoa_GL_LoadLibrary(_THIS, const char *path)
 {
-    if (_this->gl_config.driver_loaded) {
-        if (path) {
-            SDL_SetError("OpenGL library already loaded");
-            return -1;
-        } else {
-            ++_this->gl_config.driver_loaded;
-            return 0;
-        }
-    }
+    /* Load the OpenGL library */
     if (path == NULL) {
         path = SDL_getenv("SDL_OPENGL_LIBRARY");
     }
@@ -69,7 +61,6 @@ Cocoa_GL_LoadLibrary(_THIS, const char *path)
     }
     SDL_strlcpy(_this->gl_config.driver_path, path,
                 SDL_arraysize(_this->gl_config.driver_path));
-    _this->gl_config.driver_loaded = 1;
     return 0;
 }
 
@@ -79,68 +70,11 @@ Cocoa_GL_GetProcAddress(_THIS, const char *proc)
     return SDL_LoadFunction(_this->gl_config.dll_handle, proc);
 }
 
-static void
+void
 Cocoa_GL_UnloadLibrary(_THIS)
 {
-    if (_this->gl_config.driver_loaded > 0) {
-        if (--_this->gl_config.driver_loaded > 0) {
-            return;
-        }
-        SDL_UnloadObject(_this->gl_config.dll_handle);
-        _this->gl_config.dll_handle = NULL;
-    }
-}
-
-static int
-Cocoa_GL_Initialize(_THIS)
-{
-    if (_this->gl_data) {
-        ++_this->gl_data->initialized;
-        return 0;
-    }
-
-    _this->gl_data =
-        (struct SDL_GLDriverData *) SDL_calloc(1,
-                                               sizeof(struct
-                                                      SDL_GLDriverData));
-    if (!_this->gl_data) {
-        SDL_OutOfMemory();
-        return -1;
-    }
-    _this->gl_data->initialized = 1;
-
-    if (Cocoa_GL_LoadLibrary(_this, NULL) < 0) {
-        return -1;
-    }
-    return 0;
-}
-
-static void
-Cocoa_GL_Shutdown(_THIS)
-{
-    if (!_this->gl_data || (--_this->gl_data->initialized > 0)) {
-        return;
-    }
-
-    Cocoa_GL_UnloadLibrary(_this);
-
-    SDL_free(_this->gl_data);
-    _this->gl_data = NULL;
-}
-
-int
-Cocoa_GL_SetupWindow(_THIS, SDL_Window * window)
-{
-    if (Cocoa_GL_Initialize(_this) < 0) {
-        return -1;
-    }
-    return 0;
-}
-
-void
-Cocoa_GL_CleanupWindow(_THIS, SDL_Window * window)
-{
-    Cocoa_GL_Shutdown(_this);
+    SDL_UnloadObject(_this->gl_config.dll_handle);
+    _this->gl_config.dll_handle = NULL;
 }
 
 SDL_GLContext
