@@ -29,7 +29,7 @@ quit(int rc)
 {
     SDL_VideoQuit();
     if (native_window) {
-        factory->DestroyWindow(native_window);
+        factory->DestroyNativeWindow(native_window);
     }
     exit(rc);
 }
@@ -137,7 +137,7 @@ main(int argc, char *argv[])
         quit(2);
     }
     printf("Creating native window for %s driver\n", driver);
-    native_window = factory->CreateWindow(WINDOW_W, WINDOW_H);
+    native_window = factory->CreateNativeWindow(WINDOW_W, WINDOW_H);
     if (!native_window) {
         fprintf(stderr, "Couldn't create native window\n");
         quit(3);
