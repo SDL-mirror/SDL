@@ -14,7 +14,7 @@
  * Verify mouse grab support
  * Properly handle mouse grab with Vista DPI scaling
  * Make sure the mouse is where it's supposed to be when un-grabbed
- * Test native window codepath
+ * Plan how to handle events on foreign windows
  * Add keyboard enumeration / name query API
  * Implement NET_WM_PING and NET_WM_PID/WM_CLIENT_MACHINE (?)
    - http://standards.freedesktop.org/wm-spec/wm-spec-1.3.html#KILLINGWINDOWS
