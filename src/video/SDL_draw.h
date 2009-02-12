@@ -325,7 +325,7 @@ do { \
     x = x1; \
     y = y1; \
  \
-    for (i = 1; i < numpixels; ++i) { \
+    for (i = 0; i < numpixels; ++i) { \
         op(x, y); \
         if (d < 0) { \
             d += dinc1; \
