@@ -23,6 +23,7 @@
  * Implement key repeat at the driver level
  * Add name -> keysym and name -> scancode lookup functions
  * Fix building haptic system on win32
+ * Add always on top window styles
 
 Wish list for the 1.3 development branch:
 http://bugzilla.libsdl.org/
