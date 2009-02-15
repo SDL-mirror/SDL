@@ -683,7 +683,7 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         } else {
             XCopyArea(data->display, texturedata->pixmap, data->drawable,
                       data->gc, srcrect->x, srcrect->y, dstrect->w,
-                      dstrect->h, srcrect->x, srcrect->y);
+                      dstrect->h, dstrect->x, dstrect->y);
         }
     } else if (texturedata->yuv
                || texture->access == SDL_TEXTUREACCESS_STREAMING) {
