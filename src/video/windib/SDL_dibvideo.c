@@ -34,6 +34,7 @@
 #include "../SDL_pixels_c.h"
 #include "../../events/SDL_sysevents.h"
 #include "../../events/SDL_events_c.h"
+#include "SDL_gapidibvideo.h"
 #include "SDL_dibvideo.h"
 #include "../wincommon/SDL_syswm_c.h"
 #include "../wincommon/SDL_sysmouse_c.h"
@@ -128,6 +129,9 @@ static void DIB_DeleteDevice(SDL_VideoDevice *device)
 {
 	if ( device ) {
 		if ( device->hidden ) {
+			if ( device->hidden->dibInfo ) {
+				SDL_free( device->hidden->dibInfo );
+			}
 			SDL_free(device->hidden);
 		}
 		if ( device->gl_data ) {
@@ -147,6 +151,16 @@ static SDL_VideoDevice *DIB_CreateDevice(int devindex)
 		SDL_memset(device, 0, (sizeof *device));
 		device->hidden = (struct SDL_PrivateVideoData *)
 				SDL_malloc((sizeof *device->hidden));
+		if(device->hidden){
+			SDL_memset(device->hidden, 0, (sizeof *device->hidden));
+			device->hidden->dibInfo = (DibInfo *)SDL_malloc((sizeof(DibInfo)));
+			if(device->hidden->dibInfo == NULL)
+			{
+				SDL_free(device->hidden);
+				device->hidden = NULL;
+			}
+		}
+		
 		device->gl_data = (struct SDL_PrivateGLData *)
 				SDL_malloc((sizeof *device->gl_data));
 	}
@@ -156,7 +170,7 @@ static SDL_VideoDevice *DIB_CreateDevice(int devindex)
 		DIB_DeleteDevice(device);
 		return(NULL);
 	}
-	SDL_memset(device->hidden, 0, (sizeof *device->hidden));
+	SDL_memset(device->hidden->dibInfo, 0, (sizeof *device->hidden->dibInfo));
 	SDL_memset(device->gl_data, 0, (sizeof *device->gl_data));
 
 	/* Set the function pointers */
@@ -347,6 +361,8 @@ int DIB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	this->hidden->supportRotation = ChangeDisplaySettingsEx(NULL, &settings, NULL, CDS_TEST, NULL) == DISP_CHANGE_SUCCESSFUL;
 #endif
 	/* Query for the desktop resolution */
+	SDL_desktop_mode.dmSize = sizeof(SDL_desktop_mode);
+	SDL_desktop_mode.dmDriverExtra = 0;
 	EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &SDL_desktop_mode);
 	this->info.current_w = SDL_desktop_mode.dmPelsWidth;
 	this->info.current_h = SDL_desktop_mode.dmPelsHeight;
@@ -744,7 +760,7 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 				video->flags |= SDL_RESIZABLE;
 			}
 		}
-#if WS_MAXIMIZE
+#if WS_MAXIMIZE && !defined(_WIN32_WCE)
 		if (IsZoomed(SDL_Window)) style |= WS_MAXIMIZE;
 #endif
 	}
@@ -1006,7 +1022,7 @@ int DIB_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 			entry->peBlue  = colors[i].b;
 			entry->peFlags = PC_NOCOLLAPSE;
 		}
-#ifdef SYSPAL_NOSTATIC
+#if defined(SYSPAL_NOSTATIC) && !defined(_WIN32_WCE)
 		/* Check to make sure black and white are in position */
 		if ( GetSystemPaletteUse(hdc) != SYSPAL_NOSTATIC256 ) {
 			moved_entries += CheckPaletteEntry(screen_logpal, 0, 0x00, 0x00, 0x00);
@@ -1227,7 +1243,7 @@ void DIB_VideoQuit(_THIS)
 /* Exported for the windows message loop only */
 static void DIB_GrabStaticColors(HWND window)
 {
-#ifdef SYSPAL_NOSTATIC
+#if defined(SYSPAL_NOSTATIC) && !defined(_WIN32_WCE)
 	HDC hdc;
 
 	hdc = GetDC(window);
@@ -1240,7 +1256,7 @@ static void DIB_GrabStaticColors(HWND window)
 }
 static void DIB_ReleaseStaticColors(HWND window)
 {
-#ifdef SYSPAL_NOSTATIC
+#if defined(SYSPAL_NOSTATIC) && !defined(_WIN32_WCE)
 	HDC hdc;
 
 	hdc = GetDC(window);

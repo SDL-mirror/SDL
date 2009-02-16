@@ -73,7 +73,7 @@ int SDL_KeyboardInit(void)
 	SDL_EnableKeyRepeat(0, 0);
 
 	/* Allow environment override to disable special lock-key behavior */
-	env = getenv("SDL_NO_LOCK_KEYS");
+	env = SDL_getenv("SDL_NO_LOCK_KEYS");
 	SDL_NoLockKeys = 0;
 	if (env) {
 		switch (SDL_atoi(env)) {

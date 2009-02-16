@@ -27,6 +27,7 @@
 #include "SDL_mouse.h"
 #include "SDL_mutex.h"
 #include "../SDL_sysvideo.h"
+#include "../windib/SDL_gapidibvideo.h"
 
 /* From gx.h, since it's not really C compliant */
 
@@ -100,13 +101,6 @@ struct GapiFunc
 #define GX_NORMALKEYS   0x02
 #define GX_LANDSCAPEKEYS        0x03
 
-typedef enum
-{
-	SDL_ORIENTATION_UP,
-	SDL_ORIENTATION_DOWN,
-	SDL_ORIENTATION_LEFT,
-	SDL_ORIENTATION_RIGHT
-} SDL_ScreenOrientation;
 
 /* GAPI video mode */
 typedef enum {
@@ -117,26 +111,26 @@ typedef enum {
 	GAPI_PALETTE
 } GAPIVideoMode; 
 
-/* Hidden "this" pointer for the video functions */
-#define _THIS	SDL_VideoDevice *this
-
 typedef unsigned short PIXEL;
 
 /* Private display data 
    begin with DIB private structure to allow DIB events code sharing
 */
-struct SDL_PrivateVideoData {
-	HBITMAP screen_bmp;
-	HPALETTE screen_pal;
+struct GapiInfo {
+	/* Rotation which has to be applied to the key (arrow keys) and mouse events measured in quarters of a circle
+	 * counter clockwise */
+	int coordinateTransform; 
+	char hiresFix; /* using hires mode without defining hires resource */
+	int invert; //TODO this is only written but never read, so it should be removed
 
 #define NUM_MODELISTS	4		/* 8, 16, 24, and 32 bits-per-pixel */
 	int SDL_nummodes[NUM_MODELISTS];
 	SDL_Rect **SDL_modelist[NUM_MODELISTS];
+	
+
 	// The orientation of the video mode user wants to get
 	// Probably restricted to UP and RIGHT
 	SDL_ScreenOrientation userOrientation;
-	int invert;
-	char hiresFix; // using hires mode without defining hires resource
 // --------------
 	int useGXOpenDisplay; /* use GXOpenDispplay */
 	int alreadyGXOpened;
@@ -158,14 +152,8 @@ struct SDL_PrivateVideoData {
 	int startOffset; // in bytes
 	int useVga;
 	int suspended; // do not pu anything into video memory
-	// The orientation of the system, as defined by SM_CXSCREEN and SM_CYSCREEN
-	// User can change it by using 'screen layout' in system options
-	// Restricted to UP or RIGHT
-	enum SDL_ScreenOrientation systemOrientation;
 };
 
 
-#define gapiBuffer this->hidden->buffer
-#define gapi this->hidden
 
 #endif /* _SDL_gapivideo_h */

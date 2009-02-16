@@ -50,9 +50,13 @@
 #include "wmmsg.h"
 #endif
 
-#ifdef _WIN32_WCE
-#include "../gapi/SDL_gapivideo.h"
+#include "../windib/SDL_gapidibvideo.h"
 
+#ifdef SDL_VIDEO_DRIVER_GAPI
+#include "../gapi/SDL_gapivideo.h"
+#endif
+
+#ifdef _WIN32_WCE
 #define IsZoomed(HWND) 1
 #define NO_GETKEYBOARDSTATE
 #if _WIN32_WCE < 420
@@ -102,6 +106,9 @@ ToUnicodeFN SDL_ToUnicode = ToUnicode9xME;
 
 
 #if defined(_WIN32_WCE)
+
+//AdjustWindowRect is not available under WinCE 2003
+#define AdjustWindowRect(a,b,c) (AdjustWindowRectEx((a),(b),(c),0))
 
 // dynamically load aygshell dll because we want SDL to work on HPC and be300
 HINSTANCE aygshell = NULL;
@@ -211,15 +218,19 @@ void WIN_FlushMessageQueue()
 
 static void SDL_RestoreGameMode(void)
 {
-#ifdef _WIN32_WCE
+#ifdef _WIN32_WCE //Under ce we don't minimize, therefore no restore
+	
+#ifdef SDL_VIDEO_DRIVER_GAPI
 	SDL_VideoDevice *this = current_video;
 	if(SDL_strcmp(this->name, "gapi") == 0)
 	{
-		if( this->hidden->suspended )
+		if( this->hidden->gapiInfo->suspended )
 		{
-			this->hidden->suspended = 0;
+			this->hidden->gapiInfo->suspended = 0;
 		}
 	}
+#endif
+	
 #else
 	ShowWindow(SDL_Window, SW_RESTORE);
 #endif
@@ -234,14 +245,18 @@ static void SDL_RestoreDesktopMode(void)
 {
 
 #ifdef _WIN32_WCE
+	
+#ifdef SDL_VIDEO_DRIVER_GAPI
 	SDL_VideoDevice *this = current_video;
 	if(SDL_strcmp(this->name, "gapi") == 0)
 	{
-		if( !this->hidden->suspended )
+		if( !this->hidden->gapiInfo->suspended )
 		{
-			this->hidden->suspended = 1;
+			this->hidden->gapiInfo->suspended = 1;
 		}
 	}
+#endif
+	
 #else
 	/* WinCE does not have a taskbar, so minimizing is not convenient */
 	ShowWindow(SDL_Window, SW_MINIMIZE);
@@ -459,9 +474,9 @@ LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 						posted = SDL_PrivateMouseMotion(0, 1, x, y);
 					}
 				} else {
-#ifdef _WIN32_WCE
-					if (SDL_VideoSurface)
-						GapiTransform(this->hidden->userOrientation, this->hidden->hiresFix, &x, &y);
+#ifdef SDL_VIDEO_DRIVER_GAPI
+					if (SDL_VideoSurface && this->hidden->gapiInfo)
+						GapiTransform(this->hidden->gapiInfo->coordinateTransform, this->hidden->gapiInfo->hiresFix, &x, &y);
 #endif
 					posted = SDL_PrivateMouseMotion(0, 0, x, y);
 				}
@@ -564,9 +579,9 @@ LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				} else {
 					x = (Sint16)LOWORD(lParam);
 					y = (Sint16)HIWORD(lParam);
-#ifdef _WIN32_WCE
-					if (SDL_VideoSurface)
-						GapiTransform(this->hidden->userOrientation, this->hidden->hiresFix, &x, &y);
+#ifdef SDL_VIDEO_DRIVER_GAPI
+					if (SDL_VideoSurface && this->hidden->gapiInfo)
+						GapiTransform(this->hidden->gapiInfo->coordinateTransform, this->hidden->gapiInfo->hiresFix, &x, &y);
 #endif
 				}
 				posted = SDL_PrivateMouseButton(
