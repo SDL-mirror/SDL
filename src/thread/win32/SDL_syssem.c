@@ -109,7 +109,7 @@ SDL_SemWaitTimeout(SDL_sem * sem, Uint32 timeout)
     switch (WaitForSingleObject(sem->id, dwMilliseconds)) {
 #endif
     case WAIT_OBJECT_0:
-        --sem->count;
+        InterlockedDecrement(&sem->count);
         retval = 0;
         break;
     case WAIT_TIMEOUT:
@@ -158,13 +158,13 @@ SDL_SemPost(SDL_sem * sem)
      * immediately get destroyed by another thread which
      * is waiting for this semaphore.
      */
-    ++sem->count;
+    InterlockedIncrement(&sem->count);
 #if defined(_WIN32_WCE) && (_WIN32_WCE < 300)
     if (ReleaseSemaphoreCE(sem->id, 1, NULL) == FALSE) {
 #else
     if (ReleaseSemaphore(sem->id, 1, NULL) == FALSE) {
 #endif
-        --sem->count;           /* restore */
+        InterlockedDecrement(&sem->count);           /* restore */
         SDL_SetError("ReleaseSemaphore() failed");
         return -1;
     }
