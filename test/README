@@ -15,7 +15,7 @@ These are test programs for the SDL library:
 	testfile	Tests RWops layer
 	testgamma	Tests video device gamma ramp
 	testgl		A very simple example of using OpenGL with SDL
-	testgl2		Improved version of testgl
+	testgl2		An even simpler example using the SDL 1.3 API
 	testhread	Hacked up test of multi-threading
 	testiconv	Tests international string conversion
 	testjoystick	List joysticks and watch joystick events
