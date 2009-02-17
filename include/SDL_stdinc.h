@@ -83,6 +83,16 @@
 #define SDL_arraysize(array)	(sizeof(array)/sizeof(array[0]))
 #define SDL_TABLESIZE(table)	SDL_arraysize(table)
 
+/* Use proper C++ casts when compiled as C++ to be compatible with the option
+ -Wold-style-cast of GCC (and -Werror=old-style-cast in GCC 4.2 and above. */
+#ifdef __cplusplus
+#define SDL_reinterpret_cast(type, expression) reinterpret_cast<type>(expression)
+#define SDL_static_cast(type, expression) static_cast<type>(expression)
+#else
+#define SDL_reinterpret_cast(type, expression) ((type)(expression))
+#define SDL_static_cast(type, expression) ((type)(expression))
+#endif
+
 /* Basic data types */
 typedef enum SDL_bool
 {
@@ -298,7 +308,7 @@ do {								\
 		"cld\n\t"					\
 		"rep ; stosl\n\t"				\
 		: "=&D" (u0), "=&a" (u1), "=&c" (u2)		\
-		: "0" (dst), "1" (val), "2" ((Uint32)(len))	\
+		: "0" (dst), "1" (val), "2" (SDL_static_cast(Uint32, len))	\
 		: "memory" );					\
 } while(0)
 #endif
@@ -307,7 +317,7 @@ do {								\
 do {						\
 	unsigned _count = (len);		\
 	unsigned _n = (_count + 3) / 4;		\
-	Uint32 *_p = (Uint32 *)(dst);		\
+	Uint32 *_p = SDL_static_cast(Uint32 *, dst);		\
 	Uint32 _val = (val);			\
         switch (_count % 4) {			\
         case 0: do {    *_p++ = _val;		\
@@ -337,7 +347,7 @@ do {									  \
 		"movsb\n"						  \
 		"2:"							  \
 		: "=&c" (u0), "=&D" (u1), "=&S" (u2)			  \
-		: "0" ((unsigned)(len)/4), "q" (len), "1" (dst),"2" (src) \
+		: "0" (SDL_static_cast(unsigned, len)/4), "q" (len), "1" (dst),"2" (src) \
 		: "memory" );						  \
 } while(0)
 #endif
@@ -363,7 +373,7 @@ do {								\
 		"cld\n\t"					\
 		"rep ; movsl"					\
 		: "=&c" (ecx), "=&D" (edi), "=&S" (esi)		\
-		: "0" ((unsigned)(len)), "1" (dst), "2" (src)	\
+		: "0" (SDL_static_cast(unsigned, len)), "1" (dst), "2" (src)	\
 		: "memory" );					\
 } while(0)
 #endif
@@ -375,8 +385,8 @@ do {								\
 #define SDL_revcpy(dst, src, len)			\
 do {							\
 	int u0, u1, u2;					\
-	char *dstp = (char *)(dst);			\
-	char *srcp = (char *)(src);			\
+	char *dstp = SDL_static_cast(char *, dst);			\
+	char *srcp = SDL_static_cast(char *, src);			\
 	int n = (len);					\
 	if ( n >= 4 ) {					\
 	__asm__ __volatile__ (				\
