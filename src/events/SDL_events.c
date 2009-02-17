@@ -399,18 +399,24 @@ SDL_PumpEvents(void)
 int
 SDL_PollEvent(SDL_Event * event)
 {
-    SDL_PumpEvents();
-
-    /* We can't return -1, just return 0 (no event) on error */
-    if (SDL_PeepEvents(event, 1, SDL_GETEVENT, SDL_ALLEVENTS) <= 0)
-        return 0;
-    return 1;
+    return SDL_WaitEventTimeout(event, 0);
 }
 
 int
 SDL_WaitEvent(SDL_Event * event)
 {
-    while (1) {
+    return SDL_WaitEventTimeout(event, -1);
+}
+
+int
+SDL_WaitEventTimeout(SDL_Event * event, int timeout)
+{
+    Uint32 expiration = 0;
+
+    if (timeout > 0)
+        expiration = SDL_GetTicks() + timeout;
+
+    for (;;) {
         SDL_PumpEvents();
         switch (SDL_PeepEvents(event, 1, SDL_GETEVENT, SDL_ALLEVENTS)) {
         case -1:
@@ -418,7 +424,16 @@ SDL_WaitEvent(SDL_Event * event)
         case 1:
             return 1;
         case 0:
+            if (timeout == 0) {
+                /* Polling and no events, just return */
+                return 0;
+            }
+            if (timeout > 0 && ((int) (SDL_GetTicks() - expiration) >= 0)) {
+                /* Timeout expired and no events */
+                return 0;
+            }
             SDL_Delay(10);
+            break;
         }
     }
 }

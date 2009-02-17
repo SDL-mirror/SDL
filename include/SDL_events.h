@@ -412,6 +412,14 @@ extern DECLSPEC int SDLCALL SDL_PollEvent(SDL_Event * event);
  */
 extern DECLSPEC int SDLCALL SDL_WaitEvent(SDL_Event * event);
 
+/* Waits until the specified timeout (in milliseconds) for the next available
+   event, returning 1, or 0 if there was an error while waiting for events. If
+   'event' is not NULL, the next event is removed from the queue and stored in
+   that area.
+ */
+extern DECLSPEC int SDLCALL SDL_WaitEventTimeout(SDL_Event * event,
+                                                 int timeout);
+
 /* Add an event to the event queue.
    This function returns 1 on success, 0 if the event was filtered,
    or -1 if the event queue was full or there was some other error.
