@@ -164,7 +164,7 @@ SDL_SemPost(SDL_sem * sem)
 #else
     if (ReleaseSemaphore(sem->id, 1, NULL) == FALSE) {
 #endif
-        InterlockedDecrement(&sem->count);           /* restore */
+        InterlockedDecrement(&sem->count);      /* restore */
         SDL_SetError("ReleaseSemaphore() failed");
         return -1;
     }
