@@ -27,6 +27,7 @@
 #include <signal.h>
 #endif
 #include <unistd.h>
+#include <errno.h>
 
 #include "SDL_timer.h"
 #include "SDL_audio.h"
@@ -149,7 +150,7 @@ ARTS_WaitDevice(_THIS)
          */
         /* Check every 10 loops */
         if (this->hidden->parent && (((++cnt) % 10) == 0)) {
-            if (kill(this->hidden->parent, 0) < 0) {
+            if (kill(this->hidden->parent, 0) < 0 && errno == ESRCH) {
                 this->enabled = 0;
             }
         }

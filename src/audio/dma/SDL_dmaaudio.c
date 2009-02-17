@@ -417,7 +417,7 @@ DMA_WaitDevice(_THIS)
            that use a different process id for each thread.
          */
         if (parent && (((++cnt) % 10) == 0)) {  /* Check every 10 loops */
-            if (kill(parent, 0) < 0) {
+            if (kill(parent, 0) < 0 && errno == ESRCH) {
                 this->enabled = 0;
             }
         }

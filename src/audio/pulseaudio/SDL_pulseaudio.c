@@ -165,7 +165,7 @@ PULSEAUDIO_WaitDevice(_THIS)
          */
         /* Check every 10 loops */
         if (this->hidden->parent && (((++cnt) % 10) == 0)) {
-            if (kill(this->hidden->parent, 0) < 0) {
+            if (kill(this->hidden->parent, 0) < 0 && errno == ESRCH) {
                 this->enabled = 0;
             }
         }
