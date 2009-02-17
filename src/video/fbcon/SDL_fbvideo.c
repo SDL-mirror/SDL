@@ -280,7 +280,7 @@ static int read_fbmodes_line(FILE*f, char* line, int length)
 	/* find a relevant line */
 	do
 	{
-		if (fgets(line,length,f)<=0)
+		if (!fgets(line,length,f))
 			return 0;
 		c=line;
 		while(((*c=='\t')||(*c==' '))&&(*c!=0))
