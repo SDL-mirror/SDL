@@ -87,7 +87,9 @@ src/video/SDL_blit_copy.c \
 src/video/SDL_blit_N.c \
 src/video/SDL_blit_slow.c \
 src/video/SDL_bmp.c \
-src/video/SDL_fill.c \
+src/video/SDL_drawline.c \
+src/video/SDL_drawpoint.c \
+src/video/SDL_fillrect.c \
 src/video/SDL_gamma.c \
 src/video/SDL_pixels.c \
 src/video/SDL_rect.c \

@@ -23,9 +23,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <nds.h>
-#include <nds/arm9/video.h>
-#include <nds/arm9/sprite.h>
-#include <nds/arm9/trig_lut.h>
+//#include <nds/arm9/video.h>
+//#include <nds/arm9/sprite.h>
+//#include <nds/arm9/trig_lut.h>
 
 #include "SDL_config.h"
 
@@ -33,65 +33,6 @@
 #include "../SDL_sysvideo.h"
 #include "../SDL_yuv_sw_c.h"
 #include "../SDL_renderer_sw.h"
-
-/* NDS sprite-related functions */
-#define SPRITE_DMA_CHANNEL 3
-#define SPRITE_ANGLE_MASK 0x01FF
-
-void
-NDS_OAM_Update(tOAM * oam, int sub)
-{
-    DC_FlushAll();
-    dmaCopyHalfWords(SPRITE_DMA_CHANNEL, oam->spriteBuffer,
-                     sub ? OAM_SUB : OAM, SPRITE_COUNT * sizeof(SpriteEntry));
-}
-
-void
-NDS_OAM_RotateSprite(SpriteRotation * spriteRotation, u16 angle)
-{
-    s16 s = SIN[angle & SPRITE_ANGLE_MASK] >> 4;
-    s16 c = COS[angle & SPRITE_ANGLE_MASK] >> 4;
-
-    spriteRotation->hdx = c;
-    spriteRotation->hdy = s;
-    spriteRotation->vdx = -s;
-    spriteRotation->vdy = c;
-}
-
-void
-NDS_OAM_Init(tOAM * oam, int sub)
-{
-    int i;
-    for (i = 0; i < SPRITE_COUNT; i++) {
-        oam->spriteBuffer[i].attribute[0] = ATTR0_DISABLED;
-        oam->spriteBuffer[i].attribute[1] = 0;
-        oam->spriteBuffer[i].attribute[2] = 0;
-    }
-    for (i = 0; i < MATRIX_COUNT; i++) {
-        NDS_OAM_RotateSprite(&(oam->matrixBuffer[i]), 0);
-    }
-    swiWaitForVBlank();
-    NDS_OAM_Update(oam, sub);
-}
-
-void
-NDS_OAM_HideSprite(SpriteEntry * spriteEntry)
-{
-    spriteEntry->isRotoscale = 0;
-    spriteEntry->isHidden = 1;
-}
-
-void
-NDS_OAM_ShowSprite(SpriteEntry * spriteEntry, int affine, int double_bound)
-{
-    if (affine) {
-        spriteEntry->isRotoscale = 1;
-        spriteEntry->rsDouble = double_bound;
-    } else {
-        spriteEntry->isHidden = 0;
-    }
-}
-
 
 /* SDL NDS renderer implementation */
 
@@ -147,7 +88,7 @@ SDL_RenderDriver NDS_RenderDriver = {
       SDL_PIXELFORMAT_INDEX8,
       SDL_PIXELFORMAT_ABGR1555,
       SDL_PIXELFORMAT_BGR555,
-      },                        /* u32 texture_formats[20] */
+     },                         /* u32 texture_formats[20] */
      (256),                     /* int max_texture_width */
      (256),                     /* int max_texture_height */
      }
@@ -155,9 +96,8 @@ SDL_RenderDriver NDS_RenderDriver = {
 
 typedef struct
 {
-    bg_attribute *bg;           /* backgrounds */
-    tOAM oam_copy;              /* sprites */
     u8 bg_taken[4];
+    OamState *oam;
     int sub;
 } NDS_RenderData;
 
@@ -165,12 +105,11 @@ typedef struct
 {
     enum
     { NDSTX_BG, NDSTX_SPR } type;       /* represented in a bg or sprite. */
-    int hw_index;               /* sprite: index in the OAM. /  bg: 2 or 3. */
-    struct
-    {
-        int hdx, hdy, vdx, vdy; /* affine transformation, used for scaling. */
-        int pitch, bpp;         /* some useful info */
-    } dim;
+    int hw_index;               /* index of sprite in OAM or bg from libnds */
+    int pitch, bpp;             /* useful information about the texture */
+    struct { int x,y; } scale;  /* x/y stretch (24.8 fixed point) */
+    struct { int x,y; } scroll; /* x/y offset */
+    int rotate;                 /* -32768 to 32767, texture rotation */
     u16 *vram_pixels;           /* where the pixel data is stored (a pointer into VRAM) */
     u16 *vram_palette;          /* where the palette data is stored if it's indexed. */
     /*int size; */
@@ -258,17 +197,10 @@ NDS_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->info.max_texture_height =
         NDS_RenderDriver.info.max_texture_height;
 
-    data->sub = 0;              /* TODO: this is hard-coded to the "main" screen.
-                                   figure out how to detect whether to set it to
-                                   "sub" screen.  window->id, perhaps? */
-    if (!data->sub) {
-        data->bg = &BACKGROUND;
-    } else {
-        data->bg = &BACKGROUND_SUB;
-    }
+    data->sub = 0;           /* TODO: this is hard-coded to the "main" screen.
+                                figure out how to detect whether to set it to
+                                "sub" screen.  window->id, perhaps? */
     data->bg_taken[2] = data->bg_taken[3] = 0;
-
-    NDS_OAM_Init(&(data->oam_copy), data->sub); /* init sprites. */
 
     return renderer;
 }
@@ -308,8 +240,9 @@ NDS_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
        depending on which one it fits. */
     if (texture->w <= 64 && texture->h <= 64) {
         int whichspr = -1;
-        printf("Tried to make a sprite.\n");
+        printf("NDS_CreateTexture: Tried to make a sprite.\n");
         txdat->type = NDSTX_SPR;
+#if 0
         for (i = 0; i < SPRITE_COUNT; ++i) {
             if (data->oam_copy.spriteBuffer[i].attribute[0] & ATTR0_DISABLED) {
                 whichspr = i;
@@ -377,11 +310,13 @@ NDS_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
             txdat->dim.vdy = 0x100;
             txdat->dim.pitch = pitch;
             txdat->dim.bpp = bpp;
-            txdat->vram_pixels = (u16 *) (data->sub ? SPRITE_GFX_SUB : SPRITE_GFX);     /* FIXME: use tileIdx*boundary
-                                                                                           to point to proper location */
+            txdat->vram_pixels = (u16 *) (data->sub ? SPRITE_GFX_SUB : SPRITE_GFX);
+            /* FIXME: use tileIdx*boundary
+                      to point to proper location */
         } else {
             SDL_SetError("Out of NDS sprites.");
         }
+#endif
     } else if (texture->w <= 256 && texture->h <= 256) {
         int whichbg = -1, base = 0;
         if (!data->bg_taken[2]) {
@@ -398,27 +333,46 @@ NDS_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
                 return -1;
             }
 
-            /* this is hard-coded to being 256x256 ABGR1555 for now. */
-            data->bg->control[whichbg] = (bpp == 8) ?
-                BG_BMP8_256x256 : BG_BMP16_256x256;
+// hard-coded for 256x256 for now...
+// TODO: a series of if-elseif-else's to find the closest but larger size.
+            if(!data->sub) {
+                if(bpp==8) {
+                    txdat->hw_index = bgInit(whichbg, BgType_Bmp8, BgSize_B8_256x256, 0, 0);
+                } else {
+                    txdat->hw_index = bgInit(whichbg, BgType_Bmp16, BgSize_B16_256x256, 0, 0);
+                }
+            } else {
+                if(bpp==8) {
+                    txdat->hw_index = bgInitSub(whichbg, BgType_Bmp8, BgSize_B8_256x256, 0, 0);
+                } else {
+                    txdat->hw_index = bgInitSub(whichbg, BgType_Bmp16, BgSize_B16_256x256, 0, 0);
+                }
+            }
 
-            data->bg->control[whichbg] |= BG_BMP_BASE(base);
-
-            data->bg->scroll[whichbg].x = 0;
-            data->bg->scroll[whichbg].y = 0;
-
+/*   useful functions
+        bgGetGfxPtr(bg3);            
+		bgSetCenter(bg3, rcX, rcY);
+		bgSetRotateScale(bg3, angle, scaleX, scaleY);
+		bgSetScroll(bg3, scrollX, scrollY);
+		bgUpdate(bg3);
+*/
             txdat->type = NDSTX_BG;
-            txdat->hw_index = whichbg;
-            txdat->dim.hdx = 0x100;
-            txdat->dim.hdy = 0;
-            txdat->dim.vdx = 0;
-            txdat->dim.vdy = 0x100;
-            txdat->dim.pitch = 512;
-            txdat->dim.bpp = bpp;
-            txdat->vram_pixels = (u16 *) (data->sub ?
-                                          BG_BMP_RAM_SUB(base) :
-                                          BG_BMP_RAM(base));
+            txdat->pitch = (texture->w)*(bpp/8);
+            txdat->bpp = bpp;
+            txdat->rotate = 0;
+            txdat->scale.x = 0x100;
+            txdat->scale.y = 0x100;
+            txdat->scroll.x = 0;
+            txdat->scroll.y = 0;
+            txdat->vram_pixels = (u16*)bgGetGfxPtr(txdat->hw_index);
 
+            bgSetCenter(txdat->hw_index, 0, 0);
+            bgSetRotateScale(txdat->hw_index, txdat->rotate, txdat->scale.x,
+                             txdat->scale.y);
+            bgSetScroll(txdat->hw_index, txdat->scroll.x, txdat->scroll.y);
+            bgUpdate(txdat->hw_index);
+
+            data->bg_taken[whichbg] = 1;
             /*txdat->size = txdat->dim.pitch * texture->h; */
         } else {
             SDL_SetError("Out of NDS backgrounds.");
@@ -440,7 +394,7 @@ NDS_QueryTexturePixels(SDL_Renderer * renderer, SDL_Texture * texture,
 {
     NDS_TextureData *txdat = (NDS_TextureData *) texture->driverdata;
     *pixels = txdat->vram_pixels;
-    *pitch = txdat->dim.pitch;
+    *pitch = txdat->pitch;
     return 0;
 }
 
@@ -457,9 +411,9 @@ NDS_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 
     src = (Uint8 *) pixels;
     dst =
-        (Uint8 *) txdat->vram_pixels + rect->y * txdat->dim.pitch +
-        rect->x * ((txdat->dim.bpp + 1) / 8);
-    length = rect->w * ((txdat->dim.bpp + 1) / 8);
+        (Uint8 *) txdat->vram_pixels + rect->y * txdat->pitch + rect->x *
+        ((txdat->bpp + 1) / 8);
+    length = rect->w * ((txdat->bpp + 1) / 8);
 
     if (rect->w == texture->w) {
         dmaCopy(src, dst, length * rect->h);
@@ -467,7 +421,7 @@ NDS_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
         for (row = 0; row < rect->h; ++row) {
             dmaCopy(src, dst, length);
             src += pitch;
-            dst += txdat->dim.pitch;
+            dst += txdat->pitch;
         }
     }
 
@@ -481,10 +435,9 @@ NDS_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 {
     NDS_TextureData *txdat = (NDS_TextureData *) texture->driverdata;
 
-    *pixels = (void *) ((u8 *) txdat->vram_pixels + rect->y
-                        * txdat->dim.pitch +
-                        rect->x * ((txdat->dim.bpp + 1) / 8));
-    *pitch = txdat->dim.pitch;
+    *pixels = (void *) ((u8 *) txdat->vram_pixels + rect->y * txdat->pitch +
+                        rect->x * ((txdat->bpp + 1) / 8));
+    *pitch = txdat->pitch;
 
     return 0;
 }
@@ -504,7 +457,8 @@ NDS_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b,
     u16 color;
     int i, j;
 
-    color = RGB8(r, g, b);      /* <-- macro in libnds that makes an ARGB1555 pixel */
+    printf("NDS_RenderFill: stub\n");
+    color = RGB8(r, g, b);  /* macro in libnds that makes an ARGB1555 pixel */
     /* TODO: make a single-color sprite and stretch it.
        calculate the "HDX" width modifier of the sprite by:
        let S be the actual sprite's width (like, 32 pixels for example)
@@ -525,35 +479,19 @@ NDS_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     NDS_TextureData *txdat = (NDS_TextureData *) texture->driverdata;
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
     SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
-    int i;
-    int bpp = SDL_BYTESPERPIXEL(texture->format);
-    int pitch = txdat->dim.pitch;
+    int Bpp = SDL_BYTESPERPIXEL(texture->format);
 
     if (txdat->type == NDSTX_BG) {
-        bg_rotation *bgrot = (txdat->hw_index == 2) ?
-            &(data->bg->bg2_rotation) : &(data->bg->bg3_rotation);
-        bgrot->xdx = txdat->dim.hdx;
-        bgrot->xdy = txdat->dim.hdy;
-        bgrot->ydx = txdat->dim.vdx;
-        bgrot->ydy = txdat->dim.vdy;
-        bgrot->centerX = 0;
-        bgrot->centerY = 0;
-
-        data->bg->scroll[txdat->hw_index].x = dstrect->x;
-        data->bg->scroll[txdat->hw_index].y = dstrect->y;
+        txdat->scroll.x = dstrect->x;
+        txdat->scroll.y = dstrect->y;
     } else {
         /* sprites not fully implemented yet */
-        SpriteEntry *spr = &(data->oam_copy.spriteBuffer[txdat->hw_index]);
-        spr->posX = dstrect->x;
-        spr->posY = dstrect->y;
-        if (txdat->hw_index < MATRIX_COUNT && spr->isRotoscale) {
-            SpriteRotation *sprot =
-                &(data->oam_copy.matrixBuffer[txdat->hw_index]);
-            sprot->hdx = txdat->dim.hdx;
-            sprot->hdy = txdat->dim.hdy;
-            sprot->vdx = txdat->dim.vdx;
-            sprot->vdy = txdat->dim.vdy;
-        }
+        printf("NDS_RenderCopy: used sprite!\n");
+//        SpriteEntry *spr = &(data->oam_copy.spriteBuffer[txdat->hw_index]);
+//        spr->posX = dstrect->x;
+//        spr->posY = dstrect->y;
+//        if (txdat->hw_index < MATRIX_COUNT && spr->isRotoscale) {          
+//        }
     }
 
     return 0;
@@ -568,7 +506,7 @@ NDS_RenderPresent(SDL_Renderer * renderer)
     SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
 
     /* update sprites */
-    NDS_OAM_Update(&(data->oam_copy), data->sub);
+//    NDS_OAM_Update(&(data->oam_copy), data->sub);
     /* vsync for NDS */
     if (renderer->info.flags & SDL_RENDERER_PRESENTVSYNC) {
         swiWaitForVBlank();
