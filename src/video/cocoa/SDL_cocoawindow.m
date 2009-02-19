@@ -387,14 +387,16 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
 
     pool = [[NSAutoreleasePool alloc] init];
 
-    if (window->x == SDL_WINDOWPOS_CENTERED) {
+    if ((window->flags & SDL_WINDOW_FULLSCREEN)
+        || window->x == SDL_WINDOWPOS_CENTERED) {
         rect.origin.x = (CGDisplayPixelsWide(kCGDirectMainDisplay) - window->w) / 2;
     } else if (window->x == SDL_WINDOWPOS_UNDEFINED) {
         rect.origin.x = 0;
     } else {
         rect.origin.x = window->x;
     }
-    if (window->y == SDL_WINDOWPOS_CENTERED) {
+    if ((window->flags & SDL_WINDOW_FULLSCREEN)
+        || window->y == SDL_WINDOWPOS_CENTERED) {
         rect.origin.y = (CGDisplayPixelsHigh(kCGDirectMainDisplay) - window->h) / 2;
     } else if (window->y == SDL_WINDOWPOS_UNDEFINED) {
         rect.origin.y = 0;
@@ -471,8 +473,18 @@ Cocoa_SetWindowPosition(_THIS, SDL_Window * window)
     NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->window;
     NSRect rect;
 
-    rect.origin.x = window->x;
-    rect.origin.y = window->y;
+    if ((window->flags & SDL_WINDOW_FULLSCREEN)
+        || window->x == SDL_WINDOWPOS_CENTERED) {
+        rect.origin.x = (CGDisplayPixelsWide(kCGDirectMainDisplay) - window->w) / 2;
+    } else {
+        rect.origin.x = window->x;
+    }
+    if ((window->flags & SDL_WINDOW_FULLSCREEN)
+        || window->y == SDL_WINDOWPOS_CENTERED) {
+        rect.origin.y = (CGDisplayPixelsHigh(kCGDirectMainDisplay) - window->h) / 2;
+    } else {
+        rect.origin.y = window->y;
+    }
     rect.size.width = window->w;
     rect.size.height = window->h;
     ConvertNSRect(&rect);
