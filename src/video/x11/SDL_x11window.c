@@ -31,6 +31,10 @@
 #include "SDL_x11gamma.h"
 #include "../Xext/extensions/StdCmap.h"
 
+#define _NET_WM_STATE_REMOVE    0l
+#define _NET_WM_STATE_ADD       1l
+#define _NET_WM_STATE_TOGGLE    2l
+
 static void
 X11_GetDisplaySize(_THIS, SDL_Window * window, int *w, int *h)
 {
@@ -116,6 +120,40 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
             window->flags &= ~SDL_WINDOW_SHOWN;
         }
     }
+
+    {
+        Atom _NET_WM_STATE = XInternAtom(data->videodata->display, "_NET_WM_STATE", False);
+        Atom _NET_WM_STATE_MAXIMIZED_VERT = XInternAtom(data->videodata->display, "_NET_WM_STATE_MAXIMIZED_VERT", False);
+        Atom _NET_WM_STATE_MAXIMIZED_HORZ = XInternAtom(data->videodata->display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+        Atom actualType;
+        int actualFormat;
+        unsigned long i, numItems, bytesAfter;
+        unsigned char *propertyValue = NULL;
+        long maxLength = 1024;
+
+        if (XGetWindowProperty(data->videodata->display, w, _NET_WM_STATE,
+            0l, maxLength, False, XA_ATOM, &actualType, &actualFormat,
+            &numItems, &bytesAfter, &propertyValue) == Success) {
+            Atom *atoms = (Atom *)propertyValue;
+            int maximized = 0;
+
+            for (i = 0; i < numItems; ++i) {
+                if (atoms[i] == _NET_WM_STATE_MAXIMIZED_VERT) {
+                    maximized |= 1;
+                } else if (atoms[i] == _NET_WM_STATE_MAXIMIZED_HORZ) {
+                    maximized |= 2;
+                }
+                /* Might also want to check the following properties:
+                   _NET_WM_STATE_ABOVE, _NET_WM_STATE_FULLSCREEN
+                */
+            }
+            if (maximized == 3) {
+                window->flags |= SDL_WINDOW_MAXIMIZED;
+            }
+            XFree(propertyValue);
+        }
+    }
+
     /* FIXME: How can I tell?
        {
        DWORD style = GetWindowLong(hwnd, GWL_STYLE);
@@ -857,10 +895,36 @@ X11_RaiseWindow(_THIS, SDL_Window * window)
     XRaiseWindow(display, data->window);
 }
 
+static void
+X11_SetWindowMaximized(_THIS, SDL_Window * window, SDL_bool maximized)
+{
+    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+    SDL_DisplayData *displaydata =
+        (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
+    Display *display = data->videodata->display;
+    Atom _NET_WM_STATE = XInternAtom(display, "_NET_WM_STATE", False);
+    Atom _NET_WM_STATE_MAXIMIZED_VERT = XInternAtom(display, "_NET_WM_STATE_MAXIMIZED_VERT", False);
+    Atom _NET_WM_STATE_MAXIMIZED_HORZ = XInternAtom(display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+    XEvent e;
+
+    e.xany.type = ClientMessage;
+    e.xany.window = data->window;
+    e.xclient.message_type = _NET_WM_STATE;
+    e.xclient.format = 32;
+    e.xclient.data.l[0] = maximized ? _NET_WM_STATE_ADD : _NET_WM_STATE_REMOVE;
+    e.xclient.data.l[1] = _NET_WM_STATE_MAXIMIZED_VERT;
+    e.xclient.data.l[2] = _NET_WM_STATE_MAXIMIZED_HORZ;
+    e.xclient.data.l[3] = 0l;
+    e.xclient.data.l[4] = 0l;
+
+    XSendEvent(display, RootWindow(display, displaydata->screen), 0,
+               SubstructureNotifyMask|SubstructureRedirectMask, &e);
+}
+
 void
 X11_MaximizeWindow(_THIS, SDL_Window * window)
 {
-    /* FIXME: is this even possible? */
+    X11_SetWindowMaximized(_this, window, SDL_TRUE);
 }
 
 void
@@ -872,6 +936,7 @@ X11_MinimizeWindow(_THIS, SDL_Window * window)
 void
 X11_RestoreWindow(_THIS, SDL_Window * window)
 {
+    X11_SetWindowMaximized(_this, window, SDL_FALSE);
     X11_ShowWindow(_this, window);
 }
 
