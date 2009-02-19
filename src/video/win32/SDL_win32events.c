@@ -524,15 +524,18 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
     case WM_SETCURSOR:
         {
-            /*
-               Uint16 hittest;
+            Uint16 hittest;
 
-               hittest = LOWORD(lParam);
-               if (hittest == HTCLIENT) {
-               SetCursor(SDL_hcursor);
-               return (TRUE);
-               }
-             */
+            hittest = LOWORD(lParam);
+            if (hittest == HTCLIENT) {
+                /* FIXME: Implement the cursor API */
+                static HCURSOR cursor;
+                if (!cursor) {
+                    cursor = LoadCursor(NULL, IDC_ARROW);
+                }
+                SetCursor(cursor);
+                return (TRUE);
+            }
         }
         break;
 
