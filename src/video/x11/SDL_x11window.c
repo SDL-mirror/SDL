@@ -122,9 +122,14 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
     }
 
     {
-        Atom _NET_WM_STATE = XInternAtom(data->videodata->display, "_NET_WM_STATE", False);
-        Atom _NET_WM_STATE_MAXIMIZED_VERT = XInternAtom(data->videodata->display, "_NET_WM_STATE_MAXIMIZED_VERT", False);
-        Atom _NET_WM_STATE_MAXIMIZED_HORZ = XInternAtom(data->videodata->display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+        Atom _NET_WM_STATE =
+            XInternAtom(data->videodata->display, "_NET_WM_STATE", False);
+        Atom _NET_WM_STATE_MAXIMIZED_VERT =
+            XInternAtom(data->videodata->display,
+                        "_NET_WM_STATE_MAXIMIZED_VERT", False);
+        Atom _NET_WM_STATE_MAXIMIZED_HORZ =
+            XInternAtom(data->videodata->display,
+                        "_NET_WM_STATE_MAXIMIZED_HORZ", False);
         Atom actualType;
         int actualFormat;
         unsigned long i, numItems, bytesAfter;
@@ -132,9 +137,10 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
         long maxLength = 1024;
 
         if (XGetWindowProperty(data->videodata->display, w, _NET_WM_STATE,
-            0l, maxLength, False, XA_ATOM, &actualType, &actualFormat,
-            &numItems, &bytesAfter, &propertyValue) == Success) {
-            Atom *atoms = (Atom *)propertyValue;
+                               0l, maxLength, False, XA_ATOM, &actualType,
+                               &actualFormat, &numItems, &bytesAfter,
+                               &propertyValue) == Success) {
+            Atom *atoms = (Atom *) propertyValue;
             int maximized = 0;
 
             for (i = 0; i < numItems; ++i) {
@@ -145,7 +151,7 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
                 }
                 /* Might also want to check the following properties:
                    _NET_WM_STATE_ABOVE, _NET_WM_STATE_FULLSCREEN
-                */
+                 */
             }
             if (maximized == 3) {
                 window->flags |= SDL_WINDOW_MAXIMIZED;
@@ -903,22 +909,25 @@ X11_SetWindowMaximized(_THIS, SDL_Window * window, SDL_bool maximized)
         (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
     Display *display = data->videodata->display;
     Atom _NET_WM_STATE = XInternAtom(display, "_NET_WM_STATE", False);
-    Atom _NET_WM_STATE_MAXIMIZED_VERT = XInternAtom(display, "_NET_WM_STATE_MAXIMIZED_VERT", False);
-    Atom _NET_WM_STATE_MAXIMIZED_HORZ = XInternAtom(display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+    Atom _NET_WM_STATE_MAXIMIZED_VERT =
+        XInternAtom(display, "_NET_WM_STATE_MAXIMIZED_VERT", False);
+    Atom _NET_WM_STATE_MAXIMIZED_HORZ =
+        XInternAtom(display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
     XEvent e;
 
     e.xany.type = ClientMessage;
     e.xany.window = data->window;
     e.xclient.message_type = _NET_WM_STATE;
     e.xclient.format = 32;
-    e.xclient.data.l[0] = maximized ? _NET_WM_STATE_ADD : _NET_WM_STATE_REMOVE;
+    e.xclient.data.l[0] =
+        maximized ? _NET_WM_STATE_ADD : _NET_WM_STATE_REMOVE;
     e.xclient.data.l[1] = _NET_WM_STATE_MAXIMIZED_VERT;
     e.xclient.data.l[2] = _NET_WM_STATE_MAXIMIZED_HORZ;
     e.xclient.data.l[3] = 0l;
     e.xclient.data.l[4] = 0l;
 
     XSendEvent(display, RootWindow(display, displaydata->screen), 0,
-               SubstructureNotifyMask|SubstructureRedirectMask, &e);
+               SubstructureNotifyMask | SubstructureRedirectMask, &e);
 }
 
 void
