@@ -66,11 +66,18 @@ ValidHaptic(SDL_Haptic * haptic)
     int valid;
 
     valid = 0;
-    for (i = 0; i < SDL_numhaptics; i++) {
-        if (SDL_haptics[i] == haptic) {
-            valid = 1;
-            break;
+    if (haptic != NULL) {
+        for (i = 0; i < SDL_numhaptics; i++) {
+            if (SDL_haptics[i] == haptic) {
+                valid = 1;
+                break;
+            }
         }
+    }
+
+    /* Create the error here. */
+    if (valid == 0) {
+        SDL_SetError("Haptic: Invalid haptic device identifier");
     }
 
     return valid;

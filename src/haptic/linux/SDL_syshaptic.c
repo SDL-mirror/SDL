@@ -395,17 +395,28 @@ SDL_SYS_HapticOpenFromJoystick(SDL_Haptic * haptic, SDL_Joystick * joystick)
     int fd;
     int ret;
 
+
     /* Find the joystick in the haptic list. */
     for (i = 0; i < MAX_HAPTICS; i++) {
         if (SDL_hapticlist[i].fname != NULL) {
             if (SDL_strcmp(SDL_hapticlist[i].fname, joystick->hwdata->fname)
                 == 0) {
                 haptic->index = i;
+                break;
             }
         }
     }
+    if (i >= MAX_HAPTICS) {
+        SDL_SetError("Haptic: Joystick doesn't have Haptic capabilities");
+        return -1;
+    }
 
     fd = open(joystick->hwdata->fname, O_RDWR, 0);
+    if (fd < 0) {
+        SDL_SetError("Haptic: Unable to open %s: %s",
+                     joystick->hwdata->fname, strerror(errno));
+        return -1;
+    }
     ret = SDL_SYS_HapticOpenFromFD(haptic, fd); /* Already closes on error. */
     if (ret < 0) {
         return -1;
