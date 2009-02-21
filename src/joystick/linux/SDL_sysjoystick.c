@@ -377,11 +377,11 @@ EV_IsJoystick(int fd)
         (ioctl(fd, EVIOCGBIT(EV_ABS, sizeof(absbit)), absbit) < 0)) {
         return (0);
     }
+
     if (!(test_bit(EV_KEY, evbit) && test_bit(EV_ABS, evbit) &&
-          test_bit(ABS_X, absbit) && test_bit(ABS_Y, absbit) &&
-          (test_bit(BTN_TRIGGER, keybit) || test_bit(BTN_A, keybit)
-           || test_bit(BTN_1, keybit))))
+          test_bit(ABS_X, absbit) && test_bit(ABS_Y, absbit))) {
         return 0;
+    }
     return (1);
 }
 
