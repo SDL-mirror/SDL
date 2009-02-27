@@ -25,6 +25,7 @@
  * Fix building haptic system on win32
  * Add always on top window styles
  * Add video modes that have an alpha channel?
+ * Implement SDL_RenderReadPixels() for screenshots?
 
 Wish list for the 1.3 development branch:
 http://bugzilla.libsdl.org/
