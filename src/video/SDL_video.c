@@ -89,7 +89,10 @@ static VideoBootStrap *bootstrap[] = {
     &BWINDOW_bootstrap,
 #endif
 #if SDL_VIDEO_DRIVER_PHOTON
-    &ph_bootstrap,
+    &photon_bootstrap,
+#endif
+#if SDL_VIDEO_DRIVER_QNXGF
+    &qnxgf_bootstrap,
 #endif
 #if SDL_VIDEO_DRIVER_EPOC
     &EPOC_bootstrap,

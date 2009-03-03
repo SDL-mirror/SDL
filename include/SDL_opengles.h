@@ -40,6 +40,10 @@ extern "C"
 #include <OpenGLES/ES1/gl.h>    /* Header File For The OpenGL ES Library */
 #endif
 
+#if defined(__QNXNTO__) && defined(SDL_VIDEO_OPENGL_ES)
+#include <GLES/egl.h>
+#endif
+
 #ifndef APIENTRY
 #define APIENTRY
 #endif

@@ -369,7 +369,10 @@ extern VideoBootStrap WIN32_bootstrap;
 extern VideoBootStrap BWINDOW_bootstrap;
 #endif
 #if SDL_VIDEO_DRIVER_PHOTON
-extern VideoBootStrap ph_bootstrap;
+extern VideoBootStrap photon_bootstrap;
+#endif
+#if SDL_VIDEO_DRIVER_QNXGF
+extern VideoBootStrap qnxgf_bootstrap;
 #endif
 #if SDL_VIDEO_DRIVER_EPOC
 extern VideoBootStrap EPOC_bootstrap;
