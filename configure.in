@@ -2,6 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT(README)
 AC_CONFIG_HEADER(include/SDL_config.h)
 AC_GNU_SOURCE
+AC_CONFIG_AUX_DIRS($srcdir/build-scripts)
 
 dnl Set various version strings - taken gratefully from the GTk sources
 #
@@ -29,6 +30,8 @@ AC_SUBST(SDL_BINARY_AGE)
 AC_SUBST(SDL_VERSION)
 
 # libtool versioning
+LT_INIT([win32-dll])
+
 LT_RELEASE=$SDL_MAJOR_VERSION.$SDL_MINOR_VERSION
 LT_CURRENT=`expr $SDL_MICRO_VERSION - $SDL_INTERFACE_AGE`
 LT_REVISION=$SDL_INTERFACE_AGE
@@ -40,7 +43,6 @@ AC_SUBST(LT_REVISION)
 AC_SUBST(LT_AGE)
 
 dnl Detect the canonical build and host environments
-AC_CONFIG_AUX_DIRS($srcdir/build-scripts)
 AC_CANONICAL_HOST
 AC_C_BIGENDIAN
 if test x$ac_cv_c_bigendian = xyes; then
@@ -90,7 +92,6 @@ CFLAGS="$CFLAGS $EXTRA_CFLAGS"
 LDFLAGS="$LDFLAGS $EXTRA_LDFLAGS"
 
 dnl Check for tools
-AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 AC_PROG_CC
 AC_PROG_CXX
