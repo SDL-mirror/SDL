@@ -169,7 +169,7 @@ struct SDL_SysWMinfo
     int window;                 /* The RISC OS display window */
 };
 
-#elif defined(SDL_VIDEO_DRIVER_PHOTON)
+#elif defined(SDL_VIDEO_DRIVER_PHOTON) || defined(SDL_VIDEO_DRIVER_QNXGF)
 #include <sys/neutrino.h>
 #include <Ph.h>
 
@@ -180,7 +180,7 @@ struct SDL_SysWMmsg
     int data;
 };
 
-/* The QNX custom window manager information structure */
+/* The QNX Photon custom window manager information structure */
 struct SDL_SysWMinfo
 {
     SDL_version version;

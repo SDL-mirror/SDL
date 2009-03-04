@@ -129,7 +129,7 @@ main(int argc, char *argv[])
     }
 
     if (SDL_GL_LoadLibrary(gl_library) < 0) {
-        printf("Unable to dynamically open GL lib : %s\n", SDL_GetError());
+        printf("Unable to dynamically open GL ES lib : %s\n", SDL_GetError());
         quit(1);
     }
 
@@ -139,7 +139,7 @@ main(int argc, char *argv[])
     }
 
     /* Set the window manager title bar */
-    SDL_WM_SetCaption("SDL Dynamic OpenGL Loading Test", "testdyngl");
+    SDL_WM_SetCaption("SDL Dynamic OpenGL ES Loading Test", "testdyngles");
 
     init_glfuncs(&f);
 
@@ -206,7 +206,7 @@ main(int argc, char *argv[])
 int
 main(int argc, char *argv[])
 {
-    printf("No OpenGL support on this system\n");
+    printf("No OpenGL ES support on this system\n");
     return 1;
 }
 

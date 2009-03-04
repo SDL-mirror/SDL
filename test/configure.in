@@ -49,7 +49,12 @@ case "$host" in
         else
             SYS_GL_LIBS="-lOSMesa"
         fi
-		;;
+        ;;
+    *-*-qnx*)
+        EXE=""
+        MATHLIB=""
+        SYS_GL_LIBS="-lGLES_CM"
+        ;;
     *)
         EXE=""
         MATHLIB="-lm"
@@ -99,6 +104,30 @@ if test x$have_opengl = xyes; then
 else
     GLLIB=""
 fi
+
+dnl Check for OpenGL ES
+AC_MSG_CHECKING(for OpenGL ES support)
+have_opengles=no
+AC_TRY_COMPILE([
+ #if defined (__QNXNTO__)
+    #include <GLES/gl.h>
+ #elif defined (__IPHONEOS__)
+    #include <OpenGLES/ES1/gl.h>
+ #else
+    #error "No OpenGL ES support"
+ #endif /* __QNXNTO__ */
+],[
+],[
+have_opengles=yes
+])
+AC_MSG_RESULT($have_opengles)
+if test x$have_opengles = xyes; then
+    CFLAGS="$CFLAGS -DHAVE_OPENGLES"
+    GLLIB="$XPATH $SYS_GL_LIBS"
+else
+    GLLIB=""
+fi
+
 AC_SUBST(GLLIB)
 
 dnl Finally create all the generated files

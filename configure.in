@@ -1705,12 +1705,12 @@ CheckOpenGLESQNX()
         AC_MSG_RESULT($video_opengl)
         if test x$video_opengl = xyes; then
             AC_DEFINE(SDL_VIDEO_OPENGL_ES)
-            AC_DEFINE(SDL_VIDEO_RENDER_OGL_ES)
             EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lGLES_CM"
         else
             AC_MSG_CHECKING(for QNX OpenGL ES (CL) support)
             video_opengl=no
             AC_TRY_COMPILE([
+             #define COMMON_LITE
              #include <GLES/egl.h>
             ],[
             ],[
@@ -1719,7 +1719,6 @@ CheckOpenGLESQNX()
             AC_MSG_RESULT($video_opengl)
             if test x$video_opengl = xyes; then
                 AC_DEFINE(SDL_VIDEO_OPENGL_ES)
-                AC_DEFINE(SDL_VIDEO_RENDER_OGL_ES)
                 EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lGLES_CL"
             fi
         fi
@@ -2295,6 +2294,12 @@ AC_HELP_STRING([--enable-clock_gettime], [use clock_gettime() instead of gettime
         if test x$have_clock_gettime = xyes; then
             AC_DEFINE(HAVE_CLOCK_GETTIME)
             EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lrt"
+        else
+            AC_CHECK_LIB(c, clock_gettime, have_clock_gettime=yes)
+            if test x$have_clock_gettime = xyes; then
+               AC_DEFINE(HAVE_CLOCK_GETTIME)
+               EXTRA_LDFLAGS="$EXTRA_LDFLAGS"
+            fi
         fi
     fi
 }
