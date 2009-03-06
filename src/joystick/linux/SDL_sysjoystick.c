@@ -1210,9 +1210,11 @@ SDL_SYS_JoystickQuit(void)
     int i;
 
     for (i = 0; SDL_joylist[i].fname; ++i) {
-        SDL_free(SDL_joylist[i].fname);
+        if (SDL_joylist[i].fname) {
+            SDL_free(SDL_joylist[i].fname);
+            SDL_joylist[i].fname = NULL;
+        }
     }
-    SDL_joylist[0].fname = NULL;
 }
 
 #endif /* SDL_JOYSTICK_LINUX */
