@@ -98,12 +98,6 @@ AC_TRY_COMPILE([
 have_opengl=yes
 ])
 AC_MSG_RESULT($have_opengl)
-if test x$have_opengl = xyes; then
-    CFLAGS="$CFLAGS -DHAVE_OPENGL"
-    GLLIB="$XPATH $SYS_GL_LIBS"
-else
-    GLLIB=""
-fi
 
 dnl Check for OpenGL ES
 AC_MSG_CHECKING(for OpenGL ES support)
@@ -121,7 +115,11 @@ AC_TRY_COMPILE([
 have_opengles=yes
 ])
 AC_MSG_RESULT($have_opengles)
-if test x$have_opengles = xyes; then
+
+if test x$have_opengl = xyes; then
+    CFLAGS="$CFLAGS -DHAVE_OPENGL"
+    GLLIB="$XPATH $SYS_GL_LIBS"
+elif test x$have_opengles = xyes; then
     CFLAGS="$CFLAGS -DHAVE_OPENGLES"
     GLLIB="$XPATH $SYS_GL_LIBS"
 else
