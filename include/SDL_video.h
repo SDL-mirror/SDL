@@ -814,8 +814,7 @@ extern DECLSPEC int SDLCALL SDL_GetRenderDriverInfo(int index,
  * \param index The index of the rendering driver to initialize, or -1 to initialize the first one supporting the requested flags.
  * \param flags SDL_RendererFlags
  *
- * \return 0 on success, -1 if the flags were not supported, or -2 if
- *         there isn't enough memory to support the requested flags
+ * \return 0 on success, -1 if there was an error creating the renderer.
  *
  * \sa SDL_SelectRenderer()
  * \sa SDL_GetRendererInfo()

@@ -1456,7 +1456,8 @@ SDL_CreateRenderer(SDL_WindowID windowID, int index, Uint32 flags)
     SDL_Window *window = SDL_GetWindowFromID(windowID);
 
     if (!window) {
-        return 0;
+        SDL_SetError("Invalid window ID");
+        return -1;
     }
     if (index < 0) {
         const char *override = SDL_getenv("SDL_VIDEO_RENDERER");
