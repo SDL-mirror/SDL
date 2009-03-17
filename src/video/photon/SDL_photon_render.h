@@ -19,21 +19,35 @@
     Sam Lantinga
     slouken@libsdl.org
 
-    QNX Graphics Framework SDL driver
+    QNX Photon GUI SDL driver
     Copyright (C) 2009 Mike Gorchak
     (mike@malva.ua, lestat@i.com.ua)
 */
 
-#ifndef __SDL_GF_PIXELFMT_H__
-#define __SDL_GF_PIXELFMT_H__
+#ifndef __SDL_PHOTON_RENDER_H__
+#define __SDL_PHOTON_RENDER_H__
 
 #include "../SDL_sysvideo.h"
 
-#include <gf/gf.h>
+#include <Ph.h>
 
-gf_format_t qnxgf_sdl_to_gf_pixelformat(uint32_t pixelfmt);
-uint32_t    qnxgf_gf_to_sdl_pixelformat(gf_format_t pixelfmt);
+#define SDL_PHOTON_MAX_SURFACES 3
 
-#endif /* __SDL_GF_PIXELFMT_H__ */
+typedef struct SDL_RenderData
+{
+   SDL_Window*        window;        /* SDL window type                    */
+   SDL_bool           enable_vsync;  /* VSYNC flip synchronization enable  */
+   uint32_t           surface_visible_idx; /* Index of visible surface     */
+   uint32_t           surface_render_idx;  /* Index of render surface      */
+   uint32_t           surfaces_count;      /* Amount of allocated surfaces */
+} SDL_RenderData;
+
+typedef struct SDL_TextureData
+{
+} SDL_TextureData;
+
+extern void photon_addrenderdriver(_THIS);
+
+#endif /* __SDL_PHOTON_RENDER_H__ */
 
 /* vi: set ts=4 sw=4 expandtab: */

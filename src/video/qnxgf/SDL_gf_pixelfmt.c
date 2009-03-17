@@ -18,6 +18,10 @@
 
     Sam Lantinga
     slouken@libsdl.org
+
+    QNX Graphics Framework SDL driver
+    Copyright (C) 2009 Mike Gorchak
+    (mike@malva.ua, lestat@i.com.ua)
 */
 
 #include "SDL_config.h"
@@ -166,3 +170,5 @@ uint32_t qnxgf_gf_to_sdl_pixelformat(gf_format_t pixelfmt)
 
    return SDL_PIXELFORMAT_UNKNOWN;
 }
+
+/* vi: set ts=4 sw=4 expandtab: */

@@ -664,6 +664,7 @@ SDL_SetFullscreenDisplayMode(const SDL_DisplayMode * mode)
         SDL_SetError("Couldn't find display mode match");
         return -1;
     }
+
     if (SDL_memcmp
         (&fullscreen_mode, &display->fullscreen_mode,
          sizeof(fullscreen_mode)) == 0) {
@@ -1492,6 +1493,13 @@ SDL_CreateRenderer(SDL_WindowID windowID, int index, Uint32 flags)
     /* Create a new renderer instance */
     window->renderer = SDL_CurrentDisplay.render_drivers[index]
         .CreateRenderer(window, flags);
+
+    if (window->renderer==NULL)
+    {
+       /* Assuming renderer set its error */
+       return -1;
+    }
+
     SDL_SelectRenderer(window->id);
 
     return 0;

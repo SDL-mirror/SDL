@@ -18,6 +18,10 @@
 
     Sam Lantinga
     slouken@libsdl.org
+
+    QNX Graphics Framework SDL driver
+    Copyright (C) 2009 Mike Gorchak
+    (mike@malva.ua, lestat@i.com.ua)
 */
 
 #ifndef __SDL_QNXGF_H__
@@ -34,11 +38,37 @@ typedef struct SDL_VideoData
    SDL_bool      gfinitialized;      /* GF device initialization status      */
 } SDL_VideoData;
 
+#define SDL_VIDEO_GF_DEVICENAME_MAX 257
+
 typedef struct SDL_DisplayData
 {
-   gf_display_info_t display_info;   /* GF display information               */
-   gf_display_t      display;        /* GF display handle                    */
+   gf_display_info_t display_info;     /* GF display information             */
+   gf_display_t      display;          /* GF display handle                  */
+   uint32_t          custom_refresh;   /* Custom refresh rate for all modes  */
+   SDL_DisplayMode   current_mode;     /* Current video mode                 */
+   uint8_t           description[SDL_VIDEO_GF_DEVICENAME_MAX];
+                                       /* Device description                 */
+   uint32_t          caps;             /* Device capabilities                */
+   SDL_bool          layer_attached;   /* Layer attach status                */
+   gf_layer_t        layer;            /* Graphics layer to which attached   */
 } SDL_DisplayData;
+
+typedef struct SDL_WindowData
+{
+   SDL_bool     uses_gles;           /* if true window must support OpenGL ES*/
+} SDL_WindowData;
+
+/****************************************************************************/
+/* Low level GF graphics driver capabilities                                */
+/****************************************************************************/
+typedef struct GF_DeviceCaps
+{
+   uint8_t* name;
+   uint32_t caps;
+} GF_DeviceCaps;
+
+#define SDL_GF_UNACCELERATED         0x00000000
+#define SDL_GF_ACCELERATED           0x00000001
 
 /****************************************************************************/
 /* SDL_VideoDevice functions declaration                                    */
@@ -89,3 +119,5 @@ void qnxgf_pumpevents(_THIS);
 void qnxgf_suspendscreensaver(_THIS);
 
 #endif /* __SDL_QNXGF_H__ */
+
+/* vi: set ts=4 sw=4 expandtab: */

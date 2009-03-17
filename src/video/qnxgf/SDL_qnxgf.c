@@ -18,6 +18,10 @@
 
     Sam Lantinga
     slouken@libsdl.org
+
+    QNX Graphics Framework SDL driver
+    Copyright (C) 2009 Mike Gorchak
+    (mike@malva.ua, lestat@i.com.ua)
 */
 
 #include "SDL_config.h"
@@ -30,6 +34,7 @@
 #include <gf/gf.h>
 
 #include "SDL_qnxgf.h"
+#include "SDL_gf_render.h"
 #include "SDL_gf_pixelfmt.h"
 
 /******************************************************************************/
@@ -62,7 +67,10 @@ static SDL_DisplayMode generic_mode[]=
    {0, 1280, 768, 60, NULL},   /* 1280x768 mode is 60Hz only               */
    {0, 1280, 800, 60, NULL},   /* 1280x800 mode is 60Hz only               */
    {0, 1280, 960, 60, NULL},   /* 1280x960 mode is 60Hz only               */
-   {0, 1280, 1024, 60, NULL},  /* 1280x1024 mode is 60Hz only              */
+   {0, 1280, 1024, 60, NULL},  /* 1280x1024 modes are 60Hz, 75Hz, 85Hz and */
+   {0, 1280, 1024, 75, NULL},  /* 100 Hz                                   */
+   {0, 1280, 1024, 85, NULL},  /*                                          */
+   {0, 1280, 1024, 100, NULL}, /*                                          */
    {0, 1400, 1050, 60, NULL},  /* 1400x1050 mode is 60Hz only              */
    {0, 1440, 900, 60, NULL},   /* 1440x900 mode is 60Hz only               */
    {0, 1440, 960, 60, NULL},   /* 1440x960 mode is 60Hz only               */
@@ -73,6 +81,69 @@ static SDL_DisplayMode generic_mode[]=
    {0, 2048, 1536, 60, NULL},  /* 2048x1536 mode is 60Hz only              */
    {0, 2048, 1080, 60, NULL},  /* 2048x1080 mode is 60Hz only              */
    {0,    0,    0,  0, NULL}   /* End of generic mode list                 */
+};
+
+/* Low level device graphics driver names, which they are reporting */
+GF_DeviceCaps gf_devicename[]=
+{
+   /* ATI Rage 128 graphics driver (devg-ati_rage128)      */
+   {"ati_rage128", SDL_GF_ACCELERATED},
+   /* Fujitsu Carmine graphics driver (devg-carmine.so)    */
+   {"carmine", SDL_GF_ACCELERATED},
+   /* C&T graphics driver (devg-chips.so)                  */
+   {"chips", SDL_GF_ACCELERATED},
+   /* Fujitsu Coral graphics driver (devg-coral.so)        */
+   {"coral", SDL_GF_ACCELERATED},
+   /* Intel integrated graphics driver (devg-extreme2.so)  */
+   {"extreme2", SDL_GF_ACCELERATED},
+   /* Unaccelerated FB driver (devg-flat.so)               */
+   {"flat", SDL_GF_UNACCELERATED},
+   /* NS Geode graphics driver (devg-geode.so)             */
+   {"geode", SDL_GF_ACCELERATED},
+   /* Geode LX graphics driver (devg-geodelx.so)           */
+   {"geodelx", SDL_GF_ACCELERATED},
+   /* Intel integrated graphics driver (devg-gma9xx.so)    */
+   {"gma", SDL_GF_ACCELERATED},
+   /* Intel integrated graphics driver (devg-i810.so)      */
+   {"i810", SDL_GF_ACCELERATED},
+   /* Intel integrated graphics driver (devg-i830.so)      */
+   {"i830", SDL_GF_ACCELERATED},
+   /* Geode LX graphics driver (devg-lx800.so)             */
+   {"lx800", SDL_GF_ACCELERATED},
+   /* Matrox Gxx graphics driver (devg-matroxg.so)         */
+   {"matroxg", SDL_GF_ACCELERATED},
+   /* Intel Poulsbo graphics driver (devg-poulsbo.so)      */
+   {"poulsbo", SDL_GF_ACCELERATED},
+   /* ATI Radeon driver (devg-radeon.so)                   */
+   {"radeon", SDL_GF_ACCELERATED},
+   /* ATI Rage driver (devg-rage.so)                       */
+   {"rage", SDL_GF_ACCELERATED},
+   /* S3 Savage graphics driver (devg-s3_savage.so)        */
+   {"s3_savage", SDL_GF_ACCELERATED},
+   /* SiS630 integrated graphics driver (devg-sis630.so)   */
+   {"sis630", SDL_GF_ACCELERATED},
+   /* PowerVR SGX 535 graphics driver (devg-poulsbo.so)    */
+   {"sgx", SDL_GF_ACCELERATED},
+   /* SM Voyager GX graphics driver (devg-smi5xx.so)       */
+   {"smi5xx", SDL_GF_ACCELERATED},
+   /* Silicon Motion graphics driver (devg-smi7xx.so)      */
+   {"smi7xx", SDL_GF_ACCELERATED},
+   /* SVGA unaccelerated gfx driver (devg-svga.so)         */
+   {"svga", SDL_GF_UNACCELERATED},
+   /* nVidia TNT graphics driver (devg-tnt.so)             */
+   {"tnt", SDL_GF_ACCELERATED},
+   /* VIA integrated graphics driver (devg-tvia.so)        */
+   {"tvia", SDL_GF_ACCELERATED},
+   /* VIA UniChrome graphics driver (devg-unichrome.so)    */
+   {"unichrome", SDL_GF_ACCELERATED},
+   /* VESA unaccelerated gfx driver (devg-vesa.so)         */
+   {"vesa", SDL_GF_UNACCELERATED},
+   /* VmWare graphics driver (devg-volari.so)              */
+   {"vmware", SDL_GF_ACCELERATED},
+   /* XGI XP10 graphics driver (devg-volari.so)            */
+   {"volari", SDL_GF_ACCELERATED},
+   /* End of list */
+   {NULL, 0x00000000}
 };
 
 /*****************************************************************************/
@@ -110,10 +181,8 @@ static void qnxgf_destroy(SDL_VideoDevice* device)
 
    if (device->driverdata!=NULL)
    {
-      SDL_free(device->driverdata);
       device->driverdata=NULL;
    }
-   SDL_free(device);
 }
 
 static SDL_VideoDevice* qnxgf_create(int devindex)
@@ -123,7 +192,7 @@ static SDL_VideoDevice* qnxgf_create(int devindex)
    int              status;
 
    /* Initialize SDL_VideoDevice structure */
-   device = (SDL_VideoDevice*)SDL_calloc(1, sizeof(SDL_VideoDevice));
+   device=(SDL_VideoDevice*)SDL_calloc(1, sizeof(SDL_VideoDevice));
    if (device==NULL)
    {
       SDL_OutOfMemory();
@@ -131,7 +200,7 @@ static SDL_VideoDevice* qnxgf_create(int devindex)
    }
 
    /* Initialize internal GF specific data */
-   gfdata = (SDL_VideoData*)SDL_calloc(1, sizeof(SDL_VideoData));
+   gfdata=(SDL_VideoData*)SDL_calloc(1, sizeof(SDL_VideoData));
    if (gfdata==NULL)
    {
       SDL_OutOfMemory();
@@ -212,6 +281,8 @@ int qnxgf_videoinit(_THIS)
 {
    SDL_VideoData* gfdata=(SDL_VideoData*)_this->driverdata;
    uint32_t it;
+   uint32_t jt;
+   char* override;
 
    /* Add each detected output to SDL */
    for (it=0; it<gfdata->gfdev_info.ndisplays; it++)
@@ -243,7 +314,7 @@ int qnxgf_videoinit(_THIS)
       {
          /* video initialization problem */
          SDL_free(didata);
-         SDL_SetError("Display query failed");
+         SDL_SetError("display query failed");
          return -1;
       }
 
@@ -253,16 +324,68 @@ int qnxgf_videoinit(_THIS)
       {
          /* video initialization problem */
          SDL_free(didata);
-         SDL_SetError("Couldn't not attach to display");
+         SDL_SetError("couldn't attach to display");
          return -1;
       }
 
+      /* Initialize status variables */
+      didata->layer_attached=SDL_FALSE;
+
+      /* Attach to main display layer */
+      status=gf_layer_attach(&didata->layer, didata->display, didata->display_info.main_layer_index, 0);
+      if (status!=GF_ERR_OK)
+      {
+         SDL_SetError("couldn't attach to main layer, it could be busy");
+
+         /* Failed to attach to main layer */
+         return -1;
+      }
+
+      /* Enable layer in case if hardware supports layer enable/disable */
+      gf_layer_enable(didata->layer);
+
+      /* Mark main display layer is attached */
+      didata->layer_attached=SDL_TRUE;
+
+      /* Copy device name for each display */
+      SDL_strlcpy(didata->description, gfdata->gfdev_info.description, SDL_VIDEO_GF_DEVICENAME_MAX-1);
+
+      /* Search device capabilities and possible workarounds */
+      jt=0;
+      do {
+         if (gf_devicename[jt].name==NULL)
+         {
+            break;
+         }
+         if (SDL_strncmp(gf_devicename[jt].name, didata->description, SDL_strlen(gf_devicename[jt].name))==0)
+         {
+            didata->caps=gf_devicename[jt].caps;
+         }
+         jt++;
+      } while(1);
+
+      /* Initialize display structure */
       SDL_zero(display);
       display.desktop_mode = current_mode;
       display.current_mode = current_mode;
       display.driverdata = didata;
+      didata->current_mode=current_mode;
       SDL_AddVideoDisplay(&display);
+
+      /* Check for environment variables which could override some SDL settings */
+      didata->custom_refresh=0;
+      override = SDL_getenv("SDL_VIDEO_GF_REFRESH_RATE");
+      if (override!=NULL)
+      {
+         if (SDL_sscanf(override, "%u", &didata->custom_refresh)!=1)
+         {
+            didata->custom_refresh=0;
+         }
+      }
    }
+
+   /* Add GF renderer to SDL */
+   gf_addrenderdriver(_this);
 
    /* video has been initialized successfully */
    return 1;
@@ -273,6 +396,7 @@ void qnxgf_videoquit(_THIS)
    SDL_DisplayData* didata;
    uint32_t it;
 
+   /* SDL will restore our desktop mode on exit */
    for(it=0; it<_this->num_displays; it++)
    {
       didata=_this->displays[it].driverdata;
@@ -284,7 +408,7 @@ void qnxgf_videoquit(_THIS)
 
 void qnxgf_getdisplaymodes(_THIS)
 {
-   SDL_DisplayData* didata = (SDL_DisplayData*)SDL_CurrentDisplay.driverdata;
+   SDL_DisplayData* didata=(SDL_DisplayData*)SDL_CurrentDisplay.driverdata;
    SDL_DisplayMode  mode;
    gf_modeinfo_t    modeinfo;
    uint32_t it=0;
@@ -358,25 +482,155 @@ void qnxgf_getdisplaymodes(_THIS)
 
 int qnxgf_setdisplaymode(_THIS, SDL_DisplayMode* mode)
 {
-   SDL_DisplayData* didata = (SDL_DisplayData*)SDL_CurrentDisplay.driverdata;
+   SDL_DisplayData* didata=(SDL_DisplayData*)SDL_CurrentDisplay.driverdata;
+   uint32_t refresh_rate=0;
    int result;
 
-   result=gf_display_set_mode(didata->display, mode->w, mode->h, mode->refresh_rate,
+   /* Current display dimensions and bpp are no more valid */
+   didata->current_mode.format=SDL_PIXELFORMAT_UNKNOWN;
+   didata->current_mode.w=0;
+   didata->current_mode.h=0;
+
+   /* Check if custom refresh rate requested */
+   if (didata->custom_refresh!=0)
+   {
+      refresh_rate=didata->custom_refresh;
+   }
+   else
+   {
+      refresh_rate=mode->refresh_rate;
+   }
+
+   /* Check if SDL GF driver needs to find appropriate refresh rate itself */
+   if (refresh_rate==0)
+   {
+      uint32_t it;
+      SDL_DisplayMode tempmode;
+
+      /* Clear display mode structure */
+      SDL_memset(&tempmode, 0x00, sizeof(SDL_DisplayMode));
+      tempmode.refresh_rate=0x0000FFFF;
+
+      /* Check if window width and height matches one of our modes */
+      for (it=0; it<SDL_CurrentDisplay.num_display_modes; it++)
+      {
+         if ((SDL_CurrentDisplay.display_modes[it].w==mode->w) &&
+             (SDL_CurrentDisplay.display_modes[it].h==mode->h) &&
+             (SDL_CurrentDisplay.display_modes[it].format==mode->format))
+         {
+            /* Find the lowest refresh rate available */
+            if (tempmode.refresh_rate>SDL_CurrentDisplay.display_modes[it].refresh_rate)
+            {
+               tempmode=SDL_CurrentDisplay.display_modes[it];
+            }
+         }
+      }
+      if (tempmode.refresh_rate!=0x0000FFFF)
+      {
+         refresh_rate=tempmode.refresh_rate;
+      }
+      else
+      {
+         /* Let video driver decide what to do with this */
+         refresh_rate=0;
+      }
+   }
+
+   /* Check if SDL GF driver needs to check custom refresh rate */
+   if (didata->custom_refresh!=0)
+   {
+      uint32_t it;
+      SDL_DisplayMode tempmode;
+
+      /* Clear display mode structure */
+      SDL_memset(&tempmode, 0x00, sizeof(SDL_DisplayMode));
+      tempmode.refresh_rate=0x0000FFFF;
+
+      /* Check if window width and height matches one of our modes */
+      for (it=0; it<SDL_CurrentDisplay.num_display_modes; it++)
+      {
+         if ((SDL_CurrentDisplay.display_modes[it].w==mode->w) &&
+             (SDL_CurrentDisplay.display_modes[it].h==mode->h) &&
+             (SDL_CurrentDisplay.display_modes[it].format==mode->format))
+         {
+            /* Find the lowest refresh rate available */
+            if (tempmode.refresh_rate>SDL_CurrentDisplay.display_modes[it].refresh_rate)
+            {
+               tempmode=SDL_CurrentDisplay.display_modes[it];
+            }
+
+            /* Check if requested refresh rate found */
+            if (refresh_rate==SDL_CurrentDisplay.display_modes[it].refresh_rate)
+            {
+               tempmode=SDL_CurrentDisplay.display_modes[it];
+               break;
+            }
+         }
+      }
+      if (tempmode.refresh_rate!=0x0000FFFF)
+      {
+         refresh_rate=tempmode.refresh_rate;
+      }
+      else
+      {
+         /* Let video driver decide what to do with this */
+         refresh_rate=0;
+      }
+   }
+
+   /* Detach layer before switch to new graphics mode */
+   if (didata->layer_attached==SDL_TRUE)
+   {
+      /* Disable layer if hardware supports this */
+      gf_layer_disable(didata->layer);
+
+      /* Detach from layer, free it for others */
+      gf_layer_detach(didata->layer);
+
+      /* Mark it as detached */
+      didata->layer_attached=SDL_FALSE;
+   }
+
+   /* Set new display video mode */
+   result=gf_display_set_mode(didata->display, mode->w, mode->h, refresh_rate,
                               qnxgf_sdl_to_gf_pixelformat(mode->format), 0);
    if (result!=GF_ERR_OK)
    {
       /* Display mode/resolution switch has been failed */
-      SDL_SetError("Mode is not supported by qnxgf driver");
+      SDL_SetError("mode is not supported by graphics driver");
       return -1;
    }
+   else
+   {
+      didata->current_mode=*mode;
+      didata->current_mode.refresh_rate=refresh_rate;
+   }
+
+   /* Attach to main display layer */
+   result=gf_layer_attach(&didata->layer, didata->display, didata->display_info.main_layer_index, 0);
+   if (result!=GF_ERR_OK)
+   {
+      SDL_SetError("couldn't attach to main layer, it could be busy");
+
+      /* Failed to attach to main displayable layer */
+      return -1;
+   }
+
+   /* Enable layer in case if hardware supports layer enable/disable */
+   gf_layer_enable(didata->layer);
+
+   /* Mark main display layer is attached */
+   didata->layer_attached=SDL_TRUE;
 
    return 0;
 }
 
 int qnxgf_setdisplaypalette(_THIS, SDL_Palette* palette)
 {
-   /* Palette must be set through the QNXGF renderer */
-   /* It connected to surface, part of it            */
+   SDL_DisplayData* didata=(SDL_DisplayData*)SDL_CurrentDisplay.driverdata;
+
+   /* QNX GF doesn't have support for global palette changing, but we */
+   /* could store it for usage in future */
 
    /* Setting display palette operation has been failed */
    return -1;
@@ -384,7 +638,10 @@ int qnxgf_setdisplaypalette(_THIS, SDL_Palette* palette)
 
 int qnxgf_getdisplaypalette(_THIS, SDL_Palette* palette)
 {
-   /* We can give to upper level palette, which it set before */
+   SDL_DisplayData* didata=(SDL_DisplayData*)SDL_CurrentDisplay.driverdata;
+
+   /* We can't provide current palette settings and looks like SDL          */
+   /* do not call this function also, in such case this function returns -1 */
 
    /* Getting display palette operation has been failed */
    return -1;
@@ -392,12 +649,11 @@ int qnxgf_getdisplaypalette(_THIS, SDL_Palette* palette)
 
 int qnxgf_setdisplaygammaramp(_THIS, Uint16* ramp)
 {
-   SDL_DisplayData* didata = (SDL_DisplayData*)SDL_CurrentDisplay.driverdata;
+   SDL_DisplayData* didata=(SDL_DisplayData*)SDL_CurrentDisplay.driverdata;
    int status;
 
-   /* GF can set Color LUT independently for each color channel, but SDL */
-   /* uses combined gamma ramp, set it to each channel                   */
-   status=gf_display_set_color_lut16(didata->display, (uint16_t*)ramp, (uint16_t*)ramp, (uint16_t*)ramp);
+   /* Setup gamma ramp, for each color channel */
+   status=gf_display_set_color_lut16(didata->display, (uint16_t*)ramp, (uint16_t*)ramp+256, (uint16_t*)ramp+512);
    if (status!=GF_ERR_OK)
    {
       /* Setting display gamma ramp operation has been failed */
@@ -409,7 +665,8 @@ int qnxgf_setdisplaygammaramp(_THIS, Uint16* ramp)
 
 int qnxgf_getdisplaygammaramp(_THIS, Uint16* ramp)
 {
-   /* We need to return previous gamma set */
+   /* TODO: We need to return previous gamma set           */
+   /*       Also we need some initial fake gamma to return */
 
    /* Getting display gamma ramp operation has been failed */
    return -1;
@@ -417,8 +674,82 @@ int qnxgf_getdisplaygammaramp(_THIS, Uint16* ramp)
 
 int qnxgf_createwindow(_THIS, SDL_Window* window)
 {
-   /* Failed to create new window */
-   return -1;
+   SDL_DisplayData* didata=(SDL_DisplayData*)SDL_CurrentDisplay.driverdata;
+   SDL_WindowData*  wdata;
+
+   /* QNX GF supports fullscreen window modes only */
+   if ((window->flags & SDL_WINDOW_FULLSCREEN)!=SDL_WINDOW_FULLSCREEN)
+   {
+      uint32_t it;
+      SDL_DisplayMode mode;
+
+      /* Clear display mode structure */
+      SDL_memset(&mode, 0x00, sizeof(SDL_DisplayMode));
+      mode.refresh_rate=0x0000FFFF;
+
+      /* Check if window width and height matches one of our modes */
+      for (it=0; it<SDL_CurrentDisplay.num_display_modes; it++)
+      {
+         if ((SDL_CurrentDisplay.display_modes[it].w==window->w) &&
+             (SDL_CurrentDisplay.display_modes[it].h==window->h) &&
+             (SDL_CurrentDisplay.display_modes[it].format==SDL_CurrentDisplay.desktop_mode.format))
+         {
+            /* Find the lowest refresh rate available */
+            if (mode.refresh_rate>SDL_CurrentDisplay.display_modes[it].refresh_rate)
+            {
+               mode=SDL_CurrentDisplay.display_modes[it];
+            }
+         }
+      }
+
+      /* Check if end of display list has been reached */
+      if (mode.refresh_rate==0x0000FFFF)
+      {
+         SDL_SetError("desired video mode is not supported");
+
+         /* Failed to create new window */
+         return -1;
+      }
+      else
+      {
+         /* Tell to the caller that mode will be fullscreen */
+         window->flags|=SDL_WINDOW_FULLSCREEN;
+
+         /* Setup fullscreen mode, bpp used from desktop mode in this case */
+         qnxgf_setdisplaymode(_this, &mode);
+      }
+   }
+
+   /* Setup our own window decorations, which are depend on fullscreen mode */
+   window->flags|=SDL_WINDOW_SHOWN | SDL_WINDOW_BORDERLESS |
+                  SDL_WINDOW_MAXIMIZED | SDL_WINDOW_INPUT_GRABBED |
+                  SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS;
+   window->flags&=~(SDL_WINDOW_RESIZABLE | SDL_WINDOW_MINIMIZED);
+
+   /* Ignore any window position settings */
+   window->x=SDL_WINDOWPOS_UNDEFINED;
+   window->y=SDL_WINDOWPOS_UNDEFINED;
+
+   /* Allocate window internal data */
+   wdata=(SDL_WindowData*)SDL_calloc(1, sizeof(SDL_WindowData));
+   if (wdata==NULL)
+   {
+      SDL_OutOfMemory();
+      return -1;
+   }
+
+   /* Setup driver data for this window */
+   window->driverdata=wdata;
+
+   /* Check if window must support OpenGL ES rendering */
+   if ((window->flags & SDL_WINDOW_OPENGL)==SDL_WINDOW_OPENGL)
+   {
+      /* Mark this window as OpenGL ES compatible */
+      wdata->uses_gles=SDL_TRUE;
+   }
+
+   /* Window has been successfully created */
+   return 0;
 }
 
 int qnxgf_createwindowfrom(_THIS, SDL_Window* window, const void* data)
@@ -473,7 +804,12 @@ void qnxgf_setwindowgrab(_THIS, SDL_Window* window)
 
 void qnxgf_destroywindow(_THIS, SDL_Window* window)
 {
-   printf("qnxgf_destroywindow()\n");
+   SDL_DisplayData* didata=(SDL_DisplayData*)SDL_CurrentDisplay.driverdata;
+   SDL_WindowData*  wdata=(SDL_WindowData*)window->driverdata;
+
+   if (wdata!=NULL)
+   {
+   }
 }
 
 /*****************************************************************************/
@@ -481,13 +817,16 @@ void qnxgf_destroywindow(_THIS, SDL_Window* window)
 /*****************************************************************************/
 SDL_bool qnxgf_getwindowwminfo(_THIS, SDL_Window* window, struct SDL_SysWMinfo* info)
 {
-   if (info->version.major <= SDL_MAJOR_VERSION)
+   /* QNX GF do not operates at window level, this means we are have no */
+   /* Window Manager available, no specific data in SDL_SysWMinfo too   */
+
+   if (info->version.major<=SDL_MAJOR_VERSION)
    {
       return SDL_TRUE;
    }
    else
    {
-      SDL_SetError("Application not compiled with SDL %d.%d\n", SDL_MAJOR_VERSION, SDL_MINOR_VERSION);
+      SDL_SetError("application not compiled with SDL %d.%d\n", SDL_MAJOR_VERSION, SDL_MINOR_VERSION);
       return SDL_FALSE;
    }
 

@@ -1,4 +1,57 @@
 README.QNX by Mike Gorchak <mike@malva.ua>, <lestat@i.com.ua>
-Last changed at 02 Mar 2009.
+Last changed at 10 Mar 2009.
 
 QNX Photon and GF drivers are under construction. Please be patient.
+
+---------------------
+ -- SDL GF driver --
+---------------------
+
+Here is an additional information about SDL GF driver:
+ * 0. Introduction.
+ * 1. Environment variables which SDL GF driver supports.
+ * 2. Custom video modes.
+ * 3. Limitations.
+
+0. Introduction.
+
+   SDL GF driver is a layer between SDL and QNX Graphics Framework (GF). Hardware
+accelerated features which SDL could support depends on real hardware capabilities.
+
+1. Environment variables which GF driver supports.
+
+   GF driver supports the following environment variables for QNX GF specific
+customization options:
+   a) SDL_VIDEO_GF_REFRESH_RATE - refresh rate of video output in Hz. Without
+      this environment variable declaration SDL controls refresh rate of your
+      display. If this enironment variable is set to 0, SDL will control refresh
+      rate of display, otherwise value of SDL_VIDEO_GF_REFRESH_RATE is used for
+      all screen resolutions as refresh rate. This example will set 60Hz refresh
+      rate as refresh rate for all graphics modes:
+
+      export SDL_VIDEO_GF_REFRESH_RATE=60
+
+2. Custom video modes.
+
+   Since most QNX graphics drivers supports GENERIC video modes, i.e. you could
+specify any horizontal and vertical resolution and any refresh rate, SDL GF
+driver uses its own fullscreen modes list, which could be incomplete. You could
+add any custom video mode, which your QNX graphics driver supports by editing
+file ./src/video/qnxgf/SDL_qnxgf.c. Custom graphics mode definition looks like
+
+   {0, 1024, 640, 60, NULL},   /* 1024x640 mode is 60Hz only               */
+
+You must specify horizontal resolution as second parameter, vertical resolution
+as third parameter and refresh rate as fourth parameter. Please leave first and
+last parameters as 0 and NULL. Then please send me your changes to e-mail address
+which is specified in the header of this document.
+
+3. Limitations.
+
+   There are few limitations while using SDL GF driver:
+
+   a) Since GF driver supports fullscreen modes only, when you are not specifing
+SDL_WINDOW_FULLSCREEN flag, an SDL GF driver will try to find the fullscreen
+graphics mode which corresponds to SDL window size. Refresh rate will be the
+lowest available, if SDL_VIDEO_GF_REFRESH_RATE environment variable is not set.
+

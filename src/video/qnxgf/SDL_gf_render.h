@@ -18,6 +18,10 @@
 
     Sam Lantinga
     slouken@libsdl.org
+
+    QNX Graphics Framework SDL driver
+    Copyright (C) 2009 Mike Gorchak
+    (mike@malva.ua, lestat@i.com.ua)
 */
 
 #ifndef __SDL_GF_RENDER_H__
@@ -27,4 +31,27 @@
 
 #include <gf/gf.h>
 
+#define SDL_GF_MAX_SURFACES 3
+
+typedef struct SDL_RenderData
+{
+   SDL_Window*        window;        /* SDL window type                    */
+   SDL_bool           enable_vsync;  /* VSYNC flip synchronization enable  */
+   gf_surface_t       surface[SDL_GF_MAX_SURFACES]; /* Surface handles     */
+   gf_surface_info_t  surface_info[SDL_GF_MAX_SURFACES]; /* Surface info   */
+   uint32_t           surface_visible_idx; /* Index of visible surface     */
+   uint32_t           surface_render_idx;  /* Index of render surface      */
+   uint32_t           surfaces_count;      /* Amount of allocated surfaces */
+} SDL_RenderData;
+
+typedef struct SDL_TextureData
+{
+   gf_surface_t       surface;
+   gf_surface_info_t  surface_info;
+} SDL_TextureData;
+
+extern void gf_addrenderdriver(_THIS);
+
 #endif /* __SDL_GF_RENDER_H__ */
+
+/* vi: set ts=4 sw=4 expandtab: */
