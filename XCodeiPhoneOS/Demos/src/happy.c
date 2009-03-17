@@ -58,7 +58,8 @@ render(void)
     dstRect.h = HAPPY_FACE_SIZE;
 
     /* fill background in with black */
-    SDL_RenderFill(0, 0, 0, 255, NULL);
+    SDL_SetRenderDrawColor(0, 0, 0, 255);
+    SDL_RenderFill(NULL);
 
     /*
        loop through all the happy faces:

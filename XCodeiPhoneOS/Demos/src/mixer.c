@@ -167,13 +167,14 @@ void
 render(void)
 {
     int i;
-    SDL_RenderFill(50, 50, 50, 255, NULL);      /* draw background (gray) */
+    SDL_SetRenderDrawColor(50, 50, 50, 255);
+    SDL_RenderFill(NULL);      /* draw background (gray) */
     /* draw the drum buttons */
     for (i = 0; i < NUM_DRUMS; i++) {
         SDL_Color color =
             buttons[i].isPressed ? buttons[i].downColor : buttons[i].upColor;
-        SDL_RenderFill(color.r, color.g, color.b, color.unused,
-                       &buttons[i].rect);
+        SDL_SetRenderDrawColor(color.r, color.g, color.b, color.unused);
+        SDL_RenderFill(&buttons[i].rect);
     }
     /* update the screen */
     SDL_RenderPresent();

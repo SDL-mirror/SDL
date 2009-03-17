@@ -95,7 +95,8 @@ main(int argc, char *argv[])
     initializeTexture();
 
     /* fill canvass initially with all black */
-    SDL_RenderFill(0, 0, 0, 255, NULL);
+    SDL_SetRenderDrawColor(0, 0, 0, 255);
+    SDL_RenderFill(NULL);
     SDL_RenderPresent();
 
     done = 0;
