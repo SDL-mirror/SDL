@@ -57,7 +57,7 @@ static void BE_UnlockHWSurface(_THIS, SDL_Surface *surface);
 static void BE_FreeHWSurface(_THIS, SDL_Surface *surface);
 
 static int BE_ToggleFullScreen(_THIS, int fullscreen);
-static SDL_Overlay *BE_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SDL_Surface *display);
+SDL_Overlay *BE_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, SDL_Surface *display);
 
 /* OpenGL functions */
 #if SDL_VIDEO_OPENGL
@@ -637,8 +637,12 @@ int BE_GL_LoadLibrary(_THIS, const char *path)
 			int32 cookie = 0;
 			while (get_next_image_info(0,&cookie,&info) == B_OK) {
 				void *location = NULL;
-				if (get_image_symbol((image_id)cookie,"glBegin",B_SYMBOL_TYPE_ANY,&location) == B_OK) {
-					_this->gl_config.dll_handle = (void*)cookie;
+#ifdef __HAIKU__
+				if (get_image_symbol(info.id,"glBegin",B_SYMBOL_TYPE_ANY,&location) == B_OK) { // This is how it actually works in Haiku
+#else
+				if (get_image_symbol((image_id)cookie,"glBegin",B_SYMBOL_TYPE_ANY,&location) == B_OK) { // I don't know if that *did* work in BeOS
+#endif
+					_this->gl_config.dll_handle = (void*)info.id;
 					_this->gl_config.driver_loaded = 1;
 					SDL_strlcpy(_this->gl_config.driver_path, "libGL.so", SDL_arraysize(_this->gl_config.driver_path));
 				}

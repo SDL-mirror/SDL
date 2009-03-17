@@ -40,7 +40,7 @@ AC_SUBST(LT_REVISION)
 AC_SUBST(LT_AGE)
 
 dnl Detect the canonical build and host environments
-AC_CONFIG_AUX_DIRS($srcdir/build-scripts)
+AC_CONFIG_AUX_DIR([build-scripts])
 AC_CANONICAL_HOST
 AC_C_BIGENDIAN
 if test x$ac_cv_c_bigendian = xyes; then
@@ -2493,7 +2493,7 @@ case "$host" in
         SDL_CFLAGS="$SDL_CFLAGS -Dmain=SDL_main -D_WIN32_WCE=0x420"
         SDL_LIBS="-lSDLmain $SDL_LIBS"
         ;;
-    *-*-beos*)
+    *-*-beos* | *-*-haiku*)
         ARCH=beos
         ac_default_prefix=/boot/develop/tools/gnupro
         CheckDummyVideo
@@ -2536,8 +2536,16 @@ case "$host" in
         fi
         # Set up files for the shared object loading library
         if test x$enable_loadso = xyes; then
-            AC_DEFINE(SDL_LOADSO_BEOS)
-            SOURCES="$SOURCES $srcdir/src/loadso/beos/*.c"
+            case "$host" in
+                *-*-beos*)
+                    AC_DEFINE(SDL_LOADSO_BEOS)
+                    SOURCES="$SOURCES $srcdir/src/loadso/beos/*.c"
+                ;;
+                *-*-haiku*)
+                    AC_DEFINE(SDL_LOADSO_DLOPEN)
+                    SOURCES="$SOURCES $srcdir/src/loadso/dlopen/*.c"
+                ;;
+            esac    
             have_loadso=yes
         fi
         # The BeOS platform requires special setup.

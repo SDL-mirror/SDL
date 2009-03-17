@@ -162,6 +162,8 @@ int main(int argc, char *argv[])
 			"Dreamcast"
 #elif __FREEBSD__
 			"FreeBSD"
+#elif __HAIKU__
+			"Haiku"
 #elif __HPUX__
 			"HP-UX"
 #elif __IRIX__

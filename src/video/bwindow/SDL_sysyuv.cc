@@ -94,7 +94,7 @@ BBitmap * BE_GetOverlayBitmap(BRect bounds, color_space cs) {
 
 // See <GraphicsDefs.h> [btw: Cb=U, Cr=V]
 // See also http://www.fourcc.org/indexyuv.htm
-enum color_space convert_color_space(Uint32 format) {
+color_space convert_color_space(Uint32 format) {
 	switch (format) {
 	case SDL_YV12_OVERLAY:
 		return B_YUV9;
