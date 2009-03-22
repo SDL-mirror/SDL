@@ -108,7 +108,7 @@ main(int argc, char *argv[])
     /* Set 640x480 video mode */
     if ((screen =
          SDL_SetVideoMode(video_w, video_h, video_bpp, videoflags)) == NULL) {
-        fprintf(stderr, "Couldn't set %%d%d video mode: %s\n", video_w,
+        fprintf(stderr, "Couldn't set %dx%d %d video mode: %s\n", video_w,
                 video_h, video_bpp, SDL_GetError());
         quit(2);
     }
