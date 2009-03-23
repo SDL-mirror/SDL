@@ -570,6 +570,17 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         }
         return (0);
 
+        /* If this isn't our window, we don't need to repaint the frame.
+           This fixes a reentrancy issue that can cause stack overflows with foreign windows.
+           3/21/09 Mason Wheeler */
+    case WM_NCPAINT:
+        {
+            if (SDL_GetWindowFlags(data->windowID) && SDL_WINDOW_FOREIGN) {
+                return(0);
+            }
+            break;
+        }
+
         /* We'll do our own drawing, prevent flicker */
     case WM_ERASEBKGND:
         {
