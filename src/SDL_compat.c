@@ -494,6 +494,15 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
             return NULL;
         }
     }
+    
+    SDL_GetDesktopDisplayMode(&desktop_mode);
+
+    if (width == 0) {
+        width = desktop_mode.w;
+    }
+    if (height == 0) {
+        height = desktop_mode.h;
+    }
 
     /* See if we can simply resize the existing window and surface */
     if (SDL_ResizeVideoMode(width, height, bpp, flags) == 0) {
@@ -567,7 +576,6 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
     }
 
     /* Set up the desired display mode */
-    SDL_GetDesktopDisplayMode(&desktop_mode);
     desktop_format = desktop_mode.format;
     if (desktop_format && ((flags & SDL_ANYFORMAT)
                            || (bpp == SDL_BITSPERPIXEL(desktop_format)))) {
