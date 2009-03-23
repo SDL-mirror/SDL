@@ -50,6 +50,13 @@ WIN_InitMouse(_THIS)
     const char *rdp = "rdp_mou";
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
+/* WinCE has no RawInputDeviceList */
+#ifdef _WIN32_WCE
+    SDL_Mouse mouse;
+    SDL_zero(mouse);
+    mouse.id = 0;
+    SDL_AddMouse(&mouse, "Stylus", 0, 0, 1);
+#else
     /* we're checking for the number of rawinput devices */
     if (GetRawInputDeviceList(NULL, &devCount, sizeof(RAWINPUTDEVICELIST))) {
         return;
@@ -190,6 +197,7 @@ WIN_InitMouse(_THIS)
     }
     total_mice = index;
     SDL_free(deviceList);
+#endif /*_WIN32_WCE*/
 }
 
 void

@@ -27,6 +27,9 @@
 int
 WIN_SetDisplayGammaRamp(_THIS, Uint16 * ramp)
 {
+#ifdef _WIN32_WCE
+	return -1;
+#else
     SDL_DisplayData *data = (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
     HDC hdc;
     BOOL succeeded = FALSE;
@@ -40,11 +43,15 @@ WIN_SetDisplayGammaRamp(_THIS, Uint16 * ramp)
         DeleteDC(hdc);
     }
     return succeeded ? 0 : -1;
+#endif
 }
 
 int
 WIN_GetDisplayGammaRamp(_THIS, Uint16 * ramp)
 {
+#ifdef _WIN32_WCE
+	return -1;
+#else
     SDL_DisplayData *data = (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
     HDC hdc;
     BOOL succeeded = FALSE;
@@ -58,6 +65,7 @@ WIN_GetDisplayGammaRamp(_THIS, Uint16 * ramp)
         DeleteDC(hdc);
     }
     return succeeded ? 0 : -1;
+#endif
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

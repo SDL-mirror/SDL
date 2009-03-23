@@ -28,6 +28,10 @@
 #include "../SDL_yuv_sw_c.h"
 #include "../SDL_alphamult.h"
 
+#ifdef _WIN32_WCE
+#define NO_GETDIBBITS 1
+#endif
+
 /* GDI renderer implementation */
 
 static SDL_Renderer *GDI_CreateRenderer(SDL_Window * window, Uint32 flags);
@@ -106,7 +110,9 @@ typedef struct
     HDC render_hdc;
     HDC memory_hdc;
     HDC current_hdc;
+#ifndef NO_GETDIBBITS
     LPBITMAPINFO bmi;
+#endif
     HBITMAP hbm[3];
     int current_hbm;
     SDL_DirtyRectList dirty;
@@ -197,6 +203,7 @@ GDI_CreateRenderer(SDL_Window * window, Uint32 flags)
     data->render_hdc = CreateCompatibleDC(data->window_hdc);
     data->memory_hdc = CreateCompatibleDC(data->window_hdc);
 
+#ifndef NO_GETDIBBITS
     /* Fill in the compatible bitmap info */
     bmi_size = sizeof(BITMAPINFOHEADER) + 256 * sizeof(RGBQUAD);
     data->bmi = (LPBITMAPINFO) SDL_calloc(1, bmi_size);
@@ -211,6 +218,7 @@ GDI_CreateRenderer(SDL_Window * window, Uint32 flags)
     GetDIBits(data->window_hdc, hbm, 0, 1, NULL, data->bmi, DIB_RGB_COLORS);
     GetDIBits(data->window_hdc, hbm, 0, 1, NULL, data->bmi, DIB_RGB_COLORS);
     DeleteObject(hbm);
+#endif
 
     if (flags & SDL_RENDERER_SINGLEBUFFER) {
         renderer->info.flags |=
@@ -473,6 +481,7 @@ GDI_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
             /* Crap, we've lost the original pixel data... *sigh* */
         }
         return 0;
+#ifndef _WIN32_WCE /* WinCE has no alphablend */
     case SDL_BLENDMODE_MASK:
     case SDL_BLENDMODE_BLEND:
         if (!data->premultiplied && data->pixels) {
@@ -504,6 +513,7 @@ GDI_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
             }
         }
         return 0;
+#endif
     default:
         SDL_Unsupported();
         texture->blendMode = SDL_BLENDMODE_NONE;
@@ -585,12 +595,17 @@ GDI_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                 }
             }
         } else if (rect->w == texture->w && pitch == data->pitch) {
+#ifndef NO_GETDIBBITS
             if (!SetDIBits
                 (renderdata->window_hdc, data->hbm, rect->y, rect->h, pixels,
                  renderdata->bmi, DIB_RGB_COLORS)) {
                 WIN_SetError("SetDIBits()");
                 return -1;
             }
+#else
+            SDL_SetError("FIXME: Update Texture");
+            return -1;
+#endif
         } else {
             SDL_SetError
                 ("FIXME: Need to allocate temporary memory and do GetDIBits() followed by SetDIBits(), since we can only set blocks of scanlines at a time");
@@ -611,7 +626,10 @@ GDI_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
         return SDL_SW_LockYUVTexture(data->yuv, rect, markDirty, pixels,
                                      pitch);
     } else if (data->pixels) {
+#ifndef _WIN32_WCE
+    	/* WinCE has no GdiFlush */
         GdiFlush();
+#endif
         *pixels =
             (void *) ((Uint8 *) data->pixels + rect->y * data->pitch +
                       rect->x * SDL_BYTESPERPIXEL(texture->format));
@@ -760,6 +778,10 @@ GDI_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         RealizePalette(data->memory_hdc);
     }
     if (texture->blendMode & (SDL_BLENDMODE_MASK | SDL_BLENDMODE_BLEND)) {
+#ifdef _WIN32_WCE
+        SDL_SetError("Texture has blendmode not supported under WinCE");
+        return -1;
+#else
         BLENDFUNCTION blendFunc = {
             AC_SRC_OVER,
             0,
@@ -773,6 +795,7 @@ GDI_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
             WIN_SetError("AlphaBlend()");
             return -1;
         }
+#endif
     } else {
         if (srcrect->w == dstrect->w && srcrect->h == dstrect->h) {
             if (!BitBlt
@@ -851,9 +874,11 @@ GDI_DestroyRenderer(SDL_Renderer * renderer)
     if (data) {
         DeleteDC(data->render_hdc);
         DeleteDC(data->memory_hdc);
+#ifndef NO_GETDIBBITS
         if (data->bmi) {
             SDL_free(data->bmi);
         }
+#endif
         for (i = 0; i < SDL_arraysize(data->hbm); ++i) {
             if (data->hbm[i]) {
                 DeleteObject(data->hbm[i]);

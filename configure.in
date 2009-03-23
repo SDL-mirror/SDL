@@ -2531,6 +2531,71 @@ case "$host" in
             have_haptic=yes
         fi
         ;;
+    *-wince* | *-mingw32ce)
+        ARCH=win32
+        CheckDummyVideo
+        CheckDiskAudio
+        CheckDummyAudio
+        CheckWIN32
+        CheckNASM
+        #SOURCES="$SOURCES $srcdir/src/video/gapi/*.c"
+        #AC_DEFINE(SDL_VIDEO_DRIVER_GAPI)
+        if test x$enable_video = xyes; then
+            AC_DEFINE(SDL_VIDEO_DRIVER_WIN32)
+            SOURCES="$SOURCES $srcdir/src/video/win32/*.c"
+            have_video=yes
+            AC_ARG_ENABLE(render-gdi,
+AC_HELP_STRING([--enable-render-gdi], [enable the GDI render driver [[default=yes]]]),
+                                , enable_render_gdi=yes)
+            if test x$enable_render_gdi = xyes; then
+                AC_DEFINE(SDL_VIDEO_RENDER_GDI)
+            fi
+            AC_ARG_ENABLE(render-d3d,
+AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[default=yes]]]),
+                                , enable_render_d3d=yes)
+            enable_render_d3d=no
+            if test x$enable_render_d3d = xyes -a x$have_d3d = xyes; then
+                AC_DEFINE(SDL_VIDEO_RENDER_D3D)
+            fi
+        fi
+        # Set up files for the audio library
+        if test x$enable_audio = xyes; then
+            AC_DEFINE(SDL_AUDIO_DRIVER_WINWAVEOUT)
+            SOURCES="$SOURCES $srcdir/src/audio/windib/*.c"
+            if test x$have_dsound = xyes; then
+                AC_DEFINE(SDL_AUDIO_DRIVER_DSOUND)
+                SOURCES="$SOURCES $srcdir/src/audio/windx5/*.c"
+            fi
+            have_audio=yes
+        fi
+        # Set up files for the thread library
+        if test x$enable_threads = xyes; then
+            AC_DEFINE(SDL_THREAD_WIN32)
+            SOURCES="$SOURCES $srcdir/src/thread/win32/SDL_sysmutex.c"
+            SOURCES="$SOURCES $srcdir/src/thread/win32/SDL_syssem.c"
+            SOURCES="$SOURCES $srcdir/src/thread/win32/SDL_systhread.c"
+            SOURCES="$SOURCES $srcdir/src/thread/generic/SDL_syscond.c"
+            have_threads=yes
+        fi
+        # Set up files for the timer library
+        if test x$enable_timers = xyes; then
+            AC_DEFINE(SDL_TIMER_WINCE)
+            SOURCES="$SOURCES $srcdir/src/timer/wince/*.c"
+            have_timers=yes
+        fi
+        # Set up files for the shared object loading library
+        if test x$enable_loadso = xyes; then
+            AC_DEFINE(SDL_LOADSO_WIN32)
+            SOURCES="$SOURCES $srcdir/src/loadso/win32/*.c"
+            have_loadso=yes
+        fi
+        # Set up the system libraries we need
+        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lcoredll -lcommctrl -lmmtimer"
+        # The Win32 platform requires special setup
+        SDLMAIN_SOURCES="$srcdir/src/main/win32/*.c"
+        SDL_CFLAGS="$SDL_CFLAGS -Dmain=SDL_main -D_WIN32_WCE=0x420"
+        SDL_LIBS="-lSDLmain $SDL_LIBS"
+        ;;
     *-*-cygwin* | *-*-mingw32*)
         ARCH=win32
         if test "$build" != "$host"; then # cross-compiling
@@ -2850,10 +2915,10 @@ esac
 # Verify that we have all the platform specific files we need
 
 if test x$enable_joystick = xyes; then
-  if test x$have_joystick != xyes; then
-    # Wants joystick subsystem, but doesn't have a platform-specific backend...
+    if test x$have_joystick != xyes; then
+        AC_DEFINE(SDL_JOYSTICK_DISABLED)
+    fi
     SOURCES="$SOURCES $srcdir/src/joystick/dummy/*.c"
-  fi
 fi
 if test x$have_haptic != xyes; then
     if test x$enable_haptic = xyes; then

@@ -191,10 +191,12 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                                     0, 0);
                 SDL_SendWindowEvent(data->windowID,
                                     SDL_WINDOWEVENT_RESTORED, 0, 0);
+#ifndef _WIN32_WCE /* WinCE misses IsZoomed() */
                 if (IsZoomed(hwnd)) {
                     SDL_SendWindowEvent(data->windowID,
                                         SDL_WINDOWEVENT_MAXIMIZED, 0, 0);
                 }
+#endif              
                 if (keyboard && keyboard->focus != data->windowID) {
                     SDL_SetKeyboardFocus(index, data->windowID);
                 }
@@ -211,6 +213,25 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         }
         return (0);
 
+/* WinCE has no RawInput, so we use the classic mouse events.
+   In classic Win32 this is done by WM_INPUT
+ */
+#ifdef _WIN32_WCE
+    case WM_MOUSEMOVE:
+    	SDL_SendMouseMotion(0, 0, LOWORD(lParam), HIWORD(lParam), 0);
+    	break;
+    
+    case WM_LBUTTONDOWN:
+    	SDL_SendMouseMotion(0, 0, LOWORD(lParam), HIWORD(lParam), 0);
+    	SDL_SendMouseButton(0, SDL_PRESSED, SDL_BUTTON_LEFT);
+    	break;
+    	
+    case WM_LBUTTONUP:
+    	SDL_SendMouseMotion(0, 0, LOWORD(lParam), HIWORD(lParam), 0);
+    	SDL_SendMouseButton(0, SDL_RELEASED, SDL_BUTTON_LEFT);
+    	break;
+#else /* _WIN32_WCE */
+
     case WM_INPUT:             /* mouse events */
         {
             LPBYTE lpb;
@@ -223,7 +244,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             USHORT flags;
             int w, h;
 
-            /* we're collecting data from the mouse */
+            /* we're collecting raw data to be able to identify the mouse (if there are several) */
             GetRawInputData((HRAWINPUT) lParam, RID_INPUT, NULL, &size,
                             sizeof(RAWINPUTHEADER));
             lpb = SDL_stack_alloc(BYTE, size);
@@ -240,7 +261,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                     break;
                 }
             }
-/* FIXME: Doesn't this defeat the point of using raw input? */
+            
             GetCursorPos(&point);
             ScreenToClient(hwnd, &point);
 
@@ -292,7 +313,8 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             SDL_stack_free(lpb);
         }
         return (0);
-
+#endif /* _WIN32_WCE */
+        
     case WM_MOUSELEAVE:
         {
             int i;

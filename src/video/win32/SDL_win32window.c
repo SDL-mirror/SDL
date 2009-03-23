@@ -243,12 +243,14 @@ WIN_CreateWindow(_THIS, SDL_Window * window)
         g_hCtx[window->id] = videodata->WTOpenA(hwnd, &lc, TRUE);
     }
 
+#ifndef _WIN32_WCE /* has no RawInput */
     /* we're telling the window, we want it to report raw input events from mice */
     Rid.usUsagePage = 0x01;
     Rid.usUsage = 0x02;
     Rid.dwFlags = RIDEV_INPUTSINK;
     Rid.hwndTarget = hwnd;
     RegisterRawInputDevices(&Rid, 1, sizeof(Rid));
+#endif
 
     WIN_PumpEvents(_this);
 
@@ -360,8 +362,11 @@ WIN_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
             }
             SDL_FreeSurface(surface);
 
+/* TODO: create the icon in WinCE (CreateIconFromResource isn't available) */
+#ifndef _WIN32_WCE
             hicon =
                 CreateIconFromResource(icon_bmp, icon_len, TRUE, 0x00030000);
+#endif
         }
         SDL_RWclose(dst);
         SDL_stack_free(icon_bmp);
@@ -553,8 +558,8 @@ WIN_GetWindowWMInfo(_THIS, SDL_Window * window, SDL_SysWMinfo * info)
 int
 SDL_HelperWindowCreate(void)
 {
-    HINSTANCE hInstance = GetModuleHandleA(NULL);
-    WNDCLASSEX wce;
+    HINSTANCE hInstance = GetModuleHandle(NULL);
+    WNDCLASS wce;
 
     /* Make sure window isn't created twice. */
     if (SDL_HelperWindow != NULL) {
@@ -563,13 +568,12 @@ SDL_HelperWindowCreate(void)
 
     /* Create the class. */
     SDL_zero(wce);
-    wce.cbSize = sizeof(WNDCLASSEX);
-    wce.lpfnWndProc = DefWindowProcA;
+    wce.lpfnWndProc = DefWindowProc;
     wce.lpszClassName = (LPCWSTR) SDL_HelperWindowClassName;
     wce.hInstance = hInstance;
 
     /* Register the class. */
-    SDL_HelperWindowClass = RegisterClassEx(&wce);
+    SDL_HelperWindowClass = RegisterClass(&wce);
     if (SDL_HelperWindowClass == 0) {
         SDL_SetError("Unable to create Helper Window Class: error %d.",
                      GetLastError());
@@ -600,7 +604,7 @@ SDL_HelperWindowCreate(void)
 void
 SDL_HelperWindowDestroy(void)
 {
-    HINSTANCE hInstance = GetModuleHandleA(NULL);
+    HINSTANCE hInstance = GetModuleHandle(NULL);
 
     /* Destroy the window. */
     if (SDL_HelperWindow != NULL) {
