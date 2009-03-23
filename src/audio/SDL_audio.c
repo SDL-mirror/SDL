@@ -472,16 +472,12 @@ SDL_RunAudio(void *devicep)
                 SDL_StreamRead(&device->streamer, stream, stream_len);
 
                 /* Ready current buffer for play and change current buffer */
-                if (stream != device->fake_stream) {
+                if (stream != device->fake_stream && !device->paused) {
                     current_audio.impl.PlayDevice(device);
-                }
-
-                /* Wait for an audio buffer to become available */
-                if (stream == device->fake_stream) {
-                    SDL_Delay((device->spec.samples * 1000) /
-                              device->spec.freq);
-                } else {
+                    /* Wait for an audio buffer to become available */
                     current_audio.impl.WaitDevice(device);
+                } else {
+                    SDL_Delay((device->spec.samples * 1000) / device->spec.freq);
                 }
             }
 
@@ -524,15 +520,12 @@ SDL_RunAudio(void *devicep)
             }
 
             /* Ready current buffer for play and change current buffer */
-            if (stream != device->fake_stream) {
+            if (stream != device->fake_stream && !device->paused) {
                 current_audio.impl.PlayDevice(device);
-            }
-
-            /* Wait for an audio buffer to become available */
-            if (stream == device->fake_stream) {
-                SDL_Delay((device->spec.samples * 1000) / device->spec.freq);
-            } else {
+                /* Wait for an audio buffer to become available */
                 current_audio.impl.WaitDevice(device);
+            } else {
+            	SDL_Delay((device->spec.samples * 1000) / device->spec.freq);
             }
         }
     }
