@@ -257,6 +257,8 @@ SDL_VideoInit(const char *driver_name, Uint32 flags)
     _this->gl_config.multisamplesamples = 0;
     _this->gl_config.retained_backing = 1;
     _this->gl_config.accelerated = -1;  /* not known, don't set */
+    _this->gl_config.major_version = 2;
+    _this->gl_config.minor_version = 1;
 
     /* Initialize the video subsystem */
     if (_this->VideoInit(_this) < 0) {
@@ -2693,6 +2695,12 @@ SDL_GL_SetAttribute(SDL_GLattr attr, int value)
         break;
     case SDL_GL_RETAINED_BACKING:
         _this->gl_config.retained_backing = value;
+        break;
+    case SDL_GL_CONTEXT_MAJOR_VERSION:
+        _this->gl_config.major_version = value;
+        break;
+    case SDL_GL_CONTEXT_MINOR_VERSION:
+        _this->gl_config.minor_version = value;
         break;
     default:
         SDL_SetError("Unknown OpenGL attribute");

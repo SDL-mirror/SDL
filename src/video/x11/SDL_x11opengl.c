@@ -53,6 +53,15 @@
 #define GLX_NON_CONFORMANT_VISUAL_EXT      0x800D
 #endif
 
+#ifndef GLX_ARB_create_context
+#define GLX_ARB_create_context
+#define GLX_CONTEXT_MAJOR_VERSION_ARB      0x2091
+#define GLX_CONTEXT_MINOR_VERSION_ARB      0x2092
+#define GLX_CONTEXT_FLAGS_ARB              0x2094
+#define GLX_CONTEXT_DEBUG_BIT_ARB          0x0001
+#define GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB 0x0002
+#endif
+
 #define OPENGL_REQUIRS_DLOPEN
 #if defined(OPENGL_REQUIRS_DLOPEN) && defined(SDL_LOADSO_DLOPEN)
 #include <dlfcn.h>
@@ -66,6 +75,9 @@
 #endif
 
 static void X11_GL_InitExtensions(_THIS);
+
+/* Typedef for the GL 3.0 context creation function */
+typedef GLXContext ( * PFNGLXCREATECONTEXTATTRIBSARBPROC) (Display *dpy, GLXFBConfig config, GLXContext share_context, Bool direct, const int *attrib_list);
 
 int
 X11_GL_LoadLibrary(_THIS, const char *path)
@@ -270,10 +282,9 @@ X11_GL_GetVisual(_THIS, Display * display, int screen)
 
     /* 64 seems nice. */
     int attribs[64];
-    int i;
-
+    int i = 0;
+    
     /* Setup our GLX attributes according to the gl_config. */
-    i = 0;
     attribs[i++] = GLX_RGBA;
     attribs[i++] = GLX_RED_SIZE;
     attribs[i++] = _this->gl_config.red_size;
@@ -384,8 +395,43 @@ X11_GL_CreateContext(_THIS, SDL_Window * window)
     v.visualid = XVisualIDFromVisual(xattr.visual);
     vinfo = XGetVisualInfo(display, VisualScreenMask | VisualIDMask, &v, &n);
     if (vinfo) {
-        context =
-            _this->gl_data->glXCreateContext(display, vinfo, NULL, True);
+        if (_this->gl_config.major_version < 3) {        
+            context =
+                _this->gl_data->glXCreateContext(display, vinfo, NULL, True);
+        } else {
+            /* If we want a GL 3.0 context or later we need to get a temporary
+               context to grab the new context creation function */
+            GLXContext temp_context = _this->gl_data->glXCreateContext(display, vinfo, NULL, True);
+            if (!temp_context) {
+                SDL_SetError("Could not create GL context");        
+                return NULL;
+            } else {
+                int attribs[] = {
+                    GLX_CONTEXT_MAJOR_VERSION_ARB, _this->gl_config.major_version,
+                    GLX_CONTEXT_MINOR_VERSION_ARB, _this->gl_config.minor_version,
+                    0 
+                };
+                                
+                /* Get a pointer to the context creation function for GL 3.0 */
+                PFNGLXCREATECONTEXTATTRIBSARBPROC glXCreateContextAttribs = (PFNGLXCREATECONTEXTATTRIBSARBPROC)glXGetProcAddress((GLubyte*)"glXCreateContextAttribsARB");
+                if (!glXCreateContextAttribs) {
+                    SDL_SetError("GL 3.x is not supported");
+                    context = temp_context;
+                } else {
+                    /* Create a GL 3.0 context */
+                    GLXFBConfig *framebuffer_config = NULL;
+                    int fbcount = 0;                
+                    framebuffer_config = glXChooseFBConfig(display, DefaultScreen(display), NULL, &fbcount);
+                    if (!framebuffer_config) {
+                        SDL_SetError("No good framebuffers found. GL 3.0 disabled");
+                        context = temp_context;
+                    } else {                                    
+                        context = glXCreateContextAttribs(display, framebuffer_config[0], NULL, True, attribs);
+                        glXDestroyContext(display, temp_context);
+                    }
+                }
+            }
+        }
         XFree(vinfo);
     }
     XSync(display, False);

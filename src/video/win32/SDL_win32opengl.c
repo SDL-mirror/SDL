@@ -30,6 +30,17 @@
 
 #define DEFAULT_OPENGL "OPENGL32.DLL"
 
+#ifndef WGL_ARB_create_context
+#define WGL_ARB_create_context
+#define WGL_CONTEXT_MAJOR_VERSION_ARB   0x2091
+#define WGL_CONTEXT_MINOR_VERSION_ARB   0x2092
+#define WGL_CONTEXT_LAYER_PLANE_ARB     0x2093
+#define WGL_CONTEXT_FLAGS_ARB           0x2093
+#define WGL_CONTEXT_DEBUG_BIT_ARB       0x0001
+#define WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB  0x0002
+#endif
+
+typedef HGLRC (APIENTRYP PFNWGLCREATECONTEXTATTRIBSARBPROC) (HDC hDC, HGLRC hShareContext, const int * attribList);
 
 int
 WIN_GL_LoadLibrary(_THIS, const char *path)
@@ -485,7 +496,39 @@ WIN_GL_CreateContext(_THIS, SDL_Window * window)
     HDC hdc = ((SDL_WindowData *) window->driverdata)->hdc;
     HGLRC context;
 
-    context = _this->gl_data->wglCreateContext(hdc);
+    if (_this->gl_config.major_version < 3) {
+        context = _this->gl_data->wglCreateContext(hdc);
+    } else {
+        PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB;
+        HGLRC temp_context = _this->gl_data->wglCreateContext(hdc);
+        if (!temp_context) {
+            SDL_SetError("Could not create GL context");        
+            return NULL;
+        }
+        
+        /* Make the context current */
+        if (WIN_GL_MakeCurrent(_this, window, temp_context) < 0) {
+            WIN_GL_DeleteContext(_this, temp_context);
+            return NULL;
+        }
+                
+        wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC) wglGetProcAddress("wglCreateContextAttribsARB");
+        if (!wglCreateContextAttribsARB) {
+            SDL_SetError("GL 3.x is not supported");
+            context = temp_context;
+        } else {
+            int attribs[] = {
+                WGL_CONTEXT_MAJOR_VERSION_ARB, _this->gl_config.major_version,
+                WGL_CONTEXT_MINOR_VERSION_ARB, _this->gl_config.minor_version,
+                0 
+            };
+            /* Create the GL 3.x context */
+            context = wglCreateContextAttribsARB(hdc, 0, attribs);
+            /* Delete the GL 2.x context */
+            wglDeleteContext(temp_context);
+        }
+    }
+    
     if (!context) {
         SDL_SetError("Could not create GL context");
         return NULL;

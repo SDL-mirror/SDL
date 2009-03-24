@@ -305,6 +305,8 @@ struct SDL_VideoDevice
         int multisamplebuffers;
         int multisamplesamples;
         int accelerated;
+        int major_version;
+        int minor_version;
         int retained_backing;
         int driver_loaded;
         char driver_path[256];
