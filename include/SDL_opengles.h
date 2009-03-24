@@ -962,6 +962,12 @@ extern "C"
                                                   const GLvoid * pointer);
 #endif
 
+/* GL_OES_query_matrix */
+#ifndef GL_OES_query_matrix
+#define GL_OES_query_matrix 1
+    GL_API GLbitfield GL_APIENTRY glQueryMatrixxOES(GLfixed mantissa[16], GLint exponent[16]);
+#endif /* GL_OES_query_matrix */
+
 /* GL_OES_point_sprite */
 #ifndef GL_OES_point_sprite
 #define GL_OES_point_sprite 1

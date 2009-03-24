@@ -2711,12 +2711,23 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
 {
 #if SDL_VIDEO_OPENGL || SDL_VIDEO_OPENGL_ES
     void (APIENTRY * glGetIntegervFunc) (GLenum pname, GLint * params);
+    GLenum (APIENTRY * glGetErrorFunc) (void);
     GLenum attrib = 0;
+    GLenum error = 0;
 
     glGetIntegervFunc = SDL_GL_GetProcAddress("glGetIntegerv");
     if (!glGetIntegervFunc) {
         return -1;
     }
+
+    glGetErrorFunc = SDL_GL_GetProcAddress("glGetError");
+    if (!glGetErrorFunc) {
+        return -1;
+    }
+
+    /* Clear value in any case */
+    *value=0;
+
     switch (attr) {
     case SDL_GL_RETAINED_BACKING:
         *value = _this->gl_config.retained_backing;
@@ -2738,11 +2749,10 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
         attrib = GL_DOUBLEBUFFER;
         break;
 #else
-        /*
-         * I believe double buffering is the only option in OpenGL ES
-         * -- in any case, GL_DOUBLEBUFFER doesn't exist
-         */
-        *value = 1;
+        /* OpenGL ES 1.0 and above specifications have EGL_SINGLE_BUFFER      */
+        /* parameter which switches double buffer to single buffer. OpenGL ES */
+        /* SDL driver must set proper value after initialization              */
+        *value = _this->gl_config.double_buffer;
         return 0;
 #endif
     case SDL_GL_DEPTH_SIZE:
@@ -2824,6 +2834,29 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
     }
 
     glGetIntegervFunc(attrib, (GLint *) value);
+    error=glGetErrorFunc();
+    if (error!=GL_NO_ERROR)
+    {
+       switch (error)
+       {
+          case GL_INVALID_ENUM:
+               {
+                  SDL_SetError("OpenGL error: GL_INVALID_ENUM");
+               }
+               break;
+          case GL_INVALID_VALUE:
+               {
+                  SDL_SetError("OpenGL error: GL_INVALID_VALUE");
+               }
+               break;
+          default:
+               {
+                  SDL_SetError("OpenGL error: %08X", error);
+               }
+               break;
+       }
+       return -1;
+    }
     return 0;
 #else
     SDL_Unsupported();

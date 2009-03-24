@@ -1705,6 +1705,7 @@ CheckOpenGLESQNX()
         AC_MSG_RESULT($video_opengl)
         if test x$video_opengl = xyes; then
             AC_DEFINE(SDL_VIDEO_OPENGL_ES)
+            AC_DEFINE(SDL_VIDEO_RENDER_OGL_ES)
             EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lGLES_CM"
         else
             AC_MSG_CHECKING(for QNX OpenGL ES (CL) support)
@@ -1719,7 +1720,8 @@ CheckOpenGLESQNX()
             AC_MSG_RESULT($video_opengl)
             if test x$video_opengl = xyes; then
                 AC_DEFINE(SDL_VIDEO_OPENGL_ES)
-                EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lGLES_CL"
+                AC_DEFINE(SDL_VIDEO_RENDER_OGL_ES)
+                EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lGLES_CLS"
             fi
         fi
     fi
@@ -2501,8 +2503,8 @@ case "$host" in
 
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
-            AC_DEFINE(SDL_AUDIO_DRIVER_QNXNTO)
-            SOURCES="$SOURCES $srcdir/src/audio/nto/*.c"
+            AC_DEFINE(SDL_AUDIO_DRIVER_QSA)
+            SOURCES="$SOURCES $srcdir/src/audio/qsa/*.c"
             EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lasound"
             have_audio=yes
         fi

@@ -65,7 +65,7 @@ typedef struct
     void (APIENTRY * glClear) (GLbitfield);
     void (APIENTRY * glDisable) (GLenum);
     void (APIENTRY * glEnable) (GLenum);
-    void (APIENTRY * glColor4ub) (GLubyte, GLubyte, GLubyte, GLubyte);
+    void (APIENTRY * glColor4f) (GLfloat, GLfloat, GLfloat, GLfloat);
     void (APIENTRY * glPointSize) (GLfloat);
     void (APIENTRY * glHint) (GLenum, GLenum);
     void (APIENTRY * glBlendFunc) (GLenum, GLenum);
@@ -89,7 +89,7 @@ init_glfuncs(glfuncs * f)
     f->glClear = get_funcaddr("glClear");
     f->glDisable = get_funcaddr("glDisable");
     f->glEnable = get_funcaddr("glEnable");
-    f->glColor4ub = get_funcaddr("glColor4ub");
+    f->glColor4f = get_funcaddr("glColor4f");
     f->glPointSize = get_funcaddr("glPointSize");
     f->glHint = get_funcaddr("glHint");
     f->glBlendFunc = get_funcaddr("glBlendFunc");
@@ -118,6 +118,10 @@ main(int argc, char *argv[])
     /* you may want to change these according to the platform */
     video_w = 320;
     video_h = 480;
+    #ifdef __QNXNTO__
+       video_h = 640;
+       video_w = 480;
+    #endif /* __QNXNTO__ */
 
     if (argv[1]) {
         gl_library = argv[1];
@@ -149,7 +153,11 @@ main(int argc, char *argv[])
         pixels[3 * i + 2] = rand() % 250 - 125;
     }
 
-    f.glViewport(0, 0, video_w, video_h);
+    #ifdef __QNXNTO__
+       f.glViewport(0, 0, video_h, video_w);
+    #else
+       f.glViewport(0, 0, video_w, video_h);
+    #endif /* __QNXNTO__ */
 
     f.glMatrixMode(GL_PROJECTION);
     f.glLoadIdentity();
@@ -180,7 +188,7 @@ main(int argc, char *argv[])
         f.glRotatef(2.0, 1.0, 1.0, 1.0);
         f.glRotatef(1.0, 0.0, 1.0, 1.0);
 
-        f.glColor4ub(255, 255, 255, 255);
+        f.glColor4f(1.0, 1.0, 1.0, 1.0);
 
         f.glEnableClientState(GL_VERTEX_ARRAY);
         f.glVertexPointer(3, GL_FLOAT, 0, pixels);
@@ -189,6 +197,8 @@ main(int argc, char *argv[])
         SDL_GL_SwapBuffers();
 
         while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT)
+                done = 1;
             if (event.type == SDL_KEYDOWN)
                 done = 1;
         }

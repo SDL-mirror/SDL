@@ -55,7 +55,7 @@ test_multi_audio(int devcount)
         spec.userdata = &cbd[0];
         cbd[0].dev = SDL_OpenAudioDevice(devname, 0, &spec, NULL, 0);
         if (cbd[0].dev == 0) {
-            printf("Open device failed: %s\n", SDL_GetError());
+            printf("\nOpen device failed: %s\n", SDL_GetError());
         } else {
             SDL_PauseAudioDevice(cbd[0].dev, 0);
             while (!cbd[0].done)

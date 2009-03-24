@@ -168,6 +168,7 @@ main(int argc, char *argv[])
     SDL_DisplayMode mode;
     SDL_Event event;
     Uint32 then, now, frames;
+    int status;
 
     /* Initialize parameters */
     fsaa = 0;
@@ -241,26 +242,52 @@ main(int argc, char *argv[])
     printf("Extensions : %s\n", glGetString(GL_EXTENSIONS));
     printf("\n");
 
-    SDL_GL_GetAttribute(SDL_GL_RED_SIZE, &value);
-    printf("SDL_GL_RED_SIZE: requested %d, got %d\n", 5, value);
-    SDL_GL_GetAttribute(SDL_GL_GREEN_SIZE, &value);
-    printf("SDL_GL_GREEN_SIZE: requested %d, got %d\n", 5, value);
-    SDL_GL_GetAttribute(SDL_GL_BLUE_SIZE, &value);
-    printf("SDL_GL_BLUE_SIZE: requested %d, got %d\n", 5, value);
-    SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &value);
-    printf("SDL_GL_DEPTH_SIZE: requested %d, got %d\n", 16, value);
-    SDL_GL_GetAttribute(SDL_GL_DOUBLEBUFFER, &value);
-    printf("SDL_GL_DOUBLEBUFFER: requested 1, got %d\n", value);
+    status=SDL_GL_GetAttribute(SDL_GL_RED_SIZE, &value);
+    if (!status) {
+        printf("SDL_GL_RED_SIZE: requested %d, got %d\n", 5, value);
+    } else {
+        printf("Failed to get SDL_GL_RED_SIZE: %s\n", SDL_GetError());
+    }
+    status=SDL_GL_GetAttribute(SDL_GL_GREEN_SIZE, &value);
+    if (!status) {
+        printf("SDL_GL_GREEN_SIZE: requested %d, got %d\n", 5, value);
+    } else {
+        printf("Failed to get SDL_GL_GREEN_SIZE: %s\n", SDL_GetError());
+    }
+    status=SDL_GL_GetAttribute(SDL_GL_BLUE_SIZE, &value);
+    if (!status) {
+        printf("SDL_GL_BLUE_SIZE: requested %d, got %d\n", 5, value);
+    } else {
+        printf("Failed to get SDL_GL_BLUE_SIZE: %s\n", SDL_GetError());
+    }
+    status=SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &value);
+    if (!status) {
+        printf("SDL_GL_DEPTH_SIZE: requested %d, got %d\n", 16, value);
+    } else {
+        printf("Failed to get SDL_GL_DEPTH_SIZE: %s\n", SDL_GetError());
+    }
     if (fsaa) {
-        SDL_GL_GetAttribute(SDL_GL_MULTISAMPLEBUFFERS, &value);
-        printf("SDL_GL_MULTISAMPLEBUFFERS: requested 1, got %d\n", value);
-        SDL_GL_GetAttribute(SDL_GL_MULTISAMPLESAMPLES, &value);
-        printf("SDL_GL_MULTISAMPLESAMPLES: requested %d, got %d\n", fsaa,
-               value);
+        status=SDL_GL_GetAttribute(SDL_GL_MULTISAMPLEBUFFERS, &value);
+        if (!status) {
+            printf("SDL_GL_MULTISAMPLEBUFFERS: requested 1, got %d\n", value);
+        } else {
+            printf("Failed to get SDL_GL_MULTISAMPLEBUFFERS: %s\n", SDL_GetError());
+        }
+        status=SDL_GL_GetAttribute(SDL_GL_MULTISAMPLESAMPLES, &value);
+        if (!status) {
+            printf("SDL_GL_MULTISAMPLESAMPLES: requested %d, got %d\n", fsaa, value);
+        } else {
+            printf("Failed to get SDL_GL_MULTISAMPLESAMPLES: %s\n", SDL_GetError());
+        }
     }
     if (accel) {
-        SDL_GL_GetAttribute(SDL_GL_ACCELERATED_VISUAL, &value);
-        printf("SDL_GL_ACCELERATED_VISUAL: requested 1, got %d\n", value);
+        status=SDL_GL_GetAttribute(SDL_GL_ACCELERATED_VISUAL, &value);
+        if (!status)
+        {
+            printf("SDL_GL_ACCELERATED_VISUAL: requested 1, got %d\n", value);
+        } else {
+            printf("Failed to get SDL_GL_ACCELERATED_VISUAL: %s\n", SDL_GetError());
+        }
     }
 
     /* Set rendering settings */

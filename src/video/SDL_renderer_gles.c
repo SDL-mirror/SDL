@@ -30,6 +30,17 @@
 #include "SDL_rect_c.h"
 #include "SDL_yuv_sw_c.h"
 
+#ifdef __QNXNTO__
+
+/* Empty function stub to get OpenGL ES 1.0 support without  */
+/* OpenGL ES extension GL_OES_draw_texture_supported         */
+GL_API void GL_APIENTRY glDrawTexiOES(GLint x, GLint y, GLint z, GLint width, GLint height)
+{
+   return;
+}
+
+#endif /* __QNXNTO__ */
+
 /* OpenGL ES 1.1 renderer implementation, based on the OpenGL renderer */
 
 static const float inv255f = 1.0f / 255.0f;
@@ -349,6 +360,7 @@ GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     GLenum format, type;
     int texture_w, texture_h;
     GLenum result;
+
     switch (texture->format) {
     case SDL_PIXELFORMAT_INDEX1LSB:
     case SDL_PIXELFORMAT_INDEX1MSB:
@@ -479,8 +491,6 @@ static void
 SetupTextureUpdate(GLES_RenderData * renderdata, SDL_Texture * texture,
                    int pitch)
 {
-
-
     GLES_TextureData *data = (GLES_TextureData *) texture->driverdata;
     renderdata->glBindTexture(data->type, data->texture);
     renderdata->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -888,6 +898,6 @@ GLES_DestroyRenderer(SDL_Renderer * renderer)
     SDL_free(renderer);
 }
 
-#endif /* SDL_VIDEO_RENDER_OGL */
+#endif /* SDL_VIDEO_RENDER_OGL_ES */
 
 /* vi: set ts=4 sw=4 expandtab: */

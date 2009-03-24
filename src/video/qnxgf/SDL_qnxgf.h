@@ -30,12 +30,22 @@
 #include "../SDL_sysvideo.h"
 
 #include <gf/gf.h>
+#include <gf/gf3d.h>
+
+#if defined(SDL_VIDEO_OPENGL_ES)
+   #include <GLES/egl.h>
+#endif /* SDL_VIDEO_OPENGL_ES */
 
 typedef struct SDL_VideoData
 {
    gf_dev_t      gfdev;              /* GF device handle                     */
    gf_dev_info_t gfdev_info;         /* GF device information                */
    SDL_bool      gfinitialized;      /* GF device initialization status      */
+   #if defined(SDL_VIDEO_OPENGL_ES)
+      EGLDisplay egldisplay;         /* OpenGL ES display connection         */
+      uint32_t   egl_refcount;       /* OpenGL ES reference count            */
+      uint32_t   swapinterval;       /* OpenGL ES default swap interval      */
+   #endif /* SDL_VIDEO_OPENGL_ES */
 } SDL_VideoData;
 
 #define SDL_VIDEO_GF_DEVICENAME_MAX 257
@@ -55,8 +65,22 @@ typedef struct SDL_DisplayData
 
 typedef struct SDL_WindowData
 {
-   SDL_bool     uses_gles;           /* if true window must support OpenGL ES*/
+   SDL_bool   uses_gles;               /* true if window support OpenGL ES   */
+   #if defined(SDL_VIDEO_OPENGL_ES)
+      gf_3d_target_t target;           /* OpenGL ES window target            */
+      SDL_bool   target_created;       /* GF 3D target is created if true    */
+      EGLConfig  gles_config;          /* OpenGL ES framebuffer configuration*/
+      EGLContext gles_context;         /* OpenGL ES context                  */
+      EGLint     gles_attributes[256]; /* OpenGL ES attributes for context   */
+      EGLSurface gles_surface;         /* OpenGL ES target rendering surface */
+   #endif /* SDL_VIDEO_OPENGL_ES */
 } SDL_WindowData;
+
+typedef struct SDL_GLDriverData
+{
+   #if defined(SDL_VIDEO_OPENGL_ES)
+   #endif /* SDL_VIDEO_OPENGL_ES */
+} SDL_GLDriverData;
 
 /****************************************************************************/
 /* Low level GF graphics driver capabilities                                */
@@ -69,6 +93,10 @@ typedef struct GF_DeviceCaps
 
 #define SDL_GF_UNACCELERATED         0x00000000
 #define SDL_GF_ACCELERATED           0x00000001
+#define SDL_GF_NOLOWRESOLUTION       0x00000000
+#define SDL_GF_LOWRESOLUTION         0x00000002
+#define SDL_GF_UNACCELERATED_3D      0x00000000
+#define SDL_GF_ACCELERATED_3D        0x00000004
 
 /****************************************************************************/
 /* SDL_VideoDevice functions declaration                                    */

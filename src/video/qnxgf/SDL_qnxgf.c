@@ -29,6 +29,7 @@
 #include "../SDL_sysvideo.h"
 #include "SDL_version.h"
 #include "SDL_syswm.h"
+#include "SDL_loadso.h"
 
 /* Include QNX Graphics Framework declarations */
 #include <gf/gf.h>
@@ -46,104 +47,132 @@
 /******************************************************************************/
 static SDL_DisplayMode generic_mode[]=
 {
-   {0, 320, 200, 70, NULL},    /* 320x200 modes are 70Hz and 85Hz          */
-   {0, 320, 200, 85, NULL},
-   {0, 320, 240, 70, NULL},    /* 320x240 modes are 70Hz and 85Hz          */
-   {0, 320, 240, 85, NULL},
-   {0, 512, 384, 60, NULL},    /* 512x384 modes are 60Hz and 70Hz          */
-   {0, 512, 384, 70, NULL},
-   {0, 640, 480, 60, NULL},    /* 640x480 modes are 60Hz, 75Hz, 85Hz       */
-   {0, 640, 480, 75, NULL},
-   {0, 640, 480, 85, NULL},
-   {0, 800, 600, 60, NULL},    /* 800x600 modes are 60Hz, 75Hz, 85Hz       */
-   {0, 800, 600, 75, NULL},
-   {0, 800, 600, 85, NULL},
-   {0, 800, 480, 60, NULL},    /* 800x480 mode is 60Hz only                */
-   {0, 1024, 640, 60, NULL},   /* 1024x640 mode is 60Hz only               */
-   {0, 1024, 768, 60, NULL},   /* 1024x768 modes are 60Hz, 70Hz, 75Hz      */
-   {0, 1024, 768, 70, NULL},
-   {0, 1024, 768, 75, NULL},
-   {0, 1280, 720, 60, NULL},   /* 1280x720 mode is 60Hz only               */
-   {0, 1280, 768, 60, NULL},   /* 1280x768 mode is 60Hz only               */
-   {0, 1280, 800, 60, NULL},   /* 1280x800 mode is 60Hz only               */
-   {0, 1280, 960, 60, NULL},   /* 1280x960 mode is 60Hz only               */
-   {0, 1280, 1024, 60, NULL},  /* 1280x1024 modes are 60Hz, 75Hz, 85Hz and */
-   {0, 1280, 1024, 75, NULL},  /* 100 Hz                                   */
-   {0, 1280, 1024, 85, NULL},  /*                                          */
+   {0, 320,  200,  70,  NULL}, /* 320x200 modes are 70Hz and 85Hz          */
+   {0, 320,  200,  85,  NULL},
+   {0, 320,  240,  70,  NULL}, /* 320x240 modes are 70Hz and 85Hz          */
+   {0, 320,  240,  85,  NULL},
+   {0, 512,  384,  60,  NULL}, /* 512x384 modes are 60Hz and 70Hz          */
+   {0, 512,  384,  70,  NULL},
+   {0, 640,  480,  60,  NULL}, /* 640x480 modes are 60Hz, 75Hz, 85Hz       */
+   {0, 640,  480,  75,  NULL},
+   {0, 640,  480,  85,  NULL},
+   {0, 800,  600,  60,  NULL}, /* 800x600 modes are 60Hz, 75Hz, 85Hz       */
+   {0, 800,  600,  75,  NULL},
+   {0, 800,  600,  85,  NULL},
+   {0, 800,  480,  60,  NULL}, /* 800x480 mode is 60Hz only                */
+   {0, 1024, 640,  60,  NULL}, /* 1024x640 mode is 60Hz only               */
+   {0, 1024, 768,  60,  NULL}, /* 1024x768 modes are 60Hz, 70Hz, 75Hz      */
+   {0, 1024, 768,  70,  NULL},
+   {0, 1024, 768,  75,  NULL},
+   {0, 1280, 720,  60,  NULL}, /* 1280x720 mode is 60Hz only               */
+   {0, 1280, 768,  60,  NULL}, /* 1280x768 mode is 60Hz only               */
+   {0, 1280, 800,  60,  NULL}, /* 1280x800 mode is 60Hz only               */
+   {0, 1280, 960,  60,  NULL}, /* 1280x960 mode is 60Hz only               */
+   {0, 1280, 1024, 60,  NULL}, /* 1280x1024 modes are 60Hz, 75Hz, 85Hz and */
+   {0, 1280, 1024, 75,  NULL}, /* 100 Hz                                   */
+   {0, 1280, 1024, 85,  NULL}, /*                                          */
    {0, 1280, 1024, 100, NULL}, /*                                          */
-   {0, 1400, 1050, 60, NULL},  /* 1400x1050 mode is 60Hz only              */
-   {0, 1440, 900, 60, NULL},   /* 1440x900 mode is 60Hz only               */
-   {0, 1440, 960, 60, NULL},   /* 1440x960 mode is 60Hz only               */
-   {0, 1600, 1200, 60, NULL},  /* 1600x1200 mode is 60Hz only              */
-   {0, 1680, 1050, 60, NULL},  /* 1680x1050 mode is 60Hz only              */
-   {0, 1920, 1080, 60, NULL},  /* 1920x1080 mode is 60Hz only              */
-   {0, 1920, 1200, 60, NULL},  /* 1920x1200 mode is 60Hz only              */
-   {0, 2048, 1536, 60, NULL},  /* 2048x1536 mode is 60Hz only              */
-   {0, 2048, 1080, 60, NULL},  /* 2048x1080 mode is 60Hz only              */
-   {0,    0,    0,  0, NULL}   /* End of generic mode list                 */
+   {0, 1400, 1050, 60,  NULL}, /* 1400x1050 mode is 60Hz only              */
+   {0, 1440, 900,  60,  NULL}, /* 1440x900 mode is 60Hz only               */
+   {0, 1440, 960,  60,  NULL}, /* 1440x960 mode is 60Hz only               */
+   {0, 1600, 1200, 60,  NULL}, /* 1600x1200 mode is 60Hz only              */
+   {0, 1680, 1050, 60,  NULL}, /* 1680x1050 mode is 60Hz only              */
+   {0, 1920, 1080, 60,  NULL}, /* 1920x1080 mode is 60Hz only              */
+   {0, 1920, 1200, 60,  NULL}, /* 1920x1200 mode is 60Hz only              */
+   {0, 2048, 1536, 60,  NULL}, /* 2048x1536 mode is 60Hz only              */
+   {0, 2048, 1080, 60,  NULL}, /* 2048x1080 mode is 60Hz only              */
+   {0,    0,    0,  0,  NULL}  /* End of generic mode list                 */
 };
 
 /* Low level device graphics driver names, which they are reporting */
 GF_DeviceCaps gf_devicename[]=
 {
    /* ATI Rage 128 graphics driver (devg-ati_rage128)      */
-   {"ati_rage128", SDL_GF_ACCELERATED},
+   {"ati_rage128", SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
+                   SDL_GF_UNACCELERATED_3D},
    /* Fujitsu Carmine graphics driver (devg-carmine.so)    */
-   {"carmine", SDL_GF_ACCELERATED},
+   {"carmine",     SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
+                   SDL_GF_ACCELERATED_3D},
    /* C&T graphics driver (devg-chips.so)                  */
-   {"chips", SDL_GF_ACCELERATED},
+   {"chips",       SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION | 
+                   SDL_GF_UNACCELERATED_3D},
    /* Fujitsu Coral graphics driver (devg-coral.so)        */
-   {"coral", SDL_GF_ACCELERATED},
+   {"coral",       SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
+                   SDL_GF_ACCELERATED_3D},
    /* Intel integrated graphics driver (devg-extreme2.so)  */
-   {"extreme2", SDL_GF_ACCELERATED},
+   {"extreme2",    SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
+                   SDL_GF_ACCELERATED_3D},
    /* Unaccelerated FB driver (devg-flat.so)               */
-   {"flat", SDL_GF_UNACCELERATED},
+   {"flat",        SDL_GF_UNACCELERATED | SDL_GF_LOWRESOLUTION |
+                   SDL_GF_UNACCELERATED_3D},
    /* NS Geode graphics driver (devg-geode.so)             */
-   {"geode", SDL_GF_ACCELERATED},
+   {"geode",       SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
+                   SDL_GF_UNACCELERATED_3D},
    /* Geode LX graphics driver (devg-geodelx.so)           */
-   {"geodelx", SDL_GF_ACCELERATED},
+   {"geodelx",     SDL_GF_ACCELERATED | SDL_GF_LOWRESOLUTION |
+                   SDL_GF_UNACCELERATED_3D},
    /* Intel integrated graphics driver (devg-gma9xx.so)    */
-   {"gma", SDL_GF_ACCELERATED},
+   {"gma",         SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
+                   SDL_GF_ACCELERATED_3D},
    /* Intel integrated graphics driver (devg-i810.so)      */
-   {"i810", SDL_GF_ACCELERATED},
+   {"i810",        SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
+                   SDL_GF_UNACCELERATED_3D},
    /* Intel integrated graphics driver (devg-i830.so)      */
-   {"i830", SDL_GF_ACCELERATED},
+   {"i830",        SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
+                   SDL_GF_UNACCELERATED_3D},
    /* Geode LX graphics driver (devg-lx800.so)             */
-   {"lx800", SDL_GF_ACCELERATED},
+   {"lx800",       SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
+                   SDL_GF_UNACCELERATED_3D},
    /* Matrox Gxx graphics driver (devg-matroxg.so)         */
-   {"matroxg", SDL_GF_ACCELERATED},
+   {"matroxg",     SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
+                   SDL_GF_UNACCELERATED_3D},
    /* Intel Poulsbo graphics driver (devg-poulsbo.so)      */
-   {"poulsbo", SDL_GF_ACCELERATED},
+   {"poulsbo",     SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
+                   SDL_GF_ACCELERATED_3D},
    /* ATI Radeon driver (devg-radeon.so)                   */
-   {"radeon", SDL_GF_ACCELERATED},
+   {"radeon",      SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
+                   SDL_GF_UNACCELERATED_3D},
    /* ATI Rage driver (devg-rage.so)                       */
-   {"rage", SDL_GF_ACCELERATED},
+   {"rage",        SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
+                   SDL_GF_UNACCELERATED_3D},
    /* S3 Savage graphics driver (devg-s3_savage.so)        */
-   {"s3_savage", SDL_GF_ACCELERATED},
+   {"s3_savage",   SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
+                   SDL_GF_UNACCELERATED_3D},
    /* SiS630 integrated graphics driver (devg-sis630.so)   */
-   {"sis630", SDL_GF_ACCELERATED},
+   {"sis630",      SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
+                   SDL_GF_UNACCELERATED_3D},
    /* PowerVR SGX 535 graphics driver (devg-poulsbo.so)    */
-   {"sgx", SDL_GF_ACCELERATED},
+   {"sgx",         SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
+                   SDL_GF_ACCELERATED_3D},
    /* SM Voyager GX graphics driver (devg-smi5xx.so)       */
-   {"smi5xx", SDL_GF_ACCELERATED},
+   {"smi5xx",      SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
+                   SDL_GF_UNACCELERATED_3D},
    /* Silicon Motion graphics driver (devg-smi7xx.so)      */
-   {"smi7xx", SDL_GF_ACCELERATED},
+   {"smi7xx",      SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
+                   SDL_GF_UNACCELERATED_3D},
    /* SVGA unaccelerated gfx driver (devg-svga.so)         */
-   {"svga", SDL_GF_UNACCELERATED},
+   {"svga",        SDL_GF_UNACCELERATED | SDL_GF_LOWRESOLUTION |
+                   SDL_GF_UNACCELERATED_3D},
    /* nVidia TNT graphics driver (devg-tnt.so)             */
-   {"tnt", SDL_GF_ACCELERATED},
+   {"tnt",         SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
+                   SDL_GF_UNACCELERATED_3D},
    /* VIA integrated graphics driver (devg-tvia.so)        */
-   {"tvia", SDL_GF_ACCELERATED},
+   {"tvia",        SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
+                   SDL_GF_UNACCELERATED_3D},
    /* VIA UniChrome graphics driver (devg-unichrome.so)    */
-   {"unichrome", SDL_GF_ACCELERATED},
+   {"unichrome",   SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION | 
+                   SDL_GF_UNACCELERATED_3D},
    /* VESA unaccelerated gfx driver (devg-vesa.so)         */
-   {"vesa", SDL_GF_UNACCELERATED},
+   {"vesa",        SDL_GF_UNACCELERATED | SDL_GF_LOWRESOLUTION |
+                   SDL_GF_UNACCELERATED_3D},
    /* VmWare graphics driver (devg-volari.so)              */
-   {"vmware", SDL_GF_ACCELERATED},
+   {"vmware",      SDL_GF_ACCELERATED | SDL_GF_LOWRESOLUTION |
+                   SDL_GF_UNACCELERATED_3D},
    /* XGI XP10 graphics driver (devg-volari.so)            */
-   {"volari", SDL_GF_ACCELERATED},
+   {"volari",      SDL_GF_ACCELERATED | SDL_GF_LOWRESOLUTION |
+                   SDL_GF_UNACCELERATED_3D},
    /* End of list */
-   {NULL, 0x00000000}
+   {NULL,          0x00000000}
 };
 
 /*****************************************************************************/
@@ -314,7 +343,7 @@ int qnxgf_videoinit(_THIS)
       {
          /* video initialization problem */
          SDL_free(didata);
-         SDL_SetError("display query failed");
+         SDL_SetError("GF: Display query failed");
          return -1;
       }
 
@@ -324,7 +353,7 @@ int qnxgf_videoinit(_THIS)
       {
          /* video initialization problem */
          SDL_free(didata);
-         SDL_SetError("couldn't attach to display");
+         SDL_SetError("GF: Couldn't attach to display");
          return -1;
       }
 
@@ -335,7 +364,7 @@ int qnxgf_videoinit(_THIS)
       status=gf_layer_attach(&didata->layer, didata->display, didata->display_info.main_layer_index, 0);
       if (status!=GF_ERR_OK)
       {
-         SDL_SetError("couldn't attach to main layer, it could be busy");
+         SDL_SetError("GF: Couldn't attach to main layer, it could be busy");
 
          /* Failed to attach to main layer */
          return -1;
@@ -430,6 +459,16 @@ void qnxgf_getdisplaymodes(_THIS)
                if (generic_mode[jt].w==0)
                {
                   break;
+               }
+
+               /* Check if driver do not supports doublescan video modes */
+               if ((didata->caps & SDL_GF_LOWRESOLUTION)!=SDL_GF_LOWRESOLUTION)
+               {
+                  if (generic_mode[jt].w<640)
+                  {
+                     jt++;
+                     continue;
+                  }
                }
 
                mode.w=generic_mode[jt].w;
@@ -597,7 +636,7 @@ int qnxgf_setdisplaymode(_THIS, SDL_DisplayMode* mode)
    if (result!=GF_ERR_OK)
    {
       /* Display mode/resolution switch has been failed */
-      SDL_SetError("mode is not supported by graphics driver");
+      SDL_SetError("GF: Mode is not supported by graphics driver");
       return -1;
    }
    else
@@ -610,7 +649,7 @@ int qnxgf_setdisplaymode(_THIS, SDL_DisplayMode* mode)
    result=gf_layer_attach(&didata->layer, didata->display, didata->display_info.main_layer_index, 0);
    if (result!=GF_ERR_OK)
    {
-      SDL_SetError("couldn't attach to main layer, it could be busy");
+      SDL_SetError("GF: Couldn't attach to main layer, it could be busy");
 
       /* Failed to attach to main displayable layer */
       return -1;
@@ -674,8 +713,10 @@ int qnxgf_getdisplaygammaramp(_THIS, Uint16* ramp)
 
 int qnxgf_createwindow(_THIS, SDL_Window* window)
 {
+   SDL_VideoData*   gfdata=(SDL_VideoData*)_this->driverdata;
    SDL_DisplayData* didata=(SDL_DisplayData*)SDL_CurrentDisplay.driverdata;
    SDL_WindowData*  wdata;
+   int32_t          status;
 
    /* QNX GF supports fullscreen window modes only */
    if ((window->flags & SDL_WINDOW_FULLSCREEN)!=SDL_WINDOW_FULLSCREEN)
@@ -705,7 +746,7 @@ int qnxgf_createwindow(_THIS, SDL_Window* window)
       /* Check if end of display list has been reached */
       if (mode.refresh_rate==0x0000FFFF)
       {
-         SDL_SetError("desired video mode is not supported");
+         SDL_SetError("GF: Desired video mode is not supported");
 
          /* Failed to create new window */
          return -1;
@@ -716,7 +757,12 @@ int qnxgf_createwindow(_THIS, SDL_Window* window)
          window->flags|=SDL_WINDOW_FULLSCREEN;
 
          /* Setup fullscreen mode, bpp used from desktop mode in this case */
-         qnxgf_setdisplaymode(_this, &mode);
+         status=qnxgf_setdisplaymode(_this, &mode);
+         if (status!=0)
+         {
+            /* Failed to swith fullscreen video mode */
+            return -1;
+         }
       }
    }
 
@@ -744,8 +790,37 @@ int qnxgf_createwindow(_THIS, SDL_Window* window)
    /* Check if window must support OpenGL ES rendering */
    if ((window->flags & SDL_WINDOW_OPENGL)==SDL_WINDOW_OPENGL)
    {
-      /* Mark this window as OpenGL ES compatible */
-      wdata->uses_gles=SDL_TRUE;
+      #if defined(SDL_VIDEO_OPENGL_ES)
+         EGLBoolean initstatus;
+
+         /* Mark this window as OpenGL ES compatible */
+         wdata->uses_gles=SDL_TRUE;
+
+         /* Create connection to OpenGL ES */
+         if (gfdata->egldisplay==EGL_NO_DISPLAY)
+         {
+            gfdata->egldisplay=eglGetDisplay(gfdata->gfdev);
+            if (gfdata->egldisplay==EGL_NO_DISPLAY)
+            {
+               SDL_SetError("GF: Can't get connection to OpenGL ES");
+               return -1;
+            }
+
+            /* Initialize OpenGL ES library, ignore EGL version */
+            initstatus=eglInitialize(gfdata->egldisplay, NULL, NULL);
+            if (initstatus!=EGL_TRUE)
+            {
+               SDL_SetError("GF: Can't init OpenGL ES library");
+               return -1;
+            }
+         }
+
+         /* Increment GL ES reference count usage */
+         gfdata->egl_refcount++;
+      #else
+         SDL_SetError("GF: OpenGL ES support is not compiled in");
+         return -1;
+      #endif /* SDL_VIDEO_OPENGL_ES */
    }
 
    /* Window has been successfully created */
@@ -804,11 +879,37 @@ void qnxgf_setwindowgrab(_THIS, SDL_Window* window)
 
 void qnxgf_destroywindow(_THIS, SDL_Window* window)
 {
+   SDL_VideoData*   gfdata=(SDL_VideoData*)_this->driverdata;
    SDL_DisplayData* didata=(SDL_DisplayData*)SDL_CurrentDisplay.driverdata;
    SDL_WindowData*  wdata=(SDL_WindowData*)window->driverdata;
 
    if (wdata!=NULL)
    {
+      #if defined(SDL_VIDEO_OPENGL_ES)
+         /* Destroy OpenGL ES surface if it was created */
+         if (wdata->gles_surface!=EGL_NO_SURFACE)
+         {
+            eglDestroySurface(gfdata->egldisplay, wdata->gles_surface);
+         }
+
+         /* Free any 3D target if it was created before */
+         if (wdata->target_created==SDL_TRUE)
+         {
+            gf_3d_target_free(wdata->target);
+         }
+
+
+         gfdata->egl_refcount--;
+         if (gfdata->egl_refcount==0)
+         {
+            /* Terminate connection to OpenGL ES */
+            if (gfdata->egldisplay!=EGL_NO_DISPLAY)
+            {
+               eglTerminate(gfdata->egldisplay);
+               gfdata->egldisplay=EGL_NO_DISPLAY;
+            }
+         }
+      #endif /* SDL_VIDEO_OPENGL_ES */
    }
 }
 
@@ -826,7 +927,7 @@ SDL_bool qnxgf_getwindowwminfo(_THIS, SDL_Window* window, struct SDL_SysWMinfo* 
    }
    else
    {
-      SDL_SetError("application not compiled with SDL %d.%d\n", SDL_MAJOR_VERSION, SDL_MINOR_VERSION);
+      SDL_SetError("Application not compiled with SDL %d.%d\n", SDL_MAJOR_VERSION, SDL_MINOR_VERSION);
       return SDL_FALSE;
    }
 
@@ -839,50 +940,382 @@ SDL_bool qnxgf_getwindowwminfo(_THIS, SDL_Window* window, struct SDL_SysWMinfo* 
 /*****************************************************************************/
 int qnxgf_gl_loadlibrary(_THIS, const char* path)
 {
-   /* Failed to load new GL library */
-   return -1;
+   #if defined(SDL_VIDEO_OPENGL_ES)
+      /* Check if OpenGL ES library is specified for GF driver */
+      if (path==NULL)
+      {
+         path=SDL_getenv("SDL_OPENGL_LIBRARY");
+         if (path==NULL)
+         {
+            path=SDL_getenv("SDL_OPENGLES_LIBRARY");
+         }
+      }
+
+      /* Check if default library loading requested */
+      if (path==NULL)
+      {
+         /* Already linked with GF library which provides egl* subset of  */
+         /* functions, use Common profile of OpenGL ES library by default */
+         path="/usr/lib/libGLES_CM.so.1";
+      }
+
+      /* Load dynamic library */
+      _this->gl_config.dll_handle=SDL_LoadObject(path);
+      if (!_this->gl_config.dll_handle)
+      {
+         /* Failed to load new GL ES library */
+         SDL_SetError("GF: Failed to locate OpenGL ES library");
+         return -1;
+      }
+
+      /* Store OpenGL ES library path and name */
+      SDL_strlcpy(_this->gl_config.driver_path, path, SDL_arraysize(_this->gl_config.driver_path));
+
+      /* New OpenGL ES library is loaded */
+      return 0;
+   #else
+      SDL_SetError("GF: OpenGL ES support is not compiled in");
+      return -1;
+   #endif /* SDL_VIDEO_OPENGL_ES */
 }
 
 void* qnxgf_gl_getprocaddres(_THIS, const char* proc)
 {
-   /* Failed to get GL function address pointer */
-   return NULL;
+   #if defined(SDL_VIDEO_OPENGL_ES)
+      void* function_address;
+
+      /* Try to get function address through the egl interface */
+      function_address=eglGetProcAddress(proc);
+      if (function_address!=NULL)
+      {
+         return function_address;
+      }
+
+      /* Then try to get function in the OpenGL ES library */
+      if (_this->gl_config.dll_handle)
+      {
+         function_address=SDL_LoadFunction(_this->gl_config.dll_handle, proc);
+         if (function_address!=NULL)
+         {
+            return function_address;
+         }
+      }
+
+      /* Failed to get GL ES function address pointer */
+      SDL_SetError("GF: Cannot locate given function name");
+      return NULL;
+   #else
+      SDL_SetError("GF: OpenGL ES support is not compiled in");
+      return NULL;
+   #endif /* SDL_VIDEO_OPENGL_ES */
 }
 
 void qnxgf_gl_unloadlibrary(_THIS)
 {
+   #if defined(SDL_VIDEO_OPENGL_ES)
+      /* Unload OpenGL ES library */
+      if (_this->gl_config.dll_handle)
+      {
+         SDL_UnloadObject(_this->gl_config.dll_handle);
+         _this->gl_config.dll_handle=NULL;
+      }
+   #else
+      SDL_SetError("GF: OpenGL ES support is not compiled in");
+      return;
+   #endif /* SDL_VIDEO_OPENGL_ES */
 }
 
 SDL_GLContext qnxgf_gl_createcontext(_THIS, SDL_Window* window)
 {
-   /* Failed to create GL context */
-   return NULL;
+   #if defined(SDL_VIDEO_OPENGL_ES)
+      SDL_VideoData*   gfdata=(SDL_VideoData*)_this->driverdata;
+      SDL_WindowData*  wdata=(SDL_WindowData*)window->driverdata;
+      SDL_DisplayData* didata=(SDL_DisplayData*)SDL_CurrentDisplay.driverdata;
+      EGLBoolean       status;
+      int32_t          gfstatus;
+      EGLint           configs;
+      uint32_t         surfaces;
+      uint32_t         attr_pos;
+
+      /* Prepare attributes list to pass them to OpenGL ES */
+      attr_pos=0;
+      wdata->gles_attributes[attr_pos++]=EGL_NATIVE_VISUAL_ID;
+      wdata->gles_attributes[attr_pos++]=qnxgf_sdl_to_gf_pixelformat(didata->current_mode.format);
+      wdata->gles_attributes[attr_pos++]=EGL_RED_SIZE;
+      wdata->gles_attributes[attr_pos++]=_this->gl_config.red_size;
+      wdata->gles_attributes[attr_pos++]=EGL_GREEN_SIZE;
+      wdata->gles_attributes[attr_pos++]=_this->gl_config.green_size;
+      wdata->gles_attributes[attr_pos++]=EGL_BLUE_SIZE;
+      wdata->gles_attributes[attr_pos++]=_this->gl_config.blue_size;
+      wdata->gles_attributes[attr_pos++]=EGL_ALPHA_SIZE;
+      if (_this->gl_config.alpha_size)
+      {
+         wdata->gles_attributes[attr_pos++]=_this->gl_config.alpha_size;
+      }
+      else
+      {
+         wdata->gles_attributes[attr_pos++]=EGL_DONT_CARE;
+      }
+      wdata->gles_attributes[attr_pos++]=EGL_DEPTH_SIZE;
+      wdata->gles_attributes[attr_pos++]=_this->gl_config.depth_size;
+      if (_this->gl_config.buffer_size)
+      {
+         wdata->gles_attributes[attr_pos++]=EGL_BUFFER_SIZE;
+         wdata->gles_attributes[attr_pos++]=_this->gl_config.buffer_size;
+      }
+      if (_this->gl_config.stencil_size)
+      {
+         wdata->gles_attributes[attr_pos++]=EGL_STENCIL_SIZE;
+         wdata->gles_attributes[attr_pos++]=_this->gl_config.buffer_size;
+      }
+
+      /* OpenGL ES 1.0 uses double buffer by default, so if application */
+      /* do not requested double buffering, switch to single buffer     */
+      if (!_this->gl_config.double_buffer)
+      {
+         wdata->gles_attributes[attr_pos++]=EGL_SINGLE_BUFFER;
+         wdata->gles_attributes[attr_pos++]=EGL_TRUE;
+         surfaces=1;
+      }
+      else
+      {
+         surfaces=2;
+      }
+
+      /* Set number of samples in multisampling */
+      if (_this->gl_config.multisamplesamples)
+      {
+         wdata->gles_attributes[attr_pos++]=EGL_SAMPLES;
+         wdata->gles_attributes[attr_pos++]=_this->gl_config.multisamplesamples;
+      }
+
+      /* Multisample buffers, OpenGL ES 1.0 spec defines 0 or 1 buffer */
+      if (_this->gl_config.multisamplebuffers)
+      {
+         wdata->gles_attributes[attr_pos++]=EGL_SAMPLE_BUFFERS;
+         wdata->gles_attributes[attr_pos++]=_this->gl_config.multisamplebuffers;
+      }
+
+      /* Finish attributes list */
+      wdata->gles_attributes[attr_pos]=EGL_NONE;
+
+      /* Request first suitable framebuffer configuration */
+      status=eglChooseConfig(gfdata->egldisplay, wdata->gles_attributes, &wdata->gles_config, 1, &configs);
+      if (status!=EGL_TRUE)
+      {
+         SDL_SetError("GF: Can't find closest configuration for OpenGL ES");
+         return NULL;
+      }
+
+      /* Create OpenGL ES context */
+      wdata->gles_context=eglCreateContext(gfdata->egldisplay, wdata->gles_config, EGL_NO_CONTEXT, NULL);
+      if (wdata->gles_context==EGL_NO_CONTEXT)
+      {
+         SDL_SetError("GF: OpenGL ES context creation has been failed");
+         return NULL;
+      }
+
+      /* Free any 3D target if it was created before */
+      if (wdata->target_created==SDL_TRUE)
+      {
+         gf_3d_target_free(wdata->target);
+      }
+
+      /* Create surface(s) target for OpenGL ES */
+      gfstatus=gf_3d_target_create(&wdata->target, didata->layer, NULL,
+               surfaces, didata->current_mode.w, didata->current_mode.h,
+               qnxgf_sdl_to_gf_pixelformat(didata->current_mode.format));
+
+      if (gfstatus!=GF_ERR_OK)
+      {
+         /* Destroy just created context */
+         eglDestroyContext(gfdata->egldisplay, wdata->gles_context);
+         wdata->gles_context=EGL_NO_CONTEXT;
+
+         /* Mark 3D target as unallocated */
+         wdata->target_created=SDL_FALSE;
+         SDL_SetError("GF: OpenGL ES target could not be created");
+         return NULL;
+      }
+      else
+      {
+         wdata->target_created=SDL_TRUE;
+      }
+
+      /* Create target rendering surface on whole screen */
+      wdata->gles_surface=eglCreateWindowSurface(gfdata->egldisplay, wdata->gles_config, wdata->target, NULL);
+      if (wdata->gles_surface==EGL_NO_SURFACE)
+      {
+         /* Destroy 3d target */
+         gf_3d_target_free(wdata->target);
+         wdata->target_created=SDL_FALSE;
+
+         /* Destroy OpenGL ES context */
+         eglDestroyContext(gfdata->egldisplay, wdata->gles_context);
+         wdata->gles_context=EGL_NO_CONTEXT;
+
+         SDL_SetError("GF: OpenGL ES surface could not be created");
+         return NULL;
+      }
+
+      /* Make just created context current */
+      status=eglMakeCurrent(gfdata->egldisplay, wdata->gles_surface, wdata->gles_surface, wdata->gles_context);
+      if (status!=EGL_TRUE)
+      {
+         /* Destroy OpenGL ES surface */
+         eglDestroySurface(gfdata->egldisplay, wdata->gles_surface);
+
+         /* Destroy 3d target */
+         gf_3d_target_free(wdata->target);
+         wdata->target_created=SDL_FALSE;
+
+         /* Destroy OpenGL ES context */
+         eglDestroyContext(gfdata->egldisplay, wdata->gles_context);
+         wdata->gles_context=EGL_NO_CONTEXT;
+
+         /* Failed to set current GL ES context */
+         SDL_SetError("GF: Can't set OpenGL ES context on creation");
+         return NULL;
+      }
+
+      /* Setup into SDL internals state of OpenGL ES:  */
+      /* it is accelerated or not                      */
+      if ((didata->caps & SDL_GF_ACCELERATED_3D)==SDL_GF_ACCELERATED_3D)
+      {
+         _this->gl_config.accelerated=1;
+      }
+      else
+      {
+         _this->gl_config.accelerated=0;
+      }
+
+      /* Always clear stereo enable, since OpenGL ES do not supports stereo */
+      _this->gl_config.stereo=0;
+
+      /* Failed to create GL ES context */
+      return wdata->gles_context;
+   #else
+      SDL_SetError("GF: OpenGL ES support is not compiled in");
+      return NULL;
+   #endif /* SDL_VIDEO_OPENGL_ES */
 }
 
 int qnxgf_gl_makecurrent(_THIS, SDL_Window* window, SDL_GLContext context)
 {
-   /* Failed to set current GL context */
-   return -1;
+   #if defined(SDL_VIDEO_OPENGL_ES)
+      SDL_VideoData*   gfdata=(SDL_VideoData*)_this->driverdata;
+      SDL_WindowData*  wdata;
+      EGLBoolean status;
+
+      if ((window==NULL) && (context==NULL))
+      {
+         status=eglMakeCurrent(gfdata->egldisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+         if (status!=EGL_TRUE)
+         {
+            /* Failed to set current GL ES context */
+            SDL_SetError("GF: Can't set OpenGL ES context");
+            return -1;
+         }
+      }
+      else
+      {
+         wdata=(SDL_WindowData*)window->driverdata;
+         status=eglMakeCurrent(gfdata->egldisplay, wdata->gles_surface, wdata->gles_surface, wdata->gles_context);
+         if (status!=EGL_TRUE)
+         {
+            /* Failed to set current GL ES context */
+            SDL_SetError("GF: Can't set OpenGL ES context");
+            return -1;
+         }
+      }
+
+      return 0;
+   #else
+      SDL_SetError("GF: OpenGL ES support is not compiled in");
+      return -1;
+   #endif /* SDL_VIDEO_OPENGL_ES */
 }
 
 int qnxgf_gl_setswapinterval(_THIS, int interval)
 {
-   /* Failed to set swap interval */
-   return -1;
+   #if defined(SDL_VIDEO_OPENGL_ES)
+      SDL_VideoData* gfdata=(SDL_VideoData*)_this->driverdata;
+      EGLBoolean     status;
+
+      /* Check if OpenGL ES connection has been initialized */
+      if (gfdata->egldisplay!=EGL_NO_DISPLAY)
+      {
+         /* Set swap OpenGL ES interval */
+         status=eglSwapInterval(gfdata->egldisplay, interval);
+         if (status==EGL_TRUE)
+         {
+            /* Return success to upper level */
+            gfdata->swapinterval=interval;
+            return 0;
+         }
+      }
+
+      /* Failed to set swap interval */
+      SDL_SetError("GF: Cannot set swap interval");
+      return -1;
+   #else
+      SDL_SetError("GF: OpenGL ES support is not compiled in");
+      return -1;
+   #endif /* SDL_VIDEO_OPENGL_ES */
 }
 
 int qnxgf_gl_getswapinterval(_THIS)
 {
-   /* Failed to get default swap interval */
-   return -1;
+   #if defined(SDL_VIDEO_OPENGL_ES)
+      SDL_VideoData* gfdata=(SDL_VideoData*)_this->driverdata;
+
+      /* Return default swap interval value */
+      return gfdata->swapinterval;
+   #else
+      SDL_SetError("GF: OpenGL ES support is not compiled in");
+      return -1;
+   #endif /* SDL_VIDEO_OPENGL_ES */
 }
 
 void qnxgf_gl_swapwindow(_THIS, SDL_Window* window)
 {
+   #if defined(SDL_VIDEO_OPENGL_ES)
+      SDL_VideoData*   gfdata=(SDL_VideoData*)_this->driverdata;
+      SDL_WindowData*  wdata=(SDL_WindowData*)window->driverdata;
+
+      eglSwapBuffers(gfdata->egldisplay, wdata->gles_surface);
+   #else
+      SDL_SetError("GF: OpenGL ES support is not compiled in");
+      return;
+   #endif /* SDL_VIDEO_OPENGL_ES */
 }
 
 void qnxgf_gl_deletecontext(_THIS, SDL_GLContext context)
 {
+   #if defined(SDL_VIDEO_OPENGL_ES)
+      SDL_VideoData* gfdata=(SDL_VideoData*)_this->driverdata;
+      EGLBoolean     status;
+
+      /* Check if OpenGL ES connection has been initialized */
+      if (gfdata->egldisplay!=EGL_NO_DISPLAY)
+      {
+         if (context!=EGL_NO_CONTEXT)
+         {
+            status=eglDestroyContext(gfdata->egldisplay, context);
+            if (status!=EGL_TRUE)
+            {
+               /* Error during OpenGL ES context destroying */
+               SDL_SetError("GF: OpenGL ES context destroy error");
+               return;
+            }
+         }
+      }
+
+      return;
+   #else
+      SDL_SetError("GF: OpenGL ES support is not compiled in");
+      return;
+   #endif /* SDL_VIDEO_OPENGL_ES */
 }
 
 /*****************************************************************************/

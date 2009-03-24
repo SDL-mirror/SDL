@@ -103,6 +103,13 @@ static SDL_Renderer* gf_createrenderer(SDL_Window* window, Uint32 flags)
    int32_t  jt;
    int32_t  status;
 
+   /* Check if it is OpenGL ES window */
+   if ((window->flags & SDL_WINDOW_OPENGL)==SDL_WINDOW_OPENGL)
+   {
+      /* No error, just no need to create 2D renderer for OpenGL ES window */
+      return NULL;
+   }
+
    /* Allocate new renderer structure */
    renderer=(SDL_Renderer*)SDL_calloc(1, sizeof(SDL_Renderer));
    if (renderer==NULL)

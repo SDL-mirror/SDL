@@ -18,36 +18,45 @@
 
     Sam Lantinga
     slouken@libsdl.org
+
+    QNX Sound Architecture (QSA) SDL driver
+    Copyright (C) 2009 Mike Gorchak
+    (mike@malva.ua, lestat@i.com.ua)
 */
+
 #include "SDL_config.h"
 
-#ifndef __SDL_NTO_AUDIO_H__
-#define __SDL_NTO_AUDIO_H__
+#ifndef __SDL_QSA_AUDIO_H__
+#define __SDL_QSA_AUDIO_H__
 
 #include <sys/asoundlib.h>
 
 #include "../SDL_sysaudio.h"
 
 /* Hidden "this" pointer for the audio functions */
-#define _THIS	SDL_AudioDevice *this
+#define _THIS SDL_AudioDevice* this
 
 struct SDL_PrivateAudioData
 {
+    /* SDL capture state */
+    int iscapture;
+
     /* The audio device handle */
     int cardno;
     int deviceno;
-    snd_pcm_t *audio_handle;
+    snd_pcm_t* audio_handle;
 
     /* The audio file descriptor */
     int audio_fd;
 
-    /* The parent process id, to detect when application quits */
-    pid_t parent;
+    /* Select timeout status */
+    uint32_t timeout_on_wait;
 
     /* Raw mixing buffer */
-    Uint8 *pcm_buf;
+    Uint8* pcm_buf;
     Uint32 pcm_len;
 };
 
-#endif /* __SDL_NTO_AUDIO_H__ */
+#endif /* __SDL_QSA_AUDIO_H__ */
+
 /* vi: set ts=4 sw=4 expandtab: */
