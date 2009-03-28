@@ -597,7 +597,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
            3/21/09 Mason Wheeler */
     case WM_NCPAINT:
         {
-            if (SDL_GetWindowFlags(data->windowID) && SDL_WINDOW_FOREIGN) {
+            if (SDL_GetWindowFlags(data->windowID) & SDL_WINDOW_FOREIGN) {
                 return(0);
             }
             break;
