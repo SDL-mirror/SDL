@@ -188,8 +188,7 @@ int WIN_ShowWMCursor(_THIS, WMcursor *cursor)
 {
 	POINT mouse_pos;
 
-	/* The fullscreen cursor must be done in software with DirectInput */
-	if ( !this->screen || DDRAW_FULLSCREEN() ) {
+	if ( !this->screen ) {
 		return(0);
 	}
 
@@ -208,15 +207,20 @@ int WIN_ShowWMCursor(_THIS, WMcursor *cursor)
 
 void WIN_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
 {
-	if ( DDRAW_FULLSCREEN() ) {
-		SDL_PrivateMouseMotion(0, 0, x, y);
-	} else if ( mouse_relative) {
+	if ( mouse_relative) {
 		/*	RJR: March 28, 2000
 			leave physical cursor at center of screen if
 			mouse hidden and grabbed */
 		SDL_PrivateMouseMotion(0, 0, x, y);
 	} else {
 		POINT pt;
+
+		/* With DirectInput the position doesn't follow
+		 * the cursor, so it is set manually */
+		if ( DINPUT() ) {
+			SDL_PrivateMouseMotion(0, 0, x, y);
+		}
+
 		pt.x = x;
 		pt.y = y;
 		ClientToScreen(SDL_Window, &pt);
@@ -227,20 +231,15 @@ void WIN_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
 /* Update the current mouse state and position */
 void WIN_UpdateMouse(_THIS)
 {
-	RECT rect;
 	POINT pt;
 
-	if ( ! DDRAW_FULLSCREEN() ) {
-		GetClientRect(SDL_Window, &rect);
-		GetCursorPos(&pt);
-		MapWindowPoints(NULL, SDL_Window, &pt, 1);
-		if (PtInRect(&rect, pt) && (WindowFromPoint(pt) == SDL_Window)){
-			SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS);
-			SDL_PrivateMouseMotion(0,0, (Sint16)pt.x, (Sint16)pt.y);
-		} else {
-			SDL_PrivateAppActive(0, SDL_APPMOUSEFOCUS);
-		}
-	}
+	/* Always unset SDL_APPMOUSEFOCUS to give the WM_MOUSEMOVE event
+	 * handler a chance to install a TRACKMOUSEEVENT */
+	SDL_PrivateAppActive(0, SDL_APPMOUSEFOCUS);
+
+	GetCursorPos(&pt);
+	ScreenToClient(SDL_Window, &pt);
+	SDL_PrivateMouseMotion(0,0, (Sint16)pt.x, (Sint16)pt.y);
 }
 
 /* Check to see if we need to enter or leave mouse relative mode */

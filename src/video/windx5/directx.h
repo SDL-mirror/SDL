@@ -72,7 +72,7 @@
 /* We need these defines to mark what version of DirectX API we use */
 #define DIRECTDRAW_VERSION  0x0700
 #define DIRECTSOUND_VERSION 0x0500
-#define DIRECTINPUT_VERSION 0x0500
+#define DIRECTINPUT_VERSION 0x0700
 
 #ifdef __GNUC__
 #define NONAMELESSUNION
@@ -80,5 +80,21 @@
 #include <ddraw.h>
 #include <dsound.h>
 #include <dinput.h>
+
+#if DIRECTINPUT_VERSION >= 0x0700 && !defined(DIMOFS_BUTTON4)
+typedef struct _DIMOUSESTATE2 {
+    LONG    lX;
+    LONG    lY;
+    LONG    lZ;
+    BYTE    rgbButtons[8];
+} DIMOUSESTATE2, *LPDIMOUSESTATE2;
+
+#define DIMOFS_BUTTON4 (FIELD_OFFSET(DIMOUSESTATE2, rgbButtons) + 4)
+#define DIMOFS_BUTTON5 (FIELD_OFFSET(DIMOUSESTATE2, rgbButtons) + 5)
+#define DIMOFS_BUTTON6 (FIELD_OFFSET(DIMOUSESTATE2, rgbButtons) + 6)
+#define DIMOFS_BUTTON7 (FIELD_OFFSET(DIMOUSESTATE2, rgbButtons) + 7)
+
+extern const DIDATAFORMAT c_dfDIMouse2;
+#endif
 
 #endif /* _directx_h */

@@ -363,7 +363,6 @@ LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	SDL_VideoDevice *this = current_video;
 	static int mouse_pressed = 0;
-	static int in_window = 0;
 #ifdef WMMSG_DEBUG
 	fprintf(stderr, "Received windows message:  ");
 	if ( msg > MAX_WMMSG ) {
@@ -508,7 +507,7 @@ LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case WM_XBUTTONDOWN:
 		case WM_XBUTTONUP: {
 			/* Mouse is handled by DirectInput when fullscreen */
-			if ( SDL_VideoSurface && ! DINPUT_FULLSCREEN() ) {
+			if ( SDL_VideoSurface && ! DINPUT() ) {
 				WORD xbuttonval = 0;
 				Sint16 x, y;
 				Uint8 button, state;
@@ -606,7 +605,7 @@ LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 #if (_WIN32_WINNT >= 0x0400) || (_WIN32_WINDOWS > 0x0400)
 		case WM_MOUSEWHEEL: 
-			if ( SDL_VideoSurface && ! DINPUT_FULLSCREEN() ) {
+			if ( SDL_VideoSurface && ! DINPUT() ) {
 				int move = (short)HIWORD(wParam);
 				if ( move ) {
 					Uint8 button;

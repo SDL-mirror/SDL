@@ -271,6 +271,36 @@ LRESULT DIB_HandleMessage(_THIS, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 	return(DefWindowProc(hwnd, msg, wParam, lParam));
 }
 
+static void DIB_GenerateMouseMotionEvent(void)
+{
+	extern int mouse_relative;
+	extern int posted;
+
+	POINT mouse;
+	GetCursorPos( &mouse );
+
+	if ( mouse_relative ) {
+		POINT center;
+		center.x = (SDL_VideoSurface->w/2);
+		center.y = (SDL_VideoSurface->h/2);
+		ClientToScreen(SDL_Window, &center);
+
+		mouse.x -= (Sint16)center.x;
+		mouse.y -= (Sint16)center.y;
+		if ( mouse.x || mouse.y ) {
+			SetCursorPos(center.x, center.y);
+			posted = SDL_PrivateMouseMotion(0, 1, mouse.x, mouse.y);
+		}
+	} else if ( SDL_GetAppState() & SDL_APPMOUSEFOCUS ) {
+		ScreenToClient(SDL_Window, &mouse);
+#ifdef _WIN32_WCE
+		if (SDL_VideoSurface)
+			GapiTransform(this->hidden->userOrientation, this->hidden->hiresFix, &mouse.x, &mouse.y);
+#endif
+		posted = SDL_PrivateMouseMotion(0, 0, mouse.x, mouse.y);
+	}
+}
+
 void DIB_PumpEvents(_THIS)
 {
 	MSG msg;
@@ -279,6 +309,10 @@ void DIB_PumpEvents(_THIS)
 		if ( GetMessage(&msg, NULL, 0, 0) > 0 ) {
 			DispatchMessage(&msg);
 		}
+	}
+
+	if ( SDL_GetAppState() & SDL_APPINPUTFOCUS ) {
+		DIB_GenerateMouseMotionEvent( );
 	}
 }
 

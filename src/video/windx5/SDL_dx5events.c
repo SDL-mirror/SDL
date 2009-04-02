@@ -143,9 +143,14 @@ struct {
 		(DISCL_FOREGROUND|DISCL_NONEXCLUSIVE),
 		(DISCL_FOREGROUND|DISCL_NONEXCLUSIVE), handle_keyboard },
 	{ "mouse",
-		&GUID_SysMouse, &c_dfDIMouse,
+		&GUID_SysMouse,
+#if DIRECTINPUT_VERSION >= 0x700
+		&c_dfDIMouse2,
+#else
+		&c_dfDIMouse,
+#endif
 		(DISCL_FOREGROUND|DISCL_NONEXCLUSIVE),
-		(DISCL_FOREGROUND|DISCL_EXCLUSIVE), handle_mouse },
+		(DISCL_FOREGROUND|DISCL_NONEXCLUSIVE), handle_mouse },
 	{ NULL, NULL, NULL, 0, 0, NULL }
 };
 	
@@ -285,6 +290,76 @@ static void handle_keyboard(const int numevents, DIDEVICEOBJECTDATA *keybuf)
 		}
 	}
 }
+
+static void post_mouse_motion(int relative, Sint16 x, Sint16 y)
+{
+	extern int mouse_relative;
+
+	if ( SDL_GetAppState() & (SDL_APPINPUTFOCUS|SDL_APPMOUSEFOCUS) ==
+		(SDL_APPINPUTFOCUS|SDL_APPMOUSEFOCUS) ) {
+		posted = SDL_PrivateMouseMotion(
+			0, relative, x, y);
+
+		if ( !mouse_relative ) {
+			/* As DirectInput reads raw device coordinates, it has no notion of
+			 * cursors or absolute position. We must assume responsibility for
+			 * keeping track of this. */
+			int current_x, current_y;
+			POINT cursor;
+			RECT trap;
+			RECT window;
+			int at_edge;
+
+			/* Get the current cursor position */
+			SDL_GetMouseState(&current_x, &current_y);
+			cursor.x = current_x;
+			cursor.y = current_y;
+			ClientToScreen(SDL_Window, &cursor);
+
+			/* Construct a 1 pixel square RECT that is used to confine the cursor
+			 * pointer to a specific pixel using ClipCursor. This is used in
+			 * preference to SetCursorPos as it avoids the cursor jumping around as
+			 * both the OS and SDL attempt to move it simultaneously. */
+			trap.left = cursor.x;
+			trap.top = cursor.y;
+			trap.right = cursor.x + 1;
+			trap.bottom = cursor.y + 1;
+
+			GetClientRect(SDL_Window, &window);
+			window.right -= window.left; window.left = 0;
+			window.bottom -= window.top; window.top = 0;
+
+			/* As we're assuming control over the cursor, we need to know when to
+			 * relinquish control of it back to the operating system. This is when
+			 * the cursor reaches the edge of the window. */
+			at_edge = (current_x == window.left) ||
+				(current_x == (window.right - 1)) ||
+				(current_y == window.top) ||
+				(current_y == (window.bottom - 1));
+
+			if ( at_edge ) {
+				ClipCursor(NULL);
+			} else {
+				ClipCursor(&trap);
+			}
+		} else {
+			/* When in relative mode, warp the OS's idea of where the cursor is to
+			 * the center of the screen. This isn't really necessary as DirectInput
+			 * reads from the hardware itself, but in case things go wrong, the
+			 * cursor will be left in a sensible place. */
+			POINT center;
+			center.x = (SDL_VideoSurface->w/2);
+			center.y = (SDL_VideoSurface->h/2);
+			ClientToScreen(SDL_Window, &center);
+			SetCursorPos(center.x, center.y);
+		}
+	} else {
+		/* No window or mouse focus, control is lost */
+		mouse_lost = 1;
+		ClipCursor(NULL);
+	}
+}
+
 static void handle_mouse(const int numevents, DIDEVICEOBJECTDATA *ptrbuf)
 {
 	int i;
@@ -298,14 +373,8 @@ static void handle_mouse(const int numevents, DIDEVICEOBJECTDATA *ptrbuf)
 		return;
 	}
 
-	/* If we are in windowed mode, Windows is taking care of the mouse */
-	if (  (SDL_PublicSurface->flags & SDL_OPENGL) ||
-	     !(SDL_PublicSurface->flags & SDL_FULLSCREEN) ) {
-		return;
-	}
-
 	/* If the mouse was lost, regain some sense of mouse state */
-	if ( mouse_lost ) {
+	if ( mouse_lost && (SDL_GetAppState() & SDL_APPMOUSEFOCUS) ) {
 		POINT mouse_pos;
 		Uint8 old_state;
 		Uint8 new_state;
@@ -313,14 +382,17 @@ static void handle_mouse(const int numevents, DIDEVICEOBJECTDATA *ptrbuf)
 		/* Set ourselves up with the current cursor position */
 		GetCursorPos(&mouse_pos);
 		ScreenToClient(SDL_Window, &mouse_pos);
-		posted = SDL_PrivateMouseMotion(0, 0,
-				(Sint16)mouse_pos.x, (Sint16)mouse_pos.y);
+		post_mouse_motion( 0, (Sint16)mouse_pos.x, (Sint16)mouse_pos.y);
 
 		/* Check for mouse button changes */
 		old_state = SDL_GetMouseState(NULL, NULL);
 		new_state = 0;
 		{ /* Get the new DirectInput button state for the mouse */
+#if DIRECTINPUT_VERSION >= 0x700
+			DIMOUSESTATE2 distate;
+#else
 			DIMOUSESTATE distate;
+#endif
 			HRESULT result;
 
 			result=IDirectInputDevice2_GetDeviceState(SDL_DIdev[1],
@@ -341,14 +413,13 @@ static void handle_mouse(const int numevents, DIDEVICEOBJECTDATA *ptrbuf)
 		for ( i=0; i<8; ++i ) {
 			if ( (old_state&0x01) != (new_state&0x01) ) {
 				button = (Uint8)(i+1);
-				/* Button #2 on two button mice is button 3
-				   (the middle button is button 2)
-				 */
-				if ( button == 2 ) {
-					button = 3;
-				} else
-				if ( button == 3 ) {
-					button = 2;
+				/* Map DI button numbers to SDL */
+				switch ( button ) {
+					case 2: button = SDL_BUTTON_RIGHT; break;
+					case 3: button = SDL_BUTTON_MIDDLE; break;
+					case 4: button = SDL_BUTTON_X1; break;
+					case 5: button = SDL_BUTTON_X2; break;
+					default: break;
 				}
 				if ( new_state & 0x01 ) {
 					/* Grab mouse so we get mouse-up */
@@ -387,8 +458,7 @@ static void handle_mouse(const int numevents, DIDEVICEOBJECTDATA *ptrbuf)
 			case DIMOFS_X:
 				if ( timestamp != ptrbuf[i].dwTimeStamp ) {
 					if ( xrel || yrel ) {
-						posted = SDL_PrivateMouseMotion(
-								0, 1, xrel, yrel);
+						post_mouse_motion(1, xrel, yrel);
 						xrel = 0;
 						yrel = 0;
 					}
@@ -399,8 +469,7 @@ static void handle_mouse(const int numevents, DIDEVICEOBJECTDATA *ptrbuf)
 			case DIMOFS_Y:
 				if ( timestamp != ptrbuf[i].dwTimeStamp ) {
 					if ( xrel || yrel ) {
-						posted = SDL_PrivateMouseMotion(
-								0, 1, xrel, yrel);
+						post_mouse_motion(1, xrel, yrel);
 						xrel = 0;
 						yrel = 0;
 					}
@@ -410,8 +479,7 @@ static void handle_mouse(const int numevents, DIDEVICEOBJECTDATA *ptrbuf)
 				break;
 			case DIMOFS_Z:
 				if ( xrel || yrel ) {
-					posted = SDL_PrivateMouseMotion(
-							0, 1, xrel, yrel);
+					post_mouse_motion(1, xrel, yrel);
 					xrel = 0;
 					yrel = 0;
 				}
@@ -429,22 +497,26 @@ static void handle_mouse(const int numevents, DIDEVICEOBJECTDATA *ptrbuf)
 			case DIMOFS_BUTTON1:
 			case DIMOFS_BUTTON2:
 			case DIMOFS_BUTTON3:
+#if DIRECTINPUT_VERSION >= 0x700
+			case DIMOFS_BUTTON4:
+			case DIMOFS_BUTTON5:
+			case DIMOFS_BUTTON6:
+			case DIMOFS_BUTTON7:
+#endif
 				if ( xrel || yrel ) {
-					posted = SDL_PrivateMouseMotion(
-							0, 1, xrel, yrel);
+					post_mouse_motion(1, xrel, yrel);
 					xrel = 0;
 					yrel = 0;
 				}
 				timestamp = 0;
 				button = (Uint8)(ptrbuf[i].dwOfs-DIMOFS_BUTTON0)+1;
-				/* Button #2 on two button mice is button 3
-				   (the middle button is button 2)
-				 */
-				if ( button == 2 ) {
-					button = 3;
-				} else
-				if ( button == 3 ) {
-					button = 2;
+				/* Map DI button numbers to SDL */
+				switch ( button ) {
+					case 2: button = SDL_BUTTON_RIGHT; break;
+					case 3: button = SDL_BUTTON_MIDDLE; break;
+					case 4: button = SDL_BUTTON_X1; break;
+					case 5: button = SDL_BUTTON_X2; break;
+					default: break;
 				}
 				if ( ptrbuf[i].dwData & 0x80 ) {
 					/* Grab mouse so we get mouse-up */
@@ -471,7 +543,7 @@ static void handle_mouse(const int numevents, DIDEVICEOBJECTDATA *ptrbuf)
 		}
 	}
 	if ( xrel || yrel ) {
-		posted = SDL_PrivateMouseMotion( 0, 1, xrel, yrel);
+		post_mouse_motion(1, xrel, yrel);
 	}
 }
 
