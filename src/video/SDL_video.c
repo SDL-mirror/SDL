@@ -63,6 +63,9 @@ static VideoBootStrap *bootstrap[] = {
 #if SDL_VIDEO_DRIVER_PS2GS
 	&PS2GS_bootstrap,
 #endif
+#if SDL_VIDEO_DRIVER_PS3
+	&PS3_bootstrap,
+#endif
 #if SDL_VIDEO_DRIVER_GGI
 	&GGI_bootstrap,
 #endif

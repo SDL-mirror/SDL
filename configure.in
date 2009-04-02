@@ -1287,6 +1287,33 @@ AC_HELP_STRING([--enable-video-ps2gs], [use PlayStation 2 GS video driver [[defa
     fi
 }
 
+dnl See if we're running on PlayStation 3 Cell hardware
+CheckPS3()
+{
+  AC_ARG_ENABLE(video-ps3,
+                AC_HELP_STRING([--enable-video-ps3], [use PlayStation 3 Cell driver [[default=yes]]]),
+                , enable_video_ps3=yes)
+  if test x$enable_video = xyes -a x$enable_video_ps3 = xyes; then
+    AC_MSG_CHECKING(for PlayStation 3 Cell support)
+    video_ps3=no
+    AC_TRY_COMPILE([
+      #include <linux/fb.h>
+      #include <asm/ps3fb.h>
+    ],[
+    ],[
+      video_ps3=yes
+    ])
+    AC_MSG_RESULT($video_ps3)
+    if test x$video_ps3 = xyes; then
+      AC_DEFINE(SDL_VIDEO_DRIVER_PS3)
+      SOURCES="$SOURCES $srcdir/src/video/ps3/*.c"
+      EXTRA_CFLAGS="$EXTRA_CFLAGS -I/opt/cell/sdk/usr/include"
+      EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lbilin_scaler_spu -lfb_writer_spu -lyuv2rgb_spu -L/opt/cell/sdk/usr/lib -lspe2"
+      have_video=yes
+    fi
+  fi
+}
+
 dnl Find the GGI includes
 CheckGGI()
 {
@@ -2251,6 +2278,7 @@ case "$host" in
         CheckFBCON
         CheckDirectFB
         CheckPS2GS
+        CheckPS3
         CheckGGI
         CheckSVGA
         CheckVGL
