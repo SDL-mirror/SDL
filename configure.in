@@ -2916,8 +2916,8 @@ esac
 
 # Verify that we have all the platform specific files we need
 
-if test x$enable_joystick = xyes; then
-    if test x$have_joystick != xyes; then
+if test x$have_joystick != xyes; then
+    if test x$enable_joystick = xyes; then
         AC_DEFINE(SDL_JOYSTICK_DISABLED)
     fi
     SOURCES="$SOURCES $srcdir/src/joystick/dummy/*.c"
