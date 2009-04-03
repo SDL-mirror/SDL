@@ -199,6 +199,19 @@ extern DECLSPEC int SDLCALL SDL_SetSurfaceRLE(SDL_Surface * surface,
 extern DECLSPEC int SDLCALL SDL_SetColorKey(SDL_Surface * surface,
                                             Uint32 flag, Uint32 key);
 
+/*
+ * \fn int SDL_GetColorKey(SDL_Surface *surface, Uint32 *key)
+ *
+ * \brief Sets the color key (transparent pixel) in a blittable surface.
+ *
+ * \param surface The surface to update
+ * \param key A pointer filled in with the transparent pixel in the native surface format
+ *
+ * \return 0 on success, or -1 if the surface is not valid or colorkey is not enabled.
+ */
+extern DECLSPEC int SDLCALL SDL_GetColorKey(SDL_Surface * surface,
+                                            Uint32 * key);
+
 /**
  * \fn int SDL_SetSurfaceColorMod(SDL_Surface *surface, Uint8 r, Uint8 g, Uint8 b)
  *

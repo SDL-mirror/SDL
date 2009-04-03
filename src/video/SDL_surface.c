@@ -272,6 +272,23 @@ SDL_SetColorKey(SDL_Surface * surface, Uint32 flag, Uint32 key)
     return 0;
 }
 
+int
+SDL_GetColorKey(SDL_Surface * surface, Uint32 * key)
+{
+    if (!surface) {
+        return -1;
+    }
+
+    if (!(surface->map->info.flags & SDL_COPY_COLORKEY)) {
+        return -1;
+    }
+
+    if (key) {
+        *key = surface->map->info.colorkey;
+    }
+    return 0;
+}
+
 /* This is a fairly slow function to switch from colorkey to alpha */
 static void
 SDL_ConvertColorkeyToAlpha(SDL_Surface * surface)
