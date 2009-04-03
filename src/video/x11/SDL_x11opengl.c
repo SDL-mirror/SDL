@@ -413,21 +413,24 @@ X11_GL_CreateContext(_THIS, SDL_Window * window)
                 };
                                 
                 /* Get a pointer to the context creation function for GL 3.0 */
-                PFNGLXCREATECONTEXTATTRIBSARBPROC glXCreateContextAttribs = (PFNGLXCREATECONTEXTATTRIBSARBPROC)glXGetProcAddress((GLubyte*)"glXCreateContextAttribsARB");
+                PFNGLXCREATECONTEXTATTRIBSARBPROC glXCreateContextAttribs = (PFNGLXCREATECONTEXTATTRIBSARBPROC)_this->gl_data->glXGetProcAddress((GLubyte*)"glXCreateContextAttribsARB");
                 if (!glXCreateContextAttribs) {
                     SDL_SetError("GL 3.x is not supported");
                     context = temp_context;
                 } else {
-                    /* Create a GL 3.0 context */
+                    /* Create a GL 3.x context */
                     GLXFBConfig *framebuffer_config = NULL;
                     int fbcount = 0;                
-                    framebuffer_config = glXChooseFBConfig(display, DefaultScreen(display), NULL, &fbcount);
-                    if (!framebuffer_config) {
-                        SDL_SetError("No good framebuffers found. GL 3.0 disabled");
+                    GLXFBConfig* (*glXChooseFBConfig)(Display* disp, int screen, const int* attrib_list, int* nelements);
+
+                    glXChooseFBConfig = (GLXFBConfig* (*)(Display*, int, const int*, int*))_this->gl_data->glXGetProcAddress((GLubyte*)"glXChooseFBConfig");
+
+                    if (!glXChooseFBConfig || !(framebuffer_config = glXChooseFBConfig(display, DefaultScreen(display), NULL, &fbcount))) {
+                        SDL_SetError("No good framebuffers found. GL 3.x disabled");
                         context = temp_context;
                     } else {                                    
                         context = glXCreateContextAttribs(display, framebuffer_config[0], NULL, True, attribs);
-                        glXDestroyContext(display, temp_context);
+                        _this->gl_data->glXDestroyContext(display, temp_context);
                     }
                 }
             }

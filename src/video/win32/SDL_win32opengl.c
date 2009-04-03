@@ -512,7 +512,7 @@ WIN_GL_CreateContext(_THIS, SDL_Window * window)
             return NULL;
         }
                 
-        wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC) wglGetProcAddress("wglCreateContextAttribsARB");
+        wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC) _this->gl_data->wglGetProcAddress("wglCreateContextAttribsARB");
         if (!wglCreateContextAttribsARB) {
             SDL_SetError("GL 3.x is not supported");
             context = temp_context;
@@ -525,7 +525,7 @@ WIN_GL_CreateContext(_THIS, SDL_Window * window)
             /* Create the GL 3.x context */
             context = wglCreateContextAttribsARB(hdc, 0, attribs);
             /* Delete the GL 2.x context */
-            wglDeleteContext(temp_context);
+            _this->gl_data->wglDeleteContext(temp_context);
         }
     }
     
