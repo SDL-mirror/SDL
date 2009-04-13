@@ -2266,6 +2266,8 @@ int DX5_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 				SDL_colors[j].peGreen = colors[i].g;
 				SDL_colors[j].peBlue = colors[i].b;
 			}
+			/* This sends an WM_PALETTECHANGED message to us */
+			colorchange_expected = 1;
 			IDirectDrawPalette_SetEntries(SDL_palette, 0,
 				firstcolor, ncolors, &SDL_colors[firstcolor]);
 			alloct_all = 1;
