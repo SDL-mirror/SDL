@@ -588,10 +588,7 @@ LRESULT DX5_HandleMessage(_THIS, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 
 		/* The keyboard is handled via DirectInput */
 		case WM_SYSKEYUP:
-		case WM_SYSKEYDOWN: {
-			/* Pass syskey to DefWindwoProc (ALT-F4, etc.) */
-		}
-		break;
+		case WM_SYSKEYDOWN:
 		case WM_KEYUP:
 		case WM_KEYDOWN: {
 			/* Ignore windows keyboard messages */;
