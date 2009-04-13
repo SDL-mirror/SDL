@@ -332,7 +332,7 @@ static DIOBJECTDATAFORMAT KBD_fmt[] = {
 	{ &GUID_Key, 255, 0x8000FF0C, 0x00000000 },
 };
 
-const DIDATAFORMAT c_dfDIKeyboard = { 24, 16, 0x00000002, 256, 256, KBD_fmt };
+const DIDATAFORMAT c_dfDIKeyboard = { sizeof(DIDATAFORMAT), sizeof(DIOBJECTDATAFORMAT), 0x00000002, 256, 256, KBD_fmt };
 
 
 /* Mouse */
@@ -347,7 +347,7 @@ static DIOBJECTDATAFORMAT PTR_fmt[] = {
 	{ NULL, 15, 0x80FFFF0C, 0x00000000 },
 };
 
-const DIDATAFORMAT c_dfDIMouse = { 24, 16, 0x00000002, 16, 7, PTR_fmt };
+const DIDATAFORMAT c_dfDIMouse = { sizeof(DIDATAFORMAT), sizeof(DIOBJECTDATAFORMAT), 0x00000002, 16, 7, PTR_fmt };
 
 
 /* Joystick */
@@ -399,7 +399,7 @@ static DIOBJECTDATAFORMAT JOY_fmt[] = {
 	{ NULL, 79, 0x80FFFF0C, 0x00000000 },
 };
 
-const DIDATAFORMAT c_dfDIJoystick = { 24, 16, 0x00000001, 80, 44, JOY_fmt };
+const DIDATAFORMAT c_dfDIJoystick = { sizeof(DIDATAFORMAT), sizeof(DIOBJECTDATAFORMAT), 0x00000001, 80, 44, JOY_fmt };
 
 
 /* Initialization/Query functions */
