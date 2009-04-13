@@ -1,5 +1,6 @@
 
 1.3 release checklist:
+ * Create jobs@libsdl.org
  * Add higher precision timers for profiling
  * Implement YUV texture support
    - in progress, software support is done, Ryan is working on OpenGL shaders
