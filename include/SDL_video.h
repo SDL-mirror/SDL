@@ -460,14 +460,16 @@ extern DECLSPEC Uint32 SDLCALL SDL_MapRGBA
 /*
  * Maps a pixel value into the RGB components for a given pixel format
  */
-extern DECLSPEC void SDLCALL SDL_GetRGB(Uint32 pixel, SDL_PixelFormat *fmt,
+extern DECLSPEC void SDLCALL SDL_GetRGB(Uint32 pixel,
+				const SDL_PixelFormat * const fmt,
 				Uint8 *r, Uint8 *g, Uint8 *b);
 
 /*
  * Maps a pixel value into the RGBA components for a given pixel format
  */
-extern DECLSPEC void SDLCALL SDL_GetRGBA(Uint32 pixel, SDL_PixelFormat *fmt,
-				 Uint8 *r, Uint8 *g, Uint8 *b, Uint8 *a);
+extern DECLSPEC void SDLCALL SDL_GetRGBA(Uint32 pixel,
+				const SDL_PixelFormat * const fmt,
+				Uint8 *r, Uint8 *g, Uint8 *b, Uint8 *a);
 
 /*
  * Allocate and free an RGB surface (must be called after SDL_SetVideoMode)

@@ -366,7 +366,7 @@ Uint32 SDL_MapRGBA
 	}
 }
 
-void SDL_GetRGBA(Uint32 pixel, SDL_PixelFormat *fmt,
+void SDL_GetRGBA(Uint32 pixel, const SDL_PixelFormat * const fmt,
 		 Uint8 *r, Uint8 *g, Uint8 *b, Uint8 *a)
 {
 	if ( fmt->palette == NULL ) {
@@ -400,7 +400,8 @@ void SDL_GetRGBA(Uint32 pixel, SDL_PixelFormat *fmt,
 	}
 }
 
-void SDL_GetRGB(Uint32 pixel, SDL_PixelFormat *fmt, Uint8 *r,Uint8 *g,Uint8 *b)
+void SDL_GetRGB(Uint32 pixel, const SDL_PixelFormat * const fmt,
+                Uint8 *r,Uint8 *g,Uint8 *b)
 {
 	if ( fmt->palette == NULL ) {
 	        /* the note for SDL_GetRGBA above applies here too */
