@@ -552,7 +552,13 @@ static SDL_keysym *TranslateKey(WPARAM vkey, UINT scancode, SDL_keysym *keysym, 
 		Uint16	wchars[2];
 
 		GetKeyboardState(keystate);
-		if (SDL_ToUnicode((UINT)vkey, scancode, keystate, wchars, sizeof(wchars)/sizeof(wchars[0]), 0) == 1)
+		/* Numlock isn't taken into account in ToUnicode,
+		 * so we handle it as a special case here */
+		if ((keystate[VK_NUMLOCK] & 1) && vkey >= VK_NUMPAD0 && vkey <= VK_NUMPAD9)
+		{
+			keysym->unicode = vkey - VK_NUMPAD0 + '0';
+		}
+		else if (SDL_ToUnicode((UINT)vkey, scancode, keystate, wchars, sizeof(wchars)/sizeof(wchars[0]), 0) > 0)
 		{
 			keysym->unicode = wchars[0];
 		}
