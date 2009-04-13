@@ -438,62 +438,41 @@ LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		break;
 
 		case WM_MOUSEMOVE: {
-			
-			/* Mouse is handled by DirectInput when fullscreen */
-			if ( SDL_VideoSurface && ! DINPUT_FULLSCREEN() ) {
-				Sint16 x, y;
 
-				/* mouse has entered the window */
-				if ( ! in_window ) {
 #ifdef WM_MOUSELEAVE
+			/* No need to handle SDL_APPMOUSEFOCUS when fullscreen */
+			if ( SDL_VideoSurface && !FULLSCREEN() ) {
+				/* mouse has entered the window */
+
+				if ( !(SDL_GetAppState() & SDL_APPMOUSEFOCUS) ) {
 					TRACKMOUSEEVENT tme;
 
 					tme.cbSize = sizeof(tme);
 					tme.dwFlags = TME_LEAVE;
 					tme.hwndTrack = SDL_Window;
 					_TrackMouseEvent(&tme);
-#endif /* WM_MOUSELEAVE */
-					in_window = TRUE;
-
-					posted = SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS);
-				}
-
-				/* mouse has moved within the window */
-				x = LOWORD(lParam);
-				y = HIWORD(lParam);
-				if ( mouse_relative ) {
-					POINT center;
-					center.x = (SDL_VideoSurface->w/2);
-					center.y = (SDL_VideoSurface->h/2);
-					x -= (Sint16)center.x;
-					y -= (Sint16)center.y;
-					if ( x || y ) {
-						ClientToScreen(SDL_Window, &center);
-						SetCursorPos(center.x, center.y);
-						posted = SDL_PrivateMouseMotion(0, 1, x, y);
-					}
-				} else {
-#ifdef SDL_VIDEO_DRIVER_GAPI
-					if (SDL_VideoSurface && this->hidden->gapiInfo)
-						GapiTransform(this->hidden->gapiInfo->coordinateTransform, this->hidden->gapiInfo->hiresFix, &x, &y);
-#endif
-					posted = SDL_PrivateMouseMotion(0, 0, x, y);
 				}
 			}
+#endif /* WM_MOUSELEAVE */
+
+			/* Mouse motion is handled in DIB_PumpEvents or
+			 * DX5_PumpEvents, depending on the video driver
+			 * in use */
+
+			posted = SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS);
 		}
 		return(0);
 
 #ifdef WM_MOUSELEAVE
 		case WM_MOUSELEAVE: {
 
-			/* Mouse is handled by DirectInput when fullscreen */
-			if ( SDL_VideoSurface && ! DINPUT_FULLSCREEN() ) {
+			/* No need to handle SDL_APPMOUSEFOCUS when fullscreen */
+			if ( SDL_VideoSurface && !FULLSCREEN() ) {
 				/* mouse has left the window */
 				/* or */
 				/* Elvis has left the building! */
 				posted = SDL_PrivateAppActive(0, SDL_APPMOUSEFOCUS);
 			}
-			in_window = FALSE;
 		}
 		return(0);
 #endif /* WM_MOUSELEAVE */
@@ -571,20 +550,8 @@ LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 						mouse_pressed = 0;
 					}
 				}
-				if ( mouse_relative ) {
-				/*	RJR: March 28, 2000
-					report internal mouse position if in relative mode */
-					x = 0; y = 0;
-				} else {
-					x = (Sint16)LOWORD(lParam);
-					y = (Sint16)HIWORD(lParam);
-#ifdef SDL_VIDEO_DRIVER_GAPI
-					if (SDL_VideoSurface && this->hidden->gapiInfo)
-						GapiTransform(this->hidden->gapiInfo->coordinateTransform, this->hidden->gapiInfo->hiresFix, &x, &y);
-#endif
-				}
 				posted = SDL_PrivateMouseButton(
-							state, button, x, y);
+							state, button, 0, 0);
 
 				/*
 				 * MSDN says:
