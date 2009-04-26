@@ -76,7 +76,7 @@ Audio   O/S     Misc
 dma8    All     Uses MFP Timer A interrupt
 xbios	TOS     Uses MFP Timer A interrupt
 xbios   MiNT    Uses MFP Timer A interrupt
-xbios   Magic   Disabled
+xbios   Magic   Uses MFP Timer A interrupt
 stfa    All     Uses MFP interrupt
 mcsn	TOS     Uses MFP Timer A interrupt
 mcsn    MiNT    Uses MiNT thread
