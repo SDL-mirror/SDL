@@ -272,7 +272,7 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 			break;
 	}
 
-#if 1
+#if 0
 	for (i=0; i<MINTAUDIO_freqcount; i++) {
 		DEBUG_PRINT((DEBUG_NAME "freq %d: %lu Hz, clock %lu, prediv %d\n",
 			i, MINTAUDIO_frequencies[i].frequency, MINTAUDIO_frequencies[i].masterclock,
