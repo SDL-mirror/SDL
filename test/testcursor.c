@@ -156,7 +156,7 @@ main(int argc, char *argv[])
         return (1);
     }
 
-    screen = SDL_SetVideoMode(320, 200, 8, SDL_ANYFORMAT);
+    screen = SDL_SetVideoMode(640, 480, 8, SDL_ANYFORMAT);
     if (screen == NULL) {
         fprintf(stderr, "Couldn't initialize video mode: %s\n",
                 SDL_GetError());
