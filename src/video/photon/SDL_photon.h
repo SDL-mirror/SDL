@@ -27,28 +27,78 @@
 #ifndef __SDL_PHOTON_H__
 #define __SDL_PHOTON_H__
 
+/* GF headers must be included first for the Photon GF functions */
+#if defined(SDL_VIDEO_OPENGL_ES)
+   #include <gf/gf.h>
+   #include <GLES/egl.h>
+#endif /* SDL_VIDEO_OPENGL_ES */
+
+#include "SDL_config.h"
 #include "../SDL_sysvideo.h"
 
 #include <Ph.h>
+#include <Pt.h>
+#include <photon/PkKeyDef.h>
+
+/* Maximum display devices, which can handle SDL Photon driver */
+#define SDL_VIDEO_PHOTON_MAX_RIDS 16
 
 typedef struct SDL_VideoData
 {
+   PhRid_t  rid[SDL_VIDEO_PHOTON_MAX_RIDS];
+   uint32_t avail_rids;
+   uint32_t current_device_id;
+   #if defined(SDL_VIDEO_OPENGL_ES)
+      gf_dev_t      gfdev;           /* GF device handle                     */
+      gf_dev_info_t gfdev_info;      /* GF device information                */
+      SDL_bool      gfinitialized;   /* GF device initialization status      */
+      EGLDisplay    egldisplay;      /* OpenGL ES display connection         */
+      uint32_t      egl_refcount;    /* OpenGL ES reference count            */
+      uint32_t      swapinterval;    /* OpenGL ES default swap interval      */
+   #endif /* SDL_VIDEO_OPENGL_ES */
 } SDL_VideoData;
 
-#define SDL_VIDEO_PHOTON_DEVICENAME_MAX 257
+/* This is hardcoded value in photon/Pg.h */
+#define SDL_VIDEO_PHOTON_DEVICENAME_MAX  41
+#define SDL_VIDEO_PHOTON_MAX_CURSOR_SIZE 128
+
+/* Maximum event message size with data payload */
+#define SDL_VIDEO_PHOTON_EVENT_SIZE 8192
 
 typedef struct SDL_DisplayData
 {
+   uint32_t          device_id;
    uint32_t          custom_refresh;   /* Custom refresh rate for all modes  */
    SDL_DisplayMode   current_mode;     /* Current video mode                 */
    uint8_t           description[SDL_VIDEO_PHOTON_DEVICENAME_MAX];
                                        /* Device description                 */
    uint32_t          caps;             /* Device capabilities                */
+   PhCursorDef_t*    cursor;           /* Global cursor settings             */
+   SDL_bool          cursor_visible;   /* SDL_TRUE if cursor visible         */
+   uint32_t          cursor_size;      /* Cursor size in memory w/ structure */
+   #if defined(SDL_VIDEO_OPENGL_ES)
+      gf_display_t      display;       /* GF display handle                  */
+      gf_display_info_t display_info;  /* GF display information             */
+   #endif /* SDL_VIDEO_OPENGL_ES */
 } SDL_DisplayData;
+
+/* Maximum amount of OpenGL ES framebuffer configurations */
+#define SDL_VIDEO_GF_OPENGLES_CONFS 32
 
 typedef struct SDL_WindowData
 {
-   SDL_bool     uses_gles;           /* if true window must support OpenGL ES*/
+   SDL_bool       uses_gles;           /* if true window must support OpenGL ES*/
+   PtWidget_t*    window;              /* window handle                        */
+   #if defined(SDL_VIDEO_OPENGL_ES)
+      EGLConfig    gles_configs[SDL_VIDEO_GF_OPENGLES_CONFS];
+                                         /* OpenGL ES framebuffer confs        */
+      EGLint       gles_config;          /* OpenGL ES configuration index      */
+      EGLContext   gles_context;         /* OpenGL ES context                  */
+      EGLint       gles_attributes[256]; /* OpenGL ES attributes for context   */
+      EGLSurface   gles_surface;         /* OpenGL ES target rendering surface */
+      gf_surface_t gfsurface;            /* OpenGL ES GF's surface             */
+      PdOffscreenContext_t* phsurface;   /* OpenGL ES Photon's surface         */
+   #endif /* SDL_VIDEO_OPENGL_ES */
 } SDL_WindowData;
 
 /****************************************************************************/
@@ -62,22 +112,24 @@ typedef struct Photon_DeviceCaps
 
 #define SDL_PHOTON_UNACCELERATED         0x00000000
 #define SDL_PHOTON_ACCELERATED           0x00000001
+#define SDL_PHOTON_UNACCELERATED_3D      0x00000000
+#define SDL_PHOTON_ACCELERATED_3D        0x00000004
 
 /****************************************************************************/
 /* SDL_VideoDevice functions declaration                                    */
 /****************************************************************************/
 
 /* Display and window functions */
-int photon_videoinit(_THIS);
+int  photon_videoinit(_THIS);
 void photon_videoquit(_THIS);
 void photon_getdisplaymodes(_THIS);
-int photon_setdisplaymode(_THIS, SDL_DisplayMode* mode);
-int photon_setdisplaypalette(_THIS, SDL_Palette* palette);
-int photon_getdisplaypalette(_THIS, SDL_Palette* palette);
-int photon_setdisplaygammaramp(_THIS, Uint16* ramp);
-int photon_getdisplaygammaramp(_THIS, Uint16* ramp);
-int photon_createwindow(_THIS, SDL_Window* window);
-int photon_createwindowfrom(_THIS, SDL_Window* window, const void* data);
+int  photon_setdisplaymode(_THIS, SDL_DisplayMode* mode);
+int  photon_setdisplaypalette(_THIS, SDL_Palette* palette);
+int  photon_getdisplaypalette(_THIS, SDL_Palette* palette);
+int  photon_setdisplaygammaramp(_THIS, Uint16* ramp);
+int  photon_getdisplaygammaramp(_THIS, Uint16* ramp);
+int  photon_createwindow(_THIS, SDL_Window* window);
+int  photon_createwindowfrom(_THIS, SDL_Window* window, const void* data);
 void photon_setwindowtitle(_THIS, SDL_Window* window);
 void photon_setwindowicon(_THIS, SDL_Window* window, SDL_Surface* icon);
 void photon_setwindowposition(_THIS, SDL_Window* window);
