@@ -48,7 +48,8 @@ typedef struct SDL_VideoData
    #endif /* SDL_VIDEO_OPENGL_ES */
 } SDL_VideoData;
 
-#define SDL_VIDEO_GF_DEVICENAME_MAX 257
+#define SDL_VIDEO_GF_DEVICENAME_MAX  257
+#define SDL_VIDEO_GF_MAX_CURSOR_SIZE 128
 
 typedef struct SDL_DisplayData
 {
@@ -61,7 +62,13 @@ typedef struct SDL_DisplayData
    uint32_t          caps;             /* Device capabilities                */
    SDL_bool          layer_attached;   /* Layer attach status                */
    gf_layer_t        layer;            /* Graphics layer to which attached   */
+   gf_surface_t      surface[3];       /* Visible surface on the display     */
+   SDL_bool          cursor_visible;   /* SDL_TRUE if cursor visible         */
+   gf_cursor_t       cursor;           /* Cursor shape which was set last    */
 } SDL_DisplayData;
+
+/* Maximum amount of OpenGL ES framebuffer configurations */
+#define SDL_VIDEO_GF_OPENGLES_CONFS 32
 
 typedef struct SDL_WindowData
 {
@@ -69,7 +76,9 @@ typedef struct SDL_WindowData
    #if defined(SDL_VIDEO_OPENGL_ES)
       gf_3d_target_t target;           /* OpenGL ES window target            */
       SDL_bool   target_created;       /* GF 3D target is created if true    */
-      EGLConfig  gles_config;          /* OpenGL ES framebuffer configuration*/
+      EGLConfig  gles_configs[SDL_VIDEO_GF_OPENGLES_CONFS];
+                                       /* OpenGL ES framebuffer confs        */
+      EGLint     gles_config;          /* Config index in the array of cfgs  */
       EGLContext gles_context;         /* OpenGL ES context                  */
       EGLint     gles_attributes[256]; /* OpenGL ES attributes for context   */
       EGLSurface gles_surface;         /* OpenGL ES target rendering surface */
@@ -103,16 +112,16 @@ typedef struct GF_DeviceCaps
 /****************************************************************************/
 
 /* Display and window functions */
-int qnxgf_videoinit(_THIS);
+int  qnxgf_videoinit(_THIS);
 void qnxgf_videoquit(_THIS);
 void qnxgf_getdisplaymodes(_THIS);
-int qnxgf_setdisplaymode(_THIS, SDL_DisplayMode* mode);
-int qnxgf_setdisplaypalette(_THIS, SDL_Palette* palette);
-int qnxgf_getdisplaypalette(_THIS, SDL_Palette* palette);
-int qnxgf_setdisplaygammaramp(_THIS, Uint16* ramp);
-int qnxgf_getdisplaygammaramp(_THIS, Uint16* ramp);
-int qnxgf_createwindow(_THIS, SDL_Window* window);
-int qnxgf_createwindowfrom(_THIS, SDL_Window* window, const void* data);
+int  qnxgf_setdisplaymode(_THIS, SDL_DisplayMode* mode);
+int  qnxgf_setdisplaypalette(_THIS, SDL_Palette* palette);
+int  qnxgf_getdisplaypalette(_THIS, SDL_Palette* palette);
+int  qnxgf_setdisplaygammaramp(_THIS, Uint16* ramp);
+int  qnxgf_getdisplaygammaramp(_THIS, Uint16* ramp);
+int  qnxgf_createwindow(_THIS, SDL_Window* window);
+int  qnxgf_createwindowfrom(_THIS, SDL_Window* window, const void* data);
 void qnxgf_setwindowtitle(_THIS, SDL_Window* window);
 void qnxgf_setwindowicon(_THIS, SDL_Window* window, SDL_Surface* icon);
 void qnxgf_setwindowposition(_THIS, SDL_Window* window);

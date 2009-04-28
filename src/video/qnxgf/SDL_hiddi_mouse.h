@@ -24,27 +24,46 @@
     (mike@malva.ua, lestat@i.com.ua)
 */
 
-#include <GLES/gl.h>
-#include <GLES/glext.h>
+#ifndef __SDL_HIDDI_MOUSE_H__
+#define __SDL_HIDDI_MOUSE_H__
 
-/* This is OpenGL ES 1.0 helper functions from OpenGL ES 1.1 specification,  */
-/* which could be implemented independently from hardware, just wrappers     */
+#include <inttypes.h>
 
-GLAPI void APIENTRY glTexParameteri(GLenum target, GLenum pname, GLint param)
+/* USB keyboard multimedia keys are generating this packet */
+typedef struct mouse_packet2
 {
-   glTexParameterx(target, pname, (GLfixed)param);
-   return;
-}
+   uint8_t buttons;
+   int8_t  wheel;
+} mouse_packet2;
 
-GLAPI void APIENTRY glTexParameteriv(GLenum target, GLenum pname, const GLint* params)
+/* PS/2 mice are generating this packet */
+typedef struct mouse_packet4
 {
-   /* Retrieve one parameter only */
-   glTexParameterx(target, pname, (GLfixed)*params);
-   return;
-}
+   uint8_t buttons;
+   int8_t  horizontal;
+   int8_t  vertical;
+   int8_t  wheel;
+} mouse_packet4;
 
-GLAPI void APIENTRY glColor4ub(GLubyte red, GLubyte green, GLubyte blue, GLubyte alpha)
+/* USB keyboard with mice wheel onboard generating this packet */
+typedef struct mouse_packet5
 {
-   glColor4f(((GLfloat)red)/255.f, ((GLfloat)green)/255.f, ((GLfloat)blue)/255.f, ((GLfloat)alpha)/255.f);
-   return;
-}
+   uint8_t buttons;
+   int8_t  horizontal;
+   int8_t  vertical;
+   int8_t  wheel;
+   uint8_t state;
+} mouse_packet5;
+
+/* USB multi-button mice are generating this packet */
+typedef struct mouse_packet8
+{
+   uint8_t buttons;
+   int8_t  horizontal;
+   int8_t  vertical;
+   int8_t  wheel;
+   int16_t horizontal_precision;
+   int16_t vertical_precision;
+} mouse_packet8;
+
+#endif /* __SDL_HIDDI_MOUSE_H__ */

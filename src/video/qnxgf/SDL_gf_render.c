@@ -35,24 +35,24 @@
 #include "SDL_qnxgf.h"
 
 static SDL_Renderer* gf_createrenderer(SDL_Window* window, Uint32 flags);
-static int gf_displaymodechanged(SDL_Renderer* renderer);
-static int gf_activaterenderer(SDL_Renderer* renderer);
-static int gf_createtexture(SDL_Renderer* renderer, SDL_Texture* texture);
-static int gf_querytexturepixels(SDL_Renderer* renderer, SDL_Texture* texture, void** pixels, int* pitch);
-static int gf_settexturepalette(SDL_Renderer* renderer, SDL_Texture* texture, const SDL_Color* colors, int firstcolor, int ncolors);
-static int gf_gettexturepalette(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Color* colors, int firstcolor, int ncolors);
-static int gf_settexturecolormod(SDL_Renderer* renderer, SDL_Texture* texture);
-static int gf_settexturealphamod(SDL_Renderer* renderer, SDL_Texture* texture);
-static int gf_settextureblendmode(SDL_Renderer* renderer, SDL_Texture* texture);
-static int gf_settexturescalemode(SDL_Renderer* renderer, SDL_Texture* texture);
-static int gf_updatetexture(SDL_Renderer* renderer, SDL_Texture* texture, const SDL_Rect* rect, const void* pixels, int pitch);
-static int gf_locktexture(SDL_Renderer* renderer, SDL_Texture* texture, const SDL_Rect* rect, int markDirty, void** pixels, int* pitch);
+static int  gf_displaymodechanged(SDL_Renderer* renderer);
+static int  gf_activaterenderer(SDL_Renderer* renderer);
+static int  gf_createtexture(SDL_Renderer* renderer, SDL_Texture* texture);
+static int  gf_querytexturepixels(SDL_Renderer* renderer, SDL_Texture* texture, void** pixels, int* pitch);
+static int  gf_settexturepalette(SDL_Renderer* renderer, SDL_Texture* texture, const SDL_Color* colors, int firstcolor, int ncolors);
+static int  gf_gettexturepalette(SDL_Renderer* renderer, SDL_Texture* texture, SDL_Color* colors, int firstcolor, int ncolors);
+static int  gf_settexturecolormod(SDL_Renderer* renderer, SDL_Texture* texture);
+static int  gf_settexturealphamod(SDL_Renderer* renderer, SDL_Texture* texture);
+static int  gf_settextureblendmode(SDL_Renderer* renderer, SDL_Texture* texture);
+static int  gf_settexturescalemode(SDL_Renderer* renderer, SDL_Texture* texture);
+static int  gf_updatetexture(SDL_Renderer* renderer, SDL_Texture* texture, const SDL_Rect* rect, const void* pixels, int pitch);
+static int  gf_locktexture(SDL_Renderer* renderer, SDL_Texture* texture, const SDL_Rect* rect, int markDirty, void** pixels, int* pitch);
 static void gf_unlocktexture(SDL_Renderer* renderer, SDL_Texture* texture);
 static void gf_dirtytexture(SDL_Renderer* renderer, SDL_Texture* texture, int numrects, const SDL_Rect* rects);
-static int gf_renderpoint(SDL_Renderer* renderer, int x, int y);
-static int gf_renderline(SDL_Renderer* renderer, int x1, int y1, int x2, int y2);
-static int gf_renderfill(SDL_Renderer* renderer, const SDL_Rect* rect);
-static int gf_rendercopy(SDL_Renderer* renderer, SDL_Texture* texture, const SDL_Rect* srcrect, const SDL_Rect* dstrect);
+static int  gf_renderpoint(SDL_Renderer* renderer, int x, int y);
+static int  gf_renderline(SDL_Renderer* renderer, int x1, int y1, int x2, int y2);
+static int  gf_renderfill(SDL_Renderer* renderer, const SDL_Rect* rect);
+static int  gf_rendercopy(SDL_Renderer* renderer, SDL_Texture* texture, const SDL_Rect* srcrect, const SDL_Rect* dstrect);
 static void gf_renderpresent(SDL_Renderer* renderer);
 static void gf_destroytexture(SDL_Renderer* renderer, SDL_Texture* texture);
 static void gf_destroyrenderer(SDL_Renderer* renderer);
@@ -222,7 +222,6 @@ static SDL_Renderer* gf_createrenderer(SDL_Window* window, Uint32 flags)
    for (it=0; it<rdata->surfaces_count; it++)
    {
       /* TODO: add palette creation */
-      /*       do not waste surfaces when using GL ES */
 
       /* Create displayable surfaces */
       status=gf_surface_create_layer(&rdata->surface[it], &didata->layer, 1, 0,
@@ -236,6 +235,7 @@ static SDL_Renderer* gf_createrenderer(SDL_Window* window, Uint32 flags)
          for (jt=it-1; jt>0; jt--)
          {
             gf_surface_free(rdata->surface[jt]);
+            rdata->surface[jt]=NULL;
          }
          SDL_free(rdata);
          SDL_free(renderer);
@@ -288,10 +288,10 @@ static int gf_activaterenderer(SDL_Renderer* renderer)
    SDL_DisplayData* didata = (SDL_DisplayData*)display->driverdata;
 
    /* Setup current surface as visible */
-   gf_layer_set_surfaces(didata->layer, &rdata->surface[rdata->surface_visible_idx], 1);
+//   gf_layer_set_surfaces(didata->layer, &rdata->surface[rdata->surface_visible_idx], 1);
 
    /* Set visible surface when hardware in idle state */
-   gf_layer_update(didata->layer, GF_LAYER_UPDATE_NO_WAIT_IDLE);
+//   gf_layer_update(didata->layer, GF_LAYER_UPDATE_NO_WAIT_IDLE);
 
    return 0;
 }
@@ -391,7 +391,10 @@ static void gf_destroyrenderer(SDL_Renderer* renderer)
 
    for (it=0; it<rdata->surfaces_count; it++)
    {
-      gf_surface_free(rdata->surface[it]);
+      if (rdata->surface[it]!=NULL)
+      {
+         gf_surface_free(rdata->surface[it]);
+      }
    }
 }
 

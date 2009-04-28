@@ -37,6 +37,8 @@
 #include "SDL_qnxgf.h"
 #include "SDL_gf_render.h"
 #include "SDL_gf_pixelfmt.h"
+#include "SDL_gf_opengles.h"
+#include "SDL_gf_input.h"
 
 /******************************************************************************/
 /* SDL Generic video modes, which could provide GF                            */
@@ -248,6 +250,13 @@ static SDL_VideoDevice* qnxgf_create(int devindex)
       return NULL;
    }
 
+   if (gfdata->gfdev_info.description==NULL)
+   {
+      gf_dev_detach(gfdata->gfdev);
+      SDL_SetError("GF: Failed to initialize graphics driver");
+      return NULL;
+   }
+
    /* Setup amount of available displays and current display */
    device->num_displays=0;
    device->current_display=0;
@@ -312,6 +321,10 @@ int qnxgf_videoinit(_THIS)
    uint32_t it;
    uint32_t jt;
    char* override;
+   int32_t status;
+
+   /* By default GF uses buffer swap on vsync */
+   gfdata->swapinterval=1;
 
    /* Add each detected output to SDL */
    for (it=0; it<gfdata->gfdev_info.ndisplays; it++)
@@ -319,7 +332,6 @@ int qnxgf_videoinit(_THIS)
       SDL_VideoDisplay  display;
       SDL_DisplayMode   current_mode;
       SDL_DisplayData*  didata;
-      int status;
 
       didata=(SDL_DisplayData*)SDL_calloc(1, sizeof(SDL_DisplayData));
       if (didata==NULL)
@@ -329,6 +341,36 @@ int qnxgf_videoinit(_THIS)
          return -1;
       }
 
+      /* Set default cursor settings, maximum 128x128 cursor */
+      didata->cursor_visible=SDL_FALSE;
+      didata->cursor.type=GF_CURSOR_BITMAP;
+      didata->cursor.hotspot.x=0;
+      didata->cursor.hotspot.y=0;
+      didata->cursor.cursor.bitmap.w=SDL_VIDEO_GF_MAX_CURSOR_SIZE;
+      didata->cursor.cursor.bitmap.h=SDL_VIDEO_GF_MAX_CURSOR_SIZE;
+      didata->cursor.cursor.bitmap.stride=(didata->cursor.cursor.bitmap.w+7)/
+                                          (sizeof(uint8_t)*8);
+      didata->cursor.cursor.bitmap.color0=0x00000000;
+      didata->cursor.cursor.bitmap.color1=0x00000000;
+      didata->cursor.cursor.bitmap.image0=SDL_calloc(sizeof(uint8_t), (didata->cursor.cursor.bitmap.w+7)*
+                                          didata->cursor.cursor.bitmap.h/(sizeof(uint8_t)*8));
+      if (didata->cursor.cursor.bitmap.image0==NULL)
+      {
+         SDL_free(didata);
+         SDL_OutOfMemory();
+         return -1;
+      }
+      didata->cursor.cursor.bitmap.image1=SDL_calloc(sizeof(uint8_t), (didata->cursor.cursor.bitmap.w+7)*
+                                   didata->cursor.cursor.bitmap.h/(sizeof(uint8_t)*8));
+      if (didata->cursor.cursor.bitmap.image1==NULL)
+      {
+         SDL_OutOfMemory();
+         SDL_free((void*)didata->cursor.cursor.bitmap.image0);
+         SDL_free(didata);
+         return -1;
+      }
+
+      /* Query current display settings */
       status=gf_display_query(gfdata->gfdev, it, &didata->display_info);
       if (status==GF_ERR_OK)
       {
@@ -342,6 +384,8 @@ int qnxgf_videoinit(_THIS)
       else
       {
          /* video initialization problem */
+         SDL_free((void*)didata->cursor.cursor.bitmap.image0);
+         SDL_free((void*)didata->cursor.cursor.bitmap.image1);
          SDL_free(didata);
          SDL_SetError("GF: Display query failed");
          return -1;
@@ -352,6 +396,8 @@ int qnxgf_videoinit(_THIS)
       if (status!=GF_ERR_OK)
       {
          /* video initialization problem */
+         SDL_free((void*)didata->cursor.cursor.bitmap.image0);
+         SDL_free((void*)didata->cursor.cursor.bitmap.image1);
          SDL_free(didata);
          SDL_SetError("GF: Couldn't attach to display");
          return -1;
@@ -364,17 +410,63 @@ int qnxgf_videoinit(_THIS)
       status=gf_layer_attach(&didata->layer, didata->display, didata->display_info.main_layer_index, 0);
       if (status!=GF_ERR_OK)
       {
-         SDL_SetError("GF: Couldn't attach to main layer, it could be busy");
-
          /* Failed to attach to main layer */
+         SDL_free((void*)didata->cursor.cursor.bitmap.image0);
+         SDL_free((void*)didata->cursor.cursor.bitmap.image1);
+         SDL_free(didata);
+         SDL_SetError("GF: Couldn't attach to main layer, it could be busy");
+         return -1;
+      }
+
+      /* Mark main display layer is attached */
+      didata->layer_attached=SDL_TRUE;
+
+      /* Set layer source and destination viewport */
+      gf_layer_set_src_viewport(didata->layer, 0, 0, current_mode.w-1, current_mode.h-1);
+      gf_layer_set_dst_viewport(didata->layer, 0, 0, current_mode.w-1, current_mode.h-1);
+
+      /* Create main visible on display surface */
+      status=gf_surface_create_layer(&didata->surface[0], &didata->layer,
+             1, 0, current_mode.w, current_mode.h,
+             qnxgf_sdl_to_gf_pixelformat(current_mode.format),
+             NULL, GF_SURFACE_CREATE_2D_ACCESSIBLE | GF_SURFACE_CREATE_3D_ACCESSIBLE |
+             GF_SURFACE_CREATE_SHAREABLE);
+      if (status!=GF_ERR_OK)
+      {
+         gf_layer_disable(didata->layer);
+         gf_layer_detach(didata->layer);
+         didata->layer_attached=SDL_FALSE;
+         SDL_free((void*)didata->cursor.cursor.bitmap.image0);
+         SDL_free((void*)didata->cursor.cursor.bitmap.image1);
+         SDL_free(didata);
+         SDL_SetError("GF: Can't create main layer surface at init (%d)\n", status);
+         return -1;
+      }
+
+      /* Set just created surface as main visible on the layer */
+//      gf_layer_set_surfaces(didata->layer, &didata->surface[0], 1);
+
+      /* Update layer parameters */
+      status=gf_layer_update(didata->layer, GF_LAYER_UPDATE_NO_WAIT_IDLE);
+      if (status!=GF_ERR_OK)
+      {
+         /* Free allocated surface */
+         gf_surface_free(didata->surface[0]);
+         didata->surface[0]=NULL;
+
+         /* Disable and detach from layer */
+         gf_layer_disable(didata->layer);
+         gf_layer_detach(didata->layer);
+         didata->layer_attached=SDL_FALSE;
+         SDL_free((void*)didata->cursor.cursor.bitmap.image0);
+         SDL_free((void*)didata->cursor.cursor.bitmap.image1);
+         SDL_free(didata);
+         SDL_SetError("GF: Can't update layer parameters\n");
          return -1;
       }
 
       /* Enable layer in case if hardware supports layer enable/disable */
       gf_layer_enable(didata->layer);
-
-      /* Mark main display layer is attached */
-      didata->layer_attached=SDL_TRUE;
 
       /* Copy device name for each display */
       SDL_strlcpy(didata->description, gfdata->gfdev_info.description, SDL_VIDEO_GF_DEVICENAME_MAX-1);
@@ -395,9 +487,9 @@ int qnxgf_videoinit(_THIS)
 
       /* Initialize display structure */
       SDL_zero(display);
-      display.desktop_mode = current_mode;
-      display.current_mode = current_mode;
-      display.driverdata = didata;
+      display.desktop_mode=current_mode;
+      display.current_mode=current_mode;
+      display.driverdata=didata;
       didata->current_mode=current_mode;
       SDL_AddVideoDisplay(&display);
 
@@ -411,10 +503,25 @@ int qnxgf_videoinit(_THIS)
             didata->custom_refresh=0;
          }
       }
+
+      /* Get all display modes for this display */
+      _this->current_display=it;
+      qnxgf_getdisplaymodes(_this);
    }
+
+   /* Restore default display */
+   _this->current_display=0;
 
    /* Add GF renderer to SDL */
    gf_addrenderdriver(_this);
+
+   /* Add GF input devices */
+   status=gf_addinputdevices(_this);
+   if (status!=0)
+   {
+      /* SDL error is set by gf_addinputdevices() function */
+      return -1;
+   }
 
    /* video has been initialized successfully */
    return 1;
@@ -425,10 +532,57 @@ void qnxgf_videoquit(_THIS)
    SDL_DisplayData* didata;
    uint32_t it;
 
-   /* SDL will restore our desktop mode on exit */
+   /* Delete GF input devices */
+   gf_delinputdevices(_this);
+
+   /* SDL will restore old desktop mode on exit */
    for(it=0; it<_this->num_displays; it++)
    {
       didata=_this->displays[it].driverdata;
+
+      /* Free cursor image */
+      if (didata->cursor.cursor.bitmap.image0!=NULL)
+      {
+         SDL_free((void*)didata->cursor.cursor.bitmap.image0);
+      }
+      if (didata->cursor.cursor.bitmap.image1!=NULL)
+      {
+         SDL_free((void*)didata->cursor.cursor.bitmap.image1);
+      }
+
+      /* Free main surface */
+      if (didata->surface[0]!=NULL)
+      {
+         gf_surface_free(didata->surface[0]);
+         didata->surface[0]=NULL;
+      }
+
+      /* Free back surface */
+      if (didata->surface[1]!=NULL)
+      {
+         gf_surface_free(didata->surface[1]);
+         didata->surface[1]=NULL;
+      }
+
+      /* Free second back surface */
+      if (didata->surface[2]!=NULL)
+      {
+         gf_surface_free(didata->surface[2]);
+         didata->surface[2]=NULL;
+      }
+
+      /* Detach layer before quit */
+      if (didata->layer_attached==SDL_TRUE)
+      {
+         /* Disable layer if hardware supports this */
+         gf_layer_disable(didata->layer);
+
+         /* Detach from layer, free it for others */
+         gf_layer_detach(didata->layer);
+
+         /* Mark it as detached */
+         didata->layer_attached=SDL_FALSE;
+      }
 
       /* Detach from selected display */
       gf_display_detach(didata->display);
@@ -523,7 +677,7 @@ int qnxgf_setdisplaymode(_THIS, SDL_DisplayMode* mode)
 {
    SDL_DisplayData* didata=(SDL_DisplayData*)SDL_CurrentDisplay.driverdata;
    uint32_t refresh_rate=0;
-   int result;
+   int status;
 
    /* Current display dimensions and bpp are no more valid */
    didata->current_mode.format=SDL_PIXELFORMAT_UNKNOWN;
@@ -617,6 +771,27 @@ int qnxgf_setdisplaymode(_THIS, SDL_DisplayMode* mode)
       }
    }
 
+   /* Free main surface */
+   if (didata->surface[0]!=NULL)
+   {
+      gf_surface_free(didata->surface[0]);
+      didata->surface[0]=NULL;
+   }
+
+   /* Free back surface */
+   if (didata->surface[1]!=NULL)
+   {
+      gf_surface_free(didata->surface[1]);
+      didata->surface[1]=NULL;
+   }
+
+   /* Free second back surface */
+   if (didata->surface[2]!=NULL)
+   {
+      gf_surface_free(didata->surface[2]);
+      didata->surface[2]=NULL;
+   }
+
    /* Detach layer before switch to new graphics mode */
    if (didata->layer_attached==SDL_TRUE)
    {
@@ -631,9 +806,9 @@ int qnxgf_setdisplaymode(_THIS, SDL_DisplayMode* mode)
    }
 
    /* Set new display video mode */
-   result=gf_display_set_mode(didata->display, mode->w, mode->h, refresh_rate,
+   status=gf_display_set_mode(didata->display, mode->w, mode->h, refresh_rate,
                               qnxgf_sdl_to_gf_pixelformat(mode->format), 0);
-   if (result!=GF_ERR_OK)
+   if (status!=GF_ERR_OK)
    {
       /* Display mode/resolution switch has been failed */
       SDL_SetError("GF: Mode is not supported by graphics driver");
@@ -646,8 +821,8 @@ int qnxgf_setdisplaymode(_THIS, SDL_DisplayMode* mode)
    }
 
    /* Attach to main display layer */
-   result=gf_layer_attach(&didata->layer, didata->display, didata->display_info.main_layer_index, 0);
-   if (result!=GF_ERR_OK)
+   status=gf_layer_attach(&didata->layer, didata->display, didata->display_info.main_layer_index, 0);
+   if (status!=GF_ERR_OK)
    {
       SDL_SetError("GF: Couldn't attach to main layer, it could be busy");
 
@@ -655,11 +830,55 @@ int qnxgf_setdisplaymode(_THIS, SDL_DisplayMode* mode)
       return -1;
    }
 
-   /* Enable layer in case if hardware supports layer enable/disable */
-   gf_layer_enable(didata->layer);
-
    /* Mark main display layer is attached */
    didata->layer_attached=SDL_TRUE;
+
+   /* Set layer source and destination viewport */
+   gf_layer_set_src_viewport(didata->layer, 0, 0, mode->w-1, mode->h-1);
+   gf_layer_set_dst_viewport(didata->layer, 0, 0, mode->w-1, mode->h-1);
+
+   /* Create main visible on display surface */
+   status=gf_surface_create_layer(&didata->surface[0], &didata->layer, 1, 0,
+          mode->w, mode->h, qnxgf_sdl_to_gf_pixelformat(mode->format),
+          NULL, GF_SURFACE_CREATE_2D_ACCESSIBLE | GF_SURFACE_CREATE_3D_ACCESSIBLE |
+          GF_SURFACE_CREATE_SHAREABLE);
+   if (status!=GF_ERR_OK)
+   {
+      gf_layer_disable(didata->layer);
+      gf_layer_detach(didata->layer);
+      didata->layer_attached=SDL_FALSE;
+      SDL_SetError("GF: Can't create main layer surface at modeswitch (%d)\n", status);
+      return -1;
+   }
+
+   /* Set just created surface as main visible on the layer */
+   gf_layer_set_surfaces(didata->layer, &didata->surface[0], 1);
+
+   /* Update layer parameters */
+   status=gf_layer_update(didata->layer, GF_LAYER_UPDATE_NO_WAIT_IDLE);
+   if (status!=GF_ERR_OK)
+   {
+      /* Free main surface */
+      gf_surface_free(didata->surface[0]);
+      didata->surface[0]=NULL;
+
+      /* Detach layer */
+      gf_layer_disable(didata->layer);
+      gf_layer_detach(didata->layer);
+      didata->layer_attached=SDL_FALSE;
+      SDL_SetError("GF: Can't update layer parameters\n");
+      return -1;
+   }
+
+   /* Restore cursor if it was visible */
+   if (didata->cursor_visible==SDL_TRUE)
+   {
+      gf_cursor_set(didata->display, 0, &didata->cursor);
+      gf_cursor_enable(didata->display, 0);
+   }
+
+   /* Enable layer in case if hardware supports layer enable/disable */
+   gf_layer_enable(didata->layer);
 
    return 0;
 }
@@ -766,7 +985,7 @@ int qnxgf_createwindow(_THIS, SDL_Window* window)
       }
    }
 
-   /* Setup our own window decorations, which are depend on fullscreen mode */
+   /* Setup our own window decorations and states, which are depend on fullscreen mode */
    window->flags|=SDL_WINDOW_SHOWN | SDL_WINDOW_BORDERLESS |
                   SDL_WINDOW_MAXIMIZED | SDL_WINDOW_INPUT_GRABBED |
                   SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS;
@@ -822,6 +1041,13 @@ int qnxgf_createwindow(_THIS, SDL_Window* window)
          return -1;
       #endif /* SDL_VIDEO_OPENGL_ES */
    }
+
+   /* Enable mouse event collecting */
+   hiddi_enable_mouse();
+
+   /* By default last created window got a input focus */
+   SDL_SetKeyboardFocus(0, window->id);
+   SDL_SetMouseFocus(0, window->id);
 
    /* Window has been successfully created */
    return 0;
@@ -896,8 +1122,8 @@ void qnxgf_destroywindow(_THIS, SDL_Window* window)
          if (wdata->target_created==SDL_TRUE)
          {
             gf_3d_target_free(wdata->target);
+            wdata->target_created==SDL_FALSE;
          }
-
 
          gfdata->egl_refcount--;
          if (gfdata->egl_refcount==0)
@@ -1001,8 +1227,22 @@ void* qnxgf_gl_getprocaddres(_THIS, const char* proc)
          }
       }
 
+      /* Add emulated OpenGL ES 1.1 functions */
+      if (SDL_strcmp(proc, "glTexParameteri")==0)
+      {
+         return glTexParameteri;
+      }
+      if (SDL_strcmp(proc, "glTexParameteriv")==0)
+      {
+         return glTexParameteriv;
+      }
+      if (SDL_strcmp(proc, "glColor4ub")==0)
+      {
+         return glColor4ub;
+      }
+
       /* Failed to get GL ES function address pointer */
-      SDL_SetError("GF: Cannot locate given function name");
+      SDL_SetError("GF: Cannot locate OpenGL ES function name");
       return NULL;
    #else
       SDL_SetError("GF: OpenGL ES support is not compiled in");
@@ -1036,6 +1276,125 @@ SDL_GLContext qnxgf_gl_createcontext(_THIS, SDL_Window* window)
       EGLint           configs;
       uint32_t         surfaces;
       uint32_t         attr_pos;
+      EGLint           attr_value;
+      EGLint           cit;
+
+      /* Choose buffeingr scheme */
+      if (!_this->gl_config.double_buffer)
+      {
+         surfaces=1;
+      }
+      else
+      {
+         surfaces=2;
+      }
+
+      /* Free main surface */
+      if (didata->surface[0]!=NULL)
+      {
+         gf_surface_free(didata->surface[0]);
+         didata->surface[0]=NULL;
+      }
+
+      /* Free back surface */
+      if (didata->surface[1]!=NULL)
+      {
+         gf_surface_free(didata->surface[1]);
+         didata->surface[1]=NULL;
+      }
+
+      /* Free second back surface */
+      if (didata->surface[2]!=NULL)
+      {
+         gf_surface_free(didata->surface[2]);
+         didata->surface[2]=NULL;
+      }
+
+      /* Detach layer before switch to new graphics mode */
+      if (didata->layer_attached==SDL_TRUE)
+      {
+         /* Disable layer if hardware supports this */
+         gf_layer_disable(didata->layer);
+
+         /* Detach from layer, free it for others */
+         gf_layer_detach(didata->layer);
+
+         /* Mark it as detached */
+         didata->layer_attached=SDL_FALSE;
+      }
+
+      /* Attach to main display layer */
+      gfstatus=gf_layer_attach(&didata->layer, didata->display, didata->display_info.main_layer_index, 0);
+      if (gfstatus!=GF_ERR_OK)
+      {
+         SDL_SetError("GF: Couldn't attach to main layer, it could be busy");
+
+         /* Failed to attach to main displayable layer */
+         return NULL;
+      }
+
+      /* Mark main display layer is attached */
+      didata->layer_attached=SDL_TRUE;
+
+      /* Set layer source and destination viewport */
+      gf_layer_set_src_viewport(didata->layer, 0, 0, didata->current_mode.w-1, didata->current_mode.h-1);
+      gf_layer_set_dst_viewport(didata->layer, 0, 0, didata->current_mode.w-1, didata->current_mode.h-1);
+
+      /* Create main visible on display surface */
+      gfstatus=gf_surface_create_layer(&didata->surface[0], &didata->layer, 1, 0,
+               didata->current_mode.w, didata->current_mode.h, qnxgf_sdl_to_gf_pixelformat(didata->current_mode.format),
+               NULL, GF_SURFACE_CREATE_2D_ACCESSIBLE | GF_SURFACE_CREATE_3D_ACCESSIBLE |
+               GF_SURFACE_CREATE_SHAREABLE);
+      if (gfstatus!=GF_ERR_OK)
+      {
+         gf_layer_disable(didata->layer);
+         gf_layer_detach(didata->layer);
+         didata->layer_attached=SDL_FALSE;
+         SDL_SetError("GF: Can't create main layer surface at glctx (%d)\n", gfstatus);
+         return NULL;
+      }
+
+      /* Set just created surface as main visible on the layer */
+//      gf_layer_set_surfaces(didata->layer, &didata->surface[0], 1);
+
+      if (surfaces>1)
+      {
+         /* Create back display surface */
+         gfstatus=gf_surface_create_layer(&didata->surface[1], &didata->layer, 1, 0,
+                  didata->current_mode.w, didata->current_mode.h, qnxgf_sdl_to_gf_pixelformat(didata->current_mode.format),
+                  NULL, GF_SURFACE_CREATE_2D_ACCESSIBLE | GF_SURFACE_CREATE_3D_ACCESSIBLE |
+                  GF_SURFACE_CREATE_SHAREABLE);
+         if (gfstatus!=GF_ERR_OK)
+         {
+            gf_surface_free(didata->surface[0]);
+            gf_layer_disable(didata->layer);
+            gf_layer_detach(didata->layer);
+            didata->layer_attached=SDL_FALSE;
+            SDL_SetError("GF: Can't create main layer surface at glctx (%d)\n", gfstatus);
+            return NULL;
+         }
+      }
+
+      /* Update layer parameters */
+      gfstatus=gf_layer_update(didata->layer, GF_LAYER_UPDATE_NO_WAIT_IDLE);
+      if (gfstatus!=GF_ERR_OK)
+      {
+         /* Free main and back surfaces */
+         gf_surface_free(didata->surface[1]);
+         didata->surface[1]=NULL;
+         gf_surface_free(didata->surface[0]);
+         didata->surface[0]=NULL;
+
+         /* Detach layer */
+         gf_layer_disable(didata->layer);
+         gf_layer_detach(didata->layer);
+         didata->layer_attached=SDL_FALSE;
+         SDL_SetError("GF: Can't update layer parameters\n");
+         return NULL;
+      }
+
+      /* Enable layer in case if hardware supports layer enable/disable */
+      gf_layer_enable(didata->layer);
 
       /* Prepare attributes list to pass them to OpenGL ES */
       attr_pos=0;
@@ -1069,19 +1428,6 @@ SDL_GLContext qnxgf_gl_createcontext(_THIS, SDL_Window* window)
          wdata->gles_attributes[attr_pos++]=_this->gl_config.buffer_size;
       }
 
-      /* OpenGL ES 1.0 uses double buffer by default, so if application */
-      /* do not requested double buffering, switch to single buffer     */
-      if (!_this->gl_config.double_buffer)
-      {
-         wdata->gles_attributes[attr_pos++]=EGL_SINGLE_BUFFER;
-         wdata->gles_attributes[attr_pos++]=EGL_TRUE;
-         surfaces=1;
-      }
-      else
-      {
-         surfaces=2;
-      }
-
       /* Set number of samples in multisampling */
       if (_this->gl_config.multisamplesamples)
       {
@@ -1100,15 +1446,161 @@ SDL_GLContext qnxgf_gl_createcontext(_THIS, SDL_Window* window)
       wdata->gles_attributes[attr_pos]=EGL_NONE;
 
       /* Request first suitable framebuffer configuration */
-      status=eglChooseConfig(gfdata->egldisplay, wdata->gles_attributes, &wdata->gles_config, 1, &configs);
+      status=eglChooseConfig(gfdata->egldisplay, wdata->gles_attributes,
+                             wdata->gles_configs, SDL_VIDEO_GF_OPENGLES_CONFS, &configs);
       if (status!=EGL_TRUE)
       {
          SDL_SetError("GF: Can't find closest configuration for OpenGL ES");
          return NULL;
       }
 
+      /* Check if nothing has been found, try "don't care" settings */
+      if (configs==0)
+      {
+         int32_t it;
+         int32_t jt;
+         GLint   depthbits[4]={32, 24, 16, EGL_DONT_CARE};
+
+         for (it=0; it<4; it++)
+         {
+            for (jt=16; jt>=0; jt--)
+            {
+               /* Don't care about color buffer bits, use what exist */
+               /* Replace previous data set with EGL_DONT_CARE       */
+               attr_pos=0;
+               wdata->gles_attributes[attr_pos++]=EGL_NATIVE_VISUAL_ID;
+               wdata->gles_attributes[attr_pos++]=qnxgf_sdl_to_gf_pixelformat(didata->current_mode.format);
+               wdata->gles_attributes[attr_pos++]=EGL_RED_SIZE;
+               wdata->gles_attributes[attr_pos++]=EGL_DONT_CARE;
+               wdata->gles_attributes[attr_pos++]=EGL_GREEN_SIZE;
+               wdata->gles_attributes[attr_pos++]=EGL_DONT_CARE;
+               wdata->gles_attributes[attr_pos++]=EGL_BLUE_SIZE;
+               wdata->gles_attributes[attr_pos++]=EGL_DONT_CARE;
+               wdata->gles_attributes[attr_pos++]=EGL_ALPHA_SIZE;
+               wdata->gles_attributes[attr_pos++]=EGL_DONT_CARE;
+               wdata->gles_attributes[attr_pos++]=EGL_BUFFER_SIZE;
+               wdata->gles_attributes[attr_pos++]=EGL_DONT_CARE;
+
+               /* Try to find requested or smallest depth */
+               if (_this->gl_config.depth_size)
+               {
+                  wdata->gles_attributes[attr_pos++]=EGL_DEPTH_SIZE;
+                  wdata->gles_attributes[attr_pos++]=depthbits[it];
+               }
+               else
+               {
+                  wdata->gles_attributes[attr_pos++]=EGL_DEPTH_SIZE;
+                  wdata->gles_attributes[attr_pos++]=EGL_DONT_CARE;
+               }
+
+               if (_this->gl_config.stencil_size)
+               {
+                  wdata->gles_attributes[attr_pos++]=EGL_STENCIL_SIZE;
+                  wdata->gles_attributes[attr_pos++]=jt;
+               }
+               else
+               {
+                  wdata->gles_attributes[attr_pos++]=EGL_STENCIL_SIZE;
+                  wdata->gles_attributes[attr_pos++]=EGL_DONT_CARE;
+
+                  /* exit from stencil loop */
+                  jt=0;
+               }
+
+               /* Don't care about antialiasing */
+               wdata->gles_attributes[attr_pos++]=EGL_SAMPLES;
+               wdata->gles_attributes[attr_pos++]=EGL_DONT_CARE;
+               wdata->gles_attributes[attr_pos++]=EGL_SAMPLE_BUFFERS;
+               wdata->gles_attributes[attr_pos++]=EGL_DONT_CARE;
+               wdata->gles_attributes[attr_pos]=EGL_NONE;
+
+               /* Request first suitable framebuffer configuration */
+               status=eglChooseConfig(gfdata->egldisplay, wdata->gles_attributes,
+                                      wdata->gles_configs, SDL_VIDEO_GF_OPENGLES_CONFS, &configs);
+               if (status!=EGL_TRUE)
+               {
+                  SDL_SetError("Photon: Can't find closest configuration for OpenGL ES");
+                  return NULL;
+               }
+               if (configs!=0)
+               {
+                  break;
+               }
+            }
+            if (configs!=0)
+            {
+               break;
+            }
+         }
+
+         /* No available configs */
+         if (configs==0)
+         {
+            SDL_SetError("Photon: Can't find any configuration for OpenGL ES");
+            return NULL;
+         }
+      }
+
+      /* Initialize config index */
+      wdata->gles_config=0;
+
+      /* Now check each configuration to find out the best */
+      for (cit=0; cit<configs; cit++)
+      {
+         uint32_t stencil_found;
+         uint32_t depth_found;
+
+         stencil_found=0;
+         depth_found=0;
+
+         if (_this->gl_config.stencil_size)
+         {
+            status=eglGetConfigAttrib(gfdata->egldisplay, wdata->gles_configs[cit], EGL_STENCIL_SIZE, &attr_value);
+            if (status==EGL_TRUE)
+            {
+               if (attr_value!=0)
+               {
+                  stencil_found=1;
+               }
+            }
+         }
+         else
+         {
+            stencil_found=1;
+         }
+
+         if (_this->gl_config.depth_size)
+         {
+            status=eglGetConfigAttrib(gfdata->egldisplay, wdata->gles_configs[cit], EGL_DEPTH_SIZE, &attr_value);
+            if (status==EGL_TRUE)
+            {
+               if (attr_value!=0)
+               {
+                  depth_found=1;
+               }
+            }
+         }
+         else
+         {
+            depth_found=1;
+         }
+
+         /* Exit from loop if found appropriate configuration */
+         if ((depth_found!=0) && (stencil_found!=0))
+         {
+            break;
+         }
+      }
+
+      /* If best could not be found, use first */
+      if (cit==configs)
+      {
+         cit=0;
+      }
+      wdata->gles_config=cit;
+
       /* Create OpenGL ES context */
-      wdata->gles_context=eglCreateContext(gfdata->egldisplay, wdata->gles_config, EGL_NO_CONTEXT, NULL);
+      wdata->gles_context=eglCreateContext(gfdata->egldisplay, wdata->gles_configs[wdata->gles_config], EGL_NO_CONTEXT, NULL);
       if (wdata->gles_context==EGL_NO_CONTEXT)
       {
          SDL_SetError("GF: OpenGL ES context creation has been failed");
@@ -1119,13 +1611,13 @@ SDL_GLContext qnxgf_gl_createcontext(_THIS, SDL_Window* window)
       if (wdata->target_created==SDL_TRUE)
       {
          gf_3d_target_free(wdata->target);
+         wdata->target_created==SDL_FALSE;
       }
 
       /* Create surface(s) target for OpenGL ES */
-      gfstatus=gf_3d_target_create(&wdata->target, didata->layer, NULL,
+      gfstatus=gf_3d_target_create(&wdata->target, didata->layer, &didata->surface[0],
                surfaces, didata->current_mode.w, didata->current_mode.h,
                qnxgf_sdl_to_gf_pixelformat(didata->current_mode.format));
-
       if (gfstatus!=GF_ERR_OK)
       {
          /* Destroy just created context */
@@ -1143,7 +1635,7 @@ SDL_GLContext qnxgf_gl_createcontext(_THIS, SDL_Window* window)
       }
 
       /* Create target rendering surface on whole screen */
-      wdata->gles_surface=eglCreateWindowSurface(gfdata->egldisplay, wdata->gles_config, wdata->target, NULL);
+      wdata->gles_surface=eglCreateWindowSurface(gfdata->egldisplay, wdata->gles_configs[wdata->gles_config], wdata->target, NULL);
       if (wdata->gles_surface==EGL_NO_SURFACE)
       {
          /* Destroy 3d target */
@@ -1192,7 +1684,39 @@ SDL_GLContext qnxgf_gl_createcontext(_THIS, SDL_Window* window)
       /* Always clear stereo enable, since OpenGL ES do not supports stereo */
       _this->gl_config.stereo=0;
 
-      /* Failed to create GL ES context */
+      /* Get back samples and samplebuffers configurations. Rest framebuffer */
+      /* parameters could be obtained through the OpenGL ES API              */
+      status=eglGetConfigAttrib(gfdata->egldisplay, wdata->gles_configs[wdata->gles_config], EGL_SAMPLES, &attr_value);
+      if (status==EGL_TRUE)
+      {
+         _this->gl_config.multisamplesamples=attr_value;
+      }
+      status=eglGetConfigAttrib(gfdata->egldisplay, wdata->gles_configs[wdata->gles_config], EGL_SAMPLE_BUFFERS, &attr_value);
+      if (status==EGL_TRUE)
+      {
+         _this->gl_config.multisamplebuffers=attr_value;
+      }
+
+      /* Get back stencil and depth buffer sizes */
+      status=eglGetConfigAttrib(gfdata->egldisplay, wdata->gles_configs[wdata->gles_config], EGL_DEPTH_SIZE, &attr_value);
+      if (status==EGL_TRUE)
+      {
+         _this->gl_config.depth_size=attr_value;
+      }
+      status=eglGetConfigAttrib(gfdata->egldisplay, wdata->gles_configs[wdata->gles_config], EGL_STENCIL_SIZE, &attr_value);
+      if (status==EGL_TRUE)
+      {
+         _this->gl_config.stencil_size=attr_value;
+      }
+
+      /* Restore cursor if it was visible */
+      if (didata->cursor_visible==SDL_TRUE)
+      {
+         gf_cursor_set(didata->display, 0, &didata->cursor);
+         gf_cursor_enable(didata->display, 0);
+      }
+
+      /* GL ES context was successfully created */
       return wdata->gles_context;
    #else
       SDL_SetError("GF: OpenGL ES support is not compiled in");
@@ -1283,6 +1807,10 @@ void qnxgf_gl_swapwindow(_THIS, SDL_Window* window)
       SDL_VideoData*   gfdata=(SDL_VideoData*)_this->driverdata;
       SDL_WindowData*  wdata=(SDL_WindowData*)window->driverdata;
 
+      /* Finish all drawings */
+      glFinish();
+
+      /* Swap buffers */
       eglSwapBuffers(gfdata->egldisplay, wdata->gles_surface);
    #else
       SDL_SetError("GF: OpenGL ES support is not compiled in");
