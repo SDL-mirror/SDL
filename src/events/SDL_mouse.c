@@ -473,8 +473,8 @@ SDL_SendMouseMotion(int id, int relative, int x, int y, int pressure)
         event.motion.cursor = mouse->current_end;
         posted = (SDL_PushEvent(&event) > 0);
     }
-    mouse->last_x = x;
-    mouse->last_y = y;
+    mouse->last_x = mouse->x;
+    mouse->last_y = mouse->y;
     return posted;
 }
 
