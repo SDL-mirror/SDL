@@ -1279,6 +1279,10 @@ CheckQNXGF()
             AC_DEFINE(SDL_VIDEO_DRIVER_QNXGF)
             SOURCES="$SOURCES $srcdir/src/video/qnxgf/*.c"
             EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lgf"
+
+            # Add HIDDI library for HID support using GF
+            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lhiddi"
+
             have_video=yes
 
             CheckOpenGLESQNX
