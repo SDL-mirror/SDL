@@ -171,6 +171,9 @@ struct SDL_SysWMinfo
 
 #elif defined(SDL_VIDEO_DRIVER_PHOTON) || defined(SDL_VIDEO_DRIVER_QNXGF)
 #include <sys/neutrino.h>
+#if defined(SDL_VIDEO_OPENGL_ES)
+#include <gf/gf.h>
+#endif /* SDL_VIDEO_OPENGL_ES */
 #include <Ph.h>
 
 /* The QNX custom event structure */
