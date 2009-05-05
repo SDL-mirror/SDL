@@ -567,7 +567,7 @@ int photon_setdisplaymode(_THIS, SDL_DisplayMode* mode)
       return;
    }
 
-   /* Current display dimensions and bpp are no more valid */
+   /* Current display dimension and bpp are no more valid */
    didata->current_mode.format=SDL_PIXELFORMAT_UNKNOWN;
    didata->current_mode.w=0;
    didata->current_mode.h=0;
@@ -794,25 +794,15 @@ int photon_createwindow(_THIS, SDL_Window* window)
    /* Disable default window filling on redraw */
    PtSetArg(&winargs[winargc++], Pt_ARG_BASIC_FLAGS, Pt_TRUE, Pt_BASIC_PREVENT_FILL);
 
-   /* Set default maximum and minimum window sizes */
-   winsize.w=0;
-   winsize.h=0;
-   PtSetArg(&winargs[winargc++], Pt_ARG_MAX_HEIGHT, 0, 0);
-   PtSetArg(&winargs[winargc++], Pt_ARG_MAX_WIDTH, 0, 0);
-   PtSetArg(&winargs[winargc++], Pt_ARG_MIN_HEIGHT, 0, 0);
-   PtSetArg(&winargs[winargc++], Pt_ARG_MIN_WIDTH, 0, 0);
-   PtSetArg(&winargs[winargc++], Pt_ARG_MAXIMUM_DIM, &winsize, 0);
-   PtSetArg(&winargs[winargc++], Pt_ARG_MINIMUM_DIM, &winsize, 0);
-
-   /* Reset default managed events to disable */
+   /* Reset default managed flags to disabled state */
    PtSetArg(&winargs[winargc++], Pt_ARG_WINDOW_MANAGED_FLAGS, Pt_FALSE,
             Ph_WM_APP_DEF_MANAGED);
    /* Set which events we will not handle, let WM to handle them */
    PtSetArg(&winargs[winargc++], Pt_ARG_WINDOW_MANAGED_FLAGS, Pt_TRUE,
             Ph_WM_BACKDROP | Ph_WM_TOFRONT | Ph_WM_COLLAPSE | Ph_WM_FFRONT  |
             Ph_WM_FOCUS    | Ph_WM_HELP    | Ph_WM_HIDE     | Ph_WM_MAX     |
-            Ph_WM_MENU     | Ph_WM_MOVE    | Ph_WM_RESIZE   | Ph_WM_RESTORE |
-            Ph_WM_TASKBAR  | Ph_WM_TOBACK);
+            Ph_WM_MENU     | Ph_WM_MOVE    | Ph_WM_RESTORE  | Ph_WM_TASKBAR |
+            Ph_WM_TOBACK   | Ph_WM_RESIZE);
 
    /* Reset default notify events to disable */
    PtSetArg(&winargs[winargc++], Pt_ARG_WINDOW_NOTIFY_FLAGS, Pt_FALSE,
@@ -847,6 +837,7 @@ int photon_createwindow(_THIS, SDL_Window* window)
       if ((window->flags & SDL_WINDOW_RESIZABLE)==SDL_WINDOW_RESIZABLE)
       {
          decorations|=Ph_WM_RENDER_BORDER | Ph_WM_RENDER_RESIZE | Ph_WM_RENDER_MAX;
+         PtSetArg(&winargs[winargc++], Pt_ARG_RESIZE_FLAGS, Pt_TRUE, Pt_RESIZE_XY_AS_REQUIRED);
       }
       if ((window->flags & SDL_WINDOW_BORDERLESS)!=SDL_WINDOW_BORDERLESS)
       {
@@ -859,7 +850,7 @@ int photon_createwindow(_THIS, SDL_Window* window)
    PtSetArg(&winargs[winargc++], Pt_ARG_WINDOW_STATE, Pt_FALSE, Ph_WM_STATE_ISFOCUS);
    PtSetArg(&winargs[winargc++], Pt_ARG_WINDOW_STATE, Pt_TRUE, Ph_WM_STATE_ISALTKEY);
 
-   /* Set window dimensions */
+   /* Set window dimension */
    winsize.w=window->w;
    winsize.h=window->h;
    PtSetArg(&winargs[winargc++], Pt_ARG_DIM, &winsize, 0);
@@ -893,9 +884,6 @@ int photon_createwindow(_THIS, SDL_Window* window)
       winpos.y=window->y;
       PtSetArg(&winargs[winargc++], Pt_ARG_POS, &winpos, 0);
    }
-
-   /* Add SDL window id as user data */
-   PtSetArg(&winargs[winargc++], Pt_ARG_POINTER, (void*)window->id, 0);
 
    /* Check if window must support OpenGL ES rendering */
    if ((window->flags & SDL_WINDOW_OPENGL)==SDL_WINDOW_OPENGL)
@@ -1897,7 +1885,7 @@ void photon_gl_swapwindow(_THIS, SDL_Window* window)
       SDL_VideoData*   phdata=(SDL_VideoData*)_this->driverdata;
       SDL_WindowData*  wdata=(SDL_WindowData*)window->driverdata;
       SDL_DisplayData* didata=(SDL_DisplayData*)SDL_CurrentDisplay.driverdata;
-      PhRect_t*        dst_rect;
+      PhRect_t         dst_rect;
       PhRect_t         src_rect;
 
       if (phdata->gfinitialized!=SDL_TRUE)
@@ -1921,7 +1909,7 @@ void photon_gl_swapwindow(_THIS, SDL_Window* window)
       }
 
       /* Set blit area */
-      dst_rect=PtGetCanvas(wdata->window);
+      dst_rect=*PtGetCanvas(wdata->window);
       src_rect.ul.x=0;
       src_rect.ul.y=0;
       src_rect.lr.x=window->w-1;
@@ -1931,7 +1919,7 @@ void photon_gl_swapwindow(_THIS, SDL_Window* window)
       PgFFlush(Ph_START_DRAW);
       PgSetRegionCx(PhDCGetCurrent(), PtWidgetRid(wdata->window));
       PgClearTranslationCx(PgGetGCCx(PhDCGetCurrent()));
-      PgContextBlit(wdata->phsurface, &src_rect, NULL, dst_rect);
+      PgContextBlit(wdata->phsurface, &src_rect, NULL, &dst_rect);
       PgFFlush(Ph_DONE_DRAW);
       PgWaitHWIdle();
 
@@ -2025,6 +2013,7 @@ void photon_pumpevents(_THIS)
                  if (status==0)
                  {
                     window=NULL;
+                    wdata=NULL;
                  }
 
                  /* Event is ready */
@@ -2197,10 +2186,32 @@ void photon_pumpevents(_THIS)
                                           break;
                                        }
 
-                                       /* Cycle through each rectangle */
-                                       for (it=0; it<event->num_rects; it++)
+                                       /* Check if expose come to one of the our windows */
+                                       if ((wdata!=NULL) && (window!=NULL))
                                        {
-                                          /* TODO: update the damaged rectangles */
+                                          /* Check if window uses OpenGL ES */
+                                          if (wdata->uses_gles==SDL_TRUE)
+                                          {
+                                             PhRect_t dst_rect;
+                                             PhRect_t src_rect;
+
+                                             /* Cycle through each rectangle */
+                                             for (it=0; it<event->num_rects; it++)
+                                             {
+                                                /* Blit OpenGL ES pixmap surface directly to window region */
+                                                PgFFlush(Ph_START_DRAW);
+                                                PgSetRegionCx(PhDCGetCurrent(), PtWidgetRid(wdata->window));
+                                                PgClearTranslationCx(PgGetGCCx(PhDCGetCurrent()));
+                                                PgContextBlit(wdata->phsurface, &rects[it], NULL, &rects[it]);
+                                                PgFFlush(Ph_DONE_DRAW);
+                                                PgWaitHWIdle();
+                                             }
+                                          }
+                                          else
+                                          {
+                                             /* Normal window */
+                                             /* TODO: update the damaged rectangles */
+                                          }
                                        }
 
                                        /* Flush all blittings */
@@ -2209,12 +2220,38 @@ void photon_pumpevents(_THIS)
                                     break;
                                case Ph_CAPTURE_EXPOSE:
                                     {
-                                       /* We need to redraw entire screen */
-                                       PgFFlush(Ph_START_DRAW);
+                                       /* Check if expose come to one of the our windows */
+                                       if ((wdata!=NULL) && (window!=NULL))
+                                       {
+                                          /* Check if window uses OpenGL ES */
+                                          if (wdata->uses_gles==SDL_TRUE)
+                                          {
+                                             PhRect_t dst_rect;
+                                             PhRect_t src_rect;
 
-                                       /* TODO: redraw the whole screen */
+                                             /* Set blit area */
+                                             dst_rect=*PtGetCanvas(wdata->window);
+                                             src_rect.ul.x=0;
+                                             src_rect.ul.y=0;
+                                             src_rect.lr.x=window->w-1;
+                                             src_rect.lr.y=window->h-1;
 
-                                       PgFFlush(Ph_DONE_DRAW);
+                                             /* We need to redraw entire window */
+                                             PgFFlush(Ph_START_DRAW);
+                                             PgSetRegionCx(PhDCGetCurrent(), PtWidgetRid(wdata->window));
+                                             PgClearTranslationCx(PgGetGCCx(PhDCGetCurrent()));
+                                             PgContextBlit(wdata->phsurface, &src_rect, NULL, &dst_rect);
+                                             PgFFlush(Ph_DONE_DRAW);
+                                             PgWaitHWIdle();
+                                          }
+                                          else
+                                          {
+                                             /* Normal window */
+                                             /* TODO: update the damaged rectangles */
+
+                                             /* We need to redraw entire window */
+                                          }
+                                       }
                                     }
                                     break;
                                case Ph_GRAPHIC_EXPOSE:
@@ -2438,6 +2475,9 @@ void photon_pumpevents(_THIS)
                                              PhRegionQuery(PtWidgetRid(wdata->window), &wregion, NULL, NULL, 0);
                                              wregion.events_sense|=Ph_EV_PTR_MOTION_BUTTON | Ph_EV_PTR_MOTION_NOBUTTON;
                                              PhRegionChange(Ph_REGION_EV_SENSE, 0, &wregion, NULL, NULL);
+
+                                             /* If window got a focus, the it is visible */
+                                             SDL_SendWindowEvent(window->id, SDL_WINDOWEVENT_SHOWN, 0, 0);
                                           }
                                        }
                                        if (wmevent->event_state==Ph_WM_EVSTATE_FOCUSLOST)
@@ -2468,6 +2508,10 @@ void photon_pumpevents(_THIS)
                                     {
                                        if (window!=NULL)
                                        {
+                                          /* Set new window position after resize */
+                                          SDL_SendWindowEvent(window->id, SDL_WINDOWEVENT_MOVED, wmevent->pos.x, wmevent->pos.y);
+                                          /* Set new window size after resize */
+                                          SDL_SendWindowEvent(window->id, SDL_WINDOWEVENT_RESIZED, wmevent->size.w, wmevent->size.h);
                                        }
                                     }
                                     break;
@@ -2475,6 +2519,10 @@ void photon_pumpevents(_THIS)
                                     {
                                        if (window!=NULL)
                                        {
+                                          /* Send new window state: minimized */
+                                          SDL_SendWindowEvent(window->id, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
+                                          /* In case window is minimized, then it is hidden */
+                                          SDL_SendWindowEvent(window->id, SDL_WINDOWEVENT_HIDDEN, 0, 0);
                                        }
                                     }
                                     break;
@@ -2482,6 +2530,7 @@ void photon_pumpevents(_THIS)
                                     {
                                        if (window!=NULL)
                                        {
+                                          SDL_SendWindowEvent(window->id, SDL_WINDOWEVENT_MAXIMIZED, 0, 0);
                                        }
                                     }
                                     break;
@@ -2489,6 +2538,7 @@ void photon_pumpevents(_THIS)
                                     {
                                        if (window!=NULL)
                                        {
+                                          SDL_SendWindowEvent(window->id, SDL_WINDOWEVENT_RESTORED, 0, 0);
                                        }
                                     }
                                     break;

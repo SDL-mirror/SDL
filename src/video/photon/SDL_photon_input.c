@@ -369,7 +369,8 @@ void photon_movecursor(SDL_Cursor* cursor)
 {
    SDL_VideoDisplay* display;
    SDL_DisplayData*  didata;
-   SDL_Window*  window;
+   SDL_Window*       window;
+   SDL_WindowData*   wdata;
    SDL_WindowID window_id;
    int32_t status;
 
@@ -389,7 +390,15 @@ void photon_movecursor(SDL_Cursor* cursor)
          if (display!=NULL)
          {
             didata=(SDL_DisplayData*)display->driverdata;
-            if (didata==NULL)
+            if (didata!=NULL)
+            {
+               wdata=(SDL_WindowData*)window->driverdata;
+               if (wdata==NULL)
+               {
+                  return;
+               }
+            }
+            else
             {
                return;
             }
@@ -405,7 +414,9 @@ void photon_movecursor(SDL_Cursor* cursor)
       }
    }
 
-/*   cursor->mouse->x, cursor->mouse->y */
+   /* No need to move mouse cursor manually in the photon */
+
+   return;
 }
 
 void photon_freecursor(SDL_Cursor* cursor)
@@ -427,8 +438,10 @@ void photon_warpmouse(SDL_Mouse* mouse, SDL_WindowID windowID, int x, int y)
 {
    SDL_VideoDisplay* display;
    SDL_DisplayData*  didata;
-   SDL_Window* window;
-   int32_t status;
+   SDL_Window*       window;
+   SDL_WindowData*   wdata;
+   int16_t           wx;
+   int16_t           wy;
 
    /* Sanity checks */
    window=SDL_GetWindowFromID(windowID);
@@ -438,7 +451,15 @@ void photon_warpmouse(SDL_Mouse* mouse, SDL_WindowID windowID, int x, int y)
       if (display!=NULL)
       {
          didata=(SDL_DisplayData*)display->driverdata;
-         if (didata==NULL)
+         if (didata!=NULL)
+         {
+            wdata=(SDL_WindowData*)window->driverdata;
+            if (wdata==NULL)
+            {
+               return;
+            }
+         }
+         else
          {
             return;
          }
@@ -453,6 +474,10 @@ void photon_warpmouse(SDL_Mouse* mouse, SDL_WindowID windowID, int x, int y)
       return;
    }
 
+   PtGetAbsPosition(wdata->window, &wx, &wy);
+   PhMoveCursorAbs(PhInputGroup(NULL), wx+x, wy+y);
+
+   return;
 }
 
 void photon_freemouse(SDL_Mouse* mouse)
