@@ -29,6 +29,4 @@
 
 #include <inttypes.h>
 
-
-
 #endif /* __SDL_HIDDI_JOYSTICK_H__ */

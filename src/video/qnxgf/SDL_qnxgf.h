@@ -100,12 +100,14 @@ typedef struct GF_DeviceCaps
    uint32_t caps;
 } GF_DeviceCaps;
 
-#define SDL_GF_UNACCELERATED         0x00000000
-#define SDL_GF_ACCELERATED           0x00000001
-#define SDL_GF_NOLOWRESOLUTION       0x00000000
-#define SDL_GF_LOWRESOLUTION         0x00000002
-#define SDL_GF_UNACCELERATED_3D      0x00000000
-#define SDL_GF_ACCELERATED_3D        0x00000004
+#define SDL_GF_UNACCELERATED         0x00000000  /* driver is unaccelerated  */
+#define SDL_GF_ACCELERATED           0x00000001  /* driver is accelerated    */
+#define SDL_GF_NOLOWRESOLUTION       0x00000000  /* no modes below 640x480   */
+#define SDL_GF_LOWRESOLUTION         0x00000002  /* support modes <640x480   */
+#define SDL_GF_UNACCELERATED_3D      0x00000000  /* software OpenGL ES       */
+#define SDL_GF_ACCELERATED_3D        0x00000004  /* hardware acc. OpenGL ES  */
+#define SDL_GF_NOVIDEOMEMORY         0x00000000  /* no video memory alloc.   */
+#define SDL_GF_VIDEOMEMORY           0x00000008  /* has video memory alloc.  */
 
 /****************************************************************************/
 /* SDL_VideoDevice functions declaration                                    */

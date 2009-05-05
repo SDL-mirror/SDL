@@ -91,88 +91,88 @@ GF_DeviceCaps gf_devicename[]=
 {
    /* ATI Rage 128 graphics driver (devg-ati_rage128)      */
    {"ati_rage128", SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
-                   SDL_GF_UNACCELERATED_3D},
+                   SDL_GF_UNACCELERATED_3D | SDL_GF_VIDEOMEMORY},
    /* Fujitsu Carmine graphics driver (devg-carmine.so)    */
    {"carmine",     SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
-                   SDL_GF_ACCELERATED_3D},
+                   SDL_GF_ACCELERATED_3D | SDL_GF_VIDEOMEMORY},
    /* C&T graphics driver (devg-chips.so)                  */
    {"chips",       SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION | 
-                   SDL_GF_UNACCELERATED_3D},
+                   SDL_GF_UNACCELERATED_3D | SDL_GF_VIDEOMEMORY},
    /* Fujitsu Coral graphics driver (devg-coral.so)        */
    {"coral",       SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
-                   SDL_GF_ACCELERATED_3D},
+                   SDL_GF_ACCELERATED_3D | SDL_GF_VIDEOMEMORY},
    /* Intel integrated graphics driver (devg-extreme2.so)  */
    {"extreme2",    SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
-                   SDL_GF_ACCELERATED_3D},
+                   SDL_GF_ACCELERATED_3D | SDL_GF_VIDEOMEMORY},
    /* Unaccelerated FB driver (devg-flat.so)               */
    {"flat",        SDL_GF_UNACCELERATED | SDL_GF_LOWRESOLUTION |
-                   SDL_GF_UNACCELERATED_3D},
+                   SDL_GF_UNACCELERATED_3D | SDL_GF_NOVIDEOMEMORY},
    /* NS Geode graphics driver (devg-geode.so)             */
    {"geode",       SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
-                   SDL_GF_UNACCELERATED_3D},
+                   SDL_GF_UNACCELERATED_3D | SDL_GF_VIDEOMEMORY},
    /* Geode LX graphics driver (devg-geodelx.so)           */
    {"geodelx",     SDL_GF_ACCELERATED | SDL_GF_LOWRESOLUTION |
-                   SDL_GF_UNACCELERATED_3D},
+                   SDL_GF_UNACCELERATED_3D | SDL_GF_VIDEOMEMORY},
    /* Intel integrated graphics driver (devg-gma9xx.so)    */
    {"gma",         SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
-                   SDL_GF_ACCELERATED_3D},
+                   SDL_GF_ACCELERATED_3D | SDL_GF_VIDEOMEMORY},
    /* Intel integrated graphics driver (devg-i810.so)      */
    {"i810",        SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
-                   SDL_GF_UNACCELERATED_3D},
+                   SDL_GF_UNACCELERATED_3D | SDL_GF_VIDEOMEMORY},
    /* Intel integrated graphics driver (devg-i830.so)      */
    {"i830",        SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
-                   SDL_GF_UNACCELERATED_3D},
+                   SDL_GF_UNACCELERATED_3D | SDL_GF_VIDEOMEMORY},
    /* Geode LX graphics driver (devg-lx800.so)             */
    {"lx800",       SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
-                   SDL_GF_UNACCELERATED_3D},
+                   SDL_GF_UNACCELERATED_3D | SDL_GF_VIDEOMEMORY},
    /* Matrox Gxx graphics driver (devg-matroxg.so)         */
    {"matroxg",     SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
-                   SDL_GF_UNACCELERATED_3D},
+                   SDL_GF_UNACCELERATED_3D | SDL_GF_VIDEOMEMORY},
    /* Intel Poulsbo graphics driver (devg-poulsbo.so)      */
    {"poulsbo",     SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
-                   SDL_GF_ACCELERATED_3D},
+                   SDL_GF_ACCELERATED_3D | SDL_GF_VIDEOMEMORY},
    /* ATI Radeon driver (devg-radeon.so)                   */
    {"radeon",      SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
-                   SDL_GF_UNACCELERATED_3D},
+                   SDL_GF_UNACCELERATED_3D | SDL_GF_VIDEOMEMORY},
    /* ATI Rage driver (devg-rage.so)                       */
    {"rage",        SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
-                   SDL_GF_UNACCELERATED_3D},
+                   SDL_GF_UNACCELERATED_3D | SDL_GF_VIDEOMEMORY},
    /* S3 Savage graphics driver (devg-s3_savage.so)        */
    {"s3_savage",   SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
-                   SDL_GF_UNACCELERATED_3D},
+                   SDL_GF_UNACCELERATED_3D | SDL_GF_VIDEOMEMORY},
    /* SiS630 integrated graphics driver (devg-sis630.so)   */
    {"sis630",      SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
-                   SDL_GF_UNACCELERATED_3D},
+                   SDL_GF_UNACCELERATED_3D | SDL_GF_VIDEOMEMORY},
    /* PowerVR SGX 535 graphics driver (devg-poulsbo.so)    */
    {"sgx",         SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
-                   SDL_GF_ACCELERATED_3D},
+                   SDL_GF_ACCELERATED_3D | SDL_GF_VIDEOMEMORY},
    /* SM Voyager GX graphics driver (devg-smi5xx.so)       */
    {"smi5xx",      SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
-                   SDL_GF_UNACCELERATED_3D},
+                   SDL_GF_UNACCELERATED_3D | SDL_GF_VIDEOMEMORY},
    /* Silicon Motion graphics driver (devg-smi7xx.so)      */
    {"smi7xx",      SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
-                   SDL_GF_UNACCELERATED_3D},
+                   SDL_GF_UNACCELERATED_3D | SDL_GF_VIDEOMEMORY},
    /* SVGA unaccelerated gfx driver (devg-svga.so)         */
    {"svga",        SDL_GF_UNACCELERATED | SDL_GF_LOWRESOLUTION |
-                   SDL_GF_UNACCELERATED_3D},
+                   SDL_GF_UNACCELERATED_3D | SDL_GF_NOVIDEOMEMORY},
    /* nVidia TNT graphics driver (devg-tnt.so)             */
    {"tnt",         SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
-                   SDL_GF_UNACCELERATED_3D},
+                   SDL_GF_UNACCELERATED_3D | SDL_GF_VIDEOMEMORY},
    /* VIA integrated graphics driver (devg-tvia.so)        */
    {"tvia",        SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
-                   SDL_GF_UNACCELERATED_3D},
+                   SDL_GF_UNACCELERATED_3D | SDL_GF_VIDEOMEMORY},
    /* VIA UniChrome graphics driver (devg-unichrome.so)    */
    {"unichrome",   SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION | 
-                   SDL_GF_UNACCELERATED_3D},
+                   SDL_GF_UNACCELERATED_3D | SDL_GF_VIDEOMEMORY},
    /* VESA unaccelerated gfx driver (devg-vesa.so)         */
    {"vesa",        SDL_GF_UNACCELERATED | SDL_GF_LOWRESOLUTION |
-                   SDL_GF_UNACCELERATED_3D},
+                   SDL_GF_UNACCELERATED_3D | SDL_GF_NOVIDEOMEMORY},
    /* VmWare graphics driver (devg-volari.so)              */
    {"vmware",      SDL_GF_ACCELERATED | SDL_GF_LOWRESOLUTION |
-                   SDL_GF_UNACCELERATED_3D},
+                   SDL_GF_UNACCELERATED_3D | SDL_GF_NOVIDEOMEMORY},
    /* XGI XP10 graphics driver (devg-volari.so)            */
    {"volari",      SDL_GF_ACCELERATED | SDL_GF_LOWRESOLUTION |
-                   SDL_GF_UNACCELERATED_3D},
+                   SDL_GF_UNACCELERATED_3D | SDL_GF_VIDEOMEMORY},
    /* End of list */
    {NULL,          0x00000000}
 };
@@ -532,6 +532,8 @@ void qnxgf_videoquit(_THIS)
    SDL_DisplayData* didata;
    uint32_t it;
 
+   /* Stop collecting mouse events */
+   hiddi_disable_mouse();
    /* Delete GF input devices */
    gf_delinputdevices(_this);
 
@@ -1287,6 +1289,13 @@ SDL_GLContext qnxgf_gl_createcontext(_THIS, SDL_Window* window)
       else
       {
          surfaces=2;
+      }
+
+      /* If driver has no support of video memory allocation, then */
+      /* disable double buffering, use single buffer present copy  */
+      if ((didata->caps & SDL_GF_VIDEOMEMORY)!=SDL_GF_VIDEOMEMORY)
+      {
+         surfaces=1;
       }
 
       /* Free main surface */
