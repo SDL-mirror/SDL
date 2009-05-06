@@ -665,20 +665,20 @@ extern "C"
 
 /*  GL_OES_vertex_buffer_object */
 #ifndef GL_OES_vertex_buffer_object
-#define GL_ARRAY_BUFFER                                         0x8892
-#define GL_ELEMENT_ARRAY_BUFFER                                 0x8893
-#define GL_ARRAY_BUFFER_BINDING                                 0x8894
-#define GL_ELEMENT_ARRAY_BUFFER_BINDING                         0x8895
-#define GL_VERTEX_ARRAY_BUFFER_BINDING                          0x8896
-#define GL_NORMAL_ARRAY_BUFFER_BINDING                          0x8897
-#define GL_COLOR_ARRAY_BUFFER_BINDING                           0x8898
-#define GL_TEXTURE_COORD_ARRAY_BUFFER_BINDING                   0x889A
-#define GL_STATIC_DRAW                                          0x88E4
-#define GL_DYNAMIC_DRAW                                         0x88E8
-#define GL_WRITE_ONLY                                           0x88B9
-#define GL_BUFFER_SIZE                                          0x8764
-#define GL_BUFFER_USAGE                                         0x8765
-#define GL_BUFFER_ACCESS                                        0x88BB
+#define GL_ARRAY_BUFFER_OES                                     0x8892
+#define GL_ELEMENT_ARRAY_BUFFER_OES                             0x8893
+#define GL_ARRAY_BUFFER_BINDING_OES                             0x8894
+#define GL_ELEMENT_ARRAY_BUFFER_BINDING_OES                     0x8895
+#define GL_VERTEX_ARRAY_BUFFER_BINDING_OES                      0x8896
+#define GL_NORMAL_ARRAY_BUFFER_BINDING_OES                      0x8897
+#define GL_COLOR_ARRAY_BUFFER_BINDING_OES                       0x8898
+#define GL_TEXTURE_COORD_ARRAY_BUFFER_BINDING_OES               0x889A
+#define GL_STATIC_DRAW_OES                                      0x88E4
+#define GL_DYNAMIC_DRAW_OES                                     0x88E8
+#define GL_WRITE_ONLY_OES                                       0x88B9
+#define GL_BUFFER_SIZE_OES                                      0x8764
+#define GL_BUFFER_USAGE_OES                                     0x8765
+#define GL_BUFFER_ACCESS_OES                                    0x88BB
 #endif /* GL_OES_vertex_buffer_object */
 
 /*************************************************************/
