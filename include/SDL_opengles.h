@@ -344,6 +344,14 @@ extern "C"
 #define GL_SAMPLE_COVERAGE_VALUE          0x80AA
 #define GL_SAMPLE_COVERAGE_INVERT         0x80AB
 
+/* OpenGL ES 1.0 defines, they gone in 1.1 and 2.0 */
+#ifndef GL_MAX_ELEMENTS_VERTICES
+#define GL_MAX_ELEMENTS_VERTICES          0x80E8
+#endif /* GL_MAX_ELEMENTS_VERTICES */
+#ifndef GL_MAX_ELEMENTS_INDICES
+#define GL_MAX_ELEMENTS_INDICES           0x80E9
+#endif /* GL_MAX_ELEMENTS_INDICES */
+
 /* GetTextureParameter */
 /*      GL_TEXTURE_MAG_FILTER */
 /*      GL_TEXTURE_MIN_FILTER */
