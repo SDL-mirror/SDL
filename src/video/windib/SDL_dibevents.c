@@ -88,6 +88,74 @@ WPARAM rotateKey(WPARAM key,int direction)
 	return key;
 }
 
+/* for gapi landscape mode */
+static void GapiTransform(SDL_ScreenOrientation rotate, char hires, Sint16 *x, Sint16 *y) {
+    Sint16 rotatedX;
+    Sint16 rotatedY;
+
+    if (hires) {
+        *x = *x * 2;
+        *y = *y * 2;
+    }
+
+    switch(rotate) {
+        case SDL_ORIENTATION_UP:
+            {
+/* this code needs testing on a real device!
+   So it will be enabled later */
+/*
+#ifdef _WIN32_WCE
+#if _WIN32_WCE >= 420
+                // test device orientation
+                // FIXME: do not check every mouse message
+                DEVMODE settings;
+                SDL_memset(&settings, 0, sizeof(DEVMODE));
+                settings.dmSize = sizeof(DEVMODE);
+                settings.dmFields = DM_DISPLAYORIENTATION;
+                ChangeDisplaySettingsEx(NULL, &settings, NULL, CDS_TEST, NULL);
+                if( settings.dmOrientation == DMDO_90 )
+                {
+                    rotatedX = SDL_VideoSurface->h - *x;
+                    rotatedY = *y;
+                    *x = rotatedX;
+                    *y = rotatedY;
+                }
+#endif
+#endif */
+            }
+            break;
+               // FIXME: Older version used just SDL_VideoSurface->(w, h)
+               // w and h are "clipped" while x and y are "raw", which caused
+               // x in former and y in latter case to be clipped in a wrong direction,
+               // thus offsetting the coordinate on 2 x clip pixels
+               //     (like, 128 for 640 -> 512 clipping).
+               // We will now try to extract and use raw values.
+               // The way to do that RIGHT is do (orientation-dependent) clipping before
+               // doing this transform, but it's hardly possible.
+
+               // SEE SDL_mouse.c /ClipOffset to understand these calculations.
+        case SDL_ORIENTATION_RIGHT:
+            if (!SDL_VideoSurface)
+                break;
+                       rotatedX = (2 * ((SDL_VideoSurface->offset%SDL_VideoSurface->pitch)/
+                               SDL_VideoSurface->format->BytesPerPixel))
+                               + SDL_VideoSurface->w - *y;
+            rotatedY = *x;
+            *x = rotatedX;
+            *y = rotatedY;
+            break;
+        case SDL_ORIENTATION_LEFT:
+            if (!SDL_VideoSurface)
+                break;
+            rotatedX = *y;
+                       rotatedY = (2 * (SDL_VideoSurface->offset/SDL_VideoSurface->pitch))
+                               + SDL_VideoSurface->h - *x;
+            *x = rotatedX;
+            *y = rotatedY;
+            break;
+    }
+}
+
 #endif 
 
 
@@ -271,7 +339,7 @@ LRESULT DIB_HandleMessage(_THIS, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 	return(DefWindowProc(hwnd, msg, wParam, lParam));
 }
 
-static void DIB_GenerateMouseMotionEvent(void)
+static void DIB_GenerateMouseMotionEvent(_THIS)
 {
 	extern int mouse_relative;
 	extern int posted;
@@ -293,9 +361,9 @@ static void DIB_GenerateMouseMotionEvent(void)
 		}
 	} else if ( SDL_GetAppState() & SDL_APPMOUSEFOCUS ) {
 		ScreenToClient(SDL_Window, &mouse);
-#ifdef _WIN32_WCE
-		if (SDL_VideoSurface)
-			GapiTransform(this->hidden->userOrientation, this->hidden->hiresFix, &mouse.x, &mouse.y);
+#ifdef SDL_VIDEO_DRIVER_GAPI
+       if (SDL_VideoSurface && this->hidden->gapiInfo)
+			GapiTransform(this->hidden->gapiInfo->coordinateTransform, this->hidden->gapiInfo->hiresFix, &mouse.x, &mouse.y);
 #endif
 		posted = SDL_PrivateMouseMotion(0, 0, mouse.x, mouse.y);
 	}
@@ -312,7 +380,7 @@ void DIB_PumpEvents(_THIS)
 	}
 
 	if ( SDL_GetAppState() & SDL_APPINPUTFOCUS ) {
-		DIB_GenerateMouseMotionEvent( );
+		DIB_GenerateMouseMotionEvent( this );
 	}
 }
 
