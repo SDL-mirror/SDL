@@ -20,9 +20,11 @@
     slouken@libsdl.org
 */
 #include "SDL_config.h"
+#include "SDL_timer.h"
 
 #include "SDL_cocoavideo.h"
 #include "../../events/SDL_events_c.h"
+
 
 /* setAppleMenu disappeared from the headers in 10.4 */
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_4
@@ -165,6 +167,8 @@ Cocoa_PumpEvents(_THIS)
     NSAutoreleasePool *pool;
 
     /* Update activity every 30 seconds to prevent screensaver */
+    /* FIXME: This define isn't available with 64-bit Mac OS X? */
+#ifdef UsrActivity
     if (_this->suspend_screensaver) {
         SDL_VideoData *data = (SDL_VideoData *)_this->driverdata;
         Uint32 now = SDL_GetTicks();
@@ -174,6 +178,7 @@ Cocoa_PumpEvents(_THIS)
             data->screensaver_activity = now;
         }
     }
+#endif
 
     pool = [[NSAutoreleasePool alloc] init];
     while ([NSApp isRunning]) {
