@@ -103,9 +103,10 @@ SDL_RenderDriver GL_ES_RenderDriver = {
      (SDL_TEXTURESCALEMODE_NONE | SDL_TEXTURESCALEMODE_FAST |
       SDL_TEXTURESCALEMODE_SLOW), 2,
      {
-      SDL_PIXELFORMAT_RGB24,
-      SDL_PIXELFORMAT_ABGR8888,
-      },
+      /* OpenGL ES 1.x supported formats list */
+      SDL_PIXELFORMAT_BGR24,
+      SDL_PIXELFORMAT_ABGR8888
+     },
      0,
      0}
 };
@@ -182,7 +183,7 @@ GLES_LoadFunctions(GLES_RenderData * data)
 {
 
 #define SDL_PROC(ret,func,params) \
-	data->func = func;
+    data->func = func;
 #include "SDL_glesfuncs.h"
 #undef SDL_PROC
 
@@ -301,7 +302,6 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     data->blendMode = -1;
     data->glDisable(GL_DEPTH_TEST);
     data->glDisable(GL_CULL_FACE);
-    data->glEnable(GL_TEXTURE_2D);
     data->updateSize = SDL_TRUE;
 
     return renderer;
@@ -351,7 +351,7 @@ power_of_2(int input)
 }
 
 static int
-GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
+GLES_CreateTexture(SDL_Renderer *renderer, SDL_Texture *texture)
 {
     GLES_RenderData *renderdata = (GLES_RenderData *) renderer->driverdata;
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
@@ -362,30 +362,16 @@ GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     GLenum result;
 
     switch (texture->format) {
-    case SDL_PIXELFORMAT_INDEX1LSB:
-    case SDL_PIXELFORMAT_INDEX1MSB:
-    case SDL_PIXELFORMAT_INDEX8:
-    case SDL_PIXELFORMAT_RGB332:
-    case SDL_PIXELFORMAT_RGB444:
-    case SDL_PIXELFORMAT_RGB555:
-    case SDL_PIXELFORMAT_ARGB4444:
-    case SDL_PIXELFORMAT_ARGB1555:
     case SDL_PIXELFORMAT_BGR24:
-    case SDL_PIXELFORMAT_BGR888:
-    case SDL_PIXELFORMAT_RGB888:
-    case SDL_PIXELFORMAT_RGBA8888:
-    case SDL_PIXELFORMAT_ARGB2101010:
-    case SDL_PIXELFORMAT_ARGB8888:
-    case SDL_PIXELFORMAT_RGB24:
-        internalFormat = GL_RGB;
-        format = GL_RGB;
-        type = GL_UNSIGNED_BYTE;
-        break;
+         internalFormat = GL_RGB;
+         format = GL_RGB;
+         type = GL_UNSIGNED_BYTE;
+         break;
     case SDL_PIXELFORMAT_ABGR8888:
-        internalFormat = GL_RGBA;
-        format = GL_RGBA;
-        type = GL_UNSIGNED_BYTE;
-        break;
+         internalFormat = GL_RGBA;
+         format = GL_RGBA;
+         type = GL_UNSIGNED_BYTE;
+         break;
         /*
            These formats would be supported if SDL had the necessary pixel formats
            case SDL_PIXELFORMAT_BGR565:
@@ -403,7 +389,7 @@ GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
            format = GL_RGBA;
            type = GL_UNSIGNED_SHORT_4_4_4_4;
            break;
-         */
+        */
     default:
         SDL_SetError("Unsupported texture format");
         return -1;
@@ -428,6 +414,7 @@ GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     texture->driverdata = data;
 
     renderdata->glGetError();
+    renderdata->glEnable(GL_TEXTURE_2D);
     renderdata->glGenTextures(1, &data->texture);
 
     data->type = GL_TEXTURE_2D;
@@ -451,6 +438,7 @@ GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     renderdata->glTexImage2D(data->type, 0, internalFormat, texture_w,
                              texture_h, 0, format, type, NULL);
+    renderdata->glDisable(GL_TEXTURE_2D);
 
     result = renderdata->glGetError();
     if (result != GL_NO_ERROR) {
@@ -545,18 +533,20 @@ GLES_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture)
 }
 
 static int
-GLES_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
-                   const SDL_Rect * rect, const void *pixels, int pitch)
+GLES_UpdateTexture(SDL_Renderer *renderer, SDL_Texture *texture,
+                   const SDL_Rect *rect, const void *pixels, int pitch)
 {
     GLES_RenderData *renderdata = (GLES_RenderData *) renderer->driverdata;
     GLES_TextureData *data = (GLES_TextureData *) texture->driverdata;
     GLenum result;
 
-    SetupTextureUpdate(renderdata, texture, pitch);
     renderdata->glGetError();
+    renderdata->glEnable(data->type);
+    SetupTextureUpdate(renderdata, texture, pitch);
     renderdata->glTexSubImage2D(data->type, 0, rect->x, rect->y, rect->w,
                                 rect->h, data->format, data->formattype,
                                 pixels);
+    renderdata->glDisable(data->type);
     result = renderdata->glGetError();
     if (result != GL_NO_ERROR) {
         GLES_SetError("glTexSubImage2D()", result);
@@ -651,6 +641,8 @@ GLES_RenderPoint(SDL_Renderer * renderer, int x, int y)
     data->glDrawArrays(GL_POINTS, 0, 1);
     data->glDisableClientState(GL_VERTEX_ARRAY);
 
+    data->glDisable(GL_BLEND);
+
     return 0;
 }
 
@@ -676,6 +668,8 @@ GLES_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
     data->glEnableClientState(GL_VERTEX_ARRAY);
     data->glDrawArrays(GL_LINES, 0, 2);
     data->glDisableClientState(GL_VERTEX_ARRAY);
+
+    data->glDisable(GL_BLEND);
 
     return 0;
 }
@@ -712,6 +706,8 @@ GLES_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
     data->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     data->glDisableClientState(GL_VERTEX_ARRAY);
 
+    data->glDisable(GL_BLEND);
+
     return 0;
 }
 
@@ -727,6 +723,8 @@ GLES_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     int i;
     void *temp_buffer;          /* used for reformatting dirty rect pixels */
     void *temp_ptr;
+
+    data->glEnable(GL_TEXTURE_2D);
 
     if (texturedata->dirty.list) {
         SDL_DirtyRect *dirty;
@@ -767,7 +765,6 @@ GLES_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     }
 
     data->glBindTexture(texturedata->type, texturedata->texture);
-    data->glEnable(GL_TEXTURE_2D);
 
     if (texture->modMode) {
         data->glColor4f((GLfloat) texture->r * inv255f,
@@ -851,14 +848,17 @@ GLES_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         data->glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
         data->glEnableClientState(GL_TEXTURE_COORD_ARRAY);
         data->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
+        data->glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        data->glDisableClientState(GL_VERTEX_ARRAY);
     }
+
+    data->glDisable(GL_TEXTURE_2D);
 
     return 0;
 }
 
 static void
-GLES_RenderPresent(SDL_Renderer * renderer)
+GLES_RenderPresent(SDL_Renderer *renderer)
 {
     SDL_GL_SwapWindow(renderer->window);
 }
@@ -890,7 +890,6 @@ GLES_DestroyRenderer(SDL_Renderer * renderer)
 
     if (data) {
         if (data->context) {
-            /* SDL_GL_MakeCurrent(0, NULL); *//* doesn't do anything */
             SDL_GL_DeleteContext(data->context);
         }
         SDL_free(data);
