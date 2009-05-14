@@ -92,7 +92,7 @@ uint32_t   qsa_capture_devices;
 
 static inline void QSA_SetError(const char* fn, int status)
 {
-   SDL_SetError("QSA: %s failed: %s", fn, snd_strerror(status));
+   SDL_SetError("QSA: %s() failed: %s", fn, snd_strerror(status));
 }
 
 /* card names check to apply the workarounds */
@@ -479,6 +479,7 @@ static int QSA_OpenDevice(_THIS, const char* devname, int iscapture)
    /* Check if requested device is opened */
    if (status<0)
    {
+      this->hidden->audio_handle=NULL;
       QSA_CloseDevice(this);
       QSA_SetError("snd_pcm_open", status);
       return 0;
