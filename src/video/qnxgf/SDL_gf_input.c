@@ -262,6 +262,10 @@ int gf_showcursor(SDL_Cursor* cursor)
       {
          mdata=(SDL_MouseData*)cursor->mouse->driverdata;
          didata=(SDL_DisplayData*)mdata->didata;
+         if ((didata==NULL) || (mdata==NULL))
+         {
+            return;
+         }
       }
       else
       {
@@ -405,6 +409,10 @@ void gf_movecursor(SDL_Cursor* cursor)
    if (window_id<=0)
    {
       didata=(SDL_DisplayData*)cursor->mouse->driverdata;
+      if (didata==NULL)
+      {
+         return;
+      }
    }
    else
    {

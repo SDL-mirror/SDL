@@ -208,6 +208,7 @@ static void qnxgf_destroy(SDL_VideoDevice* device)
    if (gfdata->gfinitialized!=SDL_FALSE)
    {
       gf_dev_detach(gfdata->gfdev);
+      gfdata->gfdev=NULL;
    }
 
    if (device->driverdata!=NULL)
@@ -529,7 +530,7 @@ int qnxgf_videoinit(_THIS)
 
 void qnxgf_videoquit(_THIS)
 {
-   SDL_DisplayData* didata;
+   SDL_DisplayData* didata=NULL;
    uint32_t it;
 
    /* Stop collecting mouse events */
@@ -546,10 +547,12 @@ void qnxgf_videoquit(_THIS)
       if (didata->cursor.cursor.bitmap.image0!=NULL)
       {
          SDL_free((void*)didata->cursor.cursor.bitmap.image0);
+         didata->cursor.cursor.bitmap.image0=NULL;
       }
       if (didata->cursor.cursor.bitmap.image1!=NULL)
       {
          SDL_free((void*)didata->cursor.cursor.bitmap.image1);
+         didata->cursor.cursor.bitmap.image1=NULL;
       }
 
       /* Free main surface */
@@ -581,6 +584,7 @@ void qnxgf_videoquit(_THIS)
 
          /* Detach from layer, free it for others */
          gf_layer_detach(didata->layer);
+         didata->layer=NULL;
 
          /* Mark it as detached */
          didata->layer_attached=SDL_FALSE;
@@ -588,6 +592,7 @@ void qnxgf_videoquit(_THIS)
 
       /* Detach from selected display */
       gf_display_detach(didata->display);
+      didata->display=NULL;
    }
 }
 
