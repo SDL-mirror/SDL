@@ -53,6 +53,8 @@ static SDL_DisplayMode generic_mode[]=
    {0, 320,  200,  85,  NULL},
    {0, 320,  240,  70,  NULL}, /* 320x240 modes are 70Hz and 85Hz          */
    {0, 320,  240,  85,  NULL},
+   {0, 400,  300,  60,  NULL}, /* 400x300 mode is 60Hz only                */
+   {0, 480,  360,  60,  NULL}, /* 480x360 mode is 60Hz only                */
    {0, 512,  384,  60,  NULL}, /* 512x384 modes are 60Hz and 70Hz          */
    {0, 512,  384,  70,  NULL},
    {0, 640,  480,  60,  NULL}, /* 640x480 modes are 60Hz, 75Hz, 85Hz       */
@@ -62,10 +64,18 @@ static SDL_DisplayMode generic_mode[]=
    {0, 800,  600,  75,  NULL},
    {0, 800,  600,  85,  NULL},
    {0, 800,  480,  60,  NULL}, /* 800x480 mode is 60Hz only                */
+   {0, 848,  480,  60,  NULL}, /* 848x480 mode is 60Hz only                */
+   {0, 960,  600,  60,  NULL}, /* 960x600 mode is 60Hz only                */
    {0, 1024, 640,  60,  NULL}, /* 1024x640 mode is 60Hz only               */
    {0, 1024, 768,  60,  NULL}, /* 1024x768 modes are 60Hz, 70Hz, 75Hz      */
    {0, 1024, 768,  70,  NULL},
    {0, 1024, 768,  75,  NULL},
+   {0, 1088, 612,  60,  NULL}, /* 1088x612 mode is 60Hz only               */
+   {0, 1152, 864,  60,  NULL}, /* 1152x864 modes are 60Hz, 70Hz, 72Hz      */
+   {0, 1152, 864,  70,  NULL}, /* 75Hz and 85Hz                            */
+   {0, 1152, 864,  72,  NULL},
+   {0, 1152, 864,  75,  NULL},
+   {0, 1152, 864,  85,  NULL},
    {0, 1280, 720,  60,  NULL}, /* 1280x720 mode is 60Hz only               */
    {0, 1280, 768,  60,  NULL}, /* 1280x768 mode is 60Hz only               */
    {0, 1280, 800,  60,  NULL}, /* 1280x800 mode is 60Hz only               */
@@ -74,13 +84,17 @@ static SDL_DisplayMode generic_mode[]=
    {0, 1280, 1024, 75,  NULL}, /* 100 Hz                                   */
    {0, 1280, 1024, 85,  NULL}, /*                                          */
    {0, 1280, 1024, 100, NULL}, /*                                          */
+   {0, 1360,  768, 60,  NULL}, /* 1360x768 mode is 60Hz only               */
    {0, 1400, 1050, 60,  NULL}, /* 1400x1050 mode is 60Hz only              */
-   {0, 1440, 900,  60,  NULL}, /* 1440x900 mode is 60Hz only               */
-   {0, 1440, 960,  60,  NULL}, /* 1440x960 mode is 60Hz only               */
+   {0, 1440,  900, 60,  NULL}, /* 1440x900 mode is 60Hz only               */
+   {0, 1440,  960, 60,  NULL}, /* 1440x960 mode is 60Hz only               */
+   {0, 1600,  900, 60,  NULL}, /* 1600x900 mode is 60Hz only               */
+   {0, 1600, 1024, 60,  NULL}, /* 1600x1024 mode is 60Hz only              */
    {0, 1600, 1200, 60,  NULL}, /* 1600x1200 mode is 60Hz only              */
    {0, 1680, 1050, 60,  NULL}, /* 1680x1050 mode is 60Hz only              */
    {0, 1920, 1080, 60,  NULL}, /* 1920x1080 mode is 60Hz only              */
    {0, 1920, 1200, 60,  NULL}, /* 1920x1200 mode is 60Hz only              */
+   {0, 1920, 1440, 60,  NULL}, /* 1920x1440 mode is 60Hz only              */
    {0, 2048, 1536, 60,  NULL}, /* 2048x1536 mode is 60Hz only              */
    {0, 2048, 1080, 60,  NULL}, /* 2048x1080 mode is 60Hz only              */
    {0,    0,    0,  0,  NULL}  /* End of generic mode list                 */
