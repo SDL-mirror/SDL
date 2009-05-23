@@ -168,7 +168,7 @@ render(void)
 {
     int i;
     SDL_SetRenderDrawColor(50, 50, 50, 255);
-    SDL_RenderFill(NULL);      /* draw background (gray) */
+    SDL_RenderFill(NULL);       /* draw background (gray) */
     /* draw the drum buttons */
     for (i = 0; i < NUM_DRUMS; i++) {
         SDL_Color color =

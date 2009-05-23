@@ -14,7 +14,7 @@
 #include "SDL_opengles.h"
 
 static CommonState *state;
-static SDL_GLContext *context=NULL;
+static SDL_GLContext *context = NULL;
 
 /* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
 static void
@@ -22,10 +22,8 @@ quit(int rc)
 {
     int i;
 
-    if (context!=NULL)
-    {
-        for (i=0; i<state->num_windows; i++)
-        {
+    if (context != NULL) {
+        for (i = 0; i < state->num_windows; i++) {
             if (context[i]) {
                 SDL_GL_DeleteContext(context[i]);
             }
@@ -149,16 +147,14 @@ main(int argc, char *argv[])
         quit(2);
     }
 
-    context=SDL_calloc(state->num_windows, sizeof(SDL_GLContext));
-    if (context==NULL)
-    {
-       fprintf(stderr, "Out of memory!\n");
-       quit(2);
+    context = SDL_calloc(state->num_windows, sizeof(SDL_GLContext));
+    if (context == NULL) {
+        fprintf(stderr, "Out of memory!\n");
+        quit(2);
     }
 
     /* Create OpenGL ES contexts */
-    for (i=0; i<state->num_windows; i++)
-    {
+    for (i = 0; i < state->num_windows; i++) {
         context[i] = SDL_GL_CreateContext(state->windows[i]);
         if (!context[i]) {
             fprintf(stderr, "SDL_GL_CreateContext(): %s\n", SDL_GetError());
@@ -181,59 +177,65 @@ main(int argc, char *argv[])
     printf("Extensions : %s\n", glGetString(GL_EXTENSIONS));
     printf("\n");
 
-    status=SDL_GL_GetAttribute(SDL_GL_RED_SIZE, &value);
+    status = SDL_GL_GetAttribute(SDL_GL_RED_SIZE, &value);
     if (!status) {
         printf("SDL_GL_RED_SIZE: requested %d, got %d\n", 5, value);
     } else {
-        fprintf(stderr, "Failed to get SDL_GL_RED_SIZE: %s\n", SDL_GetError());
+        fprintf(stderr, "Failed to get SDL_GL_RED_SIZE: %s\n",
+                SDL_GetError());
     }
-    status=SDL_GL_GetAttribute(SDL_GL_GREEN_SIZE, &value);
+    status = SDL_GL_GetAttribute(SDL_GL_GREEN_SIZE, &value);
     if (!status) {
         printf("SDL_GL_GREEN_SIZE: requested %d, got %d\n", 5, value);
     } else {
-        fprintf(stderr, "Failed to get SDL_GL_GREEN_SIZE: %s\n", SDL_GetError());
+        fprintf(stderr, "Failed to get SDL_GL_GREEN_SIZE: %s\n",
+                SDL_GetError());
     }
-    status=SDL_GL_GetAttribute(SDL_GL_BLUE_SIZE, &value);
+    status = SDL_GL_GetAttribute(SDL_GL_BLUE_SIZE, &value);
     if (!status) {
         printf("SDL_GL_BLUE_SIZE: requested %d, got %d\n", 5, value);
     } else {
-        fprintf(stderr, "Failed to get SDL_GL_BLUE_SIZE: %s\n", SDL_GetError());
+        fprintf(stderr, "Failed to get SDL_GL_BLUE_SIZE: %s\n",
+                SDL_GetError());
     }
-    status=SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &value);
+    status = SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &value);
     if (!status) {
         printf("SDL_GL_DEPTH_SIZE: requested %d, got %d\n", 16, value);
     } else {
-        fprintf(stderr, "Failed to get SDL_GL_DEPTH_SIZE: %s\n", SDL_GetError());
+        fprintf(stderr, "Failed to get SDL_GL_DEPTH_SIZE: %s\n",
+                SDL_GetError());
     }
     if (fsaa) {
-        status=SDL_GL_GetAttribute(SDL_GL_MULTISAMPLEBUFFERS, &value);
+        status = SDL_GL_GetAttribute(SDL_GL_MULTISAMPLEBUFFERS, &value);
         if (!status) {
             printf("SDL_GL_MULTISAMPLEBUFFERS: requested 1, got %d\n", value);
         } else {
-            fprintf(stderr, "Failed to get SDL_GL_MULTISAMPLEBUFFERS: %s\n", SDL_GetError());
+            fprintf(stderr, "Failed to get SDL_GL_MULTISAMPLEBUFFERS: %s\n",
+                    SDL_GetError());
         }
-        status=SDL_GL_GetAttribute(SDL_GL_MULTISAMPLESAMPLES, &value);
+        status = SDL_GL_GetAttribute(SDL_GL_MULTISAMPLESAMPLES, &value);
         if (!status) {
-            printf("SDL_GL_MULTISAMPLESAMPLES: requested %d, got %d\n", fsaa, value);
+            printf("SDL_GL_MULTISAMPLESAMPLES: requested %d, got %d\n", fsaa,
+                   value);
         } else {
-            fprintf(stderr, "Failed to get SDL_GL_MULTISAMPLESAMPLES: %s\n", SDL_GetError());
+            fprintf(stderr, "Failed to get SDL_GL_MULTISAMPLESAMPLES: %s\n",
+                    SDL_GetError());
         }
     }
     if (accel) {
-        status=SDL_GL_GetAttribute(SDL_GL_ACCELERATED_VISUAL, &value);
-        if (!status)
-        {
+        status = SDL_GL_GetAttribute(SDL_GL_ACCELERATED_VISUAL, &value);
+        if (!status) {
             printf("SDL_GL_ACCELERATED_VISUAL: requested 1, got %d\n", value);
         } else {
-            fprintf(stderr, "Failed to get SDL_GL_ACCELERATED_VISUAL: %s\n", SDL_GetError());
+            fprintf(stderr, "Failed to get SDL_GL_ACCELERATED_VISUAL: %s\n",
+                    SDL_GetError());
         }
     }
 
     /* Set rendering settings for each context */
     for (i = 0; i < state->num_windows; ++i) {
-        status=SDL_GL_MakeCurrent(state->windows[i], context[i]);
-        if (status)
-        {
+        status = SDL_GL_MakeCurrent(state->windows[i], context[i]);
+        if (status) {
             printf("SDL_GL_MakeCurrent(): %s\n", SDL_GetError());
 
             /* Continue for next window */
@@ -262,13 +264,12 @@ main(int argc, char *argv[])
         }
         for (i = 0; i < state->num_windows; ++i) {
             int w, h;
-            status=SDL_GL_MakeCurrent(state->windows[i], context[i]);
-            if (status)
-            {
-               printf("SDL_GL_MakeCurrent(): %s\n", SDL_GetError());
+            status = SDL_GL_MakeCurrent(state->windows[i], context[i]);
+            if (status) {
+                printf("SDL_GL_MakeCurrent(): %s\n", SDL_GetError());
 
-               /* Continue for next window */
-               continue;
+                /* Continue for next window */
+                continue;
             }
             SDL_GetWindowSize(state->windows[i], &w, &h);
             glViewport(0, 0, w, h);

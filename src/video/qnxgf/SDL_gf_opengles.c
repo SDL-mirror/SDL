@@ -30,21 +30,25 @@
 /* This is OpenGL ES 1.0 helper functions from OpenGL ES 1.1 specification,  */
 /* which could be implemented independently from hardware, just wrappers     */
 
-GLAPI void APIENTRY glTexParameteri(GLenum target, GLenum pname, GLint param)
+GLAPI void APIENTRY
+glTexParameteri(GLenum target, GLenum pname, GLint param)
 {
-   glTexParameterx(target, pname, (GLfixed)param);
-   return;
+    glTexParameterx(target, pname, (GLfixed) param);
+    return;
 }
 
-GLAPI void APIENTRY glTexParameteriv(GLenum target, GLenum pname, const GLint* params)
+GLAPI void APIENTRY
+glTexParameteriv(GLenum target, GLenum pname, const GLint * params)
 {
-   /* Retrieve one parameter only */
-   glTexParameterx(target, pname, (GLfixed)*params);
-   return;
+    /* Retrieve one parameter only */
+    glTexParameterx(target, pname, (GLfixed) * params);
+    return;
 }
 
-GLAPI void APIENTRY glColor4ub(GLubyte red, GLubyte green, GLubyte blue, GLubyte alpha)
+GLAPI void APIENTRY
+glColor4ub(GLubyte red, GLubyte green, GLubyte blue, GLubyte alpha)
 {
-   glColor4f(((GLfloat)red)/255.f, ((GLfloat)green)/255.f, ((GLfloat)blue)/255.f, ((GLfloat)alpha)/255.f);
-   return;
+    glColor4f(((GLfloat) red) / 255.f, ((GLfloat) green) / 255.f,
+              ((GLfloat) blue) / 255.f, ((GLfloat) alpha) / 255.f);
+    return;
 }

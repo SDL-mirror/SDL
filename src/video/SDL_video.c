@@ -1496,10 +1496,9 @@ SDL_CreateRenderer(SDL_WindowID windowID, int index, Uint32 flags)
     window->renderer = SDL_CurrentDisplay.render_drivers[index]
         .CreateRenderer(window, flags);
 
-    if (window->renderer==NULL)
-    {
-       /* Assuming renderer set its error */
-       return -1;
+    if (window->renderer == NULL) {
+        /* Assuming renderer set its error */
+        return -1;
     }
 
     SDL_SelectRenderer(window->id);
@@ -2719,7 +2718,7 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
 {
 #if SDL_VIDEO_OPENGL || SDL_VIDEO_OPENGL_ES
     void (APIENTRY * glGetIntegervFunc) (GLenum pname, GLint * params);
-    GLenum (APIENTRY * glGetErrorFunc) (void);
+    GLenum(APIENTRY * glGetErrorFunc) (void);
     GLenum attrib = 0;
     GLenum error = 0;
 
@@ -2734,7 +2733,7 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
     }
 
     /* Clear value in any case */
-    *value=0;
+    *value = 0;
 
     switch (attr) {
     case SDL_GL_RETAINED_BACKING:
@@ -2842,28 +2841,26 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
     }
 
     glGetIntegervFunc(attrib, (GLint *) value);
-    error=glGetErrorFunc();
-    if (error!=GL_NO_ERROR)
-    {
-       switch (error)
-       {
-          case GL_INVALID_ENUM:
-               {
-                  SDL_SetError("OpenGL error: GL_INVALID_ENUM");
-               }
-               break;
-          case GL_INVALID_VALUE:
-               {
-                  SDL_SetError("OpenGL error: GL_INVALID_VALUE");
-               }
-               break;
-          default:
-               {
-                  SDL_SetError("OpenGL error: %08X", error);
-               }
-               break;
-       }
-       return -1;
+    error = glGetErrorFunc();
+    if (error != GL_NO_ERROR) {
+        switch (error) {
+        case GL_INVALID_ENUM:
+            {
+                SDL_SetError("OpenGL error: GL_INVALID_ENUM");
+            }
+            break;
+        case GL_INVALID_VALUE:
+            {
+                SDL_SetError("OpenGL error: GL_INVALID_VALUE");
+            }
+            break;
+        default:
+            {
+                SDL_SetError("OpenGL error: %08X", error);
+            }
+            break;
+        }
+        return -1;
     }
     return 0;
 #else

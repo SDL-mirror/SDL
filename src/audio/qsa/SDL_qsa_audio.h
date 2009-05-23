@@ -44,7 +44,7 @@ struct SDL_PrivateAudioData
     /* The audio device handle */
     int cardno;
     int deviceno;
-    snd_pcm_t* audio_handle;
+    snd_pcm_t *audio_handle;
 
     /* The audio file descriptor */
     int audio_fd;
@@ -53,7 +53,7 @@ struct SDL_PrivateAudioData
     uint32_t timeout_on_wait;
 
     /* Raw mixing buffer */
-    Uint8* pcm_buf;
+    Uint8 *pcm_buf;
     Uint32 pcm_len;
 };
 

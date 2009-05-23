@@ -494,7 +494,7 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
             return NULL;
         }
     }
-    
+
     SDL_GetDesktopDisplayMode(&desktop_mode);
 
     if (width == 0) {

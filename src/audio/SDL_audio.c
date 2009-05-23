@@ -477,7 +477,8 @@ SDL_RunAudio(void *devicep)
                     /* Wait for an audio buffer to become available */
                     current_audio.impl.WaitDevice(device);
                 } else {
-                    SDL_Delay((device->spec.samples * 1000) / device->spec.freq);
+                    SDL_Delay((device->spec.samples * 1000) /
+                              device->spec.freq);
                 }
             }
 
@@ -525,7 +526,7 @@ SDL_RunAudio(void *devicep)
                 /* Wait for an audio buffer to become available */
                 current_audio.impl.WaitDevice(device);
             } else {
-            	SDL_Delay((device->spec.samples * 1000) / device->spec.freq);
+                SDL_Delay((device->spec.samples * 1000) / device->spec.freq);
             }
         }
     }

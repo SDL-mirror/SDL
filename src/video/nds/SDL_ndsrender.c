@@ -88,7 +88,7 @@ SDL_RenderDriver NDS_RenderDriver = {
       SDL_PIXELFORMAT_INDEX8,
       SDL_PIXELFORMAT_ABGR1555,
       SDL_PIXELFORMAT_BGR555,
-     },                         /* u32 texture_formats[20] */
+      },                        /* u32 texture_formats[20] */
      (256),                     /* int max_texture_width */
      (256),                     /* int max_texture_height */
      }
@@ -107,8 +107,14 @@ typedef struct
     { NDSTX_BG, NDSTX_SPR } type;       /* represented in a bg or sprite. */
     int hw_index;               /* index of sprite in OAM or bg from libnds */
     int pitch, bpp;             /* useful information about the texture */
-    struct { int x,y; } scale;  /* x/y stretch (24.8 fixed point) */
-    struct { int x,y; } scroll; /* x/y offset */
+    struct
+    {
+        int x, y;
+    } scale;                    /* x/y stretch (24.8 fixed point) */
+    struct
+    {
+        int x, y;
+    } scroll;                   /* x/y offset */
     int rotate;                 /* -32768 to 32767, texture rotation */
     u16 *vram_pixels;           /* where the pixel data is stored (a pointer into VRAM) */
     u16 *vram_palette;          /* where the palette data is stored if it's indexed. */
@@ -197,9 +203,9 @@ NDS_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->info.max_texture_height =
         NDS_RenderDriver.info.max_texture_height;
 
-    data->sub = 0;           /* TODO: this is hard-coded to the "main" screen.
-                                figure out how to detect whether to set it to
-                                "sub" screen.  window->id, perhaps? */
+    data->sub = 0;              /* TODO: this is hard-coded to the "main" screen.
+                                   figure out how to detect whether to set it to
+                                   "sub" screen.  window->id, perhaps? */
     data->bg_taken[2] = data->bg_taken[3] = 0;
 
     return renderer;
@@ -310,9 +316,10 @@ NDS_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
             txdat->dim.vdy = 0x100;
             txdat->dim.pitch = pitch;
             txdat->dim.bpp = bpp;
-            txdat->vram_pixels = (u16 *) (data->sub ? SPRITE_GFX_SUB : SPRITE_GFX);
+            txdat->vram_pixels =
+                (u16 *) (data->sub ? SPRITE_GFX_SUB : SPRITE_GFX);
             /* FIXME: use tileIdx*boundary
-                      to point to proper location */
+               to point to proper location */
         } else {
             SDL_SetError("Out of NDS sprites.");
         }
@@ -332,20 +339,26 @@ NDS_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
                 SDL_OutOfMemory();
                 return -1;
             }
-
 // hard-coded for 256x256 for now...
 // TODO: a series of if-elseif-else's to find the closest but larger size.
-            if(!data->sub) {
-                if(bpp==8) {
-                    txdat->hw_index = bgInit(whichbg, BgType_Bmp8, BgSize_B8_256x256, 0, 0);
+            if (!data->sub) {
+                if (bpp == 8) {
+                    txdat->hw_index =
+                        bgInit(whichbg, BgType_Bmp8, BgSize_B8_256x256, 0, 0);
                 } else {
-                    txdat->hw_index = bgInit(whichbg, BgType_Bmp16, BgSize_B16_256x256, 0, 0);
+                    txdat->hw_index =
+                        bgInit(whichbg, BgType_Bmp16, BgSize_B16_256x256, 0,
+                               0);
                 }
             } else {
-                if(bpp==8) {
-                    txdat->hw_index = bgInitSub(whichbg, BgType_Bmp8, BgSize_B8_256x256, 0, 0);
+                if (bpp == 8) {
+                    txdat->hw_index =
+                        bgInitSub(whichbg, BgType_Bmp8, BgSize_B8_256x256, 0,
+                                  0);
                 } else {
-                    txdat->hw_index = bgInitSub(whichbg, BgType_Bmp16, BgSize_B16_256x256, 0, 0);
+                    txdat->hw_index =
+                        bgInitSub(whichbg, BgType_Bmp16, BgSize_B16_256x256,
+                                  0, 0);
                 }
             }
 
@@ -357,14 +370,14 @@ NDS_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 		bgUpdate(bg3);
 */
             txdat->type = NDSTX_BG;
-            txdat->pitch = (texture->w)*(bpp/8);
+            txdat->pitch = (texture->w) * (bpp / 8);
             txdat->bpp = bpp;
             txdat->rotate = 0;
             txdat->scale.x = 0x100;
             txdat->scale.y = 0x100;
             txdat->scroll.x = 0;
             txdat->scroll.y = 0;
-            txdat->vram_pixels = (u16*)bgGetGfxPtr(txdat->hw_index);
+            txdat->vram_pixels = (u16 *) bgGetGfxPtr(txdat->hw_index);
 
             bgSetCenter(txdat->hw_index, 0, 0);
             bgSetRotateScale(txdat->hw_index, txdat->rotate, txdat->scale.x,
@@ -458,7 +471,7 @@ NDS_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b,
     int i, j;
 
     printf("NDS_RenderFill: stub\n");
-    color = RGB8(r, g, b);  /* macro in libnds that makes an ARGB1555 pixel */
+    color = RGB8(r, g, b);      /* macro in libnds that makes an ARGB1555 pixel */
     /* TODO: make a single-color sprite and stretch it.
        calculate the "HDX" width modifier of the sprite by:
        let S be the actual sprite's width (like, 32 pixels for example)

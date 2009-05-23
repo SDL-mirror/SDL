@@ -242,8 +242,7 @@ WIN_CreateWindow(_THIS, SDL_Window * window)
         }
         g_hCtx[window->id] = videodata->WTOpenA(hwnd, &lc, TRUE);
     }
-
-#ifndef _WIN32_WCE /* has no RawInput */
+#ifndef _WIN32_WCE              /* has no RawInput */
     /* we're telling the window, we want it to report raw input events from mice */
     Rid.usUsagePage = 0x01;
     Rid.usUsage = 0x02;

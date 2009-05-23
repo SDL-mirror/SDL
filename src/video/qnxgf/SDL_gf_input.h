@@ -42,7 +42,7 @@
 
 typedef struct SDL_MouseData
 {
-   SDL_DisplayData* didata;
+    SDL_DisplayData *didata;
 } SDL_MouseData;
 
 int32_t gf_addinputdevices(_THIS);
@@ -65,85 +65,85 @@ int32_t gf_delinputdevices(_THIS);
 
 typedef struct _hid_byte
 {
-   uint8_t HIDB_Length;
-   uint8_t HIDB_Type;
-   uint8_t HIDB_Tag;
-   uint8_t reserved[1];
+    uint8_t HIDB_Length;
+    uint8_t HIDB_Type;
+    uint8_t HIDB_Tag;
+    uint8_t reserved[1];
 } hid_byte_t;
 
 typedef struct _hidd_global_item
 {
-   uint16_t usage_page;
-   uint16_t logical_min;
-   uint16_t logical_max;
-   uint16_t physical_min;
-   uint16_t physical_max;
-   uint16_t unit_expo;
-   uint16_t unit;
-   uint16_t report_size;
-   uint16_t report_id;
-   uint16_t report_count;
+    uint16_t usage_page;
+    uint16_t logical_min;
+    uint16_t logical_max;
+    uint16_t physical_min;
+    uint16_t physical_max;
+    uint16_t unit_expo;
+    uint16_t unit;
+    uint16_t report_size;
+    uint16_t report_id;
+    uint16_t report_count;
 } hidd_global_item_t;
 
 typedef struct _hidd_local_item
 {
-   uint16_t type;
-   uint8_t  reserved[2];
-   uint32_t value;
-   struct _hidd_local_item* next_local;
-   struct _hidd_local_item* alt_local;
+    uint16_t type;
+    uint8_t reserved[2];
+    uint32_t value;
+    struct _hidd_local_item *next_local;
+    struct _hidd_local_item *alt_local;
 } hidd_local_item_t;
 
 typedef struct _hidd_local_table
 {
-   hidd_local_item_t* usage_info;
-   hidd_local_item_t* designator_info;
-   hidd_local_item_t* string_info;
-   uint8_t delimiter;
-   uint8_t reserved[3];
+    hidd_local_item_t *usage_info;
+    hidd_local_item_t *designator_info;
+    hidd_local_item_t *string_info;
+    uint8_t delimiter;
+    uint8_t reserved[3];
 } hidd_local_table_t;
 
 typedef struct _hidd_field
 {
-   struct hidd_report_instance* report;
-   struct hidd_collection* collection;
-   uint16_t report_offset;
-   uint16_t flags;
-   hidd_global_item_t  gitem;
-   hidd_local_table_t* ltable;
-   struct _hidd_field* next_field;
-   void* user;
+    struct hidd_report_instance *report;
+    struct hidd_collection *collection;
+    uint16_t report_offset;
+    uint16_t flags;
+    hidd_global_item_t gitem;
+    hidd_local_table_t *ltable;
+    struct _hidd_field *next_field;
+    void *user;
 } hidd_field_t;
 
 typedef struct hidd_report_instance
 {
-   uint8_t       report_id;
-   uint8_t       reserved[1];
-   uint16_t      report_type;
-   hidd_field_t* field;
-   uint16_t      num_field;
-   uint16_t      byte_len;
-   uint16_t      bit_len;
-   uint8_t       reserved2[2];
-   struct hidd_collection* collection;
-   struct hidd_report_instance* next_col_report;
-   struct hidd_report_instance* next_report;
+    uint8_t report_id;
+    uint8_t reserved[1];
+    uint16_t report_type;
+    hidd_field_t *field;
+    uint16_t num_field;
+    uint16_t byte_len;
+    uint16_t bit_len;
+    uint8_t reserved2[2];
+    struct hidd_collection *collection;
+    struct hidd_report_instance *next_col_report;
+    struct hidd_report_instance *next_report;
 } hidd_report_instance_t;
 
 typedef struct hidd_report
 {
-   TAILQ_ENTRY(hidd_report) link;
-   hidd_report_instance_t* rinst;
-   hidd_device_instance_t* dev_inst;
-   uint32_t flags;
-   struct hidd_connection* connection;
-   void* user;
+    TAILQ_ENTRY(hidd_report) link;
+    hidd_report_instance_t *rinst;
+    hidd_device_instance_t *dev_inst;
+    uint32_t flags;
+    struct hidd_connection *connection;
+    void *user;
 } hidd_report_t;
 
 typedef struct hidview_device
 {
-   struct hidd_report_instance* instance;
-   struct hidd_report* report;
+    struct hidd_report_instance *instance;
+    struct hidd_report *report;
 } hidview_device_t;
 
 /*****************************************************************************/

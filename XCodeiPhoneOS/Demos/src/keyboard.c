@@ -174,7 +174,8 @@ void
 drawBlank(int x, int y)
 {
     SDL_Rect rect = { x, y, GLYPH_SIZE_SCREEN, GLYPH_SIZE_SCREEN };
-    SDL_SetRenderDrawColor(bg_color.r, bg_color.g, bg_color.b, bg_color.unused);
+    SDL_SetRenderDrawColor(bg_color.r, bg_color.g, bg_color.b,
+                           bg_color.unused);
     SDL_RenderFill(&rect);
 }
 
@@ -254,7 +255,8 @@ main(int argc, char *argv[])
     loadFont();
 
     /* draw the background, we'll just paint over it */
-    SDL_SetRenderDrawColor(bg_color.r, bg_color.g, bg_color.b, bg_color.unused);
+    SDL_SetRenderDrawColor(bg_color.r, bg_color.g, bg_color.b,
+                           bg_color.unused);
     SDL_RenderFill(NULL);
     SDL_RenderPresent();
 

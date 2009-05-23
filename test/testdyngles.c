@@ -118,10 +118,10 @@ main(int argc, char *argv[])
     /* you may want to change these according to the platform */
     video_w = 320;
     video_h = 480;
-    #ifdef __QNXNTO__
-       video_h = 640;
-       video_w = 480;
-    #endif /* __QNXNTO__ */
+#ifdef __QNXNTO__
+    video_h = 640;
+    video_w = 480;
+#endif /* __QNXNTO__ */
 
     if (argv[1]) {
         gl_library = argv[1];
@@ -153,11 +153,11 @@ main(int argc, char *argv[])
         pixels[3 * i + 2] = rand() % 250 - 125;
     }
 
-    #ifdef __QNXNTO__
-       f.glViewport(0, 0, video_h, video_w);
-    #else
-       f.glViewport(0, 0, video_w, video_h);
-    #endif /* __QNXNTO__ */
+#ifdef __QNXNTO__
+    f.glViewport(0, 0, video_h, video_w);
+#else
+    f.glViewport(0, 0, video_w, video_h);
+#endif /* __QNXNTO__ */
 
     f.glMatrixMode(GL_PROJECTION);
     f.glLoadIdentity();

@@ -481,7 +481,7 @@ GDI_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
             /* Crap, we've lost the original pixel data... *sigh* */
         }
         return 0;
-#ifndef _WIN32_WCE /* WinCE has no alphablend */
+#ifndef _WIN32_WCE              /* WinCE has no alphablend */
     case SDL_BLENDMODE_MASK:
     case SDL_BLENDMODE_BLEND:
         if (!data->premultiplied && data->pixels) {
@@ -627,7 +627,7 @@ GDI_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                                      pitch);
     } else if (data->pixels) {
 #ifndef _WIN32_WCE
-    	/* WinCE has no GdiFlush */
+        /* WinCE has no GdiFlush */
         GdiFlush();
 #endif
         *pixels =

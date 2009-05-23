@@ -104,9 +104,11 @@
 #define PHOTON_SCANCODE_SPACE       0x39
 #define PHOTON_SCANCODE_MENU        0x5D
 
-#define PHOTON_SCANCODE_PRNSCR      0x54   /* only key pressed event, no release */
+#define PHOTON_SCANCODE_PRNSCR      0x54        /* only key pressed event, no release */
 #define PHOTON_SCANCODE_SCROLLLOCK  0x46
-/* #define PHOTON_SCANCODE_PAUSE 0x?? */   /* pause doesn't generates a scancode */
+#if 0                           /* pause doesn't generates a scancode */
+#define PHOTON_SCANCODE_PAUSE       0x??
+#endif
 #define PHOTON_SCANCODE_INSERT      0x52
 #define PHOTON_SCANCODE_HOME        0x47
 #define PHOTON_SCANCODE_PAGEUP      0x49

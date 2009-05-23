@@ -32,9 +32,9 @@
 /* PS/2 and USB keyboards are generating this packet */
 typedef struct key_packet
 {
-   uint8_t modifiers;
-   uint8_t data;
-   uint8_t codes[6];
+    uint8_t modifiers;
+    uint8_t data;
+    uint8_t codes[6];
 } key_packet;
 
 /* Key modifier codes */

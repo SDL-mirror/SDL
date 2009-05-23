@@ -40,7 +40,11 @@
 #define WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB  0x0002
 #endif
 
-typedef HGLRC (APIENTRYP PFNWGLCREATECONTEXTATTRIBSARBPROC) (HDC hDC, HGLRC hShareContext, const int * attribList);
+typedef HGLRC(APIENTRYP PFNWGLCREATECONTEXTATTRIBSARBPROC) (HDC hDC,
+                                                            HGLRC
+                                                            hShareContext,
+                                                            const int
+                                                            *attribList);
 
 int
 WIN_GL_LoadLibrary(_THIS, const char *path)
@@ -502,17 +506,19 @@ WIN_GL_CreateContext(_THIS, SDL_Window * window)
         PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB;
         HGLRC temp_context = _this->gl_data->wglCreateContext(hdc);
         if (!temp_context) {
-            SDL_SetError("Could not create GL context");        
+            SDL_SetError("Could not create GL context");
             return NULL;
         }
-        
+
         /* Make the context current */
         if (WIN_GL_MakeCurrent(_this, window, temp_context) < 0) {
             WIN_GL_DeleteContext(_this, temp_context);
             return NULL;
         }
-                
-        wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC) _this->gl_data->wglGetProcAddress("wglCreateContextAttribsARB");
+
+        wglCreateContextAttribsARB =
+            (PFNWGLCREATECONTEXTATTRIBSARBPROC) _this->gl_data->
+            wglGetProcAddress("wglCreateContextAttribsARB");
         if (!wglCreateContextAttribsARB) {
             SDL_SetError("GL 3.x is not supported");
             context = temp_context;
@@ -520,7 +526,7 @@ WIN_GL_CreateContext(_THIS, SDL_Window * window)
             int attribs[] = {
                 WGL_CONTEXT_MAJOR_VERSION_ARB, _this->gl_config.major_version,
                 WGL_CONTEXT_MINOR_VERSION_ARB, _this->gl_config.minor_version,
-                0 
+                0
             };
             /* Create the GL 3.x context */
             context = wglCreateContextAttribsARB(hdc, 0, attribs);
@@ -528,7 +534,7 @@ WIN_GL_CreateContext(_THIS, SDL_Window * window)
             _this->gl_data->wglDeleteContext(temp_context);
         }
     }
-    
+
     if (!context) {
         SDL_SetError("Could not create GL context");
         return NULL;

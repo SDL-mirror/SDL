@@ -32,38 +32,38 @@
 /* USB keyboard multimedia keys are generating this packet */
 typedef struct mouse_packet2
 {
-   uint8_t buttons;
-   int8_t  wheel;
+    uint8_t buttons;
+    int8_t wheel;
 } mouse_packet2;
 
 /* PS/2 mice are generating this packet */
 typedef struct mouse_packet4
 {
-   uint8_t buttons;
-   int8_t  horizontal;
-   int8_t  vertical;
-   int8_t  wheel;
+    uint8_t buttons;
+    int8_t horizontal;
+    int8_t vertical;
+    int8_t wheel;
 } mouse_packet4;
 
 /* USB keyboard with mice wheel onboard generating this packet */
 typedef struct mouse_packet5
 {
-   uint8_t buttons;
-   int8_t  horizontal;
-   int8_t  vertical;
-   int8_t  wheel;
-   uint8_t state;
+    uint8_t buttons;
+    int8_t horizontal;
+    int8_t vertical;
+    int8_t wheel;
+    uint8_t state;
 } mouse_packet5;
 
 /* USB multi-button mice are generating this packet */
 typedef struct mouse_packet8
 {
-   uint8_t buttons;
-   int8_t  horizontal;
-   int8_t  vertical;
-   int8_t  wheel;
-   int16_t horizontal_precision;
-   int16_t vertical_precision;
+    uint8_t buttons;
+    int8_t horizontal;
+    int8_t vertical;
+    int8_t wheel;
+    int16_t horizontal_precision;
+    int16_t vertical_precision;
 } mouse_packet8;
 
 #endif /* __SDL_HIDDI_MOUSE_H__ */

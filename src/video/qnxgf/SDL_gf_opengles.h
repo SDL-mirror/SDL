@@ -31,7 +31,9 @@
 #include <GLES/glext.h>
 
 GLAPI void APIENTRY glTexParameteri(GLenum target, GLenum pname, GLint param);
-GLAPI void APIENTRY glTexParameteriv(GLenum target, GLenum pname, const GLint* params);
-GLAPI void APIENTRY glColor4ub(GLubyte red, GLubyte green, GLubyte blue, GLubyte alpha);
+GLAPI void APIENTRY glTexParameteriv(GLenum target, GLenum pname,
+                                     const GLint * params);
+GLAPI void APIENTRY glColor4ub(GLubyte red, GLubyte green, GLubyte blue,
+                               GLubyte alpha);
 
 #endif /* __SDL_GF_OPENGLES_H__ */

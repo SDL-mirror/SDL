@@ -35,11 +35,11 @@
 
 typedef struct SDL_RenderData
 {
-   SDL_Window*        window;        /* SDL window type                    */
-   SDL_bool           enable_vsync;  /* VSYNC flip synchronization enable  */
-   uint32_t           surface_visible_idx; /* Index of visible surface     */
-   uint32_t           surface_render_idx;  /* Index of render surface      */
-   uint32_t           surfaces_count;      /* Amount of allocated surfaces */
+    SDL_Window *window;         /* SDL window type                    */
+    SDL_bool enable_vsync;      /* VSYNC flip synchronization enable  */
+    uint32_t surface_visible_idx;       /* Index of visible surface     */
+    uint32_t surface_render_idx;        /* Index of render surface      */
+    uint32_t surfaces_count;    /* Amount of allocated surfaces */
 } SDL_RenderData;
 
 typedef struct SDL_TextureData

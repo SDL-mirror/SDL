@@ -27,148 +27,148 @@
 #include "SDL_config.h"
 #include "SDL_gf_pixelfmt.h"
 
-gf_format_t qnxgf_sdl_to_gf_pixelformat(uint32_t pixelfmt)
+gf_format_t
+qnxgf_sdl_to_gf_pixelformat(uint32_t pixelfmt)
 {
-   switch(pixelfmt)
-   {
-      case SDL_PIXELFORMAT_INDEX8:
-           {
-              return GF_FORMAT_PAL8;
-           }
-           break;
-      case SDL_PIXELFORMAT_ARGB1555:
-           {
-              return GF_FORMAT_PACK_ARGB1555;
-           }
-           break;
-      case SDL_PIXELFORMAT_ABGR1555:
-           {
-              return GF_FORMAT_PACK_ARGB1555;
-           }
-           break;
-      case SDL_PIXELFORMAT_RGB565:
-           {
-              return GF_FORMAT_PACK_RGB565;
-           }
-           break;
-      case SDL_PIXELFORMAT_RGB888:
-           {
-              return GF_FORMAT_BGR888;
-           }
-           break;
-      case SDL_PIXELFORMAT_BGRA8888:
-           {
-              return GF_FORMAT_BGRA8888;
-           }
-           break;
-      case SDL_PIXELFORMAT_ARGB8888:
-           {
-              return GF_FORMAT_ARGB8888;
-           }
-           break;
-      case SDL_PIXELFORMAT_YV12:
-           {
-              return GF_FORMAT_PLANAR_YUV_YV12;
-           }
-           break;
-      case SDL_PIXELFORMAT_YUY2:
-           {
-              return GF_FORMAT_PACK_YUV_YUY2;
-           }
-           break;
-      case SDL_PIXELFORMAT_UYVY:
-           {
-              return GF_FORMAT_PACK_YUV_UYVY;
-           }
-           break;
-      case SDL_PIXELFORMAT_YVYU:
-           {
-              return GF_FORMAT_PACK_YUV_YVYU;
-           }
-           break;
-   }
+    switch (pixelfmt) {
+    case SDL_PIXELFORMAT_INDEX8:
+        {
+            return GF_FORMAT_PAL8;
+        }
+        break;
+    case SDL_PIXELFORMAT_ARGB1555:
+        {
+            return GF_FORMAT_PACK_ARGB1555;
+        }
+        break;
+    case SDL_PIXELFORMAT_ABGR1555:
+        {
+            return GF_FORMAT_PACK_ARGB1555;
+        }
+        break;
+    case SDL_PIXELFORMAT_RGB565:
+        {
+            return GF_FORMAT_PACK_RGB565;
+        }
+        break;
+    case SDL_PIXELFORMAT_RGB888:
+        {
+            return GF_FORMAT_BGR888;
+        }
+        break;
+    case SDL_PIXELFORMAT_BGRA8888:
+        {
+            return GF_FORMAT_BGRA8888;
+        }
+        break;
+    case SDL_PIXELFORMAT_ARGB8888:
+        {
+            return GF_FORMAT_ARGB8888;
+        }
+        break;
+    case SDL_PIXELFORMAT_YV12:
+        {
+            return GF_FORMAT_PLANAR_YUV_YV12;
+        }
+        break;
+    case SDL_PIXELFORMAT_YUY2:
+        {
+            return GF_FORMAT_PACK_YUV_YUY2;
+        }
+        break;
+    case SDL_PIXELFORMAT_UYVY:
+        {
+            return GF_FORMAT_PACK_YUV_UYVY;
+        }
+        break;
+    case SDL_PIXELFORMAT_YVYU:
+        {
+            return GF_FORMAT_PACK_YUV_YVYU;
+        }
+        break;
+    }
 
-   return GF_FORMAT_INVALID;
+    return GF_FORMAT_INVALID;
 }
 
-uint32_t qnxgf_gf_to_sdl_pixelformat(gf_format_t pixelfmt)
+uint32_t
+qnxgf_gf_to_sdl_pixelformat(gf_format_t pixelfmt)
 {
-   switch(pixelfmt)
-   {
-      case GF_FORMAT_PAL8:
-           {
-              return SDL_PIXELFORMAT_INDEX8;
-           }
-           break;
-      case GF_FORMAT_PKLE_ARGB1555:
-           {
-              return SDL_PIXELFORMAT_ARGB1555;
-           }
-           break;
-      case GF_FORMAT_PACK_ARGB1555:
-           {
-              return SDL_PIXELFORMAT_ARGB1555;
-           }
-           break;
-      case GF_FORMAT_PKBE_ARGB1555:
-           {
-              return SDL_PIXELFORMAT_ABGR1555;
-           }
-           break;
-      case GF_FORMAT_PKBE_RGB565:
-           {
-              return SDL_PIXELFORMAT_RGB565;
-           }
-           break;
-      case GF_FORMAT_PKLE_RGB565:
-           {
-              return SDL_PIXELFORMAT_RGB565;
-           }
-           break;
-      case GF_FORMAT_PACK_RGB565:
-           {
-              return SDL_PIXELFORMAT_RGB565;
-           }
-           break;
-      case GF_FORMAT_BGR888:
-           {
-              return SDL_PIXELFORMAT_RGB888;
-           }
-           break;
-      case GF_FORMAT_BGRA8888:
-           {
-              return SDL_PIXELFORMAT_BGRA8888;
-           }
-           break;
-      case GF_FORMAT_ARGB8888:
-           {
-              return SDL_PIXELFORMAT_ARGB8888;
-           }
-           break;
+    switch (pixelfmt) {
+    case GF_FORMAT_PAL8:
+        {
+            return SDL_PIXELFORMAT_INDEX8;
+        }
+        break;
+    case GF_FORMAT_PKLE_ARGB1555:
+        {
+            return SDL_PIXELFORMAT_ARGB1555;
+        }
+        break;
+    case GF_FORMAT_PACK_ARGB1555:
+        {
+            return SDL_PIXELFORMAT_ARGB1555;
+        }
+        break;
+    case GF_FORMAT_PKBE_ARGB1555:
+        {
+            return SDL_PIXELFORMAT_ABGR1555;
+        }
+        break;
+    case GF_FORMAT_PKBE_RGB565:
+        {
+            return SDL_PIXELFORMAT_RGB565;
+        }
+        break;
+    case GF_FORMAT_PKLE_RGB565:
+        {
+            return SDL_PIXELFORMAT_RGB565;
+        }
+        break;
+    case GF_FORMAT_PACK_RGB565:
+        {
+            return SDL_PIXELFORMAT_RGB565;
+        }
+        break;
+    case GF_FORMAT_BGR888:
+        {
+            return SDL_PIXELFORMAT_RGB888;
+        }
+        break;
+    case GF_FORMAT_BGRA8888:
+        {
+            return SDL_PIXELFORMAT_BGRA8888;
+        }
+        break;
+    case GF_FORMAT_ARGB8888:
+        {
+            return SDL_PIXELFORMAT_ARGB8888;
+        }
+        break;
 
-      case GF_FORMAT_PLANAR_YUV_YV12:
-           {
-              return SDL_PIXELFORMAT_YV12;
-           }
-           break;
-      case GF_FORMAT_PACK_YUV_YUY2:
-           {
-              return SDL_PIXELFORMAT_YUY2;
-           }
-           break;
-      case GF_FORMAT_PACK_YUV_UYVY:
-           {
-              return SDL_PIXELFORMAT_UYVY;
-           }
-           break;
-      case GF_FORMAT_PACK_YUV_YVYU:
-           {
-              return SDL_PIXELFORMAT_YVYU;
-           }
-           break;
-   }
+    case GF_FORMAT_PLANAR_YUV_YV12:
+        {
+            return SDL_PIXELFORMAT_YV12;
+        }
+        break;
+    case GF_FORMAT_PACK_YUV_YUY2:
+        {
+            return SDL_PIXELFORMAT_YUY2;
+        }
+        break;
+    case GF_FORMAT_PACK_YUV_UYVY:
+        {
+            return SDL_PIXELFORMAT_UYVY;
+        }
+        break;
+    case GF_FORMAT_PACK_YUV_YVYU:
+        {
+            return SDL_PIXELFORMAT_YVYU;
+        }
+        break;
+    }
 
-   return SDL_PIXELFORMAT_UNKNOWN;
+    return SDL_PIXELFORMAT_UNKNOWN;
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

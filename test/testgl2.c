@@ -242,51 +242,54 @@ main(int argc, char *argv[])
     printf("Extensions : %s\n", glGetString(GL_EXTENSIONS));
     printf("\n");
 
-    status=SDL_GL_GetAttribute(SDL_GL_RED_SIZE, &value);
+    status = SDL_GL_GetAttribute(SDL_GL_RED_SIZE, &value);
     if (!status) {
         printf("SDL_GL_RED_SIZE: requested %d, got %d\n", 5, value);
     } else {
         printf("Failed to get SDL_GL_RED_SIZE: %s\n", SDL_GetError());
     }
-    status=SDL_GL_GetAttribute(SDL_GL_GREEN_SIZE, &value);
+    status = SDL_GL_GetAttribute(SDL_GL_GREEN_SIZE, &value);
     if (!status) {
         printf("SDL_GL_GREEN_SIZE: requested %d, got %d\n", 5, value);
     } else {
         printf("Failed to get SDL_GL_GREEN_SIZE: %s\n", SDL_GetError());
     }
-    status=SDL_GL_GetAttribute(SDL_GL_BLUE_SIZE, &value);
+    status = SDL_GL_GetAttribute(SDL_GL_BLUE_SIZE, &value);
     if (!status) {
         printf("SDL_GL_BLUE_SIZE: requested %d, got %d\n", 5, value);
     } else {
         printf("Failed to get SDL_GL_BLUE_SIZE: %s\n", SDL_GetError());
     }
-    status=SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &value);
+    status = SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &value);
     if (!status) {
         printf("SDL_GL_DEPTH_SIZE: requested %d, got %d\n", 16, value);
     } else {
         printf("Failed to get SDL_GL_DEPTH_SIZE: %s\n", SDL_GetError());
     }
     if (fsaa) {
-        status=SDL_GL_GetAttribute(SDL_GL_MULTISAMPLEBUFFERS, &value);
+        status = SDL_GL_GetAttribute(SDL_GL_MULTISAMPLEBUFFERS, &value);
         if (!status) {
             printf("SDL_GL_MULTISAMPLEBUFFERS: requested 1, got %d\n", value);
         } else {
-            printf("Failed to get SDL_GL_MULTISAMPLEBUFFERS: %s\n", SDL_GetError());
+            printf("Failed to get SDL_GL_MULTISAMPLEBUFFERS: %s\n",
+                   SDL_GetError());
         }
-        status=SDL_GL_GetAttribute(SDL_GL_MULTISAMPLESAMPLES, &value);
+        status = SDL_GL_GetAttribute(SDL_GL_MULTISAMPLESAMPLES, &value);
         if (!status) {
-            printf("SDL_GL_MULTISAMPLESAMPLES: requested %d, got %d\n", fsaa, value);
+            printf("SDL_GL_MULTISAMPLESAMPLES: requested %d, got %d\n", fsaa,
+                   value);
         } else {
-            printf("Failed to get SDL_GL_MULTISAMPLESAMPLES: %s\n", SDL_GetError());
+            printf("Failed to get SDL_GL_MULTISAMPLESAMPLES: %s\n",
+                   SDL_GetError());
         }
     }
     if (accel) {
-        status=SDL_GL_GetAttribute(SDL_GL_ACCELERATED_VISUAL, &value);
-        if (!status)
-        {
+        status = SDL_GL_GetAttribute(SDL_GL_ACCELERATED_VISUAL, &value);
+        if (!status) {
             printf("SDL_GL_ACCELERATED_VISUAL: requested 1, got %d\n", value);
         } else {
-            printf("Failed to get SDL_GL_ACCELERATED_VISUAL: %s\n", SDL_GetError());
+            printf("Failed to get SDL_GL_ACCELERATED_VISUAL: %s\n",
+                   SDL_GetError());
         }
     }
 

@@ -55,10 +55,10 @@ WIN_GetDisplayMode(LPCTSTR deviceName, DWORD index, SDL_DisplayMode * mode)
     mode->driverdata = data;
 #ifdef _WIN32_WCE
     /* In WinCE EnumDisplaySettings(ENUM_CURRENT_SETTINGS) doesn't take the user defined orientation
-     into account but GetSystemMetrixs does. */
-    if(index == ENUM_CURRENT_SETTINGS) {
-    	mode->w = GetSystemMetrics(SM_CXSCREEN);
-    	mode->h = GetSystemMetrics(SM_CYSCREEN);
+       into account but GetSystemMetrixs does. */
+    if (index == ENUM_CURRENT_SETTINGS) {
+        mode->w = GetSystemMetrics(SM_CXSCREEN);
+        mode->h = GetSystemMetrics(SM_CYSCREEN);
     }
 #endif
 
@@ -211,12 +211,12 @@ WIN_SetDisplayMode(_THIS, SDL_DisplayMode * mode)
 {
     SDL_DisplayModeData *data = (SDL_DisplayModeData *) mode->driverdata;
     LONG status;
-    
+
 #ifdef _WIN32_WCE
     /* TODO: implement correctly.
        On my Asus MyPAL, if I execute the code below
        I get DISP_CHANGE_BADFLAGS and the Titlebar of the fullscreen window stays
-       visible ... (SDL_RaiseWindow() would fix that one)*/ 
+       visible ... (SDL_RaiseWindow() would fix that one) */
     return 0;
 #endif
 

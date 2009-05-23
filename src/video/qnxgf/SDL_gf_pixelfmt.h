@@ -32,7 +32,7 @@
 #include <gf/gf.h>
 
 gf_format_t qnxgf_sdl_to_gf_pixelformat(uint32_t pixelfmt);
-uint32_t    qnxgf_gf_to_sdl_pixelformat(gf_format_t pixelfmt);
+uint32_t qnxgf_gf_to_sdl_pixelformat(gf_format_t pixelfmt);
 
 #endif /* __SDL_GF_PIXELFMT_H__ */
 

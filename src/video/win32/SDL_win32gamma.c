@@ -28,7 +28,7 @@ int
 WIN_SetDisplayGammaRamp(_THIS, Uint16 * ramp)
 {
 #ifdef _WIN32_WCE
-	return -1;
+    return -1;
 #else
     SDL_DisplayData *data = (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
     HDC hdc;
@@ -50,7 +50,7 @@ int
 WIN_GetDisplayGammaRamp(_THIS, Uint16 * ramp)
 {
 #ifdef _WIN32_WCE
-	return -1;
+    return -1;
 #else
     SDL_DisplayData *data = (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
     HDC hdc;

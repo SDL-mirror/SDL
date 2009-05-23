@@ -35,7 +35,7 @@
 
 typedef struct SDL_MouseData
 {
-   SDL_DisplayData* didata;
+    SDL_DisplayData *didata;
 } SDL_MouseData;
 
 int32_t photon_addinputdevices(_THIS);

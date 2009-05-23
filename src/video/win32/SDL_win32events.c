@@ -191,12 +191,12 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                                     0, 0);
                 SDL_SendWindowEvent(data->windowID,
                                     SDL_WINDOWEVENT_RESTORED, 0, 0);
-#ifndef _WIN32_WCE /* WinCE misses IsZoomed() */
+#ifndef _WIN32_WCE              /* WinCE misses IsZoomed() */
                 if (IsZoomed(hwnd)) {
                     SDL_SendWindowEvent(data->windowID,
                                         SDL_WINDOWEVENT_MAXIMIZED, 0, 0);
                 }
-#endif              
+#endif
                 if (keyboard && keyboard->focus != data->windowID) {
                     SDL_SetKeyboardFocus(index, data->windowID);
                 }
@@ -218,18 +218,18 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
  */
 #ifdef _WIN32_WCE
     case WM_MOUSEMOVE:
-    	SDL_SendMouseMotion(0, 0, LOWORD(lParam), HIWORD(lParam), 0);
-    	break;
-    
+        SDL_SendMouseMotion(0, 0, LOWORD(lParam), HIWORD(lParam), 0);
+        break;
+
     case WM_LBUTTONDOWN:
-    	SDL_SendMouseMotion(0, 0, LOWORD(lParam), HIWORD(lParam), 0);
-    	SDL_SendMouseButton(0, SDL_PRESSED, SDL_BUTTON_LEFT);
-    	break;
-    	
+        SDL_SendMouseMotion(0, 0, LOWORD(lParam), HIWORD(lParam), 0);
+        SDL_SendMouseButton(0, SDL_PRESSED, SDL_BUTTON_LEFT);
+        break;
+
     case WM_LBUTTONUP:
-    	SDL_SendMouseMotion(0, 0, LOWORD(lParam), HIWORD(lParam), 0);
-    	SDL_SendMouseButton(0, SDL_RELEASED, SDL_BUTTON_LEFT);
-    	break;
+        SDL_SendMouseMotion(0, 0, LOWORD(lParam), HIWORD(lParam), 0);
+        SDL_SendMouseButton(0, SDL_RELEASED, SDL_BUTTON_LEFT);
+        break;
 #else /* _WIN32_WCE */
 
     case WM_INPUT:             /* mouse events */
@@ -261,7 +261,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                     break;
                 }
             }
-            
+
             GetCursorPos(&point);
             ScreenToClient(hwnd, &point);
 
@@ -314,7 +314,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         }
         return (0);
 #endif /* _WIN32_WCE */
-        
+
     case WM_MOUSELEAVE:
         {
             int i;
@@ -598,7 +598,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_NCPAINT:
         {
             if (SDL_GetWindowFlags(data->windowID) & SDL_WINDOW_FOREIGN) {
-                return(0);
+                return (0);
             }
             break;
         }

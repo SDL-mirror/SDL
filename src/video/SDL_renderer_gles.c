@@ -34,9 +34,10 @@
 
 /* Empty function stub to get OpenGL ES 1.0 support without  */
 /* OpenGL ES extension GL_OES_draw_texture_supported         */
-GL_API void GL_APIENTRY glDrawTexiOES(GLint x, GLint y, GLint z, GLint width, GLint height)
+GL_API void GL_APIENTRY
+glDrawTexiOES(GLint x, GLint y, GLint z, GLint width, GLint height)
 {
-   return;
+    return;
 }
 
 #endif /* __QNXNTO__ */
@@ -105,8 +106,7 @@ SDL_RenderDriver GL_ES_RenderDriver = {
      {
       /* OpenGL ES 1.x supported formats list */
       SDL_PIXELFORMAT_BGR24,
-      SDL_PIXELFORMAT_ABGR8888
-     },
+      SDL_PIXELFORMAT_ABGR8888},
      0,
      0}
 };
@@ -351,7 +351,7 @@ power_of_2(int input)
 }
 
 static int
-GLES_CreateTexture(SDL_Renderer *renderer, SDL_Texture *texture)
+GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     GLES_RenderData *renderdata = (GLES_RenderData *) renderer->driverdata;
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
@@ -363,15 +363,15 @@ GLES_CreateTexture(SDL_Renderer *renderer, SDL_Texture *texture)
 
     switch (texture->format) {
     case SDL_PIXELFORMAT_BGR24:
-         internalFormat = GL_RGB;
-         format = GL_RGB;
-         type = GL_UNSIGNED_BYTE;
-         break;
+        internalFormat = GL_RGB;
+        format = GL_RGB;
+        type = GL_UNSIGNED_BYTE;
+        break;
     case SDL_PIXELFORMAT_ABGR8888:
-         internalFormat = GL_RGBA;
-         format = GL_RGBA;
-         type = GL_UNSIGNED_BYTE;
-         break;
+        internalFormat = GL_RGBA;
+        format = GL_RGBA;
+        type = GL_UNSIGNED_BYTE;
+        break;
         /*
            These formats would be supported if SDL had the necessary pixel formats
            case SDL_PIXELFORMAT_BGR565:
@@ -389,7 +389,7 @@ GLES_CreateTexture(SDL_Renderer *renderer, SDL_Texture *texture)
            format = GL_RGBA;
            type = GL_UNSIGNED_SHORT_4_4_4_4;
            break;
-        */
+         */
     default:
         SDL_SetError("Unsupported texture format");
         return -1;
@@ -533,8 +533,8 @@ GLES_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture)
 }
 
 static int
-GLES_UpdateTexture(SDL_Renderer *renderer, SDL_Texture *texture,
-                   const SDL_Rect *rect, const void *pixels, int pitch)
+GLES_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
+                   const SDL_Rect * rect, const void *pixels, int pitch)
 {
     GLES_RenderData *renderdata = (GLES_RenderData *) renderer->driverdata;
     GLES_TextureData *data = (GLES_TextureData *) texture->driverdata;
@@ -858,7 +858,7 @@ GLES_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 }
 
 static void
-GLES_RenderPresent(SDL_Renderer *renderer)
+GLES_RenderPresent(SDL_Renderer * renderer)
 {
     SDL_GL_SwapWindow(renderer->window);
 }
