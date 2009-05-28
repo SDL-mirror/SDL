@@ -29,7 +29,7 @@ SDL_DrawPoint(SDL_Surface * dst, int x, int y, Uint32 color)
 {
     /* This function doesn't work on surfaces < 8 bpp */
     if (dst->format->BitsPerPixel < 8) {
-        SDL_SetError("SDL_DrawLine(): Unsupported surface format");
+        SDL_SetError("SDL_DrawPoint(): Unsupported surface format");
         return (-1);
     }
 
