@@ -44,9 +44,11 @@ Thanks to everyone who made this possible, including:
 
 * Eric Wing, Max Horn, and Darrell Walisser for unflagging work on the Mac OS X port
 
-* Couriersud for the DirectFB driver
+* David Carré, for the Pandora port
 
 * Patrice Mandin, for the Atari port
+
+* Couriersud for the DirectFB driver
 
 * Jon Atkins for SDL_image, SDL_mixer and SDL_net documentation
 

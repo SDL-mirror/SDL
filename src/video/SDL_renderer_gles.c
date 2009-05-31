@@ -42,6 +42,14 @@ glDrawTexiOES(GLint x, GLint y, GLint z, GLint width, GLint height)
 
 #endif /* __QNXNTO__ */
 
+#if SDL_VIDEO_DRIVER_PANDORA
+GL_API void GL_APIENTRY
+glDrawTexiOES(GLint x, GLint y, GLint z, GLint width, GLint height)
+{
+    return;
+}
+#endif /* SDL_VIDEO_DRIVER_PANDORA */
+
 /* OpenGL ES 1.1 renderer implementation, based on the OpenGL renderer */
 
 static const float inv255f = 1.0f / 255.0f;
@@ -284,7 +292,10 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
             renderer->info.flags |= SDL_RENDERER_SINGLEBUFFER;
         }
     }
-
+#if SDL_VIDEO_DRIVER_PANDORA
+    data->GL_OES_draw_texture_supported = SDL_FALSE;
+    data->useDrawTexture = SDL_FALSE;
+#else
     if (SDL_GL_ExtensionSupported("GL_OES_draw_texture")) {
         data->GL_OES_draw_texture_supported = SDL_TRUE;
         data->useDrawTexture = SDL_TRUE;
@@ -292,6 +303,7 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
         data->GL_OES_draw_texture_supported = SDL_FALSE;
         data->useDrawTexture = SDL_FALSE;
     }
+#endif
 
     data->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &value);
     renderer->info.max_texture_width = value;

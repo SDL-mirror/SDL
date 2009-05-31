@@ -31,6 +31,10 @@
 #include "SDL_x11gamma.h"
 #include "../Xext/extensions/StdCmap.h"
 
+#ifdef SDL_VIDEO_DRIVER_PANDORA
+#include "SDL_x11opengles.h"
+#endif
+
 #define _NET_WM_STATE_REMOVE    0l
 #define _NET_WM_STATE_ADD       1l
 #define _NET_WM_STATE_TOGGLE    2l
@@ -233,6 +237,19 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         XVisualInfo *vinfo;
 
         vinfo = X11_GL_GetVisual(_this, data->display, displaydata->screen);
+        if (!vinfo) {
+            return -1;
+        }
+        visual = vinfo->visual;
+        depth = vinfo->depth;
+        XFree(vinfo);
+    } else
+#endif
+#ifdef SDL_VIDEO_DRIVER_PANDORA
+    if (window->flags & SDL_WINDOW_OPENGL) {
+        XVisualInfo *vinfo;
+
+        vinfo = X11_GLES_GetVisual(_this, data->display, displaydata->screen);
         if (!vinfo) {
             return -1;
         }
@@ -505,6 +522,19 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         SDL_SetError("Couldn't create window");
         return -1;
     }
+#if SDL_VIDEO_DRIVER_PANDORA
+    /* Create the GLES window surface */
+    _this->gles_data->egl_surface =
+        _this->gles_data->eglCreateWindowSurface(_this->gles_data->
+                                                 egl_display,
+                                                 _this->gles_data->egl_config,
+                                                 (NativeWindowType) w, NULL);
+
+    if (_this->gles_data->egl_surface == EGL_NO_SURFACE) {
+        SDL_SetError("Could not create GLES window surface");
+        return -1;
+    }
+#endif
 
     sizehints = XAllocSizeHints();
     if (sizehints) {

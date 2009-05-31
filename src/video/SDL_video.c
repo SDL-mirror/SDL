@@ -121,6 +121,9 @@ static VideoBootStrap *bootstrap[] = {
 #if SDL_VIDEO_DRIVER_DUMMY
     &DUMMY_bootstrap,
 #endif
+#if SDL_VIDEO_DRIVER_PANDORA
+    &PND_bootstrap,
+#endif
     NULL
 };
 

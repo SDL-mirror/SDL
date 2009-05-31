@@ -318,6 +318,10 @@ struct SDL_VideoDevice
     void *driverdata;
     struct SDL_GLDriverData *gl_data;
 
+#if SDL_VIDEO_DRIVER_PANDORA
+    struct SDL_PrivateGLESData *gles_data;
+#endif
+
     /* * * */
     /* The function used to dispose of this structure */
     void (*free) (_THIS);
@@ -402,6 +406,9 @@ extern VideoBootStrap DUMMY_bootstrap;
 #endif
 #if SDL_VIDEO_DRIVER_NDS
 extern VideoBootStrap NDS_bootstrap;
+#endif
+#if SDL_VIDEO_DRIVER_PANDORA
+extern VideoBootStrap PND_bootstrap;
 #endif
 
 #define SDL_CurrentDisplay	(_this->displays[_this->current_display])
