@@ -60,9 +60,11 @@ static struct
 {
     const char *name;
     void **func;
-} esd_functions[] = {
-SDL_ESD_SYM(esd_open_sound),
-        SDL_ESD_SYM(esd_close), SDL_ESD_SYM(esd_play_stream),};
+} const esd_functions[] = {
+    SDL_ESD_SYM(esd_open_sound),
+    SDL_ESD_SYM(esd_close), SDL_ESD_SYM(esd_play_stream),
+};
+
 #undef SDL_ESD_SYM
 
 static void

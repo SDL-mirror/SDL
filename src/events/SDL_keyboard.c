@@ -34,7 +34,7 @@ static int SDL_num_keyboards;
 static int SDL_current_keyboard;
 static SDL_Keyboard **SDL_keyboards;
 
-static SDLKey SDL_default_keymap[SDL_NUM_SCANCODES] = {
+static const SDLKey SDL_default_keymap[SDL_NUM_SCANCODES] = {
     0, 0, 0, 0,
     'a',
     'b',

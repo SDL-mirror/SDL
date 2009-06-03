@@ -26,7 +26,7 @@
    - msdn.microsoft.com
 */
 /* *INDENT-OFF* */
-static SDL_scancode win32_scancode_table[] = {
+static const SDL_scancode win32_scancode_table[] = {
     /*  0, 0x00 */      SDL_SCANCODE_UNKNOWN,
     /*  1, 0x01 */      SDL_SCANCODE_UNKNOWN,
     /*  2, 0x02 */      SDL_SCANCODE_UNKNOWN,

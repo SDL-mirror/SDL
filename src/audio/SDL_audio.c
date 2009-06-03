@@ -77,7 +77,7 @@ extern AudioBootStrap FUSIONSOUND_bootstrap;
 
 
 /* Available audio drivers */
-static AudioBootStrap *bootstrap[] = {
+static const AudioBootStrap *const bootstrap[] = {
 #if SDL_AUDIO_DRIVER_BSD
     &BSD_AUDIO_bootstrap,
 #endif

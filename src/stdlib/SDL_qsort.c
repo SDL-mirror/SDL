@@ -60,7 +60,7 @@
 
 #ifndef HAVE_QSORT
 
-static char _ID[] = "<qsort.c gjm 1.12 1998-03-19>";
+static const char _ID[] = "<qsort.c gjm 1.12 1998-03-19>";
 
 /* How many bytes are there per word? (Must be a power of 2,
  * and must in fact equal sizeof(int).)

@@ -27,7 +27,7 @@
    - experimentation on various ADB and USB ISO keyboards and one ADB ANSI keyboard
 */
 /* *INDENT-OFF* */
-static SDL_scancode darwin_scancode_table[] = {
+static const SDL_scancode darwin_scancode_table[] = {
     /*   0 */   SDL_SCANCODE_A,
     /*   1 */   SDL_SCANCODE_S,
     /*   2 */   SDL_SCANCODE_D,

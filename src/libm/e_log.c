@@ -11,7 +11,8 @@
  */
 
 #if defined(LIBM_SCCS) && !defined(lint)
-static char rcsid[] = "$NetBSD: e_log.c,v 1.8 1995/05/10 20:45:49 jtc Exp $";
+static const char rcsid[] =
+    "$NetBSD: e_log.c,v 1.8 1995/05/10 20:45:49 jtc Exp $";
 #endif
 
 /* __ieee754_log(x)

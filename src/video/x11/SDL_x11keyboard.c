@@ -32,7 +32,7 @@
 #include "imKStoUCS.h"
 
 /* *INDENT-OFF* */
-static struct {
+static const struct {
     KeySym keysym;
     SDLKey sdlkey;
 } KeySymToSDLKey[] = {
@@ -132,9 +132,9 @@ static struct {
     { XK_Mode_switch, SDLK_MODE },
 };
 
-static struct
+static const struct
 {
-    SDL_scancode *table;
+    const SDL_scancode const *table;
     int table_size;
 } scancode_set[] = {
     { darwin_scancode_table, SDL_arraysize(darwin_scancode_table) },

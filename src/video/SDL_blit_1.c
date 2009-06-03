@@ -512,11 +512,11 @@ Blit1toNAlphaKey(SDL_BlitInfo * info)
     }
 }
 
-static SDL_BlitFunc one_blit[] = {
+static const SDL_BlitFunc one_blit[] = {
     NULL, Blit1to1, Blit1to2, Blit1to3, Blit1to4
 };
 
-static SDL_BlitFunc one_blitkey[] = {
+static const SDL_BlitFunc one_blitkey[] = {
     NULL, Blit1to1Key, Blit1to2Key, Blit1to3Key, Blit1to4Key
 };
 

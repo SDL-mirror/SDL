@@ -1259,7 +1259,7 @@ getpix_32(Uint8 * srcbuf)
 
 typedef Uint32(*getpix_func) (Uint8 *);
 
-static getpix_func getpixes[4] = {
+static const getpix_func getpixes[4] = {
     getpix_8, getpix_16, getpix_24, getpix_32
 };
 

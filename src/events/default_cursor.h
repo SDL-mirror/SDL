@@ -33,7 +33,7 @@
 
 #ifdef USE_MACOS_CURSOR
 
-static unsigned char default_cdata[] = {
+static const unsigned char default_cdata[] = {
     0x00, 0x00,
     0x40, 0x00,
     0x60, 0x00,
@@ -52,7 +52,7 @@ static unsigned char default_cdata[] = {
     0x00, 0x00
 };
 
-static unsigned char default_cmask[] = {
+static const unsigned char default_cmask[] = {
     0xC0, 0x00,
     0xE0, 0x00,
     0xF0, 0x00,
@@ -73,7 +73,7 @@ static unsigned char default_cmask[] = {
 
 #else
 
-static unsigned char default_cdata[] = {
+static const unsigned char default_cdata[] = {
     0x00, 0x00,
     0x40, 0x00,
     0x60, 0x00,
@@ -92,7 +92,7 @@ static unsigned char default_cdata[] = {
     0x00, 0x00
 };
 
-static unsigned char default_cmask[] = {
+static const unsigned char default_cmask[] = {
     0x40, 0x00,
     0xE0, 0x00,
     0xF0, 0x00,

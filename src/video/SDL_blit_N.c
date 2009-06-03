@@ -113,7 +113,7 @@ calc_swizzle32(const SDL_PixelFormat * srcfmt, const SDL_PixelFormat * dstfmt)
      *  leave alpha with a zero mask, but we should still swizzle the bits.
      */
     /* ARGB */
-    const static struct SDL_PixelFormat default_pixel_format = {
+    const static const struct SDL_PixelFormat default_pixel_format = {
         NULL, 32, 4,
         0, 0, 0, 0,
         16, 8, 0, 24,
@@ -2404,7 +2404,7 @@ static const struct blit_table normal_blit_4[] = {
     {0, 0, 0, 0, 0, 0, 0, 0, BlitNtoN, 0}
 };
 
-static const struct blit_table *normal_blit[] = {
+static const struct blit_table *const normal_blit[] = {
     normal_blit_1, normal_blit_2, normal_blit_3, normal_blit_4
 };
 

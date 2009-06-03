@@ -29,7 +29,7 @@
 #include "../SDL_systhread.h"
 
 /* List of signals to mask in the subthreads */
-static int sig_list[] = {
+static const int sig_list[] = {
     SIGHUP, SIGINT, SIGQUIT, SIGPIPE, SIGALRM, SIGTERM, SIGCHLD, SIGWINCH,
     SIGVTALRM, SIGPROF, 0
 };

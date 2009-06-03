@@ -11,7 +11,7 @@
  */
 
 #if defined(LIBM_SCCS) && !defined(lint)
-static char rcsid[] =
+static const char rcsid[] =
     "$NetBSD: s_floor.c,v 1.8 1995/05/10 20:47:20 jtc Exp $";
 #endif
 

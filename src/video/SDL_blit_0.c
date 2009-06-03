@@ -443,11 +443,11 @@ BlitBtoNAlphaKey(SDL_BlitInfo * info)
     }
 }
 
-static SDL_BlitFunc bitmap_blit[] = {
+static const SDL_BlitFunc bitmap_blit[] = {
     NULL, BlitBto1, BlitBto2, BlitBto3, BlitBto4
 };
 
-static SDL_BlitFunc colorkey_blit[] = {
+static const SDL_BlitFunc colorkey_blit[] = {
     NULL, BlitBto1Key, BlitBto2Key, BlitBto3Key, BlitBto4Key
 };
 

@@ -48,7 +48,7 @@
 #endif /* SDL_VIDEO_OPENGL */
 
 /* Available video drivers */
-static VideoBootStrap *bootstrap[] = {
+static const VideoBootStrap *const bootstrap[] = {
 #if SDL_VIDEO_DRIVER_COCOA
     &COCOA_bootstrap,
 #endif

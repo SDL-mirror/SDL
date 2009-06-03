@@ -43,7 +43,7 @@ SDL_Parachute(int sig)
     raise(sig);
 }
 
-static int SDL_fatal_signals[] = {
+static const int SDL_fatal_signals[] = {
     SIGSEGV,
 #ifdef SIGBUS
     SIGBUS,
