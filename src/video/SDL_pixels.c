@@ -72,6 +72,12 @@ SDL_PixelFormatEnumToMasks(Uint32 format, int *bpp, Uint32 * Rmask,
         masks[2] = 0x000003E0;
         masks[3] = 0x0000001F;
         break;
+    case SDL_PACKEDLAYOUT_5551:
+        masks[0] = 0x0000F800;
+        masks[1] = 0x000007C0;
+        masks[2] = 0x0000003E;
+        masks[3] = 0x00000001;
+        break;
     case SDL_PACKEDLAYOUT_565:
         masks[0] = 0x00000000;
         masks[1] = 0x0000F800;
@@ -89,6 +95,12 @@ SDL_PixelFormatEnumToMasks(Uint32 format, int *bpp, Uint32 * Rmask,
         masks[1] = 0x3FF00000;
         masks[2] = 0x000FFC00;
         masks[3] = 0x000003FF;
+        break;
+    case SDL_PACKEDLAYOUT_1010102:
+        masks[0] = 0xFFC00000;
+        masks[1] = 0x003FF000;
+        masks[2] = 0x00000FFC;
+        masks[3] = 0x00000003;
         break;
     default:
         /* Unknown layout */
@@ -176,7 +188,12 @@ SDL_MasksToPixelFormatEnum(int bpp, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask,
         break;
     case 16:
         switch (Rmask) {
+        case 0x000F:
+            return SDL_PIXELFORMAT_ABGR4444;
         case 0x001F:
+            if (Gmask == 0x07E0) {
+                return SDL_PIXELFORMAT_BGR565;
+            }
             return SDL_PIXELFORMAT_ABGR1555;
         case 0x0F00:
             return SDL_PIXELFORMAT_ARGB4444;

@@ -30,7 +30,7 @@
 #include "SDL_rect_c.h"
 #include "SDL_yuv_sw_c.h"
 
-#ifdef __QNXNTO__
+#if defined(SDL_VIDEO_DRIVER_QNXGF) || defined(SDL_VIDEO_DRIVER_PHOTON)
 
 /* Empty function stub to get OpenGL ES 1.0 support without  */
 /* OpenGL ES extension GL_OES_draw_texture_supported         */
@@ -110,9 +110,12 @@ SDL_RenderDriver GL_ES_RenderDriver = {
      (SDL_BLENDMODE_NONE | SDL_BLENDMODE_MASK |
       SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD | SDL_BLENDMODE_MOD),
      (SDL_TEXTURESCALEMODE_NONE | SDL_TEXTURESCALEMODE_FAST |
-      SDL_TEXTURESCALEMODE_SLOW), 2,
+      SDL_TEXTURESCALEMODE_SLOW), 5,
      {
       /* OpenGL ES 1.x supported formats list */
+      SDL_PIXELFORMAT_ABGR4444,
+      SDL_PIXELFORMAT_ABGR1555,
+      SDL_PIXELFORMAT_BGR565,
       SDL_PIXELFORMAT_BGR24,
       SDL_PIXELFORMAT_ABGR8888},
      0,
@@ -384,24 +387,21 @@ GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         format = GL_RGBA;
         type = GL_UNSIGNED_BYTE;
         break;
-        /*
-           These formats would be supported if SDL had the necessary pixel formats
-           case SDL_PIXELFORMAT_BGR565:
-           internalFormat = GL_RGB;
-           format = GL_RGB;
-           type = GL_UNSIGNED_SHORT_5_6_5;
-           break;                       
-           case SDL_PIXELFORMAT_ABGR5551:
-           internalFormat = GL_RGBA;
-           format = GL_RGBA;
-           type = GL_UNSIGNED_SHORT_5_5_5_1;
-           break;
-           case SDL_PIXELFORMAT_ABGR4444:
-           internalFormat = GL_RGBA;
-           format = GL_RGBA;
-           type = GL_UNSIGNED_SHORT_4_4_4_4;
-           break;
-         */
+    case SDL_PIXELFORMAT_BGR565:
+        internalFormat = GL_RGB;
+        format = GL_RGB;
+        type = GL_UNSIGNED_SHORT_5_6_5;
+        break;
+    case SDL_PIXELFORMAT_ABGR1555:
+        internalFormat = GL_RGBA;
+        format = GL_RGBA;
+        type = GL_UNSIGNED_SHORT_5_5_5_1;
+        break;
+    case SDL_PIXELFORMAT_ABGR4444:
+        internalFormat = GL_RGBA;
+        format = GL_RGBA;
+        type = GL_UNSIGNED_SHORT_4_4_4_4;
+        break;
     default:
         SDL_SetError("Unsupported texture format");
         return -1;
