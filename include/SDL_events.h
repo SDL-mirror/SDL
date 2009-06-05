@@ -313,20 +313,6 @@ typedef struct SDL_SysWMEvent
     SDL_SysWMmsg *msg;  /**< driver dependent data, defined in SDL_syswm.h */
 } SDL_SysWMEvent;
 
-/* Typedefs for backwards compatibility */
-typedef struct SDL_ActiveEvent
-{
-    Uint8 type;
-    Uint8 gain;
-    Uint8 state;
-} SDL_ActiveEvent;
-typedef struct SDL_ResizeEvent
-{
-    Uint8 type;
-    int w;
-    int h;
-} SDL_ResizeEvent;
-
 typedef struct SDL_ProximityEvent
 {
     Uint8 type;
@@ -335,6 +321,23 @@ typedef struct SDL_ProximityEvent
     int x;
     int y;
 } SDL_ProximityEvent;
+
+/* Typedefs for backwards compatibility */
+#ifndef SDL_NO_COMPAT
+typedef struct SDL_ActiveEvent
+{
+    Uint8 type;
+    Uint8 gain;
+    Uint8 state;
+} SDL_ActiveEvent;
+
+typedef struct SDL_ResizeEvent
+{
+    Uint8 type;
+    int w;
+    int h;
+} SDL_ResizeEvent;
+#endif
 
 /**
  * \union SDL_Event
@@ -360,8 +363,10 @@ typedef union SDL_Event
     SDL_ProximityEvent proximity;   /**< Proximity In or Out event */
 
     /* Temporarily here for backwards compatibility */
+#ifndef SDL_NO_COMPAT
     SDL_ActiveEvent active;
     SDL_ResizeEvent resize;
+#endif
 } SDL_Event;
 
 
