@@ -30,25 +30,24 @@
 #include "SDL_rect_c.h"
 #include "SDL_yuv_sw_c.h"
 
-#if defined(SDL_VIDEO_DRIVER_QNXGF) || defined(SDL_VIDEO_DRIVER_PHOTON)
-
-/* Empty function stub to get OpenGL ES 1.0 support without  */
-/* OpenGL ES extension GL_OES_draw_texture_supported         */
-GL_API void GL_APIENTRY
-glDrawTexiOES(GLint x, GLint y, GLint z, GLint width, GLint height)
-{
-    return;
-}
-
+#if defined(__QNXNTO__)
+/* Include QNX system header to check QNX version later */
+#include <sys/neutrino.h>
 #endif /* __QNXNTO__ */
 
-#if SDL_VIDEO_DRIVER_PANDORA
+#if defined(SDL_VIDEO_DRIVER_QNXGF)  ||  \
+    defined(SDL_VIDEO_DRIVER_PHOTON) ||  \
+    defined(SDL_VIDEO_DRIVER_PANDORA)
+
+/* Empty function stub to get OpenGL ES 1.x support without  */
+/* OpenGL ES extension GL_OES_draw_texture supported         */
 GL_API void GL_APIENTRY
 glDrawTexiOES(GLint x, GLint y, GLint z, GLint width, GLint height)
 {
     return;
 }
-#endif /* SDL_VIDEO_DRIVER_PANDORA */
+
+#endif /* QNXGF || PHOTON || PANDORA */
 
 /* OpenGL ES 1.1 renderer implementation, based on the OpenGL renderer */
 
@@ -262,9 +261,18 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->window = window->id;
     renderer->driverdata = data;
 
-
     renderer->info.flags =
         (SDL_RENDERER_PRESENTDISCARD | SDL_RENDERER_ACCELERATED);
+
+#if defined(__QNXNTO__)
+#if _NTO_VERSION<=641
+    /* QNX's OpenGL ES implementation is broken regarding             */
+    /* packed textures support, affected versions 6.3.2, 6.4.0, 6.4.1 */
+    renderer->info.num_texture_formats=2;
+    renderer->info.texture_formats[0]=SDL_PIXELFORMAT_ABGR8888;
+    renderer->info.texture_formats[1]=SDL_PIXELFORMAT_BGR24;
+#endif /* _NTO_VERSION */
+#endif /* __QNXNTO__ */
 
     if (GLES_LoadFunctions(data) < 0) {
         GLES_DestroyRenderer(renderer);
@@ -403,7 +411,7 @@ GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         type = GL_UNSIGNED_SHORT_4_4_4_4;
         break;
     default:
-        SDL_SetError("Unsupported texture format");
+        SDL_SetError("Unsupported by OpenGL ES texture format");
         return -1;
     }
 
