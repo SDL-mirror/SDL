@@ -60,6 +60,12 @@ WIN_DeleteDevice(SDL_VideoDevice * device)
         FreeLibrary(data->d3dDLL);
     }
 #endif
+#if SDL_VIDEO_RENDER_DDRAW
+    if (data->ddraw) {
+        data->ddraw->lpVtbl->Release(data->ddraw);
+        FreeLibrary(data->ddrawDLL);
+    }
+#endif
     if (data->wintabDLL) {
         FreeLibrary(data->wintabDLL);
     }
@@ -106,6 +112,24 @@ WIN_CreateDevice(int devindex)
         }
     }
 #endif /* SDL_VIDEO_RENDER_D3D */
+#if SDL_VIDEO_RENDER_DDRAW
+    data->ddrawDLL = LoadLibrary(TEXT("ddraw.dll"));
+    if (data->ddrawDLL) {
+        IDirectDraw *(WINAPI * DDCreate) (GUID FAR * lpGUID,
+                                          LPDIRECTDRAW FAR * lplpDD,
+                                          IUnknown FAR * pUnkOuter);
+
+        DDCreate =
+            (IDirectDraw *
+             (WINAPI *) (GUID FAR *, LPDIRECTDRAW FAR *, IUnknown FAR *))
+            GetProcAddress(data->ddrawDLL, TEXT("DirectDrawCreate"));
+        if (!DDCreate || DDCreate(NULL, &data->ddraw, NULL) != DD_OK) {
+            FreeLibrary(data->ddrawDLL);
+            data->ddrawDLL = NULL;
+            data->ddraw = NULL;
+        }
+    }
+#endif /* SDL_VIDEO_RENDER_DDRAW */
 
     data->wintabDLL = LoadLibrary(TEXT("WINTAB32.DLL"));
     if (data->wintabDLL) {
@@ -188,8 +212,14 @@ WIN_VideoInit(_THIS)
 #if SDL_VIDEO_RENDER_D3D
     D3D_AddRenderDriver(_this);
 #endif
+#if SDL_VIDEO_RENDER_DDRAW
+    DDRAW_AddRenderDriver(_this);
+#endif
 #if SDL_VIDEO_RENDER_GDI
     GDI_AddRenderDriver(_this);
+#endif
+#if SDL_VIDEO_RENDER_GAPI
+    GAPI_AddRenderDriver(_this);
 #endif
 
     g_hCtx = SDL_malloc(sizeof(HCTX));

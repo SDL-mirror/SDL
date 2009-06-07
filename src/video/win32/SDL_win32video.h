@@ -37,6 +37,12 @@
 #include "d3d9.h"
 #endif
 
+#if SDL_VIDEO_RENDER_DDRAW
+/* WIN32_LEAN_AND_MEAN was defined, so we have to include this by hand */
+#include <objbase.h>
+#include "ddraw.h"
+#endif
+
 #include "wactab/wintab.h"
 #define PACKETDATA ( PK_X | PK_Y | PK_BUTTONS | PK_NORMAL_PRESSURE | PK_CURSOR)
 #define PACKETMODE 0
@@ -66,6 +72,11 @@ typedef struct SDL_VideoData
     HANDLE d3dDLL;
     IDirect3D9 *d3d;
 #endif
+#if SDL_VIDEO_RENDER_DDRAW
+    HANDLE ddrawDLL;
+    IDirectDraw *ddraw;
+#endif
+
 /* *INDENT-OFF* */
     /* Function pointers for the Wacom API */
     HANDLE wintabDLL;

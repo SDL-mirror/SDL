@@ -473,6 +473,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             int x, y;
             int w, h;
             int style;
+            BOOL menu;
 
             /* If we allow resizing, let the resize happen naturally */
             if (SDL_GetWindowFlags(data->windowID) & SDL_WINDOW_RESIZABLE) {
@@ -491,15 +492,19 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             size.bottom = h;
             size.right = w;
 
+
+            style = GetWindowLong(hwnd, GWL_STYLE);
+#ifdef _WIN32_WCE
+            menu = FALSE;
+#else
             /* DJM - according to the docs for GetMenu(), the
                return value is undefined if hwnd is a child window.
                Aparently it's too difficult for MS to check
                inside their function, so I have to do it here.
              */
-            style = GetWindowLong(hwnd, GWL_STYLE);
-            AdjustWindowRect(&size, style,
-                             style & WS_CHILDWINDOW ? FALSE : GetMenu(hwnd)
-                             != NULL);
+            menu = (style & WS_CHILDWINDOW) ? FALSE : (GetMenu(hwnd) != NULL);
+#endif
+            AdjustWindowRectEx(&size, style, menu, 0);
             w = size.right - size.left;
             h = size.bottom - size.top;
 

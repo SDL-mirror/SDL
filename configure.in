@@ -2077,6 +2077,18 @@ CheckWIN32()
        ])
     fi
 
+    AC_MSG_CHECKING(Windows CE)
+    have_wince=no
+    AC_TRY_COMPILE([
+#ifndef _WIN32_WCE
+#error This is not Windows CE
+#endif
+    ],[
+    ],[
+    have_wince=yes
+    ])
+    AC_MSG_RESULT($have_wince)
+
     dnl See if the user wants to redirect standard output to files
     AC_ARG_ENABLE(stdio-redirect,
 AC_HELP_STRING([--enable-stdio-redirect], [Redirect STDIO to files on Win32 [[default=yes]]]),
@@ -2094,6 +2106,7 @@ AC_HELP_STRING([--enable-directx], [use DirectX for Win32 audio/video [[default=
                   , enable_directx=yes)
     if test x$enable_directx = xyes; then
         AC_CHECK_HEADER(d3d9.h, have_d3d=yes)
+        AC_CHECK_HEADER(ddraw.h, have_ddraw=yes)
         AC_CHECK_HEADER(dsound.h, have_dsound=yes)
         AC_CHECK_HEADER(dinput.h, have_dinput=yes)
     fi
@@ -2555,6 +2568,18 @@ AC_HELP_STRING([--enable-render-gdi], [enable the GDI render driver [[default=ye
                                 , enable_render_gdi=yes)
             if test x$enable_render_gdi = xyes; then
                 AC_DEFINE(SDL_VIDEO_RENDER_GDI)
+            fi
+            AC_ARG_ENABLE(render-gapi,
+AC_HELP_STRING([--enable-render-gapi], [enable the GAPI/RAWFRAMEBUFFER render driver [[default=yes]]]),
+                                , enable_render_gapi=yes)
+            if test x$enable_render_gapi = xyes -a x$have_wince = xyes; then
+                AC_DEFINE(SDL_VIDEO_RENDER_GAPI)
+            fi
+            AC_ARG_ENABLE(render-ddraw,
+AC_HELP_STRING([--enable-render-ddraw], [enable the Mobile DirectDraw render driver [[default=yes]]]),
+                                , enable_render_ddraw=yes)
+            if test x$enable_render_ddraw = xyes -a x$have_wince = xyes -a x$have_ddraw = xyes; then
+                AC_DEFINE(SDL_VIDEO_RENDER_DDRAW)
             fi
             AC_ARG_ENABLE(render-d3d,
 AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[default=yes]]]),

@@ -38,6 +38,41 @@
 /* This is included after SDL_win32video.h, which includes windows.h */
 #include "SDL_syswm.h"
 
+
+#define SHFS_SHOWTASKBAR            0x0001
+#define SHFS_HIDETASKBAR            0x0002
+#define SHFS_SHOWSIPBUTTON          0x0004
+#define SHFS_HIDESIPBUTTON          0x0008
+#define SHFS_SHOWSTARTICON          0x0010
+#define SHFS_HIDESTARTICON          0x0020
+
+#ifdef _WIN32_WCE
+// dynamically load aygshell dll because we want SDL to work on HPC and be300
+int aygshell_loaded = 0;
+BOOL(WINAPI * SHFullScreen) (HWND hwndRequester, DWORD dwState) = 0;
+
+
+static BOOL
+CE_SHFullScreen(HWND hwndRequester, DWORD dwState)
+{
+    if (SHFullScreen == 0 && aygshell_loaded == 0) {
+        aygshell_loaded = 0;
+        void *lib = SDL_LoadObject("aygshell.dll");
+        if (lib) {
+            SHFullScreen =
+                (BOOL(WINAPI *) (HWND, DWORD)) SDL_LoadFunction(lib,
+                                                                "SHFullScreen");
+        }
+    }
+
+    if (SHFullScreen) {
+        SHFullScreen(hwndRequester, dwState);
+        //printf("SHFullscreen(%i)\n",dwState);
+    }
+}
+
+#endif
+
 extern HCTX *g_hCtx;            /* the table of tablet event contexts, each windows has to have it's own tablet context */
 static Uint32 highestId = 0;    /* the highest id of the tablet context */
 
@@ -385,6 +420,7 @@ WIN_SetWindowPosition(_THIS, SDL_Window * window)
     RECT rect;
     DWORD style;
     HWND top;
+    BOOL menu;
     int x, y;
 
     /* Figure out what the window area will be */
@@ -398,9 +434,12 @@ WIN_SetWindowPosition(_THIS, SDL_Window * window)
     rect.top = 0;
     rect.right = window->w;
     rect.bottom = window->h;
-    AdjustWindowRectEx(&rect, style,
-                       (style & WS_CHILDWINDOW) ? FALSE : (GetMenu(hwnd) !=
-                                                           NULL), 0);
+#ifdef _WIN32_WCE
+    menu = FALSE;
+#else
+    menu = (style & WS_CHILDWINDOW) ? FALSE : (GetMenu(hwnd) != NULL);
+#endif
+    AdjustWindowRectEx(&rect, style, menu, 0);
 
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
         || window->x == SDL_WINDOWPOS_CENTERED) {
@@ -425,6 +464,7 @@ WIN_SetWindowSize(_THIS, SDL_Window * window)
     RECT rect;
     DWORD style;
     HWND top;
+    BOOL menu;
     int w, h;
 
     /* Figure out what the window area will be */
@@ -438,9 +478,12 @@ WIN_SetWindowSize(_THIS, SDL_Window * window)
     rect.top = 0;
     rect.right = window->w;
     rect.bottom = window->h;
-    AdjustWindowRectEx(&rect, style,
-                       (style & WS_CHILDWINDOW) ? FALSE : (GetMenu(hwnd) !=
-                                                           NULL), 0);
+#ifdef _WIN32_WCE
+    menu = FALSE;
+#else
+    menu = (style & WS_CHILDWINDOW) ? FALSE : (GetMenu(hwnd) != NULL);
+#endif
+    AdjustWindowRectEx(&rect, style, menu, 0);
     w = (rect.right - rect.left);
     h = (rect.bottom - rect.top);
 
@@ -453,6 +496,14 @@ WIN_ShowWindow(_THIS, SDL_Window * window)
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
 
     ShowWindow(hwnd, SW_SHOW);
+
+#ifdef _WIN32_WCE
+    if (window->flags & SDL_WINDOW_FULLSCREEN) {
+        CE_SHFullScreen(hwnd,
+                        SHFS_HIDESTARTICON | SHFS_HIDETASKBAR |
+                        SHFS_HIDESIPBUTTON);
+    }
+#endif
 }
 
 void
@@ -461,6 +512,14 @@ WIN_HideWindow(_THIS, SDL_Window * window)
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
 
     ShowWindow(hwnd, SW_HIDE);
+
+#ifdef _WIN32_WCE
+    if (window->flags & SDL_WINDOW_FULLSCREEN) {
+        CE_SHFullScreen(hwnd,
+                        SHFS_SHOWSTARTICON | SHFS_SHOWTASKBAR |
+                        SHFS_SHOWSIPBUTTON);
+    }
+#endif
 }
 
 void
@@ -475,6 +534,14 @@ WIN_RaiseWindow(_THIS, SDL_Window * window)
         top = HWND_NOTOPMOST;
     }
     SetWindowPos(hwnd, top, 0, 0, 0, 0, (SWP_NOMOVE | SWP_NOSIZE));
+
+#ifdef _WIN32_WCE
+    if (window->flags & SDL_WINDOW_FULLSCREEN) {
+        CE_SHFullScreen(hwnd,
+                        SHFS_HIDESTARTICON | SHFS_HIDETASKBAR |
+                        SHFS_HIDESIPBUTTON);
+    }
+#endif
 }
 
 void
@@ -483,6 +550,14 @@ WIN_MaximizeWindow(_THIS, SDL_Window * window)
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
 
     ShowWindow(hwnd, SW_MAXIMIZE);
+
+#ifdef _WIN32_WCE
+    if (window->flags & SDL_WINDOW_FULLSCREEN) {
+        CE_SHFullScreen(hwnd,
+                        SHFS_HIDESTARTICON | SHFS_HIDETASKBAR |
+                        SHFS_HIDESIPBUTTON);
+    }
+#endif
 }
 
 void
@@ -491,6 +566,14 @@ WIN_MinimizeWindow(_THIS, SDL_Window * window)
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
 
     ShowWindow(hwnd, SW_MINIMIZE);
+
+#ifdef _WIN32_WCE
+    if (window->flags & SDL_WINDOW_FULLSCREEN) {
+        CE_SHFullScreen(hwnd,
+                        SHFS_SHOWSTARTICON | SHFS_SHOWTASKBAR |
+                        SHFS_SHOWSIPBUTTON);
+    }
+#endif
 }
 
 void
@@ -579,12 +662,18 @@ SDL_HelperWindowCreate(void)
         return -1;
     }
 
+    HWND hWndParent = NULL;
+#ifndef _WIN32_WCE
+    /* WinCE doesn't have HWND_MESSAGE */
+    hWndParent = HWND_MESSAGE;
+#endif
+
     /* Create the window. */
     SDL_HelperWindow = CreateWindowEx(0, SDL_HelperWindowClassName,
                                       SDL_HelperWindowName,
-                                      WS_OVERLAPPEDWINDOW, CW_USEDEFAULT,
+                                      WS_OVERLAPPED, CW_USEDEFAULT,
                                       CW_USEDEFAULT, CW_USEDEFAULT,
-                                      CW_USEDEFAULT, HWND_MESSAGE, NULL,
+                                      CW_USEDEFAULT, hWndParent, NULL,
                                       hInstance, NULL);
     if (SDL_HelperWindow == NULL) {
         UnregisterClass(SDL_HelperWindowClassName, hInstance);
