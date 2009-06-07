@@ -268,9 +268,9 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
 #if _NTO_VERSION<=641
     /* QNX's OpenGL ES implementation is broken regarding             */
     /* packed textures support, affected versions 6.3.2, 6.4.0, 6.4.1 */
-    renderer->info.num_texture_formats=2;
-    renderer->info.texture_formats[0]=SDL_PIXELFORMAT_ABGR8888;
-    renderer->info.texture_formats[1]=SDL_PIXELFORMAT_BGR24;
+    renderer->info.num_texture_formats = 2;
+    renderer->info.texture_formats[0] = SDL_PIXELFORMAT_ABGR8888;
+    renderer->info.texture_formats[1] = SDL_PIXELFORMAT_BGR24;
 #endif /* _NTO_VERSION */
 #endif /* __QNXNTO__ */
 

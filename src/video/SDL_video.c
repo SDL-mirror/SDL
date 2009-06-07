@@ -1635,17 +1635,18 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
             int apfmt;
 
             /* Pixel formats with alpha, sorted by best first */
-            static const Uint32 sdl_alpha_pformats[]={
-               SDL_PIXELFORMAT_ARGB8888,
-               SDL_PIXELFORMAT_RGBA8888,
-               SDL_PIXELFORMAT_ABGR8888,
-               SDL_PIXELFORMAT_BGRA8888,
-               SDL_PIXELFORMAT_ARGB1555,
-               SDL_PIXELFORMAT_ABGR1555,
-               SDL_PIXELFORMAT_ARGB4444,
-               SDL_PIXELFORMAT_ABGR4444,
-               SDL_PIXELFORMAT_ARGB2101010,
-               SDL_PIXELFORMAT_UNKNOWN};
+            static const Uint32 sdl_alpha_pformats[] = {
+                SDL_PIXELFORMAT_ARGB8888,
+                SDL_PIXELFORMAT_RGBA8888,
+                SDL_PIXELFORMAT_ABGR8888,
+                SDL_PIXELFORMAT_BGRA8888,
+                SDL_PIXELFORMAT_ARGB1555,
+                SDL_PIXELFORMAT_ABGR1555,
+                SDL_PIXELFORMAT_ARGB4444,
+                SDL_PIXELFORMAT_ABGR4444,
+                SDL_PIXELFORMAT_ARGB2101010,
+                SDL_PIXELFORMAT_UNKNOWN
+            };
 
             bpp = 32;
             Rmask = 0x00FF0000;
@@ -1653,7 +1654,8 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
             Bmask = 0x000000FF;
             Amask = 0xFF000000;
 
-            format = SDL_MasksToPixelFormatEnum(bpp, Rmask, Gmask, Bmask, Amask);
+            format =
+                SDL_MasksToPixelFormatEnum(bpp, Rmask, Gmask, Bmask, Amask);
             if (!format) {
                 SDL_SetError("Unknown pixel format");
                 return 0;
@@ -1661,53 +1663,46 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
 
             /* Search this format in the supported texture formats */
             /* by current renderer                                 */
-            for (it=0; it<renderer->info.num_texture_formats; it++)
-            {
-                if (renderer->info.texture_formats[it]==format)
-                {
-                   break;
+            for (it = 0; it < renderer->info.num_texture_formats; it++) {
+                if (renderer->info.texture_formats[it] == format) {
+                    break;
                 }
             }
 
             /* If this format can't be found, search any best       */
             /* compatible format with alpha which renderer provides */
-            if (it==renderer->info.num_texture_formats)
-            {
-                apfmt=0;
-                for (;;)
-                {
-                    if (sdl_alpha_pformats[apfmt]==SDL_PIXELFORMAT_UNKNOWN)
-                    {
+            if (it == renderer->info.num_texture_formats) {
+                apfmt = 0;
+                for (;;) {
+                    if (sdl_alpha_pformats[apfmt] == SDL_PIXELFORMAT_UNKNOWN) {
                         break;
                     }
 
-                    for (it=0; it<renderer->info.num_texture_formats; it++)
-                    {
-                       if (renderer->info.texture_formats[it]==sdl_alpha_pformats[apfmt])
-                       {
-                          break;
-                       }
+                    for (it = 0; it < renderer->info.num_texture_formats;
+                         it++) {
+                        if (renderer->info.texture_formats[it] ==
+                            sdl_alpha_pformats[apfmt]) {
+                            break;
+                        }
                     }
 
-                    if (it!=renderer->info.num_texture_formats)
-                    {
-                       /* Compatible format has been found */
-                       break;
+                    if (it != renderer->info.num_texture_formats) {
+                        /* Compatible format has been found */
+                        break;
                     }
                     apfmt++;
                 }
 
                 /* If compatible format can't be found, then return an error */
-                if (it==renderer->info.num_texture_formats)
-                {
+                if (it == renderer->info.num_texture_formats) {
                     SDL_SetError("Compatible pixel format can't be found");
                     return 0;
                 }
 
                 /* Convert found pixel format back to color masks */
-                if (SDL_PixelFormatEnumToMasks(renderer->info.texture_formats[it],
-                       &bpp, &Rmask, &Gmask, &Bmask, &Amask)!=SDL_TRUE)
-                {
+                if (SDL_PixelFormatEnumToMasks
+                    (renderer->info.texture_formats[it], &bpp, &Rmask, &Gmask,
+                     &Bmask, &Amask) != SDL_TRUE) {
                     SDL_SetError("Unknown pixel format");
                     return 0;
                 }
