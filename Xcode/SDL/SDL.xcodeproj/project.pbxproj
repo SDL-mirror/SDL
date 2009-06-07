@@ -342,6 +342,14 @@
 		049E6A600F034900002BF3B6 /* SDL_drawline.c in Sources */ = {isa = PBXBuildFile; fileRef = 049E6A400F034900002BF3B6 /* SDL_drawline.c */; };
 		049E6A610F034900002BF3B6 /* SDL_drawpoint.c in Sources */ = {isa = PBXBuildFile; fileRef = 049E6A410F034900002BF3B6 /* SDL_drawpoint.c */; };
 		049E6A620F034900002BF3B6 /* SDL_fillrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 049E6A420F034900002BF3B6 /* SDL_fillrect.c */; };
+		56B051B50FDB984700A86660 /* SDL_power.c in Sources */ = {isa = PBXBuildFile; fileRef = 56B051B40FDB984700A86660 /* SDL_power.c */; };
+		56B051B60FDB984700A86660 /* SDL_power.c in Sources */ = {isa = PBXBuildFile; fileRef = 56B051B40FDB984700A86660 /* SDL_power.c */; };
+		56B051B70FDB984700A86660 /* SDL_power.c in Sources */ = {isa = PBXBuildFile; fileRef = 56B051B40FDB984700A86660 /* SDL_power.c */; };
+		56B051B80FDB984700A86660 /* SDL_power.c in Sources */ = {isa = PBXBuildFile; fileRef = 56B051B40FDB984700A86660 /* SDL_power.c */; };
+		56B051BA0FDB987600A86660 /* SDL_syspower.c in Sources */ = {isa = PBXBuildFile; fileRef = 56B051B90FDB987600A86660 /* SDL_syspower.c */; };
+		56B051BB0FDB987600A86660 /* SDL_syspower.c in Sources */ = {isa = PBXBuildFile; fileRef = 56B051B90FDB987600A86660 /* SDL_syspower.c */; };
+		56B051BC0FDB987600A86660 /* SDL_syspower.c in Sources */ = {isa = PBXBuildFile; fileRef = 56B051B90FDB987600A86660 /* SDL_syspower.c */; };
+		56B051BD0FDB987600A86660 /* SDL_syspower.c in Sources */ = {isa = PBXBuildFile; fileRef = 56B051B90FDB987600A86660 /* SDL_syspower.c */; };
 		672FFFD90E36887B005A6914 /* SDL_haptic.h in Headers */ = {isa = PBXBuildFile; fileRef = 672FFFD80E36887B005A6914 /* SDL_haptic.h */; };
 		672FFFDA0E36887B005A6914 /* SDL_haptic.h in Headers */ = {isa = PBXBuildFile; fileRef = 672FFFD80E36887B005A6914 /* SDL_haptic.h */; };
 		672FFFDB0E36887B005A6914 /* SDL_haptic.h in Headers */ = {isa = PBXBuildFile; fileRef = 672FFFD80E36887B005A6914 /* SDL_haptic.h */; };
@@ -793,6 +801,8 @@
 		0C5AF5FD01191D2B7F000001 /* SDL_version.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SDL_version.h; path = ../../include/SDL_version.h; sourceTree = SOURCE_ROOT; };
 		0C5AF5FE01191D2B7F000001 /* SDL_video.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SDL_video.h; path = ../../include/SDL_video.h; sourceTree = SOURCE_ROOT; };
 		0C5AF5FF01191D2B7F000001 /* SDL.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SDL.h; path = ../../include/SDL.h; sourceTree = SOURCE_ROOT; };
+		56B051B40FDB984700A86660 /* SDL_power.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SDL_power.c; path = ../../src/power/SDL_power.c; sourceTree = SOURCE_ROOT; };
+		56B051B90FDB987600A86660 /* SDL_syspower.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SDL_syspower.c; path = ../../src/power/macosx/SDL_syspower.c; sourceTree = SOURCE_ROOT; };
 		672FFFD80E36887B005A6914 /* SDL_haptic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_haptic.h; path = ../../include/SDL_haptic.h; sourceTree = SOURCE_ROOT; };
 		672FFFDF0E3688DF005A6914 /* SDL_syshaptic.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_syshaptic.c; sourceTree = "<group>"; };
 		672FFFE00E3688DF005A6914 /* SDL_haptic.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SDL_haptic.c; path = ../../src/haptic/SDL_haptic.c; sourceTree = SOURCE_ROOT; };
@@ -1358,6 +1368,7 @@
 		08FB77ACFE841707C02AAC07 /* Library Source */ = {
 			isa = PBXGroup;
 			children = (
+				56B051B10FDB97FD00A86660 /* power */,
 				0153832C006D78D67F000001 /* audio */,
 				083E4892006D86FF7F000001 /* cdrom */,
 				B24DA50105A88D52006B9F1C /* cpuinfo */,
@@ -1376,6 +1387,23 @@
 				F317F44C0C789F2600411C95 /* SDL_compat.c */,
 			);
 			name = "Library Source";
+			sourceTree = "<group>";
+		};
+		56B051B10FDB97FD00A86660 /* power */ = {
+			isa = PBXGroup;
+			children = (
+				56B051BE0FDB987B00A86660 /* macosx */,
+				56B051B40FDB984700A86660 /* SDL_power.c */,
+			);
+			name = power;
+			sourceTree = "<group>";
+		};
+		56B051BE0FDB987B00A86660 /* macosx */ = {
+			isa = PBXGroup;
+			children = (
+				56B051B90FDB987600A86660 /* SDL_syspower.c */,
+			);
+			name = macosx;
 			sourceTree = "<group>";
 		};
 		672FFFDD0E368886005A6914 /* haptic */ = {
@@ -2150,6 +2178,8 @@
 				049E6A580F034900002BF3B6 /* SDL_drawline.c in Sources */,
 				049E6A590F034900002BF3B6 /* SDL_drawpoint.c in Sources */,
 				049E6A5A0F034900002BF3B6 /* SDL_fillrect.c in Sources */,
+				56B051B70FDB984700A86660 /* SDL_power.c in Sources */,
+				56B051BC0FDB987600A86660 /* SDL_syspower.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2240,6 +2270,8 @@
 				049E6A600F034900002BF3B6 /* SDL_drawline.c in Sources */,
 				049E6A610F034900002BF3B6 /* SDL_drawpoint.c in Sources */,
 				049E6A620F034900002BF3B6 /* SDL_fillrect.c in Sources */,
+				56B051B80FDB984700A86660 /* SDL_power.c in Sources */,
+				56B051BD0FDB987600A86660 /* SDL_syspower.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2352,6 +2384,8 @@
 				049E6A480F034900002BF3B6 /* SDL_drawline.c in Sources */,
 				049E6A490F034900002BF3B6 /* SDL_drawpoint.c in Sources */,
 				049E6A4A0F034900002BF3B6 /* SDL_fillrect.c in Sources */,
+				56B051B50FDB984700A86660 /* SDL_power.c in Sources */,
+				56B051BA0FDB987600A86660 /* SDL_syspower.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2464,6 +2498,8 @@
 				049E6A500F034900002BF3B6 /* SDL_drawline.c in Sources */,
 				049E6A510F034900002BF3B6 /* SDL_drawpoint.c in Sources */,
 				049E6A520F034900002BF3B6 /* SDL_fillrect.c in Sources */,
+				56B051B60FDB984700A86660 /* SDL_power.c in Sources */,
+				56B051BB0FDB987600A86660 /* SDL_syspower.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
