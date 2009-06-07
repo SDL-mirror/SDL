@@ -2804,6 +2804,12 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
             SOURCES="$SOURCES $srcdir/src/loadso/beos/*.c"
             have_loadso=yes
         fi
+        # Set up files for the system power library
+        if test x$enable_power = xyes; then
+            AC_DEFINE(SDL_POWER_BEOS)
+            SOURCES="$SOURCES $srcdir/src/power/beos/*.c"
+            have_power=yes
+        fi
         # The BeOS platform requires special setup.
         SOURCES="$srcdir/src/main/beos/*.cc $SOURCES"
         EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lroot -lbe -lmedia -lgame -ldevice -ltextencoding"
