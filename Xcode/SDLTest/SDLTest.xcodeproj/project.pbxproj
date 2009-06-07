@@ -609,7 +609,7 @@
 		F3DEB6A50C58BF48003E2527 /* common.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = common.c; path = ../../test/common.c; sourceTree = SOURCE_ROOT; };
 		F3DEB6A70C58BF51003E2527 /* testwm2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testwm2.c; path = ../../test/testwm2.c; sourceTree = SOURCE_ROOT; };
 		F3DEB7060C58C13E003E2527 /* testwm2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testwm2.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		F3DEB7080C58C13E003E2527 /* Info-testwm2.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info-testwm2.plist"; sourceTree = "<group>"; };
+		F3DEB7080C58C13E003E2527 /* Info-testwm2.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Info-testwm2.plist"; sourceTree = "<group>"; };
 		F57DC39802A6E6A201D28762 /* testoverlay.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = testoverlay.c; path = ../../test/testoverlay.c; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -3248,7 +3248,7 @@
 				COPY_PHASE_STRIP = YES;
 				DEBUGGING_SYMBOLS = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_OPTIMIZATION_LEVEL = 3;
+				OPTIMIZATION_CFLAGS = "-O3";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
@@ -3271,6 +3271,7 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				OPTIMIZATION_CFLAGS = "-O0";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
