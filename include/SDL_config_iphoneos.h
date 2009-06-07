@@ -131,6 +131,9 @@ typedef unsigned long uintptr_t;
 #define SDL_VIDEO_OPENGL_ES	1
 #define SDL_VIDEO_RENDER_OGL_ES	1
 
+/* Enable system power support */
+#define SDL_POWER_MACOSX 1
+
 /* enable iPhone keyboard support */
 #define SDL_IPHONE_KEYBOARD 1
 

@@ -104,4 +104,6 @@ typedef unsigned long uintptr_t;
 #define SDL_VIDEO_DRIVER_DC	1
 #define SDL_VIDEO_DRIVER_DUMMY	1
 
+#define SDL_POWER_HARDWIRED 1
+
 #endif /* _SDL_config_dreamcast_h */

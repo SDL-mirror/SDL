@@ -55,6 +55,8 @@ src/events/SDL_mouse.c \
 src/events/SDL_quit.c \
 src/events/SDL_windowevents.c \
 src/file/SDL_rwops.c \
+src/power/SDL_power.c \
+src/power/nds/SDL_syspower.c \
 src/haptic/SDL_haptic.c \
 src/haptic/nds/SDL_syshaptic.c \
 src/joystick/nds/SDL_sysjoystick.c \

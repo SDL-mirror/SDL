@@ -20,6 +20,7 @@ SOURCES = \
 	src/thread/*.c \
 	src/timer/*.c \
 	src/video/*.c \
+	src/power/*.c \
 	src/audio/dummy/*.c \
 	src/video/dummy/*.c \
 	src/joystick/dummy/*.c \

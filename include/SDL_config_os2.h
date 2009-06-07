@@ -136,6 +136,9 @@ typedef unsigned long long uint64_t;
 /* Enable OpenGL support */
 /* Nothing here yet for OS/2... :( */
 
+/* Enable system power support */
+#define SDL_POWER_OS2 1
+
 /* Enable assembly routines where available */
 #define SDL_ASSEMBLY_ROUTINES	1
 

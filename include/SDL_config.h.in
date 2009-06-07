@@ -166,6 +166,7 @@
 #undef SDL_THREADS_DISABLED
 #undef SDL_TIMERS_DISABLED
 #undef SDL_VIDEO_DISABLED
+#undef SDL_POWER_DISABLED
 
 /* Enable various audio drivers */
 #undef SDL_AUDIO_DRIVER_ALSA
@@ -323,6 +324,14 @@
 #undef SDL_VIDEO_OPENGL_WGL
 #undef SDL_VIDEO_OPENGL_OSMESA
 #undef SDL_VIDEO_OPENGL_OSMESA_DYNAMIC
+
+/* Enable system power support */
+#undef SDL_POWER_LINUX
+#undef SDL_POWER_WINDOWS
+#undef SDL_POWER_MACOSX
+#undef SDL_POWER_OS2
+#undef SDL_POWER_NINTENDODS
+#undef SDL_POWER_HARDWIRED
 
 /* Enable assembly routines */
 #undef SDL_ASSEMBLY_ROUTINES

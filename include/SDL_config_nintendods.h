@@ -116,4 +116,7 @@ typedef unsigned __PTRDIFF_TYPE__ uintptr_t;
 #define SDL_VIDEO_DRIVER_NDS	1
 /*#define SDL_VIDEO_DRIVER_DUMMY	1 TODO: uncomment this later*/
 
+/* Enable system power support */
+#define SDL_POWER_NINTENDODS 1
+
 #endif /* _SDL_config_nintendods_h */

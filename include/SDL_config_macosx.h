@@ -137,6 +137,9 @@
 #define SDL_VIDEO_OPENGL_CGL	1
 #define SDL_VIDEO_RENDER_OGL	1
 
+/* Enable system power support */
+#define SDL_POWER_MACOSX 1
+
 /* Enable assembly routines */
 #define SDL_ASSEMBLY_ROUTINES	1
 #ifdef __ppc__

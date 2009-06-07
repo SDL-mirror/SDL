@@ -185,6 +185,9 @@ typedef unsigned int uintptr_t;
 #define SDL_VIDEO_RENDER_OGL	1
 #endif
 
+/* Enable system power support */
+#define SDL_POWER_WINDOWS 1
+
 /* Enable assembly routines (Win64 doesn't have inline asm) */
 #ifndef _WIN64
 #define SDL_ASSEMBLY_ROUTINES	1

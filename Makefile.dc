@@ -31,6 +31,7 @@ SRCS = \
 	src/events/SDL_quit.c \
 	src/events/SDL_resize.c \
 	src/file/SDL_rwops.c \
+	src/power/SDL_power.c \
 	src/joystick/dc/SDL_sysjoystick.c \
 	src/joystick/SDL_joystick.c \
 	src/loadso/dummy/SDL_sysloadso.c \
