@@ -27,6 +27,10 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 #include "SDL_power.h"
 
 SDL_bool
@@ -44,8 +48,8 @@ SDL_GetPowerInfo_Linux_sys_power(SDL_PowerState *state,
 }
 
 SDL_bool
-SDL_GetPowerInfo_Linux_sys_proc_acpi(SDL_PowerState *state,
-                                     int *seconds, int *percent)
+SDL_GetPowerInfo_Linux_proc_acpi(SDL_PowerState *state,
+				 int *seconds, int *percent)
 {
     return SDL_FALSE;  /* !!! FIXME: write me. */
 #if 0
@@ -93,8 +97,8 @@ int_string(char *str, int *val)
 
 /* http://lxr.linux.no/linux+v2.6.29/drivers/char/apm-emulation.c */
 SDL_bool
-SDL_GetPowerInfo_Linux_sys_proc_apm(SDL_PowerState *state,
-                                    int *seconds, int *percent)
+SDL_GetPowerInfo_Linux_proc_apm(SDL_PowerState *state,
+				int *seconds, int *percent)
 {
     SDL_bool need_details = SDL_FALSE;
     int ac_status = 0;
