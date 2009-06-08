@@ -96,29 +96,35 @@ WIN_GetDisplayMode(LPCTSTR deviceName, DWORD index, SDL_DisplayMode * mode)
             }
         } else if (bmi->bmiHeader.biBitCount == 8) {
             mode->format = SDL_PIXELFORMAT_INDEX8;
+        } else if (bmi->bmiHeader.biBitCount == 4) {
+            mode->format = SDL_PIXELFORMAT_INDEX4LSB;
         }
     } else
 #endif /* _WIN32_WCE */
     {
-
         /* FIXME: Can we tell what this will be? */
-        switch (devmode.dmBitsPerPel) {
-        case 32:
-            mode->format = SDL_PIXELFORMAT_RGB888;
-            break;
-        case 24:
-            mode->format = SDL_PIXELFORMAT_RGB24;
-            break;
-        case 16:
-            mode->format = SDL_PIXELFORMAT_RGB565;
-            break;
-        case 15:
-            mode->format = SDL_PIXELFORMAT_RGB555;
-            break;
-        case 8:
-            mode->format = SDL_PIXELFORMAT_INDEX8;
-            break;
-        }
+	if ((devmode.dmFields & DM_BITSPERPEL)==DM_BITSPERPEL) {
+            switch (devmode.dmBitsPerPel) {
+            case 32:
+                mode->format = SDL_PIXELFORMAT_RGB888;
+                break;
+            case 24:
+                mode->format = SDL_PIXELFORMAT_RGB24;
+                break;
+            case 16:
+                mode->format = SDL_PIXELFORMAT_RGB565;
+                break;
+            case 15:
+                mode->format = SDL_PIXELFORMAT_RGB555;
+                break;
+            case 8:
+                mode->format = SDL_PIXELFORMAT_INDEX8;
+                break;
+            case 4:
+                mode->format = SDL_PIXELFORMAT_INDEX4LSB;
+                break;
+            }
+	}
     }
     return SDL_TRUE;
 }
@@ -200,8 +206,9 @@ WIN_GetDisplayModes(_THIS)
         if (!WIN_GetDisplayMode(data->DeviceName, i, &mode)) {
             break;
         }
-        if (!SDL_AddDisplayMode(_this->current_display, &mode)) {
-            SDL_free(mode.driverdata);
+	if (mode.format != SDL_PIXELFORMAT_UNKNOWN)
+            if (!SDL_AddDisplayMode(_this->current_display, &mode)) {
+                SDL_free(mode.driverdata);
         }
     }
 }
