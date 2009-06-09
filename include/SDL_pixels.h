@@ -137,10 +137,10 @@ enum
                                1, 0),
     SDL_PIXELFORMAT_INDEX4LSB =
         SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_INDEX4, SDL_BITMAPORDER_1234, 0,
-                               2, 0),
+                               4, 0),
     SDL_PIXELFORMAT_INDEX4MSB =
         SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_INDEX4, SDL_BITMAPORDER_4321, 0,
-                               2, 0),
+                               4, 0),
     SDL_PIXELFORMAT_INDEX8 =
         SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_INDEX8, 0, 0, 8, 1),
     SDL_PIXELFORMAT_RGB332 =
