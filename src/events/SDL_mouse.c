@@ -464,6 +464,7 @@ SDL_SendMouseMotion(int id, int relative, int x, int y, int pressure)
         event.motion.state = mouse->buttonstate;
         event.motion.x = mouse->x;
         event.motion.y = mouse->y;
+        event.motion.z = mouse->z;
         event.motion.pressure = mouse->pressure;
         event.motion.xrel = xrel;
         event.motion.yrel = yrel;
