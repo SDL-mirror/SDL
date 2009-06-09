@@ -159,6 +159,7 @@ if test x$enable_libc = xyes; then
     AC_CHECK_FUNCS(iconv)
 fi
 
+AC_CHECK_SIZEOF(void*)
 if test x$have_inttypes != xyes; then
     AC_CHECK_SIZEOF(char, 1)
     AC_CHECK_SIZEOF(short, 2)

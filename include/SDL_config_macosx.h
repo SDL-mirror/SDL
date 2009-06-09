@@ -30,6 +30,7 @@
 
 /* This is a set of defines to configure the SDL features */
 
+#define SIZEOF_VOIDP 4
 #define SDL_HAS_64BIT_TYPE	1
 
 /* Useful headers */

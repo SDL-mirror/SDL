@@ -49,6 +49,7 @@
 #undef int64_t
 #undef uint64_t
 #undef uintptr_t
+#undef SIZEOF_VOIDP
 #undef SDL_HAS_64BIT_TYPE
 
 /* Endianness */

@@ -38,6 +38,7 @@ typedef unsigned long uintptr_t;
 typedef signed long long int64_t;
 typedef unsigned long long uint64_t;
 
+#define SIZEOF_VOIDP 4
 #define SDL_HAS_64BIT_TYPE	1
 
 /* Use Watcom's LIBC */

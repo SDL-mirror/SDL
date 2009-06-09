@@ -68,6 +68,12 @@ typedef unsigned int size_t;
 #endif
 typedef unsigned int uintptr_t;
 #endif /* __GNUC__ || _MSC_VER */
+
+#ifdef _WIN64
+# define SIZEOF_VOIDP 8
+#else
+# define SIZEOF_VOIDP 4
+#endif
 #define SDL_HAS_64BIT_TYPE	1
 
 /* Enabled for SDL 1.2 (binary compatibility) */
