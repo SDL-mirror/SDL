@@ -77,7 +77,7 @@ SDL_atomic_int_cmp_xchg(volatile int* atomic, int oldvalue, int newvalue)
                        : "r" (newvalue),                     
                          "m" (*atomic),                    
                          "0" (oldvalue));
-  return (rv == oldvalue);                                          
+  return (SDL_bool)(rv == oldvalue);                                          
 }
 
 static __inline__ SDL_bool
@@ -95,7 +95,7 @@ SDL_atomic_ptr_cmp_xchg(volatile void** atomic, void* oldvalue, void* newvalue)
                        : "r" (newvalue),
                          "m" (*atomic),
                          "0" (oldvalue));
-  return (rv == oldvalue);
+  return (SDL_bool)(rv == oldvalue);
 }
 #elif defined(__GNUC__) && defined(__alpha__)
 # define ATOMIC_MEMORY_BARRIER (__asm__ __volatile__ ("mb" : : : "memory"))
@@ -141,7 +141,7 @@ SDL_atomic_ptr_cmp_xchg(volatile void** atomic, void* oldvalue, void* newvalue)
                          "Ir" (oldvalue),
                          "Ir" (newvalue)
                        : "memory");
-  return (rv != 0);
+  return (SDL_bool)(rv != 0);
 }
 # elif (SIZEOF_VOIDP == 8)
 static __inline__ SDL_bool
@@ -164,7 +164,7 @@ SDL_atomic_ptr_cmp_xchg(volatile void** atomic, void* oldvalue, void* newvalue)
                          "Ir" (oldvalue),
                          "Ir" (newvalue)
                        : "memory");
-  return (rv != 0);
+  return (SDL_bool)(rv != 0);
 }
 # else
 #  error "Your system has an unsupported pointer size"  
@@ -195,7 +195,7 @@ SDL_atomic_ptr_cmp_xchg(volatile void** atomic, void* oldvalue, void* newvalue)
                          "m" (*atomic),
                          "r" (atomic),
                          "0" (newvalue));
-  return (rv == oldvalue);
+  return (SDL_bool)(rv == oldvalue);
 }
 # elif (SIZEOF_VOIDP == 8)
 static __inline__ SDL_bool
@@ -210,7 +210,7 @@ SDL_atomic_ptr_cmp_xchg(volatile void** atomic, void* oldvalue, void* newvalue)
                          "m" (*a),
                          "r" (a),
                          "0" (newvalue));
-  return (rv == oldvalue);
+  return (SDL_bool)(rv == oldvalue);
 }
 # else
 #  error "Your system has an unsupported pointer size"
@@ -273,7 +273,7 @@ SDL_atomic_int_cmp_xchg(volatile int* atomic, int oldvalue, int newvalue)
                          "r"                              
                        : "cr0",                           
                          "memory");                         
-  return (rv == 0);                                              
+  return (SDL_bool)(rv == 0);                                              
 }
 
 static __inline__ SDL_bool
@@ -293,7 +293,7 @@ SDL_atomic_ptr_cmp_xchg(volatile void** atomic, void* oldvalue, void* newvalue)
                          "r" (newvalue)
                        : "cr0",
                        "memory");
-  return (rv == 0);
+  return (SDL_bool)(rv == 0);
 }
 # elif (SIZEOF_VOIDP == 8)
 static __inline__ SDL_bool
@@ -314,7 +314,7 @@ SDL_atomic_int_cmp_xchg(volatile int* atomic, int oldvalue, int newvalue)
                          "r"                              
                        : "cr0",                           
                          "memory");                         
-  return (rv == 0);                                              
+  return (SDL_bool)(rv == 0);                                              
 }
 
 static __inline__ SDL_bool
@@ -334,7 +334,7 @@ SDL_atomic_ptr_cmp_xchg(volatile void** atomic, void* oldvalue, void* newvalue)
                          "r" (newvalue)
                        : "cr0",
                        "memory");
-  return (rv == 0);
+  return (SDL_bool)(rv == 0);
 }
 # else
 #  error "Your system has an unsupported pointer size"
@@ -463,7 +463,7 @@ SDL_atomic_int_xchg_add(volatile int* atomic, int value)
                          "m" (*atomic),
                          "0" (rv)
                        : "memory");
-  return rv;
+  return (SDL_bool)rv;
 }
 
 static __inline__ void
@@ -489,7 +489,7 @@ SDL_atomic_int_cmp_xchg(volatile int* atomic, int oldvalue, int newvalue)
                        : "d" (newvalue),     
                          "m" (*atomic),    
                          "2" (oldvalue));    
-    return rv;                                        
+    return (SDL_bool)rv;                                        
 }
 
 static __inline__ SDL_bool
@@ -505,7 +505,7 @@ SDL_atomic_ptr_cmp_xchg(volatile void** atomic, void* oldvalue, void* newvalue)
                        : "d" (newvalue),     
                          "m" (*atomic),    
                          "2" (oldvalue));    
-    return rv;                                        
+    return (SDL_bool)rv;                                        
 }
 #elif defined(__GNUC__) && defined(__s390__)
 # define ATOMIC_INT_CMP_XCHG(atomic,oldvalue,newvalue)  \
@@ -530,7 +530,7 @@ SDL_atomic_ptr_cmp_xchg(volatile void** atomic, void* oldvalue, void* newvalue)
                        : "d" (newvalue),
                          "m" (*atomic)
                        : "cc");
-  return (rv == oldvalue);
+  return (SDL_bool)(rv == oldvalue);
 }
 # elif (SIZEOF_VOIDP == 8)
 static __inline__ SDL_bool
@@ -544,7 +544,7 @@ SDL_atomic_ptr_cmp_xchg(volatile void** atomic, void* oldvalue, void* newvalue)
                        : "d" ((long)(newvalue)),
                          "m" (*a)
                        : "cc");
-  return (rv == oldvalue);
+  return (SDL_bool)(rv == oldvalue);
 }
 # else
 #  error "Your system has an unsupported pointer size"
@@ -567,9 +567,9 @@ SDL_atomic_int_add(volatile int* atomic, int value)
 static __inline__ SDL_bool
 SDL_atmoic_int_cmp_xchg(volatile int* atomic, int oldvalue, int newvalue)
 {
-  return ((SDL_bool)InterlockedCompareExchangePointer((PVOID*)atomic,
-                                                      (PVOID)newvalue,
-                                                      (PVOID)oldvalue) == oldvalue);
+   return (SDL_bool)(InterlockedCompareExchangePointer((PVOID*)atomic,
+                                                       (PVOID)newvalue,
+                                                       (PVOID)oldvalue) == oldvalue);
 }
 
 
@@ -624,7 +624,7 @@ SDL_atomic_int_add(volatile int* atomic, int value)
 static __inline__ SDL_bool
 SDL_atomic_int_cmp_xchg(volatile int* atomic, int oldvalue, int newvalue)
 {
-  return ATOMIC_INT_CMP_XCHG(atomic,oldvalue,newvalue);
+  return (SDL_bool)ATOMIC_INT_CMP_XCHG(atomic,oldvalue,newvalue);
 }
 
 static __inline__ int
