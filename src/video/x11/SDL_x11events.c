@@ -339,7 +339,6 @@ X11_DispatchEvent(_THIS)
                 if (xevent.type == data->proximity_in) {
                     XProximityNotifyEvent *proximity =
                         (XProximityNotifyEvent *) & xevent;
-                    SDL_SetMouseFocus(proximity->deviceid, data->windowID);
                     SDL_SendProximity(proximity->deviceid, proximity->x,
                                       proximity->y, SDL_PROXIMITYIN);
                     return;
@@ -347,7 +346,6 @@ X11_DispatchEvent(_THIS)
                 if (xevent.type == data->proximity_out) {
                     XProximityNotifyEvent *proximity =
                         (XProximityNotifyEvent *) & xevent;
-                    SDL_SetMouseFocus(proximity->deviceid, data->windowID);
                     SDL_SendProximity(proximity->deviceid, proximity->x,
                                       proximity->y, SDL_PROXIMITYOUT);
                     return;
