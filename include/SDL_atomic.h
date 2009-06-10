@@ -42,46 +42,63 @@ extern "C" {
 /* *INDENT-ON* */
 #endif
 
+/* indent is really bad at handling assembly */
+/* *INDENT-OFF* */
+
 #if defined(__GNUC__) && (defined(i386) || defined(__i386__)  || defined(__x86_64__))
 static __inline__ void
-SDL_atomic_int_add(volatile int *atomic, int value)
+SDL_atomic_int_add(volatile int* atomic, int value)
 {
-    __asm__ __volatile__("lock;" "addl %1, %0":"=m"(*atomic)
-                         :"ir"(value), "m"(*atomic));
+  __asm__ __volatile__("lock;"
+                       "addl %1, %0"
+                       : "=m" (*atomic)
+                       : "ir" (value),
+                         "m" (*atomic));
 }
 
 static __inline__ int
-SDL_atomic_int_xchg_add(volatile int *atomic, int value)
-{
-    int rv;
-    __asm__ __volatile__("lock;" "xaddl %0, %1":"=r"(rv), "=m"(*atomic)
-                         :"0"(value), "m"(*atomic));
-    return rv;
+SDL_atomic_int_xchg_add(volatile int* atomic, int value)
+{                                              
+  int rv;                                    
+  __asm__ __volatile__("lock;"               
+                       "xaddl %0, %1"        
+                       : "=r" (rv),          
+                         "=m" (*atomic)    
+                       : "0" (value),        
+                         "m" (*atomic));   
+  return rv;                                        
 }
 
 static __inline__ SDL_bool
-SDL_atomic_int_cmp_xchg(volatile int *atomic, int oldvalue, int newvalue)
+SDL_atomic_int_cmp_xchg(volatile int* atomic, int oldvalue, int newvalue)
 {
-    int rv;
-    __asm__ __volatile__("lock;" "cmpxchgl %2, %1":"=a"(rv), "=m"(*atomic)
-                         :"r"(newvalue), "m"(*atomic), "0"(oldvalue));
-    return (SDL_bool) (rv == oldvalue);
+  int rv;                                                      
+  __asm__ __volatile__("lock;"                               
+                       "cmpxchgl %2, %1"                     
+                       : "=a" (rv),                          
+                         "=m" (*atomic)             
+                       : "r" (newvalue),                     
+                         "m" (*atomic),                    
+                         "0" (oldvalue));
+  return (SDL_bool)(rv == oldvalue);                                          
 }
 
 static __inline__ SDL_bool
-SDL_atomic_ptr_cmp_xchg(volatile void **atomic, void *oldvalue,
-                        void *newvalue)
+SDL_atomic_ptr_cmp_xchg(volatile void** atomic, void* oldvalue, void* newvalue)
 {
-    void *rv;
-    __asm__ __volatile__("lock;"
-# if defined(__x86_64__)
-                         "cmpxchgq %q2, %1"
+  void* rv;
+  __asm__ __volatile__("lock;"
+# if defined(__x86_64__)                       
+                       "cmpxchgq %q2, %1"
 # else
-                         "cmpxchgl %2, %1"
-# endif
-                         :"=a"(rv), "=m"(*atomic)
-                         :"r"(newvalue), "m"(*atomic), "0"(oldvalue));
-    return (SDL_bool) (rv == oldvalue);
+                       "cmpxchgl %2, %1"
+# endif                       
+                       : "=a" (rv),
+                         "=m" (*atomic)
+                       : "r" (newvalue),
+                         "m" (*atomic),
+                         "0" (oldvalue));
+  return (SDL_bool)(rv == oldvalue);
 }
 #elif defined(__GNUC__) && defined(__alpha__)
 # define ATOMIC_MEMORY_BARRIER (__asm__ __volatile__ ("mb" : : : "memory"))
@@ -108,45 +125,53 @@ SDL_atomic_ptr_cmp_xchg(volatile void **atomic, void *oldvalue,
 
 # if (SIZEOF_VOIDP == 4)
 static __inline__ SDL_bool
-SDL_atomic_ptr_cmp_xchg(volatile void **atomic, void *oldvalue,
-                        void *newvalue)
+SDL_atomic_ptr_cmp_xchg(volatile void** atomic, void* oldvalue, void* newvalue)
 {
-    int rv;
-    void *prev;
-    __asm__ __volatile__("   mb\n"
-                         "1: ldl_l %0,%2\n"
-                         "   cmpeq %0,%3,%1\n"
-                         "   beq   $1,2f\n"
-                         "   mov   %4,%1\n"
-                         "   stl_c %1,%2\n"
-                         "   beq   %1,1b\n"
-                         "   mb\n" "2:":"=&r"(prev), "=&r"(rv)
-                         :"m"(*atomic), "Ir"(oldvalue), "Ir"(newvalue)
-                         :"memory");
-    return (SDL_bool) (rv != 0);
+  int rv;
+  void* prev;
+  __asm__ __volatile__("   mb\n"
+                       "1: ldl_l %0,%2\n"
+                       "   cmpeq %0,%3,%1\n"
+                       "   beq   $1,2f\n"
+                       "   mov   %4,%1\n"
+                       "   stl_c %1,%2\n"
+                       "   beq   %1,1b\n"
+                       "   mb\n"
+                       "2:"
+                       : "=&r" (prev),
+                         "=&r" (rv)
+                       : "m" (*atomic),
+                         "Ir" (oldvalue),
+                         "Ir" (newvalue)
+                       : "memory");
+  return (SDL_bool)(rv != 0);
 }
 # elif (SIZEOF_VOIDP == 8)
 static __inline__ SDL_bool
-SDL_atomic_ptr_cmp_xchg(volatile void **atomic, void *oldvalue,
-                        void *newvalue)
+SDL_atomic_ptr_cmp_xchg(volatile void** atomic, void* oldvalue, void* newvalue)
 {
-    int rv;
-    void *prev;
-    __asm__ __volatile__("   mb\n"
-                         "1: ldq_l %0,%2\n"
-                         "   cmpeq %0,%3,%1\n"
-                         "   beq   %1,2f\n"
-                         "   mov   %4,%1\n"
-                         "   stq_c %1,%2\n"
-                         "   beq   %1,1b\n"
-                         "   mb\n" "2:":"=&r"(prev), "=&r"(rv)
-                         :"m"(*atomic), "Ir"(oldvalue), "Ir"(newvalue)
-                         :"memory");
-    return (SDL_bool) (rv != 0);
+  int rv;
+  void* prev;
+  __asm__ __volatile__("   mb\n"
+                       "1: ldq_l %0,%2\n"
+                       "   cmpeq %0,%3,%1\n"
+                       "   beq   %1,2f\n"
+                       "   mov   %4,%1\n"
+                       "   stq_c %1,%2\n"
+                       "   beq   %1,1b\n"
+                       "   mb\n"
+                       "2:"
+                       : "=&r" (prev),
+                         "=&r" (rv)
+                       : "m" (*atomic),
+                         "Ir" (oldvalue),
+                         "Ir" (newvalue)
+                       : "memory");
+  return (SDL_bool)(rv != 0);
 }
 # else
-#  error "Your system has an unsupported pointer size"
-# endif /* SIZEOF_VOIDP */
+#  error "Your system has an unsupported pointer size"  
+# endif  /* SIZEOF_VOIDP */
 #elif defined(__GNUC__) && defined(__sparc__)
 # define ATOMIC_MEMORY_BARRIER                                          \
   (__asm__ __volatile__("membar #LoadLoad | #LoadStore"                 \
@@ -163,25 +188,32 @@ SDL_atomic_ptr_cmp_xchg(volatile void **atomic, void *oldvalue,
 
 # if (SIZEOF_VOIDP == 4)
 static __inline__ SDL_bool
-SDL_atomic_ptr_cmp_xchg(volatile void **atomic, void *oldvalue,
-                        void *newvalue)
+SDL_atomic_ptr_cmp_xchg(volatile void** atomic, void* oldvalue, void* newvalue)
 {
-    void *rv;
-    __asm__ __volatile__("cas [%4], %2, %0":"=r"(rv), "=m"(*atomic)
-                         :"r"(oldvalue),
-                         "m"(*atomic), "r"(atomic), "0"(newvalue));
-    return (SDL_bool) (rv == oldvalue);
+  void* rv;
+  __asm__ __volatile__("cas [%4], %2, %0"
+                       : "=r" (rv),
+                         "=m" (*atomic)
+                       : "r" (oldvalue),
+                         "m" (*atomic),
+                         "r" (atomic),
+                         "0" (newvalue));
+  return (SDL_bool)(rv == oldvalue);
 }
 # elif (SIZEOF_VOIDP == 8)
 static __inline__ SDL_bool
-SDL_atomic_ptr_cmp_xchg(volatile void **atomic, void *oldvalue,
-                        void *newvalue)
+SDL_atomic_ptr_cmp_xchg(volatile void** atomic, void* oldvalue, void* newvalue)
 {
-    void *rv;
-    void **a = atomic;
-    __asm__ __volatile__("casx [%4], %2, %0":"=r"(rv), "=m"(*a)
-                         :"r"(oldvalue), "m"(*a), "r"(a), "0"(newvalue));
-    return (SDL_bool) (rv == oldvalue);
+  void* rv;
+  void** a = atomic;
+  __asm__ __volatile__("casx [%4], %2, %0"
+                       : "=r" (rv),
+                         "=m" (*a)
+                       : "r" (oldvalue),
+                         "m" (*a),
+                         "r" (a),
+                         "0" (newvalue));
+  return (SDL_bool)(rv == oldvalue);
 }
 # else
 #  error "Your system has an unsupported pointer size"
@@ -190,90 +222,122 @@ SDL_atomic_ptr_cmp_xchg(volatile void **atomic, void *oldvalue,
 # define ATOMIC_MEMORY_BARRIER \
   (__asm__ __volatile__ ("sync" : : : "memory"))
 static __inline__ void
-SDL_atomic_int_add(volatile int *atomic, int value)
-{
-    int rv, tmp;
-    __asm__ __volatile__("1: lwarx   %0,  0, %3\n"
-                         "   add     %1, %0, %4\n"
-                         "   stwcx.  %1,  0, %3\n"
-                         "   bne-    1b":"=&b"(rv), "=&r"(tmp), "=m"(*atomic)
-                         :"b"(atomic), "r"(value), "m"(*atomic)
-                         :"cr0", "memory");
+SDL_atomic_int_add(volatile int* atomic, int value)
+{                                           
+  int rv,tmp;                                   
+  __asm__ __volatile__("1: lwarx   %0,  0, %3\n" 
+                       "   add     %1, %0, %4\n"
+                       "   stwcx.  %1,  0, %3\n" 
+                       "   bne-    1b"          
+                       : "=&b" (rv),            
+                         "=&r" (tmp),           
+                         "=m" (*atomic)       
+                       : "b" (atomic),          
+                         "r" (value),           
+                         "m" (*atomic)        
+                       : "cr0",                 
+                         "memory");             
 }
 
 static __inline__ int
-SDL_atomic_int_xchg_add(volatile int *atomic, int value)
-{
-    int rv, tmp;
-    __asm__ __volatile__("1: lwarx  %0, 0, %3\n"
-                         "   add    %1, %0, %4\n"
-                         "   stwcx. %1, 0, %3\n"
-                         "   bne-   1b":"=&b"(rv), "=&r"(tmp), "=m"(*atomic)
-                         :"b"(atomic), "r"(value), "m"(*atomic)
-                         :"cr0", "memory");
-    return rv;
+SDL_atomic_int_xchg_add(volatile int* atomic, int value)
+{                                          
+  int rv,tmp;                               
+  __asm__ __volatile__("1: lwarx  %0, 0, %3\n"        
+                       "   add    %1, %0, %4\n"       
+                       "   stwcx. %1, 0, %3\n"        
+                       "   bne-   1b"                 
+                       : "=&b" (rv),                  
+                         "=&r" (tmp),                 
+                         "=m" (*atomic)
+                       : "b" (atomic),                
+                         "r" (value),                 
+                         "m" (*atomic)
+                       : "cr0",                       
+                       "memory");                   
+  return rv;                                                 
 }
 
 # if (SIZEOF_VOIDP == 4)
 static __inline__ SDL_bool
-SDL_atomic_int_cmp_xchg(volatile int *atomic, int oldvalue, int newvalue)
-{
-    int rv;
-    __asm__ __volatile__("   sync\n"
-                         "1: lwarx   %0, 0, %1\n"
-                         "   subf.   %0, %2, %0\n"
-                         "   bne     2f\n"
-                         "   stwcx.  %3, 0, %1\n"
-                         "   bne-    1b\n" "2: isync":"=&r"(rv)
-                         :"b"(atomic), "r"(oldvalue), "r":"cr0", "memory");
-    return (SDL_bool) (rv == 0);
+SDL_atomic_int_cmp_xchg(volatile int* atomic, int oldvalue, int newvalue)
+{                                                        
+  int rv;                                                 
+  __asm__ __volatile__("   sync\n"                         
+                       "1: lwarx   %0, 0, %1\n"           
+                       "   subf.   %0, %2, %0\n"          
+                       "   bne     2f\n"                  
+                       "   stwcx.  %3, 0, %1\n"           
+                       "   bne-    1b\n"                  
+                       "2: isync"                         
+                       : "=&r" (rv)                       
+                       : "b" (atomic),                    
+                         "r" (oldvalue),                  
+                         "r"                              
+                       : "cr0",                           
+                         "memory");                         
+  return (SDL_bool)(rv == 0);                                              
 }
 
 static __inline__ SDL_bool
-SDL_atomic_ptr_cmp_xchg(volatile void **atomic, void *oldvalue,
-                        void *newvalue)
+SDL_atomic_ptr_cmp_xchg(volatile void** atomic, void* oldvalue, void* newvalue)
 {
-    void *rv;
-    __asm__ __volatile__("sync\n"
-                         "1: lwarx  %0,  0, %1\n"
-                         "   subf.  %0, %2, %0\n"
-                         "   bne    2f\n"
-                         "   stwcx. %3,  0, %1\n"
-                         "   bne-   1b\n" "2: isync":"=&r"(rv)
-                         :"b"(atomic), "r"(oldvalue), "r"(newvalue)
-                         :"cr0", "memory");
-    return (SDL_bool) (rv == 0);
+  void* rv;
+  __asm__ __volatile__("sync\n"
+                       "1: lwarx  %0,  0, %1\n"
+                       "   subf.  %0, %2, %0\n"
+                       "   bne    2f\n"
+                       "   stwcx. %3,  0, %1\n"
+                       "   bne-   1b\n"
+                       "2: isync"
+                       : "=&r" (rv)
+                       : "b" (atomic),
+                         "r" (oldvalue),
+                         "r" (newvalue)
+                       : "cr0",
+                       "memory");
+  return (SDL_bool)(rv == 0);
 }
 # elif (SIZEOF_VOIDP == 8)
 static __inline__ SDL_bool
-SDL_atomic_int_cmp_xchg(volatile int *atomic, int oldvalue, int newvalue)
-{
-    int rv;
-    __asm__ __volatile__("   sync\n"
-                         "1: lwarx   %0,  0, %1\n"
-                         "   extsw   %0, %0\n"
-                         "   subf.   %0, %2, %0\n"
-                         "   bne     2f\n"
-                         "   stwcx.  %3,  0, %1\n"
-                         "   bne-    1b\n" "2: isync":"=&r"(rv)
-                         :"b"(atomic), "r"(oldvalue), "r":"cr0", "memory");
-    return (SDL_bool) (rv == 0);
+SDL_atomic_int_cmp_xchg(volatile int* atomic, int oldvalue, int newvalue)
+{                                                        
+  int rv;                                                 
+  __asm__ __volatile__("   sync\n"                         
+                       "1: lwarx   %0,  0, %1\n"
+                       "   extsw   %0, %0\n"
+                       "   subf.   %0, %2, %0\n"          
+                       "   bne     2f\n"                  
+                       "   stwcx.  %3,  0, %1\n"           
+                       "   bne-    1b\n"                  
+                       "2: isync"                         
+                       : "=&r" (rv)                       
+                       : "b" (atomic),                    
+                         "r" (oldvalue),                  
+                         "r"                              
+                       : "cr0",                           
+                         "memory");                         
+  return (SDL_bool)(rv == 0);                                              
 }
 
 static __inline__ SDL_bool
-SDL_atomic_ptr_cmp_xchg(volatile void **atomic, void *oldvalue,
-                        void *newvalue)
+SDL_atomic_ptr_cmp_xchg(volatile void** atomic, void* oldvalue, void* newvalue)
 {
-    void *rv;
-    __asm__ __volatile__("sync\n"
-                         "1: ldarx  %0,  0, %1\n"
-                         "   subf.  %0, %2, %0\n"
-                         "   bne    2f\n"
-                         "   stdcx. %3,  0, %1\n"
-                         "   bne-   1b\n" "2: isync":"=&r"(rv)
-                         :"b"(atomic), "r"(oldvalue), "r"(newvalue)
-                         :"cr0", "memory");
-    return (SDL_bool) (rv == 0);
+  void* rv;
+  __asm__ __volatile__("sync\n"
+                       "1: ldarx  %0,  0, %1\n"
+                       "   subf.  %0, %2, %0\n"
+                       "   bne    2f\n"
+                       "   stdcx. %3,  0, %1\n"
+                       "   bne-   1b\n"
+                       "2: isync"
+                       : "=&r" (rv)
+                       : "b" (atomic),
+                         "r" (oldvalue),
+                         "r" (newvalue)
+                       : "cr0",
+                       "memory");
+  return (SDL_bool)(rv == 0);
 }
 # else
 #  error "Your system has an unsupported pointer size"
@@ -290,130 +354,161 @@ SDL_atomic_ptr_cmp_xchg(volatile void **atomic, void *oldvalue,
   (__sync_bool_compare_and_swap((long*)(atomic),(long)(oldvalue),(long)(newvalue)))
 #elif defined(__GNUC__) && defined(__LINUX__) && (defined(__mips__) || defined(__MIPS__))
 static __inline__ int
-SDL_atomic_int_xchg_add(volatile int *atomic, int value)
-{
-    int rv, tmp;
-    __asm__ __volatile__("1:              \n"
-                         ".set  push      \n"
-                         ".set  mips2     \n"
-                         "ll    %0,%3     \n"
-                         "addu  %1,%4,%0  \n"
-                         "sc    %1,%2     \n"
-                         ".set  pop       \n"
-                         "beqz  %1,1b     \n":"=&r"(rv),
-                         "=&r"(tmp), "=m"(*atomic)
-                         :"m"(*atomic), "r"(value)
-                         :"memory");
-    return rv;
+SDL_atomic_int_xchg_add(volatile int* atomic, int value)
+{                                            
+  int rv,tmp;                                 
+  __asm__ __volatile__("1:              \n"                 
+                       ".set  push      \n"         
+                       ".set  mips2     \n"        
+                       "ll    %0,%3     \n"        
+                       "addu  %1,%4,%0  \n"     
+                       "sc    %1,%2     \n"        
+                       ".set  pop       \n"          
+                       "beqz  %1,1b     \n"        
+                       : "=&r" (rv),          
+                         "=&r" (tmp),         
+                         "=m" (*atomic)     
+                       : "m" (*atomic),     
+                         "r" (value)          
+                       : "memory");           
+  return rv;                                         
 }
 
 static __inline__ void
-SDL_atomic_int_add(volatile int *atomic, int value)
-{
-    int rv;
-    __asm__ __volatile__("1:               \n"
-                         ".set  push       \n"
-                         ".set  mips2      \n"
-                         "ll    %0,%2      \n"
-                         "addu  %0,%3,%0   \n"
-                         "sc    %0,%1      \n"
-                         ".set  pop        \n"
-                         "beqz  %0,1b      \n":"=&r"(rv), "=m"(*atomic)
-                         :"m"(*atomic), "r"(value)
-                         :"memory");
+SDL_atomic_int_add(volatile int* atomic, int value)
+{                                           
+  int rv;                                    
+  __asm__ __volatile__("1:               \n"                
+                       ".set  push       \n"        
+                       ".set  mips2      \n"       
+                       "ll    %0,%2      \n"       
+                       "addu  %0,%3,%0   \n"    
+                       "sc    %0,%1      \n"       
+                       ".set  pop        \n"         
+                       "beqz  %0,1b      \n"       
+                       : "=&r" (rv),         
+                         "=m" (*atomic)    
+                       : "m" (*atomic),    
+                         "r" (value)         
+                       : "memory");          
 }
 
 static __inline__ SDL_bool
-SDL_atomic_int_cmp_xchg(volatile int *atomic, int oldvalue, int newvalue)
+SDL_atomic_int_cmp_xchg(volatile int* atomic, int oldvalue, int newvalue)
 {
-    int rv;
-    __asm__ __volatile__("     .set push        \n"
-                         "     .set noat        \n"
-                         "     .set mips3       \n"
-                         "1:   ll   %0, %2      \n"
-                         "     bne  %0, %z3, 2f \n"
-                         "     .set mips0       \n"
-                         "     move $1, %z4     \n"
-                         "     .set mips3       \n"
-                         "     sc   $1, %1      \n"
-                         "     beqz $1, 1b      \n"
-                         "     sync             \n"
-                         "2:                    \n"
-                         "     .set pop         \n":"=&r"(rv), "=R"(*atomic)
-                         :"R"(*atomic), "Jr"(oldvalue), "Jr"(newvalue)
-                         :"memory");
-    return (SDL_bool) rv;
+  int rv;
+  __asm__ __volatile__("     .set push        \n"
+                       "     .set noat        \n"
+                       "     .set mips3       \n"
+                       "1:   ll   %0, %2      \n"
+                       "     bne  %0, %z3, 2f \n"
+                       "     .set mips0       \n"
+                       "     move $1, %z4     \n"
+                       "     .set mips3       \n"
+                       "     sc   $1, %1      \n"
+                       "     beqz $1, 1b      \n"
+                       "     sync             \n"
+                       "2:                    \n"
+                       "     .set pop         \n"
+                       : "=&r" (rv),
+                         "=R" (*atomic)
+                       : "R" (*atomic),
+                         "Jr" (oldvalue),
+                         "Jr" (newvalue)
+                       : "memory");
+  return (SDL_bool)rv;                  
 }
 
 static __inline__ SDL_bool
-SDL_atomic_ptr_cmp_xchg(volatile void **atomic, void *oldvalue,
-                        void *newvalue)
-{
-    int rv;
-    __asm__ __volatile__("     .set push        \n"
-                         "     .set noat        \n" "     .set mips3       \n"
+SDL_atomic_ptr_cmp_xchg(volatile void** atomic, void* oldvalue, void* newvalue)
+{                                                     
+  int rv;
+  __asm__ __volatile__("     .set push        \n"
+                       "     .set noat        \n"
+                       "     .set mips3       \n"
 # if defined(__mips64)
-                         "1:   lld  %0, %2      \n"
+                       "1:   lld  %0, %2      \n"
 # else
-                         "1:   ll   %0, %2      \n"
-# endif
-                         "     bne  %0, %z3, 2f \n" "     move $1, %z4     \n"
+                       "1:   ll   %0, %2      \n"
+# endif                       
+                       "     bne  %0, %z3, 2f \n"
+                       "     move $1, %z4     \n"
 # if defined(__mips64)
-                         "     sc   $1, %1      \n"
+                       "     sc   $1, %1      \n"
 # else
-                         "     scd  $1, %1      \n"
-# endif
-                         "     beqz $1, 1b      \n"
-                         "     sync             \n"
-                         "2:                    \n"
-                         "     .set pop         \n":"=&r"(rv), "=R"(*atomic)
-                         :"R"(*atomic), "Jr"(oldvalue), "Jr"(newvalue)
-                         :"memory");
-    return (SDL_bool) rv;
+                       "     scd  $1, %1      \n"
+# endif                       
+                       "     beqz $1, 1b      \n"
+                       "     sync             \n"
+                       "2:                    \n"
+                       "     .set pop         \n"
+                       : "=&r" (rv),
+                         "=R" (*atomic)
+                       : "R" (*atomic),
+                         "Jr" (oldvalue),
+                         "Jr" (newvalue)
+                       : "memory");
+  return (SDL_bool)rv;                                                  
 }
 #elif defined(__GNUC__) && defined(__m68k__)
 static __inline__ int
-SDL_atomic_int_xchg_add(volatile int *atomic, int value)
-{
-    int rv = *atomic;
-    int tmp;
-    __asm__ __volatile__("1: move%.l %0,%1    \n"
-                         "   add%.l  %2,%1    \n"
-                         "   cas%.l  %0,%1,%3 \n"
-                         "   jbne    1b       \n":"=d"(rv), "=&d"(tmp)
-                         :"d"(value), "m"(*atomic), "0"(rv)
-                         :"memory");
-    return (SDL_bool) rv;
+SDL_atomic_int_xchg_add(volatile int* atomic, int value)
+{                                          
+  int rv = *atomic;
+  int tmp;
+  __asm__ __volatile__("1: move%.l %0,%1    \n"
+                       "   add%.l  %2,%1    \n"
+                       "   cas%.l  %0,%1,%3 \n"
+                       "   jbne    1b       \n"
+                       : "=d" (rv),
+                         "=&d" (tmp)
+                       : "d" (value),
+                         "m" (*atomic),
+                         "0" (rv)
+                       : "memory");
+  return (SDL_bool)rv;
 }
 
 static __inline__ void
-SDL_atomic_int_add(volatile int *atomic, int value)
-{
-    __asm__ __volatile__("add%.l %0,%1"::"id"(value), "m"(*atomic)
-                         :"memory");
+SDL_atomic_int_add(volatile int* atomic, int value)
+{                                           
+  __asm__ __volatile__("add%.l %0,%1"        
+                       :                     
+                       : "id" (value),       
+                         "m" (*atomic)
+                       : "memory");          
 }
 
 static __inline__ SDL_bool
-SDL_atomic_int_cmp_xchg(volatile int *atomic, int oldvalue, int newvalue)
-{
-    char rv;
-    int readvalue;
-    __asm__ __volatile__("cas%.l %2,%3,%1\n"
-                         "seq    %0":"=dm"(rv), "=m"(*atomic), "=d"(readvalue)
-                         :"d"(newvalue), "m"(*atomic), "2"(oldvalue));
-    return (SDL_bool) rv;
+SDL_atomic_int_cmp_xchg(volatile int* atomic, int oldvalue, int newvalue)
+{                                           
+  char rv;                                   
+  int readvalue;                             
+  __asm__ __volatile__("cas%.l %2,%3,%1\n"   
+                       "seq    %0"           
+                       : "=dm" (rv),         
+                         "=m" (*atomic),   
+                         "=d" (readvalue)    
+                       : "d" (newvalue),     
+                         "m" (*atomic),    
+                         "2" (oldvalue));    
+    return (SDL_bool)rv;                                        
 }
 
 static __inline__ SDL_bool
-SDL_atomic_ptr_cmp_xchg(volatile void **atomic, void *oldvalue,
-                        void *newvalue)
+SDL_atomic_ptr_cmp_xchg(volatile void** atomic, void* oldvalue, void* newvalue)
 {
-    char rv;
-    int readvalue;
-    __asm__ __volatile__("cas%.l %2,%3,%1\n"
-                         "seq    %0":"=dm"(rv), "=m"(*atomic), "=d"(readvalue)
-                         :"d"(newvalue), "m"(*atomic), "2"(oldvalue));
-    return (SDL_bool) rv;
+  char rv;                                   
+  int readvalue;                             
+  __asm__ __volatile__("cas%.l %2,%3,%1\n"   
+                       "seq    %0"           
+                       : "=dm" (rv),         
+                         "=m" (*atomic),   
+                         "=d" (readvalue)    
+                       : "d" (newvalue),     
+                         "m" (*atomic),    
+                         "2" (oldvalue));    
+    return (SDL_bool)rv;                                        
 }
 #elif defined(__GNUC__) && defined(__s390__)
 # define ATOMIC_INT_CMP_XCHG(atomic,oldvalue,newvalue)  \
@@ -429,26 +524,30 @@ SDL_atomic_ptr_cmp_xchg(volatile void **atomic, void *oldvalue,
   })
 # if (SIZEOF_VOIDP == 4)
 static __inline__ SDL_bool
-SDL_atomic_ptr_cmp_xchg(volatile void **atomic, void *oldvalue,
-                        void *newvalue)
+SDL_atomic_ptr_cmp_xchg(volatile void** atomic, void* oldvalue, void* newvalue)
 {
-    void *rv = oldvalue;
-    __asm__ __volatile__("cs %0, %2, %1":"+d"(rv), "=Q"(*atomic)
-                         :"d"(newvalue), "m"(*atomic)
-                         :"cc");
-    return (SDL_bool) (rv == oldvalue);
+  void* rv = oldvalue;
+  __asm__ __volatile__("cs %0, %2, %1"
+                       : "+d" (rv),
+                         "=Q" (*atomic)
+                       : "d" (newvalue),
+                         "m" (*atomic)
+                       : "cc");
+  return (SDL_bool)(rv == oldvalue);
 }
 # elif (SIZEOF_VOIDP == 8)
 static __inline__ SDL_bool
-SDL_atomic_ptr_cmp_xchg(volatile void **atomic, void *oldvalue,
-                        void *newvalue)
+SDL_atomic_ptr_cmp_xchg(volatile void** atomic, void* oldvalue, void* newvalue)
 {
-    void *rv = oldvalue;
-    void **a = atomic;
-    __asm__ __volatile__("csg %0, %2, %1":"+d"(rv), "=Q"(*a)
-                         :"d"((long) (newvalue)), "m"(*a)
-                         :"cc");
-    return (SDL_bool) (rv == oldvalue);
+  void* rv = oldvalue;
+  void** a = atomic;
+  __asm__ __volatile__("csg %0, %2, %1"
+                       : "+d" (rv),
+                         "=Q" (*a)
+                       : "d" ((long)(newvalue)),
+                         "m" (*a)
+                       : "cc");
+  return (SDL_bool)(rv == oldvalue);
 }
 # else
 #  error "Your system has an unsupported pointer size"
@@ -456,34 +555,31 @@ SDL_atomic_ptr_cmp_xchg(volatile void **atomic, void *oldvalue,
 #elif defined(__WIN32__)
 # include <windows.h>
 static __inline__ int
-SDL_atomic_int_xchg_add(volatile int *atomic, int value)
+SDL_atomic_int_xchg_add(volatile int* atomic, int value)
 {
-    return InterlockedExchangeAdd(atomic, value);
+  return InterlockedExchangeAdd(atomic, value);
 }
 
 static __inline__ void
-SDL_atomic_int_add(volatile int *atomic, int value)
+SDL_atomic_int_add(volatile int* atomic, int value)
 {
-    InterlockedExchangeAdd(atomic, value);
+  InterlockedExchangeAdd(atomic, value);
 }
 
 # if (WINVER > 0X0400)
 static __inline__ SDL_bool
-SDL_atmoic_int_cmp_xchg(volatile int *atomic, int oldvalue, int newvalue)
+SDL_atmoic_int_cmp_xchg(volatile int* atomic, int oldvalue, int newvalue)
 {
-    return (SDL_bool) (InterlockedCompareExchangePointer((PVOID *) atomic,
-                                                         (PVOID) newvalue,
-                                                         (PVOID) oldvalue) ==
-                       oldvalue);
+   return (SDL_bool)(InterlockedCompareExchangePointer((PVOID*)atomic,
+                                                       (PVOID)newvalue,
+                                                       (PVOID)oldvalue) == oldvalue);
 }
 
 
 static __inline__ SDL_bool
-SDL_atomic_ptr_cmp_xchg(volatile void **atomic, void *oldvalue,
-                        void *newvalue)
+SDL_atomic_ptr_cmp_xchg(volatile void** atomic, void* oldvalue, void* newvalue)
 {
-    return (InterlockedCompareExchangePointer(atomic, newvalue, oldvalue) ==
-            oldvalue);
+  return (InterlockedCompareExchangePointer(atomic, newvalue, oldvalue) == oldvalue);
 }
 # else /* WINVER <= 0x0400 */
 #  if (SIZEOF_VOIDP != 4)
@@ -491,44 +587,43 @@ SDL_atomic_ptr_cmp_xchg(volatile void **atomic, void *oldvalue,
 #  endif
 
 static __inline__ SDL_bool
-SDL_atomic_int_cmp_xchg(volatile int *atomic, int oldvalue, int newvalue)
+SDL_atomic_int_cmp_xchg(volatile int* atomic, int oldvalue, int newvalue)
 {
-    return (InterlockedCompareExchange(atomic, newvalue, oldvalue) ==
-            oldvalue);
+  return (InterlockedCompareExchange(atomic, newvalue, oldvalue) == oldvalue);
 }
 
 static __inline__ SDL_bool
-SDL_atomic_ptr_cmp_xchg(volatile void **atomic, void *oldvalue,
-                        void *newvalue)
+SDL_atomic_ptr_cmp_xchg(volatile void** atomic, void* oldvalue, void* newvalue)
 {
-    return (InterlockedCompareExchange(atomic, newvalue, oldvalue) ==
-            oldvalue);
+  return (InterlockedCompareExchange(atomic, newvalue, oldvalue) == oldvalue);
 }
 # endif
 #else /* when all else fails */
 # define SDL_ATOMIC_OPS_NOT_SUPPORTED
 # warning "Atomic Ops for this platform not supported!"
 static __inline__ int
-SDL_atomic_int_xchg_add(volatile int *atomic, int value)
-{
-    int rv = *atomic;
-    *(atomic) += value;
-    return rv;
+SDL_atomic_int_xchg_add(volatile int* atomic, int value)
+{                                           
+  int rv = *atomic;                          
+  *(atomic) += value;                        
+  return rv;                                        
 }
 
 static __inline__ SDL_bool
-SDL_atomic_int_cmp_xchg(volatile int *atomic, int oldvalue, int newvalue)
+SDL_atomic_int_cmp_xchg(volatile int* atomic, int oldvalue, int newvalue)
 {
-    return (*atomic == oldvalue) ?
-        ((*atomic = newvalue), SDL_TRUE) : SDL_FALSE;
+  return (*atomic == oldvalue) ?  
+    ((*atomic = newvalue), SDL_TRUE) : SDL_FALSE;
 }
 
 static __inline__ void
-SDL_atomic_int_add(volatile int *atomic, int value)
+SDL_atomic_int_add(volatile int* atomic, int value)
 {
-    *atomic += value;
+  *atomic += value;
 }
 #endif /* arch & platforms */
+  
+/* *INDENT-ON* */
 
 #ifdef ATOMIC_INT_CMP_XCHG
 static __inline__ SDL_bool
