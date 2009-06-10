@@ -41,8 +41,9 @@ qnxgf_sdl_to_gf_pixelformat(uint32_t pixelfmt)
             return GF_FORMAT_PACK_ARGB1555;
         }
         break;
-    case SDL_PIXELFORMAT_ABGR1555:
+    case SDL_PIXELFORMAT_RGB555:
         {
+            /* RGB555 is the same as ARGB1555, but alpha is ignored */
             return GF_FORMAT_PACK_ARGB1555;
         }
         break;
@@ -51,18 +52,33 @@ qnxgf_sdl_to_gf_pixelformat(uint32_t pixelfmt)
             return GF_FORMAT_PACK_RGB565;
         }
         break;
-    case SDL_PIXELFORMAT_RGB888:
+    case SDL_PIXELFORMAT_BGR565:
         {
+            return GF_FORMAT_PKBE_RGB565;
+        }
+        break;
+    case SDL_PIXELFORMAT_RGB24:
+        {
+            /* GF has wrong components order */
             return GF_FORMAT_BGR888;
         }
         break;
-    case SDL_PIXELFORMAT_BGRA8888:
+    case SDL_PIXELFORMAT_RGB888:
         {
+            /* The same format as ARGB8888, but with alpha ignored */
+            /* and GF has wrong components order                   */
             return GF_FORMAT_BGRA8888;
         }
         break;
     case SDL_PIXELFORMAT_ARGB8888:
         {
+            /* GF has wrong components order */
+            return GF_FORMAT_BGRA8888;
+        }
+        break;
+    case SDL_PIXELFORMAT_BGRA8888:
+        {
+            /* GF has wrong components order */
             return GF_FORMAT_ARGB8888;
         }
         break;
@@ -110,14 +126,9 @@ qnxgf_gf_to_sdl_pixelformat(gf_format_t pixelfmt)
             return SDL_PIXELFORMAT_ARGB1555;
         }
         break;
-    case GF_FORMAT_PKBE_ARGB1555:
-        {
-            return SDL_PIXELFORMAT_ABGR1555;
-        }
-        break;
     case GF_FORMAT_PKBE_RGB565:
         {
-            return SDL_PIXELFORMAT_RGB565;
+            return SDL_PIXELFORMAT_BGR565;
         }
         break;
     case GF_FORMAT_PKLE_RGB565:
@@ -132,20 +143,22 @@ qnxgf_gf_to_sdl_pixelformat(gf_format_t pixelfmt)
         break;
     case GF_FORMAT_BGR888:
         {
-            return SDL_PIXELFORMAT_RGB888;
+            /* GF has wrong components order */
+            return SDL_PIXELFORMAT_RGB24;
         }
         break;
     case GF_FORMAT_BGRA8888:
         {
-            return SDL_PIXELFORMAT_BGRA8888;
+            /* GF has wrong components order */
+            return SDL_PIXELFORMAT_ARGB8888;
         }
         break;
     case GF_FORMAT_ARGB8888:
         {
-            return SDL_PIXELFORMAT_ARGB8888;
+            /* GF has wrong components order */
+            return SDL_PIXELFORMAT_BGRA8888;
         }
         break;
-
     case GF_FORMAT_PLANAR_YUV_YV12:
         {
             return SDL_PIXELFORMAT_YV12;

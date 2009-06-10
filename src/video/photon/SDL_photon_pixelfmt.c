@@ -72,6 +72,11 @@ photon_sdl_to_bits_pixelformat(uint32_t pixelfmt)
             return 15;
         }
         break;
+    case SDL_PIXELFORMAT_RGB555:
+        {
+            return 15;
+        }
+        break;
     case SDL_PIXELFORMAT_ABGR1555:
         {
             return 15;
@@ -82,9 +87,14 @@ photon_sdl_to_bits_pixelformat(uint32_t pixelfmt)
             return 16;
         }
         break;
-    case SDL_PIXELFORMAT_RGB888:
+    case SDL_PIXELFORMAT_RGB24:
         {
             return 24;
+        }
+        break;
+    case SDL_PIXELFORMAT_RGB888:
+        {
+            return 32;
         }
         break;
     case SDL_PIXELFORMAT_BGRA8888:
@@ -133,12 +143,12 @@ photon_image_to_sdl_pixelformat(uint32_t pixelfmt)
         break;
     case Pg_IMAGE_DIRECT_8888:
         {
-            return SDL_PIXELFORMAT_BGRA8888;
+            return SDL_PIXELFORMAT_ARGB8888;
         }
         break;
     case Pg_IMAGE_DIRECT_888:
         {
-            return SDL_PIXELFORMAT_RGB888;
+            return SDL_PIXELFORMAT_RGB24;
         }
         break;
     case Pg_IMAGE_DIRECT_565:
@@ -170,12 +180,12 @@ photon_sdl_to_image_pixelformat(uint32_t pixelfmt)
             return Pg_IMAGE_PALETTE_BYTE;
         }
         break;
-    case SDL_PIXELFORMAT_BGRA8888:
+    case SDL_PIXELFORMAT_ARGB8888:
         {
             return Pg_IMAGE_DIRECT_8888;
         }
         break;
-    case SDL_PIXELFORMAT_RGB888:
+    case SDL_PIXELFORMAT_RGB24:
         {
             return Pg_IMAGE_DIRECT_888;
         }
@@ -188,6 +198,11 @@ photon_sdl_to_image_pixelformat(uint32_t pixelfmt)
     case SDL_PIXELFORMAT_ARGB1555:
         {
             return Pg_IMAGE_DIRECT_1555;
+        }
+        break;
+    case SDL_PIXELFORMAT_RGB555:
+        {
+            return Pg_IMAGE_DIRECT_555;
         }
         break;
     }

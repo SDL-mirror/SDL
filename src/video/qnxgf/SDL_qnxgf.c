@@ -47,7 +47,7 @@
 /* but some drivers are not. Later we can distinguish one driver from another */
 /* Feel free to add any new custom graphics mode                              */
 /******************************************************************************/
-static SDL_DisplayMode generic_mode[] = {
+static const SDL_DisplayMode generic_mode[] = {
     {0, 320, 200, 70, NULL},    /* 320x200 modes are 70Hz and 85Hz          */
     {0, 320, 200, 85, NULL},
     {0, 320, 240, 70, NULL},    /* 320x240 modes are 70Hz and 85Hz          */
@@ -100,7 +100,7 @@ static SDL_DisplayMode generic_mode[] = {
 };
 
 /* Low level device graphics driver names, which they are reporting */
-GF_DeviceCaps gf_devicename[] = {
+static const GF_DeviceCaps gf_devicename[] = {
     /* ATI Rage 128 graphics driver (devg-ati_rage128)      */
     {"ati_rage128", SDL_GF_ACCELERATED | SDL_GF_NOLOWRESOLUTION |
      SDL_GF_UNACCELERATED_3D | SDL_GF_VIDEOMEMORY},
@@ -644,6 +644,25 @@ qnxgf_getdisplaymodes(_THIS)
                     mode.driverdata = NULL;
                     SDL_AddDisplayMode(_this->current_display, &mode);
 
+                    /* If mode is RGBA8888, add the same mode as RGBx888 */
+                    if (modeinfo.primary_format==GF_FORMAT_BGRA8888) {
+                        mode.w = generic_mode[jt].w;
+                        mode.h = generic_mode[jt].h;
+                        mode.refresh_rate = generic_mode[jt].refresh_rate;
+                        mode.format = SDL_PIXELFORMAT_RGB888;
+                        mode.driverdata = NULL;
+                        SDL_AddDisplayMode(_this->current_display, &mode);
+                    }
+                    /* If mode is RGBA1555, add the same mode as RGBx555 */
+                    if (modeinfo.primary_format==GF_FORMAT_PACK_ARGB1555) {
+                        mode.w = generic_mode[jt].w;
+                        mode.h = generic_mode[jt].h;
+                        mode.refresh_rate = generic_mode[jt].refresh_rate;
+                        mode.format = SDL_PIXELFORMAT_RGB555;
+                        mode.driverdata = NULL;
+                        SDL_AddDisplayMode(_this->current_display, &mode);
+                    }
+
                     jt++;
                 } while (1);
             } else {
@@ -660,6 +679,26 @@ qnxgf_getdisplaymodes(_THIS)
                                                         primary_format);
                         mode.driverdata = NULL;
                         SDL_AddDisplayMode(_this->current_display, &mode);
+
+                        /* If mode is RGBA8888, add the same mode as RGBx888 */
+                        if (modeinfo.primary_format==GF_FORMAT_BGRA8888) {
+                            mode.w = modeinfo.xres;
+                            mode.h = modeinfo.yres;
+                            mode.refresh_rate = modeinfo.refresh[jt];
+                            mode.format = SDL_PIXELFORMAT_RGB888;
+                            mode.driverdata = NULL;
+                            SDL_AddDisplayMode(_this->current_display, &mode);
+                        }
+                        /* If mode is RGBA1555, add the same mode as RGBx555 */
+                        if (modeinfo.primary_format==GF_FORMAT_PACK_ARGB1555) {
+                            mode.w = modeinfo.xres;
+                            mode.h = modeinfo.yres;
+                            mode.refresh_rate = modeinfo.refresh[jt];
+                            mode.format = SDL_PIXELFORMAT_RGB555;
+                            mode.driverdata = NULL;
+                            SDL_AddDisplayMode(_this->current_display, &mode);
+                        }
+
                         jt++;
                     } else {
                         break;
@@ -823,7 +862,7 @@ qnxgf_setdisplaymode(_THIS, SDL_DisplayMode * mode)
     /* Mark main display layer is attached */
     didata->layer_attached = SDL_TRUE;
 
-    /* Set layer source and destination viewport */
+    /* Set layer source and destination viewports */
     gf_layer_set_src_viewport(didata->layer, 0, 0, mode->w - 1, mode->h - 1);
     gf_layer_set_dst_viewport(didata->layer, 0, 0, mode->w - 1, mode->h - 1);
 
@@ -1464,7 +1503,7 @@ qnxgf_gl_createcontext(_THIS, SDL_Window * window)
     if (configs == 0) {
         int32_t it;
         int32_t jt;
-        GLint depthbits[4] = { 32, 24, 16, EGL_DONT_CARE };
+        static const GLint depthbits[4] = { 32, 24, 16, EGL_DONT_CARE };
 
         for (it = 0; it < 4; it++) {
             for (jt = 16; jt >= 0; jt--) {
@@ -1520,7 +1559,7 @@ qnxgf_gl_createcontext(_THIS, SDL_Window * window)
                                     SDL_VIDEO_GF_OPENGLES_CONFS, &configs);
                 if (status != EGL_TRUE) {
                     SDL_SetError
-                        ("Photon: Can't find closest configuration for OpenGL ES");
+                        ("GF: Can't find closest configuration for OpenGL ES");
                     return NULL;
                 }
                 if (configs != 0) {
@@ -1535,7 +1574,7 @@ qnxgf_gl_createcontext(_THIS, SDL_Window * window)
         /* No available configs */
         if (configs == 0) {
             SDL_SetError
-                ("Photon: Can't find any configuration for OpenGL ES");
+                ("GF: Can't find any configuration for OpenGL ES");
             return NULL;
         }
     }

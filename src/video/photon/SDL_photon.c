@@ -61,7 +61,7 @@
 #endif /* SDL_VIDEO_OPENGL_ES */
 
 /* Low level device graphics driver names, which they are reporting */
-Photon_DeviceCaps photon_devicename[] = {
+static const Photon_DeviceCaps photon_devicename[] = {
     /* ATI Rage 128 graphics driver (devg-ati_rage128)      */
     {"ati_rage128", SDL_PHOTON_ACCELERATED | SDL_PHOTON_UNACCELERATED_3D}
     ,
@@ -384,19 +384,47 @@ photon_videoinit(_THIS)
         /* Query photon about graphics hardware caps and current video mode */
         status = PgGetGraphicsHWCaps(&hwcaps);
         if (status != 0) {
-            SDL_SetError("Photon: Can't get graphics capabilities");
-            SDL_free(didata->cursor);
-            SDL_free(didata);
-            return -1;
-        }
+            PhRect_t extent;
+            PdOffscreenContext_t* curctx;
 
-        /* Get current video mode details */
-        status = PgGetVideoModeInfo(hwcaps.current_video_mode, &modeinfo);
-        if (status != 0) {
-            SDL_SetError("Photon: Can't get current video mode information");
-            SDL_free(didata->cursor);
-            SDL_free(didata);
-            return -1;
+            /* If error happens, this also could mean, that photon is working */
+            /* under custom (not listed by photon) video mode                 */
+            status=PhWindowQueryVisible(Ph_QUERY_GRAPHICS, 0, 0, &extent);
+            if (status != 0) {
+                SDL_SetError("Photon: Can't get graphics driver region");
+                SDL_free(didata->cursor);
+                SDL_free(didata);
+                return -1;
+            }
+            modeinfo.width=extent.lr.x+1;
+            modeinfo.height=extent.lr.y+1;
+            /* Hardcode 60Hz, as the base refresh rate frequency */
+            hwcaps.current_rrate=60;
+            /* Clear current video driver name, no way to get it somehow */
+            hwcaps.chip_name[0]=0x00;
+
+            /* Create offscreen context from video memory, which is currently */
+            /* displayed on the screen                                        */
+            curctx=PdCreateOffscreenContext(0, 0, 0, Pg_OSC_MAIN_DISPLAY);
+            if (curctx==NULL)
+            {
+                SDL_SetError("Photon: Can't get display area capabilities");
+                SDL_free(didata->cursor);
+                SDL_free(didata);
+                return -1;
+            }
+            /* Retrieve current bpp */
+            modeinfo.type=curctx->format;
+            PhDCRelease(curctx);
+        } else {
+            /* Get current video mode details */
+            status = PgGetVideoModeInfo(hwcaps.current_video_mode, &modeinfo);
+            if (status != 0) {
+                SDL_SetError("Photon: Can't get current video mode information");
+                SDL_free(didata->cursor);
+                SDL_free(didata);
+                return -1;
+            }
         }
 
         /* Setup current desktop mode for SDL */
@@ -527,6 +555,27 @@ photon_getdisplaymodes(_THIS)
                 mode.format = photon_image_to_sdl_pixelformat(modeinfo.type);
                 mode.driverdata = NULL;
                 SDL_AddDisplayMode(_this->current_display, &mode);
+
+                /* If mode is RGBA8888, add the same mode as RGBx888 */
+                if (modeinfo.type == Pg_IMAGE_DIRECT_8888) {
+                    mode.w = modeinfo.width;
+                    mode.h = modeinfo.height;
+                    mode.refresh_rate = modeinfo.refresh_rates[jt];
+                    mode.format = SDL_PIXELFORMAT_RGB888;
+                    mode.driverdata = NULL;
+                    SDL_AddDisplayMode(_this->current_display, &mode);
+                }
+
+                /* If mode is RGBA1555, add the same mode as RGBx555 */
+                if (modeinfo.type == Pg_IMAGE_DIRECT_1555) {
+                    mode.w = modeinfo.width;
+                    mode.h = modeinfo.height;
+                    mode.refresh_rate = modeinfo.refresh_rates[jt];
+                    mode.format = SDL_PIXELFORMAT_RGB555;
+                    mode.driverdata = NULL;
+                    SDL_AddDisplayMode(_this->current_display, &mode);
+                }
+
                 jt++;
             } else {
                 break;
@@ -1453,7 +1502,7 @@ photon_gl_createcontext(_THIS, SDL_Window * window)
     if (configs == 0) {
         int32_t it;
         int32_t jt;
-        GLint depthbits[4] = { 32, 24, 16, EGL_DONT_CARE };
+        static const GLint depthbits[4] = { 32, 24, 16, EGL_DONT_CARE };
 
         for (it = 0; it < 4; it++) {
             for (jt = 16; jt >= 0; jt--) {
