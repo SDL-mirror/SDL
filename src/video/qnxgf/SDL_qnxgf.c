@@ -645,7 +645,7 @@ qnxgf_getdisplaymodes(_THIS)
                     SDL_AddDisplayMode(_this->current_display, &mode);
 
                     /* If mode is RGBA8888, add the same mode as RGBx888 */
-                    if (modeinfo.primary_format==GF_FORMAT_BGRA8888) {
+                    if (modeinfo.primary_format == GF_FORMAT_BGRA8888) {
                         mode.w = generic_mode[jt].w;
                         mode.h = generic_mode[jt].h;
                         mode.refresh_rate = generic_mode[jt].refresh_rate;
@@ -654,7 +654,7 @@ qnxgf_getdisplaymodes(_THIS)
                         SDL_AddDisplayMode(_this->current_display, &mode);
                     }
                     /* If mode is RGBA1555, add the same mode as RGBx555 */
-                    if (modeinfo.primary_format==GF_FORMAT_PACK_ARGB1555) {
+                    if (modeinfo.primary_format == GF_FORMAT_PACK_ARGB1555) {
                         mode.w = generic_mode[jt].w;
                         mode.h = generic_mode[jt].h;
                         mode.refresh_rate = generic_mode[jt].refresh_rate;
@@ -681,7 +681,7 @@ qnxgf_getdisplaymodes(_THIS)
                         SDL_AddDisplayMode(_this->current_display, &mode);
 
                         /* If mode is RGBA8888, add the same mode as RGBx888 */
-                        if (modeinfo.primary_format==GF_FORMAT_BGRA8888) {
+                        if (modeinfo.primary_format == GF_FORMAT_BGRA8888) {
                             mode.w = modeinfo.xres;
                             mode.h = modeinfo.yres;
                             mode.refresh_rate = modeinfo.refresh[jt];
@@ -690,7 +690,8 @@ qnxgf_getdisplaymodes(_THIS)
                             SDL_AddDisplayMode(_this->current_display, &mode);
                         }
                         /* If mode is RGBA1555, add the same mode as RGBx555 */
-                        if (modeinfo.primary_format==GF_FORMAT_PACK_ARGB1555) {
+                        if (modeinfo.primary_format ==
+                            GF_FORMAT_PACK_ARGB1555) {
                             mode.w = modeinfo.xres;
                             mode.h = modeinfo.yres;
                             mode.refresh_rate = modeinfo.refresh[jt];
@@ -1573,8 +1574,7 @@ qnxgf_gl_createcontext(_THIS, SDL_Window * window)
 
         /* No available configs */
         if (configs == 0) {
-            SDL_SetError
-                ("GF: Can't find any configuration for OpenGL ES");
+            SDL_SetError("GF: Can't find any configuration for OpenGL ES");
             return NULL;
         }
     }

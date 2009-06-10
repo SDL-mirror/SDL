@@ -103,7 +103,7 @@ WIN_GetDisplayMode(LPCTSTR deviceName, DWORD index, SDL_DisplayMode * mode)
 #endif /* _WIN32_WCE */
     {
         /* FIXME: Can we tell what this will be? */
-	if ((devmode.dmFields & DM_BITSPERPEL)==DM_BITSPERPEL) {
+        if ((devmode.dmFields & DM_BITSPERPEL) == DM_BITSPERPEL) {
             switch (devmode.dmBitsPerPel) {
             case 32:
                 mode->format = SDL_PIXELFORMAT_RGB888;
@@ -124,7 +124,7 @@ WIN_GetDisplayMode(LPCTSTR deviceName, DWORD index, SDL_DisplayMode * mode)
                 mode->format = SDL_PIXELFORMAT_INDEX4LSB;
                 break;
             }
-	}
+        }
     }
     return SDL_TRUE;
 }
@@ -206,10 +206,10 @@ WIN_GetDisplayModes(_THIS)
         if (!WIN_GetDisplayMode(data->DeviceName, i, &mode)) {
             break;
         }
-	if (mode.format != SDL_PIXELFORMAT_UNKNOWN)
+        if (mode.format != SDL_PIXELFORMAT_UNKNOWN)
             if (!SDL_AddDisplayMode(_this->current_display, &mode)) {
                 SDL_free(mode.driverdata);
-        }
+            }
     }
 }
 

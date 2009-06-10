@@ -38,7 +38,8 @@
 
 #include "SDL_power.h"
 
-typedef struct {
+typedef struct
+{
     USHORT len;
     USHORT flags;
     UCHAR ac_status;
@@ -48,11 +49,11 @@ typedef struct {
     USHORT battery_time;
     UCHAR battery_flags;
 } PowerStatus;
-extern int CompilerAssertPowerStatus[(sizeof (PowerStatus) == 10) ? 1 : -1];
+extern int CompilerAssertPowerStatus[(sizeof(PowerStatus) == 10) ? 1 : -1];
 
 
 SDL_bool
-SDL_GetPowerInfo_OS2(SDL_PowerState *state, int *seconds, int *percent)
+SDL_GetPowerInfo_OS2(SDL_PowerState * state, int *seconds, int *percent)
 {
     PowerStatus status;
     HFILE hfile = 0;
@@ -69,11 +70,11 @@ SDL_GetPowerInfo_OS2(SDL_PowerState *state, int *seconds, int *percent)
 
     if (rc == NO_ERROR) {
         USHORT iorc = 0;
-        ULONG iorclen = sizeof (iorc);
-        ULONG statuslen = sizeof (status);
+        ULONG iorclen = sizeof(iorc);
+        ULONG statuslen = sizeof(status);
 
-        SDL_memset(&status, '\0', sizeof (status));
-        status.len = sizeof (status);
+        SDL_memset(&status, '\0', sizeof(status));
+        status.len = sizeof(status);
 
         rc = DosDevIOCtl(hfile, IOCTL_POWER, POWER_GETPOWERSTATUS, &status,
                          statuslen, &statuslen, &iorc, iorclen, &iorclen);
@@ -81,7 +82,7 @@ SDL_GetPowerInfo_OS2(SDL_PowerState *state, int *seconds, int *percent)
 
         /* (status.flags & 0x1) == power subsystem enabled. */
         if ((rc == NO_ERROR) && (status.flags & 0x1)) {
-            if (statuslen == 7) {  /* older OS/2 APM driver? Less fields. */
+            if (statuslen == 7) {       /* older OS/2 APM driver? Less fields. */
                 status.battery_time_form = 0xFF;
                 status.battery_time = 0;
                 if (status.battery_status == 0xFF) {
@@ -91,18 +92,18 @@ SDL_GetPowerInfo_OS2(SDL_PowerState *state, int *seconds, int *percent)
                 }
             }
 
-            if (status.battery_flags == 0xFF) {  /* unknown state */
+            if (status.battery_flags == 0xFF) { /* unknown state */
                 *state = SDL_POWERSTATE_UNKNOWN;
-            } else if (status.battery_flags & (1 << 7)) {  /* no battery */
+            } else if (status.battery_flags & (1 << 7)) {       /* no battery */
                 *state = SDL_POWERSTATE_NO_BATTERY;
-            } else if (status.battery_flags & (1 << 3)) {  /* charging */
+            } else if (status.battery_flags & (1 << 3)) {       /* charging */
                 *state = SDL_POWERSTATE_CHARGING;
                 need_details = SDL_TRUE;
             } else if (status.ac_status == 1) {
-                *state = SDL_POWERSTATE_CHARGED;  /* on AC, not charging. */
+                *state = SDL_POWERSTATE_CHARGED;        /* on AC, not charging. */
                 need_details = SDL_TRUE;
             } else {
-                *state = SDL_POWERSTATE_ON_BATTERY;  /* not on AC. */
+                *state = SDL_POWERSTATE_ON_BATTERY;     /* not on AC. */
                 need_details = SDL_TRUE;
             }
 
@@ -110,13 +111,13 @@ SDL_GetPowerInfo_OS2(SDL_PowerState *state, int *seconds, int *percent)
                 const int pct = (int) status.battery_life;
                 const int secs = (int) status.battery_time;
 
-                if (pct != 0xFF) {  /* 255 == unknown */
+                if (pct != 0xFF) {      /* 255 == unknown */
                     *percent = (pct > 100) ? 100 : pct;
                 }
 
-                if (status.battery_time_form == 0xFF) {  /* unknown */
+                if (status.battery_time_form == 0xFF) { /* unknown */
                     *seconds = -1;
-                } else if (status.battery_time_form == 1) {  /* minutes */
+                } else if (status.battery_time_form == 1) {     /* minutes */
                     *seconds = secs * 60;
                 } else {
                     *seconds = secs;
@@ -125,11 +126,10 @@ SDL_GetPowerInfo_OS2(SDL_PowerState *state, int *seconds, int *percent)
         }
     }
 
-    return SDL_TRUE;  /* always the definitive answer on OS/2. */
+    return SDL_TRUE;            /* always the definitive answer on OS/2. */
 }
 
 #endif /* SDL_POWER_OS2 */
 #endif /* SDL_POWER_DISABLED */
 
 /* vi: set ts=4 sw=4 expandtab: */
-

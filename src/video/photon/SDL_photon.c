@@ -385,42 +385,42 @@ photon_videoinit(_THIS)
         status = PgGetGraphicsHWCaps(&hwcaps);
         if (status != 0) {
             PhRect_t extent;
-            PdOffscreenContext_t* curctx;
+            PdOffscreenContext_t *curctx;
 
             /* If error happens, this also could mean, that photon is working */
             /* under custom (not listed by photon) video mode                 */
-            status=PhWindowQueryVisible(Ph_QUERY_GRAPHICS, 0, 0, &extent);
+            status = PhWindowQueryVisible(Ph_QUERY_GRAPHICS, 0, 0, &extent);
             if (status != 0) {
                 SDL_SetError("Photon: Can't get graphics driver region");
                 SDL_free(didata->cursor);
                 SDL_free(didata);
                 return -1;
             }
-            modeinfo.width=extent.lr.x+1;
-            modeinfo.height=extent.lr.y+1;
+            modeinfo.width = extent.lr.x + 1;
+            modeinfo.height = extent.lr.y + 1;
             /* Hardcode 60Hz, as the base refresh rate frequency */
-            hwcaps.current_rrate=60;
+            hwcaps.current_rrate = 60;
             /* Clear current video driver name, no way to get it somehow */
-            hwcaps.chip_name[0]=0x00;
+            hwcaps.chip_name[0] = 0x00;
 
             /* Create offscreen context from video memory, which is currently */
             /* displayed on the screen                                        */
-            curctx=PdCreateOffscreenContext(0, 0, 0, Pg_OSC_MAIN_DISPLAY);
-            if (curctx==NULL)
-            {
+            curctx = PdCreateOffscreenContext(0, 0, 0, Pg_OSC_MAIN_DISPLAY);
+            if (curctx == NULL) {
                 SDL_SetError("Photon: Can't get display area capabilities");
                 SDL_free(didata->cursor);
                 SDL_free(didata);
                 return -1;
             }
             /* Retrieve current bpp */
-            modeinfo.type=curctx->format;
+            modeinfo.type = curctx->format;
             PhDCRelease(curctx);
         } else {
             /* Get current video mode details */
             status = PgGetVideoModeInfo(hwcaps.current_video_mode, &modeinfo);
             if (status != 0) {
-                SDL_SetError("Photon: Can't get current video mode information");
+                SDL_SetError
+                    ("Photon: Can't get current video mode information");
                 SDL_free(didata->cursor);
                 SDL_free(didata);
                 return -1;

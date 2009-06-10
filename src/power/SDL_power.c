@@ -27,22 +27,23 @@
  * SDL_FALSE to try next implementation.
  */
 typedef SDL_bool
-(*SDL_GetPowerInfo_Impl)(SDL_PowerState *state, int *seconds, int *percent);
+    (*SDL_GetPowerInfo_Impl) (SDL_PowerState * state, int *seconds,
+                              int *percent);
 
-SDL_bool SDL_GetPowerInfo_Linux_sys_power(SDL_PowerState*, int*, int*);
-SDL_bool SDL_GetPowerInfo_Linux_proc_acpi(SDL_PowerState*, int*, int*);
-SDL_bool SDL_GetPowerInfo_Linux_proc_apm(SDL_PowerState*, int*, int*);
-SDL_bool SDL_GetPowerInfo_Windows(SDL_PowerState*, int*, int*);
-SDL_bool SDL_GetPowerInfo_MacOSX(SDL_PowerState*, int*, int*);
-SDL_bool SDL_GetPowerInfo_OS2(SDL_PowerState*, int*, int*);
-SDL_bool SDL_GetPowerInfo_BeOS(SDL_PowerState*, int*, int*);
-SDL_bool SDL_GetPowerInfo_NintendoDS(SDL_PowerState*, int*, int*);
+SDL_bool SDL_GetPowerInfo_Linux_sys_power(SDL_PowerState *, int *, int *);
+SDL_bool SDL_GetPowerInfo_Linux_proc_acpi(SDL_PowerState *, int *, int *);
+SDL_bool SDL_GetPowerInfo_Linux_proc_apm(SDL_PowerState *, int *, int *);
+SDL_bool SDL_GetPowerInfo_Windows(SDL_PowerState *, int *, int *);
+SDL_bool SDL_GetPowerInfo_MacOSX(SDL_PowerState *, int *, int *);
+SDL_bool SDL_GetPowerInfo_OS2(SDL_PowerState *, int *, int *);
+SDL_bool SDL_GetPowerInfo_BeOS(SDL_PowerState *, int *, int *);
+SDL_bool SDL_GetPowerInfo_NintendoDS(SDL_PowerState *, int *, int *);
 
 #ifndef SDL_POWER_DISABLED
 #ifdef SDL_POWER_HARDWIRED
 /* This is for things that _never_ have a battery, like the Dreamcast, etc. */
 static SDL_bool
-SDL_GetPowerInfo_Hardwired(SDL_PowerState *state, int *seconds, int *percent)
+SDL_GetPowerInfo_Hardwired(SDL_PowerState * state, int *seconds, int *percent)
 {
     *seconds = -1;
     *percent = -1;
@@ -55,24 +56,24 @@ SDL_GetPowerInfo_Hardwired(SDL_PowerState *state, int *seconds, int *percent)
 
 static SDL_GetPowerInfo_Impl implementations[] = {
 #ifndef SDL_POWER_DISABLED
-#ifdef SDL_POWER_LINUX /* in order of preference. More than could work. */
+#ifdef SDL_POWER_LINUX          /* in order of preference. More than could work. */
     SDL_GetPowerInfo_Linux_sys_power,
     SDL_GetPowerInfo_Linux_proc_acpi,
     SDL_GetPowerInfo_Linux_proc_apm,
 #endif
-#ifdef SDL_POWER_WINDOWS /* handles Win32, Win64, PocketPC. */
+#ifdef SDL_POWER_WINDOWS        /* handles Win32, Win64, PocketPC. */
     SDL_GetPowerInfo_Windows,
 #endif
-#ifdef SDL_POWER_MACOSX  /* handles Mac OS X, Darwin, iPhone. */
+#ifdef SDL_POWER_MACOSX         /* handles Mac OS X, Darwin, iPhone. */
     SDL_GetPowerInfo_MacOSX,
 #endif
-#ifdef SDL_POWER_OS2  /* handles OS/2, Warp, eComStation. */
+#ifdef SDL_POWER_OS2            /* handles OS/2, Warp, eComStation. */
     SDL_GetPowerInfo_OS2,
 #endif
-#ifdef SDL_POWER_NINTENDODS  /* handles Nintendo DS. */
+#ifdef SDL_POWER_NINTENDODS     /* handles Nintendo DS. */
     SDL_GetPowerInfo_NintendoDS,
 #endif
-#ifdef SDL_POWER_BEOS  /* handles BeOS, Zeta, with euc.jp apm driver. */
+#ifdef SDL_POWER_BEOS           /* handles BeOS, Zeta, with euc.jp apm driver. */
     SDL_GetPowerInfo_BeOS,
 #endif
 #ifdef SDL_POWER_HARDWIRED
@@ -84,7 +85,7 @@ static SDL_GetPowerInfo_Impl implementations[] = {
 SDL_PowerState
 SDL_GetPowerInfo(int *seconds, int *percent)
 {
-    const int total = sizeof (implementations) / sizeof (implementations[0]);
+    const int total = sizeof(implementations) / sizeof(implementations[0]);
     int _seconds, _percent;
     SDL_PowerState retval;
     int i;
@@ -99,7 +100,7 @@ SDL_GetPowerInfo(int *seconds, int *percent)
     }
 
     for (i = 0; i < total; i++) {
-        if (implementations[i](&retval, seconds, percent)) {
+        if (implementations[i] (&retval, seconds, percent)) {
             return retval;
         }
     }
@@ -111,4 +112,3 @@ SDL_GetPowerInfo(int *seconds, int *percent)
 }
 
 /* vi: set ts=4 sw=4 expandtab: */
-

@@ -27,7 +27,8 @@
 #include "SDL_power.h"
 
 SDL_bool
-SDL_GetPowerInfo_NintendoDS(SDL_PowerState *state, int *seconds, int *percent)
+SDL_GetPowerInfo_NintendoDS(SDL_PowerState * state, int *seconds,
+                            int *percent)
 {
     /* !!! FIXME: write me. */
 
@@ -35,11 +36,10 @@ SDL_GetPowerInfo_NintendoDS(SDL_PowerState *state, int *seconds, int *percent)
     *percent = -1;
     *seconds = -1;
 
-    return SDL_TRUE;  /* always the definitive answer on Nintendo DS. */
+    return SDL_TRUE;            /* always the definitive answer on Nintendo DS. */
 }
 
 #endif /* SDL_POWER_NINTENDODS */
 #endif /* SDL_POWER_DISABLED */
 
 /* vi: set ts=4 sw=4 expandtab: */
-

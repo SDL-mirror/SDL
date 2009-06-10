@@ -34,28 +34,28 @@
 #include "SDL_power.h"
 
 SDL_bool
-SDL_GetPowerInfo_Linux_sys_power(SDL_PowerState *state,
+SDL_GetPowerInfo_Linux_sys_power(SDL_PowerState * state,
                                  int *seconds, int *percent)
 {
-    return SDL_FALSE;  /* !!! FIXME: write me. */
+    return SDL_FALSE;           /* !!! FIXME: write me. */
 #if 0
     const int fd = open("/sys/power", O_RDONLY);
     if (fd == -1) {
-        return SDL_FALSE;  /* can't use this interface. */
+        return SDL_FALSE;       /* can't use this interface. */
     }
     return SDL_TRUE;
 #endif
 }
 
 SDL_bool
-SDL_GetPowerInfo_Linux_proc_acpi(SDL_PowerState *state,
-				 int *seconds, int *percent)
+SDL_GetPowerInfo_Linux_proc_acpi(SDL_PowerState * state,
+                                 int *seconds, int *percent)
 {
-    return SDL_FALSE;  /* !!! FIXME: write me. */
+    return SDL_FALSE;           /* !!! FIXME: write me. */
 #if 0
     const int fd = open("/proc/acpi", O_RDONLY);
     if (fd == -1) {
-        return SDL_FALSE;  /* can't use this interface. */
+        return SDL_FALSE;       /* can't use this interface. */
     }
     return SDL_TRUE;
 #endif
@@ -67,7 +67,7 @@ next_string(char **_ptr, char **_str)
     char *ptr = *_ptr;
     char *str = *_str;
 
-    while (*ptr == ' ') {  /* skip any spaces... */
+    while (*ptr == ' ') {       /* skip any spaces... */
         ptr++;
     }
 
@@ -91,14 +91,14 @@ static SDL_bool
 int_string(char *str, int *val)
 {
     char *endptr = NULL;
-    *val = (int) strtol(str+2, &endptr, 16);
+    *val = (int) strtol(str + 2, &endptr, 16);
     return ((*str != '\0') && (*endptr == '\0'));
 }
 
 /* http://lxr.linux.no/linux+v2.6.29/drivers/char/apm-emulation.c */
 SDL_bool
-SDL_GetPowerInfo_Linux_proc_apm(SDL_PowerState *state,
-				int *seconds, int *percent)
+SDL_GetPowerInfo_Linux_proc_apm(SDL_PowerState * state,
+                                int *seconds, int *percent)
 {
     SDL_bool need_details = SDL_FALSE;
     int ac_status = 0;
@@ -113,44 +113,44 @@ SDL_GetPowerInfo_Linux_proc_apm(SDL_PowerState *state,
     ssize_t br;
 
     if (fd == -1) {
-        return SDL_FALSE;  /* can't use this interface. */
+        return SDL_FALSE;       /* can't use this interface. */
     }
 
-    br = read(fd, buf, sizeof (buf) - 1);
+    br = read(fd, buf, sizeof(buf) - 1);
     close(fd);
 
     if (br < 0) {
         return SDL_FALSE;
     }
 
-    buf[br] = '\0';  // null-terminate the string.
-    if (!next_string(&ptr, &str)) {  /* driver version */
+    buf[br] = '\0';             // null-terminate the string.
+    if (!next_string(&ptr, &str)) {     /* driver version */
         return SDL_FALSE;
     }
-    if (!next_string(&ptr, &str)) {  /* BIOS version */
+    if (!next_string(&ptr, &str)) {     /* BIOS version */
         return SDL_FALSE;
     }
-    if (!next_string(&ptr, &str)) {  /* APM flags */
+    if (!next_string(&ptr, &str)) {     /* APM flags */
         return SDL_FALSE;
     }
 
-    if (!next_string(&ptr, &str)) {  /* AC line status */
+    if (!next_string(&ptr, &str)) {     /* AC line status */
         return SDL_FALSE;
     } else if (!int_string(str, &ac_status)) {
         return SDL_FALSE;
     }
 
-    if (!next_string(&ptr, &str)) {  /* battery status */
+    if (!next_string(&ptr, &str)) {     /* battery status */
         return SDL_FALSE;
     } else if (!int_string(str, &battery_status)) {
         return SDL_FALSE;
     }
-    if (!next_string(&ptr, &str)) {  /* battery flag */
+    if (!next_string(&ptr, &str)) {     /* battery flag */
         return SDL_FALSE;
     } else if (!int_string(str, &battery_flag)) {
         return SDL_FALSE;
     }
-    if (!next_string(&ptr, &str)) {  /* remaining battery life percent */
+    if (!next_string(&ptr, &str)) {     /* remaining battery life percent */
         return SDL_FALSE;
     }
     if (str[strlen(str) - 1] == '%') {
@@ -160,27 +160,27 @@ SDL_GetPowerInfo_Linux_proc_apm(SDL_PowerState *state,
         return SDL_FALSE;
     }
 
-    if (!next_string(&ptr, &str)) {  /* remaining battery life time */
+    if (!next_string(&ptr, &str)) {     /* remaining battery life time */
         return SDL_FALSE;
     } else if (!int_string(str, &battery_time)) {
         return SDL_FALSE;
     }
 
-    if (!next_string(&ptr, &str)) {  /* remaining battery life time units */
+    if (!next_string(&ptr, &str)) {     /* remaining battery life time units */
         return SDL_FALSE;
     } else if (strcmp(str, "min") == 0) {
         battery_time *= 60;
     }
 
-    if (battery_flag == 0xFF) {  /* unknown state */
+    if (battery_flag == 0xFF) { /* unknown state */
         *state = SDL_POWERSTATE_UNKNOWN;
-    } else if (battery_flag & (1 << 7)) {  /* no battery */
+    } else if (battery_flag & (1 << 7)) {       /* no battery */
         *state = SDL_POWERSTATE_NO_BATTERY;
-    } else if (battery_flag & (1 << 3)) {  /* charging */
+    } else if (battery_flag & (1 << 3)) {       /* charging */
         *state = SDL_POWERSTATE_CHARGING;
         need_details = SDL_TRUE;
     } else if (ac_status == 1) {
-        *state = SDL_POWERSTATE_CHARGED;  /* on AC, not charging. */
+        *state = SDL_POWERSTATE_CHARGED;        /* on AC, not charging. */
         need_details = SDL_TRUE;
     } else {
         *state = SDL_POWERSTATE_ON_BATTERY;
@@ -193,10 +193,10 @@ SDL_GetPowerInfo_Linux_proc_apm(SDL_PowerState *state,
         const int pct = battery_percent;
         const int secs = battery_time;
 
-        if (pct >= 0) {  /* -1 == unknown */
-            *percent = (pct > 100) ? 100 : pct;  /* clamp between 0%, 100% */
+        if (pct >= 0) {         /* -1 == unknown */
+            *percent = (pct > 100) ? 100 : pct; /* clamp between 0%, 100% */
         }
-        if (secs >= 0) {  /* -1 == unknown */
+        if (secs >= 0) {        /* -1 == unknown */
             *seconds = secs;
         }
     }
@@ -208,4 +208,3 @@ SDL_GetPowerInfo_Linux_proc_apm(SDL_PowerState *state,
 #endif /* SDL_POWER_DISABLED */
 
 /* vi: set ts=4 sw=4 expandtab: */
-

@@ -61,13 +61,15 @@ LoadSprite(char *file)
     } else {
         switch (temp->format->BitsPerPixel) {
         case 15:
-            SDL_SetColorKey(temp, SDL_SRCCOLORKEY, (*(Uint16 *) temp->pixels) & 0x00007FFF);
+            SDL_SetColorKey(temp, SDL_SRCCOLORKEY,
+                            (*(Uint16 *) temp->pixels) & 0x00007FFF);
             break;
         case 16:
             SDL_SetColorKey(temp, SDL_SRCCOLORKEY, *(Uint16 *) temp->pixels);
             break;
         case 24:
-            SDL_SetColorKey(temp, SDL_SRCCOLORKEY, (*(Uint32 *) temp->pixels) & 0x00FFFFFF);
+            SDL_SetColorKey(temp, SDL_SRCCOLORKEY,
+                            (*(Uint32 *) temp->pixels) & 0x00FFFFFF);
             break;
         case 32:
             SDL_SetColorKey(temp, SDL_SRCCOLORKEY, *(Uint32 *) temp->pixels);
