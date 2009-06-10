@@ -1,10 +1,11 @@
 README.QNX by Mike Gorchak <mike@malva.ua>, <lestat@i.com.ua>
-Last changed at 23 Mar 2009.
+Last changed at 10 Jun 2009.
 
-QNX Photon and GF drivers are being constructed.
+QNX Photon and GF drivers are being constructed, OpenGL ES support is
+    finished.  Still no 2D renderer support in GF and Photon drivers.
 QNX QSA (QNX Sound Architecture) driver is ready.
 QNX CDROM driver is ready.
-QNX HID input driver is being constructed.
+QNX HID input driver is finished.
 
 ----------------------
  -- SDL QSA driver --
@@ -96,6 +97,8 @@ doublescan low-resolution video modes.  So  modes  below  640x480  are  not
 supported. If your video driver supports low-resolution video modes, please
 add SDL_GF_LOWRESOLUTION flag to the gf_devicename array in the SDL_qnxgf.c
 source file.
+   c) Since  GF  framework supports hardware mouse cursor only,  you'll get
+hardware mouse cursor in case of specific graphics driver supports it.
 
 -------------------------
  -- SDL Photon driver --
