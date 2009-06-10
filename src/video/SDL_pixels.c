@@ -39,7 +39,7 @@ SDL_PixelFormatEnumToMasks(Uint32 format, int *bpp, Uint32 * Rmask,
     Uint32 masks[4];
 
     /* Initialize the values here */
-    if (SDL_BITSPERPIXEL(format) == 24) {
+    if (SDL_BYTESPERPIXEL(format) == 3) {
         *bpp = SDL_BYTESPERPIXEL(format) * 8;
     } else {
         *bpp = SDL_BITSPERPIXEL(format);
@@ -203,6 +203,17 @@ SDL_MasksToPixelFormatEnum(int bpp, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask,
             return SDL_PIXELFORMAT_RGB565;
         }
         break;
+    case 24:
+        switch (Rmask) {
+        case 0x00FF0000:
+            return SDL_PIXELFORMAT_RGB888;
+        case 0x000000FF:
+            return SDL_PIXELFORMAT_BGR888;
+        case 0x00000000:
+            /* FIXME: At this point we can't distinguish */
+            /* if this format is RGB24 or BGR24          */
+            return SDL_PIXELFORMAT_RGB24;
+        }
     case 32:
         switch (Rmask) {
         case 0xFF000000:
