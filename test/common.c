@@ -11,6 +11,58 @@
 #define AUDIO_USAGE \
 "[--rate N] [--format U8|S8|U16|U16LE|U16BE|S16|S16LE|S16BE] [--channels N] [--samples N]"
 
+struct pformat {
+    Uint32 id;
+    const char* idstr;
+} pixel_format[]={
+    {SDL_PIXELFORMAT_INDEX1LSB, "SDL_PIXELFORMAT_INDEX1LSB"},
+    {SDL_PIXELFORMAT_INDEX1MSB, "SDL_PIXELFORMAT_INDEX1MSB"},
+    {SDL_PIXELFORMAT_INDEX4LSB, "SDL_PIXELFORMAT_INDEX4LSB"},
+    {SDL_PIXELFORMAT_INDEX4MSB, "SDL_PIXELFORMAT_INDEX4MSB"},
+    {SDL_PIXELFORMAT_INDEX8, "SDL_PIXELFORMAT_INDEX8"},
+    {SDL_PIXELFORMAT_RGB332, "SDL_PIXELFORMAT_RGB332"},
+    {SDL_PIXELFORMAT_RGB444, "SDL_PIXELFORMAT_RGB444"},
+    {SDL_PIXELFORMAT_RGB555, "SDL_PIXELFORMAT_RGB555"},
+    {SDL_PIXELFORMAT_BGR555, "SDL_PIXELFORMAT_BGR555"},
+    {SDL_PIXELFORMAT_ARGB4444, "SDL_PIXELFORMAT_ARGB4444"},
+    {SDL_PIXELFORMAT_ABGR4444, "SDL_PIXELFORMAT_ABGR4444"},
+    {SDL_PIXELFORMAT_ARGB1555, "SDL_PIXELFORMAT_ARGB1555"},
+    {SDL_PIXELFORMAT_ABGR1555, "SDL_PIXELFORMAT_ABGR1555"},
+    {SDL_PIXELFORMAT_RGB565, "SDL_PIXELFORMAT_RGB565"},
+    {SDL_PIXELFORMAT_BGR565, "SDL_PIXELFORMAT_BGR565"},
+    {SDL_PIXELFORMAT_RGB24, "SDL_PIXELFORMAT_RGB24"},
+    {SDL_PIXELFORMAT_BGR24, "SDL_PIXELFORMAT_BGR24"},
+    {SDL_PIXELFORMAT_RGB888, "SDL_PIXELFORMAT_RGB888"},
+    {SDL_PIXELFORMAT_BGR888, "SDL_PIXELFORMAT_BGR888"},
+    {SDL_PIXELFORMAT_ARGB8888, "SDL_PIXELFORMAT_ARGB8888"},
+    {SDL_PIXELFORMAT_RGBA8888, "SDL_PIXELFORMAT_RGBA8888"},
+    {SDL_PIXELFORMAT_ABGR8888, "SDL_PIXELFORMAT_ABGR8888"},
+    {SDL_PIXELFORMAT_BGRA8888, "SDL_PIXELFORMAT_BGRA8888"},
+    {SDL_PIXELFORMAT_ARGB2101010, "SDL_PIXELFORMAT_ARGB2101010"},
+    {SDL_PIXELFORMAT_YV12, "SDL_PIXELFORMAT_YV12"},
+    {SDL_PIXELFORMAT_IYUV, "SDL_PIXELFORMAT_IYUV"},
+    {SDL_PIXELFORMAT_YUY2, "SDL_PIXELFORMAT_YUY2"},
+    {SDL_PIXELFORMAT_UYVY, "SDL_PIXELFORMAT_UYVY"},
+    {SDL_PIXELFORMAT_YVYU, "SDL_PIXELFORMAT_YVYU"}
+};
+
+const char* PixelFormatToString(Uint32 pformat)
+{
+   Uint32 it=0;
+
+   do {
+      if (pixel_format[it].idstr == NULL) {
+          break;
+      }
+      if (pixel_format[it].id == pformat) {
+          return pixel_format[it].idstr;
+      }
+      it++;
+   } while(1);
+
+   return "SDL_PIXELFORMAT_UNKNOWN";
+}
+
 CommonState *
 CommonCreateState(char **argv, Uint32 flags)
 {
@@ -399,11 +451,20 @@ PrintPixelFormat(Uint32 format)
     case SDL_PIXELFORMAT_ARGB4444:
         fprintf(stderr, "ARGB4444");
         break;
+    case SDL_PIXELFORMAT_ABGR4444:
+        fprintf(stderr, "ABGR4444");
+        break;
     case SDL_PIXELFORMAT_ARGB1555:
         fprintf(stderr, "ARGB1555");
         break;
+    case SDL_PIXELFORMAT_ABGR1555:
+        fprintf(stderr, "ABGR1555");
+        break;
     case SDL_PIXELFORMAT_RGB565:
         fprintf(stderr, "RGB565");
+        break;
+    case SDL_PIXELFORMAT_BGR565:
+        fprintf(stderr, "BGR565");
         break;
     case SDL_PIXELFORMAT_RGB24:
         fprintf(stderr, "RGB24");
@@ -567,12 +628,13 @@ CommonInit(CommonState * state)
                 SDL_PixelFormatEnumToMasks(mode.format, &bpp, &Rmask, &Gmask,
                                            &Bmask, &Amask);
                 fprintf(stderr,
-                        "  Current mode: %dx%d@%dHz, %d bits-per-pixel\n",
-                        mode.w, mode.h, mode.refresh_rate, bpp);
+                        "  Current mode: %dx%d@%dHz, %d bits-per-pixel (%s)\n",
+                        mode.w, mode.h, mode.refresh_rate, bpp,
+                        PixelFormatToString(mode.format));
                 if (Rmask || Gmask || Bmask) {
-                    fprintf(stderr, "      Red Mask = 0x%.8x\n", Rmask);
+                    fprintf(stderr, "      Red Mask   = 0x%.8x\n", Rmask);
                     fprintf(stderr, "      Green Mask = 0x%.8x\n", Gmask);
-                    fprintf(stderr, "      Blue Mask = 0x%.8x\n", Bmask);
+                    fprintf(stderr, "      Blue Mask  = 0x%.8x\n", Bmask);
                     if (Amask)
                         fprintf(stderr, "      Alpha Mask = 0x%.8x\n", Amask);
                 }
@@ -588,14 +650,15 @@ CommonInit(CommonState * state)
                         SDL_PixelFormatEnumToMasks(mode.format, &bpp, &Rmask,
                                                    &Gmask, &Bmask, &Amask);
                         fprintf(stderr,
-                                "    Mode %d: %dx%d@%dHz, %d bits-per-pixel\n",
-                                j, mode.w, mode.h, mode.refresh_rate, bpp);
+                                "    Mode %d: %dx%d@%dHz, %d bits-per-pixel (%s)\n",
+                                j, mode.w, mode.h, mode.refresh_rate, bpp,
+                                PixelFormatToString(mode.format));
                         if (Rmask || Gmask || Bmask) {
-                            fprintf(stderr, "        Red Mask = 0x%.8x\n",
+                            fprintf(stderr, "        Red Mask   = 0x%.8x\n",
                                     Rmask);
                             fprintf(stderr, "        Green Mask = 0x%.8x\n",
                                     Gmask);
-                            fprintf(stderr, "        Blue Mask = 0x%.8x\n",
+                            fprintf(stderr, "        Blue Mask  = 0x%.8x\n",
                                     Bmask);
                             if (Amask)
                                 fprintf(stderr,
@@ -633,6 +696,9 @@ CommonInit(CommonState * state)
         case 16:
             fullscreen_mode.format = SDL_PIXELFORMAT_RGB565;
             break;
+        case 24:
+            fullscreen_mode.format = SDL_PIXELFORMAT_RGB24;
+            break;
         default:
             fullscreen_mode.format = SDL_PIXELFORMAT_RGB888;
             break;
@@ -640,7 +706,11 @@ CommonInit(CommonState * state)
         fullscreen_mode.w = state->window_w;
         fullscreen_mode.h = state->window_h;
         fullscreen_mode.refresh_rate = state->refresh_rate;
-        SDL_SetFullscreenDisplayMode(&fullscreen_mode);
+        if (SDL_SetFullscreenDisplayMode(&fullscreen_mode)<0) {
+            fprintf(stderr, "Can't switch to fullscreen display mode: %s\n",
+                    SDL_GetError());
+            return SDL_FALSE;
+        }
 
         state->windows =
             (SDL_WindowID *) SDL_malloc(state->num_windows *
