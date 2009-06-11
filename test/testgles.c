@@ -242,6 +242,7 @@ main(int argc, char *argv[])
             continue;
         }
 
+        glViewport(0, 0, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         glOrthof(-2.0, 2.0, -2.0, 2.0, -20.0, 20.0);
@@ -260,10 +261,31 @@ main(int argc, char *argv[])
         /* Check for events */
         ++frames;
         while (SDL_PollEvent(&event)) {
+            switch (event.type) {
+            case SDL_WINDOWEVENT:
+                switch (event.window.event) {
+                    case SDL_WINDOWEVENT_RESIZED:
+                        for (i = 0; i < state->num_windows; ++i) {
+                            if (event.window.windowID == state->windows[i]) {
+                                status = SDL_GL_MakeCurrent(state->windows[i], context[i]);
+                                if (status) {
+                                    printf("SDL_GL_MakeCurrent(): %s\n", SDL_GetError());
+                                    break;
+                                }
+                                /* Change view port to the new window dimensions */
+                                glViewport(0, 0, event.window.data1, event.window.data2);
+                                /* Update window content */
+                                Render();
+                                SDL_GL_SwapWindow(state->windows[i]);
+                                break;
+                            }
+                        }
+                        break;
+                }
+            }
             CommonEvent(state, &event, &done);
         }
         for (i = 0; i < state->num_windows; ++i) {
-            int w, h;
             status = SDL_GL_MakeCurrent(state->windows[i], context[i]);
             if (status) {
                 printf("SDL_GL_MakeCurrent(): %s\n", SDL_GetError());
@@ -271,8 +293,6 @@ main(int argc, char *argv[])
                 /* Continue for next window */
                 continue;
             }
-            SDL_GetWindowSize(state->windows[i], &w, &h);
-            glViewport(0, 0, w, h);
             Render();
             SDL_GL_SwapWindow(state->windows[i]);
         }
