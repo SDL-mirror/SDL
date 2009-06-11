@@ -385,42 +385,42 @@ photon_videoinit(_THIS)
         status = PgGetGraphicsHWCaps(&hwcaps);
         if (status != 0) {
             PhRect_t extent;
-            PdOffscreenContext_t *curctx;
+            PdOffscreenContext_t* curctx;
 
             /* If error happens, this also could mean, that photon is working */
             /* under custom (not listed by photon) video mode                 */
-            status = PhWindowQueryVisible(Ph_QUERY_GRAPHICS, 0, 0, &extent);
+            status=PhWindowQueryVisible(Ph_QUERY_GRAPHICS, 0, 0, &extent);
             if (status != 0) {
                 SDL_SetError("Photon: Can't get graphics driver region");
                 SDL_free(didata->cursor);
                 SDL_free(didata);
                 return -1;
             }
-            modeinfo.width = extent.lr.x + 1;
-            modeinfo.height = extent.lr.y + 1;
+            modeinfo.width=extent.lr.x+1;
+            modeinfo.height=extent.lr.y+1;
             /* Hardcode 60Hz, as the base refresh rate frequency */
-            hwcaps.current_rrate = 60;
+            hwcaps.current_rrate=60;
             /* Clear current video driver name, no way to get it somehow */
-            hwcaps.chip_name[0] = 0x00;
+            hwcaps.chip_name[0]=0x00;
 
             /* Create offscreen context from video memory, which is currently */
             /* displayed on the screen                                        */
-            curctx = PdCreateOffscreenContext(0, 0, 0, Pg_OSC_MAIN_DISPLAY);
-            if (curctx == NULL) {
+            curctx=PdCreateOffscreenContext(0, 0, 0, Pg_OSC_MAIN_DISPLAY);
+            if (curctx==NULL)
+            {
                 SDL_SetError("Photon: Can't get display area capabilities");
                 SDL_free(didata->cursor);
                 SDL_free(didata);
                 return -1;
             }
             /* Retrieve current bpp */
-            modeinfo.type = curctx->format;
+            modeinfo.type=curctx->format;
             PhDCRelease(curctx);
         } else {
             /* Get current video mode details */
             status = PgGetVideoModeInfo(hwcaps.current_video_mode, &modeinfo);
             if (status != 0) {
-                SDL_SetError
-                    ("Photon: Can't get current video mode information");
+                SDL_SetError("Photon: Can't get current video mode information");
                 SDL_free(didata->cursor);
                 SDL_free(didata);
                 return -1;
@@ -1243,6 +1243,12 @@ photon_destroywindow(_THIS, SDL_Window * window)
 
 #if defined(SDL_VIDEO_OPENGL_ES)
         if (phdata->gfinitialized == SDL_TRUE) {
+            /* Destroy photon handle to GF surface */
+            if (wdata->phsurface != NULL) {
+                PhDCRelease(wdata->phsurface);
+                wdata->phsurface=NULL;
+            }
+
             /* Destroy OpenGL ES surface if it was created */
             if (wdata->gles_surface != EGL_NO_SURFACE) {
                 eglDestroySurface(phdata->egldisplay, wdata->gles_surface);
@@ -1670,13 +1676,22 @@ photon_gl_createcontext(_THIS, SDL_Window * window)
         return NULL;
     }
 
+    /* Store last used context and surface */
+    phdata->lgles_surface=wdata->gles_surface;
+    phdata->lgles_context=wdata->gles_context;
+
     /* Make just created context current */
     status =
         eglMakeCurrent(phdata->egldisplay, wdata->gles_surface,
                        wdata->gles_surface, wdata->gles_context);
     if (status != EGL_TRUE) {
+        /* Reset last used context and surface */
+        phdata->lgles_surface=EGL_NO_SURFACE;
+        phdata->lgles_context=EGL_NO_CONTEXT;
+
         /* Destroy OpenGL ES surface */
         eglDestroySurface(phdata->egldisplay, wdata->gles_surface);
+        wdata->gles_surface=EGL_NO_SURFACE;
         gf_surface_free(wdata->gfsurface);
         eglDestroyContext(phdata->egldisplay, wdata->gles_context);
         wdata->gles_context = EGL_NO_CONTEXT;
@@ -1739,6 +1754,7 @@ photon_gl_createcontext(_THIS, SDL_Window * window)
         if (status != 0) {
             /* Destroy OpenGL ES surface */
             eglDestroySurface(phdata->egldisplay, wdata->gles_surface);
+            wdata->gles_surface=EGL_NO_SURFACE;
             gf_surface_free(wdata->gfsurface);
             eglDestroyContext(phdata->egldisplay, wdata->gles_context);
             wdata->gles_context = EGL_NO_CONTEXT;
@@ -1752,6 +1768,7 @@ photon_gl_createcontext(_THIS, SDL_Window * window)
     if (wdata->phsurface == NULL) {
         /* Destroy OpenGL ES surface */
         eglDestroySurface(phdata->egldisplay, wdata->gles_surface);
+        wdata->gles_surface=EGL_NO_SURFACE;
         gf_surface_free(wdata->gfsurface);
         eglDestroyContext(phdata->egldisplay, wdata->gles_context);
         wdata->gles_context = EGL_NO_CONTEXT;
@@ -1782,12 +1799,17 @@ photon_gl_makecurrent(_THIS, SDL_Window * window, SDL_GLContext context)
     }
 
     if ((window == NULL) && (context == NULL)) {
+        /* Reset last used context and surface */
+        phdata->lgles_surface=EGL_NO_SURFACE;
+        phdata->lgles_context=EGL_NO_CONTEXT;
+
+        /* Unset current context */
         status =
             eglMakeCurrent(phdata->egldisplay, EGL_NO_SURFACE, EGL_NO_SURFACE,
                            EGL_NO_CONTEXT);
         if (status != EGL_TRUE) {
             /* Failed to set current GL ES context */
-            SDL_SetError("Photon: Can't set OpenGL ES context");
+            SDL_SetError("Photon: Can't empty current OpenGL ES context");
             return -1;
         }
     } else {
@@ -1807,10 +1829,19 @@ photon_gl_makecurrent(_THIS, SDL_Window * window, SDL_GLContext context)
                 ("Photon: OpenGL ES context is not belong to this window");
             return -1;
         }
+
+        /* Store last set surface and context */
+        phdata->lgles_surface=wdata->gles_surface;
+        phdata->lgles_context=wdata->gles_context;
+
+        /* Set new current context */
         status =
             eglMakeCurrent(phdata->egldisplay, wdata->gles_surface,
                            wdata->gles_surface, wdata->gles_context);
         if (status != EGL_TRUE) {
+            /* Reset last used context and surface */
+            phdata->lgles_surface=EGL_NO_SURFACE;
+            phdata->lgles_context=EGL_NO_CONTEXT;
             /* Failed to set current GL ES context */
             SDL_SetError("Photon: Can't set OpenGL ES context");
             return -1;
@@ -1894,6 +1925,12 @@ photon_gl_swapwindow(_THIS, SDL_Window * window)
         return;
     }
 
+    if (wdata->phsurface==NULL) {
+        SDL_SetError
+            ("Photon: Photon OpenGL ES surface is not initialized");
+        return;
+    }
+
     /* Many applications do not uses glFinish(), so we call it for them */
     glFinish();
 
@@ -1945,6 +1982,13 @@ photon_gl_deletecontext(_THIS, SDL_GLContext context)
     /* Check if OpenGL ES connection has been initialized */
     if (phdata->egldisplay != EGL_NO_DISPLAY) {
         if (context != EGL_NO_CONTEXT) {
+            /* Check if we are destroying current active context */
+            if (phdata->lgles_context==context) {
+                /* Release current context */
+                eglMakeCurrent(phdata->egldisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+                phdata->lgles_context=EGL_NO_CONTEXT;
+                phdata->lgles_surface=EGL_NO_SURFACE;
+            }
             status = eglDestroyContext(phdata->egldisplay, context);
             if (status != EGL_TRUE) {
                 /* Error during OpenGL ES context destroying */
@@ -1958,6 +2002,104 @@ photon_gl_deletecontext(_THIS, SDL_GLContext context)
 #else
     SDL_SetError("Photon: OpenGL ES support is not compiled in");
     return;
+#endif /* SDL_VIDEO_OPENGL_ES */
+}
+
+/* Helper function, which re-creates surface, not an API */
+int photon_gl_recreatesurface(_THIS, SDL_Window * window, uint32_t width, uint32_t height)
+{
+#if defined(SDL_VIDEO_OPENGL_ES)
+    SDL_VideoData *phdata = (SDL_VideoData *) _this->driverdata;
+    SDL_WindowData *wdata = (SDL_WindowData *) window->driverdata;
+    SDL_DisplayData *didata =
+        (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
+    SDL_bool makecurrent=SDL_FALSE;
+    int32_t gfstatus;
+
+    /* Check if context has been initialized */
+    if (wdata->gles_context == EGL_NO_CONTEXT) {
+        /* If no, abort surface re-creating */
+        return -1;
+    }
+
+    /* Check if last used surface the same as one which must be re-created */
+    if (phdata->lgles_surface == wdata->gles_surface) {
+        makecurrent=SDL_TRUE;
+        /* Flush all current drawings */
+        glFinish();
+        /* Wait until OpenGL ES rendering is completed */
+        eglWaitGL();
+        /* Release current context */
+        eglMakeCurrent(phdata->egldisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+        phdata->lgles_surface=EGL_NO_SURFACE;
+    }
+
+    /* Check if we need to destroy previous surface */
+    if (wdata->gles_surface != EGL_NO_SURFACE) {
+        /* Destroy photon handle to GF surface */
+        if (wdata->phsurface != NULL) {
+            PhDCRelease(wdata->phsurface);
+            wdata->phsurface=NULL;
+        }
+
+        /* Destroy previous surface */
+        eglDestroySurface(phdata->egldisplay, wdata->gles_surface);
+
+        /* Set surface to uninitialized */
+        wdata->gles_surface = EGL_NO_SURFACE;
+
+        if (wdata->gfsurface!=NULL) {
+           gf_surface_free(wdata->gfsurface);
+           wdata->gfsurface=NULL;
+        }
+    }
+
+    /* Create new GF surface */
+    gfstatus =
+        gf_surface_create(&wdata->gfsurface, phdata->gfdev, width,
+                          height,
+                          qnxgf_sdl_to_gf_pixelformat(didata->current_mode.
+                                                      format), NULL,
+                          GF_SURFACE_CREATE_2D_ACCESSIBLE |
+                          GF_SURFACE_CREATE_3D_ACCESSIBLE |
+                          GF_SURFACE_CREATE_SHAREABLE);
+    if (gfstatus != GF_ERR_OK) {
+        SDL_SetError("Photon: Can't create GF 3D surface (%08X)", gfstatus);
+        return -1;
+    }
+
+    /* Create new pixmap 3D target surface */
+    wdata->gles_surface =
+        eglCreatePixmapSurface(phdata->egldisplay,
+                               wdata->gles_configs[wdata->gles_config],
+                               wdata->gfsurface, NULL);
+    if (wdata->gles_surface == EGL_NO_SURFACE) {
+        gf_surface_free(wdata->gfsurface);
+        wdata->gfsurface=NULL;
+        SDL_SetError("Photon: Can't create EGL pixmap surface");
+        return -1;
+    }
+
+    wdata->phsurface = PdCreateOffscreenContextGF(wdata->gfsurface);
+    if (wdata->phsurface == NULL) {
+        /* Destroy OpenGL ES surface */
+        eglDestroySurface(phdata->egldisplay, wdata->gles_surface);
+        wdata->gles_surface=EGL_NO_SURFACE;
+        gf_surface_free(wdata->gfsurface);
+        wdata->gfsurface=NULL;
+        SDL_SetError("Photon: Can't bind GF surface to Photon\n");
+        return -1;
+    }
+
+    /* Check if we need to set this surface and context as current */
+    if (makecurrent == SDL_TRUE) {
+        return photon_gl_makecurrent(_this, window, wdata->gles_context);
+    } else {
+        return 0;
+    }
+#else
+    /* Do nothing, if OpenGL ES support is not compiled in */
+    return 0;
 #endif /* SDL_VIDEO_OPENGL_ES */
 }
 
@@ -2519,6 +2661,13 @@ photon_pumpevents(_THIS)
                                                         SDL_WINDOWEVENT_MOVED,
                                                         wmevent->pos.x,
                                                         wmevent->pos.y);
+
+                                    /* Check if this window uses OpenGL ES */
+                                    if (wdata->uses_gles == SDL_TRUE) {
+                                        /* If so, recreate surface with new dimensions */
+                                        photon_gl_recreatesurface(_this, window, wmevent->size.w, wmevent->size.h);
+                                    }
+
                                     /* Set new window size after resize */
                                     SDL_SendWindowEvent(window->id,
                                                         SDL_WINDOWEVENT_RESIZED,

@@ -55,7 +55,9 @@ typedef struct SDL_VideoData
     EGLDisplay egldisplay;      /* OpenGL ES display connection         */
     uint32_t egl_refcount;      /* OpenGL ES reference count            */
     uint32_t swapinterval;      /* OpenGL ES default swap interval      */
-#endif                          /* SDL_VIDEO_OPENGL_ES */
+    EGLContext lgles_context;   /* Last used OpenGL ES context          */
+    EGLSurface lgles_surface;   /* Last used OpenGL ES target surface   */
+#endif /* SDL_VIDEO_OPENGL_ES */
 } SDL_VideoData;
 
 /* This is hardcoded value in photon/Pg.h */
@@ -68,18 +70,18 @@ typedef struct SDL_VideoData
 typedef struct SDL_DisplayData
 {
     uint32_t device_id;
-    uint32_t custom_refresh;    /* Custom refresh rate for all modes  */
+    uint32_t custom_refresh;            /* Custom refresh rate for all modes  */
     SDL_DisplayMode current_mode;       /* Current video mode                 */
     uint8_t description[SDL_VIDEO_PHOTON_DEVICENAME_MAX];
-    /* Device description                 */
-    uint32_t caps;              /* Device capabilities                */
-    PhCursorDef_t *cursor;      /* Global cursor settings             */
-    SDL_bool cursor_visible;    /* SDL_TRUE if cursor visible         */
-    uint32_t cursor_size;       /* Cursor size in memory w/ structure */
+    /* Device description */
+    uint32_t caps;                      /* Device capabilities                */
+    PhCursorDef_t *cursor;              /* Global cursor settings             */
+    SDL_bool cursor_visible;            /* SDL_TRUE if cursor visible         */
+    uint32_t cursor_size;               /* Cursor size in memory w/ structure */
 #if defined(SDL_VIDEO_OPENGL_ES)
-    gf_display_t display;       /* GF display handle                  */
+    gf_display_t display;               /* GF display handle                  */
     gf_display_info_t display_info;     /* GF display information             */
-#endif                          /* SDL_VIDEO_OPENGL_ES */
+#endif /* SDL_VIDEO_OPENGL_ES */
 } SDL_DisplayData;
 
 /* Maximum amount of OpenGL ES framebuffer configurations */
@@ -88,17 +90,17 @@ typedef struct SDL_DisplayData
 typedef struct SDL_WindowData
 {
     SDL_bool uses_gles;         /* if true window must support OpenGL ES */
-    PtWidget_t *window;         /* window handle                        */
+    PtWidget_t *window;         /* window handle                         */
 #if defined(SDL_VIDEO_OPENGL_ES)
     EGLConfig gles_configs[SDL_VIDEO_GF_OPENGLES_CONFS];
-    /* OpenGL ES framebuffer confs        */
-    EGLint gles_config;         /* OpenGL ES configuration index      */
-    EGLContext gles_context;    /* OpenGL ES context                  */
+    /* OpenGL ES framebuffer confs */
+    EGLint gles_config;                 /* OpenGL ES configuration index      */
+    EGLContext gles_context;            /* OpenGL ES context                  */
     EGLint gles_attributes[256];        /* OpenGL ES attributes for context   */
-    EGLSurface gles_surface;    /* OpenGL ES target rendering surface */
-    gf_surface_t gfsurface;     /* OpenGL ES GF's surface             */
+    EGLSurface gles_surface;            /* OpenGL ES target rendering surface */
+    gf_surface_t gfsurface;             /* OpenGL ES GF's surface             */
     PdOffscreenContext_t *phsurface;    /* OpenGL ES Photon's surface         */
-#endif                          /* SDL_VIDEO_OPENGL_ES */
+#endif /* SDL_VIDEO_OPENGL_ES */
 } SDL_WindowData;
 
 /****************************************************************************/
@@ -157,6 +159,9 @@ int photon_gl_setswapinterval(_THIS, int interval);
 int photon_gl_getswapinterval(_THIS);
 void photon_gl_swapwindow(_THIS, SDL_Window * window);
 void photon_gl_deletecontext(_THIS, SDL_GLContext context);
+
+/* Helper function, which re-creates surface, not an API */
+int photon_gl_recreatesurface(_THIS, SDL_Window * window, uint32_t width, uint32_t height);
 
 /* Event handling function */
 void photon_pumpevents(_THIS);
