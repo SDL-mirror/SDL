@@ -52,6 +52,8 @@ X11_InitMouse(_THIS)
 #endif
     int num_mice = 0;
 
+    SDL_zero(mouse);
+
 #if SDL_VIDEO_DRIVER_X11_XINPUT
     /* we're getting the list of input devices */
     n = 0;

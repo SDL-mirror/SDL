@@ -97,6 +97,7 @@ SDL_AddMouse(const SDL_Mouse * mouse, char *name, int pressure_max,
     /* we're setting the mouse properties */
     length = 0;
     length = SDL_strlen(name);
+    SDL_mice[index]->focus = 0;
     SDL_mice[index]->name = SDL_malloc((length + 2) * sizeof(char));
     SDL_strlcpy(SDL_mice[index]->name, name, length + 1);
     SDL_mice[index]->pressure_max = pressure_max;

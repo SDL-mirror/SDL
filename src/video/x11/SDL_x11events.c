@@ -83,8 +83,10 @@ X11_DispatchEvent(_THIS)
         /* Gaining mouse coverage? */
     case EnterNotify:{
 #ifdef DEBUG_XEVENTS
-            printf("EnterNotify! (%d,%d)\n", xevent.xcrossing.x,
-                   xevent.xcrossing.y);
+            printf("EnterNotify! (%d,%d,%d)\n", 
+	           xevent.xcrossing.x,
+ 	           xevent.xcrossing.y,
+                   xevent.xcrossing.mode);
             if (xevent.xcrossing.mode == NotifyGrab)
                 printf("Mode: NotifyGrab\n");
             if (xevent.xcrossing.mode == NotifyUngrab)
@@ -92,10 +94,12 @@ X11_DispatchEvent(_THIS)
 #endif
             if ((xevent.xcrossing.mode != NotifyGrab) &&
                 (xevent.xcrossing.mode != NotifyUngrab)) {
+#if 1
                 /* FIXME: Should we reset data for all mice? */
-#if 0
-                SDL_SetMouseFocus(0, data->windowID);
-                SDL_SendMouseMotion(0, 0, move->x, move->y, 0);
+	       for (i = 0; i < SDL_GetNumMice(); ++i) {
+		  SDL_Mouse *mouse = SDL_GetMouse(i);
+		  SDL_SetMouseFocus(mouse->id, data->windowID);
+	       }
 #endif
             }
         }
@@ -104,8 +108,10 @@ X11_DispatchEvent(_THIS)
         /* Losing mouse coverage? */
     case LeaveNotify:{
 #ifdef DEBUG_XEVENTS
-            printf("LeaveNotify! (%d,%d)\n", xevent.xcrossing.x,
-                   xevent.xcrossing.y);
+            printf("LeaveNotify! (%d,%d,%d)\n", 
+	           xevent.xcrossing.x,
+ 	           xevent.xcrossing.y,
+                   xevent.xcrossing.mode);
             if (xevent.xcrossing.mode == NotifyGrab)
                 printf("Mode: NotifyGrab\n");
             if (xevent.xcrossing.mode == NotifyUngrab)
@@ -114,9 +120,12 @@ X11_DispatchEvent(_THIS)
             if ((xevent.xcrossing.mode != NotifyGrab) &&
                 (xevent.xcrossing.mode != NotifyUngrab) &&
                 (xevent.xcrossing.detail != NotifyInferior)) {
+#if 1
                 /* FIXME: Should we reset data for all mice? */
-#if 0
-                SDL_SetMouseFocus(0, 0);
+	       for (i = 0; i < SDL_GetNumMice(); ++i) {
+		  SDL_Mouse *mouse = SDL_GetMouse(i);
+		  SDL_SetMouseFocus(mouse->id, 0);
+	       }
 #endif
             }
         }
