@@ -87,7 +87,7 @@ typedef struct SDL_VideoData
 /* *INDENT-ON* */
 
     int keyboard;
-    SDL_scancode *key_layout;
+    const SDL_scancode *key_layout;
 } SDL_VideoData;
 
 #endif /* _SDL_win32video_h */

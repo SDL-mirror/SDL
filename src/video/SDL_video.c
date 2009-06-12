@@ -1630,7 +1630,7 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
         if (surface->format->Amask
             || !(surface->map->info.flags &
                  (SDL_COPY_COLORKEY | SDL_COPY_MASK | SDL_COPY_BLEND))) {
-            int it;
+            Uint32 it;
             int pfmt;
 
             /* Pixel formats, sorted by best first */
@@ -1724,7 +1724,7 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
             }
         } else {
             /* Need a format with alpha */
-            int it;
+            Uint32 it;
             int apfmt;
 
             /* Pixel formats with alpha, sorted by best first */

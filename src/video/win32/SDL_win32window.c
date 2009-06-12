@@ -642,6 +642,7 @@ SDL_HelperWindowCreate(void)
 {
     HINSTANCE hInstance = GetModuleHandle(NULL);
     WNDCLASS wce;
+    HWND hWndParent = NULL;
 
     /* Make sure window isn't created twice. */
     if (SDL_HelperWindow != NULL) {
@@ -662,7 +663,6 @@ SDL_HelperWindowCreate(void)
         return -1;
     }
 
-    HWND hWndParent = NULL;
 #ifndef _WIN32_WCE
     /* WinCE doesn't have HWND_MESSAGE */
     hWndParent = HWND_MESSAGE;
