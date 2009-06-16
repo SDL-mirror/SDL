@@ -412,9 +412,16 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
         pparams.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
     }
 
+    IDirect3D9_GetDeviceCaps(videodata->d3d, D3DADAPTER_DEFAULT,
+                             D3DDEVTYPE_HAL, &caps);
+
     result = IDirect3D9_CreateDevice(videodata->d3d, D3DADAPTER_DEFAULT,        /* FIXME */
                                      D3DDEVTYPE_HAL,
                                      windowdata->hwnd,
+                                     (caps.
+                                      DevCaps &
+                                      D3DDEVCAPS_HWTRANSFORMANDLIGHT) ?
+                                     D3DCREATE_HARDWARE_VERTEXPROCESSING :
                                      D3DCREATE_SOFTWARE_VERTEXPROCESSING,
                                      &pparams, &data->device);
     if (FAILED(result)) {
