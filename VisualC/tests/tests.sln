@@ -1,5 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual C++ Express 2005
+# Visual Studio 2005
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "graywin", "graywin\graywin.vcproj", "{0BCCA0BF-073E-439E-BCE0-C9353C177487}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "loopwave", "loopwave\loopwave.vcproj", "{AAAD1CB5-7ADA-47AE-85A0-08A6EC48FAFB}"
@@ -37,6 +37,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testsprite2", "testsprite2\testsprite2.vcproj", "{40FB7794-D3C3-4CFE-BCF4-A80C96635682}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testdraw2", "testdraw2\testdraw2.vcproj", "{8682FE1E-0CF6-4EDD-9BB5-1733D8C8B4DF}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testpower", "testpower\testpower.vcproj", "{C4E04D18-EF76-4B42-B4C2-16A1BACDC0A3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -120,6 +122,10 @@ Global
 		{8682FE1E-0CF6-4EDD-9BB5-1733D8C8B4DF}.Debug|Win32.Build.0 = Debug|Win32
 		{8682FE1E-0CF6-4EDD-9BB5-1733D8C8B4DF}.Release|Win32.ActiveCfg = Release|Win32
 		{8682FE1E-0CF6-4EDD-9BB5-1733D8C8B4DF}.Release|Win32.Build.0 = Release|Win32
+		{C4E04D18-EF76-4B42-B4C2-16A1BACDC0A3}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C4E04D18-EF76-4B42-B4C2-16A1BACDC0A3}.Debug|Win32.Build.0 = Debug|Win32
+		{C4E04D18-EF76-4B42-B4C2-16A1BACDC0A3}.Release|Win32.ActiveCfg = Release|Win32
+		{C4E04D18-EF76-4B42-B4C2-16A1BACDC0A3}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -296,6 +296,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\SDL_power.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\SDL_quit.h"
 				>
 			</File>
@@ -733,6 +737,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\power\SDL_power.c"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\stdlib\SDL_qsort.c"
 			>
 		</File>
@@ -830,6 +838,10 @@
 		</File>
 		<File
 			RelativePath="..\..\src\thread\win32\SDL_sysmutex.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\power\windows\SDL_syspower.c"
 			>
 		</File>
 		<File
