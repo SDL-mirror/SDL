@@ -1,64 +1,51 @@
 #include "SDL.h"
 
+/*
+  Absolutely basic test just to see if we get the expected value after
+  calling each function.
+*/
+
 int
 main(int argc, char **argv)
 {
-/*     int rv = 10; */
-/*     volatile int atomic; */
 
-/*     SDL_atomic_int_set(&atomic, 10); */
-/*     if (SDL_atomic_int_get(&atomic) != 10) */
-/*         printf("Error: "); */
-/*     printf("SDL_atomic_int_set(atomic, 10): atomic-> %d\n", */
-/*            SDL_atomic_int_get(&atomic)); */
+   Uint32 val32 = 0;
+   Uint32 ret32 = 0;
 
-/*     SDL_atomic_int_add(&atomic, 10); */
-/*     if (SDL_atomic_int_get(&atomic) != 20) */
-/*         printf("Error: "); */
-/*     printf("SDL_atomic_int_add(atomic, 10): atomic-> %d\n", */
-/*            SDL_atomic_int_get(&atomic)); */
+   Uint64 val64 = 0;
+   Uint64 ret64 = 0;
 
-/*     rv = SDL_atomic_int_cmp_xchg(&atomic, 20, 30); */
-/*     if (rv != SDL_TRUE || SDL_atomic_int_get(&atomic) != 30) */
-/*         printf("Error: "); */
-/*     printf("SDL_atomic_int_cmp_xchg(atomic, 20, 30): rv-> %d, atomic-> %d\n", */
-/*            rv, SDL_atomic_int_get(&atomic)); */
+   SDL_bool tfval = SDL_FALSE;
 
-/*     rv = SDL_atomic_int_cmp_xchg(&atomic, 20, 30); */
-/*     if (rv != SDL_FALSE || SDL_atomic_int_get(&atomic) != 30) */
-/*         printf("Error: "); */
-/*     printf("SDL_atomic_int_cmp_xchg(atomic, 20, 40): rv-> %d, atomic-> %d\n", */
-/*            rv, SDL_atomic_int_get(&atomic)); */
+   ret32 = SDL_AtomicExchange32(&val32, 10);
+   tfval = SDL_AtomicCompareThenSet32(&val32, 10, 20);
+   tfval = SDL_AtomicTestThenSet32(&val32);
+   SDL_AtomicClear32(&val32);
+   ret32 = SDL_AtomicFetchThenIncrement32(&val32);
+   ret32 = SDL_AtomicFetchThenDecrement32(&val32);
+   ret32 = SDL_AtomicFetchThenAdd32(&val32, 10);
+   ret32 = SDL_AtomicFetchThenSubtract32(&val32, 10);
+   ret32 = SDL_AtomicIncrementThenFetch32(&val32);
+   ret32 = SDL_AtomicDecrementThenFetch32(&val32);
+   ret32 = SDL_AtomicAddThenFetch32(&val32, 10);
+   ret32 = SDL_AtomicSubtractThenFetch32(&val32, 10);
 
-/*     rv = SDL_atomic_int_xchg_add(&atomic, 10); */
-/*     if (rv != 30 || SDL_atomic_int_get(&atomic) != 40) */
-/*         printf("Error: "); */
-/*     printf("SDL_atomic_int_xchg_add(atomic, 10): rv-> %d, atomic-> %d\n", */
-/*            rv, SDL_atomic_int_get(&atomic)); */
+/* #ifdef SDL_HAS_64BIT_TYPE */
+#if 0
 
-/*     SDL_atomic_int_inc(&atomic); */
-/*     if (SDL_atomic_int_get(&atomic) != 41) */
-/*         printf("Error: "); */
-/*     printf("SDL_atomic_int_inc(atomic): atomic-> %d\n", */
-/*            SDL_atomic_int_get(&atomic)); */
+   ret64 = SDL_AtomicExchange64(&val64, 10);
+   tfval = SDL_AtomicCompareThenSet64(&val64, 10, 20);
+   tfval = SDL_AtomicTestThenSet64(&val64);
+   SDL_AtomicClear64(&val64);
+   ret64 = SDL_AtomicFetchThenIncrement64(&val64);
+   ret64 = SDL_AtomicFetchThenDecrement64(&val64);
+   ret64 = SDL_AtomicFetchThenAdd64(&val64, 10);
+   ret64 = SDL_AtomicFetchThenSubtract64(&val64, 10);
+   ret64 = SDL_AtomicIncrementThenFetch64(&val64);
+   ret64 = SDL_AtomicDecrementThenFetch64(&val64);
+   ret64 = SDL_AtomicAddThenFetch64(&val64, 10);
+   ret64 = SDL_AtomicSubtractThenFetch64(&val64, 10);
+#endif
 
-/*     rv = SDL_atomic_int_dec_test(&atomic); */
-/*     if (rv != SDL_FALSE || SDL_atomic_int_get(&atomic) != 40) */
-/*         printf("Error: "); */
-/*     printf("SDL_atomic_int_dec_test(atomic): rv-> %d, atomic-> %d\n", */
-/*            rv, SDL_atomic_int_get(&atomic)); */
-
-/*     SDL_atomic_int_set(&atomic, 1); */
-/*     if (SDL_atomic_int_get(&atomic) != 1) */
-/*         printf("Error: "); */
-/*     printf("SDL_atomic_int_set(atomic, 1): atomic-> %d\n", */
-/*            SDL_atomic_int_get(&atomic)); */
-
-/*     rv = SDL_atomic_int_dec_test(&atomic); */
-/*     if (rv != SDL_TRUE || SDL_atomic_int_get(&atomic) != 0) */
-/*         printf("Error: "); */
-/*     printf("SDL_atomic_int_dec_test(atomic): rv-> %d, atomic-> %d\n", */
-/*            rv, SDL_atomic_int_get(&atomic)); */
-
-    return 0;
-}
+   return 0;
+   }

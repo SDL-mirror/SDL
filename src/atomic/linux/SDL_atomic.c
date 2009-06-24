@@ -20,8 +20,6 @@
     slouken@libsdl.org
 */
 
-#ifdef SDL_ATOMIC_LINUX
-
 #include "SDL.h"
 #include "SDL_config.h"
 #include "SDL_atomic.h"
@@ -98,7 +96,8 @@ SDL_AtomicSubtractThenFetch32(Uint32 * ptr, Uint32 value)
    return __sync_sub_and_fetch(ptr, value);
 }
 
-#ifdef SDL_HAS_64BIT_TYPE
+/* #ifdef SDL_HAS_64BIT_TYPE */
+#if 0
 
 Uint64
 SDL_AtomicExchange64(Uint64 * ptr, Uint64 value)
@@ -171,5 +170,4 @@ SDL_AtomicSubtractThenFetch64(Uint64 * ptr, Uint64 value)
 {
    return __sync_sub_and_fetch(ptr, value);
 }
-#endif
 #endif
