@@ -29,7 +29,6 @@
 #ifndef _SDL_atomic_h_
 #define _SDL_atomic_h_
 
-
 #include "SDL_stdinc.h"
 #include "SDL_platform.h"
 
@@ -42,71 +41,50 @@ extern "C" {
 /* *INDENT-ON* */
 #endif
 
-/* *INDENT-OFF* */
 /**
- * \def SDL_AtomicBusyWait32 (ptr)
- *
- * \brief Implements a simple busy wait for use with
- * SDL_AtomicTestThenSet and SDL_AtomicClear.
- *
- * Note: This can be an infinite loop.
- *
+ * These operations may, or may not, actually be implemented using
+ * processor specific atomic operations. When possible they are
+ * implemented as true processor specific atomic operations. When that
+ * is not possible the are implemented using locks that *do* use the
+ * available atomic operations. In rare cases they may be implemented
+ * using SDL's mutex fuctions.
  */
-#define SDL_AtomicBusyWait32(ptr)		\
-   {						\
-   while (!SDL_AtomicTestThenSet32(ptr)		\
-      {						\
-      };					\
-   };
-
-/**
- * \def SDL_AtomicWait32(ptr)
- *
- * \brief A safer way to wait for a test-then-set lock to be cleared.
- *
- * This assumes that the SDL_Sleep(0) call acts as a thread_yeild
- * operation. 
- *
- */
-#define SDL_AtomicWait32(ptr)			\
-   {						\
-   while (!SDL_AtomicTestThenSet32(ptr)		\
-      {						\
-	 SDL_Sleep(0);				\
-      };                                        \
-   };
-
-/**
- * \def SDL_AtomicBusyWait64(ptr)
- *
- * \brief 64 bit version of busy wait
- *
- * \sa SDL_AtomicBusyWait32
- */
-#define SDL_AtomicBusyWait64(ptr)		\
-   {						\
-   while (!SDL_AtomicTestThenSet64(ptr)		\
-      {						\
-      };					\
-   };
-
-/**
- * \def SDL_AtomicWait64(ptr)
- *
- * \brief 64 bit version of SDL_AtomicWait32
- *
- * \sa SDL_AtomicWait32
- */
-#define SDL_AtomicWait64(ptr)			\
-   {						\
-   while (!SDL_AtomicTestThenSet64(ptr)		\
-      {						\
-	 SDL_Sleep(0);				\
-      };                                        \
-   };
-/* *INDENT-ON* */
 
 /* Function prototypes */
+
+/* 8 bit atomic operations */
+
+extern DECLSPEC Uint8 SDLCALL SDL_AtomicExchange8(Uint8 * ptr, Uint8 value);
+extern DECLSPEC SDL_bool SDLCALL SDL_AtomicCompareThenSet8(Uint8 * ptr,
+                                                            Uint8 oldvalue, Uint8 newvalue);
+extern DECLSPEC SDL_bool SDLCALL SDL_AtomicTestThenSet8(Uint8 * ptr);
+extern DECLSPEC void SDLCALL SDL_AtomicClear8(Uint8 * ptr);
+extern DECLSPEC Uint8 SDLCALL SDL_AtomicFetchThenIncrement8(Uint8 * ptr);
+extern DECLSPEC Uint8 SDLCALL SDL_AtomicFetchThenDecrement8(Uint8 * ptr);
+extern DECLSPEC Uint8 SDLCALL SDL_AtomicFetchThenAdd8(Uint8 * ptr, Uint8 value);
+extern DECLSPEC Uint8 SDLCALL SDL_AtomicFetchThenSubtract8(Uint8 * ptr, Uint8 value);
+extern DECLSPEC Uint8 SDLCALL SDL_AtomicIncrementThenFetch8(Uint8 * ptr);
+extern DECLSPEC Uint8 SDLCALL SDL_AtomicDecrementThenFetch8(Uint8 * ptr);
+extern DECLSPEC Uint8 SDLCALL SDL_AtomicAddThenFetch8(Uint8 * ptr, Uint8 value);
+extern DECLSPEC Uint8 SDLCALL SDL_AtomicSubtractThenFetch8(Uint8 * ptr, Uint8 value);
+
+/* 16 bit atomic operations */
+
+extern DECLSPEC Uint16 SDLCALL SDL_AtomicExchange16(Uint16 * ptr, Uint16 value);
+extern DECLSPEC SDL_bool SDLCALL SDL_AtomicCompareThenSet16(Uint16 * ptr,
+                                                            Uint16 oldvalue, Uint16 newvalue);
+extern DECLSPEC SDL_bool SDLCALL SDL_AtomicTestThenSet16(Uint16 * ptr);
+extern DECLSPEC void SDLCALL SDL_AtomicClear16(Uint16 * ptr);
+extern DECLSPEC Uint16 SDLCALL SDL_AtomicFetchThenIncrement16(Uint16 * ptr);
+extern DECLSPEC Uint16 SDLCALL SDL_AtomicFetchThenDecrement16(Uint16 * ptr);
+extern DECLSPEC Uint16 SDLCALL SDL_AtomicFetchThenAdd16(Uint16 * ptr, Uint16 value);
+extern DECLSPEC Uint16 SDLCALL SDL_AtomicFetchThenSubtract16(Uint16 * ptr, Uint16 value);
+extern DECLSPEC Uint16 SDLCALL SDL_AtomicIncrementThenFetch16(Uint16 * ptr);
+extern DECLSPEC Uint16 SDLCALL SDL_AtomicDecrementThenFetch16(Uint16 * ptr);
+extern DECLSPEC Uint16 SDLCALL SDL_AtomicAddThenFetch16(Uint16 * ptr, Uint16 value);
+extern DECLSPEC Uint16 SDLCALL SDL_AtomicSubtractThenFetch16(Uint16 * ptr, Uint16 value);
+
+/* 32 bit atomic operations */
 
 /**
  * \fn int SDL_AtomicExchange32(Uint32 * ptr, Uint32 value)
@@ -252,6 +230,7 @@ extern DECLSPEC Uint32 SDLCALL SDL_AtomicAddThenFetch32(Uint32 * ptr, Uint32 val
  */
 extern DECLSPEC Uint32 SDLCALL SDL_AtomicSubtractThenFetch32(Uint32 * ptr, Uint32 value);
 
+/* 64 bit atomic operations */
 #ifdef SDL_HAS_64BIT_TYPE
 
 extern DECLSPEC Uint64 SDLCALL SDL_AtomicExchange64(Uint64 * ptr, Uint64 value);
@@ -267,7 +246,7 @@ extern DECLSPEC Uint64 SDLCALL SDL_AtomicIncrementThenFetch64(Uint64 * ptr);
 extern DECLSPEC Uint64 SDLCALL SDL_AtomicDecrementThenFetch64(Uint64 * ptr);
 extern DECLSPEC Uint64 SDLCALL SDL_AtomicAddThenFetch64(Uint64 * ptr, Uint64 value);
 extern DECLSPEC Uint64 SDLCALL SDL_AtomicSubtractThenFetch64(Uint64 * ptr, Uint64 value);
-#endif
+#endif /*  SDL_HAS_64BIT_TYPE */
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
