@@ -34,6 +34,7 @@
 
 #include "SDL_power.h"
 
+static const char *proc_apm_path = "/proc/apm";
 static const char *proc_acpi_battery_path = "/proc/acpi/battery";
 static const char *proc_acpi_ac_adapter_path = "/proc/acpi/ac_adapter";
 
@@ -333,7 +334,7 @@ SDL_GetPowerInfo_Linux_proc_apm(SDL_PowerState * state,
     int battery_flag = 0;
     int battery_percent = 0;
     int battery_time = 0;
-    const int fd = open("/proc/apm", O_RDONLY);
+    const int fd = open(proc_apm_path, O_RDONLY);
     char buf[128];
     char *ptr = &buf[0];
     char *str = NULL;
