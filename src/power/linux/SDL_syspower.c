@@ -318,7 +318,7 @@ static SDL_bool
 int_string(char *str, int *val)
 {
     char *endptr = NULL;
-    *val = (int) strtol(str + 2, &endptr, 16);
+    *val = (int) strtol(str, &endptr, 0);
     return ((*str != '\0') && (*endptr == '\0'));
 }
 
