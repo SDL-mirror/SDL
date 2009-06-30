@@ -1228,10 +1228,6 @@ extern DECLSPEC int SDLCALL SDL_RenderLine(int x1, int y1, int x2, int y2);
  *
  * \brief Fill the current rendering target with the drawing color.
  *
- * \param r The red value used to fill the rendering target
- * \param g The green value used to fill the rendering target
- * \param b The blue value used to fill the rendering target
- * \param a The alpha value used to fill the rendering target, usually SDL_ALPHA_OPAQUE (255)
  * \param rect A pointer to the destination rectangle, or NULL for the entire rendering target.
  *
  * \return 0 on success, or -1 if there is no rendering context current
