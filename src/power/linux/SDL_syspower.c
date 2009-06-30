@@ -34,26 +34,28 @@
 
 #include "SDL_power.h"
 
-static const char *proc_acpi_path = "/proc/acpi/battery";
+static const char *proc_acpi_battery_path = "/proc/acpi/battery";
+static const char *proc_acpi_ac_adapter_path = "/proc/acpi/ac_adapter";
 
-static int open_acpi_file(const char *node, const char *key)
+static int open_acpi_file(const char *base, const char *node, const char *key)
 {
-    const size_t pathlen = strlen(proc_acpi_path)+strlen(node)+strlen(key)+3;
+    const size_t pathlen = strlen(base) + strlen(node) + strlen(key) + 3;
     char *path = (char *) alloca(pathlen);
     if (path == NULL) {
         return -1;  /* oh well. */
     }
 
-    snprintf(path, pathlen, "%s/%s/%s", proc_acpi_path, node, key);
+    snprintf(path, pathlen, "%s/%s/%s", base, node, key);
     return open(path, O_RDONLY);
 }
 
 
 static SDL_bool
-load_acpi_file(const char *node, const char *key, char *buf, size_t buflen)
+load_acpi_file(const char *base, const char *node, const char *key,
+               char *buf, size_t buflen)
 {
     ssize_t br = 0;
-    const int fd = open_acpi_file(node, key);
+    const int fd = open_acpi_file(base, node, key);
     if (fd == -1) {
         return SDL_FALSE;
     }
@@ -66,8 +68,9 @@ load_acpi_file(const char *node, const char *key, char *buf, size_t buflen)
     return SDL_TRUE;
 }
 
+
 static SDL_bool
-make_acpi_key_val(char **_ptr, char **_key, char **_val)
+make_proc_acpi_key_val(char **_ptr, char **_key, char **_val)
 {
     char *ptr = *_ptr;
 
@@ -114,13 +117,12 @@ make_acpi_key_val(char **_ptr, char **_key, char **_val)
 }
 
 static void
-check_acpi(const char * fname, SDL_bool * have_ac, SDL_bool * have_battery,
-           SDL_bool * charging, int *seconds, int *percent)
+check_proc_acpi_battery(const char * node, SDL_bool * have_battery,
+                        SDL_bool * charging, int *seconds, int *percent)
 {
-    int fd = -1;
+    const char *base = proc_acpi_battery_path;
     char info[1024];
     char state[1024];
-    ssize_t br = 0;
     char *ptr = NULL;
     char *key = NULL;
     char *val = NULL;
@@ -132,14 +134,14 @@ check_acpi(const char * fname, SDL_bool * have_ac, SDL_bool * have_battery,
     int secs = -1;
     int pct = -1;
 
-    if (!load_acpi_file(fname, "state", state, sizeof (state))) {
+    if (!load_acpi_file(base, node, "state", state, sizeof (state))) {
         return;
-    } else if (!load_acpi_file(fname, "info", info, sizeof (info))) {
+    } else if (!load_acpi_file(base, node, "info", info, sizeof (info))) {
         return;
     }
 
     ptr = &state[0];
-    while (make_acpi_key_val(&ptr, &key, &val)) {
+    while (make_proc_acpi_key_val(&ptr, &key, &val)) {
         if (strcmp(key, "present") == 0) {
             if (strcmp(val, "yes") == 0) {
                 *have_battery = SDL_TRUE;
@@ -147,15 +149,8 @@ check_acpi(const char * fname, SDL_bool * have_ac, SDL_bool * have_battery,
         } else if (strcmp(key, "charging state") == 0) {
             /* !!! FIXME: what exactly _does_ charging/discharging mean? */
             if (strcmp(val, "charging/discharging") == 0) {
-                *have_ac = is_ac = SDL_TRUE;
                 charge = SDL_TRUE;
             } else if (strcmp(val, "charging") == 0) {
-                *have_ac = is_ac = SDL_TRUE;
-                charge = SDL_TRUE;
-            } else if (strcmp(val, "charged") == 0) {
-                /* !!! FIXME: maybe another battery is discharging,
-                   !!! FIXME:   instead of AC connection. */
-                *have_ac = is_ac = SDL_TRUE;
                 charge = SDL_TRUE;
             }
         } else if (strcmp(key, "remaining capacity") == 0) {
@@ -166,9 +161,9 @@ check_acpi(const char * fname, SDL_bool * have_ac, SDL_bool * have_battery,
             }
         }
     }
-    
+
     ptr = &info[0];
-    while (make_acpi_key_val(&ptr, &key, &val)) {
+    while (make_proc_acpi_key_val(&ptr, &key, &val)) {
         if (strcmp(key, "design capacity") == 0) {
             char *endptr = NULL;
             const int cvt = (int) strtol(val, &endptr, 10);
@@ -209,8 +204,38 @@ check_acpi(const char * fname, SDL_bool * have_ac, SDL_bool * have_battery,
         *percent = pct;
         *charging = charge;
     }
-
 }
+
+static void
+check_proc_acpi_ac_adapter(const char * node, SDL_bool * have_ac)
+{
+    const char *base = proc_acpi_ac_adapter_path;
+    char state[256];
+    char *ptr = NULL;
+    char *key = NULL;
+    char *val = NULL;
+    SDL_bool charge = SDL_FALSE;
+    SDL_bool choose = SDL_FALSE;
+    SDL_bool is_ac = SDL_FALSE;
+    int maximum = -1;
+    int remaining = -1;
+    int secs = -1;
+    int pct = -1;
+
+    if (!load_acpi_file(base, node, "state", state, sizeof (state))) {
+        return;
+    }
+
+    ptr = &state[0];
+    while (make_proc_acpi_key_val(&ptr, &key, &val)) {
+        if (strcmp(key, "state") == 0) {
+            if (strcmp(val, "on-line") == 0) {
+                *have_ac = SDL_TRUE;
+            }
+        }
+    }
+}
+
 
 SDL_bool
 SDL_GetPowerInfo_Linux_proc_acpi(SDL_PowerState * state,
@@ -218,22 +243,35 @@ SDL_GetPowerInfo_Linux_proc_acpi(SDL_PowerState * state,
 {
     struct dirent *dent = NULL;
     DIR *dirp = NULL;
-    SDL_bool have_ac = SDL_FALSE;
     SDL_bool have_battery = SDL_FALSE;
+    SDL_bool have_ac = SDL_FALSE;
     SDL_bool charging = SDL_FALSE;
 
     *seconds = -1;
     *percent = -1;
     *state = SDL_POWERSTATE_UNKNOWN;
 
-    dirp = opendir(proc_acpi_path);
+    dirp = opendir(proc_acpi_battery_path);
     if (dirp == NULL) {
         return SDL_FALSE;  /* can't use this interface. */
+    } else {
+        while ((dent = readdir(dirp)) != NULL) {
+            const char *node = dent->d_name;
+            check_proc_acpi_battery(node, &have_battery, &charging,
+                                    seconds, percent);
+        }
+        closedir(dirp);
     }
 
-    while ((dent = readdir(dirp)) != NULL) {
-        const char *name = dent->d_name;
-        check_acpi(name, &have_ac, &have_battery, &charging, seconds, percent);
+    dirp = opendir(proc_acpi_ac_adapter_path);
+    if (dirp == NULL) {
+        return SDL_FALSE;  /* can't use this interface. */
+    } else {
+        while ((dent = readdir(dirp)) != NULL) {
+            const char *node = dent->d_name;
+            check_proc_acpi_ac_adapter(node, &have_ac);
+        }
+        closedir(dirp);
     }
 
     if (!have_battery) {
