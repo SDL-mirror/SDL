@@ -34,14 +34,6 @@
 
 #include "SDL_power.h"
 
-SDL_bool
-SDL_GetPowerInfo_Linux_sys_power(SDL_PowerState * state,
-                                 int *seconds, int *percent)
-{
-    return SDL_FALSE;           /* !!! FIXME: write me. */
-}
-
-
 static const char *proc_acpi_path = "/proc/acpi/battery";
 
 static int open_acpi_file(const char *node, const char *key)
