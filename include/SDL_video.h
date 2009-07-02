@@ -1156,7 +1156,7 @@ extern DECLSPEC int SDL_SetRenderDrawColor(Uint8 r, Uint8 g, Uint8 b,
                                            Uint8 a);
 
 /**
- * \fn void SDL_GetRenderDrawColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+ * \fn void SDL_GetRenderDrawColor(Uint8 * r, Uint8 * g, Uint8 * b, Uint8 * a)
  *
  * \brief Get the color used for drawing operations (Fill and Line).
  *
