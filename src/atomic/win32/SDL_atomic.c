@@ -170,7 +170,7 @@ SDL_AtomicExchange8(Uint8 * ptr, Uint8 value)
 #ifdef nativeExchange8
    return nativeExchange8(ptr, value);
 #else
-   Uint8 tmp = 0;;
+   Uint8 tmp = 0;
 
    privateWaitLock();
    tmp = *ptr;
@@ -241,7 +241,7 @@ SDL_AtomicFetchThenIncrement8(Uint8 * ptr)
 #ifdef nativeFetchThenIncrement8
    return nativeFetchThenIncrement8(ptr);
 #else
-   Uint8 tmp = 0;;
+   Uint8 tmp = 0;
 
    privateWaitLock();
    tmp = *ptr;
@@ -258,7 +258,7 @@ SDL_AtomicFetchThenDecrement8(Uint8 * ptr)
 #ifdef nativeFetchThenDecrement8
    return nativeFetchThenDecrement8(ptr);
 #else
-   Uint8 tmp = 0;;
+   Uint8 tmp = 0;
 
    privateWaitLock();
    tmp = *ptr;
@@ -275,7 +275,7 @@ SDL_AtomicFetchThenAdd8(Uint8 * ptr, Uint8 value)
 #ifdef nativeFetchThenAdd8
    return nativeFetchThenAdd8(ptr, value);
 #else
-   Uint8 tmp = 0;;
+   Uint8 tmp = 0;
 
    privateWaitLock();
    tmp = *ptr;
@@ -292,7 +292,7 @@ SDL_AtomicFetchThenSubtract8(Uint8 * ptr, Uint8 value)
 #ifdef nativeFetchThenSubtract8
    return nativeFetchThenSubtract8(ptr, value);
 #else
-   Uint8 tmp = 0;;
+   Uint8 tmp = 0;
 
    privateWaitLock();
    tmp = *ptr;
@@ -309,7 +309,7 @@ SDL_AtomicIncrementThenFetch8(Uint8 * ptr)
 #ifdef nativeIncrementThenFetch8
    return nativeIncrementThenFetch8(ptr);
 #else
-   Uint8 tmp = 0;;
+   Uint8 tmp = 0;
 
    privateWaitLock();
    (*ptr)+= 1;
@@ -326,7 +326,7 @@ SDL_AtomicDecrementThenFetch8(Uint8 * ptr)
 #ifdef nativeDecrementThenFetch8
    return nativeDecrementThenFetch8(ptr);
 #else
-   Uint8 tmp = 0;;
+   Uint8 tmp = 0;
 
    privateWaitLock();
    (*ptr)-= 1;
@@ -343,7 +343,7 @@ SDL_AtomicAddThenFetch8(Uint8 * ptr, Uint8 value)
 #ifdef nativeAddThenFetch8
    return nativeAddThenFetch8(ptr, value);
 #else
-   Uint8 tmp = 0;;
+   Uint8 tmp = 0;
 
    privateWaitLock();
    (*ptr)+= value;
@@ -360,7 +360,7 @@ SDL_AtomicSubtractThenFetch8(Uint8 * ptr, Uint8 value)
 #ifdef nativeSubtractThenFetch8
    return nativeSubtractThenFetch8(ptr, value);
 #else
-   Uint8 tmp = 0;;
+   Uint8 tmp = 0;
 
    privateWaitLock();
    (*ptr)-= value;
@@ -379,7 +379,7 @@ SDL_AtomicExchange16(Uint16 * ptr, Uint16 value)
 #ifdef nativeExchange16
    return nativeExchange16(ptr, value);
 #else
-   Uint16 tmp = 0;;
+   Uint16 tmp = 0;
 
    privateWaitLock();
    tmp = *ptr;
@@ -450,7 +450,7 @@ SDL_AtomicFetchThenIncrement16(Uint16 * ptr)
 #ifdef nativeFetchThenIncrement16
    return nativeFetchThenIncrement16(ptr);
 #else
-   Uint16 tmp = 0;;
+   Uint16 tmp = 0;
 
    privateWaitLock();
    tmp = *ptr;
@@ -467,7 +467,7 @@ SDL_AtomicFetchThenDecrement16(Uint16 * ptr)
 #ifdef nativeFetchThenDecrement16
    return nativeFetchThenDecrement16(ptr);
 #else
-   Uint16 tmp = 0;;
+   Uint16 tmp = 0;
 
    privateWaitLock();
    tmp = *ptr;
@@ -484,7 +484,7 @@ SDL_AtomicFetchThenAdd16(Uint16 * ptr, Uint16 value)
 #ifdef nativeFetchThenAdd16
    return nativeFetchThenAdd16(ptr, value);
 #else
-   Uint16 tmp = 0;;
+   Uint16 tmp = 0;
 
    privateWaitLock();
    tmp = *ptr;
@@ -501,7 +501,7 @@ SDL_AtomicFetchThenSubtract16(Uint16 * ptr, Uint16 value)
 #ifdef nativeFetchThenSubtract16
    return nativeFetchThenSubtract16(ptr, value);
 #else
-   Uint16 tmp = 0;;
+   Uint16 tmp = 0;
 
    privateWaitLock();
    tmp = *ptr;
@@ -518,7 +518,7 @@ SDL_AtomicIncrementThenFetch16(Uint16 * ptr)
 #ifdef nativeIncrementThenFetch16
    return nativeIncrementThenFetch16(ptr);
 #else
-   Uint16 tmp = 0;;
+   Uint16 tmp = 0;
 
    privateWaitLock();
    (*ptr)+= 1;
@@ -535,7 +535,7 @@ SDL_AtomicDecrementThenFetch16(Uint16 * ptr)
 #ifdef nativeDecrementThenFetch16
    return nativeDecrementThenFetch16(ptr);
 #else
-   Uint16 tmp = 0;;
+   Uint16 tmp = 0;
 
    privateWaitLock();
    (*ptr)-= 1;
@@ -552,7 +552,7 @@ SDL_AtomicAddThenFetch16(Uint16 * ptr, Uint16 value)
 #ifdef nativeAddThenFetch16
    return nativeAddThenFetch16(ptr, value);
 #else
-   Uint16 tmp = 0;;
+   Uint16 tmp = 0;
 
    privateWaitLock();
    (*ptr)+= value;
@@ -569,7 +569,7 @@ SDL_AtomicSubtractThenFetch16(Uint16 * ptr, Uint16 value)
 #ifdef nativeSubtractThenFetch16
    return nativeSubtractThenFetch16(ptr, value);
 #else
-   Uint16 tmp = 0;;
+   Uint16 tmp = 0;
 
    privateWaitLock();
    (*ptr)-= value;
@@ -588,7 +588,7 @@ SDL_AtomicExchange32(Uint32 * ptr, Uint32 value)
 #ifdef nativeExchange32
    return nativeExchange32(ptr, value);
 #else
-   Uint32 tmp = 0;;
+   Uint32 tmp = 0;
 
    privateWaitLock();
    tmp = *ptr;
@@ -659,7 +659,7 @@ SDL_AtomicFetchThenIncrement32(Uint32 * ptr)
 #ifdef nativeFetchThenIncrement32
    return nativeFetchThenIncrement32(ptr);
 #else
-   Uint32 tmp = 0;;
+   Uint32 tmp = 0;
 
    privateWaitLock();
    tmp = *ptr;
@@ -676,7 +676,7 @@ SDL_AtomicFetchThenDecrement32(Uint32 * ptr)
 #ifdef nativeFetchThenDecrement32
    return nativeFetchThenDecrement32(ptr);
 #else
-   Uint32 tmp = 0;;
+   Uint32 tmp = 0;
 
    privateWaitLock();
    tmp = *ptr;
@@ -693,7 +693,7 @@ SDL_AtomicFetchThenAdd32(Uint32 * ptr, Uint32 value)
 #ifdef nativeFetchThenAdd32
    return nativeFetchThenAdd32(ptr, value);
 #else
-   Uint32 tmp = 0;;
+   Uint32 tmp = 0;
 
    privateWaitLock();
    tmp = *ptr;
@@ -710,7 +710,7 @@ SDL_AtomicFetchThenSubtract32(Uint32 * ptr, Uint32 value)
 #ifdef nativeFetchThenSubtract32
    return nativeFetchThenSubtract32(ptr, value);
 #else
-   Uint32 tmp = 0;;
+   Uint32 tmp = 0;
 
    privateWaitLock();
    tmp = *ptr;
@@ -727,7 +727,7 @@ SDL_AtomicIncrementThenFetch32(Uint32 * ptr)
 #ifdef nativeIncrementThenFetch32
    return nativeIncrementThenFetch32(ptr);
 #else
-   Uint32 tmp = 0;;
+   Uint32 tmp = 0;
 
    privateWaitLock();
    (*ptr)+= 1;
@@ -744,7 +744,7 @@ SDL_AtomicDecrementThenFetch32(Uint32 * ptr)
 #ifdef nativeDecrementThenFetch32
    return nativeDecrementThenFetch32(ptr);
 #else
-   Uint32 tmp = 0;;
+   Uint32 tmp = 0;
 
    privateWaitLock();
    (*ptr)-= 1;
@@ -761,7 +761,7 @@ SDL_AtomicAddThenFetch32(Uint32 * ptr, Uint32 value)
 #ifdef nativeAddThenFetch32
    return nativeAddThenFetch32(ptr, value);
 #else
-   Uint32 tmp = 0;;
+   Uint32 tmp = 0;
 
    privateWaitLock();
    (*ptr)+= value;
@@ -778,7 +778,7 @@ SDL_AtomicSubtractThenFetch32(Uint32 * ptr, Uint32 value)
 #ifdef nativeSubtractThenFetch32
    return nativeSubtractThenFetch32(ptr, value);
 #else
-   Uint32 tmp = 0;;
+   Uint32 tmp = 0;
 
    privateWaitLock();
    (*ptr)-= value;
@@ -798,7 +798,7 @@ SDL_AtomicExchange64(Uint64 * ptr, Uint64 value)
 #ifdef nativeExchange64
    return nativeExchange64(ptr, value);
 #else
-   Uint64 tmp = 0;;
+   Uint64 tmp = 0;
 
    privateWaitLock();
    tmp = *ptr;
@@ -869,7 +869,7 @@ SDL_AtomicFetchThenIncrement64(Uint64 * ptr)
 #ifdef nativeFetchThenIncrement64
    return nativeFetchThenIncrement64(ptr);
 #else
-   Uint64 tmp = 0;;
+   Uint64 tmp = 0;
 
    privateWaitLock();
    tmp = *ptr;
@@ -886,7 +886,7 @@ SDL_AtomicFetchThenDecrement64(Uint64 * ptr)
 #ifdef nativeFetchThenDecrement64
    return nativeFetchThenDecrement64(ptr);
 #else
-   Uint64 tmp = 0;;
+   Uint64 tmp = 0;
 
    privateWaitLock();
    tmp = *ptr;
@@ -903,7 +903,7 @@ SDL_AtomicFetchThenAdd64(Uint64 * ptr, Uint64 value)
 #ifdef nativeFetchThenAdd64
    return nativeFetchThenAdd64(ptr, value);
 #else
-   Uint64 tmp = 0;;
+   Uint64 tmp = 0;
 
    privateWaitLock();
    tmp = *ptr;
@@ -920,7 +920,7 @@ SDL_AtomicFetchThenSubtract64(Uint64 * ptr, Uint64 value)
 #ifdef nativeFetchThenSubtract64
    return nativeFetchThenSubtract64(ptr, value);
 #else
-   Uint64 tmp = 0;;
+   Uint64 tmp = 0;
 
    privateWaitLock();
    tmp = *ptr;
@@ -937,7 +937,7 @@ SDL_AtomicIncrementThenFetch64(Uint64 * ptr)
 #ifdef nativeIncrementThenFetch64
    return nativeIncrementThenFetch64(ptr);
 #else
-   Uint64 tmp = 0;;
+   Uint64 tmp = 0;
 
    privateWaitLock();
    (*ptr)+= 1;
@@ -954,7 +954,7 @@ SDL_AtomicDecrementThenFetch64(Uint64 * ptr)
 #ifdef nativeDecrementThenFetch64
    return nativeDecrementThenFetch64(ptr);
 #else
-   Uint64 tmp = 0;;
+   Uint64 tmp = 0;
 
    privateWaitLock();
    (*ptr)-= 1;
@@ -971,7 +971,7 @@ SDL_AtomicAddThenFetch64(Uint64 * ptr, Uint64 value)
 #ifdef nativeAddThenFetch64
    return nativeAddThenFetch64(ptr, value);
 #else
-   Uint64 tmp = 0;;
+   Uint64 tmp = 0;
 
    privateWaitLock();
    (*ptr)+= value;
@@ -988,7 +988,7 @@ SDL_AtomicSubtractThenFetch64(Uint64 * ptr, Uint64 value)
 #ifdef nativeSubtractThenFetch64
    return nativeSubtractThenFetch64(ptr, value);
 #else
-   Uint64 tmp = 0;;
+   Uint64 tmp = 0;
 
    privateWaitLock();
    (*ptr)-= value;
