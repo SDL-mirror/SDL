@@ -1142,7 +1142,7 @@ extern DECLSPEC void SDLCALL SDL_DirtyTexture(SDL_TextureID textureID,
                                               const SDL_Rect * rects);
 
 /**
- * \fn void SDL_SetRenderDrawColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+ * \fn int SDL_SetRenderDrawColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a)
  *
  * \brief Set the color used for drawing operations (Fill and Line).
  *
@@ -1156,7 +1156,7 @@ extern DECLSPEC int SDL_SetRenderDrawColor(Uint8 r, Uint8 g, Uint8 b,
                                            Uint8 a);
 
 /**
- * \fn void SDL_GetRenderDrawColor(Uint8 * r, Uint8 * g, Uint8 * b, Uint8 * a)
+ * \fn int SDL_GetRenderDrawColor(Uint8 * r, Uint8 * g, Uint8 * b, Uint8 * a)
  *
  * \brief Get the color used for drawing operations (Fill and Line).
  *
