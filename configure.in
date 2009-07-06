@@ -2881,6 +2881,12 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
             SOURCES="$SOURCES $srcdir/src/audio/macrom/*.c"
             have_audio=yes
         fi
+        # Set up files for the atomic operations library
+        if test x$enable_atomic = xyes; then
+            AC_DEFINE(SDL_ATOMIC_MACOSX)
+            SOURCES="$SOURCES $srcdir/src/atomic/macosx/*.c"
+            have_atomic=yes
+        fi
         # Set up files for the joystick library
         if test x$enable_joystick = xyes; then
             AC_DEFINE(SDL_JOYSTICK_IOKIT)
