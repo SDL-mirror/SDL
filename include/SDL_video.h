@@ -915,7 +915,7 @@ extern DECLSPEC int SDLCALL SDL_QueryTexturePixels(SDL_TextureID textureID,
 /**
  * \fn int SDL_SetTexturePalette(SDL_TextureID textureID, const SDL_Color * colors, int firstcolor, int ncolors)
  *
- * \brief Update an indexed texture with a color palette
+ * \brief Set the collor palette of an indexed texture.
  *
  * \param texture The texture to update
  * \param colors The array of RGB color data
@@ -932,7 +932,7 @@ extern DECLSPEC int SDLCALL SDL_SetTexturePalette(SDL_TextureID textureID,
 /**
  * \fn int SDL_GetTexturePalette(SDL_TextureID textureID, SDL_Color * colors, int firstcolor, int ncolors)
  *
- * \brief Update an indexed texture with a color palette
+ * \brief Get the color palette from an indexed texture if it has one.
  *
  * \param texture The texture to update
  * \param colors The array to fill with RGB color data
