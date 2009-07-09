@@ -23,16 +23,16 @@ int
 main(int argc, char **argv)
 {
 
-   Uint8 val8 = 0;
+   volatile Uint8 val8 = 0;
    Uint8 ret8 = 0;
 
-   Uint16 val16 = 0;
+   volatile Uint16 val16 = 0;
    Uint16 ret16 = 0;
 
-   Uint32 val32 = 0;
+   volatile Uint32 val32 = 0;
    Uint32 ret32 = 0;
 
-   Uint64 val64 = 0;
+   volatile Uint64 val64 = 0;
    Uint64 ret64 = 0;
 
    SDL_bool tfret = SDL_FALSE;

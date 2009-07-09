@@ -54,40 +54,40 @@ extern "C" {
 
 /* 8 bit atomic operations */
 
-extern DECLSPEC Uint8 SDLCALL SDL_AtomicExchange8(Uint8 * ptr, Uint8 value);
-extern DECLSPEC SDL_bool SDLCALL SDL_AtomicCompareThenSet8(Uint8 * ptr,
+extern DECLSPEC Uint8 SDLCALL SDL_AtomicExchange8(volatile Uint8 * ptr, Uint8 value);
+extern DECLSPEC SDL_bool SDLCALL SDL_AtomicCompareThenSet8(volatile Uint8 * ptr,
                                                             Uint8 oldvalue, Uint8 newvalue);
-extern DECLSPEC SDL_bool SDLCALL SDL_AtomicTestThenSet8(Uint8 * ptr);
-extern DECLSPEC void SDLCALL SDL_AtomicClear8(Uint8 * ptr);
-extern DECLSPEC Uint8 SDLCALL SDL_AtomicFetchThenIncrement8(Uint8 * ptr);
-extern DECLSPEC Uint8 SDLCALL SDL_AtomicFetchThenDecrement8(Uint8 * ptr);
-extern DECLSPEC Uint8 SDLCALL SDL_AtomicFetchThenAdd8(Uint8 * ptr, Uint8 value);
-extern DECLSPEC Uint8 SDLCALL SDL_AtomicFetchThenSubtract8(Uint8 * ptr, Uint8 value);
-extern DECLSPEC Uint8 SDLCALL SDL_AtomicIncrementThenFetch8(Uint8 * ptr);
-extern DECLSPEC Uint8 SDLCALL SDL_AtomicDecrementThenFetch8(Uint8 * ptr);
-extern DECLSPEC Uint8 SDLCALL SDL_AtomicAddThenFetch8(Uint8 * ptr, Uint8 value);
-extern DECLSPEC Uint8 SDLCALL SDL_AtomicSubtractThenFetch8(Uint8 * ptr, Uint8 value);
+extern DECLSPEC SDL_bool SDLCALL SDL_AtomicTestThenSet8(volatile Uint8 * ptr);
+extern DECLSPEC void SDLCALL SDL_AtomicClear8(volatile Uint8 * ptr);
+extern DECLSPEC Uint8 SDLCALL SDL_AtomicFetchThenIncrement8(volatile Uint8 * ptr);
+extern DECLSPEC Uint8 SDLCALL SDL_AtomicFetchThenDecrement8(volatile Uint8 * ptr);
+extern DECLSPEC Uint8 SDLCALL SDL_AtomicFetchThenAdd8(volatile Uint8 * ptr, Uint8 value);
+extern DECLSPEC Uint8 SDLCALL SDL_AtomicFetchThenSubtract8(volatile Uint8 * ptr, Uint8 value);
+extern DECLSPEC Uint8 SDLCALL SDL_AtomicIncrementThenFetch8(volatile Uint8 * ptr);
+extern DECLSPEC Uint8 SDLCALL SDL_AtomicDecrementThenFetch8(volatile Uint8 * ptr);
+extern DECLSPEC Uint8 SDLCALL SDL_AtomicAddThenFetch8(volatile Uint8 * ptr, Uint8 value);
+extern DECLSPEC Uint8 SDLCALL SDL_AtomicSubtractThenFetch8(volatile Uint8 * ptr, Uint8 value);
 
 /* 16 bit atomic operations */
 
-extern DECLSPEC Uint16 SDLCALL SDL_AtomicExchange16(Uint16 * ptr, Uint16 value);
-extern DECLSPEC SDL_bool SDLCALL SDL_AtomicCompareThenSet16(Uint16 * ptr,
+extern DECLSPEC Uint16 SDLCALL SDL_AtomicExchange16(volatile Uint16 * ptr, Uint16 value);
+extern DECLSPEC SDL_bool SDLCALL SDL_AtomicCompareThenSet16(volatile Uint16 * ptr,
                                                             Uint16 oldvalue, Uint16 newvalue);
-extern DECLSPEC SDL_bool SDLCALL SDL_AtomicTestThenSet16(Uint16 * ptr);
-extern DECLSPEC void SDLCALL SDL_AtomicClear16(Uint16 * ptr);
-extern DECLSPEC Uint16 SDLCALL SDL_AtomicFetchThenIncrement16(Uint16 * ptr);
-extern DECLSPEC Uint16 SDLCALL SDL_AtomicFetchThenDecrement16(Uint16 * ptr);
-extern DECLSPEC Uint16 SDLCALL SDL_AtomicFetchThenAdd16(Uint16 * ptr, Uint16 value);
-extern DECLSPEC Uint16 SDLCALL SDL_AtomicFetchThenSubtract16(Uint16 * ptr, Uint16 value);
-extern DECLSPEC Uint16 SDLCALL SDL_AtomicIncrementThenFetch16(Uint16 * ptr);
-extern DECLSPEC Uint16 SDLCALL SDL_AtomicDecrementThenFetch16(Uint16 * ptr);
-extern DECLSPEC Uint16 SDLCALL SDL_AtomicAddThenFetch16(Uint16 * ptr, Uint16 value);
-extern DECLSPEC Uint16 SDLCALL SDL_AtomicSubtractThenFetch16(Uint16 * ptr, Uint16 value);
+extern DECLSPEC SDL_bool SDLCALL SDL_AtomicTestThenSet16(volatile Uint16 * ptr);
+extern DECLSPEC void SDLCALL SDL_AtomicClear16(volatile Uint16 * ptr);
+extern DECLSPEC Uint16 SDLCALL SDL_AtomicFetchThenIncrement16(volatile Uint16 * ptr);
+extern DECLSPEC Uint16 SDLCALL SDL_AtomicFetchThenDecrement16(volatile Uint16 * ptr);
+extern DECLSPEC Uint16 SDLCALL SDL_AtomicFetchThenAdd16(volatile Uint16 * ptr, Uint16 value);
+extern DECLSPEC Uint16 SDLCALL SDL_AtomicFetchThenSubtract16(volatile Uint16 * ptr, Uint16 value);
+extern DECLSPEC Uint16 SDLCALL SDL_AtomicIncrementThenFetch16(volatile Uint16 * ptr);
+extern DECLSPEC Uint16 SDLCALL SDL_AtomicDecrementThenFetch16(volatile Uint16 * ptr);
+extern DECLSPEC Uint16 SDLCALL SDL_AtomicAddThenFetch16(volatile Uint16 * ptr, Uint16 value);
+extern DECLSPEC Uint16 SDLCALL SDL_AtomicSubtractThenFetch16(volatile Uint16 * ptr, Uint16 value);
 
 /* 32 bit atomic operations */
 
 /**
- * \fn int SDL_AtomicExchange32(Uint32 * ptr, Uint32 value)
+ * \fn int SDL_AtomicExchange32(volatile Uint32 * ptr, Uint32 value)
  *
  * \brief Atomically exchange two 32 bit values.
  *
@@ -100,9 +100,9 @@ extern DECLSPEC Uint16 SDLCALL SDL_AtomicSubtractThenFetch16(Uint16 * ptr, Uint1
  * with value. This function can be used to implement SDL_TestThenSet.
  *
  */
-extern DECLSPEC Uint32 SDLCALL SDL_AtomicExchange32(Uint32 * ptr, Uint32 value);
+extern DECLSPEC Uint32 SDLCALL SDL_AtomicExchange32(volatile Uint32 * ptr, Uint32 value);
 /**
- * \fn int SDL_AtomicCompareThenSet32(Uint32 * ptr, Uint32 oldvalue, Uint32 newvalue)
+ * \fn int SDL_AtomicCompareThenSet32(volatile Uint32 * ptr, Uint32 oldvalue, Uint32 newvalue)
  *
  * \brief If *ptr == oldvalue then replace the contents of *ptr by new value. 
  *
@@ -113,10 +113,10 @@ extern DECLSPEC Uint32 SDLCALL SDL_AtomicExchange32(Uint32 * ptr, Uint32 value);
  * \param newvalue is value to be stored at *ptr.
  *
  */
-extern DECLSPEC SDL_bool SDLCALL SDL_AtomicCompareThenSet32(Uint32 * ptr,
+extern DECLSPEC SDL_bool SDLCALL SDL_AtomicCompareThenSet32(volatile Uint32 * ptr,
                                                             Uint32 oldvalue, Uint32 newvalue);
 /**
- * \fn  SDL_bool SDL_AtomicTestThenSet32(Uint32 * ptr);
+ * \fn  SDL_bool SDL_AtomicTestThenSet32(volatile Uint32 * ptr);
  *
  * \brief Check to see if *ptr == 0 and set it to non-zero.
  *
@@ -126,18 +126,18 @@ extern DECLSPEC SDL_bool SDLCALL SDL_AtomicCompareThenSet32(Uint32 * ptr,
  * \param ptr points to the value to be tested and set.
  *
  */
-extern DECLSPEC SDL_bool SDLCALL SDL_AtomicTestThenSet32(Uint32 * ptr);
+extern DECLSPEC SDL_bool SDLCALL SDL_AtomicTestThenSet32(volatile Uint32 * ptr);
 /**
- * \fn  void SDL_AtomicClear32(Uint32 * ptr);
+ * \fn  void SDL_AtomicClear32(volatile Uint32 * ptr);
  *
  * \brief set the value pointed to by ptr to be zero.
  *
  * \param ptr address of the value to be set to zero
  *
  */
-extern DECLSPEC void SDLCALL SDL_AtomicClear32(Uint32 * ptr);
+extern DECLSPEC void SDLCALL SDL_AtomicClear32(volatile Uint32 * ptr);
 /**
- * \fn  Uint32 SDL_AtomicFetchThenIncrement32(Uint32 * ptr);
+ * \fn  Uint32 SDL_AtomicFetchThenIncrement32(volatile Uint32 * ptr);
  *
  * \brief fetch the current value of *ptr and then increment that
  * value in place.
@@ -147,9 +147,9 @@ extern DECLSPEC void SDLCALL SDL_AtomicClear32(Uint32 * ptr);
  * \param ptr address of the value to fetch and increment
  *
  */
-extern DECLSPEC Uint32 SDLCALL SDL_AtomicFetchThenIncrement32(Uint32 * ptr);
+extern DECLSPEC Uint32 SDLCALL SDL_AtomicFetchThenIncrement32(volatile Uint32 * ptr);
 /**
- * \fn  Uint32 SDL_AtomicFetchThenDecrement32(Uint32 * ptr);
+ * \fn  Uint32 SDL_AtomicFetchThenDecrement32(volatile Uint32 * ptr);
  *
  * \brief fetch *ptr and then decrement the value in place.
  *
@@ -158,9 +158,9 @@ extern DECLSPEC Uint32 SDLCALL SDL_AtomicFetchThenIncrement32(Uint32 * ptr);
  * \param ptr address of the value to fetch and drement
  *
  */
-extern DECLSPEC Uint32 SDLCALL SDL_AtomicFetchThenDecrement32(Uint32 * ptr);
+extern DECLSPEC Uint32 SDLCALL SDL_AtomicFetchThenDecrement32(volatile Uint32 * ptr);
 /**
- * \fn  Uint32 SDL_AtomicFetchThenAdd32(Uint32 * ptr, Uint32 value);
+ * \fn  Uint32 SDL_AtomicFetchThenAdd32(volatile Uint32 * ptr, Uint32 value);
  *
  * \brief fetch the current value at ptr and then add value to *ptr.
  *
@@ -170,9 +170,9 @@ extern DECLSPEC Uint32 SDLCALL SDL_AtomicFetchThenDecrement32(Uint32 * ptr);
  * \param value the value to add to *ptr. 
  *
  */
-extern DECLSPEC Uint32 SDLCALL SDL_AtomicFetchThenAdd32(Uint32 * ptr, Uint32 value);
+extern DECLSPEC Uint32 SDLCALL SDL_AtomicFetchThenAdd32(volatile Uint32 * ptr, Uint32 value);
 /**
- * \fn  Uint32 SDL_AtomicFetchThenSubtract32(Uint32 * ptr, Uint32 value);
+ * \fn  Uint32 SDL_AtomicFetchThenSubtract32(volatile Uint32 * ptr, Uint32 value);
  *
  * \brief Fetch *ptr and then subtract value from it.
  *
@@ -182,9 +182,9 @@ extern DECLSPEC Uint32 SDLCALL SDL_AtomicFetchThenAdd32(Uint32 * ptr, Uint32 val
  * \param value the value to subtract from *ptr.
  *
  */
-extern DECLSPEC Uint32 SDLCALL SDL_AtomicFetchThenSubtract32(Uint32 * ptr, Uint32 value);
+extern DECLSPEC Uint32 SDLCALL SDL_AtomicFetchThenSubtract32(volatile Uint32 * ptr, Uint32 value);
 /**
- * \fn  Uint32 SDL_AtomicIncrementThenFetch32(Uint32 * ptr);
+ * \fn  Uint32 SDL_AtomicIncrementThenFetch32(volatile Uint32 * ptr);
  *
  * \brief Add one to the data pointed to by ptr and return that value.
  *
@@ -193,9 +193,9 @@ extern DECLSPEC Uint32 SDLCALL SDL_AtomicFetchThenSubtract32(Uint32 * ptr, Uint3
  * \param ptr address of the data to increment.
  *
  */
-extern DECLSPEC Uint32 SDLCALL SDL_AtomicIncrementThenFetch32(Uint32 * ptr);
+extern DECLSPEC Uint32 SDLCALL SDL_AtomicIncrementThenFetch32(volatile Uint32 * ptr);
 /**
- * \fn  Uint32 SDL_AtomicDecrementThenFetch32(Uint32 * ptr);
+ * \fn  Uint32 SDL_AtomicDecrementThenFetch32(volatile Uint32 * ptr);
  *
  * \brief Subtract one from data pointed to by ptr and return the new value.
  *
@@ -204,9 +204,9 @@ extern DECLSPEC Uint32 SDLCALL SDL_AtomicIncrementThenFetch32(Uint32 * ptr);
  * \param ptr The address of the data to decrement.
  *
  */
-extern DECLSPEC Uint32 SDLCALL SDL_AtomicDecrementThenFetch32(Uint32 * ptr);
+extern DECLSPEC Uint32 SDLCALL SDL_AtomicDecrementThenFetch32(volatile Uint32 * ptr);
 /**
- * \fn  Uint32 SDL_AtomicAddThenFetch32(Uint32 * ptr, Uint32 value);
+ * \fn  Uint32 SDL_AtomicAddThenFetch32(volatile Uint32 * ptr, Uint32 value);
  *
  * \brief Add value to the data pointed to by ptr and return result.
  *
@@ -216,9 +216,9 @@ extern DECLSPEC Uint32 SDLCALL SDL_AtomicDecrementThenFetch32(Uint32 * ptr);
  * \param value The value to be added.
  *
  */
-extern DECLSPEC Uint32 SDLCALL SDL_AtomicAddThenFetch32(Uint32 * ptr, Uint32 value);
+extern DECLSPEC Uint32 SDLCALL SDL_AtomicAddThenFetch32(volatile Uint32 * ptr, Uint32 value);
 /**
- * \fn  Uint32 SDL_AtomicSubtractThenFetch32(Uint32 * ptr, Uint32 value);
+ * \fn  Uint32 SDL_AtomicSubtractThenFetch32(volatile Uint32 * ptr, Uint32 value);
  *
  * \brief Subtract value from the data pointed to by ptr and return the result.
  *
@@ -228,24 +228,24 @@ extern DECLSPEC Uint32 SDLCALL SDL_AtomicAddThenFetch32(Uint32 * ptr, Uint32 val
  * \param value The value to be subtracted.
  *
  */
-extern DECLSPEC Uint32 SDLCALL SDL_AtomicSubtractThenFetch32(Uint32 * ptr, Uint32 value);
+extern DECLSPEC Uint32 SDLCALL SDL_AtomicSubtractThenFetch32(volatile Uint32 * ptr, Uint32 value);
 
 /* 64 bit atomic operations */
 #ifdef SDL_HAS_64BIT_TYPE
 
-extern DECLSPEC Uint64 SDLCALL SDL_AtomicExchange64(Uint64 * ptr, Uint64 value);
-extern DECLSPEC SDL_bool SDLCALL SDL_AtomicCompareThenSet64(Uint64 * ptr,
+extern DECLSPEC Uint64 SDLCALL SDL_AtomicExchange64(volatile Uint64 * ptr, Uint64 value);
+extern DECLSPEC SDL_bool SDLCALL SDL_AtomicCompareThenSet64(volatile Uint64 * ptr,
                                                             Uint64 oldvalue, Uint64 newvalue);
-extern DECLSPEC SDL_bool SDLCALL SDL_AtomicTestThenSet64(Uint64 * ptr);
-extern DECLSPEC void SDLCALL SDL_AtomicClear64(Uint64 * ptr);
-extern DECLSPEC Uint64 SDLCALL SDL_AtomicFetchThenIncrement64(Uint64 * ptr);
-extern DECLSPEC Uint64 SDLCALL SDL_AtomicFetchThenDecrement64(Uint64 * ptr);
-extern DECLSPEC Uint64 SDLCALL SDL_AtomicFetchThenAdd64(Uint64 * ptr, Uint64 value);
-extern DECLSPEC Uint64 SDLCALL SDL_AtomicFetchThenSubtract64(Uint64 * ptr, Uint64 value);
-extern DECLSPEC Uint64 SDLCALL SDL_AtomicIncrementThenFetch64(Uint64 * ptr);
-extern DECLSPEC Uint64 SDLCALL SDL_AtomicDecrementThenFetch64(Uint64 * ptr);
-extern DECLSPEC Uint64 SDLCALL SDL_AtomicAddThenFetch64(Uint64 * ptr, Uint64 value);
-extern DECLSPEC Uint64 SDLCALL SDL_AtomicSubtractThenFetch64(Uint64 * ptr, Uint64 value);
+extern DECLSPEC SDL_bool SDLCALL SDL_AtomicTestThenSet64(volatile Uint64 * ptr);
+extern DECLSPEC void SDLCALL SDL_AtomicClear64(volatile Uint64 * ptr);
+extern DECLSPEC Uint64 SDLCALL SDL_AtomicFetchThenIncrement64(volatile Uint64 * ptr);
+extern DECLSPEC Uint64 SDLCALL SDL_AtomicFetchThenDecrement64(volatile Uint64 * ptr);
+extern DECLSPEC Uint64 SDLCALL SDL_AtomicFetchThenAdd64(volatile Uint64 * ptr, Uint64 value);
+extern DECLSPEC Uint64 SDLCALL SDL_AtomicFetchThenSubtract64(volatile Uint64 * ptr, Uint64 value);
+extern DECLSPEC Uint64 SDLCALL SDL_AtomicIncrementThenFetch64(volatile Uint64 * ptr);
+extern DECLSPEC Uint64 SDLCALL SDL_AtomicDecrementThenFetch64(volatile Uint64 * ptr);
+extern DECLSPEC Uint64 SDLCALL SDL_AtomicAddThenFetch64(volatile Uint64 * ptr, Uint64 value);
+extern DECLSPEC Uint64 SDLCALL SDL_AtomicSubtractThenFetch64(volatile Uint64 * ptr, Uint64 value);
 #endif /*  SDL_HAS_64BIT_TYPE */
 
 /* Ends C function definitions when using C++ */
