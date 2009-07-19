@@ -2572,6 +2572,12 @@ case "$host" in
             SOURCES="$SOURCES $srcdir/src/timer/unix/*.c"
             have_timers=yes
         fi
+        # Setup files for the atomic operations
+        if test x$enable_atomic = xyes; then
+                AC_DEFINE(SDL_ATOMIC_QNX)
+                SOURCES="$SOURCES $srcdir/src/atomic/qnx/*.c"
+                have_atomic=yes
+        fi
         # Set up dummy files for the joystick for now
         if test x$enable_joystick = xyes; then
             AC_DEFINE(SDL_JOYSTICK_DUMMY)
