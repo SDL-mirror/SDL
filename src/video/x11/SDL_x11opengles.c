@@ -298,8 +298,8 @@ X11_GLES_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
 {
     int retval;
 
-    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
-    Display *display = data->videodata->display;
+//    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+//    Display *display = data->videodata->display;
 
     retval = 1;
     if (!_this->gles_data->eglMakeCurrent(_this->gles_data->egl_display,
@@ -309,7 +309,7 @@ X11_GLES_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
         SDL_SetError("Unable to make EGL context current");
         retval = -1;
     }
-    XSync(display, False);
+//    XSync(display, False);
 
     return (retval);
 }
@@ -359,6 +359,10 @@ X11_GLES_DeleteContext(_THIS, SDL_GLContext context)
         }
     }
     _this->gles_data->egl_active = 0;
+
+/* crappy fix */
+    X11_GLES_UnloadLibrary(_this);
+
 }
 
 #endif /* SDL_VIDEO_OPENGL_ES */

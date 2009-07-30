@@ -28,6 +28,9 @@
 
 #include "SDL_x11video.h"
 
+#if SDL_VIDEO_DRIVER_PANDORA
+#include "SDL_x11opengles.h"
+#endif
 
 /* Initialization/Query functions */
 static int X11_VideoInit(_THIS);
@@ -101,6 +104,9 @@ X11_DeleteDevice(SDL_VideoDevice * device)
     }
     SDL_free(data->windowlist);
     SDL_free(device->driverdata);
+#if SDL_VIDEO_DRIVER_PANDORA
+    SDL_free(device->gles_data);
+#endif
     SDL_free(device);
 
     SDL_X11_UnloadSymbols();
@@ -130,6 +136,14 @@ X11_CreateDevice(int devindex)
         return NULL;
     }
     device->driverdata = data;
+
+#if SDL_VIDEO_DRIVER_PANDORA
+    device->gles_data = (struct SDL_PrivateGLESData *) SDL_calloc(1, sizeof(SDL_PrivateGLESData));
+    if (!device->gles_data) {
+        SDL_OutOfMemory();
+        return NULL;
+    }
+#endif
 
     /* FIXME: Do we need this?
        if ( (SDL_strncmp(XDisplayName(display), ":", 1) == 0) ||
@@ -197,6 +211,17 @@ X11_CreateDevice(int devindex)
     device->GL_GetSwapInterval = X11_GL_GetSwapInterval;
     device->GL_SwapWindow = X11_GL_SwapWindow;
     device->GL_DeleteContext = X11_GL_DeleteContext;
+#endif
+#if SDL_VIDEO_DRIVER_PANDORA
+    device->GL_LoadLibrary = X11_GLES_LoadLibrary;
+    device->GL_GetProcAddress = X11_GLES_GetProcAddress;
+    device->GL_UnloadLibrary = X11_GLES_UnloadLibrary;
+    device->GL_CreateContext = X11_GLES_CreateContext;
+    device->GL_MakeCurrent = X11_GLES_MakeCurrent;
+    device->GL_SetSwapInterval = X11_GLES_SetSwapInterval;
+    device->GL_GetSwapInterval = X11_GLES_GetSwapInterval;
+    device->GL_SwapWindow = X11_GLES_SwapWindow;
+    device->GL_DeleteContext = X11_GLES_DeleteContext;
 #endif
 
     device->free = X11_DeleteDevice;

@@ -35,6 +35,7 @@
 #include <limits.h>             /* INT_MAX */
 #include <errno.h>              /* errno, strerror */
 #include <math.h>               /* atan2 */
+#include <sys/stat.h>           /* stat */
 
 /* Just in case. */
 #ifndef M_PI
