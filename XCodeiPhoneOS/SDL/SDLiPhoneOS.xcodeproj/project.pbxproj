@@ -71,6 +71,8 @@
 		04B2ECFF1025CEB900F9BC5F /* SDL_atomic.c in Sources */ = {isa = PBXBuildFile; fileRef = 04B2ECF11025CEB900F9BC5F /* SDL_atomic.c */; };
 		04B2ED071025CF9E00F9BC5F /* SDL_config.h in Headers */ = {isa = PBXBuildFile; fileRef = 04B2ED061025CF9E00F9BC5F /* SDL_config.h */; };
 		04B2ED081025CF9E00F9BC5F /* SDL_config.h in Headers */ = {isa = PBXBuildFile; fileRef = 04B2ED061025CF9E00F9BC5F /* SDL_config.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		04EC8B511025D12900431D42 /* SDL_config_iphoneos.h in Headers */ = {isa = PBXBuildFile; fileRef = 04EC8B501025D12900431D42 /* SDL_config_iphoneos.h */; };
+		04EC8B521025D12900431D42 /* SDL_config_iphoneos.h in Headers */ = {isa = PBXBuildFile; fileRef = 04EC8B501025D12900431D42 /* SDL_config_iphoneos.h */; };
 		FD1EF0580DEA7BAC001E9768 /* SDL_syscond.c in Sources */ = {isa = PBXBuildFile; fileRef = FD1EF0520DEA7BAC001E9768 /* SDL_syscond.c */; };
 		FD1EF0590DEA7BAC001E9768 /* SDL_sysmutex.c in Sources */ = {isa = PBXBuildFile; fileRef = FD1EF0530DEA7BAC001E9768 /* SDL_sysmutex.c */; };
 		FD1EF05A0DEA7BAC001E9768 /* SDL_sysmutex_c.h in Headers */ = {isa = PBXBuildFile; fileRef = FD1EF0540DEA7BAC001E9768 /* SDL_sysmutex_c.h */; };
@@ -389,6 +391,7 @@
 		04B2ECE81025CE4800F9BC5F /* SDL_revision.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_revision.h; path = ../../include/SDL_revision.h; sourceTree = SOURCE_ROOT; };
 		04B2ECF11025CEB900F9BC5F /* SDL_atomic.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_atomic.c; sourceTree = "<group>"; };
 		04B2ED061025CF9E00F9BC5F /* SDL_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_config.h; path = ../../include/SDL_config.h; sourceTree = SOURCE_ROOT; };
+		04EC8B501025D12900431D42 /* SDL_config_iphoneos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_config_iphoneos.h; path = ../../include/SDL_config_iphoneos.h; sourceTree = SOURCE_ROOT; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D3623EB0D0F72F000981E51 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -755,6 +758,7 @@
 				FD99B8CF0DD52EB400FB1D6B /* SDL_audio.h */,
 				FD99B8D00DD52EB400FB1D6B /* SDL_cdrom.h */,
 				FD99B8D10DD52EB400FB1D6B /* SDL_compat.h */,
+				04EC8B501025D12900431D42 /* SDL_config_iphoneos.h */,
 				04B2ED061025CF9E00F9BC5F /* SDL_config.h */,
 				FD99B8DA0DD52EB400FB1D6B /* SDL_copying.h */,
 				FD99B8DB0DD52EB400FB1D6B /* SDL_cpuinfo.h */,
@@ -1108,6 +1112,7 @@
 				04B2ECED1025CE4800F9BC5F /* SDL_power.h in Headers */,
 				04B2ECEE1025CE4800F9BC5F /* SDL_revision.h in Headers */,
 				04B2ED081025CF9E00F9BC5F /* SDL_config.h in Headers */,
+				04EC8B521025D12900431D42 /* SDL_config_iphoneos.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1190,6 +1195,7 @@
 				04B2ECEA1025CE4800F9BC5F /* SDL_power.h in Headers */,
 				04B2ECEB1025CE4800F9BC5F /* SDL_revision.h in Headers */,
 				04B2ED071025CF9E00F9BC5F /* SDL_config.h in Headers */,
+				04EC8B511025D12900431D42 /* SDL_config_iphoneos.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
