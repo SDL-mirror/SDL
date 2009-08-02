@@ -342,7 +342,7 @@
 		049E6A600F034900002BF3B6 /* SDL_drawline.c in Sources */ = {isa = PBXBuildFile; fileRef = 049E6A400F034900002BF3B6 /* SDL_drawline.c */; };
 		049E6A610F034900002BF3B6 /* SDL_drawpoint.c in Sources */ = {isa = PBXBuildFile; fileRef = 049E6A410F034900002BF3B6 /* SDL_drawpoint.c */; };
 		049E6A620F034900002BF3B6 /* SDL_fillrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 049E6A420F034900002BF3B6 /* SDL_fillrect.c */; };
-		04A837601025D0A000C07A33 /* SDL_revision.h in Headers */ = {isa = PBXBuildFile; fileRef = 04A8375F1025D0A000C07A33 /* SDL_revision.h */; };
+		04A837601025D0A000C07A33 /* SDL_revision.h in Headers */ = {isa = PBXBuildFile; fileRef = 04A8375F1025D0A000C07A33 /* SDL_revision.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04A837611025D0A000C07A33 /* SDL_revision.h in Headers */ = {isa = PBXBuildFile; fileRef = 04A8375F1025D0A000C07A33 /* SDL_revision.h */; };
 		04A837621025D0A000C07A33 /* SDL_revision.h in Headers */ = {isa = PBXBuildFile; fileRef = 04A8375F1025D0A000C07A33 /* SDL_revision.h */; };
 		04A837631025D0A000C07A33 /* SDL_revision.h in Headers */ = {isa = PBXBuildFile; fileRef = 04A8375F1025D0A000C07A33 /* SDL_revision.h */; };
@@ -350,8 +350,8 @@
 		04D5202A1025C66100AA5D3B /* SDL_atomic.c in Sources */ = {isa = PBXBuildFile; fileRef = 04D5201E1025C66100AA5D3B /* SDL_atomic.c */; };
 		04D5202F1025C66100AA5D3B /* SDL_atomic.c in Sources */ = {isa = PBXBuildFile; fileRef = 04D5201E1025C66100AA5D3B /* SDL_atomic.c */; };
 		04D520341025C66100AA5D3B /* SDL_atomic.c in Sources */ = {isa = PBXBuildFile; fileRef = 04D5201E1025C66100AA5D3B /* SDL_atomic.c */; };
-		04D520391025C6CE00AA5D3B /* SDL_atomic.h in Headers */ = {isa = PBXBuildFile; fileRef = 04D520371025C6CE00AA5D3B /* SDL_atomic.h */; };
-		04D5203A1025C6CE00AA5D3B /* SDL_power.h in Headers */ = {isa = PBXBuildFile; fileRef = 04D520381025C6CE00AA5D3B /* SDL_power.h */; };
+		04D520391025C6CE00AA5D3B /* SDL_atomic.h in Headers */ = {isa = PBXBuildFile; fileRef = 04D520371025C6CE00AA5D3B /* SDL_atomic.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		04D5203A1025C6CE00AA5D3B /* SDL_power.h in Headers */ = {isa = PBXBuildFile; fileRef = 04D520381025C6CE00AA5D3B /* SDL_power.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04D5203B1025C6CE00AA5D3B /* SDL_atomic.h in Headers */ = {isa = PBXBuildFile; fileRef = 04D520371025C6CE00AA5D3B /* SDL_atomic.h */; };
 		04D5203C1025C6CE00AA5D3B /* SDL_power.h in Headers */ = {isa = PBXBuildFile; fileRef = 04D520381025C6CE00AA5D3B /* SDL_power.h */; };
 		04D5203D1025C6CE00AA5D3B /* SDL_atomic.h in Headers */ = {isa = PBXBuildFile; fileRef = 04D520371025C6CE00AA5D3B /* SDL_atomic.h */; };
