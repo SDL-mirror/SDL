@@ -27,6 +27,7 @@
 
 /* This is a set of defines to configure the SDL features */
 
+#ifndef HAVE_STDINT_H
 #if defined(__GNUC__) || defined(__DMC__)
 #define HAVE_STDINT_H	1
 #elif defined(_MSC_VER)
@@ -68,6 +69,7 @@ typedef unsigned int size_t;
 #endif
 typedef unsigned int uintptr_t;
 #endif /* __GNUC__ || _MSC_VER */
+#endif /* !HAVE_STDINT_H */
 
 #ifdef _WIN64
 # define SIZEOF_VOIDP 8

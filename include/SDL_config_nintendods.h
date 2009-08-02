@@ -27,6 +27,7 @@
 
 /* This is a set of defines to configure the SDL features */
 
+#ifndef HAVE_STDINT_H
 typedef signed char int8_t;
 typedef unsigned char uint8_t;
 typedef signed short int16_t;
@@ -43,7 +44,7 @@ typedef unsigned long uintptr_t;
 #else
 typedef unsigned __PTRDIFF_TYPE__ uintptr_t;
 #endif
-
+#endif /* !HAVE_STDINT_H */
 
 #define SDL_HAS_64BIT_TYPE	1
 
