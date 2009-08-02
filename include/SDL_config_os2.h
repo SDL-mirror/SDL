@@ -27,7 +27,7 @@
 
 /* This is a set of defines to configure the SDL features */
 
-#ifndef HAVE_STDINT_H
+#if !defined(_STDINT_H_) && (!defined(HAVE_STDINT_H) || !_HAVE_STDINT_H)
 typedef signed char int8_t;
 typedef unsigned char uint8_t;
 typedef signed short int16_t;
@@ -38,7 +38,7 @@ typedef unsigned int size_t;
 typedef unsigned long uintptr_t;
 typedef signed long long int64_t;
 typedef unsigned long long uint64_t;
-#endif /* !HAVE_STDINT_H */
+#endif /* !_STDINT_H_ && !HAVE_STDINT_H */
 
 #define SIZEOF_VOIDP 4
 #define SDL_HAS_64BIT_TYPE	1

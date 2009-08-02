@@ -39,6 +39,7 @@
 #undef volatile
 
 /* C datatypes */
+#if !defined(_STDINT_H_) && (!defined(HAVE_STDINT_H) || !_HAVE_STDINT_H)
 #undef size_t
 #undef int8_t
 #undef uint8_t
@@ -49,6 +50,8 @@
 #undef int64_t
 #undef uint64_t
 #undef uintptr_t
+#endif /* !_STDINT_H_ && !HAVE_STDINT_H */
+
 #undef SIZEOF_VOIDP
 #undef SDL_HAS_64BIT_TYPE
 
