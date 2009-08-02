@@ -538,17 +538,12 @@ X11_CreateWindow(_THIS, SDL_Window * window)
 
     sizehints = XAllocSizeHints();
     if (sizehints) {
-        if ((window->flags & SDL_WINDOW_RESIZABLE)
-            && !(window->flags & SDL_WINDOW_FULLSCREEN)) {
-            sizehints->min_width = 32;
-            sizehints->min_height = 32;
-            sizehints->max_height = 4096;
-            sizehints->max_width = 4096;
-        } else {
+        if (!(window->flags & SDL_WINDOW_RESIZABLE)
+            || (window->flags & SDL_WINDOW_FULLSCREEN)) {
             sizehints->min_width = sizehints->max_width = window->w;
             sizehints->min_height = sizehints->max_height = window->h;
+            sizehints->flags = PMaxSize | PMinSize;
         }
-        sizehints->flags = PMaxSize | PMinSize;
         if (!(window->flags & SDL_WINDOW_FULLSCREEN)
             && window->x != SDL_WINDOWPOS_UNDEFINED
             && window->y != SDL_WINDOWPOS_UNDEFINED) {
