@@ -342,6 +342,10 @@
 		049E6A600F034900002BF3B6 /* SDL_drawline.c in Sources */ = {isa = PBXBuildFile; fileRef = 049E6A400F034900002BF3B6 /* SDL_drawline.c */; };
 		049E6A610F034900002BF3B6 /* SDL_drawpoint.c in Sources */ = {isa = PBXBuildFile; fileRef = 049E6A410F034900002BF3B6 /* SDL_drawpoint.c */; };
 		049E6A620F034900002BF3B6 /* SDL_fillrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 049E6A420F034900002BF3B6 /* SDL_fillrect.c */; };
+		04A837601025D0A000C07A33 /* SDL_revision.h in Headers */ = {isa = PBXBuildFile; fileRef = 04A8375F1025D0A000C07A33 /* SDL_revision.h */; };
+		04A837611025D0A000C07A33 /* SDL_revision.h in Headers */ = {isa = PBXBuildFile; fileRef = 04A8375F1025D0A000C07A33 /* SDL_revision.h */; };
+		04A837621025D0A000C07A33 /* SDL_revision.h in Headers */ = {isa = PBXBuildFile; fileRef = 04A8375F1025D0A000C07A33 /* SDL_revision.h */; };
+		04A837631025D0A000C07A33 /* SDL_revision.h in Headers */ = {isa = PBXBuildFile; fileRef = 04A8375F1025D0A000C07A33 /* SDL_revision.h */; };
 		04D520251025C66100AA5D3B /* SDL_atomic.c in Sources */ = {isa = PBXBuildFile; fileRef = 04D5201E1025C66100AA5D3B /* SDL_atomic.c */; };
 		04D5202A1025C66100AA5D3B /* SDL_atomic.c in Sources */ = {isa = PBXBuildFile; fileRef = 04D5201E1025C66100AA5D3B /* SDL_atomic.c */; };
 		04D5202F1025C66100AA5D3B /* SDL_atomic.c in Sources */ = {isa = PBXBuildFile; fileRef = 04D5201E1025C66100AA5D3B /* SDL_atomic.c */; };
@@ -786,6 +790,7 @@
 		049E6A400F034900002BF3B6 /* SDL_drawline.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_drawline.c; sourceTree = "<group>"; };
 		049E6A410F034900002BF3B6 /* SDL_drawpoint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_drawpoint.c; sourceTree = "<group>"; };
 		049E6A420F034900002BF3B6 /* SDL_fillrect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_fillrect.c; sourceTree = "<group>"; };
+		04A8375F1025D0A000C07A33 /* SDL_revision.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_revision.h; path = ../../include/SDL_revision.h; sourceTree = SOURCE_ROOT; };
 		04D5201E1025C66100AA5D3B /* SDL_atomic.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_atomic.c; sourceTree = "<group>"; };
 		04D520371025C6CE00AA5D3B /* SDL_atomic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_atomic.h; path = ../../include/SDL_atomic.h; sourceTree = SOURCE_ROOT; };
 		04D520381025C6CE00AA5D3B /* SDL_power.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_power.h; path = ../../include/SDL_power.h; sourceTree = SOURCE_ROOT; };
@@ -1293,6 +1298,7 @@
 				04D520381025C6CE00AA5D3B /* SDL_power.h */,
 				0C5AF5F701191D2B7F000001 /* SDL_quit.h */,
 				F3C8334F0DCDBE3B00B01593 /* SDL_rect.h */,
+				04A8375F1025D0A000C07A33 /* SDL_revision.h */,
 				0C5AF5F801191D2B7F000001 /* SDL_rwops.h */,
 				F3C832DE0DCDAE7200B01593 /* SDL_scancode.h */,
 				F3C833540DCDBE8400B01593 /* SDL_surface.h */,
@@ -1659,6 +1665,7 @@
 				049E6A570F034900002BF3B6 /* SDL_draw.h in Headers */,
 				04D5203D1025C6CE00AA5D3B /* SDL_atomic.h in Headers */,
 				04D5203E1025C6CE00AA5D3B /* SDL_power.h in Headers */,
+				04A837621025D0A000C07A33 /* SDL_revision.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1712,6 +1719,7 @@
 				049E6A5F0F034900002BF3B6 /* SDL_draw.h in Headers */,
 				04D5203F1025C6CE00AA5D3B /* SDL_atomic.h in Headers */,
 				04D520401025C6CE00AA5D3B /* SDL_power.h in Headers */,
+				04A837631025D0A000C07A33 /* SDL_revision.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1794,6 +1802,7 @@
 				049E6A470F034900002BF3B6 /* SDL_draw.h in Headers */,
 				04D520391025C6CE00AA5D3B /* SDL_atomic.h in Headers */,
 				04D5203A1025C6CE00AA5D3B /* SDL_power.h in Headers */,
+				04A837601025D0A000C07A33 /* SDL_revision.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1859,6 +1868,7 @@
 				049E6A4F0F034900002BF3B6 /* SDL_draw.h in Headers */,
 				04D5203B1025C6CE00AA5D3B /* SDL_atomic.h in Headers */,
 				04D5203C1025C6CE00AA5D3B /* SDL_power.h in Headers */,
+				04A837611025D0A000C07A33 /* SDL_revision.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
