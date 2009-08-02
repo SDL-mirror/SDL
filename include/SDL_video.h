@@ -1255,7 +1255,7 @@ extern DECLSPEC int SDLCALL SDL_RenderCopy(SDL_TextureID textureID,
  * \brief Read pixels from the current rendering target.
  *
  * \param rect A pointer to the rectangle to read, or NULL for the entire render target
- * \param pixels A pointer to be filled in with the pixel data
+ * \param pixels A pointer to be filled in with the pixel data in the rendering target format
  * \param pitch The pitch of the pixels parameter
  *
  * \return 0 on success, or -1 if pixel reading is not supported.
