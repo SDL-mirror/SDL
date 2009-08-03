@@ -34,6 +34,8 @@
 #include "../SDL_audio_c.h"
 #include "SDL_fsaudio.h"
 
+#include <fusionsound/fusionsound_version.h>
+
 //#define SDL_AUDIO_DRIVER_FUSIONSOUND_DYNAMIC "libfusionsound.so"
 
 #ifdef SDL_AUDIO_DRIVER_FUSIONSOUND_DYNAMIC
@@ -41,6 +43,10 @@
 #include "SDL_loadso.h"
 #else
 #define SDL_NAME(X)	X
+#endif
+
+#if (FUSIONSOUND_MAJOR_VERSION == 1) && (FUSIONSOUND_MINOR_VERSION < 1)
+typedef DFBResult DirectResult;
 #endif
 
 /* The tag name used by fusionsoundc audio */
@@ -53,8 +59,8 @@
 static const char *fs_library = SDL_AUDIO_DRIVER_FUSIONSOUND_DYNAMIC;
 static void *fs_handle = NULL;
 
-static DirectResult(*SDL_NAME(FusionSoundInit)) (int *argc, char *(*argv[]));
-static DirectResult(*SDL_NAME(FusionSoundCreate)) (IFusionSound **
+static DirectResult (*SDL_NAME(FusionSoundInit)) (int *argc, char *(*argv[]));
+static DirectResult (*SDL_NAME(FusionSoundCreate)) (IFusionSound **
                                                    ret_interface);
 
 #define SDL_FS_SYM(x) { #x, (void **) (char *) &SDL_NAME(x) }
