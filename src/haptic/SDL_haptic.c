@@ -263,11 +263,13 @@ SDL_HapticOpenFromJoystick(SDL_Joystick * joystick)
 
     /* Must be a valid joystick */
     if (!SDL_PrivateJoystickValid(&joystick)) {
+        SDL_SetError("Haptic: Joystick isn't valid.");
         return NULL;
     }
 
     /* Joystick must be haptic */
     if (SDL_SYS_JoystickIsHaptic(joystick) <= 0) {
+        SDL_SetError("Haptic: Joystick isn't a haptic device.");
         return NULL;
     }
 
