@@ -319,6 +319,7 @@ do {						\
 	unsigned _n = (_count + 3) / 4;		\
 	Uint32 *_p = SDL_static_cast(Uint32 *, dst);		\
 	Uint32 _val = (val);			\
+	if (len == 0) break;			\
         switch (_count % 4) {			\
         case 0: do {    *_p++ = _val;		\
         case 3:         *_p++ = _val;		\
