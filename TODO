@@ -30,7 +30,7 @@
  * Implement SDL_RenderReadPixels() for screenshots and automated testing
  * Create extended set of (negative) error codes and have the API functions document and return them.
  * Add clipboard support (from scrap demo)
-
+ * Add support for desktop windows?
 
 Wish list for the 1.3 development branch:
 http://bugzilla.libsdl.org/
