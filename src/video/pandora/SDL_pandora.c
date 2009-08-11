@@ -327,6 +327,8 @@ PND_setwindowgrab(_THIS, SDL_Window * window)
 void
 PND_destroywindow(_THIS, SDL_Window * window)
 {
+    SDL_VideoData *phdata = (SDL_VideoData *) _this->driverdata;
+    eglTerminate(phdata->egl_display);
 }
 
 /*****************************************************************************/
