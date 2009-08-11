@@ -23,12 +23,6 @@ int
 main(int argc, char **argv)
 {
 
-   volatile Uint8 val8 = 0;
-   Uint8 ret8 = 0;
-
-   volatile Uint16 val16 = 0;
-   Uint16 ret16 = 0;
-
    volatile Uint32 val32 = 0;
    Uint32 ret32 = 0;
 
@@ -36,102 +30,6 @@ main(int argc, char **argv)
    Uint64 ret64 = 0;
 
    SDL_bool tfret = SDL_FALSE;
-
-
-   printf("8 bit -----------------------------------------\n\n");
-
-   ret8 = SDL_AtomicExchange8(&val8, 10);
-   printf("Exchange8           ret=%d val=%d\n", ret8, val8);
-   ret8 = SDL_AtomicExchange8(&val8, 0);
-   printf("Exchange8           ret=%d val=%d\n", ret8, val8);
-
-   val8 = 10;
-   tfret = SDL_AtomicCompareThenSet8(&val8, 10, 20);
-   printf("CompareThenSet8     tfret=%s val=%d\n", tf(tfret), val8);
-   val8 = 10;
-   tfret = SDL_AtomicCompareThenSet8(&val8, 0, 20);
-   printf("CompareThenSet8     tfret=%s val=%d\n", tf(tfret), val8);
-
-   val8 = 0;
-   tfret = SDL_AtomicTestThenSet8(&val8);
-   printf("TestThenSet8        tfret=%s val=%d\n", tf(tfret), val8);
-   tfret = SDL_AtomicTestThenSet8(&val8);
-   printf("TestThenSet8        tfret=%s val=%d\n", tf(tfret), val8);
-
-   SDL_AtomicClear8(&val8);
-   printf("Clear8              val=%d\n", val8);
-
-   ret8 = SDL_AtomicFetchThenIncrement8(&val8);
-   printf("FetchThenIncrement8 ret=%d val=%d\n", ret8, val8);
-
-   ret8 = SDL_AtomicFetchThenDecrement8(&val8);
-   printf("FetchThenDecrement8 ret=%d val=%d\n", ret8, val8);
-
-   ret8 = SDL_AtomicFetchThenAdd8(&val8, 10);
-   printf("FetchThenAdd8       ret=%d val=%d\n", ret8, val8);
-
-   ret8 = SDL_AtomicFetchThenSubtract8(&val8, 10);
-   printf("FetchThenSubtract8  ret=%d val=%d\n", ret8, val8);
-
-   ret8 = SDL_AtomicIncrementThenFetch8(&val8);
-   printf("IncrementThenFetch8 ret=%d val=%d\n", ret8, val8);
-
-   ret8 = SDL_AtomicDecrementThenFetch8(&val8);
-   printf("DecrementThenFetch8 ret=%d val=%d\n", ret8, val8);
-
-   ret8 = SDL_AtomicAddThenFetch8(&val8, 10);
-   printf("AddThenFetch8       ret=%d val=%d\n", ret8, val8);
-
-   ret8 = SDL_AtomicSubtractThenFetch8(&val8, 10);
-   printf("SubtractThenFetch8  ret=%d val=%d\n", ret8, val8);
-
-
-   printf("16 bit -----------------------------------------\n\n");
-
-   ret16 = SDL_AtomicExchange16(&val16, 10);
-   printf("Exchange16           ret=%d val=%d\n", ret16, val16);
-   ret16 = SDL_AtomicExchange16(&val16, 0);
-   printf("Exchange16           ret=%d val=%d\n", ret16, val16);
-
-   val16 = 10;
-   tfret = SDL_AtomicCompareThenSet16(&val16, 10, 20);
-   printf("CompareThenSet16     tfret=%s val=%d\n", tf(tfret), val16);
-   val16 = 10;
-   tfret = SDL_AtomicCompareThenSet16(&val16, 0, 20);
-   printf("CompareThenSet16     tfret=%s val=%d\n", tf(tfret), val16);
-
-   val16 = 0;
-   tfret = SDL_AtomicTestThenSet16(&val16);
-   printf("TestThenSet16        tfret=%s val=%d\n", tf(tfret), val16);
-   tfret = SDL_AtomicTestThenSet16(&val16);
-   printf("TestThenSet16        tfret=%s val=%d\n", tf(tfret), val16);
-
-   SDL_AtomicClear16(&val16);
-   printf("Clear16              val=%d\n", val16);
-
-   ret16 = SDL_AtomicFetchThenIncrement16(&val16);
-   printf("FetchThenIncrement16 ret=%d val=%d\n", ret16, val16);
-
-   ret16 = SDL_AtomicFetchThenDecrement16(&val16);
-   printf("FetchThenDecrement16 ret=%d val=%d\n", ret16, val16);
-
-   ret16 = SDL_AtomicFetchThenAdd16(&val16, 10);
-   printf("FetchThenAdd16       ret=%d val=%d\n", ret16, val16);
-
-   ret16 = SDL_AtomicFetchThenSubtract16(&val16, 10);
-   printf("FetchThenSubtract16  ret=%d val=%d\n", ret16, val16);
-
-   ret16 = SDL_AtomicIncrementThenFetch16(&val16);
-   printf("IncrementThenFetch16 ret=%d val=%d\n", ret16, val16);
-
-   ret16 = SDL_AtomicDecrementThenFetch16(&val16);
-   printf("DecrementThenFetch16 ret=%d val=%d\n", ret16, val16);
-
-   ret16 = SDL_AtomicAddThenFetch16(&val16, 10);
-   printf("AddThenFetch16       ret=%d val=%d\n", ret16, val16);
-
-   ret16 = SDL_AtomicSubtractThenFetch16(&val16, 10);
-   printf("SubtractThenFetch16  ret=%d val=%d\n", ret16, val16);
 
    printf("32 bit -----------------------------------------\n\n");
 
