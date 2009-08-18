@@ -91,8 +91,8 @@ PND_create()
 
 
     /* Setup amount of available displays and current display */
-    device->num_displays = 1;
-    device->current_display = 1;
+    device->num_displays = 0;
+    device->current_display = 0;
 
     /* Set device free function */
     device->free = PND_destroy;
@@ -323,6 +323,8 @@ PND_restorewindow(_THIS, SDL_Window * window)
 void
 PND_setwindowgrab(_THIS, SDL_Window * window)
 {
+    SDL_VideoData *phdata = (SDL_VideoData *) _this->driverdata;
+    eglTerminate(phdata->egl_display);
 }
 void
 PND_destroywindow(_THIS, SDL_Window * window)
