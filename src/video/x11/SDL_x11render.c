@@ -359,7 +359,7 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
                     shm_error = False;
                     X_handler = XSetErrorHandler(shm_errhandler);
                     XShmAttach(renderdata->display, shminfo);
-                    XSync(renderdata->display, True);
+                    XSync(renderdata->display, False);
                     XSetErrorHandler(X_handler);
                     if (shm_error) {
                         shmdt(shminfo->shmaddr);
