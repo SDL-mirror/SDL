@@ -28,7 +28,7 @@
 #ifndef HAVE_LIBC
 /* These are some C runtime intrinsics that need to be defined */
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && !defined(_WIN64)
 
 #ifndef __FLTUSED__
 #define __FLTUSED__
@@ -40,7 +40,9 @@ __declspec(selectany)
 #endif
 
 /* Float to long */
-     void __declspec(naked) _ftol()
+void
+__declspec(naked)
+_ftol()
 {
     /* *INDENT-OFF* */
     __asm {

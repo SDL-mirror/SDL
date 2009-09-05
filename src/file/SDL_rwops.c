@@ -150,7 +150,7 @@ win32_file_seek(SDL_RWops * context, long offset, int whence)
 
     /* FIXME: We may be able to satisfy the seek within buffered data */
     if (whence == RW_SEEK_CUR && context->hidden.win32io.buffer.left) {
-        offset -= context->hidden.win32io.buffer.left;
+        offset -= (long)context->hidden.win32io.buffer.left;
     }
     context->hidden.win32io.buffer.left = 0;
 
@@ -198,7 +198,7 @@ win32_file_read(SDL_RWops * context, void *ptr, size_t size, size_t maxnum)
             context->hidden.win32io.buffer.size -
             context->hidden.win32io.buffer.left;
         read_ahead =
-            SDL_min(total_need, (size_t) context->hidden.win32io.buffer.left);
+            SDL_min(total_need, context->hidden.win32io.buffer.left);
         SDL_memcpy(ptr, data, read_ahead);
         context->hidden.win32io.buffer.left -= read_ahead;
 
@@ -224,7 +224,7 @@ win32_file_read(SDL_RWops * context, void *ptr, size_t size, size_t maxnum)
         total_read += read_ahead;
     } else {
         if (!ReadFile
-            (context->hidden.win32io.h, ptr, total_need, &byte_read, NULL)) {
+            (context->hidden.win32io.h, ptr, (DWORD)total_need, &byte_read, NULL)) {
             SDL_Error(SDL_EFREAD);
             return 0;
         }
@@ -239,7 +239,8 @@ win32_file_write(SDL_RWops * context, const void *ptr, size_t size,
 {
 
     size_t total_bytes;
-    DWORD byte_written, nwritten;
+    DWORD byte_written;
+    size_t nwritten;
 
     total_bytes = size * num;
 
@@ -249,7 +250,7 @@ win32_file_write(SDL_RWops * context, const void *ptr, size_t size,
 
     if (context->hidden.win32io.buffer.left) {
         SetFilePointer(context->hidden.win32io.h,
-                       -context->hidden.win32io.buffer.left, NULL,
+                       -(LONG)context->hidden.win32io.buffer.left, NULL,
                        FILE_CURRENT);
         context->hidden.win32io.buffer.left = 0;
     }
@@ -264,7 +265,7 @@ win32_file_write(SDL_RWops * context, const void *ptr, size_t size,
     }
 
     if (!WriteFile
-        (context->hidden.win32io.h, ptr, total_bytes, &byte_written, NULL)) {
+        (context->hidden.win32io.h, ptr, (DWORD)total_bytes, &byte_written, NULL)) {
         SDL_Error(SDL_EFWRITE);
         return 0;
     }
@@ -377,7 +378,7 @@ mem_seek(SDL_RWops * context, long offset, int whence)
         newpos = context->hidden.mem.stop;
     }
     context->hidden.mem.here = newpos;
-    return (context->hidden.mem.here - context->hidden.mem.base);
+    return (long)(context->hidden.mem.here - context->hidden.mem.base);
 }
 
 static size_t SDLCALL
@@ -608,42 +609,42 @@ SDL_ReadBE64(SDL_RWops * src)
     return (SDL_SwapBE64(value));
 }
 
-int
+size_t
 SDL_WriteLE16(SDL_RWops * dst, Uint16 value)
 {
     value = SDL_SwapLE16(value);
     return (SDL_RWwrite(dst, &value, (sizeof value), 1));
 }
 
-int
+size_t
 SDL_WriteBE16(SDL_RWops * dst, Uint16 value)
 {
     value = SDL_SwapBE16(value);
     return (SDL_RWwrite(dst, &value, (sizeof value), 1));
 }
 
-int
+size_t
 SDL_WriteLE32(SDL_RWops * dst, Uint32 value)
 {
     value = SDL_SwapLE32(value);
     return (SDL_RWwrite(dst, &value, (sizeof value), 1));
 }
 
-int
+size_t
 SDL_WriteBE32(SDL_RWops * dst, Uint32 value)
 {
     value = SDL_SwapBE32(value);
     return (SDL_RWwrite(dst, &value, (sizeof value), 1));
 }
 
-int
+size_t
 SDL_WriteLE64(SDL_RWops * dst, Uint64 value)
 {
     value = SDL_SwapLE64(value);
     return (SDL_RWwrite(dst, &value, (sizeof value), 1));
 }
 
-int
+size_t
 SDL_WriteBE64(SDL_RWops * dst, Uint64 value)
 {
     value = SDL_SwapBE64(value);

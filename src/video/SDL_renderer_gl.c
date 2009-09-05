@@ -515,7 +515,7 @@ compile_shader(GL_RenderData * data, GLenum shader_type, const char *_code)
     data->glGenProgramsARB(1, &program);
     data->glBindProgramARB(shader_type, program);
     data->glProgramStringARB(shader_type, GL_PROGRAM_FORMAT_ASCII_ARB,
-                             SDL_strlen(code), code);
+                             (GLsizei)SDL_strlen(code), code);
 
     SDL_free(code);
 

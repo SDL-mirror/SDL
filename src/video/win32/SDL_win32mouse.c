@@ -44,7 +44,7 @@ WIN_InitMouse(_THIS)
     RAWINPUTDEVICELIST *deviceList = NULL;
     int devCount = 0;
     int i;
-    int tmp = 0;
+    UINT tmp = 0;
     char *buffer = NULL;
     char *tab = "wacom";        /* since windows does't give us handles to tablets, we have to detect a tablet by it's name */
     const char *rdp = "rdp_mou";
@@ -71,8 +71,8 @@ WIN_InitMouse(_THIS)
     /* we're getting the details of the devices */
     for (i = 0; i < devCount; ++i) {
         int is_rdp = 0;
-        int j;
-        int k;
+        UINT j;
+        UINT k;
         char *default_device_name = "Pointing device xx";
         const char *reg_key_root = "System\\CurrentControlSet\\Enum\\";
         char *device_name = SDL_malloc(256 * sizeof(char));
@@ -83,7 +83,7 @@ WIN_InitMouse(_THIS)
         DWORD regtype = REG_SZ;
         DWORD out = 256 * sizeof(char);
         SDL_Mouse mouse;
-        int l;
+        size_t l;
         if (deviceList[i].dwType != RIM_TYPEMOUSE) {    /* if a device isn't a mouse type we don't want it */
             continue;
         }

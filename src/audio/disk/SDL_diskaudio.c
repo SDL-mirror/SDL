@@ -67,14 +67,14 @@ DISKAUD_WaitDevice(_THIS)
 static void
 DISKAUD_PlayDevice(_THIS)
 {
-    int written;
+    size_t written;
 
     /* Write the audio data */
     written = SDL_RWwrite(this->hidden->output,
                           this->hidden->mixbuf, 1, this->hidden->mixlen);
 
     /* If we couldn't write, assume fatal error for now */
-    if ((Uint32) written != this->hidden->mixlen) {
+    if (written != this->hidden->mixlen) {
         this->enabled = 0;
     }
 #ifdef DEBUG_AUDIO

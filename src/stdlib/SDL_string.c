@@ -1342,7 +1342,7 @@ SDL_vsnprintf(char *text, size_t maxlen, const char *fmt, va_list ap)
     }
     *text = '\0';
 
-    return (text - textstart);
+    return (int)(text - textstart);
 }
 #endif
 /* vi: set ts=4 sw=4 expandtab: */

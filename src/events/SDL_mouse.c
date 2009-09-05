@@ -70,7 +70,8 @@ SDL_AddMouse(const SDL_Mouse * mouse, char *name, int pressure_max,
 {
     SDL_Mouse **mice;
     int selected_mouse;
-    int index, length;
+    int index;
+    size_t length;
 
     if (SDL_GetMouseIndexId(mouse->id) != -1) {
         SDL_SetError("Mouse ID already in use");

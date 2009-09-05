@@ -82,8 +82,8 @@ typedef struct SDL_RWops
             struct
             {
                 void *data;
-                int size;
-                int left;
+                size_t size;
+                size_t left;
             } buffer;
         } win32io;
 #endif
@@ -147,12 +147,12 @@ extern DECLSPEC Uint64 SDLCALL SDL_ReadLE64(SDL_RWops * src);
 extern DECLSPEC Uint64 SDLCALL SDL_ReadBE64(SDL_RWops * src);
 
 /* Write an item of native format to the specified endianness */
-extern DECLSPEC int SDLCALL SDL_WriteLE16(SDL_RWops * dst, Uint16 value);
-extern DECLSPEC int SDLCALL SDL_WriteBE16(SDL_RWops * dst, Uint16 value);
-extern DECLSPEC int SDLCALL SDL_WriteLE32(SDL_RWops * dst, Uint32 value);
-extern DECLSPEC int SDLCALL SDL_WriteBE32(SDL_RWops * dst, Uint32 value);
-extern DECLSPEC int SDLCALL SDL_WriteLE64(SDL_RWops * dst, Uint64 value);
-extern DECLSPEC int SDLCALL SDL_WriteBE64(SDL_RWops * dst, Uint64 value);
+extern DECLSPEC size_t SDLCALL SDL_WriteLE16(SDL_RWops * dst, Uint16 value);
+extern DECLSPEC size_t SDLCALL SDL_WriteBE16(SDL_RWops * dst, Uint16 value);
+extern DECLSPEC size_t SDLCALL SDL_WriteLE32(SDL_RWops * dst, Uint32 value);
+extern DECLSPEC size_t SDLCALL SDL_WriteBE32(SDL_RWops * dst, Uint32 value);
+extern DECLSPEC size_t SDLCALL SDL_WriteLE64(SDL_RWops * dst, Uint64 value);
+extern DECLSPEC size_t SDLCALL SDL_WriteBE64(SDL_RWops * dst, Uint64 value);
 
 
 /* Ends C function definitions when using C++ */
