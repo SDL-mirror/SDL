@@ -25,10 +25,11 @@
 #include <sys/time.h>
 #include <unistd.h>
 
-#include "SDL_syswm.h"
 #include "SDL_x11video.h"
 #include "../../events/SDL_events_c.h"
 #include "../../events/SDL_mouse_c.h"
+
+#include "SDL_syswm.h"
 
 static void
 X11_DispatchEvent(_THIS)

@@ -21,7 +21,6 @@
 */
 #include "SDL_config.h"
 
-#include "SDL_syswm.h"
 #include "../SDL_sysvideo.h"
 #include "../../events/SDL_keyboard_c.h"
 #include "../../events/SDL_mouse_c.h"
@@ -34,6 +33,8 @@
 #ifdef SDL_VIDEO_DRIVER_PANDORA
 #include "SDL_x11opengles.h"
 #endif
+
+#include "SDL_syswm.h"
 
 #define _NET_WM_STATE_REMOVE    0l
 #define _NET_WM_STATE_ADD       1l

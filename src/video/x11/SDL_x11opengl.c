@@ -39,6 +39,10 @@
 #define DEFAULT_OPENGL	"libGL.so.1"
 #endif
 
+#ifndef GLX_NONE_EXT
+#define GLX_NONE_EXT                       0x8000
+#endif
+
 #ifndef GLX_ARB_multisample
 #define GLX_ARB_multisample
 #define GLX_SAMPLE_BUFFERS_ARB             100000

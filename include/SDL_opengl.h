@@ -22,6 +22,9 @@
 
 /* This is a simple file to encapsulate the OpenGL API headers */
 
+#ifndef _SDL_opengl_h
+#define _SDL_opengl_h
+
 #include "SDL_config.h"
 
 #ifdef __WIN32__
@@ -37,6 +40,7 @@
 #if defined(__MACOSX__)
 #include <OpenGL/gl.h>          /* Header File For The OpenGL Library */
 #include <OpenGL/glu.h>         /* Header File For The GLU Library */
+#define __X_GL_H
 #else
 #include <GL/gl.h>              /* Header File For The OpenGL Library */
 #include <GL/glu.h>             /* Header File For The GLU Library */
@@ -9307,3 +9311,7 @@ typedef void (APIENTRYP PFNGLGETOBJECTPARAMETERIVAPPLEPROC) (GLenum objectType, 
 #endif
 /* *INDENT-ON* */
 #endif /* NO_SDL_GLEXT */
+
+#endif /* _SDL_opengl_h */
+
+/* vi: set ts=4 sw=4 expandtab: */
