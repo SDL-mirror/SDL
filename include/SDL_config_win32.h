@@ -150,13 +150,6 @@ typedef unsigned int uintptr_t;
 #define SDL_AUDIO_DRIVER_DISK	1
 #define SDL_AUDIO_DRIVER_DUMMY	1
 
-/* Enable various cdrom drivers */
-#ifdef _WIN32_WCE
-#define SDL_CDROM_DISABLED	1
-#else
-#define SDL_CDROM_WIN32		1
-#endif
-
 /* Enable various input drivers */
 #ifdef _WIN32_WCE
 #define SDL_JOYSTICK_DISABLED	1

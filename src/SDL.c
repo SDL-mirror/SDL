@@ -42,10 +42,6 @@ extern void SDL_JoystickQuit(void);
 extern int SDL_HapticInit(void);
 extern int SDL_HapticQuit(void);
 #endif
-#if !SDL_CDROM_DISABLED
-extern int SDL_CDROMInit(void);
-extern void SDL_CDROMQuit(void);
-#endif
 #if !SDL_TIMERS_DISABLED
 extern void SDL_StartTicks(void);
 extern int SDL_TimerInit(void);
@@ -145,22 +141,6 @@ SDL_InitSubSystem(Uint32 flags)
         return (-1);
     }
 #endif
-
-
-#if !SDL_CDROM_DISABLED
-    /* Initialize the CD-ROM subsystem */
-    if ((flags & SDL_INIT_CDROM) && !(SDL_initialized & SDL_INIT_CDROM)) {
-        if (SDL_CDROMInit() < 0) {
-            return (-1);
-        }
-        SDL_initialized |= SDL_INIT_CDROM;
-    }
-#else
-    if (flags & SDL_INIT_CDROM) {
-        SDL_SetError("SDL not built with cdrom support");
-        return (-1);
-    }
-#endif
     return (0);
 }
 
@@ -198,12 +178,6 @@ void
 SDL_QuitSubSystem(Uint32 flags)
 {
     /* Shut down requested initialized subsystems */
-#if !SDL_CDROM_DISABLED
-    if ((flags & SDL_initialized & SDL_INIT_CDROM)) {
-        SDL_CDROMQuit();
-        SDL_initialized &= ~SDL_INIT_CDROM;
-    }
-#endif
 #if !SDL_JOYSTICK_DISABLED
     if ((flags & SDL_initialized & SDL_INIT_JOYSTICK)) {
         SDL_JoystickQuit();

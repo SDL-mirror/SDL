@@ -50,4 +50,4 @@ we should do it though, since the 1.2 series should not break binary
 compatibility in this way.
 
 Requests:
- * PCM and CDROM volume control (deprecated, but possible)
+ * PCM volume control (deprecated, but possible)

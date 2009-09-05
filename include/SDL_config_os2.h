@@ -116,9 +116,6 @@ typedef unsigned long long uint64_t;
 #define SDL_AUDIO_DRIVER_DISK	1
 #define SDL_AUDIO_DRIVER_DUMMY	1
 
-/* Enable various cdrom drivers */
-#define SDL_CDROM_OS2	1
-
 /* Enable various input drivers */
 #define SDL_JOYSTICK_OS2	1
 #define SDL_HAPTIC_DUMMY	1

@@ -160,7 +160,6 @@
 
 /* Allow disabling of core subsystems */
 #undef SDL_AUDIO_DISABLED
-#undef SDL_CDROM_DISABLED
 #undef SDL_CPUINFO_DISABLED
 #undef SDL_EVENTS_DISABLED
 #undef SDL_FILE_DISABLED
@@ -203,22 +202,6 @@
 #undef SDL_AUDIO_DRIVER_WINWAVEOUT
 #undef SDL_AUDIO_DRIVER_FUSIONSOUND
 #undef SDL_AUDIO_DRIVER_FUSIONSOUND_DYNAMIC
-
-/* Enable various cdrom drivers */
-#undef SDL_CDROM_AIX
-#undef SDL_CDROM_BEOS
-#undef SDL_CDROM_BSDI
-#undef SDL_CDROM_DC
-#undef SDL_CDROM_DUMMY
-#undef SDL_CDROM_FREEBSD
-#undef SDL_CDROM_LINUX
-#undef SDL_CDROM_MACOSX
-#undef SDL_CDROM_MINT
-#undef SDL_CDROM_OPENBSD
-#undef SDL_CDROM_OS2
-#undef SDL_CDROM_OSF
-#undef SDL_CDROM_QNX
-#undef SDL_CDROM_WIN32
 
 /* Enable various input drivers */
 #undef SDL_INPUT_LINUXEV

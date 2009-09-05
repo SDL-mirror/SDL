@@ -96,9 +96,6 @@ typedef unsigned __PTRDIFF_TYPE__ uintptr_t;
 #define SDL_AUDIO_DRIVER_NDS	1
 /*#define SDL_AUDIO_DRIVER_DUMMY	1 TODO: uncomment this later*/
 
-/* DS doesn't have optical media */
-#define SDL_CDROM_DISABLED	1
-
 /* Enable various input drivers */
 #define SDL_JOYSTICK_NDS	1
 /*#define SDL_JOYSTICK_DUMMY	1 TODO: uncomment this later*/
