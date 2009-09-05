@@ -55,7 +55,7 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../include,../../src,../../src/video,../../src/thread,../../src/thread/generic,../../src/audio,../../src/cdrom,../../src/timer,../../src/joystick,../../src/events,../../src/video/wincommon,../../src/video/windib,../../src/video/gapi"
+				AdditionalIncludeDirectories="../../include,../../src,../../src/video,../../src/thread,../../src/thread/generic,../../src/audio,../../src/timer,../../src/joystick,../../src/events,../../src/video/wincommon,../../src/video/windib,../../src/video/gapi"
 				PreprocessorDefinitions="DEBUG;ARM;_ARM_;ARMV4;_WIN32_WCE=$(CEVER);$(CePlatform);UNDER_CE=$(CEVER);UNICODE;SDL_EXPORTS"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
@@ -156,7 +156,7 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../include,../../src,../../src/video,../../src/thread,../../src/thread/generic,../../src/audio,../../src/cdrom,../../src/timer,../../src/joystick,../../src/events,../../src/video/wincommon,../../src/video/windib,../../src/video/gapi"
+				AdditionalIncludeDirectories="../../include,../../src,../../src/video,../../src/thread,../../src/thread/generic,../../src/audio,../../src/timer,../../src/joystick,../../src/events,../../src/video/wincommon,../../src/video/windib,../../src/video/gapi"
 				PreprocessorDefinitions="DEBUG;ARM;_ARM_;ARMV4;_WIN32_WCE=$(CEVER);$(CePlatform);UNDER_CE=$(CEVER);UNICODE;SDL_EXPORTS"
 				RuntimeLibrary="1"
 				BufferSecurityCheck="true"
@@ -258,7 +258,7 @@
 				Name="VCCLCompilerTool"
 				ExecutionBucket="7"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../include;../../src;../../src/video;../../src/thread;../../src/thread/generic;../../src/audio;../../src/cdrom;../../src/timer;../../src/joystick;../../src/events;../../src/video/wincommon;../../src/video/gapi;../../src/video/windib"
+				AdditionalIncludeDirectories="../../include;../../src;../../src/video;../../src/thread;../../src/thread/generic;../../src/audio;../../src/timer;../../src/joystick;../../src/events;../../src/video/wincommon;../../src/video/gapi;../../src/video/windib"
 				PreprocessorDefinitions="DEBUG;ARM;_ARM_;THUMB;_THUMB_;ARMV4T;_WIN32_WCE=$(CEVER);$(CePlatform);UNDER_CE=$(CEVER);UNICODE;SDL_EXPORTS"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
@@ -360,7 +360,7 @@
 				ExecutionBucket="7"
 				Optimization="4"
 				InlineFunctionExpansion="2"
-				AdditionalIncludeDirectories="../../include,../../src,../../src/video,../../src/thread,../../src/thread/generic,../../src/audio,../../src/cdrom,../../src/timer,../../src/joystick,../../src/events,../../src/video/wincommon"
+				AdditionalIncludeDirectories="../../include,../../src,../../src/video,../../src/thread,../../src/thread/generic,../../src/audio,../../src/timer,../../src/joystick,../../src/events,../../src/video/wincommon"
 				PreprocessorDefinitions="ARM;_ARM_;ARMV4;NDEBUG;_WIN32_WCE=$(CEVER);$(CePlatform);UNDER_CE=$(CEVER);UNICODE;SDL_EXPORTS"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
@@ -462,7 +462,7 @@
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="../../include,../../src,../../src/video,../../src/thread,../../src/thread/generic,../../src/audio,../../src/cdrom,../../src/timer,../../src/joystick,../../src/events,../../src/video/wincommon,../../src/video/windib,../../src/video/gapi"
+				AdditionalIncludeDirectories="../../include,../../src,../../src/video,../../src/thread,../../src/thread/generic,../../src/audio,../../src/timer,../../src/joystick,../../src/events,../../src/video/wincommon,../../src/video/windib,../../src/video/gapi"
 				PreprocessorDefinitions="ARM;_ARM_;ARMV4;NDEBUG;_WIN32_WCE=$(CEVER);$(CePlatform);UNDER_CE=$(CEVER);UNICODE;SDL_EXPORTS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -567,7 +567,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories="../../include;../../src;../../src/video;../../src/thread;../../src/thread/generic;../../src/audio;../../src/cdrom;../../src/timer;../../src/joystick;../../src/events;../../src/video/wincommon;../../src/video/gapi;../../src/video/windib"
+				AdditionalIncludeDirectories="../../include;../../src;../../src/video;../../src/thread;../../src/thread/generic;../../src/audio;../../src/timer;../../src/joystick;../../src/events;../../src/video/wincommon;../../src/video/gapi;../../src/video/windib"
 				PreprocessorDefinitions="DEBUG;ARM;_ARM_;THUMB;_THUMB_;ARMV4T;_WIN32_WCE=$(CEVER);$(CePlatform);UNDER_CE=$(CEVER);UNICODE;SDL_EXPORTS"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -2601,64 +2601,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\src\cdrom\dummy\SDL_syscdrom.c"
-				>
-				<FileConfiguration
-					Name="Debug|Smartphone 2003 (ARMV4)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Pocket PC 2003 (ARMV4)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Smartphone 2003 (ARMV4)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Pocket PC 2003 (ARMV4)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Windows Mobile 5.0 Pocket PC SDK (ARMV4I)"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="..\..\src\thread\generic\SDL_syscond.c"
 				>
 				<FileConfiguration
@@ -3664,10 +3606,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\SDL_cdrom.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\include\SDL_config.h"
 				>
 			</File>
@@ -3841,10 +3779,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\audio\SDL_sysaudio.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\cdrom\SDL_syscdrom.h"
 				>
 			</File>
 			<File

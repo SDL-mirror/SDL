@@ -224,10 +224,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\SDL_cdrom.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\include\SDL_compat.h"
 				>
 			</File>
@@ -517,10 +513,6 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\cdrom\SDL_cdrom.c"
-			>
-		</File>
-		<File
 			RelativePath="..\..\src\SDL_compat.c"
 			>
 		</File>
@@ -806,14 +798,6 @@
 		</File>
 		<File
 			RelativePath="..\..\src\audio\SDL_sysaudio.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\cdrom\win32\SDL_syscdrom.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\cdrom\SDL_syscdrom.h"
 			>
 		</File>
 		<File
