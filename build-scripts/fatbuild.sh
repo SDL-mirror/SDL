@@ -218,8 +218,14 @@ case `uname -p` in
     powerpc)
         native_path=ppc
         ;;
+    powerpc64)
+        native_path=ppc64
+        ;;
     *86)
         native_path=x86
+        ;;
+    x86_64)
+        native_path=x64
         ;;
     *)
         echo "Couldn't figure out native architecture path"
