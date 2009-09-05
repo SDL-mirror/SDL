@@ -38,7 +38,6 @@
 		0014B92409C0E585003A99D5 /* begin_code.h in Headers */ = {isa = PBXBuildFile; fileRef = 0C5AF5E501191D2B7F000001 /* begin_code.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0014B92509C0E585003A99D5 /* close_code.h in Headers */ = {isa = PBXBuildFile; fileRef = 0C5AF5E601191D2B7F000001 /* close_code.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0014B92709C0E585003A99D5 /* SDL_audio.h in Headers */ = {isa = PBXBuildFile; fileRef = 0C5AF5E801191D2B7F000001 /* SDL_audio.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		0014B92909C0E585003A99D5 /* SDL_cdrom.h in Headers */ = {isa = PBXBuildFile; fileRef = 0C5AF5EA01191D2B7F000001 /* SDL_cdrom.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0014B92A09C0E585003A99D5 /* SDL_copying.h in Headers */ = {isa = PBXBuildFile; fileRef = 0C5AF5EB01191D2B7F000001 /* SDL_copying.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0014B92B09C0E585003A99D5 /* SDL_cpuinfo.h in Headers */ = {isa = PBXBuildFile; fileRef = B2CF8DC405C444E400E5DC7F /* SDL_cpuinfo.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0014B92C09C0E585003A99D5 /* SDL_endian.h in Headers */ = {isa = PBXBuildFile; fileRef = 0C5AF5EC01191D2B7F000001 /* SDL_endian.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -62,7 +61,6 @@
 		0014B93F09C0E585003A99D5 /* SDL_version.h in Headers */ = {isa = PBXBuildFile; fileRef = 0C5AF5FD01191D2B7F000001 /* SDL_version.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0014B94009C0E585003A99D5 /* SDL_video.h in Headers */ = {isa = PBXBuildFile; fileRef = 0C5AF5FE01191D2B7F000001 /* SDL_video.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0014B94109C0E585003A99D5 /* SDL.h in Headers */ = {isa = PBXBuildFile; fileRef = 0C5AF5FF01191D2B7F000001 /* SDL.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		0014B94509C0E585003A99D5 /* SDL_romaudio.c in Sources */ = {isa = PBXBuildFile; fileRef = 0153832E006D78D67F000001 /* SDL_romaudio.c */; };
 		0014B94609C0E585003A99D5 /* SDL_audio.c in Sources */ = {isa = PBXBuildFile; fileRef = 01538330006D78D67F000001 /* SDL_audio.c */; };
 		0014B94709C0E585003A99D5 /* SDL_audiocvt.c in Sources */ = {isa = PBXBuildFile; fileRef = 01538331006D78D67F000001 /* SDL_audiocvt.c */; };
 		0014B94809C0E585003A99D5 /* SDL_audiodev.c in Sources */ = {isa = PBXBuildFile; fileRef = 01538332006D78D67F000001 /* SDL_audiodev.c */; };
@@ -90,17 +88,11 @@
 		0014B96309C0E585003A99D5 /* SDL_fatal.c in Sources */ = {isa = PBXBuildFile; fileRef = 01538439006D7D947F000001 /* SDL_fatal.c */; };
 		0014B96409C0E585003A99D5 /* SDL.c in Sources */ = {isa = PBXBuildFile; fileRef = 0153843C006D7D947F000001 /* SDL.c */; };
 		0014B96509C0E585003A99D5 /* SDL_thread.c in Sources */ = {isa = PBXBuildFile; fileRef = 01538445006D7EC67F000001 /* SDL_thread.c */; };
-		0014B96609C0E585003A99D5 /* SDL_cdrom.c in Sources */ = {isa = PBXBuildFile; fileRef = 083E4895006D86FF7F000001 /* SDL_cdrom.c */; };
 		0014B96709C0E585003A99D5 /* SDL_joystick.c in Sources */ = {isa = PBXBuildFile; fileRef = 083E489D006D88D97F000001 /* SDL_joystick.c */; };
 		0014B96809C0E585003A99D5 /* SDL_stretch.c in Sources */ = {isa = PBXBuildFile; fileRef = 015383EA006D7A567F000001 /* SDL_stretch.c */; };
 		0014B96909C0E585003A99D5 /* SDL_sysjoystick.c in Sources */ = {isa = PBXBuildFile; fileRef = F51789D101769A2401D3D55B /* SDL_sysjoystick.c */; };
 		0014B97009C0E585003A99D5 /* SDL_cpuinfo.c in Sources */ = {isa = PBXBuildFile; fileRef = B24DA50405A88D52006B9F1C /* SDL_cpuinfo.c */; };
-		0014B97109C0E585003A99D5 /* SDL_syscdrom.c in Sources */ = {isa = PBXBuildFile; fileRef = B2A23A7B04157C5700A80002 /* SDL_syscdrom.c */; };
 		0014B97209C0E585003A99D5 /* SDL_coreaudio.c in Sources */ = {isa = PBXBuildFile; fileRef = BECDF5D50761B759005FE872 /* SDL_coreaudio.c */; };
-		0014B97309C0E585003A99D5 /* AudioFilePlayer.c in Sources */ = {isa = PBXBuildFile; fileRef = 004C2C860975E13300E9D430 /* AudioFilePlayer.c */; };
-		0014B97409C0E585003A99D5 /* AudioFileReaderThread.c in Sources */ = {isa = PBXBuildFile; fileRef = 004C2C870975E13300E9D430 /* AudioFileReaderThread.c */; };
-		0014B97509C0E585003A99D5 /* CDPlayer.c in Sources */ = {isa = PBXBuildFile; fileRef = 004C2C880975E13300E9D430 /* CDPlayer.c */; };
-		0014B97609C0E585003A99D5 /* SDLOSXCAGuard.c in Sources */ = {isa = PBXBuildFile; fileRef = 004C2C890975E13300E9D430 /* SDLOSXCAGuard.c */; };
 		0014B97709C0E585003A99D5 /* SDL_syscond.c in Sources */ = {isa = PBXBuildFile; fileRef = 00162D4D09BD20DA0037C8D0 /* SDL_syscond.c */; };
 		0014B97809C0E585003A99D5 /* SDL_sysmutex.c in Sources */ = {isa = PBXBuildFile; fileRef = 00162D4E09BD20DA0037C8D0 /* SDL_sysmutex.c */; };
 		0014B97909C0E585003A99D5 /* SDL_syssem.c in Sources */ = {isa = PBXBuildFile; fileRef = 00162D5009BD20DA0037C8D0 /* SDL_syssem.c */; };
@@ -155,7 +147,6 @@
 		00162DAC09BD222F0037C8D0 /* begin_code.h in Headers */ = {isa = PBXBuildFile; fileRef = 0C5AF5E501191D2B7F000001 /* begin_code.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		00162DAD09BD222F0037C8D0 /* close_code.h in Headers */ = {isa = PBXBuildFile; fileRef = 0C5AF5E601191D2B7F000001 /* close_code.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		00162DAF09BD222F0037C8D0 /* SDL_audio.h in Headers */ = {isa = PBXBuildFile; fileRef = 0C5AF5E801191D2B7F000001 /* SDL_audio.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		00162DB109BD222F0037C8D0 /* SDL_cdrom.h in Headers */ = {isa = PBXBuildFile; fileRef = 0C5AF5EA01191D2B7F000001 /* SDL_cdrom.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		00162DB209BD222F0037C8D0 /* SDL_copying.h in Headers */ = {isa = PBXBuildFile; fileRef = 0C5AF5EB01191D2B7F000001 /* SDL_copying.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		00162DB309BD222F0037C8D0 /* SDL_cpuinfo.h in Headers */ = {isa = PBXBuildFile; fileRef = B2CF8DC405C444E400E5DC7F /* SDL_cpuinfo.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		00162DB409BD222F0037C8D0 /* SDL_endian.h in Headers */ = {isa = PBXBuildFile; fileRef = 0C5AF5EC01191D2B7F000001 /* SDL_endian.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -191,7 +182,6 @@
 		002F31EF09CA02D800EBEB88 /* SDL_cpuinfo.h in Headers */ = {isa = PBXBuildFile; fileRef = B2CF8DC405C444E400E5DC7F /* SDL_cpuinfo.h */; };
 		002F31F009CA02D800EBEB88 /* SDL_name.h in Headers */ = {isa = PBXBuildFile; fileRef = B2CF8DC705C4450500E5DC7F /* SDL_name.h */; };
 		002F31F109CA02D800EBEB88 /* SDL_coreaudio.h in Headers */ = {isa = PBXBuildFile; fileRef = BECDF5D60761B759005FE872 /* SDL_coreaudio.h */; };
-		002F31F209CA02D800EBEB88 /* SDLOSXCAGuard.h in Headers */ = {isa = PBXBuildFile; fileRef = 004C2C8A0975E13300E9D430 /* SDLOSXCAGuard.h */; };
 		002F31F609CA02D800EBEB88 /* SDL_config_macosx.h in Headers */ = {isa = PBXBuildFile; fileRef = 00162D3409BD1FA90037C8D0 /* SDL_config_macosx.h */; };
 		002F31F909CA02D800EBEB88 /* SDL_config.h in Headers */ = {isa = PBXBuildFile; fileRef = 00162D3709BD1FA90037C8D0 /* SDL_config.h */; };
 		002F31FA09CA02D800EBEB88 /* SDL_platform.h in Headers */ = {isa = PBXBuildFile; fileRef = 00162D3809BD1FA90037C8D0 /* SDL_platform.h */; };
@@ -206,8 +196,6 @@
 		002F321509CA02D800EBEB88 /* SDL_audiodev.c in Sources */ = {isa = PBXBuildFile; fileRef = 01538332006D78D67F000001 /* SDL_audiodev.c */; };
 		002F321609CA02D800EBEB88 /* SDL_mixer.c in Sources */ = {isa = PBXBuildFile; fileRef = 01538334006D78D67F000001 /* SDL_mixer.c */; };
 		002F321709CA02D800EBEB88 /* SDL_wave.c in Sources */ = {isa = PBXBuildFile; fileRef = 01538335006D78D67F000001 /* SDL_wave.c */; };
-		002F321809CA02D800EBEB88 /* SDL_romaudio.c in Sources */ = {isa = PBXBuildFile; fileRef = 0153832E006D78D67F000001 /* SDL_romaudio.c */; };
-		002F321909CA02D800EBEB88 /* SDL_cdrom.c in Sources */ = {isa = PBXBuildFile; fileRef = 083E4895006D86FF7F000001 /* SDL_cdrom.c */; };
 		002F321B09CA02D800EBEB88 /* SDL_events.c in Sources */ = {isa = PBXBuildFile; fileRef = 01538369006D79147F000001 /* SDL_events.c */; };
 		002F321D09CA02D800EBEB88 /* SDL_keyboard.c in Sources */ = {isa = PBXBuildFile; fileRef = 0153836B006D79147F000001 /* SDL_keyboard.c */; };
 		002F321E09CA02D800EBEB88 /* SDL_mouse.c in Sources */ = {isa = PBXBuildFile; fileRef = 0153836C006D79147F000001 /* SDL_mouse.c */; };
@@ -233,13 +221,8 @@
 		002F323509CA02D800EBEB88 /* SDL_fatal.c in Sources */ = {isa = PBXBuildFile; fileRef = 01538439006D7D947F000001 /* SDL_fatal.c */; };
 		002F323609CA02D800EBEB88 /* SDL.c in Sources */ = {isa = PBXBuildFile; fileRef = 0153843C006D7D947F000001 /* SDL.c */; };
 		002F323709CA02D800EBEB88 /* SDL_sysjoystick.c in Sources */ = {isa = PBXBuildFile; fileRef = F51789D101769A2401D3D55B /* SDL_sysjoystick.c */; };
-		002F323809CA02D800EBEB88 /* SDL_syscdrom.c in Sources */ = {isa = PBXBuildFile; fileRef = 083E4894006D86FF7F000001 /* SDL_syscdrom.c */; };
 		002F323F09CA02D800EBEB88 /* SDL_cpuinfo.c in Sources */ = {isa = PBXBuildFile; fileRef = B24DA50405A88D52006B9F1C /* SDL_cpuinfo.c */; };
 		002F324009CA02D800EBEB88 /* SDL_coreaudio.c in Sources */ = {isa = PBXBuildFile; fileRef = BECDF5D50761B759005FE872 /* SDL_coreaudio.c */; };
-		002F324109CA02D800EBEB88 /* AudioFilePlayer.c in Sources */ = {isa = PBXBuildFile; fileRef = 004C2C860975E13300E9D430 /* AudioFilePlayer.c */; };
-		002F324209CA02D800EBEB88 /* AudioFileReaderThread.c in Sources */ = {isa = PBXBuildFile; fileRef = 004C2C870975E13300E9D430 /* AudioFileReaderThread.c */; };
-		002F324309CA02D800EBEB88 /* CDPlayer.c in Sources */ = {isa = PBXBuildFile; fileRef = 004C2C880975E13300E9D430 /* CDPlayer.c */; };
-		002F324409CA02D800EBEB88 /* SDLOSXCAGuard.c in Sources */ = {isa = PBXBuildFile; fileRef = 004C2C890975E13300E9D430 /* SDLOSXCAGuard.c */; };
 		002F324509CA02D800EBEB88 /* SDL_syscond.c in Sources */ = {isa = PBXBuildFile; fileRef = 00162D4D09BD20DA0037C8D0 /* SDL_syscond.c */; };
 		002F324609CA02D800EBEB88 /* SDL_sysmutex.c in Sources */ = {isa = PBXBuildFile; fileRef = 00162D4E09BD20DA0037C8D0 /* SDL_sysmutex.c */; };
 		002F324709CA02D800EBEB88 /* SDL_syssem.c in Sources */ = {isa = PBXBuildFile; fileRef = 00162D5009BD20DA0037C8D0 /* SDL_syssem.c */; };
@@ -277,15 +260,6 @@
 		002F32EA09CA0BF600EBEB88 /* SDL_dummyaudio.c in Sources */ = {isa = PBXBuildFile; fileRef = 002F32E209CA0BF600EBEB88 /* SDL_dummyaudio.c */; };
 		002F32EC09CA0BF600EBEB88 /* SDL_dummyaudio.c in Sources */ = {isa = PBXBuildFile; fileRef = 002F32E209CA0BF600EBEB88 /* SDL_dummyaudio.c */; };
 		002F32ED09CA0BF600EBEB88 /* SDL_dummyaudio.h in Headers */ = {isa = PBXBuildFile; fileRef = 002F32E309CA0BF600EBEB88 /* SDL_dummyaudio.h */; };
-		004C2C8B0975E13300E9D430 /* AudioFilePlayer.c in Sources */ = {isa = PBXBuildFile; fileRef = 004C2C860975E13300E9D430 /* AudioFilePlayer.c */; };
-		004C2C8C0975E13300E9D430 /* AudioFileReaderThread.c in Sources */ = {isa = PBXBuildFile; fileRef = 004C2C870975E13300E9D430 /* AudioFileReaderThread.c */; };
-		004C2C8D0975E13300E9D430 /* CDPlayer.c in Sources */ = {isa = PBXBuildFile; fileRef = 004C2C880975E13300E9D430 /* CDPlayer.c */; };
-		004C2C8E0975E13300E9D430 /* SDLOSXCAGuard.c in Sources */ = {isa = PBXBuildFile; fileRef = 004C2C890975E13300E9D430 /* SDLOSXCAGuard.c */; };
-		004C2C900975E13300E9D430 /* AudioFilePlayer.c in Sources */ = {isa = PBXBuildFile; fileRef = 004C2C860975E13300E9D430 /* AudioFilePlayer.c */; };
-		004C2C910975E13300E9D430 /* AudioFileReaderThread.c in Sources */ = {isa = PBXBuildFile; fileRef = 004C2C870975E13300E9D430 /* AudioFileReaderThread.c */; };
-		004C2C920975E13300E9D430 /* CDPlayer.c in Sources */ = {isa = PBXBuildFile; fileRef = 004C2C880975E13300E9D430 /* CDPlayer.c */; };
-		004C2C930975E13300E9D430 /* SDLOSXCAGuard.c in Sources */ = {isa = PBXBuildFile; fileRef = 004C2C890975E13300E9D430 /* SDLOSXCAGuard.c */; };
-		004C2C940975E13300E9D430 /* SDLOSXCAGuard.h in Headers */ = {isa = PBXBuildFile; fileRef = 004C2C8A0975E13300E9D430 /* SDLOSXCAGuard.h */; };
 		007317A20858DECD00B2BC32 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0073179B0858DECD00B2BC32 /* AudioToolbox.framework */; };
 		007317A30858DECD00B2BC32 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0073179C0858DECD00B2BC32 /* AudioUnit.framework */; };
 		007317A40858DECD00B2BC32 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0073179D0858DECD00B2BC32 /* Cocoa.framework */; };
@@ -382,7 +356,6 @@
 		672FFFF60E368CAC005A6914 /* ForceFeedback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 672FFFF40E368CAC005A6914 /* ForceFeedback.framework */; };
 		672FFFF70E368CAC005A6914 /* ForceFeedback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 672FFFF40E368CAC005A6914 /* ForceFeedback.framework */; };
 		672FFFF80E368CAC005A6914 /* ForceFeedback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 672FFFF40E368CAC005A6914 /* ForceFeedback.framework */; };
-		BECDF62D0761BA81005FE872 /* SDL_romaudio.c in Sources */ = {isa = PBXBuildFile; fileRef = 0153832E006D78D67F000001 /* SDL_romaudio.c */; };
 		BECDF62E0761BA81005FE872 /* SDL_audio.c in Sources */ = {isa = PBXBuildFile; fileRef = 01538330006D78D67F000001 /* SDL_audio.c */; };
 		BECDF62F0761BA81005FE872 /* SDL_audiocvt.c in Sources */ = {isa = PBXBuildFile; fileRef = 01538331006D78D67F000001 /* SDL_audiocvt.c */; };
 		BECDF6300761BA81005FE872 /* SDL_audiodev.c in Sources */ = {isa = PBXBuildFile; fileRef = 01538332006D78D67F000001 /* SDL_audiodev.c */; };
@@ -410,12 +383,10 @@
 		BECDF64E0761BA81005FE872 /* SDL_fatal.c in Sources */ = {isa = PBXBuildFile; fileRef = 01538439006D7D947F000001 /* SDL_fatal.c */; };
 		BECDF6500761BA81005FE872 /* SDL.c in Sources */ = {isa = PBXBuildFile; fileRef = 0153843C006D7D947F000001 /* SDL.c */; };
 		BECDF6510761BA81005FE872 /* SDL_thread.c in Sources */ = {isa = PBXBuildFile; fileRef = 01538445006D7EC67F000001 /* SDL_thread.c */; };
-		BECDF6520761BA81005FE872 /* SDL_cdrom.c in Sources */ = {isa = PBXBuildFile; fileRef = 083E4895006D86FF7F000001 /* SDL_cdrom.c */; };
 		BECDF6530761BA81005FE872 /* SDL_joystick.c in Sources */ = {isa = PBXBuildFile; fileRef = 083E489D006D88D97F000001 /* SDL_joystick.c */; };
 		BECDF6580761BA81005FE872 /* SDL_stretch.c in Sources */ = {isa = PBXBuildFile; fileRef = 015383EA006D7A567F000001 /* SDL_stretch.c */; };
 		BECDF6590761BA81005FE872 /* SDL_sysjoystick.c in Sources */ = {isa = PBXBuildFile; fileRef = F51789D101769A2401D3D55B /* SDL_sysjoystick.c */; };
 		BECDF6610761BA81005FE872 /* SDL_cpuinfo.c in Sources */ = {isa = PBXBuildFile; fileRef = B24DA50405A88D52006B9F1C /* SDL_cpuinfo.c */; };
-		BECDF6620761BA81005FE872 /* SDL_syscdrom.c in Sources */ = {isa = PBXBuildFile; fileRef = B2A23A7B04157C5700A80002 /* SDL_syscdrom.c */; };
 		BECDF6670761BA81005FE872 /* SDL_coreaudio.c in Sources */ = {isa = PBXBuildFile; fileRef = BECDF5D50761B759005FE872 /* SDL_coreaudio.c */; };
 		BECDF6760761BA81005FE872 /* SDL_cpuinfo.h in Headers */ = {isa = PBXBuildFile; fileRef = B2CF8DC405C444E400E5DC7F /* SDL_cpuinfo.h */; };
 		BECDF6770761BA81005FE872 /* SDL_name.h in Headers */ = {isa = PBXBuildFile; fileRef = B2CF8DC705C4450500E5DC7F /* SDL_name.h */; };
@@ -425,8 +396,6 @@
 		BECDF67D0761BA81005FE872 /* SDL_audiodev.c in Sources */ = {isa = PBXBuildFile; fileRef = 01538332006D78D67F000001 /* SDL_audiodev.c */; };
 		BECDF67E0761BA81005FE872 /* SDL_mixer.c in Sources */ = {isa = PBXBuildFile; fileRef = 01538334006D78D67F000001 /* SDL_mixer.c */; };
 		BECDF67F0761BA81005FE872 /* SDL_wave.c in Sources */ = {isa = PBXBuildFile; fileRef = 01538335006D78D67F000001 /* SDL_wave.c */; };
-		BECDF6800761BA81005FE872 /* SDL_romaudio.c in Sources */ = {isa = PBXBuildFile; fileRef = 0153832E006D78D67F000001 /* SDL_romaudio.c */; };
-		BECDF6810761BA81005FE872 /* SDL_cdrom.c in Sources */ = {isa = PBXBuildFile; fileRef = 083E4895006D86FF7F000001 /* SDL_cdrom.c */; };
 		BECDF6840761BA81005FE872 /* SDL_events.c in Sources */ = {isa = PBXBuildFile; fileRef = 01538369006D79147F000001 /* SDL_events.c */; };
 		BECDF6860761BA81005FE872 /* SDL_keyboard.c in Sources */ = {isa = PBXBuildFile; fileRef = 0153836B006D79147F000001 /* SDL_keyboard.c */; };
 		BECDF6870761BA81005FE872 /* SDL_mouse.c in Sources */ = {isa = PBXBuildFile; fileRef = 0153836C006D79147F000001 /* SDL_mouse.c */; };
@@ -452,7 +421,6 @@
 		BECDF6A30761BA81005FE872 /* SDL_fatal.c in Sources */ = {isa = PBXBuildFile; fileRef = 01538439006D7D947F000001 /* SDL_fatal.c */; };
 		BECDF6A50761BA81005FE872 /* SDL.c in Sources */ = {isa = PBXBuildFile; fileRef = 0153843C006D7D947F000001 /* SDL.c */; };
 		BECDF6A60761BA81005FE872 /* SDL_sysjoystick.c in Sources */ = {isa = PBXBuildFile; fileRef = F51789D101769A2401D3D55B /* SDL_sysjoystick.c */; };
-		BECDF6A80761BA81005FE872 /* SDL_syscdrom.c in Sources */ = {isa = PBXBuildFile; fileRef = 083E4894006D86FF7F000001 /* SDL_syscdrom.c */; };
 		BECDF6AF0761BA81005FE872 /* SDL_cpuinfo.c in Sources */ = {isa = PBXBuildFile; fileRef = B24DA50405A88D52006B9F1C /* SDL_cpuinfo.c */; };
 		BECDF6B00761BA81005FE872 /* SDL_coreaudio.c in Sources */ = {isa = PBXBuildFile; fileRef = BECDF5D50761B759005FE872 /* SDL_coreaudio.c */; };
 		F306D6A00CB645A900B70512 /* SDL_yuv_mmx.c in Sources */ = {isa = PBXBuildFile; fileRef = 00B7E625097F2DD100826121 /* SDL_yuv_mmx.c */; };
@@ -732,11 +700,6 @@
 		002F32D509CA0BE700EBEB88 /* SDL_diskaudio.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SDL_diskaudio.h; sourceTree = "<group>"; };
 		002F32E209CA0BF600EBEB88 /* SDL_dummyaudio.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = SDL_dummyaudio.c; sourceTree = "<group>"; };
 		002F32E309CA0BF600EBEB88 /* SDL_dummyaudio.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SDL_dummyaudio.h; sourceTree = "<group>"; };
-		004C2C860975E13300E9D430 /* AudioFilePlayer.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = AudioFilePlayer.c; sourceTree = "<group>"; };
-		004C2C870975E13300E9D430 /* AudioFileReaderThread.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = AudioFileReaderThread.c; sourceTree = "<group>"; };
-		004C2C880975E13300E9D430 /* CDPlayer.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = CDPlayer.c; sourceTree = "<group>"; };
-		004C2C890975E13300E9D430 /* SDLOSXCAGuard.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = SDLOSXCAGuard.c; sourceTree = "<group>"; };
-		004C2C8A0975E13300E9D430 /* SDLOSXCAGuard.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SDLOSXCAGuard.h; sourceTree = "<group>"; };
 		0073179B0858DECD00B2BC32 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = /System/Library/Frameworks/AudioToolbox.framework; sourceTree = "<absolute>"; };
 		0073179C0858DECD00B2BC32 /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = /System/Library/Frameworks/AudioUnit.framework; sourceTree = "<absolute>"; };
 		0073179D0858DECD00B2BC32 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
@@ -751,7 +714,6 @@
 		00B7E620097F2D9E00826121 /* SDL_mixer_MMX.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SDL_mixer_MMX.h; sourceTree = "<group>"; };
 		00B7E625097F2DD100826121 /* SDL_yuv_mmx.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = SDL_yuv_mmx.c; sourceTree = "<group>"; };
 		00F5D79E0990CA0D0051C449 /* UniversalBinaryNotes.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = UniversalBinaryNotes.rtf; sourceTree = "<group>"; };
-		0153832E006D78D67F000001 /* SDL_romaudio.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = SDL_romaudio.c; sourceTree = "<group>"; };
 		01538330006D78D67F000001 /* SDL_audio.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = SDL_audio.c; sourceTree = "<group>"; };
 		01538331006D78D67F000001 /* SDL_audiocvt.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = SDL_audiocvt.c; sourceTree = "<group>"; };
 		01538332006D78D67F000001 /* SDL_audiodev.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = SDL_audiodev.c; sourceTree = "<group>"; };
@@ -794,13 +756,10 @@
 		04D5201E1025C66100AA5D3B /* SDL_atomic.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_atomic.c; sourceTree = "<group>"; };
 		04D520371025C6CE00AA5D3B /* SDL_atomic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_atomic.h; path = ../../include/SDL_atomic.h; sourceTree = SOURCE_ROOT; };
 		04D520381025C6CE00AA5D3B /* SDL_power.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_power.h; path = ../../include/SDL_power.h; sourceTree = SOURCE_ROOT; };
-		083E4894006D86FF7F000001 /* SDL_syscdrom.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = SDL_syscdrom.c; sourceTree = "<group>"; };
-		083E4895006D86FF7F000001 /* SDL_cdrom.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = SDL_cdrom.c; sourceTree = "<group>"; };
 		083E489D006D88D97F000001 /* SDL_joystick.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = SDL_joystick.c; sourceTree = "<group>"; };
 		0C5AF5E501191D2B7F000001 /* begin_code.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = begin_code.h; path = ../../include/begin_code.h; sourceTree = SOURCE_ROOT; };
 		0C5AF5E601191D2B7F000001 /* close_code.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = close_code.h; path = ../../include/close_code.h; sourceTree = SOURCE_ROOT; };
 		0C5AF5E801191D2B7F000001 /* SDL_audio.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SDL_audio.h; path = ../../include/SDL_audio.h; sourceTree = SOURCE_ROOT; };
-		0C5AF5EA01191D2B7F000001 /* SDL_cdrom.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SDL_cdrom.h; path = ../../include/SDL_cdrom.h; sourceTree = SOURCE_ROOT; };
 		0C5AF5EB01191D2B7F000001 /* SDL_copying.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SDL_copying.h; path = ../../include/SDL_copying.h; sourceTree = SOURCE_ROOT; };
 		0C5AF5EC01191D2B7F000001 /* SDL_endian.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SDL_endian.h; path = ../../include/SDL_endian.h; sourceTree = SOURCE_ROOT; };
 		0C5AF5ED01191D2B7F000001 /* SDL_error.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SDL_error.h; path = ../../include/SDL_error.h; sourceTree = SOURCE_ROOT; };
@@ -829,10 +788,6 @@
 		672FFFF40E368CAC005A6914 /* ForceFeedback.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ForceFeedback.framework; path = /System/Library/Frameworks/ForceFeedback.framework; sourceTree = "<absolute>"; };
 		B24DA50405A88D52006B9F1C /* SDL_cpuinfo.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = SDL_cpuinfo.c; sourceTree = "<group>"; };
 		B29A290D04E5B28700A80002 /* SDL_loadso.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SDL_loadso.h; path = ../../include/SDL_loadso.h; sourceTree = "<group>"; };
-		B2A23A450415799100A80002 /* AudioFilePlayer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = AudioFilePlayer.h; sourceTree = "<group>"; };
-		B2A23A7A04157C5700A80002 /* SDL_syscdrom_c.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SDL_syscdrom_c.h; sourceTree = "<group>"; };
-		B2A23A7B04157C5700A80002 /* SDL_syscdrom.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = SDL_syscdrom.c; sourceTree = "<group>"; };
-		B2A23A8104157D5D00A80002 /* CDPlayer.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CDPlayer.h; sourceTree = "<group>"; };
 		B2CF8DC405C444E400E5DC7F /* SDL_cpuinfo.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SDL_cpuinfo.h; path = ../../include/SDL_cpuinfo.h; sourceTree = SOURCE_ROOT; };
 		B2CF8DC705C4450500E5DC7F /* SDL_name.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SDL_name.h; path = ../../include/SDL_name.h; sourceTree = SOURCE_ROOT; };
 		BECDF5D50761B759005FE872 /* SDL_coreaudio.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = SDL_coreaudio.c; sourceTree = "<group>"; };
@@ -1147,7 +1102,6 @@
 			isa = PBXGroup;
 			children = (
 				BECDF5D20761B759005FE872 /* macosx */,
-				0153832D006D78D67F000001 /* macrom */,
 				002F32D209CA0BE700EBEB88 /* disk */,
 				002F32E009CA0BF600EBEB88 /* dummy */,
 				01538330006D78D67F000001 /* SDL_audio.c */,
@@ -1162,14 +1116,6 @@
 			name = audio;
 			path = ../../src/audio;
 			sourceTree = SOURCE_ROOT;
-		};
-		0153832D006D78D67F000001 /* macrom */ = {
-			isa = PBXGroup;
-			children = (
-				0153832E006D78D67F000001 /* SDL_romaudio.c */,
-			);
-			path = macrom;
-			sourceTree = "<group>";
 		};
 		01538367006D79147F000001 /* events */ = {
 			isa = PBXGroup;
@@ -1276,7 +1222,6 @@
 				0C5AF5E501191D2B7F000001 /* begin_code.h */,
 				0C5AF5E601191D2B7F000001 /* close_code.h */,
 				0C5AF5E801191D2B7F000001 /* SDL_audio.h */,
-				0C5AF5EA01191D2B7F000001 /* SDL_cdrom.h */,
 				F3DEB5820C57E0D4003E2527 /* SDL_compat.h */,
 				0C5AF5EB01191D2B7F000001 /* SDL_copying.h */,
 				B2CF8DC405C444E400E5DC7F /* SDL_cpuinfo.h */,
@@ -1352,25 +1297,6 @@
 			path = macosx;
 			sourceTree = "<group>";
 		};
-		083E4892006D86FF7F000001 /* cdrom */ = {
-			isa = PBXGroup;
-			children = (
-				B2A23A420415799100A80002 /* macosx */,
-				083E4893006D86FF7F000001 /* dummy */,
-				083E4895006D86FF7F000001 /* SDL_cdrom.c */,
-			);
-			name = cdrom;
-			path = ../../src/cdrom;
-			sourceTree = SOURCE_ROOT;
-		};
-		083E4893006D86FF7F000001 /* dummy */ = {
-			isa = PBXGroup;
-			children = (
-				083E4894006D86FF7F000001 /* SDL_syscdrom.c */,
-			);
-			path = dummy;
-			sourceTree = "<group>";
-		};
 		083E489A006D88D97F000001 /* joystick */ = {
 			isa = PBXGroup;
 			children = (
@@ -1411,7 +1337,6 @@
 				04D520181025C66100AA5D3B /* atomic */,
 				56B051B10FDB97FD00A86660 /* power */,
 				0153832C006D78D67F000001 /* audio */,
-				083E4892006D86FF7F000001 /* cdrom */,
 				B24DA50105A88D52006B9F1C /* cpuinfo */,
 				01538367006D79147F000001 /* events */,
 				01538376006D79307F000001 /* file */,
@@ -1472,22 +1397,6 @@
 			);
 			name = cpuinfo;
 			path = ../../src/cpuinfo;
-			sourceTree = "<group>";
-		};
-		B2A23A420415799100A80002 /* macosx */ = {
-			isa = PBXGroup;
-			children = (
-				004C2C860975E13300E9D430 /* AudioFilePlayer.c */,
-				B2A23A450415799100A80002 /* AudioFilePlayer.h */,
-				004C2C870975E13300E9D430 /* AudioFileReaderThread.c */,
-				004C2C880975E13300E9D430 /* CDPlayer.c */,
-				B2A23A8104157D5D00A80002 /* CDPlayer.h */,
-				004C2C890975E13300E9D430 /* SDLOSXCAGuard.c */,
-				004C2C8A0975E13300E9D430 /* SDLOSXCAGuard.h */,
-				B2A23A7B04157C5700A80002 /* SDL_syscdrom.c */,
-				B2A23A7A04157C5700A80002 /* SDL_syscdrom_c.h */,
-			);
-			path = macosx;
 			sourceTree = "<group>";
 		};
 		BEC562FE0761C0E800A33029 /* Linked Frameworks */ = {
@@ -1608,7 +1517,6 @@
 				0014B92409C0E585003A99D5 /* begin_code.h in Headers */,
 				0014B92509C0E585003A99D5 /* close_code.h in Headers */,
 				0014B92709C0E585003A99D5 /* SDL_audio.h in Headers */,
-				0014B92909C0E585003A99D5 /* SDL_cdrom.h in Headers */,
 				0014B92A09C0E585003A99D5 /* SDL_copying.h in Headers */,
 				0014B92B09C0E585003A99D5 /* SDL_cpuinfo.h in Headers */,
 				0014B92C09C0E585003A99D5 /* SDL_endian.h in Headers */,
@@ -1676,7 +1584,6 @@
 				002F31EF09CA02D800EBEB88 /* SDL_cpuinfo.h in Headers */,
 				002F31F009CA02D800EBEB88 /* SDL_name.h in Headers */,
 				002F31F109CA02D800EBEB88 /* SDL_coreaudio.h in Headers */,
-				002F31F209CA02D800EBEB88 /* SDLOSXCAGuard.h in Headers */,
 				002F31F609CA02D800EBEB88 /* SDL_config_macosx.h in Headers */,
 				002F31F909CA02D800EBEB88 /* SDL_config.h in Headers */,
 				002F31FA09CA02D800EBEB88 /* SDL_platform.h in Headers */,
@@ -1734,7 +1641,6 @@
 				00162DAC09BD222F0037C8D0 /* begin_code.h in Headers */,
 				00162DAD09BD222F0037C8D0 /* close_code.h in Headers */,
 				00162DAF09BD222F0037C8D0 /* SDL_audio.h in Headers */,
-				00162DB109BD222F0037C8D0 /* SDL_cdrom.h in Headers */,
 				00162DB209BD222F0037C8D0 /* SDL_copying.h in Headers */,
 				00162DB309BD222F0037C8D0 /* SDL_cpuinfo.h in Headers */,
 				00162DB409BD222F0037C8D0 /* SDL_endian.h in Headers */,
@@ -1813,7 +1719,6 @@
 				BECDF6760761BA81005FE872 /* SDL_cpuinfo.h in Headers */,
 				BECDF6770761BA81005FE872 /* SDL_name.h in Headers */,
 				BECDF6780761BA81005FE872 /* SDL_coreaudio.h in Headers */,
-				004C2C940975E13300E9D430 /* SDLOSXCAGuard.h in Headers */,
 				00162D4609BD1FA90037C8D0 /* SDL_config_macosx.h in Headers */,
 				00162D4909BD1FA90037C8D0 /* SDL_config.h in Headers */,
 				00162D4A09BD1FA90037C8D0 /* SDL_platform.h in Headers */,
@@ -2148,7 +2053,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0014B94509C0E585003A99D5 /* SDL_romaudio.c in Sources */,
 				0014B94609C0E585003A99D5 /* SDL_audio.c in Sources */,
 				0014B94709C0E585003A99D5 /* SDL_audiocvt.c in Sources */,
 				0014B94809C0E585003A99D5 /* SDL_audiodev.c in Sources */,
@@ -2176,17 +2080,11 @@
 				0014B96309C0E585003A99D5 /* SDL_fatal.c in Sources */,
 				0014B96409C0E585003A99D5 /* SDL.c in Sources */,
 				0014B96509C0E585003A99D5 /* SDL_thread.c in Sources */,
-				0014B96609C0E585003A99D5 /* SDL_cdrom.c in Sources */,
 				0014B96709C0E585003A99D5 /* SDL_joystick.c in Sources */,
 				0014B96809C0E585003A99D5 /* SDL_stretch.c in Sources */,
 				0014B96909C0E585003A99D5 /* SDL_sysjoystick.c in Sources */,
 				0014B97009C0E585003A99D5 /* SDL_cpuinfo.c in Sources */,
-				0014B97109C0E585003A99D5 /* SDL_syscdrom.c in Sources */,
 				0014B97209C0E585003A99D5 /* SDL_coreaudio.c in Sources */,
-				0014B97309C0E585003A99D5 /* AudioFilePlayer.c in Sources */,
-				0014B97409C0E585003A99D5 /* AudioFileReaderThread.c in Sources */,
-				0014B97509C0E585003A99D5 /* CDPlayer.c in Sources */,
-				0014B97609C0E585003A99D5 /* SDLOSXCAGuard.c in Sources */,
 				0014B97709C0E585003A99D5 /* SDL_syscond.c in Sources */,
 				0014B97809C0E585003A99D5 /* SDL_sysmutex.c in Sources */,
 				0014B97909C0E585003A99D5 /* SDL_syssem.c in Sources */,
@@ -2246,8 +2144,6 @@
 				002F321509CA02D800EBEB88 /* SDL_audiodev.c in Sources */,
 				002F321609CA02D800EBEB88 /* SDL_mixer.c in Sources */,
 				002F321709CA02D800EBEB88 /* SDL_wave.c in Sources */,
-				002F321809CA02D800EBEB88 /* SDL_romaudio.c in Sources */,
-				002F321909CA02D800EBEB88 /* SDL_cdrom.c in Sources */,
 				002F321B09CA02D800EBEB88 /* SDL_events.c in Sources */,
 				002F321D09CA02D800EBEB88 /* SDL_keyboard.c in Sources */,
 				002F321E09CA02D800EBEB88 /* SDL_mouse.c in Sources */,
@@ -2273,13 +2169,8 @@
 				002F323509CA02D800EBEB88 /* SDL_fatal.c in Sources */,
 				002F323609CA02D800EBEB88 /* SDL.c in Sources */,
 				002F323709CA02D800EBEB88 /* SDL_sysjoystick.c in Sources */,
-				002F323809CA02D800EBEB88 /* SDL_syscdrom.c in Sources */,
 				002F323F09CA02D800EBEB88 /* SDL_cpuinfo.c in Sources */,
 				002F324009CA02D800EBEB88 /* SDL_coreaudio.c in Sources */,
-				002F324109CA02D800EBEB88 /* AudioFilePlayer.c in Sources */,
-				002F324209CA02D800EBEB88 /* AudioFileReaderThread.c in Sources */,
-				002F324309CA02D800EBEB88 /* CDPlayer.c in Sources */,
-				002F324409CA02D800EBEB88 /* SDLOSXCAGuard.c in Sources */,
 				002F324509CA02D800EBEB88 /* SDL_syscond.c in Sources */,
 				002F324609CA02D800EBEB88 /* SDL_sysmutex.c in Sources */,
 				002F324709CA02D800EBEB88 /* SDL_syssem.c in Sources */,
@@ -2334,7 +2225,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BECDF62D0761BA81005FE872 /* SDL_romaudio.c in Sources */,
 				BECDF62E0761BA81005FE872 /* SDL_audio.c in Sources */,
 				BECDF62F0761BA81005FE872 /* SDL_audiocvt.c in Sources */,
 				BECDF6300761BA81005FE872 /* SDL_audiodev.c in Sources */,
@@ -2362,17 +2252,11 @@
 				BECDF64E0761BA81005FE872 /* SDL_fatal.c in Sources */,
 				BECDF6500761BA81005FE872 /* SDL.c in Sources */,
 				BECDF6510761BA81005FE872 /* SDL_thread.c in Sources */,
-				BECDF6520761BA81005FE872 /* SDL_cdrom.c in Sources */,
 				BECDF6530761BA81005FE872 /* SDL_joystick.c in Sources */,
 				BECDF6580761BA81005FE872 /* SDL_stretch.c in Sources */,
 				BECDF6590761BA81005FE872 /* SDL_sysjoystick.c in Sources */,
 				BECDF6610761BA81005FE872 /* SDL_cpuinfo.c in Sources */,
-				BECDF6620761BA81005FE872 /* SDL_syscdrom.c in Sources */,
 				BECDF6670761BA81005FE872 /* SDL_coreaudio.c in Sources */,
-				004C2C8B0975E13300E9D430 /* AudioFilePlayer.c in Sources */,
-				004C2C8C0975E13300E9D430 /* AudioFileReaderThread.c in Sources */,
-				004C2C8D0975E13300E9D430 /* CDPlayer.c in Sources */,
-				004C2C8E0975E13300E9D430 /* SDLOSXCAGuard.c in Sources */,
 				00162D5309BD20DA0037C8D0 /* SDL_syscond.c in Sources */,
 				00162D5409BD20DA0037C8D0 /* SDL_sysmutex.c in Sources */,
 				00162D5609BD20DA0037C8D0 /* SDL_syssem.c in Sources */,
@@ -2454,8 +2338,6 @@
 				BECDF67D0761BA81005FE872 /* SDL_audiodev.c in Sources */,
 				BECDF67E0761BA81005FE872 /* SDL_mixer.c in Sources */,
 				BECDF67F0761BA81005FE872 /* SDL_wave.c in Sources */,
-				BECDF6800761BA81005FE872 /* SDL_romaudio.c in Sources */,
-				BECDF6810761BA81005FE872 /* SDL_cdrom.c in Sources */,
 				BECDF6840761BA81005FE872 /* SDL_events.c in Sources */,
 				BECDF6860761BA81005FE872 /* SDL_keyboard.c in Sources */,
 				BECDF6870761BA81005FE872 /* SDL_mouse.c in Sources */,
@@ -2481,13 +2363,8 @@
 				BECDF6A30761BA81005FE872 /* SDL_fatal.c in Sources */,
 				BECDF6A50761BA81005FE872 /* SDL.c in Sources */,
 				BECDF6A60761BA81005FE872 /* SDL_sysjoystick.c in Sources */,
-				BECDF6A80761BA81005FE872 /* SDL_syscdrom.c in Sources */,
 				BECDF6AF0761BA81005FE872 /* SDL_cpuinfo.c in Sources */,
 				BECDF6B00761BA81005FE872 /* SDL_coreaudio.c in Sources */,
-				004C2C900975E13300E9D430 /* AudioFilePlayer.c in Sources */,
-				004C2C910975E13300E9D430 /* AudioFileReaderThread.c in Sources */,
-				004C2C920975E13300E9D430 /* CDPlayer.c in Sources */,
-				004C2C930975E13300E9D430 /* SDLOSXCAGuard.c in Sources */,
 				00162D5909BD20DA0037C8D0 /* SDL_syscond.c in Sources */,
 				00162D5A09BD20DA0037C8D0 /* SDL_sysmutex.c in Sources */,
 				00162D5C09BD20DA0037C8D0 /* SDL_syssem.c in Sources */,
@@ -2937,23 +2814,22 @@
 		0073178F0858DB0500B2BC32 /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					i386,
-					ppc,
-				);
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1 = "x86_64 i386 ppc";
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_AUTO_VECTORIZATION = YES;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_ENABLE_SSE3_EXTENSIONS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_VERSION = 4.0;
 				GCC_VERSION_i386 = 4.0;
-				GCC_VERSION_ppc = 3.3;
+				GCC_VERSION_ppc = 4.0;
 				MACOSX_DEPLOYMENT_TARGET = "";
 				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
-				MACOSX_DEPLOYMENT_TARGET_ppc = 10.2;
+				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				PREBINDING = NO;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 				SDKROOT_i386 = /Developer/SDKs/MacOSX10.4u.sdk;
 				SDKROOT_ppc = /Developer/SDKs/MacOSX10.4u.sdk;
 				WARNING_CFLAGS = "-Wmost";
@@ -2964,23 +2840,22 @@
 		007317900858DB0500B2BC32 /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					i386,
-					ppc,
-				);
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1 = "x86_64 i386 ppc";
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_AUTO_VECTORIZATION = YES;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_ENABLE_SSE3_EXTENSIONS = YES;
 				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_VERSION = 4.0;
 				GCC_VERSION_i386 = 4.0;
-				GCC_VERSION_ppc = 3.3;
+				GCC_VERSION_ppc = 4.0;
 				MACOSX_DEPLOYMENT_TARGET = "";
 				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
-				MACOSX_DEPLOYMENT_TARGET_ppc = 10.2;
+				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				PREBINDING = NO;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 				SDKROOT_i386 = /Developer/SDKs/MacOSX10.4u.sdk;
 				SDKROOT_ppc = /Developer/SDKs/MacOSX10.4u.sdk;
 				WARNING_CFLAGS = "-Wmost";
@@ -2991,23 +2866,22 @@
 		007317910858DB0500B2BC32 /* Default */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					i386,
-					ppc,
-				);
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1 = "x86_64 i386 ppc";
 				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_AUTO_VECTORIZATION = YES;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_ENABLE_SSE3_EXTENSIONS = YES;
 				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_VERSION = 4.0;
 				GCC_VERSION_i386 = 4.0;
-				GCC_VERSION_ppc = 3.3;
+				GCC_VERSION_ppc = 4.0;
 				MACOSX_DEPLOYMENT_TARGET = "";
 				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
-				MACOSX_DEPLOYMENT_TARGET_ppc = 10.2;
+				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				PREBINDING = NO;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+				SDKROOT = /Developer/SDKs/MacOSX10.5.sdk;
 				SDKROOT_i386 = /Developer/SDKs/MacOSX10.4u.sdk;
 				SDKROOT_ppc = /Developer/SDKs/MacOSX10.4u.sdk;
 				WARNING_CFLAGS = "-Wmost";
