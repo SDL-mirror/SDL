@@ -170,7 +170,6 @@ Things to do:
 - Finish video driver (the 'wincommon' can be a good example for missing
   things like application icon and so on...)
 - Enable MMX/SSE/SSE2 acceleration functions
-- Rewrite CDROM support using DOS Ioctl for better support.
 
 
 

@@ -85,7 +85,6 @@ Window Manager - Mostly done. SetIcon/IconifyWindow not implemented.
 Events - Mostly done. Resize and some joystick events missing.
 Joystick - Currently assumes a single joystick with 4 buttons.
 Audio - Done
-CDROM - Not implemented.
 Threads - Done
 Timers - Done
 

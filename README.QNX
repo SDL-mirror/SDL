@@ -4,7 +4,6 @@ Last changed at 10 Jun 2009.
 QNX Photon and GF drivers are being constructed, OpenGL ES support is
     finished.  Still no 2D renderer support in GF and Photon drivers.
 QNX QSA (QNX Sound Architecture) driver is ready.
-QNX CDROM driver is ready.
 QNX HID input driver is finished.
 
 ----------------------
