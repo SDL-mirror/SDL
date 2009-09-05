@@ -22,8 +22,9 @@
 #include "SDL_config.h"
 
 #include <CoreAudio/CoreAudio.h>
+#include <CoreServices/CoreServices.h>
 #include <AudioUnit/AudioUnit.h>
-#ifdef AVAILABLE_MAC_OS_X_VERSION_10_5_AND_LATER
+#if MAC_OS_X_VERSION_MAX_ALLOWED == 1050
 #include <AudioUnit/AUNTComponent.h>
 #endif
 
