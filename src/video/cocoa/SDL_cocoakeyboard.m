@@ -351,14 +351,22 @@ HandleModifiers(_THIS, unsigned short scancode, unsigned int modifierFlags)
 static void
 UpdateKeymap(SDL_VideoData *data)
 {
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1050
+    TISInputSourceRef key_layout;
+#else
     KeyboardLayoutRef key_layout;
+#endif
     const void *chr_data;
     int i;
     SDL_scancode scancode;
     SDLKey keymap[SDL_NUM_SCANCODES];
 
     /* See if the keymap needs to be updated */
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1050
+    key_layout = TISCopyCurrentKeyboardLayoutInputSource();
+#else
     KLGetCurrentKeyboardLayout(&key_layout);
+#endif
     if (key_layout == data->key_layout) {
         return;
     }
@@ -367,7 +375,15 @@ UpdateKeymap(SDL_VideoData *data)
     SDL_GetDefaultKeymap(keymap);
 
     /* Try Unicode data first (preferred as of Mac OS X 10.5) */
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1050
+    CFDataRef uchrDataRef = TISGetInputSourceProperty(key_layout, kTISPropertyUnicodeKeyLayoutData);
+    if (uchrDataRef)
+        chr_data = CFDataGetBytePtr(uchrDataRef);
+    else
+        goto cleanup;
+#else
     KLGetKeyboardLayoutProperty(key_layout, kKLuchrData, &chr_data);
+#endif
     if (chr_data) {
         UInt32 keyboard_type = LMGetKbdType();
         OSStatus err;
@@ -385,7 +401,8 @@ UpdateKeymap(SDL_VideoData *data)
             }
 
             dead_key_state = 0;
-            err = UCKeyTranslate (chr_data, i, kUCKeyActionDown,
+            err = UCKeyTranslate ((UCKeyboardLayout *) chr_data,
+                                  i, kUCKeyActionDown,
                                   0, keyboard_type,
                                   kUCKeyTranslateNoDeadKeysMask,
                                   &dead_key_state, 8, &len, s);
@@ -400,6 +417,10 @@ UpdateKeymap(SDL_VideoData *data)
         return;
     }
 
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1050
+cleanup:
+    CFRelease(key_layout);
+#else
     /* Fall back to older style key map data */
     KLGetKeyboardLayoutProperty(key_layout, kKLKCHRData, &chr_data);
     if (chr_data) {
@@ -449,6 +470,7 @@ UpdateKeymap(SDL_VideoData *data)
         SDL_SetKeymap(data->keyboard, 0, keymap, SDL_NUM_SCANCODES);
         return;
     }
+#endif
 }
 
 void
