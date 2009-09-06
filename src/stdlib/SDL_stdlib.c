@@ -28,16 +28,16 @@
 #ifndef HAVE_LIBC
 /* These are some C runtime intrinsics that need to be defined */
 
-#if defined(_MSC_VER) && !defined(_WIN64)
+#if defined(_MSC_VER)
 
 #ifndef __FLTUSED__
 #define __FLTUSED__
-#ifdef __cplusplus
-extern "C"
+__declspec(selectany) int _fltused = 1;
 #endif
-__declspec(selectany)
-     int _fltused = 1;
-#endif
+
+#ifdef _WIN64
+
+#else
 
 /* Float to long */
 void
@@ -692,6 +692,8 @@ RETZERO:
     }
     /* *INDENT-ON* */
 }
+
+#endif /* _WIN64 */
 
 #endif /* MSC_VER */
 
