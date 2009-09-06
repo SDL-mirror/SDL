@@ -528,7 +528,10 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             int w, h;
             Uint32 window_flags;
 
-            GetClientRect(hwnd, &rect);
+            if (!GetClientRect(hwnd, &rect) ||
+                (rect.right == rect.left && rect.bottom == rect.top)) {
+                break;
+            }
             ClientToScreen(hwnd, (LPPOINT) & rect);
             ClientToScreen(hwnd, (LPPOINT) & rect + 1);
 
