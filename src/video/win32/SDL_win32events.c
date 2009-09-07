@@ -236,7 +236,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         {
             LPBYTE lpb;
             const RAWINPUTHEADER *header;
-            int index;
+            int index = -1;
             int i;
             int size = 0;
             const RAWMOUSE *raw_mouse = NULL;
@@ -260,6 +260,10 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                     index = i;
                     break;
                 }
+            }
+            if (index < 0) {
+                /* New mouse?  Should we dynamically update mouse list? */
+                return (0);
             }
 
             GetCursorPos(&point);
