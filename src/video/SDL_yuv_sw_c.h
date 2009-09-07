@@ -26,6 +26,32 @@
 
 /* This is the software implementation of the YUV texture support */
 
+struct SDL_SW_YUVTexture
+{
+    Uint32 format;
+    Uint32 target_format;
+    int w, h;
+    Uint8 *pixels;
+    int *colortab;
+    Uint32 *rgb_2_pix;
+    void (*Display1X) (int *colortab, Uint32 * rgb_2_pix,
+                       unsigned char *lum, unsigned char *cr,
+                       unsigned char *cb, unsigned char *out,
+                       int rows, int cols, int mod);
+    void (*Display2X) (int *colortab, Uint32 * rgb_2_pix,
+                       unsigned char *lum, unsigned char *cr,
+                       unsigned char *cb, unsigned char *out,
+                       int rows, int cols, int mod);
+
+    /* These are just so we don't have to allocate them separately */
+    Uint16 pitches[3];
+    Uint8 *planes[3];
+
+    /* This is a temporary surface in case we have to stretch copy */
+    SDL_Surface *stretch;
+    SDL_Surface *display;
+};
+
 typedef struct SDL_SW_YUVTexture SDL_SW_YUVTexture;
 
 SDL_SW_YUVTexture *SDL_SW_CreateYUVTexture(Uint32 format, int w, int h);
