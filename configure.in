@@ -2626,8 +2626,6 @@ case "$host" in
         if test x$enable_audio = xyes; then
             AC_DEFINE(SDL_AUDIO_DRIVER_COREAUDIO)
             SOURCES="$SOURCES $srcdir/src/audio/macosx/*.c"
-            AC_DEFINE(SDL_AUDIO_DRIVER_SNDMGR)
-            SOURCES="$SOURCES $srcdir/src/audio/macrom/*.c"
             have_audio=yes
         fi
         # Set up files for the joystick library
