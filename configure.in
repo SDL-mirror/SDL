@@ -676,6 +676,14 @@ CheckNASM()
             return
             ;;
     esac
+
+    dnl Mac OS X might report itself as "i386" but generate x86_64 code.
+    dnl  So see what size we think a pointer is, and bail if not 32-bit.
+    AC_CHECK_SIZEOF([void *], 4)
+    if test x"$SIZEOF_VOID_P" != x4; then
+        return
+    fi
+
     dnl Check for NASM (for assembly blit routines)
     AC_ARG_ENABLE(nasm,
 AC_HELP_STRING([--enable-nasm], [use nasm assembly blitters on x86 [[default=yes]]]),
