@@ -45,13 +45,20 @@
 #define GLX_SAMPLES_ARB                    100001
 #endif
 
-#ifndef GLX_EXT_visual_rating
-#define GLX_EXT_visual_rating
+/* GLX_EXT_visual_rating stuff that might not be in the system headers... */
+#ifndef GLX_VISUAL_CAVEAT_EXT
 #define GLX_VISUAL_CAVEAT_EXT              0x20
+#endif
+#ifndef GLX_NONE_EXT
 #define GLX_NONE_EXT                       0x8000
+#endif
+#ifndef GLX_SLOW_VISUAL_EXT
 #define GLX_SLOW_VISUAL_EXT                0x8001
+#endif
+#ifndef GLX_NON_CONFORMANT_VISUAL_EXT
 #define GLX_NON_CONFORMANT_VISUAL_EXT      0x800D
 #endif
+
 
 #if SDL_VIDEO_OPENGL_GLX
 static int glXExtensionSupported(_THIS, const char *extension)
