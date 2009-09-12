@@ -21,8 +21,10 @@
 */
 #include "SDL_config.h"
 
+#include <CoreAudio/CoreAudio.h>
+#include <CoreServices/CoreServices.h>
 #include <AudioUnit/AudioUnit.h>
-#ifdef AVAILABLE_MAC_OS_X_VERSION_10_5_AND_LATER
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= 1050
 #include <AudioUnit/AUNTComponent.h>
 #endif
 
@@ -91,19 +93,25 @@ AudioBootStrap COREAUDIO_bootstrap = {
 };
 
 /* The CoreAudio callback */
-static OSStatus     audioCallback (void                             *inRefCon, 
-                                    AudioUnitRenderActionFlags      inActionFlags,
-                                    const AudioTimeStamp            *inTimeStamp, 
-                                    UInt32                          inBusNumber, 
-                                    AudioBuffer                     *ioData)
+static OSStatus     audioCallback (void                            *inRefCon,
+                                   AudioUnitRenderActionFlags      *ioActionFlags,
+                                   const AudioTimeStamp            *inTimeStamp,
+                                   UInt32                          inBusNumber,
+                                   UInt32                          inNumberFrames,
+                                   AudioBufferList                 *ioData)
 {
     SDL_AudioDevice *this = (SDL_AudioDevice *)inRefCon;
     UInt32 remaining, len;
+    AudioBuffer *abuf;
     void *ptr;
+    UInt32 i;
 
     /* Only do anything if audio is enabled and not paused */
     if ( ! this->enabled || this->paused ) {
-        SDL_memset(ioData->mData, this->spec.silence, ioData->mDataByteSize);
+        for (i = 0; i < ioData->mNumberBuffers; i++) {
+            abuf = &ioData->mBuffers[i];
+            SDL_memset(abuf->mData, this->spec.silence, abuf->mDataByteSize);
+        }
         return 0;
     }
     
@@ -114,29 +122,32 @@ static OSStatus     audioCallback (void                             *inRefCon,
     assert(!this->convert.needed);
     assert(this->spec.channels == ioData->mNumberChannels);
      */
-    
-    remaining = ioData->mDataByteSize;
-    ptr = ioData->mData;
-    while (remaining > 0) {
-        if (bufferOffset >= bufferSize) {
-            /* Generate the data */
-            SDL_memset(buffer, this->spec.silence, bufferSize);
-            SDL_mutexP(this->mixer_lock);
-            (*this->spec.callback)(this->spec.userdata,
-                        buffer, bufferSize);
-            SDL_mutexV(this->mixer_lock);
-            bufferOffset = 0;
-        }
+
+    for (i = 0; i < ioData->mNumberBuffers; i++) {
+        abuf = &ioData->mBuffers[i];
+        remaining = abuf->mDataByteSize;
+        ptr = abuf->mData;
+        while (remaining > 0) {
+            if (bufferOffset >= bufferSize) {
+                /* Generate the data */
+                SDL_memset(buffer, this->spec.silence, bufferSize);
+                SDL_mutexP(this->mixer_lock);
+                (*this->spec.callback)(this->spec.userdata,
+                            buffer, bufferSize);
+                SDL_mutexV(this->mixer_lock);
+                bufferOffset = 0;
+            }
         
-        len = bufferSize - bufferOffset;
-        if (len > remaining)
-            len = remaining;
-        SDL_memcpy(ptr, (char *)buffer + bufferOffset, len);
-        ptr = (char *)ptr + len;
-        remaining -= len;
-        bufferOffset += len;
+            len = bufferSize - bufferOffset;
+            if (len > remaining)
+                len = remaining;
+            SDL_memcpy(ptr, (char *)buffer + bufferOffset, len);
+            ptr = (char *)ptr + len;
+            remaining -= len;
+            bufferOffset += len;
+        }
     }
-    
+
     return 0;
 }
 
@@ -159,7 +170,7 @@ Uint8 *Core_GetAudioBuf(_THIS)
 void Core_CloseAudio(_THIS)
 {
     OSStatus result;
-    struct AudioUnitInputCallback callback;
+    struct AURenderCallbackStruct callback;
 
     /* stop processing the audio unit */
     result = AudioOutputUnitStop (outputAudioUnit);
@@ -172,7 +183,7 @@ void Core_CloseAudio(_THIS)
     callback.inputProc = 0;
     callback.inputProcRefCon = 0;
     result = AudioUnitSetProperty (outputAudioUnit, 
-                        kAudioUnitProperty_SetInputCallback, 
+                        kAudioUnitProperty_SetRenderCallback,
                         kAudioUnitScope_Input, 
                         0,
                         &callback, 
@@ -203,7 +214,7 @@ int Core_OpenAudio(_THIS, SDL_AudioSpec *spec)
     OSStatus result = noErr;
     Component comp;
     ComponentDescription desc;
-    struct AudioUnitInputCallback callback;
+    struct AURenderCallbackStruct callback;
     AudioStreamBasicDescription requestedDesc;
 
     /* Setup a AudioStreamBasicDescription with the requested format */
@@ -224,9 +235,9 @@ int Core_OpenAudio(_THIS, SDL_AudioSpec *spec)
 
 
     /* Locate the default output audio unit */
-    desc.componentType = kAudioUnitComponentType;
-    desc.componentSubType = kAudioUnitSubType_Output;
-    desc.componentManufacturer = kAudioUnitID_DefaultOutput;
+    desc.componentType = kAudioUnitType_Output;
+    desc.componentSubType = kAudioUnitSubType_DefaultOutput;
+    desc.componentManufacturer = kAudioUnitManufacturer_Apple;
     desc.componentFlags = 0;
     desc.componentFlagsMask = 0;
     
@@ -256,7 +267,7 @@ int Core_OpenAudio(_THIS, SDL_AudioSpec *spec)
     callback.inputProc = audioCallback;
     callback.inputProcRefCon = this;
     result = AudioUnitSetProperty (outputAudioUnit, 
-                        kAudioUnitProperty_SetInputCallback, 
+                        kAudioUnitProperty_SetRenderCallback,
                         kAudioUnitScope_Input, 
                         0,
                         &callback, 
