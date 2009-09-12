@@ -33,7 +33,7 @@
 #include <CoreServices/CoreServices.h>
 
 #include <AudioUnit/AudioUnit.h>
-#ifdef AVAILABLE_MAC_OS_X_VERSION_10_5_AND_LATER
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= 1050
 #include <AudioUnit/AUNTComponent.h>
 #endif
 
@@ -82,7 +82,7 @@ typedef struct S_AudioFilePlayer
     AudioUnit                       mPlayUnit;
     SInt16                          mForkRefNum;
     
-    AudioUnitInputCallback          mInputCallback;
+    AURenderCallbackStruct          mInputCallback;
 
     AudioStreamBasicDescription     mFileDescription;
     
@@ -114,7 +114,7 @@ typedef struct S_AudioFileManager
            as it is called by the parent's Disconnect() method */
     void                (*Disconnect)(struct S_AudioFileManager *afm);
     int                 (*DoConnect)(struct S_AudioFileManager *afm);
-    OSStatus            (*Read)(struct S_AudioFileManager *afm, char *buffer, UInt32 *len);
+    OSStatus            (*Read)(struct S_AudioFileManager *afm, char *buffer, ByteCount *len);
     const char*         (*GetFileBuffer)(struct S_AudioFileManager *afm);
     const AudioFilePlayer *(*GetParent)(struct S_AudioFileManager *afm);
     void                (*SetPosition)(struct S_AudioFileManager *afm, SInt64 pos);  /* seek/rewind in the file */
@@ -148,17 +148,18 @@ typedef struct S_AudioFileManager
     int                 mFinishedReadingData;
 
 /*protected:*/
-    OSStatus            (*Render)(struct S_AudioFileManager *afm, AudioBuffer *ioData);
+    OSStatus            (*Render)(struct S_AudioFileManager *afm, AudioBufferList *ioData);
     OSStatus            (*GetFileData)(struct S_AudioFileManager *afm, void** inOutData, UInt32 *inOutDataSize);
     void                (*AfterRender)(struct S_AudioFileManager *afm);
 
 /*public:*/
     /*static*/
-    OSStatus            (*FileInputProc)(void                             *inRefCon,
-                                         AudioUnitRenderActionFlags      inActionFlags,
+    OSStatus            (*FileInputProc)(void                            *inRefCon,
+                                         AudioUnitRenderActionFlags      *ioActionFlags,
                                          const AudioTimeStamp            *inTimeStamp,
                                          UInt32                          inBusNumber,
-                                         AudioBuffer                     *ioData);
+                                         UInt32                          inNumberFrames,
+                                         AudioBufferList                 *ioData);
 } AudioFileManager;
 
 

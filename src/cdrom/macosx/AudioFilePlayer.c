@@ -23,6 +23,7 @@
     so if you want to see the original search for it on apple.com/developer
 */
 #include "SDL_config.h"
+#include "SDL_endian.h"
 
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     AudioFilePlayer.cpp
@@ -78,7 +79,7 @@ static int AudioFilePlayer_SetDestination (AudioFilePlayer *afp, AudioUnit  *inD
         /* we're going to use this to know which convert routine to call
            a v1 audio unit will have a type of 'aunt'
            a v2 audio unit will have one of several different types. */
-    if (desc.componentType != kAudioUnitComponentType) {
+    if (desc.componentType != kAudioUnitType_Output) {
         result = badComponentInstance;
         /*THROW_RESULT("BAD COMPONENT")*/
         if (result) return 0;
@@ -175,7 +176,7 @@ static int    AudioFilePlayer_Connect(AudioFilePlayer *afp)
         afp->mInputCallback.inputProcRefCon = afp->mAudioFileManager;
 
         OSStatus result = AudioUnitSetProperty (afp->mPlayUnit, 
-                            kAudioUnitProperty_SetInputCallback, 
+                            kAudioUnitProperty_SetRenderCallback,
                             kAudioUnitScope_Input, 
                             0,
                             &afp->mInputCallback, 
@@ -215,7 +216,7 @@ static void    AudioFilePlayer_Disconnect (AudioFilePlayer *afp)
         afp->mInputCallback.inputProc = 0;
         afp->mInputCallback.inputProcRefCon = 0;
         OSStatus result = AudioUnitSetProperty (afp->mPlayUnit, 
-                                        kAudioUnitProperty_SetInputCallback, 
+                                        kAudioUnitProperty_SetRenderCallback,
                                         kAudioUnitScope_Input, 
                                         0,
                                         &afp->mInputCallback, 
@@ -254,12 +255,12 @@ static int    AudioFilePlayer_OpenFile (AudioFilePlayer *afp, const FSRef *inRef
     result = FSReadFork(afp->mForkRefNum, fsAtMark, 0, sizeof(chunkHeader), &chunkHeader, &actual);
        if (result) return 0; /*THROW_RESULT("AudioFilePlayer::OpenFile(): FSReadFork")*/
 
-    if (chunkHeader.ckID != 'FORM') {
+    if (SDL_SwapBE32(chunkHeader.ckID) != 'FORM') {
         result = -1;
         if (result) return 0; /*THROW_RESULT("AudioFilePlayer::OpenFile(): chunk id is not 'FORM'");*/
     }
 
-    if (chunkHeader.formType != 'AIFC') {
+    if (SDL_SwapBE32(chunkHeader.formType) != 'AIFC') {
         result = -1;
         if (result) return 0; /*THROW_RESULT("AudioFilePlayer::OpenFile(): file format is not 'AIFC'");*/
     }
@@ -272,8 +273,11 @@ static int    AudioFilePlayer_OpenFile (AudioFilePlayer *afp, const FSRef *inRef
     offset = 0;
     do {
         result = FSReadFork(afp->mForkRefNum, fsFromMark, offset, sizeof(chunk), &chunk, &actual);
-           if (result) return 0; /*THROW_RESULT("AudioFilePlayer::OpenFile(): FSReadFork")*/
-            
+        if (result) return 0; /*THROW_RESULT("AudioFilePlayer::OpenFile(): FSReadFork")*/
+
+        chunk.ckID = SDL_SwapBE32(chunk.ckID);
+        chunk.ckSize = SDL_SwapBE32(chunk.ckSize);
+
         /* Skip the chunk data */
         offset = chunk.ckSize;
     } while (chunk.ckID != 'SSND');
@@ -281,10 +285,12 @@ static int    AudioFilePlayer_OpenFile (AudioFilePlayer *afp, const FSRef *inRef
     /* Read the header of the SSND chunk. After this, we are positioned right
        at the start of the audio data. */
     result = FSReadFork(afp->mForkRefNum, fsAtMark, 0, sizeof(ssndData), &ssndData, &actual);
-       if (result) return 0; /*THROW_RESULT("AudioFilePlayer::OpenFile(): FSReadFork")*/
+    if (result) return 0; /*THROW_RESULT("AudioFilePlayer::OpenFile(): FSReadFork")*/
+
+    ssndData.offset = SDL_SwapBE32(ssndData.offset);
 
     result = FSSetForkPosition(afp->mForkRefNum, fsFromMark, ssndData.offset);
-       if (result) return 0; /*THROW_RESULT("AudioFilePlayer::OpenFile(): FSSetForkPosition")*/
+    if (result) return 0; /*THROW_RESULT("AudioFilePlayer::OpenFile(): FSSetForkPosition")*/
 
     /* Data size */
     *outFileDataSize = chunk.ckSize - ssndData.offset - 8;
