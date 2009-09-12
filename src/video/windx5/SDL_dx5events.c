@@ -295,7 +295,7 @@ static void post_mouse_motion(int relative, Sint16 x, Sint16 y)
 {
 	extern int mouse_relative;
 
-	if ( SDL_GetAppState() & (SDL_APPINPUTFOCUS|SDL_APPMOUSEFOCUS) ==
+	if ( (SDL_GetAppState() & (SDL_APPINPUTFOCUS|SDL_APPMOUSEFOCUS)) ==
 		(SDL_APPINPUTFOCUS|SDL_APPMOUSEFOCUS) ) {
 		posted = SDL_PrivateMouseMotion(
 			0, relative, x, y);
