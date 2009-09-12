@@ -26,11 +26,11 @@
 /*
  * GL_ARB_Multisample is supposed to be available in 10.1, according to Apple:
  *
- *   http://developer.apple.com/opengl/extensions.html#GL_ARB_multisample
+ *   http://developer.apple.com/graphicsimaging/opengl/extensions.html#GL_ARB_multisample
  *
  *  ...but it isn't in the system headers, according to Sam:
  *
- *   http://www.libsdl.org/pipermail/sdl/2003-December/058335.html
+ *   http://lists.libsdl.org/pipermail/sdl-libsdl.org/2003-December/039794.html
  *
  * These are normally enums and not #defines in the system headers.
  *
