@@ -37,10 +37,121 @@
 #include "../SDL_audiodev_c.h"
 #include "SDL_nasaudio.h"
 
+#ifdef SDL_AUDIO_DRIVER_NAS_DYNAMIC
+#include "SDL_loadso.h"
+#endif
+
 /* The tag name used by artsc audio */
 #define NAS_DRIVER_NAME         "nas"
 
 static struct SDL_PrivateAudioData *this2 = NULL;
+
+static void (*NAS_AuCloseServer) (AuServer *);
+static void (*NAS_AuNextEvent) (AuServer *, AuBool, AuEvent *);
+static AuBool(*NAS_AuDispatchEvent) (AuServer *, AuEvent *);
+static AuFlowID(*NAS_AuCreateFlow) (AuServer *, AuStatus *);
+static void (*NAS_AuStartFlow) (AuServer *, AuFlowID, AuStatus *);
+static void (*NAS_AuSetElements)
+  (AuServer *, AuFlowID, AuBool, int, AuElement *, AuStatus *);
+static void (*NAS_AuWriteElement)
+  (AuServer *, AuFlowID, int, AuUint32, AuPointer, AuBool, AuStatus *);
+static AuServer *(*NAS_AuOpenServer)
+  (_AuConst char *, int, _AuConst char *, int, _AuConst char *, char **);
+static AuEventHandlerRec *(*NAS_AuRegisterEventHandler)
+  (AuServer *, AuMask, int, AuID, AuEventHandlerCallback, AuPointer);
+
+
+#ifdef SDL_AUDIO_DRIVER_NAS_DYNAMIC
+
+static const char *nas_library = SDL_AUDIO_DRIVER_NAS_DYNAMIC;
+static void *nas_handle = NULL;
+
+static int
+load_nas_sym(const char *fn, void **addr)
+{
+    *addr = SDL_LoadFunction(nas_handle, fn);
+    if (*addr == NULL) {
+        return 0;
+    }
+    return 1;
+}
+
+/* cast funcs to char* first, to please GCC's strict aliasing rules. */
+#define SDL_NAS_SYM(x) \
+    if (!load_nas_sym(#x, (void **) (char *) &NAS_##x)) return -1
+#else
+#define SDL_NAS_SYM(x) NAS_##x = x
+#endif
+
+static int
+load_nas_syms(void)
+{
+    SDL_NAS_SYM(AuCloseServer);
+    SDL_NAS_SYM(AuNextEvent);
+    SDL_NAS_SYM(AuDispatchEvent);
+    SDL_NAS_SYM(AuCreateFlow);
+    SDL_NAS_SYM(AuStartFlow);
+    SDL_NAS_SYM(AuSetElements);
+    SDL_NAS_SYM(AuWriteElement);
+    SDL_NAS_SYM(AuOpenServer);
+    SDL_NAS_SYM(AuRegisterEventHandler);
+    return 0;
+}
+
+#undef SDL_NAS_SYM
+
+#ifdef SDL_AUDIO_DRIVER_NAS_DYNAMIC
+
+static void
+UnloadNASLibrary(void)
+{
+    if (nas_handle != NULL) {
+        SDL_UnloadObject(nas_handle);
+        nas_handle = NULL;
+    }
+}
+
+static int
+LoadNASLibrary(void)
+{
+    int retval = 0;
+    if (nas_handle == NULL) {
+        nas_handle = SDL_LoadObject(nas_library);
+        if (nas_handle == NULL) {
+            /* Copy error string so we can use it in a new SDL_SetError(). */
+            char *origerr = SDL_GetError();
+            size_t len = SDL_strlen(origerr) + 1;
+            char *err = (char *) alloca(len);
+            SDL_strlcpy(err, origerr, len);
+            retval = -1;
+            SDL_SetError("NAS: SDL_LoadObject('%s') failed: %s\n",
+                         nas_library, err);
+        } else {
+            retval = load_nas_syms();
+            if (retval < 0) {
+                UnloadNASLibrary();
+            }
+        }
+    }
+    return retval;
+}
+
+#else
+
+static void
+UnloadNASLibrary(void)
+{
+}
+
+static int
+LoadNASLibrary(void)
+{
+    load_nas_syms();
+    return 0;
+}
+
+#endif /* SDL_AUDIO_DRIVER_NAS_DYNAMIC */
+
 
 /* Audio driver functions */
 static int NAS_OpenAudio(_THIS, SDL_AudioSpec *spec);
@@ -53,15 +164,22 @@ static void NAS_CloseAudio(_THIS);
 
 static int Audio_Available(void)
 {
-	AuServer *aud = AuOpenServer("", 0, NULL, 0, NULL, NULL);
-	if (!aud) return 0;
-
-	AuCloseServer(aud);
-	return 1;
+	if (LoadNASLibrary() == 0) {
+		AuServer *aud = NAS_AuOpenServer("", 0, NULL, 0, NULL, NULL);
+		if (!aud) {
+			UnloadNASLibrary();
+			return 0;
+		}
+		NAS_AuCloseServer(aud);
+		UnloadNASLibrary();
+		return 1;
+	}
+	return 0;
 }
 
 static void Audio_DeleteDevice(SDL_AudioDevice *device)
 {
+	UnloadNASLibrary();
 	SDL_free(device->hidden);
 	SDL_free(device);
 }
@@ -69,6 +187,10 @@ static void Audio_DeleteDevice(SDL_AudioDevice *device)
 static SDL_AudioDevice *Audio_CreateDevice(int devindex)
 {
 	SDL_AudioDevice *this;
+
+	if (LoadNASLibrary() < 0) {
+		return NULL;
+	}
 
 	/* Initialize all variables that we clean on shutdown */
 	this = (SDL_AudioDevice *)SDL_malloc(sizeof(SDL_AudioDevice));
@@ -82,7 +204,7 @@ static SDL_AudioDevice *Audio_CreateDevice(int devindex)
 		if ( this ) {
 			SDL_free(this);
 		}
-		return(0);
+		return NULL;
 	}
 	SDL_memset(this->hidden, 0, (sizeof *this->hidden));
 
@@ -108,8 +230,8 @@ static void NAS_WaitAudio(_THIS)
 {
 	while ( this->hidden->buf_free < this->hidden->mixlen ) {
 		AuEvent ev;
-		AuNextEvent(this->hidden->aud, AuTrue, &ev);
-		AuDispatchEvent(this->hidden->aud, &ev);
+		NAS_AuNextEvent(this->hidden->aud, AuTrue, &ev);
+		NAS_AuDispatchEvent(this->hidden->aud, &ev);
 	}
 }
 
@@ -119,13 +241,13 @@ static void NAS_PlayAudio(_THIS)
 				    in the hope that some of them is LowWater events telling us more
 				    of the buffer is free now than what we think. */
 		AuEvent ev;
-		AuNextEvent(this->hidden->aud, AuTrue, &ev);
-		AuDispatchEvent(this->hidden->aud, &ev);
+		NAS_AuNextEvent(this->hidden->aud, AuTrue, &ev);
+		NAS_AuDispatchEvent(this->hidden->aud, &ev);
 	}
 	this->hidden->buf_free -= this->hidden->mixlen;
 
 	/* Write the audio data */
-	AuWriteElement(this->hidden->aud, this->hidden->flow, 0, this->hidden->mixlen, this->hidden->mixbuf, AuFalse, NULL);
+	NAS_AuWriteElement(this->hidden->aud, this->hidden->flow, 0, this->hidden->mixlen, this->hidden->mixbuf, AuFalse, NULL);
 
 	this->hidden->written += this->hidden->mixlen;
 	
@@ -146,7 +268,7 @@ static void NAS_CloseAudio(_THIS)
 		this->hidden->mixbuf = NULL;
 	}
 	if ( this->hidden->aud ) {
-		AuCloseServer(this->hidden->aud);
+		NAS_AuCloseServer(this->hidden->aud);
 		this->hidden->aud = 0;
 	}
 }
@@ -211,6 +333,7 @@ event_handler(AuServer* aud, AuEvent* ev, AuEventHandlerRec* hnd)
 static AuDeviceID
 find_device(_THIS, int nch)
 {
+    /* These "Au" things are all macros, not functions... */
 	int i;
 	for (i = 0; i < AuServerNumDevices(this->hidden->aud); i++) {
 		if ((AuDeviceKind(AuServerDevice(this->hidden->aud, i)) ==
@@ -246,7 +369,7 @@ static int NAS_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	}
 	spec->format = test_format;
 
-	this->hidden->aud = AuOpenServer("", 0, NULL, 0, NULL, NULL);
+	this->hidden->aud = NAS_AuOpenServer("", 0, NULL, 0, NULL, NULL);
 	if (this->hidden->aud == 0)
 	{
 		SDL_SetError("Couldn't open connection to NAS server");
@@ -254,8 +377,8 @@ static int NAS_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	}
 	
 	this->hidden->dev = find_device(this, spec->channels);
-	if ((this->hidden->dev == AuNone) || (!(this->hidden->flow = AuCreateFlow(this->hidden->aud, NULL)))) {
-		AuCloseServer(this->hidden->aud);
+	if ((this->hidden->dev == AuNone) || (!(this->hidden->flow = NAS_AuCreateFlow(this->hidden->aud, NULL)))) {
+		NAS_AuCloseServer(this->hidden->aud);
 		this->hidden->aud = 0;
 		SDL_SetError("Couldn't find a fitting playback device on NAS server");
 		return (-1);
@@ -273,15 +396,16 @@ static int NAS_OpenAudio(_THIS, SDL_AudioSpec *spec)
 
 	this2 = this->hidden;
 
+    /* These "Au" things without a NAS_ prefix are macros, not functions... */
 	AuMakeElementImportClient(elms, spec->freq, format, spec->channels, AuTrue,
 				buffer_size, buffer_size / 4, 0, NULL);
 	AuMakeElementExportDevice(elms+1, 0, this->hidden->dev, spec->freq,
 				AuUnlimitedSamples, 0, NULL);
-	AuSetElements(this->hidden->aud, this->hidden->flow, AuTrue, 2, elms, NULL);
-	AuRegisterEventHandler(this->hidden->aud, AuEventHandlerIDMask, 0, this->hidden->flow,
+	NAS_AuSetElements(this->hidden->aud, this->hidden->flow, AuTrue, 2, elms, NULL);
+	NAS_AuRegisterEventHandler(this->hidden->aud, AuEventHandlerIDMask, 0, this->hidden->flow,
 				event_handler, (AuPointer) NULL);
 
-	AuStartFlow(this->hidden->aud, this->hidden->flow, NULL);
+	NAS_AuStartFlow(this->hidden->aud, this->hidden->flow, NULL);
 
 	/* Allocate mixing buffer */
 	this->hidden->mixlen = spec->size;
