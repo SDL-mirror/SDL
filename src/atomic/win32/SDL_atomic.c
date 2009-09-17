@@ -1,789 +1,303 @@
 /*
-    SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2009 Sam Lantinga
+  SDL - Simple DirectMedia Layer
+  Copyright (C) 1997-2009 Sam Lantinga
 
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
-    License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
 
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
-    Sam Lantinga
-    slouken@libsdl.org
+  Sam Lantinga
+  slouken@libsdl.org
+
+  Contributed by Bob Pendleton, bob@pendleton.com
 */
 
 #include "SDL_stdinc.h"
 #include "SDL_atomic.h"
 
+#include "SDL_error.h"
+
 /*
-  This file provides 8, 16, 32, and 64 bit atomic operations. If the
+  This file provides 32, and 64 bit atomic operations. If the
   operations are provided by the native hardware and operating system
   they are used. If they are not then the operations are emulated
-  using the SDL mutex operations. 
- */
-
-/* 
-  First, detect whether the operations are supported and create
-  #defines that indicate that they do exist. The goal is to have all
-  the system dependent code in the top part of the file so that the
-  bottom can be use unchanged across all platforms.
-
-  Second, #define all the operations in each size class that are
-  supported. Doing this allows supported operations to be used along
-  side of emulated operations.
+  using the SDL spin lock operations. If spin lock can not be
+  implemented then these functions must fail.
 */
 
 /* 
-   Emmulated version.
+  DUMMY VERSION.
 
-   Assume there is no support for atomic operations. All such
-   operations are implemented using SDL mutex operations.
- */
+  This version of the code assumes there is no support for atomic
+  operations. Therefore, every function sets the SDL error
+  message. Oddly enough, if you only have one thread then this
+  version actuallys works.
+*/
 
-#ifdef EMULATED_ATOMIC_OPERATIONS
-#undef EMULATED_ATOMIC_OPERATIONS
-#endif
+/*
+  Native spinlock routines. Because this is the dummy implementation
+  these will always call SDL_SetError() and do nothing.
+*/
 
-#ifdef EMULATED_ATOMIC_OPERATIONS
-#define HAVE_ALL_8_BIT_OPS
+void 
+SDL_AtomicLock(SDL_SpinLock *lock)
+{
+   SDL_SetError("SDL_atomic.c: is not implemented on this platform");
+}
 
-#define nativeExchange8(ptr, value)			()
-#define nativeCompareThenSet8(ptr, oldvalue, newvalue) 	()
-#define nativeTestThenSet8(ptr)    	     		()
-#define nativeClear8(ptr)				()
-#define nativeFetchThenIncrement8(ptr)   		()
-#define nativeFetchThenDecrement8(ptr) 			()
-#define nativeFetchThenAdd8(ptr, value) 		()
-#define nativeFetchThenSubtract8(ptr, value) 		()
-#define nativeIncrementThenFetch8(ptr) 			()
-#define nativeDecrementThenFetch8(ptr) 			()
-#define nativeAddThenFetch8(ptr, value) 		()
-#define nativeSubtractThenFetch8(ptr, value) 		()
-#endif
+void 
+SDL_AtomicUnlock(SDL_SpinLock *lock)
+{
+   SDL_SetError("SDL_atomic.c: is not implemented on this platform");
+}
 
-#ifdef EMULATED_ATOMIC_OPERATIONS
-#define HAVE_ALL_16_BIT_OPS
+/*
+  Note that platform specific versions can be built from this version
+  by changing the #undefs to #defines and adding platform specific
+  code.
+*/
 
-#define nativeExchange16(ptr, value)			()
-#define nativeCompareThenSet16(ptr, oldvalue, newvalue) ()
-#define nativeTestThenSet16(ptr)    	     		()
-#define nativeClear16(ptr)				()
-#define nativeFetchThenIncrement16(ptr)   		()
-#define nativeFetchThenDecrement16(ptr) 		()
-#define nativeFetchThenAdd16(ptr, value) 		()
-#define nativeFetchThenSubtract16(ptr, value) 		()
-#define nativeIncrementThenFetch16(ptr) 		()
-#define nativeDecrementThenFetch16(ptr) 		()
-#define nativeAddThenFetch16(ptr, value) 		()
-#define nativeSubtractThenFetch16(ptr, value) 		()
-#endif
+#undef  nativeTestThenSet32
+#undef  nativeClear32
+#undef  nativeFetchThenIncrement32
+#undef  nativeFetchThenDecrement32
+#undef  nativeFetchThenAdd32
+#undef  nativeFetchThenSubtract32
+#undef  nativeIncrementThenFetch32
+#undef  nativeDecrementThenFetch32
+#undef  nativeAddThenFetch32
+#undef  nativeSubtractThenFetch32
 
-#ifdef EMULATED_ATOMIC_OPERATIONS
-#define HAVE_ALL_32_BIT_OPS
-
-#define nativeExchange32(ptr, value)			()
-#define nativeCompareThenSet32(ptr, oldvalue, newvalue) ()
-#define nativeTestThenSet32(ptr)    	     		()
-#define nativeClear32(ptr)				()
-#define nativeFetchThenIncrement32(ptr)   		()
-#define nativeFetchThenDecrement32(ptr) 		()
-#define nativeFetchThenAdd32(ptr, value) 		()
-#define nativeFetchThenSubtract32(ptr, value) 		()
-#define nativeIncrementThenFetch32(ptr) 		()
-#define nativeDecrementThenFetch32(ptr) 		()
-#define nativeAddThenFetch32(ptr, value) 		()
-#define nativeSubtractThenFetch32(ptr, value) 		()
-#endif
-
-#ifdef EMULATED_ATOMIC_OPERATIONS
-#define HAVE_ALL_64_BIT_OPS
-
-#define nativeExchange64(ptr, value)			()
-#define nativeCompareThenSet64(ptr, oldvalue, newvalue) ()
-#define nativeTestThenSet64(ptr)    	     		()
-#define nativeClear64(ptr)				()
-#define nativeFetchThenIncrement64(ptr)   		()
-#define nativeFetchThenDecrement64(ptr) 		()
-#define nativeFetchThenAdd64(ptr, value) 		()
-#define nativeFetchThenSubtract64(ptr, value) 		()
-#define nativeIncrementThenFetch64(ptr) 		()
-#define nativeDecrementThenFetch64(ptr) 		()
-#define nativeAddThenFetch64(ptr, value) 		()
-#define nativeSubtractThenFetch64(ptr, value) 		()
-#endif
+#undef  nativeTestThenSet64
+#undef  nativeClear64
+#undef  nativeFetchThenIncrement64
+#undef  nativeFetchThenDecrement64
+#undef  nativeFetchThenAdd64
+#undef  nativeFetchThenSubtract64
+#undef  nativeIncrementThenFetch64
+#undef  nativeDecrementThenFetch64
+#undef  nativeAddThenFetch64
+#undef  nativeSubtractThenFetch64
 
 /* 
-If any of the operations are not provided then we must emulate some of
-them.
- */
+  If any of the operations are not provided then we must emulate some
+  of them. That means we need a nice implementation of spin locks
+  that avoids the "one big lock" problem. We use a vector of spin
+  locks and pick which one to use based on the address of the operand
+  of the function.
 
-#if !defined(HAVE_ALL_8_BIT_OPS) || !defined(HAVE_ALL_16_BIT_OPS) || !defined(HAVE_ALL_32_BIT_OPS) || !defined(HAVE_ALL_64_BIT_OPS)
+  To generate the index of the lock we first shift by 3 bits to get
+  rid on the zero bits that result from 32 and 64 bit allignment of
+  data. We then mask off all but 5 bits and use those 5 bits as an
+  index into the table. 
 
-#include "SDL_mutex.h"
-#include "SDL_error.h"
+  Picking the lock this way insures that accesses to the same data at
+  the same time will go to the same lock. OTOH, accesses to different
+  data have only a 1/32 chance of hitting the same lock. That should
+  pretty much eliminate the chances of several atomic operations on
+  different data from waiting on the same "big lock". If it isn't
+  then the table of locks can be expanded to a new size so long as
+  the new size if a power of two.
+*/
 
-static SDL_mutex * lock = NULL;
-
-static __inline__ void
-privateWaitLock()
-{
-   if(NULL == lock)
-   {
-      lock = SDL_CreateMutex();
-      if (NULL == lock)
-      {
-	 SDL_SetError("SDL_atomic.c: can't create a mutex");
-	 return;
-      }
-   }
-
-   if (-1 == SDL_LockMutex(lock))
-   {
-      SDL_SetError("SDL_atomic.c: can't lock mutex");
-   }
-}
+static SDL_SpinLock locks[32] = {
+   0, 0, 0, 0, 0, 0, 0, 0,
+   0, 0, 0, 0, 0, 0, 0, 0,
+   0, 0, 0, 0, 0, 0, 0, 0,
+   0, 0, 0, 0, 0, 0, 0, 0,
+};
 
 static __inline__ void
-privateUnlock()
+privateWaitLock(volatile void *ptr)
 {
-   if (-1 == SDL_UnlockMutex(lock))
-   {
-      SDL_SetError("SDL_atomic.c: can't unlock mutex");
-   }
+#if SIZEOF_VOIDP == 4
+   Uint32 index = ((((Uint32)ptr) >> 3) & 0x1f);
+#elif SIZEOF_VOIDP == 8
+   Uint64 index = ((((Uint64)ptr) >> 3) & 0x1f);
+#endif
+
+   SDL_AtomicLock(&locks[index]);
 }
 
-#endif
-
-/* 8 bit atomic operations */
-
-Uint8
-SDL_AtomicExchange8(Uint8 * ptr, Uint8 value)
+static __inline__ void
+privateUnlock(volatile void *ptr)
 {
-#ifdef nativeExchange8
-   return nativeExchange8(ptr, value);
-#else
-   Uint8 tmp = 0;
-
-   privateWaitLock();
-   tmp = *ptr;
-   *ptr = value;
-   privateUnlock();
-
-   return tmp;
+#if SIZEOF_VOIDP == 4
+   Uint32 index = ((((Uint32)ptr) >> 3) & 0x1f);
+#elif SIZEOF_VOIDP == 8
+   Uint64 index = ((((Uint64)ptr) >> 3) & 0x1f);
 #endif
-}
 
-SDL_bool
-SDL_AtomicCompareThenSet8(Uint8 * ptr, Uint8 oldvalue, Uint8 newvalue)
-{
-#ifdef nativeCompareThenSet8
-   return (SDL_bool)nativeCompareThenSet8(ptr, oldvalue, newvalue);
-#else
-   SDL_bool result = SDL_FALSE;
-
-   privateWaitLock();
-   result = (*ptr == oldvalue);
-   if (result)
-   {
-      *ptr = newvalue;
-   }
-   privateUnlock();
-
-   return result;
-#endif
-}
-
-SDL_bool
-SDL_AtomicTestThenSet8(Uint8 * ptr)
-{
-#ifdef nativeTestThenSet8
-   return (SDL_bool)nativeTestThenSet8(ptr);
-#else
-   SDL_bool result = SDL_FALSE;
-
-   privateWaitLock();
-   result = (*ptr == 0);
-   if (result)
-   {
-      *ptr = 1;
-   }
-   privateUnlock();
-
-   return result;
-#endif
-}
-
-void
-SDL_AtomicClear8(Uint8 * ptr)
-{
-#ifdef nativeClear8
-   nativeClear8(ptr);
-#else
-   privateWaitLock();
-   *ptr = 0;
-   privateUnlock();
-
-   return;
-#endif
-}
-
-Uint8
-SDL_AtomicFetchThenIncrement8(Uint8 * ptr)
-{
-#ifdef nativeFetchThenIncrement8
-   return nativeFetchThenIncrement8(ptr);
-#else
-   Uint8 tmp = 0;
-
-   privateWaitLock();
-   tmp = *ptr;
-   (*ptr)+= 1;
-   privateUnlock();
-
-   return tmp;
-#endif
-}
-
-Uint8
-SDL_AtomicFetchThenDecrement8(Uint8 * ptr)
-{
-#ifdef nativeFetchThenDecrement8
-   return nativeFetchThenDecrement8(ptr);
-#else
-   Uint8 tmp = 0;
-
-   privateWaitLock();
-   tmp = *ptr;
-   (*ptr) -= 1;
-   privateUnlock();
-
-   return tmp;
-#endif
-}
-
-Uint8
-SDL_AtomicFetchThenAdd8(Uint8 * ptr, Uint8 value)
-{
-#ifdef nativeFetchThenAdd8
-   return nativeFetchThenAdd8(ptr, value);
-#else
-   Uint8 tmp = 0;
-
-   privateWaitLock();
-   tmp = *ptr;
-   (*ptr)+= value;
-   privateUnlock();
-
-   return tmp;
-#endif
-}
-
-Uint8
-SDL_AtomicFetchThenSubtract8(Uint8 * ptr, Uint8 value)
-{
-#ifdef nativeFetchThenSubtract8
-   return nativeFetchThenSubtract8(ptr, value);
-#else
-   Uint8 tmp = 0;
-
-   privateWaitLock();
-   tmp = *ptr;
-   (*ptr)-= value;
-   privateUnlock();
-
-   return tmp;
-#endif
-}
-
-Uint8
-SDL_AtomicIncrementThenFetch8(Uint8 * ptr)
-{
-#ifdef nativeIncrementThenFetch8
-   return nativeIncrementThenFetch8(ptr);
-#else
-   Uint8 tmp = 0;
-
-   privateWaitLock();
-   (*ptr)+= 1;
-   tmp = *ptr;
-   privateUnlock();
-
-   return tmp;
-#endif
-}
-
-Uint8
-SDL_AtomicDecrementThenFetch8(Uint8 * ptr)
-{
-#ifdef nativeDecrementThenFetch8
-   return nativeDecrementThenFetch8(ptr);
-#else
-   Uint8 tmp = 0;
-
-   privateWaitLock();
-   (*ptr)-= 1;
-   tmp = *ptr;
-   privateUnlock();
-
-   return tmp;
-#endif
-}
-
-Uint8
-SDL_AtomicAddThenFetch8(Uint8 * ptr, Uint8 value)
-{
-#ifdef nativeAddThenFetch8
-   return nativeAddThenFetch8(ptr, value);
-#else
-   Uint8 tmp = 0;
-
-   privateWaitLock();
-   (*ptr)+= value;
-   tmp = *ptr;
-   privateUnlock();
-
-   return tmp;
-#endif
-}
-
-Uint8
-SDL_AtomicSubtractThenFetch8(Uint8 * ptr, Uint8 value)
-{
-#ifdef nativeSubtractThenFetch8
-   return nativeSubtractThenFetch8(ptr, value);
-#else
-   Uint8 tmp = 0;
-
-   privateWaitLock();
-   (*ptr)-= value;
-   tmp = *ptr;
-   privateUnlock();
-
-   return tmp;
-#endif
-}
-
-/* 16 bit atomic operations */
-
-Uint16
-SDL_AtomicExchange16(Uint16 * ptr, Uint16 value)
-{
-#ifdef nativeExchange16
-   return nativeExchange16(ptr, value);
-#else
-   Uint16 tmp = 0;
-
-   privateWaitLock();
-   tmp = *ptr;
-   *ptr = value;
-   privateUnlock();
-
-   return tmp;
-#endif
-}
-
-SDL_bool
-SDL_AtomicCompareThenSet16(Uint16 * ptr, Uint16 oldvalue, Uint16 newvalue)
-{
-#ifdef nativeCompareThenSet16
-   return (SDL_bool)nativeCompareThenSet16(ptr, oldvalue, newvalue);
-#else
-   SDL_bool result = SDL_FALSE;
-
-   privateWaitLock();
-   result = (*ptr == oldvalue);
-   if (result)
-   {
-      *ptr = newvalue;
-   }
-   privateUnlock();
-
-   return result;
-#endif
-}
-
-SDL_bool
-SDL_AtomicTestThenSet16(Uint16 * ptr)
-{
-#ifdef nativeTestThenSet16
-   return (SDL_bool)nativeTestThenSet16(ptr);
-#else
-   SDL_bool result = SDL_FALSE;
-
-   privateWaitLock();
-   result = (*ptr == 0);
-   if (result)
-   {
-      *ptr = 1;
-   }
-   privateUnlock();
-
-   return result;
-#endif
-}
-
-void
-SDL_AtomicClear16(Uint16 * ptr)
-{
-#ifdef nativeClear16
-   nativeClear16(ptr);
-#else
-   privateWaitLock();
-   *ptr = 0;
-   privateUnlock();
-
-   return;
-#endif
-}
-
-Uint16
-SDL_AtomicFetchThenIncrement16(Uint16 * ptr)
-{
-#ifdef nativeFetchThenIncrement16
-   return nativeFetchThenIncrement16(ptr);
-#else
-   Uint16 tmp = 0;
-
-   privateWaitLock();
-   tmp = *ptr;
-   (*ptr)+= 1;
-   privateUnlock();
-
-   return tmp;
-#endif
-}
-
-Uint16
-SDL_AtomicFetchThenDecrement16(Uint16 * ptr)
-{
-#ifdef nativeFetchThenDecrement16
-   return nativeFetchThenDecrement16(ptr);
-#else
-   Uint16 tmp = 0;
-
-   privateWaitLock();
-   tmp = *ptr;
-   (*ptr) -= 1;
-   privateUnlock();
-
-   return tmp;
-#endif
-}
-
-Uint16
-SDL_AtomicFetchThenAdd16(Uint16 * ptr, Uint16 value)
-{
-#ifdef nativeFetchThenAdd16
-   return nativeFetchThenAdd16(ptr, value);
-#else
-   Uint16 tmp = 0;
-
-   privateWaitLock();
-   tmp = *ptr;
-   (*ptr)+= value;
-   privateUnlock();
-
-   return tmp;
-#endif
-}
-
-Uint16
-SDL_AtomicFetchThenSubtract16(Uint16 * ptr, Uint16 value)
-{
-#ifdef nativeFetchThenSubtract16
-   return nativeFetchThenSubtract16(ptr, value);
-#else
-   Uint16 tmp = 0;
-
-   privateWaitLock();
-   tmp = *ptr;
-   (*ptr)-= value;
-   privateUnlock();
-
-   return tmp;
-#endif
-}
-
-Uint16
-SDL_AtomicIncrementThenFetch16(Uint16 * ptr)
-{
-#ifdef nativeIncrementThenFetch16
-   return nativeIncrementThenFetch16(ptr);
-#else
-   Uint16 tmp = 0;
-
-   privateWaitLock();
-   (*ptr)+= 1;
-   tmp = *ptr;
-   privateUnlock();
-
-   return tmp;
-#endif
-}
-
-Uint16
-SDL_AtomicDecrementThenFetch16(Uint16 * ptr)
-{
-#ifdef nativeDecrementThenFetch16
-   return nativeDecrementThenFetch16(ptr);
-#else
-   Uint16 tmp = 0;
-
-   privateWaitLock();
-   (*ptr)-= 1;
-   tmp = *ptr;
-   privateUnlock();
-
-   return tmp;
-#endif
-}
-
-Uint16
-SDL_AtomicAddThenFetch16(Uint16 * ptr, Uint16 value)
-{
-#ifdef nativeAddThenFetch16
-   return nativeAddThenFetch16(ptr, value);
-#else
-   Uint16 tmp = 0;
-
-   privateWaitLock();
-   (*ptr)+= value;
-   tmp = *ptr;
-   privateUnlock();
-
-   return tmp;
-#endif
-}
-
-Uint16
-SDL_AtomicSubtractThenFetch16(Uint16 * ptr, Uint16 value)
-{
-#ifdef nativeSubtractThenFetch16
-   return nativeSubtractThenFetch16(ptr, value);
-#else
-   Uint16 tmp = 0;
-
-   privateWaitLock();
-   (*ptr)-= value;
-   tmp = *ptr;
-   privateUnlock();
-
-   return tmp;
-#endif
+   SDL_AtomicUnlock(&locks[index]);
 }
 
 /* 32 bit atomic operations */
 
-Uint32
-SDL_AtomicExchange32(Uint32 * ptr, Uint32 value)
-{
-#ifdef nativeExchange32
-   return nativeExchange32(ptr, value);
-#else
-   Uint32 tmp = 0;
-
-   privateWaitLock();
-   tmp = *ptr;
-   *ptr = value;
-   privateUnlock();
-
-   return tmp;
-#endif
-}
-
 SDL_bool
-SDL_AtomicCompareThenSet32(Uint32 * ptr, Uint32 oldvalue, Uint32 newvalue)
-{
-#ifdef nativeCompareThenSet32
-   return (SDL_bool)nativeCompareThenSet32(ptr, oldvalue, newvalue);
-#else
-   SDL_bool result = SDL_FALSE;
-
-   privateWaitLock();
-   result = (*ptr == oldvalue);
-   if (result)
-   {
-      *ptr = newvalue;
-   }
-   privateUnlock();
-
-   return result;
-#endif
-}
-
-SDL_bool
-SDL_AtomicTestThenSet32(Uint32 * ptr)
+SDL_AtomicTestThenSet32(volatile Uint32 * ptr)
 {
 #ifdef nativeTestThenSet32
-   return (SDL_bool)nativeTestThenSet32(ptr);
 #else
    SDL_bool result = SDL_FALSE;
 
-   privateWaitLock();
+   privateWaitLock(ptr);
    result = (*ptr == 0);
    if (result)
    {
       *ptr = 1;
    }
-   privateUnlock();
+   privateUnlock(ptr);
 
    return result;
 #endif
 }
 
 void
-SDL_AtomicClear32(Uint32 * ptr)
+SDL_AtomicClear32(volatile Uint32 * ptr)
 {
 #ifdef nativeClear32
-   nativeClear32(ptr);
 #else
-   privateWaitLock();
+   privateWaitLock(ptr);
    *ptr = 0;
-   privateUnlock();
+   privateUnlock(ptr);
 
    return;
 #endif
 }
 
 Uint32
-SDL_AtomicFetchThenIncrement32(Uint32 * ptr)
+SDL_AtomicFetchThenIncrement32(volatile Uint32 * ptr)
 {
 #ifdef nativeFetchThenIncrement32
-   return nativeFetchThenIncrement32(ptr);
 #else
    Uint32 tmp = 0;
 
-   privateWaitLock();
+   privateWaitLock(ptr);
    tmp = *ptr;
    (*ptr)+= 1;
-   privateUnlock();
+   privateUnlock(ptr);
 
    return tmp;
 #endif
 }
 
 Uint32
-SDL_AtomicFetchThenDecrement32(Uint32 * ptr)
+SDL_AtomicFetchThenDecrement32(volatile Uint32 * ptr)
 {
 #ifdef nativeFetchThenDecrement32
-   return nativeFetchThenDecrement32(ptr);
 #else
    Uint32 tmp = 0;
 
-   privateWaitLock();
+   privateWaitLock(ptr);
    tmp = *ptr;
    (*ptr) -= 1;
-   privateUnlock();
+   privateUnlock(ptr);
 
    return tmp;
 #endif
 }
 
 Uint32
-SDL_AtomicFetchThenAdd32(Uint32 * ptr, Uint32 value)
+SDL_AtomicFetchThenAdd32(volatile Uint32 * ptr, Uint32 value)
 {
 #ifdef nativeFetchThenAdd32
-   return nativeFetchThenAdd32(ptr, value);
 #else
    Uint32 tmp = 0;
 
-   privateWaitLock();
+   privateWaitLock(ptr);
    tmp = *ptr;
    (*ptr)+= value;
-   privateUnlock();
+   privateUnlock(ptr);
 
    return tmp;
 #endif
 }
 
 Uint32
-SDL_AtomicFetchThenSubtract32(Uint32 * ptr, Uint32 value)
+SDL_AtomicFetchThenSubtract32(volatile Uint32 * ptr, Uint32 value)
 {
 #ifdef nativeFetchThenSubtract32
-   return nativeFetchThenSubtract32(ptr, value);
 #else
    Uint32 tmp = 0;
 
-   privateWaitLock();
+   privateWaitLock(ptr);
    tmp = *ptr;
    (*ptr)-= value;
-   privateUnlock();
+   privateUnlock(ptr);
 
    return tmp;
 #endif
 }
 
 Uint32
-SDL_AtomicIncrementThenFetch32(Uint32 * ptr)
+SDL_AtomicIncrementThenFetch32(volatile Uint32 * ptr)
 {
 #ifdef nativeIncrementThenFetch32
-   return nativeIncrementThenFetch32(ptr);
 #else
    Uint32 tmp = 0;
 
-   privateWaitLock();
+   privateWaitLock(ptr);
    (*ptr)+= 1;
    tmp = *ptr;
-   privateUnlock();
+   privateUnlock(ptr);
 
    return tmp;
 #endif
 }
 
 Uint32
-SDL_AtomicDecrementThenFetch32(Uint32 * ptr)
+SDL_AtomicDecrementThenFetch32(volatile Uint32 * ptr)
 {
 #ifdef nativeDecrementThenFetch32
-   return nativeDecrementThenFetch32(ptr);
 #else
    Uint32 tmp = 0;
 
-   privateWaitLock();
+   privateWaitLock(ptr);
    (*ptr)-= 1;
    tmp = *ptr;
-   privateUnlock();
+   privateUnlock(ptr);
 
    return tmp;
 #endif
 }
 
 Uint32
-SDL_AtomicAddThenFetch32(Uint32 * ptr, Uint32 value)
+SDL_AtomicAddThenFetch32(volatile Uint32 * ptr, Uint32 value)
 {
 #ifdef nativeAddThenFetch32
-   return nativeAddThenFetch32(ptr, value);
 #else
    Uint32 tmp = 0;
 
-   privateWaitLock();
+   privateWaitLock(ptr);
    (*ptr)+= value;
    tmp = *ptr;
-   privateUnlock();
+   privateUnlock(ptr);
 
    return tmp;
 #endif
 }
 
 Uint32
-SDL_AtomicSubtractThenFetch32(Uint32 * ptr, Uint32 value)
+SDL_AtomicSubtractThenFetch32(volatile Uint32 * ptr, Uint32 value)
 {
 #ifdef nativeSubtractThenFetch32
-   return nativeSubtractThenFetch32(ptr, value);
 #else
    Uint32 tmp = 0;
 
-   privateWaitLock();
+   privateWaitLock(ptr);
    (*ptr)-= value;
    tmp = *ptr;
-   privateUnlock();
+   privateUnlock(ptr);
 
    return tmp;
 #endif
@@ -792,208 +306,161 @@ SDL_AtomicSubtractThenFetch32(Uint32 * ptr, Uint32 value)
 /* 64 bit atomic operations */
 #ifdef SDL_HAS_64BIT_TYPE
 
-Uint64
-SDL_AtomicExchange64(Uint64 * ptr, Uint64 value)
-{
-#ifdef nativeExchange64
-   return nativeExchange64(ptr, value);
-#else
-   Uint64 tmp = 0;
-
-   privateWaitLock();
-   tmp = *ptr;
-   *ptr = value;
-   privateUnlock();
-
-   return tmp;
-#endif
-}
-
 SDL_bool
-SDL_AtomicCompareThenSet64(Uint64 * ptr, Uint64 oldvalue, Uint64 newvalue)
-{
-#ifdef nativeCompareThenSet64
-   return (SDL_bool)nativeCompareThenSet64(ptr, oldvalue, newvalue);
-#else
-   SDL_bool result = SDL_FALSE;
-
-   privateWaitLock();
-   result = (*ptr == oldvalue);
-   if (result)
-   {
-      *ptr = newvalue;
-   }
-   privateUnlock();
-
-   return result;
-#endif
-}
-
-SDL_bool
-SDL_AtomicTestThenSet64(Uint64 * ptr)
+SDL_AtomicTestThenSet64(volatile Uint64 * ptr)
 {
 #ifdef nativeTestThenSet64
-   return (SDL_bool)nativeTestThenSet64(ptr);
 #else
    SDL_bool result = SDL_FALSE;
 
-   privateWaitLock();
+   privateWaitLock(ptr);
    result = (*ptr == 0);
    if (result)
    {
       *ptr = 1;
    }
-   privateUnlock();
+   privateUnlock(ptr);
 
    return result;
 #endif
 }
 
 void
-SDL_AtomicClear64(Uint64 * ptr)
+SDL_AtomicClear64(volatile Uint64 * ptr)
 {
 #ifdef nativeClear64
-   nativeClear64(ptr);
 #else
-   privateWaitLock();
+   privateWaitLock(ptr);
    *ptr = 0;
-   privateUnlock();
+   privateUnlock(ptr);
 
    return;
 #endif
 }
 
 Uint64
-SDL_AtomicFetchThenIncrement64(Uint64 * ptr)
+SDL_AtomicFetchThenIncrement64(volatile Uint64 * ptr)
 {
 #ifdef nativeFetchThenIncrement64
-   return nativeFetchThenIncrement64(ptr);
 #else
    Uint64 tmp = 0;
 
-   privateWaitLock();
+   privateWaitLock(ptr);
    tmp = *ptr;
    (*ptr)+= 1;
-   privateUnlock();
+   privateUnlock(ptr);
 
    return tmp;
 #endif
 }
 
 Uint64
-SDL_AtomicFetchThenDecrement64(Uint64 * ptr)
+SDL_AtomicFetchThenDecrement64(volatile Uint64 * ptr)
 {
 #ifdef nativeFetchThenDecrement64
-   return nativeFetchThenDecrement64(ptr);
 #else
    Uint64 tmp = 0;
 
-   privateWaitLock();
+   privateWaitLock(ptr);
    tmp = *ptr;
    (*ptr) -= 1;
-   privateUnlock();
+   privateUnlock(ptr);
 
    return tmp;
 #endif
 }
 
 Uint64
-SDL_AtomicFetchThenAdd64(Uint64 * ptr, Uint64 value)
+SDL_AtomicFetchThenAdd64(volatile Uint64 * ptr, Uint64 value)
 {
 #ifdef nativeFetchThenAdd64
-   return nativeFetchThenAdd64(ptr, value);
 #else
    Uint64 tmp = 0;
 
-   privateWaitLock();
+   privateWaitLock(ptr);
    tmp = *ptr;
    (*ptr)+= value;
-   privateUnlock();
+   privateUnlock(ptr);
 
    return tmp;
 #endif
 }
 
 Uint64
-SDL_AtomicFetchThenSubtract64(Uint64 * ptr, Uint64 value)
+SDL_AtomicFetchThenSubtract64(volatile Uint64 * ptr, Uint64 value)
 {
 #ifdef nativeFetchThenSubtract64
-   return nativeFetchThenSubtract64(ptr, value);
 #else
    Uint64 tmp = 0;
 
-   privateWaitLock();
+   privateWaitLock(ptr);
    tmp = *ptr;
    (*ptr)-= value;
-   privateUnlock();
+   privateUnlock(ptr);
 
    return tmp;
 #endif
 }
 
 Uint64
-SDL_AtomicIncrementThenFetch64(Uint64 * ptr)
+SDL_AtomicIncrementThenFetch64(volatile Uint64 * ptr)
 {
 #ifdef nativeIncrementThenFetch64
-   return nativeIncrementThenFetch64(ptr);
 #else
    Uint64 tmp = 0;
 
-   privateWaitLock();
+   privateWaitLock(ptr);
    (*ptr)+= 1;
    tmp = *ptr;
-   privateUnlock();
+   privateUnlock(ptr);
 
    return tmp;
 #endif
 }
 
 Uint64
-SDL_AtomicDecrementThenFetch64(Uint64 * ptr)
+SDL_AtomicDecrementThenFetch64(volatile Uint64 * ptr)
 {
 #ifdef nativeDecrementThenFetch64
-   return nativeDecrementThenFetch64(ptr);
 #else
    Uint64 tmp = 0;
 
-   privateWaitLock();
+   privateWaitLock(ptr);
    (*ptr)-= 1;
    tmp = *ptr;
-   privateUnlock();
+   privateUnlock(ptr);
 
    return tmp;
 #endif
 }
 
 Uint64
-SDL_AtomicAddThenFetch64(Uint64 * ptr, Uint64 value)
+SDL_AtomicAddThenFetch64(volatile Uint64 * ptr, Uint64 value)
 {
 #ifdef nativeAddThenFetch64
-   return nativeAddThenFetch64(ptr, value);
 #else
    Uint64 tmp = 0;
 
-   privateWaitLock();
+   privateWaitLock(ptr);
    (*ptr)+= value;
    tmp = *ptr;
-   privateUnlock();
+   privateUnlock(ptr);
 
    return tmp;
 #endif
 }
 
 Uint64
-SDL_AtomicSubtractThenFetch64(Uint64 * ptr, Uint64 value)
+SDL_AtomicSubtractThenFetch64(volatile Uint64 * ptr, Uint64 value)
 {
 #ifdef nativeSubtractThenFetch64
-   return nativeSubtractThenFetch64(ptr, value);
 #else
    Uint64 tmp = 0;
 
-   privateWaitLock();
+   privateWaitLock(ptr);
    (*ptr)-= value;
    tmp = *ptr;
-   privateUnlock();
+   privateUnlock(ptr);
 
    return tmp;
 #endif

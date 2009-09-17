@@ -29,21 +29,18 @@ main(int argc, char **argv)
    volatile Uint64 val64 = 0;
    Uint64 ret64 = 0;
 
+   SDL_SpinLock lock = 0;
+
    SDL_bool tfret = SDL_FALSE;
 
-   printf("32 bit -----------------------------------------\n\n");
+   printf("\nspin lock---------------------------------------\n\n");
 
-   ret32 = SDL_AtomicExchange32(&val32, 10);
-   printf("Exchange32           ret=%d val=%d\n", ret32, val32);
-   ret32 = SDL_AtomicExchange32(&val32, 0);
-   printf("Exchange32           ret=%d val=%d\n", ret32, val32);
+   SDL_AtomicLock(&lock);
+   printf("AtomicLock                   lock=%d\n", lock);
+   SDL_AtomicUnlock(&lock);
+   printf("AtomicUnlock                 lock=%d\n", lock);
 
-   val32 = 10;
-   tfret = SDL_AtomicCompareThenSet32(&val32, 10, 20);
-   printf("CompareThenSet32     tfret=%s val=%d\n", tf(tfret), val32);
-   val32 = 10;
-   tfret = SDL_AtomicCompareThenSet32(&val32, 0, 20);
-   printf("CompareThenSet32     tfret=%s val=%d\n", tf(tfret), val32);
+   printf("\n32 bit -----------------------------------------\n\n");
 
    val32 = 0;
    tfret = SDL_AtomicTestThenSet32(&val32);
@@ -79,19 +76,7 @@ main(int argc, char **argv)
    printf("SubtractThenFetch32  ret=%d val=%d\n", ret32, val32);
 
 #ifdef SDL_HAS_64BIT_TYPE
-   printf("64 bit -----------------------------------------\n\n");
-
-   ret64 = SDL_AtomicExchange64(&val64, 10);
-   printf("Exchange64           ret=%lld val=%lld\n", ret64, val64);
-   ret64 = SDL_AtomicExchange64(&val64, 0);
-   printf("Exchange64           ret=%lld val=%lld\n", ret64, val64);
-
-   val64 = 10;
-   tfret = SDL_AtomicCompareThenSet64(&val64, 10, 20);
-   printf("CompareThenSet64     tfret=%s val=%lld\n", tf(tfret), val64);
-   val64 = 10;
-   tfret = SDL_AtomicCompareThenSet64(&val64, 0, 20);
-   printf("CompareThenSet64     tfret=%s val=%lld\n", tf(tfret), val64);
+   printf("\n64 bit -----------------------------------------\n\n");
 
    val64 = 0;
    tfret = SDL_AtomicTestThenSet64(&val64);

@@ -18,6 +18,8 @@
 
     Sam Lantinga
     slouken@libsdl.org
+
+    Contributed by Bob Pendleton, bob@pendleton.com
  */
 
 /**
@@ -46,48 +48,50 @@ extern "C" {
  * processor specific atomic operations. When possible they are
  * implemented as true processor specific atomic operations. When that
  * is not possible the are implemented using locks that *do* use the
- * available atomic operations. In rare cases they may be implemented
- * using SDL's mutex fuctions.
+ * available atomic operations.
+ *
+ * At the very minimum spin locks must be implemented. Without spin
+ * locks it is not possible (AFAICT) to emulate the rest of the atomic
+ * operations.
  */
 
 /* Function prototypes */
 
+/**
+ * SDL AtomicLock.
+ * 
+ * The spin lock functions and type are required and can not be
+ * emulated because they are used in the emulation code.
+ */
+
+typedef volatile Uint32 SDL_SpinLock;
+
+/**
+ * \fn  void SDL_AtomicLock(SDL_SpinLock *lock);
+ *
+ * \brief Lock a spin lock by setting it to a none zero value.
+ *
+ * \param lock points to the lock.
+ *
+ */
+extern DECLSPEC void SDLCALL SDL_AtomicLock(SDL_SpinLock *lock);
+
+/**
+ * \fn  void SDL_AtomicUnlock(SDL_SpinLock *lock);
+ *
+ * \brief Unlock a spin lock by setting it to 0. Always returns immediately
+ *
+ * \param lock points to the lock.
+ *
+ */
+extern DECLSPEC void SDLCALL SDL_AtomicUnlock(SDL_SpinLock *lock);
+
 /* 32 bit atomic operations */
 
 /**
- * \fn int SDL_AtomicExchange32(volatile Uint32 * ptr, Uint32 value)
- *
- * \brief Atomically exchange two 32 bit values.
- *
- * \return the value point to by ptr.
- *
- * \param ptr points to the value to be fetched from *ptr.  
- * \param value is value to be stored at *ptr.
- *
- * The current value stored at *ptr is returned and it is replaced
- * with value. This function can be used to implement SDL_TestThenSet.
- *
- */
-extern DECLSPEC Uint32 SDLCALL SDL_AtomicExchange32(volatile Uint32 * ptr, Uint32 value);
-
-/**
- * \fn int SDL_AtomicCompareThenSet32(volatile Uint32 * ptr, Uint32 oldvalue, Uint32 newvalue)
- *
- * \brief If *ptr == oldvalue then replace the contents of *ptr by new value. 
- *
- * \return true if the newvalue was stored.
- *
- * \param *ptr is the value to be compared and replaced.
- * \param oldvalue is value to be compared to *ptr.
- * \param newvalue is value to be stored at *ptr.
- *
- */
-extern DECLSPEC SDL_bool SDLCALL SDL_AtomicCompareThenSet32(volatile Uint32 * ptr,
-                                                            Uint32 oldvalue, Uint32 newvalue);
-/**
  * \fn  SDL_bool SDL_AtomicTestThenSet32(volatile Uint32 * ptr);
  *
- * \brief Check to see if *ptr == 0 and set it to non-zero.
+ * \brief Check to see if *ptr == 0 and set it to 1.
  *
  * \return SDL_True if the value pointed to by ptr was zero and
  * SDL_False if it was not zero
@@ -211,9 +215,6 @@ extern DECLSPEC Uint32 SDLCALL SDL_AtomicSubtractThenFetch32(volatile Uint32 * p
 /* 64 bit atomic operations */
 #ifdef SDL_HAS_64BIT_TYPE
 
-extern DECLSPEC Uint64 SDLCALL SDL_AtomicExchange64(volatile Uint64 * ptr, Uint64 value);
-extern DECLSPEC SDL_bool SDLCALL SDL_AtomicCompareThenSet64(volatile Uint64 * ptr,
-                                                            Uint64 oldvalue, Uint64 newvalue);
 extern DECLSPEC SDL_bool SDLCALL SDL_AtomicTestThenSet64(volatile Uint64 * ptr);
 extern DECLSPEC void SDLCALL SDL_AtomicClear64(volatile Uint64 * ptr);
 extern DECLSPEC Uint64 SDLCALL SDL_AtomicFetchThenIncrement64(volatile Uint64 * ptr);
