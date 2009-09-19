@@ -134,10 +134,19 @@ MoveSprites(SDL_WindowID window, SDL_TextureID sprite)
         SDL_SetTextureAlphaMod(sprite, (Uint8) current_alpha);
     }
 
-    /* Move the sprite, bounce at the wall, and draw */
-    n = 0;
+    /* Draw a gray background */
     SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
     SDL_RenderFill(NULL);
+
+    /* Draw two red points to make sure they show up correctly */
+    SDL_SetRenderDrawColor(0xFF, 0x00, 0x00, 0xFF);
+    SDL_RenderPoint(0, 0);
+    SDL_RenderPoint(window_w-1, 0);
+    SDL_RenderPoint(0, window_h-1);
+    SDL_RenderPoint(window_w-1, window_h-1);
+
+    /* Move the sprite, bounce at the wall, and draw */
+    n = 0;
     for (i = 0; i < num_sprites; ++i) {
         position = &positions[i];
         velocity = &velocities[i];

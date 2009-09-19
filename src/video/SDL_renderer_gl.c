@@ -450,8 +450,8 @@ GL_ActivateRenderer(SDL_Renderer * renderer)
         data->glMatrixMode(GL_MODELVIEW);
         data->glLoadIdentity();
         data->glViewport(0, 0, window->w, window->h);
-        data->glOrtho(0.0, (GLdouble) window->w, (GLdouble) window->h, 0.0,
-                      0.0, 1.0);
+        data->glOrtho(-0.5, (GLdouble) window->w-0.5,
+                      (GLdouble) window->h-0.5, -0.5, 0.0, 1.0);
         data->updateSize = SDL_FALSE;
     }
     return 0;
