@@ -50,6 +50,7 @@
 #include "SDL_xbios_centscreen.h"
 #include "SDL_xbios_sb3.h"
 #include "SDL_xbios_tveille.h"
+#include "SDL_xbios_milan.h"
 
 #define XBIOS_VID_DRIVER_NAME "xbios"
 
@@ -182,6 +183,8 @@ static int XBIOS_Available(void)
 					return 0;
 				}
 			}
+			break;
+		case VDO_MILAN:
 			break;
 		default:
 			return 0;
@@ -488,6 +491,9 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 				}
 			}
 			break;
+		case VDO_MILAN:
+			SDL_XBIOS_ListMilanModes(this, 0);
+			break;
 	}
 
 	for ( i=0; i<NUM_MODELISTS; ++i ) {
@@ -551,6 +557,9 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 					SDL_XBIOS_ListBlowupModes(this, 1, (blow_cookie_t *)cookie_blow);
 				}
 			}
+			break;
+		case VDO_MILAN:
+			SDL_XBIOS_ListMilanModes(this, 1);
 			break;
 	}
 
@@ -694,7 +703,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 		XBIOS_screens[1]=(void *) (( (long) XBIOS_screensmem[1]+256) & 0xFFFFFF00UL);
 		modeflags |= SDL_DOUBLEBUF;
 	}
-	
+
 	/* Allocate the new pixel format for the screen */
 	if ( ! SDL_ReallocFormat(current, new_depth, 0, 0, 0, 0) ) {
 		XBIOS_FreeBuffers(this);

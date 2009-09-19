@@ -69,7 +69,8 @@ enum {
 	VDO_ST=0,
 	VDO_STE,
 	VDO_TT,
-	VDO_F30
+	VDO_F30,
+	VDO_MILAN
 };
 
 /* Monitor types */
