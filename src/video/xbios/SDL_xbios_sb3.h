@@ -77,6 +77,6 @@ typedef struct {
 
 int SDL_XBIOS_SB3Usable(scpn_cookie_t *cookie_scpn);
 
-void SDL_XBIOS_SB3Init(_THIS, scpn_cookie_t *cookie_scpn);
+void SDL_XBIOS_ListSB3Modes(_THIS, int actually_add, scpn_cookie_t *cookie_scpn);
 
 #endif /* _SDL_xbios_sb3_h_ */

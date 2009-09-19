@@ -32,18 +32,11 @@
 #include "SDL_xbios.h"
 #include "SDL_xbios_centscreen.h"
 
-int SDL_XBIOS_CentscreenInit(_THIS)
+int SDL_XBIOS_ListCentscreenModes(_THIS, int actually_add)
 {
-	centscreen_mode_t	curmode, listedmode;
+	centscreen_mode_t curmode, listedmode;
 	unsigned long result;
 	int cur_handle;	/* Current Centscreen mode handle */
-
-	/* Reset current mode list */
-	if (XBIOS_modelist) {
-		SDL_free(XBIOS_modelist);
-		XBIOS_nummodes = 0;
-		XBIOS_modelist = NULL;
-	}
 
 	/* Add Centscreen modes */
 	Vread(&curmode);
@@ -58,9 +51,15 @@ int SDL_XBIOS_CentscreenInit(_THIS)
 			if ((listedmode.mode & CSCREEN_VIRTUAL)==0) {
 				/* Don't add modes with bpp<8 */
 				if (listedmode.plan>=8) {
-					SDL_XBIOS_AddMode(this, listedmode.mode, listedmode.physx,
-						listedmode.physy, listedmode.plan, SDL_FALSE
-					);
+					xbiosmode_t modeinfo;
+
+					modeinfo.number = listedmode.mode;
+					modeinfo.width = listedmode.physx;
+					modeinfo.height = listedmode.physy;
+					modeinfo.depth = listedmode.plan;
+					modeinfo.doubleline = SDL_FALSE;
+
+					SDL_XBIOS_AddMode(this, actually_add, &modeinfo);
 				}
 			}
 			SDL_memcpy(&curmode, &listedmode, sizeof(centscreen_mode_t));
@@ -77,7 +76,7 @@ int SDL_XBIOS_CentscreenInit(_THIS)
 
 void SDL_XBIOS_CentscreenSetmode(_THIS, int width, int height, int planes)
 {
-	centscreen_mode_t	newmode, curmode;
+	centscreen_mode_t newmode, curmode;
 	
 	newmode.handle = newmode.mode = newmode.logx = newmode.logy = -1;
 	newmode.physx = width;
@@ -95,7 +94,7 @@ void SDL_XBIOS_CentscreenSetmode(_THIS, int width, int height, int planes)
 
 void SDL_XBIOS_CentscreenRestore(_THIS, int prev_handle)
 {
-	centscreen_mode_t	newmode, curmode;
+	centscreen_mode_t newmode, curmode;
 
 	/* Restore old video mode */
 	newmode.handle = prev_handle;

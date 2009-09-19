@@ -32,14 +32,21 @@
 #include "SDL_xbios.h"
 #include "SDL_xbios_blowup.h"
 
-void SDL_XBIOS_BlowupInit(_THIS, blow_cookie_t *cookie_blow)
+void SDL_XBIOS_ListBlowupModes(_THIS, int actually_add, blow_cookie_t *cookie_blow)
 {
-	int i, num_mode, bank;
+	int i, j, num_mode, bank;
 	blow_mode_t *blow_mode;
+	xbiosmode_t modeinfo;
 
-	/* Add bit 15 for old modes */
-	for (i=0;i<XBIOS_nummodes;i++) {
-		XBIOS_modelist[i].number |= 1<<15;
+	if (actually_add) {
+		/* Set bit 15 for old modes */
+		for (i=0;i<NUM_MODELISTS;i++) {
+			if ( SDL_xbiosmode[i] != NULL ) {
+				for ( j=0; SDL_xbiosmode[i][j]; ++j ) {
+					SDL_xbiosmode[i][j]->number |= 1<<15;
+				}
+			}
+		}
 	}
 
 	/* Add Blowup modes for 8 and 16 bpp */
@@ -57,13 +64,13 @@ void SDL_XBIOS_BlowupInit(_THIS, blow_cookie_t *cookie_blow)
 					&& (cookie_blow->montype == MONITOR_TV)))
 			{
 				/* we can use this extended mode */
-				SDL_XBIOS_AddMode(this,
-					num_mode == 3 ? BPS8 : BPS16,
-					blow_mode->width + 1,
-					blow_mode->height + 1,
-					num_mode == 3 ? 8 : 16,
-					SDL_FALSE
-				);
+				modeinfo.number = (num_mode == 3 ? BPS8 : BPS16);
+				modeinfo.width = blow_mode->width + 1;
+				modeinfo.height = blow_mode->height + 1;
+				modeinfo.depth = (num_mode == 3 ? 8 : 16);
+				modeinfo.doubleline = SDL_FALSE;
+
+				SDL_XBIOS_AddMode(this, actually_add, &modeinfo);
 			}
 		}
 	}

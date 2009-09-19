@@ -111,7 +111,7 @@ typedef struct {
 
 /*--- Functions prototypes ---*/
 
-int SDL_XBIOS_CentscreenInit(_THIS);
+int SDL_XBIOS_ListCentscreenModes(_THIS, int actually_add);
 void SDL_XBIOS_CentscreenSetmode(_THIS, int width, int height, int planes);
 void SDL_XBIOS_CentscreenRestore(_THIS, int prev_handle);
 

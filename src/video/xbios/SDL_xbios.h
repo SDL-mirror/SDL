@@ -30,13 +30,6 @@
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_VideoDevice *this
 
-/* TT video modes:	2
-   Falcon RVB:		16 (could be *2 by adding PAL/NTSC modes)
-   Falcon VGA:		6
-   ST low:		1
-*/
-#define SDL_NUMMODES 16
-
 typedef struct
 {
 	Uint16 number;		/* Video mode number */
@@ -47,7 +40,7 @@ typedef struct
 } xbiosmode_t;
 
 /* Private display data */
-#define NUM_MODELISTS	2		/* 8 and 16 bits-per-pixel */
+#define NUM_MODELISTS	4		/* 8, 16, 24, and 32 bits-per-pixel */
 
 struct SDL_PrivateVideoData {
 	long cookie_vdo;
@@ -55,8 +48,6 @@ struct SDL_PrivateVideoData {
 	void *old_video_base;			/* Old pointer to screen buffer */
 	void *old_palette;				/* Old palette */
 	Uint32 old_num_colors;			/* Nb of colors in saved palette */
-	int num_modes;					/* Number of xbios video modes */
-	xbiosmode_t	*mode_list;			/* List of xbios video modes */
 
 	void *screens[2];		/* Pointers to aligned screen buffer */
 	void *screensmem[2];	/* Pointers to screen buffer */
@@ -68,8 +59,9 @@ struct SDL_PrivateVideoData {
 
 	SDL_bool centscreen;	/* Centscreen extension present ? */
 
-	SDL_Rect *SDL_modelist[NUM_MODELISTS][SDL_NUMMODES+1];
-	xbiosmode_t *videomodes[NUM_MODELISTS][SDL_NUMMODES+1];
+	int SDL_nummodes[NUM_MODELISTS];
+	SDL_Rect **SDL_modelist[NUM_MODELISTS];
+	xbiosmode_t **SDL_xbiosmode[NUM_MODELISTS];
 };
 
 /* _VDO cookie values */
@@ -102,19 +94,18 @@ enum {
 #endif
 
 /* Hidden structure -> variables names */
+#define SDL_nummodes		(this->hidden->SDL_nummodes)
 #define SDL_modelist		(this->hidden->SDL_modelist)
+#define SDL_xbiosmode		(this->hidden->SDL_xbiosmode)
 #define XBIOS_mutex		    (this->hidden->mutex)
 #define XBIOS_cvdo		    (this->hidden->cookie_vdo)
 #define XBIOS_oldpalette	(this->hidden->old_palette)
 #define XBIOS_oldnumcol		(this->hidden->old_num_colors)
 #define XBIOS_oldvbase		(this->hidden->old_video_base)
 #define XBIOS_oldvmode		(this->hidden->old_video_mode)
-#define XBIOS_nummodes		(this->hidden->num_modes)
-#define XBIOS_modelist		(this->hidden->mode_list)
 #define XBIOS_screens		(this->hidden->screens)
 #define XBIOS_screensmem	(this->hidden->screensmem)
 #define XBIOS_shadowscreen	(this->hidden->shadowscreen)
-#define XBIOS_videomodes	(this->hidden->videomodes)
 #define XBIOS_doubleline	(this->hidden->doubleline)
 #define XBIOS_fbnum			(this->hidden->frame_number)
 #define XBIOS_pitch			(this->hidden->pitch)
@@ -124,7 +115,6 @@ enum {
 
 /*--- Functions prototypes ---*/
 
-void SDL_XBIOS_AddMode(_THIS, Uint16 modecode, Uint16 width, Uint16 height,
-	Uint16 depth, SDL_bool flags);
+void SDL_XBIOS_AddMode(_THIS, int actually_add, const xbiosmode_t *modeinfo);
 
 #endif /* _SDL_xbios_h */

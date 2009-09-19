@@ -81,6 +81,6 @@ typedef struct {
 
 /*--- Functions prototypes ---*/
 
-void SDL_XBIOS_BlowupInit(_THIS, blow_cookie_t *cookie_blow);
+void SDL_XBIOS_ListBlowupModes(_THIS, int actually_add, blow_cookie_t *cookie_blow);
 
 #endif /* _SDL_xbios_blowup_h */
