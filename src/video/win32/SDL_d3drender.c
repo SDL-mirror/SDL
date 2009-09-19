@@ -1060,10 +1060,10 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         data->beginScene = SDL_FALSE;
     }
 
-    minx = (float) dstrect->x;
-    miny = (float) dstrect->y;
-    maxx = (float) dstrect->x + dstrect->w;
-    maxy = (float) dstrect->y + dstrect->h;
+    minx = (float) dstrect->x - 0.5f;
+    miny = (float) dstrect->y - 0.5f;
+    maxx = (float) dstrect->x + dstrect->w - 0.5f;
+    maxy = (float) dstrect->y + dstrect->h - 0.5f;
 
     minu = (float) srcrect->x / texture->w;
     maxu = (float) (srcrect->x + srcrect->w) / texture->w;
