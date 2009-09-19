@@ -1561,33 +1561,6 @@ AC_HELP_STRING([--enable-video-vgl], [use VGL video driver [[default=no]]]),
     fi
 }
 
-dnl Set up the wscons video driver if enabled
-CheckWscons()
-{
-    AC_ARG_ENABLE(video-wscons,
-AC_HELP_STRING([--enable-video-wscons], [use wscons video driver [[default=no]]]),
-                  , enable_video_wscons=no)
-    if test x$enable_video = xyes -a x$enable_video_wscons = xyes; then
-        AC_MSG_CHECKING(for wscons support)
-        video_wscons=no
-        AC_TRY_COMPILE([
-         #include <sys/time.h>
-         #include <dev/wscons/wsconsio.h>
-         #include <dev/wscons/wsdisplay_usl_io.h>
-        ],[
-         int wsmode = WSDISPLAYIO_MODE_DUMBFB;
-        ],[
-        video_wscons=yes
-        ])
-        AC_MSG_RESULT($video_wscons)
-        if test x$video_wscons = xyes; then
-            AC_DEFINE(SDL_VIDEO_DRIVER_WSCONS)
-            SOURCES="$SOURCES $srcdir/src/video/wscons/*.c"
-            have_video=yes
-        fi
-    fi
-}
-
 dnl Set up the Atari Bios keyboard driver
 CheckAtariBiosEvent()
 {
