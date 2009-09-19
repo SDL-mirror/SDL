@@ -943,42 +943,6 @@ CheckVisibilityHidden()
 }
 
 
-dnl Find the nanox include and library directories
-CheckNANOX()
-{
-    AC_ARG_ENABLE(video-nanox,
-        AC_HELP_STRING([--enable-video-nanox], [use nanox video driver [[default=no]]]),
-        , enable_video_nanox=no)
-
-    if test x$enable_video = xyes -a x$enable_video_nanox = xyes; then
-        AC_ARG_ENABLE(nanox-debug,  
-            AC_HELP_STRING([--enable-nanox-debug], [print debug messages [[default=no]]]),
-            , enable_nanox_debug=no)
-        if test x$enable_nanox_debug = xyes; then
-            EXTRA_CFLAGS="$EXTRA_CFLAGS -DENABLE_NANOX_DEBUG"
-        fi
-
-        AC_ARG_ENABLE(nanox-share-memory,  
-            AC_HELP_STRING([--enable-nanox-share-memory], [use share memory [[default=no]]]),
-            , enable_nanox_share_memory=no)
-        if test x$enable_nanox_share_memory = xyes; then
-            EXTRA_CFLAGS="$EXTRA_CFLAGS -DNANOX_SHARE_MEMORY"
-        fi
-
-        AC_ARG_ENABLE(nanox_direct_fb, 
-            AC_HELP_STRING([--enable-nanox-direct-fb], [use direct framebuffer access [[default=no]]]),
-            , enable_nanox_direct_fb=no)
-        if test x$enable_nanox_direct_fb = xyes; then
-            EXTRA_CFLAGS="$EXTRA_CFLAGS -DENABLE_NANOX_DIRECT_FB"
-        fi
-
-        AC_DEFINE(SDL_VIDEO_DRIVER_NANOX)
-        SOURCES="$SOURCES $srcdir/src/video/nanox/*.c"
-        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lnano-X"
-        have_video=yes
-    fi
-}
-
 dnl Find the X11 include and library directories
 CheckX11()
 {
@@ -2422,7 +2386,6 @@ case "$host" in
         CheckESD
         CheckNAS
         CheckX11
-        CheckNANOX
         CheckFBCON
         CheckDirectFB
         CheckFusionSound

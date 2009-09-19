@@ -112,23 +112,6 @@ struct SDL_SysWMinfo
     } info;
 };
 
-#elif defined(SDL_VIDEO_DRIVER_NANOX)
-#include <microwin/nano-X.h>
-
-/* The generic custom event structure */
-struct SDL_SysWMmsg
-{
-    SDL_version version;
-    int data;
-};
-
-/* The windows custom window manager information structure */
-struct SDL_SysWMinfo
-{
-    SDL_version version;
-    GR_WINDOW_ID window;        /* The display window */
-};
-
 #elif defined(SDL_VIDEO_DRIVER_WIN32)
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>

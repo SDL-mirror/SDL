@@ -341,9 +341,6 @@ extern VideoBootStrap COCOA_bootstrap;
 #if SDL_VIDEO_DRIVER_X11
 extern VideoBootStrap X11_bootstrap;
 #endif
-#if SDL_VIDEO_DRIVER_NANOX
-extern VideoBootStrap NX_bootstrap;
-#endif
 #if SDL_VIDEO_DRIVER_WSCONS
 extern VideoBootStrap WSCONS_bootstrap;
 #endif
