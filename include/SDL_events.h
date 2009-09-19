@@ -60,6 +60,7 @@ typedef enum
     SDL_WINDOWEVENT,            /**< Window state change */
     SDL_KEYDOWN,                /**< Keys pressed */
     SDL_KEYUP,                  /**< Keys released */
+    SDL_TEXTEDITING,            /**< Keyboard text editing (composition) */
     SDL_TEXTINPUT,              /**< Keyboard text input */
     SDL_MOUSEMOTION,            /**< Mouse moved */
     SDL_MOUSEBUTTONDOWN,        /**< Mouse button pressed */
@@ -97,6 +98,7 @@ typedef enum
     SDL_KEYDOWNMASK = SDL_EVENTMASK(SDL_KEYDOWN),
     SDL_KEYUPMASK = SDL_EVENTMASK(SDL_KEYUP),
     SDL_KEYEVENTMASK = SDL_EVENTMASK(SDL_KEYDOWN) | SDL_EVENTMASK(SDL_KEYUP),
+    SDL_TEXTEDITINGMASK = SDL_EVENTMASK(SDL_TEXTEDITING),
     SDL_TEXTINPUTMASK = SDL_EVENTMASK(SDL_TEXTINPUT),
     SDL_MOUSEMOTIONMASK = SDL_EVENTMASK(SDL_MOUSEMOTION),
     SDL_MOUSEBUTTONDOWNMASK = SDL_EVENTMASK(SDL_MOUSEBUTTONDOWN),
@@ -147,6 +149,20 @@ typedef struct SDL_KeyboardEvent
     Uint8 state;            /**< SDL_PRESSED or SDL_RELEASED */
     SDL_keysym keysym;      /**< The key that was pressed or released */
 } SDL_KeyboardEvent;
+
+/**
+ * \struct SDL_TextEditingEvent
+ *
+ * \brief Keyboard text editing event structure (event.edit.*)
+ */
+#define SDL_TEXTEDITINGEVENT_TEXT_SIZE (32)
+typedef struct SDL_TextEditingEvent
+{
+    Uint8 type;                                 /**< SDL_TEXTEDITING */
+    char text[SDL_TEXTEDITINGEVENT_TEXT_SIZE];  /**< The editing text */
+    int start;                                  /**< The start cursor of selected editing text */
+    int length;                                 /**< The length of selected editing text */
+} SDL_TextEditingEvent;
 
 /**
  * \struct SDL_TextInputEvent
@@ -350,6 +366,7 @@ typedef union SDL_Event
     Uint8 type;                     /**< Event type, shared with all events */
     SDL_WindowEvent window;         /**< Window event data */
     SDL_KeyboardEvent key;          /**< Keyboard event data */
+    SDL_TextEditingEvent edit;      /**< Text editing event data */
     SDL_TextInputEvent text;        /**< Text input event data */
     SDL_MouseMotionEvent motion;    /**< Mouse motion event data */
     SDL_MouseButtonEvent button;    /**< Mouse button event data */

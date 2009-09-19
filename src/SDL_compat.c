@@ -40,6 +40,7 @@ static SDL_GLContext *SDL_VideoContext = NULL;
 static Uint32 SDL_VideoFlags = 0;
 static char *wm_title = NULL;
 static SDL_Surface *SDL_VideoIcon;
+static int SDL_enabled_UNICODE = 0;
 
 char *
 SDL_AudioDriverName(char *namebuf, int maxlen)
@@ -1720,7 +1721,19 @@ SDL_GetKeyRepeat(int *delay, int *interval)
 int
 SDL_EnableUNICODE(int enable)
 {
-    return SDL_EventState(SDL_TEXTINPUT, enable);
+    int previous = SDL_enabled_UNICODE;
+
+    switch (enable) {
+    case 1:
+        SDL_enabled_UNICODE = 1;
+        SDL_StartTextInput();
+        break;
+    case 0:
+        SDL_enabled_UNICODE = 0;
+        SDL_StopTextInput();
+        break;
+    }
+    return previous;
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

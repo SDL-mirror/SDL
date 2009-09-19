@@ -3233,4 +3233,32 @@ SDL_GetWindowWMInfo(SDL_WindowID windowID, struct SDL_SysWMinfo *info)
     return (_this->GetWindowWMInfo(_this, window, info));
 }
 
+void
+SDL_StartTextInput(void)
+{
+    if (_this->StartTextInput) {
+        _this->StartTextInput(_this);
+    }
+    SDL_EventState(SDL_TEXTINPUT, SDL_ENABLE);
+    SDL_EventState(SDL_TEXTEDITING, SDL_ENABLE);
+}
+
+void
+SDL_StopTextInput(void)
+{
+    if (_this->StopTextInput) {
+        _this->StopTextInput(_this);
+    }
+    SDL_EventState(SDL_TEXTINPUT, SDL_DISABLE);
+    SDL_EventState(SDL_TEXTEDITING, SDL_DISABLE);
+}
+
+void
+SDL_SetTextInputRect(SDL_Rect *rect)
+{
+    if (_this->SetTextInputRect) {
+        _this->SetTextInputRect(_this, rect);
+    }
+}
+
 /* vi: set ts=4 sw=4 expandtab: */

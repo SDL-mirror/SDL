@@ -28,6 +28,8 @@
 
 #include <Carbon/Carbon.h>
 
+//#define DEBUG_IME NSLog
+#define DEBUG_IME
 
 #ifndef NX_DEVICERCTLKEYMASK
     #define NX_DEVICELCTLKEYMASK    0x00000001
@@ -54,14 +56,142 @@
     #define NX_DEVICERCTLKEYMASK    0x00002000
 #endif
 
-@interface SDLTranslatorResponder : NSTextView
+@interface SDLTranslatorResponder : NSView <NSTextInput>
 {
+    NSString *_markedText;
+    NSRange   _markedRange;
+    NSRange   _selectedRange;
+    SDL_Rect  _inputRect;
+    int       _keyboard;
 }
 - (void) doCommandBySelector:(SEL)myselector;
+- (void) setInputRect:(SDL_Rect *) rect;
+- (void) setKeyboard:(int) keyboard;
 @end
 
 @implementation SDLTranslatorResponder
-- (void) doCommandBySelector:(SEL) myselector {}
+
+- (void) setKeyboard:(int) keyboard
+{
+    _keyboard = keyboard;
+}
+
+- (void) setInputRect:(SDL_Rect *) rect
+{
+    _inputRect = *rect;
+}
+
+- (void) insertText:(id) aString
+{
+    const char *str;
+
+    DEBUG_IME(@"insertText: %@", aString);
+
+    /* Could be NSString or NSAttributedString, so we have
+     * to test and convert it before return as SDL event */
+    if ([aString isKindOfClass: [NSAttributedString class]])
+        str = [[aString string] UTF8String];
+    else
+        str = [aString UTF8String];
+
+    SDL_SendKeyboardText(_keyboard, str);
+}
+
+- (void) doCommandBySelector:(SEL) myselector
+{
+    [super doCommandBySelector: myselector];
+}
+
+- (BOOL) hasMarkedText
+{
+    return _markedText != nil;
+}
+
+- (NSRange) markedRange
+{
+    return _markedRange;
+}
+
+- (NSRange) selectedRange
+{
+    return _selectedRange;
+}
+
+- (void) setMarkedText:(id) aString
+         selectedRange:(NSRange) selRange
+{
+    if ([aString isKindOfClass: [NSAttributedString class]])
+        aString = [aString string];
+
+    if ([aString length] == 0)
+    {
+        [self unmarkText];
+        return;
+    }
+
+    if (_markedText != aString)
+    {
+        [_markedText release];
+        _markedText = [aString retain];
+    }
+
+    _selectedRange = selRange;
+    _markedRange = NSMakeRange(0, [aString length]);
+
+    SDL_SendEditingText([aString UTF8String], selRange.location, selRange.length);
+
+    DEBUG_IME(@"setMarkedText: %@, (%d, %d)", _markedText,
+          selRange.location, selRange.length);
+}
+
+- (void) unmarkText
+{
+    [_markedText release];
+    _markedText = nil;
+}
+
+- (NSRect) firstRectForCharacterRange: (NSRange) theRange
+{
+    float windowHeight = [[self window] frame].size.height;
+    NSRect rect = NSMakeRect(_inputRect.x, windowHeight - _inputRect.y - _inputRect.h,
+                             _inputRect.w, _inputRect.h);
+
+    DEBUG_IME(@"firstRectForCharacterRange: (%d, %d): windowHeight = %g, rect = %@",
+            theRange.location, theRange.length, windowHeight,
+            NSStringFromRect(rect));
+    rect.origin = [[self window] convertBaseToScreen: rect.origin];
+
+    return rect;
+}
+
+- (NSAttributedString *) attributedSubstringFromRange: (NSRange) theRange
+{
+    DEBUG_IME(@"attributedSubstringFromRange: (%d, %d)", theRange.location, theRange.length);
+    return nil;
+}
+
+- (NSInteger) conversationIdentifier
+{
+    return (NSInteger) self;
+}
+
+// This method returns the index for character that is 
+// nearest to thePoint.  thPoint is in screen coordinate system.
+- (NSUInteger) characterIndexForPoint:(NSPoint) thePoint
+{
+    DEBUG_IME(@"characterIndexForPoint: (%g, %g)", thePoint.x, thePoint.y);
+    return 0;
+}
+
+// This method is the key to attribute extension. 
+// We could add new attributes through this method.
+// NSInputServer examines the return value of this
+// method & constructs appropriate attributed string.
+- (NSArray *) validAttributesForMarkedText
+{
+    return [NSArray array];
+}
+
 @end
 
 /* This is the original behavior, before support was added for 
@@ -478,12 +608,7 @@ Cocoa_InitKeyboard(_THIS)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     SDL_Keyboard keyboard;
-    NSAutoreleasePool *pool;
 
-    pool = [[NSAutoreleasePool alloc] init];
-    data->fieldEdit = [[SDLTranslatorResponder alloc] initWithFrame:NSMakeRect(0.0, 0.0, 0.0, 0.0)];
-    [pool release];
-    
     SDL_zero(keyboard);
     data->keyboard = SDL_AddKeyboard(&keyboard, -1);
     UpdateKeymap(data);
@@ -495,6 +620,47 @@ Cocoa_InitKeyboard(_THIS)
     SDL_SetScancodeName(SDL_SCANCODE_LGUI, "Left Command");
     SDL_SetScancodeName(SDL_SCANCODE_RALT, "Right Option");
     SDL_SetScancodeName(SDL_SCANCODE_RGUI, "Right Command");
+}
+
+void
+Cocoa_StartTextInput(_THIS)
+{
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    NSView *parentView = [[NSApp keyWindow] contentView];
+
+    data->fieldEdit = [[SDLTranslatorResponder alloc] initWithFrame:NSMakeRect(0.0, 0.0, 0.0, 0.0)];
+    [data->fieldEdit setKeyboard: data->keyboard];
+
+    if (! [[data->fieldEdit superview] isEqual: parentView])
+    {
+        // DEBUG_IME(@"add fieldEdit to window contentView");
+        [data->fieldEdit removeFromSuperview];
+        [parentView addSubview: data->fieldEdit];
+        [[NSApp keyWindow] makeFirstResponder: data->fieldEdit];
+    }
+
+    [pool release];
+}
+
+void
+Cocoa_StopTextInput(_THIS)
+{
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    [data->fieldEdit removeFromSuperview];
+    [data->fieldEdit release];
+    data->fieldEdit = nil;
+    [pool release];
+}
+
+void
+Cocoa_SetTextInputRect(_THIS, SDL_Rect *rect)
+{
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+
+    [data->fieldEdit setInputRect: rect];
 }
 
 void
@@ -533,11 +699,13 @@ Cocoa_HandleKeyEvent(_THIS, NSEvent *event)
         if (SDL_EventState(SDL_TEXTINPUT, SDL_QUERY)) {
             /* FIXME CW 2007-08-16: only send those events to the field editor for which we actually want text events, not e.g. esc or function keys. Arrow keys in particular seem to produce crashes sometimes. */
             [data->fieldEdit interpretKeyEvents:[NSArray arrayWithObject:event]];
+#if 0
             text = [[event characters] UTF8String];
             if(text && *text) {
                 SDL_SendKeyboardText(data->keyboard, text);
                 [data->fieldEdit setString:@""];
             }
+#endif
         }
         break;
     case NSKeyUp:
@@ -559,10 +727,6 @@ Cocoa_QuitKeyboard(_THIS)
     NSAutoreleasePool *pool;
 
     SDL_DelKeyboard(data->keyboard);
-
-    pool = [[NSAutoreleasePool alloc] init];
-    [data->fieldEdit release];
-    [pool release];
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

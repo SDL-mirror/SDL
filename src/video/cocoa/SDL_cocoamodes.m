@@ -250,6 +250,8 @@ Cocoa_SetDisplayMode(_THIS, SDL_DisplayMode * mode)
         CGReleaseDisplayFadeReservation(fade_token);
     }
 
+    [[NSApp mainWindow] makeKeyAndOrderFront: nil];
+
 #if MAC_OS_X_VERSION_MAX_ALLOWED < 1050
     /* 
         There is a bug in Cocoa where NSScreen doesn't synchronize

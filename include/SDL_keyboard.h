@@ -154,6 +154,34 @@ extern DECLSPEC const char *SDLCALL SDL_GetScancodeName(SDL_scancode
  */
 extern DECLSPEC const char *SDLCALL SDL_GetKeyName(SDLKey key);
 
+/**
+ * \fn void SDL_StartTextInput(void)
+ *
+ * \brief Start accepting Unicode text input events.
+ *
+ * \sa SDL_StopTextInput()
+ * \sa SDL_SetTextInputRect()
+ */
+extern DECLSPEC void SDLCALL SDL_StartTextInput(void);
+
+/**
+ * \fn void SDL_StopTextInput(void)
+ *
+ * \brief Stop receiving any text input events.
+ *
+ * \sa SDL_StartTextInput()
+ */
+extern DECLSPEC void SDLCALL SDL_StopTextInput(void);
+
+/**
+ * \fn void SDL_SetTextInputRect(SDL_Rect *rect)
+ *
+ * \brief Set the rectangle used to type Unicode text inputs.
+ *
+ * \sa SDL_StartTextInput()
+ */
+extern DECLSPEC void SDLCALL SDL_SetTextInputRect(SDL_Rect *rect);
+
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

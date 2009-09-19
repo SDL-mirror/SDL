@@ -852,6 +852,24 @@ SDL_SendKeyboardText(int index, const char *text)
     return (posted);
 }
 
+int
+SDL_SendEditingText(const char *text, int start, int length)
+{
+    int posted;
+
+    /* Post the event, if desired */
+    posted = 0;
+    if (SDL_ProcessEvents[SDL_TEXTEDITING] == SDL_ENABLE) {
+        SDL_Event event;
+        event.edit.type = SDL_TEXTEDITING;
+        event.edit.start = start;
+        event.edit.length = length;
+        SDL_strlcpy(event.edit.text, text, SDL_arraysize(event.text.text));
+        posted = (SDL_PushEvent(&event) > 0);
+    }
+    return (posted);
+}
+
 void
 SDL_KeyboardQuit(void)
 {

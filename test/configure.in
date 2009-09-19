@@ -128,5 +128,23 @@ fi
 
 AC_SUBST(GLLIB)
 
+dnl Check for SDL_ttf
+AC_MSG_CHECKING(for SDL_ttf)
+have_SDL_ttf=no
+AC_TRY_COMPILE([
+ #include "SDL_ttf.h"
+],[
+],[
+have_SDL_ttf=yes
+])
+AC_MSG_RESULT($have_SDL_ttf)
+
+if test x$have_SDL_ttf = xyes; then
+    CFLAGS="$CFLAGS -DHAVE_SDL_TTF"
+    SDL_TTF_LIB="-lSDL_ttf"
+fi
+
+AC_SUBST(SDL_TTF_LIB)
+
 dnl Finally create all the generated files
 AC_OUTPUT([Makefile])

@@ -41,6 +41,8 @@
 
 /* Private display data */
 
+@class SDLTranslatorResponder;
+
 typedef struct SDL_VideoData
 {
     SInt32 osversion;
@@ -48,7 +50,7 @@ typedef struct SDL_VideoData
     int mouse;
     int keyboard;
     void *key_layout;
-    NSText *fieldEdit;
+    SDLTranslatorResponder *fieldEdit;
     Uint32 screensaver_activity;
 } SDL_VideoData;
 

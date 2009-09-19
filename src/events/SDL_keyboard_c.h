@@ -81,6 +81,9 @@ extern int SDL_SendKeyboardKey(int index, Uint8 state, SDL_scancode scancode);
 /* Send keyboard text input for a keyboard at an index */
 extern int SDL_SendKeyboardText(int index, const char *text);
 
+/* Send editing text for selected range from start to end */
+extern int SDL_SendEditingText(const char *text, int start, int end);
+
 /* Shutdown the keyboard subsystem */
 extern void SDL_KeyboardQuit(void);
 
