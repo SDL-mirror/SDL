@@ -33,8 +33,6 @@
 #include "dc/SDL_systhread_c.h"
 #elif SDL_THREAD_EPOC
 #include "epoc/SDL_systhread_c.h"
-#elif SDL_THREAD_OS2
-#include "os2/SDL_systhread_c.h"
 #elif SDL_THREAD_PTH
 #include "pth/SDL_systhread_c.h"
 #elif SDL_THREAD_PTHREAD

@@ -49,16 +49,6 @@
 #  else
 #   define DECLSPEC	__declspec(dllexport)
 #  endif
-# elif defined(__OS2__)
-#  ifdef __WATCOMC__
-#   ifdef BUILD_SDL
-#    define DECLSPEC	__declspec(dllexport)
-#   else
-#    define DECLSPEC
-#   endif
-#  else
-#   define DECLSPEC
-#  endif
 # else
 #  if defined(__GNUC__) && __GNUC__ >= 4
 #   define DECLSPEC	__attribute__ ((visibility("default")))
@@ -73,13 +63,7 @@
 #if defined(__WIN32__) && !defined(__GNUC__)
 #define SDLCALL __cdecl
 #else
-#ifdef __OS2__
-/* But on OS/2, we use the _System calling convention */
-/* to be compatible with every compiler */
-#define SDLCALL _System
-#else
 #define SDLCALL
-#endif
 #endif
 #endif /* SDLCALL */
 

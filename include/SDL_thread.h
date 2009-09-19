@@ -48,9 +48,9 @@ struct SDL_Thread;
 typedef struct SDL_Thread SDL_Thread;
 
 /* Create a thread */
-#if (defined(__WIN32__) && !defined(HAVE_LIBC)) || defined(__OS2__)
+#if defined(__WIN32__) && !defined(HAVE_LIBC)
 /*
-   We compile SDL into a DLL on OS/2. This means, that it's the DLL which
+   We compile SDL into a DLL. This means, that it's the DLL which
    creates a new thread for the calling process with the SDL_CreateThread()
    API. There is a problem with this, that only the RTL of the SDL.DLL will
    be initialized for those threads, and not the RTL of the calling application!
@@ -67,11 +67,7 @@ typedef struct SDL_Thread SDL_Thread;
 #include <process.h>            /* This has _beginthread() and _endthread() defined! */
 #endif
 
-#ifdef __OS2__
-typedef int (*pfnSDL_CurrentBeginThread) (void (*func) (void *), void *,
-                                          unsigned, void *arg);
-typedef void (*pfnSDL_CurrentEndThread) (void);
-#elif __GNUC__
+#ifdef __GNUC__
 typedef unsigned long (__cdecl * pfnSDL_CurrentBeginThread) (void *, unsigned,
                                                              unsigned
                                                              (__stdcall *
@@ -96,9 +92,7 @@ SDL_CreateThread(int (SDLCALL * f) (void *), void *data,
                  pfnSDL_CurrentBeginThread pfnBeginThread,
                  pfnSDL_CurrentEndThread pfnEndThread);
 
-#ifdef __OS2__
-#define SDL_CreateThread(fn, data) SDL_CreateThread(fn, data, _beginthread, _endthread)
-#elif defined(_WIN32_WCE)
+#if defined(_WIN32_WCE)
 #define SDL_CreateThread(fn, data) SDL_CreateThread(fn, data, NULL, NULL)
 #else
 #define SDL_CreateThread(fn, data) SDL_CreateThread(fn, data, _beginthreadex, _endthreadex)

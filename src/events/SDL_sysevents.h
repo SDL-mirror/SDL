@@ -33,8 +33,4 @@
 #define CANT_THREAD_EVENTS
 #endif
 
-#ifdef __OS2__                  /* The OS/2 event loop runs in a separate thread */
-#define MUST_THREAD_EVENTS
-#endif
-
 /* vi: set ts=4 sw=4 expandtab: */

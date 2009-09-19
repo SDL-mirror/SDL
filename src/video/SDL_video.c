@@ -109,9 +109,6 @@ static VideoBootStrap *bootstrap[] = {
 #if SDL_VIDEO_DRIVER_RISCOS
     &RISCOS_bootstrap,
 #endif
-#if SDL_VIDEO_DRIVER_OS2FS
-    &OS2FSLib_bootstrap,
-#endif
 #if SDL_VIDEO_DRIVER_NDS
     &NDS_bootstrap,
 #endif

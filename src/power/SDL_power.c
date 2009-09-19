@@ -34,7 +34,6 @@ SDL_bool SDL_GetPowerInfo_Linux_proc_acpi(SDL_PowerState *, int *, int *);
 SDL_bool SDL_GetPowerInfo_Linux_proc_apm(SDL_PowerState *, int *, int *);
 SDL_bool SDL_GetPowerInfo_Windows(SDL_PowerState *, int *, int *);
 SDL_bool SDL_GetPowerInfo_MacOSX(SDL_PowerState *, int *, int *);
-SDL_bool SDL_GetPowerInfo_OS2(SDL_PowerState *, int *, int *);
 SDL_bool SDL_GetPowerInfo_BeOS(SDL_PowerState *, int *, int *);
 SDL_bool SDL_GetPowerInfo_NintendoDS(SDL_PowerState *, int *, int *);
 
@@ -64,9 +63,6 @@ static SDL_GetPowerInfo_Impl implementations[] = {
 #endif
 #ifdef SDL_POWER_MACOSX         /* handles Mac OS X, Darwin, iPhone. */
     SDL_GetPowerInfo_MacOSX,
-#endif
-#ifdef SDL_POWER_OS2            /* handles OS/2, Warp, eComStation. */
-    SDL_GetPowerInfo_OS2,
 #endif
 #ifdef SDL_POWER_NINTENDODS     /* handles Nintendo DS. */
     SDL_GetPowerInfo_NintendoDS,

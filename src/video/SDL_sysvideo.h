@@ -395,9 +395,6 @@ extern VideoBootStrap DC_bootstrap;
 #if SDL_VIDEO_DRIVER_RISCOS
 extern VideoBootStrap RISCOS_bootstrap;
 #endif
-#if SDL_VIDEO_DRIVER_OS2FS
-extern VideoBootStrap OS2FSLib_bootstrap;
-#endif
 #if SDL_VIDEO_DRIVER_UIKIT
 extern VideoBootStrap UIKIT_bootstrap;
 #endif
