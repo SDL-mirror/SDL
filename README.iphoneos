@@ -5,7 +5,7 @@ Building the Simple DirectMedia Layer for iPhone OS 2.0
 Requirements: Mac OS X v10.5 or later and the iPhone SDK.
 
 Instructions:
-1.  Open SDLiPhoneOS.xcodeproj (located in XCodeiPhoneOS/SDL) in XCode.
+1.  Open SDLiPhoneOS.xcodeproj (located in Xcode-iPhoneOS/SDL) in XCode.
 2.  Set Project->Set Active SDK to "Use Project Settings"
 3.  Select your desired target, and hit build.
 
