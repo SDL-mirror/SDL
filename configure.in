@@ -1529,38 +1529,6 @@ AC_HELP_STRING([--enable-video-svga], [use SVGAlib video driver [[default=no]]])
     fi
 }
 
-dnl Find the VGL includes and libraries
-CheckVGL()
-{
-    AC_ARG_ENABLE(video-vgl,
-AC_HELP_STRING([--enable-video-vgl], [use VGL video driver [[default=no]]]),
-                  , enable_video_vgl=no)
-    if test x$enable_video = xyes -a x$enable_video_vgl = xyes; then
-        AC_MSG_CHECKING(for libVGL support)
-        video_vgl=no
-        AC_TRY_COMPILE([
-         #include <sys/fbio.h>
-         #include <sys/consio.h>
-         #include <sys/kbio.h>
-         #include <vgl.h>
-        ],[
-         VGLBitmap bitmap;
-         bitmap.Type = VIDBUF32;
-         bitmap.PixelBytes = 4;
-         exit(bitmap.Bitmap);
-        ],[
-        video_vgl=yes
-        ])
-        AC_MSG_RESULT($video_vgl)
-        if test x$video_vgl = xyes; then
-            AC_DEFINE(SDL_VIDEO_DRIVER_VGL)
-            SOURCES="$SOURCES $srcdir/src/video/vgl/*.c"
-            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lvgl"
-            have_video=yes
-        fi
-    fi
-}
-
 dnl Set up the Atari Bios keyboard driver
 CheckAtariBiosEvent()
 {
@@ -2365,8 +2333,6 @@ case "$host" in
         CheckPS2GS
         CheckPS3
         CheckSVGA
-        CheckVGL
-        CheckWscons
         CheckOpenGLX11
         CheckInputEvents
         CheckTslib
