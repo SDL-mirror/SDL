@@ -143,9 +143,6 @@ static const AudioBootStrap *const bootstrap[] = {
 #if SDL_AUDIO_DRIVER_MMEAUDIO
     &MMEAUDIO_bootstrap,
 #endif
-#if SDL_AUDIO_DRIVER_DART
-    &DART_bootstrap,
-#endif
 #if SDL_AUDIO_DRIVER_NDS
     &NDSAUD_bootstrap,
 #endif
