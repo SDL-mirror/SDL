@@ -894,8 +894,8 @@ D3D_RenderPoint(SDL_Renderer * renderer, int x, int y)
 
     color = D3DCOLOR_ARGB(renderer->a, renderer->r, renderer->g, renderer->b);
 
-    vertices[0].x = (float) x - 0.5f;
-    vertices[0].y = (float) y - 0.5f;
+    vertices[0].x = (float) x;
+    vertices[0].y = (float) y;
     vertices[0].z = 0.0f;
     vertices[0].rhw = 1.0f;
     vertices[0].color = color;
@@ -936,16 +936,16 @@ D3D_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
 
     color = D3DCOLOR_ARGB(renderer->a, renderer->r, renderer->g, renderer->b);
 
-    vertices[0].x = (float) x1 - 0.5f;
-    vertices[0].y = (float) y1 - 0.5f;
+    vertices[0].x = (float) x1;
+    vertices[0].y = (float) y1;
     vertices[0].z = 0.0f;
     vertices[0].rhw = 1.0f;
     vertices[0].color = color;
     vertices[0].u = 0.0f;
     vertices[0].v = 0.0f;
 
-    vertices[1].x = (float) x2 - 0.5f;
-    vertices[1].y = (float) y2 - 0.5f;
+    vertices[1].x = (float) x2;
+    vertices[1].y = (float) y2;
     vertices[1].z = 0.0f;
     vertices[1].rhw = 1.0f;
     vertices[1].color = color;
@@ -985,10 +985,10 @@ D3D_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
         data->beginScene = SDL_FALSE;
     }
 
-    minx = (float) rect->x - 0.5f;
-    miny = (float) rect->y - 0.5f;
-    maxx = (float) rect->x + rect->w - 0.5f;
-    maxy = (float) rect->y + rect->h - 0.5f;
+    minx = (float) rect->x;
+    miny = (float) rect->y;
+    maxx = (float) rect->x + rect->w;
+    maxy = (float) rect->y + rect->h;
 
     color = D3DCOLOR_ARGB(renderer->a, renderer->r, renderer->g, renderer->b);
 
@@ -1060,10 +1060,10 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         data->beginScene = SDL_FALSE;
     }
 
-    minx = (float) dstrect->x - 0.5f;
-    miny = (float) dstrect->y - 0.5f;
-    maxx = (float) dstrect->x + dstrect->w - 0.5f;
-    maxy = (float) dstrect->y + dstrect->h - 0.5f;
+    minx = (float) dstrect->x;
+    miny = (float) dstrect->y;
+    maxx = (float) dstrect->x + dstrect->w;
+    maxy = (float) dstrect->y + dstrect->h;
 
     minu = (float) srcrect->x / texture->w;
     maxu = (float) (srcrect->x + srcrect->w) / texture->w;
