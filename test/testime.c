@@ -59,7 +59,7 @@ void InitVideo(int argc, char *argv[])
     SDL_putenv("SDL_VIDEO_WINDOW_POS=center");
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
-        fprintf(stderr, "Unable to init SDL: %s\n", TTF_GetError());
+        fprintf(stderr, "Unable to init SDL: %s\n", SDL_GetError());
         exit(-1);
     }
 
@@ -70,7 +70,7 @@ void InitVideo(int argc, char *argv[])
     font = TTF_OpenFont(fontname, DEFAULT_PTSIZE);
     if (! font)
     {
-        fprintf(stderr, "Failed to find font: %s\n", SDL_GetError());
+        fprintf(stderr, "Failed to find font: %s\n", TTF_GetError());
         exit(-1);
     }
 #endif
