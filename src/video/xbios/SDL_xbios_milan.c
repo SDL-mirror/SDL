@@ -57,6 +57,28 @@ static const Uint8 mode_bpp[4]={
 	8, 15, 16, 32
 };
 
+/*--- Variables ---*/
+
+static int enum_actually_add;
+static SDL_VideoDevice *enum_this;
+
+/*--- Functions ---*/
+
+static unsigned long /*cdecl*/ enumfunc(SCREENINFO *inf, unsigned long flag)
+{
+	xbiosmode_t modeinfo;
+
+	modeinfo.number = inf->devID;
+	modeinfo.width = inf->scrWidth;
+	modeinfo.height = inf->scrHeight;
+	modeinfo.depth = inf->scrPlanes;
+	modeinfo.doubleline = SDL_FALSE;
+
+	SDL_XBIOS_AddMode(enum_this, enum_actually_add, &modeinfo);
+
+	return ENUMMODE_CONT; 
+} 
+
 void SDL_XBIOS_ListMilanModes(_THIS, int actually_add)
 {
 	int i;
@@ -84,4 +106,7 @@ void SDL_XBIOS_ListMilanModes(_THIS, int actually_add)
 	}
 
 	/* Read custom created modes */
+	enum_this = this;
+	enum_actually_add = actually_add;
+	VsetScreen(-1, &enumfunc, MI_MAGIC, CMD_ENUMMODES);
 }
