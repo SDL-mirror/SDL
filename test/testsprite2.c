@@ -153,29 +153,31 @@ MoveSprites(SDL_WindowID window, SDL_TextureID sprite)
     SDL_RenderLine(0, 1, 0, window_h-2);
     SDL_RenderLine(window_w-1, 1, window_w-1, window_h-2);
 
-    /* Test fill */
+    /* Test fill and copy */
     SDL_SetRenderDrawColor(0xFF, 0xFF, 0xFF, 0xFF);
+    temp.x = 1;
+    temp.y = 1;
+    temp.w = sprite_w;
+    temp.h = sprite_h;
+    SDL_RenderFill(&temp);
+    SDL_RenderCopy(sprite, NULL, &temp);
     temp.x = window_w-sprite_w-1;
     temp.y = 1;
     temp.w = sprite_w;
     temp.h = sprite_h;
     SDL_RenderFill(&temp);
+    SDL_RenderCopy(sprite, NULL, &temp);
     temp.x = 1;
     temp.y = window_h-sprite_h-1;
     temp.w = sprite_w;
     temp.h = sprite_h;
     SDL_RenderFill(&temp);
-
-    /* Test copy */
-    temp.x = 1;
-    temp.y = 1;
-    temp.w = sprite_w;
-    temp.h = sprite_h;
     SDL_RenderCopy(sprite, NULL, &temp);
     temp.x = window_w-sprite_w-1;
     temp.y = window_h-sprite_h-1;
     temp.w = sprite_w;
     temp.h = sprite_h;
+    SDL_RenderFill(&temp);
     SDL_RenderCopy(sprite, NULL, &temp);
 
     /* Test diagonal lines */
