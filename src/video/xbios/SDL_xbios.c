@@ -613,7 +613,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 				int width, int height, int bpp, Uint32 flags)
 {
 	int mode, new_depth;
-	int i;
+	int i, num_buffers;
 	xbiosmode_t *new_video_mode;
 	Uint32 new_screen_size;
 	Uint32 modeflags;
@@ -670,16 +670,8 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 		XBIOS_doubleline = SDL_TRUE;
 	}
 
-	XBIOS_screensmem[0] = Atari_SysMalloc(new_screen_size, MX_STRAM);
-
-	if (XBIOS_screensmem[0]==NULL) {
-		XBIOS_FreeBuffers(this);
-		SDL_SetError("Can not allocate %d KB for frame buffer", new_screen_size>>10);
-		return (NULL);
-	}
-	SDL_memset(XBIOS_screensmem[0], 0, new_screen_size);
-
-	XBIOS_screens[0]=(void *) (( (long) XBIOS_screensmem[0]+256) & 0xFFFFFF00UL);
+	/* Double buffer ? */
+	num_buffers = 1;
 
 #if SDL_VIDEO_OPENGL
 	if (flags & SDL_OPENGL) {
@@ -688,20 +680,23 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 		}
 	}
 #endif
-
-	/* Double buffer ? */
 	if (flags & SDL_DOUBLEBUF) {
-		XBIOS_screensmem[1] = Atari_SysMalloc(new_screen_size, MX_STRAM);
+		num_buffers = 2;
+		modeflags |= SDL_DOUBLEBUF;
+	}
 
-		if (XBIOS_screensmem[1]==NULL) {
+	/* Allocate buffers */
+	for (i=0; i<num_buffers; i++) {
+		XBIOS_screensmem[i] = Atari_SysMalloc(new_screen_size, MX_STRAM);
+
+		if (XBIOS_screensmem[i]==NULL) {
 			XBIOS_FreeBuffers(this);
-			SDL_SetError("Can not allocate %d KB for double buffer", new_screen_size>>10);
+			SDL_SetError("Can not allocate %d KB for buffer %d", new_screen_size>>10, i);
 			return (NULL);
 		}
-		SDL_memset(XBIOS_screensmem[1], 0, new_screen_size);
+		SDL_memset(XBIOS_screensmem[i], 0, new_screen_size);
 
-		XBIOS_screens[1]=(void *) (( (long) XBIOS_screensmem[1]+256) & 0xFFFFFF00UL);
-		modeflags |= SDL_DOUBLEBUF;
+		XBIOS_screens[i]=(void *) (( (long) XBIOS_screensmem[i]+256) & 0xFFFFFF00UL);
 	}
 
 	/* Allocate the new pixel format for the screen */

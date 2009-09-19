@@ -28,6 +28,7 @@
 */
 
 #include <mint/cookie.h>
+#include <mint/falcon.h>
 
 #include "SDL_xbios.h"
 #include "SDL_xbios_milan.h"
