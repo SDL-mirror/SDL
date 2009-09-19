@@ -39,7 +39,7 @@ SDL_bool SDL_GetPowerInfo_NintendoDS(SDL_PowerState *, int *, int *);
 
 #ifndef SDL_POWER_DISABLED
 #ifdef SDL_POWER_HARDWIRED
-/* This is for things that _never_ have a battery, like the Dreamcast, etc. */
+/* This is for things that _never_ have a battery */
 static SDL_bool
 SDL_GetPowerInfo_Hardwired(SDL_PowerState * state, int *seconds, int *percent)
 {

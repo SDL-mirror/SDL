@@ -28,8 +28,6 @@
 /* Add any platform that doesn't build using the configure system */
 #if defined(__NINTENDODS__)
 #include "SDL_config_nintendods.h"
-#elif defined(__DREAMCAST__)
-#include "SDL_config_dreamcast.h"
 #elif defined(__IPHONEOS__) 
 #include "SDL_config_iphoneos.h"
 #elif defined(__MACOSX__)

@@ -394,10 +394,8 @@ DEP_CPP_TESTW=\
 	"..\..\include\SDL_cdrom.h"\
 	"..\..\include\SDL_config.h"\
 	"..\..\include\SDL_config_amiga.h"\
-	"..\..\include\SDL_config_dreamcast.h"\
 	"..\..\include\SDL_config_macos.h"\
 	"..\..\include\SDL_config_macosx.h"\
-	"..\..\include\SDL_config_os2.h"\
 	"..\..\include\SDL_config_win32.h"\
 	"..\..\include\SDL_cpuinfo.h"\
 	"..\..\include\SDL_endian.h"\
@@ -431,10 +429,8 @@ DEP_CPP_TESTW=\
 	"..\..\include\SDL_cdrom.h"\
 	"..\..\include\SDL_config.h"\
 	"..\..\include\SDL_config_amiga.h"\
-	"..\..\include\SDL_config_dreamcast.h"\
 	"..\..\include\SDL_config_macos.h"\
 	"..\..\include\SDL_config_macosx.h"\
-	"..\..\include\SDL_config_os2.h"\
 	"..\..\include\SDL_config_win32.h"\
 	"..\..\include\SDL_cpuinfo.h"\
 	"..\..\include\SDL_endian.h"\
@@ -468,10 +464,8 @@ DEP_CPP_TESTW=\
 	"..\..\include\SDL_cdrom.h"\
 	"..\..\include\SDL_config.h"\
 	"..\..\include\SDL_config_amiga.h"\
-	"..\..\include\SDL_config_dreamcast.h"\
 	"..\..\include\SDL_config_macos.h"\
 	"..\..\include\SDL_config_macosx.h"\
-	"..\..\include\SDL_config_os2.h"\
 	"..\..\include\SDL_config_win32.h"\
 	"..\..\include\SDL_cpuinfo.h"\
 	"..\..\include\SDL_endian.h"\
@@ -505,10 +499,8 @@ DEP_CPP_TESTW=\
 	"..\..\include\SDL_cdrom.h"\
 	"..\..\include\SDL_config.h"\
 	"..\..\include\SDL_config_amiga.h"\
-	"..\..\include\SDL_config_dreamcast.h"\
 	"..\..\include\SDL_config_macos.h"\
 	"..\..\include\SDL_config_macosx.h"\
-	"..\..\include\SDL_config_os2.h"\
 	"..\..\include\SDL_config_win32.h"\
 	"..\..\include\SDL_cpuinfo.h"\
 	"..\..\include\SDL_endian.h"\
@@ -544,10 +536,8 @@ NODEP_CPP_TESTW=\
 	"..\include\SDL_cdrom.h"\
 	"..\include\SDL_config.h"\
 	"..\include\SDL_config_amiga.h"\
-	"..\include\SDL_config_dreamcast.h"\
 	"..\include\SDL_config_macos.h"\
 	"..\include\SDL_config_macosx.h"\
-	"..\include\SDL_config_os2.h"\
 	"..\include\SDL_config_win32.h"\
 	"..\include\SDL_config_wince.h"\
 	"..\include\SDL_cpuinfo.h"\
@@ -584,10 +574,8 @@ NODEP_CPP_TESTW=\
 	"..\include\SDL_cdrom.h"\
 	"..\include\SDL_config.h"\
 	"..\include\SDL_config_amiga.h"\
-	"..\include\SDL_config_dreamcast.h"\
 	"..\include\SDL_config_macos.h"\
 	"..\include\SDL_config_macosx.h"\
-	"..\include\SDL_config_os2.h"\
 	"..\include\SDL_config_win32.h"\
 	"..\include\SDL_config_wince.h"\
 	"..\include\SDL_cpuinfo.h"\

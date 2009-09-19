@@ -29,8 +29,6 @@
 #include "generic/SDL_systhread_c.h"
 #elif SDL_THREAD_BEOS
 #include "beos/SDL_systhread_c.h"
-#elif SDL_THREAD_DC
-#include "dc/SDL_systhread_c.h"
 #elif SDL_THREAD_EPOC
 #include "epoc/SDL_systhread_c.h"
 #elif SDL_THREAD_PTH

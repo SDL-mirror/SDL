@@ -389,9 +389,6 @@ extern VideoBootStrap XBIOS_bootstrap;
 #if SDL_VIDEO_DRIVER_GEM
 extern VideoBootStrap GEM_bootstrap;
 #endif
-#if SDL_VIDEO_DRIVER_DC
-extern VideoBootStrap DC_bootstrap;
-#endif
 #if SDL_VIDEO_DRIVER_RISCOS
 extern VideoBootStrap RISCOS_bootstrap;
 #endif

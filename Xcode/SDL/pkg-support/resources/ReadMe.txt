@@ -84,8 +84,8 @@ Known Issues:
 	there are new public headers. But also as a result of these changes, there are 
 	also new headers that qualify as "PrivateHeaders". Private Headers are headers 
 	that must be exported because a public header includes them, but users shouldn't 
-	directly invoke these. SDL_config_macosx.h and SDL_config_dreamcast.h are 
-	examples of this. We have considered marking these headers as Private, but it 
+	directly invoke these. SDL_config_macosx.h is an example of this.
+	We have considered marking these headers as Private, but it 
 	requires that the public headers invoke them via framework conventions, i.e.
 	#include <FrameworkName/Header.h>
 	e.g.

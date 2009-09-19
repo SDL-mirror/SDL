@@ -1518,10 +1518,8 @@ DEP_CPP_SDL_W=\
 	{$(INCLUDE)}"..\..\include\SDL_cdrom.h"\
 	{$(INCLUDE)}"..\..\include\SDL_config.h"\
 	{$(INCLUDE)}"..\..\include\SDL_config_amiga.h"\
-	{$(INCLUDE)}"..\..\include\SDL_config_dreamcast.h"\
 	{$(INCLUDE)}"..\..\include\SDL_config_macos.h"\
 	{$(INCLUDE)}"..\..\include\SDL_config_macosx.h"\
-	{$(INCLUDE)}"..\..\include\SDL_config_os2.h"\
 	{$(INCLUDE)}"..\..\include\SDL_config_win32.h"\
 	{$(INCLUDE)}"..\..\include\SDL_config_wince.h"\
 	{$(INCLUDE)}"..\..\include\SDL_cpuinfo.h"\
@@ -1556,10 +1554,8 @@ DEP_CPP_SDL_W=\
 	{$(INCLUDE)}"..\..\include\SDL_cdrom.h"\
 	{$(INCLUDE)}"..\..\include\SDL_config.h"\
 	{$(INCLUDE)}"..\..\include\SDL_config_amiga.h"\
-	{$(INCLUDE)}"..\..\include\SDL_config_dreamcast.h"\
 	{$(INCLUDE)}"..\..\include\SDL_config_macos.h"\
 	{$(INCLUDE)}"..\..\include\SDL_config_macosx.h"\
-	{$(INCLUDE)}"..\..\include\SDL_config_os2.h"\
 	{$(INCLUDE)}"..\..\include\SDL_config_win32.h"\
 	{$(INCLUDE)}"..\..\include\SDL_config_wince.h"\
 	{$(INCLUDE)}"..\..\include\SDL_cpuinfo.h"\
