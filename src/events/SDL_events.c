@@ -195,12 +195,10 @@ SDL_StopEventThread(void)
         SDL_EventThread = NULL;
         SDL_DestroyMutex(SDL_EventLock.lock);
     }
-#ifndef IPOD
     if (SDL_EventQ.lock) {
         SDL_DestroyMutex(SDL_EventQ.lock);
         SDL_EventQ.lock = NULL;
     }
-#endif
 }
 
 Uint32
