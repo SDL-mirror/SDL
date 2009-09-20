@@ -521,11 +521,21 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	for ( i=0; i<NUM_MODELISTS; ++i ) {
 		int j;
 
-		SDL_xbiosmode[i] = (xbiosmode_t **)SDL_malloc(SDL_nummodes[i]*sizeof(xbiosmode_t));
+		SDL_xbiosmode[i] = (xbiosmode_t **)
+			SDL_malloc(SDL_nummodes[i]*sizeof(xbiosmode_t *));
 		if ( SDL_xbiosmode[i] == NULL ) {
 			SDL_OutOfMemory();
 			return(-1);
 		}
+		for ( j=0; j<SDL_nummodes[i]; ++j ) {
+			SDL_xbiosmode[i][j]=(xbiosmode_t *)SDL_malloc(sizeof(xbiosmode_t));
+			if ( SDL_xbiosmode[i][j] == NULL ) {
+				SDL_OutOfMemory();
+				return(-1);
+			}
+			SDL_memset(SDL_xbiosmode[i][j], 0, sizeof(xbiosmode_t));
+		}
+
 		SDL_modelist[i] = (SDL_Rect **)
 				SDL_malloc((SDL_nummodes[i]+1)*sizeof(SDL_Rect *));
 		if ( SDL_modelist[i] == NULL ) {
