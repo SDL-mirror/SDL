@@ -62,11 +62,6 @@ extern AudioBootStrap BEOSAUDIO_bootstrap;
 extern AudioBootStrap COREAUDIO_bootstrap;
 extern AudioBootStrap COREAUDIOIPHONE_bootstrap;
 extern AudioBootStrap SNDMGR_bootstrap;
-extern AudioBootStrap MINTAUDIO_GSXB_bootstrap;
-extern AudioBootStrap MINTAUDIO_MCSN_bootstrap;
-extern AudioBootStrap MINTAUDIO_STFA_bootstrap;
-extern AudioBootStrap MINTAUDIO_XBIOS_bootstrap;
-extern AudioBootStrap MINTAUDIO_DMA8_bootstrap;
 extern AudioBootStrap DISKAUD_bootstrap;
 extern AudioBootStrap DUMMYAUD_bootstrap;
 extern AudioBootStrap DCAUD_bootstrap;
@@ -126,13 +121,6 @@ static const AudioBootStrap *const bootstrap[] = {
 #endif
 #if SDL_AUDIO_DRIVER_COREAUDIOIPHONE
     &COREAUDIOIPHONE_bootstrap,
-#endif
-#if SDL_AUDIO_DRIVER_MINT
-    &MINTAUDIO_GSXB_bootstrap,
-    &MINTAUDIO_MCSN_bootstrap,
-    &MINTAUDIO_STFA_bootstrap,
-    &MINTAUDIO_XBIOS_bootstrap,
-    &MINTAUDIO_DMA8_bootstrap,
 #endif
 #if SDL_AUDIO_DRIVER_DISK
     &DISKAUD_bootstrap,

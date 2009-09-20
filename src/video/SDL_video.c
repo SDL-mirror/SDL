@@ -88,12 +88,6 @@ static VideoBootStrap *bootstrap[] = {
 #if SDL_VIDEO_DRIVER_EPOC
     &EPOC_bootstrap,
 #endif
-#if SDL_VIDEO_DRIVER_XBIOS
-    &XBIOS_bootstrap,
-#endif
-#if SDL_VIDEO_DRIVER_GEM
-    &GEM_bootstrap,
-#endif
 #if SDL_VIDEO_DRIVER_RISCOS
     &RISCOS_bootstrap,
 #endif

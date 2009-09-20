@@ -897,25 +897,6 @@ AC_HELP_STRING([--enable-dummyaudio], [support the dummy audio driver [[default=
     fi
 }
 
-dnl Set up the Atari Audio driver
-CheckAtariAudio()
-{
-    AC_ARG_ENABLE(mintaudio,
-AC_HELP_STRING([--enable-mintaudio], [support Atari audio driver [[default=yes]]]),
-                  , enable_mintaudio=yes)
-    if test x$enable_audio = xyes -a x$enable_mintaudio = xyes; then
-        mintaudio=no
-        AC_CHECK_HEADER(mint/falcon.h, have_mint_falcon_hdr=yes)
-        if test x$have_mint_falcon_hdr = xyes; then
-            mintaudio=yes
-            AC_DEFINE(SDL_AUDIO_DRIVER_MINT)
-            SOURCES="$SOURCES $srcdir/src/audio/mint/*.c"
-            SOURCES="$SOURCES $srcdir/src/audio/mint/*.S"
-            have_audio=yes
-        fi
-    fi
-}
-
 dnl See if GCC's -fvisibility=hidden is supported (gcc4 and later, usually).
 dnl  Details of this flag are here: http://gcc.gnu.org/wiki/Visibility
 CheckVisibilityHidden()
@@ -1529,48 +1510,6 @@ AC_HELP_STRING([--enable-video-svga], [use SVGAlib video driver [[default=no]]])
     fi
 }
 
-dnl Set up the Atari Bios keyboard driver
-CheckAtariBiosEvent()
-{
-    SOURCES="$SOURCES $srcdir/src/video/ataricommon/*.c"
-    SOURCES="$SOURCES $srcdir/src/video/ataricommon/*.S"
-}
-
-dnl Set up the Atari Xbios driver
-CheckAtariXbiosVideo()
-{
-    AC_ARG_ENABLE(video-xbios,
-AC_HELP_STRING([--enable-video-xbios], [use Atari Xbios video driver [[default=yes]]]),
-                  , enable_video_xbios=yes)
-    video_xbios=no
-    if test x$enable_video = xyes -a x$enable_video_xbios = xyes; then
-        video_xbios=yes
-        AC_DEFINE(SDL_VIDEO_DRIVER_XBIOS)
-        SOURCES="$SOURCES $srcdir/src/video/xbios/*.c"
-        have_video=yes
-    fi
-}
-
-dnl Set up the Atari Gem driver
-CheckAtariGemVideo()
-{
-    AC_ARG_ENABLE(video-gem,
-AC_HELP_STRING([--enable-video-gem], [use Atari Gem video driver [[default=yes]]]),
-                  , enable_video_gem=yes)
-    if test x$enable_video = xyes -a x$enable_video_gem = xyes; then
-        video_gem=no
-        AC_CHECK_HEADER(gem.h, have_gem_hdr=yes)
-        AC_CHECK_LIB(gem, appl_init, have_gem_lib=yes)
-        if test x$have_gem_hdr = xyes -a x$have_gem_lib = xyes; then
-            video_gem=yes
-            AC_DEFINE(SDL_VIDEO_DRIVER_GEM)
-            SOURCES="$SOURCES $srcdir/src/video/gem/*.c"
-            SDL_LIBS="$SDL_LIBS -lgem"
-            have_video=yes
-        fi
-    fi
-}
-
 dnl rcg04172001 Set up the Null video driver.
 CheckDummyVideo()
 {
@@ -1705,43 +1644,6 @@ CheckMacGL()
                     EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,OpenGL"
                 fi
         esac
-    fi
-}
-
-dnl Check for Mesa offscreen rendering
-CheckAtariOSMesa()
-{
-    if test "x$enable_video" = "xyes" -a "x$enable_video_opengl" = "xyes"; then
-        AC_CHECK_HEADER(GL/osmesa.h, have_osmesa_hdr=yes)
-        AC_CHECK_LIB(OSMesa, OSMesaCreateContext, have_osmesa_lib=yes, have_osmesa_lib=no, -lm)
-
-        # Static linking to -lOSMesa
-        AC_PATH_PROG(OSMESA_CONFIG, osmesa-config, no)
-        if test "x$OSMESA_CONFIG" = "xno" -o "x$enable_atari_ldg" = "xno"; then
-            # -lOSMesa is really the static library
-            if test "x$have_osmesa_hdr" = "xyes" -a "x$have_osmesa_lib" = "xyes"; then
-                OSMESA_LIBS="-lOSMesa"
-            fi
-        else
-            # -lOSMesa is a loader for OSMesa.ldg
-            OSMESA_CFLAGS=`$OSMESA_CONFIG --cflags`
-            OSMESA_LIBS=`$OSMESA_CONFIG --libs`
-        fi
-        AC_DEFINE(SDL_VIDEO_OPENGL)
-        AC_DEFINE(SDL_VIDEO_OPENGL_OSMESA)
-        AC_DEFINE(SDL_VIDEO_RENDER_OGL)
-        SDL_CFLAGS="$SDL_CFLAGS $OSMESA_CFLAGS"
-        SDL_LIBS="$SDL_LIBS $OSMESA_LIBS"
-
-        AC_ARG_ENABLE(osmesa-shared,
-AC_HELP_STRING([--enable-osmesa-shared], [dynamically load OSMesa OpenGL support [[default=yes]]]),
-                              , enable_osmesa_shared=yes)
-        if test "x$enable_osmesa_shared" = "xyes" -a "x$enable_atari_ldg" = "xyes"; then
-            # Dynamic linking
-            if test "x$have_osmesa_hdr" = "xyes"; then
-                AC_DEFINE(SDL_VIDEO_OPENGL_OSMESA_DYNAMIC)
-            fi
-        fi
     fi
 }
 
@@ -2081,24 +1983,6 @@ AC_HELP_STRING([--enable-sdl-dlopen], [use dlopen for shared object loading [[de
             fi
             AC_DEFINE(SDL_LOADSO_DLOPEN)
             SOURCES="$SOURCES $srcdir/src/loadso/dlopen/*.c"
-            have_loadso=yes
-        fi
-    fi
-}
-
-dnl Set up the Atari LDG (shared object loader)
-CheckAtariLdg()
-{
-    AC_ARG_ENABLE(atari-ldg,
-AC_HELP_STRING([--enable-atari-ldg], [use Atari LDG for shared object loading [[default=yes]]]),
-                  , enable_atari_ldg=yes)
-    if test x$video_gem = xyes -a x$enable_atari_ldg = xyes; then
-        AC_CHECK_HEADER(ldg.h, have_ldg_hdr=yes)
-        AC_CHECK_LIB(ldg, ldg_open, have_ldg_lib=yes, have_ldg_lib=no, -lgem)
-        if test x$have_ldg_hdr = xyes -a x$have_ldg_lib = xyes; then
-            AC_DEFINE(SDL_LOADSO_LDG)
-            SOURCES="$SOURCES $srcdir/src/loadso/mint/*.c"
-            SDL_LIBS="$SDL_LIBS -lldg -lgem"
             have_loadso=yes
         fi
     fi
@@ -2793,45 +2677,6 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         # If either the audio or CD driver is used, add the AudioUnit framework
         if test x$enable_audio = xyes; then
             EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-framework,AudioUnit"
-        fi
-        ;;
-    *-*-mint*)
-        ARCH=mint
-        CheckDummyVideo
-        CheckDiskAudio
-        CheckDummyAudio
-        CheckAtariBiosEvent
-        CheckAtariXbiosVideo
-        CheckAtariGemVideo
-        CheckAtariAudio
-        CheckAtariLdg
-        CheckAtariOSMesa
-        CheckPTH
-        # Set up files for the audio library
-        if test x$enable_threads = xyes -a x$enable_pth = xyes; then
-            if test x$enable_audio = xyes; then
-                AC_DEFINE(SDL_AUDIO_DRIVER_SUNAUDIO)
-                SOURCES="$SOURCES $srcdir/src/audio/sun/*.c"
-                have_audio=yes
-            fi
-        fi
-        # Set up files for the joystick library
-        if test x$enable_joystick = xyes; then
-            AC_DEFINE(SDL_JOYSTICK_MINT)
-            SOURCES="$SOURCES $srcdir/src/joystick/mint/*.c"
-            have_joystick=yes
-        fi
-        # Set up files for the timer library
-        if test x$enable_timers = xyes; then
-            if test x$enable_threads = xyes -a x$enable_pth = xyes; then
-                AC_DEFINE(SDL_TIMER_UNIX)
-                SOURCES="$SOURCES $srcdir/src/timer/unix/*.c"
-            else
-                AC_DEFINE(SDL_TIMER_MINT)
-                SOURCES="$SOURCES $srcdir/src/timer/mint/*.c"
-                SOURCES="$SOURCES $srcdir/src/timer/mint/*.S"
-            fi
-            have_timers=yes
         fi
         ;;
     *-riscos)

@@ -379,12 +379,6 @@ extern VideoBootStrap qnxgf_bootstrap;
 #if SDL_VIDEO_DRIVER_EPOC
 extern VideoBootStrap EPOC_bootstrap;
 #endif
-#if SDL_VIDEO_DRIVER_XBIOS
-extern VideoBootStrap XBIOS_bootstrap;
-#endif
-#if SDL_VIDEO_DRIVER_GEM
-extern VideoBootStrap GEM_bootstrap;
-#endif
 #if SDL_VIDEO_DRIVER_RISCOS
 extern VideoBootStrap RISCOS_bootstrap;
 #endif
