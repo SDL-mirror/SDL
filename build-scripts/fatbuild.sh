@@ -17,7 +17,7 @@ CONFIG_PPC="--build=`uname -p`-apple-darwin --host=powerpc-apple-darwin \
 # PowerPC 32-bit compiler flags
 CC_PPC="gcc-4.0 -arch ppc"
 CXX_PPC="g++-4.0 -arch ppc"
-CFLAGS_PPC=""
+CFLAGS_PPC="-mmacosx-version-min=10.4"
 CPPFLAGS_PPC="-DMAC_OS_X_VERSION_MIN_REQUIRED=1040 \
 -nostdinc \
 -F/Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks \
@@ -38,7 +38,7 @@ CONFIG_PPC64="--build=`uname -p`-apple-darwin --host=powerpc-apple-darwin \
 # PowerPC 64-bit compiler flags
 CC_PPC64="gcc-4.0 -arch ppc64"
 CXX_PPC64="g++-4.0 -arch ppc64"
-CFLAGS_PPC64=""
+CFLAGS_PPC64="-mmacosx-version-min=10.5"
 CPPFLAGS_PPC64="-DMAC_OS_X_VERSION_MIN_REQUIRED=1050 \
 -nostdinc \
 -F/Developer/SDKs/MacOSX10.5.sdk/System/Library/Frameworks \
