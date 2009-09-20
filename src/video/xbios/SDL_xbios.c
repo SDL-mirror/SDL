@@ -143,7 +143,7 @@ static int XBIOS_Available(void)
 	const char *envr = SDL_getenv("SDL_VIDEODRIVER");
 
 	/* Milan/Hades Atari clones do not have an Atari video chip */
-	if ( (Getcookie(C__MIL, &cookie_mil) == C_FOUND) ||
+	if ( /*(Getcookie(C__MIL, &cookie_mil) == C_FOUND) ||*/
 		(Getcookie(C_hade, &cookie_hade) == C_FOUND) ) {
 		return 0;
 	}
@@ -387,6 +387,7 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	/* Initialize video mode list */
 	/* and save current screen status (palette, screen address, video mode) */
 	XBIOS_centscreen = SDL_FALSE;
+	XBIOS_oldvbase = Physbase();
 
 	/* Determine the current screen size */
 	this->info.current_w = 0;
@@ -402,7 +403,6 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 			{
 				short *oldpalette;
 			
-				XBIOS_oldvbase=Physbase();
 				XBIOS_oldvmode=Getrez();
 				switch(XBIOS_oldvmode << 8) {
 					case ST_LOW:
@@ -425,7 +425,6 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 			}
 			break;
 		case VDO_TT:
-			XBIOS_oldvbase=Logbase();
 			XBIOS_oldvmode=EgetShift();
 
 			switch(XBIOS_oldvmode & ES_MODE) {
@@ -451,7 +450,6 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 			XBIOS_ListTTModes(this, 0);
 			break;
 		case VDO_F30:
-			XBIOS_oldvbase=Logbase();
 			XBIOS_oldvmode=VsetMode(-1);
 
 			XBIOS_oldnumcol= 1<< (1 << (XBIOS_oldvmode & NUMCOLS));
@@ -622,7 +620,13 @@ static void XBIOS_FreeBuffers(_THIS)
 
 	for (i=0;i<2;i++) {
 		if (XBIOS_screensmem[i]!=NULL) {
-			Mfree(XBIOS_screensmem[i]);
+			if ((XBIOS_cvdo>>16) == VDO_MILAN)) {
+				if (i==1) {
+					VsetScreen(-1, -1, MI_MAGIC, CMD_FREEPAGE);
+				}
+			} else {
+				Mfree(XBIOS_screensmem[i]);
+			}
 			XBIOS_screensmem[i]=NULL;
 		}
 	}
@@ -709,7 +713,15 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 
 	/* Allocate buffers */
 	for (i=0; i<num_buffers; i++) {
-		XBIOS_screensmem[i] = Atari_SysMalloc(new_screen_size, MX_STRAM);
+		if ((XBIOS_cvdo>>16) == VDO_MILAN) {
+			if (i==0) {
+				XBIOS_screensmem[i] = XBIOS_oldvbase;
+			} else {
+				XBIOS_screensmem[i] = VsetScreen(-1, new_video_mode->number, MI_MAGIC, CMD_ALLOCPAGE);
+			}
+		} else {
+			XBIOS_screensmem[i] = Atari_SysMalloc(new_screen_size, MX_STRAM);
+		}
 
 		if (XBIOS_screensmem[i]==NULL) {
 			XBIOS_FreeBuffers(this);
@@ -805,6 +817,8 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 			}
 			break;
 		case VDO_MILAN:
+			VsetScreen(-1, new_video_mode->number, MI_MAGIC, CMD_SETMODE);
+
 			/* Set hardware palette to black in True Colour */
 			if (new_depth > 8) {
 				SDL_memset(F30_palette, 0, sizeof(F30_palette));
@@ -1033,6 +1047,7 @@ static void XBIOS_VideoQuit(_THIS)
 			}
 			break;
 		case VDO_MILAN:
+			VsetScreen(-1, &XBIOS_oldvbase, MI_MAGIC, CMD_SETADR);
 			VsetScreen(-1, &XBIOS_oldvmode, MI_MAGIC, CMD_SETMODE);
 			if (XBIOS_oldnumcol) {
 				VsetRGB(0, XBIOS_oldnumcol, XBIOS_oldpalette);
