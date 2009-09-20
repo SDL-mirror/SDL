@@ -39,10 +39,10 @@ SDL_PixelFormatEnumToMasks(Uint32 format, int *bpp, Uint32 * Rmask,
     Uint32 masks[4];
 
     /* Initialize the values here */
-    if (SDL_BYTESPERPIXEL(format) == 3) {
-        *bpp = SDL_BYTESPERPIXEL(format) * 8;
-    } else {
+    if (SDL_BYTESPERPIXEL(format) <= 2) {
         *bpp = SDL_BITSPERPIXEL(format);
+    } else {
+        *bpp = SDL_BYTESPERPIXEL(format) * 8;
     }
     *Rmask = *Gmask = *Bmask = *Amask = 0;
 
