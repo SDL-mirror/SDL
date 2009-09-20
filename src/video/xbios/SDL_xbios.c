@@ -620,7 +620,7 @@ static void XBIOS_FreeBuffers(_THIS)
 
 	for (i=0;i<2;i++) {
 		if (XBIOS_screensmem[i]!=NULL) {
-			if ((XBIOS_cvdo>>16) == VDO_MILAN)) {
+			if ((XBIOS_cvdo>>16) == VDO_MILAN) {
 				if (i==1) {
 					VsetScreen(-1, -1, MI_MAGIC, CMD_FREEPAGE);
 				}
@@ -717,7 +717,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 			if (i==0) {
 				XBIOS_screensmem[i] = XBIOS_oldvbase;
 			} else {
-				XBIOS_screensmem[i] = VsetScreen(-1, new_video_mode->number, MI_MAGIC, CMD_ALLOCPAGE);
+				VsetScreen(-1, &XBIOS_screensmem[i], MI_MAGIC, CMD_ALLOCPAGE);
 			}
 		} else {
 			XBIOS_screensmem[i] = Atari_SysMalloc(new_screen_size, MX_STRAM);
