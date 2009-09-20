@@ -68,7 +68,7 @@ void SDL_XBIOS_ListBlowupModes(_THIS, int actually_add, blow_cookie_t *cookie_bl
 				modeinfo.width = blow_mode->width + 1;
 				modeinfo.height = blow_mode->height + 1;
 				modeinfo.depth = (num_mode == 3 ? 8 : 16);
-				modeinfo.doubleline = SDL_FALSE;
+				modeinfo.flags = (modeinfo.depth == 8 ? XBIOSMODE_C2P : 0);
 
 				SDL_XBIOS_AddMode(this, actually_add, &modeinfo);
 			}

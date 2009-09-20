@@ -77,7 +77,7 @@ void SDL_XBIOS_ListSB3Modes(_THIS, int actually_add, scpn_cookie_t *cookie_scpn)
 	modeinfo.width = scrinfo->virtual_width;
 	modeinfo.height = scrinfo->virtual_height;
 	modeinfo.depth = 1<<(SDL_XBIOS_scpn_planes_device[scrinfo->device]);
-	modeinfo.doubleline = SDL_FALSE;
+	modeinfo.flags = (modeinfo.depth == 8 ? XBIOSMODE_C2P : 0);
 
 	SDL_XBIOS_AddMode(this, actually_add, &modeinfo);
 }

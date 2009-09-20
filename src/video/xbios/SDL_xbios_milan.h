@@ -70,10 +70,23 @@ enum {
 	BLK_CLEARED
 };
 
-/* bitFlags */ 
-#define STANDARD_BITS  1 
-#define FALCON_BITS   2 
-#define INTEL_BITS   8 
+/* scrFlags */
+#define SCRINFO_OK 1
+
+/* scrClut */
+#define NO_CLUT 0
+#define HARD_CLUT 1
+#define SOFT_CLUT 2
+
+/* scrFormat */
+#define INTERLEAVE_PLANES 0
+#define STANDARD_PLANES  1
+#define PACKEDPIX_PLANES 2
+
+/* bitFlags */
+#define STANDARD_BITS  1
+#define FALCON_BITS   2
+#define INTEL_BITS   8
 
 /*--- Structures ---*/
 

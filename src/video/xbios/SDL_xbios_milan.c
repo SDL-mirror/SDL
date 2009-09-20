@@ -73,7 +73,7 @@ static unsigned long /*cdecl*/ enumfunc(SCREENINFO *inf, unsigned long flag)
 	modeinfo.width = inf->scrWidth;
 	modeinfo.height = inf->scrHeight;
 	modeinfo.depth = inf->scrPlanes;
-	modeinfo.doubleline = SDL_FALSE;
+	modeinfo.flags = 0;
 
 	SDL_XBIOS_AddMode(enum_this, enum_actually_add, &modeinfo);
 
@@ -83,8 +83,6 @@ static unsigned long /*cdecl*/ enumfunc(SCREENINFO *inf, unsigned long flag)
 void SDL_XBIOS_ListMilanModes(_THIS, int actually_add)
 {
 	int i;
-
-	/* Read infos about current mode */ 
 
 	/* Read validated predefined modes */
 	for (i=0; i<NUM_PREDEFINED_MODES; i++) {
@@ -99,7 +97,7 @@ void SDL_XBIOS_ListMilanModes(_THIS, int actually_add)
 				modeinfo.width = mode_list[i].width;
 				modeinfo.height = mode_list[i].height;
 				modeinfo.depth = mode_bpp[j-1];
-				modeinfo.doubleline = SDL_FALSE;
+				modeinfo.flags = 0;
 
 				SDL_XBIOS_AddMode(this, actually_add, &modeinfo);
 			}

@@ -98,40 +98,40 @@ static unsigned long	F30_palette[256];
 /* Default list of video modes */
 
 static const xbiosmode_t stmodes[1]={
-	{ST_LOW>>8,320,200,4,SDL_FALSE}
+	{ST_LOW>>8,320,200,4, XBIOSMODE_C2P}
 };
 
 static const xbiosmode_t ttmodes[2]={
-	{TT_LOW,320,480,8,SDL_FALSE},
-	{TT_LOW,320,240,8,SDL_TRUE}	/* Software double-lined mode */
+	{TT_LOW,320,480,8, XBIOSMODE_C2P},
+	{TT_LOW,320,240,8, XBIOSMODE_C2P|XBIOSMODE_DOUBLELINE}
 };
 
 static const xbiosmode_t falconrgbmodes[16]={
-	{BPS16|COL80|OVERSCAN|VERTFLAG,768,480,16,SDL_FALSE},
-	{BPS16|COL80|OVERSCAN,768,240,16,SDL_FALSE},
-	{BPS16|COL80|VERTFLAG,640,400,16,SDL_FALSE},
-	{BPS16|COL80,640,200,16,SDL_FALSE},
-	{BPS16|OVERSCAN|VERTFLAG,384,480,16,SDL_FALSE},
-	{BPS16|OVERSCAN,384,240,16,SDL_FALSE},
-	{BPS16|VERTFLAG,320,400,16,SDL_FALSE},
-	{BPS16,320,200,16,SDL_FALSE},
-	{BPS8|COL80|OVERSCAN|VERTFLAG,768,480,8,SDL_FALSE},
-	{BPS8|COL80|OVERSCAN,768,240,8,SDL_FALSE},
-	{BPS8|COL80|VERTFLAG,640,400,8,SDL_FALSE},
-	{BPS8|COL80,640,200,8,SDL_FALSE},
-	{BPS8|OVERSCAN|VERTFLAG,384,480,8,SDL_FALSE},
-	{BPS8|OVERSCAN,384,240,8,SDL_FALSE},
-	{BPS8|VERTFLAG,320,400,8,SDL_FALSE},
-	{BPS8,320,200,8,SDL_FALSE}
+	{BPS16|COL80|OVERSCAN|VERTFLAG,768,480,16,0},
+	{BPS16|COL80|OVERSCAN,768,240,16,0},
+	{BPS16|COL80|VERTFLAG,640,400,16,0},
+	{BPS16|COL80,640,200,16,0},
+	{BPS16|OVERSCAN|VERTFLAG,384,480,16,0},
+	{BPS16|OVERSCAN,384,240,16,0},
+	{BPS16|VERTFLAG,320,400,16,0},
+	{BPS16,320,200,16,0},
+	{BPS8|COL80|OVERSCAN|VERTFLAG,768,480,8,XBIOSMODE_C2P},
+	{BPS8|COL80|OVERSCAN,768,240,8,XBIOSMODE_C2P},
+	{BPS8|COL80|VERTFLAG,640,400,8,XBIOSMODE_C2P},
+	{BPS8|COL80,640,200,8,XBIOSMODE_C2P},
+	{BPS8|OVERSCAN|VERTFLAG,384,480,8,XBIOSMODE_C2P},
+	{BPS8|OVERSCAN,384,240,8,XBIOSMODE_C2P},
+	{BPS8|VERTFLAG,320,400,8,XBIOSMODE_C2P},
+	{BPS8,320,200,8,XBIOSMODE_C2P}
 };
 
 static const xbiosmode_t falconvgamodes[6]={
-	{BPS16,320,480,16,SDL_FALSE},
-	{BPS16|VERTFLAG,320,240,16,SDL_FALSE},
-	{BPS8|COL80,640,480,8,SDL_FALSE},
-	{BPS8|COL80|VERTFLAG,640,240,8,SDL_FALSE},
-	{BPS8,320,480,8,SDL_FALSE},
-	{BPS8|VERTFLAG,320,240,8,SDL_FALSE}
+	{BPS16,320,480,16,0},
+	{BPS16|VERTFLAG,320,240,16,0},
+	{BPS8|COL80,640,480,8,XBIOSMODE_C2P},
+	{BPS8|COL80|VERTFLAG,640,240,8,XBIOSMODE_C2P},
+	{BPS8,320,480,8,XBIOSMODE_C2P},
+	{BPS8|VERTFLAG,320,240,8,XBIOSMODE_C2P}
 };
 
 /* Xbios driver bootstrap functions */
@@ -492,7 +492,31 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 			}
 			break;
 		case VDO_MILAN:
-			SDL_XBIOS_ListMilanModes(this, 0);
+			{
+				SCREENINFO si;
+
+				/* Read infos about current mode */ 
+				VsetScreen(-1, &XBIOS_oldvmode, MI_MAGIC, CMD_GETMODE);
+				this->info.current_w = si.scrWidth;
+				this->info.current_h = si.scrHeight;
+
+				si.size = sizeof(SCREENINFO);
+				si.devID = XBIOS_oldvmode;
+				si.scrFlags = 0;
+				VsetScreen(-1, &si, MI_MAGIC, CMD_GETINFO);
+
+				XBIOS_oldnumcol = 0;
+				if (si.scrFlags & SCRINFO_OK) {
+					if (si.scrPlanes <= 8) {
+						XBIOS_oldnumcol = 1<<si.scrPlanes;
+					}
+				}
+				if (XBIOS_oldnumcol) {
+					VgetRGB(0, XBIOS_oldnumcol, XBIOS_oldpalette);
+				}
+
+				SDL_XBIOS_ListMilanModes(this, 0);
+			}
 			break;
 	}
 
@@ -653,7 +677,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 	new_screen_size = width * height * ((new_depth)>>3);
 	new_screen_size += 256; /* To align on a 256 byte adress */	
 
-	if (new_depth == 8) {
+	if (new_video_mode->flags & XBIOSMODE_C2P) {
 		XBIOS_shadowscreen = Atari_SysMalloc(new_screen_size, MX_PREFTTRAM);
 
 		if (XBIOS_shadowscreen == NULL) {
@@ -664,10 +688,8 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 	}
 
 	/* Output buffer needs to be twice in size for the software double-line mode */
-	XBIOS_doubleline = SDL_FALSE;
-	if (new_video_mode->doubleline) {
+	if (new_video_mode->flags & XBIOSMODE_DOUBLELINE) {
 		new_screen_size <<= 1;
-		XBIOS_doubleline = SDL_TRUE;
 	}
 
 	/* Double buffer ? */
@@ -706,14 +728,15 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 		return(NULL);
 	}
 
-	current->w = XBIOS_width = width;
-	current->h = XBIOS_height = height;
+	XBIOS_current = new_video_mode;
+	current->w = width;
+	current->h = height;
 	current->pitch = (width * new_depth)>>3;
 
 	/* this is for C2P conversion */
 	XBIOS_pitch = (new_video_mode->width * new_video_mode->depth)>>3;
 
-	if (new_depth == 8)
+	if (new_video_mode->flags & XBIOSMODE_C2P)
 		current->pixels = XBIOS_shadowscreen;
 	else
 		current->pixels = XBIOS_screens[0];
@@ -736,7 +759,11 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 
 #ifndef DEBUG_VIDEO_XBIOS
 	/* Now set the video mode */
-	Setscreen(-1,XBIOS_screens[0],-1);
+	if ((XBIOS_cvdo>>16) == VDO_MILAN) {
+		VsetScreen(-1, XBIOS_screens[0], MI_MAGIC, CMD_SETADR);
+	} else {
+		Setscreen(-1,XBIOS_screens[0],-1);
+	}
 
 	switch(XBIOS_cvdo >> 16) {
 		case VDO_ST:
@@ -772,7 +799,14 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 			}
 
 			/* Set hardware palette to black in True Colour */
-			if (new_depth == 16) {
+			if (new_depth > 8) {
+				SDL_memset(F30_palette, 0, sizeof(F30_palette));
+				VsetRGB(0,256,F30_palette);
+			}
+			break;
+		case VDO_MILAN:
+			/* Set hardware palette to black in True Colour */
+			if (new_depth > 8) {
 				SDL_memset(F30_palette, 0, sizeof(F30_palette));
 				VsetRGB(0,256,F30_palette);
 			}
@@ -814,8 +848,9 @@ static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 
 	surface = this->screen;
 
-	if ((surface->format->BitsPerPixel) == 8) {
+	if (XBIOS_current->flags & XBIOSMODE_C2P) {
 		int i;
+		int doubleline = (XBIOS_current->flags & XBIOSMODE_DOUBLELINE ? 1 : 0);
 
 		for (i=0;i<numrects;i++) {
 			void *source,*destination;
@@ -841,7 +876,7 @@ static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 				destination,
 				x2-x1,
 				rects[i].h,
-				XBIOS_doubleline,
+				doubleline,
 				surface->pitch,
 				XBIOS_pitch
 			);
@@ -849,14 +884,18 @@ static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 	}
 
 #ifndef DEBUG_VIDEO_XBIOS
-	Setscreen(-1,XBIOS_screens[XBIOS_fbnum],-1);
+	if ((XBIOS_cvdo>>16) == VDO_MILAN) {
+		VsetScreen(-1, XBIOS_screens[XBIOS_fbnum], MI_MAGIC, CMD_SETADR);
+	} else {
+		Setscreen(-1,XBIOS_screens[XBIOS_fbnum],-1);
+	}
 
 	Vsync();
 #endif
 
 	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
 		XBIOS_fbnum ^= 1;
-		if ((surface->format->BitsPerPixel) > 8) {
+		if ((XBIOS_current->flags & XBIOSMODE_C2P) == 0) {
 			surface->pixels=XBIOS_screens[XBIOS_fbnum];
 		}
 	}
@@ -864,14 +903,15 @@ static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 
 static int XBIOS_FlipHWSurface(_THIS, SDL_Surface *surface)
 {
-	if ((surface->format->BitsPerPixel) == 8) {
+	if (XBIOS_current->flags & XBIOSMODE_C2P) {
 		void *destscr;
 		int destx;
+		int doubleline = (XBIOS_current->flags & XBIOSMODE_DOUBLELINE ? 1 : 0);
 			
 		/* Center on destination screen */
 		destscr = XBIOS_screens[XBIOS_fbnum];
-		destscr += XBIOS_pitch * ((XBIOS_height - surface->h) >> 1);
-		destx = (XBIOS_width - surface->w) >> 1;
+		destscr += XBIOS_pitch * ((XBIOS_current->height - surface->h) >> 1);
+		destx = (XBIOS_current->width - surface->w) >> 1;
 		destx &= ~15;
 		destscr += destx;
 
@@ -881,21 +921,25 @@ static int XBIOS_FlipHWSurface(_THIS, SDL_Surface *surface)
 			destscr,
 			surface->w,
 			surface->h,
-			XBIOS_doubleline,
+			doubleline,
 			surface->pitch,
 			XBIOS_pitch
 		);
 	}
 
 #ifndef DEBUG_VIDEO_XBIOS
-	Setscreen(-1,XBIOS_screens[XBIOS_fbnum],-1);
+	if ((XBIOS_cvdo>>16) == VDO_MILAN) {
+		VsetScreen(-1, XBIOS_screens[XBIOS_fbnum], MI_MAGIC, CMD_SETADR);
+	} else {
+		Setscreen(-1,XBIOS_screens[XBIOS_fbnum],-1);
+	}
 
 	Vsync();
 #endif
 
 	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
 		XBIOS_fbnum ^= 1;
-		if ((surface->format->BitsPerPixel) > 8) {
+		if ((XBIOS_current->flags & XBIOSMODE_C2P) == 0) {
 			surface->pixels=XBIOS_screens[XBIOS_fbnum];
 		}
 	}
@@ -934,6 +978,7 @@ static int XBIOS_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors
 			EsetPalette(firstcolor,ncolors,TT_palette);
 			break;
 		case VDO_F30:
+		case VDO_MILAN:
 			for(i = 0; i < ncolors; i++)
 			{
 				r = colors[i].r;	
@@ -983,6 +1028,12 @@ static void XBIOS_VideoQuit(_THIS)
 			} else {
 				VsetMode(XBIOS_oldvmode);
 			}
+			if (XBIOS_oldnumcol) {
+				VsetRGB(0, XBIOS_oldnumcol, XBIOS_oldpalette);
+			}
+			break;
+		case VDO_MILAN:
+			VsetScreen(-1, &XBIOS_oldvmode, MI_MAGIC, CMD_SETMODE);
 			if (XBIOS_oldnumcol) {
 				VsetRGB(0, XBIOS_oldnumcol, XBIOS_oldpalette);
 			}

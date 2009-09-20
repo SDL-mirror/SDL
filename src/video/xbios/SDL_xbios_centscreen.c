@@ -57,7 +57,7 @@ int SDL_XBIOS_ListCentscreenModes(_THIS, int actually_add)
 					modeinfo.width = listedmode.physx;
 					modeinfo.height = listedmode.physy;
 					modeinfo.depth = listedmode.plan;
-					modeinfo.doubleline = SDL_FALSE;
+					modeinfo.flags = (modeinfo.depth == 8 ? XBIOSMODE_C2P : 0);
 
 					SDL_XBIOS_AddMode(this, actually_add, &modeinfo);
 				}

@@ -30,13 +30,16 @@
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_VideoDevice *this
 
+#define XBIOSMODE_DOUBLELINE (1<<0)
+#define XBIOSMODE_C2P (1<<1)
+
 typedef struct
 {
 	Uint16 number;		/* Video mode number */
 	Uint16 width;		/* Size */	
 	Uint16 height;
 	Uint16 depth;		/* bits per plane */
-	SDL_bool doubleline;	/* Double the lines ? */
+	Uint16 flags;
 } xbiosmode_t;
 
 /* Private display data */
@@ -44,7 +47,7 @@ typedef struct
 
 struct SDL_PrivateVideoData {
 	long cookie_vdo;
-	int old_video_mode;				/* Old video mode before entering SDL */
+	long old_video_mode;				/* Old video mode before entering SDL */
 	void *old_video_base;			/* Old pointer to screen buffer */
 	void *old_palette;				/* Old palette */
 	Uint32 old_num_colors;			/* Nb of colors in saved palette */
@@ -52,13 +55,12 @@ struct SDL_PrivateVideoData {
 	void *screens[2];		/* Pointers to aligned screen buffer */
 	void *screensmem[2];	/* Pointers to screen buffer */
 	void *shadowscreen;		/* Shadow screen for c2p conversion */
-	int doubleline;			/* Double line mode ? */
 	int frame_number;		/* Number of frame for double buffer */
 	int pitch;				/* Destination line width for C2P */
-	int width, height;		/* Screen size for centered C2P */
 
 	SDL_bool centscreen;	/* Centscreen extension present ? */
 
+	xbiosmode_t *current;	/* Current set mode */
 	int SDL_nummodes[NUM_MODELISTS];
 	SDL_Rect **SDL_modelist[NUM_MODELISTS];
 	xbiosmode_t **SDL_xbiosmode[NUM_MODELISTS];
@@ -107,12 +109,10 @@ enum {
 #define XBIOS_screens		(this->hidden->screens)
 #define XBIOS_screensmem	(this->hidden->screensmem)
 #define XBIOS_shadowscreen	(this->hidden->shadowscreen)
-#define XBIOS_doubleline	(this->hidden->doubleline)
 #define XBIOS_fbnum			(this->hidden->frame_number)
 #define XBIOS_pitch			(this->hidden->pitch)
-#define XBIOS_width			(this->hidden->width)
-#define XBIOS_height		(this->hidden->height)
 #define XBIOS_centscreen	(this->hidden->centscreen)
+#define XBIOS_current		(this->hidden->current)
 
 /*--- Functions prototypes ---*/
 
