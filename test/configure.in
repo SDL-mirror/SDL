@@ -20,7 +20,7 @@ case "$host" in
         MATHLIB=""
         SYS_GL_LIBS="-lopengl32"
         ;;
-    *-*-beos*)
+    *-*-beos* | *-*-haiku*)
         EXE=""
         MATHLIB=""
         SYS_GL_LIBS="-lGL"

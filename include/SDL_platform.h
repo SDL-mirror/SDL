@@ -33,6 +33,10 @@
 #undef __BEOS__
 #define __BEOS__	1
 #endif
+#if defined(__HAIKU__)
+#undef __HAIKU__
+#define __HAIKU__	1
+#endif
 #if defined(bsdi) || defined(__bsdi) || defined(__bsdi__)
 #undef __BSDI__
 #define __BSDI__	1

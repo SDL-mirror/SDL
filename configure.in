@@ -2542,7 +2542,7 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         SDL_CFLAGS="$SDL_CFLAGS -Dmain=SDL_main"
         SDL_LIBS="-lmingw32 -lSDLmain $SDL_LIBS -mwindows"
         ;;
-    *-*-beos*)
+    *-*-beos* | *-*-haiku*)
         ARCH=beos
         ac_default_prefix=/boot/develop/tools/gnupro
         CheckDummyVideo

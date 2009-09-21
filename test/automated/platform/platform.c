@@ -139,6 +139,9 @@ const char *platform_getPlatform (void)
    return
 #if __AIX__   
       "AIX"
+#elif __HAIKU__
+/* Haiku must appear here before BeOS, since it also defines __BEOS__ */
+      "Haiku"
 #elif __BEOS__
       "BeOS"
 #elif __BSDI__
@@ -146,7 +149,6 @@ const char *platform_getPlatform (void)
 #elif __DREAMCAST__
       "Dreamcast"
 #elif __FREEBSD__
-
       "FreeBSD"
 #elif __HPUX__ 
       "HP-UX"

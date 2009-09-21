@@ -33,7 +33,7 @@
 
 /* Some compilers use a special export keyword */
 #ifndef DECLSPEC
-# if defined(__BEOS__)
+# if defined(__BEOS__) || defined(__HAIKU__)
 #  if defined(__GNUC__)
 #   define DECLSPEC	__declspec(dllexport)
 #  else

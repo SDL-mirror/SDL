@@ -160,6 +160,9 @@ main(int argc, char *argv[])
         printf("This system is running %s\n",
 #if __AIX__
                "AIX"
+#elif __HAIKU__
+/* Haiku must appear here before BeOS, since it also defines __BEOS__ */
+               "Haiku"
 #elif __BEOS__
                "BeOS"
 #elif __BSDI__
