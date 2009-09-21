@@ -1,3 +1,4 @@
+/* -*- Mode: C; c-basic-offset: 8; indent-tabs-mode: t -*- */
 /*
     SDL - Simple DirectMedia Layer
     Copyright (C) 1997-2009 Sam Lantinga
@@ -18,7 +19,7 @@
 
     Stéphan Kochen
     stephan@kochen.nl
-    
+
     Based on parts of the ALSA and ESounD output drivers.
 */
 #include "SDL_config.h"
@@ -78,14 +79,14 @@ static int (*SDL_NAME(pa_simple_write))(
 	pa_simple *s,
 	const void *data,
 	size_t length,
-	int *error 
+	int *error
 );
 static pa_channel_map* (*SDL_NAME(pa_channel_map_init_auto))(
 	pa_channel_map *m,
 	unsigned channels,
 	pa_channel_map_def_t def
 );
-	
+
 
 static struct {
 	const char *name;
@@ -158,16 +159,16 @@ static int Audio_Available(void)
 	if ( LoadPulseLibrary() < 0 ) {
 		return available;
 	}
-	
+
 	/* Connect with a dummy format. */
 	paspec.format = PA_SAMPLE_U8;
 	paspec.rate = 11025;
 	paspec.channels = 1;
 	connection = SDL_NAME(pa_simple_new)(
-		SDL_getenv("PASERVER"),      /* server */
+		NULL,                        /* server */
 		"Test stream",               /* application name */
 		PA_STREAM_PLAYBACK,          /* playback mode */
-		SDL_getenv("PADEVICE"),      /* device on the server */
+		NULL,                        /* device on the server */
 		"Simple DirectMedia Layer",  /* stream description */
 		&paspec,                     /* sample format spec */
 		NULL,                        /* channel map */
@@ -178,7 +179,7 @@ static int Audio_Available(void)
 		available = 1;
 		SDL_NAME(pa_simple_free)(connection);
 	}
-	
+
 	UnloadPulseLibrary();
 	return(available);
 }
@@ -233,7 +234,7 @@ static void PULSE_WaitAudio(_THIS)
 {
 	/* Check to see if the thread-parent process is still alive */
 	{ static int cnt = 0;
-		/* Note that this only works with thread implementations 
+		/* Note that this only works with thread implementations
 		   that use a different process id for each thread.
 		*/
 		if (parent && (((++cnt)%10) == 0)) { /* Check every 10 loops */
@@ -302,7 +303,7 @@ static int PULSE_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	pa_sample_spec  paspec;
 	pa_buffer_attr  paattr;
 	pa_channel_map  pacmap;
-	
+
 	paspec.format = PA_SAMPLE_INVALID;
 	for ( test_format = SDL_FirstAudioFormat(spec->format); test_format; ) {
 		switch ( test_format ) {
@@ -324,7 +325,7 @@ static int PULSE_OpenAudio(_THIS, SDL_AudioSpec *spec)
 		return(-1);
 	}
 	spec->format = test_format;
-	
+
 	paspec.channels = spec->channels;
 	paspec.rate = spec->freq;
 
@@ -338,25 +339,24 @@ static int PULSE_OpenAudio(_THIS, SDL_AudioSpec *spec)
 		return(-1);
 	}
 	SDL_memset(mixbuf, spec->silence, spec->size);
-	
+
 	/* Reduced prebuffering compared to the defaults. */
-	paattr.tlength = mixlen;
+	paattr.tlength = mixlen*2;
 	paattr.minreq = mixlen;
-	paattr.fragsize = mixlen;
-	paattr.prebuf = mixlen;
-	paattr.maxlength = mixlen * 4;
-	
+	paattr.prebuf = mixlen*2;
+	paattr.maxlength = mixlen*2;
+
 	/* The SDL ALSA output hints us that we use Windows' channel mapping */
 	/* http://bugzilla.libsdl.org/show_bug.cgi?id=110 */
 	SDL_NAME(pa_channel_map_init_auto)(
 		&pacmap, spec->channels, PA_CHANNEL_MAP_WAVEEX);
-	
+
 	/* Connect to the PulseAudio server */
 	stream = SDL_NAME(pa_simple_new)(
-		SDL_getenv("PASERVER"),      /* server */
+		NULL,                        /* server */
 		get_progname(),              /* application name */
 		PA_STREAM_PLAYBACK,          /* playback mode */
-		SDL_getenv("PADEVICE"),      /* device on the server */
+		NULL,                        /* device on the server */
 		"Simple DirectMedia Layer",  /* stream description */
 		&paspec,                     /* sample format spec */
 		&pacmap,                     /* channel map */
@@ -371,7 +371,6 @@ static int PULSE_OpenAudio(_THIS, SDL_AudioSpec *spec)
 
 	/* Get the parent process id (we're the parent of the audio thread) */
 	parent = getpid();
-	
+
 	return(0);
 }
-
