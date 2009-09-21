@@ -82,16 +82,31 @@ SDL_AtomicUnlock(SDL_SpinLock *lock)
 #define nativeAddThenFetch32
 #define nativeSubtractThenFetch32
 
-#define nativeTestThenSet64
-#define nativeClear64
-#define nativeFetchThenIncrement64
-#define nativeFetchThenDecrement64
-#define nativeFetchThenAdd64
-#define nativeFetchThenSubtract64
-#define nativeIncrementThenFetch64
-#define nativeDecrementThenFetch64
-#define nativeAddThenFetch64
-#define nativeSubtractThenFetch64
+#ifdef SDL_HAS_64BIT_TYPE
+  #ifdef __GCC_HAVE_SYNC_COMPARE_AND_SWAP_8
+    #define nativeTestThenSet64
+    #define nativeClear64
+    #define nativeFetchThenIncrement64
+    #define nativeFetchThenDecrement64
+    #define nativeFetchThenAdd64
+    #define nativeFetchThenSubtract64
+    #define nativeIncrementThenFetch64
+    #define nativeDecrementThenFetch64
+    #define nativeAddThenFetch64
+    #define nativeSubtractThenFetch64
+  #elif
+    #undef  nativeTestThenSet64
+    #undef  nativeClear64
+    #undef  nativeFetchThenIncrement64
+    #undef  nativeFetchThenDecrement64
+    #undef  nativeFetchThenAdd64
+    #undef  nativeFetchThenSubtract64
+    #undef  nativeIncrementThenFetch64
+    #undef  nativeDecrementThenFetch64
+    #undef  nativeAddThenFetch64
+    #undef  nativeSubtractThenFetch64
+  #endif /* __GCC_HAVE_SYNC_COMPARE_AND_SWAP_8 */
+#endif /* SDL_HAS_64BIT_TYPE */
 
 /* 
   If any of the operations are not provided then we must emulate some
