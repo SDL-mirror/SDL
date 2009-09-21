@@ -94,7 +94,7 @@ SDL_AtomicUnlock(SDL_SpinLock *lock)
     #define nativeDecrementThenFetch64
     #define nativeAddThenFetch64
     #define nativeSubtractThenFetch64
-  #elif
+  #else
     #undef  nativeTestThenSet64
     #undef  nativeClear64
     #undef  nativeFetchThenIncrement64
