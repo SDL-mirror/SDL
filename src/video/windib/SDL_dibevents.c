@@ -653,10 +653,11 @@ static SDL_keysym *TranslateKey(WPARAM vkey, UINT scancode, SDL_keysym *keysym, 
 
 int DIB_CreateWindow(_THIS)
 {
-	char *windowid = SDL_getenv("SDL_WINDOWID");
+	char *windowid;
 
 	SDL_RegisterApp(NULL, 0, 0);
 
+	windowid = SDL_getenv("SDL_WINDOWID");
 	SDL_windowid = (windowid != NULL);
 	if ( SDL_windowid ) {
 #if defined(_WIN32_WCE) && (_WIN32_WCE < 300)
