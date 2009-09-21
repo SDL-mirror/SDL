@@ -136,6 +136,7 @@
 
 /* Enable OpenGL support */
 #define SDL_VIDEO_OPENGL	1
+#define SDL_VIDEO_OPENGL_GLX 1
 
 /* Disable screensaver */
 #define SDL_VIDEO_DISABLE_SCREENSAVER	1
