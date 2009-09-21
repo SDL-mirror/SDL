@@ -20,5 +20,9 @@
     slouken@libsdl.org
 */
 
+/** @file SDL_types.h
+ *  @deprecated Use SDL_stdinc.h instead.
+ */
+
 /* DEPRECATED */
 #include "SDL_stdinc.h"

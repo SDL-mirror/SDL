@@ -20,16 +20,23 @@
     slouken@libsdl.org
 */
 
-/* Functions for reading and writing endian-specific values */
+/**
+ *  @file SDL_endian.h
+ *  Functions for reading and writing endian-specific values
+ */
 
 #ifndef _SDL_endian_h
 #define _SDL_endian_h
 
 #include "SDL_stdinc.h"
 
-/* The two types of endianness */
+/** @name SDL_ENDIANs
+ *  The two types of endianness 
+ */
+/*@{*/
 #define SDL_LIL_ENDIAN	1234
 #define SDL_BIG_ENDIAN	4321
+/*@}*/
 
 #ifndef SDL_BYTEORDER	/* Not defined in SDL_config.h? */
 #if defined(__hppa__) || \
@@ -50,11 +57,14 @@
 extern "C" {
 #endif
 
-/* Use inline functions for compilers that support them, and static
-   functions for those that do not.  Because these functions become
-   static for compilers that do not support inline functions, this
-   header should only be included in files that actually use them.
-*/
+/**
+ *  @name SDL_Swap Functions
+ *  Use inline functions for compilers that support them, and static
+ *  functions for those that do not.  Because these functions become
+ *  static for compilers that do not support inline functions, this
+ *  header should only be included in files that actually use them.
+ */
+/*@{*/
 #if defined(__GNUC__) && defined(__i386__) && \
    !(__GNUC__ == 2 && __GNUC_MINOR__ <= 95 /* broken gcc version */)
 static __inline__ Uint16 SDL_Swap16(Uint16 x)
@@ -161,14 +171,18 @@ static __inline__ Uint64 SDL_Swap64(Uint64 x)
 #endif
 #else
 /* This is mainly to keep compilers from complaining in SDL code.
-   If there is no real 64-bit datatype, then compilers will complain about
-   the fake 64-bit datatype that SDL provides when it compiles user code.
-*/
+ * If there is no real 64-bit datatype, then compilers will complain about
+ * the fake 64-bit datatype that SDL provides when it compiles user code.
+ */
 #define SDL_Swap64(X)	(X)
 #endif /* SDL_HAS_64BIT_TYPE */
+/*@}*/
 
-
-/* Byteswap item from the specified endianness to the native endianness */
+/**
+ *  @name SDL_SwapLE and SDL_SwapBE Functions
+ *  Byteswap item from the specified endianness to the native endianness
+ */
+/*@{*/
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN
 #define SDL_SwapLE16(X)	(X)
 #define SDL_SwapLE32(X)	(X)
@@ -184,6 +198,7 @@ static __inline__ Uint64 SDL_Swap64(Uint64 x)
 #define SDL_SwapBE32(X)	(X)
 #define SDL_SwapBE64(X)	(X)
 #endif
+/*@}*/
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

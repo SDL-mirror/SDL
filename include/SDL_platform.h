@@ -20,7 +20,9 @@
     slouken@libsdl.org
 */
 
-/* Try to get a standard set of platform defines */
+/** @file SDL_platform.h
+ *  Try to get a standard set of platform defines
+ */
 
 #ifndef _SDL_platform_h
 #define _SDL_platform_h
