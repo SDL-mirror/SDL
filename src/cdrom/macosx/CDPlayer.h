@@ -34,6 +34,10 @@
 #include "SDL_thread.h"
 #include "SDL_mutex.h"
 
+#if __MAC_OS_X_VERSION_MIN_REQUIRED < 1050
+typedef SInt16 FSIORefNum;
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
