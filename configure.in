@@ -898,7 +898,7 @@ dnl Do the iPod thing
 CheckIPod()
 {
     AC_ARG_ENABLE(ipod,
-AC_HELP_STRING([--enable-ipod], [configure SDL to work with iPodLinux [default=yes on arm-elf]]),
+AC_HELP_STRING([--enable-ipod], [configure SDL to work with iPodLinux [[default=yes]]]),
         , enable_ipod=yes)
 
     if test x$enable_ipod = xyes; then
