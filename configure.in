@@ -2696,8 +2696,8 @@ case "$host" in
             need_iokit_framework=yes
         fi
         if test x$enable_video_carbon = xyes -o x$enable_video_cocoa = xyes; then
-            # The Cocoa backend still needs Carbon, and the YUV code QuickTime
-            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,QuickTime -Wl,-framework,ApplicationServices"
+            # The Cocoa backend still needs Carbon
+            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,ApplicationServices"
             EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,Carbon"
         fi
         # If either the audio or CD driver is used, add the AudioUnit framework

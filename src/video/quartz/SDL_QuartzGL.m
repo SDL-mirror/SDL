@@ -41,13 +41,24 @@
 #define NSOpenGLPFASamples ((NSOpenGLPixelFormatAttribute) 56)
 #endif
 
-
+#ifdef __powerpc__   /* we lost this in 10.6, which has no PPC support. */
 @implementation NSOpenGLContext (CGLContextAccess)
 - (CGLContextObj) cglContext;
 {
     return _contextAuxiliary;
 }
 @end
+CGLContextObj QZ_GetCGLContextObj(NSOpenGLContext *nsctx)
+{
+    return [nsctx cglContext];
+}
+#else
+CGLContextObj QZ_GetCGLContextObj(NSOpenGLContext *nsctx)
+{
+    return (CGLContextObj) [nsctx CGLContextObj];
+}
+#endif
+
 
 /* OpenGL helper functions (used internally) */
 
@@ -165,7 +176,7 @@ int QZ_SetupOpenGL (_THIS, int bpp, Uint32 flags) {
 
     {
         long cache_max = 64;
-        CGLContextObj ctx = [ gl_context cglContext ];
+        CGLContextObj ctx = QZ_GetCGLContextObj(gl_context);
         CGLSetParameter (ctx, GLI_SUBMIT_FUNC_CACHE_MAX, &cache_max);
         CGLSetParameter (ctx, GLI_ARRAY_FUNC_CACHE_MAX, &cache_max);
     }

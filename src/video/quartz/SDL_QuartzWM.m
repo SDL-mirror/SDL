@@ -171,11 +171,7 @@ void QZ_PrivateSDLToCocoa (_THIS, NSPoint *p) {
     else {
        
         *p = [ window_view convertPoint:*p toView: nil ];
-        
-        /* We need a workaround in OpenGL mode */
-        if ( SDL_VideoSurface->flags & SDL_OPENGL ) {
-            p->y = [window_view frame].size.height - p->y;
-        }
+        p->y = [window_view frame].size.height - p->y;
     }
 }
 
@@ -189,11 +185,7 @@ void QZ_PrivateCocoaToSDL (_THIS, NSPoint *p) {
     else {
 
         *p = [ window_view convertPoint:*p fromView: nil ];
-        
-        /* We need a workaround in OpenGL mode */
-        if ( SDL_VideoSurface != NULL && (SDL_VideoSurface->flags & SDL_OPENGL) ) {
-            p->y = [window_view frame].size.height - p->y;
-        }
+        p->y = [window_view frame].size.height - p->y;
     }
 }
 
