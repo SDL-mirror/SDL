@@ -111,12 +111,7 @@
 #define SDL_HAPTIC_IOKIT	1
 
 /* Enable various shared object loading systems */
-#ifdef __ppc__
-/* For Mac OS X 10.2 compatibility */
-#define SDL_LOADSO_DLCOMPAT	1
-#else
 #define SDL_LOADSO_DLOPEN	1
-#endif
 
 /* Enable various threading systems */
 #define SDL_THREAD_PTHREAD	1
@@ -142,10 +137,13 @@
 #define SDL_VIDEO_DRIVER_X11_SCRNSAVER 1
 #define SDL_VIDEO_DRIVER_X11_XV 1
 
+#define SDL_VIDEO_RENDER_OGL	1
+#define SDL_VIDEO_RENDER_X11	1
+
 /* Enable OpenGL support */
 #define SDL_VIDEO_OPENGL	1
 #define SDL_VIDEO_OPENGL_CGL	1
-#define SDL_VIDEO_RENDER_OGL	1
+#define SDL_VIDEO_OPENGL_GLX	1
 
 /* Enable system power support */
 #define SDL_POWER_MACOSX 1
