@@ -508,6 +508,9 @@ AC_HELP_STRING([--enable-altivec], [use Altivec assembly routines [[default=yes]
     fi
 fi
 
+dnl set this to use on systems that use lib64 instead of lib
+base_libdir=`echo \${libdir} | sed 's/.*\/\(.*\)/\1/; q'`
+
 dnl See if the OSS audio interface is supported
 CheckOSS()
 {
@@ -569,12 +572,12 @@ AC_HELP_STRING([--enable-alsa], [support the ALSA audio API [[default=yes]]]),
 AC_HELP_STRING([--enable-alsa-shared], [dynamically load ALSA audio support [[default=yes]]]),
                           , enable_alsa_shared=yes)
             if test "x`echo $ALSA_LIBS | grep -- -L`" = "x"; then
-                if test "x`ls /lib/libasound.so.* 2> /dev/null`" != "x"; then
-                    ALSA_LIBS="-L/lib $ALSA_LIBS"
-                elif test "x`ls /usr/lib/libasound.so.* 2> /dev/null`" != "x"; then
-                    ALSA_LIBS="-L/usr/lib $ALSA_LIBS"
-                elif test "x`ls /usr/local/lib/libasound.so.* 2> /dev/null`" != "x"; then
-                    ALSA_LIBS="-L/usr/local/lib $ALSA_LIBS"
+                if test "x`ls /$base_libdir/libasound.so.* 2> /dev/null`" != "x"; then
+                    ALSA_LIBS="-L/$base_libdir $ALSA_LIBS"
+                elif test "x`ls /usr/$base_libdir/libasound.so.* 2> /dev/null`" != "x"; then
+                    ALSA_LIBS="-L/usr/$base_libdir $ALSA_LIBS"
+                elif test "x`ls /usr/local/$base_libdir/libasound.so.* 2> /dev/null`" != "x"; then
+                    ALSA_LIBS="-L/usr/local/$base_libdir $ALSA_LIBS"
                 fi
             fi
             alsa_lib_spec=`echo $ALSA_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libasound.so.*/'`
@@ -722,12 +725,12 @@ AC_HELP_STRING([--enable-pulseaudio], [use PulseAudio [[default=yes]]]),
 AC_HELP_STRING([--enable-pulseaudio-shared], [dynamically load PulseAudio support [[default=yes]]]),
                           , enable_pulseaudio_shared=yes)
             if test "x`echo $PULSEAUDIO_LIBS | grep -- -L`" = "x"; then
-                if test "x`ls /lib/libpulse-simple.so.* 2> /dev/null`" != "x"; then
-                    PULSEAUDIO_LIBS="-L/lib $PULSEAUDIO_LIBS"
-                elif test "x`ls /usr/lib/libpulse-simple.so.* 2> /dev/null`" != "x"; then
-                    PULSEAUDIO_LIBS="-L/usr/lib $PULSEAUDIO_LIBS"
-                elif test "x`ls /usr/local/lib/libpulse-simple.so.* 2> /dev/null`" != "x"; then
-                    PULSEAUDIO_LIBS="-L/usr/local/lib $PULSEAUDIO_LIBS"
+                if test "x`ls /$base_libdir/libpulse-simple.so.* 2> /dev/null`" != "x"; then
+                    PULSE_LIBS="-L/$base_libdir $PULSE_LIBS"
+                elif test "x`ls /usr/$base_libdir/libpulse-simple.so.* 2> /dev/null`" != "x"; then
+                    PULSE_LIBS="-L/usr/$base_libdir $PULSE_LIBS"
+                elif test "x`ls /usr/local/$base_libdir/libpulse-simple.so.* 2> /dev/null`" != "x"; then
+                    PULSE_LIBS="-L/usr/local/$base_libdir $PULSE_LIBS"
                 fi
             fi
             pulseaudio_lib_spec=`echo $PULSEAUDIO_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libpulse-simple.so.*/'`
@@ -782,7 +785,7 @@ AC_HELP_STRING([--enable-arts], [support the Analog Real Time Synthesizer [[defa
                 AC_ARG_ENABLE(arts-shared,
 AC_HELP_STRING([--enable-arts-shared], [dynamically load aRts audio support [[default=yes]]]),
                               , enable_arts_shared=yes)
-                arts_lib_spec="$ARTS_PREFIX/lib/libartsc.so.*"
+                arts_lib_spec="$ARTS_PREFIX/$base_libdir/libartsc.so.*"
                 arts_lib=`ls -- $arts_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
                 echo "-- $arts_lib_spec -> $arts_lib"
 
@@ -972,7 +975,7 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [[default=ma
                     ;;
                 *)
                     x11_lib_spec=[`echo $X_LIBS | sed 's/.*-L\([^ ]*\).*/\1/'`]
-                    for path in $x11_lib_path /usr/lib /usr/X11/lib /usr/X11R6/lib; do
+                    for path in $x11_lib_path /usr/$base_libdir /usr/X11/$base_libdir /usr/X11R6/$base_libdir; do
                         if test "x$x11_lib" = "x"; then
                             x11_lib=[`ls -- $path/libX11.so.[0-9] 2>/dev/null | sort -r | sed 's/.*\/\(.*\)/\1/; q'`]
                             if test "x$x11_lib" = "x"; then
