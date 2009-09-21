@@ -238,7 +238,7 @@ static int xio_errhandler(Display *d)
 	/* Ack!  Lost X11 connection! */
 
 	/* We will crash if we try to clean up our display */
-	if ( current_video->hidden->Ximage ) {
+	if ( SDL_VideoSurface && current_video->hidden->Ximage ) {
 		SDL_VideoSurface->pixels = NULL;
 	}
 	current_video->hidden->X11_Display = NULL;
