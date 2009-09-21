@@ -32,20 +32,38 @@
 #define _THIS	SDL_AudioDevice *this
 
 struct SDL_PrivateAudioData {
-	/* The audio stream handle */
-	pa_simple * stream;
-
-	/* The parent process id, to detect when application quits */
-	pid_t parent;
+	pa_mainloop *mainloop;
+	pa_mainloop_api *mainloop_api;
+	pa_context *context;
+	pa_stream *stream;
 
 	/* Raw mixing buffer */
 	Uint8 *mixbuf;
 	int    mixlen;
 };
 
+#if (PA_API_VERSION < 12)
+/** Return non-zero if the passed state is one of the connected states */
+static inline int PA_CONTEXT_IS_GOOD(pa_context_state_t x) {
+    return
+        x == PA_CONTEXT_CONNECTING ||
+        x == PA_CONTEXT_AUTHORIZING ||
+        x == PA_CONTEXT_SETTING_NAME ||
+        x == PA_CONTEXT_READY;
+}
+/** Return non-zero if the passed state is one of the connected states */
+static inline int PA_STREAM_IS_GOOD(pa_stream_state_t x) {
+    return
+        x == PA_STREAM_CREATING ||
+        x == PA_STREAM_READY;
+}
+#endif	/* pulseaudio <= 0.9.10 */
+
 /* Old variable names */
+#define mainloop		(this->hidden->mainloop)
+#define mainloop_api		(this->hidden->mainloop_api)
+#define context			(this->hidden->context)
 #define stream			(this->hidden->stream)
-#define parent			(this->hidden->parent)
 #define mixbuf			(this->hidden->mixbuf)
 #define mixlen			(this->hidden->mixlen)
 
