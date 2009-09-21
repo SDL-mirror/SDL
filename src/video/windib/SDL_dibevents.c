@@ -88,74 +88,37 @@ WPARAM rotateKey(WPARAM key,int direction)
 	return key;
 }
 
-/* for gapi landscape mode */
-static void GapiTransform(SDL_ScreenOrientation rotate, char hires, Sint16 *x, Sint16 *y) {
+static void GapiTransform(GapiInfo *gapiInfo, LONG *x, LONG *y) {
     Sint16 rotatedX;
     Sint16 rotatedY;
 
-    if (hires) {
-        *x = *x * 2;
-        *y = *y * 2;
+    if(gapiInfo->userOrientation == SDL_ORIENTATION_UP &&
+       gapiInfo->gapiOrientation == SDL_ORIENTATION_RIGHT)
+    {
+        rotatedX = *x;
+        rotatedY = *y;
+        *x = rotatedX;
+        *y = rotatedY;
+     }
+    else
+    if(gapiInfo->userOrientation == SDL_ORIENTATION_RIGHT &&
+       gapiInfo->gapiOrientation == SDL_ORIENTATION_RIGHT)
+    {
+        rotatedX = (2 * ((SDL_VideoSurface->offset%SDL_VideoSurface->pitch)/
+                    SDL_VideoSurface->format->BytesPerPixel))
+                    + SDL_VideoSurface->w - *y;
+        rotatedY = *x;
+        *x = rotatedX;
+        *y = rotatedY;
     }
-
-    switch(rotate) {
-        case SDL_ORIENTATION_UP:
-            {
-/* this code needs testing on a real device!
-   So it will be enabled later */
-/*
-#ifdef _WIN32_WCE
-#if _WIN32_WCE >= 420
-                // test device orientation
-                // FIXME: do not check every mouse message
-                DEVMODE settings;
-                SDL_memset(&settings, 0, sizeof(DEVMODE));
-                settings.dmSize = sizeof(DEVMODE);
-                settings.dmFields = DM_DISPLAYORIENTATION;
-                ChangeDisplaySettingsEx(NULL, &settings, NULL, CDS_TEST, NULL);
-                if( settings.dmOrientation == DMDO_90 )
-                {
-                    rotatedX = SDL_VideoSurface->h - *x;
-                    rotatedY = *y;
-                    *x = rotatedX;
-                    *y = rotatedY;
-                }
-#endif
-#endif */
-            }
-            break;
-               // FIXME: Older version used just SDL_VideoSurface->(w, h)
-               // w and h are "clipped" while x and y are "raw", which caused
-               // x in former and y in latter case to be clipped in a wrong direction,
-               // thus offsetting the coordinate on 2 x clip pixels
-               //     (like, 128 for 640 -> 512 clipping).
-               // We will now try to extract and use raw values.
-               // The way to do that RIGHT is do (orientation-dependent) clipping before
-               // doing this transform, but it's hardly possible.
-
-               // SEE SDL_mouse.c /ClipOffset to understand these calculations.
-        case SDL_ORIENTATION_RIGHT:
-            if (!SDL_VideoSurface)
-                break;
-                       rotatedX = (2 * ((SDL_VideoSurface->offset%SDL_VideoSurface->pitch)/
-                               SDL_VideoSurface->format->BytesPerPixel))
-                               + SDL_VideoSurface->w - *y;
-            rotatedY = *x;
-            *x = rotatedX;
-            *y = rotatedY;
-            break;
-        case SDL_ORIENTATION_LEFT:
-            if (!SDL_VideoSurface)
-                break;
-            rotatedX = *y;
-                       rotatedY = (2 * (SDL_VideoSurface->offset/SDL_VideoSurface->pitch))
-                               + SDL_VideoSurface->h - *x;
-            *x = rotatedX;
-            *y = rotatedY;
-            break;
+    else
+    {
+        rotatedX = SDL_VideoSurface->w - *y;
+        rotatedY = *x;
+        *y = rotatedY;
+        *x = rotatedX;
     }
 }
-
 #endif 
 
 
@@ -339,13 +302,28 @@ LRESULT DIB_HandleMessage(_THIS, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 	return(DefWindowProc(hwnd, msg, wParam, lParam));
 }
 
+#ifdef _WIN32_WCE
+static BOOL GetLastStylusPos(POINT* ptLast)
+{
+    BOOL bResult = FALSE;
+    UINT nRet;
+    GetMouseMovePoints(ptLast, 1, &nRet);
+    if ( nRet == 1 ) {
+        ptLast->x /= 4;
+        ptLast->y /= 4;
+        bResult = TRUE;
+    }
+    return bResult;
+}
+#endif
+
 static void DIB_GenerateMouseMotionEvent(_THIS)
 {
 	extern int mouse_relative;
 	extern int posted;
 
 	POINT mouse;
-	GetCursorPos( &mouse );
+	if(!GetCursorPos( &mouse ) && !GetLastStylusPos( &mouse )) return;
 
 	if ( mouse_relative ) {
 		POINT center;
@@ -363,7 +341,7 @@ static void DIB_GenerateMouseMotionEvent(_THIS)
 		ScreenToClient(SDL_Window, &mouse);
 #ifdef SDL_VIDEO_DRIVER_GAPI
        if (SDL_VideoSurface && this->hidden->gapiInfo)
-			GapiTransform(this->hidden->gapiInfo->coordinateTransform, this->hidden->gapiInfo->hiresFix, &mouse.x, &mouse.y);
+			GapiTransform(this->hidden->gapiInfo, &mouse.x, &mouse.y);
 #endif
 		posted = SDL_PrivateMouseMotion(0, 0, mouse.x, mouse.y);
 	}
