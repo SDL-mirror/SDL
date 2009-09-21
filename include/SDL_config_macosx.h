@@ -90,7 +90,6 @@
 
 /* Enable various audio drivers */
 #define SDL_AUDIO_DRIVER_COREAUDIO	1
-#define SDL_AUDIO_DRIVER_SNDMGR	1
 #define SDL_AUDIO_DRIVER_DISK	1
 #define SDL_AUDIO_DRIVER_DUMMY	1
 
