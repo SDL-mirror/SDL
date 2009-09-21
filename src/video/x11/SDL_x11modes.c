@@ -1034,6 +1034,7 @@ int X11_EnterFullScreen(_THIS)
     /* Save the current video mode */
     if ( use_vidmode ) {
         SDL_NAME(XF86VidModeLockModeSwitch)(SDL_Display, SDL_Screen, True);
+        save_mode(this);
     }
 #endif
     currently_fullscreen = 1;
