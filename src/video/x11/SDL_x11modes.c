@@ -526,7 +526,7 @@ int X11_GetVideoModes(_THIS)
     /* Query Xinerama extention */
     if ( CheckXinerama(this, &xinerama_major, &xinerama_minor) ) {
         /* Find out which screen is the desired one */
-        int desired = 0;
+        int desired = -1;
         int screens;
         int w, h;
         SDL_NAME(XineramaScreenInfo) *xinerama;
@@ -647,7 +647,7 @@ int X11_GetVideoModes(_THIS)
     /* XVidMode */
     if ( !use_xrandr &&
 #if SDL_VIDEO_DRIVER_X11_XINERAMA
-         (!use_xinerama || xinerama_info.screen_number == 0) &&
+         (!use_xinerama || xinerama_info.screen_number == -1) &&
 #endif
          CheckVidMode(this, &vm_major, &vm_minor) &&
          SDL_NAME(XF86VidModeGetAllModeLines)(SDL_Display, SDL_Screen,&nmodes,&modes) )
