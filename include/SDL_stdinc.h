@@ -75,7 +75,7 @@
 #ifdef HAVE_MATH_H
 # include <math.h>
 #endif
-#ifdef HAVE_ICONV_H
+#if defined(HAVE_ICONV) && defined(HAVE_ICONV_H)
 # include <iconv.h>
 #endif
 
@@ -735,7 +735,7 @@ extern DECLSPEC double SDLCALL SDL_sqrt(double x);
 #define SDL_ICONV_EILSEQ	(size_t)-3
 #define SDL_ICONV_EINVAL	(size_t)-4
 
-#ifdef HAVE_ICONV_H
+#if defined(HAVE_ICONV) && defined(HAVE_ICONV_H)
 #define SDL_iconv_t     iconv_t
 #define SDL_iconv_open  iconv_open
 #define SDL_iconv_close iconv_close
