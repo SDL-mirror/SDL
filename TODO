@@ -31,6 +31,7 @@
  * Create extended set of (negative) error codes and have the API functions document and return them.
  * Add clipboard support (from scrap demo)
  * Add support for desktop windows?
+ * Add support for synchronizing 2D updates with vblank (bug #406)
 
 Wish list for the 1.3 development branch:
 http://bugzilla.libsdl.org/
