@@ -771,16 +771,11 @@ static void X11_SetSizeHints(_THIS, int w, int h, Uint32 flags)
 
 	hints = XAllocSizeHints();
 	if ( hints ) {
-		if ( flags & SDL_RESIZABLE ) {
-			hints->min_width = 32;
-			hints->min_height = 32;
-			hints->max_height = 4096;
-			hints->max_width = 4096;
-		} else {
+		if (!(flags & SDL_RESIZABLE)) {
 			hints->min_width = hints->max_width = w;
 			hints->min_height = hints->max_height = h;
+			hints->flags = PMaxSize | PMinSize;
 		}
-		hints->flags = PMaxSize | PMinSize;
 		if ( flags & SDL_FULLSCREEN ) {
 			hints->x = 0;
 			hints->y = 0;
