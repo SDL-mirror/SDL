@@ -323,7 +323,11 @@ static void DIB_GenerateMouseMotionEvent(_THIS)
 	extern int posted;
 
 	POINT mouse;
-	if(!GetCursorPos( &mouse ) && !GetLastStylusPos( &mouse )) return;
+#ifdef _WIN32_WCE
+	if ( !GetCursorPos(&mouse) && !GetLastStylusPos(&mouse) ) return;
+#else
+	if ( !GetCursorPos(&mouse) ) return;
+#endif
 
 	if ( mouse_relative ) {
 		POINT center;
