@@ -785,7 +785,7 @@ void QZ_PumpEvents (_THIS)
                     if ( SDL_getenv("SDL_HAS3BUTTONMOUSE") ) {
                         DO_MOUSE_DOWN (SDL_BUTTON_LEFT);
                     } else {
-                        if ( NSControlKeyMask & current_mods ) {
+                        if ( NSCommandKeyMask & current_mods ) {
                             last_virtual_button = SDL_BUTTON_RIGHT;
                             DO_MOUSE_DOWN (SDL_BUTTON_RIGHT);
                         }
