@@ -1685,10 +1685,10 @@ CheckMacGL()
         case "$host" in
             *-*-darwin*)
                 if test x$enable_video_cocoa = xyes; then
-                    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -framework OpenGL"
+                    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,OpenGL"
                 fi
                 if test x$enable_video_carbon = xyes; then
-                    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -framework AGL"
+                    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,AGL"
                 fi
         esac
     fi
@@ -2695,21 +2695,21 @@ case "$host" in
         EXTRA_CFLAGS="$EXTRA_CFLAGS -fpascal-strings"
         SDL_LIBS="-lSDLmain $SDL_LIBS"
         if test x$enable_video_cocoa = xyes; then
-            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -framework Cocoa"
+            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,Cocoa"
             need_iokit_framework=yes
         fi
         if test x$enable_video_carbon = xyes -o x$enable_video_cocoa = xyes; then
             # The Cocoa backend still needs Carbon
-            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -framework ApplicationServices"
-            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -framework Carbon"
+            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,ApplicationServices"
+            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,Carbon"
         fi
         # If either the audio or CD driver is used, add the AudioUnit framework
         if test x$enable_audio = xyes -o x$enable_cdrom = xyes; then
-            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -framework AudioToolbox -framework AudioUnit"
+            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,AudioToolbox -Wl,-framework,AudioUnit"
         fi
         # Some subsystems reference IOKit...
         if test x$need_iokit_framework = xyes; then
-            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -framework IOKit"
+            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,IOKit"
         fi
         ;;
     *-*-mint*)
@@ -2854,10 +2854,10 @@ fi
 case "$ARCH" in
   macosx)
     if test x$enable_video = xyes -a x$enable_video_cocoa = xyes; then
-      SDL_LIBS="$SDL_LIBS -framework Cocoa"
+      SDL_LIBS="$SDL_LIBS -Wl,-framework,Cocoa"
     fi
     if test x$enable_video = xyes -a x$enable_video_carbon = xyes; then
-      SDL_LIBS="$SDL_LIBS -framework Carbon"
+      SDL_LIBS="$SDL_LIBS -Wl,-framework,Carbon"
     fi
     # Evil hack to allow static linking on Mac OS X
     SDL_STATIC_LIBS="\${libdir}/libSDLmain.a \${libdir}/libSDL.a $EXTRA_LDFLAGS"
