@@ -134,9 +134,11 @@ static void SDL_DelThread(SDL_Thread *thread)
 	}
 	SDL_mutexV(thread_lock);
 
+#if 0	/* There could be memory corruption if another thread is starting */
 	if ( SDL_Threads == NULL ) {
 		SDL_ThreadsQuit();
 	}
+#endif
 }
 
 /* The default (non-thread-safe) global error variable */
