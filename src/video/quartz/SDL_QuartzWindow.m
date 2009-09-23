@@ -128,6 +128,30 @@ static void QZ_SetPortAlphaOpaque () {
     }
 }
 
+/* QZ_DoActivate() calls a low-level CoreGraphics routine to adjust
+   the cursor position, if input is being grabbed. If app activation is
+   triggered by a mouse click in the title bar, then the window manager
+   gets confused and thinks we're dragging the window. The solution
+   below postpones the activate event to avoid this scenario. */
+- (void)becomeKeyWindow
+{
+	NSEvent *event = [self currentEvent];
+	if ([event type] == NSLeftMouseDown && [event window] == self)
+		watchForMouseUp = YES;
+	else
+		[super becomeKeyWindow];
+}
+
+- (void)sendEvent:(NSEvent *)event
+{
+	[super sendEvent:event];
+	if (watchForMouseUp && [event type] == NSLeftMouseUp)
+	{
+		watchForMouseUp = NO;
+		[super becomeKeyWindow];
+	}
+}
+
 - (void)appDidHide:(NSNotification*)note
 {
     SDL_PrivateAppActive (0, SDL_APPACTIVE);

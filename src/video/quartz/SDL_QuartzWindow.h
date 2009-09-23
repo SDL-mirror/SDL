@@ -27,6 +27,10 @@ typedef unsigned int NSUInteger;
 
 /* Subclass of NSWindow to fix genie effect and support resize events  */
 @interface SDL_QuartzWindow : NSWindow
+{
+	BOOL watchForMouseUp;
+}
+
 - (void)miniaturize:(id)sender;
 - (void)display;
 - (void)setFrame:(NSRect)frameRect display:(BOOL)flag;
