@@ -43,7 +43,7 @@
 #endif
 
 /* The keyboard and mouse device input */
-#define MAX_INPUTS	16		/* Maximum of 16-1 input devices */
+#define MAX_INPUTS	2
 #define INPUT_QSIZE	512		/* Buffer up to 512 input messages */
 
 static LPDIRECTINPUT dinput = NULL;
@@ -264,6 +264,8 @@ static void DX5_DInputQuit(_THIS)
 				SDL_DIdev[i] = NULL;
 			}
 		}
+		SDL_DIndev = 0;
+
 		/* Release DirectInput */
 		IDirectInput_Release(dinput);
 		dinput = NULL;
@@ -664,15 +666,17 @@ static int DX5_CheckInput(_THIS, int timeout, BOOL processInput)
 
 	/* Pump the DirectInput flow */
 	if ( SDL_GetAppState() & SDL_APPINPUTFOCUS ) {
-		for ( i=0; i<SDL_DIndev; ++i ) {
-			result = IDirectInputDevice2_Poll(SDL_DIdev[i]);
-			if ( (result == DIERR_INPUTLOST) ||
-					(result == DIERR_NOTACQUIRED) ) {
-				if ( SDL_strcmp(inputs[i].name, "mouse") == 0 ) {
-					mouse_lost = 1;
+		for ( i=0; i<MAX_INPUTS; ++i ) {
+			if ( SDL_DIdev[i] != NULL ) {
+				result = IDirectInputDevice2_Poll(SDL_DIdev[i]);
+				if ( (result == DIERR_INPUTLOST) ||
+						(result == DIERR_NOTACQUIRED) ) {
+					if ( SDL_strcmp(inputs[i].name, "mouse") == 0 ) {
+						mouse_lost = 1;
+					}
+					IDirectInputDevice2_Acquire(SDL_DIdev[i]);
+					IDirectInputDevice2_Poll(SDL_DIdev[i]);
 				}
-				IDirectInputDevice2_Acquire(SDL_DIdev[i]);
-				IDirectInputDevice2_Poll(SDL_DIdev[i]);
 			}
 		}
 	}
