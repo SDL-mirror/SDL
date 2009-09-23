@@ -776,9 +776,14 @@ SDL_Surface *GAPI_SetVideoMode(_THIS, SDL_Surface *current,
 	*/
 	WIN_FlushMessageQueue();
 
-	/* Open GAPI display */
+       /* Open GAPI display */
        if( !gapi->useVga && gapi->useGXOpenDisplay && !gapi->alreadyGXOpened )
        {
+#if REPORT_VIDEO_INFO
+               printf("system display width  (orig): %d\n", GetSystemMetrics(SM_CXSCREEN));
+               printf("system display height (orig): %d\n", GetSystemMetrics(SM_CYSCREEN));
+#endif
+               gapi->hiresFix = (width > GetSystemMetrics(SM_CXSCREEN)) || (height > GetSystemMetrics(SM_CYSCREEN));
                gapi->alreadyGXOpened = 1;
 		if( !gapi->gxFunc.GXOpenDisplay(SDL_Window, GX_FULLSCREEN) )
 		{

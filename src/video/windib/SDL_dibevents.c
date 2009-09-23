@@ -92,6 +92,12 @@ static void GapiTransform(GapiInfo *gapiInfo, LONG *x, LONG *y) {
     Sint16 rotatedX;
     Sint16 rotatedY;
 
+    if(gapiInfo->hiresFix)
+    {
+	*x *= 2;
+	*y *= 2;
+    }
+
     if(gapiInfo->userOrientation == SDL_ORIENTATION_UP &&
        gapiInfo->gapiOrientation == SDL_ORIENTATION_RIGHT)
     {
