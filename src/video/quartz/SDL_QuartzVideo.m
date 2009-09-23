@@ -867,15 +867,24 @@ static SDL_Surface* QZ_SetVideoMode (_THIS, SDL_Surface *current, int width,
                 return NULL;
             case 32:   /* (8)-8-8-8 ARGB */
                 amask = 0x00000000;
+		if ( flags & SDL_FULLSCREEN )
+		{
+			rmask = 0x00FF0000;
+			gmask = 0x0000FF00;
+			bmask = 0x000000FF;
+		}
+		else
+		{
 #ifdef __LITTLE_ENDIAN__
-                rmask = 0x0000FF00;
-                gmask = 0x00FF0000;
-                bmask = 0xFF000000;
+			rmask = 0x0000FF00;
+			gmask = 0x00FF0000;
+			bmask = 0xFF000000;
 #else
-                rmask = 0x00FF0000;
-                gmask = 0x0000FF00;
-                bmask = 0x000000FF;
+			rmask = 0x00FF0000;
+			gmask = 0x0000FF00;
+			bmask = 0x000000FF;
 #endif
+		}
                 break;
         }
 
@@ -883,7 +892,7 @@ static SDL_Surface* QZ_SetVideoMode (_THIS, SDL_Surface *current, int width,
                                   rmask, gmask, bmask, amask ) ) {
             SDL_SetError ("Couldn't reallocate pixel format");
             return NULL;
-           }
+        }
     }
 
     /* Signal successful completion (used internally) */
