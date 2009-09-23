@@ -20,7 +20,7 @@ tf(SDL_bool tf)
 }
   
 int
-main(int argc, char **argv)
+main(int argc, char *argv[])
 {
 
    volatile Uint32 val32 = 0;

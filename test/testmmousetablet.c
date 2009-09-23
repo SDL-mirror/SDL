@@ -5,7 +5,7 @@ SDL_Surface *screen;
 int quit = 0;
 
 int
-main()
+main(int argc, char *argv[])
 {
     SDL_Event event;
     int mice;
