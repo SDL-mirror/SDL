@@ -107,7 +107,7 @@ SDL_AtomicUnlock(SDL_SpinLock *lock)
   pretty much eliminate the chances of several atomic operations on
   different data from waiting on the same "big lock". If it isn't
   then the table of locks can be expanded to a new size so long as
-  the new size if a power of two.
+  the new size is a power of two.
 */
 
 static SDL_SpinLock locks[32] = {
