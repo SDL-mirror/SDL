@@ -26,6 +26,7 @@
 #include "SDL_atomic.h"
 
 #include "SDL_error.h"
+#include "Windows.h"
 
 /*
   This file provides 32, and 64 bit atomic operations. If the
@@ -36,12 +37,9 @@
 */
 
 /* 
-  DUMMY VERSION.
+  WIN32 VERSION.
 
-  This version of the code assumes there is no support for atomic
-  operations. Therefore, every function sets the SDL error
-  message. Oddly enough, if you only have one thread then this
-  version actuallys works.
+  This makes use of native Windows atomic operations.
 */
 
 /*
@@ -52,13 +50,24 @@
 void 
 SDL_AtomicLock(SDL_SpinLock *lock)
 {
-   SDL_SetError("SDL_atomic.c: is not implemented on this platform");
+  long volatile * l = (long volatile *)lock;
+  Uint32 old = 0;
+  Uint32 new = 1;
+
+  old = InterlockedExchange(l, new);
+  while(1 == old)
+    {
+      old = InterlockedExchange(l, new);
+    }
 }
 
 void 
 SDL_AtomicUnlock(SDL_SpinLock *lock)
 {
-   SDL_SetError("SDL_atomic.c: is not implemented on this platform");
+  long volatile * l = (long volatile *)lock;
+  Uint32 new = 0;
+
+  InterlockedExchange(l, new);
 }
 
 /*
@@ -67,16 +76,16 @@ SDL_AtomicUnlock(SDL_SpinLock *lock)
   code.
 */
 
-#undef  nativeTestThenSet32
-#undef  nativeClear32
-#undef  nativeFetchThenIncrement32
-#undef  nativeFetchThenDecrement32
-#undef  nativeFetchThenAdd32
-#undef  nativeFetchThenSubtract32
-#undef  nativeIncrementThenFetch32
-#undef  nativeDecrementThenFetch32
-#undef  nativeAddThenFetch32
-#undef  nativeSubtractThenFetch32
+#define nativeTestThenSet32
+#define nativeClear32
+#define nativeFetchThenIncrement32
+#define nativeFetchThenDecrement32
+#define nativeFetchThenAdd32
+#define nativeFetchThenSubtract32
+#define nativeIncrementThenFetch32
+#define nativeDecrementThenFetch32
+#define nativeAddThenFetch32
+#define nativeSubtractThenFetch32
 
 #undef  nativeTestThenSet64
 #undef  nativeClear64
@@ -147,6 +156,10 @@ SDL_bool
 SDL_AtomicTestThenSet32(volatile Uint32 * ptr)
 {
 #ifdef nativeTestThenSet32
+  long volatile * p = (long volatile *)ptr;
+  Uint32 new = 1;
+
+  return 0 == InterlockedExchange(p, new);
 #else
    SDL_bool result = SDL_FALSE;
 
@@ -166,6 +179,10 @@ void
 SDL_AtomicClear32(volatile Uint32 * ptr)
 {
 #ifdef nativeClear32
+  long volatile * p = (long volatile *)ptr;
+  Uint32 new = 0;
+
+  InterlockedExchange(p, new);
 #else
    privateWaitLock(ptr);
    *ptr = 0;
@@ -179,6 +196,9 @@ Uint32
 SDL_AtomicFetchThenIncrement32(volatile Uint32 * ptr)
 {
 #ifdef nativeFetchThenIncrement32
+  long volatile * p = (long volatile *)ptr;
+
+  return InterlockedExchangeAdd(p, 1);
 #else
    Uint32 tmp = 0;
 
@@ -195,6 +215,9 @@ Uint32
 SDL_AtomicFetchThenDecrement32(volatile Uint32 * ptr)
 {
 #ifdef nativeFetchThenDecrement32
+  long volatile * p = (long volatile *)ptr;
+
+  return InterlockedExchangeAdd(p, -1);
 #else
    Uint32 tmp = 0;
 
@@ -211,6 +234,9 @@ Uint32
 SDL_AtomicFetchThenAdd32(volatile Uint32 * ptr, Uint32 value)
 {
 #ifdef nativeFetchThenAdd32
+  long volatile * p = (long volatile *)ptr;
+
+  return InterlockedExchangeAdd(p, value);
 #else
    Uint32 tmp = 0;
 
@@ -227,6 +253,9 @@ Uint32
 SDL_AtomicFetchThenSubtract32(volatile Uint32 * ptr, Uint32 value)
 {
 #ifdef nativeFetchThenSubtract32
+  long volatile * p = (long volatile *)ptr;
+
+  return InterlockedExchangeAdd(p, (0 - value));
 #else
    Uint32 tmp = 0;
 
@@ -243,6 +272,9 @@ Uint32
 SDL_AtomicIncrementThenFetch32(volatile Uint32 * ptr)
 {
 #ifdef nativeIncrementThenFetch32
+  long volatile * p = (LONG volatile *)ptr;
+
+  return InterlockedIncrement(p);
 #else
    Uint32 tmp = 0;
 
@@ -259,6 +291,9 @@ Uint32
 SDL_AtomicDecrementThenFetch32(volatile Uint32 * ptr)
 {
 #ifdef nativeDecrementThenFetch32
+  long volatile * p = (LONG volatile *)ptr;
+
+  return InterlockedDecrement(p);
 #else
    Uint32 tmp = 0;
 
@@ -275,6 +310,9 @@ Uint32
 SDL_AtomicAddThenFetch32(volatile Uint32 * ptr, Uint32 value)
 {
 #ifdef nativeAddThenFetch32
+  long volatile * p = (long volatile *)ptr;
+
+  return InterlockedExchangeAdd(p, value) + value;
 #else
    Uint32 tmp = 0;
 
@@ -291,6 +329,9 @@ Uint32
 SDL_AtomicSubtractThenFetch32(volatile Uint32 * ptr, Uint32 value)
 {
 #ifdef nativeSubtractThenFetch32
+  long volatile * p = (long volatile *)ptr;
+
+  return InterlockedExchangeAdd(p, (0 - value)) - value;
 #else
    Uint32 tmp = 0;
 
