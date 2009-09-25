@@ -2498,6 +2498,12 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
             fi
             have_audio=yes
         fi
+        # Set up files for the atomic operations library
+        if test x$enable_atomic = xyes; then
+            AC_DEFINE(SDL_ATOMIC_WIN32)
+            SOURCES="$SOURCES $srcdir/src/atomic/win32/*.c"
+            have_atomic=yes
+        fi
         # Set up files for the joystick library
         if test x$enable_joystick = xyes; then
             if test x$have_dinput = xyes; then
