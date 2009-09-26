@@ -6,6 +6,21 @@
 	objectVersion = 44;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		002D2A9E106C18E700BF972E /* Generate Header Files */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 002D2AAA106C198E00BF972E /* Build configuration list for PBXAggregateTarget "Generate Header Files" */;
+			buildPhases = (
+				002D2AA5106C190C00BF972E /* Run Script to Create SDL_config.h */,
+				002D2AA7106C194100BF972E /* Run Script to Create SDL_revision.h */,
+			);
+			dependencies = (
+			);
+			name = "Generate Header Files";
+			productName = "Generate Header Files";
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		00162D4609BD1FA90037C8D0 /* SDL_config_macosx.h in Headers */ = {isa = PBXBuildFile; fileRef = 00162D3409BD1FA90037C8D0 /* SDL_config_macosx.h */; };
 		00162D4909BD1FA90037C8D0 /* SDL_config.h in Headers */ = {isa = PBXBuildFile; fileRef = 00162D3709BD1FA90037C8D0 /* SDL_config.h */; };
@@ -430,6 +445,20 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		002D2AA8106C196E00BF972E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 002D2A9E106C18E700BF972E;
+			remoteInfo = "Generate Header Files";
+		};
+		002D2AAB106C19B200BF972E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 002D2A9E106C18E700BF972E;
+			remoteInfo = "Generate Header Files";
+		};
 		BECDF6C50761BA81005FE872 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
@@ -1542,8 +1571,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 0073177A0858DB0500B2BC32 /* Build configuration list for PBXNativeTarget "Framework" */;
 			buildPhases = (
-				00D55F050A11143E0030ED2A /* Run Script to Create SDL_config.h */,
-				00CFA875106B4A1400758660 /* Run Script to Create SDL_revision.h */,
 				BECDF5FF0761BA81005FE872 /* Headers */,
 				BECDF62A0761BA81005FE872 /* Resources */,
 				BECDF62C0761BA81005FE872 /* Sources */,
@@ -1553,6 +1580,7 @@
 			);
 			comments = "We recommend installing to /Library/Frameworks\nAn alternative is $(HOME)/Library/Frameworks for per-user if permissions are an issue.\n\nAdd the framework to the Groups & Files panel (under Linked Frameworks is a good place) and enable the check box for the targets that need to link to it. You can also manually add \"-framework SDL\" to your linker flags if you don't like the check box system.\n\nAdd /Library/Frameworks/SDL.framework/Headers to your header search path\nAdd /Library/Frameworks to your library search path\n(Adjust the two above if installed in $(HOME)/Library/Frameworks. You can also list both paths if you want robustness.)\n\nWe used to use an exports file. It was becoming a maintenance issue we kept neglecting, so we have removed it. If you need it back, set the \"Exported Symbols File\" option to:\n../../src/main/macosx/exports/SDL.x\n(You may need to regenerate the exports list. There is a Makefile in that directory that you can run from the command line to rebuild it.)\nLong term, we want to utilize gcc 4.0's new visibility feature (analogous to declspec on Windows). Other platforms would benefit from this change too. The downside is that we still use gcc 3.3 for the PowerPC build here so only our x86 builds will cull the symbols if we go down this route (and don't use the exports file).\n\n";
 			dependencies = (
+				002D2AA9106C196E00BF972E /* PBXTargetDependency */,
 			);
 			name = Framework;
 			productInstallPath = "@executable_path/../Frameworks";
@@ -1564,7 +1592,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 0073177E0858DB0500B2BC32 /* Build configuration list for PBXNativeTarget "Static Library" */;
 			buildPhases = (
-				00D55F080A11147F0030ED2A /* Run Script to Create SDL_config.h */,
 				BECDF66E0761BA81005FE872 /* Headers */,
 				BECDF6790761BA81005FE872 /* Sources */,
 				BECDF6B10761BA81005FE872 /* Frameworks */,
@@ -1574,6 +1601,7 @@
 			);
 			comments = "This produces libsdl.a, which is the static build of SDL. You will have to link to the Cocoa and OpenGL frameworks in your application.";
 			dependencies = (
+				002D2AAC106C19B200BF972E /* PBXTargetDependency */,
 			);
 			name = "Static Library";
 			productInstallPath = /usr/local/lib;
@@ -1627,6 +1655,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+				002D2A9E106C18E700BF972E /* Generate Header Files */,
 				BECDF5FE0761BA81005FE872 /* Framework */,
 				BECDF66D0761BA81005FE872 /* Static Library */,
 				BECDF6BB0761BA81005FE872 /* Standard DMG */,
@@ -1656,23 +1685,7 @@
 /* End PBXRezBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		00CFA875106B4A1400758660 /* Run Script to Create SDL_revision.h */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"$(SRCROOT)/../../build-scripts/updaterev.sh",
-			);
-			name = "Run Script to Create SDL_revision.h";
-			outputPaths = (
-				"$(SRCROOT)/../../include/SDL_revision.h",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "sh ../../build-scripts/updaterev.sh";
-		};
-		00D55F050A11143E0030ED2A /* Run Script to Create SDL_config.h */ = {
+		002D2AA5106C190C00BF972E /* Run Script to Create SDL_config.h */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -1688,19 +1701,22 @@
 			shellPath = /bin/sh;
 			shellScript = "# Make sure that include/SDL_config.h is a symlink to SDL_config.h.default.\n# If it exists and is not a symlink, it was probably generated by configure and\n# we move it aside.\nif [ ! -L ../../include/SDL_config.h ]; then\n        if [ -e ../../include/SDL_config.h ]; then\n                mv ../../include/SDL_config.h ../../include/SDL_config.h.generated\n        fi\n        ln -s SDL_config.h.default ../../include/SDL_config.h\nfi\n";
 		};
-		00D55F080A11147F0030ED2A /* Run Script to Create SDL_config.h */ = {
+		002D2AA7106C194100BF972E /* Run Script to Create SDL_revision.h */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
+				"$(SRCROOT)/../../build-scripts/showrev.sh",
+				"$(SRCROOT)/../../build-scripts/updaterev.sh",
 			);
-			name = "Run Script to Create SDL_config.h";
+			name = "Run Script to Create SDL_revision.h";
 			outputPaths = (
+				"$(SRCROOT)/../../include/SDL_revision.h",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Make sure that include/SDL_config.h is a symlink to SDL_config.h.default.\n# If it exists and is not a symlink, it was probably generated by configure and\n# we move it aside.\nif [ ! -L ../../include/SDL_config.h ]; then\n        if [ -e ../../include/SDL_config.h ]; then\n                mv ../../include/SDL_config.h ../../include/SDL_config.h.generated\n        fi\n        ln -s SDL_config.h.default ../../include/SDL_config.h\nfi\n";
+			shellScript = "sh ../../build-scripts/updaterev.sh";
 		};
 		BECDF6BD0761BA81005FE872 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1947,6 +1963,16 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		002D2AA9106C196E00BF972E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 002D2A9E106C18E700BF972E /* Generate Header Files */;
+			targetProxy = 002D2AA8106C196E00BF972E /* PBXContainerItemProxy */;
+		};
+		002D2AAC106C19B200BF972E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 002D2A9E106C18E700BF972E /* Generate Header Files */;
+			targetProxy = 002D2AAB106C19B200BF972E /* PBXContainerItemProxy */;
+		};
 		BECDF6C60761BA81005FE872 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = BECDF5FE0761BA81005FE872 /* Framework */;
@@ -1955,6 +1981,41 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		002D2A9F106C18E700BF972E /* Deployment_for_official_releases_using_10.4SDK_and_10.6SDK */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "Generate Header Files";
+			};
+			name = Deployment_for_official_releases_using_10.4SDK_and_10.6SDK;
+		};
+		002D2AA0106C18E700BF972E /* Development_using_10.4SDK_and_10.6SDK */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "Generate Header Files";
+			};
+			name = Development_using_10.4SDK_and_10.6SDK;
+		};
+		002D2AA1106C18E700BF972E /* Development_native_only */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "Generate Header Files";
+			};
+			name = Development_native_only;
+		};
+		002D2AA2106C18E700BF972E /* Deployment_native_only */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "Generate Header Files";
+			};
+			name = Deployment_native_only;
+		};
+		002D2AA3106C18E700BF972E /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "Generate Header Files";
+			};
+			name = Default;
+		};
 		0073177B0858DB0500B2BC32 /* Development_using_10.4SDK_and_10.6SDK */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2408,6 +2469,18 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		002D2AAA106C198E00BF972E /* Build configuration list for PBXAggregateTarget "Generate Header Files" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				002D2A9F106C18E700BF972E /* Deployment_for_official_releases_using_10.4SDK_and_10.6SDK */,
+				002D2AA0106C18E700BF972E /* Development_using_10.4SDK_and_10.6SDK */,
+				002D2AA1106C18E700BF972E /* Development_native_only */,
+				002D2AA2106C18E700BF972E /* Deployment_native_only */,
+				002D2AA3106C18E700BF972E /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
 		0073177A0858DB0500B2BC32 /* Build configuration list for PBXNativeTarget "Framework" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
