@@ -161,7 +161,7 @@ static __inline__ int CPU_getCPUIDFeatures(void)
 "        movl    %%edi,%%ebx\n"
 	: "=m" (features)
 	:
-	: "%eax", "%ecx", "%edx", "%edi"
+	: "%eax", "%ebx", "%ecx", "%edx", "%edi"
 	);
 #elif defined(__GNUC__) && defined(__x86_64__)
 	__asm__ (
@@ -178,7 +178,7 @@ static __inline__ int CPU_getCPUIDFeatures(void)
 "        movq    %%rdi,%%rbx\n"
 	: "=m" (features)
 	:
-	: "%rax", "%rcx", "%rdx", "%rdi"
+	: "%rax", "%rbx", "%rcx", "%rdx", "%rdi"
 	);
 #elif (defined(_MSC_VER) && defined(_M_IX86)) || defined(__WATCOMC__)
 	__asm {
@@ -230,7 +230,7 @@ static __inline__ int CPU_getCPUIDFeaturesExt(void)
 "        movl    %%edi,%%ebx\n"
 	: "=m" (features)
 	:
-	: "%eax", "%ecx", "%edx", "%edi"
+	: "%eax", "%ebx", "%ecx", "%edx", "%edi"
 	);
 #elif defined(__GNUC__) && defined (__x86_64__)
 	__asm__ (
@@ -246,7 +246,7 @@ static __inline__ int CPU_getCPUIDFeaturesExt(void)
 "        movq    %%rdi,%%rbx\n"
 	: "=m" (features)
 	:
-	: "%rax", "%rcx", "%rdx", "%rdi"
+	: "%rax", "%rbx", "%rcx", "%rdx", "%rdi"
 	);
 #elif (defined(_MSC_VER) && defined(_M_IX86)) || defined(__WATCOMC__)
 	__asm {
