@@ -47,20 +47,20 @@ static void plat_testTypes (void)
    SDL_ATbegin( "Type size" );
 
    ret = plat_testSize( sizeof(Uint8), 1 );
-   if (SDL_ATvassert( ret == 0, "sizeof(Uint8) = %ul instead of 1", sizeof(Uint8) ))
+   if (SDL_ATvassert( ret == 0, "sizeof(Uint8) = %lu instead of 1", sizeof(Uint8) ))
       return;
 
    ret = plat_testSize( sizeof(Uint16), 2 );
-   if (SDL_ATvassert( ret == 0, "sizeof(Uint16) = %ul instead of 2", sizeof(Uint16) ))
+   if (SDL_ATvassert( ret == 0, "sizeof(Uint16) = %lu instead of 2", sizeof(Uint16) ))
       return;
 
    ret = plat_testSize( sizeof(Uint32), 4 );
-   if (SDL_ATvassert( ret == 0, "sizeof(Uint32) = %ul instead of 4", sizeof(Uint32) ))
+   if (SDL_ATvassert( ret == 0, "sizeof(Uint32) = %lu instead of 4", sizeof(Uint32) ))
       return;
 
 #ifdef SDL_HAS_64BIT_TYPE
    ret = plat_testSize( sizeof(Uint64), 8 );
-   if (SDL_ATvassert( ret == 0, "sizeof(Uint64) = %ul instead of 8", sizeof(Uint64) ))
+   if (SDL_ATvassert( ret == 0, "sizeof(Uint64) = %lu instead of 8", sizeof(Uint64) ))
       return;
 #endif /* SDL_HAS_64BIT_TYPE */
 
