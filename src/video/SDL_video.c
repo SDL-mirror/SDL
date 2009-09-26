@@ -1501,11 +1501,16 @@ SDL_SelectRenderer(SDL_WindowID windowID)
     SDL_Window *window = SDL_GetWindowFromID(windowID);
     SDL_Renderer *renderer;
 
-    if (!window || !window->renderer) {
+    if (!window) {
+        SDL_SetError("Invalid window ID");
         return -1;
     }
     renderer = window->renderer;
-    if (renderer && renderer->ActivateRenderer) {
+    if (!renderer) {
+        SDL_SetError("Renderer hasn't been created yet");
+        return -1;
+    }
+    if (renderer->ActivateRenderer) {
         if (renderer->ActivateRenderer(renderer) < 0) {
             return -1;
         }
