@@ -1596,6 +1596,7 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
 
     renderer = SDL_CurrentDisplay.current_renderer;
     if (!renderer) {
+        SDL_SetError("No current renderer available");
         return 0;
     }
 
@@ -1815,10 +1816,7 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
     if (bpp == fmt->BitsPerPixel && Rmask == fmt->Rmask && Gmask == fmt->Gmask
         && Bmask == fmt->Bmask && Amask == fmt->Amask) {
         if (SDL_MUSTLOCK(surface)) {
-            if (SDL_LockSurface(surface) < 0) {
-                SDL_DestroyTexture(textureID);
-                return 0;
-            }
+            SDL_LockSurface(surface);
             SDL_UpdateTexture(textureID, NULL, surface->pixels,
                               surface->pitch);
             SDL_UnlockSurface(surface);
