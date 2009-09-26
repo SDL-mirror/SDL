@@ -172,7 +172,7 @@ int main( int argc, char *argv[] )
       SDL_ATprintErr( "Tests run with SDL %d.%d.%d revision %d\n",
             ver.major, ver.minor, ver.patch, rev );
       SDL_ATprintErr( "System is running %s and is %s endian\n",
-            platform_getPlatform(),
+            SDL_GetPlatform(),
 #ifdef SDL_LIL_ENDIAN
             "little"
 #else

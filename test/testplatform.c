@@ -157,58 +157,7 @@ main(int argc, char *argv[])
         verbose = SDL_FALSE;
     }
     if (verbose) {
-        printf("This system is running %s\n",
-#if __AIX__
-               "AIX"
-#elif __HAIKU__
-/* Haiku must appear here before BeOS, since it also defines __BEOS__ */
-               "Haiku"
-#elif __BEOS__
-               "BeOS"
-#elif __BSDI__
-               "BSDI"
-#elif __DREAMCAST__
-               "Dreamcast"
-#elif __FREEBSD__
-               "FreeBSD"
-#elif __HPUX__
-               "HP-UX"
-#elif __IRIX__
-               "Irix"
-#elif __LINUX__
-               "Linux"
-#elif __MINT__
-               "Atari MiNT"
-#elif __MACOS__
-               "MacOS Classic"
-#elif __MACOSX__
-               "Mac OS X"
-#elif __NETBSD__
-               "NetBSD"
-#elif __OPENBSD__
-               "OpenBSD"
-#elif __OS2__
-               "OS/2"
-#elif __OSF__
-               "OSF/1"
-#elif __QNXNTO__
-               "QNX Neutrino"
-#elif __RISCOS__
-               "RISC OS"
-#elif __SOLARIS__
-               "Solaris"
-#elif __WIN32__
-#ifdef _WIN32_WCE
-               "Windows CE"
-#else
-               "Windows"
-#endif
-#elif __IPHONEOS__
-               "iPhone OS"
-#else
-               "an unknown operating system! (see SDL_platform.h)"
-#endif
-            );
+        printf("This system is running %s\n", SDL_GetPlatform());
     }
 
     status += TestTypes(verbose);

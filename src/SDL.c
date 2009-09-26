@@ -277,6 +277,62 @@ SDL_GetRevision(void)
     return SDL_REVISION;
 }
 
+/* Get the name of the platform */
+const char *
+SDL_GetPlatform()
+{
+#if __AIX__
+    return "AIX";
+#elif __HAIKU__
+/* Haiku must appear here before BeOS, since it also defines __BEOS__ */
+    return "Haiku";
+#elif __BEOS__
+    return "BeOS";
+#elif __BSDI__
+    return "BSDI";
+#elif __DREAMCAST__
+    return "Dreamcast";
+#elif __FREEBSD__
+    return "FreeBSD";
+#elif __HPUX__
+    return "HP-UX";
+#elif __IRIX__
+    return "Irix";
+#elif __LINUX__
+    return "Linux";
+#elif __MINT__
+    return "Atari MiNT";
+#elif __MACOS__
+    return "MacOS Classic";
+#elif __MACOSX__
+    return "Mac OS X";
+#elif __NETBSD__
+    return "NetBSD";
+#elif __OPENBSD__
+    return "OpenBSD";
+#elif __OS2__
+    return "OS/2";
+#elif __OSF__
+    return "OSF/1";
+#elif __QNXNTO__
+    return "QNX Neutrino";
+#elif __RISCOS__
+    return "RISC OS";
+#elif __SOLARIS__
+    return "Solaris";
+#elif __WIN32__
+#ifdef _WIN32_WCE
+    return "Windows CE";
+#else
+    return "Windows";
+#endif
+#elif __IPHONEOS__
+    return "iPhone OS";
+#else
+    return "Unknown (see SDL_platform.h)";
+#endif
+}
+
 #if defined(__WIN32__)
 
 #if !defined(HAVE_LIBC) || (defined(__WATCOMC__) && defined(BUILD_DLL))

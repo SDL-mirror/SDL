@@ -123,4 +123,29 @@
 #define __NINTENDODS__	1
 #endif
 
+
+#include "begin_code.h"
+/* Set up for C function definitions, even when using C++ */
+#ifdef __cplusplus
+/* *INDENT-OFF* */
+extern "C" {
+/* *INDENT-ON* */
+#endif
+
+/**
+ * \fn const char *SDL_GetPlatform(void)
+ * \brief Gets the name of the platform.
+ */
+extern DECLSPEC const char * SDLCALL SDL_GetPlatform (void);
+
+/* Ends C function definitions when using C++ */
+#ifdef __cplusplus
+/* *INDENT-OFF* */
+}
+/* *INDENT-ON* */
+#endif
+#include "close_code.h"
+
 #endif /* _SDL_platform_h */
+
+/* vi: set ts=4 sw=4 expandtab: */
