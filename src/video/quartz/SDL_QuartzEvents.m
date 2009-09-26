@@ -28,6 +28,13 @@
 #include <IOKit/pwr_mgt/IOPMLib.h> /* For wake from sleep detection */
 #include "SDL_QuartzKeys.h"
 
+/*
+ * On Leopard, this is missing from the 64-bit headers
+ */
+#ifndef UsrActivity
+#define UsrActivity 1
+#endif
+
 /* 
  * In Panther, this header defines device dependent masks for 
  * right side keys. These definitions only exist in Panther, but
