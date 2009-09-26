@@ -55,7 +55,7 @@ LT_RELEASE  = @LT_RELEASE@
 LT_REVISION = @LT_REVISION@
 LT_LDFLAGS  = -no-undefined -rpath $(DESTDIR)$(libdir) -release $(LT_RELEASE) -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
 
-all: $(srcdir)/configure Makefile $(objects) update-revision $(objects)/$(TARGET) $(objects)/$(SDLMAIN_TARGET)
+all: $(srcdir)/configure Makefile $(objects) $(objects)/$(TARGET) $(objects)/$(SDLMAIN_TARGET)
 
 $(srcdir)/configure: $(srcdir)/configure.in
 	@echo "Warning, configure.in is out of date"
@@ -68,11 +68,14 @@ Makefile: $(srcdir)/Makefile.in
 $(objects):
 	$(SHELL) $(auxdir)/mkinstalldirs $@
 
+# To make sure parallel builds will not fail
+$(srcdir)/include/SDL_revision.h: update-revision
+
 update-revision:
 	$(SHELL) $(auxdir)/updaterev.sh
 
 .PHONY: all update-revision depend install install-bin install-hdrs install-lib install-data install-man uninstall uninstall-bin uninstall-hdrs uninstall-lib uninstall-data uninstall-man clean distclean dist
-depend:
+depend: update-revision
 	@SOURCES="$(SOURCES)" INCLUDE="$(INCLUDE)" output="$(depend)" \
 	$(SHELL) $(auxdir)/makedep.sh
 	@for src in $(SDLMAIN_SOURCES); do \
