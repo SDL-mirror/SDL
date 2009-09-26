@@ -231,6 +231,9 @@ SDL_Error(SDL_errorcode code)
     case SDL_EFSEEK:
         SDL_SetError("Error seeking in datastream");
         break;
+    case SDL_UNSUPPORTED:
+        SDL_SetError("That operation is not supported");
+        break;
     default:
         SDL_SetError("Unknown SDL error");
         break;
