@@ -2417,11 +2417,17 @@ SDL_RenderCopy(SDL_TextureID textureID, const SDL_Rect * srcrect,
     SDL_Rect real_srcrect;
     SDL_Rect real_dstrect;
 
-    if (!texture || texture->renderer != SDL_CurrentDisplay.current_renderer) {
-        return -1;
-    }
     renderer = SDL_CurrentDisplay.current_renderer;
     if (!renderer) {
+        SDL_SetError("No current renderer available");
+        return -1;
+    }
+    if (!texture) {
+        SDL_SetError("Texture not found");
+        return -1;
+    }
+    if (texture->renderer != renderer) {
+        SDL_SetError("Texture was not created with this renderer");
         return -1;
     }
     if (!renderer->RenderCopy) {
