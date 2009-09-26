@@ -166,7 +166,7 @@ CPU_getCPUIDFeatures(void)
 "        movl    %%edi,%%ebx\n"
 	: "=m" (features)
 	:
-	: "%eax", "%ebx", "%ecx", "%edx", "%edi"
+	: "%eax", "%ecx", "%edx", "%edi"
 	);
 #elif defined(__GNUC__) && defined(__x86_64__)
 	__asm__ (
@@ -238,7 +238,7 @@ CPU_getCPUIDFeaturesExt(void)
 "        movl    %%edi,%%ebx\n"
 	: "=m" (features)
 	:
-	: "%eax", "%ebx", "%ecx", "%edx", "%edi"
+	: "%eax", "%ecx", "%edx", "%edi"
 	);
 #elif defined(__GNUC__) && defined (__x86_64__)
 	__asm__ (
