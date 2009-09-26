@@ -828,7 +828,7 @@ char *SDL_iconv_string(const char *tocode, const char *fromcode, const char *inb
 			tocode = "UTF-8";
 		}
 		if ( !fromcode || !*fromcode ) {
-			tocode = "UTF-8";
+			fromcode = "UTF-8";
 		}
 		cd = SDL_iconv_open(tocode, fromcode);
 	}
