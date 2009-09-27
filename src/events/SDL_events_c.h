@@ -64,6 +64,9 @@ extern int SDL_PrivateExpose(void);
 extern int SDL_PrivateQuit(void);
 extern int SDL_PrivateSysWMEvent(SDL_SysWMmsg *message);
 
+/* Used to clamp the mouse coordinates separately from the video surface */
+extern void SDL_SetMouseRange(int maxX, int maxY);
+
 /* Used by the activity event handler to remove mouse focus */
 extern void SDL_ResetMouse(void);
 

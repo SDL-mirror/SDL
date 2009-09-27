@@ -34,6 +34,8 @@ static Sint16 SDL_MouseX = 0;
 static Sint16 SDL_MouseY = 0;
 static Sint16 SDL_DeltaX = 0;
 static Sint16 SDL_DeltaY = 0;
+static Sint16 SDL_MouseMaxX = 0;
+static Sint16 SDL_MouseMaxY = 0;
 static Uint8  SDL_ButtonState = 0;
 
 
@@ -45,6 +47,8 @@ int SDL_MouseInit(void)
 	SDL_MouseY = 0;
 	SDL_DeltaX = 0;
 	SDL_DeltaY = 0;
+	SDL_MouseMaxX = 0;
+	SDL_MouseMaxY = 0;
 	SDL_ButtonState = 0;
 
 	/* That's it! */
@@ -92,11 +96,17 @@ static void ClipOffset(Sint16 *x, Sint16 *y)
 	/* This clips absolute mouse coordinates when the apparent
 	   display surface is smaller than the real display surface.
 	 */
-	if ( SDL_VideoSurface->offset ) {
+	if ( SDL_VideoSurface && SDL_VideoSurface->offset ) {
 		*y -= SDL_VideoSurface->offset/SDL_VideoSurface->pitch;
 		*x -= (SDL_VideoSurface->offset%SDL_VideoSurface->pitch)/
 				SDL_VideoSurface->format->BytesPerPixel;
 	}
+}
+
+void SDL_SetMouseRange(int maxX, int maxY)
+{
+	SDL_MouseMaxX = (Sint16)maxX;
+	SDL_MouseMaxY = (Sint16)maxY;
 }
 
 /* These are global for SDL_eventloop.c */
@@ -106,11 +116,6 @@ int SDL_PrivateMouseMotion(Uint8 buttonstate, int relative, Sint16 x, Sint16 y)
 	Uint16 X, Y;
 	Sint16 Xrel;
 	Sint16 Yrel;
-
-	/* Don't handle mouse motion if there's no cursor surface */
-	if ( SDL_VideoSurface == NULL ) {
-		return(0);
-	}
 
 	/* Default buttonstate is the current one */
 	if ( ! buttonstate ) {
@@ -132,16 +137,16 @@ int SDL_PrivateMouseMotion(Uint8 buttonstate, int relative, Sint16 x, Sint16 y)
 	if ( x < 0 )
 		X = 0;
 	else
-	if ( x >= SDL_VideoSurface->w )
-		X = SDL_VideoSurface->w-1;
+	if ( x >= SDL_MouseMaxX )
+		X = SDL_MouseMaxX-1;
 	else
 		X = (Uint16)x;
 
 	if ( y < 0 )
 		Y = 0;
 	else
-	if ( y >= SDL_VideoSurface->h )
-		Y = SDL_VideoSurface->h-1;
+	if ( y >= SDL_MouseMaxY )
+		Y = SDL_MouseMaxY-1;
 	else
 		Y = (Uint16)y;
 
@@ -206,14 +211,14 @@ int SDL_PrivateMouseButton(Uint8 state, Uint8 button, Sint16 x, Sint16 y)
 		if ( x < 0 )
 			x = 0;
 		else
-		if ( x >= SDL_VideoSurface->w )
-			x = SDL_VideoSurface->w-1;
+		if ( x >= SDL_MouseMaxX )
+			x = SDL_MouseMaxX-1;
 
 		if ( y < 0 )
 			y = 0;
 		else
-		if ( y >= SDL_VideoSurface->h )
-			y = SDL_VideoSurface->h-1;
+		if ( y >= SDL_MouseMaxY )
+			y = SDL_MouseMaxY-1;
 	} else {
 		move_mouse = 0;
 	}

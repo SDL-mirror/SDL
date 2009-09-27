@@ -420,7 +420,6 @@ LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			/* Mouse is handled by DirectInput when fullscreen */
 			if ( SDL_VideoSurface && ! DINPUT() ) {
 				WORD xbuttonval = 0;
-				Sint16 x, y;
 				Uint8 button, state;
 
 				/* DJM:

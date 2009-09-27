@@ -54,6 +54,7 @@ int SDL_PrivateResize(int w, int h)
 	     ((w == SDL_VideoSurface->w) && (h == SDL_VideoSurface->h)) ) {
 		return(0);
 	}
+	SDL_SetMouseRange(w, h);
 
 	/* Pull out all old resize events */
 	SDL_PeepEvents(events, sizeof(events)/sizeof(events[0]),
