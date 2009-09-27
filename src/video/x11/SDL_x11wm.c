@@ -224,9 +224,10 @@ void X11_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 
 	/* Set the window icon to the icon pixmap (and icon window) */
 	wmhints = XAllocWMHints();
-	wmhints->flags = (IconPixmapHint | IconMaskHint);
+	wmhints->flags = (IconPixmapHint | IconMaskHint | InputHint);
 	wmhints->icon_pixmap = icon_pixmap;
 	wmhints->icon_mask = mask_pixmap;
+	wmhints->input = True;
 	if(icon_window != None) {
 		wmhints->flags |= IconWindowHint;
 		wmhints->icon_window = icon_window;
