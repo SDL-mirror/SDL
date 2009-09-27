@@ -588,6 +588,22 @@ LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		return(0);
 #endif /* WM_GETMINMAXINFO */
 
+		case WM_WINDOWPOSCHANGING: {
+			WINDOWPOS *windowpos = (WINDOWPOS*)lParam;
+
+			/* When menu is at the side or top, Windows likes
+			   to try to reposition the fullscreen window when
+			   changing video modes.
+			 */
+			if ( !SDL_resizing &&
+			     SDL_PublicSurface &&
+			     (SDL_PublicSurface->flags & SDL_FULLSCREEN) ) {
+				windowpos->x = 0;
+				windowpos->y = 0;
+			}
+		}
+		return(0);
+
 		case WM_WINDOWPOSCHANGED: {
 			SDL_VideoDevice *this = current_video;
 			int w, h;
