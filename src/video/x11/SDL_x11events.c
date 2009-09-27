@@ -423,15 +423,12 @@ printf("Mode: NotifyGrab\n");
 if ( xevent.xcrossing.mode == NotifyUngrab )
 printf("Mode: NotifyUngrab\n");
 #endif
-		if ( (xevent.xcrossing.mode != NotifyGrab) &&
-		     (xevent.xcrossing.mode != NotifyUngrab) ) {
-			if ( this->input_grab == SDL_GRAB_OFF ) {
-				posted = SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS);
-			}
-			posted = SDL_PrivateMouseMotion(0, 0,
-					xevent.xcrossing.x,
-					xevent.xcrossing.y);
+		if ( this->input_grab == SDL_GRAB_OFF ) {
+			posted = SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS);
 		}
+		posted = SDL_PrivateMouseMotion(0, 0,
+				xevent.xcrossing.x,
+				xevent.xcrossing.y);
 	    }
 	    break;
 
@@ -444,9 +441,7 @@ printf("Mode: NotifyGrab\n");
 if ( xevent.xcrossing.mode == NotifyUngrab )
 printf("Mode: NotifyUngrab\n");
 #endif
-		if ( (xevent.xcrossing.mode != NotifyGrab) &&
-		     (xevent.xcrossing.mode != NotifyUngrab) &&
-		     (xevent.xcrossing.detail != NotifyInferior) ) {
+		if ( xevent.xcrossing.detail != NotifyInferior ) {
 			if ( this->input_grab == SDL_GRAB_OFF ) {
 				posted = SDL_PrivateAppActive(0, SDL_APPMOUSEFOCUS);
 			} else {
