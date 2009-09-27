@@ -31,7 +31,13 @@
 /*
  * On Leopard, this is missing from the 64-bit headers
  */
-#ifndef UsrActivity
+#if defined(__LP64__) && !defined(__POWER__)
+/*
+ * Workaround for a bug in the 10.5 SDK: By accident, OSService.h does
+ * not include Power.h at all when compiling in 64bit mode. This has
+ * been fixed in 10.6, but for 10.5, we manually define UsrActivity
+ * to ensure compilation works.
+ */
 #define UsrActivity 1
 #endif
 
