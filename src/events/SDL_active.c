@@ -87,5 +87,9 @@ int SDL_PrivateAppActive(Uint8 gain, Uint8 state)
 	if ( (state & SDL_APPINPUTFOCUS) && !gain ) {
 		SDL_ResetKeyboard();
 	}
+	/* If we were minimized, post button-up events */
+	if ( (state & SDL_APPACTIVE) && !gain ) {
+		SDL_ResetMouse();
+	}
 	return(posted);
 }
