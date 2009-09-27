@@ -93,16 +93,13 @@ X11_DispatchEvent(_THIS)
             if (xevent.xcrossing.mode == NotifyUngrab)
                 printf("Mode: NotifyUngrab\n");
 #endif
-            if ((xevent.xcrossing.mode != NotifyGrab) &&
-                (xevent.xcrossing.mode != NotifyUngrab)) {
 #if 1
-                /* FIXME: Should we reset data for all mice? */
-	       for (i = 0; i < SDL_GetNumMice(); ++i) {
-		  SDL_Mouse *mouse = SDL_GetMouse(i);
-		  SDL_SetMouseFocus(mouse->id, data->windowID);
-	       }
-#endif
+            /* FIXME: Should we reset data for all mice? */
+            for (i = 0; i < SDL_GetNumMice(); ++i) {
+                SDL_Mouse *mouse = SDL_GetMouse(i);
+                SDL_SetMouseFocus(mouse->id, data->windowID);
             }
+#endif
         }
         break;
 
@@ -118,15 +115,13 @@ X11_DispatchEvent(_THIS)
             if (xevent.xcrossing.mode == NotifyUngrab)
                 printf("Mode: NotifyUngrab\n");
 #endif
-            if ((xevent.xcrossing.mode != NotifyGrab) &&
-                (xevent.xcrossing.mode != NotifyUngrab) &&
-                (xevent.xcrossing.detail != NotifyInferior)) {
+            if (xevent.xcrossing.detail != NotifyInferior) {
 #if 1
                 /* FIXME: Should we reset data for all mice? */
-	       for (i = 0; i < SDL_GetNumMice(); ++i) {
-		  SDL_Mouse *mouse = SDL_GetMouse(i);
-		  SDL_SetMouseFocus(mouse->id, 0);
-	       }
+	        for (i = 0; i < SDL_GetNumMice(); ++i) {
+		    SDL_Mouse *mouse = SDL_GetMouse(i);
+		    SDL_SetMouseFocus(mouse->id, 0);
+	        }
 #endif
             }
         }
