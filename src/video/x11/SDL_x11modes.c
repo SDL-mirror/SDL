@@ -338,6 +338,18 @@ static void move_cursor_to(_THIS, int x, int y)
     XWarpPointer(SDL_Display, None, SDL_Root, 0, 0, 0, 0, x, y);
 }
 
+static int add_default_visual(_THIS)
+{
+    int i;
+    int n = this->hidden->nvisuals;
+    for (i=0; i<n; i++) {
+        if (this->hidden->visuals[i].visual == DefaultVisual(SDL_Display, SDL_Screen)) return n;
+    }
+    this->hidden->visuals[n].depth = DefaultDepth(SDL_Display, SDL_Screen);;
+    this->hidden->visuals[n].visual = DefaultVisual(SDL_Display, SDL_Screen);;
+    this->hidden->nvisuals++;
+    return(this->hidden->nvisuals);
+}
 static int add_visual(_THIS, int depth, int class)
 {
     XVisualInfo vi;
@@ -801,6 +813,7 @@ int X11_GetVideoModes(_THIS)
                                 add_visual(this, depth_list[i], StaticColor);
                         }
                 }
+                add_default_visual(this);
         }
         if ( this->hidden->nvisuals == 0 ) {
             SDL_SetError("Found no sufficiently capable X11 visuals");
