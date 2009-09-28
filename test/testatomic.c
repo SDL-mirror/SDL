@@ -80,36 +80,36 @@ main(int argc, char *argv[])
 
    val64 = 0;
    tfret = SDL_AtomicTestThenSet64(&val64);
-   printf("TestThenSet64        tfret=%s val=%lld\n", tf(tfret), val64);
+   printf("TestThenSet64        tfret=%s val=%llu\n", tf(tfret), ((unsigned long long)val64));
    tfret = SDL_AtomicTestThenSet64(&val64);
-   printf("TestThenSet64        tfret=%s val=%lld\n", tf(tfret), val64);
+   printf("TestThenSet64        tfret=%s val=%llu\n", tf(tfret), ((unsigned long long)val64));
 
    SDL_AtomicClear64(&val64);
-   printf("Clear64              val=%lld\n", val64);
+   printf("Clear64              val=%llu\n", ((unsigned long long)val64));
 
    ret64 = SDL_AtomicFetchThenIncrement64(&val64);
-   printf("FetchThenIncrement64 ret=%lld val=%lld\n", ret64, val64);
+   printf("FetchThenIncrement64 ret=%llu val=%llu\n", ((unsigned long long)ret64), ((unsigned long long)val64));
 
    ret64 = SDL_AtomicFetchThenDecrement64(&val64);
-   printf("FetchThenDecrement64 ret=%lld val=%lld\n", ret64, val64);
+   printf("FetchThenDecrement64 ret=%llu val=%llu\n", ((unsigned long long)ret64), ((unsigned long long)val64));
 
    ret64 = SDL_AtomicFetchThenAdd64(&val64, 10);
-   printf("FetchThenAdd64       ret=%lld val=%lld\n", ret64, val64);
+   printf("FetchThenAdd64       ret=%llu val=%llu\n", ((unsigned long long)ret64), ((unsigned long long)val64));
 
    ret64 = SDL_AtomicFetchThenSubtract64(&val64, 10);
-   printf("FetchThenSubtract64  ret=%lld val=%lld\n", ret64, val64);
+   printf("FetchThenSubtract64  ret=%llu val=%llu\n", ((unsigned long long)ret64), ((unsigned long long)val64));
 
    ret64 = SDL_AtomicIncrementThenFetch64(&val64);
-   printf("IncrementThenFetch64 ret=%lld val=%lld\n", ret64, val64);
+   printf("IncrementThenFetch64 ret=%llu val=%llu\n", ((unsigned long long)ret64), ((unsigned long long)val64));
 
    ret64 = SDL_AtomicDecrementThenFetch64(&val64);
-   printf("DecrementThenFetch64 ret=%lld val=%lld\n", ret64, val64);
+   printf("DecrementThenFetch64 ret=%llu val=%llu\n", ((unsigned long long)ret64), ((unsigned long long)val64));
 
    ret64 = SDL_AtomicAddThenFetch64(&val64, 10);
-   printf("AddThenFetch64       ret=%lld val=%lld\n", ret64, val64);
+   printf("AddThenFetch64       ret=%llu val=%llu\n", ((unsigned long long)ret64), ((unsigned long long)val64));
 
    ret64 = SDL_AtomicSubtractThenFetch64(&val64, 10);
-   printf("SubtractThenFetch64  ret=%lld val=%lld\n", ret64, val64);
+   printf("SubtractThenFetch64  ret=%llu val=%llu\n", ((unsigned long long)ret64), ((unsigned long long)val64));
 #endif
 
    return 0;
