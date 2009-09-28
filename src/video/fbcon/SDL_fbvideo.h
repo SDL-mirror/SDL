@@ -38,6 +38,14 @@
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_VideoDevice *this
 
+typedef void FB_bitBlit(
+		Uint8 *src_pos,
+		int src_right_delta,	/* pixels, not bytes */
+		int src_down_delta,		/* pixels, not bytes */
+		Uint8 *dst_pos,
+		int dst_linebytes,
+		int width,
+		int height);
 
 /* This is the structure we use to keep track of video memory */
 typedef struct vidmem_bucket {
@@ -69,12 +77,17 @@ struct SDL_PrivateVideoData {
 #endif
 
 	char *mapped_mem;
+	char *shadow_mem;
 	int mapped_memlen;
 	int mapped_offset;
 	char *mapped_io;
 	long mapped_iolen;
 	int flip_page;
 	char *flip_address[2];
+	int rotate;
+	int shadow_fb;				/* Tells whether a shadow is being used. */
+	FB_bitBlit *blitFunc;
+	int physlinebytes;			/* Length of a line in bytes in physical fb */
 
 #define NUM_MODELISTS	4		/* 8, 16, 24, and 32 bits-per-pixel */
 	int SDL_nummodes[NUM_MODELISTS];
@@ -110,12 +123,17 @@ struct SDL_PrivateVideoData {
 #define saved_cmaplen		(this->hidden->saved_cmaplen)
 #define saved_cmap		(this->hidden->saved_cmap)
 #define mapped_mem		(this->hidden->mapped_mem)
+#define shadow_mem		(this->hidden->shadow_mem)
 #define mapped_memlen		(this->hidden->mapped_memlen)
 #define mapped_offset		(this->hidden->mapped_offset)
 #define mapped_io		(this->hidden->mapped_io)
 #define mapped_iolen		(this->hidden->mapped_iolen)
 #define flip_page		(this->hidden->flip_page)
 #define flip_address		(this->hidden->flip_address)
+#define rotate			(this->hidden->rotate)
+#define shadow_fb		(this->hidden->shadow_fb)
+#define blitFunc		(this->hidden->blitFunc)
+#define physlinebytes		(this->hidden->physlinebytes)
 #define SDL_nummodes		(this->hidden->SDL_nummodes)
 #define SDL_modelist		(this->hidden->SDL_modelist)
 #define surfaces		(this->hidden->surfaces)
