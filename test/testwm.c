@@ -168,6 +168,71 @@ void HotKey_Quit(void)
 	SDL_PushEvent(&event);
 }
 
+static void print_modifiers(void)
+{
+	int mod;
+	printf(" modifiers:");
+	mod = SDL_GetModState();
+	if(!mod) {
+		printf(" (none)");
+		return;
+	}
+	if(mod & KMOD_LSHIFT)
+		printf(" LSHIFT");
+	if(mod & KMOD_RSHIFT)
+		printf(" RSHIFT");
+	if(mod & KMOD_LCTRL)
+		printf(" LCTRL");
+	if(mod & KMOD_RCTRL)
+		printf(" RCTRL");
+	if(mod & KMOD_LALT)
+		printf(" LALT");
+	if(mod & KMOD_RALT)
+		printf(" RALT");
+	if(mod & KMOD_LMETA)
+		printf(" LMETA");
+	if(mod & KMOD_RMETA)
+		printf(" RMETA");
+	if(mod & KMOD_NUM)
+		printf(" NUM");
+	if(mod & KMOD_CAPS)
+		printf(" CAPS");
+	if(mod & KMOD_MODE)
+		printf(" MODE");
+}
+
+static void PrintKey(const SDL_keysym *sym, int pressed)
+{
+	/* Print the keycode, name and state */
+	if ( sym->sym ) {
+		printf("Key %s:  %d-%s ", pressed ?  "pressed" : "released",
+					sym->sym, SDL_GetKeyName(sym->sym));
+	} else {
+		printf("Unknown Key (scancode = %d) %s ", sym->scancode,
+					pressed ?  "pressed" : "released");
+	}
+
+	/* Print the translated character, if one exists */
+	if ( sym->unicode ) {
+		/* Is it a control-character? */
+		if ( sym->unicode < ' ' ) {
+			printf(" (^%c)", sym->unicode+'@');
+		} else {
+#ifdef UNICODE
+			printf(" (%c)", sym->unicode);
+#else
+			/* This is a Latin-1 program, so only show 8-bits */
+			if ( !(sym->unicode & 0xFF00) )
+				printf(" (%c)", sym->unicode);
+			else
+				printf(" (0x%X)", sym->unicode);
+#endif
+		}
+	}
+	print_modifiers();
+	printf("\n");
+}
+
 int SDLCALL FilterEvents(const SDL_Event *event)
 {
 	static int reallyquit = 0;
@@ -217,6 +282,7 @@ int SDLCALL FilterEvents(const SDL_Event *event)
 			return(0);
 
 		case SDL_KEYDOWN:
+			PrintKey(&event->key.keysym, 1);
 			if ( event->key.keysym.sym == SDLK_ESCAPE ) {
 				HotKey_Quit();
 			}
@@ -232,6 +298,10 @@ int SDLCALL FilterEvents(const SDL_Event *event)
 			     (event->key.keysym.mod & KMOD_ALT) ) {
 				HotKey_ToggleFullScreen();
 			}
+			return(0);
+
+		case SDL_KEYUP:
+			PrintKey(&event->key.keysym, 0);
 			return(0);
 
 		/* Pass the video resize event through .. */
@@ -345,9 +415,6 @@ int main(int argc, char *argv[])
 
 	/* Set an event filter that discards everything but QUIT */
 	SDL_SetEventFilter(FilterEvents);
-
-	/* Ignore key up events, they don't even get filtered */
-	SDL_EventState(SDL_KEYUP, SDL_IGNORE);
 
 	/* Loop, waiting for QUIT */
 	while ( SDL_WaitEvent(&event) ) {
