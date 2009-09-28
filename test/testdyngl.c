@@ -68,6 +68,7 @@ typedef struct
     void (APIENTRY * glRotatef) (GLfloat, GLfloat, GLfloat, GLfloat);
     void (APIENTRY * glViewport) (GLint, GLint, GLsizei, GLsizei);
     void (APIENTRY * glFogf) (GLenum, GLfloat);
+    const GLubyte* (APIENTRY * glGetString) (GLenum);
 }
 glfuncs;
 
@@ -91,6 +92,12 @@ init_glfuncs(glfuncs * f)
     f->glRotatef = get_funcaddr("glRotatef");
     f->glViewport = get_funcaddr("glViewport");
     f->glFogf = get_funcaddr("glFogf");
+    f->glGetString = get_funcaddr("glGetString");
+
+    printf("Vendor     : %s\n", f->glGetString(GL_VENDOR));
+    printf("Renderer   : %s\n", f->glGetString(GL_RENDERER));
+    printf("Version    : %s\n", f->glGetString(GL_VERSION));
+    printf("Extensions : %s\n", f->glGetString(GL_EXTENSIONS));
 }
 
 #define NB_PIXELS 1000
