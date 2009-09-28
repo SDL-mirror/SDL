@@ -1118,8 +1118,10 @@ static SDL_Surface *FB_SetVideoMode(_THIS, SDL_Surface *current,
 					rotate == FBCON_ROTATE_UD) ?
 				FB_blit16 : FB_blit16blocked;
 		} else {
+#ifdef FBCON_DEBUG
 			fprintf(stderr, "Init vinfo:\n");
 			print_vinfo(&vinfo);
+#endif
 			SDL_SetError("Using software buffer, but no blitter "
 					"function is available for %d bpp.",
 					vinfo.bits_per_pixel);
