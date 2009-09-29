@@ -670,7 +670,7 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
     current->h = height;
     
     contentRect = NSMakeRect (0, 0, width, height);
-    
+
     /*
         Check if we should completely destroy the previous mode 
         - If it is fullscreen
@@ -719,13 +719,7 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
                 current->flags |= SDL_RESIZABLE;
             }
         }
-                
-        if ( QZ_WindowPosition(this, &origin_x, &origin_y) ) {
-            center_window = 0;
-            contentRect.origin.x = (float)origin_x;
-            contentRect.origin.y = (float)origin_y;            
-        }
-        
+
         /* Manually create a window, avoids having a nib file resource */
         qz_window = [ [ SDL_QuartzWindow alloc ] 
             initWithContentRect:contentRect
@@ -741,14 +735,21 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
             }
             return NULL;
         }
-    
+
         /*[ qz_window setReleasedWhenClosed:YES ];*/ /* no need to set this as it's the default for NSWindows */
         QZ_SetCaption(this, this->wm_title, this->wm_icon);
         [ qz_window setAcceptsMouseMovedEvents:YES ];
         [ qz_window setViewsNeedDisplay:NO ];
-        if ( center_window ) {
+
+        if ( QZ_WindowPosition(this, &origin_x, &origin_y) ) {
+            /* have to flip the Y value (NSPoint is lower left corner origin) */
+            [ qz_window setFrameTopLeftPoint:NSMakePoint((float) origin_x, (float) (this->info.current_h - origin_y))];
+            center_window = 0;
+        }
+        else if ( center_window ) {
             [ qz_window center ];
         }
+
         [ qz_window setDelegate:
             [ [ SDL_QuartzWindowDelegate alloc ] init ] ];
         [ qz_window setContentView: [ [ [ SDL_QuartzView alloc ] init ] autorelease ] ];
