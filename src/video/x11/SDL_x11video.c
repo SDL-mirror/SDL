@@ -109,10 +109,8 @@ static SDL_VideoDevice *X11_CreateDevice(int devindex)
 			SDL_memset(device, 0, (sizeof *device));
 			device->hidden = (struct SDL_PrivateVideoData *)
 					SDL_malloc((sizeof *device->hidden));
-			SDL_memset(device->hidden, 0, (sizeof *device->hidden));
 			device->gl_data = (struct SDL_PrivateGLData *)
 					SDL_malloc((sizeof *device->gl_data));
-			SDL_memset(device->gl_data, 0, (sizeof *device->gl_data));
 		}
 		if ( (device == NULL) || (device->hidden == NULL) ||
 		                         (device->gl_data == NULL) ) {
