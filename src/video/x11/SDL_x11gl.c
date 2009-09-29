@@ -289,7 +289,9 @@ int X11_GL_CreateContext(_THIS)
 		if ( this->gl_data->glXSwapIntervalMESA ) {
 			this->gl_data->glXSwapIntervalMESA(this->gl_config.swap_control);
 		} else if ( this->gl_data->glXSwapIntervalSGI ) {
-			this->gl_data->glXSwapIntervalSGI(this->gl_config.swap_control);
+			if (this->gl_data->glXSwapIntervalSGI(this->gl_config.swap_control) != 0) {
+				this->gl_data->sgi_swap_interval = this->gl_config.swap_control;
+			}
 		}
 	}
 #else
@@ -412,7 +414,10 @@ int X11_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
 	    case SDL_GL_SWAP_CONTROL:
 		if ( this->gl_data->glXGetSwapIntervalMESA ) {
 			*value = this->gl_data->glXGetSwapIntervalMESA();
-			return(0);
+			return 0;
+		} else if ( this->gl_data->glXSwapIntervalSGI ) {
+			*value = this->gl_data->sgi_swap_interval;
+			return 0;
 		} else {
 			unsupported = 1;
 		}
