@@ -234,12 +234,12 @@ static void BlitRGBtoRGBSurfaceAlpha128MMX(SDL_BlitInfo *info)
 	Uint32 *dstp = (Uint32 *)info->d_pixels;
 	int dstskip = info->d_skip >> 2;
 	Uint32 dalpha = info->dst->Amask;
-	Uint8 load[8];
+	Uint64 load;
 
-	*(Uint64 *)load = 0x00fefefe00fefefeULL;/* alpha128 mask */
-	movq_m2r(*load, mm4); /* alpha128 mask -> mm4 */
-	*(Uint64 *)load = 0x0001010100010101ULL;/* !alpha128 mask */
-	movq_m2r(*load, mm3); /* !alpha128 mask -> mm3 */
+	load = 0x00fefefe00fefefeULL;/* alpha128 mask */
+	movq_m2r(load, mm4); /* alpha128 mask -> mm4 */
+	load = 0x0001010100010101ULL;/* !alpha128 mask */
+	movq_m2r(load, mm3); /* !alpha128 mask -> mm3 */
 	movd_m2r(dalpha, mm7); /* dst alpha mask */
 	punpckldq_r2r(mm7, mm7); /* dst alpha mask | dst alpha mask -> mm7 */
 	while(height--) {
@@ -1883,13 +1883,13 @@ static void Blit565to565SurfaceAlphaMMX(SDL_BlitInfo *info)
 		Uint16 *dstp = (Uint16 *)info->d_pixels;
 		int dstskip = info->d_skip >> 1;
 		Uint32 s, d;
-		Uint8 load[8];
+		Uint64 load;
 	  
 		alpha &= ~(1+2+4);		/* cut alpha to get the exact same behaviour */
-		*(Uint64 *)load = alpha;
+		load = alpha;
 		alpha >>= 3;		/* downscale alpha to 5 bits */
 
-		movq_m2r(*load, mm0); /* alpha(0000000A) -> mm0 */
+		movq_m2r(load, mm0); /* alpha(0000000A) -> mm0 */
 		punpcklwd_r2r(mm0, mm0); /* 00000A0A -> mm0 */
 		punpcklwd_r2r(mm0, mm0); /* 0A0A0A0A -> mm0 */
 		/* position alpha to allow for mullo and mulhi on diff channels
@@ -1897,10 +1897,10 @@ static void Blit565to565SurfaceAlphaMMX(SDL_BlitInfo *info)
 		psllq_i2r(3, mm0);
 	  
 		/* Setup the 565 color channel masks */
-		*(Uint64 *)load = 0x07E007E007E007E0ULL;
-		movq_m2r(*load, mm4); /* MASKGREEN -> mm4 */
-		*(Uint64 *)load = 0x001F001F001F001FULL;
-		movq_m2r(*load, mm7); /* MASKBLUE -> mm7 */
+		load = 0x07E007E007E007E0ULL;
+		movq_m2r(load, mm4); /* MASKGREEN -> mm4 */
+		load = 0x001F001F001F001FULL;
+		movq_m2r(load, mm7); /* MASKBLUE -> mm7 */
 		while(height--) {
 			DUFFS_LOOP_QUATRO2(
 			{
@@ -2022,13 +2022,13 @@ static void Blit555to555SurfaceAlphaMMX(SDL_BlitInfo *info)
 		Uint16 *dstp = (Uint16 *)info->d_pixels;
 		int dstskip = info->d_skip >> 1;
 		Uint32 s, d;
-		Uint8 load[8];
+		Uint64 load;
 	  
 		alpha &= ~(1+2+4);		/* cut alpha to get the exact same behaviour */
-		*(Uint64 *)load = alpha;
+		load = alpha;
 		alpha >>= 3;		/* downscale alpha to 5 bits */
 
-		movq_m2r(*load, mm0); /* alpha(0000000A) -> mm0 */
+		movq_m2r(load, mm0); /* alpha(0000000A) -> mm0 */
 		punpcklwd_r2r(mm0, mm0); /* 00000A0A -> mm0 */
 		punpcklwd_r2r(mm0, mm0); /* 0A0A0A0A -> mm0 */
 		/* position alpha to allow for mullo and mulhi on diff channels
@@ -2036,10 +2036,10 @@ static void Blit555to555SurfaceAlphaMMX(SDL_BlitInfo *info)
 		psllq_i2r(3, mm0);
 
 		/* Setup the 555 color channel masks */
-		*(Uint64 *)load = 0x03E003E003E003E0ULL;
-		movq_m2r(*load, mm4); /* MASKGREEN -> mm4 */
-		*(Uint64 *)load = 0x001F001F001F001FULL;
-		movq_m2r(*load, mm7); /* MASKBLUE -> mm7 */
+		load = 0x03E003E003E003E0ULL;
+		movq_m2r(load, mm4); /* MASKGREEN -> mm4 */
+		load = 0x001F001F001F001FULL;
+		movq_m2r(load, mm7); /* MASKBLUE -> mm7 */
 		while(height--) {
 			DUFFS_LOOP_QUATRO2(
 			{
