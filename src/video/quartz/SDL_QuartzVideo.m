@@ -461,7 +461,6 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
     NSRect screen_rect;
     CGError error;
     NSRect contentRect;
-    BOOL isCustom = NO;
     CGDisplayFadeReservationToken fade_token = kCGDisplayFadeReservationInvalidToken;
 
     /* Fade to black to hide resolution-switching flicker (and garbage
@@ -577,11 +576,9 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
     }
     /* We already have a window, just change its size */
     else {
-        if (!isCustom) {
-            [ qz_window setContentSize:contentRect.size ];
-            current->flags |= (SDL_NOFRAME|SDL_RESIZABLE) & mode_flags;
-            [ window_view setFrameSize:contentRect.size ];
-        }
+        [ qz_window setContentSize:contentRect.size ];
+        current->flags |= (SDL_NOFRAME|SDL_RESIZABLE) & mode_flags;
+        [ window_view setFrameSize:contentRect.size ];
     }
 
     /* Setup OpenGL for a fullscreen context */
@@ -660,7 +657,6 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
                                          int height, int *bpp, Uint32 flags) {
     unsigned int style;
     NSRect contentRect;
-    BOOL isCustom = NO;
     int center_window = 1;
     int origin_x, origin_y;
     CGDisplayFadeReservationToken fade_token = kCGDisplayFadeReservationInvalidToken;
@@ -745,8 +741,7 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
             /* have to flip the Y value (NSPoint is lower left corner origin) */
             [ qz_window setFrameTopLeftPoint:NSMakePoint((float) origin_x, (float) (this->info.current_h - origin_y))];
             center_window = 0;
-        }
-        else if ( center_window ) {
+        } else if ( center_window ) {
             [ qz_window center ];
         }
 
@@ -756,12 +751,9 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
     }
     /* We already have a window, just change its size */
     else {
-    
-        if (!isCustom) {
-            [ qz_window setContentSize:contentRect.size ];
-            current->flags |= (SDL_NOFRAME|SDL_RESIZABLE) & mode_flags;
-            [ window_view setFrameSize:contentRect.size ];
-        }
+        [ qz_window setContentSize:contentRect.size ];
+        current->flags |= (SDL_NOFRAME|SDL_RESIZABLE) & mode_flags;
+        [ window_view setFrameSize:contentRect.size ];
     }
 
     /* For OpenGL, we bind the context to a subview */
