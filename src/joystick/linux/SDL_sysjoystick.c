@@ -59,6 +59,9 @@ static struct {
 	{ "Saitek Saitek X45", 6, 1, 0 }
 };
 
+/* It looks like newer kernels have the logical mapping at the driver level */
+#define NO_LOGICAL_JOYSTICKS
+
 #ifndef NO_LOGICAL_JOYSTICKS
 
 /*
