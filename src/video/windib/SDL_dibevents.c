@@ -341,11 +341,11 @@ static void DIB_GenerateMouseMotionEvent(_THIS)
 		center.y = (SDL_VideoSurface->h/2);
 		ClientToScreen(SDL_Window, &center);
 
-		mouse.x -= (Sint16)center.x;
-		mouse.y -= (Sint16)center.y;
+		mouse.x -= center.x;
+		mouse.y -= center.y;
 		if ( mouse.x || mouse.y ) {
 			SetCursorPos(center.x, center.y);
-			posted = SDL_PrivateMouseMotion(0, 1, mouse.x, mouse.y);
+			posted = SDL_PrivateMouseMotion(0, 1, (Sint16)mouse.x, (Sint16)mouse.y);
 		}
 	} else if ( SDL_GetAppState() & SDL_APPMOUSEFOCUS ) {
 		ScreenToClient(SDL_Window, &mouse);
@@ -353,7 +353,7 @@ static void DIB_GenerateMouseMotionEvent(_THIS)
        if (SDL_VideoSurface && this->hidden->gapiInfo)
 			GapiTransform(this->hidden->gapiInfo, &mouse.x, &mouse.y);
 #endif
-		posted = SDL_PrivateMouseMotion(0, 0, mouse.x, mouse.y);
+		posted = SDL_PrivateMouseMotion(0, 0, (Sint16)mouse.x, (Sint16)mouse.y);
 	}
 }
 
