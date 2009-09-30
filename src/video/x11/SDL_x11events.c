@@ -515,9 +515,9 @@ printf("KeymapNotify!\n");
 #ifdef DEBUG_MOTION
   printf("DGA motion: %d,%d\n", xevent.xmotion.x_root, xevent.xmotion.y_root);
 #endif
-					/* batch DGA motion into one event, queued later. */
-					dga_x += xevent.xmotion.x_root;
-					dga_y += xevent.xmotion.y_root;
+					posted = SDL_PrivateMouseMotion(0, 1,
+							xevent.xmotion.x_root,
+							xevent.xmotion.y_root);
 				} else {
 					posted = X11_WarpedMotion(this,&xevent);
 				}
@@ -931,16 +931,6 @@ void X11_PumpEvents(_THIS)
 		X11_DispatchEvent(this);
 		++pending;
 	}
-
-	/* We batch up all the DGA motion events and generate a single SDL
-	   event from them, since newer x.org releases might send a LOT of
-	   these at once and flood the SDL event queue. --ryan. */
-	if (dga_x || dga_y) {
-		SDL_PrivateMouseMotion(0, 1, dga_x, dga_y);
-		dga_x = 0;
-		dga_y = 0;
-	}
-
 	if ( switch_waiting ) {
 		Uint32 now;
 

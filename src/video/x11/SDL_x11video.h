@@ -70,8 +70,6 @@ struct SDL_PrivateVideoData {
 
     /* Direct Graphics Access extension information */
     int using_dga;
-    Sint16 dga_x;
-    Sint16 dga_y;
 
 #ifndef NO_SHARED_MEMORY
     /* MIT shared memory extension information */
@@ -174,8 +172,6 @@ struct SDL_PrivateVideoData {
 #define SDL_IC			(this->hidden->X11_IC)
 #define SDL_windowid		(this->hidden->SDL_windowid)
 #define using_dga		(this->hidden->using_dga)
-#define dga_x			(this->hidden->dga_x)
-#define dga_y			(this->hidden->dga_y)
 #define use_mitshm		(this->hidden->use_mitshm)
 #define shminfo			(this->hidden->shminfo)
 #define SDL_Ximage		(this->hidden->Ximage)
