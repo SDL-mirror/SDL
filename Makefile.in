@@ -3,7 +3,6 @@
 top_builddir = .
 srcdir  = @srcdir@
 objects = build
-depend	= build-deps
 prefix = @prefix@
 exec_prefix = @exec_prefix@
 bindir	= @bindir@
@@ -33,11 +32,10 @@ RANLIB	= @RANLIB@
 WINDRES	= @WINDRES@
 
 TARGET  = libSDL.la
-SOURCES = @SOURCES@
 OBJECTS = @OBJECTS@
+VERSION_OBJECTS = @VERSION_OBJECTS@
 
 SDLMAIN_TARGET = libSDLmain.a
-SDLMAIN_SOURCES = @SDLMAIN_SOURCES@
 SDLMAIN_OBJECTS = @SDLMAIN_OBJECTS@
 
 # PS3 SPU programs
@@ -74,20 +72,15 @@ $(srcdir)/include/SDL_revision.h: update-revision
 update-revision:
 	$(SHELL) $(auxdir)/updaterev.sh
 
-.PHONY: all update-revision depend install install-bin install-hdrs install-lib install-data install-man uninstall uninstall-bin uninstall-hdrs uninstall-lib uninstall-data uninstall-man clean distclean dist
-depend: update-revision
-	@SOURCES="$(SOURCES)" INCLUDE="$(INCLUDE)" output="$(depend)" \
-	$(SHELL) $(auxdir)/makedep.sh
-	@for src in $(SDLMAIN_SOURCES); do \
-	    obj=`echo $$src | sed -e 's|.*/||' -e 's|\.[^\.]*$$|.o|'`; \
-	    echo "\$$(objects)/$$obj: $$src" >>$(depend); \
-	    echo "	\$$(CC) \$$(CFLAGS) \$$(EXTRA_CFLAGS) -c $$src -o \$$@" >>$(depend); \
-	done
+.PHONY: all update-revision install install-bin install-hdrs install-lib install-data install-man uninstall uninstall-bin uninstall-hdrs uninstall-lib uninstall-data uninstall-man clean distclean dist
 
-include $(depend)
+-include $(OBJECTS:.lo=.d)
+@DEPENDS@
+@VERSION_DEPENDS@
+@SDLMAIN_DEPENDS@
 
-$(objects)/$(TARGET): $(OBJECTS)
-	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJECTS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(LT_LDFLAGS)
+$(objects)/$(TARGET): $(OBJECTS) $(VERSION_OBJECTS)
+	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJECTS) $(VERSION_OBJECTS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(LT_LDFLAGS)
 
 $(objects)/$(SDLMAIN_TARGET): $(SDLMAIN_OBJECTS)
 	$(AR) cru $@ $(SDLMAIN_OBJECTS)
@@ -147,7 +140,7 @@ clean:
 distclean: clean
 	rm -f Makefile include/SDL_config.h sdl-config
 	rm -f SDL.qpg
-	rm -f config.status config.cache config.log libtool $(depend)
+	rm -f config.status config.cache config.log libtool
 	rm -rf $(srcdir)/autom4te*
 	find $(srcdir) \( \
 	    -name '*~' -o \

@@ -2555,7 +2555,7 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         #EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lunicows"
         EXTRA_LDFLAGS="$EXTRA_LDFLAGS -luser32 -lgdi32 -lmsimg32 -lwinmm"
         # The Win32 platform requires special setup
-        SOURCES="$SOURCES $srcdir/src/main/win32/*.rc"
+        VERSION_SOURCES="$srcdir/src/main/win32/*.rc"
         SDLMAIN_SOURCES="$srcdir/src/main/win32/*.c"
         SDL_CFLAGS="$SDL_CFLAGS -Dmain=SDL_main"
         SDL_LIBS="-lmingw32 -lSDLmain $SDL_LIBS -mwindows"
@@ -2769,15 +2769,28 @@ if test x$SDLMAIN_SOURCES = x; then
     SDLMAIN_SOURCES="$srcdir/src/main/dummy/*.c"
 fi
 
-OBJECTS=`echo $SOURCES | sed 's,[[^ ]]*/\([[^ ]]*\)\.asm,$(objects)/\1.lo,g'`
-OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.cc,$(objects)/\1.lo,g'`
-OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.m,$(objects)/\1.lo,g'`
-OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects)/\1.lo,g'`
-OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.S,$(objects)/\1.lo,g'`
-OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.rc,$(objects)/\1.o,g'`
+OBJECTS=`echo $SOURCES`
+DEPENDS=`echo $SOURCES`
+for EXT in asm cc m c S; do
+    OBJECTS=`echo "$OBJECTS" | sed 's,[[^ ]]*/\([[^ ]]*\)\.'$EXT',$(objects)/\1.lo,g'`
+    DEPENDS=`echo "$DEPENDS" | sed 's,\([[^ ]]*\)/\([[^ ]]*\)\.'$EXT',\\
+$(objects)/\2.lo: \1/\2.'$EXT'\\
+	\$(LIBTOOL) --mode=compile \$(CC) \$(CFLAGS) \$(EXTRA_CFLAGS) -MMD -MT \$@ -c \$< -o \$@,g'`
+done
 
-SDLMAIN_OBJECTS=`echo $SDLMAIN_SOURCES | sed 's,[[^ ]]*/\([[^ ]]*\)\.cc,$(objects)/\1.o,g'`
-SDLMAIN_OBJECTS=`echo $SDLMAIN_OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects)/\1.o,g'`
+VERSION_OBJECTS=`echo $VERSION_SOURCES`
+VERSION_DEPENDS=`echo $VERSION_SOURCES`
+VERSION_OBJECTS=`echo "$VERSION_OBJECTS" | sed 's,[[^ ]]*/\([[^ ]]*\)\.rc,$(objects)/\1.o,g'`
+VERSION_DEPENDS=`echo "$VERSION_DEPENDS" | sed 's,\([[^ ]]*\)/\([[^ ]]*\)\.rc,\\
+$(objects)/\2.o: \1/\2.rc\\
+	\$(WINDRES) \$< \$@,g'`
+
+SDLMAIN_OBJECTS=`echo $SDLMAIN_SOURCES`
+SDLMAIN_DEPENDS=`echo $SDLMAIN_SOURCES`
+SDLMAIN_OBJECTS=`echo "$SDLMAIN_OBJECTS" | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects)/\1.o,g'`
+SDLMAIN_DEPENDS=`echo "$SDLMAIN_DEPENDS" | sed 's,\([[^ ]]*\)/\([[^ ]]*\)\.c,\\
+$(objects)/\2.o: \1/\2.c\\
+	\$(LIBTOOL) --mode=compile \$(CC) \$(CFLAGS) \$(EXTRA_CFLAGS) -MMD -MT \$@ -c \$< -o \$@,g'`
 
 # Set runtime shared library paths as needed
 
@@ -2829,10 +2842,12 @@ AC_SUBST(ENABLE_STATIC_FALSE)
 dnl Expand the sources and objects needed to build the library
 AC_SUBST(ac_aux_dir)
 AC_SUBST(INCLUDE)
-AC_SUBST(SOURCES)
 AC_SUBST(OBJECTS)
-AC_SUBST(SDLMAIN_SOURCES)
+AC_SUBST(DEPENDS)
+AC_SUBST(VERSION_OBJECTS)
+AC_SUBST(VERSION_DEPENDS)
 AC_SUBST(SDLMAIN_OBJECTS)
+AC_SUBST(SDLMAIN_DEPENDS)
 AC_SUBST(BUILD_CFLAGS)
 AC_SUBST(EXTRA_CFLAGS)
 AC_SUBST(BUILD_LDFLAGS)
@@ -2841,7 +2856,4 @@ AC_SUBST(WINDRES)
 
 AC_OUTPUT([
     Makefile sdl-config SDL.spec sdl.pc
-], [
-    : >build-deps
-    if test x"$MAKE" = x; then MAKE=make; fi; $MAKE depend
 ])
