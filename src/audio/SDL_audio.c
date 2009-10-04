@@ -326,6 +326,7 @@ SDL_RunAudio(void *devicep)
     void *udata;
     void (SDLCALL * fill) (void *userdata, Uint8 * stream, int len);
     int silence;
+    Uint32 delay;
 
     /* For streaming when the buffer sizes don't match up */
     Uint8 *istream;
@@ -379,9 +380,12 @@ SDL_RunAudio(void *devicep)
         stream_len = device->spec.size;
     }
 
+    /* Calculate the delay while paused */
+    delay = ((device->spec.samples * 1000) / device->spec.freq);
+
     /* Determine if the streamer is necessary here */
     if (device->use_streamer == 1) {
-        /* This code is almost the same as the old code. The difference is, instead of reding
+        /* This code is almost the same as the old code. The difference is, instead of reading
            directly from the callback into "stream", then converting and sending the audio off,
            we go: callback -> "istream" -> (conversion) -> streamer -> stream -> device.
            However, reading and writing with streamer are done separately:
@@ -394,6 +398,12 @@ SDL_RunAudio(void *devicep)
            stream's maximum length is, but I suspect 2*max(len_cvt, stream_len) is a good figure.
          */
         while (device->enabled) {
+
+            if (device->paused) {
+                SDL_Delay(delay);
+                continue;
+            }
+
             /* Only read in audio if the streamer doesn't have enough already (if it does not have enough samples to output) */
             if (SDL_StreamLength(&device->streamer) < stream_len) {
                 /* Set up istream */
@@ -404,6 +414,9 @@ SDL_RunAudio(void *devicep)
                         continue;
                     }
                 } else {
+/* FIXME: Ryan, this is probably wrong.  I imagine we don't want to get
+ * a device buffer both here and below in the stream output.
+ */
                     istream = current_audio.impl.GetDeviceBuf(device);
                     if (istream == NULL) {
                         istream = device->fake_stream;
@@ -411,11 +424,9 @@ SDL_RunAudio(void *devicep)
                 }
 
                 /* Read from the callback into the _input_ stream */
-                if (!device->paused) {
-                    SDL_mutexP(device->mixer_lock);
-                    (*fill) (udata, istream, istream_len);
-                    SDL_mutexV(device->mixer_lock);
-                }
+                SDL_mutexP(device->mixer_lock);
+                (*fill) (udata, istream, istream_len);
+                SDL_mutexV(device->mixer_lock);
 
                 /* Convert the audio if necessary and write to the streamer */
                 if (device->convert.needed) {
@@ -451,13 +462,12 @@ SDL_RunAudio(void *devicep)
                 SDL_StreamRead(&device->streamer, stream, stream_len);
 
                 /* Ready current buffer for play and change current buffer */
-                if (stream != device->fake_stream && !device->paused) {
+                if (stream != device->fake_stream) {
                     current_audio.impl.PlayDevice(device);
                     /* Wait for an audio buffer to become available */
                     current_audio.impl.WaitDevice(device);
                 } else {
-                    SDL_Delay((device->spec.samples * 1000) /
-                              device->spec.freq);
+                    SDL_Delay(delay);
                 }
             }
 
@@ -467,6 +477,11 @@ SDL_RunAudio(void *devicep)
 
         /* Loop, filling the audio buffers */
         while (device->enabled) {
+
+            if (device->paused) {
+                SDL_Delay(delay);
+                continue;
+            }
 
             /* Fill the current buffer with sound */
             if (device->convert.needed) {
@@ -482,11 +497,9 @@ SDL_RunAudio(void *devicep)
                 }
             }
 
-            if (!device->paused) {
-                SDL_mutexP(device->mixer_lock);
-                (*fill) (udata, stream, stream_len);
-                SDL_mutexV(device->mixer_lock);
-            }
+            SDL_mutexP(device->mixer_lock);
+            (*fill) (udata, stream, stream_len);
+            SDL_mutexV(device->mixer_lock);
 
             /* Convert the audio if necessary */
             if (device->convert.needed) {
@@ -500,12 +513,12 @@ SDL_RunAudio(void *devicep)
             }
 
             /* Ready current buffer for play and change current buffer */
-            if (stream != device->fake_stream && !device->paused) {
+            if (stream != device->fake_stream) {
                 current_audio.impl.PlayDevice(device);
                 /* Wait for an audio buffer to become available */
                 current_audio.impl.WaitDevice(device);
             } else {
-                SDL_Delay((device->spec.samples * 1000) / device->spec.freq);
+                SDL_Delay(delay);
             }
         }
     }
