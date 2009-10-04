@@ -499,12 +499,20 @@ DirectFB_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     DirectFB_TextureData *data;
     DFBResult ret;
     DFBSurfaceDescription dsc;
+    DFBSurfacePixelFormat pixelformat;
 
     SDL_DFB_CALLOC(data, 1, sizeof(*data));
     texture->driverdata = data;
 
+    /* find the right pixelformat */
+    pixelformat = SDLToDFBPixelFormat(texture->format);
+    if (pixelformat == DSPF_UNKNOWN) {
+        SDL_SetError("Unknown pixel format %d\n", data->format);
+        goto error;
+    }
+
     data->format = texture->format;
-    data->pitch = (texture->w * SDL_BYTESPERPIXEL(data->format));
+    data->pitch = texture->w * DFB_BYTES_PER_PIXEL(pixelformat);
 
     if (DirectFB_AcquireVidLayer(renderer, texture) != 0) {
         /* fill surface description */
@@ -525,14 +533,7 @@ DirectFB_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
             dsc.caps |= DSCAPS_VIDEOONLY;
 #endif
 
-        /* find the right pixelformat */
-
-        dsc.pixelformat = SDLToDFBPixelFormat(data->format);
-        if (dsc.pixelformat == DSPF_UNKNOWN) {
-            SDL_SetError("Unknown pixel format %d\n", data->format);
-            goto error;
-        }
-
+        dsc.pixelformat = pixelformat;
         data->pixels = NULL;
 
         /* Create the surface */
@@ -550,8 +551,13 @@ DirectFB_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 #endif
 
     if (texture->access == SDL_TEXTUREACCESS_STREAMING) {
-        data->pitch = texture->w * SDL_BYTESPERPIXEL(texture->format);
-        SDL_DFB_CALLOC(data->pixels, 1, texture->h * data->pitch);
+        /* 3 plane YUVs return 1 bpp, but we need more space for other planes */
+        if(texture->format == SDL_PIXELFORMAT_YV12 ||
+           texture->format == SDL_PIXELFORMAT_IYUV) {
+            SDL_DFB_CALLOC(data->pixels, 1, (texture->h * data->pitch * 3 + texture->h * data->pitch * 3 % 2) / 2);
+        } else {
+            SDL_DFB_CALLOC(data->pixels, 1, texture->h * data->pitch);
+        }
     }
 
     return 0;
@@ -726,6 +732,24 @@ DirectFB_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
         src += pitch;
         dst += dpitch;
     }
+    /* copy other planes for 3 plane formats */
+    if (texture->format == SDL_PIXELFORMAT_YV12 ||
+        texture->format == SDL_PIXELFORMAT_IYUV) {
+        src = (Uint8 *) pixels + texture->h * pitch;
+        dst = (Uint8 *) dpixels + texture->h * dpitch + rect->y * dpitch / 4 + rect->x * bpp / 2;
+        for (row = 0; row < rect->h / 2; ++row) {
+            SDL_memcpy(dst, src, length / 2);
+            src += pitch / 2;
+            dst += dpitch / 2;
+        }
+        src = (Uint8 *) pixels + texture->h * pitch + texture->h * pitch / 4;
+        dst = (Uint8 *) dpixels + texture->h * dpitch + texture->h * dpitch / 4 + rect->y * dpitch / 4 + rect->x * bpp / 2;
+        for (row = 0; row < rect->h / 2; ++row) {
+            SDL_memcpy(dst, src, length / 2);
+            src += pitch / 2;
+            dst += dpitch / 2;
+        }
+    }
     SDL_DFB_CHECKERR(data->surface->Unlock(data->surface));
     return 0;
   error:
@@ -759,7 +783,7 @@ DirectFB_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
         *pixels =
             (void *) ((Uint8 *) texturedata->pixels +
                       rect->y * texturedata->pitch +
-                      rect->x * SDL_BYTESPERPIXEL(texture->format));
+                      rect->x * DFB_BYTES_PER_PIXEL(SDLToDFBPixelFormat(texture->format)));
         *pitch = texturedata->pitch;
     }
     return 0;
@@ -916,7 +940,7 @@ DirectFB_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         if (texturedata->dirty.list) {
             SDL_DirtyRect *dirty;
             void *pixels;
-            int bpp = SDL_BYTESPERPIXEL(texture->format);
+            int bpp = DFB_BYTES_PER_PIXEL(SDLToDFBPixelFormat(texture->format));
             int pitch = texturedata->pitch;
 
             for (dirty = texturedata->dirty.list; dirty; dirty = dirty->next) {
