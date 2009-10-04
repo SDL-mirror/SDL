@@ -1008,12 +1008,8 @@ int X11_EnterFullScreen(_THIS)
     screen_w = DisplayWidth(SDL_Display, SDL_Screen);
     screen_h = DisplayHeight(SDL_Display, SDL_Screen);
     get_real_resolution(this, &real_w, &real_h);
-    if ( window_w > real_w ) {
-        real_w = MAX(real_w, screen_w);
-    }
-    if ( window_h > real_h ) {
-        real_h = MAX(real_h, screen_h);
-    }
+    real_w = MAX(window_w, MAX(real_w, screen_w));
+    real_h = MAX(window_h, MAX(real_h, screen_h));
     XMoveResizeWindow(SDL_Display, FSwindow,
                       x, y, real_w, real_h);
     XMapRaised(SDL_Display, FSwindow);
