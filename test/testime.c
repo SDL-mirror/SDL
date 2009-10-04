@@ -1,5 +1,5 @@
 /* A simple program to test the Input Method support in the SDL library (1.3+) */
- 
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -8,7 +8,7 @@
 #ifdef HAVE_SDL_TTF
 #include "SDL_ttf.h"
 #endif
- 
+
 #define DEFAULT_PTSIZE  30
 #define DEFAULT_FONT    "/System/Library/Fonts/华文细黑.ttf"
 #define MAX_TEXT_LENGTH 256
@@ -210,12 +210,12 @@ HotKey_ToggleFullScreen(void)
 
 int main(int argc, char *argv[])
 {
+    SDL_Event event;
+    int done = 0;
+
     InitVideo(argc, argv);
     InitInput();
     Redraw();
-
-    SDL_Event event;
-    int done = 0;
 
     while (! done && SDL_WaitEvent(&event))
     {

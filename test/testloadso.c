@@ -1,9 +1,10 @@
 
-/* Test program to test dynamic loading with the loadso subsystem. 
+/* Test program to test dynamic loading with the loadso subsystem.
 */
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "SDL.h"
 

@@ -14,6 +14,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 /*
  * includes
  */
+#include <stdlib.h>
 #include "SDL.h"
 #include "SDL_haptic.h"
 

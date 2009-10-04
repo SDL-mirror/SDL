@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "SDL.h"
 
 /* Make sure we have good macros for printing 32 and 64 bit values */
@@ -17,7 +18,7 @@
   after calling each function.
 */
 
-char * 
+char *
 tf(SDL_bool tf)
 {
    static char *t = "true";
@@ -30,7 +31,7 @@ tf(SDL_bool tf)
 
    return f;
 }
-  
+
 int
 main(int argc, char *argv[])
 {

@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "SDL.h"
 
 static void
