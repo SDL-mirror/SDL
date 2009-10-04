@@ -33,7 +33,7 @@ libm_hidden_proto(copysign)
 #endif
        two54 = 1.80143985094819840000e+16,      /* 0x43500000, 0x00000000 */
          twom54 = 5.55111512312578270212e-17,   /* 0x3C900000, 0x00000000 */
-         huge = 1.0e+300, tiny = 1.0e-300;
+         huge_val = 1.0e+300, tiny = 1.0e-300;
 
 libm_hidden_proto(scalbn)
 #ifdef __STDC__
@@ -60,14 +60,14 @@ libm_hidden_proto(scalbn)
         return x + x;           /* NaN or Inf */
     k = k + n;
     if (k > 0x7fe)
-        return huge * copysign(huge, x);        /* overflow  */
+        return huge_val * copysign(huge_val, x);        /* overflow  */
     if (k > 0) {                /* normal result */
         SET_HIGH_WORD(x, (hx & 0x800fffff) | (k << 20));
         return x;
     }
     if (k <= -54) {
         if (n > 50000)          /* in case integer overflow in n+k */
-            return huge * copysign(huge, x);    /*overflow */
+            return huge_val * copysign(huge_val, x);    /*overflow */
         else
             return tiny * copysign(tiny, x);    /*underflow */
     }

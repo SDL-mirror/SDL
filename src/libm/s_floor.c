@@ -28,9 +28,9 @@ static const char rcsid[] =
 #include "math_private.h"
 
 #ifdef __STDC__
-static const double huge = 1.0e300;
+static const double huge_val = 1.0e300;
 #else
-static double huge = 1.0e300;
+static double huge_val = 1.0e300;
 #endif
 
 libm_hidden_proto(floor)
@@ -47,7 +47,7 @@ libm_hidden_proto(floor)
     j0 = ((i0 >> 20) & 0x7ff) - 0x3ff;
     if (j0 < 20) {
         if (j0 < 0) {           /* raise inexact if x != 0 */
-            if (huge + x > 0.0) {       /* return 0*sign(x) if |x|<1 */
+            if (huge_val + x > 0.0) {       /* return 0*sign(x) if |x|<1 */
                 if (i0 >= 0) {
                     i0 = i1 = 0;
                 } else if (((i0 & 0x7fffffff) | i1) != 0) {
@@ -59,7 +59,7 @@ libm_hidden_proto(floor)
             i = (0x000fffff) >> j0;
             if (((i0 & i) | i1) == 0)
                 return x;       /* x is integral */
-            if (huge + x > 0.0) {       /* raise inexact flag */
+            if (huge_val + x > 0.0) {       /* raise inexact flag */
                 if (i0 < 0)
                     i0 += (0x00100000) >> j0;
                 i0 &= (~i);
@@ -75,7 +75,7 @@ libm_hidden_proto(floor)
         i = ((u_int32_t) (0xffffffff)) >> (j0 - 20);
         if ((i1 & i) == 0)
             return x;           /* x is integral */
-        if (huge + x > 0.0) {   /* raise inexact flag */
+        if (huge_val + x > 0.0) {   /* raise inexact flag */
             if (i0 < 0) {
                 if (j0 == 20)
                     i0 += 1;

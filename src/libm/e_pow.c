@@ -76,7 +76,7 @@ libm_hidden_proto(scalbn)
      0.0, 1.35003920212974897128e-08,}, /* 0x3E4CFDEB, 0x43CFD006 */
 
          zero = 0.0, one = 1.0, two = 2.0, two53 = 9007199254740992.0,  /* 0x43400000, 0x00000000 */
-         huge = 1.0e300, tiny = 1.0e-300,
+         huge_val = 1.0e300, tiny = 1.0e-300,
          /* poly coefs for (3/2)*(log(x)-2s-2/3*s**3 */
          L1 = 5.99999999999994648725e-01,       /* 0x3FE33333, 0x33333303 */
          L2 = 4.28571428578550184252e-01,       /* 0x3FDB6DB6, 0xDB6FABFF */
@@ -199,15 +199,15 @@ libm_hidden_proto(scalbn)
          if (iy > 0x41e00000) { /* if |y| > 2**31 */
              if (iy > 0x43f00000) {     /* if |y| > 2**64, must o/uflow */
                  if (ix <= 0x3fefffff)
-                     return (hy < 0) ? huge * huge : tiny * tiny;
+                     return (hy < 0) ? huge_val * huge_val : tiny * tiny;
                  if (ix >= 0x3ff00000)
-                     return (hy > 0) ? huge * huge : tiny * tiny;
+                     return (hy > 0) ? huge_val * huge_val : tiny * tiny;
              }
              /* over/underflow if x is not close to one */
              if (ix < 0x3fefffff)
-                 return (hy < 0) ? huge * huge : tiny * tiny;
+                 return (hy < 0) ? huge_val * huge_val : tiny * tiny;
              if (ix > 0x3ff00000)
-                 return (hy > 0) ? huge * huge : tiny * tiny;
+                 return (hy > 0) ? huge_val * huge_val : tiny * tiny;
              /* now |1-x| is tiny <= 2**-20, suffice to compute
                 log(x) by x-x^2/2+x^3/3-x^4/4 */
              t = x - 1;         /* t has 20 trailing zeros */
@@ -293,10 +293,10 @@ libm_hidden_proto(scalbn)
          EXTRACT_WORDS(j, i, z);
          if (j >= 0x40900000) { /* z >= 1024 */
              if (((j - 0x40900000) | i) != 0)   /* if z > 1024 */
-                 return s * huge * huge;        /* overflow */
+                 return s * huge_val * huge_val;        /* overflow */
              else {
                  if (p_l + ovt > z - p_h)
-                     return s * huge * huge;    /* overflow */
+                     return s * huge_val * huge_val;    /* overflow */
              }
          } else if ((j & 0x7fffffff) >= 0x4090cc00) {   /* z <= -1075 */
              if (((j - 0xc090cc00) | i) != 0)   /* z < -1075 */
