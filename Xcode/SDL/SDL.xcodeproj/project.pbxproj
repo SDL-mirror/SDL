@@ -117,6 +117,8 @@
 		007317AD0858DECD00B2BC32 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0073179F0858DECD00B2BC32 /* IOKit.framework */; };
 		007317AE0858DECD00B2BC32 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 007317A00858DECD00B2BC32 /* OpenGL.framework */; };
 		007317C30858E15000B2BC32 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 007317C10858E15000B2BC32 /* Carbon.framework */; };
+		00A6EBDA1078D569001EEA06 /* SDL_revision.h in Headers */ = {isa = PBXBuildFile; fileRef = 00A6EBD91078D569001EEA06 /* SDL_revision.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		00A6EBDB1078D569001EEA06 /* SDL_revision.h in Headers */ = {isa = PBXBuildFile; fileRef = 00A6EBD91078D569001EEA06 /* SDL_revision.h */; };
 		00CFA682106B44CE00758660 /* SDL_atomic.h in Headers */ = {isa = PBXBuildFile; fileRef = 00CFA67A106B44CE00758660 /* SDL_atomic.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		00CFA683106B44CE00758660 /* SDL_compat.h in Headers */ = {isa = PBXBuildFile; fileRef = 00CFA67B106B44CE00758660 /* SDL_compat.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		00CFA684106B44CE00758660 /* SDL_haptic.h in Headers */ = {isa = PBXBuildFile; fileRef = 00CFA67C106B44CE00758660 /* SDL_haptic.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -522,6 +524,7 @@
 		007317A00858DECD00B2BC32 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
 		007317C10858E15000B2BC32 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		00794D3F09D0C461003FC8A1 /* License.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = License.rtf; sourceTree = "<group>"; };
+		00A6EBD91078D569001EEA06 /* SDL_revision.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_revision.h; path = ../../include/SDL_revision.h; sourceTree = SOURCE_ROOT; };
 		00AE6E1E08B958CC00255E2F /* ReadMeDevLite.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = ReadMeDevLite.txt; sourceTree = "<group>"; };
 		00B7E61F097F2D9E00826121 /* SDL_mixer_MMX.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = SDL_mixer_MMX.c; sourceTree = "<group>"; };
 		00B7E620097F2D9E00826121 /* SDL_mixer_MMX.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SDL_mixer_MMX.h; sourceTree = "<group>"; };
@@ -1208,6 +1211,7 @@
 				00CFA67E106B44CE00758660 /* SDL_power.h */,
 				0C5AF5F701191D2B7F000001 /* SDL_quit.h */,
 				00CFA67F106B44CE00758660 /* SDL_rect.h */,
+				00A6EBD91078D569001EEA06 /* SDL_revision.h */,
 				0C5AF5F801191D2B7F000001 /* SDL_rwops.h */,
 				00CFA680106B44CE00758660 /* SDL_scancode.h */,
 				00162D3909BD1FA90037C8D0 /* SDL_stdinc.h */,
@@ -1493,6 +1497,7 @@
 				00CFA83D106B49B600758660 /* SDL_RLEaccel_c.h in Headers */,
 				00CFA841106B49B600758660 /* SDL_sysvideo.h in Headers */,
 				00CFA844106B49B600758660 /* SDL_yuv_sw_c.h in Headers */,
+				00A6EBDA1078D569001EEA06 /* SDL_revision.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1590,6 +1595,7 @@
 				00CFA86B106B49B600758660 /* SDL_RLEaccel_c.h in Headers */,
 				00CFA86F106B49B600758660 /* SDL_sysvideo.h in Headers */,
 				00CFA872106B49B600758660 /* SDL_yuv_sw_c.h in Headers */,
+				00A6EBDB1078D569001EEA06 /* SDL_revision.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1685,11 +1691,11 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				002D2A9E106C18E700BF972E /* Generate Header Files */,
 				BECDF5FE0761BA81005FE872 /* Framework */,
 				BECDF66D0761BA81005FE872 /* Static Library */,
 				BECDF6BB0761BA81005FE872 /* Standard DMG */,
 				BECDF6C00761BA81005FE872 /* Developer Extras Package */,
+				002D2A9E106C18E700BF972E /* Generate Header Files */,
 				0083103F1072EA5700A531F1 /* Generate Doxygen DocSet */,
 			);
 		};
@@ -2177,6 +2183,7 @@
 					"SDL_VIDEO_DRIVER_X11_XRANDR=1",
 					"SDL_VIDEO_DRIVER_X11_XV=1",
 				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				HEADER_SEARCH_PATHS = /usr/X11R6/include;
 				OTHER_CFLAGS = "$(OTHER_CFLAGS_$(CURRENT_ARCH))";
 				PRODUCT_NAME = SDL;
@@ -2201,6 +2208,7 @@
 					"SDL_VIDEO_DRIVER_X11_XRANDR=1",
 					"SDL_VIDEO_DRIVER_X11_XV=1",
 				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				HEADER_SEARCH_PATHS = /usr/X11R6/include;
 				OTHER_CFLAGS = "$(OTHER_CFLAGS_$(CURRENT_ARCH))";
 				PRODUCT_NAME = SDL;
@@ -2225,6 +2233,7 @@
 					"SDL_VIDEO_DRIVER_X11_XRANDR=1",
 					"SDL_VIDEO_DRIVER_X11_XV=1",
 				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				HEADER_SEARCH_PATHS = /usr/X11R6/include;
 				OTHER_CFLAGS = "$(OTHER_CFLAGS_$(CURRENT_ARCH))";
 				PRODUCT_NAME = SDL;
@@ -2455,6 +2464,7 @@
 					"SDL_VIDEO_DRIVER_X11_XRANDR=1",
 					"SDL_VIDEO_DRIVER_X11_XV=1",
 				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				HEADER_SEARCH_PATHS = /usr/X11R6/include;
 				OTHER_CFLAGS = "$(OTHER_CFLAGS_$(CURRENT_ARCH))";
 				PRODUCT_NAME = SDL;
@@ -2539,6 +2549,7 @@
 					"SDL_VIDEO_DRIVER_X11_XRANDR=1",
 					"SDL_VIDEO_DRIVER_X11_XV=1",
 				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				HEADER_SEARCH_PATHS = /usr/X11R6/include;
 				OTHER_CFLAGS = "$(OTHER_CFLAGS_$(CURRENT_ARCH))";
 				PRODUCT_NAME = SDL;
