@@ -3015,9 +3015,9 @@ func_to_host_path ()
             ;;
         esac
         if test -z "$func_to_host_path_result" ; then
-          func_error "Could not determine host path corresponding to"
-          func_error "  '$1'"
-          func_error "Continuing, but uninstalled executables may not work."
+          #func_error "Could not determine host path corresponding to"
+          #func_error "  '$1'"
+          #func_error "Continuing, but uninstalled executables may not work."
           # Fallback:
           func_to_host_path_result="$1"
         fi
@@ -3359,6 +3359,7 @@ static const size_t env_append_opt_len  = LTWRAPPER_OPTION_PREFIX_LENGTH + 10;
 static const char *env_append_opt       = LTWRAPPER_OPTION_PREFIX "env-append";
   /* argument is putenv-style "foo=bar", new value of foo is ${foo}bar */
 
+#undef main
 int
 main (int argc, char *argv[])
 {
