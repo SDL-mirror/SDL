@@ -25,16 +25,97 @@ SDL 1.2.14 is a minor bug fix release.
 <P>
 	Fixed flicker when resizing the SDL window
 </P>
+<P>
+	Fixed crash in SDL_SetGammaRamp()
+</P>
+<P>
+	Fixed freeze in SDL_memset() with 0 length when assembly code is disabled.
+</P>
+<P>
+	Added SDL_NO_LOCK_KEYS environment variable to enable normal up/down events for Caps-Lock and Num-Lock keys.
+</P>
+<P>
+	Fixed audio quality problem when converting between 22050 Hz and 44100 Hz.
+</P>
+<P>
+	Fixed a threading crash when a few threads are rapidly created and complete.
+</P>
+<P>
+	Fixed crash loading BMP files saved with the scanlines inverted.
+</P>
+<P>
+	Fixed mouse coordinate clamping if SDL_SetVideoMode() isn't called in response to SDL_VIDEORESIZE event.
+</P>
+<P>
+	Added doxygen documentation for the SDL API headers.
+</P>
 </BLOCKQUOTE>
 
 <H3> Unix Notes </H3>
 
 <BLOCKQUOTE>
 <P>
+	Fixed potential memory corruption due to assembly bug with SDL_revcpy()
+</P>
+<P>
+	Fixed crashes trying to detect SSE features on x86_64 architecture.
+</P>
+<P>
+	Fixed assembly for GCC optimized 50% alpha blending blits.
+</P>
+<P>
 	Added configure option --enable-screensaver, to allow enabling the screensaver by default.
 </P>
 <P>
 	Use XResetScreenSaver() instead of disabling screensaver entirely.
+</P>
+<P>
+	Removed the maximum window size limitation on X11.
+</P>
+<P>
+	Fixed setting the X11 window input hint.
+</P>
+<P>
+	Fixed distorted X11 window icon for some visuals.
+</P>
+<P>
+	Fixed detecting X11 libraries for dynamic loading on 64-bit Linux.
+</P>
+<P>
+	SDL_GL_GetAttribute(SDL_GL_SWAP_CONTROL) returns the correct value with GLX_SGI_swap_control.
+</P>
+<P>
+	The SDL_VIDEO_FULLSCREEN_HEAD environment variable can be set to 0 to place fullscreen SDL windows on the first Xinerama screen.
+</P>
+<P>
+	Added the SDL_VIDEO_FBCON_ROTATION environment variable to control output orientation on the framebuffer console.
+	<BR>
+	Valid values are:
+	<UL>
+	<LI>not set   - Not rotating, no shadow.
+	<LI>"NONE"    - Not rotating, but still using shadow.
+	<LI>"CW"      - Rotating screen clockwise.
+	<LI>"UD"      - Rotating screen upside down.
+	<LI>"CCW"     - Rotating screen counter clockwise.
+	</UL>
+</P>
+<P>
+	Fixed DirectFB detection on some Linux distributions.
+</P>
+<P>
+	Added code to use the PS3 SPE processors for YUV conversion on Linux.
+</P>
+<P>
+	Improved support for PulseAudio
+</P>
+<P>
+	The Network Audio System support is now dynamically loaded at runtime.
+</P>
+<P>
+	Fixed crash with the MP-8866 Dual USB Joypad on newer Linux kernels.
+</P>
+<P>
+	Fixed crash in SDL_Quit() when a joystick has been unplugged.
 </P>
 </BLOCKQUOTE>
 
@@ -42,6 +123,22 @@ SDL 1.2.14 is a minor bug fix release.
 
 <BLOCKQUOTE>
 <P>
+	Verified 100% compatibility with Windows 7.
+</P>
+<P>
+	Prevent loss of OpenGL context when setting the video mode in response to a window resize event.
+</P>
+<P>
+	Improved mouse input responsiveness for first-person-shooter games.
+</P>
+<P>
+	The SDL_STDIO_REDIRECT environment variable can be used to override whether SDL redirects stdio to stdout.txt and stderr.txt.
+</P>
+<P>
+	Fixed video initialization with SDL_WINDOWID on Windows XP
+</P>
+<P>
+	Fixed dynamic object loading on Windows CE.
 </P>
 </BLOCKQUOTE>
 
@@ -49,6 +146,18 @@ SDL 1.2.14 is a minor bug fix release.
 
 <BLOCKQUOTE>
 <P>
+	SDL now builds on Mac OS X 10.6 (Snow Leopard).
+	<BR>
+	Eric Wing posted a good rundown on the numerous changes here: <A HREF="http://playcontrol.net/ewing/jibberjabber/big_behind-the-scenes_chang.html">http://playcontrol.net/ewing/jibberjabber/big_behind-the-scenes_chang.html</A>
+</P>
+<P>
+	The X11 video driver is built by default.
+</P>
+<P>
+	Fixed SDL_VIDEO_WINDOW_POS environment variable for Quartz target.
+</P>
+<P>
+	Fixed setting the starting working directory in release builds.
 </P>
 </BLOCKQUOTE>
 
