@@ -1323,7 +1323,6 @@ AC_HELP_STRING([--enable-video-directfb], [use DirectFB video driver [[default=n
         AC_PATH_PROG(DIRECTFBCONFIG, directfb-config, no)
         if test x$DIRECTFBCONFIG = xno; then
             AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
-            AC_MSG_CHECKING(for DirectFB $DIRECTFB_REQUIRED_VERSION support)
             if test x$PKG_CONFIG != xno; then
                 if $PKG_CONFIG --atleast-pkgconfig-version 0.7 && $PKG_CONFIG --atleast-version $DIRECTFB_REQUIRED_VERSION directfb; then
                     DIRECTFB_CFLAGS=`$PKG_CONFIG --cflags directfb`
@@ -1332,9 +1331,7 @@ AC_HELP_STRING([--enable-video-directfb], [use DirectFB video driver [[default=n
                     video_directfb=yes
                 fi
             fi
-            AC_MSG_RESULT($video_directfb)
         else
-            AC_MSG_CHECKING(for DirectFB $DIRECTFB_REQUIRED_VERSION support)
             set -- `echo $DIRECTFB_REQUIRED_VERSION | sed 's/\./ /g'`
             NEED_VERSION=`expr $1 \* 10000 + $2 \* 100 + $3`
             set -- `directfb-config --version | sed 's/\./ /g'`
@@ -1345,8 +1342,17 @@ AC_HELP_STRING([--enable-video-directfb], [use DirectFB video driver [[default=n
                 DIRECTFB_PREFIX=`$DIRECTFBCONFIG --prefix`
                 video_directfb=yes
             fi
-            AC_MSG_RESULT($video_directfb)
         fi
+        if test x$video_directfb = xyes; then
+            # SuSE 11.1 installs directfb-config without directfb-devel
+            save_CFLAGS="$CFLAGS"
+            CFLAGS="$CFLAGS $DIRECTFB_CFLAGS"
+            AC_CHECK_HEADER(directfb.h, have_directfb_hdr=yes, have_directfb_hdr=no)
+            CFLAGS="$save_CFLAGS"
+            video_directfb=$have_directfb_hdr
+        fi
+        AC_MSG_CHECKING(for DirectFB $DIRECTFB_REQUIRED_VERSION support)
+        AC_MSG_RESULT($video_directfb)
 
         if test x$video_directfb = xyes; then
             AC_ARG_ENABLE(directfb-shared,
