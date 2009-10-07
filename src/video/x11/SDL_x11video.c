@@ -121,7 +121,9 @@ static SDL_VideoDevice *X11_CreateDevice(int devindex)
 		SDL_memset(device->hidden, 0, (sizeof *device->hidden));
 		SDL_memset(device->gl_data, 0, (sizeof *device->gl_data));
 
+#if SDL_VIDEO_OPENGL_GLX
 		device->gl_data->sgi_swap_interval = 1;
+#endif
 
 		/* Set the driver flags */
 		device->handles_any_size = 1;
