@@ -120,6 +120,7 @@ uninstall-lib:
 	rm -f $(DESTDIR)$(libdir)/$(SDLMAIN_TARGET)
 uninstall-data:
 	rm -f $(DESTDIR)$(datadir)/aclocal/sdl.m4
+	rm -f $(DESTDIR)$(libdir)/pkgconfig/sdl.pc
 
 clean:
 	rm -rf $(objects)
