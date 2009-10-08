@@ -123,6 +123,7 @@ uninstall-lib:
 	rm -f $(DESTDIR)$(libdir)/$(SDLMAIN_TARGET)
 uninstall-data:
 	rm -f $(DESTDIR)$(datadir)/aclocal/sdl.m4
+	rm -f $(DESTDIR)$(libdir)/pkgconfig/sdl.pc
 uninstall-man:
 	for src in $(srcdir)/docs/man3/*.3; do \
 	    file=`echo $$src | sed -e 's|^.*/||'`; \
