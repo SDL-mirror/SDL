@@ -160,9 +160,9 @@ static __inline__ Uint64 SDL_Swap64(Uint64 x)
 	Uint32 hi, lo;
 
 	/* Separate into high and low 32-bit values and swap them */
-	lo = (Uint32)(x&0xFFFFFFFF);
+	lo = SDL_static_cast(Uint32, x & 0xFFFFFFFF);
 	x >>= 32;
-	hi = (Uint32)(x&0xFFFFFFFF);
+	hi = SDL_static_cast(Uint32, x & 0xFFFFFFFF);
 	x = SDL_Swap32(lo);
 	x <<= 32;
 	x |= SDL_Swap32(hi);
