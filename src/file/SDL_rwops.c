@@ -102,14 +102,74 @@ static int SDLCALL win32_file_open(SDL_RWops *context, const char *filename, con
 		SDL_stack_free(filenameW);
 	}
 #else
-	/* Do not open a dialog box if failure */
-	old_error_mode = SetErrorMode(SEM_NOOPENFILEERRORBOX|SEM_FAILCRITICALERRORS);
+	{
 
-	h = CreateFile(filename, (w_right|r_right), (w_right)? 0 : FILE_SHARE_READ, 
-		           NULL, (must_exist|truncate|a_mode), FILE_ATTRIBUTE_NORMAL,NULL);
+	/* handle Unicode filenames.  We do some tapdancing here to make sure this
+	   works on Win9x, which doesn't support anything but 1-byte codepages. */
+	const size_t size = SDL_strlen(filename)+1;
+	static int unicode_support = -1;
 
-	/* restore old behaviour */
-	SetErrorMode(old_error_mode);
+	if (unicode_support == -1) {
+		OSVERSIONINFO osVerInfo;     /* Information about the OS */
+		osVerInfo.dwOSVersionInfoSize = sizeof(osVerInfo);
+		if (!GetVersionEx(&osVerInfo)) {
+			unicode_support = 0;
+		} else if (osVerInfo.dwPlatformId != VER_PLATFORM_WIN32_WINDOWS) {
+			unicode_support = 1;  /* Not Win95/98/ME. */
+		} else {
+			unicode_support = 0;
+		}
+	}
+
+	if (unicode_support) {  /* everything but Win95/98/ME. */
+		wchar_t *filenameW = SDL_stack_alloc(wchar_t, size);
+		if ( MultiByteToWideChar(CP_UTF8, 0, filename, -1, filenameW, size) == 0 ) {
+			SDL_stack_free(filenameW);
+			SDL_free(context->hidden.win32io.buffer.data);
+			context->hidden.win32io.buffer.data = NULL;
+			SDL_SetError("Unable to convert filename to Unicode");
+			return -1;
+		}
+
+		/* Do not open a dialog box if failure */
+		old_error_mode = SetErrorMode(SEM_NOOPENFILEERRORBOX|SEM_FAILCRITICALERRORS);
+		h = CreateFileW(filenameW, (w_right|r_right), (w_right)? 0 : FILE_SHARE_READ,
+					   NULL, (must_exist|truncate|a_mode), FILE_ATTRIBUTE_NORMAL,NULL);
+		/* restore old behaviour */
+		SetErrorMode(old_error_mode);
+
+		SDL_stack_free(filenameW);
+	} else {
+		/* CP_UTF8 might not be supported (Win95), so use SDL_iconv to get wchars. */
+		/* Use UCS2: no UTF-16 support here. Try again in SDL 1.3.  :) */
+		char *utf16 = SDL_iconv_string("UCS2", "UTF8", filename, SDL_strlen(filename) + 1);
+		char *filenameA = SDL_stack_alloc(char, size * 6);  /* 6, just in case. */
+		BOOL bDefCharUsed = FALSE;
+
+		/* Dither down to a codepage and hope for the best. */
+		if (!utf16 ||
+			!WideCharToMultiByte(CP_ACP, 0, (LPCWSTR)utf16, -1, filenameA, size*6, 0, &bDefCharUsed) ||
+			bDefCharUsed) {
+			SDL_stack_free(filenameA);
+			SDL_free(utf16);
+			SDL_free(context->hidden.win32io.buffer.data);
+			context->hidden.win32io.buffer.data = NULL;
+			SDL_SetError("Unable to convert filename to Unicode");
+			return -1;
+		}
+
+		/* Do not open a dialog box if failure */
+		old_error_mode = SetErrorMode(SEM_NOOPENFILEERRORBOX|SEM_FAILCRITICALERRORS);
+		h = CreateFile(filenameA, (w_right|r_right), (w_right)? 0 : FILE_SHARE_READ,
+		               NULL, (must_exist|truncate|a_mode), FILE_ATTRIBUTE_NORMAL,NULL);
+		/* restore old behaviour */
+		SetErrorMode(old_error_mode);
+
+		SDL_stack_free(filenameA);
+		SDL_free(utf16);
+	}
+
+	}
 #endif /* _WIN32_WCE */
 
 	if (h==INVALID_HANDLE_VALUE) {
