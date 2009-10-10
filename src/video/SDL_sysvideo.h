@@ -407,6 +407,9 @@ extern VideoBootStrap OS2FSLib_bootstrap;
 #if SDL_VIDEO_DRIVER_AALIB
 extern VideoBootStrap AALIB_bootstrap;
 #endif
+#if SDL_VIDEO_DRIVER_CACA
+extern VideoBootStrap CACA_bootstrap;
+#endif
 #if SDL_VIDEO_DRIVER_DUMMY
 extern VideoBootStrap DUMMY_bootstrap;
 #endif

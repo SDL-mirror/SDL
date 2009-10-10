@@ -254,6 +254,7 @@
 /* Enable various video drivers */
 #undef SDL_VIDEO_DRIVER_AALIB
 #undef SDL_VIDEO_DRIVER_BWINDOW
+#undef SDL_VIDEO_DRIVER_CACA
 #undef SDL_VIDEO_DRIVER_DC
 #undef SDL_VIDEO_DRIVER_DDRAW
 #undef SDL_VIDEO_DRIVER_DGA

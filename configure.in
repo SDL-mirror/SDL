@@ -1518,6 +1518,38 @@ AC_HELP_STRING([--enable-video-aalib], [use AAlib video driver [[default=no]]]),
     fi
 }
 
+dnl Find the libcaca includes
+CheckCaca()
+{
+    AC_ARG_ENABLE(video-caca,
+AC_HELP_STRING([--enable-video-caca], [use libcaca video driver [[default=no]]]),
+                  , enable_video_caca=no)
+    if test x$enable_video = xyes -a x$enable_video_caca = xyes; then
+        video_caca=no
+        AC_PATH_PROG(CACACONFIG, caca-config, no)
+        if test x$CACACONFIG != xno; then
+            AC_MSG_CHECKING(for libcaca support)
+            CACA_CFLAGS=`$CACACONFIG --cflags`
+            CACA_LDFLAGS=`$CACACONFIG --libs`
+            save_CFLAGS="$CFLAGS"
+            AC_TRY_COMPILE([
+             #include <caca.h>
+            ],[
+            ],[
+             video_caca=yes
+            ])
+            CFLAGS="$save_CFLAGS"
+            AC_MSG_RESULT($video_caca)
+            if test x$video_caca = xyes; then
+                AC_DEFINE(SDL_VIDEO_DRIVER_CACA)
+                EXTRA_CFLAGS="$EXTRA_CFLAGS $CACA_CFLAGS"
+                EXTRA_LDFLAGS="$EXTRA_LDFLAGS $CACA_LDFLAGS"
+                SOURCES="$SOURCES $srcdir/src/video/caca/*.c"
+            fi
+        fi
+    fi
+}
+
 dnl Set up the QTopia video driver if enabled
 CheckQtopia()
 {
@@ -2347,6 +2379,7 @@ case "$host" in
         CheckVGL
         CheckWscons
         CheckAAlib
+        CheckCaca
         CheckQtopia
         CheckPicoGUI
         CheckOpenGLX11
