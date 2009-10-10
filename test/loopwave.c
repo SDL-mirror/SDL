@@ -64,14 +64,9 @@ poked(int sig)
     done = 1;
 }
 
-
-#define NAMESIZE 32
-
 int
 main(int argc, char *argv[])
 {
-    char name[NAMESIZE];
-
     /* Load the SDL library */
     if (SDL_Init(SDL_INIT_AUDIO) < 0) {
         fprintf(stderr, "Couldn't initialize SDL: %s\n", SDL_GetError());
@@ -110,7 +105,7 @@ main(int argc, char *argv[])
     /* Right now we're using the 1.2 SDL_OpenAudio(), but if we move to the
        1.3 device enumeration version, we shouldn't hardcore device id #1 for
        SDL_GetAudioDeviceName(), below. */
-    printf("Using audio driver: %s\n", SDL_AudioDriverName(name, NAMESIZE));
+    printf("Using audio driver: %s\n", SDL_GetCurrentAudioDriver());
     printf("Using audio device: %s\n", SDL_GetAudioDeviceName(1, 0));
 
     /* Let the audio run */
