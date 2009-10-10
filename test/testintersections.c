@@ -349,6 +349,8 @@ main(int argc, char *argv[])
         }
     }
 
+    CommonQuit(state);
+
     /* Print out some timing information */
     now = SDL_GetTicks();
     if (now > then) {
