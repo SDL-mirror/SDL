@@ -111,12 +111,13 @@ VideoBootStrap QZ_bootstrap = {
 
 
 /* Bootstrap functions */
-static int QZ_Available () {
+static int QZ_Available ()
+{
     return 1;
 }
 
-static SDL_VideoDevice* QZ_CreateDevice (int device_index) {
-
+static SDL_VideoDevice* QZ_CreateDevice (int device_index)
+{
 #pragma unused (device_index)
 
     SDL_VideoDevice *device;
@@ -188,19 +189,20 @@ static SDL_VideoDevice* QZ_CreateDevice (int device_index) {
     return device;
 }
 
-static void QZ_DeleteDevice (SDL_VideoDevice *device) {
-
+static void QZ_DeleteDevice (SDL_VideoDevice *device)
+{
     SDL_free (device->hidden);
     SDL_free (device);
 }
 
-static int QZ_VideoInit (_THIS, SDL_PixelFormat *video_format) {
-
+static int QZ_VideoInit (_THIS, SDL_PixelFormat *video_format)
+{
     NSRect r = NSMakeRect(0.0, 0.0, 0.0, 0.0);
     const char *env = NULL;
-
+	
     /* Initialize the video settings; this data persists between mode switches */
     display_id = kCGDirectMainDisplay;
+
     save_mode  = CGDisplayCurrentMode    (display_id);
     mode_list  = CGDisplayAvailableModes (display_id);
     palette    = CGPaletteCreateDefaultColorPalette ();
@@ -253,8 +255,8 @@ static int QZ_VideoInit (_THIS, SDL_PixelFormat *video_format) {
     return 0;
 }
 
-static SDL_Rect** QZ_ListModes (_THIS, SDL_PixelFormat *format, Uint32 flags) {
-
+static SDL_Rect** QZ_ListModes (_THIS, SDL_PixelFormat *format, Uint32 flags)
+{
     CFIndex num_modes;
     CFIndex i;
 
@@ -379,8 +381,8 @@ static SDL_bool QZ_WindowPosition(_THIS, int *x, int *y)
     return SDL_FALSE;
 }
 
-static void QZ_UnsetVideoMode (_THIS, BOOL to_desktop) {
-
+static void QZ_UnsetVideoMode (_THIS, BOOL to_desktop)
+{
     /* Reset values that may change between switches */
     this->info.blit_fill  = 0;
     this->FillHWRect      = NULL;
@@ -456,7 +458,8 @@ static void QZ_UnsetVideoMode (_THIS, BOOL to_desktop) {
 }
 
 static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int width,
-                                           int height, int bpp, Uint32 flags) {
+                                           int height, int bpp, Uint32 flags)
+{
     boolean_t exact_match = 0;
     NSRect screen_rect;
     CGError error;
@@ -654,7 +657,8 @@ ERR_NO_MATCH:   if ( fade_token != kCGDisplayFadeReservationInvalidToken ) {
 }
 
 static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
-                                         int height, int *bpp, Uint32 flags) {
+                                         int height, int *bpp, Uint32 flags)
+{
     unsigned int style;
     NSRect contentRect;
     int center_window = 1;
@@ -821,8 +825,8 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
 }
 
 static SDL_Surface* QZ_SetVideoMode (_THIS, SDL_Surface *current, int width,
-                                     int height, int bpp, Uint32 flags) {
-
+                                     int height, int bpp, Uint32 flags)
+{
     current->flags = 0;
     current->pixels = NULL;
 
@@ -894,13 +898,14 @@ static SDL_Surface* QZ_SetVideoMode (_THIS, SDL_Surface *current, int width,
     return current;
 }
 
-static int QZ_ToggleFullScreen (_THIS, int on) {
+static int QZ_ToggleFullScreen (_THIS, int on)
+{
     return 0;
 }
 
 static int QZ_SetColors (_THIS, int first_color, int num_colors,
-                         SDL_Color *colors) {
-
+                         SDL_Color *colors)
+{
     CGTableCount  index;
     CGDeviceColor color;
 
@@ -922,18 +927,18 @@ static int QZ_SetColors (_THIS, int first_color, int num_colors,
     return 1;
 }
 
-static int QZ_LockDoubleBuffer (_THIS, SDL_Surface *surface) {
-
+static int QZ_LockDoubleBuffer (_THIS, SDL_Surface *surface)
+{
     return 1;
 }
 
-static void QZ_UnlockDoubleBuffer (_THIS, SDL_Surface *surface) {
-
+static void QZ_UnlockDoubleBuffer (_THIS, SDL_Surface *surface)
+{
 }
 
- /* The VBL delay is based on code by Ian R Ollmann's RezLib <iano@cco.caltech.edu> */
- static AbsoluteTime QZ_SecondsToAbsolute ( double seconds ) {
-    
+/* The VBL delay is based on code by Ian R Ollmann's RezLib <iano@cco.caltech.edu> */
+static AbsoluteTime QZ_SecondsToAbsolute ( double seconds )
+{
     union
     {
         UInt64 i;
@@ -945,8 +950,8 @@ static void QZ_UnlockDoubleBuffer (_THIS, SDL_Surface *surface) {
     return NanosecondsToAbsolute ( temp.ns );
 }
 
-static int QZ_ThreadFlip (_THIS) {
-
+static int QZ_ThreadFlip (_THIS)
+{
     Uint8 *src, *dst;
     int skip, len, h;
     
@@ -1051,8 +1056,8 @@ static int QZ_ThreadFlip (_THIS) {
     return 0;
 }
         
-static int QZ_FlipDoubleBuffer (_THIS, SDL_Surface *surface) {
-
+static int QZ_FlipDoubleBuffer (_THIS, SDL_Surface *surface)
+{
     /* wait for previous flip to complete */
     SDL_SemWait (sem2);
     
@@ -1069,14 +1074,14 @@ static int QZ_FlipDoubleBuffer (_THIS, SDL_Surface *surface) {
     return 0;
 }
 
-
-static void QZ_DoubleBufferUpdate (_THIS, int num_rects, SDL_Rect *rects) {
-
+static void QZ_DoubleBufferUpdate (_THIS, int num_rects, SDL_Rect *rects)
+{
     /* perform a flip if someone calls updaterects on a doublebuferred surface */
     this->FlipHWSurface (this, SDL_VideoSurface);
 }
 
-static void QZ_DirectUpdate (_THIS, int num_rects, SDL_Rect *rects) {
+static void QZ_DirectUpdate (_THIS, int num_rects, SDL_Rect *rects)
+{
 #pragma unused(this,num_rects,rects)
 }
 
@@ -1121,8 +1126,8 @@ static const unsigned char QZ_ResizeIcon[] = {
     0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,0x0b
 };
 
-static void QZ_DrawResizeIcon (_THIS) {
-
+static void QZ_DrawResizeIcon (_THIS)
+{
     /* Check if we should draw the resize icon */
     if (SDL_VideoSurface->flags & SDL_RESIZABLE) {
     
@@ -1152,8 +1157,8 @@ static void QZ_DrawResizeIcon (_THIS) {
     }
 }
 
-static void QZ_UpdateRects (_THIS, int numRects, SDL_Rect *rects) {
-
+static void QZ_UpdateRects (_THIS, int numRects, SDL_Rect *rects)
+{
     if (SDL_VideoSurface->flags & SDL_OPENGLBLIT) {
         QZ_GL_SwapBuffers (this);
     }
@@ -1178,8 +1183,8 @@ static void QZ_UpdateRects (_THIS, int numRects, SDL_Rect *rects) {
     }
 }
 
-static void QZ_VideoQuit (_THIS) {
-
+static void QZ_VideoQuit (_THIS)
+{
     CGDisplayFadeReservationToken fade_token = kCGDisplayFadeReservationInvalidToken;
 
     /* Restore gamma settings */
@@ -1219,28 +1224,30 @@ static void QZ_VideoQuit (_THIS) {
 }
 
 #if 0 /* Not used (apparently, it's really slow) */
-static int  QZ_FillHWRect (_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color) {
-
+static int  QZ_FillHWRect (_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color)
+{
     CGSDisplayHWFill (display_id, rect->x, rect->y, rect->w, rect->h, color);
 
     return 0;
 }
 #endif
 
-static int  QZ_LockHWSurface(_THIS, SDL_Surface *surface) {
-
+static int  QZ_LockHWSurface(_THIS, SDL_Surface *surface)
+{
     return 1;
 }
 
-static void QZ_UnlockHWSurface(_THIS, SDL_Surface *surface) {
-
+static void QZ_UnlockHWSurface(_THIS, SDL_Surface *surface)
+{
 }
 
-static int QZ_AllocHWSurface(_THIS, SDL_Surface *surface) {
+static int QZ_AllocHWSurface(_THIS, SDL_Surface *surface)
+{
     return(-1); /* unallowed (no HWSURFACE support here). */
 }
 
-static void QZ_FreeHWSurface (_THIS, SDL_Surface *surface) {
+static void QZ_FreeHWSurface (_THIS, SDL_Surface *surface)
+{
 }
 
 /*
@@ -1250,8 +1257,8 @@ static void QZ_FreeHWSurface (_THIS, SDL_Surface *surface) {
  */
 
 /* Gamma functions */
-int QZ_SetGamma (_THIS, float red, float green, float blue) {
-
+int QZ_SetGamma (_THIS, float red, float green, float blue)
+{
     const CGGammaValue min = 0.0, max = 1.0;
 
     if (red == 0.0)
@@ -1280,8 +1287,8 @@ int QZ_SetGamma (_THIS, float red, float green, float blue) {
     }
 }
 
-int QZ_GetGamma (_THIS, float *red, float *green, float *blue) {
-
+int QZ_GetGamma (_THIS, float *red, float *green, float *blue)
+{
     CGGammaValue dummy;
     if ( CGDisplayNoErr == CGGetDisplayTransferByFormula
          (display_id, &dummy, &dummy, red,
@@ -1292,8 +1299,8 @@ int QZ_GetGamma (_THIS, float *red, float *green, float *blue) {
         return -1;
 }
 
-int QZ_SetGammaRamp (_THIS, Uint16 *ramp) {
-
+int QZ_SetGammaRamp (_THIS, Uint16 *ramp)
+{
     const CGTableCount tableSize = 255;
     CGGammaValue redTable[tableSize];
     CGGammaValue greenTable[tableSize];
@@ -1318,8 +1325,8 @@ int QZ_SetGammaRamp (_THIS, Uint16 *ramp) {
         return -1;
 }
 
-int QZ_GetGammaRamp (_THIS, Uint16 *ramp) {
-
+int QZ_GetGammaRamp (_THIS, Uint16 *ramp)
+{
     const CGTableCount tableSize = 255;
     CGGammaValue redTable[tableSize];
     CGGammaValue greenTable[tableSize];
