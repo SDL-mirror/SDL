@@ -379,3 +379,20 @@ void SDL_BWin::DispatchMessage(BMessage *msg, BHandler *target)
 	}
 	BDirectWindow::DispatchMessage(msg, target);
 }
+
+void SDL_BWin::DirectConnected(direct_buffer_info *info) {
+	switch (info->buffer_state & B_DIRECT_MODE_MASK) {
+		case B_DIRECT_START:
+		case B_DIRECT_MODIFY:
+			{
+				int32 width = info->window_bounds.right -
+					info->window_bounds.left + 1;
+				int32 height = info->window_bounds.bottom -
+					info->window_bounds.top + 1;
+				SDL_PrivateResize(width, height);
+				break;
+			}
+		default:
+			break;
+	}
+}

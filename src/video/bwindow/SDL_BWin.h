@@ -267,6 +267,8 @@ public:
 	}
 
 	virtual void DispatchMessage(BMessage *msg, BHandler *target);
+	
+	virtual void DirectConnected(direct_buffer_info *info);
 
 private:
 #if SDL_VIDEO_OPENGL
