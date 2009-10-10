@@ -283,15 +283,16 @@ int X11_GL_CreateContext(_THIS)
 	}
 	if ( !glXExtensionSupported(this, "GLX_MESA_swap_control") ) {
 		this->gl_data->glXSwapIntervalMESA = NULL;
-		this->gl_data->glXGetSwapIntervalMESA = NULL;
 	}
 	if ( this->gl_config.swap_control >= 0 ) {
+        int rc = -1;
 		if ( this->gl_data->glXSwapIntervalMESA ) {
-			this->gl_data->glXSwapIntervalMESA(this->gl_config.swap_control);
+			rc = this->gl_data->glXSwapIntervalMESA(this->gl_config.swap_control);
 		} else if ( this->gl_data->glXSwapIntervalSGI ) {
-			if (this->gl_data->glXSwapIntervalSGI(this->gl_config.swap_control) == 0) {
-				this->gl_data->sgi_swap_interval = this->gl_config.swap_control;
-			}
+			rc = this->gl_data->glXSwapIntervalSGI(this->gl_config.swap_control);
+		}
+		if (rc == 0) {
+			this->gl_data->swap_interval = this->gl_config.swap_control;
 		}
 	}
 #else
@@ -412,11 +413,9 @@ int X11_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
 		}
 		break;
 	    case SDL_GL_SWAP_CONTROL:
-		if ( this->gl_data->glXGetSwapIntervalMESA ) {
-			*value = this->gl_data->glXGetSwapIntervalMESA();
-			return 0;
-		} else if ( this->gl_data->glXSwapIntervalSGI ) {
-			*value = this->gl_data->sgi_swap_interval;
+		if ( ( this->gl_data->glXSwapIntervalMESA ) ||
+		     ( this->gl_data->glXSwapIntervalSGI ) ) {
+			*value = this->gl_data->swap_interval;
 			return 0;
 		} else {
 			unsupported = 1;
@@ -469,7 +468,6 @@ void X11_GL_UnloadLibrary(_THIS)
 		this->gl_data->glXSwapBuffers = NULL;
 		this->gl_data->glXSwapIntervalSGI = NULL;
 		this->gl_data->glXSwapIntervalMESA = NULL;
-		this->gl_data->glXGetSwapIntervalMESA = NULL;
 
 		this->gl_config.dll_handle = NULL;
 		this->gl_config.driver_loaded = 0;
@@ -530,8 +528,6 @@ int X11_GL_LoadLibrary(_THIS, const char* path)
 		(int (*)(int)) GL_LoadFunction(handle, "glXSwapIntervalSGI");
 	this->gl_data->glXSwapIntervalMESA =
 		(GLint (*)(unsigned)) GL_LoadFunction(handle, "glXSwapIntervalMESA");
-	this->gl_data->glXGetSwapIntervalMESA =
-		(GLint (*)(void)) GL_LoadFunction(handle, "glXGetSwapIntervalMESA");
 
 	if ( (this->gl_data->glXChooseVisual == NULL) || 
 	     (this->gl_data->glXCreateContext == NULL) ||
