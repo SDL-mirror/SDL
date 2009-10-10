@@ -8,7 +8,7 @@ Version 1.0:
 		SDL_reinterpret_cast(type, expression)
 		SDL_static_cast(type, expression)
 
-	Added SDL_NO_LOCK_KEYS environment variable to enable normal
+	Added SDL_DISABLE_LOCK_KEYS environment variable to enable normal
 	up/down events for Caps-Lock and Num-Lock keys.
 
 1.2.13:
