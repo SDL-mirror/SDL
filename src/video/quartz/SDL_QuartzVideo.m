@@ -203,6 +203,19 @@ static int QZ_VideoInit (_THIS, SDL_PixelFormat *video_format)
     /* Initialize the video settings; this data persists between mode switches */
     display_id = kCGDirectMainDisplay;
 
+#if 0 /* The mouse event code needs to take this into account... */
+    env = getenv("SDL_VIDEO_FULLSCREEN_DISPLAY");
+    if ( env ) {
+        int monitor = SDL_atoi(env);
+    	CGDirectDisplayID activeDspys [3];
+    	CGDisplayCount dspyCnt;
+    	CGGetActiveDisplayList (3, activeDspys, &dspyCnt);
+        if ( monitor >= 0 && monitor < dspyCnt ) {
+    	    display_id = activeDspys[monitor];
+        }
+    }
+#endif
+
     save_mode  = CGDisplayCurrentMode    (display_id);
     mode_list  = CGDisplayAvailableModes (display_id);
     palette    = CGPaletteCreateDefaultColorPalette ();
