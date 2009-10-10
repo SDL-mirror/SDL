@@ -912,8 +912,8 @@ dnl Do the iPod thing
 CheckIPod()
 {
     AC_ARG_ENABLE(ipod,
-AC_HELP_STRING([--enable-ipod], [configure SDL to work with iPodLinux [[default=yes]]]),
-        , enable_ipod=yes)
+AC_HELP_STRING([--enable-ipod], [configure SDL to work with iPodLinux [[default=no]]]),
+        , enable_ipod=no)
 
     if test x$enable_ipod = xyes; then
         EXTRA_CFLAGS="$EXTRA_CFLAGS -DIPOD"
