@@ -106,12 +106,12 @@ extern AudioBootStrap BSD_AUDIO_bootstrap;
 #if SDL_AUDIO_DRIVER_PULSE
 extern AudioBootStrap PULSE_bootstrap;
 #endif
+#if SDL_AUDIO_DRIVER_ALSA
+extern AudioBootStrap ALSA_bootstrap;
+#endif
 #if SDL_AUDIO_DRIVER_OSS
 extern AudioBootStrap DSP_bootstrap;
 extern AudioBootStrap DMA_bootstrap;
-#endif
-#if SDL_AUDIO_DRIVER_ALSA
-extern AudioBootStrap ALSA_bootstrap;
 #endif
 #if SDL_AUDIO_DRIVER_QNXNTO
 extern AudioBootStrap QNXNTOAUDIO_bootstrap;
