@@ -421,11 +421,16 @@ static int CheckXRandR(_THIS, int *major, int *minor)
         return 0;
     }
 
-    /* This defaults off now, due to KDE window maximize problems */
-    if ( !env ) {
+    /* This used to default off, due to KDE window maximize problems */
+    /* Reactivated since I haven't encountered such problems with KDE, but if
+       one does encounter such problems he/she can just set
+       SDL_VIDEO_X11_XRANDR to 0
+       Closes Debian bug: #450689
+     */
+/*  if ( !env ) {
         return 0;
     }
-
+*/
     if ( !SDL_X11_HAVE_XRANDR ) {
         return 0;
     }
