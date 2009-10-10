@@ -43,6 +43,9 @@ SDL 1.2.14 is a significant bug fix release and a recommended update.
 	Fixed a threading crash when a few threads are rapidly created and complete.
 </P>
 <P>
+	Increased accuracy of alpha blending routines.
+</P>
+<P>
 	Fixed crash loading BMP files saved with the scanlines inverted.
 </P>
 <P>
@@ -73,6 +76,9 @@ SDL 1.2.14 is a significant bug fix release and a recommended update.
 </P>
 <P>
 	Removed the maximum window size limitation on X11.
+</P>
+<P>
+	Fixed SDL_GL_SWAP_CONTROL on X11.
 </P>
 <P>
 	Fixed setting the X11 window input hint.
@@ -108,6 +114,9 @@ SDL 1.2.14 is a significant bug fix release and a recommended update.
 	Added code to use the PS3 SPE processors for YUV conversion on Linux.
 </P>
 <P>
+	Updated ALSA support to the latest stable API
+</P>
+<P>
 	Improved support for PulseAudio
 </P>
 <P>
@@ -131,13 +140,19 @@ SDL 1.2.14 is a significant bug fix release and a recommended update.
 	Prevent loss of OpenGL context when setting the video mode in response to a window resize event.
 </P>
 <P>
+	Fixed video initialization with SDL_WINDOWID on Windows XP.
+</P>
+<P>
 	Improved mouse input responsiveness for first-person-shooter games.
 </P>
 <P>
-	The SDL_STDIO_REDIRECT environment variable can be used to override whether SDL redirects stdio to stdout.txt and stderr.txt.
+	IME messages are now generated for localized input.
 </P>
 <P>
-	Fixed video initialization with SDL_WINDOWID on Windows XP
+	SDL_RWFromFile() takes a UTF-8 filename when opening a file.
+</P>
+<P>
+	The SDL_STDIO_REDIRECT environment variable can be used to override whether SDL redirects stdio to stdout.txt and stderr.txt.
 </P>
 <P>
 	Fixed dynamic object loading on Windows CE.
