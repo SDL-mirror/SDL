@@ -289,7 +289,7 @@ int X11_GL_CreateContext(_THIS)
 		if ( this->gl_data->glXSwapIntervalMESA ) {
 			this->gl_data->glXSwapIntervalMESA(this->gl_config.swap_control);
 		} else if ( this->gl_data->glXSwapIntervalSGI ) {
-			if (this->gl_data->glXSwapIntervalSGI(this->gl_config.swap_control) != 0) {
+			if (this->gl_data->glXSwapIntervalSGI(this->gl_config.swap_control) == 0) {
 				this->gl_data->sgi_swap_interval = this->gl_config.swap_control;
 			}
 		}
