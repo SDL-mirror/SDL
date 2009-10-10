@@ -1227,7 +1227,7 @@ AC_HELP_STRING([--enable-video-photon], [use QNX Photon video driver [[default=y
         if test x$video_photon = xyes; then
             AC_DEFINE(SDL_VIDEO_DRIVER_PHOTON)
             SOURCES="$SOURCES $srcdir/src/video/photon/*.c"
-            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lph"
+            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lph -lphrender"
             have_video=yes
 
             CheckOpenGLQNX
