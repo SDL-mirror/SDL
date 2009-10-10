@@ -30,16 +30,27 @@
 #include "../SDL_sysvideo.h"
 
 #include <Ph.h>
+#include <photon/PhRender.h>
 
 #define SDL_PHOTON_MAX_SURFACES 3
 
+#define SDL_PHOTON_SURFTYPE_UNKNOWN    0x00000000
+#define SDL_PHOTON_SURFTYPE_OFFSCREEN  0x00000001
+#define SDL_PHOTON_SURFTYPE_PHIMAGE    0x00000002
+
 typedef struct SDL_RenderData
 {
-    SDL_Window *window;         /* SDL window type                    */
-    SDL_bool enable_vsync;      /* VSYNC flip synchronization enable  */
-    uint32_t surface_visible_idx;       /* Index of visible surface     */
-    uint32_t surface_render_idx;        /* Index of render surface      */
-    uint32_t surfaces_count;    /* Amount of allocated surfaces */
+    SDL_bool enable_vsync;              /* VSYNC flip synchronization enable  */
+    uint32_t surface_visible_idx;       /* Index of visible surface           */
+    uint32_t surface_render_idx;        /* Index of render surface            */
+    uint32_t surfaces_count;            /* Amount of allocated surfaces       */
+    uint32_t surfaces_type;             /* Type of allocated surfaces         */
+    uint32_t window_width;              /* Last active window width           */
+    uint32_t window_height;             /* Last active window height          */
+    PhGC_t* gc;                         /* Graphics context                   */
+    PdOffscreenContext_t* osurfaces[SDL_PHOTON_MAX_SURFACES];
+    PhImage_t* psurfaces[SDL_PHOTON_MAX_SURFACES];
+    PmMemoryContext_t* pcontexts[SDL_PHOTON_MAX_SURFACES];
 } SDL_RenderData;
 
 typedef struct SDL_TextureData
@@ -47,6 +58,9 @@ typedef struct SDL_TextureData
 } SDL_TextureData;
 
 extern void photon_addrenderdriver(_THIS);
+
+/* Helper function, which redraws the backbuffer */
+int _photon_update_rectangles(SDL_Renderer* renderer, PhRect_t* rect);
 
 #endif /* __SDL_PHOTON_RENDER_H__ */
 

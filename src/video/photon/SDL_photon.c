@@ -44,7 +44,7 @@
 #if defined(SDL_VIDEO_OPENGL_ES)
 #include "../qnxgf/SDL_gf_pixelfmt.h"
 
-   /* If GF driver is not compiled in, include some of usefull functions */
+/* If GF driver is not compiled in, include some of usefull functions */
 #if !defined(SDL_VIDEO_DRIVER_QNXGF)
 #include "../qnxgf/SDL_gf_pixelfmt.c"
 #endif /* SDL_VIDEO_DRIVER_QNXGF */
@@ -54,7 +54,7 @@
 #if defined(SDL_VIDEO_OPENGL_ES)
 #include "../qnxgf/SDL_gf_opengles.h"
 
-   /* If GF driver is not compiled in, include some of usefull functions */
+/* If GF driver is not compiled in, include some of usefull functions */
 #if !defined(SDL_VIDEO_DRIVER_QNXGF)
 #include "../qnxgf/SDL_gf_opengles.c"
 #endif /* SDL_VIDEO_DRIVER_QNXGF */
@@ -137,7 +137,7 @@ static const Photon_DeviceCaps photon_devicename[] = {
     /* VIA UniChrome graphics driver (devg-unichrome.so)    */
     {"unichrome", SDL_PHOTON_ACCELERATED | SDL_PHOTON_UNACCELERATED_3D}
     ,
-    /* VESA unaccelerated gfx driver (devg-vesa.so)         */
+    /* VESA unaccelerated gfx driver (devg-vesabios.so)     */
     {"vesa", SDL_PHOTON_UNACCELERATED | SDL_PHOTON_UNACCELERATED_3D}
     ,
     /* VmWare graphics driver (devg-volari.so)              */
@@ -155,7 +155,7 @@ static SDL_bool photon_initialized = SDL_FALSE;
 static int
 photon_available(void)
 {
-    int status;
+    int32_t status;
 
     /* Check if Photon was initialized before */
     if (photon_initialized == SDL_FALSE) {
@@ -194,7 +194,7 @@ photon_create(int devindex)
 {
     SDL_VideoDevice *device;
     SDL_VideoData *phdata;
-    int status;
+    int32_t status;
 
     /* Check if photon could be initialized */
     status = photon_available();
@@ -883,6 +883,13 @@ photon_createwindow(_THIS, SDL_Window * window)
     PtSetArg(&winargs[winargc++], Pt_ARG_WINDOW_STATE, Pt_TRUE,
              Ph_WM_STATE_ISALTKEY);
 
+    /* Special case, do not handle maximize events, if window can't be resized */
+    if ((window->flags & SDL_WINDOW_RESIZABLE) != SDL_WINDOW_RESIZABLE)
+    {
+       PtSetArg(&winargs[winargc++], Pt_ARG_WINDOW_MANAGED_FLAGS, Pt_FALSE,
+                Ph_WM_MAX | Ph_WM_RESTORE | Ph_WM_RESIZE);
+    }
+
     /* Set window dimension */
     winsize.w = window->w;
     winsize.h = window->h;
@@ -1305,7 +1312,7 @@ photon_gl_loadlibrary(_THIS, const char *path)
     if (phdata->gfinitialized != SDL_TRUE) {
         SDL_SetError
             ("Photon: GF initialization failed, no OpenGL ES support");
-        return NULL;
+        return -1;
     }
 
     /* Check if OpenGL ES library is specified for GF driver */
@@ -1918,6 +1925,7 @@ photon_gl_swapwindow(_THIS, SDL_Window * window)
         (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
     PhRect_t dst_rect;
     PhRect_t src_rect;
+    int32_t status;
 
     if (phdata->gfinitialized != SDL_TRUE) {
         SDL_SetError
@@ -1950,6 +1958,17 @@ photon_gl_swapwindow(_THIS, SDL_Window * window)
     src_rect.ul.y = 0;
     src_rect.lr.x = window->w - 1;
     src_rect.lr.y = window->h - 1;
+
+    /* Check if current device is not the same as target */
+    if (phdata->current_device_id != didata->device_id) {
+        /* Set target device as default for Pd and Pg functions */
+        status = PdSetTargetDevice(NULL, phdata->rid[didata->device_id]);
+        if (status != 0) {
+            SDL_SetError("Photon: Can't set default target device\n");
+            return;
+        }
+        phdata->current_device_id = didata->device_id;
+    }
 
     /* Blit OpenGL ES pixmap surface directly to window region */
     PgFFlush(Ph_START_DRAW);
@@ -2324,12 +2343,8 @@ photon_pumpevents(_THIS)
                                 if ((wdata != NULL) && (window != NULL)) {
                                     /* Check if window uses OpenGL ES */
                                     if (wdata->uses_gles == SDL_TRUE) {
-                                        PhRect_t dst_rect;
-                                        PhRect_t src_rect;
-
                                         /* Cycle through each rectangle */
-                                        for (it = 0; it < event->num_rects;
-                                             it++) {
+                                        for (it = 0; it < event->num_rects; it++) {
                                             /* Blit OpenGL ES pixmap surface directly to window region */
                                             PgFFlush(Ph_START_DRAW);
                                             PgSetRegionCx(PhDCGetCurrent(),
@@ -2345,8 +2360,14 @@ photon_pumpevents(_THIS)
                                             PgWaitHWIdle();
                                         }
                                     } else {
-                                        /* Normal window */
-                                        /* TODO: update the damaged rectangles */
+                                        /* Cycle through each rectangle */
+                                        for (it = 0; it < event->num_rects;
+                                             it++) {
+                                            /* Blit 2D pixmap surface directly to window region */
+                                            _photon_update_rectangles(window->renderer, &rects[it]);
+                                        }
+                                        PgFlush();
+                                        PgWaitHWIdle();
                                     }
                                 }
 
@@ -2385,10 +2406,19 @@ photon_pumpevents(_THIS)
                                         PgFFlush(Ph_DONE_DRAW);
                                         PgWaitHWIdle();
                                     } else {
-                                        /* Normal window */
-                                        /* TODO: update the damaged rectangles */
+                                        PhRect_t rect;
 
                                         /* We need to redraw entire window */
+                                        rect.ul.x = 0;
+                                        rect.ul.y = 0;
+                                        rect.lr.x = window->w - 1;
+                                        rect.lr.y = window->h - 1;
+
+                                        /* Blit 2D pixmap surface directly to window region */
+                                        PgFFlush(Ph_START_DRAW);
+                                        _photon_update_rectangles(window->renderer, &rect);
+                                        PgFFlush(Ph_DONE_DRAW);
+                                        PgWaitHWIdle();
                                     }
                                 }
                             }
@@ -2693,9 +2723,16 @@ photon_pumpevents(_THIS)
                         case Ph_WM_MAX:
                             {
                                 if (window != NULL) {
-                                    SDL_SendWindowEvent(window->id,
-                                                        SDL_WINDOWEVENT_MAXIMIZED,
-                                                        0, 0);
+                                    if ((window->flags & SDL_WINDOW_RESIZABLE)==SDL_WINDOW_RESIZABLE)
+                                    {
+                                       SDL_SendWindowEvent(window->id,
+                                                           SDL_WINDOWEVENT_MAXIMIZED,
+                                                           0, 0);
+                                    }
+                                    else
+                                    {
+                                       /* otherwise ignor the resize events */
+                                    }
                                 }
                             }
                             break;
