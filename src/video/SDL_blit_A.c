@@ -629,7 +629,7 @@ Blit32to565PixelAlphaAltivec(SDL_BlitInfo * info)
                 dR = (dstpixel >> 8) & 0xf8; \
                 dG = (dstpixel >> 3) & 0xfc; \
                 dB = (dstpixel << 3) & 0xf8; \
-                ACCURATE_ALPHA_BLEND(sR, sG, sB, sA, dR, dG, dB); \
+                ALPHA_BLEND(sR, sG, sB, sA, dR, dG, dB); \
                 *((unsigned short *)dst) = ( \
                     ((dR & 0xf8) << 8) | ((dG & 0xfc) << 3) | (dB >> 3) \
                 ); \
@@ -775,7 +775,7 @@ Blit32to32SurfaceAlphaKeyAltivec(SDL_BlitInfo * info)
             if(sA && Pixel != ckey) { \
                 RGB_FROM_PIXEL(Pixel, srcfmt, sR, sG, sB); \
                 DISEMBLE_RGB(((Uint8 *)dstp), 4, dstfmt, Pixel, dR, dG, dB); \
-                ACCURATE_ALPHA_BLEND(sR, sG, sB, sA, dR, dG, dB); \
+                ALPHA_BLEND(sR, sG, sB, sA, dR, dG, dB); \
                 ASSEMBLE_RGBA(((Uint8 *)dstp), 4, dstfmt, dR, dG, dB, dA); \
             } \
             dstp++; \
@@ -882,7 +882,7 @@ Blit32to32PixelAlphaAltivec(SDL_BlitInfo * info)
             DISEMBLE_RGBA((Uint8 *)srcp, 4, srcfmt, Pixel, sR, sG, sB, sA); \
             if(sA) { \
               DISEMBLE_RGBA((Uint8 *)dstp, 4, dstfmt, Pixel, dR, dG, dB, dA); \
-              ACCURATE_ALPHA_BLEND(sR, sG, sB, sA, dR, dG, dB); \
+              ALPHA_BLEND(sR, sG, sB, sA, dR, dG, dB); \
               ASSEMBLE_RGBA((Uint8 *)dstp, 4, dstfmt, dR, dG, dB, dA); \
             } \
             ++srcp; \
@@ -1082,7 +1082,7 @@ Blit32to32SurfaceAlphaAltivec(SDL_BlitInfo * info)
             unsigned sR, sG, sB, dR, dG, dB; \
             DISEMBLE_RGB(((Uint8 *)srcp), 4, srcfmt, Pixel, sR, sG, sB); \
             DISEMBLE_RGB(((Uint8 *)dstp), 4, dstfmt, Pixel, dR, dG, dB); \
-            ACCURATE_ALPHA_BLEND(sR, sG, sB, sA, dR, dG, dB); \
+            ALPHA_BLEND(sR, sG, sB, sA, dR, dG, dB); \
             ASSEMBLE_RGBA(((Uint8 *)dstp), 4, dstfmt, dR, dG, dB, dA); \
             ++srcp; \
             ++dstp; \

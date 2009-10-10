@@ -444,22 +444,9 @@ do {									   \
 /* Blend the RGB values of two Pixels based on a source alpha value */
 #define ALPHA_BLEND(sR, sG, sB, A, dR, dG, dB)	\
 do {						\
-	dR = (((sR-dR)*(A))>>8)+dR;		\
-	dG = (((sG-dG)*(A))>>8)+dG;		\
-	dB = (((sB-dB)*(A))>>8)+dB;		\
-} while(0)
-
-/* Blend the RGB values of two Pixels based on a source alpha value */
-#define ACCURATE_ALPHA_BLEND(sR, sG, sB, sA, dR, dG, dB)	\
-do {						\
-    unsigned tR, tG, tB, tA; \
-    tA = 255 - sA; \
-    tR = 1 + (sR * sA) + (dR * tA); \
-    dR = (tR + (tR >> 8)) >> 8; \
-    tG = 1 + (sG * sA) + (dG * tA); \
-    dG = (tG + (tG >> 8)) >> 8; \
-    tB = 1 + (sB * sA) + (dB * tA); \
-    dB = (tB + (tB >> 8)) >> 8; \
+	dR = (((sR-dR)*(A)+255)>>8)+dR;		\
+	dG = (((sG-dG)*(A)+255)>>8)+dG;		\
+	dB = (((sB-dB)*(A)+255)>>8)+dB;		\
 } while(0)
 
 
