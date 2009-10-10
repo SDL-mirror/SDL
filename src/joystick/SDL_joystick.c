@@ -376,7 +376,7 @@ void SDL_JoystickClose(SDL_Joystick *joystick)
 	/* Remove joystick from list */
 	for ( i=0; SDL_joysticks[i]; ++i ) {
 		if ( joystick == SDL_joysticks[i] ) {
-			SDL_memcpy(&SDL_joysticks[i], &SDL_joysticks[i+1],
+			SDL_memmove(&SDL_joysticks[i], &SDL_joysticks[i+1],
 			       (SDL_numjoysticks-i)*sizeof(joystick));
 			break;
 		}
