@@ -36,6 +36,10 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#ifndef __FreeBSD_kernel_version
+#define __FreeBSD_kernel_version __FreeBSD_version
+#endif
+
 #if defined(HAVE_USB_H)
 #include <usb.h>
 #endif
