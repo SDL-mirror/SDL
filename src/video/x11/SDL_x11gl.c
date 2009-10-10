@@ -77,6 +77,11 @@ static int glXExtensionSupported(_THIS, const char *extension)
 	/* It takes a bit of care to be fool-proof about parsing the
 	 * OpenGL extensions string. Don't be fooled by sub-strings, etc.
 	 */
+
+	/* http://bugs.debian.org/537487 */
+	if (extensions == NULL) {
+	      return 0;
+	}
 	
 	start = extensions;
 	
