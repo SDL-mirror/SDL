@@ -655,6 +655,7 @@ static int DX5_CheckInput(_THIS, int timeout, BOOL processInput)
 	while ( ! posted &&
 	        PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE) ) {
 		if ( GetMessage(&msg, NULL, 0, 0) > 0 ) {
+			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		} else {
 			return(-1);
@@ -713,12 +714,17 @@ static int DX5_CheckInput(_THIS, int timeout, BOOL processInput)
 	}
 	if ( event != WAIT_TIMEOUT ) {
 		/* Maybe there was a windows message? */
-		if ( PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE) ) {
+		posted = 0;
+		while ( ! posted &&
+			PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE) ) {
 			if ( GetMessage(&msg, NULL, 0, 0) > 0 ) {
+				TranslateMessage(&msg);
 				DispatchMessage(&msg);
 			} else {
 				return(-1);
 			}
+		}
+		if ( posted ) {
 			return(1);
 		}
 	}

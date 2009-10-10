@@ -198,7 +198,7 @@ LRESULT DIB_HandleMessage(_THIS, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 				m.wParam = wParam;
 				m.lParam = lParam;
 				m.time = 0;
-				if ( TranslateMessage(&m) && PeekMessage(&m, hwnd, 0, WM_USER, PM_NOREMOVE) && (m.message == WM_CHAR) ) {
+				if ( PeekMessage(&m, hwnd, 0, WM_USER, PM_NOREMOVE) && (m.message == WM_CHAR) ) {
 					GetMessage(&m, hwnd, 0, WM_USER);
 			    		wParam = m.wParam;
 				}
@@ -363,6 +363,7 @@ void DIB_PumpEvents(_THIS)
 
 	while ( PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE) ) {
 		if ( GetMessage(&msg, NULL, 0, 0) > 0 ) {
+			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
 	}
