@@ -1022,6 +1022,12 @@ CommonQuit(CommonState * state)
         SDL_AudioQuit();
     }
     if (state->windows) {
+        int it;
+
+        for (it=0; it<state->num_windows; it++)
+        {
+           SDL_DestroyWindow(state->windows[it]);
+        }
         SDL_free(state->windows);
     }
     SDL_free(state);
