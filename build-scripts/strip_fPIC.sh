@@ -5,8 +5,8 @@
 command=""
 while [ $# -gt 0 ]; do
     case "$1" in
-        -?PIC)
-            # Ignore -fPIC and -DPIC options
+        -fPIC)
+            # Ignore -fPIC option
             ;;
         -fno-common)
             # Ignore -fPIC and -DPIC options
