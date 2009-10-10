@@ -8,6 +8,9 @@ Version 1.0:
 		SDL_reinterpret_cast(type, expression)
 		SDL_static_cast(type, expression)
 
+	Added SDL_VIDEO_FULLSCREEN_DISPLAY as a preferred synonym for 
+	SDL_VIDEO_FULLSCREEN_HEAD on X11.
+
 	Added SDL_DISABLE_LOCK_KEYS environment variable to enable normal
 	up/down events for Caps-Lock and Num-Lock keys.
 

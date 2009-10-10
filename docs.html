@@ -93,7 +93,10 @@ SDL 1.2.14 is a significant bug fix release and a recommended update.
 	SDL_GL_GetAttribute(SDL_GL_SWAP_CONTROL) returns the correct value with GLX_SGI_swap_control.
 </P>
 <P>
-	The SDL_VIDEO_FULLSCREEN_HEAD environment variable can be set to 0 to place fullscreen SDL windows on the first Xinerama screen.
+	Added SDL_VIDEO_FULLSCREEN_DISPLAY as a preferred synonym for SDL_VIDEO_FULLSCREEN_HEAD on X11.
+</P>
+<P>
+	The SDL_VIDEO_FULLSCREEN_DISPLAY environment variable can be set to 0 to place fullscreen SDL windows on the first Xinerama screen.
 </P>
 <P>
 	Added the SDL_VIDEO_FBCON_ROTATION environment variable to control output orientation on the framebuffer console.

@@ -548,7 +548,10 @@ int X11_GetVideoModes(_THIS)
         int w, h;
         SDL_NAME(XineramaScreenInfo) *xinerama;
 
-        const char *variable = SDL_getenv("SDL_VIDEO_FULLSCREEN_HEAD");
+        const char *variable = SDL_getenv("SDL_VIDEO_FULLSCREEN_DISPLAY");
+	if ( !variable ) {
+        	variable = SDL_getenv("SDL_VIDEO_FULLSCREEN_HEAD");
+	}
         if ( variable ) {
                 desired = SDL_atoi(variable);
         }
