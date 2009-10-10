@@ -131,6 +131,7 @@ struct GapiInfo {
 	// The orientation of the video mode user wants to get
 	// Probably restricted to UP and RIGHT
 	SDL_ScreenOrientation userOrientation;
+	SDL_ScreenOrientation systemOrientation;
 // --------------
 	int useGXOpenDisplay; /* use GXOpenDispplay */
 	int alreadyGXOpened;

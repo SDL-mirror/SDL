@@ -622,7 +622,6 @@ SDL_Surface *GAPI_SetVideoMode(_THIS, SDL_Surface *current,
 	Uint32 Rmask, Gmask, Bmask; 
 	DWORD style; 
 	SDL_Rect allScreen;
-	SDL_ScreenOrientation systemOrientation;
 
 	if( bpp < 4 )
 	{
@@ -674,7 +673,7 @@ SDL_Surface *GAPI_SetVideoMode(_THIS, SDL_Surface *current,
 	}
 
 	gapi->userOrientation = SDL_ORIENTATION_UP;
-	systemOrientation = SDL_ORIENTATION_UP;
+	gapi->systemOrientation = SDL_ORIENTATION_UP;
 	video->flags = SDL_FULLSCREEN;	/* Clear flags, GAPI supports fullscreen only */
 
 	/* GAPI or VGA? */
@@ -697,18 +696,15 @@ SDL_Surface *GAPI_SetVideoMode(_THIS, SDL_Surface *current,
 		gapi->userOrientation = SDL_ORIENTATION_RIGHT;
 
        if(GetSystemMetrics(SM_CYSCREEN) < GetSystemMetrics(SM_CXSCREEN))
-		systemOrientation = SDL_ORIENTATION_RIGHT;
+		gapi->systemOrientation = SDL_ORIENTATION_RIGHT;
 
-	/* shall we apply hires fix? for example when we do not use hires resource */
 	gapi->hiresFix = 0;
-	if( systemOrientation == gapi->userOrientation )
+
+	/* check hires */
+	if(GetSystemMetrics(SM_CXSCREEN) < width && GetSystemMetrics(SM_CYSCREEN) < height)
 	{
-               if( (width > GetSystemMetrics(SM_CXSCREEN)) || (height > GetSystemMetrics(SM_CYSCREEN)))
-			gapi->hiresFix = 1;
-	} else
-               if( (width > GetSystemMetrics(SM_CYSCREEN)) || (height > GetSystemMetrics(SM_CXSCREEN)))
-//                     if( !((width == gapi->gxProperties.cyHeight) && (height == gapi->gxProperties.cxWidth))) // user portrait, device landscape
-				gapi->hiresFix = 1;
+	    gapi->hiresFix = 1;
+	}
 
 	switch( gapi->userOrientation )
 	{
@@ -783,7 +779,6 @@ SDL_Surface *GAPI_SetVideoMode(_THIS, SDL_Surface *current,
                printf("system display width  (orig): %d\n", GetSystemMetrics(SM_CXSCREEN));
                printf("system display height (orig): %d\n", GetSystemMetrics(SM_CYSCREEN));
 #endif
-               gapi->hiresFix = (width > GetSystemMetrics(SM_CXSCREEN)) || (height > GetSystemMetrics(SM_CYSCREEN));
                gapi->alreadyGXOpened = 1;
 		if( !gapi->gxFunc.GXOpenDisplay(SDL_Window, GX_FULLSCREEN) )
 		{
@@ -793,7 +788,7 @@ SDL_Surface *GAPI_SetVideoMode(_THIS, SDL_Surface *current,
        }
 
 	if(gapi->useVga)
-		gapi->coordinateTransform = (4 - systemOrientation + gapi->userOrientation) % 4;
+		gapi->coordinateTransform = (4 - gapi->systemOrientation + gapi->userOrientation) % 4;
 	else
 		gapi->coordinateTransform = gapi->userOrientation;
 
@@ -808,7 +803,7 @@ SDL_Surface *GAPI_SetVideoMode(_THIS, SDL_Surface *current,
 	printf("y pitch: %d\n", gapi->gxProperties.cbyPitch);
 	printf("gapi flags: 0x%x\n", gapi->gxProperties.ffFormat);
        printf("user orientation: %d\n", gapi->userOrientation);
-	printf("system orientation: %d\n", systemOrientation);
+	printf("system orientation: %d\n", gapi->systemOrientation);
        printf("gapi orientation: %d\n", gapi->gapiOrientation);
 
 

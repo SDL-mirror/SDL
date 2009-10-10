@@ -88,41 +88,41 @@ WPARAM rotateKey(WPARAM key,int direction)
 	return key;
 }
 
-static void GapiTransform(GapiInfo *gapiInfo, LONG *x, LONG *y) {
-    Sint16 rotatedX;
-    Sint16 rotatedY;
-
+static void GapiTransform(GapiInfo *gapiInfo, LONG *x, LONG *y)
+{
     if(gapiInfo->hiresFix)
     {
 	*x *= 2;
 	*y *= 2;
     }
 
-    if(gapiInfo->userOrientation == SDL_ORIENTATION_UP &&
-       gapiInfo->gapiOrientation == SDL_ORIENTATION_RIGHT)
+    // 0 3 0
+    if((!gapiInfo->userOrientation && gapiInfo->systemOrientation && !gapiInfo->gapiOrientation) ||
+    // 3 0 3
+       (gapiInfo->userOrientation && !gapiInfo->systemOrientation && gapiInfo->gapiOrientation) ||
+    // 3 0 0
+       (gapiInfo->userOrientation && !gapiInfo->systemOrientation && !gapiInfo->gapiOrientation))
     {
-        rotatedX = *x;
-        rotatedY = *y;
-        *x = rotatedX;
-        *y = rotatedY;
-     }
-    else
-    if(gapiInfo->userOrientation == SDL_ORIENTATION_RIGHT &&
-       gapiInfo->gapiOrientation == SDL_ORIENTATION_RIGHT)
-    {
-        rotatedX = (2 * ((SDL_VideoSurface->offset%SDL_VideoSurface->pitch)/
-                    SDL_VideoSurface->format->BytesPerPixel))
-                    + SDL_VideoSurface->w - *y;
-        rotatedY = *x;
-        *x = rotatedX;
-        *y = rotatedY;
+	Sint16 temp = *x;
+        *x = SDL_VideoSurface->w - *y;
+        *y = temp;
     }
     else
+    // 0 0 0
+    if((!gapiInfo->userOrientation && !gapiInfo->systemOrientation && !gapiInfo->gapiOrientation) ||
+    // 0 0 3
+      (!gapiInfo->userOrientation && !gapiInfo->systemOrientation && gapiInfo->gapiOrientation))
     {
-        rotatedX = SDL_VideoSurface->w - *y;
-        rotatedY = *x;
-        *y = rotatedY;
-        *x = rotatedX;
+	// without changes
+	// *x = *x;
+	// *y = *y;
+    }
+    // default
+    else
+    {
+	// without changes
+	// *x = *x;
+	// *y = *y;
     }
 }
 #endif 
