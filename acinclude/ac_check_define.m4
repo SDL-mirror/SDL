@@ -8,7 +8,7 @@ YES_IS_DEFINED
     ], ac_cv_define_$1=yes, ac_cv_define_$1=no)
   )
   if test "$ac_cv_define_$1" = "yes" ; then
-    AC_DEFINE(HAVE_$1)
+    AC_DEFINE([HAVE_$1],[],[Added by AC_CHECK_DEFINE])
   fi
 ])dnl
-AC_DEFINE(HAVE_$1)
+AC_DEFINE([HAVE_$1],[],[Added by AC_CHECK_DEFINE])
