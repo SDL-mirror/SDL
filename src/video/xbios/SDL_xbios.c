@@ -495,13 +495,14 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 				/* Read infos about current mode */ 
 				VsetScreen(-1, &XBIOS_oldvmode, MI_MAGIC, CMD_GETMODE);
-				this->info.current_w = si.scrWidth;
-				this->info.current_h = si.scrHeight;
 
 				si.size = sizeof(SCREENINFO);
 				si.devID = XBIOS_oldvmode;
 				si.scrFlags = 0;
 				VsetScreen(-1, &si, MI_MAGIC, CMD_GETINFO);
+
+				this->info.current_w = si.scrWidth;
+				this->info.current_h = si.scrHeight;
 
 				XBIOS_oldnumcol = 0;
 				if (si.scrFlags & SCRINFO_OK) {
@@ -717,7 +718,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 		}
 	}
 #endif
-	if (flags & SDL_DOUBLEBUF) {
+	if ((flags & SDL_DOUBLEBUF) && ((XBIOS_cvdo>>16) != VDO_MILAN)) {
 		num_buffers = 2;
 		modeflags |= SDL_DOUBLEBUF;
 	}
