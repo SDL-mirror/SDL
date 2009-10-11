@@ -94,8 +94,7 @@ SDL_RenderDriver photon_renderdriver = {
       SDL_RENDERER_ACCELERATED),
      (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_COLOR |
       SDL_TEXTUREMODULATE_ALPHA),
-     (SDL_BLENDMODE_NONE | SDL_BLENDMODE_MASK |
-      SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD | SDL_BLENDMODE_MOD),
+     (SDL_BLENDMODE_NONE | SDL_BLENDMODE_MASK | SDL_BLENDMODE_BLEND),
      (SDL_TEXTURESCALEMODE_NONE | SDL_TEXTURESCALEMODE_SLOW |
       SDL_TEXTURESCALEMODE_FAST | SDL_TEXTURESCALEMODE_BEST),
      10,
@@ -222,6 +221,10 @@ photon_createrenderer(SDL_Window * window, Uint32 flags)
        PgDefaultGC(rdata->gc);
     }
 
+    /* Setup textures supported by current renderer instance */
+    renderer->info.num_texture_formats=1;
+    renderer->info.texture_formats[0]=didata->current_mode.format;
+
     return renderer;
 }
 
@@ -343,7 +346,7 @@ static int _photon_recreate_surfaces(SDL_Renderer * renderer)
                for (it=0; it<rdata->surfaces_count; it++)
                {
                   rdata->osurfaces[it]=PdCreateOffscreenContext(0, window->w, window->h,
-                  Pg_OSC_MEM_LINEAR_ACCESSIBLE |
+                  Pg_OSC_MEM_LINEAR_ACCESSIBLE | Pg_OSC_MEM_PAGE_ALIGN |
                   /* in case if 2D acceleration is not available use CPU optimized surfaces */
                   Pg_OSC_MEM_HINT_CPU_READ | Pg_OSC_MEM_HINT_CPU_WRITE |
                   /* in case if 2D acceleration is available use it */
@@ -445,6 +448,7 @@ static int _photon_recreate_surfaces(SDL_Renderer * renderer)
             }
             break;
        case SDL_PHOTON_SURFTYPE_UNKNOWN:
+       default:
             {
                /* do nothing with surface allocation */
                rdata->surfaces_type=SDL_PHOTON_SURFTYPE_UNKNOWN;
@@ -493,6 +497,7 @@ static int _photon_recreate_surfaces(SDL_Renderer * renderer)
             PgSetGCCx(rdata->pcontexts[rdata->surface_render_idx], rdata->gc);
             break;
        case SDL_PHOTON_SURFTYPE_UNKNOWN:
+       default:
             break;
     }
 
@@ -520,6 +525,7 @@ int _photon_update_rectangles(SDL_Renderer* renderer, PhRect_t* rect)
                PmMemFlush(rdata->pcontexts[rdata->surface_visible_idx], rdata->psurfaces[rdata->surface_visible_idx]);
                break;
           case SDL_PHOTON_SURFTYPE_UNKNOWN:
+          default:
                return;
       }
    }
@@ -538,6 +544,7 @@ int _photon_update_rectangles(SDL_Renderer* renderer, PhRect_t* rect)
             PgDrawPhImageRectv(&src_point, rdata->psurfaces[rdata->surface_visible_idx], rect, 0);
             break;
        case SDL_PHOTON_SURFTYPE_UNKNOWN:
+       default:
             break;
    }
 }
@@ -567,6 +574,7 @@ photon_activaterenderer(SDL_Renderer * renderer)
            PgSetGCCx(rdata->pcontexts[rdata->surface_render_idx], rdata->gc);
            break;
       case SDL_PHOTON_SURFTYPE_UNKNOWN:
+      default:
            break;
    }
 
@@ -582,10 +590,33 @@ photon_displaymodechanged(SDL_Renderer * renderer)
 static int
 photon_createtexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-    SDL_RenderData *renderdata = (SDL_RenderData *) renderer->driverdata;
+    SDL_RenderData *rdata = (SDL_RenderData *) renderer->driverdata;
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
     SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_DisplayData *didata = (SDL_DisplayData *) display->driverdata;
     SDL_TextureData *tdata = NULL;
+    uint32_t it;
+
+    /* Check, if it is not initialized */
+    if (rdata->surfaces_type==SDL_PHOTON_SURFTYPE_UNKNOWN)
+    {
+       SDL_SetError("Photon: can't create texture for OpenGL ES window");
+       return -1;
+    }
+
+    /* Check if requested texture format is supported */
+    for (it=0; it<renderer->info.num_texture_formats; it++)
+    {
+       if (renderer->info.texture_formats[it]==texture->format)
+       {
+          break;
+       }
+    }
+    if (it==renderer->info.num_texture_formats)
+    {
+       SDL_SetError("Photon: requested texture format is not supported");
+       return -1;
+    }
 
     /* Allocate texture driver data */
     tdata = (SDL_TextureData *) SDL_calloc(1, sizeof(SDL_TextureData));
@@ -596,12 +627,105 @@ photon_createtexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     /* Set texture driver data */
     texture->driverdata = tdata;
+
+    /* Try offscreen allocation only in case if displayable buffers are also offscreen */
+    if (rdata->surfaces_type==SDL_PHOTON_SURFTYPE_OFFSCREEN)
+    {
+       /* Try to allocate offscreen memory first */
+       tdata->osurface=PdCreateOffscreenContext(0, texture->w, texture->h,
+                       Pg_OSC_MEM_LINEAR_ACCESSIBLE | Pg_OSC_MEM_PAGE_ALIGN |
+                       /* in case if 2D acceleration is not available use CPU optimized surfaces */
+                       Pg_OSC_MEM_HINT_CPU_READ | Pg_OSC_MEM_HINT_CPU_WRITE |
+                       /* in case if 2D acceleration is available use it */
+                       Pg_OSC_MEM_2D_WRITABLE | Pg_OSC_MEM_2D_READABLE);
+    }
+
+    /* Check if offscreen allocation has been failed */
+    if (tdata->osurface==NULL)
+    {
+       PhPoint_t translation={0, 0};
+       PhDim_t   dimension={texture->w, texture->h};
+       uint32_t  image_pfmt=photon_sdl_to_image_pixelformat(didata->current_mode.format);
+
+       /* Allocate photon image */
+       if (image_pfmt==Pg_IMAGE_PALETTE_BYTE)
+       {
+          tdata->psurface=PhCreateImage(NULL, texture->w, texture->h,
+                          image_pfmt, NULL, 256, 1);
+       }
+       else
+       {
+          tdata->psurface=PhCreateImage(NULL, texture->w, texture->h,
+                          image_pfmt, NULL, 0, 1);
+       }
+
+       if (tdata->psurface==NULL)
+       {
+          return -1;
+       }
+
+       /* Create memory context for PhImage_t */
+       tdata->pcontext=PmMemCreateMC(tdata->psurface, &dimension, &translation);
+       if (tdata->pcontext==NULL)
+       {
+          /* Destroy PhImage */
+          if (tdata->psurface!=NULL)
+          {
+             if (tdata->psurface->palette!=NULL)
+             {
+                SDL_free(tdata->psurface->palette);
+                tdata->psurface->palette=NULL;
+             }
+             /* Destroy shared memory for PhImage_t */
+             PgShmemDestroy(tdata->psurface->image);
+             tdata->psurface->image=NULL;
+             SDL_free(tdata->psurface);
+             tdata->psurface=NULL;
+          }
+       }
+       tdata->surface_type=SDL_PHOTON_SURFTYPE_PHIMAGE;
+    }
+    else
+    {
+       tdata->surface_type=SDL_PHOTON_SURFTYPE_OFFSCREEN;
+    }
+
+    return 0;
 }
 
 static int
 photon_querytexturepixels(SDL_Renderer * renderer, SDL_Texture * texture,
                           void **pixels, int *pitch)
 {
+   SDL_RenderData *rdata = (SDL_RenderData *) renderer->driverdata;
+   SDL_TextureData* tdata=(SDL_TextureData*)texture->driverdata;
+
+   /* Check, if it is not initialized */
+   if (rdata->surfaces_type==SDL_PHOTON_SURFTYPE_UNKNOWN)
+   {
+      SDL_SetError("Photon: can't query texture pixels for OpenGL ES window");
+      return -1;
+   }
+
+   /* Clear outcoming parameters */
+   *pixels=NULL;
+   *pitch=0;
+
+   switch (tdata->surface_type)
+   {
+      case SDL_PHOTON_SURFTYPE_OFFSCREEN:
+           *pixels=(void*)PdGetOffscreenContextPtr(tdata->osurface);
+           *pitch=tdata->osurface->pitch;
+           break;
+      case SDL_PHOTON_SURFTYPE_PHIMAGE:
+           *pixels=(void*)tdata->psurface->image;
+           *pitch=tdata->psurface->bpl;
+           break;
+      default:
+           break;
+   }
+
+   return 0;
 }
 
 static int
@@ -609,38 +733,151 @@ photon_settexturepalette(SDL_Renderer * renderer, SDL_Texture * texture,
                          const SDL_Color * colors, int firstcolor,
                          int ncolors)
 {
+   SDL_RenderData *rdata = (SDL_RenderData *) renderer->driverdata;
+   SDL_TextureData* tdata=(SDL_TextureData*)texture->driverdata;
+
+   /* Check, if it is not initialized */
+   if (rdata->surfaces_type==SDL_PHOTON_SURFTYPE_UNKNOWN)
+   {
+      SDL_SetError("Photon: can't set texture palette for OpenGL ES window");
+      return -1;
+   }
+
+   if (texture->format!=SDL_PIXELFORMAT_INDEX8)
+   {
+      SDL_SetError("Photon: can't set palette for non-paletted texture");
+      return -1;
+   }
+
+   return -1;
 }
 
 static int
 photon_gettexturepalette(SDL_Renderer * renderer, SDL_Texture * texture,
                          SDL_Color * colors, int firstcolor, int ncolors)
 {
+   SDL_RenderData *rdata = (SDL_RenderData *) renderer->driverdata;
+   SDL_TextureData* tdata=(SDL_TextureData*)texture->driverdata;
+
+   /* Check, if it is not initialized */
+   if (rdata->surfaces_type==SDL_PHOTON_SURFTYPE_UNKNOWN)
+   {
+      SDL_SetError("Photon: can't return texture palette for OpenGL ES window");
+      return -1;
+   }
+
+   if (texture->format!=SDL_PIXELFORMAT_INDEX8)
+   {
+      SDL_SetError("Photon: can't return palette for non-paletted texture");
+      return -1;
+   }
+
+   return -1;
 }
 
 static int
 photon_settexturecolormod(SDL_Renderer * renderer, SDL_Texture * texture)
 {
+   /* TODO */
+   return -1;
 }
 
 static int
 photon_settexturealphamod(SDL_Renderer * renderer, SDL_Texture * texture)
 {
+   /* TODO */
+   return -1;
 }
 
 static int
 photon_settextureblendmode(SDL_Renderer * renderer, SDL_Texture * texture)
 {
+    SDL_RenderData *rdata = (SDL_RenderData *) renderer->driverdata;
+
+    /* Check, if it is not initialized */
+    if (rdata->surfaces_type==SDL_PHOTON_SURFTYPE_UNKNOWN)
+    {
+       SDL_SetError("Photon: can't set texture blend mode for OpenGL ES window");
+       return -1;
+    }
+
+    switch (texture->blendMode)
+    {
+        case SDL_BLENDMODE_NONE:
+        case SDL_BLENDMODE_MASK:
+        case SDL_BLENDMODE_BLEND:
+             return 0;
+        case SDL_BLENDMODE_ADD:
+        case SDL_BLENDMODE_MOD:
+        default:
+             SDL_Unsupported();
+             texture->blendMode = SDL_BLENDMODE_NONE;
+             return -1;
+    }
 }
 
 static int
 photon_settexturescalemode(SDL_Renderer * renderer, SDL_Texture * texture)
 {
+   /* TODO */
+   return -1;
 }
 
 static int
 photon_updatetexture(SDL_Renderer * renderer, SDL_Texture * texture,
                      const SDL_Rect * rect, const void *pixels, int pitch)
 {
+   SDL_RenderData *rdata = (SDL_RenderData *) renderer->driverdata;
+   SDL_TextureData* tdata=(SDL_TextureData*)texture->driverdata;
+
+   uint8_t* src=(uint8_t*)pixels;
+   uint8_t* dst;
+   uint32_t dst_pitch;
+   uint32_t it;
+   uint32_t copy_length;
+
+   /* Check, if it is not initialized */
+   if (rdata->surfaces_type==SDL_PHOTON_SURFTYPE_UNKNOWN)
+   {
+       SDL_SetError("Photon: can't update texture for OpenGL ES window");
+       return -1;
+   }
+
+   switch (tdata->surface_type)
+   {
+      case SDL_PHOTON_SURFTYPE_OFFSCREEN:
+           dst=(uint8_t*)PdGetOffscreenContextPtr(tdata->osurface);
+           dst_pitch=tdata->osurface->pitch;
+           if (dst==NULL)
+           {
+              SDL_SetError("Photon: can't get pointer to texture surface");
+              return -1;
+           }
+           break;
+      case SDL_PHOTON_SURFTYPE_PHIMAGE:
+           dst=(uint8_t*)tdata->psurface->image;
+           dst_pitch=tdata->psurface->bpl;
+           if (dst==NULL)
+           {
+              SDL_SetError("Photon: can't get pointer to texture surface");
+              return -1;
+           }
+           break;
+      default:
+           SDL_SetError("Photon: invalid internal surface type");
+           return -1;
+   }
+
+   dst+=rect->y * dst_pitch + rect->x * SDL_BYTESPERPIXEL(texture->format);
+   copy_length=rect->w * SDL_BYTESPERPIXEL(texture->format);
+   for (it = 0; it < rect->h; it++)
+   {
+      SDL_memcpy(dst, src, copy_length);
+      src+=pitch;
+      dst+=dst_pitch;
+   }
+
+   return 0;
 }
 
 static int
@@ -648,23 +885,72 @@ photon_locktexture(SDL_Renderer * renderer, SDL_Texture * texture,
                    const SDL_Rect * rect, int markDirty, void **pixels,
                    int *pitch)
 {
+   SDL_RenderData *rdata = (SDL_RenderData *) renderer->driverdata;
+   SDL_TextureData* tdata=(SDL_TextureData*)texture->driverdata;
+
+   /* Check, if it is not initialized */
+   if (rdata->surfaces_type==SDL_PHOTON_SURFTYPE_UNKNOWN)
+   {
+       SDL_SetError("Photon: can't lock texture for OpenGL ES window");
+       return -1;
+   }
+
+   /* Clear outcoming parameters */
+   *pixels=NULL;
+   *pitch=0;
+
+   switch (tdata->surface_type)
+   {
+      case SDL_PHOTON_SURFTYPE_OFFSCREEN:
+           *pixels=(void*)((uint8_t*)PdGetOffscreenContextPtr(tdata->osurface) +
+                   rect->y * tdata->osurface->pitch +
+                   rect->x * SDL_BYTESPERPIXEL(texture->format));
+           *pitch=tdata->osurface->pitch;
+           break;
+      case SDL_PHOTON_SURFTYPE_PHIMAGE:
+           *pixels=(void*)((uint8_t*)tdata->psurface->image +
+                   rect->y * tdata->osurface->pitch +
+                   rect->x * SDL_BYTESPERPIXEL(texture->format));
+           *pitch=tdata->psurface->bpl;
+           break;
+      default:
+           break;
+   }
+
+   return 0;
 }
 
 static void
 photon_unlocktexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
+   SDL_RenderData *rdata = (SDL_RenderData *) renderer->driverdata;
+
+   /* Check, if it is not initialized */
+   if (rdata->surfaces_type==SDL_PHOTON_SURFTYPE_UNKNOWN)
+   {
+       SDL_SetError("Photon: can't unlock texture for OpenGL ES window");
+       return;
+   }
 }
 
 static void
 photon_dirtytexture(SDL_Renderer * renderer, SDL_Texture * texture,
                     int numrects, const SDL_Rect * rects)
 {
+   /* TODO */
 }
 
 static int
 photon_setdrawcolor(SDL_Renderer * renderer)
 {
    SDL_RenderData *rdata = (SDL_RenderData *) renderer->driverdata;
+
+   /* Check, if it is not initialized */
+   if (rdata->surfaces_type==SDL_PHOTON_SURFTYPE_UNKNOWN)
+   {
+       SDL_SetError("Photon: can't set draw color for OpenGL ES window");
+       return -1;
+   }
 
    switch (rdata->surfaces_type)
    {
@@ -674,19 +960,31 @@ photon_setdrawcolor(SDL_Renderer * renderer)
             PgSetStrokeColorCx(rdata->gc, PgRGB(renderer->r, renderer->g, renderer->b));
             break;
        case SDL_PHOTON_SURFTYPE_UNKNOWN:
+       default:
             break;
    }
+
+   return 0;
 }
 
 static int
 photon_setdrawblendmode(SDL_Renderer * renderer)
 {
+   /* TODO */
+   return -1;
 }
 
 static int
 photon_renderpoint(SDL_Renderer * renderer, int x, int y)
 {
    SDL_RenderData *rdata = (SDL_RenderData *) renderer->driverdata;
+
+   /* Check, if it is not initialized */
+   if (rdata->surfaces_type==SDL_PHOTON_SURFTYPE_UNKNOWN)
+   {
+       SDL_SetError("Photon: can't render point in OpenGL ES window");
+       return -1;
+   }
 
    switch (rdata->surfaces_type)
    {
@@ -697,14 +995,24 @@ photon_renderpoint(SDL_Renderer * renderer, int x, int y)
             PgDrawIPixelCx(rdata->pcontexts[rdata->surface_render_idx], x, y);
             break;
        case SDL_PHOTON_SURFTYPE_UNKNOWN:
+       default:
             break;
    }
+
+   return 0;
 }
 
 static int
 photon_renderline(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
 {
    SDL_RenderData *rdata = (SDL_RenderData *) renderer->driverdata;
+
+   /* Check, if it is not initialized */
+   if (rdata->surfaces_type==SDL_PHOTON_SURFTYPE_UNKNOWN)
+   {
+       SDL_SetError("Photon: can't render line in OpenGL ES window");
+       return -1;
+   }
 
    switch (rdata->surfaces_type)
    {
@@ -715,14 +1023,24 @@ photon_renderline(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
             PgDrawILineCx(rdata->pcontexts[rdata->surface_render_idx], x1, y1, x2, y2);
             break;
        case SDL_PHOTON_SURFTYPE_UNKNOWN:
+       default:
             break;
    }
+
+   return 0;
 }
 
 static int
 photon_renderfill(SDL_Renderer * renderer, const SDL_Rect * rect)
 {
    SDL_RenderData *rdata = (SDL_RenderData *) renderer->driverdata;
+
+   /* Check, if it is not initialized */
+   if (rdata->surfaces_type==SDL_PHOTON_SURFTYPE_UNKNOWN)
+   {
+       SDL_SetError("Photon: can't render filled box in OpenGL ES window");
+       return -1;
+   }
 
    switch (rdata->surfaces_type)
    {
@@ -733,6 +1051,7 @@ photon_renderfill(SDL_Renderer * renderer, const SDL_Rect * rect)
             PgDrawIRectCx(rdata->pcontexts[rdata->surface_render_idx], rect->x, rect->y, rect->w+rect->x-1, rect->h+rect->y-1, Pg_DRAW_FILL);
             break;
        case SDL_PHOTON_SURFTYPE_UNKNOWN:
+       default:
             break;
    }
 }
@@ -741,6 +1060,110 @@ static int
 photon_rendercopy(SDL_Renderer * renderer, SDL_Texture * texture,
                   const SDL_Rect * srcrect, const SDL_Rect * dstrect)
 {
+   SDL_RenderData *rdata = (SDL_RenderData *) renderer->driverdata;
+   SDL_TextureData* tdata=(SDL_TextureData*)texture->driverdata;
+
+   PhRect_t src_rect;
+   PhRect_t dst_rect;
+   PhPoint_t dst_point;
+
+   /* Check, if it is not initialized */
+   if (rdata->surfaces_type==SDL_PHOTON_SURFTYPE_UNKNOWN)
+   {
+       SDL_SetError("Photon: can't blit textures in OpenGL ES window");
+       return -1;
+   }
+
+   /* Switch on requested graphics context modifiers */
+   switch(texture->blendMode)
+   {
+      case SDL_BLENDMODE_MASK:
+           /* Enable and set chroma key */
+           PgChromaOnCx(rdata->gc);
+           PgSetChromaCx(rdata->gc, PgRGB(255, 255, 255), Pg_CHROMA_SRC_MATCH | Pg_CHROMA_NODRAW);
+           break;
+      case SDL_BLENDMODE_BLEND:
+           /* TODO */
+           break;
+      case SDL_BLENDMODE_NONE:
+      default:
+           /* Do nothing */
+           break;
+   }
+
+   /* Set source blit area */
+   src_rect.ul.x = srcrect->x;
+   src_rect.ul.y = srcrect->y;
+   src_rect.lr.x = srcrect->x + srcrect->w - 1;
+   src_rect.lr.y = srcrect->y + srcrect->h - 1;
+
+   /* Set destination blit area */
+   dst_rect.ul.x = dstrect->x;
+   dst_rect.ul.y = dstrect->y;
+   dst_rect.lr.x = dstrect->x + dstrect->w - 1;
+   dst_rect.lr.y = dstrect->y + dstrect->h - 1;
+
+   /* Set destination point */
+   dst_point.x = dstrect->x;
+   dst_point.y = dstrect->y;
+
+   /* Do blit */
+   switch (rdata->surfaces_type)
+   {
+       case SDL_PHOTON_SURFTYPE_OFFSCREEN:
+            /* two possible combinations */
+            switch (tdata->surface_type)
+            {
+               case SDL_PHOTON_SURFTYPE_OFFSCREEN:
+                    /* easiest full accelerated combination: offscreen->offscreen */
+                    PgContextBlitCx(rdata->osurfaces[rdata->surface_render_idx], tdata->osurface,
+                                    &src_rect, rdata->osurfaces[rdata->surface_render_idx], &dst_rect);
+                    break;
+               case SDL_PHOTON_SURFTYPE_PHIMAGE:
+                    /* not accelerated combination: PhImage->offscreen */
+                    /* scaling is not supported in this method */
+                    PgDrawPhImageRectCxv(rdata->osurfaces[rdata->surface_render_idx], &dst_point,
+                                         tdata->psurface, &src_rect, 0);
+                    break;
+               default:
+                    break;
+            }
+            break;
+       case SDL_PHOTON_SURFTYPE_PHIMAGE:
+            /* two possible combinations */
+            switch (tdata->surface_type)
+            {
+               case SDL_PHOTON_SURFTYPE_OFFSCREEN:
+                    /* not supported combination: offscreen->PhImage */
+                    return -1;
+               case SDL_PHOTON_SURFTYPE_PHIMAGE:
+                    /* not accelerated combination, but fast: PhImage->PhImage */
+                    /* scaling is not supported in this method */
+                    PgDrawPhImageRectCxv(rdata->pcontexts[rdata->surface_render_idx], &dst_point, tdata->psurface, &src_rect, 0);
+                    break;
+               default:
+                    break;
+            }
+            break;
+   }
+
+   /* Switch off graphics context modifiers */
+   switch(texture->blendMode)
+   {
+      case SDL_BLENDMODE_MASK:
+           /* Disable chroma key */
+           PgChromaOffCx(rdata->gc);
+           break;
+      case SDL_BLENDMODE_BLEND:
+           /* TODO */
+           break;
+      case SDL_BLENDMODE_NONE:
+      default:
+           /* Do nothing */
+           break;
+   }
+
+   return 0;
 }
 
 static void
@@ -751,6 +1174,13 @@ photon_renderpresent(SDL_Renderer * renderer)
    SDL_WindowData *wdata = (SDL_WindowData *) window->driverdata;
    PhRect_t src_rect;
    PhPoint_t src_point;
+
+   /* Check, if it is not initialized */
+   if (rdata->surfaces_type==SDL_PHOTON_SURFTYPE_UNKNOWN)
+   {
+       SDL_SetError("Photon: can't render present for OpenGL ES window");
+       return;
+   }
 
    /* Flush all undrawn graphics data to surface */
    switch (rdata->surfaces_type)
@@ -763,6 +1193,7 @@ photon_renderpresent(SDL_Renderer * renderer)
             PmMemFlush(rdata->pcontexts[rdata->surface_render_idx], rdata->psurfaces[rdata->surface_render_idx]);
             break;
        case SDL_PHOTON_SURFTYPE_UNKNOWN:
+       default:
             return;
    }
 
@@ -787,6 +1218,7 @@ photon_renderpresent(SDL_Renderer * renderer)
             PgDrawPhImagev(&src_point, rdata->psurfaces[rdata->surface_render_idx], 0);
             break;
        case SDL_PHOTON_SURFTYPE_UNKNOWN:
+       default:
             break;
    }
 
@@ -798,6 +1230,55 @@ photon_renderpresent(SDL_Renderer * renderer)
 static void
 photon_destroytexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
+   SDL_RenderData *rdata = (SDL_RenderData *) renderer->driverdata;
+   SDL_TextureData* tdata=(SDL_TextureData*)texture->driverdata;
+
+   /* Check if partially created texture must be destroyed */
+   if (tdata==NULL)
+   {
+      return;
+   }
+
+   /* Check, if it is not initialized */
+   if (rdata->surfaces_type==SDL_PHOTON_SURFTYPE_UNKNOWN)
+   {
+       SDL_SetError("Photon: can't destroy texture for OpenGL ES window");
+       return;
+   }
+
+   switch (tdata->surface_type)
+   {
+      case SDL_PHOTON_SURFTYPE_OFFSCREEN:
+           if (tdata->osurface!=NULL)
+           {
+              PhDCRelease(tdata->osurface);
+              tdata->osurface = NULL;
+           }
+           break;
+      case SDL_PHOTON_SURFTYPE_PHIMAGE:
+           if (tdata->pcontext!=NULL)
+           {
+              PmMemReleaseMC(tdata->pcontext);
+              tdata->pcontext=NULL;
+           }
+
+           if (tdata->psurface!=NULL)
+           {
+              if (tdata->psurface->palette!=NULL)
+              {
+                 SDL_free(tdata->psurface->palette);
+                 tdata->psurface->palette=NULL;
+              }
+              /* Destroy shared memory for PhImage_t */
+              PgShmemDestroy(tdata->psurface->image);
+              tdata->psurface->image=NULL;
+              SDL_free(tdata->psurface);
+              tdata->psurface=NULL;
+           }
+           break;
+      default:
+           break;
+   }
 }
 
 static void
@@ -857,6 +1338,7 @@ photon_destroyrenderer(SDL_Renderer * renderer)
             }
             break;
        case SDL_PHOTON_SURFTYPE_UNKNOWN:
+       default:
             {
                /* nothing to do */
             }

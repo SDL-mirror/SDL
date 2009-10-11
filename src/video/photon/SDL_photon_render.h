@@ -55,6 +55,10 @@ typedef struct SDL_RenderData
 
 typedef struct SDL_TextureData
 {
+   uint32_t surface_type;
+   PdOffscreenContext_t* osurface;
+   PhImage_t* psurface;
+   PmMemoryContext_t* pcontext;
 } SDL_TextureData;
 
 extern void photon_addrenderdriver(_THIS);

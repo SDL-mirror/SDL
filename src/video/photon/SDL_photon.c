@@ -817,7 +817,7 @@ photon_createwindow(_THIS, SDL_Window * window)
     if (window->title != NULL) {
         PtSetArg(&winargs[winargc++], Pt_ARG_WINDOW_TITLE, window->title, 0);
     } else {
-        PtSetArg(&winargs[winargc++], Pt_ARG_WINDOW_TITLE, "", 0);
+        PtSetArg(&winargs[winargc++], Pt_ARG_WINDOW_TITLE, "SDL unnamed application", 0);
     }
 
     /* TODO: handle SDL_WINDOW_INPUT_GRABBED */
