@@ -4,6 +4,9 @@ AC_CONFIG_HEADER(include/SDL_config.h)
 AC_GNU_SOURCE
 AC_CONFIG_AUX_DIRS($srcdir/build-scripts)
 
+dnl Save the CFLAGS to see whether they were passed in or generated
+orig_CFLAGS="$CFLAGS"
+
 dnl Set various version strings - taken gratefully from the GTk sources
 #
 # Making releases:
@@ -87,6 +90,10 @@ case "$host" in
         ;;
 esac
 BUILD_CFLAGS="$CFLAGS $CPPFLAGS"
+# The default optimization for SDL 1.3 is -O3 (Bug #31)
+if test x$orig_CFLAGS = x; then
+    BUILD_CFLAGS=`echo $BUILD_CFLAGS | sed 's/-O2/-O3/'`
+fi
 EXTRA_CFLAGS="$INCLUDE $BASE_CFLAGS"
 BUILD_LDFLAGS="$LDFLAGS"
 EXTRA_LDFLAGS="$BASE_LDFLAGS"
