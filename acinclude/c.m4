@@ -626,13 +626,13 @@ if test "$ac_test_CFLAGS" = set; then
   CFLAGS=$ac_save_CFLAGS
 elif test $ac_cv_prog_cc_g = yes; then
   if test "$GCC" = yes; then
-    CFLAGS="-g -O2"
+    CFLAGS="-g -O3"
   else
     CFLAGS="-g"
   fi
 else
   if test "$GCC" = yes; then
-    CFLAGS="-O2"
+    CFLAGS="-O3"
   else
     CFLAGS=
   fi
@@ -860,13 +860,13 @@ if test "$ac_test_CXXFLAGS" = set; then
   CXXFLAGS=$ac_save_CXXFLAGS
 elif test $ac_cv_prog_cxx_g = yes; then
   if test "$GXX" = yes; then
-    CXXFLAGS="-g -O2"
+    CXXFLAGS="-g -O3"
   else
     CXXFLAGS="-g"
   fi
 else
   if test "$GXX" = yes; then
-    CXXFLAGS="-O2"
+    CXXFLAGS="-O3"
   else
     CXXFLAGS=
   fi
@@ -1030,13 +1030,13 @@ if test "$ac_test_OBJCFLAGS" = set; then
   OBJCFLAGS=$ac_save_OBJCFLAGS
 elif test $ac_cv_prog_objc_g = yes; then
   if test "$GOBJC" = yes; then
-    OBJCFLAGS="-g -O2"
+    OBJCFLAGS="-g -O3"
   else
     OBJCFLAGS="-g"
   fi
 else
   if test "$GOBJC" = yes; then
-    OBJCFLAGS="-O2"
+    OBJCFLAGS="-O3"
   else
     OBJCFLAGS=
   fi
