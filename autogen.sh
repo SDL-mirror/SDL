@@ -3,6 +3,9 @@
 echo "Generating build information using autoconf"
 echo "This may take a while ..."
 
+# Generate SDL_revision.h
+sh build-scripts/updaterev.sh
+
 # Regenerate configuration files
 cat acinclude/* >aclocal.m4
 found=false
