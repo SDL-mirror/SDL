@@ -48,6 +48,7 @@ typedef struct SDL_RenderData
     uint32_t window_width;              /* Last active window width           */
     uint32_t window_height;             /* Last active window height          */
     PhGC_t* gc;                         /* Graphics context                   */
+    SDL_bool direct_mode;               /* Direct Mode state                  */
     PdOffscreenContext_t* osurfaces[SDL_PHOTON_MAX_SURFACES];
     PhImage_t* psurfaces[SDL_PHOTON_MAX_SURFACES];
     PmMemoryContext_t* pcontexts[SDL_PHOTON_MAX_SURFACES];

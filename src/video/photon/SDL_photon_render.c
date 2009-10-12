@@ -163,6 +163,9 @@ photon_createrenderer(SDL_Window * window, Uint32 flags)
     renderer->window = window->id;
     renderer->driverdata = rdata;
 
+    /* Copy direct_mode status */
+    rdata->direct_mode=didata->direct_mode;
+
     /* Set render acceleration flag in case it is accelerated */
     if ((didata->caps & SDL_PHOTON_ACCELERATED) == SDL_PHOTON_ACCELERATED) {
         renderer->info.flags = SDL_RENDERER_ACCELERATED;
@@ -172,7 +175,16 @@ photon_createrenderer(SDL_Window * window, Uint32 flags)
 
     /* Check if upper level requested synchronization on vsync signal */
     if ((flags & SDL_RENDERER_PRESENTVSYNC) == SDL_RENDERER_PRESENTVSYNC) {
-        rdata->enable_vsync = SDL_TRUE;
+        if (rdata->direct_mode==SDL_TRUE)
+        {
+           /* We can control vsync only in direct mode */
+           rdata->enable_vsync = SDL_TRUE;
+           renderer->info.flags |= SDL_RENDERER_PRESENTVSYNC;
+        }
+        else
+        {
+           rdata->enable_vsync = SDL_FALSE;
+        }
     } else {
         rdata->enable_vsync = SDL_FALSE;
     }
@@ -600,6 +612,15 @@ photon_activaterenderer(SDL_Renderer * renderer)
 static int
 photon_displaymodechanged(SDL_Renderer * renderer)
 {
+    SDL_RenderData *rdata = (SDL_RenderData *) renderer->driverdata;
+    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_DisplayData *didata = (SDL_DisplayData *) display->driverdata;
+
+    /* Copy direct_mode status */
+    rdata->direct_mode=didata->direct_mode;
+
+    /* Update the surfaces */
     return _photon_recreate_surfaces(renderer);
 }
 

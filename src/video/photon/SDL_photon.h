@@ -83,6 +83,7 @@ typedef struct SDL_DisplayData
     SDL_bool cursor_visible;            /* SDL_TRUE if cursor visible         */
     uint32_t cursor_size;               /* Cursor size in memory w/ structure */
     uint32_t mode_2dcaps;               /* Current video mode 2D capabilities */
+    SDL_bool direct_mode;               /* Direct mode state                  */
 #if defined(SDL_VIDEO_OPENGL_ES)
     gf_display_t display;               /* GF display handle                  */
     gf_display_info_t display_info;     /* GF display information             */

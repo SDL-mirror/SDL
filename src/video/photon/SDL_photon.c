@@ -2456,6 +2456,35 @@ photon_pumpevents(_THIS)
                     break;
                 case Ph_EV_INFO:
                     {
+                        switch (event->subtype)
+                        {
+                           case Ph_OFFSCREEN_INVALID:
+                                {
+                                   uint32_t* type;
+
+                                   type = PhGetData(event);
+                                   switch (*type)
+                                   {
+                                      case Pg_VIDEO_MODE_SWITCHED:
+                                      case Pg_ENTERED_DIRECT:
+                                      case Pg_EXITED_DIRECT:
+                                      case Pg_DRIVER_STARTED:
+                                           {
+                                               /* TODO: */
+                                               /* We must tell the renderer, that it have */
+                                               /* to recreate all surfaces                */
+                                           }
+                                           break;
+                                      default:
+                                           {
+                                           }
+                                           break;
+                                   }
+                                }
+                                break;
+                           default:
+                                break;
+                        }
                     }
                     break;
                 case Ph_EV_KEY:
