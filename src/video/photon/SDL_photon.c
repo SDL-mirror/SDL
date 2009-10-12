@@ -431,11 +431,11 @@ photon_videoinit(_THIS)
             didata->mode_2dcaps=0;
             if ((modeinfo.mode_capabilities2 & PgVM_MODE_CAP2_ALPHA_BLEND)==PgVM_MODE_CAP2_ALPHA_BLEND)
             {
-               didata->mode_2dcaps|=SDL_VIDEO_CAP_ALPHA_BLEND;
+               didata->mode_2dcaps|=SDL_VIDEO_PHOTON_CAP_ALPHA_BLEND;
             }
             if ((modeinfo.mode_capabilities2 & PgVM_MODE_CAP2_SCALED_BLIT)==PgVM_MODE_CAP2_SCALED_BLIT)
             {
-               didata->mode_2dcaps|=SDL_VIDEO_CAP_SCALED_BLIT;
+               didata->mode_2dcaps|=SDL_VIDEO_PHOTON_CAP_SCALED_BLIT;
             }
         }
 
@@ -765,11 +765,11 @@ photon_setdisplaymode(_THIS, SDL_DisplayMode * mode)
     didata->mode_2dcaps=0;
     if ((modeinfo.mode_capabilities2 & PgVM_MODE_CAP2_ALPHA_BLEND)==PgVM_MODE_CAP2_ALPHA_BLEND)
     {
-       didata->mode_2dcaps|=SDL_VIDEO_CAP_ALPHA_BLEND;
+       didata->mode_2dcaps|=SDL_VIDEO_PHOTON_CAP_ALPHA_BLEND;
     }
     if ((modeinfo.mode_capabilities2 & PgVM_MODE_CAP2_SCALED_BLIT)==PgVM_MODE_CAP2_SCALED_BLIT)
     {
-       didata->mode_2dcaps|=SDL_VIDEO_CAP_SCALED_BLIT;
+       didata->mode_2dcaps|=SDL_VIDEO_PHOTON_CAP_SCALED_BLIT;
     }
 
     return 0;

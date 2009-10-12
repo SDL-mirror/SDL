@@ -68,8 +68,8 @@ typedef struct SDL_VideoData
 #define SDL_VIDEO_PHOTON_EVENT_SIZE 8192
 
 /* Current video mode graphics capabilities */
-#define SDL_VIDEO_CAP_ALPHA_BLEND 0x00000001
-#define SDL_VIDEO_CAP_SCALED_BLIT 0x00000002
+#define SDL_VIDEO_PHOTON_CAP_ALPHA_BLEND 0x00000001
+#define SDL_VIDEO_PHOTON_CAP_SCALED_BLIT 0x00000002
 
 typedef struct SDL_DisplayData
 {
