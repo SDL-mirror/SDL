@@ -363,7 +363,7 @@ AC_HELP_STRING([--enable-alsa-shared], [dynamically load ALSA audio support [[de
                 fi
             fi
             alsa_lib_spec=`echo $ALSA_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libasound.so.*/'`
-            if [ x$alsa_lib_spec = x ]; then
+            if test x$alsa_lib_spec = x; then
                 alsa_lib_spec="/usr/$base_libdir/libasound.so.*"
             fi
             alsa_lib=`ls -- $alsa_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
@@ -462,7 +462,7 @@ AC_HELP_STRING([--enable-esd], [support the Enlightened Sound Daemon [[default=y
 AC_HELP_STRING([--enable-esd-shared], [dynamically load ESD audio support [[default=yes]]]),
                           , enable_esd_shared=yes)
             esd_lib_spec=`echo $ESD_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libesd.so.*/'`
-            if [ x$esd_lib_spec = x ]; then
+            if test x$esd_lib_spec = x; then
                 esd_lib_spec="/usr/$base_libdir/libesd.so.*"
             fi
             esd_lib=`ls -- $esd_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
@@ -522,7 +522,7 @@ AC_HELP_STRING([--enable-pulseaudio-shared], [dynamically load PulseAudio suppor
                 fi
             fi
             pulse_lib_spec=`echo $PULSE_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libpulse-simple.so.*/'`
-            if [ x$pulse_lib_spec = x ]; then
+            if test x$pulse_lib_spec = x; then
                 pulse_lib_spec="/usr/$base_libdir/libpulse-simple.so.*"
             fi
             pulse_lib=`ls -- $pulse_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
@@ -645,7 +645,7 @@ AC_HELP_STRING([--enable-nas-shared], [dynamically load NAS audio support [[defa
                 fi
             fi
             nas_lib_spec=`echo $NAS_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libaudio.so.*/'`
-            if [ x$nas_lib_spec = x ]; then
+            if test x$nas_lib_spec = x ; then
                 nas_lib_spec="/usr/$base_libdir/libaudio.so.*"
             fi
             nas_lib=`ls -- $nas_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
