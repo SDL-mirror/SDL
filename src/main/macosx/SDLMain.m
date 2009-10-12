@@ -64,10 +64,10 @@ static NSString *getApplicationName(void)
 @end
 #endif
 
-@interface SDLApplication : NSApplication
+@interface NSApplication (SDLApplication)
 @end
 
-@implementation SDLApplication
+@implementation NSApplication (SDLApplication)
 /* Invoked from the Quit menu item */
 - (void)terminate:(id)sender
 {
@@ -119,7 +119,6 @@ static NSString *getApplicationName(void)
         if ([menuItem hasSubmenu])
             [self fixMenu:[menuItem submenu] withAppName:appName];
     }
-    [ aMenu sizeToFit ];
 }
 
 #else
@@ -373,7 +372,6 @@ int main (int argc, char **argv)
     }
 
 #if SDL_USE_NIB_FILE
-    [SDLApplication poseAsClass:[NSApplication class]];
     NSApplicationMain (argc, argv);
 #else
     CustomApplicationMain (argc, argv);
