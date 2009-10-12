@@ -304,17 +304,18 @@ static __inline__ void swizzle_alsa_channels(_THIS)
 
 static void ALSA_PlayAudio(_THIS)
 {
-	int           status;
-	int           sample_len;
-	signed short *sample_buf;
+	int status;
+	snd_pcm_uframes_t frames_left;
+	const Uint8 *sample_buf = (const Uint8 *) mixbuf;
+	const int frame_size = ( ((int) this->spec.channels) *
+	                         ((int) (this->spec.format & 0xFF)) );
 
 	swizzle_alsa_channels(this);
 
-	sample_len = this->spec.samples;
-	sample_buf = (signed short *)mixbuf;
+	frames_left = ((snd_pcm_uframes_t) this->spec.samples) / this->spec.channels;
 
-	while ( sample_len > 0 ) {
-		status = SDL_NAME(snd_pcm_writei)(pcm_handle, sample_buf, sample_len);
+	while ( frames_left > 0 ) {
+		status = SDL_NAME(snd_pcm_writei)(pcm_handle, sample_buf, frames_left);
 		if ( status < 0 ) {
 			if ( status == -EAGAIN ) {
 				SDL_Delay(1);
@@ -336,8 +337,8 @@ static void ALSA_PlayAudio(_THIS)
 			}
 			continue;
 		}
-		sample_buf += status * this->spec.channels;
-		sample_len -= status;
+		sample_buf += status * frame_size;
+		frames_left -= status;
 	}
 }
 
