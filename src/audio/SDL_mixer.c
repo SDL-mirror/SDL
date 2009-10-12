@@ -128,6 +128,7 @@ void SDL_MixAudio (Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 		break;
 
 		case AUDIO_S8: {
+#if defined(SDL_BUGGY_MMX_MIXERS) /* buggy, so we're disabling them. --ryan. */
 #if defined(__GNUC__) && defined(__i386__) && defined(SDL_ASSEMBLY_ROUTINES)
 			if (SDL_HasMMX())
 			{
@@ -141,6 +142,8 @@ void SDL_MixAudio (Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 			}
 			else
 #endif
+#endif
+
 #if defined(__GNUC__) && defined(__M68000__) && defined(SDL_ASSEMBLY_ROUTINES)
 			SDL_MixAudio_m68k_S8((char*)dst,(char*)src,(unsigned long)len,(long)volume);
 #else
@@ -174,6 +177,7 @@ void SDL_MixAudio (Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 		break;
 
 		case AUDIO_S16LSB: {
+#if defined(SDL_BUGGY_MMX_MIXERS) /* buggy, so we're disabling them. --ryan. */
 #if defined(__GNUC__) && defined(__i386__) && defined(SDL_ASSEMBLY_ROUTINES)
 			if (SDL_HasMMX())
 			{
@@ -187,6 +191,8 @@ void SDL_MixAudio (Uint8 *dst, const Uint8 *src, Uint32 len, int volume)
 			}
 			else
 #endif
+#endif
+
 #if defined(__GNUC__) && defined(__M68000__) && defined(SDL_ASSEMBLY_ROUTINES)
 			SDL_MixAudio_m68k_S16LSB((short*)dst,(short*)src,(unsigned long)len,(long)volume);
 #else

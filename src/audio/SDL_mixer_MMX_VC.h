@@ -22,6 +22,7 @@
 #include "SDL_config.h"
 
 
+#if defined(SDL_BUGGY_MMX_MIXERS) /* buggy, so we're disabling them. --ryan. */
 #if ((defined(_MSC_VER) && defined(_M_IX86)) || defined(__WATCOMC__)) && defined(SDL_ASSEMBLY_ROUTINES)
 /* headers for MMX assembler version of SDL_MixAudio
    Copyright 2002 Stephane Marchesin (stephane.marchesin@wanadoo.fr)
@@ -33,4 +34,5 @@
 */
 void SDL_MixAudio_MMX_S16_VC(char* ,char* ,unsigned int ,int );
 void SDL_MixAudio_MMX_S8_VC(char* ,char* ,unsigned int ,int );
+#endif
 #endif

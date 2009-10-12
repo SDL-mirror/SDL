@@ -23,6 +23,7 @@
 
 #include "SDL_mixer_MMX_VC.h"
 
+#if defined(SDL_BUGGY_MMX_MIXERS) /* buggy, so we're disabling them. --ryan. */
 #if ((defined(_MSC_VER) && defined(_M_IX86)) || defined(__WATCOMC__)) && defined(SDL_ASSEMBLY_ROUTINES)
 // MMX assembler version of SDL_MixAudio for signed little endian 16 bit samples and signed 8 bit samples
 // Copyright 2002 Stephane Marchesin (stephane.marchesin@wanadoo.fr)
@@ -179,3 +180,4 @@ endS8:
 }
 
 #endif /* SDL_ASSEMBLY_ROUTINES */
+#endif /* SDL_BUGGY_MMX_MIXERS */
