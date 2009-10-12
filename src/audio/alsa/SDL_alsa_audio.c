@@ -308,7 +308,7 @@ static void ALSA_PlayAudio(_THIS)
 	snd_pcm_uframes_t frames_left;
 	const Uint8 *sample_buf = (const Uint8 *) mixbuf;
 	const int frame_size = ( ((int) this->spec.channels) *
-	                         ((int) (this->spec.format & 0xFF)) );
+	                         (((int) (this->spec.format & 0xFF)) / 8) );
 
 	swizzle_alsa_channels(this);
 
