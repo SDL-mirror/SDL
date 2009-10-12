@@ -382,6 +382,7 @@ photon_videoinit(_THIS)
         didata->device_id = it;
 
         /* Query photon about graphics hardware caps and current video mode */
+        SDL_memset(&hwcaps, 0x00, sizeof(PgHWCaps_t));
         status = PgGetGraphicsHWCaps(&hwcaps);
         if (status != 0) {
             PhRect_t extent;
@@ -424,6 +425,17 @@ photon_videoinit(_THIS)
                 SDL_free(didata->cursor);
                 SDL_free(didata);
                 return -1;
+            }
+
+            /* Get current video mode 2D capabilities */
+            didata->mode_2dcaps=0;
+            if ((modeinfo.mode_capabilities2 & PgVM_MODE_CAP2_ALPHA_BLEND)==PgVM_MODE_CAP2_ALPHA_BLEND)
+            {
+               didata->mode_2dcaps|=SDL_VIDEO_CAP_ALPHA_BLEND;
+            }
+            if ((modeinfo.mode_capabilities2 & PgVM_MODE_CAP2_SCALED_BLIT)==PgVM_MODE_CAP2_SCALED_BLIT)
+            {
+               didata->mode_2dcaps|=SDL_VIDEO_CAP_SCALED_BLIT;
             }
         }
 
@@ -748,6 +760,17 @@ photon_setdisplaymode(_THIS, SDL_DisplayMode * mode)
     /* Store new video mode parameters */
     didata->current_mode = *mode;
     didata->current_mode.refresh_rate = refresh_rate;
+
+    /* Get current video mode 2D capabilities */
+    didata->mode_2dcaps=0;
+    if ((modeinfo.mode_capabilities2 & PgVM_MODE_CAP2_ALPHA_BLEND)==PgVM_MODE_CAP2_ALPHA_BLEND)
+    {
+       didata->mode_2dcaps|=SDL_VIDEO_CAP_ALPHA_BLEND;
+    }
+    if ((modeinfo.mode_capabilities2 & PgVM_MODE_CAP2_SCALED_BLIT)==PgVM_MODE_CAP2_SCALED_BLIT)
+    {
+       didata->mode_2dcaps|=SDL_VIDEO_CAP_SCALED_BLIT;
+    }
 
     return 0;
 }

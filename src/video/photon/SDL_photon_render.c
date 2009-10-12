@@ -96,7 +96,7 @@ SDL_RenderDriver photon_renderdriver = {
       SDL_TEXTUREMODULATE_ALPHA),
      (SDL_BLENDMODE_NONE | SDL_BLENDMODE_MASK | SDL_BLENDMODE_BLEND),
      (SDL_TEXTURESCALEMODE_NONE | SDL_TEXTURESCALEMODE_SLOW |
-      SDL_TEXTURESCALEMODE_FAST | SDL_TEXTURESCALEMODE_BEST),
+      SDL_TEXTURESCALEMODE_FAST),
      10,
      {SDL_PIXELFORMAT_INDEX8,
       SDL_PIXELFORMAT_RGB555,
@@ -167,7 +167,7 @@ photon_createrenderer(SDL_Window * window, Uint32 flags)
     if ((didata->caps & SDL_PHOTON_ACCELERATED) == SDL_PHOTON_ACCELERATED) {
         renderer->info.flags = SDL_RENDERER_ACCELERATED;
     } else {
-        renderer->info.flags &= ~(SDL_RENDERER_ACCELERATED);
+        renderer->info.flags = 0;
     }
 
     /* Check if upper level requested synchronization on vsync signal */
@@ -214,7 +214,7 @@ photon_createrenderer(SDL_Window * window, Uint32 flags)
         }
     }
 
-    /* Create new graphics context */
+    /* Create new graphics context for the renderer */
     if (rdata->gc==NULL)
     {
        rdata->gc=PgCreateGC(0);
@@ -224,6 +224,25 @@ photon_createrenderer(SDL_Window * window, Uint32 flags)
     /* Setup textures supported by current renderer instance */
     renderer->info.num_texture_formats=1;
     renderer->info.texture_formats[0]=didata->current_mode.format;
+
+    /* Initialize surfaces */
+    _photon_recreate_surfaces(renderer);
+
+    /* Set current scale blitting capabilities */
+    if (rdata->surfaces_type==SDL_PHOTON_SURFTYPE_OFFSCREEN)
+    {
+       renderer->info.scale_modes=SDL_TEXTURESCALEMODE_NONE | SDL_TEXTURESCALEMODE_SLOW;
+       if ((didata->mode_2dcaps & SDL_VIDEO_CAP_SCALED_BLIT)==SDL_VIDEO_CAP_SCALED_BLIT)
+       {
+          /* This video mode supports hardware scaling */
+          renderer->info.scale_modes|=SDL_TEXTURESCALEMODE_FAST;
+       }
+    }
+    else
+    {
+       /* PhImage blit functions do not support scaling */
+       renderer->info.scale_modes=SDL_TEXTURESCALEMODE_NONE;
+    }
 
     return renderer;
 }
@@ -347,11 +366,8 @@ static int _photon_recreate_surfaces(SDL_Renderer * renderer)
                {
                   rdata->osurfaces[it]=PdCreateOffscreenContext(0, window->w, window->h,
                   Pg_OSC_MEM_LINEAR_ACCESSIBLE | Pg_OSC_MEM_PAGE_ALIGN |
-                  /* in case if 2D acceleration is not available use CPU optimized surfaces */
-                  Pg_OSC_MEM_HINT_CPU_READ | Pg_OSC_MEM_HINT_CPU_WRITE |
                   /* in case if 2D acceleration is available use it */
                   Pg_OSC_MEM_2D_WRITABLE | Pg_OSC_MEM_2D_READABLE);
-
                   /* If we can't create an offscreen surface, then fallback to software */
                   if (rdata->osurfaces[it]==NULL)
                   {
@@ -634,13 +650,11 @@ photon_createtexture(SDL_Renderer * renderer, SDL_Texture * texture)
        /* Try to allocate offscreen memory first */
        tdata->osurface=PdCreateOffscreenContext(0, texture->w, texture->h,
                        Pg_OSC_MEM_LINEAR_ACCESSIBLE | Pg_OSC_MEM_PAGE_ALIGN |
-                       /* in case if 2D acceleration is not available use CPU optimized surfaces */
-                       Pg_OSC_MEM_HINT_CPU_READ | Pg_OSC_MEM_HINT_CPU_WRITE |
                        /* in case if 2D acceleration is available use it */
                        Pg_OSC_MEM_2D_WRITABLE | Pg_OSC_MEM_2D_READABLE);
     }
 
-    /* Check if offscreen allocation has been failed */
+    /* Check if offscreen allocation has been failed or not performed */
     if (tdata->osurface==NULL)
     {
        PhPoint_t translation={0, 0};
@@ -819,7 +833,46 @@ photon_settextureblendmode(SDL_Renderer * renderer, SDL_Texture * texture)
 static int
 photon_settexturescalemode(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-   /* TODO */
+   SDL_RenderData *rdata = (SDL_RenderData *) renderer->driverdata;
+
+   switch (texture->scaleMode)
+   {
+      case SDL_TEXTURESCALEMODE_NONE:
+           return 0;
+      case SDL_TEXTURESCALEMODE_FAST:
+           if ((renderer->info.scale_modes & SDL_TEXTURESCALEMODE_FAST)==SDL_TEXTURESCALEMODE_FAST)
+           {
+              return 0;
+           }
+           else
+           {
+              SDL_Unsupported();
+              texture->scaleMode = SDL_TEXTURESCALEMODE_FAST;
+              return -1;
+           }
+           break;
+      case SDL_TEXTURESCALEMODE_SLOW:
+           if ((renderer->info.scale_modes & SDL_TEXTURESCALEMODE_SLOW)==SDL_TEXTURESCALEMODE_SLOW)
+           {
+              return 0;
+           }
+           else
+           {
+              SDL_Unsupported();
+              texture->scaleMode = SDL_TEXTURESCALEMODE_SLOW;
+              return -1;
+           }
+           break;
+      case SDL_TEXTURESCALEMODE_BEST:
+           SDL_Unsupported();
+           texture->scaleMode = SDL_TEXTURESCALEMODE_SLOW;
+           return -1;
+      default:
+           SDL_Unsupported();
+           texture->scaleMode = SDL_TEXTURESCALEMODE_NONE;
+           return -1;
+   }
+
    return -1;
 }
 
@@ -937,7 +990,12 @@ static void
 photon_dirtytexture(SDL_Renderer * renderer, SDL_Texture * texture,
                     int numrects, const SDL_Rect * rects)
 {
-   /* TODO */
+   /* Check, if it is not initialized */
+   if (rdata->surfaces_type==SDL_PHOTON_SURFTYPE_UNKNOWN)
+   {
+       SDL_SetError("Photon: can't update dirty texture for OpenGL ES window");
+       return;
+   }
 }
 
 static int

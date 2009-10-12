@@ -67,6 +67,10 @@ typedef struct SDL_VideoData
 /* Maximum event message size with data payload */
 #define SDL_VIDEO_PHOTON_EVENT_SIZE 8192
 
+/* Current video mode graphics capabilities */
+#define SDL_VIDEO_CAP_ALPHA_BLEND 0x00000001
+#define SDL_VIDEO_CAP_SCALED_BLIT 0x00000002
+
 typedef struct SDL_DisplayData
 {
     uint32_t device_id;
@@ -78,6 +82,7 @@ typedef struct SDL_DisplayData
     PhCursorDef_t *cursor;              /* Global cursor settings             */
     SDL_bool cursor_visible;            /* SDL_TRUE if cursor visible         */
     uint32_t cursor_size;               /* Cursor size in memory w/ structure */
+    uint32_t mode_2dcaps;               /* Current video mode 2D capabilities */
 #if defined(SDL_VIDEO_OPENGL_ES)
     gf_display_t display;               /* GF display handle                  */
     gf_display_info_t display_info;     /* GF display information             */
