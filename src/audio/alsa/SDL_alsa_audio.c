@@ -43,9 +43,6 @@
 /* The tag name used by ALSA audio */
 #define DRIVER_NAME         "alsa"
 
-/* The default ALSA audio driver */
-#define DEFAULT_DEVICE	"default"
-
 /* Whether we should set the buffer size or the period size */
 /*#define SET_PERIOD_SIZE*/
 /*#define DEBUG_PERIOD_SIZE*/
@@ -172,9 +169,17 @@ static const char *get_audio_device(int channels)
 	
 	device = SDL_getenv("AUDIODEV");	/* Is there a standard variable name? */
 	if ( device == NULL ) {
-		if (channels == 6) device = "surround51";
-		else if (channels == 4) device = "surround40";
-		else device = DEFAULT_DEVICE;
+		switch (channels) {
+		case 6:
+			device = "plug:surround51";
+			break;
+		case 4:
+			device = "plug:surround40";
+			break;
+		default:
+			device = "default";
+			break;
+		}
 	}
 	return device;
 }
