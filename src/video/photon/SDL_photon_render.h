@@ -38,6 +38,10 @@
 #define SDL_PHOTON_SURFTYPE_OFFSCREEN  0x00000001
 #define SDL_PHOTON_SURFTYPE_PHIMAGE    0x00000002
 
+#define SDL_PHOTON_UNKNOWN_BLEND       0x00000000
+#define SDL_PHOTON_DRAW_BLEND          0x00000001
+#define SDL_PHOTON_TEXTURE_BLEND       0x00000002
+
 typedef struct SDL_RenderData
 {
     SDL_bool enable_vsync;              /* VSYNC flip synchronization enable  */

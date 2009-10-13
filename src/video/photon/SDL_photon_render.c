@@ -270,7 +270,7 @@ photon_addrenderdriver(_THIS)
 }
 
 /****************************************************************************/
-/* Render helper functions                                                  */
+/* Renderer helper functions                                                  */
 /****************************************************************************/
 
 static int _photon_recreate_surfaces(SDL_Renderer * renderer)
@@ -575,6 +575,100 @@ int _photon_update_rectangles(SDL_Renderer* renderer, PhRect_t* rect)
        default:
             break;
    }
+}
+
+int _photon_set_blending(SDL_Renderer* renderer, uint32_t blendmode, uint32_t globalalpha, uint32_t blendsource)
+{
+   SDL_RenderData *rdata = (SDL_RenderData *) renderer->driverdata;
+
+   /* Switch on requested graphics context modifiers */
+   switch (blendmode)
+   {
+      case SDL_BLENDMODE_MASK:
+           /* Enable and set chroma key */
+           if (blendsource==SDL_PHOTON_TEXTURE_BLEND)
+           {
+              PgSetChromaCx(rdata->gc, PgRGB(255, 255, 255), Pg_CHROMA_SRC_MATCH | Pg_CHROMA_NODRAW);
+              PgChromaOnCx(rdata->gc);
+           }
+           break;
+      case SDL_BLENDMODE_BLEND:
+           /* Enable and set chroma key and alpha blending */
+           if (blendsource==SDL_PHOTON_TEXTURE_BLEND)
+           {
+              PgSetChromaCx(rdata->gc, PgRGB(255, 255, 255), Pg_CHROMA_SRC_MATCH | Pg_CHROMA_NODRAW);
+              PgChromaOnCx(rdata->gc);
+           }
+           PgSetAlphaCx(rdata->gc, Pg_ALPHA_OP_SRC_GLOBAL | Pg_BLEND_SRC_As | Pg_BLEND_DST_1mAs, NULL, NULL, globalalpha, 0);
+           PgAlphaOnCx(rdata->gc);
+           break;
+      case SDL_BLENDMODE_ADD:
+           /* Enable and set chroma key and alpha blending */
+           if (blendsource==SDL_PHOTON_TEXTURE_BLEND)
+           {
+              PgSetChromaCx(rdata->gc, PgRGB(255, 255, 255), Pg_CHROMA_SRC_MATCH | Pg_CHROMA_NODRAW);
+              PgChromaOnCx(rdata->gc);
+           }
+           PgSetAlphaCx(rdata->gc, Pg_ALPHA_OP_SRC_GLOBAL | Pg_BLEND_SRC_As | Pg_BLEND_DST_1, NULL, NULL, globalalpha, 0);
+           PgAlphaOnCx(rdata->gc);
+           break;
+      case SDL_BLENDMODE_MOD:
+           /* Enable and set alpha blending */
+           PgSetAlphaCx(rdata->gc, Pg_BLEND_SRC_0 | Pg_BLEND_DST_S, NULL, NULL, 0, 0);
+           PgAlphaOnCx(rdata->gc);
+           break;
+      case SDL_BLENDMODE_NONE:
+           /* Do nothing */
+           break;
+      default:
+           return -1;
+   }
+
+   return 0;
+}
+
+int _photon_reset_blending(SDL_Renderer* renderer, uint32_t blendmode, uint32_t blendsource)
+{
+   SDL_RenderData *rdata = (SDL_RenderData *) renderer->driverdata;
+
+   /* Switch off graphics context modifiers */
+   switch (blendmode)
+   {
+      case SDL_BLENDMODE_MASK:
+           /* Disable chroma key */
+           if (blendsource==SDL_PHOTON_TEXTURE_BLEND)
+           {
+              PgChromaOffCx(rdata->gc);
+           }
+           break;
+      case SDL_BLENDMODE_BLEND:
+           /* Disable chroma key and alpha blending */
+           if (blendsource==SDL_PHOTON_TEXTURE_BLEND)
+           {
+              PgChromaOffCx(rdata->gc);
+           }
+           PgAlphaOffCx(rdata->gc);
+           break;
+      case SDL_BLENDMODE_ADD:
+           /* Disable chroma key and alpha blending */
+           if (blendsource==SDL_PHOTON_TEXTURE_BLEND)
+           {
+              PgChromaOffCx(rdata->gc);
+           }
+           PgAlphaOffCx(rdata->gc);
+           break;
+      case SDL_BLENDMODE_MOD:
+           /* Disable chroma key and alpha blending */
+           PgAlphaOffCx(rdata->gc);
+           break;
+      case SDL_BLENDMODE_NONE:
+           /* Do nothing */
+           break;
+      default:
+           return -1;
+   }
+
+   return 0;
 }
 
 /****************************************************************************/
@@ -1069,9 +1163,30 @@ photon_setdrawcolor(SDL_Renderer * renderer)
 static int
 photon_setdrawblendmode(SDL_Renderer * renderer)
 {
-   /* TODO */
-   SDL_Unsupported();
-   return -1;
+    SDL_RenderData *rdata = (SDL_RenderData *) renderer->driverdata;
+
+    /* Check, if it is not initialized */
+    if (rdata->surfaces_type==SDL_PHOTON_SURFTYPE_UNKNOWN)
+    {
+       SDL_SetError("Photon: can't set texture blend mode for OpenGL ES window");
+       return -1;
+    }
+
+    switch (renderer->blendMode)
+    {
+        case SDL_BLENDMODE_NONE:
+        case SDL_BLENDMODE_MASK:
+        case SDL_BLENDMODE_BLEND:
+        case SDL_BLENDMODE_ADD:
+        case SDL_BLENDMODE_MOD:
+             return 0;
+        default:
+             SDL_Unsupported();
+             renderer->blendMode = SDL_BLENDMODE_NONE;
+             return -1;
+    }
+
+    return 0;
 }
 
 static int
@@ -1086,6 +1201,9 @@ photon_renderpoint(SDL_Renderer * renderer, int x, int y)
        return -1;
    }
 
+   /* Enable blending, if requested */
+   _photon_set_blending(renderer, renderer->blendMode, renderer->a, SDL_PHOTON_DRAW_BLEND);
+
    switch (rdata->surfaces_type)
    {
        case SDL_PHOTON_SURFTYPE_OFFSCREEN:
@@ -1098,6 +1216,9 @@ photon_renderpoint(SDL_Renderer * renderer, int x, int y)
        default:
             break;
    }
+
+   /* Disable blending, if it was enabled */
+   _photon_reset_blending(renderer, renderer->blendMode, SDL_PHOTON_DRAW_BLEND);
 
    return 0;
 }
@@ -1114,6 +1235,9 @@ photon_renderline(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
        return -1;
    }
 
+   /* Enable blending, if requested */
+   _photon_set_blending(renderer, renderer->blendMode, renderer->a, SDL_PHOTON_DRAW_BLEND);
+
    switch (rdata->surfaces_type)
    {
        case SDL_PHOTON_SURFTYPE_OFFSCREEN:
@@ -1126,6 +1250,9 @@ photon_renderline(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
        default:
             break;
    }
+
+   /* Disable blending, if it was enabled */
+   _photon_reset_blending(renderer, renderer->blendMode, SDL_PHOTON_DRAW_BLEND);
 
    return 0;
 }
@@ -1142,6 +1269,9 @@ photon_renderfill(SDL_Renderer * renderer, const SDL_Rect * rect)
        return -1;
    }
 
+   /* Enable blending, if requested */
+   _photon_set_blending(renderer, renderer->blendMode, renderer->a, SDL_PHOTON_DRAW_BLEND);
+
    switch (rdata->surfaces_type)
    {
        case SDL_PHOTON_SURFTYPE_OFFSCREEN:
@@ -1154,6 +1284,11 @@ photon_renderfill(SDL_Renderer * renderer, const SDL_Rect * rect)
        default:
             break;
    }
+
+   /* Disable blending, if it was enabled */
+   _photon_reset_blending(renderer, renderer->blendMode, SDL_PHOTON_DRAW_BLEND);
+
+   return 0;
 }
 
 static int
@@ -1174,38 +1309,7 @@ photon_rendercopy(SDL_Renderer * renderer, SDL_Texture * texture,
        return -1;
    }
 
-   /* Switch on requested graphics context modifiers */
-   switch(texture->blendMode)
-   {
-      case SDL_BLENDMODE_MASK:
-           /* Enable and set chroma key */
-           PgSetChromaCx(rdata->gc, PgRGB(255, 255, 255), Pg_CHROMA_SRC_MATCH | Pg_CHROMA_NODRAW);
-           PgChromaOnCx(rdata->gc);
-           break;
-      case SDL_BLENDMODE_BLEND:
-           /* Enable and set chroma key and alpha blending */
-           PgSetChromaCx(rdata->gc, PgRGB(255, 255, 255), Pg_CHROMA_SRC_MATCH | Pg_CHROMA_NODRAW);
-           PgChromaOnCx(rdata->gc);
-           PgSetAlphaCx(rdata->gc, Pg_ALPHA_OP_SRC_GLOBAL | Pg_BLEND_SRC_As | Pg_BLEND_DST_1mAs, NULL, NULL, texture->a, 0);
-           PgAlphaOnCx(rdata->gc);
-           break;
-      case SDL_BLENDMODE_ADD:
-           /* Enable and set chroma key and alpha blending */
-           PgSetChromaCx(rdata->gc, PgRGB(255, 255, 255), Pg_CHROMA_SRC_MATCH | Pg_CHROMA_NODRAW);
-           PgChromaOnCx(rdata->gc);
-           PgSetAlphaCx(rdata->gc, Pg_ALPHA_OP_SRC_GLOBAL | Pg_BLEND_SRC_As | Pg_BLEND_DST_1, NULL, NULL, texture->a, 0);
-           PgAlphaOnCx(rdata->gc);
-           break;
-      case SDL_BLENDMODE_MOD:
-           /* Enable and set alpha blending */
-           PgSetAlphaCx(rdata->gc, Pg_BLEND_SRC_0 | Pg_BLEND_DST_S, NULL, NULL, 0, 0);
-           PgAlphaOnCx(rdata->gc);
-           break;
-      case SDL_BLENDMODE_NONE:
-      default:
-           /* Do nothing */
-           break;
-   }
+   _photon_set_blending(renderer, texture->blendMode, texture->a, SDL_PHOTON_TEXTURE_BLEND);
 
    /* Set source blit area */
    src_rect.ul.x = srcrect->x;
@@ -1263,32 +1367,7 @@ photon_rendercopy(SDL_Renderer * renderer, SDL_Texture * texture,
             break;
    }
 
-   /* Switch off graphics context modifiers */
-   switch(texture->blendMode)
-   {
-      case SDL_BLENDMODE_MASK:
-           /* Disable chroma key */
-           PgChromaOffCx(rdata->gc);
-           break;
-      case SDL_BLENDMODE_BLEND:
-           /* Disable chroma key and alpha blending */
-           PgChromaOffCx(rdata->gc);
-           PgAlphaOffCx(rdata->gc);
-           break;
-      case SDL_BLENDMODE_ADD:
-           /* Disable chroma key and alpha blending */
-           PgChromaOffCx(rdata->gc);
-           PgAlphaOffCx(rdata->gc);
-           break;
-      case SDL_BLENDMODE_MOD:
-           /* Disable chroma key and alpha blending */
-           PgAlphaOffCx(rdata->gc);
-           break;
-      case SDL_BLENDMODE_NONE:
-      default:
-           /* Do nothing */
-           break;
-   }
+   _photon_reset_blending(renderer, texture->blendMode, SDL_PHOTON_TEXTURE_BLEND);
 
    return 0;
 }
@@ -1352,6 +1431,20 @@ photon_renderpresent(SDL_Renderer * renderer)
    /* finish blit */
    PgFFlush(Ph_DONE_DRAW);
    PgWaitHWIdle();
+
+   /* Check if we are using double buffering */
+   if ((renderer->info.flags & SDL_RENDERER_PRESENTFLIP2) == SDL_RENDERER_PRESENTFLIP2)
+   {
+      rdata->surface_visible_idx=rdata->surface_render_idx;
+      rdata->surface_render_idx=(rdata->surface_render_idx + 1) % 2;
+   }
+
+   /* Check if we are using triple buffering */
+   if ((renderer->info.flags & SDL_RENDERER_PRESENTFLIP3) == SDL_RENDERER_PRESENTFLIP3)
+   {
+      rdata->surface_visible_idx=rdata->surface_render_idx;
+      rdata->surface_render_idx=(rdata->surface_render_idx + 1) % 3;
+   }
 }
 
 static void

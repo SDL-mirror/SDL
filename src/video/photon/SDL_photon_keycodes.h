@@ -106,7 +106,7 @@
 
 #define PHOTON_SCANCODE_PRNSCR      0x54        /* only key pressed event, no release */
 #define PHOTON_SCANCODE_SCROLLLOCK  0x46
-#if 0                           /* pause doesn't generates a scancode */
+#if 0                                           /* pause doesn't generates a scancode */
 #define PHOTON_SCANCODE_PAUSE       0x??
 #endif
 #define PHOTON_SCANCODE_INSERT      0x52
