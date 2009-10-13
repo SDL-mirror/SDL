@@ -46,6 +46,10 @@
 /* The default ALSA audio driver */
 #define DEFAULT_DEVICE	"default"
 
+/* Whether we should set the buffer size or the period size */
+/*#define SET_PERIOD_SIZE*/
+/*#define DEBUG_PERIOD_SIZE*/
+
 /* Audio driver functions */
 static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec);
 static void ALSA_WaitAudio(_THIS);
@@ -78,13 +82,13 @@ static int (*SDL_NAME(snd_pcm_hw_params_set_period_size_near))(snd_pcm_t *pcm, s
 static int (*SDL_NAME(snd_pcm_hw_params_get_period_size))(const snd_pcm_hw_params_t *params, snd_pcm_uframes_t *frames, int *dir);
 static int (*SDL_NAME(snd_pcm_hw_params_set_periods_near))(snd_pcm_t *pcm, snd_pcm_hw_params_t *params, unsigned int *val, int *dir);
 static int (*SDL_NAME(snd_pcm_hw_params_get_periods))(const snd_pcm_hw_params_t *params, unsigned int *val, int *dir);
+static int (*SDL_NAME(snd_pcm_hw_params_set_buffer_size_near))(snd_pcm_t *pcm, snd_pcm_hw_params_t *params, snd_pcm_uframes_t *val);
 static int (*SDL_NAME(snd_pcm_hw_params_get_buffer_size))(const snd_pcm_hw_params_t *params, snd_pcm_uframes_t *val);
 static int (*SDL_NAME(snd_pcm_hw_params))(snd_pcm_t *pcm, snd_pcm_hw_params_t *params);
 /*
 */
 static int (*SDL_NAME(snd_pcm_sw_params_current))(snd_pcm_t *pcm, snd_pcm_sw_params_t *swparams);
 static int (*SDL_NAME(snd_pcm_sw_params_set_start_threshold))(snd_pcm_t *pcm, snd_pcm_sw_params_t *params, snd_pcm_uframes_t val);
-static int (*SDL_NAME(snd_pcm_sw_params_set_avail_min))(snd_pcm_t *pcm, snd_pcm_sw_params_t *params, snd_pcm_uframes_t val);
 static int (*SDL_NAME(snd_pcm_sw_params))(snd_pcm_t *pcm, snd_pcm_sw_params_t *params);
 static int (*SDL_NAME(snd_pcm_nonblock))(snd_pcm_t *pcm, int nonblock);
 #define snd_pcm_hw_params_sizeof SDL_NAME(snd_pcm_hw_params_sizeof)
@@ -114,11 +118,11 @@ static struct {
 	{ "snd_pcm_hw_params_get_period_size",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params_get_period_size)	},
 	{ "snd_pcm_hw_params_set_periods_near",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params_set_periods_near)	},
 	{ "snd_pcm_hw_params_get_periods",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params_get_periods)	},
+	{ "snd_pcm_hw_params_set_buffer_size_near",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params_set_buffer_size_near) },
 	{ "snd_pcm_hw_params_get_buffer_size",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params_get_buffer_size) },
 	{ "snd_pcm_hw_params",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params)	},
 	{ "snd_pcm_sw_params_current",	(void**)(char*)&SDL_NAME(snd_pcm_sw_params_current)	},
 	{ "snd_pcm_sw_params_set_start_threshold",	(void**)(char*)&SDL_NAME(snd_pcm_sw_params_set_start_threshold)	},
-	{ "snd_pcm_sw_params_set_avail_min",	(void**)(char*)&SDL_NAME(snd_pcm_sw_params_set_avail_min)	},
 	{ "snd_pcm_sw_params",	(void**)(char*)&SDL_NAME(snd_pcm_sw_params)	},
 	{ "snd_pcm_nonblock",	(void**)(char*)&SDL_NAME(snd_pcm_nonblock)	},
 };
@@ -368,8 +372,10 @@ static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	snd_pcm_format_t     format;
 	snd_pcm_uframes_t    frames;
 	unsigned int         rate;
+#ifdef SET_PERIOD_SIZE
 	unsigned int         periods;
-	unsigned int 		 channels;
+#endif
+	unsigned int 	     channels;
 	Uint16               test_format;
 
 	/* Open the audio device */
@@ -464,10 +470,11 @@ static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	spec->freq = rate;
 
 	/* Set the buffer size, in samples */
+#ifdef SET_PERIOD_SIZE
 	frames = spec->samples;
 	status = SDL_NAME(snd_pcm_hw_params_set_period_size_near)(pcm_handle, hwparams, &frames, NULL);
 	if ( status < 0 ) {
-		SDL_SetError("Couldn't set audio frequency: %s", SDL_NAME(snd_strerror)(status));
+		SDL_SetError("Couldn't set period size: %s", SDL_NAME(snd_strerror)(status));
 		ALSA_CloseAudio(this);
 		return(-1);
 	}
@@ -475,7 +482,16 @@ static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	spec->samples = frames;
 
 	periods = 2;
-	SDL_NAME(snd_pcm_hw_params_set_periods_near)(pcm_handle, hwparams, &periods, NULL);
+	status = SDL_NAME(snd_pcm_hw_params_set_periods_near)(pcm_handle, hwparams, &periods, NULL);
+	if ( status < 0 ) {
+		SDL_SetError("Couldn't set period count: %s", SDL_NAME(snd_strerror)(status));
+		ALSA_CloseAudio(this);
+		return(-1);
+	}
+#else
+	frames = spec->samples * 2;
+	status = SDL_NAME(snd_pcm_hw_params_set_buffer_size_near)(pcm_handle, hwparams, &frames);
+#endif
 
 	/* "set" the hardware with the desired parameters */
 	status = SDL_NAME(snd_pcm_hw_params)(pcm_handle, hwparams);
@@ -486,7 +502,7 @@ static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	}
 
 /* This is useful for debugging... */
-#if 0
+#ifdef DEBUG_PERIOD_SIZE
 { snd_pcm_uframes_t bufsize; snd_pcm_sframes_t persize; unsigned int periods; int dir;
    SDL_NAME(snd_pcm_hw_params_get_buffer_size)(hwparams, &bufsize);
    SDL_NAME(snd_pcm_hw_params_get_period_size)(hwparams, &persize, &dir);
@@ -507,12 +523,6 @@ static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	status = SDL_NAME(snd_pcm_sw_params_set_start_threshold)(pcm_handle, swparams, 1);
 	if ( status < 0 ) {
 		SDL_SetError("Couldn't set start threshold: %s", SDL_NAME(snd_strerror)(status));
-		ALSA_CloseAudio(this);
-		return(-1);
-	}
-	status = SDL_NAME(snd_pcm_sw_params_set_avail_min)(pcm_handle, swparams, frames);
-	if ( status < 0 ) {
-		SDL_SetError("Couldn't set avail min: %s", SDL_NAME(snd_strerror)(status));
 		ALSA_CloseAudio(this);
 		return(-1);
 	}
