@@ -242,7 +242,7 @@ main(int argc, char *argv[])
             continue;
         }
 
-        glViewport(0, 0, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
+        glViewport(0, 0, state->window_w, state->window_h);
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
         glOrthof(-2.0, 2.0, -2.0, 2.0, -20.0, 20.0);
