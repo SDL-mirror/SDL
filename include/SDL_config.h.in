@@ -150,7 +150,6 @@
 #undef HAVE_SETJMP
 #undef HAVE_NANOSLEEP
 #undef HAVE_CLOCK_GETTIME
-#undef HAVE_DLVSYM
 #undef HAVE_GETPAGESIZE
 
 #else
