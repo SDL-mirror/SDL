@@ -106,6 +106,29 @@ CPPFLAGS="$CPPFLAGS $EXTRA_CFLAGS"
 CFLAGS="$CFLAGS $EXTRA_CFLAGS"
 LDFLAGS="$LDFLAGS $EXTRA_LDFLAGS"
 
+dnl set this to use on systems that use lib64 instead of lib
+base_libdir=`echo \${libdir} | sed 's/.*\/\(.*\)/\1/; q'`
+
+dnl Function to find a library in the compiler search path
+find_lib()
+{
+    gcc_bin_path=[`$CC -print-search-dirs 2>/dev/null | fgrep programs: | sed 's/[^=]*=\(.*\)/\1/' | sed 's/:/ /g'`]
+    gcc_lib_path=[`$CC -print-search-dirs 2>/dev/null | fgrep libraries: | sed 's/[^=]*=\(.*\)/\1/' | sed 's/:/ /g'`]
+    env_lib_path=[`echo $LIBS $LDFLAGS $* | sed 's/-L[ ]*//g'`]
+    if test "$cross_compiling" = yes; then
+        host_lib_path=""
+    else
+        host_lib_path="/usr/$base_libdir /usr/local/$base_libdir"
+    fi
+    for path in $gcc_bin_path $gcc_lib_path $env_lib_path $host_lib_path; do
+        lib=[`ls -- $path/$1 2>/dev/null | sort | sed 's/.*\/\(.*\)/\1/; q'`]
+        if test x$lib != x; then
+            echo $lib
+            return
+        fi
+    done
+}
+
 dnl Check for compiler characteristics
 AC_C_CONST
 AC_C_INLINE
@@ -290,9 +313,6 @@ if test x$enable_assembly = xyes; then
     AC_DEFINE(SDL_ASSEMBLY_ROUTINES)
 fi
 
-dnl set this to use on systems that use lib64 instead of lib
-base_libdir=`echo \${libdir} | sed 's/.*\/\(.*\)/\1/; q'`
-
 dnl See if the OSS audio interface is supported
 CheckOSS()
 {
@@ -353,21 +373,8 @@ AC_HELP_STRING([--enable-alsa], [support the ALSA audio API [[default=yes]]]),
             AC_ARG_ENABLE(alsa-shared,
 AC_HELP_STRING([--enable-alsa-shared], [dynamically load ALSA audio support [[default=yes]]]),
                           , enable_alsa_shared=yes)
-            if test "x`echo $ALSA_LIBS | grep -- -L`" = "x"; then
-                if test "x`ls /$base_libdir/libasound.so.* 2> /dev/null`" != "x"; then
-                    ALSA_LIBS="-L/$base_libdir $ALSA_LIBS"
-                elif test "x`ls /usr/$base_libdir/libasound.so.* 2> /dev/null`" != "x"; then
-                    ALSA_LIBS="-L/usr/$base_libdir $ALSA_LIBS"
-                elif test "x`ls /usr/local/$base_libdir/libasound.so.* 2> /dev/null`" != "x"; then
-                    ALSA_LIBS="-L/usr/local/$base_libdir $ALSA_LIBS"
-                fi
-            fi
-            alsa_lib_spec=`echo $ALSA_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libasound.so.*/'`
-            if test x$alsa_lib_spec = x; then
-                alsa_lib_spec="/usr/$base_libdir/libasound.so.*"
-            fi
-            alsa_lib=`ls -- $alsa_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
-            echo "-- $alsa_lib_spec -> $alsa_lib"
+            alsa_lib=[`find_lib "libasound.so.*" "$ALSA_LIBS" | sed 's/.*\/\(.*\)/\1/; q'`]
+            echo "-- dynamic libasound -> $alsa_lib"
 
             AC_DEFINE(SDL_AUDIO_DRIVER_ALSA)
             SOURCES="$SOURCES $srcdir/src/audio/alsa/*.c"
@@ -461,12 +468,8 @@ AC_HELP_STRING([--enable-esd], [support the Enlightened Sound Daemon [[default=y
             AC_ARG_ENABLE(esd-shared,
 AC_HELP_STRING([--enable-esd-shared], [dynamically load ESD audio support [[default=yes]]]),
                           , enable_esd_shared=yes)
-            esd_lib_spec=`echo $ESD_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libesd.so.*/'`
-            if test x$esd_lib_spec = x; then
-                esd_lib_spec="/usr/$base_libdir/libesd.so.*"
-            fi
-            esd_lib=`ls -- $esd_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
-            echo "-- $esd_lib_spec -> $esd_lib"
+            esd_lib=[`find_lib "libesd.so.*" "$ESD_LIBS" | sed 's/.*\/\(.*\)/\1/; q'`]
+            echo "-- dynamic libesd -> $esd_lib"
 
             AC_DEFINE(SDL_AUDIO_DRIVER_ESD)
             SOURCES="$SOURCES $srcdir/src/audio/esd/*.c"
@@ -500,11 +503,11 @@ AC_HELP_STRING([--enable-pulseaudio], [use PulseAudio [[default=yes]]]),
         AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
         AC_MSG_CHECKING(for PulseAudio $PULSE_REQUIRED_VERSION support)
         if test x$PKG_CONFIG != xno; then
-        if $PKG_CONFIG --atleast-pkgconfig-version 0.7 && $PKG_CONFIG --atleast-version $PULSE_REQUIRED_VERSION libpulse-simple; then
+            if $PKG_CONFIG --atleast-pkgconfig-version 0.7 && $PKG_CONFIG --atleast-version $PULSE_REQUIRED_VERSION libpulse-simple; then
                 PULSE_CFLAGS=`$PKG_CONFIG --cflags libpulse-simple`
                 PULSE_LIBS=`$PKG_CONFIG --libs libpulse-simple`
                 audio_pulse=yes
-        fi
+            fi
         fi
         AC_MSG_RESULT($audio_pulse)
 
@@ -512,21 +515,8 @@ AC_HELP_STRING([--enable-pulseaudio], [use PulseAudio [[default=yes]]]),
             AC_ARG_ENABLE(pulseaudio-shared,
 AC_HELP_STRING([--enable-pulseaudio-shared], [dynamically load PulseAudio support [[default=yes]]]),
                           , enable_pulseaudio_shared=yes)
-            if test "x`echo $PULSE_LIBS | grep -- -L`" = "x"; then
-                if test "x`ls /$base_libdir/libpulse-simple.so.* 2> /dev/null`" != "x"; then
-                    PULSE_LIBS="-L/$base_libdir $PULSE_LIBS"
-                elif test "x`ls /usr/$base_libdir/libpulse-simple.so.* 2> /dev/null`" != "x"; then
-                    PULSE_LIBS="-L/usr/$base_libdir $PULSE_LIBS"
-                elif test "x`ls /usr/local/$base_libdir/libpulse-simple.so.* 2> /dev/null`" != "x"; then
-                    PULSE_LIBS="-L/usr/local/$base_libdir $PULSE_LIBS"
-                fi
-            fi
-            pulse_lib_spec=`echo $PULSE_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libpulse-simple.so.*/'`
-            if test x$pulse_lib_spec = x; then
-                pulse_lib_spec="/usr/$base_libdir/libpulse-simple.so.*"
-            fi
-            pulse_lib=`ls -- $pulse_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
-            echo "-- $pulse_lib_spec -> $pulse_lib"
+            pulse_lib=[`find_lib "libpulse-simple.so.*" "$PULSE_LIBS" | sed 's/.*\/\(.*\)/\1/; q'`]
+            echo "-- dynamic libpulse-simple -> $pulse_lib"
 
             AC_DEFINE(SDL_AUDIO_DRIVER_PULSE)
             SOURCES="$SOURCES $srcdir/src/audio/pulse/*.c"
@@ -558,7 +548,6 @@ AC_HELP_STRING([--enable-arts], [support the Analog Real Time Synthesizer [[defa
         else
             ARTS_CFLAGS=`$ARTSCONFIG --cflags`
             ARTS_LIBS=`$ARTSCONFIG --libs`
-            ARTS_PREFIX=`$ARTSCONFIG --arts-prefix`
             AC_MSG_CHECKING(for aRts development environment)
             audio_arts=no
             save_CFLAGS="$CFLAGS"
@@ -576,9 +565,8 @@ AC_HELP_STRING([--enable-arts], [support the Analog Real Time Synthesizer [[defa
                 AC_ARG_ENABLE(arts-shared,
 AC_HELP_STRING([--enable-arts-shared], [dynamically load aRts audio support [[default=yes]]]),
                               , enable_arts_shared=yes)
-                arts_lib_spec="$ARTS_PREFIX/$base_libdir/libartsc.so.*"
-                arts_lib=`ls -- $arts_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
-                echo "-- $arts_lib_spec -> $arts_lib"
+                arts_lib=[`find_lib "libartsc.so.*" "$ARTS_LIBS" | sed 's/.*\/\(.*\)/\1/; q'`]
+                echo "-- dynamic libartsc -> $arts_lib"
 
                 AC_DEFINE(SDL_AUDIO_DRIVER_ARTS)
                 SOURCES="$SOURCES $srcdir/src/audio/arts/*.c"
@@ -635,21 +623,8 @@ AC_HELP_STRING([--enable-nas], [support the NAS audio API [[default=yes]]]),
             AC_ARG_ENABLE(nas-shared,
 AC_HELP_STRING([--enable-nas-shared], [dynamically load NAS audio support [[default=yes]]]),
                           , enable_nas_shared=yes)
-            if test "x`echo $NAS_LIBS | grep -- -L`" = "x"; then
-                if test "x`ls /lib/libaudio.so.* 2> /dev/null`" != "x"; then
-                    NAS_LIBS="-L/lib $NAS_LIBS"
-                elif test "x`ls /usr/lib/libaudio.so.* 2> /dev/null`" != "x"; then
-                    NAS_LIBS="-L/usr/lib $NAS_LIBS"
-                elif test "x`ls /usr/local/lib/libaudio.so.* 2> /dev/null`" != "x"; then
-                    NAS_LIBS="-L/usr/local/lib $NAS_LIBS"
-                fi
-            fi
-            nas_lib_spec=`echo $NAS_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libaudio.so.*/'`
-            if test x$nas_lib_spec = x ; then
-                nas_lib_spec="/usr/$base_libdir/libaudio.so.*"
-            fi
-            nas_lib=`ls -- $nas_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
-            echo "-- $nas_lib_spec -> $nas_lib"
+            nas_lib=[`find_lib "libaudio.so.*" "$NAS_LIBS" | sed 's/.*\/\(.*\)/\1/; q'`]
+            echo "-- dynamic libaudio -> $nas_lib"
 
             if test x$have_loadso != xyes && \
                test x$enable_nas_shared = xyes; then
@@ -1006,33 +981,10 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [[default=ma
                     x11ext_lib='libXext.so'
                     ;;
                 *)
-                    x11_lib_path=[`echo $X_LIBS | sed 's/.*-L\([^ ]*\).*/\1/'`]
-                    for path in $x11_lib_path /usr/$base_libdir /usr/X11/$base_libdir /usr/X11R6/$base_libdir; do
-                        if test "x$x11_lib" = "x"; then
-                            x11_lib=[`ls -- $path/libX11.so.[0-9] 2>/dev/null | sort -r | sed 's/.*\/\(.*\)/\1/; q'`]
-                            if test "x$x11_lib" = "x"; then
-                                x11_lib=[`ls -- $path/libX11.so.[0-9]* 2>/dev/null | sort -r | sed 's/.*\/\(.*\)/\1/; q'`]
-                            fi
-                        fi
-                        if test "x$x11ext_lib" = "x"; then
-                            x11ext_lib=[`ls -- $path/libXext.so.[0-9] 2>/dev/null | sort -r | sed 's/.*\/\(.*\)/\1/; q'`]
-                            if test "x$x11ext_lib" = "x"; then
-                                x11ext_lib=[`ls -- $path/libXext.so.[0-9]* 2>/dev/null | sort -r | sed 's/.*\/\(.*\)/\1/; q'`]
-                            fi
-                        fi
-                        if test "x$xrender_lib" = "x"; then
-                            xrender_lib=[`ls -- $path/libXrender.so.[0-9] 2>/dev/null | sort -r | sed 's/.*\/\(.*\)/\1/; q'`]
-                            if test "x$xrender_lib" = "x"; then
-                                xrender_lib=[`ls -- $path/libXrender.so.[0-9]* 2>/dev/null | sort -r | sed 's/.*\/\(.*\)/\1/; q'`]
-                            fi
-                        fi
-                        if test "x$xrandr_lib" = "x"; then
-                            xrandr_lib=[`ls -- $path/libXrandr.so.[0-9] 2>/dev/null | sort -r | sed 's/.*\/\(.*\)/\1/; q'`]
-                            if test "x$xrandr_lib" = "x"; then
-                                xrandr_lib=[`ls -- $path/libXrandr.so.[0-9]* 2>/dev/null | sort -r | sed 's/.*\/\(.*\)/\1/; q'`]
-                            fi
-                        fi
-                    done
+                    x11_lib=[`find_lib "libX11.so.*" "$X_LIBS -L/usr/X11/$base_libdir -L/usr/X11R6/$base_libdir" | sed 's/.*\/\(.*\)/\1/; q'`]
+                    x11ext_lib=[`find_lib "libXext.so.*" "$X_LIBS -L/usr/X11/$base_libdir -L/usr/X11R6/$base_libdir" | sed 's/.*\/\(.*\)/\1/; q'`]
+                    xrender_lib=[`find_lib "libXrender.so.*" "$X_LIBS -L/usr/X11/$base_libdir -L/usr/X11R6/$base_libdir" | sed 's/.*\/\(.*\)/\1/; q'`]
+                    xrandr_lib=[`find_lib "libXrandr.so.*" "$X_LIBS -L/usr/X11/$base_libdir -L/usr/X11R6/$base_libdir" | sed 's/.*\/\(.*\)/\1/; q'`]
                     ;;
             esac
 
