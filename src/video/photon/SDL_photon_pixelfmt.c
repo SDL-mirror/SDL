@@ -185,6 +185,11 @@ photon_sdl_to_image_pixelformat(uint32_t pixelfmt)
             return Pg_IMAGE_DIRECT_8888;
         }
         break;
+    case SDL_PIXELFORMAT_RGB888:
+        {
+            return Pg_IMAGE_DIRECT_8888;
+        }
+        break;
     case SDL_PIXELFORMAT_RGB24:
         {
             return Pg_IMAGE_DIRECT_888;

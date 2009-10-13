@@ -427,7 +427,7 @@ photon_videoinit(_THIS)
                 return -1;
             }
 
-            /* Get current video mode 2D capabilities */
+            /* Get current video mode 2D capabilities for the renderer */
             didata->mode_2dcaps=0;
             if ((modeinfo.mode_capabilities2 & PgVM_MODE_CAP2_ALPHA_BLEND)==PgVM_MODE_CAP2_ALPHA_BLEND)
             {
@@ -469,6 +469,7 @@ photon_videoinit(_THIS)
         SDL_zero(display);
         display.desktop_mode = current_mode;
         display.current_mode = current_mode;
+        display.fullscreen_mode = current_mode;
         display.driverdata = didata;
         didata->current_mode = current_mode;
         SDL_AddVideoDisplay(&display);
@@ -615,7 +616,7 @@ photon_setdisplaymode(_THIS, SDL_DisplayMode * mode)
         status = PdSetTargetDevice(NULL, phdata->rid[didata->device_id]);
         if (status != 0) {
             SDL_SetError("Photon: Can't set default target device\n");
-            return;
+            return -1;
         }
         phdata->current_device_id = didata->device_id;
     }
@@ -624,7 +625,7 @@ photon_setdisplaymode(_THIS, SDL_DisplayMode * mode)
     status = PgGetVideoModeList(&modes);
     if (status != 0) {
         SDL_SetError("Photon: Can't get video mode list");
-        return;
+        return -1;
     }
 
     /* Current display dimension and bpp are no more valid */
@@ -761,7 +762,7 @@ photon_setdisplaymode(_THIS, SDL_DisplayMode * mode)
     didata->current_mode = *mode;
     didata->current_mode.refresh_rate = refresh_rate;
 
-    /* Get current video mode 2D capabilities */
+    /* Get current video mode 2D capabilities for the renderer */
     didata->mode_2dcaps=0;
     if ((modeinfo.mode_capabilities2 & PgVM_MODE_CAP2_ALPHA_BLEND)==PgVM_MODE_CAP2_ALPHA_BLEND)
     {
@@ -1039,6 +1040,9 @@ photon_createwindow(_THIS, SDL_Window * window)
     /* By default last created window got a input focus */
     SDL_SetKeyboardFocus(0, window->id);
 
+    /* Emit focus gained event, because photon is not sending it */
+    SDL_OnWindowFocusGained(window);
+
     /* Window has been successfully created */
     return 0;
 }
@@ -1287,6 +1291,7 @@ photon_destroywindow(_THIS, SDL_Window * window)
             /* Free OpenGL ES target surface */
             if (wdata->gfsurface != NULL) {
                 gf_surface_free(wdata->gfsurface);
+                wdata->gfsurface=NULL;
             }
 
             phdata->egl_refcount--;
@@ -1700,6 +1705,7 @@ photon_gl_createcontext(_THIS, SDL_Window * window)
                                wdata->gfsurface, NULL);
     if (wdata->gles_surface == EGL_NO_SURFACE) {
         gf_surface_free(wdata->gfsurface);
+        wdata->gfsurface=NULL;
         eglDestroyContext(phdata->egldisplay, wdata->gles_context);
         wdata->gles_context = EGL_NO_CONTEXT;
         SDL_SetError("Photon: Can't create EGL pixmap surface");
@@ -1723,6 +1729,7 @@ photon_gl_createcontext(_THIS, SDL_Window * window)
         eglDestroySurface(phdata->egldisplay, wdata->gles_surface);
         wdata->gles_surface=EGL_NO_SURFACE;
         gf_surface_free(wdata->gfsurface);
+        wdata->gfsurface=NULL;
         eglDestroyContext(phdata->egldisplay, wdata->gles_context);
         wdata->gles_context = EGL_NO_CONTEXT;
         SDL_SetError("Photon: Can't set OpenGL ES context on creation");
@@ -1786,6 +1793,7 @@ photon_gl_createcontext(_THIS, SDL_Window * window)
             eglDestroySurface(phdata->egldisplay, wdata->gles_surface);
             wdata->gles_surface=EGL_NO_SURFACE;
             gf_surface_free(wdata->gfsurface);
+            wdata->gfsurface=NULL;
             eglDestroyContext(phdata->egldisplay, wdata->gles_context);
             wdata->gles_context = EGL_NO_CONTEXT;
             SDL_SetError("Photon: Can't set default target device\n");
@@ -1800,6 +1808,7 @@ photon_gl_createcontext(_THIS, SDL_Window * window)
         eglDestroySurface(phdata->egldisplay, wdata->gles_surface);
         wdata->gles_surface=EGL_NO_SURFACE;
         gf_surface_free(wdata->gfsurface);
+        wdata->gfsurface=NULL;
         eglDestroyContext(phdata->egldisplay, wdata->gles_context);
         wdata->gles_context = EGL_NO_CONTEXT;
         SDL_SetError("Photon: Can't bind GF surface to Photon\n");
