@@ -188,6 +188,8 @@ Xbios video:
 	Falcon:
 		All modes supported by the current monitor (RVB or VGA).
 		BlowUp and Centscreen extended modes, ScreenBlaster 3 current mode.
+	Milan:
+		Experimental support
 	Clones and any machine with monochrome monitor:
 		Not supported.
 
