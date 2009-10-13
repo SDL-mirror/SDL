@@ -6,7 +6,7 @@
 #include "common.h"
 
 #define VIDEO_USAGE \
-"[--video driver] [--renderer driver] [--info all|video|modes|render|event] [--display %d] [--fullscreen | --windows N] [--title title] [--center | --position X,Y] [--geometry WxH] [--depth N] [--refresh R] [--vsync] [--noframe] [--resize] [--minimize] [--maximize] [--grab]"
+"[--video driver] [--renderer driver] [--info all|video|modes|render|event] [--display %d] [--fullscreen | --windows N] [--title title] [--center | --position X,Y] [--geometry WxH] [--depth N] [--refresh R] [--vsync] [--noframe] [--resize] [--minimize] [--maximize] [--grab] [--double] [--triple]"
 
 #define AUDIO_USAGE \
 "[--rate N] [--format U8|S8|U16|U16LE|U16BE|S16|S16LE|S16BE] [--channels N] [--samples N]"
@@ -231,6 +231,14 @@ CommonArg(CommonState * state, int index)
     }
     if (SDL_strcasecmp(argv[index], "--vsync") == 0) {
         state->render_flags |= SDL_RENDERER_PRESENTVSYNC;
+        return 1;
+    }
+    if (SDL_strcasecmp(argv[index], "--double") == 0) {
+        state->render_flags |= SDL_RENDERER_PRESENTFLIP2;
+        return 1;
+    }
+    if (SDL_strcasecmp(argv[index], "--triple") == 0) {
+        state->render_flags |= SDL_RENDERER_PRESENTFLIP3;
         return 1;
     }
     if (SDL_strcasecmp(argv[index], "--noframe") == 0) {
