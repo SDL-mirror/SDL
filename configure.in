@@ -374,7 +374,6 @@ AC_HELP_STRING([--enable-alsa], [support the ALSA audio API [[default=yes]]]),
 AC_HELP_STRING([--enable-alsa-shared], [dynamically load ALSA audio support [[default=yes]]]),
                           , enable_alsa_shared=yes)
             alsa_lib=[`find_lib "libasound.so.*" "$ALSA_LIBS" | sed 's/.*\/\(.*\)/\1/; q'`]
-            echo "-- dynamic libasound -> $alsa_lib"
 
             AC_DEFINE(SDL_AUDIO_DRIVER_ALSA)
             SOURCES="$SOURCES $srcdir/src/audio/alsa/*.c"
@@ -385,6 +384,7 @@ AC_HELP_STRING([--enable-alsa-shared], [dynamically load ALSA audio support [[de
             fi
             if test x$have_loadso = xyes && \
                test x$enable_alsa_shared = xyes && test x$alsa_lib != x; then
+                echo "-- dynamic libasound -> $alsa_lib"
                 AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_ALSA_DYNAMIC, "$alsa_lib")
             else
                 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $ALSA_LIBS"
@@ -469,7 +469,6 @@ AC_HELP_STRING([--enable-esd], [support the Enlightened Sound Daemon [[default=y
 AC_HELP_STRING([--enable-esd-shared], [dynamically load ESD audio support [[default=yes]]]),
                           , enable_esd_shared=yes)
             esd_lib=[`find_lib "libesd.so.*" "$ESD_LIBS" | sed 's/.*\/\(.*\)/\1/; q'`]
-            echo "-- dynamic libesd -> $esd_lib"
 
             AC_DEFINE(SDL_AUDIO_DRIVER_ESD)
             SOURCES="$SOURCES $srcdir/src/audio/esd/*.c"
@@ -480,6 +479,7 @@ AC_HELP_STRING([--enable-esd-shared], [dynamically load ESD audio support [[defa
             fi
             if test x$have_loadso = xyes && \
                test x$enable_esd_shared = xyes && test x$esd_lib != x; then
+                echo "-- dynamic libesd -> $esd_lib"
                 AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_ESD_DYNAMIC, "$esd_lib")
             else
                 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $ESD_LIBS"
@@ -516,7 +516,6 @@ AC_HELP_STRING([--enable-pulseaudio], [use PulseAudio [[default=yes]]]),
 AC_HELP_STRING([--enable-pulseaudio-shared], [dynamically load PulseAudio support [[default=yes]]]),
                           , enable_pulseaudio_shared=yes)
             pulse_lib=[`find_lib "libpulse-simple.so.*" "$PULSE_LIBS" | sed 's/.*\/\(.*\)/\1/; q'`]
-            echo "-- dynamic libpulse-simple -> $pulse_lib"
 
             AC_DEFINE(SDL_AUDIO_DRIVER_PULSE)
             SOURCES="$SOURCES $srcdir/src/audio/pulse/*.c"
@@ -527,6 +526,7 @@ AC_HELP_STRING([--enable-pulseaudio-shared], [dynamically load PulseAudio suppor
             fi
             if test x$have_loadso = xyes && \
                test x$enable_pulseaudio_shared = xyes && test x$pulse_lib != x; then
+                echo "-- dynamic libpulse-simple -> $pulse_lib"
                 AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_PULSE_DYNAMIC, "$pulse_lib")
             else
                 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $PULSE_LIBS"
@@ -566,7 +566,6 @@ AC_HELP_STRING([--enable-arts], [support the Analog Real Time Synthesizer [[defa
 AC_HELP_STRING([--enable-arts-shared], [dynamically load aRts audio support [[default=yes]]]),
                               , enable_arts_shared=yes)
                 arts_lib=[`find_lib "libartsc.so.*" "$ARTS_LIBS" | sed 's/.*\/\(.*\)/\1/; q'`]
-                echo "-- dynamic libartsc -> $arts_lib"
 
                 AC_DEFINE(SDL_AUDIO_DRIVER_ARTS)
                 SOURCES="$SOURCES $srcdir/src/audio/arts/*.c"
@@ -577,6 +576,7 @@ AC_HELP_STRING([--enable-arts-shared], [dynamically load aRts audio support [[de
                 fi
                 if test x$have_loadso = xyes && \
                    test x$enable_arts_shared = xyes && test x$arts_lib != x; then
+                    echo "-- dynamic libartsc -> $arts_lib"
                     AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_ARTS_DYNAMIC, "$arts_lib")
                 else
                     EXTRA_LDFLAGS="$EXTRA_LDFLAGS $ARTS_LIBS"
@@ -624,7 +624,6 @@ AC_HELP_STRING([--enable-nas], [support the NAS audio API [[default=yes]]]),
 AC_HELP_STRING([--enable-nas-shared], [dynamically load NAS audio support [[default=yes]]]),
                           , enable_nas_shared=yes)
             nas_lib=[`find_lib "libaudio.so.*" "$NAS_LIBS" | sed 's/.*\/\(.*\)/\1/; q'`]
-            echo "-- dynamic libaudio -> $nas_lib"
 
             if test x$have_loadso != xyes && \
                test x$enable_nas_shared = xyes; then
@@ -632,6 +631,7 @@ AC_HELP_STRING([--enable-nas-shared], [dynamically load NAS audio support [[defa
             fi
             if test x$have_loadso = xyes && \
                test x$enable_nas_shared = xyes && test x$nas_lib != x; then
+                echo "-- dynamic libaudio -> $nas_lib"
                 AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_NAS_DYNAMIC, "$nas_lib")
             else
                 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $NAS_LIBS"
