@@ -611,7 +611,7 @@ GLES_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 }
 
 static void
-GLES_SetBlendMode(GLES_RenderData * data, int blendMode)
+GLES_SetBlendMode(GLES_RenderData * data, int blendMode, int isprimitive)
 {
     if (blendMode != data->blendMode) {
         switch (blendMode) {
@@ -620,6 +620,14 @@ GLES_SetBlendMode(GLES_RenderData * data, int blendMode)
             data->glDisable(GL_BLEND);
             break;
         case SDL_BLENDMODE_MASK:
+            if (isprimitive) {
+                data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+                data->glDisable(GL_BLEND);
+                /* The same as SDL_BLENDMODE_NONE */
+                blendMode = SDL_BLENDMODE_NONE;
+                break;
+            }
+            /* fall through */
         case SDL_BLENDMODE_BLEND:
             data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
             data->glEnable(GL_BLEND);
@@ -645,7 +653,7 @@ GLES_RenderPoint(SDL_Renderer * renderer, int x, int y)
 {
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
 
-    GLES_SetBlendMode(data, renderer->blendMode);
+    GLES_SetBlendMode(data, renderer->blendMode, 1);
 
     data->glColor4f((GLfloat) renderer->r * inv255f,
                     (GLfloat) renderer->g * inv255f,
@@ -669,7 +677,7 @@ GLES_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
 {
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
 
-    GLES_SetBlendMode(data, renderer->blendMode);
+    GLES_SetBlendMode(data, renderer->blendMode, 1);
 
     data->glColor4f((GLfloat) renderer->r * inv255f,
                     (GLfloat) renderer->g * inv255f,
@@ -695,7 +703,7 @@ GLES_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
 {
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
 
-    GLES_SetBlendMode(data, renderer->blendMode);
+    GLES_SetBlendMode(data, renderer->blendMode, 1);
 
     data->glColor4f((GLfloat) renderer->r * inv255f,
                     (GLfloat) renderer->g * inv255f,
@@ -789,7 +797,7 @@ GLES_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         data->glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
-    GLES_SetBlendMode(data, texture->blendMode);
+    GLES_SetBlendMode(data, texture->blendMode, 0);
 
     switch (texture->scaleMode) {
     case SDL_TEXTURESCALEMODE_NONE:
