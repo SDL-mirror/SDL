@@ -2125,10 +2125,6 @@ AC_HELP_STRING([--enable-sdl-dlopen], [use dlopen for shared object loading [[de
             AC_CHECK_LIB(c, dlopen, EXTRA_LDFLAGS="$EXTRA_LDFLAGS",
                AC_CHECK_LIB(dl, dlopen, EXTRA_LDFLAGS="$EXTRA_LDFLAGS -ldl",
                   AC_CHECK_LIB(ltdl, dlopen, EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lltdl")))
-            AC_CHECK_LIB(dl, dlvsym, have_dlvsym=yes)
-            if test x$have_dlvsym = xyes; then
-                AC_DEFINE(HAVE_DLVSYM)
-            fi
             AC_DEFINE(SDL_LOADSO_DLOPEN)
             SOURCES="$SOURCES $srcdir/src/loadso/dlopen/*.c"
             have_loadso=yes
