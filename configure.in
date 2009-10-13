@@ -763,11 +763,11 @@ AC_HELP_STRING([--enable-pulseaudio-shared], [dynamically load PulseAudio suppor
                           , enable_pulseaudio_shared=yes)
             if test "x`echo $PULSEAUDIO_LIBS | grep -- -L`" = "x"; then
                 if test "x`ls /$base_libdir/libpulse-simple.so.* 2> /dev/null`" != "x"; then
-                    PULSE_LIBS="-L/$base_libdir $PULSE_LIBS"
+                    PULSEAUDIO_LIBS="-L/$base_libdir $PULSEAUDIO_LIBS"
                 elif test "x`ls /usr/$base_libdir/libpulse-simple.so.* 2> /dev/null`" != "x"; then
-                    PULSE_LIBS="-L/usr/$base_libdir $PULSE_LIBS"
+                    PULSEAUDIO_LIBS="-L/usr/$base_libdir $PULSEAUDIO_LIBS"
                 elif test "x`ls /usr/local/$base_libdir/libpulse-simple.so.* 2> /dev/null`" != "x"; then
-                    PULSE_LIBS="-L/usr/local/$base_libdir $PULSE_LIBS"
+                    PULSEAUDIO_LIBS="-L/usr/local/$base_libdir $PULSEAUDIO_LIBS"
                 fi
             fi
             pulseaudio_lib_spec=`echo $PULSEAUDIO_LIBS | sed 's/.*-L\([[^ ]]*\).*/\1\/libpulse-simple.so.*/'`
