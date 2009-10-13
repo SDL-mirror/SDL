@@ -365,7 +365,7 @@ if test x$enable_assembly = xyes; then
             # x86 64-bit architectures all have SSE instructions
             default_ssemath=yes
             ;;
-	*)
+        *)
             default_ssemath=no
             ;;
     esac
@@ -538,7 +538,7 @@ AC_HELP_STRING([--enable-altivec], [use Altivec assembly routines [[default=yes]
             have_altivec_h_hdr=yes
             ])
             AC_MSG_RESULT($have_gcc_altivec)
-	fi
+        fi
 
         if test x$have_gcc_altivec = xno; then
             AC_MSG_CHECKING(for Altivec with GCC -faltivec option)
@@ -625,7 +625,6 @@ AC_HELP_STRING([--enable-alsa], [support the ALSA audio API [[default=yes]]]),
 AC_HELP_STRING([--enable-alsa-shared], [dynamically load ALSA audio support [[default=yes]]]),
                           , enable_alsa_shared=yes)
             alsa_lib=[`find_lib "libasound.so.*" "$ALSA_LIBS" | sed 's/.*\/\(.*\)/\1/; q'`]
-            echo "-- dynamic libasound -> $alsa_lib"
 
             AC_DEFINE(SDL_AUDIO_DRIVER_ALSA)
             SOURCES="$SOURCES $srcdir/src/audio/alsa/*.c"
@@ -636,6 +635,7 @@ AC_HELP_STRING([--enable-alsa-shared], [dynamically load ALSA audio support [[de
             fi
             if test x$have_loadso = xyes && \
                test x$enable_alsa_shared = xyes && test x$alsa_lib != x; then
+                echo "-- dynamic libasound -> $alsa_lib"
                 AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_ALSA_DYNAMIC, "$alsa_lib")
             else
                 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $ALSA_LIBS"
@@ -720,7 +720,6 @@ AC_HELP_STRING([--enable-esd], [support the Enlightened Sound Daemon [[default=y
 AC_HELP_STRING([--enable-esd-shared], [dynamically load ESD audio support [[default=yes]]]),
                           , enable_esd_shared=yes)
             esd_lib=[`find_lib "libesd.so.*" "$ESD_LIBS" | sed 's/.*\/\(.*\)/\1/; q'`]
-            echo "-- dynamic libesd -> $esd_lib"
 
             AC_DEFINE(SDL_AUDIO_DRIVER_ESD)
             SOURCES="$SOURCES $srcdir/src/audio/esd/*.c"
@@ -731,6 +730,7 @@ AC_HELP_STRING([--enable-esd-shared], [dynamically load ESD audio support [[defa
             fi
             if test x$have_loadso = xyes && \
                test x$enable_esd_shared = xyes && test x$esd_lib != x; then
+                echo "-- dynamic libesd -> $esd_lib"
                 AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_ESD_DYNAMIC, "$esd_lib")
             else
                 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $ESD_LIBS"
@@ -767,7 +767,6 @@ AC_HELP_STRING([--enable-pulseaudio], [use PulseAudio [[default=yes]]]),
 AC_HELP_STRING([--enable-pulseaudio-shared], [dynamically load PulseAudio support [[default=yes]]]),
                           , enable_pulseaudio_shared=yes)
             pulseaudio_lib=[`find_lib "libpulse-simple.so.*" "$PULSEAUDIO_LIBS" | sed 's/.*\/\(.*\)/\1/; q'`]
-            echo "-- dynamic libpulse-simple -> $pulseaudio_lib"
 
             AC_DEFINE(SDL_AUDIO_DRIVER_PULSEAUDIO)
             SOURCES="$SOURCES $srcdir/src/audio/pulseaudio/*.c"
@@ -778,6 +777,7 @@ AC_HELP_STRING([--enable-pulseaudio-shared], [dynamically load PulseAudio suppor
             fi
             if test x$have_loadso = xyes && \
                test x$enable_pulseaudio_shared = xyes && test x$pulseaudio_lib != x; then
+                echo "-- dynamic libpulse-simple -> $pulseaudio_lib"
                 AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_PULSEAUDIO_DYNAMIC, "$pulseaudio_lib")
             else
                 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $PULSEAUDIO_LIBS"
@@ -817,7 +817,6 @@ AC_HELP_STRING([--enable-arts], [support the Analog Real Time Synthesizer [[defa
 AC_HELP_STRING([--enable-arts-shared], [dynamically load aRts audio support [[default=yes]]]),
                               , enable_arts_shared=yes)
                 arts_lib=[`find_lib "libartsc.so.*" "$ARTS_LIBS" | sed 's/.*\/\(.*\)/\1/; q'`]
-                echo "-- dynamic libartsc -> $arts_lib"
 
                 AC_DEFINE(SDL_AUDIO_DRIVER_ARTS)
                 SOURCES="$SOURCES $srcdir/src/audio/arts/*.c"
@@ -828,6 +827,7 @@ AC_HELP_STRING([--enable-arts-shared], [dynamically load aRts audio support [[de
                 fi
                 if test x$have_loadso = xyes && \
                    test x$enable_arts_shared = xyes && test x$arts_lib != x; then
+                    echo "-- dynamic libartsc -> $arts_lib"
                     AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_ARTS_DYNAMIC, "$arts_lib")
                 else
                     EXTRA_LDFLAGS="$EXTRA_LDFLAGS $ARTS_LIBS"
@@ -875,7 +875,6 @@ AC_HELP_STRING([--enable-nas], [support the NAS audio API [[default=yes]]]),
 AC_HELP_STRING([--enable-nas-shared], [dynamically load NAS audio support [[default=yes]]]),
                           , enable_nas_shared=yes)
             nas_lib=[`find_lib "libaudio.so.*" "$NAS_LIBS" | sed 's/.*\/\(.*\)/\1/; q'`]
-            echo "-- dynamic libaudio -> $nas_lib"
 
             if test x$have_loadso != xyes && \
                test x$enable_nas_shared = xyes; then
@@ -883,6 +882,7 @@ AC_HELP_STRING([--enable-nas-shared], [dynamically load NAS audio support [[defa
             fi
             if test x$have_loadso = xyes && \
                test x$enable_nas_shared = xyes && test x$nas_lib != x; then
+                echo "-- dynamic libaudio -> $nas_lib"
                 AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_NAS_DYNAMIC, "$nas_lib")
             else
                 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $NAS_LIBS"
@@ -1338,11 +1338,9 @@ AC_HELP_STRING([--enable-directfb-shared], [dynamically load directfb support [[
             SOURCES="$SOURCES $srcdir/src/video/directfb/*.c"
             EXTRA_CFLAGS="$EXTRA_CFLAGS $DIRECTFB_CFLAGS"
 
-	        AC_MSG_CHECKING(for directfb dynamic loading support)
-			directfb_shared=no
-            directfb_lib_spec="$DIRECTFB_PREFIX/lib/libdirectfb.so*"
-            directfb_lib=`ls -- $directfb_lib_spec | sed 's/.*\/\(.*\)/\1/; q'`
-            dnl echo "-- $directfb_lib_spec -> $directfb_lib"
+            AC_MSG_CHECKING(for directfb dynamic loading support)
+            directfb_shared=no
+            directfb_lib=[`find_lib "libdirectfb.so.*" "$DIRECTFB_LIBS" | sed 's/.*\/\(.*\)/\1/; q'`]
 
             if test x$have_loadso != xyes && \
                test x$enable_directfb_shared = xyes; then
@@ -1350,12 +1348,13 @@ AC_HELP_STRING([--enable-directfb-shared], [dynamically load directfb support [[
             fi
             if test x$have_loadso = xyes && \
                test x$enable_directfb_shared = xyes && test x$directfb_lib != x; then
-				directfb_shared=yes
+                directfb_shared=yes
+                echo "-- $directfb_lib_spec -> $directfb_lib"
                 AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_DIRECTFB_DYNAMIC, "$directfb_lib")
             else
-	            EXTRA_LDFLAGS="$EXTRA_LDFLAGS $DIRECTFB_LIBS"
+                EXTRA_LDFLAGS="$EXTRA_LDFLAGS $DIRECTFB_LIBS"
             fi
-	        AC_MSG_RESULT($directfb_shared)
+            AC_MSG_RESULT($directfb_shared)
             have_video=yes
         fi
     fi
@@ -1392,7 +1391,7 @@ AC_HELP_STRING([--enable-fusionsound], [use FusionSound audio driver [[default=n
 AC_HELP_STRING([--enable-fusionsound-shared], [dynamically load fusionsound audio support [[default=yes]]]),
                           , enable_fusionsound_shared=yes)
             fusionsound_shared=no
-	        AC_MSG_CHECKING(for FusionSound dynamic loading support)
+            AC_MSG_CHECKING(for FusionSound dynamic loading support)
             if test x$have_loadso != xyes && \
                test x$enable_fusionsound_shared = xyes; then
                 AC_MSG_WARN([You must have SDL_LoadObject() support for dynamic fusionsound loading])
@@ -1400,11 +1399,11 @@ AC_HELP_STRING([--enable-fusionsound-shared], [dynamically load fusionsound audi
             if test x$have_loadso = xyes && \
                test x$enable_fusionsound_shared = xyes; then
                 AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_FUSIONSOUND_DYNAMIC, "libfusionsound.so")
-            	fusionsound_shared=yes
+                fusionsound_shared=yes
             else
-	            EXTRA_LDFLAGS="$EXTRA_LDFLAGS $FUSIONSOUND_LIBS"
+                EXTRA_LDFLAGS="$EXTRA_LDFLAGS $FUSIONSOUND_LIBS"
             fi
-	        AC_MSG_RESULT($fusionsound_shared)
+            AC_MSG_RESULT($fusionsound_shared)
             
             have_audio=yes
         fi
@@ -1446,9 +1445,9 @@ CheckPS3()
     video_ps3=no
     AC_CHECK_HEADER([linux/fb.h])
     AC_CHECK_HEADER([asm/ps3fb.h], [have_ps3fb_hdr=yes], [],
-			[#ifndef _LINUX_TYPES_H
-				#include <linux/types.h>
-			#endif])
+            [#ifndef _LINUX_TYPES_H
+                #include <linux/types.h>
+            #endif])
     AC_CHECK_HEADER([libspe2.h], have_libspe2_hdr=yes)
     AC_CHECK_LIB([spe2], spe_context_create, have_spe2_lib=yes)
 
@@ -2072,13 +2071,13 @@ CheckUSBHID()
               #if defined(HAVE_USB_H)
               #include <usb.h>
               #endif
-	      #ifdef __DragonFly__
+              #ifdef __DragonFly__
               #include <bus/usb/usb.h>
               #include <bus/usb/usbhid.h>
-	      #else
+              #else
               #include <dev/usb/usb.h>
               #include <dev/usb/usbhid.h>
-	      #endif
+              #endif
               #if defined(HAVE_USBHID_H)
               #include <usbhid.h>
               #elif defined(HAVE_LIBUSB_H)
