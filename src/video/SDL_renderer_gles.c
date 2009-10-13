@@ -661,8 +661,6 @@ GLES_RenderPoint(SDL_Renderer * renderer, int x, int y)
     data->glDrawArrays(GL_POINTS, 0, 1);
     data->glDisableClientState(GL_VERTEX_ARRAY);
 
-    data->glDisable(GL_BLEND);
-
     return 0;
 }
 
@@ -688,8 +686,6 @@ GLES_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
     data->glEnableClientState(GL_VERTEX_ARRAY);
     data->glDrawArrays(GL_LINES, 0, 2);
     data->glDisableClientState(GL_VERTEX_ARRAY);
-
-    data->glDisable(GL_BLEND);
 
     return 0;
 }
@@ -725,8 +721,6 @@ GLES_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
     data->glEnableClientState(GL_VERTEX_ARRAY);
     data->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     data->glDisableClientState(GL_VERTEX_ARRAY);
-
-    data->glDisable(GL_BLEND);
 
     return 0;
 }
