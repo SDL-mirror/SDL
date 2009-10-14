@@ -317,7 +317,7 @@ static void ALSA_PlayAudio(_THIS)
 	int status;
 	snd_pcm_uframes_t frames_left;
 	const Uint8 *sample_buf = (const Uint8 *) mixbuf;
-	const int sample_size = ((int) (this->spec.format & 0xFF)) / 8;
+	const int frame_size = (((int) (this->spec.format & 0xFF)) / 8) * this->spec.channels;
 
 	swizzle_alsa_channels(this);
 
@@ -346,7 +346,7 @@ static void ALSA_PlayAudio(_THIS)
 			}
 			continue;
 		}
-		sample_buf += status * sample_size;
+		sample_buf += status * frame_size;
 		frames_left -= status;
 	}
 }
