@@ -201,7 +201,7 @@ static void CustomApplicationMain (int argc, char **argv)
     SDLMain				*sdlMain;
 
     /* Ensure the application object is initialised */
-    [SDLApplication sharedApplication];
+    [NSApplication sharedApplication];
     
 #ifdef SDL_USE_CPS
     {
@@ -210,7 +210,7 @@ static void CustomApplicationMain (int argc, char **argv)
         if (!CPSGetCurrentProcess(&PSN))
             if (!CPSEnableForegroundOperation(&PSN,0x03,0x3C,0x2C,0x1103))
                 if (!CPSSetFrontProcess(&PSN))
-                    [SDLApplication sharedApplication];
+                    [NSApplication sharedApplication];
     }
 #endif /* SDL_USE_CPS */
 
