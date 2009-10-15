@@ -246,7 +246,7 @@ static SDL_AudioDevice *Audio_CreateDevice(int devindex)
 }
 
 AudioBootStrap ALSA_bootstrap = {
-	DRIVER_NAME, "ALSA 0.9 PCM audio",
+	DRIVER_NAME, "ALSA PCM audio",
 	Audio_Available, Audio_CreateDevice
 };
 
