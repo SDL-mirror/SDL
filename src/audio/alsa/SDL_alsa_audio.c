@@ -323,7 +323,7 @@ static void ALSA_PlayAudio(_THIS)
 
 	frames_left = ((snd_pcm_uframes_t) this->spec.samples);
 
-	while ( frames_left > 0 ) {
+	while ( frames_left > 0 && this->enabled ) {
 		status = SDL_NAME(snd_pcm_writei)(pcm_handle, sample_buf, frames_left);
 		if ( status < 0 ) {
 			if ( status == -EAGAIN ) {
