@@ -885,7 +885,7 @@ static SDL_Surface* QZ_SetVideoMode (_THIS, SDL_Surface *current, int width,
 		}
 		else
 		{
-#ifdef __LITTLE_ENDIAN__
+#if SDL_BYTEORDER == SDL_LITTLE_ENDIAN
 			rmask = 0x0000FF00;
 			gmask = 0x00FF0000;
 			bmask = 0xFF000000;
