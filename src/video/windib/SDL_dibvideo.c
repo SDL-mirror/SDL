@@ -508,6 +508,76 @@ static int DIB_SussScreenDepth()
 /* Various screen update functions available */
 static void DIB_NormalUpdate(_THIS, int numrects, SDL_Rect *rects);
 
+static void DIB_ResizeWindow(_THIS, int width, int height, int prev_width, int prev_height, Uint32 flags)
+{
+	RECT bounds;
+	int x, y;
+
+#ifndef _WIN32_WCE
+	/* Resize the window */
+	if ( !SDL_windowid && !IsZoomed(SDL_Window) ) {
+#else
+	if ( !SDL_windowid ) {
+#endif
+		HWND top;
+		UINT swp_flags;
+		const char *window = NULL;
+		const char *center = NULL;
+
+		if ( width != prev_width || height != prev_height ) {
+			window = SDL_getenv("SDL_VIDEO_WINDOW_POS");
+			center = SDL_getenv("SDL_VIDEO_CENTERED");
+			if ( window ) {
+				if ( SDL_sscanf(window, "%d,%d", &x, &y) == 2 ) {
+					SDL_windowX = x;
+					SDL_windowY = y;
+				}
+				if ( SDL_strcmp(window, "center") == 0 ) {
+					center = window;
+				}
+			}
+		}
+		swp_flags = (SWP_NOCOPYBITS | SWP_SHOWWINDOW);
+
+		bounds.left = SDL_windowX;
+		bounds.top = SDL_windowY;
+		bounds.right = SDL_windowX+width;
+		bounds.bottom = SDL_windowY+height;
+#ifndef _WIN32_WCE
+		AdjustWindowRectEx(&bounds, GetWindowLong(SDL_Window, GWL_STYLE), (GetMenu(SDL_Window) != NULL), 0);
+#else
+		// The bMenu parameter must be FALSE; menu bars are not supported
+		AdjustWindowRectEx(&bounds, GetWindowLong(SDL_Window, GWL_STYLE), 0, 0);
+#endif
+		width = bounds.right-bounds.left;
+		height = bounds.bottom-bounds.top;
+		if ( (flags & SDL_FULLSCREEN) ) {
+			x = (GetSystemMetrics(SM_CXSCREEN)-width)/2;
+			y = (GetSystemMetrics(SM_CYSCREEN)-height)/2;
+		} else if ( center ) {
+			x = (GetSystemMetrics(SM_CXSCREEN)-width)/2;
+			y = (GetSystemMetrics(SM_CYSCREEN)-height)/2;
+		} else if ( SDL_windowX || SDL_windowY || window ) {
+			x = bounds.left;
+			y = bounds.top;
+		} else {
+			x = y = -1;
+			swp_flags |= SWP_NOMOVE;
+		}
+		if ( flags & SDL_FULLSCREEN ) {
+			top = HWND_TOPMOST;
+		} else {
+			top = HWND_NOTOPMOST;
+		}
+		SetWindowPos(SDL_Window, top, x, y, width, height, swp_flags);
+		if ( !(flags & SDL_FULLSCREEN) ) {
+			SDL_windowX = SDL_bounds.left;
+			SDL_windowY = SDL_bounds.top;
+		}
+		SetForegroundWindow(SDL_Window);
+	}
+}
+
 SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 				int width, int height, int bpp, Uint32 flags)
 {
@@ -524,9 +594,11 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 	int binfo_size;
 	BITMAPINFO *binfo;
 	HDC hdc;
-	RECT bounds;
-	int x, y;
 	Uint32 Rmask, Gmask, Bmask;
+
+	prev_w = current->w;
+	prev_h = current->h;
+	prev_flags = current->flags;
 
 	/*
 	 * Special case for OpenGL windows...since the app needs to call
@@ -535,30 +607,20 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 	 *  there's no sense in tearing the context down just to rebuild it
 	 *  to what it already was...tearing it down sacrifices your GL state
 	 *  and uploaded textures. So if we're requesting the same video mode
-	 *  attributes and the width/height matches the physical window, just
-	 *  return immediately.
+	 *  attributes just resize the window and return immediately.
 	 */
-	if ( (SDL_Window != NULL) &&
-	     (current != NULL) &&
-	     (current->flags == flags) &&
+	if ( SDL_Window &&
+	     ((current->flags & ~SDL_ANYFORMAT) == (flags & ~SDL_ANYFORMAT)) &&
 	     (current->format->BitsPerPixel == bpp) &&
-	     ((flags & SDL_FULLSCREEN) == 0) ) {  /* probably not safe for fs */
-		int curwidth, curheight;
-		RECT size;
-
-		/* Get the current position of our window */
-		GetClientRect(SDL_Window, &size);
-
-		curwidth = (size.right - size.left);
-		curheight = (size.bottom - size.top);
-		if ((width == curwidth) && (height == curheight)) {
-			current->w = width;
-			current->h = height;
-			return current;  /* we're already good to go. */
-		}
+	     (flags & SDL_OPENGL) && 
+	     !(flags & SDL_FULLSCREEN) ) {  /* probably not safe for fs */
+		current->w = width;
+		current->h = height;
+		SDL_resizing = 1;
+		DIB_ResizeWindow(this, width, height, prev_w, prev_h, flags);
+		SDL_resizing = 0;
+		return current;
 	}
-
-	prev_flags = current->flags;
 
 	/* Clean up any GL context that may be hanging around */
 	if ( current->flags & SDL_OPENGL ) {
@@ -607,8 +669,6 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 	}
 
 	/* Fill in part of the video surface */
-	prev_w = video->w;
-	prev_h = video->h;
 	video->flags = 0;	/* Clear flags */
 	video->w = width;
 	video->h = height;
@@ -843,69 +903,7 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 			video->flags |= SDL_HWPALETTE;
 		}
 	}
-#ifndef _WIN32_WCE
-	/* Resize the window */
-	if ( !SDL_windowid && !IsZoomed(SDL_Window) ) {
-#else
-	if ( !SDL_windowid ) {
-#endif
-		HWND top;
-		UINT swp_flags;
-		const char *window = NULL;
-		const char *center = NULL;
-
-		if ( video->w != prev_w || video->h != prev_h ) {
-			window = SDL_getenv("SDL_VIDEO_WINDOW_POS");
-			center = SDL_getenv("SDL_VIDEO_CENTERED");
-			if ( window ) {
-				if ( SDL_sscanf(window, "%d,%d", &x, &y) == 2 ) {
-					SDL_windowX = x;
-					SDL_windowY = y;
-				}
-				if ( SDL_strcmp(window, "center") == 0 ) {
-					center = window;
-				}
-			}
-		}
-		swp_flags = (SWP_NOCOPYBITS | SWP_SHOWWINDOW);
-
-		bounds.left = SDL_windowX;
-		bounds.top = SDL_windowY;
-		bounds.right = SDL_windowX+video->w;
-		bounds.bottom = SDL_windowY+video->h;
-#ifndef _WIN32_WCE
-		AdjustWindowRectEx(&bounds, GetWindowLong(SDL_Window, GWL_STYLE), (GetMenu(SDL_Window) != NULL), 0);
-#else
-		// The bMenu parameter must be FALSE; menu bars are not supported
-		AdjustWindowRectEx(&bounds, GetWindowLong(SDL_Window, GWL_STYLE), 0, 0);
-#endif
-		width = bounds.right-bounds.left;
-		height = bounds.bottom-bounds.top;
-		if ( (flags & SDL_FULLSCREEN) ) {
-			x = (GetSystemMetrics(SM_CXSCREEN)-width)/2;
-			y = (GetSystemMetrics(SM_CYSCREEN)-height)/2;
-		} else if ( center ) {
-			x = (GetSystemMetrics(SM_CXSCREEN)-width)/2;
-			y = (GetSystemMetrics(SM_CYSCREEN)-height)/2;
-		} else if ( SDL_windowX || SDL_windowY || window ) {
-			x = bounds.left;
-			y = bounds.top;
-		} else {
-			x = y = -1;
-			swp_flags |= SWP_NOMOVE;
-		}
-		if ( flags & SDL_FULLSCREEN ) {
-			top = HWND_TOPMOST;
-		} else {
-			top = HWND_NOTOPMOST;
-		}
-		SetWindowPos(SDL_Window, top, x, y, width, height, swp_flags);
-		if ( !(flags & SDL_FULLSCREEN) ) {
-			SDL_windowX = SDL_bounds.left;
-			SDL_windowY = SDL_bounds.top;
-		}
-		SetForegroundWindow(SDL_Window);
-	}
+	DIB_ResizeWindow(this, width, height, prev_w, prev_h, flags);
 	SDL_resizing = 0;
 
 	/* Set up for OpenGL */
