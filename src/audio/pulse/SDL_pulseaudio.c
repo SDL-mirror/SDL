@@ -346,8 +346,8 @@ static void PULSE_CloseAudio(_THIS)
 /* Try to get the name of the program */
 static char *get_progname(void)
 {
-	char *progname = NULL;
 #ifdef __LINUX__
+	char *progname = NULL;
 	FILE *fp;
 	static char temp[BUFSIZ];
 
@@ -364,8 +364,12 @@ static char *get_progname(void)
 		}
 		fclose(fp);
 	}
-#endif
 	return(progname);
+#elif defined(__NetBSD__)
+	return getprogname();
+#else
+	return("unknown");
+#endif
 }
 
 static void stream_drain_complete(pa_stream *s, int success, void *userdata) {
