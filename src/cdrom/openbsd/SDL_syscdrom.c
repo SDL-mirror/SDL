@@ -391,6 +391,7 @@ static int SDL_SYS_CDStop(SDL_CD *cdrom)
 /* Eject the CD-ROM */
 static int SDL_SYS_CDEject(SDL_CD *cdrom)
 {
+	SDL_SYS_CDioctl(cdrom->id, CDIOCALLOW, 0);
 	return(SDL_SYS_CDioctl(cdrom->id, CDIOCEJECT, 0));
 }
 
