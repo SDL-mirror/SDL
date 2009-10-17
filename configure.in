@@ -2517,7 +2517,7 @@ case "$host" in
         # Set up the system libraries we need
         EXTRA_LDFLAGS="$EXTRA_LDFLAGS -luser32 -lgdi32 -lwinmm"
         if test x$have_directx = xyes; then
-            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -ldxguid -ldinput8"
+            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -ldxguid"
         fi
         # The Win32 platform requires special setup
         SOURCES="$SOURCES $srcdir/src/main/win32/*.rc"
