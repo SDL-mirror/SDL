@@ -35,9 +35,6 @@
 #define DEFAULT_OPENGL	"libGL.so.3"
 #elif defined(__OpenBSD__)
 #define DEFAULT_OPENGL	"libGL.so.4.0"
-#elif defined(__NetBSD__)
-/* pkgsrc is .1, base system is .2 */
-#define DEFAULT_OPENGL	"libGL.so"
 #else
 #define DEFAULT_OPENGL	"libGL.so.1"
 #endif
