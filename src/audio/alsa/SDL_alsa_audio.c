@@ -43,8 +43,6 @@
 /* The tag name used by ALSA audio */
 #define DRIVER_NAME         "alsa"
 
-/* Whether we should set the buffer size or the period size */
-/*#define SET_PERIOD_SIZE*/
 /*#define DEBUG_PERIOD_SIZE*/
 
 /* Audio driver functions */
@@ -377,9 +375,7 @@ static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	snd_pcm_format_t     format;
 	snd_pcm_uframes_t    frames;
 	unsigned int         rate;
-#ifdef SET_PERIOD_SIZE
 	unsigned int         periods;
-#endif
 	unsigned int 	     channels;
 	Uint16               test_format;
 
@@ -475,28 +471,33 @@ static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	spec->freq = rate;
 
 	/* Set the buffer size, in samples */
-#ifdef SET_PERIOD_SIZE
-	frames = spec->samples;
-	status = SDL_NAME(snd_pcm_hw_params_set_period_size_near)(pcm_handle, hwparams, &frames, NULL);
-	if ( status < 0 ) {
-		SDL_SetError("Couldn't set period size: %s", SDL_NAME(snd_strerror)(status));
-		ALSA_CloseAudio(this);
-		return(-1);
-	}
+	if (getenv("SDL_AUDIO_ALSA_SET_PERIOD_SIZE")) {
+		frames = spec->samples;
+		status = SDL_NAME(snd_pcm_hw_params_set_period_size_near)(pcm_handle, hwparams, &frames, NULL);
+		if ( status < 0 ) {
+			SDL_SetError("Couldn't set period size: %s", SDL_NAME(snd_strerror)(status));
+			ALSA_CloseAudio(this);
+			return(-1);
+		}
 
-	spec->samples = frames;
+		spec->samples = frames;
 
-	periods = 2;
-	status = SDL_NAME(snd_pcm_hw_params_set_periods_near)(pcm_handle, hwparams, &periods, NULL);
-	if ( status < 0 ) {
-		SDL_SetError("Couldn't set period count: %s", SDL_NAME(snd_strerror)(status));
-		ALSA_CloseAudio(this);
-		return(-1);
+		periods = 2;
+		status = SDL_NAME(snd_pcm_hw_params_set_periods_near)(pcm_handle, hwparams, &periods, NULL);
+		if ( status < 0 ) {
+			SDL_SetError("Couldn't set period count: %s", SDL_NAME(snd_strerror)(status));
+			ALSA_CloseAudio(this);
+			return(-1);
+		}
+	} else {
+		frames = spec->samples * 2;
+		status = SDL_NAME(snd_pcm_hw_params_set_buffer_size_near)(pcm_handle, hwparams, &frames);
+		if ( status < 0 ) {
+			SDL_SetError("Couldn't set buffer size: %s", SDL_NAME(snd_strerror)(status));
+			ALSA_CloseAudio(this);
+			return(-1);
+		}
 	}
-#else
-	frames = spec->samples * 2;
-	status = SDL_NAME(snd_pcm_hw_params_set_buffer_size_near)(pcm_handle, hwparams, &frames);
-#endif
 
 	/* "set" the hardware with the desired parameters */
 	status = SDL_NAME(snd_pcm_hw_params)(pcm_handle, hwparams);
