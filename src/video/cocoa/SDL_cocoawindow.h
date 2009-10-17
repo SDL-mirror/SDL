@@ -24,10 +24,16 @@
 #ifndef _SDL_cocoawindow_h
 #define _SDL_cocoawindow_h
 
+#import <Cocoa/Cocoa.h>
+
 typedef struct SDL_WindowData SDL_WindowData;
 
 /* *INDENT-OFF* */
-@interface Cocoa_WindowListener:NSResponder {
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
+@interface Cocoa_WindowListener : NSResponder <NSWindowDelegate> {
+#else
+@interface Cocoa_WindowListener : NSResponder {
+#endif		
     SDL_WindowData *_data;
 }
 

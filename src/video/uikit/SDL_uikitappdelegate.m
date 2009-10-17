@@ -56,6 +56,7 @@ int main(int argc, char **argv) {
 @implementation SDLUIKitDelegate
 
 @synthesize window;
+@synthesize windowID;
 
 /* convenience method */
 +(SDLUIKitDelegate *)sharedAppDelegate {
@@ -66,6 +67,7 @@ int main(int argc, char **argv) {
 - (id)init {
 	self = [super init];
 	window = nil;
+	windowID = 0;
 	return self;
 }
 
@@ -96,6 +98,20 @@ int main(int argc, char **argv) {
 	longjmp(*(jump_env()), 1);
 	
 }
+
+- (void) applicationWillResignActive:(UIApplication*)application
+{
+//	NSLog(@"%@", NSStringFromSelector(_cmd));
+	SDL_SendWindowEvent(self.windowID, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
+}
+
+- (void) applicationDidBecomeActive:(UIApplication*)application
+{
+//	NSLog(@"%@", NSStringFromSelector(_cmd));
+	SDL_SendWindowEvent(self.windowID, SDL_WINDOWEVENT_RESTORED, 0, 0);
+}
+
+
 
 -(void)dealloc {
 	[window release];

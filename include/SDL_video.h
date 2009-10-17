@@ -414,8 +414,9 @@ extern DECLSPEC int SDLCALL SDL_GetDesktopDisplayMode(SDL_DisplayMode * mode);
  */
 extern DECLSPEC int SDLCALL SDL_GetCurrentDisplayMode(SDL_DisplayMode * mode);
 
+
 /**
- * \fn SDL_DisplayMode *SDL_GetClosestDisplayMode(const SDL_DisplayMode *mode, SDL_DisplayMode *closest)
+ * \fn SDL_DisplayMode SDL_GetClosestDisplayMode(const SDL_DisplayMode mode, SDL_DisplayMode closest)
  *
  * \brief Get the closest match to the requested display mode.
  *

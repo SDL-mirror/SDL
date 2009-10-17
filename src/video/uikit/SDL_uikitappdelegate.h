@@ -26,9 +26,11 @@
 /* *INDENT-OFF* */
 @interface SDLUIKitDelegate:NSObject<UIApplicationDelegate> {
     UIWindow *window;
+	SDL_WindowID windowID;
 }
 
 @property (readwrite, retain) UIWindow *window;
+@property (readwrite, assign) SDL_WindowID windowID;
 
 +(SDLUIKitDelegate *)sharedAppDelegate;
 

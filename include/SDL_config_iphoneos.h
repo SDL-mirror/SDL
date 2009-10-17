@@ -35,6 +35,12 @@ typedef unsigned int uint32_t;
 typedef unsigned long uintptr_t;
 #endif /* !_STDINT_H_ && !HAVE_STDINT_H */
 
+#ifdef __LP64__
+#define SIZEOF_VOIDP 8
+#else
+#define SIZEOF_VOIDP 4
+#endif
+
 #define SDL_HAS_64BIT_TYPE	1
 
 #define HAVE_ALLOCA_H		1

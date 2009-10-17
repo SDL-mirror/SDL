@@ -82,7 +82,7 @@ static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bo
 
 int UIKit_CreateWindow(_THIS, SDL_Window *window) {
 		
-	/* iPhone applications are single window only */
+	/* We currently only handle single window applications on iPhone */
 	if (nil != [SDLUIKitDelegate sharedAppDelegate].window) {
 		SDL_SetError("Window already exists, no multi-window support.");
 		return -1;
@@ -96,7 +96,10 @@ int UIKit_CreateWindow(_THIS, SDL_Window *window) {
         return -1;
     }	
 	
+	// This saves the main window in the app delegate so event callbacks can do stuff on the window.
+	// This assumes a single window application design and needs to be fixed for multiple windows.
 	[SDLUIKitDelegate sharedAppDelegate].window = uiwindow;
+	[SDLUIKitDelegate sharedAppDelegate].windowID = window->id;
 	[uiwindow release]; /* release the window (the app delegate has retained it) */
 	
 	return 1;
@@ -113,6 +116,7 @@ void UIKit_DestroyWindow(_THIS, SDL_Window * window) {
 
 	/* this will also destroy the window */
 	[SDLUIKitDelegate sharedAppDelegate].window = nil;
+	[SDLUIKitDelegate sharedAppDelegate].windowID = 0;
 
 }
 
