@@ -507,16 +507,18 @@ static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec)
 		return(-1);
 	}
 
-/* This is useful for debugging... */
-#ifdef DEBUG_PERIOD_SIZE
-{ snd_pcm_uframes_t bufsize; snd_pcm_sframes_t persize; unsigned int periods; int dir;
-   SDL_NAME(snd_pcm_hw_params_get_buffer_size)(hwparams, &bufsize);
-   SDL_NAME(snd_pcm_hw_params_get_period_size)(hwparams, &persize, &dir);
-   SDL_NAME(snd_pcm_hw_params_get_periods)(hwparams, &periods, &dir);
+	/* This is useful for debugging */
+	if (getenv("SDL_AUDIO_ALSA_DEBUG_PERIOD_SIZE")) {
+		snd_pcm_uframes_t bufsize;
+		snd_pcm_sframes_t persize;
+		unsigned int periods; int dir;
 
-   fprintf(stderr, "ALSA: period size = %ld, periods = %u, buffer size = %lu\n", persize, periods, bufsize);
-}
-#endif
+		SDL_NAME(snd_pcm_hw_params_get_buffer_size)(hwparams, &bufsize);
+		SDL_NAME(snd_pcm_hw_params_get_period_size)(hwparams, &persize, &dir);
+		SDL_NAME(snd_pcm_hw_params_get_periods)(hwparams, &periods, &dir);
+
+		fprintf(stderr, "ALSA: period size = %ld, periods = %u, buffer size = %lu\n", persize, periods, bufsize);
+	}
 
 	/* Set the software parameters */
 	snd_pcm_sw_params_alloca(&swparams);
