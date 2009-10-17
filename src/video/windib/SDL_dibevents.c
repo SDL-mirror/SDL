@@ -347,7 +347,7 @@ static void DIB_GenerateMouseMotionEvent(_THIS)
 			SetCursorPos(center.x, center.y);
 			posted = SDL_PrivateMouseMotion(0, 1, (Sint16)mouse.x, (Sint16)mouse.y);
 		}
-	} else if ( SDL_GetAppState() & SDL_APPMOUSEFOCUS ) {
+	} else {
 		ScreenToClient(SDL_Window, &mouse);
 #ifdef SDL_VIDEO_DRIVER_GAPI
        if (SDL_VideoSurface && this->hidden->gapiInfo)
@@ -368,7 +368,7 @@ void DIB_PumpEvents(_THIS)
 		}
 	}
 
-	if ( SDL_GetAppState() & SDL_APPINPUTFOCUS ) {
+	if ( SDL_GetAppState() & SDL_APPMOUSEFOCUS ) {
 		DIB_GenerateMouseMotionEvent( this );
 	}
 }
