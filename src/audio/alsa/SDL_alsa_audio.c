@@ -43,8 +43,6 @@
 /* The tag name used by ALSA audio */
 #define DRIVER_NAME         "alsa"
 
-/*#define DEBUG_PERIOD_SIZE*/
-
 /* Audio driver functions */
 static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec);
 static void ALSA_WaitAudio(_THIS);
