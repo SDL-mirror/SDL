@@ -37,7 +37,9 @@
 #if ((defined(_MFC_VER) && defined(_M_IX86)/* && !defined(_WIN32_WCE) still needed? */) || \
      defined(__WATCOMC__) || \
      (defined(__GNUC__) && defined(__i386__))) && SDL_ASSEMBLY_ROUTINES
-#define USE_ASM_STRETCH
+/* There's a bug with gcc 4.4.1 and -O2 where srcp doesn't get the correct
+ * value after the first scanline.  FIXME? */
+/*#define USE_ASM_STRETCH*/
 #endif
 
 #ifdef USE_ASM_STRETCH
