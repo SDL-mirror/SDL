@@ -14,7 +14,7 @@ while ( ($file = shift(@ARGV)) ) {
 	while (<FILE>) {
 		if ( / DECLSPEC.* SDLCALL ([^\s\(]+)/ ) {
 			if ( not $exclude{$1} ) {
-				print "\t$1\n";
+				print "\t$1\r";
 			}
 		}
 	}
@@ -22,22 +22,22 @@ while ( ($file = shift(@ARGV)) ) {
 }
 
 # Special exports to include for this platform
-print "\tSDL_putenv\n";
-print "\tSDL_getenv\n";
-print "\tSDL_qsort\n";
-print "\tSDL_revcpy\n";
-print "\tSDL_strlcpy\n";
-print "\tSDL_strlcat\n";
-print "\tSDL_strdup\n";
-print "\tSDL_strrev\n";
-print "\tSDL_strupr\n";
-print "\tSDL_strlwr\n";
-print "\tSDL_ltoa\n";
-print "\tSDL_ultoa\n";
-print "\tSDL_strcasecmp\n";
-print "\tSDL_strncasecmp\n";
-print "\tSDL_snprintf\n";
-print "\tSDL_vsnprintf\n";
-print "\tSDL_iconv\n";
-print "\tSDL_iconv_string\n";
-print "\tSDL_InitQuickDraw\n";
+print "\tSDL_putenv\r";
+print "\tSDL_getenv\r";
+print "\tSDL_qsort\r";
+print "\tSDL_revcpy\r";
+print "\tSDL_strlcpy\r";
+print "\tSDL_strlcat\r";
+print "\tSDL_strdup\r";
+print "\tSDL_strrev\r";
+print "\tSDL_strupr\r";
+print "\tSDL_strlwr\r";
+print "\tSDL_ltoa\r";
+print "\tSDL_ultoa\r";
+print "\tSDL_strcasecmp\r";
+print "\tSDL_strncasecmp\r";
+print "\tSDL_snprintf\r";
+print "\tSDL_vsnprintf\r";
+print "\tSDL_iconv\r";
+print "\tSDL_iconv_string\r";
+print "\tSDL_InitQuickDraw\r";
