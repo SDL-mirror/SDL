@@ -366,14 +366,15 @@ LogicalSuffix(int logicalno, char *namebuf, int len)
 
 #if SDL_INPUT_LINUXEV
 #define test_bit(nr, addr) \
-	(((1UL << ((nr) & 31)) & (((const Uint32 *) addr)[(nr) >> 5])) != 0)
+	(((1UL << ((nr) % (sizeof(long) * 8))) & ((addr)[(nr) / (sizeof(long) * 8)])) != 0)
+#define NBITS(x) ((((x)-1)/(sizeof(long) * 8))+1)
 
 static int
 EV_IsJoystick(int fd)
 {
-    unsigned long evbit[40];
-    unsigned long keybit[40];
-    unsigned long absbit[40];
+    unsigned long evbit[NBITS(EV_MAX)] = { 0 };
+    unsigned long keybit[NBITS(KEY_MAX)] = { 0 };
+    unsigned long absbit[NBITS(ABS_MAX)] = { 0 };
 
     if ((ioctl(fd, EVIOCGBIT(0, sizeof(evbit)), evbit) < 0) ||
         (ioctl(fd, EVIOCGBIT(EV_KEY, sizeof(keybit)), keybit) < 0) ||
@@ -664,9 +665,9 @@ static SDL_bool
 EV_ConfigJoystick(SDL_Joystick * joystick, int fd)
 {
     int i, t;
-    unsigned long keybit[40];
-    unsigned long absbit[40];
-    unsigned long relbit[40];
+    unsigned long keybit[NBITS(KEY_MAX)] = { 0 };
+    unsigned long absbit[NBITS(ABS_MAX)] = { 0 };
+    unsigned long relbit[NBITS(REL_MAX)] = { 0 };
 
     /* See if this device uses the new unified event API */
     if ((ioctl(fd, EVIOCGBIT(EV_KEY, sizeof(keybit)), keybit) >= 0) &&
