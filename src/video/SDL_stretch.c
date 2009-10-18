@@ -103,6 +103,13 @@ static int generate_rowbytes(int src_w, int dst_w, int bpp)
 		SDL_SetError("ASM stretch of %d bytes isn't supported\n", bpp);
 		return(-1);
 	}
+#ifdef HAVE_MPROTECT
+	/* Make the code writeable */
+	if ( mprotect(copy_row, sizeof(copy_row), PROT_READ|PROT_WRITE) < 0 ) {
+		SDL_SetError("Couldn't make copy buffer writeable");
+		return(-1);
+	}
+#endif
 	pos = 0x10000;
 	inc = (src_w << 16) / dst_w;
 	eip = copy_row;
@@ -128,8 +135,8 @@ static int generate_rowbytes(int src_w, int dst_w, int bpp)
 		return(-1);
 	}
 #ifdef HAVE_MPROTECT
-	/* Make the code executable */
-	if ( mprotect(copy_row, sizeof(copy_row), PROT_READ|PROT_WRITE|PROT_EXEC) < 0 ) {
+	/* Make the code executable but not writeable */
+	if ( mprotect(copy_row, sizeof(copy_row), PROT_READ|PROT_EXEC) < 0 ) {
 		SDL_SetError("Couldn't make copy buffer executable");
 		return(-1);
 	}
