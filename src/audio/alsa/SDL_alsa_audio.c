@@ -327,7 +327,7 @@ static void ALSA_PlayAudio(_THIS)
 			status = SDL_NAME(snd_pcm_recover)(pcm_handle, status, 0);
 			if ( status < 0 ) {
 				/* Hmm, not much we can do - abort */
-				fprintf(stderr, "ALSA write failed (unrecoverable): %s", SDL_NAME(snd_strerror)(status));
+				fprintf(stderr, "ALSA write failed (unrecoverable): %s\n", SDL_NAME(snd_strerror)(status));
 				this->enabled = 0;
 				return;
 			}
