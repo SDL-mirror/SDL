@@ -85,6 +85,7 @@ static int (*SDL_NAME(snd_pcm_sw_params_current))(snd_pcm_t *pcm, snd_pcm_sw_par
 static int (*SDL_NAME(snd_pcm_sw_params_set_start_threshold))(snd_pcm_t *pcm, snd_pcm_sw_params_t *params, snd_pcm_uframes_t val);
 static int (*SDL_NAME(snd_pcm_sw_params))(snd_pcm_t *pcm, snd_pcm_sw_params_t *params);
 static int (*SDL_NAME(snd_pcm_nonblock))(snd_pcm_t *pcm, int nonblock);
+static int (*SDL_NAME(snd_pcm_wait))(snd_pcm_t *pcm, int timeout);
 #define snd_pcm_hw_params_sizeof SDL_NAME(snd_pcm_hw_params_sizeof)
 #define snd_pcm_sw_params_sizeof SDL_NAME(snd_pcm_sw_params_sizeof)
 
@@ -120,6 +121,7 @@ static struct {
 	{ "snd_pcm_sw_params_set_start_threshold",	(void**)(char*)&SDL_NAME(snd_pcm_sw_params_set_start_threshold)	},
 	{ "snd_pcm_sw_params",	(void**)(char*)&SDL_NAME(snd_pcm_sw_params)	},
 	{ "snd_pcm_nonblock",	(void**)(char*)&SDL_NAME(snd_pcm_nonblock)	},
+	{ "snd_pcm_wait",	(void**)(char*)&SDL_NAME(snd_pcm_wait)	},
 };
 
 static void UnloadALSALibrary(void) {
@@ -312,10 +314,13 @@ static void ALSA_PlayAudio(_THIS)
 	frames_left = ((snd_pcm_uframes_t) this->spec.samples);
 
 	while ( frames_left > 0 && this->enabled ) {
+		/* This works, but needs more testing before going live */
+		/*SDL_NAME(snd_pcm_wait)(pcm_handle, -1);*/
+
 		status = SDL_NAME(snd_pcm_writei)(pcm_handle, sample_buf, frames_left);
 		if ( status < 0 ) {
 			if ( status == -EAGAIN ) {
-				/* Apparently snd_pcm_recover() doesn't handle this. Foo. */
+				/* Apparently snd_pcm_recover() doesn't handle this case - does it assume snd_pcm_wait() above? */
 				SDL_Delay(1);
 				continue;
 			}
