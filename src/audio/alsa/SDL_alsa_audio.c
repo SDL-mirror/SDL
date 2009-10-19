@@ -59,7 +59,7 @@ static int alsa_loaded = 0;
 static int (*SDL_NAME(snd_pcm_open))(snd_pcm_t **pcm, const char *name, snd_pcm_stream_t stream, int mode);
 static int (*SDL_NAME(snd_pcm_close))(snd_pcm_t *pcm);
 static snd_pcm_sframes_t (*SDL_NAME(snd_pcm_writei))(snd_pcm_t *pcm, const void *buffer, snd_pcm_uframes_t size);
-static int (*SDL_NAME(snd_pcm_resume))(snd_pcm_t *pcm);
+static int (*SDL_NAME(snd_pcm_recover))(snd_pcm_t *pcm, int err, int silent);
 static int (*SDL_NAME(snd_pcm_prepare))(snd_pcm_t *pcm);
 static int (*SDL_NAME(snd_pcm_drain))(snd_pcm_t *pcm);
 static const char *(*SDL_NAME(snd_strerror))(int errnum);
@@ -96,7 +96,7 @@ static struct {
 	{ "snd_pcm_open",	(void**)(char*)&SDL_NAME(snd_pcm_open)		},
 	{ "snd_pcm_close",	(void**)(char*)&SDL_NAME(snd_pcm_close)	},
 	{ "snd_pcm_writei",	(void**)(char*)&SDL_NAME(snd_pcm_writei)	},
-	{ "snd_pcm_resume",	(void**)(char*)&SDL_NAME(snd_pcm_resume)	},
+	{ "snd_pcm_recover",	(void**)(char*)&SDL_NAME(snd_pcm_recover)	},
 	{ "snd_pcm_prepare",	(void**)(char*)&SDL_NAME(snd_pcm_prepare)	},
 	{ "snd_pcm_drain",	(void**)(char*)&SDL_NAME(snd_pcm_drain)	},
 	{ "snd_strerror",	(void**)(char*)&SDL_NAME(snd_strerror)		},
@@ -324,20 +324,7 @@ static void ALSA_PlayAudio(_THIS)
 	while ( frames_left > 0 && this->enabled ) {
 		status = SDL_NAME(snd_pcm_writei)(pcm_handle, sample_buf, frames_left);
 		if ( status < 0 ) {
-			if ( status == -EAGAIN ) {
-				SDL_Delay(1);
-				continue;
-			}
-			if ( status == -ESTRPIPE ) {
-				do {
-					SDL_Delay(1);
-					status = SDL_NAME(snd_pcm_resume)(pcm_handle);
-				} while ( status == -EAGAIN );
-			}
-			if ( status < 0 ) {
-				status = SDL_NAME(snd_pcm_prepare)(pcm_handle);
-			}
-			if ( status < 0 ) {
+			if ( SDL_NAME(snd_pcm_recover)(pcm_handle, status, 0) < 0 ) {
 				/* Hmm, not much we can do - abort */
 				this->enabled = 0;
 				return;
@@ -418,7 +405,7 @@ static int ALSA_set_period_size(_THIS, SDL_AudioSpec *spec, snd_pcm_hw_params_t 
 
 	env = getenv("SDL_AUDIO_ALSA_SET_PERIOD_SIZE");
 	if ( env ) {
-		override = SDL_strol(env);
+		override = SDL_atoi(env);
 		if ( override == 0 ) {
 			return(-1);
 		}
@@ -453,7 +440,7 @@ static int ALSA_set_buffer_size(_THIS, SDL_AudioSpec *spec, snd_pcm_hw_params_t 
 
 	env = getenv("SDL_AUDIO_ALSA_SET_BUFFER_SIZE");
 	if ( env ) {
-		override = SDL_strol(env);
+		override = SDL_atoi(env);
 		if ( override == 0 ) {
 			return(-1);
 		}
