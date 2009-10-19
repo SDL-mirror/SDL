@@ -381,7 +381,7 @@ static int ALSA_finalize_hardware(_THIS, SDL_AudioSpec *spec, snd_pcm_hw_params_
 
 	/* This is useful for debugging */
 	if ( getenv("SDL_AUDIO_ALSA_DEBUG") ) {
-		snd_pcm_sframes_t persize = 0;
+		snd_pcm_uframes_t persize = 0;
 		unsigned int periods = 0;
 
 		SDL_NAME(snd_pcm_hw_params_get_period_size)(hwparams, &persize, NULL);
@@ -467,7 +467,6 @@ static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	snd_pcm_format_t     format;
 	unsigned int         rate;
 	unsigned int 	     channels;
-	snd_pcm_uframes_t    bufsize;
 	Uint16               test_format;
 
 	/* Open the audio device */
