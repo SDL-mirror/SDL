@@ -314,6 +314,11 @@ static void ALSA_PlayAudio(_THIS)
 	while ( frames_left > 0 && this->enabled ) {
 		status = SDL_NAME(snd_pcm_writei)(pcm_handle, sample_buf, frames_left);
 		if ( status < 0 ) {
+			if ( status == -EAGAIN ) {
+				/* Apparently snd_pcm_recover() doesn't handle this. Foo. */
+				SDL_Delay(1);
+				continue;
+			}
 			status = SDL_NAME(snd_pcm_recover)(pcm_handle, status, 0);
 			if ( status < 0 ) {
 				/* Hmm, not much we can do - abort */
