@@ -380,11 +380,10 @@ static int ALSA_finalize_hardware(_THIS, SDL_AudioSpec *spec, snd_pcm_hw_params_
 	return(0);
 }
 
-static int ALSA_set_period_size(_THIS, SDL_AudioSpec *spec, snd_pcm_hw_params_t *params)
+static int ALSA_set_period_size(_THIS, SDL_AudioSpec *spec, snd_pcm_hw_params_t *params, int override)
 {
 	const char *env;
 	int status;
-	int override = 0;
 	snd_pcm_hw_params_t *hwparams;
 	snd_pcm_uframes_t frames;
 	unsigned int periods;
@@ -393,11 +392,13 @@ static int ALSA_set_period_size(_THIS, SDL_AudioSpec *spec, snd_pcm_hw_params_t 
 	snd_pcm_hw_params_alloca(&hwparams);
 	SDL_NAME(snd_pcm_hw_params_copy)(hwparams, params);
 
-	env = getenv("SDL_AUDIO_ALSA_SET_PERIOD_SIZE");
-	if ( env ) {
-		override = SDL_atoi(env);
-		if ( override == 0 ) {
-			return(-1);
+	if ( !override ) {
+		env = getenv("SDL_AUDIO_ALSA_SET_PERIOD_SIZE");
+		if ( env ) {
+			override = SDL_atoi(env);
+			if ( override == 0 ) {
+				return(-1);
+			}
 		}
 	}
 
@@ -416,11 +417,10 @@ static int ALSA_set_period_size(_THIS, SDL_AudioSpec *spec, snd_pcm_hw_params_t 
 	return ALSA_finalize_hardware(this, spec, hwparams, override);
 }
 
-static int ALSA_set_buffer_size(_THIS, SDL_AudioSpec *spec, snd_pcm_hw_params_t *params)
+static int ALSA_set_buffer_size(_THIS, SDL_AudioSpec *spec, snd_pcm_hw_params_t *params, int override)
 {
 	const char *env;
 	int status;
-	int override = 0;
 	snd_pcm_hw_params_t *hwparams;
 	snd_pcm_uframes_t frames;
 
@@ -428,11 +428,13 @@ static int ALSA_set_buffer_size(_THIS, SDL_AudioSpec *spec, snd_pcm_hw_params_t 
 	snd_pcm_hw_params_alloca(&hwparams);
 	SDL_NAME(snd_pcm_hw_params_copy)(hwparams, params);
 
-	env = getenv("SDL_AUDIO_ALSA_SET_BUFFER_SIZE");
-	if ( env ) {
-		override = SDL_atoi(env);
-		if ( override == 0 ) {
-			return(-1);
+	if ( !override ) {
+		env = getenv("SDL_AUDIO_ALSA_SET_BUFFER_SIZE");
+		if ( env ) {
+			override = SDL_atoi(env);
+			if ( override == 0 ) {
+				return(-1);
+			}
 		}
 	}
 
@@ -548,10 +550,10 @@ static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	spec->freq = rate;
 
 	/* Set the buffer size, in samples */
-	if ( ALSA_set_period_size(this, spec, hwparams) < 0 &&
-	     ALSA_set_buffer_size(this, spec, hwparams) < 0 ) {
-		/* Failed to set buffer size, try to just use the defaults */
-		if ( ALSA_finalize_hardware(this, spec, hwparams, 1) < 0 ) {
+	if ( ALSA_set_period_size(this, spec, hwparams, 0) < 0 &&
+	     ALSA_set_buffer_size(this, spec, hwparams, 0) < 0 ) {
+		/* Failed to set desired buffer size, do the best you can... */
+		if ( ALSA_set_period_size(this, spec, hwparams, 1) < 0 ) {
 			SDL_SetError("Couldn't set hardware audio parameters: %s", SDL_NAME(snd_strerror)(status));
 			ALSA_CloseAudio(this);
 			return(-1);
