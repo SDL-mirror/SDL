@@ -35,9 +35,6 @@ struct SDL_PrivateAudioData {
 	/* The audio device handle */
 	snd_pcm_t *pcm_handle;
 
-	/* The parent process id, to detect when application quits */
-	pid_t parent;
-
 	/* Raw mixing buffer */
 	Uint8 *mixbuf;
 	int    mixlen;
@@ -45,7 +42,6 @@ struct SDL_PrivateAudioData {
 
 /* Old variable names */
 #define pcm_handle		(this->hidden->pcm_handle)
-#define parent			(this->hidden->parent)
 #define mixbuf			(this->hidden->mixbuf)
 #define mixlen			(this->hidden->mixlen)
 

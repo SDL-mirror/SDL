@@ -251,17 +251,7 @@ AudioBootStrap ALSA_bootstrap = {
 /* This function waits until it is possible to write a full sound buffer */
 static void ALSA_WaitAudio(_THIS)
 {
-	/* Check to see if the thread-parent process is still alive */
-	{ static int cnt = 0;
-		/* Note that this only works with thread implementations 
-		   that use a different process id for each thread.
-		*/
-		if (parent && (((++cnt)%10) == 0)) { /* Check every 10 loops */
-			if ( kill(parent, 0) < 0 ) {
-				this->enabled = 0;
-			}
-		}
-	}
+	/* We're in blocking mode, so there's nothing to do here */
 }
 
 
@@ -600,9 +590,6 @@ static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec)
 		return(-1);
 	}
 	SDL_memset(mixbuf, spec->silence, spec->size);
-
-	/* Get the parent process id (we're the parent of the audio thread) */
-	parent = getpid();
 
 	/* Switch to blocking mode for playback */
 	SDL_NAME(snd_pcm_nonblock)(pcm_handle, 0);
