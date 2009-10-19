@@ -27,6 +27,7 @@
 #include <X11/Xlib.h>
 #include "../Xext/extensions/xf86dga.h"
 
+#include "SDL_timer.h"
 #include "../SDL_sysvideo.h"
 #include "../../events/SDL_events_c.h"
 #include "SDL_dgavideo.h"
