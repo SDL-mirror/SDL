@@ -20,7 +20,11 @@
     slouken@libsdl.org
 */
 
-/* This is a simple file to encapsulate the OpenGL API headers */
+/**
+ *  \file SDL_opengl.h
+ *  
+ *  This is a simple file to encapsulate the OpenGL API headers.
+ */
 
 #ifndef _SDL_opengl_h
 #define _SDL_opengl_h
@@ -49,11 +53,23 @@
 #undef __glext_h_
 #endif
 
-/* This file is included because glext.h is not available on some systems.
-   If you don't want this version included, simply define "NO_SDL_GLEXT"
-   The latest version is available from:
-	http://www.opengl.org/registry/
+/**
+ *  \file SDL_opengl.h
+ *  
+ *  This file is included because glext.h is not available on some systems.
+ *  If you don't want this version included, simply define ::NO_SDL_GLEXT.
+ *  
+ *  The latest version is available from:
+ *  	http://www.opengl.org/registry/
  */
+
+/**
+ *  \def NO_SDL_GLEXT
+ *  
+ *  Define this if you have your own version of glext.h and want to disable the 
+ *  version included in SDL_opengl.h.
+ */
+
 #if !defined(NO_SDL_GLEXT) && !defined(GL_GLEXT_LEGACY)
 /* *INDENT-OFF* */
 #ifndef __glext_h_

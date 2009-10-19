@@ -21,9 +21,9 @@
 */
 
 /**
- * \file SDL_stdinc.h
- *
- * This is a general header that includes C language support
+ *  \file SDL_stdinc.h
+ *  
+ *  This is a general header that includes C language support.
  */
 
 #ifndef _SDL_stdinc_h
@@ -79,12 +79,19 @@
 # include <iconv.h>
 #endif
 
-/* The number of elements in an array */
+/**
+ *  The number of elements in an array.
+ */
 #define SDL_arraysize(array)	(sizeof(array)/sizeof(array[0]))
 #define SDL_TABLESIZE(table)	SDL_arraysize(table)
 
-/* Use proper C++ casts when compiled as C++ to be compatible with the option
- -Wold-style-cast of GCC (and -Werror=old-style-cast in GCC 4.2 and above. */
+/**
+ *  \name Cast operators
+ *  
+ *  Use proper C++ casts when compiled as C++ to be compatible with the option
+ *  -Wold-style-cast of GCC (and -Werror=old-style-cast in GCC 4.2 and above).
+ */
+/*@{*/
 #ifdef __cplusplus
 #define SDL_reinterpret_cast(type, expression) reinterpret_cast<type>(expression)
 #define SDL_static_cast(type, expression) static_cast<type>(expression)
@@ -92,8 +99,13 @@
 #define SDL_reinterpret_cast(type, expression) ((type)(expression))
 #define SDL_static_cast(type, expression) ((type)(expression))
 #endif
+/*@}*//*Cast operators*/
 
-/* Basic data types */
+/**
+ *  \name Basic data types
+ */
+/*@{*/
+
 typedef enum
 {
     SDL_FALSE = 0,
@@ -101,45 +113,37 @@ typedef enum
 } SDL_bool;
 
 /**
- * \typedef Sint8
  * \brief A signed 8-bit integer type.
  */
 typedef int8_t Sint8;
 /**
- * \typedef Uint8
  * \brief An unsigned 8-bit integer type.
  */
 typedef uint8_t Uint8;
 /**
- * \typedef Sint16
  * \brief A signed 16-bit integer type.
  */
 typedef int16_t Sint16;
 /**
- * \typedef Uint16
  * \brief An unsigned 16-bit integer type.
  */
 typedef uint16_t Uint16;
 /**
- * \typedef Sint32
  * \brief A signed 32-bit integer type.
  */
 typedef int32_t Sint32;
 /**
- * \typedef Uint32
  * \brief An unsigned 32-bit integer type.
  */
 typedef uint32_t Uint32;
 
 #ifdef SDL_HAS_64BIT_TYPE
 /**
- * \typedef Sint64
  * \brief A signed 64-bit integer type.
  * \warning On platforms without any sort of 64-bit datatype, this is equivalent to Sint32!
  */
 typedef int64_t Sint64;
 /**
- * \typedef Uint64
  * \brief An unsigned 64-bit integer type.
  * \warning On platforms without any sort of 64-bit datatype, this is equivalent to Uint32!
  */
@@ -150,9 +154,12 @@ typedef Sint32 Sint64;
 typedef Uint32 Uint64;
 #endif
 
-/* Make sure the types really have the right sizes */
+/*@}*//*Basic data types*/
+
+
 #define SDL_COMPILE_TIME_ASSERT(name, x)               \
        typedef int SDL_dummy_ ## name[(x) * 2 - 1]
+/** \cond */
 #ifndef DOXYGEN_SHOULD_IGNORE_THIS
 SDL_COMPILE_TIME_ASSERT(uint8, sizeof(Uint8) == 1);
 SDL_COMPILE_TIME_ASSERT(sint8, sizeof(Sint8) == 1);
@@ -167,6 +174,7 @@ SDL_COMPILE_TIME_ASSERT(uint64, sizeof(Uint64) == 8);
 SDL_COMPILE_TIME_ASSERT(sint64, sizeof(Sint64) == 8);
 #endif
 #endif /* DOXYGEN_SHOULD_IGNORE_THIS */
+/** \endcond */
 
 /* Check to make sure enums are the size of ints, for structure packing.
    For both Watcom C/C++ and Borland C/C++ the compiler option that makes
@@ -178,6 +186,7 @@ SDL_COMPILE_TIME_ASSERT(sint64, sizeof(Sint64) == 8);
 #pragma enumsalwaysint on
 #endif
 
+/** \cond */
 #ifndef DOXYGEN_SHOULD_IGNORE_THIS
 #ifndef __NINTENDODS__          /* TODO: include/SDL_stdinc.h:174: error: size of array 'SDL_dummy_enum' is negative */
 typedef enum
@@ -188,6 +197,7 @@ typedef enum
 SDL_COMPILE_TIME_ASSERT(enum, sizeof(SDL_DUMMY_ENUM) == sizeof(int));
 #endif
 #endif /* DOXYGEN_SHOULD_IGNORE_THIS */
+/** \endcond */
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
@@ -748,9 +758,10 @@ extern DECLSPEC int SDLCALL SDL_iconv_close(SDL_iconv_t cd);
 extern DECLSPEC size_t SDLCALL SDL_iconv(SDL_iconv_t cd, const char **inbuf,
                                          size_t * inbytesleft, char **outbuf,
                                          size_t * outbytesleft);
-/* This function converts a string between encodings in one pass, returning a
-   string that must be freed with SDL_free() or NULL on error.
-*/
+/**
+ *  This function converts a string between encodings in one pass, returning a
+ *  string that must be freed with SDL_free() or NULL on error.
+ */
 extern DECLSPEC char *SDLCALL SDL_iconv_string(const char *tocode,
                                                const char *fromcode,
                                                const char *inbuf,

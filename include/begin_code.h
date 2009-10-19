@@ -20,10 +20,13 @@
     slouken@libsdl.org
 */
 
-/* This file sets things up for C dynamic library function definitions,
-   static inlined functions, and structures aligned at 4-byte alignment.
-   If you don't like ugly C preprocessor code, don't look at this file. :)
-*/
+/**
+ *  \file begin_code.h
+ *
+ *  This file sets things up for C dynamic library function definitions,
+ *  static inlined functions, and structures aligned at 4-byte alignment.
+ *  If you don't like ugly C preprocessor code, don't look at this file. :)
+ */
 
 /* This shouldn't be nested -- included it around code only. */
 #ifdef _begin_code_h

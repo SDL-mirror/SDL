@@ -25,7 +25,11 @@
 
 #include "SDL_platform.h"
 
-/* This is the minimal configuration that can be used to build SDL */
+/**
+ *  \file SDL_config_minimal.h
+ *  
+ *  This is the minimal configuration that can be used to build SDL.
+ */
 
 #include <stdarg.h>
 

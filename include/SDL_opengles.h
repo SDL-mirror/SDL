@@ -20,10 +20,13 @@
  slouken@libsdl.org
  */
 
-/*
-	This is a simple file to encapsulate the OpenGL ES API headers.
-	Headers copied from The Kronos Group website.
-	http://www.khronos.org/opengles/
+/**
+ *  \file SDL_opengles.h
+ *  
+ *  This is a simple file to encapsulate the OpenGL ES API headers.
+ *  
+ *  Headers copied from The Kronos Group website.
+ *  	http://www.khronos.org/opengles/
  */
 
 #ifndef __gles_h_

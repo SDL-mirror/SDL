@@ -23,7 +23,11 @@
 #ifndef _SDL_config_h
 #define _SDL_config_h
 
-/* This is a set of defines to configure the SDL features */
+/**
+ *  \file SDL_config.h.in
+ *
+ *  This is a set of defines to configure the SDL features
+ */
 
 /* General platform specific identifiers */
 #include "SDL_platform.h"

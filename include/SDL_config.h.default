@@ -25,7 +25,13 @@
 
 #include "SDL_platform.h"
 
-/* Add any platform that doesn't build using the configure system */
+/**
+ *  \file SDL_config.h.default
+ *
+ *  SDL_config.h for any platform that doesn't build using the configure system.
+ */
+ 
+/* Add any platform that doesn't build using the configure system. */
 #if defined(__NINTENDODS__)
 #include "SDL_config_nintendods.h"
 #elif defined(__IPHONEOS__) 

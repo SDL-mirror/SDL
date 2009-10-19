@@ -24,9 +24,9 @@
 #define _SDL_power_h
 
 /**
- * \file SDL_power.h
- *
- * Header for the SDL power management routines
+ *  \file SDL_power.h
+ *  
+ *  Header for the SDL power management routines.
  */
 
 #include "SDL_stdinc.h"
@@ -40,9 +40,7 @@ extern "C" {
 #endif
 
 /**
- * \enum SDL_PowerState
- *
- * \brief The basic state for the system's power supply.
+ *  \brief The basic state for the system's power supply.
  */
 typedef enum
 {
@@ -55,19 +53,17 @@ typedef enum
 
 
 /**
- * \fn int SDL_GetPowerInfo(void)
- *
- * \brief Get the current power supply details.
- *
- * \param secs Seconds of battery life left. You can pass a NULL here if
- *                you don't care. Will return -1 if we can't determine a
- *                value, or we're not running on a battery.
- *
- * \param pct Percentage of battery life left, between 0 and 100. You can
- *                pass a NULL here if you don't care. Will return -1 if we
- *                can't determine a value, or we're not running on a battery.
- *
- * \return The state of the battery (if any).
+ *  \brief Get the current power supply details.
+ *  
+ *  \param secs Seconds of battery life left. You can pass a NULL here if
+ *              you don't care. Will return -1 if we can't determine a
+ *              value, or we're not running on a battery.
+ *  
+ *  \param pct Percentage of battery life left, between 0 and 100. You can
+ *             pass a NULL here if you don't care. Will return -1 if we
+ *             can't determine a value, or we're not running on a battery.
+ *  
+ *  \return The state of the battery (if any).
  */
 extern DECLSPEC SDL_PowerState SDLCALL SDL_GetPowerInfo(int *secs, int *pct);
 

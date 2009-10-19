@@ -20,7 +20,11 @@
     slouken@libsdl.org
 */
 
-/* Try to get a standard set of platform defines */
+/**
+ *  \file SDL_platform.h
+ *  
+ *  Try to get a standard set of platform defines.
+ */
 
 #ifndef _SDL_platform_h
 #define _SDL_platform_h
@@ -133,8 +137,7 @@ extern "C" {
 #endif
 
 /**
- * \fn const char *SDL_GetPlatform(void)
- * \brief Gets the name of the platform.
+ *  \brief Gets the name of the platform.
  */
 extern DECLSPEC const char * SDLCALL SDL_GetPlatform (void);
 
