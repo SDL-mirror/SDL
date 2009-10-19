@@ -65,6 +65,7 @@ static int (*SDL_NAME(snd_pcm_drain))(snd_pcm_t *pcm);
 static const char *(*SDL_NAME(snd_strerror))(int errnum);
 static size_t (*SDL_NAME(snd_pcm_hw_params_sizeof))(void);
 static size_t (*SDL_NAME(snd_pcm_sw_params_sizeof))(void);
+static void (*SDL_NAME(snd_pcm_hw_params_copy))(snd_pcm_hw_params_t *dst, const snd_pcm_hw_params_t *src);
 static int (*SDL_NAME(snd_pcm_hw_params_any))(snd_pcm_t *pcm, snd_pcm_hw_params_t *params);
 static int (*SDL_NAME(snd_pcm_hw_params_set_access))(snd_pcm_t *pcm, snd_pcm_hw_params_t *params, snd_pcm_access_t access);
 static int (*SDL_NAME(snd_pcm_hw_params_set_format))(snd_pcm_t *pcm, snd_pcm_hw_params_t *params, snd_pcm_format_t val);
@@ -101,6 +102,7 @@ static struct {
 	{ "snd_strerror",	(void**)(char*)&SDL_NAME(snd_strerror)		},
 	{ "snd_pcm_hw_params_sizeof",		(void**)(char*)&SDL_NAME(snd_pcm_hw_params_sizeof)		},
 	{ "snd_pcm_sw_params_sizeof",		(void**)(char*)&SDL_NAME(snd_pcm_sw_params_sizeof)		},
+	{ "snd_pcm_hw_params_copy",		(void**)(char*)&SDL_NAME(snd_pcm_hw_params_copy)		},
 	{ "snd_pcm_hw_params_any",		(void**)(char*)&SDL_NAME(snd_pcm_hw_params_any)		},
 	{ "snd_pcm_hw_params_set_access",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params_set_access)		},
 	{ "snd_pcm_hw_params_set_format",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params_set_format)		},
@@ -365,16 +367,116 @@ static void ALSA_CloseAudio(_THIS)
 	}
 }
 
+static int ALSA_finalize_hardware(_THIS, SDL_AudioSpec *spec, snd_pcm_hw_params_t *hwparams, int override)
+{
+	int status;
+	snd_pcm_uframes_t bufsize;
+
+	/* "set" the hardware with the desired parameters */
+	status = SDL_NAME(snd_pcm_hw_params)(pcm_handle, hwparams);
+	if ( status < 0 ) {
+		return(-1);
+	}
+
+	/* Get samples for the actual buffer size */
+	status = SDL_NAME(snd_pcm_hw_params_get_buffer_size)(hwparams, &bufsize);
+	if ( status < 0 ) {
+		return(-1);
+	}
+	if ( !override && bufsize != spec->samples * 2 ) {
+		return(-1);
+	}
+
+	/* FIXME: Is this safe to do? */
+	spec->samples = bufsize / 2;
+
+	/* This is useful for debugging */
+	if ( getenv("SDL_AUDIO_ALSA_DEBUG") ) {
+		snd_pcm_sframes_t persize = 0;
+		unsigned int periods = 0;
+
+		SDL_NAME(snd_pcm_hw_params_get_period_size)(hwparams, &persize, NULL);
+		SDL_NAME(snd_pcm_hw_params_get_periods)(hwparams, &periods, NULL);
+
+		fprintf(stderr, "ALSA: period size = %ld, periods = %u, buffer size = %lu\n", persize, periods, bufsize);
+	}
+	return(0);
+}
+
+static int ALSA_set_period_size(_THIS, SDL_AudioSpec *spec, snd_pcm_hw_params_t *params)
+{
+	const char *env;
+	int status;
+	int override = 0;
+	snd_pcm_hw_params_t *hwparams;
+	snd_pcm_uframes_t frames;
+	unsigned int periods;
+
+	/* Copy the hardware parameters for this setup */
+	snd_pcm_hw_params_alloca(&hwparams);
+	SDL_NAME(snd_pcm_hw_params_copy)(hwparams, params);
+
+	env = getenv("SDL_AUDIO_ALSA_SET_PERIOD_SIZE");
+	if ( env ) {
+		override = SDL_strol(env);
+		if ( override == 0 ) {
+			return(-1);
+		}
+	}
+
+	frames = spec->samples;
+	status = SDL_NAME(snd_pcm_hw_params_set_period_size_near)(pcm_handle, hwparams, &frames, NULL);
+	if ( status < 0 ) {
+		return(-1);
+	}
+
+	periods = 2;
+	status = SDL_NAME(snd_pcm_hw_params_set_periods_near)(pcm_handle, hwparams, &periods, NULL);
+	if ( status < 0 ) {
+		return(-1);
+	}
+
+	return ALSA_finalize_hardware(this, spec, hwparams, override);
+}
+
+static int ALSA_set_buffer_size(_THIS, SDL_AudioSpec *spec, snd_pcm_hw_params_t *params)
+{
+	const char *env;
+	int status;
+	int override = 0;
+	snd_pcm_hw_params_t *hwparams;
+	snd_pcm_uframes_t frames;
+
+	/* Copy the hardware parameters for this setup */
+	snd_pcm_hw_params_alloca(&hwparams);
+	SDL_NAME(snd_pcm_hw_params_copy)(hwparams, params);
+
+	env = getenv("SDL_AUDIO_ALSA_SET_BUFFER_SIZE");
+	if ( env ) {
+		override = SDL_strol(env);
+		if ( override == 0 ) {
+			return(-1);
+		}
+	}
+
+	frames = spec->samples * 2;
+	status = SDL_NAME(snd_pcm_hw_params_set_buffer_size_near)(pcm_handle, hwparams, &frames);
+	if ( status < 0 ) {
+		return(-1);
+	}
+
+	return ALSA_finalize_hardware(this, spec, hwparams, override);
+}
+
 static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec)
 {
 	int                  status;
 	snd_pcm_hw_params_t *hwparams;
 	snd_pcm_sw_params_t *swparams;
 	snd_pcm_format_t     format;
-	snd_pcm_uframes_t    frames;
 	unsigned int         rate;
-	unsigned int         periods;
 	unsigned int 	     channels;
+	snd_pcm_uframes_t    bufsize;
 	Uint16               test_format;
 
 	/* Open the audio device */
@@ -469,53 +571,14 @@ static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	spec->freq = rate;
 
 	/* Set the buffer size, in samples */
-	if (getenv("SDL_AUDIO_ALSA_SET_PERIOD_SIZE")) {
-		frames = spec->samples;
-		status = SDL_NAME(snd_pcm_hw_params_set_period_size_near)(pcm_handle, hwparams, &frames, NULL);
-		if ( status < 0 ) {
-			SDL_SetError("Couldn't set period size: %s", SDL_NAME(snd_strerror)(status));
+	if ( ALSA_set_period_size(this, spec, hwparams) < 0 &&
+	     ALSA_set_buffer_size(this, spec, hwparams) < 0 ) {
+		/* Failed to set buffer size, try to just use the defaults */
+		if ( ALSA_finalize_hardware(this, spec, hwparams, 1) < 0 ) {
+			SDL_SetError("Couldn't set hardware audio parameters: %s", SDL_NAME(snd_strerror)(status));
 			ALSA_CloseAudio(this);
 			return(-1);
 		}
-
-		spec->samples = frames;
-
-		periods = 2;
-		status = SDL_NAME(snd_pcm_hw_params_set_periods_near)(pcm_handle, hwparams, &periods, NULL);
-		if ( status < 0 ) {
-			SDL_SetError("Couldn't set period count: %s", SDL_NAME(snd_strerror)(status));
-			ALSA_CloseAudio(this);
-			return(-1);
-		}
-	} else {
-		frames = spec->samples * 2;
-		status = SDL_NAME(snd_pcm_hw_params_set_buffer_size_near)(pcm_handle, hwparams, &frames);
-		if ( status < 0 ) {
-			SDL_SetError("Couldn't set buffer size: %s", SDL_NAME(snd_strerror)(status));
-			ALSA_CloseAudio(this);
-			return(-1);
-		}
-	}
-
-	/* "set" the hardware with the desired parameters */
-	status = SDL_NAME(snd_pcm_hw_params)(pcm_handle, hwparams);
-	if ( status < 0 ) {
-		SDL_SetError("Couldn't set hardware audio parameters: %s", SDL_NAME(snd_strerror)(status));
-		ALSA_CloseAudio(this);
-		return(-1);
-	}
-
-	/* This is useful for debugging */
-	if (getenv("SDL_AUDIO_ALSA_DEBUG_PERIOD_SIZE")) {
-		snd_pcm_uframes_t bufsize;
-		snd_pcm_sframes_t persize;
-		unsigned int periods; int dir;
-
-		SDL_NAME(snd_pcm_hw_params_get_buffer_size)(hwparams, &bufsize);
-		SDL_NAME(snd_pcm_hw_params_get_period_size)(hwparams, &persize, &dir);
-		SDL_NAME(snd_pcm_hw_params_get_periods)(hwparams, &periods, &dir);
-
-		fprintf(stderr, "ALSA: period size = %ld, periods = %u, buffer size = %lu\n", persize, periods, bufsize);
 	}
 
 	/* Set the software parameters */
