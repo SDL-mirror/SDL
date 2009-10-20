@@ -37,6 +37,10 @@
 #include <AudioUnit/AUNTComponent.h>
 #endif
 
+#if __MAC_OS_X_VERSION_MIN_REQUIRED < 1050
+typedef SInt16 FSIORefNum;
+#endif
+
 #include "SDL_error.h"
 
 const char* AudioFilePlayerErrorStr (OSStatus error);
@@ -80,12 +84,8 @@ typedef struct S_AudioFilePlayer
 
 /*private:*/
     AudioUnit                       mPlayUnit;
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1050
     FSIORefNum                      mForkRefNum;
-#else
-    int                             mForkRefNum;
-#endif
-
+    
     AURenderCallbackStruct          mInputCallback;
 
     AudioStreamBasicDescription     mFileDescription;
