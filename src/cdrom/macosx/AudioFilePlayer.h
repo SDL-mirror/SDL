@@ -80,8 +80,12 @@ typedef struct S_AudioFilePlayer
 
 /*private:*/
     AudioUnit                       mPlayUnit;
-    SInt16                          mForkRefNum;
-    
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1050
+    FSIORefNum                      mForkRefNum;
+#else
+    int                             mForkRefNum;
+#endif
+
     AURenderCallbackStruct          mInputCallback;
 
     AudioStreamBasicDescription     mFileDescription;
