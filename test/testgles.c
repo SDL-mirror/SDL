@@ -15,6 +15,7 @@
 
 static CommonState *state;
 static SDL_GLContext *context = NULL;
+static int depth = 16;
 
 /* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
 static void
@@ -118,12 +119,20 @@ main(int argc, char *argv[])
             } else if (SDL_strcasecmp(argv[i], "--accel") == 0) {
                 ++accel;
                 consumed = 1;
+            } else if (SDL_strcasecmp(argv[i], "--zdepth") == 0) {
+                i++;
+                if (!argv[i]) {
+                    consumed = -1;
+                } else {
+                    depth = SDL_atoi(argv[i]);
+                    consumed = 1;
+                }
             } else {
                 consumed = -1;
             }
         }
         if (consumed < 0) {
-            fprintf(stderr, "Usage: %s %s [--fsaa] [--accel]\n", argv[0],
+            fprintf(stderr, "Usage: %s %s [--fsaa] [--accel] [--zdepth %%d]\n", argv[0],
                     CommonUsage(state));
             quit(1);
         }
@@ -132,16 +141,16 @@ main(int argc, char *argv[])
 
     /* Set OpenGL parameters */
     state->window_flags |= SDL_WINDOW_OPENGL;
-    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
-    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 5);
-    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
+    state->gl_red_size = 5;
+    state->gl_green_size = 5;
+    state->gl_blue_size = 5;
+    state->gl_depth_size = depth;
     if (fsaa) {
-        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, fsaa);
+        state->gl_multisamplebuffers=1;
+        state->gl_multisamplesamples=fsaa;
     }
     if (accel) {
-        SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+        state->gl_accelerated=1;
     }
     if (!CommonInit(state)) {
         quit(2);
@@ -169,7 +178,7 @@ main(int argc, char *argv[])
     }
 
     SDL_GetCurrentDisplayMode(&mode);
-    printf("Screen BPP: %d\n", SDL_BITSPERPIXEL(mode.format));
+    printf("Screen bpp: %d\n", SDL_BITSPERPIXEL(mode.format));
     printf("\n");
     printf("Vendor     : %s\n", glGetString(GL_VENDOR));
     printf("Renderer   : %s\n", glGetString(GL_RENDERER));
@@ -200,7 +209,7 @@ main(int argc, char *argv[])
     }
     status = SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &value);
     if (!status) {
-        printf("SDL_GL_DEPTH_SIZE: requested %d, got %d\n", 16, value);
+        printf("SDL_GL_DEPTH_SIZE: requested %d, got %d\n", depth, value);
     } else {
         fprintf(stderr, "Failed to get SDL_GL_DEPTH_SIZE: %s\n",
                 SDL_GetError());

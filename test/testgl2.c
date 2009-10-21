@@ -204,18 +204,19 @@ main(int argc, char *argv[])
 
     /* Set OpenGL parameters */
     state->window_flags |= SDL_WINDOW_OPENGL;
-    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
-    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 5);
-    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    state->gl_red_size = 5;
+    state->gl_green_size = 5;
+    state->gl_blue_size = 5;
+    state->gl_depth_size = 16;
+    state->gl_doublebuffer = 1;
     if (fsaa) {
-        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, fsaa);
+        state->gl_multisamplebuffers = 1;
+        state->gl_multisamplesamples = fsaa;
     }
     if (accel) {
-        SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+        state->gl_accelerated=1;
     }
+
     if (!CommonInit(state)) {
         quit(2);
     }

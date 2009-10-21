@@ -86,6 +86,28 @@ CommonCreateState(char **argv, Uint32 flags)
     state->audiospec.format = AUDIO_S16;
     state->audiospec.channels = 2;
     state->audiospec.samples = 2048;
+
+    /* Set some very sane GL defaults */
+    state->gl_red_size = 3;
+    state->gl_green_size = 3;
+    state->gl_blue_size = 2;
+    state->gl_alpha_size = 0;
+    state->gl_buffer_size = 0;
+    state->gl_depth_size = 16;
+    state->gl_stencil_size = 0;
+    state->gl_double_buffer = 1;
+    state->gl_accum_red_size = 0;
+    state->gl_accum_green_size = 0;
+    state->gl_accum_blue_size = 0;
+    state->gl_accum_alpha_size = 0;
+    state->gl_stereo = 0;
+    state->gl_multisamplebuffers = 0;
+    state->gl_multisamplesamples = 0;
+    state->gl_retained_backing = 1;
+    state->gl_accelerated = 1;
+    state->gl_major_version = 2;
+    state->gl_minor_version = 1;
+
     return state;
 }
 
@@ -620,6 +642,27 @@ CommonInit(CommonState * state)
             fprintf(stderr, "Video driver: %s\n",
                     SDL_GetCurrentVideoDriver());
         }
+
+        /* Upload GL settings */
+        SDL_GL_SetAttribute(SDL_GL_RED_SIZE, state->gl_red_size);
+        SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, state->gl_green_size);
+        SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, state->gl_blue_size);
+        SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, state->gl_alpha_size);
+        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, state->gl_double_buffer);
+        SDL_GL_SetAttribute(SDL_GL_BUFFER_SIZE, state->gl_buffer_size);
+        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, state->gl_depth_size);
+        SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, state->gl_stencil_size);
+        SDL_GL_SetAttribute(SDL_GL_ACCUM_RED_SIZE, state->gl_accum_red_size);
+        SDL_GL_SetAttribute(SDL_GL_ACCUM_GREEN_SIZE, state->gl_accum_green_size);
+        SDL_GL_SetAttribute(SDL_GL_ACCUM_BLUE_SIZE, state->gl_accum_blue_size);
+        SDL_GL_SetAttribute(SDL_GL_ACCUM_ALPHA_SIZE, state->gl_accum_alpha_size);
+        SDL_GL_SetAttribute(SDL_GL_STEREO, state->gl_stereo);
+        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, state->gl_multisamplebuffers);
+        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, state->gl_multisamplesamples);
+        SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, state->gl_accelerated);
+        SDL_GL_SetAttribute(SDL_GL_RETAINED_BACKING, state->gl_retained_backing);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, state->gl_major_version);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, state->gl_minor_version);
 
         if (state->verbose & VERBOSE_MODES) {
             SDL_DisplayMode mode;
