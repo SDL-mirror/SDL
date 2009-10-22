@@ -34,6 +34,11 @@
 #include "SDL_photon_render.h"
 #include "SDL_photon.h"
 
+#ifndef Pg_OSC_MEM_LINEAR_ACCESSIBLE
+    /* For QNX 6.3.2 compatibility */
+    #define Pg_OSC_MEM_LINEAR_ACCESSIBLE 0
+#endif /* Pg_OSC_MEM_LINEAR_ACCESSIBLE */
+
 static SDL_Renderer *photon_createrenderer(SDL_Window * window, Uint32 flags);
 static int photon_displaymodechanged(SDL_Renderer * renderer);
 static int photon_activaterenderer(SDL_Renderer * renderer);

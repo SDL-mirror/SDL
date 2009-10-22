@@ -328,7 +328,9 @@ photon_videoinit(_THIS)
     char *override;
 
     /* By default Photon do not uses swap on VSYNC */
+#if defined(SDL_VIDEO_OPENGL_ES)
     phdata->swapinterval = 0;
+#endif /* SDL_VIDEO_OPENGL_ES */
 
     for (it = 0; it < phdata->avail_rids; it++) {
         didata = (SDL_DisplayData *) SDL_calloc(1, sizeof(SDL_DisplayData));
@@ -1470,7 +1472,7 @@ photon_gl_createcontext(_THIS, SDL_Window * window)
         return NULL;
     }
 
-    /* Prepare attributes list to pass them to OpenGL ES */
+    /* Prepare attributes list to pass them to OpenGL ES egl interface */
     attr_pos = 0;
     wdata->gles_attributes[attr_pos++] = EGL_NATIVE_VISUAL_ID;
     wdata->gles_attributes[attr_pos++] =
@@ -1501,12 +1503,19 @@ photon_gl_createcontext(_THIS, SDL_Window * window)
 
     /* Setup depth buffer bits */
     wdata->gles_attributes[attr_pos++] = EGL_DEPTH_SIZE;
-    wdata->gles_attributes[attr_pos++] = _this->gl_config.depth_size;
+    if (_this->gl_config.depth_size)
+    {
+        wdata->gles_attributes[attr_pos++] = _this->gl_config.depth_size;
+    }
+    else
+    {
+        wdata->gles_attributes[attr_pos++] = EGL_DONT_CARE;
+    }
 
     /* Setup stencil bits */
     if (_this->gl_config.stencil_size) {
         wdata->gles_attributes[attr_pos++] = EGL_STENCIL_SIZE;
-        wdata->gles_attributes[attr_pos++] = _this->gl_config.buffer_size;
+        wdata->gles_attributes[attr_pos++] = _this->gl_config.stencil_size;
     } else {
         wdata->gles_attributes[attr_pos++] = EGL_STENCIL_SIZE;
         wdata->gles_attributes[attr_pos++] = EGL_DONT_CARE;
@@ -1622,6 +1631,8 @@ photon_gl_createcontext(_THIS, SDL_Window * window)
     for (cit = 0; cit < configs; cit++) {
         uint32_t stencil_found;
         uint32_t depth_found;
+        EGLint   cur_depth;
+        EGLint   cur_stencil;
 
         stencil_found = 0;
         depth_found = 0;
@@ -1630,9 +1641,9 @@ photon_gl_createcontext(_THIS, SDL_Window * window)
             status =
                 eglGetConfigAttrib(phdata->egldisplay,
                                    wdata->gles_configs[cit], EGL_STENCIL_SIZE,
-                                   &attr_value);
+                                   &cur_stencil);
             if (status == EGL_TRUE) {
-                if (attr_value != 0) {
+                if (cur_stencil != 0) {
                     stencil_found = 1;
                 }
             }
@@ -1644,9 +1655,9 @@ photon_gl_createcontext(_THIS, SDL_Window * window)
             status =
                 eglGetConfigAttrib(phdata->egldisplay,
                                    wdata->gles_configs[cit], EGL_DEPTH_SIZE,
-                                   &attr_value);
+                                   &cur_depth);
             if (status == EGL_TRUE) {
-                if (attr_value != 0) {
+                if (cur_depth != 0) {
                     depth_found = 1;
                 }
             }
@@ -1656,15 +1667,34 @@ photon_gl_createcontext(_THIS, SDL_Window * window)
 
         /* Exit from loop if found appropriate configuration */
         if ((depth_found != 0) && (stencil_found != 0)) {
-            break;
+            /* Store last satisfied configuration id */
+            wdata->gles_config = cit;
+
+            if (cur_depth==_this->gl_config.depth_size)
+            {
+                /* Exact match on depth bits */
+                if (!_this->gl_config.stencil_size)
+                {
+                    /* Stencil is not required */
+                    break;
+                }
+                else
+                {
+                    if (cur_stencil==_this->gl_config.stencil_size)
+                    {
+                        /* Exact match on stencil bits */
+                        break;
+                    }
+                }
+            }
         }
     }
 
-    /* If best could not be found, use first */
-    if (cit == configs) {
+    /* If best could not be found, use first or last satisfied */
+    if ((cit == configs) && (wdata->gles_config==0)) {
         cit = 0;
+        wdata->gles_config = cit;
     }
-    wdata->gles_config = cit;
 
     /* Create OpenGL ES context */
     wdata->gles_context =
@@ -2375,6 +2405,7 @@ photon_pumpevents(_THIS)
                                 if ((wdata != NULL) && (window != NULL)) {
                                     /* Check if window uses OpenGL ES */
                                     if (wdata->uses_gles == SDL_TRUE) {
+                                        #if defined(SDL_VIDEO_OPENGL_ES)
                                         /* Cycle through each rectangle */
                                         for (it = 0; it < event->num_rects; it++) {
                                             /* Blit OpenGL ES pixmap surface directly to window region */
@@ -2391,6 +2422,7 @@ photon_pumpevents(_THIS)
                                             PgFFlush(Ph_DONE_DRAW);
                                             PgWaitHWIdle();
                                         }
+                                        #endif /* SDL_VIDEO_OPENGL_ES */
                                     } else {
                                         /* Cycle through each rectangle */
                                         for (it = 0; it < event->num_rects;
@@ -2424,6 +2456,7 @@ photon_pumpevents(_THIS)
                                         src_rect.lr.x = window->w - 1;
                                         src_rect.lr.y = window->h - 1;
 
+                                        #if defined(SDL_VIDEO_OPENGL_ES)
                                         /* We need to redraw entire window */
                                         PgFFlush(Ph_START_DRAW);
                                         PgSetRegionCx(PhDCGetCurrent(),
@@ -2437,6 +2470,7 @@ photon_pumpevents(_THIS)
                                                       &dst_rect);
                                         PgFFlush(Ph_DONE_DRAW);
                                         PgWaitHWIdle();
+                                        #endif /* SDL_VIDEO_OPENGL_ES */
                                     } else {
                                         PhRect_t rect;
 
@@ -2705,7 +2739,7 @@ photon_pumpevents(_THIS)
                                         PhRegionChange(Ph_REGION_EV_SENSE, 0,
                                                        &wregion, NULL, NULL);
 
-                                        /* If window got a focus, the it is visible */
+                                        /* If window got a focus, then it is visible */
                                         SDL_SendWindowEvent(window->id,
                                                             SDL_WINDOWEVENT_SHOWN,
                                                             0, 0);
