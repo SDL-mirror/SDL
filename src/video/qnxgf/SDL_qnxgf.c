@@ -1463,15 +1463,21 @@ qnxgf_gl_createcontext(_THIS, SDL_Window * window)
     } else {
         wdata->gles_attributes[attr_pos++] = EGL_DONT_CARE;
     }
+
     wdata->gles_attributes[attr_pos++] = EGL_DEPTH_SIZE;
-    wdata->gles_attributes[attr_pos++] = _this->gl_config.depth_size;
+    if (_this->gl_config.depth_size) {
+        wdata->gles_attributes[attr_pos++] = _this->gl_config.depth_size;
+    } else {
+        wdata->gles_attributes[attr_pos++] = EGL_DONT_CARE;
+    }
+
     if (_this->gl_config.buffer_size) {
         wdata->gles_attributes[attr_pos++] = EGL_BUFFER_SIZE;
         wdata->gles_attributes[attr_pos++] = _this->gl_config.buffer_size;
     }
     if (_this->gl_config.stencil_size) {
         wdata->gles_attributes[attr_pos++] = EGL_STENCIL_SIZE;
-        wdata->gles_attributes[attr_pos++] = _this->gl_config.buffer_size;
+        wdata->gles_attributes[attr_pos++] = _this->gl_config.stencil_size;
     }
 
     /* Set number of samples in multisampling */
@@ -1586,6 +1592,8 @@ qnxgf_gl_createcontext(_THIS, SDL_Window * window)
     for (cit = 0; cit < configs; cit++) {
         uint32_t stencil_found;
         uint32_t depth_found;
+        EGLint   cur_depth;
+        EGLint   cur_stencil;
 
         stencil_found = 0;
         depth_found = 0;
@@ -1594,7 +1602,7 @@ qnxgf_gl_createcontext(_THIS, SDL_Window * window)
             status =
                 eglGetConfigAttrib(gfdata->egldisplay,
                                    wdata->gles_configs[cit], EGL_STENCIL_SIZE,
-                                   &attr_value);
+                                   &cur_stencil);
             if (status == EGL_TRUE) {
                 if (attr_value != 0) {
                     stencil_found = 1;
@@ -1608,7 +1616,7 @@ qnxgf_gl_createcontext(_THIS, SDL_Window * window)
             status =
                 eglGetConfigAttrib(gfdata->egldisplay,
                                    wdata->gles_configs[cit], EGL_DEPTH_SIZE,
-                                   &attr_value);
+                                   &cur_depth);
             if (status == EGL_TRUE) {
                 if (attr_value != 0) {
                     depth_found = 1;
@@ -1620,15 +1628,34 @@ qnxgf_gl_createcontext(_THIS, SDL_Window * window)
 
         /* Exit from loop if found appropriate configuration */
         if ((depth_found != 0) && (stencil_found != 0)) {
-            break;
+            /* Store last satisfied configuration id */
+            wdata->gles_config = cit;
+
+            if (cur_depth==_this->gl_config.depth_size)
+            {
+                /* Exact match on depth bits */
+                if (!_this->gl_config.stencil_size)
+                {
+                    /* Stencil is not required */
+                    break;
+                }
+                else
+                {
+                    if (cur_stencil==_this->gl_config.stencil_size)
+                    {
+                        /* Exact match on stencil bits */
+                        break;
+                    }
+                }
+            }
         }
     }
 
-    /* If best could not be found, use first */
-    if (cit == configs) {
+    /* If best could not be found, use first or last satisfied */
+    if ((cit == configs) && (wdata->gles_config==0)) {
         cit = 0;
+        wdata->gles_config = cit;
     }
-    wdata->gles_config = cit;
 
     /* Create OpenGL ES context */
     wdata->gles_context =
