@@ -50,11 +50,8 @@ get_funcaddr(const char *p)
 
 typedef struct
 {
-    //void (APIENTRY * glBegin) (GLenum);
-    //void (APIENTRY * glEnd) ();
-    //void (APIENTRY * glVertex3f) (GLfloat, GLfloat, GLfloat);
-
     void (APIENTRY * glEnableClientState) (GLenum array);
+    void (APIENTRY * glDisableClientState) (GLenum array);
     void (APIENTRY * glVertexPointer) (GLint size, GLenum type,
                                        GLsizei stride,
                                        const GLvoid * pointer);
@@ -83,6 +80,7 @@ void
 init_glfuncs(glfuncs * f)
 {
     f->glEnableClientState = get_funcaddr("glEnableClientState");
+    f->glDisableClientState = get_funcaddr("glDisableClientState");
     f->glVertexPointer = get_funcaddr("glVertexPointer");
     f->glDrawArrays = get_funcaddr("glDrawArrays");
     f->glClearColor = get_funcaddr("glClearColor");
@@ -119,8 +117,8 @@ main(int argc, char *argv[])
     video_w = 320;
     video_h = 480;
 #ifdef __QNXNTO__
-    video_h = 640;
     video_w = 480;
+    video_h = 640;
 #endif /* __QNXNTO__ */
 
     if (argv[1]) {
@@ -176,11 +174,14 @@ main(int argc, char *argv[])
 
     f.glEnable(GL_POINT_SMOOTH);
     f.glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
-    f.glPointSize(5.0f);
+    f.glPointSize(1.0f);
     f.glEnable(GL_FOG);
     f.glFogf(GL_FOG_START, -500);
     f.glFogf(GL_FOG_END, 500);
     f.glFogf(GL_FOG_DENSITY, 0.005);
+
+    f.glVertexPointer(3, GL_FLOAT, 0, pixels);
+    f.glEnableClientState(GL_VERTEX_ARRAY);
 
     do {
         f.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -190,8 +191,6 @@ main(int argc, char *argv[])
 
         f.glColor4f(1.0, 1.0, 1.0, 1.0);
 
-        f.glEnableClientState(GL_VERTEX_ARRAY);
-        f.glVertexPointer(3, GL_FLOAT, 0, pixels);
         f.glDrawArrays(GL_POINTS, 0, NB_PIXELS);
 
         SDL_GL_SwapBuffers();
@@ -206,6 +205,8 @@ main(int argc, char *argv[])
         SDL_Delay(20);
     }
     while (!done);
+
+    f.glDisableClientState(GL_VERTEX_ARRAY);
 
     SDL_Quit();
     return 0;
