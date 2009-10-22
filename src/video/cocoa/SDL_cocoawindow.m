@@ -239,6 +239,15 @@ static __inline__ void ConvertNSRect(NSRect *r)
     mouse = SDL_GetMouse(index);
 
     point = [NSEvent mouseLocation];
+    if ( (window->flags & SDL_WINDOW_FULLSCREEN) ) {
+        rect.size.width = CGDisplayPixelsWide(kCGDirectMainDisplay);
+        rect.size.height = CGDisplayPixelsHigh(kCGDirectMainDisplay);
+        point.y = rect.size.height - point.y;
+    } else {
+        rect = [_data->window contentRectForFrameRect:[_data->window frame]];
+        point.x = point.x - rect.origin.x;
+        point.y = rect.size.height - (point.y - rect.origin.y);
+    }
     point.x = point.x - rect.origin.x;
     point.y = rect.size.height - (point.y - rect.origin.y);
     if ( point.x < 0 || point.x >= rect.size.width ||
