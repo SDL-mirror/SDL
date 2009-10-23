@@ -29,7 +29,7 @@
 typedef struct SDL_WindowData SDL_WindowData;
 
 /* *INDENT-OFF* */
-#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= 1060
 @interface Cocoa_WindowListener : NSResponder <NSWindowDelegate> {
 #else
 @interface Cocoa_WindowListener : NSResponder {
