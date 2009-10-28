@@ -754,8 +754,10 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
     SDL_Window *windows;
 
     if (!_this) {
-        SDL_UninitializedVideo();
-        return 0;
+        /* Initialize the video system if needed */
+        if (SDL_VideoInit(NULL, 0) < 0) {
+            return 0;
+        }
     }
     if (flags & SDL_WINDOW_OPENGL) {
         if (!_this->GL_CreateContext) {
@@ -926,15 +928,28 @@ SDL_GetWindowFromID(SDL_WindowID windowID)
         SDL_UninitializedVideo();
         return NULL;
     }
-    for (i = 0; i < _this->num_displays; ++i) {
-        SDL_VideoDisplay *display = &_this->displays[i];
-        for (j = 0; j < display->num_windows; ++j) {
-            SDL_Window *window = &display->windows[j];
-            if (window->id == windowID) {
+    if (windowID) {
+        for (i = 0; i < _this->num_displays; ++i) {
+            SDL_VideoDisplay *display = &_this->displays[i];
+            for (j = 0; j < display->num_windows; ++j) {
+                SDL_Window *window = &display->windows[j];
+                if (window->id == windowID) {
+                    return window;
+                }
+            }
+        }
+    } else {
+        /* Just return the first active window */
+        for (i = 0; i < _this->num_displays; ++i) {
+            SDL_VideoDisplay *display = &_this->displays[i];
+            for (j = 0; j < display->num_windows; ++j) {
+                SDL_Window *window = &display->windows[j];
                 return window;
             }
         }
     }
+    /* Couldn't find the window with the requested ID */
+    SDL_SetError("Invalid window ID");
     return NULL;
 }
 
@@ -949,6 +964,23 @@ SDL_GetDisplayFromWindow(SDL_Window * window)
         return NULL;
     }
     return &_this->displays[window->display];
+}
+
+static __inline__ SDL_Renderer *
+SDL_GetCurrentRenderer()
+{
+    SDL_Renderer *renderer;
+
+    if (!_this) {
+        SDL_UninitializedVideo();
+        return NULL;
+    }
+    if (!SDL_CurrentRenderer) {
+        if (SDL_CreateRenderer(0, -1, 0) < 0) {
+            return NULL;
+        }
+    }
+    return SDL_CurrentRenderer;
 }
 
 Uint32
@@ -1506,31 +1538,29 @@ SDL_SelectRenderer(SDL_WindowID windowID)
         return -1;
     }
     renderer = window->renderer;
-    if (!renderer) {
-        SDL_SetError("Renderer hasn't been created yet");
-        return -1;
-    }
-    if (renderer->ActivateRenderer) {
-        if (renderer->ActivateRenderer(renderer) < 0) {
+    if (renderer) {
+        if (renderer->ActivateRenderer) {
+            if (renderer->ActivateRenderer(renderer) < 0) {
+                return -1;
+            }
+        }
+        SDL_CurrentDisplay.current_renderer = renderer;
+    } else {
+        if (SDL_CreateRenderer(windowID, -1, 0) < 0) {
             return -1;
         }
     }
-    SDL_CurrentDisplay.current_renderer = renderer;
     return 0;
 }
 
 int
 SDL_GetRendererInfo(SDL_RendererInfo * info)
 {
-    if (!_this) {
-        SDL_UninitializedVideo();
+    SDL_Renderer *renderer = SDL_GetCurrentRenderer();
+    if (!renderer) {
         return -1;
     }
-    if (!SDL_CurrentDisplay.current_renderer) {
-        SDL_SetError("There is no current renderer");
-        return -1;
-    }
-    *info = SDL_CurrentDisplay.current_renderer->info;
+    *info = renderer->info;
     return 0;
 }
 
@@ -1541,11 +1571,7 @@ SDL_CreateTexture(Uint32 format, int access, int w, int h)
     SDL_Renderer *renderer;
     SDL_Texture *texture;
 
-    if (!_this) {
-        SDL_UninitializedVideo();
-        return 0;
-    }
-    renderer = SDL_CurrentDisplay.current_renderer;
+    renderer = SDL_GetCurrentRenderer();
     if (!renderer) {
         return 0;
     }
@@ -1599,9 +1625,8 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
     }
     fmt = surface->format;
 
-    renderer = SDL_CurrentDisplay.current_renderer;
+    renderer = SDL_GetCurrentRenderer();
     if (!renderer) {
-        SDL_SetError("No current renderer available");
         return 0;
     }
 
@@ -2234,11 +2259,7 @@ SDL_SetRenderDrawColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
     SDL_Renderer *renderer;
 
-    if (!_this) {
-        SDL_UninitializedVideo();
-        return -1;
-    }
-    renderer = SDL_CurrentDisplay.current_renderer;
+    renderer = SDL_GetCurrentRenderer();
     if (!renderer) {
         return -1;
     }
@@ -2258,11 +2279,7 @@ SDL_GetRenderDrawColor(Uint8 * r, Uint8 * g, Uint8 * b, Uint8 * a)
 {
     SDL_Renderer *renderer;
 
-    if (!_this) {
-        SDL_UninitializedVideo();
-        return -1;
-    }
-    renderer = SDL_CurrentDisplay.current_renderer;
+    renderer = SDL_GetCurrentRenderer();
     if (!renderer) {
         return -1;
     }
@@ -2286,11 +2303,7 @@ SDL_SetRenderDrawBlendMode(int blendMode)
 {
     SDL_Renderer *renderer;
 
-    if (!_this) {
-        SDL_UninitializedVideo();
-        return -1;
-    }
-    renderer = SDL_CurrentDisplay.current_renderer;
+    renderer = SDL_GetCurrentRenderer();
     if (!renderer) {
         return -1;
     }
@@ -2307,11 +2320,7 @@ SDL_GetRenderDrawBlendMode(int *blendMode)
 {
     SDL_Renderer *renderer;
 
-    if (!_this) {
-        SDL_UninitializedVideo();
-        return -1;
-    }
-    renderer = SDL_CurrentDisplay.current_renderer;
+    renderer = SDL_GetCurrentRenderer();
     if (!renderer) {
         return -1;
     }
@@ -2325,11 +2334,7 @@ SDL_RenderPoint(int x, int y)
     SDL_Renderer *renderer;
     SDL_Window *window;
 
-    if (!_this) {
-        SDL_UninitializedVideo();
-        return -1;
-    }
-    renderer = SDL_CurrentDisplay.current_renderer;
+    renderer = SDL_GetCurrentRenderer();
     if (!renderer) {
         return -1;
     }
@@ -2355,11 +2360,7 @@ SDL_RenderLine(int x1, int y1, int x2, int y2)
         return SDL_RenderPoint(x1, y1);
     }
 
-    if (!_this) {
-        SDL_UninitializedVideo();
-        return -1;
-    }
-    renderer = SDL_CurrentDisplay.current_renderer;
+    renderer = SDL_GetCurrentRenderer();
     if (!renderer) {
         return -1;
     }
@@ -2386,11 +2387,7 @@ SDL_RenderFill(const SDL_Rect * rect)
     SDL_Window *window;
     SDL_Rect real_rect;
 
-    if (!_this) {
-        SDL_UninitializedVideo();
-        return -1;
-    }
-    renderer = SDL_CurrentDisplay.current_renderer;
+    renderer = SDL_GetCurrentRenderer();
     if (!renderer) {
         return -1;
     }
@@ -2422,9 +2419,8 @@ SDL_RenderCopy(SDL_TextureID textureID, const SDL_Rect * srcrect,
     SDL_Rect real_srcrect;
     SDL_Rect real_dstrect;
 
-    renderer = SDL_CurrentDisplay.current_renderer;
+    renderer = SDL_GetCurrentRenderer();
     if (!renderer) {
-        SDL_SetError("No current renderer available");
         return -1;
     }
     if (!texture) {
@@ -2483,11 +2479,7 @@ SDL_RenderPresent(void)
 {
     SDL_Renderer *renderer;
 
-    if (!_this) {
-        SDL_UninitializedVideo();
-        return;
-    }
-    renderer = SDL_CurrentDisplay.current_renderer;
+    renderer = SDL_GetCurrentRenderer();
     if (!renderer || !renderer->RenderPresent) {
         return;
     }

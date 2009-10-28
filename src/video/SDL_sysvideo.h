@@ -396,6 +396,7 @@ extern VideoBootStrap PND_bootstrap;
 #endif
 
 #define SDL_CurrentDisplay	(_this->displays[_this->current_display])
+#define SDL_CurrentRenderer	(SDL_CurrentDisplay.current_renderer)
 
 extern SDL_VideoDevice *SDL_GetVideoDevice();
 extern int SDL_AddBasicVideoDisplay(const SDL_DisplayMode * desktop_mode);
