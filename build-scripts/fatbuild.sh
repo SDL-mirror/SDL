@@ -70,6 +70,17 @@ fi # 10.2 or 10.3 SDK
 CONFIG_X86="--build=`uname -p`-apple-darwin --host=i386-apple-darwin \
 --x-includes=/usr/X11R6/include --x-libraries=/usr/X11R6/lib"
 
+# They changed this to "darwin10" in Xcode 3.2 (Snow Leopard).
+GCCUSRPATH="$SDK_PATH/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin9/4.0.1"
+if [ ! -d "$GCCUSRPATH" ]; then
+    GCCUSRPATH="$SDK_PATH/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin10/4.0.1"
+fi
+
+if [ ! -d "$GCCUSRPATH" ]; then
+    echo "Couldn't find any GCC usr path"
+    exit 1
+fi
+
 # Intel compiler flags
 CC_X86="gcc-4.0 -arch i386"
 CXX_X86="g++-4.0 -arch i386"
@@ -77,12 +88,12 @@ CFLAGS_X86="-mmacosx-version-min=10.4"
 CPPFLAGS_X86="-DMAC_OS_X_VERSION_MIN_REQUIRED=1040 \
 -nostdinc \
 -F$SDK_PATH/MacOSX10.4u.sdk/System/Library/Frameworks \
--I$SDK_PATH/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin9/4.0.1/include \
+-I$GCCUSRPATH/include \
 -isystem $SDK_PATH/MacOSX10.4u.sdk/usr/include"
 
 # Intel linker flags
 LFLAGS_X86="-Wl,-headerpad_max_install_names -arch i386 -mmacosx-version-min=10.4 \
--L$SDK_PATH/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin9/4.0.1 \
+-L$GCCUSRPATH \
 -Wl,-syslibroot,$SDK_PATH/MacOSX10.4u.sdk"
 
 #
