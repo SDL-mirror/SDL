@@ -162,10 +162,10 @@ photon_createcursor(SDL_Surface * surface, int hot_x, int hot_y)
     internal_cursor->size1.y = surface->h;
     internal_cursor->size2.x = surface->w;
     internal_cursor->size2.y = surface->h;
-    internal_cursor->offset1.x = hot_x;
-    internal_cursor->offset1.y = hot_y;
-    internal_cursor->offset2.x = hot_x;
-    internal_cursor->offset2.y = hot_y;
+    internal_cursor->offset1.x = -hot_x;
+    internal_cursor->offset1.y = -hot_y;
+    internal_cursor->offset2.x = -hot_x;
+    internal_cursor->offset2.y = -hot_y;
     internal_cursor->bytesperline1 = ((surface->w + 7) >> 3);
     internal_cursor->bytesperline2 = ((surface->w + 7) >> 3);
     internal_cursor->color1 = (SDL_PHOTON_MOUSE_COLOR_BLACK) & 0x00FFFFFF;
