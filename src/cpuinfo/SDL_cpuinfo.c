@@ -166,7 +166,7 @@ CPU_getCPUIDFeatures(void)
 "        popl    %%ebx\n"
 	: "=m" (features)
 	:
-	: "%eax", "%ecx", "%edx", "cc"
+	: "%eax", "%ecx", "%edx"
 	);
 #elif defined(__GNUC__) && defined(__x86_64__)
 	__asm__ (
@@ -183,7 +183,7 @@ CPU_getCPUIDFeatures(void)
 "        popq    %%rbx\n"
 	: "=m" (features)
 	:
-	: "%rax", "%rcx", "%rdx", "cc"
+	: "%rax", "%rcx", "%rdx"
 	);
 #elif (defined(_MSC_VER) && defined(_M_IX86)) || defined(__WATCOMC__)
 	__asm {
@@ -238,7 +238,7 @@ CPU_getCPUIDFeaturesExt(void)
 "        popl    %%ebx\n"
 	: "=m" (features)
 	:
-	: "%eax", "%ecx", "%edx", "cc"
+	: "%eax", "%ecx", "%edx"
 	);
 #elif defined(__GNUC__) && defined (__x86_64__)
 	__asm__ (
@@ -254,7 +254,7 @@ CPU_getCPUIDFeaturesExt(void)
 "        popq    %%rbx\n"
 	: "=m" (features)
 	:
-	: "%rax", "%rcx", "%rdx", "cc"
+	: "%rax", "%rcx", "%rdx"
 	);
 #elif (defined(_MSC_VER) && defined(_M_IX86)) || defined(__WATCOMC__)
 	__asm {
