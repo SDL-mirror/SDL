@@ -153,7 +153,7 @@ CPU_getCPUIDFeatures(void)
 /* *INDENT-OFF* */
 #if defined(__GNUC__) && defined(i386)
 	__asm__ (
-"        movl    %%ebx,%%edi\n"
+"        pushl   %%ebx\n"
 "        xorl    %%eax,%%eax         # Set up for CPUID instruction    \n"
 "        cpuid                       # Get and save vendor ID          \n"
 "        cmpl    $1,%%eax            # Make sure 1 is valid input for CPUID\n"
@@ -163,14 +163,14 @@ CPU_getCPUIDFeatures(void)
 "        cpuid                       # Get family/model/stepping/features\n"
 "        movl    %%edx,%0                                              \n"
 "1:                                                                    \n"
-"        movl    %%edi,%%ebx\n"
+"        popl    %%ebx\n"
 	: "=m" (features)
 	:
-	: "%eax", "%ecx", "%edx", "%edi"
+	: "%eax", "%ecx", "%edx", "cc"
 	);
 #elif defined(__GNUC__) && defined(__x86_64__)
 	__asm__ (
-"        movq    %%rbx,%%rdi\n"
+"        pushq   %%rbx\n"
 "        xorl    %%eax,%%eax         # Set up for CPUID instruction    \n"
 "        cpuid                       # Get and save vendor ID          \n"
 "        cmpl    $1,%%eax            # Make sure 1 is valid input for CPUID\n"
@@ -180,10 +180,10 @@ CPU_getCPUIDFeatures(void)
 "        cpuid                       # Get family/model/stepping/features\n"
 "        movl    %%edx,%0                                              \n"
 "1:                                                                    \n"
-"        movq    %%rdi,%%rbx\n"
+"        popq    %%rbx\n"
 	: "=m" (features)
 	:
-	: "%rax", "%rbx", "%rcx", "%rdx", "%rdi"
+	: "%rax", "%rcx", "%rdx", "cc"
 	);
 #elif (defined(_MSC_VER) && defined(_M_IX86)) || defined(__WATCOMC__)
 	__asm {
@@ -226,7 +226,7 @@ CPU_getCPUIDFeaturesExt(void)
 /* *INDENT-OFF* */
 #if defined(__GNUC__) && defined(i386)
 	__asm__ (
-"        movl    %%ebx,%%edi\n"
+"        pushl   %%ebx\n"
 "        movl    $0x80000000,%%eax   # Query for extended functions    \n"
 "        cpuid                       # Get extended function limit     \n"
 "        cmpl    $0x80000001,%%eax                                     \n"
@@ -235,14 +235,14 @@ CPU_getCPUIDFeaturesExt(void)
 "        cpuid                       # and get the information         \n"
 "        movl    %%edx,%0                                              \n"
 "1:                                                                    \n"
-"        movl    %%edi,%%ebx\n"
+"        popl    %%ebx\n"
 	: "=m" (features)
 	:
-	: "%eax", "%ecx", "%edx", "%edi"
+	: "%eax", "%ecx", "%edx", "cc"
 	);
 #elif defined(__GNUC__) && defined (__x86_64__)
 	__asm__ (
-"        movq    %%rbx,%%rdi\n"
+"        pushq   %%rbx\n"
 "        movl    $0x80000000,%%eax   # Query for extended functions    \n"
 "        cpuid                       # Get extended function limit     \n"
 "        cmpl    $0x80000001,%%eax                                     \n"
@@ -251,10 +251,10 @@ CPU_getCPUIDFeaturesExt(void)
 "        cpuid                       # and get the information         \n"
 "        movl    %%edx,%0                                              \n"
 "1:                                                                    \n"
-"        movq    %%rdi,%%rbx\n"
+"        popq    %%rbx\n"
 	: "=m" (features)
 	:
-	: "%rax", "%rbx", "%rcx", "%rdx", "%rdi"
+	: "%rax", "%rcx", "%rdx", "cc"
 	);
 #elif (defined(_MSC_VER) && defined(_M_IX86)) || defined(__WATCOMC__)
 	__asm {
