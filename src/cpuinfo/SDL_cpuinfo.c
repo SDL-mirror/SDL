@@ -148,7 +148,7 @@ static __inline__ int CPU_getCPUIDFeatures(void)
 	int features = 0;
 #if defined(__GNUC__) && defined(i386)
 	__asm__ (
-"        movl    %%ebx,%%edi\n"
+"        pushl   %%ebx\n"
 "        xorl    %%eax,%%eax         # Set up for CPUID instruction    \n"
 "        cpuid                       # Get and save vendor ID          \n"
 "        cmpl    $1,%%eax            # Make sure 1 is valid input for CPUID\n"
@@ -158,14 +158,14 @@ static __inline__ int CPU_getCPUIDFeatures(void)
 "        cpuid                       # Get family/model/stepping/features\n"
 "        movl    %%edx,%0                                              \n"
 "1:                                                                    \n"
-"        movl    %%edi,%%ebx\n"
+"        popl    %%ebx\n"
 	: "=m" (features)
 	:
-	: "%eax", "%ecx", "%edx", "%edi"
+	: "%eax", "%ecx", "%edx"
 	);
 #elif defined(__GNUC__) && defined(__x86_64__)
 	__asm__ (
-"        movq    %%rbx,%%rdi\n"
+"        pushq   %%rbx\n"
 "        xorl    %%eax,%%eax         # Set up for CPUID instruction    \n"
 "        cpuid                       # Get and save vendor ID          \n"
 "        cmpl    $1,%%eax            # Make sure 1 is valid input for CPUID\n"
@@ -175,10 +175,10 @@ static __inline__ int CPU_getCPUIDFeatures(void)
 "        cpuid                       # Get family/model/stepping/features\n"
 "        movl    %%edx,%0                                              \n"
 "1:                                                                    \n"
-"        movq    %%rdi,%%rbx\n"
+"        popq    %%rbx\n"
 	: "=m" (features)
 	:
-	: "%rax", "%rbx", "%rcx", "%rdx", "%rdi"
+	: "%rax", "%rcx", "%rdx"
 	);
 #elif (defined(_MSC_VER) && defined(_M_IX86)) || defined(__WATCOMC__)
 	__asm {
@@ -194,7 +194,7 @@ done:
 	}
 #elif defined(__sun) && (defined(__i386) || defined(__amd64))
 	    __asm(
-"        movl    %ebx,%edi\n"
+"        pushl   %ebx\n"
 "        xorl    %eax,%eax         \n"
 "        cpuid                     \n"
 "        cmpl    $1,%eax           \n"
@@ -208,7 +208,7 @@ done:
 "        movl    %edx,-8(%rbp)     \n"
 #endif
 "1:                                \n"
-"        movl    %edi,%ebx\n" );
+"        popl    %ebx\n" );
 #endif
 	return features;
 }
@@ -218,7 +218,7 @@ static __inline__ int CPU_getCPUIDFeaturesExt(void)
 	int features = 0;
 #if defined(__GNUC__) && defined(i386)
 	__asm__ (
-"        movl    %%ebx,%%edi\n"
+"        pushl   %%ebx\n"
 "        movl    $0x80000000,%%eax   # Query for extended functions    \n"
 "        cpuid                       # Get extended function limit     \n"
 "        cmpl    $0x80000001,%%eax                                     \n"
@@ -227,14 +227,14 @@ static __inline__ int CPU_getCPUIDFeaturesExt(void)
 "        cpuid                       # and get the information         \n"
 "        movl    %%edx,%0                                              \n"
 "1:                                                                    \n"
-"        movl    %%edi,%%ebx\n"
+"        popl    %%ebx\n"
 	: "=m" (features)
 	:
-	: "%eax", "%ecx", "%edx", "%edi"
+	: "%eax", "%ecx", "%edx"
 	);
 #elif defined(__GNUC__) && defined (__x86_64__)
 	__asm__ (
-"        movq    %%rbx,%%rdi\n"
+"        pushq   %%rbx\n"
 "        movl    $0x80000000,%%eax   # Query for extended functions    \n"
 "        cpuid                       # Get extended function limit     \n"
 "        cmpl    $0x80000001,%%eax                                     \n"
@@ -243,10 +243,10 @@ static __inline__ int CPU_getCPUIDFeaturesExt(void)
 "        cpuid                       # and get the information         \n"
 "        movl    %%edx,%0                                              \n"
 "1:                                                                    \n"
-"        movq    %%rdi,%%rbx\n"
+"        popq    %%rbx\n"
 	: "=m" (features)
 	:
-	: "%rax", "%rbx", "%rcx", "%rdx", "%rdi"
+	: "%rax", "%rcx", "%rdx"
 	);
 #elif (defined(_MSC_VER) && defined(_M_IX86)) || defined(__WATCOMC__)
 	__asm {
@@ -261,7 +261,7 @@ done:
 	}
 #elif defined(__sun) && ( defined(__i386) || defined(__amd64) )
 	    __asm (
-"        movl    %ebx,%edi\n"
+"        pushl   %ebx\n"
 "        movl    $0x80000000,%eax \n"
 "        cpuid                    \n"
 "        cmpl    $0x80000001,%eax \n"
@@ -274,7 +274,7 @@ done:
 "        movl    %edx,-8(%rbp)   \n"
 #endif
 "1:                               \n"
-"        movl    %edi,%ebx\n"
+"        popl    %ebx\n"
 	    );
 #endif
 	return features;
