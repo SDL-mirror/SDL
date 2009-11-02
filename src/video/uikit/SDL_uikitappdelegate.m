@@ -71,11 +71,8 @@ int main(int argc, char **argv) {
 	return self;
 }
 
-- (void)applicationDidFinishLaunching:(UIApplication *)application {
-			
-	/* Set working directory to resource path */
-	[[NSFileManager defaultManager] changeCurrentDirectoryPath: [[NSBundle mainBundle] resourcePath]];
-	
+- (void)postFinishLaunch {
+
 	/* run the user's application, passing argc and argv */
 	int exit_status = SDL_main(forward_argc, forward_argv);
 	
@@ -88,7 +85,15 @@ int main(int argc, char **argv) {
 		
 	/* exit, passing the return status from the user's application */
 	exit(exit_status);
-		
+}
+
+- (void)applicationDidFinishLaunching:(UIApplication *)application {
+			
+	/* Set working directory to resource path */
+	[[NSFileManager defaultManager] changeCurrentDirectoryPath: [[NSBundle mainBundle] resourcePath]];
+	
+	[self performSelector:@selector(postFinishLaunch) withObject:nil
+afterDelay:0.0];
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application {
