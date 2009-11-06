@@ -181,7 +181,7 @@ ikbd_finbuffer:
 ikbd:
 #if defined(__mcoldfire__)
 	lea	sp@(-12),sp
-	moveml	sp@,d0-d1/a0
+	moveml	d0-d1/a0,sp@
 #else
 	moveml	d0-d1/a0,sp@-
 #endif
@@ -288,7 +288,7 @@ ikbd_oldmidi:
 ikbd_mousex:
 #if defined(__mcoldfire__)
 	lea	sp@(-12),sp
-	moveml	sp@,d0-d1/a0
+	moveml	d0-d1/a0,sp@
 #else
 	moveml	d0-d1/a0,sp@-
 #endif
@@ -323,7 +323,7 @@ ikbd_mousex:
 ikbd_mousey:
 #if defined(__mcoldfire__)
 	lea	sp@(-12),sp
-	moveml	sp@,d0-d1/a0
+	moveml	d0-d1/a0,sp@
 #else
 	moveml	d0-d1/a0,sp@-
 #endif
@@ -358,7 +358,7 @@ ikbd_mousey:
 ikbd_joystick:
 #if defined(__mcoldfire__)
 	lea	sp@(-12),sp
-	moveml	sp@,d0-d1/a0
+	moveml	d0-d1/a0,sp@
 #else
 	moveml	d0-d1/a0,sp@-
 #endif
