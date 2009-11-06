@@ -31,8 +31,8 @@
 
 #include <errno.h>
 
-#include <cdromio.h>
-#include <metados.h>
+#include <mint/cdromio.h>
+#include <mint/metados.h>
 
 #include "SDL_cdrom.h"
 #include "../SDL_syscdrom.h"
