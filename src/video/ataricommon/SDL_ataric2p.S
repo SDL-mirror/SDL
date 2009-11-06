@@ -38,6 +38,7 @@
 
 	.text
 _SDL_Atari_C2pConvert8:
+#if !defined(__mcoldfire__)
 	movel	sp@(4),c2p_source
 	movel	sp@(8),c2p_dest
 	movel	sp@(12),c2p_width
@@ -283,11 +284,13 @@ SDL_Atari_C2p8_nodblline:
 	bne		SDL_Atari_C2p8_rowloop	
 
 	moveml	sp@+,d2-d7/a2-a6
+#endif
 	rts
 
 /* ------------	Conversion C2P, 4 bits ------------ */
 
 _SDL_Atari_C2pConvert4:
+#if !defined(__mcoldfire__)
 	movel	sp@(4),c2p_source
 	movel	sp@(8),c2p_dest
 	movel	sp@(12),c2p_width
@@ -393,11 +396,13 @@ c2p4_nodblligne:
 	dbra	d7,c2p4_bcly
 
 	moveml	sp@+,d2-d7/a2-a6
+#endif
 	rts
 
 /* ------------	Conversion of a light palette in 4 bits ------------ */
 
 _SDL_Atari_C2pConvert4_pal:
+#if !defined(__mcoldfire__)
 	/* a0 is a 256-word light palette */
 	movel	sp@(4),a0
 
@@ -423,7 +428,7 @@ c2p_pal_initbyte:
 	dbra	d3,c2p_pal_initbcl
 
 	moveml	sp@+,d2-d3
-
+#endif
 	rts
 
 /* ------------	Buffers ------------ */
