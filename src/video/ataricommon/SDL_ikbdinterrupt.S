@@ -78,6 +78,9 @@ _SDL_AtariIkbdInstall:
 	movel	d0,old_ikbd
 	lea	ikbd,a0
 	movel	a0,0x118:w
+	moveql	#6,d0
+	bset	d0,0xfffffa09:w	| IERB
+	bset	d0,0xfffffa15:w	| IMRB
 #else
 	movel	0x118:w,old_ikbd
 	movel	#ikbd,0x118:w
@@ -104,8 +107,8 @@ _SDL_AtariIkbdInstall:
 	movel	#0xffff,d0
 	movew	d0,_SDL_AtariIkbd_enabled
 
-	moveml   sp@,d0-d1/a0-a1
-	lea       sp@(16),sp
+	moveml	sp@,d0-d1/a0-a1
+	lea	sp@(16),sp
 #else
 	movew	#0xffff,_SDL_AtariIkbd_enabled
 
