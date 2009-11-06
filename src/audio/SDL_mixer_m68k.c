@@ -27,7 +27,7 @@
 	Patrice Mandin
 */
 
-#if defined(__M68000__) && defined(__GNUC__)
+#if defined(__M68000__) && !defined(__mcoldfire__) && defined(__GNUC__)
 void SDL_MixAudio_m68k_U8(char* dst, char* src, long len, long volume, char* mix8)
 {
     __asm__ __volatile__ (
@@ -208,4 +208,3 @@ void SDL_MixAudio_m68k_S16LSB(short* dst, short* src, long len, long volume)
 	 );
 }
 #endif
-
