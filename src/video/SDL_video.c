@@ -969,8 +969,6 @@ SDL_GetDisplayFromWindow(SDL_Window * window)
 static __inline__ SDL_Renderer *
 SDL_GetCurrentRenderer()
 {
-    SDL_Renderer *renderer;
-
     if (!_this) {
         SDL_UninitializedVideo();
         return NULL;
