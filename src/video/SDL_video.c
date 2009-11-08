@@ -1483,19 +1483,35 @@ SDL_CreateRenderer(SDL_WindowID windowID, int index, Uint32 flags)
         SDL_SetError("Invalid window ID");
         return -1;
     }
+
+    /* Free any existing renderer */
+    SDL_DestroyRenderer(windowID);
+
     if (index < 0) {
         const char *override = SDL_getenv("SDL_VIDEO_RENDERER");
+        if (override) {
+            int i, n = SDL_GetNumRenderDrivers();
+            for (i = 0; i < n; ++i) {
+                SDL_RenderDriver *driver =
+                    &SDL_CurrentDisplay.render_drivers[i];
+                if (SDL_strcasecmp(override, driver->info.name) == 0) {
+                    index = i;
+                    break;
+                }
+            }
+        }
+    }
+    if (index < 0) {
         int n = SDL_GetNumRenderDrivers();
         for (index = 0; index < n; ++index) {
             SDL_RenderDriver *driver =
                 &SDL_CurrentDisplay.render_drivers[index];
 
-            if (override) {
-                if (SDL_strcasecmp(override, driver->info.name) == 0) {
-                    break;
-                }
-            } else {
-                if ((driver->info.flags & flags) == flags) {
+            if ((driver->info.flags & flags) == flags) {
+                /* Create a new renderer instance */
+                window->renderer = SDL_CurrentDisplay.render_drivers[index].CreateRenderer(window, flags);
+                if (window->renderer) {
+                    /* Yay, we got one! */
                     break;
                 }
             }
@@ -1504,18 +1520,16 @@ SDL_CreateRenderer(SDL_WindowID windowID, int index, Uint32 flags)
             SDL_SetError("Couldn't find matching render driver");
             return -1;
         }
-    }
-    if (index >= SDL_GetNumRenderDrivers()) {
-        SDL_SetError("index must be -1 or in the range of 0 - %d",
-                     SDL_GetNumRenderDrivers() - 1);
-        return -1;
-    }
-    /* Free any existing renderer */
-    SDL_DestroyRenderer(windowID);
+    } else {
+        if (index >= SDL_GetNumRenderDrivers()) {
+            SDL_SetError("index must be -1 or in the range of 0 - %d",
+                         SDL_GetNumRenderDrivers() - 1);
+            return -1;
+        }
 
-    /* Create a new renderer instance */
-    window->renderer = SDL_CurrentDisplay.render_drivers[index]
-        .CreateRenderer(window, flags);
+        /* Create a new renderer instance */
+        window->renderer = SDL_CurrentDisplay.render_drivers[index].CreateRenderer(window, flags);
+    }
 
     if (window->renderer == NULL) {
         /* Assuming renderer set its error */
