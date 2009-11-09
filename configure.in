@@ -48,12 +48,6 @@ AC_SUBST(LT_AGE)
 
 dnl Detect the canonical build and host environments
 dnl AC_CANONICAL_HOST
-AC_C_BIGENDIAN
-if test x$ac_cv_c_bigendian = xyes; then
-    AC_DEFINE(SDL_BYTEORDER, 4321)
-else
-    AC_DEFINE(SDL_BYTEORDER, 1234)
-fi
 
 dnl Check for tools
 AC_PROG_LIBTOOL

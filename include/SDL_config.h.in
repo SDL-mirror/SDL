@@ -59,9 +59,6 @@
 #undef SIZEOF_VOIDP
 #undef SDL_HAS_64BIT_TYPE
 
-/* Endianness */
-#undef SDL_BYTEORDER
-
 /* Comment this if you want to build without any C library requirements */
 #undef HAVE_LIBC
 #if HAVE_LIBC
