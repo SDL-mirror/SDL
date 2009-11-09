@@ -72,6 +72,8 @@ static int D3D_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2,
 static int D3D_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect);
 static int D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * srcrect, const SDL_Rect * dstrect);
+static int D3D_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                                void * pixels, int pitch);
 static void D3D_RenderPresent(SDL_Renderer * renderer);
 static void D3D_DestroyTexture(SDL_Renderer * renderer,
                                SDL_Texture * texture);
@@ -367,6 +369,7 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->RenderLine = D3D_RenderLine;
     renderer->RenderFill = D3D_RenderFill;
     renderer->RenderCopy = D3D_RenderCopy;
+    renderer->RenderReadPixels = D3D_RenderReadPixels;
     renderer->RenderPresent = D3D_RenderPresent;
     renderer->DestroyTexture = D3D_DestroyTexture;
     renderer->DestroyRenderer = D3D_DestroyRenderer;
@@ -1143,6 +1146,50 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         return -1;
     }
     return 0;
+}
+
+static int
+D3D_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                     void * pixels, int pitch)
+{
+    BYTE * pBytes;
+    D3DLOCKED_RECT lockedRect;
+    BYTE b, g, r, a;
+    unsigned long index;
+    int cur_mouse;
+    int x, y;
+
+    LPDIRECT3DSURFACE9 backBuffer;
+    LPDIRECT3DSURFACE9 pickOffscreenSurface;
+    D3DSURFACE_DESC desc;
+
+    D3D_RenderData * data = (D3D_RenderData *) renderer->driverdata;
+    
+    IDirect3DDevice9_GetBackBuffer(data->device, 0, 0, D3DBACKBUFFER_TYPE_MONO, &backBuffer);
+    
+    
+    IDirect3DSurface9_GetDesc(backBuffer, &desc);
+
+    IDirect3DDevice9_CreateOffscreenPlainSurface(data->device, desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pickOffscreenSurface, NULL);
+
+    IDirect3DDevice9_GetRenderTargetData(data->device, backBuffer, pickOffscreenSurface);
+
+    IDirect3DSurface9_LockRect(pickOffscreenSurface, &lockedRect, NULL, D3DLOCK_READONLY);
+    pBytes = (BYTE*)lockedRect.pBits;
+    IDirect3DSurface9_UnlockRect(pickOffscreenSurface);
+
+    // just to debug -->
+    cur_mouse = SDL_SelectMouse(-1);
+    SDL_GetMouseState(cur_mouse, &x, &y);
+    index = (x * 4 + (y * lockedRect.Pitch));
+
+    b = pBytes[index];
+    g = pBytes[index+1];
+    r = pBytes[index+2];
+    a = pBytes[index+3];
+    // <--
+    
+    return -1;
 }
 
 static void

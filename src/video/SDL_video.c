@@ -2486,6 +2486,82 @@ SDL_RenderCopy(SDL_TextureID textureID, const SDL_Rect * srcrect,
                                 &real_dstrect);
 }
 
+int
+SDL_RenderReadPixels(const SDL_Rect * rect, void * pixels, int pitch)
+{
+    SDL_Renderer *renderer;
+    SDL_Window *window;
+    SDL_Rect real_rect;
+
+    renderer = SDL_GetCurrentRenderer();
+    if (!renderer) {
+        return -1;
+    }
+    if (!renderer->RenderReadPixels) {
+        SDL_Unsupported();
+        return -1;
+    }
+    window = SDL_GetWindowFromID(renderer->window);
+
+    real_rect.x = 0;
+    real_rect.y = 0;
+    real_rect.w = window->w;
+    real_rect.h = window->h;
+    if (rect) {
+        if (!SDL_IntersectRect(rect, &real_rect, &real_rect)) {
+            return 0;
+        }
+        if (real_rect.y > rect->y) {
+            pixels = (Uint8 *)pixels + pitch * (real_rect.y - rect->y);
+        }
+        if (real_rect.x > rect->x) {
+            Uint32 format = SDL_CurrentDisplay.current_mode.format;
+            int bpp = SDL_BYTESPERPIXEL(format);
+            pixels = (Uint8 *)pixels + bpp * (real_rect.x - rect->x);
+        }
+    }
+
+    return renderer->RenderReadPixels(renderer, &real_rect, pixels, pitch);
+}
+
+int
+SDL_RenderWritePixels(const SDL_Rect * rect, const void * pixels, int pitch)
+{
+    SDL_Renderer *renderer;
+    SDL_Window *window;
+    SDL_Rect real_rect;
+
+    renderer = SDL_GetCurrentRenderer();
+    if (!renderer) {
+        return -1;
+    }
+    if (!renderer->RenderWritePixels) {
+        SDL_Unsupported();
+        return -1;
+    }
+    window = SDL_GetWindowFromID(renderer->window);
+
+    real_rect.x = 0;
+    real_rect.y = 0;
+    real_rect.w = window->w;
+    real_rect.h = window->h;
+    if (rect) {
+        if (!SDL_IntersectRect(rect, &real_rect, &real_rect)) {
+            return 0;
+        }
+        if (real_rect.y > rect->y) {
+            pixels = (const Uint8 *)pixels + pitch * (real_rect.y - rect->y);
+        }
+        if (real_rect.x > rect->x) {
+            Uint32 format = SDL_CurrentDisplay.current_mode.format;
+            int bpp = SDL_BYTESPERPIXEL(format);
+            pixels = (const Uint8 *)pixels + bpp * (real_rect.x - rect->x);
+        }
+    }
+
+    return renderer->RenderWritePixels(renderer, &real_rect, pixels, pitch);
+}
+
 void
 SDL_RenderPresent(void)
 {

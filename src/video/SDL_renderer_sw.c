@@ -65,6 +65,10 @@ static int SW_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2,
 static int SW_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect);
 static int SW_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                          const SDL_Rect * srcrect, const SDL_Rect * dstrect);
+static int SW_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                               void * pixels, int pitch);
+static int SW_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                                const void * pixels, int pitch);
 static void SW_RenderPresent(SDL_Renderer * renderer);
 static void SW_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static void SW_DestroyRenderer(SDL_Renderer * renderer);
@@ -228,6 +232,8 @@ SW_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->RenderLine = SW_RenderLine;
     renderer->RenderFill = SW_RenderFill;
     renderer->RenderCopy = SW_RenderCopy;
+    renderer->RenderReadPixels = SW_RenderReadPixels;
+    renderer->RenderWritePixels = SW_RenderWritePixels;
     renderer->RenderPresent = SW_RenderPresent;
     renderer->DestroyRenderer = SW_DestroyRenderer;
     renderer->info.name = SW_RenderDriver.info.name;
@@ -726,6 +732,76 @@ SW_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     data->renderer->UnlockTexture(data->renderer,
                                   data->texture[data->current_texture]);
     return status;
+}
+
+static int
+SW_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                    void * pixels, int pitch)
+{
+    SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
+    const Uint8 *src;
+    Uint8 *dst;
+    int src_pitch, dst_pitch, w, h;
+
+    if (data->renderer->LockTexture(data->renderer,
+                                    data->texture[data->current_texture],
+                                    rect, 0, &data->surface.pixels,
+                                    &data->surface.pitch) < 0) {
+        return -1;
+    }
+
+    src = data->surface.pixels;
+    src_pitch = data->surface.pitch;
+    dst = pixels;
+    dst_pitch = pitch;
+    h = rect->h;
+    w = rect->w * data->surface.format->BytesPerPixel;
+    while (h--) {
+        SDL_memcpy(dst, src, w);
+        src += src_pitch;
+        dst += dst_pitch;
+    }
+
+    data->renderer->UnlockTexture(data->renderer,
+                                  data->texture[data->current_texture]);
+    return 0;
+}
+
+static int
+SW_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                     const void * pixels, int pitch)
+{
+    SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
+    const Uint8 *src;
+    Uint8 *dst;
+    int src_pitch, dst_pitch, w, h;
+
+    if (data->renderer->info.flags & SDL_RENDERER_PRESENTCOPY) {
+        SDL_AddDirtyRect(&data->dirty, rect);
+    }
+
+    if (data->renderer->LockTexture(data->renderer,
+                                    data->texture[data->current_texture],
+                                    rect, 1, &data->surface.pixels,
+                                    &data->surface.pitch) < 0) {
+        return -1;
+    }
+
+    src = pixels;
+    src_pitch = pitch;
+    dst = data->surface.pixels;
+    dst_pitch = data->surface.pitch;
+    h = rect->h;
+    w = rect->w * data->surface.format->BytesPerPixel;
+    while (h--) {
+        SDL_memcpy(dst, src, w);
+        src += src_pitch;
+        dst += dst_pitch;
+    }
+
+    data->renderer->UnlockTexture(data->renderer,
+                                  data->texture[data->current_texture]);
+    return 0;
 }
 
 static void
