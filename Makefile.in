@@ -42,7 +42,7 @@ SPU_GCC = @SPU_GCC@
 EMBEDSPU = @EMBEDSPU@
 #include $(srcdir)/src/video/ps3/spulibs/Makefile
 
-DIST = acinclude autogen.sh Borland.html Borland.zip BUGS build-scripts configure configure.in COPYING CREDITS docs docs.html include INSTALL Makefile.minimal Makefile.in README* sdl-config.in sdl.m4 sdl.pc.in SDL.spec SDL.spec.in src test TODO VisualC.html VisualC VisualCE Watcom-Win32.zip WhatsNew Xcode
+DIST = acinclude autogen.sh Borland.html Borland.zip BUGS build-scripts configure configure.in COPYING CREDITS docs.html include INSTALL Makefile.minimal Makefile.in README* sdl-config.in sdl.m4 sdl.pc.in SDL.spec SDL.spec.in src test TODO VisualC.html VisualC VisualCE Watcom-Win32.zip WhatsNew Xcode
 
 HDRS = SDL.h SDL_atomic.h SDL_audio.h SDL_compat.h SDL_cpuinfo.h SDL_endian.h SDL_error.h SDL_events.h SDL_haptic.h SDL_joystick.h SDL_keyboard.h SDL_keysym.h SDL_loadso.h SDL_main.h SDL_mouse.h SDL_mutex.h SDL_name.h SDL_opengl.h SDL_opengles.h SDL_pixels.h SDL_platform.h SDL_power.h SDL_quit.h SDL_rect.h SDL_revision.h SDL_rwops.h SDL_scancode.h SDL_stdinc.h SDL_surface.h SDL_syswm.h SDL_thread.h SDL_timer.h SDL_types.h SDL_version.h SDL_video.h begin_code.h close_code.h
 
