@@ -502,8 +502,7 @@ calc_swizzle32(const SDL_PixelFormat * srcfmt, const SDL_PixelFormat * dstfmt)
         NULL, 0, 0,
         0, 0, 0, 0,
         16, 8, 0, 24,
-        0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000,
-        0, 0
+        0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000
     };
     if (!srcfmt) {
         srcfmt = &default_pixel_format;
