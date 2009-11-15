@@ -93,9 +93,9 @@ SDL_PROC_UNUSED(void, glDrawBuffer, (GLenum mode))
 SDL_PROC_UNUSED(void, glDrawElements,
                 (GLenum mode, GLsizei count, GLenum type,
                  const GLvoid * indices))
-SDL_PROC_UNUSED(void, glDrawPixels,
-                (GLsizei width, GLsizei height, GLenum format, GLenum type,
-                 const GLvoid * pixels))
+SDL_PROC(void, glDrawPixels,
+         (GLsizei width, GLsizei height, GLenum format, GLenum type,
+          const GLvoid * pixels))
 SDL_PROC_UNUSED(void, glEdgeFlag, (GLboolean flag))
 SDL_PROC_UNUSED(void, glEdgeFlagPointer,
                 (GLsizei stride, const GLvoid * pointer))
@@ -315,9 +315,9 @@ SDL_PROC_UNUSED(void, glRasterPos4s,
                 (GLshort x, GLshort y, GLshort z, GLshort w))
 SDL_PROC_UNUSED(void, glRasterPos4sv, (const GLshort * v))
 SDL_PROC_UNUSED(void, glReadBuffer, (GLenum mode))
-SDL_PROC_UNUSED(void, glReadPixels,
-                (GLint x, GLint y, GLsizei width, GLsizei height,
-                 GLenum format, GLenum type, GLvoid * pixels))
+SDL_PROC(void, glReadPixels,
+         (GLint x, GLint y, GLsizei width, GLsizei height,
+          GLenum format, GLenum type, GLvoid * pixels))
 SDL_PROC_UNUSED(void, glRectd,
                 (GLdouble x1, GLdouble y1, GLdouble x2, GLdouble y2))
 SDL_PROC_UNUSED(void, glRectdv, (const GLdouble * v1, const GLdouble * v2))

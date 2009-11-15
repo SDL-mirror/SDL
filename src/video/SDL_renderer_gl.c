@@ -583,6 +583,147 @@ static const char *fragment_program_UYVY_source_code = "!!ARBfp1.0\n"
     /* ...and we're done! */
     "END\n";
 
+static __inline__ SDL_bool
+convert_format(GL_RenderData *renderdata, Uint32 pixel_format,
+               GLint* internalFormat, GLenum* format, GLenum* type)
+{
+    switch (pixel_format) {
+    case SDL_PIXELFORMAT_INDEX1LSB:
+    case SDL_PIXELFORMAT_INDEX1MSB:
+        *internalFormat = GL_RGB;
+        *format = GL_COLOR_INDEX;
+        *type = GL_BITMAP;
+        break;
+    case SDL_PIXELFORMAT_INDEX8:
+        if (!renderdata->GL_EXT_paletted_texture_supported) {
+            return SDL_FALSE;
+        }
+        *internalFormat = GL_COLOR_INDEX8_EXT;
+        *format = GL_COLOR_INDEX;
+        *type = GL_UNSIGNED_BYTE;
+        break;
+    case SDL_PIXELFORMAT_RGB332:
+        *internalFormat = GL_R3_G3_B2;
+        *format = GL_RGB;
+        *type = GL_UNSIGNED_BYTE_3_3_2;
+        break;
+    case SDL_PIXELFORMAT_RGB444:
+        *internalFormat = GL_RGB4;
+        *format = GL_RGB;
+        *type = GL_UNSIGNED_SHORT_4_4_4_4;
+        break;
+    case SDL_PIXELFORMAT_RGB555:
+        *internalFormat = GL_RGB5;
+        *format = GL_RGB;
+        *type = GL_UNSIGNED_SHORT_5_5_5_1;
+        break;
+    case SDL_PIXELFORMAT_ARGB4444:
+        *internalFormat = GL_RGBA4;
+        *format = GL_BGRA;
+        *type = GL_UNSIGNED_SHORT_4_4_4_4_REV;
+        break;
+    case SDL_PIXELFORMAT_ARGB1555:
+        *internalFormat = GL_RGB5_A1;
+        *format = GL_BGRA;
+        *type = GL_UNSIGNED_SHORT_1_5_5_5_REV;
+        break;
+    case SDL_PIXELFORMAT_RGB565:
+        *internalFormat = GL_RGB8;
+        *format = GL_RGB;
+        *type = GL_UNSIGNED_SHORT_5_6_5;
+        break;
+    case SDL_PIXELFORMAT_RGB24:
+        *internalFormat = GL_RGB8;
+        *format = GL_RGB;
+        *type = GL_UNSIGNED_BYTE;
+        break;
+    case SDL_PIXELFORMAT_RGB888:
+        *internalFormat = GL_RGB8;
+        *format = GL_BGRA;
+        *type = GL_UNSIGNED_BYTE;
+        break;
+    case SDL_PIXELFORMAT_BGR24:
+        *internalFormat = GL_RGB8;
+        *format = GL_BGR;
+        *type = GL_UNSIGNED_BYTE;
+        break;
+    case SDL_PIXELFORMAT_BGR888:
+        *internalFormat = GL_RGB8;
+        *format = GL_RGBA;
+        *type = GL_UNSIGNED_BYTE;
+        break;
+    case SDL_PIXELFORMAT_ARGB8888:
+#ifdef __MACOSX__
+        *internalFormat = GL_RGBA;
+        *format = GL_BGRA;
+        *type = GL_UNSIGNED_INT_8_8_8_8_REV;
+#else
+        *internalFormat = GL_RGBA8;
+        *format = GL_BGRA;
+        *type = GL_UNSIGNED_BYTE;
+#endif
+        break;
+    case SDL_PIXELFORMAT_ABGR8888:
+        *internalFormat = GL_RGBA8;
+        *format = GL_RGBA;
+        *type = GL_UNSIGNED_BYTE;
+        break;
+    case SDL_PIXELFORMAT_ARGB2101010:
+        *internalFormat = GL_RGB10_A2;
+        *format = GL_BGRA;
+        *type = GL_UNSIGNED_INT_2_10_10_10_REV;
+        break;
+    case SDL_PIXELFORMAT_UYVY:
+        if (renderdata->GL_APPLE_ycbcr_422_supported) {
+            *internalFormat = GL_RGB;
+            *format = GL_YCBCR_422_APPLE;
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
+            *type = GL_UNSIGNED_SHORT_8_8_APPLE;
+#else
+            *type = GL_UNSIGNED_SHORT_8_8_REV_APPLE;
+#endif
+        } else if (renderdata->GL_MESA_ycbcr_texture_supported) {
+            *internalFormat = GL_RGB;
+            *format = GL_YCBCR_MESA;
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
+            *type = GL_UNSIGNED_SHORT_8_8_MESA;
+#else
+            *type = GL_UNSIGNED_SHORT_8_8_REV_MESA;
+#endif
+        } else if (renderdata->GL_ARB_fragment_program_supported) {
+            *internalFormat = GL_RGBA;
+            *format = GL_RGBA;
+            *type = GL_UNSIGNED_BYTE;
+        } else {
+            return SDL_FALSE;
+        }
+        break;
+    case SDL_PIXELFORMAT_YUY2:
+        if (renderdata->GL_APPLE_ycbcr_422_supported) {
+            *internalFormat = GL_RGB;
+            *format = GL_YCBCR_422_APPLE;
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
+            *type = GL_UNSIGNED_SHORT_8_8_REV_APPLE;
+#else
+            *type = GL_UNSIGNED_SHORT_8_8_APPLE;
+#endif
+        } else if (renderdata->GL_MESA_ycbcr_texture_supported) {
+            *internalFormat = GL_RGB;
+            *format = GL_YCBCR_MESA;
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
+            *type = GL_UNSIGNED_SHORT_8_8_REV_MESA;
+#else
+            *type = GL_UNSIGNED_SHORT_8_8_MESA;
+#endif
+        } else {
+            return SDL_FALSE;
+        }
+        break;
+    default:
+        return SDL_FALSE;
+    }
+    return SDL_TRUE;
+}
 
 static int
 GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
@@ -596,154 +737,25 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     GLuint shader = 0;
     GLenum result;
 
-    switch (texture->format) {
-    case SDL_PIXELFORMAT_INDEX1LSB:
-    case SDL_PIXELFORMAT_INDEX1MSB:
-        internalFormat = GL_RGB;
-        format = GL_COLOR_INDEX;
-        type = GL_BITMAP;
-        break;
-    case SDL_PIXELFORMAT_INDEX8:
-        if (!renderdata->GL_EXT_paletted_texture_supported) {
-            SDL_SetError("Unsupported texture format");
-            return -1;
-        }
-        internalFormat = GL_COLOR_INDEX8_EXT;
-        format = GL_COLOR_INDEX;
-        type = GL_UNSIGNED_BYTE;
-        break;
-    case SDL_PIXELFORMAT_RGB332:
-        internalFormat = GL_R3_G3_B2;
-        format = GL_RGB;
-        type = GL_UNSIGNED_BYTE_3_3_2;
-        break;
-    case SDL_PIXELFORMAT_RGB444:
-        internalFormat = GL_RGB4;
-        format = GL_RGB;
-        type = GL_UNSIGNED_SHORT_4_4_4_4;
-        break;
-    case SDL_PIXELFORMAT_RGB555:
-        internalFormat = GL_RGB5;
-        format = GL_RGB;
-        type = GL_UNSIGNED_SHORT_5_5_5_1;
-        break;
-    case SDL_PIXELFORMAT_ARGB4444:
-        internalFormat = GL_RGBA4;
-        format = GL_BGRA;
-        type = GL_UNSIGNED_SHORT_4_4_4_4_REV;
-        break;
-    case SDL_PIXELFORMAT_ARGB1555:
-        internalFormat = GL_RGB5_A1;
-        format = GL_BGRA;
-        type = GL_UNSIGNED_SHORT_1_5_5_5_REV;
-        break;
-    case SDL_PIXELFORMAT_RGB565:
-        internalFormat = GL_RGB8;
-        format = GL_RGB;
-        type = GL_UNSIGNED_SHORT_5_6_5;
-        break;
-    case SDL_PIXELFORMAT_RGB24:
-        internalFormat = GL_RGB8;
-        format = GL_RGB;
-        type = GL_UNSIGNED_BYTE;
-        break;
-    case SDL_PIXELFORMAT_RGB888:
-        internalFormat = GL_RGB8;
-        format = GL_BGRA;
-        type = GL_UNSIGNED_BYTE;
-        break;
-    case SDL_PIXELFORMAT_BGR24:
-        internalFormat = GL_RGB8;
-        format = GL_BGR;
-        type = GL_UNSIGNED_BYTE;
-        break;
-    case SDL_PIXELFORMAT_BGR888:
-        internalFormat = GL_RGB8;
-        format = GL_RGBA;
-        type = GL_UNSIGNED_BYTE;
-        break;
-    case SDL_PIXELFORMAT_ARGB8888:
-#ifdef __MACOSX__
-        internalFormat = GL_RGBA;
-        format = GL_BGRA;
-        type = GL_UNSIGNED_INT_8_8_8_8_REV;
-#else
-        internalFormat = GL_RGBA8;
-        format = GL_BGRA;
-        type = GL_UNSIGNED_BYTE;
-#endif
-        break;
-    case SDL_PIXELFORMAT_ABGR8888:
-        internalFormat = GL_RGBA8;
-        format = GL_RGBA;
-        type = GL_UNSIGNED_BYTE;
-        break;
-    case SDL_PIXELFORMAT_ARGB2101010:
-        internalFormat = GL_RGB10_A2;
-        format = GL_BGRA;
-        type = GL_UNSIGNED_INT_2_10_10_10_REV;
-        break;
-    case SDL_PIXELFORMAT_UYVY:
-        if (renderdata->GL_APPLE_ycbcr_422_supported) {
-            internalFormat = GL_RGB;
-            format = GL_YCBCR_422_APPLE;
-#if SDL_BYTEORDER == SDL_LIL_ENDIAN
-            type = GL_UNSIGNED_SHORT_8_8_APPLE;
-#else
-            type = GL_UNSIGNED_SHORT_8_8_REV_APPLE;
-#endif
-        } else if (renderdata->GL_MESA_ycbcr_texture_supported) {
-            internalFormat = GL_RGB;
-            format = GL_YCBCR_MESA;
-#if SDL_BYTEORDER == SDL_LIL_ENDIAN
-            type = GL_UNSIGNED_SHORT_8_8_MESA;
-#else
-            type = GL_UNSIGNED_SHORT_8_8_REV_MESA;
-#endif
-        } else if (renderdata->GL_ARB_fragment_program_supported) {
-            if (renderdata->fragment_program_UYVY == 0) {
-                renderdata->fragment_program_UYVY =
-                    compile_shader(renderdata, GL_FRAGMENT_PROGRAM_ARB,
-                                   fragment_program_UYVY_source_code);
-                if (renderdata->fragment_program_UYVY == 0) {
-                    SDL_SetError("Fragment program compile error");
-                    return -1;
-                }
-            }
-            shader = renderdata->fragment_program_UYVY;
-            internalFormat = GL_RGBA;
-            format = GL_RGBA;
-            type = GL_UNSIGNED_BYTE;
-        } else {
-            SDL_SetError("Unsupported texture format");
-            return -1;
-        }
-        break;
-    case SDL_PIXELFORMAT_YUY2:
-        if (renderdata->GL_APPLE_ycbcr_422_supported) {
-            internalFormat = GL_RGB;
-            format = GL_YCBCR_422_APPLE;
-#if SDL_BYTEORDER == SDL_LIL_ENDIAN
-            type = GL_UNSIGNED_SHORT_8_8_REV_APPLE;
-#else
-            type = GL_UNSIGNED_SHORT_8_8_APPLE;
-#endif
-        } else if (renderdata->GL_MESA_ycbcr_texture_supported) {
-            internalFormat = GL_RGB;
-            format = GL_YCBCR_MESA;
-#if SDL_BYTEORDER == SDL_LIL_ENDIAN
-            type = GL_UNSIGNED_SHORT_8_8_REV_MESA;
-#else
-            type = GL_UNSIGNED_SHORT_8_8_MESA;
-#endif
-        } else {
-            SDL_SetError("Unsupported texture format");
-            return -1;
-        }
-        break;
-    default:
+    if (!convert_format(renderdata, texture->format, &internalFormat,
+                        &format, &type)) {
         SDL_SetError("Unsupported texture format");
         return -1;
+    }
+    if (texture->format == SDL_PIXELFORMAT_UYVY &&
+        !renderdata->GL_APPLE_ycbcr_422_supported &&
+        !renderdata->GL_MESA_ycbcr_texture_supported &&
+        renderdata->GL_ARB_fragment_program_supported) {
+        if (renderdata->fragment_program_UYVY == 0) {
+            renderdata->fragment_program_UYVY =
+                compile_shader(renderdata, GL_FRAGMENT_PROGRAM_ARB,
+                               fragment_program_UYVY_source_code);
+            if (renderdata->fragment_program_UYVY == 0) {
+                SDL_SetError("Fragment program compile error");
+                return -1;
+            }
+        }
+        shader = renderdata->fragment_program_UYVY;
     }
 
     data = (GL_TextureData *) SDL_calloc(1, sizeof(*data));
@@ -1244,7 +1256,29 @@ static int
 GL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                     void * pixels, int pitch)
 {
-    //glReadPixels(rect->x, rect->y+rect->h-1, rect->w, rect->h,
+    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
+    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    Uint32 pixel_format = display->current_mode.format;
+    GLint internalFormat;
+    GLenum format, type;
+
+    if (!convert_format(data, pixel_format, &internalFormat, &format, &type)) {
+        SDL_SetError("Unsupported pixel format");
+        return -1;
+    }
+
+    if (pixel_format == SDL_PIXELFORMAT_INDEX1LSB) {
+        data->glPixelStorei(GL_PACK_LSB_FIRST, 1);
+    } else if (pixel_format == SDL_PIXELFORMAT_INDEX1MSB) {
+        data->glPixelStorei(GL_PACK_LSB_FIRST, 0);
+    }
+    data->glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    data->glPixelStorei(GL_PACK_ROW_LENGTH,
+                        -2 * (pitch / bytes_per_pixel(pixel_format)));
+
+    data->glReadPixels(rect->x, rect->y+rect->h-1, rect->w, rect->h,
+                       format, type, pixels + (rect->h-1)*pitch);
 }
 
 static int
