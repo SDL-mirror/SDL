@@ -559,13 +559,15 @@ LRESULT DX5_HandleMessage(_THIS, HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPar
 
 			active = (wParam && (GetForegroundWindow() == hwnd));
 			if ( active ) {
-				for ( i=0; SDL_DIdev[i]; ++i ) {
-					IDirectInputDevice2_Acquire(
+				for ( i=0; i<MAX_INPUTS; ++i ) {
+					if (SDL_DIdev[i] != NULL)
+						IDirectInputDevice2_Acquire(
 								SDL_DIdev[i]);
 				}
 			} else {
-				for ( i=0; SDL_DIdev[i]; ++i ) {
-					IDirectInputDevice2_Unacquire(
+				for ( i=0; i<MAX_INPUTS; ++i ) {
+					if (SDL_DIdev[i] != NULL) 
+						IDirectInputDevice2_Unacquire(
 								SDL_DIdev[i]);
 				}
 				mouse_lost = 1;
