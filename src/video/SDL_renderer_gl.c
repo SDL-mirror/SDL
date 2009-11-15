@@ -102,7 +102,10 @@ static int GL_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2,
 static int GL_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect);
 static int GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                          const SDL_Rect * srcrect, const SDL_Rect * dstrect);
-
+static int GL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                               void * pixels, int pitch);
+static int GL_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                                const void * pixels, int pitch);
 static void GL_RenderPresent(SDL_Renderer * renderer);
 static void GL_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static void GL_DestroyRenderer(SDL_Renderer * renderer);
@@ -312,6 +315,8 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->RenderLine = GL_RenderLine;
     renderer->RenderFill = GL_RenderFill;
     renderer->RenderCopy = GL_RenderCopy;
+    renderer->RenderReadPixels = GL_RenderReadPixels;
+    renderer->RenderWritePixels = GL_RenderWritePixels;
     renderer->RenderPresent = GL_RenderPresent;
     renderer->DestroyTexture = GL_DestroyTexture;
     renderer->DestroyRenderer = GL_DestroyRenderer;
@@ -1233,6 +1238,19 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     data->glDisable(texturedata->type);
 
     return 0;
+}
+
+static int
+GL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                    void * pixels, int pitch)
+{
+    //glReadPixels(rect->x, rect->y+rect->h-1, rect->w, rect->h,
+}
+
+static int
+GL_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                     const void * pixels, int pitch)
+{
 }
 
 static void
