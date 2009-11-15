@@ -863,6 +863,109 @@ SDL_ConvertSurface(SDL_Surface * surface, SDL_PixelFormat * format,
 }
 
 /*
+ * Create a surface on the stack for quick blit operations
+ */
+static __inline__ SDL_bool
+SDL_CreateSurfaceOnStack(int width, int height, Uint32 pixel_format,
+                         void * pixels, int pitch, SDL_Surface * surface, 
+                         SDL_PixelFormat * format, SDL_BlitMap * blitmap)
+{
+    int bpp;
+    Uint32 Rmask, Gmask, Bmask, Amask;
+
+    if (!SDL_PixelFormatEnumToMasks(pixel_format,
+                                    &bpp, &Rmask, &Gmask, &Bmask, &Amask)) {
+        return SDL_FALSE;
+    }
+    if (bpp <= 8) {
+        SDL_SetError("Indexed pixel formats not supported");
+        return SDL_FALSE;
+    }
+
+    SDL_zerop(surface);
+    surface->flags = SDL_PREALLOC;
+    surface->format = SDL_InitFormat(format, bpp, Rmask, Gmask, Bmask, Amask);
+    surface->pixels = pixels;
+    surface->w = width;
+    surface->h = height;
+    surface->pitch = pitch;
+    /* We don't actually need to set up the clip rect for our purposes */
+    /*SDL_SetClipRect(surface, NULL);*/
+
+    /* Allocate an empty mapping */
+    SDL_zerop(blitmap);
+    blitmap->info.r = 0xFF;
+    blitmap->info.g = 0xFF;
+    blitmap->info.b = 0xFF;
+    blitmap->info.a = 0xFF;
+    surface->map = blitmap;
+    SDL_FormatChanged(surface);
+
+    /* The surface is ready to go */
+    surface->refcount = 1;
+    return SDL_TRUE;
+}
+
+/*
+ * Copy a block of pixels of one format to another format
+ */
+int SDL_ConvertPixels(int width, int height,
+                      Uint32 src_format, const void * src, int src_pitch,
+                      Uint32 dst_format, void * dst, int dst_pitch)
+{
+    SDL_Surface src_surface, dst_surface;
+    SDL_PixelFormat src_fmt, dst_fmt;
+    SDL_BlitMap src_blitmap, dst_blitmap;
+    SDL_Rect rect;
+
+    /* Fast path for same format copy */
+    if (src_format == dst_format) {
+        int bpp;
+
+        if (SDL_ISPIXELFORMAT_FOURCC(src_format)) {
+            switch (src_format) {
+            case SDL_PIXELFORMAT_YV12:
+            case SDL_PIXELFORMAT_IYUV:
+            case SDL_PIXELFORMAT_YUY2:
+            case SDL_PIXELFORMAT_UYVY:
+            case SDL_PIXELFORMAT_YVYU:
+                bpp = 2;
+            default:
+                SDL_SetError("Unknown FOURCC pixel format");
+                return -1;
+            }
+        } else {
+            bpp = SDL_BYTESPERPIXEL(src_format);
+        }
+        width *= bpp;
+
+        while (height-- > 0) {
+            SDL_memcpy(dst, src, width);
+            src = (Uint8*)src + src_pitch;
+            dst = (Uint8*)dst + dst_pitch;
+        }
+        return SDL_TRUE;
+    }
+
+    if (!SDL_CreateSurfaceOnStack(width, height, src_format, (void*)src,
+                                  src_pitch,
+                                  &src_surface, &src_fmt, &src_blitmap)) {
+        return -1;
+    }
+    if (!SDL_CreateSurfaceOnStack(width, height, dst_format, dst, dst_pitch,
+                                  &dst_surface, &dst_fmt, &dst_blitmap)) {
+        return -1;
+    }
+
+    /* Set up the rect and go! */
+    rect.x = 0;
+    rect.y = 0;
+    rect.w = width;
+    rect.h = width;
+    return SDL_LowerBlit(&src_surface, &rect, &dst_surface, &rect);
+}
+
+/*
  * Free a surface created by the above function.
  */
 void

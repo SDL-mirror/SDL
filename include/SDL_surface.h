@@ -387,6 +387,15 @@ extern DECLSPEC SDL_Surface *SDLCALL SDL_ConvertSurface
     (SDL_Surface * src, SDL_PixelFormat * fmt, Uint32 flags);
 
 /**
+ * \brief Copy a block of pixels of one format to another format
+ */
+extern DECLSPEC int SDLCALL SDL_ConvertPixels(int width, int height,
+                                              Uint32 src_format,
+                                              const void * src, int src_pitch,
+                                              Uint32 dst_format,
+                                              void * dst, int dst_pitch);
+
+/**
  *  Draws a point with \c color.
  *
  *  The color should be a pixel of the format used by the surface, and 
