@@ -961,7 +961,7 @@ int SDL_ConvertPixels(int width, int height,
     rect.x = 0;
     rect.y = 0;
     rect.w = width;
-    rect.h = width;
+    rect.h = height;
     return SDL_LowerBlit(&src_surface, &rect, &dst_surface, &rect);
 }
 
