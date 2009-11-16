@@ -66,9 +66,9 @@ static int SW_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect);
 static int SW_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                          const SDL_Rect * srcrect, const SDL_Rect * dstrect);
 static int SW_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
-                               void * pixels, int pitch);
+                               Uint32 format, void * pixels, int pitch);
 static int SW_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
-                                const void * pixels, int pitch);
+                                Uint32 format, const void * pixels, int pitch);
 static void SW_RenderPresent(SDL_Renderer * renderer);
 static void SW_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static void SW_DestroyRenderer(SDL_Renderer * renderer);
@@ -736,12 +736,9 @@ SW_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
 static int
 SW_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
-                    void * pixels, int pitch)
+                    Uint32 format, void * pixels, int pitch)
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
-    const Uint8 *src;
-    Uint8 *dst;
-    int src_pitch, dst_pitch, w, h;
 
     if (data->renderer->LockTexture(data->renderer,
                                     data->texture[data->current_texture],
@@ -750,17 +747,9 @@ SW_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
         return -1;
     }
 
-    src = data->surface.pixels;
-    src_pitch = data->surface.pitch;
-    dst = pixels;
-    dst_pitch = pitch;
-    h = rect->h;
-    w = rect->w * data->surface.format->BytesPerPixel;
-    while (h--) {
-        SDL_memcpy(dst, src, w);
-        src += src_pitch;
-        dst += dst_pitch;
-    }
+    SDL_ConvertPixels(rect->w, rect->h,
+                      data->format, data->surface.pixels, data->surface.pitch,
+                      format, pixels, pitch);
 
     data->renderer->UnlockTexture(data->renderer,
                                   data->texture[data->current_texture]);
@@ -769,12 +758,9 @@ SW_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
 
 static int
 SW_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
-                     const void * pixels, int pitch)
+                     Uint32 format, const void * pixels, int pitch)
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
-    const Uint8 *src;
-    Uint8 *dst;
-    int src_pitch, dst_pitch, w, h;
 
     if (data->renderer->info.flags & SDL_RENDERER_PRESENTCOPY) {
         SDL_AddDirtyRect(&data->dirty, rect);
@@ -787,17 +773,8 @@ SW_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
         return -1;
     }
 
-    src = pixels;
-    src_pitch = pitch;
-    dst = data->surface.pixels;
-    dst_pitch = data->surface.pitch;
-    h = rect->h;
-    w = rect->w * data->surface.format->BytesPerPixel;
-    while (h--) {
-        SDL_memcpy(dst, src, w);
-        src += src_pitch;
-        dst += dst_pitch;
-    }
+    SDL_ConvertPixels(rect->w, rect->h, format, pixels, pitch,
+                      data->format, data->surface.pixels, data->surface.pitch);
 
     data->renderer->UnlockTexture(data->renderer,
                                   data->texture[data->current_texture]);

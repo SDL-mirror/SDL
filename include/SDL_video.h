@@ -1173,8 +1173,9 @@ extern DECLSPEC int SDLCALL SDL_RenderCopy(SDL_TextureID textureID,
  *  
  *  \param rect   A pointer to the rectangle to read, or NULL for the entire 
  *                render target.
- *  \param pixels A pointer to be filled in with the pixel data in the rendering
- *                target format.
+ *  \param format The desired format of the pixel data, or 0 to use the format
+ *                of the rendering target
+ *  \param pixels A pointer to be filled in with the pixel data
  *  \param pitch  The pitch of the pixels parameter.
  *  
  *  \return 0 on success, or -1 if pixel reading is not supported.
@@ -1182,6 +1183,7 @@ extern DECLSPEC int SDLCALL SDL_RenderCopy(SDL_TextureID textureID,
  *  \warning This is a very slow operation, and should not be used frequently.
  */
 extern DECLSPEC int SDLCALL SDL_RenderReadPixels(const SDL_Rect * rect,
+                                                 Uint32 format,
                                                  void *pixels, int pitch);
 
 /**
@@ -1189,6 +1191,8 @@ extern DECLSPEC int SDLCALL SDL_RenderReadPixels(const SDL_Rect * rect,
  *  
  *  \param rect   A pointer to the rectangle to write, or NULL for the entire 
  *                render target.
+ *  \param format The format of the pixel data, or 0 to use the format
+ *                of the rendering target
  *  \param pixels A pointer to the pixel data to write.
  *  \param pitch  The pitch of the pixels parameter.
  *  
@@ -1197,6 +1201,7 @@ extern DECLSPEC int SDLCALL SDL_RenderReadPixels(const SDL_Rect * rect,
  *  \warning This is a very slow operation, and should not be used frequently.
  */
 extern DECLSPEC int SDLCALL SDL_RenderWritePixels(const SDL_Rect * rect,
+                                                  Uint32 format,
                                                   const void *pixels,
                                                   int pitch);
 

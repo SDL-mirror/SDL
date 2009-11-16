@@ -67,7 +67,7 @@ static int render_compare( const char *msg, const SurfaceImage_t *s )
       return 1;
 
    /* Read pixels. */
-   ret = SDL_RenderReadPixels( NULL, pix, 80*4 );
+   ret = SDL_RenderReadPixels( NULL, FORMAT, pix, 80*4 );
    if (SDL_ATassert( "SDL_RenderReadPixels", ret==0) )
       return 1;
 

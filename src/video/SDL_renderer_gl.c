@@ -103,9 +103,9 @@ static int GL_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect);
 static int GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                          const SDL_Rect * srcrect, const SDL_Rect * dstrect);
 static int GL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
-                               void * pixels, int pitch);
+                               Uint32 pixel_format, void * pixels, int pitch);
 static int GL_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
-                                const void * pixels, int pitch);
+                                Uint32 pixel_format, const void * pixels, int pitch);
 static void GL_RenderPresent(SDL_Renderer * renderer);
 static void GL_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static void GL_DestroyRenderer(SDL_Renderer * renderer);
@@ -1254,16 +1254,16 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
 static int
 GL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
-                    void * pixels, int pitch)
+                    Uint32 pixel_format, void * pixels, int pitch)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
-    Uint32 pixel_format = display->current_mode.format;
     GLint internalFormat;
     GLenum format, type;
+    Uint8 *src, *dst, *tmp;
+    int length, rows;
 
     if (!convert_format(data, pixel_format, &internalFormat, &format, &type)) {
+        /* FIXME: Do a temp copy to a format that is supported */
         SDL_SetError("Unsupported pixel format");
         return -1;
     }
@@ -1275,16 +1275,52 @@ GL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
     }
     data->glPixelStorei(GL_PACK_ALIGNMENT, 1);
     data->glPixelStorei(GL_PACK_ROW_LENGTH,
-                        -2 * (pitch / bytes_per_pixel(pixel_format)));
+                        (pitch / bytes_per_pixel(pixel_format)));
 
     data->glReadPixels(rect->x, rect->y+rect->h-1, rect->w, rect->h,
-                       format, type, pixels + (rect->h-1)*pitch);
+                       format, type, pixels);
+
+    /* Flip the rows to be top-down */
+    length = rect->w * bytes_per_pixel(pixel_format);
+    src = (Uint8*)pixels + (rect->h-1)*pitch;
+    dst = (Uint8*)pixels;
+    tmp = SDL_stack_alloc(Uint8, length);
+    rows = rect->h / 2;
+    while (rows--) {
+        SDL_memcpy(tmp, dst, length);
+        SDL_memcpy(dst, src, length);
+        SDL_memcpy(src, tmp, length);
+    }
+    SDL_stack_free(tmp);
 }
 
 static int
 GL_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
-                     const void * pixels, int pitch)
+                     Uint32 pixel_format, const void * pixels, int pitch)
 {
+    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
+    GLint internalFormat;
+    GLenum format, type;
+
+    if (!convert_format(data, pixel_format, &internalFormat, &format, &type)) {
+        /* FIXME: Do a temp copy to a format that is supported */
+        SDL_SetError("Unsupported pixel format");
+        return -1;
+    }
+
+    /* FIXME: We need to copy the data and flip it */
+
+    if (pixel_format == SDL_PIXELFORMAT_INDEX1LSB) {
+        data->glPixelStorei(GL_UNPACK_LSB_FIRST, 1);
+    } else if (pixel_format == SDL_PIXELFORMAT_INDEX1MSB) {
+        data->glPixelStorei(GL_UNPACK_LSB_FIRST, 0);
+    }
+    data->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    data->glPixelStorei(GL_UNPACK_ROW_LENGTH,
+                        (pitch / bytes_per_pixel(pixel_format)));
+
+    data->glReadPixels(rect->x, rect->y+rect->h-1, rect->w, rect->h,
+                       format, type, pixels);
 }
 
 static void

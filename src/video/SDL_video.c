@@ -2487,7 +2487,8 @@ SDL_RenderCopy(SDL_TextureID textureID, const SDL_Rect * srcrect,
 }
 
 int
-SDL_RenderReadPixels(const SDL_Rect * rect, void * pixels, int pitch)
+SDL_RenderReadPixels(const SDL_Rect * rect, Uint32 format,
+                     void * pixels, int pitch)
 {
     SDL_Renderer *renderer;
     SDL_Window *window;
@@ -2502,6 +2503,10 @@ SDL_RenderReadPixels(const SDL_Rect * rect, void * pixels, int pitch)
         return -1;
     }
     window = SDL_GetWindowFromID(renderer->window);
+
+    if (!format) {
+        format = SDL_GetDisplayFromWindow(window)->current_mode.format;
+    }
 
     real_rect.x = 0;
     real_rect.y = 0;
@@ -2521,11 +2526,13 @@ SDL_RenderReadPixels(const SDL_Rect * rect, void * pixels, int pitch)
         }
     }
 
-    return renderer->RenderReadPixels(renderer, &real_rect, pixels, pitch);
+    return renderer->RenderReadPixels(renderer, &real_rect,
+                                      format, pixels, pitch);
 }
 
 int
-SDL_RenderWritePixels(const SDL_Rect * rect, const void * pixels, int pitch)
+SDL_RenderWritePixels(const SDL_Rect * rect, Uint32 format,
+                      const void * pixels, int pitch)
 {
     SDL_Renderer *renderer;
     SDL_Window *window;
@@ -2540,6 +2547,10 @@ SDL_RenderWritePixels(const SDL_Rect * rect, const void * pixels, int pitch)
         return -1;
     }
     window = SDL_GetWindowFromID(renderer->window);
+
+    if (!format) {
+        format = SDL_GetDisplayFromWindow(window)->current_mode.format;
+    }
 
     real_rect.x = 0;
     real_rect.y = 0;
@@ -2559,7 +2570,8 @@ SDL_RenderWritePixels(const SDL_Rect * rect, const void * pixels, int pitch)
         }
     }
 
-    return renderer->RenderWritePixels(renderer, &real_rect, pixels, pitch);
+    return renderer->RenderWritePixels(renderer, &real_rect,
+                                       format, pixels, pitch);
 }
 
 void
