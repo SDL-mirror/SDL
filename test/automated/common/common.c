@@ -73,5 +73,37 @@ int surface_compare( SDL_Surface *sur, const SurfaceImage_t *img )
 
    SDL_UnlockSurface( sur );
 
+   if (ret) {
+      SDL_SaveBMP(sur, "fail.bmp");
+
+      SDL_LockSurface( sur );
+
+      bpp = sur->format->BytesPerPixel;
+
+      /* Compare image - should be same format. */
+      if (bpp == 4) {
+         for (j=0; j<sur->h; j++) {
+            for (i=0; i<sur->w; i++) {
+               p  = (Uint8 *)sur->pixels + j * sur->pitch + i * bpp;
+               pd = (Uint8 *)img->pixel_data + (j*img->width + i) * img->bytes_per_pixel;
+               Uint8 R, G, B, A;
+
+               R = pd[0];
+               G = pd[1];
+               B = pd[2];
+               if (img->bytes_per_pixel == 4) {
+                  A = pd[3];
+               } else {
+                  A = 0;
+               }
+               *(Uint32*)p = (A << 24) | (R << 16) | (G << 8) | B;
+            }
+         }
+      }
+
+      SDL_UnlockSurface( sur );
+
+      SDL_SaveBMP(sur, "good.bmp");
+   }
    return ret;
 }

@@ -11,7 +11,7 @@
 #  define COMMON_H
 
 
-#  define FORMAT SDL_PIXELFORMAT_ARGB8888
+#  define FORMAT  SDL_PIXELFORMAT_ARGB8888
 #  define AMASK   0xff000000 /**< Alpha bit mask. */
 #  define RMASK   0x00ff0000 /**< Red bit mask. */
 #  define GMASK   0x0000ff00 /**< Green bit mask. */

@@ -67,6 +67,7 @@ static int render_compare( const char *msg, const SurfaceImage_t *s )
       return 1;
 
    /* Read pixels. */
+   SDL_RenderPresent();
    ret = SDL_RenderReadPixels( NULL, FORMAT, pix, 80*4 );
    if (SDL_ATassert( "SDL_RenderReadPixels", ret==0) )
       return 1;
@@ -1012,7 +1013,7 @@ int test_render (void)
          goto err;
       /* Create window. */
       wid = SDL_CreateWindow( msg, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-            80, 60, 0 );
+            80, 60, SDL_WINDOW_SHOWN );
       if (SDL_ATassert( "SDL_CreateWindow", wid!=0 ))
          goto err;
       /* Check title. */
