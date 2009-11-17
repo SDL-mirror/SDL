@@ -1292,6 +1292,8 @@ GL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
         SDL_memcpy(src, tmp, length);
     }
     SDL_stack_free(tmp);
+
+    return 0;
 }
 
 static int
@@ -1321,6 +1323,8 @@ GL_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
 
     data->glReadPixels(rect->x, rect->y+rect->h-1, rect->w, rect->h,
                        format, type, pixels);
+
+    return 0;
 }
 
 static void
