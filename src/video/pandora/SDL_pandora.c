@@ -38,6 +38,12 @@
 #include "SDL_pandora.h"
 #include "SDL_pandora_events.h"
 
+/* WIZ declarations */
+#include "GLES/gl.h"
+#ifdef WIZ_GLES_LITE
+static NativeWindowType hNativeWnd = 0; // A handle to the window we will create.
+#endif
+
 static SDL_bool PND_initialized = SDL_FALSE;
 
 static int
@@ -136,8 +142,13 @@ PND_create()
 }
 
 VideoBootStrap PND_bootstrap = {
+#ifdef WIZ_GLES_LITE
+    "wiz",
+    "SDL Wiz Video Driver",
+#else
     "pandora",
     "SDL Pandora Video Driver",
+#endif
     PND_available,
     PND_create
 };
@@ -152,8 +163,13 @@ PND_videoinit(_THIS)
     SDL_DisplayMode current_mode;
 
     SDL_zero(current_mode);
+#ifdef WIZ_GLES_LITE
+    current_mode.w = 320;
+    current_mode.h = 240;
+#else
     current_mode.w = 800;
     current_mode.h = 480;
+#endif
     current_mode.refresh_rate = 60;
     current_mode.format = SDL_PIXELFORMAT_RGB565;
     current_mode.driverdata = NULL;
@@ -371,7 +387,11 @@ PND_gl_loadlibrary(_THIS, const char *path)
     if (path == NULL) {
         /* Already linked with GF library which provides egl* subset of  */
         /* functions, use Common profile of OpenGL ES library by default */
+#ifdef WIZ_GLES_LITE
+	path = "/lib/libopengles_lite.so";
+#else
         path = "/usr/lib/libGLES_CM.so";
+#endif
     }
 
     /* Load dynamic library */
@@ -652,10 +672,31 @@ PND_gl_createcontext(_THIS, SDL_Window * window)
         return NULL;
     }
 
+#ifdef WIZ_GLES_LITE
+    if( !hNativeWnd ) {
+	hNativeWnd = (NativeWindowType)malloc(16*1024);
+
+	if(!hNativeWnd)
+	    printf( "Error : Wiz framebuffer allocatation failed\n" ); 
+	else
+	    printf( "SDL13: Wiz framebuffer allocated: %X\n", hNativeWnd );
+    }
+    else {
+	printf( "SDL13: Wiz framebuffer already allocated: %X\n", hNativeWnd );
+    }
+
+    wdata->gles_surface =
+	eglCreateWindowSurface(phdata->egl_display, 
+			       wdata->gles_configs[wdata->gles_config],
+			       hNativeWnd, NULL );
+#else
     wdata->gles_surface =
         eglCreateWindowSurface(phdata->egl_display,
                                wdata->gles_configs[wdata->gles_config],
                                (NativeWindowType) 0, NULL);
+#endif
+
+
     if (wdata->gles_surface == 0) {
         SDL_SetError("Error : eglCreateWindowSurface failed;\n");
         return NULL;
@@ -855,6 +896,15 @@ PND_gl_deletecontext(_THIS, SDL_GLContext context)
             }
         }
     }
+
+#ifdef WIZ_GLES_LITE
+    if( hNativeWnd != 0 )
+    {
+	  free(hNativeWnd);
+	  hNativeWnd = 0;
+	  printf( "SDL13: Wiz framebuffer released\n" );
+    }
+#endif
 
     return;
 }
