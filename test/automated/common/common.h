@@ -11,19 +11,11 @@
 #  define COMMON_H
 
 
-#if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
-#  define FORMAT  SDL_PIXELFORMAT_RGBA8888
-#  define RMASK   0xff000000 /**< Red bit mask. */
-#  define GMASK   0x00ff0000 /**< Green bit mask. */
-#  define BMASK   0x0000ff00 /**< Blue bit mask. */
-#  define AMASK   0x000000ff /**< Alpha bit mask. */
-#else
-#  define FORMAT  SDL_PIXELFORMAT_ABGR8888
-#  define RMASK   0x000000ff /**< Red bit mask. */
-#  define GMASK   0x0000ff00 /**< Green bit mask. */
-#  define BMASK   0x00ff0000 /**< Blue bit mask. */
+#  define FORMAT SDL_PIXELFORMAT_ARGB8888
 #  define AMASK   0xff000000 /**< Alpha bit mask. */
-#endif
+#  define RMASK   0x00ff0000 /**< Red bit mask. */
+#  define GMASK   0x0000ff00 /**< Green bit mask. */
+#  define BMASK   0x000000ff /**< Blue bit mask. */
 
 
 typedef struct SurfaceImage_s {

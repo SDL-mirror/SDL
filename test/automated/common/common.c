@@ -46,9 +46,26 @@ int surface_compare( SDL_Surface *sur, const SurfaceImage_t *img )
                break;
 
             case 4:
-               ret += !( (p[0] == pd[0]) &&
-                         (p[1] == pd[1]) &&
-                         (p[2] == pd[2]) );
+               {
+                  int fail;
+                  Uint8 R, G, B, A;
+
+                  SDL_GetRGBA(*(Uint32*)p, sur->format, &R, &G, &B, &A);
+
+                  if (img->bytes_per_pixel == 3) {
+                     fail = !( (R == pd[0]) &&
+                               (G == pd[1]) &&
+                               (B == pd[2]) );
+                  } else {
+                     fail = !( (R == pd[0]) &&
+                               (G == pd[1]) &&
+                               (B == pd[2]) &&
+                               (A == pd[3]) );
+                  }
+                  if (fail) {
+                     ++ret;
+                  }
+               }
                break;
          }
       }
