@@ -1273,9 +1273,9 @@ GL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
     } else if (pixel_format == SDL_PIXELFORMAT_INDEX1MSB) {
         data->glPixelStorei(GL_PACK_LSB_FIRST, 0);
     }
-    //data->glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    //data->glPixelStorei(GL_PACK_ROW_LENGTH,
-    //                    (pitch / bytes_per_pixel(pixel_format)));
+    data->glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    data->glPixelStorei(GL_PACK_ROW_LENGTH,
+                        (pitch / bytes_per_pixel(pixel_format)));
     data->glReadBuffer(GL_FRONT);
 
 memset(pixels, 0xff, rect->h*pitch);
@@ -1325,8 +1325,8 @@ GL_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
     data->glPixelStorei(GL_UNPACK_ROW_LENGTH,
                         (pitch / bytes_per_pixel(pixel_format)));
 
-    data->glReadPixels(rect->x, rect->y+rect->h-1, rect->w, rect->h,
-                       format, type, pixels);
+    data->glRasterPos2i(rect->x, rect->y);
+    data->glDrawPixels(rect->w, rect->h, format, type, pixels);
 
     return 0;
 }
